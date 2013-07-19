@@ -81,8 +81,15 @@ boolean CDriverEmotivEPOC::buildPath(void)
 
 	if( l_pFound == string::npos )
 	{
+		// If the emotiv component is not part of the path, we add it.
 		m_sCommandForPathModification = l_sPath + CString(";") + m_sPathToEmotivSDK;
 		m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] Emotiv Driver: Building new Windows PATH.\n";
+	} 
+	else 
+	{
+		// If we found the emotiv component in path already, keep the path as-is.
+		m_sCommandForPathModification = CString(l_sPath);
+		m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] Emotiv Driver: Using the existing PATH.\n";
 	}
 
 	return true;
@@ -98,7 +105,7 @@ boolean CDriverEmotivEPOC::initialize(
 	//because SEH (__try/__except) does not allow the use of local variables with destructor.
 	if(!this->buildPath())
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: Failed to get the environment PATH.\n";
+		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: Failed to get the ENV variable PATH.\n";
 		return false;
 	}
 		
