@@ -77,7 +77,7 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_SimpleDSP_Miscellaneous|
  * The equation can use at most 16 variables, for 16 input signals.
- * The variable names are the 16 first letters of the alphabet, i.e. 'a' (or 'A') to 'p' (or 'P') matche inputs 1 to 16.
+ * The variable names are the 16 first letters of the alphabet, i.e. 'a' (or 'A') to 'p' (or 'P') matches inputs 1 to 16.
  * \b NB : The first input variable can be named 'x' or 'X'.
  *
  * Here is a list of supported functions/operators :

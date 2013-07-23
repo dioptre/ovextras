@@ -6,7 +6,7 @@ Detailed description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_EpochAverage_Description|
- * This box prosed several methods of averaging for streamed epoched streamed.
+ * This box offers several methods of averaging for epoched streams.
  * |OVP_DocEnd_BoxAlgorithm_EpochAverage_Description|
 __________________________________________________________________
 
@@ -55,12 +55,12 @@ __________________________________________________________________
  * as enough input has been received.
  *  - <em>Moving average (Immediate)</em> : in this case, the averaging is done at
  * every input reception on the last few buffers, starting immediately. When
- * the number of recevied buffer is lower than the wished number of epochs, the
+ * the number of received buffer is lower than the wished number of epochs, the
  * average is computed on this very few number of input buffers.
  *  - <em>Epoch block average</em> : in this case, the averaging
  * is done on a number of epochs (see next setting). Once this exact
  * number of input is received, the average is computed and output.
- *  - <em>Cummulative average</em> : in this case, the averaging
+ *  - <em>Cumulative average</em> : in this case, the averaging
  * is done on an infinite number of epochs starting from the first
  * received buffer to the last received buffer. This can be \b very
  * memory consuming !

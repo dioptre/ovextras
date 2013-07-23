@@ -17,12 +17,12 @@ __________________________________________________________________
  * reasonably big number of input channels, possibly all over the scalp (areas where
  * the evoked response potential can not be seen will be naturally used as references
  * to reduce noise). The spatial filter results in space reduction to only keep significant
- * chanels for later detection. Consider using at least 4 times more input channels than
+ * channels for later detection. Consider using at least 4 times more input channels than
  * the number of output channels you want. For example, reducing 16 electrodes to 3 channels
  * for P300 detection is OK.
  *
  * For more details about xDAWN, see <a href="http://www.icp.inpg.fr/~rivetber/Publications/references/Rivet2009a.pdf">Rivet et al. 2009</a>
- * or in case this links disapears, <a href="http://www.ncbi.nlm.nih.gov/pubmed/19174332">this website</a>.
+ * or in case this links disappears, <a href="http://www.ncbi.nlm.nih.gov/pubmed/19174332">this website</a>.
  * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Description|
 __________________________________________________________________
 
@@ -33,7 +33,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Inputs|
 
  * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Input1|
- * This input receives the exepriment stimulations. As soon as the "train"
+ * This input receives the experiment stimulations. As soon as the "train"
  * stimulation is received, the spatial filter is computed.
  * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Input1|
 
@@ -53,7 +53,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_CSPSpatialFilterTrainer_Outputs|
 
  * |OVP_DocBegin_BoxAlgorithm_CSPSpatialFilterTrainer_Output1|
-  The xDAWN Trainer outputs the stimulation <b>OVTK_StimulationId_TrainCompleted</b> when the training process was successfull. No output is produced if the process failed.
+  The xDAWN Trainer outputs the stimulation <b>OVTK_StimulationId_TrainCompleted</b> when the training process was successful. No output is produced if the process failed.
  * |OVP_DocEnd_BoxAlgorithm_CSPSpatialFilterTrainer_Output1|
 __________________________________________________________________
 

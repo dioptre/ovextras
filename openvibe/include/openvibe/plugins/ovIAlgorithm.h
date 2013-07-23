@@ -61,7 +61,7 @@ namespace OpenViBE
 			 * \return \e false in case of error.
 			 *
 			 * When called, this function should get its "input" parameters, do stuffs with them
-			 * and finally produce "ouput" parameters.
+			 * and finally produce "output" parameters.
 			 */
 			virtual OpenViBE::boolean process(
 				OpenViBE::Kernel::IAlgorithmContext& rAlgorithmContext)=0;

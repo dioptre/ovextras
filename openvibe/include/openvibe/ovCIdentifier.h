@@ -28,7 +28,7 @@ namespace OpenViBE
 	 *
 	 * This class is heavily used in the OpenViBE::IObject class. Also,
 	 * the OpenViBE specification gives serveral already defined
-	 * class identifiers the developper should know of. For this,
+	 * class identifiers the developer should know of. For this,
 	 * let you have a look to the documentation of ov_defines.h !
 	 *
 	 * \sa ov_defines.h
@@ -92,14 +92,14 @@ namespace OpenViBE
 			const OpenViBE::CIdentifier& rIdentifier);
 		/**
 		 * \brief Increments this identifier by 1
-		 * \return this identifer
+		 * \return this identifier
 		 * \note if this identifier is \c OV_UndefinedIdentifier, it is not incremented
 		 * \note if this idenfitier is not \c OV_UndefinedIdentifier, it can not becomre \c OV_UndefinedIdentifier after being incremented
 		 */
 		OpenViBE::CIdentifier& operator++(void);
 		/**
 		 * \brief Decrements this identifier by 1
-		 * \return this identifer
+		 * \return this identifier
 		 * \note if this identifier is \c OV_UndefinedIdentifier, it is not decremented
 		 * \note if this idenfitier is not \c OV_UndefinedIdentifier, it can not becomre \c OV_UndefinedIdentifier after being decremented
 		 */

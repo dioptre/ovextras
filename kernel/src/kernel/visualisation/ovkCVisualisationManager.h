@@ -59,7 +59,7 @@ namespace OpenViBE
 			 * When it is set to one (upon first call to this method) the group is actually initialized, but isn't upon
 			 * subsequent calls. It has to be destroyed (its ref count set back to 0) and recreated to be reinitialized.
 			 * \param rResourceGroupIdentifier Resource group identifier
-			 * \return True if resource group could be initialized (or was initialized already), false if an error occured
+			 * \return True if resource group could be initialized (or was initialized already), false if an error occurred
 			 */
 			virtual OpenViBE::boolean initializeResourceGroup(
 				const OpenViBE::CIdentifier& rResourceGroupIdentifier);
@@ -69,7 +69,7 @@ namespace OpenViBE
 			 * \remarks Each call to this method decrements the group's internal reference counter.
 			 * Only when this counter reaches 0 is the group actually destroyed.
 			 * \param rResourceGroupIdentifier Resource group identifier
-			 * \return True if resource group could be destroyed (or was initialized already), false if an error occured
+			 * \return True if resource group could be destroyed (or was initialized already), false if an error occurred
 			 */
 			virtual OpenViBE::boolean destroyResourceGroup(
 				const OpenViBE::CIdentifier& rResourceGroupIdentifier);

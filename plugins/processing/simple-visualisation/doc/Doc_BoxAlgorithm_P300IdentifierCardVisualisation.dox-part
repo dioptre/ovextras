@@ -24,7 +24,7 @@ The two other inputs are optional and used for defining the target and the selec
  * |OVP_DocBegin_BoxAlgorithm_P300IdentifierCardVisualisation_Input1|
 This input is used for sequencing the card display. It uses specific stimulations to know which
 card should be shown (see \ref Doc_BoxAlgorithm_P300IdentifierCardVisualisation_Setting_5)
-The card display is switched off thanks to the \c OVTK_StimulationId_VisualStimulationStop stimultion
+The card display is switched off thanks to the \c OVTK_StimulationId_VisualStimulationStop stimulation
 (this is automatically triggered by the \ref Doc_BoxAlgorithm_P300SpellerStimulator box).
  * |OVP_DocEnd_BoxAlgorithm_P300IdentifierCardVisualisation_Input1|
 

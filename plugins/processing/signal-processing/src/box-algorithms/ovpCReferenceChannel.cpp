@@ -65,7 +65,7 @@ void CReferenceChannelOld::setSampleBuffer(const float64* pBuffer)
 
 		for(size_t i=0 ; i<m_oChannelNames.size() ; i++)
 		{
-			//substract
+			//subtract
 			uint64 l_ui64Index = i*m_ui32SamplesPerBuffer;
 			for(uint32 j=0 ; j<m_ui32SamplesPerBuffer ; j++, l_ui64Index++)
 			{
@@ -145,7 +145,7 @@ boolean CReferenceChannelOld::uninitialize()
 
 boolean CReferenceChannelOld::processInput(uint32 ui32InputIndex)
 {
-	//don't process anything if an error has occured
+	//don't process anything if an error has occurred
 	if(m_bError)
 	{
 		return false;

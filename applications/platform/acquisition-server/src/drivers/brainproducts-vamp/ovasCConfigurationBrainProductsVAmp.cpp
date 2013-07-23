@@ -524,13 +524,13 @@ boolean CConfigurationBrainProductsVAmp::controlVampService(boolean bStartServic
 	{
 		if (l_handleService != NULL)
 		{
-			m_rDriverContext.getLogManager() << LogLevel_Error << " [VampService] An error occured with the VampService handler (err code "<<(uint32)GetLastError()<<".\n";
+			m_rDriverContext.getLogManager() << LogLevel_Error << " [VampService] An error occurred with the VampService handler (err code "<<(uint32)GetLastError()<<".\n";
 			CloseServiceHandle(l_handleService);
 			l_handleService = NULL;
 		}
 		if (l_handleSCM != NULL)
 		{
-			m_rDriverContext.getLogManager() << LogLevel_Error << " [VampService] An error occured with the SCManager handler (err code "<<(uint32)GetLastError()<<".\n";
+			m_rDriverContext.getLogManager() << LogLevel_Error << " [VampService] An error occurred with the SCManager handler (err code "<<(uint32)GetLastError()<<".\n";
 			CloseServiceHandle(l_handleSCM);
 			l_handleSCM = NULL;
 		}

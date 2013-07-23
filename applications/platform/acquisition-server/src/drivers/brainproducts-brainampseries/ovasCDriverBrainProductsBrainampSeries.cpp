@@ -297,7 +297,7 @@ boolean CDriverBrainProductsBrainampSeries::initialize(
 	m_ui32SampleCountPerSentBlock=ui32SampleCountPerSentBlock;
 	m_ui16Marker=0;
 
-	// -- Optionnaly starts impedance check
+	// -- Optionally starts impedance check
 
 	m_rDriverContext.getLogManager() << LogLevel_Trace << (m_rDriverContext.isImpedanceCheckRequested()?"Impedance will be checked":"Impedance won't be checked") << "\n";
 	if(m_rDriverContext.isImpedanceCheckRequested())
@@ -316,7 +316,7 @@ boolean CDriverBrainProductsBrainampSeries::start(void)
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(m_rDriverContext.isStarted()) { return false; }
 
-	// -- Optionnaly stops impedance check
+	// -- Optionally stops impedance check
 
 	if(m_rDriverContext.isImpedanceCheckRequested())
 	{
@@ -520,7 +520,7 @@ boolean CDriverBrainProductsBrainampSeries::stop(void)
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not stop acquisition\n";
 	}
 
-	// -- Optionnaly starts impedance check
+	// -- Optionally starts impedance check
 
 	if(m_rDriverContext.isImpedanceCheckRequested())
 	{
@@ -538,7 +538,7 @@ boolean CDriverBrainProductsBrainampSeries::uninitialize(void)
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(m_rDriverContext.isStarted()) { return false; }
 
-	// -- Optionnaly stops impedance check
+	// -- Optionally stops impedance check
 
 	if(m_rDriverContext.isImpedanceCheckRequested())
 	{

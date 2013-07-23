@@ -60,7 +60,7 @@ namespace OpenViBE
 
 		/**
 		 * \brief ASCII string cast operator
-		 * \return The string formated as standard ASCII string used in C.
+		 * \return The string formatted as standard ASCII string used in C.
 		 *
 		 * The implementation simply calls \c c_str().
 		 */

@@ -45,11 +45,11 @@ namespace OpenViBESkeletonGenerator
 		OpenViBE::boolean executeSedCommand(OpenViBE::CString sTemplateFile, OpenViBE::CString sCommand, OpenViBE::CString sDestinationFile = OpenViBE::CString(""));
 		// executes a sed substitution and build a new file, by replacing the tag by the substitute. Sed-compliancy is verified. If no destination file is provided, the template file is modified.
 		OpenViBE::boolean executeSedSubstitution(OpenViBE::CString sTemplateFile, OpenViBE::CString sTag, OpenViBE::CString sSubstitute, OpenViBE::CString sDestinationFile = OpenViBE::CString(""));
-		// get the formated string date
+		// get the formatted string date
 		OpenViBE::CString getDate();
 		
 		// generate a new file, giving a template file, a destination file, and a map ofsubstitutions (Tag,Substitute)
-		// return false if an error occured.
+		// return false if an error occurred.
 		OpenViBE::boolean generate(OpenViBE::CString sTemplateFile, OpenViBE::CString sDestinationFile, std::map<OpenViBE::CString,OpenViBE::CString> mSubstitutions, OpenViBE::CString& rLog);
 
 		virtual void getCurrentParameters(void) = 0;

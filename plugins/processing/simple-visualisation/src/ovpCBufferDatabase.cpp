@@ -320,7 +320,7 @@ void CBufferDatabase::setMatrixDimensionLabel(const uint32 ui32DimensionIndex, c
 
 void CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTime, uint64 ui64EndTime)
 {
-	//if an error has occured, do nothing
+	//if an error has occurred, do nothing
 	if(m_bError)
 	{
 		return;

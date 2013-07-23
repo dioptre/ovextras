@@ -92,7 +92,7 @@ namespace OpenViBE
 			 * \brief Informs the plugin description it won't be used any more
 			 *
 			 * This is called by the OpenViBE platform to inform
-			 * the plugin description it is not usefull anymore.
+			 * the plugin description it is not useful anymore.
 			 * The plugin can chose whether to delete itself or
 			 * to stay in memory until it decides it is ok to be
 			 * deleted. However, the OpenViBE platform will not

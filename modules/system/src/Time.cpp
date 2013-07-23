@@ -119,7 +119,7 @@ namespace
 			l_ui64Result2_last=l_ui64Result2;
 		}
 
-		// when denominator is 0, consider that elapsed time was not sufficient since the begining
+		// when denominator is 0, consider that elapsed time was not sufficient since the beginning
 		if(l_ui64Result2_last==0)
 		{
 			return 0;

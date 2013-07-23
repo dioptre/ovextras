@@ -87,7 +87,7 @@ boolean CAlgorithmBrainampFileReader::process(void)
 				std::getline(m_oHeaderFile, l_sWhat, '\n');
 				getLogManager() << LogLevel_Debug << CString(l_sWhat.c_str()) << "\n";
 
-				// optionally removes ending cariage return for windows / linux compatibility
+				// optionally removes ending carriage return for windows / linux compatibility
 				if(l_sWhat.length()!=0)
 				{
 					if(l_sWhat[l_sWhat.length()-1]=='\r')
@@ -312,7 +312,7 @@ boolean CAlgorithmBrainampFileReader::process(void)
 					std::getline(m_oMarkerFile, l_sWhat, '\n');
 					getLogManager() << LogLevel_Debug << CString(l_sWhat.c_str()) << "\n";
 
-					// optionnaly removes ending cariage return for windows / linux compatibility
+					// optionally removes ending carriage return for windows / linux compatibility
 					if(l_sWhat.length()!=0)
 					{
 						if(l_sWhat[l_sWhat.length()-1]=='\r')

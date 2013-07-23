@@ -7,7 +7,7 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainer_Description|
 The <em>Classifier Trainer</em> box is a generic box for classification training purpose. It works
-in cunjunction with the \ref Doc_BoxAlgorithm_ClassifierProcessor box.
+in conjunction with the \ref Doc_BoxAlgorithm_ClassifierProcessor box.
 This box' role is to expose a generic interface to the rest of the BCI pipelines. The tasks
 specific to a given classifier are forwarded to one of the registered \c OVTK_TypeId_ClassifierAlgorithm
 algorithms. The behavior is simple, the box collects a number of feature vectors. Those feature vectors
@@ -15,7 +15,7 @@ are labelled depending on the input they arrive on. When a specific stimulation 
 process is triggered. This process can take some time so this box should be used offline. Depending on the
 settings you enter, you will be able to perform a k-fold test in order to train a better classifier. When
 this training stimulation is received, the box requests the selected classification algorithm to generate
-a configuration file that will be useable online by the \ref Doc_BoxAlgorithm_ClassifierProcessor box. Finally, the box releases a particular stimulation (OVTK_StimulationId_TrainCompleted) on its ouput, that can be used to trigger further treatments in the scenario.
+a configuration file that will be usable online by the \ref Doc_BoxAlgorithm_ClassifierProcessor box. Finally, the box releases a particular stimulation (OVTK_StimulationId_TrainCompleted) on its ouput, that can be used to trigger further treatments in the scenario.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Description|
 __________________________________________________________________
 
@@ -63,7 +63,7 @@ The number of settings of this box can vary depending on the classification algo
 could have specific input OpenViBE::Kernel::IParameter objects (see \ref OpenViBE::Kernel::IAlgorithmProxy for details). If
 the type of those parameters is simple enough to be handled in the GUI, then additional settings will be added to this box.
 For this to be applied, you will have to close & reopen the settings configuration dialog after the actual classification
-algorithm is choosen. Supported parameter types are : Integers, Floats, Enumeations, Booleans. The documentation for those
+algorithm is chosen. Supported parameter types are : Integers, Floats, Enumeations, Booleans. The documentation for those
 parameters can not be done in this page because it is impossible to know at this time what classifier thus what hyper
 parameters you will have available. This will depend on the classification algorihtms that are be implemented in OpenViBE.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Settings|
@@ -109,9 +109,9 @@ In this section, we will detail how the k-fold test is implemented in this box. 
 have to choose more than 1 partition in the related settings. Suppose you chose \c n partitions. Then when trigger stimulation
 is received, the feature vector set is splitted in \c n consecutive segments. The classification algorithm is trained on
 \c n-1 of those segments and tested on the last one. This is performed for each segment. Then the classifier with the
-best accuracy is choosen.
+best accuracy is chosen.
 
-For example, suppose you have 5 parititions of feature vectors (\c FVs)
+For example, suppose you have 5 partitions of feature vectors (\c FVs)
 \verbatim
 +------+ +------+ +------+ +------+ +------+
 | FVs1 | | FVs2 | | FVs3 | | FVs4 | | FVs5 |

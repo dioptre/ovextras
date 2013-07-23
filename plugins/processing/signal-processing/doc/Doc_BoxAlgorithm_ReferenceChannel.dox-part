@@ -6,7 +6,7 @@ Detailed description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ReferenceChannel_Description|
- * This plugin substracts the values of the samples from a reference
+ * This plugin subtracts the values of the samples from a reference
  * channel from the other channels' samples.
  * |OVP_DocEnd_BoxAlgorithm_ReferenceChannel_Description|
 __________________________________________________________________

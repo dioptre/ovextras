@@ -63,7 +63,7 @@ __________________________________________________________________
  *
  * Default behavior is to launch the command synchronously. It means
  * that the command you launch should not be time consuming. If you want
- * asynchrnonous call, then you have to postfix the command with
+ * asynchronous call, then you have to postfix the command with
  * <em>&</em> under, eg :
  * \code
  * xdg-open http://openvibe.inria.fr &

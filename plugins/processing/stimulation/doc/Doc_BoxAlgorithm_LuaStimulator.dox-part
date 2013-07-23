@@ -84,7 +84,7 @@ setting value may be expanded using the configuration manager thanks to a \ref L
 
 \subsection LuaScriptAPI_log box:log(log_level, line_of_text)
 This function sends a string to the log manager. This message may be printed in the console
-for the user or may be poped up to him if this is important enough. In any case, it will appear
+for the user or may be popped up to him if this is important enough. In any case, it will appear
 in the log file.
 - \c log_level the log level which you want to use to print this line of text ; this is represented in
 string and can take the following values : \c Debug, \c Trace, \c Info, \c Warning, \c ImportantWarning, \c Error and \c Fatal.
@@ -98,7 +98,7 @@ environment.
 - \c token can be any string containing configuration variables (e.g. <em>${Path_Samples}/my-experiment</em>).
 
 \subsection LuaScriptAPI_get_current_time box:get_current_time()
-This function returns the elapsed time in seconds since the scneario started. The retuned value is a float.
+This function returns the elapsed time in seconds since the scenario started. The returned value is a float.
 - \b WARNING: this function should only be called while in the \ref LuaScriptAPI_process callback.
 
 \subsection LuaScriptAPI_get_stimulation_count box:get_stimulation_count(input_index)

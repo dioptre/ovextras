@@ -68,39 +68,39 @@ file depending on the type of the input connector.
 For the Signal stream, you will have something like this :
 \verbatim
 Time (s), Channel 1, Channel 2, ..., Channel n, Sampling Rate
-Time of mesure 1, Mesure 1 of channel 1, Mesure 1 of channel 2, ..., Mesure 1 of channel n, Value of the sampling rate
-Time of mesure 2, Mesure 2 of channel 1, Mesure 2 of channel 2, ..., Mesure 2 of channel n
+Time of measure 1, Measure 1 of channel 1, Measure 1 of channel 2, ..., Measure 1 of channel n, Value of the sampling rate
+Time of measure 2, Measure 2 of channel 1, Measure 2 of channel 2, ..., Measure 2 of channel n
 ...
-Time of mesure t, Mesure t of channel 1, Mesure t of channel 2, ..., Mesure t of channel n
+Time of measure t, Measure t of channel 1, Measure t of channel 2, ..., Measure t of channel n
 \endverbatim
 
 For the Spectrum stream, you will have something like this :
 \verbatim
 Time (s), Channel 1, Channel 2, ..., Channel n, Min frequency band, Max frequency band
-Time of mesure 1, Freq band 1 of mes 1 of chan 1, Freq band 1 of mes 1 of chan 2, ..., Freq band 1 of mes 1 of chan n, Value Min Frequency Band of band 1, Value Max Frequency Band of band 1
-Time of mesure 1, Freq band 2 of mes 1 of chan 1, Freq band 2 of mes 1 of chan 2, ..., Freq band 2 of mes 1 of chan n, Value Min Frequency Band of band 2, Value Max Frequency Band of band 2
+Time of measure 1, Freq band 1 of m. 1 of chan 1, Freq band 1 of m. 1 of chan 2, ..., Freq band 1 of m. 1 of chan n, Value Min Frequency Band of band 1, Value Max Frequency Band of band 1
+Time of measure 1, Freq band 2 of m. 1 of chan 1, Freq band 2 of m. 1 of chan 2, ..., Freq band 2 of m. 1 of chan n, Value Min Frequency Band of band 2, Value Max Frequency Band of band 2
 ...
-Time of mesure 1, Freq band f of mes 1 of chan 1, Freq band f of mes 1 of chan 2, ..., Freq band f of mes 1 of chan n, Value Min Frequency Band of band f, Value Max Frequency Band of band f
-Time of mesure 2, Freq band 1 of mes 2 of chan 1, Freq band 1 of mes 2 of chan 2, ..., Freq band 1 of mes 2 of chan n
-Time of mesure 2, Freq band 2 of mes 2 of chan 1, Freq band 2 of mes 2 of chan 2, ..., Freq band 2 of mes 2 of chan n
+Time of measure 1, Freq band f of m. 1 of chan 1, Freq band f of m. 1 of chan 2, ..., Freq band f of m. 1 of chan n, Value Min Frequency Band of band f, Value Max Frequency Band of band f
+Time of measure 2, Freq band 1 of m. 2 of chan 1, Freq band 1 of m. 2 of chan 2, ..., Freq band 1 of m. 2 of chan n
+Time of measure 2, Freq band 2 of m. 2 of chan 1, Freq band 2 of m. 2 of chan 2, ..., Freq band 2 of m. 2 of chan n
 ...
-Time of mesure 2, Freq band f of mes 2 of chan 1, Freq band f of mes 2 of chan 2, ..., Freq band f of mes 2 of chan n
+Time of measure 2, Freq band f of m. 2 of chan 1, Freq band f of m. 2 of chan 2, ..., Freq band f of m. 2 of chan n
 ...
 ...
 ...
-Time of mesure t, Freq band 1 of mes t of chan 1, Freq band 1 of mes t of chan 2, ..., Freq band 1 of mes t of chan n
-Time of mesure t, Freq band 2 of mes t of chan 1, Freq band 2 of mes t of chan 2, ..., Freq band 2 of mes t of chan n
+Time of measure t, Freq band 1 of m. t of chan 1, Freq band 1 of m. t of chan 2, ..., Freq band 1 of m. t of chan n
+Time of measure t, Freq band 2 of m. t of chan 1, Freq band 2 of m. t of chan 2, ..., Freq band 2 of m. t of chan n
 ...
-Time of mesure t, Freq band f of mes t of chan 1, Freq band f of mes t of chan 2, ..., Freq band f of mes t of chan n
+Time of measure t, Freq band f of m. t of chan 1, Freq band f of m. t of chan 2, ..., Freq band f of m. t of chan n
 \endverbatim
 
 For the Stimulation stream, you will have something like this :
 \verbatim
 Time (s), Identifier, Duration
-Time of stim 1, Idenfitifer of stim 1, Duration of stim 1
-Time of stim 2, Idenfitifer of stim 2, Duration of stim 2
+Time of stim 1, Identifier of stim 1, Duration of stim 1
+Time of stim 2, Identifier of stim 2, Duration of stim 2
 ...
-Time of stim n, Idenfitifer of stim n, Duration of stim n
+Time of stim n, Identifier of stim n, Duration of stim n
 \endverbatim
  * |OVP_DocEnd_BoxAlgorithm_CSVFileWriter_Miscellaneous|
  */

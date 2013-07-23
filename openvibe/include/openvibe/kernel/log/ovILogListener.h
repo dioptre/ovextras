@@ -149,7 +149,7 @@ namespace OpenViBE
 			//@{
 
 			/**
-			 * \brief Logs a formated time value (64 bits unsigned integer)
+			 * \brief Logs a formatted time value (64 bits unsigned integer)
 			 * \param ui64Value [in] : the value that should be logged
 			 */
 			virtual void log(const OpenViBE::time64 time64Value)=0;

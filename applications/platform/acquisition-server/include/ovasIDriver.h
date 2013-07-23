@@ -137,7 +137,7 @@ namespace OpenViBEAcquisitionServer
 		 * \note This function can be called several times if needed
 		 *       but does not change what \ref getDriftSampleCount
 		 *       returns until the next \ref IDriver::loop execution
-		 * \warning Please be carefull when calling this function.
+		 * \warning Please be careful when calling this function.
 		 *          Consider the fact that there could be some drifting
 		 *          in the device and ths OS-level driver itself, or even
 		 *          in the communication pipeline to the prorprietary
@@ -159,14 +159,14 @@ namespace OpenViBEAcquisitionServer
 		 * and are usually not provided by the device manufacturer. An intelligent
 		 * setup based on hardware tagging could however induce a fair estimate of this
 		 * latency so that it can be injected in the drift correction process.
-		 * Driver developpers will generally not have to care about this feature.
+		 * Driver developers will generally not have to care about this feature.
 		 * However, if it is important to have neurophysiologically relevant measures
 		 * (more particularly on ERPs) and it is know that the driver and / or hardware
 		 * has a latency, this latency compensation can be injected in the drift correction
 		 * process using the aforementionned function.
 		 *
 		 * \note Passing a positive value supposes the driver / hardware induce a delay which shall be corrected
-		 * \note Passing a negative value supposes the driver / hardware is able to predict and send future measures before they actually get measured (probably not recommanded)
+		 * \note Passing a negative value supposes the driver / hardware is able to predict and send future measures before they actually get measured (probably not recommended)
 		 * \note Passing 0 supposes both the driver and hardware are ideals and send samples immediately to the acquisition server as they happen on the scalp
 		 * \note Default configuration supposes both the driver and hardware are ideal, thus sets the inner latency to 0
 		 *
@@ -385,7 +385,7 @@ namespace OpenViBEAcquisitionServer
 		 *
 		 * Filling these information can be done any way you want... But
 		 * if the driver developer wants to use a GUI for this, it is
-		 * recommanded to use Glade/GTK since the acquisition server
+		 * recommended to use Glade/GTK since the acquisition server
 		 * already uses this API. If you use Glade/GTK, you won't have to
 		 * perform API initialization ; this is done by the acquisition server
 		 * already. It is the responsability of the driver developer to
@@ -439,7 +439,7 @@ namespace OpenViBEAcquisitionServer
 		 * \return the header information for the session
 		 *
 		 * The returned header is used by the acquisition server to send
-		 * encapsulated data to the platform at the begining of the sending
+		 * encapsulated data to the platform at the beginning of the sending
 		 * process. This header should be filled by the information collected
 		 * from the hardware or the driver itself when configure is called.
 		 *

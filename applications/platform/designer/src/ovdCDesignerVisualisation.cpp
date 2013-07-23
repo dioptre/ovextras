@@ -1341,7 +1341,7 @@ boolean CDesignerVisualisation::removeVisualisationPanel()
 	//destroy hierarchy but only unaffect visualisation boxes (as opposed to destroying them)
 	if(m_rVisualisationTree.destroyHierarchy(m_rVisualisationTree.getVisualisationWidget(l_oVisualisationPanelIdentifier)->getIdentifier(), false) == false)
 	{
-		displayErrorDialog("Tab removal failed !", "An error occured while destroying widget hierarchy.");
+		displayErrorDialog("Tab removal failed !", "An error occurred while destroying widget hierarchy.");
 		return false;
 	}
 

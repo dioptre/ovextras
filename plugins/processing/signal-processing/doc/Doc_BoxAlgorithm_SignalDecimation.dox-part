@@ -58,7 +58,7 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_SignalDecimation_Examples|
 Suppose you have a signal with a sampling rate of 1000Hz streamed with 32 samples per buffer
 that you want to downsample to 100Hz. Downsampling this signal to 100Hz will require that you
-low-pass filter the signal to at most 50Hz to avoid bad results. Additionnaly,
+low-pass filter the signal to at most 50Hz to avoid bad results. Additionally,
 Changing the epoch sizes using a the
 \ref Doc_BoxAlgorithm_TimeBasedEpoching box and configuring it e.g. for epochs of 0.1s every
 0.1s will cause this box to output 10 samples sized buffers.

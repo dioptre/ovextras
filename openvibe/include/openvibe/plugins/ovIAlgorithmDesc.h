@@ -14,7 +14,7 @@ namespace OpenViBE
 		 * \brief Algorithm plugin descriptor
 		 * \ingroup Group_Extend
 		 *
-		 * This class should be derived by any plugin developper in
+		 * This class should be derived by any plugin developer in
 		 * order to describe a specific OpenViBE algorithm.
 		 *
 		 * \sa OpenViBE::Plugins::IAlgorithm

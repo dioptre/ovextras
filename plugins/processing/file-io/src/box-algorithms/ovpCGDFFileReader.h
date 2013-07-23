@@ -101,7 +101,7 @@ namespace OpenViBEPlugins
 
 		public:
 
-			OpenViBE::boolean m_bErrorOccured;	//true if an error has occured while reading the GDF file
+			OpenViBE::boolean m_bErrorOccurred;	//true if an error has occurred while reading the GDF file
 
 			//The GDF filename and handle
 			OpenViBE::CString m_sFileName;

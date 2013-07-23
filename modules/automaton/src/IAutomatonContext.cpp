@@ -234,7 +234,7 @@ CIdentifier CAutomatonContext::getVariableIdentifier(const char * pName)
 CIdentifier CAutomatonContext::addParameter(const char * pName, Automaton::uint64 ui64Value)
 {
 	//uses the value map's size plus 1 to create the identifier (plus 1 since 0 is used
-	//to indicate that an error occured)
+	//to indicate that an error occurred)
 	CIdentifier l_oCurrentIdentifier(m_oParameterValue.size() + 1);
 
 	if(pName)

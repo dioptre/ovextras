@@ -327,7 +327,7 @@ int edf_set_label(int handle, int edfsignal, const char *label);
 /* Sets the label (name) of signal edfsignal. ("FP1", "SaO2", etc.) */
 /* label is a pointer to a NULL-terminated ASCII-string containing the label (name) of the signal edfsignal */
 /* Returns 0 on success, otherwise -1 */
-/* This function is recommanded for every signal when you want to write a file */
+/* This function is recommended for every signal when you want to write a file */
 /* and can be called only after opening a file in writemode and before the first sample write action */
 
 
@@ -354,7 +354,7 @@ int edf_set_physical_dimension(int handle, int edfsignal, const char *phys_dim);
 /* Sets the physical dimension of signal edfsignal. ("uV", "BPM", "mA", "Degr.", etc.) */
 /* phys_dim is a pointer to a NULL-terminated ASCII-string containing the physical dimension of the signal edfsignal */
 /* Returns 0 on success, otherwise -1 */
-/* This function is recommanded for every signal when you want to write a file */
+/* This function is recommended for every signal when you want to write a file */
 /* and can be called only after opening a file in writemode and before the first sample write action */
 
 

@@ -103,7 +103,7 @@ namespace OpenViBE
 			 * \return \e true in case of success.
 			 * \return \e false in case of error.
 			 *
-			 * This handler won't be useable until \c initialize is called successfully again.
+			 * This handler won't be usable until \c initialize is called successfully again.
 			 */
 			OpenViBE::boolean uninitialize(void)
 			{
@@ -134,7 +134,7 @@ namespace OpenViBE
 			 * \return The handled object itself
 			 *
 			 * This cast operator allows the handler to be used as if it was the handled
-			 * object itself. For example, an unsigned integer parameter handler is useable
+			 * object itself. For example, an unsigned integer parameter handler is usable
 			 * in arithmetic operations :
 			 *
 			 * \code
@@ -159,7 +159,7 @@ namespace OpenViBE
 			 * \return The handled object itself for access operation
 			 *
 			 * This operator allows the handler to be used as if it was the handled
-			 * object itself. For example, a matrix parameter handler is useable
+			 * object itself. For example, a matrix parameter handler is usable
 			 * as if it was a matrix pointer :
 			 *
 			 * \code

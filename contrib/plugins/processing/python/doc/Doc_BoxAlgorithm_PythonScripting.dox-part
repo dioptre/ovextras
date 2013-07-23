@@ -9,7 +9,7 @@ __________________________________________________________________
  This box can process data from and to OpenViBE using Python script.
  Available IO types are Streamed Matrix, Signal and Stimulations.
  
- The user Pyhton Script must define a new class that inherits from OVBox, 
+ The user Python Script must define a new class that inherits from OVBox, 
  and implements the initialize, process and uninitialize methods.
  
  User script must end with : box = MyOVBox() where MyOVBox is the new class.

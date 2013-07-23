@@ -69,7 +69,7 @@ namespace OpenViBEPlugins
 			//! The reference channel
 			OpenViBE::uint32 m_ui32ReferenceChannel;
 
-			//! True if an error has occured
+			//! True if an error has occurred
 			OpenViBE::boolean m_bError;
 
 			OpenViBE::float64 * m_pMatrixBuffer;

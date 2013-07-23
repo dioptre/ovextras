@@ -72,7 +72,7 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_Downsampling_Examples|
  * Let's consider our input signal sampling rate is 1 kHz.
  * If the new selected sampling rate is 200 Hz and the Frequency
- * cutoff ratio is 1/4, then a low-pass filter (with freqeuncy
+ * cutoff ratio is 1/4, then a low-pass filter (with frequency
  * cutoff equal to 200*1/4 = 50 Hz) is applied  before downsampling
  * at 200 Hz.
  * |OVP_DocEnd_BoxAlgorithm_Downsampling_Examples|

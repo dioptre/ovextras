@@ -9,7 +9,7 @@ __________________________________________________________________
  * Filters a stimulation stream in order to select or reject some
  * specific stimulation ranges. The configuration of the box consists
  * of a time range in which the filter will be activated, and 
- * a set of rules which will be exectuted consecutively. The first
+ * a set of rules which will be executed consecutively. The first
  * rule is the default one, specifying what to do if no other rule
  * matches. The next rules will specify what to do for their respective
  * range of stimulations. The last matching rule is chosen so you should
@@ -84,7 +84,7 @@ __________________________________________________________________
  * to \c Reject and use one \c Select rule for range Label 00 to Label 0F.
  *
  * A complete example could be to select Label 00 to 0F,
- * and the particular stimulations GDF LEFT and GDF RIGHT. Additionnaly, for a
+ * and the particular stimulations GDF LEFT and GDF RIGHT. Additionally, for a
  * reason, you want to avoid the Label 07 and Label 08. In this case, you
  * will have to turn the default action setting to \c Reject then build up 4 rules :
  *  - rule 1 : \c Select range Label 00 to Label 0F

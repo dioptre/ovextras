@@ -282,7 +282,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 
 	l_sCommand = CString("addpath('") + OpenViBE::Directories::getDataDir() + "/plugins/matlab');";
 	::engEvalString(m_pMatlabEngine, (const char * )l_sCommand);
-	//if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, (const char * )l_sOpenvibeToolboxPath) == 0, "An error occured while adding the path to openvibe toolbox\n")) return false;
+	//if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, (const char * )l_sOpenvibeToolboxPath) == 0, "An error occurred while adding the path to openvibe toolbox\n")) return false;
 	// If there is more than 1 Matlab box in the scenario, the path is set repeatedly
 	// resulting in warning messages in the buffer. We don't print them.
 	// this->printOutputBufferWithFormat(); 
@@ -293,17 +293,17 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 
 	this->getLogManager() << LogLevel_Trace << "Setting working directory to " << l_sWorkingDir << "\n";
 	l_sCommand = CString("cd ") + l_sWorkingDir;
-	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occured while changing the working directory\n")) return false;
+	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while changing the working directory\n")) return false;
 
 	// executes the pre-run routine that defines the global identifiers for streams and stimulations codes
 	l_sCommand = CString("run '") + OpenViBE::Directories::getDataDir() + "/plugins/matlab/OV_define.m'";
-	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occured while calling OV_define.m")) return false;
+	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while calling OV_define.m")) return false;
 
 	// executes the pre-run routine that construct the ov_box object
 	char l_sInputCount[32]; sprintf(l_sInputCount, "%i", this->getStaticBoxContext().getInputCount());
 	char l_sOutputCount[32]; sprintf(l_sOutputCount, "%i", this->getStaticBoxContext().getOutputCount());
 	l_sCommand = m_sBoxInstanceVariableName + " = OV_createBoxInstance(" + l_sInputCount + "," + l_sOutputCount + ");";
-	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occured while calling OV_createBoxInstance.m")) return false;
+	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while calling OV_createBoxInstance.m")) return false;
 	
 	//First call to a function of the openvibe toolbox
 	// if it fails, the toolbox may be not installed
@@ -375,7 +375,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 	l_sSettingValues = l_sSettingValues +"}";
 
 	// On Windows, Matlab doesn't sometimes notice .m files have been changed, esp. if you have matlab box running while you change them
-	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, "clear functions;") == 0, "An error occured while calling matlab 'clear functions;'\n")) return false;
+	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, "clear functions;") == 0, "An error occurred while calling matlab 'clear functions;'\n")) return false;
 
 	l_sCommand = m_sBoxInstanceVariableName + " = OV_setSettings("+m_sBoxInstanceVariableName+"," + l_sSettingNames + "," + l_sSettingTypes +"," + l_sSettingValues +");";
 	//this->getLogManager() << LogLevel_Error << l_sCommand << "\n";
@@ -384,10 +384,10 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 	// we set the box clock frequency in the box structure, so it's accessible in the user scripts if needed
 	getStaticBoxContext().getSettingValue(0,l_sTemp);
 	l_sCommand = m_sBoxInstanceVariableName + ".clock_frequency = " + l_sTemp + ";";
-	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occured while setting the clock frequency\n")) return false;
+	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while setting the clock frequency\n")) return false;
 
 	l_sCommand = m_sBoxInstanceVariableName + " = " + m_sInitializeFunction + "(" + m_sBoxInstanceVariableName + ");";
-	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occured while calling the initialize function\n")) return false;
+	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while calling the initialize function\n")) return false;
 
 	m_oMatlabHelper.setMatlabEngine(m_pMatlabEngine);
 	m_oMatlabHelper.setBoxInstanceVariableName(m_sBoxInstanceVariableName);
@@ -432,7 +432,7 @@ boolean CBoxAlgorithmMatlabScripting::uninitialize(void)
 	if(m_pMatlabEngine != NULL)
 	{
 		CString l_sCommand = m_sBoxInstanceVariableName + " = " + m_sUninitializeFunction + "(" + m_sBoxInstanceVariableName + ");";
-		if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occured while calling the uninitialize function\n")) 
+		if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while calling the uninitialize function\n")) 
 		{ 
 			// NOP, we still want to deallocate below
 		} 
@@ -476,7 +476,7 @@ boolean CBoxAlgorithmMatlabScripting::processClock(IMessageClock& rMessageClock)
 	CString l_sCommand = m_sBoxInstanceVariableName + CString(".clock = ") + CString(l_sBuffer) + CString(";");
 	if(::engEvalString(m_pMatlabEngine, l_sCommand) != 0)
 	{
-		this->getLogManager() << LogLevel_Error << "An error occured while updating the box clock.\n";
+		this->getLogManager() << LogLevel_Error << "An error occurred while updating the box clock.\n";
 		return false;
 	}
 

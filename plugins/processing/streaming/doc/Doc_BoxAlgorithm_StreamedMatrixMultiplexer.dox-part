@@ -15,7 +15,7 @@ __________________________________________________________________
  * in a similar manner for a similar purpose. This actually joins the pipelines in only one, dropping the need
  * to edit and execute similar boxes.
  *
- * \b Warning: this box is usually missused and used in place of a \ref Doc_BoxAlgorithm_SignalMerger box.
+ * \b Warning: this box is usually misused and used in place of a \ref Doc_BoxAlgorithm_SignalMerger box.
  * Please consider reading this documentation twice, and maybe read the \ref Doc_BoxAlgorithm_SignalMerger
  * documentation once again as well ;)
  * |OVP_DocEnd_BoxAlgorithm_StreamedMatrixMultiplexer_Description|

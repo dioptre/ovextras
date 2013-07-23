@@ -8,7 +8,7 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_ConfusionMatrix_Description|
  The Confusion Matrix box performs real-time computation of the confusion matrix of a given classifier.
  Confusion matrix can be used to measure the performance of a classifier.
- The confusion matrix output can be filled with either percentages or values. Optionnal colum and row can be added to
+ The confusion matrix output can be filled with either percentages or values. Optional colum and row can be added to
  give the sums of each row and column.
  The confusion matrix output can be displayed usig a \ref BoxAlgorithm_MatrixDisplay.
  * |OVP_DocEnd_BoxAlgorithm_ConfusionMatrix_Description|
@@ -25,7 +25,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_ConfusionMatrix_Input1|
 
  * |OVP_DocBegin_BoxAlgorithm_ConfusionMatrix_Input2|
- The classification results coming from a classifer. These stimulations will be compared to teh target to perform the computation.
+ The classification results coming from a classifier. These stimulations will be compared to teh target to perform the computation.
  * |OVP_DocEnd_BoxAlgorithm_ConfusionMatrix_Input2|
 __________________________________________________________________
 

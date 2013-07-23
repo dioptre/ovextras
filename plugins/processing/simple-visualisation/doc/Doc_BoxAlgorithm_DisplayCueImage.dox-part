@@ -28,7 +28,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Outputs|
 
  * |OVP_DocBegin_BoxAlgorithm_DisplayCueImage_Output1|
- The input stimulations are outputed when the GTK rendering is actually finished (image is displayed or scren is cleared). These stimulations have precise timing, for the applications that need precise  synchronization.
+ The input stimulations are output when the GTK rendering is actually finished (image is displayed or scren is cleared). These stimulations have precise timing, for the applications that need precise  synchronization.
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Output1|
 __________________________________________________________________
 

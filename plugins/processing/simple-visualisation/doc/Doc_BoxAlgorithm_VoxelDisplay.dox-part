@@ -60,7 +60,7 @@ Online options include :
 
 The previous 4 settings allow to specify which voxels are to be displayed. 
 
-To see extrema values, i.e. the least and most activated voxels, set the minimum display threshold boundary to '<' (the other boundary automativally swtiches to '>'). This will display voxels whose level is either lower than the minimum display threshold, OR higher than the maximum display threshold.
+To see extrema values, i.e. the least and most activated voxels, set the minimum display threshold boundary to '<' (the other boundary automatically swtiches to '>'). This will display voxels whose level is either lower than the minimum display threshold, OR higher than the maximum display threshold.
 
 To see all other voxels, click the Min Display Threshold Boundary and set it to '>' (the other boundary automatically switches to '<'). This will display voxels whose level lies in [Min Display Threshold, Max Display Threshold].
 

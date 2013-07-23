@@ -17,7 +17,7 @@ namespace OpenViBE
 		 *
 		 * The log manager is responsible for keeping a trace of all the messages
 		 * the application could send as debug output. Such information is not
-		 * usefull most of the cases but could become crucial in some cases.
+		 * useful most of the cases but could become crucial in some cases.
 		 * Thus there are different levels of activation for the log manager
 		 * to work. The log manager forwards each log request to its registered
 		 * log listeners that effectively do the log the way they want

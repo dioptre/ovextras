@@ -9,7 +9,7 @@ __________________________________________________________________
  This box displays an input matrix in a table of gradient-colored squares. 
  <b> WARNING : The color gradient is centered (50%) at the value 0. </b>
  The limits of colors match the minimum and maximum values, ever received or in real time if the corresponding setting is set.
- These values can evolve symetrically, using the maximum absolute value.
+ These values can evolve symmetrically, using the maximum absolute value.
  * |OVP_DocEnd_BoxAlgorithm_MatrixDisplay_Description|
 __________________________________________________________________
 
@@ -41,7 +41,7 @@ The color gradient used.
 
  * |OVP_DocBegin_BoxAlgorithm_MatrixDisplay_Setting3|
  This parameter determines if the minimum and maximum values, matching the 0% and 100% color in the gradient, 
- should change symetrically using the maximum absolute value and its opposite.
+ should change symmetrically using the maximum absolute value and its opposite.
  * |OVP_DocEnd_BoxAlgorithm_MatrixDisplay_Setting3|
  
  * |OVP_DocBegin_BoxAlgorithm_MatrixDisplay_Setting4|

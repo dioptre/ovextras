@@ -52,7 +52,7 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_ChannelRename_Examples|
  * Suppose you compute the delta, alpha and beta band power at location Cz and merge the three
  * streams in a single stream. The resulting stream will handle three channels all named Cz. For
- * convevience, it could be handfull to rename those channels Delta, Alpha and Beta respectively.
+ * convenience, it could be useful to rename those channels Delta, Alpha and Beta respectively.
  * In order to achieve this, use a \ref Doc_BoxAlgorithm_ChannelRename with the following setting
  * value : "Delta;Alpha;Beta"
  * |OVP_DocEnd_BoxAlgorithm_ChannelRename_Examples|

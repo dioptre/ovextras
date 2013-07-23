@@ -277,13 +277,13 @@ boolean CDriverEmotivEPOC::loop(void)
 			m_ui32EDK_LastErrorCode = EE_DataUpdateHandle(m_ui32UserID, m_tDataHandle);
 			if(m_ui32EDK_LastErrorCode != EDK_OK)
 			{
-				m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occured while updating the DataHandle. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
+				m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occurred while updating the DataHandle. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
 				return false;
 			}
 			m_ui32EDK_LastErrorCode = EE_DataGetNumberOfSample(m_tDataHandle, &l_ui32nSamplesTaken);
 			if(m_ui32EDK_LastErrorCode != EDK_OK)
 			{
-				m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occured while getting new samples from device. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
+				m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occurred while getting new samples from device. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
 				return false;
 			}
 			// warning : if you connect/disconnect then reconnect, the internal buffer may be full of samples, thus maybe l_ui32nSamplesTaken > m_ui32SampleCountPerSentBlock
@@ -298,7 +298,7 @@ boolean CDriverEmotivEPOC::loop(void)
 					m_ui32EDK_LastErrorCode = EE_DataGet(m_tDataHandle, g_ChannelList[i], l_pBuffer, l_ui32nSamplesTaken);
 					if(m_ui32EDK_LastErrorCode != EDK_OK)
 					{
-						m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occured while getting new samples from device. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
+						m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occurred while getting new samples from device. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
 						return false;
 					}
 					
@@ -319,7 +319,7 @@ boolean CDriverEmotivEPOC::loop(void)
 					m_ui32EDK_LastErrorCode = EE_DataGet(m_tDataHandle, g_ChannelList[i], l_pBuffer, l_ui32nSamplesTaken);
 					if(m_ui32EDK_LastErrorCode != EDK_OK)
 					{
-						m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occured while getting new samples from device. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
+						m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occurred while getting new samples from device. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
 						return false;
 					}
 					m_pSample[i] = (float32)l_pBuffer[s];

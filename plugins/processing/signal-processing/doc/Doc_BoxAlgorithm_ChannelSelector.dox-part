@@ -31,7 +31,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_ChannelSelector_Outputs|
 
  * |OVP_DocBegin_BoxAlgorithm_ChannelSelector_Output1|
- * The output matrix with selected or preseverd channels. The type of this output can be changed to
+ * The output matrix with selected or preserved channels. The type of this output can be changed to
  * signal or spectrum depending on what kind of stream channel to select.
  * |OVP_DocEnd_BoxAlgorithm_ChannelSelector_Output1|
 __________________________________________________________________
@@ -44,7 +44,7 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ChannelSelector_Setting1|
  * A semi colon separated list of channel identifiers. You can use the index of the channel or the name of the
- * channel. Also, ranges can be selected specifying first channel identifer, followed by a colon, followed by
+ * channel. Also, ranges can be selected specifying first channel identifier, followed by a colon, followed by
  * the second channel identifier.
  * |OVP_DocEnd_BoxAlgorithm_ChannelSelector_Setting1|
 
@@ -55,8 +55,8 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_ChannelSelector_Setting3|
  * The kind of identification for channel list.
  * - \c Smart let the box try to detect if the channel identifier is an index or a name
- * - \c Name forces the channel identifiers to be considered as channel names. This can be handfull if channel names are numbers.
- * - \c Index forces the channel identifiers to be considered as channel indices. This can be handfull if channel names are numbers.
+ * - \c Name forces the channel identifiers to be considered as channel names. This can be useful if channel names are numbers.
+ * - \c Index forces the channel identifiers to be considered as channel indices. This can be useful if channel names are numbers.
  * |OVP_DocEnd_BoxAlgorithm_ChannelSelector_Setting3|
 __________________________________________________________________
 

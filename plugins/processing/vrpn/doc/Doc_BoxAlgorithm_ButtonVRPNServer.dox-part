@@ -61,7 +61,7 @@ __________________________________________________________________
  *
  * If the on and off stimulation codes for a given button are the same,
  * then when this stimulation happens, the button state switches to \e pressed
- * and immedialty comes back to \e released. Client application will receive
+ * and immediately comes back to \e released. Client application will receive
  * the two state changes.
  * |OVP_DocEnd_BoxAlgorithm_ButtonVRPNServer_Settings|
  *

@@ -52,7 +52,7 @@ namespace OpenViBE
 	 * the object could finally be casted in this interface or subclass.
 	 * Several interfaces are provided in the OpenViBE specficiation
 	 * but custom class could also be created. It is the responsability
-	 * of the developper to notify the user of what interfaces are
+	 * of the developer to notify the user of what interfaces are
 	 * implemented in a concrete class.
 	 *
 	 * See isDerivedFromClass to have a sample of how this function

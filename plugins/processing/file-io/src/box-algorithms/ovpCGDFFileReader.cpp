@@ -42,7 +42,7 @@ void CGDFFileReader::writeStimulationOutput(const void* pBuffer, const EBML::uin
 
 //Plugin Methods
 CGDFFileReader::CGDFFileReader(void):
-	m_bErrorOccured(false),
+	m_bErrorOccurred(false),
 	m_ui64FileSize(0),
 	m_f32FileVersion(-1),
 	m_pSignalOutputWriterHelper(NULL),
@@ -234,7 +234,7 @@ void CGDFFileReader::GDFBufferToFloat64Buffer(float64 * out, void * in, uint64 i
 		{
 			//Not handled
 			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "This data type is currently not handled : float128.\n";
-			m_bErrorOccured = true;
+			m_bErrorOccurred = true;
 		}
 		break;
 
@@ -263,7 +263,7 @@ void CGDFFileReader::GDFBufferToFloat64Buffer(float64 * out, void * in, uint64 i
 		default:
 			//not handled
 			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Invalid GDF data type!\n";
-			m_bErrorOccured = true;
+			m_bErrorOccurred = true;
 			break;
 	}
 }
@@ -287,7 +287,7 @@ boolean CGDFFileReader::readFileHeader()
 		{
 			//Handle error
 			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning <<"This is not a valid GDF File!\n";
-			m_bErrorOccured = true;
+			m_bErrorOccurred = true;
 			return false;
 		}
 
@@ -298,7 +298,7 @@ boolean CGDFFileReader::readFileHeader()
 		{
 			//Handle error
 			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Error while reading file.\n";
-			m_bErrorOccured = true;
+			m_bErrorOccurred = true;
 			return false;
 		}
 
@@ -317,7 +317,7 @@ boolean CGDFFileReader::readFileHeader()
 
 			if(!l_oFixedHeader->read(m_oFile))
 			{
-				m_bErrorOccured = true;
+				m_bErrorOccurred = true;
 				delete l_oFixedHeader;
 				return false;
 			}
@@ -359,7 +359,7 @@ boolean CGDFFileReader::readFileHeader()
 		{
 			//Not a known GDF File version
 			//Error handling
-			m_bErrorOccured = true;
+			m_bErrorOccurred = true;
 		}
 	}//END of ExperimentHeader
 
@@ -374,7 +374,7 @@ boolean CGDFFileReader::readFileHeader()
 		if(m_oFile.bad())
 		{
 			//Handle error
-			m_bErrorOccured = true;
+			m_bErrorOccurred = true;
 			return false;
 		}
 
@@ -418,7 +418,7 @@ boolean CGDFFileReader::readFileHeader()
 				{
 					getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Can't handle GDF files with channels having different sampling rates!\n";
 				}
-				m_bErrorOccured = true;
+				m_bErrorOccurred = true;
 				return false;
 			}
 		}
@@ -574,9 +574,9 @@ void CGDFFileReader::writeEvents()
 
 boolean CGDFFileReader::process()
 {
-	//Don't do anything if an error as occured while reading the input file
+	//Don't do anything if an error as occurred while reading the input file
 	//for instance, if the file has channels with different sampling rates
-	if(m_bErrorOccured)
+	if(m_bErrorOccurred)
 	{
 		return false;
 	}
@@ -608,7 +608,7 @@ boolean CGDFFileReader::process()
 			if(m_oFile.bad())
 			{
 				//Handle error
-				m_bErrorOccured = true;
+				m_bErrorOccurred = true;
 				return false;
 			}
 
@@ -674,7 +674,7 @@ boolean CGDFFileReader::process()
 					if(m_oFile.bad())
 					{
 						//Handle error
-						m_bErrorOccured = true;
+						m_bErrorOccurred = true;
 						return false;
 					}
 
@@ -720,7 +720,7 @@ boolean CGDFFileReader::process()
 					if(m_oFile.bad())
 					{
 						//Handle error
-						m_bErrorOccured = true;
+						m_bErrorOccurred = true;
 						return false;
 					}
 				}

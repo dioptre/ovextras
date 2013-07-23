@@ -216,7 +216,7 @@ boolean CDriverNeuroskyMindset::initialize(
 					else if(l_iErrCode == -2)
 						m_rDriverContext.getLogManager() << LogLevel_Info << "  Last TG_ReadPackets error: -2, 0 bytes on the stream\n";
 					else if(l_iErrCode == -3) 
-						m_rDriverContext.getLogManager() << LogLevel_Info << "  Last TG_ReadPackets error: -3, I/O error occured\n";
+						m_rDriverContext.getLogManager() << LogLevel_Info << "  Last TG_ReadPackets error: -3, I/O error occurred\n";
 					else 
 						m_rDriverContext.getLogManager() << LogLevel_Info << "  Last TG_ReadPackets error: " << l_iErrCode << ", Unknown\n";
 				}

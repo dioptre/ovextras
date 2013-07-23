@@ -7,7 +7,7 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ClockStimulator_Description|
  * This box produces stimulations at specific times depending on
- * its configuration. The stimulation interval is fixe.
+ * its configuration. The stimulation interval is fixed.
  *
  * It is important to underline that this box runs as fast as possible
  * thus producting empty \ref Doc_Streams_Stimulation chunks when needed.
@@ -45,7 +45,7 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ClockStimulator_Examples|
  * In the designer, drag'n drop a \ref Dox_BoxAlgorithm_StimulationListener
- * and connect it to a clock stimulator box. Configure it to your prefered
+ * and connect it to a clock stimulator box. Configure it to your preferred
  * active log level, press start and see what happens.
  *
  * The output should like this :

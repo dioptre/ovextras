@@ -49,7 +49,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_StimulationBasedEpoching_Output1|
 
  * |OVP_DocBegin_BoxAlgorithm_StimulationBasedEpoching_Output2|
- This output sends a stimulation at the begining of the selected epoch.
+ This output sends a stimulation at the beginning of the selected epoch.
  <em><b>This output is deprecated and should not be used anymore.</b></em>
  * |OVP_DocEnd_BoxAlgorithm_StimulationBasedEpoching_Output2|
 
@@ -130,7 +130,7 @@ time   =      1      2      3      4      5      6      7      8      9
 stim   =                        ^                ^
 \endverbatim
 
-Suppose that we want to grab 3 seconds of signal begining 1 second before a specific stimulation code.
+Suppose that we want to grab 3 seconds of signal beginning 1 second before a specific stimulation code.
 Suppose that the actual stimulation happens at <em>t=1.5</em> and <em>t=6</em>. Then the following figure
 illustrate how epochs will be built. (<em>Ix</em> represents the x<em>th</em> input epoch and
 <em>Ox</em> represents the x<em>th</em> output epoch)
@@ -148,7 +148,7 @@ stim   =          ^                              ^
 \endverbatim
 
 Overlapping epochs would also work as defined on the following example...
-Suppose that we want to grab 3 seconds of signal begining 1 second before a specific stimulation code.
+Suppose that we want to grab 3 seconds of signal beginning 1 second before a specific stimulation code.
 Suppose that the actual stimulation happens at <em>t=1.5</em>, <em>t=2</em> and <em>t=6</em>. Then the following figure
 illustrate how epochs will be built. (<em>Ix</em> represents the x<em>th</em> input epoch and
 <em>Ox</em> represents the x<em>th</em> output epoch)

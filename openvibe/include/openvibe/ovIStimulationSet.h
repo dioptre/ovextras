@@ -42,7 +42,7 @@ namespace OpenViBE
 		 * \brief Gets the date of a specific stimulation in this stimulation set
 		 * \param ui64StimulationIndex [in] : the index of the stimulation which date has to be returned
 		 * \return the date for the specified stimulation.
-		 * \note the returned date is relative to the begining of this stimulation set
+		 * \note the returned date is relative to the beginning of this stimulation set
 		 * \note dates and durations are returned in seconds fixed point 32:32. Refer to \Doc_TimeManagement for more details
 		 */
 		virtual const OpenViBE::uint64 getStimulationDate(
@@ -90,7 +90,7 @@ namespace OpenViBE
 		 * \param ui64StimulationDuration [in] : the new duration for the specified stimulation
 		 * \return \e true in case of success.
 		 * \return \e false in case of error.
-		 * \note the returned date is relative to the begining of this stimulation set
+		 * \note the returned date is relative to the beginning of this stimulation set
 		 * \note dates and durations are returned in seconds fixed point 32:32. Refer to \Doc_TimeManagement for more details
 		 */
 		virtual OpenViBE::boolean setStimulationDuration(

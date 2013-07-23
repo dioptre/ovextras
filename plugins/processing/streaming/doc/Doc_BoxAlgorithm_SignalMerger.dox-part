@@ -47,7 +47,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_SignalMerger_Outputs|
 
  * |OVP_DocBegin_BoxAlgorithm_SignalMerger_Output1|
- * The output stream contains all the channels grabed from the different input streams.
+ * The output stream contains all the channels grabbed from the different input streams.
  * |OVP_DocEnd_BoxAlgorithm_SignalMerger_Output1|
 __________________________________________________________________
 

@@ -57,7 +57,7 @@ namespace itppext
 		it_assert_debug(B.rows() == B.cols(), "eig: Matrix B is not square");
 		it_assert_debug(A.rows() == B.cols(), "eig: Matrix A and B don't have the same size");
 
-		int worksize=4*A.rows(); // This may be choosen better!
+		int worksize=4*A.rows(); // This may be chosen better!
 		itpp::mat l_A(A);
 		itpp::mat l_B(B);
 		itpp::vec l_W(A.rows());

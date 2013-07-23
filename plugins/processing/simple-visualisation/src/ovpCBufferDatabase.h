@@ -192,7 +192,7 @@ namespace OpenViBEPlugins
 
 			/**
 			 * \brief Get error status
-			 * \return Error status. If true, an error occured.
+			 * \return Error status. If true, an error occurred.
 			 */
 			virtual OpenViBE::boolean getErrorStatus();
 

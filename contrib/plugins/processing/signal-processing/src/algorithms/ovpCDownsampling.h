@@ -42,7 +42,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("G. Gibert - E. Maby - P.E. Aguera"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INSERM/U821"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Downsamples input signal."); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Downsamples input signal respect of the new sampling rate choosen by user."); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Downsamples input signal to the new sampling rate chosen by user."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing Gpl/Basic"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }
 

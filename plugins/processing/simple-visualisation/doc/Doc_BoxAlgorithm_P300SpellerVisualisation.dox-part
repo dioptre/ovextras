@@ -8,7 +8,7 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_P300SpellerVisualisation_Description|
 This box can be used with the \ref Doc_BoxAlgorithm_P300SpellerStimulator box in order to
 establish a P300 speller application. The visualisation consists in a matrix of 6 lines and
-columns containing 26 characters and 10 numbers. The lines and columns can be flashed sequencially
+columns containing 26 characters and 10 numbers. The lines and columns can be flashed sequentially
 resulting in an evoked potential in the user's brain activity. This evoked potential can be
 detected and used to find which line and which column the user was focused on, thus resulting
 in the ability to write text.
@@ -33,7 +33,7 @@ The three other inputs are optional and used for defining the target and the sel
 This input is used for sequencing the flashes. It uses specific stimulations to know which
 line/column should be flashed (see \ref Doc_BoxAlgorithm_P300SpellerVisualisation_Setting_2
 and \ref Doc_BoxAlgorithm_P300SpellerVisualisation_Setting_3). The flash is switched off thanks
-to the \c OVTK_StimulationId_VisualStimulationStop stimultion (this is automatically triggered
+to the \c OVTK_StimulationId_VisualStimulationStop stimulation (this is automatically triggered
 by the \ref Doc_BoxAlgorithm_P300SpellerStimulator box).
  * |OVP_DocEnd_BoxAlgorithm_P300SpellerVisualisation_Input1|
 
@@ -101,7 +101,7 @@ exact stimulation code to the first input. Flashing the second column needs this
 
  * |OVP_DocBegin_BoxAlgorithm_P300SpellerVisualisation_Setting4|
 This color defines the flash background. It is not common in P300 spellers to have a changing background but this
-probabaly enhances the response.
+probably enhances the response.
  * |OVP_DocEnd_BoxAlgorithm_P300SpellerVisualisation_Setting4|
 
  * |OVP_DocBegin_BoxAlgorithm_P300SpellerVisualisation_Setting5|

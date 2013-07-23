@@ -23,7 +23,7 @@ namespace OpenViBE
 		 * to override the parameter content directly pointing to another parameter
 		 * or another value. In order to be as generic as possible, this interface
 		 * uses \c void* pointers in conjunction with data size values. It can be
-		 * hard/tricky to understand for unexperienced developers. Thus I recommand
+		 * hard/tricky to understand for unexperienced developers. Thus I recommend
 		 * the use of the TParameterHandler object which dramatically eases the use
 		 * of the IParameter interface.
 		 */

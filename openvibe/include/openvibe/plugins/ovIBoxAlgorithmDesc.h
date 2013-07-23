@@ -22,7 +22,7 @@ namespace OpenViBE
 		 * \brief Box algorithm plugin descriptor
 		 * \ingroup Group_Extend
 		 *
-		 * This class should be derived by any plugin developper in
+		 * This class should be derived by any plugin developer in
 		 * order to describe a specific OpenViBE box algorithm.
 		 *
 		 * \sa OpenViBE::Plugins::IBoxAlgorithm

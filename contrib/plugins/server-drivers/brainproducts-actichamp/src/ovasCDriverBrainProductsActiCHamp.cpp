@@ -697,7 +697,7 @@ boolean CDriverBrainProductsActiCHamp::loop(void)
 			}
 		}
 
-		// As described in at the begining of this file, the drift
+		// As described in at the beginning of this file, the drift
 		// correction process is altered to consider the ~ 50ms delay
 		// of the single way filtering process
 		// Inner latency was set accordingly.

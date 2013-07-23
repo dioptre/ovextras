@@ -63,7 +63,7 @@ __________________________________________________________________
  * oscillator. Leave the default sinus oscillator settings to their
  * default, except the sample count per buffer can be set to 8 for the
  * example. Chose an appropriate log level for the EBML stream spy and
- * press 'start'. You will probabaly notice that a lot of text is sent
+ * press 'start'. You will probably notice that a lot of text is sent
  * to the log manager, making the use of this box difficult in real time.
  * Once again, consider it as a debugging box.
  *

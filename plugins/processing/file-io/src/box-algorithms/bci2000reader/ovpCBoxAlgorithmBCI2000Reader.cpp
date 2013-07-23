@@ -181,7 +181,7 @@ boolean CBoxAlgorithmBCI2000Reader::process(void)
 	}
 	else
 	{
-		this->getLogManager() << LogLevel_Error << "An error occured while trying to get new samples from file. The file may be corrupted.\n";
+		this->getLogManager() << LogLevel_Error << "An error occurred while trying to get new samples from file. The file may be corrupted.\n";
 		return false;
 	}
 	return true;

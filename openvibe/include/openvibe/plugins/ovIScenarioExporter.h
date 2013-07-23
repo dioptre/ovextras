@@ -26,7 +26,7 @@ namespace OpenViBE
 			 *         or \e false if it didn't succeed to initialize.
 			 * \note Default implementation simply returns \e true.
 			 *
-			 * After a successfull initialization, the caller knows
+			 * After a successful initialization, the caller knows
 			 * the object can safely be used... On failure, this object
 			 * should be ready to be uninitialized and then released.
 			 *

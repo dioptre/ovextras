@@ -8,7 +8,7 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_VotingClassifier_Description|
 The purpose of this simple classifier is to choose between multiple two class classifiers which
 one mostly fits a condition. For example imagine \c n states. Each of those states can be either active
-or inactive. Additionnaly, imagine you want only one active state at a time. Then you can have \c n
+or inactive. Additionally, imagine you want only one active state at a time. Then you can have \c n
 two-class classifiers telling for each state if it is active or not, and a following voting classifier
 that chooses which of those states is the <em>most active</em>.
  * |OVP_DocEnd_BoxAlgorithm_VotingClassifier_Description|
@@ -25,19 +25,19 @@ The inputs of this classifier can be changed to either streamed matrix of stimul
 In the case you choose stimulations, each active stimulation gives a point
 to the preceeding state. Both an inactive and a reject stimulation gives no point.
 Any other stimulation is ignored.
-After a number of repetitions, the state whith the best score is chossen.
+After a number of repetitions, the state with the best score is chosen.
 
 In the case you choose streamed matrix, the matrix must have only one
 element. This element is used as a score coefficient (in place of the simple 1-0 of the previous
-case).  After a number of repetitions, the state whith the best score is chossen.
+case).  After a number of repetitions, the state with the best score is chosen.
  * |OVP_DocEnd_BoxAlgorithm_VotingClassifier_Inputs|
 
  * |OVP_DocBegin_BoxAlgorithm_VotingClassifier_Input1|
-Input streaam for the first state.
+Input stream for the first state.
  * |OVP_DocEnd_BoxAlgorithm_VotingClassifier_Input1|
 
  * |OVP_DocBegin_BoxAlgorithm_VotingClassifier_Input2|
-Input streaam for the second state.
+Input stream for the second state.
  * |OVP_DocEnd_BoxAlgorithm_VotingClassifier_Input2|
 __________________________________________________________________
 

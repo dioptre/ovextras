@@ -67,7 +67,7 @@ __________________________________________________________________
  * needs. First, it only works on Linux for now. Second, it does not use
  * a sound file reading nor a sound card management API. It simply directly
  * sends an uncompressed wave file to the dsp device. This results in a
- * non audible articfact due to the header of the wave file. Also, the
+ * non audible artifact due to the header of the wave file. Also, the
  * wave file sampling rate should be at the exact same value as the
  * configuration of the dsp device.
  *

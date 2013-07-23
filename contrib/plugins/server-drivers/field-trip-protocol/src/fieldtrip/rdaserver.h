@@ -94,7 +94,7 @@ void rda_aux_convert_to_float(UINT32_T N, void *dest, UINT32_T data_type, const 
 	@param blocksize    Block size for streaming out samples (0=send out variable blocks depending on incoming data)
 	@param errval		Optional pointer to an integer error value. Will contain either
 						FT_NO_ERROR, FT_ERR_SOCKET, FT_OUT_OF_MEM or FT_THREADING on exit.
-	@return 	Pointer to RDA server control structure, or NULL if an error occured
+	@return 	Pointer to RDA server control structure, or NULL if an error occurred
 */
 rda_server_ctrl_t *rda_start_server(int ft_buffer, int use16bit, int port, int blocksize, int *errval);
 

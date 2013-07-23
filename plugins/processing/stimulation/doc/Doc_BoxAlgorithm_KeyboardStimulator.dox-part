@@ -60,7 +60,7 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_KeyboardStimulator_Miscellaneous|
  *
- * The configuration file should contain a list where each element is formated like this :
+ * The configuration file should contain a list where each element is formatted like this :
  *
  * \code
  * Name_of_the_key Stimulation_numeric_identifier

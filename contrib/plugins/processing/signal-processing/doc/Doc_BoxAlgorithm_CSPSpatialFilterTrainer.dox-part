@@ -10,7 +10,7 @@ __________________________________________________________________
  This box computes spatial filters according to the Common Spatial Pattern algorithm. The goal of the algorithm is to improve the discrimination of two types of signals.
  The spatial filters are constructed in a way they maximize the variance for signals of the first condition while at the same time they minimize it for the second condition.
  This can be used for discriminating the signals of two commonly used motor-imagery tasks (e.g. left versus right hand movement).
- It can also be used for two-class SSVEP experiments or any other experiment where the disciminative information is contained in the variance (or power in a certain band) of the signal conditions.
+ It can also be used for two-class SSVEP experiments or any other experiment where the discriminative information is contained in the variance (or power in a certain band) of the signal conditions.
  
  Please note that this implementation computes a <b>trace normalization</b>. 
  
@@ -43,7 +43,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_CSPSpatialFilterTrainer_Outputs|
 
  * |OVP_DocBegin_BoxAlgorithm_CSPSpatialFilterTrainer_Output1|
- The CSP Trainer outputs the stimulation <b>OVTK_StimulationId_TrainCompleted</b> when the training process was successfull. No output is produced if the process failed.
+ The CSP Trainer outputs the stimulation <b>OVTK_StimulationId_TrainCompleted</b> when the training process was successful. No output is produced if the process failed.
  * |OVP_DocEnd_BoxAlgorithm_CSPSpatialFilterTrainer_Output1|
 __________________________________________________________________
 

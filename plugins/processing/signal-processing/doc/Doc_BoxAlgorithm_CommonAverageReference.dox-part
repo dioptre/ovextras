@@ -7,7 +7,7 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_CommonAverageReferenceFilter_Description|
 
-Re-referencing the signal to common average reference consists in substracting 
+Re-referencing the signal to common average reference consists in subtracting 
 to each sample the average value of the samples of all electrodes at this time
 
  * |OVP_DocEnd_BoxAlgorithm_CommonAverageReferenceFilter_Description|

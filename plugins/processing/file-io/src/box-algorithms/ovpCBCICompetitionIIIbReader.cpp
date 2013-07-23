@@ -39,7 +39,7 @@ namespace OpenViBEPlugins
 		}
 
 		CBCICompetitionIIIbReader::CBCICompetitionIIIbReader()
-			: m_bErrorOccured(false),
+			: m_bErrorOccurred(false),
 			m_ui64FileSize(0),
 			m_pSignalOutputWriterHelper(NULL),
 			m_pStimulationOutputWriterHelper(NULL),
@@ -287,7 +287,7 @@ namespace OpenViBEPlugins
 
 		OpenViBE::boolean CBCICompetitionIIIbReader::process()
 		{
-			if(m_bErrorOccured)
+			if(m_bErrorOccurred)
 			{
 				return false;
 			}

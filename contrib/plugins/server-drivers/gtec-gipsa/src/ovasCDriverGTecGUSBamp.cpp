@@ -444,7 +444,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 					//wait for notification from the system telling that new data is available
 					if (WaitForSingleObject(m_overlapped[deviceIndex][m_ui32CurrentQueueIndex].hEvent, 1000) == WAIT_TIMEOUT)
 					{
-						//cout << "Error on data transfer: timeout occured." << "\n";
+						//cout << "Error on data transfer: timeout occurred." << "\n";
 						m_flagChunkTimeOutDetected = true;
 					}
 
