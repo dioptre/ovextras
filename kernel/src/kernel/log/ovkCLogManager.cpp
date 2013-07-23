@@ -151,17 +151,15 @@ boolean CLogManager::addListener(ILogListener* pListener)
 
 boolean CLogManager::removeListener(ILogListener* pListener)
 {
-	boolean l_bResult=false;
 	vector<ILogListener*>::iterator itLogListener=m_vListener.begin();
 	while(itLogListener!=m_vListener.end())
 	{
 		if((*itLogListener)==pListener)
 		{
-			itLogListener=m_vListener.erase(itLogListener);
-			l_bResult=true;
-		} else {
-			itLogListener++;
+			m_vListener.erase(itLogListener);
+			return true;	// due to constraint in addListener(), pListener can be in the array only once, so we can return
 		}
+		itLogListener++;
 	}
-	return l_bResult;
+	return false;
 }

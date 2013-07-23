@@ -25,6 +25,7 @@ namespace OpenViBE
 		{
 		public:
 			CPluginModuleBase(const IKernelContext& rKernelContext);
+			virtual ~CPluginModuleBase();
 
 			virtual boolean initialize(void);
 			virtual boolean getPluginObjectDescription(
@@ -188,6 +189,8 @@ CPluginModuleBase::CPluginModuleBase(const IKernelContext& rKernelContext)
 	,onUninitializeCB(NULL)
 {
 }
+
+CPluginModuleBase::~CPluginModuleBase() { };
 
 boolean CPluginModuleBase::initialize(void)
 {

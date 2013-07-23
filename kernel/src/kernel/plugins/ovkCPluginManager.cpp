@@ -143,6 +143,14 @@ CPluginManager::~CPluginManager(void)
 			(*j)->release();
 		}
 	}
+
+	vector < IPluginModule* >::iterator k;
+	for(k=m_vPluginModule.begin(); k!=m_vPluginModule.end(); k++)
+	{
+		this->getLogManager() << LogLevel_Trace << "Releasing plugin module with class id " << (*k)->getClassIdentifier() << "\n";
+		(*k)->uninitialize();
+		delete (*k);
+	}
 }
 
 boolean CPluginManager::addPluginsFromFiles(

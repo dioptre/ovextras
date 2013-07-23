@@ -323,11 +323,17 @@ boolean CKernelContext::uninitialize(void)
 	delete m_pConfigurationManager;
 	m_pConfigurationManager=NULL;
 
+	this->getLogManager() << LogLevel_Trace << "Detaching log console listener\n";
+	this->getLogManager().removeListener(m_pLogListenerConsole);
+
+	this->getLogManager() << LogLevel_Trace << "Detaching log file listener\n";
+	this->getLogManager().removeListener(m_pLogListenerFile);
+
 	this->getLogManager() << LogLevel_Trace << "Releasing log manager - no more log possible with log manager !\n";
 	delete m_pLogManager;
 	m_pLogManager=NULL;
 
-	this->getLogManager() << LogLevel_Trace << "Releasing log file console\n";
+	this->getLogManager() << LogLevel_Trace << "Releasing log console listener\n";
 	delete m_pLogListenerConsole;
 	m_pLogListenerConsole=NULL;
 

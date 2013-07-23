@@ -194,6 +194,14 @@ namespace OpenViBEPlugins
 			//unref the xml file as it's not needed anymore
 			g_object_unref(G_OBJECT(m_pBuilderInterface));
 			m_pBuilderInterface=NULL;
+
+			std::vector < CSignalChannelDisplay* >::iterator it;
+			for(it=m_oChannelDisplay.begin(); it!=m_oChannelDisplay.end(); it++) {
+				delete (*it);
+			}
+
+			delete m_pBottomRuler;
+			m_pBottomRuler = NULL;
 		}
 
 		void CSignalDisplayView::getWidgets(::GtkWidget*& pWidget, ::GtkWidget*& pToolbarWidget)

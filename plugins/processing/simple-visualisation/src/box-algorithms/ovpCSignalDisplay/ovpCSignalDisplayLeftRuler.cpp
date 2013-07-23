@@ -68,7 +68,7 @@ CSignalDisplayLeftRuler::CSignalDisplayLeftRuler(int32 i32WidthRequest, int32 i3
 
 CSignalDisplayLeftRuler::~CSignalDisplayLeftRuler()
 {
-	g_object_unref(m_pLeftRuler);
+
 }
 
 void CSignalDisplayLeftRuler::update(float64 f64Min, float64 f64Max)

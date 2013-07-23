@@ -514,7 +514,6 @@ CApplication::~CApplication(void)
 {
 	if(m_pBuilderInterface)
 	{
-		m_rKernelContext.getLogManager().removeListener(m_pLogListenerDesigner);
 		// @FIXME this likely still does not deallocate the actual widgets allocated by add_from_file
 		g_object_unref(G_OBJECT(m_pBuilderInterface));
 		m_pBuilderInterface = NULL;
@@ -1841,11 +1840,9 @@ boolean CApplication::quitApplicationCB(void)
 	}
 
 	// release the log manager and free the memory
-
-	/*
-	   m_rKernelContext.getLogManager().removeListener( m_pLogListenerDesigner );
-	   delete m_pLogListenerDesigner;
-	   */
+	m_rKernelContext.getLogManager().removeListener( m_pLogListenerDesigner );
+	delete m_pLogListenerDesigner;
+	m_pLogListenerDesigner = NULL;
 
 	// OK to kill app
 	return true;

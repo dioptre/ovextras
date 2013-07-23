@@ -75,6 +75,7 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 CSignalChannelDisplay::~CSignalChannelDisplay()
 {
 	delete m_pLeftRuler;
+	m_pLeftRuler=NULL;
 }
 
 GtkWidget* CSignalChannelDisplay::getRulerWidget() const

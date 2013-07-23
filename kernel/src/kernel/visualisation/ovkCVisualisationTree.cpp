@@ -90,6 +90,12 @@ CVisualisationTree::~CVisualisationTree()
 	//delete display panels
 	//TODO!
 
+	std::map<OpenViBE::CIdentifier, OpenViBE::Kernel::IVisualisationWidget*>::iterator i;
+	for (i=m_vVisualisationWidget.begin();i!=m_vVisualisationWidget.end();i++)
+	{
+		delete (*i).second;
+	}
+
 	g_object_unref(m_pTreeStore);
 }
 
