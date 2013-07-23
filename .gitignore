@@ -1,0 +1,5 @@
+local-tmp
+dependencies
+scripts/win32-dependencies.cmd
+dist
+
