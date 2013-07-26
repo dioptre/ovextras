@@ -35,28 +35,22 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			OpenViBE::IMatrix* m_pInputMatrix1;
-			OpenViBE::IMatrix* m_pInputMatrix2;
+			OpenViBE::Kernel::IAlgorithmProxy* m_pHilbertTransform;
 
-			OpenViBE::uint64 m_ui64SamplingRate1;
-			OpenViBE::uint64 m_ui64SamplingRate2;
+			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pSignal1;
+			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pSignal2;
 
-			OpenViBE::IMatrix* m_pChannelPairs;
-			OpenViBE::IMatrix* m_pOutputMatrix;
-			OpenViBE::IMatrix* m_pChannelToCompare;
+			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pChannelPairs;
+			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pMatrix;
 
-			OpenViBE::uint32 m_ui32ChannelCount1;
-			OpenViBE::uint32 m_ui32SamplesPerChannel1;
+			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pHilbertInput;
+			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pInstantaneousPhase;
 
-			OpenViBE::uint32 m_ui32ChannelCount2;
-			OpenViBE::uint32 m_ui32SamplesPerChannel2;
-
-			OpenViBE::uint32 m_ui32PairsCount;
 
 		private:
 
-			 void HilbertPhase (Eigen::RowVectorXd InputVector, Eigen::RowVectorXd OutputVector);
-	 	};
+			void HilbertPhase (Eigen::VectorXd InputVector, Eigen::VectorXd OutputVector);
+		};
 
 		class CAlgorithmSingleTrialPhaseLockingValueDesc : public OpenViBEToolkit::CConnectivityAlgorithmDesc //OpenViBE::Plugins::IAlgorithmDesc
 		{
@@ -78,20 +72,18 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 					OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
-/*
-				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_SingleTrialPhaseLockingValue_InputParameterId_InputMatrix1,     "Signal 1", OpenViBE::Kernel::ParameterType_Matrix);
-				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_SingleTrialPhaseLockingValue_InputParameterId_InputMatrix2,     "Signal 2", OpenViBE::Kernel::ParameterType_Matrix);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_SingleTrialPhaseLockingValue_InputParameterId_LookupMatrix, "Pairs of channel", OpenViBE::Kernel::ParameterType_Matrix);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_SingleTrialPhaseLockingValue_InputParameterId_ui64SamplingRate1, "Sampling Rate of signal 1", OpenViBE::Kernel::ParameterType_UInteger);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_SingleTrialPhaseLockingValue_InputParameterId_ui64SamplingRate2, "Sampling Rate of signal 2", OpenViBE::Kernel::ParameterType_UInteger);
-			    rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_SingleTrialPhaseLockingValue_OutputParameterId_OutputMatrix,    "Matrix", OpenViBE::Kernel::ParameterType_Matrix);
 
-			    rAlgorithmPrototype.addInputTrigger   (OVP_Algorithm_SingleTrialPhaseLockingValue_InputTriggerId_Initialize,   "Initialize");
-			    rAlgorithmPrototype.addInputTrigger   (OVP_Algorithm_SingleTrialPhaseLockingValue_InputTriggerId_Process,      "Process");
-			    rAlgorithmPrototype.addOutputTrigger  (OVP_Algorithm_SingleTrialPhaseLockingValue_OutputTriggerId_ProcessDone, "Process done");
-*/
+				rAlgorithmPrototype.addInputParameter(OVTK_Algorithm_Connectivity_InputParameterId_InputMatrix1,     "Signal 1", OpenViBE::Kernel::ParameterType_Matrix);
+				rAlgorithmPrototype.addInputParameter(OVTK_Algorithm_Connectivity_InputParameterId_InputMatrix2,     "Signal 2", OpenViBE::Kernel::ParameterType_Matrix);
+				rAlgorithmPrototype.addInputParameter(OVTK_Algorithm_Connectivity_InputParameterId_LookupMatrix, "Pairs of channel", OpenViBE::Kernel::ParameterType_Matrix);
 
-			    return true;
+				rAlgorithmPrototype.addOutputParameter(OVTK_Algorithm_Connectivity_OutputParameterId_OutputMatrix,    "Matrix", OpenViBE::Kernel::ParameterType_Matrix);
+
+				rAlgorithmPrototype.addInputTrigger   (OVTK_Algorithm_Connectivity_InputTriggerId_Initialize,   "Initialize");
+				rAlgorithmPrototype.addInputTrigger   (OVTK_Algorithm_Connectivity_InputTriggerId_Process,      "Process");
+				rAlgorithmPrototype.addOutputTrigger  (OVTK_Algorithm_Connectivity_OutputTriggerId_ProcessDone, "Process done");
+
+				return true;
 			}
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::CConnectivityAlgorithmDesc, OVP_TypeId_Algorithm_SingleTrialPhaseLockingValueDesc);

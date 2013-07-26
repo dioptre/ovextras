@@ -57,8 +57,12 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pChannelTable;
 			std::vector < OpenViBE::uint32 > m_vChannelTable; // Matrix storing the index of the channels required
 
+		private:
+
 			OpenViBE::uint32 m_ui32PairsCount; // Number of pairs of channel to measure connectivity between
 			OpenViBE::uint32 m_ui32InputCount; // Number of inputs (1 or 2)
+			OpenViBE::boolean m_bRange1;
+			OpenViBE::boolean m_bRange2;
 
 		};
 
@@ -115,7 +119,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addOutput("Connectivity measure", OV_TypeId_Signal);
 				
 				rBoxAlgorithmPrototype.addSetting("Method",OVTK_ClassId_ConnectivityAlgorithm, OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue.toString());
-				rBoxAlgorithmPrototype.addSetting("Pairs of channels",OV_TypeId_String,"-:-");
+				rBoxAlgorithmPrototype.addSetting("Pairs of channels",OV_TypeId_String,"1-2");
 				rBoxAlgorithmPrototype.addSetting("Channel Matching Method",  OVP_TypeId_MatchMethod, OVP_TypeId_MatchMethod_Smart.toString());
 
 //				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
