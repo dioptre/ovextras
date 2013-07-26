@@ -238,9 +238,14 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 	// On train stimulation reception, build up the labelled feature vector set matrix and go on training
 	if(l_bTrainStimulationReceived)
 	{
+		if(m_vFeatureVector.size()<m_ui64PartitionCount) 
+		{
+			this->getLogManager() << LogLevel_Error << "Fewer examples (" << m_vFeatureVector.size() << ") than the specified partition count (" << m_ui64PartitionCount << ").\n";
+			return false;
+		}
 		if(m_vFeatureVector.size()==0)
 		{
-			this->getLogManager() << LogLevel_Warning << "Received train stimulation but no feature vector\n";
+			this->getLogManager() << LogLevel_Warning << "Received train stimulation but no training examples received\n";
 		}
 		else
 		{

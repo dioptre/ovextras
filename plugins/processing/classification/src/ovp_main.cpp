@@ -22,6 +22,11 @@
 #include "algorithms/ovpCAlgorithmClassifierLDA.h"
 #endif // TARGET_HAS_ThirdPartyITPP
 
+#if defined TARGET_HAS_ThirdPartyEIGEN
+#include "algorithms/ovpCAlgorithmCovariance.h"
+#include "algorithms/ovpCAlgorithmClassifierShrinkageLDA.h"
+#endif // TARGET_HAS_ThirdPartyEIGEN
+
 OVP_Declare_Begin();
 
 //	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "NULL Classifier (does nothing)",OVP_ClassId_Algorithm_ClassifierNULL.toUInteger());
@@ -74,4 +79,12 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierLDADesc);
 #endif // TARGET_HAS_ThirdPartyITPP
 	
+#if defined TARGET_HAS_ThirdPartyEIGEN
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmCovarianceDesc);
+
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Shrinkage LDA", OVP_ClassId_Algorithm_ClassifierShrinkageLDA.toUInteger());
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierShrinkageLDADesc);
+
+#endif // TARGET_HAS_ThirdPartyEIGEN
+
 OVP_Declare_End();
