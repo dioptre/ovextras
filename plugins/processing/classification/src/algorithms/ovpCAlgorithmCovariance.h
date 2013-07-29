@@ -17,6 +17,7 @@
 #define OVP_Algorithm_Covariance_InputParameterId_Shrinkage                        OpenViBE::CIdentifier(0x54B90EA7, 0x600A4ACC)
 #define OVP_Algorithm_Covariance_InputParameterId_FeatureVectorSet                 OpenViBE::CIdentifier(0x2CF30E42, 0x051F3996)
 
+#define OVP_Algorithm_Covariance_OutputParameterId_Mean                            OpenViBE::CIdentifier(0x0C671FB7, 0x550B01B3)
 #define OVP_Algorithm_Covariance_OutputParameterId_CovarianceMatrix                OpenViBE::CIdentifier(0x19F07FB4, 0x084E273B)
 
 namespace OpenViBEPlugins
@@ -63,10 +64,11 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
-				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_Covariance_InputParameterId_Shrinkage,         "Shrinkage",           OpenViBE::Kernel::ParameterType_Float);
+				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_Covariance_InputParameterId_Shrinkage,         "Shrinkage (-1 == auto)",           OpenViBE::Kernel::ParameterType_Float);
 				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_Covariance_InputParameterId_FeatureVectorSet,  "Feature vectors",     OpenViBE::Kernel::ParameterType_Matrix);
 
-				rAlgorithmPrototype.addOutputParameter (OVP_Algorithm_Covariance_OutputParameterId_CovarianceMatrix, "Covariance matrix",   OpenViBE::Kernel::ParameterType_Matrix);
+				rAlgorithmPrototype.addOutputParameter (OVP_Algorithm_Covariance_OutputParameterId_Mean,             "Mean vector",        OpenViBE::Kernel::ParameterType_Matrix);
+				rAlgorithmPrototype.addOutputParameter (OVP_Algorithm_Covariance_OutputParameterId_CovarianceMatrix, "Covariance matrix",  OpenViBE::Kernel::ParameterType_Matrix);
 
 				return true;
 			}

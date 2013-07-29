@@ -23,19 +23,19 @@ using namespace Eigen;
 
 #define LDA_DEBUG 0
 #if LDA_DEBUG
-void CAlgorithmClassifierShrinkageLDA::dumpMatrix(OpenViBE::Kernel::ILogManager &pMgr, const MatrixXdRowMajor &mat, const CString &desc)
+void CAlgorithmClassifierShrinkageLDA::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const MatrixXdRowMajor &mat, const CString &desc)
 {
-	pMgr << LogLevel_Info << desc << "\n";
+	rMgr << LogLevel_Info << desc << "\n";
 	for(int i=0;i<mat.rows();i++) {
-		pMgr << LogLevel_Info << "Row " << i << ": ";
+		rMgr << LogLevel_Info << "Row " << i << ": ";
 		for(int j=0;j<mat.cols();j++) {
-			pMgr << mat(i,j) << " ";
+			rMgr << mat(i,j) << " ";
 		}
-		pMgr << "\n";
+		rMgr << "\n";
 	}
 }
 #else 
-void CAlgorithmClassifierShrinkageLDA::dumpMatrix(OpenViBE::Kernel::ILogManager& /* pMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { };
+void CAlgorithmClassifierShrinkageLDA::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { };
 #endif
 
 boolean CAlgorithmClassifierShrinkageLDA::initialize(void)
@@ -43,6 +43,9 @@ boolean CAlgorithmClassifierShrinkageLDA::initialize(void)
 	// This is the weight parameter local to this module and automatically exposed to the GUI
 	TParameterHandler< float64 > ip_f64Shrinkage(getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage));
 	ip_f64Shrinkage = -1;
+
+	TParameterHandler < boolean > ip_bDiagonalCov(this->getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov));
+	ip_bDiagonalCov = false;
 
 	// Initialize the Covariance Matrix algorithm
 	m_pCovarianceAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_Covariance));
@@ -53,7 +56,7 @@ boolean CAlgorithmClassifierShrinkageLDA::initialize(void)
 
 boolean CAlgorithmClassifierShrinkageLDA::uninitialize(void)
 {
-	// Free resources
+	// Free the resources
 	m_pCovarianceAlgorithm->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*m_pCovarianceAlgorithm);
 
@@ -62,7 +65,10 @@ boolean CAlgorithmClassifierShrinkageLDA::uninitialize(void)
 
 boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
+	TParameterHandler< boolean > ip_bDiagonalCov(getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov));
+
 	// IO to the covariance alg
+	TParameterHandler < OpenViBE::IMatrix* > op_pMean(m_pCovarianceAlgorithm->getOutputParameter(OVP_Algorithm_Covariance_OutputParameterId_Mean));
 	TParameterHandler < OpenViBE::IMatrix* > op_pCovarianceMatrix(m_pCovarianceAlgorithm->getOutputParameter(OVP_Algorithm_Covariance_OutputParameterId_CovarianceMatrix));
 	TParameterHandler < OpenViBE::IMatrix* > ip_pFeatureVectorSet(m_pCovarianceAlgorithm->getInputParameter(OVP_Algorithm_Covariance_InputParameterId_FeatureVectorSet));
 	TParameterHandler< float64 > ip_f64ShrinkageAlg(m_pCovarianceAlgorithm->getInputParameter(OVP_Algorithm_Covariance_InputParameterId_Shrinkage));
@@ -90,21 +96,23 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 
 	static const uint32 l_ui32nClasses = 2;
 
+	// Get class labels
 	m_f64Class1=l_vClassLabels.begin()->first;
 	m_f64Class2=l_vClassLabels.rbegin()->first;
-	uint32 l_ui32VectorLen = rFeatureVectorSet[0].getSize();
+	const uint32 l_ui32VectorLen = rFeatureVectorSet.getFeatureVector(0).getSize();
 
-	// Get regularized covariances of classes
-	float64 l_f64Labels[] = {m_f64Class1,m_f64Class2};
+	// Get regularized covariances of all the classes
+	const float64 l_f64Labels[] = {m_f64Class1,m_f64Class2};
 	MatrixXd l_aCov[l_ui32nClasses];
 	MatrixXd l_aMean[l_ui32nClasses];
 	MatrixXd l_oGlobalCov = MatrixXd::Zero(l_ui32VectorLen,l_ui32VectorLen);
 
 	for(int classIdx=0;classIdx<l_ui32nClasses;classIdx++) 
 	{
-		float64 l_f64Label = l_f64Labels[classIdx];
-		uint32 l_ui32nExamples = (uint32)l_vClassLabels[l_f64Label];
+		const float64 l_f64Label = l_f64Labels[classIdx];
+		const uint32 l_ui32nExamples = (uint32)l_vClassLabels[l_f64Label];
 
+		// Copy all the data of the class to a feature matrix
 		ip_pFeatureVectorSet->setDimensionCount(2);
 		ip_pFeatureVectorSet->setDimensionSize(0, l_ui32nExamples);
 		ip_pFeatureVectorSet->setDimensionSize(1, l_ui32VectorLen);
@@ -118,22 +126,29 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 			}
 		}
 
+		// Compute mean and cov
 		if(!m_pCovarianceAlgorithm->process()) {
 			this->getLogManager() << LogLevel_Error << "Covariance computation failed for class " << classIdx << " ("<< l_f64Label << ")\n";
 			return false;
 		}
 
-		l_aCov[classIdx].resize(l_ui32VectorLen,l_ui32VectorLen);
-		for(uint32 i=0;i<l_ui32VectorLen;i++) 
+		// Get the results from the algorithm
+		Map<MatrixXdRowMajor> l_oMeanMapper(op_pMean->getBuffer(), 1, l_ui32VectorLen);
+		l_aMean[classIdx] = l_oMeanMapper;
+		Map<MatrixXdRowMajor> l_oCovMapper(op_pCovarianceMatrix->getBuffer(), l_ui32VectorLen, l_ui32VectorLen);
+		l_aCov[classIdx] = l_oCovMapper;
+
+		if(ip_bDiagonalCov) 
 		{
-			for(uint32 j=0;j<l_ui32VectorLen;j++) 
+			for(uint32 i=0;i<l_ui32VectorLen;i++) 
 			{
-				l_aCov[classIdx](i,j) = op_pCovarianceMatrix->getBuffer()[i*l_ui32VectorLen+j];
+				for(uint32 j=i+1;j<l_ui32VectorLen;j++) 
+				{
+					l_aCov[classIdx](i,j) = 0.0;
+					l_aCov[classIdx](j,i) = 0.0;
+				}
 			}
 		}
-
-		Map<MatrixXdRowMajor> tmp(ip_pFeatureVectorSet->getBuffer(), l_ui32nExamples, l_ui32VectorLen);
-		l_aMean[classIdx] = tmp.colwise().mean();
 
 		l_oGlobalCov += l_aCov[classIdx];
 
@@ -145,7 +160,7 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 
 	dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
 
-	// Get the pseudoinverse using eigen decomposition for self-adjoint matrices
+	// Get the pseudoinverse of the global cov using eigen decomposition for self-adjoint matrices
 	const float64 l_f64Tolerance = 1e-10;
 	SelfAdjointEigenSolver<MatrixXd> l_oEigenSolver;
 	l_oEigenSolver.compute(l_oGlobalCov);
@@ -159,11 +174,9 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	dumpMatrix(this->getLogManager(), l_oEigenValues, "Eigenvalues");
 	dumpMatrix(this->getLogManager(), l_oEigenSolver.eigenvectors(), "Eigenvectors");
 
-	MatrixXd l_oGlobalCovInv = l_oEigenSolver.eigenvectors() * l_oEigenValues.asDiagonal() * l_oEigenSolver.eigenvectors().inverse();
-
+	// Build LDA model for 2 classes. This is a special case of the multiclass version.
+	const MatrixXd l_oGlobalCovInv = l_oEigenSolver.eigenvectors() * l_oEigenValues.asDiagonal() * l_oEigenSolver.eigenvectors().inverse();
 	dumpMatrix(this->getLogManager(),l_oGlobalCovInv, "Global cov inverse");	
-
-	// LDA model for 2 classes
 
 	const MatrixXd l_oMeanSum  = l_aMean[0] + l_aMean[1];
 	const MatrixXd l_oMeanDiff = l_aMean[0] - l_aMean[1];
@@ -171,13 +184,14 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	const MatrixXd l_oBias = -0.5 * l_oMeanSum * l_oGlobalCovInv * l_oMeanDiff.transpose();
 	const MatrixXd l_oWeights = l_oGlobalCovInv * l_oMeanDiff.transpose();
 
-	// Catenate
+	// Catenate the bias term and the weights
 	m_oCoefficients.resize(1, l_ui32VectorLen+1 );
 	m_oCoefficients(0,0) = l_oBias(0,0);
 	m_oCoefficients.block(0,1,1,l_ui32VectorLen) = l_oWeights.transpose();
 
 	dumpMatrix(this->getLogManager(), m_oCoefficients, "Coefficients");
 
+	// Write the classifier to an .xml
 	std::stringstream l_sClasses;
 	std::stringstream l_sCoefficients;
 
@@ -208,7 +222,7 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 
 boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
 {
-	uint32 l_ui32nPaddedCols = m_oCoefficients.size();
+	const uint32 l_ui32nPaddedCols = m_oCoefficients.size();
 
 	if(rFeatureVector.getSize()+1!=l_ui32nPaddedCols)
 	{
@@ -219,13 +233,12 @@ boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatur
 	Map<MatrixXdRowMajor> l_oFeatureVec(const_cast<float64*>(rFeatureVector.getBuffer()), 1, rFeatureVector.getSize());
 
 	// Catenate
-	MatrixXd l_oPaddedVec;
-	l_oPaddedVec.resize(1, l_ui32nPaddedCols );
-	l_oPaddedVec(0,0) = 1.0;
-	l_oPaddedVec.block(0,1,1,l_ui32nPaddedCols-1) = l_oFeatureVec;
+	MatrixXd l_oWeights;
+	l_oWeights.resize(1, l_ui32nPaddedCols );
+	l_oWeights(0,0) = 1.0;
+	l_oWeights.block(0,1,1,l_ui32nPaddedCols-1) = l_oFeatureVec;
 
-	MatrixXd l_oResult = l_oPaddedVec*m_oCoefficients.transpose();
-	float64 l_f64Result = l_oResult(0,0);
+	const float64 l_f64Result = (l_oWeights*m_oCoefficients.transpose()).col(0)(0);
 
 	rClassificationValues.setSize(1);
 	rClassificationValues[0]= -l_f64Result;
