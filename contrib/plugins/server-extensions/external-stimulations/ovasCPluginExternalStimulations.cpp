@@ -24,8 +24,10 @@ CPluginExternalStimulations::CPluginExternalStimulations(const IKernelContext& r
 
 	m_oProperties.name = "Software Tagging";
 
-	addSetting<boolean>("Enable External Stimulations", true);
-	addSetting<OpenViBE::CString>("External Stimulation Queue Name", "openvibeExternalStimulations");
+    IConfigurationManager& l_pConfigurationManager = m_rKernelContext.getConfigurationManager();
+
+    addSetting<boolean>("Enable External Stimulations", l_pConfigurationManager.expandAsBoolean("${AcquisitionServer_ExternalStimulations}", false));
+    addSetting<OpenViBE::CString>("External Stimulation Queue Name", l_pConfigurationManager.expand("${AcquisitionServer_ExternalStimulationsQueueName}"));
 
 }
 
