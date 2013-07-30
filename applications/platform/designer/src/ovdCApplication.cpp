@@ -1715,7 +1715,11 @@ void CApplication::forwardScenarioCB(void)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "forwardScenarioCB\n";
 
-	this->createPlayer();
+	if(!this->createPlayer()) 
+	{
+		m_rKernelContext.getLogManager() << LogLevel_Error << "CreatePlayer failed\n";
+		return;
+	};
 	this->getPlayer()->forward();
 	this->getCurrentInterfacedScenario()->m_ePlayerStatus=this->getPlayer()->getStatus();
 

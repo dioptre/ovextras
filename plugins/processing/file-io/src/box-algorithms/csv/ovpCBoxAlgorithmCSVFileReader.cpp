@@ -78,16 +78,20 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 	m_pFile=::fopen(m_sFilename.toASCIIString(), "rb");
 	if(!m_pFile)
 	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFilename << "]\n";
+		this->getLogManager() << LogLevel_Error << "Could not open file [" << m_sFilename << "]\n";
 		return false;
 	}
 
 	//read the header
-	char* l_pLine=new char[500];
-	char *l_pResult=::fgets(l_pLine,500,m_pFile);
+	char l_pLine[m_ui32bufferLen];
+	char *l_pResult=::fgets(l_pLine,m_ui32bufferLen,m_pFile);
 	if(NULL==l_pResult)
 	{
-	// bad : FIXME handle reading error here
+		// bad : FIXME handle reading error here
+		fclose(m_pFile);
+		m_pFile = NULL;
+		this->getLogManager() << LogLevel_Error << "fgets() error\n";
+		return false;
 	}
 	m_vHeaderFile=split(std::string(l_pLine),m_sSeparator);
 	m_ui32NbColumn=m_vHeaderFile.size();
@@ -134,18 +138,32 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_signal;
 
 		//find the sampling rate
-		l_pResult=::fgets(l_pLine,500,m_pFile);
+		l_pResult=::fgets(l_pLine,m_ui32bufferLen,m_pFile);
 		if(NULL==l_pResult)
 		{
-		// bad : FIXME handle reading error here
+			fclose(m_pFile);
+			m_pFile=NULL;
+			this->getLogManager() << LogLevel_Error << "fgets() error\n";
+			return false;
 		}
-		m_ui64SamplingRate=atoi(split(std::string(l_pLine),m_sSeparator)[m_ui32NbColumn-1].c_str());
+		std::vector<std::string> l_vParsed = split(std::string(l_pLine),m_sSeparator);
+		if((m_ui32NbColumn-1)>=l_vParsed.size()) {
+			fclose(m_pFile);
+			m_pFile=NULL;
+			this->getLogManager() << LogLevel_Error << "Line didn't have enough components. Remember it needs to have +1 for freq. \n";
+			return false;
+		}
+		m_ui64SamplingRate=atoi(l_vParsed[m_ui32NbColumn-1].c_str());
 
 		::rewind(m_pFile);
-		l_pResult=::fgets(l_pLine,500,m_pFile);
+		l_pResult=::fgets(l_pLine,m_ui32bufferLen,m_pFile);
 		if(NULL==l_pResult)
 		{
-		// bad : FIXME handle reading error here
+			// bad : FIXME handle reading error here
+			fclose(m_pFile);
+			m_pFile=NULL;
+			this->getLogManager() << LogLevel_Error << "fgets() error\n";
+			return false;
 		}
 
 		//number of column without the column contains the sampling rate parameters
@@ -169,13 +187,12 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 	}
 	else
 	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Invalid input type identifier " << this->getTypeManager().getTypeName(m_oTypeIdentifier) << "\n";
+		this->getLogManager() << LogLevel_Error << "Invalid input type identifier " << this->getTypeManager().getTypeName(m_oTypeIdentifier) << "\n";
 		return false;
 	}
 	getLogManager()<< LogLevel_Trace <<"number of column without parameters: "<<m_ui32NbColumn<<"\n";
 
 	m_bUseCompression=false;
-	delete[] l_pLine;
 	getLogManager() << LogLevel_Trace << "use the file time: "<<(!m_bNotUseTimer)<<"\n";
 	m_f64NextTime=0.;
 	return true;
@@ -212,8 +229,9 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 {
 
 	//line buffer
-	char* l_pLine=new char[500];
+	char l_pLine[m_ui32bufferLen];
 	bool l_bStimulationSend=false;
+	// float64 l_f64currentTime=ITimeArithmetics::timeToSeconds(getPlayerContext().getCurrentTime());  ?
 	float64 l_f64currentTime=(getPlayerContext().getCurrentTime()>>16)/65536.0;
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
@@ -222,7 +240,7 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 	{
 		//next line
 		uint32 l_ui32NbSamples=0;
-		while(!feof(m_pFile) && l_ui32NbSamples<m_ui32SamplesPerBuffer && fgets(l_pLine, 500, m_pFile) != NULL )
+		while(!feof(m_pFile) && l_ui32NbSamples<m_ui32SamplesPerBuffer && fgets(l_pLine, m_ui32bufferLen, m_pFile) != NULL )
 		{
 			m_vLastLineSplit=split(std::string(l_pLine),m_sSeparator);
 			l_ui32NbSamples++;
@@ -259,7 +277,7 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 
 			l_bStimulationSend=true;
 
-			if(!feof(m_pFile) && fgets(l_pLine, 500, m_pFile) != NULL)
+			if(!feof(m_pFile) && fgets(l_pLine, m_ui32bufferLen, m_pFile) != NULL)
 			{
 				m_vLastLineSplit=split(std::string(l_pLine),m_sSeparator);
 
@@ -301,7 +319,6 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 		//clear the Data Matrix.
 		clearMatrix(m_vDataMatrix);
 	}
-	delete[] l_pLine;
 	return true;
 
 }

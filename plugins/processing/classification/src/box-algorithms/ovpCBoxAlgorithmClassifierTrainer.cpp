@@ -240,7 +240,7 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 	{
 		if(m_vFeatureVector.size()<m_ui64PartitionCount) 
 		{
-			this->getLogManager() << LogLevel_Error << "Fewer examples (" << m_vFeatureVector.size() << ") than the specified partition count (" << m_ui64PartitionCount << ").\n";
+			this->getLogManager() << LogLevel_Error << "Fewer examples (" << (uint32)m_vFeatureVector.size() << ") than the specified partition count (" << m_ui64PartitionCount << ").\n";
 			return false;
 		}
 		if(m_vFeatureVector.size()==0)
@@ -249,7 +249,8 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 		}
 		else
 		{
-			this->getLogManager() << LogLevel_Info << "Received train stimulation\n";
+			this->getLogManager() << LogLevel_Info << "Received train stimulation. Data dim is [" << (uint32) m_vFeatureVector.size() << "x" 
+				<< m_vFeatureVector[0].m_pFeatureVectorMatrix->getBufferElementCount() << "]\n";
 			for(i=1; i<l_rStaticBoxContext.getInputCount(); i++)
 			{
 				this->getLogManager() << LogLevel_Trace << "For information, we have " << m_vFeatureCount[i] << " feature vector(s) for input " << i << "\n";
@@ -310,16 +311,18 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 				}
 				l_fDeviation = sqrt( l_fDeviation / m_ui64PartitionCount );
 
-				this->getLogManager() << LogLevel_Trace << "Training on whole set...\n";
-				this->train(0, 0);
-				this->getLogManager() << LogLevel_Info << "Classifier performance on whole set is " << l_fMean << "% (sigma = " << l_fDeviation << "%)\n";
-			}
+				this->getLogManager() << LogLevel_Info << "Cross-validation test accuracy is " << l_fMean << "% (sigma = " << l_fDeviation << "%)\n";
+			} 
 			else
 			{
-				this->getLogManager() << LogLevel_Trace << "Training on whole set...\n";
-				this->train(0, 0);
-				this->getLogManager() << LogLevel_Info << "Classifier performance on whole set is " << this->getAccuracy(0, m_vFeatureVector.size()) << "% (trained without k-fold test - performance estimation may not be accurate)\n";
+				this->getLogManager() << LogLevel_Info << "Training without cross-validation.\n";
+				this->getLogManager() << LogLevel_Info << "*** Reported training data accuracy will be optimistic ***\n";
 			}
+
+			this->getLogManager() << LogLevel_Trace << "Training final classifier on the whole set...\n";
+			this->train(0, 0);
+
+			this->getLogManager() << LogLevel_Info << "Training data accuracy is " << this->getAccuracy(0, m_vFeatureVector.size()) << "% (optimistic)\n";
 
 			CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1));
 			std::ofstream l_oFile(l_sConfigurationFilename.toASCIIString(), ios::binary);

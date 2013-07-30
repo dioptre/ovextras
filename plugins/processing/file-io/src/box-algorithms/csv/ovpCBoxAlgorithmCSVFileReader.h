@@ -70,6 +70,8 @@ namespace OpenViBEPlugins
 			std::vector<std::vector<std::string> > m_vDataMatrix;
 
 			OpenViBE::float64 m_f64NextTime;
+
+			static const OpenViBE::uint32 m_ui32bufferLen = 16384; // Side-effect: a maximum allowed length for a line of a CSV file
 		};
 
 		class CBoxAlgorithmCSVFileReaderListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >

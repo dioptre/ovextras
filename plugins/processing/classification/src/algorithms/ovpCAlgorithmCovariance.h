@@ -3,8 +3,6 @@
 #ifndef __OpenViBEPlugins_Algorithm_Covariance_H__
 #define __OpenViBEPlugins_Algorithm_Covariance_H__
 
-// See e.g. Ledoit & Wolf for paper
-
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
@@ -28,9 +26,6 @@ namespace OpenViBEPlugins
 		{
 		typedef Eigen::Matrix< double , Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor > MatrixXdRowMajor;
 
-		protected:
-			void dumpMatrix(OpenViBE::Kernel::ILogManager& pMgr, const MatrixXdRowMajor& mat, const OpenViBE::CString& desc);
-
 		public:
 
 			virtual void release(void) { delete this; }
@@ -42,6 +37,9 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVP_ClassId_Algorithm_Covariance);
 
+		protected:
+			// Debug method
+			void dumpMatrix(OpenViBE::Kernel::ILogManager& pMgr, const MatrixXdRowMajor& mat, const OpenViBE::CString& desc);
 		};
 
 		class CAlgorithmCovarianceDesc : virtual public OpenViBE::Plugins::IAlgorithmDesc

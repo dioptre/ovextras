@@ -1,5 +1,12 @@
 #include "ovpCAlgorithmCovariance.h"
 
+/*
+ * This implementation is based on the matlab code corresponding to 
+ *
+ * Ledoit & Wolf: "A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices", 2004.
+ *
+ */
+
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
 using namespace OpenViBE;
@@ -65,10 +72,15 @@ OpenViBE::boolean CAlgorithmCovariance::process(void)
 
 	const uint32 l_ui32nRows = ip_pFeatureVectorSet->getDimensionSize(0);
 	const uint32 l_ui32nCols = ip_pFeatureVectorSet->getDimensionSize(1);
-	float64 *l_pBuffer = ip_pFeatureVectorSet->getBuffer();
-	if(l_ui32nRows<1 || l_ui32nCols<1 || !l_pBuffer) 
+	if(l_ui32nRows<1 || l_ui32nCols<1) 
 	{
 		this->getLogManager() << LogLevel_Error << "Input matrix is too small, [" << l_ui32nRows << "x" << l_ui32nCols << "]\n";
+		return false;
+	}
+	float64 *l_pBuffer = ip_pFeatureVectorSet->getBuffer();
+	if(!l_pBuffer)
+	{
+		this->getLogManager() << LogLevel_Error << "Feature set buffer ptr is NULL\n";
 		return false;
 	}
 
@@ -111,7 +123,7 @@ OpenViBE::boolean CAlgorithmCovariance::process(void)
 		MatrixXd l_oPhiMat = (l_oDataSquared.transpose()*l_oDataSquared) / (double)l_ui32nRows - l_oSampleCov.cwiseAbs2();
 
 		const float64 l_f64phi = l_oPhiMat.sum();
-		const float64 l_f64gamma = (l_oSampleCov - l_oPriorCov).squaredNorm();
+		const float64 l_f64gamma = (l_oSampleCov - l_oPriorCov).squaredNorm();	// Frobenius norm
 		const float64 l_f64kappa = l_f64phi / l_f64gamma;
 
 		l_f64Shrinkage = std::max<float64>(0,std::min<float64>(1,l_f64kappa/(double)l_ui32nRows));
@@ -120,18 +132,10 @@ OpenViBE::boolean CAlgorithmCovariance::process(void)
 		this->getLogManager() << LogLevel_Debug << "Estimated shrinkage weight as " << l_f64Shrinkage << "\n";		
 
 		dumpMatrix(this->getLogManager(), l_oPhiMat, "PhiMat");
-
-		// y=x.^2;
-		// phiMat=y'*y/t-2*(x'*x).*sample/t+sample.^2;
-		// phi=sum(sum(phiMat)); 
-		// gamma=norm(sample-prior,'fro')^2;
-		// % compute shrinkage constant
-		// kappa=phi/gamma;
-		// shrinkage=max(0,min(1,kappa/t));
 	}
 	else 
 	{
-		this->getLogManager() << LogLevel_Info << "Using user-provided shrinkage weight " << l_f64Shrinkage << "\n";
+		this->getLogManager() << LogLevel_Debug << "Using user-provided shrinkage weight " << l_f64Shrinkage << "\n";
 	}
 
 	// Use the output as a buffer to avoid copying

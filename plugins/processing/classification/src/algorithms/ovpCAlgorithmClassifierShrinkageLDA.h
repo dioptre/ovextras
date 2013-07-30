@@ -29,9 +29,6 @@ namespace OpenViBEPlugins
 		{
 		typedef Eigen::Matrix< double , Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor > MatrixXdRowMajor;
 
-		protected:
-			void dumpMatrix(OpenViBE::Kernel::ILogManager& pMgr, const MatrixXdRowMajor& mat, const OpenViBE::CString& desc);
-
 		public:
 
 			virtual OpenViBE::boolean initialize(void);
@@ -53,6 +50,9 @@ namespace OpenViBEPlugins
 			virtual void processChildData(const char* sData); // XML IReaderCallback
 			virtual void closeChild(void); // XML ReaderCallback
 
+			// debug method
+			void dumpMatrix(OpenViBE::Kernel::ILogManager& pMgr, const MatrixXdRowMajor& mat, const OpenViBE::CString& desc);
+
 			std::stack<OpenViBE::CString> m_vNode;
 
 			OpenViBE::float64 m_f64Class1;
@@ -73,7 +73,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Shrinkage LDA Classifier"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Jussi T. Lindgren"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Estimates LDA using regularized covariances"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
