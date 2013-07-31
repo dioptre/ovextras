@@ -50,7 +50,7 @@ namespace OpenViBEPlugins
 			virtual void processChildData(const char* sData); // XML IReaderCallback
 			virtual void closeChild(void); // XML ReaderCallback
 
-			// debug method
+			// Debug method. Prints the matrix to the logManager. May be disabled in implementation.
 			void dumpMatrix(OpenViBE::Kernel::ILogManager& pMgr, const MatrixXdRowMajor& mat, const OpenViBE::CString& desc);
 
 			std::stack<OpenViBE::CString> m_vNode;

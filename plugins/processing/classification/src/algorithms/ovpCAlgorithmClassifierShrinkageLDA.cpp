@@ -9,7 +9,7 @@
 
 #include <Eigen/Eigenvalues>
 
-#include "../algorithms/ovpCAlgorithmCovariance.h"
+#include "../algorithms/ovpCAlgorithmConditionedCovariance.h"
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -40,23 +40,22 @@ void CAlgorithmClassifierShrinkageLDA::dumpMatrix(OpenViBE::Kernel::ILogManager&
 
 boolean CAlgorithmClassifierShrinkageLDA::initialize(void)
 {
-	// This is the weight parameter local to this module and automatically exposed to the GUI
-	TParameterHandler< float64 > ip_f64Shrinkage(getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage));
-	ip_f64Shrinkage = -1;
+	// Initialize the Conditioned Covariance Matrix algorithm
+	m_pCovarianceAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ConditionedCovariance));
+	m_pCovarianceAlgorithm->initialize();
+
+	// This is the weight parameter local to this module and automatically exposed to the GUI. Its redirected to the corresponding parameter of the cov alg.
+	TParameterHandler< float64 > ip_f64Shrinkage(this->getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage));
+	ip_f64Shrinkage.setReferenceTarget(m_pCovarianceAlgorithm->getInputParameter(OVP_Algorithm_ConditionedCovariance_InputParameterId_Shrinkage));
 
 	TParameterHandler < boolean > ip_bDiagonalCov(this->getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov));
 	ip_bDiagonalCov = false;
-
-	// Initialize the Covariance Matrix algorithm
-	m_pCovarianceAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_Covariance));
-	m_pCovarianceAlgorithm->initialize();
 
 	return CAlgorithmClassifier::initialize();
 }
 
 boolean CAlgorithmClassifierShrinkageLDA::uninitialize(void)
 {
-	// Free the resources
 	m_pCovarianceAlgorithm->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*m_pCovarianceAlgorithm);
 
@@ -68,21 +67,22 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	TParameterHandler< boolean > ip_bDiagonalCov(getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov));
 
 	// IO to the covariance alg
-	TParameterHandler < OpenViBE::IMatrix* > op_pMean(m_pCovarianceAlgorithm->getOutputParameter(OVP_Algorithm_Covariance_OutputParameterId_Mean));
-	TParameterHandler < OpenViBE::IMatrix* > op_pCovarianceMatrix(m_pCovarianceAlgorithm->getOutputParameter(OVP_Algorithm_Covariance_OutputParameterId_CovarianceMatrix));
-	TParameterHandler < OpenViBE::IMatrix* > ip_pFeatureVectorSet(m_pCovarianceAlgorithm->getInputParameter(OVP_Algorithm_Covariance_InputParameterId_FeatureVectorSet));
-	TParameterHandler< float64 > ip_f64ShrinkageAlg(m_pCovarianceAlgorithm->getInputParameter(OVP_Algorithm_Covariance_InputParameterId_Shrinkage));
-	TParameterHandler< float64 > ip_f64Shrinkage(this->getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage));
-	// This construction passes our local param value that the user may have modified to the algorithm 
-	float64 l_f64tmp = ip_f64Shrinkage; ip_f64ShrinkageAlg = l_f64tmp;
+	TParameterHandler < OpenViBE::IMatrix* > op_pMean(m_pCovarianceAlgorithm->getOutputParameter(OVP_Algorithm_ConditionedCovariance_OutputParameterId_Mean));
+	TParameterHandler < OpenViBE::IMatrix* > op_pCovarianceMatrix(m_pCovarianceAlgorithm->getOutputParameter(OVP_Algorithm_ConditionedCovariance_OutputParameterId_CovarianceMatrix));
+	TParameterHandler < OpenViBE::IMatrix* > ip_pFeatureVectorSet(m_pCovarianceAlgorithm->getInputParameter(OVP_Algorithm_ConditionedCovariance_InputParameterId_FeatureVectorSet));
 
-	// Debug
-	int l_ui32nDim = (rFeatureVectorSet.getFeatureVectorCount() > 0 ? rFeatureVectorSet[0].getSize() : 0);
+	const uint32 l_ui32nRows = rFeatureVectorSet.getFeatureVectorCount();
+	const uint32 l_ui32nCols = (l_ui32nRows > 0 ? rFeatureVectorSet[0].getSize() : 0);
 	this->getLogManager() << LogLevel_Debug << "Feature set input dims [" 
-		<< rFeatureVectorSet.getFeatureVectorCount() << "x" << l_ui32nDim << "]\n";
+		<< rFeatureVectorSet.getFeatureVectorCount() << "x" << l_ui32nCols << "]\n";
+
+	if(l_ui32nRows==0 || l_ui32nCols==0) {
+		this->getLogManager() << LogLevel_Error << "Input data has a zero-size dimension, dims = [" << l_ui32nRows << "x" << l_ui32nCols << "]\n";
+		return false;
+	}
 
 	// Count the classes
-	std::map < float64, uint64 > l_vClassLabels;
+	std::map < float64, uint32 > l_vClassLabels;
 	for(uint32 i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
 	{
 		l_vClassLabels[rFeatureVectorSet[i].getLabel()]++;
@@ -99,30 +99,29 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	// Get class labels
 	m_f64Class1=l_vClassLabels.begin()->first;
 	m_f64Class2=l_vClassLabels.rbegin()->first;
-	const uint32 l_ui32VectorLen = rFeatureVectorSet.getFeatureVector(0).getSize();
 
 	// Get regularized covariances of all the classes
 	const float64 l_f64Labels[] = {m_f64Class1,m_f64Class2};
 	MatrixXd l_aCov[l_ui32nClasses];
 	MatrixXd l_aMean[l_ui32nClasses];
-	MatrixXd l_oGlobalCov = MatrixXd::Zero(l_ui32VectorLen,l_ui32VectorLen);
+	MatrixXd l_oGlobalCov = MatrixXd::Zero(l_ui32nCols,l_ui32nCols);
 
 	for(int classIdx=0;classIdx<l_ui32nClasses;classIdx++) 
 	{
 		const float64 l_f64Label = l_f64Labels[classIdx];
-		const uint32 l_ui32nExamples = (uint32)l_vClassLabels[l_f64Label];
+		const uint32 l_ui32nExamplesInClass = l_vClassLabels[l_f64Label];
 
 		// Copy all the data of the class to a feature matrix
 		ip_pFeatureVectorSet->setDimensionCount(2);
-		ip_pFeatureVectorSet->setDimensionSize(0, l_ui32nExamples);
-		ip_pFeatureVectorSet->setDimensionSize(1, l_ui32VectorLen);
+		ip_pFeatureVectorSet->setDimensionSize(0, l_ui32nExamplesInClass);
+		ip_pFeatureVectorSet->setDimensionSize(1, l_ui32nCols);
 		float64 *l_pBuffer = ip_pFeatureVectorSet->getBuffer();
-		for(uint32 i=0;i<rFeatureVectorSet.getFeatureVectorCount();i++) 
+		for(uint32 i=0;i<l_ui32nRows;i++) 
 		{
 			if(rFeatureVectorSet[i].getLabel() == l_f64Label) 
 			{
-				System::Memory::copy(l_pBuffer, rFeatureVectorSet[i].getBuffer(), l_ui32VectorLen*sizeof(float64));
-				l_pBuffer += l_ui32VectorLen;
+				System::Memory::copy(l_pBuffer, rFeatureVectorSet[i].getBuffer(), l_ui32nCols*sizeof(float64));
+				l_pBuffer += l_ui32nCols;
 			}
 		}
 
@@ -132,17 +131,17 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 			return false;
 		}
 
-		// Get the results from the algorithm
-		Map<MatrixXdRowMajor> l_oMeanMapper(op_pMean->getBuffer(), 1, l_ui32VectorLen);
+		// Get the results from the cov algorithm
+		Map<MatrixXdRowMajor> l_oMeanMapper(op_pMean->getBuffer(), 1, l_ui32nCols);
 		l_aMean[classIdx] = l_oMeanMapper;
-		Map<MatrixXdRowMajor> l_oCovMapper(op_pCovarianceMatrix->getBuffer(), l_ui32VectorLen, l_ui32VectorLen);
+		Map<MatrixXdRowMajor> l_oCovMapper(op_pCovarianceMatrix->getBuffer(), l_ui32nCols, l_ui32nCols);
 		l_aCov[classIdx] = l_oCovMapper;
 
 		if(ip_bDiagonalCov) 
 		{
-			for(uint32 i=0;i<l_ui32VectorLen;i++) 
+			for(uint32 i=0;i<l_ui32nCols;i++) 
 			{
-				for(uint32 j=i+1;j<l_ui32VectorLen;j++) 
+				for(uint32 j=i+1;j<l_ui32nCols;j++) 
 				{
 					l_aCov[classIdx](i,j) = 0.0;
 					l_aCov[classIdx](j,i) = 0.0;
@@ -158,25 +157,19 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 
 	l_oGlobalCov /= (double)l_ui32nClasses;
 
-	dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
-
 	// Get the pseudoinverse of the global cov using eigen decomposition for self-adjoint matrices
 	const float64 l_f64Tolerance = 1e-10;
 	SelfAdjointEigenSolver<MatrixXd> l_oEigenSolver;
 	l_oEigenSolver.compute(l_oGlobalCov);
 	VectorXd l_oEigenValues = l_oEigenSolver.eigenvalues();
-	for(uint32 i=0;i<l_ui32VectorLen;i++) {
+	for(uint32 i=0;i<l_ui32nCols;i++) {
 		if(l_oEigenValues(i) >= l_f64Tolerance) {
 			l_oEigenValues(i) = 1.0/l_oEigenValues(i);
 		}
 	}
 
-	dumpMatrix(this->getLogManager(), l_oEigenValues, "Eigenvalues");
-	dumpMatrix(this->getLogManager(), l_oEigenSolver.eigenvectors(), "Eigenvectors");
-
 	// Build LDA model for 2 classes. This is a special case of the multiclass version.
-	const MatrixXd l_oGlobalCovInv = l_oEigenSolver.eigenvectors() * l_oEigenValues.asDiagonal() * l_oEigenSolver.eigenvectors().inverse();
-	dumpMatrix(this->getLogManager(),l_oGlobalCovInv, "Global cov inverse");	
+	const MatrixXd l_oGlobalCovInv = l_oEigenSolver.eigenvectors() * l_oEigenValues.asDiagonal() * l_oEigenSolver.eigenvectors().inverse();	
 
 	const MatrixXd l_oMeanSum  = l_aMean[0] + l_aMean[1];
 	const MatrixXd l_oMeanDiff = l_aMean[0] - l_aMean[1];
@@ -185,11 +178,9 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	const MatrixXd l_oWeights = l_oGlobalCovInv * l_oMeanDiff.transpose();
 
 	// Catenate the bias term and the weights
-	m_oCoefficients.resize(1, l_ui32VectorLen+1 );
+	m_oCoefficients.resize(1, l_ui32nCols+1 );
 	m_oCoefficients(0,0) = l_oBias(0,0);
-	m_oCoefficients.block(0,1,1,l_ui32VectorLen) = l_oWeights.transpose();
-
-	dumpMatrix(this->getLogManager(), m_oCoefficients, "Coefficients");
+	m_oCoefficients.block(0,1,1,l_ui32nCols) = l_oWeights.transpose();
 
 	// Write the classifier to an .xml
 	std::stringstream l_sClasses;
@@ -197,7 +188,7 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 
 	l_sClasses << m_f64Class1 << " " << m_f64Class2;
 	l_sCoefficients << std::scientific;
-	for(uint32 i=0; i<l_ui32VectorLen+1; i++)
+	for(uint32 i=0; i<l_ui32nCols+1; i++)
 	{
 		l_sCoefficients << " " << m_oCoefficients(0,i);
 	}
@@ -206,6 +197,9 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	XML::IWriter* l_pWriter=XML::createWriter(*this);
 	l_pWriter->openChild("OpenViBE-Classifier");
 	 l_pWriter->openChild("LDA");
+	  l_pWriter->openChild("Creator");
+	   l_pWriter->setChildData("ShrinkageLDA");
+	  l_pWriter->closeChild();
 	  l_pWriter->openChild("Classes");
 	   l_pWriter->setChildData(l_sClasses.str().c_str());
 	  l_pWriter->closeChild();
@@ -216,27 +210,33 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	l_pWriter->closeChild();
 	l_pWriter->release();
 	l_pWriter=NULL;
+	
+	// Debug output
+	dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
+	dumpMatrix(this->getLogManager(), l_oEigenValues, "Eigenvalues");
+	dumpMatrix(this->getLogManager(), l_oEigenSolver.eigenvectors(), "Eigenvectors");
+	dumpMatrix(this->getLogManager(), l_oGlobalCovInv, "Global cov inverse");
+	dumpMatrix(this->getLogManager(), m_oCoefficients, "Hyperplane weights");
 
 	return true;
 }
 
 boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
 {
-	const uint32 l_ui32nPaddedCols = m_oCoefficients.size();
+	const uint32 l_ui32nColsWithBiasTerm = m_oCoefficients.size();
 
-	if(rFeatureVector.getSize()+1!=l_ui32nPaddedCols)
+	if(rFeatureVector.getSize()+1!=l_ui32nColsWithBiasTerm)
 	{
-		this->getLogManager() << LogLevel_Warning << "Feature vector size " << rFeatureVector.getSize() << " and hyperplane parameter size " << (uint32) m_oCoefficients.size() << " does not match\n";
+		this->getLogManager() << LogLevel_Warning << "Feature vector size " << rFeatureVector.getSize() << " + 1 and hyperplane parameter size " << l_ui32nColsWithBiasTerm << " do not match\n";
 		return false;
 	}
 
-	Map<MatrixXdRowMajor> l_oFeatureVec(const_cast<float64*>(rFeatureVector.getBuffer()), 1, rFeatureVector.getSize());
+	const Map<MatrixXdRowMajor> l_oFeatureVec(const_cast<float64*>(rFeatureVector.getBuffer()), 1, rFeatureVector.getSize());
 
-	// Catenate
-	MatrixXd l_oWeights;
-	l_oWeights.resize(1, l_ui32nPaddedCols );
+	// Catenate 1.0 to match the bias term
+	MatrixXd l_oWeights(1, l_ui32nColsWithBiasTerm);
 	l_oWeights(0,0) = 1.0;
-	l_oWeights.block(0,1,1,l_ui32nPaddedCols-1) = l_oFeatureVec;
+	l_oWeights.block(0,1,1,l_ui32nColsWithBiasTerm-1) = l_oFeatureVec;
 
 	const float64 l_f64Result = (l_oWeights*m_oCoefficients.transpose()).col(0)(0);
 

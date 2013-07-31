@@ -1,4 +1,4 @@
-#include "ovpCAlgorithmCovariance.h"
+#include "ovpCAlgorithmConditionedCovariance.h"
 
 /*
  * This implementation is based on the matlab code corresponding to 
@@ -22,7 +22,7 @@ using namespace Eigen;
 
 #define COV_DEBUG 0
 #if COV_DEBUG
-void CAlgorithmCovariance::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const MatrixXdRowMajor &mat, const CString &desc)
+void CAlgorithmConditionedCovariance::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const MatrixXdRowMajor &mat, const CString &desc)
 {
 	rMgr << LogLevel_Info << desc << "\n";
 	for(int i=0;i<mat.rows();i++) {
@@ -34,30 +34,30 @@ void CAlgorithmCovariance::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const
 	}
 }
 #else 
-void CAlgorithmCovariance::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { };
+void CAlgorithmConditionedCovariance::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { };
 #endif
 
-OpenViBE::boolean CAlgorithmCovariance::initialize(void) 
+OpenViBE::boolean CAlgorithmConditionedCovariance::initialize(void) 
 { 
 	// Default value setting
-	OpenViBE::Kernel::TParameterHandler < float64 > ip_f64Shrinkage(getInputParameter(OVP_Algorithm_Covariance_InputParameterId_Shrinkage));
+	OpenViBE::Kernel::TParameterHandler < float64 > ip_f64Shrinkage(getInputParameter(OVP_Algorithm_ConditionedCovariance_InputParameterId_Shrinkage));
 	ip_f64Shrinkage = -1.0;
 
 	return true;
 } 
 
-OpenViBE::boolean CAlgorithmCovariance::uninitialize(void) 
+OpenViBE::boolean CAlgorithmConditionedCovariance::uninitialize(void) 
 { 
 	return true;
 } 
 
-OpenViBE::boolean CAlgorithmCovariance::process(void) 
+OpenViBE::boolean CAlgorithmConditionedCovariance::process(void) 
 {
 	// Set up the IO
-	const TParameterHandler< float64 >  ip_f64Shrinkage(getInputParameter(OVP_Algorithm_Covariance_InputParameterId_Shrinkage));
-	TParameterHandler< IMatrix* > ip_pFeatureVectorSet(getInputParameter(OVP_Algorithm_Covariance_InputParameterId_FeatureVectorSet));
-	TParameterHandler< IMatrix* > op_pMean(getOutputParameter(OVP_Algorithm_Covariance_OutputParameterId_Mean));
-	TParameterHandler< IMatrix* > op_pCovarianceMatrix(getOutputParameter(OVP_Algorithm_Covariance_OutputParameterId_CovarianceMatrix));
+	const TParameterHandler< float64 >  ip_f64Shrinkage(getInputParameter(OVP_Algorithm_ConditionedCovariance_InputParameterId_Shrinkage));
+	const TParameterHandler< IMatrix* > ip_pFeatureVectorSet(getInputParameter(OVP_Algorithm_ConditionedCovariance_InputParameterId_FeatureVectorSet));
+	TParameterHandler< IMatrix* > op_pMean(getOutputParameter(OVP_Algorithm_ConditionedCovariance_OutputParameterId_Mean));
+	TParameterHandler< IMatrix* > op_pCovarianceMatrix(getOutputParameter(OVP_Algorithm_ConditionedCovariance_OutputParameterId_CovarianceMatrix));
 	float64 l_f64Shrinkage = ip_f64Shrinkage;
 	if(l_f64Shrinkage>1.0) {
 		this->getLogManager() << LogLevel_Error << "Max shrinkage parameter value is 1.0\n";
@@ -77,7 +77,7 @@ OpenViBE::boolean CAlgorithmCovariance::process(void)
 		this->getLogManager() << LogLevel_Error << "Input matrix is too small, [" << l_ui32nRows << "x" << l_ui32nCols << "]\n";
 		return false;
 	}
-	float64 *l_pBuffer = ip_pFeatureVectorSet->getBuffer();
+	const float64 *l_pBuffer = ip_pFeatureVectorSet->getBuffer();
 	if(!l_pBuffer)
 	{
 		this->getLogManager() << LogLevel_Error << "Feature set buffer ptr is NULL\n";
@@ -92,29 +92,20 @@ OpenViBE::boolean CAlgorithmCovariance::process(void)
 	op_pCovarianceMatrix->setDimensionSize(0, l_ui32nCols);
 	op_pCovarianceMatrix->setDimensionSize(1, l_ui32nCols);
 
-	// Insert our data into an Eigen matrix
-	const Map<MatrixXdRowMajor> l_oDataMatrix(l_pBuffer,l_ui32nRows,l_ui32nCols); 
-
-	// dumpMatrix(this->getLogManager(), l_oDataMatrix, "Data");
+	// Insert our data into an Eigen matrix. As Eigen doesn't have const float64* constructor, we cast away the const.
+	const Map<MatrixXdRowMajor> l_oDataMatrix(const_cast<float64*>(l_pBuffer),l_ui32nRows,l_ui32nCols); 
 
 	// Estimate the data center and center the data
 	Map<MatrixXdRowMajor> l_oDataMean(op_pMean->getBuffer(), 1, l_ui32nCols);
 	l_oDataMean = l_oDataMatrix.colwise().mean();	
 	const MatrixXdRowMajor l_oDataCentered = l_oDataMatrix.rowwise() - l_oDataMean.row(0);
 
-	dumpMatrix(this->getLogManager(), l_oDataMean, "DataMean");
-	// dumpMatrix(this->getLogManager(), l_oDataCentered, "Centered data");
-
 	// Compute the sample cov matrix
 	const MatrixXd l_oSampleCov = (l_oDataCentered.transpose() * l_oDataCentered) * (1/(double)l_ui32nRows);
-
-	dumpMatrix(this->getLogManager(), l_oSampleCov, "Sample cov");
 
 	// Compute the prior cov matrix
 	MatrixXd l_oPriorCov = MatrixXd::Zero(l_ui32nCols,l_ui32nCols);
 	l_oPriorCov.diagonal().setConstant( l_oSampleCov.diagonal().mean() );
-
-	dumpMatrix(this->getLogManager(), l_oPriorCov, "Prior cov");
 
 	// Compute shrinkage coefficient if its not given
 	if(l_f64Shrinkage<0) {
@@ -144,6 +135,10 @@ OpenViBE::boolean CAlgorithmCovariance::process(void)
 	// Mix the prior and the sample estimates according to the shrinkage parameter
 	l_oOutputCov = l_f64Shrinkage*l_oPriorCov + (1.0-l_f64Shrinkage)*l_oSampleCov;
 
+	// Debug block
+	dumpMatrix(this->getLogManager(), l_oDataMean, "DataMean");
+	dumpMatrix(this->getLogManager(), l_oSampleCov, "Sample cov");
+	dumpMatrix(this->getLogManager(), l_oPriorCov, "Prior cov");
 	dumpMatrix(this->getLogManager(), l_oOutputCov, "Output cov");
 
 	return true;

@@ -316,13 +316,13 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 			else
 			{
 				this->getLogManager() << LogLevel_Info << "Training without cross-validation.\n";
-				this->getLogManager() << LogLevel_Info << "*** Reported training data accuracy will be optimistic ***\n";
+				this->getLogManager() << LogLevel_Info << "*** Reported training set accuracy will be optimistic ***\n";
 			}
 
 			this->getLogManager() << LogLevel_Trace << "Training final classifier on the whole set...\n";
 			this->train(0, 0);
 
-			this->getLogManager() << LogLevel_Info << "Training data accuracy is " << this->getAccuracy(0, m_vFeatureVector.size()) << "% (optimistic)\n";
+			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << this->getAccuracy(0, m_vFeatureVector.size()) << "% (optimistic)\n";
 
 			CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1));
 			std::ofstream l_oFile(l_sConfigurationFilename.toASCIIString(), ios::binary);
