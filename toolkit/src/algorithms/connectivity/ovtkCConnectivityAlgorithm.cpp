@@ -21,12 +21,12 @@ boolean CConnectivityAlgorithm::initialize(void)
 
 boolean CConnectivityAlgorithm::uninitialize(void)
 {
-	ip_pSignal1.uninitialize();
+/*	ip_pSignal1.uninitialize();
 	ip_pSignal2.uninitialize();
 	ip_ui64SamplingRate1.uninitialize();
 	ip_ui64SamplingRate2.uninitialize();
 	ip_pChannelPairs.uninitialize();
-	op_pMatrix.uninitialize();
+	op_pMatrix.uninitialize();*/
 
 	return true;
 }

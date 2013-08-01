@@ -128,7 +128,7 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 			VectorXd l_vecXdPhase2;
 
 
-			std::complex <double> sum(0.0,0.0);
+			std::complex <double> l_sum(0.0,0.0);
 //			std::cout<<"Channel pairs = "<<l_pChannelPairs->getBuffer() <<std::endl;
 
 
@@ -171,6 +171,7 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 				l_vecXdChannelToCompare2 = VectorXd::Zero(l_ui32SamplesPerChannel2);
 				l_vecXdPhase1 = VectorXd::Zero(l_ui32SamplesPerChannel1);
 				l_vecXdPhase2 = VectorXd::Zero(l_ui32SamplesPerChannel2);
+				l_sum = (0.0,0.0);
 //				std::cout<<"channel to compare = "<<l_pChannelToCompare<<std::endl;
 
 				for(uint32 i=0; i<l_ui32SamplesPerChannel1; i++)
@@ -208,7 +209,7 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 				{
 					l_vecXdPhase2(i) = op_pInstantaneousPhase->getBuffer()[i];
 
-					sum += exp(iComplex*(l_vecXdPhase1(i)-l_vecXdPhase2(i)));
+					l_sum += exp(iComplex*(l_vecXdPhase1(i)-l_vecXdPhase2(i)));
 				}
 
 //				std::cout<<"Phase 2 = "<<l_vecXdPhase2.transpose()<<"\n"<<std::endl;
@@ -216,8 +217,8 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 
 
 
-				l_pOutputMatrix->getBuffer()[channel] = abs(sum)/l_ui32SamplesPerChannel1;
-//				std::cout<<"sum2 = "<<abs(sum)<<"\n"<<std::endl;
+				l_pOutputMatrix->getBuffer()[channel] = abs(l_sum)/l_ui32SamplesPerChannel1;
+//				std::cout<<"sum2 = "<<abs(l_sum)<<"\n"<<std::endl;
 
 			}
 

@@ -5,7 +5,7 @@
 
 #include "../../ovp_defines.h"
 #include <openvibe/ov_all.h>
-#include <toolkit/ovtk_all.h> //toolkit/include/
+#include <toolkit/ovtk_all.h>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/FFT>
 

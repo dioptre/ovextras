@@ -143,5 +143,6 @@
 
 
 #define OVP_Value_CoupledStringSeparator                                '-'
+#define OVP_Value_AllSelection											'*'
 
 #endif // __OpenViBEPlugins_Defines_H__

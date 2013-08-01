@@ -27,9 +27,9 @@ namespace OpenViBEToolkit
 
 				virtual void release(void) {delete this;}
 
-				virtual OV_API OpenViBE::boolean initialize(void);
-				virtual OV_API OpenViBE::boolean uninitialize(void);
-				virtual OV_API OpenViBE::boolean process(void);
+				virtual OpenViBE::boolean initialize(void);
+				virtual OpenViBE::boolean uninitialize(void);
+				virtual OpenViBE::boolean process(void);
 
 				_IsDerivedFromClass_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVTK_ClassId_ConnectivityAlgorithm);
 
