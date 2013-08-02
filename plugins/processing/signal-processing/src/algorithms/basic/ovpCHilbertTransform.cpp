@@ -119,7 +119,6 @@ boolean CAlgorithmHilbertTransform::process(void)
 				m_vecXcdSignalBuffer(samples).real(l_pInputMatrix->getBuffer()[samples + channel * (l_ui32SamplesPerChannel)]);
 				m_vecXcdSignalBuffer(samples).imag(0.0);
 			}
-//			std::cout <<"channel "<<channel<<" = "<<m_vecXcdSignalBuffer.transpose()<<std::endl;
 
 			//Fast Fourier Transform of input signal
 			fft.fwd(m_vecXcdSignalFourier, m_vecXcdSignalBuffer);
@@ -133,13 +132,9 @@ boolean CAlgorithmHilbertTransform::process(void)
 			//Inverse Fast Fourier transform
 			fft.inv(m_vecXcdSignalBuffer, m_vecXcdSignalFourier); // m_vecXcdSignalBuffer is now the analytical signal of the initial input signal
 
-			//std::cout <<"channel "<<channel<<" = "<<m_vecXcdSignalBuffer.transpose()<<std::endl;
 			//Compute envelope and phase and pass it to the corresponding output
 			for(uint32 samples=0; samples<l_ui32SamplesPerChannel;samples++)
 			{
-
-				//std::cout<<"channel "<<channel<<" = "<<arg(m_vecXcdSignalBuffer(samples))<<std::endl;
-
 
 				l_pOutputHilbertMatrix->getBuffer()[samples + channel*l_ui32SamplesPerChannel] = m_vecXcdSignalBuffer(samples).imag();
 				l_pOutputEnvelopeMatrix->getBuffer()[samples + channel*l_ui32SamplesPerChannel] = abs(m_vecXcdSignalBuffer(samples));

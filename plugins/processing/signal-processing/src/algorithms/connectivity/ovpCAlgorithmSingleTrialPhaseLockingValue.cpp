@@ -165,7 +165,7 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 
 
 			//Compute S-PLV for each pairs
-			for(uint32 channel = 0; channel < l_ui32PairsCount*2; channel = channel+1)
+			for(uint32 channel = 0; channel < l_ui32PairsCount; channel = channel+1)
 			{
 				l_vecXdChannelToCompare1 = VectorXd::Zero(l_ui32SamplesPerChannel1);
 				l_vecXdChannelToCompare2 = VectorXd::Zero(l_ui32SamplesPerChannel2);

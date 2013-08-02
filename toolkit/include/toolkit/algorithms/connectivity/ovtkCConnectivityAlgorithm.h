@@ -21,7 +21,7 @@
 
 namespace OpenViBEToolkit
 {
-		class CConnectivityAlgorithm : public OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >
+		class OV_API CConnectivityAlgorithm : public OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >
 		{
 		public:
 
@@ -43,7 +43,7 @@ namespace OpenViBEToolkit
 				OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pMatrix;
 		};
 
-		class CConnectivityAlgorithmDesc : public OpenViBE::Plugins::IAlgorithmDesc
+		class OV_API CConnectivityAlgorithmDesc : public OpenViBE::Plugins::IAlgorithmDesc
 		{
 		public:
 
