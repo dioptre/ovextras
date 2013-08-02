@@ -45,6 +45,8 @@ boolean CBoxAlgorithmFrequencyBandSelector::initialize(void)
 	std::vector < std::string > l_vSettingRange;
 	std::vector < std::string >::const_iterator it;
 	std::vector < std::string >::const_iterator itRange;
+	boolean l_bHadError = false;
+	m_vSelected.clear();
 	for(it=l_vSetting.begin(); it!=l_vSetting.end(); it++)
 	{
 		boolean l_bGood=false;
@@ -71,6 +73,7 @@ boolean CBoxAlgorithmFrequencyBandSelector::initialize(void)
 		if(!l_bGood)
 		{
 			this->getLogManager() << LogLevel_ImportantWarning << "Ignored invalid frequency band : " << CString(it->c_str()) << "\n";
+			l_bHadError=true;
 		}
 	}
 
@@ -91,6 +94,12 @@ boolean CBoxAlgorithmFrequencyBandSelector::initialize(void)
 	ip_pBands.setReferenceTarget(op_pBands);
 	ip_pMatrix=&m_oMatrix;
 	op_pMatrix=&m_oMatrix;
+
+	if(l_bHadError && m_vSelected.size()==0) 
+	{
+		this->getLogManager() << LogLevel_ImportantWarning << "Unable to correctly parse the frequency band options.\n";
+		return false;
+	}
 
 	return true;
 }

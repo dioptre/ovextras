@@ -68,7 +68,8 @@ namespace OpenViBEPlugins
 			{
 				rBoxAlgorithmPrototype.addInput  ("Input spectrum",  OV_TypeId_Spectrum);
 				rBoxAlgorithmPrototype.addOutput ("Output spectrum", OV_TypeId_Spectrum);
-				rBoxAlgorithmPrototype.addSetting("Frequencies to select", OV_TypeId_String, "8-12;16-24");
+				rBoxAlgorithmPrototype.addSetting("Frequencies to select", OV_TypeId_String, "8:12;16:24");
+				// @fixme Use OV_Value_RangeStringSeparator / OV_Value_EnumeratedStringSeparator tokens above
 
 				return true;
 			}

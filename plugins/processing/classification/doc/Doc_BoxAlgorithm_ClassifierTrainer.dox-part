@@ -150,9 +150,9 @@ is trained on this feature vector set. Then the classifier is tested on the \c F
 Then, a feature vector set is built form the \c FVs1, \c FVs3, \c FVs4, \c FVs5. The classifier algorithm
 is trained on this feature vector set. Then the classifier is tested on the \c FVs2 :
 \verbatim
-+------+ +------+ +------------------------+
-|Traini| | FVs2 | |ng Feature Vector Set 2 |
-+------+ +------+ +------------------------+
++-------+ +------+ +------------------------+
+| Train | | FVs2 | | ing Feat. Vector Set 2 |
++-------+ +------+ +------------------------+
 \endverbatim
 The same process if performed on all the partitions :
 \verbatim

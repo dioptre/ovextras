@@ -106,9 +106,9 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	MatrixXd l_aMean[l_ui32nClasses];
 	MatrixXd l_oGlobalCov = MatrixXd::Zero(l_ui32nCols,l_ui32nCols);
 
-	for(int classIdx=0;classIdx<l_ui32nClasses;classIdx++) 
+	for(uint32 l_ui32classIdx=0;l_ui32classIdx<l_ui32nClasses;l_ui32classIdx++) 
 	{
-		const float64 l_f64Label = l_f64Labels[classIdx];
+		const float64 l_f64Label = l_f64Labels[l_ui32classIdx];
 		const uint32 l_ui32nExamplesInClass = l_vClassLabels[l_f64Label];
 
 		// Copy all the data of the class to a feature matrix
@@ -127,15 +127,15 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 
 		// Compute mean and cov
 		if(!m_pCovarianceAlgorithm->process()) {
-			this->getLogManager() << LogLevel_Error << "Covariance computation failed for class " << classIdx << " ("<< l_f64Label << ")\n";
+			this->getLogManager() << LogLevel_Error << "Covariance computation failed for class " << l_ui32classIdx << " ("<< l_f64Label << ")\n";
 			return false;
 		}
 
 		// Get the results from the cov algorithm
 		Map<MatrixXdRowMajor> l_oMeanMapper(op_pMean->getBuffer(), 1, l_ui32nCols);
-		l_aMean[classIdx] = l_oMeanMapper;
+		l_aMean[l_ui32classIdx] = l_oMeanMapper;
 		Map<MatrixXdRowMajor> l_oCovMapper(op_pCovarianceMatrix->getBuffer(), l_ui32nCols, l_ui32nCols);
-		l_aCov[classIdx] = l_oCovMapper;
+		l_aCov[l_ui32classIdx] = l_oCovMapper;
 
 		if(ip_bDiagonalCov) 
 		{
@@ -143,16 +143,16 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 			{
 				for(uint32 j=i+1;j<l_ui32nCols;j++) 
 				{
-					l_aCov[classIdx](i,j) = 0.0;
-					l_aCov[classIdx](j,i) = 0.0;
+					l_aCov[l_ui32classIdx](i,j) = 0.0;
+					l_aCov[l_ui32classIdx](j,i) = 0.0;
 				}
 			}
 		}
 
-		l_oGlobalCov += l_aCov[classIdx];
+		l_oGlobalCov += l_aCov[l_ui32classIdx];
 
-		dumpMatrix(this->getLogManager(), l_aMean[classIdx], "Mean");
-		dumpMatrix(this->getLogManager(), l_aCov[classIdx], "Shrinked cov");
+		dumpMatrix(this->getLogManager(), l_aMean[l_ui32classIdx], "Mean");
+		dumpMatrix(this->getLogManager(), l_aCov[l_ui32classIdx], "Shrinked cov");
 	}
 
 	l_oGlobalCov /= (double)l_ui32nClasses;
