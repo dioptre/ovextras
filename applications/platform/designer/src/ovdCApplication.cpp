@@ -508,6 +508,7 @@ CApplication::CApplication(const IKernelContext& rKernelContext)
 	m_pPluginManager=&m_rKernelContext.getPluginManager();
 	m_pScenarioManager=&m_rKernelContext.getScenarioManager();
 	m_pVisualisationManager=&m_rKernelContext.getVisualisationManager();
+	m_pLogListenerDesigner = NULL;
 }
 
 CApplication::~CApplication(void) 
@@ -1715,11 +1716,12 @@ void CApplication::forwardScenarioCB(void)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "forwardScenarioCB\n";
 
-	if(!this->createPlayer()) 
+	if(!this->createPlayer())
 	{
 		m_rKernelContext.getLogManager() << LogLevel_Error << "CreatePlayer failed\n";
 		return;
-	};
+	}
+
 	this->getPlayer()->forward();
 	this->getCurrentInterfacedScenario()->m_ePlayerStatus=this->getPlayer()->getStatus();
 
@@ -1844,9 +1846,12 @@ boolean CApplication::quitApplicationCB(void)
 	}
 
 	// release the log manager and free the memory
-	m_rKernelContext.getLogManager().removeListener( m_pLogListenerDesigner );
-	delete m_pLogListenerDesigner;
-	m_pLogListenerDesigner = NULL;
+	if(m_pLogListenerDesigner) 
+	{
+		m_rKernelContext.getLogManager().removeListener( m_pLogListenerDesigner );
+		delete m_pLogListenerDesigner;
+		m_pLogListenerDesigner = NULL;
+	}
 
 	// OK to kill app
 	return true;
