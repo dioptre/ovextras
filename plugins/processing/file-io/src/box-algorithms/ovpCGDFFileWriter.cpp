@@ -24,10 +24,14 @@ void CGDFFileWriter::setChannelCount(const uint32 ui32ChannelCount)
 
 void CGDFFileWriter::setChannelName(const uint32 ui32ChannelIndex, const char* sChannelName)
 {
-	//prepares the variable header
-	sprintf(m_oVariableHeader[ui32ChannelIndex].m_sLabel, "%s", sChannelName);
-	//remove \0 character
-	m_oVariableHeader[ui32ChannelIndex].m_sLabel[strlen(sChannelName)] = ' ';
+	const uint32 l_ui32LabelSize = sizeof(m_oVariableHeader[ui32ChannelIndex].m_sLabel);
+
+	// initialize label with spaces
+	memset(m_oVariableHeader[ui32ChannelIndex].m_sLabel, ' ', l_ui32LabelSize);
+
+	// copy at most l_ui32LabelSize-1 characters, leaving room for 1 space. Note that the label is not NULL terminated.
+	const uint32 l_ui32ChannelNameLen = std::min<uint32>(strlen(sChannelName), l_ui32LabelSize-1);
+	memcpy(m_oVariableHeader[ui32ChannelIndex].m_sLabel, sChannelName, l_ui32ChannelNameLen);
 
 	m_oVariableHeader[ui32ChannelIndex].m_ui32ChannelType=17;                //float64
 	m_oVariableHeader[ui32ChannelIndex].m_ui32NumberOfSamplesInEachRecord=1;
