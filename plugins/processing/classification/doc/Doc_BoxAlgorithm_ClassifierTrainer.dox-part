@@ -62,8 +62,7 @@ __________________________________________________________________
 The number of settings of this box can vary depending on the classification algorithm you choose. Such algorithm
 could have specific input OpenViBE::Kernel::IParameter objects (see \ref OpenViBE::Kernel::IAlgorithmProxy for details). If
 the type of those parameters is simple enough to be handled in the GUI, then additional settings will be added to this box.
-For this to be applied, you will have to close & reopen the settings configuration dialog after the actual classification
-algorithm is chosen. Supported parameter types are : Integers, Floats, Enumeations, Booleans. The documentation for those
+<b>After switching a classifier, you will have to close and re-open the settings configuration dialog to see the parameters of the new classifier.</b> Supported parameter types are : Integers, Floats, Enumerations, Booleans. The documentation for those
 parameters can not be done in this page because it is impossible to know at this time what classifier thus what hyper
 parameters you will have available. This will depend on the classification algorihtms that are be implemented in OpenViBE.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Settings|
@@ -89,6 +88,9 @@ better classification rates. The idea is to divide the set of feature vectors in
 algorithm is trained on some of the partitions and its accuracy is tested on the others. The classifier with the best results
 is selected as the trained classifier. See the miscellaneous section for details on how the k-fold test is done in this box.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Setting4|
+ 
+
+
 __________________________________________________________________
 
 Examples description
@@ -105,6 +107,27 @@ Miscellaneous description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainer_Miscellaneous|
+ 
+Available classifiers:
+
+\par Support Vector Machine (SVM)
+A well-known classifier supporting non-linear classification via kernels. The implementation is based on LIBSVM 2.91, which is included in the OpenViBE source tree. The parameters exposed in the GUI correspond to LIBSVM parameters. For more information on LIBSVM, see <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/">here</a>.
+
+\par Linear Discriminant Analysis (LDA)
+ A simple and fast linear classifier. For description, see any major textbook on Machine Learning or Statistics (e.g. Duda, Hart & Stork, or Hastie, Tibshirani & Friedman).
+
+\par Shrinkage LDA (sLDA)
+A variant of Linear Discriminant Analysis (LDA) with regularization. The regularization is performed by shrinking the empiric covariance matrix towards a prior covariance matrix according to a method proposed by Ledoit & Wolf: "A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices", 2004. The code follows the original Matlab implementation of the authors.
+\par
+The shrinkage LDA classifier has the following options.
+\par
+\li Shrinkage: A value s between [0,1] sets a linear weight between dataCov and priorCov. I.e. cov=(1-s)*dataCov+s*priorCov. Value <0 is used to auto-estimate the shrinking coefficient (default). If var(x) is a vector of empirical variances of all data dimensions, priorCov is a diagonal matrix with a single value mean(var(x)) pasted on its diagonal.
+\li Force diagonal cov: This sets the nondiagonal entries of the covariance matrices to zero. 
+\par
+Note that setting shrinkage to 0 should get you the regular LDA behavior. If you additionally force the covariance to be diagonal, you should get a model resembling the Naive Bayes classifier.
+ 
+Cross Validation 
+ 
 In this section, we will detail how the k-fold test is implemented in this box. For the k-fold test to be performed, you
 have to choose more than 1 partition in the related settings. Suppose you chose \c n partitions. Then when trigger stimulation
 is received, the feature vector set is splitted in \c n consecutive segments. The classification algorithm is trained on
@@ -127,9 +150,9 @@ is trained on this feature vector set. Then the classifier is tested on the \c F
 Then, a feature vector set is built form the \c FVs1, \c FVs3, \c FVs4, \c FVs5. The classifier algorithm
 is trained on this feature vector set. Then the classifier is tested on the \c FVs2 :
 \verbatim
-+------+ +------+ +------------------------+
-|Traini| | FVs2 | |ng Feature Vector Set 2 |
-+------+ +------+ +------------------------+
++-------+ +------+ +------------------------+
+| Train | | FVs2 | | ing Feat. Vector Set 2 |
++-------+ +------+ +------------------------+
 \endverbatim
 The same process if performed on all the partitions :
 \verbatim

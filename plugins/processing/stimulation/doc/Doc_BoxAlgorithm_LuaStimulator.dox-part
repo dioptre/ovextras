@@ -86,7 +86,7 @@ setting value may be expanded using the configuration manager thanks to a \ref L
 This function sends a string to the log manager. This message may be printed in the console
 for the user or may be popped up to him if this is important enough. In any case, it will appear
 in the log file.
-- \c log_level the log level which you want to use to print this line of text ; this is represented in
+- \c log_level the log level which you want to use to print this line of text. This is represented in
 string and can take the following values : \c Debug, \c Trace, \c Info, \c Warning, \c ImportantWarning, \c Error and \c Fatal.
 If you use an invalid value, then \c Debug is used.
 - \c line_of_text can be any line of text you want to print

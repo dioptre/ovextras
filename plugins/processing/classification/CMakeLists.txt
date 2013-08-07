@@ -20,6 +20,7 @@ INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindThirdPartyBLiFF")
 INCLUDE("FindThirdPartyITPP")
+INCLUDE("FindThirdPartyEigen")
 
 # ---------------------------------
 # Target macros

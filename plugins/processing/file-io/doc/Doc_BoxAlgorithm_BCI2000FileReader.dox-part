@@ -33,7 +33,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_BCI2000FileReader_Settings|
 
  * |OVP_DocBegin_BoxAlgorithm_BCI2000FileReader_Setting1| 
- * The file name; should be a BCI2000 .dat file.
+ * The file name should be a BCI2000 .dat file.
  * |OVP_DocEnd_BoxAlgorithm_BCI2000FileReader_Setting1|
  
  * |OVP_DocBegin_BoxAlgorithm_BCI2000FileReader_Setting2| 
