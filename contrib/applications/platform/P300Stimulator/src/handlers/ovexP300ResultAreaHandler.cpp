@@ -1,0 +1,240 @@
+#include "ovexP300ResultAreaHandler.h"
+#include "ovexP300TargetAreaHandler.h"
+#include "ovexUndoHandler.h"
+#include "../visualisation/glGButton.h"
+#include "../visualisation/glGSymbol.h"
+#include "../visualisation/glGPictureSymbol.h"
+
+#include <stdexcept>
+
+#include <system/Time.h>
+
+using namespace OpenViBE;
+using namespace OpenViBE::Kernel;
+using namespace OpenViBEApplications;
+
+//class P300UndoHandler;
+
+P300ResultAreaHandler::P300ResultAreaHandler(GTable* container, P300ScreenLayoutReader* propertyObject) 
+: m_pSymbolContainer(container), m_pScreenLayoutObject(propertyObject), m_sSpelledLetters(""), m_ui32ResultCounter(0)
+{
+	#ifdef OUTPUT_TIMING
+	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/gl_result_move_timing.txt","w");
+	#endif
+	/*for (OpenViBE::uint32 i=0; i<m_pSymbolContainer->getColumnDimension(); i++)
+	{
+		GLabel* l_pLabel = new GLabel();
+		l_pLabel->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
+		//m_vBlankLabel.push_back(l_pLabel);
+		m_pSymbolContainer->addChild(l_pLabel, 0.05f);
+	}*/
+}
+
+void P300ResultAreaHandler::update(GObservable* observable, const void * pUserData)
+{
+	P300UndoHandler* l_pUndoHandler = dynamic_cast<P300UndoHandler*>(observable);
+	P300TargetAreaHandler* l_pTargetHandler = dynamic_cast<P300TargetAreaHandler*>(observable);
+	GButton* l_pObservedButton = dynamic_cast<GButton*>(observable);
+	//if the notification comes from a key of the keyboard
+	if (l_pObservedButton!=NULL)
+	{
+		const GButton* l_pNewButton = static_cast<const GButton*>(pUserData);
+		GSymbol* l_pTextLabel = dynamic_cast<GSymbol*>(l_pNewButton->getLabel());
+		//GPictureSymbol* l_pPictureLabel = dynamic_cast<GPictureSymbol*>(l_pNewButton->getLabel());
+
+		std::vector<GLabel*>* l_pLabelVector = new std::vector<GLabel*>();
+		std::string l_sTextLabel;
+		boolean l_bUpdate = true;
+		GLabel* l_pLabel;
+		
+		m_ui32State = l_pNewButton->getState();
+		switch (m_ui32State)
+		{
+			case GButton_WrongClick:		
+			case GButton_Clicked:
+				if (l_pTextLabel!=NULL)
+				{
+					l_sTextLabel = l_pTextLabel->getTextLabel();
+					if (l_pObservedButton->getAction()==GButton_WordPrediction)
+					{
+						this->trimPrefix(l_sTextLabel);
+						for (uint32 i=0; i<l_sTextLabel.length(); i++)
+						{
+							l_pLabel = l_pTextLabel->clone();
+							dynamic_cast<GSymbol*>(l_pLabel)->setTextLabel(l_sTextLabel.substr(i,1).c_str());
+							l_pLabelVector->push_back(l_pLabel);
+						}
+					}
+					else
+					{	
+						l_pLabel = l_pTextLabel->clone();
+						dynamic_cast<GSymbol*>(l_pLabel)->setTextLabel(l_sTextLabel.c_str());
+						std::cout << "Background color " << l_pLabel->getBackgroundColor().red << "," << l_pLabel->getBackgroundColor().green << "," << l_pLabel->getBackgroundColor().blue << "\n";
+						std::cout << "is changed? " << l_pLabel->isChanged() << "\n";
+						l_pLabelVector->push_back(l_pLabel);
+					}
+				}
+				else
+					//if it is an icon then we should represent it by one entry on the undo stack
+					l_sTextLabel = std::string(" "); 
+				break;	
+			default:
+				l_bUpdate = false;
+				break;
+		}
+		if (l_bUpdate)
+		{
+			if (l_pLabelVector->size()>m_pSymbolContainer->getColumnDimension())
+			{
+				uint32 l_ui32SizeDifference = l_pLabelVector->size() - m_pSymbolContainer->getColumnDimension();
+				l_pLabelVector->erase(l_pLabelVector->begin(), l_pLabelVector->begin()+l_ui32SizeDifference);
+			}
+			
+			#ifdef OUTPUT_TIMING
+			fprintf(timingFile, "%f\n",float64((System::Time::zgetTime()>>22)/1024.0));	
+			#endif
+			//std::cout << "" << m_sSpelledLetters << ", " << m_pSymbolContainer->getColumnDimension() << ", " << l_pLabelVector->size() << "\n";
+			if (m_ui32ResultCounter+l_pLabelVector->size()>m_pSymbolContainer->getColumnDimension())
+				moveSymbolsLeft(l_pLabelVector->size());
+			#ifdef OUTPUT_TIMING
+			fprintf(timingFile, "%f\n",float64((System::Time::zgetTime()>>22)/1024.0));
+			#endif
+			
+			for (uint32 i=0, j=m_ui32ResultCounter; i<l_pLabelVector->size();  i++,j++)
+			{
+				if (m_ui32State==GButton_WrongClick)
+					l_pLabelVector->at(i)->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(CENTRAL_FEEDBACK_WRONG));
+				/*BoxDimensions l_Dim = m_pSymbolContainer->getChild(0, j)->getDimParameters();
+				l_pLabelVector->at(i)->setDimParameters(l_Dim);
+				delete m_pSymbolContainer->getChild(0, j);
+				m_pSymbolContainer->getChild(0, j) = l_pLabelVector->at(i);*/
+				m_pSymbolContainer->addChild(l_pLabelVector->at(i),l_pLabel->getDepth());
+			}
+			updateResultBuffer();
+			this->notifyObservers(l_sTextLabel.c_str());
+		}
+		delete l_pLabelVector;
+	}
+	//if the notification comes from the UNDO handler (to undo an action)
+	else if (l_pUndoHandler!=NULL)
+	{
+		uint32 l_ui32UndoSize = *static_cast< const uint32* >(pUserData);
+		//std::cout << "P300ResultAreaHandler:: undo notification: " << l_ui32UndoSize << "," << m_sSpelledLetters.length() << "," << m_ui32ResultCounter << "\n";
+		if (!m_sSpelledLetters.empty())
+		{
+			int32 l_i32Diff = m_sSpelledLetters.length()-l_ui32UndoSize;
+			if (l_i32Diff>=0)
+				m_sSpelledLetters.erase(l_i32Diff, l_ui32UndoSize);	
+			else
+				m_sSpelledLetters.clear();	
+		}
+				
+		l_ui32UndoSize = l_ui32UndoSize<=m_ui32ResultCounter?l_ui32UndoSize:m_ui32ResultCounter;
+		//float32 l_f32Depth =  m_pSymbolContainer->getChild(0, 0)->getDepth();
+		for (uint32 i=1; i<=l_ui32UndoSize; i++)
+		{
+			m_pSymbolContainer->removeChild(m_ui32ResultCounter-i);	
+			/*BoxDimensions l_Dim = m_pSymbolContainer->getChild(0, m_ui32ResultCounter-i)->getDimParameters();
+			GLabel* l_pLabel = new GLabel();
+			l_pLabel->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
+			l_pLabel->setDimParameters(l_Dim);
+			delete m_pSymbolContainer->getChild(0, m_ui32ResultCounter-i);
+			m_pSymbolContainer->getChild(0, m_ui32ResultCounter-i) = l_pLabel;*/			
+		}
+		/*for (uint32 i=1; i<=l_ui32UndoSize; i++)
+			m_pSymbolContainer->addChild(m_vBlankLabel[i-1],l_f32Depth);*/
+		std::cout << "P300ResultAreaHandler:: undo notification: number of children" << m_pSymbolContainer->getNumberOfChildren() << "\n";
+			
+		updateResultBuffer();
+	}
+	//in this case the result area for the targets notifies the result area of the predictions that it has to move left
+	else if (l_pTargetHandler!=NULL)
+	{
+		if (m_pSymbolContainer->getNumberOfChildren()>0)
+			moveSymbolsLeft(1);
+		updateResultBuffer();
+	}	
+}
+
+void P300ResultAreaHandler::trimPrefix(std::string& textLabel)
+{
+	size_t l_iLastIndexOfSpace = m_sSpelledLetters.find_last_of(" ");
+	//std::cout << "P300ResultAreaHandler:: Last index of space " << l_iLastIndexOfSpace << ", npos " << std::string::npos << "\n";
+	//std::cout << "P300ResultAreaHandler:: Text to trim " << textLabel << "\n";
+	if (l_iLastIndexOfSpace!=std::string::npos)
+	{
+		try
+		{
+			std::string l_sPrefix = m_sSpelledLetters.substr(l_iLastIndexOfSpace+1);
+			//std::cout << "P300ResultAreaHandler:: Prefix string " << l_sPrefix << ", length of prefix " << l_sPrefix.length() << "\n";
+			size_t l_iIndexOfPrefix = textLabel.find(l_sPrefix);
+			//std::cout << "P300ResultAreaHandler:: Prefix position " <<l_iIndexOfPrefix << "\n";
+			if (l_iIndexOfPrefix!=std::string::npos && l_sPrefix.length()!=0)
+			{
+				l_iIndexOfPrefix += l_sPrefix.length();
+				textLabel = textLabel.substr(l_iIndexOfPrefix);
+			}
+			//else
+				//std::cout << "Prefix " << l_sPrefix << " not found in " << textLabel << "\n";
+			//std::cout << "P300ResultAreaHandler:: Index of prefix is " << l_iIndexOfPrefix << ", " << textLabel << " will be added as suffix to the result\n";
+		}
+		catch (const std::out_of_range&)
+		{
+			std::cout << "P300ResultAreaHandler:: Last letter was a space so we can add the entire word " << textLabel << " to the result.\n";
+		}
+	}
+	else if(m_sSpelledLetters.length()>0 && textLabel.length()>=m_sSpelledLetters.length())
+	{
+		//std::cout << "ElsIf: TrimPrefix, length spelled letters " << m_sSpelledLetters.length() << ", length text label " <<textLabel.length() << "\n";
+		textLabel = textLabel.substr(m_sSpelledLetters.length());
+		//std::cout << "Trimmed prefix " << textLabel.c_str() << "\n";
+		//std::cout << "P300ResultAreaHandler:: " << textLabel << " will be added as suffix to the result\n";
+	}
+	//else
+		//std::cout << "P300ResultAreaHandler:: We will add the entire word " << textLabel << " to the result.\n";
+	m_sSpelledLetters += textLabel;
+}
+
+void P300ResultAreaHandler::moveSymbolsLeft(OpenViBE::uint32 nshift)
+{
+	nshift = m_pSymbolContainer->getNumberOfChildren()+nshift-m_pSymbolContainer->getColumnDimension();
+	std::cout << "Move left, number of children " << m_pSymbolContainer->getNumberOfChildren() << " nshift " << nshift << "\n";
+	for(int i=m_pSymbolContainer->getNumberOfChildren()-1-nshift;i>=0;i--)
+	{
+		//std::cout << "P300ResultAreaHandler:: move left, number of children " << l_ui32NumberOfChildren << ", moving symbol " << i+nshift<< "\n";
+		m_pSymbolContainer->getChild(0, i+nshift)->setDimParameters(m_pSymbolContainer->getChild(0, i)->getDimParameters());	
+		//std::cout << "X of child " << i << " " << m_pSymbolContainer->getChild(0, i+nshift)->getX() << "\n";
+	}
+	
+	//float32 l_f32Depth = m_pSymbolContainer->getChild(0, 0)->getDepth();
+	for(uint32 i=0;i<nshift;i++)
+		m_pSymbolContainer->removeChild(0);	
+	/*for(uint32 i=0;i<nshift;i++)
+	{	
+		GLabel* l_pLabel = new GLabel();
+		l_pLabel->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
+		m_pSymbolContainer->addChild(l_pLabel, l_f32Depth);
+	}*/
+	m_ui32ResultCounter -= nshift;
+	//std::cout << "P300ResultAreaHandler:: number of children left " << m_sSpelledLetters.length() << "\n";
+}
+
+void P300ResultAreaHandler::updateResultBuffer()
+{
+		//updates the result buffer
+	m_sSpelledLetters.clear();
+	m_ui32ResultCounter = 0;
+	//std::cout << "P300ResultAreaHandler:: updateResultBuffer: number of children " << m_pSymbolContainer->getNumberOfChildren() << "\n";
+	for(uint32 i=0;i<m_pSymbolContainer->getNumberOfChildren();i++)
+	{
+		//std::cout << "move left, number of children " << m_pSymbolContainer->getNumberOfChildren() << ", moving symbol " << i<< "\n";
+		GSymbol* l_pSymbol = dynamic_cast<GSymbol*>(m_pSymbolContainer->getChild(0, i));
+		//std::cout << "updateResultBuffer:: X of child " << i << " " << m_pSymbolContainer->getChild(0, i)->getX() << "\n";
+		if (l_pSymbol!=NULL)
+		{
+			m_sSpelledLetters += l_pSymbol->getTextLabel();
+			m_ui32ResultCounter++;
+		}
+	}
+	std::cout << "P300ResultAreaHandler:: Spelled letters #" << m_sSpelledLetters << "#" << m_ui32ResultCounter << "\n";
+}
