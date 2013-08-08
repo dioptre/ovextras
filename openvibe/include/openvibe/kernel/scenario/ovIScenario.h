@@ -193,6 +193,19 @@ namespace OpenViBE
 			 */
 			virtual OpenViBE::CIdentifier getNextLinkIdentifier(
 				const OpenViBE::CIdentifier& rPreviousIdentifier) const=0;
+
+/**
+			 * \brief Gets next  message link identifier
+			 * \param rPreviousIdentifier [in] : The identifier
+			 *        for the preceeding link
+			 * \return The identifier of the next link in case of success.
+			 * \return \c OV_UndefinedIdentifier on error.
+			 * \note Giving \c OV_UndefinedIdentifier as \c rPreviousIdentifier
+			 *       will cause this function to return the first link
+			 *       identifier.
+			 */
+			virtual OpenViBE::CIdentifier getNextMessageLinkIdentifier(
+				const OpenViBE::CIdentifier& rPreviousIdentifier) const=0;
 			/**
 			 * \brief Gets next link identifier from fixed box
 			 * \param rPreviousIdentifier [in] : The identifier
@@ -280,6 +293,10 @@ namespace OpenViBE
 			/// \copydoc getLinkDetails(const OpenViBE::CIdentifier&)const
 			virtual OpenViBE::Kernel::ILink* getLinkDetails(
 				const OpenViBE::CIdentifier& rLinkIdentifier)=0;
+
+
+			virtual const OpenViBE::Kernel::ILink* getMessageLinkDetails(
+				const OpenViBE::CIdentifier& rLinkIdentifier) const=0;
 			/**
 			 * \brief Creates a connection between two boxes
 			 * \param rSourceBoxIdentifier [in] : The source

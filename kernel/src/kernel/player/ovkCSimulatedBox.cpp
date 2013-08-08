@@ -1297,4 +1297,65 @@ void CSimulatedBox::handleCrash(const char* sHintName)
 	}
 }
 
+
+bool CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
+{
+
+    this->getLogManager() << LogLevel_Error << "SimulatedBox sendmessage" <<"\n";
+    //for now we test with a two box scenario, so the target box is the only other box in the scenario ('hardcoded connection')
+
+    CIdentifier l_oId = m_pBox->getIdentifier();
+    //the issue is that the two box could be in one order or the other
+    CIdentifier l_oTargetId = m_pScenario->getNextBoxIdentifier(l_oId);
+    if (l_oTargetId==CIdentifier(0xFFFFFFFF, 0xFFFFFFFF) )
+    {
+        l_oTargetId = m_pScenario->getNextBoxIdentifier(OV_UndefinedIdentifier);
+    }
+
+    this->getLogManager() << LogLevel_Error << "sending from this box " << l_oId  << " to " << l_oTargetId <<"\n";
+
+    m_rScheduler.sendMessage(msg, l_oTargetId, 1);
+
+    /*//once the hardcoded connection is tested, use that (test it)
+    // get the links related to outputIndex from scenario
+    CIdentifier l_oCurrentMessageLinkId = m_pScenario->getNextMessageLinkIdentifier(OV_UndefinedIdentifier);
+    CIdentifier l_oCurrentMessageLinkSourceId = m_pScenario->getMessageLinkDetails(l_oCurrentMessageLinkId)->getSourceBoxIdentifier();
+    uint32 l_ui32CurrentMessageLinkSourceOutputIndex = m_pScenario->getMessageLinkDetails(l_oCurrentMessageLinkId)->getSourceBoxOutputIndex();
+
+   //*
+    while((outputIndex!=l_ui32CurrentMessageLinkSourceOutputIndex)&&(m_pBox->getIdentifier()!=l_oCurrentMessageLinkSourceId))
+    {
+        l_oCurrentMessageLinkId = m_pScenario->getNextMessageLinkIdentifier(OV_UndefinedIdentifier);
+        l_oCurrentMessageLinkSourceId = m_pScenario->getMessageLinkDetails(l_oCurrentMessageLinkId)->getSourceBoxIdentifier();
+        l_ui32CurrentMessageLinkSourceOutputIndex = m_pScenario->getMessageLinkDetails(l_oCurrentMessageLinkId)->getSourceBoxOutputIndex();
+
+    }
+    CIdentifier targetBoxId1 = l_oCurrentMessageLinkSourceId;
+    uint32 inputIndex1 = l_ui32CurrentMessageLinkSourceOutputIndex;
+
+    // find out all target boxes and the inputIndex of each
+        // finally send to all receivers
+        m_rScheduler.sendMessage(msg, targetBoxId1, inputIndex1);
+        //m_rScheduler->sendMessage(msg, targetBoxId2, inputIndex2);
+        //....
+        //*/
+    //*/
+        return true; // if success
+}
+
+bool CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
+{
+    this->getLogManager() << LogLevel_Error << "simulated box receiving message on input " << inputIndex <<"\n";
+    //m_pBoxAlgorithm->processMessage();
+    return true;
+}
+
+
+bool CSimulatedBox::cleanupMessages() {
+    // ...
+    //this->getLogManager() << LogLevel_Error << "cleaning messages " << "\n";
+    m_vPreparedMessages.clear();//that'll do for now
+    return true; // if success
+}
+
 // #endif // __MY_COMPILE_ALL

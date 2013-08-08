@@ -43,6 +43,7 @@
 #define OV_ClassId_Kernel_Player_Message                     OpenViBE::CIdentifier(0x64DCCE4E, 0x530CA785)
 #define OV_ClassId_Kernel_Player_MessageClock                OpenViBE::CIdentifier(0x58AE3092, 0x0C3371A7)
 #define OV_ClassId_Kernel_Player_MessageEvent                OpenViBE::CIdentifier(0x1B9B49DB, 0x6DA217E7)
+#define OV_ClassId_Kernel_Player_MyMessage                OpenViBE::CIdentifier(0x1B9B49DB, 0x6DA2117E)
 #define OV_ClassId_Kernel_Player_MessageSignal               OpenViBE::CIdentifier(0x4E1709E5, 0x38AADA6C)
 #define OV_ClassId_Kernel_Player_Player                      OpenViBE::CIdentifier(0x790A8CC5, 0x1439C776)
 #define OV_ClassId_Kernel_Player_PlayerContext               OpenViBE::CIdentifier(0x1F8D3E14, 0x73A4DB1F)

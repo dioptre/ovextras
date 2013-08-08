@@ -404,6 +404,8 @@ boolean CScheduler::loop(void)
 				}
 				l_rSimulatedBoxInputChunkList.clear();
 			}
+            //process and processClock have been called for this cycle, we can clean the messages
+            l_pSimulatedBox->cleanupMessages();
 		}
 		l_rSimulatedBoxChrono.stepOut();
 
@@ -498,4 +500,35 @@ uint64 CScheduler::getFrequency(void) const
 float64 CScheduler::getCPUUsage(void) const
 {
 	return (const_cast<System::CChrono&>(m_oBenchmarkChrono)).getStepInPercentage();
+}
+
+bool CScheduler::sendMessage(const IMyMessage &msg, CIdentifier targetBox, uint32 inputIndex)
+{
+    CSimulatedBox* l_oReceiverSimulatedBox= NULL;
+
+
+    map < pair < int32, CIdentifier >, CSimulatedBox* >::iterator itSimulatedBox;
+    itSimulatedBox = m_vSimulatedBox.begin();
+    CIdentifier l_oCurrentIdentifier = itSimulatedBox->first.second;
+    // Find out the simulatedbox of targetBox, ask it to process it
+    while ((l_oCurrentIdentifier != targetBox)&&(itSimulatedBox != m_vSimulatedBox.end()))
+    {
+        itSimulatedBox++;
+        l_oCurrentIdentifier = itSimulatedBox->first.second;
+    }
+
+    if (l_oCurrentIdentifier == targetBox)
+    {
+        // Process
+        l_oReceiverSimulatedBox = itSimulatedBox->second;
+        return l_oReceiverSimulatedBox->receiveMessage(msg, inputIndex);
+    }
+    else
+    {
+        getLogManager() << LogLevel_ImportantWarning << "The box identifier provided for this message does not correspond to any box in this scenario\n";
+        return false;
+    }
+
+
+
 }

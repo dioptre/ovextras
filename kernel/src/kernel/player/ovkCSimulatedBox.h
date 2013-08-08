@@ -5,6 +5,8 @@
 #include "ovkCBuffer.h"
 #include "../ovkIGtkOVCustomHandler.h"
 
+#include "ovkCMyMessage.h"
+
 #include <gtk/gtk.h>
 #include <system/CChrono.h>
 #include <vector>
@@ -270,6 +272,24 @@ namespace OpenViBE
 				OpenViBE::uint32* pTriangleIndexArray) const;
 			//@}
 
+            /** \name Messaging API - messages management */
+            //@{
+            bool sendMessage(const IMyMessage &msg, uint32 outputIndex);
+
+            bool cleanupMessages();
+
+            //should it not be better to return a pointer?
+            IMyMessage& createMessage()
+            {
+                m_vPreparedMessages.push_back(new CMyMessage());
+                IMyMessage* msg = m_vPreparedMessages[m_vPreparedMessages.size()];
+                return *msg;
+
+            }
+            bool receiveMessage(const IMyMessage &msg, uint32 inputIndex);
+
+            //@}
+
 			_IsDerivedFromClass_Final_(OpenViBE::Kernel::TKernelObject < OpenViBE::Kernel::IBoxIO >, OVK_ClassId_Kernel_Player_SimulatedBox);
 
 			OpenViBE::Kernel::CScheduler& getScheduler(void)
@@ -318,6 +338,10 @@ namespace OpenViBE
 
 			/// maps object identifiers to object names
 			std::map<OpenViBE::CIdentifier, OpenViBE::CString> m_mSimulatedObjects;
+
+            // messages
+            std::vector< CMyMessage*> m_vPreparedMessages;
+
 
 		public:
 

@@ -63,6 +63,11 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier* pTargetIdentifier,
 				const OpenViBE::uint32 ui32TargetIdentifierCount)=0;
 
+
+
+			virtual OpenViBE::boolean sendMessage( OpenViBE::Kernel::IMyMessage& message, OpenViBE::uint32 outputIndex)=0;
+            		virtual OpenViBE::Kernel::IMyMessage& createMessage(void)=0;
+
 			//@}
 			/** \name Time management */
 			//@{
