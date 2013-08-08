@@ -5,6 +5,7 @@
 #include "ovkCBox.h"
 #include "ovkCComment.h"
 #include "ovkCLink.h"
+#include "ovkCMessageLink.h"
 #include "ovkCProcessingUnit.h"
 
 #include "../ovkCObjectVisitorContext.h"
@@ -518,6 +519,24 @@ CIdentifier CScenario::getNextLinkIdentifier(
 	return getNextTIdentifier<CLink, TTestTrue<CLink> >(m_vLink, rPreviousIdentifier, TTestTrue<CLink>());
 }
 
+CIdentifier CScenario::getNextMessageLinkIdentifier(
+    const CIdentifier& rPreviousIdentifier) const
+{
+    //TODO quick implementation, check the TTest thing
+    map<CIdentifier, CMessageLink*>::const_iterator l_oIterator;
+    if(rPreviousIdentifier == OV_UndefinedIdentifier)
+    {
+        //l_oIterator = m_vMessageLink.begin();
+    }
+    else
+    {
+        //l_oIterator = m_vMessageLink.find(rPreviousIdentifier);
+        //get the next
+        //l_oIterator++;
+    }
+    return l_oIterator->first;
+}
+
 CIdentifier CScenario::getNextLinkIdentifierFromBox(
 	const CIdentifier& rPreviousIdentifier,
 	const CIdentifier& rBoxIdentifier) const
@@ -585,6 +604,21 @@ ILink* CScenario::getLinkDetails(
 		return NULL;
 	}
 	return itLink->second;
+}
+
+const ILink* CScenario::getMessageLinkDetails(
+    const CIdentifier& rLinkIdentifier) const
+{
+    this->getLogManager() << LogLevel_Debug << "Retrieving message link details from scenario\n";
+
+    map<CIdentifier, CMessageLink*>::const_iterator itLink;
+    itLink=m_vMessageLink.find(rLinkIdentifier);
+    if(itLink==m_vMessageLink.end())
+    {
+        this->getLogManager() << LogLevel_Warning << "The message link does not exist\n";
+        return NULL;
+    }
+    return itLink->second;
 }
 
 boolean CScenario::connect(
