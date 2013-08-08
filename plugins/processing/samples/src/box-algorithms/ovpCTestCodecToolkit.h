@@ -96,8 +96,8 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput  ("Stimulations",  OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addOutput ("Stimulations", OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addInput  ("XP info",  OV_TypeId_ExperimentationInformation);
-				rBoxAlgorithmPrototype.addOutput ("XP info", OV_TypeId_ExperimentationInformation);
+				rBoxAlgorithmPrototype.addInput  ("XP info",  OV_TypeId_ExperimentInformation);
+				rBoxAlgorithmPrototype.addOutput ("XP info", OV_TypeId_ExperimentInformation);
 
 				return true;
 			}

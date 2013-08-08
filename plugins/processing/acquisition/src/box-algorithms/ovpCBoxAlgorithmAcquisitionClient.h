@@ -63,7 +63,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addOutput ("Experiment information",      OV_TypeId_ExperimentationInformation);
+				rBoxAlgorithmPrototype.addOutput ("Experiment information",      OV_TypeId_ExperimentInformation);
 				rBoxAlgorithmPrototype.addOutput ("Signal strea",                OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addOutput ("Stimulations",                OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addOutput ("Channel localisation",        OV_TypeId_ChannelLocalisation);

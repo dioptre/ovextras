@@ -186,7 +186,7 @@ boolean CGenericNetworkAcquisitionDesc::getBoxPrototype(Kernel::IBoxProto& rProt
 	// Adds box inputs
 
 	// Adds box outputs
-	rPrototype.addOutput("Experiment information",	OV_TypeId_ExperimentationInformation);
+	rPrototype.addOutput("Experiment information",	OV_TypeId_ExperimentInformation);
 	rPrototype.addOutput("EEG stream",           OV_TypeId_Signal);
 	rPrototype.addOutput("Stimulations",           OV_TypeId_Stimulations);
 

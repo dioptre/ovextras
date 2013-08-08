@@ -225,7 +225,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				// Adds box outputs
-				rPrototype.addOutput("Experiment information", OV_TypeId_ExperimentationInformation);
+				rPrototype.addOutput("Experiment information", OV_TypeId_ExperimentInformation);
 				rPrototype.addOutput("EEG stream", OV_TypeId_Signal);
 				rPrototype.addOutput("Stimulations", OV_TypeId_Stimulations);
 
