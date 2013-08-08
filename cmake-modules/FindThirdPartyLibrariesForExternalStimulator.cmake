@@ -1,0 +1,128 @@
+# ---------------------------------
+# Finds OpenGL
+# Adds library to target
+# Adds include path
+# ---------------------------------
+
+SET(foundIncludeDir 1)
+
+#GL is natively installed on our Linux pc's and comes with the installation of visual studio. In that case however, one has to make sure the SDK is in the INCLUDE environment variable
+IF(WIN32)
+	FIND_PATH(PATH_GL GL\\gl.h)
+ELSE(WIN32)
+	FIND_PATH(PATH_GL GL/gl.h)
+ENDIF(WIN32)
+IF(PATH_GL)
+	MESSAGE(STATUS "  Found OpenGL in ${PATH_GL}" )
+	INCLUDE_DIRECTORIES(${PATH_GL})
+ELSE(PATH_GL)
+	SET(foundIncludeDir 0)
+ENDIF(PATH_GL)
+
+FIND_PATH(PATH_FreeType include/ft2build.h PATHS ${OpenViBE_dependencies}/FreeType $ENV{OpenViBE_dependencies}/include/FreeType/ NO_DEFAULT_PATH NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
+IF(PATH_FreeType)
+	MESSAGE(STATUS "  Found FreeType in ${PATH_FreeType}" )
+	IF(WIN32)
+		INCLUDE_DIRECTORIES(${PATH_FreeType}/include)
+	ELSE(WIN32)
+		INCLUDE_DIRECTORIES(${PATH_FreeType}/include/freetype2)
+	ENDIF(WIN32)
+ELSE(PATH_FreeType)
+	SET(foundIncludeDir 0)
+ENDIF(PATH_FreeType)
+
+#needs to be installed on both platforms (headers not present on our Linux box), headers should be installed in $ENV{OV_DEP_ExternalStimulator}/FTGL/include
+FIND_PATH(PATH_FTGL include/FTGL/ftgl.h PATHS ${OpenViBE_dependencies}/FTGL $ENV{OpenViBE_dependencies}/include/FTGL)
+IF(PATH_FTGL)
+	MESSAGE(STATUS "  Found FTGL in ${PATH_FTGL}" )
+	INCLUDE_DIRECTORIES(${PATH_FTGL}/include)
+ELSE(PATH_FTGL)
+	SET(foundIncludeDir 0)
+ENDIF(PATH_FTGL)
+
+#natively installed on our Linux pc's, but should be installed on our Windows pc separately. Headers should be in $ENV{OV_DEP_ExternalStimulator}/SDL/include
+IF(WIN32)
+	FIND_PATH(PATH_SDL include/SDL.h PATHS ${OpenViBE_dependencies}/SDL $ENV{OpenViBE_dependencies}/include/SDL)
+	IF(PATH_SDL)
+		MESSAGE(STATUS "  Found SDL in ${PATH_SDL}" )
+		INCLUDE_DIRECTORIES(${PATH_SDL}/include)
+	ELSE(PATH_SDL)
+		SET(foundIncludeDir 0)
+	ENDIF(PATH_SDL)
+ELSE(WIN32)
+	FIND_PATH(PATH_SDL SDL/SDL.h)
+	IF(PATH_SDL)
+		MESSAGE(STATUS "  Found SDL in ${PATH_SDL}" )
+		INCLUDE_DIRECTORIES(${PATH_SDL}/SDL)
+	ELSE(PATH_SDL)
+		SET(foundIncludeDir 0)
+	ENDIF(PATH_SDL)
+ENDIF(WIN32)
+
+#include windows library inpout32 for writing to parallel port
+IF(WIN32)
+	FIND_PATH(INPOUT32 include/inpout32.h ${OpenViBE_dependencies}/inpout32/)
+	IF(INPOUT32)
+		MESSAGE(STATUS " Found inpout32 in ${INPOUT32}")
+		INCLUDE_DIRECTORIES(${INPOUT32}/include)
+	ELSE(INPOUT32)
+		SET(foundIncludeDir 0)
+	ENDIF(INPOUT32)
+ENDIF(WIN32)
+
+FIND_PATH(PATH_PRESAGE presage.h PATHS $ENV{OpenViBE_dependencies}/include/presage/ $ENV{OpenViBE_dependencies}/presage/include)
+IF(PATH_PRESAGE)
+	MESSAGE(STATUS "  Found Presage in ${PATH_PRESAGE}")
+	INCLUDE_DIRECTORIES(${PATH_PRESAGE})
+	SET(name_libpresage presage)
+	ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyPresage)
+ELSE(PATH_PRESAGE)
+	MESSAGE(STATUS "  FAILED to find Presage")
+ENDIF(PATH_PRESAGE)
+
+IF(foundIncludeDir)
+	IF(WIN32)
+		FIND_LIBRARY(LIB_GL OpenGL32)
+		#FIND_LIBRARY(LIB_glut glut32)
+		FIND_LIBRARY(LIB_SDL SDL PATHS ${OpenViBE_dependencies}/SDL/lib)
+		FIND_LIBRARY(LIB_SDLmain SDLmain PATHS ${OpenViBE_dependencies}/SDL/lib )
+		FIND_LIBRARY(LIB_FTGL ftgl PATHS ${OpenViBE_dependencies}/FTGL/lib)
+		FIND_LIBRARY(LIB_SDL_image SDL_image PATHS ${OpenViBE_dependencies}/SDL/lib)
+		FIND_LIBRARY(LIB_presage presage-1 PATHS ${OpenViBE_dependencies}/presage/lib)
+		IF(LIB_GL AND LIB_FTGL AND LIB_SDL AND LIB_SDLmain AND LIB_SDL_image AND LIB_presage)
+			MESSAGE(STATUS "    [  OK  ] lib ${LIB_GL}, ${LIB_FTGL}, ${LIB_SDL}, ${LIB_SDLmain}, ${LIB_SDL_image} and ${LIB_presage}")
+			TARGET_LINK_LIBRARIES(${PROJECT_NAME}-dynamic ${LIB_GL} ${LIB_FTGL} ${LIB_SDL} ${LIB_SDLmain} ${LIB_SDL_image} ${LIB_presage})
+		ELSE(LIB_GL AND LIB_FTGL AND LIB_SDL AND LIB_SDLmain AND LIB_SDL_image AND LIB_presage)
+			MESSAGE(STATUS "    [FAILED] lib GL FTGL SDL presage")
+		ENDIF(LIB_GL AND LIB_FTGL AND LIB_SDL AND LIB_SDLmain AND LIB_SDL_image AND LIB_presage)	
+
+		#inpout32.lib
+		FIND_LIBRARY(LIB_INPOUT32 NAMES "inpout32.lib" PATHS ${OpenViBE_dependencies}/inpout32/lib/)
+		IF(LIB_INPOUT32)
+			MESSAGE(STATUS "    [  OK  ] lib ${LIB_INPOUT32}")
+			TARGET_LINK_LIBRARIES(${PROJECT_NAME}-dynamic ${LIB_INPOUT32} )
+		ELSE(LIB_INPOUT32)
+			MESSAGE(STATUS "    [FAILED] lib inpout32")
+		ENDIF(LIB_INPOUT32)	
+	ELSE(WIN32)
+		FIND_LIBRARY(LIB_GL GL)
+		FIND_LIBRARY(LIB_GLU GLU)
+		#FIND_LIBRARY(LIB_glut glut)
+		FIND_LIBRARY(LIB_SDL SDL)
+		FIND_LIBRARY(LIB_FTGL NAMES ftgl PATHS $ENV{OpenViBE_dependencies}/lib/)
+		FIND_LIBRARY(LIB_PRESAGE ${name_libpresage} PATHS $ENV{OpenViBE_dependencies}/lib/)
+		IF(LIB_GL AND LIB_GLU AND LIB_FTGL AND LIB_SDL AND LIB_PRESAGE)
+			MESSAGE(STATUS "    [  OK  ] lib ${LIB_GL}, ${LIB_GLU}, ${LIB_FTGL}, ${LIB_SDL} and ${LIB_PRESAGE}")
+			TARGET_LINK_LIBRARIES(${PROJECT_NAME}-dynamic ${LIB_GL} ${LIB_GLU} ${LIB_FTGL} ${LIB_SDL} ${LIB_SDL_image} ${LIB_PRESAGE})
+		ELSE(LIB_GL AND LIB_GLU AND LIB_FTGL AND LIB_SDL AND LIB_PRESAGE)
+			MESSAGE(STATUS "    [FAILED] lib GL GLU FTGL SDL presage")
+		ENDIF(LIB_GL AND LIB_GLU AND LIB_FTGL AND LIB_SDL AND LIB_PRESAGE)		
+
+		#pthread and rt seemed to be necessary on linux when using boost interprocess communication
+		TARGET_LINK_LIBRARIES(${PROJECT_NAME}-dynamic pthread rt)	
+	ENDIF(WIN32)
+
+	ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyModulesForExternalStimulator -D_GNU_SOURCE=1 -D_REENTRANT)
+ENDIF(foundIncludeDir)
+
+
