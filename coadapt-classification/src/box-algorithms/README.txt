@@ -1,0 +1,36 @@
+******************************************************
+* Thanks for using the OpenViBE Skeleton Generator ! *
+******************************************************
+
+File generation completed
+[Thu Jan 19 13:17:56 2012]
+-------------------------
+
+The generator produced the following files:
+
+The Box class:
+- ovpCBoxAlgorithmTestCLassifieur.h
+- ovpCBoxAlgorithmTestCLassifieur.cpp
+Please put these files in your local repository, in the project of your choice (e.g. Signal Processing or Classification)
+     [openvibe-repository]/trunk/openvibe-plugins/[plugin-project]/trunc/src/[my-box-folder]
+ 
+You may have to change the file ovpCBoxAlgorithmTestCLassifieur.h to make it find the included file ovp_defines.h, whose path is related to the project used.
+ 
+Don't forget to declare your box in ovp_main.cpp, in order to make it available in the Designer.
+Look in one of the ovp_main.cpp file, you will find examples of such declarations (#include the header, then OVP_Declare_New macro).
+
+If your box doesn't appear in the designer, maybe it's because you cannot see Unstable Boxes.
+Try to set your configuration file (openvibe.conf on windows / .openviberc on Linux) with the following token :
+>>>>>
+Designer_ShowUnstable = true
+>>>>>
+
+For more information about implementing algorithms and boxes to fill your skeleton, please read the official tutorial:
+http://openvibe.inria.fr/documentation/unstable/Doc_DeveloperDocumentation_Plugin.html
+
+Feel free to propose your contribution on the forum ! 
+http://openvibe.inria.fr/forum/
+
+Enjoy OpenViBE !
+
+- The development team -
