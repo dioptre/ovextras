@@ -258,11 +258,11 @@ boolean CBox::addInput(
 	{
 		if(rTypeIdentifier==OV_UndefinedIdentifier) 
 		{
-			this->getLogManager() << LogLevel_Warning << "Box input maps to OV_UndefinedIdentifier. Please configure the box.\n";
+			this->getLogManager() << LogLevel_Warning << "Box '" << getName() << "' input '" << sName << "' maps to OV_UndefinedIdentifier. Please configure the box.\n";
 		} 
 		else 
 		{
-			this->getLogManager() << LogLevel_Warning << "While adding input to box, unknown stream type identifier " << rTypeIdentifier << "\n";
+			this->getLogManager() << LogLevel_Warning << "While adding input '" << sName << "' to box '" << getName() << "', unknown stream type identifier " << rTypeIdentifier << "\n";
 		}
 	}
 
@@ -373,7 +373,7 @@ boolean CBox::setInputType(
 {
 	if(!this->getTypeManager().isStream(rTypeIdentifier))
 	{
-		this->getLogManager() << LogLevel_Warning << "While changing box input type, unknown stream type identifier " << rTypeIdentifier << "\n";
+		this->getLogManager() << LogLevel_Warning << "While changing box '" << getName() << "' input type, unknown stream type identifier " << rTypeIdentifier << "\n";
 	}
 
 	if(ui32InputIndex>=m_vInput.size())
@@ -413,11 +413,11 @@ boolean CBox::addOutput(
 	{
 		if(rTypeIdentifier==OV_UndefinedIdentifier) 
 		{
-			this->getLogManager() << LogLevel_Warning << "Box output maps to OV_UndefinedIdentifier. Please configure the box.\n";
+			this->getLogManager() << LogLevel_Warning << "Box '" << getName() << "' output '" << sName << "' maps to OV_UndefinedIdentifier. Please configure the box.\n";
 		} 
 		else 
 		{
-			this->getLogManager() << LogLevel_Warning << "While adding output to box, unknown stream type identifier " << rTypeIdentifier << "\n";
+			this->getLogManager() << LogLevel_Warning << "While adding output '" << sName << "' to box '" << getName() << "', unknown stream type identifier " << rTypeIdentifier << "\n";
 		}
 	}
 
@@ -528,7 +528,7 @@ boolean CBox::setOutputType(
 {
 	if(!this->getTypeManager().isStream(rTypeIdentifier))
 	{
-		this->getLogManager() << LogLevel_Warning << "While changing box output type, unknown stream type identifier " << rTypeIdentifier << "\n";
+		this->getLogManager() << LogLevel_Warning << "While changing box '" << getName() << "' output type, unknown stream type identifier " << rTypeIdentifier << "\n";
 	}
 
 	if(ui32OutputIndex>=m_vOutput.size())

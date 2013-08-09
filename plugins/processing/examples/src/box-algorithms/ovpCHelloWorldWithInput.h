@@ -24,66 +24,37 @@ namespace OpenViBEPlugins
 		{
 		public:
 
-			OpenViBE::boolean check(OpenViBE::Kernel::IBox& rBox)
+			// The purposes of the following functions is to make the output correspond to the input
+
+			virtual OpenViBE::boolean onInputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				char l_sName[1024];
-				OpenViBE::uint32 i;
-				for(i=0; i<rBox.getInputCount(); i++)
-				{
-					sprintf(l_sName, "Input stream %u", i+1);
-					rBox.setInputName(i, l_sName);
-				}
-				for(i=0; i<rBox.getOutputCount(); i++)
-				{
-					sprintf(l_sName, "Output stream %u", i+1);
-					rBox.setOutputName(i, l_sName);
-				}
+				OpenViBE::CString l_sInputName;
+				rBox.getInputName(ui32Index, l_sInputName);
+				rBox.setOutputName(ui32Index, OpenViBE::CString("Copy of '") + l_sInputName + OpenViBE::CString("'")); 
 				return true;
 			}
 
 			virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				rBox.addOutput("", OV_UndefinedIdentifier);
-				this->check(rBox);
+				// Duplicate input as new output
+				rBox.addOutput("Temporary name", OV_TypeId_EBMLStream);
 				return true;
 			}
 
 			virtual OpenViBE::boolean onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				rBox.removeOutput(ui32Index);
-				this->check(rBox);
 				return true;
 			}
 
 			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
+				// Keep input and output types identical
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getInputType(ui32Index, l_oTypeIdentifier);
 				rBox.setOutputType(ui32Index, l_oTypeIdentifier);
 				return true;
 			}
-
-			virtual OpenViBE::boolean onOutputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
-			{
-				rBox.addInput("", OV_UndefinedIdentifier);
-				this->check(rBox);
-				return true;
-			}
-
-			virtual OpenViBE::boolean onOutputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
-			{
-				rBox.removeInput(ui32Index);
-				this->check(rBox);
-				return true;
-			}
-
-			virtual OpenViBE::boolean onOutputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
-			{
-				OpenViBE::CIdentifier l_oTypeIdentifier;
-				rBox.getOutputType(ui32Index, l_oTypeIdentifier);
-				rBox.setInputType(ui32Index, l_oTypeIdentifier);
-				return true;
-			};
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 		};
@@ -110,14 +81,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
-				rPrototype.addSetting("Message",			OV_TypeId_String, "Hello World (with input)!");		// setting 0
+				rPrototype.addSetting("Message",			OV_TypeId_String, "Hello!");		// setting 0
 
-				rPrototype.addInput ("Input stream",  OV_UndefinedIdentifier);									
-				rPrototype.addOutput("Output stream", OV_UndefinedIdentifier);									
-				rPrototype.addFlag  (OpenViBE::Kernel::BoxFlag_CanAddOutput);									
-				rPrototype.addFlag  (OpenViBE::Kernel::BoxFlag_CanModifyOutput);								
-				rPrototype.addFlag  (OpenViBE::Kernel::BoxFlag_CanAddInput);									
-				rPrototype.addFlag  (OpenViBE::Kernel::BoxFlag_CanModifyInput);									
+				rPrototype.addInput ("Input 0",  OV_TypeId_Signal);
+				rPrototype.addOutput("Copy of 'Input 0'", OV_TypeId_Signal);
+				rPrototype.addFlag  (OpenViBE::Kernel::BoxFlag_CanAddInput);
+				rPrototype.addFlag  (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				return true;
 			}
 
