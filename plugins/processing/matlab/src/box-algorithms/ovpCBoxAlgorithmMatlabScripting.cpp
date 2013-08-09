@@ -166,7 +166,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 		{
 			l_pDecoder= new TStimulationDecoder<CBoxAlgorithmMatlabScripting>(*this);
 		}
-		else if(l_oInputType==OV_TypeId_ExperimentationInformation)
+		else if(l_oInputType==OV_TypeId_ExperimentInformation)
 		{
 			l_pDecoder= new TExperimentInformationDecoder<CBoxAlgorithmMatlabScripting>(*this);
 		}
@@ -210,7 +210,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 		{
 			l_pEncoder= new TStimulationEncoder<CBoxAlgorithmMatlabScripting>(*this);
 		}
-		else if(l_oOutputType==OV_TypeId_ExperimentationInformation)
+		else if(l_oOutputType==OV_TypeId_ExperimentInformation)
 		{
 			l_pEncoder= new TExperimentInformationEncoder<CBoxAlgorithmMatlabScripting>(*this);
 		}
@@ -553,7 +553,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 					l_bUnknownStream = false;
 				}
 
-				if(l_oType == OV_TypeId_ExperimentationInformation)
+				if(l_oType == OV_TypeId_ExperimentInformation)
 				{
 					this->getLogManager() << LogLevel_Warning << "The Experiment Information Stream is not implemented with the Matlab Scripting Box. If this is relevant for your usage, please contact the official development Team.\n";
 					m_NbInputHeaderSent++;
@@ -700,7 +700,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 					l_bUnknownType = false;
 				}
 
-				if(l_oType == OV_TypeId_ExperimentationInformation)
+				if(l_oType == OV_TypeId_ExperimentInformation)
 				{
 					this->getLogManager() << LogLevel_Warning << "The Experiment Information Stream is not implemented with the Matlab Scripting Box. If this is relevant for your usage, please contact the official development Team.\n";
 					l_bUnknownType = false;

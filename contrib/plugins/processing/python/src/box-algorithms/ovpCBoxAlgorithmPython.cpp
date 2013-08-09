@@ -350,7 +350,7 @@ OpenViBE::boolean CBoxAlgorithmPython::initialize(void)
 		{
 			m_vDecoders.push_back( new TStimulationDecoder <CBoxAlgorithmPython> (*this) );
 		}
-		else if (l_oTypeIdentifier == OV_TypeId_ExperimentationInformation)
+		else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
 		{
 			m_vDecoders.push_back( new TExperimentInformationDecoder <CBoxAlgorithmPython> (*this) );
 		}
@@ -389,7 +389,7 @@ OpenViBE::boolean CBoxAlgorithmPython::initialize(void)
 		{
 			m_vEncoders.push_back( new TStimulationEncoder <CBoxAlgorithmPython> (*this) );
 		}
-		else if (l_oTypeIdentifier == OV_TypeId_ExperimentationInformation)
+		else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
 		{
 			m_vEncoders.push_back( new TExperimentInformationEncoder <CBoxAlgorithmPython> (*this) );
 		}
@@ -497,9 +497,9 @@ OpenViBE::boolean CBoxAlgorithmPython::initialize(void)
 		{
 			l_sInputOutputType = "Stimulations";
 		}
-		else if (l_oTypeIdentifier == OV_TypeId_ExperimentationInformation)
+		else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
 		{
-			l_sInputOutputType = "ExperimentationInformation";
+			l_sInputOutputType = "ExperimentInformation";
 		}
 		//New reference
 		PyObject* l_pResult = PyObject_CallMethod(m_pBox, const_cast<char *>("addInput"), const_cast<char *>("s"), const_cast <char*>(l_sInputOutputType.toASCIIString()));
@@ -539,9 +539,9 @@ OpenViBE::boolean CBoxAlgorithmPython::initialize(void)
 		{
 			l_sInputOutputType = "Stimulations";
 		}
-		else if (l_oTypeIdentifier == OV_TypeId_ExperimentationInformation)
+		else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
 		{
-			l_sInputOutputType = "ExperimentationInformation";
+			l_sInputOutputType = "ExperimentInformation";
 		}
 		//New reference
 		PyObject* l_pResult = PyObject_CallMethod(m_pBox, const_cast<char *>("addOutput"), const_cast<char *>("s"), const_cast <char*>(l_sInputOutputType.toASCIIString()));
@@ -1949,7 +1949,7 @@ OpenViBE::boolean CBoxAlgorithmPython::process(void)
 			}
 		}
 		/*
-		else if (l_oTypeIdentifier == OV_TypeId_ExperimentationInformation)
+		else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
 		{
 
 		}
@@ -2040,7 +2040,7 @@ OpenViBE::boolean CBoxAlgorithmPython::process(void)
 			}
 		}
 		/*
-		else if (l_oTypeIdentifier == OV_TypeId_ExperimentationInformation)
+		else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
 		{
 
 		}

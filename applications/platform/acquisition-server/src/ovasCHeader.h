@@ -13,7 +13,7 @@ namespace OpenViBEAcquisitionServer
 		virtual ~CHeader(void);
 		virtual void reset(void);
 
-		// Experimentation information
+		// Experiment information
 		virtual OpenViBE::boolean setExperimentIdentifier(const OpenViBE::uint32 ui32ExperimentIdentifier);
 		virtual OpenViBE::boolean setSubjectAge(const OpenViBE::uint32 ui32SubjectAge);
 		virtual OpenViBE::boolean setSubjectGender(const OpenViBE::uint32 ui32SubjectGender);
@@ -62,7 +62,7 @@ namespace OpenViBEAcquisitionServer
 
 		virtual void reset(void) { return m_rAdpatedHeader.reset(); }
 
-		// Experimentation information
+		// Experiment information
 		virtual OpenViBE::boolean setExperimentIdentifier(const OpenViBE::uint32 ui32ExperimentIdentifier) { return m_rAdpatedHeader.setExperimentIdentifier(ui32ExperimentIdentifier); }
 		virtual OpenViBE::boolean setSubjectAge(const OpenViBE::uint32 ui32SubjectAge) { return m_rAdpatedHeader.setSubjectAge(ui32SubjectAge); }
 		virtual OpenViBE::boolean setSubjectGender(const OpenViBE::uint32 ui32SubjectGender) { return m_rAdpatedHeader.setSubjectGender(ui32SubjectGender); }

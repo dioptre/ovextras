@@ -42,7 +42,7 @@ namespace OpenViBEAcquisitionServer
 		virtual void reset(void)=0;
 
 		//@}
-		/** \name Experimentation information */
+		/** \name Experiment information */
 		//@{
 
 		/**

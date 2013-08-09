@@ -25,7 +25,8 @@
 
 #define OVTK_TypeId_EBMLStream                                         OpenViBE::CIdentifier(0x434F6587, 0x2EFD2B7E)
 #define   OVTK_TypeId_ChannelLocalisation                              OpenViBE::CIdentifier(0x1E4C0D6E, 0x5204EEB2)
-#define   OVTK_TypeId_ExperimentationInformation                       OpenViBE::CIdentifier(0x403488E7, 0x565D70B6)
+#define   OVTK_TypeId_ExperimentInformation                            OpenViBE::CIdentifier(0x403488E7, 0x565D70B6)
+#define   OVTK_TypeId_ExperimentationInformation                       OpenViBE::CIdentifier(0x403488E7, 0x565D70B6) // deprecated, kept for compatibility
 #define   OVTK_TypeId_Stimulations                                     OpenViBE::CIdentifier(0x6F752DD0, 0x082A321E)
 #define   OVTK_TypeId_StreamedMatrix                                   OpenViBE::CIdentifier(0x544A003E, 0x6DCBA5F6)
 #define     OVTK_TypeId_FeatureVector                                  OpenViBE::CIdentifier(0x17341935, 0x152FF448)
@@ -529,12 +530,12 @@
 
 //___________________________________________________________________//
 //                                                                   //
-// Experimentation information node identifiers                      //
+// Experiment information node identifiers                           //
 //___________________________________________________________________//
 //                                                                   //
 
 /*
- * Experimentation information stream description (fixed on november 6th 2006)
+ * Experiment information stream description (fixed on november 6th 2006)
  *
  * version 1 :
  * ----------------------------------------------------------------- *

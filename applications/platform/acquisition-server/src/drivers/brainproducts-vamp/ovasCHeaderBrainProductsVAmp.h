@@ -30,7 +30,7 @@ namespace OpenViBEAcquisitionServer
 		virtual ~CHeaderBrainProductsVAmp(void);
 		virtual void reset(void);
 
-		// Experimentation information
+		// Experiment information
 		virtual OpenViBE::boolean setExperimentIdentifier(const OpenViBE::uint32 ui32ExperimentIdentifier);
 		virtual OpenViBE::boolean setSubjectAge(const OpenViBE::uint32 ui32SubjectAge);
 		virtual OpenViBE::boolean setSubjectGender(const OpenViBE::uint32 ui32SubjectGender);
