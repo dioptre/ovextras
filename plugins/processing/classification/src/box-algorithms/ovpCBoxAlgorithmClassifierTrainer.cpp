@@ -130,6 +130,13 @@ boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
 	}
 	m_vFeatureVectorsDecoder.clear();
 
+	for(uint32 i=0;i<m_vFeatureVector.size();i++) {
+		delete m_vFeatureVector[i].m_pFeatureVectorMatrix;
+		m_vFeatureVector[i].m_pFeatureVectorMatrix = NULL;
+	}
+	m_vFeatureVector.clear();
+	m_vFeatureVectorIndex.clear();
+
 	return true;
 }
 
