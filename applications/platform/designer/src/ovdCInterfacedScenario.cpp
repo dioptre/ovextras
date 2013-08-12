@@ -183,6 +183,9 @@ static void context_menu_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 
 		case ContextMenu_ScenarioAbout:    l_pContextMenuCB->pInterfacedScenario->contextMenuScenarioAboutCB(); break;
 	}
+	// Redraw in any case, as some of the actual callbacks can forget to redraw. As this callback is only called after the user has accessed
+	// the right-click menu, so its not a large overhead to do it in general. @TODO might remove the individual redraws.
+	l_pContextMenuCB->pInterfacedScenario->redraw();
 }
 
 static void gdk_draw_rounded_rectangle(::GdkDrawable* pDrawable, ::GdkGC* pDrawGC, ::gboolean bFill, gint x, gint y, gint width, gint height, gint radius=8)
@@ -2367,7 +2370,7 @@ void CInterfacedScenario::contextMenuBoxDeleteCB(IBox& rBox)
 void CInterfacedScenario::contextMenuBoxAddInputCB(IBox& rBox)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxAddInputCB\n";
-	rBox.addInput("New input", OV_UndefinedIdentifier);
+	rBox.addInput("New input", OV_TypeId_Signal);
 	if(rBox.hasAttribute(OV_AttributeId_Box_FlagCanModifyInput))
 	{
 		CConnectorEditor l_oConnectorEditor(m_rKernelContext, rBox, Connector_Input, rBox.getInputCount()-1, "Add Input", m_sGUIFilename.c_str());
@@ -2404,7 +2407,7 @@ void CInterfacedScenario::contextMenuBoxRemoveInputCB(IBox& rBox, uint32 ui32Ind
 void CInterfacedScenario::contextMenuBoxAddOutputCB(IBox& rBox)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxAddOutputCB\n";
-	rBox.addOutput("New output", OV_UndefinedIdentifier);
+	rBox.addOutput("New output", OV_TypeId_Signal);
 	if(rBox.hasAttribute(OV_AttributeId_Box_FlagCanModifyOutput))
 	{
 		CConnectorEditor l_oConnectorEditor(m_rKernelContext, rBox, Connector_Output, rBox.getOutputCount()-1, "Add Output", m_sGUIFilename.c_str());

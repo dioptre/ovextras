@@ -23,10 +23,12 @@ Inputs description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_2DTopographicMap_Inputs|
+Note: the channel names specified on the 'Signal' and 'Channel Localization' input streams should match. Mismatches may not be reported by the box. For example, if electrode localisation file reader provides the positions of the electrodes from some configuration file, the channel names in that file should correspend to the names of the signal channels delivered in the Signal stream.
  * |OVP_DocEnd_BoxAlgorithm_2DTopographicMap_Inputs|
 
  * |OVP_DocBegin_BoxAlgorithm_2DTopographicMap_Input1|
  * |OVP_DocEnd_BoxAlgorithm_2DTopographicMap_Input1|
+
 __________________________________________________________________
 
 Settings description
@@ -60,7 +62,7 @@ __________________________________________________________________
   - Top/Left/Right/Back View : these buttons enable view switching.
   - Delay : this cursor defines the delay to apply to the values that are drawn.
 
- \img html topographicmap2ddisplay_toolbar.png "2D Topographic Map toolbar."
+ \image html topographicmap2ddisplay_toolbar.png "2D Topographic Map toolbar."
  * |OVP_DocEnd_BoxAlgorithm_2DTopographicMap_OnlineVisualizationSettings|
 __________________________________________________________________
 
@@ -70,10 +72,18 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_2DTopographicMap_Examples|
  Practical example :
 
- This example is based on the following scenario file : tutorials/visualisation/sample_2D_topographic_map
+ This example is based on the following scenario file : 
+
+\code
+box-tutorials/topographic_map.xml
+\endcode
 
  To see this plugin in action, one should first locate a file corresponding to a prerecorded EEG or MEG session and play it back using e. g. a GDF file reader or some other suitable plugin.
- The GDF file used by default in this scenario is the following : tutorials/data/real_hand_movements_eeg.gdf
+ The GDF file used by default in this scenario is the following : 
+
+\code
+signals/real-hand-movements.gdf
+\endcode
 
  Signal data read by this box can be forwarded to the 2D Topographic Map plugin, which has a single input connector. However, interpolating unprocessed data will not deliver very meaningful
  results. To make it easier to analyse, one can restrict signals to a frequency band of interest. Also, it can be desirable to average out signals using DSPs (a typical formula
