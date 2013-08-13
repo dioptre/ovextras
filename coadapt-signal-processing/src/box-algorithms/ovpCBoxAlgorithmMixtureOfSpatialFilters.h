@@ -3,7 +3,7 @@
 
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
-#include <openvibe-toolkit/ovtk_all.h>
+#include <toolkit/ovtk_all.h>
 
 #include <vector>
 
@@ -34,7 +34,8 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > ip_pMatrix;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pMemoryBuffer;
 			
-			OpenViBEToolkit::TStimulationDecoder<CBoxAlgorithmSpatialFilter> m_oStimulationDecoder;
+			//OpenViBEToolkit::TStimulationDecoder<CBoxAlgorithmSpatialFilter> m_oStimulationDecoder;
+			OpenViBEToolkit::TStreamedMatrixDecoder<CBoxAlgorithmSpatialFilter> m_oStreamedMatrixDecoder;
 
 			std::vector < OpenViBE::float64 > m_vCoefficient;
 			OpenViBE::uint64  m_ui64Trigger;
@@ -110,7 +111,8 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput  ("Input Signal",                OV_TypeId_Signal);
-				rBoxAlgorithmPrototype.addInput  ("Trigger",                OV_TypeId_Stimulations);
+				//rBoxAlgorithmPrototype.addInput  ("Trigger",                OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addInput  ("Streamed Matrix",                OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addOutput ("Output Signal",               OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addSetting("Spatial Fitler Coefficients", OV_TypeId_String,  "1;0;0;0;0;1;0;0;0;0;1;0;0;0;0;1");
 				rBoxAlgorithmPrototype.addSetting("Number of Output Channels",   OV_TypeId_Integer, "4");

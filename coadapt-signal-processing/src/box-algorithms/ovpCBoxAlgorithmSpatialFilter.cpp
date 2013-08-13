@@ -155,7 +155,8 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 	ip_pMatrix.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix));
 	op_pMemoryBuffer.initialize(m_pStreamEncoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
 
-	m_oStimulationDecoder.initialize(*this);
+	//m_oStimulationDecoder.initialize(*this);
+	m_oStreamedMatrixDecoder.initialize(*this);
 	
 	return true;
 }
@@ -176,7 +177,8 @@ boolean CBoxAlgorithmSpatialFilter::uninitialize(void)
 		m_pStreamEncoder=NULL;
 	}
 	
-	m_oStimulationDecoder.uninitialize();
+	//m_oStimulationDecoder.uninitialize();
+	m_oStreamedMatrixDecoder.uninitialize();
 
 	return true;
 }
@@ -193,6 +195,19 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	uint32 i, j, k, l;
+	
+	for(i=0, l=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
+	{
+		m_oStreamedMatrixDecoder.decode(1,i);
+		IMatrix* l_pSpatialFilter = m_oStreamedMatrixDecoder.getOutputMatrix();
+		if (m_oStreamedMatrixDecoder.isBufferReceived())
+		{
+			for(j=0; j<l_pSpatialFilter->getDimensionSize(0); j++)
+				for(k=0; k<l_pSpatialFilter->getDimensionSize(1); k++)
+					m_vCoefficient[j*l_pSpatialFilter->getDimensionSize(1)+k] = *(l_pSpatialFilter->getBuffer()+l++);	
+		}
+		this->getLogManager() << LogLevel_Info << "Spatial filter updated, dimensions " << l_pSpatialFilter->getDimensionSize(0) << ", " << l_pSpatialFilter->getDimensionSize(1) << "\n";
+	}		
 
 	for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
@@ -264,7 +279,7 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 	}
 	
-	for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
+	/*for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
 	{
 		m_oStimulationDecoder.decode(1,i);
 		IStimulationSet* l_pStimSet = m_oStimulationDecoder.getOutputStimulationSet();
@@ -280,7 +295,7 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 				}
 			}
 		}
-	}
+	}*/	
 
 	return true;
 }

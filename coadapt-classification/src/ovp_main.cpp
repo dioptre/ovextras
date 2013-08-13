@@ -10,6 +10,7 @@
 //#include "box-algorithms/classification/ovpCDynamicNaiveBayesComputeBoxAlgorithm.h"
 
 #include "algorithms/classification/ovpCAlgorithmClassifierNULL.h"
+#include "algorithms/classification/ovpCAlgorithmClassifierMixtureOfExperts.h"
 //#include "algorithms/classification/ovpCLikelihoodComputeFunction.h"
 
 
@@ -37,6 +38,8 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EvidenceAccumulationAlgorithm, "Counter", OVP_ClassId_Algorithm_EvidenceAccumulationCounter.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EvidenceAccumulationAlgorithm, "Bayesian", OVP_ClassId_Algorithm_EvidenceAccumulationBayesian.toUInteger());	
 	
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Mixture of Experts", OVP_ClassId_Algorithm_ClassifierMixtureOfExperts.toUInteger());
+	
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorWithUpdateDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmSupErrPDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmDynamicVotingClassifierDesc);
@@ -46,4 +49,5 @@ OVP_Declare_Begin();
 	//OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CLikelihoodComputeFunctionDesc);
 	//OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CDynamicNaiveBayesComputeBoxAlgorithmDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmEvidenceAccumulatorDesc);
+	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierMixtureOfExpertsDesc);
 OVP_Declare_End();

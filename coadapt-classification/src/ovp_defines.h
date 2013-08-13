@@ -26,8 +26,11 @@
 #define OVP_ClassId_BoxAlgorithm_EvidenceAccumulator 			OpenViBE::CIdentifier(0x47BC41D5, 0x94D9F146)
 #define OVP_ClassId_BoxAlgorithm_EvidenceAccumulatorDesc 		OpenViBE::CIdentifier(0x47BC41D5, 0x94D9F146)
 
-/*
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0x16DFF805, 0x0BC431BF)
+#define OVP_ClassId_Algorithm_ClassifierMixtureOfExperts                                        OpenViBE::CIdentifier(0xDF828072, 0x22C0CF5F)
+#define OVP_ClassId_Algorithm_ClassifierMixtureOfExpertsDesc                                    OpenViBE::CIdentifier(0x68595043, 0x6D981FC2)
+//#define OVP_Algorithm_ClassifierMOE_InputParameterId_MOE_Mode	OpenViBE::CIdentifier(0x16DFF805, 0x0BC431BF)
+
+/*                                      
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0x020300BF, 0xB4BAC0A1)
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0xBB1C5CFB, 0x1DD8690F)
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0x1575A534, 0xD7C09DD9)
