@@ -1,11 +1,11 @@
-#ifndef __OpenViBEKernel_Kernel_Player_CMessageEvent_H__
-#define __OpenViBEKernel_Kernel_Player_CMessageEvent_H__
+#ifndef __OpenViBEKernel_Kernel_Player_CMyMessage_H__
+#define __OpenViBEKernel_Kernel_Player_CMyMessage_H__
 
 #include "../ovkTKernelObject.h"
 #include "ovkTMessage.h"
 
 #include <map>
-
+#include <iostream>
 
 #include <openvibe/ov_all.h>
 
@@ -19,7 +19,6 @@ namespace OpenViBE
 
             CMyMessage()
 			{
-                //??
 			}
 
             // Returned references are invalid after processMessage().
@@ -50,4 +49,4 @@ namespace OpenViBE
 	};
 };
 
-#endif // __OpenViBEKernel_Kernel_Player_CMessageEvent_H__
+#endif // __OpenViBEKernel_Kernel_Player_CMyMessage_H__

@@ -279,13 +279,8 @@ namespace OpenViBE
             bool cleanupMessages();
 
             //should it not be better to return a pointer?
-            IMyMessage& createMessage()
-            {
-                m_vPreparedMessages.push_back(new CMyMessage());
-                IMyMessage* msg = m_vPreparedMessages[m_vPreparedMessages.size()];
-                return *msg;
+            IMyMessage& createMessage();
 
-            }
             bool receiveMessage(const IMyMessage &msg, uint32 inputIndex);
 
             //@}
@@ -340,7 +335,7 @@ namespace OpenViBE
 			std::map<OpenViBE::CIdentifier, OpenViBE::CString> m_mSimulatedObjects;
 
             // messages
-            std::vector< CMyMessage*> m_vPreparedMessages;
+            std::vector< OpenViBE::Kernel::CMyMessage > m_vPreparedMessages;
 
 
 		public:

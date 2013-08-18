@@ -394,6 +394,66 @@ namespace OpenViBE
 
 			//@}
 
+            /** \name Message input management */
+            //@{
+            /**
+             * \brief Adds an input to this box
+             * \param sName [in] : The input name
+             * \return \e true in case of success.
+             * \return \e false in case of error.
+             *
+             * The input is always added after the last
+             * already existing input.
+             */
+            virtual OpenViBE::boolean addMessageInput(
+                const OpenViBE::CString& sName)=0;
+            /**
+             * \brief Removes an input for this box
+             * \param ui32InputIndex [in] : The index
+             *        of the input to be removed
+             * \return \e true in case of success.
+             * \return \e false in case of error.
+             *
+             * Inputs coming after the removed input
+             * have their indices changing after this,
+             * they all decrease by 1.
+             */
+            virtual OpenViBE::boolean removeMessageInput(
+                const OpenViBE::uint32 ui32InputIndex)=0;
+            /**
+             * \brief Gets the number of inputs for this box
+             * \return The number of inputs for this box.
+             */
+            virtual OpenViBE::uint32 getMessageInputCount(void) const=0;
+
+            /**
+             * \brief Gets an input name
+             * \param ui32InputIndex [in] : The input index
+             * \param rName [out] : The name of this input
+             * \return \e true in case of success.
+             * \return \e false in case of error. In such case,
+             *         \c rName remains unchanged.
+             */
+            virtual OpenViBE::boolean getMessageInputName(
+                const OpenViBE::uint32 ui32InputIndex,
+                OpenViBE::CString& rName) const=0;
+
+            /**
+             * \brief Sets an input name
+             * \param ui32InputIndex [in] : The input index
+             * \param rName [in] : The name of this input
+             * \return \e true in case of success.
+             * \return \e false in case of error.
+             */
+            virtual OpenViBE::boolean setMessageInputName(
+                const OpenViBE::uint32 ui32InputIndex,
+                const OpenViBE::CString& rName)=0;
+            //@}
+
+            /** \name Message output management */
+            //@{
+            //@}
+
 			_IsDerivedFromClass_(OpenViBE::Kernel::IAttributable, OV_ClassId_Kernel_Scenario_Box)
 		};
 

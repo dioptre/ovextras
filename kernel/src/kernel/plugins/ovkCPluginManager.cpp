@@ -290,6 +290,18 @@ namespace
 			m_oHash=m_oHash.toUInteger()^v;
 			return true;
 		}
+        //
+        virtual uint32 addMessageInput(const CString& sName)
+        {
+            /*
+            uint64 v=rTypeIdentifier.toUInteger();
+            swap_byte(v, m_ui64InputCountHash);
+            swap_byte(m_ui64InputCountHash, 0x7936A0F3BD12D936LL);
+            m_oHash=m_oHash.toUInteger()^v;
+            //*/
+            return true;
+        }
+        //
 		virtual uint32 addOutput(const CString& sName, const CIdentifier& rTypeIdentifier)
 		{
 			uint64 v=rTypeIdentifier.toUInteger();

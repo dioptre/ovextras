@@ -16,6 +16,9 @@ namespace OpenViBE
 			virtual OpenViBE::uint32 addInput(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier);
+            virtual OpenViBE::uint32 addMessageInput(
+                const OpenViBE::CString& sName);
+
 			virtual OpenViBE::uint32 addOutput(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier);
