@@ -59,6 +59,26 @@ namespace OpenViBE
 				const OpenViBE::uint32 ui32InputIndex,
 				const OpenViBE::CString& rName);
 
+
+            //messages input
+            virtual OpenViBE::boolean addMessageInput(
+                const OpenViBE::CString& sName);
+            virtual OpenViBE::boolean removeMessageInput(
+                const OpenViBE::uint32 ui32InputIndex)
+            {
+                return true;
+
+            }
+
+
+            virtual OpenViBE::uint32 getMessageInputCount(void) const;
+            virtual OpenViBE::boolean getMessageInputName(
+                const OpenViBE::uint32 ui32InputIndex,
+                OpenViBE::CString& rName) const;
+            virtual OpenViBE::boolean setMessageInputName(
+                const OpenViBE::uint32 ui32InputIndex,
+                const OpenViBE::CString& rName);
+
 			virtual OpenViBE::boolean addOutput(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier);
@@ -185,6 +205,7 @@ namespace OpenViBE
 			std::vector<CInput> m_vInput;
 			std::vector<COutput> m_vOutput;
 			std::vector<CSetting> m_vSetting;
+            std::vector<OpenViBE::CString> m_vMessageInput;
 		};
 	};
 };

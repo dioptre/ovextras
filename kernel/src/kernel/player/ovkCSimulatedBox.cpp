@@ -1345,8 +1345,12 @@ bool CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 
 bool CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
 {
-    this->getLogManager() << LogLevel_Error << "simulated box receiving message on input " << inputIndex <<"\n";
-    //m_pBoxAlgorithm->processMessage();
+
+    CBoxAlgorithmContext l_oBoxAlgorithmContext(getKernelContext(), this, m_pBox);
+    this->getLogManager() << LogLevel_Error << "simulated box" << m_pBox->getName() <<" receiving message on input " << inputIndex <<"\n";
+    bool success;
+    success = m_pBoxAlgorithm->processMessage(l_oBoxAlgorithmContext, msg, inputIndex);
+    this->getLogManager() << LogLevel_Error << success << "\n";
     return true;
 }
 
@@ -1356,6 +1360,30 @@ bool CSimulatedBox::cleanupMessages() {
     //this->getLogManager() << LogLevel_Error << "cleaning messages " << "\n";
     m_vPreparedMessages.clear();//that'll do for now
     return true; // if success
+}
+
+IMyMessage& CSimulatedBox::createMessage()
+{
+    CMyMessage* newMessage = new CMyMessage();
+    //newMessage->setValueUint64( CString("meaning of life"), 42);
+
+
+
+    m_vPreparedMessages.push_back(*newMessage);
+    IMyMessage* msg = &m_vPreparedMessages[m_vPreparedMessages.size()-1];
+
+    bool success;
+    CString uiKey = CString("meaning of life");
+    uint64 uinteger = msg->getValueUint64(uiKey, success);
+
+
+
+    //msg->setValueFloat64(CString("float"), 1.354);
+    //msg->setValueCString( CString("string"), CString("testest"));
+
+
+    return *msg;
+
 }
 
 // #endif // __MY_COMPILE_ALL

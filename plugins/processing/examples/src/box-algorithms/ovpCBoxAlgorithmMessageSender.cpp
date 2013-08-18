@@ -77,7 +77,19 @@ boolean CBoxAlgorithmMessageSender::process(void)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 
+
     IMyMessage& msg = this->getPlayerContext().createMessage();
+    getLogManager() << OpenViBE::Kernel::LogLevel_Info  << "message sender created a message\n";
+
+    //*
+    msg.setValueUint64( CString("meaning of life"), 42);
+
+
+    msg.setValueFloat64(CString("float"), 1.354);
+    msg.setValueCString( CString("string"), CString("testest"));
+    //msg.setValueCMatrix( "", const CMatrix &valueIn);
+    //*/
+
     this->getPlayerContext().sendMessage(msg, 1);
 
 

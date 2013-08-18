@@ -248,9 +248,9 @@ boolean CPlayerContext::sendMessage(
 
 boolean CPlayerContext::sendMessage( IMyMessage& message, uint32 outputIndex)
 {
-    this->getLogManager() << LogLevel_Fatal << "CPlayerContext::sendMessage to "<<  outputIndex << "\n";
+    //this->getLogManager() << LogLevel_Fatal << "CPlayerContext::sendMessage to "<<  outputIndex << "\n";
     bool erf = m_pSimulatedBox->sendMessage(message, outputIndex);
-    this->getLogManager() << LogLevel_Fatal << "CPlayerContext::sendMessage to "<<  outputIndex << " done\n";
+    //this->getLogManager() << LogLevel_Fatal << "CPlayerContext::sendMessage to "<<  outputIndex << " done\n";
     return erf;
 }
 

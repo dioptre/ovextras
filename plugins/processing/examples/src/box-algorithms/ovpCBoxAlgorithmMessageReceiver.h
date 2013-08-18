@@ -42,6 +42,8 @@ namespace OpenViBEPlugins
 			
 			virtual OpenViBE::boolean process(void);
 
+            virtual OpenViBE::boolean processMessage(const OpenViBE::Kernel::IMyMessage& msg, OpenViBE::uint32 inputIndex);
+
 			// As we do with any class in openvibe, we use the macro below 
 			// to associate this box to an unique identifier. 
 			// The inheritance information is also made available, 
@@ -148,6 +150,9 @@ namespace OpenViBEPlugins
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+
+                //rBoxAlgorithmPrototype.addMessageInput(OpenViBE::CString("message input"));
+                //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageInput);
 				
 				return true;
 			}

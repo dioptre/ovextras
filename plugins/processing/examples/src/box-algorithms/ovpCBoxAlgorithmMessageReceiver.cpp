@@ -68,6 +68,24 @@ boolean CBoxAlgorithmMessageReceiver::processInput(uint32 ui32InputIndex)
 }
 /*******************************************************************************/
 
+OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMyMessage& msg, uint32 inputIndex)
+{
+    getLogManager() << OpenViBE::Kernel::LogLevel_Info << "on messagr input " << inputIndex << "\n";
+    bool success;
+    CString uiKey = CString("meaning of life");
+    CString floatKey = CString("float");
+    CString strKey = CString("string");
+    uint64 uinteger = msg.getValueUint64(uiKey, success);
+    float64 flt = msg.getValueFloat64( floatKey, success);
+    const CString* cstr =  msg.getValueCString(strKey, success);
+    getLogManager() << OpenViBE::Kernel::LogLevel_Info << uinteger << " " << flt << " " << cstr <<"\n";
+                //CMatrix* getValueCMatrix(CString &key, bool &success) const;
+    return true;
+}
+
+
+
+
 boolean CBoxAlgorithmMessageReceiver::process(void)
 {
 	

@@ -37,6 +37,28 @@ uint32 CBoxProto::addInput(
 	return true;
 }
 
+uint32 CBoxProto::addMessageInput(
+    const CString& sName)
+{
+    if(!m_rBox.addMessageInput(sName))
+    {
+        return false;
+    }
+
+    char l_sBuffer[1024];
+    ::sprintf(l_sBuffer, "%d", m_rBox.getMessageInputCount());
+    if(m_rBox.hasAttribute(OV_AttributeId_Box_InitialInputCount))
+    {
+        m_rBox.setAttributeValue(OV_AttributeId_Box_InitialInputCount, l_sBuffer);
+    }
+    else
+    {
+        m_rBox.addAttribute(OV_AttributeId_Box_InitialInputCount, l_sBuffer);
+    }
+
+    return true;
+}
+
 uint32 CBoxProto::addOutput(
 	const CString& sName,
 	const CIdentifier& rTypeIdentifier)
