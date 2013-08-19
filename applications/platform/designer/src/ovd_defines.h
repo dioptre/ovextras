@@ -100,6 +100,9 @@ namespace OpenViBEDesigner
 		Connector_Output,
 		Connector_Setting,
 		Connector_Link,
+        Connector_MessageInput,
+        Connector_MessageOutput,
+        Connector_MessageLink
 	};
 
 	enum
