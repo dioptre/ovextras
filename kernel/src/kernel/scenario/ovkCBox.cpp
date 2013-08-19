@@ -210,6 +210,15 @@ boolean CBox::initializeFromExistingBox(
 		addInput(l_sName, l_oType);
 	}
 
+    for(i=0; i<rExisitingBox.getMessageInputCount(); i++)
+    {
+        //CIdentifier l_oType;
+        CString l_sName;
+        //rExisitingBox.getInputType(i, l_oType);
+        rExisitingBox.getMessageInputName(i, l_sName);
+        addMessageInput(l_sName);
+    }
+
 	for(i=0; i<rExisitingBox.getOutputCount(); i++)
 	{
 		CIdentifier l_oType;
@@ -218,6 +227,15 @@ boolean CBox::initializeFromExistingBox(
 		rExisitingBox.getOutputName(i, l_sName);
 		addOutput(l_sName, l_oType);
 	}
+
+    for(i=0; i<rExisitingBox.getMessageOutputCount(); i++)
+    {
+        //CIdentifier l_oType;
+        CString l_sName;
+        //rExisitingBox.getOutputType(i, l_oType);
+        rExisitingBox.getMessageOutputName(i, l_sName);
+        addMessageOutput(l_sName);
+    }
 
 	for(i=0; i<rExisitingBox.getSettingCount(); i++)
 	{
