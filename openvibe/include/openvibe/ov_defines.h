@@ -142,6 +142,12 @@
 #define OV_AttributeId_Box_InitialInputCount                 OpenViBE::CIdentifier(0xCFAD85B0, 0x7C6D841C)
 #define OV_AttributeId_Box_InitialOutputCount                OpenViBE::CIdentifier(0xC80CE8AF, 0xF699F813)
 #define OV_AttributeId_Box_InitialSettingCount               OpenViBE::CIdentifier(0xCE18836A, 0x9C0EB403)
+//
+#define OV_AttributeId_Box_InitialMessageInputCount                 OpenViBE::CIdentifier(0x996FFCD6, 0x5ACFB930)//
+#define OV_AttributeId_Box_InitialMessageOutputCount                OpenViBE::CIdentifier(0x4D3DEFB7, 0xF238570D)
+//
+                                      
+
 
 #define OV_AttributeId_Box_FlagCanAddInput                   OpenViBE::CIdentifier(0xFBA64161, 0x65304E21)
 #define OV_AttributeId_Box_FlagCanModifyInput                OpenViBE::CIdentifier(0x527AD68D, 0x16D746A0)
@@ -149,6 +155,11 @@
 #define OV_AttributeId_Box_FlagCanModifyOutput               OpenViBE::CIdentifier(0x30A4E5C9, 0x83502953)
 #define OV_AttributeId_Box_FlagCanAddSetting                 OpenViBE::CIdentifier(0x61D11811, 0x71E65362)
 #define OV_AttributeId_Box_FlagCanModifySetting              OpenViBE::CIdentifier(0xF191C1C8, 0xA0123976)
+//
+#define OV_AttributeId_Box_FlagCanAddMessageInput                   OpenViBE::CIdentifier(0xB6DE295D, 0x6C16B23A)
+#define OV_AttributeId_Box_FlagCanModifyMessageInput                OpenViBE::CIdentifier(0x593C6420, 0x0F33442C)
+#define OV_AttributeId_Box_FlagCanAddMessageOutput                  OpenViBE::CIdentifier(0x98BEA2F6, 0xE7144D95)
+#define OV_AttributeId_Box_FlagCanModifyMessageOutput               OpenViBE::CIdentifier(0xA7AE8227, 0x2C4D83DE)
 
 #define OV_AttributeId_Box_Muted                             OpenViBE::CIdentifier(0xC73E83EC, 0xF855C5BC)
 

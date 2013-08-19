@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#include <iostream>//
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -40,6 +41,7 @@ uint32 CBoxProto::addInput(
 uint32 CBoxProto::addMessageInput(
     const CString& sName)
 {
+    std::cout << "\n\nadding message input\n\n";
     if(!m_rBox.addMessageInput(sName))
     {
         return false;
@@ -47,13 +49,36 @@ uint32 CBoxProto::addMessageInput(
 
     char l_sBuffer[1024];
     ::sprintf(l_sBuffer, "%d", m_rBox.getMessageInputCount());
-    if(m_rBox.hasAttribute(OV_AttributeId_Box_InitialInputCount))
+    if(m_rBox.hasAttribute(OV_AttributeId_Box_InitialMessageInputCount))
     {
-        m_rBox.setAttributeValue(OV_AttributeId_Box_InitialInputCount, l_sBuffer);
+        m_rBox.setAttributeValue(OV_AttributeId_Box_InitialMessageInputCount, l_sBuffer);
     }
     else
     {
-        m_rBox.addAttribute(OV_AttributeId_Box_InitialInputCount, l_sBuffer);
+        m_rBox.addAttribute(OV_AttributeId_Box_InitialMessageInputCount, l_sBuffer);
+    }
+
+    return true;
+}
+
+uint32 CBoxProto::addMessageOutput(
+    const CString& sName)
+{
+    std::cout << "\n\nadding message output\n\n";
+    if(!m_rBox.addMessageOutput(sName))
+    {
+        return false;
+    }
+
+    char l_sBuffer[1024];
+    ::sprintf(l_sBuffer, "%d", m_rBox.getMessageOutputCount());
+    if(m_rBox.hasAttribute(OV_AttributeId_Box_InitialMessageOutputCount))
+    {
+        m_rBox.setAttributeValue(OV_AttributeId_Box_InitialMessageOutputCount, l_sBuffer);
+    }
+    else
+    {
+        m_rBox.addAttribute(OV_AttributeId_Box_InitialMessageOutputCount, l_sBuffer);
     }
 
     return true;

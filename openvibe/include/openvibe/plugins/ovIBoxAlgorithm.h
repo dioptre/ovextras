@@ -46,7 +46,13 @@ namespace OpenViBE
 			BoxModification_MessageInputAdded,
 			BoxModification_MessageInputRemoved,
 			//BoxModification_InputTypeChanged,
-			BoxModification_MessageInputNameChanged,
+            BoxModification_MessageInputNameChanged,//
+            BoxModification_MessageOutputConnected,//
+            BoxModification_MessageOutputDisconnected,
+            BoxModification_MessageOutputAdded,
+            BoxModification_MessageOutputRemoved,
+            //BoxModification_OutputTypeChanged,
+            BoxModification_MessageOutputNameChanged,
 		};
 	};
 
