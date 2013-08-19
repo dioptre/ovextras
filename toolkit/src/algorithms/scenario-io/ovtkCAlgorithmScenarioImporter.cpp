@@ -21,6 +21,7 @@ namespace OpenViBEToolkit
 		#define _default_and_copy_constructor_6_(c,m1,m2,m3,m4,m5,m6)       c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6) { }
 		#define _default_and_copy_constructor_7_(c,m1,m2,m3,m4,m5,m6,m7)    c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6), m7(r.m7) { }
 		#define _default_and_copy_constructor_8_(c,m1,m2,m3,m4,m5,m6,m7,m8) c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6), m7(r.m7), m8(r.m8) { }
+        #define _default_and_copy_constructor_9_(c,m1,m2,m3,m4,m5,m6,m7,m8, m9) c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6), m7(r.m7), m8(r.m8), m9(r.m9) { }
 
 		typedef struct _SInput
 		{
@@ -28,12 +29,27 @@ namespace OpenViBEToolkit
 			CIdentifier m_oTypeIdentifier;
 			CString m_sName;
 		} SInput;
+
+        typedef struct _SMessageInput
+        {
+            _default_and_copy_constructor_1_(_SMessageInput, m_sName);
+            CString m_sName;
+        } SMessageInput;
+
 		typedef struct _SOutput
 		{
 			_default_and_copy_constructor_2_(_SOutput, m_oTypeIdentifier, m_sName);
 			CIdentifier m_oTypeIdentifier;
 			CString m_sName;
 		} SOutput;
+
+        typedef struct _SMessageOutput
+        {
+            _default_and_copy_constructor_1_(_SMessageOutput, m_sName);
+            //CIdentifier m_oTypeIdentifier;
+            CString m_sName;
+        } SMessageOutput;
+
 		typedef struct _SSetting
 		{
 			_default_and_copy_constructor_4_(_SSetting, m_oTypeIdentifier, m_sName, m_sDefaultValue, m_sValue);
@@ -50,7 +66,9 @@ namespace OpenViBEToolkit
 		} SAttribute;
 		typedef struct _SBox
 		{
-			_default_and_copy_constructor_7_(_SBox, m_oIdentifier, m_oAlgorithmClassIdentifier, m_sName, m_vInput, m_vOutput, m_vSetting, m_vAttribute);
+            //_default_and_copy_constructor_7_(_SBox, m_oIdentifier, m_oAlgorithmClassIdentifier, m_sName, m_vInput, m_vOutput, m_vSetting, m_vAttribute);
+            //_default_and_copy_constructor_8_(_SBox, m_oIdentifier, m_oAlgorithmClassIdentifier, m_sName, m_vInput, m_vOutput, m_vSetting, m_vAttribute, m_vMessageInput);
+            _default_and_copy_constructor_9_(_SBox, m_oIdentifier, m_oAlgorithmClassIdentifier, m_sName, m_vInput, m_vOutput, m_vSetting, m_vAttribute, m_vMessageInput, m_vMessageOutput);
 			CIdentifier m_oIdentifier;
 			CIdentifier m_oAlgorithmClassIdentifier;
 			CString m_sName;
@@ -58,6 +76,8 @@ namespace OpenViBEToolkit
 			std::vector<SOutput> m_vOutput;
 			std::vector<SSetting> m_vSetting;
 			std::vector<SAttribute> m_vAttribute;
+            std::vector<SMessageInput> m_vMessageInput;
+            std::vector<SMessageOutput> m_vMessageOutput;
 		} SBox;
 		typedef struct _SComment
 		{
@@ -115,6 +135,8 @@ namespace OpenViBEToolkit
 		#undef _default_and_copy_constructor_5_
 		#undef _default_and_copy_constructor_6_
 		#undef _default_and_copy_constructor_7_
+        #undef _default_and_copy_constructor_8_
+        #undef _default_and_copy_constructor_9_
 	};
 
 	class CAlgorithmScenarioImporterContext : public IAlgorithmScenarioImporterContext
@@ -177,6 +199,8 @@ boolean CAlgorithmScenarioImporter::process(void)
 	std::vector<SBox>::const_iterator b;
 	std::vector<SComment>::const_iterator c;
 	std::vector<SInput>::const_iterator i;
+    std::vector<SMessageInput>::const_iterator mi;
+    std::vector<SMessageOutput>::const_iterator mo;
 	std::vector<SOutput>::const_iterator o;
 	std::vector<SSetting>::const_iterator s;
 	std::vector<SLink>::const_iterator l;
@@ -199,6 +223,18 @@ boolean CAlgorithmScenarioImporter::process(void)
 					i->m_sName,
 					i->m_oTypeIdentifier);
 			}
+            //
+            for(mi=b->m_vMessageInput.begin(); mi!=b->m_vMessageInput.end(); mi++)
+            {
+                l_pBox->addMessageInput(
+                    mi->m_sName);
+            }
+            for(mo=b->m_vMessageOutput.begin(); mo!=b->m_vMessageOutput.end(); mo++)
+            {
+                l_pBox->addMessageOutput(
+                    mo->m_sName);
+            }
+            //
 			for(o=b->m_vOutput.begin(); o!=b->m_vOutput.end(); o++)
 			{
 				l_pBox->addOutput(
@@ -343,6 +379,11 @@ boolean CAlgorithmScenarioImporterContext::processStart(const CIdentifier& rIden
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Output)                               { m_oSymbolicScenario.m_vBox.back().m_vOutput.push_back(SOutput()); }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Settings)                             { }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting)                              { m_oSymbolicScenario.m_vBox.back().m_vSetting.push_back(SSetting()); }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInputs)                               { }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInput)                                { m_oSymbolicScenario.m_vBox.back().m_vMessageInput.push_back(SMessageInput()); }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutputs)                              { }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutput)                               { m_oSymbolicScenario.m_vBox.back().m_vMessageOutput.push_back(SMessageOutput()); }
+    //
 	else m_rAlgorithmContext.getLogManager() << LogLevel_Warning << "Unexpected node identifier " << rIdentifier << "\n";
 
 	return true;
@@ -390,6 +431,9 @@ boolean CAlgorithmScenarioImporterContext::processString(const CIdentifier& rIde
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Comment_Attribute_Value)                  { m_oSymbolicScenario.m_vComment.back().m_vAttribute.back().m_sValue=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Link_Attribute_Value)                     { m_oSymbolicScenario.m_vLink.back().m_vAttribute.back().m_sValue=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Scenario_Attribute_Value)                 { m_oSymbolicScenario.m_vAttribute.back().m_sValue=rValue; }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInput_Name)                           { m_oSymbolicScenario.m_vBox.back().m_vMessageInput.back().m_sName=rValue; }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutput_Name)                          { m_oSymbolicScenario.m_vBox.back().m_vMessageOutput.back().m_sName=rValue; }
+
 	else m_rAlgorithmContext.getLogManager() << LogLevel_Warning << "Unexpected node identifier " << rIdentifier << "\n";
 
 	return true;

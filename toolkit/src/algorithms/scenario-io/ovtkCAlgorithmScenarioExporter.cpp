@@ -134,6 +134,44 @@ boolean CAlgorithmScenarioExporterHelper::exportBox(IMemoryBuffer& rMemoryBuffer
 		m_rParent.exportStop(rMemoryBuffer);
 	}
 
+    //message stuff
+//*
+    if(rBox.getMessageInputCount()!=0)
+    {
+        m_rParent.exportStart(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInputs);
+        for(uint32 i=0; i<rBox.getMessageInputCount(); i++)
+        {
+            //CIdentifier l_oInputTypeIdentifier;
+            CString l_sInputName;
+            //rBox.getInputType(i, l_oInputTypeIdentifier);
+            rBox.getMessageInputName(i, l_sInputName);
+            m_rParent.exportStart(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInput);
+             //m_rParent.exportIdentifier(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_Input_TypeIdentifier, l_oInputTypeIdentifier);
+             m_rParent.exportString(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInput_Name, l_sInputName);
+            m_rParent.exportStop(rMemoryBuffer);
+        }
+        m_rParent.exportStop(rMemoryBuffer);
+    }
+
+    if(rBox.getMessageOutputCount()!=0)
+    {
+        m_rParent.exportStart(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutputs);
+        for(uint32 i=0; i<rBox.getMessageOutputCount(); i++)
+        {
+            //CIdentifier l_oInputTypeIdentifier;
+            CString l_sInputName;
+            //rBox.getInputType(i, l_oInputTypeIdentifier);
+            rBox.getMessageOutputName(i, l_sInputName);
+            m_rParent.exportStart(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutput);
+             //m_rParent.exportIdentifier(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_Input_TypeIdentifier, l_oInputTypeIdentifier);
+             m_rParent.exportString(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutput_Name, l_sInputName);
+            m_rParent.exportStop(rMemoryBuffer);
+        }
+        m_rParent.exportStop(rMemoryBuffer);
+    }
+    //*/
+    //
+
 	if(rBox.getOutputCount()!=0)
 	{
 		m_rParent.exportStart(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_Outputs);
