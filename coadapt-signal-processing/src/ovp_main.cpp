@@ -10,6 +10,7 @@
 #include "box-algorithms/basic/ovpCBoxAlgorithmEpochVariance.h"
 #include "box-algorithms/ovpCBoxAlgorithmXDAWNSpatialFilterTrainer.h"
 #include "box-algorithms/ovpCBoxAlgorithmSpatialFilter.h"
+#include "box-algorithms/ovpCBoxAlgorithmMultipleSpatialFilters.h"
 #include "box-algorithms/ovpCBoxAlgorithmConditionalIdentity.h"
 #include "algorithms/basic/ovpCMatrixVariance.h"
 
@@ -27,4 +28,5 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CBoxAlgorithmXDAWNSpatialFilterTrainerDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CBoxAlgorithmSpatialFilterDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CConditionalIdentityDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CBoxAlgorithmMultipleSpatialFiltersDesc);
 OVP_Declare_End();

@@ -54,6 +54,9 @@
 #define OVP_ClassId_ConditionalIdentity OpenViBE::CIdentifier(0xE4CE5D77, 0xBCC64C3F)
 #define OVP_ClassId_ConditionalIdentityDesc OpenViBE::CIdentifier(0xDDE86CE9, 0xE75B0A29)
 
+#define OVP_ClassId_BoxAlgorithm_MultipleSpatialFilters	 	OpenViBE::CIdentifier(0x04C1466C, 0xFC89B739)
+#define OVP_ClassId_BoxAlgorithm_MultipleSpatialFiltersDesc	OpenViBE::CIdentifier(0xB1A96C51, 0xD75136A6)
+
 //___________________________________________________________________//
 //                                                                   //
 // Gloabal defines                                                   //
