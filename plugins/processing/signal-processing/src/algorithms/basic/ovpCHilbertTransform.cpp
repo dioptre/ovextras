@@ -48,8 +48,6 @@ boolean CAlgorithmHilbertTransform::process(void)
 	IMatrix* l_pOutputEnvelopeMatrix = op_pEnvelopeMatrix;
 	IMatrix* l_pOutputPhaseMatrix = op_pPhaseMatrix;
 
-//	FFT< double, internal::kissfft_impl<double > > m_fft; //create instance of fft transform
-
 	if(this->isInputTriggerActive(OVP_Algorithm_HilbertTransform_InputTriggerId_Initialize)) //Check if the input is correct
 	{
 		if( l_pInputMatrix->getDimensionCount() != 2)
