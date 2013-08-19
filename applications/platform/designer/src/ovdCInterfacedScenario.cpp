@@ -619,6 +619,97 @@ void CInterfacedScenario::redraw(IBox& rBox)
 		}
 	}
 
+    //m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "message input "<< " / " << rBox.getMessageInputCount() <<"\n";
+    //draw messages input
+    int l_iMessageInputOffset=ySize/2-rBox.getMessageInputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize/4;
+    //int minput = 3;
+    //int l_iMessageInputOffset=ySize/2-minput*(iCircleSpace+iCircleSize)/2+iCircleSize;
+        //for(i=0; i<minput; i++)
+    for(i=0; i<rBox.getMessageInputCount(); i++)
+    {
+        ::GdkColor l_oMessageInputColor;
+        l_oMessageInputColor.pixel=(guint16)0;
+        l_oMessageInputColor.red  =(guint16)117;
+        l_oMessageInputColor.green=(guint16)117;
+        l_oMessageInputColor.blue =(guint16)117;
+
+        ::GdkPoint l_vPoint[4];
+        l_vPoint[0].x=iCircleSize;
+        l_vPoint[0].y=-iCircleSize>>1;
+        l_vPoint[1].x=0;
+        l_vPoint[1].y=-(iCircleSize-1);
+        l_vPoint[2].x=0;
+        l_vPoint[2].y=0;
+        for(int j=0; j<3; j++)
+        {
+            l_vPoint[j].x+=xStart-(iCircleSize>>1);
+            l_vPoint[j].y+=yStart+i*(iCircleSpace+iCircleSize)+l_iMessageInputOffset;;
+        }
+
+        updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
+        gdk_draw_polygon(
+            GDK_DRAWABLE(m_pStencilBuffer),
+            l_pStencilGC,
+            TRUE,
+            l_vPoint,
+            3);
+        //m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier(), Connector_Input, i);
+
+        gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oMessageInputColor);
+        gdk_draw_polygon(
+            l_pWidget->window,
+            l_pDrawGC,
+            TRUE,
+            l_vPoint,
+            3);
+
+    }
+    //*
+    //int moutput = 3;
+    int l_iMessageOutputOffset=xSize/2-rBox.getMessageOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize/4;
+    //int l_iMessageOutputOffset=ySize/2-moutput*(iCircleSpace+iCircleSize)/2+iCircleSize;
+    for(i=0; i<rBox.getMessageOutputCount(); i++)
+    {
+        ::GdkColor l_oMessageOutputColor;
+        l_oMessageOutputColor.pixel=(guint16)0;
+        l_oMessageOutputColor.red  =(guint16)117;
+        l_oMessageOutputColor.green=(guint16)117;
+        l_oMessageOutputColor.blue =(guint16)117;
+
+        ::GdkPoint l_vPoint[4];
+        l_vPoint[0].x=iCircleSize;
+        l_vPoint[0].y=-iCircleSize>>1;
+        l_vPoint[1].x=0;
+        l_vPoint[1].y=-(iCircleSize-1);
+        l_vPoint[2].x=0;
+        l_vPoint[2].y=0;
+        for(int j=0; j<3; j++)
+        {
+            l_vPoint[j].x+=xStart-(iCircleSize>>1)+xSize;
+            l_vPoint[j].y+=yStart+i*(iCircleSpace+iCircleSize)+l_iMessageOutputOffset;;
+        }
+
+        updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
+        gdk_draw_polygon(
+            GDK_DRAWABLE(m_pStencilBuffer),
+            l_pStencilGC,
+            TRUE,
+            l_vPoint,
+            3);
+        //m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier(), Connector_Input, i);
+
+        gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oMessageOutputColor);
+        gdk_draw_polygon(
+            l_pWidget->window,
+            l_pDrawGC,
+            TRUE,
+            l_vPoint,
+            3);
+
+    }
+    //*/
+
+
 	int l_iOutputOffset=xSize/2-rBox.getOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize/4;
 	for(i=0; i<rBox.getOutputCount(); i++)
 	{

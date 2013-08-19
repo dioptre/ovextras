@@ -151,8 +151,8 @@ namespace OpenViBEPlugins
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 
-                //rBoxAlgorithmPrototype.addMessageInput(OpenViBE::CString("message input"));
-                //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageInput);
+                rBoxAlgorithmPrototype.addMessageInput(OpenViBE::CString("message input"));
+                rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageInput);
 				
 				return true;
 			}

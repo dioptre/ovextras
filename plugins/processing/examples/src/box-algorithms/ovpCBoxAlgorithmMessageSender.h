@@ -150,6 +150,9 @@ namespace OpenViBEPlugins
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+
+                rBoxAlgorithmPrototype.addMessageOutput(OpenViBE::CString("message output"));
+                rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageOutput);
 				
 				return true;
 			}
