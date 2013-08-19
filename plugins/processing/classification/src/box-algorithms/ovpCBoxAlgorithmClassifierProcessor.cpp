@@ -122,24 +122,30 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 		{
 			if(m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify))
 			{
-				if(!m_bOutputHeaderSent)
+				if (m_pClassifier->isOutputTriggerActive(OVTK_Algorithm_Classifier_OutputTriggerId_Success))
 				{
-					m_pLabelsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
-					m_pClassificationStateEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
-					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64StartTime);
-					l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64StartTime);
-					m_bOutputHeaderSent=true;
+					this->getLogManager() << LogLevel_Warning << "---Classification successful---\n";
+					if(!m_bOutputHeaderSent)
+					{
+						m_pLabelsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
+						m_pClassificationStateEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
+						l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64StartTime);
+						l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64StartTime);
+						m_bOutputHeaderSent=true;
+					}
+
+					ip_pLabelsStimulationSet->setStimulationCount(1);
+					ip_pLabelsStimulationSet->setStimulationIdentifier(0, m_vStimulation[op_f64ClassificationStateClass]);
+					ip_pLabelsStimulationSet->setStimulationDate(0, l_ui64EndTime);
+					ip_pLabelsStimulationSet->setStimulationDuration(0, 0);
+
+					m_pLabelsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
+					m_pClassificationStateEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeBuffer);
+					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
+					l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
 				}
-
-				ip_pLabelsStimulationSet->setStimulationCount(1);
-				ip_pLabelsStimulationSet->setStimulationIdentifier(0, m_vStimulation[op_f64ClassificationStateClass]);
-				ip_pLabelsStimulationSet->setStimulationDate(0, l_ui64EndTime);
-				ip_pLabelsStimulationSet->setStimulationDuration(0, 0);
-
-				m_pLabelsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
-				m_pClassificationStateEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeBuffer);
-				l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
-				l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
+				else
+					this->getLogManager() << LogLevel_Warning << "---Classification failed---\n";
 			}
 		}
 		if(m_pFeaturesDecoder->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedEnd))
