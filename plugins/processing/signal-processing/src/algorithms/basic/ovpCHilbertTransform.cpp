@@ -23,6 +23,7 @@ boolean CAlgorithmHilbertTransform::initialize(void)
 	op_pEnvelopeMatrix.initialize(this->getOutputParameter(OVP_Algorithm_HilbertTransform_OutputParameterId_EnvelopeMatrix));
 	op_pPhaseMatrix.initialize(this->getOutputParameter(OVP_Algorithm_HilbertTransform_OutputParameterId_PhaseMatrix));
 
+
 	return true;
 }
 
@@ -47,7 +48,7 @@ boolean CAlgorithmHilbertTransform::process(void)
 	IMatrix* l_pOutputEnvelopeMatrix = op_pEnvelopeMatrix;
 	IMatrix* l_pOutputPhaseMatrix = op_pPhaseMatrix;
 
-	FFT< double, internal::kissfft_impl<double > > fft; //create instance of fft transform
+//	FFT< double, internal::kissfft_impl<double > > m_fft; //create instance of fft transform
 
 	if(this->isInputTriggerActive(OVP_Algorithm_HilbertTransform_InputTriggerId_Initialize)) //Check if the input is correct
 	{
@@ -91,26 +92,20 @@ boolean CAlgorithmHilbertTransform::process(void)
 			if(l_ui32SamplesPerChannel%2 == 0)
 			{
 				m_vecXdHilbert(l_ui32SamplesPerChannel/2) = 1.0;
-				for(uint32 i=1; i<l_ui32SamplesPerChannel/2; i++)
-				{
-					m_vecXdHilbert(i) = 2.0;
-				}
-				for(uint32 i=(l_ui32SamplesPerChannel/2)+1; i<l_ui32SamplesPerChannel; i++)
-				{
-					m_vecXdHilbert(i) = 0.0;
-				}
+
+				m_vecXdHilbert.segment(1,(l_ui32SamplesPerChannel/2)-1).setOnes();
+				m_vecXdHilbert.segment(1,(l_ui32SamplesPerChannel/2)-1) *= 2.0;
+
+				m_vecXdHilbert.tail((l_ui32SamplesPerChannel/2)+1).setZero();
 			}
 			else
 			{
 				m_vecXdHilbert((l_ui32SamplesPerChannel+1)/2) = 1.0;
-				for(uint32 i=1; i<(l_ui32SamplesPerChannel+1); i++)
-				{
-					m_vecXdHilbert(i) = 2.0;
-				}
-				for(uint32 i=(l_ui32SamplesPerChannel+1)/2+1; i<l_ui32SamplesPerChannel; i++)
-				{
-					m_vecXdHilbert(i) = 0.0;
-				}
+
+				m_vecXdHilbert.segment(1,(l_ui32SamplesPerChannel/2)).setOnes();
+				m_vecXdHilbert.segment(1,(l_ui32SamplesPerChannel/2)) *= 2.0;
+
+				m_vecXdHilbert.tail(((l_ui32SamplesPerChannel+1)/2)+1).setZero();
 			}
 
 			//Copy input signal chunk on buffer
@@ -121,16 +116,14 @@ boolean CAlgorithmHilbertTransform::process(void)
 			}
 
 			//Fast Fourier Transform of input signal
-			fft.fwd(m_vecXcdSignalFourier, m_vecXcdSignalBuffer);
+			m_fft.fwd(m_vecXcdSignalFourier, m_vecXcdSignalBuffer);
 
 			//Apply Hilbert transform by element-wise multiplying fft vector by h
-			for(uint32 samples=0; samples<l_ui32SamplesPerChannel;samples++)
-			{
-				m_vecXcdSignalFourier(samples) = m_vecXcdSignalFourier(samples)*m_vecXdHilbert(samples);
-			}
+			m_vecXcdSignalFourier = m_vecXcdSignalFourier.cwiseProduct(m_vecXdHilbert);
+
 
 			//Inverse Fast Fourier transform
-			fft.inv(m_vecXcdSignalBuffer, m_vecXcdSignalFourier); // m_vecXcdSignalBuffer is now the analytical signal of the initial input signal
+			m_fft.inv(m_vecXcdSignalBuffer, m_vecXcdSignalFourier); // m_vecXcdSignalBuffer is now the analytical signal of the initial input signal
 
 			//Compute envelope and phase and pass it to the corresponding output
 			for(uint32 samples=0; samples<l_ui32SamplesPerChannel;samples++)

@@ -90,7 +90,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addInput("EEG Signal",OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addInput("Input Signal",OV_TypeId_Signal);
 				
 				rBoxAlgorithmPrototype.addOutput("Hilbert Transform", OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addOutput("Envelope",OV_TypeId_Signal);

@@ -8,6 +8,7 @@
 #include <toolkit/ovtk_all.h>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/FFT>
+#include <complex>
 
 
 namespace OpenViBEPlugins
@@ -40,6 +41,8 @@ namespace OpenViBEPlugins
 			Eigen::VectorXcd m_vecXcdSignalBuffer; // Input signal Buffer
 			Eigen::VectorXcd m_vecXcdSignalFourier; // Fourier Transform of input signal
 			Eigen::VectorXd m_vecXdHilbert; // Vector h used to apply Hilbert transform
+
+			Eigen::FFT< double, Eigen::internal::kissfft_impl<double > > m_fft; //create instance of fft transform
 
 		};
 
