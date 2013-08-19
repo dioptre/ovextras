@@ -653,7 +653,7 @@ void CInterfacedScenario::redraw(IBox& rBox)
             TRUE,
             l_vPoint,
             3);
-        //m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier(), Connector_Input, i);
+        m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier(), Connector_MessageInput, i);
 
         gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oMessageInputColor);
         gdk_draw_polygon(
@@ -696,7 +696,7 @@ void CInterfacedScenario::redraw(IBox& rBox)
             TRUE,
             l_vPoint,
             3);
-        //m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier(), Connector_Input, i);
+        m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier(), Connector_MessageOutput, i);
 
         gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oMessageOutputColor);
         gdk_draw_polygon(
@@ -1400,6 +1400,22 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 				l_pBoxDetails->getOutputType(l_rObject.m_ui32ConnectorIndex, l_oType);
 				l_sType=m_rKernelContext.getTypeManager().getTypeName(l_oType);
 			}
+            if(l_rObject.m_ui32ConnectorType==Connector_MessageInput)
+            {
+                //CIdentifier l_oType;
+                l_pBoxDetails->getMessageInputName(l_rObject.m_ui32ConnectorIndex, l_sName);
+                //l_pBoxDetails->getInputType(l_rObject.m_ui32ConnectorIndex, l_oType);
+                //l_sType=m_rKernelContext.getTypeManager().getTypeName(l_oType);
+                l_sType = "message";
+            }
+            if(l_rObject.m_ui32ConnectorType==Connector_MessageOutput)
+            {
+                //CIdentifier l_oType;
+                l_pBoxDetails->getMessageOutputName(l_rObject.m_ui32ConnectorIndex, l_sName);
+                //l_pBoxDetails->getOutputType(l_rObject.m_ui32ConnectorIndex, l_oType);
+                //l_sType=m_rKernelContext.getTypeManager().getTypeName(l_oType);
+                l_sType = "message";
+            }
 			l_sType=CString("[")+l_sType+CString("]");
 			gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(m_pBuilderTooltip, "tooltip-label_name_content")), l_sName);
 			gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(m_pBuilderTooltip, "tooltip-label_type_content")), l_sType);
