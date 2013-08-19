@@ -903,3 +903,52 @@ boolean CBox::setMessageInputName(
     return true;
 }
 
+//
+boolean CBox::addMessageOutput(
+    const CString& sName)
+{
+    this->getLogManager() << LogLevel_Fatal << "adding message Output named "<< sName << "for box "<< m_sName << "\n";
+    m_vMessageOutput.push_back(sName);
+
+    this->notify(BoxModification_MessageOutputAdded, m_vMessageOutput.size()-1);
+
+    return true;
+}
+
+uint32 CBox::getMessageOutputCount(void) const
+{
+    this->getLogManager() << LogLevel_Fatal << "box "<< m_sName << " has " << (uint64)m_vMessageOutput.size() << " message Output\n";
+    return m_vMessageOutput.size();
+}
+
+
+
+boolean CBox::getMessageOutputName(
+    const uint32 ui32InputIndex,
+    CString& rName) const
+{
+    if(ui32InputIndex>=m_vMessageOutput.size())
+    {
+        return false;
+    }
+    rName=m_vMessageOutput[ui32InputIndex];
+    return true;
+}
+
+
+boolean CBox::setMessageOutputName(
+    const uint32 ui32InputIndex,
+    const CString& rName)
+{
+    if(ui32InputIndex>=m_vMessageOutput.size())
+    {
+        return false;
+    }
+    m_vMessageOutput[ui32InputIndex]=rName;
+
+    this->notify(BoxModification_MessageOutputNameChanged, ui32InputIndex);
+
+    return true;
+}
+//
+

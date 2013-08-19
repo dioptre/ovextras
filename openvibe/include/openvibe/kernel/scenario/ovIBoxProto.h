@@ -21,8 +21,10 @@ namespace OpenViBE
 			BoxFlag_CanModifySetting,
 			BoxFlag_IsDeprecated,
 			BoxFlag_IsUnstable,
-            BoxFlag_CanAddMessageInput,
-            BoxFlag_CanModifyMessageInput,
+            		BoxFlag_CanAddMessageInput,
+            		BoxFlag_CanModifyMessageInput,
+			BoxFlag_CanAddMessageOutput,
+            		BoxFlag_CanModifyMessageOutput,
 		};
 
 		/**
@@ -61,6 +63,15 @@ namespace OpenViBE
              * \return The created input index.
              */
             virtual OpenViBE::uint32 addMessageInput(
+                const OpenViBE::CString& sName)=0;
+
+/**
+             * \brief Adds an input to the box
+             * \param sName [in] : the name of the input to add
+             * \param rTypeIdentifier [in] : the type of the input
+             * \return The created input index.
+             */
+            virtual OpenViBE::uint32 addMessageOutput(
                 const OpenViBE::CString& sName)=0;
 			/**
 			 * \brief Adds an output to the box
