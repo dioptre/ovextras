@@ -16,7 +16,7 @@
 
 #include <vector>
 
-OVP_Declare_Begin();
+OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_ProcessType, "Process");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ProcessType, "When all inputs are decoded", OVP_TypeId_ProcessType_AllInputs.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ProcessType, "For each input", OVP_TypeId_ProcessType_EachInput.toUInteger());
@@ -50,4 +50,4 @@ OVP_Declare_Begin();
 	//OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CDynamicNaiveBayesComputeBoxAlgorithmDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmEvidenceAccumulatorDesc);
 	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierMixtureOfExpertsDesc);
-OVP_Declare_End();
+OVP_Declare_End()
