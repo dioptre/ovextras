@@ -37,7 +37,7 @@ boolean CBoxAlgorithmEvidenceAccumulator::initialize(void)
 	else
 		getLogManager() << LogLevel_Info << "Early stopping is disabled\n";
 	m_bStopCondition = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
-	m_bScaleFactor = 0.1;
+	m_bScaleFactor = 0.5;
 	
 	m_bReceivedSomeEvidence = false;
 	m_bEarlyStoppingConditionMet = false;
