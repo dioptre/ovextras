@@ -513,6 +513,7 @@ boolean CDriverTMSiRefa32B::loop(void)
 					l_ui32Trigger=m_lSignalBuffer[(l_ui32IndexBuffer+j)*m_ui32NbTotalChannels +m_i32NumOfTriggerChannel];
 				}
 				//std::cout<<l_ui32Trigger<<" ";
+				l_ui32Trigger~=l_ui32Trigger;
 				l_ui32Trigger&=255;
 
 				if(m_ui32LastTriggerValue!=l_ui32Trigger)
