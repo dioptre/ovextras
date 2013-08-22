@@ -52,6 +52,7 @@ int CSoftTagger::write(OpenViBE::uint32 value)
 	message[0] = 0; // unused at the moment
 	message[1] = static_cast<uint64>(value);
 	message[2] = stimulationTime;
+	//std::cout << "Writing stimulus tagger " << value << "\n";
 
 	try
 	{
