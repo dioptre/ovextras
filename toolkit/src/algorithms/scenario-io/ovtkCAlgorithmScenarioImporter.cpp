@@ -120,10 +120,12 @@ namespace OpenViBEToolkit
 		} SVisualisationWidget;
 		typedef struct _SScenario
 		{
-			_default_and_copy_constructor_5_(_SScenario, m_vBox, m_vComment, m_vLink, m_vAttribute, m_vVisualisationWidget);
+            //_default_and_copy_constructor_5_(_SScenario, m_vBox, m_vComment, m_vLink, m_vAttribute, m_vVisualisationWidget);
+            _default_and_copy_constructor_6_(_SScenario, m_vBox, m_vComment, m_vLink, m_vMessageLink, m_vAttribute, m_vVisualisationWidget);
 			std::vector<SBox> m_vBox;
 			std::vector<SComment> m_vComment;
 			std::vector<SLink> m_vLink;
+            std::vector<SLink> m_vMessageLink;
 			std::vector<SAttribute> m_vAttribute;
 			std::vector<SVisualisationWidget> m_vVisualisationWidget;
 		} SScenario;
@@ -184,6 +186,7 @@ boolean CAlgorithmScenarioImporter::process(void)
 	std::map<CIdentifier, CIdentifier> l_vBoxIdMapping;
 	std::map<CIdentifier, CIdentifier> l_vCommentIdMapping;
 	std::map<CIdentifier, CIdentifier> l_vLinkIdMapping;
+    std::map<CIdentifier, CIdentifier> l_vMessageLinkIdMapping;
 	std::map<CIdentifier, CIdentifier> l_vVisualisationWidgetIdMapping;
 
 	CAlgorithmScenarioImporterContext l_oContext(this->getAlgorithmContext());
@@ -204,6 +207,7 @@ boolean CAlgorithmScenarioImporter::process(void)
 	std::vector<SOutput>::const_iterator o;
 	std::vector<SSetting>::const_iterator s;
 	std::vector<SLink>::const_iterator l;
+    std::vector<SLink>::const_iterator ml;
 	std::vector<SVisualisationWidget>::const_iterator v;
 	std::vector<SAttribute>::const_iterator a;
 	for(b=l_rSymbolicScenario.m_vBox.begin(); b!=l_rSymbolicScenario.m_vBox.end(); b++)
@@ -307,6 +311,31 @@ boolean CAlgorithmScenarioImporter::process(void)
 			l_vLinkIdMapping[l->m_oIdentifier]=l_oNewLinkIdentifier;
 		}
 	}
+
+    for(ml=l_rSymbolicScenario.m_vMessageLink.begin(); ml!=l_rSymbolicScenario.m_vMessageLink.end(); ml++)
+    {
+        ILink* l_pLink=NULL;
+        CIdentifier l_oNewLinkIdentifier;
+
+        l_pScenario->connectMessage(
+            l_vBoxIdMapping[ml->m_oLinkSource.m_oBoxIdentifier],
+            ml->m_oLinkSource.m_ui32BoxOutputIndex,
+            l_vBoxIdMapping[ml->m_oLinkTarget.m_oBoxIdentifier],
+            ml->m_oLinkTarget.m_ui32BoxInputIndex,
+            l_oNewLinkIdentifier);
+        l_pLink=l_pScenario->getMessageLinkDetails(l_oNewLinkIdentifier);
+        if(l_pLink)
+        {
+            for(a=ml->m_vAttribute.begin(); a!=ml->m_vAttribute.end(); a++)
+            {
+                l_pLink->addAttribute(
+                    a->m_oIdentifier,
+                    a->m_sValue);
+            }
+            l_vMessageLinkIdMapping[ml->m_oIdentifier]=l_oNewLinkIdentifier;
+        }
+    }
+
 	for(v=l_rSymbolicScenario.m_vVisualisationWidget.begin(); v!=l_rSymbolicScenario.m_vVisualisationWidget.end(); v++)
 	{
 		IVisualisationWidget* l_pVisualisationWidget=NULL;
@@ -361,6 +390,8 @@ boolean CAlgorithmScenarioImporterContext::processStart(const CIdentifier& rIden
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Attribute)                            { m_oSymbolicScenario.m_vBox.back().m_vAttribute.push_back(SAttribute()); }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Link_Attributes)                          { }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Link_Attribute)                           { m_oSymbolicScenario.m_vLink.back().m_vAttribute.push_back(SAttribute()); }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Attributes)                          { }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Attribute)                           { m_oSymbolicScenario.m_vMessageLink.back().m_vAttribute.push_back(SAttribute()); }//Message
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_VisualisationWidget_Attributes)           { }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_VisualisationWidget_Attribute)            { m_oSymbolicScenario.m_vVisualisationWidget.back().m_vAttribute.push_back(SAttribute()); }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Boxes)                                    { }
@@ -383,8 +414,12 @@ boolean CAlgorithmScenarioImporterContext::processStart(const CIdentifier& rIden
     else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInput)                                { m_oSymbolicScenario.m_vBox.back().m_vMessageInput.push_back(SMessageInput()); }
     else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutputs)                              { }
     else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutput)                               { m_oSymbolicScenario.m_vBox.back().m_vMessageOutput.push_back(SMessageOutput()); }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLinks)                                    { }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink)                                     { m_oSymbolicScenario.m_vMessageLink.push_back(SLink()); }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source)                              { }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target)                              { }
     //
-	else m_rAlgorithmContext.getLogManager() << LogLevel_Warning << "Unexpected node identifier " << rIdentifier << "\n";
+    else m_rAlgorithmContext.getLogManager() << LogLevel_Warning << "(start) Unexpected node identifier " << rIdentifier << "\n";
 
 	return true;
 }
@@ -409,8 +444,14 @@ boolean CAlgorithmScenarioImporterContext::processIdentifier(const CIdentifier& 
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Link_Identifier)                          { m_oSymbolicScenario.m_vLink.back().m_oIdentifier=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Link_Source_BoxIdentifier)                { m_oSymbolicScenario.m_vLink.back().m_oLinkSource.m_oBoxIdentifier=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Link_Target_BoxIdentifier)                { m_oSymbolicScenario.m_vLink.back().m_oLinkTarget.m_oBoxIdentifier=rValue; }
-	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Scenario_Attribute_Identifier)            { m_oSymbolicScenario.m_vAttribute.back().m_oIdentifier=rValue; }
-	else m_rAlgorithmContext.getLogManager() << LogLevel_Warning << "Unexpected node identifier " << rIdentifier << "\n";
+
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Attribute_Identifier)                { m_oSymbolicScenario.m_vMessageLink.back().m_vAttribute.back().m_oIdentifier=rValue; }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Identifier)                          { m_oSymbolicScenario.m_vMessageLink.back().m_oIdentifier=rValue; }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source_BoxIdentifier)                { m_oSymbolicScenario.m_vMessageLink.back().m_oLinkSource.m_oBoxIdentifier=rValue; }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target_BoxIdentifier)                { m_oSymbolicScenario.m_vMessageLink.back().m_oLinkTarget.m_oBoxIdentifier=rValue; }
+
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Scenario_Attribute_Identifier)            { m_oSymbolicScenario.m_vAttribute.back().m_oIdentifier=rValue; }
+    else m_rAlgorithmContext.getLogManager() << LogLevel_Warning << "(id) Unexpected node identifier " << rIdentifier << "\n";
 
 	return true;
 }
@@ -430,11 +471,13 @@ boolean CAlgorithmScenarioImporterContext::processString(const CIdentifier& rIde
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Comment_Text)                             { m_oSymbolicScenario.m_vComment.back().m_sText=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Comment_Attribute_Value)                  { m_oSymbolicScenario.m_vComment.back().m_vAttribute.back().m_sValue=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Link_Attribute_Value)                     { m_oSymbolicScenario.m_vLink.back().m_vAttribute.back().m_sValue=rValue; }
-	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Scenario_Attribute_Value)                 { m_oSymbolicScenario.m_vAttribute.back().m_sValue=rValue; }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Attribute_Value)              { m_oSymbolicScenario.m_vMessageLink.back().m_vAttribute.back().m_sValue=rValue; }
+
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Scenario_Attribute_Value)                 { m_oSymbolicScenario.m_vAttribute.back().m_sValue=rValue; }
     else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInput_Name)                           { m_oSymbolicScenario.m_vBox.back().m_vMessageInput.back().m_sName=rValue; }
     else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutput_Name)                          { m_oSymbolicScenario.m_vBox.back().m_vMessageOutput.back().m_sName=rValue; }
 
-	else m_rAlgorithmContext.getLogManager() << LogLevel_Warning << "Unexpected node identifier " << rIdentifier << "\n";
+    else m_rAlgorithmContext.getLogManager() << LogLevel_Warning << "(string) Unexpected node identifier " << rIdentifier << "\n";
 
 	return true;
 }
@@ -447,7 +490,9 @@ boolean CAlgorithmScenarioImporterContext::processUInteger(const CIdentifier& rI
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_VisualisationWidget_NumChildren)          { m_oSymbolicScenario.m_vVisualisationWidget.back().m_ui32NbChildren=(uint32)ui64Value; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Link_Source_BoxOutputIndex)               { m_oSymbolicScenario.m_vLink.back().m_oLinkSource.m_ui32BoxOutputIndex=(uint32)ui64Value; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Link_Target_BoxInputIndex)                { m_oSymbolicScenario.m_vLink.back().m_oLinkTarget.m_ui32BoxInputIndex=(uint32)ui64Value; }
-	else m_rAlgorithmContext.getLogManager() << LogLevel_Warning << "Unexpected node identifier " << rIdentifier << "\n";
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source_BoxOutputIndex)        { m_oSymbolicScenario.m_vMessageLink.back().m_oLinkSource.m_ui32BoxOutputIndex=(uint32)ui64Value; }
+    else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target_BoxInputIndex)         { m_oSymbolicScenario.m_vMessageLink.back().m_oLinkTarget.m_ui32BoxInputIndex=(uint32)ui64Value; }
+    else m_rAlgorithmContext.getLogManager() << LogLevel_Warning << "(uint) Unexpected node identifier " << rIdentifier << "\n";
 
 	return true;
 }

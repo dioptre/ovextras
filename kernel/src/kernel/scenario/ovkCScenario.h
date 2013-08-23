@@ -97,6 +97,24 @@ namespace OpenViBE
 			virtual OpenViBE::boolean isLink(
 				const OpenViBE::CIdentifier& rBoxIdentifier) const;
 
+            virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierFromBox(
+                const OpenViBE::CIdentifier& rPreviousIdentifier,
+                const OpenViBE::CIdentifier& rBoxIdentifier) const;
+            virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierFromBoxOutput(
+                const OpenViBE::CIdentifier& rPreviousIdentifier,
+                const OpenViBE::CIdentifier& rBoxIdentifier,
+                const OpenViBE::uint32 ui32OutputIndex) const;
+            virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierToBox(
+                const OpenViBE::CIdentifier& rPreviousIdentifier,
+                const OpenViBE::CIdentifier& rBoxIdentifier) const;
+            virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierToBoxInput(
+                const OpenViBE::CIdentifier& rPreviousIdentifier,
+                const OpenViBE::CIdentifier& rBoxIdentifier,
+                const OpenViBE::uint32 ui32InputInex) const;
+            virtual OpenViBE::boolean isMessageLink(
+                const OpenViBE::CIdentifier& rBoxIdentifier) const;
+
+
             virtual const OpenViBE::Kernel::ILink* getLinkDetails(
 				const OpenViBE::CIdentifier& rLinkIdentifier) const;
 			virtual OpenViBE::Kernel::ILink* getLinkDetails(
@@ -104,6 +122,8 @@ namespace OpenViBE
 
             virtual const OpenViBE::Kernel::ILink* getMessageLinkDetails(
                 const OpenViBE::CIdentifier& rLinkIdentifier) const;
+            virtual OpenViBE::Kernel::ILink* getMessageLinkDetails(
+                const OpenViBE::CIdentifier& rLinkIdentifier);
 
 			virtual OpenViBE::boolean connect(
 				const OpenViBE::CIdentifier& rSourceBoxIdentifier,
@@ -118,6 +138,13 @@ namespace OpenViBE
 				const OpenViBE::uint32 ui32TargetBoxInputIndex);
 			virtual OpenViBE::boolean disconnect(
 				const OpenViBE::CIdentifier& rLinkIdentifier);
+
+            virtual OpenViBE::boolean connectMessage(
+                const OpenViBE::CIdentifier& rSourceBoxIdentifier,
+                const OpenViBE::uint32 ui32SourceBoxOutputIndex,
+                const OpenViBE::CIdentifier& rTargetBoxIdentifier,
+                const OpenViBE::uint32 ui32TargetBoxInputIndex,
+                OpenViBE::CIdentifier& rLinkIdentifier);
 
 			virtual OpenViBE::CIdentifier getNextProcessingUnitIdentifier(
 				const OpenViBE::CIdentifier& rPreviousIdentifier) const;

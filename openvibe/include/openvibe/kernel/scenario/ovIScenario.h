@@ -221,6 +221,9 @@ namespace OpenViBE
 			virtual OpenViBE::CIdentifier getNextLinkIdentifierFromBox(
 				const OpenViBE::CIdentifier& rPreviousIdentifier,
 				const OpenViBE::CIdentifier& rBoxIdentifier) const=0;
+			virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierFromBox(
+				const OpenViBE::CIdentifier& rPreviousIdentifier,
+				const OpenViBE::CIdentifier& rBoxIdentifier) const=0;
 			/**
 			 * \brief Gets next link identifier from fixed box output
 			 * \param rPreviousIdentifier [in] : The identifier
@@ -239,6 +242,10 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier& rPreviousIdentifier,
 				const OpenViBE::CIdentifier& rBoxIdentifier,
 				const OpenViBE::uint32 ui32OutputIndex) const=0;
+			virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierFromBoxOutput(
+				const OpenViBE::CIdentifier& rPreviousIdentifier,
+				const OpenViBE::CIdentifier& rBoxIdentifier,
+				const OpenViBE::uint32 ui32OutputIndex) const=0;
 			/**
 			 * \brief Gets next link identifier from fixed box
 			 * \param rPreviousIdentifier [in] : The identifier
@@ -252,6 +259,9 @@ namespace OpenViBE
 			 *       identifier.
 			 */
 			virtual OpenViBE::CIdentifier getNextLinkIdentifierToBox(
+				const OpenViBE::CIdentifier& rPreviousIdentifier,
+				const OpenViBE::CIdentifier& rBoxIdentifier) const=0;
+			virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierToBox(
 				const OpenViBE::CIdentifier& rPreviousIdentifier,
 				const OpenViBE::CIdentifier& rBoxIdentifier) const=0;
 			/**
@@ -272,6 +282,10 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier& rPreviousIdentifier,
 				const OpenViBE::CIdentifier& rBoxIdentifier,
 				const OpenViBE::uint32 ui32InputInex) const=0;
+			virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierToBoxInput(
+				const OpenViBE::CIdentifier& rPreviousIdentifier,
+				const OpenViBE::CIdentifier& rBoxIdentifier,
+				const OpenViBE::uint32 ui32InputInex) const=0;
 			/**
 			 * \brief Tests whether a given identifier is a link or not
 			 * \param rIdentifier [in] : the identifier to test
@@ -280,6 +294,8 @@ namespace OpenViBE
 			 * \note Requesting a bad identifier returns \e false
 			 */
 			virtual OpenViBE::boolean isLink(
+				const OpenViBE::CIdentifier& rIdentifier) const=0;
+			virtual OpenViBE::boolean isMessageLink(
 				const OpenViBE::CIdentifier& rIdentifier) const=0;
 			/**
 			 * \brief Gets the details for a specific link
@@ -295,6 +311,8 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier& rLinkIdentifier)=0;
 
 
+			virtual OpenViBE::Kernel::ILink* getMessageLinkDetails(
+				const OpenViBE::CIdentifier& rLinkIdentifier)=0;
 			virtual const OpenViBE::Kernel::ILink* getMessageLinkDetails(
 				const OpenViBE::CIdentifier& rLinkIdentifier) const=0;
 			/**
@@ -314,6 +332,13 @@ namespace OpenViBE
 			 *         rLinkIdentifier remains unchanged.
 			 */
 			virtual OpenViBE::boolean connect(
+				const OpenViBE::CIdentifier& rSourceBoxIdentifier,
+				const OpenViBE::uint32 ui32SourceBoxOutputIndex,
+				const OpenViBE::CIdentifier& rTargetBoxIdentifier,
+				const OpenViBE::uint32 ui32TargetBoxInputIndex,
+				OpenViBE::CIdentifier& rLinkIdentifier)=0;
+
+			virtual OpenViBE::boolean connectMessage(
 				const OpenViBE::CIdentifier& rSourceBoxIdentifier,
 				const OpenViBE::uint32 ui32SourceBoxOutputIndex,
 				const OpenViBE::CIdentifier& rTargetBoxIdentifier,

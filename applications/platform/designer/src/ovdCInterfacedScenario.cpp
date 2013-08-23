@@ -666,6 +666,32 @@ void CInterfacedScenario::redraw(IBox& rBox)
             l_vPoint,
             3);
 
+
+        //int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iMessageInputOffset;
+        //int32 y=yStart-(iCircleSize>>1)-m_i32ViewOffsetY;
+        int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX;
+        int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageInputOffset;
+        CIdentifier l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierToBoxInput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
+        while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
+        {
+            ILink* l_pLink=m_rScenario.getMessageLinkDetails(l_oLinkIdentifier);
+            if(l_pLink)
+            {
+                TAttributeHandler l_oAttributeHandler(*l_pLink);
+
+                if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_XTargetPosition))
+                    l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_XTargetPosition, x);
+                else
+                    l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_XTargetPosition, x);
+
+                if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_YTargetPosition))
+                    l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_YTargetPosition, y);
+                else
+                    l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_YTargetPosition, y);
+            }
+            l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierToBoxInput(l_oLinkIdentifier, rBox.getIdentifier(), i);
+        }
+
     }
     //*
     //int moutput = 3;
@@ -708,6 +734,35 @@ void CInterfacedScenario::redraw(IBox& rBox)
             TRUE,
             l_vPoint,
             3);
+
+
+
+       //*
+        //int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iMessageOutputOffset;
+        //int32 y=yStart+ySize+(iCircleSize>>1)+1-m_i32ViewOffsetY;
+        int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX+xSize;
+        int32 y=yStart+i*(iCircleSpace+iCircleSize)+ySize+(iCircleSize>>1)+1-m_i32ViewOffsetY+l_iMessageOutputOffset-ySize;
+        CIdentifier l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierFromBoxOutput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
+        while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
+        {
+            ILink* l_pLink=m_rScenario.getMessageLinkDetails(l_oLinkIdentifier);
+            if(l_pLink)
+            {
+                TAttributeHandler l_oAttributeHandler(*l_pLink);
+
+                if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_XSourcePosition))
+                    l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_XSourcePosition, x);
+                else
+                    l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_XSourcePosition, x);
+
+                if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_YSourcePosition))
+                    l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_YSourcePosition, y);
+                else
+                    l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_YSourcePosition, y);
+            }
+            l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierFromBoxOutput(l_oLinkIdentifier, rBox.getIdentifier(), i);
+        }
+        //*/
 
     }
     //*/
@@ -875,6 +930,7 @@ void CInterfacedScenario::redraw(IComment& rComment)
 
 void CInterfacedScenario::redraw(ILink& rLink)
 {
+    m_rKernelContext.getLogManager() << LogLevel_Info << " drawing link\n";
 	::GtkWidget* l_pWidget=GTK_WIDGET(m_pScenarioDrawingArea);
 	::GdkGC* l_pStencilGC=gdk_gc_new(GDK_DRAWABLE(m_pStencilBuffer));
 	::GdkGC* l_pDrawGC=gdk_gc_new(l_pWidget->window);
@@ -1105,6 +1161,14 @@ void CInterfacedScenario::snapshotCB(boolean bManageModifiedStatusFlag)
 		else
 			m_rScenario.getLinkDetails(l_oIdentifier)->removeAttribute(OV_ClassId_Selected);
 
+    //*
+    while((l_oIdentifier=m_rScenario.getNextMessageLinkIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
+        if(m_vCurrentObject[l_oIdentifier])
+            m_rScenario.getMessageLinkDetails(l_oIdentifier)->addAttribute(OV_ClassId_Selected, "");
+        else
+            m_rScenario.getMessageLinkDetails(l_oIdentifier)->removeAttribute(OV_ClassId_Selected);
+            //*/
+
 	if(bManageModifiedStatusFlag)
 	{
 		m_bHasBeenModified=true;
@@ -1285,6 +1349,20 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		l_ui32LinkCount++;
 	}
 	m_ui32LinkCount=l_ui32LinkCount;
+
+    //
+    uint32 l_ui32MessageLinkCount=0;
+    CIdentifier l_oMessageLinkIdentifier;
+    //*
+    while((l_oMessageLinkIdentifier=m_rScenario.getNextMessageLinkIdentifier(l_oMessageLinkIdentifier))!=OV_UndefinedIdentifier)
+    {
+        redraw(*m_rScenario.getMessageLinkDetails(l_oMessageLinkIdentifier));
+        l_ui32MessageLinkCount++;
+    }
+    //*/
+    //m_ui32LinkCount=l_ui32LinkCount;
+    //
+
 
 	if(m_ui32CurrentMode==Mode_Selection || m_ui32CurrentMode==Mode_SelectionAdd)
 	{
@@ -1520,7 +1598,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 					}
 					else
 					{
-						if(m_oCurrentObject.m_ui32ConnectorType==Connector_Input || m_oCurrentObject.m_ui32ConnectorType==Connector_Output)
+                        if(m_oCurrentObject.m_ui32ConnectorType==Connector_Input || m_oCurrentObject.m_ui32ConnectorType==Connector_Output || m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput || m_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput)
 						{
 							m_ui32CurrentMode=Mode_Connect;
 						}
@@ -1854,6 +1932,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 		if(m_ui32CurrentMode==Mode_Connect)
 		{
 			boolean l_bIsActuallyConnecting=false;
+            boolean l_bIsConnectionIsMessage=false;
 			uint32 l_ui32InterfacedObjectId=pickInterfacedObject((int)m_f64ReleaseMouseX, (int)m_f64ReleaseMouseY);
 			CInterfacedObject l_oCurrentObject=m_vInterfacedObject[l_ui32InterfacedObjectId];
 			CInterfacedObject l_oSourceObject;
@@ -1870,6 +1949,22 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				l_oTargetObject=l_oCurrentObject;
 				l_bIsActuallyConnecting=true;
 			}
+            //
+            if(l_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput && m_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput)
+            {
+                l_oSourceObject=l_oCurrentObject;
+                l_oTargetObject=m_oCurrentObject;
+                l_bIsActuallyConnecting=true;
+                l_bIsConnectionIsMessage = true;
+            }
+            if(l_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput && m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput)
+            {
+                l_oSourceObject=m_oCurrentObject;
+                l_oTargetObject=l_oCurrentObject;
+                l_bIsActuallyConnecting=true;
+                l_bIsConnectionIsMessage = true;
+            }
+            //
 			if(l_bIsActuallyConnecting)
 			{
 				CIdentifier l_oSourceTypeIdentifier;
@@ -1880,8 +1975,8 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				{
 					l_pSourceBox->getOutputType(l_oSourceObject.m_ui32ConnectorIndex, l_oSourceTypeIdentifier);
 					l_pTargetBox->getInputType(l_oTargetObject.m_ui32ConnectorIndex, l_oTargetTypeIdentifier);
-					if(m_rKernelContext.getTypeManager().isDerivedFromStream(l_oSourceTypeIdentifier, l_oTargetTypeIdentifier)
-					|| m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_AllowUpCastConnection}", false))
+                    if((m_rKernelContext.getTypeManager().isDerivedFromStream(l_oSourceTypeIdentifier, l_oTargetTypeIdentifier)
+                            || m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_AllowUpCastConnection}", false))&&(!l_bIsConnectionIsMessage))
 					{
 						CIdentifier l_oLinkIdentifier;
 						m_rScenario.connect(
@@ -1890,8 +1985,24 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 							l_oTargetObject.m_oIdentifier,
 							l_oTargetObject.m_ui32ConnectorIndex,
 							l_oLinkIdentifier);
+                        m_rKernelContext.getLogManager() << LogLevel_Info << "snap\n";
 						this->snapshotCB();
 					}
+
+                    //or if it is a message
+                    else if (l_bIsConnectionIsMessage)
+                    {
+                        m_rKernelContext.getLogManager() << LogLevel_Info << "connect message\n";
+                        CIdentifier l_oLinkIdentifier;
+                        m_rScenario.connectMessage(
+                            l_oSourceObject.m_oIdentifier,
+                            l_oSourceObject.m_ui32ConnectorIndex,
+                            l_oTargetObject.m_oIdentifier,
+                            l_oTargetObject.m_ui32ConnectorIndex,
+                            l_oLinkIdentifier);
+                        this->snapshotCB();
+                    }
+                    //
 					else
 					{
 						m_rKernelContext.getLogManager() << LogLevel_Warning << "Invalid connection\n";
@@ -1936,7 +2047,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				this->snapshotCB();
 			}
 		}
-
+m_rKernelContext.getLogManager() << LogLevel_Info << "redraw\n";
 		this->redraw();
 	}
 
