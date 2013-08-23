@@ -5,7 +5,7 @@
 				<ScaleSize>0.6</ScaleSize>
 				<ForegroundColor>20,20,20</ForegroundColor>
 				<BackgroundColor>10,10,10</BackgroundColor>
-				<Source>/openvibe-applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>
@@ -14,7 +14,7 @@
 				<ScaleSize>0.85</ScaleSize>
 				<ForegroundColor>70,70,70</ForegroundColor>
 				<BackgroundColor>10,10,10</BackgroundColor>
-				<Source>/openvibe-applications/externalP300Stimulator/smiley.png</Source>
+				<Source>openvibe/applications/externalP300Stimulator/smiley.png</Source>
 			</PictureSymbol>
 		</Event>	
 		<Event id="target">
@@ -22,7 +22,7 @@
 				<ScaleSize>0.7</ScaleSize>
 				<ForegroundColor>20,20,20</ForegroundColor>
 				<BackgroundColor>10,10,65</BackgroundColor>
-				<Source>/openvibe-applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>	
@@ -31,7 +31,7 @@
 				<ScaleSize>0.7</ScaleSize>
 				<ForegroundColor>10,20,10</ForegroundColor>
 				<BackgroundColor>0,40,0</BackgroundColor>
-				<Source>/openvibe-applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>
@@ -40,7 +40,7 @@
 				<ScaleSize>0.7</ScaleSize>
 				<ForegroundColor>50,20,20</ForegroundColor>
 				<BackgroundColor>92,5,5</BackgroundColor>
-				<Source>/openvibe-applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>			
@@ -51,10 +51,10 @@
 	<ResultArea x="0.05" y="0.05" width="0.65" height="0.075">
 		<!--BackgroundColor>10,10,10</BackgroundColor-->
 	</ResultArea>
-	<PredictionArea x="0.05" y="0.25" width="0" height="0" ncolumns="0" nrows="0">
+	<PredictionArea x="0.05" y="0.25" width="0.9" height="0.15" ncolumns="3" nrows="2">
 		<!--BackgroundColor>10,10,10</BackgroundColor-->
 	</PredictionArea>
-	<P300Keyboard x="0.05" y="0.25" width="0.9" height="0.7" numberOfStandardKeys="37">	
+	<P300Keyboard x="0.05" y="0.45" width="0.9" height="0.50" numberOfStandardKeys="37">	
 		<Key x="0" y="0.8" width="0.1" height="0.2">
 			<Action>write</Action>
 			<Event id="noflash"><TextSymbol><Label>A</Label></TextSymbol></Event>
@@ -313,6 +313,110 @@
 			<Event id="target"><TextSymbol><Label>UNDO</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>UNDO</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>UNDO</Label></TextSymbol></Event>
-		</Key>			
+		</Key>		
+		
+		
+		<Key x="1" y="1" width="1" height="1">
+			<Action>wordprediction</Action>
+			<Event id="flash">			
+				<TextSymbol>
+					<ScaleSize>0.9</ScaleSize>
+					<ForegroundColor>70,70,70</ForegroundColor>
+					<BackgroundColor>10,10,10</BackgroundColor>
+					<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+					<Label>A</Label>
+				</TextSymbol>
+			</Event>			
+			<Event id="noflash"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="target"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="correct_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="wrong_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+		</Key>
+		<Key x="1" y="1" width="1" height="1">
+			<Action>wordprediction</Action>
+			<Event id="flash">			
+				<TextSymbol>
+					<ScaleSize>0.9</ScaleSize>
+					<ForegroundColor>70,70,70</ForegroundColor>
+					<BackgroundColor>10,10,10</BackgroundColor>
+					<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+					<Label>A</Label>
+				</TextSymbol>
+			</Event>			
+			<Event id="noflash"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="target"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="correct_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="wrong_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+		</Key>
+		<Key x="1" y="1" width="1" height="1">
+			<Action>wordprediction</Action>
+			<Event id="flash">			
+				<TextSymbol>
+					<ScaleSize>0.9</ScaleSize>
+					<ForegroundColor>70,70,70</ForegroundColor>
+					<BackgroundColor>10,10,10</BackgroundColor>
+					<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+					<Label>A</Label>
+				</TextSymbol>
+			</Event>			
+			<Event id="noflash"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="target"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="correct_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="wrong_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+		</Key>
+		<Key  x="1" y="1" width="1" height="1">
+			<Action>wordprediction</Action>
+			<Event id="flash">			
+				<TextSymbol>
+					<ScaleSize>0.9</ScaleSize>
+					<ForegroundColor>70,70,70</ForegroundColor>
+					<BackgroundColor>10,10,10</BackgroundColor>
+					<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+					<Label>A</Label>
+				</TextSymbol>
+			</Event>			
+			<Event id="noflash"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="target"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="correct_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="wrong_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+		</Key>
+		<Key x="1" y="1" width="1" height="1">
+			<Action>wordprediction</Action>
+			<Event id="flash">			
+				<TextSymbol>
+					<ScaleSize>0.9</ScaleSize>
+					<ForegroundColor>70,70,70</ForegroundColor>
+					<BackgroundColor>10,10,10</BackgroundColor>
+					<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+					<Label>A</Label>
+				</TextSymbol>
+			</Event>
+			<Event id="noflash"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="target"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="correct_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="wrong_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+		</Key>
+		<Key x="1" y="1" width="1" height="1">
+			<Action>wordprediction</Action>
+			<Event id="flash">			
+				<TextSymbol>
+					<ScaleSize>0.9</ScaleSize>
+					<ForegroundColor>70,70,70</ForegroundColor>
+					<BackgroundColor>10,10,10</BackgroundColor>
+					<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+					<Label>A</Label>
+				</TextSymbol>
+			</Event>			
+			<Event id="noflash"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="target"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="correct_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+			<Event id="wrong_feedback"><TextSymbol><Label></Label></TextSymbol></Event>
+		</Key>		
+		<!--Key>
+			<Action>undo</Action>
+			<Event id="noflash">
+				<Label>UNDO</Label>
+			</Event>
+		</Key-->		
 	</P300Keyboard>
 </ScreenLayout>

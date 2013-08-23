@@ -326,7 +326,7 @@ int main (int argc, char *argv[])
 	externalVisualiser->initializeOpenViBEKernel();
 	
 	externalVisualiser->m_pInterfacePropReader = new P300InterfacePropertyReader(externalVisualiser->m_pKernelContext);
-	externalVisualiser->m_pInterfacePropReader->readPropertiesFromFile(OpenViBE::Directories::getDistRootDir() + "/share/openvibe-applications/externalP300Stimulator/interface-properties.xml");
+	externalVisualiser->m_pInterfacePropReader->readPropertiesFromFile(OpenViBE::Directories::getDistRootDir() + "/share/openvibe/applications/externalP300Stimulator/interface-properties.xml");
 	externalVisualiser->m_pScreenLayoutReader = new P300ScreenLayoutReader(externalVisualiser->m_pKernelContext);
 	externalVisualiser->m_pScreenLayoutReader->readPropertiesFromFile(externalVisualiser->m_pInterfacePropReader->getScreenDefinitionFile());
 	externalVisualiser->m_pStimulatorPropReader = new P300StimulatorPropertyReader(externalVisualiser->m_pKernelContext, externalVisualiser->m_pScreenLayoutReader->getSymbolList());

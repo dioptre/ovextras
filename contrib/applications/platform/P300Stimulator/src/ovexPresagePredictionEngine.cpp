@@ -14,7 +14,7 @@ PresagePredictionEngine::PresagePredictionEngine(CString nGramDatabaseName)
 	#ifdef TARGET_OS_Linux
 	m_sSpellerContext = std::string("");
 	m_pPresageCallback = new MyPresageCallback(m_sSpellerContext);
-	CString l_sPath(OpenViBE::Directories::getDistRootDir() + "/share/openvibe-applications/externalP300Stimulator/presage.xml");
+	CString l_sPath(OpenViBE::Directories::getDistRootDir() + "/share/openvibe/applications/externalP300Stimulator/presage.xml");
 	m_pPresageEngine = new Presage(m_pPresageCallback,l_sPath.toASCIIString());
 	m_pPresageEngine->config("Presage.Predictors.DefaultSmoothedNgramPredictor.DBFILENAME",nGramDatabaseName.toASCIIString());
 	#endif
@@ -23,7 +23,7 @@ PresagePredictionEngine::PresagePredictionEngine(CString nGramDatabaseName)
 	const char* FUTURE = "";
 	if (PRESAGE_OK == 
 		presage_new_with_config (get_past_stream, (void *) PresagePredictionEngine::m_sSpellerContext, get_future_stream, (void *) FUTURE, 
-		(OpenViBE::Directories::getDistRootDir() + "/share/openvibe-applications/externalP300Stimulator/presage.xml").toASCIIString(), &m_pPresageEngine))
+		(OpenViBE::Directories::getDistRootDir() + "/share/openvibe/applications/externalP300Stimulator/presage.xml").toASCIIString(), &m_pPresageEngine))
 	{
 		presage_config_set(m_pPresageEngine, "Presage.Predictors.DefaultSmoothedNgramPredictor.DBFILENAME", nGramDatabaseName.toASCIIString());	
 	}

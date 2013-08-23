@@ -5,16 +5,16 @@
 				<ScaleSize>0.7</ScaleSize>
 				<ForegroundColor>20,20,20</ForegroundColor>
 				<BackgroundColor>10,10,10</BackgroundColor>
-				<Source>/openvibe-applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>
 		<Event id="flash">
 			<PictureSymbol>
 				<ScaleSize>0.8</ScaleSize>
-				<ForegroundColor>70,70,70</ForegroundColor>
+				<ForegroundColor>90,90,90</ForegroundColor>
 				<BackgroundColor>10,10,10</BackgroundColor>
-				<Source>/openvibe-applications/externalP300Stimulator/smiley.png</Source>
+				<Source>openvibe/applications/externalP300Stimulator/smiley.png</Source>
 			</PictureSymbol>
 		</Event>	
 		<Event id="target">
@@ -22,7 +22,7 @@
 				<ScaleSize>0.7</ScaleSize>
 				<ForegroundColor>20,20,20</ForegroundColor>
 				<BackgroundColor>10,10,65</BackgroundColor>
-				<Source>/openvibe-applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>	
@@ -31,7 +31,7 @@
 				<ScaleSize>0.7</ScaleSize>
 				<ForegroundColor>10,20,10</ForegroundColor>
 				<BackgroundColor>0,40,0</BackgroundColor>
-				<Source>/openvibe-applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>
@@ -40,7 +40,7 @@
 				<ScaleSize>0.7</ScaleSize>
 				<ForegroundColor>50,20,20</ForegroundColor>
 				<BackgroundColor>92,5,5</BackgroundColor>
-				<Source>/openvibe-applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>			
@@ -58,6 +58,7 @@
 		<!-- keyboard specification from left to right and from top to bottom -->
 		<Key x="0" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>~</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>~</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>~</Label></TextSymbol></Event>
@@ -65,6 +66,7 @@
 		</Key>	
 		<Key x="0.0526" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>and</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>and</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>and</Label></TextSymbol></Event>
@@ -72,6 +74,7 @@
 		</Key>
 		<Key x="0.1053" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>é</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>é</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>é</Label></TextSymbol></Event>
@@ -79,6 +82,7 @@
 		</Key>
 		<Key x="0.1579" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>"</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>"</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>"</Label></TextSymbol></Event>
@@ -86,6 +90,7 @@
 		</Key>
 		<Key x="0.2105" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>'</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>'</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>'</Label></TextSymbol></Event>
@@ -93,6 +98,7 @@
 		</Key>
 		<Key x="0.2632" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>(</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>(</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>(</Label></TextSymbol></Event>
@@ -100,6 +106,7 @@
 		</Key>
 		<Key x="0.3158" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>-</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>-</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>-</Label></TextSymbol></Event>
@@ -107,6 +114,7 @@
 		</Key>
 		<Key x="0.3684" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>è</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>è</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>è</Label></TextSymbol></Event>
@@ -114,6 +122,7 @@
 		</Key>
 		<Key x="0.4211" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>_</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>_</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>_</Label></TextSymbol></Event>
@@ -121,6 +130,7 @@
 		</Key>
 		<Key x="0.4737" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>ç</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>ç</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>ç</Label></TextSymbol></Event>
@@ -128,6 +138,7 @@
 		</Key>
 		<Key x="0.5263" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>à</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>à</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>à</Label></TextSymbol></Event>
@@ -135,6 +146,7 @@
 		</Key>
 		<Key x="0.5789" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>)</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>)</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>)</Label></TextSymbol></Event>
@@ -142,13 +154,15 @@
 		</Key>
 		<Key x="0.6316" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>=</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>=</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>=</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>=</Label></TextSymbol></Event>
 		</Key>
-		<Key x="0.6842" y="0.8" width="0.1053" height="0.2">
+		<Key x="0.7369" y="0.8" width="0.0526" height="0.2">
 			<Action>backspace</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>back</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>back</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>back</Label></TextSymbol></Event>
@@ -156,6 +170,7 @@
 		</Key>
 		<Key x="0.7895" y="0.8" width="0.0526" height="0.2">
 			<Action>numlock</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>NUM</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>NUM</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>NUM</Label></TextSymbol></Event>
@@ -163,6 +178,7 @@
 		</Key>
 		<Key x="0.8421" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>/</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>/</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>/</Label></TextSymbol></Event>
@@ -170,6 +186,7 @@
 		</Key>
 		<Key x="0.8947" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>*</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>*</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>*</Label></TextSymbol></Event>
@@ -177,6 +194,7 @@
 		</Key>
 		<Key x="0.9474" y="0.8" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>-</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>-</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>-</Label></TextSymbol></Event>
@@ -184,8 +202,9 @@
 		</Key>
 		
 		<!-- SECOND ROW -->
-		<Key x="0" y="0.6" width="0.0825" height="0.2">
+		<Key x="0" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>tab</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>tab</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>tab</Label></TextSymbol></Event>
@@ -193,6 +212,7 @@
 		</Key>
 		<Key x="0.0825" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>A</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>A</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>A</Label></TextSymbol></Event>
@@ -200,6 +220,7 @@
 		</Key>
 		<Key x="0.1351" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>Z</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>Z</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>Z</Label></TextSymbol></Event>
@@ -207,6 +228,7 @@
 		</Key>
 		<Key x="0.1878" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>E</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>E</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>E</Label></TextSymbol></Event>
@@ -214,6 +236,7 @@
 		</Key>
 		<Key x="0.2404" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>R</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>R</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>R</Label></TextSymbol></Event>
@@ -221,6 +244,7 @@
 		</Key>
 		<Key x="0.2930" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>T</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>T</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>T</Label></TextSymbol></Event>
@@ -228,6 +252,7 @@
 		</Key>
 		<Key x="0.3457" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>Y</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>Y</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>Y</Label></TextSymbol></Event>
@@ -235,6 +260,7 @@
 		</Key>
 		<Key x="0.3983" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>U</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>U</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>U</Label></TextSymbol></Event>
@@ -242,6 +268,7 @@
 		</Key>
 		<Key x="0.4509" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>I</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>I</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>I</Label></TextSymbol></Event>
@@ -249,6 +276,7 @@
 		</Key>
 		<Key x="0.5036" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>O</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>O</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>O</Label></TextSymbol></Event>
@@ -256,6 +284,7 @@
 		</Key>
 		<Key x="0.5562" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>P</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>P</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>P</Label></TextSymbol></Event>
@@ -263,20 +292,23 @@
 		</Key>
 		<Key x="0.6088" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>^</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>^</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>^</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>^</Label></TextSymbol></Event>
 		</Key>
-		<Key x="0.6614" y="0.6" width="0.0668" height="0.2">
+		<Key x="0.6614" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>$</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>$</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>$</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>$</Label></TextSymbol></Event>
 		</Key>
-		<Key x="0.7282" y="0.4" width="0.0613" height="0.4">
+		<Key x="0.7369" y="0.4" width="0.0526" height="0.4">
 			<Action>return</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>RTN</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>RTN</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>RTN</Label></TextSymbol></Event>
@@ -284,6 +316,7 @@
 		</Key>
 		<Key x="0.7895" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>7</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>7</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>7</Label></TextSymbol></Event>
@@ -291,6 +324,7 @@
 		</Key>
 		<Key x="0.8421" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>8</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>8</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>8</Label></TextSymbol></Event>
@@ -298,6 +332,7 @@
 		</Key>
 		<Key x="0.8947" y="0.6" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>9</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>9</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>9</Label></TextSymbol></Event>
@@ -305,6 +340,7 @@
 		</Key>
 		<Key x="0.9474" y="0.4" width="0.0526" height="0.4">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>+</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>+</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>+</Label></TextSymbol></Event>
@@ -312,8 +348,9 @@
 		</Key>
 		
 		<!-- THIRD ROW -->
-		<Key x="0" y="0.4" width="0.0967" height="0.2">
+		<Key x="0" y="0.4" width="0.0526" height="0.2">
 			<Action>caps</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>CAPS</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>CAPS</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>CAPS</Label></TextSymbol></Event>
@@ -321,6 +358,7 @@
 		</Key>
 		<Key x="0.0967" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>Q</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>Q</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>Q</Label></TextSymbol></Event>
@@ -328,6 +366,7 @@
 		</Key>
 		<Key x="0.1493" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>S</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>S</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>S</Label></TextSymbol></Event>
@@ -335,6 +374,7 @@
 		</Key>
 		<Key x="0.2020" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>D</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>D</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>D</Label></TextSymbol></Event>
@@ -342,6 +382,7 @@
 		</Key>
 		<Key x="0.2546" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>F</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>F</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>F</Label></TextSymbol></Event>
@@ -349,6 +390,7 @@
 		</Key>
 		<Key x="0.3072" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>G</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>G</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>G</Label></TextSymbol></Event>
@@ -356,6 +398,7 @@
 		</Key>
 		<Key x="0.3599" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>H</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>H</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>H</Label></TextSymbol></Event>
@@ -363,6 +406,7 @@
 		</Key>
 		<Key x="0.4125" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>J</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>J</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>J</Label></TextSymbol></Event>
@@ -370,6 +414,7 @@
 		</Key>
 		<Key x="0.4651" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>K</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>K</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>K</Label></TextSymbol></Event>
@@ -377,6 +422,7 @@
 		</Key>
 		<Key x="0.5178" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>L</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>L</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>L</Label></TextSymbol></Event>
@@ -384,6 +430,7 @@
 		</Key>
 		<Key x="0.5704" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>M</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>M</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>M</Label></TextSymbol></Event>
@@ -391,6 +438,7 @@
 		</Key>
 		<Key x="0.6230" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>%</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>%</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>%</Label></TextSymbol></Event>
@@ -398,6 +446,7 @@
 		</Key>
 		<Key x="0.6756" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>ù</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>ù</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>ù</Label></TextSymbol></Event>
@@ -405,6 +454,7 @@
 		</Key>
 		<Key x="0.7895" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>4</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>4</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>4</Label></TextSymbol></Event>
@@ -412,6 +462,7 @@
 		</Key>
 		<Key x="0.8421" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>5</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>5</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>5</Label></TextSymbol></Event>
@@ -419,6 +470,7 @@
 		</Key>
 		<Key x="0.8947" y="0.4" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>6</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>6</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>6</Label></TextSymbol></Event>
@@ -426,8 +478,9 @@
 		</Key>
 		
 		<!-- FOURTH ROW -->
-		<Key x="0" y="0.2" width="0.0597" height="0.2">
+		<Key x="0" y="0.2" width="0.0526" height="0.2">
 			<Action>shift</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>shift</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>shift</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>shift</Label></TextSymbol></Event>
@@ -435,6 +488,7 @@
 		</Key>
 		<Key x="0.0597" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>gt</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>gt</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>gt</Label></TextSymbol></Event>
@@ -442,6 +496,7 @@
 		</Key>
 		<Key x="0.1123" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>W</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>W</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>W</Label></TextSymbol></Event>
@@ -449,6 +504,7 @@
 		</Key>
 		<Key x="0.1650" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>X</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>X</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>X</Label></TextSymbol></Event>
@@ -456,6 +512,7 @@
 		</Key>
 		<Key x="0.2176" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>C</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>C</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>C</Label></TextSymbol></Event>
@@ -463,6 +520,7 @@
 		</Key>
 		<Key x="0.2702" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>V</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>V</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>V</Label></TextSymbol></Event>
@@ -470,6 +528,7 @@
 		</Key>
 		<Key x="0.3229" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>B</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>B</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>B</Label></TextSymbol></Event>
@@ -477,6 +536,7 @@
 		</Key>
 		<Key x="0.3755" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>N</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>N</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>N</Label></TextSymbol></Event>
@@ -484,6 +544,7 @@
 		</Key>
 		<Key x="0.4281" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>,</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>,</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>,</Label></TextSymbol></Event>
@@ -491,6 +552,7 @@
 		</Key>
 		<Key x="0.4808" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>?</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>?</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>?</Label></TextSymbol></Event>
@@ -498,6 +560,7 @@
 		</Key>
 		<Key x="0.5334" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>:</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>:</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>:</Label></TextSymbol></Event>
@@ -505,13 +568,15 @@
 		</Key>
 		<Key x="0.5860" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>!</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>!</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>!</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>!</Label></TextSymbol></Event>
 		</Key>
-		<Key x="0.6386" y="0.2" width="0.1509" height="0.2">
+		<Key x="0.7369" y="0.2" width="0.0526" height="0.2">
 			<Action>shift</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>shift</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>shift</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>shift</Label></TextSymbol></Event>
@@ -519,6 +584,7 @@
 		</Key>		
 		<Key x="0.7895" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>1</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>1</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>1</Label></TextSymbol></Event>
@@ -526,6 +592,7 @@
 		</Key>
 		<Key x="0.8421" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>2</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>2</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>2</Label></TextSymbol></Event>
@@ -533,6 +600,7 @@
 		</Key>
 		<Key x="0.8947" y="0.2" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>3</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>3</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>3</Label></TextSymbol></Event>
@@ -540,6 +608,7 @@
 		</Key>
 		<Key x="0.9474" y="0" width="0.0526" height="0.4">
 			<Action>enter</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>enter</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>enter</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>enter</Label></TextSymbol></Event>
@@ -547,57 +616,65 @@
 		</Key>		
 		
 		<!-- FIFTH ROW -->
-		<Key x="0" y="0" width="0.0744" height="0.2">
+		<Key x="0" y="0" width="0.0526" height="0.2">
 			<Action>control</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>ctrl</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>ctrl</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>ctrl</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>ctrl</Label></TextSymbol></Event>
 		</Key>
-		<Key x="0.0744" y="0" width="0.0654" height="0.2">
+		<Key x="0.0526" y="0" width="0.0526" height="0.2">
 			<Action>windows</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>winkey</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>winkey</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>winkey</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>winkey</Label></TextSymbol></Event>
 		</Key>
-		<Key x="0.1397" y="0" width="0.0744" height="0.2">
+		<Key x="0.1052" y="0" width="0.0526" height="0.2">
 			<Action>alt</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>alt</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>alt</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>alt</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>alt</Label></TextSymbol></Event>
 		</Key>
-		<Key x="0.2141" y="0" width="0.3614" height="0.2">
+		<Key x="0.3947" y="0" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label> </Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label> </Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label> </Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label> </Label></TextSymbol></Event>
 		</Key>
-		<Key x="0.5755" y="0" width="0.0744" height="0.2">
+		<Key x="0.6317" y="0" width="0.0526" height="0.2">
 			<Action>altgr</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>altgr</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>altgr</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>altgr</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>altgr</Label></TextSymbol></Event>
 		</Key>
-		<Key x="0.6499" y="0" width="0.0654" height="0.2">
+		<Key x="0.6843" y="0" width="0.0526" height="0.2">
 			<Action>menukey</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>menu</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>menu</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>menu</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>menu</Label></TextSymbol></Event>
 		</Key>
-		<Key x="0.7153" y="0" width="0.0742" height="0.2">
+		<Key x="0.7369" y="0" width="0.0526" height="0.2">
 			<Action>control</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>ctrl</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>ctrl</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>ctrl</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>ctrl</Label></TextSymbol></Event>
 		</Key>		
-		<Key x="0.7895" y="0" width="0.1052" height="0.2">
+		<Key x="0.7895" y="0" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>0</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>0</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>0</Label></TextSymbol></Event>
@@ -605,6 +682,7 @@
 		</Key>
 		<Key x="0.8947" y="0" width="0.0526" height="0.2">
 			<Action>write</Action>
+			
 			<Event id="noflash"><TextSymbol><Label>.</Label></TextSymbol></Event>
 			<Event id="target"><TextSymbol><Label>.</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>.</Label></TextSymbol></Event>
