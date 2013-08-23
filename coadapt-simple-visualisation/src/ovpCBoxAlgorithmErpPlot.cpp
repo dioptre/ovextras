@@ -467,7 +467,8 @@ boolean CBoxAlgorithmErpPlot::initialize(void)
         //initialize graphic component
         ::GtkBuilder* m_pMainWidgetInterface=gtk_builder_new(); // glade_xml_new(m_sInterfaceFilename.toASCIIString(), "p300-speller-toolbar", NULL);
         GError* error = NULL;
-        gtk_builder_add_from_file(m_pMainWidgetInterface, OpenViBE::Directories::getDataDir() + "/openvibe-plugins/simple-visualisation/erp-plot.ui", &error);
+	  std::cout << "Path to erp.ui " << OpenViBE::Directories::getDataDir() + CString("/plugins/simple-visualisation/erp-plot.ui\n");
+        gtk_builder_add_from_file(m_pMainWidgetInterface, OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/erp-plot.ui", &error);
 
         m_pDrawWindow=GTK_WIDGET(gtk_builder_get_object(m_pMainWidgetInterface, "plot-window"));
 

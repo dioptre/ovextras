@@ -35,7 +35,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 	
 	//create shared vector for meta info (type and name)
 	const ShmemAllocatorMetaInfo alloc_inst_metainfo(m_oSharedMemoryArray.get_segment_manager());
-	MyVectorMetaInfo* l_vMetaInfoVector  = m_oSharedMemoryArray.construct<MyVectorMetaInfo>("MetaInfo")(alloc_inst_metainfo);
+	MyVectorMetaInfo* l_vMetaInfoVector  = m_oSharedMemoryArray.construct<MyVectorMetaInfo>("MetaInfo")(std::less<ShmString>(),alloc_inst_metainfo);
 	const StringAllocator alloc_inst_string(m_oSharedMemoryArray.get_segment_manager());
 	
 	//fill meta info vector and create shared vector variable for the appropriate types
@@ -51,7 +51,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 		{
 			ShmString l_sShmVariableName("Matrix", alloc_inst_string);
 			l_sShmVariableName += ShmString(convert.str().c_str(), alloc_inst_string);
-			l_vMetaInfoVector->push_back(std::pair<ShmString,CIdentifier>(l_sShmVariableName,l_TypeIndentifier));
+			l_vMetaInfoVector->insert(std::make_pair<const ShmString,CIdentifier>(l_sShmVariableName,l_TypeIndentifier));
 
 			const ShmemAllocatorMatrix alloc_inst(m_oSharedMemoryArray.get_segment_manager());
 			m_vStreamedMatrix.push_back(m_oSharedMemoryArray.construct<MyVectorStreamedMatrix>(l_sShmVariableName.c_str())(alloc_inst));
@@ -62,7 +62,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 		{
 			ShmString l_sShmVariableName("Stimuli", alloc_inst_string);
 			l_sShmVariableName += ShmString(convert.str().c_str(), alloc_inst_string);
-			l_vMetaInfoVector->push_back(std::pair<ShmString,CIdentifier>(l_sShmVariableName,l_TypeIndentifier));
+			l_vMetaInfoVector->insert(std::make_pair<const ShmString,CIdentifier>(l_sShmVariableName,l_TypeIndentifier));
 			
 			const ShmemAllocatorStimulation alloc_inst(m_oSharedMemoryArray.get_segment_manager());
 			m_vStimuliSet.push_back(m_oSharedMemoryArray.construct<MyVectorStimulation>(l_sShmVariableName.c_str())(alloc_inst));

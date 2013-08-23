@@ -11,6 +11,7 @@
 #include <vector>
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/containers/vector.hpp>
+#include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/containers/string.hpp>
@@ -44,8 +45,8 @@ namespace OpenViBEPlugins
 		typedef basic_string<char, std::char_traits<char>, CharAllocator> ShmString;
 		typedef allocator<ShmString, managed_shared_memory::segment_manager> StringAllocator;      
 		//typedef vector<ShmString, StringAllocator> MyShmStringVector;		
-		typedef allocator< std::pair<ShmString, OpenViBE::CIdentifier > , managed_shared_memory::segment_manager>  ShmemAllocatorMetaInfo;
-		typedef vector< std::pair<ShmString, OpenViBE::CIdentifier >, ShmemAllocatorMetaInfo > MyVectorMetaInfo;
+		typedef allocator< std::pair<const ShmString, OpenViBE::CIdentifier > , managed_shared_memory::segment_manager>  ShmemAllocatorMetaInfo;
+		typedef map<ShmString, OpenViBE::CIdentifier, std::less<ShmString>, ShmemAllocatorMetaInfo> MyVectorMetaInfo;
 		
 		typedef allocator<OpenViBE::uint32, managed_shared_memory::segment_manager>  ShmemAllocatorStimulation;
 		typedef allocator<offset_ptr<SMatrix>, managed_shared_memory::segment_manager>  ShmemAllocatorMatrix;
