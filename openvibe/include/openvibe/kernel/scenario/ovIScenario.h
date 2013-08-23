@@ -362,6 +362,11 @@ namespace OpenViBE
 				const OpenViBE::uint32 ui32SourceBoxOutputIndex,
 				const OpenViBE::CIdentifier& rTargetBoxIdentifier,
 				const OpenViBE::uint32 ui32TargetBoxInputIndex)=0;
+virtual OpenViBE::boolean disconnectMessage(
+				const OpenViBE::CIdentifier& rSourceBoxIdentifier,
+				const OpenViBE::uint32 ui32SourceBoxOutputIndex,
+				const OpenViBE::CIdentifier& rTargetBoxIdentifier,
+				const OpenViBE::uint32 ui32TargetBoxInputIndex)=0;
 			/**
 			 * \brief Deletes a connection between two boxes
 			 * \param rLinkIdentifier [out] : The identifier
@@ -370,6 +375,8 @@ namespace OpenViBE
 			 * \return \e false in case of error.
 			 */
 			virtual OpenViBE::boolean disconnect(
+				const OpenViBE::CIdentifier& rLinkIdentifier)=0;
+virtual OpenViBE::boolean disconnectMessage(
 				const OpenViBE::CIdentifier& rLinkIdentifier)=0;
 
 			//@}
