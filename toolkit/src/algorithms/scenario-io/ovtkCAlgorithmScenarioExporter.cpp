@@ -19,6 +19,7 @@ namespace OpenViBEToolkit
 			boolean exportBox(IMemoryBuffer& rMemoryBuffer, const IBox& rBox);
 			boolean exportComment(IMemoryBuffer& rMemoryBuffer, const IComment& rComment);
 			boolean exportLink(IMemoryBuffer& rMemoryBuffer, const ILink& rLink);
+            boolean exportMessageLink(IMemoryBuffer& rMemoryBuffer, const ILink& rLink);
 			boolean exportVisualisationTree(IMemoryBuffer& rMemoryBuffer, const IVisualisationTree& rVisualisationTree);
 			boolean exportVisualisationWidget(IMemoryBuffer& rMemoryBuffer, const IVisualisationTree& rVisualisationTree, const IVisualisationWidget& rVisualisationWidget);
 
@@ -84,6 +85,13 @@ boolean CAlgorithmScenarioExporter::process(void)
 	  while((l_oLinkIdentifier=l_pScenario->getNextLinkIdentifier(l_oLinkIdentifier))!=OV_UndefinedIdentifier)
 	   l_oHelper.exportLink(l_oTemporaryMemoryBuffer, *l_pScenario->getLinkDetails(l_oLinkIdentifier));
 	 this->exportStop(l_oTemporaryMemoryBuffer);
+
+      //
+      this->exportStart(l_oTemporaryMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_MessageLinks);
+       while((l_oLinkIdentifier=l_pScenario->getNextMessageLinkIdentifier(l_oLinkIdentifier))!=OV_UndefinedIdentifier)
+        l_oHelper.exportMessageLink(l_oTemporaryMemoryBuffer, *l_pScenario->getMessageLinkDetails(l_oLinkIdentifier));
+      this->exportStop(l_oTemporaryMemoryBuffer);
+      //
 
 	 this->exportStart(l_oTemporaryMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Comments);
 	  while((l_oCommentIdentifier=l_pScenario->getNextCommentIdentifier(l_oCommentIdentifier))!=OV_UndefinedIdentifier)
@@ -258,6 +266,34 @@ boolean CAlgorithmScenarioExporterHelper::exportLink(IMemoryBuffer& rMemoryBuffe
 	m_rParent.exportStop(rMemoryBuffer);
 
 	return true;
+}
+
+boolean CAlgorithmScenarioExporterHelper::exportMessageLink(IMemoryBuffer& rMemoryBuffer, const ILink& rLink)
+{
+    CIdentifier l_oSourceBoxIdentifier;
+    CIdentifier l_oTargetBoxIdentifier;
+    uint32 l_ui32SourceBoxOutputIndex=0xffffffff;
+    uint32 l_ui32TargetBoxInputIndex=0xffffffff;
+
+    rLink.getSource(l_oSourceBoxIdentifier, l_ui32SourceBoxOutputIndex);
+    rLink.getTarget(l_oTargetBoxIdentifier, l_ui32TargetBoxInputIndex);
+
+    m_rParent.exportStart(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink);
+     m_rParent.exportIdentifier(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Identifier, rLink.getIdentifier());
+     m_rParent.exportStart(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source);
+      m_rParent.exportIdentifier(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source_BoxIdentifier, l_oSourceBoxIdentifier);
+      m_rParent.exportUInteger(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source_BoxOutputIndex, l_ui32SourceBoxOutputIndex);
+     m_rParent.exportStop(rMemoryBuffer);
+     m_rParent.exportStart(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target);
+      m_rParent.exportIdentifier(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target_BoxIdentifier, l_oTargetBoxIdentifier);
+      m_rParent.exportUInteger(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target_BoxInputIndex, l_ui32TargetBoxInputIndex);
+     m_rParent.exportStop(rMemoryBuffer);
+
+    __export_attributes__(rLink, m_rParent, rMemoryBuffer, MessageLink);
+
+    m_rParent.exportStop(rMemoryBuffer);
+
+    return true;
 }
 
 boolean CAlgorithmScenarioExporterHelper::exportVisualisationTree(IMemoryBuffer& rMemoryBuffer, const IVisualisationTree& rVisualisationTree)

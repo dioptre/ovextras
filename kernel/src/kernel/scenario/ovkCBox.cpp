@@ -812,7 +812,7 @@ boolean CBox::acceptVisitor(
 boolean CBox::addMessageInput(
     const CString& sName)
 {
-    this->getLogManager() << LogLevel_Fatal << "adding message input named "<< sName << "for box "<< m_sName << "\n";
+    //this->getLogManager() << LogLevel_Fatal << "adding message input named "<< sName << "for box "<< m_sName << "\n";
     m_vMessageInput.push_back(sName);
 
     this->notify(BoxModification_MessageInputAdded, m_vMessageInput.size()-1);
@@ -887,7 +887,7 @@ boolean CBox::removeInput(
 
 uint32 CBox::getMessageInputCount(void) const
 {
-    this->getLogManager() << LogLevel_Fatal << "box "<< m_sName << " has " << (uint64)m_vMessageInput.size() << " message input\n";
+    //this->getLogManager() << LogLevel_Fatal << "box "<< m_sName << " has " << (uint64)m_vMessageInput.size() << " message input\n";
     return m_vMessageInput.size();
 }
 
@@ -925,7 +925,7 @@ boolean CBox::setMessageInputName(
 boolean CBox::addMessageOutput(
     const CString& sName)
 {
-    this->getLogManager() << LogLevel_Fatal << "adding message Output named "<< sName << "for box "<< m_sName << "\n";
+    //this->getLogManager() << LogLevel_Fatal << "adding message Output named "<< sName << "for box "<< m_sName << "\n";
     m_vMessageOutput.push_back(sName);
 
     this->notify(BoxModification_MessageOutputAdded, m_vMessageOutput.size()-1);
@@ -935,7 +935,7 @@ boolean CBox::addMessageOutput(
 
 uint32 CBox::getMessageOutputCount(void) const
 {
-    this->getLogManager() << LogLevel_Fatal << "box "<< m_sName << " has " << (uint64)m_vMessageOutput.size() << " message Output\n";
+    //this->getLogManager() << LogLevel_Fatal << "box "<< m_sName << " has " << (uint64)m_vMessageOutput.size() << " message Output\n";
     return m_vMessageOutput.size();
 }
 

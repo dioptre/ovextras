@@ -3,7 +3,6 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
-#include <iostream>//
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -41,7 +40,6 @@ uint32 CBoxProto::addInput(
 uint32 CBoxProto::addMessageInput(
     const CString& sName)
 {
-    std::cout << "\n\nadding message input\n\n";
     if(!m_rBox.addMessageInput(sName))
     {
         return false;
@@ -64,7 +62,6 @@ uint32 CBoxProto::addMessageInput(
 uint32 CBoxProto::addMessageOutput(
     const CString& sName)
 {
-    std::cout << "\n\nadding message output\n\n";
     if(!m_rBox.addMessageOutput(sName))
     {
         return false;
