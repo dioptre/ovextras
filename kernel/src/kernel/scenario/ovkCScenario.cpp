@@ -431,6 +431,25 @@ boolean CScenario::removeBox(
 		}
 	}
 
+    // same thing with message links
+    map<CIdentifier, CMessageLink*>::iterator itMessageLink=m_vMessageLink.begin();
+    while(itMessageLink!=m_vMessageLink.end())
+    {
+        map<CIdentifier, CMessageLink*>::iterator itMessageLinkCurrent=itMessageLink;
+        itMessageLink++;
+
+        if(itMessageLinkCurrent->second->getSourceBoxIdentifier()==rBoxIdentifier || itMessageLinkCurrent->second->getTargetBoxIdentifier()==rBoxIdentifier)
+        {
+            this->getLogManager() << LogLevel_Trace << "Found a Message link to this box - it will be deleted !\n";
+
+            // Deletes this link
+            delete itMessageLinkCurrent->second;
+
+            // Removes link from the link list
+            m_vMessageLink.erase(itMessageLinkCurrent);
+        }
+    }
+
 	// Deletes the box itself
 	delete itBox->second;
 
