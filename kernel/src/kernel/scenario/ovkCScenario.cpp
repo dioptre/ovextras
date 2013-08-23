@@ -901,6 +901,71 @@ boolean CScenario::disconnect(
 	return true;
 }
 
+///disconnectmessage
+
+boolean CScenario::disconnectMessage(
+    const CIdentifier& rSourceBoxIdentifier,
+    const uint32 ui32SourceBoxOutputIndex,
+    const CIdentifier& rTargetBoxIdentifier,
+    const uint32 ui32TargetBoxInputIndex)
+{
+    // Looks for any link with the same signature
+    map<CIdentifier, CMessageLink*>::iterator itLink;
+    for(itLink=m_vMessageLink.begin(); itLink!=m_vMessageLink.end(); itLink++)
+    {
+        CMessageLink* l_pLink=itLink->second;
+        if(l_pLink)
+        {
+            if(l_pLink->getTargetBoxIdentifier()==rTargetBoxIdentifier && l_pLink->getTargetBoxInputIndex()==ui32TargetBoxInputIndex)
+            {
+                if(l_pLink->getSourceBoxIdentifier()==rSourceBoxIdentifier && l_pLink->getSourceBoxOutputIndex()==ui32SourceBoxOutputIndex)
+                {
+                    // Found a link, so removes it
+                    delete l_pLink;
+                    m_vMessageLink.erase(itLink);
+
+                    this->getLogManager() << LogLevel_Trace << "Message Link removed\n";
+                    return true;
+                }
+            }
+        }
+    }
+
+    this->getLogManager() << LogLevel_Warning << "The Message link does not exist\n";
+    return false;
+}
+
+boolean CScenario::disconnectMessage(
+    const CIdentifier& rLinkIdentifier)
+{
+    this->getLogManager() << LogLevel_Trace << "(Message) Disconnecting boxes\n";
+
+    // Finds the link according to its identifier
+    map<CIdentifier, CMessageLink*>::iterator itLink;
+    itLink=m_vMessageLink.find(rLinkIdentifier);
+    if(itLink==m_vMessageLink.end())
+    {
+        // The link does not exist !
+        this->getLogManager() << LogLevel_Warning << "The Message link does not exist\n";
+        return false;
+    }
+
+    this->getLogManager() << LogLevel_Trace << "Found the Message link !\n";
+
+    // Deletes the link itself
+    delete itLink->second;
+
+    // Removes link from the link list
+    m_vMessageLink.erase(itLink);
+
+    this->getLogManager() << LogLevel_Trace << "Message Link removed\n";
+
+    return true;
+}
+
+//
+
+
 //___________________________________________________________________//
 //                                                                   //
 

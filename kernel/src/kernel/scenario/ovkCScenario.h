@@ -145,6 +145,13 @@ namespace OpenViBE
                 const OpenViBE::CIdentifier& rTargetBoxIdentifier,
                 const OpenViBE::uint32 ui32TargetBoxInputIndex,
                 OpenViBE::CIdentifier& rLinkIdentifier);
+            virtual OpenViBE::boolean disconnectMessage(
+                const OpenViBE::CIdentifier& rSourceBoxIdentifier,
+                const OpenViBE::uint32 ui32SourceBoxOutputIndex,
+                const OpenViBE::CIdentifier& rTargetBoxIdentifier,
+                const OpenViBE::uint32 ui32TargetBoxInputIndex);
+            virtual OpenViBE::boolean disconnectMessage(
+                const OpenViBE::CIdentifier& rLinkIdentifier);
 
 			virtual OpenViBE::CIdentifier getNextProcessingUnitIdentifier(
 				const OpenViBE::CIdentifier& rPreviousIdentifier) const;

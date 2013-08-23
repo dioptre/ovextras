@@ -2454,6 +2454,11 @@ void CInterfacedScenario::deleteSelection(void)
 				// removes link from scenario
 				m_rScenario.disconnect(i->first);
 			}
+            if(m_rScenario.isMessageLink(i->first))
+            {
+                // removes message link from scenario
+                m_rScenario.disconnectMessage(i->first);
+            }
 		}
 	}
 	m_vCurrentObject.clear();
