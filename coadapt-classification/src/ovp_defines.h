@@ -42,6 +42,9 @@
 #define OVP_ClassId_Algorithm_EvidenceAccumulationBayesian	OpenViBE::CIdentifier(0xA15EAEC5, 0xAB0CE73D)   
 #define OVP_TypeId_EvidenceAccumulationAlgorithm		OpenViBE::CIdentifier(0x1E1065B2, 0x2CA32013)
 
+#define OVP_ClassId_BoxAlgorithm_AdaptiveP300Classifier 		OpenViBE::CIdentifier(0x73C8A153, 0x6537A7E2)
+#define OVP_ClassId_BoxAlgorithm_AdaptiveP300ClassifierDesc 	OpenViBE::CIdentifier(0xBA56CFE0, 0x7EBBE949)
+
 //___________________________________________________________________//
 //                                                                   //
 // Plugin Object Class Identifiers                                   //

@@ -8,6 +8,7 @@
 #include "box-algorithms/classification/ovpCBoxAlgorithmClassifierProcessorWithUpdate.h"
 #include "box-algorithms/classification/ovpCBoxAlgorithmEvidenceAccumulator.h"
 //#include "box-algorithms/classification/ovpCDynamicNaiveBayesComputeBoxAlgorithm.h"
+#include "box-algorithms/classification/ovpCBoxAlgorithmAdaptiveP300Classifier.h"
 
 #include "algorithms/classification/ovpCAlgorithmClassifierNULL.h"
 #include "algorithms/classification/ovpCAlgorithmClassifierMixtureOfExperts.h"
@@ -50,4 +51,5 @@ OVP_Declare_Begin()
 	//OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CDynamicNaiveBayesComputeBoxAlgorithmDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmEvidenceAccumulatorDesc);
 	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierMixtureOfExpertsDesc);
+	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmAdaptiveP300ClassifierDesc);
 OVP_Declare_End()
