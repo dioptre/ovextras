@@ -1300,37 +1300,41 @@ void CSimulatedBox::handleCrash(const char* sHintName)
 
 bool CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 {
-
-    this->getLogManager() << LogLevel_Error << "SimulatedBox sendmessage" <<"\n";
-
-    //once the hardcoded connection is tested, use that (test it)
+    this->getLogManager() << LogLevel_Debug << "SimulatedBox sendmessage on output" << outputIndex <<"\n";
 
     // get the links related to outputIndex from scenario
-    //*
     CIdentifier l_oMessageLinkId = m_pScenario->getNextMessageLinkIdentifier(OV_UndefinedIdentifier);
     CIdentifier l_oCurrentMessageLinkSourceId = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxIdentifier();
     uint32 l_ui32CurrentMessageLinkSourceOutputIndex = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxOutputIndex();
 
 
-    while((outputIndex!=l_ui32CurrentMessageLinkSourceOutputIndex)&&(m_pBox->getIdentifier()!=l_oCurrentMessageLinkSourceId))
+    std::vector<std::pair<CIdentifier, uint32> > l_vTarget;
+    while(l_oMessageLinkId!=OV_UndefinedIdentifier)
     {
-        l_oMessageLinkId = m_pScenario->getNextMessageLinkIdentifier(OV_UndefinedIdentifier);
         l_oCurrentMessageLinkSourceId = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxIdentifier();
         l_ui32CurrentMessageLinkSourceOutputIndex = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxOutputIndex();
+        this->getLogManager() << LogLevel_Debug << "Link " << l_oCurrentMessageLinkSourceId << " - " << l_ui32CurrentMessageLinkSourceOutputIndex << "\n";
+        //if this link goes from this box at this output
+        if((outputIndex==l_ui32CurrentMessageLinkSourceOutputIndex)&&(m_pBox->getIdentifier()==l_oCurrentMessageLinkSourceId))
+        {
+            //store the target
+            std::pair<CIdentifier, uint32> l_oTarget(m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getTargetBoxIdentifier(), m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getTargetBoxInputIndex());
+            l_vTarget.push_back(l_oTarget);
+        }
+        //
+        l_oMessageLinkId = m_pScenario->getNextMessageLinkIdentifier(l_oMessageLinkId);
+
+
+
 
     }
 
-
-    CIdentifier targetBoxId1 = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getTargetBoxIdentifier();
-    uint32 inputIndex1 = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getTargetBoxInputIndex();
-
-    // find out all target boxes and the inputIndex of each
+    this->getLogManager() << LogLevel_Debug << "found " << (uint64)l_vTarget.size() <<" targets\n";
         // finally send to all receivers
-        m_rScheduler.sendMessage(msg, targetBoxId1, inputIndex1);
-        //m_rScheduler->sendMessage(msg, targetBoxId2, inputIndex2);
-        //....
-        //*/
-    //*/
+    for (uint32 i=0; i<l_vTarget.size(); i++)
+    {
+        m_rScheduler.sendMessage(msg, l_vTarget[i].first, l_vTarget[i].second);
+    }
         return true; // if success
 }
 
@@ -1356,23 +1360,8 @@ bool CSimulatedBox::cleanupMessages() {
 IMyMessage& CSimulatedBox::createMessage()
 {
     CMyMessage* newMessage = new CMyMessage();
-    //newMessage->setValueUint64( CString("meaning of life"), 42);
-
-
-
     m_vPreparedMessages.push_back(*newMessage);
     IMyMessage* msg = &m_vPreparedMessages[m_vPreparedMessages.size()-1];
-
-    bool success;
-    CString uiKey = CString("meaning of life");
-    uint64 uinteger = msg->getValueUint64(uiKey, success);
-
-
-
-    //msg->setValueFloat64(CString("float"), 1.354);
-    //msg->setValueCString( CString("string"), CString("testest"));
-
-
     return *msg;
 
 }
