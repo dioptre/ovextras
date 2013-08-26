@@ -248,18 +248,13 @@ boolean CPlayerContext::sendMessage(
 
 boolean CPlayerContext::sendMessage( IMyMessage& message, uint32 outputIndex)
 {
-    //this->getLogManager() << LogLevel_Fatal << "CPlayerContext::sendMessage to "<<  outputIndex << "\n";
-    bool erf = m_pSimulatedBox->sendMessage(message, outputIndex);
-    //this->getLogManager() << LogLevel_Fatal << "CPlayerContext::sendMessage to "<<  outputIndex << " done\n";
-    return erf;
+    return m_pSimulatedBox->sendMessage(message, outputIndex);
 }
 
 IMyMessage& CPlayerContext::createMessage(void)
 {
-    // TODO
-    this->getLogManager() << LogLevel_Fatal << "CPlayerContext::createdMessage\n";
+    this->getLogManager() << LogLevel_Debug << "CPlayerContext::createdMessage\n";
     return m_pSimulatedBox->createMessage();
-    //return true;
 }
 
 uint64 CPlayerContext::getCurrentTime(void)

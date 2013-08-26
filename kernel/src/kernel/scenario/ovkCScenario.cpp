@@ -792,7 +792,7 @@ boolean CScenario::connectMessage(
     const uint32 ui32TargetBoxInputIndex,
     CIdentifier& rLinkIdentifier)
 {
-    this->getLogManager() << LogLevel_Info << "(Message) Connecting boxes\n";
+    this->getLogManager() << LogLevel_Debug << "(Message) Connecting boxes\n";
 
     map<CIdentifier, CBox*>::const_iterator itBox1;
     map<CIdentifier, CBox*>::const_iterator itBox2;
@@ -806,6 +806,7 @@ boolean CScenario::connectMessage(
             this->getLogManager() << LogLevel_Warning << mit->first << mit->second->getName() << "\n";
         }
         this->getLogManager() << LogLevel_Warning << "(Message) At least one of the boxes does not exist\n";
+        /*
         if (itBox1==m_vBox.end())
         {
             this->getLogManager() << LogLevel_Warning << "Source missing\n";
@@ -814,6 +815,7 @@ boolean CScenario::connectMessage(
         {
             this->getLogManager() << LogLevel_Warning << "Target missing" << rTargetBoxIdentifier << "\n";
         }
+        //*/
         return false;
     }
     CBox* l_pSourceBox=itBox1->second;
