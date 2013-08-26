@@ -2709,8 +2709,9 @@ void CInterfacedScenario::contextMenuBoxAddInputCB(IBox& rBox)
 
 void CInterfacedScenario::contextMenuBoxAddMessageInputCB(IBox& rBox)
 {
-    m_rKernelContext.getLogManager() << LogLevel_Fatal << "contextMenuBoxAddMessageInputCB\n";
+    m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxAddMessageInputCB\n";
     rBox.addMessageInput(CString("an input"));
+    this->snapshotCB();
 
 }
 
@@ -2723,8 +2724,9 @@ void CInterfacedScenario::contextMenuBoxRemoveMessageInputCB(IBox& rBox, uint32 
 
 void CInterfacedScenario::contextMenuBoxAddMessageOutputCB(IBox& rBox)
 {
-    m_rKernelContext.getLogManager() << LogLevel_Fatal << "contextMenuBoxAddMessageOutputCB\n";
+    m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxAddMessageOutputCB\n";
     rBox.addMessageOutput(CString("an Output"));
+    this->snapshotCB();
 
 }
 
