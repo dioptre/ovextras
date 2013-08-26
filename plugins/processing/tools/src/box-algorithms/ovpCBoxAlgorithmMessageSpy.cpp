@@ -1,13 +1,13 @@
-#include "ovpCBoxAlgorithmMessageSender.h"
+#include "ovpCBoxAlgorithmMessageSpy.h"
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Samples;
+using namespace OpenViBEPlugins::Tools;
 
-boolean CBoxAlgorithmMessageSender::initialize(void)
+boolean CBoxAlgorithmMessageSpy::initialize(void)
 {
 	
 	// If you need to, you can manually set the reference targets to link the codecs input and output. To do so, you can use :
@@ -29,7 +29,7 @@ boolean CBoxAlgorithmMessageSender::initialize(void)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmMessageSender::uninitialize(void)
+boolean CBoxAlgorithmMessageSpy::uninitialize(void)
 {
 
 	return true;
@@ -37,7 +37,7 @@ boolean CBoxAlgorithmMessageSender::uninitialize(void)
 /*******************************************************************************/
 
 
-boolean CBoxAlgorithmMessageSender::processClock(IMessageClock& rMessageClock)
+boolean CBoxAlgorithmMessageSpy::processClock(IMessageClock& rMessageClock)
 {
 	// some pre-processing code if needed...
 
@@ -49,15 +49,15 @@ boolean CBoxAlgorithmMessageSender::processClock(IMessageClock& rMessageClock)
 /*******************************************************************************/
 
 
-uint64 CBoxAlgorithmMessageSender::getClockFrequency(void)
+uint64 CBoxAlgorithmMessageSpy::getClockFrequency(void)
 {
 	// Note that the time is coded on a 64 bits unsigned integer, fixed decimal point (32:32)
-	return 4LL<<32; // the box clock frequency
+	return 1LL<<32; // the box clock frequency
 }
 /*******************************************************************************/
 
 /*
-boolean CBoxAlgorithmMessageSender::processInput(uint32 ui32InputIndex)
+boolean CBoxAlgorithmMessageSpy::processInput(uint32 ui32InputIndex)
 {
 	// some pre-processing code if needed...
 
@@ -66,32 +66,38 @@ boolean CBoxAlgorithmMessageSender::processInput(uint32 ui32InputIndex)
 
 	return true;
 }
+//*/
+OpenViBE::boolean CBoxAlgorithmMessageSpy::processMessage(const IMyMessage& msg, uint32 inputIndex)
+{
+    //we do not know the keys, the current interface do not allow to access the content if we do not know the key
+
+    /*
+    CString l_sMessageContent;
+    bool success;
+    CString l_sKey;
+    msg.getValueUint64(l_sKey, success);
+    msg.getValueFloat64(l_sKey, success);
+    msg.getValueCString(l_sKey, success);
+    msg.getValueCMatrix(l_sKey, success);
+    //*/
+
+
+
+    return true;
+}
+
+
+
+
 /*******************************************************************************/
 
-boolean CBoxAlgorithmMessageSender::process(void)
+boolean CBoxAlgorithmMessageSpy::process(void)
 {
 	
 	// the static box context describes the box inputs, outputs, settings structures
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
-
-
-
-    IMyMessage& msg = this->getPlayerContext().createMessage();
-    getLogManager() << OpenViBE::Kernel::LogLevel_Info  << "message sender created a message\n";
-
-    //*
-    msg.setValueUint64( CString("meaning of life"), 42);
-
-
-    msg.setValueFloat64(CString("float"), 1.354);
-    msg.setValueCString( CString("string"), CString("testest"));
-    //msg.setValueCMatrix( "", const CMatrix &valueIn);
-    //*/
-
-    this->getPlayerContext().sendMessage(msg, 0);
-
 
 	// here is some useful functions:
 	// - To get input/output/setting count:
