@@ -625,10 +625,9 @@ void CInterfacedScenario::redraw(IBox& rBox)
 			l_oLinkIdentifier=m_rScenario.getNextLinkIdentifierToBoxInput(l_oLinkIdentifier, rBox.getIdentifier(), i);
 		}
 	}
-
     //m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "message input "<< " / " << rBox.getMessageInputCount() <<"\n";
     //draw messages input
-    int l_iMessageInputOffset=ySize/2-rBox.getMessageInputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize/4;
+    int l_iMessageInputOffset=ySize/2-rBox.getMessageInputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize;
     //int minput = 3;
     //int l_iMessageInputOffset=ySize/2-minput*(iCircleSpace+iCircleSize)/2+iCircleSize;
         //for(i=0; i<minput; i++)
@@ -673,8 +672,8 @@ void CInterfacedScenario::redraw(IBox& rBox)
 
         //int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iMessageInputOffset;
         //int32 y=yStart-(iCircleSize>>1)-m_i32ViewOffsetY;
-        int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX;
-        int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageInputOffset;
+        int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX - iCircleSize;
+        int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageInputOffset - iCircleSize/2;
         CIdentifier l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierToBoxInput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
         while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
         {
@@ -699,7 +698,7 @@ void CInterfacedScenario::redraw(IBox& rBox)
     }
     //*
     //int moutput = 3;
-    int l_iMessageOutputOffset=xSize/2-rBox.getMessageOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize/4;
+    int l_iMessageOutputOffset=ySize/2-rBox.getMessageOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize;
     //int l_iMessageOutputOffset=ySize/2-moutput*(iCircleSpace+iCircleSize)/2+iCircleSize;
     for(i=0; i<rBox.getMessageOutputCount(); i++)
     {
@@ -744,8 +743,9 @@ void CInterfacedScenario::redraw(IBox& rBox)
        //*
         //int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iMessageOutputOffset;
         //int32 y=yStart+ySize+(iCircleSize>>1)+1-m_i32ViewOffsetY;
-        int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX+xSize;
-        int32 y=yStart+i*(iCircleSpace+iCircleSize)+ySize+(iCircleSize>>1)+1-m_i32ViewOffsetY+l_iMessageOutputOffset-ySize;
+        int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX + xSize;
+        //int32 y=yStart+i*(iCircleSpace+iCircleSize)+ySize-m_i32ViewOffsetY+l_iMessageOutputOffset-iCircleSize;
+        int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageOutputOffset - iCircleSize/2;
         CIdentifier l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierFromBoxOutput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
         while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
         {
@@ -770,8 +770,6 @@ void CInterfacedScenario::redraw(IBox& rBox)
 
     }
     //*/
-
-
 	int l_iOutputOffset=xSize/2-rBox.getOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize/4;
 	for(i=0; i<rBox.getOutputCount(); i++)
 	{
@@ -934,7 +932,6 @@ void CInterfacedScenario::redraw(IComment& rComment)
 
 void CInterfacedScenario::redraw(ILink& rLink)
 {
-    m_rKernelContext.getLogManager() << LogLevel_Info << " drawing link\n";
 	::GtkWidget* l_pWidget=GTK_WIDGET(m_pScenarioDrawingArea);
 	::GdkGC* l_pStencilGC=gdk_gc_new(GDK_DRAWABLE(m_pStencilBuffer));
 	::GdkGC* l_pDrawGC=gdk_gc_new(l_pWidget->window);
@@ -2127,7 +2124,6 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				this->snapshotCB();
 			}
 		}
-m_rKernelContext.getLogManager() << LogLevel_Info << "redraw\n";
 		this->redraw();
 	}
 
@@ -2393,6 +2389,25 @@ void CInterfacedScenario::copySelection(void)
 			}
 		}
 	}
+
+    // Copies message links to clipboard
+    for(it=m_vCurrentObject.begin(); it!=m_vCurrentObject.end(); it++)
+    {
+        if(it->second)
+        {
+            if(m_rScenario.isMessageLink(it->first))
+            {
+                CIdentifier l_oNewIdentifier;
+                const ILink* l_pLink=m_rScenario.getMessageLinkDetails(it->first);
+                m_rApplication.m_pClipboardScenario->connectMessage(
+                    l_vIdMapping[l_pLink->getSourceBoxIdentifier()],
+                    l_pLink->getSourceBoxOutputIndex(),
+                    l_vIdMapping[l_pLink->getTargetBoxIdentifier()],
+                    l_pLink->getTargetBoxInputIndex(),
+                    l_oNewIdentifier);
+            }
+        }
+    }
 }
 void CInterfacedScenario::cutSelection(void)
 {
