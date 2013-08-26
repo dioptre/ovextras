@@ -64,11 +64,7 @@ namespace OpenViBE
             virtual OpenViBE::boolean addMessageInput(
                 const OpenViBE::CString& sName);
             virtual OpenViBE::boolean removeMessageInput(
-                const OpenViBE::uint32 ui32InputIndex)
-            {
-                return true;
-
-            }
+                const OpenViBE::uint32 ui32InputIndex);
 
 
             virtual OpenViBE::uint32 getMessageInputCount(void) const;
@@ -83,11 +79,7 @@ namespace OpenViBE
             virtual OpenViBE::boolean addMessageOutput(
                 const OpenViBE::CString& sName);
             virtual OpenViBE::boolean removeMessageOutput(
-                const OpenViBE::uint32 ui32InputIndex)
-            {
-                return true;
-
-            }
+                const OpenViBE::uint32 ui32InputIndex);
 
 
             virtual OpenViBE::uint32 getMessageOutputCount(void) const;

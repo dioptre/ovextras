@@ -49,6 +49,11 @@ namespace OpenViBEDesigner
 
 		ContextMenu_SelectionMute,
 		ContextMenu_BoxMute,
+
+        ContextMenu_BoxAddMessageInput,
+        ContextMenu_BoxRemoveMessageInput,
+        ContextMenu_BoxAddMessageOutput,
+        ContextMenu_BoxRemoveMessageOutput,
 	};
 
 	enum

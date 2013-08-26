@@ -141,8 +141,8 @@ namespace OpenViBEPlugins
 				//No output specified.To add outputs use :
 //rBoxAlgorithmPrototype.addOutput("Output Name",OV_TypeId_XXXX);
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
+                //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
+                //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
 				
 				rBoxAlgorithmPrototype.addSetting("frequency",OV_TypeId_Integer,"");
 
