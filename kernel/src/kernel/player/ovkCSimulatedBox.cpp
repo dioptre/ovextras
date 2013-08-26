@@ -1314,6 +1314,7 @@ bool CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
         l_oCurrentMessageLinkSourceId = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxIdentifier();
         l_ui32CurrentMessageLinkSourceOutputIndex = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxOutputIndex();
         this->getLogManager() << LogLevel_Debug << "Link " << l_oCurrentMessageLinkSourceId << " - " << l_ui32CurrentMessageLinkSourceOutputIndex << "\n";
+
         //if this link goes from this box at this output
         if((outputIndex==l_ui32CurrentMessageLinkSourceOutputIndex)&&(m_pBox->getIdentifier()==l_oCurrentMessageLinkSourceId))
         {
@@ -1321,32 +1322,24 @@ bool CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
             std::pair<CIdentifier, uint32> l_oTarget(m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getTargetBoxIdentifier(), m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getTargetBoxInputIndex());
             l_vTarget.push_back(l_oTarget);
         }
-        //
         l_oMessageLinkId = m_pScenario->getNextMessageLinkIdentifier(l_oMessageLinkId);
-
-
-
-
     }
 
     this->getLogManager() << LogLevel_Debug << "found " << (uint64)l_vTarget.size() <<" targets\n";
-        // finally send to all receivers
+    // finally send to all receivers
     for (uint32 i=0; i<l_vTarget.size(); i++)
     {
         m_rScheduler.sendMessage(msg, l_vTarget[i].first, l_vTarget[i].second);
     }
-        return true; // if success
+    return true; // if success
 }
 
 bool CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
 {
-
+    //TODO change to limited context
     CBoxAlgorithmContext l_oBoxAlgorithmContext(getKernelContext(), this, m_pBox);
-    this->getLogManager() << LogLevel_Error << "simulated box" << m_pBox->getName() <<" receiving message on input " << inputIndex <<"\n";
-    bool success;
-    success = m_pBoxAlgorithm->processMessage(l_oBoxAlgorithmContext, msg, inputIndex);
-    this->getLogManager() << LogLevel_Error << success << "\n";
-    return true;
+    this->getLogManager() << LogLevel_Debug << "simulated box" << m_pBox->getName() <<" receiving message on input " << inputIndex <<"\n";
+    return m_pBoxAlgorithm->processMessage(l_oBoxAlgorithmContext, msg, inputIndex);
 }
 
 

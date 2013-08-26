@@ -2061,15 +2061,14 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 							l_oSourceObject.m_ui32ConnectorIndex,
 							l_oTargetObject.m_oIdentifier,
 							l_oTargetObject.m_ui32ConnectorIndex,
-							l_oLinkIdentifier);
-                        m_rKernelContext.getLogManager() << LogLevel_Info << "snap\n";
+                            l_oLinkIdentifier);
 						this->snapshotCB();
 					}
 
                     //or if it is a message
                     else if (l_bIsConnectionIsMessage)
                     {
-                        m_rKernelContext.getLogManager() << LogLevel_Info << "connect message\n";
+                        m_rKernelContext.getLogManager() << LogLevel_Debug << "connect message\n";
                         CIdentifier l_oLinkIdentifier;
                         m_rScenario.connectMessage(
                             l_oSourceObject.m_oIdentifier,
@@ -2479,6 +2478,19 @@ void CInterfacedScenario::pasteSelection(void)
 			l_pLink->getTargetBoxInputIndex(),
 			l_oNewIdentifier);
 	}
+
+    // Pastes message links from clipboard
+    while((l_oIdentifier=m_rApplication.m_pClipboardScenario->getNextMessageLinkIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
+    {
+        CIdentifier l_oNewIdentifier;
+        ILink* l_pLink=m_rApplication.m_pClipboardScenario->getMessageLinkDetails(l_oIdentifier);
+        m_rScenario.connectMessage(
+            l_vIdMapping[l_pLink->getSourceBoxIdentifier()],
+            l_pLink->getSourceBoxOutputIndex(),
+            l_vIdMapping[l_pLink->getTargetBoxIdentifier()],
+            l_pLink->getTargetBoxInputIndex(),
+            l_oNewIdentifier);
+    }
 
 	// Makes pasted stuff the default selection
 	// Moves boxes under cursor

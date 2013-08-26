@@ -836,8 +836,7 @@ boolean CApplication::openScenario(const char* sFileName)
 
 					l_pImporter->process();
 					l_pImporter->uninitialize();
-					m_rKernelContext.getAlgorithmManager().releaseAlgorithm(*l_pImporter);
-                    m_rKernelContext.getLogManager() << LogLevel_Info << " scenario impoported...\n";
+                    m_rKernelContext.getAlgorithmManager().releaseAlgorithm(*l_pImporter);
 					l_bSuccess=true;
 				}
 			}
