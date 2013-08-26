@@ -27,6 +27,7 @@
 	#include <sys/ioctl.h>
 	#include <linux/parport.h>
 	#include <linux/ppdev.h>
+	#include <unistd.h>
 	#define PARALLELBASE 0x378
 #elif defined TARGET_OS_Windows
 
