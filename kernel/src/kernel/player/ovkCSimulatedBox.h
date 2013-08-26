@@ -275,12 +275,8 @@ namespace OpenViBE
             /** \name Messaging API - messages management */
             //@{
             bool sendMessage(const IMyMessage &msg, uint32 outputIndex);
-
             bool cleanupMessages();
-
-            //should it not be better to return a pointer?
             IMyMessage& createMessage();
-
             bool receiveMessage(const IMyMessage &msg, uint32 inputIndex);
 
             //@}
