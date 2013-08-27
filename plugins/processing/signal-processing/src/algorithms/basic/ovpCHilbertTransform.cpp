@@ -52,8 +52,7 @@ boolean CAlgorithmHilbertTransform::process(void)
 	{
 		if( l_pInputMatrix->getDimensionCount() != 2)
 		{
-			this->getLogManager() << LogLevel_Error << "The input matrix must have 2 dimensions, here the dimension is ";
-			std::cout<<l_pInputMatrix->getDimensionCount()<<std::endl;
+			this->getLogManager() << LogLevel_Error << "The input matrix must have 2 dimensions, here the dimension is "<<l_pInputMatrix->getDimensionCount()<<"\n";
 			return false;
 		}
 
@@ -70,6 +69,13 @@ boolean CAlgorithmHilbertTransform::process(void)
 		l_pOutputPhaseMatrix->setDimensionCount(2);
 		l_pOutputPhaseMatrix->setDimensionSize(0,l_ui32ChannelCount);
 		l_pOutputPhaseMatrix->setDimensionSize(1,l_ui32SamplesPerChannel);
+
+		for(uint32 i=0; i<l_ui32ChannelCount;i++)
+		{
+			l_pOutputHilbertMatrix->setDimensionLabel(0,i,l_pInputMatrix->getDimensionLabel(0,i));
+			l_pOutputEnvelopeMatrix->setDimensionLabel(0,i,l_pInputMatrix->getDimensionLabel(0,i));
+			l_pOutputPhaseMatrix->setDimensionLabel(0,i,l_pInputMatrix->getDimensionLabel(0,i));
+		}
 
 	}
 

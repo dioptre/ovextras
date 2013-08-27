@@ -7,6 +7,8 @@
 #include <unsupported/Eigen/FFT>
 #include <system/Memory.h>
 #include <iostream>
+#include <sstream>
+
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -58,39 +60,30 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::uninitialize(void) {
 
 boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 {
-		std::complex <double> iComplex(0.0,1.0);
+		const std::complex <double> iComplex(0.0,1.0);
 
-		IMatrix* l_pInputMatrix1;
-		IMatrix* l_pInputMatrix2;
+		IMatrix* l_pInputMatrix1 = ip_pSignal1;
+		IMatrix* l_pInputMatrix2 = ip_pSignal2;
 
-		IMatrix* l_pChannelPairs;
-		IMatrix* l_pOutputMatrix;
+		IMatrix* l_pChannelPairs = ip_pChannelPairs;
+		IMatrix* l_pOutputMatrix = op_pMatrix;
 
-		MatrixXd l_pChannelToCompare;
+		uint32 l_ui32ChannelCount1 = l_pInputMatrix1->getDimensionSize(0);
+		uint32 l_ui32SamplesPerChannel1 = l_pInputMatrix1->getDimensionSize(1);
 
-		uint32 l_ui32ChannelCount1;
-		uint32 l_ui32SamplesPerChannel1;
+		uint32 l_ui32ChannelCount2 = l_pInputMatrix2->getDimensionSize(0);
+		uint32 l_ui32SamplesPerChannel2 = l_pInputMatrix2->getDimensionSize(1);
 
-		uint32 l_ui32ChannelCount2;
-		uint32 l_ui32SamplesPerChannel2;
+		uint32 l_ui32PairsCount = ip_pChannelPairs->getDimensionSize(0)/2;
 
-		uint32 l_ui32PairsCount;
+		MatrixXd l_pChannelToCompare = MatrixXd::Zero(ip_pChannelPairs->getDimensionSize(0),l_ui32SamplesPerChannel1);
 
-		l_pInputMatrix1 = ip_pSignal1;
-		l_pInputMatrix2 = ip_pSignal2;
+		float64* l_ipMatrixBuffer1 = l_pInputMatrix1->getBuffer();
+		float64* l_ipMatrixBuffer2 = l_pInputMatrix2->getBuffer();
+		float64* l_opMatrixBuffer = l_pOutputMatrix->getBuffer();
 
-		l_pOutputMatrix = op_pMatrix;
-
-		l_ui32ChannelCount1 = l_pInputMatrix1->getDimensionSize(0);
-		l_ui32SamplesPerChannel1 = l_pInputMatrix1->getDimensionSize(1);
-
-		l_ui32ChannelCount2 = l_pInputMatrix2->getDimensionSize(0);
-		l_ui32SamplesPerChannel2 = l_pInputMatrix2->getDimensionSize(1);
-
-		l_pChannelPairs = ip_pChannelPairs;
-		l_ui32PairsCount = ip_pChannelPairs->getDimensionSize(0)/2;
-
-		l_pChannelToCompare = MatrixXd::Zero(l_ui32ChannelCount1,l_ui32SamplesPerChannel1);
+		float64* l_pHilberInputBuffer = ip_pHilbertInput->getBuffer();
+		float64* l_pInstPhaseBuffer = op_pInstantaneousPhase->getBuffer();
 
 
 		if(this->isInputTriggerActive(OVTK_Algorithm_Connectivity_InputTriggerId_Initialize))
@@ -114,6 +107,19 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 			l_pOutputMatrix->setDimensionSize(0,l_ui32PairsCount); //
 			l_pOutputMatrix->setDimensionSize(1,1);//
 
+			// Setting name of output channels for visualization
+			CString l_name1, l_name2, l_name;
+			uint32 l_ui32Index;
+			for(uint32 i=0;i<l_ui32PairsCount;i++)
+			{
+				l_ui32Index=2*i;
+				l_name1 = l_pInputMatrix1->getDimensionLabel(0,l_pChannelPairs->getBuffer()[l_ui32Index]);
+				l_name2 = l_pInputMatrix2->getDimensionLabel(0,l_pChannelPairs->getBuffer()[l_ui32Index+1]);
+				l_name = l_name1+l_name2;
+				l_pOutputMatrix->setDimensionLabel(0,i,l_name);
+			}
+
+			//
 			ip_pHilbertInput->setDimensionCount(2);
 			ip_pHilbertInput->setDimensionSize(0,1);
 			ip_pHilbertInput->setDimensionSize(1,l_ui32SamplesPerChannel1);
@@ -127,83 +133,65 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 			VectorXd l_vecXdPhase1;
 			VectorXd l_vecXdPhase2;
 
-
 			std::complex <double> l_sum(0.0,0.0);
-//			std::cout<<"Channel pairs = "<<l_pChannelPairs->getBuffer() <<std::endl;
-
 
 			//_______________________________________________________________________________________
 			//
-			// Form pairs with the lookup matrix given
+			// Compute S-PLV for each pairs
 			//_______________________________________________________________________________________
 			//
 
-			for(uint32 i=0; i<l_ui32PairsCount*2; i++)
-			{
-
-				if(l_pChannelPairs->getBuffer()[i] < l_ui32ChannelCount1)
-				{
-					for(uint32 sample = 0; sample<l_ui32SamplesPerChannel1; sample++)
-					{
-						l_pChannelToCompare(i,sample) = l_pInputMatrix1->getBuffer()[sample+(uint32)l_pChannelPairs->getBuffer()[i]*l_ui32SamplesPerChannel1];
-//						std::cout<<"Input matrix 1 = "<<l_pInputMatrix1->getBuffer()[sample+(uint32)l_pChannelPairs->getBuffer()[i]*l_ui32SamplesPerChannel1]<<std::endl;
-
-					}
-
-				}
-			}
-
-/*				for(uint32 i=1; i<l_pChannelPairs->getDimensionSize(0); i=i+2)
-				{
-					if(l_pChannelPairs->getBuffer()[i] < l_pInputMatrix2->getDimensionSize(0))
-					{
-						System::Memory::copy(l_pChannelToCompare->getBuffer()+i*l_ui32SamplesPerChannel2, l_pInputMatrix2->getBuffer()+(uint32)l_pChannelPairs->getBuffer()[i]*l_ui32SamplesPerChannel2,
-								l_ui32SamplesPerChannel2*sizeof(float64));
-					}
-				}*/
-
-
-
-			//Compute S-PLV for each pairs
-			for(uint32 channel = 0; channel < l_ui32PairsCount; channel = channel+1)
+			for(uint32 channel = 0; channel < l_ui32PairsCount; channel++)
 			{
 				l_vecXdChannelToCompare1 = VectorXd::Zero(l_ui32SamplesPerChannel1);
 				l_vecXdChannelToCompare2 = VectorXd::Zero(l_ui32SamplesPerChannel2);
 				l_vecXdPhase1 = VectorXd::Zero(l_ui32SamplesPerChannel1);
 				l_vecXdPhase2 = VectorXd::Zero(l_ui32SamplesPerChannel2);
 				l_sum = (0.0,0.0);
-//				std::cout<<"channel to compare = "<<l_pChannelToCompare<<std::endl;
 
-				for(uint32 i=0; i<l_ui32SamplesPerChannel1; i++)
+				uint32 l_channelIndex = 2*channel; //Index on single channel
+
+				//_______________________________________________________________________________________
+				//
+				// Form pairs with the lookup matrix given
+				//_______________________________________________________________________________________
+				//
+
+				for(uint32 sample = 0; sample < l_ui32SamplesPerChannel1; sample++)
 				{
-					l_vecXdChannelToCompare1(i) = l_pChannelToCompare(channel,i);
-					l_vecXdChannelToCompare2(i) = l_pChannelToCompare(channel+1,i);
-
-//					std::cout<<"channel to compare = "<<l_pChannelToCompare<<std::endl;
+					if(l_pChannelPairs->getBuffer()[sample] < l_ui32ChannelCount1)
+					{
+						l_pChannelToCompare(l_channelIndex,sample) = l_ipMatrixBuffer1[sample+(uint32)l_pChannelPairs->getBuffer()[l_channelIndex]*l_ui32SamplesPerChannel1];
+						l_pChannelToCompare(l_channelIndex+1,sample) = l_ipMatrixBuffer2[sample+(uint32)l_pChannelPairs->getBuffer()[l_channelIndex+1]*l_ui32SamplesPerChannel2];
+					}
 				}
 
-//				std::cout<<"channel to compare 1 = "<<l_vecXdChannelToCompare1.transpose()<<std::endl;
-//				std::cout<<"channel to compare 2 = "<<l_vecXdChannelToCompare2.transpose()<<std::endl;
 
-				for(uint32 i=0; i<l_ui32SamplesPerChannel1; i++)
+				// Retrieve the 2 channel to compare
+				l_vecXdChannelToCompare1 = l_pChannelToCompare.row(l_channelIndex);
+				l_vecXdChannelToCompare2 = l_pChannelToCompare.row(l_channelIndex+1);
+
+				// Apply Hilbert transform to each channel to compute instantaneous phase
+					// Channel 1
+				for(uint32 sample = 0; sample<l_ui32SamplesPerChannel1; sample++)
 				{
-					ip_pHilbertInput->getBuffer()[i] = l_vecXdChannelToCompare1(i);
+					l_pHilberInputBuffer[sample] = l_vecXdChannelToCompare1(sample);
 				}
 
 				m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Initialize);
 				m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Process);
-//				std::cout<<"N1 = "<<l_ui32SamplesPerChannel1<<"\n"<<std::endl;
 
+					// Channel 2
 				for(uint32 i=0; i<l_ui32SamplesPerChannel1; i++)
 				{
 					l_vecXdPhase1(i) = op_pInstantaneousPhase->getBuffer()[i];
-					ip_pHilbertInput->getBuffer()[i] = (float64)l_vecXdChannelToCompare2(i);
+					l_pHilberInputBuffer[i] = l_vecXdChannelToCompare2(i);
 				}
-
-//				std::cout<<"Phase 1 = "<<l_vecXdPhase1.transpose()<<"\n"<<std::endl;
 
 				m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Initialize);
 				m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Process);
+
+				// Compute S-PLV and store it in l_opMatrixBuffer for each pair
 
 				for(uint32 i=0; i<l_ui32SamplesPerChannel1; i++)
 				{
@@ -212,18 +200,12 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 					l_sum += exp(iComplex*(l_vecXdPhase1(i)-l_vecXdPhase2(i)));
 				}
 
-//				std::cout<<"Phase 2 = "<<l_vecXdPhase2.transpose()<<"\n"<<std::endl;
-//				std::cout<<"N2 = "<<l_ui32SamplesPerChannel1<<"\n"<<std::endl;
-
-
-
-				l_pOutputMatrix->getBuffer()[channel] = abs(l_sum)/l_ui32SamplesPerChannel1;
-//				std::cout<<"sum2 = "<<abs(l_sum)<<"\n"<<std::endl;
+				l_opMatrixBuffer[channel] = abs(l_sum)/l_ui32SamplesPerChannel1;
 
 			}
 
 			this->activateOutputTrigger(OVTK_Algorithm_Connectivity_OutputTriggerId_ProcessDone, true);
-			}
+		}
 
 	return true;
 }
