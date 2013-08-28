@@ -86,7 +86,19 @@ boolean CBoxAlgorithmMessageSender::process(void)
 
 
     msg.setValueFloat64(CString("float"), 1.354);
-    msg.setValueCString( CString("string"), CString("testest"));
+
+
+    //that work
+    CString test("test");
+    msg.setValueCString( CString("string"), test);
+
+    //however if we call
+    // msg.setValueCString( CString("string"), CString("test"));
+    //the receiver will crash
+    //my guess is that since the string only exist in the call to the setValue funciton, the stored pointer is invalid
+    //need a warning or something
+
+
     //msg.setValueCMatrix( "", const CMatrix &valueIn);
     //*/
 

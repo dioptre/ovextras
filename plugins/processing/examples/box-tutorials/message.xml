@@ -1,88 +1,58 @@
 <OpenViBE-Scenario>
 	<Boxes>
 		<Box>
-			<Identifier>(0x3f417e9c, 0x30ac40f2)</Identifier>
-			<Name>Message Receiver</Name>
-			<AlgorithmClassIdentifier>(0xd2846ff3, 0x4802ef84)</AlgorithmClassIdentifier>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x17ee7c08, 0x94c14893)</Identifier>
-					<Value></Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
-					<Value>256</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>65</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>320</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x30a4e5c9, 0x83502953)</Identifier>
-					<Value></Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0xc9377565, 0x412973b8)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>128</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xc67a01dc, 0x28ce06c1)</Identifier>
-					<Value></Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
-					<Value>false</Value>
-				</Attribute>
-			</Attributes>
-		</Box>
-		<Box>
-			<Identifier>(0x5a9e26e7, 0x3dd5e65b)</Identifier>
+			<Identifier>(0x0572bbab, 0x5f0a7cd5)</Identifier>
 			<Name>Message Sender</Name>
 			<AlgorithmClassIdentifier>(0x8c881f74, 0x920b95a3)</AlgorithmClassIdentifier>
+			<MessageOutputs>
+				<MessageOutput>
+					<Name>message output</Name>
+				</MessageOutput>
+			</MessageOutputs>
 			<Settings>
 				<Setting>
 					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
 					<Name>frequency</Name>
 					<DefaultValue></DefaultValue>
-					<Value></Value>
+					<Value>1</Value>
 				</Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
-					<Identifier>(0x17ee7c08, 0x94c14893)</Identifier>
-					<Value></Value>
-				</Attribute>
-				<Attribute>
 					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
-					<Value>80</Value>
+					<Value>304</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>65</Value>
+					<Value>48</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>336</Value>
+					<Value>176</Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0x30a4e5c9, 0x83502953)</Identifier>
-					<Value></Value>
+					<Identifier>(0x4d3defb7, 0xf238570d)</Identifier>
+					<Value>1</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x5c4a9ba3, 0x6e177341)</Value>
+					<Value>(0xd6774d22, 0xb343b05f)</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x98bea2f6, 0xe7144d95)</Identifier>
+					<Value></Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
 					<Value>126</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xb6de295d, 0x6c16b23a)</Identifier>
+					<Value></Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xc67a01dc, 0x28ce06c1)</Identifier>
+					<Value></Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
@@ -94,45 +64,101 @@
 				</Attribute>
 			</Attributes>
 		</Box>
-	</Boxes>
-	<Links></Links>
-	<Comments></Comments>
-	<VisualisationTree>
-		<VisualisationWidget>
-			<Identifier>(0x1ede770a, 0x2bd5a875)</Identifier>
-			<Name>Default window</Name>
-			<Type>1</Type>
-			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
+		<Box>
+			<Identifier>(0x1a0c5cd1, 0x7d32a071)</Identifier>
+			<Name>Message Receiver</Name>
+			<AlgorithmClassIdentifier>(0xd2846ff3, 0x4802ef84)</AlgorithmClassIdentifier>
+			<MessageInputs>
+				<MessageInput>
+					<Name>message input</Name>
+				</MessageInput>
+			</MessageInputs>
 			<Attributes>
 				<Attribute>
-					<Identifier>(0x4c90d4ad, 0x7a2554ec)</Identifier>
-					<Value>320</Value>
+					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
+					<Value>304</Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0x7b814cca, 0x271df6dd)</Identifier>
-					<Value>480</Value>
+					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
+					<Value>48</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
+					<Value>448</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
+					<Value>(0x15de6c3d, 0xe6e9f0f0)</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x996ffcd6, 0x5acfb930)</Identifier>
+					<Value>1</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
+					<Value>128</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xb6de295d, 0x6c16b23a)</Identifier>
+					<Value></Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
+					<Value>false</Value>
 				</Attribute>
 			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x1d325c24, 0x3e15758a)</Identifier>
-			<Name>Default tab</Name>
-			<Type>2</Type>
-			<ParentIdentifier>(0x1ede770a, 0x2bd5a875)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x7b2c553f, 0x56223625)</Identifier>
-			<Name>Empty</Name>
-			<Type>0</Type>
-			<ParentIdentifier>(0x1d325c24, 0x3e15758a)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-	</VisualisationTree>
+		</Box>
+	</Boxes>
+	<Links></Links>
+	<MessageLinks>
+		<MessageLink>
+			<Identifier>(0x32f76265, 0x2bcf4900)</Identifier>
+			<Source>
+				<BoxIdentifier>(0x0572bbab, 0x5f0a7cd5)</BoxIdentifier>
+				<BoxOutputIndex>0</BoxOutputIndex>
+			</Source>
+			<Target>
+				<BoxIdentifier>(0x1a0c5cd1, 0x7d32a071)</BoxIdentifier>
+				<BoxInputIndex>0</BoxInputIndex>
+			</Target>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
+					<Value>303</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
+					<Value>244</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
+					<Value>303</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
+					<Value>378</Value>
+				</Attribute>
+			</Attributes>
+		</MessageLink>
+	</MessageLinks>
+	<Comments>
+		<Comment>
+			<Identifier>(0x2e6561a8, 0x58947b4a)</Identifier>
+			<Text>Right click on the message sender
+should not give the option of adding
+message inputs, I do not know 
+why it happens.</Text>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
+					<Value>144</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
+					<Value>224</Value>
+				</Attribute>
+			</Attributes>
+		</Comment>
+	</Comments>
+	<VisualisationTree></VisualisationTree>
 </OpenViBE-Scenario>
