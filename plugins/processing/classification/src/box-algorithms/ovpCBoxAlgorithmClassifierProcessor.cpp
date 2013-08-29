@@ -124,7 +124,7 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 			{
 				if (m_pClassifier->isOutputTriggerActive(OVTK_Algorithm_Classifier_OutputTriggerId_Success))
 				{
-					this->getLogManager() << LogLevel_Warning << "---Classification successful---\n";
+					//this->getLogManager() << LogLevel_Warning << "---Classification successful---\n";
 					if(!m_bOutputHeaderSent)
 					{
 						m_pLabelsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
@@ -144,8 +144,8 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 					l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
 				}
-				else
-					this->getLogManager() << LogLevel_Warning << "---Classification failed---\n";
+				//else
+				//	this->getLogManager() << LogLevel_Warning << "---Classification failed---\n";
 			}
 		}
 		if(m_pFeaturesDecoder->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedEnd))
