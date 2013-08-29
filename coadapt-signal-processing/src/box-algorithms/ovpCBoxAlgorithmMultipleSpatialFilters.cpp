@@ -179,7 +179,7 @@ boolean CBoxAlgorithmMultipleSpatialFilters::initialize(void)
 		l_oFile.close();
 		
 		XML::IReader* l_pReader=XML::createReader(*this);
-		std::cout << l_pConfigurationFile << "\n";
+		//std::cout << l_pConfigurationFile << "\n";
 		l_pReader->processData(l_pConfigurationFile, l_iFileLen);
 		l_pReader->release();
 		l_pReader=NULL;			
@@ -236,7 +236,7 @@ boolean CBoxAlgorithmMultipleSpatialFilters::process(void)
 
 		m_pStreamDecoder->process();
 		CString l_sSettingOverrideFilename = l_rStaticBoxContext.getAttributeValue(OV_AttributeId_Box_SettingOverrideFilename);
-		this->getLogManager() << LogLevel_Info << "Override filename " << l_sSettingOverrideFilename << "\n";
+		//this->getLogManager() << LogLevel_Info << "Override filename " << l_sSettingOverrideFilename << "\n";
 		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedHeader))
 		{
 			//CString l_sCoefficient=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
@@ -282,8 +282,8 @@ boolean CBoxAlgorithmMultipleSpatialFilters::process(void)
 			itpp::Mat<float64> l_oSignal(l_pMatrix, l_ui32InputChannelCount, l_ui32SampleCount, false);
 			for(j=0; j<m_ui32NumberOfFilters; j++)
 			{
-				this->getLogManager() << LogLevel_Info << "spatial filter dimensions " << (uint32)m_vCoefficients[j].rows() << "," << (uint32)m_vCoefficients[j].cols() << "\n";
-				this->getLogManager() << LogLevel_Info << "signal dimensions " << (uint32)l_oSignal.rows() << "," << (uint32)l_oSignal.cols() << "\n";
+				//this->getLogManager() << LogLevel_Info << "spatial filter dimensions " << (uint32)m_vCoefficients[j].rows() << "," << (uint32)m_vCoefficients[j].cols() << "\n";
+				//this->getLogManager() << LogLevel_Info << "signal dimensions " << (uint32)l_oSignal.rows() << "," << (uint32)l_oSignal.cols() << "\n";
 				itpp::Mat<float64> l_oFilteredMatrix = m_vCoefficients[j]*l_oSignal;
 				for(k=0; k<l_ui32OutputChannelCount; k++)
 				{
@@ -304,8 +304,6 @@ boolean CBoxAlgorithmMultipleSpatialFilters::process(void)
 			l_rDynamicBoxContext.markInputAsDeprecated(0, i);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
-
-		
 	}
 	
 	/*for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
@@ -349,6 +347,8 @@ void CBoxAlgorithmMultipleSpatialFilters::processChildData(const char* sData)
 		}
 		else
 			m_ui32InputChannelCount = l_ui32InputChannelCount;
+		
+		//std::cout << "Input Channel Count " << m_ui32InputChannelCount << "\n";
 	}
 	
 	if(m_vNode.top()==CString("OutputChannels"))
@@ -362,10 +362,13 @@ void CBoxAlgorithmMultipleSpatialFilters::processChildData(const char* sData)
 		}
 		else
 			m_ui32OutputChannelCount = l_ui32OutputChannelCount;
+		
+		//std::cout << "OUtput Channel Count " << m_ui32OutputChannelCount << "\n";
 	}	
 
 	if(m_vNode.top()==CString("Coefficients"))
 	{
+		//std::cout << "Coefficients\n";
 		//std::vector < float64 > l_vCoefficients;
 		float64* l_vCoefficients = new float64[m_ui32OutputChannelCount*m_ui32InputChannelCount];
 		int i=0;
@@ -375,9 +378,9 @@ void CBoxAlgorithmMultipleSpatialFilters::processChildData(const char* sData)
 			l_sData >> l_f64Value;
 			//l_vCoefficients.push_back(l_f64Value);
 			l_vCoefficients[i++] = l_f64Value;
-			std::cout << " " << l_vCoefficients[i-1];
+			//std::cout << " " << l_vCoefficients[i-1];
 		}
-		std::cout << "--------------\n" <<  i << ", " << m_ui32OutputChannelCount*m_ui32InputChannelCount <<"\n";
+		//std::cout << "--------------\n" <<  i << ", " << m_ui32OutputChannelCount*m_ui32InputChannelCount <<"\n";
 
 		m_vCoefficients.push_back(itpp::Mat<float64>(l_vCoefficients,m_ui32OutputChannelCount,m_ui32InputChannelCount,false));
 		//m_vCoefficients[m_ui32NumberOfExperts].set_size(l_vCoefficients.size());
@@ -385,8 +388,8 @@ void CBoxAlgorithmMultipleSpatialFilters::processChildData(const char* sData)
 		{
 			m_vCoefficients[m_ui32NumberOfExperts].set(l_vCoefficients[i]);
 		}*/
-		std::cout << "test \n";
-		std::cout << "test " << l_vCoefficients[0] << "," << l_vCoefficients[m_ui32OutputChannelCount*m_ui32InputChannelCount-1] << "\n";
+		//std::cout << "test \n";
+		//std::cout << "test " << l_vCoefficients[0] << "," << l_vCoefficients[m_ui32OutputChannelCount*m_ui32InputChannelCount-1] << "\n";
 		delete[] l_vCoefficients;
 	}
 }

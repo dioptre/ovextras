@@ -244,7 +244,9 @@ void CAlgorithmClassifierMixtureOfExperts::processChildData(const char* sData)
 		for(size_t i=0; i<l_vCoefficients.size(); i++)
 		{
 			m_vCoefficients[m_ui32NumberOfExperts][i]=l_vCoefficients[i];
+			//std::cout << m_vCoefficients[m_ui32NumberOfExperts][i] << " ";
 		}
+		//std::cout << "\n " << l_vCoefficients.size() << "\n";
 	}
 }
 

@@ -4,7 +4,7 @@
 -- this function is called when the box is initialized
 function initialize(box)
         box:log("Trace", "initialize has been called")
-        dofile(box:get_config("${Path_Data}") .. "/openvibe-plugins/stimulation/lua-stimulator-stim-codes.lua")
+        -- dofile(box:get_config("${Path_Data}") .. "/openvibe-plugins/stimulation/lua-stimulator-stim-codes.lua")
         offset = box:get_setting(2)
 end
 
