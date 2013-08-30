@@ -196,7 +196,7 @@ void P300MainContainer::initializeGridArea(uint32 nCells)
 void P300MainContainer::initializeResultArea()
 {
 	//std::cout << "initializeResultArea\n";
-	m_gResultArea = new GTable((uint32)1,(uint32)3);	
+	m_gResultArea = new GTable((uint32)1,(uint32)30);	
 	m_gResultArea->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
 	BoxDimensions dim = m_pScreenLayoutObject->getResultAreaDimensions();
 	this->addChild(m_gResultArea, dim.x, dim.y, dim.width, dim.height, 0.05f);
@@ -209,7 +209,7 @@ void P300MainContainer::initializeResultArea()
 }
 void P300MainContainer::initializeTargetArea()
 {
-	m_gTargetArea = new GTable((uint32)1,(uint32)3);	
+	m_gTargetArea = new GTable((uint32)1,(uint32)30);	
 	m_gTargetArea->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
 	BoxDimensions dim = m_pScreenLayoutObject->getTargetAreaDimensions();
 	this->addChild(m_gTargetArea, dim.x, dim.y, dim.width, dim.height, 0.05f);
