@@ -53,6 +53,7 @@ namespace OpenViBEPlugins
 
 		protected:
 			// No codec algorithms were specified in the skeleton-generator.
+            OpenViBE::uint64 m_ui64BoxFrequency;
 
 		};
 
