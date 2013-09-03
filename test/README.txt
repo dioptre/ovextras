@@ -9,7 +9,7 @@ Dependencies:
 to run these scripts, you need ctest (cmake suit), sh-utils (coreutils on windows cygwin or gnuwin32), svn command-line tools and a c++ compiler (C++ Visual Studio 2010 on windows) 
 
 On Linux fedora you need to install :
-yum install cmake svn redhat-lsb gcc-c++ expect
+yum install cmake git redhat-lsb gcc-c++ expect
 
 SUDOER on Linux :
 ------
@@ -30,8 +30,8 @@ WARNING 2 : execution of test change de root password in Fedora distributions to
 
 Get tests scripts:
 -----------------
-svn checkout svn://scm.gforge.inria.fr/svnroot/openvibe/trunk/test
-cd test
+git clone git://scm.gforge.inria.fr/openvibe/openvibe.git
+cd openvibe/test/
 
 
 
