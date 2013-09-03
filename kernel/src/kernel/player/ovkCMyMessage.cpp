@@ -11,7 +11,7 @@ using namespace OpenViBE::Kernel;
 // Returned references are invalid after processMessage().
 uint64 CMyMessage::getValueUint64(OpenViBE::CString &key, bool &success) const
 {
-    uint64 l_ui64Value;
+    uint64 l_ui64Value = 0;//default value
     std::map<CString, uint64>::const_iterator l_oIterator = m_oUint64s.find(key);
     if (l_oIterator!=m_oUint64s.end())
     {
@@ -27,7 +27,7 @@ uint64 CMyMessage::getValueUint64(OpenViBE::CString &key, bool &success) const
 
 OpenViBE::float64 CMyMessage::getValueFloat64(CString &key, bool &success) const
 {
-    float64 l_f64Value;
+    float64 l_f64Value = 0;//defaul value
     std::map<CString, float64>::const_iterator l_oIterator = m_oFloat64s.find(key);
     if (l_oIterator!=m_oFloat64s.end())
     {

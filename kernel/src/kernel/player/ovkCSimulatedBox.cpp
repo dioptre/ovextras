@@ -1304,15 +1304,15 @@ bool CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 
     // get the links related to outputIndex from scenario
     CIdentifier l_oMessageLinkId = m_pScenario->getNextMessageLinkIdentifier(OV_UndefinedIdentifier);
-    CIdentifier l_oCurrentMessageLinkSourceId = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxIdentifier();
-    uint32 l_ui32CurrentMessageLinkSourceOutputIndex = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxOutputIndex();
+    //CIdentifier l_oCurrentMessageLinkSourceId = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxIdentifier();
+    //uint32 l_ui32CurrentMessageLinkSourceOutputIndex = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxOutputIndex();
 
 
     std::vector<std::pair<CIdentifier, uint32> > l_vTarget;
     while(l_oMessageLinkId!=OV_UndefinedIdentifier)
     {
-        l_oCurrentMessageLinkSourceId = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxIdentifier();
-        l_ui32CurrentMessageLinkSourceOutputIndex = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxOutputIndex();
+        CIdentifier l_oCurrentMessageLinkSourceId = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxIdentifier();
+        CIdentifier l_ui32CurrentMessageLinkSourceOutputIndex = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxOutputIndex();
         this->getLogManager() << LogLevel_Debug << "Link " << l_oCurrentMessageLinkSourceId << " - " << l_ui32CurrentMessageLinkSourceOutputIndex << "\n";
 
         //if this link goes from this box at this output
@@ -1354,6 +1354,7 @@ IMyMessage& CSimulatedBox::createMessage()
 {
     CMyMessage* newMessage = new CMyMessage();
     m_vPreparedMessages.push_back(*newMessage);
+    delete newMessage;
     IMyMessage* msg = &m_vPreparedMessages[m_vPreparedMessages.size()-1];
     return *msg;
 
