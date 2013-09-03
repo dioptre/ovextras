@@ -21,6 +21,18 @@ namespace OpenViBE
 			{
 			}
 
+            ~CMyMessage()
+            {
+                m_oUint64s.clear();
+                m_oStrings.clear();
+                m_oFloat64s.clear();
+                m_oMatrices.clear();
+            }
+
+
+
+
+
             // Returned references are invalid after processMessage().
 
                 OpenViBE::uint64 getValueUint64(OpenViBE::CString &key, bool &success) const;

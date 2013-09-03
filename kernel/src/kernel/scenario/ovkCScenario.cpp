@@ -1155,13 +1155,15 @@ CIdentifier CScenario::getUnusedIdentifier(void) const
 	CIdentifier l_oResult;
 	map<CIdentifier, CBox*>::const_iterator i;
 	map<CIdentifier, CLink*>::const_iterator j;
+    map<CIdentifier, CMessageLink*>::const_iterator k;
 	do
 	{
 		l_ui64Identifier++;
 		l_oResult=CIdentifier(l_ui64Identifier);
 		i=m_vBox.find(l_oResult);
 		j=m_vLink.find(l_oResult);
+        k=m_vMessageLink.find(l_oResult);
 	}
-	while(i!=m_vBox.end() || j!= m_vLink.end() || l_oResult==OV_UndefinedIdentifier);
+    while(i!=m_vBox.end() || j!= m_vLink.end() || k!= m_vMessageLink.end() || l_oResult==OV_UndefinedIdentifier);
 	return l_oResult;
 }
