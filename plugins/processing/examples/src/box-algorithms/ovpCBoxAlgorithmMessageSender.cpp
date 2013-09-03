@@ -18,7 +18,7 @@ boolean CBoxAlgorithmMessageSender::initialize(void)
 	// If you need to retrieve setting values, use the FSettingValueAutoCast function.
 	// For example :
 	// - CString setting at index 0 in the setting list :
-	// CString l_sSettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+    m_ui64BoxFrequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	// - unsigned int64 setting at index 1 in the setting list :
 	// uint64 l_ui64SettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 	// - float64 setting at index 2 in the setting list :
@@ -52,7 +52,7 @@ boolean CBoxAlgorithmMessageSender::processClock(IMessageClock& rMessageClock)
 uint64 CBoxAlgorithmMessageSender::getClockFrequency(void)
 {
 	// Note that the time is coded on a 64 bits unsigned integer, fixed decimal point (32:32)
-	return 4LL<<32; // the box clock frequency
+    return m_ui64BoxFrequency<<32; // the box clock frequency
 }
 /*******************************************************************************/
 
@@ -102,7 +102,13 @@ boolean CBoxAlgorithmMessageSender::process(void)
     //msg.setValueCMatrix( "", const CMatrix &valueIn);
     //*/
 
-    this->getPlayerContext().sendMessage(msg, 0);
+
+
+    //send the message for all available output
+    for (uint64 output = 0; output<l_rStaticBoxContext.getMessageOutputCount(); output++)
+    {
+        this->getPlayerContext().sendMessage(msg, output);
+    }
 
 
 	// here is some useful functions:
