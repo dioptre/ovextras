@@ -34,7 +34,6 @@ git clone git://scm.gforge.inria.fr/openvibe/openvibe.git
 cd openvibe/test/
 
 
-
 Run test:
 --------
 
