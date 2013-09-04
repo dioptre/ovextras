@@ -1790,8 +1790,8 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
                                 // -------------- MESSAGE INPUTS -----------------
                                 boolean l_bFlagCanAddMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddMessageInput);
                                 boolean l_bFlagCanModifyMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageInput);
-                                m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can add message input " << l_bFlagCanAddMessageInput    <<"\n";
-                                m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message input " << l_bFlagCanModifyMessageInput    <<"\n";
+                                //m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can add message input " << l_bFlagCanAddMessageInput    <<"\n";
+                                //m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message input " << l_bFlagCanModifyMessageInput    <<"\n";
 
                                 if(l_bFlagCanAddMessageInput || l_bFlagCanModifyMessageInput)
                                 {
@@ -1864,8 +1864,8 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
                                 // -------------- MESSAGE OUTPUTS -----------------
                                 boolean l_bFlagCanAddMessageOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddMessageOutput);
                                 boolean l_bFlagCanModifyMessageOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageOutput);
-                                m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can add message Output " << l_bFlagCanAddMessageOutput    <<"\n";
-                                m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message Output " << l_bFlagCanModifyMessageOutput    <<"\n";
+                                //m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can add message Output " << l_bFlagCanAddMessageOutput    <<"\n";
+                                //m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message Output " << l_bFlagCanModifyMessageOutput    <<"\n";
 
                                 if(l_bFlagCanAddMessageOutput || l_bFlagCanModifyMessageOutput)
                                 {
