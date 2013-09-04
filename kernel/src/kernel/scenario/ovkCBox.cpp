@@ -162,8 +162,8 @@ boolean CBox::initializeFromAlgorithmClassIdentifier(
 	setName(l_pBoxAlgorithmDesc->getName());
 	setAlgorithmClassIdentifier(rAlgorithmClassIdentifier);
 
-	CBoxProto l_oBoxProto(getKernelContext(), *this);
-	l_pBoxAlgorithmDesc->getBoxPrototype(l_oBoxProto);
+    CBoxProto l_oBoxProto(getKernelContext(), *this);
+    l_pBoxAlgorithmDesc->getBoxPrototype(l_oBoxProto);
 
 	if(this->hasAttribute(OV_AttributeId_Box_InitialPrototypeHashValue))
 	{
@@ -181,7 +181,7 @@ boolean CBox::initializeFromAlgorithmClassIdentifier(
 	else
 	{
 		this->addAttribute(OV_AttributeId_Box_Muted, "false");
-	}
+    }
 
 	this->enableNotification();
 

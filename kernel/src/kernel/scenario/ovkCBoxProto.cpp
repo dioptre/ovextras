@@ -139,11 +139,11 @@ boolean CBoxProto::addFlag(
 		case BoxFlag_CanModifyOutput:  m_rBox.addAttribute(OV_AttributeId_Box_FlagCanModifyOutput,  ""); break;
 		case BoxFlag_CanAddSetting:    m_rBox.addAttribute(OV_AttributeId_Box_FlagCanAddSetting,    ""); break;
 		case BoxFlag_CanModifySetting: m_rBox.addAttribute(OV_AttributeId_Box_FlagCanModifySetting, ""); break;
-		case BoxFlag_IsDeprecated:
-		case BoxFlag_IsUnstable:
         case BoxFlag_CanAddMessageInput:      m_rBox.addAttribute(OV_AttributeId_Box_FlagCanAddMessageInput,      ""); break;
         case BoxFlag_CanAddMessageOutput:     m_rBox.addAttribute(OV_AttributeId_Box_FlagCanAddMessageOutput,     ""); break;
-			break;
+        case BoxFlag_IsDeprecated:
+        case BoxFlag_IsUnstable:
+            break;
 		default:
 			return false;
 	}
