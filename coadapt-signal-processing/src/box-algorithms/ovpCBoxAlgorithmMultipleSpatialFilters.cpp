@@ -279,19 +279,34 @@ boolean CBoxAlgorithmMultipleSpatialFilters::process(void)
 
 			System::Memory::set(l_pFilteredMatrix, l_ui32SampleCount*l_ui32OutputChannelCount*sizeof(float64), 0);
 
-			itpp::Mat<float64> l_oSignal(l_pMatrix, l_ui32InputChannelCount, l_ui32SampleCount, false);
+			itpp::Mat<float64> l_oSignal(l_pMatrix, l_ui32InputChannelCount, l_ui32SampleCount, true);
+			/*std::cout << "signal\n";
+			for(k=0; k<l_ui32InputChannelCount; k++)
+			{
+				for(l=0; l<l_ui32SampleCount; l++)
+				{
+					//std::cout << *(l_pMatrix+k*l_ui32SampleCount+l) << " ";
+					std::cout << l_oSignal.get(k,l) << " ";
+				}
+				std::cout << "\n";
+			}*/
+			
 			for(j=0; j<m_ui32NumberOfFilters; j++)
 			{
 				//this->getLogManager() << LogLevel_Info << "spatial filter dimensions " << (uint32)m_vCoefficients[j].rows() << "," << (uint32)m_vCoefficients[j].cols() << "\n";
 				//this->getLogManager() << LogLevel_Info << "signal dimensions " << (uint32)l_oSignal.rows() << "," << (uint32)l_oSignal.cols() << "\n";
 				itpp::Mat<float64> l_oFilteredMatrix = m_vCoefficients[j]*l_oSignal;
-				for(k=0; k<l_ui32OutputChannelCount; k++)
+				//std::cout << "Spatially filtered signal\n";
+				for(uint32 k=0; k<l_ui32OutputChannelCount; k++)
 				{
-					for(l=0; l<l_ui32SampleCount; l++)
+					for(uint32 l=0; l<l_ui32SampleCount; l++)
 					{
 						l_pFilteredMatrix[k*l_ui32SampleCount+l]=l_oFilteredMatrix.get(k,l);
+						//std::cout << l_pFilteredMatrix[k*l_ui32SampleCount+l] << " ";
 					}
+					//std::cout << "\n";
 				}
+				//std::cout << "\n";
 				
 				m_pStreamEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeBuffer);
 				l_rDynamicBoxContext.markInputAsDeprecated(0, i);
@@ -382,7 +397,17 @@ void CBoxAlgorithmMultipleSpatialFilters::processChildData(const char* sData)
 		}
 		//std::cout << "--------------\n" <<  i << ", " << m_ui32OutputChannelCount*m_ui32InputChannelCount <<"\n";
 
-		m_vCoefficients.push_back(itpp::Mat<float64>(l_vCoefficients,m_ui32OutputChannelCount,m_ui32InputChannelCount,false));
+		m_vCoefficients.push_back(itpp::Mat<float64>(l_vCoefficients,m_ui32OutputChannelCount,m_ui32InputChannelCount,true));
+		//std::cout << "spatial filter\n";
+		for(uint32 k=0; k<m_ui32OutputChannelCount; k++)
+		{
+			for(uint32 l=0; l<m_ui32InputChannelCount; l++)
+			{
+				//std::cout << *(l_pMatrix+k*l_ui32SampleCount+l) << " ";
+				//std::cout << m_vCoefficients.back().get(k,l) << " ";
+			}
+			//std::cout << "\n";
+		}		
 		//m_vCoefficients[m_ui32NumberOfExperts].set_size(l_vCoefficients.size());
 		/*for(size_t i=0; i<l_vCoefficients.size(); i++)
 		{

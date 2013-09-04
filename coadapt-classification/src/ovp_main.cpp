@@ -39,6 +39,10 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EvidenceAccumulationAlgorithm, "Counter", OVP_ClassId_Algorithm_EvidenceAccumulationCounter.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EvidenceAccumulationAlgorithm, "Bayesian", OVP_ClassId_Algorithm_EvidenceAccumulationBayesian.toUInteger());	
 	
+	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_EvidenceAccumulationAlgorithmInputType, "Evidence Accumulation Input Type");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EvidenceAccumulationAlgorithmInputType, "Distance to hyperplane", OVP_InputType_EvidenceAccumulationDistance.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EvidenceAccumulationAlgorithmInputType, "Class probabilities", OVP_InputType_EvidenceAccumulationProbability.toUInteger());
+	
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Mixture of Experts", OVP_ClassId_Algorithm_ClassifierMixtureOfExperts.toUInteger());
 	
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorWithUpdateDesc);

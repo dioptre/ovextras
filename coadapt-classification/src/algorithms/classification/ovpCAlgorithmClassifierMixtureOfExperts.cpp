@@ -149,14 +149,19 @@ boolean CAlgorithmClassifierMixtureOfExperts::classify(const IFeatureVector& rFe
 	else
 	{
 		m_ui32ClassificationCount++;
-		m_f64Result+=-l_oFeatures*m_vCoefficients[m_ui32ClassificationCount-1];
+		m_f64Result+=(-(l_oFeatures*m_vCoefficients[m_ui32ClassificationCount-1])<0?1:0);
+		std::cout << "Feature vectors\n";
+		for (uint32 i =0; i<l_oFeatures.size(); i++)
+			std::cout << l_oFeatures[i] << " ";
+		std::cout << "\n";
+		std::cout << "Output: " << (l_oFeatures*m_vCoefficients[m_ui32ClassificationCount-1]) << "\n";
 		if (m_ui32ClassificationCount%m_ui32NumberOfExperts==0)
 			m_f64Result /= static_cast<float64>(m_ui32NumberOfExperts);
 	}
 	
 	if (m_ui32Mode==1 || m_ui32ClassificationCount%m_ui32NumberOfExperts==0)
 	{
-		
+		this->getLogManager() << LogLevel_Info << "Classification output " << m_f64Result << "\n";
 		rClassificationValues.setSize(1);
 		rClassificationValues[0]=m_f64Result;
 

@@ -37,6 +37,8 @@ boolean CBoxAlgorithmEvidenceAccumulator::initialize(void)
 	else
 		getLogManager() << LogLevel_Info << "Early stopping is disabled\n";
 	m_bStopCondition = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+	m_oInputType = this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_EvidenceAccumulationAlgorithmInputType, 
+												     FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5));
 	m_bScaleFactor = 0.5;
 	
 	m_bReceivedSomeEvidence = false;
@@ -237,9 +239,17 @@ boolean CBoxAlgorithmEvidenceAccumulator::process(void)
 				//std::cout << "Accumulated evidence ";
 				for (uint32 j=0; j<l_pInputMatrix->getBufferElementCount(); j++)
 				{
+					float64 l_f64ProbabilityEstimate = 0.0;
 					float64 l_f64InputValue = *(l_pInputMatrix->getBuffer()+j);
-					float64 l_f64ProbabilityEstimate = std::exp(m_bScaleFactor*l_f64InputValue) / 
-											(1+std::exp(m_bScaleFactor*l_f64RealPredictionValue));
+					if (m_oInputType==OVP_InputType_EvidenceAccumulationDistance)
+					{
+						l_f64ProbabilityEstimate = std::exp(m_bScaleFactor*l_f64InputValue) / 
+												(1+std::exp(m_bScaleFactor*l_f64RealPredictionValue));
+					}
+					else if (m_oInputType==OVP_InputType_EvidenceAccumulationProbability)
+					{
+						l_f64ProbabilityEstimate = l_f64InputValue==0?1.0-l_f64InputValue:l_f64InputValue;
+					}
 					if (l_f64InputValue!=0)
 						*(m_pAccumulatedEvidence->getBuffer()+j) += std::log(l_f64ProbabilityEstimate/(float64)l_ui32NumberOfNonZero);
 					else

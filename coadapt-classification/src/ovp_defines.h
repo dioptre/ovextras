@@ -41,6 +41,9 @@
 #define OVP_ClassId_Algorithm_EvidenceAccumulationNone	OpenViBE::CIdentifier(0xE405260B, 0x59EEFAE4)
 #define OVP_ClassId_Algorithm_EvidenceAccumulationBayesian	OpenViBE::CIdentifier(0xA15EAEC5, 0xAB0CE73D)   
 #define OVP_TypeId_EvidenceAccumulationAlgorithm		OpenViBE::CIdentifier(0x1E1065B2, 0x2CA32013)
+#define OVP_TypeId_EvidenceAccumulationAlgorithmInputType 	OpenViBE::CIdentifier(0xE5103C63, 0x08D825E0)
+#define OVP_InputType_EvidenceAccumulationProbability		OpenViBE::CIdentifier(0x043A1BC4, 0x925D3CD6)
+#define OVP_InputType_EvidenceAccumulationDistance		OpenViBE::CIdentifier(0x781F51CA, 0xE6E3B0B8)
 
 #define OVP_ClassId_BoxAlgorithm_AdaptiveP300Classifier 		OpenViBE::CIdentifier(0x73C8A153, 0x6537A7E2)
 #define OVP_ClassId_BoxAlgorithm_AdaptiveP300ClassifierDesc 	OpenViBE::CIdentifier(0xBA56CFE0, 0x7EBBE949)
@@ -52,10 +55,7 @@
 //                                                                   //
 
 /*
-#															OpenViBE::CIdentifier(0x7FEFDCA9, 0x816ED903)
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0x781F51CA, 0xE6E3B0B8)
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0xE5103C63, 0x08D825E0)
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0x043A1BC4, 0x925D3CD6)
+#															OpenViBE::CIdentifier(0x7FEFDCA9, 0x816ED903)                              
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0x5CF66A73, 0xF5BBF0BF)
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0xD5C5EF91, 0xE1B1C4F4)
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0xEBAEB213, 0xDD4735A0)

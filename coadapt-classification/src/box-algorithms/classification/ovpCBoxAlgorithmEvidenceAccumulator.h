@@ -59,6 +59,7 @@ namespace OpenViBEPlugins
 			OpenViBE::IMatrix* m_pAccumulatedEvidence;
 			OpenViBE::IMatrix* m_pNormalizedAccumulatedEvidence;
 			OpenViBE::CIdentifier m_oEvidenceAlgorithm;
+			OpenViBE::CIdentifier m_oInputType;
 
 			
 		private:
@@ -167,6 +168,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("StimulationLabelBase",OV_TypeId_Stimulation,"");
 				rBoxAlgorithmPrototype.addSetting("EarlyStopping",OV_TypeId_Boolean,"false");
 				rBoxAlgorithmPrototype.addSetting("StopCondition",OV_TypeId_Float,"0.0");
+				rBoxAlgorithmPrototype.addSetting("InputType",OVP_TypeId_EvidenceAccumulationAlgorithmInputType,"Distance to hyperplane");
 
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
