@@ -40,9 +40,6 @@ getuname(cpu    -m)
 
 set(CTEST_BUILD_NAME                    "${osname}_${cpu}_${distrib}${distrib-release}")
 
-## -- SVN command
-## ----------------
-find_program(CTEST_SVN_COMMAND NAMES svn)
 
 # -----------------------------------------------------------  
 # -- build specific
