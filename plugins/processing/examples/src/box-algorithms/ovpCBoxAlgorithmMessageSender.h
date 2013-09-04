@@ -154,6 +154,8 @@ namespace OpenViBEPlugins
 
                 rBoxAlgorithmPrototype.addMessageOutput(OpenViBE::CString("message output"));
                 rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageOutput);
+
+                rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyMessageOutput);
 				
 				return true;
 			}
