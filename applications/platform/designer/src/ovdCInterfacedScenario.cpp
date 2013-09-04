@@ -188,6 +188,9 @@ static void context_menu_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
     case ContextMenu_BoxAddMessageOutput:      l_pContextMenuCB->pInterfacedScenario->contextMenuBoxAddMessageOutputCB(*l_pContextMenuCB->pBox); break;
     case ContextMenu_BoxRemoveMessageOutput:   l_pContextMenuCB->pInterfacedScenario->contextMenuBoxRemoveMessageOutputCB(*l_pContextMenuCB->pBox, l_pContextMenuCB->ui32Index); break;
 
+    case ContextMenu_BoxEditMessageInput:   l_pContextMenuCB->pInterfacedScenario->contextMenuBoxEditMessageInputCB(*l_pContextMenuCB->pBox, l_pContextMenuCB->ui32Index); break;
+    case ContextMenu_BoxEditMessageOutput:      l_pContextMenuCB->pInterfacedScenario->contextMenuBoxEditMessageOutputCB(*l_pContextMenuCB->pBox,  l_pContextMenuCB->ui32Index); break;
+
 
 	}
 	// Redraw in any case, as some of the actual callbacks can forget to redraw. As this callback is only called after the user has accessed
@@ -1791,7 +1794,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
                                 boolean l_bFlagCanAddMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddMessageInput);
                                 boolean l_bFlagCanModifyMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageInput);
                                 //m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can add message input " << l_bFlagCanAddMessageInput    <<"\n";
-                                //m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message input " << l_bFlagCanModifyMessageInput    <<"\n";
+                                m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message input " << l_bFlagCanModifyMessageInput    <<"\n";
 
                                 if(l_bFlagCanAddMessageInput || l_bFlagCanModifyMessageInput)
                                 {
@@ -1811,7 +1814,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
                                         if(l_bFlagCanModifyMessageInput || l_ui32FixedMessageInputCount <= i)
                                         {
                                             ::GtkMenu* l_pMenuInputMenuAction=GTK_MENU(gtk_menu_new());
-                                            //gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanModifyMessageInput, l_pMenuInputMenuAction, l_pMenuInputInputMenuItemConfigure, GTK_STOCK_EDIT, "configure...", context_menu_cb, l_pBox, ContextMenu_BoxEditMessageInput, i);
+                                            gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanModifyMessageInput, l_pMenuInputMenuAction, l_pMenuInputInputMenuItemConfigure, GTK_STOCK_EDIT, "configure...", context_menu_cb, l_pBox, ContextMenu_BoxEditMessageInput, i);
                                             gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanAddMessageInput && l_ui32FixedMessageInputCount <= i, l_pMenuInputMenuAction, l_pMenuInputInputMenuItemRemove, GTK_STOCK_REMOVE, "delete...", context_menu_cb, l_pBox, ContextMenu_BoxRemoveMessageInput, i);
                                             gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuInputMenuItem), GTK_WIDGET(l_pMenuInputMenuAction));
                                         }
@@ -1885,7 +1888,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
                                         if(l_bFlagCanModifyMessageOutput || l_ui32FixedMessageOutputCount <= i)
                                         {
                                             ::GtkMenu* l_pMenuOutputMenuAction=GTK_MENU(gtk_menu_new());
-                                            //gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanModifyMessageInput, l_pMenuInputMenuAction, l_pMenuInputInputMenuItemConfigure, GTK_STOCK_EDIT, "configure...", context_menu_cb, l_pBox, ContextMenu_BoxEditMessageInput, i);
+                                            gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanModifyMessageOutput, l_pMenuOutputMenuAction, l_pMenuInputInputMenuItemConfigure, GTK_STOCK_EDIT, "configure...", context_menu_cb, l_pBox, ContextMenu_BoxEditMessageOutput, i);
                                             gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanAddMessageOutput && l_ui32FixedMessageOutputCount <= i, l_pMenuOutputMenuAction, l_pMenuInputOutputMenuItemRemove, GTK_STOCK_REMOVE, "delete...", context_menu_cb, l_pBox, ContextMenu_BoxRemoveMessageOutput, i);
                                             gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuOutputMenuItem), GTK_WIDGET(l_pMenuOutputMenuAction));
                                         }
@@ -2725,8 +2728,14 @@ void CInterfacedScenario::contextMenuBoxAddInputCB(IBox& rBox)
 void CInterfacedScenario::contextMenuBoxAddMessageInputCB(IBox& rBox)
 {
     m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxAddMessageInputCB\n";
-    rBox.addMessageInput(CString("an input"));
-    this->snapshotCB();
+    CString l_sMessageInputName("A message input");
+
+    CRenameDialog l_oRename(m_rKernelContext, l_sMessageInputName , l_sMessageInputName, m_sGUIFilename.c_str());
+    if(l_oRename.run())
+    {
+        rBox.addMessageInput(l_oRename.getResult());
+        this->snapshotCB();
+    }
 
 }
 
@@ -2740,8 +2749,15 @@ void CInterfacedScenario::contextMenuBoxRemoveMessageInputCB(IBox& rBox, uint32 
 void CInterfacedScenario::contextMenuBoxAddMessageOutputCB(IBox& rBox)
 {
     m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxAddMessageOutputCB\n";
-    rBox.addMessageOutput(CString("an Output"));
-    this->snapshotCB();
+
+    CString l_sMessageInputName("A message output");
+
+    CRenameDialog l_oRename(m_rKernelContext, l_sMessageInputName , l_sMessageInputName, m_sGUIFilename.c_str());
+    if(l_oRename.run())
+    {
+        rBox.addMessageOutput(l_oRename.getResult());
+    }
+
 
 }
 
@@ -2750,6 +2766,33 @@ void CInterfacedScenario::contextMenuBoxRemoveMessageOutputCB(IBox& rBox, uint32
     m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxRemoveOutputCB\n";
     rBox.removeMessageOutput(ui32Index);
     this->snapshotCB();
+}
+//erferferf
+void CInterfacedScenario::contextMenuBoxEditMessageInputCB(IBox& rBox, uint32 ui32Index)
+{
+    m_rKernelContext.getLogManager() << LogLevel_Fatal << "contextMenuBoxEditMessageInputCB\n";
+    CString l_sMessageInputName;
+    rBox.getMessageInputName(ui32Index, l_sMessageInputName);
+
+    CRenameDialog l_oRename(m_rKernelContext, l_sMessageInputName , l_sMessageInputName, m_sGUIFilename.c_str());
+    if(l_oRename.run())
+    {
+        rBox.setMessageInputName(ui32Index, l_oRename.getResult());
+        this->snapshotCB();
+    }
+}
+void CInterfacedScenario::contextMenuBoxEditMessageOutputCB(IBox& rBox, uint32 ui32Index)
+{
+    m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxEditMessageOutputCB\n";
+    CString l_sMessageOutputName;
+    rBox.getMessageOutputName(ui32Index, l_sMessageOutputName);
+
+    CRenameDialog l_oRename(m_rKernelContext, l_sMessageOutputName , l_sMessageOutputName, m_sGUIFilename.c_str());
+    if(l_oRename.run())
+    {
+        rBox.setMessageOutputName(ui32Index, l_oRename.getResult());
+        this->snapshotCB();
+    }
 }
 
 

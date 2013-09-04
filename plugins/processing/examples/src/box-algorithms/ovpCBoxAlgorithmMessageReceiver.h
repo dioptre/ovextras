@@ -153,6 +153,8 @@ namespace OpenViBEPlugins
 
                 rBoxAlgorithmPrototype.addMessageInput(OpenViBE::CString("message input"));
                 rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageInput);
+
+                rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyMessageInput);
 				
 				return true;
 			}
