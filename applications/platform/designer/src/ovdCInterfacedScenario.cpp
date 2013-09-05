@@ -1646,6 +1646,39 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 									}
 								}
 							}
+						}//double clicking on a message in/output
+						else if(m_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput || m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput)
+						{
+							IBox* l_pBox=m_rScenario.getBoxDetails(m_oCurrentObject.m_oIdentifier);
+							if(l_pBox)
+							{
+								if((m_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput  && l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageInput))
+								|| (m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput && l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageOutput)))
+								{
+									CString l_sMessageSocketName;
+									if (m_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput)
+									{
+										l_pBox->getMessageInputName(m_oCurrentObject.m_ui32ConnectorIndex, l_sMessageSocketName);
+									}
+									if (m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput)
+									{
+										l_pBox->getMessageOutputName(m_oCurrentObject.m_ui32ConnectorIndex, l_sMessageSocketName);
+									}
+
+									//m_rKernelContext.getLogManager() << LogLevel_Fatal << "box connector " << m_oCurrentObject.m_ui32ConnectorIndex <<  " message socket name " << l_sMessageSocketName <<"\n";
+
+									CRenameDialog l_oRename(m_rKernelContext, l_sMessageSocketName , l_sMessageSocketName, m_sGUIFilename.c_str());
+									if(l_oRename.run())
+									{
+										if (m_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput)
+												l_pBox->setMessageInputName(m_oCurrentObject.m_ui32ConnectorIndex, l_oRename.getResult());
+										if (m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput)
+											l_pBox->setMessageOutputName(m_oCurrentObject.m_ui32ConnectorIndex, l_oRename.getResult());
+
+										this->snapshotCB();
+									}
+								}
+							}
 						}
 						else
 						{
@@ -1787,43 +1820,43 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 									gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuItemInput), GTK_WIDGET(l_pMenuInput));
 								}
 
-                                // -------------- MESSAGE INPUTS -----------------
-                                boolean l_bFlagCanAddMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddMessageInput);
-                                boolean l_bFlagCanModifyMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageInput);
-                                //m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can add message input " << l_bFlagCanAddMessageInput    <<"\n";
-                                m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message input " << l_bFlagCanModifyMessageInput    <<"\n";
+								// -------------- MESSAGE INPUTS -----------------
+								boolean l_bFlagCanAddMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddMessageInput);
+								boolean l_bFlagCanModifyMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageInput);
+								//m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can add message input " << l_bFlagCanAddMessageInput    <<"\n";
+								//m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message input " << l_bFlagCanModifyMessageInput    <<"\n";
 
-                                if(l_bFlagCanAddMessageInput || l_bFlagCanModifyMessageInput)
-                                {
-                                    uint32 l_ui32FixedMessageInputCount=0;
-                                    ::sscanf(l_pBox->getAttributeValue(OV_AttributeId_Box_InitialMessageInputCount).toASCIIString(), "%d", &l_ui32FixedMessageInputCount);
-                                    ::GtkMenu* l_pMenuInput=GTK_MENU(gtk_menu_new());
-                                    gtk_menu_add_new_image_menu_item(l_pMenu, l_pMenuItemInput, GTK_STOCK_PROPERTIES, "modify Message inputs");
-                                    for(i=0; i<l_pBox->getMessageInputCount(); i++)
-                                    {
-                                        CString l_sName;
-                                        //CIdentifier l_oType;
-                                        l_pBox->getMessageInputName(i, l_sName);
-                                        //l_pBox->getMessageInputType(i, l_oType);
-                                        sprintf(l_sCompleteName, "%i : %s", (int)i+1, l_sName.toASCIIString());
-                                        gtk_menu_add_new_image_menu_item(l_pMenuInput, l_pMenuInputMenuItem, GTK_STOCK_PROPERTIES, l_sCompleteName);
-//*
-                                        if(l_bFlagCanModifyMessageInput || l_ui32FixedMessageInputCount <= i)
-                                        {
-                                            ::GtkMenu* l_pMenuInputMenuAction=GTK_MENU(gtk_menu_new());
-                                            gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanModifyMessageInput, l_pMenuInputMenuAction, l_pMenuInputInputMenuItemConfigure, GTK_STOCK_EDIT, "configure...", context_menu_cb, l_pBox, ContextMenu_BoxEditMessageInput, i);
-                                            gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanAddMessageInput && l_ui32FixedMessageInputCount <= i, l_pMenuInputMenuAction, l_pMenuInputInputMenuItemRemove, GTK_STOCK_REMOVE, "delete...", context_menu_cb, l_pBox, ContextMenu_BoxRemoveMessageInput, i);
-                                            gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuInputMenuItem), GTK_WIDGET(l_pMenuInputMenuAction));
-                                        }
-                                        else
-                                        {//*/
-                                            gtk_widget_set_sensitive(GTK_WIDGET(l_pMenuInputMenuItem), false);
-                                        }
-                                    }
-                                    gtk_menu_add_separator_menu_item(l_pMenuInput);
-                                    gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanAddMessageInput, l_pMenuInput, l_pMenuInputMenuItemAdd, GTK_STOCK_ADD, "new...", context_menu_cb, l_pBox, ContextMenu_BoxAddMessageInput, -1);
-                                    gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuItemInput), GTK_WIDGET(l_pMenuInput));
-                                }
+								if(l_bFlagCanAddMessageInput || l_bFlagCanModifyMessageInput)
+								{
+									uint32 l_ui32FixedMessageInputCount=0;
+									::sscanf(l_pBox->getAttributeValue(OV_AttributeId_Box_InitialMessageInputCount).toASCIIString(), "%d", &l_ui32FixedMessageInputCount);
+									::GtkMenu* l_pMenuInput=GTK_MENU(gtk_menu_new());
+									gtk_menu_add_new_image_menu_item(l_pMenu, l_pMenuItemInput, GTK_STOCK_PROPERTIES, "modify Message inputs");
+									for(i=0; i<l_pBox->getMessageInputCount(); i++)
+									{
+										CString l_sName;
+										//CIdentifier l_oType;
+										l_pBox->getMessageInputName(i, l_sName);
+										//l_pBox->getMessageInputType(i, l_oType);
+										sprintf(l_sCompleteName, "%i : %s", (int)i+1, l_sName.toASCIIString());
+										gtk_menu_add_new_image_menu_item(l_pMenuInput, l_pMenuInputMenuItem, GTK_STOCK_PROPERTIES, l_sCompleteName);
+	//*
+										if(l_bFlagCanModifyMessageInput || l_ui32FixedMessageInputCount <= i)
+										{
+											::GtkMenu* l_pMenuInputMenuAction=GTK_MENU(gtk_menu_new());
+											gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanModifyMessageInput, l_pMenuInputMenuAction, l_pMenuInputInputMenuItemConfigure, GTK_STOCK_EDIT, "configure...", context_menu_cb, l_pBox, ContextMenu_BoxEditMessageInput, i);
+											gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanAddMessageInput && l_ui32FixedMessageInputCount <= i, l_pMenuInputMenuAction, l_pMenuInputInputMenuItemRemove, GTK_STOCK_REMOVE, "delete...", context_menu_cb, l_pBox, ContextMenu_BoxRemoveMessageInput, i);
+											gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuInputMenuItem), GTK_WIDGET(l_pMenuInputMenuAction));
+										}
+										else
+										{//*/
+											gtk_widget_set_sensitive(GTK_WIDGET(l_pMenuInputMenuItem), false);
+										}
+									}
+									gtk_menu_add_separator_menu_item(l_pMenuInput);
+									gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanAddMessageInput, l_pMenuInput, l_pMenuInputMenuItemAdd, GTK_STOCK_ADD, "new...", context_menu_cb, l_pBox, ContextMenu_BoxAddMessageInput, -1);
+									gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuItemInput), GTK_WIDGET(l_pMenuInput));
+								}
 
 								// -------------- OUTPUTS --------------
 
@@ -1861,43 +1894,43 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 									gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuItemOutput), GTK_WIDGET(l_pMenuOutput));
 								}
 
-                                // -------------- MESSAGE OUTPUTS -----------------
-                                boolean l_bFlagCanAddMessageOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddMessageOutput);
-                                boolean l_bFlagCanModifyMessageOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageOutput);
-                                //m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can add message Output " << l_bFlagCanAddMessageOutput    <<"\n";
-                                //m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message Output " << l_bFlagCanModifyMessageOutput    <<"\n";
+								// -------------- MESSAGE OUTPUTS -----------------
+								boolean l_bFlagCanAddMessageOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddMessageOutput);
+								boolean l_bFlagCanModifyMessageOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageOutput);
+								//m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can add message Output " << l_bFlagCanAddMessageOutput    <<"\n";
+								//m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message Output " << l_bFlagCanModifyMessageOutput    <<"\n";
 
-                                if(l_bFlagCanAddMessageOutput || l_bFlagCanModifyMessageOutput)
-                                {
-                                    uint32 l_ui32FixedMessageOutputCount=0;
-                                    ::sscanf(l_pBox->getAttributeValue(OV_AttributeId_Box_InitialMessageOutputCount).toASCIIString(), "%d", &l_ui32FixedMessageOutputCount);
-                                    ::GtkMenu* l_pMenuOutput=GTK_MENU(gtk_menu_new());
-                                    gtk_menu_add_new_image_menu_item(l_pMenu, l_pMenuItemOutput, GTK_STOCK_PROPERTIES, "modify Message Outputs");
-                                    for(i=0; i<l_pBox->getMessageOutputCount(); i++)
-                                    {
-                                        CString l_sName;
-                                        //CIdentifier l_oType;
-                                        l_pBox->getMessageOutputName(i, l_sName);
-                                        //l_pBox->getMessageInputType(i, l_oType);
-                                        sprintf(l_sCompleteName, "%i : %s", (int)i+1, l_sName.toASCIIString());
-                                        gtk_menu_add_new_image_menu_item(l_pMenuOutput, l_pMenuOutputMenuItem, GTK_STOCK_PROPERTIES, l_sCompleteName);
-//*
-                                        if(l_bFlagCanModifyMessageOutput || l_ui32FixedMessageOutputCount <= i)
-                                        {
-                                            ::GtkMenu* l_pMenuOutputMenuAction=GTK_MENU(gtk_menu_new());
-                                            gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanModifyMessageOutput, l_pMenuOutputMenuAction, l_pMenuInputInputMenuItemConfigure, GTK_STOCK_EDIT, "configure...", context_menu_cb, l_pBox, ContextMenu_BoxEditMessageOutput, i);
-                                            gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanAddMessageOutput && l_ui32FixedMessageOutputCount <= i, l_pMenuOutputMenuAction, l_pMenuInputOutputMenuItemRemove, GTK_STOCK_REMOVE, "delete...", context_menu_cb, l_pBox, ContextMenu_BoxRemoveMessageOutput, i);
-                                            gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuOutputMenuItem), GTK_WIDGET(l_pMenuOutputMenuAction));
-                                        }
-                                        else
-                                        {//*/
-                                            gtk_widget_set_sensitive(GTK_WIDGET(l_pMenuOutputMenuItem), false);
-                                        }
-                                    }
-                                    gtk_menu_add_separator_menu_item(l_pMenuOutput);
-                                    gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanAddMessageOutput, l_pMenuOutput, l_pMenuOutputMenuItemAdd, GTK_STOCK_ADD, "new...", context_menu_cb, l_pBox, ContextMenu_BoxAddMessageOutput, -1);
-                                    gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuItemOutput), GTK_WIDGET(l_pMenuOutput));
-                                }
+								if(l_bFlagCanAddMessageOutput || l_bFlagCanModifyMessageOutput)
+								{
+									uint32 l_ui32FixedMessageOutputCount=0;
+									::sscanf(l_pBox->getAttributeValue(OV_AttributeId_Box_InitialMessageOutputCount).toASCIIString(), "%d", &l_ui32FixedMessageOutputCount);
+									::GtkMenu* l_pMenuOutput=GTK_MENU(gtk_menu_new());
+									gtk_menu_add_new_image_menu_item(l_pMenu, l_pMenuItemOutput, GTK_STOCK_PROPERTIES, "modify Message Outputs");
+									for(i=0; i<l_pBox->getMessageOutputCount(); i++)
+									{
+										CString l_sName;
+										//CIdentifier l_oType;
+										l_pBox->getMessageOutputName(i, l_sName);
+										//l_pBox->getMessageInputType(i, l_oType);
+										sprintf(l_sCompleteName, "%i : %s", (int)i+1, l_sName.toASCIIString());
+										gtk_menu_add_new_image_menu_item(l_pMenuOutput, l_pMenuOutputMenuItem, GTK_STOCK_PROPERTIES, l_sCompleteName);
+	//*
+										if(l_bFlagCanModifyMessageOutput || l_ui32FixedMessageOutputCount <= i)
+										{
+											::GtkMenu* l_pMenuOutputMenuAction=GTK_MENU(gtk_menu_new());
+											gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanModifyMessageOutput, l_pMenuOutputMenuAction, l_pMenuInputInputMenuItemConfigure, GTK_STOCK_EDIT, "configure...", context_menu_cb, l_pBox, ContextMenu_BoxEditMessageOutput, i);
+											gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanAddMessageOutput && l_ui32FixedMessageOutputCount <= i, l_pMenuOutputMenuAction, l_pMenuInputOutputMenuItemRemove, GTK_STOCK_REMOVE, "delete...", context_menu_cb, l_pBox, ContextMenu_BoxRemoveMessageOutput, i);
+											gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuOutputMenuItem), GTK_WIDGET(l_pMenuOutputMenuAction));
+										}
+										else
+										{//*/
+											gtk_widget_set_sensitive(GTK_WIDGET(l_pMenuOutputMenuItem), false);
+										}
+									}
+									gtk_menu_add_separator_menu_item(l_pMenuOutput);
+									gtk_menu_add_new_image_menu_item_with_cb_condition(l_bFlagCanAddMessageOutput, l_pMenuOutput, l_pMenuOutputMenuItemAdd, GTK_STOCK_ADD, "new...", context_menu_cb, l_pBox, ContextMenu_BoxAddMessageOutput, -1);
+									gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuItemOutput), GTK_WIDGET(l_pMenuOutput));
+								}
 
 								// -------------- SETTINGS --------------
 
@@ -2012,7 +2045,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 		if(m_ui32CurrentMode==Mode_Connect)
 		{
 			boolean l_bIsActuallyConnecting=false;
-            boolean l_bIsConnectionIsMessage=false;
+			boolean l_bIsConnectionIsMessage=false;
 			uint32 l_ui32InterfacedObjectId=pickInterfacedObject((int)m_f64ReleaseMouseX, (int)m_f64ReleaseMouseY);
 			CInterfacedObject l_oCurrentObject=m_vInterfacedObject[l_ui32InterfacedObjectId];
 			CInterfacedObject l_oSourceObject;
@@ -2029,22 +2062,22 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				l_oTargetObject=l_oCurrentObject;
 				l_bIsActuallyConnecting=true;
 			}
-            //
-            if(l_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput && m_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput)
-            {
-                l_oSourceObject=l_oCurrentObject;
-                l_oTargetObject=m_oCurrentObject;
-                l_bIsActuallyConnecting=true;
-                l_bIsConnectionIsMessage = true;
-            }
-            if(l_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput && m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput)
-            {
-                l_oSourceObject=m_oCurrentObject;
-                l_oTargetObject=l_oCurrentObject;
-                l_bIsActuallyConnecting=true;
-                l_bIsConnectionIsMessage = true;
-            }
-            //
+			//
+			if(l_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput && m_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput)
+			{
+				l_oSourceObject=l_oCurrentObject;
+				l_oTargetObject=m_oCurrentObject;
+				l_bIsActuallyConnecting=true;
+				l_bIsConnectionIsMessage = true;
+			}
+			if(l_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput && m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput)
+			{
+				l_oSourceObject=m_oCurrentObject;
+				l_oTargetObject=l_oCurrentObject;
+				l_bIsActuallyConnecting=true;
+				l_bIsConnectionIsMessage = true;
+			}
+			//
 			if(l_bIsActuallyConnecting)
 			{
 				CIdentifier l_oSourceTypeIdentifier;
@@ -2055,8 +2088,8 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				{
 					l_pSourceBox->getOutputType(l_oSourceObject.m_ui32ConnectorIndex, l_oSourceTypeIdentifier);
 					l_pTargetBox->getInputType(l_oTargetObject.m_ui32ConnectorIndex, l_oTargetTypeIdentifier);
-                    if((m_rKernelContext.getTypeManager().isDerivedFromStream(l_oSourceTypeIdentifier, l_oTargetTypeIdentifier)
-                            || m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_AllowUpCastConnection}", false))&&(!l_bIsConnectionIsMessage))
+					if((m_rKernelContext.getTypeManager().isDerivedFromStream(l_oSourceTypeIdentifier, l_oTargetTypeIdentifier)
+							|| m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_AllowUpCastConnection}", false))&&(!l_bIsConnectionIsMessage))
 					{
 						CIdentifier l_oLinkIdentifier;
 						m_rScenario.connect(
@@ -2064,24 +2097,24 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 							l_oSourceObject.m_ui32ConnectorIndex,
 							l_oTargetObject.m_oIdentifier,
 							l_oTargetObject.m_ui32ConnectorIndex,
-                            l_oLinkIdentifier);
+							l_oLinkIdentifier);
 						this->snapshotCB();
 					}
 
-                    //or if it is a message
-                    else if (l_bIsConnectionIsMessage)
-                    {
-                        m_rKernelContext.getLogManager() << LogLevel_Debug << "connect message\n";
-                        CIdentifier l_oLinkIdentifier;
-                        m_rScenario.connectMessage(
-                            l_oSourceObject.m_oIdentifier,
-                            l_oSourceObject.m_ui32ConnectorIndex,
-                            l_oTargetObject.m_oIdentifier,
-                            l_oTargetObject.m_ui32ConnectorIndex,
-                            l_oLinkIdentifier);
-                        this->snapshotCB();
-                    }
-                    //
+					//or if it is a message
+					else if (l_bIsConnectionIsMessage)
+					{
+						m_rKernelContext.getLogManager() << LogLevel_Debug << "connect message\n";
+						CIdentifier l_oLinkIdentifier;
+						m_rScenario.connectMessage(
+							l_oSourceObject.m_oIdentifier,
+							l_oSourceObject.m_ui32ConnectorIndex,
+							l_oTargetObject.m_oIdentifier,
+							l_oTargetObject.m_ui32ConnectorIndex,
+							l_oLinkIdentifier);
+						this->snapshotCB();
+					}
+					//
 					else
 					{
 						m_rKernelContext.getLogManager() << LogLevel_Warning << "Invalid connection\n";
@@ -2392,24 +2425,24 @@ void CInterfacedScenario::copySelection(void)
 		}
 	}
 
-    // Copies message links to clipboard
-    for(it=m_vCurrentObject.begin(); it!=m_vCurrentObject.end(); it++)
-    {
-        if(it->second)
-        {
-            if(m_rScenario.isMessageLink(it->first))
-            {
-                CIdentifier l_oNewIdentifier;
-                const ILink* l_pLink=m_rScenario.getMessageLinkDetails(it->first);
-                m_rApplication.m_pClipboardScenario->connectMessage(
-                    l_vIdMapping[l_pLink->getSourceBoxIdentifier()],
-                    l_pLink->getSourceBoxOutputIndex(),
-                    l_vIdMapping[l_pLink->getTargetBoxIdentifier()],
-                    l_pLink->getTargetBoxInputIndex(),
-                    l_oNewIdentifier);
-            }
-        }
-    }
+	// Copies message links to clipboard
+	for(it=m_vCurrentObject.begin(); it!=m_vCurrentObject.end(); it++)
+	{
+		if(it->second)
+		{
+			if(m_rScenario.isMessageLink(it->first))
+			{
+				CIdentifier l_oNewIdentifier;
+				const ILink* l_pLink=m_rScenario.getMessageLinkDetails(it->first);
+				m_rApplication.m_pClipboardScenario->connectMessage(
+					l_vIdMapping[l_pLink->getSourceBoxIdentifier()],
+					l_pLink->getSourceBoxOutputIndex(),
+					l_vIdMapping[l_pLink->getTargetBoxIdentifier()],
+					l_pLink->getTargetBoxInputIndex(),
+					l_oNewIdentifier);
+			}
+		}
+	}
 }
 void CInterfacedScenario::cutSelection(void)
 {
@@ -2485,14 +2518,14 @@ void CInterfacedScenario::pasteSelection(void)
     // Pastes message links from clipboard
     while((l_oIdentifier=m_rApplication.m_pClipboardScenario->getNextMessageLinkIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
     {
-        CIdentifier l_oNewIdentifier;
-        ILink* l_pLink=m_rApplication.m_pClipboardScenario->getMessageLinkDetails(l_oIdentifier);
-        m_rScenario.connectMessage(
-            l_vIdMapping[l_pLink->getSourceBoxIdentifier()],
-            l_pLink->getSourceBoxOutputIndex(),
-            l_vIdMapping[l_pLink->getTargetBoxIdentifier()],
-            l_pLink->getTargetBoxInputIndex(),
-            l_oNewIdentifier);
+		CIdentifier l_oNewIdentifier;
+		ILink* l_pLink=m_rApplication.m_pClipboardScenario->getMessageLinkDetails(l_oIdentifier);
+		m_rScenario.connectMessage(
+			l_vIdMapping[l_pLink->getSourceBoxIdentifier()],
+			l_pLink->getSourceBoxOutputIndex(),
+			l_vIdMapping[l_pLink->getTargetBoxIdentifier()],
+			l_pLink->getTargetBoxInputIndex(),
+			l_oNewIdentifier);
     }
 
 	// Makes pasted stuff the default selection
@@ -2567,11 +2600,11 @@ void CInterfacedScenario::deleteSelection(void)
 				// removes link from scenario
 				m_rScenario.disconnect(i->first);
 			}
-            if(m_rScenario.isMessageLink(i->first))
-            {
-                // removes message link from scenario
-                m_rScenario.disconnectMessage(i->first);
-            }
+			if(m_rScenario.isMessageLink(i->first))
+			{
+				// removes message link from scenario
+				m_rScenario.disconnectMessage(i->first);
+			}
 		}
 	}
 	m_vCurrentObject.clear();
@@ -2724,72 +2757,72 @@ void CInterfacedScenario::contextMenuBoxAddInputCB(IBox& rBox)
 
 void CInterfacedScenario::contextMenuBoxAddMessageInputCB(IBox& rBox)
 {
-    m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxAddMessageInputCB\n";
-    CString l_sMessageInputName("A message input");
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxAddMessageInputCB\n";
+	CString l_sMessageInputName("A message input");
 
-    CRenameDialog l_oRename(m_rKernelContext, l_sMessageInputName , l_sMessageInputName, m_sGUIFilename.c_str());
-    if(l_oRename.run())
-    {
-        rBox.addMessageInput(l_oRename.getResult());
-        this->snapshotCB();
-    }
+	CRenameDialog l_oRename(m_rKernelContext, l_sMessageInputName , l_sMessageInputName, m_sGUIFilename.c_str());
+	if(l_oRename.run())
+	{
+		rBox.addMessageInput(l_oRename.getResult());
+		this->snapshotCB();
+	}
 
 }
 
 void CInterfacedScenario::contextMenuBoxRemoveMessageInputCB(IBox& rBox, uint32 ui32Index)
 {
-    m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxRemoveInputCB\n";
-    rBox.removeMessageInput(ui32Index);
-    this->snapshotCB();
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxRemoveInputCB\n";
+	rBox.removeMessageInput(ui32Index);
+	this->snapshotCB();
 }
 
 void CInterfacedScenario::contextMenuBoxAddMessageOutputCB(IBox& rBox)
 {
-    m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxAddMessageOutputCB\n";
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxAddMessageOutputCB\n";
 
-    CString l_sMessageInputName("A message output");
+	CString l_sMessageInputName("A message output");
 
-    CRenameDialog l_oRename(m_rKernelContext, l_sMessageInputName , l_sMessageInputName, m_sGUIFilename.c_str());
-    if(l_oRename.run())
-    {
-        rBox.addMessageOutput(l_oRename.getResult());
-    }
+	CRenameDialog l_oRename(m_rKernelContext, l_sMessageInputName , l_sMessageInputName, m_sGUIFilename.c_str());
+	if(l_oRename.run())
+	{
+		rBox.addMessageOutput(l_oRename.getResult());
+	}
 
 
 }
 
 void CInterfacedScenario::contextMenuBoxRemoveMessageOutputCB(IBox& rBox, uint32 ui32Index)
 {
-    m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxRemoveOutputCB\n";
-    rBox.removeMessageOutput(ui32Index);
-    this->snapshotCB();
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxRemoveOutputCB\n";
+	rBox.removeMessageOutput(ui32Index);
+	this->snapshotCB();
 }
 //erferferf
 void CInterfacedScenario::contextMenuBoxEditMessageInputCB(IBox& rBox, uint32 ui32Index)
 {
-    m_rKernelContext.getLogManager() << LogLevel_Fatal << "contextMenuBoxEditMessageInputCB\n";
-    CString l_sMessageInputName;
-    rBox.getMessageInputName(ui32Index, l_sMessageInputName);
+	m_rKernelContext.getLogManager() << LogLevel_Fatal << "contextMenuBoxEditMessageInputCB\n";
+	CString l_sMessageInputName;
+	rBox.getMessageInputName(ui32Index, l_sMessageInputName);
 
-    CRenameDialog l_oRename(m_rKernelContext, l_sMessageInputName , l_sMessageInputName, m_sGUIFilename.c_str());
-    if(l_oRename.run())
-    {
-        rBox.setMessageInputName(ui32Index, l_oRename.getResult());
-        this->snapshotCB();
-    }
+	CRenameDialog l_oRename(m_rKernelContext, l_sMessageInputName , l_sMessageInputName, m_sGUIFilename.c_str());
+	if(l_oRename.run())
+	{
+		rBox.setMessageInputName(ui32Index, l_oRename.getResult());
+		this->snapshotCB();
+	}
 }
 void CInterfacedScenario::contextMenuBoxEditMessageOutputCB(IBox& rBox, uint32 ui32Index)
 {
-    m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxEditMessageOutputCB\n";
-    CString l_sMessageOutputName;
-    rBox.getMessageOutputName(ui32Index, l_sMessageOutputName);
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxEditMessageOutputCB\n";
+	CString l_sMessageOutputName;
+	rBox.getMessageOutputName(ui32Index, l_sMessageOutputName);
 
-    CRenameDialog l_oRename(m_rKernelContext, l_sMessageOutputName , l_sMessageOutputName, m_sGUIFilename.c_str());
-    if(l_oRename.run())
-    {
-        rBox.setMessageOutputName(ui32Index, l_oRename.getResult());
-        this->snapshotCB();
-    }
+	CRenameDialog l_oRename(m_rKernelContext, l_sMessageOutputName , l_sMessageOutputName, m_sGUIFilename.c_str());
+	if(l_oRename.run())
+	{
+		rBox.setMessageOutputName(ui32Index, l_oRename.getResult());
+		this->snapshotCB();
+	}
 }
 
 
