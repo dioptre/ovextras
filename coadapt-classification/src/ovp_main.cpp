@@ -13,6 +13,7 @@
 #include "algorithms/classification/ovpCAlgorithmClassifierNULL.h"
 #include "algorithms/classification/ovpCAlgorithmClassifierMixtureOfExperts.h"
 //#include "algorithms/classification/ovpCLikelihoodComputeFunction.h"
+#include "algorithms/classification/ovpCAlgorithmClassifierLDA.h"
 
 
 #include <vector>
@@ -44,6 +45,7 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EvidenceAccumulationAlgorithmInputType, "Class probabilities", OVP_InputType_EvidenceAccumulationProbability.toUInteger());
 	
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Mixture of Experts", OVP_ClassId_Algorithm_ClassifierMixtureOfExperts.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Probabilistic LDA", OVP_ClassId_Algorithm_ClassifierPLDA.toUInteger());
 	
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorWithUpdateDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmSupErrPDesc);
@@ -56,4 +58,5 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmEvidenceAccumulatorDesc);
 	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierMixtureOfExpertsDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmAdaptiveP300ClassifierDesc);
+	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierPLDADesc);
 OVP_Declare_End()

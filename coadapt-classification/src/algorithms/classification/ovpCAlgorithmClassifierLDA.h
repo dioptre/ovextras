@@ -1,8 +1,8 @@
 
 // @copyright notice: Possibly due to dependencies, this box used to be GPL before upgrade to AGPL3
 
-#ifndef __OpenViBEPlugins_Algorithm_ClassifierMixtureOfExperts_H__
-#define __OpenViBEPlugins_Algorithm_ClassifierMixtureOfExperts_H__
+#ifndef __OpenViBEPlugins_Algorithm_ClassifierPLDA_H__
+#define __OpenViBEPlugins_Algorithm_ClassifierPLDA_H__
 
 #include "../../ovp_defines.h"
 #include <openvibe/ov_all.h>
@@ -17,22 +17,23 @@
 
 #include <itpp/itbase.h>
 
+
+
 namespace OpenViBEPlugins
 {
 	namespace Local
 	{
-		class CAlgorithmClassifierMixtureOfExperts : public OpenViBEToolkit::CAlgorithmClassifier, public XML::IWriterCallback, public XML::IReaderCallback
+		class CAlgorithmClassifierPLDA : public OpenViBEToolkit::CAlgorithmClassifier, public XML::IWriterCallback, public XML::IReaderCallback
 		{
 		public:
 
-			//virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
 			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
 
 			virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer);
 			virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer);
 
-			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierMixtureOfExperts);
+			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierPLDA);
 
 		protected:
 
@@ -48,40 +49,35 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 m_f64Class2;
 
 			OpenViBE::CMemoryBuffer m_oConfiguration;
-			std::vector<itpp::vec> m_vCoefficientsClass1;
-			std::vector<itpp::vec> m_vCoefficientsClass2;
-			OpenViBE::uint32 m_ui32NumberOfExperts;
-			OpenViBE::uint32 m_ui32ClassificationCount;
-			OpenViBE::float64 m_f64Result;
-			int m_ui32Mode;
+			itpp::vec m_oCoefficientsClass1;
+			itpp::vec m_oCoefficientsClass2;
 		};
 
-		class CAlgorithmClassifierMixtureOfExpertsDesc : public OpenViBEToolkit::CAlgorithmClassifierDesc
+		class CAlgorithmClassifierPLDADesc : public OpenViBEToolkit::CAlgorithmClassifierDesc
 		{
 		public:
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Mixture of expert classifier"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Dieter Devlaminck"); }
-			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("PLDA classifier"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard / Fabien Lotte / Dieter Devlaminck"); }
+			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA / INSA/IRISA / INRIA"); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("LDA classifier with probabilistic outputs"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
-			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ClassifierMixtureOfExperts; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Local::CAlgorithmClassifierMixtureOfExperts; }
+			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ClassifierPLDA; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Local::CAlgorithmClassifierPLDA; }
 
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
 				CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
-				//rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMOE_InputParameterId_MOE_Mode,"Mode",OpenViBE::Kernel::ParameterType_Boolean);
 				return true;
 			}
 
-			_IsDerivedFromClass_Final_(CAlgorithmClassifierDesc, OVP_ClassId_Algorithm_ClassifierMixtureOfExpertsDesc);
+			_IsDerivedFromClass_Final_(CAlgorithmClassifierDesc, OVP_ClassId_Algorithm_ClassifierPLDADesc);
 		};
 	};
 };

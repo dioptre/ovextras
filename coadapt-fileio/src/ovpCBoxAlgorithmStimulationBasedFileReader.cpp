@@ -31,20 +31,16 @@ struct csvReader: ctype<char> {
 
 boolean CBoxAlgorithmStimulationBasedFileReader::initialize(void)
 {
-	std::cout << "initialize stimulation based reader\n";
 	m_oAlgo0_StimulationDecoder.initialize(*this);
-	std::cout << "initialize stimulation based reader 2\n";
 	m_sFileName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_ui64Trigger = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 	m_bIncremental = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
-	std::cout << "initialize stimulation based reader 3\n";
 	//IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	//l_rStaticBoxContext.getOutputType(0, m_oTypeIdentifier);
 	//if (m_oTypeIdentifier==OVTK_TypeId_StreamedMatrix)
 		m_oAlgo1_StreamedMatrixEncoder.initialize(*this);
 	//else if (m_oTypeIdentifier==OVTK_TypeId_FeatureVector)
 	//	m_oAlgo2_FeatureVectorEncoder.initialize(*this);
-	std::cout << "initialize stimulation based reader 4\n";
 	m_ui32FilePosition = 0;
 	m_ui32LineNumber = 0;
 	m_ui32ColumnNumber = 0;
@@ -100,6 +96,7 @@ boolean CBoxAlgorithmStimulationBasedFileReader::process(void)
 			IStimulationSet* l_pStimulationSet = m_oAlgo0_StimulationDecoder.getOutputStimulationSet(); // the StreamedMatrix of samples.
 			if(l_pStimulationSet->getStimulationCount()>0 && m_ui64Trigger==l_pStimulationSet->getStimulationIdentifier(0))
 			{
+				//std::cout << "Stim received " << l_pStimulationSet->getStimulationIdentifier(0) << "\n";
 				CIdentifier l_oTypeIdentifier;
 				l_rStaticBoxContext.getOutputType(0, l_oTypeIdentifier);
 				
@@ -131,7 +128,7 @@ boolean CBoxAlgorithmStimulationBasedFileReader::process(void)
 					l_LineBuffer.seekg(0);	
 					
 					m_ui32LineNumber = 0;
-					while (l_FileHandle.gcount()>1)	
+					while (l_FileHandle.gcount()>2)	
 					{
 						l_FileHandle.getline(l_Line,32768);
 						m_ui32LineNumber++;
@@ -141,7 +138,7 @@ boolean CBoxAlgorithmStimulationBasedFileReader::process(void)
 					l_FileHandle.seekg(0);
 					l_FileHandle.getline(l_Line,32768);
 				
-					std::cout << "Line number " << m_ui32LineNumber << ", col number " << m_ui32ColumnNumber << "\n";
+					//std::cout << "Line number " << m_ui32LineNumber << ", col number " << m_ui32ColumnNumber << "\n";
 				
 					m_bFirstStimulusReceived = true;	
 					
@@ -165,7 +162,7 @@ boolean CBoxAlgorithmStimulationBasedFileReader::process(void)
 
 					uint32 l_ui32LineCounter = 0, l_ui32ColumnCounter = 0;
 					float64 l_f64Value;
-					while (l_FileHandle.gcount()>1)
+					while (l_FileHandle.gcount()>2)
 					{
 						l_ui32ColumnCounter = 0;
 						if (l_oTypeIdentifier==OVTK_TypeId_FeatureVector)
@@ -178,8 +175,8 @@ boolean CBoxAlgorithmStimulationBasedFileReader::process(void)
 						else
 							while(l_LineBuffer>>l_f64Value)
 								*(l_f64MatrixBuffer+(m_ui32LineNumber*l_ui32ColumnCounter++)+l_ui32LineCounter) = l_f64Value;
-						//std::cout << l_LineBuffer.str() << "\n";
-
+						//std::cout << l_Line << "\n";
+						
 						l_FileHandle.getline(l_Line,32768);
 						
 						l_LineBuffer.clear();

@@ -128,9 +128,9 @@ boolean CAlgorithmClassifierMixtureOfExperts::train(const IFeatureVectorSet& rFe
 
 boolean CAlgorithmClassifierMixtureOfExperts::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
 {
-	if(rFeatureVector.getSize()+1!=(unsigned int)m_vCoefficients[0].size())
+	if(rFeatureVector.getSize()+1!=(unsigned int)m_vCoefficientsClass1[0].size())
 	{
-		this->getLogManager() << LogLevel_Warning << "Feature vector size " << rFeatureVector.getSize() << " and hyperplane parameter size " << (uint32) m_vCoefficients[0].size() << " does not match\n";
+		this->getLogManager() << LogLevel_Warning << "Feature vector size " << rFeatureVector.getSize() << " and hyperplane parameter size " << (uint32) m_vCoefficientsClass1[0].size() << " does not match\n";
 		return false;
 	}
 	
@@ -143,29 +143,34 @@ boolean CAlgorithmClassifierMixtureOfExperts::classify(const IFeatureVector& rFe
 	{
 		m_f64Result = 0;
 		for (uint32 i=0; i<m_ui32NumberOfExperts; i++)
-			m_f64Result+=-l_oFeatures*m_vCoefficients[i];
+		{
+			m_f64Result+=std::exp(l_oFeatures*m_vCoefficientsClass1[i])
+					/(std::exp(l_oFeatures*m_vCoefficientsClass1[i])+std::exp(l_oFeatures*m_vCoefficientsClass2[i]));		
+		}
 		m_f64Result /= static_cast<float64>(m_ui32NumberOfExperts);
 	}
 	else
 	{
 		m_ui32ClassificationCount++;
-		m_f64Result+=(-(l_oFeatures*m_vCoefficients[m_ui32ClassificationCount-1])<0?1:0);
-		std::cout << "Feature vectors\n";
+		m_f64Result+=std::exp(l_oFeatures*m_vCoefficientsClass1[m_ui32ClassificationCount-1])
+					/(std::exp(l_oFeatures*m_vCoefficientsClass1[m_ui32ClassificationCount-1])+
+					std::exp(l_oFeatures*m_vCoefficientsClass2[m_ui32ClassificationCount-1]));
+		/*std::cout << "Feature vectors\n";
 		for (uint32 i =0; i<l_oFeatures.size(); i++)
 			std::cout << l_oFeatures[i] << " ";
 		std::cout << "\n";
-		std::cout << "Output: " << (l_oFeatures*m_vCoefficients[m_ui32ClassificationCount-1]) << "\n";
+		std::cout << "Output: " << (l_oFeatures*m_vCoefficients[m_ui32ClassificationCount-1]) << "\n";*/
 		if (m_ui32ClassificationCount%m_ui32NumberOfExperts==0)
 			m_f64Result /= static_cast<float64>(m_ui32NumberOfExperts);
 	}
 	
 	if (m_ui32Mode==1 || m_ui32ClassificationCount%m_ui32NumberOfExperts==0)
 	{
-		this->getLogManager() << LogLevel_Info << "Classification output " << m_f64Result << "\n";
+		//this->getLogManager() << LogLevel_Info << "Classification output " << m_f64Result << "\n";
 		rClassificationValues.setSize(1);
 		rClassificationValues[0]=m_f64Result;
 
-		if(m_f64Result < 0)
+		if(m_f64Result >= 0.5)
 		{
 			rf64Class=m_f64Class1;
 		}
@@ -197,7 +202,7 @@ boolean CAlgorithmClassifierMixtureOfExperts::loadConfiguration(const IMemoryBuf
 	m_ui32NumberOfExperts=0;
 	m_ui32ClassificationCount=0;
 	m_f64Result = 0;
-
+	std::cout << "load configuration\n";
 	XML::IReader* l_pReader=XML::createReader(*this);
 	l_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
 	l_pReader->release();
@@ -234,7 +239,7 @@ void CAlgorithmClassifierMixtureOfExperts::processChildData(const char* sData)
 		l_sData >> m_f64Class2;
 	}
 
-	if(m_vNode.top()==CString("Coefficients"))
+	if(m_vNode.top()==CString("CoefficientsClass1") || m_vNode.top()==CString("CoefficientsClass2"))
 	{
 		std::vector < float64 > l_vCoefficients;
 		while(!l_sData.eof())
@@ -244,13 +249,27 @@ void CAlgorithmClassifierMixtureOfExperts::processChildData(const char* sData)
 			l_vCoefficients.push_back(l_f64Value);
 		}
 
-		m_vCoefficients.push_back(itpp::vec(l_vCoefficients.size()));
-		//m_vCoefficients[m_ui32NumberOfExperts].set_size(l_vCoefficients.size());
-		for(size_t i=0; i<l_vCoefficients.size(); i++)
+		if(m_vNode.top()==CString("CoefficientsClass1"))
 		{
-			m_vCoefficients[m_ui32NumberOfExperts][i]=l_vCoefficients[i];
-			//std::cout << m_vCoefficients[m_ui32NumberOfExperts][i] << " ";
+			m_vCoefficientsClass1.push_back(itpp::vec(l_vCoefficients.size()));
+			//m_vCoefficients[m_ui32NumberOfExperts].set_size(l_vCoefficients.size());
+			for(size_t i=0; i<l_vCoefficients.size(); i++)
+			{
+				m_vCoefficientsClass1[m_ui32NumberOfExperts][i]=l_vCoefficients[i];
+				//std::cout << m_vCoefficients[m_ui32NumberOfExperts][i] << " ";
+			}	
 		}
+		
+		if(m_vNode.top()==CString("CoefficientsClass2"))
+		{
+			m_vCoefficientsClass2.push_back(itpp::vec(l_vCoefficients.size()));
+			//m_vCoefficients[m_ui32NumberOfExperts].set_size(l_vCoefficients.size());
+			for(size_t i=0; i<l_vCoefficients.size(); i++)
+			{
+				m_vCoefficientsClass2[m_ui32NumberOfExperts][i]=l_vCoefficients[i];
+				//std::cout << m_vCoefficients[m_ui32NumberOfExperts][i] << " ";
+			}	
+		}		
 		//std::cout << "\n " << l_vCoefficients.size() << "\n";
 	}
 }
