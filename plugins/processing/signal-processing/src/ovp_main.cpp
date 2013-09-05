@@ -20,6 +20,7 @@
 
 #include "box-algorithms/connectivity/ovpCBoxAlgorithmConnectivityMeasure.h"
 #include "algorithms/connectivity/ovpCAlgorithmSingleTrialPhaseLockingValue.h"
+#include "algorithms/connectivity/ovpCAlgorithmMagnitudeSquaredCoherence.h"
 
 #include "box-algorithms/basic/ovpCBoxAlgorithmHilbert.h"
 #include "algorithms/basic/ovpCHilbertTransform.h"
@@ -70,9 +71,9 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_DifferentialIntegralOperation, "Differential", OVP_TypeId_DifferentialIntegralOperation_Differential.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_DifferentialIntegralOperation, "Integral",     OVP_TypeId_DifferentialIntegralOperation_Integral.toUInteger());
 
-	rPluginModuleContext.getTypeManager().registerEnumerationType (OVTK_ClassId_ConnectivityAlgorithm, "Connectivity measure method");
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVTK_ClassId_ConnectivityAlgorithm, "Single-Trial Phase Locking Value", OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVTK_ClassId_ConnectivityAlgorithm, "Magnitude squared coherence", OVP_TypeId_ConnectivityAlgorithm_MagnitudeSquaredCoherence.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_ClassId_ConnectivityAlgorithm, "Connectivity measure method");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_ClassId_ConnectivityAlgorithm, "Single-Trial Phase Locking Value", OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_ClassId_ConnectivityAlgorithm, "Magnitude squared coherence", OVP_TypeId_Algorithm_MagnitudeSquaredCoherence.toUInteger());
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CTimeBasedEpochingDesc);
 

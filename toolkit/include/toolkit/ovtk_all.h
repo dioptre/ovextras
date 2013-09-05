@@ -76,7 +76,6 @@
 
 #include "algorithms/ovtkTAlgorithm.h"
 #include "algorithms/classification/ovtkCAlgorithmClassifier.h"
-#include "algorithms/connectivity/ovtkCConnectivityAlgorithm.h"
 
 #include "algorithms/scenario-io/ovtkCAlgorithmScenarioImporter.h"
 #include "algorithms/scenario-io/ovtkCAlgorithmScenarioExporter.h"

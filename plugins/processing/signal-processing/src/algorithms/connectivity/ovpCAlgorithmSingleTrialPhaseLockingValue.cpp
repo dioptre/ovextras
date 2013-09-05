@@ -5,9 +5,7 @@
 #include <complex>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/FFT>
-#include <system/Memory.h>
-#include <iostream>
-#include <sstream>
+
 
 
 using namespace OpenViBE;
@@ -24,11 +22,11 @@ using namespace std;
 boolean CAlgorithmSingleTrialPhaseLockingValue::initialize(void)
 {
 
-	ip_pSignal1.initialize(this->getInputParameter(OVTK_Algorithm_Connectivity_InputParameterId_InputMatrix1));
-	ip_pSignal2.initialize(this->getInputParameter(OVTK_Algorithm_Connectivity_InputParameterId_InputMatrix2));
+	ip_pSignal1.initialize(this->getInputParameter(OVP_Algorithm_Connectivity_InputParameterId_InputMatrix1));
+	ip_pSignal2.initialize(this->getInputParameter(OVP_Algorithm_Connectivity_InputParameterId_InputMatrix2));
 
-	ip_pChannelPairs.initialize(this->getInputParameter(OVTK_Algorithm_Connectivity_InputParameterId_LookupMatrix));
-	op_pMatrix.initialize(this->getOutputParameter(OVTK_Algorithm_Connectivity_OutputParameterId_OutputMatrix));
+	ip_pChannelPairs.initialize(this->getInputParameter(OVP_Algorithm_Connectivity_InputParameterId_LookupMatrix));
+	op_pMatrix.initialize(this->getOutputParameter(OVP_Algorithm_Connectivity_OutputParameterId_OutputMatrix));
 
 	// Create algorithm instance of Hilbert transform
 	m_pHilbertTransform = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_HilbertTransform));
@@ -86,7 +84,7 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 		float64* l_pInstPhaseBuffer = op_pInstantaneousPhase->getBuffer();
 
 
-		if(this->isInputTriggerActive(OVTK_Algorithm_Connectivity_InputTriggerId_Initialize))
+		if(this->isInputTriggerActive(OVP_Algorithm_Connectivity_InputTriggerId_Initialize))
 		{
 
 
@@ -126,7 +124,7 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 
 		}
 
-		if(this->isInputTriggerActive(OVTK_Algorithm_Connectivity_InputTriggerId_Process))
+		if(this->isInputTriggerActive(OVP_Algorithm_Connectivity_InputTriggerId_Process))
 		{
 			VectorXd l_vecXdChannelToCompare1;
 			VectorXd l_vecXdChannelToCompare2;
@@ -204,7 +202,7 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 
 			}
 
-			this->activateOutputTrigger(OVTK_Algorithm_Connectivity_OutputTriggerId_ProcessDone, true);
+			this->activateOutputTrigger(OVP_Algorithm_Connectivity_OutputTriggerId_ProcessDone, true);
 		}
 
 	return true;

@@ -69,7 +69,7 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 	// Retrieve algorithm chosen by the user
 	CIdentifier l_oConnectivityAlgorithmClassIdentifier;
 	CString l_sConnectivityAlgorithmClassIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-	l_oConnectivityAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_ClassId_ConnectivityAlgorithm, l_sConnectivityAlgorithmClassIdentifier);
+	l_oConnectivityAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_ClassId_ConnectivityAlgorithm, l_sConnectivityAlgorithmClassIdentifier);
 
 	// Display an error message if the algorithm is not recognized
 	if(l_oConnectivityAlgorithmClassIdentifier==OV_UndefinedIdentifier)
@@ -83,10 +83,10 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 	m_pConnectivityMethod->initialize();
 
 	// Initialize
-	ip_pMatrix1.initialize(m_pConnectivityMethod->getInputParameter(OVTK_Algorithm_Connectivity_InputParameterId_InputMatrix1));
-	ip_pMatrix2.initialize(m_pConnectivityMethod->getInputParameter(OVTK_Algorithm_Connectivity_InputParameterId_InputMatrix2));
-	ip_pChannelTable.initialize(m_pConnectivityMethod->getInputParameter(OVTK_Algorithm_Connectivity_InputParameterId_LookupMatrix));
-	op_pMatrix.initialize(m_pConnectivityMethod->getOutputParameter(OVTK_Algorithm_Connectivity_OutputParameterId_OutputMatrix));
+	ip_pMatrix1.initialize(m_pConnectivityMethod->getInputParameter(OVP_Algorithm_Connectivity_InputParameterId_InputMatrix1));
+	ip_pMatrix2.initialize(m_pConnectivityMethod->getInputParameter(OVP_Algorithm_Connectivity_InputParameterId_InputMatrix2));
+	ip_pChannelTable.initialize(m_pConnectivityMethod->getInputParameter(OVP_Algorithm_Connectivity_InputParameterId_LookupMatrix));
+	op_pMatrix.initialize(m_pConnectivityMethod->getOutputParameter(OVP_Algorithm_Connectivity_OutputParameterId_OutputMatrix));
 
 	// Signal stream decoder and encoder initialization
 	m_oAlgo0_SignalDecoder.initialize(*this);
@@ -342,7 +342,7 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 			}
 
 			// Make sure the algo initialization was successful
-			if(!m_pConnectivityMethod->process(OVTK_Algorithm_Connectivity_InputTriggerId_Initialize))
+			if(!m_pConnectivityMethod->process(OVP_Algorithm_Connectivity_InputTriggerId_Initialize))
 			{
 				this->getLogManager() << LogLevel_Warning << "initialization was unsuccessful";
 				return false;
@@ -357,9 +357,9 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 		if(l_bBufferReceived)
 		{
 			
-			m_pConnectivityMethod->process(OVTK_Algorithm_Connectivity_InputTriggerId_Process);
+			m_pConnectivityMethod->process(OVP_Algorithm_Connectivity_InputTriggerId_Process);
 
-			if(m_pConnectivityMethod->isOutputTriggerActive(OVTK_Algorithm_Connectivity_OutputTriggerId_ProcessDone))
+			if(m_pConnectivityMethod->isOutputTriggerActive(OVP_Algorithm_Connectivity_OutputTriggerId_ProcessDone))
 			{
 				// Encode the output buffer :
 				m_oAlgo1_SignalEncoder.encodeBuffer(0);

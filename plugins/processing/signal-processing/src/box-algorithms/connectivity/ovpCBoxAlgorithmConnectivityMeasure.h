@@ -7,6 +7,7 @@
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include "../../algorithms/connectivity/ovpCConnectivityAlgorithm.h"
 
 #include <string>
 
@@ -118,7 +119,7 @@ namespace OpenViBEPlugins
 				
 				rBoxAlgorithmPrototype.addOutput("Connectivity measure", OV_TypeId_Signal);
 				
-				rBoxAlgorithmPrototype.addSetting("Method",OVTK_ClassId_ConnectivityAlgorithm, OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue.toString());
+				rBoxAlgorithmPrototype.addSetting("Method",OVP_ClassId_ConnectivityAlgorithm, OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue.toString());
 				rBoxAlgorithmPrototype.addSetting("Pairs of channels",OV_TypeId_String,"1-2");
 				rBoxAlgorithmPrototype.addSetting("Channel Matching Method",  OVP_TypeId_MatchMethod, OVP_TypeId_MatchMethod_Smart.toString());
 
