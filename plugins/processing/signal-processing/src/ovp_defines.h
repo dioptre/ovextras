@@ -80,6 +80,20 @@
 #define OVP_Algorithm_ARBurgMethod_InputTriggerId_Process		     		OpenViBE::CIdentifier(0xBEEBBE84, 0x4F14F8F8)
 #define OVP_Algorithm_ARBurgMethod_OutputTriggerId_ProcessDone           	OpenViBE::CIdentifier(0xA5AAD435, 0x9EC3DB80) 
 
+#define OVP_ClassId_Algorithm_HilbertTransform                              OpenViBE::CIdentifier(0x344B79DE, 0x89EAAABB)
+#define OVP_ClassId_Algorithm_HilbertTransformDesc                          OpenViBE::CIdentifier(0x8CAB236A, 0xA789800D)
+#define OVP_Algorithm_HilbertTransform_InputParameterId_Matrix              OpenViBE::CIdentifier(0xC117CE9A, 0x3FFCB156)
+#define OVP_Algorithm_HilbertTransform_OutputParameterId_HilbertMatrix      OpenViBE::CIdentifier(0xDAE13CB8, 0xEFF82E69)
+#define OVP_Algorithm_HilbertTransform_OutputParameterId_EnvelopeMatrix     OpenViBE::CIdentifier(0x9D0A023A, 0x7690C48E)
+#define OVP_Algorithm_HilbertTransform_OutputParameterId_PhaseMatrix        OpenViBE::CIdentifier(0x495B55E2, 0x8CAAC08E)
+#define OVP_Algorithm_HilbertTransform_InputTriggerId_Initialize            OpenViBE::CIdentifier(0xE4B3CB4A, 0xF0121A20)
+#define OVP_Algorithm_HilbertTransform_InputTriggerId_Process               OpenViBE::CIdentifier(0xC3DC087D, 0x4AAFC1F0)
+#define OVP_Algorithm_HilbertTransform_OutputTriggerId_ProcessDone          OpenViBE::CIdentifier(0xB0B2A2DD, 0x73529B46)
+
+#define OVP_ClassId_BoxAlgorithm_Hilbert                                    OpenViBE::CIdentifier(0x7878A47F, 0x9A8FE349)
+#define OVP_ClassId_BoxAlgorithm_HilbertDesc                                OpenViBE::CIdentifier(0x2DB54E2F, 0x435675EF)
+
+
 //___________________________________________________________________//
 //                                                                   //
 // Plugin Object Descriptor Class Identifiers                        //

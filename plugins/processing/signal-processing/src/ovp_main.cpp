@@ -18,6 +18,9 @@
 #include "box-algorithms/spectral-analysis/ovpCBoxAlgorithmFrequencyBandSelector.h"
 #include "box-algorithms/spectral-analysis/ovpCBoxAlgorithmSpectrumAverage.h"
 
+#include "box-algorithms/basic/ovpCBoxAlgorithmHilbert.h"
+#include "algorithms/basic/ovpCHilbertTransform.h"
+
 #include "box-algorithms/ovpCTimeBasedEpoching.h"
 #include "box-algorithms/ovpCReferenceChannel.h"
 #include "box-algorithms/ovpCChannelSelector.h"
@@ -109,4 +112,17 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CAlgorithmARBurgMethodDesc);
 #endif
 	
+#ifdef __OpenViBEPlugins_BoxAlgorithm_ConnectivityMeasure_H__
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmConnectivityMeasureDesc)
+#endif
+#ifdef __OpenViBEPlugins_Algorithm_HilbertTransform_H__
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmHilbertTransformDesc)
+#endif
+#ifdef __OpenViBEPlugins_Algorithm_SingleTrialPhaseLockingValue_H__
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmSingleTrialPhaseLockingValueDesc)
+#endif
+
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessingBasic::CBoxAlgorithmHilbertDesc)
+
+
 OVP_Declare_End()
