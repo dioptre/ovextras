@@ -1300,7 +1300,7 @@ void CSimulatedBox::handleCrash(const char* sHintName)
 
 bool CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 {
-    this->getLogManager() << LogLevel_Debug << "SimulatedBox sendmessage on output" << outputIndex <<"\n";
+	this->getLogManager() << LogLevel_Debug << "SimulatedBox sendmessage on output" << outputIndex <<"\n";
 
 	CIdentifier l_oLinkIdentifier=m_pScenario->getNextMessageLinkIdentifierFromBox(OV_UndefinedIdentifier, m_pBox->getIdentifier());
 	while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
@@ -1319,27 +1319,27 @@ bool CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 
 bool CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
 {
-    //TODO change to limited context
-    CBoxAlgorithmContext l_oBoxAlgorithmContext(getKernelContext(), this, m_pBox);
-    this->getLogManager() << LogLevel_Debug << "simulated box" << m_pBox->getName() <<" receiving message on input " << inputIndex <<"\n";
-    return m_pBoxAlgorithm->processMessage(l_oBoxAlgorithmContext, msg, inputIndex);
+	//TODO change to limited context
+	CBoxAlgorithmContext l_oBoxAlgorithmContext(getKernelContext(), this, m_pBox);
+	this->getLogManager() << LogLevel_Debug << "simulated box" << m_pBox->getName() <<" receiving message on input " << inputIndex <<"\n";
+	return m_pBoxAlgorithm->processMessage(l_oBoxAlgorithmContext, msg, inputIndex);
 }
 
 
 bool CSimulatedBox::cleanupMessages() {
-    // ...
-    //this->getLogManager() << LogLevel_Error << "cleaning messages " << "\n";
-    m_vPreparedMessages.clear();//that'll do for now
-    return true; // if success
+	// ...
+	//this->getLogManager() << LogLevel_Error << "cleaning messages " << "\n";
+	m_vPreparedMessages.clear();//that'll do for now
+	return true; // if success
 }
 
 IMyMessage& CSimulatedBox::createMessage()
 {
-    CMyMessage* newMessage = new CMyMessage();
-    m_vPreparedMessages.push_back(*newMessage);
-    delete newMessage;
-    IMyMessage* msg = &m_vPreparedMessages[m_vPreparedMessages.size()-1];
-    return *msg;
+	CMyMessage* newMessage = new CMyMessage();
+	m_vPreparedMessages.push_back(*newMessage);
+	delete newMessage;
+	IMyMessage* msg = &m_vPreparedMessages[m_vPreparedMessages.size()-1];
+	return *msg;
 
 }
 

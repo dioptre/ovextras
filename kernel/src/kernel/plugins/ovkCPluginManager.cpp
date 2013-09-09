@@ -282,7 +282,7 @@ namespace
 			,m_ui64SettingCountHash(0x6BDFB15B54B09F63LL)
 		{
 		}
-		virtual uint32 addInput(const CString& sName, const CIdentifier& rTypeIdentifier)
+		virtual boolean addInput(const CString& sName, const CIdentifier& rTypeIdentifier)
 		{
 			uint64 v=rTypeIdentifier.toUInteger();
 			swap_byte(v, m_ui64InputCountHash);
@@ -291,7 +291,7 @@ namespace
 			return true;
 		}
         //
-        virtual uint32 addMessageInput(const CString& sName)
+		virtual boolean addMessageInput(const CString& sName)
         {
             /*
             uint64 v=rTypeIdentifier.toUInteger();
@@ -301,7 +301,7 @@ namespace
             //*/
             return true;
         }
-        virtual uint32 addMessageOutput(const CString& sName)
+		virtual boolean addMessageOutput(const CString& sName)
         {
             /*
             uint64 v=rTypeIdentifier.toUInteger();
@@ -312,7 +312,7 @@ namespace
             return true;
         }
         //
-		virtual uint32 addOutput(const CString& sName, const CIdentifier& rTypeIdentifier)
+		virtual boolean addOutput(const CString& sName, const CIdentifier& rTypeIdentifier)
 		{
 			uint64 v=rTypeIdentifier.toUInteger();
 			swap_byte(v, m_ui64OutputCountHash);
@@ -320,7 +320,7 @@ namespace
 			m_oHash=m_oHash.toUInteger()^v;
 			return true;
 		}
-		virtual uint32 addSetting(const CString& sName, const CIdentifier& rTypeIdentifier, const CString& sDefaultValue)
+		virtual boolean addSetting(const CString& sName, const CIdentifier& rTypeIdentifier, const CString& sDefaultValue)
 		{
 			uint64 v=rTypeIdentifier.toUInteger();
 			swap_byte(v, m_ui64SettingCountHash);
