@@ -73,17 +73,7 @@ void P300ScreenLayoutReader::openChild(const char* sName, const char** sAttribut
 			m_bKeyboardIsGrid = true;
 		m_pKey->setDimensions(dim);
 	}	
-}
-
-void P300ScreenLayoutReader::processChildData(const char* sData)
-{
-	writeElement(m_vNode.top().toASCIIString(), sData);
 	
-	if (m_vNode.top()==CString("Action"))	
-	{
-		CString l_sAction = CString(sData);
-		m_pKey->addAction(l_sAction);
-	}
 	if (m_bDefaultKeyProperties && m_vNode.top()==CString("TextSymbol"))
 	{
 		m_mDefaultIsTextSymbol->insert(std::pair<VisualState,boolean>(m_iState,true));
@@ -99,7 +89,18 @@ void P300ScreenLayoutReader::processChildData(const char* sData)
 	if (!m_bDefaultKeyProperties && m_vNode.top()==CString("PictureSymbol"))
 	{
 		m_pKey->setIfTextSymbol(m_iState, false);
-	}	
+	}		
+}
+
+void P300ScreenLayoutReader::processChildData(const char* sData)
+{
+	writeElement(m_vNode.top().toASCIIString(), sData);
+	
+	if (m_vNode.top()==CString("Action"))	
+	{
+		CString l_sAction = CString(sData);
+		m_pKey->addAction(l_sAction);
+	}
 	if (m_bDefaultKeyProperties && m_bEventElement)
 	{
 		if (m_vNode.top()==CString("ScaleSize"))

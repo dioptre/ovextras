@@ -316,10 +316,10 @@
 		</Key>		
 		<Key x="0" y="0" width="0.1" height="0.2">
 			<Action>undo</Action>
-			<Event id="noflash"><TextSymbol><Label>UNDO</Label></TextSymbol></Event>
-			<Event id="target"><TextSymbol><Label>UNDO</Label></TextSymbol></Event>
-			<Event id="correct_feedback"><TextSymbol><Label>UNDO</Label></TextSymbol></Event>
-			<Event id="wrong_feedback"><TextSymbol><Label>UNDO</Label></TextSymbol></Event>
+			<Event id="noflash"><PictureSymbol><Source>openvibe/applications/externalP300Stimulator/undo.png</Source></PictureSymbol></Event>
+			<Event id="target"><PictureSymbol><Source>openvibe/applications/externalP300Stimulator/undo.png</Source></PictureSymbol></Event>
+			<Event id="correct_feedback"><PictureSymbol><Source>openvibe/applications/externalP300Stimulator/undo.png</Source></PictureSymbol></Event>
+			<Event id="wrong_feedback"><PictureSymbol><Source>openvibe/applications/externalP300Stimulator/undo.png</Source></PictureSymbol></Event>
 		</Key>		
 		<Key x="0.2" y="0.2" width="0.1" height="0.2">
 			<Action>write</Action>
