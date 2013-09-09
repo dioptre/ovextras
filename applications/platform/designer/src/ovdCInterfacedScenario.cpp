@@ -2048,7 +2048,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 		if(m_ui32CurrentMode==Mode_Connect)
 		{
 			boolean l_bIsActuallyConnecting=false;
-			boolean l_bIsConnectionIsMessage=false;
+			boolean l_bConnectionIsMessage=false;
 			uint32 l_ui32InterfacedObjectId=pickInterfacedObject((int)m_f64ReleaseMouseX, (int)m_f64ReleaseMouseY);
 			CInterfacedObject l_oCurrentObject=m_vInterfacedObject[l_ui32InterfacedObjectId];
 			CInterfacedObject l_oSourceObject;
@@ -2071,14 +2071,14 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				l_oSourceObject=l_oCurrentObject;
 				l_oTargetObject=m_oCurrentObject;
 				l_bIsActuallyConnecting=true;
-				l_bIsConnectionIsMessage = true;
+				l_bConnectionIsMessage = true;
 			}
 			if(l_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput && m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput)
 			{
 				l_oSourceObject=m_oCurrentObject;
 				l_oTargetObject=l_oCurrentObject;
 				l_bIsActuallyConnecting=true;
-				l_bIsConnectionIsMessage = true;
+				l_bConnectionIsMessage = true;
 			}
 			//
 			if(l_bIsActuallyConnecting)
@@ -2092,7 +2092,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 					l_pSourceBox->getOutputType(l_oSourceObject.m_ui32ConnectorIndex, l_oSourceTypeIdentifier);
 					l_pTargetBox->getInputType(l_oTargetObject.m_ui32ConnectorIndex, l_oTargetTypeIdentifier);
 					if((m_rKernelContext.getTypeManager().isDerivedFromStream(l_oSourceTypeIdentifier, l_oTargetTypeIdentifier)
-							|| m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_AllowUpCastConnection}", false))&&(!l_bIsConnectionIsMessage))
+							|| m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_AllowUpCastConnection}", false))&&(!l_bConnectionIsMessage))
 					{
 						CIdentifier l_oLinkIdentifier;
 						m_rScenario.connect(
@@ -2105,7 +2105,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 					}
 
 					//or if it is a message
-					else if (l_bIsConnectionIsMessage)
+					else if (l_bConnectionIsMessage)
 					{
 						m_rKernelContext.getLogManager() << LogLevel_Debug << "connect message\n";
 						CIdentifier l_oLinkIdentifier;

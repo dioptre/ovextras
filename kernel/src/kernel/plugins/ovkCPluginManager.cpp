@@ -338,10 +338,10 @@ namespace
 				case BoxFlag_CanModifyOutput:   m_oHash=m_oHash.toUInteger()^OpenViBE::CIdentifier(0x6E162C01, 0xAC979F22).toUInteger(); break;
 				case BoxFlag_CanAddSetting:     m_oHash=m_oHash.toUInteger()^OpenViBE::CIdentifier(0xFA7A50DC, 0x2140C013).toUInteger(); break;
 				case BoxFlag_CanModifySetting:  m_oHash=m_oHash.toUInteger()^OpenViBE::CIdentifier(0x624D7661, 0xD8DDEA0A).toUInteger(); break;
-            case BoxFlag_CanAddMessageInput:       m_oHash=m_oHash.toUInteger()^OpenViBE::CIdentifier(0xEA2193C2, 0x19160F0F).toUInteger(); break;
-            case BoxFlag_CanModifyMessageInput:    m_oHash=m_oHash.toUInteger()^OpenViBE::CIdentifier(0x88A6E575, 0x529D07E7).toUInteger(); break;
-            case BoxFlag_CanAddMessageOutput:      m_oHash=m_oHash.toUInteger()^OpenViBE::CIdentifier(0xBCF55C1B, 0x63824F59).toUInteger(); break;
-            case BoxFlag_CanModifyMessageOutput:   m_oHash=m_oHash.toUInteger()^OpenViBE::CIdentifier(0x42630702, 0xC23EC773).toUInteger(); break;
+				case BoxFlag_CanAddMessageInput:       m_oHash=m_oHash.toUInteger()^OpenViBE::CIdentifier(0xEA2193C2, 0x19160F0F).toUInteger(); break;
+				case BoxFlag_CanModifyMessageInput:    m_oHash=m_oHash.toUInteger()^OpenViBE::CIdentifier(0x88A6E575, 0x529D07E7).toUInteger(); break;
+				case BoxFlag_CanAddMessageOutput:      m_oHash=m_oHash.toUInteger()^OpenViBE::CIdentifier(0xBCF55C1B, 0x63824F59).toUInteger(); break;
+				case BoxFlag_CanModifyMessageOutput:   m_oHash=m_oHash.toUInteger()^OpenViBE::CIdentifier(0x42630702, 0xC23EC773).toUInteger(); break;
 				case BoxFlag_IsDeprecated:      m_bIsDeprecated=true; break;
 				case BoxFlag_IsUnstable:        m_bIsUnstable=true;   break;
 				default:

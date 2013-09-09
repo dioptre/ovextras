@@ -1302,36 +1302,19 @@ bool CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 {
     this->getLogManager() << LogLevel_Debug << "SimulatedBox sendmessage on output" << outputIndex <<"\n";
 
-    // get the links related to outputIndex from scenario
-    CIdentifier l_oMessageLinkId = m_pScenario->getNextMessageLinkIdentifier(OV_UndefinedIdentifier);
-    //CIdentifier l_oCurrentMessageLinkSourceId = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxIdentifier();
-    //uint32 l_ui32CurrentMessageLinkSourceOutputIndex = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxOutputIndex();
-
-
-    std::vector<std::pair<CIdentifier, uint32> > l_vTarget;
-    while(l_oMessageLinkId!=OV_UndefinedIdentifier)
-    {
-        CIdentifier l_oCurrentMessageLinkSourceId = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxIdentifier();
-        CIdentifier l_ui32CurrentMessageLinkSourceOutputIndex = m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getSourceBoxOutputIndex();
-        this->getLogManager() << LogLevel_Debug << "Link " << l_oCurrentMessageLinkSourceId << " - " << l_ui32CurrentMessageLinkSourceOutputIndex << "\n";
-
-        //if this link goes from this box at this output
-        if((outputIndex==l_ui32CurrentMessageLinkSourceOutputIndex)&&(m_pBox->getIdentifier()==l_oCurrentMessageLinkSourceId))
-        {
-            //store the target
-            std::pair<CIdentifier, uint32> l_oTarget(m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getTargetBoxIdentifier(), m_pScenario->getMessageLinkDetails(l_oMessageLinkId)->getTargetBoxInputIndex());
-            l_vTarget.push_back(l_oTarget);
-        }
-        l_oMessageLinkId = m_pScenario->getNextMessageLinkIdentifier(l_oMessageLinkId);
-    }
-
-    this->getLogManager() << LogLevel_Debug << "found " << (uint64)l_vTarget.size() <<" targets\n";
-    // finally send to all receivers
-    for (uint32 i=0; i<l_vTarget.size(); i++)
-    {
-        m_rScheduler.sendMessage(msg, l_vTarget[i].first, l_vTarget[i].second);
-    }
-    return true; // if success
+	CIdentifier l_oLinkIdentifier=m_pScenario->getNextMessageLinkIdentifierFromBox(OV_UndefinedIdentifier, m_pBox->getIdentifier());
+	while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
+	{
+		const ILink* l_pLink=m_pScenario->getMessageLinkDetails(l_oLinkIdentifier);
+		if(l_pLink)
+		{
+			CIdentifier l_oTargetBoxIdentifier=l_pLink->getTargetBoxIdentifier();
+			uint32 l_ui32TargetBoxInputIndex=l_pLink->getTargetBoxInputIndex();
+			m_rScheduler.sendMessage(msg, l_oTargetBoxIdentifier, l_ui32TargetBoxInputIndex);
+		}
+		l_oLinkIdentifier=m_pScenario->getNextMessageLinkIdentifierFromBox(l_oLinkIdentifier, m_pBox->getIdentifier());
+	}
+	return true; // if success
 }
 
 bool CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
