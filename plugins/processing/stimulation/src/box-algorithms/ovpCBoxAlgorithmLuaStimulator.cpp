@@ -469,8 +469,8 @@ boolean CBoxAlgorithmLuaStimulator::uninitialize(void)
 		lua_close(m_pLuaState);
 		m_pLuaState = NULL;
 	}
-
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+    /* TODO: Remove next comment*/
+	/*IBox& l_rStaticBoxContext=*/ this->getStaticBoxContext();
 
 	for(uint32 i=0; i<m_vStreamDecoder.size(); i++)
 	{
