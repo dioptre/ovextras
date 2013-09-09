@@ -82,6 +82,7 @@ boolean CBoxProto::addMessageOutput(
 }
 
 boolean CBoxProto::addOutput(
+
 	const CString& sName,
 	const CIdentifier& rTypeIdentifier)
 {

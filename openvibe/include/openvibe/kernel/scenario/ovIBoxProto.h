@@ -21,10 +21,10 @@ namespace OpenViBE
 			BoxFlag_CanModifySetting,
 			BoxFlag_IsDeprecated,
 			BoxFlag_IsUnstable,
-            		BoxFlag_CanAddMessageInput,
-            		BoxFlag_CanModifyMessageInput,
+			BoxFlag_CanAddMessageInput,
+			BoxFlag_CanModifyMessageInput,
 			BoxFlag_CanAddMessageOutput,
-            		BoxFlag_CanModifyMessageOutput,
+			BoxFlag_CanModifyMessageOutput,
 		};
 
 		/**
