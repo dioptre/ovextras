@@ -4,7 +4,7 @@
 	<StimulatorConfigFile>openvibe/applications/externalP300Stimulator/stimulator-properties.xml</StimulatorConfigFile>
 	<!--AdditionalConfigurationFile>/P300AcquisitionConfig.conf</AdditionalConfigurationFile -->
 	<FlashGroupDefinitionFile>${FlashGroupDefinitionFile}</FlashGroupDefinitionFile>
-	<NGramDatabase>openvibe/applications/externalP300Stimulator/mydb.db</NGramDatabase>
+	<NGramDatabase>openvibe/applications/externalP300Stimulator/fr.db</NGramDatabase>
 
 	<Screen width="800" height="600">nofull</Screen>
 	
