@@ -2048,11 +2048,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 		if(m_ui32CurrentMode==Mode_Connect)
 		{
 			boolean l_bIsActuallyConnecting=false;
-<<<<<<< HEAD
 			boolean l_bConnectionIsMessage=false;
-=======
-			boolean l_bIsConnectionIsMessage=false;
->>>>>>> 5ccfcd7bcdce0df37d0739e090307deb753454c5
 			uint32 l_ui32InterfacedObjectId=pickInterfacedObject((int)m_f64ReleaseMouseX, (int)m_f64ReleaseMouseY);
 			CInterfacedObject l_oCurrentObject=m_vInterfacedObject[l_ui32InterfacedObjectId];
 			CInterfacedObject l_oSourceObject;
@@ -2075,22 +2071,14 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				l_oSourceObject=l_oCurrentObject;
 				l_oTargetObject=m_oCurrentObject;
 				l_bIsActuallyConnecting=true;
-<<<<<<< HEAD
 				l_bConnectionIsMessage = true;
-=======
-				l_bIsConnectionIsMessage = true;
->>>>>>> 5ccfcd7bcdce0df37d0739e090307deb753454c5
 			}
 			if(l_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput && m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput)
 			{
 				l_oSourceObject=m_oCurrentObject;
 				l_oTargetObject=l_oCurrentObject;
 				l_bIsActuallyConnecting=true;
-<<<<<<< HEAD
 				l_bConnectionIsMessage = true;
-=======
-				l_bIsConnectionIsMessage = true;
->>>>>>> 5ccfcd7bcdce0df37d0739e090307deb753454c5
 			}
 			//
 			if(l_bIsActuallyConnecting)
@@ -2104,11 +2092,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 					l_pSourceBox->getOutputType(l_oSourceObject.m_ui32ConnectorIndex, l_oSourceTypeIdentifier);
 					l_pTargetBox->getInputType(l_oTargetObject.m_ui32ConnectorIndex, l_oTargetTypeIdentifier);
 					if((m_rKernelContext.getTypeManager().isDerivedFromStream(l_oSourceTypeIdentifier, l_oTargetTypeIdentifier)
-<<<<<<< HEAD
 							|| m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_AllowUpCastConnection}", false))&&(!l_bConnectionIsMessage))
-=======
-							|| m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_AllowUpCastConnection}", false))&&(!l_bIsConnectionIsMessage))
->>>>>>> 5ccfcd7bcdce0df37d0739e090307deb753454c5
 					{
 						CIdentifier l_oLinkIdentifier;
 						m_rScenario.connect(
@@ -2121,11 +2105,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 					}
 
 					//or if it is a message
-<<<<<<< HEAD
 					else if (l_bConnectionIsMessage)
-=======
-					else if (l_bIsConnectionIsMessage)
->>>>>>> 5ccfcd7bcdce0df37d0739e090307deb753454c5
 					{
 						m_rKernelContext.getLogManager() << LogLevel_Debug << "connect message\n";
 						CIdentifier l_oLinkIdentifier;

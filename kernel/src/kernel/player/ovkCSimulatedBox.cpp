@@ -1319,49 +1319,27 @@ bool CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 
 bool CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
 {
-<<<<<<< HEAD
 	//TODO change to limited context
 	CBoxAlgorithmContext l_oBoxAlgorithmContext(getKernelContext(), this, m_pBox);
 	this->getLogManager() << LogLevel_Debug << "simulated box" << m_pBox->getName() <<" receiving message on input " << inputIndex <<"\n";
 	return m_pBoxAlgorithm->processMessage(l_oBoxAlgorithmContext, msg, inputIndex);
-=======
-    //TODO change to limited context
-    CBoxAlgorithmContext l_oBoxAlgorithmContext(getKernelContext(), this, m_pBox);
-    this->getLogManager() << LogLevel_Debug << "simulated box" << m_pBox->getName() <<" receiving message on input " << inputIndex <<"\n";
-    return m_pBoxAlgorithm->processMessage(l_oBoxAlgorithmContext, msg, inputIndex);
->>>>>>> 5ccfcd7bcdce0df37d0739e090307deb753454c5
 }
 
 
 bool CSimulatedBox::cleanupMessages() {
-<<<<<<< HEAD
 	// ...
 	//this->getLogManager() << LogLevel_Error << "cleaning messages " << "\n";
 	m_vPreparedMessages.clear();//that'll do for now
 	return true; // if success
-=======
-    // ...
-    //this->getLogManager() << LogLevel_Error << "cleaning messages " << "\n";
-    m_vPreparedMessages.clear();//that'll do for now
-    return true; // if success
->>>>>>> 5ccfcd7bcdce0df37d0739e090307deb753454c5
 }
 
 IMyMessage& CSimulatedBox::createMessage()
 {
-<<<<<<< HEAD
 	CMyMessage* newMessage = new CMyMessage();
 	m_vPreparedMessages.push_back(*newMessage);
 	delete newMessage;
 	IMyMessage* msg = &m_vPreparedMessages[m_vPreparedMessages.size()-1];
 	return *msg;
-=======
-    CMyMessage* newMessage = new CMyMessage();
-    m_vPreparedMessages.push_back(*newMessage);
-    delete newMessage;
-    IMyMessage* msg = &m_vPreparedMessages[m_vPreparedMessages.size()-1];
-    return *msg;
->>>>>>> 5ccfcd7bcdce0df37d0739e090307deb753454c5
 
 }
 
