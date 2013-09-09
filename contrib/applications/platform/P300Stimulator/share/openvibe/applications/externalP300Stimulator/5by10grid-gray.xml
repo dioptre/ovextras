@@ -54,7 +54,7 @@
 	<PredictionArea x="0.05" y="0.25" width="0" height="0" ncolumns="0" nrows="0">
 		<!--BackgroundColor>10,10,10</BackgroundColor-->
 	</PredictionArea>
-	<P300Keyboard x="0.05" y="0.25" width="0.9" height="0.7" numberOfStandardKeys="43">	
+	<P300Keyboard x="0.05" y="0.25" width="0.9" height="0.7" numberOfStandardKeys="42">	
 		<Key x="0" y="0.8" width="0.1" height="0.2">
 			<Action>write</Action>
 			<Event id="noflash"><TextSymbol><Label>A</Label></TextSymbol></Event>
