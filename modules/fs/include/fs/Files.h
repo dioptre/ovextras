@@ -16,6 +16,9 @@ namespace FS
 		static FS::boolean createPath(const char* sPath);
 		// Creates all components of a path to the filesystem except the last part (i.e. for paths including a filename in the end)
 		static FS::boolean createParentPath(const char* sPath);
+		// Returns a path omitting the last part of it (essentially boost::filesystem::parent_path). Output sParentPath needs to be pre-allocated.
+		static FS::boolean getParentPath(const char *sPath, char *sParentPath);
+
 	private:
 
 		Files(void);

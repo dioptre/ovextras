@@ -158,3 +158,14 @@ bool Files::createParentPath(const char *sPath)
 {
 	return boost::filesystem::create_directories(boost::filesystem::path(sPath).parent_path());
 }
+
+bool Files::getParentPath(const char *sPath, char *sParentPath) 
+{
+	if(!sPath || !sParentPath) {
+		return false;
+	}
+
+	strcpy(sParentPath, boost::filesystem::path(sPath).parent_path().string().c_str());
+
+	return true;
+}

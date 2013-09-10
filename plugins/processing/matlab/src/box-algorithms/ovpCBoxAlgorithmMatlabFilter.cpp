@@ -15,6 +15,8 @@
 	#include <windows.h>
 #endif
 
+#include <fs/Files.h>
+
 #define MATLAB_BUFFER 2048
 #define m_pMatlabEngine ((Engine*)m_pMatlabEngineHandle)
 #define m_pMatlabStimulation ((mxArray*)m_pMatlabStimulationHandle)
@@ -32,11 +34,44 @@ using namespace OpenViBEPlugins::Tools;
 
 #define boolean OpenViBE::boolean
 
+// Sanitizes a path so that it only has / or \ characters and has a / or \ in the end.
+// @fixme should move to plugins-FS possibly
+void CBoxAlgorithmMatlabFilter::sanitizePath(OpenViBE::CString &sPathToModify) const {
+
+	std::string l_oTmpPath(sPathToModify);
+	// Append / to end of path if its not there already
+	if(l_oTmpPath.length()>0) 
+	{
+		char l_cLastChar = l_oTmpPath.at(l_oTmpPath.length()-1);
+		if(l_cLastChar != '\\' && l_cLastChar != '/')
+		{
+			l_oTmpPath = l_oTmpPath + "/";
+		}
+	}
+
+#if defined TARGET_OS_Windows
+	// Convert '/' to '\'
+	for (size_t i=0; i < l_oTmpPath.length(); i++) {
+		if(l_oTmpPath[i] == '/') 
+		{
+			l_oTmpPath[i] = '\\';
+		}
+	}
+#endif
+	sPathToModify = OpenViBE::CString(l_oTmpPath.c_str());
+}
+
 boolean CBoxAlgorithmMatlabFilter::OpenMatlabEngineSafely(void)
 {
-	this->getLogManager() << LogLevel_Trace << "Trying to open Matlab engine\n";
+	this->getLogManager() << LogLevel_Trace << "Trying to open the Matlab engine\n";
 #if defined TARGET_OS_Linux
 	m_pMatlabEngineHandle=::engOpen(m_sMatlabPath.toASCIIString());
+	if(!m_pMatlabEngine) 
+	{
+		this->getLogManager() << LogLevel_Error << "Could not open the Matlab engine.\n" << 
+			"The configured path to the matlab executable was expanded as '" << m_sMatlabPath << "'.\n";
+		return false;
+	}
 #elif defined TARGET_OS_Windows
 	__try
 	{
@@ -44,18 +79,20 @@ boolean CBoxAlgorithmMatlabFilter::OpenMatlabEngineSafely(void)
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
-		this->getLogManager() << LogLevel_Error << "First call to MATLAB engine failed.\n"
+		this->getLogManager() << LogLevel_Error << "First call to the MATLAB engine failed.\n"
 			<< "\tTo use this box you must have MATLAB (32 bits version) installed on your computer.\n";
-
+		m_pMatlabEngineHandle = NULL;
+	}
+	if(!m_pMatlabEngine)
+	{
+		this->getLogManager() << LogLevel_Error << "Could not open the Matlab engine.\n" << 
+			"The configured path to the matlab bin directory was expanded as '" << m_sMatlabPath << "'.\n";
 		return false;
 	}
 #else
+	this->getLogManager() << LogLevel_Error << "Only Linux and Windows are supported\n";
+	return false;
 #endif
-	if(!m_pMatlabEngine)
-	{
-		this->getLogManager() << LogLevel_Error << "Could not open Matlab engine\n";
-		return false;
-	}
 	return true;
 }
 
@@ -78,30 +115,27 @@ boolean CBoxAlgorithmMatlabFilter::initialize(void)
 	ip_pMatrix.initialize(m_pStreamedMatrixEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix));
 
 	m_ui64LatestStimulationChunkEndTime=0;
-	uint32 l_ui32FirstCommonIndex = 0;
 
 	getStaticBoxContext().getSettingValue(0, m_sMatlabPath);
 
 #if defined TARGET_OS_Windows
-	std::string l_oTmpPath(m_sMatlabPath);
-	// Convert '/' to '\'
-	for (size_t i=0; i < l_oTmpPath.length(); i++) {
-		if(l_oTmpPath[i] == '/') 
-		{
-			l_oTmpPath[i] = '\\';
-		}
-	}
-	// Append \ to end of path if its not there already
-	if(l_oTmpPath.length()>0) 
+	if(!FS::Files::directoryExists(m_sMatlabPath) && FS::Files::fileExists(m_sMatlabPath)) 
 	{
-		char l_cLastChar = l_oTmpPath.at(l_oTmpPath.length()-1);
-		if(l_cLastChar != '\\')
-		{
-			l_oTmpPath = l_oTmpPath + "\\";
-		}
-		m_sMatlabPath = OpenViBE::CString(l_oTmpPath.c_str());
+		// The path might be pointing to the executable, try to extract the directory
+		char l_sParentPath[MAX_PATH];
+		FS::Files::getParentPath(m_sMatlabPath, l_sParentPath);
+		m_sMatlabPath = OpenViBE::CString(l_sParentPath);
 	}
-	m_sMatlabPath = OpenViBE::CString(l_oTmpPath.c_str());
+
+	sanitizePath(m_sMatlabPath);
+
+	this->getLogManager() << LogLevel_Trace << "Interpreting Matlab path as '" << m_sMatlabPath << "'\n";
+
+	if(!FS::Files::directoryExists(m_sMatlabPath)) 
+	{
+		this->getLogManager() << LogLevel_Error << "Configured Matlab path'" << m_sMatlabPath << "' does not seem to be a directory\n";
+		return false;
+	}
 
 	char * l_sPath = getenv("PATH");
 	if(l_sPath == NULL)
