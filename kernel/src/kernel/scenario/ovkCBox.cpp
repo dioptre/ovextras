@@ -814,7 +814,9 @@ boolean CBox::addMessageInput(
     const CString& sName)
 {
     //this->getLogManager() << LogLevel_Fatal << "adding message input named "<< sName << "for box "<< m_sName << "\n";
-    m_vMessageInput.push_back(sName);
+	CMessageInput l_oMessageInput;
+	l_oMessageInput.m_sName = sName;
+	m_vMessageInput.push_back(l_oMessageInput);
 
     this->notify(BoxModification_MessageInputAdded, m_vMessageInput.size()-1);
 
@@ -902,7 +904,7 @@ boolean CBox::getMessageInputName(
     {
         return false;
     }
-    rName=m_vMessageInput[ui32InputIndex];
+	rName=m_vMessageInput[ui32InputIndex].m_sName;
     return true;
 }
 
@@ -915,7 +917,7 @@ boolean CBox::setMessageInputName(
     {
         return false;
     }
-    m_vMessageInput[ui32InputIndex]=rName;
+	m_vMessageInput[ui32InputIndex].m_sName=rName;
 
     this->notify(BoxModification_MessageInputNameChanged, ui32InputIndex);
 
@@ -927,7 +929,9 @@ boolean CBox::addMessageOutput(
     const CString& sName)
 {
     //this->getLogManager() << LogLevel_Fatal << "adding message Output named "<< sName << "for box "<< m_sName << "\n";
-    m_vMessageOutput.push_back(sName);
+	CMessageOutput l_oMessageOutput;
+	l_oMessageOutput.m_sName = sName;
+	m_vMessageOutput.push_back(l_oMessageOutput);
 
     this->notify(BoxModification_MessageOutputAdded, m_vMessageOutput.size()-1);
 
@@ -1012,7 +1016,7 @@ boolean CBox::getMessageOutputName(
     {
         return false;
     }
-    rName=m_vMessageOutput[ui32InputIndex];
+	rName=m_vMessageOutput[ui32InputIndex].m_sName;
     return true;
 }
 
@@ -1025,7 +1029,7 @@ boolean CBox::setMessageOutputName(
     {
         return false;
     }
-    m_vMessageOutput[ui32InputIndex]=rName;
+	m_vMessageOutput[ui32InputIndex].m_sName=rName;
 
     this->notify(BoxModification_MessageOutputNameChanged, ui32InputIndex);
 

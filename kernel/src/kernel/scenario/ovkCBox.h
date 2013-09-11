@@ -60,37 +60,37 @@ namespace OpenViBE
 				const OpenViBE::CString& rName);
 
 
-            //messages input
-            virtual OpenViBE::boolean addMessageInput(
-                const OpenViBE::CString& sName);
-            virtual OpenViBE::boolean removeMessageInput(
-                const OpenViBE::uint32 ui32InputIndex);
+			//messages input
+			virtual OpenViBE::boolean addMessageInput(
+				const OpenViBE::CString& sName);
+			virtual OpenViBE::boolean removeMessageInput(
+				const OpenViBE::uint32 ui32InputIndex);
 
 
-            virtual OpenViBE::uint32 getMessageInputCount(void) const;
-            virtual OpenViBE::boolean getMessageInputName(
-                const OpenViBE::uint32 ui32InputIndex,
-                OpenViBE::CString& rName) const;
-            virtual OpenViBE::boolean setMessageInputName(
-                const OpenViBE::uint32 ui32InputIndex,
-                const OpenViBE::CString& rName);
+			virtual OpenViBE::uint32 getMessageInputCount(void) const;
+			virtual OpenViBE::boolean getMessageInputName(
+				const OpenViBE::uint32 ui32InputIndex,
+				OpenViBE::CString& rName) const;
+			virtual OpenViBE::boolean setMessageInputName(
+				const OpenViBE::uint32 ui32InputIndex,
+				const OpenViBE::CString& rName);
 
-            //message output
-            virtual OpenViBE::boolean addMessageOutput(
-                const OpenViBE::CString& sName);
-            virtual OpenViBE::boolean removeMessageOutput(
-                const OpenViBE::uint32 ui32InputIndex);
+			//message output
+			virtual OpenViBE::boolean addMessageOutput(
+				const OpenViBE::CString& sName);
+			virtual OpenViBE::boolean removeMessageOutput(
+				const OpenViBE::uint32 ui32InputIndex);
 
 
-            virtual OpenViBE::uint32 getMessageOutputCount(void) const;
-            virtual OpenViBE::boolean getMessageOutputName(
-                const OpenViBE::uint32 ui32InputIndex,
-                OpenViBE::CString& rName) const;
-            virtual OpenViBE::boolean setMessageOutputName(
-                const OpenViBE::uint32 ui32InputIndex,
-                const OpenViBE::CString& rName);
+			virtual OpenViBE::uint32 getMessageOutputCount(void) const;
+			virtual OpenViBE::boolean getMessageOutputName(
+				const OpenViBE::uint32 ui32InputIndex,
+				OpenViBE::CString& rName) const;
+			virtual OpenViBE::boolean setMessageOutputName(
+				const OpenViBE::uint32 ui32InputIndex,
+				const OpenViBE::CString& rName);
 
-            //
+			//
 
 			virtual OpenViBE::boolean addOutput(
 				const OpenViBE::CString& sName,
@@ -202,6 +202,26 @@ namespace OpenViBE
 				OpenViBE::CString m_sValue;
 			};
 
+			class CMessageInput
+			{
+			public:
+				CMessageInput(void) { }
+				CMessageInput(const CMessageInput& mi)
+					:m_sName(mi.m_sName) { }
+				OpenViBE::CString m_sName;
+
+			};
+
+			class CMessageOutput
+			{
+			public:
+				CMessageOutput(void) { }
+				CMessageOutput(const CMessageOutput& mi)
+					:m_sName(mi.m_sName) { }
+				OpenViBE::CString m_sName;
+
+			};
+
 		protected:
 
 			OpenViBE::Kernel::CScenario& m_rOwnerScenario;
@@ -220,8 +240,8 @@ namespace OpenViBE
 			std::vector<CSetting> m_vSetting;
 
             //only the name of the in/output are stored for message socket
-            std::vector<OpenViBE::CString> m_vMessageInput;
-            std::vector<OpenViBE::CString> m_vMessageOutput;
+			std::vector<CMessageInput> m_vMessageInput;
+			std::vector<CMessageOutput> m_vMessageOutput;
 		};
 	};
 };
