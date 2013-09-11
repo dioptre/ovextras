@@ -114,10 +114,8 @@ boolean CBoxAlgorithmMatlabScripting::OpenMatlabEngineSafely(void)
 	}
 	if(!m_pMatlabEngine)
 	{
-		char l_sMatlabDirectory[MAX_PATH];
-		FS::Files::getParentPath(m_sMatlabPath, l_sMatlabDirectory);
 		this->getLogManager() << LogLevel_Error << "Could not open the Matlab engine.\n" << 
-			"The matlab binary path was reasoned to be '" << l_sMatlabDirectory << "'.\n";
+			"The matlab binary path was reasoned to be '" << m_sMatlabPath << "'.\n";
 		return false;
 	}
 #else
