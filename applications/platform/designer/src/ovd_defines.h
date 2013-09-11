@@ -49,6 +49,8 @@ namespace OpenViBEDesigner
 
 		ContextMenu_SelectionMute,
 		ContextMenu_BoxMute,
+
+		ContextMenu_BoxDocumentation
 	};
 
 	enum

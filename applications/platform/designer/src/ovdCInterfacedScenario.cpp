@@ -179,6 +179,7 @@ static void context_menu_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 		case ContextMenu_BoxRemoveSetting: l_pContextMenuCB->pInterfacedScenario->contextMenuBoxRemoveSettingCB(*l_pContextMenuCB->pBox, l_pContextMenuCB->ui32Index); break;
 		case ContextMenu_BoxConfigure:     l_pContextMenuCB->pInterfacedScenario->contextMenuBoxConfigureCB(*l_pContextMenuCB->pBox); break;
 		case ContextMenu_BoxAbout:         l_pContextMenuCB->pInterfacedScenario->contextMenuBoxAboutCB(*l_pContextMenuCB->pBox); break;
+		case ContextMenu_BoxDocumentation: l_pContextMenuCB->pInterfacedScenario->contextMenuBoxDocumentationCB(*l_pContextMenuCB->pBox); break;
 		case ContextMenu_BoxMute:          l_pContextMenuCB->pInterfacedScenario->contextMenuBoxMuteCB(*l_pContextMenuCB->pBox); break;
 
 		case ContextMenu_ScenarioAbout:    l_pContextMenuCB->pInterfacedScenario->contextMenuScenarioAboutCB(); break;
@@ -1689,6 +1690,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 								gtk_menu_add_new_image_menu_item_with_cb(l_pMenu, l_pMenuItemRename, GTK_STOCK_EDIT, "rename box...", context_menu_cb, l_pBox, ContextMenu_BoxRename, -1);
 								gtk_menu_add_new_image_menu_item_with_cb(l_pMenu, l_pMenuItemDelete, GTK_STOCK_CUT, "delete box...", context_menu_cb, l_pBox, ContextMenu_BoxDelete, -1);
 								gtk_menu_add_new_image_menu_item_with_cb(l_pMenu, l_pMenuItemAbout, GTK_STOCK_ABOUT, "about box...", context_menu_cb, l_pBox, ContextMenu_BoxAbout, -1);
+								gtk_menu_add_new_image_menu_item_with_cb(l_pMenu, l_pMenuItemDocumentation, GTK_STOCK_ABOUT, "box documentation...", context_menu_cb, l_pBox, ContextMenu_BoxDocumentation, -1);
 							}
 						}
 
@@ -1907,9 +1909,6 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 	// F1 : browse documentation
 	if(pEvent->keyval==GDK_F1)
 	{
-		CString l_sWebBrowser=m_rKernelContext.getConfigurationManager().expand("${Designer_WebBrowserCommand}");
-		CString l_sURLBase=m_rKernelContext.getConfigurationManager().expand("${Designer_WebBrowserHelpURLBase}");
-
 		map < CIdentifier, boolean > l_vSelectedBoxAlgorithm;
 		map < CIdentifier, boolean >::const_iterator it;
 		for(it=m_vCurrentObject.begin(); it!=m_vCurrentObject.end(); it++)
@@ -1927,21 +1926,7 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 		{
 			for(it=l_vSelectedBoxAlgorithm.begin(); it!=l_vSelectedBoxAlgorithm.end(); it++)
 			{
-				if(it->first!=OV_UndefinedIdentifier)
-				{
-					if(m_rKernelContext.getPluginManager().canCreatePluginObject(it->first))
-					{
-						const IPluginObjectDesc* l_pPluginObjectDesc=m_rKernelContext.getPluginManager().getPluginObjectDescCreating(it->first);
-						CString l_sHTMLName=CString("Doc_BoxAlgorithm_")+CString(getBoxAlgorithmURL(l_pPluginObjectDesc->getName().toASCIIString()).c_str())+CString(".html");
-						CString l_sFullURL=l_sURLBase+CString("/")+l_sHTMLName;
-						m_rKernelContext.getLogManager() << LogLevel_Trace << "Requesting web browser on URL " << l_sFullURL << "\n";
-						int l_iResult=::system((l_sWebBrowser+CString(" ")+l_sFullURL).toASCIIString());
-						if(l_iResult<0)
-						{
-							m_rKernelContext.getLogManager() << LogLevel_Warning << "Could not launch command " << l_sWebBrowser+CString(" ")+l_sFullURL << "\n";
-						}
-					}
-				}
+				browseBoxDocumentation(it->first);
 			}
 		}
 		else
@@ -1949,12 +1934,11 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 			CString l_sFullURL=m_rScenario.getAttributeValue(OV_AttributeId_Scenario_DocumentationPage);
 			if(l_sFullURL!=CString(""))
 			{
-				m_rKernelContext.getLogManager() << LogLevel_Trace << "Requesting web browser on URL " << l_sFullURL << "\n";
-				int l_iResult=::system((l_sWebBrowser+CString(" ")+l_sFullURL).toASCIIString());
-				if(l_iResult<0)
-				{
-					m_rKernelContext.getLogManager() << LogLevel_Warning << "Could not launch command " << l_sWebBrowser+CString(" ")+l_sFullURL << "\n";
-				}
+				browseURL(l_sFullURL);
+			} 
+			else 
+			{
+				m_rKernelContext.getLogManager() << LogLevel_Info << "The scenario does not define a documentation page.\n";
 			}
 		}
 	}
@@ -2489,6 +2473,51 @@ void CInterfacedScenario::contextMenuBoxAboutCB(IBox& rBox)
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxAboutCB\n";
 	CAboutPluginDialog l_oAboutPluginDialog(m_rKernelContext, rBox.getAlgorithmClassIdentifier(), m_sGUIFilename.c_str());
 	l_oAboutPluginDialog.run();
+}
+
+bool CInterfacedScenario::browseURL(CString sURL)  {
+	CString l_sWebBrowser=m_rKernelContext.getConfigurationManager().expand("${Designer_WebBrowserCommand}");
+
+	m_rKernelContext.getLogManager() << LogLevel_Trace << "Requesting web browser on URL " << sURL << "\n";
+#if TARGET_OS_Linux
+	CString l_sCommand = l_sWebBrowser+CString(" ")+sURL+CString(" &");
+#else
+	CString l_sCommand = l_sWebBrowser+CString(" ")+sURL;
+#endif
+	m_rKernelContext.getLogManager() << LogLevel_Trace << "Launching '" << l_sCommand << "'\n";
+	int l_iResult=::system(l_sCommand.toASCIIString());
+	if(l_iResult<0)
+	{
+		m_rKernelContext.getLogManager() << LogLevel_Warning << "Could not launch command " << l_sWebBrowser+CString(" ")+sURL << "\n";
+		return false;
+	}
+	return true;
+}
+
+bool CInterfacedScenario::browseBoxDocumentation(CIdentifier oBoxId) 
+{
+	if(oBoxId!=OV_UndefinedIdentifier && m_rKernelContext.getPluginManager().canCreatePluginObject(oBoxId))
+	{
+		CString l_sURLBase=m_rKernelContext.getConfigurationManager().expand("${Designer_WebBrowserHelpURLBase}");
+
+		const IPluginObjectDesc* l_pPluginObjectDesc=m_rKernelContext.getPluginManager().getPluginObjectDescCreating(oBoxId);
+		CString l_sHTMLName=CString("Doc_BoxAlgorithm_")+CString(getBoxAlgorithmURL(l_pPluginObjectDesc->getName().toASCIIString()).c_str())+CString(".html");
+		CString l_sFullURL=l_sURLBase+CString("/")+l_sHTMLName;
+
+		return browseURL(l_sFullURL);
+	} else {
+		m_rKernelContext.getLogManager() << LogLevel_Warning << "Box with id " << oBoxId << " can not create a pluging object\n";
+		return false;
+	}
+	return true;
+}
+
+void CInterfacedScenario::contextMenuBoxDocumentationCB(IBox& rBox)
+{
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxDocumentationCB\n";
+	CIdentifier l_oBoxId = rBox.getAlgorithmClassIdentifier();
+
+	browseBoxDocumentation(l_oBoxId);
 }
 
 void CInterfacedScenario::contextMenuScenarioAboutCB(void)
