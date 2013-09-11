@@ -1,4 +1,5 @@
 #include "ovpCBoxAlgorithmMessageSpy.h"
+#include <sstream>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -9,6 +10,9 @@ using namespace OpenViBEPlugins::Tools;
 
 boolean CBoxAlgorithmMessageSpy::initialize(void)
 {
+
+	uint64  l_ui64LogLevel=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	m_eLogLevel=static_cast<ELogLevel>(l_ui64LogLevel);
 	
 	// If you need to, you can manually set the reference targets to link the codecs input and output. To do so, you can use :
 	//m_oEncoder.getInputX().setReferenceTarget(m_oDecoder.getOutputX())
@@ -69,21 +73,87 @@ boolean CBoxAlgorithmMessageSpy::processInput(uint32 ui32InputIndex)
 //*/
 OpenViBE::boolean CBoxAlgorithmMessageSpy::processMessage(const IMyMessage& msg, uint32 inputIndex)
 {
-    //we do not know the keys, the current interface do not allow to access the content if we do not know the key
+	CString l_sMessageContent("content\n");
+	bool success;
+	const CString* l_sKey;
+	//get the content
+	//get first key
 
-    /*
-    CString l_sMessageContent;
-    bool success;
-    CString l_sKey;
-    msg.getValueUint64(l_sKey, success);
-    msg.getValueFloat64(l_sKey, success);
-    msg.getValueCString(l_sKey, success);
-    msg.getValueCMatrix(l_sKey, success);
-    //*/
+	l_sKey = msg.getFirstCStringToken();
+	if(l_sKey==NULL)
+	{
+		l_sMessageContent = l_sMessageContent+CString("No string value\n");
+	}
+	else
+	{
+		while(l_sKey!=NULL)
+		{
+			const CString* l_sValue = msg.getValueCString(*l_sKey, success);
+			l_sMessageContent = l_sMessageContent+(*l_sKey)+CString(" ")+(*l_sValue)+CString("\n");
+			l_sKey = msg.getNextCStringToken(*l_sKey);
+		}
+	}
 
+	l_sKey = msg.getFirstUInt64Token();
+	if(l_sKey==NULL)
+	{
+		l_sMessageContent = l_sMessageContent+CString("No UInt64 value\n");
+	}
+	else
+	{
+		while(l_sKey!=NULL)
+		{
+			const uint64 l_ui64Value = msg.getValueUint64(*l_sKey, success);
+			//easier way to convert uint -> char* -> CString ?
+			std::stringstream l_oStream;
+			l_oStream << l_ui64Value;
+			l_sMessageContent = l_sMessageContent+(*l_sKey)+CString(" ")+CString(l_oStream.str().c_str())+CString("\n");
+			l_sKey = msg.getNextUInt64Token(*l_sKey);
+		}
+	}
 
-
-    return true;
+	l_sKey = msg.getFirstFloat64Token();
+	if(l_sKey==NULL)
+	{
+		l_sMessageContent = l_sMessageContent+CString("No Float64 value\n");
+	}
+	else
+	{
+		while(l_sKey!=NULL)
+		{
+			const float64 l_f64Value = msg.getValueFloat64(*l_sKey, success);
+			//easier way to convert Float -> char* -> CString ?
+			std::stringstream l_oStream;
+			l_oStream << l_f64Value;
+			l_sMessageContent = l_sMessageContent+(*l_sKey)+CString(" ")+CString(l_oStream.str().c_str())+CString("\n");
+			l_sKey = msg.getNextFloat64Token(*l_sKey);
+		}
+	}
+//*
+	l_sKey = msg.getFirstIMatrixToken();
+	if(l_sKey==NULL)
+	{
+		l_sMessageContent = l_sMessageContent+CString("No IMatrix value\n");
+	}
+	else
+	{
+		while(l_sKey!=NULL)
+		{
+			const IMatrix* l_oMatrix = msg.getValueCMatrix(*l_sKey, success);
+			//easier way to convert Float -> char* -> CString ?
+			std::stringstream l_oStream;
+			const float64* l_f64Buffer = l_oMatrix->getBuffer();
+			float64 l_f64BufferSize = l_oMatrix->getBufferElementCount();
+			for (uint64 i=0; i<l_f64BufferSize; i++)
+			{
+				l_oStream << l_f64Buffer[i] << " ";
+			}
+			l_sMessageContent = l_sMessageContent+(*l_sKey)+CString(" ")+CString(l_oStream.str().c_str())+CString("\n");
+			l_sKey = msg.getNextIMatrixToken(*l_sKey);
+		}
+	}
+	getLogManager() << m_eLogLevel << l_sMessageContent;
+	return true;
 }
 
 

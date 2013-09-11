@@ -52,6 +52,7 @@ namespace OpenViBEPlugins
 
 		protected:
 			// No codec algorithms were specified in the skeleton-generator.
+			OpenViBE::Kernel::ELogLevel m_eLogLevel;
 
 		};
 

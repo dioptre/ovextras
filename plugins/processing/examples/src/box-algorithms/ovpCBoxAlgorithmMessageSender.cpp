@@ -88,9 +88,17 @@ boolean CBoxAlgorithmMessageSender::process(void)
     msg.setValueFloat64(CString("float"), 1.354);
 
 
-    //that work
-    CString test("test");
-    msg.setValueCString( CString("string"), test);
+	//that work
+	CString test("test");
+	msg.setValueCString( CString("string"), test);
+
+	CString test2("test2");
+	msg.setValueCString( CString("string2"), test2);
+
+	CString test3("test3");
+	msg.setValueCString( CString("string3"), test3);
+
+
 
     //however if we call
     // msg.setValueCString( CString("string"), CString("test"));
