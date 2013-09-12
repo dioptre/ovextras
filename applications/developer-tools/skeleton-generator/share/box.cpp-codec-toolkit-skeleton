@@ -64,6 +64,13 @@ boolean CBoxAlgorithm@@ClassName@@::processInput(uint32 ui32InputIndex)
 }
 /*******************************************************************************/
 
+boolean CBoxAlgorithmMessageSpy::processMessage(const IMyMessage& msg, uint32 inputIndex)
+{
+	//
+	return true;
+}
+/*******************************************************************************/
+
 boolean CBoxAlgorithm@@ClassName@@::process(void)
 {
 	

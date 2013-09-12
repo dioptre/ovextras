@@ -42,6 +42,8 @@ namespace OpenViBEPlugins
 			
 			virtual OpenViBE::boolean process(void);
 
+			virtual OpenViBE::boolean processMessage(const OpenViBE::Kernel::IMyMessage& msg, OpenViBE::uint32 inputIndex);
+
 			// As we do with any class in openvibe, we use the macro below 
 			// to associate this box to an unique identifier. 
 			// The inheritance information is also made available, 
@@ -135,7 +137,15 @@ namespace OpenViBEPlugins
 				@@Outputs@@
 				@@OutputFlagCanModify@@
 				@@OutputFlagCanAdd@@
-				
+
+				@@MessageInputs@@
+				@@MessageInputFlagCanModify@@
+				@@MessageInputFlagCanAdd@@
+
+				@@MessageOutputs@@
+				@@MessageOutputFlagCanModify@@
+				@@MessageOutputFlagCanAdd@@
+
 				@@Settings@@
 				@@SettingFlagCanModify@@
 				@@SettingFlagCanAdd@@
