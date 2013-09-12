@@ -5,4 +5,10 @@ dist
 build
 CMakeLists.txt.*
 .*.swp
+*~
+externals
+CMakeLists_full.txt
+CMakeLists_COADAPT.txt
+coadapt.patch
+coadapt.patch.fc19
 
