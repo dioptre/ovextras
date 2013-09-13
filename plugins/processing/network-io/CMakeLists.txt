@@ -16,7 +16,6 @@ INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
 INCLUDE("FindOpenViBEToolkit")
 INCLUDE("FindThirdPartyBoost")
-INCLUDE("FindThirdPartyBoost_Thread")
 INCLUDE("FindThirdPartyBoost_System")
 
 # ---------------------------------

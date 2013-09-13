@@ -1,0 +1,63 @@
+/**
+ * \page BoxAlgorithm_TCPWriter Stimulus TCP Writer
+__________________________________________________________________
+
+Detailed description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Description|
+This box sends its input stream out to a TCP socket as raw data. Multiple clients can connect to the socket of the box.
+
+With StreamedMatrix and Signal inputs, the box first sends every connecting box three uint32 variables: sampling frequency, number of channels (matrix rows) and number of samples per chunk (matrix columns). However, with Streamed Matrix, the sampling frequency will always be 0. Next, the data itself is spooled as it arrives as a raw sequence of float64. 
+
+With Stimulations input, the box only sends the stimulation codes, formatted either as uint64, hex string, or a descriptive string.
+
+ * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Description|
+__________________________________________________________________
+
+Inputs description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Inputs|
+ * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Inputs|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Input1|
+The supported input stream types are StreamedMatrix, Signal and Stimulations. The stream type of the input can be changed by the user.
+ * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Input1|
+__________________________________________________________________
+
+Settings description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Settings|
+ * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Settings|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Setting1|
+ Port denotes the TCP port that will accept the client connections. Default is 5678.
+ * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Setting1|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Setting2|
+ If the input is Stimulations, this setting can change the format the stimulations are sent in to the TCP socket. The choices are raw uint64, hex string, or a descriptive string.
+ * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Setting2|
+ *
+__________________________________________________________________
+
+Examples description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Examples|
+ Easiest way to test the box is to connect to the socket of the box with 'telnet' and redirect the output to a file.
+ * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Examples|
+__________________________________________________________________
+
+Miscellaneous description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Miscellaneous|
+ The box performs no little-endian/big-endian conversions. The data is sent raw in the native format of the host system.
+ 
+ The box writes to all the sockets synchronously in the process() call and drops no data. If the connection is too slow to accommodate the data flow, the box will lag.
+ 
+ Detected transmission errors will cause a disconnection of the client.
+ * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Miscellaneous|
+ */
