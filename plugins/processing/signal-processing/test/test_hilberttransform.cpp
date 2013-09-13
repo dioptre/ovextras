@@ -32,7 +32,7 @@ std::vector fileToBuffer(const Cstring sFileName)
 
 
 /* Method to compare two files */
-boolean compareBuffers (const float* &rMatrixBuffer, const std::vector& rVector, const float64 f64precision)
+boolean compareBuffers (const float* &rMatrixBuffer, const std::vector<float64>& rVector, const float64 f64precision)
 {
 	int cpt = 0;
 	float64 l_f64DiffValue;
@@ -65,13 +65,6 @@ boolean compareBuffers (const float* &rMatrixBuffer, const std::vector& rVector,
 
 /*void initializeHilbertAlgorithm(void)
 {
-
-	// Create algorithm instance of Hilbert transform
-	OpenViBE::Kernel::IAlgorithmProxy* l_pHilbertTransform = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_HilbertTransform));
-	l_pHilbertTransform->initialize();
-
-	ip_pHilbertInput.initialize(m_pHilbertTransform->getInputParameter(OVP_Algorithm_HilbertTransform_InputParameterId_Matrix));
-	op_pInstantaneousPhase.initialize(m_pHilbertTransform->getOutputParameter(OVP_Algorithm_HilbertTransform_OutputParameterId_PhaseMatrix));
 }*/
 
 
@@ -87,8 +80,8 @@ boolean compareBuffers (const float* &rMatrixBuffer, const std::vector& rVector,
 	 *
 	 */
 
-// validation Test has 4 parameters : the input file containing the data of the input signal to apply algorithm to, and the expected outputs(Phase,envelope and hilbert transform) computed by matlab
-boolean validationTest(const CString rInputFile, const CString rEnvelopeOutputFile, const CString rPhaseOutputFile, const CString rHilbertOutputFile,)
+// validation Test has 5 parameters : the input file containing the data of the input signal to apply algorithm to, the expected outputs(Phase,envelope and hilbert transform) computed by matlab, and the precision tolerance
+boolean validationTest(const CString sInputFile, const CString sEnvelopeOutputFile, const CString sPhaseOutputFile, const CString sHilbertOutputFile, const float64 f64precision)
 {
 	boolean l_bTestPassed = false;
 	boolean l_bIsHilbertCorrect = false;
@@ -97,11 +90,15 @@ boolean validationTest(const CString rInputFile, const CString rEnvelopeOutputFi
 
 
 	// Get data from input file, and the file containing the correct output
-	std::vector l_vInputVector;
-	std::vector l_vExpectedOutputVector;
+	std::vector<float64> l_vInputVector;
+	std::vector<float64> l_vExpectedEnvelopeVector;
+	std::vector<float64> l_vExpectedPhaseVector;
+	std::vector<float64> l_vExpectedHilbertVector;
 
-	l_vInputVector = fileToBuffer(rInputFile);
-	l_vExpectedOutputVector = fileToBuffer(rOutputFile);
+	l_vInputVector = fileToBuffer(sInputFile);
+	l_vExpectedEnvelopeVector = fileToBuffer(sEnvelopeOutputFile);
+	l_vExpectedPhaseVector = fileToBuffer(sPhaseOutputFile);
+	l_vExpectedHilbertVector = fileToBuffer(sHilbertOutputFile);
 
 
 	// Create algorithm instance of Hilbert transform
@@ -120,9 +117,9 @@ boolean validationTest(const CString rInputFile, const CString rEnvelopeOutputFi
 	op_pPhaseMatrix.initialize(m_pHilbertTransform->getOutputParameter(OVP_Algorithm_HilbertTransform_OutputParameterId_PhaseMatrix));
 
 	// Setting size of input
-	l_pOutputMatrix->setDimensionCount(2); // the input matrix will have 2 dimensions
-	l_pOutputMatrix->setDimensionSize(0,l_vInputVector.Size()); //
-	l_pOutputMatrix->setDimensionSize(1,1);//
+	ip_pHilbertInput->setDimensionCount(2); // the input matrix will have 2 dimensions
+	ip_pHilbertInput->setDimensionSize(0,l_vInputVector.Size()); //
+	ip_pHilbertInput->setDimensionSize(1,1);//
 
 	for(uint32 i =0; i<l_vInputVector.Size();i++)
 	{
@@ -133,21 +130,26 @@ boolean validationTest(const CString rInputFile, const CString rEnvelopeOutputFi
 	{
 		m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Process);
 
-		l_bIsHilbertCorrect = compareBuffers(op_pHilbertMatrix->getBuffer(), l_vExpectedOutputVector);
+		l_bIsEnvelopeCorrect = compareBuffers(op_pEnvelopeMatrix->getBuffer(), l_vExpectedEnvelopeVector,f64precision);
+		l_bIsPhaseCorrect = compareBuffers(op_pPhaseMatrix->getBuffer(), l_vExpectedPhaseVector,f64precision);
+		l_bIsHilbertCorrect = compareBuffers(op_pHilbertMatrix->getBuffer(), l_vExpectedHilbertVector,f64precision);
 
 
 		if(l_bIsHilbertCorrect && l_bIsPhaseCorrect && l_bIsEnvelopeCorrect)
 		{
+			cout<<"All results are right, test passed \n"<<endl;
 			return true;
 		}
 		else
 		{
-			return false; // Need to display some log comments
+			cout<<"Algorithm results do not correspond to expected results, test failed \n"<<endl;
+			return false;
 		}
 	}
 	else
 	{
-		return false;// Need to display some log comments
+		cout<<"Algorithm initialization failed, test failed \n"<<endl;
+		return false;
 	}
 
 
@@ -155,6 +157,7 @@ boolean validationTest(const CString rInputFile, const CString rEnvelopeOutputFi
 	op_pHilbertMatrix.uninitialize();
 	op_pEnvelopeMatrix.uninitialize();
 	op_pPhaseMatrix.uninitialize();
+
 	l_pHilbertTransform->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*m_pHilbertTransform);
 
@@ -169,8 +172,55 @@ boolean validationTest(const CString rInputFile, const CString rEnvelopeOutputFi
 	 *
 	 */
 
-boolean badInputTest(const float64* pBadInput)
+boolean badInputTest(const std::vector<float64> vBadInput)
 {
+	boolean l_bTestPassed = false;
+
+	// Create algorithm instance of Hilbert transform
+
+	OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pHilbertInput;
+	OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pPhaseMatrix;
+	OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pHilbertMatrix;
+	OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pEnvelopeMatrix;
+
+	OpenViBE::Kernel::IAlgorithmProxy* l_pHilbertTransform = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_HilbertTransform));
+	l_pHilbertTransform->initialize();
+
+	ip_pHilbertInput.initialize(m_pHilbertTransform->getInputParameter(OVP_Algorithm_HilbertTransform_InputParameterId_Matrix));
+	op_pHilbertMatrix.initialize(m_pHilbertTransform->getOutputParameter(OVP_Algorithm_HilbertTransform_OutputParameterId_HilbertMatrix));
+	op_pEnvelopeMatrix.initialize(m_pHilbertTransform->getOutputParameter(OVP_Algorithm_HilbertTransform_OutputParameterId_EnvelopeMatrix));
+	op_pPhaseMatrix.initialize(m_pHilbertTransform->getOutputParameter(OVP_Algorithm_HilbertTransform_OutputParameterId_PhaseMatrix));
+
+	// Setting size of input
+	ip_pHilbertInput->setDimensionCount(2); // the input matrix will have 2 dimensions
+	ip_pHilbertInput->setDimensionSize(0,vBadInput.Size()); //
+	ip_pHilbertInput->setDimensionSize(1,1);//
+
+	for(uint32 i =0; i<vBadInput.Size();i++)
+	{
+		ip_pHilbertInput->getBuffer()[i] = vBadInput[i];
+	}
+
+	if(l_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Initialize)) // Check initialization before doing the process
+	{
+		m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Process);
+		if(m_pHilbertTransform->isInputTriggerActive(OVP_Algorithm_HilbertTransform_InputTriggerId_ProcessDone))
+		{
+			cout<<"Process done without crashing, test passed \n"<<endl;
+			return true;
+		}
+		else
+		{
+			cout<<"Algorithm failed, test failed \n"<<endl;
+			return false;
+		}
+	}
+	else
+	{
+		cout<<"Initialization failed, the algorithm identified the input was not what expected, the test is considered as passed \n"<<endl;
+		return true;
+	}
+
 
 }
 
@@ -178,17 +228,23 @@ boolean badInputTest(const float64* pBadInput)
 
 int main(int argc, char *argv[])
 {
-	const float64 l_precisionTolerance = 0.001;
+	const float64 l_f64precisionTolerance = 0.001;
+	std::vector<float64> l_vBadInput (3);
 
 	boolean l_bValidationTestPassed = false;
 	boolean l_bBadInputTestPassed = false;
 
-	l_bValidationTestPassed = validationTest("sin50.mat","envelopeSin50.mat","phaseSin50.mat", "hilbertSin50.mat");
+	l_bValidationTestPassed = validationTest("sin50.mat","envelopeSin50.mat","phaseSin50.mat", "hilbertSin50.mat",l_f64precisionTolerance);
 
 	if(!l_bValidationTestPassed)
 	{
-		cout<<"Algorithm failed validation test"<<endl;
+		cout<<"Algorithm failed validation test \n"<<endl;
 	}
 
+	l_bBadInputTestPassed = badInputTest(l_vBadInput);
+	if(!l_bBadInputTestPassed)
+	{
+		cout<<"Algorithm failed bad input test for input = "<<l_vBadInput<<"\n"<<endl;
+	}
 
 }

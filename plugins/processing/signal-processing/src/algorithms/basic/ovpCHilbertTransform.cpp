@@ -56,6 +56,12 @@ boolean CAlgorithmHilbertTransform::process(void)
 			return false;
 		}
 
+		if( l_pInputMatrix->getDimensionSize(1) < 2)
+		{
+			this->getLogManager() << LogLevel_Error << "Can't compute Hilbert transform on data length "<<l_pInputMatrix->getDimensionSize(1)<<"\n";
+			return false;
+		}
+
 		//Setting size of outputs
 
 		l_pOutputHilbertMatrix->setDimensionCount(2);
