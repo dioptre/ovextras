@@ -24,7 +24,7 @@ void CBoxAlgorithmTCPWriter::startAccept()
 	// Since startAccept will only be called inside ioService.poll(), there is no need to access control m_vSockets
 	m_vSockets.push_back(l_pSocket);
 
-	this->getLogManager() << LogLevel_Debug << "We are now using " << m_vSockets.size() << " socket(s)\n";
+	this->getLogManager() << LogLevel_Debug << "We are now using " << (uint32)m_vSockets.size() << " socket(s)\n";
 
 	m_pAcceptor->async_accept(*l_pSocket, 
 		boost::bind(&CBoxAlgorithmTCPWriter::handleAccept, this, boost::asio::placeholders::error, l_pSocket));
@@ -37,13 +37,18 @@ void CBoxAlgorithmTCPWriter::handleAccept(const boost::system::error_code& ec, b
 		this->getLogManager() << LogLevel_Debug << "Handling a new incoming connection\n";
 
 		// Send the known configuration to the client
-		// @fixme handle errors
-		boost::system::error_code ec2;
 		if(m_pActiveDecoder != &m_StimulationDecoder) 
 		{
-			boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Frequency, sizeof(uint32)), ec2);
-			boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32NumberOfChannels, sizeof(uint32)), ec2);
-			boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32NumberOfSamplesPerChunk, sizeof(uint32)), ec2);
+			try 
+			{
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Frequency, sizeof(uint32)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32NumberOfChannels, sizeof(uint32)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32NumberOfSamplesPerChunk, sizeof(uint32)));
+			} 
+			catch (boost::system::system_error l_oError) 
+			{
+				this->getLogManager() << LogLevel_Warning << "Issue '" << l_oError.code().message().c_str() << "' with writing header to client\n";		
+			}
 		}
 	} 
 	else 
@@ -81,7 +86,18 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	m_ui32NumberOfSamplesPerChunk = 0;
 	m_ui32Frequency = 0;
 
-	m_pAcceptor = new tcp::acceptor(m_oIOService, tcp::endpoint(tcp::v4(), (uint32)l_ui64Port));
+	try 
+	{
+		m_pAcceptor = new tcp::acceptor(m_oIOService, tcp::endpoint(tcp::v4(), (uint32)l_ui64Port), false);
+	}
+	catch (boost::system::system_error l_oError) 
+	{
+		this->getLogManager() << LogLevel_Warning << "Got error '" << l_oError.code().message().c_str() << "' allocating acceptor to port " << (uint32)l_ui64Port << "\n";
+		m_pActiveDecoder->uninitialize();
+		m_pActiveDecoder=NULL;
+		m_pAcceptor=NULL; // if new throws, deleting the returned m_pAcceptor causes problems on Linux. So we NULL it.
+		return false;
+	}
 
 	startAccept();
 
@@ -93,7 +109,11 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 
 boolean CBoxAlgorithmTCPWriter::uninitialize(void)
 {
-	m_pActiveDecoder->uninitialize();
+	if(m_pActiveDecoder) 
+	{
+		m_pActiveDecoder->uninitialize();
+		m_pActiveDecoder=NULL;
+	}
 
 	for(uint32 i=0;i<m_vSockets.size();i++) 
 	{
@@ -138,22 +158,30 @@ boolean CBoxAlgorithmTCPWriter::sendToClients(void *pBuffer, uint32 ui32BufferLe
 		bool hadError = false;
 		if(tmpSock->is_open()) 
 		{
-			boost::system::error_code ec;
-
-			boost::asio::write(*tmpSock, boost::asio::buffer(pBuffer,ui32BufferLength), ec);
-
-			if(ec) 
+			try 
 			{
-				this->getLogManager() << LogLevel_Warning << "Got error '" << ec.message().c_str() << "' while trying to write to socket\n";
+				boost::asio::write(*tmpSock, boost::asio::buffer(pBuffer,ui32BufferLength));
+			} 
+			catch (boost::system::system_error l_oError) 
+			{
+				this->getLogManager() << LogLevel_Warning << "Got error '" << l_oError.code().message().c_str() << "' while trying to write to socket\n";
 				hadError = true;
-			}
+			};
 		}
 		if(hadError) 
 		{
 			// Close the socket
 			this->getLogManager() << LogLevel_Debug << "Closing the socket\n";
-			tmpSock->shutdown(boost::asio::socket_base::shutdown_both);
-			tmpSock->close();
+			try
+			{
+				tmpSock->shutdown(boost::asio::socket_base::shutdown_both);
+				tmpSock->close();
+			} 
+			catch (boost::system::system_error l_oError) 
+			{
+				// Just report...
+				this->getLogManager() << LogLevel_Warning << "Error while socket shutdown/close: '" << l_oError.code().message().c_str() << "'\n";
+			}
 			m_oIOService.poll();
 			delete tmpSock;
 			it = m_vSockets.erase(it);
@@ -166,8 +194,6 @@ boolean CBoxAlgorithmTCPWriter::sendToClients(void *pBuffer, uint32 ui32BufferLe
 
 boolean CBoxAlgorithmTCPWriter::process(void)
 {
-	// the static box context describes the box inputs, outputs, settings structures
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 

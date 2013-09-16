@@ -6,11 +6,13 @@ Detailed description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Description|
-This box sends its input stream out to a TCP socket as raw data. Multiple clients can connect to the socket of the box.
+This box works as a TCP server that writes its input stream out to a TCP socket as raw data. The main motivation for this box is to allow external applications to receive information from OpenViBE without requiring unusual dependencies such as VRPN.
 
-With StreamedMatrix and Signal inputs, the box first sends every connecting box three uint32 variables: sampling frequency, number of channels (matrix rows) and number of samples per chunk (matrix columns). However, with Streamed Matrix, the sampling frequency will always be 0. Next, the data itself is spooled as it arrives as a raw sequence of float64. 
+Output: With StreamedMatrix and Signal inputs, the box first sends every connecting box three uint32 variables: sampling frequency, the number of channels (matrix rows) and the number of samples per chunk (matrix columns). However, with Streamed Matrix input, the sampling frequency will always be 0. Next, the data itself is sent as a raw sequence of float64. 
 
 With Stimulations input, the box only sends the stimulation codes, formatted either as uint64, hex string, or a descriptive string.
+
+Multiple clients can connect to the socket of the box. The box keeps sending data it receives to each client until either the scenario is stopped or the client disconnects. If a client connects in the middle of a stream, it will receive data from the start of the next chunk the box receives.
 
  * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Description|
 __________________________________________________________________
@@ -46,7 +48,7 @@ Examples description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Examples|
- Easiest way to test the box is to connect to the socket of the box with 'telnet' and redirect the output to a file.
+ Easiest way to test the box is to connect to the socket of the box with 'telnet' and redirect the telnet output to a file.
  * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Examples|
 __________________________________________________________________
 
