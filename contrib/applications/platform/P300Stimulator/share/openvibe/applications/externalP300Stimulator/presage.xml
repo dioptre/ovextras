@@ -49,7 +49,7 @@
             <PREDICTOR>RecencyPredictor</PREDICTOR>
         </DefaultRecencyPredictor-->
         <DefaultSmoothedNgramPredictor>
-            <DBFILENAME>mydb.db</DBFILENAME>
+            <DBFILENAME>fr.db</DBFILENAME>
             <DELTAS>0.01 0.1 0.89</DELTAS>
             <DatabaseConnector>
                 <LOGGER>ERROR</LOGGER>

@@ -31,7 +31,7 @@ ELSE(PATH_FreeType)
 	SET(foundIncludeDir 0)
 ENDIF(PATH_FreeType)
 
-#needs to be installed on both platforms (headers not present on our Linux box), headers should be installed in $ENV{OV_DEP_ExternalStimulator}/FTGL/include
+#needs to be installed on both platforms (headers not present on our Linux box), headers should be installed in ${OV_CUSTOM_DEPENDENCIES_PATH}/FTGL/include
 FIND_PATH(PATH_FTGL include/FTGL/ftgl.h PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/FTGL ${OV_CUSTOM_DEPENDENCIES_PATH}/include/FTGL)
 IF(PATH_FTGL)
 	MESSAGE(STATUS "  Found FTGL in ${PATH_FTGL}" )
