@@ -5,6 +5,7 @@
 
 #include <plugins/ovpCHilbertTransform.h>
 #include <fstream>
+#include <iostream>
 
 
 using namespace OpenViBE;
@@ -34,7 +35,6 @@ std::vector fileToBuffer(const Cstring sFileName)
 /* Method to compare two files */
 boolean compareBuffers (const float* &rMatrixBuffer, const std::vector<float64>& rVector, const float64 f64precision)
 {
-	int cpt = 0;
 	float64 l_f64DiffValue;
 	// Compare size
 	if(rMatrixBuffer->getDimesionSize(0) != rVector.Size())
@@ -43,6 +43,7 @@ boolean compareBuffers (const float* &rMatrixBuffer, const std::vector<float64>&
 	}
 	else // If size are the same compare the data
 	{
+		int cpt = 0;
 		l_f64DiffValue = rMatrixBuffer[cpt]-rVector[cpt];
 		while(abs(l_f64DiffValue) <= f64precision && cpt < rVector.Size());
 		{
@@ -50,7 +51,7 @@ boolean compareBuffers (const float* &rMatrixBuffer, const std::vector<float64>&
 			l_f64DiffValue = rMatrixBuffer[cpt]-rVector[cpt];
 		}
 
-		if (cpt == rVector.Size()-1)
+		if (cpt == rVector.Size())
 		{
 			return true;
 		}
@@ -234,7 +235,7 @@ int main(int argc, char *argv[])
 	boolean l_bValidationTestPassed = false;
 	boolean l_bBadInputTestPassed = false;
 
-	l_bValidationTestPassed = validationTest("sin50.mat","envelopeSin50.mat","phaseSin50.mat", "hilbertSin50.mat",l_f64precisionTolerance);
+	l_bValidationTestPassed = validationTest("sin50.ref.csv","envelopeSin50.ref.csv","phaseSin50.ref.csv", "hilbertSin50.ref.csv",l_f64precisionTolerance);
 
 	if(!l_bValidationTestPassed)
 	{
@@ -245,6 +246,15 @@ int main(int argc, char *argv[])
 	if(!l_bBadInputTestPassed)
 	{
 		cout<<"Algorithm failed bad input test for input = "<<l_vBadInput<<"\n"<<endl;
+	}
+
+	if (l_bValidationTestPassed && l_bBadInputTestPassed)
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
 	}
 
 }
