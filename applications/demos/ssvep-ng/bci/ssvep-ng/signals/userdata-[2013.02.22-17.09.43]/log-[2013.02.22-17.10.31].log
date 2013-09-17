@@ -1,0 +1,25 @@
+[  INF  ] Target Size : (0.300000, 0.300000)
+[  INF  ] Target (0) : Position = (0.000000, 0.500000), Texture = default
+[  INF  ] Target (1) : Position = (-0.600000, 0.000000), Texture = checkers-red
+[  INF  ] Target (2) : Position = (0.000000, 0.000000), Texture = checkers-green
+[  INF  ] Target (3) : Position = (0.600000, 0.000000), Texture = checkers-blue
+[ DEBUG ] + addCommand(new CCommandStartStop(...)
+[ DEBUG ] VRPN SERVER PORT :53883
+[ DEBUG ] + addCommand(new CCommandStimulatorControl(...))
+[ DEBUG ] + m_poVRPNButton = new vrpn_Button_Remote(SSVEP_VRPN_StimulatorControl@localhost)
+[ DEBUG ] + addCommand(new CC(...))
+[ DEBUG ] + m_poVRPNButton = new vrpn_Button_Remote(SSVEP_VRPN_TargetControl@localhost)
+[ DEBUG ]   * CTrainerApplication::setup() completed successfully
+[ DEBUG ] Associating application as Ogre frame listener
+[ DEBUG ] Entering Ogre rendering loop
+[ DEBUG ] Ogre rendering loop finished ... exiting
+[ DEBUG ] - app
+[ DEBUG ] - m_poPainter
+[ DEBUG ] - ICommand
+[  INF  ] End message sent
+[ DEBUG ] - destroy m_poKeyboard
+[ DEBUG ] - ICommand
+[ DEBUG ] - delete m_poVRPNButton
+[ DEBUG ] - ICommand
+[ DEBUG ] - delete m_poVRPNButton
+[ DEBUG ] - m_poRoot
