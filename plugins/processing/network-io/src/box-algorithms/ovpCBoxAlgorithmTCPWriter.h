@@ -73,9 +73,16 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64OutputStyle;
 
 			OpenViBE::CIdentifier m_oInputType;
+
+			// Data written as global output header, 8*4 = 32 bytes. Padding allows dumb readers to step with float64 (==8 bytes).
+			OpenViBE::uint32 m_ui32RawVersion;					// in network byte order, version of the raw stream
+			OpenViBE::uint32 m_ui32Endianness;					// in network byte order, 0==unknown, 1==little, 2==big, 3==pdp
+			OpenViBE::uint32 m_ui32Frequency;					// this and the rest are in host byte order
 			OpenViBE::uint32 m_ui32NumberOfChannels;
 			OpenViBE::uint32 m_ui32NumberOfSamplesPerChunk;
-			OpenViBE::uint32 m_ui32Frequency;
+			OpenViBE::uint32 m_ui32Reserved0;
+			OpenViBE::uint32 m_ui32Reserved1;
+			OpenViBE::uint32 m_ui32Reserved2;
 
 			void startAccept();
 			void handleAccept(const boost::system::error_code& ec, boost::asio::ip::tcp::socket* pSocket);
@@ -95,6 +102,30 @@ namespace OpenViBEPlugins
 					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Only StreamedMatrix, Signal and Stimulation are supported\n";
 					rBox.setInputType(ui32Index, OV_TypeId_StreamedMatrix);
 					return false;
+				}
+				// Set output type to RAW if the new input is not stimulations
+				if(l_oNewInputType != OV_TypeId_Stimulations) 
+				{
+					rBox.setSettingValue(1, "Raw");
+				}
+				return true;
+			}
+
+			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) {
+				// Test that output type is RAW if the input are not stimulations
+				if(ui32Index == 1) 
+				{
+					OpenViBE::CIdentifier l_oCurrentInputType;
+					OpenViBE::CString l_sNewValue;
+
+					rBox.getInputType(0, l_oCurrentInputType);
+					rBox.getSettingValue(1, l_sNewValue);
+					if(l_oCurrentInputType != OV_TypeId_Stimulations && l_sNewValue != OpenViBE::CString("Raw"))
+					{
+						rBox.setSettingValue(1, "Raw");
+						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Only RAW output accepted for this input type\n";
+						return false;
+					}
 				}
 				return true;
 			}
@@ -137,7 +168,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput("Input 1",OV_TypeId_StreamedMatrix);
 				
 				rBoxAlgorithmPrototype.addSetting("Port",OV_TypeId_Integer,"5678");
-				rBoxAlgorithmPrototype.addSetting("Stimulus output", OVP_TypeID_TCPWriter_OutputStyle, "String");
+				rBoxAlgorithmPrototype.addSetting("Stimulus output", OVP_TypeID_TCPWriter_OutputStyle, "Raw");
 
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);

@@ -7,6 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
+#include <boost/detail/endian.hpp>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -37,13 +38,18 @@ void CBoxAlgorithmTCPWriter::handleAccept(const boost::system::error_code& ec, b
 		this->getLogManager() << LogLevel_Debug << "Handling a new incoming connection\n";
 
 		// Send the known configuration to the client
-		if(m_pActiveDecoder != &m_StimulationDecoder) 
+		if( m_pActiveDecoder != &m_StimulationDecoder || m_ui64OutputStyle==TCPWRITER_RAW ) 
 		{
 			try 
 			{
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32RawVersion, sizeof(uint32)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Endianness, sizeof(uint32)));
 				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Frequency, sizeof(uint32)));
 				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32NumberOfChannels, sizeof(uint32)));
 				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32NumberOfSamplesPerChunk, sizeof(uint32)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Reserved0, sizeof(uint32)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Reserved1, sizeof(uint32)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Reserved2, sizeof(uint32)));
 			} 
 			catch (boost::system::system_error l_oError) 
 			{
@@ -82,9 +88,24 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	uint64 l_ui64Port = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_ui64OutputStyle = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
+	m_ui32RawVersion = htonl(1);
+#if defined(BOOST_LITTLE_ENDIAN)
+	m_ui32Endianness = htonl(1);
+#elif defined(BOOST_BIG_ENDIAN)
+	m_ui32Endianness = htonl(2);
+#elif defined(BOOST_PDP_ENDIAN)
+	m_ui32Endianness = htonl(3);
+#else
+	m_ui32Endianness = htonl(0);
+	this->getLogManager() << LogLevel_Warning << "Platform endianness was not recognized\n");
+#endif
+
+	m_ui32Frequency = 0;
 	m_ui32NumberOfChannels	= 0;
 	m_ui32NumberOfSamplesPerChunk = 0;
-	m_ui32Frequency = 0;
+	m_ui32Reserved0 = 0;
+	m_ui32Reserved1 = 0;
+	m_ui32Reserved2 = 0;
 
 	try 
 	{
