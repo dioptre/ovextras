@@ -11,4 +11,8 @@ CMakeLists_full.txt
 CMakeLists_COADAPT.txt
 coadapt.patch
 coadapt.patch.fc19
+cmake-modules/FindThirdPartyBoost_Math.cmake
+cmake-modules/FindThirdPartyLibrariesForExternalStimulator.cmake
+cmake-modules/GNUInstallDirs.cmake
+coadapt.patch
 
