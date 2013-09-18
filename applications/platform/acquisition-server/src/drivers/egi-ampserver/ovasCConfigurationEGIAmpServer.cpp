@@ -94,6 +94,9 @@ boolean CConfigurationEGIAmpServer::postConfigure(void)
 {
 	if(m_bApplyConfiguration)
 	{
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pStreamPort));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pCommandPort));
+
 		m_ui32StreamPort=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pStreamPort));
 		m_ui32CommandPort=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pCommandPort));
 		m_sHostName=gtk_entry_get_text(GTK_ENTRY(m_pHostName));
