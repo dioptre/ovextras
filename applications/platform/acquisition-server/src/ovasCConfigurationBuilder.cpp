@@ -231,6 +231,10 @@ boolean CConfigurationBuilder::postConfigure(void)
 {
 	if(m_bApplyConfiguration)
 	{
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pIdentifier));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pAge));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pNumberOfChannels));
+
 		gchar* l_sSamplingFrequency=gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pSamplingFrequency));
 		string l_sGender=gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pGender));
 		m_pHeader->setExperimentIdentifier(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pIdentifier)));
