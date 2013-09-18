@@ -1,3 +1,19 @@
+/*
+ * The raw reader expects the data to be formatted as follows
+ *
+ * [START][BLOCK0][BLOCK1][BLOCK2]...
+ *  skip   parse   parse   parse  ...
+ *
+ * where each block is          [===========BLOCKX=================]
+ *                  is read as  [===========dataFrameSize==========]
+ *                  breaks to   [header====][sample====][footer====]
+ *                  equals      [headerSize][sampleSize][footerSize]
+ *                  means          skip        keep         skip
+ *
+ * For correct parsing, user must provide the exact sizes of the skipped parts "start", "header" and "footer" in bytes. 
+ *
+ */
+
 #include "ovasCDriverGenericRawReader.h"
 #include "../ovasCConfigurationBuilder.h"
 
@@ -12,6 +28,8 @@
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
+
+// #define OPENVIBE_DEBUG_RAW_READER
 
 namespace
 {
@@ -41,8 +59,9 @@ CDriverGenericRawReader::CDriverGenericRawReader(IDriverContext& rDriverContext)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_ui32SampleFormat(Format_SignedInteger32)
 	,m_ui32SampleEndian(Endian_Little)
+	,m_ui32StartSkip(0)
 	,m_ui32HeaderSkip(0)
-	,m_ui32FrameSkip(20)
+	,m_ui32FooterSkip(20)
 	,m_bLimitSpeed(false)
 	,m_pDataFrame(NULL)
 	,m_pSample(NULL)
@@ -89,8 +108,8 @@ boolean CDriverGenericRawReader::initialize(
 	}
 
 	m_ui32DataFrameSize=m_ui32SampleSize*m_oHeader.getChannelCount();
-	m_ui32DataFrameSize+=m_ui32FrameSkip;
 	m_ui32DataFrameSize+=m_ui32HeaderSkip;
+	m_ui32DataFrameSize+=m_ui32FooterSkip;
 
 	m_pSample=new float32[m_oHeader.getChannelCount()];
 	m_pDataFrame=new uint8[m_ui32DataFrameSize];
@@ -100,6 +119,7 @@ boolean CDriverGenericRawReader::initialize(
 		return false;
 	}
 
+	// open() should skip m_ui32StartSkip worth of bytes already
 	if(!this->open())
 	{
 		return false;
@@ -132,17 +152,20 @@ boolean CDriverGenericRawReader::loop(void)
 		return true;
 	}
 
-	uint32 i, j;
-	for(j=0; j<m_ui32SampleCountPerSentBlock; j++)
+#ifdef OPENVIBE_DEBUG_RAW_READER
+	m_rDriverContext.getLogManager() << LogLevel_Info << "Decoded : ";
+#endif
+
+	for(uint32 j=0; j<m_ui32SampleCountPerSentBlock; j++)
 	{
 		if(!this->read())
 		{
 			return false;
 		}
 
-		for(i=0; i<m_oHeader.getChannelCount(); i++)
+		for(uint32 i=0; i<m_oHeader.getChannelCount(); i++)
 		{
-			uint8* l_pDataFrame=m_pDataFrame+i*m_ui32SampleSize;
+			uint8* l_pDataFrame=m_pDataFrame+m_ui32HeaderSkip+i*m_ui32SampleSize;
 			switch(m_ui32SampleEndian)
 			{
 				case Endian_Little:
@@ -177,6 +200,9 @@ boolean CDriverGenericRawReader::loop(void)
 				default:
 					break;
 			}
+#ifdef OPENVIBE_DEBUG_RAW_READER
+			m_rDriverContext.getLogManager() << m_pSample[i] << " ";
+#endif
 		}
 
 		if(m_rDriverContext.isStarted())
@@ -184,6 +210,9 @@ boolean CDriverGenericRawReader::loop(void)
 			m_pCallback->setSamples(m_pSample, 1);
 		}
 	}
+#ifdef OPENVIBE_DEBUG_RAW_READER
+	m_rDriverContext.getLogManager() << "\n";
+#endif
 
 	if(m_rDriverContext.isStarted())
 	{

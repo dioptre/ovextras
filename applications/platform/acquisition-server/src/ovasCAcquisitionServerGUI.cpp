@@ -114,7 +114,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	,m_pImpedanceWindow(NULL)
 	,m_pThread(NULL)
 {
-	boolean l_bShowUnstable=m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_ShowUnstable}", false);
+	// boolean l_bShowUnstable=m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_ShowUnstable}", false);
 
 	m_pAcquisitionServer=new CAcquisitionServer(rKernelContext);
 

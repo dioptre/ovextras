@@ -149,6 +149,10 @@ boolean CConfigurationBrainProductsActiCHamp::postConfigure(void)
 
 	if(m_bApplyConfiguration)
 	{
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_rActiveShieldGain));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_rGoodImpedanceLimit));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_rBadImpedanceLimit));
+
 		m_rDeviceId=::gtk_combo_box_get_active(m_pComboBoxDeviceId);
 		m_rMode=::gtk_combo_box_get_active(m_pComboBoxMode);
 		m_rPhysicalSampleRate=::gtk_combo_box_get_active(m_pComboBoxPhysicalSampleRate);

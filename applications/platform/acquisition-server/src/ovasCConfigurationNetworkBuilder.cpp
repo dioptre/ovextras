@@ -76,6 +76,8 @@ boolean CConfigurationNetworkBuilder::postConfigure(void)
 {
 	if(m_bApplyConfiguration)
 	{
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pHostPort));
+
 		m_ui32HostPort=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pHostPort));
 		m_sHostName=gtk_entry_get_text(GTK_ENTRY(m_pHostName));
 	}

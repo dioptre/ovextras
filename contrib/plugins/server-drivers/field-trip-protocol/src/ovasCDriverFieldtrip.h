@@ -48,7 +48,7 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean configure(void);
 		virtual const OpenViBEAcquisitionServer::IHeader* getHeader(void) { return &m_oHeader; }
 		
-		void FreeResponse(message_t * response, char* message);
+		void FreeResponse(message_t * response, const char* message);
 
 	protected:
 
