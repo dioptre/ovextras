@@ -33,6 +33,12 @@ void CBoxAlgorithmTCPWriter::startAccept()
 
 void CBoxAlgorithmTCPWriter::handleAccept(const boost::system::error_code& ec, boost::asio::ip::tcp::socket* pSocket)
 { 
+	if(!m_pAcceptor->is_open())
+	{
+		this->getLogManager() << LogLevel_Debug << "handleAccept() was called with acceptor already closed\n";
+		return;
+	}
+
 	if(!ec) 
 	{
 		this->getLogManager() << LogLevel_Debug << "Handling a new incoming connection\n";
@@ -97,7 +103,7 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	m_ui32Endianness = htonl(3);
 #else
 	m_ui32Endianness = htonl(0);
-	this->getLogManager() << LogLevel_Warning << "Platform endianness was not recognized\n");
+	this->getLogManager() << LogLevel_Warning << "Platform endianness was not recognized\n";
 #endif
 
 	m_ui32Frequency = 0;
@@ -109,7 +115,13 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 
 	try 
 	{
+#ifdef TARGET_OS_Windows
+		// On Windows, unless we deny reuse_addr, it seems several different servers can bind to the same socket. This is not what we want.
 		m_pAcceptor = new tcp::acceptor(m_oIOService, tcp::endpoint(tcp::v4(), (uint32)l_ui64Port), false);
+#else
+		// On Linux, unless we allow reuse_addr, disconnection may set the socket to TIME_WAIT state and prevent opening it again until that state expires
+		m_pAcceptor = new tcp::acceptor(m_oIOService, tcp::endpoint(tcp::v4(), (uint32)l_ui64Port), true);
+#endif
 	}
 	catch (boost::system::system_error l_oError) 
 	{
@@ -119,6 +131,9 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 		m_pAcceptor=NULL; // if new throws, deleting the returned m_pAcceptor causes problems on Linux. So we NULL it.
 		return false;
 	}
+
+	boost::asio::socket_base::linger l_oOption(true, 0);
+	m_pAcceptor->set_option(l_oOption);
 
 	startAccept();
 
@@ -138,10 +153,19 @@ boolean CBoxAlgorithmTCPWriter::uninitialize(void)
 
 	for(uint32 i=0;i<m_vSockets.size();i++) 
 	{
-		if(m_vSockets[i]->is_open()) 
+		boost::asio::ip::tcp::socket* l_oTmpSock = m_vSockets[i];
+		if(l_oTmpSock->is_open()) 
 		{
-			m_vSockets[i]->shutdown(boost::asio::socket_base::shutdown_both);
-			m_vSockets[i]->close();
+			try
+			{
+				l_oTmpSock->shutdown(boost::asio::socket_base::shutdown_both);
+				l_oTmpSock->close();
+			}
+			catch (boost::system::system_error l_oError) 
+			{
+				// Just report...
+				this->getLogManager() << LogLevel_Warning << "Error in uninitialize() socket shutdown/close: '" << l_oError.code().message().c_str() << "'\n";
+			}
 		}
 	}
 	m_oIOService.poll();

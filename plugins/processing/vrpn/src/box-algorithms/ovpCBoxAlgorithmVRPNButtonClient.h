@@ -121,7 +121,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Connects to an external VRPN device and translate a button information into OpenViBE stimulations"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("-"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("VRPN"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Acquisition and network IO/VRPN"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-connect"); }
 
