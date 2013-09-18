@@ -144,7 +144,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	}
 	else
 	{
-		(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandTargetControl(...)\n";
+		(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandImpactCustomTargetControl(...)\n";
 		this->addCommand(new CCommandImpactCustomTargetControl( this ));
 
 		(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandFeedbackHandler(...)\n";
@@ -156,7 +156,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 		}
 		else
 		{
-			(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandShipControl(...))\n";
+			(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandImpactShipControl(...))\n";
 			this->addCommand(new CCommandImpactShipControl( this ));
 		}
 	}
