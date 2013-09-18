@@ -12,7 +12,7 @@ function process(box)
 
 	local finished = false
 
-	while not finished do
+	while box:keep_processing() and not finished do
 
 		time = box:get_current_time()
 

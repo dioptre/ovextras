@@ -16,7 +16,7 @@ function process(box)
 
 		time = box:get_current_time()
 
-		while box:get_stimulation_count(1) > 0 do
+		while box:keep_processing() and box:get_stimulation_count(1) > 0 do
 
 			local decision = 0
 			local decided = false
