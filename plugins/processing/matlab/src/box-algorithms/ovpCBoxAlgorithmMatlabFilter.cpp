@@ -161,7 +161,7 @@ boolean CBoxAlgorithmMatlabFilter::initialize(void)
 	
 	CString l_sSettingValue;
 	getStaticBoxContext().getSettingValue(1, l_sSettingValue); // working directory
-	l_sSettingValue=CString("cd ")+l_sSettingValue;
+	l_sSettingValue=CString("cd '")+l_sSettingValue+CString("'");
 	::engEvalString(m_pMatlabEngine, l_sSettingValue.toASCIIString());
 
 	getStaticBoxContext().getSettingValue(2,m_sInitializeFunction);
