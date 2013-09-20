@@ -21,8 +21,11 @@ FormatTo=( "csv" "edf" "gdf" "ov" )
 if [ $[$BASH_ARGC] != 2 ]; then
   echo Usage: openvibe-convert [sourceFile] [destinationFile] 
   echo
+  echo WARNING: This script is provided as an example only. There is no guarantee that the files
+  echo will be correctly converted or that they retain all information across the different formats. 
+  echo
   echo Converts stream files from source to dest.
-  echo File formats are discovered from the file extensions.
+  echo File formats are discovered from the filename extensions.
   echo
   echo Supported sources: ${FormatFrom[@]}
   echo Supported destinations: ${FormatTo[@]}
@@ -74,7 +77,7 @@ fi
 
 if [ $From ] && [ $To ]; then
 
-  ScenarioFolder="$LOCAL_DATA_PATH/applications/convert/"
+  ScenarioFolder="$LOCAL_DATA_PATH/scenarios/convert/"
   ScenarioToOpen=$Extension"2"$DestinationExtension".xml"
 
   #get the files path to the scenario

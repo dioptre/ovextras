@@ -20,8 +20,11 @@ for %%x in (%*) do Set /A argC+=1
 if not %argC% == 2 (
   echo Usage: openvibe-convert [sourceFile] [destinationFile]
   echo.
+  echo WARNING: This script is provided as an example only. There is no guarantee that the files 
+  echo will be correctly converted or that they retain all information across the different formats. 
+  echo  
   echo Converts stream files from source to dest.
-  echo Formats of the files are discovered from the file extensions.
+  echo File formats are discovered from the filename extensions.
   echo.
   echo Supported sources are "%FormatFrom%"
   echo Supported destinations are "%FormatTo%"
@@ -69,7 +72,7 @@ if %To%==false (
   goto:EOF
 )
 
-set "ScenarioFolder=%OV_PATH_DATA%\applications\convert\"
+set "ScenarioFolder=%OV_PATH_DATA%\scenarios\convert\"
 
 set "ScenarioToOpen=%Extension%2%DestinationExtension%.xml"
 
