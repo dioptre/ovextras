@@ -102,6 +102,7 @@ int main(int argc, char** argv)
 				(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Info << l_poConfigurationManager->expand("${UserHome}") << "\n";
 				l_poConfigurationManager->addConfigurationFromFile(l_sScenarioFolder + "/appconf/application-configuration.conf");
 
+				l_poConfigurationManager->createConfigurationToken("SSVEP_MindShooterFolderName", "ssvep-mind-shooter");
 			}
 		}
 	}

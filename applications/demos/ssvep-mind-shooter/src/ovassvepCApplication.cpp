@@ -322,7 +322,6 @@ void CApplication::setupResources()
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/gui").toASCIIString(), "FileSystem", "CEGUI");
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(m_sScenarioDir+"/appconf/materials").toASCIIString(), "FileSystem", "CEGUI");
 
-	std::cout << CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/${SSVEP_MindShooterFolderName}/resources/gui") << std::endl;
 	Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("SSVEP");
 	Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("SSVEPTrainer");
 	Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("SSVEPGeneric");
