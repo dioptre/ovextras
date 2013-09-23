@@ -1,4 +1,4 @@
-PROJECT(openvibe-ssvep-ng)
+PROJECT(openvibe-ssvep-mind-shooter)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})
 SET(PROJECT_VERSION_MINOR ${OV_GLOBAL_VERSION_MINOR})
@@ -65,9 +65,9 @@ ENDIF(UNIX)
 # ----------------------
 # Generate launch script
 # ----------------------
-OV_INSTALL_LAUNCH_SCRIPT("ov-ssvep-demo-impact-trainer" "impact-trainer")
-OV_INSTALL_LAUNCH_SCRIPT("ov-ssvep-demo-impact-shooter" "impact-shooter")
-OV_INSTALL_LAUNCH_SCRIPT("ov-ssvep-demo-generic" "generic")
+OV_INSTALL_LAUNCH_SCRIPT("ov-ssvep-mind-shooter-trainer" "impact-trainer")
+OV_INSTALL_LAUNCH_SCRIPT("ov-ssvep-mind-shooter-shooter" "impact-shooter")
+OV_INSTALL_LAUNCH_SCRIPT("ov-ssvep-stimulator-generic" "generic")
 
 
 # -----------------------------
@@ -78,7 +78,7 @@ INSTALL(TARGETS ${PROJECT_NAME}
 	LIBRARY DESTINATION  DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 	ARCHIVE DESTINATION  DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 
-INSTALL(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/applications/ssvep-ng  PATTERN ".svn" EXCLUDE)
+INSTALL(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/applications/ssvep-mind-shooter  PATTERN ".svn" EXCLUDE)
 
 INSTALL(DIRECTORY bci-examples DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/   PATTERN ".svn" EXCLUDE)
 

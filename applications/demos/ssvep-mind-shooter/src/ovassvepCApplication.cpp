@@ -8,11 +8,11 @@ using namespace OpenViBE::Kernel;
 #define MIN(a,b) ( a < b ? a : b )
 
 CApplication::CApplication(CString scenarioDir)
-	: m_bContinueRendering( true ),
+	: m_sScenarioDir(scenarioDir),
+	  m_bContinueRendering( true ),
 	  m_ui32CurrentFrame( 0 ),
 	  m_ui64CurrentTime( 0 ),
-	  m_roGUIRenderer( NULL ),
-	  m_sScenarioDir(scenarioDir)
+	  m_roGUIRenderer( NULL )
 {
 }
 
@@ -59,13 +59,13 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	// Plugin config path setup
 	Ogre::String l_oPluginsPath;
 
-#if defined OVA_OS_Windows
-#if defined OVA_BUILDTYPE_Debug
+#if defined TARGET_OS_Windows
+#if defined TARGET_BUILDTYPE_Debug
 	l_oPluginsPath = std::string(getenv("OGRE_HOME")) + std::string("/bin/debug/plugins_d.cfg");
 #else
 	l_oPluginsPath = std::string(getenv("OGRE_HOME")) + std::string("/bin/release/plugins.cfg");
 #endif
-#elif defined OVA_OS_Linux
+#elif defined TARGET_OS_Linux
 	l_oPluginsPath = std::string(l_poConfigurationManager->expand("${Path_Data}/openvibe-ogre-plugins.cfg").toASCIIString());
 #else
 #error "No OS defined."
@@ -315,14 +315,14 @@ void CApplication::setupResources()
 {
 	IConfigurationManager* l_poConfigurationManager = &(m_poKernelContext->getConfigurationManager());
 
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources").toASCIIString(), "FileSystem", "SSVEP");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/generic").toASCIIString(), "FileSystem", "SSVEPGeneric");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/generic/textures").toASCIIString(), "FileSystem", "SSVEPGeneric");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/trainer").toASCIIString(), "FileSystem", "SSVEPTrainer");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/gui").toASCIIString(), "FileSystem", "CEGUI");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources").toASCIIString(), "FileSystem", "SSVEP");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/generic").toASCIIString(), "FileSystem", "SSVEPGeneric");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/generic/textures").toASCIIString(), "FileSystem", "SSVEPGeneric");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/trainer").toASCIIString(), "FileSystem", "SSVEPTrainer");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/gui").toASCIIString(), "FileSystem", "CEGUI");
 	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(m_sScenarioDir+"/appconf/materials").toASCIIString(), "FileSystem", "CEGUI");
 
-	std::cout << CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/gui") << std::endl;
+	std::cout << CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/${SSVEP_MindShooterFolderName}/resources/gui") << std::endl;
 	Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("SSVEP");
 	Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("SSVEPTrainer");
 	Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("SSVEPGeneric");

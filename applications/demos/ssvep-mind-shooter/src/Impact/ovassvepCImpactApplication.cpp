@@ -78,14 +78,14 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	(*m_poLogManager) << LogLevel_Debug << "Adding Impact game resources\n";
 
 
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/impact").toASCIIString(), "FileSystem", "SSVEPImpact", true);
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/impact/battleship").toASCIIString(), "FileSystem", "SSVEPImpact");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/impact/battleship-destroyed").toASCIIString(), "FileSystem", "SSVEPImpact");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/impact/enemy1").toASCIIString(), "FileSystem", "SSVEPImpact");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/impact/enemy2").toASCIIString(), "FileSystem", "SSVEPImpact");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/impact/enemy3").toASCIIString(), "FileSystem", "SSVEPImpact");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/impact/ships").toASCIIString(), "FileSystem", "SSVEPImpact");
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}")+"/applications/ssvep-ng/resources/impact/starsky").toASCIIString(), "FileSystem", "SSVEPImpact");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/impact")).toASCIIString(), "FileSystem", "SSVEPImpact", true);
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/impact/battleship")).toASCIIString(), "FileSystem", "SSVEPImpact");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/impact/battleship-destroyed")).toASCIIString(), "FileSystem", "SSVEPImpact");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/impact/enemy1")).toASCIIString(), "FileSystem", "SSVEPImpact");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/impact/enemy2")).toASCIIString(), "FileSystem", "SSVEPImpact");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/impact/enemy3")).toASCIIString(), "FileSystem", "SSVEPImpact");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/impact/ships")).toASCIIString(), "FileSystem", "SSVEPImpact");
+	Ogre::ResourceGroupManager::getSingleton().addResourceLocation(CString(l_poConfigurationManager->expand("${Path_Data}/applications/${SSVEP_MindShooterFolderName}/resources/impact/starsky")).toASCIIString(), "FileSystem", "SSVEPImpact");
 	Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("SSVEPImpact");
 
 	setupScene();
