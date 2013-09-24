@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 		l_sApplicationSubtype = "shooter";
 	}
 
-#ifdef OVA_OS_Windows
+#ifdef TARGET_OS_Windows
 	std::cout << "[  INF  ] Loading Windows kernel\n";
 	if(!l_oKernelLoader.load(OpenViBE::Directories::getBinDir() + "/openvibe-kernel.dll", &l_sError))
 #else
