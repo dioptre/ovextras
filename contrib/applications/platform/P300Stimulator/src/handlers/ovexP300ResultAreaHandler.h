@@ -40,6 +40,7 @@ namespace OpenViBEApplications
 		void moveSymbolsLeft(OpenViBE::uint32 nshift);
 		void trimPrefix(std::string& textLabel);
 		void updateResultBuffer();
+		std::string eraseLastCharacter();
 		
 	protected:
 		GTable* m_pSymbolContainer;
@@ -53,6 +54,8 @@ namespace OpenViBEApplications
 		FILE * timingFile;
 		#endif
 		//std::vector<GLabel*> m_vBlankLabel;
+		GLabel* m_oLastAddedLabel;
+		OpenViBE::float64 m_f32LastFontSize;
 	};
 };
 #endif

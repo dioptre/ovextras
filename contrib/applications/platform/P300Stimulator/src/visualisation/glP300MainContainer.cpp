@@ -42,6 +42,7 @@ P300MainContainer::P300MainContainer(const P300MainContainer& gcontainer) : GCon
 	this->m_pP300PredictionHandler = gcontainer.m_pP300PredictionHandler;
 	#endif
 	this->m_pP300UndoHandler = gcontainer.m_pP300UndoHandler;
+	this->m_pP300BackspaceHandler = gcontainer.m_pP300BackspaceHandler;
 	this->m_pP300ResultAreaHandler = gcontainer.m_pP300ResultAreaHandler;
 	this->m_pP300TargetAreaHandler = gcontainer.m_pP300TargetAreaHandler;
 }
@@ -54,6 +55,7 @@ P300MainContainer::~P300MainContainer()
 	delete m_pP300PredictionHandler;
 	#endif
 	delete m_pP300UndoHandler;
+	delete m_pP300BackspaceHandler;
 	delete m_pP300ResultAreaHandler;
 	delete m_pP300TargetAreaHandler;
 	delete m_pP300KeyboardHandler;
@@ -81,17 +83,24 @@ void P300MainContainer::initialize(uint32 nGridCells)
 	m_pP300KeyboardHandler->addActionObserver(CString("write"), m_pP300ResultAreaHandler);
 	m_pP300KeyboardHandler->addActionObserver(CString("wordprediction"), m_pP300ResultAreaHandler);
 	m_pP300TargetAreaHandler->addObserver(m_pP300ResultAreaHandler);
-	
+
 	m_pP300UndoHandler = new P300UndoHandler();
 	m_pP300KeyboardHandler->addActionObserver(CString("undo"), m_pP300UndoHandler);
+	m_pP300KeyboardHandler->addActionObserver(CString("redo"), m_pP300UndoHandler);
 	m_pP300ResultAreaHandler->addObserver(m_pP300UndoHandler);
 	m_pP300UndoHandler->addObserver(m_pP300ResultAreaHandler);
+
+	m_pP300BackspaceHandler = new P300BackspaceHandler();
+	m_pP300KeyboardHandler->addActionObserver(CString("backspace"), m_pP300BackspaceHandler);
+	m_pP300ResultAreaHandler->addObserver(m_pP300BackspaceHandler);
+	m_pP300BackspaceHandler->addObserver(m_pP300ResultAreaHandler);
 	
 	//ENABLE WORD PREDICTION HERE
 	#ifdef WORDPREDICTION
 	m_pP300PredictionHandler = new P300PredictionboardHandler(m_gPredictionArea, m_pP300ResultAreaHandler->getResultBuffer(), m_pInterfacePropertyObject->getNGramDatabaseName());
 	m_pP300ResultAreaHandler->addObserver(m_pP300PredictionHandler);
 	m_pP300UndoHandler->addObserver(m_pP300PredictionHandler);
+	m_pP300BackspaceHandler->addObserver(m_pP300PredictionHandler);
 	m_pP300PredictionHandler->addObserver(m_pP300KeyboardHandler);
 	#endif
 }

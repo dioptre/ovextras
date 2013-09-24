@@ -115,6 +115,10 @@ void GButton::setAction(OpenViBE::CString action)
 		m_iButtonAction = GButton_WordPrediction;
 	else if (action==CString("write"))
 		m_iButtonAction = GButton_Write;
+	else if (action==CString("undo"))
+		m_iButtonAction = GButton_Undo;
+	else if (action==CString("redo"))
+		m_iButtonAction = GButton_Redo;
 	else
 		m_iButtonAction = GButton_None;	
 }

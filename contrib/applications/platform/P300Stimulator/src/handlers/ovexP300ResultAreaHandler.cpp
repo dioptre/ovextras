@@ -1,6 +1,7 @@
 #include "ovexP300ResultAreaHandler.h"
 #include "ovexP300TargetAreaHandler.h"
 #include "ovexUndoHandler.h"
+#include "ovexBackspaceHandler.h"
 #include "../visualisation/glGButton.h"
 #include "../visualisation/glGSymbol.h"
 #include "../visualisation/glGPictureSymbol.h"
@@ -28,11 +29,14 @@ P300ResultAreaHandler::P300ResultAreaHandler(GTable* container, P300ScreenLayout
 		//m_vBlankLabel.push_back(l_pLabel);
 		m_pSymbolContainer->addChild(l_pLabel, 0.05f);
 	}*/
+	m_oLastAddedLabel = NULL;
+	m_f32LastFontSize = 0;
 }
 
 void P300ResultAreaHandler::update(GObservable* observable, const void * pUserData)
 {
 	P300UndoHandler* l_pUndoHandler = dynamic_cast<P300UndoHandler*>(observable);
+	P300BackspaceHandler* l_pBackspaceHandler = dynamic_cast<P300BackspaceHandler*>(observable);
 	P300TargetAreaHandler* l_pTargetHandler = dynamic_cast<P300TargetAreaHandler*>(observable);
 	GButton* l_pObservedButton = dynamic_cast<GButton*>(observable);
 	//if the notification comes from a key of the keyboard
@@ -110,42 +114,111 @@ void P300ResultAreaHandler::update(GObservable* observable, const void * pUserDa
 				m_pSymbolContainer->getChild(0, j) = l_pLabelVector->at(i);*/
 				m_pSymbolContainer->addChild(l_pLabelVector->at(i),l_pLabel->getDepth());
 			}
+			m_oLastAddedLabel = l_pLabelVector->at(0)->clone();
+			m_f32LastFontSize = m_oLastAddedLabel->getLabelScaleSize();
 			updateResultBuffer();
 			this->notifyObservers(l_sTextLabel.c_str());
 		}
 		delete l_pLabelVector;
 	}
-	//if the notification comes from the UNDO handler (to undo an action)
+	//if the notification comes from the UNDO handler (to undo or redo an action)
 	else if (l_pUndoHandler!=NULL)
 	{
-		uint32 l_ui32UndoSize = *static_cast< const uint32* >(pUserData);
-		//std::cout << "P300ResultAreaHandler:: undo notification: " << l_ui32UndoSize << "," << m_sSpelledLetters.length() << "," << m_ui32ResultCounter << "\n";
-		if (!m_sSpelledLetters.empty())
+		std::pair<int32,std::string> l_oUndoData = *static_cast< const std::pair<int32,std::string>* >(pUserData);
+		int32 l_i32UndoSize = l_oUndoData.first;
+
+		//if we redo something
+		if (l_i32UndoSize<0)
 		{
-			int32 l_i32Diff = m_sSpelledLetters.length()-l_ui32UndoSize;
-			if (l_i32Diff>=0)
-				m_sSpelledLetters.erase(l_i32Diff, l_ui32UndoSize);	
-			else
-				m_sSpelledLetters.clear();	
+			std::string l_sStringToRedo = l_oUndoData.second;
+
+			//if we redo a backspace
+			if (l_sStringToRedo.find("<")!=std::string::npos)
+			{
+				eraseLastCharacter();
+			}
+			else //
+			{
+				for (uint32 i=0; i<l_sStringToRedo.length(); i++)
+				{
+					GSymbol* l_oSymbol = dynamic_cast<GSymbol*>(m_oLastAddedLabel->clone());
+					l_oSymbol->setTextLabel(l_sStringToRedo.substr(i,1).c_str());
+					l_oSymbol->setChanged(true);
+					std::cout <<"adding symbol " << l_oSymbol->getTextLabel() << "\n\n";
+					m_pSymbolContainer->addChild(l_oSymbol, l_oSymbol->getDepth());
+				}
+			}
 		}
-				
-		l_ui32UndoSize = l_ui32UndoSize<=m_ui32ResultCounter?l_ui32UndoSize:m_ui32ResultCounter;
-		//float32 l_f32Depth =  m_pSymbolContainer->getChild(0, 0)->getDepth();
-		for (uint32 i=1; i<=l_ui32UndoSize; i++)
+		//if we undo a backspace
+		else if (l_i32UndoSize==0)
 		{
-			m_pSymbolContainer->removeChild(m_ui32ResultCounter-i);	
-			/*BoxDimensions l_Dim = m_pSymbolContainer->getChild(0, m_ui32ResultCounter-i)->getDimParameters();
-			GLabel* l_pLabel = new GLabel();
-			l_pLabel->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
-			l_pLabel->setDimParameters(l_Dim);
-			delete m_pSymbolContainer->getChild(0, m_ui32ResultCounter-i);
-			m_pSymbolContainer->getChild(0, m_ui32ResultCounter-i) = l_pLabel;*/			
+			std::string l_sCharToRestore = l_oUndoData.second;
+			std::cout <<"char to restore |" << l_sCharToRestore << "|\n";
+			m_sSpelledLetters+=l_sCharToRestore;
+			std::cout <<"creating symbol <\n";
+			//GSymbol* l_oSymbol = m_oLastAddedLabel->clone();
+			GSymbol* l_oSymbol = dynamic_cast<GSymbol*>(m_oLastAddedLabel);
+			l_oSymbol->setTextLabel(l_sCharToRestore.c_str());
+			l_oSymbol->setChanged(true);
+			//l_oSymbol->setTextLabel(l_sCharToRestore.c_str());
+			std::cout <<"adding symbol " << l_oSymbol->getTextLabel() << "\n\n";
+			m_pSymbolContainer->addChild(l_oSymbol, l_oSymbol->getDepth());
+			std::cout <<"done ... <\n";
+
+		}
+		else //we undo something that is not a backspace
+		{
+			//std::cout << "P300ResultAreaHandler:: undo notification: " << l_ui32UndoSize << "," << m_sSpelledLetters.length() << "," << m_ui32ResultCounter << "\n";
+			if (!m_sSpelledLetters.empty())
+			{
+				int32 l_i32Diff = m_sSpelledLetters.length()-l_i32UndoSize;
+				if (l_i32Diff>=0)
+					m_sSpelledLetters.erase(l_i32Diff, l_i32UndoSize);
+				else
+					m_sSpelledLetters.clear();
+			}
+
+			l_i32UndoSize = l_i32UndoSize<=m_ui32ResultCounter?l_i32UndoSize:m_ui32ResultCounter;
+			//float32 l_f32Depth =  m_pSymbolContainer->getChild(0, 0)->getDepth();
+			for (uint32 i=1; i<=l_i32UndoSize; i++)
+			{
+				m_pSymbolContainer->removeChild(m_ui32ResultCounter-i);
+				/*BoxDimensions l_Dim = m_pSymbolContainer->getChild(0, m_ui32ResultCounter-i)->getDimParameters();
+				GLabel* l_pLabel = new GLabel();
+				l_pLabel->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
+				l_pLabel->setDimParameters(l_Dim);
+				delete m_pSymbolContainer->getChild(0, m_ui32ResultCounter-i);
+				m_pSymbolContainer->getChild(0, m_ui32ResultCounter-i) = l_pLabel;*/
+			}
 		}
 		/*for (uint32 i=1; i<=l_ui32UndoSize; i++)
 			m_pSymbolContainer->addChild(m_vBlankLabel[i-1],l_f32Depth);*/
 		std::cout << "P300ResultAreaHandler:: undo notification: number of children" << m_pSymbolContainer->getNumberOfChildren() << "\n";
 			
 		updateResultBuffer();
+	}
+
+	//if the notification comes from the BACKSPACE handler (to erase a letter)
+	else if (l_pBackspaceHandler!=NULL)
+	{
+		/*// moved to eraseLastLetter()
+		std::string l_sCharacterRemoved;
+		if (!m_sSpelledLetters.empty())
+		{
+			//erase last character
+			l_sCharacterRemoved = m_sSpelledLetters.substr(m_sSpelledLetters.length()-1,1);
+			std::cout <<"removing " << l_sCharacterRemoved << "\n";
+			m_sSpelledLetters.erase(m_sSpelledLetters.length()-1);
+		}
+		m_pSymbolContainer->removeChild(m_ui32ResultCounter-1);
+		//*/
+		std::string l_sCharacterRemoved = eraseLastCharacter();
+		updateResultBuffer();
+		//notify the undo handler
+		std::string l_sNotification = std::string("<") + l_sCharacterRemoved;
+		std::cout << "resultarea handler notification " << l_sNotification << "\n";
+		this->notifyObservers(l_sNotification.c_str());
+
 	}
 	//in this case the result area for the targets notifies the result area of the predictions that it has to move left
 	else if (l_pTargetHandler!=NULL)
@@ -237,4 +310,18 @@ void P300ResultAreaHandler::updateResultBuffer()
 		}
 	}
 	std::cout << "P300ResultAreaHandler:: Spelled letters #" << m_sSpelledLetters << "#" << m_ui32ResultCounter << "\n";
+}
+
+std::string P300ResultAreaHandler::eraseLastCharacter()
+{
+	std::string l_sCharacterRemoved = "";
+	if (!m_sSpelledLetters.empty())
+	{
+		//erase last character
+		l_sCharacterRemoved = m_sSpelledLetters.substr(m_sSpelledLetters.length()-1,1);
+		std::cout <<"removing " << l_sCharacterRemoved << "\n";
+		m_sSpelledLetters.erase(m_sSpelledLetters.length()-1);
+	}
+	m_pSymbolContainer->removeChild(m_ui32ResultCounter-1);
+	return l_sCharacterRemoved;
 }

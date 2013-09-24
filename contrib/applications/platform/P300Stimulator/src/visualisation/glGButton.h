@@ -22,6 +22,7 @@ namespace OpenViBEApplications
 		GButton_Write = 2,
 		GButton_WordPrediction = 8,
 		GButton_Undo = 16,
+		GButton_Redo = 32,
 	};	
 	
 	/**

@@ -11,6 +11,7 @@
 #include "../handlers/ovexP300KeyboardHandler.h"
 #include "../handlers/ovexP300ResultAreaHandler.h"
 #include "../handlers/ovexUndoHandler.h"
+#include "../handlers/ovexBackspaceHandler.h"
 #include "../handlers/ovexP300PredictionboardHandler.h"
 #include "../handlers/ovexP300TargetAreaHandler.h"
 
@@ -93,6 +94,7 @@ namespace OpenViBEApplications
 		P300ResultAreaHandler* m_pP300ResultAreaHandler;
 		P300TargetAreaHandler* m_pP300TargetAreaHandler;
 		P300KeyboardHandler* m_pP300KeyboardHandler;
+		P300BackspaceHandler* m_pP300BackspaceHandler;
 		
 		//WordPredictionInterface* m_pWordPredictionEngine;
 		

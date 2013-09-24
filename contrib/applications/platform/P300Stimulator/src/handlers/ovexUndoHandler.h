@@ -18,6 +18,7 @@ namespace OpenViBEApplications
 		P300UndoHandler()//(GTable* container) : m_pSymbolContainer(container)
 		{
 			m_sUndoStack = new std::list< std::string >();
+			m_sRedoStack = new std::list< std::string >();
 		}
 		
 		~P300UndoHandler()
@@ -33,6 +34,7 @@ namespace OpenViBEApplications
 				m_sUndoStack->pop();
 			}*/
 			delete m_sUndoStack;
+			delete m_sRedoStack;
 		}
 		
 		//inherited from GObserver
@@ -42,6 +44,7 @@ namespace OpenViBEApplications
 		//GTable* m_pSymbolContainer;
 		//std::stack< std::stack<GLabel*>* >* m_sUndoStack;
 		std::list< std::string >* m_sUndoStack;
+		std::list< std::string >* m_sRedoStack;
 	};
 };
 #endif
