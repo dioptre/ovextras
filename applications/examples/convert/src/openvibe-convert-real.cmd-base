@@ -22,7 +22,7 @@ if not %argC% == 2 (
   echo.
   echo WARNING: This script is provided as an example only. There is no guarantee that the files 
   echo will be correctly converted or that they retain all information across the different formats. 
-  echo  
+  echo.
   echo Converts stream files from source to dest.
   echo File formats are discovered from the filename extensions.
   echo.
