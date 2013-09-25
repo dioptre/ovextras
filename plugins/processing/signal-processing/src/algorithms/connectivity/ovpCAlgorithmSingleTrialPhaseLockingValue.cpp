@@ -69,7 +69,6 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 		uint32 l_ui32ChannelCount1 = l_pInputMatrix1->getDimensionSize(0);
 		uint32 l_ui32SamplesPerChannel1 = l_pInputMatrix1->getDimensionSize(1);
 
-		uint32 l_ui32ChannelCount2 = l_pInputMatrix2->getDimensionSize(0);
 		uint32 l_ui32SamplesPerChannel2 = l_pInputMatrix2->getDimensionSize(1);
 
 		uint32 l_ui32PairsCount = ip_pChannelPairs->getDimensionSize(0)/2;
@@ -81,7 +80,6 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 		float64* l_opMatrixBuffer = l_pOutputMatrix->getBuffer();
 
 		float64* l_pHilberInputBuffer = ip_pHilbertInput->getBuffer();
-		float64* l_pInstPhaseBuffer = op_pInstantaneousPhase->getBuffer();
 
 
 		if(this->isInputTriggerActive(OVP_Algorithm_Connectivity_InputTriggerId_Initialize))
@@ -94,9 +92,10 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 				return false;
 			}
 
-			if(l_ui32SamplesPerChannel1==0||l_ui32SamplesPerChannel2==0)
+			if(l_ui32SamplesPerChannel1<2||l_ui32SamplesPerChannel2<2)
 			{
-				this->getLogManager() << LogLevel_Error << "Can't compute S-PLV, input signal size = 0";
+				uint32 l_size = l_ui32SamplesPerChannel1<=l_ui32SamplesPerChannel2?l_ui32SamplesPerChannel1:l_ui32SamplesPerChannel2;
+				this->getLogManager() << LogLevel_Error << "Can't compute S-PLV, input signal size = "<<l_size<<"\n";
 				return false;
 			}
 
@@ -126,6 +125,7 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 
 		if(this->isInputTriggerActive(OVP_Algorithm_Connectivity_InputTriggerId_Process))
 		{
+
 			VectorXd l_vecXdChannelToCompare1;
 			VectorXd l_vecXdChannelToCompare2;
 			VectorXd l_vecXdPhase1;
@@ -173,32 +173,43 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 					// Channel 1
 				for(uint32 sample = 0; sample<l_ui32SamplesPerChannel1; sample++)
 				{
-					l_pHilberInputBuffer[sample] = l_vecXdChannelToCompare1(sample);
+					l_pHilberInputBuffer[sample] = l_vecXdChannelToCompare1(sample); // Pass channel 1 as input for the Hilbert transform algorithm
 				}
 
-				m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Initialize);
-				m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Process);
+
+				if(m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Initialize)) // Check initialization before doing the process on channel 1
+				{
+					m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Process);
 
 					// Channel 2
-				for(uint32 i=0; i<l_ui32SamplesPerChannel1; i++)
-				{
-					l_vecXdPhase1(i) = op_pInstantaneousPhase->getBuffer()[i];
-					l_pHilberInputBuffer[i] = l_vecXdChannelToCompare2(i);
+					for(uint32 i=0; i<l_ui32SamplesPerChannel1; i++)
+					{
+						l_vecXdPhase1(i) = op_pInstantaneousPhase->getBuffer()[i]; // Store instantaneous phase given by Hilbert algorithm
+						l_pHilberInputBuffer[i] = l_vecXdChannelToCompare2(i); // Pass channel 2 as input for the Hilbert transform algorithm
+					}
+
+					if(m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Initialize)) // Check initialization before doing the process on channel 2
+					{
+						m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Process);
+
+						// Compute S-PLV and store it in l_opMatrixBuffer for each pair
+
+						for(uint32 i=0; i<l_ui32SamplesPerChannel1; i++)
+						{
+							l_vecXdPhase2(i) = op_pInstantaneousPhase->getBuffer()[i]; // Store instantaneous phase given by Hilbert algorithm
+
+							l_sum += exp(iComplex*(l_vecXdPhase1(i)-l_vecXdPhase2(i)));
+						}
+
+						l_opMatrixBuffer[channel] = abs(l_sum)/l_ui32SamplesPerChannel1;
+					}
+
 				}
 
-				m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Initialize);
-				m_pHilbertTransform->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Process);
-
-				// Compute S-PLV and store it in l_opMatrixBuffer for each pair
-
-				for(uint32 i=0; i<l_ui32SamplesPerChannel1; i++)
+				else // Display error if initialization of Hilbert transform was unsuccessful
 				{
-					l_vecXdPhase2(i) = op_pInstantaneousPhase->getBuffer()[i];
-
-					l_sum += exp(iComplex*(l_vecXdPhase1(i)-l_vecXdPhase2(i)));
+					this->getLogManager() << LogLevel_Error << "Hilbert transform initialization returned bad status\n";
 				}
-
-				l_opMatrixBuffer[channel] = abs(l_sum)/l_ui32SamplesPerChannel1;
 
 			}
 
