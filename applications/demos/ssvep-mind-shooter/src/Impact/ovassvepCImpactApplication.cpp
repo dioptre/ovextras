@@ -1,6 +1,6 @@
 #include "ovassvepCImpactApplication.h"
 
-//#include "../log/ovkCLogListenerFileBuffered.h"
+#include "openvibe/ov_all.h"
 
 #include "../ovassvepCCommandStartStop.h"
 #include "../ovassvepCCommandStimulatorControl.h"
@@ -10,6 +10,8 @@
 #include "ovassvepCCommandImpactShipControl.h"
 #include "ovassvepCCommandImpactShipControlOIS.h"
 #include "ovassvepCCommandFeedbackHandler.h"
+
+#include "kernel/log/ovkCLogListenerFile.h"
 
 #include "ovassvepCAdvancedControl.h"
 
@@ -54,13 +56,13 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 
 	IConfigurationManager* l_poConfigurationManager = &(m_poKernelContext->getConfigurationManager());
 	l_poConfigurationManager->addConfigurationFromFile(m_sScenarioDir + "/appconf/impact-configuration.conf");
-	/*
+
 	poKernelContext->getLogManager().activate(LogLevel_First, LogLevel_Last, true);
 
-	ILogListener* l_poLogListenerFileBuffered = new CLogListenerFileBuffered(*poKernelContext, "ssvep-stimulator",
+	ILogListener* l_poLogListenerFileBuffered = new CLogListenerFile(*poKernelContext, "ssvep-stimulator",
 															 l_poConfigurationManager->expand("${SSVEP_UserDataFolder}/log-[$core{date}-$core{time}].log"));
 	poKernelContext->getLogManager().addListener(l_poLogListenerFileBuffered);
-*/
+
 
 	m_poSceneLoader = new DotSceneLoader();
 
@@ -144,8 +146,16 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	}
 	else
 	{
-		(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandImpactCustomTargetControl(...)\n";
-		this->addCommand(new CCommandImpactCustomTargetControl( this ));
+		if (l_poConfigurationManager->expandAsBoolean("${SSVEP_OneByOne}"))
+		{
+			(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandTargetControl(...)\n";
+			this->addCommand(new CCommandImpactTargetControl( this ));
+		}
+		else
+		{
+			(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandImpactCustomTargetControl(...)\n";
+			this->addCommand(new CCommandImpactCustomTargetControl( this ));
+		}
 
 		(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandFeedbackHandler(...)\n";
 		this->addCommand(new CCommandFeedbackHandler( this ));

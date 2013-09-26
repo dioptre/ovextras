@@ -1,6 +1,8 @@
 #ifndef __OpenViBEApplication_CBasicPainter_H__
 #define __OpenViBEApplication_CBasicPainter_H__
 
+/// this class is a wrapper around some ogre methods to display basic shapes
+
 #include <Ogre.h>
 
 #define SSVEP_DEFAULT_COLOUR Ogre::ColourValue(1.0f, 1.0f, 1.0f)

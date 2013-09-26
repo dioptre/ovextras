@@ -60,7 +60,6 @@ namespace OpenViBESSVEP
 				return &(m_poKernelContext->getConfigurationManager());
 			}
 
-//SP			std::vector<std::pair<OpenViBE::uint32, OpenViBE::uint32> >* getFrequencies()
 			std::vector<OpenViBE::uint64>* getFrequencies()
 			{
 				return &m_oFrequencies;
@@ -99,7 +98,6 @@ namespace OpenViBESSVEP
 			CEGUI::WindowManager* m_poGUIWindowManager;
 			CEGUI::Window* m_poSheet;
 
-//SP			std::vector<std::pair<OpenViBE::uint32, OpenViBE::uint32> > m_oFrequencies;
 			std::vector<OpenViBE::uint64> m_oFrequencies;
 
 			std::vector<ICommand*> m_oCommands;

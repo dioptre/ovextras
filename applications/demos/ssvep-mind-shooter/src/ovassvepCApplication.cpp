@@ -1,11 +1,10 @@
 #include "ovassvepCApplication.h"
 #include <cmath>
+#include <algorithm>
 
 using namespace OpenViBE;
 using namespace OpenViBESSVEP;
 using namespace OpenViBE::Kernel;
-
-#define MIN(a,b) ( a < b ? a : b )
 
 CApplication::CApplication(CString scenarioDir)
 	: m_sScenarioDir(scenarioDir),
@@ -156,12 +155,13 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 
 	CIdentifier l_oFrequencyId = l_poConfigurationManager->createConfigurationToken("SSVEP_FrequencyId", CString(l_sFrequencyString));
 
-//SP	m_oFrequencies.push_back(std::pair<OpenViBE::uint32, OpenViBE::uint32>(30, 30));
 	m_oFrequencies.push_back(30);
 
 	OpenViBE::uint32 m_ui32PatternsLoaded = 0;
 
 	// TODO: Load patterns
+
+	// Load pre-defined stimulation patterns (binary encoded dark/light frames inside a 64bit integer)
 	while (l_poConfigurationManager->lookUpConfigurationTokenIdentifier(l_poConfigurationManager->expand("SSVEP_Pattern_${SSVEP_FrequencyId}")) != OV_UndefinedIdentifier)
 	{
 		OpenViBE::uint64 l_ui64StimulationPattern = (OpenViBE::uint64)(l_poConfigurationManager->expandAsInteger("${SSVEP_Pattern_${SSVEP_FrequencyId}}"));
@@ -178,12 +178,12 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	}
 
 
+	// Generate patterns from frequencies
 	if (m_ui32PatternsLoaded == 0)
 	{
 		// Load frequencies
 		while (l_poConfigurationManager->lookUpConfigurationTokenIdentifier(l_poConfigurationManager->expand("SSVEP_Frequency_${SSVEP_FrequencyId}")) != OV_UndefinedIdentifier)
 		{
-			//SP		std::pair<OpenViBE::uint32, OpenViBE::uint32> l_oFrequency;
 			OpenViBE::uint64 l_ui64StimulationPattern = 0;
 			OpenViBE::uint32 l_ui32FramesL;
 			OpenViBE::uint32 l_ui32FramesD;
@@ -196,14 +196,15 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 
 			l_f64ApproximatedFrameCount= m_f64ScreenRefreshRate / l_f64CurrentFrequency;
 
+			// test if the desired frequency can be reasonably created on the screen
 			if (fabs(l_f64ApproximatedFrameCount - floor(l_f64ApproximatedFrameCount + 0.5)) < 0.003)
 			{
 
-				//SP			l_oFrequency.first = int(floor(l_f64ApproximatedFrameCount + 0.5)) / 2 + int(floor(l_f64ApproximatedFrameCount + 0.5)) % 2;
-				//SP			l_oFrequency.second = int(floor(l_f64ApproximatedFrameCount + 0.5)) / 2;
 				l_ui32FramesL = int(floor(l_f64ApproximatedFrameCount + 0.5)) / 2 + int(floor(l_f64ApproximatedFrameCount + 0.5)) % 2;
 				l_ui32FramesD = int(floor(l_f64ApproximatedFrameCount + 0.5)) / 2;
 
+				// the pattern is procedurally generated and always starts by a 1, following by as many 0s as there are Light frames and finally as many 1s as
+				// there are Dark frames
 				l_ui64StimulationPattern = 1;
 				l_ui64StimulationPattern <<= 1;
 
@@ -221,11 +222,9 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 				}
 
 
-				//SP			(*m_poLogManager) << LogLevel_Info << "Frequency number " << i << ": " << l_f64CurrentFrequency << "Hz / " << floor(l_f64ApproximatedFrameCount + 0.5) << " ( " << l_oFrequency.first << ", " << l_oFrequency.second << ") frames @ " << m_f64ScreenRefreshRate << "fps\n";
 				(*m_poLogManager) << LogLevel_Info << "Frequency number " << i << ": " << l_f64CurrentFrequency << "Hz / " << floor(l_f64ApproximatedFrameCount + 0.5) << " ( " << l_ui32FramesL << ", " << l_ui32FramesD << ") frames @ " << m_f64ScreenRefreshRate << "fps\n";
 				(*m_poLogManager) << LogLevel_Info << "Frequency number " << i << " pattern : " << l_ui64StimulationPattern << "\n";
 
-				//SP			m_oFrequencies.push_back(l_oFrequency);
 				m_oFrequencies.push_back(l_ui64StimulationPattern);
 			}
 			else
@@ -257,8 +256,6 @@ bool CApplication::configure()
 
 	// Set hard-coded parameters, VSync in particular
 	m_poRoot->getRenderSystem()->setConfigOption("VSync", "True");
-//	m_poRoot->getRenderSystem()->setConfigOption("Full Screen","No");
-//	m_poRoot->getRenderSystem()->setConfigOption("Video Mode","640 x 480 @ 16-bit colour");
 
 
 	return true;
@@ -284,7 +281,7 @@ void CApplication::resizeViewport()
 {
 	(*m_poLogManager) << LogLevel_Trace << "Creating a new viewport\n";
 
-	Ogre::uint32 l_ui32ViewportSize = MIN(m_ui32WindowWidth, m_ui32WindowHeight);
+	Ogre::uint32 l_ui32ViewportSize = std::min(m_ui32WindowWidth, m_ui32WindowHeight);
 	(*m_poLogManager) << LogLevel_Info << "New viewport size : " << l_ui32ViewportSize << "\n";
 
 	m_poViewport->setDimensions(
@@ -298,16 +295,6 @@ void CApplication::resizeViewport()
 void CApplication::processFrame(OpenViBE::uint32 ui32CurrentFrame)
 {
 	m_ui64CurrentTime++;
-
-	/*
-	if (m_ui32WindowWidth != m_poWindow->getWidth() || m_ui32WindowHeight != m_poWindow->getHeight())
-	{
-		m_ui32WindowWidth = m_poWindow->getWidth();
-		m_ui32WindowHeight = m_poWindow->getHeight();
-		//this->resizeViewport();
-	}
-	*/
-
 }
 
 

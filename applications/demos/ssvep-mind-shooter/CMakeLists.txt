@@ -65,9 +65,9 @@ ENDIF(UNIX)
 # ----------------------
 # Generate launch script
 # ----------------------
-OV_INSTALL_LAUNCH_SCRIPT("ov-ssvep-mind-shooter-trainer" "impact-trainer")
-OV_INSTALL_LAUNCH_SCRIPT("ov-ssvep-mind-shooter-shooter" "impact-shooter")
-OV_INSTALL_LAUNCH_SCRIPT("ov-ssvep-stimulator-generic" "generic")
+OV_INSTALL_LAUNCH_SCRIPT("openvibe-ssvep-mind-shooter-trainer" "impact-trainer")
+OV_INSTALL_LAUNCH_SCRIPT("openvibe-ssvep-mind-shooter-shooter" "impact-shooter")
+OV_INSTALL_LAUNCH_SCRIPT("openvibe-ssvep-stimulator-generic" "generic")
 
 
 # -----------------------------

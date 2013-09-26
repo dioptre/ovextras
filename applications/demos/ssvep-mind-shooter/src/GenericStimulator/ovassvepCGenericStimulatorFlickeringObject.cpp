@@ -53,7 +53,7 @@ CGenericStimulatorFlickeringObject* CGenericStimulatorFlickeringObject::createGe
 	{
 		ColourValue l_oCurrentTargetColour = ( l_i32TargetId == 0) ? m_oDarkColour : m_oLightColour;
 
-		char l_sTargetIdString[255];
+		char l_sTargetIdString[255]; // this is an overkill
 		sprintf(l_sTargetIdString, "%d", l_i32TargetId);
 
 		OpenViBE::CIdentifier l_oTargetId = l_poConfigurationManager->createConfigurationToken("SSVEPTarget_Id", OpenViBE::CString(l_sTargetIdString));

@@ -8,6 +8,7 @@ function initialize(box)
 	s_target_lockdown = box:get_setting(4)
 	s_pilot_assist = box:get_setting(5)
 	s_feedback = box:get_setting(6)
+	s_onebyone = box:get_setting(7)
 
 	box:log("Info", string.format("Target Types Sequence : [%s]\n", s_sequence_types))
 
@@ -22,6 +23,7 @@ function initialize(box)
 	cfg_file:write("SSVEP_TargetLockdown = ", s_target_lockdown, "\n")
 	cfg_file:write("SSVEP_PilotAssist = ", s_pilot_assist, "\n")
 	cfg_file:write("SSVEP_Feedback = ", s_feedback, "\n")
+	cfg_file:write("SSVEP_OneByOne = ", s_onebyone, "\n")
 	cfg_file:close()
 end
 
