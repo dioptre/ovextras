@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <sstream>
+#include <iostream>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -13,11 +14,16 @@ CLogListenerFileBuffered::CLogListenerFileBuffered(const IKernelContext& rKernel
 	,m_sLogFilename(sLogFilename)
 {
 	m_f = fopen(m_sLogFilename.toASCIIString(), "wt");
+	if (m_f == NULL)
+	{
+		std::cout << "[  ERROR  ] This log listener can not be initialized, it will do nothing!" << std::endl;
+	}
 }
 
 CLogListenerFileBuffered::~CLogListenerFileBuffered()
 {
-	fclose(m_f);
+	if (m_f != NULL)
+		fclose(m_f);
 }
 
 boolean CLogListenerFileBuffered::isActive(ELogLevel eLogLevel)
@@ -52,82 +58,98 @@ boolean CLogListenerFileBuffered::activate(boolean bActive)
 
 void CLogListenerFileBuffered::log(const time64 time64Value)
 {
-	fprintf(m_f, "%llu", time64Value.m_ui64TimeValue);
+	if (m_f != NULL)
+		fprintf(m_f, "%llu", time64Value.m_ui64TimeValue);
 }
 
 void CLogListenerFileBuffered::log(const uint64 ui64Value)
 {
-	fprintf(m_f, "%llu", ui64Value);
+	if (m_f != NULL)
+		fprintf(m_f, "%llu", ui64Value);
 }
 
 void CLogListenerFileBuffered::log(const uint32 ui32Value)
 {
-	fprintf(m_f, "%u", ui32Value);
+	if (m_f != NULL)
+		fprintf(m_f, "%u", ui32Value);
 }
 
 void CLogListenerFileBuffered::log(const uint16 ui16Value)
 {
-	fprintf(m_f, "%u", ui16Value);
+	if (m_f != NULL)
+		fprintf(m_f, "%u", ui16Value);
 }
 
 void CLogListenerFileBuffered::log(const uint8 ui8Value)
 {
-	fprintf(m_f, "%u", ui8Value);
+	if (m_f != NULL)
+		fprintf(m_f, "%u", ui8Value);
 }
 
 void CLogListenerFileBuffered::log(const int64 i64Value)
 {
-	fprintf(m_f, "%lli", i64Value);
+	if (m_f != NULL)
+		fprintf(m_f, "%lli", i64Value);
 }
 
 void CLogListenerFileBuffered::log(const int32 i32Value)
 {
-	fprintf(m_f, "%i", i32Value);
+	if (m_f != NULL)
+		fprintf(m_f, "%i", i32Value);
 }
 
 void CLogListenerFileBuffered::log(const int16 i16Value)
 {
-	fprintf(m_f, "%i", i16Value);
+	if (m_f != NULL)
+		fprintf(m_f, "%i", i16Value);
 }
 
 void CLogListenerFileBuffered::log(const int8 i8Value)
 {
-	fprintf(m_f, "%i", i8Value);
+	if (m_f != NULL)
+		fprintf(m_f, "%i", i8Value);
 }
 
 void CLogListenerFileBuffered::log(const float32 f32Value)
 {
-	fprintf(m_f, "%f", f32Value);
+	if (m_f != NULL)
+		fprintf(m_f, "%f", f32Value);
 }
 
 void CLogListenerFileBuffered::log(const float64 f64Value)
 {
-	fprintf(m_f, "%lf", f64Value);
+	if (m_f != NULL)
+		fprintf(m_f, "%lf", f64Value);
 }
 
 void CLogListenerFileBuffered::log(const boolean bValue)
 {
-	fprintf(m_f, "%s", (bValue?"true":"false"));
+	if (m_f != NULL)
+		fprintf(m_f, "%s", (bValue?"true":"false"));
 }
 
 void CLogListenerFileBuffered::log(const CIdentifier& rValue)
 {
 	CString l_sValue=rValue.toString();
-	fprintf(m_f, "%s", (const char*)l_sValue);
+	if (m_f != NULL)
+		fprintf(m_f, "%s", (const char*)l_sValue);
 }
 
 void CLogListenerFileBuffered::log(const CString& rValue)
 {
-	fprintf(m_f, "%s", (const char*)rValue);
+	if (m_f != NULL)
+		fprintf(m_f, "%s", (const char*)rValue);
 }
 
 void CLogListenerFileBuffered::log(const char* pValue)
 {
-	fprintf(m_f, "%s", pValue);
+	if (m_f != NULL)
+		fprintf(m_f, "%s", pValue);
 }
 
 void CLogListenerFileBuffered::log(const ELogLevel eLogLevel)
 {
+	if (m_f != NULL)
 	switch(eLogLevel)
 	{
 	case LogLevel_Debug:

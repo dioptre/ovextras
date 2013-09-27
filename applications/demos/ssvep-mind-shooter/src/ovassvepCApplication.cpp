@@ -103,8 +103,8 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 
 	l_oOptionList["vsync"] = "1";
 
-	int l_iWidth = l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenWidth}");
-	int l_iHeight = l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenHeight}");
+	int l_iWidth = l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenWidth}", 800);
+	int l_iHeight = l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenHeight}", 600);
 	OpenViBE::boolean l_bFullScreen = l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_FullScreen}", false);
 
 	(*m_poLogManager) << LogLevel_Info << "Fullscreen : " << l_poConfigurationManager->expand("${SSVEP_Ogre_FullScreen}") << "\n";
@@ -145,7 +145,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 
 	// create the vector of stimulation frequencies
 
-	m_f64ScreenRefreshRate = (OpenViBE::uint32)(l_poConfigurationManager->expandAsUInteger("${SSVEP_ScreenRefreshRate}"));
+	m_f64ScreenRefreshRate = (OpenViBE::uint32)(l_poConfigurationManager->expandAsUInteger("${SSVEP_ScreenRefreshRate}", 60));
 
 	(*m_poLogManager) << LogLevel_Info << "Specified screen refresh rate :" << m_f64ScreenRefreshRate << "Hz\n";
 

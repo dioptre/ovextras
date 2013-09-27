@@ -61,6 +61,7 @@ int main(int argc, char** argv)
 #endif
 	{
 		std::cout << "[ FAILED ] Error loading kernel (" << l_sError << ")" << "\n";
+		exit(1);
 	}
 	else
 	{
@@ -128,7 +129,7 @@ int main(int argc, char** argv)
 	{
 		(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Error << "Wrong application identifier specified\n";
 
-		return 1;
+		exit(1);
 	}
 
 	app->setup(l_poKernelContext);
