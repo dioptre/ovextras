@@ -11,7 +11,7 @@
 #include "ovassvepCCommandImpactShipControlOIS.h"
 #include "ovassvepCCommandFeedbackHandler.h"
 
-#include "kernel/log/ovkCLogListenerFile.h"
+#include "../log/ovkCLogListenerFileBuffered.h"
 
 #include "ovassvepCAdvancedControl.h"
 
@@ -59,7 +59,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 
 	poKernelContext->getLogManager().activate(LogLevel_First, LogLevel_Last, true);
 
-	ILogListener* l_poLogListenerFileBuffered = new CLogListenerFile(*poKernelContext, "ssvep-stimulator",
+	ILogListener* l_poLogListenerFileBuffered = new CLogListenerFileBuffered(*poKernelContext, "ssvep-stimulator",
 															 l_poConfigurationManager->expand("${SSVEP_UserDataFolder}/log-[$core{date}-$core{time}].log"));
 	poKernelContext->getLogManager().addListener(l_poLogListenerFileBuffered);
 
