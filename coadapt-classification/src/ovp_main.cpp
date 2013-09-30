@@ -47,6 +47,12 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Mixture of Experts", OVP_ClassId_Algorithm_ClassifierMixtureOfExperts.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Probabilistic LDA", OVP_ClassId_Algorithm_ClassifierPLDA.toUInteger());
 	
+	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_ShrinkageType,"Shrinkage");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Full covariance",OpenViBEPlugins::Local::FULL);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Shrink to diagonal",OpenViBEPlugins::Local::SHRINK_TO_DIAG);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Diagonal",OpenViBEPlugins::Local::DIAG);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Shrink to unity",OpenViBEPlugins::Local::SHRINK_TO_UNITY);
+	
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorWithUpdateDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmSupErrPDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmDynamicVotingClassifierDesc);

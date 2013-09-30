@@ -109,8 +109,8 @@ boolean CBoxAlgorithmEvidenceAccumulator::process(void)
 				{
 					//gettimeofday(&currentLTime, NULL);	
 					//getLogManager() << LogLevel_Trace << "Encoding evidence and final stimulus  " << m_pStimulationBase+l_ui32MaximumIndex << " at time " << (uint32)currentLTime.tv_sec << "," << (uint32)currentLTime.tv_usec <<"\n";	
-					l_pStimulationSet->appendStimulation(m_pStimulationBase+m_ui32MaximumIndex, l_rDynamicBoxContext.getInputChunkStartTime(0, i), 0);					
-					l_pStimulationSet->appendStimulation(m_pResetTrigger, l_rDynamicBoxContext.getInputChunkStartTime(0, i), 0);					
+					l_pStimulationSet->appendStimulation(m_pResetTrigger, l_rDynamicBoxContext.getInputChunkStartTime(0, i), 0);
+					l_pStimulationSet->appendStimulation(m_pStimulationBase+m_ui32MaximumIndex, l_rDynamicBoxContext.getInputChunkStartTime(0, i), 0);										
 					
 					//OpenViBEToolkit::Tools::Matrix::copy(*m_oAlgo3_FeatureVectorEncoder.getInputMatrix(), *m_pAccumulatedEvidence);
 					m_oAlgo3_FeatureVectorEncoder.encodeBuffer(1);
@@ -119,15 +119,15 @@ boolean CBoxAlgorithmEvidenceAccumulator::process(void)
 					m_bReceivedSomeEvidence = false;
 				}
 				
-				std::cout << "Maximum " << l_f32Maximum << " at " << m_ui32MaximumIndex << "\n";					
+				getLogManager() << LogLevel_Info << "Maximum evidence " << l_f32Maximum << " at index " << m_ui32MaximumIndex << "\n";					
 				
 				for (uint32 j=0; j<m_pAccumulatedEvidence->getBufferElementCount(); j++)
 				{
-					std::cout << " " << *(m_pNormalizedAccumulatedEvidence->getBuffer()+j);
+					//std::cout << " " << *(m_pNormalizedAccumulatedEvidence->getBuffer()+j);
 					*(m_pAccumulatedEvidence->getBuffer()+j) = 0;	
 					*(m_pNormalizedAccumulatedEvidence->getBuffer()+j) = 0;
 				}
-				std::cout << "\n";
+				//std::cout << "\n";
 				m_bEarlyStoppingConditionMet = false;
 			}
 			else

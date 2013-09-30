@@ -7,6 +7,14 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
+//#include <map>
+#include <stack>
+//#include <set>
+
+#include <xml/IWriter.h>
+#include <xml/IReader.h>
+#include <itpp/itbase.h>
+
 // The unique identifiers for the box and its descriptor.
 // Identifier are randomly chosen by the skeleton-generator.
 
@@ -21,7 +29,7 @@ namespace OpenViBEPlugins
 		 * \brief The class CBoxAlgorithmAdaptiveP300Classifier describes the box AdaptiveP300Classifier.
 		 *
 		 */
-		class CBoxAlgorithmAdaptiveP300Classifier : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
+		class CBoxAlgorithmAdaptiveP300Classifier : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >//, public XML::IWriterCallback, public XML::IReaderCallback
 		{
 		public:
 			virtual void release(void) { delete this; }
@@ -47,14 +55,58 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_AdaptiveP300Classifier);
 
 		protected:
+			//virtual OpenViBE::boolean classify(const OpenViBE::IMatrix* rFeatureVector, OpenViBE::float64& rf64Class, OpenViBE::float64& rProbability);
+			
+			//virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer);
+			//virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer);			
+			
+			//virtual void write(const char* sString); // XML IWriterCallback
+
+			//virtual void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount); // XML IReaderCallback
+			//virtual void processChildData(const char* sData); // XML IReaderCallback
+			//virtual void closeChild(void); // XML ReaderCallback
+			
+			virtual void train();
+			
+		protected:
 			// Codec algorithms specified in the skeleton-generator:
 			// Feature vector stream decoder
 			OpenViBEToolkit::TFeatureVectorDecoder < CBoxAlgorithmAdaptiveP300Classifier > m_oAlgo0_FeatureVectorDecoder;
+			OpenViBEToolkit::TFeatureVectorDecoder < CBoxAlgorithmAdaptiveP300Classifier > m_oAlgo1_FeatureVectorDecoder;
 			// Stimulation stream decoder
 			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmAdaptiveP300Classifier > m_oAlgo1_StimulationDecoder;
 			// Streamed matrix stream encoder
 			OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmAdaptiveP300Classifier > m_oAlgo2_StreamedMatrixEncoder;
+			
+			OpenViBE::Kernel::IAlgorithmProxy* m_pClassifier;
+			
+			std::stack<OpenViBE::CString> m_vNode;
+			/*std::vector<itpp::vec> m_vCircularSampleBuffer;
+			std::vector<OpenViBE::uint64> m_vCircularLabelBuffer;
+			OpenViBE::uint32 m_ui32BufferPointer;*/
 
+			OpenViBE::float64 m_f64Class1;
+			OpenViBE::float64 m_f64Class2;
+
+			itpp::vec m_oCoefficientsClass1;
+			itpp::vec m_oCoefficientsClass2;	
+			
+			OpenViBE::CMemoryBuffer m_oConfiguration;
+			
+			std::vector < OpenViBE::IMatrix* > m_vSampleVector;
+			
+			//OpenViBE::uint64 m_ui64StimulationIdentifier;
+			//OpenViBE::boolean m_bPredictionReceived;
+			
+			std::vector < OpenViBE::IMatrix* > m_vFlashGroups;
+			OpenViBE::boolean m_bFlashGroupsReceived;
+			OpenViBE::boolean m_bTargetReceived;
+			OpenViBE::boolean m_bFeedbackReceived;
+			OpenViBE::boolean m_bFeedbackBasedLearning;
+			OpenViBE::uint64 m_ui64LetterIndex;
+			OpenViBE::uint64 m_ui64FeedbackOnsetIdentifier;
+			OpenViBE::uint64 m_ui64TargetOnsetIdentifier;
+			OpenViBE::uint64 m_ui64SaveConfigurationTriggerIdentifier;
 		};
 
 
@@ -145,8 +197,14 @@ namespace OpenViBEPlugins
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
 				
-				rBoxAlgorithmPrototype.addSetting("eta",OV_TypeId_Float,"0.03");
-				rBoxAlgorithmPrototype.addSetting("lambda",OV_TypeId_Float,"0.0001");
+				rBoxAlgorithmPrototype.addSetting("Filename to load configuration from", OV_TypeId_Filename,    "");
+				rBoxAlgorithmPrototype.addSetting("Feedback based learning", OV_TypeId_Boolean,    "");
+				rBoxAlgorithmPrototype.addSetting("Feedback onset stimulation", OV_TypeId_Stimulation,    "");
+				rBoxAlgorithmPrototype.addSetting("Target onset stimulation", OV_TypeId_Stimulation,    "");
+				rBoxAlgorithmPrototype.addSetting("Save file trigger", OV_TypeId_Stimulation,    "");
+				//rBoxAlgorithmPrototype.addSetting("eta",OV_TypeId_Float,"0.03");
+				//rBoxAlgorithmPrototype.addSetting("lambda",OV_TypeId_Float,"0.0001");
+				
 
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);

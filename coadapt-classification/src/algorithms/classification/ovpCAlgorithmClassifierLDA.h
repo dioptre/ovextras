@@ -12,20 +12,26 @@
 #include <xml/IReader.h>
 
 #include <stack>
+#include <vector>
 
 #if defined TARGET_HAS_ThirdPartyITPP
 
 #include <itpp/itbase.h>
 
-
-
 namespace OpenViBEPlugins
 {
 	namespace Local
 	{
+		
+		enum { FULL=0, DIAG=1, SHRINK_TO_DIAG=2, SHRINK_TO_UNITY=3 };
+		
 		class CAlgorithmClassifierPLDA : public OpenViBEToolkit::CAlgorithmClassifier, public XML::IWriterCallback, public XML::IReaderCallback
 		{
 		public:
+			
+			CAlgorithmClassifierPLDA() : m_ui32BufferPointer(0), m_bBufferFilled(false)
+			{	
+			}
 
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
 			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
@@ -47,10 +53,16 @@ namespace OpenViBEPlugins
 
 			OpenViBE::float64 m_f64Class1;
 			OpenViBE::float64 m_f64Class2;
-
+			OpenViBE::uint64 m_ui64TmpLabel;
 			OpenViBE::CMemoryBuffer m_oConfiguration;
 			itpp::vec m_oCoefficientsClass1;
 			itpp::vec m_oCoefficientsClass2;
+			
+			std::vector<itpp::vec> m_vCircularSampleBuffer;
+			std::vector<OpenViBE::uint64> m_vCircularLabelBuffer;
+			OpenViBE::uint32 m_ui32BufferPointer;		
+			OpenViBE::boolean m_bBufferFilled;
+			OpenViBE::uint32 m_ui32BufferEnd;
 		};
 
 		class CAlgorithmClassifierPLDADesc : public OpenViBEToolkit::CAlgorithmClassifierDesc
@@ -74,6 +86,9 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
 				CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
+				
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Shrinkage,"Shrinkage",OpenViBE::Kernel::ParameterType_Enumeration, OVP_TypeId_ShrinkageType);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Lambda,"Lambda",OpenViBE::Kernel::ParameterType_Float);			
 				return true;
 			}
 

@@ -51,16 +51,17 @@
 #define OVP_ClassId_Algorithm_ClassifierPLDA                                         OpenViBE::CIdentifier(0x5CF66A73, 0xF5BBF0BF)
 #define OVP_ClassId_Algorithm_ClassifierPLDADesc                                   OpenViBE::CIdentifier(0xD5C5EF91, 0xE1B1C4F4)
 
+#define OVP_Algorithm_ClassifierPLDA_InputParameterId_Shrinkage		OpenViBE::CIdentifier(0x7FEFDCA9, 0x816ED903) 
+#define OVP_Algorithm_ClassifierPLDA_InputParameterId_Lambda		OpenViBE::CIdentifier(0xEBAEB213, 0xDD4735A0)
+#define OVP_TypeId_ShrinkageType									OpenViBE::CIdentifier(0x344A52F5, 0x489DB439)
+
 //___________________________________________________________________//
 //                                                                   //
 // Plugin Object Class Identifiers                                   //
 //___________________________________________________________________//
 //                                                                   //
 
-/*
-#															OpenViBE::CIdentifier(0x7FEFDCA9, 0x816ED903)                                                                    
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0xEBAEB213, 0xDD4735A0)
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0x344A52F5, 0x489DB439)
+/*												                                                                                                                                         
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0x2F9ECA0B, 0x8D3CA7BD)
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0x1BD67420, 0x587600E6)
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0xB083614E, 0x26C6B4BD)
