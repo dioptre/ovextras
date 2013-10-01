@@ -13,7 +13,7 @@
 	<FeedbackPresentation mode="free">central</FeedbackPresentation>
 	<FeedbackPresentation mode="copy">color</FeedbackPresentation>
 
-	<Tagging method="hardware">
+	<Tagging method="software">
 		<ParallelPortNumber>0x378</ParallelPortNumber>	<!-- 0x378 for windows and 0 for linux -->
 		<PhotoDiode>no</PhotoDiode>
 		<SampleFrequency>256</SampleFrequency>
