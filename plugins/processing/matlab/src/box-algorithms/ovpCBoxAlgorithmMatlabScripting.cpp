@@ -307,7 +307,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 	sanitizePath(l_sWorkingDir);
 
 	this->getLogManager() << LogLevel_Trace << "Setting working directory to " << l_sWorkingDir << "\n";
-	l_sCommand = CString("cd ") + l_sWorkingDir;
+	l_sCommand = CString("cd '") + l_sWorkingDir + CString("'");
 	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while changing the working directory\n")) return false;
 
 	// executes the pre-run routine that defines the global identifiers for streams and stimulations codes

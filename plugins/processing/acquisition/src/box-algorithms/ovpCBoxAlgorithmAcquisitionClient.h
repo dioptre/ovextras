@@ -53,7 +53,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("A generic network based acquisition client"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This algorithm waits for EEG data from the network and distributes it into the scenario"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Acquisition"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Acquisition and network IO"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_AcquisitionClient; }

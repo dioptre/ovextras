@@ -15,8 +15,9 @@ namespace OpenViBEAcquisitionServer
 			OpenViBE::boolean& rLimitSpeed,
 			OpenViBE::uint32& rSampleFormat,
 			OpenViBE::uint32& rSampleEndian,
+			OpenViBE::uint32& rStartSkip,
 			OpenViBE::uint32& rHeaderSkip,
-			OpenViBE::uint32& rFrameSkip,
+			OpenViBE::uint32& rFooterSkip,
 			OpenViBE::CString& rFilename);
 
 	protected:
@@ -29,8 +30,9 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean& m_rLimitSpeed;
 		OpenViBE::uint32& m_rSampleFormat;
 		OpenViBE::uint32& m_rSampleEndian;
+		OpenViBE::uint32& m_rStartSkip;
 		OpenViBE::uint32& m_rHeaderSkip;
-		OpenViBE::uint32& m_rFrameSkip;
+		OpenViBE::uint32& m_rFooterSkip;
 		OpenViBE::CString& m_rFilename;
 	};
 };
