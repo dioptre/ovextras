@@ -1,0 +1,29 @@
+<ExternelP300Stimulator>
+	<Mode>${AcquisitionMode}</Mode> <!-- can be acquisition, copy, free or oddball -->
+	<SymbolDefinitionFile>${KeyboardLayout}</SymbolDefinitionFile>
+	<StimulatorConfigFile>openvibe/applications/externalP300Stimulator/stimulator-properties.xml</StimulatorConfigFile>
+	<!--AdditionalConfigurationFile>/P300AcquisitionConfig.conf</AdditionalConfigurationFile -->
+	<FlashGroupDefinitionFile>${FlashGroupDefinitionFile}</FlashGroupDefinitionFile>
+	<NGramDatabase>openvibe/applications/externalP300Stimulator/fr.db</NGramDatabase>
+
+	<Screen width="800" height="600">nofull</Screen>
+	
+	<FlashMode>${FlashMode}</FlashMode>
+	
+	<FeedbackPresentation mode="free">central</FeedbackPresentation>
+	<FeedbackPresentation mode="copy">color</FeedbackPresentation>
+
+	<Tagging method="software">
+		<ParallelPortNumber>0x378</ParallelPortNumber>	<!-- 0x378 for windows and 0 for linux -->
+		<PhotoDiode>no</PhotoDiode>
+		<SampleFrequency>256</SampleFrequency>
+	</Tagging>
+	
+	<ContinuousFeedback mode="disabled">
+		<FeedbackStartColor>25,50,30</FeedbackStartColor>
+		<FeedbackEndColor>0,100,25</FeedbackEndColor>
+		<FeedbackStartValue>0.8</FeedbackStartValue>
+		<ColorFeedbackSteps>100</ColorFeedbackSteps>
+		<MaxFeedbackSymbols>3</MaxFeedbackSymbols>
+	</ContinuousFeedback>
+</ExternelP300Stimulator>
