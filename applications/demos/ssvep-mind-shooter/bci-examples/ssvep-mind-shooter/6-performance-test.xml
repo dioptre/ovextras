@@ -5519,4 +5519,30 @@ configuration scenario.</Text>
 			<NumChildren>0</NumChildren>
 		</VisualisationWidget>
 	</VisualisationTree>
+	<Attributes>
+		<Attribute>
+			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>
+			<Value>Jozef Legeny</Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0x8c1fc55b, 0x7b433dc2)</Identifier>
+			<Value>1.0</Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0x9f5c4075, 0x4a0d3666)</Identifier>
+			<Value>SSVEP Performance Test</Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0xf36a1567, 0xd13c53da)</Identifier>
+			<Value>http://openvibe.inria.fr/using-the-ssvep-mind-shooter-scenarios/</Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0xf6b2e3fa, 0x7bd43926)</Identifier>
+			<Value>SSVEP</Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0xf8034a49, 0x8b3f37cc)</Identifier>
+			<Value>Inria</Value>
+		</Attribute>
+	</Attributes>	
 </OpenViBE-Scenario>
