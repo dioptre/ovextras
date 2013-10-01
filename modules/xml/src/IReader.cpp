@@ -2,6 +2,7 @@
 
 #include <expat.h>
 #include <string>
+#include <iostream>
 
 using namespace XML;
 using namespace std;
@@ -53,7 +54,7 @@ boolean CReader::processData(const void* pBuffer, const uint64 ui64BufferSize)
 	if(l_eStatus!=XML_STATUS_OK) {
 		XML_Error l_oErrorCode = XML_GetErrorCode(m_pXMLParser);
 		// Although printf() is not too elegant, this component has no context to use e.g. LogManager -> printf() is better than a silent fail.
-		printf("processData(): expat error %d on the line %d of the input .xml\n", l_oErrorCode, XML_GetCurrentLineNumber(m_pXMLParser) );
+		std::cout << "processData(): expat error " << l_oErrorCode << " on the line " << XML_GetCurrentLineNumber(m_pXMLParser) << " of the input .xml\n";
 	}
 
 	return (l_eStatus==XML_STATUS_OK);
