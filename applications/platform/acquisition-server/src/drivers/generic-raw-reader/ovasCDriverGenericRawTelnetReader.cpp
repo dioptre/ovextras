@@ -20,8 +20,9 @@ boolean CDriverGenericRawTelnetReader::configure(void)
 		m_bLimitSpeed,
 		m_ui32SampleFormat,
 		m_ui32SampleEndian,
+		m_ui32StartSkip,
 		m_ui32HeaderSkip,
-		m_ui32FrameSkip,
+		m_ui32FooterSkip,
 		l_sFilename);
 	m_oConfiguration.setHostName(m_sHostName);
 	m_oConfiguration.setHostPort(m_ui32HostPort);
@@ -48,6 +49,15 @@ boolean CDriverGenericRawTelnetReader::open(void)
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not connect to server [" << m_sHostName << ":" << m_ui32HostPort << "]\n";
 		return false;
 	}
+	char *l_sBuffer = new char[m_ui32StartSkip];
+	if(m_ui32StartSkip>0 && !m_pConnection->receiveBufferBlocking(l_sBuffer, m_ui32StartSkip))
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Unable to skip " << m_ui32StartSkip << " bytes at the beginning\n";
+		delete[] l_sBuffer;
+		return false;
+	}
+	delete[] l_sBuffer;
+
 	return true;
 }
 

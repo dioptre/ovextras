@@ -57,6 +57,8 @@ namespace OpenViBEDesigner
 
         ContextMenu_BoxEditMessageInput,
         ContextMenu_BoxEditMessageOutput,
+
+		ContextMenu_BoxDocumentation
 	};
 
 	enum

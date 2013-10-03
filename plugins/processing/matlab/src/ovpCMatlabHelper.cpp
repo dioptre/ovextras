@@ -103,7 +103,7 @@ boolean CMatlabHelper::setSignalInputHeader(uint32 ui32InputIndex, IMatrix * pMa
 	sprintf(l_sBuffer, "%i",pMatrix->getDimensionSize(1));
 	l_sCommand = l_sCommand + CString(l_sBuffer) + CString(",");
 	l_sCommand = l_sCommand + CString("{")+ l_sLabelList + CString("},");
-	sprintf(l_sBuffer, "%i",ui64SamplingRate);
+	sprintf(l_sBuffer, "%i",(int)ui64SamplingRate);
 	l_sCommand = l_sCommand + CString(l_sBuffer)+ CString(");");
 
 	return engEvalString(m_pMatlabEngine, (const char *) l_sCommand) == 0;
@@ -474,7 +474,7 @@ boolean CMatlabHelper::getChannelLocalisationOutputHeader(uint32 ui32OutputIndex
 	mxArray * l_pDynamic    = ::engGetVariable(m_pMatlabEngine,"OV_DYNAMIC");
 
 	uint32 l_ui32NbChannels = (uint32) *mxGetPr(l_pNbChannels);
-	boolean l_ui32Dynamic   = ((uint32) *mxGetPr(l_pDynamic) == 1);
+	// boolean l_ui32Dynamic   = ((uint32) *mxGetPr(l_pDynamic) == 1);
 	mwSize l_oNbCells = mxGetNumberOfElements(l_pNames);
 	char ** l_pNameList = new char*[l_oNbCells];
 	for(uint32 cell = 0; cell < l_oNbCells; cell++)

@@ -28,13 +28,20 @@ boolean CSimpleDSP::initialize(void)
 	m_ppVariable=new float64*[l_rStaticBoxContext.getInputCount()];
 	if(!m_ppVariable)
 	{
+		this->getLogManager() << LogLevel_Error << "Unable to allocate an array of floats for " << l_rStaticBoxContext.getInputCount() << " inputs\n";
 		return false;
 	}
 
 	CString l_sEquation=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_pEquationParser=new CEquationParser(*this, m_ppVariable, l_rStaticBoxContext.getInputCount());
+	if(!m_pEquationParser) 
+	{
+		this->getLogManager() << LogLevel_Error << "Failed to create EquationParser\n";	
+		return false;
+	}
 	if(!m_pEquationParser->compileEquation(l_sEquation.toASCIIString()))
 	{
+		this->getLogManager() << LogLevel_Error << "Failed to compile equation '" << l_sEquation << "'\n";	
 		return false;
 	}
 	m_ui64EquationType=m_pEquationParser->getTreeCategory();
@@ -44,6 +51,7 @@ boolean CSimpleDSP::initialize(void)
 	l_rStaticBoxContext.getOutputType(0, l_oStreamType);
 	if(!this->getTypeManager().isDerivedFromStream(l_oStreamType, OV_TypeId_StreamedMatrix))
 	{
+		this->getLogManager() << LogLevel_Error << "Output stream is not derived from OV_TypeId_StreamedMatrix\n";	
 		return false;
 	}
 	if(l_oStreamType==OV_TypeId_StreamedMatrix)

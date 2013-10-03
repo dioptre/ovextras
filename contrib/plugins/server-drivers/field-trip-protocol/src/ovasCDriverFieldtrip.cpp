@@ -577,7 +577,7 @@ OpenViBE::int32 CDriverFieldtrip::requestChunk(OpenViBE::CStimulationSet& oStimu
 	return l_ui32NbDataToSend; // no error
 }
 
-void CDriverFieldtrip::FreeResponse(message_t * response, char* message)
+void CDriverFieldtrip::FreeResponse(message_t * response, const char* message)
 {
 	if (message!=NULL)
 	   m_rDriverContext.getLogManager() << LogLevel_Error << message << "\n";

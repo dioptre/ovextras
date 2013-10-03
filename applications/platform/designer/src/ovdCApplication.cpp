@@ -12,6 +12,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <algorithm>
 
 #include <openvibe/ovITimeArithmetics.h>
 
@@ -943,17 +944,21 @@ CString CApplication::getWorkingDirectory(void)
 	{
 		if(l_pCurrentScenario->m_bHasFileName)
 		{
-			char* l_sCurrentDirectory=g_path_get_dirname(l_pCurrentScenario->m_sFileName.c_str());
-			l_sWorkingDirectory=l_sCurrentDirectory;
-			g_free(l_sCurrentDirectory);
+			std::string l_sCurrentDirectory=std::string(g_path_get_dirname(l_pCurrentScenario->m_sFileName.c_str()));
+#if defined TARGET_OS_Windows
+			std::replace(l_sCurrentDirectory.begin(), l_sCurrentDirectory.end(), '\\', '/');
+#endif
+			l_sWorkingDirectory=l_sCurrentDirectory.c_str();
 		}
 	}
 
 	if(!g_path_is_absolute(l_sWorkingDirectory.toASCIIString()))
 	{
-		char* l_sCurrentDirectory=g_get_current_dir();
-		l_sWorkingDirectory=l_sCurrentDirectory+CString("/")+l_sWorkingDirectory;
-		g_free(l_sCurrentDirectory);
+		std::string l_sCurrentDirectory=g_get_current_dir();
+#if defined TARGET_OS_Windows
+		std::replace(l_sCurrentDirectory.begin(), l_sCurrentDirectory.end(), '\\', '/');
+#endif
+		l_sWorkingDirectory=l_sCurrentDirectory.c_str()+CString("/")+l_sWorkingDirectory;
 	}
 
 	return l_sWorkingDirectory;
