@@ -1,5 +1,8 @@
 #include "ovpCBoxAlgorithmMessageSender.h"
 
+//to remove
+#include <sstream>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -9,21 +12,41 @@ using namespace OpenViBEPlugins::Samples;
 
 boolean CBoxAlgorithmMessageSender::initialize(void)
 {
-	
-	// If you need to, you can manually set the reference targets to link the codecs input and output. To do so, you can use :
-	//m_oEncoder.getInputX().setReferenceTarget(m_oDecoder.getOutputX())
-	// Where 'X' depends on the codec type. Please refer to the Codec Toolkit Reference Page
-	// (http://openvibe.inria.fr/documentation/unstable/Doc_Tutorial_Developer_SignalProcessing_CodecToolkit_Ref.html) for a complete list.
-	
-	// If you need to retrieve setting values, use the FSettingValueAutoCast function.
-	// For example :
-	// - CString setting at index 0 in the setting list :
+	//get box clock frequency as defined by the user
     m_ui64BoxFrequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-	// - unsigned int64 setting at index 1 in the setting list :
-	// uint64 l_ui64SettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-	// - float64 setting at index 2 in the setting list :
-	// float64 l_f64SettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
-	// ...
+
+
+	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	uint32 l_ui32NumberOfSettings = l_rStaticBoxContext.getSettingCount();
+	//get the other settings, they will fill the message
+	// only Integer, Float and String settings are allowed (no CMatrix setting available)
+	for (uint32 i=0; i<l_ui32NumberOfSettings; i++)
+	{
+		CString l_sSettingName;
+		CIdentifier l_oSettingId;
+		l_rStaticBoxContext.getSettingName(i, l_sSettingName);
+		l_rStaticBoxContext.getSettingType(i, l_oSettingId);
+
+		boolean l_bIsInteger = (l_oSettingId==OV_TypeId_Integer);
+		boolean l_bIsFloat = (l_oSettingId==OV_TypeId_Float);
+		boolean l_bIsString = (l_oSettingId==OV_TypeId_String);
+
+		if (l_bIsInteger)
+		{
+			uint64 l_ui64Value = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+			m_oIntegers[l_sSettingName] = l_ui64Value;
+		}
+		else if (l_bIsFloat)
+		{
+			float64 l_f64Value = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+			m_oFloats[l_sSettingName] = l_f64Value;
+		}
+		else if (l_bIsString)
+		{
+			CString l_sValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+			m_oStrings[l_sSettingName] = l_sValue;
+		}
+	}
 
 	return true;
 }
@@ -70,124 +93,71 @@ boolean CBoxAlgorithmMessageSender::processInput(uint32 ui32InputIndex)
 
 boolean CBoxAlgorithmMessageSender::process(void)
 {
-	
 	// the static box context describes the box inputs, outputs, settings structures
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-
-
+	//create the message
     IMyMessage& msg = this->getPlayerContext().createMessage();
-    getLogManager() << OpenViBE::Kernel::LogLevel_Info  << "message sender created a message\n";
 
-    //*
+	//put the integers in the message
+	std::map<CString, uint64>::const_iterator l_oIntegerIterator;
+	for (l_oIntegerIterator=m_oIntegers.begin(); l_oIntegerIterator!=m_oIntegers.end(); l_oIntegerIterator++)
+	{
+		msg.setValueUint64(l_oIntegerIterator->first, l_oIntegerIterator->second);
+	}
+
+	//put the floats
+	std::map<CString, float64>::const_iterator l_oFloatIterator;
+	for (l_oFloatIterator=m_oFloats.begin(); l_oFloatIterator!=m_oFloats.end(); l_oFloatIterator++)
+	{
+		msg.setValueFloat64(l_oFloatIterator->first, l_oFloatIterator->second);
+	}
+
+	//put the strings
+	std::map<CString, CString>::const_iterator l_oStringIterator;
+	for (l_oStringIterator=m_oStrings.begin(); l_oStringIterator!=m_oStrings.end(); l_oStringIterator++)
+	{
+		msg.setValueCString(l_oStringIterator->first, l_oStringIterator->second);
+	}
+
+
+	//has been used for tests, to remove
     msg.setValueUint64( CString("meaning of life"), 42);
-
-
     msg.setValueFloat64(CString("float"), 1.354);
-
-
 	//that work
-	CString test("test");
-	msg.setValueCString( CString("string"), test);
-
+	//CString test("test");
+	//msg.setValueCString( CString("string"), test);
 	CString test2("test2");
 	msg.setValueCString( CString("string2"), test2);
-
 	CString test3("test3");
 	msg.setValueCString( CString("string3"), test3);
+	//this now works as well
+	msg.setValueCString( CString("string"), CString("testhahaha"));
 
+	//adding a matrix to the message to test if it is received correctly
+	CMatrix *l_oMatrix = new CMatrix();
+	l_oMatrix->setDimensionCount(3);
+	l_oMatrix->setDimensionSize(0,2);
+	l_oMatrix->setDimensionSize(1,3);
+	l_oMatrix->setDimensionSize(2,2);
 
+	float64* l_f64Buffer = l_oMatrix->getBuffer();
 
-    //however if we call
-    // msg.setValueCString( CString("string"), CString("test"));
-    //the receiver will crash
-    //my guess is that since the string only exist in the call to the setValue funciton, the stored pointer is invalid
-    //need a warning or something
-
-
-    //msg.setValueCMatrix( "", const CMatrix &valueIn);
-    //*/
-
-
+	for (uint64 i=0; i<l_oMatrix->getBufferElementCount(); i++)
+	{
+		l_f64Buffer[i] = i;
+	}
+	msg.setValueCMatrix( CString("matrix"), *l_oMatrix);
+	delete l_oMatrix;
 
     //send the message for all available output
     for (uint64 output = 0; output<l_rStaticBoxContext.getMessageOutputCount(); output++)
     {
-        this->getPlayerContext().sendMessage(msg, output);
+		getLogManager() << OpenViBE::Kernel::LogLevel_Trace << "sending message on output " << output << "\n";
+		this->getPlayerContext().sendMessage(msg, output);
     }
-
-
-	// here is some useful functions:
-	// - To get input/output/setting count:
-	// l_rStaticBoxContext.getInputCount();
-	// l_rStaticBoxContext.getOutputCount();
-	
-	// - To get the number of chunks currently available on a particular input :
-	// l_rDynamicBoxContext.getInputChunkCount(input_index)
-	
-	// - To send an output chunk :
-	// l_rDynamicBoxContext.markOutputAsReadyToSend(output_index, chunk_start_time, chunk_end_time);
-	
-	
-	// A typical process iteration may look like this.
-	// This example only iterate over the first input of type Signal, and output a modified Signal.
-	// thus, the box uses 1 decoder (m_oSignalDecoder) and 1 encoder (m_oSignalEncoder)
-	/*
-	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
-
-	//iterate over all chunk on input 0
-	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
-	{
-		// decode the chunk i on input 0
-		m_oSignalDecoder.decode(0,i);
-		// the decoder may have decoded 3 different parts : the header, a buffer or the end of stream.
-		if(m_oSignalDecoder.isHeaderReceived())
-		{
-			// Header received. This happens only once when pressing "play". For example with a StreamedMatrix input, you now know the dimension count, sizes, and labels of the matrix
-			// ... maybe do some process ...
-			
-			// Pass the header to the next boxes, by encoding a header on the output 0:
-			m_oSignalEncoder.encodeHeader(0);
-			// send the output chunk containing the header. The dates are the same as the input chunk:
-			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
-		}
-		if(m_oSignalDecoder.isBufferReceived())
-		{
-			// Buffer received. For example the signal values
-			// Access to the buffer can be done thanks to :
-			IMatrix* l_pMatrix = m_oSignalDecoder.getOutputMatrix(); // the StreamedMatrix of samples.
-			uint64 l_uiSamplingFrequency = m_oSignalDecoder.getOutputSamplingRate(); // the sampling rate of the signal
-			
-			// ... do some process on the matrix ...
-
-			// Encode the output buffer :
-			m_oSignalEncoder.encodeBuffer(0);
-			// and send it to the next boxes :
-			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
-			
-		}
-		if(m_oSignalDecoder.isEndReceived())
-		{
-			// End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
-			m_oSignalEncoder.encodeEnd(0);
-			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
-		}
-
-		// The current input chunk has been processed, and automaticcaly discarded.
-		// you don't need to call "l_rDynamicBoxContext.markInputAsDeprecated(0, i);"
-	}
-	*/
-
-	// check the official developer documentation webpage for more example and information :
-	
-	// Tutorials:
-	// http://openvibe.inria.fr/documentation/#Developer+Documentation
-	// Codec Toolkit page :
-	// http://openvibe.inria.fr/codec-toolkit-references/
-	
-	// Feel free to ask experienced developers on the forum (http://openvibe.inria.fr/forum) and IRC (#openvibe on irc.freenode.net).
 
 	return true;
 }

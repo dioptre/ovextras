@@ -9,6 +9,7 @@
 
 //#include <openvibe/ov_all.h>
 //#include <openvibe-toolkit/ovtk_all.h>
+#include <map>
 
 // The unique identifiers for the box and its descriptor.
 // Identifier are randomly chosen by the skeleton-generator.
@@ -54,6 +55,9 @@ namespace OpenViBEPlugins
 		protected:
 			// No codec algorithms were specified in the skeleton-generator.
             OpenViBE::uint64 m_ui64BoxFrequency;
+			std::map<OpenViBE::CString, OpenViBE::uint64> m_oIntegers;
+			std::map<OpenViBE::CString, OpenViBE::float64> m_oFloats;
+			std::map<OpenViBE::CString, OpenViBE::CString> m_oStrings;
 
 		};
 
@@ -69,7 +73,7 @@ namespace OpenViBEPlugins
 		};
 		*/
 		
-		/*
+		//*
 		// The box listener can be used to call specific callbacks whenever the box structure changes : input added, name changed, etc.
 		// Please uncomment below the callbacks you want to use.
 		class CBoxAlgorithmMessageSenderListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
@@ -90,16 +94,40 @@ namespace OpenViBEPlugins
 			//virtual OpenViBE::boolean onOutputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
 			//virtual OpenViBE::boolean onOutputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
 			//virtual OpenViBE::boolean onOutputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
+			virtual OpenViBE::boolean onSettingAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			{
+				char l_sName[1024];
+				sprintf(l_sName, "Setting %u", ui32Index);
+				OpenViBE::CString l_sSettingName(&l_sName[0]);
+				rBox.setSettingName(ui32Index, l_sSettingName);
+
+				rBox.setSettingDefaultValue(ui32Index, OpenViBE::CString("0") );
+				rBox.setSettingValue(ui32Index, OpenViBE::CString("0") );
+				return true;
+			};
 			//virtual OpenViBE::boolean onSettingRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
+			virtual OpenViBE::boolean onSettingTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			{
+				OpenViBE::CIdentifier rTypeIdentifier;
+				rBox.getSettingType(ui32Index, rTypeIdentifier);
+
+				OpenViBE::boolean l_bIsInteger = (rTypeIdentifier==OV_TypeId_Integer);
+				OpenViBE::boolean l_bIsFloat = (rTypeIdentifier==OV_TypeId_Float);
+				OpenViBE::boolean l_bIsString = (rTypeIdentifier==OV_TypeId_String);
+
+				if ((!l_bIsInteger)&&(!l_bIsFloat)&&(!l_bIsString))
+				{
+					rBox.removeSetting(ui32Index);
+				}
+				return true;
+			};
 			//virtual OpenViBE::boolean onSettingNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
 			//virtual OpenViBE::boolean onSettingDefaultValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
 			//virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 		};
-		*/
+		//*/
 
 		/**
 		 * \class CBoxAlgorithmMessageSenderDesc
@@ -126,10 +154,10 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_MessageSender; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CBoxAlgorithmMessageSender; }
 			
-			/*
+			//*
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmMessageSenderListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
-			*/
+			//*/
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
@@ -145,14 +173,14 @@ namespace OpenViBEPlugins
                 //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
                 //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
 				
-				rBoxAlgorithmPrototype.addSetting("frequency",OV_TypeId_Integer,"");
+				rBoxAlgorithmPrototype.addSetting("Frequency",OV_TypeId_Integer,"1");
 
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 
-                rBoxAlgorithmPrototype.addMessageOutput(OpenViBE::CString("message output"));
+				rBoxAlgorithmPrototype.addMessageOutput(OpenViBE::CString("Message output"));
                 rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageOutput);
 
                 rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyMessageOutput);

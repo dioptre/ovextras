@@ -1,14 +1,13 @@
-
-
 #include "ovkCMyMessage.h"
-
 
 using namespace std;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 
-//*
 // Returned references are invalid after processMessage().
+//---------------------------------------------------------------------------------------------------//
+//------------------------------------------------- GETTERS -----------------------------------------//
+//---------------------------------------------------------------------------------------------------//
 uint64 CMyMessage::getValueUint64(const OpenViBE::CString &key, bool &success) const
 {
 	uint64 l_ui64Value = 0;//default value
@@ -27,7 +26,7 @@ uint64 CMyMessage::getValueUint64(const OpenViBE::CString &key, bool &success) c
 
 OpenViBE::float64 CMyMessage::getValueFloat64(const CString &key, bool &success) const
 {
-	float64 l_f64Value = 0;//defaul value
+	float64 l_f64Value = 0;//default value
 	std::map<CString, float64>::const_iterator l_oIterator = m_oFloat64s.find(key);
 	if (l_oIterator!=m_oFloat64s.end())
 	{
@@ -44,7 +43,42 @@ OpenViBE::float64 CMyMessage::getValueFloat64(const CString &key, bool &success)
 const OpenViBE::CString* CMyMessage::getValueCString(const CString &key, bool &success) const
 {
 	const CString* l_sValue = NULL;
-	std::map<CString, const CString*>::const_iterator l_oIterator = m_oStrings.find(key);
+	std::map<CString, CString>::const_iterator l_oIterator = m_oStrings.find(key);
+	if (l_oIterator!=m_oStrings.end())
+	{
+		l_sValue = &(l_oIterator->second);
+		success = true;
+	}
+	else
+	{
+		success = false;
+	}
+	return l_sValue;
+}
+
+const OpenViBE::IMatrix* CMyMessage::getValueCMatrix(const CString &key, bool &success) const
+{
+	const IMatrix* l_oValue = NULL;
+	std::map<CString, CMatrix*>::const_iterator l_oIterator = m_oMatrices.find(key);
+	if (l_oIterator!=m_oMatrices.end())
+	{
+		l_oValue = (l_oIterator->second);
+		success = true;
+	}
+	else
+	{
+		success = false;
+	}
+	return l_oValue;
+}
+
+//---------------------------------------------------------------------------------------------------//
+//---------------------------------------------COPY GETTERS -----------------------------------------//
+//---------------------------------------------------------------------------------------------------//
+const OpenViBE::CString CMyMessage::getCopyValueCString(const CString &key, bool &success) const
+{
+	CString l_sValue;
+	std::map<CString, CString>::const_iterator l_oIterator = m_oStrings.find(key);
 	if (l_oIterator!=m_oStrings.end())
 	{
 		l_sValue = l_oIterator->second;
@@ -55,25 +89,28 @@ const OpenViBE::CString* CMyMessage::getValueCString(const CString &key, bool &s
 		success = false;
 	}
 	return l_sValue;
+
 }
-//*/
-const OpenViBE::IMatrix* CMyMessage::getValueCMatrix(const CString &key, bool &success) const
+const OpenViBE::CMatrix CMyMessage::getCopyValueCMatrix(const CString &key, bool &success) const
 {
-	const IMatrix* l_oValue = NULL;
-	std::map<CString, const CMatrix*>::const_iterator l_oIterator = m_oMatrices.find(key);
+	CMatrix *l_oValue = new CMatrix();
+	std::map<CString, CMatrix*>::const_iterator l_oIterator = m_oMatrices.find(key);
 	if (l_oIterator!=m_oMatrices.end())
 	{
-		l_oValue = l_oIterator->second;
+		l_oValue->getFullCopy(*(l_oIterator->second));
 		success = true;
 	}
 	else
 	{
 		success = false;
 	}
-	return l_oValue;
+	return *l_oValue;
+
 }
 
-
+//---------------------------------------------------------------------------------------------------//
+//------------------------------------------------- SETTERS -----------------------------------------//
+//---------------------------------------------------------------------------------------------------//
 bool CMyMessage::setValueUint64(CString key, uint64 valueIn)
 {
 	bool success = false;
@@ -91,19 +128,23 @@ bool CMyMessage::setValueFloat64(CString key, float64 valueIn){
 
 bool CMyMessage::setValueCString(CString key, const CString &valueIn){
 	bool success = false;
-	m_oStrings[key] = &valueIn;
+	//copy the ref inside
+	m_oStrings[key] = valueIn;
 	success = true;
 	return success;
 }
 
 bool CMyMessage::setValueCMatrix(CString key, const CMatrix &valueIn){
 	bool success = false;
-	m_oMatrices[key] = &valueIn;
+	m_oMatrices[key] = new CMatrix();
+	m_oMatrices[key]->getFullCopy(valueIn);
 	success = true;
 	return success;
 }
 
-//get key
+//---------------------------------------------------------------------------------------------------//
+//----------------------------------------------KEY GETTERS -----------------------------------------//
+//---------------------------------------------------------------------------------------------------//
 const OpenViBE::CString* CMyMessage::getFirstCStringToken() const
 {
 	const CString* l_sToken = NULL;
@@ -147,7 +188,7 @@ const OpenViBE::CString* CMyMessage::getFirstIMatrixToken() const
 const OpenViBE::CString* CMyMessage::getNextCStringToken(const OpenViBE::CString &previousToken) const
 {
 	const CString* l_sKey = NULL;
-	std::map<CString, const CString* >::const_iterator it = m_oStrings.find(previousToken);
+	std::map<CString, CString >::const_iterator it = m_oStrings.find(previousToken);
 	it++;
 	if (it!=m_oStrings.end())
 	{
@@ -183,7 +224,7 @@ const OpenViBE::CString* CMyMessage::getNextFloat64Token(const OpenViBE::CString
 const OpenViBE::CString* CMyMessage::getNextIMatrixToken(const OpenViBE::CString &previousToken) const
 {
 	const CString* l_sKey = NULL;
-	std::map<CString, const CMatrix* >::const_iterator it = m_oMatrices.find(previousToken);
+	std::map<CString, CMatrix* >::const_iterator it = m_oMatrices.find(previousToken);
 	it++;
 	if (it!=m_oMatrices.end())
 	{
@@ -191,5 +232,3 @@ const OpenViBE::CString* CMyMessage::getNextIMatrixToken(const OpenViBE::CString
 	}
 	return l_sKey;
 }
-//*/
-

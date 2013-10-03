@@ -60,6 +60,9 @@ namespace OpenViBE
 			const char* sDimensionLabel);
 		virtual OpenViBE::float64* getBuffer(void);
 
+		//get full copy of the matrix
+		CMatrix& getFullCopy(const CMatrix& rMatrix);
+
 		_IsDerivedFromClass_Final_(OpenViBE::IMatrix, OV_ClassId_MatrixBridge);
 
 	private:

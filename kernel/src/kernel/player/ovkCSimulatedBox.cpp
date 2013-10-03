@@ -1298,26 +1298,30 @@ void CSimulatedBox::handleCrash(const char* sHintName)
 }
 
 
-bool CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
+boolean CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 {
 	this->getLogManager() << LogLevel_Debug << "SimulatedBox sendmessage on output" << outputIndex <<"\n";
 
+	//get the message links originating from this box
 	CIdentifier l_oLinkIdentifier=m_pScenario->getNextMessageLinkIdentifierFromBox(OV_UndefinedIdentifier, m_pBox->getIdentifier());
 	while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
 	{
 		const ILink* l_pLink=m_pScenario->getMessageLinkDetails(l_oLinkIdentifier);
 		if(l_pLink)
 		{
-			CIdentifier l_oTargetBoxIdentifier=l_pLink->getTargetBoxIdentifier();
-			uint32 l_ui32TargetBoxInputIndex=l_pLink->getTargetBoxInputIndex();
-			m_rScheduler.sendMessage(msg, l_oTargetBoxIdentifier, l_ui32TargetBoxInputIndex);
+			if ( l_pLink->getSourceBoxOutputIndex()==outputIndex)
+			{
+				CIdentifier l_oTargetBoxIdentifier=l_pLink->getTargetBoxIdentifier();
+				uint32 l_ui32TargetBoxInputIndex=l_pLink->getTargetBoxInputIndex();
+				m_rScheduler.sendMessage(msg, l_oTargetBoxIdentifier, l_ui32TargetBoxInputIndex);
+			}
 		}
 		l_oLinkIdentifier=m_pScenario->getNextMessageLinkIdentifierFromBox(l_oLinkIdentifier, m_pBox->getIdentifier());
 	}
 	return true; // if success
 }
 
-bool CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
+boolean CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
 {
 	//TODO change to limited context
 	CBoxAlgorithmContext l_oBoxAlgorithmContext(getKernelContext(), this, m_pBox);
@@ -1326,9 +1330,9 @@ bool CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
 }
 
 
-bool CSimulatedBox::cleanupMessages() {
+boolean CSimulatedBox::cleanupMessages() {
 	// ...
-	//this->getLogManager() << LogLevel_Error << "cleaning messages " << "\n";
+	this->getLogManager() << LogLevel_Debug << "cleaning messages " << "\n";
 	m_vPreparedMessages.clear();//that'll do for now
 	return true; // if success
 }

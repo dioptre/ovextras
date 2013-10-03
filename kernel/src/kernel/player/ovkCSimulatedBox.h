@@ -272,14 +272,13 @@ namespace OpenViBE
 				OpenViBE::uint32* pTriangleIndexArray) const;
 			//@}
 
-            /** \name Messaging API - messages management */
-            //@{
-            bool sendMessage(const IMyMessage &msg, uint32 outputIndex);
-            bool cleanupMessages();
-            IMyMessage& createMessage();
-            bool receiveMessage(const IMyMessage &msg, uint32 inputIndex);
-
-            //@}
+			/** \name Messaging API - messages management */
+			//@{
+			OpenViBE::boolean sendMessage(const IMyMessage &msg, uint32 outputIndex);
+			OpenViBE::boolean cleanupMessages();
+			IMyMessage& createMessage();
+			OpenViBE::boolean receiveMessage(const IMyMessage &msg, uint32 inputIndex);
+			//@}
 
 			_IsDerivedFromClass_Final_(OpenViBE::Kernel::TKernelObject < OpenViBE::Kernel::IBoxIO >, OVK_ClassId_Kernel_Player_SimulatedBox);
 

@@ -52,6 +52,8 @@ namespace OpenViBEPlugins
 
 		protected:
 			// No codec algorithms were specified in the skeleton-generator.
+			bool l_bMessageReceived;
+			OpenViBE::CMatrix m_oMatrix;
 
 		};
 
