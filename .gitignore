@@ -2,19 +2,14 @@ local-tmp
 dependencies
 scripts/win32-dependencies.cmd
 dist
+build
+CMakeLists.txt.*
+.*.swp
 *~
-CMakeLists.txt
+externals
+CMakeLists_full.txt
 CMakeLists_COADAPT.txt
 coadapt.patch
-cmake-modules/FindThirdPartyBoost_Math.cmake
-cmake-modules/FindThirdPartyLibrariesForExternalStimulator.cmake
-cmake-modules/GNUInstallDirs.cmake
-cmake-modules/FindThirdPartyGMobiLabPlusAPI.cmake
-kernel/share/openvibe.conf
-contrib/applications/platform/P300Stimulator/share/openvibe-applications/externalP300Stimulator/P300AcquisitionConfig.conf
-externals/coadapt-classification/
-externals/coadapt-fileio/
-externals/coadapt-scenarios/
-externals/coadapt-signal-processing/
-externals/coadapt-simple-visualisation/
+coadapt.patch.fc19
+externals/*/
 
