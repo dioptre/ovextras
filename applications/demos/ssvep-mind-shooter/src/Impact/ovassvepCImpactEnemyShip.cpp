@@ -31,7 +31,7 @@ CImpactEnemyShip* CImpactEnemyShip::createTarget( Ogre::Real rPosition )
 }
 
 CImpactEnemyShip::CImpactEnemyShip( Ogre::Real rPosition )
-	: m_rShipWidth(0.1),
+	: m_rShipWidth(0.1f),
 	  m_ui32DestructionStatus(0),
 	  m_bShipDestroyed(false),
 	  m_iPointValue(100)
@@ -51,8 +51,8 @@ CImpactEnemyShip::CImpactEnemyShip( Ogre::Real rPosition )
 
 			m_poEnemyNode = m_poApplication->getSceneManager()->getSceneNode("v2_vaisseau");
 			m_poEnemyNode->scale(1.0f, 1.0f, 1.0f);
-			m_rShipWidth = 0.5;
-			m_iLeaveCountdown = 2.0 * 3600;
+			m_rShipWidth = 0.5f;
+			m_iLeaveCountdown = (int)(2.0f * 3600);
 			m_iPointValue = 100;
 			break;
 		case 2:
@@ -60,8 +60,8 @@ CImpactEnemyShip::CImpactEnemyShip( Ogre::Real rPosition )
 
 			m_poEnemyNode = m_poApplication->getSceneManager()->getSceneNode("v1_vaisseau");
 			m_poEnemyNode->scale(1.9f, 1.9f, 1.9f);
-			m_rShipWidth = 0.45;
-			m_iLeaveCountdown = 1.5 * 3600;
+			m_rShipWidth = 0.45f;
+			m_iLeaveCountdown = (int)(1.5f * 3600);
 			m_iPointValue = 200;
 			break;
 		case 3:
@@ -69,8 +69,8 @@ CImpactEnemyShip::CImpactEnemyShip( Ogre::Real rPosition )
 
 			m_poEnemyNode = m_poApplication->getSceneManager()->getSceneNode("v3_vaisseau");
 			m_poEnemyNode->scale(2.2f, 2.0f, 2.0f);
-			m_rShipWidth = 0.4;
-			m_iLeaveCountdown = 1.0 * 3600;
+			m_rShipWidth = 0.4f;
+			m_iLeaveCountdown = (int)(1.0f * 3600);
 			m_iPointValue = 400;
 			break;
 		case 4:
@@ -94,9 +94,9 @@ CImpactEnemyShip::CImpactEnemyShip( Ogre::Real rPosition )
 
 		if (l_ui32Type >= 4 && l_ui32Type <= 6)
 		{
-			m_poEnemyNode->scale(1.2, 1.2f, 1.2f);
-			m_rShipWidth = 0.3;
-			m_iLeaveCountdown = 1.0 * 3600;
+			m_poEnemyNode->scale(1.2f, 1.2f, 1.2f);
+			m_rShipWidth = 0.3f;
+			m_iLeaveCountdown = (int)(1.0f * 3600);
 		}
 
 
@@ -114,8 +114,8 @@ CImpactEnemyShip::CImpactEnemyShip( Ogre::Real rPosition )
 									 */
 
 
-		m_poHitBox->translate(rPosition / 70.0, 1.2, 0.0, Node::TS_LOCAL);
-		m_poEnemyNode->translate( rPosition, 0.0, -60.0, Node::TS_LOCAL);
+		m_poHitBox->translate(rPosition / 70.0f, 1.2f, 0.0f, Node::TS_LOCAL);
+		m_poEnemyNode->translate( rPosition, 0.0f, -60.0f, Node::TS_LOCAL);
 		m_rIncomingStatus = 30.0f;
 	}
 	else
@@ -196,8 +196,8 @@ void CImpactEnemyShip::processFrame()
 		sin_oscillator++;
 		sin_oscillator = sin_oscillator % 360;
 		//	m_poEnemyNode->roll(Radian(Math::Sin(Degree(sin_oscillator)) / 80));
-		m_poEnemyNode->translate(Math::Sin(Degree(sin_oscillator)) / 20.0 * 0, Math::Sin(Degree(sin_oscillator*2 + 90)) / 20, 0.0,  Node::TS_LOCAL);
-		m_poHitBox->translate(Math::Sin(Degree(sin_oscillator)) / 20.0 / 50.0 * 0, 0.0, 0.0,  Node::TS_LOCAL);
+		m_poEnemyNode->translate(Math::Sin(Degree((Ogre::Real)sin_oscillator)) / 20.0f * 0, Math::Sin(Degree((Ogre::Real)(sin_oscillator*2 + 90))) / 20, 0.0f,  Node::TS_LOCAL);
+		m_poHitBox->translate(Math::Sin(Degree((Ogre::Real)sin_oscillator)) / 20.0f / 50.0f * 0, 0.0f, 0.0f,  Node::TS_LOCAL);
 
 
 		// incoming enemy animation
@@ -213,14 +213,14 @@ void CImpactEnemyShip::processFrame()
 		{
 			m_ui32DestructionStatus++;
 
-			m_poEnemyNode->translate(0.1, 2, 1, Node::TS_PARENT);
-			m_poEnemyNode->rotate(Vector3(0.3, 0.25, 1.0), Radian(3.14/20.0), Node::TS_LOCAL);
-			m_poEnemyNode->scale(0.95, 0.95, 0.95);
+			m_poEnemyNode->translate(0.1f, 2, 1, Node::TS_PARENT);
+			m_poEnemyNode->rotate(Vector3(0.3f, 0.25f, 1.0f), Radian(3.14f/20.0f), Node::TS_LOCAL);
+			m_poEnemyNode->scale(0.95f, 0.95f, 0.95f);
 		}
 	}
 	else
 	{
-		m_poEnemyNode->translate(0.0, -1.0, m_iLeaveCountdown * 0.5, Node::TS_LOCAL);
+		m_poEnemyNode->translate(0.0f, -1.0f, m_iLeaveCountdown * 0.5f, Node::TS_LOCAL);
 		m_iLeaveCountdown++;
 
 		if (m_poEnemyNode->getPosition().z < -100)
@@ -289,7 +289,7 @@ void CImpactEnemyShip::processHit(Ogre::Vector2 oPoint)
 	l_poExplosion->pNode = m_poParentNode->createChildSceneNode();
 
 	l_poExplosion->pNode->attachObject(l_poExplosion->pParticleSystem);
-	l_poExplosion->pNode->translate(oPoint.x * -65.0, 0.0, 30.0, Ogre::Node::TS_WORLD);
+	l_poExplosion->pNode->translate(oPoint.x * -65.0f, 0.0f, 30.0f, Ogre::Node::TS_WORLD);
 
 	m_vExplosions.push_back(l_poExplosion);
 }

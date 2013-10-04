@@ -13,7 +13,6 @@ using namespace OpenViBE;
  */
 int main(int argc, char** argv)
 {
-	
 	if (argc < 2)
 	{
 		printf("Usage : %s <application-type> [application-subtype]\n", argv[0]);
@@ -28,8 +27,6 @@ int main(int argc, char** argv)
 	OpenViBE::Kernel::IKernelContext* l_poKernelContext = NULL;
 	OpenViBE::Kernel::ILogManager* l_poLogManager = NULL;
 	OpenViBE::Kernel::IConfigurationManager* l_poConfigurationManager = NULL;
-
-
 
 	CString l_sApplicationString = CString(argv[1]);
 	CString l_sScenarioFolder = CString(argv[2]);
@@ -132,7 +129,12 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
-	app->setup(l_poKernelContext);
+	if(!app->setup(l_poKernelContext))
+	{
+		(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Error << "Cannot proceed, exiting\n";
+
+		exit(2);
+	}
 
 	app->go();
 

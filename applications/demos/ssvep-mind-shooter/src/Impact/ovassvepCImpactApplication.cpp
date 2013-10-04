@@ -52,7 +52,9 @@ CImpactApplication::~CImpactApplication()
 
 bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 {
-	CApplication::setup(poKernelContext);
+	if(!CApplication::setup(poKernelContext)) {
+		return false;
+	}
 
 	IConfigurationManager* l_poConfigurationManager = &(m_poKernelContext->getConfigurationManager());
 	l_poConfigurationManager->addConfigurationFromFile(m_sScenarioDir + "/appconf/impact-configuration.conf");
@@ -181,7 +183,8 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 		m_poInstructionWindow->show();
 		m_poInstructionWindow->setSize( CEGUI::UVector2( CEGUI::UDim( 0.50f, 0 ), CEGUI::UDim( 0.10f, 0 ) ) );
 		m_poInstructionWindow->setPosition( CEGUI::UVector2( CEGUI::UDim( 0.25f, 0 ), CEGUI::UDim( 0.45f, 0 ) ) );
-		m_poInstructionWindow->setText("Appuyez sur la touche ESPACE pour commencer le jeu ...");
+		// m_poInstructionWindow->setText("Appuyez sur la touche ESPACE pour commencer le jeu ...");
+		m_poInstructionWindow->setText("Press SPACE to start the game ...");
 	}
 	else
 	{
@@ -191,7 +194,8 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 		m_poInstructionWindow->show();
 		m_poInstructionWindow->setSize( CEGUI::UVector2( CEGUI::UDim( 0.50f, 0 ), CEGUI::UDim( 0.15f, 0 ) ) );
 		m_poInstructionWindow->setPosition( CEGUI::UVector2( CEGUI::UDim( 0.25f, 0 ), CEGUI::UDim( 0.425f, 0 ) ) );
-		m_poInstructionWindow->setText("Le systeme a besoin de faire quelques reglages.\nVeuillez vous concentrer sur les cibles indiques par les instructions.\n\nAppuyez sur la touche ESPACE pour commencer l'entrainement ...");
+		// m_poInstructionWindow->setText("Le systeme a besoin de faire quelques reglages.\nVeuillez vous concentrer sur les cibles indiques par les instructions.\n\nAppuyez sur la touche ESPACE pour commencer l'entrainement ...");
+		m_poInstructionWindow->setText("The system needs to calibrate.\nPlease concentrate on the targets as instructed.\n\nPlease press SPACE to start the process ...");
 	}
 	return true;
 }
@@ -212,14 +216,14 @@ void CImpactApplication::setupScene()
 	pointLight->setType(Ogre::Light::LT_POINT);
 	pointLight->setPosition(Ogre::Vector3(0, 50, 0));
 
-	pointLight->setDiffuseColour(1.0, 1.0, 0.8);
-	pointLight->setSpecularColour(1.0, 1.0, 1.0);
+	pointLight->setDiffuseColour(1.0f, 1.0f, 0.8f);
+	pointLight->setSpecularColour(1.0f, 1.0f, 1.0f);
 
 	pointLight = m_poSceneManager->createLight();
 	pointLight->setType(Ogre::Light::LT_POINT);
 	pointLight->setPosition(Ogre::Vector3(10, -10, 0));
 
-	pointLight->setDiffuseColour(0.5, 0.0, 0.0);
+	pointLight->setDiffuseColour(0.5f, 0.0f, 0.0f);
 
 	m_poSceneLoader->parseDotScene("v6.scene", "SSVEPImpact", m_poSceneManager);
 	m_poSceneManager->getSceneNode("v6_sky")->showBoundingBox(true);
@@ -306,7 +310,7 @@ void CImpactApplication::processFrame(OpenViBE::uint32 ui32CurrentFrame)
 
 	m_poShip->processFrame( ui32CurrentFrame );
 	m_poShip->setTargetLocked(false);
-	m_poSceneManager->getSceneNode("v6_sky")->pitch(Radian(0.0001));
+	m_poSceneManager->getSceneNode("v6_sky")->pitch(Radian(0.0001f));
 
 	if (m_eGameState == STARTED)
 	{
@@ -439,22 +443,26 @@ void CImpactApplication::addTarget(OpenViBE::uint32 ui32TargetPosition)
 		{
 		case 0:
 			l_fTextSize = 0.35f;
-			m_poInstructionWindow->setText("Regardez au milieu (MIDDLE) du vaisseau!");
+			// m_poInstructionWindow->setText("Regardez au milieu (MIDDLE) du vaisseau!");
+			m_poInstructionWindow->setText("Focus on the MIDDLE of the ship");
 			break;
 
 		case 1:
 			l_fTextSize = 0.35f;
-			m_poInstructionWindow->setText("Regardez le CANON (CANNON) du vaisseau pour tirer!");
+			// m_poInstructionWindow->setText("Regardez le CANON (CANNON) du vaisseau pour tirer!");
+			m_poInstructionWindow->setText("Focus on the CANNON to fire!");
 			break;
 
 		case 2:
 			l_fTextSize = 0.50f;
-			m_poInstructionWindow->setText("Regardez l'aile GAUCHE (LEFT WING) du vaisseau pour deplacer le vaisseau vers la gauche");
+			// m_poInstructionWindow->setText("Regardez l'aile GAUCHE (LEFT WING) du vaisseau pour de`placer le vaisseau vers la gauche");
+			m_poInstructionWindow->setText("Focus on the LEFT WING to turn the ship to the left");
 			break;
 
 		case 3:
 			l_fTextSize = 0.50f;
-			m_poInstructionWindow->setText("Regardez l'aile DROITE (RIGHT WING) du vaisseau pour de`placer le vaisseau vers la droite");
+			// m_poInstructionWindow->setText("Regardez l'aile DROITE (RIGHT WING) du vaisseau pour de`placer le vaisseau vers la droite");
+			m_poInstructionWindow->setText("Focus on the RIGHT WING to turn the ship to the right");
 			break;
 		}
 
@@ -482,7 +490,7 @@ void CImpactApplication::addTarget(OpenViBE::uint32 ui32TargetPosition)
 void CImpactApplication::insertEnemy( int ui32TargetPosition )
 {
 	logPrefix() << "Creating Enemy : position = " << ui32TargetPosition << "\n";
-	m_oTargets.push_back( CImpactEnemyShip::createTarget( (Ogre::Real( ui32TargetPosition ) - 3.5) / 7.0 * 100.0 ));
+	m_oTargets.push_back( CImpactEnemyShip::createTarget( (Ogre::Real( ui32TargetPosition ) - 3.5f) / 7.0f * 100.0f ));
 }
 
 void CImpactApplication::startFlickering()
@@ -548,7 +556,8 @@ void CImpactApplication::stopExperiment()
 		else
 		{
 			OpenViBE::float32 l_fTextSize = 0.35f;
-			m_poInstructionWindow->setText("L'application va prendre quelque temps pour le calcul, veuillez patienter.\nLe jeu va commencer automatiquement une fois l'application est prete.");
+			// m_poInstructionWindow->setText("L'application va prendre quelque temps pour le calcul, veuillez patienter.\nLe jeu va commencer automatiquement une fois l'application est prete.");
+			m_poInstructionWindow->setText("The application needs some time to compute, please be patient.\nThe game starts automatically when the application is ready.");
 			m_poInstructionWindow->setSize( CEGUI::UVector2( CEGUI::UDim( l_fTextSize, 0 ), CEGUI::UDim( 0.10f, 0 ) ) );
 			m_poInstructionWindow->setPosition( CEGUI::UVector2( CEGUI::UDim( (1.0f - l_fTextSize) / 2.0f, 0 ), CEGUI::UDim( 0.45f, 0 ) ) );
 			m_poInstructionWindow->show();
@@ -561,7 +570,8 @@ void CImpactApplication::stopExperiment()
 	{
 		OpenViBE::float32 l_fTextSize = 0.45f;
 		char l_sText[1024];
-		sprintf(l_sText, "Bravo!\nVous avez obtenu %d points!\nAppuyez sur ECHAP pour fermer le programme", m_iScore);
+		// sprintf(l_sText, "Bravo!\nVous avez obtenu %d points!\nAppuyez sur ECHAP pour fermer le programme", m_iScore);
+		sprintf(l_sText, "Bravo!\nYou have obtained %d points!\nPress ESC to close the program", m_iScore);
 		m_poInstructionWindow->setText(l_sText);
 		m_poInstructionWindow->setSize( CEGUI::UVector2( CEGUI::UDim( l_fTextSize, 0 ), CEGUI::UDim( 0.10f, 0 ) ) );
 		m_poInstructionWindow->setPosition( CEGUI::UVector2( CEGUI::UDim( (1.0f - l_fTextSize) / 2.0f, 0 ), CEGUI::UDim( 0.45f, 0 ) ) );

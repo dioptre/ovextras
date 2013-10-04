@@ -63,7 +63,7 @@ CGenericStimulatorFlickeringObject* CGenericStimulatorFlickeringObject::createGe
 		OpenViBE::CString l_sMaterial = (OpenViBE::CString)(l_poConfigurationManager->expand("${SSVEP_Target_Material_${SSVEPTarget_Id}}"));
 //SP		OpenViBE::uint32 l_ui32FramesL = (*(m_poApplication->getFrequencies()))[ l_i32TargetId ].first;
 //SP		OpenViBE::uint32 l_ui32FramesD = (*(m_poApplication->getFrequencies()))[ l_i32TargetId ].second;
-		OpenViBE::uint32 l_ui32StimulationPattern = (*(m_poApplication->getFrequencies()))[ l_i32TargetId ];
+		OpenViBE::uint32 l_ui32StimulationPattern = (OpenViBE::uint32) (*(m_poApplication->getFrequencies()))[ l_i32TargetId ];
 
 //SP		m_poApplication->getLogManager() << OpenViBE::Kernel::LogLevel_Info << "New trainer object : id=" << l_i32TargetId << " litFrames=" << l_ui32FramesL << " darkFrames=" << l_ui32FramesD << "\n";
 		/*

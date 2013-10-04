@@ -99,6 +99,11 @@ void DotSceneLoader::parseDotScene(const Ogre::String &SceneName, const Ogre::St
 	}
 
 	Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource( SceneName, groupName );
+	if(!stream->isReadable()) {
+		Ogre::LogManager::getSingleton().logMessage( "[DotSceneLoader] stream is not readable" );
+		return;
+	}
+
 	char* scene = strdup(stream->getAsString().c_str());
 	XMLDoc.parse<0>(scene);
 
@@ -109,7 +114,7 @@ void DotSceneLoader::parseDotScene(const Ogre::String &SceneName, const Ogre::St
 	if( getAttrib(XMLRoot, "formatVersion", "") == "")
 	{
 		Ogre::LogManager::getSingleton().logMessage( "[DotSceneLoader] Error: Invalid .scene File. Missing <scene>" );
-		delete scene;
+		free(scene);
 		return;
 	}
 
@@ -121,7 +126,7 @@ void DotSceneLoader::parseDotScene(const Ogre::String &SceneName, const Ogre::St
 	// Process the scene
 	processScene(XMLRoot);
 
-	delete scene;
+	free(scene);
 
 	Ogre::LogManager::getSingleton().logMessage( "[DotSceneLoader] Scene parsing finished" );
 }
@@ -317,8 +322,9 @@ void DotSceneLoader::processEnvironment(rapidxml::xml_node<>* XMLNode)
 	// Process colourBackground (?)
 	//! @todo Set the background colour of all viewports (RenderWindow has to be provided then)
 	pElement = XMLNode->first_node("colourBackground");
-	if(pElement)
+	if(pElement) {
 		;//mSceneMgr->set(parseColour(pElement));
+	}
 
 	// Process userDataReference (?)
 	pElement = XMLNode->first_node("userDataReference");
@@ -599,8 +605,9 @@ void DotSceneLoader::processLight(rapidxml::xml_node<>* XMLNode, Ogre::SceneNode
 	}
 	// Process userDataReference (?)
 	pElement = XMLNode->first_node("userDataReference");
-	if(pElement)
+	if(pElement) {
 		;//processUserDataReference(pElement, pLight);
+	}
 }
 
 void DotSceneLoader::processCamera(rapidxml::xml_node<>* XMLNode, Ogre::SceneNode *pParent)
@@ -664,22 +671,29 @@ void DotSceneLoader::processCamera(rapidxml::xml_node<>* XMLNode, Ogre::SceneNod
 	// Process normal (?)
 	pElement = XMLNode->first_node("normal");
 	if(pElement)
+	{
 		;//!< @todo What to do with this element?
+	}
 
 	// Process lookTarget (?)
 	pElement = XMLNode->first_node("lookTarget");
 	if(pElement)
+	{
 		;//!< @todo Implement the camera look target
+	}
 
 	// Process trackTarget (?)
 	pElement = XMLNode->first_node("trackTarget");
 	if(pElement)
+	{
 		;//!< @todo Implement the camera track target
-
+	}
 	// Process userDataReference (?)
 	pElement = XMLNode->first_node("userDataReference");
 	if(pElement)
+	{
 		;//!< @todo Implement the camera user data reference
+	}
 /*
 	// construct a scenenode is no parent
 	if(!pParent)
@@ -930,13 +944,15 @@ void DotSceneLoader::processEntity(rapidxml::xml_node<>* XMLNode, Ogre::SceneNod
 
 	// Process vertexBuffer (?)
 	pElement = XMLNode->first_node("vertexBuffer");
-	if(pElement)
+	if(pElement) {
 		;//processVertexBuffer(pElement);
+	}
 
 	// Process indexBuffer (?)
 	pElement = XMLNode->first_node("indexBuffer");
-	if(pElement)
+	if(pElement) {
 		;//processIndexBuffer(pElement);
+	}
 
 	// Create the entity
 	Ogre::Entity *pEntity = 0;
@@ -1166,7 +1182,7 @@ void DotSceneLoader::processFog(rapidxml::xml_node<>* XMLNode)
 	Ogre::LogManager::getSingleton().logMessage( "[DotSceneLoader] Process Fog" );
 
 	// Process attributes
-	Ogre::Real expDensity = getAttribReal(XMLNode, "density", 0.001);
+	Ogre::Real expDensity = getAttribReal(XMLNode, "density", 0.001f);
 	Ogre::Real linearStart = getAttribReal(XMLNode, "start", 0.0);
 	Ogre::Real linearEnd = getAttribReal(XMLNode, "end", 1.0);
 
