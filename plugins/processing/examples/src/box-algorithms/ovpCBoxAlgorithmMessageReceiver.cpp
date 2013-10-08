@@ -56,6 +56,17 @@ boolean CBoxAlgorithmMessageReceiver::processInput(uint32 ui32InputIndex)
 
 OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMyMessage& msg, uint32 inputIndex)
 {
+	// the static box context describes the box inputs, outputs, settings structures
+	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
+	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
+
+	//create the message
+	IMyMessage& MMM = this->getPlayerContext().createMessage();
+	//test that the sending is actually impossible
+	this->getPlayerContext().sendMessage(MMM, 0);
+
+
 	getLogManager() << OpenViBE::Kernel::LogLevel_Info << "on message input " << inputIndex << "\n";
 	bool success;
 	CString uiKey = CString("meaning of life");
@@ -67,9 +78,6 @@ OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMyMessage&
 	getLogManager() << OpenViBE::Kernel::LogLevel_Info << flt << " " << success <<"\n";
 	const CString* cstr =  msg.getValueCString(strKey, success);
 	getLogManager() << OpenViBE::Kernel::LogLevel_Info << *cstr  << " " << success <<"\n";
-
-	const CString CopyStr =  msg.getCopyValueCString(strKey, success);
-	getLogManager() << OpenViBE::Kernel::LogLevel_Info << CopyStr  << " " << success <<" (by copy)\n";;
 
 	CString matKey = CString("matrix");
 	const IMatrix * l_oMatrix = msg.getValueCMatrix( matKey, success);
@@ -85,7 +93,9 @@ OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMyMessage&
 
 
 	getLogManager() << OpenViBE::Kernel::LogLevel_Info << "testing copy matrix\n";
-	m_oMatrix.getFullCopy(msg.getCopyValueCMatrix( "matrix", success));
+	//m_oMatrix.getFullCopy(msg.getCopyValueCMatrix( "matrix", success));
+	OpenViBEToolkit::Tools::Matrix::copy(m_oMatrix, *(msg.getValueCMatrix( "matrix", success)) );
+
 	getLogManager() << OpenViBE::Kernel::LogLevel_Info <<  "matrix " << success <<" (by copy)\n";
 
 	const float64* l_f64CopyBuffer = m_oMatrix.getBuffer();

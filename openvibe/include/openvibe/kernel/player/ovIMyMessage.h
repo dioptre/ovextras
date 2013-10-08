@@ -58,9 +58,6 @@ namespace OpenViBE
 			 * \return \e NULL in case of error
 			 */
 				virtual const OpenViBE::IMatrix* getValueCMatrix(const CString &key, bool &success) const=0;
-			//copy getters
-				virtual const OpenViBE::CString getCopyValueCString(const CString &key, bool &success) const=0;
-				virtual const OpenViBE::CMatrix getCopyValueCMatrix(const CString &key, bool &success) const=0;
 			//@}
 			/** \name Setters */
 			//@{

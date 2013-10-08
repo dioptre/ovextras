@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
 
 using namespace OpenViBE;
 using namespace std;
@@ -265,26 +264,4 @@ boolean CMatrix::setDimensionLabel(const uint32 ui32DimensionIndex, const uint32
 float64* CMatrix::getBuffer(void)
 {
 	return m_pMatrixImpl->getBuffer();
-}
-
-CMatrix& CMatrix::getFullCopy(const CMatrix& rMatrix)
-{
-	uint32 l_ui32DimensionCount = rMatrix.getDimensionCount();
-	this->setDimensionCount(l_ui32DimensionCount);
-	for (uint32 i=0; i<l_ui32DimensionCount; i++)
-	{
-		uint32 l_ui32DimensionSize = rMatrix.getDimensionSize(i);
-		this->setDimensionSize(i,l_ui32DimensionSize);
-		for (uint32 j=0; j<l_ui32DimensionSize; j++)
-		{
-			const char* l_cLabel = rMatrix.getDimensionLabel(i,j);
-			this->setDimensionLabel(i,j,l_cLabel);
-		}
-	}
-
-	for (uint32 i=0;i<rMatrix.getBufferElementCount();i++)
-	{
-		this->getBuffer()[i] = rMatrix.getBuffer()[i];
-	}
-	return *this;
 }

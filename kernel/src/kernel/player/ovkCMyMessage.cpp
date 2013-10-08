@@ -73,42 +73,6 @@ const OpenViBE::IMatrix* CMyMessage::getValueCMatrix(const CString &key, bool &s
 }
 
 //---------------------------------------------------------------------------------------------------//
-//---------------------------------------------COPY GETTERS -----------------------------------------//
-//---------------------------------------------------------------------------------------------------//
-const OpenViBE::CString CMyMessage::getCopyValueCString(const CString &key, bool &success) const
-{
-	CString l_sValue;
-	std::map<CString, CString>::const_iterator l_oIterator = m_oStrings.find(key);
-	if (l_oIterator!=m_oStrings.end())
-	{
-		l_sValue = l_oIterator->second;
-		success = true;
-	}
-	else
-	{
-		success = false;
-	}
-	return l_sValue;
-
-}
-const OpenViBE::CMatrix CMyMessage::getCopyValueCMatrix(const CString &key, bool &success) const
-{
-	CMatrix *l_oValue = new CMatrix();
-	std::map<CString, CMatrix*>::const_iterator l_oIterator = m_oMatrices.find(key);
-	if (l_oIterator!=m_oMatrices.end())
-	{
-		l_oValue->getFullCopy(*(l_oIterator->second));
-		success = true;
-	}
-	else
-	{
-		success = false;
-	}
-	return *l_oValue;
-
-}
-
-//---------------------------------------------------------------------------------------------------//
 //------------------------------------------------- SETTERS -----------------------------------------//
 //---------------------------------------------------------------------------------------------------//
 bool CMyMessage::setValueUint64(CString key, uint64 valueIn)
@@ -137,7 +101,25 @@ bool CMyMessage::setValueCString(CString key, const CString &valueIn){
 bool CMyMessage::setValueCMatrix(CString key, const CMatrix &valueIn){
 	bool success = false;
 	m_oMatrices[key] = new CMatrix();
-	m_oMatrices[key]->getFullCopy(valueIn);
+	// we copy 'manually' since we do not have access to the toolkit functions
+	uint32 l_ui32DimensionCount = valueIn.getDimensionCount();
+	m_oMatrices[key]->setDimensionCount(l_ui32DimensionCount);
+	for (uint32 i=0; i<l_ui32DimensionCount; i++)
+	{
+		uint32 l_ui32DimensionSize = valueIn.getDimensionSize(i);
+		m_oMatrices[key]->setDimensionSize(i,l_ui32DimensionSize);
+		for (uint32 j=0; j<l_ui32DimensionSize; j++)
+		{
+			const char* l_cLabel = valueIn.getDimensionLabel(i,j);
+			m_oMatrices[key]->setDimensionLabel(i,j,l_cLabel);
+		}
+	}
+
+	for (uint32 i=0;i<valueIn.getBufferElementCount();i++)
+	{
+		m_oMatrices[key]->getBuffer()[i] = valueIn.getBuffer()[i];
+	}
+	//
 	success = true;
 	return success;
 }

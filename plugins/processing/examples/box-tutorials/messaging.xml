@@ -1,7 +1,7 @@
 <OpenViBE-Scenario>
 	<Boxes>
 		<Box>
-			<Identifier>(0x387ab0e9, 0x719730db)</Identifier>
+			<Identifier>(0x3ab35741, 0x3c532da4)</Identifier>
 			<Name>Message Sender</Name>
 			<AlgorithmClassIdentifier>(0x8c881f74, 0x920b95a3)</AlgorithmClassIdentifier>
 			<MessageOutputs>
@@ -55,6 +55,10 @@
 					<Value>126</Value>
 				</Attribute>
 				<Attribute>
+					<Identifier>(0xc67a01dc, 0x28ce06c1)</Identifier>
+					<Value></Value>
+				</Attribute>
+				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
 					<Value>false</Value>
 				</Attribute>
@@ -69,14 +73,22 @@
 			</Attributes>
 		</Box>
 		<Box>
-			<Identifier>(0x57dec68f, 0x1e488916)</Identifier>
+			<Identifier>(0x3db6a6a0, 0x4b8b7888)</Identifier>
 			<Name>Message Receiver</Name>
-			<AlgorithmClassIdentifier>(0xd2846ff3, 0x4802ef84)</AlgorithmClassIdentifier>
+			<AlgorithmClassIdentifier>(0x46b2ce4c, 0x1f00f5d3)</AlgorithmClassIdentifier>
 			<MessageInputs>
 				<MessageInput>
 					<Name>message input</Name>
 				</MessageInput>
 			</MessageInputs>
+			<Settings>
+				<Setting>
+					<TypeIdentifier>(0xa88b3667, 0x0871638c)</TypeIdentifier>
+					<Name>LogLevel</Name>
+					<DefaultValue>Trace</DefaultValue>
+					<Value>Information</Value>
+				</Setting>
+			</Settings>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
@@ -84,19 +96,15 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>48</Value>
+					<Value>65</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>400</Value>
+					<Value>416</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x9d788948, 0xb474f717)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x593c6420, 0x0f33442c)</Identifier>
-					<Value></Value>
+					<Value>(0x76555ab1, 0xee985897)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x996ffcd6, 0x5acfb930)</Identifier>
@@ -104,7 +112,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>128</Value>
+					<Value>136</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xb6de295d, 0x6c16b23a)</Identifier>
@@ -114,19 +122,23 @@
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
 					<Value>false</Value>
 				</Attribute>
+				<Attribute>
+					<Identifier>(0xce18836a, 0x9c0eb403)</Identifier>
+					<Value>1</Value>
+				</Attribute>
 			</Attributes>
 		</Box>
 	</Boxes>
 	<Links></Links>
 	<MessageLinks>
 		<MessageLink>
-			<Identifier>(0x1f040d3a, 0x52ae6da7)</Identifier>
+			<Identifier>(0x5f3b4f80, 0x314fe6ae)</Identifier>
 			<Source>
-				<BoxIdentifier>(0x387ab0e9, 0x719730db)</BoxIdentifier>
+				<BoxIdentifier>(0x3ab35741, 0x3c532da4)</BoxIdentifier>
 				<BoxOutputIndex>0</BoxOutputIndex>
 			</Source>
 			<Target>
-				<BoxIdentifier>(0x57dec68f, 0x1e488916)</BoxIdentifier>
+				<BoxIdentifier>(0x3db6a6a0, 0x4b8b7888)</BoxIdentifier>
 				<BoxInputIndex>0</BoxInputIndex>
 			</Target>
 			<Attributes>
@@ -144,30 +156,33 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
-					<Value>330</Value>
+					<Value>342</Value>
 				</Attribute>
 			</Attributes>
 		</MessageLink>
 	</MessageLinks>
 	<Comments>
 		<Comment>
-			<Identifier>(0x0b000461, 0x14f9d6e9)</Identifier>
-			<Text>You can modify the frequency 
-at which the MessageSender 
-box sends messages</Text>
+			<Identifier>(0x39597a01, 0x16e46978)</Identifier>
+			<Text>You can add, remove and change 
+the names of message inputs 
+on the MessageReceiver box 
+and of message outputs on the 
+MessageSender box. Right click
+on a box to access the menu </Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>176</Value>
+					<Value>448</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>144</Value>
+					<Value>176</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
 		<Comment>
-			<Identifier>(0x193ed884, 0x47142764)</Identifier>
+			<Identifier>(0x40f5830c, 0x32a0817e)</Identifier>
 			<Text>MessageReceiver will print 
 the content of the message 
 in the console.</Text>
@@ -183,7 +198,7 @@ in the console.</Text>
 			</Attributes>
 		</Comment>
 		<Comment>
-			<Identifier>(0x2973be63, 0x03e97299)</Identifier>
+			<Identifier>(0x536a2afa, 0x1f4dc31a)</Identifier>
 			<Text>This scenario shows the message capabilies. Box can exchange messages</Text>
 			<Attributes>
 				<Attribute>
@@ -197,7 +212,7 @@ in the console.</Text>
 			</Attributes>
 		</Comment>
 		<Comment>
-			<Identifier>(0x53ebe805, 0x609f0906)</Identifier>
+			<Identifier>(0x58104af9, 0x12d6f066)</Identifier>
 			<Text>You can add settings as long as
 they are integers floats or strings. 
 If you change an existing setting 
@@ -217,21 +232,18 @@ used to fill the message.</Text>
 			</Attributes>
 		</Comment>
 		<Comment>
-			<Identifier>(0x7077c69c, 0x26259028)</Identifier>
-			<Text>You can add, remove and change 
-the names of message inputs 
-on the MessageReceiver box 
-and of message outputs on the 
-MessageSender box. Right click
-on a box to access the menu </Text>
+			<Identifier>(0x655d2db7, 0x376173d9)</Identifier>
+			<Text>You can modify the frequency 
+at which the MessageSender 
+box sends messages</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>448</Value>
+					<Value>176</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>176</Value>
+					<Value>144</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>

@@ -31,9 +31,6 @@ namespace OpenViBE
 			OpenViBE::float64 getValueFloat64(const CString &key, bool &success) const;
 			const OpenViBE::CString* getValueCString(const CString &key, bool &success) const;
 			const OpenViBE::IMatrix* getValueCMatrix(const CString &key, bool &success) const;
-			//copy getters
-			const OpenViBE::CString getCopyValueCString(const CString &key, bool &success) const;
-			const OpenViBE::CMatrix getCopyValueCMatrix(const CString &key, bool &success) const;
 			//setters
 			bool setValueUint64(CString key, uint64 valueIn);
 			bool setValueFloat64(CString key, float64 valueIn);

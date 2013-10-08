@@ -90,6 +90,7 @@ CSimulatedBox::CSimulatedBox(const IKernelContext& rKernelContext, CScheduler& r
 	,m_ui64ClockActivationStep(0)
 	,m_pOgreVis(NULL)
 	,m_oSceneIdentifier(OV_UndefinedIdentifier)
+	,m_bIsReceivingMessage(false)
 {
 #if defined _SimulatedBox_ScopeTester_
 	this->getLogManager() << LogLevel_Debug << __OV_FUNC__ << " - " << __OV_FILE__ << ":" << __OV_LINE__ << "\n";
@@ -1300,6 +1301,11 @@ void CSimulatedBox::handleCrash(const char* sHintName)
 
 boolean CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 {
+	if(m_bIsReceivingMessage) {
+			this->getLogManager() << LogLevel_Error << "Message sending prohibited while receiving message.\n";
+			return false;
+		}
+
 	this->getLogManager() << LogLevel_Debug << "SimulatedBox sendmessage on output" << outputIndex <<"\n";
 
 	//get the message links originating from this box
@@ -1313,7 +1319,12 @@ boolean CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 			{
 				CIdentifier l_oTargetBoxIdentifier=l_pLink->getTargetBoxIdentifier();
 				uint32 l_ui32TargetBoxInputIndex=l_pLink->getTargetBoxInputIndex();
-				m_rScheduler.sendMessage(msg, l_oTargetBoxIdentifier, l_ui32TargetBoxInputIndex);
+				boolean l_bMessageReceived = m_rScheduler.sendMessage(msg, l_oTargetBoxIdentifier, l_ui32TargetBoxInputIndex);
+				if (!l_bMessageReceived)
+				{
+					this->getLogManager() << LogLevel_ImportantWarning << "Box " << m_pScenario->getBoxDetails(l_oTargetBoxIdentifier)->getName()
+									<< " with ID " << l_oTargetBoxIdentifier << " failed to receive the message. Check the connection and/or the message content\n";
+				}
 			}
 		}
 		l_oLinkIdentifier=m_pScenario->getNextMessageLinkIdentifierFromBox(l_oLinkIdentifier, m_pBox->getIdentifier());
@@ -1323,10 +1334,12 @@ boolean CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 
 boolean CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
 {
-	//TODO change to limited context
+	m_bIsReceivingMessage = true;
 	CBoxAlgorithmContext l_oBoxAlgorithmContext(getKernelContext(), this, m_pBox);
 	this->getLogManager() << LogLevel_Debug << "simulated box" << m_pBox->getName() <<" receiving message on input " << inputIndex <<"\n";
 	return m_pBoxAlgorithm->processMessage(l_oBoxAlgorithmContext, msg, inputIndex);
+
+	m_bIsReceivingMessage = false;
 }
 
 

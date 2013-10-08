@@ -64,9 +64,40 @@ boolean CBoxAlgorithm@@ClassName@@::processInput(uint32 ui32InputIndex)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmMessageSpy::processMessage(const IMyMessage& msg, uint32 inputIndex)
+boolean CBoxAlgorithm@@ClassName@@::processMessage(const IMyMessage& msg, uint32 inputIndex)
 {
-	//
+	//You can get the first key of the CString map by calling this function
+	//const CString *l_sKey = msg.getFirstCStringToken();
+	//You can then go through all the keys by calling
+	// getNextCStringToken(previousKey)
+	//it will return NULL when reaching the end of the map
+	/*
+	while(l_sKey!=NULL)
+	{
+		l_sKey = msg.getNextCStringToken(*l_sKey);
+		//and access the content with
+		boolean ok;
+		CString * l_sContent = msg.getValueCString(l_sKey, ok);
+		//if ok is false, the retrieval was not successful
+		//the message will be deleted when the function goes out of scope, store the value if you wish to use it later
+	}
+
+	//Same thing for the other maps
+	/*
+	const CString *l_sMatrixKey = msg.getFirstCMatrixToken();
+	while(l_sMatrixKey!=NULL)
+	{
+		l_sMatrixKey = msg.getNextCMatrixToken(*l_sMatrixKey);
+		//and access the content with
+		boolean ok;
+		IMatrix * l_oContent = msg.getValueCMatrix(l_sMatrixKey, ok);
+		//if ok is false, the retrieval was not successful
+		//the message will be deleted when the function goes out of scope, store the value if you wish to use it later
+		//for matrices, the copy is done that way
+		//CMatrix * l_oLocalMatrix = new CMatrix();
+		//OpenViBEToolkit::Tools::Matrix::copy(*l_oLocalMatrix, l_oContent);
+	}
+	//*/
 	return true;
 }
 /*******************************************************************************/

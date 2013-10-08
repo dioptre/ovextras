@@ -1,8 +1,5 @@
 #include "ovpCBoxAlgorithmMessageSender.h"
 
-//to remove
-#include <sstream>
-
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -18,9 +15,9 @@ boolean CBoxAlgorithmMessageSender::initialize(void)
 
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	uint32 l_ui32NumberOfSettings = l_rStaticBoxContext.getSettingCount();
-	//get the other settings, they will fill the message
+	//get the other settings, they will fill the message (except the setting 0, which is the box frequency)
 	// only Integer, Float and String settings are allowed (no CMatrix setting available)
-	for (uint32 i=0; i<l_ui32NumberOfSettings; i++)
+	for (uint32 i=1; i<l_ui32NumberOfSettings; i++)
 	{
 		CString l_sSettingName;
 		CIdentifier l_oSettingId;
@@ -126,15 +123,9 @@ boolean CBoxAlgorithmMessageSender::process(void)
 	//has been used for tests, to remove
     msg.setValueUint64( CString("meaning of life"), 42);
     msg.setValueFloat64(CString("float"), 1.354);
-	//that work
-	//CString test("test");
-	//msg.setValueCString( CString("string"), test);
-	CString test2("test2");
-	msg.setValueCString( CString("string2"), test2);
-	CString test3("test3");
-	msg.setValueCString( CString("string3"), test3);
-	//this now works as well
-	msg.setValueCString( CString("string"), CString("testhahaha"));
+	CString test("test");
+	msg.setValueCString( CString("string"), test);
+	msg.setValueCString( CString("string2"), CString("test2"));
 
 	//adding a matrix to the message to test if it is received correctly
 	CMatrix *l_oMatrix = new CMatrix();

@@ -331,6 +331,7 @@ namespace OpenViBE
 
             // messages
             std::vector< OpenViBE::Kernel::CMyMessage > m_vPreparedMessages;
+			OpenViBE::boolean m_bIsReceivingMessage;
 
 
 		public:
