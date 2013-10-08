@@ -25,7 +25,7 @@ boolean CBoxAlgorithmAdaptiveP300Classifier::initialize(void)
 	// Streamed matrix stream encoder
 	m_oAlgo2_StreamedMatrixEncoder.initialize(*this);
 	
-	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierPLDA));
+	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierRelearnPLDA));
 	m_pClassifier->initialize();
 	
 	m_oAlgo2_StreamedMatrixEncoder.getInputMatrix().setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
