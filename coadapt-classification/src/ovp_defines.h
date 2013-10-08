@@ -1,6 +1,8 @@
 #ifndef __OpenViBEPlugins_Defines_H__
 #define __OpenViBEPlugins_Defines_H__
 
+enum { FULL=0, DIAG=1, SHRINK_TO_DIAG=2, SHRINK_TO_UNITY=3 };
+
 //___________________________________________________________________//
 //                                                                   //
 // Plugin Object Descriptor Class Identifiers                        //
@@ -48,12 +50,16 @@
 #define OVP_ClassId_BoxAlgorithm_AdaptiveP300Classifier 		OpenViBE::CIdentifier(0x73C8A153, 0x6537A7E2)
 #define OVP_ClassId_BoxAlgorithm_AdaptiveP300ClassifierDesc 	OpenViBE::CIdentifier(0xBA56CFE0, 0x7EBBE949)
 
-#define OVP_ClassId_Algorithm_ClassifierPLDA                                         OpenViBE::CIdentifier(0x5CF66A73, 0xF5BBF0BF)
-#define OVP_ClassId_Algorithm_ClassifierPLDADesc                                   OpenViBE::CIdentifier(0xD5C5EF91, 0xE1B1C4F4)
+#define OVP_ClassId_Algorithm_ClassifierRelearnPLDA                                         OpenViBE::CIdentifier(0x5CF66A73, 0xF5BBF0BF)
+#define OVP_ClassId_Algorithm_ClassifierRelearnPLDADesc                                   OpenViBE::CIdentifier(0xD5C5EF91, 0xE1B1C4F4)
 
 #define OVP_Algorithm_ClassifierPLDA_InputParameterId_Shrinkage		OpenViBE::CIdentifier(0x7FEFDCA9, 0x816ED903) 
 #define OVP_Algorithm_ClassifierPLDA_InputParameterId_Lambda		OpenViBE::CIdentifier(0xEBAEB213, 0xDD4735A0)
 #define OVP_TypeId_ShrinkageType									OpenViBE::CIdentifier(0x344A52F5, 0x489DB439)
+
+
+#define OVP_ClassId_Algorithm_ClassifierPLDA                                         OpenViBE::CIdentifier(0x2F9ECA0B, 0x8D3CA7BD)
+#define OVP_ClassId_Algorithm_ClassifierPLDADesc                                   OpenViBE::CIdentifier(0x1BD67420, 0x587600E6)
 
 //___________________________________________________________________//
 //                                                                   //
@@ -62,8 +68,8 @@
 //                                                                   //
 
 /*												                                                                                                                                         
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0x2F9ECA0B, 0x8D3CA7BD)
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0x1BD67420, 0x587600E6)
+#define OVP_ClassId_                                        
+#define OVP_ClassId_                                        
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0xB083614E, 0x26C6B4BD)
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0x7D13B924, 0xF194DA09)
 #define OVP_ClassId_                                        OpenViBE::CIdentifier(0x2397E74F, 0xCAC8F95C)

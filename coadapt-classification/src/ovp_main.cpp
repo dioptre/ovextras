@@ -13,7 +13,8 @@
 #include "algorithms/classification/ovpCAlgorithmClassifierNULL.h"
 #include "algorithms/classification/ovpCAlgorithmClassifierMixtureOfExperts.h"
 //#include "algorithms/classification/ovpCLikelihoodComputeFunction.h"
-#include "algorithms/classification/ovpCAlgorithmClassifierLDA.h"
+#include "algorithms/classification/ovpCAlgorithmClassifierRelearnPLDA.h"
+#include "algorithms/classification/ovpCAlgorithmClassifierPLDA.h"
 
 
 #include <vector>
@@ -45,13 +46,14 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EvidenceAccumulationAlgorithmInputType, "Class probabilities", OVP_InputType_EvidenceAccumulationProbability.toUInteger());
 	
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Mixture of Experts", OVP_ClassId_Algorithm_ClassifierMixtureOfExperts.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Relearn Probabilistic LDA", OVP_ClassId_Algorithm_ClassifierRelearnPLDA.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Probabilistic LDA", OVP_ClassId_Algorithm_ClassifierPLDA.toUInteger());
 	
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_ShrinkageType,"Shrinkage");
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Full covariance",OpenViBEPlugins::Local::FULL);
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Shrink to diagonal",OpenViBEPlugins::Local::SHRINK_TO_DIAG);
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Diagonal",OpenViBEPlugins::Local::DIAG);
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Shrink to unity",OpenViBEPlugins::Local::SHRINK_TO_UNITY);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Full covariance",FULL);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Shrink to diagonal",SHRINK_TO_DIAG);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Diagonal",DIAG);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Shrink to unity",SHRINK_TO_UNITY);
 	
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorWithUpdateDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmSupErrPDesc);
@@ -62,7 +64,8 @@ OVP_Declare_Begin()
 	//OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CLikelihoodComputeFunctionDesc);
 	//OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CDynamicNaiveBayesComputeBoxAlgorithmDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmEvidenceAccumulatorDesc);
-	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierMixtureOfExpertsDesc);
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierMixtureOfExpertsDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmAdaptiveP300ClassifierDesc);
-	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierPLDADesc);
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierRelearnPLDADesc);
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierPLDADesc);
 OVP_Declare_End()

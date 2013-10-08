@@ -1,4 +1,4 @@
-#include "ovpCAlgorithmClassifierLDA.h"
+#include "ovpCAlgorithmClassifierRelearnPLDA.h"
 
 #if defined TARGET_HAS_ThirdPartyITPP
 
@@ -13,13 +13,13 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Local;
+using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
 
 #define CIRCULAR_BUFFER_SIZE 3600
 
-boolean CAlgorithmClassifierPLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
+boolean CAlgorithmClassifierRelearnPLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
 	TParameterHandler < int64 > ip_i64ShrinkageType(this->getInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Shrinkage));
 	TParameterHandler < float64 > l_f64Lambda(this->getInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Lambda));
@@ -227,7 +227,7 @@ boolean CAlgorithmClassifierPLDA::train(const IFeatureVectorSet& rFeatureVectorS
 	return true;
 }
 
-boolean CAlgorithmClassifierPLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
+boolean CAlgorithmClassifierRelearnPLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
 {
 	if(rFeatureVector.getSize()+1!=(unsigned int)m_oCoefficientsClass1.size())
 	{
@@ -251,7 +251,7 @@ boolean CAlgorithmClassifierPLDA::classify(const IFeatureVector& rFeatureVector,
 	float64 l_f64Result=std::exp(l_oFeatures*m_oCoefficientsClass1)
 					/(std::exp(l_oFeatures*m_oCoefficientsClass1)+std::exp(l_oFeatures*m_oCoefficientsClass2));
 					
-	this->getLogManager() << LogLevel_Info << "p(Class1|x)=" << l_f64Result << "\n";
+	this->getLogManager() << LogLevel_Debug << "p(Class1|x)=" << l_f64Result << "\n";
 	
 	rClassificationValues.setSize(1);
 	rClassificationValues[0]=l_f64Result;
@@ -268,14 +268,14 @@ boolean CAlgorithmClassifierPLDA::classify(const IFeatureVector& rFeatureVector,
 	return true;
 }
 
-boolean CAlgorithmClassifierPLDA::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
+boolean CAlgorithmClassifierRelearnPLDA::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
 {
 	rMemoryBuffer.setSize(0, true);
 	rMemoryBuffer.append(m_oConfiguration);
 	return true;
 }
 
-boolean CAlgorithmClassifierPLDA::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
+boolean CAlgorithmClassifierRelearnPLDA::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
 {
 	m_f64Class1=0;
 	m_f64Class2=0;
@@ -293,13 +293,13 @@ boolean CAlgorithmClassifierPLDA::loadConfiguration(const IMemoryBuffer& rMemory
 	return true;
 }
 
-void CAlgorithmClassifierPLDA::write(const char* sString)
+void CAlgorithmClassifierRelearnPLDA::write(const char* sString)
 {
 	//std::cout << " " << sString << "\n";
 	m_oConfiguration.append((const uint8*)sString, ::strlen(sString));
 }
 
-void CAlgorithmClassifierPLDA::openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
+void CAlgorithmClassifierRelearnPLDA::openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
 {
 	m_vNode.push(sName);
 	
@@ -311,7 +311,7 @@ void CAlgorithmClassifierPLDA::openChild(const char* sName, const char** sAttrib
 	}		
 }
 
-void CAlgorithmClassifierPLDA::processChildData(const char* sData)
+void CAlgorithmClassifierRelearnPLDA::processChildData(const char* sData)
 {
 	std::stringstream l_sData(sData);
 
@@ -380,7 +380,7 @@ void CAlgorithmClassifierPLDA::processChildData(const char* sData)
 	}		
 }
 
-void CAlgorithmClassifierPLDA::closeChild(void)
+void CAlgorithmClassifierRelearnPLDA::closeChild(void)
 {
 	m_vNode.pop();
 }

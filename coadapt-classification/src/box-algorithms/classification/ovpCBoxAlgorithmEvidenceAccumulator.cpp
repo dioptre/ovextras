@@ -271,9 +271,14 @@ boolean CBoxAlgorithmEvidenceAccumulator::process(void)
 				}
 				
 				for (uint32 j=0; j<l_pInputMatrix->getBufferElementCount(); j++)
+				{
 					*(m_pNormalizedAccumulatedEvidence->getBuffer()+j) = std::exp(*(m_pAccumulatedEvidence->getBuffer()+j))/l_f64Sum;
+					//std::cout << " " << *(m_pNormalizedAccumulatedEvidence->getBuffer()+j);
+				}
+				//std::cout << "\n";
 				
 				findMaximum(m_pNormalizedAccumulatedEvidence->getBuffer(), m_ui32MaximumIndex, l_f32Maximum);
+				getLogManager() << LogLevel_Debug << "Intermediate maximum " << l_f32Maximum << " at index " << m_ui32MaximumIndex << "\n";	
 				m_bEarlyStoppingConditionMet = true;
 				for (uint32 j=0; j<l_pInputMatrix->getBufferElementCount(); j++)
 					if (m_ui32MaximumIndex!=j && *(m_pNormalizedAccumulatedEvidence->getBuffer()+j)>l_f32Maximum-m_bStopCondition)
