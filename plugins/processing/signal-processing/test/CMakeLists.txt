@@ -1,4 +1,4 @@
-PROJECT(test_hilberttransform)
+PROJECT(test_thresholdDataComparison)
 
 IF(WIN32)
 	ADD_DEFINITIONS(-DTARGET_OS_Windows)
@@ -10,7 +10,7 @@ ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
 ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
 	
 INCLUDE_DIRECTORIES(../src)
-ADD_EXECUTABLE(${PROJECT_NAME} test_hilberttransform.cpp)
+ADD_EXECUTABLE(${PROJECT_NAME} test_thresholdDataComparison.cpp)
 
 INCLUDE("FindOpenViBE")
 

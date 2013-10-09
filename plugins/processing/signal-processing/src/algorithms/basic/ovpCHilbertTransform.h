@@ -10,6 +10,20 @@
 #include <unsupported/Eigen/FFT>
 #include <complex>
 
+// This class could be in its own file
+class HilbertTransform {
+
+public:
+	
+	OpenViBE::boolean transform(const Eigen::VectorXcd& vecXcdInput, Eigen::VectorXcd& vecXcdOutput);
+
+private:
+	Eigen::VectorXcd m_vecXcdSignalFourier;    // Fourier Transform of the input signal
+	Eigen::VectorXcd m_vecXcdHilbert;          // Vector h used to apply Hilbert transform
+
+	Eigen::FFT< double, Eigen::internal::kissfft_impl<double > > m_oFFT; // Instance of the fft transform
+
+};
 
 namespace OpenViBEPlugins
 {
@@ -38,11 +52,7 @@ namespace OpenViBEPlugins
 
 		private:
 
-			Eigen::VectorXcd m_vecXcdSignalBuffer; // Input signal Buffer
-			Eigen::VectorXcd m_vecXcdSignalFourier; // Fourier Transform of input signal
-			Eigen::VectorXd m_vecXdHilbert; // Vector h used to apply Hilbert transform
-
-			Eigen::FFT< double, Eigen::internal::kissfft_impl<double > > m_fft; //create instance of fft transform
+			HilbertTransform m_oHilbert; // Instance of the Hilbert transform doing the actual computation
 
 		};
 
@@ -53,11 +63,11 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Hilbert Transform"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Alison Cellard"); }
-			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
+			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Computes the Hilbert transform of a signal"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Give the analytic signal ua(t) = u(t) + iH(u(t)) of the input signal u(t) using Hilbert transform"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Basic"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-execute"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_HilbertTransform; }
@@ -66,8 +76,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 					OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
-				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_HilbertTransform_InputParameterId_Matrix,     		"Matrix", OpenViBE::Kernel::ParameterType_Matrix);
-				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_HilbertTransform_OutputParameterId_HilbertMatrix, "Hilbert Matrix", OpenViBE::Kernel::ParameterType_Matrix);
+				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_HilbertTransform_InputParameterId_Matrix,     	    "Matrix", OpenViBE::Kernel::ParameterType_Matrix);
+				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_HilbertTransform_OutputParameterId_HilbertMatrix,  "Hilbert Matrix", OpenViBE::Kernel::ParameterType_Matrix);
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_HilbertTransform_OutputParameterId_EnvelopeMatrix, "Envelope Matrix", OpenViBE::Kernel::ParameterType_Matrix);
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_HilbertTransform_OutputParameterId_PhaseMatrix,    "Phase Matrix", OpenViBE::Kernel::ParameterType_Matrix);
 
