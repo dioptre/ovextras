@@ -1,0 +1,83 @@
+/**
+ * \page BoxAlgorithm_ConnectivityMeasure Connectivity Measure
+__________________________________________________________________
+
+Detailed description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Description|
+ This box measure connectivity between pairs of channels using several method. For now, Single-Trial Phase Locking Value [1] and Magnitude squared coherence are available. 
+ 
+ [1] JP Lachaux, E Rodriguez, M Le Van Quyen, A Lutz, J Martinerie, FJ Varela, Studying single-trials of phase synchronous activity in the brain, International Journal of Bifurcation and Chaos in Applied Sciences and Engineering vol.10 p.2429-2440, 2000.
+ 
+ 
+ * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Description|
+__________________________________________________________________
+
+Inputs description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Inputs|
+ * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Inputs|
+
+ * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Input1|
+The input signal on which connectivity between channels needs to be measured.
+ * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Input1|
+__________________________________________________________________
+
+Outputs description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Outputs|
+ * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Outputs|
+
+ * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Output1|
+ Connectivity measure between chosen channels
+ * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Output1|
+__________________________________________________________________
+
+Settings description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Settings|
+ * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Settings|
+
+ * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Setting1|
+ Choice of the algorithm to measure connectivity (PLV, coherence, etc.)
+ * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Setting1|
+
+ * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Setting2|
+ A semicolon separated list of pairs of channel identifiers. Channels within a pair must be separated by a hyphen. You can use the index of the channel or the name of the
+ channel. Also, ranges can be selected specifying first channel identifier, followed by a colon, followed by
+ the second channel identifier. To select all channels at once, use '*'.
+ * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Setting2|
+
+ * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Setting3|
+ The kind of identification for channel list.
+ - \c Smart let the box try to detect if the channel identifier is an index or a name
+ - \c Name forces the channel identifiers to be considered as channel names. This can be useful if channel names are numbers.
+ - \c Index forces the channel identifiers to be considered as channel indices. This can be useful if channel names are numbers.
+ * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Setting3|
+__________________________________________________________________
+
+Examples description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Examples|
+ * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Examples|
+__________________________________________________________________
+
+Miscellaneous description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Miscellaneous|
+ By default the box have one input for a signal set and you can measure connectivity between its channels. If you want to measure connectivity between two channels from two differents signals set, you can add an input. Please make sure the the two signal set have the same properties (same length, same sampling frequency).
+ Also, note that in case of two input, the first channel of each pairs will be from the first input and the second channel from the second input.
+ 
+ Channel selection examples:
+ 
+	Single channel selection : 4-5;6-7, measure connectivity between channel 4 and 5 and between channel 6 and 7, if 2 inputs, this will measure connectivity between the 1st channel of input signal 1 and the 5th channel of input 2. Same goes for channel 6 and 7.
+	Range selection : 1:4-5, measure connectivity between 4 pairs, equivalent to 1-5;2-5;3-5;4-5.
+	All selection : 5-* measure connectivity between channel 5 and all the others or *-*, that form n*n pairs if one input signal with n channels or n*m pairs if two input signals with respectively n and m channels.
+ * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Miscellaneous|
+ */
