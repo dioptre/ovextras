@@ -132,6 +132,8 @@ OpenViBE::boolean CBoxAlgorithmPython::initializePythonSafely()
 		return true;
 	}
 
+	this->getLogManager() << LogLevel_Info << "Discovered Python is v" << Py_GetVersion() << " (" << Py_GetPlatform() << ")\n";
+
 	OpenViBE::CString l_sCommand;
 	l_sCommand = l_sCommand + "import sys\n";
 	l_sCommand = l_sCommand + "sys.path.append('";
@@ -307,6 +309,8 @@ OpenViBE::boolean CBoxAlgorithmPython::initialize(void)
 	{
 		return false;
 	}
+
+
 
 	//Initialize the clock frequency of the box depending on the first setting of the box
 	CString l_sSettingValue;
