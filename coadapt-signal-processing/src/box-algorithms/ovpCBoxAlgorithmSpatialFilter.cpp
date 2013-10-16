@@ -204,9 +204,9 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 		{
 			for(j=0; j<l_pSpatialFilter->getDimensionSize(0); j++)
 				for(k=0; k<l_pSpatialFilter->getDimensionSize(1); k++)
-					m_vCoefficient[j*l_pSpatialFilter->getDimensionSize(1)+k] = *(l_pSpatialFilter->getBuffer()+l++);	
+					m_vCoefficient[j*l_pSpatialFilter->getDimensionSize(1)+k] = *(l_pSpatialFilter->getBuffer()+l++);
+			this->getLogManager() << LogLevel_Info << "Spatial filter updated, dimensions " << l_pSpatialFilter->getDimensionSize(0) << ", " << l_pSpatialFilter->getDimensionSize(1) << "\n";	
 		}
-		this->getLogManager() << LogLevel_Info << "Spatial filter updated, dimensions " << l_pSpatialFilter->getDimensionSize(0) << ", " << l_pSpatialFilter->getDimensionSize(1) << "\n";
 	}		
 
 	for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
@@ -216,7 +216,7 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 
 		m_pStreamDecoder->process();
 		CString l_sSettingOverrideFilename = l_rStaticBoxContext.getAttributeValue(OV_AttributeId_Box_SettingOverrideFilename);
-		this->getLogManager() << LogLevel_Info << "Override filename " << l_sSettingOverrideFilename << "\n";
+
 		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedHeader))
 		{
 			CString l_sCoefficient=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);

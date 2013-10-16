@@ -270,6 +270,7 @@ boolean CAlgorithmClassifierRelearnPLDA::classify(const IFeatureVector& rFeature
 
 boolean CAlgorithmClassifierRelearnPLDA::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
 {
+	std::cout << "saving config relearn plda\n";
 	rMemoryBuffer.setSize(0, true);
 	rMemoryBuffer.append(m_oConfiguration);
 	return true;

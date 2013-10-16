@@ -67,6 +67,7 @@ namespace OpenViBEPlugins
 			//virtual void closeChild(void); // XML ReaderCallback
 			
 			virtual void train();
+			virtual void loadConfiguration();
 			
 		protected:
 			// Codec algorithms specified in the skeleton-generator:

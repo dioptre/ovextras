@@ -62,31 +62,7 @@ boolean CBoxAlgorithmAdaptiveP300Classifier::initialize(void)
 	m_ui64LetterIndex = 0;
 	m_ui64SaveConfigurationTriggerIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 	
-	CString l_sConfigurationFilename;
-	this->getStaticBoxContext().getSettingValue(0, l_sConfigurationFilename);
-	
-	TParameterHandler < IMemoryBuffer* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
-	IMemoryBuffer* l_pConfigurationFile = ip_pClassificationConfiguration;
-	ifstream l_oFile(l_sConfigurationFilename.toASCIIString(), ios::binary);
-	
-	if(l_oFile.is_open())
-	{
-		size_t l_iFileLen;
-		l_oFile.seekg(0, ios::end);
-		l_iFileLen=l_oFile.tellg();
-		l_oFile.seekg(0, ios::beg);
-		l_pConfigurationFile->setSize(l_iFileLen, true);
-		l_oFile.read((char*)l_pConfigurationFile->getDirectPointer(), l_iFileLen);
-		l_oFile.close();
-		//m_bIsConfigurationFile = true;
-		std::cout << "trigger load configuration\n";
-		m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
-	}
-	else
-	{
-		this->getLogManager() << LogLevel_Warning << "Could not load configuration from file [" << l_sConfigurationFilename << "]\n";
-		//m_bIsConfigurationFile = false;
-	}
+	loadConfiguration();
 
 	return true;
 }
@@ -104,27 +80,6 @@ boolean CBoxAlgorithmAdaptiveP300Classifier::uninitialize(void)
 	
 	return true;
 }
-/*******************************************************************************/
-
-/*
-boolean CBoxAlgorithmAdaptiveP300Classifier::processClock(IMessageClock& rMessageClock)
-{
-	// some pre-processing code if needed...
-
-	// ready to process !
-	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
-
-	return true;
-}
-/*******************************************************************************/
-
-/*
-uint64 CBoxAlgorithmAdaptiveP300Classifier::getClockFrequency(void)
-{
-	// Note that the time is coded on a 64 bits unsigned integer, fixed decimal point (32:32)
-	return 0LL<<32; // the box clock frequency
-}
-/*******************************************************************************/
 
 
 boolean CBoxAlgorithmAdaptiveP300Classifier::processInput(uint32 ui32InputIndex)
@@ -220,7 +175,7 @@ boolean CBoxAlgorithmAdaptiveP300Classifier::process(void)
 					
 					/*if (m_ui32BufferPointer==CIRCULAR_BUFFER_SIZE)
 						m_ui32BufferPointer = 0;
-					m_vCircularSampleBuffer[m_ui32BufferPointer] = l_oFeatures;
+					m_vCim_vSampleVectorrcularSampleBuffer[m_ui32BufferPointer] = l_oFeatures;
 					m_vCircularLabelBuffer[m_ui32BufferPointer] = l_f64Class;
 					m_ui32BufferPointer++;*/		
 
@@ -315,6 +270,7 @@ boolean CBoxAlgorithmAdaptiveP300Classifier::process(void)
 					m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration);
 					
 					CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0));
+					std::cout << "saving in " << l_sConfigurationFilename << "\n";
 					std::ofstream l_oFile(l_sConfigurationFilename.toASCIIString(), ios::binary);
 					if(l_oFile.is_open())
 					{
@@ -328,6 +284,10 @@ boolean CBoxAlgorithmAdaptiveP300Classifier::process(void)
 						return false;
 					}					
 				}
+				if (l_ui64StimulationIdentifier==OVTK_StimulationId_TrainCompleted)
+				{
+					loadConfiguration();
+				}
 			}
 		}
 		if(m_oAlgo1_StimulationDecoder.isEndReceived())
@@ -338,8 +298,14 @@ boolean CBoxAlgorithmAdaptiveP300Classifier::process(void)
 	
 	if (m_ui64LetterIndex!=0 && m_bFeedbackReceived && m_bFlashGroupsReceived)
 	{
-		getLogManager() << LogLevel_Info << "Start training... \n";
-		train();
+		if (m_vSampleVector.size()>0)
+		{
+			getLogManager() << LogLevel_Info << "Start training... \n";
+			train();
+		}
+		for(size_t j=0; j<m_vFlashGroups.size(); j++)	
+			delete m_vFlashGroups[j];
+		m_vFlashGroups.clear();
 		m_bFlashGroupsReceived = false;
 		m_bFeedbackReceived = false;
 		m_bTargetReceived = false;
@@ -394,134 +360,30 @@ void CBoxAlgorithmAdaptiveP300Classifier::train()
 	m_vFlashGroups.clear();
 }
 
-/*boolean CBoxAlgorithmAdaptiveP300Classifier::classify(const itpp::vec& l_oFeatures, float64& rf64Class, float64& rProbability)
+void CBoxAlgorithmAdaptiveP300Classifier::loadConfiguration()
 {
-	if(l_oFeatures.length()+1!=(unsigned int)m_oCoefficientsClass1.size())
+	CString l_sConfigurationFilename;
+	this->getStaticBoxContext().getSettingValue(0, l_sConfigurationFilename);	
+	
+	this->getLogManager() << LogLevel_Info << "Loading new configuration from file " << l_sConfigurationFilename << "\n";
+	
+	TParameterHandler < IMemoryBuffer* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
+	IMemoryBuffer* l_pConfigurationFile = ip_pClassificationConfiguration;
+	ifstream l_oFile(l_sConfigurationFilename.toASCIIString(), ios::binary);
+	
+	if(l_oFile.is_open())
 	{
-		this->getLogManager() << LogLevel_Warning << "Feature vector size " << l_oFeatures.length() << " and hyperplane parameter size " << (uint32) m_oCoefficientsClass1.size() << " does not match\n";
-		return false;
-	}
-
-	l_oFeatures.ins(0, 1);
-
-	rProbability=std::exp(l_oFeatures*m_oCoefficientsClass1)
-					/(std::exp(l_oFeatures*m_oCoefficientsClass1)+std::exp(l_oFeatures*m_oCoefficientsClass2));
-					
-	this->getLogManager() << LogLevel_Debug << "p(Class1|x)=" << rProbability << "\n";
-
-	if(rProbability >= 0.5)
-	{
-		rf64Class=m_f64Class1;
+		size_t l_iFileLen;
+		l_oFile.seekg(0, ios::end);
+		l_iFileLen=l_oFile.tellg();
+		l_oFile.seekg(0, ios::beg);
+		l_pConfigurationFile->setSize(l_iFileLen, true);
+		l_oFile.read((char*)l_pConfigurationFile->getDirectPointer(), l_iFileLen);
+		l_oFile.close();
+		m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
 	}
 	else
 	{
-		rf64Class=m_f64Class2;
-	}
-
-	return true;
-}
-
-boolean CBoxAlgorithmAdaptiveP300Classifier::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
-{
-	rMemoryBuffer.setSize(0, true);
-	rMemoryBuffer.append(m_oConfiguration);
-	return true;
-}
-
-boolean CBoxAlgorithmAdaptiveP300Classifier::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
-{
-	m_f64Class1=0;
-	m_f64Class2=0;
-	XML::IReader* l_pReader=XML::createReader(*this);
-	l_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
-	l_pReader->release();
-	l_pReader=NULL;
-
-	return true;
-}
-
-void CBoxAlgorithmAdaptiveP300Classifier::write(const char* sString)
-{
-	m_oConfiguration.append((const uint8*)sString, ::strlen(sString));
-}
-
-void CBoxAlgorithmAdaptiveP300Classifier::openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
-{
-	m_vNode.push(sName);
-	
-	if(CString(sName)==CString("Sample"))
-	{
-		for (uint32 i=0; i<ui64AttributeCount; i++)
-			if (CString(*(sAttributeName+i))==CString("label"))
-				m_ui64TmpLabel = getConfigurationManager().expandAsUInteger(CString(*(sAttributeValue+i)));
+		this->getLogManager() << LogLevel_Warning << "Could not load configuration from file [" << l_sConfigurationFilename << "]\n";
 	}	
 }
-
-void CBoxAlgorithmAdaptiveP300Classifier::processChildData(const char* sData)
-{
-	std::stringstream l_sData(sData);
-
-	if(m_vNode.top()==CString("Classes"))
-	{
-		l_sData >> m_f64Class1;
-		l_sData >> m_f64Class2;
-		//std::cout << "Classes \n";
-	}
-
-	if(m_vNode.top()==CString("CoefficientsClass1") || m_vNode.top()==CString("CoefficientsClass2"))
-	{
-		//std::cout << "Coefficients \n";
-		std::vector < float64 > l_vCoefficients;
-		while(!l_sData.eof())
-		{
-			float64 l_f64Value;
-			l_sData >> l_f64Value;
-			l_vCoefficients.push_back(l_f64Value);
-		}
-		if(m_vNode.top()==CString("CoefficientsClass1"))
-		{
-			m_oCoefficientsClass1.set_size(l_vCoefficients.size());
-			//std::cout << "coefficients 1\n";
-			for(size_t i=0; i<l_vCoefficients.size(); i++)
-			{
-				m_oCoefficientsClass1[i]=l_vCoefficients[i];
-				//std::cout << m_oCoefficientsClass1[i] << " ";
-			}
-			//std::cout << "\n";
-		}	
-		else if (m_vNode.top()==CString("CoefficientsClass2"))
-		{
-			m_oCoefficientsClass2.set_size(l_vCoefficients.size());
-			//std::cout << "coefficients 2\n";
-			for(size_t i=0; i<l_vCoefficients.size(); i++)
-			{
-				m_oCoefficientsClass2[i]=l_vCoefficients[i];
-				//std::cout << m_oCoefficientsClass2[i] << " ";
-			}
-			//std::cout << "\n";
-		}		
-	}
-	
-	if(m_vNode.top()==CString("Sample")
-	{
-		std::vector < float64 > l_vSample;
-		while(!l_sData.eof())
-		{
-			float64 l_f64Value;
-			l_sData >> l_f64Value;
-			l_vSample.push_back(l_f64Value);
-		}	
-		ittp:vec l_vSampleVector(l_vSample.size());
-		for(size_t i=0; i<l_vCoefficients.size(); i++)
-			l_vSampleVector[i]=l_vSample[i];
-		
-		m_vCircularSampleBuffer[m_ui32BufferPointer] = l_vSampleVector;
-		m_vCircularLabelBuffer[m_ui32BufferPointer] = m_ui64TmpLabel;
-		m_ui32BufferPointer++;
-	}	
-}
-
-void CBoxAlgorithmAdaptiveP300Classifier::closeChild(void)
-{
-	m_vNode.pop();
-}*/
