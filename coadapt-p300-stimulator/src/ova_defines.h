@@ -3,26 +3,46 @@
 
 #ifndef StimulationIdDefinitions
 #define StimulationIdDefinitions
+	/** */
 	#define OVA_StimulationId_ExperimentStart				181
+	/** */
 	#define OVA_StimulationId_ExperimentStop				182
-	#define OVA_StimulationId_TrialStart				183
-	#define OVA_StimulationId_TrialStop					184
-	#define OVA_StimulationId_SegmentStart				185
-	#define OVA_StimulationId_SegmentStop				186
-	#define OVA_StimulationId_RestStart					187
-	#define OVA_StimulationId_RestStop					188
+	/** */
+	#define OVA_StimulationId_TrialStart					183
+	/** */
+	#define OVA_StimulationId_TrialStop						184
+	/** not used */
+	#define OVA_StimulationId_SegmentStart					185
+	/** not used */
+	#define OVA_StimulationId_SegmentStop					186
+	/** */
+	#define OVA_StimulationId_RestStart						187
+	/** */
+	#define OVA_StimulationId_RestStop						188
+	/** not used */
 	#define OVA_StimulationId_VisualStimulationStart		189
+	/** to reset the display */
 	#define OVA_StimulationId_VisualStimulationStop			190
-	#define OVA_StimulationId_Target					191
-	#define OVA_StimulationId_NonTarget					192
-	#define OVA_StimulationId_FeedbackCue				193
-	#define OVA_StimulationId_TargetCue					194
-	#define OVA_StimulationId_Flash					195
-	#define OVA_StimulationId_ErpDetected				196
+	/** in copy or calibration each flash is either flagged as target or non-target, for ease of training XDAWN and the classifier in OpenViBE*/
+	#define OVA_StimulationId_Target						191
+	/** in copy or calibration each flash is either flagged as target or non-target, for ease of training XDAWN and the classifier in OpenViBE*/
+	#define OVA_StimulationId_NonTarget						192
+	/** send to the OpenViBE designer to ask the evidence accumulator to flush the latest prediction and letter probabilities*/
+	#define OVA_StimulationId_FeedbackCue					193
+	/** indicates a target letter will appear during copy or calibration. The following stimulus should range from 1 to the number of symbols on the keyboard*/
+	#define OVA_StimulationId_TargetCue						194
+	/** */
+	#define OVA_StimulationId_Flash							195
+	/** */
+	#define OVA_StimulationId_ErpDetected					196
+	/** indicates new symbol probabilities are available which the visualiser can use to color certain symbols*/
 	#define OVA_StimulationId_LetterColorFeedback			197
-	#define OVA_StimulationId_FlashStop					198
-	#define OVA_StimulationId_UpdateModel				199
-	#define OVA_StimulationId_Label(i)                          0+i
+	/** */
+	#define OVA_StimulationId_FlashStop						198
+	/** is send to the designer so that it trains the classifier and XDAWN after a 10-letter copy or calibration spelling with the subject independent classifier*/
+	#define OVA_StimulationId_UpdateModel					199
+	/** these stimuli range from 1 to the number of symbols in the keyboard and are used to indicate which letter should be the target letter or which letter was predicted*/
+	#define OVA_StimulationId_Label(i)                      0+i
 #endif
 
 #define GL_GLEXT_PROTOTYPES

@@ -14,7 +14,7 @@
 	<FeedbackPresentation mode="copy">color</FeedbackPresentation>
 
 	<Tagging method="software">
-		<ParallelPortNumber>0x378</ParallelPortNumber>	<!-- 0x378 for windows and 0 for linux -->
+		<ParallelPortNumber>0x378</ParallelPortNumber>	<!-- 0x378 for the windows laptops, 0xE060 for the INRIA desktop at the lab and 0 for linux -->
 		<PhotoDiode>no</PhotoDiode>
 		<SampleFrequency>256</SampleFrequency>
 	</Tagging>

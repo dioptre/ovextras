@@ -6,8 +6,8 @@ using namespace OpenViBEApplications;
 
 GButton::GButton() : GObject(true, 1) 
 {
-      m_pLabel =  NULL;
-      m_iButtonState = GButton_Inactive;
+    m_pLabel =  NULL;
+    m_iButtonState = GButton_Inactive;
 	m_iButtonAction = GButton_None;
 	
 	/*If you want to use VBO buffers uncomment this and call GObject(false,2). 
@@ -21,7 +21,7 @@ GButton::GButton() : GObject(true, 1)
 
 GButton::GButton(const GButton& gbutton) : GObject(gbutton)
 {
-      this->m_pLabel = gbutton.m_pLabel->clone();
+    this->m_pLabel = gbutton.m_pLabel->clone();
 	assignHelper(gbutton);
 }
 

@@ -34,15 +34,6 @@ IMatrix* SharedMatrixReader::_front()
 	if (!m_bFailedToFind && m_vMatrixVector->size()>0)
 	{
 		offset_ptr<SMatrix> l_sMatrix = m_vMatrixVector->front();
-		//std::cout << "SharedMatrixReader: dimensions of matrix " <<  l_sMatrix->rowDimension << ", " << l_sMatrix->columnDimension << "\n";
-		/*for (int i=0; i<l_sMatrix->rowDimension; i++)
-		{
-			for (int j=0; j<l_sMatrix->columnDimension; j++)
-			{
-				std::cout << " " << *(l_sMatrix->data+j*l_sMatrix->rowDimension+i);
-			}
-			std::cout << "\n";
-		}*/
 		l_pMatrix = new CMatrix();
 		l_pMatrix->setDimensionCount(2);
 		l_pMatrix->setDimensionSize(0,l_sMatrix->columnDimension);
@@ -65,14 +56,7 @@ IMatrix* SharedMatrixReader::front()
 	if (lock)
 		l_pMatrix = this->_front();
 	else
-	{
-		/*l_pMatrix = new CMatrix();
-		l_pMatrix->setDimensionCount(2);
-		l_pMatrix->setDimensionSize(0,1);
-		l_pMatrix->setDimensionSize(1,1);	
-		*l_pMatrix->getBuffer() = 0;*/
 		l_pMatrix = NULL;
-	}
 	
 	return l_pMatrix;
 }
@@ -89,14 +73,7 @@ IMatrix* SharedMatrixReader::pop_front()
 			m_vMatrixVector->erase(m_vMatrixVector->begin());
 	}
 	else
-	{
-		/*l_pMatrix = new CMatrix();
-		l_pMatrix->setDimensionCount(2);
-		l_pMatrix->setDimensionSize(0,1);
-		l_pMatrix->setDimensionSize(1,1);	
-		*l_pMatrix->getBuffer() = 0;*/
 		l_pMatrix = NULL;
-	}
 	
 	return l_pMatrix;
 }
@@ -115,5 +92,5 @@ void SharedMatrixReader::close()
 {
 	this->clear();	
 	m_oSharedMemory.destroy<MyVectorStreamedMatrix>(m_sSharedVariableName.toASCIIString());	
-	ISharedMemoryReader::close();
+	//ISharedMemoryReader::close();
 }

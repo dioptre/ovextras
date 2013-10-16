@@ -4,6 +4,7 @@
 #include <utility> 
 
 #include "../visualisation/glGSymbol.h"
+#include "../visualisation/glGPictureSymbol.h"
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -19,6 +20,11 @@ m_pSymbolContainer(container), m_pPredictionContainer(container2), m_pPropertyOb
 	for (uint32 i=0; i<8; i++)
 		m_vButtons->at(i) = new std::vector<GButton*>();
 
+	//In the key descriptor (in the xml file) we don't have states for NONCENTRAL feedback for example. So to create GButtons for
+	//those NONCENTRAL states we use the CENTRAL feedback states by mapping the states accordingly as below
+	//TODO Each event in the keyboard layout file should have a position element available 
+	//that enables us to define an alternative position for the key. We should add events for noncentral feedback then as well, then there
+	//is a 1to1 mapping
 	VisualStateMap[ FLASH ] = FLASH;
 	VisualStateMap[ NOFLASH ] = NOFLASH;
 	VisualStateMap[ CENTRAL_FEEDBACK_WRONG ] = CENTRAL_FEEDBACK_WRONG;
@@ -31,6 +37,17 @@ m_pSymbolContainer(container), m_pPredictionContainer(container2), m_pPropertyOb
 	m_ui32MaximumSymbolActivity = 0;
 	
 	initializeKeyboard();
+}
+
+P300KeyboardHandler::~P300KeyboardHandler()
+{
+	for (OpenViBE::uint32 i=0; i<8; i++)
+	{
+		for (OpenViBE::uint32 j=0; j<m_pLayoutObject->getNumberOfKeys(); j++)
+			delete m_vButtons->at(i)->at(j);
+		delete m_vButtons->at(i);
+	}			
+	delete m_vButtons;
 }
 
 void P300KeyboardHandler::addObserver(GObserver * observer)
@@ -49,11 +66,6 @@ void P300KeyboardHandler::addActionObserver(CString action, GObserver * observer
 {
 	//we don't add any observers to buttons in FLASH or NOFLASH state as these should never trigger an action (only a visual state change in the keyboard)
 	std::vector<P300KeyDescriptor*>* l_lKeyDefinitions = m_pLayoutObject->getP300KeyboardLayout();
-	/*for (uint32 j=0; j<m_pSymbolContainer->getNumberOfChildren(); j++)
-	{
-		if (l_lKeyDefinitions->at(j)->isActionEnabled(action))
-			m_pSymbolContainer->getChild(j)->addObserver(observer);
-	}*/
 	for (uint32 j=0; j<m_pLayoutObject->getNumberOfKeys(); j++)
 	{
 		if (l_lKeyDefinitions->at(j)->isActionEnabled(action))
@@ -62,12 +74,6 @@ void P300KeyboardHandler::addActionObserver(CString action, GObserver * observer
 				m_vButtons->at(i)->at(j)->addObserver(observer);
 		}
 	}
-	/*uint32 k=m_pSymbolContainer->getNumberOfChildren();
-	for (uint32 j=0; j<m_pPredictionContainer->getNumberOfChildren(); j++, k++)
-	{
-		if (l_lKeyDefinitions->at(k)->isActionEnabled(action))
-			m_pPredictionContainer->getChild(j)->addObserver(observer);
-	}*/
 }
 
 void P300KeyboardHandler::update(GObservable* observable, const void * pUserData)
@@ -76,25 +82,14 @@ void P300KeyboardHandler::update(GObservable* observable, const void * pUserData
 	P300PredictionboardHandler* l_pPredictionHandler = dynamic_cast<P300PredictionboardHandler*>(observable);
 	if (l_Button!=NULL)
 	{
-		//std::cout << "P300KeyboardHandler notification of " << l_Button->toString() << "\n";
 		const GButton* l_pNewButton = static_cast<const GButton*>(pUserData);
-		//std::cout << "P300KeyboardHandler notification for new " << l_pNewButton->toString() << "\n";
+		//TODO give the working button a color based on its probability (for that we need the button index)
 		if (l_pNewButton!=NULL)
 			*l_Button = *l_pNewButton;
-		/*std::cout << l_Button->toString() << " on position " << l_Button->getX() 
-		<< "," << l_Button->getY() << "," << l_Button->getWidth() << "," << l_Button->getHeight() << "," << l_Button->getDepth() 
-		<< " and foreground color " << l_Button->getLabel()->getForegroundColor().red << "," << l_Button->getLabel()->getForegroundColor().green << "," << l_Button->getLabel()->getForegroundColor().blue << "\n"; 
-		std::cout << "replace by " << l_pNewButton->toString() << " on position " << l_pNewButton->getX() 
-		<< "," << l_pNewButton->getY() << "," << l_pNewButton->getWidth() << "," << l_pNewButton->getHeight() << "," << l_pNewButton->getDepth() 
-		<< " and foreground color " << l_pNewButton->getLabel()->getForegroundColor().red << "," << l_pNewButton->getLabel()->getForegroundColor().green << "," << l_pNewButton->getLabel()->getForegroundColor().blue << "\n"; 
-		*/
-		//std::cout << "Updating " << l_Button->toString() << " with state " << l_Button->getState() <<
-		//" replacing it with " << l_pNewButton->toString() << " with state " << l_pNewButton->getState() << "\n";	
 	}
 	else if(l_pPredictionHandler!=NULL)
 	{
 		const std::vector<std::string>* l_lWords = static_cast< const std::vector<std::string>* >(pUserData);
-		//std::cout << "P300KeyboardHandler notification of prediction handler, new words have to be added, such as " << l_lWords->at(0) << "\n";
 		std::vector<std::string>::const_iterator l_lIterator = l_lWords->begin();
 		
 		uint32 k = m_pSymbolContainer->getNumberOfChildren();
@@ -102,8 +97,6 @@ void P300KeyboardHandler::update(GObservable* observable, const void * pUserData
 		{
 			GButton* l_pButton = dynamic_cast<GButton*>(m_pPredictionContainer->getChild(j));
 			GSymbol* l_pSymbol = dynamic_cast<GSymbol*>(l_pButton->getLabel());
-			//std::cout << "KeyboardHandler " << (*l_lIterator).c_str() << "\n";
-			//l_pSymbol->setTextLabel((*l_lIterator).c_str());
 			for (uint32 i=0; i<8; i++)
 			{
 				l_pSymbol = dynamic_cast<GSymbol*>(m_vButtons->at(i)->at(k)->getLabel());
@@ -242,9 +235,7 @@ void P300KeyboardHandler::initializeKeyboard()
 			l_pPredictionTable->addChild(l_Button,0.1f);
 		else
 			std::cout << "One should specify coordinates for " << l_Button->toString() << "\n";
-		//l_Button->generateGButtonGLDisplayLists();
             m_vButtons->at(0)->push_back(l_Button->clone());
-            //m_vButtons->at(0)->back()->generateGLDisplayLists();
 	}
 	
 	for (uint32 i=1; i<8; i++)
@@ -253,11 +244,8 @@ void P300KeyboardHandler::initializeKeyboard()
 		{	
 			m_vButtons->at(i)->push_back(m_vButtons->at(0)->at(it)->clone());
 			setGButtonFromSLabel(m_vButtons->at(i)->back(), it, static_cast<VisualState>(i));
-			//std::cout << m_vButtons->at(i)->back()->toString() << " set state to " << m_vButtons->at(i)->back()->getState() << "\n";
 		}
 	}
-
-      //std::cout << "FontMap size is " << m_mFontSourceMap.size() << "\n";
 }
 
 void P300KeyboardHandler::setGButtonFromSLabel(GButton* gbutton, uint32 keyIndex, VisualState keyState)
@@ -283,13 +271,11 @@ void P300KeyboardHandler::setGButtonFromSLabel(GButton* gbutton, uint32 keyIndex
 	{
 		gbutton->setState(GButton_Clicked);	
 		gbutton->setDimParameters(l_Dimensions);			
-	      //gbutton->generateGButtonGLDisplayLists();
       }
 	else if (keyState==CENTRAL_FEEDBACK_WRONG)
 	{
 		gbutton->setState(GButton_Clicked);	
 		gbutton->setDimParameters(l_Dimensions);
-            //gbutton->generateGButtonGLDisplayLists();
 	}
 	else if (keyState==NONCENTRAL_FEEDBACK_CORRECT)
 		gbutton->setState(GButton_Clicked);			
@@ -305,26 +291,21 @@ GLabel* P300KeyboardHandler::constructGLabelFromDescriptor(uint32 keyIndex, Visu
 {
 	P300KeyDescriptor* descriptor = m_pLayoutObject->getP300KeyboardLayout()->at(keyIndex);
 	GLabel* l_pGLabel;
-	//std::cout << "constructGLabelFromDescriptor " << descriptor->getLabel(state).c_str() << "\n";
 	if (descriptor->isTextSymbol(state))
 	{
+		//TODO a resource manager should be written for the fonts just as the texture manager for the GPictureSymbol
 		boost::shared_ptr<FTFont> l_ftglFont;
-            FontID l_pFontId = {descriptor->getSource(state),descriptor->getScaleSize(state),keyIndex};
-            std::map< FontID, boost::shared_ptr<FTFont> >::iterator l_pIterator;
-            l_pIterator = m_mFontSourceMap.find(l_pFontId);
+        FontID l_pFontId = {descriptor->getSource(state),descriptor->getScaleSize(state),keyIndex};
+        std::map< FontID, boost::shared_ptr<FTFont> >::iterator l_pIterator;
+        l_pIterator = m_mFontSourceMap.find(l_pFontId);
 		if (l_pIterator!=m_mFontSourceMap.end())
+		    l_pGLabel = new GSymbol(descriptor->getLabel(state).c_str(), l_pIterator->second, descriptor->getScaleSize(state));
+		else
 		{
-			//std::cout << "Font already exists, use count " << l_pIterator->second.use_count() << "\n";
-		      l_pGLabel = new GSymbol(descriptor->getLabel(state).c_str(), l_pIterator->second, descriptor->getScaleSize(state));
-		}
-            else
-            {
-                  //std::cout << "New font created with source " << l_pFontId.source.toASCIIString() << " and scale size " << l_pFontId.size << " and key " << l_pFontId.keyIndex << "\n";
 			l_ftglFont = boost::shared_ptr<FTFont>(new FTGLPolygonFont(descriptor->getSource(state).toASCIIString()));
-                  l_ftglFont->UseDisplayList(false);
-		      m_mFontSourceMap.insert(std::make_pair(l_pFontId,l_ftglFont));
-                  //l_pIterator = m_mFontSourceMap.find(l_pFontId);
-		      l_pGLabel = new GSymbol(descriptor->getLabel(state).c_str(), l_ftglFont, descriptor->getScaleSize(state));
+			l_ftglFont->UseDisplayList(false);
+			m_mFontSourceMap.insert(std::make_pair(l_pFontId,l_ftglFont));
+			l_pGLabel = new GSymbol(descriptor->getLabel(state).c_str(), l_ftglFont, descriptor->getScaleSize(state));
 		}
 	}
 	else
@@ -344,11 +325,9 @@ void P300KeyboardHandler::initializeColorMap(GColor startColor, GColor endColor,
 	m_mColorMap.insert(std::pair<float64, GColor>(sigLevel, l_oColorTriple));	
 	for (uint32 i=1; i<nSteps; i++)
 	{
-	    	l_oColorTriple.red = (float32)(l_fRedBegin - ((l_fRedBegin-l_fRedEnd)*i)/(float32)nSteps);
-	    	l_oColorTriple.green = (float32)(l_fGreenBegin - ((l_fGreenBegin-l_fGreenEnd)*i)/(float32)nSteps);
-		//std::cout << (l_fGreenBegin-l_fGreenEnd)*i << " " << ((l_fGreenBegin-l_fGreenEnd)*i)/(int)nSteps << " " << (l_fGreenBegin - ((l_fGreenBegin-l_fGreenEnd)*i)/(int)nSteps) << "\n";
-	    	l_oColorTriple.blue = (float32)(l_fBlueBegin - ((l_fBlueBegin-l_fBlueEnd)*i)/(float32)nSteps);	
-		//std::cout << "Color key = " << pow(logRate,-(startKey+i-1)) << ", color R: " << l_oColorTriple.color[0] << ", G: " << l_oColorTriple.color[1] << ", B:" << l_oColorTriple.color[2] <<"\n";
+		l_oColorTriple.red = (float32)(l_fRedBegin - ((l_fRedBegin-l_fRedEnd)*i)/(float32)nSteps);
+		l_oColorTriple.green = (float32)(l_fGreenBegin - ((l_fGreenBegin-l_fGreenEnd)*i)/(float32)nSteps);
+		l_oColorTriple.blue = (float32)(l_fBlueBegin - ((l_fBlueBegin-l_fBlueEnd)*i)/(float32)nSteps);	
 		m_mColorMap.insert(std::pair<float64, GColor>(sigLevel+i*(1.0-sigLevel)/nSteps, l_oColorTriple));
 	}
 }
@@ -364,4 +343,3 @@ GColor P300KeyboardHandler::getAssignedProbabilityColor(uint32 symbolIndex)
 	
 	return l_cProbabilityColor;
 }
-		

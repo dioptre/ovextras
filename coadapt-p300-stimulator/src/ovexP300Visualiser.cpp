@@ -370,7 +370,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
 		//(this is used in the subject-independent classifier scenario to initialize the subject-specific classifier)
 		if (m_ui32FeedbackResultCounter!= 0 && 
 			m_ui32PreviousFeedbackResultCounter!=m_ui32FeedbackResultCounter && 
-			m_ui32FeedbackResultCounter%5 == 0) //TODO: should  be a configurable parameter
+			m_ui32FeedbackResultCounter%10 == 0) //TODO: should  be a configurable parameter
 		{
 			m_ui32PreviousFeedbackResultCounter = m_ui32FeedbackResultCounter;
 			m_qEventQueue.push(OVA_StimulationId_UpdateModel);

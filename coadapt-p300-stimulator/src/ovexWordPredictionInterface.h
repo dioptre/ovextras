@@ -12,10 +12,17 @@
 
 namespace OpenViBEApplications
 {	
-	//template<class TContainer>
+	/**
+	 * Interface for get the most probable words given a prefix
+	 */
 	class WordPredictionInterface
 	{	
 	public:
+		/**
+		 * @param prefix the letters or words previously spelled on which we need to base our predictions for the next word or the word to complete
+		 * @param nWords number of words we want to get back in the result vector
+		 * @return vector of strings with the nWords most probable words given the prefix
+		 */
 		virtual std::vector<std::string>* getMostProbableWords(const std::string&  prefix, OpenViBE::uint32 nWords)=0;
 	};
 };

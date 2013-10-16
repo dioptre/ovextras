@@ -14,14 +14,17 @@
 #include "ovexP300SharedMemoryReader.h"
 #include "properties/ovexP300StimulatorPropertyReader.h"
 #include "ovexP300SequenceGenerator.h"
-//#include "ovexP300SequenceGenerator.h"
 
+//TODO get rid of the SDL dependency, should not be in the stimulator, create a separate SDL_thread that listens for key events
 #include "SDL.h"
 
 namespace OpenViBEApplications
 {		
 		typedef void (*Callback2Visualiser)(OpenViBE::uint32);	
 
+		/**
+		 * States of the stimulator (depends on the time within a trial)
+		 */
 		enum
 		{
 			State_None,
@@ -34,21 +37,61 @@ namespace OpenViBEApplications
 			State_InterFlash,
 		};		
 		
+		/**
+		 * The stimulator class is the main loop of the program. Based on stimulated time steps it will go from one state to another
+		 * (e.g. if the duration of flash is over then it will go to the noflash state). Each time it changes to another state it notifies the 
+		 * main ExternalP300Visualiser class by means of a stimulation id as defined in ova_defines.h
+		 */
 		class ExternalP300Stimulator
 		{
 			public:
 
+				/**
+				 * The main loop of the program
+				 */
 				virtual void run();
+				
+				/**
+				 * Constructor that will create an ExternalP300SharedMemoryReader object for reading the predictions and probabilities of the letters
+				 * as computed by the openvibe-designer TODO the stimulator should not handle reading from shared memory, 
+				 * a separate thread should do that and then notify the the stimulator of that event
+				 * @param propertyObject the object containing the properties for the stimulator such as flash duration, interflash duration, intertrial...
+				 * @param l_pSequenceGenerator the sequence generator that defines which letters are flashed at one single point in time (does that for the whole trial)
+				 */
 				ExternalP300Stimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator);
+				
 				~ExternalP300Stimulator();
 
+				/**
+				 * The callback that the stimulator will call to notify the ExternalP300Visualiser that the state has changed and the display should be updated
+				 */
 				void setCallBack( Callback2Visualiser callback) { m_funcVisualiserCallback = callback; }
+				
+				/**
+				 * At the beginning of the the next trial, generate the whole sequence of letters that have to be flashed in the trial
+				 */ 
 				void generateNewSequence() { m_pSequenceGenerator->generateSequence(); }
+				
+				/**
+				 * @return return vector of zeros and ones defining which letters will be flashed next
+				 */
 				std::vector<OpenViBE::uint32>* getNextFlashGroup() { return m_pSequenceGenerator->getNextFlashGroup(); }
+				
+				/**
+				 * @return The shared memory reader that is created during construction of the stimulator
+				 */
 				ExternalP300SharedMemoryReader* getSharedMemoryReader() { return &m_oSharedMemoryReader; }
 				
 			private:
+				/**
+				 * If you stop early then it will adjust the variables such as m_ui64TrialStartTime so that the next
+				 * trial can begin
+				 */
 				virtual void adjustForNextTrial(OpenViBE::uint64 currentTime);
+				
+				/**
+				 * Checks if the escape button is pressed TODO should be in separate SDL_thread
+				 */
 				virtual OpenViBE::boolean checkForQuitEvent();
 
 			protected:
@@ -97,7 +140,7 @@ namespace OpenViBEApplications
 				SDL_Event m_eKeyEvent;
 
 				#ifdef OUTPUT_TIMING
-                        FILE* timingFile;
+                FILE* timingFile;
 				#endif
 				
 				OpenViBE::uint64 m_ui64StimulatedCycleTime;

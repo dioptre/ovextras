@@ -36,20 +36,12 @@ ExternalP300Stimulator::ExternalP300Stimulator(P300StimulatorPropertyReader* pro
 	m_bStopReceived = false;
 
 	m_ui32LastState=State_None;
-	m_ui64TrialStartTime=m_ui64InterTrialDuration; 
-	OpenViBE::uint64 l_ui64InterTrialPartition = m_ui64InterTrialDuration >> 3;
-	m_ui64NextFeedbackStartTime = m_ui64TrialStartTime-m_ui64InterTrialDuration+(l_ui64InterTrialPartition<<1);
-	m_ui64NextFeedbackEndTime = m_ui64NextFeedbackStartTime+(l_ui64InterTrialPartition<<1);
-	m_ui64NextTargetStartTime = m_ui64NextFeedbackEndTime+l_ui64InterTrialPartition;
-	m_ui64NextTargetEndTime = m_ui64NextTargetStartTime+(l_ui64InterTrialPartition<<1);
+	adjustForNextTrial(0);
 
 	m_ui32FlashCountInRepetition=m_pSequenceGenerator->getNumberOfGroups();
 	m_ui64RepetitionDuration = (m_ui32FlashCountInRepetition-1)*m_ui64InterStimulusOnset+m_ui64FlashDuration;
 	m_ui64TrialDuration=m_ui32RepetitionCountInTrial*(m_ui64RepetitionDuration+m_ui64InterRepetitionDuration);
-	m_ui32TrialIndex=0;
-	
-	m_ui64TimeToNextFlash = 0;
-	m_ui64TimeToNextFlashStop = m_ui64TimeToNextFlash + m_ui64FlashDuration;					
+	m_ui32TrialIndex=0;					
 
 	m_oSharedMemoryReader.openSharedMemory(m_sSharedMemoryName);
 	m_ui64Prediction = 0;				
@@ -103,6 +95,7 @@ void ExternalP300Stimulator::run()
             fprintf(timingFile, "%f \n",float64((System::Time::zgetTime()>>22)/1024.0));
 		#endif
 		
+		//very often one cycle of this loop does not take much time, so we just put the program to sleep until the next time step
 		if (m_ui64RealCycleTime<m_ui64StimulatedCycleTime)
 			System::Time::sleep(static_cast<uint32>(std::ceil(1000.0*((m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep)>>22)/1024.0)));		
             

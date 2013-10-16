@@ -16,10 +16,6 @@ boolean SharedStimulusReader::open()
 		m_vStimulusVector  = m_oSharedMemory.find< MyVectorStimulation >(m_sSharedVariableName.toASCIIString()).first;
 		if(!m_vStimulusVector)
 			m_bFailedToFind = true;
-		/*if(!m_bFailedToFind)
-			std::cout << "FOUND VARIABLE WITH NAME " << m_sSharedVariableName.toASCIIString() << " in shared memory\n";
-		else
-			std::cout << "DID NOT FiND VARIABLE WITH NAME " << m_sSharedVariableName.toASCIIString() << " in shared memory\n";*/
 	}
 	
 	return !m_bFailedToFind;
@@ -92,5 +88,5 @@ void SharedStimulusReader::close()
 {
 	this->clear();		
 	m_oSharedMemory.destroy<MyVectorStimulation>(m_sSharedVariableName.toASCIIString());	
-	ISharedMemoryReader::close();
+	//ISharedMemoryReader::close();
 }
