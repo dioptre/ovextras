@@ -12,6 +12,7 @@ class MyOVBox(OVBox):
 		self.flashedSymbolsHeader = None
 		self.flashedSymbols = deque([])
 		self.Label = -1
+		self.triggerReceived = False
 	
 	def initialize(self):
 		 self.Trigger = self.setting['Trigger']
@@ -25,11 +26,12 @@ class MyOVBox(OVBox):
 				stimSet = self.input[0].pop()
 				for  stimIndex in range(len(stimSet)):
 					if stimSet[stimIndex].identifier==int(self.Trigger):
-						for  stimIndex in range(len(stimSet)):
-							if stimSet[stimIndex].identifier!=int(self.Trigger):
-								self.Label = stimSet[stimIndex].identifier
+						self.triggerReceived = True
+					if self.triggerReceived and stimSet[stimIndex].identifier<180:
+						self.triggerReceived = False
+						self.Label = stimSet[stimIndex].identifier
 				if self.Label != -1:
-					print "Label received, flushing target and non-target epochs"
+					print 'Label received, flushing target and non-target epochs' + str(self.Label)
 					while self.signalBuffer:
 						flashGroup = self.flashedSymbols.popleft()
 						pyFlashGroup = numpy.array(flashGroup).reshape(tuple(self.flashedSymbolsHeader.dimensionSizes))
