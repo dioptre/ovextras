@@ -13,9 +13,9 @@ CSSVEPFlickeringObject::CSSVEPFlickeringObject(Ogre::SceneNode* poObjectNode, Op
 	m_ui64StimulationPattern( ui64StimulationPattern ),
 	m_bVisible( true )
 {
-	static int nextid = 0;
+	static int l_iNextid = 0;
 
-	m_iId = ++nextid;
+	m_iId = ++l_iNextid;
 }
 
 void CSSVEPFlickeringObject::setVisible( bool bVisibility )

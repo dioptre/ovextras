@@ -389,19 +389,19 @@ void CImpactShip::setFeedbackLevels(int iF1, int iF2, int iF3)
 
 	if (m_bFeedbackActive)
 	{
-		int nbActives = 0;
+		int l_iNbActives = 0;
 
 		if (iF1 > 0) { l_poSceneManager->getSceneNode("v5_a1b")->setVisible(true); }
 		if (iF1 > 1) { l_poSceneManager->getSceneNode("v5_a2b")->setVisible(true); }
-		if (iF1 > 2) { l_poSceneManager->getSceneNode("v5_a3b")->setVisible(true); nbActives++; }
+		if (iF1 > 2) { l_poSceneManager->getSceneNode("v5_a3b")->setVisible(true); l_iNbActives++; }
 		if (iF2 > 0) { l_poSceneManager->getSceneNode("v5_g1b")->setVisible(true); }
 		if (iF2 > 1) { l_poSceneManager->getSceneNode("v5_g2b")->setVisible(true); }
-		if (iF2 > 2) { l_poSceneManager->getSceneNode("v5_g3b")->setVisible(true); nbActives++; }
+		if (iF2 > 2) { l_poSceneManager->getSceneNode("v5_g3b")->setVisible(true); l_iNbActives++; }
 		if (iF3 > 0) { l_poSceneManager->getSceneNode("v5_d1b")->setVisible(true); }
 		if (iF3 > 1) { l_poSceneManager->getSceneNode("v5_d2b")->setVisible(true); }
-		if (iF3 > 2) { l_poSceneManager->getSceneNode("v5_d3b")->setVisible(true); nbActives++; }
+		if (iF3 > 2) { l_poSceneManager->getSceneNode("v5_d3b")->setVisible(true); l_iNbActives++; }
 
-		if (nbActives > 1)
+		if (l_iNbActives > 1)
 		{
 			l_poSceneManager->getSceneNode("v5_a3b")->setVisible(false);
 			l_poSceneManager->getSceneNode("v5_g3b")->setVisible(false);

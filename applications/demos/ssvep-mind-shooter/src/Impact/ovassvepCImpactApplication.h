@@ -83,7 +83,7 @@ namespace OpenViBESSVEP
 			GameState m_eGameState;
 
 			std::queue<int> m_oEnemyOrder;
-			double pMaxFeedbackLevel[3];
+			OpenViBE::float64 m_pMaxFeedbackLevel[3];
 
 			bool m_bActive;
 

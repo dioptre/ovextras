@@ -1,3 +1,9 @@
+/*
+ * @author Ogre
+ * @note This code likely originates from the Ogre project
+ *
+ */
+
 #ifndef DOT_SCENELOADER_H
 #define DOT_SCENELOADER_H
 
@@ -52,19 +58,19 @@
 		void         parseDotScene(const Ogre::String &SceneName, const Ogre::String &groupName, Ogre::SceneManager *yourSceneMgr, Ogre::SceneNode *pAttachNode = NULL, const Ogre::String &sPrependNode = "");
 		Ogre::String getProperty(const Ogre::String &ndNm, const Ogre::String &prop);
 
-		Ogre::String getResourceLocationBaseDir(){ return resLocationsBaseDir; };
-		void         setResourceLocationBaseDir( Ogre::String newBaseDir ){ resLocationsBaseDir = newBaseDir; };
+		Ogre::String getResourceLocationBaseDir(){ return m_sResLocationsBaseDir; };
+		void         setResourceLocationBaseDir( Ogre::String newBaseDir ){ m_sResLocationsBaseDir = newBaseDir; };
 
 //		Ogre::TerrainGroup* getTerrainGroup() { return mTerrainGroup; }
 
 
-		std::vector<nodeProperty>               nodeProperties;
-		std::vector<Ogre::String>               staticObjects;
-		std::vector<Ogre::String>               dynamicObjects;
+		std::vector<nodeProperty>               m_vNodeProperties;
+		std::vector<Ogre::String>               m_vStaticObjects;
+		std::vector<Ogre::String>               m_vDynamicObjects;
 //		std::vector<Forests::PagedGeometry *>   mPGHandles;
 //		std::vector<Forests::TreeLoader3D *>    mTreeHandles;
 //		Forests::GrassLoader*                   mGrassLoaderHandle;   /** Handle to Forests::GrassLoader object */
-		std::vector<Ogre::ParticleSystem *>     particleSystemList;	// contains all the Particle Systems created
+		std::vector<Ogre::ParticleSystem *>     m_vParticleSystemList;	// contains all the Particle Systems created
 
 	protected:
 		void processScene(rapidxml::xml_node<>* XMLRoot);
@@ -111,19 +117,19 @@
 		Ogre::ColourValue parseColour(rapidxml::xml_node<>* XMLNode);
 
 
-		Ogre::SceneManager *mSceneMgr;
-		Ogre::SceneNode *mAttachNode;
+		Ogre::SceneManager *m_pSceneMgr;
+		Ogre::SceneNode *m_pAttachNode;
 		Ogre::String m_sGroupName;
 		Ogre::String m_sPrependNode;
 //		Ogre::TerrainGroup* mTerrainGroup;
-		Ogre::Vector3 mTerrainPosition;
-		Ogre::Vector3 mLightDirection;
+		Ogre::Vector3 m_vTerrainPosition;
+		Ogre::Vector3 m_vLightDirection;
 
 		// paged geometry related values
 //		int mPGPageSize;
 //		int mPGDetailDistance;
 		// resource locations basedir
-		Ogre::String resLocationsBaseDir;
+		Ogre::String m_sResLocationsBaseDir;
 	};
 
 #endif // DOT_SCENELOADER_H
