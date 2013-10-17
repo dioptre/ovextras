@@ -1,3 +1,4 @@
+<!--  xml file specifying a keyboard layout, see 5by10grid-abc-gray.xml for some more explanation -->
 <ScreenLayout>
 	<DefaultKeyProperties>
 		<Event id="noflash">
@@ -356,8 +357,9 @@
 			<Event id="correct_feedback"><TextSymbol><Label>$</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>$</Label></TextSymbol></Event>
 		</Key>	
+		<!-- This key has a special action (undo) associated with it instead of the usual write operation that writes the symbol to the screen -->
 		<Key x="0" y="0" width="0.1" height="0.2">
-			<Action>undo</Action>
+			<Action>undo</Action> 
 			<Event id="noflash"><PictureSymbol><Source>openvibe/applications/externalP300Stimulator/undo.png</Source></PictureSymbol></Event>
 			<Event id="target"><PictureSymbol><Source>openvibe/applications/externalP300Stimulator/undo.png</Source></PictureSymbol></Event>
 			<Event id="correct_feedback"><PictureSymbol><Source>openvibe/applications/externalP300Stimulator/undo.png</Source></PictureSymbol></Event>

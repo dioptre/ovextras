@@ -1,3 +1,4 @@
+<!--  xml file specifying a keyboard layout, see 5by10grid-abc-gray.xml for some more explanation -->
 <ScreenLayout>
 	<DefaultKeyProperties>
 		<Event id="noflash">
@@ -364,7 +365,7 @@
 			<Event id="wrong_feedback"><TextSymbol><Label>$</Label></TextSymbol></Event>
 		</Key>
 		
-		
+		<!-- these keys can change from trial to trial, they are updated based on the most probable words given the already spelled letters -->
 		<Key x="1" y="1" width="1" height="1">
 			<Action>wordprediction</Action>			
 			<Event id="noflash"><TextSymbol><Label></Label></TextSymbol></Event>
