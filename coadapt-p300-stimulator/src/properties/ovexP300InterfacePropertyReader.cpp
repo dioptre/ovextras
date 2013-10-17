@@ -103,13 +103,13 @@ void P300InterfacePropertyReader::processChildData(const char* sData)
 
 	if(m_vNode.top()==CString("Mode"))
 	{
-		if(l_sExpandedString==CString("calibration"))
+		if(l_sExpandedString==CString("Cal"))
 			m_eSpellingMode = CALIBRATION_MODE;
-		else if(l_sExpandedString==CString("copy"))
+		else if(l_sExpandedString==CString("Cop"))
 			m_eSpellingMode = COPY_MODE;
-		else if(l_sExpandedString==CString("free"))
+		else if(l_sExpandedString==CString("Fr"))
 			m_eSpellingMode = FREE_MODE;
-		else if(l_sExpandedString==CString("oddball"))
+		else if(l_sExpandedString==CString("Oddball"))
 			m_eSpellingMode = ODDBALL;	
 	}
 	if(m_vNode.top()==CString("StimulatorConfigFile"))
