@@ -6,26 +6,6 @@ using namespace OpenViBEApplications;
 
 using namespace std;
 
-namespace{
-	class _AutoCast_
-	{
-	public:
-		_AutoCast_(const char * settingValue) : m_sSettingValue(settingValue) {  }
-
-		operator uint64 (void)
-		{
-			OpenViBE::float64 l_f64FlashDuration = strtod(m_sSettingValue,NULL);
-			OpenViBE::uint64 l_ui64IntegerPart = (OpenViBE::uint64)l_f64FlashDuration;
-			OpenViBE::float64 l_f64FractionalPart = (OpenViBE::float64)(l_f64FlashDuration-l_ui64IntegerPart);
-			l_ui64IntegerPart = l_ui64IntegerPart << 32;
-			OpenViBE::uint64 l_ui64FlashDuration = l_ui64IntegerPart+(OpenViBE::uint64)(l_f64FractionalPart*(1LL<<32));
-			return 	l_ui64FlashDuration;		
-		}
-	protected:
-		const char * m_sSettingValue;
-	};
-}
-
 void P300StimulatorPropertyReader::openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
 {
 	writeAttribute(sName, sAttributeName, sAttributeValue, ui64AttributeCount);

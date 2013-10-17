@@ -1,5 +1,4 @@
 #include "ovexP300InterfacePropertyReader.h"
-#include "../visualisation/glGObject.h"
 #include "FTGL/ftgl.h"
 
 using namespace OpenViBE;
@@ -7,27 +6,6 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
 
 using namespace std;
-
-namespace
-{
-	class _AutoCast_
-	{
-	public:
-		_AutoCast_(const char * settingValue) : m_sSettingValue(settingValue) {  }
-		operator GColor (void)
-		{
-			GColor l_oColor;
-			int r=0, g=0, b=0;
-			sscanf(m_sSettingValue, "%i,%i,%i", &r, &g, &b);
-			l_oColor.red=(GLfloat)r/100.0f;
-			l_oColor.green=(GLfloat)g/100.0f;
-			l_oColor.blue=(GLfloat)b/100.0f;
-			return l_oColor;
-		}
-
-		const char * m_sSettingValue;
-	};
-};
 
 P300InterfacePropertyReader::P300InterfacePropertyReader(OpenViBE::Kernel::IKernelContext* kernelContext) : ExternalP300PropertyReader(kernelContext) 
 {

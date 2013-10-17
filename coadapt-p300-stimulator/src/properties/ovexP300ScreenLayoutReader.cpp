@@ -7,9 +7,49 @@ using namespace OpenViBEApplications;
 
 using namespace std;
 
-//NoSuchEventException noSuchEventException;
-
 CString P300ScreenLayoutReader::KeyEventStrings[5] = {"flash","noflash","wrong_feedback", "correct_feedback","target"};
+
+P300ScreenLayoutReader::P300ScreenLayoutReader(OpenViBE::Kernel::IKernelContext* kernelContext) : ExternalP300PropertyReader(kernelContext) 
+{
+	m_lKeyList = new std::vector<P300KeyDescriptor*>();
+	m_lSymbolList = new std::list<std::string>();
+	m_mDefaultEventMapScaleSize = new std::map<OpenViBE::uint32, OpenViBE::float32>();
+	m_mDefaultEventMapForegroundColor = new std::map<OpenViBE::uint32, GColor>();
+	m_mDefaultEventMapBackgroundColor = new std::map<OpenViBE::uint32, GColor>();
+	m_mDefaultEventMapSource = new std::map<OpenViBE::uint32, OpenViBE::CString>();
+	m_mDefaultEventMapLabel = new std::map<OpenViBE::uint32, std::string>();
+	m_mDefaultIsTextSymbol = new std::map<OpenViBE::uint32, OpenViBE::boolean>(); 
+	
+	m_bDefaultKeyProperties = false;
+	m_bEventElement = false;
+	m_bScaleSize = false;
+	m_bForegroundColor = false;
+	m_bBackgroundColor = false;
+	m_bLabel = false;
+	m_bSource = false;
+	m_bKeyboardIsGrid = false;
+	
+	EventStringMap[ KeyEventStrings[0] ] = FLASH;
+	EventStringMap[ KeyEventStrings[1] ] = NOFLASH;
+	EventStringMap[ KeyEventStrings[2] ] = CENTRAL_FEEDBACK_WRONG;
+	EventStringMap[ KeyEventStrings[3] ] = CENTRAL_FEEDBACK_CORRECT;
+	EventStringMap[ KeyEventStrings[4] ] = TARGET;
+}
+
+P300ScreenLayoutReader::~P300ScreenLayoutReader()
+{
+	std::vector<P300KeyDescriptor*>::iterator l_ListIterator = m_lKeyList->begin();
+	for (; l_ListIterator!=m_lKeyList->end(); l_ListIterator++)
+		delete *l_ListIterator;
+	delete m_lKeyList;
+	delete m_lSymbolList;
+	delete m_mDefaultEventMapScaleSize;
+	delete m_mDefaultEventMapForegroundColor;
+	delete m_mDefaultEventMapBackgroundColor;
+	delete m_mDefaultEventMapSource;
+	delete m_mDefaultEventMapLabel;
+	delete m_mDefaultIsTextSymbol;
+}
 
 void P300ScreenLayoutReader::openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
 {

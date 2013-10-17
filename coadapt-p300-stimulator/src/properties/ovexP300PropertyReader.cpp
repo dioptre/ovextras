@@ -35,7 +35,6 @@ void ExternalP300PropertyReader::readPropertiesFromFile(CString propertyFile)
 	}
 }
 
-
 void ExternalP300PropertyReader::writeAttribute(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
 {
 	m_pKernelContext->getLogManager() << LogLevel_Trace << "Reading property " << sName;
