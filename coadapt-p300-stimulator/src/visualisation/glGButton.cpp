@@ -37,6 +37,7 @@ GButton& GButton::operator= (GButton const& gbutton)
 		this->GObject::operator=(gbutton);
 		delete this->m_pLabel;
 		this->m_pLabel = gbutton.m_pLabel->clone();
+		this->m_pLabel->setChanged(true);
 		assignHelper(gbutton);
 	}
 	return *this;
@@ -47,7 +48,7 @@ void GButton::setDimParameters(BoxDimensions dim)
 	GObject::setDimParameters(dim);
 	
 	//If you want to use VBO buffers uncomment this
-      //generateVBOBuffers();
+    //generateVBOBuffers();
 	
 	//If you want to use display lists uncomment this
 	generateGLDisplayLists();

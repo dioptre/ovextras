@@ -6,18 +6,12 @@ using namespace OpenViBEApplications;
 
 GPictureSymbol::GPictureSymbol(OpenViBE::CString sourcePath, OpenViBE::float32 scaleSize) : GLabel(sourcePath, scaleSize) 
 {	
-	//std::cout << "GPictureSymbol constructor: " << sourcePath.toASCIIString() << "\n";
 	m_pTextureManager = new OpenGLTextureManager(sourcePath);
+	//if the source file was not known yet, we have to call the opengl initialisation code for creating the texture
 	if (!m_pTextureManager->sourceExists())
-	{
-	//m_pTextureManager->createResources();
-		initializeOpenGLTexture();
-		//std::cout << "INTIALIZING OPENGL TEXTURE: " << m_pTextureManager->getResource(0) << "\n";
-	}
+		initializeOpenGLTexture(); // TODO maybe this should be handled by the OpenGLTextureManager
 	else
 		m_bImageLoaded = true;
-	//else
-	//	std::cout << "OpenGL texture already exists: " << m_pTextureManager->getResource(0) << "\n";
 		
 	generateGLDisplayLists();
 }
@@ -44,6 +38,7 @@ GPictureSymbol::~GPictureSymbol()
 	return *this;
 }*/
 
+// TODO maybe this should be moved to the OpenGLTextureManager
 void GPictureSymbol::initializeOpenGLTexture()
 {
 	SDL_Surface* l_pSurface = IMG_Load(m_sSourceFile);
@@ -59,10 +54,7 @@ void GPictureSymbol::initializeOpenGLTexture()
 		if (l_pSurface->format->BytesPerPixel == 3)
 			m_iMode = GL_RGB;
 		else if (l_pSurface->format->BytesPerPixel == 4)
-		{
 			m_iMode = GL_RGBA;
-			//std::cout << "Alpha channel available\n";
-		}
 		else 
 		{
 			m_bImageLoaded = false;
@@ -73,7 +65,6 @@ void GPictureSymbol::initializeOpenGLTexture()
 		if(m_bImageLoaded)
 		{
 			//SDL_SetAlpha(l_pSurface, SDL_SRCALPHA | SDL_RLEACCEL, 50);
-			//std::cout << "Alpha value of image " << l_pSurface->format->alpha << "\n";
 
 			//tell opengl to use the generated texture name
 			glBindTexture(GL_TEXTURE_2D, m_pTextureManager->getResource(0));
@@ -94,33 +85,23 @@ void GPictureSymbol::initializeOpenGLTexture()
 
 void GPictureSymbol::draw()
 {
-	GLabel::draw();
-	if (m_bImageLoaded)
+	if (isChanged())
 	{
-		glColor3d(m_cForegroundColor.red,m_cForegroundColor.green,m_cForegroundColor.blue);
-		glCallList(getGLResourceID(1));
+		GLabel::draw();
+		if (m_bImageLoaded)
+		{
+			glColor3d(m_cForegroundColor.red,m_cForegroundColor.green,m_cForegroundColor.blue);
+			glCallList(getGLResourceID(1));
+		}
 	}
 }
-
-/*void GPictureSymbol::setLabelDimParameters()
-{
-	computeLabelPosition();
-	
-	BoxDimensions l_Dimensions;
-	l_Dimensions.width = m_f32MaxLabelSize*m_f32LabelScaleSize;
-	l_Dimensions.height = l_Dimensions.width;
-	l_Dimensions.x = m_pLabelPosition.first;
-	l_Dimensions.y = m_pLabelPosition.second;
-	l_Dimensions.depth = getDepth();
-	setDimParameters(l_Dimensions);
-}*/
 
 void GPictureSymbol::setDimParameters(BoxDimensions dim)
 {	
 	GLabel::setDimParameters(dim);
-	//computeLabelPosition(); //not really necessary as this is called by the computeMaximumFontSize
-	//computeMaximumLabelSize();
-      //setFontSize();	
+	//computeLabelPosition(); //not really necessary as this is called by the computeMaximumFontSize	
+	//every time we set new dimensions to the object we should recreate the display list code in graphical memory
+	//by calling the setDimParameters of GLabel we recreate the OpenGL resources
 	generateGLDisplayLists();
 }
 
