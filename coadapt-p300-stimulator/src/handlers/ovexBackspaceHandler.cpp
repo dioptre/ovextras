@@ -21,11 +21,11 @@ void P300BackspaceHandler::update(GObservable* observable, const void * pUserDat
 	if (l_pResultHandler!=NULL)
 	{
 		m_sSpeltLetters = l_pResultHandler->getResultBuffer();
-		std::cout <<"backspace handler, spelt letters are " << m_sSpeltLetters <<"\n";
+		std::cout <<"backspace handler, spelt letters are " << m_sSpeltLetters.c_str() <<"\n";
 	}
 
 	//if Backspace button is clicked
-	if ((l_pButtonHandler!=NULL)&&(m_sSpeltLetters!=""))
+	if ((l_pButtonHandler!=NULL)&&(m_sSpeltLetters.compare("")!=0))
 	{
 		std::cout << "backspace handler clicked\n";
 		const GButton* l_pButton = static_cast<const GButton*>(pUserData);
