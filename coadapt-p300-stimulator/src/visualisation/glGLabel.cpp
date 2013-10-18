@@ -28,7 +28,7 @@ GLabel& GLabel::operator= (GLabel const& glabel)
 {
 	if(this!=&glabel)
 	{
-		this->GObject::operator=(glabel);
+		this->GObject::operator=(glabel); //this will set isChanged to true
 		assignHelper(glabel);
 	}
 	return *this;
@@ -37,10 +37,11 @@ GLabel& GLabel::operator= (GLabel const& glabel)
 void GLabel::draw()
 {
 	//rendering background rectangle
-	//glLoadIdentity();
-	//std::cout << "Drawing " << toString() << " with color " << getBackgroundColor().red << "," << getBackgroundColor().green << "," << getBackgroundColor().blue << "\n";
 	if (isChanged())
 	{
+		//the below code was used to only redraw certain parts of the screen and not the entire screen 
+		//(in conjunction with code in other files such as GContainer). The speedup didn't seem significant
+		//and the code gave some weird issues that were sometimes hard to solve so I dropped it.
 		/*glEnable(GL_SCISSOR_TEST);
 		glScissor(static_cast<GLint>(getX())+2, static_cast<GLint>(getY())+2, static_cast<GLsizei>(getWidth())-4, static_cast<GLsizei>(getHeight())-4);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -51,20 +52,12 @@ void GLabel::draw()
 		
 		//this->setChanged(false);
 	}
-	/*glBegin(GL_QUADS);
-		glColor3f(getBackgroundColor().red,getBackgroundColor().green,getBackgroundColor().blue); 
-		glVertex3f(getX(), getY(), getDepth());
-		glVertex3f(getX()+getWidth(), getY(), getDepth());
-		glVertex3f(getX()+getWidth(), getY()+getHeight(), getDepth());
-		glVertex3f(getX(), getY()+getHeight(), getDepth());
-	glEnd();*/
 }
 
 void GLabel::setDimParameters(BoxDimensions dim)
 {
 	GObject::setDimParameters(dim);
 	computeMaximumLabelSize();
-	//std::cout <<  toString() << "GLabel::setDimParameters\n";
 	this->generateGLDisplayLists();
 }
 
@@ -88,9 +81,7 @@ void GLabel::computeMaximumLabelSize()
 
 void GLabel::generateGLDisplayLists()
 {
-	//std::cout << toString() << "GLabel::generateGLDisplayLists\n";
-      //display list for the rectangle
-      //std::cout << "GenerateDisplayList for " << toString() << "at " << getX() << "," << getY() << "," << getWidth() << "," << getHeight() << "\n";
+	//just a rectangle
       glNewList(getGLResourceID(0),GL_COMPILE); 
 		glLoadIdentity();
 		glBegin(GL_QUADS);

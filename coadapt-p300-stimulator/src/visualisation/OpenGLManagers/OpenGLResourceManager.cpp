@@ -28,8 +28,6 @@ OpenGLResourceManager::~OpenGLResourceManager()
 
 void OpenGLResourceManager::createResources(OpenGLResourceManager* context)
 {
-	//context->m_uiNumberOfGLResources = n;
-	//context->m_uiGLResourceIds = new GLuint[context->m_uiNumberOfGLResources];
 	context->_createResources();
 	
 	std::map<GLuint, uint32>& l_mIdCoutMap = context->getResourceMap();
@@ -37,9 +35,12 @@ void OpenGLResourceManager::createResources(OpenGLResourceManager* context)
 	for (uint32 i=0; i<context->m_uiNumberOfGLResources; i++)
 	{
 		l_Iterator = l_mIdCoutMap.find(context->m_uiGLResourceIds[i]);
+		//if the resources already exist just increase its count in the map, otherwise insert a new element in the map with count 1
+		//the if should never occur as a new resource is created for each graphical object unless it is created via the copy constructor
+		//in which case this copy constructor is called that increases the count in the map by one
 		if (l_Iterator!=l_mIdCoutMap.end())
 		{
-			std::cout << "Creating new opengl resource, resource id " << context->m_uiGLResourceIds[i] << " should not exist\n";
+			std::cout << "Creating new opengl resource: resource id " << context->m_uiGLResourceIds[i] << " should not exist, but seems to exist\n";
 			l_mIdCoutMap[ context->m_uiGLResourceIds[i] ]++;
 		}
 		else
@@ -55,8 +56,8 @@ void OpenGLResourceManager::deleteResources(OpenGLResourceManager* context)
 		l_Iterator = l_mIdCoutMap.find(context->m_uiGLResourceIds[i]);
 		if (l_Iterator!=l_mIdCoutMap.end())
 		{
-			//std::cout << "OpenGLResourceManager:: Deleting opengl resources with id " << context->m_uiGLResourceIds[i] 
-			//<< " and count " << l_mIdCoutMap[ context->m_uiGLResourceIds[i] ] << "\n";
+			//decrease the count for this resource id, if it reaches zero call the specific delete code for the resource
+			//and remove the id from the map
 			if (--l_mIdCoutMap[ context->m_uiGLResourceIds[i] ] == 0)
 			{
 				context->_deleteResource(context->m_uiGLResourceIds+i);

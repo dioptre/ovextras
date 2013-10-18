@@ -235,7 +235,7 @@ void P300KeyboardHandler::initializeKeyboard()
 			l_pPredictionTable->addChild(l_Button,0.1f);
 		else
 			std::cout << "One should specify coordinates for " << l_Button->toString() << "\n";
-            m_vButtons->at(0)->push_back(l_Button->clone());
+		m_vButtons->at(0)->push_back(l_Button->clone());
 	}
 	
 	for (uint32 i=1; i<8; i++)

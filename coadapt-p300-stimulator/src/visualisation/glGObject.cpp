@@ -70,6 +70,7 @@ void GObject::setDimParameters(BoxDimensions dim)
 {
 	if (m_oDimensions!=dim)
 	{
+		//the code needs to be rewritten to graphical memory with the new dimensions so we need to recreate the OpenGL resources
 		deleteAndCreateGLResources();	
 		
 		m_oDimensions.x = dim.x;

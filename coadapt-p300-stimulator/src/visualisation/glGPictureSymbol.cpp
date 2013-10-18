@@ -99,7 +99,6 @@ void GPictureSymbol::draw()
 void GPictureSymbol::setDimParameters(BoxDimensions dim)
 {	
 	GLabel::setDimParameters(dim);
-	//computeLabelPosition(); //not really necessary as this is called by the computeMaximumFontSize	
 	//every time we set new dimensions to the object we should recreate the display list code in graphical memory
 	//by calling the setDimParameters of GLabel we recreate the OpenGL resources
 	generateGLDisplayLists();

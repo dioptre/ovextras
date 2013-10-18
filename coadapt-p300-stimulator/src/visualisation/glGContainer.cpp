@@ -20,7 +20,6 @@ GContainer::GContainer(OpenViBE::float32 x, OpenViBE::float32 y, OpenViBE::float
 
 GContainer::GContainer(const GContainer& gcontainer) : GObject(gcontainer)
 {
-	//std::cout << "Calling copy construction in GContainer on " << gcontainer.toString() << "\n";
 	m_lChildren = new std::vector<GObject*>();
 	for (OpenViBE::uint32 i=0; i<gcontainer.getNumberOfChildren(); i++)
 	{
@@ -31,7 +30,6 @@ GContainer::GContainer(const GContainer& gcontainer) : GObject(gcontainer)
 
 GContainer::~GContainer()
 {
-	//std::cout << "GContainer deconstructor called\n";
 	for (std::vector<GObject*>::iterator it=m_lChildren->begin();it!=m_lChildren->end(); it++)
 		delete *it;
 	delete m_lChildren;
@@ -39,7 +37,6 @@ GContainer::~GContainer()
 
 GContainer& GContainer::operator= (GContainer const& mainContainer)
 {
-	//std::cout << "GContainer assignment operator\n";
 	if(this!=&mainContainer)
 	{
 		this->GObject::operator=(mainContainer);
@@ -61,17 +58,9 @@ GContainer& GContainer::operator= (GContainer const& mainContainer)
 
 void GContainer::draw()
 {
-	/*glLoadIdentity();
-
-	glBegin(GL_QUADS);
-		glColor3f(getBackgroundColor().red,getBackgroundColor().green,getBackgroundColor().blue); 
-		glVertex3f(getX(), getY(), getDepth());
-		glVertex3f(getX(), getY()+getHeight(), getDepth());
-		glVertex3f(getX()+getWidth(), getY()+getHeight(), getDepth());
-		glVertex3f(getX()+getWidth(), getY(), getDepth());
-	glEnd();*/
 	if (isChanged())
 	{
+		//code for drawing only certain parts of the screen
 		/*glEnable(GL_SCISSOR_TEST);
 		glScissor(static_cast<GLint>(getX()), static_cast<GLint>(getY()), static_cast<GLsizei>(getWidth()), static_cast<GLsizei>(getHeight()));
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
@@ -79,8 +68,8 @@ void GContainer::draw()
 		
 		glCallList(getGLResourceID(0));
 	}
-	//std::cout << "Container background color " << getBackgroundColor().red << "," << getBackgroundColor().green << "," << getBackgroundColor().blue << "\n";
 	
+	//This is code for the VBO buffers
 	/*glBindBuffer(GL_ARRAY_BUFFER, getGLResourceID(0));
 	glVertexPointer(3,GL_FLOAT,0,0); 
 	glBindBuffer(GL_ARRAY_BUFFER, getGLResourceID(1));
@@ -99,12 +88,11 @@ void GContainer::draw()
 	std::vector<GObject*>::iterator it = m_lChildren->begin();
 	for(; it!=m_lChildren->end(); it++)
 	{
-			if (isChanged())
-				(*it)->setChanged(true);
+			//draw everything, if the object, on which draw is called, has not changed it should not execute its own draw function
+			//if (isChanged())
+			//	(*it)->setChanged(true);
 			(*it)->draw();
 	}
-	
-	//setChanged(false);
 }
 
 void GContainer::addChild(GObject* child, float32 offsetX, float32 offsetY, float32 width, float32 height, float32 depth)

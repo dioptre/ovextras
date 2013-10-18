@@ -36,8 +36,7 @@ GButton& GButton::operator= (GButton const& gbutton)
 	{
 		this->GObject::operator=(gbutton);
 		delete this->m_pLabel;
-		this->m_pLabel = gbutton.m_pLabel->clone();
-		this->m_pLabel->setChanged(true);
+		this->m_pLabel = gbutton.m_pLabel->clone(); // by cloning isChanged of the label should be set to true (in copy constructor of GObject)
 		assignHelper(gbutton);
 	}
 	return *this;
