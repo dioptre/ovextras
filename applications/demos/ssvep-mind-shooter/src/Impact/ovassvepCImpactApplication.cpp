@@ -258,7 +258,11 @@ void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
 	}
 
 	int l_vLevel[3];
+
 	// @FIXME bad, modifying non-ref input parameter
+	if(iChannelCount!=3) {
+		getLogManager() << LogLevel_Warning << "Changing iChannelCount from " << iChannelCount << " to 3\n";
+	}
 	iChannelCount = 3;
 
 	//std::cout << "feedback: ";
