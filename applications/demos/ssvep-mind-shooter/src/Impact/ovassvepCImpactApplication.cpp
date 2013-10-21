@@ -74,9 +74,9 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 
 	while (l_sEnemyOrder.peek() != EOF)
 	{
-		int next_type;
-		l_sEnemyOrder >> next_type;
-		m_oEnemyOrder.push(next_type);
+		int l_iNextType;
+		l_sEnemyOrder >> l_iNextType;
+		m_oEnemyOrder.push(l_iNextType);
 	}
 
 	(*m_poLogManager) << LogLevel_Debug << "Adding Impact game resources\n";
@@ -94,9 +94,9 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 
 	setupScene();
 
-	pMaxFeedbackLevel[0] = 0.5;
-	pMaxFeedbackLevel[1] = 0.5;
-	pMaxFeedbackLevel[2] = 0.5;
+	m_pMaxFeedbackLevel[0] = 0.5;
+	m_pMaxFeedbackLevel[1] = 0.5;
+	m_pMaxFeedbackLevel[2] = 0.5;
 
 	// Create the StarShip object
 	(*m_poLogManager) << LogLevel_Debug << "+ m_poShip = new CStarShip(...)\n";
@@ -210,20 +210,20 @@ void CImpactApplication::setupScene()
 	m_poCamera->lookAt(0, 0, 1);
 	m_poCamera->move(Ogre::Vector3(0,0,0));
 
-	Ogre::Light* pointLight;
+	Ogre::Light* l_pPointLight;
 
-	pointLight = m_poSceneManager->createLight();
-	pointLight->setType(Ogre::Light::LT_POINT);
-	pointLight->setPosition(Ogre::Vector3(0, 50, 0));
+	l_pPointLight = m_poSceneManager->createLight();
+	l_pPointLight->setType(Ogre::Light::LT_POINT);
+	l_pPointLight->setPosition(Ogre::Vector3(0, 50, 0));
 
-	pointLight->setDiffuseColour(1.0f, 1.0f, 0.8f);
-	pointLight->setSpecularColour(1.0f, 1.0f, 1.0f);
+	l_pPointLight->setDiffuseColour(1.0f, 1.0f, 0.8f);
+	l_pPointLight->setSpecularColour(1.0f, 1.0f, 1.0f);
 
-	pointLight = m_poSceneManager->createLight();
-	pointLight->setType(Ogre::Light::LT_POINT);
-	pointLight->setPosition(Ogre::Vector3(10, -10, 0));
+	l_pPointLight = m_poSceneManager->createLight();
+	l_pPointLight->setType(Ogre::Light::LT_POINT);
+	l_pPointLight->setPosition(Ogre::Vector3(10, -10, 0));
 
-	pointLight->setDiffuseColour(0.5f, 0.0f, 0.0f);
+	l_pPointLight->setDiffuseColour(0.5f, 0.0f, 0.0f);
 
 	m_poSceneLoader->parseDotScene("v6.scene", "SSVEPImpact", m_poSceneManager);
 	m_poSceneManager->getSceneNode("v6_sky")->showBoundingBox(true);
@@ -238,17 +238,17 @@ bool CImpactApplication::enemyDestroyed(CImpactEnemyShip* es)
 
 void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
 {
-	static int skip_control = 0;
-	static int previous_levels[3] = {0, 0, 0};
+	static int l_iSkipControl = 0;
+	static int l_vPreviousLevels[3] = {0, 0, 0};
 
-	if (skip_control < 2)
+	if (l_iSkipControl < 2)
 	{
-		skip_control++;
+		l_iSkipControl++;
 		return;
 	}
 	else
 	{
-		skip_control = 0;
+		l_iSkipControl = 0;
 	}
 
 
@@ -257,47 +257,52 @@ void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
 		m_poAdvancedControl->processFrame(pChannel[0], pChannel[1], pChannel[2]);
 	}
 
-	int level[3];
+	int l_vLevel[3];
+
+	// @FIXME bad, modifying non-ref input parameter
+	if(iChannelCount!=3) {
+		getLogManager() << LogLevel_Warning << "Changing iChannelCount from " << iChannelCount << " to 3\n";
+	}
 	iChannelCount = 3;
 
 	//std::cout << "feedback: ";
 	for (int i = 0; i < iChannelCount; i++)
 	{
-		if (pChannel[i] > pMaxFeedbackLevel[i])
+		if (pChannel[i] > m_pMaxFeedbackLevel[i])
 		{
-			pMaxFeedbackLevel[i] += 0.1;
+			m_pMaxFeedbackLevel[i] += 0.1;
 		}
 
-		double cLevel = pChannel[i] / pMaxFeedbackLevel[i];
+		float64 l_f64CLevel = pChannel[i] / m_pMaxFeedbackLevel[i];
 
 		//std::cout << cLevel << ", ";
-		level[i] = 0;
+		l_vLevel[i] = 0;
 
-		if (cLevel < 0.7)
+		if (l_f64CLevel < 0.7)
 		{
-			level[i]++;
+			l_vLevel[i]++;
 		}
-		if (cLevel < 0.3)
+		if (l_f64CLevel < 0.3)
 		{
-			level[i]++;
+			l_vLevel[i]++;
 		}
-		if (cLevel <= 0.0)
+		if (l_f64CLevel <= 0.0)
 		{
-			level[i]++;
+			l_vLevel[i]++;
 		}
 	}
 	//std::cout << "\n";
 
 
-	if (level[0] != previous_levels[0] || level[1] != previous_levels[1] || level[2] != previous_levels[2])
+	if (l_vLevel[0] != l_vPreviousLevels[0] || l_vLevel[1] != l_vPreviousLevels[1] || l_vLevel[2] != l_vPreviousLevels[2])
 	{
-		logPrefix() << "Feedback levels : " << level[0] << " " << level[1] << " " << level[2] << "\n";
+		logPrefix() << "Feedback levels : " << l_vLevel[0] << " " << l_vLevel[1] << " " << l_vLevel[2] << "\n";
 
-		previous_levels[0] = level[0];
-		previous_levels[1] = level[1];
-		previous_levels[2] = level[2];
+		l_vPreviousLevels[0] = l_vLevel[0];
+		l_vPreviousLevels[1] = l_vLevel[1];
+		l_vPreviousLevels[2] = l_vLevel[2];
 
-		m_poShip->setFeedbackLevels(level[0], level[1], level[2]);
+		m_poShip->setFeedbackLevels(l_vLevel[0], l_vLevel[1], l_vLevel[2]);
 	}
 
 }

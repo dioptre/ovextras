@@ -38,13 +38,13 @@ CImpactEnemyShip::CImpactEnemyShip( Ogre::Real rPosition )
 {
 
 	m_bEnemyLeaving = false;
-	int l_ui32Type = m_poApplication->getNextTargetType();
-	m_poApplication->logPrefix() << "Creating enemy " << l_ui32Type << "\n";
+	int l_iType = m_poApplication->getNextTargetType();
+	m_poApplication->logPrefix() << "Creating enemy " << l_iType << "\n";
 
-	if (l_ui32Type > 0 && l_ui32Type <= 6)
+	if (l_iType > 0 && l_iType <= 6)
 	{
 
-		switch (l_ui32Type)
+		switch (l_iType)
 		{
 		case 1:
 			m_poApplication->getSceneLoader()->parseDotScene("v2.scene", "SSVEPImpact", m_poApplication->getSceneManager());
@@ -92,7 +92,7 @@ CImpactEnemyShip::CImpactEnemyShip( Ogre::Real rPosition )
 			break;
 		}
 
-		if (l_ui32Type >= 4 && l_ui32Type <= 6)
+		if (l_iType >= 4 && l_iType <= 6)
 		{
 			m_poEnemyNode->scale(1.2f, 1.2f, 1.2f);
 			m_rShipWidth = 0.3f;
@@ -120,7 +120,7 @@ CImpactEnemyShip::CImpactEnemyShip( Ogre::Real rPosition )
 	}
 	else
 	{
-		m_poApplication->getLogManager() << OpenViBE::Kernel::LogLevel_Fatal << "Unknown enemy type " << l_ui32Type << " ! The application will now crash!\n";
+		m_poApplication->getLogManager() << OpenViBE::Kernel::LogLevel_Fatal << "Unknown enemy type " << l_iType << " ! The application will now crash!\n";
 	}
 
 
@@ -177,7 +177,7 @@ void CImpactEnemyShip::processFrame()
 
 
 	// oscillation animation
-	static int sin_oscillator = 90;
+	static int l_iSinOscillator = 90;
 
 	if (m_iLeaveCountdown > 0 && !m_bEnemyLeaving)
 	{
@@ -193,11 +193,11 @@ void CImpactEnemyShip::processFrame()
 
 	if (!m_bEnemyLeaving)
 	{
-		sin_oscillator++;
-		sin_oscillator = sin_oscillator % 360;
+		l_iSinOscillator++;
+		l_iSinOscillator = l_iSinOscillator % 360;
 		//	m_poEnemyNode->roll(Radian(Math::Sin(Degree(sin_oscillator)) / 80));
-		m_poEnemyNode->translate(Math::Sin(Degree((Ogre::Real)sin_oscillator)) / 20.0f * 0, Math::Sin(Degree((Ogre::Real)(sin_oscillator*2 + 90))) / 20, 0.0f,  Node::TS_LOCAL);
-		m_poHitBox->translate(Math::Sin(Degree((Ogre::Real)sin_oscillator)) / 20.0f / 50.0f * 0, 0.0f, 0.0f,  Node::TS_LOCAL);
+		m_poEnemyNode->translate(Math::Sin(Degree((Ogre::Real)l_iSinOscillator)) / 20.0f * 0, Math::Sin(Degree((Ogre::Real)(l_iSinOscillator*2 + 90))) / 20, 0.0f,  Node::TS_LOCAL);
+		m_poHitBox->translate(Math::Sin(Degree((Ogre::Real)l_iSinOscillator)) / 20.0f / 50.0f * 0, 0.0f, 0.0f,  Node::TS_LOCAL);
 
 
 		// incoming enemy animation
