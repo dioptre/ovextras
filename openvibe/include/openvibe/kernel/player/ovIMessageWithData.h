@@ -1,5 +1,5 @@
-#ifndef __OpenViBE_Kernel_Player_IMyMessage_H__
-#define __OpenViBE_Kernel_Player_IMyMessage_H__
+#ifndef __OpenViBE_Kernel_Player_IMessageWithData_H__
+#define __OpenViBE_Kernel_Player_IMessageWithData_H__
 
 #include "../ovIKernelObject.h"
 
@@ -8,152 +8,159 @@ namespace OpenViBE
 	namespace Kernel
 	{
 		/**
-		 * \class IMyMessage
-		 * \author Loic Mahe (INRIA)
+		 * \class IMessageWithData
+		 * \author Loic Mahe (Inria)
 		 * \date 2013-10-02
-		 * \brief The message class
+		 * \brief A type of message that can contain different kinds of arbitrary data
 		 * \ingroup Group_Player
 		 * \ingroup Group_Kernel
 		 *
-		 * Message that are exchanged between boxes. A message can hold four types of parameters, uint64, float64, CString and CMatrix.
-		 * Each type gets a map.
+		 * A message that can contain different kinds of data. The intended usage is for the message to be exchanged between boxes. 
+		 * A message can hold four types of data: uint64, float64, CString and CMatrix.
+		 * Each data item is accessed by its string identifier key using a getter/setter corresponding to the data type. 
+		 * The key is unique within the data type.
 		 *
 		 */
-		class OV_API IMyMessage : public OpenViBE::Kernel::IKernelObject
+		class OV_API IMessageWithData : public OpenViBE::Kernel::IMessage
 		{
 		public:
 			//@}
 			/** \name Getters */
 			//@{
-			// Returned references are invalid after processMessage().
+
+			// Note that any returned pointers from the getters are invalid after processMessage() scope has passed.
+
 			/**
 			 * \brief Gets the integer value stored under this key
 			 * \param key : a reference to the name of the key
-			 * \param success : a boolean which gives the status of the function, true if the retrieval is successful, false otherwise
-			 * \return \e the value in case of success
-			 * \return \e 0 in case of error
+			 * \param rValueOut : the associated data. Unmodified in case of error.
+			 * \return \e true in case of success
+			 * \return \e false in case of error
 			 */
-				virtual OpenViBE::uint64 getValueUint64(const OpenViBE::CString &key, bool &success) const=0;
+				virtual bool getValueUint64(const CString &key, OpenViBE::uint64& rValueOut) const=0;
 			/**
 			 * \brief Gets the float value stored under this key
 			 * \param key : a reference to the name of the key
-			 * \param success : a boolean which gives the status of the function, true if the retrieval is successful, false otherwise
-			 * \return \e the value in case of success
-			 * \return \e 0 in case of error
+			 * \param rValueOut : the associated data. Unmodified in case of error.
+			 * \return \e true in case of success
+			 * \return \e false in case of error
 			 */
-				virtual OpenViBE::float64 getValueFloat64(const CString &key, bool &success) const=0;
+				virtual bool getValueFloat64(const CString &key, OpenViBE::float64& rValueOut) const=0;
 			/**
 			 * \brief Gets a pointer to the CString value stored under this key
+			 * \note User should copy the content, the returned pointer will be invalid later.
 			 * \param key : a reference to the name of the key
-			 * \param success : a boolean which gives the status of the function, true if the retrieval is successful, false otherwise
-			 * \return \e a pointer to the value in case of success
-			 * \return \e NULL in case of error
+			 * \param pValueOut : pointer to the associated data. Unmodified in case of error. Do not free.
+			 * \return \e true if fetched ok, false otherwise
 			 */
-				virtual const OpenViBE::CString* getValueCString(const CString &key, bool &success) const=0;
+				virtual bool getValueCString(const CString &key, const OpenViBE::CString** pValueOut) const=0;
 			/**
 			 * \brief Gets a pointer to the CMatrix value stored under this key
+			 * \note User should copy the content, the returned pointer will be invalid later.
 			 * \param key : a reference to the name of the key
-			 * \param success : a boolean which gives the status of the function, true if the retrieval is successful, false otherwise
-			 * \return \e a pointer to the value in case of success
-			 * \return \e NULL in case of error
+			 * \param pValueOut : pointer to the associated data. Unmodified in case of error. Do not free.
+			 * \return \e true in case of success
+			 * \return \e false in case of error
 			 */
-				virtual const OpenViBE::IMatrix* getValueCMatrix(const CString &key, bool &success) const=0;
+				virtual bool getValueIMatrix(const CString &key, const OpenViBE::IMatrix** pOutMatrix) const=0;
 			//@}
 			/** \name Setters */
 			//@{
 			/**
 			 * \brief Sets the message internal UInt64 value stored under this key
 			 * \param key : the name of the key
-			 * \param valueIn : the integer value to put in the message
+			 * \param valueIn : the value to put into the message
 			 * \return \e true in case of success
 			 * \return \e false in case of error
 			 */
-				virtual bool setValueUint64(CString key, uint64 valueIn)=0;
+				virtual bool setValueUint64(const CString &key, uint64 valueIn)=0;
 			/**
 			 * \brief Sets the message internal Float64 value stored under this key
 			 * \param key : the name of the key
-			 * \param valueIn : the integer value to put in the message
+			 * \param valueIn : the value to put in the message
 			 * \return \e true in case of success
 			 * \return \e false in case of error
 			 */
-				virtual bool setValueFloat64(CString key, float64 valueIn)=0;
+				virtual bool setValueFloat64(const CString &key, float64 valueIn)=0;
 			/**
 			 * \brief Sets the message internal CString value stored under this key
+			 * \note The message will make an internal full copy of valueIn.
 			 * \param key : the name of the key
-			 * \param valueIn : the integer value to put in the message
+			 * \param valueIn : the value to put in the message
 			 * \return \e true in case of success
 			 * \return \e false in case of error
 			 */
-				virtual bool setValueCString(CString key, const CString &valueIn)=0;
+				virtual bool setValueCString(const CString &key, const CString &valueIn)=0;
 			/**
-			 * \brief Sets the message internal CMatrix value stored under this key
+			 * \brief Sets the message internal IMatrix value stored under this key
+			 * \note The message will make an internal full copy of valueIn.
 			 * \param key : the name of the key
-			 * \param valueIn : the integer value to put in the message
+			 * \param valueIn : the data to put in the message
 			 * \return \e true in case of success
 			 * \return \e false in case of error
 			 */
-				virtual bool setValueCMatrix(CString key, const CMatrix &valueIn)=0;
+				virtual bool setValueIMatrix(const CString &key, const IMatrix &valueIn)=0;
 			//@}
-			/** \name Keys getters */
+			/** \name Getters and iterators for keys */
 			//@{
 			/**
-			 * \brief Get the first key of the CString map
+			 * \brief Get the first key of the CString container
 			 * \return \e a pointer to the key in case of success
-			 * \return \e NULL in case of error
+			 * \return \e NULL in case of error or container is empty
 			 */
 				virtual const OpenViBE::CString* getFirstCStringToken() const=0;
 			/**
-			 * \brief Get the first key of the UInt64 map
+			 * \brief Get the first key of the UInt64 container
 			 * \return \e a pointer to the key in case of success
-			 * \return \e NULL in case of error
+			 * \return \e NULL in case of error or container is empty
 			 */
 				virtual const OpenViBE::CString* getFirstUInt64Token() const=0;
 			/**
-			 * \brief Get the first key of the Float64 map
+			 * \brief Get the first key of the Float64 container
 			 * \return \e a pointer to the key in case of success
-			 * \return \e NULL in case of error
+			 * \return \e NULL in case of error or container is empty
 			 */
 				virtual const OpenViBE::CString* getFirstFloat64Token() const=0;
 			/**
-			 * \brief Get the first key of the CMatrix map
+			 * \brief Get the first key of the CMatrix container
 			 * \return \e a pointer to the key in case of success
-			 * \return \e NULL in case of error
+			 * \return \e NULL in case of error or container is empty
 			 */
 				virtual const OpenViBE::CString* getFirstIMatrixToken() const=0;
 			/**
-			 * \brief Get the next key of the CString map
+			 * \brief Get the next key of the CString container
 			 * \param previousToken : a reference to the previous key
 			 * \return \e a pointer to the key in case of success
-			 * \return \e NULL in case of error or if we reached the end of the map
+			 * \return \e NULL in case of error or if no more tokens are available
 			 */
 				virtual const OpenViBE::CString* getNextCStringToken(const OpenViBE::CString &previousToken) const=0;
 			/**
-			 * \brief Get the next key of the UInt64 map
+			 * \brief Get the next key of the UInt64 container
 			 * \param previousToken : a reference to the previous key
 			 * \return \e a pointer to the key in case of success
-			 * \return \e NULL in case of error or if we reached the end of the map
+			 * \return \e NULL in case of error or if no more tokens are available
 			 */
 				virtual const OpenViBE::CString* getNextUInt64Token(const OpenViBE::CString &previousToken) const=0;
 			/**
-			 * \brief Get the next key of the Float64 map
+			 * \brief Get the next key of the Float64 container
 			 * \param previousToken : a reference to the previous key
 			 * \return \e a pointer to the key in case of success
-			 * \return \e NULL in case of error or if we reached the end of the map
+			 * \return \e NULL in case of error or if no more tokens are available
 			 */
 				virtual const OpenViBE::CString* getNextFloat64Token(const OpenViBE::CString &previousToken) const=0;
 			/**
-			 * \brief Get the next key of the CMatrix map
+			 * \brief Get the next key of the CMatrix container
 			 * \param previousToken : a reference to the previous key
 			 * \return \e a pointer to the key in case of success
-			 * \return \e NULL in case of error or if we reached the end of the map
+			 * \return \e NULL in case of error or if no more tokens are available
 			 */
 				virtual const OpenViBE::CString* getNextIMatrixToken(const OpenViBE::CString &previousToken) const=0;
 			//@}
 
-			_IsDerivedFromClass_(OpenViBE::Kernel::IKernelObject, OV_ClassId_Kernel_Player_MyMessage)
+			_IsDerivedFromClass_(OpenViBE::Kernel::IMessage, OV_ClassId_Kernel_Player_MessageWithData)
 
 		};
 	};
 };
 
-#endif // __OpenViBE_Kernel_Player_IMyMessage_H__
+#endif // __OpenViBE_Kernel_Player_IMessageWithData_H__

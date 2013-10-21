@@ -246,15 +246,20 @@ boolean CPlayerContext::sendMessage(
 	return false;
 }
 
-boolean CPlayerContext::sendMessage( IMyMessage& message, uint32 outputIndex)
+boolean CPlayerContext::sendMessage( const IMessageWithData& message, uint32 outputIndex)
 {
     return m_pSimulatedBox->sendMessage(message, outputIndex);
 }
 
-IMyMessage& CPlayerContext::createMessage(void)
+IMessageWithData& CPlayerContext::createMessage(void)
 {
     this->getLogManager() << LogLevel_Debug << "CPlayerContext::createdMessage\n";
-    return m_pSimulatedBox->createMessage();
+	IMessageWithData& rMyMessage = m_pSimulatedBox->createMessage();
+
+	// Timestamp the message with the creation time. Other option would be to stamp it at sendMessage().
+	rMyMessage.setTime(getCurrentTime());
+
+	return rMyMessage;
 }
 
 uint64 CPlayerContext::getCurrentTime(void)

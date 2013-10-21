@@ -42,7 +42,7 @@ namespace OpenViBEPlugins
 			
 			virtual OpenViBE::boolean process(void);
 
-            virtual OpenViBE::boolean processMessage(const OpenViBE::Kernel::IMyMessage& msg, OpenViBE::uint32 inputIndex);
+            virtual OpenViBE::boolean processMessage(const OpenViBE::Kernel::IMessageWithData& msg, OpenViBE::uint32 inputIndex);
 
 			// As we do with any class in openvibe, we use the macro below 
 			// to associate this box to an unique identifier. 
@@ -114,13 +114,13 @@ namespace OpenViBEPlugins
 			virtual void release(void) { }
 
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Message Spy"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("lmahe"); }
-			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Loic Mahe"); }
+			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Dumps message contents to LogManager"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Goes through all key/value pairs present in messages and prints them to LogManager"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tools"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1"); }
-			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-info"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_MessageSpy; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Tools::CBoxAlgorithmMessageSpy; }
@@ -144,14 +144,14 @@ namespace OpenViBEPlugins
                 //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
                 //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
 				
-				rBoxAlgorithmPrototype.addSetting("LogLevel",OV_TypeId_LogLevel,"Trace");
+				rBoxAlgorithmPrototype.addSetting("LogLevel",OV_TypeId_LogLevel,"Information");
 
                 //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 
-                rBoxAlgorithmPrototype.addMessageInput(OpenViBE::CString("message input"));
+                rBoxAlgorithmPrototype.addMessageInput(OpenViBE::CString("Message input"));
                 rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageInput);
 				
 				return true;

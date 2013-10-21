@@ -1299,14 +1299,14 @@ void CSimulatedBox::handleCrash(const char* sHintName)
 }
 
 
-boolean CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
+boolean CSimulatedBox::sendMessage(const IMessageWithData &msg, uint32 outputIndex)
 {
 	if(m_bIsReceivingMessage) {
-			this->getLogManager() << LogLevel_Error << "Message sending prohibited while receiving message.\n";
-			return false;
-		}
+		this->getLogManager() << LogLevel_Error << "Message sending prohibited while receiving message.\n";
+		return false;
+	}
 
-	this->getLogManager() << LogLevel_Debug << "SimulatedBox sendmessage on output" << outputIndex <<"\n";
+	this->getLogManager() << LogLevel_Debug << "SimulatedBox sendMessage on output" << outputIndex <<"\n";
 
 	//get the message links originating from this box
 	CIdentifier l_oLinkIdentifier=m_pScenario->getNextMessageLinkIdentifierFromBox(OV_UndefinedIdentifier, m_pBox->getIdentifier());
@@ -1332,7 +1332,7 @@ boolean CSimulatedBox::sendMessage(const IMyMessage &msg, uint32 outputIndex)
 	return true; // if success
 }
 
-boolean CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
+boolean CSimulatedBox::receiveMessage(const IMessageWithData &msg, uint32 inputIndex)
 {
 	m_bIsReceivingMessage = true;
 	CBoxAlgorithmContext l_oBoxAlgorithmContext(getKernelContext(), this, m_pBox);
@@ -1346,18 +1346,23 @@ boolean CSimulatedBox::receiveMessage(const IMyMessage &msg, uint32 inputIndex)
 boolean CSimulatedBox::cleanupMessages() {
 	// ...
 	this->getLogManager() << LogLevel_Debug << "cleaning messages " << "\n";
-	m_vPreparedMessages.clear();//that'll do for now
+	
+	for(std::vector<OpenViBE::Kernel::CMessageWithData*>::iterator it = m_vPreparedMessages.begin();
+		it!=m_vPreparedMessages.end(); it++) 
+	{
+		delete (*it);
+	}
+
+	m_vPreparedMessages.clear();
 	return true; // if success
 }
 
-IMyMessage& CSimulatedBox::createMessage()
+IMessageWithData& CSimulatedBox::createMessage()
 {
-	CMyMessage* newMessage = new CMyMessage();
-	m_vPreparedMessages.push_back(*newMessage);
-	delete newMessage;
-	IMyMessage* msg = &m_vPreparedMessages[m_vPreparedMessages.size()-1];
-	return *msg;
+	CMessageWithData* newMessage = new CMessageWithData(getKernelContext());
+	m_vPreparedMessages.push_back(newMessage);
 
+	return *newMessage;
 }
 
 // #endif // __MY_COMPILE_ALL

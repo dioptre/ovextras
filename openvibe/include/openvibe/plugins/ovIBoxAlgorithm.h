@@ -10,7 +10,7 @@ namespace OpenViBE
 		class IMessageClock;
 		class IMessageEvent;
 		class IMessageSignal;
-		class IMyMessage;
+		class IMessageWithData;
 
 		/**
 		 * \brief This enum lists all the way a box can be modified
@@ -288,7 +288,7 @@ namespace OpenViBE
 			 */
 			virtual OpenViBE::boolean processMessage(
 				OpenViBE::Kernel::IBoxAlgorithmContext& rBoxAlgorithmContext, 
-				const OpenViBE::Kernel::IMyMessage& rMyMessage, OpenViBE::uint32 inputIndex ) {return false; }
+				const OpenViBE::Kernel::IMessageWithData& rMessageWithData, OpenViBE::uint32 inputIndex ) {return false; }
 			//@}
 
 			_IsDerivedFromClass_(OpenViBE::Plugins::IPluginObject, OV_ClassId_Plugins_BoxAlgorithm)

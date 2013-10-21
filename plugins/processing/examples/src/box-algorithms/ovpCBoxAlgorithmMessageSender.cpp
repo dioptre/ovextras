@@ -11,13 +11,13 @@ boolean CBoxAlgorithmMessageSender::initialize(void)
 {
 	//get box clock frequency as defined by the user
     m_ui64BoxFrequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-
+    m_bAppendTestMatrix = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	uint32 l_ui32NumberOfSettings = l_rStaticBoxContext.getSettingCount();
-	//get the other settings, they will fill the message (except the setting 0, which is the box frequency)
+	//get the other settings, they will fill the message (except the setting 0 and 1 which are hardcoded)
 	// only Integer, Float and String settings are allowed (no CMatrix setting available)
-	for (uint32 i=1; i<l_ui32NumberOfSettings; i++)
+	for (uint32 i=2; i<l_ui32NumberOfSettings; i++)
 	{
 		CString l_sSettingName;
 		CIdentifier l_oSettingId;
@@ -96,7 +96,7 @@ boolean CBoxAlgorithmMessageSender::process(void)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	//create the message
-    IMyMessage& msg = this->getPlayerContext().createMessage();
+    IMessageWithData& msg = this->getPlayerContext().createMessage();
 
 	//put the integers in the message
 	std::map<CString, uint64>::const_iterator l_oIntegerIterator;
@@ -119,32 +119,26 @@ boolean CBoxAlgorithmMessageSender::process(void)
 		msg.setValueCString(l_oStringIterator->first, l_oStringIterator->second);
 	}
 
-
-	//has been used for tests, to remove
-    msg.setValueUint64( CString("meaning of life"), 42);
-    msg.setValueFloat64(CString("float"), 1.354);
-	CString test("test");
-	msg.setValueCString( CString("string"), test);
-	msg.setValueCString( CString("string2"), CString("test2"));
-
 	//adding a matrix to the message to test if it is received correctly
-	CMatrix *l_oMatrix = new CMatrix();
-	l_oMatrix->setDimensionCount(3);
-	l_oMatrix->setDimensionSize(0,2);
-	l_oMatrix->setDimensionSize(1,3);
-	l_oMatrix->setDimensionSize(2,2);
-
-	float64* l_f64Buffer = l_oMatrix->getBuffer();
-
-	for (uint64 i=0; i<l_oMatrix->getBufferElementCount(); i++)
+	if(m_bAppendTestMatrix) 
 	{
-		l_f64Buffer[i] = i;
-	}
-	msg.setValueCMatrix( CString("matrix"), *l_oMatrix);
-	delete l_oMatrix;
+		CMatrix l_oMatrix;
+		l_oMatrix.setDimensionCount(3);
+		l_oMatrix.setDimensionSize(0,2);
+		l_oMatrix.setDimensionSize(1,3);
+		l_oMatrix.setDimensionSize(2,2);
 
-    //send the message for all available output
-    for (uint64 output = 0; output<l_rStaticBoxContext.getMessageOutputCount(); output++)
+		float64* l_f64Buffer = l_oMatrix.getBuffer();
+
+		for (uint64 i=0; i<l_oMatrix.getBufferElementCount(); i++)
+		{
+			l_f64Buffer[i] = (float64)i;
+		}
+		msg.setValueIMatrix( CString("Matrix"), l_oMatrix);
+	}
+
+    //send the message to all available outputs
+    for (uint32 output = 0; output<l_rStaticBoxContext.getMessageOutputCount(); output++)
     {
 		getLogManager() << OpenViBE::Kernel::LogLevel_Trace << "sending message on output " << output << "\n";
 		this->getPlayerContext().sendMessage(msg, output);

@@ -502,7 +502,7 @@ float64 CScheduler::getCPUUsage(void) const
 	return (const_cast<System::CChrono&>(m_oBenchmarkChrono)).getStepInPercentage();
 }
 
-bool CScheduler::sendMessage(const IMyMessage &msg, CIdentifier targetBox, uint32 inputIndex)
+bool CScheduler::sendMessage(const IMessageWithData &msg, CIdentifier targetBox, uint32 inputIndex)
 {
     CSimulatedBox* l_oReceiverSimulatedBox= NULL;
 

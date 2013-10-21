@@ -55,6 +55,8 @@ namespace OpenViBEPlugins
 		protected:
 			// No codec algorithms were specified in the skeleton-generator.
             OpenViBE::uint64 m_ui64BoxFrequency;
+			OpenViBE::boolean m_bAppendTestMatrix;
+
 			std::map<OpenViBE::CString, OpenViBE::uint64> m_oIntegers;
 			std::map<OpenViBE::CString, OpenViBE::float64> m_oFloats;
 			std::map<OpenViBE::CString, OpenViBE::CString> m_oStrings;
@@ -143,12 +145,12 @@ namespace OpenViBEPlugins
 			virtual void release(void) { }
 
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Message Sender"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("lmahe"); }
-			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Samples"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Loic Mahe"); }
+			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Code example on how to construct messages"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This box can be configured to send out fixed messages periodically."); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tests and examples/Messaging"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_MessageSender; }
@@ -174,6 +176,7 @@ namespace OpenViBEPlugins
                 //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
 				
 				rBoxAlgorithmPrototype.addSetting("Frequency",OV_TypeId_Integer,"1");
+				rBoxAlgorithmPrototype.addSetting("Append test matrix",OV_TypeId_Boolean,"true");
 
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);

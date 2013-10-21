@@ -42,7 +42,7 @@ namespace OpenViBEPlugins
 			
 			virtual OpenViBE::boolean process(void);
 
-            virtual OpenViBE::boolean processMessage(const OpenViBE::Kernel::IMyMessage& msg, OpenViBE::uint32 inputIndex);
+            virtual OpenViBE::boolean processMessage(const OpenViBE::Kernel::IMessageWithData& msg, OpenViBE::uint32 inputIndex);
 
 			// As we do with any class in openvibe, we use the macro below 
 			// to associate this box to an unique identifier. 
@@ -52,7 +52,7 @@ namespace OpenViBEPlugins
 
 		protected:
 			// No codec algorithms were specified in the skeleton-generator.
-			bool l_bMessageReceived;
+			bool m_bMatrixReceived;
 			OpenViBE::CMatrix m_oMatrix;
 
 		};
@@ -115,45 +115,24 @@ namespace OpenViBEPlugins
 			virtual void release(void) { }
 
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Message Receiver"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("lmahe"); }
-			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Samples"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Loic Mahe"); }
+			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Code example on how to parse messages"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This box expects the input messages to contain specific keys of specific types. The corresponding data is printed to LogManager. For an example how to retrieve all keys from a message, please see the Message Spy box."); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tests and examples/Messaging"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_MessageReceiver; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CBoxAlgorithmMessageReceiver; }
 			
-			/*
-			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmMessageReceiverListener; }
-			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
-			*/
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				//No input specified.To add inputs use :
-//rBoxAlgorithmPrototype.addInput("Input Name",OV_TypeId_XXXX);
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddInput);
-				
-				//No output specified.To add outputs use :
-//rBoxAlgorithmPrototype.addOutput("Output Name",OV_TypeId_XXXX);
-
-                //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
-                //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
-				
-				//No setting specified.To add settings use :
-//rBoxAlgorithmPrototype.addSetting("Setting Name",OV_TypeId_XXXX,"default value");
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 
-                rBoxAlgorithmPrototype.addMessageInput(OpenViBE::CString("message input"));
+                rBoxAlgorithmPrototype.addMessageInput(OpenViBE::CString("Message input"));
                 rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageInput);
 
                 rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyMessageInput);
