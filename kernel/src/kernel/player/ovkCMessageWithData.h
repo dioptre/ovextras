@@ -15,11 +15,7 @@ namespace OpenViBE
 		{
 		public:
 
-			CMessageWithData(const OpenViBE::Kernel::IKernelContext& rKernelContext)
-				: OpenViBE::Kernel::TMessage<OpenViBE::Kernel::TKernelObject<OpenViBE::Kernel::IMessageWithData> >(rKernelContext)
-			{
-			}
-
+			CMessageWithData(const OpenViBE::Kernel::IKernelContext& rKernelContext);
 			~CMessageWithData();
 
 			// Getters

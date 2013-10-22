@@ -256,9 +256,6 @@ IMessageWithData& CPlayerContext::createMessage(void)
     this->getLogManager() << LogLevel_Debug << "CPlayerContext::createdMessage\n";
 	IMessageWithData& rMyMessage = m_pSimulatedBox->createMessage();
 
-	// Timestamp the message with the creation time. Other option would be to stamp it at sendMessage().
-	rMyMessage.setTime(getCurrentTime());
-
 	return rMyMessage;
 }
 

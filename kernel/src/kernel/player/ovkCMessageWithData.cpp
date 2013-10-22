@@ -4,6 +4,12 @@ using namespace std;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 
+CMessageWithData::CMessageWithData(const OpenViBE::Kernel::IKernelContext& rKernelContext)
+	: OpenViBE::Kernel::TMessage<OpenViBE::Kernel::TKernelObject<OpenViBE::Kernel::IMessageWithData> >(rKernelContext)
+{
+
+}
+
 CMessageWithData::~CMessageWithData()
 {
 	m_oUint64s.clear();
@@ -69,6 +75,7 @@ bool CMessageWithData::getValueCString(const CString &key, const OpenViBE::CStri
 	}
 	else
 	{
+		*pValueOut = NULL;
 		return false;
 	}
 }
@@ -89,6 +96,7 @@ bool CMessageWithData::getValueIMatrix(const CString &key, const OpenViBE::IMatr
 	}
 	else
 	{
+		*pValueOut = NULL;
 		return false;
 	}
 }

@@ -16,9 +16,15 @@ namespace OpenViBE
 		 * \ingroup Group_Kernel
 		 *
 		 * A message that can contain different kinds of data. The intended usage is for the message to be exchanged between boxes. 
-		 * A message can hold four types of data: uint64, float64, CString and CMatrix.
+		 * A message can hold four types of data: uint64, float64, CString and IMatrix.
 		 * Each data item is accessed by its string identifier key using a getter/setter corresponding to the data type. 
 		 * The key is unique within the data type.
+		 *
+		 * Although the IMessageWithData inherits IMessage, the parent class' identifier and timestamp fields are not automatically filled.
+		 * For example, we are not timestamping the message on its creation. This is because the IMessageWithData is a type that 
+		 * was designed to be immediately processed anyway during the same kernel scheduler tick. So for most use-cases, 
+		 * the time stamp does not make sense. If needed (for example for debug purposes), the caller who fills the message
+		 * can also stamp it or set it an identifier using the setters inherited from the parent class.
 		 *
 		 */
 		class OV_API IMessageWithData : public OpenViBE::Kernel::IMessage
@@ -50,7 +56,7 @@ namespace OpenViBE
 			 * \brief Gets a pointer to the CString value stored under this key
 			 * \note User should copy the content, the returned pointer will be invalid later.
 			 * \param key : a reference to the name of the key
-			 * \param pValueOut : pointer to the associated data. Unmodified in case of error. Do not free.
+			 * \param pValueOut : pointer to the associated data. NULL in case of error. Do not free.
 			 * \return \e true if fetched ok, false otherwise
 			 */
 				virtual bool getValueCString(const CString &key, const OpenViBE::CString** pValueOut) const=0;
@@ -58,7 +64,7 @@ namespace OpenViBE
 			 * \brief Gets a pointer to the CMatrix value stored under this key
 			 * \note User should copy the content, the returned pointer will be invalid later.
 			 * \param key : a reference to the name of the key
-			 * \param pValueOut : pointer to the associated data. Unmodified in case of error. Do not free.
+			 * \param pValueOut : pointer to the associated data. NULL in case of error. Do not free.
 			 * \return \e true in case of success
 			 * \return \e false in case of error
 			 */

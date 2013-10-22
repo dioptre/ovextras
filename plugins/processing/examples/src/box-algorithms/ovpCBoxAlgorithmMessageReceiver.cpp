@@ -97,7 +97,7 @@ OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMessageWit
 	}
 
 	// Note that the string pointer is no longer valid after processMessage()
-	const CString* l_pStringMessage;
+	const CString* l_pStringMessage = NULL;
 	success =  msg.getValueCString("Quote", &l_pStringMessage);
 	if(success) 
 	{
@@ -109,7 +109,7 @@ OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMessageWit
 	}
 
 	// Note that the matrix pointer is no longer valid after processMessage()
-	const IMatrix* l_pMatrixMessage;
+	const IMatrix* l_pMatrixMessage = NULL;
 	success = msg.getValueIMatrix("Matrix", &l_pMatrixMessage);
 	if(success) {
 		getLogManager() << OpenViBE::Kernel::LogLevel_Info << "Matrix received, " << l_pMatrixMessage->getBufferElementCount() << " elements\n";

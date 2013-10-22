@@ -1493,17 +1493,13 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 			{
 				CIdentifier l_oType = OV_TypeId_Message;
 				l_pBoxDetails->getMessageInputName(l_rObject.m_ui32ConnectorIndex, l_sName);
-				//l_pBoxDetails->getInputType(l_rObject.m_ui32ConnectorIndex, l_oType);
 				l_sType=m_rKernelContext.getTypeManager().getTypeName(l_oType);
-				//l_sType = "message";
 			}
 			if(l_rObject.m_ui32ConnectorType==Connector_MessageOutput)
 			{
 				CIdentifier l_oType = OV_TypeId_Message;
 				l_pBoxDetails->getMessageOutputName(l_rObject.m_ui32ConnectorIndex, l_sName);
-				//l_pBoxDetails->getOutputType(l_rObject.m_ui32ConnectorIndex, l_oType);
 				l_sType=m_rKernelContext.getTypeManager().getTypeName(l_oType);
-				//l_sType = "message";
 			}
 			l_sType=CString("[")+l_sType+CString("]");
 			gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(m_pBuilderTooltip, "tooltip-label_name_content")), l_sName);

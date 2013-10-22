@@ -48,7 +48,8 @@ OpenViBE::boolean CBoxAlgorithmMessageSpy::processMessage(const IMessageWithData
 	bool l_bReceivedSomething = false;
 	const CString* l_sKey;
 
-	this->getLogManager() << m_eLogLevel << "Spying message input socket " << inputIndex << ", message time stamp is " << msg.getTime() << "\n";
+	this->getLogManager() << m_eLogLevel << "Spying message input socket " << inputIndex << "\n";
+	this->getLogManager() << m_eLogLevel << "Message time stamp is "<< msg.getTime() << " and id " << msg.getIdentifier() << "\n";
 	
 	CString l_sMessageContent;
 

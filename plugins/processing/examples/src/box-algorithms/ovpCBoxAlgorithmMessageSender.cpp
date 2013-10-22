@@ -98,6 +98,10 @@ boolean CBoxAlgorithmMessageSender::process(void)
 	//create the message
     IMessageWithData& msg = this->getPlayerContext().createMessage();
 
+	//set optional parent class params; setTime() may not be meaningful in general use as the message should be processed immediately during sendMessage().
+	msg.setIdentifier(CIdentifier(0x01234567,0x789abcde));
+	msg.setTime(getPlayerContext().getCurrentTime());
+
 	//put the integers in the message
 	std::map<CString, uint64>::const_iterator l_oIntegerIterator;
 	for (l_oIntegerIterator=m_oIntegers.begin(); l_oIntegerIterator!=m_oIntegers.end(); l_oIntegerIterator++)
