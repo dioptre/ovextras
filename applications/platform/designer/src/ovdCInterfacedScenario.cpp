@@ -184,13 +184,13 @@ static void context_menu_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 
 		case ContextMenu_ScenarioAbout:    l_pContextMenuCB->pInterfacedScenario->contextMenuScenarioAboutCB(); break;
 
-    case ContextMenu_BoxAddMessageInput:      l_pContextMenuCB->pInterfacedScenario->contextMenuBoxAddMessageInputCB(*l_pContextMenuCB->pBox); break;
-    case ContextMenu_BoxRemoveMessageInput:   l_pContextMenuCB->pInterfacedScenario->contextMenuBoxRemoveMessageInputCB(*l_pContextMenuCB->pBox, l_pContextMenuCB->ui32Index); break;
-    case ContextMenu_BoxAddMessageOutput:      l_pContextMenuCB->pInterfacedScenario->contextMenuBoxAddMessageOutputCB(*l_pContextMenuCB->pBox); break;
-    case ContextMenu_BoxRemoveMessageOutput:   l_pContextMenuCB->pInterfacedScenario->contextMenuBoxRemoveMessageOutputCB(*l_pContextMenuCB->pBox, l_pContextMenuCB->ui32Index); break;
+		case ContextMenu_BoxAddMessageInput:       l_pContextMenuCB->pInterfacedScenario->contextMenuBoxAddMessageInputCB(*l_pContextMenuCB->pBox); break;
+		case ContextMenu_BoxRemoveMessageInput:    l_pContextMenuCB->pInterfacedScenario->contextMenuBoxRemoveMessageInputCB(*l_pContextMenuCB->pBox, l_pContextMenuCB->ui32Index); break;
+		case ContextMenu_BoxAddMessageOutput:      l_pContextMenuCB->pInterfacedScenario->contextMenuBoxAddMessageOutputCB(*l_pContextMenuCB->pBox); break;
+		case ContextMenu_BoxRemoveMessageOutput:   l_pContextMenuCB->pInterfacedScenario->contextMenuBoxRemoveMessageOutputCB(*l_pContextMenuCB->pBox, l_pContextMenuCB->ui32Index); break;
 
-    case ContextMenu_BoxEditMessageInput:   l_pContextMenuCB->pInterfacedScenario->contextMenuBoxEditMessageInputCB(*l_pContextMenuCB->pBox, l_pContextMenuCB->ui32Index); break;
-    case ContextMenu_BoxEditMessageOutput:      l_pContextMenuCB->pInterfacedScenario->contextMenuBoxEditMessageOutputCB(*l_pContextMenuCB->pBox,  l_pContextMenuCB->ui32Index); break;
+		case ContextMenu_BoxEditMessageInput:      l_pContextMenuCB->pInterfacedScenario->contextMenuBoxEditMessageInputCB(*l_pContextMenuCB->pBox, l_pContextMenuCB->ui32Index); break;
+		case ContextMenu_BoxEditMessageOutput:     l_pContextMenuCB->pInterfacedScenario->contextMenuBoxEditMessageOutputCB(*l_pContextMenuCB->pBox,  l_pContextMenuCB->ui32Index); break;
 
 
 	}
@@ -2784,10 +2784,9 @@ void CInterfacedScenario::contextMenuBoxRemoveMessageOutputCB(IBox& rBox, uint32
 	rBox.removeMessageOutput(ui32Index);
 	this->snapshotCB();
 }
-//erferferf
 void CInterfacedScenario::contextMenuBoxEditMessageInputCB(IBox& rBox, uint32 ui32Index)
 {
-	m_rKernelContext.getLogManager() << LogLevel_Fatal << "contextMenuBoxEditMessageInputCB\n";
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxEditMessageInputCB\n";
 	CString l_sMessageInputName;
 	rBox.getMessageInputName(ui32Index, l_sMessageInputName);
 

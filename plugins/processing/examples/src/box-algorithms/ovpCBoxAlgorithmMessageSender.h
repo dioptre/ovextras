@@ -22,7 +22,7 @@ namespace OpenViBEPlugins
 	{
 		/**
 		 * \class CBoxAlgorithmMessageSender
-		 * \author lmahe (INRIA)
+		 * \author Loic Mahe (Inria)
 		 * \date Thu Aug  8 11:17:24 2013
 		 * \brief The class CBoxAlgorithmMessageSender describes the box Message Sender.
 		 *
@@ -133,7 +133,7 @@ namespace OpenViBEPlugins
 
 		/**
 		 * \class CBoxAlgorithmMessageSenderDesc
-		 * \author lmahe (INRIA)
+		 * \author Loic Mahe (Inria)
 		 * \date Thu Aug  8 11:17:24 2013
 		 * \brief Descriptor of the box Message Sender.
 		 *
@@ -162,19 +162,7 @@ namespace OpenViBEPlugins
 			//*/
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
-			{
-				//No input specified.To add inputs use :
-//rBoxAlgorithmPrototype.addInput("Input Name",OV_TypeId_XXXX);
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddInput);
-				
-				//No output specified.To add outputs use :
-//rBoxAlgorithmPrototype.addOutput("Output Name",OV_TypeId_XXXX);
-
-                //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
-                //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
-				
+			{	
 				rBoxAlgorithmPrototype.addSetting("Frequency",OV_TypeId_Integer,"1");
 				rBoxAlgorithmPrototype.addSetting("Append test matrix",OV_TypeId_Boolean,"true");
 

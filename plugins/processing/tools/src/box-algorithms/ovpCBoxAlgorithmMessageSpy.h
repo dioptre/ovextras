@@ -18,7 +18,7 @@ namespace OpenViBEPlugins
 	{
 		/**
 		 * \class CBoxAlgorithmMessageSpy
-		 * \author lmahe (INRIA)
+		 * \author Loic Mahe (Inria)
 		 * \date Mon Aug 26 00:17:36 2013
 		 * \brief The class CBoxAlgorithmMessageSpy describes the box Message Spy.
 		 *
@@ -102,7 +102,7 @@ namespace OpenViBEPlugins
 
 		/**
 		 * \class CBoxAlgorithmMessageSpyDesc
-		 * \author lmahe (INRIA)
+		 * \author Loic Mahe (Inria)
 		 * \date Mon Aug 26 00:17:36 2013
 		 * \brief Descriptor of the box Message Spy.
 		 *
@@ -131,28 +131,14 @@ namespace OpenViBEPlugins
 			*/
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
-			{
-				//No input specified.To add inputs use :
-//rBoxAlgorithmPrototype.addInput("Input Name",OV_TypeId_XXXX);
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddInput);
-				
-				//No output specified.To add outputs use :
-//rBoxAlgorithmPrototype.addOutput("Output Name",OV_TypeId_XXXX);
-
-                //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
-                //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
-				
+			{				
 				rBoxAlgorithmPrototype.addSetting("LogLevel",OV_TypeId_LogLevel,"Information");
-
-                //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 
                 rBoxAlgorithmPrototype.addMessageInput(OpenViBE::CString("Message input"));
                 rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageInput);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyMessageInput);
 				
 				return true;
 			}

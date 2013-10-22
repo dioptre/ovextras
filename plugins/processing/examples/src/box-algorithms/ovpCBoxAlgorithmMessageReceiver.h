@@ -18,7 +18,7 @@ namespace OpenViBEPlugins
 	{
 		/**
 		 * \class CBoxAlgorithmMessageReceiver
-		 * \author lmahe (INRIA)
+		 * \author Loic Mahe (Inria)
 		 * \date Thu Aug  8 13:56:21 2013
 		 * \brief The class CBoxAlgorithmMessageReceiver describes the box Message Receiver.
 		 *
@@ -103,7 +103,7 @@ namespace OpenViBEPlugins
 
 		/**
 		 * \class CBoxAlgorithmMessageReceiverDesc
-		 * \author lmahe (INRIA)
+		 * \author Loic Mahe (Inria)
 		 * \date Thu Aug  8 13:56:21 2013
 		 * \brief Descriptor of the box Message Receiver.
 		 *
