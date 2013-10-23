@@ -15,4 +15,4 @@ SET "PATH=%OV_PATH_ROOT%\bin;%PATH%"
 
 REM for visual studio express...
 
-"%VSINSTALLDIR%Common7\IDE\VCExpress.exe" ..\local-tmp\visual\OpenViBE.sln
+"%VSINSTALLDIR%\Common7\IDE\VCExpress.exe" ..\local-tmp\visual\OpenViBE.sln

@@ -39,6 +39,11 @@ int main(void)
 #endif
 
 #if defined(WIN32) || (defined(LINUX) && defined(__GXX_EXPERIMENTAL_CXX0X__))
+#ifndef static_assert
+	// On VS2008 we don't have static_assert(). Fine - we just skip these.
+#define static_assert(x,y) {} 
+#endif
+
 	static_assert(sizeof(uint64)>=8, "uint64 is not at least 8 bytes");
 	static_assert(sizeof(uint32)>=4, "uint32 is not at least 4 bytes");
 	static_assert(sizeof(uint16)>=2, "uint16 is not at least 2 bytes");

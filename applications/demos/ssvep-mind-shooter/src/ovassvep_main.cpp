@@ -13,7 +13,6 @@ using namespace OpenViBE;
  */
 int main(int argc, char** argv)
 {
-	
 	if (argc < 2)
 	{
 		printf("Usage : %s <application-type> [application-subtype]\n", argv[0]);
@@ -28,8 +27,6 @@ int main(int argc, char** argv)
 	OpenViBE::Kernel::IKernelContext* l_poKernelContext = NULL;
 	OpenViBE::Kernel::ILogManager* l_poLogManager = NULL;
 	OpenViBE::Kernel::IConfigurationManager* l_poConfigurationManager = NULL;
-
-
 
 	CString l_sApplicationString = CString(argv[1]);
 	CString l_sScenarioFolder = CString(argv[2]);
@@ -110,20 +107,20 @@ int main(int argc, char** argv)
 
 
 
-	OpenViBESSVEP::CApplication* app = NULL;
+	OpenViBESSVEP::CApplication* l_pApp = NULL;
 
 
 
 	if (l_sApplicationType == CString("generic"))
 	{
 		(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Debug << "+ app = new OpenViBESSVEP::CGenericStimulatorApplication(...)\n";
-		app = new OpenViBESSVEP::CGenericStimulatorApplication(l_sScenarioFolder);
+		l_pApp = new OpenViBESSVEP::CGenericStimulatorApplication(l_sScenarioFolder);
 	}
 	else if (l_sApplicationType == CString("impact"))
 	{
 		(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Debug << "+ app = new OpenViBESSVEP::CImpactApplication(...)\n";
 		(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Info << "application subtype " << l_sApplicationSubtype << "\n";
-		app = new OpenViBESSVEP::CImpactApplication(l_sScenarioFolder, l_sApplicationSubtype);
+		l_pApp = new OpenViBESSVEP::CImpactApplication(l_sScenarioFolder, l_sApplicationSubtype);
 	}
 	else
 	{
@@ -132,13 +129,18 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
-	app->setup(l_poKernelContext);
+	if(!l_pApp->setup(l_poKernelContext))
+	{
+		(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Error << "Cannot proceed, exiting\n";
 
-	app->go();
+		exit(2);
+	}
+
+	l_pApp->go();
 
 
 	(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Debug << "- app\n";
-	delete app;
+	delete l_pApp;
 
 	return 0;
 }

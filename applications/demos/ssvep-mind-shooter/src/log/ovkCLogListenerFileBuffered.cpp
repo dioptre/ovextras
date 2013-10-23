@@ -130,9 +130,11 @@ void CLogListenerFileBuffered::log(const boolean bValue)
 
 void CLogListenerFileBuffered::log(const CIdentifier& rValue)
 {
-	CString l_sValue=rValue.toString();
-	if (m_f != NULL)
+	if (m_f != NULL) 
+	{
+		CString l_sValue=rValue.toString();
 		fprintf(m_f, "%s", (const char*)l_sValue);
+	}
 }
 
 void CLogListenerFileBuffered::log(const CString& rValue)
@@ -150,43 +152,45 @@ void CLogListenerFileBuffered::log(const char* pValue)
 void CLogListenerFileBuffered::log(const ELogLevel eLogLevel)
 {
 	if (m_f != NULL)
-	switch(eLogLevel)
 	{
-	case LogLevel_Debug:
-		fprintf(m_f, "[ DEBUG ] ");
-		break;
+		switch(eLogLevel)
+		{
+		case LogLevel_Debug:
+			fprintf(m_f, "[ DEBUG ] ");
+			break;
 
-	case LogLevel_Benchmark:
-		fprintf(m_f, "[ BENCH ] ");
-		break;
+		case LogLevel_Benchmark:
+			fprintf(m_f, "[ BENCH ] ");
+			break;
 
-	case LogLevel_Trace:
-		fprintf(m_f, "[ TRACE ] ");
-		break;
+		case LogLevel_Trace:
+			fprintf(m_f, "[ TRACE ] ");
+			break;
 
-	case LogLevel_Info:
-		fprintf(m_f, "[  INF  ] ");
-		break;
+		case LogLevel_Info:
+			fprintf(m_f, "[  INF  ] ");
+			break;
 
-	case LogLevel_Warning:
-		fprintf(m_f, "[WARNING] ");
-		break;
+		case LogLevel_Warning:
+			fprintf(m_f, "[WARNING] ");
+			break;
 
-	case LogLevel_ImportantWarning:
-		fprintf(m_f, "[WARNING] ");
-		break;
+		case LogLevel_ImportantWarning:
+			fprintf(m_f, "[WARNING] ");
+			break;
 
-	case LogLevel_Error:
-		fprintf(m_f, "[ ERROR ] ");
-		break;
+		case LogLevel_Error:
+			fprintf(m_f, "[ ERROR ] ");
+			break;
 
-	case LogLevel_Fatal:
-		fprintf(m_f, "[ FATAL ] ");
-		break;
+		case LogLevel_Fatal:
+			fprintf(m_f, "[ FATAL ] ");
+			break;
 
-	default:
-		fprintf(m_f, "[UNKNOWN] ");
-		break;
+		default:
+			fprintf(m_f, "[UNKNOWN] ");
+			break;
+		}
 	}
 }
 
