@@ -61,19 +61,11 @@ enum { FULL=0, DIAG=1, SHRINK_TO_DIAG=2, SHRINK_TO_UNITY=3 };
 
 #define OVP_ClassId_Algorithm_ClassifierPLDA                                         OpenViBE::CIdentifier(0x2F9ECA0B, 0x8D3CA7BD)
 #define OVP_ClassId_Algorithm_ClassifierPLDADesc                                   OpenViBE::CIdentifier(0x1BD67420, 0x587600E6)
-
-//___________________________________________________________________//
-//                                                                   //
-// Plugin Object Class Identifiers                                   //
-//___________________________________________________________________//
-//                                                                   //
-
-/*												                                                                                                                                                                            
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0x7D13B924, 0xF194DA09)
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0x2397E74F, 0xCAC8F95C)
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0xD6E1AC79, 0xBE50C28F)
-#define OVP_ClassId_                                        OpenViBE::CIdentifier(0x5E8D9B97, 0xF82F92D7)
-*/
+	
+#define OVP_ClassId_Algorithm_ClassifierAdaptiveGradientDescentLDA			OpenViBE::CIdentifier(0x7D13B924, 0xF194DA09)
+#define OVP_ClassId_Algorithm_ClassifierAdaptiveGradientDescentLDADesc		OpenViBE::CIdentifier(0x2397E74F, 0xCAC8F95C)
+#define OVP_Algorithm_ClassifierGradientDescentLDA_InputParameterId_Lambda	OpenViBE::CIdentifier(0xD6E1AC79, 0xBE50C28F)
+#define OVP_Algorithm_ClassifierGradientDescentLDA_InputParameterId_Eta		OpenViBE::CIdentifier(0x5E8D9B97, 0xF82F92D7)
 
 #define OVP_TypeId_ProcessType                                        					OpenViBE::CIdentifier(0x98CF8BCC, 0xA8A5102A)
 #define OVP_TypeId_ProcessType_AllInputs                             					OpenViBE::CIdentifier(0x68E5FAE6, 0x0C1A4382)

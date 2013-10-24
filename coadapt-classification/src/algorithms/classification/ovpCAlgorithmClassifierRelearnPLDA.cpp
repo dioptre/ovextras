@@ -17,8 +17,6 @@ using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
 
-//#define CIRCULAR_BUFFER_SIZE 3600
-
 boolean CAlgorithmClassifierRelearnPLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
 	TParameterHandler < int64 > ip_i64ShrinkageType(this->getInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Shrinkage));

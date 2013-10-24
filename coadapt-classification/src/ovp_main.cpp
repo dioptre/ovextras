@@ -15,6 +15,7 @@
 //#include "algorithms/classification/ovpCLikelihoodComputeFunction.h"
 #include "algorithms/classification/ovpCAlgorithmClassifierRelearnPLDA.h"
 #include "algorithms/classification/ovpCAlgorithmClassifierPLDA.h"
+#include "algorithms/classification/ovpCAlgorithmClassifierAdaptiveGradientDescentLDA.h"
 
 
 #include <vector>
@@ -48,6 +49,7 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Mixture of Experts", OVP_ClassId_Algorithm_ClassifierMixtureOfExperts.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Relearn Probabilistic LDA", OVP_ClassId_Algorithm_ClassifierRelearnPLDA.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Probabilistic LDA", OVP_ClassId_Algorithm_ClassifierPLDA.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Adaptive Gradient Descent LDA", OVP_ClassId_Algorithm_ClassifierAdaptiveGradientDescentLDA.toUInteger());
 	
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_ShrinkageType,"Shrinkage");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Full covariance",FULL);
@@ -68,4 +70,5 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmAdaptiveP300ClassifierDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierRelearnPLDADesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierPLDADesc);
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierAdaptiveGradientDescentLDADesc);
 OVP_Declare_End()
