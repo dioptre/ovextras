@@ -38,7 +38,7 @@ namespace OpenViBE
 			virtual OpenViBE::boolean initializeFromAlgorithmClassIdentifier(
 				const OpenViBE::CIdentifier& rAlgorithmClassIdentifier);
 			virtual OpenViBE::boolean initializeFromExistingBox(
-				const OpenViBE::Kernel::IBox& rExisitingBox);
+				const OpenViBE::Kernel::IBox& rExistingBox);
 
 			virtual OpenViBE::boolean addInput(
 				const OpenViBE::CString& sName,
@@ -239,7 +239,7 @@ namespace OpenViBE
 			std::vector<COutput> m_vOutput;
 			std::vector<CSetting> m_vSetting;
 
-            //only the name of the in/output are stored for message socket
+			//only the name of the in/output are stored for message socket
 			std::vector<CMessageInput> m_vMessageInput;
 			std::vector<CMessageOutput> m_vMessageOutput;
 		};

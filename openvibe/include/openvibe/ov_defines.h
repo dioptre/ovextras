@@ -146,8 +146,6 @@
 #define OV_AttributeId_Box_InitialMessageInputCount          OpenViBE::CIdentifier(0x996FFCD6, 0x5ACFB930)
 #define OV_AttributeId_Box_InitialMessageOutputCount         OpenViBE::CIdentifier(0x4D3DEFB7, 0xF238570D)
 //
-                                      
-
 
 #define OV_AttributeId_Box_FlagCanAddInput                   OpenViBE::CIdentifier(0xFBA64161, 0x65304E21)
 #define OV_AttributeId_Box_FlagCanModifyInput                OpenViBE::CIdentifier(0x527AD68D, 0x16D746A0)

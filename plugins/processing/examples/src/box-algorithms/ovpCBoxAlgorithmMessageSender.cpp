@@ -10,8 +10,8 @@ using namespace OpenViBEPlugins::Samples;
 boolean CBoxAlgorithmMessageSender::initialize(void)
 {
 	//get box clock frequency as defined by the user
-    m_ui64BoxFrequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-    m_bAppendTestMatrix = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+	m_ui64BoxFrequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	m_bAppendTestMatrix = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	uint32 l_ui32NumberOfSettings = l_rStaticBoxContext.getSettingCount();
@@ -72,7 +72,7 @@ boolean CBoxAlgorithmMessageSender::processClock(IMessageClock& rMessageClock)
 uint64 CBoxAlgorithmMessageSender::getClockFrequency(void)
 {
 	// Note that the time is coded on a 64 bits unsigned integer, fixed decimal point (32:32)
-    return m_ui64BoxFrequency<<32; // the box clock frequency
+	return m_ui64BoxFrequency<<32; // the box clock frequency
 }
 /*******************************************************************************/
 
@@ -83,10 +83,10 @@ boolean CBoxAlgorithmMessageSender::process(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	//create the message
-    IMessageWithData& msg = this->getPlayerContext().createMessage();
+	IMessageWithData& msg = this->getPlayerContext().createMessage();
 
 	//set optional parent class params; setTime() may not be meaningful in general use as the message should be processed immediately during sendMessage().
-	msg.setIdentifier(CIdentifier(0x01234567,0x789abcde));
+	msg.setIdentifier(CIdentifier(0x01234567,0x89abcdef));
 	msg.setTime(getPlayerContext().getCurrentTime());
 
 	//put the integers in the message
@@ -128,12 +128,12 @@ boolean CBoxAlgorithmMessageSender::process(void)
 		msg.setValueIMatrix( CString("Matrix"), l_oMatrix);
 	}
 
-    //send the message to all available outputs
-    for (uint32 output = 0; output<l_rStaticBoxContext.getMessageOutputCount(); output++)
-    {
+	//send the message to all available outputs
+	for (uint32 output = 0; output<l_rStaticBoxContext.getMessageOutputCount(); output++)
+	{
 		getLogManager() << OpenViBE::Kernel::LogLevel_Trace << "sending message on output " << output << "\n";
 		this->getPlayerContext().sendMessage(msg, output);
-    }
+	}
 
 	return true;
 }

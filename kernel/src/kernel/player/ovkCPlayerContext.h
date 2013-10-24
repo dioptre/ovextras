@@ -26,8 +26,8 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier* pTargetIdentifier,
 				const OpenViBE::uint32 ui32TargetIdentifierCount);
 
-            virtual OpenViBE::boolean sendMessage( const OpenViBE::Kernel::IMessageWithData& message, OpenViBE::uint32 outputIndex);
-            virtual OpenViBE::Kernel::IMessageWithData& createMessage(void);
+			virtual OpenViBE::boolean sendMessage( const OpenViBE::Kernel::IMessageWithData& message, OpenViBE::uint32 outputIndex);
+			virtual OpenViBE::Kernel::IMessageWithData& createMessage(void);
 
 			virtual OpenViBE::uint64 getCurrentTime(void);
 

@@ -632,151 +632,143 @@ void CInterfacedScenario::redraw(IBox& rBox)
 			l_oLinkIdentifier=m_rScenario.getNextLinkIdentifierToBoxInput(l_oLinkIdentifier, rBox.getIdentifier(), i);
 		}
 	}
-    //m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "message input "<< " / " << rBox.getMessageInputCount() <<"\n";
-    //draw messages input
-    int l_iMessageInputOffset=ySize/2-rBox.getMessageInputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize;
-    //int minput = 3;
-    //int l_iMessageInputOffset=ySize/2-minput*(iCircleSpace+iCircleSize)/2+iCircleSize;
-        //for(i=0; i<minput; i++)
-    for(i=0; i<rBox.getMessageInputCount(); i++)
-    {
-        ::GdkColor l_oMessageInputColor;
-        l_oMessageInputColor.pixel=(guint16)0;
-        l_oMessageInputColor.red  =(guint16)117;
-        l_oMessageInputColor.green=(guint16)117;
-        l_oMessageInputColor.blue =(guint16)117;
+	//m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "message input "<< " / " << rBox.getMessageInputCount() <<"\n";
+	//draw messages input
+	int l_iMessageInputOffset=ySize/2-rBox.getMessageInputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize;
+	//int minput = 3;
+	//int l_iMessageInputOffset=ySize/2-minput*(iCircleSpace+iCircleSize)/2+iCircleSize;
+		//for(i=0; i<minput; i++)
+	for(i=0; i<rBox.getMessageInputCount(); i++)
+	{
+		::GdkColor l_oMessageInputColor;
+		l_oMessageInputColor.pixel=(guint16)0;
+		l_oMessageInputColor.red  =(guint16)117;
+		l_oMessageInputColor.green=(guint16)117;
+		l_oMessageInputColor.blue =(guint16)117;
 
-        ::GdkPoint l_vPoint[4];
-        l_vPoint[0].x=iCircleSize;
-        l_vPoint[0].y=-iCircleSize>>1;
-        l_vPoint[1].x=0;
-        l_vPoint[1].y=-(iCircleSize-1);
-        l_vPoint[2].x=0;
-        l_vPoint[2].y=0;
-        for(int j=0; j<3; j++)
-        {
-            l_vPoint[j].x+=xStart-(iCircleSize>>1);
-            l_vPoint[j].y+=yStart+i*(iCircleSpace+iCircleSize)+l_iMessageInputOffset;;
-        }
+		::GdkPoint l_vPoint[4];
+		l_vPoint[0].x=iCircleSize;
+		l_vPoint[0].y=-iCircleSize>>1;
+		l_vPoint[1].x=0;
+		l_vPoint[1].y=-(iCircleSize-1);
+		l_vPoint[2].x=0;
+		l_vPoint[2].y=0;
+		for(int j=0; j<3; j++)
+		{
+			l_vPoint[j].x+=xStart-(iCircleSize>>1);
+			l_vPoint[j].y+=yStart+i*(iCircleSpace+iCircleSize)+l_iMessageInputOffset;;
+		}
 
-        updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
-        gdk_draw_polygon(
-            GDK_DRAWABLE(m_pStencilBuffer),
-            l_pStencilGC,
-            TRUE,
-            l_vPoint,
-            3);
-        m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier(), Connector_MessageInput, i);
+		updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
+		gdk_draw_polygon(
+			GDK_DRAWABLE(m_pStencilBuffer),
+			l_pStencilGC,
+			TRUE,
+			l_vPoint,
+			3);
+		m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier(), Connector_MessageInput, i);
 
-        gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oMessageInputColor);
-        gdk_draw_polygon(
-            l_pWidget->window,
-            l_pDrawGC,
-            TRUE,
-            l_vPoint,
-            3);
-
-
-        //int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iMessageInputOffset;
-        //int32 y=yStart-(iCircleSize>>1)-m_i32ViewOffsetY;
-        int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX - iCircleSize;
-        int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageInputOffset - iCircleSize/2;
-        CIdentifier l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierToBoxInput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
-        while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
-        {
-            ILink* l_pLink=m_rScenario.getMessageLinkDetails(l_oLinkIdentifier);
-            if(l_pLink)
-            {
-                TAttributeHandler l_oAttributeHandler(*l_pLink);
-
-                if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_XTargetPosition))
-                    l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_XTargetPosition, x);
-                else
-                    l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_XTargetPosition, x);
-
-                if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_YTargetPosition))
-                    l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_YTargetPosition, y);
-                else
-                    l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_YTargetPosition, y);
-            }
-            l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierToBoxInput(l_oLinkIdentifier, rBox.getIdentifier(), i);
-        }
-
-    }
-    //*
-    //int moutput = 3;
-    int l_iMessageOutputOffset=ySize/2-rBox.getMessageOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize;
-    //int l_iMessageOutputOffset=ySize/2-moutput*(iCircleSpace+iCircleSize)/2+iCircleSize;
-    for(i=0; i<rBox.getMessageOutputCount(); i++)
-    {
-        ::GdkColor l_oMessageOutputColor;
-        l_oMessageOutputColor.pixel=(guint16)0;
-        l_oMessageOutputColor.red  =(guint16)117;
-        l_oMessageOutputColor.green=(guint16)117;
-        l_oMessageOutputColor.blue =(guint16)117;
-
-        ::GdkPoint l_vPoint[4];
-        l_vPoint[0].x=iCircleSize;
-        l_vPoint[0].y=-iCircleSize>>1;
-        l_vPoint[1].x=0;
-        l_vPoint[1].y=-(iCircleSize-1);
-        l_vPoint[2].x=0;
-        l_vPoint[2].y=0;
-        for(int j=0; j<3; j++)
-        {
-            l_vPoint[j].x+=xStart-(iCircleSize>>1)+xSize;
-            l_vPoint[j].y+=yStart+i*(iCircleSpace+iCircleSize)+l_iMessageOutputOffset;;
-        }
-
-        updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
-        gdk_draw_polygon(
-            GDK_DRAWABLE(m_pStencilBuffer),
-            l_pStencilGC,
-            TRUE,
-            l_vPoint,
-            3);
-        m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier(), Connector_MessageOutput, i);
-
-        gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oMessageOutputColor);
-        gdk_draw_polygon(
-            l_pWidget->window,
-            l_pDrawGC,
-            TRUE,
-            l_vPoint,
-            3);
+		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oMessageInputColor);
+		gdk_draw_polygon(
+			l_pWidget->window,
+			l_pDrawGC,
+			TRUE,
+			l_vPoint,
+			3);
 
 
+		//int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iMessageInputOffset;
+		//int32 y=yStart-(iCircleSize>>1)-m_i32ViewOffsetY;
+		int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX - iCircleSize;
+		int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageInputOffset - iCircleSize/2;
+		CIdentifier l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierToBoxInput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
+		while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
+		{
+			ILink* l_pLink=m_rScenario.getMessageLinkDetails(l_oLinkIdentifier);
+			if(l_pLink)
+			{
+				TAttributeHandler l_oAttributeHandler(*l_pLink);
 
-       //*
-        //int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iMessageOutputOffset;
-        //int32 y=yStart+ySize+(iCircleSize>>1)+1-m_i32ViewOffsetY;
-        int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX + xSize;
-        //int32 y=yStart+i*(iCircleSpace+iCircleSize)+ySize-m_i32ViewOffsetY+l_iMessageOutputOffset-iCircleSize;
-        int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageOutputOffset - iCircleSize/2;
-        CIdentifier l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierFromBoxOutput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
-        while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
-        {
-            ILink* l_pLink=m_rScenario.getMessageLinkDetails(l_oLinkIdentifier);
-            if(l_pLink)
-            {
-                TAttributeHandler l_oAttributeHandler(*l_pLink);
+				if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_XTargetPosition))
+					l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_XTargetPosition, x);
+				else
+					l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_XTargetPosition, x);
 
-                if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_XSourcePosition))
-                    l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_XSourcePosition, x);
-                else
-                    l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_XSourcePosition, x);
+				if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_YTargetPosition))
+					l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_YTargetPosition, y);
+				else
+					l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_YTargetPosition, y);
+			}
+			l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierToBoxInput(l_oLinkIdentifier, rBox.getIdentifier(), i);
+		}
 
-                if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_YSourcePosition))
-                    l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_YSourcePosition, y);
-                else
-                    l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_YSourcePosition, y);
-            }
-            l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierFromBoxOutput(l_oLinkIdentifier, rBox.getIdentifier(), i);
-        }
-        //*/
+	}
+	int l_iMessageOutputOffset=ySize/2-rBox.getMessageOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize;
+	for(i=0; i<rBox.getMessageOutputCount(); i++)
+	{
+		::GdkColor l_oMessageOutputColor;
+		l_oMessageOutputColor.pixel=(guint16)0;
+		l_oMessageOutputColor.red  =(guint16)117;
+		l_oMessageOutputColor.green=(guint16)117;
+		l_oMessageOutputColor.blue =(guint16)117;
 
-    }
-    //*/
+		::GdkPoint l_vPoint[4];
+		l_vPoint[0].x=iCircleSize;
+		l_vPoint[0].y=-iCircleSize>>1;
+		l_vPoint[1].x=0;
+		l_vPoint[1].y=-(iCircleSize-1);
+		l_vPoint[2].x=0;
+		l_vPoint[2].y=0;
+		for(int j=0; j<3; j++)
+		{
+			l_vPoint[j].x+=xStart-(iCircleSize>>1)+xSize;
+			l_vPoint[j].y+=yStart+i*(iCircleSpace+iCircleSize)+l_iMessageOutputOffset;;
+		}
+
+		updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
+		gdk_draw_polygon(
+			GDK_DRAWABLE(m_pStencilBuffer),
+			l_pStencilGC,
+			TRUE,
+			l_vPoint,
+			3);
+		m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier(), Connector_MessageOutput, i);
+
+		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oMessageOutputColor);
+		gdk_draw_polygon(
+			l_pWidget->window,
+			l_pDrawGC,
+			TRUE,
+			l_vPoint,
+			3);
+
+		//int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iMessageOutputOffset;
+		//int32 y=yStart+ySize+(iCircleSize>>1)+1-m_i32ViewOffsetY;
+		int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX + xSize;
+		//int32 y=yStart+i*(iCircleSpace+iCircleSize)+ySize-m_i32ViewOffsetY+l_iMessageOutputOffset-iCircleSize;
+		int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageOutputOffset - iCircleSize/2;
+		CIdentifier l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierFromBoxOutput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
+		while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
+		{
+			ILink* l_pLink=m_rScenario.getMessageLinkDetails(l_oLinkIdentifier);
+			if(l_pLink)
+			{
+				TAttributeHandler l_oAttributeHandler(*l_pLink);
+
+				if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_XSourcePosition))
+					l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_XSourcePosition, x);
+				else
+					l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_XSourcePosition, x);
+
+				if(!l_oAttributeHandler.hasAttribute(OV_AttributeId_Link_YSourcePosition))
+					l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Link_YSourcePosition, y);
+				else
+					l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Link_YSourcePosition, y);
+			}
+			l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierFromBoxOutput(l_oLinkIdentifier, rBox.getIdentifier(), i);
+		}
+
+	}
 	int l_iOutputOffset=xSize/2-rBox.getOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize/4;
 	for(i=0; i<rBox.getOutputCount(); i++)
 	{
@@ -1169,13 +1161,11 @@ void CInterfacedScenario::snapshotCB(boolean bManageModifiedStatusFlag)
 		else
 			m_rScenario.getLinkDetails(l_oIdentifier)->removeAttribute(OV_ClassId_Selected);
 
-    //*
-    while((l_oIdentifier=m_rScenario.getNextMessageLinkIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
-        if(m_vCurrentObject[l_oIdentifier])
-            m_rScenario.getMessageLinkDetails(l_oIdentifier)->addAttribute(OV_ClassId_Selected, "");
-        else
-            m_rScenario.getMessageLinkDetails(l_oIdentifier)->removeAttribute(OV_ClassId_Selected);
-            //*/
+	while((l_oIdentifier=m_rScenario.getNextMessageLinkIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
+		if(m_vCurrentObject[l_oIdentifier])
+			m_rScenario.getMessageLinkDetails(l_oIdentifier)->addAttribute(OV_ClassId_Selected, "");
+		else
+			m_rScenario.getMessageLinkDetails(l_oIdentifier)->removeAttribute(OV_ClassId_Selected);
 
 	if(bManageModifiedStatusFlag)
 	{
@@ -1358,19 +1348,13 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 	}
 	m_ui32LinkCount=l_ui32LinkCount;
 
-    //
-    uint32 l_ui32MessageLinkCount=0;
-    CIdentifier l_oMessageLinkIdentifier;
-    //*
-    while((l_oMessageLinkIdentifier=m_rScenario.getNextMessageLinkIdentifier(l_oMessageLinkIdentifier))!=OV_UndefinedIdentifier)
-    {
-        redraw(*m_rScenario.getMessageLinkDetails(l_oMessageLinkIdentifier));
-        l_ui32MessageLinkCount++;
-    }
-    //*/
-    //m_ui32LinkCount=l_ui32LinkCount;
-    //
-
+	uint32 l_ui32MessageLinkCount=0;
+	CIdentifier l_oMessageLinkIdentifier;
+	while((l_oMessageLinkIdentifier=m_rScenario.getNextMessageLinkIdentifier(l_oMessageLinkIdentifier))!=OV_UndefinedIdentifier)
+	{
+		redraw(*m_rScenario.getMessageLinkDetails(l_oMessageLinkIdentifier));
+		l_ui32MessageLinkCount++;
+	}
 
 	if(m_ui32CurrentMode==Mode_Selection || m_ui32CurrentMode==Mode_SelectionAdd)
 	{
@@ -1602,7 +1586,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 					}
 					else
 					{
-                        if(m_oCurrentObject.m_ui32ConnectorType==Connector_Input || m_oCurrentObject.m_ui32ConnectorType==Connector_Output || m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput || m_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput)
+						if(m_oCurrentObject.m_ui32ConnectorType==Connector_Input || m_oCurrentObject.m_ui32ConnectorType==Connector_Output || m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput || m_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput)
 						{
 							m_ui32CurrentMode=Mode_Connect;
 						}
@@ -1840,7 +1824,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 										//l_pBox->getMessageInputType(i, l_oType);
 										sprintf(l_sCompleteName, "%i : %s", (int)i+1, l_sName.toASCIIString());
 										gtk_menu_add_new_image_menu_item(l_pMenuInput, l_pMenuInputMenuItem, GTK_STOCK_PROPERTIES, l_sCompleteName);
-	//*
+
 										if(l_bFlagCanModifyMessageInput || l_ui32FixedMessageInputCount <= i)
 										{
 											::GtkMenu* l_pMenuInputMenuAction=GTK_MENU(gtk_menu_new());
@@ -1849,7 +1833,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 											gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuInputMenuItem), GTK_WIDGET(l_pMenuInputMenuAction));
 										}
 										else
-										{//*/
+										{
 											gtk_widget_set_sensitive(GTK_WIDGET(l_pMenuInputMenuItem), false);
 										}
 									}
@@ -1909,12 +1893,12 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 									for(i=0; i<l_pBox->getMessageOutputCount(); i++)
 									{
 										CString l_sName;
-										//CIdentifier l_oType;
+
 										l_pBox->getMessageOutputName(i, l_sName);
-										//l_pBox->getMessageInputType(i, l_oType);
+
 										sprintf(l_sCompleteName, "%i : %s", (int)i+1, l_sName.toASCIIString());
 										gtk_menu_add_new_image_menu_item(l_pMenuOutput, l_pMenuOutputMenuItem, GTK_STOCK_PROPERTIES, l_sCompleteName);
-	//*
+
 										if(l_bFlagCanModifyMessageOutput || l_ui32FixedMessageOutputCount <= i)
 										{
 											::GtkMenu* l_pMenuOutputMenuAction=GTK_MENU(gtk_menu_new());
@@ -1923,7 +1907,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 											gtk_menu_item_set_submenu(GTK_MENU_ITEM(l_pMenuOutputMenuItem), GTK_WIDGET(l_pMenuOutputMenuAction));
 										}
 										else
-										{//*/
+										{
 											gtk_widget_set_sensitive(GTK_WIDGET(l_pMenuOutputMenuItem), false);
 										}
 									}
@@ -2498,9 +2482,9 @@ void CInterfacedScenario::pasteSelection(void)
 			l_oNewIdentifier);
 	}
 
-    // Pastes message links from clipboard
-    while((l_oIdentifier=m_rApplication.m_pClipboardScenario->getNextMessageLinkIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
-    {
+	// Pastes message links from clipboard
+	while((l_oIdentifier=m_rApplication.m_pClipboardScenario->getNextMessageLinkIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
+	{
 		CIdentifier l_oNewIdentifier;
 		ILink* l_pLink=m_rApplication.m_pClipboardScenario->getMessageLinkDetails(l_oIdentifier);
 		m_rScenario.connectMessage(
@@ -2509,7 +2493,7 @@ void CInterfacedScenario::pasteSelection(void)
 			l_vIdMapping[l_pLink->getTargetBoxIdentifier()],
 			l_pLink->getTargetBoxInputIndex(),
 			l_oNewIdentifier);
-    }
+	}
 
 	// Makes pasted stuff the default selection
 	// Moves boxes under cursor

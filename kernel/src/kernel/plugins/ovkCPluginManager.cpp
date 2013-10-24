@@ -290,28 +290,24 @@ namespace
 			m_oHash=m_oHash.toUInteger()^v;
 			return true;
 		}
-        //
+		//
 		virtual boolean addMessageInput(const CString& sName)
-        {
-            /*
-            uint64 v=rTypeIdentifier.toUInteger();
-            swap_byte(v, m_ui64InputCountHash);
-            swap_byte(m_ui64InputCountHash, 0x7936A0F3BD12D936LL);
-            m_oHash=m_oHash.toUInteger()^v;
-            //*/
-            return true;
-        }
+		{
+			uint64 v=OV_TypeId_Message.toUInteger();
+			swap_byte(v, m_ui64InputCountHash);
+			swap_byte(m_ui64InputCountHash, 0x5F8E5F3719B2204ELL);
+			m_oHash=m_oHash.toUInteger()^v;
+			return true;
+		}
 		virtual boolean addMessageOutput(const CString& sName)
-        {
-            /*
-            uint64 v=rTypeIdentifier.toUInteger();
-            swap_byte(v, m_ui64InputCountHash);
-            swap_byte(m_ui64InputCountHash, 0x7936A0F3BD12D936LL);
-            m_oHash=m_oHash.toUInteger()^v;
-            //*/
-            return true;
-        }
-        //
+		{
+			uint64 v=OV_TypeId_Message.toUInteger();
+			swap_byte(v, m_ui64OutputCountHash);
+			swap_byte(m_ui64OutputCountHash, 0x4FAB6A4F3D9B5E82LL);
+			m_oHash=m_oHash.toUInteger()^v;
+			return true;
+		}
+		//
 		virtual boolean addOutput(const CString& sName, const CIdentifier& rTypeIdentifier)
 		{
 			uint64 v=rTypeIdentifier.toUInteger();

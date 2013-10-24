@@ -1,7 +1,55 @@
 <OpenViBE-Scenario>
 	<Boxes>
 		<Box>
-			<Identifier>(0x0000008c, 0x0000357f)</Identifier>
+			<Identifier>(0x000048e6, 0x00003606)</Identifier>
+			<Name>Message Receiver</Name>
+			<AlgorithmClassIdentifier>(0xd2846ff3, 0x4802ef84)</AlgorithmClassIdentifier>
+			<MessageInputs>
+				<MessageInput>
+					<Name>Message input</Name>
+				</MessageInput>
+			</MessageInputs>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
+					<Value>496</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
+					<Value>33</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
+					<Value>432</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
+					<Value>(0x975e3473, 0x0968011d)</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x593c6420, 0x0f33442c)</Identifier>
+					<Value></Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x996ffcd6, 0x5acfb930)</Identifier>
+					<Value>1</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
+					<Value>113</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xb6de295d, 0x6c16b23a)</Identifier>
+					<Value></Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
+					<Value>false</Value>
+				</Attribute>
+			</Attributes>
+		</Box>
+		<Box>
+			<Identifier>(0x00004a0e, 0x000044ab)</Identifier>
 			<Name>Message Spy</Name>
 			<AlgorithmClassIdentifier>(0x46b2ce4c, 0x1f00f5d3)</AlgorithmClassIdentifier>
 			<MessageInputs>
@@ -32,7 +80,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0xfef3bfc4, 0xbc055f70)</Value>
+					<Value>(0xf4d502ff, 0x0119a97a)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x593c6420, 0x0f33442c)</Identifier>
@@ -61,7 +109,7 @@
 			</Attributes>
 		</Box>
 		<Box>
-			<Identifier>(0x00001c75, 0x00003107)</Identifier>
+			<Identifier>(0x000078b4, 0x00004532)</Identifier>
 			<Name>Message Sender</Name>
 			<AlgorithmClassIdentifier>(0x8c881f74, 0x920b95a3)</AlgorithmClassIdentifier>
 			<MessageOutputs>
@@ -103,8 +151,8 @@
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Quote</Name>
-					<DefaultValue>Thank you for all the fish</DefaultValue>
-					<Value>Thank you for all the fish</Value>
+					<DefaultValue>Thanks for all the fish</DefaultValue>
+					<Value>Thanks for all the fish</Value>
 				</Setting>
 			</Settings>
 			<Attributes>
@@ -118,7 +166,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>160</Value>
+					<Value>176</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4d3defb7, 0xf238570d)</Identifier>
@@ -126,7 +174,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x3df843b1, 0x8312b727)</Value>
+					<Value>(0x21de78bb, 0x3e180ad1)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x61d11811, 0x71e65362)</Identifier>
@@ -158,65 +206,17 @@
 				</Attribute>
 			</Attributes>
 		</Box>
-		<Box>
-			<Identifier>(0x000049d0, 0x0000123c)</Identifier>
-			<Name>Message Receiver</Name>
-			<AlgorithmClassIdentifier>(0xd2846ff3, 0x4802ef84)</AlgorithmClassIdentifier>
-			<MessageInputs>
-				<MessageInput>
-					<Name>Message input</Name>
-				</MessageInput>
-			</MessageInputs>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
-					<Value>496</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>33</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>432</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x9d788948, 0xb474f717)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x593c6420, 0x0f33442c)</Identifier>
-					<Value></Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x996ffcd6, 0x5acfb930)</Identifier>
-					<Value>1</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>113</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xb6de295d, 0x6c16b23a)</Identifier>
-					<Value></Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
-					<Value>false</Value>
-				</Attribute>
-			</Attributes>
-		</Box>
 	</Boxes>
 	<Links></Links>
 	<MessageLinks>
 		<MessageLink>
-			<Identifier>(0x00005d2b, 0x0000638d)</Identifier>
+			<Identifier>(0x00005279, 0x00003a28)</Identifier>
 			<Source>
-				<BoxIdentifier>(0x00001c75, 0x00003107)</BoxIdentifier>
+				<BoxIdentifier>(0x000078b4, 0x00004532)</BoxIdentifier>
 				<BoxOutputIndex>0</BoxOutputIndex>
 			</Source>
 			<Target>
-				<BoxIdentifier>(0x0000008c, 0x0000357f)</BoxIdentifier>
+				<BoxIdentifier>(0x00004a0e, 0x000044ab)</BoxIdentifier>
 				<BoxInputIndex>0</BoxInputIndex>
 			</Target>
 			<Attributes>
@@ -226,7 +226,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
-					<Value>223</Value>
+					<Value>239</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
@@ -241,7 +241,39 @@
 	</MessageLinks>
 	<Comments>
 		<Comment>
-			<Identifier>(0x00000a87, 0x00005479)</Identifier>
+			<Identifier>(0x000008ff, 0x000031d9)</Identifier>
+			<Text>Message Receiver box only prints the values
+related to a few fixed keys. It is an example.
+Try connecting to it.</Text>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
+					<Value>192</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
+					<Value>496</Value>
+				</Attribute>
+			</Attributes>
+		</Comment>
+		<Comment>
+			<Identifier>(0x0000194d, 0x000013f5)</Identifier>
+			<Text>Message Spy will print all
+content of the message 
+to the console.</Text>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
+					<Value>432</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
+					<Value>304</Value>
+				</Attribute>
+			</Attributes>
+		</Comment>
+		<Comment>
+			<Identifier>(0x000020ad, 0x000032d0)</Identifier>
 			<Text>You can add, remove and change 
 the names of message inputs 
 on the Message Spy box 
@@ -260,23 +292,21 @@ on a box to access the menu</Text>
 			</Attributes>
 		</Comment>
 		<Comment>
-			<Identifier>(0x00001246, 0x00005842)</Identifier>
-			<Text>You can modify the frequency 
-at which the Message Sender 
-box sends messages</Text>
+			<Identifier>(0x00002cd5, 0x000004b1)</Identifier>
+			<Text>This scenario shows the message capabilies. Boxes can exchange messages.</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>176</Value>
+					<Value>304</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>144</Value>
+					<Value>64</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
 		<Comment>
-			<Identifier>(0x000043db, 0x000057c3)</Identifier>
+			<Identifier>(0x00004b9d, 0x00000915)</Identifier>
 			<Text>You can add settings as long as
 they are integers floats or strings. 
 If you change an existing setting 
@@ -296,48 +326,18 @@ used to fill the message.</Text>
 			</Attributes>
 		</Comment>
 		<Comment>
-			<Identifier>(0x00005882, 0x000066bf)</Identifier>
-			<Text>This scenario shows the message capabilies. Boxes can exchange messages.</Text>
+			<Identifier>(0x000065ca, 0x00001928)</Identifier>
+			<Text>You can modify the frequency 
+at which the Message Sender 
+box sends messages</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>304</Value>
+					<Value>176</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>64</Value>
-				</Attribute>
-			</Attributes>
-		</Comment>
-		<Comment>
-			<Identifier>(0x000067d0, 0x000054bf)</Identifier>
-			<Text>Message Receiver box only prints the values
-related to a few fixed keys. It is an example.
-Try connecting to it.</Text>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>192</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>496</Value>
-				</Attribute>
-			</Attributes>
-		</Comment>
-		<Comment>
-			<Identifier>(0x00006d73, 0x0000084e)</Identifier>
-			<Text>Message Spy will print all
-content of the message 
-to the console.</Text>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>432</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>304</Value>
+					<Value>144</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>

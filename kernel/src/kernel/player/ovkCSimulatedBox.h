@@ -329,10 +329,9 @@ namespace OpenViBE
 			/// maps object identifiers to object names
 			std::map<OpenViBE::CIdentifier, OpenViBE::CString> m_mSimulatedObjects;
 
-            // messages. The vector owns the pointer.
-            std::vector< OpenViBE::Kernel::CMessageWithData* > m_vPreparedMessages;
+			// messages. The vector owns the pointer.
+			std::vector< OpenViBE::Kernel::CMessageWithData* > m_vPreparedMessages;
 			OpenViBE::boolean m_bIsReceivingMessage;
-
 
 		public:
 

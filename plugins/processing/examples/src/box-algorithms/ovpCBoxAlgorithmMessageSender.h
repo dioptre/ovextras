@@ -54,7 +54,7 @@ namespace OpenViBEPlugins
 
 		protected:
 			// No codec algorithms were specified in the skeleton-generator.
-            OpenViBE::uint64 m_ui64BoxFrequency;
+			OpenViBE::uint64 m_ui64BoxFrequency;
 			OpenViBE::boolean m_bAppendTestMatrix;
 
 			std::map<OpenViBE::CString, OpenViBE::uint64> m_oIntegers;
@@ -172,9 +172,9 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 
 				rBoxAlgorithmPrototype.addMessageOutput(OpenViBE::CString("Message output"));
-                rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageOutput);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageOutput);
 
-                rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyMessageOutput);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyMessageOutput);
 				
 				return true;
 			}

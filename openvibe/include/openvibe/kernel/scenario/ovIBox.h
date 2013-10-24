@@ -108,7 +108,7 @@ namespace OpenViBE
 			 * according to the existing box.
 			 */
 			virtual OpenViBE::boolean initializeFromExistingBox(
-				const OpenViBE::Kernel::IBox& rExisitingBox)=0;
+				const OpenViBE::Kernel::IBox& rExistingBox)=0;
 
 			//@}
 			/** \name Input management */
