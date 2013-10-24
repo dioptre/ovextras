@@ -43,29 +43,13 @@ uint64 CBoxAlgorithmMessageReceiver::getClockFrequency(void)
 }
 /*******************************************************************************/
 
-/*
-boolean CBoxAlgorithmMessageReceiver::processInput(uint32 ui32InputIndex)
-{
-	// some pre-processing code if needed...
-
-	// ready to process !
-	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
-
-	return true;
-}
-/*******************************************************************************/
 
 OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMessageWithData& msg, uint32 inputIndex)
 {
-	// the static box context describes the box inputs, outputs, settings structures
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
-	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	/*
-	//create the message
-	IMessageWithData& MMM = this->getPlayerContext().createMessage();
 	//test that the sending is actually impossible
+	IMessageWithData& MMM = this->getPlayerContext().createMessage();
 	this->getPlayerContext().sendMessage(MMM, 0);
 	*/
 
@@ -149,12 +133,6 @@ OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMessageWit
 boolean CBoxAlgorithmMessageReceiver::process(void)
 {
 	
-	// the static box context describes the box inputs, outputs, settings structures
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
-	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
-
-
 	if (m_bMatrixReceived)
 	{
 		// Print out the matrix we stored before

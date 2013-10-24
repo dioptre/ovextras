@@ -65,7 +65,7 @@ OpenViBE::boolean CBoxAlgorithmMessageSpy::processMessage(const IMessageWithData
 			const CString* l_sValue;
 			
 			bool success = msg.getValueCString(*l_sKey, &l_sValue);
-			l_sMessageContent = l_sMessageContent+CString("[String] ") + (*l_sKey)+CString(" = ")+(*l_sValue)+CString("\n");
+			l_sMessageContent = l_sMessageContent + CString("[String] ") + (*l_sKey) + CString(" = ") + (success ? *l_sValue : "NOTFOUND") + CString("\n");
 			l_sKey = msg.getNextCStringToken(*l_sKey);
 		}
 	}
@@ -83,7 +83,8 @@ OpenViBE::boolean CBoxAlgorithmMessageSpy::processMessage(const IMessageWithData
 			//easier way to convert uint -> char* -> CString ?
 			std::stringstream l_oStream;
 			l_oStream << l_ui64Value;
-			l_sMessageContent = l_sMessageContent+CString("[Uint64] ")+(*l_sKey)+CString(" = ")+CString(l_oStream.str().c_str())+CString("\n");
+			l_sMessageContent = l_sMessageContent+CString("[Uint64] ")+ (*l_sKey) + CString(" = ") + 
+				(success ? CString(l_oStream.str().c_str()) : "NOTFOUND") + CString("\n");
 			l_sKey = msg.getNextUInt64Token(*l_sKey);
 		}
 	}
@@ -101,7 +102,8 @@ OpenViBE::boolean CBoxAlgorithmMessageSpy::processMessage(const IMessageWithData
 			//easier way to convert Float -> char* -> CString ?
 			std::stringstream l_oStream;
 			l_oStream << l_f64Value;
-			l_sMessageContent = l_sMessageContent+CString("[Float64] ")+(*l_sKey)+CString(" = ")+CString(l_oStream.str().c_str())+CString("\n");
+			l_sMessageContent = l_sMessageContent + CString("[Float64] ") + (*l_sKey) + CString(" = ") + 
+				(success ? CString(l_oStream.str().c_str()) : "NOTFOUND") + CString("\n");
 			l_sKey = msg.getNextFloat64Token(*l_sKey);
 		}
 	}
@@ -119,19 +121,26 @@ OpenViBE::boolean CBoxAlgorithmMessageSpy::processMessage(const IMessageWithData
 			//easier way to convert Float -> char* -> CString ?
 			std::stringstream l_oStream;
 
-			l_oStream << "Dims [";
-			for (uint32 i=0; i<l_oMatrix->getDimensionCount();i++) {
-				l_oStream << " " << l_oMatrix->getDimensionSize(i);
-			}
-			l_oStream << " ] Data [";
-
-			const float64* l_f64Buffer = l_oMatrix->getBuffer();
-			const uint32 l_ui32BufferSize = l_oMatrix->getBufferElementCount();
-			for (uint32 i=0; i<l_ui32BufferSize; i++)
+			if(success) 
 			{
-				l_oStream << " " << l_f64Buffer[i];
+				l_oStream << "Dims [";
+				for (uint32 i=0; i<l_oMatrix->getDimensionCount();i++) {
+					l_oStream << " " << l_oMatrix->getDimensionSize(i);
+				}
+				l_oStream << " ] Data [";
+
+				const float64* l_f64Buffer = l_oMatrix->getBuffer();
+				const uint32 l_ui32BufferSize = l_oMatrix->getBufferElementCount();
+				for (uint32 i=0; i<l_ui32BufferSize; i++)
+				{
+					l_oStream << " " << l_f64Buffer[i];
+				}
+				l_oStream << " ]";
+			} 
+			else
+			{
+				l_oStream << "NOTFOUND";
 			}
-			l_oStream << " ]";
 
 			l_sMessageContent = l_sMessageContent+CString("[Matrix] ")+(*l_sKey)+CString(" = ")+CString(l_oStream.str().c_str())+CString("\n");
 			l_sKey = msg.getNextIMatrixToken(*l_sKey);

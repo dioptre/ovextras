@@ -76,24 +76,11 @@ uint64 CBoxAlgorithmMessageSender::getClockFrequency(void)
 }
 /*******************************************************************************/
 
-/*
-boolean CBoxAlgorithmMessageSender::processInput(uint32 ui32InputIndex)
-{
-	// some pre-processing code if needed...
-
-	// ready to process !
-	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
-
-	return true;
-}
-/*******************************************************************************/
 
 boolean CBoxAlgorithmMessageSender::process(void)
 {
 	// the static box context describes the box inputs, outputs, settings structures
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
-	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	//create the message
     IMessageWithData& msg = this->getPlayerContext().createMessage();
