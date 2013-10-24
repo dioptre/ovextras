@@ -15,6 +15,10 @@
 #include <xml/IReader.h>
 #include <itpp/itbase.h>
 
+#include "ovpCBoxAlgorithmCommonClassifierListener.inl"
+
+#define OVP_BoxAlgorithm_AdaptiveClassifier_CommonSettingsCount  6
+
 // The unique identifiers for the box and its descriptor.
 // Identifier are randomly chosen by the skeleton-generator.
 
@@ -198,7 +202,8 @@ namespace OpenViBEPlugins
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
 				
-				rBoxAlgorithmPrototype.addSetting("Filename to load configuration from", OV_TypeId_Filename,    "");
+				rBoxAlgorithmPrototype.addSetting("Classifier to use", OVTK_TypeId_ClassificationAlgorithm, "");
+				rBoxAlgorithmPrototype.addSetting("File to load/write configuration", OV_TypeId_Filename,    "");
 				rBoxAlgorithmPrototype.addSetting("Feedback based learning", OV_TypeId_Boolean,    "");
 				rBoxAlgorithmPrototype.addSetting("Feedback onset stimulation", OV_TypeId_Stimulation,    "");
 				rBoxAlgorithmPrototype.addSetting("Target onset stimulation", OV_TypeId_Stimulation,    "");
@@ -214,6 +219,9 @@ namespace OpenViBEPlugins
 				
 				return true;
 			}
+			
+			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const { return new CBoxAlgorithmCommonClassifierListener(OVP_BoxAlgorithm_AdaptiveClassifier_CommonSettingsCount); }
+			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) { delete pBoxListener; }
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_AdaptiveP300ClassifierDesc);
 		};
 	};

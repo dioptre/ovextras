@@ -29,6 +29,8 @@ namespace OpenViBEPlugins
 			
 			CAlgorithmClassifierRelearnPLDA() : m_ui32BufferPointer(0), m_bBufferFilled(false)
 			{	
+				if (m_ui32BufferPointer!=0 || m_bBufferFilled)
+					this->getLogManager() << OpenViBE::Kernel::LogLevel_Warning << "m_ui32BufferPointer not initialised to zero or m_bBufferFilled initialised to true\n";
 			}
 
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
@@ -61,6 +63,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32BufferPointer;		
 			OpenViBE::boolean m_bBufferFilled;
 			OpenViBE::uint32 m_ui32BufferEnd;
+			OpenViBE::uint32 m_ui32BufferSize;
 		};
 
 		class CAlgorithmClassifierRelearnPLDADesc : public OpenViBEToolkit::CAlgorithmClassifierDesc
@@ -86,7 +89,8 @@ namespace OpenViBEPlugins
 				CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
 				
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Shrinkage,"Shrinkage",OpenViBE::Kernel::ParameterType_Enumeration, OVP_TypeId_ShrinkageType);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Lambda,"Lambda",OpenViBE::Kernel::ParameterType_Float);			
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Lambda,"Lambda",OpenViBE::Kernel::ParameterType_Float);	
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_BufferSize,"Buffer size",OpenViBE::Kernel::ParameterType_Integer);
 				return true;
 			}
 

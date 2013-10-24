@@ -17,12 +17,13 @@ using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
 
-#define CIRCULAR_BUFFER_SIZE 3600
+//#define CIRCULAR_BUFFER_SIZE 3600
 
 boolean CAlgorithmClassifierRelearnPLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
 	TParameterHandler < int64 > ip_i64ShrinkageType(this->getInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Shrinkage));
 	TParameterHandler < float64 > l_f64Lambda(this->getInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Lambda));
+	TParameterHandler < uint32 > m_ui32BufferSize(this->getInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_BufferSize));
 	float l_f32Lambda = static_cast<float>(l_f64Lambda);
 	
 	uint32 i;
@@ -30,9 +31,10 @@ boolean CAlgorithmClassifierRelearnPLDA::train(const IFeatureVectorSet& rFeature
 	uint32 l_ui32NumberOfFeatures=rFeatureVectorSet[0].getSize();
 	uint32 l_ui32NumberOfFeatureVectors=rFeatureVectorSet.getFeatureVectorCount();
 	
+	m_bBufferFilled = false;
 	for (uint32 i=0; i<l_ui32NumberOfFeatureVectors; i++)
 	{
-		if (m_ui32BufferPointer==CIRCULAR_BUFFER_SIZE)
+		if (m_ui32BufferPointer==m_ui32BufferSize)
 		{
 			m_ui32BufferPointer = 0;
 			m_bBufferFilled = true;
@@ -47,25 +49,16 @@ boolean CAlgorithmClassifierRelearnPLDA::train(const IFeatureVectorSet& rFeature
 			m_vCircularSampleBuffer[m_ui32BufferPointer] = itpp::vec(rFeatureVectorSet[i].getBuffer(), l_ui32NumberOfFeatures);
 			m_vCircularLabelBuffer[m_ui32BufferPointer] = rFeatureVectorSet[i].getLabel();
 		}	
-		
-		//std::cout << "CAlgorithmClassifierPLDA::Label " << m_vCircularLabelBuffer[m_ui32BufferPointer] << "\n";
-		
 		m_ui32BufferPointer++;
 	}
 	
-	std::cout << "Buffer pointer info " << m_bBufferFilled << " " << CIRCULAR_BUFFER_SIZE << " " << m_ui32BufferPointer << "\n";
+	this->getLogManager() << LogLevel_Debug << "Buffer pointer info " << m_bBufferFilled << " " << m_ui32BufferSize << " " << m_ui32BufferPointer << "\n";
 	
-	m_ui32BufferEnd = m_bBufferFilled?CIRCULAR_BUFFER_SIZE:m_ui32BufferPointer;
+	m_ui32BufferEnd = m_bBufferFilled?m_ui32BufferSize:m_ui32BufferPointer;
 	
 	std::map < float64, uint64 > l_vClassLabels;
 	for(i=0; i<m_ui32BufferEnd; i++)
-	{
-		//std::cout << "Label " << i << " " << m_vCircularLabelBuffer[i] << "\n";
 		l_vClassLabels[m_vCircularLabelBuffer[i]]++;
-	}
-	/*std::cout << "Buffer end " << m_ui32BufferEnd << "\n";
-	std::cout << "Number of objects for class " << l_vClassLabels.begin()->first << " is " << l_vClassLabels.begin()->second << "\n";
-	std::cout << "Number of objects for class " << l_vClassLabels.rbegin()->first << " is " << l_vClassLabels.rbegin()->second << "\n";*/
 
 	if(l_vClassLabels.size() != 2)
 	{
@@ -214,7 +207,7 @@ boolean CAlgorithmClassifierRelearnPLDA::train(const IFeatureVectorSet& rFeature
 			l_sClasses << m_vCircularLabelBuffer[i];
 			l_pWriter->setAttribute("label",l_sClasses.str().c_str());
 			l_sSamples.str(std::string());
-			for (uint32 j=0; j<m_vCircularSampleBuffer[i].length(); j++)
+			for (int j=0; j<m_vCircularSampleBuffer[i].length(); j++)
 				l_sSamples << " " << m_vCircularSampleBuffer[i][j];
 			l_pWriter->setChildData(l_sSamples.str().c_str());
 			l_pWriter->closeChild();
@@ -278,12 +271,14 @@ boolean CAlgorithmClassifierRelearnPLDA::saveConfiguration(IMemoryBuffer& rMemor
 
 boolean CAlgorithmClassifierRelearnPLDA::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
 {
+	TParameterHandler < uint32 > m_ui32BufferSize(this->getInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_BufferSize));
+	
 	m_f64Class1=0;
 	m_f64Class2=0;
 	m_ui32BufferPointer = 0;
 	m_bBufferFilled = false;
-	m_vCircularSampleBuffer = std::vector<itpp::vec>(CIRCULAR_BUFFER_SIZE);
-	m_vCircularLabelBuffer = std::vector<uint64>(CIRCULAR_BUFFER_SIZE);
+	m_vCircularSampleBuffer = std::vector<itpp::vec>(m_ui32BufferSize);
+	m_vCircularLabelBuffer = std::vector<uint64>(m_ui32BufferSize);
 	//std::cout << "load configuration 1\n";
 	XML::IReader* l_pReader=XML::createReader(*this);
 	l_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
@@ -370,7 +365,7 @@ void CAlgorithmClassifierRelearnPLDA::processChildData(const char* sData)
 		for(size_t i=0; i<l_vSample.size(); i++)
 			l_vSampleVector[i]=l_vSample[i];
 		
-		if (m_ui32BufferPointer==CIRCULAR_BUFFER_SIZE)
+		if (m_ui32BufferPointer==m_ui32BufferSize)
 		{
 			m_ui32BufferPointer = 0;
 			m_bBufferFilled = true;

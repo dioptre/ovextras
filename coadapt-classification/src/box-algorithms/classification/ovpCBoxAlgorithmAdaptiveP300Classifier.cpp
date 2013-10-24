@@ -25,42 +25,86 @@ boolean CBoxAlgorithmAdaptiveP300Classifier::initialize(void)
 	// Streamed matrix stream encoder
 	m_oAlgo2_StreamedMatrixEncoder.initialize(*this);
 	
-	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierRelearnPLDA));
+	CIdentifier l_oClassifierAlgorithmClassIdentifier;
+	CString l_sClassifierAlgorithmClassIdentifier;
+	this->getStaticBoxContext().getSettingValue(0, l_sClassifierAlgorithmClassIdentifier);
+	l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
+
+	if(l_oClassifierAlgorithmClassIdentifier==OV_UndefinedIdentifier)
+	{
+		this->getLogManager() << LogLevel_Error << "Unknown classifier algorithm [" << l_sClassifierAlgorithmClassIdentifier << "]\n";
+		return false;
+	}	
+	
+	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
 	m_pClassifier->initialize();
 	
 	m_oAlgo2_StreamedMatrixEncoder.getInputMatrix().setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
 	
-	// If you need to, you can manually set the reference targets to link the codecs input and output. To do so, you can use :
-	//m_oEncoder.getInputX().setReferenceTarget(m_oDecoder.getOutputX())
-	// Where 'X' depends on the codec type. Please refer to the Codec Toolkit Reference Page
-	// (http://openvibe.inria.fr/documentation/unstable/Doc_Tutorial_Developer_SignalProcessing_CodecToolkit_Ref.html) for a complete list.
-	
-	// If you need to retrieve setting values, use the FSettingValueAutoCast function.
-	// For example :
-	// - CString setting at index 0 in the setting list :
-	// CString l_sSettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-	// - unsigned int64 setting at index 1 in the setting list :
-	// uint64 l_ui64SettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-	// - float64 setting at index 2 in the setting list :
-	// float64 l_f64SettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
-	// ...
-	
-	//m_bPredictionReceived = false;
-	//m_ui64StimulationIdentifier = 0;
-	
-	TParameterHandler < int64 > ip_i64ShrinkageType(m_pClassifier->getInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Shrinkage));
+	/*TParameterHandler < int64 > ip_i64ShrinkageType(m_pClassifier->getInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Shrinkage));
 	ip_i64ShrinkageType = 2;
 	TParameterHandler < float64 > l_f64Lambda(m_pClassifier->getInputParameter(OVP_Algorithm_ClassifierPLDA_InputParameterId_Lambda));
-	l_f64Lambda = 0.5;
+	l_f64Lambda = 0.5;*/
+	
+	m_bFeedbackBasedLearning = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+	m_ui64FeedbackOnsetIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+	m_ui64TargetOnsetIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+	m_ui64SaveConfigurationTriggerIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
+	
+	CIdentifier l_oIdentifier;
+	uint32 i = OVP_BoxAlgorithm_AdaptiveClassifier_CommonSettingsCount; // number of settings when no additional setting is added
+	while(i < this->getStaticBoxContext().getSettingCount() && (l_oIdentifier=m_pClassifier->getNextInputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
+	{
+		if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
+		&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet)
+		&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_Configuration))
+		{
+			IParameter* l_pParameter=m_pClassifier->getInputParameter(l_oIdentifier);
+			TParameterHandler < int64 > ip_i64Parameter(l_pParameter);
+			TParameterHandler < uint64 > ip_ui64Parameter(l_pParameter);
+			TParameterHandler < float64 > ip_f64Parameter(l_pParameter);
+			TParameterHandler < boolean > ip_bParameter(l_pParameter);
+			TParameterHandler < CString* > ip_sParameter(l_pParameter);
+			CString l_sParam;
+			bool l_bValid=true;
+			switch(l_pParameter->getType())
+			{
+				case ParameterType_Enumeration:
+				case ParameterType_UInteger:
+					ip_ui64Parameter=(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+					break;
+
+				case ParameterType_Integer:
+					ip_i64Parameter=(int64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+					break;
+
+				case ParameterType_Boolean:
+					ip_bParameter=(boolean)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+					break;
+
+				case ParameterType_Float:
+					ip_f64Parameter=(float64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+					break;
+
+				case ParameterType_String:
+					l_sParam=(CString)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+					*ip_sParameter=l_sParam;
+					break;
+				default:
+					l_bValid=false;
+					break;
+			}
+			if(l_bValid)
+			{
+				i++;
+			}
+		}
+	}
 	
 	m_bFlashGroupsReceived = false;
 	m_bFeedbackReceived = false;
-	m_bTargetReceived = false;
-	m_bFeedbackBasedLearning = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-	m_ui64FeedbackOnsetIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
-	m_ui64TargetOnsetIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+	m_bTargetReceived = false;	
 	m_ui64LetterIndex = 0;
-	m_ui64SaveConfigurationTriggerIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 	
 	loadConfiguration();
 
@@ -269,7 +313,7 @@ boolean CBoxAlgorithmAdaptiveP300Classifier::process(void)
 					
 					m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration);
 					
-					CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0));
+					CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1));
 					std::cout << "saving in " << l_sConfigurationFilename << "\n";
 					std::ofstream l_oFile(l_sConfigurationFilename.toASCIIString(), ios::binary);
 					if(l_oFile.is_open())
@@ -363,7 +407,7 @@ void CBoxAlgorithmAdaptiveP300Classifier::train()
 void CBoxAlgorithmAdaptiveP300Classifier::loadConfiguration()
 {
 	CString l_sConfigurationFilename;
-	this->getStaticBoxContext().getSettingValue(0, l_sConfigurationFilename);	
+	this->getStaticBoxContext().getSettingValue(1, l_sConfigurationFilename);	
 	
 	this->getLogManager() << LogLevel_Info << "Loading new configuration from file " << l_sConfigurationFilename << "\n";
 	
