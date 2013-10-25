@@ -48,18 +48,18 @@ OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMessageWit
 {
 
 	/*
-	//test that the sending is actually impossible
+	//test that message sending is impossible from processMessage()
 	IMessageWithData& MMM = this->getPlayerContext().createMessage();
 	this->getPlayerContext().sendMessage(MMM, 0);
 	*/
 
 	getLogManager() << OpenViBE::Kernel::LogLevel_Info << "Reading message input " << inputIndex << "\n";
 
-	bool success;
+	bool l_bSuccess;
 	
 	uint64 l_ui64IntMessage = 0;
-	success = msg.getValueUint64("Meaning of life", l_ui64IntMessage);
-	if(success) 
+	l_bSuccess = msg.getValueUint64("Meaning of life", l_ui64IntMessage);
+	if(l_bSuccess) 
 	{
 		getLogManager() << OpenViBE::Kernel::LogLevel_Info << "The meaning of life is " << l_ui64IntMessage << "\n";
 	}
@@ -70,8 +70,8 @@ OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMessageWit
 	}
 
 	float64 l_f64FloatMessage = 0;
-	success = msg.getValueFloat64("Pi", l_f64FloatMessage);
-	if(success) 
+	l_bSuccess = msg.getValueFloat64("Pi", l_f64FloatMessage);
+	if(l_bSuccess) 
 	{
 		getLogManager() << OpenViBE::Kernel::LogLevel_Info << "Pi is " << l_f64FloatMessage << "\n";
 	}
@@ -82,8 +82,8 @@ OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMessageWit
 
 	// Note that the string pointer is no longer valid after processMessage()
 	const CString* l_pStringMessage = NULL;
-	success =  msg.getValueCString("Quote", &l_pStringMessage);
-	if(success) 
+	l_bSuccess =  msg.getValueCString("Quote", &l_pStringMessage);
+	if(l_bSuccess) 
 	{
 		getLogManager() << OpenViBE::Kernel::LogLevel_Info << "Quote is \"" << *l_pStringMessage << "\"\n";
 	} 
@@ -94,8 +94,8 @@ OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMessageWit
 
 	// Note that the matrix pointer is no longer valid after processMessage()
 	const IMatrix* l_pMatrixMessage = NULL;
-	success = msg.getValueIMatrix("Matrix", &l_pMatrixMessage);
-	if(success) {
+	l_bSuccess = msg.getValueIMatrix("Matrix", &l_pMatrixMessage);
+	if(l_bSuccess) {
 		getLogManager() << OpenViBE::Kernel::LogLevel_Info << "Matrix received, " << l_pMatrixMessage->getBufferElementCount() << " elements\n";
 
 		const float64* l_f64Buffer = l_pMatrixMessage->getBuffer();
@@ -110,11 +110,11 @@ OpenViBE::boolean CBoxAlgorithmMessageReceiver::processMessage(const IMessageWit
 
 		getLogManager() << OpenViBE::Kernel::LogLevel_Info << "Storing the matrix\n";
 
-		success = OpenViBEToolkit::Tools::Matrix::copy(m_oMatrix, *l_pMatrixMessage);
+		l_bSuccess = OpenViBEToolkit::Tools::Matrix::copy(m_oMatrix, *l_pMatrixMessage);
 
-		getLogManager() << OpenViBE::Kernel::LogLevel_Info << "Matrix copy, success: " << success << "\n";
+		getLogManager() << OpenViBE::Kernel::LogLevel_Info << "Matrix copy, success: " << l_bSuccess << "\n";
 
-		if(success) 
+		if(l_bSuccess) 
 		{
 			m_bMatrixReceived = true;
 		}

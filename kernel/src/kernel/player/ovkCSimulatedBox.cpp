@@ -1337,9 +1337,12 @@ boolean CSimulatedBox::receiveMessage(const IMessageWithData &msg, uint32 inputI
 	m_bIsReceivingMessage = true;
 	CBoxAlgorithmContext l_oBoxAlgorithmContext(getKernelContext(), this, m_pBox);
 	this->getLogManager() << LogLevel_Debug << "simulated box" << m_pBox->getName() <<" receiving message on input " << inputIndex <<"\n";
-	return m_pBoxAlgorithm->processMessage(l_oBoxAlgorithmContext, msg, inputIndex);
+	
+	bool l_bReturnValue = m_pBoxAlgorithm->processMessage(l_oBoxAlgorithmContext, msg, inputIndex);
 
 	m_bIsReceivingMessage = false;
+
+	return l_bReturnValue;
 }
 
 
