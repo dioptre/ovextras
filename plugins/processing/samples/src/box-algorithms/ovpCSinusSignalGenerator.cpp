@@ -52,6 +52,24 @@ boolean CSinusSignalGenerator::initialize(void)
 	m_ui32GeneratedEpochSampleCount=atoi(l_sGeneratedEpochSampleCount);
 	m_bHeaderSent=false;
 
+	if(m_ui32ChannelCount == 0)
+	{
+		this->getLogManager() << LogLevel_Error << "Channel count is 0. At least 1 channel required. Check box settings.\n";
+		return false;
+	}
+
+	if(m_ui32SamplingFrequency == 0)
+	{
+		this->getLogManager() << LogLevel_Error << "Sampling rate of 0 is not supported. Check box settings.\n";
+		return false;
+	}
+
+	if(m_ui32GeneratedEpochSampleCount == 0)
+	{
+		this->getLogManager() << LogLevel_Error << "Epoch sample count is 0. An epoch must have at least 1 sample. Check box settings.\n";
+		return false;
+	}
+
 	// Allocates sample block
 	m_pSampleBuffer=new float64[m_ui32ChannelCount*m_ui32GeneratedEpochSampleCount];
 

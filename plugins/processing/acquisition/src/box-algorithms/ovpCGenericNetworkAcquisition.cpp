@@ -148,6 +148,11 @@ void CGenericNetworkAcquisition::readerProcessChildData(const void* pBuffer, con
 			//increases total sample counter
 			m_ui32SentSampleCount += m_pSignalDescription->m_ui32SampleCount;
 
+			if(m_pSignalDescription->m_ui32SamplingRate==0) {
+				// Fixing this would require changing the IReader interface to support boolean output from this function
+				this->getLogManager() << LogLevel_Error << "Sampling rate is 0, crash is likely imminent\n";
+			}
+
 			OpenViBE::uint64 l_ui64StartTime= ITimeArithmetics::sampleCountToTime(m_pSignalDescription->m_ui32SamplingRate, (uint64)(m_ui32SentSampleCount - m_pSignalDescription->m_ui32SampleCount));
 			OpenViBE::uint64 l_ui64EndTime  = ITimeArithmetics::sampleCountToTime(m_pSignalDescription->m_ui32SamplingRate, m_ui32SentSampleCount);
 
@@ -403,7 +408,10 @@ boolean CGenericNetworkAcquisition::process()
 		l_ui32Received=m_pConnectionClient->receiveBuffer(l_pBuffer, sizeof(l_pBuffer));
 
 		// Sends them to the EBML processor
-		m_pReader->processData(l_pBuffer, l_ui32Received);
+		if(!m_pReader->processData(l_pBuffer, l_ui32Received)) {
+			this->getLogManager() << LogLevel_Error << "processData() failed, returning.\n";
+			return false;
+		}
 	}
 
 	return true;
