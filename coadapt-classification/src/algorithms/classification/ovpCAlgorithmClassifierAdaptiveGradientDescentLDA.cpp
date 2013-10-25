@@ -20,7 +20,7 @@ using namespace OpenViBEToolkit;
 boolean CAlgorithmClassifierAdaptiveGradientDescentLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
 	TParameterHandler < float64 > l_f64Lambda(this->getInputParameter(OVP_Algorithm_ClassifierGradientDescentLDA_InputParameterId_Lambda));
-	TParameterHandler < float64 > m_ui32BufferSize(this->getInputParameter(OVP_Algorithm_ClassifierGradientDescentLDA_InputParameterId_Eta));
+	TParameterHandler < float64 > l_f64Eta(this->getInputParameter(OVP_Algorithm_ClassifierGradientDescentLDA_InputParameterId_Eta));
 	float l_f32Lambda = static_cast<float>(l_f64Lambda);
 
 	uint32 l_ui32NumberOfFeatures=rFeatureVectorSet[0].getSize();
@@ -28,7 +28,7 @@ boolean CAlgorithmClassifierAdaptiveGradientDescentLDA::train(const IFeatureVect
 	
 	for (uint32 i=0; i<l_ui32NumberOfFeatureVectors; i++)
 	{
-		m_vSampleBuffer.push_back(itpp::vec(rFeatureVectorSet[i].getBuffer(), l_ui32NumberOfFeatures));
+		//m_vSampleBuffer.push_back(itpp::vec(rFeatureVectorSet[i].getBuffer(), l_ui32NumberOfFeatures));
 		m_vLabelBuffer.push_back(rFeatureVectorSet[i].getLabel());
 	}
 	
@@ -58,13 +58,15 @@ boolean CAlgorithmClassifierAdaptiveGradientDescentLDA::train(const IFeatureVect
 		float64 l_f64Probability=std::exp(l_oFeatures*m_oCoefficientsClass1)
 						/(std::exp(l_oFeatures*m_oCoefficientsClass1)+std::exp(l_oFeatures*m_oCoefficientsClass2));		
 		
-		if(m_vLabelBuffer[i]==m_f64Class1)
+		if(rFeatureVectorSet[i].getLabel()==m_f64Class1)
 		{
-			m_oCoefficientsClass1;
+			m_oCoefficientsClass1 = (1.0-l_f64Eta*l_f64Lambda)*m_oCoefficientsClass1 +
+									l_f64Eta*(1.0-l_f64Probability)*l_oFeatures;
 		}
-		else if(m_vLabelBuffer[i]==m_f64Class2)
+		else if(rFeatureVectorSet[i].getLabel()==m_f64Class2)
 		{
-			m_oCoefficientsClass2;
+			m_oCoefficientsClass2 = (1.0-l_f64Eta*l_f64Lambda)*m_oCoefficientsClass2 +
+									l_f64Eta*l_f64Probability*l_oFeatures;
 		}
 	}
 	

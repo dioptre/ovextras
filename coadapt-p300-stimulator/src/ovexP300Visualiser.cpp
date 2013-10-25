@@ -359,6 +359,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
             fprintf(timingFile, "%f \n",l_f64TimeBefore);
 		#endif
 
+		//this will notify all listeners/observers of the keyboard buttons that they should be updated	
 		m_pMainContainer->getKeyboardHandler()->updateChildProperties();
 
 		#ifdef OUTPUT_TIMING
