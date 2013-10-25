@@ -5,6 +5,8 @@
 #include "ovkCBuffer.h"
 #include "../ovkIGtkOVCustomHandler.h"
 
+#include "ovkCMessageWithData.h"
+
 #include <gtk/gtk.h>
 #include <system/CChrono.h>
 #include <vector>
@@ -270,6 +272,14 @@ namespace OpenViBE
 				OpenViBE::uint32* pTriangleIndexArray) const;
 			//@}
 
+			/** \name Messaging API - messages management */
+			//@{
+			OpenViBE::boolean sendMessage(const IMessageWithData &msg, uint32 outputIndex);
+			OpenViBE::boolean cleanupMessages();
+			IMessageWithData& createMessage();
+			OpenViBE::boolean receiveMessage(const IMessageWithData &msg, uint32 inputIndex);
+			//@}
+
 			_IsDerivedFromClass_Final_(OpenViBE::Kernel::TKernelObject < OpenViBE::Kernel::IBoxIO >, OVK_ClassId_Kernel_Player_SimulatedBox);
 
 			OpenViBE::Kernel::CScheduler& getScheduler(void)
@@ -318,6 +328,10 @@ namespace OpenViBE
 
 			/// maps object identifiers to object names
 			std::map<OpenViBE::CIdentifier, OpenViBE::CString> m_mSimulatedObjects;
+
+			// messages. The vector owns the pointer.
+			std::vector< OpenViBE::Kernel::CMessageWithData* > m_vPreparedMessages;
+			OpenViBE::boolean m_bIsReceivingMessage;
 
 		public:
 

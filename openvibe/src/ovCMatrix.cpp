@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
 
 using namespace OpenViBE;
 using namespace std;

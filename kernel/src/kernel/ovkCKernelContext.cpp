@@ -276,6 +276,8 @@ boolean CKernelContext::initialize(void)
 	m_pTypeManager->registerStreamType(    OV_TypeId_Signal, "Signal", OV_TypeId_StreamedMatrix);
 	m_pTypeManager->registerStreamType(    OV_TypeId_Spectrum, "Spectrum", OV_TypeId_StreamedMatrix);
 
+	m_pTypeManager->registerType(OV_TypeId_Message,  "Message");
+
 	this->getLogManager() << LogLevel_Trace << "Creating scenario manager\n";
 	m_pScenarioManager=new CScenarioManager(m_rMasterKernelContext);
 

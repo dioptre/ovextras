@@ -14,7 +14,7 @@ CBoxProto::CBoxProto(const IKernelContext& rKernelContext, IBox& rBox)
 {
 }
 
-uint32 CBoxProto::addInput(
+boolean CBoxProto::addInput(
 	const CString& sName,
 	const CIdentifier& rTypeIdentifier)
 {
@@ -37,7 +37,52 @@ uint32 CBoxProto::addInput(
 	return true;
 }
 
-uint32 CBoxProto::addOutput(
+boolean CBoxProto::addMessageInput(
+	const CString& sName)
+{
+	if(!m_rBox.addMessageInput(sName))
+	{
+		return false;
+	}
+
+	char l_sBuffer[1024];
+	::sprintf(l_sBuffer, "%d", m_rBox.getMessageInputCount());
+	if(m_rBox.hasAttribute(OV_AttributeId_Box_InitialMessageInputCount))
+	{
+		m_rBox.setAttributeValue(OV_AttributeId_Box_InitialMessageInputCount, l_sBuffer);
+	}
+	else
+	{
+		m_rBox.addAttribute(OV_AttributeId_Box_InitialMessageInputCount, l_sBuffer);
+	}
+
+	return true;
+}
+
+boolean CBoxProto::addMessageOutput(
+	const CString& sName)
+{
+	if(!m_rBox.addMessageOutput(sName))
+	{
+		return false;
+	}
+
+	char l_sBuffer[1024];
+	::sprintf(l_sBuffer, "%d", m_rBox.getMessageOutputCount());
+	if(m_rBox.hasAttribute(OV_AttributeId_Box_InitialMessageOutputCount))
+	{
+		m_rBox.setAttributeValue(OV_AttributeId_Box_InitialMessageOutputCount, l_sBuffer);
+	}
+	else
+	{
+		m_rBox.addAttribute(OV_AttributeId_Box_InitialMessageOutputCount, l_sBuffer);
+	}
+
+	return true;
+}
+
+boolean CBoxProto::addOutput(
+
 	const CString& sName,
 	const CIdentifier& rTypeIdentifier)
 {
@@ -60,7 +105,7 @@ uint32 CBoxProto::addOutput(
 	return true;
 }
 
-uint32 CBoxProto::addSetting(
+boolean CBoxProto::addSetting(
 	const CString& sName,
 	const CIdentifier& rTypeIdentifier,
 	const CString& sDefaultValue)
@@ -95,6 +140,10 @@ boolean CBoxProto::addFlag(
 		case BoxFlag_CanModifyOutput:  m_rBox.addAttribute(OV_AttributeId_Box_FlagCanModifyOutput,  ""); break;
 		case BoxFlag_CanAddSetting:    m_rBox.addAttribute(OV_AttributeId_Box_FlagCanAddSetting,    ""); break;
 		case BoxFlag_CanModifySetting: m_rBox.addAttribute(OV_AttributeId_Box_FlagCanModifySetting, ""); break;
+		case BoxFlag_CanAddMessageInput:      m_rBox.addAttribute(OV_AttributeId_Box_FlagCanAddMessageInput,      ""); break;
+		case BoxFlag_CanAddMessageOutput:     m_rBox.addAttribute(OV_AttributeId_Box_FlagCanAddMessageOutput,     ""); break;
+		case BoxFlag_CanModifyMessageInput:      m_rBox.addAttribute(OV_AttributeId_Box_FlagCanModifyMessageInput,      ""); break;
+		case BoxFlag_CanModifyMessageOutput:     m_rBox.addAttribute(OV_AttributeId_Box_FlagCanModifyMessageOutput,     ""); break;
 		case BoxFlag_IsDeprecated:
 		case BoxFlag_IsUnstable:
 			break;

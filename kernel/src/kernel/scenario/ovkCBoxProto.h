@@ -13,13 +13,19 @@ namespace OpenViBE
 
 			CBoxProto(const OpenViBE::Kernel::IKernelContext& rKernelContext, OpenViBE::Kernel::IBox& rBox);
 
-			virtual OpenViBE::uint32 addInput(
+			virtual OpenViBE::boolean addInput(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier);
-			virtual OpenViBE::uint32 addOutput(
+
+			virtual OpenViBE::boolean addMessageInput(
+				const OpenViBE::CString& sName);
+			virtual OpenViBE::boolean addMessageOutput(
+				const OpenViBE::CString& sName);
+
+			virtual OpenViBE::boolean addOutput(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier);
-			virtual OpenViBE::uint32 addSetting(
+			virtual OpenViBE::boolean addSetting(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier,
 				const OpenViBE::CString& sDefaultValue);
