@@ -293,7 +293,7 @@ on a box to access the menu</Text>
 		</Comment>
 		<Comment>
 			<Identifier>(0x00002cd5, 0x000004b1)</Identifier>
-			<Text>This scenario shows the message capabilies. Boxes can exchange messages.</Text>
+			<Text>This scenario demonstrates how boxes can exchange messages.</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
