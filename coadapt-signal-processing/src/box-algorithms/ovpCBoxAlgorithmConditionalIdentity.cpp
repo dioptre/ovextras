@@ -47,6 +47,20 @@ boolean CConditionalIdentity::process(void)
 	uint64 l_ui64ChunkSize=0;
 	const uint8* l_pChunkBuffer=NULL;
 	
+	for(uint32 i=1; i<l_pStaticBoxContext->getInputCount(); i++)
+	{
+		for(uint32 j=0; j<l_pDynamicBoxContext->getInputChunkCount(i); j++)
+		{
+			if(!m_bStopSending)
+			{
+				l_pDynamicBoxContext->getInputChunk(i, j, l_ui64StartTime, l_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer);
+				l_pDynamicBoxContext->appendOutputChunkData(i, l_pChunkBuffer, l_ui64ChunkSize);
+				l_pDynamicBoxContext->markOutputAsReadyToSend(i, l_ui64StartTime, l_ui64EndTime);
+			}
+			l_pDynamicBoxContext->markInputAsDeprecated(i, j);
+		}
+	}	
+	
 	for(uint32 i=0; i<l_pDynamicBoxContext->getInputChunkCount(0); i++)
 	{
 		// decode the chunk i on input 0
@@ -82,21 +96,6 @@ boolean CConditionalIdentity::process(void)
 		l_pDynamicBoxContext->markInputAsDeprecated(0, i);	
 			
 	}
-
-
-	for(uint32 i=1; i<l_pStaticBoxContext->getInputCount(); i++)
-	{
-		for(uint32 j=0; j<l_pDynamicBoxContext->getInputChunkCount(i); j++)
-		{
-			if(!m_bStopSending)
-			{
-				l_pDynamicBoxContext->getInputChunk(i, j, l_ui64StartTime, l_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer);
-				l_pDynamicBoxContext->appendOutputChunkData(i, l_pChunkBuffer, l_ui64ChunkSize);
-				l_pDynamicBoxContext->markOutputAsReadyToSend(i, l_ui64StartTime, l_ui64EndTime);
-			}
-			l_pDynamicBoxContext->markInputAsDeprecated(i, j);
-		}
-	}
-
+	
 	return true;
 }

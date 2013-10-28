@@ -18,7 +18,15 @@ class MyOVBox(OVBox):
 		 self.Trigger = self.setting['Trigger']
 
 # The process method will be called by openvibe on every clock tick
+# This script will 'relabel' the epochs based on the final prediction (index of symbol that has been selected)
+# and the information available of which symbols have been flashed in each flash (represented by a matrix with lines
+# containing zeros and ones). 
+# The relabeling is done by sending the target epochs to the first output and the non-target epochs to the second output
 	def process(self):
+		#if a symbol prediction is received (identifier<180) then we will go over all 
+		#flashedSymbols lines and check whether the predicted label just received was active in that flash
+		#if so we will sent the epoch on the first output (the target) otherwise on the second output
+		#if feedback cue trigger is received the flashedSymbols matrix is flushed
 		for chunkIndex in range( len(self.input[0]) ):
 			if(type(self.input[0][chunkIndex])==OVStimulationHeader):
 				stimSet = self.input[0].pop()
@@ -31,7 +39,7 @@ class MyOVBox(OVBox):
 						self.triggerReceived = False
 						self.Label = stimSet[stimIndex].identifier
 				if self.Label != -1:
-					print 'Label received, flushing target and non-target epochs' + str(self.Label)
+					#print 'Label received, flushing target and non-target epochs ' + str(self.Label)
 					while self.signalBuffer:
 						flashGroup = self.flashedSymbols.popleft()
 						pyFlashGroup = numpy.array(flashGroup).reshape(tuple(self.flashedSymbolsHeader.dimensionSizes))
@@ -48,6 +56,8 @@ class MyOVBox(OVBox):
 			elif(type(self.input[0][chunkIndex])==OVStimulationEnd):
 				stimSet = self.input[0].pop()
 
+		#here the matrix, that specifies which symbols are flashed during each flash, is buffered
+		#the ones in each line indicat which symbols have been active in that flash
 		for chunkIndex in range( len(self.input[1]) ):
 			if(type(self.input[1][chunkIndex]) == OVStreamedMatrixHeader):
 				self.flashedSymbolsHeader = self.input[1].pop()
@@ -57,6 +67,7 @@ class MyOVBox(OVBox):
 			elif(type(self.input[1][chunkIndex]) == OVSreamedMatrixEnd):
 				chunk = self.input[1].pop()
 
+		#Here all epochs (target and non-target) are buffered
 		for chunkIndex in range( len(self.input[2]) ):
 			if(type(self.input[2][chunkIndex]) == OVSignalHeader):
 				chunk = self.input[2].pop()

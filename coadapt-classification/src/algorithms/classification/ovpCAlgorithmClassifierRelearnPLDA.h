@@ -30,7 +30,9 @@ namespace OpenViBEPlugins
 			CAlgorithmClassifierRelearnPLDA() : m_ui32BufferPointer(0), m_bBufferFilled(false)
 			{	
 				if (m_ui32BufferPointer!=0 || m_bBufferFilled)
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Warning << "m_ui32BufferPointer not initialised to zero or m_bBufferFilled initialised to true\n";
+					std::cout << "CAlgorithmClassifierRelearnPLDA: m_ui32BufferPointer not initialised to zero or m_bBufferFilled initialised to true\n";
+				else
+					std::cout << "CAlgorithmClassifierRelearnPLDA constructor called\n";
 			}
 
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
@@ -63,7 +65,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32BufferPointer;		
 			OpenViBE::boolean m_bBufferFilled;
 			OpenViBE::uint32 m_ui32BufferEnd;
-			OpenViBE::uint32 m_ui32BufferSize;
+			OpenViBE::uint32 m_ui32RelearnBufferSize;
 		};
 
 		class CAlgorithmClassifierRelearnPLDADesc : public OpenViBEToolkit::CAlgorithmClassifierDesc
