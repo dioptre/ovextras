@@ -52,7 +52,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("CoAdapt xDAWN Spatial Filter Trainer"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard/Dieter Devlaminck"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Computes spatial filter coeffcients in order to get better evoked potential classification (typically used for P300 detection), adds the spatial filter as output"); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Computes spatial filter coeffcients in order to get better evoked potential classification (typically used for P300 detection) and then adds the spatial filter as output"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Filtering"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }

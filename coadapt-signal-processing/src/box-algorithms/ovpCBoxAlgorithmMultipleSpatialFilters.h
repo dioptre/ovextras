@@ -109,7 +109,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard/Dieter Devlaminck"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This will apply not just a set of spatial filters on a sample, \n but multiple sets on the same sample, resulting in multiple spatially filtered versions of the same sample.\n This has to be used in conjunction with the mixture of experts classifier.\nTypically each set of spatial filters comes from a certain subject."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Filtering"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-missing-image"); }

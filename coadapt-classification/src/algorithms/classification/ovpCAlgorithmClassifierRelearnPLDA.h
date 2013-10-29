@@ -77,8 +77,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Probabilistic classifier with relearning"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard / Fabien Lotte / Dieter Devlaminck"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA / INSA/IRISA / INRIA"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("LDA classifier with probabilistic outputs"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("LDA classifier with probabilistic outputs and online relearn ability"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This classifier will load the samples from the config file and then add the new samples that come in. \nEach time it will retrain on all the samples that it holds in a circular buffer that can be specified in the settings."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 

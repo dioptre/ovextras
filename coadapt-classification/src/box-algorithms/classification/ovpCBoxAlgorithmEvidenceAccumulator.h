@@ -135,8 +135,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("EvidenceAccumulator"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Dieter Devlaminck"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("accumulates evidence for each class"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("accumulates evidence for each class (feature vector inputs represent evidence for each class)\nbased on a stimulus input the evidence can be reset for the next trial"); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("accumulates evidence"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("accumulates evidence. The input can either be distance to hyperplane or a true probability which has to be specified in the settings. \n Furthermore you can use bayesian accumulation or just counting then it will simply add up all the inputs it receives. \n For the P300 speller each entry in the input feature vector corresponds to the direct probability of the symbol (thus our classes are the symbols)\nbased on a stimulus input the evidence can be reset for the next trial"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Classification"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
