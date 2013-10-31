@@ -1,0 +1,276 @@
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser}{
+\section{OpenViBEApplications::ExternalP300Visualiser Class Reference}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser}\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+}
+
+
+{\ttfamily \#include $<$ovexP300Visualiser.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a70ebbe1061d6b8c7caf20e358f39ca11}{ExternalP300Visualiser} ()
+\item 
+\hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a2f7bbf7e8d04f23464cc02460864bac6}{$\sim$ExternalP300Visualiser} ()
+\item 
+void \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_ad638eed494b89345ea6c05f66d2e6b68}{process} (OpenViBE::uint32 event)
+\item 
+void \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_ad741899fb86d35ee9696c2d37b9a4603}{initializeOpenViBEKernel} ()
+\item 
+void \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_aa884bd3c7b07b85cbad627ffc030f65f}{start} ()
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_aaaae01aba68b3fe6d4c83883713c52c1}{getNumberOfKeys} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_abb72f652c92905d850ef53d45e3b07cf}{processCallback} (OpenViBE::uint32 event)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1ExternalP300Stimulator}{ExternalP300Stimulator} $\ast$ \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a681ca45d6909f4702eea8b732e5c0267}{m\_\-oStimulator}
+\item 
+\hyperlink{classOpenViBEApplications_1_1ITagger}{ITagger} $\ast$ \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a4358bd9d5623138cd6a5516e988536b2}{m\_\-pTagger}
+\item 
+OpenViBE::Kernel::IKernelContext $\ast$ \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_aaeac05e7590e589f7167aeec97b9712a}{m\_\-pKernelContext}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300InterfacePropertyReader}{P300InterfacePropertyReader} $\ast$ \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a24c1d41f231682b4527171f3b5ba86d1}{m\_\-pInterfacePropReader}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300ScreenLayoutReader}{P300ScreenLayoutReader} $\ast$ \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_aad1840ac9784503247ad735b295f8027}{m\_\-pScreenLayoutReader}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300StimulatorPropertyReader}{P300StimulatorPropertyReader} $\ast$ \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a1e6cc7a87f3033f5118a2de7c6b850c4}{m\_\-pStimulatorPropReader}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300MainContainer}{P300MainContainer} $\ast$ \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a41e13bb1e9208989a27b9d99d620eb01}{m\_\-pMainContainer}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300SequenceWriter}{P300SequenceWriter} $\ast$ \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a4f56254ed488ec70b79c61116c2b4739}{m\_\-pSequenceWriter}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator}{P300SequenceGenerator} $\ast$ \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a3891dbe652e540d5739b689c9a82f1e1}{m\_\-pSequenceGenerator}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a82810be9f97e3c694ec4ac038ce4d228}{changeStates} (OpenViBE::uint32 $\ast$states, \hyperlink{ova__defines_8h_ac2575a0c79ceb4592555fa66f173dfc8}{VisualState} ifState, \hyperlink{ova__defines_8h_ac2575a0c79ceb4592555fa66f173dfc8}{VisualState} elseState=NONE)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std::queue$<$ OpenViBE::uint32 $>$ \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a04a821adef1b94191723146578ae3669}{m\_\-qEventQueue}
+\item 
+OpenViBE::boolean \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a9a6a96e6b9464c6916f10bee02c80dde}{m\_\-bChanged}
+\item 
+OpenViBE::boolean \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_abcbcbeb679022145d362eccd0d783e98}{m\_\-bInRest}
+\item 
+OpenViBE::boolean \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_aba5f6c7b2a9021cd90a150fbc78e21d1}{m\_\-bInFeedback}
+\item 
+OpenViBE::boolean \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a2062a6bab61a6764682e1ad904b50639}{m\_\-bInTarget}
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a2b8102f008299c94ecafbd2f1609f105}{m\_\-bTargetId}
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_ad6e2d7401659d373523480531da643fa}{m\_\-ui32FeedbackCueCounter}
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_aa6239b87146df722ad2c69e3e25fb994}{m\_\-ui32FeedbackResultCounter}
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser_a495ce12b0d23b6e6262e067557946375}{m\_\-ui32PreviousFeedbackResultCounter}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+The implementation file includes the main function (press 's' to start the stimulator). The class itself will receive events from the stimulator \hyperlink{classOpenViBEApplications_1_1ExternalP300Stimulator}{ExternalP300Stimulator} through the processCallback function. Based on those events/stimuli it will make the appropriate calls for displaying the flashes. To update the states of the keys from flash to non-\/flash state for example it notifies the \hyperlink{classOpenViBEApplications_1_1P300KeyboardHandler}{P300KeyboardHandler} which will notify the keys that need to be changed. The keys are then replaced by other keys of the required state. However this does not display anything on the screen yet. For this we have to call the drawAndSync method of the \hyperlink{classOpenViBEApplications_1_1P300MainContainer}{P300MainContainer} class. This will call the draw function on all the tables/containers on the screen which in turn will call the draw function of all the children in those containers/tables, eventually drawing the buttons/symbols. Property files are read by the \hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader}{ExternalP300PropertyReader} classes, stimuli generated by the \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator}{P300SequenceGenerator} classes and communication with openvibe is done by the \hyperlink{classOpenViBEApplications_1_1ISharedMemoryReader}{ISharedMemoryReader} and \hyperlink{classOpenViBEApplications_1_1ExternalP300SharedMemoryReader}{ExternalP300SharedMemoryReader} classes Furthermore some keys have special actions associated with them which are handled by the handler classes. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a70ebbe1061d6b8c7caf20e358f39ca11}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!ExternalP300Visualiser@{ExternalP300Visualiser}}
+\index{ExternalP300Visualiser@{ExternalP300Visualiser}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{ExternalP300Visualiser}]{\setlength{\rightskip}{0pt plus 5cm}ExternalP300Visualiser::ExternalP300Visualiser (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a70ebbe1061d6b8c7caf20e358f39ca11}
+Constructor initializes some private working variables \hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a2f7bbf7e8d04f23464cc02460864bac6}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!$\sim$ExternalP300Visualiser@{$\sim$ExternalP300Visualiser}}
+\index{$\sim$ExternalP300Visualiser@{$\sim$ExternalP300Visualiser}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{$\sim$ExternalP300Visualiser}]{\setlength{\rightskip}{0pt plus 5cm}ExternalP300Visualiser::$\sim$ExternalP300Visualiser (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a2f7bbf7e8d04f23464cc02460864bac6}
+Deconstructor deletes the stimulator object, the tagger object and all the property readers 
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a82810be9f97e3c694ec4ac038ce4d228}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!changeStates@{changeStates}}
+\index{changeStates@{changeStates}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{changeStates}]{\setlength{\rightskip}{0pt plus 5cm}void ExternalP300Visualiser::changeStates (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32 $\ast$}]{states, }
+\item[{{\bf VisualState}}]{ifState, }
+\item[{{\bf VisualState}}]{elseState = {\ttfamily NONE}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a82810be9f97e3c694ec4ac038ce4d228}
+Iterates over states and changes the value at each index either to ifState or elseState depending on the current value (either one or zero) 
+\begin{DoxyParams}{Parameters}
+{\em states} & contains either a zero or one for each symbol on the keyboard \\
+\hline
+{\em ifState} & in case states\mbox{[}i\mbox{]}==1 it will replace the state to ifState \\
+\hline
+{\em elseState} & in case states\mbox{[}i\mbox{]}==1 it will replace the state to elseState \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_aaaae01aba68b3fe6d4c83883713c52c1}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!getNumberOfKeys@{getNumberOfKeys}}
+\index{getNumberOfKeys@{getNumberOfKeys}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{getNumberOfKeys}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 OpenViBEApplications::ExternalP300Visualiser::getNumberOfKeys (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_aaaae01aba68b3fe6d4c83883713c52c1}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_ad741899fb86d35ee9696c2d37b9a4603}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!initializeOpenViBEKernel@{initializeOpenViBEKernel}}
+\index{initializeOpenViBEKernel@{initializeOpenViBEKernel}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{initializeOpenViBEKernel}]{\setlength{\rightskip}{0pt plus 5cm}void ExternalP300Visualiser::initializeOpenViBEKernel (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_ad741899fb86d35ee9696c2d37b9a4603}
+Initializes the OpenViBE kernel so that we can use some facilities such as the LogManager \hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_ad638eed494b89345ea6c05f66d2e6b68}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!process@{process}}
+\index{process@{process}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{process}]{\setlength{\rightskip}{0pt plus 5cm}void ExternalP300Visualiser::process (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32}]{event}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_ad638eed494b89345ea6c05f66d2e6b68}
+This function is called by processCallback. Based on the event received by the stimulator it will call the necessary functions. 
+\begin{DoxyParams}{Parameters}
+{\em event} & the stimulus or event number. For a list of the stimuli you can take a look in the \hyperlink{ova__defines_8h}{ova\_\-defines.h} file. \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_abb72f652c92905d850ef53d45e3b07cf}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!processCallback@{processCallback}}
+\index{processCallback@{processCallback}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{processCallback}]{\setlength{\rightskip}{0pt plus 5cm}void ExternalP300Visualiser::processCallback (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32}]{event}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_abb72f652c92905d850ef53d45e3b07cf}
+This is the callback function called by the stimulator \hyperlink{classOpenViBEApplications_1_1ExternalP300Stimulator}{ExternalP300Stimulator} in case of an event. It calls the process function 
+\begin{DoxyParams}{Parameters}
+{\em event} & the stimulus or event number. For a list of the stimuli you can take a look in the \hyperlink{ova__defines_8h}{ova\_\-defines.h} file. \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_aa884bd3c7b07b85cbad627ffc030f65f}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!start@{start}}
+\index{start@{start}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}void ExternalP300Visualiser::start (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_aa884bd3c7b07b85cbad627ffc030f65f}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a9a6a96e6b9464c6916f10bee02c80dde}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-bChanged@{m\_\-bChanged}}
+\index{m\_\-bChanged@{m\_\-bChanged}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-bChanged}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::boolean {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-bChanged}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a9a6a96e6b9464c6916f10bee02c80dde}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_aba5f6c7b2a9021cd90a150fbc78e21d1}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-bInFeedback@{m\_\-bInFeedback}}
+\index{m\_\-bInFeedback@{m\_\-bInFeedback}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-bInFeedback}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::boolean {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-bInFeedback}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_aba5f6c7b2a9021cd90a150fbc78e21d1}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_abcbcbeb679022145d362eccd0d783e98}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-bInRest@{m\_\-bInRest}}
+\index{m\_\-bInRest@{m\_\-bInRest}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-bInRest}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::boolean {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-bInRest}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_abcbcbeb679022145d362eccd0d783e98}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a2062a6bab61a6764682e1ad904b50639}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-bInTarget@{m\_\-bInTarget}}
+\index{m\_\-bInTarget@{m\_\-bInTarget}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-bInTarget}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::boolean {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-bInTarget}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a2062a6bab61a6764682e1ad904b50639}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a2b8102f008299c94ecafbd2f1609f105}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-bTargetId@{m\_\-bTargetId}}
+\index{m\_\-bTargetId@{m\_\-bTargetId}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-bTargetId}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-bTargetId}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a2b8102f008299c94ecafbd2f1609f105}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a681ca45d6909f4702eea8b732e5c0267}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-oStimulator@{m\_\-oStimulator}}
+\index{m\_\-oStimulator@{m\_\-oStimulator}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-oStimulator}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ExternalP300Stimulator}$\ast$ {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-oStimulator}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a681ca45d6909f4702eea8b732e5c0267}
+The stimulator object that generates the stimuli/events given a certain timing \hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a24c1d41f231682b4527171f3b5ba86d1}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-pInterfacePropReader@{m\_\-pInterfacePropReader}}
+\index{m\_\-pInterfacePropReader@{m\_\-pInterfacePropReader}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-pInterfacePropReader}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300InterfacePropertyReader}$\ast$ {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-pInterfacePropReader}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a24c1d41f231682b4527171f3b5ba86d1}
+\hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader}{ExternalP300PropertyReader} that reads the interface-\/properties file in share/openvibe/applications/externalP300Stimulator/ \hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_aaeac05e7590e589f7167aeec97b9712a}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-pKernelContext@{m\_\-pKernelContext}}
+\index{m\_\-pKernelContext@{m\_\-pKernelContext}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-pKernelContext}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::Kernel::IKernelContext$\ast$ {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-pKernelContext}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_aaeac05e7590e589f7167aeec97b9712a}
+OpenViBE's kernel context \hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a41e13bb1e9208989a27b9d99d620eb01}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-pMainContainer@{m\_\-pMainContainer}}
+\index{m\_\-pMainContainer@{m\_\-pMainContainer}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-pMainContainer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300MainContainer}$\ast$ {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-pMainContainer}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a41e13bb1e9208989a27b9d99d620eb01}
+The main container that will initialize the OpenGL context, the main regions of the P300 keyboard and attach handlers/listeners to them \hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_aad1840ac9784503247ad735b295f8027}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-pScreenLayoutReader@{m\_\-pScreenLayoutReader}}
+\index{m\_\-pScreenLayoutReader@{m\_\-pScreenLayoutReader}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-pScreenLayoutReader}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300ScreenLayoutReader}$\ast$ {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-pScreenLayoutReader}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_aad1840ac9784503247ad735b295f8027}
+\hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader}{ExternalP300PropertyReader} that reads one of the keyboard layout files such as 5by10grid-\/abc-\/gray.xml in share/openvibe/applications/externalP300Stimulator/ \hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a3891dbe652e540d5739b689c9a82f1e1}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-pSequenceGenerator@{m\_\-pSequenceGenerator}}
+\index{m\_\-pSequenceGenerator@{m\_\-pSequenceGenerator}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-pSequenceGenerator}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300SequenceGenerator}$\ast$ {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-pSequenceGenerator}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a3891dbe652e540d5739b689c9a82f1e1}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a4f56254ed488ec70b79c61116c2b4739}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-pSequenceWriter@{m\_\-pSequenceWriter}}
+\index{m\_\-pSequenceWriter@{m\_\-pSequenceWriter}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-pSequenceWriter}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300SequenceWriter}$\ast$ {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-pSequenceWriter}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a4f56254ed488ec70b79c61116c2b4739}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a1e6cc7a87f3033f5118a2de7c6b850c4}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-pStimulatorPropReader@{m\_\-pStimulatorPropReader}}
+\index{m\_\-pStimulatorPropReader@{m\_\-pStimulatorPropReader}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-pStimulatorPropReader}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300StimulatorPropertyReader}$\ast$ {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-pStimulatorPropReader}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a1e6cc7a87f3033f5118a2de7c6b850c4}
+\hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader}{ExternalP300PropertyReader} that reads the stimulator-\/properties file in share/openvibe/applications/externalP300Stimulator/ \hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a4358bd9d5623138cd6a5516e988536b2}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-pTagger@{m\_\-pTagger}}
+\index{m\_\-pTagger@{m\_\-pTagger}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-pTagger}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ITagger}$\ast$ {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-pTagger}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a4358bd9d5623138cd6a5516e988536b2}
+The tagger to write the stimuli either to OpenViBE's acquisition server or to the parallel port \hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a04a821adef1b94191723146578ae3669}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-qEventQueue@{m\_\-qEventQueue}}
+\index{m\_\-qEventQueue@{m\_\-qEventQueue}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-qEventQueue}]{\setlength{\rightskip}{0pt plus 5cm}std::queue$<$OpenViBE::uint32$>$ {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-qEventQueue}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a04a821adef1b94191723146578ae3669}
+A queue with events that should be written by the \hyperlink{classOpenViBEApplications_1_1ITagger}{ITagger} \hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_ad6e2d7401659d373523480531da643fa}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-ui32FeedbackCueCounter@{m\_\-ui32FeedbackCueCounter}}
+\index{m\_\-ui32FeedbackCueCounter@{m\_\-ui32FeedbackCueCounter}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-ui32FeedbackCueCounter}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-ui32FeedbackCueCounter}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_ad6e2d7401659d373523480531da643fa}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_aa6239b87146df722ad2c69e3e25fb994}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-ui32FeedbackResultCounter@{m\_\-ui32FeedbackResultCounter}}
+\index{m\_\-ui32FeedbackResultCounter@{m\_\-ui32FeedbackResultCounter}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-ui32FeedbackResultCounter}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-ui32FeedbackResultCounter}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_aa6239b87146df722ad2c69e3e25fb994}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300Visualiser_a495ce12b0d23b6e6262e067557946375}{
+\index{OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}!m\_\-ui32PreviousFeedbackResultCounter@{m\_\-ui32PreviousFeedbackResultCounter}}
+\index{m\_\-ui32PreviousFeedbackResultCounter@{m\_\-ui32PreviousFeedbackResultCounter}!OpenViBEApplications::ExternalP300Visualiser@{OpenViBEApplications::ExternalP300Visualiser}}
+\subsubsection[{m\_\-ui32PreviousFeedbackResultCounter}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 {\bf OpenViBEApplications::ExternalP300Visualiser::m\_\-ui32PreviousFeedbackResultCounter}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300Visualiser_a495ce12b0d23b6e6262e067557946375}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/\hyperlink{ovexP300Visualiser_8h}{ovexP300Visualiser.h}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/\hyperlink{ovexP300Visualiser_8cpp}{ovexP300Visualiser.cpp}\end{DoxyCompactItemize}

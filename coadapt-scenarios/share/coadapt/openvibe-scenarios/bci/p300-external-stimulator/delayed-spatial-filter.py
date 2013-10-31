@@ -14,9 +14,11 @@ class MyOVBox(OVBox):
 		# all settings
 		print 'initialize'
 		
+	#This script receives the spatial filter computed from the XDAWN trainer
+	#and then applies it on the epochs it buffered
 	def process(self):
 
-		# process spatial filter input
+		# receive the spatial filter and set ReadyToProcess to true
 		for chunk_index in range( len(self.input[1]) ):
 			
 			if(type(self.input[1][chunk_index]) == OVStreamedMatrixHeader):
@@ -41,7 +43,7 @@ class MyOVBox(OVBox):
 			elif(type(self.input[1][chunk_index]) == OVStreamedMatrixEnd):
 				self.input[1].pop()
 											
-			# process first signal input
+		# buffer the epochs and apply the spatial filter when it arrives
 		for chunk_index in range( len(self.input[0]) ):
 
 			if(type(self.input[0][chunk_index]) == OVSignalHeader):

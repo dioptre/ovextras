@@ -1,0 +1,287 @@
+\hypertarget{classOpenViBEApplications_1_1GSymbol}{
+\section{OpenViBEApplications::GSymbol Class Reference}
+\label{classOpenViBEApplications_1_1GSymbol}\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+}
+
+
+{\ttfamily \#include $<$glGSymbol.h$>$}
+
+Inheritance diagram for OpenViBEApplications::GSymbol:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classOpenViBEApplications_1_1GSymbol}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1GSymbol_a597ee43c991d767196400779091826c3}{GSymbol} (const char $\ast$symbol, boost::shared\_\-ptr$<$ FTFont $>$ font, OpenViBE::float32 fontScaleSize)
+\item 
+\hyperlink{classOpenViBEApplications_1_1GSymbol_a9939ec117a7f3dbfe63507d8b1f08696}{GSymbol} (const char $\ast$symbol, OpenViBE::CString fontPath, OpenViBE::float32 fontScaleSize)
+\item 
+\hyperlink{classOpenViBEApplications_1_1GSymbol_ac99e2473e7dda70294af2edb4bcde686}{GSymbol} (const \hyperlink{classOpenViBEApplications_1_1GSymbol}{GSymbol} \&gsymbol)
+\item 
+virtual \hyperlink{classOpenViBEApplications_1_1GSymbol_abf9d04bc833730fc6efe2e22fa8a36e0}{$\sim$GSymbol} ()
+\item 
+virtual \hyperlink{classOpenViBEApplications_1_1GSymbol}{GSymbol} $\ast$ \hyperlink{classOpenViBEApplications_1_1GSymbol_af8dff353fcf951388275cc05dea15665}{clone} () const 
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GSymbol_a45a39e83701c4692f97d7b82a6fd7567}{draw} ()
+\item 
+virtual std::string \hyperlink{classOpenViBEApplications_1_1GSymbol_afec3806bc335de92b23d072f64faa56e}{toString} () const 
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GSymbol_a7b03ff2c19eb8ef34decd0b5ce8f6211}{setDimParameters} (\hyperlink{structOpenViBEApplications_1_1__BoxDimensions}{BoxDimensions} dim)
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GSymbol_a710522b9eab1794764bbe28aca85b354}{setTextLabel} (const char $\ast$symbol)
+\item 
+virtual std::string \hyperlink{classOpenViBEApplications_1_1GSymbol_af3c7e24797c217233d450a3b03324ab5}{getTextLabel} () const 
+\item 
+virtual boost::shared\_\-ptr$<$ FTFont $>$ \hyperlink{classOpenViBEApplications_1_1GSymbol_ab1a0c5b925c3f64ff430561532187e8b}{getFont} () const 
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GSymbol_a466e619246af5eac18a25df98ca52b26}{computeLabelPosition} ()
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GSymbol_a53747ffe50a464dd798328075d8760b0}{computeMaximumLabelSize} ()
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GSymbol_a0a07d49a58665cda4b0fc5da8109672c}{generateGLDisplayLists} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std::string \hyperlink{classOpenViBEApplications_1_1GSymbol_af901c52795dac9bbe644eb7fa58664be}{m\_\-sTextLabel}
+\item 
+boost::shared\_\-ptr$<$ FTFont $>$ \hyperlink{classOpenViBEApplications_1_1GSymbol_a3d8dc4f93343e955b77f6a8a3e923fd3}{m\_\-ftglFont}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classOpenViBEApplications_1_1GSymbol_a2fa0b57365fb6b63e66fc7c4a1481fdf}{assignHelper} (\hyperlink{classOpenViBEApplications_1_1GSymbol}{GSymbol} const \&gsymbol)
+\item 
+boost::shared\_\-ptr$<$ FTFont $>$ \hyperlink{classOpenViBEApplications_1_1GSymbol_aeb8ea4caf31b920ac2c30282e452f80c}{createFont} (const char $\ast$fontPath)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A label class that has letters as content instead of pictures such as \hyperlink{classOpenViBEApplications_1_1GPictureSymbol}{GPictureSymbol} 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_a597ee43c991d767196400779091826c3}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!GSymbol@{GSymbol}}
+\index{GSymbol@{GSymbol}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{GSymbol}]{\setlength{\rightskip}{0pt plus 5cm}GSymbol::GSymbol (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{symbol, }
+\item[{boost::shared\_\-ptr$<$ FTFont $>$}]{font, }
+\item[{OpenViBE::float32}]{fontScaleSize}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1GSymbol_a597ee43c991d767196400779091826c3}
+TODO: certain copies of objects should use the same font source to save memory and time for deleting and creation of font object. The management of this is done in \hyperlink{classOpenViBEApplications_1_1P300KeyboardHandler_a60751010ae5c5533655c10102290d934}{P300KeyboardHandler::constructGLabelFromDescriptor}, but it does not belong there, a manager such as the OpenGL managers should be made for fonts as well in \hyperlink{classOpenViBEApplications_1_1P300KeyboardHandler_a60751010ae5c5533655c10102290d934}{P300KeyboardHandler::constructGLabelFromDescriptor} we check whether a certain key already exists that uses the same font resource, in which case no new font object is created 
+\begin{DoxyParams}{Parameters}
+{\em symbol} & the string (word or character) that should be displayed \\
+\hline
+{\em font} & a shared pointer to a font object of the FTGL library \\
+\hline
+{\em fontScaleSize} & a number between 0 and 1 to define its size (1 almost filling up the entire label box) \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_a9939ec117a7f3dbfe63507d8b1f08696}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!GSymbol@{GSymbol}}
+\index{GSymbol@{GSymbol}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{GSymbol}]{\setlength{\rightskip}{0pt plus 5cm}GSymbol::GSymbol (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{symbol, }
+\item[{OpenViBE::CString}]{fontPath, }
+\item[{OpenViBE::float32}]{fontScaleSize}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1GSymbol_a9939ec117a7f3dbfe63507d8b1f08696}
+
+\begin{DoxyParams}{Parameters}
+{\em symbol} & the string (word or character) that should be displayed \\
+\hline
+{\em fontPath} & the path to the ttf file which defines the font and from which a FTFont object will be created \\
+\hline
+{\em fontScaleSize} & a number between 0 and 1 to define its size (1 almost filling up the entire label box) \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_ac99e2473e7dda70294af2edb4bcde686}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!GSymbol@{GSymbol}}
+\index{GSymbol@{GSymbol}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{GSymbol}]{\setlength{\rightskip}{0pt plus 5cm}GSymbol::GSymbol (
+\begin{DoxyParamCaption}
+\item[{const {\bf GSymbol} \&}]{gsymbol}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1GSymbol_ac99e2473e7dda70294af2edb4bcde686}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_abf9d04bc833730fc6efe2e22fa8a36e0}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!$\sim$GSymbol@{$\sim$GSymbol}}
+\index{$\sim$GSymbol@{$\sim$GSymbol}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{$\sim$GSymbol}]{\setlength{\rightskip}{0pt plus 5cm}GSymbol::$\sim$GSymbol (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_abf9d04bc833730fc6efe2e22fa8a36e0}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_a2fa0b57365fb6b63e66fc7c4a1481fdf}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!assignHelper@{assignHelper}}
+\index{assignHelper@{assignHelper}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{assignHelper}]{\setlength{\rightskip}{0pt plus 5cm}void GSymbol::assignHelper (
+\begin{DoxyParamCaption}
+\item[{{\bf GSymbol} const \&}]{gsymbol}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_a2fa0b57365fb6b63e66fc7c4a1481fdf}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_af8dff353fcf951388275cc05dea15665}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!clone@{clone}}
+\index{clone@{clone}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{clone}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf GSymbol}$\ast$ OpenViBEApplications::GSymbol::clone (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_af8dff353fcf951388275cc05dea15665}
+Virtual clone function used for making a copy of a \hyperlink{classOpenViBEApplications_1_1GObject}{GObject} (invokes the copy constructor) 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_aca9909e04e4852aa3185b22de50470fc}{OpenViBEApplications::GLabel}.
+
+\hypertarget{classOpenViBEApplications_1_1GSymbol_a466e619246af5eac18a25df98ca52b26}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!computeLabelPosition@{computeLabelPosition}}
+\index{computeLabelPosition@{computeLabelPosition}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{computeLabelPosition}]{\setlength{\rightskip}{0pt plus 5cm}void GSymbol::computeLabelPosition (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_a466e619246af5eac18a25df98ca52b26}
+Computes where the label should be positioned within the button/label box (saved in m\_\-pLabelPosition variable of super class \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel}) some specific properties of the font need to be used to compute this 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_a98fe7f61d0fc4738737786f9f82cd66a}{OpenViBEApplications::GLabel}.
+
+\hypertarget{classOpenViBEApplications_1_1GSymbol_a53747ffe50a464dd798328075d8760b0}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!computeMaximumLabelSize@{computeMaximumLabelSize}}
+\index{computeMaximumLabelSize@{computeMaximumLabelSize}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{computeMaximumLabelSize}]{\setlength{\rightskip}{0pt plus 5cm}void GSymbol::computeMaximumLabelSize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_a53747ffe50a464dd798328075d8760b0}
+Overwrites the default maximum size as computed by the super class \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel}. This is because we need some specific properties from the bounding box of the symbol in a certain font to compute the point size of that font. 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_a7f0688b34724d97ba7f01383b5b63363}{OpenViBEApplications::GLabel}.
+
+\hypertarget{classOpenViBEApplications_1_1GSymbol_aeb8ea4caf31b920ac2c30282e452f80c}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!createFont@{createFont}}
+\index{createFont@{createFont}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{createFont}]{\setlength{\rightskip}{0pt plus 5cm}boost::shared\_\-ptr$<$FTFont$>$ OpenViBEApplications::GSymbol::createFont (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{fontPath}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_aeb8ea4caf31b920ac2c30282e452f80c}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_a45a39e83701c4692f97d7b82a6fd7567}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!draw@{draw}}
+\index{draw@{draw}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{draw}]{\setlength{\rightskip}{0pt plus 5cm}void GSymbol::draw (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_a45a39e83701c4692f97d7b82a6fd7567}
+This just draws a rectangle in the background color (in case the object is changed by calling for example the assign operator somewhere, otherwise it is not drawn) 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_ac94194b56ef4517fd62d6a1f68661a18}{OpenViBEApplications::GLabel}.
+
+\hypertarget{classOpenViBEApplications_1_1GSymbol_a0a07d49a58665cda4b0fc5da8109672c}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!generateGLDisplayLists@{generateGLDisplayLists}}
+\index{generateGLDisplayLists@{generateGLDisplayLists}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{generateGLDisplayLists}]{\setlength{\rightskip}{0pt plus 5cm}void GSymbol::generateGLDisplayLists (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_a0a07d49a58665cda4b0fc5da8109672c}
+This just constructs a rectangle in the background color 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_a445a03a33e74bc64b93e4a3fd2629953}{OpenViBEApplications::GLabel}.
+
+\hypertarget{classOpenViBEApplications_1_1GSymbol_ab1a0c5b925c3f64ff430561532187e8b}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!getFont@{getFont}}
+\index{getFont@{getFont}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{getFont}]{\setlength{\rightskip}{0pt plus 5cm}virtual boost::shared\_\-ptr$<$FTFont$>$ OpenViBEApplications::GSymbol::getFont (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_ab1a0c5b925c3f64ff430561532187e8b}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_af3c7e24797c217233d450a3b03324ab5}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!getTextLabel@{getTextLabel}}
+\index{getTextLabel@{getTextLabel}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{getTextLabel}]{\setlength{\rightskip}{0pt plus 5cm}virtual std::string OpenViBEApplications::GSymbol::getTextLabel (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_af3c7e24797c217233d450a3b03324ab5}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_a7b03ff2c19eb8ef34decd0b5ce8f6211}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!setDimParameters@{setDimParameters}}
+\index{setDimParameters@{setDimParameters}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{setDimParameters}]{\setlength{\rightskip}{0pt plus 5cm}void GSymbol::setDimParameters (
+\begin{DoxyParamCaption}
+\item[{{\bf BoxDimensions}}]{dim}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_a7b03ff2c19eb8ef34decd0b5ce8f6211}
+This will call the setDimParameters from the super class \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} which will recompute the maximum label size (by calling the computeMaximumLabelSize of this class \hyperlink{classOpenViBEApplications_1_1GSymbol}{GSymbol}) and will call the generateGLDisplayLists of this class \hyperlink{classOpenViBEApplications_1_1GSymbol}{GSymbol} (which also calls the generateGLDisplayLists of \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel}). This is because these functions are all virtual and first the derived class function is called before the base class function 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_ad720a3ee7c141b7eaa25be2adf7a2256}{OpenViBEApplications::GLabel}.
+
+\hypertarget{classOpenViBEApplications_1_1GSymbol_a710522b9eab1794764bbe28aca85b354}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!setTextLabel@{setTextLabel}}
+\index{setTextLabel@{setTextLabel}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{setTextLabel}]{\setlength{\rightskip}{0pt plus 5cm}void GSymbol::setTextLabel (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{symbol}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_a710522b9eab1794764bbe28aca85b354}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_afec3806bc335de92b23d072f64faa56e}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!toString@{toString}}
+\index{toString@{toString}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{toString}]{\setlength{\rightskip}{0pt plus 5cm}std::string GSymbol::toString (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_afec3806bc335de92b23d072f64faa56e}
+String representation of \hyperlink{classOpenViBEApplications_1_1GObject}{GObject}, e.g. for a button with a text label it should output that it is a button with the text of the label \begin{DoxyReturn}{Returns}
+the string representation of \hyperlink{classOpenViBEApplications_1_1GObject}{GObject} 
+\end{DoxyReturn}
+
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_a562a8811832fa57cd0b5ae48467ed687}{OpenViBEApplications::GLabel}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_a3d8dc4f93343e955b77f6a8a3e923fd3}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!m\_\-ftglFont@{m\_\-ftglFont}}
+\index{m\_\-ftglFont@{m\_\-ftglFont}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{m\_\-ftglFont}]{\setlength{\rightskip}{0pt plus 5cm}boost::shared\_\-ptr$<$FTFont$>$ {\bf OpenViBEApplications::GSymbol::m\_\-ftglFont}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_a3d8dc4f93343e955b77f6a8a3e923fd3}
+\hypertarget{classOpenViBEApplications_1_1GSymbol_af901c52795dac9bbe644eb7fa58664be}{
+\index{OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}!m\_\-sTextLabel@{m\_\-sTextLabel}}
+\index{m\_\-sTextLabel@{m\_\-sTextLabel}!OpenViBEApplications::GSymbol@{OpenViBEApplications::GSymbol}}
+\subsubsection[{m\_\-sTextLabel}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf OpenViBEApplications::GSymbol::m\_\-sTextLabel}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GSymbol_af901c52795dac9bbe644eb7fa58664be}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/visualisation/\hyperlink{glGSymbol_8h}{glGSymbol.h}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/visualisation/\hyperlink{glGSymbol_8cpp}{glGSymbol.cpp}\end{DoxyCompactItemize}

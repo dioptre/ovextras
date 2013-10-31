@@ -1,0 +1,135 @@
+\hypertarget{classOpenViBEApplications_1_1GObservable}{
+\section{OpenViBEApplications::GObservable Class Reference}
+\label{classOpenViBEApplications_1_1GObservable}\index{OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}}
+}
+
+
+{\ttfamily \#include $<$glGObservable.h$>$}
+
+Inheritance diagram for OpenViBEApplications::GObservable:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=0.880503cm]{classOpenViBEApplications_1_1GObservable}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1GObservable_ac9fdceed62feeb73efae75c7d9ecf184}{GObservable} ()
+\item 
+virtual \hyperlink{classOpenViBEApplications_1_1GObservable_a924879d1fbeab6546cdbd127efd56132}{$\sim$GObservable} ()
+\item 
+\hyperlink{classOpenViBEApplications_1_1GObservable_a41637818b8b04ab963dbcf7059047105}{GObservable} (const \hyperlink{classOpenViBEApplications_1_1GObservable}{GObservable} \&gobservable)
+\item 
+\hyperlink{classOpenViBEApplications_1_1GObservable}{GObservable} \& \hyperlink{classOpenViBEApplications_1_1GObservable_a66335d1ba9e07d5696debd30489bc587}{operator=} (\hyperlink{classOpenViBEApplications_1_1GObservable}{GObservable} const \&gobservable)
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GObservable_a1fb6672b187acd1fe6cbb162b5d09b79}{addObserver} (\hyperlink{classOpenViBEApplications_1_1GObserver}{GObserver} $\ast$observer)
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GObservable_aaf7305b9dc1b2fa3f7f3eb47a19be746}{notifyObservers} (const void $\ast$pUserData)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std::vector$<$ \hyperlink{classOpenViBEApplications_1_1GObserver}{GObserver} $\ast$ $>$ $\ast$ \hyperlink{classOpenViBEApplications_1_1GObservable_a294f95145fbb2ac73c7139f23589851c}{m\_\-vObservers}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class implements some kind of MVC (Model-\/View-\/Controller) pattern. Each class implementing \hyperlink{classOpenViBEApplications_1_1GObservable}{GObservable} can register observers that are notified when an event occurs. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1GObservable_ac9fdceed62feeb73efae75c7d9ecf184}{
+\index{OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}!GObservable@{GObservable}}
+\index{GObservable@{GObservable}!OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}}
+\subsubsection[{GObservable}]{\setlength{\rightskip}{0pt plus 5cm}GObservable::GObservable (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1GObservable_ac9fdceed62feeb73efae75c7d9ecf184}
+Simple constructor that creates a vector of to hold the observers \hypertarget{classOpenViBEApplications_1_1GObservable_a924879d1fbeab6546cdbd127efd56132}{
+\index{OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}!$\sim$GObservable@{$\sim$GObservable}}
+\index{$\sim$GObservable@{$\sim$GObservable}!OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}}
+\subsubsection[{$\sim$GObservable}]{\setlength{\rightskip}{0pt plus 5cm}GObservable::$\sim$GObservable (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GObservable_a924879d1fbeab6546cdbd127efd56132}
+The destructor is not responsible for the clean up of the \hyperlink{classOpenViBEApplications_1_1GObserver}{GObserver} objects as they are created elsewhere, only the vector that holds the \hyperlink{classOpenViBEApplications_1_1GObserver}{GObserver} objects is cleaned up. So all the \hyperlink{classOpenViBEApplications_1_1GObserver}{GObserver} objects that are registered should be cleaned up afterwards by the user. \hypertarget{classOpenViBEApplications_1_1GObservable_a41637818b8b04ab963dbcf7059047105}{
+\index{OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}!GObservable@{GObservable}}
+\index{GObservable@{GObservable}!OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}}
+\subsubsection[{GObservable}]{\setlength{\rightskip}{0pt plus 5cm}GObservable::GObservable (
+\begin{DoxyParamCaption}
+\item[{const {\bf GObservable} \&}]{gobservable}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1GObservable_a41637818b8b04ab963dbcf7059047105}
+Copy constructor calls the vector copy constructor 
+\begin{DoxyParams}{Parameters}
+{\em gobservable} & \hyperlink{classOpenViBEApplications_1_1GObservable}{GObservable} object that is copied \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1GObservable_a1fb6672b187acd1fe6cbb162b5d09b79}{
+\index{OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}!addObserver@{addObserver}}
+\index{addObserver@{addObserver}!OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}}
+\subsubsection[{addObserver}]{\setlength{\rightskip}{0pt plus 5cm}void GObservable::addObserver (
+\begin{DoxyParamCaption}
+\item[{{\bf GObserver} $\ast$}]{observer}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GObservable_a1fb6672b187acd1fe6cbb162b5d09b79}
+Registers an \hyperlink{classOpenViBEApplications_1_1GObserver}{GObserver} to the \hyperlink{classOpenViBEApplications_1_1GObservable}{GObservable} 
+\begin{DoxyParams}{Parameters}
+{\em observer} & \hyperlink{classOpenViBEApplications_1_1GObserver}{GObserver} object that is stored in the vector and is notified when an event occurs \\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented in \hyperlink{classOpenViBEApplications_1_1P300KeyboardHandler_abc75584b55a59ca0731ccedd94a5d14d}{OpenViBEApplications::P300KeyboardHandler}.
+
+\hypertarget{classOpenViBEApplications_1_1GObservable_aaf7305b9dc1b2fa3f7f3eb47a19be746}{
+\index{OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}!notifyObservers@{notifyObservers}}
+\index{notifyObservers@{notifyObservers}!OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}}
+\subsubsection[{notifyObservers}]{\setlength{\rightskip}{0pt plus 5cm}void GObservable::notifyObservers (
+\begin{DoxyParamCaption}
+\item[{const void $\ast$}]{pUserData}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GObservable_aaf7305b9dc1b2fa3f7f3eb47a19be746}
+Notifies all the registered \hyperlink{classOpenViBEApplications_1_1GObserver}{GObserver} objects when an event occurs 
+\begin{DoxyParams}{Parameters}
+{\em pUserData} & data/message/event that is transmitted to the \hyperlink{classOpenViBEApplications_1_1GObserver}{GObserver} objects \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1GObservable_a66335d1ba9e07d5696debd30489bc587}{
+\index{OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}!operator=@{operator=}}
+\index{operator=@{operator=}!OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}}
+\subsubsection[{operator=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GObservable} \& GObservable::operator= (
+\begin{DoxyParamCaption}
+\item[{{\bf GObservable} const \&}]{gobservable}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1GObservable_a66335d1ba9e07d5696debd30489bc587}
+Assignment operator clears the vector holding the \hyperlink{classOpenViBEApplications_1_1GObserver}{GObserver} objects and fills them with the \hyperlink{classOpenViBEApplications_1_1GObserver}{GObserver} objects in the gobservable vector 
+\begin{DoxyParams}{Parameters}
+{\em gobservable} & observable object that is assigned to this \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1GObservable_a294f95145fbb2ac73c7139f23589851c}{
+\index{OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}!m\_\-vObservers@{m\_\-vObservers}}
+\index{m\_\-vObservers@{m\_\-vObservers}!OpenViBEApplications::GObservable@{OpenViBEApplications::GObservable}}
+\subsubsection[{m\_\-vObservers}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$ {\bf GObserver}$\ast$ $>$$\ast$ {\bf OpenViBEApplications::GObservable::m\_\-vObservers}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GObservable_a294f95145fbb2ac73c7139f23589851c}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/visualisation/\hyperlink{glGObservable_8h}{glGObservable.h}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/visualisation/\hyperlink{glGObservable_8cpp}{glGObservable.cpp}\end{DoxyCompactItemize}

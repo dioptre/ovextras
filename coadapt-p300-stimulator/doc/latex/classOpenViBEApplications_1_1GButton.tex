@@ -1,0 +1,354 @@
+\hypertarget{classOpenViBEApplications_1_1GButton}{
+\section{OpenViBEApplications::GButton Class Reference}
+\label{classOpenViBEApplications_1_1GButton}\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+}
+
+
+{\ttfamily \#include $<$glGButton.h$>$}
+
+Inheritance diagram for OpenViBEApplications::GButton:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classOpenViBEApplications_1_1GButton}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1GButton_a423672527ee0510fe9b1f78b62c5b573}{GButton} ()
+\item 
+\hyperlink{classOpenViBEApplications_1_1GButton_ab0665fd19be1233eca19587ad51702be}{GButton} (const \hyperlink{classOpenViBEApplications_1_1GButton}{GButton} \&gbutton)
+\item 
+virtual \hyperlink{classOpenViBEApplications_1_1GButton_adae8d580e96fc94a2c84930eb3178b70}{$\sim$GButton} ()
+\item 
+\hyperlink{classOpenViBEApplications_1_1GButton}{GButton} \& \hyperlink{classOpenViBEApplications_1_1GButton_aaa56a2e2f576593dff06f3515020fd14}{operator=} (\hyperlink{classOpenViBEApplications_1_1GButton}{GButton} const \&gbutton)
+\item 
+virtual \hyperlink{classOpenViBEApplications_1_1GButton}{GButton} $\ast$ \hyperlink{classOpenViBEApplications_1_1GButton_afa3ac2d6060125071494d6abecabd19e}{clone} () const 
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GButton_abde44c49c9f5ab97d7398864ff15969d}{draw} ()
+\item 
+virtual std::string \hyperlink{classOpenViBEApplications_1_1GButton_a963ce207a2936305b251e3cbf30a406c}{toString} () const 
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GButton_acae80df7373e4fdd46165e4822511d9d}{setDimParameters} (\hyperlink{structOpenViBEApplications_1_1__BoxDimensions}{BoxDimensions} dim)
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GButton_a592d569f121bcf3c449b70b5b836a28e}{setLabel} (\hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} $\ast$glabel)
+\item 
+virtual \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} $\ast$ \hyperlink{classOpenViBEApplications_1_1GButton_a8c57a786686428590e0121ddec1ff0c8}{getLabel} () const 
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GButton_a0197e3f226c0bdac3be8437091948356}{setState} (\hyperlink{namespaceOpenViBEApplications_a4b71ded51609d9643a2256d0479f0bd4}{ButtonState} state)
+\item 
+virtual \hyperlink{namespaceOpenViBEApplications_a4b71ded51609d9643a2256d0479f0bd4}{ButtonState} \hyperlink{classOpenViBEApplications_1_1GButton_a1909ce68759714d2275b3dcc04b51b5e}{getState} () const 
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GButton_a138cf2168d28a762fa3583d300148e5d}{setAction} (OpenViBE::CString action)
+\item 
+virtual \hyperlink{namespaceOpenViBEApplications_ad87631a613368054b4f5c133add72cb7}{ButtonAction} \hyperlink{classOpenViBEApplications_1_1GButton_a8faf954d313d08995cdddfe351ce7ec6}{getAction} () const 
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GButton_a38e8bfe08accb554989f1c5a5ac309fe}{setChanged} (OpenViBE::boolean l\_\-bChanged)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} $\ast$ \hyperlink{classOpenViBEApplications_1_1GButton_a17b1282304974afc646f1d716b1f6d26}{m\_\-pLabel}
+\item 
+\hyperlink{namespaceOpenViBEApplications_a4b71ded51609d9643a2256d0479f0bd4}{ButtonState} \hyperlink{classOpenViBEApplications_1_1GButton_a1e013e7c20a5034f5e30cfa923673df3}{m\_\-iButtonState}
+\item 
+\hyperlink{namespaceOpenViBEApplications_ad87631a613368054b4f5c133add72cb7}{ButtonAction} \hyperlink{classOpenViBEApplications_1_1GButton_a62885570e148eb79955f575a2058bfb6}{m\_\-iButtonAction}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classOpenViBEApplications_1_1GButton_aa8fe41bb06213badf1c75dfc0e09c417}{generateVBOBuffers} ()
+\item 
+void \hyperlink{classOpenViBEApplications_1_1GButton_a7bf64a3dcec4e5f75b1eb9701d06388b}{generateGLDisplayLists} ()
+\item 
+void \hyperlink{classOpenViBEApplications_1_1GButton_abde1fd8c4edbd59da0b63e02a3c83c45}{fillVertexBuffer} (GLfloat $\ast$buffer, OpenViBE::float32 depth)
+\item 
+void \hyperlink{classOpenViBEApplications_1_1GButton_ae10ff931ecdde0b05a80f20c5a6eb8af}{fillColorBuffer} (GLfloat $\ast$buffer, const \hyperlink{structOpenViBEApplications_1_1GColor}{GColor} \&l\_\-color)
+\item 
+void \hyperlink{classOpenViBEApplications_1_1GButton_a78e51e7836788fc6e8f5c39735abf3da}{assignHelper} (const \hyperlink{classOpenViBEApplications_1_1GButton}{GButton} \&gbutton)
+\end{DoxyCompactItemize}
+\subsection*{Static Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static const OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1GButton_a0642f4b200f1d9107f284e3998d1ff1c}{VertexCount} = 4
+\item 
+static const OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1GButton_ac7e4b8f92a1e10ec6c85cd2e41bd6d79}{VBOSize} = 3$\ast$\hyperlink{classOpenViBEApplications_1_1GButton_a0642f4b200f1d9107f284e3998d1ff1c}{VertexCount}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class will represent the keys of the P300 keyboard which can be selected for feedback or for focus (target letter in copy spelling task). It can also have an action associated with them in case they are selected, e.g. write, wordprediction, undo (specified by a number; enum ButtonAction ).\par
+ The \hyperlink{classOpenViBEApplications_1_1GButton}{GButton} should always have a \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} set. The \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} can either be a \hyperlink{classOpenViBEApplications_1_1GPictureSymbol}{GPictureSymbol} or a regular text \hyperlink{classOpenViBEApplications_1_1GSymbol}{GSymbol}. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1GButton_a423672527ee0510fe9b1f78b62c5b573}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!GButton@{GButton}}
+\index{GButton@{GButton}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{GButton}]{\setlength{\rightskip}{0pt plus 5cm}GButton::GButton (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1GButton_a423672527ee0510fe9b1f78b62c5b573}
+\hyperlink{classOpenViBEApplications_1_1GButton}{GButton} constructor will call GObject(true, 1) which means it will use one OpenGL display list. Also generates the display list. GButton\_\-Inactive \hypertarget{classOpenViBEApplications_1_1GButton_ab0665fd19be1233eca19587ad51702be}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!GButton@{GButton}}
+\index{GButton@{GButton}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{GButton}]{\setlength{\rightskip}{0pt plus 5cm}GButton::GButton (
+\begin{DoxyParamCaption}
+\item[{const {\bf GButton} \&}]{gbutton}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1GButton_ab0665fd19be1233eca19587ad51702be}
+\hyperlink{classOpenViBEApplications_1_1GButton}{GButton} copy constructor \hypertarget{classOpenViBEApplications_1_1GButton_adae8d580e96fc94a2c84930eb3178b70}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!$\sim$GButton@{$\sim$GButton}}
+\index{$\sim$GButton@{$\sim$GButton}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{$\sim$GButton}]{\setlength{\rightskip}{0pt plus 5cm}GButton::$\sim$GButton (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_adae8d580e96fc94a2c84930eb3178b70}
+\hyperlink{classOpenViBEApplications_1_1GButton}{GButton} destructor will invoke the \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} destructor. The OpenGL resources will be released by subsequent call (in reverse order) to the \hyperlink{classOpenViBEApplications_1_1GObject}{GObject} destructor 
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1GButton_a78e51e7836788fc6e8f5c39735abf3da}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!assignHelper@{assignHelper}}
+\index{assignHelper@{assignHelper}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{assignHelper}]{\setlength{\rightskip}{0pt plus 5cm}void GButton::assignHelper (
+\begin{DoxyParamCaption}
+\item[{const {\bf GButton} \&}]{gbutton}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a78e51e7836788fc6e8f5c39735abf3da}
+\hypertarget{classOpenViBEApplications_1_1GButton_afa3ac2d6060125071494d6abecabd19e}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!clone@{clone}}
+\index{clone@{clone}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{clone}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf GButton}$\ast$ OpenViBEApplications::GButton::clone (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_afa3ac2d6060125071494d6abecabd19e}
+Clone function used for making a copy of a \hyperlink{classOpenViBEApplications_1_1GButton}{GButton} (invokes the copy constructor) 
+
+Implements \hyperlink{classOpenViBEApplications_1_1GObject_a47a74b8b3ce8781c4d54fbf872e205e3}{OpenViBEApplications::GObject}.
+
+\hypertarget{classOpenViBEApplications_1_1GButton_abde44c49c9f5ab97d7398864ff15969d}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!draw@{draw}}
+\index{draw@{draw}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{draw}]{\setlength{\rightskip}{0pt plus 5cm}void GButton::draw (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_abde44c49c9f5ab97d7398864ff15969d}
+This method should contain the OpenGL code to draw on the back buffer. It will first check if the \hyperlink{classOpenViBEApplications_1_1GButton}{GButton} has changed and if it has to be redrawn. If it has to be redrawn it will only clear the space on the screen it occupies and redraw that by setting the background color and calling the display list (or vbo buffer if it is used). After that it will call the draw function of \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} and set the status of changed to false. 
+
+Implements \hyperlink{classOpenViBEApplications_1_1GObject_a00e373a12688223086a334eae0436332}{OpenViBEApplications::GObject}.
+
+\hypertarget{classOpenViBEApplications_1_1GButton_ae10ff931ecdde0b05a80f20c5a6eb8af}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!fillColorBuffer@{fillColorBuffer}}
+\index{fillColorBuffer@{fillColorBuffer}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{fillColorBuffer}]{\setlength{\rightskip}{0pt plus 5cm}void GButton::fillColorBuffer (
+\begin{DoxyParamCaption}
+\item[{GLfloat $\ast$}]{buffer, }
+\item[{const {\bf GColor} \&}]{l\_\-color}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_ae10ff931ecdde0b05a80f20c5a6eb8af}
+\hypertarget{classOpenViBEApplications_1_1GButton_abde1fd8c4edbd59da0b63e02a3c83c45}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!fillVertexBuffer@{fillVertexBuffer}}
+\index{fillVertexBuffer@{fillVertexBuffer}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{fillVertexBuffer}]{\setlength{\rightskip}{0pt plus 5cm}void OpenViBEApplications::GButton::fillVertexBuffer (
+\begin{DoxyParamCaption}
+\item[{GLfloat $\ast$}]{buffer, }
+\item[{OpenViBE::float32}]{depth}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_abde1fd8c4edbd59da0b63e02a3c83c45}
+\hypertarget{classOpenViBEApplications_1_1GButton_a7bf64a3dcec4e5f75b1eb9701d06388b}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!generateGLDisplayLists@{generateGLDisplayLists}}
+\index{generateGLDisplayLists@{generateGLDisplayLists}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{generateGLDisplayLists}]{\setlength{\rightskip}{0pt plus 5cm}void GButton::generateGLDisplayLists (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a7bf64a3dcec4e5f75b1eb9701d06388b}
+\hypertarget{classOpenViBEApplications_1_1GButton_aa8fe41bb06213badf1c75dfc0e09c417}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!generateVBOBuffers@{generateVBOBuffers}}
+\index{generateVBOBuffers@{generateVBOBuffers}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{generateVBOBuffers}]{\setlength{\rightskip}{0pt plus 5cm}void GButton::generateVBOBuffers (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_aa8fe41bb06213badf1c75dfc0e09c417}
+\hypertarget{classOpenViBEApplications_1_1GButton_a8faf954d313d08995cdddfe351ce7ec6}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!getAction@{getAction}}
+\index{getAction@{getAction}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{getAction}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf ButtonAction} OpenViBEApplications::GButton::getAction (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a8faf954d313d08995cdddfe351ce7ec6}
+Returns GButton's action when clicked \begin{DoxyReturn}{Returns}
+GButton\_\-None, GButton\_\-Write, GButton\_\-WordPrediction or GButton\_\-Undo. 
+\end{DoxyReturn}
+\hypertarget{classOpenViBEApplications_1_1GButton_a8c57a786686428590e0121ddec1ff0c8}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!getLabel@{getLabel}}
+\index{getLabel@{getLabel}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{getLabel}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf GLabel}$\ast$ OpenViBEApplications::GButton::getLabel (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a8c57a786686428590e0121ddec1ff0c8}
+\begin{DoxyReturn}{Returns}
+GButton's label 
+\end{DoxyReturn}
+\hypertarget{classOpenViBEApplications_1_1GButton_a1909ce68759714d2275b3dcc04b51b5e}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!getState@{getState}}
+\index{getState@{getState}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{getState}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf ButtonState} OpenViBEApplications::GButton::getState (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a1909ce68759714d2275b3dcc04b51b5e}
+\begin{DoxyReturn}{Returns}
+GButton's state, GButton\_\-Inactive, GButton\_\-Active, GButton\_\-Clicked, GButton\_\-Focus or GButton\_\-WrongClick 
+\end{DoxyReturn}
+\hypertarget{classOpenViBEApplications_1_1GButton_aaa56a2e2f576593dff06f3515020fd14}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!operator=@{operator=}}
+\index{operator=@{operator=}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{operator=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GButton} \& GButton::operator= (
+\begin{DoxyParamCaption}
+\item[{{\bf GButton} const \&}]{gbutton}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1GButton_aaa56a2e2f576593dff06f3515020fd14}
+The assignment operator calls the \hyperlink{classOpenViBEApplications_1_1GObject}{GObject} assignment operator first and marks the object as changed so that it is drawn the next time. Through this call the OpenGL resources are also being taken care of. 
+\begin{DoxyParams}{Parameters}
+{\em gbutton} & the \hyperlink{classOpenViBEApplications_1_1GButton}{GButton} to be assigned to this \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1GButton_a138cf2168d28a762fa3583d300148e5d}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!setAction@{setAction}}
+\index{setAction@{setAction}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{setAction}]{\setlength{\rightskip}{0pt plus 5cm}void GButton::setAction (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::CString}]{action}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a138cf2168d28a762fa3583d300148e5d}
+Sets the action associated with \hyperlink{classOpenViBEApplications_1_1GButton}{GButton} when it is clicked (in state GButton\_\-Clicked) 
+\begin{DoxyParams}{Parameters}
+{\em action} & 'write' or 'wordprediction' \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1GButton_a38e8bfe08accb554989f1c5a5ac309fe}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!setChanged@{setChanged}}
+\index{setChanged@{setChanged}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{setChanged}]{\setlength{\rightskip}{0pt plus 5cm}void GButton::setChanged (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::boolean}]{l\_\-bChanged}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a38e8bfe08accb554989f1c5a5ac309fe}
+Sets the status of the \hyperlink{classOpenViBEApplications_1_1GButton}{GButton} to changed or not changed, and that of the \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} as well. 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GObject_a2c9e566e5d5e9a9975f9f6efb79efea8}{OpenViBEApplications::GObject}.
+
+\hypertarget{classOpenViBEApplications_1_1GButton_acae80df7373e4fdd46165e4822511d9d}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!setDimParameters@{setDimParameters}}
+\index{setDimParameters@{setDimParameters}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{setDimParameters}]{\setlength{\rightskip}{0pt plus 5cm}void GButton::setDimParameters (
+\begin{DoxyParamCaption}
+\item[{{\bf BoxDimensions}}]{dim}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_acae80df7373e4fdd46165e4822511d9d}
+Sets the dimension parameters of the \hyperlink{classOpenViBEApplications_1_1GButton}{GButton}. Therefore it first call the corresponding method of \hyperlink{classOpenViBEApplications_1_1GObject}{GObject} which recreates the OpenGL resources (as the dimensions of \hyperlink{classOpenViBEApplications_1_1GButton}{GButton} have been changed). Then it regenerates the contents of the display list or the vbo buffers. Finally it will increase the depth dimension with 0.01 for the \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} and set the label's dimensions. 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GObject_a6142ac58568e334e50c3eae060590f82}{OpenViBEApplications::GObject}.
+
+\hypertarget{classOpenViBEApplications_1_1GButton_a592d569f121bcf3c449b70b5b836a28e}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!setLabel@{setLabel}}
+\index{setLabel@{setLabel}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{setLabel}]{\setlength{\rightskip}{0pt plus 5cm}void GButton::setLabel (
+\begin{DoxyParamCaption}
+\item[{{\bf GLabel} $\ast$}]{glabel}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a592d569f121bcf3c449b70b5b836a28e}
+Sets a new \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel}. If it's different from the previous one, the old \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} will be deleted. The new one will point to the parameter glabel and the correct (according to \hyperlink{classOpenViBEApplications_1_1GButton}{GButton}) dimensions will be set (glabel.depth = gbutton.depth + 0.01) 
+\begin{DoxyParams}{Parameters}
+{\em glabel} & the \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} pointer that will be set as the new \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel} \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1GButton_a0197e3f226c0bdac3be8437091948356}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!setState@{setState}}
+\index{setState@{setState}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{setState}]{\setlength{\rightskip}{0pt plus 5cm}void GButton::setState (
+\begin{DoxyParamCaption}
+\item[{{\bf ButtonState}}]{state}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a0197e3f226c0bdac3be8437091948356}
+Sets the button's state, e.g. GButton\_\-Clicked when it is selected for feedback The handlers, such as \hyperlink{classOpenViBEApplications_1_1P300KeyboardHandler}{P300KeyboardHandler}, \hyperlink{classOpenViBEApplications_1_1P300ResultAreaHandler}{P300ResultAreaHandler}, etc. need to know the state of the button. 
+\begin{DoxyParams}{Parameters}
+{\em state} & GButton\_\-Inactive, GButton\_\-Active, GButton\_\-Clicked, GButton\_\-Focus or GButton\_\-WrongClick \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1GButton_a963ce207a2936305b251e3cbf30a406c}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!toString@{toString}}
+\index{toString@{toString}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{toString}]{\setlength{\rightskip}{0pt plus 5cm}std::string GButton::toString (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a963ce207a2936305b251e3cbf30a406c}
+String representation of \hyperlink{classOpenViBEApplications_1_1GButton}{GButton}. Also calls the toString method of the \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel}. \begin{DoxyReturn}{Returns}
+the string representation of \hyperlink{classOpenViBEApplications_1_1GButton}{GButton} 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classOpenViBEApplications_1_1GObject_a4b50dbc5c1db8346461892dcdd53db86}{OpenViBEApplications::GObject}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1GButton_a62885570e148eb79955f575a2058bfb6}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!m\_\-iButtonAction@{m\_\-iButtonAction}}
+\index{m\_\-iButtonAction@{m\_\-iButtonAction}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{m\_\-iButtonAction}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ButtonAction} {\bf OpenViBEApplications::GButton::m\_\-iButtonAction}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a62885570e148eb79955f575a2058bfb6}
+\hypertarget{classOpenViBEApplications_1_1GButton_a1e013e7c20a5034f5e30cfa923673df3}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!m\_\-iButtonState@{m\_\-iButtonState}}
+\index{m\_\-iButtonState@{m\_\-iButtonState}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{m\_\-iButtonState}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ButtonState} {\bf OpenViBEApplications::GButton::m\_\-iButtonState}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a1e013e7c20a5034f5e30cfa923673df3}
+\hypertarget{classOpenViBEApplications_1_1GButton_a17b1282304974afc646f1d716b1f6d26}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!m\_\-pLabel@{m\_\-pLabel}}
+\index{m\_\-pLabel@{m\_\-pLabel}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{m\_\-pLabel}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GLabel}$\ast$ {\bf OpenViBEApplications::GButton::m\_\-pLabel}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a17b1282304974afc646f1d716b1f6d26}
+\hypertarget{classOpenViBEApplications_1_1GButton_ac7e4b8f92a1e10ec6c85cd2e41bd6d79}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!VBOSize@{VBOSize}}
+\index{VBOSize@{VBOSize}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{VBOSize}]{\setlength{\rightskip}{0pt plus 5cm}const OpenViBE::uint32 {\bf OpenViBEApplications::GButton::VBOSize} = 3$\ast${\bf VertexCount}\hspace{0.3cm}{\ttfamily  \mbox{[}static, private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_ac7e4b8f92a1e10ec6c85cd2e41bd6d79}
+\hypertarget{classOpenViBEApplications_1_1GButton_a0642f4b200f1d9107f284e3998d1ff1c}{
+\index{OpenViBEApplications::GButton@{OpenViBEApplications::GButton}!VertexCount@{VertexCount}}
+\index{VertexCount@{VertexCount}!OpenViBEApplications::GButton@{OpenViBEApplications::GButton}}
+\subsubsection[{VertexCount}]{\setlength{\rightskip}{0pt plus 5cm}const OpenViBE::uint32 {\bf OpenViBEApplications::GButton::VertexCount} = 4\hspace{0.3cm}{\ttfamily  \mbox{[}static, private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GButton_a0642f4b200f1d9107f284e3998d1ff1c}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/visualisation/\hyperlink{glGButton_8h}{glGButton.h}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/visualisation/\hyperlink{glGButton_8cpp}{glGButton.cpp}\end{DoxyCompactItemize}

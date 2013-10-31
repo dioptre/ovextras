@@ -1,0 +1,98 @@
+\hypertarget{classOpenViBEApplications_1_1PresagePredictionEngine}{
+\section{OpenViBEApplications::PresagePredictionEngine Class Reference}
+\label{classOpenViBEApplications_1_1PresagePredictionEngine}\index{OpenViBEApplications::PresagePredictionEngine@{OpenViBEApplications::PresagePredictionEngine}}
+}
+
+
+{\ttfamily \#include $<$ovexPresagePredictionEngine.h$>$}
+
+Inheritance diagram for OpenViBEApplications::PresagePredictionEngine:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classOpenViBEApplications_1_1PresagePredictionEngine}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1PresagePredictionEngine_a40c511585d4b20407cdbe25ce2f78e32}{PresagePredictionEngine} (OpenViBE::CString nGramDatabaseName)
+\item 
+\hyperlink{classOpenViBEApplications_1_1PresagePredictionEngine_a5dca1486e1d00776285d46228e5f12b7}{$\sim$PresagePredictionEngine} ()
+\item 
+virtual std::vector$<$ std::string $>$ $\ast$ \hyperlink{classOpenViBEApplications_1_1PresagePredictionEngine_ae7013ed31db4d57926c87b0858019a57}{getMostProbableWords} (const std::string \&prefix, OpenViBE::uint32 nWords)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std::vector$<$ std::string $>$ $\ast$ \hyperlink{classOpenViBEApplications_1_1PresagePredictionEngine_ae5f5089d4a66e00659833e526848ecf2}{m\_\-lPredictedWords}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Specific implementation of the \hyperlink{classOpenViBEApplications_1_1WordPredictionInterface}{WordPredictionInterface} using the Presage library for word prediction/completion 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1PresagePredictionEngine_a40c511585d4b20407cdbe25ce2f78e32}{
+\index{OpenViBEApplications::PresagePredictionEngine@{OpenViBEApplications::PresagePredictionEngine}!PresagePredictionEngine@{PresagePredictionEngine}}
+\index{PresagePredictionEngine@{PresagePredictionEngine}!OpenViBEApplications::PresagePredictionEngine@{OpenViBEApplications::PresagePredictionEngine}}
+\subsubsection[{PresagePredictionEngine}]{\setlength{\rightskip}{0pt plus 5cm}PresagePredictionEngine::PresagePredictionEngine (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::CString}]{nGramDatabaseName}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1PresagePredictionEngine_a40c511585d4b20407cdbe25ce2f78e32}
+Constructor 
+\begin{DoxyParams}{Parameters}
+{\em nGramDatabaseName} & the full path name that points to the n-\/gram database for Presage \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1PresagePredictionEngine_a5dca1486e1d00776285d46228e5f12b7}{
+\index{OpenViBEApplications::PresagePredictionEngine@{OpenViBEApplications::PresagePredictionEngine}!$\sim$PresagePredictionEngine@{$\sim$PresagePredictionEngine}}
+\index{$\sim$PresagePredictionEngine@{$\sim$PresagePredictionEngine}!OpenViBEApplications::PresagePredictionEngine@{OpenViBEApplications::PresagePredictionEngine}}
+\subsubsection[{$\sim$PresagePredictionEngine}]{\setlength{\rightskip}{0pt plus 5cm}PresagePredictionEngine::$\sim$PresagePredictionEngine (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1PresagePredictionEngine_a5dca1486e1d00776285d46228e5f12b7}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1PresagePredictionEngine_ae7013ed31db4d57926c87b0858019a57}{
+\index{OpenViBEApplications::PresagePredictionEngine@{OpenViBEApplications::PresagePredictionEngine}!getMostProbableWords@{getMostProbableWords}}
+\index{getMostProbableWords@{getMostProbableWords}!OpenViBEApplications::PresagePredictionEngine@{OpenViBEApplications::PresagePredictionEngine}}
+\subsubsection[{getMostProbableWords}]{\setlength{\rightskip}{0pt plus 5cm}virtual std::vector$<$std::string$>$$\ast$ OpenViBEApplications::PresagePredictionEngine::getMostProbableWords (
+\begin{DoxyParamCaption}
+\item[{const std::string \&}]{prefix, }
+\item[{OpenViBE::uint32}]{nWords}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1PresagePredictionEngine_ae7013ed31db4d57926c87b0858019a57}
+
+\begin{DoxyParams}{Parameters}
+{\em prefix} & the letters or words previously spelled on which we need to base our predictions for the next word or the word to complete \\
+\hline
+{\em nWords} & number of words we want to get back in the result vector \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+vector of strings with the nWords most probable words given the prefix 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classOpenViBEApplications_1_1WordPredictionInterface_a9eb048db224c4d233bbfa8e3999a7b6c}{OpenViBEApplications::WordPredictionInterface}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1PresagePredictionEngine_ae5f5089d4a66e00659833e526848ecf2}{
+\index{OpenViBEApplications::PresagePredictionEngine@{OpenViBEApplications::PresagePredictionEngine}!m\_\-lPredictedWords@{m\_\-lPredictedWords}}
+\index{m\_\-lPredictedWords@{m\_\-lPredictedWords}!OpenViBEApplications::PresagePredictionEngine@{OpenViBEApplications::PresagePredictionEngine}}
+\subsubsection[{m\_\-lPredictedWords}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$std::string$>$$\ast$ {\bf OpenViBEApplications::PresagePredictionEngine::m\_\-lPredictedWords}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1PresagePredictionEngine_ae5f5089d4a66e00659833e526848ecf2}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/\hyperlink{ovexPresagePredictionEngine_8h}{ovexPresagePredictionEngine.h}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/\hyperlink{ovexPresagePredictionEngine_8cpp}{ovexPresagePredictionEngine.cpp}\end{DoxyCompactItemize}

@@ -1,0 +1,92 @@
+\hypertarget{classOpenViBEApplications_1_1WordPredictionEngine}{
+\section{OpenViBEApplications::WordPredictionEngine Class Reference}
+\label{classOpenViBEApplications_1_1WordPredictionEngine}\index{OpenViBEApplications::WordPredictionEngine@{OpenViBEApplications::WordPredictionEngine}}
+}
+
+
+{\ttfamily \#include $<$ovexWordPredictionEngine.h$>$}
+
+Inheritance diagram for OpenViBEApplications::WordPredictionEngine:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classOpenViBEApplications_1_1WordPredictionEngine}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1WordPredictionEngine_ac9999482f410828e8053f73573176c09}{WordPredictionEngine} ()
+\item 
+\hyperlink{classOpenViBEApplications_1_1WordPredictionEngine_a992d915c6060ce47e14e9817752f6457}{$\sim$WordPredictionEngine} ()
+\item 
+virtual std::vector$<$ std::string $>$ $\ast$ \hyperlink{classOpenViBEApplications_1_1WordPredictionEngine_a9a7b3a5dcf9777a120185a34ee19af14}{getMostProbableWords} (const std::string \&prefix, OpenViBE::uint32 nWords)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std::vector$<$ std::string $>$ $\ast$ \hyperlink{classOpenViBEApplications_1_1WordPredictionEngine_a3215eeb57bf7e1fabc9756972940a248}{m\_\-lPredictedWords}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A dummy class for word prediction/completion 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1WordPredictionEngine_ac9999482f410828e8053f73573176c09}{
+\index{OpenViBEApplications::WordPredictionEngine@{OpenViBEApplications::WordPredictionEngine}!WordPredictionEngine@{WordPredictionEngine}}
+\index{WordPredictionEngine@{WordPredictionEngine}!OpenViBEApplications::WordPredictionEngine@{OpenViBEApplications::WordPredictionEngine}}
+\subsubsection[{WordPredictionEngine}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBEApplications::WordPredictionEngine::WordPredictionEngine (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classOpenViBEApplications_1_1WordPredictionEngine_ac9999482f410828e8053f73573176c09}
+\hypertarget{classOpenViBEApplications_1_1WordPredictionEngine_a992d915c6060ce47e14e9817752f6457}{
+\index{OpenViBEApplications::WordPredictionEngine@{OpenViBEApplications::WordPredictionEngine}!$\sim$WordPredictionEngine@{$\sim$WordPredictionEngine}}
+\index{$\sim$WordPredictionEngine@{$\sim$WordPredictionEngine}!OpenViBEApplications::WordPredictionEngine@{OpenViBEApplications::WordPredictionEngine}}
+\subsubsection[{$\sim$WordPredictionEngine}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBEApplications::WordPredictionEngine::$\sim$WordPredictionEngine (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classOpenViBEApplications_1_1WordPredictionEngine_a992d915c6060ce47e14e9817752f6457}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1WordPredictionEngine_a9a7b3a5dcf9777a120185a34ee19af14}{
+\index{OpenViBEApplications::WordPredictionEngine@{OpenViBEApplications::WordPredictionEngine}!getMostProbableWords@{getMostProbableWords}}
+\index{getMostProbableWords@{getMostProbableWords}!OpenViBEApplications::WordPredictionEngine@{OpenViBEApplications::WordPredictionEngine}}
+\subsubsection[{getMostProbableWords}]{\setlength{\rightskip}{0pt plus 5cm}virtual std::vector$<$std::string$>$$\ast$ OpenViBEApplications::WordPredictionEngine::getMostProbableWords (
+\begin{DoxyParamCaption}
+\item[{const std::string \&}]{prefix, }
+\item[{OpenViBE::uint32}]{nWords}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1WordPredictionEngine_a9a7b3a5dcf9777a120185a34ee19af14}
+
+\begin{DoxyParams}{Parameters}
+{\em prefix} & the letters or words previously spelled on which we need to base our predictions for the next word or the word to complete \\
+\hline
+{\em nWords} & number of words we want to get back in the result vector \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+vector of strings with the nWords most probable words given the prefix 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classOpenViBEApplications_1_1WordPredictionInterface_a9eb048db224c4d233bbfa8e3999a7b6c}{OpenViBEApplications::WordPredictionInterface}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1WordPredictionEngine_a3215eeb57bf7e1fabc9756972940a248}{
+\index{OpenViBEApplications::WordPredictionEngine@{OpenViBEApplications::WordPredictionEngine}!m\_\-lPredictedWords@{m\_\-lPredictedWords}}
+\index{m\_\-lPredictedWords@{m\_\-lPredictedWords}!OpenViBEApplications::WordPredictionEngine@{OpenViBEApplications::WordPredictionEngine}}
+\subsubsection[{m\_\-lPredictedWords}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$std::string$>$$\ast$ {\bf OpenViBEApplications::WordPredictionEngine::m\_\-lPredictedWords}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1WordPredictionEngine_a3215eeb57bf7e1fabc9756972940a248}
+
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/\hyperlink{ovexWordPredictionEngine_8h}{ovexWordPredictionEngine.h}\end{DoxyCompactItemize}

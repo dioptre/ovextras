@@ -4,6 +4,43 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
 
+GTable::GTable() {}	
+
+GTable::GTable(OpenViBE::uint32 nElements)
+{
+	m_ui32RowDimension = (OpenViBE::uint32)std::floor(0.5+std::sqrt((double)nElements));
+	m_ui32ColumnDimension = (OpenViBE::uint32)std::ceil((double)nElements/(double)m_ui32RowDimension);	
+}
+
+GTable::GTable(OpenViBE::uint32 nRows, OpenViBE::uint32 nCols) : GContainer()
+{
+	m_ui32RowDimension = nRows;
+	m_ui32ColumnDimension = nCols;	
+}
+
+GTable::GTable(const GTable& gtable) : GContainer(gtable)
+{		
+	m_ui32RowDimension = gtable.m_ui32RowDimension;
+	m_ui32ColumnDimension = gtable.m_ui32ColumnDimension;
+}
+
+GTable& GTable::operator= (GTable const& mainTable)
+{
+	if(this!=&mainTable)
+	{
+		this->GContainer::operator=(mainTable);
+		this->m_ui32RowDimension = mainTable.m_ui32RowDimension;
+		this->m_ui32ColumnDimension = mainTable.m_ui32ColumnDimension;
+	}
+	return *this;
+}	
+
+GObject*& GTable::getChild(OpenViBE::uint32 rowIndex, OpenViBE::uint32 colIndex) const 
+{ 
+	OpenViBE::uint32 childIndex = rowIndex*m_ui32ColumnDimension+colIndex;
+	return this->getChild(childIndex); 
+}
+
 void GTable::draw()
 {
 	GContainer::draw();
