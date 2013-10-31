@@ -31,7 +31,10 @@ IF(Matlab_EXECUTABLE)
 	
 	# Try relative to the executable path
 	GET_FILENAME_COMPONENT(Matlab_ROOT ${Matlab_EXECUTABLE} PATH)
-	FIND_PATH(Matlab_INCLUDE "mex.h" PATHS ${Matlab_ROOT}/../extern/include ${Matlab_ROOT}/../extern/include/extern)
+	IF(Matlab_ROOT)
+		SET(Matlab_ROOT, ${Matlab_ROOT}/../)
+		FIND_PATH(Matlab_INCLUDE "mex.h" PATHS ${Matlab_ROOT}/extern/include ${Matlab_ROOT}/extern/include/extern)
+	ENDIF(Matlab_ROOT)
 
 	# matlab executable path might have been pointing to a symbolic link elsewhere, try something else
 	IF((NOT Matlab_INCLUDE) AND UNIX)
@@ -51,7 +54,7 @@ IF(Matlab_EXECUTABLE)
 		ENDIF(UNIX)
 		IF(WIN32)
 			SET(Matlab_LIBRARIES libmex libmx libeng) #mclmcrrt
-			SET(Matlab_LIB_DIRECTORIES ${Matlab_ROOT}/../extern/lib/win32/microsoft)
+			SET(Matlab_LIB_DIRECTORIES ${Matlab_ROOT}/extern/lib/win32/microsoft)
 			# for delayed importation on windows
 			TARGET_LINK_LIBRARIES(${PROJECT_NAME} Delayimp )
 			SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/DELAYLOAD:libeng.dll /DELAYLOAD:libmx.dll")
