@@ -81,6 +81,13 @@ void COutputChannel::sendHeader(OpenViBE::uint64 samplingRate, OpenViBE::CMatrix
 	op_pMemoryBufferSignal    = l_rDynamicBoxContext.getOutputChunk(SIGNAL_CHANNEL);
 	ip_pMatrixSignal          = m_oMatrixBuffer;
 	ip_ui64SamplingRateSignal = m_ui64SamplingRate;
+
+	//copy channel names
+	for (uint32 i = 0; i< pMatrix->getDimensionSize(0); i++) 
+	{
+		ip_pMatrixSignal->setDimensionLabel(0, i , pMatrix->getDimensionLabel(0,i));
+	}
+
 	m_pStreamEncoderSignal->process(OVP_GD_Algorithm_SignalStreamEncoder_InputTriggerId_EncodeHeader);
 	l_rDynamicBoxContext.markOutputAsReadyToSend(SIGNAL_CHANNEL, 0, 0);
 }
