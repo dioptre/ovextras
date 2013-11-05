@@ -1,6 +1,8 @@
 #include "ovasCDriverGenericRawTelnetReader.h"
 #include "ovasCConfigurationGenericRawReader.h"
 
+#include "../ovasCSettingsHelper.h"
+
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -11,6 +13,7 @@ CDriverGenericRawTelnetReader::CDriverGenericRawTelnetReader(IDriverContext& rDr
 {
 	m_sHostName="localhost";
 	m_ui32HostPort=1337;
+
 }
 
 boolean CDriverGenericRawTelnetReader::configure(void)
@@ -24,8 +27,23 @@ boolean CDriverGenericRawTelnetReader::configure(void)
 		m_ui32HeaderSkip,
 		m_ui32FooterSkip,
 		l_sFilename);
+
+	// Relay configuration properties to the configuration manager
+	SettingsHelper l_oProperties("AcquisitionServer_Driver_GenericRawTelnetReader", m_rDriverContext.getConfigurationManager());
+	// l_oProperties.add("Header", &m_oHeader);
+	l_oProperties.add("LimitSpeed", &m_bLimitSpeed);
+	l_oProperties.add("SampleFormat", &m_ui32SampleFormat);
+	l_oProperties.add("SampleEndian", &m_ui32SampleEndian);
+	l_oProperties.add("StartSkip", &m_ui32StartSkip);
+	l_oProperties.add("HeaderSkip", &m_ui32HeaderSkip);
+	l_oProperties.add("FooterSkip", &m_ui32FooterSkip);
+	l_oProperties.add("HostName", &m_sHostName);
+	l_oProperties.add("HostPort", &m_ui32HostPort);
+	l_oProperties.load();
+
 	m_oConfiguration.setHostName(m_sHostName);
 	m_oConfiguration.setHostPort(m_ui32HostPort);
+
 	if(!m_oConfiguration.configure(m_oHeader))
 	{
 		return false;
@@ -33,6 +51,9 @@ boolean CDriverGenericRawTelnetReader::configure(void)
 
 	m_sHostName=m_oConfiguration.getHostName();
 	m_ui32HostPort=m_oConfiguration.getHostPort();
+
+	l_oProperties.save();
+
 	return true;
 }
 
@@ -80,3 +101,4 @@ boolean CDriverGenericRawTelnetReader::read(void)
 	}
 	return m_pConnection->receiveBufferBlocking(m_pDataFrame, m_ui32DataFrameSize);
 }
+

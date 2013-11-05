@@ -3,6 +3,8 @@
 #include "ovasCDriverEmotivEPOC.h"
 #include "ovasCConfigurationEmotivEPOC.h"
 
+#include "../ovasCSettingsHelper.h"
+
 #include "edk.h"
 
 #include <system/Time.h>
@@ -383,12 +385,22 @@ boolean CDriverEmotivEPOC::isConfigurable(void)
 
 boolean CDriverEmotivEPOC::configure(void)
 {
-	CConfigurationEmotivEPOC m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Emotiv-EPOC.ui", m_bUseGyroscope, m_sPathToEmotivSDK, m_ui32UserID);
+	CConfigurationEmotivEPOC m_oConfiguration(m_rDriverContext, 
+		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Emotiv-EPOC.ui", 
+		m_bUseGyroscope, m_sPathToEmotivSDK, m_ui32UserID);
+
+	SettingsHelper l_oProperties("AcquisitionServer_Driver_EmotivEPOC", m_rDriverContext.getConfigurationManager() );
+	l_oProperties.add("UseGyroscope", &m_bUseGyroscope);
+	l_oProperties.add("PathToEmotivSDK", &m_sPathToEmotivSDK);
+	l_oProperties.add("UserID", &m_ui32UserID);
+	l_oProperties.load();
 
 	if(!m_oConfiguration.configure(m_oHeader)) 
 	{
 		return false;
 	}
+
+	l_oProperties.save();
 
 	return true;
 }

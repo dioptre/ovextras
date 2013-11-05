@@ -2,6 +2,7 @@
 
 #include "ovasCDriverNeuroskyMindset.h"
 #include "ovasCConfigurationNeuroskyMindset.h"
+#include "../ovasCSettingsHelper.h"
 
 #include <sstream>
 #include <system/Time.h>
@@ -523,10 +524,20 @@ boolean CDriverNeuroskyMindset::configure(void)
 		,m_bBlinkStimulations
 		,m_bBlinkStrenghtChannel);
 
+	SettingsHelper l_oProperties("AcquisitionServer_Driver_NeuroSkyMindSet", m_rDriverContext.getConfigurationManager());
+	l_oProperties.add("ComPort", &m_ui32ComPort);
+	l_oProperties.add("ESenseChannels", &m_bESenseChannels);
+	l_oProperties.add("BandPowerChannels", &m_bBandPowerChannels);
+	l_oProperties.add("Stimulations", &m_bBlinkStimulations);
+	l_oProperties.add("StrenghtChannel", &m_bBlinkStrenghtChannel);
+	l_oProperties.load();
+
 	if(!m_oConfiguration.configure(m_oHeader)) // the basic configure will use the basic header
 	{
 		return false;
 	}
+
+	l_oProperties.save();
 
 	return true;
 }

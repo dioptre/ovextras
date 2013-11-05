@@ -4,6 +4,8 @@
 
 #include "ovasCConfigurationMitsarEEG202A.h"
 
+#include "../ovasCSettingsHelper.h"
+
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ovITimeArithmetics.h>
 
@@ -390,12 +392,21 @@ boolean CDriverMitsarEEG202A::configure(void)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverMitsarEEG202A::configure\n";
 	
-	CConfigurationMitsarEEG202A m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Mitsar-EEG202.ui", m_ui32RefIndex, m_bEventAndBioChannelsState);
+	CConfigurationMitsarEEG202A m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Mitsar-EEG202.ui", 
+		m_ui32RefIndex, m_bEventAndBioChannelsState);
 	
+	SettingsHelper l_oProperties("AcquisitionServer_Driver_MitsarEEG202A", m_rDriverContext.getConfigurationManager());
+	// l_oProperties.add("Header", &m_oHeader);
+	l_oProperties.add("RefIndex", &m_ui32RefIndex);
+	l_oProperties.add("EventAndBioChannelsState", &m_bEventAndBioChannelsState);
+	l_oProperties.load();
+
 	if(!m_oConfiguration.configure(m_oHeader))
 	{
 		return false;
 	}
+
+	l_oProperties.save();
 
 	return true;
 }

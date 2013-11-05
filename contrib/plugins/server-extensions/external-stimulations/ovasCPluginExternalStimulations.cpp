@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include <openvibe/ovITimeArithmetics.h>
+#include "../ovasCSettingsHelper.h"
 
 #define boolean OpenViBE::boolean
 
@@ -17,17 +18,25 @@ using namespace OpenViBEAcquisitionServerPlugins;
 using namespace std;
 
 CPluginExternalStimulations::CPluginExternalStimulations(const IKernelContext& rKernelContext) :
-	IAcquisitionServerPlugin(rKernelContext),
-	m_bIsExternalStimulationsEnabled(false)
+	IAcquisitionServerPlugin(rKernelContext, CString("AcquisitionServer_Plugin_SoftwareTagging")),
+	m_bIsExternalStimulationsEnabled(false),
+	m_sExternalStimulationsQueueName("openvibeExternalStimulations")
 {
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Loading plugin: Software Tagging\n";
 
+#ifdef OV_BOOST_SETTINGS
 	m_oProperties.name = "Software Tagging";
 
     IConfigurationManager& l_pConfigurationManager = m_rKernelContext.getConfigurationManager();
 
+	// These are loaded first here from the openvibe legacy values, and later re-loaded from the configuration file with new names?
     addSetting<boolean>("Enable External Stimulations", l_pConfigurationManager.expandAsBoolean("${AcquisitionServer_ExternalStimulations}", false));
     addSetting<OpenViBE::CString>("External Stimulation Queue Name", l_pConfigurationManager.expand("${AcquisitionServer_ExternalStimulationsQueueName}"));
+#endif
+
+	m_oSettingsHelper.add("EnableExternalStimulations", &m_bIsExternalStimulationsEnabled);
+	m_oSettingsHelper.add("ExternalStimulationQueueName", &m_sExternalStimulationsQueueName);
+	m_oSettingsHelper.load();
 
 }
 
@@ -37,13 +46,18 @@ CPluginExternalStimulations::~CPluginExternalStimulations()
 
 // Hooks
 
+
 void CPluginExternalStimulations::startHook()
 {
+#ifdef OV_BOOST_SETTINGS
 	m_bIsExternalStimulationsEnabled = getSetting<boolean>("Enable External Stimulations");
+#endif
 
 	if (m_bIsExternalStimulationsEnabled)
 	{
+#ifdef OV_BOOST_SETTINGS
 		m_sExternalStimulationsQueueName = getSetting<OpenViBE::CString>("External Stimulation Queue Name");
+#endif
 		ftime(&m_CTStartTime);
 		m_bIsESThreadRunning = true;
 		m_ESthreadPtr.reset(new boost::thread( boost::bind(&CPluginExternalStimulations::readExternalStimulations , this )));

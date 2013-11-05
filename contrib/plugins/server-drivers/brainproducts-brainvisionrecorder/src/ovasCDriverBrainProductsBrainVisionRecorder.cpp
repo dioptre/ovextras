@@ -1,5 +1,6 @@
 #include "ovasCDriverBrainProductsBrainVisionRecorder.h"
 #include "../ovasCConfigurationNetworkBuilder.h"
+#include "../ovasCSettingsHelper.h"
 
 #include <system/Time.h>
 
@@ -377,10 +378,18 @@ boolean CDriverBrainProductsBrainVisionRecorder::configure(void)
 	l_oConfiguration.setHostName(m_sServerHostName);
 	l_oConfiguration.setHostPort(m_ui32ServerHostPort);
 
+	SettingsHelper l_oProperties("AcquisitionServer_Driver_BrainVisionRecorder", m_rDriverContext.getConfigurationManager());
+	l_oProperties.add("ServerHostName", &m_sServerHostName);
+	l_oProperties.add("ServerHostPont", &m_ui32ServerHostPort);
+	l_oProperties.load();
+
 	if(l_oConfiguration.configure(m_oHeader))
 	{
 		m_sServerHostName=l_oConfiguration.getHostName();
 		m_ui32ServerHostPort=l_oConfiguration.getHostPort();
+
+		l_oProperties.save();
+
 		return true;
 	}
 

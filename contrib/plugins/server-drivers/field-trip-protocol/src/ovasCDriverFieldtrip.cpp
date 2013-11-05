@@ -4,6 +4,8 @@
 
 #include "ovasCDriverFieldtrip.h"
 #include "ovasCConfigurationFieldtrip.h"
+#include "../ovasCSettingsHelper.h"
+
 #include <toolkit/ovtk_all.h>
 
 #include <pthread.h>
@@ -242,14 +244,26 @@ OpenViBE::boolean CDriverFieldtrip::configure(void)
 	l_oConfiguration.setHostName(m_sHostName);
 	l_oConfiguration.setSRCorrection(m_bCorrectNonIntegerSR);
 
+	SettingsHelper l_oProperties("AcquisitionServer_Driver_FieldTrip", m_rDriverContext.getConfigurationManager());
+	// l_oProperties.add("Header", &m_oHeader);
+	l_oProperties.add("MinSamples", &m_ui32MinSamples);
+	l_oProperties.add("PortNumber", &m_ui32PortNumber);
+	l_oProperties.add("HostName", &m_sHostName);
+	l_oProperties.add("CorrectNonIntegerSR", &m_bCorrectNonIntegerSR);
+	l_oProperties.load();
+
 	if (l_oConfiguration.configure(m_oHeader))
 	{
 		m_ui32MinSamples = l_oConfiguration.getMinSamples();
 		m_ui32PortNumber = l_oConfiguration.getHostPort();
 		m_sHostName = l_oConfiguration.getHostName();
 		m_bCorrectNonIntegerSR = l_oConfiguration.getSRCorrection();
+
+		l_oProperties.save();
+
 		return true;
 	}
+
 	return false;
 }
 
