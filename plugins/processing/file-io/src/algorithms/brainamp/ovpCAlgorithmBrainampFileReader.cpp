@@ -217,7 +217,8 @@ boolean CAlgorithmBrainampFileReader::process(void)
 									{
 										m_ui32BinaryFormat=BinaryFormat_UnsignedInteger16;
 									}
-									else if(l_sOptionValue=="FLOAT_32")
+									else if(l_sOptionValue=="FLOAT_32" ||
+											l_sOptionValue=="IEEE_FLOAT_32")
 									{
 										m_ui32BinaryFormat=BinaryFormat_Float32;
 									}
@@ -430,16 +431,15 @@ boolean CAlgorithmBrainampFileReader::process(void)
 
 	if(this->isInputTriggerActive(OVP_Algorithm_BrainampFileReader_InputTriggerId_Next))
 	{
-		if(!m_pBuffer)
-		{
-			m_pBuffer=new uint8[op_pSignalMatrix->getBufferElementCount()*sizeof(int16)];
-		}
-
-		uint8* l_pFileBuffer=m_pBuffer;
 		float64* l_pSignalMatrixBuffer=op_pSignalMatrix->getBuffer();
 
 #define _do_it_with_type_(T) \
 		{ \
+			if(!m_pBuffer) \
+			{ \
+				m_pBuffer=new uint8[op_pSignalMatrix->getBufferElementCount()*sizeof(T)]; \
+			} \
+			uint8* l_pFileBuffer=m_pBuffer; \
 			T l_tValue; \
 			m_oDataFile.read((char*)l_pFileBuffer, op_pSignalMatrix->getBufferElementCount()*sizeof(T)); \
 			boolean (*l_fpFileToHost)(const uint8*, T*); \
