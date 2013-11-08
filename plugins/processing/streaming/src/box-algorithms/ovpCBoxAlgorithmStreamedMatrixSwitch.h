@@ -124,7 +124,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Redirect its input on a particular output"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This box act as a switch between N possible outputs for its Streamed Matrix input. N Stimulation settings trigger the switch."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Streaming"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-sort-ascending"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_StreamedMatrixSwitch; }
@@ -149,6 +149,7 @@ namespace OpenViBEPlugins
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
 				
+				rBoxAlgorithmPrototype.addSetting("Default to output 1", OV_TypeId_Boolean, "false");
 				rBoxAlgorithmPrototype.addSetting("Switch stim for output 1",OV_TypeId_Stimulation,"OVTK_StimulationId_Label_00");
 				rBoxAlgorithmPrototype.addSetting("Switch stim for output 2",OV_TypeId_Stimulation,"OVTK_StimulationId_Label_01");
 
