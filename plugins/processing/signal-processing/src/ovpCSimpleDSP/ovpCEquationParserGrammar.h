@@ -318,6 +318,7 @@ struct CEquationGrammar : public grammar<CEquationGrammar>
 				(root_node_d[as_lower_d[binaryFunction_p]] >> no_node_d[ch_p('(')] >> infix_node_d[(ifthen >> ',' >> ifthen)] >> no_node_d[ch_p(')')]);
 
 			factor = (function | constant | variable | real)
+				| inner_node_d['(' >> expression >> ')']
 				| inner_node_d['(' >> ifthen >> ')']
 				| (root_node_d[ch_p('-')] >> factor)
 				| (root_node_d[ch_p('+')] >> factor);
