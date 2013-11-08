@@ -28,11 +28,13 @@ ENDIF(UNIX)
 
 # Figure out the paths to libs and includes
 IF(Matlab_EXECUTABLE)
-	
+	# MESSAGE(STATUS "Have Matlab_EXECUTABLE ${Matlab_EXECUTABLE}")
 	# Try relative to the executable path
 	GET_FILENAME_COMPONENT(Matlab_ROOT ${Matlab_EXECUTABLE} PATH)
 	IF(Matlab_ROOT)
-		SET(Matlab_ROOT, ${Matlab_ROOT}/../)
+		# MESSAGE(STATUS "Have Matlab_ROOT ${Matlab_ROOT}")
+		SET(Matlab_ROOT ${Matlab_ROOT}/../)
+		# MESSAGE(STATUS " -> ${Matlab_ROOT}")	
 		FIND_PATH(Matlab_INCLUDE "mex.h" PATHS ${Matlab_ROOT}/extern/include ${Matlab_ROOT}/extern/include/extern)
 	ENDIF(Matlab_ROOT)
 
@@ -44,6 +46,7 @@ IF(Matlab_EXECUTABLE)
 	ENDIF((NOT Matlab_INCLUDE) AND UNIX)
 
 	IF(Matlab_INCLUDE)
+		# MESSAGE(STATUS "Have Matlab_INCLUDE ${Matlab_INCLUDE}")
 		IF(UNIX)
 			SET(Matlab_LIBRARIES mex mx eng)
 			IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
