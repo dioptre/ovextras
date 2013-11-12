@@ -193,6 +193,7 @@ namespace OpenViBE
 			 */
 			virtual OpenViBE::CIdentifier getNextLinkIdentifier(
 				const OpenViBE::CIdentifier& rPreviousIdentifier) const=0;
+
 			/**
 			 * \brief Gets next link identifier from fixed box
 			 * \param rPreviousIdentifier [in] : The identifier
@@ -208,6 +209,7 @@ namespace OpenViBE
 			virtual OpenViBE::CIdentifier getNextLinkIdentifierFromBox(
 				const OpenViBE::CIdentifier& rPreviousIdentifier,
 				const OpenViBE::CIdentifier& rBoxIdentifier) const=0;
+
 			/**
 			 * \brief Gets next link identifier from fixed box output
 			 * \param rPreviousIdentifier [in] : The identifier
@@ -226,6 +228,7 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier& rPreviousIdentifier,
 				const OpenViBE::CIdentifier& rBoxIdentifier,
 				const OpenViBE::uint32 ui32OutputIndex) const=0;
+
 			/**
 			 * \brief Gets next link identifier from fixed box
 			 * \param rPreviousIdentifier [in] : The identifier
@@ -241,6 +244,7 @@ namespace OpenViBE
 			virtual OpenViBE::CIdentifier getNextLinkIdentifierToBox(
 				const OpenViBE::CIdentifier& rPreviousIdentifier,
 				const OpenViBE::CIdentifier& rBoxIdentifier) const=0;
+
 			/**
 			 * \brief Gets next link identifier from fixed box input
 			 * \param rPreviousIdentifier [in] : The identifier
@@ -259,6 +263,7 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier& rPreviousIdentifier,
 				const OpenViBE::CIdentifier& rBoxIdentifier,
 				const OpenViBE::uint32 ui32InputInex) const=0;
+
 			/**
 			 * \brief Tests whether a given identifier is a link or not
 			 * \param rIdentifier [in] : the identifier to test
@@ -268,6 +273,7 @@ namespace OpenViBE
 			 */
 			virtual OpenViBE::boolean isLink(
 				const OpenViBE::CIdentifier& rIdentifier) const=0;
+
 			/**
 			 * \brief Gets the details for a specific link
 			 * \param rLinkIdentifier [in] : The identifier
@@ -280,6 +286,7 @@ namespace OpenViBE
 			/// \copydoc getLinkDetails(const OpenViBE::CIdentifier&)const
 			virtual OpenViBE::Kernel::ILink* getLinkDetails(
 				const OpenViBE::CIdentifier& rLinkIdentifier)=0;
+
 			/**
 			 * \brief Creates a connection between two boxes
 			 * \param rSourceBoxIdentifier [in] : The source
@@ -302,6 +309,7 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier& rTargetBoxIdentifier,
 				const OpenViBE::uint32 ui32TargetBoxInputIndex,
 				OpenViBE::CIdentifier& rLinkIdentifier)=0;
+
 			/**
 			 * \brief Deletes a connection between two boxes
 			 * \param rSourceBoxIdentifier [in] : The source
@@ -320,6 +328,7 @@ namespace OpenViBE
 				const OpenViBE::uint32 ui32SourceBoxOutputIndex,
 				const OpenViBE::CIdentifier& rTargetBoxIdentifier,
 				const OpenViBE::uint32 ui32TargetBoxInputIndex)=0;
+
 			/**
 			 * \brief Deletes a connection between two boxes
 			 * \param rLinkIdentifier [out] : The identifier
@@ -329,6 +338,164 @@ namespace OpenViBE
 			 */
 			virtual OpenViBE::boolean disconnect(
 				const OpenViBE::CIdentifier& rLinkIdentifier)=0;
+
+
+			//@}
+			/** \name Message connection management */
+			//@{
+			/**
+			 * \brief Gets next  message link identifier
+			 * \param rPreviousIdentifier [in] : The identifier
+			 *        for the preceeding link
+			 * \return The identifier of the next link in case of success.
+			 * \return \c OV_UndefinedIdentifier on error.
+			 * \note Giving \c OV_UndefinedIdentifier as \c rPreviousIdentifier
+			 *       will cause this function to return the first link
+			 *       identifier.
+			 */
+			virtual OpenViBE::CIdentifier getNextMessageLinkIdentifier(
+				const OpenViBE::CIdentifier& rPreviousIdentifier) const=0;
+
+			/**
+			 * \brief Gets next message link identifier from fixed box
+			 * \param rPreviousIdentifier [in] : The identifier
+			 *        for the preceeding message link
+			 * \param rBoxIdentifier [in] : The box identifier
+			 *        which the message link should end to
+			 * \return The identifier of the next message link in case of success.
+			 * \return \c OV_UndefinedIdentifier on error.
+			 * \note Giving \c OV_UndefinedIdentifier as \c rPreviousIdentifier
+			 *       will cause this function to return the first message link
+			 *       identifier.
+			 */
+			virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierFromBox(
+				const OpenViBE::CIdentifier& rPreviousIdentifier,
+				const OpenViBE::CIdentifier& rBoxIdentifier) const=0;
+			/**
+			 * \brief Gets next message  link identifier from fixed box output
+			 * \param rPreviousIdentifier [in] : The identifier
+			 *        for the preceeding message  link
+			 * \param rBoxIdentifier [in] : The box identifier
+			 *        which the message  link should end to
+			 * \param ui32OutputIndex [in] : The input index
+			 *        which the message  link should end to
+			 * \return The identifier of the next message  link in case of success.
+			 * \return \c OV_UndefinedIdentifier on error.
+			 * \note Giving \c OV_UndefinedIdentifier as \c rPreviousIdentifier
+			 *       will cause this function to return the first message  link
+			 *       identifier.
+			 */
+			virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierFromBoxOutput(
+				const OpenViBE::CIdentifier& rPreviousIdentifier,
+				const OpenViBE::CIdentifier& rBoxIdentifier,
+				const OpenViBE::uint32 ui32OutputIndex) const=0;
+
+			/**
+			 * \brief Gets next message link identifier from fixed box
+			 * \param rPreviousIdentifier [in] : The identifier
+			 *        for the preceeding message link
+			 * \param rBoxIdentifier [in] : The box identifier
+			 *        which the message link should start from
+			 * \return The identifier of the next message link in case of success.
+			 * \return \c OV_UndefinedIdentifier on error.
+			 * \note Giving \c OV_UndefinedIdentifier as \c rPreviousIdentifier
+			 *       will cause this function to return the first message link
+			 *       identifier.
+			 */
+			virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierToBox(
+				const OpenViBE::CIdentifier& rPreviousIdentifier,
+				const OpenViBE::CIdentifier& rBoxIdentifier) const=0;
+			/**
+			 * \brief Gets next message link identifier from fixed box input
+			 * \param rPreviousIdentifier [in] : The identifier
+			 *        for the preceeding message link
+			 * \param rBoxIdentifier [in] : The box identifier
+			 *        which the message link should start from
+			 * \param ui32InputInex [in] : The input index
+			 *        which the message link should start from
+			 * \return The identifier of the next message link in case of success.
+			 * \return \c OV_UndefinedIdentifier on error.
+			 * \note Giving \c OV_UndefinedIdentifier as \c rPreviousIdentifier
+			 *       will cause this function to return the first message link
+			 *       identifier.
+			 */
+			virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierToBoxInput(
+				const OpenViBE::CIdentifier& rPreviousIdentifier,
+				const OpenViBE::CIdentifier& rBoxIdentifier,
+				const OpenViBE::uint32 ui32InputInex) const=0;
+
+			/**
+			 * \brief Tests whether a given identifier is a message link or not
+			 * \param rIdentifier [in] : the identifier to test
+			 * \return \e true if the identified object is a message link
+			 * \return \e false if the identified object is not a message link
+			 * \note Requesting a bad identifier returns \e false
+			 */
+			virtual OpenViBE::boolean isMessageLink(
+				const OpenViBE::CIdentifier& rIdentifier) const=0;
+
+			/**
+			 * \brief Gets the details for a specific message link
+			 * \param rLinkIdentifier [in] : The identifier
+			 *        of the message link which details should be
+			 *        sent.
+			 * \return The message link details
+			 */
+			virtual OpenViBE::Kernel::ILink* getMessageLinkDetails(
+				const OpenViBE::CIdentifier& rLinkIdentifier)=0;
+			/// \copydoc getMessageLinkDetails(const OpenViBE::CIdentifier&)const
+			virtual const OpenViBE::Kernel::ILink* getMessageLinkDetails(
+				const OpenViBE::CIdentifier& rLinkIdentifier) const=0;
+
+			/**
+			 * \brief Creates a message connection between two boxes
+			 * \param rSourceBoxIdentifier [in] : The source
+			 *        box identifier
+			 * \param ui32SourceBoxOutputIndex [in] : The output
+			 *        index for the given source box
+			 * \param rTargetBoxIdentifier [in] : The target
+			 *        box identifier
+			 * \param ui32TargetBoxInputIndex [in] : The input
+			 *        index for the given target box
+			 * \param rLinkIdentifier [out] : The created link
+			 *        identifier.
+			 * \return \e true in case of success.
+			 * \return \e false in case of error. In such case,
+			 *         rLinkIdentifier remains unchanged.
+			 */
+			virtual OpenViBE::boolean connectMessage(
+				const OpenViBE::CIdentifier& rSourceBoxIdentifier,
+				const OpenViBE::uint32 ui32SourceBoxOutputIndex,
+				const OpenViBE::CIdentifier& rTargetBoxIdentifier,
+				const OpenViBE::uint32 ui32TargetBoxInputIndex,
+				OpenViBE::CIdentifier& rLinkIdentifier)=0;
+			/**
+			 * \brief Deletes a message connection between two boxes
+			 * \param rSourceBoxIdentifier [in] : The source
+			 *        box identifier
+			 * \param ui32SourceBoxOutputIndex [in] : The message output
+			 *        index for the given source box
+			 * \param rTargetBoxIdentifier [in] : The target
+			 *        box identifier
+			 * \param ui32TargetBoxInputIndex [in] : The message input
+			 *        index for the given target box
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 */
+			virtual OpenViBE::boolean disconnectMessage(
+							const OpenViBE::CIdentifier& rSourceBoxIdentifier,
+							const OpenViBE::uint32 ui32SourceBoxOutputIndex,
+							const OpenViBE::CIdentifier& rTargetBoxIdentifier,
+							const OpenViBE::uint32 ui32TargetBoxInputIndex)=0;
+			/**
+			 * \brief Deletes a message connection between two boxes
+			 * \param rLinkIdentifier [out] : The identifier
+			 *        for the message link to be deleted
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 */
+			virtual OpenViBE::boolean disconnectMessage(
+							const OpenViBE::CIdentifier& rLinkIdentifier)=0;
 
 			//@}
 			/** \name Comment management */

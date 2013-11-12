@@ -192,7 +192,7 @@
 		</Box>
 		<Box>
 			<Identifier>(0x33cc7b54, 0x6d6b5526)</Identifier>
-			<Name>Spectral analysis - GPL</Name>
+			<Name>Spectral analysis</Name>
 			<AlgorithmClassIdentifier>(0x84218ff8, 0xa87e7995)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -466,7 +466,7 @@
 		</Box>
 		<Box>
 			<Identifier>(0x539ee68b, 0x60654464)</Identifier>
-			<Name>Temporal filter - GPL</Name>
+			<Name>Temporal filter</Name>
 			<AlgorithmClassIdentifier>(0xb4f9d042, 0x9d79f2e5)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -555,7 +555,7 @@
 		</Box>
 		<Box>
 			<Identifier>(0x5a0a993a, 0x53e06555)</Identifier>
-			<Name>Temporal filter - GPL</Name>
+			<Name>Temporal filter</Name>
 			<AlgorithmClassIdentifier>(0xb4f9d042, 0x9d79f2e5)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -1081,7 +1081,9 @@
 	<Comments>
 		<Comment>
 			<Identifier>(0x1c66e0c4, 0x284e18b5)</Identifier>
-			<Text>You can browse each box' documentation by selecting the box and pressing &lt;b&gt;F1&lt;/b&gt;</Text>
+			<Text>You can browse each box' documentation by selecting the box and pressing &lt;b&gt;F1&lt;/b&gt;
+			
+			This scenario set is documented in 'http://openvibe.inria.fr/using-the-ssvep-mind-shooter-scenarios/'</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
@@ -1198,7 +1200,7 @@ of the average of all channels.
 	<Attributes>
 		<Attribute>
 			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>
-			<Value>Jozef Legény</Value>
+			<Value>Jozef Legeny</Value>
 		</Attribute>
 		<Attribute>
 			<Identifier>(0x8c1fc55b, 0x7b433dc2)</Identifier>
@@ -1210,7 +1212,7 @@ of the average of all channels.
 		</Attribute>
 		<Attribute>
 			<Identifier>(0xf36a1567, 0xd13c53da)</Identifier>
-			<Value></Value>
+			<Value>http://openvibe.inria.fr/using-the-ssvep-mind-shooter-scenarios/</Value>
 		</Attribute>
 		<Attribute>
 			<Identifier>(0xf6b2e3fa, 0x7bd43926)</Identifier>

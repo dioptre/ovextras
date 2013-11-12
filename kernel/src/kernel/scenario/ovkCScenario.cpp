@@ -5,6 +5,7 @@
 #include "ovkCBox.h"
 #include "ovkCComment.h"
 #include "ovkCLink.h"
+#include "ovkCMessageLink.h"
 #include "ovkCProcessingUnit.h"
 
 #include "../ovkCObjectVisitorContext.h"
@@ -64,6 +65,38 @@ namespace
 		boolean operator()(map<CIdentifier, CBox*>::const_iterator it) const { return it->second->getProcessingUnitIdentifier()==m_rId; }
 		const CIdentifier& m_rId;
 	};
+//{
+	//factorize??
+	struct TTestMessageEqSourceBox
+	{
+		TTestMessageEqSourceBox(const CIdentifier& rId) : m_rId(rId) { }
+		boolean operator()(map<CIdentifier, CMessageLink*>::const_iterator it) const { return it->second->getSourceBoxIdentifier()==m_rId; }
+		const CIdentifier& m_rId;
+	};
+
+	struct TTestMessageEqSourceBoxOutput
+	{
+		TTestMessageEqSourceBoxOutput(const CIdentifier& rId, uint32 ui32Id) : m_rId(rId), m_ui32Id(ui32Id) { }
+		boolean operator()(map<CIdentifier, CMessageLink*>::const_iterator it) const { return it->second->getSourceBoxIdentifier()==m_rId && it->second->getSourceBoxOutputIndex()==m_ui32Id; }
+		const CIdentifier& m_rId;
+		uint32 m_ui32Id;
+	};
+
+	struct TTestMessageEqTargetBox
+	{
+		TTestMessageEqTargetBox(const CIdentifier& rId) : m_rId(rId) { }
+		boolean operator()(map<CIdentifier, CMessageLink*>::const_iterator it) const { return it->second->getTargetBoxIdentifier()==m_rId; }
+		const CIdentifier& m_rId;
+	};
+
+	struct TTestMessageEqTargetBoxInput
+	{
+		TTestMessageEqTargetBoxInput(const CIdentifier& rId, uint32 ui32Id) : m_rId(rId), m_ui32Id(ui32Id) { }
+		boolean operator()(map<CIdentifier, CMessageLink*>::const_iterator it) const { return it->second->getTargetBoxIdentifier()==m_rId && it->second->getTargetBoxInputIndex()==m_ui32Id; }
+		const CIdentifier& m_rId;
+		uint32 m_ui32Id;
+	};
+//}
 
 	template <class T, class TTest>
 	CIdentifier getNextTIdentifier(
@@ -144,6 +177,14 @@ boolean CScenario::clear(void)
 		delete itLink->second;
 	}
 	m_vLink.clear();
+
+	// Clears message links
+	map<CIdentifier, CMessageLink*>::iterator itMessageLink;
+	for(itMessageLink=m_vMessageLink.begin(); itMessageLink!=m_vMessageLink.end(); itMessageLink++)
+	{
+		delete itMessageLink->second;
+	}
+	m_vMessageLink.clear();
 
 	// Clears processing units
 	map<CIdentifier, CProcessingUnit*>::iterator itProcessingUnit;
@@ -390,6 +431,25 @@ boolean CScenario::removeBox(
 		}
 	}
 
+	// same thing with message links
+	map<CIdentifier, CMessageLink*>::iterator itMessageLink=m_vMessageLink.begin();
+	while(itMessageLink!=m_vMessageLink.end())
+	{
+		map<CIdentifier, CMessageLink*>::iterator itMessageLinkCurrent=itMessageLink;
+		itMessageLink++;
+
+		if(itMessageLinkCurrent->second->getSourceBoxIdentifier()==rBoxIdentifier || itMessageLinkCurrent->second->getTargetBoxIdentifier()==rBoxIdentifier)
+		{
+			this->getLogManager() << LogLevel_Trace << "Found a Message link to this box - it will be deleted !\n";
+
+			// Deletes this link
+			delete itMessageLinkCurrent->second;
+
+			// Removes link from the link list
+			m_vMessageLink.erase(itMessageLinkCurrent);
+		}
+	}
+
 	// Deletes the box itself
 	delete itBox->second;
 
@@ -518,6 +578,12 @@ CIdentifier CScenario::getNextLinkIdentifier(
 	return getNextTIdentifier<CLink, TTestTrue<CLink> >(m_vLink, rPreviousIdentifier, TTestTrue<CLink>());
 }
 
+CIdentifier CScenario::getNextMessageLinkIdentifier(
+	const CIdentifier& rPreviousIdentifier) const
+{
+	return getNextTIdentifier<CMessageLink, TTestTrue<CMessageLink> >(m_vMessageLink, rPreviousIdentifier, TTestTrue<CMessageLink>());
+}
+
 CIdentifier CScenario::getNextLinkIdentifierFromBox(
 	const CIdentifier& rPreviousIdentifier,
 	const CIdentifier& rBoxIdentifier) const
@@ -556,6 +622,46 @@ boolean CScenario::isLink(
 	itLink=m_vLink.find(rIdentifier);
 	return itLink!=m_vLink.end();
 }
+//*
+CIdentifier CScenario::getNextMessageLinkIdentifierFromBox(
+	const CIdentifier& rPreviousIdentifier,
+	const CIdentifier& rBoxIdentifier) const
+{
+	return getNextTIdentifier<CMessageLink, TTestMessageEqSourceBox>(m_vMessageLink, rPreviousIdentifier, TTestMessageEqSourceBox(rBoxIdentifier));
+}
+
+CIdentifier CScenario::getNextMessageLinkIdentifierFromBoxOutput(
+	const CIdentifier& rPreviousIdentifier,
+	const CIdentifier& rBoxIdentifier,
+	const uint32 ui32OutputIndex) const
+{
+	return getNextTIdentifier<CMessageLink, TTestMessageEqSourceBoxOutput>(m_vMessageLink, rPreviousIdentifier, TTestMessageEqSourceBoxOutput(rBoxIdentifier, ui32OutputIndex));
+}
+
+CIdentifier CScenario::getNextMessageLinkIdentifierToBox(
+	const CIdentifier& rPreviousIdentifier,
+	const CIdentifier& rBoxIdentifier) const
+{
+	return getNextTIdentifier<CMessageLink, TTestMessageEqTargetBox>(m_vMessageLink, rPreviousIdentifier, TTestMessageEqTargetBox(rBoxIdentifier));
+}
+
+CIdentifier CScenario::getNextMessageLinkIdentifierToBoxInput(
+	const CIdentifier& rPreviousIdentifier,
+	const CIdentifier& rBoxIdentifier,
+	const uint32 ui32InputInex) const
+{
+
+	return getNextTIdentifier<CMessageLink, TTestMessageEqTargetBoxInput>(m_vMessageLink, rPreviousIdentifier, TTestMessageEqTargetBoxInput(rBoxIdentifier, ui32InputInex));
+}
+
+boolean CScenario::isMessageLink(
+	const CIdentifier& rIdentifier) const
+{
+	map<CIdentifier, CMessageLink*>::const_iterator itMessageLink;
+	itMessageLink=m_vMessageLink.find(rIdentifier);
+	return itMessageLink!=m_vMessageLink.end();
+}
+//*/
 
 const ILink* CScenario::getLinkDetails(
 	const CIdentifier& rLinkIdentifier) const
@@ -582,6 +688,36 @@ ILink* CScenario::getLinkDetails(
 	if(itLink==m_vLink.end())
 	{
 		this->getLogManager() << LogLevel_Warning << "The link does not exist\n";
+		return NULL;
+	}
+	return itLink->second;
+}
+
+const ILink* CScenario::getMessageLinkDetails(
+	const CIdentifier& rLinkIdentifier) const
+{
+	this->getLogManager() << LogLevel_Debug << "Retrieving message link details from scenario\n";
+
+	map<CIdentifier, CMessageLink*>::const_iterator itLink;
+	itLink=m_vMessageLink.find(rLinkIdentifier);
+	if(itLink==m_vMessageLink.end())
+	{
+		this->getLogManager() << LogLevel_Warning << "The message link does not exist\n";
+		return NULL;
+	}
+	return itLink->second;
+}
+
+ILink* CScenario::getMessageLinkDetails(
+	const CIdentifier& rLinkIdentifier)
+{
+	this->getLogManager() << LogLevel_Debug << "Retrieving message link details from scenario\n";
+
+	map<CIdentifier, CMessageLink*>::const_iterator itLink;
+	itLink=m_vMessageLink.find(rLinkIdentifier);
+	if(itLink==m_vMessageLink.end())
+	{
+		this->getLogManager() << LogLevel_Warning << "The message link does not exist\n";
 		return NULL;
 	}
 	return itLink->second;
@@ -648,6 +784,84 @@ boolean CScenario::connect(
 	return true;
 }
 
+
+boolean CScenario::connectMessage(
+	const CIdentifier& rSourceBoxIdentifier,
+	const uint32 ui32SourceBoxOutputIndex,
+	const CIdentifier& rTargetBoxIdentifier,
+	const uint32 ui32TargetBoxInputIndex,
+	CIdentifier& rLinkIdentifier)
+{
+	this->getLogManager() << LogLevel_Debug << "(Message) Connecting boxes\n";
+
+	map<CIdentifier, CBox*>::const_iterator itBox1;
+	map<CIdentifier, CBox*>::const_iterator itBox2;
+	map<CIdentifier, CBox*>::const_iterator mit;
+	itBox1=m_vBox.find(rSourceBoxIdentifier);
+	itBox2=m_vBox.find(rTargetBoxIdentifier);
+	if(itBox1==m_vBox.end() || itBox2==m_vBox.end())
+	{
+		for(mit=m_vBox.begin(); mit!=m_vBox.end(); mit++)
+		{
+			this->getLogManager() << LogLevel_Warning << mit->first << mit->second->getName() << "\n";
+		}
+		this->getLogManager() << LogLevel_Warning << "(Message) At least one of the boxes does not exist\n";
+		/*
+		if (itBox1==m_vBox.end())
+		{
+			this->getLogManager() << LogLevel_Warning << "Source missing\n";
+		}
+		if(itBox2==m_vBox.end())
+		{
+			this->getLogManager() << LogLevel_Warning << "Target missing" << rTargetBoxIdentifier << "\n";
+		}
+		//*/
+		return false;
+	}
+	CBox* l_pSourceBox=itBox1->second;
+	CBox* l_pTargetBox=itBox2->second;
+	if(ui32SourceBoxOutputIndex >= l_pSourceBox->getMessageOutputCount())
+	{
+		this->getLogManager() << LogLevel_Warning << "Wrong message output index\n";
+		return false;
+	}
+	if(ui32TargetBoxInputIndex >= l_pTargetBox->getMessageInputCount())
+	{
+		this->getLogManager() << LogLevel_Warning << "Wrong message input index\n";
+		return false;
+	}
+
+	// Looks for any connected link to this box input and removes it
+	map<CIdentifier, CMessageLink*>::iterator itLink=m_vMessageLink.begin();
+	while(itLink!=m_vMessageLink.end())
+	{
+		map<CIdentifier, CMessageLink*>::iterator itLinkCurrent=itLink;
+		itLink++;
+
+		CMessageLink* l_pLink=itLinkCurrent->second;
+		if(l_pLink)
+		{
+			if(l_pLink->getTargetBoxIdentifier()==rTargetBoxIdentifier && l_pLink->getTargetBoxInputIndex()==ui32TargetBoxInputIndex)
+			{
+				delete l_pLink;
+				m_vMessageLink.erase(itLinkCurrent);
+			}
+		}
+	}
+
+	rLinkIdentifier=getUnusedIdentifier();
+
+	CMessageLink* l_pLink=new CMessageLink(this->getKernelContext(), *this);
+	l_pLink->setIdentifier(rLinkIdentifier);
+	l_pLink->setSource(rSourceBoxIdentifier, ui32SourceBoxOutputIndex);
+	l_pLink->setTarget(rTargetBoxIdentifier, ui32TargetBoxInputIndex);
+
+	m_vMessageLink[l_pLink->getIdentifier()]=l_pLink;
+
+	return true;
+}
+
+
 boolean CScenario::disconnect(
 	const CIdentifier& rSourceBoxIdentifier,
 	const uint32 ui32SourceBoxOutputIndex,
@@ -707,6 +921,71 @@ boolean CScenario::disconnect(
 
 	return true;
 }
+
+///disconnectmessage
+
+boolean CScenario::disconnectMessage(
+	const CIdentifier& rSourceBoxIdentifier,
+	const uint32 ui32SourceBoxOutputIndex,
+	const CIdentifier& rTargetBoxIdentifier,
+	const uint32 ui32TargetBoxInputIndex)
+{
+	// Looks for any link with the same signature
+	map<CIdentifier, CMessageLink*>::iterator itLink;
+	for(itLink=m_vMessageLink.begin(); itLink!=m_vMessageLink.end(); itLink++)
+	{
+		CMessageLink* l_pLink=itLink->second;
+		if(l_pLink)
+		{
+			if(l_pLink->getTargetBoxIdentifier()==rTargetBoxIdentifier && l_pLink->getTargetBoxInputIndex()==ui32TargetBoxInputIndex)
+			{
+				if(l_pLink->getSourceBoxIdentifier()==rSourceBoxIdentifier && l_pLink->getSourceBoxOutputIndex()==ui32SourceBoxOutputIndex)
+				{
+					// Found a link, so removes it
+					delete l_pLink;
+					m_vMessageLink.erase(itLink);
+
+					this->getLogManager() << LogLevel_Trace << "Message Link removed\n";
+					return true;
+				}
+			}
+		}
+	}
+
+	this->getLogManager() << LogLevel_Warning << "The Message link does not exist\n";
+	return false;
+}
+
+boolean CScenario::disconnectMessage(
+	const CIdentifier& rLinkIdentifier)
+{
+	this->getLogManager() << LogLevel_Trace << "(Message) Disconnecting boxes\n";
+
+	// Finds the link according to its identifier
+	map<CIdentifier, CMessageLink*>::iterator itLink;
+	itLink=m_vMessageLink.find(rLinkIdentifier);
+	if(itLink==m_vMessageLink.end())
+	{
+		// The link does not exist !
+		this->getLogManager() << LogLevel_Warning << "The Message link does not exist\n";
+		return false;
+	}
+
+	this->getLogManager() << LogLevel_Trace << "Found the Message link !\n";
+
+	// Deletes the link itself
+	delete itLink->second;
+
+	// Removes link from the link list
+	m_vMessageLink.erase(itLink);
+
+	this->getLogManager() << LogLevel_Trace << "Message Link removed\n";
+
+	return true;
+}
+
+//
+
 
 //___________________________________________________________________//
 //                                                                   //
@@ -876,13 +1155,15 @@ CIdentifier CScenario::getUnusedIdentifier(void) const
 	CIdentifier l_oResult;
 	map<CIdentifier, CBox*>::const_iterator i;
 	map<CIdentifier, CLink*>::const_iterator j;
+	map<CIdentifier, CMessageLink*>::const_iterator k;
 	do
 	{
 		l_ui64Identifier++;
 		l_oResult=CIdentifier(l_ui64Identifier);
 		i=m_vBox.find(l_oResult);
 		j=m_vLink.find(l_oResult);
+		k=m_vMessageLink.find(l_oResult);
 	}
-	while(i!=m_vBox.end() || j!= m_vLink.end() || l_oResult==OV_UndefinedIdentifier);
+	while(i!=m_vBox.end() || j!= m_vLink.end() || k!= m_vMessageLink.end() || l_oResult==OV_UndefinedIdentifier);
 	return l_oResult;
 }

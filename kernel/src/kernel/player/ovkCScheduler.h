@@ -38,6 +38,8 @@ namespace OpenViBE
 			virtual OpenViBE::uint64 getFrequency(void) const;
 			virtual OpenViBE::float64 getCPUUsage(void) const;
 
+			bool sendMessage(const IMessageWithData &msg, CIdentifier targetBox, uint32 inputIndex);
+
 			_IsDerivedFromClass_Final_(OpenViBE::Kernel::TKernelObject < OpenViBE::Kernel::IKernelObject >, OVK_ClassId_Kernel_Player_Scheduler);
 
 			CPlayer& getPlayer(void)

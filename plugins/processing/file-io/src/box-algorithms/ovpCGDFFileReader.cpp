@@ -92,6 +92,13 @@ boolean CGDFFileReader::initialize()
 	l_pBoxContext->getSettingValue(1, l_sParam);
 	m_ui32SamplesPerBuffer = static_cast<uint32>(atoi((const char*)l_sParam));
 
+	if(m_ui32SamplesPerBuffer==0) 
+	{
+		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error <<
+			"SamplesPerBuffer is 0, this will not work\n";
+		return false;
+	}
+
 	//Prepares the writers proxies
 	m_pOutputWriterCallbackProxy[GDFReader_ExperimentInfoOutput] = new EBML::TWriterCallbackProxy1<OpenViBEPlugins::FileIO::CGDFFileReader>(*this, &CGDFFileReader::writeExperimentOutput);
 
@@ -178,6 +185,11 @@ boolean CGDFFileReader::uninitialize()
 
 boolean CGDFFileReader::processClock(CMessageClock& rMessageClock)
 {
+	if(m_pSignalDescription.m_ui32SamplingRate==0) {
+		this->getLogManager() << LogLevel_Error << "Sampling rate is 0.\n";
+		return false;
+	}
+
 	uint64 l_ui64SampleTime = ITimeArithmetics::sampleCountToTime(m_pSignalDescription.m_ui32SamplingRate, m_ui32SentSampleCount+m_pSignalDescription.m_ui32SampleCount);
 	if(rMessageClock.getTime() > l_ui64SampleTime)
 	{
@@ -450,6 +462,11 @@ boolean CGDFFileReader::readFileHeader()
 
 		//needs to be computed based on the duration of a data record and the number of samples in one of those data records
 		m_pSignalDescription.m_ui32SamplingRate = static_cast<EBML::uint32>(0.5 + (m_ui32NumberOfSamplesPerRecord/m_f64DurationOfDataRecord));
+
+		if(m_pSignalDescription.m_ui32SamplingRate==0) 
+		{
+			this->getLogManager() << LogLevel_Error << "Sampling rate is 0\n";
+		}
 
 		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Debug <<"Sample count per buffer : " << m_ui32SamplesPerBuffer << "\n";
 		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Debug <<"Sampling rate : " << m_pSignalDescription.m_ui32SamplingRate << "\n";

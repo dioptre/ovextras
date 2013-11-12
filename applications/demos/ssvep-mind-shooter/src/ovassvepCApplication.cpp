@@ -103,8 +103,8 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 
 	l_oOptionList["vsync"] = "1";
 
-	int l_iWidth = l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenWidth}", 800);
-	int l_iHeight = l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenHeight}", 600);
+	int l_iWidth = (int) l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenWidth}", 800);
+	int l_iHeight = (int) l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenHeight}", 600);
 	OpenViBE::boolean l_bFullScreen = l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_FullScreen}", false);
 
 	(*m_poLogManager) << LogLevel_Info << "Fullscreen : " << l_poConfigurationManager->expand("${SSVEP_Ogre_FullScreen}") << "\n";
@@ -157,7 +157,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 
 	m_oFrequencies.push_back(30);
 
-	OpenViBE::uint32 m_ui32PatternsLoaded = 0;
+	OpenViBE::uint32 l_ui32PatternsLoaded = 0;
 
 	// TODO: Load patterns
 
@@ -174,12 +174,12 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 		sprintf(l_sFrequencyString, "%d", ++i);
 
 		l_oFrequencyId = l_poConfigurationManager->createConfigurationToken("SSVEP_FrequencyId", CString(l_sFrequencyString));
-		m_ui32PatternsLoaded++;
+		l_ui32PatternsLoaded++;
 	}
 
 
 	// Generate patterns from frequencies
-	if (m_ui32PatternsLoaded == 0)
+	if (l_ui32PatternsLoaded == 0)
 	{
 		// Load frequencies
 		while (l_poConfigurationManager->lookUpConfigurationTokenIdentifier(l_poConfigurationManager->expand("SSVEP_Frequency_${SSVEP_FrequencyId}")) != OV_UndefinedIdentifier)
@@ -226,6 +226,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 				(*m_poLogManager) << LogLevel_Info << "Frequency number " << i << " pattern : " << l_ui64StimulationPattern << "\n";
 
 				m_oFrequencies.push_back(l_ui64StimulationPattern);
+				l_ui32PatternsLoaded++;
 			}
 			else
 			{
@@ -238,6 +239,13 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 
 			l_oFrequencyId = l_poConfigurationManager->createConfigurationToken("SSVEP_FrequencyId", CString(l_sFrequencyString));
 		}
+	}
+
+	if(!l_ui32PatternsLoaded)
+	{
+		(*m_poLogManager) << LogLevel_Error << "No flashing frequencies loaded. Have you run the SSVEP Impact Shooter configuring scenario?\n";
+		(*m_poLogManager) << LogLevel_Error << "Are you running this app from the correct scenario with the previous stages run properly?\n";
+		return false;
 	}
 
 	return true;

@@ -40,9 +40,13 @@ CImpactShip::CImpactShip(CImpactApplication* poApplication, Ogre::SceneNode* poP
 	m_poProjectilesNode = poParentNode->createChildSceneNode();
 
 	m_poShipNode = l_poSceneManager->getSceneNode("battleship");
-	m_poShipNode->scale(0.6, 0.6, 0.6);
-	m_poShipNode->yaw(Radian(-Math::PI / 2.0));
-	m_poShipNode->translate(-25.0, 0.0, 0.0, Node::TS_LOCAL);
+	m_poShipNode->scale(0.6f, 0.6f, 0.6f);
+	m_poShipNode->yaw(Radian(-Math::PI / 2.0f));
+	m_poShipNode->translate(-25.0f, 0.0f, 0.0f, Node::TS_LOCAL);
+
+	if(!pFrequencies || pFrequencies->size()<4) {
+		std::cout << "Error: Expected the frequencies vector to contain indexes 0...3 but its size is " << (pFrequencies ? pFrequencies->size() : -1) << ". Crash is likely imminent.\n";
+	}
 
 	l_poSceneManager->getSceneNode("v5_ecran_avant2")->setVisible(false);
 //SP	m_poShipCannon = new CSSVEPFlickeringObject( l_poSceneManager->getSceneNode("shipCannon"), (*pFrequencies)[1].first, (*pFrequencies)[1].second);
@@ -243,7 +247,7 @@ void CImpactShip::processFrame( OpenViBE::uint32 ui32CurrentFrame )
 
 					if (SIGN(m_iCurrentDisplacementCount) == FSIGN(l_rShipPosition - l_rEnemyPosition))
 					{
-						l_rSlowdown = 1.0 - l_rDistance * l_rDistance * l_rDistance;
+						l_rSlowdown = 1.0f - l_rDistance * l_rDistance * l_rDistance;
 					}
 
 					if (SIGN(m_iCurrentDisplacementCount) > 0)
@@ -257,7 +261,7 @@ void CImpactShip::processFrame( OpenViBE::uint32 ui32CurrentFrame )
 				}
 			}
 			m_poApplication->logPrefix() << "Ship Moving : direction " << (m_iCurrentDisplacementCount > 0 ? "left" : "right") << ", slowdown = " << l_rSlowdown << "\n";
-			m_poShipNode->translate( (0.5f - l_rSlowdown * 0.3 ) * -SIGN(m_iCurrentDisplacementCount) * IMPACTSHIP_SPEEDFACTOR, 0.0f, 0.0f );
+			m_poShipNode->translate( (0.5f - l_rSlowdown * 0.3f ) * -SIGN(m_iCurrentDisplacementCount) * IMPACTSHIP_SPEEDFACTOR, 0.0f, 0.0f );
 		}
 
 		//		m_poTargetingNode->translate( 0.007f * SIGN(m_iCurrentDisplacementCount), 0.0f, 0.0f );
@@ -346,7 +350,7 @@ void CImpactShip::shoot()
 
 	l_poProjectile->pNode->attachObject(l_poProjectile->pParticleSystem);
 
-	l_poProjectile->rRelX = -m_poShipNode->getPosition().x / 70.0;
+	l_poProjectile->rRelX = -m_poShipNode->getPosition().x / 70.0f;
 	l_poProjectile->rRelY = 0.6f;
 
 
@@ -385,19 +389,19 @@ void CImpactShip::setFeedbackLevels(int iF1, int iF2, int iF3)
 
 	if (m_bFeedbackActive)
 	{
-		int nbActives = 0;
+		int l_iNbActives = 0;
 
 		if (iF1 > 0) { l_poSceneManager->getSceneNode("v5_a1b")->setVisible(true); }
 		if (iF1 > 1) { l_poSceneManager->getSceneNode("v5_a2b")->setVisible(true); }
-		if (iF1 > 2) { l_poSceneManager->getSceneNode("v5_a3b")->setVisible(true); nbActives++; }
+		if (iF1 > 2) { l_poSceneManager->getSceneNode("v5_a3b")->setVisible(true); l_iNbActives++; }
 		if (iF2 > 0) { l_poSceneManager->getSceneNode("v5_g1b")->setVisible(true); }
 		if (iF2 > 1) { l_poSceneManager->getSceneNode("v5_g2b")->setVisible(true); }
-		if (iF2 > 2) { l_poSceneManager->getSceneNode("v5_g3b")->setVisible(true); nbActives++; }
+		if (iF2 > 2) { l_poSceneManager->getSceneNode("v5_g3b")->setVisible(true); l_iNbActives++; }
 		if (iF3 > 0) { l_poSceneManager->getSceneNode("v5_d1b")->setVisible(true); }
 		if (iF3 > 1) { l_poSceneManager->getSceneNode("v5_d2b")->setVisible(true); }
-		if (iF3 > 2) { l_poSceneManager->getSceneNode("v5_d3b")->setVisible(true); nbActives++; }
+		if (iF3 > 2) { l_poSceneManager->getSceneNode("v5_d3b")->setVisible(true); l_iNbActives++; }
 
-		if (nbActives > 1)
+		if (l_iNbActives > 1)
 		{
 			l_poSceneManager->getSceneNode("v5_a3b")->setVisible(false);
 			l_poSceneManager->getSceneNode("v5_g3b")->setVisible(false);
@@ -420,7 +424,7 @@ Ogre::Vector2 CImpactShip::getPosition()
 
 Ogre::Vector2 CImpactShip::getNormalizedPosition()
 {
-	return Ogre::Vector2(-m_poShipNode->getPosition().x / 70.0, m_poShipNode->getPosition().y);
+	return Ogre::Vector2(-m_poShipNode->getPosition().x / 70.0f, m_poShipNode->getPosition().y);
 }
 
 
@@ -443,8 +447,8 @@ bool CImpactShip::evaluateHit(CImpactEnemyShip* poEnemy)
 
 		if (Ogre::Math::pointInTri2D(
 				Ogre::Vector2((*it)->rRelX, (*it)->rRelY),
-				Ogre::Vector2(l_oPoint.x + poEnemy->getWidth() / 2.0, l_oPoint.y + poEnemy->getWidth() / 2.0f),
-				Ogre::Vector2(l_oPoint.x - poEnemy->getWidth() / 2.0, l_oPoint.y + poEnemy->getWidth() / 2.0f),
+				Ogre::Vector2(l_oPoint.x + poEnemy->getWidth() / 2.0f, l_oPoint.y + poEnemy->getWidth() / 2.0f),
+				Ogre::Vector2(l_oPoint.x - poEnemy->getWidth() / 2.0f, l_oPoint.y + poEnemy->getWidth() / 2.0f),
 				Ogre::Vector2(l_oPoint.x , l_oPoint.y - 0.1f)
 				))
 		{

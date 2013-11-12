@@ -127,6 +127,12 @@ boolean CBoxAlgorithmSignalDecimation::process(void)
 			m_ui32OutputSampleCountPerSentBlock=(m_ui32OutputSampleCountPerSentBlock?m_ui32OutputSampleCountPerSentBlock:1);
 			m_ui64OutputSamplingFrequency=op_ui64SamplingRate/m_i64DecimationFactor;
 
+			if(m_ui64OutputSamplingFrequency==0) 
+			{
+				this->getLogManager() << LogLevel_Error << "Output sampling frequency is 0\n";
+				return false;
+			}
+
 			m_ui32ChannelCount=op_pMatrix->getDimensionSize(0);
 			m_ui64TotalSampleCount=0;
 

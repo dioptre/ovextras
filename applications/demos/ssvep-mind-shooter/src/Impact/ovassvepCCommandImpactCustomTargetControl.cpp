@@ -42,14 +42,14 @@ void CCommandImpactCustomTargetControl::execute(int iButton, int iState)
 	l_poImpactApplication->m_rNextOrigin =  0.0;
 	if (iButton == 0)
 	{
-		l_poImpactApplication->m_rNextOrigin = -0.21;
+		l_poImpactApplication->m_rNextOrigin = -0.21f;
 		l_poImpactApplication->addTarget(1);
 		l_poImpactApplication->addTarget(6);
 		l_poImpactApplication->addTarget(4);
 	}
 	else if (iButton == 1)
 	{
-		l_poImpactApplication->m_rNextOrigin = 0.21;
+		l_poImpactApplication->m_rNextOrigin = 0.21f;
 		l_poImpactApplication->addTarget(6);
 		l_poImpactApplication->addTarget(1);
 		l_poImpactApplication->addTarget(3);

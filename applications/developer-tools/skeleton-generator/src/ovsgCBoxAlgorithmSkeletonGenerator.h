@@ -48,6 +48,14 @@ namespace OpenViBESkeletonGenerator
 			OpenViBE::boolean              m_bCanModifySettings;
 			OpenViBE::boolean              m_bCanAddSettings;
 			std::vector<IOSStruct>         m_vSettings;
+			// Message Inputs
+			OpenViBE::boolean              m_bCanModifyMessageInputs;
+			OpenViBE::boolean              m_bCanAddMessageInputs;
+			std::vector<IOSStruct>         m_vMessageInputs;
+			// Message Outputs
+			OpenViBE::boolean              m_bCanModifyMessageOutputs;
+			OpenViBE::boolean              m_bCanAddMessageOutputs;
+			std::vector<IOSStruct>         m_vMessageOutputs;
 
 			//Algorithms
 			std::vector<OpenViBE::CString> m_vAlgorithms; // the algorithm selected by user
@@ -84,6 +92,7 @@ namespace OpenViBESkeletonGenerator
 			OpenViBE::boolean              m_bProcessInput;
 			OpenViBE::boolean              m_bProcessClock;
 			OpenViBE::uint32               m_ui32ClockFrequency;
+			OpenViBE::boolean              m_bProcessMessage;
 
 			void buttonCheckCB(void);
 			void buttonOkCB(void);
@@ -102,6 +111,11 @@ namespace OpenViBESkeletonGenerator
 			void buttonAddAlgorithmCB(void);
 			void buttonRemoveAlgorithmCB(void);
 			void algorithmSelectedCB(OpenViBE::int32 i32IndexSelected);
+
+			void buttonAddMessageInputCB(void);
+			void buttonRemoveMessageInputCB(void);
+			void buttonAddMessageOutputCB(void);
+			void buttonRemoveMessageOutputCB(void);
 
 		private:
 

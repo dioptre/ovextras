@@ -13,21 +13,32 @@ using namespace std;
 
 boolean CBoxAlgorithmStreamedMatrixSwitch::initialize(void)
 {
+
 	// Getting the settings to build the map Stim code / output index
-	for(uint32 i = 0; i < this->getStaticBoxContext().getSettingCount(); i++)
+	for(uint32 i = 1; i < this->getStaticBoxContext().getSettingCount(); i++)
 	{
-		uint64 l_oStimCode  = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),i);
-		if(!m_mStimulationOutputIndexMap.insert(make_pair(l_oStimCode, i)).second)
+		const uint64 l_oStimCode  = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),i);
+		const uint32 l_ui32OutputIndex = i-1;
+		if(!m_mStimulationOutputIndexMap.insert(make_pair(l_oStimCode, l_ui32OutputIndex)).second)
 		{
-			this->getLogManager() << LogLevel_Warning << "The stimulation code ["<<this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation,l_oStimCode) << "] for the output ["<< i << "] is already used by a previous output.\n";
+			this->getLogManager() << LogLevel_Warning << "The stimulation code ["<<this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation,l_oStimCode) << "] for the output ["<< l_ui32OutputIndex << "] is already used by a previous output.\n";
 		}
 		else
 		{
-			this->getLogManager() << LogLevel_Trace << "The stimulation code ["<<this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation,l_oStimCode) << "] is registered for the output ["<< i << "]\n";
+			this->getLogManager() << LogLevel_Trace << "The stimulation code ["<<this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation,l_oStimCode) << "] is registered for the output ["<< l_ui32OutputIndex << "]\n";
 		}
 	}
-	// At start, no output is active.
-	m_i32ActiveOutputIndex = -1;
+
+	boolean l_bDefaultToFirstOutput = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),0);
+	if(l_bDefaultToFirstOutput)
+	{
+		m_i32ActiveOutputIndex = 0;
+	} 
+	else
+	{
+		// At start, no output is active.
+		m_i32ActiveOutputIndex = -1;
+	}
 
 	// Stimulation stream decoder
 	m_oStimulationDecoder.initialize(*this);

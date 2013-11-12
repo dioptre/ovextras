@@ -26,6 +26,17 @@
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Box_Attribute                            OpenViBE::CIdentifier(0xAAE1C0BA, 0x0CCB4F6E)
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Box_Attribute_Identifier                 OpenViBE::CIdentifier(0xFDE975E7, 0x9EE828E5)
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Box_Attribute_Value                      OpenViBE::CIdentifier(0x08700489, 0x15D4C296)
+//message stuff
+#define OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInputs                        OpenViBE::CIdentifier(0xA0F94978, 0xDB7A4FAB)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInput                         OpenViBE::CIdentifier(0x889D48D2, 0x539E1538)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInput_Name                    OpenViBE::CIdentifier(0x2C1B53CC, 0x01DA7DFF)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutputs                       OpenViBE::CIdentifier(0x750C940A, 0xA66C528E)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutput                        OpenViBE::CIdentifier(0x54CE362B, 0x54353742)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutput_Name                   OpenViBE::CIdentifier(0xDCDB4A4B, 0xFC8BDC99)
+//
+
+
+
 
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Comments                                 OpenViBE::CIdentifier(0x05FFFB9C, 0x0D3F72B9)
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Comment                                  OpenViBE::CIdentifier(0x8A90B4C7, 0x1B1F91C8)
@@ -49,6 +60,22 @@
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Link_Attribute                           OpenViBE::CIdentifier(0xA1487B45, 0x88C442B6)
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Link_Attribute_Identifier                OpenViBE::CIdentifier(0x03710320, 0x0A550AE0)
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Link_Attribute_Value                     OpenViBE::CIdentifier(0x3831E536, 0x6E0C9282)
+
+//
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLinks                             OpenViBE::CIdentifier(0xDFB8097A, 0xE6014AE4)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink                              OpenViBE::CIdentifier(0x1C3E0EFE, 0x4FBC0EE2)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Identifier                   OpenViBE::CIdentifier(0x7C1E6A54, 0x57E51106)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source                       OpenViBE::CIdentifier(0x8B6F6D16, 0x358A6505)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source_BoxIdentifier         OpenViBE::CIdentifier(0xD6DE2CDC, 0x91C5186B)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source_BoxOutputIndex        OpenViBE::CIdentifier(0x3FF5001F, 0x688733ED)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target                       OpenViBE::CIdentifier(0xB6F6FFAF, 0xD4A5E073)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target_BoxIdentifier         OpenViBE::CIdentifier(0xF8770840, 0xB420D830)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target_BoxInputIndex         OpenViBE::CIdentifier(0x11BA9A21, 0x23142DF9)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Attributes                   OpenViBE::CIdentifier(0xA91F72D1, 0x3CDB253D)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Attribute                    OpenViBE::CIdentifier(0x98AA5F5F, 0xF120D8A0)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Attribute_Identifier         OpenViBE::CIdentifier(0x5F7E59A7, 0x0C8D1674)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Attribute_Value              OpenViBE::CIdentifier(0x5957E132, 0xF6E851CE)
+//
 
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Scenario_Attributes                      OpenViBE::CIdentifier(0x06B858A3, 0xE3F6B199)
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Scenario_Attribute                       OpenViBE::CIdentifier(0x195DF0C2, 0x01071746)

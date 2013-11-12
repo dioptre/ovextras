@@ -61,6 +61,12 @@ namespace OpenViBEToolkit
 			return processInput(ui32InputIndex);
 		}
 
+		virtual OpenViBE::boolean processMessage(OpenViBE::Kernel::IBoxAlgorithmContext& rBoxAlgorithmContext, const OpenViBE::Kernel::IMessageWithData& rMessageWithData, OpenViBE::uint32 ui32InputIndex)
+		{
+			CScopedBoxAlgorithm l_oScopedBoxAlgorithm(m_pBoxAlgorithmContext, &rBoxAlgorithmContext);
+			return processMessage(rMessageWithData, ui32InputIndex);
+		}
+
 		virtual OpenViBE::boolean process(OpenViBE::Kernel::IBoxAlgorithmContext& rBoxAlgorithmContext)
 		{
 			CScopedBoxAlgorithm l_oScopedBoxAlgorithm(m_pBoxAlgorithmContext, &rBoxAlgorithmContext);
@@ -78,6 +84,7 @@ namespace OpenViBEToolkit
 		virtual OpenViBE::boolean processSignal(OpenViBE::CMessageSignal& rMessageSignal) { return false; }
 		virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock)    { return false; }
 		virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex)           { return false; }
+		virtual OpenViBE::boolean processMessage(const OpenViBE::Kernel::IMessageWithData& rMessageWithData, OpenViBE::uint32 ui32InputIndex)           { return false; }
 		virtual OpenViBE::boolean process(void)=0;
 
 // ====================================================================================================================================

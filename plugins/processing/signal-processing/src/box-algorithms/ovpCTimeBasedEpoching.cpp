@@ -128,6 +128,10 @@ void CTimeBasedEpoching::COutputHandler::setChannelName(const uint32 ui32Channel
 
 void CTimeBasedEpoching::COutputHandler::setSamplingRate(const uint32 ui32SamplingFrequency)
 {
+	if(ui32SamplingFrequency==0) {
+		m_rParent.getLogManager() << LogLevel_Error << "Sampling rate is about to be set to 0. Expect a crash.\n"; 
+	}
+
 	m_ui32SamplingRate=ui32SamplingFrequency;
 	this->setSampleCountPerEpoch    ((uint32)(m_f64EpochDuration*ui32SamplingFrequency));
 	this->setSampleCountBetweenEpoch((uint32)(m_f64EpochInterval*ui32SamplingFrequency));
