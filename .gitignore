@@ -3,3 +3,4 @@ dependencies
 scripts/win32-dependencies.cmd
 dist
 
+/CMakeLists.txt.user
