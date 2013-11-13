@@ -25,7 +25,7 @@ namespace OpenViBEAcquisitionServer
 {
 	/**
 	 * \class CDriverGTecGUSBamp
-	 * \author Anton Andreev
+	 * \author Anton Andreev, Gipsa-lab, VIBS team
 	 * \date 19/07/2012
 	 * \brief GTEC driver
 	 *
@@ -40,10 +40,11 @@ namespace OpenViBEAcquisitionServer
 	 *
 	 * This driver also sets the current process to higher priority when started and reverts to normal when stopped. 
 	 *
-	 * It can also set the GTEC thread (which reading from the amplifier) to higher priority, but you should enable this according
-	 * to your needs.
+	 * It can also set the GTEC thread (the one that fills the ring buffer with data from the amplifier) to higher priority, but 
+	 * you should enable this according to your needs.
 	 *
-	 * Currently one limitation: only one device is supported even if most of the code for supporting more is already there
+	 * The driver supports several g.tec devices working with the provided async cables. There are several requirements for async
+	 * acquisition to work properly and these are checked in verifySyncMode().
 	 */
 
 	class CDriverGTecGUSBamp : public OpenViBEAcquisitionServer::IDriver
