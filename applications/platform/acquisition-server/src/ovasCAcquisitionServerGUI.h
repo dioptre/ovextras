@@ -6,8 +6,6 @@
 #include "ovasIHeader.h"
 #include "ovasCHeader.h"
 
-#include "../ovasCSettingsHelper.h"
-
 #include <socket/IConnectionServer.h>
 
 #include <boost/thread.hpp>
@@ -23,6 +21,7 @@ namespace OpenViBEAcquisitionServer
 	class CAcquisitionServerThread;
 	class IAcquisitionServerPlugin;
 	struct PluginSetting;
+	class Property;
 
 	class CAcquisitionServerGUI
 	{

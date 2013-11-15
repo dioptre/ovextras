@@ -4,6 +4,7 @@
 #include "ovas_base.h"
 
 #include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
 
 #include "boost/variant.hpp"
 #include <map>

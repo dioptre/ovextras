@@ -1,6 +1,9 @@
 #include "ovasCDriverGenericOscilator.h"
 #include "ovasCConfigurationDriverGenericOscilator.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <toolkit/ovtk_all.h>
 
 #include <system/Time.h>
@@ -184,5 +187,17 @@ boolean CDriverGenericOscillator::configure(void)
 
 	CConfigurationDriverGenericOscilator m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Generic-Oscillator.ui", 
 		m_bSendPeriodicStimulations);
-	return m_oConfiguration.configure(m_oHeader);
+
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_GenericOscillator", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("SendPeriodicStimulations", &m_bSendPeriodicStimulations);
+	l_oSettings.load();
+
+	if(m_oConfiguration.configure(m_oHeader)) 
+	{
+		l_oSettings.save();
+		return true;
+	}
+
+	return false;
 }

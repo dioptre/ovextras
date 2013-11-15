@@ -4,6 +4,7 @@
 #include "ovasCConfigurationGTecGUSBamp.h"
 
 #include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
 
 #include <toolkit/ovtk_all.h>
 
@@ -747,16 +748,16 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 		m_ui32DeviceIndex, m_ui8CommonGndAndRefBitmap, m_i32NotchFilterIndex,m_i32BandPassFilterIndex,
 		m_bTriggerInputEnabled,m_vDevicesSerials,targetMasterSerial);
 
-	SettingsHelper l_oProperties("AcquisitionServer_Driver_GTecGUSBamp", m_rDriverContext.getConfigurationManager());
-	// l_oProperties.add("Header", &m_oHeader);
-	l_oProperties.add("DeviceIndex", &m_ui32DeviceIndex);
-	l_oProperties.add("CommonGndAndRefBitmap", &m_ui8CommonGndAndRefBitmap);
-	l_oProperties.add("NotchFilterIndex", &m_i32NotchFilterIndex);
-	l_oProperties.add("BandPassFilterIndex", &m_i32BandPassFilterIndex);
-	l_oProperties.add("TriggerInputEnabled", &m_bTriggerInputEnabled);
-	l_oProperties.add("DeviceSerials", &m_vDevicesSerials);
-	l_oProperties.add("TargetMasterSerial", &targetMasterSerial);
-	l_oProperties.load();
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_GTecGUSBamp", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("DeviceIndex", &m_ui32DeviceIndex);
+	l_oSettings.add("CommonGndAndRefBitmap", &m_ui8CommonGndAndRefBitmap);
+	l_oSettings.add("NotchFilterIndex", &m_i32NotchFilterIndex);
+	l_oSettings.add("BandPassFilterIndex", &m_i32BandPassFilterIndex);
+	l_oSettings.add("TriggerInputEnabled", &m_bTriggerInputEnabled);
+	l_oSettings.add("DeviceSerials", &m_vDevicesSerials);
+	l_oSettings.add("TargetMasterSerial", &targetMasterSerial);
+	l_oSettings.load();
 
 	//reduce from number of channels for all devices to the number of channels for one device
 	m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
@@ -766,7 +767,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 		return false;
 	}
 
-	l_oProperties.save();
+	l_oSettings.save();
 
 	//start reconfigure based on the new input:
 

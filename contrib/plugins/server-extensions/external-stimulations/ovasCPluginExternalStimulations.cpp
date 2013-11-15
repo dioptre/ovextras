@@ -7,7 +7,9 @@
 #include <iostream>
 
 #include <openvibe/ovITimeArithmetics.h>
+
 #include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
 
 #define boolean OpenViBE::boolean
 

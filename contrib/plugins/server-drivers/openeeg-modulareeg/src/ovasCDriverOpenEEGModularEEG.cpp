@@ -3,6 +3,9 @@
 
 #include <toolkit/ovtk_all.h>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <system/Time.h>
 #include <system/Memory.h>
 #include <cmath>
@@ -169,7 +172,19 @@ boolean CDriverOpenEEGModularEEG::configure(void)
 	CConfigurationOpenEEGModularEEG m_oConfiguration(
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-OpenEEG-ModularEEG.ui", 
 		m_ui32DeviceIdentifier);
-	return m_oConfiguration.configure(m_oHeader);
+
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_OpenEEG-ModularEEG", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("DeviceIdentifier", &m_ui32DeviceIdentifier);
+	l_oSettings.load();
+
+	if(!m_oConfiguration.configure(m_oHeader)) {
+		return false;
+	}
+
+	l_oSettings.save();
+
+	return true;
 }
 
 //___________________________________________________________________//

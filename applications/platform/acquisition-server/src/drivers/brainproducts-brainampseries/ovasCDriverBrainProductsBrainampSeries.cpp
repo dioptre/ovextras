@@ -25,6 +25,9 @@
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ovITimeArithmetics.h>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <system/Memory.h>
 #include <system/Time.h>
 
@@ -639,6 +642,7 @@ boolean CDriverBrainProductsBrainampSeries::isConfigurable(void)
 	return true;
 }
 
+
 boolean CDriverBrainProductsBrainampSeries::configure(void)
 {
 	CConfigurationBrainProductsBrainampSeries l_oConfiguration(
@@ -654,7 +658,25 @@ boolean CDriverBrainProductsBrainampSeries::configure(void)
 		m_eResolution,
 		m_eDCCoupling,
 		m_eImpedance);
+
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_BrainAmpSeries", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("USBIndex", &m_ui32USBIndex);
+	l_oSettings.add("DecimationFactor", &m_ui32DecimationFactor);
+	l_oSettings.add("ChannelSelected", m_peChannelSelected);
+	l_oSettings.add("LowPassFilterFull", &m_peLowPassFilterFull);
+	l_oSettings.add("ResolutionFull", &m_peResolutionFull);
+	l_oSettings.add("DCCouplingFull", &m_peDCCouplingFull);
+	l_oSettings.add("LowPass", &m_eLowPass);
+	l_oSettings.add("Resolution", &m_eResolution);
+	l_oSettings.add("DCCoupling", &m_eDCCoupling);
+	l_oSettings.add("Impedance", &m_eImpedance);
+	l_oSettings.load();
+
 	l_oConfiguration.configure(m_oHeader);
+
+	l_oSettings.save();
+
 	m_oHeader.setSamplingFrequency(5000/m_ui32DecimationFactor);
 	return true;
 }

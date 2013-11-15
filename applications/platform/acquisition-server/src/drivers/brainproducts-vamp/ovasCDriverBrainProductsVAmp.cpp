@@ -4,6 +4,9 @@
 #include "ovasCConfigurationBrainProductsVAmp.h"
 #include "ovasCHeaderBrainProductsVAmp.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <system/Time.h>
 #include <windows.h>
 
@@ -374,10 +377,17 @@ boolean CDriverBrainProductsVAmp::configure(void)
 	CConfigurationBrainProductsVAmp m_oConfiguration(m_rDriverContext, 
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-BrainProducts-VAmp.ui", &m_oHeader); // the specific header is passed into the specific configuration
 
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_BrainProducts-VAmp", m_rDriverContext.getConfigurationManager());
+	// @note m_oHeader is CHeaderBrainProductsVAmp, whereas the current interface supports only IHeader. Thus, some info may not be loaded/saved.
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.load();
+
 	if(!m_oConfiguration.configure(*(m_oHeader.getBasicHeader()))) // the basic configure will use the basic header
 	{
 		return false;
 	}
+	
+	l_oSettings.save();
 
 	if(m_ui32AcquisitionMode == AcquisitionMode_VAmp4Fast)
 	{

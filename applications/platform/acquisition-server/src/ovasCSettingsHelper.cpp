@@ -14,15 +14,15 @@ void OpenViBEAcquisitionServer::SettingsHelper::save(void)
 
 		// m_rContext.getLogManager() << OpenViBE::Kernel::LogLevel_Info << "Token " << it->first << " wrote [" << ss.str().c_str() << "]\n";
 		const OpenViBE::CString l_sTokenName = m_sPrefix + OpenViBE::CString("_") + it->first;
-		OpenViBE::CIdentifier l_oTokenId = m_rMgr.lookUpConfigurationTokenIdentifier(l_sTokenName);
+		OpenViBE::CIdentifier l_oTokenId = m_rConfigurationManager.lookUpConfigurationTokenIdentifier(l_sTokenName);
 		if(l_oTokenId == OV_UndefinedIdentifier) 
 		{
-			m_rMgr.createConfigurationToken(m_sPrefix + OpenViBE::CString("_") + it->first, OpenViBE::CString(ss.str().c_str()));
+			m_rConfigurationManager.createConfigurationToken(m_sPrefix + OpenViBE::CString("_") + it->first, OpenViBE::CString(ss.str().c_str()));
 		} 
 		else 
 		{
 			// replacing token value
-			m_rMgr.setConfigurationTokenValue(l_oTokenId, OpenViBE::CString(ss.str().c_str()));
+			m_rConfigurationManager.setConfigurationTokenValue(l_oTokenId, OpenViBE::CString(ss.str().c_str()));
 		}
 	}
 		
@@ -34,9 +34,9 @@ void OpenViBEAcquisitionServer::SettingsHelper::load(void)
 	std::map<OpenViBE::CString, Property*>::const_iterator it = m_vProperties.begin();
 	for(;it!=m_vProperties.end();++it) {
 		const OpenViBE::CString l_sTokenName = m_sPrefix + OpenViBE::CString("_") + it->first;
-		if(m_rMgr.lookUpConfigurationTokenIdentifier(l_sTokenName) != OV_UndefinedIdentifier) {
+		if(m_rConfigurationManager.lookUpConfigurationTokenIdentifier(l_sTokenName) != OV_UndefinedIdentifier) {
 				
-			const OpenViBE::CString value = m_rMgr.expand(OpenViBE::CString("${") + l_sTokenName + OpenViBE::CString("}"));
+			const OpenViBE::CString value = m_rConfigurationManager.expand(OpenViBE::CString("${") + l_sTokenName + OpenViBE::CString("}"));
 
 			// m_rContext.getLogManager() << OpenViBE::Kernel::LogLevel_Info << "Token " << it->first << " found, mgr setting = [" << value << "]\n";
 

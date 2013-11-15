@@ -1,6 +1,9 @@
 #include "ovasCDriverEGIAmpServer.h"
 #include "ovasCConfigurationEGIAmpServer.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <toolkit/ovtk_all.h>
 
 #include <system/Time.h>
@@ -297,11 +300,19 @@ boolean CDriverEGIAmpServer::configure(void)
 	m_oConfiguration.setCommandPort(m_ui32CommandPort);
 	m_oConfiguration.setStreamPort(m_ui32StreamPort);
 
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_EGIAmpServer", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("AmpServerHostName", &m_sAmpServerHostName);
+	l_oSettings.add("CommandPort", &m_ui32CommandPort);
+	l_oSettings.add("StreamPort", &m_ui32StreamPort);
+	l_oSettings.load();
+
 	if(m_oConfiguration.configure(m_oHeader))
 	{
 		m_sAmpServerHostName=m_oConfiguration.getHostName();
 		m_ui32CommandPort=m_oConfiguration.getCommandPort();
 		m_ui32StreamPort=m_oConfiguration.getStreamPort();
+		l_oSettings.save();
 		return true;
 	}
 	return false;

@@ -16,6 +16,9 @@
 #include <windows.h>
 #include <cstring>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <openvibe/ovITimeArithmetics.h>
 
 #define boolean OpenViBE::boolean
@@ -870,12 +873,17 @@ boolean CDriverMicromedSystemPlusEvolution::configure(void)
 {
 	CConfigurationNetworkBuilder l_oConfiguration(
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Micromed-SystemPlusEvolution.ui");
-
 	l_oConfiguration.setHostPort(m_ui32ServerHostPort);
+
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_SystemPlusEvolution", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("ServerHostPort", &m_ui32ServerHostPort);
+	l_oSettings.load();
 
 	if(l_oConfiguration.configure(m_oHeader))
 	{
 		m_ui32ServerHostPort=l_oConfiguration.getHostPort();
+		l_oSettings.save();
 		return true;
 	}
 

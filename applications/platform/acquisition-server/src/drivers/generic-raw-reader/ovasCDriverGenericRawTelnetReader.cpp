@@ -2,6 +2,7 @@
 #include "ovasCConfigurationGenericRawReader.h"
 
 #include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
 
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
@@ -29,17 +30,17 @@ boolean CDriverGenericRawTelnetReader::configure(void)
 		l_sFilename);
 
 	// Relay configuration properties to the configuration manager
-	SettingsHelper l_oProperties("AcquisitionServer_Driver_GenericRawTelnetReader", m_rDriverContext.getConfigurationManager());
-	// l_oProperties.add("Header", &m_oHeader);
-	l_oProperties.add("LimitSpeed", &m_bLimitSpeed);
-	l_oProperties.add("SampleFormat", &m_ui32SampleFormat);
-	l_oProperties.add("SampleEndian", &m_ui32SampleEndian);
-	l_oProperties.add("StartSkip", &m_ui32StartSkip);
-	l_oProperties.add("HeaderSkip", &m_ui32HeaderSkip);
-	l_oProperties.add("FooterSkip", &m_ui32FooterSkip);
-	l_oProperties.add("HostName", &m_sHostName);
-	l_oProperties.add("HostPort", &m_ui32HostPort);
-	l_oProperties.load();
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_GenericRawTelnetReader", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("LimitSpeed", &m_bLimitSpeed);
+	l_oSettings.add("SampleFormat", &m_ui32SampleFormat);
+	l_oSettings.add("SampleEndian", &m_ui32SampleEndian);
+	l_oSettings.add("StartSkip", &m_ui32StartSkip);
+	l_oSettings.add("HeaderSkip", &m_ui32HeaderSkip);
+	l_oSettings.add("FooterSkip", &m_ui32FooterSkip);
+	l_oSettings.add("HostName", &m_sHostName);
+	l_oSettings.add("HostPort", &m_ui32HostPort);
+	l_oSettings.load();
 
 	m_oConfiguration.setHostName(m_sHostName);
 	m_oConfiguration.setHostPort(m_ui32HostPort);
@@ -52,7 +53,7 @@ boolean CDriverGenericRawTelnetReader::configure(void)
 	m_sHostName=m_oConfiguration.getHostName();
 	m_ui32HostPort=m_oConfiguration.getHostPort();
 
-	l_oProperties.save();
+	l_oSettings.save();
 
 	return true;
 }

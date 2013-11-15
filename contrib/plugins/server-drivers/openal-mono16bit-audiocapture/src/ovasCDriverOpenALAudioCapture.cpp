@@ -5,6 +5,9 @@
 #include <toolkit/ovtk_all.h>
 #include <system/Time.h>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -215,10 +218,18 @@ boolean CDriverOpenALAudioCapture::configure(void)
 	// Change this line if you need to specify some references to your driver attribute that need configuration, e.g. the connection ID.
 	CConfigurationOpenALAudioCapture m_oConfiguration(m_rDriverContext,
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-OpenALAudioCapture.ui");
+
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_OpenALAudioCapture", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.load();
+
 	if(!m_oConfiguration.configure(m_oHeader))
 	{
 		return false;
 	}
+
+	l_oSettings.save();
+
 	return true;
 }
 #endif //TARGET_HAS_ThirdPartyOpenAL

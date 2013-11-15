@@ -2,8 +2,6 @@
 #define __OpenViBE_AcquisitionServer_CSettingsHelper_H__
 
 #include <ovas_base.h>
-// #include "ovasIDriver.h"
-// #include <openvibe/ovCIdentifier.h>
 
 #include <sstream>
 #include <map>
@@ -72,73 +70,42 @@ namespace OpenViBEAcquisitionServer
 		T* m_data;
 	};
 
-	// Operators used to convert between typical variables (as used in properties) and streams
-
-	inline std::ostream& operator<< (std::ostream& out, const OpenViBE::CString& var)
+#ifdef OV_SH_SUPPORT_GETTERS
+	/*
+	 * \class GetterSetterProperty
+	 * \author Jussi T. Lindgren (Inria)
+	 * \date 2013-11
+	 * \brief A property for situations where the data can only be accessed by getters and setters
+	 *
+	 * \note Type T is the type of the object that has the getters and setters as a member. The
+	 * types V and W indicate the actual data type that the getters and setters deal with. We
+	 * use two types V and W as in the case of the setter, the type is usually const, but for getter, 
+	 * its not. This avoids the compiler getting confused.
+	 */
+	template<typename T, typename V, typename W> class GetterSetterProperty : public Property
 	{
-		out << std::string(var.toASCIIString());
+	public:
+		GetterSetterProperty(const OpenViBE::CString& name, 
+			T& obj, 
+			V ( T::*getter)(void) const,
+			OpenViBE::boolean ( T::*setter)(W))
+			: Property(name), m_obj(obj), m_getterFunction(getter), m_setterFunction(setter) { };
+	
+		virtual std::ostream& toStream(std::ostream& out) const { 
+			// std::cout << "Writing " << (m_obj.*m_getter)() << "\n"; 
+			out << (m_obj.*m_getterFunction)() ; return out; } ;
+		virtual std::istream& fromStream(std::istream& in) { 
+			W tmp; in >> tmp; 
+			// std::cout << "Reading " << tmp << "\n";
+			(m_obj.*m_setterFunction)(tmp); return in; } ;
+	private:
 
-		return out;
-	}
-
-	inline std::istream& operator>> (std::istream& in, OpenViBE::CString& var)
-	{
-		std::string tmp;
-
-		std::getline(in, tmp);
-
-		var.set(tmp.c_str());
-
-		// std::cout << "Parsed [" << var.toASCIIString() << "]\n";
-		return in;
-	}
-
-
-#if 0
-	inline std::ostream& operator<< (std::ostream& out, const OpenViBEAcquisitionServer::CHeader& var)
-	{
-		out << var.getChannelCount(); out << " ";
-		out << var.getSubjectAge(); out << " ";
-
-		return out;
-	}
-
-	inline std::istream& operator>> (std::istream& in, OpenViBEAcquisitionServer::CHeader& var)
-	{
-		OpenViBE::uint32 tmp;
-
-		in >> tmp; var.setChannelCount(tmp);
-		in >> tmp; var.setSubjectAge(tmp);
-
-		return in;
-	}
+		T& m_obj;
+		V ( T::*m_getterFunction )(void) const;
+		OpenViBE::boolean ( T::*m_setterFunction )(W);
+		
+	};
 #endif
-
-	inline std::ostream& operator<< (std::ostream& out, const std::map<OpenViBE::uint32, OpenViBE::uint32>& var)
-	{
-		std::map<OpenViBE::uint32, OpenViBE::uint32>::const_iterator it = var.begin();
-		for(;it!=var.end();++it) {
-			out << it->first;
-			out << " ";
-			out << it->second;
-			out << " ";
-		}
-
-		return out;
-	}
-
-	inline std::istream& operator>> (std::istream& in, std::map<OpenViBE::uint32, OpenViBE::uint32>& var)
-	{
-		var.clear();
-		OpenViBE::uint32 key;
-		OpenViBE::uint32 value;
-		while( in >> key ) {
-			in >> value;
-			var[key] = value; 
-		}
-
-		return in;
-	}
 
 	/*
 	 * \class SettingsHelper
@@ -151,7 +118,7 @@ namespace OpenViBEAcquisitionServer
 	class SettingsHelper {
 	public:
 		SettingsHelper(const char *prefix, OpenViBE::Kernel::IConfigurationManager& rMgr) 
-			: m_sPrefix(prefix), m_rMgr(rMgr) { } ; 
+			: m_sPrefix(prefix), m_rConfigurationManager(rMgr) { } ; 
 		~SettingsHelper() {
 			std::map<OpenViBE::CString, Property*>::const_iterator it = m_vProperties.begin();
 			for(;it!=m_vProperties.end();++it) {
@@ -160,12 +127,12 @@ namespace OpenViBEAcquisitionServer
 			m_vProperties.clear();
 		}
 
-		// Register or replace a variable
+		// Register or replace a variable. The variable must remain valid for the lifetime of the SettingsHelper object.
 		template<typename T> OpenViBE::boolean add(const OpenViBE::CString& name, T* var) {
 
 			if(!var) 
 			{
-				// cout << "Tried to add a NULL pointer\n";
+				// std::cout << "Tried to add a NULL pointer\n";
 				return false;
 			}
 
@@ -182,6 +149,34 @@ namespace OpenViBEAcquisitionServer
 			return true;
 		}
 
+#ifdef OV_SH_SUPPORT_GETTERS
+		// Register or replace a property used via setters and getters. The actual object must be provided as well and
+		// must remain valid for the lifetime of the SettingsHelper object.
+		template<typename T, typename V, typename W> OpenViBE::boolean add(const OpenViBE::CString& name, 
+			T& obj, 
+			V ( T::*getter)(void) const,
+			OpenViBE::boolean ( T::*setter)(W) ) {
+
+			if(getter == NULL || setter == NULL) 
+			{
+				// std::cout << "Tried to add a NULL pointer\n";
+				return false;
+			}
+
+			// If key is in map, replace
+			std::map<OpenViBE::CString, Property*>::const_iterator it = m_vProperties.find(name);
+			if(it!=m_vProperties.end()) {
+				// m_rContext.getLogManager() << LogLevel_Trace << "Replacing key [" << name << "]\n";
+				delete it->second;
+			}
+
+			GetterSetterProperty<T,V,W> *myProperty = new GetterSetterProperty<T,V,W>(name, obj, getter, setter);
+			m_vProperties[myProperty->getName()] = myProperty;
+
+			return true;
+		}
+#endif
+
 		// Save all registered variables to the configuration manager
 		void save(void);
 
@@ -193,7 +188,7 @@ namespace OpenViBEAcquisitionServer
 	
 	private:
 		OpenViBE::CString m_sPrefix;
-		OpenViBE::Kernel::IConfigurationManager& m_rMgr;
+		OpenViBE::Kernel::IConfigurationManager& m_rConfigurationManager;
 
 		std::map<OpenViBE::CString, Property*> m_vProperties;
 	};

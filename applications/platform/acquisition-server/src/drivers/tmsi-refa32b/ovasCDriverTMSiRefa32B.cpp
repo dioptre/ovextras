@@ -6,6 +6,9 @@
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ovITimeArithmetics.h>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <iostream>
 #include <cmath>
 #include <cstring>
@@ -638,8 +641,21 @@ boolean CDriverTMSiRefa32B::configure(void)
 
 	//call configuration frame
 	l_oConfiguration.setDeviceList(l_vDevicePath, &m_pDevicePathMaster, &m_vDevicePathSlave);
+
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_TMSIRefa32B", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("DevicePaths", &l_vDevicePath);
+	l_oSettings.load();
+
 	bool result=l_oConfiguration.configure(m_oHeader);
-	return result;
+	if(!result) 
+	{
+		return false;
+	}
+
+	l_oSettings.save();
+
+	return true;
 }
 
 boolean CDriverTMSiRefa32B::refreshDevicePath(void)
