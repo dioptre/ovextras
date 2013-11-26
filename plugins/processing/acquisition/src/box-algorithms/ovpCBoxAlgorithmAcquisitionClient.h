@@ -53,7 +53,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("A generic network based acquisition client"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This algorithm waits for EEG data from the network and distributes it into the scenario"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Acquisition"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Acquisition and network IO"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_AcquisitionClient; }
@@ -63,7 +63,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addOutput ("Experiment information",      OV_TypeId_ExperimentationInformation);
+				rBoxAlgorithmPrototype.addOutput ("Experiment information",      OV_TypeId_ExperimentInformation);
 				rBoxAlgorithmPrototype.addOutput ("Signal strea",                OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addOutput ("Stimulations",                OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addOutput ("Channel localisation",        OV_TypeId_ChannelLocalisation);

@@ -19,8 +19,10 @@ function OV_define()
     OV_TypeId_EBMLStream = uint64(hex2dec('434F65872EFD2B7E'));
     global OV_TypeId_ChannelLocalisation;
     OV_TypeId_ChannelLocalisation = uint64(hex2dec('013DF452A3A8879A'));
-    global OV_TypeId_ExperimentationInformation;
-    OV_TypeId_ExperimentationInformation = uint64(hex2dec('403488E7565D70B6'));
+    global OV_TypeId_ExperimentationInformation;                                % deprecated
+    OV_TypeId_ExperimentationInformation = uint64(hex2dec('403488E7565D70B6')); % deprecated
+    global OV_TypeId_ExperimentInformation;
+    OV_TypeId_ExperimentInformation = uint64(hex2dec('403488E7565D70B6'));
     global OV_TypeId_Stimulations;
     OV_TypeId_Stimulations = uint64(hex2dec('6F752DD0082A321E'));
     global OV_TypeId_StreamedMatrix;

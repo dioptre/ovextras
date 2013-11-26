@@ -6,7 +6,9 @@ SET(PROJECT_VERSION_PATCH ${OV_GLOBAL_VERSION_PATCH})
 SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files}
+	"../../../contrib/packages/libSVM/svm.cpp"
+	"../../../contrib/packages/libSVM/svm.h")
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 	VERSION ${PROJECT_VERSION}
 	SOVERSION ${PROJECT_VERSION_MAJOR}
@@ -20,6 +22,7 @@ INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindThirdPartyBLiFF")
 INCLUDE("FindThirdPartyITPP")
+INCLUDE("FindThirdPartyEigen")
 
 # ---------------------------------
 # Target macros

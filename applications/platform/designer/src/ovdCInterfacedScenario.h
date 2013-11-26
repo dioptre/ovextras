@@ -69,8 +69,20 @@ namespace OpenViBEDesigner
 		void contextMenuBoxConfigureCB(OpenViBE::Kernel::IBox& rBox);
 		void contextMenuBoxAboutCB(OpenViBE::Kernel::IBox& rBox);
 		void contextMenuBoxMuteCB(OpenViBE::Kernel::IBox& rBox);
+		void contextMenuBoxDocumentationCB(OpenViBE::Kernel::IBox& rBox);
+
+		void contextMenuBoxAddMessageInputCB(OpenViBE::Kernel::IBox& rBox);
+		void contextMenuBoxRemoveMessageInputCB(OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index);
+		void contextMenuBoxAddMessageOutputCB(OpenViBE::Kernel::IBox& rBox);
+		void contextMenuBoxRemoveMessageOutputCB(OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index);
+
+		void contextMenuBoxEditMessageInputCB(OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index);
+		void contextMenuBoxEditMessageOutputCB(OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index);
 
 		void contextMenuScenarioAboutCB(void);
+
+		bool browseURL(OpenViBE::CString sURL);
+		bool browseBoxDocumentation(OpenViBE::CIdentifier oBoxId);
 
 		void toggleDesignerVisualisation();
 		OpenViBE::boolean isDesignerVisualisationToggled();

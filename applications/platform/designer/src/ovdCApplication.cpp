@@ -12,6 +12,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <algorithm>
 
 #include <openvibe/ovITimeArithmetics.h>
 
@@ -508,6 +509,7 @@ CApplication::CApplication(const IKernelContext& rKernelContext)
 	m_pPluginManager=&m_rKernelContext.getPluginManager();
 	m_pScenarioManager=&m_rKernelContext.getScenarioManager();
 	m_pVisualisationManager=&m_rKernelContext.getVisualisationManager();
+	m_pLogListenerDesigner = NULL;
 }
 
 CApplication::~CApplication(void) 
@@ -836,7 +838,6 @@ boolean CApplication::openScenario(const char* sFileName)
 					l_pImporter->process();
 					l_pImporter->uninitialize();
 					m_rKernelContext.getAlgorithmManager().releaseAlgorithm(*l_pImporter);
-
 					l_bSuccess=true;
 				}
 			}
@@ -943,17 +944,21 @@ CString CApplication::getWorkingDirectory(void)
 	{
 		if(l_pCurrentScenario->m_bHasFileName)
 		{
-			char* l_sCurrentDirectory=g_path_get_dirname(l_pCurrentScenario->m_sFileName.c_str());
-			l_sWorkingDirectory=l_sCurrentDirectory;
-			g_free(l_sCurrentDirectory);
+			std::string l_sCurrentDirectory=std::string(g_path_get_dirname(l_pCurrentScenario->m_sFileName.c_str()));
+#if defined TARGET_OS_Windows
+			std::replace(l_sCurrentDirectory.begin(), l_sCurrentDirectory.end(), '\\', '/');
+#endif
+			l_sWorkingDirectory=l_sCurrentDirectory.c_str();
 		}
 	}
 
 	if(!g_path_is_absolute(l_sWorkingDirectory.toASCIIString()))
 	{
-		char* l_sCurrentDirectory=g_get_current_dir();
-		l_sWorkingDirectory=l_sCurrentDirectory+CString("/")+l_sWorkingDirectory;
-		g_free(l_sCurrentDirectory);
+		std::string l_sCurrentDirectory=g_get_current_dir();
+#if defined TARGET_OS_Windows
+		std::replace(l_sCurrentDirectory.begin(), l_sCurrentDirectory.end(), '\\', '/');
+#endif
+		l_sWorkingDirectory=l_sCurrentDirectory.c_str()+CString("/")+l_sWorkingDirectory;
 	}
 
 	return l_sWorkingDirectory;
@@ -1715,7 +1720,12 @@ void CApplication::forwardScenarioCB(void)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "forwardScenarioCB\n";
 
-	this->createPlayer();
+	if(!this->createPlayer())
+	{
+		m_rKernelContext.getLogManager() << LogLevel_Error << "CreatePlayer failed\n";
+		return;
+	}
+
 	this->getPlayer()->forward();
 	this->getCurrentInterfacedScenario()->m_ePlayerStatus=this->getPlayer()->getStatus();
 
@@ -1840,9 +1850,12 @@ boolean CApplication::quitApplicationCB(void)
 	}
 
 	// release the log manager and free the memory
-	m_rKernelContext.getLogManager().removeListener( m_pLogListenerDesigner );
-	delete m_pLogListenerDesigner;
-	m_pLogListenerDesigner = NULL;
+	if(m_pLogListenerDesigner) 
+	{
+		m_rKernelContext.getLogManager().removeListener( m_pLogListenerDesigner );
+		delete m_pLogListenerDesigner;
+		m_pLogListenerDesigner = NULL;
+	}
 
 	// OK to kill app
 	return true;

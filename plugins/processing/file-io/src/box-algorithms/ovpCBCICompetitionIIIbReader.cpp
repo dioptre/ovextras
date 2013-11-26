@@ -209,6 +209,13 @@ namespace OpenViBEPlugins
 							"Please consider adjusting the BCI Competition IIIb reader settings to correct this!\n";
 					}
 
+					if(m_ui32SamplesPerBuffer==0) 
+					{
+						getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error <<
+							"SamplesPerBuffer is 0, this will not work\n";
+						return false;
+					}
+
 					// Intentional parameter swap to get the frequency
 					m_ui64ClockFrequency = ITimeArithmetics::sampleCountToTime(m_ui32SamplesPerBuffer, m_ui32SamplingRate);
 				}

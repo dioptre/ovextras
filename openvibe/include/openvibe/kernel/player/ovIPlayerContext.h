@@ -63,6 +63,23 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier* pTargetIdentifier,
 				const OpenViBE::uint32 ui32TargetIdentifierCount)=0;
 
+
+
+			/**
+			 * \brief Sends a message to a box message output, forward the call to CSimulatedBox then CScheduler
+			 * \param message [in] : the message to send
+			 * \param outputIndex [in] : the index of the message output to send the message from
+			 * \return \e true in case of success, \e false in other cases.
+			 */
+			virtual OpenViBE::boolean sendMessage( const OpenViBE::Kernel::IMessageWithData& message, OpenViBE::uint32 outputIndex)=0;
+
+			/**
+			 * \brief Creates a message in the CSimulatedBox
+			 * \return \e a reference to the created message
+			 * \warning Messages are erased at each cycle so the reference is only valid for one cycle
+			 */
+			virtual OpenViBE::Kernel::IMessageWithData& createMessage(void)=0;
+
 			//@}
 			/** \name Time management */
 			//@{

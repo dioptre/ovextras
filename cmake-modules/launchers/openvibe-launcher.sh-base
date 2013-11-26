@@ -6,6 +6,15 @@
 #export OV_PATH_LIB="$OV_PATH_ROOT/lib"
 #export OV_PATH_DATA="$OV_PATH_ROOT/share/openvibe"
 
+# Tries to locate matlab executable from $PATH, and set the library path to the corresponding matlab libs.
+if [ "`which matlab`" != "" ] ; then
+	MATLAB_ROOT=`matlab -e | grep "^MATLAB=" | sed -e "s/^MATLAB=//"`
+	MATLAB_ARCH=`matlab -e | grep "^ARCH=" | sed -e "s/^ARCH=//"`
+	MATLAB_LIBPATH="$MATLAB_ROOT/bin/$MATLAB_ARCH"
+	# echo Matlab libs expected at $MATLAB_LIBPATH
+	export LD_LIBRARY_PATH="$MATLAB_LIBPATH:$LD_LIBRARY_PATH"
+fi
+
 LOCAL_BIN_PATH="@CMAKE_INSTALL_FULL_BINDIR@"
 if [ "$OV_PATH_BIN" != "" ]; then
 	LOCAL_BIN_PATH="$OV_PATH_BIN"

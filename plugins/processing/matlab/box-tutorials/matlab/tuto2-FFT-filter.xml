@@ -293,9 +293,9 @@
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
-					<Name>Path to Matlab Executables</Name>
-					<DefaultValue>C:/Program Files (x86)/MATLAB/R2011b/bin/win32</DefaultValue>
-					<Value>C:/Program Files (x86)/MATLAB/R2011b/bin/win32</Value>
+					<Name>Matlab executable (path)</Name>
+					<DefaultValue>C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe</DefaultValue>
+					<Value>C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
@@ -672,8 +672,8 @@ every 2 seconds</Text>
 			<Identifier>(0x000042fe, 0x00002140)</Identifier>
 			<Text>&lt;b&gt;Configure the Matlab Scripting box:&lt;/b&gt;
 
-&lt;span color=&quot;red&quot;&gt; Set the matlab installation directory
-and working directory before use !&lt;/span&gt;
+&lt;span color=&quot;red&quot;&gt; Set the matlab executable path
+and the working directory before use !&lt;/span&gt;
 
 If you want to add a sinusoid noise to the signal
 set the noise frequency and amplitude.

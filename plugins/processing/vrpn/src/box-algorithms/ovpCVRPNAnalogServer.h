@@ -78,7 +78,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Creates VRPN analog servers (one per input)."); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Creates VRPN analog servers to make data from the plugin's inputs available to VRPN client applications."); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("VRPN"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Acquisition and network IO/VRPN"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-connect"); }
 			virtual void release(void)                                   { }

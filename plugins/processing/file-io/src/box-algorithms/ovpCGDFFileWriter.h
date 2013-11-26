@@ -115,7 +115,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				// Adds box inputs //swap order of the first two
-				rPrototype.addInput("Experiment information", OV_TypeId_ExperimentationInformation);
+				rPrototype.addInput("Experiment information", OV_TypeId_ExperimentInformation);
 				rPrototype.addInput("Signal", OV_TypeId_Signal);
 
 				rPrototype.addInput("Stimulation", OV_TypeId_Stimulations);

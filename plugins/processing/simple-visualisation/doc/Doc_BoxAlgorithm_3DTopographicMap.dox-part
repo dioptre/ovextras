@@ -21,10 +21,13 @@ Inputs description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_3DTopographicMap_Inputs|
+Note: the channel names specified on the 'Signal' and 'Channel Localization' input streams should match. Mismatches may not be reported by the box. For example, if electrode localisation file reader provides the positions of the electrodes from some configuration file, the channel names in that file should correspend to the names of the signal channels delivered in the Signal stream.
  * |OVP_DocEnd_BoxAlgorithm_3DTopographicMap_Inputs|
 
  * |OVP_DocBegin_BoxAlgorithm_3DTopographicMap_Input1|
  * |OVP_DocEnd_BoxAlgorithm_3DTopographicMap_Input1|
+
+
 __________________________________________________________________
 
 Settings description

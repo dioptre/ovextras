@@ -55,7 +55,7 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				// Adds box outputs
-				rBoxAlgorithmPrototype.addOutput("Experiment information", OV_TypeId_ExperimentationInformation);
+				rBoxAlgorithmPrototype.addOutput("Experiment information", OV_TypeId_ExperimentInformation);
 				rBoxAlgorithmPrototype.addOutput("EEG stream", OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addOutput("Stimulations", OV_TypeId_Stimulations);
 

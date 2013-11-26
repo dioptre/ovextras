@@ -1,7 +1,7 @@
 #include "ovasCDriver@@ClassName@@.h"
 #include "ovasCConfiguration@@ClassName@@.h"
 
-#include <openvibe-toolkit/ovtk_all.h>
+#include <toolkit/ovtk_all.h>
 
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;

@@ -54,13 +54,15 @@ namespace OpenViBEPlugins
 			void* m_pMatlabMatrixHandle;
 			void* m_pMatlabBCIContextHandle;
 
-			OpenViBE::CString m_sMatlabPath;
+			OpenViBE::CString m_sMatlabPath;          // On Linux, path of the executable. On Windows, the executable directory.
 			OpenViBE::CString m_sProcessFunction;
 			OpenViBE::CString m_sInitializeFunction;
 
 		private:
 			OpenViBE::boolean OpenMatlabEngineSafely(void);
 			OpenViBE::boolean CloseMatlabEngineSafely(void);
+
+			void sanitizePath(OpenViBE::CString &sPathToModify) const;
 		};
 
 		class CBoxAlgorithmMatlabFilterDesc : virtual public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -89,9 +91,9 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addOutput ("Filtered streamed matrix", OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addOutput ("Stimulations", OV_TypeId_Stimulations);
 #if defined TARGET_OS_Linux
-				rBoxAlgorithmPrototype.addSetting("Matlab launch command", OV_TypeId_String, "[ssh user@host] /path/to/matlab");
+				rBoxAlgorithmPrototype.addSetting("Matlab executable (path)", OV_TypeId_String, "[ssh user@host] /path/to/matlab");
 #elif defined TARGET_OS_Windows
-				rBoxAlgorithmPrototype.addSetting("Path to Matlab Executable", OV_TypeId_String, "C:/Program Files (x86)/MATLAB/R2011b/bin/win32");
+				rBoxAlgorithmPrototype.addSetting("Matlab executable (path)", OV_TypeId_String, "C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe");
 #else
 #endif
 				rBoxAlgorithmPrototype.addSetting("Matlab working directory", OV_TypeId_String, "${__volatile_ScenarioDir}");
@@ -99,6 +101,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Process function", OV_TypeId_String, "bci_Process");
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsDeprecated);
 
 				return true;
 			}

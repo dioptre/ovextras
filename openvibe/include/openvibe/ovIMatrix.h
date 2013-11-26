@@ -68,14 +68,14 @@ namespace OpenViBE
 		 *
 		 * float64* l_pMatrixRawBuffer=l_pMatrix->getBuffer();
 		 *
-		 * l_pMatrixRawBuffer[0]; // this is l_pMatrixRawBuffer[0*2 + 0];
-		 * l_pMatrixRawBuffer[1]; // this is l_pMatrixRawBuffer[0*2 + 1];
-		 * l_pMatrixRawBuffer[2]; // this is l_pMatrixRawBuffer[1*2 + 0];
-		 * l_pMatrixRawBuffer[3]; // this is l_pMatrixRawBuffer[1*2 + 1];
-		 * l_pMatrixRawBuffer[4]; // this is l_pMatrixRawBuffer[2*2 + 0];
-		 * l_pMatrixRawBuffer[5]; // this is l_pMatrixRawBuffer[1*2 + 1];
+		 * l_pMatrixRawBuffer[0]; // this is l_pMatrixRawBuffer[0*3 + 0];
+		 * l_pMatrixRawBuffer[1]; // this is l_pMatrixRawBuffer[0*3 + 1];
+		 * l_pMatrixRawBuffer[2]; // this is l_pMatrixRawBuffer[0*3 + 2];
+		 * l_pMatrixRawBuffer[3]; // this is l_pMatrixRawBuffer[1*3 + 0];
+		 * l_pMatrixRawBuffer[4]; // this is l_pMatrixRawBuffer[1*3 + 1];
+		 * l_pMatrixRawBuffer[5]; // this is l_pMatrixRawBuffer[1*3 + 2];
 		 *
-		 * l_pMatrixRawBuffer[i*2+j]; // this is index i of the first dimension, and j of the second dimension
+		 * l_pMatrixRawBuffer[i*3+j]; // this is index i of the first dimension, and j of the second dimension
 		 *
 		 * \endcode
 		 * \sa getBufferElementCount

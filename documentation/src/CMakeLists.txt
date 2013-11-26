@@ -112,12 +112,21 @@ IF(doxygen_bin)
 		CreateDoxygen.cmake
 		@ONLY)
 
+IF(WIN32)
 	ADD_CUSTOM_COMMAND(
 		TARGET ${PROJECT_NAME}
 		POST_BUILD
-		COMMAND cmake -P CreateDoxygen.cmake
+                COMMAND ${OV_CUSTOM_DEPENDENCIES_PATH}/cmake/bin/cmake.exe -P CreateDoxygen.cmake
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 	)
+ELSEIF(UNIX)
+        ADD_CUSTOM_COMMAND(
+                TARGET ${PROJECT_NAME}
+                POST_BUILD
+                COMMAND cmake -P CreateDoxygen.cmake
+                WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        )
+ENDIF(WIN32)
 	
 # does not work, for some reason
 MESSAGE(STATUS "CURRENT SOURCE: ${CMAKE_CURRENT_SOURCE_DIR}")

@@ -49,13 +49,16 @@ namespace OpenViBEPlugins
 				if(l_oTypeIdentifier==OV_TypeId_Signal || l_oTypeIdentifier==OV_TypeId_Spectrum)
 				{
 					rBox.setInputType(0, l_oTypeIdentifier);
+					return true;
 				}
 				else
 				{
+					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are Signal and Spectrum, change refused.\n";
+
 					rBox.getInputType(0, l_oTypeIdentifier);
 					rBox.setOutputType(0, l_oTypeIdentifier);
+					return false;
 				}
-				return true;
 			}
 
 			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
@@ -65,13 +68,16 @@ namespace OpenViBEPlugins
 				if(l_oTypeIdentifier==OV_TypeId_Signal || l_oTypeIdentifier==OV_TypeId_Spectrum)
 				{
 					rBox.setOutputType(0, l_oTypeIdentifier);
+					return true;
 				}
 				else
 				{
+					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are Signal and Spectrum, change refused.\n";
+
 					rBox.getOutputType(0, l_oTypeIdentifier);
 					rBox.setInputType(0, l_oTypeIdentifier);
+					return false;
 				}
-				return true;
 			}
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);

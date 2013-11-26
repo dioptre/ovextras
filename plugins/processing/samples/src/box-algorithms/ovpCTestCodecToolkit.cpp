@@ -185,7 +185,7 @@ boolean CTestCodecToolkit::process(void)
 						m_oStimEncoder.getInputStimulationSet()->appendStimulation(l_pStimulations->getStimulationIdentifier(0)+1,l_pStimulations->getStimulationDate(0),0);
 					}
 				}
-				else if(l_oInputType==OV_TypeId_ExperimentationInformation)
+				else if(l_oInputType==OV_TypeId_ExperimentInformation)
 				{
 					uint64 l_pXPid = m_oExperimentInformationDecoder.getOutputExperimentIdentifier();
 					this->getLogManager() << LogLevel_Info << "Experiment information buffer received (xp ID: "<<l_pXPid<<").\n";

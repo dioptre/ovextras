@@ -92,9 +92,15 @@ boolean CBoxAlgorithmMatlabScripting::checkFailureRoutine(boolean bResult, const
 
 boolean CBoxAlgorithmMatlabScripting::OpenMatlabEngineSafely(void)
 {
-	this->getLogManager() << LogLevel_Trace << "Trying to open Matlab engine\n";
+	this->getLogManager() << LogLevel_Trace << "Trying to open the Matlab engine\n";
 #if defined TARGET_OS_Linux
 	m_pMatlabEngineHandle=::engOpen(m_sMatlabPath.toASCIIString());
+	if(!m_pMatlabEngine) 
+	{
+		this->getLogManager() << LogLevel_Error << "Could not open the Matlab engine.\n" << 
+			"The configured path to the matlab executable was expanded as '" << m_sMatlabPath << "'.\n";
+		return false;
+	}
 #elif defined TARGET_OS_Windows
 	__try
 	{
@@ -106,13 +112,16 @@ boolean CBoxAlgorithmMatlabScripting::OpenMatlabEngineSafely(void)
 			<< "\tTo use this box you must have MATLAB (32 bits version) installed on your computer.\n";
 		m_pMatlabEngineHandle = NULL;
 	}
-#endif
 	if(!m_pMatlabEngine)
 	{
 		this->getLogManager() << LogLevel_Error << "Could not open the Matlab engine.\n" << 
-			"The path in the box configuration was interpreted as '" << m_sMatlabPath << "'.\n";
+			"The matlab binary path was reasoned to be '" << m_sMatlabPath << "'.\n";
 		return false;
 	}
+#else
+	this->getLogManager() << LogLevel_Error << "Only Linux and Windows are supported\n";
+	return false;
+#endif
 	return true;
 }
 
@@ -166,7 +175,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 		{
 			l_pDecoder= new TStimulationDecoder<CBoxAlgorithmMatlabScripting>(*this);
 		}
-		else if(l_oInputType==OV_TypeId_ExperimentationInformation)
+		else if(l_oInputType==OV_TypeId_ExperimentInformation)
 		{
 			l_pDecoder= new TExperimentInformationDecoder<CBoxAlgorithmMatlabScripting>(*this);
 		}
@@ -210,7 +219,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 		{
 			l_pEncoder= new TStimulationEncoder<CBoxAlgorithmMatlabScripting>(*this);
 		}
-		else if(l_oOutputType==OV_TypeId_ExperimentationInformation)
+		else if(l_oOutputType==OV_TypeId_ExperimentInformation)
 		{
 			l_pEncoder= new TExperimentInformationEncoder<CBoxAlgorithmMatlabScripting>(*this);
 		}
@@ -226,24 +235,30 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 	}
 
 	getStaticBoxContext().getSettingValue(1, m_sMatlabPath);
+
+#if defined TARGET_OS_Windows
+	if(!FS::Files::directoryExists(m_sMatlabPath) && FS::Files::fileExists(m_sMatlabPath)) 
+	{
+		// The path might be pointing to the executable, try to extract the directory
+		char l_sParentPath[MAX_PATH];
+		FS::Files::getParentPath(m_sMatlabPath, l_sParentPath);
+		m_sMatlabPath = OpenViBE::CString(l_sParentPath);
+	}
+
 	sanitizePath(m_sMatlabPath);
 
 	this->getLogManager() << LogLevel_Trace << "Interpreting Matlab path as '" << m_sMatlabPath << "'\n";
 
-
-
 	if(!FS::Files::directoryExists(m_sMatlabPath)) 
 	{
-		this->getLogManager() << LogLevel_Error << "Problem with Matlab path '" << m_sMatlabPath << "'\n";
+		this->getLogManager() << LogLevel_Error << "Configured Matlab path '" << m_sMatlabPath << "' does not seem to be a directory\n";
 		return false;
 	}
-
-#if defined TARGET_OS_Windows
 
 	char * l_sPath = getenv("PATH");
 	if(l_sPath == NULL)
 	{
-		this->getLogManager() << LogLevel_Error << "Could not access the environment variable PATH to add Matlab.\n";
+		this->getLogManager() << LogLevel_Error << "Could not access the environment variable PATH to add Matlab path to it.\n";
 		return false;
 	}
 	string l_sStrPath = string(l_sPath);
@@ -292,7 +307,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 	sanitizePath(l_sWorkingDir);
 
 	this->getLogManager() << LogLevel_Trace << "Setting working directory to " << l_sWorkingDir << "\n";
-	l_sCommand = CString("cd ") + l_sWorkingDir;
+	l_sCommand = CString("cd '") + l_sWorkingDir + CString("'");
 	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while changing the working directory\n")) return false;
 
 	// executes the pre-run routine that defines the global identifiers for streams and stimulations codes
@@ -553,7 +568,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 					l_bUnknownStream = false;
 				}
 
-				if(l_oType == OV_TypeId_ExperimentationInformation)
+				if(l_oType == OV_TypeId_ExperimentInformation)
 				{
 					this->getLogManager() << LogLevel_Warning << "The Experiment Information Stream is not implemented with the Matlab Scripting Box. If this is relevant for your usage, please contact the official development Team.\n";
 					m_NbInputHeaderSent++;
@@ -700,7 +715,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 					l_bUnknownType = false;
 				}
 
-				if(l_oType == OV_TypeId_ExperimentationInformation)
+				if(l_oType == OV_TypeId_ExperimentInformation)
 				{
 					this->getLogManager() << LogLevel_Warning << "The Experiment Information Stream is not implemented with the Matlab Scripting Box. If this is relevant for your usage, please contact the official development Team.\n";
 					l_bUnknownType = false;

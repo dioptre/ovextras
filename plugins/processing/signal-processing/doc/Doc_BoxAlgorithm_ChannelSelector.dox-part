@@ -64,8 +64,9 @@ Examples description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ChannelSelector_Examples|
- * Suppose you want to select the first 8 channel of an input stream, plus you want the Cz electrode. You would then use
- * the following string : "1:8;Cz"
+ * Suppose you want to select the first 8 channels of an input stream, plus you want the Cz electrode. You would then use
+ * the following string : "1:8[SEMICOLON]Cz", where you replace [SEMICOLON] with the actual semicolon character (that we are unable
+ * to print here due to bug in CMake). 
  * |OVP_DocEnd_BoxAlgorithm_ChannelSelector_Examples|
 __________________________________________________________________
 

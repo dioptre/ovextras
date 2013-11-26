@@ -9,7 +9,7 @@
 #include <xml/IReader.h>
 
 #include <stack>
-#include "libSVM/svm.h"
+#include "../../../contrib/packages/libSVM/svm.h"
 
 #define OVP_ClassId_Algorithm_ClassifierSVM                                        OpenViBE::CIdentifier(0x50486EC2, 0x6F2417FC)
 #define OVP_ClassId_Algorithm_ClassifierSVMDesc                                    OpenViBE::CIdentifier(0x272B056E, 0x0C6502AC)

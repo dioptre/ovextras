@@ -36,6 +36,13 @@ boolean CBoxAlgorithmBCI2000Reader::initialize(void)
 	m_ui32ChannelCount=m_pB2KReaderHelper->getChannels();
 	m_ui32SampleCountPerBuffer=static_cast<uint32>((uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(),1));
 	m_ui32SamplesSent=0;
+
+	if(m_ui32SampleCountPerBuffer==0) 
+	{
+		this->getLogManager() << LogLevel_Error << "SampleCountPerBuffer is 0, this will not work\n";
+		return false;
+	}
+
 	m_pBuffer=new float64[m_ui32ChannelCount*m_ui32SampleCountPerBuffer];
 	m_pStates=new uint32[m_pB2KReaderHelper->getStateVectorSize()*m_ui32SampleCountPerBuffer];
 	m_ui32Rate=(uint32)m_pB2KReaderHelper->getRate();
@@ -44,7 +51,11 @@ boolean CBoxAlgorithmBCI2000Reader::initialize(void)
 		this->getLogManager() << LogLevel_Error << "Sampling rate could not be extracted from the file.\n";
 		return false;
 	}
-
+	if(m_ui32Rate == 0)
+	{
+		this->getLogManager() << LogLevel_Error << "Sampling rate of 0 is not supported.\n";
+		return false;
+	}
 
 	m_oSignalEncoder.initialize(*this);
 	m_pSignalOutputMatrix=m_oSignalEncoder.getInputMatrix();

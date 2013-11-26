@@ -51,7 +51,8 @@ __________________________________________________________________
  * Suppose you have a full band spectrum and that you want to work on alpha band. You can use
  * a \ref Doc_BoxAlgorithm_FrequencyBandSelector box to select this band for later processing
  * with the following setting : "8:12". Now suppose you want to work on two bands, for instance
- * Alpha and the 16-24Hz subset of Beta, you should use the following setting value : "8:12;16:24"
+ * Alpha and the 16-24Hz subset of Beta, you should use the following setting value : "8:12[SEMICOLON]16:24"
+ * with [SEMICOLON] replaced by the actual semicolon charater.
  * |OVP_DocEnd_BoxAlgorithm_FrequencyBandSelector_Examples|
 __________________________________________________________________
 

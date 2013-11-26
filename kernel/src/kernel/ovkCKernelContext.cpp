@@ -268,13 +268,15 @@ boolean CKernelContext::initialize(void)
 	m_pTypeManager->registerEnumerationEntry(OV_TypeId_LogLevel, "Fatal error",              LogLevel_Fatal);
 
 	m_pTypeManager->registerStreamType(OV_TypeId_EBMLStream, "EBML stream", OV_UndefinedIdentifier);
-	m_pTypeManager->registerStreamType(  OV_TypeId_ExperimentationInformation, "Experiment information", OV_TypeId_EBMLStream);
+	m_pTypeManager->registerStreamType(  OV_TypeId_ExperimentInformation, "Experiment information", OV_TypeId_EBMLStream);
 	m_pTypeManager->registerStreamType(  OV_TypeId_Stimulations, "Stimulations", OV_TypeId_EBMLStream);
 	m_pTypeManager->registerStreamType(  OV_TypeId_StreamedMatrix, "Streamed matrix", OV_TypeId_EBMLStream);
 	m_pTypeManager->registerStreamType(    OV_TypeId_ChannelLocalisation, "Channel localisation", OV_TypeId_StreamedMatrix);
 	m_pTypeManager->registerStreamType(    OV_TypeId_FeatureVector, "Feature vector", OV_TypeId_StreamedMatrix);
 	m_pTypeManager->registerStreamType(    OV_TypeId_Signal, "Signal", OV_TypeId_StreamedMatrix);
 	m_pTypeManager->registerStreamType(    OV_TypeId_Spectrum, "Spectrum", OV_TypeId_StreamedMatrix);
+
+	m_pTypeManager->registerType(OV_TypeId_Message,  "Message");
 
 	this->getLogManager() << LogLevel_Trace << "Creating scenario manager\n";
 	m_pScenarioManager=new CScenarioManager(m_rMasterKernelContext);

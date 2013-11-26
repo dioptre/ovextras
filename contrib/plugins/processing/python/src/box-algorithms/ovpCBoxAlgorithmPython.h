@@ -118,9 +118,9 @@ namespace OpenViBEPlugins
 					{
 						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Channel Localisation input is not implemented.\n";
 					}
-					else if (l_oTypeIdentifier == OV_TypeId_ExperimentationInformation)
+					else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
 					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Experimentation Information input is not implemented.\n";
+						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Experiment Information input is not implemented.\n";
 					}
 					else
 					{
@@ -170,9 +170,9 @@ namespace OpenViBEPlugins
 					{
 						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Channel Localisation output is not implemented.\n";
 					}
-					else if (l_oTypeIdentifier == OV_TypeId_ExperimentationInformation)
+					else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
 					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Experimentation Information output is not implemented.\n";
+						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Experiment Information output is not implemented.\n";
 					}
 					else
 					{

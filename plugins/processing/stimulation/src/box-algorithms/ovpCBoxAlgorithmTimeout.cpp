@@ -15,6 +15,8 @@ boolean CBoxAlgorithmTimeout::initialize(void)
 	m_ui64Timeout = static_cast<uint64>(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0)) << 32;
 	m_ui64StimulationToSend = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
+	m_ui64LastTimePolled = 0;
+
 	return true;
 }
 /*******************************************************************************/

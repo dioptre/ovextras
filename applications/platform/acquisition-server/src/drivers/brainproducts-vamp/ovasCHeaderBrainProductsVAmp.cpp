@@ -153,7 +153,7 @@ boolean CHeaderBrainProductsVAmp::isPairGainSet(void) const
 //___________________________________________________________________//
 //                                                                   //
 
-// Experimentation information
+// Experiment information
 boolean CHeaderBrainProductsVAmp::setExperimentIdentifier(const uint32 ui32ExperimentIdentifier)
 {
 	return m_pBasicHeader->setExperimentIdentifier(ui32ExperimentIdentifier);

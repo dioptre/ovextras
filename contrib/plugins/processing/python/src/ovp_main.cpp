@@ -37,7 +37,7 @@ bool CPythonInitializer::checkPythonPath()
 			bool l_bExists = (_access(l_sFilename.c_str(), 0) == 0);
 			if (l_bExists)
 			{
-				//std::cout << "found : " << l_sPath.substr(0,found) << std::endl;
+				// std::cout << "Found Python in : " << l_sPath.substr(0,found) << std::endl;
 				return true;
 			}
 			else
@@ -50,6 +50,8 @@ bool CPythonInitializer::checkPythonPath()
 	}
 	
 	std::cout << "Python directory not found. You probably have a corrupted python installation!" << std::endl;
+	std::cout << "The tried path from Py_GetPath() was [" << Py_GetPath() << "]\n";
+
 	return false;
 }
 #endif
@@ -82,8 +84,6 @@ CPythonInitializer::CPythonInitializer(void) :
 			m_bPythonAvailable = true;
 		}
 #endif
-
-
 
 }
 
