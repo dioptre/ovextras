@@ -64,6 +64,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32IndexOut;
 		OpenViBE::uint32 m_ui32BuffDataIndex;
 
+		OpenViBE::uint32 m_ui32TimeOutMilliseconds;
+
 		char* m_pStructHeader;
 		char* m_pStructHeaderInfo;
 		unsigned short int *m_pStructBuffData;

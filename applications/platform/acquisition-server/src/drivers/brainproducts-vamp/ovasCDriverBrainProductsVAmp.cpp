@@ -28,8 +28,8 @@ using namespace std;
 
 CDriverBrainProductsVAmp::CDriverBrainProductsVAmp(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
-	,m_bAcquireAuxiliaryAsEEG(rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_Driver_VAmpAcquireAuxiliaryAsEEG}", false))
-	,m_bAcquireTriggerAsEEG(rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_Driver_VAmpAcquireTriggerAsEEG}", false))
+	,m_bAcquireAuxiliaryAsEEG(false)
+	,m_bAcquireTriggerAsEEG(false)
 	,m_oHeader(
 		m_bAcquireAuxiliaryAsEEG,
 		m_bAcquireTriggerAsEEG)
@@ -380,6 +380,8 @@ boolean CDriverBrainProductsVAmp::configure(void)
 	SettingsHelper l_oSettings("AcquisitionServer_Driver_BrainProducts-VAmp", m_rDriverContext.getConfigurationManager());
 	// @note m_oHeader is CHeaderBrainProductsVAmp, whereas the current interface supports only IHeader. Thus, some info may not be loaded/saved.
 	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("AcquireAuxiliaryAsEEG", &m_bAcquireAuxiliaryAsEEG);
+	l_oSettings.add("AcquireTriggerAsEEG", &m_bAcquireTriggerAsEEG);
 	l_oSettings.load();
 
 	if(!m_oConfiguration.configure(*(m_oHeader.getBasicHeader()))) // the basic configure will use the basic header

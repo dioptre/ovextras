@@ -38,10 +38,10 @@ CDriverNeuroskyMindset::CDriverNeuroskyMindset(IDriverContext& rDriverContext)
 
 	m_ui32ComPort = OVAS_MINDSET_INVALID_COM_PORT;
 
-	m_bESenseChannels       = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_ESenseValues}", false);
-	m_bBandPowerChannels    = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_PowerBands}", false);
-	m_bBlinkStimulations    = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_Blink}", false);
-	m_bBlinkStrenghtChannel = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_BlinkStrength}", false);
+	m_bESenseChannels       = false; 
+	m_bBandPowerChannels    = false;
+	m_bBlinkStimulations    = false;
+	m_bBlinkStrenghtChannel = false;
 }
 
 CDriverNeuroskyMindset::~CDriverNeuroskyMindset(void)

@@ -4,6 +4,7 @@
 #include "../ovasCConfigurationBuilder.h"
 #include <gtk/gtk.h>
 #include <string.h>
+#include <iostream>
 
 namespace OpenViBEAcquisitionServer
 {

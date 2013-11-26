@@ -44,16 +44,7 @@ CDriverEmotivEPOC::CDriverEmotivEPOC(IDriverContext& rDriverContext)
 	,m_pSample(NULL)
 {
 	m_bUseGyroscope = false;
-	if(m_rDriverContext.getConfigurationManager().lookUpConfigurationTokenIdentifier("AcquisitionServer_PathToEmotivResearchSDK") == OV_UndefinedIdentifier)
-	{
-		//it's possible at first start of the acquisition server/ emotiv driver selection
-		m_rDriverContext.getLogManager() << LogLevel_Trace << "[CONS] {AcquisitionServer_PathToEmotivResearchSDK} token unset. Ignore this message if you never used the Emotiv Driver.\n";
-		m_sPathToEmotivSDK = "";
-	}
-	else
-	{
-		m_sPathToEmotivSDK = m_rDriverContext.getConfigurationManager().expand("${AcquisitionServer_PathToEmotivResearchSDK}");
-	}
+	m_sPathToEmotivSDK = "";
 	m_sCommandForPathModification = "";
 
 	m_ui32UserID = 0;

@@ -24,10 +24,9 @@ CDriverGenericOscillator::CDriverGenericOscillator(IDriverContext& rDriverContex
 	,m_pSample(NULL)
 	,m_ui32TotalSampleCount(0)
 	,m_ui32StartTime(0)
+	,m_bSendPeriodicStimulations(false)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGenericOscillator::CDriverGenericOscillator\n";
-
-	m_bSendPeriodicStimulations = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_GenericOscilator_SendPeriodicStimulations}");
 
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(4);
