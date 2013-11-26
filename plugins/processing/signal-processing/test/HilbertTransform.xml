@@ -23,7 +23,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>/home/ac-inria/work/git/openvibe/dist/share/openvibe/scenarios/signals/real-hand-movements.gdf</Value>
+					<Value>${Path_Data}/scenarios/signals/real-hand-movements.gdf</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
@@ -82,7 +82,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue>record-[$core{date}-$core{time}].csv</DefaultValue>
-					<Value>/home/ac-inria/work/git/openvibe/plugins/processing/signal-processing/test/phase_HilbertTransform.csv</Value>
+					<Value>${Path_Root}/../plugins/processing/signal-processing/test/phase_HilbertTransform.csv</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
@@ -151,7 +151,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue>record-[$core{date}-$core{time}].csv</DefaultValue>
-					<Value>/home/ac-inria/work/git/openvibe/plugins/processing/signal-processing/test/envelope_HilbertTransform.csv</Value>
+					<Value>${Path_Root}/../plugins/processing/signal-processing/test/envelope_HilbertTransform.csv</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
@@ -358,7 +358,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue>record-[$core{date}-$core{time}].csv</DefaultValue>
-					<Value>/home/ac-inria/work/git/openvibe/plugins/processing/signal-processing/test/hilbert_HilbertTransform.csv</Value>
+					<Value>${Path_Root}/../plugins/processing/signal-processing/test/hilbert_HilbertTransform.csv</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>

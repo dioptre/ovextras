@@ -7,4 +7,3 @@ CMakeLists.txt.*
 .*.swp
 externals/*/
 
-/CMakeLists.txt.user
