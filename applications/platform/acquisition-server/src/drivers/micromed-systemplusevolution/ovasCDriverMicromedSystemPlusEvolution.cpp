@@ -16,6 +16,9 @@
 #include <windows.h>
 #include <cstring>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <openvibe/ovITimeArithmetics.h>
 
 #define boolean OpenViBE::boolean
@@ -199,6 +202,7 @@ CDriverMicromedSystemPlusEvolution::CDriverMicromedSystemPlusEvolution(IDriverCo
 ,m_pCallback(NULL)
 ,m_ui32SampleCountPerSentBlock(0)
 ,m_pSample(NULL)
+,m_ui32TimeOutMilliseconds(5000)
 {
 	//load the ddl of the driver
 	m_oLibMicromed = NULL ;
@@ -549,15 +553,14 @@ boolean CDriverMicromedSystemPlusEvolution::initialize(
 
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "> Server is listening on port : " << m_ui32ServerHostPort << "\n";
 
-	uint32 l_ui32TimeOutMilliseconds=(uint32)m_rDriverContext.getConfigurationManager().expandAsInteger("${AcquisitionServer_Driver_MicromedTimeOut}", 5000);
-	if(m_pConnectionServer->isReadyToReceive(l_ui32TimeOutMilliseconds))
+	if(m_pConnectionServer->isReadyToReceive(m_ui32TimeOutMilliseconds))
 	{
 		// Accept new client
 		m_pConnection=m_pConnectionServer->accept();
 	}
 	else
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "> Time out after " << l_ui32TimeOutMilliseconds << " milliseconds\n";
+		m_rDriverContext.getLogManager() << LogLevel_Error << "> Time out after " << m_ui32TimeOutMilliseconds << " milliseconds\n";
 
 		// Cleans up server connection
 		m_pConnectionServer->close();
@@ -868,13 +871,20 @@ boolean CDriverMicromedSystemPlusEvolution::isConfigurable(void)
 
 boolean CDriverMicromedSystemPlusEvolution::configure(void)
 {
-	CConfigurationNetworkBuilder l_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Micromed-SystemPlusEvolution.ui");
-
+	CConfigurationNetworkBuilder l_oConfiguration(
+		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Micromed-SystemPlusEvolution.ui");
 	l_oConfiguration.setHostPort(m_ui32ServerHostPort);
+
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_SystemPlusEvolution", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("ServerHostPort", &m_ui32ServerHostPort);
+	l_oSettings.add("TimeOutMs",  &m_ui32TimeOutMilliseconds);
+	l_oSettings.load();
 
 	if(l_oConfiguration.configure(m_oHeader))
 	{
 		m_ui32ServerHostPort=l_oConfiguration.getHostPort();
+		l_oSettings.save();
 		return true;
 	}
 

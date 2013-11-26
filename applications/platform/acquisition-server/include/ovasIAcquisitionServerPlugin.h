@@ -3,6 +3,9 @@
 
 #include "ovas_base.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include "boost/variant.hpp"
 #include <map>
 
@@ -15,6 +18,8 @@
 namespace OpenViBEAcquisitionServer
 {
 	class CAcquisitionServer;
+
+#ifdef OV_BOOST_SETTINGS
 
 	/// Structure holding a single user-available setting for the plugin
 	struct PluginSetting
@@ -31,6 +36,7 @@ namespace OpenViBEAcquisitionServer
 				return boost::get<T>(value);
 			}
 	};
+#endif
 
 	class IAcquisitionServerPlugin
 	{
@@ -59,18 +65,18 @@ namespace OpenViBEAcquisitionServer
 
 		public:
 
+			IAcquisitionServerPlugin(const OpenViBE::Kernel::IKernelContext& rKernelContext, const OpenViBE::CString &name) :
+				m_rKernelContext(rKernelContext), m_oSettingsHelper(name, rKernelContext.getConfigurationManager())
+			{}
+
+			virtual ~IAcquisitionServerPlugin() {}
+
+#ifdef OV_BOOST_SETTINGS
 			struct PluginProperties
 			{
 					OpenViBE::CString name;
 					std::map<OpenViBE::CString, PluginSetting> settings;
 			};
-
-			IAcquisitionServerPlugin(const OpenViBE::Kernel::IKernelContext& rKernelContext) :
-				m_rKernelContext(rKernelContext)
-			{}
-
-			virtual ~IAcquisitionServerPlugin() {}
-
 
 			/// Adds a setting to the plugin. This method should be called from the constructor
 			template<typename T> void addSetting(OpenViBE::CString name, T value)
@@ -95,11 +101,18 @@ namespace OpenViBEAcquisitionServer
 			const PluginProperties& getProperties() const { return m_oProperties; }
 			PluginProperties& getProperties() { return m_oProperties; }
 
-
 		protected:
 			struct PluginProperties m_oProperties;
-
 			const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
+#endif
+		public:
+			const SettingsHelper& getSettingsHelper() const { return m_oSettingsHelper; }
+			SettingsHelper& getSettingsHelper() { return m_oSettingsHelper; }
+
+		protected:
+			const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
+			SettingsHelper m_oSettingsHelper;
+
 	};
 }
 

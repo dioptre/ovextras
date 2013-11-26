@@ -3,6 +3,9 @@
 #include "ovasCDriverEmotivEPOC.h"
 #include "ovasCConfigurationEmotivEPOC.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include "edk.h"
 
 #include <system/Time.h>
@@ -41,16 +44,7 @@ CDriverEmotivEPOC::CDriverEmotivEPOC(IDriverContext& rDriverContext)
 	,m_pSample(NULL)
 {
 	m_bUseGyroscope = false;
-	if(m_rDriverContext.getConfigurationManager().lookUpConfigurationTokenIdentifier("AcquisitionServer_PathToEmotivResearchSDK") == OV_UndefinedIdentifier)
-	{
-		//it's possible at first start of the acquisition server/ emotiv driver selection
-		m_rDriverContext.getLogManager() << LogLevel_Trace << "[CONS] {AcquisitionServer_PathToEmotivResearchSDK} token unset. Ignore this message if you never used the Emotiv Driver.\n";
-		m_sPathToEmotivSDK = "";
-	}
-	else
-	{
-		m_sPathToEmotivSDK = m_rDriverContext.getConfigurationManager().expand("${AcquisitionServer_PathToEmotivResearchSDK}");
-	}
+	m_sPathToEmotivSDK = "";
 	m_sCommandForPathModification = "";
 
 	m_ui32UserID = 0;
@@ -383,12 +377,23 @@ boolean CDriverEmotivEPOC::isConfigurable(void)
 
 boolean CDriverEmotivEPOC::configure(void)
 {
-	CConfigurationEmotivEPOC m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Emotiv-EPOC.ui", m_bUseGyroscope, m_sPathToEmotivSDK, m_ui32UserID);
+	CConfigurationEmotivEPOC m_oConfiguration(m_rDriverContext, 
+		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Emotiv-EPOC.ui", 
+		m_bUseGyroscope, m_sPathToEmotivSDK, m_ui32UserID);
+
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_EmotivEPOC", m_rDriverContext.getConfigurationManager() );
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("UseGyroscope", &m_bUseGyroscope);
+	l_oSettings.add("PathToEmotivSDK", &m_sPathToEmotivSDK);
+	l_oSettings.add("UserID", &m_ui32UserID);
+	l_oSettings.load();
 
 	if(!m_oConfiguration.configure(m_oHeader)) 
 	{
 		return false;
 	}
+
+	l_oSettings.save();
 
 	return true;
 }

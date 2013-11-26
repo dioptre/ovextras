@@ -3,6 +3,9 @@
 #include "ovasCDriverNeuroskyMindset.h"
 #include "ovasCConfigurationNeuroskyMindset.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <sstream>
 #include <system/Time.h>
 
@@ -35,10 +38,10 @@ CDriverNeuroskyMindset::CDriverNeuroskyMindset(IDriverContext& rDriverContext)
 
 	m_ui32ComPort = OVAS_MINDSET_INVALID_COM_PORT;
 
-	m_bESenseChannels       = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_ESenseValues}", false);
-	m_bBandPowerChannels    = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_PowerBands}", false);
-	m_bBlinkStimulations    = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_Blink}", false);
-	m_bBlinkStrenghtChannel = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_BlinkStrength}", false);
+	m_bESenseChannels       = false; 
+	m_bBandPowerChannels    = false;
+	m_bBlinkStimulations    = false;
+	m_bBlinkStrenghtChannel = false;
 }
 
 CDriverNeuroskyMindset::~CDriverNeuroskyMindset(void)
@@ -523,10 +526,21 @@ boolean CDriverNeuroskyMindset::configure(void)
 		,m_bBlinkStimulations
 		,m_bBlinkStrenghtChannel);
 
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_NeuroSkyMindSet", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("ComPort", &m_ui32ComPort);
+	l_oSettings.add("ESenseChannels", &m_bESenseChannels);
+	l_oSettings.add("BandPowerChannels", &m_bBandPowerChannels);
+	l_oSettings.add("Stimulations", &m_bBlinkStimulations);
+	l_oSettings.add("StrenghtChannel", &m_bBlinkStrenghtChannel);
+	l_oSettings.load();
+
 	if(!m_oConfiguration.configure(m_oHeader)) // the basic configure will use the basic header
 	{
 		return false;
 	}
+
+	l_oSettings.save();
 
 	return true;
 }

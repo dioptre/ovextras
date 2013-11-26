@@ -3,6 +3,9 @@
 #include "ovasCDriverGTecGUSBamp.h"
 #include "ovasCConfigurationGTecGUSBamp.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <toolkit/ovtk_all.h>
 
 #include <system/Time.h>
@@ -721,7 +724,20 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 	detectDevices();
 
 	string targetMasterSerial = (numDevices>1) ? m_masterSerial : "";
-	CConfigurationGTecGUSBamp m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-GTec-GUSBamp.ui", m_ui32DeviceIndex, m_ui8CommonGndAndRefBitmap, m_i32NotchFilterIndex,m_i32BandPassFilterIndex,m_bTriggerInputEnabled,m_vDevicesSerials,targetMasterSerial);
+	CConfigurationGTecGUSBamp m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-GTec-GUSBamp.ui", 
+		m_ui32DeviceIndex, m_ui8CommonGndAndRefBitmap, m_i32NotchFilterIndex,m_i32BandPassFilterIndex,
+		m_bTriggerInputEnabled,m_vDevicesSerials,targetMasterSerial);
+
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_GTecGUSBamp", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.add("DeviceIndex", &m_ui32DeviceIndex);
+	l_oSettings.add("CommonGndAndRefBitmap", &m_ui8CommonGndAndRefBitmap);
+	l_oSettings.add("NotchFilterIndex", &m_i32NotchFilterIndex);
+	l_oSettings.add("BandPassFilterIndex", &m_i32BandPassFilterIndex);
+	l_oSettings.add("TriggerInputEnabled", &m_bTriggerInputEnabled);
+	l_oSettings.add("DeviceSerials", &m_vDevicesSerials);
+	l_oSettings.add("TargetMasterSerial", &targetMasterSerial);
+	l_oSettings.load();
 
 	//reduce from number of channels for all devices to the number of channels for one device
 	m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
@@ -730,6 +746,8 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 	{
 		return false;
 	}
+
+	l_oSettings.save();
 
 	//start reconfigure based on the new input:
 
@@ -774,6 +792,30 @@ void CDriverGTecGUSBamp::applyPriority(boost::thread* thread, int priority)
 		case THREAD_PRIORITY_BELOW_NORMAL   : res = SetThreadPriority(th, THREAD_PRIORITY_BELOW_NORMAL);    break;
 		case THREAD_PRIORITY_LOWEST                   : res = SetThreadPriority(th, THREAD_PRIORITY_LOWEST);                  break;
     }
+}
+
+namespace OpenViBEAcquisitionServer {
+
+inline std::ostream& operator<< (std::ostream& out, const vector<string>& var)
+{
+	for(size_t i=0;i<var.size();i++) {
+		out << var[i] << " ";
+	}
+
+	return out;
+}
+
+inline std::istream& operator>> (std::istream& in, vector<string>& var)
+{
+	var.clear();
+	string tmp;
+	while( in >> tmp ) {
+		var.push_back(tmp);
+	}
+
+	return in;
+}
+
 }
 
 #endif // TARGET_HAS_ThirdPartyGUSBampCAPI

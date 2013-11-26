@@ -6,6 +6,9 @@
 #include <system/Time.h>
 #include <system/Memory.h>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #if defined TARGET_OS_Windows
 
 #include <cmath>
@@ -238,7 +241,19 @@ boolean CDriverMindMediaNeXus32B::isConfigurable(void)
 boolean CDriverMindMediaNeXus32B::configure(void)
 {
 	CConfigurationBuilder m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-MindMedia-NeXus32B.ui");
-	return m_oConfiguration.configure(m_oHeader);
+
+	SettingsHelper l_oSettings("AcquisitionServer_Driver_MindMediaNexus32B", m_rDriverContext.getConfigurationManager());
+	l_oSettings.add("Header", &m_oHeader);
+	l_oSettings.load();
+
+	if(!m_oConfiguration.configure(m_oHeader)) 
+	{
+		return false;
+	}
+
+	l_oSettings.save();
+
+	return true;
 }
 
 void CDriverMindMediaNeXus32B::processData(
