@@ -46,7 +46,7 @@ MESSAGE(STATUS "  CMAKE_CXX_FLAGS_DEBUG = '${CMAKE_CXX_FLAGS_DEBUG}'")
 # if no specific branch has been given for an openvibe component, default is to compile its trunk folder
 ## SET(OV_TRUNK "trunc")
 
-# SET(OV_COMPILE_TESTS "true")
+SET(OV_COMPILE_TESTS "true")
 
 # By setting SKIP[_FOLDER]* you can skip a subtree (example: SKIP_A_B_C skips folder a/b/c and all its subfolders if any)
 SET(SKIP_DOCUMENTATION "1")
