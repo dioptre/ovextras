@@ -42,6 +42,10 @@ IF(UNIX)
 	ADD_DEFINITIONS(-DTARGET_COMPILER_GCC)
 ENDIF(UNIX)
 
+IF(OV_COMPILE_TESTS)
+    ADD_SUBDIRECTORY("test")
+ENDIF(OV_COMPILE_TESTS)
+
 # -----------------------------
 # Install files
 # -----------------------------
