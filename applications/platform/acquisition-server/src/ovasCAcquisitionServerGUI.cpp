@@ -15,6 +15,7 @@
 #include "generic-raw-reader/ovasCDriverGenericRawTelnetReader.h"
 #include "brainproducts-brainampseries/ovasCDriverBrainProductsBrainampSeries.h"
 #include "brainproducts-vamp/ovasCDriverBrainProductsVAmp.h"
+#include "egi-ampserver/ovasCDriverEGIAmpServer.h"
 #include "emotiv-epoc/ovasCDriverEmotivEPOC.h"
 #include "micromed-systemplusevolution/ovasCDriverMicromedSystemPlusEvolution.h"
 #include "mindmedia-nexus32b/ovasCDriverMindMediaNeXus32B.h"
@@ -131,6 +132,8 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	m_vDriver.push_back(new CDriverTMSiRefa32B(m_pAcquisitionServer->getDriverContext()));
 	m_vDriver.push_back(new CDriverBrainProductsBrainampSeries(m_pAcquisitionServer->getDriverContext()));
 #endif
+
+	m_vDriver.push_back(new CDriverEGIAmpServer(m_pAcquisitionServer->getDriverContext()));
 
 #if defined TARGET_HAS_ThirdPartyUSBFirstAmpAPI
 	m_vDriver.push_back(new CDriverBrainProductsVAmp(m_pAcquisitionServer->getDriverContext()));

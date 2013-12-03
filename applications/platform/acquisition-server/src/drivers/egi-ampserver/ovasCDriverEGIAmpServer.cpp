@@ -296,16 +296,16 @@ boolean CDriverEGIAmpServer::configure(void)
 {
 	CConfigurationEGIAmpServer m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-egi-ampserver.ui" );
 
-	m_oConfiguration.setHostName(m_sAmpServerHostName);
-	m_oConfiguration.setCommandPort(m_ui32CommandPort);
-	m_oConfiguration.setStreamPort(m_ui32StreamPort);
-
 	SettingsHelper l_oSettings("AcquisitionServer_Driver_EGIAmpServer", m_rDriverContext.getConfigurationManager());
 	l_oSettings.add("Header", &m_oHeader);
 	l_oSettings.add("AmpServerHostName", &m_sAmpServerHostName);
 	l_oSettings.add("CommandPort", &m_ui32CommandPort);
 	l_oSettings.add("StreamPort", &m_ui32StreamPort);
 	l_oSettings.load();
+	
+	m_oConfiguration.setHostName(m_sAmpServerHostName);
+	m_oConfiguration.setCommandPort(m_ui32CommandPort);
+	m_oConfiguration.setStreamPort(m_ui32StreamPort);
 
 	if(m_oConfiguration.configure(m_oHeader))
 	{
