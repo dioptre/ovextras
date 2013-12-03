@@ -110,8 +110,8 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 			for(uint32 i=0;i<l_ui32PairsCount;i++)
 			{
 				l_ui32Index=2*i;
-				l_name1 = l_pInputMatrix1->getDimensionLabel(0,l_pChannelPairs->getBuffer()[l_ui32Index]);
-				l_name2 = l_pInputMatrix2->getDimensionLabel(0,l_pChannelPairs->getBuffer()[l_ui32Index+1]);
+				l_name1 = l_pInputMatrix1->getDimensionLabel(0,(uint32)(l_pChannelPairs->getBuffer()[l_ui32Index]));
+				l_name2 = l_pInputMatrix2->getDimensionLabel(0,(uint32)(l_pChannelPairs->getBuffer()[l_ui32Index+1]));
 				l_name = l_name1+l_name2;
 				l_pOutputMatrix->setDimensionLabel(0,i,l_name);
 			}
@@ -145,7 +145,7 @@ boolean CAlgorithmSingleTrialPhaseLockingValue::process(void)
 				l_vecXdChannelToCompare2 = VectorXd::Zero(l_ui32SamplesPerChannel2);
 				l_vecXdPhase1 = VectorXd::Zero(l_ui32SamplesPerChannel1);
 				l_vecXdPhase2 = VectorXd::Zero(l_ui32SamplesPerChannel2);
-				l_sum = (0.0,0.0);
+				l_sum = 0.0;		// imaginary part is set to zero by definition
 
 				uint32 l_channelIndex = 2*channel; //Index on single channel
 

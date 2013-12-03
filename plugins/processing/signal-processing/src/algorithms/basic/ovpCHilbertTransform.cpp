@@ -20,7 +20,7 @@ OpenViBE::boolean HilbertTransform::transform(const Eigen::VectorXcd& vecXcdInpu
 	const uint32 l_ui32NSamples = vecXcdInput.size();
 
 	// Resize our buffers if input size has changed
-	if(m_vecXcdSignalFourier.size() != l_ui32NSamples) 
+	if((uint32)m_vecXcdSignalFourier.size() != l_ui32NSamples) 
 	{
 		m_vecXcdSignalFourier = VectorXcd::Zero(l_ui32NSamples);
 		m_vecXcdHilbert = VectorXcd::Zero(l_ui32NSamples);
