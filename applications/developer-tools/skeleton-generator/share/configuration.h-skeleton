@@ -12,7 +12,7 @@ namespace OpenViBEAcquisitionServer
 	 * \class CConfiguration@@ClassName@@
 	 * \author @@AuthorName@@ (@@CompanyName@@)
 	 * \date @@Date@@
-	 * \erief The CConfiguration@@ClassName@@ handles the configuration dialog specific to the @@DriverName@@ device.
+	 * \brief The CConfiguration@@ClassName@@ handles the configuration dialog specific to the @@DriverName@@ device.
 	 *
 	 * TODO: details
 	 *

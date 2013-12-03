@@ -7,31 +7,28 @@ File generation completed
 -------------------------
 
 WARNING:
-Writing a new driver for an EEG device is hardly dependent on hardware specifications, such as OS compatibility
+Writing a new driver for an EEG device is often dependent on hardware specifications, such as OS compatibility
 or communication protocol. The generator gives you only the basic skeletons for easy integration with OpenViBE, 
 please refer to your device specifications (API, protocol description, etc.) for the next steps...
 
 The generator produced the following files:
 
-The Driver class:
-- ovasCDriver@@ClassName@@.h
-- ovasCDriver@@ClassName@@.cpp
-You can put the driver files in the trunk directory in your local repository:
-     [openvibe-repository]/trunk/openvibe-applications/acquisition-server/trunk/src/[my-device]/
-
-The configuration class:
+The Configuration and Driver classes:
 - ovasCConfiguration@@ClassName@@.h
 - ovasCConfiguration@@ClassName@@.cpp
-You can put these files in the trunk directory in your local repository:
-     [openvibe-repository]/trunk/openvibe-applications/acquisition-server/trunk/src/[my-device]/
+- ovasCDriver@@ClassName@@.h
+- ovasCDriver@@ClassName@@.cpp
+You can put these files here in your local repository:
+     [openvibe-repository]/contrib/plugins/server-drivers/[my-device]/src/
 
 The glade interface:
 - interface-@@ClassName@@.glade
-You can put this file in the trunk directory in your local repository:
-     [openvibe-repository]/trunk/openvibe-applications/acquisition-server/trunk/share/openvibe-applications/acquisition-server/
+You can put this file in here in your local repository:
+     [openvibe-repository]/contrib/plugins/server-drivers/[my-device]/share/
 
-Don't forget to declare your driver in the Acquisition Server application.
-Look in ovasCAquisitionServerGUI.cpp, you will find examples of such declarations.
+Don't forget to declare your driver to the Acquisition Server application.
+This happens in ./contrib/common/contribAcquisitionServer.inl, there you 
+will find examples of such declarations.
 
 For more information about building a new driver and filling your skeleton, please read the official tutorial:
 http://openvibe.inria.fr/tutorial-creating-a-new-driver-for-the-acquisition-server/
