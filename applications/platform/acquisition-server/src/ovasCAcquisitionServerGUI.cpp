@@ -103,6 +103,13 @@ static void combobox_sample_count_per_sent_block_changed_cb(::GtkComboBox* pComb
 	static_cast<CAcquisitionServerGUI*>(pUserData)->comboBoxSampleCountPerSentBlockChanged(pComboBox);
 }
 
+static bool compare_driver_names(OpenViBEAcquisitionServer::IDriver* a,
+	OpenViBEAcquisitionServer::IDriver* b) 
+{
+		return std::string(a->getName()) < std::string(b->getName());
+}
+
+
 //___________________________________________________________________//
 //                                                                   //
 
@@ -148,6 +155,8 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 #if defined TARGET_HAS_OpenViBEContributions
 	OpenViBEContributions::initiateContributions(this, m_pAcquisitionServer, rKernelContext, &m_vDriver);
 #endif
+
+	std::sort(m_vDriver.begin(), m_vDriver.end(), compare_driver_names);
 
 	scanPluginSettings();
 
