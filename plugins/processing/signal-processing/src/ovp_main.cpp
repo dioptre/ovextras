@@ -25,6 +25,8 @@
 #include "box-algorithms/basic/ovpCBoxAlgorithmHilbert.h"
 #include "algorithms/basic/ovpCHilbertTransform.h"
 
+#include "algorithms/basic/ovpCWindowFunctions.h"
+
 
 #include "box-algorithms/ovpCTimeBasedEpoching.h"
 #include "box-algorithms/ovpCReferenceChannel.h"
@@ -74,6 +76,13 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_ClassId_ConnectivityAlgorithm, "Connectivity measure method");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_ClassId_ConnectivityAlgorithm, "Single-Trial Phase Locking Value", OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_ClassId_ConnectivityAlgorithm, "Magnitude squared coherence", OVP_TypeId_Algorithm_MagnitudeSquaredCoherence.toUInteger());
+
+	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_WindowType, "Window method");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_TypeId_WindowType, "Bartlett (triangular)", OVP_TypeId_WindowType_Bartlett.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_TypeId_WindowType, "Hamming", OVP_TypeId_WindowType_Hamming.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_TypeId_WindowType, "Hann", OVP_TypeId_WindowType_Hann.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_TypeId_WindowType, "Parzen", OVP_TypeId_WindowType_Parzen.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_TypeId_WindowType, "Welch", OVP_TypeId_WindowType_Welch.toUInteger());
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CTimeBasedEpochingDesc);
 
@@ -131,7 +140,9 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmSingleTrialPhaseLockingValueDesc)
 #endif
 
+#if defined TARGET_HAS_ThirdPartyEIGEN
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingBasic::CBoxAlgorithmHilbertDesc)
-
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmMagnitudeSquaredCoherenceDesc)
+#endif
 
 OVP_Declare_End()

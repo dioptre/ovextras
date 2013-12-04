@@ -13,11 +13,11 @@ class WindowFunctions {
 
 public:
 
-	Eigen::VectorXd bartlett(OpenViBE::uint32 ui32WinSize);
-	Eigen::VectorXd hamming(OpenViBE::uint32 ui32WinSize);
-	Eigen::VectorXd hann(OpenViBE::uint32 ui32WinSize);
-	Eigen::VectorXd parzen(OpenViBE::uint32 ui32WinSize);
-	Eigen::VectorXd welch(OpenViBE::uint32 ui32WinSize);
+	OpenViBE::boolean bartlett(Eigen::VectorXd& vecXdWindow, OpenViBE::uint32 ui32WinSize);
+	OpenViBE::boolean hamming(Eigen::VectorXd& vecXdWindow, OpenViBE::uint32 ui32WinSize);
+	OpenViBE::boolean hann(Eigen::VectorXd& vecXdWindow, OpenViBE::uint32 ui32WinSize);
+	OpenViBE::boolean parzen(Eigen::VectorXd& vecXdWindow, OpenViBE::uint32 ui32WinSize);
+	OpenViBE::boolean welch(Eigen::VectorXd& vecXdWindow, OpenViBE::uint32 ui32WinSize);
 
 };
 

@@ -80,12 +80,18 @@
 #define OVP_Algorithm_ARBurgMethod_InputTriggerId_Process		     		OpenViBE::CIdentifier(0xBEEBBE84, 0x4F14F8F8)
 #define OVP_Algorithm_ARBurgMethod_OutputTriggerId_ProcessDone           	OpenViBE::CIdentifier(0xA5AAD435, 0x9EC3DB80) 
 
-#define OVP_ClassId_BoxAlgorithm_ConnectivityMeasure 					OpenViBE::CIdentifier(0x8E3A1AEF, 0x7CACD368)
-#define OVP_ClassId_BoxAlgorithm_ConnectivityMeasureDesc 				OpenViBE::CIdentifier(0xA20B0A40, 0x1A92D645)
-#define OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue				OpenViBE::CIdentifier(0x740E1284, 0x24107052)
-#define OVP_TypeId_Algorithm_SingleTrialPhaseLockingValueDesc			OpenViBE::CIdentifier(0x71CA3FD4, 0x0ED22534)
-#define OVP_TypeId_Algorithm_MagnitudeSquaredCoherence      			OpenViBE::CIdentifier(0x5BAB50C3, 0x3A0E7D20)
-#define OVP_TypeId_Algorithm_MagnitudeSquaredCoherenceDesc				OpenViBE::CIdentifier(0x24322906, 0xDE1D4AB3)
+#define OVP_ClassId_BoxAlgorithm_ConnectivityMeasure 											OpenViBE::CIdentifier(0x8E3A1AEF, 0x7CACD368)
+#define OVP_ClassId_BoxAlgorithm_ConnectivityMeasureDesc 										OpenViBE::CIdentifier(0xA20B0A40, 0x1A92D645)
+#define OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue										OpenViBE::CIdentifier(0x740E1284, 0x24107052)
+#define OVP_TypeId_Algorithm_SingleTrialPhaseLockingValueDesc									OpenViBE::CIdentifier(0x71CA3FD4, 0x0ED22534)
+#define OVP_TypeId_Algorithm_MagnitudeSquaredCoherence      									OpenViBE::CIdentifier(0x5BAB50C3, 0x3A0E7D20)
+#define OVP_TypeId_Algorithm_MagnitudeSquaredCoherenceDesc										OpenViBE::CIdentifier(0x24322906, 0xDE1D4AB3)
+#define OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_SegLength						OpenViBE::CIdentifier(0xA4826743, 0x0FA27C06)
+#define OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Overlap						OpenViBE::CIdentifier(0x527F8AEC, 0xA25F2EAB)
+#define OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Window							OpenViBE::CIdentifier(0x0EA349EE, 0xB9DC95D0)
+#define OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Nfft							OpenViBE::CIdentifier(0x7726C677, 0xE266C5A2)
+#define OVP_Algorithm_MagnitudeSquaredCoherence_OutputParameterId_OutputMatrixSpectrum			OpenViBE::CIdentifier(0x331326BA, 0xA94CFC8A)
+#define OVP_Algorithm_MagnitudeSquaredCoherence_OutputParameterId_FreqVector					OpenViBE::CIdentifier(0xD9FAA21C, 0x67D7C451)
 
 #define OVP_ClassId_Algorithm_HilbertTransform								OpenViBE::CIdentifier(0x344B79DE, 0x89EAAABB)
 #define OVP_ClassId_Algorithm_HilbertTransformDesc							OpenViBE::CIdentifier(0x8CAB236A, 0xA789800D)
@@ -99,6 +105,15 @@
 
 #define OVP_ClassId_BoxAlgorithm_Hilbert				OpenViBE::CIdentifier(0x7878A47F, 0x9A8FE349)
 #define OVP_ClassId_BoxAlgorithm_HilbertDesc			OpenViBE::CIdentifier(0x2DB54E2F, 0x435675EF)
+
+#define OVP_ClassId_WindowFunctions					OpenViBE::CIdentifier(0x45FD3D73, 0x6C197A9C)
+
+#define OVP_TypeId_WindowType						OpenViBE::CIdentifier(0x332BBB80, 0xC212810A)
+#define OVP_TypeId_WindowType_Bartlett				OpenViBE::CIdentifier(0x4D7037DB, 0x3D2FD99A)
+#define OVP_TypeId_WindowType_Hamming				OpenViBE::CIdentifier(0x4DDFE902, 0xA5318E97)
+#define OVP_TypeId_WindowType_Hann					OpenViBE::CIdentifier(0xD784EB3B, 0x7B4A2658)
+#define OVP_TypeId_WindowType_Parzen				OpenViBE::CIdentifier(0xDC2C83B7, 0xA78F8B31)
+#define OVP_TypeId_WindowType_Welch					OpenViBE::CIdentifier(0x872D9FA8, 0x663C10A0)
 
 
 //___________________________________________________________________//
