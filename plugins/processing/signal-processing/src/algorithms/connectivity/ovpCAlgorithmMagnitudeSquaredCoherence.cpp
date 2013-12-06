@@ -179,6 +179,11 @@ boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 
 		uint32 l_ui32OverlapPercent = (uint32) ip_ui64Overlap;
 
+		vector<float64> l_vecFreqVector;
+
+		float64 l_f64FrequencyBandStart = 0;
+		float64 l_f64FrequencyBandStop = 0;
+
 		// Setting window vector
 		VectorXd m_vecXdWindow = VectorXd::Zero(l_ui32SegmentsLength);
 
@@ -252,8 +257,8 @@ boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 			l_pOutputMatrixCoherenceSpectrum->setDimensionSize(1, l_ui32SegmentsLength);
 
 			l_pFrequencyVector->setDimensionCount(2);
-			l_pFrequencyVector->setDimensionSize(0,l_ui32PairsCount);
-			l_pFrequencyVector->setDimensionSize(1, 2*(l_ui32SegmentsLength-1));
+			l_pFrequencyVector->setDimensionSize(0,2);
+			l_pFrequencyVector->setDimensionSize(1, l_ui32SegmentsLength); // the frequency vector is a matrix of size 2*l_ui32SegmentsLength to match the spectrum encoder requirements
 
 
 			// Setting name of output channels for visualization
@@ -269,6 +274,19 @@ boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 				l_pOutputMatrixCoherenceSpectrum->setDimensionLabel(0,i,l_name);
 			}
 
+			// Create frequency vector for the spectrum encoder
+			for(uint32 i = 0; i<l_ui32SegmentsLength; i++)
+			{
+				l_f64FrequencyBandStart = i * l_ui64SamplingRate/2.0/l_ui32SegmentsLength;
+				l_f64FrequencyBandStop = (i+1) * l_ui64SamplingRate/2.0/l_ui32SegmentsLength;
+				l_vecFreqVector.push_back(l_f64FrequencyBandStart);
+				l_vecFreqVector.push_back(l_f64FrequencyBandStop);
+			}
+
+			for(uint32 k = 0; k < 2*(l_ui32SegmentsLength);k++)
+			{
+				l_pFrequencyVector->getBuffer()[k] = l_vecFreqVector[k];
+			}
 
 		}
 
@@ -288,10 +306,7 @@ boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 			uint32 l_ui32NbSegments = 0;
 			float64 l_f64MeanCohere = 0;
 
-			vector<float64> l_vecFreqVector;
 
-			float64 l_f64FrequencyBandStart = 0;
-			float64 l_f64FrequencyBandStop = 0;
 
 			// Calculate number of segment on data set giving segment's length and overlap
 			if(l_ui32NOverlap != 0)
@@ -349,28 +364,17 @@ boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 				CAlgorithmMagnitudeSquaredCoherence::powerSpectralDensity(l_vecXdChannelToCompare2, m_vecXdPowerSpectrum2, m_vecXdWindow, l_ui32NbSegments, l_ui32SegmentsLength, l_ui32NOverlap);
 				CAlgorithmMagnitudeSquaredCoherence::crossSpectralDensity(l_vecXdChannelToCompare1, l_vecXdChannelToCompare2, m_vecXcdCrossSpectrum, m_vecXdWindow, l_ui32NbSegments, l_ui32SegmentsLength, l_ui32NOverlap);
 
-//				cout<<"Gxx = "<<m_vecXdPowerSpectrum1.transpose()<<endl;
-//				cout<<"Gyy = "<<m_vecXdPowerSpectrum2.transpose()<<endl;
-//				cout<<"Gxy = "<<m_vecXcdCrossSpectrum.transpose()<<endl;
-
 				for (uint32 i = 0; i<m_vecXcdCrossSpectrum.size(); i++)
 				{
 					l_vecXdCoherenceNum(i) = real(m_vecXcdCrossSpectrum(i)*(conj(m_vecXcdCrossSpectrum(i))));
 				}
-//				l_vecXdCoherenceNum = real(m_vecXcdCrossSpectrum.cwiseProduct(conj(m_vecXcdCrossSpectrum)));
 				l_vecXdCoherenceDen = m_vecXdPowerSpectrum1.cwiseProduct(m_vecXdPowerSpectrum2);
 				l_vecXdCoherence = l_vecXdCoherenceNum.cwiseQuotient(l_vecXdCoherenceDen);
-
-//				cout<<"Cxy = "<<l_vecXdCoherence.transpose()<<endl;
-//				cout<<"Cohere size ="<<l_vecXdCoherence.size()<<endl;
-
 
 				for(uint32 i = 0; i<l_vecXdCoherence.size(); i++)
 				{
 					// Write coherence to output
 					l_pOutputMatrixCoherenceSpectrum->getBuffer()[i+channel*l_vecXdCoherence.size()] = l_vecXdCoherence(i);
-
-//					cout<<"Cxy = "<<l_opMatrixSpectrumBuffer[i+channel*l_vecXdCoherence.size()]<<endl;
 
 					// Compute MSC mean over frequencies
 					l_f64MeanCohere += l_vecXdCoherence(i);
@@ -380,24 +384,6 @@ boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 				// Write coherence mean over frequencies to output
 				l_pOutputMatrixMeanCoherence->getBuffer()[channel] = l_f64MeanCohere/l_vecXdCoherence.size();
 
-//				cout<<"Mean = "<<l_pOutputMatrixMeanCoherence->getBuffer()[channel]<<endl;
-
-				// Create frequency vector for the spectrum encoder
-				for(uint32 i = 0; i<l_ui32SegmentsLength; i++)
-				{
-					l_f64FrequencyBandStart = i * l_ui64SamplingRate/l_ui32SegmentsLength;
-					l_f64FrequencyBandStop = (i+1) * l_ui64SamplingRate/l_ui32SegmentsLength;
-					l_vecFreqVector.push_back(l_f64FrequencyBandStart);
-					l_vecFreqVector.push_back(l_f64FrequencyBandStop);
-				}
-
-//				cout<<"size = "<<l_vecFreqVector.size()<<endl;
-
-				for(uint32 k = 0; k < 2*(l_ui32SegmentsLength-1);k++)
-				{
-					op_pFrequencyBandVector->getBuffer()[k+channel*2*(l_ui32SegmentsLength-1)] = l_vecFreqVector[k];
-//					cout<<"Freq = "<<op_pFrequencyBandVector->getBuffer()[k+channel*2*(l_ui32SegmentsLength-1)]<<endl;
-				}
 			}
 			this->activateOutputTrigger(OVP_Algorithm_Connectivity_OutputTriggerId_ProcessDone, true);
 		}

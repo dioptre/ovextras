@@ -10,6 +10,7 @@ using namespace OpenViBEPlugins::SignalProcessing;
 #include <vector>
 #include <string>
 #include <cstdio>
+#include <iostream>
 
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)<(b)?(b):(a))
@@ -92,6 +93,7 @@ boolean CBoxAlgorithmFrequencyBandSelector::initialize(void)
 	ip_pMatrix=&m_oMatrix;
 	op_pMatrix=&m_oMatrix;
 
+
 	return true;
 }
 
@@ -131,12 +133,15 @@ boolean CBoxAlgorithmFrequencyBandSelector::process(void)
 		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
 		op_pMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
 
+
+
 		m_pStreamDecoder->process();
 		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputTriggerId_ReceivedHeader))
 		{
 			m_vSelectionFactor.clear();
 			for(uint32 j=0; j<ip_pBands->getDimensionSize(1); j++)
 			{
+
 				boolean l_bSelected=false;
 				for(size_t k=0; k<m_vSelected.size(); k++)
 				{
