@@ -366,7 +366,7 @@ if [[ ! -e "$ov_target_folder_hit/no-native-packages.hit" ]]; then
 
 	echo "Checking native dependencies..."
 
-	if [[ "`grep -E 'Ubuntu|LinuxMint' /etc/lsb-release 2> /dev/null`" != "" || "`grep Debian /etc/issue 2> /dev/null`" != "" ]]; then
+	if [[ "`grep -E 'Ubuntu|LinuxMint' /etc/lsb-release 2> /dev/null`" != "" || "`grep -E 'Raspbian' /etc/os-release 2> /dev/null`" != "" || "`grep Debian /etc/issue 2> /dev/null`" != "" ]]; then
 		ov_native_package_installed=true
 		ov_native_package_log_file="$ov_target_folder_log/native-packages.log"
 		if [[ "`grep -E 'Ubuntu' /etc/lsb-release 2> /dev/null`" != "" && "`grep DISTRIB_RELEASE /etc/lsb-release 2> /dev/null | sed -e s/DISTRIB_RELEASE=//g`" == "13.10" ]]; then
