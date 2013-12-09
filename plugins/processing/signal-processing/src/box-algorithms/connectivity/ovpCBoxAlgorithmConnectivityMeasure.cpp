@@ -1,8 +1,9 @@
-//#if defined(TARGET_HAS_ThirdPartyEIGEN)
+#if defined(TARGET_HAS_ThirdPartyEIGEN)
 
 #include "ovpCBoxAlgorithmConnectivityMeasure.h"
 
 #include <cstdio>
+#include <iostream>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -65,6 +66,8 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_ui32InputCount = l_rStaticBoxContext.getInputCount();
+	m_ui32OutputCount = l_rStaticBoxContext.getOutputCount();
+
 
 	// Retrieve algorithm chosen by the user
 	CIdentifier l_oConnectivityAlgorithmClassIdentifier;
@@ -104,14 +107,46 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 				return false;
 	}
 
+	// if an output was added, creation of the corresponding encoder
+	if(m_ui32OutputCount>1)
+	{
+		m_oAlgo3_SpectrumEncoder.initialize(*this);
+
+	}
+
+	// if MScoherence is computed, manage corresponding settings and output
+	if(l_oConnectivityAlgorithmClassIdentifier == OVP_TypeId_Algorithm_MagnitudeSquaredCoherence)
+	{
+		op_pMatrix2.initialize(m_pConnectivityMethod->getOutputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_OutputParameterId_OutputMatrixSpectrum));
+		ip_ui64SamplingRate1.initialize(m_pConnectivityMethod->getInputParameter(OVP_Algorithm_Connectivity_InputParameterId_ui64SamplingRate1));
+
+		// Retrieve windowing method specified by the user
+		CIdentifier l_oWindowMethodIdentifier;
+		CString l_sWindowMethodIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+		l_oWindowMethodIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_WindowType, l_sWindowMethodIdentifier);
+
+		// Initialize other settings
+		ip_ui64WindowMethod.initialize(m_pConnectivityMethod->getInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Window));
+		ip_ui64SegmentsLength.initialize(m_pConnectivityMethod->getInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_SegLength));
+		ip_ui64Overlap.initialize(m_pConnectivityMethod->getInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Overlap));
+		op_pFrequencyVector.initialize(m_pConnectivityMethod->getOutputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_OutputParameterId_FreqVector));
+
+		ip_ui64WindowMethod = l_oWindowMethodIdentifier.toUInteger();
+		ip_ui64SegmentsLength = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
+		ip_ui64Overlap = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+
+		m_oAlgo3_SpectrumEncoder.getInputMatrix().setReferenceTarget(op_pMatrix2);
+		m_oAlgo3_SpectrumEncoder.getInputMinMaxFrequencyBands().setReferenceTarget(op_pFrequencyVector);
+	}
+
+
 	ip_pChannelTable->setDimensionCount(2);
 	ip_pChannelTable->setDimensionSize(1,1);
 
 	// Set reference target
 	ip_pMatrix1.setReferenceTarget(m_oAlgo0_SignalDecoder.getOutputMatrix());
-
-
 	ip_ui64SamplingRate1.setReferenceTarget(m_oAlgo0_SignalDecoder.getOutputSamplingRate());
+
 	if( m_ui32InputCount == 2)
 	{
 		ip_pMatrix2.setReferenceTarget(m_oAlgo2_SignalDecoder.getOutputMatrix());
@@ -139,9 +174,13 @@ boolean CBoxAlgorithmConnectivityMeasure::uninitialize(void)
 
 	// if a second decoder algorithm was created
 	if(m_ui32InputCount==2)
-		{
-			m_oAlgo2_SignalDecoder.uninitialize();
-		}
+	{
+		m_oAlgo2_SignalDecoder.uninitialize();
+	}
+	if(m_ui32OutputCount>1)
+	{
+		m_oAlgo3_SpectrumEncoder.uninitialize();
+	}
 
 	return true;
 }
@@ -239,7 +278,7 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 
 			//______________________________________________________________________________________________________________________________________
 			//
-			// Splits the channel list in order to identify channel pairs to process
+			// Splits the channel list in order to identify channel pairs to process ***** Code adapted from channel selector *****
 			//_______________________________________________________________________________________________________________________________________
 			//
 
@@ -350,9 +389,15 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 
 			// Pass the header to the next boxes, by encoding a header on the output 0:
 			m_oAlgo1_SignalEncoder.encodeHeader(0);
-
 			// send the output chunk containing the header. The dates are the same as the input chunk:
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+
+			if(m_ui32OutputCount>1)
+			{
+				m_oAlgo3_SpectrumEncoder.encodeHeader(1);
+				l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+			}
+
 		}
 		if(l_bBufferReceived)
 		{
@@ -365,6 +410,12 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 				m_oAlgo1_SignalEncoder.encodeBuffer(0);
 				// and send it to the next boxes :
 				l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+				if(m_ui32OutputCount>1)
+				{
+					m_oAlgo3_SpectrumEncoder.encodeBuffer(1);
+					l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+				}
+
 			}
 
 		}
@@ -374,6 +425,14 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 			m_oAlgo1_SignalEncoder.encodeEnd(0);
 
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+
+			if(m_ui32OutputCount>1)
+			{
+				m_oAlgo3_SpectrumEncoder.encodeEnd(1);
+				l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+			}
+
+
 		}
 
 		// The current input chunk has been processed, and automatically discarded
@@ -382,4 +441,4 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 	return true;
 }
 
-//#endif //#TARGET_HAS_ThirdPartyEIGEN
+#endif //#TARGET_HAS_ThirdPartyEIGEN
