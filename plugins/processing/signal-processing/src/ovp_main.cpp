@@ -20,6 +20,7 @@
 
 #include "box-algorithms/connectivity/ovpCBoxAlgorithmConnectivityMeasure.h"
 #include "algorithms/connectivity/ovpCAlgorithmSingleTrialPhaseLockingValue.h"
+#include "algorithms/connectivity/ovpCAlgorithmMagnitudeSquaredCoherence.h"
 
 #include "box-algorithms/basic/ovpCBoxAlgorithmHilbert.h"
 #include "algorithms/basic/ovpCHilbertTransform.h"
@@ -72,6 +73,7 @@ OVP_Declare_Begin()
 
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_ClassId_ConnectivityAlgorithm, "Connectivity measure method");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_ClassId_ConnectivityAlgorithm, "Single-Trial Phase Locking Value", OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_ClassId_ConnectivityAlgorithm, "Magnitude Squared Coherence", OVP_TypeId_Algorithm_MagnitudeSquaredCoherence.toUInteger());
 
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_WindowType, "Window method");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_TypeId_WindowType, "Bartlett (triangular)", OVP_TypeId_WindowType_Bartlett.toUInteger());

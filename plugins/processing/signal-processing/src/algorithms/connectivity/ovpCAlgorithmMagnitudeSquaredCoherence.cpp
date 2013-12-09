@@ -121,6 +121,7 @@ boolean CAlgorithmMagnitudeSquaredCoherence::initialize(void)
 	ip_ui64SegmentLength.initialize(this->getInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_SegLength));
 	ip_ui64Overlap.initialize(this->getInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Overlap));
 
+	ip_ui64SegmentLength = 32;
 
 	return true;
 }
@@ -161,7 +162,7 @@ boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 		uint32 l_ui32ChannelCount1 = l_pInputMatrix1->getDimensionSize(0);
 		uint32 l_ui32SamplesPerChannel1 = l_pInputMatrix1->getDimensionSize(1);
 
-		uint32 l_ui32ChannelCount2 = l_pInputMatrix2->getDimensionSize(0);
+		// uint32 l_ui32ChannelCount2 = l_pInputMatrix2->getDimensionSize(0);
 		uint32 l_ui32SamplesPerChannel2 = l_pInputMatrix2->getDimensionSize(1);
 
 		uint32 l_ui32PairsCount = ip_pChannelPairs->getDimensionSize(0)/2;
@@ -171,8 +172,8 @@ boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 
 		float64* l_ipMatrixBuffer1 = l_pInputMatrix1->getBuffer();
 		float64* l_ipMatrixBuffer2 = l_pInputMatrix2->getBuffer();
-		float64* l_opMatrixMeanBuffer = l_pOutputMatrixMeanCoherence->getBuffer();
-		float64* l_opMatrixSpectrumBuffer = l_pOutputMatrixCoherenceSpectrum->getBuffer();
+		// float64* l_opMatrixMeanBuffer = l_pOutputMatrixMeanCoherence->getBuffer();
+		// float64* l_opMatrixSpectrumBuffer = l_pOutputMatrixCoherenceSpectrum->getBuffer();
 
 		uint32 l_ui32SegmentsLength = (uint32) ip_ui64SegmentLength;
 		uint64 l_ui64WindowType = ip_ui64WindowType;
@@ -267,8 +268,8 @@ boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 			for(uint32 i=0;i<l_ui32PairsCount;i++)
 			{
 				l_ui32Index=2*i;
-				l_name1 = l_pInputMatrix1->getDimensionLabel(0,l_pChannelPairs->getBuffer()[l_ui32Index+1]);
-				l_name2 = l_pInputMatrix2->getDimensionLabel(0,l_pChannelPairs->getBuffer()[l_ui32Index+2]);
+				l_name1 = l_pInputMatrix1->getDimensionLabel(0,(uint32)l_pChannelPairs->getBuffer()[l_ui32Index+1]);
+				l_name2 = l_pInputMatrix2->getDimensionLabel(0,(uint32)l_pChannelPairs->getBuffer()[l_ui32Index+2]);
 				l_name = l_name1+" "+l_name2;
 				l_pOutputMatrixMeanCoherence->setDimensionLabel(0,i,l_name);
 				l_pOutputMatrixCoherenceSpectrum->setDimensionLabel(0,i,l_name);
@@ -364,14 +365,14 @@ boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 				CAlgorithmMagnitudeSquaredCoherence::powerSpectralDensity(l_vecXdChannelToCompare2, m_vecXdPowerSpectrum2, m_vecXdWindow, l_ui32NbSegments, l_ui32SegmentsLength, l_ui32NOverlap);
 				CAlgorithmMagnitudeSquaredCoherence::crossSpectralDensity(l_vecXdChannelToCompare1, l_vecXdChannelToCompare2, m_vecXcdCrossSpectrum, m_vecXdWindow, l_ui32NbSegments, l_ui32SegmentsLength, l_ui32NOverlap);
 
-				for (uint32 i = 0; i<m_vecXcdCrossSpectrum.size(); i++)
+				for (int32 i = 0; i<m_vecXcdCrossSpectrum.size(); i++)
 				{
 					l_vecXdCoherenceNum(i) = real(m_vecXcdCrossSpectrum(i)*(conj(m_vecXcdCrossSpectrum(i))));
 				}
 				l_vecXdCoherenceDen = m_vecXdPowerSpectrum1.cwiseProduct(m_vecXdPowerSpectrum2);
 				l_vecXdCoherence = l_vecXdCoherenceNum.cwiseQuotient(l_vecXdCoherenceDen);
 
-				for(uint32 i = 0; i<l_vecXdCoherence.size(); i++)
+				for (int32 i = 0; i<l_vecXdCoherence.size(); i++)
 				{
 					// Write coherence to output
 					l_pOutputMatrixCoherenceSpectrum->getBuffer()[i+channel*l_vecXdCoherence.size()] = l_vecXdCoherence(i);

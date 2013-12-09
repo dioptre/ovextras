@@ -98,7 +98,7 @@ namespace OpenViBEPlugins
 				CConnectivityAlgorithmDesc::getAlgorithmPrototype(rAlgorithmPrototype);
 
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Window, "Window method", OpenViBE::Kernel::ParameterType_Enumeration, OVP_TypeId_WindowType);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_SegLength, "Length of segments", OpenViBE::Kernel::ParameterType_Integer);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_SegLength, "Length of segments", OpenViBE::Kernel::ParameterType_Integer, 32);
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Overlap, "Overlap (percentage)", OpenViBE::Kernel::ParameterType_Integer);
 
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_Connectivity_OutputParameterId_OutputMatrix,    "Mean coherence signal", OpenViBE::Kernel::ParameterType_Matrix);
