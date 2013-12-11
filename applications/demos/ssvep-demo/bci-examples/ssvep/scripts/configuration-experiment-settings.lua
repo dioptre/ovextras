@@ -45,22 +45,27 @@ function process(box)
 
 	box:log("Info", box:get_config("Writing additional configuration to '${CustomConfigurationPrefix${OperatingSystem}}-ssvep-demo${CustomConfigurationSuffix${OperatingSystem}}'"))
 
-	cfg_file = io.open(box:get_config("${CustomConfigurationPrefix${OperatingSystem}}-ssvep-demo${CustomConfigurationSuffix${OperatingSystem}}"), "a")
+	cfg_file = assert(io.open(box:get_config("${CustomConfigurationPrefix${OperatingSystem}}-ssvep-demo${CustomConfigurationSuffix${OperatingSystem}}"), "a"))
 
-	cfg_file:write("SSVEP_TargetLightColourRed = ", target_light_color[1] / 100, "\n")
-	cfg_file:write("SSVEP_TargetLightColourGreen = ", target_light_color[2] / 100, "\n")
-	cfg_file:write("SSVEP_TargetLightColourBlue = ", target_light_color[3] / 100, "\n")
-
-	cfg_file:write("SSVEP_TargetDarkColourRed = ", target_dark_color[1] / 100, "\n")
-	cfg_file:write("SSVEP_TargetDarkColourGreen = ", target_dark_color[2] / 100, "\n")
-	cfg_file:write("SSVEP_TargetDarkColourBlue = ", target_dark_color[3] / 100, "\n")
+	success = true 
+	success = success and cfg_file:write("SSVEP_TargetLightColourRed = ", target_light_color[1] / 100, "\n")
+	success = success and cfg_file:write("SSVEP_TargetLightColourGreen = ", target_light_color[2] / 100, "\n")
+	success = success and cfg_file:write("SSVEP_TargetLightColourBlue = ", target_light_color[3] / 100, "\n")
+	success = success and cfg_file:write("SSVEP_TargetDarkColourRed = ", target_dark_color[1] / 100, "\n")
+	success = success and cfg_file:write("SSVEP_TargetDarkColourGreen = ", target_dark_color[2] / 100, "\n")
+	success = success and cfg_file:write("SSVEP_TargetDarkColourBlue = ", target_dark_color[3] / 100, "\n")
 
 	for i=1,frequency_count do
-		cfg_file:write("SSVEP_Frequency_", i, " = ", string.format("%g", stimulation_frequencies[i]), "\n")
+		success = success and cfg_file:write("SSVEP_Frequency_", i, " = ", string.format("%g", stimulation_frequencies[i]), "\n")
 	end
-
+	
 	cfg_file:close()
 
+	if (success == false) then
+		box:log("Error", box:get_config("Write error"))
+		return false
+	end
+	
 	-- create configuration files for temporal filters
 
 	scenario_path = box:get_config("${__volatile_ScenarioDir}")
@@ -76,16 +81,23 @@ function process(box)
 			return false
 		end
 		
-		cfg_file:write("<OpenViBE-SettingsOverride>\n")
-		cfg_file:write("<SettingValue>Butterworth</SettingValue>\n")
-		cfg_file:write("<SettingValue>Band pass</SettingValue>\n")
-		cfg_file:write("<SettingValue>4</SettingValue>\n")
-		cfg_file:write(string.format("<SettingValue>%g</SettingValue>\n", stimulation_frequencies[i] - processing_frequency_tolerance))
-		cfg_file:write(string.format("<SettingValue>%g</SettingValue>\n", stimulation_frequencies[i] + processing_frequency_tolerance))
-		cfg_file:write("<SettingValue>0.500000</SettingValue>\n")
-		cfg_file:write("</OpenViBE-SettingsOverride>\n")
-
+		success = true
+		success = success and cfg_file:write("<OpenViBE-SettingsOverride>\n")
+		success = success and cfg_file:write("<SettingValue>Butterworth</SettingValue>\n")
+		success = success and cfg_file:write("<SettingValue>Band pass</SettingValue>\n")
+		success = success and cfg_file:write("<SettingValue>4</SettingValue>\n")
+		success = success and cfg_file:write(string.format("<SettingValue>%g</SettingValue>\n", stimulation_frequencies[i] - processing_frequency_tolerance))
+		success = success and cfg_file:write(string.format("<SettingValue>%g</SettingValue>\n", stimulation_frequencies[i] + processing_frequency_tolerance))
+		success = success and cfg_file:write("<SettingValue>0.500000</SettingValue>\n")
+		success = success and cfg_file:write("</OpenViBE-SettingsOverride>\n")
+		
 		cfg_file:close()
+		
+		if (success == false) then
+			box:log("Error", box:get_config("Write error"))
+			return false
+		end
+	
 	end
 
 	-- create configuration file for time based epoching
@@ -100,12 +112,19 @@ function process(box)
 		return false
 	end
 		
-	cfg_file:write("<OpenViBE-SettingsOverride>\n")
-	cfg_file:write(string.format("<SettingValue>%g</SettingValue>\n", processing_epoch_duration))
-	cfg_file:write(string.format("<SettingValue>%g</SettingValue>\n", processing_epoch_interval))
-	cfg_file:write("</OpenViBE-SettingsOverride>\n")
+	success = true
+	success = success and cfg_file:write("<OpenViBE-SettingsOverride>\n")
+	success = success and cfg_file:write(string.format("<SettingValue>%g</SettingValue>\n", processing_epoch_duration))
+	success = success and cfg_file:write(string.format("<SettingValue>%g</SettingValue>\n", processing_epoch_interval))
+	success = success and cfg_file:write("</OpenViBE-SettingsOverride>\n")
+		
 	cfg_file:close()
 
+	if (success == false) then
+		box:log("Error", box:get_config("Write error"))
+		return false
+	end
+	
 	-- notify the scenario that the configuration process is complete
 	
 	box:send_stimulation(1, OVTK_StimulationId_TrainCompleted, box:get_current_time() + 0.2, 0)
