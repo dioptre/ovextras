@@ -122,6 +122,14 @@ boolean CAlgorithmMagnitudeSquaredCoherence::initialize(void)
 	ip_ui64Overlap.initialize(this->getInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Overlap));
 
 
+	// Set default values
+	ip_ui64WindowType = OVP_TypeId_WindowType_Welch.toUInteger();
+	ip_ui64SegmentLength = 32;
+	ip_ui64Overlap = 50;
+
+
+
+
 	return true;
 }
 
