@@ -59,6 +59,7 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::CString* > ip_sFilename;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::float64 > ip_f64EpochDuration;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64SeekTime;
+			OpenViBE::Kernel::TParameterHandler < OpenViBE::boolean > ip_bConvertStimuli;
 
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > op_ui64CurrentStartTime;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > op_ui64CurrentEndTime;
@@ -97,7 +98,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Reads input having the BrainAmp file format"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("File reading and writing/Brainamp"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_BrainampFileReader; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::FileIO::CAlgorithmBrainampFileReader; }
@@ -108,6 +109,7 @@ namespace OpenViBEPlugins
 				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_BrainampFileReader_InputParameterId_Filename,          "Filename",           OpenViBE::Kernel::ParameterType_String);
 				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_BrainampFileReader_InputParameterId_EpochDuration,     "Epoch duration",     OpenViBE::Kernel::ParameterType_Float);
 				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_BrainampFileReader_InputParameterId_SeekTime,          "Seek time",          OpenViBE::Kernel::ParameterType_Integer);
+				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_BrainampFileReader_InputParameterId_ConvertStimuli,    "Convert stimuli",    OpenViBE::Kernel::ParameterType_Boolean);
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_BrainampFileReader_OutputParameterId_CurrentStartTime, "Current start time", OpenViBE::Kernel::ParameterType_Integer);
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_BrainampFileReader_OutputParameterId_CurrentEndTime,   "Current end time",   OpenViBE::Kernel::ParameterType_Integer);
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_BrainampFileReader_OutputParameterId_SamplingRate,     "Sampling rate",      OpenViBE::Kernel::ParameterType_Integer);

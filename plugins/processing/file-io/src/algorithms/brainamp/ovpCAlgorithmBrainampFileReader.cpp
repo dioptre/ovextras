@@ -19,12 +19,16 @@ boolean CAlgorithmBrainampFileReader::initialize(void)
 	ip_sFilename.initialize(getInputParameter(OVP_Algorithm_BrainampFileReader_InputParameterId_Filename));
 	ip_f64EpochDuration.initialize(getInputParameter(OVP_Algorithm_BrainampFileReader_InputParameterId_EpochDuration));
 	ip_ui64SeekTime.initialize(getInputParameter(OVP_Algorithm_BrainampFileReader_InputParameterId_SeekTime));
+	ip_bConvertStimuli.initialize(getInputParameter(OVP_Algorithm_BrainampFileReader_InputParameterId_ConvertStimuli));
 
 	op_ui64CurrentStartTime.initialize(getOutputParameter(OVP_Algorithm_BrainampFileReader_OutputParameterId_CurrentStartTime));
 	op_ui64CurrentEndTime.initialize(getOutputParameter(OVP_Algorithm_BrainampFileReader_OutputParameterId_CurrentEndTime));
 	op_ui64SamplingRate.initialize(getOutputParameter(OVP_Algorithm_BrainampFileReader_OutputParameterId_SamplingRate));
 	op_pSignalMatrix.initialize(getOutputParameter(OVP_Algorithm_BrainampFileReader_OutputParameterId_SignalMatrix));
 	op_pStimulations.initialize(getOutputParameter(OVP_Algorithm_BrainampFileReader_OutputParameterId_Stimulations));
+
+	// Default value
+	ip_bConvertStimuli = true;
 
 	m_pBuffer=NULL;
 
@@ -39,6 +43,7 @@ boolean CAlgorithmBrainampFileReader::uninitialize(void)
 	op_ui64CurrentEndTime.uninitialize();
 	op_ui64CurrentStartTime.uninitialize();
 
+	ip_bConvertStimuli.uninitialize();
 	ip_ui64SeekTime.uninitialize();
 	ip_f64EpochDuration.uninitialize();
 	ip_sFilename.uninitialize();
@@ -72,6 +77,7 @@ boolean CAlgorithmBrainampFileReader::process(void)
 		if(!m_oHeaderFile.good())
 		{
 			getLogManager() << LogLevel_Error << "Could not open file [" << *ip_sFilename << "]\n";
+			return false;
 		}
 		else
 		{
@@ -387,27 +393,38 @@ boolean CAlgorithmBrainampFileReader::process(void)
 											<< CString(l_sMarkerChannelIndex.c_str()) << ","
 											<< CString(l_sMarkerDate.c_str()) << "\n";
 
-										if(l_sMarkerType=="Stimulus" && l_sMarkerDescription.length()>2)
+										if(l_sMarkerType=="Stimulus" && l_sMarkerDescription.length()>0)
 										{
-											if(l_sMarkerDescription[0]=='S' && l_sMarkerDescription[1]==' ')
+											if(l_sMarkerChannelIndex!="0")
 											{
-												if(l_sMarkerChannelIndex!="0")
-												{
-													getLogManager() << LogLevel_Warning << "Marker [" << CString(l_sMarkerType.c_str()) << ":" << CString(l_sMarkerDescription.c_str()) << "] is not marked on channel 0 and OpenViBE only supports global scope stimulations. Therefore it will this marker will be considered as global\n";
-												}
-
-												std::string l_sStimulationIdentifier;
-												l_sStimulationIdentifier.assign(l_sMarkerDescription, 2, l_sWhat.length()-2);
-
-												SStimulation l_oStimulation;
-												l_oStimulation.m_ui64Identifier=OVTK_StimulationId_Label(::atoi(l_sStimulationIdentifier.c_str()));
-												l_oStimulation.m_ui64StartIndex=::atoi(l_sMarkerPosition.c_str());
-												l_oStimulation.m_ui64Duration=::atoi(l_sMarkerDuration.c_str());
-												l_oStimulation.m_sName=l_sMarkerDescription;
-												m_vStimulation.push_back(l_oStimulation);
-
-												getLogManager() << LogLevel_Trace << "Found stimulation " << l_oStimulation.m_ui64Identifier << " at sample index [" << l_oStimulation.m_ui64StartIndex << ":" << l_oStimulation.m_ui64Duration << "]\n";
+												getLogManager() << LogLevel_Warning << "Marker [" << CString(l_sMarkerType.c_str()) << ":" << CString(l_sMarkerDescription.c_str()) << "] is not marked on channel 0 and OpenViBE only supports global scope stimulations. Therefore this marker will be considered as global\n";
 											}
+
+											uint64 l_ui64Identifier;
+											if(l_sMarkerDescription[0]=='S')
+											{
+												l_ui64Identifier = ::atoi(l_sMarkerDescription.substr(1, std::string::npos).c_str());
+											} 
+											else 
+											{
+												l_ui64Identifier = ::atoi(l_sMarkerDescription.c_str());
+											}
+
+											if(ip_bConvertStimuli) 
+											{
+												getLogManager() << LogLevel_Trace << "Pre-conversion stimulation is " << l_sMarkerDescription.c_str() << " at sample index [" << l_sMarkerPosition.c_str() << "]\n";
+												l_ui64Identifier = OVTK_StimulationId_Label(l_ui64Identifier);
+											}
+
+											SStimulation l_oStimulation;
+											l_oStimulation.m_ui64Identifier=l_ui64Identifier;
+											l_oStimulation.m_ui64StartIndex=::atoi(l_sMarkerPosition.c_str());
+											l_oStimulation.m_ui64Duration=::atoi(l_sMarkerDuration.c_str());
+											l_oStimulation.m_sName=l_sMarkerDescription;
+											m_vStimulation.push_back(l_oStimulation);
+
+											getLogManager() << LogLevel_Trace << "Found stimulation " << l_oStimulation.m_ui64Identifier << " at sample index [" << l_oStimulation.m_ui64StartIndex << ":" << l_oStimulation.m_ui64Duration << "]\n";
+
 										}
 										else
 										{
