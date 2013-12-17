@@ -86,7 +86,7 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Sound Player (Deprecated)"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Sound Player (deprecated)"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard / Matthieu Goyat"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA / Gipsa-Lab"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Deprecated."); }

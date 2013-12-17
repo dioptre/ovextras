@@ -73,7 +73,7 @@ namespace OpenViBEPlugins
 		{
 			public:
 
-				virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Frequency Comparison"); }
+				virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Frequency Comparison (deprecated)"); }
 				virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Guillaume Gibert"); }
 				virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INSERM"); }
 				virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Comparison of Frequencies"); }
