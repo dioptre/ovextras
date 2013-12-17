@@ -18,36 +18,52 @@ using namespace OpenViBEPlugins::SignalProcessing;
 using namespace Eigen;
 using namespace std;
 
+// Debug
+#if 0
+void dumpMatrix(const char *desc, const IMatrix& mat)
+{
+	const float64 *buf = mat.getBuffer();
+	uint32 dim0size = mat.getDimensionSize(0);
+	uint32 dim1size = mat.getDimensionSize(1);
 
+	cout << desc << "\n";
+	for(uint32 i=0;i<dim0size;i++) {
+		cout << "Row " << i << ": ";
+		for(uint32 j=0;j<dim1size;j++) {
+			cout << buf[i*dim1size+j] << " ";
+		}
+		cout << "\n";
+	}
+}
+#endif
 
+// Let s=w.*x(k) be the windowed input signal x at segment k. The column k of the output matrix will be fft(s).
 boolean CAlgorithmMagnitudeSquaredCoherence::computePeriodogram(const VectorXd& vecXdInput, Eigen::MatrixXcd& matXcdSignalFourier, const Eigen::VectorXd& vecXdWindow, const uint32& ui32NSegments, const uint32& ui32LSegments, const uint32& ui32NOverlap)
 {
-	MatrixXd l_matXdWindowedSegments = MatrixXd::Zero(ui32LSegments, ui32NSegments);
-
-	m_f64U = 0; // Window normalization constant
-
-	// Calculate window normalization constant. A 1/ui32LSegments factor has been removed since it will be canceled below
-	for(uint32 i = 0; i<ui32LSegments; i++)
-	{
-		m_f64U += pow(vecXdWindow(i),2);
-	}
+	matXcdSignalFourier = MatrixXcd::Zero(ui32LSegments, ui32NSegments);
 
 	// Segment input vector and apply window to segment each segment
 	for(uint32 k = 0; k<ui32NSegments; k++)
 	{
-		VectorXd l_vecXdWinSeg = VectorXd::Zero(ui32LSegments);
-		VectorXcd l_vecXcdFourier = VectorXcd::Zero(ui32LSegments);
-
+		VectorXd l_vecXdWindowedSegments(ui32LSegments);
 
 		for(uint32 i = 0; i<ui32LSegments; i++)
 		{
-			l_matXdWindowedSegments(i,k) = vecXdInput(i+k*ui32NOverlap)*vecXdWindow(i);
+			l_vecXdWindowedSegments(i) = vecXdInput(i+k*ui32NOverlap)*vecXdWindow(i);
 		}
 
-		l_vecXdWinSeg = l_matXdWindowedSegments.col(k);
+		// Remove the DC component of each channel. Without this we get really high coherences spread all over the 
+		// spectrum when using e.g. the motor imagery dataset bundled with OpenViBE. @todo before or after windowing? here after.
+		// l_vecXdWindowedSegments = l_vecXdWindowedSegments - VectorXd::Ones(ui32LSegments) * l_vecXdWindowedSegments.mean();
+
+		VectorXcd l_vecXcdFourier = VectorXcd::Zero(ui32LSegments);
 
 		// FFT of windowed segments
-		m_oFFT.fwd(l_vecXcdFourier,l_vecXdWinSeg);
+		m_oFFT.fwd(l_vecXcdFourier,l_vecXdWindowedSegments);
+
+		// cout << "fi " << l_vecXdWindowedSegments.transpose() << "\n";
+		// cout << "fo " << l_vecXcdFourier.transpose() << "\n";
+
 
 		matXcdSignalFourier.col(k) = l_vecXcdFourier;
 
@@ -58,24 +74,21 @@ boolean CAlgorithmMagnitudeSquaredCoherence::computePeriodogram(const VectorXd& 
 
 boolean CAlgorithmMagnitudeSquaredCoherence::powerSpectralDensity(const VectorXd& vecXdInput, VectorXd& vecXdOutput, const VectorXd& vecXdWindow, const uint32& ui32NSegments, const uint32& ui32LSegments, const uint32& ui32NOverlap)
 {
-	MatrixXcd l_matXcdSignalFourier = MatrixXcd::Zero(ui32LSegments, ui32NSegments);
-	MatrixXd l_matXdPeriodograms = MatrixXd::Zero(ui32LSegments, ui32NSegments);
-
 	// Compute periodograms
-	CAlgorithmMagnitudeSquaredCoherence::computePeriodogram(vecXdInput, l_matXcdSignalFourier, vecXdWindow, ui32NSegments, ui32LSegments, ui32NOverlap);
+	MatrixXcd l_matXcdSignalFourier;
 
+	CAlgorithmMagnitudeSquaredCoherence::computePeriodogram(vecXdInput, l_matXcdSignalFourier, vecXdWindow, ui32NSegments, ui32LSegments, ui32NOverlap);
+	//cout << "sf " << l_matXcdSignalFourier << "\n";
+
+	// vecXdOutput(i) will be the power for the band i across segments (time) as summed from the periodogram
+	vecXdOutput = VectorXd::Zero(ui32LSegments);
 	for(uint32 k = 0; k<ui32NSegments; k++)
 	{
-		for(uint32 i = 0; i<ui32LSegments; i++)
-		{
-			l_matXdPeriodograms(i+k*ui32LSegments) = real(l_matXcdSignalFourier(i+k*ui32LSegments)*conj(l_matXcdSignalFourier(i+k*ui32LSegments)))/m_f64U;
-			//vecXdOutput = vecXdOutput + l_matXdPeriodograms.col(k);
-		}
-
-		vecXdOutput = vecXdOutput + l_matXdPeriodograms.col(k);
+		vecXdOutput += (l_matXcdSignalFourier.col(k).cwiseProduct(l_matXcdSignalFourier.col(k).conjugate())).real()/m_f64U;
 	}
+	vecXdOutput /= ui32NSegments;
 
-	vecXdOutput = vecXdOutput / ui32NSegments;
+ //   cout << "vxO " << vecXdOutput.transpose() << "\n";
 
 	return true;
 
@@ -84,22 +97,23 @@ boolean CAlgorithmMagnitudeSquaredCoherence::powerSpectralDensity(const VectorXd
 
 boolean CAlgorithmMagnitudeSquaredCoherence::crossSpectralDensity(const VectorXd& vecXdInput1, const VectorXd& vecXdInput2, VectorXcd& vecXcdOutput, const VectorXd& vecXdWindow, const uint32& ui32NSegments, const uint32& ui32LSegments, const uint32& ui32NOverlap)
 {
-	MatrixXcd l_matXcdSignalFourier1 = MatrixXcd::Zero(ui32LSegments, ui32NSegments);
-	MatrixXcd l_matXcdSignalFourier2 = MatrixXcd::Zero(ui32LSegments, ui32NSegments);
-	MatrixXcd l_matXcdPeriodograms = MatrixXcd::Zero(ui32LSegments, ui32NSegments);
+	MatrixXcd l_matXcdSignalFourier1;
+	MatrixXcd l_matXcdSignalFourier2;
 
 	//Compute periodograms for input 1 and 2
 	CAlgorithmMagnitudeSquaredCoherence::computePeriodogram(vecXdInput1, l_matXcdSignalFourier1, vecXdWindow, ui32NSegments, ui32LSegments, ui32NOverlap);
 	CAlgorithmMagnitudeSquaredCoherence::computePeriodogram(vecXdInput2, l_matXcdSignalFourier2, vecXdWindow, ui32NSegments, ui32LSegments, ui32NOverlap);
 
+	vecXcdOutput = VectorXcd::Zero(ui32LSegments);
 
 	for(uint32 k = 0; k<ui32NSegments; k++)
 	{
-		l_matXcdPeriodograms.col(k) = l_matXcdSignalFourier2.col(k).cwiseProduct(conj(l_matXcdSignalFourier1.col(k)))/m_f64U;
-		vecXcdOutput = vecXcdOutput + l_matXcdPeriodograms.col(k);
+		vecXcdOutput += l_matXcdSignalFourier2.col(k).cwiseProduct(l_matXcdSignalFourier1.col(k).conjugate())/m_f64U;
 	}
 
 	vecXcdOutput = vecXcdOutput / ui32NSegments;
+
+	// cout << "vxX " << vecXcdOutput.transpose() << "\n";
 
 	return true;
 
@@ -121,15 +135,10 @@ boolean CAlgorithmMagnitudeSquaredCoherence::initialize(void)
 	ip_ui64SegmentLength.initialize(this->getInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_SegLength));
 	ip_ui64Overlap.initialize(this->getInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Overlap));
 
-	ip_ui64SegmentLength = 32;
-
 	// Set default values
 	ip_ui64WindowType = OVP_TypeId_WindowType_Welch.toUInteger();
 	ip_ui64SegmentLength = 32;
 	ip_ui64Overlap = 50;
-
-
-
 
 	return true;
 }
@@ -156,67 +165,80 @@ boolean CAlgorithmMagnitudeSquaredCoherence::uninitialize(void)
 
 boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 {
+	// Inputs
+	const IMatrix* l_pInputMatrix1 = ip_pSignal1;
+	const IMatrix* l_pInputMatrix2 = ip_pSignal2;
+	const IMatrix* l_pChannelPairs = ip_pChannelPairs;
+	// dumpMatrix("s1", *l_pInputMatrix1);
+	// dumpMatrix("s2", *l_pInputMatrix2);
 
-		IMatrix* l_pInputMatrix1 = ip_pSignal1;
-		IMatrix* l_pInputMatrix2 = ip_pSignal2;
-		uint64 l_ui64SamplingRate = ip_ui64SamplingRate1;
+	const uint64 l_ui64SamplingRate = ip_ui64SamplingRate1;
+	const uint32 l_ui32SamplesPerChannel1 = l_pInputMatrix1->getDimensionSize(1);
+	const uint32 l_ui32SamplesPerChannel2 = l_pInputMatrix2->getDimensionSize(1);
+	const uint32 l_ui32PairsCount = ip_pChannelPairs->getDimensionSize(0)/2;
 
-		IMatrix* l_pChannelPairs = ip_pChannelPairs;
-		IMatrix* l_pOutputMatrixMeanCoherence = op_pMatrixMean;
-		IMatrix* l_pOutputMatrixCoherenceSpectrum = op_pMatrixSpectrum;
+	const float64* l_pMatrixBuffer1 = l_pInputMatrix1->getBuffer();
+	const float64* l_pMatrixBuffer2 = l_pInputMatrix2->getBuffer();
+	const float64* l_pChannelBuffer = l_pChannelPairs->getBuffer();
 
-		IMatrix* l_pFrequencyVector = op_pFrequencyBandVector;
+	const uint32 l_ui32SegmentsLength = (uint32) ip_ui64SegmentLength;
+	const uint64 l_ui64WindowType = ip_ui64WindowType;
+	const uint32 l_ui32OverlapPercent = (uint32) ip_ui64Overlap;
+	// cout << "OP : " << l_ui32OverlapPercent << "\n";
 
-		uint32 l_ui32ChannelCount1 = l_pInputMatrix1->getDimensionSize(0);
-		uint32 l_ui32SamplesPerChannel1 = l_pInputMatrix1->getDimensionSize(1);
+	// Outputs
+	IMatrix* l_pOutputMatrixMeanCoherence = op_pMatrixMean;
+	IMatrix* l_pOutputMatrixCoherenceSpectrum = op_pMatrixSpectrum;
+	IMatrix* l_pFrequencyVector = op_pFrequencyBandVector;
 
-		// uint32 l_ui32ChannelCount2 = l_pInputMatrix2->getDimensionSize(0);
-		uint32 l_ui32SamplesPerChannel2 = l_pInputMatrix2->getDimensionSize(1);
+	if(this->isInputTriggerActive(OVP_Algorithm_Connectivity_InputTriggerId_Initialize))
+	{
 
-		uint32 l_ui32PairsCount = ip_pChannelPairs->getDimensionSize(0)/2;
+		// Do some checks
+		if(l_ui32SamplesPerChannel1 != l_ui32SamplesPerChannel2)
+		{
+			this->getLogManager() << LogLevel_Error << "Can't compute MSCoherence on two signals with different lengths\n";
+			return false;
+		}
 
-		MatrixXd l_pChannelToCompare = MatrixXd::Zero(ip_pChannelPairs->getDimensionSize(0),l_ui32SamplesPerChannel1);
+		if(l_ui32SamplesPerChannel1==0||l_ui32SamplesPerChannel2==0)
+		{
+			this->getLogManager() << LogLevel_Error << "Can't compute MSCoherence, input signal size = 0\n";
+			return false;
+		}
 
+		if(l_ui32OverlapPercent < 0 || l_ui32OverlapPercent > 100)
+		{
+			this->getLogManager() << LogLevel_Error << "Overlap must be a value between 0 and 100\n";
+			return false;
+		}
 
-		float64* l_ipMatrixBuffer1 = l_pInputMatrix1->getBuffer();
-		float64* l_ipMatrixBuffer2 = l_pInputMatrix2->getBuffer();
-		// float64* l_opMatrixMeanBuffer = l_pOutputMatrixMeanCoherence->getBuffer();
-		// float64* l_opMatrixSpectrumBuffer = l_pOutputMatrixCoherenceSpectrum->getBuffer();
+		if(l_ui32SegmentsLength == 0)
+		{
+			this->getLogManager() << LogLevel_Error << "Segments must have a strictly positive length (>0)\n";
+			return false;
+		}
 
-		uint32 l_ui32SegmentsLength = (uint32) ip_ui64SegmentLength;
-		uint64 l_ui64WindowType = ip_ui64WindowType;
-
-		uint32 l_ui32OverlapPercent = (uint32) ip_ui64Overlap;
-
-		vector<float64> l_vecFreqVector;
-
-		float64 l_f64FrequencyBandStart = 0;
-		float64 l_f64FrequencyBandStop = 0;
-
-		// Setting window vector
-		VectorXd m_vecXdWindow = VectorXd::Zero(l_ui32SegmentsLength);
+		// Setting window vector. We do this only once after we know the real segment length.
+		m_vecXdWindow = VectorXd::Zero(l_ui32SegmentsLength);
 
 		// Getting window vector
 		if (l_ui64WindowType == OVP_TypeId_WindowType_Bartlett)
 		{
 			m_oWindow.bartlett(m_vecXdWindow, l_ui32SegmentsLength);
 		}
-
 		else if (l_ui64WindowType == OVP_TypeId_WindowType_Hamming)
 		{
 			m_oWindow.hamming(m_vecXdWindow, l_ui32SegmentsLength);
 		}
-
 		else if (l_ui64WindowType == OVP_TypeId_WindowType_Hann)
 		{
 			m_oWindow.hann(m_vecXdWindow, l_ui32SegmentsLength);
 		}
-
 		else if (l_ui64WindowType == OVP_TypeId_WindowType_Parzen)
 		{
 			m_oWindow.parzen(m_vecXdWindow, l_ui32SegmentsLength);
 		}
-
 		else if (l_ui64WindowType == OVP_TypeId_WindowType_Welch)
 		{
 			m_oWindow.welch(m_vecXdWindow, l_ui32SegmentsLength);
@@ -225,177 +247,167 @@ boolean CAlgorithmMagnitudeSquaredCoherence::process(void)
 		{
 			m_vecXdWindow = VectorXd::Ones(l_ui32SegmentsLength);
 		}
-//		cout<<"window = "<<m_vecXdWindow.transpose()<<endl;
+		// cout<<"window = "<<m_vecXdWindow.transpose()<<endl;
 
-
-		if(this->isInputTriggerActive(OVP_Algorithm_Connectivity_InputTriggerId_Initialize))
+		// Calculate window normalization constant m_f64U. A 1/ui32LSegments factor has been removed since it will be canceled
+		m_f64U = 0;
+		for(uint32 i = 0; i<l_ui32SegmentsLength; i++)
 		{
+			m_f64U += pow(m_vecXdWindow(i),2);
+		}
+		// cout << "norm " << m_f64U << "\n";
 
-			// Do some verification
-			if(l_ui32SamplesPerChannel1 != l_ui32SamplesPerChannel2)
-			{
-				this->getLogManager() << LogLevel_Error << "Can't compute MSCoherence on two signals with different lengths\n";
-				return false;
-			}
+		// Setting size of outputs
+		l_pOutputMatrixMeanCoherence->setDimensionCount(2); // the output matrix will have 2 dimensions
+		l_pOutputMatrixMeanCoherence->setDimensionSize(0,l_ui32PairsCount);
+		l_pOutputMatrixMeanCoherence->setDimensionSize(1,1); // Compute the mean so only one value
 
-			if(l_ui32SamplesPerChannel1==0||l_ui32SamplesPerChannel2==0)
-			{
-				this->getLogManager() << LogLevel_Error << "Can't compute MSCoherence, input signal size = 0\n";
-				return false;
-			}
+		l_pOutputMatrixCoherenceSpectrum->setDimensionCount(2); // the output matrix will have 2 dimensions
+		l_pOutputMatrixCoherenceSpectrum->setDimensionSize(0,l_ui32PairsCount);
+		l_pOutputMatrixCoherenceSpectrum->setDimensionSize(1, l_ui32SegmentsLength);
 
-			if(l_ui32OverlapPercent < 0 || l_ui32OverlapPercent > 100)
-			{
-				this->getLogManager() << LogLevel_Error << "Overlap must be a value between 0 and 100\n";
-				return false;
-			}
-
-			if(l_ui32SegmentsLength == 0)
-			{
-				this->getLogManager() << LogLevel_Error << "Segments must have a strictly positive length (>0)\n";
-				return false;
-			}
-
-			// Setting size of outputs
-			l_pOutputMatrixMeanCoherence->setDimensionCount(2); // the output matrix will have 2 dimensions
-			l_pOutputMatrixMeanCoherence->setDimensionSize(0,l_ui32PairsCount);
-			l_pOutputMatrixMeanCoherence->setDimensionSize(1,1); // Compute the mean so only one value
-
-			l_pOutputMatrixCoherenceSpectrum->setDimensionCount(2); // the output matrix will have 2 dimensions
-			l_pOutputMatrixCoherenceSpectrum->setDimensionSize(0,l_ui32PairsCount);
-			l_pOutputMatrixCoherenceSpectrum->setDimensionSize(1, l_ui32SegmentsLength);
-
-			l_pFrequencyVector->setDimensionCount(2);
-			l_pFrequencyVector->setDimensionSize(0,2);
-			l_pFrequencyVector->setDimensionSize(1, l_ui32SegmentsLength); // the frequency vector is a matrix of size 2*l_ui32SegmentsLength to match the spectrum encoder requirements
+		l_pFrequencyVector->setDimensionCount(2);
+		l_pFrequencyVector->setDimensionSize(0,2);
+		l_pFrequencyVector->setDimensionSize(1, l_ui32SegmentsLength); // the frequency vector is a matrix of size 2*l_ui32SegmentsLength to match the spectrum encoder requirements
 
 
-			// Setting name of output channels for visualization
-			CString l_name1, l_name2, l_name;
-			uint32 l_ui32Index;
-			for(uint32 i=0;i<l_ui32PairsCount;i++)
-			{
-				l_ui32Index=2*i;
-				l_name1 = l_pInputMatrix1->getDimensionLabel(0,(uint32)l_pChannelPairs->getBuffer()[l_ui32Index+1]);
-				l_name2 = l_pInputMatrix2->getDimensionLabel(0,(uint32)l_pChannelPairs->getBuffer()[l_ui32Index+2]);
-				l_name = l_name1+" "+l_name2;
-				l_pOutputMatrixMeanCoherence->setDimensionLabel(0,i,l_name);
-				l_pOutputMatrixCoherenceSpectrum->setDimensionLabel(0,i,l_name);
-			}
+		// Setting name of output channels for visualization
+		for(uint32 i=0;i<l_ui32PairsCount;i++)
+		{
+			const uint32 l_ui32Index=2*i;
+			CString l_name1 = l_pInputMatrix1->getDimensionLabel(0,(uint32)l_pChannelBuffer[l_ui32Index+0]);
+			CString l_name2 = l_pInputMatrix2->getDimensionLabel(0,(uint32)l_pChannelBuffer[l_ui32Index+1]);
+			CString l_name = l_name1+" "+l_name2;
 
-			// Create frequency vector for the spectrum encoder
-			for(uint32 i = 0; i<l_ui32SegmentsLength; i++)
-			{
-				l_f64FrequencyBandStart = i * l_ui64SamplingRate/2.0/l_ui32SegmentsLength;
-				l_f64FrequencyBandStop = (i+1) * l_ui64SamplingRate/2.0/l_ui32SegmentsLength;
-				l_vecFreqVector.push_back(l_f64FrequencyBandStart);
-				l_vecFreqVector.push_back(l_f64FrequencyBandStop);
-			}
-
-			for(uint32 k = 0; k < 2*(l_ui32SegmentsLength);k++)
-			{
-				l_pFrequencyVector->getBuffer()[k] = l_vecFreqVector[k];
-			}
-
+			l_pOutputMatrixMeanCoherence->setDimensionLabel(0,i,l_name);
+			l_pOutputMatrixCoherenceSpectrum->setDimensionLabel(0,i,l_name);
 		}
 
-		if(this->isInputTriggerActive(OVP_Algorithm_Connectivity_InputTriggerId_Process))
+		// Create frequency vector for the spectrum encoder
+		float64* l_pFrequencyVectorBuffer = l_pFrequencyVector->getBuffer(); 
+		for(uint32 i = 0; i<l_ui32SegmentsLength; i++)
 		{
+			const float64 l_f64FrequencyBandStart = i * l_ui64SamplingRate/2.0/l_ui32SegmentsLength;
+			const float64 l_f64FrequencyBandStop = (i+1) * l_ui64SamplingRate/2.0/l_ui32SegmentsLength;
+			l_pFrequencyVectorBuffer[2*i+0] = l_f64FrequencyBandStart;
+			l_pFrequencyVectorBuffer[2*i+1] = l_f64FrequencyBandStop;
+		}
+	}
+
+	if(this->isInputTriggerActive(OVP_Algorithm_Connectivity_InputTriggerId_Process))
+	{
+		const uint32 l_ui32NOverlap = l_ui32OverlapPercent*l_ui32SegmentsLength/100; // Convert percentage in samples
+
+		uint32 l_ui32NbSegments = 0;
+		float64 l_f64MeanCohere = 0;
+
+		// Calculate number of segment on data set giving segment's length and overlap
+		if(l_ui32NOverlap != 0)
+		{
+			l_ui32NbSegments = (l_ui32SamplesPerChannel1 - l_ui32SegmentsLength)/l_ui32NOverlap + 1;
+		}
+		else
+		{
+			l_ui32NbSegments = l_ui32SamplesPerChannel1/l_ui32SegmentsLength;
+		}
 
 
-			VectorXd l_vecXdChannelToCompare1;
-			VectorXd l_vecXdChannelToCompare2;
+		//_______________________________________________________________________________________
+		//
+		// Compute MSC for each pair
+		//_______________________________________________________________________________________
+		//
 
-			VectorXd l_vecXdCoherenceNum;
-			VectorXd l_vecXdCoherenceDen;
-			VectorXd l_vecXdCoherence;
-
-			uint32 l_ui32NOverlap = l_ui32OverlapPercent*l_ui32SegmentsLength/100; // Convert percentage in samples
-
-			uint32 l_ui32NbSegments = 0;
-			float64 l_f64MeanCohere = 0;
-
-
-
-			// Calculate number of segment on data set giving segment's length and overlap
-			if(l_ui32NOverlap != 0)
-			{
-				l_ui32NbSegments = (l_ui32SamplesPerChannel1 - l_ui32SegmentsLength)/l_ui32NOverlap + 1;
-			}
-			else
-			{
-				l_ui32NbSegments = l_ui32SamplesPerChannel1/l_ui32SegmentsLength;
-			}
-
+		for(uint32 channel = 0; channel < l_ui32PairsCount; channel++)
+		{
+			VectorXd l_vecXdChannelToCompare1(l_ui32SamplesPerChannel1);
+			VectorXd l_vecXdChannelToCompare2(l_ui32SamplesPerChannel2);
 
 			//_______________________________________________________________________________________
 			//
-			// Compute MSC for each pairs
+			// Form pairs with the lookup matrix given
 			//_______________________________________________________________________________________
 			//
 
-			for(uint32 channel = 0; channel < l_ui32PairsCount; channel++)
+			const uint32 l_ui32ChannelIndex = 2*channel; //Index of a single channel
+			const uint32 l_ui32Channel1 = (uint32)l_pChannelBuffer[l_ui32ChannelIndex+0];
+			const uint32 l_ui32Channel2 = (uint32)l_pChannelBuffer[l_ui32ChannelIndex+1];
+
+			for(uint32 sample = 0; sample < l_ui32SamplesPerChannel1; sample++)
 			{
-				l_vecXdChannelToCompare1 = VectorXd::Zero(l_ui32SamplesPerChannel1);
-				l_vecXdChannelToCompare2 = VectorXd::Zero(l_ui32SamplesPerChannel2);
+				l_vecXdChannelToCompare1(sample) = l_pMatrixBuffer1[sample+l_ui32Channel1*l_ui32SamplesPerChannel1];
+			}
+			for(uint32 sample = 0; sample < l_ui32SamplesPerChannel2; sample++)
+			{
+				l_vecXdChannelToCompare2(sample) = l_pMatrixBuffer2[sample+l_ui32Channel2*l_ui32SamplesPerChannel2];
+			}
 
-				l_vecXdCoherenceNum = VectorXd::Zero(l_ui32SegmentsLength);
-				l_vecXdCoherenceDen = VectorXd::Zero(l_ui32SegmentsLength);
-				l_vecXdCoherence = VectorXd::Zero(l_ui32SegmentsLength);
+			// Remove the DC component of each channel. Without this we get really high coherences spread all over the 
+			// spectrum when using e.g. the motor imagery dataset bundled with OpenViBE. @todo before or after windowing? here before.
+			l_vecXdChannelToCompare1 = l_vecXdChannelToCompare1 - VectorXd::Ones(l_ui32SamplesPerChannel1) * l_vecXdChannelToCompare1.mean();
+			l_vecXdChannelToCompare2 = l_vecXdChannelToCompare2 - VectorXd::Ones(l_ui32SamplesPerChannel2) * l_vecXdChannelToCompare2.mean();
 
-				m_vecXdPowerSpectrum1 = VectorXd::Zero(l_ui32SegmentsLength);
-				m_vecXdPowerSpectrum2 = VectorXd::Zero(l_ui32SegmentsLength);
-				m_vecXcdCrossSpectrum = VectorXcd::Zero(l_ui32SegmentsLength);
+			//	cout << "c1 " << l_vecXdChannelToCompare1 << "\n";
+			//	cout << "c2 " << l_vecXdChannelToCompare2 << "\n";
 
-				uint32 l_channelIndex = 2*channel; //Index on single channel
+			/* Compute MSC */
+ 			CAlgorithmMagnitudeSquaredCoherence::powerSpectralDensity(l_vecXdChannelToCompare1, m_vecXdPowerSpectrum1, m_vecXdWindow, l_ui32NbSegments, l_ui32SegmentsLength, l_ui32NOverlap);
+ 			// cout << "s1 " << m_vecXdPowerSpectrum1.transpose() << "\n";
+  			CAlgorithmMagnitudeSquaredCoherence::powerSpectralDensity(l_vecXdChannelToCompare2, m_vecXdPowerSpectrum2, m_vecXdWindow, l_ui32NbSegments, l_ui32SegmentsLength, l_ui32NOverlap);
+			// cout << "s2 " << m_vecXdPowerSpectrum2.transpose() << "\n";
+			CAlgorithmMagnitudeSquaredCoherence::crossSpectralDensity(l_vecXdChannelToCompare1, l_vecXdChannelToCompare2, m_vecXcdCrossSpectrum, m_vecXdWindow, l_ui32NbSegments, l_ui32SegmentsLength, l_ui32NOverlap);
+			// cout << "xs " << m_vecXcdCrossSpectrum.transpose() << "\n";
 
-				//_______________________________________________________________________________________
-				//
-				// Form pairs with the lookup matrix given
-				//_______________________________________________________________________________________
-				//
+			const float64 l_f64Epsilon = 10e-3;	// discard bands with autospectral power smaller than this
 
-				for(uint32 sample = 0; sample < l_ui32SamplesPerChannel1; sample++)
+			const VectorXd l_vecXdCoherenceNum = (m_vecXcdCrossSpectrum.real().cwiseProduct(m_vecXcdCrossSpectrum.conjugate())).real();
+			const VectorXd l_vecXdCoherenceDen = m_vecXdPowerSpectrum1.cwiseProduct(m_vecXdPowerSpectrum2);
+			const VectorXd l_vecXdCoherence = l_vecXdCoherenceNum.cwiseQuotient(l_vecXdCoherenceDen);
+
+			// cout << "vCohNum: " << l_vecXdCoherenceNum.transpose() << "\n";
+			// cout << "vCohDen: " << l_vecXdCoherenceDen.transpose() << "\n";
+			// cout << "vCoh: " << l_vecXdCoherence.transpose() << "\n";
+
+			uint32 l_ui32NumValids = 0;
+			for (int32 i = 0; i<l_vecXdCoherence.size()/2; i++) // skip symmetric part
+			{
+				// Write coherence to output
+				float64 val = l_vecXdCoherence(i);
+				// if( (m_vecXdPowerSpectrum1(i)<l_f64Epsilon || m_vecXdPowerSpectrum2(i)<l_f64Epsilon)
+				if( (l_vecXdCoherenceDen(i)<l_f64Epsilon)
+					|| val!=val) 
 				{
-					if(l_pChannelPairs->getBuffer()[sample] < l_ui32ChannelCount1)
-					{
-						l_pChannelToCompare(l_channelIndex,sample) = l_ipMatrixBuffer1[sample+(uint32)l_pChannelPairs->getBuffer()[l_channelIndex]*l_ui32SamplesPerChannel1];
-						l_pChannelToCompare(l_channelIndex+1,sample) = l_ipMatrixBuffer2[sample+(uint32)l_pChannelPairs->getBuffer()[l_channelIndex+1]*l_ui32SamplesPerChannel2];
-					}
+					// Set to zero if both channels have very low autospectral power or if the result is NaN 
+					val = 0;
+				}
+				else 
+				{
+					// Only include valid results in the mean
+					l_ui32NumValids++;
 				}
 
-				// Retrieve the 2 channel to compare
-				l_vecXdChannelToCompare1 = l_pChannelToCompare.row(l_channelIndex);
-				l_vecXdChannelToCompare2 = l_pChannelToCompare.row(l_channelIndex+1);
+				l_pOutputMatrixCoherenceSpectrum->getBuffer()[i*2+0+channel*l_vecXdCoherence.size()] = val;
+				l_pOutputMatrixCoherenceSpectrum->getBuffer()[i*2+1+channel*l_vecXdCoherence.size()] = val;
 
-				/* Compute MSC */
-				CAlgorithmMagnitudeSquaredCoherence::powerSpectralDensity(l_vecXdChannelToCompare1, m_vecXdPowerSpectrum1, m_vecXdWindow, l_ui32NbSegments, l_ui32SegmentsLength, l_ui32NOverlap);
-				CAlgorithmMagnitudeSquaredCoherence::powerSpectralDensity(l_vecXdChannelToCompare2, m_vecXdPowerSpectrum2, m_vecXdWindow, l_ui32NbSegments, l_ui32SegmentsLength, l_ui32NOverlap);
-				CAlgorithmMagnitudeSquaredCoherence::crossSpectralDensity(l_vecXdChannelToCompare1, l_vecXdChannelToCompare2, m_vecXcdCrossSpectrum, m_vecXdWindow, l_ui32NbSegments, l_ui32SegmentsLength, l_ui32NOverlap);
-
-				for (int32 i = 0; i<m_vecXcdCrossSpectrum.size(); i++)
-				{
-					l_vecXdCoherenceNum(i) = real(m_vecXcdCrossSpectrum(i)*(conj(m_vecXcdCrossSpectrum(i))));
-				}
-				l_vecXdCoherenceDen = m_vecXdPowerSpectrum1.cwiseProduct(m_vecXdPowerSpectrum2);
-				l_vecXdCoherence = l_vecXdCoherenceNum.cwiseQuotient(l_vecXdCoherenceDen);
-
-				for (int32 i = 0; i<l_vecXdCoherence.size(); i++)
-				{
-					// Write coherence to output
-					l_pOutputMatrixCoherenceSpectrum->getBuffer()[i+channel*l_vecXdCoherence.size()] = l_vecXdCoherence(i);
-
-					// Compute MSC mean over frequencies
-					l_f64MeanCohere += l_vecXdCoherence(i);
-
-				}
-
-				// Write coherence mean over frequencies to output
-				l_pOutputMatrixMeanCoherence->getBuffer()[channel] = l_f64MeanCohere/l_vecXdCoherence.size();
+				// Compute MSC mean over frequencies
+				l_f64MeanCohere += val;
 
 			}
-			this->activateOutputTrigger(OVP_Algorithm_Connectivity_OutputTriggerId_ProcessDone, true);
+
+			// Write coherence mean over valid frequencies to output. 
+			// The validity test might not matter much for real data that may have power on all bands, but its critical for artificial examples.
+			if(l_ui32NumValids) 
+			{
+				l_pOutputMatrixMeanCoherence->getBuffer()[channel] = l_f64MeanCohere/l_ui32NumValids;
+			} 
+			else 
+			{
+				l_pOutputMatrixMeanCoherence->getBuffer()[channel] = 0;
+			}
+			// cout << "Coh " << l_f64MeanCohere << "\n";
 		}
+		this->activateOutputTrigger(OVP_Algorithm_Connectivity_OutputTriggerId_ProcessDone, true);
+	}
 
 	return true;
 }

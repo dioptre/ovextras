@@ -59,15 +59,15 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pFrequencyBandVector;
 
 		private:
+			// why members?
 			Eigen::VectorXd m_vecXdPowerSpectrum1;
 			Eigen::VectorXd m_vecXdPowerSpectrum2;
 			Eigen::VectorXcd m_vecXcdCrossSpectrum;
-			Eigen::VectorXd m_vecXdWindow;
 
-			OpenViBE::float64 m_f64U; // Window normalization constant
+			Eigen::VectorXd m_vecXdWindow;  // Window weight vector
+			OpenViBE::float64 m_f64U;       // Window's normalization constant
 
 			WindowFunctions m_oWindow;
-
 
 			Eigen::FFT< double, Eigen::internal::kissfft_impl<double > > m_oFFT; // Instance of the fft transform
 
