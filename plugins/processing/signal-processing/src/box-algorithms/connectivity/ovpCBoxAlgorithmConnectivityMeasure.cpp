@@ -68,7 +68,6 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 	m_ui32InputCount = l_rStaticBoxContext.getInputCount();
 	m_ui32OutputCount = l_rStaticBoxContext.getOutputCount();
 
-
 	// Retrieve algorithm chosen by the user
 	CIdentifier l_oConnectivityAlgorithmClassIdentifier;
 	CString l_sConnectivityAlgorithmClassIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
@@ -103,15 +102,14 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 	// The box can't process more than two input
 	else if(m_ui32InputCount > 2)
 	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Incorrect number of input";
-				return false;
+		this->getLogManager() << LogLevel_ImportantWarning << "Incorrect number of inputs\n";
+		return false;
 	}
 
 	// if an output was added, creation of the corresponding encoder
 	if(m_ui32OutputCount>1)
 	{
 		m_oAlgo3_SpectrumEncoder.initialize(*this);
-
 	}
 
 	// if MScoherence is computed, manage corresponding settings and output
@@ -158,7 +156,6 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 
 	m_oAlgo1_SignalEncoder.getInputMatrix().setReferenceTarget(op_pMatrix);
 	m_oAlgo1_SignalEncoder.getInputSamplingRate().setReferenceTarget(m_oAlgo0_SignalDecoder.getOutputSamplingRate());
-
 
 	return true;
 }
@@ -241,8 +238,6 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 	// we decode the input signal chunks
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-
-
 		m_oAlgo0_SignalDecoder.decode(0,i);
 
 		if(m_ui32InputCount==2)
@@ -363,7 +358,7 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 								m_vChannelTable.push_back(k);
 								m_vChannelTable.push_back(j);
 
-								this->getLogManager() << LogLevel_Info << "  Selected channels [" << k+1 << ","<< j+1 <<"]\n";
+								this->getLogManager() << LogLevel_Trace << "  Selected channels [" << k+1 << ","<< j+1 <<"]\n";
 
 							}
 
@@ -373,6 +368,7 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 			}
 
 			ip_pChannelTable->setDimensionSize(0,m_vChannelTable.size());
+
 
 			// Copy the look up vector into the parameterHandler in order to pass it to the algorithm
 			for(uint32 cpt=0;cpt<m_vChannelTable.size();cpt++)
@@ -415,10 +411,9 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 					m_oAlgo3_SpectrumEncoder.encodeBuffer(1);
 					l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 				}
-
 			}
-
 		}
+
 		if(l_bEndReceived)
 		{
 			// End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
@@ -431,8 +426,6 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 				m_oAlgo3_SpectrumEncoder.encodeEnd(1);
 				l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 			}
-
-
 		}
 
 		// The current input chunk has been processed, and automatically discarded
