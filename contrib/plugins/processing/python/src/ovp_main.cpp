@@ -1,4 +1,9 @@
+#if defined(WIN32) && defined(TARGET_BUILDTYPE_Debug)
+// Windows debug build doesn't typically link as most people don't have the python debug library.
+#else
+
 #if defined TARGET_HAS_ThirdPartyPython
+
 #include "box-algorithms/ovpCBoxAlgorithmPython.h"
 
 #ifdef TARGET_OS_Windows
@@ -85,6 +90,8 @@ CPythonInitializer::CPythonInitializer(void) :
 		}
 #endif
 
+
+
 }
 
 CPythonInitializer::~CPythonInitializer(void)
@@ -112,3 +119,5 @@ if (l_oPythonInitializer.IsPythonAvailable())
 OVP_Declare_End();
 
 #endif // TARGET_HAS_ThirdPartyPython
+
+#endif

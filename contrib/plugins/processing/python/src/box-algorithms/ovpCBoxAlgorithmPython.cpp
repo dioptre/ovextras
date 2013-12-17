@@ -1,3 +1,7 @@
+#if defined(WIN32) && defined(TARGET_BUILDTYPE_Debug)
+// Windows debug build doesn't typically link as most people don't have the python debug library.
+#else
+
 #include "ovpCBoxAlgorithmPython.h"
 
 #if defined TARGET_HAS_ThirdPartyPython
@@ -2060,3 +2064,4 @@ OpenViBE::boolean CBoxAlgorithmPython::process(void)
 }
 
 #endif // TARGET_HAS_ThirdPartyPython
+#endif
