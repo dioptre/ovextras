@@ -59,6 +59,8 @@ CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 	m_oSettings.add("MasterSerial", &m_masterSerial);
 	m_oSettings.load();
 
+	m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();	
+
 }
 
 void CDriverGTecGUSBamp::release(void)
@@ -745,6 +747,9 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 		return false;
 	}
 
+	//get new value from header
+	this->m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
+
 	m_oSettings.save();
 
 	//start reconfigure based on the new input:
@@ -752,8 +757,6 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 	if (targetMasterSerial!="")
 	    setMasterDevice(targetMasterSerial);
 
-	//get new value from header
-	this->m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
 	//expand the value from one device to all devices
 	if (m_bTriggerInputEnabled)
 	{
