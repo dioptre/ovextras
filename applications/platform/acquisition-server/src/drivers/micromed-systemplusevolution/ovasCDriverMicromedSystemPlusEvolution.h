@@ -4,6 +4,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #if defined TARGET_OS_Windows
 #include <openvibe/ov_all.h>
 #include <iostream>
@@ -80,6 +83,8 @@ namespace OpenViBEAcquisitionServer
 
 		std::list<char*> m_lHeader;
 		std::list<char> m_lTempBuff;
+
+		SettingsHelper m_oSettings;
 	};
 };
 

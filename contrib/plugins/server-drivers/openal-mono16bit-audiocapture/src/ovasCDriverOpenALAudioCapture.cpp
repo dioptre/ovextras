@@ -5,9 +5,6 @@
 #include <toolkit/ovtk_all.h>
 #include <system/Time.h>
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -18,6 +15,7 @@ using namespace std;
 
 CDriverOpenALAudioCapture::CDriverOpenALAudioCapture(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_OpenALAudioCapture", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
@@ -27,6 +25,10 @@ CDriverOpenALAudioCapture::CDriverOpenALAudioCapture(IDriverContext& rDriverCont
 	Device = NULL;
 	Context = NULL;
 	CaptureDevice = NULL;
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.load();
+
 }
 
 CDriverOpenALAudioCapture::~CDriverOpenALAudioCapture(void)
@@ -219,16 +221,12 @@ boolean CDriverOpenALAudioCapture::configure(void)
 	CConfigurationOpenALAudioCapture m_oConfiguration(m_rDriverContext,
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-OpenALAudioCapture.ui");
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_OpenALAudioCapture", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.load();
-
 	if(!m_oConfiguration.configure(m_oHeader))
 	{
 		return false;
 	}
 
-	l_oSettings.save();
+	m_oSettings.save();
 
 	return true;
 }

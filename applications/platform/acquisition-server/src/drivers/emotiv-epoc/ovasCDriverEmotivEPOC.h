@@ -6,6 +6,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <openvibe/ov_all.h>
 
 #include "EmoStateDLL.h"
@@ -72,6 +75,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::CString m_sPathToEmotivSDK;
 		OpenViBE::CString m_sCommandForPathModification;
 		virtual OpenViBE::boolean buildPath(void);
+
+		SettingsHelper m_oSettings;
 	};
 };
 

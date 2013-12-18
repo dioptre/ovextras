@@ -3,9 +3,6 @@
 #include "ovasCDriverGTecGUSBampLegacy.h"
 #include "ovasCConfigurationGTecGUSBampLegacy.h"
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ovITimeArithmetics.h>
 
@@ -36,6 +33,7 @@ using namespace std;
 
 CDriverGTecGUSBampLegacy::CDriverGTecGUSBampLegacy(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_GTecGUSBampLegacy", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_ui32DeviceIndex(uint32(-1))
@@ -53,6 +51,14 @@ CDriverGTecGUSBampLegacy::CDriverGTecGUSBampLegacy(IDriverContext& rDriverContex
 {
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(GTEC_NUM_CHANNELS);
+	
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("DeviceIndex", &m_ui32DeviceIndex);
+	m_oSettings.add("CommonGndAndRefBitmap", &m_ui8CommonGndAndRefBitmap);
+	m_oSettings.add("NotchFilterIndex", &m_i32NotchFilterIndex);
+	m_oSettings.add("BandPassFilterIndex", &m_i32BandPassFilterIndex);
+	m_oSettings.add("TriggerInputEnabled", &m_bTriggerInputEnabled);
+	m_oSettings.load();
 }
 
 void CDriverGTecGUSBampLegacy::release(void)
@@ -376,17 +382,6 @@ OpenViBE::boolean CDriverGTecGUSBampLegacy::configure(void)
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-GTec-GUSBampLegacy.ui", 
 		m_ui32DeviceIndex, m_ui8CommonGndAndRefBitmap, m_i32NotchFilterIndex,m_i32BandPassFilterIndex,m_bTriggerInputEnabled);
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_GTecGUSBampLegacy", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("DeviceIndex", &m_ui32DeviceIndex);
-	l_oSettings.add("CommonGndAndRefBitmap", &m_ui8CommonGndAndRefBitmap);
-	l_oSettings.add("NotchFilterIndex", &m_i32NotchFilterIndex);
-	l_oSettings.add("BandPassFilterIndex", &m_i32BandPassFilterIndex);
-	l_oSettings.add("TriggerInputEnabled", &m_bTriggerInputEnabled);
-	l_oSettings.load();
-
-	m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
-	
 	if(!m_oConfiguration.configure(m_oHeader))
 	{
 		return false;
@@ -394,7 +389,7 @@ OpenViBE::boolean CDriverGTecGUSBampLegacy::configure(void)
 
 	this->m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
 
-	l_oSettings.save();
+	m_oSettings.save();
 
 	return true;
 }

@@ -6,6 +6,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <Windows.h>
 
 #include "ringbuffer.h"
@@ -150,6 +153,7 @@ namespace OpenViBEAcquisitionServer
 
 		vector<string> m_vDevicesSerials;
 
+		SettingsHelper m_oSettings;
 	};
 };
 

@@ -3,9 +3,6 @@
 #include "ovasCDriverEmotivEPOC.h"
 #include "ovasCConfigurationEmotivEPOC.h"
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 #include "edk.h"
 
 #include <system/Time.h>
@@ -38,6 +35,7 @@ static const EE_DataChannel_t g_ChannelList[] =
 
 CDriverEmotivEPOC::CDriverEmotivEPOC(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_EmotivEPOC", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_ui32TotalSampleCount(0)
@@ -51,6 +49,11 @@ CDriverEmotivEPOC::CDriverEmotivEPOC(IDriverContext& rDriverContext)
 	m_bReadyToCollect = false;
 	m_bFirstStart = true;
 
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("UseGyroscope", &m_bUseGyroscope);
+	m_oSettings.add("PathToEmotivSDK", &m_sPathToEmotivSDK);
+	m_oSettings.add("UserID", &m_ui32UserID);
+	m_oSettings.load();
 }
 
 CDriverEmotivEPOC::~CDriverEmotivEPOC(void)
@@ -381,19 +384,12 @@ boolean CDriverEmotivEPOC::configure(void)
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Emotiv-EPOC.ui", 
 		m_bUseGyroscope, m_sPathToEmotivSDK, m_ui32UserID);
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_EmotivEPOC", m_rDriverContext.getConfigurationManager() );
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("UseGyroscope", &m_bUseGyroscope);
-	l_oSettings.add("PathToEmotivSDK", &m_sPathToEmotivSDK);
-	l_oSettings.add("UserID", &m_ui32UserID);
-	l_oSettings.load();
-
 	if(!m_oConfiguration.configure(m_oHeader)) 
 	{
 		return false;
 	}
 
-	l_oSettings.save();
+	m_oSettings.save();
 
 	return true;
 }

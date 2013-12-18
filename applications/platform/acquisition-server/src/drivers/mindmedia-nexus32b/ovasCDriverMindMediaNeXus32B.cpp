@@ -6,8 +6,6 @@
 #include <system/Time.h>
 #include <system/Memory.h>
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
 
 #if defined TARGET_OS_Windows
 
@@ -29,6 +27,7 @@ namespace
 
 CDriverMindMediaNeXus32B::CDriverMindMediaNeXus32B(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_MindMediaNexus32B", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
@@ -36,6 +35,9 @@ CDriverMindMediaNeXus32B::CDriverMindMediaNeXus32B(IDriverContext& rDriverContex
 {
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(4);
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.load();
 }
 
 void CDriverMindMediaNeXus32B::release(void)
@@ -242,16 +244,12 @@ boolean CDriverMindMediaNeXus32B::configure(void)
 {
 	CConfigurationBuilder m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-MindMedia-NeXus32B.ui");
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_MindMediaNexus32B", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.load();
-
 	if(!m_oConfiguration.configure(m_oHeader)) 
 	{
 		return false;
 	}
 
-	l_oSettings.save();
+	m_oSettings.save();
 
 	return true;
 }

@@ -6,6 +6,9 @@
 
 #include <openvibe/ov_all.h>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <vector>
 
 #include <socket/IConnectionClient.h>
@@ -135,6 +138,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_MessageStop* m_pStructRDA_MessageStop;
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_MessageData32* m_pStructRDA_MessageData32;
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_Marker* m_pStructRDA_Marker;
+
+		SettingsHelper m_oSettings;
 	};
 };
 

@@ -5,6 +5,9 @@
 #include "../ovasCHeader.h"
 #include "ovas_base.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #if defined TARGET_OS_Windows
 
 #include "ovasCConfigurationTMSIRefa32B.h"
@@ -62,6 +65,9 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bCheckImpedance;
 		OpenViBE::int32 m_i32NumOfTriggerChannel;
 		OpenViBE::uint32 m_ui32LastTriggerValue;
+
+		SettingsHelper m_oSettings;
+
 		//----------- TYPE ---------------------
 		//constants used by set chantype
 		#define EXG (ULONG) 0x0001

@@ -4,6 +4,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 namespace OpenViBEAcquisitionServer
 {
 	class CDriverGenericOscillator : public OpenViBEAcquisitionServer::IDriver
@@ -40,6 +43,8 @@ namespace OpenViBEAcquisitionServer
 
 	private:
 		OpenViBE::boolean m_bSendPeriodicStimulations;
+
+		SettingsHelper m_oSettings;
 	};
 };
 

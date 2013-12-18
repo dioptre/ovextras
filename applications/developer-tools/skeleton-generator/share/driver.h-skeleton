@@ -5,6 +5,9 @@
 #include "../ovasCHeader.h"
 #include <openvibe/ov_all.h>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 namespace OpenViBEAcquisitionServer
 {
 	/**
@@ -61,6 +64,8 @@ namespace OpenViBEAcquisitionServer
 		 * Example :
 		 */
 		// OpenViBE::uint32 m_ui32ConnectionID;
+		
+		SettingsHelper m_oSettings;
 	};
 };
 

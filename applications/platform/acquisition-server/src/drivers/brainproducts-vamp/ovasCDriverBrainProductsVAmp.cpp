@@ -4,9 +4,6 @@
 #include "ovasCConfigurationBrainProductsVAmp.h"
 #include "ovasCHeaderBrainProductsVAmp.h"
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 #include <system/Time.h>
 #include <windows.h>
 
@@ -28,6 +25,7 @@ using namespace std;
 
 CDriverBrainProductsVAmp::CDriverBrainProductsVAmp(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_BrainProducts-VAmp", m_rDriverContext.getConfigurationManager())
 	,m_bAcquireAuxiliaryAsEEG(false)
 	,m_bAcquireTriggerAsEEG(false)
 	,m_oHeader(
@@ -58,6 +56,13 @@ CDriverBrainProductsVAmp::CDriverBrainProductsVAmp(IDriverContext& rDriverContex
 
 	m_oHeader.setFastModeSettings(l_tVamp4FastSettings);
 	m_oHeader.setDeviceId(FA_ID_INVALID);
+
+	// @note m_oHeader is CHeaderBrainProductsVAmp, whereas the current interface supports only IHeader. Thus, some info may not be loaded/saved.
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("AcquireAuxiliaryAsEEG", &m_bAcquireAuxiliaryAsEEG);
+	m_oSettings.add("AcquireTriggerAsEEG", &m_bAcquireTriggerAsEEG);
+	m_oSettings.load();
+
 }
 
 CDriverBrainProductsVAmp::~CDriverBrainProductsVAmp(void)
@@ -377,19 +382,12 @@ boolean CDriverBrainProductsVAmp::configure(void)
 	CConfigurationBrainProductsVAmp m_oConfiguration(m_rDriverContext, 
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-BrainProducts-VAmp.ui", &m_oHeader); // the specific header is passed into the specific configuration
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_BrainProducts-VAmp", m_rDriverContext.getConfigurationManager());
-	// @note m_oHeader is CHeaderBrainProductsVAmp, whereas the current interface supports only IHeader. Thus, some info may not be loaded/saved.
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("AcquireAuxiliaryAsEEG", &m_bAcquireAuxiliaryAsEEG);
-	l_oSettings.add("AcquireTriggerAsEEG", &m_bAcquireTriggerAsEEG);
-	l_oSettings.load();
-
 	if(!m_oConfiguration.configure(*(m_oHeader.getBasicHeader()))) // the basic configure will use the basic header
 	{
 		return false;
 	}
 	
-	l_oSettings.save();
+	m_oSettings.save();
 
 	if(m_ui32AcquisitionMode == AcquisitionMode_VAmp4Fast)
 	{

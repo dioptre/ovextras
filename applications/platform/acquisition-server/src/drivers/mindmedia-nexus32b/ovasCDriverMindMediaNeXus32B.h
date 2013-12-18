@@ -4,6 +4,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #if defined TARGET_OS_Windows
 
 namespace OpenViBEAcquisitionServer
@@ -39,6 +42,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
 		OpenViBE::float32* m_pSample;
 		OpenViBE::uint32 m_ui32SampleIndex;
+
+		SettingsHelper m_oSettings;
 	};
 };
 

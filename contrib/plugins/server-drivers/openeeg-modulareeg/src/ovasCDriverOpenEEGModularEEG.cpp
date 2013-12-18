@@ -3,9 +3,6 @@
 
 #include <toolkit/ovtk_all.h>
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 #include <system/Time.h>
 #include <system/Memory.h>
 #include <cmath>
@@ -38,6 +35,7 @@ using namespace OpenViBE::Kernel;
 
 CDriverOpenEEGModularEEG::CDriverOpenEEGModularEEG(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_OpenEEG-ModularEEG", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32ChannelCount(6)
 	,m_ui32DeviceIdentifier(uint32(-1))
@@ -45,6 +43,11 @@ CDriverOpenEEGModularEEG::CDriverOpenEEGModularEEG(IDriverContext& rDriverContex
 {
 	m_oHeader.setSamplingFrequency(256);
 	m_oHeader.setChannelCount(m_ui32ChannelCount);
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("DeviceIdentifier", &m_ui32DeviceIdentifier);
+	m_oSettings.load();
+
 }
 
 void CDriverOpenEEGModularEEG::release(void)
@@ -173,16 +176,11 @@ boolean CDriverOpenEEGModularEEG::configure(void)
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-OpenEEG-ModularEEG.ui", 
 		m_ui32DeviceIdentifier);
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_OpenEEG-ModularEEG", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("DeviceIdentifier", &m_ui32DeviceIdentifier);
-	l_oSettings.load();
-
 	if(!m_oConfiguration.configure(m_oHeader)) {
 		return false;
 	}
 
-	l_oSettings.save();
+	m_oSettings.save();
 
 	return true;
 }

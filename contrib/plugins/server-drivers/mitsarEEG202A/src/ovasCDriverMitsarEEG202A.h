@@ -6,6 +6,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 namespace OpenViBEAcquisitionServer
 {
 	/**
@@ -66,6 +69,7 @@ namespace OpenViBEAcquisitionServer
 		std::vector<OpenViBE::float32>               m_vInputSamples;
 		std::vector<OpenViBE::float32>               m_vOutputSamples;
 
+		SettingsHelper m_oSettings;
 	};
 };
 

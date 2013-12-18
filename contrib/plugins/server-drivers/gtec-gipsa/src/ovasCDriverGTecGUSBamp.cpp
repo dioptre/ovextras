@@ -3,9 +3,6 @@
 #include "ovasCDriverGTecGUSBamp.h"
 #include "ovasCConfigurationGTecGUSBamp.h"
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 #include <toolkit/ovtk_all.h>
 
 #include <system/Time.h>
@@ -36,6 +33,7 @@ const DWORD CDriverGTecGUSBamp::bufferSizeBytes = HEADER_SIZE + nPoints * sizeof
 
 CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_GTecGUSBamp", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_ui32DeviceIndex(uint32(-1))
@@ -50,6 +48,17 @@ CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 {
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(GTEC_NUM_CHANNELS);	
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("DeviceIndex", &m_ui32DeviceIndex);
+	m_oSettings.add("CommonGndAndRefBitmap", &m_ui8CommonGndAndRefBitmap);
+	m_oSettings.add("NotchFilterIndex", &m_i32NotchFilterIndex);
+	m_oSettings.add("BandPassFilterIndex", &m_i32BandPassFilterIndex);
+	m_oSettings.add("TriggerInputEnabled", &m_bTriggerInputEnabled);
+	m_oSettings.add("DeviceSerials", &m_vDevicesSerials);
+	m_oSettings.add("MasterSerial", &m_masterSerial);
+	m_oSettings.load();
+
 }
 
 void CDriverGTecGUSBamp::release(void)
@@ -728,17 +737,6 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 		m_ui32DeviceIndex, m_ui8CommonGndAndRefBitmap, m_i32NotchFilterIndex,m_i32BandPassFilterIndex,
 		m_bTriggerInputEnabled,m_vDevicesSerials,targetMasterSerial);
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_GTecGUSBamp", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("DeviceIndex", &m_ui32DeviceIndex);
-	l_oSettings.add("CommonGndAndRefBitmap", &m_ui8CommonGndAndRefBitmap);
-	l_oSettings.add("NotchFilterIndex", &m_i32NotchFilterIndex);
-	l_oSettings.add("BandPassFilterIndex", &m_i32BandPassFilterIndex);
-	l_oSettings.add("TriggerInputEnabled", &m_bTriggerInputEnabled);
-	l_oSettings.add("DeviceSerials", &m_vDevicesSerials);
-	l_oSettings.add("TargetMasterSerial", &targetMasterSerial);
-	l_oSettings.load();
-
 	//reduce from number of channels for all devices to the number of channels for one device
 	m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
 	
@@ -747,7 +745,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 		return false;
 	}
 
-	l_oSettings.save();
+	m_oSettings.save();
 
 	//start reconfigure based on the new input:
 

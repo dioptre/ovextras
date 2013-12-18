@@ -11,6 +11,9 @@
 
 #include "fieldtrip/message.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 // for GET_CPU_TIME
 #include <iostream>
 #include <fstream>
@@ -89,6 +92,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::float64 m_f64mesureLostTime;
 		OpenViBE::uint32 m_ui32mesureNumber;
 
+		SettingsHelper m_oSettings;
 	};
 };
 

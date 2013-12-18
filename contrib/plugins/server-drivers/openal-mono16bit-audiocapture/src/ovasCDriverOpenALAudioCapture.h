@@ -2,9 +2,14 @@
 #define __OpenViBE_AcquisitionServer_CDriverOpenALAudioCapture_H__
 
 #if defined TARGET_HAS_ThirdPartyOpenAL
+
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 #include <openvibe/ov_all.h>
+
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #if defined TARGET_OS_Windows
 	#include <al.h>
 	#include <alc.h>
@@ -74,6 +79,8 @@ namespace OpenViBEAcquisitionServer
 		ALCdevice* Device;
 		ALCcontext* Context;
 		ALCdevice* CaptureDevice;
+
+		SettingsHelper m_oSettings;
 	};
 };
 

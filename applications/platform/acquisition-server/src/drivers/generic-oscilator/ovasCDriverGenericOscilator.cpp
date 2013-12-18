@@ -1,9 +1,6 @@
 #include "ovasCDriverGenericOscilator.h"
 #include "ovasCConfigurationDriverGenericOscilator.h"
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 #include <toolkit/ovtk_all.h>
 
 #include <system/Time.h>
@@ -19,6 +16,7 @@ using namespace OpenViBE::Kernel;
 
 CDriverGenericOscillator::CDriverGenericOscillator(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_GenericOscillator", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
@@ -30,6 +28,10 @@ CDriverGenericOscillator::CDriverGenericOscillator(IDriverContext& rDriverContex
 
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(4);
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("SendPeriodicStimulations", &m_bSendPeriodicStimulations);
+	m_oSettings.load();
 }
 
 void CDriverGenericOscillator::release(void)
@@ -187,14 +189,9 @@ boolean CDriverGenericOscillator::configure(void)
 	CConfigurationDriverGenericOscilator m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Generic-Oscillator.ui", 
 		m_bSendPeriodicStimulations);
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_GenericOscillator", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("SendPeriodicStimulations", &m_bSendPeriodicStimulations);
-	l_oSettings.load();
-
 	if(m_oConfiguration.configure(m_oHeader)) 
 	{
-		l_oSettings.save();
+		m_oSettings.save();
 		return true;
 	}
 

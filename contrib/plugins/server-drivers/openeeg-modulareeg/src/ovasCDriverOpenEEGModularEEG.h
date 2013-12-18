@@ -4,6 +4,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #if defined TARGET_OS_Windows
  typedef void * FD_TYPE;
 #elif defined TARGET_OS_Linux
@@ -65,6 +68,8 @@ namespace OpenViBEAcquisitionServer
 		std::vector < OpenViBE::int32 > m_vChannelBuffer2;
 
 		OpenViBE::CString m_sTTYName;
+
+		SettingsHelper m_oSettings;
 	};
 };
 

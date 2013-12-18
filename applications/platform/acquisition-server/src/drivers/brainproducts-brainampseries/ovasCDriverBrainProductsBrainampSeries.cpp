@@ -25,9 +25,6 @@
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ovITimeArithmetics.h>
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 #include <system/Memory.h>
 #include <system/Time.h>
 
@@ -86,6 +83,7 @@ const ELogLevel LogLevel_TraceAPI=LogLevel_None;
 
 CDriverBrainProductsBrainampSeries::CDriverBrainProductsBrainampSeries(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_BrainAmpSeries", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_oHeaderAdapter(m_oHeader, m_peChannelSelected)
 	,m_pDevice(NULL)
@@ -123,6 +121,20 @@ CDriverBrainProductsBrainampSeries::CDriverBrainProductsBrainampSeries(IDriverCo
 		m_peResolutionFull[i]=Parameter_Default;
 		m_peDCCouplingFull[i]=Parameter_Default;
 	}
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("USBIndex", &m_ui32USBIndex);
+	m_oSettings.add("DecimationFactor", &m_ui32DecimationFactor);
+	m_oSettings.add("ChannelSelected", m_peChannelSelected);
+	m_oSettings.add("LowPassFilterFull", &m_peLowPassFilterFull);
+	m_oSettings.add("ResolutionFull", &m_peResolutionFull);
+	m_oSettings.add("DCCouplingFull", &m_peDCCouplingFull);
+	m_oSettings.add("LowPass", &m_eLowPass);
+	m_oSettings.add("Resolution", &m_eResolution);
+	m_oSettings.add("DCCoupling", &m_eDCCoupling);
+	m_oSettings.add("Impedance", &m_eImpedance);
+	m_oSettings.load();
+
 }
 
 void CDriverBrainProductsBrainampSeries::release(void)
@@ -659,23 +671,9 @@ boolean CDriverBrainProductsBrainampSeries::configure(void)
 		m_eDCCoupling,
 		m_eImpedance);
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_BrainAmpSeries", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("USBIndex", &m_ui32USBIndex);
-	l_oSettings.add("DecimationFactor", &m_ui32DecimationFactor);
-	l_oSettings.add("ChannelSelected", m_peChannelSelected);
-	l_oSettings.add("LowPassFilterFull", &m_peLowPassFilterFull);
-	l_oSettings.add("ResolutionFull", &m_peResolutionFull);
-	l_oSettings.add("DCCouplingFull", &m_peDCCouplingFull);
-	l_oSettings.add("LowPass", &m_eLowPass);
-	l_oSettings.add("Resolution", &m_eResolution);
-	l_oSettings.add("DCCoupling", &m_eDCCoupling);
-	l_oSettings.add("Impedance", &m_eImpedance);
-	l_oSettings.load();
-
 	l_oConfiguration.configure(m_oHeader);
 
-	l_oSettings.save();
+	m_oSettings.save();
 
 	m_oHeader.setSamplingFrequency(5000/m_ui32DecimationFactor);
 	return true;

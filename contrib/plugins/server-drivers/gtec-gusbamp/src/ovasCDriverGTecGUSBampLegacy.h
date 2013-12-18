@@ -6,6 +6,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <gtk/gtk.h>
 #include <vector>
 
@@ -78,6 +81,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32TotalDriverChunksLost; //since start button clicked
 		OpenViBE::uint32 m_ui32AcquiredChannelCount; //number of channels 1..16 specified bu user
 
+		SettingsHelper m_oSettings;
 	};
 };
 

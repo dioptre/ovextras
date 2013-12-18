@@ -24,6 +24,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #if defined TARGET_OS_Windows
 
 #include "ovas_defines_brainamp_series.h"
@@ -101,6 +104,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBEAcquisitionServer::EParameter m_eResolution;
 		OpenViBEAcquisitionServer::EParameter m_eDCCoupling;
 		OpenViBEAcquisitionServer::EParameter m_eImpedance;
+
+		SettingsHelper m_oSettings;
 	};
 
 	inline std::ostream& operator<< (std::ostream& out, const OpenViBEAcquisitionServer::EParameter& var)

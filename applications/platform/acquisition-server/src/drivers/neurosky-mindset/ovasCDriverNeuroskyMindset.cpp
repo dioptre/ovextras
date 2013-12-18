@@ -3,9 +3,6 @@
 #include "ovasCDriverNeuroskyMindset.h"
 #include "ovasCConfigurationNeuroskyMindset.h"
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 #include <sstream>
 #include <system/Time.h>
 
@@ -23,6 +20,7 @@ using namespace std;
 
 CDriverNeuroskyMindset::CDriverNeuroskyMindset(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_NeuroSkyMindSet", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_ui32TotalSampleCount(0)
@@ -42,6 +40,15 @@ CDriverNeuroskyMindset::CDriverNeuroskyMindset(IDriverContext& rDriverContext)
 	m_bBandPowerChannels    = false;
 	m_bBlinkStimulations    = false;
 	m_bBlinkStrenghtChannel = false;
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("ComPort", &m_ui32ComPort);
+	m_oSettings.add("ESenseChannels", &m_bESenseChannels);
+	m_oSettings.add("BandPowerChannels", &m_bBandPowerChannels);
+	m_oSettings.add("Stimulations", &m_bBlinkStimulations);
+	m_oSettings.add("StrenghtChannel", &m_bBlinkStrenghtChannel);
+	m_oSettings.load();
+
 }
 
 CDriverNeuroskyMindset::~CDriverNeuroskyMindset(void)
@@ -526,21 +533,12 @@ boolean CDriverNeuroskyMindset::configure(void)
 		,m_bBlinkStimulations
 		,m_bBlinkStrenghtChannel);
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_NeuroSkyMindSet", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("ComPort", &m_ui32ComPort);
-	l_oSettings.add("ESenseChannels", &m_bESenseChannels);
-	l_oSettings.add("BandPowerChannels", &m_bBandPowerChannels);
-	l_oSettings.add("Stimulations", &m_bBlinkStimulations);
-	l_oSettings.add("StrenghtChannel", &m_bBlinkStrenghtChannel);
-	l_oSettings.load();
-
 	if(!m_oConfiguration.configure(m_oHeader)) // the basic configure will use the basic header
 	{
 		return false;
 	}
 
-	l_oSettings.save();
+	m_oSettings.save();
 
 	return true;
 }

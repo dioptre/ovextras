@@ -4,6 +4,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <openvibe/ov_all.h>
 
 #include <socket/IConnectionClient.h>
@@ -101,6 +104,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32IndexOut;
 		OpenViBE::uint32 m_ui32SocketFlag;
 		OpenViBE::uint32 m_ui32BuffDataIndex;
+
+		SettingsHelper m_oSettings;
 	};
 };
 
