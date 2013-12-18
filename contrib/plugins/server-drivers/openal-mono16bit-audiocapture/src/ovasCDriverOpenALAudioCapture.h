@@ -60,6 +60,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 
 		// Replace this generic Header with any specific header you might have written
@@ -80,7 +82,6 @@ namespace OpenViBEAcquisitionServer
 		ALCcontext* Context;
 		ALCdevice* CaptureDevice;
 
-		SettingsHelper m_oSettings;
 	};
 };
 

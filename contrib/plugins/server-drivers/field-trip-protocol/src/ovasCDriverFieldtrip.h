@@ -55,6 +55,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 
@@ -92,7 +94,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::float64 m_f64mesureLostTime;
 		OpenViBE::uint32 m_ui32mesureNumber;
 
-		SettingsHelper m_oSettings;
 	};
 };
 

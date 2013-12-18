@@ -48,7 +48,9 @@ namespace OpenViBEAcquisitionServer
 		}
 
 	protected:
-
+		
+		SettingsHelper m_oSettings;
+		
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 
 		// Replace this generic Header with any specific header you might have written
@@ -64,8 +66,6 @@ namespace OpenViBEAcquisitionServer
 		 * Example :
 		 */
 		// OpenViBE::uint32 m_ui32ConnectionID;
-		
-		SettingsHelper m_oSettings;
 	};
 };
 

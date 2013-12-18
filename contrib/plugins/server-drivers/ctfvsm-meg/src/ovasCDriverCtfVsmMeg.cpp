@@ -17,10 +17,10 @@ using namespace std;
 
 CDriverCtfVsmMeg::CDriverCtfVsmMeg(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
-	,m_oSettings("AcquisitionServer_Driver_CtfVsmMeg", m_rDriverContext.getConfigurationManager())
 	,m_pConnectionClient(NULL)
 	,m_sServerHostName("localhost")
 	,m_ui32ServerHostPort(9999)
+	,m_oSettings("AcquisitionServer_Driver_CtfVsmMeg", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)

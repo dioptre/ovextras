@@ -52,6 +52,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 
 		OpenViBE::boolean m_bAcquireAuxiliaryAsEEG;
@@ -75,7 +77,6 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::boolean m_bFirstStart;
 
-		SettingsHelper m_oSettings;
 	};
 };
 

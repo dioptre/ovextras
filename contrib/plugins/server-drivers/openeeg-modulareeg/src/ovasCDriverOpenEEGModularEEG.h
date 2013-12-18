@@ -50,6 +50,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 
@@ -68,8 +70,6 @@ namespace OpenViBEAcquisitionServer
 		std::vector < OpenViBE::int32 > m_vChannelBuffer2;
 
 		OpenViBE::CString m_sTTYName;
-
-		SettingsHelper m_oSettings;
 	};
 };
 

@@ -32,6 +32,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 
@@ -43,8 +45,6 @@ namespace OpenViBEAcquisitionServer
 
 	private:
 		OpenViBE::boolean m_bSendPeriodicStimulations;
-
-		SettingsHelper m_oSettings;
 	};
 };
 

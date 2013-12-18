@@ -30,10 +30,11 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		FILE* m_pFile;
 		OpenViBE::CString m_sFilename;
 
-		SettingsHelper m_oSettings;
 	};
 };
 

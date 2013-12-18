@@ -44,6 +44,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 
@@ -81,7 +83,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32TotalDriverChunksLost; //since start button clicked
 		OpenViBE::uint32 m_ui32AcquiredChannelCount; //number of channels 1..16 specified bu user
 
-		SettingsHelper m_oSettings;
 	};
 };
 

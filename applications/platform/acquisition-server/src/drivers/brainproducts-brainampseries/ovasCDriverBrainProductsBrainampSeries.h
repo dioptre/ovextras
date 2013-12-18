@@ -74,6 +74,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 		OpenViBEAcquisitionServer::CHeaderAdapterBrainProductsBrainampSeries m_oHeaderAdapter;
@@ -105,7 +107,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBEAcquisitionServer::EParameter m_eDCCoupling;
 		OpenViBEAcquisitionServer::EParameter m_eImpedance;
 
-		SettingsHelper m_oSettings;
 	};
 
 	inline std::ostream& operator<< (std::ostream& out, const OpenViBEAcquisitionServer::EParameter& var)

@@ -91,6 +91,8 @@ namespace OpenViBEAcquisitionServer
 		int validPoints;
 		static const DWORD bufferSizeBytes;
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 
@@ -153,7 +155,6 @@ namespace OpenViBEAcquisitionServer
 
 		vector<string> m_vDevicesSerials;
 
-		SettingsHelper m_oSettings;
 	};
 };
 

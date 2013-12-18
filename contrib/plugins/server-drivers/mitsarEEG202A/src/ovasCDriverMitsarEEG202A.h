@@ -54,6 +54,8 @@ namespace OpenViBEAcquisitionServer
 		//??? virtual void processData (cf neXus)
 
 	protected:
+		
+		SettingsHelper m_oSettings;
 
 		OpenViBEAcquisitionServer::IDriverCallback*  m_pCallback;
 		OpenViBEAcquisitionServer::CHeader           m_oHeader;
@@ -69,7 +71,6 @@ namespace OpenViBEAcquisitionServer
 		std::vector<OpenViBE::float32>               m_vInputSamples;
 		std::vector<OpenViBE::float32>               m_vOutputSamples;
 
-		SettingsHelper m_oSettings;
 	};
 };
 

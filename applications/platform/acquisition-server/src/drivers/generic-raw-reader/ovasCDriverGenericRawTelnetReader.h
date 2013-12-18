@@ -28,11 +28,12 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		Socket::IConnectionClient* m_pConnection;
 		OpenViBE::CString m_sHostName;
 		OpenViBE::uint32 m_ui32HostPort;
 
-		SettingsHelper m_oSettings;
 	};
 };
 

@@ -35,6 +35,8 @@ namespace OpenViBEAcquisitionServer
 		virtual void processData(OpenViBE::uint32 ui32SampleCount, OpenViBE::uint32 ui32Channel, OpenViBE::float32* pSample);
 
 	protected:
+		
+		SettingsHelper m_oSettings;
 
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
@@ -43,7 +45,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::float32* m_pSample;
 		OpenViBE::uint32 m_ui32SampleIndex;
 
-		SettingsHelper m_oSettings;
 	};
 };
 

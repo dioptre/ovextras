@@ -55,6 +55,9 @@ namespace OpenViBEAcquisitionServer
 	protected:
 
 		virtual OpenViBE::boolean dropData();
+
+		SettingsHelper m_oSettings;
+
 		OpenViBE::boolean m_bValid;
 
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
@@ -84,7 +87,6 @@ namespace OpenViBEAcquisitionServer
 		std::list<char*> m_lHeader;
 		std::list<char> m_lTempBuff;
 
-		SettingsHelper m_oSettings;
 	};
 };
 

@@ -51,6 +51,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
@@ -76,7 +78,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::CString m_sCommandForPathModification;
 		virtual OpenViBE::boolean buildPath(void);
 
-		SettingsHelper m_oSettings;
 	};
 };
 

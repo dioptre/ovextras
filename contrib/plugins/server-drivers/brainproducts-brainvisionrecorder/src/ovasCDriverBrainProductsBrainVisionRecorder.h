@@ -55,6 +55,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		Socket::IConnectionClient* m_pConnectionClient;
 		OpenViBE::CString m_sServerHostName;
@@ -139,7 +141,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_MessageData32* m_pStructRDA_MessageData32;
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_Marker* m_pStructRDA_Marker;
 
-		SettingsHelper m_oSettings;
 	};
 };
 

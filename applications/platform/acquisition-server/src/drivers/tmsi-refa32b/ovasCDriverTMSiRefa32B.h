@@ -50,6 +50,8 @@ namespace OpenViBEAcquisitionServer
 		virtual const OpenViBEAcquisitionServer::IHeader* getHeader(void) { return &m_oHeader; }
 		virtual OpenViBE::boolean CDriverTMSiRefa32B::measureMode(OpenViBE::uint32 mode,OpenViBE::uint32 info );
 	protected:
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 
@@ -65,8 +67,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bCheckImpedance;
 		OpenViBE::int32 m_i32NumOfTriggerChannel;
 		OpenViBE::uint32 m_ui32LastTriggerValue;
-
-		SettingsHelper m_oSettings;
 
 		//----------- TYPE ---------------------
 		//constants used by set chantype
