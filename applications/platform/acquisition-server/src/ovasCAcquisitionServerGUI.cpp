@@ -106,7 +106,13 @@ static void combobox_sample_count_per_sent_block_changed_cb(::GtkComboBox* pComb
 static bool compare_driver_names(OpenViBEAcquisitionServer::IDriver* a,
 	OpenViBEAcquisitionServer::IDriver* b) 
 {
-		return std::string(a->getName()) < std::string(b->getName());
+	std::string l_sA = a->getName();
+	std::string l_sB = b->getName();
+
+	std::transform(l_sA.begin(), l_sA.end(), l_sA.begin(), ::tolower);
+	std::transform(l_sB.begin(), l_sB.end(), l_sB.begin(), ::tolower);
+
+	return l_sA < l_sB;
 }
 
 

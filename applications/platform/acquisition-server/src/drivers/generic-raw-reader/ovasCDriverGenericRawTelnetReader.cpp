@@ -1,19 +1,29 @@
 #include "ovasCDriverGenericRawTelnetReader.h"
 #include "ovasCConfigurationGenericRawReader.h"
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 
 CDriverGenericRawTelnetReader::CDriverGenericRawTelnetReader(IDriverContext& rDriverContext)
 	:CDriverGenericRawReader(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_GenericRawTelnetReader", m_rDriverContext.getConfigurationManager())
 	,m_pConnection(NULL)
 {
 	m_sHostName="localhost";
 	m_ui32HostPort=1337;
+
+	// Relay configuration properties to the configuration manager
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("LimitSpeed", &m_bLimitSpeed);
+	m_oSettings.add("SampleFormat", &m_ui32SampleFormat);
+	m_oSettings.add("SampleEndian", &m_ui32SampleEndian);
+	m_oSettings.add("StartSkip", &m_ui32StartSkip);
+	m_oSettings.add("HeaderSkip", &m_ui32HeaderSkip);
+	m_oSettings.add("FooterSkip", &m_ui32FooterSkip);
+	m_oSettings.add("HostName", &m_sHostName);
+	m_oSettings.add("HostPort", &m_ui32HostPort);
+	m_oSettings.load();
 
 }
 
@@ -29,18 +39,7 @@ boolean CDriverGenericRawTelnetReader::configure(void)
 		m_ui32FooterSkip,
 		l_sFilename);
 
-	// Relay configuration properties to the configuration manager
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_GenericRawTelnetReader", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("LimitSpeed", &m_bLimitSpeed);
-	l_oSettings.add("SampleFormat", &m_ui32SampleFormat);
-	l_oSettings.add("SampleEndian", &m_ui32SampleEndian);
-	l_oSettings.add("StartSkip", &m_ui32StartSkip);
-	l_oSettings.add("HeaderSkip", &m_ui32HeaderSkip);
-	l_oSettings.add("FooterSkip", &m_ui32FooterSkip);
-	l_oSettings.add("HostName", &m_sHostName);
-	l_oSettings.add("HostPort", &m_ui32HostPort);
-	l_oSettings.load();
+
 
 	m_oConfiguration.setHostName(m_sHostName);
 	m_oConfiguration.setHostPort(m_ui32HostPort);
@@ -53,7 +52,7 @@ boolean CDriverGenericRawTelnetReader::configure(void)
 	m_sHostName=m_oConfiguration.getHostName();
 	m_ui32HostPort=m_oConfiguration.getHostPort();
 
-	l_oSettings.save();
+	m_oSettings.save();
 
 	return true;
 }

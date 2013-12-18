@@ -3,9 +3,6 @@
 
 #include <toolkit/ovtk_all.h>
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -16,12 +13,19 @@ using namespace std;
 
 CDriver@@ClassName@@::CDriver@@ClassName@@(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_@@ClassName@@", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
 {
 	m_oHeader.setSamplingFrequency(@@SamplingFrequency@@);
 	m_oHeader.setChannelCount(@@MaxChannel@@);
+	
+	// The following class allows saving and loading driver settings from the acquisition server .conf file
+	m_oSettings.add("Header", &m_oHeader);
+	// To save your custom driver settings, register each variable to the SettingsHelper
+	//m_oSettings.add("SettingName", &variable);
+	m_oSettings.load();	
 }
 
 CDriver@@ClassName@@::~CDriver@@ClassName@@(void)
@@ -150,18 +154,11 @@ boolean CDriver@@ClassName@@::configure(void)
 	// Change this line if you need to specify some references to your driver attribute that need configuration, e.g. the connection ID.
 	CConfiguration@@ClassName@@ m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-@@ClassName@@.ui");
 	
-	// The following class allows saving and loading driver settings from the acquisition server .conf file
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_@@ClassName@@", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	// To save your custom driver settings, register each variable to the SettingsHelper
-	//l_oSettings.add("SettingName", &variable);
-	l_oSettings.load();
-	
 	if(!m_oConfiguration.configure(m_oHeader))
 	{
 		return false;
 	}
-	l_oSettings.save();
+	m_oSettings.save();
 	
 	return true;
 }

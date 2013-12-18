@@ -5,9 +5,6 @@
 #include "ovasCDriverFieldtrip.h"
 #include "ovasCConfigurationFieldtrip.h"
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 #include <toolkit/ovtk_all.h>
 
 #include <pthread.h>
@@ -33,6 +30,7 @@ using namespace std;
 
 CDriverFieldtrip::CDriverFieldtrip(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_FieldTrip", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
@@ -54,6 +52,14 @@ CDriverFieldtrip::CDriverFieldtrip(IDriverContext& rDriverContext)
 	m_pGetData_Request = new message_t();
 	m_pGetData_Request->def = new messagedef_t();
 	m_pGetData_Request->buf = NULL;
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("MinSamples", &m_ui32MinSamples);
+	m_oSettings.add("PortNumber", &m_ui32PortNumber);
+	m_oSettings.add("HostName", &m_sHostName);
+	m_oSettings.add("CorrectNonIntegerSR", &m_bCorrectNonIntegerSR);
+	m_oSettings.load();
+
 
 }
 
@@ -246,14 +252,6 @@ OpenViBE::boolean CDriverFieldtrip::configure(void)
 	l_oConfiguration.setHostName(m_sHostName);
 	l_oConfiguration.setSRCorrection(m_bCorrectNonIntegerSR);
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_FieldTrip", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("MinSamples", &m_ui32MinSamples);
-	l_oSettings.add("PortNumber", &m_ui32PortNumber);
-	l_oSettings.add("HostName", &m_sHostName);
-	l_oSettings.add("CorrectNonIntegerSR", &m_bCorrectNonIntegerSR);
-	l_oSettings.load();
-
 	if (l_oConfiguration.configure(m_oHeader))
 	{
 		m_ui32MinSamples = l_oConfiguration.getMinSamples();
@@ -261,7 +259,7 @@ OpenViBE::boolean CDriverFieldtrip::configure(void)
 		m_sHostName = l_oConfiguration.getHostName();
 		m_bCorrectNonIntegerSR = l_oConfiguration.getSRCorrection();
 
-		l_oSettings.save();
+		m_oSettings.save();
 
 		return true;
 	}

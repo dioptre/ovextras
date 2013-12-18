@@ -16,9 +16,6 @@
 #include <windows.h>
 #include <cstring>
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 #include <openvibe/ovITimeArithmetics.h>
 
 #define boolean OpenViBE::boolean
@@ -195,6 +192,7 @@ const char* g_sRegisteryKeyName="Software\\VB and VBA Program Settings\\Brain Qu
 
 CDriverMicromedSystemPlusEvolution::CDriverMicromedSystemPlusEvolution(IDriverContext& rDriverContext)
 :IDriver(rDriverContext)
+,m_oSettings("AcquisitionServer_Driver_SystemPlusEvolution", m_rDriverContext.getConfigurationManager())
 ,m_bValid(true)
 ,m_pConnectionServer(NULL)
 ,m_ui32ServerHostPort(3000)
@@ -294,6 +292,12 @@ CDriverMicromedSystemPlusEvolution::CDriverMicromedSystemPlusEvolution(IDriverCo
 	g_hRegistryKey=NULL;
 	//	g_bInitializedFromRegistry=true;
 #endif
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("ServerHostPort", &m_ui32ServerHostPort);
+	m_oSettings.add("TimeOutMs",  &m_ui32TimeOutMilliseconds);
+	m_oSettings.load();
+
 }
 
 CDriverMicromedSystemPlusEvolution::~CDriverMicromedSystemPlusEvolution(void)
@@ -875,16 +879,10 @@ boolean CDriverMicromedSystemPlusEvolution::configure(void)
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Micromed-SystemPlusEvolution.ui");
 	l_oConfiguration.setHostPort(m_ui32ServerHostPort);
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_SystemPlusEvolution", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("ServerHostPort", &m_ui32ServerHostPort);
-	l_oSettings.add("TimeOutMs",  &m_ui32TimeOutMilliseconds);
-	l_oSettings.load();
-
 	if(l_oConfiguration.configure(m_oHeader))
 	{
 		m_ui32ServerHostPort=l_oConfiguration.getHostPort();
-		l_oSettings.save();
+		m_oSettings.save();
 		return true;
 	}
 

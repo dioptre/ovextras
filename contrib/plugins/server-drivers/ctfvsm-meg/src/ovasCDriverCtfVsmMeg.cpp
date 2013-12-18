@@ -1,9 +1,6 @@
 #include "ovasCDriverCtfVsmMeg.h"
 #include "../ovasCConfigurationNetworkBuilder.h"
 
-#include "../ovasCSettingsHelper.h"
-#include "../ovasCSettingsHelperOperators.h"
-
 #include <system/Time.h>
 
 #include <cmath>
@@ -23,10 +20,15 @@ CDriverCtfVsmMeg::CDriverCtfVsmMeg(IDriverContext& rDriverContext)
 	,m_pConnectionClient(NULL)
 	,m_sServerHostName("localhost")
 	,m_ui32ServerHostPort(9999)
+	,m_oSettings("AcquisitionServer_Driver_CtfVsmMeg", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
 {
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("ServerHostName", &m_sServerHostName);
+	m_oSettings.add("ServerHostPort", &m_ui32ServerHostPort);
+	m_oSettings.load();
 }
 
 CDriverCtfVsmMeg::~CDriverCtfVsmMeg(void)
@@ -382,18 +384,12 @@ boolean CDriverCtfVsmMeg::configure(void)
 	l_oConfiguration.setHostName(m_sServerHostName);
 	l_oConfiguration.setHostPort(m_ui32ServerHostPort);
 
-	SettingsHelper l_oSettings("AcquisitionServer_Driver_CtfVsmMeg", m_rDriverContext.getConfigurationManager());
-	l_oSettings.add("Header", &m_oHeader);
-	l_oSettings.add("ServerHostName", &m_sServerHostName);
-	l_oSettings.add("ServerHostPort", &m_ui32ServerHostPort);
-	l_oSettings.load();
-
 	if(l_oConfiguration.configure(m_oHeader))
 	{
 		m_sServerHostName=l_oConfiguration.getHostName();
 		m_ui32ServerHostPort=l_oConfiguration.getHostPort();
 
-		l_oSettings.save();
+		m_oSettings.save();
 
 		return true;
 	}

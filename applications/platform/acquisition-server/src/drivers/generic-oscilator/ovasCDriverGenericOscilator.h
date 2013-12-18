@@ -4,6 +4,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 namespace OpenViBEAcquisitionServer
 {
 	class CDriverGenericOscillator : public OpenViBEAcquisitionServer::IDriver
@@ -28,6 +31,8 @@ namespace OpenViBEAcquisitionServer
 		virtual const OpenViBEAcquisitionServer::IHeader* getHeader(void) { return &m_oHeader; }
 
 	protected:
+
+		SettingsHelper m_oSettings;
 
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;

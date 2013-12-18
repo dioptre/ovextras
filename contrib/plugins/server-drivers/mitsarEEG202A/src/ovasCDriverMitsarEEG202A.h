@@ -6,6 +6,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 namespace OpenViBEAcquisitionServer
 {
 	/**
@@ -51,6 +54,8 @@ namespace OpenViBEAcquisitionServer
 		//??? virtual void processData (cf neXus)
 
 	protected:
+		
+		SettingsHelper m_oSettings;
 
 		OpenViBEAcquisitionServer::IDriverCallback*  m_pCallback;
 		OpenViBEAcquisitionServer::CHeader           m_oHeader;

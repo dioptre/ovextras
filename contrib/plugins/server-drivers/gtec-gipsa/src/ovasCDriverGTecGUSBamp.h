@@ -6,6 +6,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <Windows.h>
 
 #include "ringbuffer.h"
@@ -87,6 +90,8 @@ namespace OpenViBEAcquisitionServer
 		static const OpenViBE::uint32 nPoints = NUMBER_OF_SCANS * (GTEC_NUM_CHANNELS + 1);
 		int validPoints;
 		static const DWORD bufferSizeBytes;
+
+		SettingsHelper m_oSettings;
 
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;

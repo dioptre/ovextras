@@ -4,6 +4,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #if defined TARGET_OS_Windows
  typedef void * FD_TYPE;
 #elif defined TARGET_OS_Linux
@@ -46,6 +49,8 @@ namespace OpenViBEAcquisitionServer
 		void closeTTY(::FD_TYPE i32FileDescriptor);
 
 	protected:
+
+		SettingsHelper m_oSettings;
 
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;

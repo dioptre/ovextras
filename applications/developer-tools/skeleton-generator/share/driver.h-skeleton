@@ -5,6 +5,9 @@
 #include "../ovasCHeader.h"
 #include <openvibe/ov_all.h>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 namespace OpenViBEAcquisitionServer
 {
 	/**
@@ -45,7 +48,9 @@ namespace OpenViBEAcquisitionServer
 		}
 
 	protected:
-
+		
+		SettingsHelper m_oSettings;
+		
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 
 		// Replace this generic Header with any specific header you might have written

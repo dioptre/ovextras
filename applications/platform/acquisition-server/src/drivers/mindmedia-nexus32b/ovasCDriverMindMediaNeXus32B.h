@@ -4,6 +4,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #if defined TARGET_OS_Windows
 
 namespace OpenViBEAcquisitionServer
@@ -32,6 +35,8 @@ namespace OpenViBEAcquisitionServer
 		virtual void processData(OpenViBE::uint32 ui32SampleCount, OpenViBE::uint32 ui32Channel, OpenViBE::float32* pSample);
 
 	protected:
+		
+		SettingsHelper m_oSettings;
 
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
@@ -39,6 +44,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
 		OpenViBE::float32* m_pSample;
 		OpenViBE::uint32 m_ui32SampleIndex;
+
 	};
 };
 
