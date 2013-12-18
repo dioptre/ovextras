@@ -20,8 +20,9 @@ namespace OpenViBEAcquisitionServer
 	{
 	public:
 
-		CConfigurationGTecGMobiLabPlus(const char* sGtkBuilderFileName);
+		CConfigurationGTecGMobiLabPlus(const char* sGtkBuilderFileName, const char* sPortName);
 
+		virtual OpenViBE::boolean preConfigure(void);
 		virtual OpenViBE::boolean postConfigure(void);
 		std::string getPortName(void);
 

@@ -34,6 +34,7 @@ static const uint32 g_ui32AcquiredChannelCount=8;
 //constructor
 CDriverGTecGMobiLabPlus::CDriverGTecGMobiLabPlus(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_GTecMobiLabPlus", m_rDriverContext.getConfigurationManager())
 	,m_pHeader(NULL)
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
@@ -59,6 +60,10 @@ CDriverGTecGMobiLabPlus::CDriverGTecGMobiLabPlus(IDriverContext& rDriverContext)
 	m_oAnalogIn.ain6 = false;
 	m_oAnalogIn.ain7 = false;
 	m_oAnalogIn.ain8 = false;
+
+	m_oSettings.add("Header", m_pHeader);
+	m_oSettings.add("PortName", &m_oPortName);
+	m_oSettings.load();
 }
 
 CDriverGTecGMobiLabPlus::~CDriverGTecGMobiLabPlus(void)
@@ -97,7 +102,8 @@ boolean CDriverGTecGMobiLabPlus::configure(void)
 
 	// We use CConfigurationGTecMobilabPlus configuration which is a class that inheritate from the CConfigurationBuilder class
 	// The difference between these two classes is the addition of a member of class. This member allows to change the port where is connected the device.
-	CConfigurationGTecGMobiLabPlus m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-GTec-GMobiLabPlus.ui");
+	CConfigurationGTecGMobiLabPlus m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-GTec-GMobiLabPlus.ui",
+		m_oPortName.c_str());
 
 	// We configure the Header with it...
 	if(!m_oConfiguration.configure(*m_pHeader))
@@ -107,6 +113,9 @@ boolean CDriverGTecGMobiLabPlus::configure(void)
 
 	//...and the port name
 	m_oPortName=m_oConfiguration.getPortName();
+
+	m_oSettings.save();
+
 	m_rDriverContext.getLogManager() << LogLevel_Debug << "Port name after configuration " << CString(m_oPortName.c_str()) << " \n";
 	return true;
 }
@@ -129,7 +138,7 @@ boolean CDriverGTecGMobiLabPlus::initialize(const uint32 ui32SampleCountPerSentB
 
 	if(!m_pHeader->isChannelCountSet() || !m_pHeader->isSamplingFrequencySet())
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Trace << "either channel count or sampling frequency is not set\n";
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Either channel count or sampling frequency is not set\n";
 		return false;
 	}
 
@@ -152,6 +161,7 @@ boolean CDriverGTecGMobiLabPlus::initialize(const uint32 ui32SampleCountPerSentB
 	// if there is a problem while creating the two arrays
 	if(!m_oBuffer.pBuffer || !m_pSample)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Memory allocation problem\n";
 		delete [] m_oBuffer.pBuffer;
 		delete [] m_pSample;
 		m_pSample=NULL;
@@ -165,6 +175,7 @@ boolean CDriverGTecGMobiLabPlus::initialize(const uint32 ui32SampleCountPerSentB
 	m_oDevice=::GT_OpenDevice(m_oPortName.c_str());
 	if(m_oDevice==0)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Unable to connect to [" << m_oPortName.c_str() << "]\n";
 		delete [] m_oBuffer.pBuffer;
 		delete [] m_pSample;
 		return false;

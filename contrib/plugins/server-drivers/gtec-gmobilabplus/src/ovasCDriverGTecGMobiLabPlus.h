@@ -11,6 +11,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <string>
 #include <gMOBIlabplus.h>
 
@@ -45,6 +48,8 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean loop(void);
 
 	protected:
+
+		SettingsHelper m_oSettings;
 
 		//usefull data to communicate with OpenViBE
 		OpenViBEAcquisitionServer::IHeader* m_pHeader;

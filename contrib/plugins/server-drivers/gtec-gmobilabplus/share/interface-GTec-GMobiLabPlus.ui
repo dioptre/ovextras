@@ -232,10 +232,25 @@
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkEntry" id="entry_port">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="text" translatable="yes">/dev/rfcomm0</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
+                      </packing>
+                    </child>					
+					<!--
+                    <child>
                       <object class="GtkComboBoxEntry" id="combobox_port">
                         <property name="visible">True</property>
                         <property name="model">model2</property>
-                        <property name="active">1</property>
+                        <property name="active">1</property> 
                         <property name="button_sensitivity">on</property>
                         <property name="text_column">0</property>
                         <child>
@@ -252,6 +267,7 @@
                         <property name="bottom_attach">4</property>
                       </packing>
                     </child>
+					-->
                     <child>
                       <object class="GtkComboBox" id="combobox_sampling_frequency">
                         <property name="visible">True</property>
