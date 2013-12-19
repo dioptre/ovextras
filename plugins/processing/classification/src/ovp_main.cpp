@@ -5,11 +5,12 @@
 
 #include "algorithms/ovpCAlgorithmClassifierNULL.h"
 #include "algorithms/ovpCAlgorithmClassifierSVM.h"
-
+#include "algorithms/ovpCAlgorithmClassifierOneVsAll.h"
 #include "algorithms/ovpCAlgorithmConfusionMatrix.h"
 
 #include "box-algorithms/ovpCBoxAlgorithmVotingClassifier.h"
 #include "box-algorithms/ovpCBoxAlgorithmClassifierTrainer.h"
+#include "box-algorithms/ovpCBoxAlgorithmMulticlassClassifierTrainer.h"
 #include "box-algorithms/ovpCBoxAlgorithmClassifierProcessor.h"
 #include "box-algorithms/ovpCBoxAlgorithmConfusionMatrix.h"
 
@@ -32,6 +33,8 @@ OVP_Declare_Begin();
 //	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "NULL Classifier (does nothing)",OVP_ClassId_Algorithm_ClassifierNULL.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "Support Vector Machine (SVM)",OVP_ClassId_Algorithm_ClassifierSVM.toUInteger());
 
+    rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_PairingClassification, "1 vs All",OVP_ClassId_Algorithm_ClassifierOneVsAll.toUInteger());
+
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_SVMType,"SVM Type");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SVMType,"C-SVC",C_SVC);
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SVMType,"Nu-SVC",NU_SVC);
@@ -45,13 +48,14 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SVMKernelType,"Radial basis function",RBF);
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SVMKernelType,"Sigmoid",SIGMOID);
 
-//	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierNULLDesc);
+    //OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierNULLDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierSVMDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmConfusionMatrixDesc);
 
-	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmVotingClassifierDesc);
+    OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmVotingClassifierDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierTrainerDesc);
+    OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmMulticlassClassifierTrainerDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmConfusionMatrixDesc);
 
@@ -77,6 +81,10 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Linear Discrimimant Analysis (LDA)", OVP_ClassId_Algorithm_ClassifierLDA.toUInteger());
 
 	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierLDADesc);
+
+    rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Multiclass Linear Discrimimant Analysis (LDA)", OVP_ClassId_Algorithm_ClassifierLDA.toUInteger());
+
+    OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierLDADesc);
 #endif // TARGET_HAS_ThirdPartyITPP
 	
 #if defined TARGET_HAS_ThirdPartyEIGEN
