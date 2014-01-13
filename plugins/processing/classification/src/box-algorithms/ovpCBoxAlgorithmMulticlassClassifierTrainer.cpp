@@ -23,37 +23,42 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::initialize(void)
     CString l_sClassifierAlgorithmClassIdentifier;
     l_rStaticBoxContext.getSettingValue(0, l_sClassifierAlgorithmClassIdentifier);
 
+    m_ui64TrainStimulation=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+
+    l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
+
+    if(l_oClassifierAlgorithmClassIdentifier==OV_UndefinedIdentifier)
+    {
+        this->getLogManager() << LogLevel_Error << "Unknown classifier algorithm [" << l_sClassifierAlgorithmClassIdentifier << "]\n";
+        return false;
+    }
+
+
+    int64 l_i64PartitionCount=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+    if(l_i64PartitionCount<0)
+    {
+        this->getLogManager() << LogLevel_Error << "Partition count can not be less than 0 (was " << l_i64PartitionCount << ")\n";
+        return false;
+    }
+    m_ui64PartitionCount=uint64(l_i64PartitionCount);
+
+    m_pStimulationsDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
+    m_pStimulationsDecoder->initialize();
+
+    m_pStimulationsEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
+    m_pStimulationsEncoder->initialize();
+
+
+    for(i=1; i<l_rStaticBoxContext.getInputCount(); i++)
+    {
+        m_vFeatureVectorsDecoder[i-1]=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_FeatureVectorStreamDecoder));
+        m_vFeatureVectorsDecoder[i-1]->initialize();
+    }
+
     uint32 l_iClassCount = l_rStaticBoxContext.getInputCount() -1;
     if(l_iClassCount <= 2)
     {
         this->getLogManager() << LogLevel_Info << "Got only 2 classes so let's use classic trainer\n";
-        l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
-
-        if(l_oClassifierAlgorithmClassIdentifier==OV_UndefinedIdentifier)
-        {
-            this->getLogManager() << LogLevel_Error << "Unknown classifier algorithm [" << l_sClassifierAlgorithmClassIdentifier << "]\n";
-            return false;
-        }
-
-        m_ui64TrainStimulation=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
-
-        int64 l_i64PartitionCount=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
-        if(l_i64PartitionCount<0)
-        {
-            this->getLogManager() << LogLevel_Error << "Partition count can not be less than 0 (was " << l_i64PartitionCount << ")\n";
-            return false;
-        }
-        m_ui64PartitionCount=uint64(l_i64PartitionCount);
-
-
-        for(i=1; i<l_rStaticBoxContext.getInputCount(); i++)
-        {
-            m_vFeatureVectorsDecoder[i-1]=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_FeatureVectorStreamDecoder));
-            m_vFeatureVectorsDecoder[i-1]->initialize();
-        }
-
-        m_pStimulationsDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-        m_pStimulationsDecoder->initialize();
 
         m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
         m_pClassifier->initialize();
@@ -107,15 +112,35 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::initialize(void)
                 }
             }
         }
-
         m_vFeatureCount.clear();
 
-        m_pStimulationsEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
-        m_pStimulationsEncoder->initialize();
+
     } else {
         this->getLogManager() << LogLevel_Info << "Got more than 2 class, let's use a pairing strategy\n";
+        CString l_sPairingStrategyClassIdentifier;
+        l_rStaticBoxContext.getSettingValue(4, l_sPairingStrategyClassIdentifier);
+        CIdentifier l_oPairingStrategyClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_PairingClassification, l_sPairingStrategyClassIdentifier);
 
+        if(l_oPairingStrategyClassIdentifier==OV_UndefinedIdentifier)
+        {
+            this->getLogManager() << LogLevel_Error << "Unknown pairing strategy [" << l_sPairingStrategyClassIdentifier << "]\n";
+            return false;
+        }
+
+        this->getLogManager() << LogLevel_Error << "Known pairing\n";
+
+
+        m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oPairingStrategyClassIdentifier));
+        m_pClassifier->initialize();
+
+        TParameterHandler < CIdentifier* > ip_pClassifierId(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
+        ip_pClassifierId = &l_oClassifierAlgorithmClassIdentifier;
+
+        m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture);
+        //The vector will be use later (rename classes)
     }
+
+
     return true;
 }
 
@@ -124,11 +149,16 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::uninitialize(void)
     IBox& l_rStaticBoxContext=this->getStaticBoxContext();
     // IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-    m_pClassifier->uninitialize();
+    if(m_pClassifier != NULL)
+    {
+        m_pClassifier->uninitialize();
+        this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
+    }
+
     m_pStimulationsDecoder->uninitialize();
     m_pStimulationsEncoder->uninitialize();
 
-    this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
+
     this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationsDecoder);
     this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationsEncoder);
 

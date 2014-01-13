@@ -202,6 +202,8 @@ void CAlgorithmClassifierLDA::processChildData(const char* sData)
 			m_oCoefficients[i]=l_vCoefficients[i];
 		}
 	}
+
+
 }
 
 void CAlgorithmClassifierLDA::closeChild(void)

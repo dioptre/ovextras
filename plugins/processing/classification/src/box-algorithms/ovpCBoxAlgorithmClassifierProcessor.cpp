@@ -43,7 +43,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	m_pFeaturesDecoder->initialize();
 	m_pLabelsEncoder->initialize();
 	m_pClassificationStateEncoder->initialize();
-	m_pClassifier->initialize();
+    m_pClassifier->initialize();
 
 	m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)->setReferenceTarget(m_pFeaturesDecoder->getOutputParameter(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputParameterId_Matrix));
 	m_pClassificationStateEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));

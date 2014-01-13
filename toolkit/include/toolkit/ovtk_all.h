@@ -76,6 +76,7 @@
 
 #include "algorithms/ovtkTAlgorithm.h"
 #include "algorithms/classification/ovtkCAlgorithmClassifier.h"
+#include "algorithms/classification/ovtkCAlgorithmPairingStrategy.h"
 
 #include "algorithms/scenario-io/ovtkCAlgorithmScenarioImporter.h"
 #include "algorithms/scenario-io/ovtkCAlgorithmScenarioExporter.h"

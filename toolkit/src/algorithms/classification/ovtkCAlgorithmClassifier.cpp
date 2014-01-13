@@ -19,6 +19,7 @@ boolean CAlgorithmClassifier::process(void)
 	TParameterHandler < IMatrix* > ip_pFeatureVectorSet(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
 	TParameterHandler < IMemoryBuffer* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
 
+    this->getLogManager() << LogLevel_ImportantWarning << "Algorithm\n";
 	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_Train))
 	{
 		IMatrix* l_pFeatureVectorSet=ip_pFeatureVectorSet;

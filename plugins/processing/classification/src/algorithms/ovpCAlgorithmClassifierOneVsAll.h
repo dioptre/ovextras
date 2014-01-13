@@ -6,7 +6,6 @@
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
-#include <toolkit/algorithms/classification/ovtkCAlgorithmPairingStrategy.h>
 
 #include <xml/IWriter.h>
 #include <xml/IReader.h>
@@ -20,7 +19,7 @@ namespace OpenViBEPlugins
 {
     namespace Local
     {
-        class CAlgorithmClassifierOneVsAll : public OpenViBEToolkit::CAlgorithmPairingStrategy
+        class CAlgorithmClassifierOneVsAll : public OpenViBEToolkit::CAlgorithmPairingStrategy, public XML::IWriterCallback, public XML::IReaderCallback
         {
         public:
 
@@ -31,7 +30,7 @@ namespace OpenViBEPlugins
             virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer);
             virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer);
 
-            _IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierOneVsAll);
+            _IsDerivedFromClass_Final_(CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsAll);
 
         protected:
 
@@ -49,7 +48,7 @@ namespace OpenViBEPlugins
             OpenViBE::CMemoryBuffer m_oConfiguration;
         };
 
-        class CAlgorithmClassifierOneVsAllDesc : public OpenViBEToolkit::CAlgorithmClassifierDesc
+        class CAlgorithmClassifierOneVsAllDesc : public OpenViBEToolkit::CAlgorithmPairingStrategyDesc
         {
         public:
 
@@ -69,11 +68,11 @@ namespace OpenViBEPlugins
             virtual OpenViBE::boolean getAlgorithmPrototype(
                 OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
             {
-                CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
+                CAlgorithmPairingStrategyDesc::getAlgorithmPrototype(rAlgorithmPrototype);
                 return true;
             }
 
-            _IsDerivedFromClass_Final_(CAlgorithmClassifierDesc, OVP_ClassId_Algorithm_ClassifierOneVsAllDesc);
+            _IsDerivedFromClass_Final_(CAlgorithmPairingStrategyDesc, OVP_ClassId_Algorithm_ClassifierOneVsAllDesc);
         };
     };
 };

@@ -13,8 +13,12 @@ using namespace OpenViBEToolkit;
 
 boolean CAlgorithmPairingStrategy::process(void)
 {
-    if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_Train))
+    this->getLogManager() << LogLevel_Warning << "Process from pairing\n";
+    if(this->isInputTriggerActive(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture))
     {
-
+        this->getLogManager() << LogLevel_Warning << "Design architecture\n";
+    } else {
+        CAlgorithmClassifier::process();
     }
+    return true;
 }
