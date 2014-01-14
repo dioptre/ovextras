@@ -496,7 +496,7 @@ boolean CScenario::isComment(
 IComment* CScenario::getCommentDetails(
 	const CIdentifier& rCommentIdentifier)
 {
-	this->getLogManager() << LogLevel_Debug << "Getting comment details from scenario\n";
+//	this->getLogManager() << LogLevel_Debug << "Getting comment details from scenario\n";
 
 	map<CIdentifier, CComment*>::const_iterator itComment;
 	itComment=m_vComment.find(rCommentIdentifier);
@@ -666,7 +666,7 @@ boolean CScenario::isMessageLink(
 const ILink* CScenario::getLinkDetails(
 	const CIdentifier& rLinkIdentifier) const
 {
-	this->getLogManager() << LogLevel_Debug << "Retrieving const link details from scenario\n";
+	// this->getLogManager() << LogLevel_Debug << "Retrieving const link details from scenario\n";
 
 	map<CIdentifier, CLink*>::const_iterator itLink;
 	itLink=m_vLink.find(rLinkIdentifier);
@@ -681,7 +681,7 @@ const ILink* CScenario::getLinkDetails(
 ILink* CScenario::getLinkDetails(
 	const CIdentifier& rLinkIdentifier)
 {
-	this->getLogManager() << LogLevel_Debug << "Retrieving link details from scenario\n";
+	// this->getLogManager() << LogLevel_Debug << "Retrieving link details from scenario\n";
 
 	map<CIdentifier, CLink*>::const_iterator itLink;
 	itLink=m_vLink.find(rLinkIdentifier);
@@ -696,7 +696,7 @@ ILink* CScenario::getLinkDetails(
 const ILink* CScenario::getMessageLinkDetails(
 	const CIdentifier& rLinkIdentifier) const
 {
-	this->getLogManager() << LogLevel_Debug << "Retrieving message link details from scenario\n";
+	// this->getLogManager() << LogLevel_Debug << "Retrieving message link details from scenario\n";
 
 	map<CIdentifier, CMessageLink*>::const_iterator itLink;
 	itLink=m_vMessageLink.find(rLinkIdentifier);
@@ -711,7 +711,7 @@ const ILink* CScenario::getMessageLinkDetails(
 ILink* CScenario::getMessageLinkDetails(
 	const CIdentifier& rLinkIdentifier)
 {
-	this->getLogManager() << LogLevel_Debug << "Retrieving message link details from scenario\n";
+	// this->getLogManager() << LogLevel_Debug << "Retrieving message link details from scenario\n";
 
 	map<CIdentifier, CMessageLink*>::const_iterator itLink;
 	itLink=m_vMessageLink.find(rLinkIdentifier);
