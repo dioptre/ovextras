@@ -136,6 +136,9 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::initialize(void)
         TParameterHandler < CIdentifier* > ip_pClassifierId(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
         ip_pClassifierId = &l_oClassifierAlgorithmClassIdentifier;
 
+        TParameterHandler < uint64* > ip_pClassAmount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount));
+        *ip_pClassAmount = l_iClassCount;
+
         m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture);
         //The vector will be use later (rename classes)
     }

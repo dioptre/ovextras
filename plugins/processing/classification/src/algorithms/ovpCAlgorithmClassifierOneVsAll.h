@@ -6,11 +6,13 @@
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include <system/Memory.h>
 
 #include <xml/IWriter.h>
 #include <xml/IReader.h>
 
 #include <stack>
+#include <vector>
 
 #define OVP_ClassId_Algorithm_ClassifierOneVsAll                                        OpenViBE::CIdentifier(0xD7183FC6, 0xBD74F297)
 #define OVP_ClassId_Algorithm_ClassifierOneVsAllDesc                                    OpenViBE::CIdentifier(0xD42D5449, 0x7A28DDB0)
@@ -23,9 +25,10 @@ namespace OpenViBEPlugins
         {
         public:
 
+            virtual OpenViBE::boolean uninitialize(void);
             virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
             virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
-            virtual OpenViBE::boolean designArchitecture(OpenViBE::CIdentifier &rId, OpenViBEToolkit::IVector& rClassesList);
+            virtual OpenViBE::boolean designArchitecture(OpenViBE::CIdentifier &rId, OpenViBE::uint64& rClassAmount);
 
             virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer);
             virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer);
@@ -44,6 +47,7 @@ namespace OpenViBEPlugins
 
             OpenViBE::float64 m_f64Class1;
             OpenViBE::float64 m_f64Class2;
+            std::vector<OpenViBE::Kernel::IAlgorithmProxy*> m_oSubClassifierList;
 
             OpenViBE::CMemoryBuffer m_oConfiguration;
         };
