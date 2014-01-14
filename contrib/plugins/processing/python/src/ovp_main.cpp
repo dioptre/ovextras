@@ -111,11 +111,12 @@ OpenViBE::boolean CPythonInitializer::IsPythonAvailable(void)
 
 OVP_Declare_Begin();
 
-static CPythonInitializer l_oPythonInitializer;
-if (l_oPythonInitializer.IsPythonAvailable())
-{
-	OVP_Declare_New(OpenViBEPlugins::Python::CBoxAlgorithmPythonDesc);
-}
+	static CPythonInitializer l_oPythonInitializer;
+	if (l_oPythonInitializer.IsPythonAvailable())
+	{
+		OVP_Declare_New(OpenViBEPlugins::Python::CBoxAlgorithmPythonDesc);
+	}
+
 OVP_Declare_End();
 
 #endif // TARGET_HAS_ThirdPartyPython

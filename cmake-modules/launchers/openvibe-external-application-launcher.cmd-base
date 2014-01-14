@@ -14,5 +14,5 @@ IF /i "%1"=="--run-bg" (
 	SHIFT
 )
 
-%OV_RUN_IN_BG% %OV_PATH_BIN%\%OV_RUN_APP% %1 %2 %3 %4 %5
+%OV_RUN_IN_BG% "%OV_PATH_BIN%\%OV_RUN_APP%" %1 %2 %3 %4 %5
 

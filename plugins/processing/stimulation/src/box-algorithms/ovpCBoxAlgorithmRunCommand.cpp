@@ -65,6 +65,7 @@ boolean CBoxAlgorithmRunCommand::process(void)
 					std::vector < CString >::const_iterator itCommand=l_rCommand.begin();
 					while(itCommand!=l_rCommand.end())
 					{
+						this->getLogManager() << LogLevel_Debug << "Running command [" << *itCommand << "]\n";
 						if(::system(itCommand->toASCIIString())<0)
 						{
 							this->getLogManager() << LogLevel_Warning << "Could not run command " << *itCommand << "\n";
