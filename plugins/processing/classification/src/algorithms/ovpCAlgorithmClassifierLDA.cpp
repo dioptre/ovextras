@@ -165,7 +165,7 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(const IMemoryBuffer& rMemoryB
 	l_pReader->release();
 	l_pReader=NULL;
 
-	return true;
+    return true;
 }
 
 void CAlgorithmClassifierLDA::write(const char* sString)

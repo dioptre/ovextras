@@ -2,6 +2,8 @@
 
 #include <map>
 #include <sstream>
+#include <cstring>
+#include <string>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -71,7 +73,6 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
         }
 
         m_oSubClassifierList[l_iClassifierCounter-1]->process(OVTK_Algorithm_Classifier_InputTriggerId_Train);
-        m_oSubClassifierList[l_iClassifierCounter-1]->process(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration);
     }
     return true;
 }
@@ -95,9 +96,47 @@ boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &
     return true;
 }
 
+void CAlgorithmClassifierOneVsAll::getClassifierConfiguration(IAlgorithmProxy* rClassifier, CString &rConfiguration)
+{
+    CMemoryBuffer l_oConfiguration;
+    TParameterHandler < IMemoryBuffer* > op_pConfiguration(rClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+    TParameterHandler < IMemoryBuffer* > ip_pConfiguration(rClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
+    op_pConfiguration=&l_oConfiguration;
+    ip_pConfiguration=&l_oConfiguration;
+
+    rClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration);
+    l_oConfiguration.getDirectPointer();
+    std::string l_sConfiguration = std::string((char*)l_oConfiguration.getDirectPointer(), (size_t)l_oConfiguration.getSize());
+    rConfiguration.set(l_sConfiguration.c_str());
+}
+
 boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
 {
+    this->getLogManager() << LogLevel_Warning << "Save configuration\n";
 
+    m_oConfiguration.setSize(0, true);
+    XML::IWriter* l_pWriter=XML::createWriter(*this);
+    l_pWriter->openChild("OpenViBE-Classifier");
+     l_pWriter->openChild("OneVsAll");
+     for(uint64 i = 0; i<m_oSubClassifierList.size(); ++i)
+     {
+         l_pWriter->openChild("SubClassifier");
+         CString l_oSubCLassifierConfiguration = CString();
+         this->getClassifierConfiguration(m_oSubClassifierList[i], l_oSubCLassifierConfiguration);
+         this->getLogManager() << LogLevel_Warning << l_oSubCLassifierConfiguration.toASCIIString() << "\n";
+         l_pWriter->setChildData(l_oSubCLassifierConfiguration.toASCIIString());
+         l_pWriter->closeChild();
+     }
+
+     l_pWriter->closeChild();
+    l_pWriter->closeChild();
+    l_pWriter->release();
+    l_pWriter=NULL;
+
+
+
+    rMemoryBuffer.setSize(0, true);
+    rMemoryBuffer.append(m_oConfiguration);
     return true;
 }
 
@@ -110,11 +149,12 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(const IMemoryBuffer& rMe
 
 void CAlgorithmClassifierOneVsAll::write(const char* sString)
 {
+    m_oConfiguration.append((const uint8*)sString, ::strlen(sString));
 }
 
 void CAlgorithmClassifierOneVsAll::openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
 {
-
+    m_vNode.push(sName);
 }
 
 void CAlgorithmClassifierOneVsAll::processChildData(const char* sData)
@@ -125,5 +165,6 @@ void CAlgorithmClassifierOneVsAll::processChildData(const char* sData)
 
 void CAlgorithmClassifierOneVsAll::closeChild(void)
 {
+    m_vNode.pop();
 }
 
