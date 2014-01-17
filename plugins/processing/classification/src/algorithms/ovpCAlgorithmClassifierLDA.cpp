@@ -28,9 +28,7 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		this->getLogManager() << LogLevel_Error << "A LDA classifier can only be trained with 2 classes, not more, not less - got " << (uint32)l_vClassLabels.size() << "\n";
 		return false;
 	}
-    this->getLogManager() << LogLevel_Warning << "Let's start training with " << (uint32)l_vClassLabels.size() << " classes\n";
-    this->getLogManager() << LogLevel_Warning << "Element in class 1 " << (uint32)l_vClassLabels[1] << "\n";
-    this->getLogManager() << LogLevel_Warning << "Element in class 2 " << (uint32)l_vClassLabels[2] << "\n";
+
 	uint32 l_ui32NumberOfFeatures=rFeatureVectorSet[0].getSize();
 	uint32 l_ui32NumberOfFeatureVectors=rFeatureVectorSet.getFeatureVectorCount();
 
@@ -183,13 +181,13 @@ void CAlgorithmClassifierLDA::processChildData(const char* sData)
 	std::stringstream l_sData(sData);
 
 	if(m_vNode.top()==CString("Classes"))
-	{
+    {
 		l_sData >> m_f64Class1;
 		l_sData >> m_f64Class2;
 	}
 
 	if(m_vNode.top()==CString("Coefficients"))
-	{
+    {
 		std::vector < float64 > l_vCoefficients;
 		while(!l_sData.eof())
 		{

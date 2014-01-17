@@ -39,7 +39,10 @@ namespace OpenViBEToolkit
 
 
     protected:
-        std::vector <OpenViBE::float64> m_fClasses;
+        //  std::vector <OpenViBE::float64> m_fClasses;
+        //The vector will be use when the user will be able to specify class label
+        OpenViBE::CIdentifier m_sSubClassifierAlgorithmName;
+        OpenViBE::uint64 m_iAmountClass;
     };
 
     class OV_API CAlgorithmPairingStrategyDesc: public OpenViBEToolkit::CAlgorithmClassifierDesc

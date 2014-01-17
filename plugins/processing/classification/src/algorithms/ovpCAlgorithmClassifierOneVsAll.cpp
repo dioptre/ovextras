@@ -17,10 +17,10 @@ using namespace OpenViBEToolkit;
 
 boolean CAlgorithmClassifierOneVsAll::uninitialize(void)
 {
-    for(int64 i = m_oSubClassifierList.size()-1 ; i >= 0 ; --i)
+    while(!m_oSubClassifierList.empty())
     {
-        this->getLogManager() << LogLevel_Warning << "Release classifier " << i <<"\n";
-        IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierList[i];
+        this->getLogManager() << LogLevel_Warning << "Release classifier " << m_oSubClassifierList.size() <<"\n";
+        IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierList.back();
         l_pSubClassifier->uninitialize();
         this->getAlgorithmManager().releaseAlgorithm(*l_pSubClassifier);
         m_oSubClassifierList.pop_back();
@@ -86,6 +86,9 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &rId, uint64 &rClassAmount)
 {
     this->getLogManager() << LogLevel_Warning << "Start design architecture for " << rClassAmount <<" and algorithm "<< rId.toString() <<"\n";
+    m_sSubClassifierAlgorithmName = CIdentifier(rId);
+    m_iAmountClass = rClassAmount;
+
     for(uint64 i = 1 ; i <= rClassAmount ; ++i)
     {
         this->getLogManager() << LogLevel_Warning << "Create Subclassifier for class" << i <<"\n";
@@ -114,16 +117,29 @@ boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBu
 {
     this->getLogManager() << LogLevel_Warning << "Save configuration\n";
 
+    std::stringstream l_sAmountClasses;
+    l_sAmountClasses << this->m_iAmountClass;
+
+    std::stringstream l_sClassIdentifier;
+    l_sClassIdentifier << this->m_sSubClassifierAlgorithmName.toUInteger();
+
     m_oConfiguration.setSize(0, true);
     XML::IWriter* l_pWriter=XML::createWriter(*this);
     l_pWriter->openChild("OpenViBE-Classifier");
      l_pWriter->openChild("OneVsAll");
+     l_pWriter->openChild("SubClassifierIdentifier");
+     l_pWriter->setChildData(l_sClassIdentifier.str().c_str());
+     l_pWriter->closeChild();
+
+     l_pWriter->openChild("SubClassifierCount");
+      l_pWriter->setChildData(l_sAmountClasses.str().c_str());
+     l_pWriter->closeChild();
+
      for(uint64 i = 0; i<m_oSubClassifierList.size(); ++i)
      {
          l_pWriter->openChild("SubClassifier");
          CString l_oSubCLassifierConfiguration = CString();
          this->getClassifierConfiguration(m_oSubClassifierList[i], l_oSubCLassifierConfiguration);
-         this->getLogManager() << LogLevel_Warning << l_oSubCLassifierConfiguration.toASCIIString() << "\n";
          l_pWriter->setChildData(l_oSubCLassifierConfiguration.toASCIIString());
          l_pWriter->closeChild();
      }
@@ -142,7 +158,12 @@ boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBu
 
 boolean CAlgorithmClassifierOneVsAll::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
 {
-
+    this->getLogManager() << LogLevel_Warning << "Loading configuration\n";
+    this->m_iClassCounter = 0;
+    XML::IReader* l_pReader=XML::createReader(*this);
+    l_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
+    l_pReader->release();
+    l_pReader=NULL;
 
     return true;
 }
@@ -160,6 +181,63 @@ void CAlgorithmClassifierOneVsAll::openChild(const char* sName, const char** sAt
 void CAlgorithmClassifierOneVsAll::processChildData(const char* sData)
 {
 
+
+    if(m_vNode.top() == CString("SubClassifier"))
+    {
+        //We should be able to load configuration from scratch or to load it in an existing configuration
+        CMemoryBuffer l_oConfiguration;
+        TParameterHandler < IMemoryBuffer* > ip_pConfiguration(m_oSubClassifierList[this->m_iClassCounter]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
+        ip_pConfiguration=&l_oConfiguration;
+        l_oConfiguration.append((const uint8*)sData, ::strlen(sData));
+        m_oSubClassifierList[this->m_iClassCounter]->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
+        ++(this->m_iClassCounter);
+    }
+    else if(m_vNode.top() == CString("SubClassifierIdentifier"))
+    {
+        std::stringstream l_sData(sData);
+        uint64 l_iIdentifier;
+        l_sData >> l_iIdentifier;
+        //We are in this case if we create the configuration of if we change the algorithm previously used by the pairing strategy
+        if(m_sSubClassifierAlgorithmName.toUInteger() != l_iIdentifier)
+        {
+            while(!m_oSubClassifierList.empty())
+            {
+                IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierList.back();
+                l_pSubClassifier->uninitialize();
+                this->getAlgorithmManager().releaseAlgorithm(*l_pSubClassifier);
+                m_oSubClassifierList.pop_back();
+            }
+            m_sSubClassifierAlgorithmName = CIdentifier(l_iIdentifier);
+        }
+    }
+    else if(m_vNode.top() == CString("SubClassifierCount"))
+    {
+        std::stringstream l_sData(sData);
+        uint64 l_iAmountClass;
+        l_sData >> l_iAmountClass;
+
+        if(l_iAmountClass < this->m_iAmountClass)
+        {
+            while(this->m_iAmountClass > l_iAmountClass)
+            {
+                IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierList.back();
+                l_pSubClassifier->uninitialize();
+                this->getAlgorithmManager().releaseAlgorithm(*l_pSubClassifier);
+                m_oSubClassifierList.pop_back();
+                --this->m_iAmountClass;
+            }
+        }
+        else if(l_iAmountClass > this->m_iAmountClass)
+        {
+            while(this->m_iAmountClass < l_iAmountClass)
+            {
+                IAlgorithmProxy* l_pSubClassifier = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(this->m_sSubClassifierAlgorithmName));
+                l_pSubClassifier->initialize();
+                m_oSubClassifierList.push_back(l_pSubClassifier);
+                ++this->m_iAmountClass;
+            }
+        }
+    }
 
 }
 

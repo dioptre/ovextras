@@ -46,9 +46,8 @@ namespace OpenViBEPlugins
 
             std::stack<OpenViBE::CString> m_vNode;
 
-            OpenViBE::float64 m_f64Class1;
-            OpenViBE::float64 m_f64Class2;
             std::vector<OpenViBE::Kernel::IAlgorithmProxy*> m_oSubClassifierList;
+            OpenViBE::uint64 m_iClassCounter; //This variable is use during configuration loading
 
             OpenViBE::CMemoryBuffer m_oConfiguration;
         };
