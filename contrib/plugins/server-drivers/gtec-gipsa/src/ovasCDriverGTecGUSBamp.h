@@ -60,8 +60,8 @@ namespace OpenViBEAcquisitionServer
 		virtual const char* getName(void);
 
 		virtual OpenViBE::boolean initialize(
-		const OpenViBE::uint32 ui32SampleCountPerSentBlock,
-		OpenViBEAcquisitionServer::IDriverCallback& rCallback);
+		    const OpenViBE::uint32 ui32SampleCountPerSentBlock,
+		    OpenViBEAcquisitionServer::IDriverCallback& rCallback);
 		virtual OpenViBE::boolean uninitialize(void);
 
 		virtual OpenViBE::boolean start(void);
@@ -76,12 +76,13 @@ namespace OpenViBEAcquisitionServer
 
 		//sets priority - could be used for higher frequencies
 		//15 gives you realtime priority
-		void CDriverGTecGUSBamp::applyPriority(boost::thread* thread, int priority);
+		void applyPriority(boost::thread* thread, int priority);
+		void ConfigFiltering(HANDLE o_pDevice);
 
 	protected:
 
 		static const int BUFFER_SIZE_SECONDS = 2;		         //the size of the GTEC ring buffer in seconds
-		static const int GTEC_NUM_CHANNELS = 16;
+		static const int GTEC_NUM_CHANNELS = 16;          //the number of channels without countig the trigger channel
 		static const int QUEUE_SIZE = 8;//4 default		 //the number of GT_GetData calls that will be queued during acquisition to avoid loss of data
 		static const int NUMBER_OF_SCANS = 32;           //the number of scans that should be received simultaneously (depending on the _sampleRate; see C-API documentation for this value!)
 		
