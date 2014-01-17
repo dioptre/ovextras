@@ -147,14 +147,14 @@ boolean CBoxAlgorithmBrainampFileWriter::processInput(uint32 ui32InputIndex)
 
 boolean CBoxAlgorithmBrainampFileWriter::process(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	//1. Process signal
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++) //first input channel data
 	{
-		uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
-		uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
+		// uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
+		// uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
 		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
 
 		m_pStreamDecoder->process();
@@ -170,7 +170,7 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 		//BUFFER
 		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedBuffer))
 		{
-			OpenViBE::uint32 l_uint32ChannelCount = m_pMatrix->getDimensionSize(0);
+			// OpenViBE::uint32 l_uint32ChannelCount = m_pMatrix->getDimensionSize(0);
 	
 			switch (m_ui32BinaryFormat)
 			{
@@ -200,7 +200,7 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 	//2. Process stimulations - input channel 1
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
 	{
-		uint64 l_ui64ChunkStartTime =l_rDynamicBoxContext.getInputChunkStartTime(0, i);
+		// uint64 l_ui64ChunkStartTime =l_rDynamicBoxContext.getInputChunkStartTime(0, i);
 
 		TParameterHandler < const IMemoryBuffer* > ip_pMemoryBuffer(m_pStimulationDecoderTrigger->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
 		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(1, i);
@@ -234,7 +234,7 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 			  TParameterHandler < IStimulationSet* > op_pStimulationSetTrigger(m_pStimulationDecoderTrigger->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
 		  
 			  // Loop on stimulations
-			  for(int j=0; j<op_pStimulationSetTrigger->getStimulationCount(); j++)
+			  for(uint32 j=0; j<op_pStimulationSetTrigger->getStimulationCount(); j++)
 			  {
 				uint64 code = op_pStimulationSetTrigger->getStimulationIdentifier(j);
 
@@ -255,15 +255,15 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 
 OpenViBE::boolean CBoxAlgorithmBrainampFileWriter::writeHeaderFile()
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
+	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	// IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	OpenViBE::uint32 l_uint32ChannelCount = m_pMatrix->getDimensionSize(0);
-	OpenViBE::uint32 l_uint32SamplesPerChunk = m_pMatrix->getDimensionSize(1);
+	// OpenViBE::uint32 l_uint32SamplesPerChunk = m_pMatrix->getDimensionSize(1);
 
 	OpenViBE::uint32 l_f32Sampling_Interval = (OpenViBE::uint32) (1000000.0 / (OpenViBE::float32)op_ui64SamplingFrequency);
 
-	char* format;
+	CString format("UNKNOWN");
 	switch (m_ui32BinaryFormat)
 	{
 		case BinaryFormat_Integer16: 
@@ -277,6 +277,9 @@ OpenViBE::boolean CBoxAlgorithmBrainampFileWriter::writeHeaderFile()
 		case BinaryFormat_Float32: 
 				format = "IEEE_FLOAT_32"; //TODO: should be "IEEE_FLOAT_32", but OpenVibe Brainamp reader uses "FLOAT_32" for due to bug
 				//this->getLogManager() << LogLevel_ImportantWarning<< "The BinaryFormat will be saved as 'FLOAT_32' instead of 'IEEE_FLOAT_32'. This can be a problem for other programs that read Brainamp format.\n";
+				break;
+		default:
+				// Should not happen
 				break;
 	}
 
@@ -295,7 +298,7 @@ OpenViBE::boolean CBoxAlgorithmBrainampFileWriter::writeHeaderFile()
 		<< "SamplingInterval=" << l_f32Sampling_Interval << std::endl
 		<< std::endl
 		<< "[Binary Infos]" << std::endl
-		<< "BinaryFormat=" << format << std::endl
+		<< "BinaryFormat=" << format.toASCIIString() << std::endl
 	    << std::endl; 
 
 	m_oHeaderFile << "[Channel Infos]" << std::endl
