@@ -20,10 +20,7 @@ boolean CAlgorithmClassifierOneVsAll::uninitialize(void)
     while(!m_oSubClassifierList.empty())
     {
         this->getLogManager() << LogLevel_Warning << "Release classifier " << m_oSubClassifierList.size() <<"\n";
-        IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierList.back();
-        l_pSubClassifier->uninitialize();
-        this->getAlgorithmManager().releaseAlgorithm(*l_pSubClassifier);
-        m_oSubClassifierList.pop_back();
+        this->removeClassifierAtBack();
     }
     return true;
 }
@@ -83,18 +80,32 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
     return true;
 }
 
+void CAlgorithmClassifierOneVsAll::addNewClassifierAtBack(void)
+{
+    IAlgorithmProxy* l_pSubClassifier = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(this->m_oSubClassifierAlgorithmIdentifier));
+    l_pSubClassifier->initialize();
+    this->m_oSubClassifierList.push_back(l_pSubClassifier);
+    ++(this->m_iAmountClass);
+}
+
+void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
+{
+    IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierList.back();
+    l_pSubClassifier->uninitialize();
+    this->getAlgorithmManager().releaseAlgorithm(*l_pSubClassifier);
+    this->m_oSubClassifierList.pop_back();
+    --(this->m_iAmountClass);
+}
+
 boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &rId, uint64 &rClassAmount)
 {
     this->getLogManager() << LogLevel_Warning << "Start design architecture for " << rClassAmount <<" and algorithm "<< rId.toString() <<"\n";
-    m_sSubClassifierAlgorithmName = CIdentifier(rId);
-    m_iAmountClass = rClassAmount;
+    m_oSubClassifierAlgorithmIdentifier = CIdentifier(rId);
 
     for(uint64 i = 1 ; i <= rClassAmount ; ++i)
     {
         this->getLogManager() << LogLevel_Warning << "Create Subclassifier for class" << i <<"\n";
-        IAlgorithmProxy* l_pSubClassifier = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(rId));
-        l_pSubClassifier->initialize();
-        m_oSubClassifierList.push_back(l_pSubClassifier);
+        this->addNewClassifierAtBack();
     }
     return true;
 }
@@ -121,7 +132,7 @@ boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBu
     l_sAmountClasses << this->m_iAmountClass;
 
     std::stringstream l_sClassIdentifier;
-    l_sClassIdentifier << this->m_sSubClassifierAlgorithmName.toUInteger();
+    l_sClassIdentifier << this->m_oSubClassifierAlgorithmIdentifier.toUInteger();
 
     m_oConfiguration.setSize(0, true);
     XML::IWriter* l_pWriter=XML::createWriter(*this);
@@ -198,16 +209,13 @@ void CAlgorithmClassifierOneVsAll::processChildData(const char* sData)
         uint64 l_iIdentifier;
         l_sData >> l_iIdentifier;
         //We are in this case if we create the configuration of if we change the algorithm previously used by the pairing strategy
-        if(m_sSubClassifierAlgorithmName.toUInteger() != l_iIdentifier)
+        if(m_oSubClassifierAlgorithmIdentifier.toUInteger() != l_iIdentifier)
         {
             while(!m_oSubClassifierList.empty())
             {
-                IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierList.back();
-                l_pSubClassifier->uninitialize();
-                this->getAlgorithmManager().releaseAlgorithm(*l_pSubClassifier);
-                m_oSubClassifierList.pop_back();
+                this->removeClassifierAtBack();
             }
-            m_sSubClassifierAlgorithmName = CIdentifier(l_iIdentifier);
+            m_oSubClassifierAlgorithmIdentifier = CIdentifier(l_iIdentifier);
         }
     }
     else if(m_vNode.top() == CString("SubClassifierCount"))
@@ -220,21 +228,14 @@ void CAlgorithmClassifierOneVsAll::processChildData(const char* sData)
         {
             while(this->m_iAmountClass > l_iAmountClass)
             {
-                IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierList.back();
-                l_pSubClassifier->uninitialize();
-                this->getAlgorithmManager().releaseAlgorithm(*l_pSubClassifier);
-                m_oSubClassifierList.pop_back();
-                --this->m_iAmountClass;
+                this->removeClassifierAtBack();
             }
         }
         else if(l_iAmountClass > this->m_iAmountClass)
         {
             while(this->m_iAmountClass < l_iAmountClass)
             {
-                IAlgorithmProxy* l_pSubClassifier = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(this->m_sSubClassifierAlgorithmName));
-                l_pSubClassifier->initialize();
-                m_oSubClassifierList.push_back(l_pSubClassifier);
-                ++this->m_iAmountClass;
+                this->addNewClassifierAtBack();
             }
         }
     }

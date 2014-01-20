@@ -44,6 +44,9 @@ namespace OpenViBEPlugins
             virtual void processChildData(const char* sData); // XML IReaderCallback
             virtual void closeChild(void); // XML ReaderCallback
 
+            void addNewClassifierAtBack(void);
+            void removeClassifierAtBack(void);
+
             std::stack<OpenViBE::CString> m_vNode;
 
             std::vector<OpenViBE::Kernel::IAlgorithmProxy*> m_oSubClassifierList;

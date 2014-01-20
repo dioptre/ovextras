@@ -41,7 +41,7 @@ namespace OpenViBEToolkit
     protected:
         //  std::vector <OpenViBE::float64> m_fClasses;
         //The vector will be use when the user will be able to specify class label
-        OpenViBE::CIdentifier m_sSubClassifierAlgorithmName;
+        OpenViBE::CIdentifier m_oSubClassifierAlgorithmIdentifier;
         OpenViBE::uint64 m_iAmountClass;
     };
 
