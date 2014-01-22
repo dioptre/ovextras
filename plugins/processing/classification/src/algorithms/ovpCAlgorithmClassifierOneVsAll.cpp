@@ -4,6 +4,8 @@
 #include <sstream>
 #include <cstring>
 #include <string>
+#include <utility>
+
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -36,7 +38,6 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
     {
         l_vClassLabels[rFeatureVectorSet[i].getLabel()]++;
     }
-    this->getLogManager() << "blabla" << l_vClassLabels.size() << "]\n";
 
     //We send new set of data to each classifer. They will all use two different classes 1 and 2. 1 is for the class it should recognize, 2 for the others
     for(uint32 l_iClassifierCounter = 1 ; l_iClassifierCounter <= m_oSubClassifierList.size() ; ++l_iClassifierCounter )
@@ -76,8 +77,62 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
 
 boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
 {
+    std::vector< std::pair < float64, IMatrix*> > l_oClassificationVector;
 
+    uint32 l_ui32FeatureVectorSize=rFeatureVector.getSize();
+
+    for(uint32 l_iClassifierCounter = 0 ; l_iClassifierCounter < m_oSubClassifierList.size() ; ++l_iClassifierCounter )
+    {
+        IAlgorithmProxy* l_pSubClassifier = this->m_oSubClassifierList[l_iClassifierCounter];
+        TParameterHandler < IMatrix* > ip_pFeatureVector(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
+        TParameterHandler < float64 > op_f64ClassificationStateClass(l_pSubClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
+        TParameterHandler < IMatrix* > op_pClassificationValues(l_pSubClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
+        ip_pFeatureVector->setDimensionCount(1);
+        ip_pFeatureVector->setDimensionSize(0, l_ui32FeatureVectorSize);
+
+        float64* l_pFeatureVectorBuffer=ip_pFeatureVector->getBuffer();
+        System::Memory::copy(
+            l_pFeatureVectorBuffer,
+            rFeatureVector.getBuffer(),
+            l_ui32FeatureVectorSize*sizeof(float64));
+        l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
+        l_oClassificationVector.push_back(std::pair< float64, IMatrix*>(op_f64ClassificationStateClass, op_pClassificationValues));
+    }
+
+    //Now, we determine the best classification
+    std::pair<float64, IMatrix*> best = std::pair<float64, IMatrix*>(-1, NULL);
+    IAlgorithmProxy* l_pSubClassifier = this->m_oSubClassifierList[0];
+
+    for(uint32 l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
+    {
+        std::pair<float64, IMatrix*> l_pTemp = l_oClassificationVector[l_iClassificationCount];
+        if(l_pTemp.first==1)
+        {
+            if(best.second == NULL)
+            {
+                best = l_pTemp;
+                rf64Class = ((float64)l_iClassificationCount)+1;
+            }
+            else
+            {
+                if(((CAlgorithmClassifier*)l_pSubClassifier)->getBestClassification(*(best.second), *(l_pTemp.second)))
+                {
+                    best = l_pTemp;
+                    rf64Class = ((float64)l_iClassificationCount)+1;
+                }
+            }
+        }
+
+    }
+
+    rClassificationValues.setSize(best.second->getBufferElementCount());
+    System::Memory::copy(rClassificationValues.getBuffer(), best.second->getBuffer(), best.second->getBufferElementCount()*sizeof(float64));
     return true;
+}
+
+uint32 CAlgorithmClassifierOneVsAll::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
+{
+    return 0;
 }
 
 void CAlgorithmClassifierOneVsAll::addNewClassifierAtBack(void)
@@ -126,8 +181,6 @@ void CAlgorithmClassifierOneVsAll::getClassifierConfiguration(IAlgorithmProxy* r
 
 boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
 {
-    this->getLogManager() << LogLevel_Warning << "Save configuration\n";
-
     std::stringstream l_sAmountClasses;
     l_sAmountClasses << this->m_iAmountClass;
 
@@ -169,7 +222,6 @@ boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBu
 
 boolean CAlgorithmClassifierOneVsAll::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
 {
-    this->getLogManager() << LogLevel_Warning << "Loading configuration\n";
     this->m_iClassCounter = 0;
     XML::IReader* l_pReader=XML::createReader(*this);
     l_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());

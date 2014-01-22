@@ -3,6 +3,7 @@
 
 #include "../ovtkTAlgorithm.h"
 #include "../../ovtkIVector.h"
+#include <openvibe/ov_all.h>
 #include "../../ovtkIFeatureVector.h"
 #include "../../ovtkIFeatureVectorSet.h"
 
@@ -41,6 +42,8 @@ namespace OpenViBEToolkit
 
 		virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer)=0;
 		virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer)=0;
+
+        virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)=0;
 
 		_IsDerivedFromClass_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVTK_ClassId_Algorithm_Classifier);
 	};

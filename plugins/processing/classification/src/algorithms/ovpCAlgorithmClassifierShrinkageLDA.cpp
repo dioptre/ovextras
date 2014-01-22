@@ -255,6 +255,11 @@ boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatur
 	return true;
 }
 
+uint32 CAlgorithmClassifierShrinkageLDA::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
+{
+    return 0;
+}
+
 boolean CAlgorithmClassifierShrinkageLDA::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
 {
 	rMemoryBuffer.setSize(0, true);

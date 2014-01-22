@@ -51,6 +51,11 @@ boolean CAlgorithmClassifierNULL::classify(const IFeatureVector& rFeatureVector,
 	return true;
 }
 
+uint32 CAlgorithmClassifierNULL::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
+{
+    return 0;
+}
+
 boolean CAlgorithmClassifierNULL::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
 {
 	return true;

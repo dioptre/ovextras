@@ -441,6 +441,11 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 	return true;
 }
 
+uint32 CAlgorithmClassifierSVM::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
+{
+    return 0;
+}
+
 boolean CAlgorithmClassifierSVM::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
 {
 	//std::cout<<"save config"<<std::endl;

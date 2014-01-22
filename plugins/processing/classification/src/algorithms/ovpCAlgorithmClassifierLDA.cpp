@@ -142,8 +142,18 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 	{
 		rf64Class=m_f64Class2;
 	}
-
 	return true;
+}
+
+
+uint32 CAlgorithmClassifierLDA::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
+{
+    if(rFirstClassificationValue[0]  < rSecondClassificationValue[0] )
+        return -1;
+    else if(rFirstClassificationValue[0] == rSecondClassificationValue[0])
+        return 0;
+    else
+       return 1;
 }
 
 boolean CAlgorithmClassifierLDA::saveConfiguration(IMemoryBuffer& rMemoryBuffer)

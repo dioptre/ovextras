@@ -32,6 +32,7 @@ namespace OpenViBEPlugins
 
             virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer);
             virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer);
+            virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
             _IsDerivedFromClass_Final_(CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsAll);
 
@@ -46,6 +47,8 @@ namespace OpenViBEPlugins
 
             void addNewClassifierAtBack(void);
             void removeClassifierAtBack(void);
+
+
 
             std::stack<OpenViBE::CString> m_vNode;
 
@@ -62,12 +65,12 @@ namespace OpenViBEPlugins
             virtual void release(void) { }
 
             virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("OneVsAll pairing classifier"); }
-            virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard / Fabien Lotte"); }
+            virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Guillaume Serriere"); }
             virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA / INSA/IRISA"); }
             virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
             virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
             virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString(""); }
-            virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+            virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 
             virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ClassifierOneVsAll; }
             virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Local::CAlgorithmClassifierOneVsAll; }
