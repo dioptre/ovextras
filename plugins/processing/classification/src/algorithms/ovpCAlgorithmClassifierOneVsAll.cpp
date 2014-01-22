@@ -154,12 +154,10 @@ void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
 
 boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &rId, uint64 &rClassAmount)
 {
-    this->getLogManager() << LogLevel_Warning << "Start design architecture for " << rClassAmount <<" and algorithm "<< rId.toString() <<"\n";
     m_oSubClassifierAlgorithmIdentifier = CIdentifier(rId);
 
     for(uint64 i = 1 ; i <= rClassAmount ; ++i)
     {
-        this->getLogManager() << LogLevel_Warning << "Create Subclassifier for class" << i <<"\n";
         this->addNewClassifierAtBack();
     }
     return true;

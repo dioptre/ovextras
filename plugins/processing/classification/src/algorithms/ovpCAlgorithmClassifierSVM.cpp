@@ -443,7 +443,12 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 
 uint32 CAlgorithmClassifierSVM::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
 {
-    return 0;
+    if(rFirstClassificationValue[0]  < rSecondClassificationValue[0] )
+        return -1;
+    else if(rFirstClassificationValue[0] == rSecondClassificationValue[0])
+        return 0;
+    else
+       return 1;
 }
 
 boolean CAlgorithmClassifierSVM::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
