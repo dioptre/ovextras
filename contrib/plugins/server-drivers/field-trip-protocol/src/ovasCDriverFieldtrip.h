@@ -11,6 +11,9 @@
 
 #include "fieldtrip/message.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 // for GET_CPU_TIME
 #include <iostream>
 #include <fstream>
@@ -51,6 +54,8 @@ namespace OpenViBEAcquisitionServer
 		void FreeResponse(message_t * response, const char* message);
 
 	protected:
+
+		SettingsHelper m_oSettings;
 
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;

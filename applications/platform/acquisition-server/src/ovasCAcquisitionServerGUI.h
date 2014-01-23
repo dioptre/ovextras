@@ -6,7 +6,6 @@
 #include "ovasIHeader.h"
 #include "ovasCHeader.h"
 
-
 #include <socket/IConnectionServer.h>
 
 #include <boost/thread.hpp>
@@ -22,6 +21,7 @@ namespace OpenViBEAcquisitionServer
 	class CAcquisitionServerThread;
 	class IAcquisitionServerPlugin;
 	struct PluginSetting;
+	class Property;
 
 	class CAcquisitionServerGUI
 	{
@@ -50,6 +50,7 @@ namespace OpenViBEAcquisitionServer
 		virtual void comboBoxDriverChanged(::GtkComboBox* pComboBox);
 		virtual void comboBoxSampleCountPerSentBlockChanged(::GtkComboBox* pComboBox);
 
+#ifdef OV_BOOST_SETTINGS
 		class PluginSettingReference
 		{
 			public:
@@ -83,6 +84,7 @@ namespace OpenViBEAcquisitionServer
 					unique_name = OpenViBE::CString(("AcquisitionServerPlugin_" + pluginName + "_"  + settingName).c_str());
 				}
 		};
+#endif
 
 		/// registers a new acquisition server plugin, the plugin is activated immediately
 		void registerPlugin(IAcquisitionServerPlugin* plugin);
@@ -90,8 +92,21 @@ namespace OpenViBEAcquisitionServer
 		/// scans all plugins for settings and puts them into a flat structure easier to handle
 		void scanPluginSettings();
 
+#ifdef OV_BOOST_SETTINGS
 		/// holds references to the plugins' settings for faster access
 		std::vector<PluginSettingReference> m_vPluginSettings;
+#endif
+
+		void savePluginSettings();
+
+		class PropertyAndWidget {
+		public:
+			PropertyAndWidget(Property* prop, GtkWidget* widget) : m_pProperty(prop), m_pWidget(widget) { };
+			Property* m_pProperty;
+			GtkWidget* m_pWidget;
+		};
+		/// holds references to the plugins' settings for faster access
+		std::vector<PropertyAndWidget> m_vPluginProperties;
 
 	protected :
 

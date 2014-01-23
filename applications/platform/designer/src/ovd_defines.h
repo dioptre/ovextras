@@ -50,6 +50,14 @@ namespace OpenViBEDesigner
 		ContextMenu_SelectionMute,
 		ContextMenu_BoxMute,
 
+		ContextMenu_BoxAddMessageInput,
+		ContextMenu_BoxRemoveMessageInput,
+		ContextMenu_BoxAddMessageOutput,
+		ContextMenu_BoxRemoveMessageOutput,
+
+		ContextMenu_BoxEditMessageInput,
+		ContextMenu_BoxEditMessageOutput,
+
 		ContextMenu_BoxDocumentation
 	};
 
@@ -102,6 +110,9 @@ namespace OpenViBEDesigner
 		Connector_Output,
 		Connector_Setting,
 		Connector_Link,
+		Connector_MessageInput,
+		Connector_MessageOutput,
+		Connector_MessageLink
 	};
 
 	enum

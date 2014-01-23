@@ -38,7 +38,7 @@ namespace OpenViBE
 			virtual OpenViBE::boolean initializeFromAlgorithmClassIdentifier(
 				const OpenViBE::CIdentifier& rAlgorithmClassIdentifier);
 			virtual OpenViBE::boolean initializeFromExistingBox(
-				const OpenViBE::Kernel::IBox& rExisitingBox);
+				const OpenViBE::Kernel::IBox& rExistingBox);
 
 			virtual OpenViBE::boolean addInput(
 				const OpenViBE::CString& sName,
@@ -58,6 +58,39 @@ namespace OpenViBE
 			virtual OpenViBE::boolean setInputName(
 				const OpenViBE::uint32 ui32InputIndex,
 				const OpenViBE::CString& rName);
+
+
+			//messages input
+			virtual OpenViBE::boolean addMessageInput(
+				const OpenViBE::CString& sName);
+			virtual OpenViBE::boolean removeMessageInput(
+				const OpenViBE::uint32 ui32InputIndex);
+
+
+			virtual OpenViBE::uint32 getMessageInputCount(void) const;
+			virtual OpenViBE::boolean getMessageInputName(
+				const OpenViBE::uint32 ui32InputIndex,
+				OpenViBE::CString& rName) const;
+			virtual OpenViBE::boolean setMessageInputName(
+				const OpenViBE::uint32 ui32InputIndex,
+				const OpenViBE::CString& rName);
+
+			//message output
+			virtual OpenViBE::boolean addMessageOutput(
+				const OpenViBE::CString& sName);
+			virtual OpenViBE::boolean removeMessageOutput(
+				const OpenViBE::uint32 ui32InputIndex);
+
+
+			virtual OpenViBE::uint32 getMessageOutputCount(void) const;
+			virtual OpenViBE::boolean getMessageOutputName(
+				const OpenViBE::uint32 ui32InputIndex,
+				OpenViBE::CString& rName) const;
+			virtual OpenViBE::boolean setMessageOutputName(
+				const OpenViBE::uint32 ui32InputIndex,
+				const OpenViBE::CString& rName);
+
+			//
 
 			virtual OpenViBE::boolean addOutput(
 				const OpenViBE::CString& sName,
@@ -182,6 +215,26 @@ namespace OpenViBE
 				OpenViBE::boolean m_bMod;
 			};
 
+			class CMessageInput
+			{
+			public:
+				CMessageInput(void) { }
+				CMessageInput(const CMessageInput& mi)
+					:m_sName(mi.m_sName) { }
+				OpenViBE::CString m_sName;
+
+			};
+
+			class CMessageOutput
+			{
+			public:
+				CMessageOutput(void) { }
+				CMessageOutput(const CMessageOutput& mi)
+					:m_sName(mi.m_sName) { }
+				OpenViBE::CString m_sName;
+
+			};
+
 		protected:
 
 			OpenViBE::Kernel::CScenario& m_rOwnerScenario;
@@ -198,6 +251,10 @@ namespace OpenViBE
 			std::vector<CInput> m_vInput;
 			std::vector<COutput> m_vOutput;
 			std::vector<CSetting> m_vSetting;
+
+			//only the name of the in/output are stored for message socket
+			std::vector<CMessageInput> m_vMessageInput;
+			std::vector<CMessageOutput> m_vMessageOutput;
 		};
 	};
 };

@@ -64,6 +64,49 @@ boolean CBoxAlgorithm@@ClassName@@::processInput(uint32 ui32InputIndex)
 }
 /*******************************************************************************/
 
+@@ProcessMessageCommentIn@@
+boolean CBoxAlgorithm@@ClassName@@::processMessage(const IMessageWithData& msg, uint32 inputIndex)
+{
+	//If you know what the message should contain, you can directly access the values by using 
+	//getters of the message class with known keys. Otherwise, you can loop over the contents to discover the keys.
+	
+	//You can get the first CString key of the message by calling this function
+	//const CString *l_sKey = msg.getFirstCStringToken();
+	//You can then go through all the keys by calling
+	// getNextCStringToken(previousKey)
+	//The function will return NULL when no more keys are found
+#if 0
+	while(l_sKey!=NULL)
+	{
+		l_sKey = msg.getNextCStringToken(*l_sKey);
+		//and access the content with
+		CString* l_sContent;
+		boolean ok = msg.getValueCString(l_sKey, &l_sContent);
+		//if ok is false, the retrieval was not successful
+		//the message will be deleted when the function goes out of scope, store the value if you wish to use it later
+	}
+	
+	//Same thing for the other types
+	const CString *l_sMatrixKey = msg.getFirstIMatrixToken();
+	while(l_sMatrixKey!=NULL)
+	{
+		l_sMatrixKey = msg.getNextIMatrixToken(*l_sMatrixKey);
+		//and access the content with
+		IMatrix* l_oContent;
+		boolean ok = msg.getValueIMatrix(l_sMatrixKey, &l_oContent);
+		//if ok is false, the retrieval was not successful
+		//the message will be deleted when the function goes out of scope, store the value if you wish to use it later
+		//for matrices, the copy is done that way
+		//CMatrix * l_oLocalMatrix = new CMatrix();
+		//OpenViBEToolkit::Tools::Matrix::copy(*l_oLocalMatrix, *l_oContent);
+	}
+#endif
+	
+	// Remember to return false in case the message was unexpected (user has made a wrong connection)	
+	return true;
+}
+/*******************************************************************************/
+
 boolean CBoxAlgorithm@@ClassName@@::process(void)
 {
 	

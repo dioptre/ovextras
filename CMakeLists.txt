@@ -46,11 +46,20 @@ MESSAGE(STATUS "  CMAKE_CXX_FLAGS_DEBUG = '${CMAKE_CXX_FLAGS_DEBUG}'")
 # if no specific branch has been given for an openvibe component, default is to compile its trunk folder
 ## SET(OV_TRUNK "trunc")
 
-# SET(OV_COMPILE_TESTS "true")
+SET(OV_COMPILE_TESTS "true")
 
 # By setting SKIP[_FOLDER]* you can skip a subtree (example: SKIP_A_B_C skips folder a/b/c and all its subfolders if any)
 SET(SKIP_DOCUMENTATION "1")
 #SET(SKIP_CONTRIB_PLUGINS_PROCESSING_PYTHON "1")
+
+IF(UNIX)
+	# On Linux, the presence of matlab plugin .so can cause crashes in Simple DSP box as the two may use different versions of boost which are
+	# then wrongly exposed to the other party due to the dlopen() flag RTLD_GLOBAL. Unfortunately this flag is needed or the python plugin 
+	# imports no longer work... You may enable the Matlab plugin compilation and possibly set the flag to RTLD_LOCAL in ovCKernelLoader.cpp, 
+	# but be aware of the consequences.
+	MESSAGE(STATUS "Note: Disabling Matlab plugin compilation by default")
+	SET(SKIP_PLUGINS_PROCESSING_MATLAB "1")
+ENDIF(UNIX)
 
 #SET(SKIP_MODULES_AUTOMATON "1")
 #SET(SKIP_MODULES_EBML "1")

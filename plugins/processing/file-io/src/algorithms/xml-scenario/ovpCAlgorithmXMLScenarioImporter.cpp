@@ -20,7 +20,9 @@ enum
 
 	Status_ParsingBox,
 	Status_ParsingBoxInput,
+	Status_ParsingBoxMessageInput,
 	Status_ParsingBoxOutput,
+	Status_ParsingBoxMessageOutput,
 	Status_ParsingBoxSetting,
 	Status_ParsingBoxAttribute,
 
@@ -31,6 +33,11 @@ enum
 	Status_ParsingLinkSource,
 	Status_ParsingLinkTarget,
 	Status_ParsingLinkAttribute,
+
+	Status_ParsingMessageLink,
+	Status_ParsingMessageLinkSource,
+	Status_ParsingMessageLinkTarget,
+	Status_ParsingMessageLinkAttribute,
 
 	Status_ParsingVisualisationTree,
 
@@ -78,7 +85,9 @@ void CAlgorithmXMLScenarioImporter::openChild(const char* sName, const char** sA
 
 	else if(l_sTop=="Box"                 && m_ui32Status==Status_ParsingScenario) { m_ui32Status=Status_ParsingBox;               m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Box); }
 	else if(l_sTop=="Input"               && m_ui32Status==Status_ParsingBox)      { m_ui32Status=Status_ParsingBoxInput;          m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Box_Input); }
+	else if(l_sTop=="MessageInput"        && m_ui32Status==Status_ParsingBox)      { m_ui32Status=Status_ParsingBoxMessageInput;   m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInput); }
 	else if(l_sTop=="Output"              && m_ui32Status==Status_ParsingBox)      { m_ui32Status=Status_ParsingBoxOutput;         m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Box_Output); }
+	else if(l_sTop=="MessageOutput"       && m_ui32Status==Status_ParsingBox)      { m_ui32Status=Status_ParsingBoxMessageOutput;  m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutput); }
 	else if(l_sTop=="Setting"             && m_ui32Status==Status_ParsingBox)      { m_ui32Status=Status_ParsingBoxSetting;        m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting); }
 	else if(l_sTop=="Attribute"           && m_ui32Status==Status_ParsingBox)      { m_ui32Status=Status_ParsingBoxAttribute;      m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Box_Attribute); }
 
@@ -89,6 +98,11 @@ void CAlgorithmXMLScenarioImporter::openChild(const char* sName, const char** sA
 	else if(l_sTop=="Source"              && m_ui32Status==Status_ParsingLink)     { m_ui32Status=Status_ParsingLinkSource;        m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Link_Source); }
 	else if(l_sTop=="Target"              && m_ui32Status==Status_ParsingLink)     { m_ui32Status=Status_ParsingLinkTarget;        m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Link_Target); }
 	else if(l_sTop=="Attribute"           && m_ui32Status==Status_ParsingLink)     { m_ui32Status=Status_ParsingLinkAttribute;     m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Link_Attribute); }
+
+	else if(l_sTop=="MessageLink"         && m_ui32Status==Status_ParsingScenario)        { m_ui32Status=Status_ParsingMessageLink;              m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink); }
+	else if(l_sTop=="Source"              && m_ui32Status==Status_ParsingMessageLink)     { m_ui32Status=Status_ParsingMessageLinkSource;        m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source); }
+	else if(l_sTop=="Target"              && m_ui32Status==Status_ParsingMessageLink)     { m_ui32Status=Status_ParsingMessageLinkTarget;        m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target); }
+	else if(l_sTop=="Attribute"           && m_ui32Status==Status_ParsingMessageLink)     { m_ui32Status=Status_ParsingMessageLinkAttribute;     m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Attribute); }
 
 	else if(l_sTop=="VisualisationTree"   && m_ui32Status==Status_ParsingScenario) { m_ui32Status=Status_ParsingVisualisationTree; m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_VisualisationTree); }
 
@@ -111,9 +125,17 @@ void CAlgorithmXMLScenarioImporter::processChildData(const char* sData)
 			if(l_sTop=="TypeIdentifier")           m_pContext->processIdentifier(OVTK_Algorithm_ScenarioExporter_NodeId_Box_Input_TypeIdentifier, _AutoBind_(sData));
 			if(l_sTop=="Name")                     m_pContext->processString(OVTK_Algorithm_ScenarioExporter_NodeId_Box_Input_Name, _AutoBind_(sData));
 			break;
+		case Status_ParsingBoxMessageInput:
+			//if(l_sTop=="TypeIdentifier")           m_pContext->processIdentifier(OVTK_Algorithm_ScenarioExporter_NodeId_Box_Input_TypeIdentifier, _AutoBind_(sData));
+			if(l_sTop=="Name")                     m_pContext->processString(OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageInput_Name, _AutoBind_(sData));
+			break;
 		case Status_ParsingBoxOutput:
 			if(l_sTop=="TypeIdentifier")           m_pContext->processIdentifier(OVTK_Algorithm_ScenarioExporter_NodeId_Box_Output_TypeIdentifier, _AutoBind_(sData));
 			if(l_sTop=="Name")                     m_pContext->processString(OVTK_Algorithm_ScenarioExporter_NodeId_Box_Output_Name, _AutoBind_(sData));
+			break;
+		case Status_ParsingBoxMessageOutput:
+			//if(l_sTop=="TypeIdentifier")           m_pContext->processIdentifier(OVTK_Algorithm_ScenarioExporter_NodeId_Box_Input_TypeIdentifier, _AutoBind_(sData));
+			if(l_sTop=="Name")                     m_pContext->processString(OVTK_Algorithm_ScenarioExporter_NodeId_Box_MessageOutput_Name, _AutoBind_(sData));
 			break;
 		case Status_ParsingBoxSetting:
 			if(l_sTop=="TypeIdentifier")           m_pContext->processIdentifier(OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_TypeIdentifier, _AutoBind_(sData));
@@ -152,6 +174,24 @@ void CAlgorithmXMLScenarioImporter::processChildData(const char* sData)
 			if(l_sTop=="Value")                    m_pContext->processString(OVTK_Algorithm_ScenarioExporter_NodeId_Link_Attribute_Value, _AutoBind_(sData));
 			break;
 
+		//
+		case Status_ParsingMessageLink:
+			if(l_sTop=="Identifier")               m_pContext->processIdentifier(OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Identifier, _AutoBind_(sData));
+			break;
+		case Status_ParsingMessageLinkSource:
+			if(l_sTop=="BoxIdentifier")            m_pContext->processIdentifier(OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source_BoxIdentifier, _AutoBind_(sData));
+			if(l_sTop=="BoxOutputIndex")           m_pContext->processUInteger(OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Source_BoxOutputIndex, _AutoBind_(sData));
+			break;
+		case Status_ParsingMessageLinkTarget:
+			if(l_sTop=="BoxIdentifier")            m_pContext->processIdentifier(OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target_BoxIdentifier, _AutoBind_(sData));
+			if(l_sTop=="BoxInputIndex")            m_pContext->processUInteger(OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Target_BoxInputIndex, _AutoBind_(sData));
+			break;
+		case Status_ParsingMessageLinkAttribute:
+			if(l_sTop=="Identifier")               m_pContext->processIdentifier(OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Attribute_Identifier, _AutoBind_(sData));
+			if(l_sTop=="Value")                    m_pContext->processString(OVTK_Algorithm_ScenarioExporter_NodeId_MessageLink_Attribute_Value, _AutoBind_(sData));
+			break;
+		//
+
 		case Status_ParsingVisualisationWidget:
 			if(l_sTop=="Identifier")               m_pContext->processIdentifier(OVTK_Algorithm_ScenarioExporter_NodeId_VisualisationWidget_Identifier, _AutoBind_(sData));
 			if(l_sTop=="Name")                     m_pContext->processString(OVTK_Algorithm_ScenarioExporter_NodeId_VisualisationWidget_Name, _AutoBind_(sData));
@@ -184,7 +224,9 @@ void CAlgorithmXMLScenarioImporter::closeChild(void)
 
 	else if(l_sTop=="Box"                 && m_ui32Status==Status_ParsingBox)               { m_ui32Status=Status_ParsingScenario; m_pContext->processStop(); }
 	else if(l_sTop=="Input"               && m_ui32Status==Status_ParsingBoxInput)          { m_ui32Status=Status_ParsingBox;      m_pContext->processStop(); }
+	else if(l_sTop=="MessageInput"        && m_ui32Status==Status_ParsingBoxMessageInput)   { m_ui32Status=Status_ParsingBox;      m_pContext->processStop(); }
 	else if(l_sTop=="Output"              && m_ui32Status==Status_ParsingBoxOutput)         { m_ui32Status=Status_ParsingBox;      m_pContext->processStop(); }
+	else if(l_sTop=="MessageOutput"       && m_ui32Status==Status_ParsingBoxMessageOutput)  { m_ui32Status=Status_ParsingBox;      m_pContext->processStop(); }
 	else if(l_sTop=="Setting"             && m_ui32Status==Status_ParsingBoxSetting)        { m_ui32Status=Status_ParsingBox;      m_pContext->processStop(); }
 	else if(l_sTop=="Attribute"           && m_ui32Status==Status_ParsingBoxAttribute)      { m_ui32Status=Status_ParsingBox;      m_pContext->processStop(); }
 
@@ -195,6 +237,13 @@ void CAlgorithmXMLScenarioImporter::closeChild(void)
 	else if(l_sTop=="Source"              && m_ui32Status==Status_ParsingLinkSource)        { m_ui32Status=Status_ParsingLink;     m_pContext->processStop(); }
 	else if(l_sTop=="Target"              && m_ui32Status==Status_ParsingLinkTarget)        { m_ui32Status=Status_ParsingLink;     m_pContext->processStop(); }
 	else if(l_sTop=="Attribute"           && m_ui32Status==Status_ParsingLinkAttribute)     { m_ui32Status=Status_ParsingLink;     m_pContext->processStop(); }
+
+	//
+	else if(l_sTop=="MessageLink"         && m_ui32Status==Status_ParsingMessageLink)              { m_ui32Status=Status_ParsingScenario;        m_pContext->processStop(); }
+	else if(l_sTop=="Source"              && m_ui32Status==Status_ParsingMessageLinkSource)        { m_ui32Status=Status_ParsingMessageLink;     m_pContext->processStop(); }
+	else if(l_sTop=="Target"              && m_ui32Status==Status_ParsingMessageLinkTarget)        { m_ui32Status=Status_ParsingMessageLink;     m_pContext->processStop(); }
+	else if(l_sTop=="Attribute"           && m_ui32Status==Status_ParsingMessageLinkAttribute)     { m_ui32Status=Status_ParsingMessageLink;     m_pContext->processStop(); }
+	//
 
 	else if(l_sTop=="VisualisationTree"   && m_ui32Status==Status_ParsingVisualisationTree) { m_ui32Status=Status_ParsingScenario; m_pContext->processStop(); }
 

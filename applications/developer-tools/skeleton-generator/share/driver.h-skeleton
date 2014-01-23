@@ -1,9 +1,12 @@
 #ifndef __OpenViBE_AcquisitionServer_CDriver@@ClassName@@_H__
 #define __OpenViBE_AcquisitionServer_CDriver@@ClassName@@_H__
 
-#include "../ovasIDriver.h"
+#include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 #include <openvibe/ov_all.h>
+
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
 
 namespace OpenViBEAcquisitionServer
 {
@@ -11,7 +14,7 @@ namespace OpenViBEAcquisitionServer
 	 * \class CDriver@@ClassName@@
 	 * \author @@AuthorName@@ (@@CompanyName@@)
 	 * \date @@Date@@
-	 * \erief The CDriver@@ClassName@@ allows the acquisition server to acquire data from a @@DriverName@@ device.
+	 * \brief The CDriver@@ClassName@@ allows the acquisition server to acquire data from a @@DriverName@@ device.
 	 *
 	 * TODO: details
 	 *
@@ -45,7 +48,9 @@ namespace OpenViBEAcquisitionServer
 		}
 
 	protected:
-
+		
+		SettingsHelper m_oSettings;
+		
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 
 		// Replace this generic Header with any specific header you might have written

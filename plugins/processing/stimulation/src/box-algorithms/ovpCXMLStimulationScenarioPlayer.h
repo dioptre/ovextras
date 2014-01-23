@@ -71,7 +71,7 @@ namespace OpenViBEPlugins
 		class CXMLStimulationScenarioPlayerDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
 		{
 		public:
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("XML stimulation scenario player"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("XML stimulation scenario player (deprecated)"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Bruno Renier"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Plays a stimulation scenarion from an XML file"); }

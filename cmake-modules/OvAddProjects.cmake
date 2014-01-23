@@ -1,6 +1,6 @@
 # Adds the current project to the global properties
 FUNCTION(OV_ADD_THIS_TO_PROJECT_LIST)
-	MESSAGE(STATUS "ADDING: ${CMAKE_CURRENT_SOURCE_DIR}")
+	# MESSAGE(STATUS "ADDING: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 	# Add the dir to be parsed for documentation later. We need to do this before adding subdir, in case the subdir is the actual docs dir
 	GET_PROPERTY(OV_TMP GLOBAL PROPERTY OV_PROP_CURRENT_PROJECTS)

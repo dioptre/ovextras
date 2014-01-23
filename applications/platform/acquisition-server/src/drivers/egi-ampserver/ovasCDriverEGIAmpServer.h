@@ -4,6 +4,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <socket/IConnectionClient.h>
 
 namespace OpenViBEAcquisitionServer
@@ -45,6 +48,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 
@@ -58,6 +63,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::CString m_sAmpServerHostName;
 		OpenViBE::uint32 m_ui32CommandPort;
 		OpenViBE::uint32 m_ui32StreamPort;
+
 	};
 };
 

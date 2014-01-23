@@ -21,12 +21,14 @@ namespace OpenViBE
 
 		/**
 		 * \brief Given a sample count and the sampling rate, returns the duration of the samples in fixed point time
-		 * \param ui64SamplingRate : the sampling rate of the signal
+		 * \param ui64SamplingRate : the sampling rate of the signal, must not be 0 or the function will crash.
 		 * \param ui64SampleCount : the size of the sample
 		 * \return Time in fixed point format corresponding to the input parameters
 		 */
 		static uint64 sampleCountToTime(const uint64 ui64SamplingRate, const uint64 ui64SampleCount)
 		{
+			// Note that if samplingRate is 0, this will crash. Its preferable to silent fail, the caller should check the argument.
+
 			return (ui64SampleCount<<32)/ui64SamplingRate;
 		}
 

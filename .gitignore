@@ -6,4 +6,6 @@ build
 CMakeLists.txt.*
 .*.swp
 externals/*/
+*~
+*.swp
 

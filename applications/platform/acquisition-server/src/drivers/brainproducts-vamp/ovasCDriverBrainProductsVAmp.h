@@ -7,6 +7,9 @@
 #include "ovasCHeaderBrainProductsVAmp.h"
 #include <openvibe/ov_all.h>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #include <windows.h>
 #include <FirstAmp.h>
 
@@ -49,6 +52,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 
 		OpenViBE::boolean m_bAcquireAuxiliaryAsEEG;
@@ -71,6 +76,7 @@ namespace OpenViBEAcquisitionServer
 	private:
 
 		OpenViBE::boolean m_bFirstStart;
+
 	};
 };
 

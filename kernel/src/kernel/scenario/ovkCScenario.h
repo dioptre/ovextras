@@ -15,6 +15,7 @@ namespace OpenViBE
 		class CBox;
 		class CComment;
 		class CLink;
+        class CMessageLink;
 		class CProcessingUnit;
 
 		class CScenario : public OpenViBE::Kernel::TAttributable < OpenViBE::Kernel::TKernelObject < OpenViBE::Kernel::IScenario > >
@@ -74,6 +75,11 @@ namespace OpenViBE
 
 			virtual OpenViBE::CIdentifier getNextLinkIdentifier(
 				const OpenViBE::CIdentifier& rPreviousIdentifier) const;
+
+            virtual OpenViBE::CIdentifier getNextMessageLinkIdentifier(
+                const OpenViBE::CIdentifier& rPreviousIdentifier) const;
+
+
 			virtual OpenViBE::CIdentifier getNextLinkIdentifierFromBox(
 				const OpenViBE::CIdentifier& rPreviousIdentifier,
 				const OpenViBE::CIdentifier& rBoxIdentifier) const;
@@ -90,10 +96,35 @@ namespace OpenViBE
 				const OpenViBE::uint32 ui32InputInex) const;
 			virtual OpenViBE::boolean isLink(
 				const OpenViBE::CIdentifier& rBoxIdentifier) const;
-			virtual const OpenViBE::Kernel::ILink* getLinkDetails(
+
+            virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierFromBox(
+                const OpenViBE::CIdentifier& rPreviousIdentifier,
+                const OpenViBE::CIdentifier& rBoxIdentifier) const;
+            virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierFromBoxOutput(
+                const OpenViBE::CIdentifier& rPreviousIdentifier,
+                const OpenViBE::CIdentifier& rBoxIdentifier,
+                const OpenViBE::uint32 ui32OutputIndex) const;
+            virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierToBox(
+                const OpenViBE::CIdentifier& rPreviousIdentifier,
+                const OpenViBE::CIdentifier& rBoxIdentifier) const;
+            virtual OpenViBE::CIdentifier getNextMessageLinkIdentifierToBoxInput(
+                const OpenViBE::CIdentifier& rPreviousIdentifier,
+                const OpenViBE::CIdentifier& rBoxIdentifier,
+                const OpenViBE::uint32 ui32InputInex) const;
+            virtual OpenViBE::boolean isMessageLink(
+                const OpenViBE::CIdentifier& rBoxIdentifier) const;
+
+
+            virtual const OpenViBE::Kernel::ILink* getLinkDetails(
 				const OpenViBE::CIdentifier& rLinkIdentifier) const;
 			virtual OpenViBE::Kernel::ILink* getLinkDetails(
 				const OpenViBE::CIdentifier& rLinkIdentifier);
+
+            virtual const OpenViBE::Kernel::ILink* getMessageLinkDetails(
+                const OpenViBE::CIdentifier& rLinkIdentifier) const;
+            virtual OpenViBE::Kernel::ILink* getMessageLinkDetails(
+                const OpenViBE::CIdentifier& rLinkIdentifier);
+
 			virtual OpenViBE::boolean connect(
 				const OpenViBE::CIdentifier& rSourceBoxIdentifier,
 				const OpenViBE::uint32 ui32SourceBoxOutputIndex,
@@ -107,6 +138,20 @@ namespace OpenViBE
 				const OpenViBE::uint32 ui32TargetBoxInputIndex);
 			virtual OpenViBE::boolean disconnect(
 				const OpenViBE::CIdentifier& rLinkIdentifier);
+
+            virtual OpenViBE::boolean connectMessage(
+                const OpenViBE::CIdentifier& rSourceBoxIdentifier,
+                const OpenViBE::uint32 ui32SourceBoxOutputIndex,
+                const OpenViBE::CIdentifier& rTargetBoxIdentifier,
+                const OpenViBE::uint32 ui32TargetBoxInputIndex,
+                OpenViBE::CIdentifier& rLinkIdentifier);
+            virtual OpenViBE::boolean disconnectMessage(
+                const OpenViBE::CIdentifier& rSourceBoxIdentifier,
+                const OpenViBE::uint32 ui32SourceBoxOutputIndex,
+                const OpenViBE::CIdentifier& rTargetBoxIdentifier,
+                const OpenViBE::uint32 ui32TargetBoxInputIndex);
+            virtual OpenViBE::boolean disconnectMessage(
+                const OpenViBE::CIdentifier& rLinkIdentifier);
 
 			virtual OpenViBE::CIdentifier getNextProcessingUnitIdentifier(
 				const OpenViBE::CIdentifier& rPreviousIdentifier) const;
@@ -137,6 +182,7 @@ namespace OpenViBE
 			std::map<OpenViBE::CIdentifier, OpenViBE::Kernel::CBox*> m_vBox;
 			std::map<OpenViBE::CIdentifier, OpenViBE::Kernel::CComment*> m_vComment;
 			std::map<OpenViBE::CIdentifier, OpenViBE::Kernel::CLink*> m_vLink;
+            std::map<OpenViBE::CIdentifier, OpenViBE::Kernel::CMessageLink*> m_vMessageLink;
 			std::map<OpenViBE::CIdentifier, OpenViBE::Kernel::CProcessingUnit*> m_vProcessingUnit;
 		};
 	};

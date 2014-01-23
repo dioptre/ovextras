@@ -1,3 +1,7 @@
+#if defined(WIN32) && defined(TARGET_BUILDTYPE_Debug)
+// Windows debug build doesn't typically link as most people don't have the python debug library.
+#else
+
 #include "ovpCBoxAlgorithmPython.h"
 
 #if defined TARGET_HAS_ThirdPartyPython
@@ -132,7 +136,8 @@ OpenViBE::boolean CBoxAlgorithmPython::initializePythonSafely()
 		return true;
 	}
 
-	this->getLogManager() << LogLevel_Info << "Discovered Python is v" << Py_GetVersion() << " (" << Py_GetPlatform() << ")\n";
+	this->getLogManager() << LogLevel_Info << "Discovered Python is " << CString(Py_GetVersion()) << " (" << CString(Py_GetPlatform()) << ")\n";
+	this->getLogManager() << LogLevel_Debug << "The Python path is [" << CString(Py_GetPath()) << "]\n";
 
 	OpenViBE::CString l_sCommand;
 	l_sCommand = l_sCommand + "import sys\n";
@@ -424,6 +429,8 @@ OpenViBE::boolean CBoxAlgorithmPython::initialize(void)
 		{
 			this->getLogManager() << ", result = NULL\n";
 		}
+		logSysStdout(); 
+		logSysStderr();
 		Py_CLEAR(l_pTemporyPyObject);
 		Py_CLEAR(l_pResult);
 		return false;
@@ -2060,3 +2067,4 @@ OpenViBE::boolean CBoxAlgorithmPython::process(void)
 }
 
 #endif // TARGET_HAS_ThirdPartyPython
+#endif

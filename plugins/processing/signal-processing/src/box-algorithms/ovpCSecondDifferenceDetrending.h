@@ -110,7 +110,7 @@ namespace OpenViBEPlugins
 	public:
 
 	  virtual void release(void) { }
-	  virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Second difference detrending"); }
+	  virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Second difference detrending (deprecated)"); }
 	  virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Fabien Lotte"); }
 	  virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("IRISA/INSA Rennes"); }
 	  virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Detrend the data using the second differencing method."); }

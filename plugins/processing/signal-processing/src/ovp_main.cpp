@@ -18,6 +18,9 @@
 #include "box-algorithms/spectral-analysis/ovpCBoxAlgorithmFrequencyBandSelector.h"
 #include "box-algorithms/spectral-analysis/ovpCBoxAlgorithmSpectrumAverage.h"
 
+#include "box-algorithms/connectivity/ovpCBoxAlgorithmConnectivityMeasure.h"
+#include "algorithms/connectivity/ovpCAlgorithmSingleTrialPhaseLockingValue.h"
+
 #include "box-algorithms/basic/ovpCBoxAlgorithmHilbert.h"
 #include "algorithms/basic/ovpCHilbertTransform.h"
 
@@ -65,6 +68,9 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_DifferentialIntegralOperation, "Differential/Integral select");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_DifferentialIntegralOperation, "Differential", OVP_TypeId_DifferentialIntegralOperation_Differential.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_DifferentialIntegralOperation, "Integral",     OVP_TypeId_DifferentialIntegralOperation_Integral.toUInteger());
+
+	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_ClassId_ConnectivityAlgorithm, "Connectivity measure method");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_ClassId_ConnectivityAlgorithm, "Single-Trial Phase Locking Value", OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue.toUInteger());
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CTimeBasedEpochingDesc);
 

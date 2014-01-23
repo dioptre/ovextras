@@ -33,6 +33,7 @@ const DWORD CDriverGTecGUSBamp::bufferSizeBytes = HEADER_SIZE + nPoints * sizeof
 
 CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_GTecGUSBamp", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_ui32DeviceIndex(uint32(-1))
@@ -47,6 +48,19 @@ CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 {
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(GTEC_NUM_CHANNELS);	
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("DeviceIndex", &m_ui32DeviceIndex);
+	m_oSettings.add("CommonGndAndRefBitmap", &m_ui8CommonGndAndRefBitmap);
+	m_oSettings.add("NotchFilterIndex", &m_i32NotchFilterIndex);
+	m_oSettings.add("BandPassFilterIndex", &m_i32BandPassFilterIndex);
+	m_oSettings.add("TriggerInputEnabled", &m_bTriggerInputEnabled);
+	m_oSettings.add("DeviceSerials", &m_vDevicesSerials);
+	m_oSettings.add("MasterSerial", &m_masterSerial);
+	m_oSettings.load();
+
+	m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();	
+
 }
 
 void CDriverGTecGUSBamp::release(void)
@@ -73,19 +87,15 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 	{
 		return false;
 	}                         
-
-	//begin device code
-	//m_ui32DeviceIndex not considered in this version, it performs an automatic configuration
+	
 	m_callSequenceHandles.clear();
 	numDevices = 0;
-	/*m_mastersCnt = 0;
-	m_slavesCnt = 0;*/
 
 	detectDevices();
 
 	if (numDevices==0) return false; 
 	
-	//assign automatically last device as master if no master has been selected from "Device properties" before that
+	//assign automatically the last device as master if no master has been selected from "Device properties" before that
 	if (numDevices>1 && m_masterSerial=="")
 	{
 		char serial[16];
@@ -94,10 +104,10 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 	}
 
 	m_rDriverContext.getLogManager() << LogLevel_Info << "Number of devices: " << numDevices << "\n";
-	//end device code
 
-	//m_bTriggerInputEnabled = true; //anton temporarily
+	//m_bTriggerInputEnabled = true; //for testing purposes
 
+	//add the trigger channel
 	if (m_bTriggerInputEnabled)
 	{
 		m_oHeader.setChannelCount((m_ui32AcquiredChannelCount+1)*numDevices);
@@ -107,8 +117,6 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 		m_oHeader.setChannelCount(m_ui32AcquiredChannelCount*numDevices);
 	}
 
-	//end of device code
-
 	m_ui32ActualImpedanceIndex=0;
 	m_ui32SampleCountPerSentBlock=ui32SampleCountPerSentBlock;
 	m_pCallback=&rCallback;
@@ -117,7 +125,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 	validPoints = NUMBER_OF_SCANS * (GTEC_NUM_CHANNELS + 1) * numDevices;
 	m_buffers = new BYTE**[numDevices];
 	m_overlapped = new OVERLAPPED*[numDevices];
-	m_pSample = new float[nPoints * numDevices]; //neded later when data is read
+	m_pSample = new float[nPoints * numDevices]; //needed later when data is being acquired
 	m_bufferReceivedData = new float[validPoints];
 
 	m_RingBuffer.Initialize(BUFFER_SIZE_SECONDS * m_oHeader.getSamplingFrequency() * (GTEC_NUM_CHANNELS + 1) * numDevices );
@@ -154,7 +162,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 			    char serial[16];
 		        ::GT_GetSerial(m_callSequenceHandles[0], serial, 16);
 		        m_masterSerial = serial;
-				m_rDriverContext.getLogManager() << LogLevel_Warning << "Configured as MASTER device: " << m_masterSerial.c_str() << " \n";
+				m_rDriverContext.getLogManager() << LogLevel_Info << "Configured as MASTER device: " << m_masterSerial.c_str() << " \n";
 				m_mastersCnt++;
 		}
 		else m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetSlave\n";
@@ -217,34 +225,24 @@ OpenViBE::boolean CDriverGTecGUSBamp::ConfigureDevice(OpenViBE::uint32 deviceNum
     if(!::GT_SetBufferSize(o_pDevice, NUMBER_OF_SCANS)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetBufferSize\n";
        
     if(!::GT_SetChannels(o_pDevice, l_oChannel, sizeof(l_oChannel)/sizeof(::UCHAR))) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetChannels\n";
-
-	/*if (isSlave)
-	{
-		m_rDriverContext.getLogManager() << LogLevel_Warning << "Configured as slave device: " << current_serial << " \n";
-		m_slavesCnt++;
-	}
-	else 
-	{
-		m_rDriverContext.getLogManager() << LogLevel_Warning << "Configured as master device: " << current_serial << " \n";
-		m_mastersCnt++;
-	}
-	if(!::GT_SetSlave(o_pDevice, isSlave)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetSlave\n";*/
-	//end GT_SetSlave
        
     if(!::GT_EnableTriggerLine(o_pDevice, TRUE)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_EnableTriggerLine - the extra input trigger channel is disabled\n";
     // GT_EnableSC
     // GT_SetBipolar
 
-    for(uint32 i=0; i<m_ui32AcquiredChannelCount; i++)
+    /* for(uint32 i=0; i<m_ui32AcquiredChannelCount; i++)
     {
         if(!::GT_SetBandPass(o_pDevice, i+1, m_i32BandPassFilterIndex)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetBandPass for channel " << i << "\n";
         if(!::GT_SetNotch(o_pDevice, i+1, m_i32NotchFilterIndex)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetNotch for channel " << i << "\n";
-    }
+    }*/
+	ConfigFiltering(o_pDevice);
 
     if(!::GT_SetSampleRate(o_pDevice, m_oHeader.getSamplingFrequency())) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetSampleRate\n";
 
     if(!::GT_SetReference(o_pDevice, l_oReference)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetReference\n";
     if(!::GT_SetGround(o_pDevice, l_oGround)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetGround\n";
+
+	
 
 	return true;
 }
@@ -281,7 +279,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::start(void)
 	return true;
 }
 
-//This method is called by the AS and it provdes it with data
+//This method is called by the AS and it supplies the acquired data to the AS
 OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 {
 	CStimulationSet   l_oStimulationSet;
@@ -324,13 +322,11 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 		//and numChannelsPerDevice the number of channels from each of those devices.
 		     
 		uint32 o_limit=(GTEC_NUM_CHANNELS + 1)*numDevices;
-		//int o_limit=(GTEC_NUM_CHANNELS + 1);
 
 		for(uint32 i=0; i<o_limit; i++)
 		{
 			for(uint32 j=0; j<NUMBER_OF_SCANS; j++)
 			{
-				//m_pSample[i*NUMBER_OF_SCANS+j]=m_bufferReceivedData[j*(GTEC_NUM_CHANNELS + 1)+i];
 				m_pSample[i*NUMBER_OF_SCANS+j]=m_bufferReceivedData[j*o_limit+i];
 			}
 		}
@@ -348,7 +344,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 	{
 		if(m_rDriverContext.isImpedanceCheckRequested())
 		{
-			HANDLE o_pDevice = m_callSequenceHandles[0];//done to handle only one device
+			HANDLE o_pDevice = m_callSequenceHandles[0];//works only for one device
 
 			double l_dImpedance=0;
 			::GT_GetImpedance(o_pDevice, m_ui32ActualImpedanceIndex+1, &l_dImpedance);
@@ -372,7 +368,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 	return true;
 }
 
-//this function is as close to the original as possible: DoAcquisition in gUSBampSyncDemo.cpp
+//This function is as close to the original as possible: DoAcquisition in gUSBampSyncDemo.cpp
 OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 {		
 	DWORD numBytesReceived = 0;
@@ -408,9 +404,9 @@ OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 
 		for (uint32 deviceIndex=0; deviceIndex<numDevices; deviceIndex++)
 		{
-			//devices are started in "Start" method, so this part skipped from the origianl code
-
+			//devices are started in "Start" method, so this part is skipped from the original g.tec code
 			HANDLE hDevice = m_callSequenceHandles[deviceIndex];
+			
 			//queue-up the first batch of transfer requests
 			for (int queueIndex=0; queueIndex<QUEUE_SIZE; queueIndex++)
 			{
@@ -490,7 +486,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 					}
 				}
 
-				//add new GetData call to the queue replacing the currently received one
+				//add new GetData call to the queue replacing the currently processed one
 				//this gives us time to process data while we wait for a new data chunk from the amplifier
 				for (uint32 deviceIndex = 0; deviceIndex < numDevices; deviceIndex++)
 				{
@@ -502,18 +498,19 @@ OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 						return false;
 					}
 				}
-				//increment circular queueIndex to process the next queue at the next loop repitition (on overrun start at index 0 again)
+				//increment circular queueIndex to process the next queue at the next loop repetition (on overrun start at index 0 again)
 				m_ui32CurrentQueueIndex = (m_ui32CurrentQueueIndex + 1) % QUEUE_SIZE;
 			}
 			catch(std::exception e)
 			{
-				m_rDriverContext.getLogManager() << LogLevel_Error << "General error in the thread function acquiring data from GTEC! Acquistion interrupted. Error is: " << e.what() << "\n";
+				m_rDriverContext.getLogManager() << LogLevel_Error << "General error in the thread function acquiring data from GTEC! Acquisition interrupted. Error is: " << e.what() << "\n";
 				m_bIsThreadRunning = false;
 				return false;
 			}
 		}
 	}
 	//__finally
+	
 	//This code stops the amplifiers in the same thread:
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Info << "Stopping devices and cleaning up..." << "\n";
@@ -553,7 +550,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 				m_rDriverContext.getLogManager() << LogLevel_Error << "Stopping device failed! Serial = " << serial << "\n";
 			}
 
-			//reset data trnasfer
+			//reset data transfer
 			if(!::GT_ResetTransfer(hDevice)) 
 			{
 				::GT_GetSerial(m_callSequenceHandles[numDevices-1], serial, 16);
@@ -739,9 +736,16 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 	//CConfigurationGTecGUSBamp m_oConfiguration("../share/openvibe-applications/acquisition-server/interface-GTec-GUSBamp.ui", m_ui32DeviceIndex, m_ui8CommonGndAndRefBitmap, m_i32NotchFilterIndex,m_i32BandPassFilterIndex,m_bTriggerInputEnabled);
 
 	detectDevices();
-
+	
 	string targetMasterSerial = (numDevices>1) ? m_masterSerial : "";
-	CConfigurationGTecGUSBamp m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-GTec-GUSBamp.ui", m_ui32DeviceIndex, m_ui8CommonGndAndRefBitmap, m_i32NotchFilterIndex,m_i32BandPassFilterIndex,m_bTriggerInputEnabled,m_vDevicesSerials,targetMasterSerial);
+	CConfigurationGTecGUSBamp m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-GTec-GUSBamp.ui", 
+		m_ui32DeviceIndex, 
+		m_ui8CommonGndAndRefBitmap, 
+		m_i32NotchFilterIndex, 
+		m_i32BandPassFilterIndex,
+		m_bTriggerInputEnabled,
+		m_vDevicesSerials,
+		targetMasterSerial);
 
 	//reduce from number of channels for all devices to the number of channels for one device
 	m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
@@ -751,13 +755,16 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 		return false;
 	}
 
+	//get new value from header
+	this->m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
+
+	m_oSettings.save();
+
 	//start reconfigure based on the new input:
 
 	if (targetMasterSerial!="")
 	    setMasterDevice(targetMasterSerial);
 
-	//get new value from header
-	this->m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
 	//expand the value from one device to all devices
 	if (m_bTriggerInputEnabled)
 	{
@@ -794,6 +801,100 @@ void CDriverGTecGUSBamp::applyPriority(boost::thread* thread, int priority)
 		case THREAD_PRIORITY_BELOW_NORMAL   : res = SetThreadPriority(th, THREAD_PRIORITY_BELOW_NORMAL);    break;
 		case THREAD_PRIORITY_LOWEST                   : res = SetThreadPriority(th, THREAD_PRIORITY_LOWEST);                  break;
     }
+}
+
+
+void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
+{
+	OpenViBE::boolean status;
+	int32 nrOfFilters;
+	float32 mySamplingRate = m_oHeader.getSamplingFrequency();
+
+	//Set BandPass
+	
+	// get the number of available filters
+	status = GT_GetNumberOfFilter(&nrOfFilters);
+
+	// create array of FILT structures to store the filter settings
+	FILT *filters = new FILT[nrOfFilters];
+
+	// fill array with filter settings
+	status = GT_GetFilterSpec(filters);
+	if (status==0) 
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the list of dsp filters! Filtering is disabled.\n";
+	    return;
+	}
+	
+	for(int i=1; i<=GTEC_NUM_CHANNELS; i++)  //channels must be [1..16]
+	{
+		status = GT_SetBandPass(o_pDevice, i, m_i32BandPassFilterIndex);
+		if (status==0) 
+		{ 
+			char serial[20];
+		    ::GT_GetSerial(o_pDevice, serial, 20);
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Could not set band pass filter on channel " << i << " on device " << serial << "\n";
+			return;
+		}
+	}
+	
+	if (m_i32BandPassFilterIndex ==-1) m_rDriverContext.getLogManager() << LogLevel_Info << "No BandPass filter applied.\n";
+	else m_rDriverContext.getLogManager() << LogLevel_Info << "Bandpass filter applied: between " << filters[m_i32BandPassFilterIndex].fu << " and " << filters[m_i32BandPassFilterIndex].fo << ", order = " << filters[m_i32BandPassFilterIndex].order << ", type = " << ((filters[m_i32BandPassFilterIndex].type == 1) ? "butterworth" : "chebyshev") << ", frequency = " << mySamplingRate << "\n";
+	
+	//Set Notch
+
+	// get the number of available filters
+	status = GT_GetNumberOfNotch(&nrOfFilters);
+
+	// create array of FILT structures to store the filter settings
+	filters = new FILT[nrOfFilters];
+
+	// fill array with filter settings
+	status = GT_GetNotchSpec(filters);
+	if (status==0) 
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the list of notch filters! Filtering is disabled.\n";
+	    return;
+	}
+	
+	for(int i=1; i<=GTEC_NUM_CHANNELS; i++)  //channels must be [1..16]
+	{
+		status = GT_SetNotch(o_pDevice, i, m_i32NotchFilterIndex);
+		if (status==0) 
+		{ 
+			char serial[20];
+		    ::GT_GetSerial(o_pDevice, serial, 20);
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Could not set notch filter on channel " << i << " on device " << serial << "\n";
+			return;
+		}
+	}
+	
+	if (m_i32NotchFilterIndex ==-1) m_rDriverContext.getLogManager() << LogLevel_Info << "No Notch filter applied.\n";
+	else m_rDriverContext.getLogManager() << LogLevel_Info << "Notch filter applied: " << (filters[m_i32NotchFilterIndex].fo +  filters[m_i32NotchFilterIndex].fu) /2 << " Hz.\n";	
+}
+
+namespace OpenViBEAcquisitionServer {
+
+inline std::ostream& operator<< (std::ostream& out, const vector<string>& var)
+{
+	for(size_t i=0;i<var.size();i++) {
+		out << var[i] << " ";
+	}
+
+	return out;
+}
+
+inline std::istream& operator>> (std::istream& in, vector<string>& var)
+{
+	var.clear();
+	string tmp;
+	while( in >> tmp ) {
+		var.push_back(tmp);
+	}
+
+	return in;
+}
+
 }
 
 #endif // TARGET_HAS_ThirdPartyGUSBampCAPI

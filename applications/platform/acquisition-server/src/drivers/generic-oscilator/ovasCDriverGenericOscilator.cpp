@@ -16,18 +16,22 @@ using namespace OpenViBE::Kernel;
 
 CDriverGenericOscillator::CDriverGenericOscillator(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_GenericOscillator", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
 	,m_ui32TotalSampleCount(0)
 	,m_ui32StartTime(0)
+	,m_bSendPeriodicStimulations(false)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGenericOscillator::CDriverGenericOscillator\n";
 
-	m_bSendPeriodicStimulations = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_GenericOscilator_SendPeriodicStimulations}");
-
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(4);
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("SendPeriodicStimulations", &m_bSendPeriodicStimulations);
+	m_oSettings.load();
 }
 
 void CDriverGenericOscillator::release(void)
@@ -182,6 +186,14 @@ boolean CDriverGenericOscillator::configure(void)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGenericOscillator::configure\n";
 
-	CConfigurationDriverGenericOscilator m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Generic-Oscillator.ui", m_bSendPeriodicStimulations);
-	return m_oConfiguration.configure(m_oHeader);
+	CConfigurationDriverGenericOscilator m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Generic-Oscillator.ui", 
+		m_bSendPeriodicStimulations);
+
+	if(m_oConfiguration.configure(m_oHeader)) 
+	{
+		m_oSettings.save();
+		return true;
+	}
+
+	return false;
 }

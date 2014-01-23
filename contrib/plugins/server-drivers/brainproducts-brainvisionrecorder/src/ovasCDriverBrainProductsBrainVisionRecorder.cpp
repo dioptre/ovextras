@@ -22,6 +22,7 @@ using namespace std;
 
 CDriverBrainProductsBrainVisionRecorder::CDriverBrainProductsBrainVisionRecorder(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_BrainVisionRecorder", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_pConnectionClient(NULL)
 	,m_sServerHostName("localhost")
@@ -29,6 +30,10 @@ CDriverBrainProductsBrainVisionRecorder::CDriverBrainProductsBrainVisionRecorder
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
 {
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("ServerHostName", &m_sServerHostName);
+	m_oSettings.add("ServerHostPort", &m_ui32ServerHostPort);
+	m_oSettings.load();
 }
 
 CDriverBrainProductsBrainVisionRecorder::~CDriverBrainProductsBrainVisionRecorder(void)
@@ -381,6 +386,9 @@ boolean CDriverBrainProductsBrainVisionRecorder::configure(void)
 	{
 		m_sServerHostName=l_oConfiguration.getHostName();
 		m_ui32ServerHostPort=l_oConfiguration.getHostPort();
+
+		m_oSettings.save();
+
 		return true;
 	}
 

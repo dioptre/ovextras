@@ -3,36 +3,40 @@
                       |OpenViBE| |AUTHORS|
          *========================================*
 
+         Contact: http://openvibe.inria.fr/contact/
+		 
 |People|
 
 Project Leader :
- - Anatole Lecuyer, Inria &lt;anatole.lecuyer@irisa.fr&gt;
+ - Anatole Lecuyer, Inria
 
 Lead Software Engineer :
- - Jozef Legény, Inria &lt;jozef.legeny@inria.fr&gt;
+ - Jussi T. Lindgren, Inria
 
 Core Developers :
- - Jussi T. Lindgren, Inria
  - Alison Cellard, Inria
  - Loic Mahe, Inria
-
+ - Guillaume Serrière, Inria
+ 
 Former Core Developers
- - Yann Renard, INRIA
- - Laurent Bonnet, INRIA
- - Vincent Delannoy, INRIA
- - Fabien Lotte, INRIA
- - Bruno Renier, INRIA
- - Baptiste Payan, INRIA
+ - Yann Renard, Inria
+ - Laurent Bonnet, Inria
+ - Jozef Legény, Inria
+ - Vincent Delannoy, Inria
+ - Fabien Lotte, Inria
+ - Bruno Renier, Inria
+ - Baptiste Payan, Inria
 
 Contributors :
- - Anton Andreev, CNRS/Gipsa-lab (Software Tagging for the acquisition server)
- - Dieter Devlaminck, Ghent Univ.
- - Yann Renard, INRIA
- - Laurent Bonnet, INRIA
+ - Anton Andreev, CNRS/Gipsa-lab
+ - Guillermo Andrade Barroso, Inria
 
 Previous Contributors :
+ - Dieter Devlaminck, Ghent Univ.
+ - Yann Renard, Inria
+ - Laurent Bonnet, Inria
  - Mattieu Goyat, INPG (Univariate Statistics box)
- - Joan Fruitet, INRIA
+ - Joan Fruitet, Inria
  - Guillaume Gibert, INSERM
  - Guillaume Lio, INP Grenoble (Signal Merger box)
  - Emmanuel Maby, INSERM

@@ -4,6 +4,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #if defined TARGET_OS_Windows
 #include <openvibe/ov_all.h>
 #include <iostream>
@@ -52,6 +55,9 @@ namespace OpenViBEAcquisitionServer
 	protected:
 
 		virtual OpenViBE::boolean dropData();
+
+		SettingsHelper m_oSettings;
+
 		OpenViBE::boolean m_bValid;
 
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
@@ -63,6 +69,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32IndexIn;
 		OpenViBE::uint32 m_ui32IndexOut;
 		OpenViBE::uint32 m_ui32BuffDataIndex;
+
+		OpenViBE::uint32 m_ui32TimeOutMilliseconds;
 
 		char* m_pStructHeader;
 		char* m_pStructHeaderInfo;
@@ -78,6 +86,7 @@ namespace OpenViBEAcquisitionServer
 
 		std::list<char*> m_lHeader;
 		std::list<char> m_lTempBuff;
+
 	};
 };
 

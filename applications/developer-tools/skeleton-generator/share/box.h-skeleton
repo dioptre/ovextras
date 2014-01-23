@@ -33,15 +33,17 @@ namespace OpenViBEPlugins
 				
 			//Here is the different process callbacks possible
 			// - On clock ticks :
-			@@ProcessClockComment@@virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
+			@@ProcessClockComment@@virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);		
 			// - On new input received (the most common behaviour for signal processing) :
 			@@ProcessInputComment@@virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			// - On message received :
+			@@ProcessMessageComment@@virtual OpenViBE::boolean processMessage(const OpenViBE::Kernel::IMessageWithData& msg, OpenViBE::uint32 inputIndex);	
 			
 			// If you want to use processClock, you must provide the clock frequency.
 			@@ProcessClockComment@@virtual OpenViBE::uint64 getClockFrequency(void);
 			
 			virtual OpenViBE::boolean process(void);
-
+			
 			// As we do with any class in openvibe, we use the macro below 
 			// to associate this box to an unique identifier. 
 			// The inheritance information is also made available, 
@@ -135,7 +137,15 @@ namespace OpenViBEPlugins
 				@@Outputs@@
 				@@OutputFlagCanModify@@
 				@@OutputFlagCanAdd@@
-				
+
+				@@MessageInputs@@
+				@@MessageInputFlagCanModify@@
+				@@MessageInputFlagCanAdd@@
+
+				@@MessageOutputs@@
+				@@MessageOutputFlagCanModify@@
+				@@MessageOutputFlagCanAdd@@
+
 				@@Settings@@
 				@@SettingFlagCanModify@@
 				@@SettingFlagCanAdd@@

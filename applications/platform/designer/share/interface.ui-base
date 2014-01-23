@@ -34,43 +34,46 @@ Project Leader :
  - Anatole Lecuyer, Inria
 
 Lead Software Engineer :
- - Jozef Legény, Inria
+ - Jussi T. Lindgren, Inria
 
 Core Developers :
- - Jussi T. Lindgren, Inria
  - Alison Cellard, Inria
  - Loic Mahe, Inria
+ - Guillaume Serrière, Inria
 
 Former Core Developers
- - Yann Renard, INRIA
- - Laurent Bonnet, INRIA
- - Vincent Delannoy, INRIA
- - Fabien Lotte, INRIA
- - Bruno Renier, INRIA
- - Baptiste Payan, INRIA
+ - Yann Renard, Inria
+ - Laurent Bonnet, Inria
+ - Jozef Legény, Inria
+ - Vincent Delannoy, Inria
+ - Fabien Lotte, Inria
+ - Bruno Renier, Inria
+ - Baptiste Payan, Inria
 
 Contributors :
  - Anton Andreev, CNRS/Gipsa-lab
- - Dieter Devlaminck, Ghent Univ.
- - Yann Renard, INRIA
- - Laurent Bonnet, INRIA
+ - Guillermo Andrade Barroso, Inria
 
 Previous Contributors :
+ - Dieter Devlaminck, Ghent Univ./Inria
  - Mattieu Goyat, INPG
- - Joan Fruitet, INRIA
+ - Joan Fruitet, Inria
  - Guillaume Gibert, INSERM
  - Emmanuel Maby, INSERM
  - Pierre-Emmanuel Aguera, INSERM
  - Chris Veigl, UAS Technikum Wien
  - Lucie Daubigney, Supelec</property>
 <property name="documenters">Documenters :
- - Yann Renard, INRIA
- - Laurent Bonnet, INRIA
- - Jozef Legény, INRIA
-
-Former Documenters :
- - Baptiste Payan, INRIA
- - Vincent Delannoy, INRIA
+ - Yann Renard, Inria
+ - Laurent Bonnet, Inria
+ - Jozef Legény, Inria
+  
+Contributions also from :
+ - Jussi T. Lindgren, Inria
+ - Loic Mahe, Inria
+ - Alison Cellard, Inria
+ - Baptiste Payan, Inria
+ - Vincent Delannoy, Inria
  - Guillaume Gibert, INSERM
  - Emmanuel Maby, INSERM</property>
     <child internal-child="vbox">

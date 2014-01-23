@@ -126,7 +126,8 @@ bool COgreVRApplication::setup()
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
 	// Scene graph and rendering initialisation
-	m_poSceneManager = m_poRoot->createSceneManager("TerrainSceneManager", "DefaultSceneManager");
+	// m_poSceneManager = m_poRoot->createSceneManager("TerrainSceneManager", "DefaultSceneManager");
+	m_poSceneManager = m_poRoot->createSceneManager(Ogre::ST_GENERIC);
 
 	//Camera
 	m_poCamera = m_poSceneManager->createCamera("DefaultCamera");

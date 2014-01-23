@@ -48,10 +48,19 @@ namespace OpenViBESkeletonGenerator
 			OpenViBE::boolean              m_bCanModifySettings;
 			OpenViBE::boolean              m_bCanAddSettings;
 			std::vector<IOSStruct>         m_vSettings;
+			// Message Inputs
+			OpenViBE::boolean              m_bCanModifyMessageInputs;
+			OpenViBE::boolean              m_bCanAddMessageInputs;
+			std::vector<IOSStruct>         m_vMessageInputs;
+			// Message Outputs
+			OpenViBE::boolean              m_bCanModifyMessageOutputs;
+			OpenViBE::boolean              m_bCanAddMessageOutputs;
+			std::vector<IOSStruct>         m_vMessageOutputs;
 
 			//Algorithms
 			std::vector<OpenViBE::CString> m_vAlgorithms; // the algorithm selected by user
-			OpenViBE::boolean              m_bUseCodecToolkit; // use or not the codec toolkit for encoder and decoder algorithms
+			// Can be made non-const after '= false' produces working code
+			static const OpenViBE::boolean              m_bUseCodecToolkit = true; // use or not the codec toolkit for encoder and decoder algorithms
 			std::map <OpenViBE::CString, OpenViBE::CString> m_mAlgorithmHeaderDeclaration; //the map between algorithm and corresponding header declaration (all variables algo/input/output).
 			std::map <OpenViBE::CString, OpenViBE::CString> m_mAlgorithmInitialisation;//the map between algorithm and corresponding initialisation
 			std::map <OpenViBE::CString, OpenViBE::CString> m_mAlgorithmInitialisation_ReferenceTargets;//the map between algorithm and corresponding initialisation of ref targets
@@ -84,6 +93,7 @@ namespace OpenViBESkeletonGenerator
 			OpenViBE::boolean              m_bProcessInput;
 			OpenViBE::boolean              m_bProcessClock;
 			OpenViBE::uint32               m_ui32ClockFrequency;
+			OpenViBE::boolean              m_bProcessMessage;
 
 			void buttonCheckCB(void);
 			void buttonOkCB(void);
@@ -103,6 +113,11 @@ namespace OpenViBESkeletonGenerator
 			void buttonRemoveAlgorithmCB(void);
 			void algorithmSelectedCB(OpenViBE::int32 i32IndexSelected);
 
+			void buttonAddMessageInputCB(void);
+			void buttonRemoveMessageInputCB(void);
+			void buttonAddMessageOutputCB(void);
+			void buttonRemoveMessageOutputCB(void);
+
 		private:
 
 			std::map < ::GtkButton*, OpenViBE::CString > m_vTooltips;
@@ -111,6 +126,8 @@ namespace OpenViBESkeletonGenerator
 
 			std::vector<OpenViBE::CString> m_vParameterType_EnumTypeCorrespondance;
 
+			// Sanity checks that a string is not empty or consist of spaces
+			OpenViBE::boolean isStringValid(const char *string);
 	};
 
 	class CDummyAlgoProto : public OpenViBE::Kernel::IAlgorithmProto

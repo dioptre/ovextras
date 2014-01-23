@@ -46,7 +46,10 @@ void CEpoching::setSampleCountPerBuffer(const uint32 ui32SampleCountPerBuffer)
 	}
 
 	//we have everything needed to send the stream header
-	m_pSignalOutputWriterHelper->setSamplingRate(m_pSignalDescription->m_ui32SamplingRate);
+	if(!m_pSignalOutputWriterHelper->setSamplingRate(m_pSignalDescription->m_ui32SamplingRate)) {
+		this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Setting sampling rate to " << m_pSignalDescription->m_ui32SamplingRate << " failed\n";
+	}
+
 	m_pSignalOutputWriterHelper->setChannelCount(m_pSignalDescription->m_ui32ChannelCount);
 
 	for(uint32 i=0 ; i<m_pSignalDescription->m_ui32ChannelCount ; i++)

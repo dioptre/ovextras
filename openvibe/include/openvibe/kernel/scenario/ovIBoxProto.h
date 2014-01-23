@@ -21,6 +21,10 @@ namespace OpenViBE
 			BoxFlag_CanModifySetting,
 			BoxFlag_IsDeprecated,
 			BoxFlag_IsUnstable,
+			BoxFlag_CanAddMessageInput,
+			BoxFlag_CanModifyMessageInput,
+			BoxFlag_CanAddMessageOutput,
+			BoxFlag_CanModifyMessageOutput,
 		};
 
 		/**
@@ -49,16 +53,32 @@ namespace OpenViBE
 			 * \param rTypeIdentifier [in] : the type of the input
 			 * \return The created input index.
 			 */
-			virtual OpenViBE::uint32 addInput(
+			virtual OpenViBE::boolean addInput(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+			/**
+			* \brief Adds a message input to the box
+			* \param sName [in] : the name of the message input to add
+			* \return The created message input index.
+			*/
+			virtual OpenViBE::boolean addMessageInput(
+			const OpenViBE::CString& sName)=0;
+
+			/**
+			* \brief Adds a message output to the box
+			* \param sName [in] : the name of the message output to add
+			* \return The created message output index.
+			*/
+			virtual OpenViBE::boolean addMessageOutput(
+			const OpenViBE::CString& sName)=0;
+
 			/**
 			 * \brief Adds an output to the box
 			 * \param sName [in] : the name of the output to add
 			 * \param rTypeIdentifier [in] : the type of the output
 			 * \return The created output index.
 			 */
-			virtual OpenViBE::uint32 addOutput(
+			virtual OpenViBE::boolean addOutput(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier)=0;
 			/**
@@ -69,8 +89,8 @@ namespace OpenViBE
 			 *        setting (used to initialize the box itself)
 			 * \return The created setting index.
 			 */
-			/*
-			virtual OpenViBE::uint32 addSetting(
+
+			virtual OpenViBE::boolean addSetting(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier,
 				const OpenViBE::CString& sDefaultValue)=0;

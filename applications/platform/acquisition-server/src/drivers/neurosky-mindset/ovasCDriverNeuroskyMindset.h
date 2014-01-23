@@ -7,6 +7,9 @@
 #include "../ovasCHeader.h"
 #include <openvibe/ov_all.h>
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 namespace OpenViBEAcquisitionServer
 {
 	/**
@@ -42,6 +45,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
@@ -60,6 +65,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bBlinkStrenghtChannel;
 
 		OpenViBE::uint32 m_ui32WarningCount;
+
 	};
 };
 

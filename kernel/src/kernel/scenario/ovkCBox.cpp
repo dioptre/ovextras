@@ -191,35 +191,49 @@ boolean CBox::initializeFromAlgorithmClassIdentifier(
 }
 
 boolean CBox::initializeFromExistingBox(
-	const IBox& rExisitingBox)
+	const IBox& rExistingBox)
 {
 	uint32 i;
 
 	this->disableNotification();
 
 	clear();
-	setName(rExisitingBox.getName());
-	setAlgorithmClassIdentifier(rExisitingBox.getAlgorithmClassIdentifier());
+	setName(rExistingBox.getName());
+	setAlgorithmClassIdentifier(rExistingBox.getAlgorithmClassIdentifier());
 
-	for(i=0; i<rExisitingBox.getInputCount(); i++)
+	for(i=0; i<rExistingBox.getInputCount(); i++)
 	{
 		CIdentifier l_oType;
 		CString l_sName;
-		rExisitingBox.getInputType(i, l_oType);
-		rExisitingBox.getInputName(i, l_sName);
+		rExistingBox.getInputType(i, l_oType);
+		rExistingBox.getInputName(i, l_sName);
 		addInput(l_sName, l_oType);
 	}
 
-	for(i=0; i<rExisitingBox.getOutputCount(); i++)
+	for(i=0; i<rExistingBox.getMessageInputCount(); i++)
+	{
+		CString l_sName;
+		rExistingBox.getMessageInputName(i, l_sName);
+		addMessageInput(l_sName);
+	}
+
+	for(i=0; i<rExistingBox.getOutputCount(); i++)
 	{
 		CIdentifier l_oType;
 		CString l_sName;
-		rExisitingBox.getOutputType(i, l_oType);
-		rExisitingBox.getOutputName(i, l_sName);
+		rExistingBox.getOutputType(i, l_oType);
+		rExistingBox.getOutputName(i, l_sName);
 		addOutput(l_sName, l_oType);
 	}
 
-	for(i=0; i<rExisitingBox.getSettingCount(); i++)
+	for(i=0; i<rExistingBox.getMessageOutputCount(); i++)
+	{
+		CString l_sName;
+		rExistingBox.getMessageOutputName(i, l_sName);
+		addMessageOutput(l_sName);
+	}
+
+	for(i=0; i<rExistingBox.getSettingCount(); i++)
 	{
 		CIdentifier l_oType;
 		CString l_sName;
@@ -236,11 +250,11 @@ boolean CBox::initializeFromExistingBox(
 		setSettingValue(i, l_sValue);
 	}
 
-	CIdentifier l_oIdentifier=rExisitingBox.getNextAttributeIdentifier(OV_UndefinedIdentifier);
+	CIdentifier l_oIdentifier=rExistingBox.getNextAttributeIdentifier(OV_UndefinedIdentifier);
 	while(l_oIdentifier!=OV_UndefinedIdentifier)
 	{
-		addAttribute(l_oIdentifier, rExisitingBox.getAttributeValue(l_oIdentifier));
-		l_oIdentifier=rExisitingBox.getNextAttributeIdentifier(l_oIdentifier);
+		addAttribute(l_oIdentifier, rExistingBox.getAttributeValue(l_oIdentifier));
+		l_oIdentifier=rExistingBox.getNextAttributeIdentifier(l_oIdentifier);
 	}
 
 	this->enableNotification();
@@ -796,6 +810,8 @@ void CBox::clear(void)
 	m_vInput.clear();
 	m_vOutput.clear();
 	m_vSetting.clear();
+	m_vMessageInput.clear();
+	m_vMessageOutput.clear();
 	this->removeAllAttributes();
 }
 
@@ -831,3 +847,228 @@ boolean CBox::acceptVisitor(
 	CObjectVisitorContext l_oObjectVisitorContext(getKernelContext());
 	return rObjectVisitor.processBegin(l_oObjectVisitorContext, *this) && rObjectVisitor.processEnd(l_oObjectVisitorContext, *this);
 }
+
+boolean CBox::addMessageInput(
+	const CString& sName)
+{
+	//this->getLogManager() << LogLevel_Fatal << "adding message input named "<< sName << "for box "<< m_sName << "\n";
+	CMessageInput l_oMessageInput;
+	l_oMessageInput.m_sName = sName;
+	m_vMessageInput.push_back(l_oMessageInput);
+
+	this->notify(BoxModification_MessageInputAdded, m_vMessageInput.size()-1);
+
+	return true;
+}
+
+boolean CBox::removeMessageInput(
+	const uint32 ui32InputIndex)
+{
+	CIdentifier l_oIdentifier;
+	size_t i;
+
+	if(ui32InputIndex >= m_vMessageInput.size())
+	{
+		return false;
+	}
+
+	while((l_oIdentifier=m_rOwnerScenario.getNextMessageLinkIdentifierToBoxInput(l_oIdentifier, m_oIdentifier, ui32InputIndex))!=OV_UndefinedIdentifier)
+	{
+		m_rOwnerScenario.disconnectMessage(l_oIdentifier);
+	}
+
+	// $$$
+	// The way the links are removed here
+	// is not correct because they are all
+	// collected and then all removed. In case
+	// the box listener callback on box removal,
+	// the nextcoming links would potentially be
+	// invalid
+	vector < CIdentifier > l_vMessageLinksToRemove;
+	vector < pair < pair < uint64, uint32 >, pair < uint64, uint32 > > > l_vMessageLink;
+	while((l_oIdentifier=m_rOwnerScenario.getNextMessageLinkIdentifierToBox(l_oIdentifier, m_oIdentifier))!=OV_UndefinedIdentifier)
+	{
+		ILink* l_pLink=m_rOwnerScenario.getMessageLinkDetails(l_oIdentifier);
+		if(l_pLink->getTargetBoxInputIndex()>ui32InputIndex)
+		{
+			pair < pair < uint64, uint32 >, pair < uint64, uint32 > > l;
+			l.first.first=l_pLink->getSourceBoxIdentifier().toUInteger();
+			l.first.second=l_pLink->getSourceBoxOutputIndex();
+			l.second.first=l_pLink->getTargetBoxIdentifier().toUInteger();
+			l.second.second=l_pLink->getTargetBoxInputIndex();
+			l_vMessageLink.push_back(l);
+			l_vMessageLinksToRemove.push_back(l_oIdentifier);
+		}
+	}
+
+	for(i=0; i<l_vMessageLinksToRemove.size(); i++)
+	{
+		m_rOwnerScenario.disconnectMessage(l_vMessageLinksToRemove[i]);
+	}
+
+	m_vMessageInput.erase(m_vMessageInput.begin()+ui32InputIndex);
+
+	for(i=0; i<l_vMessageLink.size(); i++)
+	{
+		m_rOwnerScenario.connectMessage(
+			l_vMessageLink[i].first.first,
+			l_vMessageLink[i].first.second,
+			l_vMessageLink[i].second.first,
+			l_vMessageLink[i].second.second-1,
+			l_oIdentifier);
+	}
+
+	this->notify(BoxModification_MessageInputRemoved, ui32InputIndex);
+
+	return true;
+}
+
+uint32 CBox::getMessageInputCount(void) const
+{
+	//this->getLogManager() << LogLevel_Fatal << "box "<< m_sName << " has " << (uint64)m_vMessageInput.size() << " message input\n";
+	return m_vMessageInput.size();
+}
+
+
+
+boolean CBox::getMessageInputName(
+	const uint32 ui32InputIndex,
+	CString& rName) const
+{
+	if(ui32InputIndex>=m_vMessageInput.size())
+	{
+		return false;
+	}
+	rName=m_vMessageInput[ui32InputIndex].m_sName;
+	return true;
+}
+
+
+boolean CBox::setMessageInputName(
+	const uint32 ui32InputIndex,
+	const CString& rName)
+{
+	if(ui32InputIndex>=m_vMessageInput.size())
+	{
+		return false;
+	}
+	m_vMessageInput[ui32InputIndex].m_sName=rName;
+
+	this->notify(BoxModification_MessageInputNameChanged, ui32InputIndex);
+
+	return true;
+}
+
+//
+boolean CBox::addMessageOutput(
+	const CString& sName)
+{
+	//this->getLogManager() << LogLevel_Fatal << "adding message Output named "<< sName << "for box "<< m_sName << "\n";
+	CMessageOutput l_oMessageOutput;
+	l_oMessageOutput.m_sName = sName;
+	m_vMessageOutput.push_back(l_oMessageOutput);
+
+	this->notify(BoxModification_MessageOutputAdded, m_vMessageOutput.size()-1);
+
+	return true;
+}
+
+boolean CBox::removeMessageOutput(
+	const uint32 ui32OutputIndex)
+{
+	CIdentifier l_oIdentifier;
+	size_t i;
+
+	if(ui32OutputIndex >= m_vMessageOutput.size())
+	{
+		return false;
+	}
+
+	while((l_oIdentifier=m_rOwnerScenario.getNextMessageLinkIdentifierFromBoxOutput(l_oIdentifier, m_oIdentifier, ui32OutputIndex))!=OV_UndefinedIdentifier)
+	{
+		m_rOwnerScenario.disconnectMessage(l_oIdentifier);
+	}
+
+	// $$$
+	// The way the links are removed here
+	// is not correct because they are all
+	// collected and then all removed. In case
+	// the box listener callback on box removal,
+	// the nextcoming links would potentially be
+	// invalid
+	vector < CIdentifier > l_vMessageLinksToRemove;
+	vector < pair < pair < uint64, uint32 >, pair < uint64, uint32 > > > l_vMessageLink;
+	while((l_oIdentifier=m_rOwnerScenario.getNextMessageLinkIdentifierFromBox(l_oIdentifier, m_oIdentifier))!=OV_UndefinedIdentifier)
+	{
+		ILink* l_pLink=m_rOwnerScenario.getMessageLinkDetails(l_oIdentifier);
+		if(l_pLink->getSourceBoxOutputIndex()>ui32OutputIndex)
+		{
+			pair < pair < uint64, uint32 >, pair < uint64, uint32 > > l;
+			l.first.first=l_pLink->getSourceBoxIdentifier().toUInteger();
+			l.first.second=l_pLink->getSourceBoxOutputIndex();
+			l.second.first=l_pLink->getTargetBoxIdentifier().toUInteger();
+			l.second.second=l_pLink->getTargetBoxInputIndex();
+			l_vMessageLink.push_back(l);
+			l_vMessageLinksToRemove.push_back(l_oIdentifier);
+		}
+	}
+
+	for(i=0; i<l_vMessageLinksToRemove.size(); i++)
+	{
+		m_rOwnerScenario.disconnectMessage(l_vMessageLinksToRemove[i]);
+	}
+
+	m_vMessageOutput.erase(m_vMessageOutput.begin()+ui32OutputIndex);
+
+	for(i=0; i<l_vMessageLink.size(); i++)
+	{
+		m_rOwnerScenario.connectMessage(
+			l_vMessageLink[i].first.first,
+			l_vMessageLink[i].first.second-1,
+			l_vMessageLink[i].second.first,
+			l_vMessageLink[i].second.second,
+			l_oIdentifier);
+	}
+
+	this->notify(BoxModification_MessageOutputRemoved, ui32OutputIndex);
+
+	return true;
+}
+
+uint32 CBox::getMessageOutputCount(void) const
+{
+	//this->getLogManager() << LogLevel_Fatal << "box "<< m_sName << " has " << (uint64)m_vMessageOutput.size() << " message Output\n";
+	return m_vMessageOutput.size();
+}
+
+
+
+boolean CBox::getMessageOutputName(
+	const uint32 ui32InputIndex,
+	CString& rName) const
+{
+	if(ui32InputIndex>=m_vMessageOutput.size())
+	{
+		return false;
+	}
+	rName=m_vMessageOutput[ui32InputIndex].m_sName;
+	return true;
+}
+
+
+boolean CBox::setMessageOutputName(
+	const uint32 ui32InputIndex,
+	const CString& rName)
+{
+	if(ui32InputIndex>=m_vMessageOutput.size())
+	{
+		return false;
+	}
+	m_vMessageOutput[ui32InputIndex].m_sName=rName;
+
+	this->notify(BoxModification_MessageOutputNameChanged, ui32InputIndex);
+
+	return true;
+}
+//
+

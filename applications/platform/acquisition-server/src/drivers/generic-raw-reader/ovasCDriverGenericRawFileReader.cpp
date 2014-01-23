@@ -7,9 +7,23 @@ using namespace OpenViBE::Kernel;
 
 CDriverGenericRawFileReader::CDriverGenericRawFileReader(IDriverContext& rDriverContext)
 	:CDriverGenericRawReader(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_GenericRawFileReader", m_rDriverContext.getConfigurationManager())
 	,m_pFile(NULL)
 {
 	m_sFilename="/tmp/some_raw_file";
+
+	// Relay configuration properties to the configuration manager
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("LimitSpeed", &m_bLimitSpeed);
+	m_oSettings.add("SampleFormat", &m_ui32SampleFormat);
+	m_oSettings.add("SampleEndian", &m_ui32SampleEndian);
+	m_oSettings.add("StartSkip", &m_ui32StartSkip);
+	m_oSettings.add("HeaderSkip", &m_ui32HeaderSkip);
+	m_oSettings.add("FooterSkip", &m_ui32FooterSkip);
+	m_oSettings.add("FileName", &m_sFilename);
+	m_oSettings.load();
+
 }
 
 boolean CDriverGenericRawFileReader::configure(void)
@@ -22,7 +36,17 @@ boolean CDriverGenericRawFileReader::configure(void)
 		m_ui32HeaderSkip,
 		m_ui32FooterSkip,
 		m_sFilename);
-	return m_oConfiguration.configure(m_oHeader);
+
+
+
+	if(!m_oConfiguration.configure(m_oHeader)) 
+	{
+		return false;
+	}
+
+	m_oSettings.save();
+
+	return true;
 }
 
 boolean CDriverGenericRawFileReader::open(void)

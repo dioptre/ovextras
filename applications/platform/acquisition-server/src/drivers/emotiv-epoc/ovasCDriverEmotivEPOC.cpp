@@ -35,28 +35,25 @@ static const EE_DataChannel_t g_ChannelList[] =
 
 CDriverEmotivEPOC::CDriverEmotivEPOC(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_EmotivEPOC", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_ui32TotalSampleCount(0)
 	,m_pSample(NULL)
 {
 	m_bUseGyroscope = false;
-	if(m_rDriverContext.getConfigurationManager().lookUpConfigurationTokenIdentifier("AcquisitionServer_PathToEmotivResearchSDK") == OV_UndefinedIdentifier)
-	{
-		//it's possible at first start of the acquisition server/ emotiv driver selection
-		m_rDriverContext.getLogManager() << LogLevel_Trace << "[CONS] {AcquisitionServer_PathToEmotivResearchSDK} token unset. Ignore this message if you never used the Emotiv Driver.\n";
-		m_sPathToEmotivSDK = "";
-	}
-	else
-	{
-		m_sPathToEmotivSDK = m_rDriverContext.getConfigurationManager().expand("${AcquisitionServer_PathToEmotivResearchSDK}");
-	}
+	m_sPathToEmotivSDK = "";
 	m_sCommandForPathModification = "";
 
 	m_ui32UserID = 0;
 	m_bReadyToCollect = false;
 	m_bFirstStart = true;
 
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("UseGyroscope", &m_bUseGyroscope);
+	m_oSettings.add("PathToEmotivSDK", &m_sPathToEmotivSDK);
+	m_oSettings.add("UserID", &m_ui32UserID);
+	m_oSettings.load();
 }
 
 CDriverEmotivEPOC::~CDriverEmotivEPOC(void)
@@ -383,12 +380,16 @@ boolean CDriverEmotivEPOC::isConfigurable(void)
 
 boolean CDriverEmotivEPOC::configure(void)
 {
-	CConfigurationEmotivEPOC m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Emotiv-EPOC.ui", m_bUseGyroscope, m_sPathToEmotivSDK, m_ui32UserID);
+	CConfigurationEmotivEPOC m_oConfiguration(m_rDriverContext, 
+		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Emotiv-EPOC.ui", 
+		m_bUseGyroscope, m_sPathToEmotivSDK, m_ui32UserID);
 
 	if(!m_oConfiguration.configure(m_oHeader)) 
 	{
 		return false;
 	}
+
+	m_oSettings.save();
 
 	return true;
 }

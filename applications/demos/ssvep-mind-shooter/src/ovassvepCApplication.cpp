@@ -2,6 +2,8 @@
 #include <cmath>
 #include <algorithm>
 
+#include "fs/Files.h"
+
 using namespace OpenViBE;
 using namespace OpenViBESSVEP;
 using namespace OpenViBE::Kernel;
@@ -77,12 +79,16 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	Ogre::LogManager* l_poLogManager = new Ogre::LogManager();
 	(*m_poLogManager) << LogLevel_Info << "Log level: " << l_poConfigurationManager->expand("${Kernel_ConsoleLogLevel}") << "\n";
 	(*m_poLogManager) << LogLevel_Info << "Application will output Ogre Log : " << l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_LogToConsole}", false) << "\n";
-	l_poLogManager->createLog("Ogre.log", true, l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_LogToConsole}", false), true );
-
+	CString l_sOgreLog = l_poConfigurationManager->expand("${Path_Log}") + "/openvibe-ssvep-mind-shooter-ogre.log";
+	(*m_poLogManager) << LogLevel_Info << "Ogre log file : " << l_sOgreLog << "\n";
+	FS::Files::createParentPath(l_sOgreLog);
+	l_poLogManager->createLog(l_sOgreLog.toASCIIString(), true, l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_LogToConsole}", false), true );
 
 	// Root creation
+	CString l_sOgreCfg = l_poConfigurationManager->expand("${Path_UserData}") + "/openvibe-ssvep-mind-shooter-ogre.cfg";
 	(*m_poLogManager) << LogLevel_Debug << "+ m_poRoot = new Ogre::Root(...)\n";
-	m_poRoot = new Ogre::Root(l_oPluginsPath, "ogre.cfg","ogre.log");
+	(*m_poLogManager) << LogLevel_Info << "Ogre cfg file : " << l_sOgreCfg << "\n";
+	m_poRoot = new Ogre::Root(l_oPluginsPath, l_sOgreCfg.toASCIIString(), l_sOgreLog.toASCIIString());
 
 	// Resource handling
 	this->setupResources();

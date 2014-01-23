@@ -90,6 +90,7 @@ CSimulatedBox::CSimulatedBox(const IKernelContext& rKernelContext, CScheduler& r
 	,m_ui64ClockActivationStep(0)
 	,m_pOgreVis(NULL)
 	,m_oSceneIdentifier(OV_UndefinedIdentifier)
+	,m_bIsReceivingMessage(false)
 {
 #if defined _SimulatedBox_ScopeTester_
 	this->getLogManager() << LogLevel_Debug << __OV_FUNC__ << " - " << __OV_FILE__ << ":" << __OV_LINE__ << "\n";
@@ -1295,6 +1296,76 @@ void CSimulatedBox::handleCrash(const char* sHintName)
 		this->getLogManager() << LogLevel_Fatal << "  This plugin has been disabled !\n";
 		m_bCrashed=true;
 	}
+}
+
+
+boolean CSimulatedBox::sendMessage(const IMessageWithData &msg, uint32 outputIndex)
+{
+	if(m_bIsReceivingMessage) {
+		this->getLogManager() << LogLevel_Error << "Message sending prohibited while receiving message.\n";
+		return false;
+	}
+
+	this->getLogManager() << LogLevel_Debug << "SimulatedBox sendMessage on output" << outputIndex <<"\n";
+
+	//get the message links originating from this box
+	CIdentifier l_oLinkIdentifier=m_pScenario->getNextMessageLinkIdentifierFromBox(OV_UndefinedIdentifier, m_pBox->getIdentifier());
+	while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
+	{
+		const ILink* l_pLink=m_pScenario->getMessageLinkDetails(l_oLinkIdentifier);
+		if(l_pLink)
+		{
+			if ( l_pLink->getSourceBoxOutputIndex()==outputIndex)
+			{
+				CIdentifier l_oTargetBoxIdentifier=l_pLink->getTargetBoxIdentifier();
+				uint32 l_ui32TargetBoxInputIndex=l_pLink->getTargetBoxInputIndex();
+				boolean l_bMessageReceived = m_rScheduler.sendMessage(msg, l_oTargetBoxIdentifier, l_ui32TargetBoxInputIndex);
+				if (!l_bMessageReceived)
+				{
+					this->getLogManager() << LogLevel_ImportantWarning << "Box " << m_pScenario->getBoxDetails(l_oTargetBoxIdentifier)->getName()
+									<< " with ID " << l_oTargetBoxIdentifier << " failed to receive the message. Check the connection and/or the message content\n";
+				}
+			}
+		}
+		l_oLinkIdentifier=m_pScenario->getNextMessageLinkIdentifierFromBox(l_oLinkIdentifier, m_pBox->getIdentifier());
+	}
+	return true; // if success
+}
+
+boolean CSimulatedBox::receiveMessage(const IMessageWithData &msg, uint32 inputIndex)
+{
+	m_bIsReceivingMessage = true;
+	CBoxAlgorithmContext l_oBoxAlgorithmContext(getKernelContext(), this, m_pBox);
+	this->getLogManager() << LogLevel_Debug << "simulated box" << m_pBox->getName() <<" receiving message on input " << inputIndex <<"\n";
+	
+	bool l_bReturnValue = m_pBoxAlgorithm->processMessage(l_oBoxAlgorithmContext, msg, inputIndex);
+
+	m_bIsReceivingMessage = false;
+
+	return l_bReturnValue;
+}
+
+
+boolean CSimulatedBox::cleanupMessages() {
+	// ...
+//	this->getLogManager() << LogLevel_Debug << "cleaning messages " << "\n";
+	
+	for(std::vector<OpenViBE::Kernel::CMessageWithData*>::iterator it = m_vPreparedMessages.begin();
+		it!=m_vPreparedMessages.end(); it++) 
+	{
+		delete (*it);
+	}
+
+	m_vPreparedMessages.clear();
+	return true; // if success
+}
+
+IMessageWithData& CSimulatedBox::createMessage()
+{
+	CMessageWithData* newMessage = new CMessageWithData(getKernelContext());
+	m_vPreparedMessages.push_back(newMessage);
+
+	return *newMessage;
 }
 
 // #endif // __MY_COMPILE_ALL

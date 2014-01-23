@@ -3,6 +3,11 @@
 
 #include "ovasCDriverGenericRawReader.h"
 
+
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
+
 #include <cstdio>
 
 namespace OpenViBEAcquisitionServer
@@ -25,8 +30,11 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		FILE* m_pFile;
 		OpenViBE::CString m_sFilename;
+
 	};
 };
 
