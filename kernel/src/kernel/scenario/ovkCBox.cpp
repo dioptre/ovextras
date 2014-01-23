@@ -225,11 +225,14 @@ boolean CBox::initializeFromExistingBox(
 		CString l_sName;
 		CString l_sValue;
 		CString l_sDefaultValue;
+		boolean l_bModifiability;
+
 		rExisitingBox.getSettingType(i, l_oType);
 		rExisitingBox.getSettingName(i, l_sName);
 		rExisitingBox.getSettingValue(i, l_sValue);
 		rExisitingBox.getSettingDefaultValue(i, l_sDefaultValue);
-		addSetting(l_sName, l_oType, l_sDefaultValue);
+		rExisitingBox.getSettingMod(i, l_bModifiability);
+		addSetting(l_sName, l_oType, l_sDefaultValue, l_bModifiability);
 		setSettingValue(i, l_sValue);
 	}
 
@@ -563,7 +566,8 @@ boolean CBox::setOutputName(
 boolean CBox::addSetting(
 	const CString& sName,
 	const CIdentifier& rTypeIdentifier,
-	const CString& sDefaultValue)
+	const CString& sDefaultValue,
+	const boolean bModifiability)
 {
 	CString l_sValue(sDefaultValue);
 	if(this->getTypeManager().isEnumeration(rTypeIdentifier))
@@ -597,6 +601,7 @@ boolean CBox::addSetting(
 	s.m_oTypeIdentifier=rTypeIdentifier;
 	s.m_sDefaultValue=l_sValue;
 	s.m_sValue=l_sValue;
+	s.m_bMod=bModifiability;
 
 	m_vSetting.push_back(s);
 
@@ -737,6 +742,48 @@ boolean CBox::setSettingValue(
 
 	return true;
 }
+
+//*
+boolean CBox::getSettingMod(
+	const OpenViBE::uint32 ui32SettingIndex,
+	OpenViBE::boolean& rValue) const
+{
+	if(ui32SettingIndex>=m_vSetting.size())
+	{
+		return false;
+	}
+	rValue=m_vSetting[ui32SettingIndex].m_bMod;
+	return true;
+}
+
+
+boolean CBox::setSettingMod(
+	const OpenViBE::uint32 ui32SettingIndex,
+	const OpenViBE::boolean rValue)
+{
+	if(ui32SettingIndex>=m_vSetting.size())
+	{
+		return false;
+	}
+	m_vSetting[ui32SettingIndex].m_bMod=rValue;
+
+	//this->notify(BoxModification_SettingNameChanged, ui32SettingIndex);
+	return true;
+}
+
+boolean CBox::hasModUI(void)const
+{
+	uint32 i=0;
+	boolean rValue = false;
+	while((i<m_vSetting.size())&&(!rValue))
+	{
+		rValue = m_vSetting[i].m_bMod;
+		i++;
+	}
+	return rValue;
+}
+
+//*/
 
 //___________________________________________________________________//
 //                                                                   //

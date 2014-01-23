@@ -69,10 +69,18 @@ namespace OpenViBE
 			 *        setting (used to initialize the box itself)
 			 * \return The created setting index.
 			 */
+			/*
 			virtual OpenViBE::uint32 addSetting(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier,
 				const OpenViBE::CString& sDefaultValue)=0;
+				//*/
+
+			virtual OpenViBE::uint32 addSetting(
+				const OpenViBE::CString& sName,
+				const OpenViBE::CIdentifier& rTypeIdentifier,
+				const OpenViBE::CString& sDefaultValue,
+				const OpenViBE::boolean bModifiable = false)=0;
 			/**
 			 * \brief Adds a flag to the box
 			 * \param eBoxFlag [in] : the flag to add to the box

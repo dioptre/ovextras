@@ -160,15 +160,23 @@ boolean CAlgorithmScenarioExporterHelper::exportBox(IMemoryBuffer& rMemoryBuffer
 			CString l_sSettingName;
 			CString l_sDefaultValue;
 			CString l_sValue;
+			boolean l_bModifiability;
 			rBox.getSettingType(i, l_oSettingTypeIdentifier);
 			rBox.getSettingName(i, l_sSettingName);
 			rBox.getSettingDefaultValue(i, l_sDefaultValue);
 			rBox.getSettingValue(i, l_sValue);
+			rBox.getSettingMod(i, l_bModifiability);
+			CString l_sModifiability;
+			if (l_bModifiability)
+				l_sModifiability = CString("true");
+			else
+				l_sModifiability = CString("false");
 			m_rParent.exportStart(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting);
 			 m_rParent.exportIdentifier(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_TypeIdentifier, l_oSettingTypeIdentifier);
 			 m_rParent.exportString(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Name, l_sSettingName);
 			 m_rParent.exportString(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_DefaultValue, l_sDefaultValue);
 			 m_rParent.exportString(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Value, l_sValue);
+			 m_rParent.exportString(rMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Modifiability, l_sModifiability);
 			m_rParent.exportStop(rMemoryBuffer);
 		}
 		m_rParent.exportStop(rMemoryBuffer);

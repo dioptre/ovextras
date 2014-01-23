@@ -9,15 +9,6 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Examples;
 
-
-static void enter_callback( GtkWidget *widget,
-							GtkWidget *entry )
-{
-  const gchar *entry_text;
-  entry_text = gtk_entry_get_text (GTK_ENTRY (entry));
-  //printf ("Entry contents: %s\n", entry_text);
-}
-
 boolean CBoxAlgorithmModUI::initialize(void)
 {
 
@@ -43,47 +34,16 @@ boolean CBoxAlgorithmModUI::initialize(void)
 	// - float64 setting at index 2 in the setting list :
 	// float64 l_f64SettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 	// ...
-
-
-
-
-
-	::GtkBuilder* l_pBuilder=gtk_builder_new(); // glade_xml_new(OpenViBE::Directories::getDataDir() + "/plugins/stimulation/keyboard-stimulator.ui", NULL, NULL);
-	gtk_builder_add_from_file(l_pBuilder, OpenViBE::Directories::getDataDir() + "/plugins/stimulation/modui.ui", NULL);
-	if(!l_pBuilder)
-	{
-		g_warning("Couldn't load the interface!");
-		return false;
-	}
-	gtk_builder_connect_signals(l_pBuilder, NULL);
-
-	m_pWidget=GTK_WIDGET(gtk_builder_get_object(l_pBuilder, "settings_collection-hbox_setting_integer"));
-
-	m_pEntry = GTK_WIDGET(gtk_builder_get_object(l_pBuilder, "settings_collection-entry_setting_integer_string"));
-
-			g_signal_connect (m_pEntry, "activate",
-						  G_CALLBACK (enter_callback),
-						  m_pEntry);
-
-	g_object_unref(l_pBuilder);
-
-	this->getVisualisationContext().setWidget(m_pWidget);
-
 	return true;
 }
 /*******************************************************************************/
 
 boolean CBoxAlgorithmModUI::uninitialize(void)
 {
+	getLogManager() << OpenViBE::Kernel::LogLevel_Info << "uninitialize " << m_ui64Factor <<"\n";
 	m_oSignalDecoder.uninitialize();
 	m_oSignalEncoder.uninitialize();
 	m_oAlgo2_StimulationEncoder.uninitialize();
-
-	if(m_pWidget)
-	{
-		g_object_unref(m_pWidget);
-		m_pWidget = NULL;
-	}
 
 	return true;
 }
@@ -126,32 +86,14 @@ boolean CBoxAlgorithmModUI::process(void)
 	
 	// the static box context describes the box inputs, outputs, settings structures
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
-	//IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-	// here is some useful functions:
-	// - To get input/output/setting count:
-	// l_rStaticBoxContext.getInputCount();
-	// l_rStaticBoxContext.getOutputCount();
-	
-	// - To get the number of chunks currently available on a particular input :
-	// l_rDynamicBoxContext.getInputChunkCount(input_index)
-	
-	// - To send an output chunk :
-	// l_rDynamicBoxContext.markOutputAsReadyToSend(output_index, chunk_start_time, chunk_end_time);
-	
-	
-	// A typical process iteration may look like this.
-	// This example only iterate over the first input of type Signal, and output a modified Signal.
-	// thus, the box uses 1 decoder (m_oSignalDecoder) and 1 encoder (m_oSignalEncoder)
-	//*
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-
-	const gchar * l_sText = gtk_entry_get_text( GTK_ENTRY(m_pEntry) );
-
-	//uint64 l_ui64Factor
-	m_ui64Factor= atoi(l_sText);
+	//you have to get back the setting value from the box context at each cycle
+	CString l_sFactor;
+	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1, l_sFactor);
+	m_ui64Factor= atoi(l_sFactor.toASCIIString());
+	//getLogManager() << OpenViBE::Kernel::LogLevel_Info << "modUI box, factor is " << m_ui64Factor <<"\n";
 
 	//iterate over all chunk on input 0
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
@@ -208,20 +150,7 @@ boolean CBoxAlgorithmModUI::process(void)
 			m_oSignalEncoder.encodeEnd(0);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
-
-		// The current input chunk has been processed, and automaticcaly discarded.
-		// you don't need to call "l_rDynamicBoxContext.markInputAsDeprecated(0, i);"
 	}
-	//*/
-
-	// check the official developer documentation webpage for more example and information :
-	
-	// Tutorials:
-	// http://openvibe.inria.fr/documentation/#Developer+Documentation
-	// Codec Toolkit page :
-	// http://openvibe.inria.fr/codec-toolkit-references/
-	
-	// Feel free to ask experienced developers on the forum (http://openvibe.inria.fr/forum) and IRC (#openvibe on irc.freenode.net).
 
 	return true;
 }

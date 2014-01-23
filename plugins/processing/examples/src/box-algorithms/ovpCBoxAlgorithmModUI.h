@@ -162,6 +162,9 @@ namespace OpenViBEPlugins
 				
 				rBoxAlgorithmPrototype.addSetting("LogLevel",OV_TypeId_LogLevel,"Trace");
 
+				//add true at the end to mark a setting as modifiable
+				rBoxAlgorithmPrototype.addSetting("Int",OV_TypeId_Integer,"1", true);
+
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				

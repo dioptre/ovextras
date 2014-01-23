@@ -288,7 +288,8 @@ namespace OpenViBE
 			virtual OpenViBE::boolean addSetting(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier,
-				const OpenViBE::CString& sDefaultValue)=0;
+				const OpenViBE::CString& sDefaultValue,
+				const OpenViBE::boolean bModifiability = false)=0;
 			/**
 			 * \brief Removes a setting for this box
 			 * \param ui32SettingIndex [in] : The index
@@ -391,6 +392,17 @@ namespace OpenViBE
 			virtual OpenViBE::boolean setSettingValue(
 				const OpenViBE::uint32 ui32SettingIndex,
 				const OpenViBE::CString& rValue)=0;
+
+
+
+			virtual OpenViBE::boolean getSettingMod(
+				const OpenViBE::uint32 ui32SettingIndex,
+				OpenViBE::boolean& rValue) const=0;
+			virtual OpenViBE::boolean setSettingMod(
+				const OpenViBE::uint32 ui32SettingIndex,
+				const OpenViBE::boolean rValue)=0;
+
+			virtual OpenViBE::boolean hasModUI(void)const=0;
 
 			//@}
 

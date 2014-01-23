@@ -61,6 +61,7 @@ boolean CAlgorithmXMLScenarioExporter::exportStart(IMemoryBuffer& rMemoryBuffer,
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Name                         ) l_sNodeName="Name";
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_DefaultValue                 ) l_sNodeName="DefaultValue";
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Value                        ) l_sNodeName="Value";
+	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Modifiability				 ) l_sNodeName="Modifiability";
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Attributes                           ) l_sNodeName="Attributes";
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Attribute                            ) l_sNodeName="Attribute";
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Attribute_Identifier                 ) l_sNodeName="Identifier";
