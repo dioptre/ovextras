@@ -9,6 +9,9 @@
 #
 # Adds library to target
 # Adds include path
+#
+# Script @author Jussi T. Lindgren / Inria
+#
 # ---------------------------------
 
 # The first ${..}/liblsl path is for Windows, the second ${..}/ for Linux
