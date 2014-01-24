@@ -1,26 +1,18 @@
+
+#if defined TARGET_HAS_ThirdPartyLSL
+
 #include "ovpCBoxLSLExport.h"
 
 #include <system/Memory.h>
 
-#include <itpp/base/algebra/eigen.h>
-#include <itpp/base/algebra/inv.h>
-#include <itpp/base/converters.h>
-#include <itpp/stat/misc_stat.h>
-#include <itpp/itsignal.h>
-#include <itpp/signal/resampling.h>
-#include <itpp/base/factory.h>
-using namespace itpp;
-
 #include <openvibe/ovITimeArithmetics.h>
-#include <array>
-
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Streaming;
+using namespace OpenViBEPlugins::NetworkIO;
 
 
 CBoxAlgorithmLSLExport::CBoxAlgorithmLSLExport()
@@ -72,7 +64,7 @@ boolean CBoxAlgorithmLSLExport::process(void)
 			 try 
 			 {
 				//if it fails here then most likely you are using the wrong dll - e.x debug instead of release or vice-versa
-				lsl::stream_info info(m_sStreamName.toASCIIString(),m_sStreamType.toASCIIString(),m_oCInputChannel1.getNbOfChannels() + 1 ,m_oCInputChannel1.getSamplingRate(),lsl::cf_float32);
+				lsl::stream_info info(m_sStreamName.toASCIIString(),m_sStreamType.toASCIIString(), (int)m_oCInputChannel1.getNbOfChannels() + 1 , (double)m_oCInputChannel1.getSamplingRate(),lsl::cf_float32);
 
 				lsl::xml_element channels = info.desc().append_child("channels");
 
@@ -87,7 +79,7 @@ boolean CBoxAlgorithmLSLExport::process(void)
 						.append_child_value("type","marker");
 
 				if (m_outlet!=NULL)
-					this->getLogManager() << LogLevel_Error << "Possible double initializatioin!\n";
+					this->getLogManager() << LogLevel_Error << "Possible double initialization!\n";
 
 				m_outlet =  new lsl::stream_outlet(info); //here the length of the buffered signal can be specified	
 			 }
@@ -142,40 +134,41 @@ boolean CBoxAlgorithmLSLExport::process(void)
 			if(l_pInputBuffer)
 			{
 
-		        uint32 l_ui32SamplesPerChannelInput = m_oCInputChannel1.getNbOfSamples();
-				std::vector<std::vector<float32>> mychunk(l_ui32SamplesPerChannelInput);
+		        uint32 l_ui32SamplesPerChannelInput = (uint32)m_oCInputChannel1.getNbOfSamples();
+				std::vector< std::vector<float32> > mychunk(l_ui32SamplesPerChannelInput);
 
 				for(uint32 k=0;k<l_ui32SamplesPerChannelInput;k++)
 				{
-					mychunk[k] = std::vector<float32>(m_oCInputChannel1.getNbOfChannels()+1);
+					mychunk[k] = std::vector<float32>((unsigned int)m_oCInputChannel1.getNbOfChannels()+1);
 				}
 
 				//Fill a matrix - OpenVibe provides the data ch1 (all values from all samples), ch2(all values from all samples) ... chN, 
 				//In the generated chunk every row is a single sample (containing the data from all channels) and every column number is the number of the channel
 				for (uint32 k=0;k < m_oCInputChannel1.getNbOfChannels(); k++) 
 				{
-					for (int j=0;j <l_ui32SamplesPerChannelInput; j++)
+					for (uint32 j=0;j <l_ui32SamplesPerChannelInput; j++)
 					{
 						int index = (k * l_ui32SamplesPerChannelInput) + j;
-						mychunk[j][k] = l_pInputBuffer[index];
+						mychunk[j][k] = (float32)l_pInputBuffer[index]; // @note 64bit->32bit conversion
 					}
 				}
 
 				//Process stimulations and add them to the output in a dedicated channel
 				std::vector<float32> stim_chan = std::vector<float32>(l_ui32SamplesPerChannelInput);
 
-				std::vector<std::pair<OpenViBE::float32,OpenViBE::uint64>>::iterator it; 
+				std::vector< std::pair<OpenViBE::float32,OpenViBE::uint64> >::iterator it;
 
-				std::vector<std::pair<OpenViBE::float32,OpenViBE::uint64>>::iterator selected = std::remove_if
-					        (m_stims.begin(),  
-							 m_stims.end(),
-							[l_u64StartTimestamp,l_u64EndTimestamp](std::pair<OpenViBE::float32,OpenViBE::uint64> v) { return (v.second >= l_u64StartTimestamp && v.second <= l_u64EndTimestamp); }
-				            );
-
-				for (it = selected ; it < m_stims.end(); it++)
+				it = m_stims.begin();
+				while (it != m_stims.end())
 				{
 					std::pair<float32,uint64> current = *it;
-					
+				
+					if (!(current.second >= l_u64StartTimestamp && current.second <= l_u64EndTimestamp)) 
+					{
+						// not in current time range, do not send now.
+						it++;
+						continue;
+					}
 					uint64 posCurrent = ITimeArithmetics::timeToSampleCount(m_oCInputChannel1.getSamplingRate(), current.second);
 					//uint64 posEnd = ITimeArithmetics::timeToSampleCount(m_oCInputChannel1.getSamplingRate(), l_u64EndTimestamp);
 					uint64 posStart = ITimeArithmetics::timeToSampleCount(m_oCInputChannel1.getSamplingRate(), l_u64StartTimestamp);
@@ -190,13 +183,13 @@ boolean CBoxAlgorithmLSLExport::process(void)
 					  //std::cout<< "pos relative: " << pos << " value: " << stim_chan[pos] << " time:" << ITimeArithmetics::timeToSeconds(current.second)<< "\n";
 					}
 					else this->getLogManager() << LogLevel_Warning << "Bad stimulation position: " << pos << "stim code: " << current.first << "\n";
+				
+					// processed, erase
+					it = m_stims.erase(it);
 				}
 
-				//remove the processed ones
-				m_stims.erase(selected,m_stims.end());
-
 				//add the stim channel at the end of the matrix
-				uint32 k = m_oCInputChannel1.getNbOfChannels();
+				uint32 k = (uint32)m_oCInputChannel1.getNbOfChannels();
                 for (uint32 j=0;j <l_ui32SamplesPerChannelInput; j++)
 				{
 					mychunk[j][k] = stim_chan[j];
@@ -210,3 +203,5 @@ boolean CBoxAlgorithmLSLExport::process(void)
 	
 	return true;
 }
+
+#endif
