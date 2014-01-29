@@ -6,8 +6,8 @@ using namespace OpenViBEApplications;
 
 GButton::GButton() : GObject(true, 1) 
 {
-      m_pLabel =  NULL;
-      m_iButtonState = GButton_Inactive;
+    m_pLabel =  NULL;
+    m_iButtonState = GButton_Inactive;
 	m_iButtonAction = GButton_None;
 	
 	/*If you want to use VBO buffers uncomment this and call GObject(false,2). 
@@ -21,7 +21,7 @@ GButton::GButton() : GObject(true, 1)
 
 GButton::GButton(const GButton& gbutton) : GObject(gbutton)
 {
-      this->m_pLabel = gbutton.m_pLabel->clone();
+    this->m_pLabel = gbutton.m_pLabel->clone();
 	assignHelper(gbutton);
 }
 
@@ -36,7 +36,7 @@ GButton& GButton::operator= (GButton const& gbutton)
 	{
 		this->GObject::operator=(gbutton);
 		delete this->m_pLabel;
-		this->m_pLabel = gbutton.m_pLabel->clone();
+		this->m_pLabel = gbutton.m_pLabel->clone(); // by cloning isChanged of the label should be set to true (in copy constructor of GObject)
 		assignHelper(gbutton);
 	}
 	return *this;
@@ -47,7 +47,7 @@ void GButton::setDimParameters(BoxDimensions dim)
 	GObject::setDimParameters(dim);
 	
 	//If you want to use VBO buffers uncomment this
-      //generateVBOBuffers();
+    //generateVBOBuffers();
 	
 	//If you want to use display lists uncomment this
 	generateGLDisplayLists();

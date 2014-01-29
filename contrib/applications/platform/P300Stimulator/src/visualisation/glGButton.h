@@ -40,7 +40,7 @@ namespace OpenViBEApplications
 	public:
 		/**
 		 * GButton constructor will call GObject(true, 1) which means it will use one OpenGL display list. Also generates 
-		 * the display list.GButton_Inactive
+		 * the display list. GButton_Inactive
 		 */
 		GButton();
 		

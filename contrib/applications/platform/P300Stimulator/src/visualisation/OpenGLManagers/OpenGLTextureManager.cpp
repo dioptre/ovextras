@@ -11,7 +11,7 @@ std::map<GLuint, CString> OpenGLTextureManager::m_mId2SourceFileMap = std::map<G
 OpenGLTextureManager::OpenGLTextureManager(CString sourceFile) : OpenGLResourceManager(1), m_sSourceFile(sourceFile)
 {
 	std::map<CString, GLuint>::iterator l_FindResult = m_mSourceFile2IdMap.find(sourceFile);
-	//OpenGLTexture manager created for new source
+	//OpenGLTexture manager created for a new source that did not already exist
 	if (l_FindResult == m_mSourceFile2IdMap.end())
 	{
 		m_bSourceExists = false;

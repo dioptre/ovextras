@@ -1,3 +1,4 @@
+<!--  xml file specifying a keyboard layout, see 5by10grid-abc-gray.xml for some more explanation -->
 <ScreenLayout>
 	<DefaultKeyProperties>
 		<Event id="noflash">

@@ -9,6 +9,9 @@
 namespace OpenViBEApplications
 {	
 	#ifdef TARGET_OS_Windows
+	/**
+	 * On windows we have to use the C interface of the Presage library
+	 */
 	static const char * get_past_stream(void* arg)
 	{
 		return (char*)arg;
@@ -20,6 +23,9 @@ namespace OpenViBEApplications
 	#endif
 
 	#ifdef TARGET_OS_Linux
+	/**
+	 * Implentation of the PresageCallback
+	 */
 	class MyPresageCallback : public PresageCallback
 	{
 	public:
@@ -35,37 +41,46 @@ namespace OpenViBEApplications
 	};	
 	#endif
 	
+	/**
+	 * Specific implementation of the WordPredictionInterface using the Presage library for word prediction/completion
+	 */
 	class PresagePredictionEngine : public WordPredictionInterface
 	{	
 	public:
-		/*#ifdef TARGET_OS_Windows
-		static const char* get_past_stream(void* arg)
-		{
-			return (char*) arg;
-		}
-
-		static const char* get_future_stream(void* arg)
-		{
-			return (char*) arg;
-		}
-		#endif	*/	
 		
+		/**
+		 * Constructor
+		 * @param nGramDatabaseName the full path name that points to the n-gram database for Presage
+		 */
 		PresagePredictionEngine(OpenViBE::CString nGramDatabaseName);
 		
 		~PresagePredictionEngine();
 		
+		/**
+		 * @param prefix the letters or words previously spelled on which we need to base our predictions for the next word or the word to complete
+		 * @param nWords number of words we want to get back in the result vector
+		 * @return vector of strings with the nWords most probable words given the prefix
+		 */		
 		virtual std::vector<std::string>* getMostProbableWords(const std::string& prefix, OpenViBE::uint32 nWords);
 		
 	protected:
 		std::vector<std::string>* m_lPredictedWords;
 		
 		#ifdef TARGET_OS_Linux
+		/**
+		 * Contains the previously spelled letters or words on which we base our predictions
+		 */
 		std::string m_sSpellerContext;
+		
 		MyPresageCallback* m_pPresageCallback;
 		Presage* m_pPresageEngine;	
 		#endif
 		#ifdef TARGET_OS_Windows
 		presage_t m_pPresageEngine;
+		
+		/**
+		 * Contains the previously spelled letters or words on which we base our predictions
+		 */		
 		char * m_sSpellerContext;
 		#endif
 	};

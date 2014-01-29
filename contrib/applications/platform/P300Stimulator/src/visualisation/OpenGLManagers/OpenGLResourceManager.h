@@ -22,6 +22,7 @@ namespace OpenViBEApplications
 	 * This class and its inheriting classes will create, delete and manage OpenGL resources such as display list, VBO buffers and
 	 * textures.\n
 	 * No objects of this class can be constructed only of the specific inheriting classes.
+	 * Each graphical object should call a constructor from the derived class and specify how many resources it needs
 	 */
 	class OpenGLResourceManager {
 	//protected:
@@ -35,7 +36,7 @@ namespace OpenViBEApplications
 		OpenGLResourceManager(OpenViBE::uint32 n);
 		
 		/**
-		 * Copy constructor. It will copy the resource ids and increase there count by one.\n
+		 * Copy constructor. It will copy the resource ids and increase their count by one.\n
 		 * The static member variable m_mIdCountMap keeps track of all resource ids managed
 		 * by all OpenGLResourceManager objects and their count, i.e. how many OpenGLResourceManager
 		 * objects that are using the same resource.
@@ -75,7 +76,7 @@ namespace OpenViBEApplications
 	protected:
 		/**
 		 * Calls context->_createResources() on the derived OpenGLResourceManager class object which creates a number of
-		 * OpenGL resources and sets the resource ids. It then inserts the ids in the static member map m_mIdCountMap with count one.
+		 * specific OpenGL resources and sets the resource ids. It then inserts the ids in the static member map m_mIdCountMap with count one.
 		 * @param context the derived OpenGLResourceManager class object which will call the specific OpenGL code to request the resources
 		 * @see _createResources()
 		 */

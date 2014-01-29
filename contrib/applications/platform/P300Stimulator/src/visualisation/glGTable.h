@@ -7,42 +7,33 @@
 
 namespace OpenViBEApplications
 {
+	/**
+	 * This class is a specialisation of the GContainer and mainly differs from it in that you don't have
+	 * to specify a position for the child when you add it. It will arrange the objects itself in the table
+	 * as you add them
+	 */
 	class GTable : public GContainer
 	{
 	public:
-		GTable() : GContainer() {}
+		GTable();
 		/*GTable(OpenViBE::float32 w, OpenViBE::float32 h) : GContainer(w,h) {}			
 		GTable(OpenViBE::float32 x, OpenViBE::float32 y, OpenViBE::float32 w, OpenViBE::float32 h) : GContainer(x,y,w,h) {}	*/		
 		
-		GTable(OpenViBE::uint32 nElements) : GContainer()
-		{
-			m_ui32RowDimension = (OpenViBE::uint32)std::floor(0.5+std::sqrt((double)nElements));
-			m_ui32ColumnDimension = (OpenViBE::uint32)std::ceil((double)nElements/(double)m_ui32RowDimension);	
-		}
+		/**
+		 * @param nElements the number of elements that the GTable has to contain, it will compute the number of rows
+		 * and columns automatically
+		 */
+		GTable(OpenViBE::uint32 nElements);
 		
-		GTable(OpenViBE::uint32 nRows, OpenViBE::uint32 nCols) : GContainer()
-		{
-			m_ui32RowDimension = nRows;
-			m_ui32ColumnDimension = nCols;	
-		}
+		/**
+		 * @param nRows number of rows
+		 * @param nCols number of columns
+		 */
+		GTable(OpenViBE::uint32 nRows, OpenViBE::uint32 nCols);
 		
-		GTable(const GTable& gtable) : GContainer(gtable)
-		{		
-			//std::cout << "Calling copy construction in GTable on " << gtable.toString() << "\n";
-			m_ui32RowDimension = gtable.m_ui32RowDimension;
-			m_ui32ColumnDimension = gtable.m_ui32ColumnDimension;
-		}
+		GTable(const GTable& gtable);
 		
-		virtual GTable& operator= (GTable const& mainTable)
-		{
-			if(this!=&mainTable)
-			{
-				this->GContainer::operator=(mainTable);
-				this->m_ui32RowDimension = mainTable.m_ui32RowDimension;
-				this->m_ui32ColumnDimension = mainTable.m_ui32ColumnDimension;
-			}
-			return *this;
-		}		
+		virtual GTable& operator= (GTable const& mainTable);		
 		
 		virtual ~GTable()
 		{
@@ -50,11 +41,7 @@ namespace OpenViBEApplications
 		}		
 		
 		virtual void addChild(GObject* child, OpenViBE::float32 depth);
-		virtual GObject*& getChild(OpenViBE::uint32 rowIndex, OpenViBE::uint32 colIndex) const 
-		{ 
-			OpenViBE::uint32 childIndex = rowIndex*m_ui32ColumnDimension+colIndex;
-			return this->getChild(childIndex); 
-		}
+		virtual GObject*& getChild(OpenViBE::uint32 rowIndex, OpenViBE::uint32 colIndex) const;
 		virtual OpenViBE::uint32 getRowDimension() { return m_ui32RowDimension; }
 		virtual OpenViBE::uint32 getColumnDimension() { return m_ui32ColumnDimension; }
 		
@@ -67,10 +54,7 @@ namespace OpenViBEApplications
 		virtual std::string toString() const;
 		
 		//inherited setters
-		virtual void setDimParameters(BoxDimensions dim)
-		{
-			GContainer::setDimParameters(dim);
-		}		
+		virtual void setDimParameters(BoxDimensions dim) { GContainer::setDimParameters(dim); }		
 		virtual void setBackgroundColor(GColor color) { GContainer::setBackgroundColor(color); }	
 		
 		//inherited getters

@@ -13,88 +13,67 @@
 namespace OpenViBEApplications
 {
 	
-	class _AutoCast_
-	{
-	public:
-		_AutoCast_(const char * settingValue) : m_sSettingValue(settingValue) {  }
-		operator GColor (void)
-		{
-			GColor l_oColor;
-			int r=0, g=0, b=0;
-			sscanf(m_sSettingValue, "%i,%i,%i", &r, &g, &b);
-			l_oColor.red=(GLfloat)r/100.0f;
-			l_oColor.green=(GLfloat)g/100.0f;
-			l_oColor.blue=(GLfloat)b/100.0f;
-			return l_oColor;
-		}
-
-		const char * m_sSettingValue;
-	};	
-	
+	/**
+	* Class that reads the xml file specifying the keyboard layout, files such as 5by10grid-abc-gray.xml
+	*/	
 	class P300ScreenLayoutReader : public ExternalP300PropertyReader
 	{
 		
 	public:
 		
-		P300ScreenLayoutReader(OpenViBE::Kernel::IKernelContext* kernelContext) : ExternalP300PropertyReader(kernelContext) 
-		{
-			m_lKeyList = new std::vector<P300KeyDescriptor*>();
-			m_lSymbolList = new std::list<std::string>();
-			m_mDefaultEventMapScaleSize = new std::map<OpenViBE::uint32, OpenViBE::float32>();
-			m_mDefaultEventMapForegroundColor = new std::map<OpenViBE::uint32, GColor>();
-			m_mDefaultEventMapBackgroundColor = new std::map<OpenViBE::uint32, GColor>();
-			m_mDefaultEventMapSource = new std::map<OpenViBE::uint32, OpenViBE::CString>();
-			m_mDefaultEventMapLabel = new std::map<OpenViBE::uint32, std::string>();
-			m_mDefaultIsTextSymbol = new std::map<OpenViBE::uint32, OpenViBE::boolean>(); 
-			
-			m_bDefaultKeyProperties = false;
-			m_bEventElement = false;
-			m_bScaleSize = false;
-			m_bForegroundColor = false;
-			m_bBackgroundColor = false;
-			m_bLabel = false;
-			m_bSource = false;
-			m_bKeyboardIsGrid = false;
-			
-			EventStringMap[ KeyEventStrings[0] ] = FLASH;
-			EventStringMap[ KeyEventStrings[1] ] = NOFLASH;
-			EventStringMap[ KeyEventStrings[2] ] = CENTRAL_FEEDBACK_WRONG;
-			EventStringMap[ KeyEventStrings[3] ] = CENTRAL_FEEDBACK_CORRECT;
-			EventStringMap[ KeyEventStrings[4] ] = TARGET;
-		}
+		P300ScreenLayoutReader(OpenViBE::Kernel::IKernelContext* kernelContext);
 		
-		~P300ScreenLayoutReader()
-		{
-			std::vector<P300KeyDescriptor*>::iterator l_ListIterator = m_lKeyList->begin();
-			for (; l_ListIterator!=m_lKeyList->end(); l_ListIterator++)
-				delete *l_ListIterator;
-			delete m_lKeyList;
-			delete m_lSymbolList;
-			delete m_mDefaultEventMapScaleSize;
-			delete m_mDefaultEventMapForegroundColor;
-			delete m_mDefaultEventMapBackgroundColor;
-			delete m_mDefaultEventMapSource;
-			delete m_mDefaultEventMapLabel;
-			delete m_mDefaultIsTextSymbol;
-		}
+		~P300ScreenLayoutReader();
 		
 		virtual void readPropertiesFromFile(OpenViBE::CString propertyFile);
 		
+		/**
+		 * Dimensions of the area where the predictions are shown
+		 * @return the box dimensions are numbers between 0 and 1. (0,0) is the left lower corner of the window
+		 * (1,1) the right upper corner
+		 */
 		BoxDimensions getResultAreaDimensions() { return m_dResultAreaDimensions; }
+		/**
+		 * dimensions for area where the predicted words will be shown
+		 */
 		BoxDimensions getPredictionAreaDimensions() { return m_dPredictionAreaDimensions; }
 		BoxDimensions getP300KeyboardDimensions() { return m_dKeyboardDimensions; }
 		BoxDimensions getTargetAreaDimensions() { return m_dTargetAreaDimensions; }
+		/**
+		 * @return vector of P300KeyDescriptor objects that describe the properties of each key in the keyboard for each state
+		 */
 		std::vector<P300KeyDescriptor*>* getP300KeyboardLayout() { return m_lKeyList; } 
 		std::list<std::string> * getSymbolList() { return m_lSymbolList; }
-		OpenViBE::uint32 getNumberOfStandardKeys() { return m_ui32NumberOfStandardKeys; }	
+		/**
+		 * number of keys that are not predicted words. The labels of this type of keys can't change during the experiment
+		 */
+		OpenViBE::uint32 getNumberOfStandardKeys() { return m_ui32NumberOfStandardKeys; }
+		/**
+		 * number of keys will contain the predicted words. The labels of this type of keys will change after each trial
+		 */		
 		OpenViBE::uint32 getNumberOfPredictiveKeys() { return m_ui32PredictionAreaRows*m_ui32PredictionAreaColumns; }
+		/**
+		 * total number of keys
+		 */
 		OpenViBE::uint32 getNumberOfKeys() { return m_ui32NumberOfStandardKeys+getNumberOfPredictiveKeys(); }
 		OpenViBE::uint32 getPredictionAreaRows() { return m_ui32PredictionAreaRows;}
 		OpenViBE::uint32 getPredictionAreaColumns() { return m_ui32PredictionAreaColumns;}
+		/**
+		 * Checks whether dimensions parameters are given per key or not, if not a simple GTable will be created
+		 */
 		OpenViBE::boolean isKeyboardTable() { return m_bKeyboardIsGrid;}
 		
+		/**
+		 *  some default properties that can be overridden per key
+		 */
 		const OpenViBE::float32 getDefaultScaleSize(const VisualState event) const { return m_mDefaultEventMapScaleSize->find(event)->second; }
+		/**
+		 *  some default properties that can be overridden per key
+		 */
 		const GColor& getDefaultForegroundColor(const VisualState event) const { return m_mDefaultEventMapForegroundColor->find(event)->second; }
+		/**
+		 *  some default properties that can be overridden per key
+		 */
 		const GColor& getDefaultBackgroundColor(const VisualState event) const { return m_mDefaultEventMapBackgroundColor->find(event)->second; }
 		//const OpenViBE::CString& getDefaultSource(const VisualState event) const;// { return eventMapSource->find(event)->second; }
 		//const std::string& getDefaultLabel(const VisualState event) const;// { return eventMapLabel->find(event)->second; }
@@ -116,14 +95,41 @@ namespace OpenViBEApplications
 		BoxDimensions m_dPredictionAreaDimensions;
 		BoxDimensions m_dResultAreaDimensions;
 		BoxDimensions m_dTargetAreaDimensions;
+		/**
+		 * vector of P300KeyDescriptor objects that describe the properties of each key in the keyboard for each state
+		 */
 		std::vector<P300KeyDescriptor*> * m_lKeyList;
 		std::list<std::string> * m_lSymbolList;
 		
+		/**
+		 * This default map variable maps each state, that a key can be in, into a property, here scale size of an image or font
+		 * these default values are then used to fill in the properties that have not been specified
+		 */
 		std::map<OpenViBE::uint32, OpenViBE::float32>* m_mDefaultEventMapScaleSize;
+		/**
+		 * This default map variable maps each state, that a key can be in, into a property, here the foreground color
+		 * these default values are then used to fill in the properties that have not been specified
+		 */	
 		std::map<OpenViBE::uint32, GColor>* m_mDefaultEventMapForegroundColor;
+		/**
+		 * This default map variable maps each state, that a key can be in, into a property, here the background color
+		 * these default values are then used to fill in the properties that have not been specified
+		 */			
 		std::map<OpenViBE::uint32, GColor>* m_mDefaultEventMapBackgroundColor;
+		/**
+		 * This default map variable maps each state, that a key can be in, into a property, here the source of the key, either a font file or a png file
+		 * these default values are then used to fill in the properties that have not been specified
+		 */		
 		std::map<OpenViBE::uint32, OpenViBE::CString>* m_mDefaultEventMapSource;
+		/**
+		 * This default map variable maps each state, that a key can be in, into a property, here the default label of a key in case it is a text label
+		 * these default values are then used to fill in the properties that have not been specified
+		 */		
 		std::map<OpenViBE::uint32, std::string>* m_mDefaultEventMapLabel;	
+		/**
+		 * This default map variable maps each state, that a key can be in, into a property, here if it concerns a text symbol or a picture
+		 * these default values are then used to fill in the properties that have not been specified
+		 */		
 		std::map<OpenViBE::uint32, OpenViBE::boolean>* m_mDefaultIsTextSymbol;
 		
 		OpenViBE::boolean m_bKeyboardIsGrid;
@@ -138,6 +144,9 @@ namespace OpenViBEApplications
 		VisualState m_iState;
 		
 		static OpenViBE::CString KeyEventStrings[5];
+		/**
+		 * will map the string representation of the key states to an enum value
+		 */
 		std::map<OpenViBE::CString,VisualState> EventStringMap;				
 	};
 };

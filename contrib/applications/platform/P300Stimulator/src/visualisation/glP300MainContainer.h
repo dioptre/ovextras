@@ -21,14 +21,25 @@
 
 namespace OpenViBEApplications
 {
-	//class P300KeyboardHandler;
 	
+	/**
+	 * This class initializes the OpenGL context, creates the different GContainer or GTable for the keyboard,
+	 * the results and the predicted words. It also creates the handlers that will observe those areas
+	 * in case something changes. For example the keyboard handler P300KeyboardHandler will observer the word prediction area 
+	 * and the keyboard area. It will also populate it with the necessary symbols.
+	 * This class also has the drawAndSync function so that everything is drawn to screen and the corresponding events
+	 * written to the ITagger
+	 */
 	class P300MainContainer : public GContainer
 	{
-	//typedef void (P300MainContainer::*_change_symbol_property_)(GSymbol* l_Symbol, void* pUserData);	
 
 		
 	public:
+		/**
+		 * @param propertyObject this is the property reader that reads from interface-properties.xml
+		 * @param layoutPropObject the reader that contains all information/properties of all keys as specified in for example
+		 * the 5by10grid-abc-gray.xml file
+		 */
 		P300MainContainer(P300InterfacePropertyReader* propertyObject, P300ScreenLayoutReader* layoutPropObject);	
 		P300MainContainer(const P300MainContainer& gcontainer);
 		virtual ~P300MainContainer();		
@@ -60,26 +71,67 @@ namespace OpenViBEApplications
 			return new P300MainContainer(*this);
 		}		
 		
+		/**
+		 * There is an area dedicated for use with a photo diode (TODO: specify its location in configuration file instead of hardcoded)
+		 * With this function you can change its background color
+		 */
 		void changeBackgroundColorDiodeArea(GColor bColor);
 		
+		/**
+		 * @return the keyboard handler, this object gives you the ability to make changes to the screen (symbols flashed, symbols not flashed...)
+		 * this object is used in the ExternalP300Visualiser for making updates
+		 */
 		P300KeyboardHandler* getKeyboardHandler();	
 		
 		//inherited functions		
 		std::string toString() const;
 		
 		//encapsulation for draw functions
+		/**
+		 * @param tagger either a software or hardware tagger which will send the stimuli in l_qEventQueue to either
+		 * the acquisition server (software) or parallel port (hardware)
+		 * @param l_qEventQueue a queue of stimuli that need to be send for synchronisation to the tagger
+		 */ 
 		void drawAndSync(ITagger * tagger, std::queue<OpenViBE::uint32>& l_qEventQueue);
 		
+		/**
+		 * Before calling this class constructor you need to call this function to initialize the OpenGL context
+		 * otherwise the constructor will already create graphical objects while the OpenGL context does not exist yet
+		 * @param fullScreen enable full screen or not
+		 * @param width width of window (also needs to be specified for full screen, TODO in full screen mode the width and 
+		 * height should be detected automatically)
+		 * @param height height of the window
+		 */
 		static void initializeGL(OpenViBE::boolean fullScreen, OpenViBE::float32 width, OpenViBE::float32 height);
 	private:
-		//void draw(ITagger * tagger, std::queue<OpenViBE::uint32> &l_qEventQueue);
+		/**
+		 * This function is used by drawAndSync
+		 */
 		void draw();
 		
+		/**
+		 * Helper function to initialize all the areas and the handlers
+		 */
 		void initialize(OpenViBE::uint32 nGridCells);
+		/**
+		 * Helper function to initialize the main keyboard area
+		 */		
 		void initializeGridArea(OpenViBE::uint32 nCells);
+		/**
+		 * Helper function to initialize the result area
+		 */		
 		void initializeResultArea();
+		/**
+		 * Helper function to initialize the word prediction area
+		 */		
 		void initializePredictionArea();
+		/**
+		 * Helper function to initialize the target area (for the blue letters in copy mode)
+		 */		
 		void initializeTargetArea();
+		/**
+		 * Helper function to initialize the diode area
+		 */		
 		void initializeDiodeArea();
 	
 		static void do_ortho(OpenViBE::float32 width, OpenViBE::float32 height);	

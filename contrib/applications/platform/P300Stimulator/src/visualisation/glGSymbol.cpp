@@ -10,9 +10,8 @@ GSymbol::GSymbol(const char * symbol, boost::shared_ptr<FTFont> font, OpenViBE::
 {		
 	m_sTextLabel = std::string(symbol);
 	m_ftglFont = font;
-	//std::cout << "Constructing symbol " << symbol << " font use count " << font.use_count() << "\n";
 	m_ftglFont->FaceSize(static_cast<uint32>(m_f32LabelScaleSize*m_f32MaxLabelSize));
-	//m_ftglFont->UseDisplayList(false);
+	//m_ftglFont->UseDisplayList(false); //fonts should by default use the display lists
 	generateGLDisplayLists();
 }		
 
@@ -33,7 +32,6 @@ GSymbol::GSymbol(const GSymbol& gsymbol) : GLabel(gsymbol)
 GSymbol::~GSymbol()
 {
 	m_ftglFont.reset();
-	//std::cout << "Use count font " << m_ftglFont.use_count() << "\n";
 }
 
 /*GSymbol& GSymbol::operator= (GSymbol const& gsymbol)
@@ -50,28 +48,26 @@ GSymbol::~GSymbol()
 
 void GSymbol::draw()
 {
-	GLabel::draw();
-	//rendering font with given foreground color
-	//glLoadIdentity();
-	glColor3f(m_cForegroundColor.red,m_cForegroundColor.green,m_cForegroundColor.blue);
-	//glPushMatrix();	
-	glCallList(getGLResourceID(1));
-	//glPopMatrix();	
-	//std::cout << "Drawing " << m_sTextLabel.c_str() << "\n";
-	//std::cout << "Drawing " << m_sTextLabel.c_str() << " foreground color " << m_cForegroundColor.red << "," << m_cForegroundColor.green << "," << m_cForegroundColor.blue
-	//<< " background color " << getBackgroundColor().red << "," << getBackgroundColor().green << "," << getBackgroundColor().blue
-	//<< " position " << m_pLabelPosition.first << "," << m_pLabelPosition.second << " font size " << (m_f32LabelScaleSize*m_f32MaxLabelSize) << " depth " << this->getDepth() 
-	//<< " box x " << getX() << " box y " << getY() << " box width " << getWidth() << " box height " << getHeight() << "\n";	
+	if (isChanged())
+	{
+		GLabel::draw();
+		//rendering font with given foreground color, if this would be in the display list we should recreate
+		//the display list each time we change color as well, this way we don't have to do that
+		glColor3f(m_cForegroundColor.red,m_cForegroundColor.green,m_cForegroundColor.blue);
+		glCallList(getGLResourceID(1));	
+	}
 }
 
 void GSymbol::setDimParameters(BoxDimensions dim)
 {
-	//std::cout <<  toString() << "GSymbol::setDimParameters\n";
+	/*
+	* This will call the setDimParameters from the super class GLabel which will recompute the maximum label size 
+	* (by calling the computeMaximumLabelSize of this class GSymbol) and will call the generateGLDisplayLists
+	* of this class GSymbol (which also calls the generateGLDisplayLists of GLabel). This is because these functions
+	* are all virtual and first the derived class function is called before the base class function. So we don't have
+	* to call generateGLDisplayLists and computeMaximumLabelSize here again it is implicitely done
+	*/	
 	GLabel::setDimParameters(dim);
-	//computeLabelPosition(); //not really necessary as this is called by the computeMaximumFontSize
-	//computeMaximumLabelSize();
-      //setFontSize();	
-	//generateGLDisplayLists();
 }
 
 /*void GSymbol::setLabelScaleSize(float32 fontScaleSize)
@@ -105,7 +101,7 @@ void GSymbol::setTextLabel(const char * symbol)
 {
 	m_sTextLabel = std::string(symbol); 
 	computeMaximumLabelSize();
-      //setFontSize();
+    //we have to recreate the OpenGL resources of course and rewrite the code that should be saved in graphical memory
 	deleteAndCreateGLResources();
 	generateGLDisplayLists();
 }
@@ -153,15 +149,14 @@ void GSymbol::computeLabelPosition()
 
 void GSymbol::generateGLDisplayLists()
 {
-	//std::cout <<  toString() << "GSymbol::generateGLDisplayLists\n";
 	GLabel::generateGLDisplayLists();
 	m_ftglFont->FaceSize(static_cast<uint32>(m_f32LabelScaleSize*m_f32MaxLabelSize));
 	computeLabelPosition();
-      FTPoint l_ftPoint(m_pLabelPosition.first, m_pLabelPosition.second, this->getDepth()+0.01);
-      glNewList(getGLResourceID(1),GL_COMPILE); 
+	FTPoint l_ftPoint(m_pLabelPosition.first, m_pLabelPosition.second, this->getDepth()+0.01);
+	glNewList(getGLResourceID(1),GL_COMPILE); 
 		glLoadIdentity();
 		m_ftglFont->Render(m_sTextLabel.c_str(), -1, l_ftPoint);
-      glEndList();
+	glEndList();
 }
 
 void GSymbol::assignHelper(GSymbol const& gsymbol)

@@ -2,7 +2,7 @@
 
 #include <system/Time.h>
 
-//#include <sys/time.h>
+#include "SDL.h"
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -28,17 +28,77 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/symbol_update_timing.txt","w");		
 	timingFile3 = fopen(OpenViBE::Directories::getDataDir() + "/generate_sequence_timing.txt","w");	
 	#endif
+	
+	//initializes openvibe kernel
+	this->initializeOpenViBEKernel();
+	
+	//this will read all configuration files, interface-properties.xml, stimulator-properties.xml and the keyboard layout in share/openvibe/applications/externalP300Stimulator/
+	this->m_pInterfacePropReader = new P300InterfacePropertyReader(this->m_pKernelContext);
+	this->m_pInterfacePropReader->readPropertiesFromFile(OpenViBE::Directories::getDistRootDir() + "/share/openvibe/applications/externalP300Stimulator/interface-properties.xml");
+	this->m_pScreenLayoutReader = new P300ScreenLayoutReader(this->m_pKernelContext);
+	this->m_pScreenLayoutReader->readPropertiesFromFile(this->m_pInterfacePropReader->getScreenDefinitionFile());
+	this->m_pStimulatorPropReader = new P300StimulatorPropertyReader(this->m_pKernelContext, this->m_pScreenLayoutReader->getSymbolList());
+	this->m_pStimulatorPropReader->readPropertiesFromFile(this->m_pInterfacePropReader->getStimulatorConfigFile());	
+	
+	//In case hardware of software tagging is enable a different object for tagging is constructed
+	if (this->m_pInterfacePropReader->getHardwareTagging())
+	{
+		this->m_pTagger = new ParallelPort(this->m_pInterfacePropReader->getParallelPortNumber(),
+									this->m_pInterfacePropReader->getSampleFrequency());
+		if (this->m_pTagger->open())
+			this->m_pKernelContext->getLogManager() << LogLevel_Info << "Opened parallel port\n";
+	}
+	else
+	{
+		try
+		{
+			this->m_pTagger = new CSoftTagger();
+		}
+		catch (exception& e)
+		{
+			this->m_pKernelContext->getLogManager() << LogLevel_Info << "Opening software tagger failed: " << e.what() << "\n";
+		}
+		if (this->m_pTagger->open())
+			this->m_pKernelContext->getLogManager() << LogLevel_Info << "Opened software tagger\n";
+	}		
+	
+	//this is a file writer that will write the generated flash groups to a file when they are generator by the sequence generator
+	m_pSequenceWriter = new P300SequenceFileWriter(this->m_pInterfacePropReader->getFlashGroupDefinitionFile()); 
+	
+	//this will create a sequence generator that is responsible for defining which symbols are in each flash. This is either row-column or RIPRAND
+	P300SequenceGenerator* m_pSequenceGenerator;
+	if (this->m_pInterfacePropReader->getFlashMode()==CString("rowcol"))
+		m_pSequenceGenerator = new P300RowColumnSequenceGenerator(
+			this->m_pScreenLayoutReader->getNumberOfKeys(), 
+			this->m_pStimulatorPropReader->getNumberOfGroups(), 
+			this->m_pStimulatorPropReader->getNumberOfRepetitions());		
+	else
+		m_pSequenceGenerator = new P300RipRandSequenceGenerator(
+			this->m_pScreenLayoutReader->getNumberOfKeys(), 
+			this->m_pStimulatorPropReader->getNumberOfGroups(), 
+			this->m_pStimulatorPropReader->getNumberOfRepetitions());
+	//register the file write with the sequence generator
+	m_pSequenceGenerator->setSequenceWriter(m_pSequenceWriter);
+	
+	//create the stimulator object and register the callback function that is implemented above.
+	this->m_oStimulator = new ExternalP300Stimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator); 
+	this->m_oStimulator->setCallBack(ExternalP300Visualiser::processCallback);	
+
+	//initialize the OpenGL context and the main container that is needed to draw everything on the screen by calling the drawAndSync function
+	P300MainContainer::initializeGL(this->m_pInterfacePropReader->getFullScreen(),
+						this->m_pInterfacePropReader->getWidth(),
+						this->m_pInterfacePropReader->getHeight());
+	this->m_pMainContainer = new P300MainContainer(this->m_pInterfacePropReader, this->m_pScreenLayoutReader);
+				
+	//draw everything on the screen			
+	this->m_pMainContainer->drawAndSync(this->m_pTagger,this->m_qEventQueue);		
 }
 
 ExternalP300Visualiser::~ExternalP300Visualiser()
 {
-	std::cout << "P300Visualiser destructor\n";
 	delete m_oStimulator;
-	
 	delete m_pTagger;
-	
 	//delete m_pMainContainer; //should be delete before m_pScreenLayoutReader is deleted (needed to iterate over buttons)
-	
 	delete m_pInterfacePropReader; 
 	delete m_pScreenLayoutReader; 
 	delete m_pStimulatorPropReader;
@@ -47,6 +107,9 @@ ExternalP300Visualiser::~ExternalP300Visualiser()
 	fclose(timingFile);
 	fclose(timingFile3);
 	#endif
+	
+	delete m_pSequenceWriter;
+	delete m_pSequenceGenerator;
 }
 
 void ExternalP300Visualiser::initializeOpenViBEKernel()
@@ -107,10 +170,10 @@ void ExternalP300Visualiser::process(uint32 eventID)
 	float64 l_f64TimeAfter;
 	#endif
 	
-      switch(eventID)
+    switch(eventID)
 	{
 		case 0:
-			m_pKernelContext->getLogManager() << LogLevel_Warning << "Something bad happened, probably during prediction nothing was received\n";
+			m_pKernelContext->getLogManager() << LogLevel_Warning << "Something abnormal happened, probably during prediction nothing was received\n";
 			break;
 		case OVA_StimulationId_ExperimentStart:
 			m_pMainContainer->getKeyboardHandler()->resetChildStates();
@@ -155,7 +218,8 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			break;
 		case OVA_StimulationId_RestStart:
 			m_pTagger->write(eventID);
-			m_bInRest = true;		
+			m_bInRest = true;
+			//reset the color of all symbols by setting the probabilities to the uniform distribution
 			m_pMainContainer->getKeyboardHandler()->updateChildProbabilities(s_pResetSymbolProbabilities);
 			break;
 		case OVA_StimulationId_TargetCue:
@@ -165,7 +229,6 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			break;
 		case OVA_StimulationId_FeedbackCue:
 			m_ui32FeedbackCueCounter++;
-			//std::cout << "FeedbackCueCounter " << m_ui32FeedbackCueCounter << "\n";
 			m_bInFeedback = true;
 			m_pTagger->write(eventID);
 			break;
@@ -187,6 +250,8 @@ void ExternalP300Visualiser::process(uint32 eventID)
 				m_pMainContainer->changeBackgroundColorDiodeArea(m_pInterfacePropReader->getNoFlashBackgroundColor());
 			*/
 		
+			//reset the child states, but only the ones that have been flashed for the longest (in case of overlapping stimuli), 
+			//the others should stay in their current state
 			m_pMainContainer->getKeyboardHandler()->resetMostActiveChildStates();
 			m_bChanged = true;
 			m_qEventQueue.push(eventID);			
@@ -198,6 +263,8 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			
 			m_qEventQueue.push(eventID);
 			
+			//get the next flash group which is a vector, the size of the number of symbols on the keyboard, with one or zero to indicate
+			//whether it is flashed or not
 			l_lSymbolChangeList = m_oStimulator->getNextFlashGroup()->data();
 			changeStates(l_lSymbolChangeList,FLASH);
 			m_pMainContainer->getKeyboardHandler()->updateChildStates(l_lSymbolChangeList);	
@@ -212,31 +279,35 @@ void ExternalP300Visualiser::process(uint32 eventID)
 				else
 					m_qEventQueue.push(OVA_StimulationId_NonTarget);
 			}		
-			//if (m_bChanged && m_pInterfacePropReader->getSpellingMode()==FREE_MODE)
-			//	m_qEventQueue.push(OVA_StimulationId_NonTarget);
 			break;
 		default:
 			eventID--;
-			m_qEventQueue.push(eventID);
+			m_qEventQueue.push(eventID+1);
 			l_lSymbolChangeList = new uint32[m_pScreenLayoutReader->getNumberOfKeys()]();
+			//we are in the period where feedback is presented
 			if (m_bInFeedback)
 			{
 				m_ui32FeedbackResultCounter++;
 				//std::cout << "FeedbackResultCounter " << m_ui32FeedbackResultCounter << "\n";
 				m_pKernelContext->getLogManager() << LogLevel_Info << "Feedback received, eventID " << eventID << "\n";
+				//FREE MODE
 				if(m_pInterfacePropReader->getSpellingMode()==FREE_MODE)
 				{
 					l_lSymbolChangeList[eventID] = 1;
 					
+					//feedback is presented in the centre of the screen
 					if(m_pInterfacePropReader->getCentralFeedbackFreeMode())
-						changeStates(l_lSymbolChangeList,CENTRAL_FEEDBACK_CORRECT,NOFLASH);						
+						changeStates(l_lSymbolChangeList,CENTRAL_FEEDBACK_CORRECT,NOFLASH);	
+					//letter in the grid is highlighted as feedback
 					else
 						changeStates(l_lSymbolChangeList,NONCENTRAL_FEEDBACK_CORRECT,NOFLASH);
 					
 					m_bChanged = true;
 				}
+				//COPY MODE: here we have to compare with the target letter to either show the prediction in red or green
 				else if(m_pInterfacePropReader->getSpellingMode()==COPY_MODE)
 				{	
+					//feedback is presented in the centre of the screen
 					if(m_pInterfacePropReader->getCentralFeedbackCopyMode())	
 					{
 						l_lSymbolChangeList[eventID] = 1;
@@ -246,6 +317,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
 						else
 							changeStates(l_lSymbolChangeList,CENTRAL_FEEDBACK_WRONG,NOFLASH);							
 					}
+					//letter in the grid is highlighted as feedback
 					else
 					{
 						l_lSymbolChangeList[m_bTargetId] = 1;
@@ -262,6 +334,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
 				}
 				m_bInFeedback = false;
 			}
+			//we are in the period where the target is displayed
 			else if(m_bInTarget && m_pInterfacePropReader->getSpellingMode()!=FREE_MODE) 
 			{
 				l_lSymbolChangeList[eventID] = 1;	
@@ -272,6 +345,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
 				m_bInTarget = false;
 			}
 			
+			//this tells the keyboard handler the state of the symbols (i.e. flashed, not flashed, feedback...)
 			m_pMainContainer->getKeyboardHandler()->updateChildStates(l_lSymbolChangeList);
 			delete l_lSymbolChangeList;
 			
@@ -285,6 +359,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
             fprintf(timingFile, "%f \n",l_f64TimeBefore);
 		#endif
 
+		//this will notify all listeners/observers of the keyboard buttons that they should be updated	
 		m_pMainContainer->getKeyboardHandler()->updateChildProperties();
 
 		#ifdef OUTPUT_TIMING
@@ -292,17 +367,24 @@ void ExternalP300Visualiser::process(uint32 eventID)
             fprintf(timingFile, "%f \n",l_f64TimeAfter);
 		#endif
 		
-		//send a stimulus to openvibe as to update the model
+		//send a stimulus to openvibe in order to train the XDAWN and the classifier 
+		//(this is used in the subject-independent classifier scenario to initialize the subject-specific classifier)
 		if (m_ui32FeedbackResultCounter!= 0 && 
 			m_ui32PreviousFeedbackResultCounter!=m_ui32FeedbackResultCounter && 
-			m_ui32FeedbackResultCounter%5 == 0) //TODO: should  be a configurable parameter
+			m_ui32FeedbackResultCounter%10 == 0) //TODO: should  be a configurable parameter
 		{
 			m_ui32PreviousFeedbackResultCounter = m_ui32FeedbackResultCounter;
 			m_qEventQueue.push(OVA_StimulationId_UpdateModel);
 			m_pKernelContext->getLogManager() << LogLevel_Info << "Sending stimulus to OpenViBE to update model\n";
 		}
-            m_pMainContainer->drawAndSync(m_pTagger,m_qEventQueue);	
+		//draw all the changes on screen and tag the event
+        m_pMainContainer->drawAndSync(m_pTagger,m_qEventQueue);	
 	}
+}
+
+void ExternalP300Visualiser::start()
+{
+	externalVisualiser->m_oStimulator->run();
 }
 
 void ExternalP300Visualiser::changeStates(uint32* states, VisualState ifState, VisualState elseState)
@@ -316,83 +398,20 @@ void ExternalP300Visualiser::changeStates(uint32* states, VisualState ifState, V
 	}	
 }
 
-/*
-MAIN
+/**
+MAIN: press 's' to start the stimulator
 */
-
 int main (int argc, char *argv[])
 {	
+	//create the main visualiser object
 	externalVisualiser = new ExternalP300Visualiser();
-	externalVisualiser->initializeOpenViBEKernel();
-	
-	externalVisualiser->m_pInterfacePropReader = new P300InterfacePropertyReader(externalVisualiser->m_pKernelContext);
-	externalVisualiser->m_pInterfacePropReader->readPropertiesFromFile(OpenViBE::Directories::getDistRootDir() + "/share/openvibe/applications/externalP300Stimulator/interface-properties.xml");
-	externalVisualiser->m_pScreenLayoutReader = new P300ScreenLayoutReader(externalVisualiser->m_pKernelContext);
-	externalVisualiser->m_pScreenLayoutReader->readPropertiesFromFile(externalVisualiser->m_pInterfacePropReader->getScreenDefinitionFile());
-	externalVisualiser->m_pStimulatorPropReader = new P300StimulatorPropertyReader(externalVisualiser->m_pKernelContext, externalVisualiser->m_pScreenLayoutReader->getSymbolList());
-	externalVisualiser->m_pStimulatorPropReader->readPropertiesFromFile(externalVisualiser->m_pInterfacePropReader->getStimulatorConfigFile());	
-	
-	if (externalVisualiser->m_pInterfacePropReader->getHardwareTagging())
-	{
-		externalVisualiser->m_pTagger = new ParallelPort(externalVisualiser->m_pInterfacePropReader->getParallelPortNumber(),
-									externalVisualiser->m_pInterfacePropReader->getSampleFrequency());
-		if (externalVisualiser->m_pTagger->open())
-			externalVisualiser->m_pKernelContext->getLogManager() << LogLevel_Info << "Opened parallel port\n";
-	}
-	else
-	{
-		try
-		{
-			externalVisualiser->m_pTagger = new CSoftTagger();
-		}
-		catch (exception& e)
-		{
-			externalVisualiser->m_pKernelContext->getLogManager() << LogLevel_Info << "Opening software tagger failed: " << e.what() << "\n";
-		}
-		if (externalVisualiser->m_pTagger->open())
-			externalVisualiser->m_pKernelContext->getLogManager() << LogLevel_Info << "Opened software tagger\n";
-	}		
-	
-	P300SequenceWriter* l_pSequenceWriter = new P300SequenceFileWriter(externalVisualiser->m_pInterfacePropReader->getFlashGroupDefinitionFile()); 
-	P300SequenceGenerator* l_pSequenceGenerator;
-	if (externalVisualiser->m_pInterfacePropReader->getFlashMode()==CString("rowcol"))
-		l_pSequenceGenerator = new P300RowColumnSequenceGenerator(
-			externalVisualiser->m_pScreenLayoutReader->getNumberOfKeys(), 
-			externalVisualiser->m_pStimulatorPropReader->getNumberOfGroups(), 
-			externalVisualiser->m_pStimulatorPropReader->getNumberOfRepetitions());		
-	else
-		l_pSequenceGenerator = new P300RipRandSequenceGenerator(
-			externalVisualiser->m_pScreenLayoutReader->getNumberOfKeys(), 
-			externalVisualiser->m_pStimulatorPropReader->getNumberOfGroups(), 
-			externalVisualiser->m_pStimulatorPropReader->getNumberOfRepetitions());
-	l_pSequenceGenerator->setSequenceWriter(l_pSequenceWriter);
-	
-	externalVisualiser->m_oStimulator = new ExternalP300Stimulator(externalVisualiser->m_pStimulatorPropReader, l_pSequenceGenerator); 
-	externalVisualiser->m_oStimulator->setCallBack(ExternalP300Visualiser::processCallback);	
 
-	P300MainContainer::initializeGL(externalVisualiser->m_pInterfacePropReader->getFullScreen(),
-						externalVisualiser->m_pInterfacePropReader->getWidth(),
-						externalVisualiser->m_pInterfacePropReader->getHeight());
-	externalVisualiser->m_pMainContainer = new P300MainContainer(externalVisualiser->m_pInterfacePropReader, externalVisualiser->m_pScreenLayoutReader);
-	//externalVisualiser->m_pMainContainer->initialize(externalVisualiser->m_pScreenLayoutReader->getNumberOfStandardKeys());
-	//externalVisualiser->m_pMainContainer->addSymbolsToGrid(externalVisualiser->m_pScreenLayoutReader->getSymbolList());
+	//variable for the symbol probabilities
+	s_pResetSymbolProbabilities = new float64[externalVisualiser->getNumberOfKeys()];
+	for (uint32 i=0;i<externalVisualiser->getNumberOfKeys();i++)
+		s_pResetSymbolProbabilities[i] = 1.0/externalVisualiser->getNumberOfKeys();
 	
-	s_pResetSymbolProbabilities = new float64[externalVisualiser->m_pScreenLayoutReader->getNumberOfKeys()];
-	for (uint32 i=0;i<externalVisualiser->m_pScreenLayoutReader->getNumberOfKeys();i++)
-	{
-		s_pResetSymbolProbabilities[i] = 1.0/externalVisualiser->m_pScreenLayoutReader->getNumberOfKeys();
-		//std::cout << " " << s_pResetSymbolProbabilities[i];
-	}
-	//std::cout << "\n";
-	/*externalVisualiser->m_pP300KeyboardHandler = boost::shared_ptr<P300KeyboardHandler>(
-		new P300KeyboardHandler(externalVisualiser->m_pMainContainer->getKeyboardObject(), 
-						externalVisualiser->m_pInterfacePropReader, 
-						externalVisualiser->m_pScreenLayoutReader));
-	externalVisualiser->m_pP300KeyboardHandler->addObserver(externalVisualiser->m_pP300KeyboardHandler);*/
-	//externalVisualiser->m_pP300KeyboardHandler->initializeKeyboard();
-						
-	externalVisualiser->m_pMainContainer->drawAndSync(externalVisualiser->m_pTagger,externalVisualiser->m_qEventQueue);	
-	
+	//listen for an key event. If 's' is pressed the stimulator is started.
 	SDL_Event event;
 	boolean l_bEventReceived = false;
 	while (!l_bEventReceived && SDL_WaitEvent(&event)) {
@@ -401,7 +420,7 @@ int main (int argc, char *argv[])
 				if(event.key.keysym.sym==SDLK_s)
 				{
 					l_bEventReceived = true;
-					externalVisualiser->m_oStimulator->run();
+					externalVisualiser->start();
 				}
 				break;
 			default:
@@ -410,8 +429,7 @@ int main (int argc, char *argv[])
 		System::Time::sleep(10);
 	}
 	
-	delete l_pSequenceGenerator;
-	delete l_pSequenceWriter;
+	//clean up
 	delete externalVisualiser;
 	delete[] s_pResetSymbolProbabilities;
 	SDL_Quit();

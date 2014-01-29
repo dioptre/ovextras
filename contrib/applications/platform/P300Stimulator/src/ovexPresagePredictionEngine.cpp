@@ -58,7 +58,7 @@ std::vector<std::string>* PresagePredictionEngine::getMostProbableWords(const st
 		for (i = 0; prediction[i] != 0; i++)
 		{
 			m_lPredictedWords->push_back(std::string(prediction[i]));
-			printf ("prediction[%d]: %s\n", i, prediction[i]);
+			//printf ("prediction[%d]: %s\n", i, prediction[i]);
 		}
 		presage_free_string_array (prediction);
 	}	
@@ -68,29 +68,23 @@ std::vector<std::string>* PresagePredictionEngine::getMostProbableWords(const st
 	*m_lPredictedWords = m_pPresageEngine->predict();
 	#endif
 	
-	//std::cout << "PresagePredictionEngine\n";
 	for (uint32 i=0; i<m_lPredictedWords->size(); i++)
 	{
 		boost::to_upper(m_lPredictedWords->at(i));
 		m_lPredictedWords->at(i) += std::string(" ");
-		//std::cout << m_lPredictedWords->at(i).c_str() << "\n";
 	}
-	//std::cout << "-----------------------\n";
 
 	uint32 l_ui32Size = m_lPredictedWords->size();
 	if (l_ui32Size<nWords)
 	{
-		//std::cout << "Size lower than " << nWords << ": " << l_ui32Size << "\n";
 		for(uint32 i=0; i<nWords-l_ui32Size; i++)
 			m_lPredictedWords->push_back(std::string(""));
 	}
 	else if (l_ui32Size>nWords)
 	{
-		//std::cout << "Size higher than " << nWords << ": " << l_ui32Size << "\n";
 		for(uint32 i=l_ui32Size; i>nWords; i--)
 			m_lPredictedWords->pop_back();
 	}
-	//std::cout << "Size is " << m_lPredictedWords->size() << "\n";
 
 	return m_lPredictedWords;
 }

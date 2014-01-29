@@ -14,20 +14,9 @@ INCLUDE("FindOpenViBEToolkit")
 INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindOpenViBEModuleSystem")
-#INCLUDE("FindOpenViBEPluginsGlobalDefines")
 INCLUDE("FindOpenViBEModuleXML")
-#INCLUDE("FindThirdPartyGL")
 INCLUDE("FindThirdPartyBoost")
-#INCLUDE("FindThirdPartyBoost_Thread")
 INCLUDE("FindThirdPartyLibrariesForExternalStimulator")
-#IF(UNIX)
-#INCLUDE("FindThirdPartyBoost_Thread")
-#ENDIF(UNIX)
-#IF(WIN32)
-#INCLUDE("FindThirdPartyInpOut32")
-#ENDIF(WIN32)
-
-
 
 #so that boost won't need to link against DateTime when using the interprocess communication library
 ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)

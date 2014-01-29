@@ -1,3 +1,4 @@
+<!--  xml file specifying a keyboard layout, see 5by10grid-abc-gray.xml for some more explanation -->
 <ScreenLayout>
 	<DefaultKeyProperties>
 		<Event id="noflash">
@@ -188,6 +189,13 @@
 			<Event id="correct_feedback"><TextSymbol><Label>L</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>L</Label></TextSymbol></Event>
 		</Key>
+		<Key x="0.9" y="0.6" width="0.1" height="0.2">
+			<Action>write</Action>
+			<Event id="noflash"><TextSymbol><Label>M</Label></TextSymbol></Event>
+			<Event id="target"><TextSymbol><Label>M</Label></TextSymbol></Event>
+			<Event id="correct_feedback"><TextSymbol><Label>M</Label></TextSymbol></Event>
+			<Event id="wrong_feedback"><TextSymbol><Label>M</Label></TextSymbol></Event>
+		</Key>			
 		<Key x="0" y="0.4" width="0.1" height="0.2">
 			<Action>write</Action>
 			<Event id="noflash"><TextSymbol><Label>W</Label></TextSymbol></Event>
@@ -229,14 +237,7 @@
 			<Event id="target"><TextSymbol><Label>N</Label></TextSymbol></Event>
 			<Event id="correct_feedback"><TextSymbol><Label>N</Label></TextSymbol></Event>
 			<Event id="wrong_feedback"><TextSymbol><Label>N</Label></TextSymbol></Event>
-		</Key>
-		<Key x="0.6" y="0.4" width="0.1" height="0.2">
-			<Action>write</Action>
-			<Event id="noflash"><TextSymbol><Label>M</Label></TextSymbol></Event>
-			<Event id="target"><TextSymbol><Label>M</Label></TextSymbol></Event>
-			<Event id="correct_feedback"><TextSymbol><Label>M</Label></TextSymbol></Event>
-			<Event id="wrong_feedback"><TextSymbol><Label>M</Label></TextSymbol></Event>
-		</Key>		
+		</Key>	
 		<Key x="0.6" y="0" width="0.1" height="0.2">
 			<Action>write</Action>
 			<Event id="noflash"><TextSymbol><Label>0</Label></TextSymbol></Event>

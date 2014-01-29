@@ -7,6 +7,10 @@
 
 namespace OpenViBEApplications
 {
+	/**
+	 * This class will represent an area in the P300 speller that can be filled with graphical objects such as
+	 * GButton, GSymbol... When draw function is called it will call the draw function on itself and all its children
+	 */
 	class GContainer : public GObject
 	{
 		
@@ -29,6 +33,9 @@ namespace OpenViBEApplications
 		{
 			return new GContainer(*this);
 		}
+		/**
+		 * When draw function is called it will call the draw function on itself and all its children
+		 */
 		virtual void draw();
 		virtual std::string toString() const;
 
@@ -45,12 +52,30 @@ namespace OpenViBEApplications
 		virtual GColor getBackgroundColor() const { return GObject::getBackgroundColor(); }	
 		
 		//additional functions
+		/**
+		 * The position of the graphical object child is computed based on the parameters you provide here
+		 * (those are relative to the container, left lower corner represented by 0,0 and upper right
+		 * corner represented by 1,1)
+		 * @param child the graphical object you want to add to the container
+		 * @param offsetX number between zero and one indicating where it should be placed within the container
+		 * 0.5 would mean will be positioned halfway (horizontally) in the container
+		 * @param offsetY number between zero and one indicating where it should be placed within the container
+		 * @param width number between zero and one indicating the width of the element relative to the container
+		 * 1.0 would mean the child takes up the entire width of the container
+		 * @param height number between zero and one, same interpretation as the height
+		 * @param depth number between -1.0 and 1.0, -1.0 meaning towards the back, 1.0 towards the front
+		 */
 		virtual void addChild(GObject* child, OpenViBE::float32 offsetX, OpenViBE::float32 offsetY, 
 					OpenViBE::float32 width, OpenViBE::float32 height, OpenViBE::float32 depth);		
 		virtual void removeChild(OpenViBE::uint32 childIndex);
 		virtual void removeAllChildren();
 		
 		//additional getters
+		/**
+		 * gets the graphical object of the container at index childIndex
+		 * @return a reference to a pointer so you can actually replace the graphical object with another one by letting
+		 * it point to that new object
+		 */
 		virtual GObject*& getChild(OpenViBE::uint32 childIndex) const { return m_lChildren->at(childIndex); }
 		virtual OpenViBE::uint32 getNumberOfChildren() const { return m_lChildren->size(); }
 		
@@ -61,7 +86,7 @@ namespace OpenViBEApplications
 	protected:
 		virtual void generateVBOBuffers();
 		virtual void generateGLDisplayLists();
-            virtual void fillVertexBuffer(GLfloat* buffer, OpenViBE::float32 depth);
+        virtual void fillVertexBuffer(GLfloat* buffer, OpenViBE::float32 depth);
 		virtual void fillColorBuffer(GLfloat* buffer, const GColor& l_color);
 		
 	protected:	

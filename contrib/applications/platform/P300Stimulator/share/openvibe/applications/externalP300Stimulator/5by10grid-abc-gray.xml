@@ -1,4 +1,8 @@
+<!--  xml file specifying a keyboard layout -->
 <ScreenLayout>
+	<!-- some default properties that can be overridden later per key the section P300Keyboard
+		For each state a key can be in we will specify the default properties, such as size
+		label, source file for font or png, background and foreground color, text label or label consisting of a picture-->
 	<DefaultKeyProperties>
 		<Event id="noflash">
 			<TextSymbol>
@@ -45,6 +49,7 @@
 			</TextSymbol>
 		</Event>			
 	</DefaultKeyProperties>
+	<!-- the box dimensions are numbers between 0 and 1. (0,0) is the left lower corner of the window and (1,1) the right upper corner -->
 	<TargetArea x="0.05" y="0.125" width="0.65" height="0.075">
 		<!--BackgroundColor>10,10,10</BackgroundColor-->
 	</TargetArea>
@@ -54,6 +59,8 @@
 	<PredictionArea x="0.05" y="0.25" width="0" height="0" ncolumns="0" nrows="0">
 		<!--BackgroundColor>10,10,10</BackgroundColor-->
 	</PredictionArea>
+	<!-- In this section we will override the default properties for each key such as the label. Properties
+	that do not differ from the default don't have to be specified. This has to be done per state of the key-->
 	<P300Keyboard x="0.05" y="0.25" width="0.9" height="0.7" numberOfStandardKeys="43">	
 		<Key x="0" y="0.8" width="0.1" height="0.2">
 			<Action>write</Action>

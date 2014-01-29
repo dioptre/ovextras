@@ -5,6 +5,9 @@
 
 namespace OpenViBEApplications
 {	
+	/**
+	 * A dummy class for word prediction/completion
+	 */
 	class WordPredictionEngine : public WordPredictionInterface
 	{	
 	public:

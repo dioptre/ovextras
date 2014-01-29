@@ -186,6 +186,8 @@ namespace OpenViBEApplications
 		
 		/**
 		 * Sets the x, y, height, width and depth parameters of the object. It also sets the internal state of the object to changed.
+		 * It will also call deleteAndCreateGLResources because the code needs to be rewritten to graphical memory with the new dimensions
+		 * and thus new resources need to be created and the old ones deleted
 		 * @param dim the dimensions of the object (in OpenGL units, P300MainContainer redefines the space so that 1 unit is 1 pixel).
 		 */
 		virtual void setDimParameters(BoxDimensions dim);

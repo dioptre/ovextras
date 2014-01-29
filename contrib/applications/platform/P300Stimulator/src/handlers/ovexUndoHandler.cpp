@@ -31,7 +31,7 @@ void P300UndoHandler::update(GObservable* observable, const void * pUserData)
 		if (l_pButton->getState()==GButton_Clicked && m_sUndoStack->size()>0 && l_eAction==GButton_Undo)
 		{
 			std::string l_sStringToUndo = m_sUndoStack->back();
-			std::cout <<"string to undo" <<  l_sStringToUndo << "\n";
+			std::cout <<"string to undo" <<  l_sStringToUndo.c_str() << "\n";
 			uint32 l_ui32UndoSize = m_sUndoStack->back().length();			
 			//what is undone goes to the redo stack
 			m_sUndoStack->pop_back();
@@ -42,7 +42,7 @@ void P300UndoHandler::update(GObservable* observable, const void * pUserData)
 			{
 				std::cout <<"undo handler undiing <\n";
 				l_CharToRestore = l_sStringToUndo[l_sStringToUndo.size()-1];
-				std::cout <<"restoring |"  << l_CharToRestore << "|\n";
+				std::cout <<"restoring |"  << l_CharToRestore.c_str() << "|\n";
 				l_ui32UndoSize = 0;
 			}
 
@@ -55,11 +55,12 @@ void P300UndoHandler::update(GObservable* observable, const void * pUserData)
 		{
 			std::cout <<"redoing\n";
 			std::string l_sStringToRedo = m_sRedoStack->back();
-			int32 l_i64RedoSize = -l_sStringToRedo.size();
+			int32 l_i64RedoSize = l_sStringToRedo.size();
+			l_i64RedoSize = -l_i64RedoSize;
 			//what is redone goes to the undo stack
 			m_sRedoStack->pop_back();
 			m_sUndoStack->push_back(l_sStringToRedo);
-			std::cout <<"redoing" << l_sStringToRedo << "\n";
+			std::cout <<"redoing" << l_sStringToRedo.c_str() << "\n";
 
 			std::cout <<"undo handler (redo) notifying\n";
 			std::pair<int32, std::string> l_oUserData(l_i64RedoSize,l_sStringToRedo);

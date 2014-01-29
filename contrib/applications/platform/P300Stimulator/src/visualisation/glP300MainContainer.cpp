@@ -126,9 +126,8 @@ void P300MainContainer::initializeGL(OpenViBE::boolean fullScreen, OpenViBE::flo
 	SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE,	    8);
 	SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE,	8);
 
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS,  1);
-
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,  2);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS,  1); //seems to give trouble for Matthew TODO: implement check if these attributes are supported
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,  2); //seems to give trouble for Matthew
 
 	uint32 l_ui32SDLFlags = SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER | SDL_OPENGL;
 	if (fullScreen)

@@ -7,16 +7,27 @@
 
 namespace OpenViBEApplications
 {
+	/**
+	 * Base class of GPictureSymbol and GSymbol that handles the common properties such as
+	 * foreground color, filename of the source file (font file for GSymbol, png file for GPictureSymbol)
+	 * label size and label position
+	 * TODO maybe some of these constructors should be protected as we should always construct
+	 * an object of the derived classes
+	 */
 	class GLabel : public GObject
 	{
 	public:
 		GLabel(); //can serve as a dummy label
+		/**
+		 * By calling the super class constructor GObject it will ask for two OpenGL resources, one for itself
+		 * and one for the derived class as we SHOULD never construct a GLabel directly
+		 * It generates the code for its own display list
+		 * @param sourceFile font file for GSymbol, png file for GPictureSymbol
+		 * @param scaleSize a number between 0 and 1 to define its size (1 almost filling up the entire label box)
+		 */
 		GLabel(OpenViBE::CString sourceFile, OpenViBE::float32 scaleSize);//should be made protected
 		GLabel(const GLabel& glabel);
-		virtual ~GLabel()
-		{
-			//std::cout << "GLabel destructor called on " << this->toString() << "\n";
-		}		
+		virtual ~GLabel() {}		
 		
 		virtual GLabel& operator= (GLabel const& glabel);
 		
@@ -25,14 +36,25 @@ namespace OpenViBEApplications
 			return new GLabel(*this);
 		}			
 		
+		/**
+		 * This just draws a rectangle in the background color 
+		 * (in case the object is changed by calling for example the assign operator somewhere, otherwise it is not drawn)
+		 */
 		virtual void draw();
 		virtual std::string toString() const;
 		
 		//inherited setters
+		/**
+		 * This will call setDimParameters from GObject which will recreate the OpenGL resources
+		 * so that we can generate new code in graphical memory with the new dimensions
+		 */
 		virtual void setDimParameters(BoxDimensions dim);
 		
 		//additional setters and getters
 		virtual void setForegroundColor(GColor color) { m_cForegroundColor = color; }
+		/**
+		 * 
+		 */
 		virtual void setLabelScaleSize(OpenViBE::float32 labelScaleSize);
 		//virtual void setSourceFile(OpenViBE::CString sourceFile) { m_sSourceFile = sourceFile; }
 		
@@ -44,6 +66,9 @@ namespace OpenViBEApplications
 	protected:		
 		virtual void computeLabelPosition();	
 		virtual void computeMaximumLabelSize();
+		/**
+		 * This just constructs a rectangle in the background color
+		 */
 		virtual void generateGLDisplayLists();
 		
 	private:
