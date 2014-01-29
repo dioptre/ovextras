@@ -1,0 +1,381 @@
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer}{
+\section{OpenViBEApplications::P300MainContainer Class Reference}
+\label{classOpenViBEApplications_1_1P300MainContainer}\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+}
+
+
+{\ttfamily \#include $<$glP300MainContainer.h$>$}
+
+Inheritance diagram for OpenViBEApplications::P300MainContainer:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classOpenViBEApplications_1_1P300MainContainer}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300MainContainer_a2268ed29215d50eeecf297ba8dc8fa54}{P300MainContainer} (\hyperlink{classOpenViBEApplications_1_1P300InterfacePropertyReader}{P300InterfacePropertyReader} $\ast$propertyObject, \hyperlink{classOpenViBEApplications_1_1P300ScreenLayoutReader}{P300ScreenLayoutReader} $\ast$layoutPropObject)
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300MainContainer_aab93ee2cc5f1003ba1e6d32004417ca7}{P300MainContainer} (const \hyperlink{classOpenViBEApplications_1_1P300MainContainer}{P300MainContainer} \&gcontainer)
+\item 
+virtual \hyperlink{classOpenViBEApplications_1_1P300MainContainer_afea187e939b23606bf2046bdff5f412b}{$\sim$P300MainContainer} ()
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300MainContainer}{P300MainContainer} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_ad85e82b0d066a9ef87226d1a98e29b01}{clone} () const 
+\item 
+void \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a2e0a6d9ef0ae9a8401eb62cff92449e2}{changeBackgroundColorDiodeArea} (\hyperlink{structOpenViBEApplications_1_1GColor}{GColor} bColor)
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300KeyboardHandler}{P300KeyboardHandler} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_aa69124aee2f4fc40c5fc872d7329a58e}{getKeyboardHandler} ()
+\item 
+std::string \hyperlink{classOpenViBEApplications_1_1P300MainContainer_adc9a6d35ed5a3e7939837561ddc2ebad}{toString} () const 
+\item 
+void \hyperlink{classOpenViBEApplications_1_1P300MainContainer_ac2f2c67a6b51277491d4bdd07d0d0417}{drawAndSync} (\hyperlink{classOpenViBEApplications_1_1ITagger}{ITagger} $\ast$tagger, std::queue$<$ OpenViBE::uint32 $>$ \&l\_\-qEventQueue)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a4c97f1858d872bda7adb938b8a34021c}{initializeGL} (OpenViBE::boolean fullScreen, OpenViBE::float32 width, OpenViBE::float32 height)
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a4a7058842de36b427233d89cd49be17c}{draw} ()
+\item 
+void \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a2ae18d5fd4a152d3d9d26c50adb0408b}{initialize} (OpenViBE::uint32 nGridCells)
+\item 
+void \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a8279db3f4477509970b60cfedff68e64}{initializeGridArea} (OpenViBE::uint32 nCells)
+\item 
+void \hyperlink{classOpenViBEApplications_1_1P300MainContainer_ad40989824595a34377d872f8276655de}{initializeResultArea} ()
+\item 
+void \hyperlink{classOpenViBEApplications_1_1P300MainContainer_aa33fa6df9f8f7b40666ab6bb46302e80}{initializePredictionArea} ()
+\item 
+void \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a94b22557a1154c40670a4f9bd5108602}{initializeTargetArea} ()
+\item 
+void \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a0f2db451575ab86dacaa6bedf0762732}{initializeDiodeArea} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a29b9524de3e6d6e8b36475b51e449077}{do\_\-ortho} (OpenViBE::float32 width, OpenViBE::float32 height)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300PredictionboardHandler}{P300PredictionboardHandler} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_ab9a8b594f31398b35c2379f6f1e51ba5}{m\_\-pP300PredictionHandler}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300UndoHandler}{P300UndoHandler} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_ad8c503ed9ccadfd6096c0a7c462eef6e}{m\_\-pP300UndoHandler}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300ResultAreaHandler}{P300ResultAreaHandler} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a3340088f9472c1a019149301adbc340c}{m\_\-pP300ResultAreaHandler}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300TargetAreaHandler}{P300TargetAreaHandler} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_adecc9ca2fa692d9a5f4d741d08ce567c}{m\_\-pP300TargetAreaHandler}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300KeyboardHandler}{P300KeyboardHandler} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_afc43c92129c3311fe266fb3cb02fcd95}{m\_\-pP300KeyboardHandler}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300BackspaceHandler}{P300BackspaceHandler} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_ad699ec3cede735dddfa60103a6d80baa}{m\_\-pP300BackspaceHandler}
+\item 
+\hyperlink{classOpenViBEApplications_1_1GContainer}{GContainer} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_ac639f7f61e0c4393b959378dc426e31f}{m\_\-gGridArea}
+\item 
+\hyperlink{classOpenViBEApplications_1_1GTable}{GTable} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_aa573cdc09f41bdcb6f149b99fc8c1e0a}{m\_\-gTargetArea}
+\item 
+\hyperlink{classOpenViBEApplications_1_1GTable}{GTable} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a2aea9eec1dc46d9308b9c5000a061cda}{m\_\-gResultArea}
+\item 
+\hyperlink{classOpenViBEApplications_1_1GTable}{GTable} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a922413bfcce731559ce2532760143a5b}{m\_\-gPredictionArea}
+\item 
+\hyperlink{classOpenViBEApplications_1_1GContainer}{GContainer} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a46275892de0b86a60e99bd4e1402e686}{m\_\-gDiodeArea}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300InterfacePropertyReader}{P300InterfacePropertyReader} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a0c82050dab1b1bad1cc7957ad8455f5e}{m\_\-pInterfacePropertyObject}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300ScreenLayoutReader}{P300ScreenLayoutReader} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a4ad545db272667dc7384daaac6866e39}{m\_\-pScreenLayoutObject}
+\end{DoxyCompactItemize}
+\subsection*{Static Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static SDL\_\-Surface $\ast$ \hyperlink{classOpenViBEApplications_1_1P300MainContainer_a677b182f627d403aa79fcdf32d573e3c}{m\_\-oSDLSurface}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class initializes the OpenGL context, creates the different \hyperlink{classOpenViBEApplications_1_1GContainer}{GContainer} or \hyperlink{classOpenViBEApplications_1_1GTable}{GTable} for the keyboard, the results and the predicted words. It also creates the handlers that will observe those areas in case something changes. For example the keyboard handler \hyperlink{classOpenViBEApplications_1_1P300KeyboardHandler}{P300KeyboardHandler} will observer the word prediction area and the keyboard area. It will also populate it with the necessary symbols. This class also has the drawAndSync function so that everything is drawn to screen and the corresponding events written to the \hyperlink{classOpenViBEApplications_1_1ITagger}{ITagger} 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a2268ed29215d50eeecf297ba8dc8fa54}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!P300MainContainer@{P300MainContainer}}
+\index{P300MainContainer@{P300MainContainer}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{P300MainContainer}]{\setlength{\rightskip}{0pt plus 5cm}P300MainContainer::P300MainContainer (
+\begin{DoxyParamCaption}
+\item[{{\bf P300InterfacePropertyReader} $\ast$}]{propertyObject, }
+\item[{{\bf P300ScreenLayoutReader} $\ast$}]{layoutPropObject}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a2268ed29215d50eeecf297ba8dc8fa54}
+
+\begin{DoxyParams}{Parameters}
+{\em propertyObject} & this is the property reader that reads from interface-\/properties.xml \\
+\hline
+{\em layoutPropObject} & the reader that contains all information/properties of all keys as specified in for example the 5by10grid-\/abc-\/gray.xml file \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_aab93ee2cc5f1003ba1e6d32004417ca7}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!P300MainContainer@{P300MainContainer}}
+\index{P300MainContainer@{P300MainContainer}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{P300MainContainer}]{\setlength{\rightskip}{0pt plus 5cm}P300MainContainer::P300MainContainer (
+\begin{DoxyParamCaption}
+\item[{const {\bf P300MainContainer} \&}]{gcontainer}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1P300MainContainer_aab93ee2cc5f1003ba1e6d32004417ca7}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_afea187e939b23606bf2046bdff5f412b}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!$\sim$P300MainContainer@{$\sim$P300MainContainer}}
+\index{$\sim$P300MainContainer@{$\sim$P300MainContainer}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{$\sim$P300MainContainer}]{\setlength{\rightskip}{0pt plus 5cm}P300MainContainer::$\sim$P300MainContainer (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_afea187e939b23606bf2046bdff5f412b}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a2e0a6d9ef0ae9a8401eb62cff92449e2}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!changeBackgroundColorDiodeArea@{changeBackgroundColorDiodeArea}}
+\index{changeBackgroundColorDiodeArea@{changeBackgroundColorDiodeArea}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{changeBackgroundColorDiodeArea}]{\setlength{\rightskip}{0pt plus 5cm}void P300MainContainer::changeBackgroundColorDiodeArea (
+\begin{DoxyParamCaption}
+\item[{{\bf GColor}}]{bColor}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a2e0a6d9ef0ae9a8401eb62cff92449e2}
+There is an area dedicated for use with a photo diode (TODO: specify its location in configuration file instead of hardcoded) With this function you can change its background color \hypertarget{classOpenViBEApplications_1_1P300MainContainer_ad85e82b0d066a9ef87226d1a98e29b01}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!clone@{clone}}
+\index{clone@{clone}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{clone}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300MainContainer}$\ast$ OpenViBEApplications::P300MainContainer::clone (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_ad85e82b0d066a9ef87226d1a98e29b01}
+Virtual clone function used for making a copy of a \hyperlink{classOpenViBEApplications_1_1GObject}{GObject} (invokes the copy constructor) 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GContainer_a5a65050110f1e269905e2de75f281695}{OpenViBEApplications::GContainer}.
+
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a29b9524de3e6d6e8b36475b51e449077}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!do\_\-ortho@{do\_\-ortho}}
+\index{do\_\-ortho@{do\_\-ortho}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{do\_\-ortho}]{\setlength{\rightskip}{0pt plus 5cm}void P300MainContainer::do\_\-ortho (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::float32}]{width, }
+\item[{OpenViBE::float32}]{height}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}static, private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a29b9524de3e6d6e8b36475b51e449077}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a4a7058842de36b427233d89cd49be17c}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!draw@{draw}}
+\index{draw@{draw}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{draw}]{\setlength{\rightskip}{0pt plus 5cm}void P300MainContainer::draw (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a4a7058842de36b427233d89cd49be17c}
+This function is used by drawAndSync 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GContainer_a5ae508ebbc61d807143db96ee2f96883}{OpenViBEApplications::GContainer}.
+
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_ac2f2c67a6b51277491d4bdd07d0d0417}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!drawAndSync@{drawAndSync}}
+\index{drawAndSync@{drawAndSync}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{drawAndSync}]{\setlength{\rightskip}{0pt plus 5cm}void P300MainContainer::drawAndSync (
+\begin{DoxyParamCaption}
+\item[{{\bf ITagger} $\ast$}]{tagger, }
+\item[{std::queue$<$ OpenViBE::uint32 $>$ \&}]{l\_\-qEventQueue}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1P300MainContainer_ac2f2c67a6b51277491d4bdd07d0d0417}
+
+\begin{DoxyParams}{Parameters}
+{\em tagger} & either a software or hardware tagger which will send the stimuli in l\_\-qEventQueue to either the acquisition server (software) or parallel port (hardware) \\
+\hline
+{\em l\_\-qEventQueue} & a queue of stimuli that need to be send for synchronisation to the tagger \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_aa69124aee2f4fc40c5fc872d7329a58e}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!getKeyboardHandler@{getKeyboardHandler}}
+\index{getKeyboardHandler@{getKeyboardHandler}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{getKeyboardHandler}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300KeyboardHandler} $\ast$ P300MainContainer::getKeyboardHandler (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1P300MainContainer_aa69124aee2f4fc40c5fc872d7329a58e}
+\begin{DoxyReturn}{Returns}
+the keyboard handler, this object gives you the ability to make changes to the screen (symbols flashed, symbols not flashed...) this object is used in the \hyperlink{classOpenViBEApplications_1_1ExternalP300Visualiser}{ExternalP300Visualiser} for making updates 
+\end{DoxyReturn}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a2ae18d5fd4a152d3d9d26c50adb0408b}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!initialize@{initialize}}
+\index{initialize@{initialize}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}void P300MainContainer::initialize (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32}]{nGridCells}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a2ae18d5fd4a152d3d9d26c50adb0408b}
+Helper function to initialize all the areas and the handlers \hypertarget{classOpenViBEApplications_1_1P300MainContainer_a0f2db451575ab86dacaa6bedf0762732}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!initializeDiodeArea@{initializeDiodeArea}}
+\index{initializeDiodeArea@{initializeDiodeArea}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{initializeDiodeArea}]{\setlength{\rightskip}{0pt plus 5cm}void P300MainContainer::initializeDiodeArea (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a0f2db451575ab86dacaa6bedf0762732}
+Helper function to initialize the diode area \hypertarget{classOpenViBEApplications_1_1P300MainContainer_a4c97f1858d872bda7adb938b8a34021c}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!initializeGL@{initializeGL}}
+\index{initializeGL@{initializeGL}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{initializeGL}]{\setlength{\rightskip}{0pt plus 5cm}void P300MainContainer::initializeGL (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::boolean}]{fullScreen, }
+\item[{OpenViBE::float32}]{width, }
+\item[{OpenViBE::float32}]{height}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a4c97f1858d872bda7adb938b8a34021c}
+Before calling this class constructor you need to call this function to initialize the OpenGL context otherwise the constructor will already create graphical objects while the OpenGL context does not exist yet 
+\begin{DoxyParams}{Parameters}
+{\em fullScreen} & enable full screen or not \\
+\hline
+{\em width} & width of window (also needs to be specified for full screen, TODO in full screen mode the width and height should be detected automatically) \\
+\hline
+{\em height} & height of the window \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a8279db3f4477509970b60cfedff68e64}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!initializeGridArea@{initializeGridArea}}
+\index{initializeGridArea@{initializeGridArea}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{initializeGridArea}]{\setlength{\rightskip}{0pt plus 5cm}void P300MainContainer::initializeGridArea (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32}]{nCells}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a8279db3f4477509970b60cfedff68e64}
+Helper function to initialize the main keyboard area \hypertarget{classOpenViBEApplications_1_1P300MainContainer_aa33fa6df9f8f7b40666ab6bb46302e80}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!initializePredictionArea@{initializePredictionArea}}
+\index{initializePredictionArea@{initializePredictionArea}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{initializePredictionArea}]{\setlength{\rightskip}{0pt plus 5cm}void P300MainContainer::initializePredictionArea (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_aa33fa6df9f8f7b40666ab6bb46302e80}
+Helper function to initialize the word prediction area \hypertarget{classOpenViBEApplications_1_1P300MainContainer_ad40989824595a34377d872f8276655de}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!initializeResultArea@{initializeResultArea}}
+\index{initializeResultArea@{initializeResultArea}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{initializeResultArea}]{\setlength{\rightskip}{0pt plus 5cm}void P300MainContainer::initializeResultArea (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_ad40989824595a34377d872f8276655de}
+Helper function to initialize the result area \hypertarget{classOpenViBEApplications_1_1P300MainContainer_a94b22557a1154c40670a4f9bd5108602}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!initializeTargetArea@{initializeTargetArea}}
+\index{initializeTargetArea@{initializeTargetArea}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{initializeTargetArea}]{\setlength{\rightskip}{0pt plus 5cm}void P300MainContainer::initializeTargetArea (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a94b22557a1154c40670a4f9bd5108602}
+Helper function to initialize the target area (for the blue letters in copy mode) \hypertarget{classOpenViBEApplications_1_1P300MainContainer_adc9a6d35ed5a3e7939837561ddc2ebad}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!toString@{toString}}
+\index{toString@{toString}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{toString}]{\setlength{\rightskip}{0pt plus 5cm}std::string P300MainContainer::toString (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_adc9a6d35ed5a3e7939837561ddc2ebad}
+String representation of \hyperlink{classOpenViBEApplications_1_1GObject}{GObject}, e.g. for a button with a text label it should output that it is a button with the text of the label \begin{DoxyReturn}{Returns}
+the string representation of \hyperlink{classOpenViBEApplications_1_1GObject}{GObject} 
+\end{DoxyReturn}
+
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GContainer_afa60cc492f0ef420e2082289b2f979e5}{OpenViBEApplications::GContainer}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a46275892de0b86a60e99bd4e1402e686}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-gDiodeArea@{m\_\-gDiodeArea}}
+\index{m\_\-gDiodeArea@{m\_\-gDiodeArea}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-gDiodeArea}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GContainer}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-gDiodeArea}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a46275892de0b86a60e99bd4e1402e686}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_ac639f7f61e0c4393b959378dc426e31f}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-gGridArea@{m\_\-gGridArea}}
+\index{m\_\-gGridArea@{m\_\-gGridArea}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-gGridArea}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GContainer}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-gGridArea}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_ac639f7f61e0c4393b959378dc426e31f}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a922413bfcce731559ce2532760143a5b}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-gPredictionArea@{m\_\-gPredictionArea}}
+\index{m\_\-gPredictionArea@{m\_\-gPredictionArea}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-gPredictionArea}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GTable}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-gPredictionArea}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a922413bfcce731559ce2532760143a5b}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a2aea9eec1dc46d9308b9c5000a061cda}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-gResultArea@{m\_\-gResultArea}}
+\index{m\_\-gResultArea@{m\_\-gResultArea}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-gResultArea}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GTable}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-gResultArea}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a2aea9eec1dc46d9308b9c5000a061cda}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_aa573cdc09f41bdcb6f149b99fc8c1e0a}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-gTargetArea@{m\_\-gTargetArea}}
+\index{m\_\-gTargetArea@{m\_\-gTargetArea}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-gTargetArea}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GTable}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-gTargetArea}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_aa573cdc09f41bdcb6f149b99fc8c1e0a}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a677b182f627d403aa79fcdf32d573e3c}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-oSDLSurface@{m\_\-oSDLSurface}}
+\index{m\_\-oSDLSurface@{m\_\-oSDLSurface}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-oSDLSurface}]{\setlength{\rightskip}{0pt plus 5cm}SDL\_\-Surface $\ast$ {\bf P300MainContainer::m\_\-oSDLSurface}\hspace{0.3cm}{\ttfamily  \mbox{[}static, private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a677b182f627d403aa79fcdf32d573e3c}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a0c82050dab1b1bad1cc7957ad8455f5e}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-pInterfacePropertyObject@{m\_\-pInterfacePropertyObject}}
+\index{m\_\-pInterfacePropertyObject@{m\_\-pInterfacePropertyObject}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-pInterfacePropertyObject}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300InterfacePropertyReader}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-pInterfacePropertyObject}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a0c82050dab1b1bad1cc7957ad8455f5e}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_ad699ec3cede735dddfa60103a6d80baa}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-pP300BackspaceHandler@{m\_\-pP300BackspaceHandler}}
+\index{m\_\-pP300BackspaceHandler@{m\_\-pP300BackspaceHandler}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-pP300BackspaceHandler}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300BackspaceHandler}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-pP300BackspaceHandler}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_ad699ec3cede735dddfa60103a6d80baa}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_afc43c92129c3311fe266fb3cb02fcd95}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-pP300KeyboardHandler@{m\_\-pP300KeyboardHandler}}
+\index{m\_\-pP300KeyboardHandler@{m\_\-pP300KeyboardHandler}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-pP300KeyboardHandler}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300KeyboardHandler}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-pP300KeyboardHandler}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_afc43c92129c3311fe266fb3cb02fcd95}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_ab9a8b594f31398b35c2379f6f1e51ba5}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-pP300PredictionHandler@{m\_\-pP300PredictionHandler}}
+\index{m\_\-pP300PredictionHandler@{m\_\-pP300PredictionHandler}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-pP300PredictionHandler}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300PredictionboardHandler}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-pP300PredictionHandler}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_ab9a8b594f31398b35c2379f6f1e51ba5}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a3340088f9472c1a019149301adbc340c}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-pP300ResultAreaHandler@{m\_\-pP300ResultAreaHandler}}
+\index{m\_\-pP300ResultAreaHandler@{m\_\-pP300ResultAreaHandler}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-pP300ResultAreaHandler}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300ResultAreaHandler}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-pP300ResultAreaHandler}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a3340088f9472c1a019149301adbc340c}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_adecc9ca2fa692d9a5f4d741d08ce567c}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-pP300TargetAreaHandler@{m\_\-pP300TargetAreaHandler}}
+\index{m\_\-pP300TargetAreaHandler@{m\_\-pP300TargetAreaHandler}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-pP300TargetAreaHandler}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300TargetAreaHandler}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-pP300TargetAreaHandler}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_adecc9ca2fa692d9a5f4d741d08ce567c}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_ad8c503ed9ccadfd6096c0a7c462eef6e}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-pP300UndoHandler@{m\_\-pP300UndoHandler}}
+\index{m\_\-pP300UndoHandler@{m\_\-pP300UndoHandler}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-pP300UndoHandler}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300UndoHandler}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-pP300UndoHandler}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_ad8c503ed9ccadfd6096c0a7c462eef6e}
+\hypertarget{classOpenViBEApplications_1_1P300MainContainer_a4ad545db272667dc7384daaac6866e39}{
+\index{OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}!m\_\-pScreenLayoutObject@{m\_\-pScreenLayoutObject}}
+\index{m\_\-pScreenLayoutObject@{m\_\-pScreenLayoutObject}!OpenViBEApplications::P300MainContainer@{OpenViBEApplications::P300MainContainer}}
+\subsubsection[{m\_\-pScreenLayoutObject}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300ScreenLayoutReader}$\ast$ {\bf OpenViBEApplications::P300MainContainer::m\_\-pScreenLayoutObject}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300MainContainer_a4ad545db272667dc7384daaac6866e39}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/visualisation/\hyperlink{glP300MainContainer_8h}{glP300MainContainer.h}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/visualisation/\hyperlink{glP300MainContainer_8cpp}{glP300MainContainer.cpp}\end{DoxyCompactItemize}

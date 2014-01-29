@@ -1,0 +1,222 @@
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol}{
+\section{OpenViBEApplications::GPictureSymbol Class Reference}
+\label{classOpenViBEApplications_1_1GPictureSymbol}\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+}
+
+
+{\ttfamily \#include $<$glGPictureSymbol.h$>$}
+
+Inheritance diagram for OpenViBEApplications::GPictureSymbol:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classOpenViBEApplications_1_1GPictureSymbol}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1GPictureSymbol_aac73ebde57146de0bbb6724833c53cf8}{GPictureSymbol} (OpenViBE::CString sourcePath, OpenViBE::float32 scaleSize)
+\item 
+\hyperlink{classOpenViBEApplications_1_1GPictureSymbol_aa6018be99bc4605f4a70164d40fd0a71}{GPictureSymbol} (const \hyperlink{classOpenViBEApplications_1_1GPictureSymbol}{GPictureSymbol} \&gsymbol)
+\item 
+virtual \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_a6ac3188bac96439e918ae2cb4c087ca2}{$\sim$GPictureSymbol} ()
+\item 
+virtual \hyperlink{classOpenViBEApplications_1_1GPictureSymbol}{GPictureSymbol} $\ast$ \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_ab6242401d181519cd7095d800b74fd2a}{clone} () const 
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_ae4599b766493b68a3be8d0002cb7eb59}{draw} ()
+\item 
+virtual std::string \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_a1dcff61ca3a281b9ff86f90761a6dc2f}{toString} () const 
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_adbd8bcc5e9a366b939ec9020c7e661d8}{setDimParameters} (\hyperlink{structOpenViBEApplications_1_1__BoxDimensions}{BoxDimensions} dim)
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_afc028614da2a886429a9eb116a79cde5}{computeLabelPosition} ()
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_a6e877a3048dcfa192ba7915188878811}{generateGLDisplayLists} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+OpenViBE::boolean \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_a2d1c4763b217b7b21de1a69ca0a2da35}{m\_\-bImageLoaded}
+\item 
+int \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_a8a893eb95cd346f30b66bdd7379a80d4}{m\_\-iMode}
+\item 
+\hyperlink{classOpenViBEApplications_1_1OpenGLTextureManager}{OpenGLTextureManager} $\ast$ \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_a31525f4e7bbde19d7e455944184d12d0}{m\_\-pTextureManager}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_aca1fcbd7db1caac6f80c6c20b2269144}{initializeOpenGLTexture} ()
+\item 
+void \hyperlink{classOpenViBEApplications_1_1GPictureSymbol_a7e0c0d6cf9ca6b22efe29ad886f567cf}{assignHelper} (\hyperlink{classOpenViBEApplications_1_1GPictureSymbol}{GPictureSymbol} const \&gpicturesymbol)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A label class that does not have letters as content such as \hyperlink{classOpenViBEApplications_1_1GSymbol}{GSymbol}, but pictures coming from png files 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_aac73ebde57146de0bbb6724833c53cf8}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!GPictureSymbol@{GPictureSymbol}}
+\index{GPictureSymbol@{GPictureSymbol}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{GPictureSymbol}]{\setlength{\rightskip}{0pt plus 5cm}GPictureSymbol::GPictureSymbol (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::CString}]{sourcePath, }
+\item[{OpenViBE::float32}]{scaleSize}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_aac73ebde57146de0bbb6724833c53cf8}
+has to create a texture manager to make sure all buttons that use the same picture use the same resource in graphical memory so that no multiple textures of the same pic are created\par
+ On top of that it also uses display lists managed by \hyperlink{classOpenViBEApplications_1_1OpenGLDListManager}{OpenGLDListManager}, both are created by the super class \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel}. One display list is filled in by \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel}, the other one by this class 
+\begin{DoxyParams}{Parameters}
+{\em sourcePath} & the file name of the png file that will be used to make the texture \\
+\hline
+{\em scaleSize} & a number between 0 and 1 that defines the size of the texture in the button box \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_aa6018be99bc4605f4a70164d40fd0a71}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!GPictureSymbol@{GPictureSymbol}}
+\index{GPictureSymbol@{GPictureSymbol}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{GPictureSymbol}]{\setlength{\rightskip}{0pt plus 5cm}GPictureSymbol::GPictureSymbol (
+\begin{DoxyParamCaption}
+\item[{const {\bf GPictureSymbol} \&}]{gsymbol}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_aa6018be99bc4605f4a70164d40fd0a71}
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_a6ac3188bac96439e918ae2cb4c087ca2}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!$\sim$GPictureSymbol@{$\sim$GPictureSymbol}}
+\index{$\sim$GPictureSymbol@{$\sim$GPictureSymbol}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{$\sim$GPictureSymbol}]{\setlength{\rightskip}{0pt plus 5cm}GPictureSymbol::$\sim$GPictureSymbol (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_a6ac3188bac96439e918ae2cb4c087ca2}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_a7e0c0d6cf9ca6b22efe29ad886f567cf}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!assignHelper@{assignHelper}}
+\index{assignHelper@{assignHelper}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{assignHelper}]{\setlength{\rightskip}{0pt plus 5cm}void GPictureSymbol::assignHelper (
+\begin{DoxyParamCaption}
+\item[{{\bf GPictureSymbol} const \&}]{gpicturesymbol}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_a7e0c0d6cf9ca6b22efe29ad886f567cf}
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_ab6242401d181519cd7095d800b74fd2a}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!clone@{clone}}
+\index{clone@{clone}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{clone}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf GPictureSymbol}$\ast$ OpenViBEApplications::GPictureSymbol::clone (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_ab6242401d181519cd7095d800b74fd2a}
+Virtual clone function used for making a copy of a \hyperlink{classOpenViBEApplications_1_1GObject}{GObject} (invokes the copy constructor) 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_aca9909e04e4852aa3185b22de50470fc}{OpenViBEApplications::GLabel}.
+
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_afc028614da2a886429a9eb116a79cde5}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!computeLabelPosition@{computeLabelPosition}}
+\index{computeLabelPosition@{computeLabelPosition}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{computeLabelPosition}]{\setlength{\rightskip}{0pt plus 5cm}void GPictureSymbol::computeLabelPosition (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_afc028614da2a886429a9eb116a79cde5}
+Computes where the label should be positioned within the button/label box (saved in m\_\-pLabelPosition variable of super class \hyperlink{classOpenViBEApplications_1_1GLabel}{GLabel}) 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_a98fe7f61d0fc4738737786f9f82cd66a}{OpenViBEApplications::GLabel}.
+
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_ae4599b766493b68a3be8d0002cb7eb59}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!draw@{draw}}
+\index{draw@{draw}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{draw}]{\setlength{\rightskip}{0pt plus 5cm}void GPictureSymbol::draw (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_ae4599b766493b68a3be8d0002cb7eb59}
+This just draws a rectangle in the background color (in case the object is changed by calling for example the assign operator somewhere, otherwise it is not drawn) 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_ac94194b56ef4517fd62d6a1f68661a18}{OpenViBEApplications::GLabel}.
+
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_a6e877a3048dcfa192ba7915188878811}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!generateGLDisplayLists@{generateGLDisplayLists}}
+\index{generateGLDisplayLists@{generateGLDisplayLists}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{generateGLDisplayLists}]{\setlength{\rightskip}{0pt plus 5cm}void GPictureSymbol::generateGLDisplayLists (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_a6e877a3048dcfa192ba7915188878811}
+This will generate the display list code that will also bind the texture 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_a445a03a33e74bc64b93e4a3fd2629953}{OpenViBEApplications::GLabel}.
+
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_aca1fcbd7db1caac6f80c6c20b2269144}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!initializeOpenGLTexture@{initializeOpenGLTexture}}
+\index{initializeOpenGLTexture@{initializeOpenGLTexture}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{initializeOpenGLTexture}]{\setlength{\rightskip}{0pt plus 5cm}void GPictureSymbol::initializeOpenGLTexture (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_aca1fcbd7db1caac6f80c6c20b2269144}
+this initializes the opengl texture TODO maybe this should be moved to the \hyperlink{classOpenViBEApplications_1_1OpenGLTextureManager}{OpenGLTextureManager} \hypertarget{classOpenViBEApplications_1_1GPictureSymbol_adbd8bcc5e9a366b939ec9020c7e661d8}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!setDimParameters@{setDimParameters}}
+\index{setDimParameters@{setDimParameters}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{setDimParameters}]{\setlength{\rightskip}{0pt plus 5cm}void GPictureSymbol::setDimParameters (
+\begin{DoxyParamCaption}
+\item[{{\bf BoxDimensions}}]{dim}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_adbd8bcc5e9a366b939ec9020c7e661d8}
+This will call setDimParameters from \hyperlink{classOpenViBEApplications_1_1GObject}{GObject} which will recreate the OpenGL resources so that we can generate new code in graphical memory with the new dimensions 
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_ad720a3ee7c141b7eaa25be2adf7a2256}{OpenViBEApplications::GLabel}.
+
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_a1dcff61ca3a281b9ff86f90761a6dc2f}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!toString@{toString}}
+\index{toString@{toString}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{toString}]{\setlength{\rightskip}{0pt plus 5cm}std::string GPictureSymbol::toString (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_a1dcff61ca3a281b9ff86f90761a6dc2f}
+String representation of \hyperlink{classOpenViBEApplications_1_1GObject}{GObject}, e.g. for a button with a text label it should output that it is a button with the text of the label \begin{DoxyReturn}{Returns}
+the string representation of \hyperlink{classOpenViBEApplications_1_1GObject}{GObject} 
+\end{DoxyReturn}
+
+
+Reimplemented from \hyperlink{classOpenViBEApplications_1_1GLabel_a562a8811832fa57cd0b5ae48467ed687}{OpenViBEApplications::GLabel}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_a2d1c4763b217b7b21de1a69ca0a2da35}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!m\_\-bImageLoaded@{m\_\-bImageLoaded}}
+\index{m\_\-bImageLoaded@{m\_\-bImageLoaded}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{m\_\-bImageLoaded}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::boolean {\bf OpenViBEApplications::GPictureSymbol::m\_\-bImageLoaded}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_a2d1c4763b217b7b21de1a69ca0a2da35}
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_a8a893eb95cd346f30b66bdd7379a80d4}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!m\_\-iMode@{m\_\-iMode}}
+\index{m\_\-iMode@{m\_\-iMode}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{m\_\-iMode}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf OpenViBEApplications::GPictureSymbol::m\_\-iMode}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_a8a893eb95cd346f30b66bdd7379a80d4}
+\hypertarget{classOpenViBEApplications_1_1GPictureSymbol_a31525f4e7bbde19d7e455944184d12d0}{
+\index{OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}!m\_\-pTextureManager@{m\_\-pTextureManager}}
+\index{m\_\-pTextureManager@{m\_\-pTextureManager}!OpenViBEApplications::GPictureSymbol@{OpenViBEApplications::GPictureSymbol}}
+\subsubsection[{m\_\-pTextureManager}]{\setlength{\rightskip}{0pt plus 5cm}{\bf OpenGLTextureManager}$\ast$ {\bf OpenViBEApplications::GPictureSymbol::m\_\-pTextureManager}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1GPictureSymbol_a31525f4e7bbde19d7e455944184d12d0}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/visualisation/\hyperlink{glGPictureSymbol_8h}{glGPictureSymbol.h}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/visualisation/\hyperlink{glGPictureSymbol_8cpp}{glGPictureSymbol.cpp}\end{DoxyCompactItemize}

@@ -1,0 +1,56 @@
+\hypertarget{classOpenViBEApplications_1_1WordPredictionInterface}{
+\section{OpenViBEApplications::WordPredictionInterface Class Reference}
+\label{classOpenViBEApplications_1_1WordPredictionInterface}\index{OpenViBEApplications::WordPredictionInterface@{OpenViBEApplications::WordPredictionInterface}}
+}
+
+
+{\ttfamily \#include $<$ovexWordPredictionInterface.h$>$}
+
+Inheritance diagram for OpenViBEApplications::WordPredictionInterface:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.885522cm]{classOpenViBEApplications_1_1WordPredictionInterface}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual std::vector$<$ std::string $>$ $\ast$ \hyperlink{classOpenViBEApplications_1_1WordPredictionInterface_a9eb048db224c4d233bbfa8e3999a7b6c}{getMostProbableWords} (const std::string \&prefix, OpenViBE::uint32 nWords)=0
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Interface for get the most probable words given a prefix 
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1WordPredictionInterface_a9eb048db224c4d233bbfa8e3999a7b6c}{
+\index{OpenViBEApplications::WordPredictionInterface@{OpenViBEApplications::WordPredictionInterface}!getMostProbableWords@{getMostProbableWords}}
+\index{getMostProbableWords@{getMostProbableWords}!OpenViBEApplications::WordPredictionInterface@{OpenViBEApplications::WordPredictionInterface}}
+\subsubsection[{getMostProbableWords}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$ std::string $>$ $\ast$ WordPredictionEngine::getMostProbableWords (
+\begin{DoxyParamCaption}
+\item[{const std::string \&}]{prefix, }
+\item[{OpenViBE::uint32}]{nWords}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1WordPredictionInterface_a9eb048db224c4d233bbfa8e3999a7b6c}
+
+\begin{DoxyParams}{Parameters}
+{\em prefix} & the letters or words previously spelled on which we need to base our predictions for the next word or the word to complete \\
+\hline
+{\em nWords} & number of words we want to get back in the result vector \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+vector of strings with the nWords most probable words given the prefix 
+\end{DoxyReturn}
+
+
+Implemented in \hyperlink{classOpenViBEApplications_1_1PresagePredictionEngine_ae7013ed31db4d57926c87b0858019a57}{OpenViBEApplications::PresagePredictionEngine}, and \hyperlink{classOpenViBEApplications_1_1WordPredictionEngine_a9a7b3a5dcf9777a120185a34ee19af14}{OpenViBEApplications::WordPredictionEngine}.
+
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/\hyperlink{ovexWordPredictionInterface_8h}{ovexWordPredictionInterface.h}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/\hyperlink{ovexPresagePredictionEngine_8cpp}{ovexPresagePredictionEngine.cpp}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/\hyperlink{ovexWordPredictionEngine_8cpp}{ovexWordPredictionEngine.cpp}\end{DoxyCompactItemize}

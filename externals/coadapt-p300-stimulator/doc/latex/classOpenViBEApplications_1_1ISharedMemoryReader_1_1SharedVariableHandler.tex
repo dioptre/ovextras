@@ -1,0 +1,127 @@
+\hypertarget{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler}{
+\section{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler Class Reference}
+\label{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler}\index{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}}
+}
+
+
+{\ttfamily \#include $<$ovexISharedMemoryReader.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_abc7ac61cf1b8e626819446395721d9ce}{SharedVariableHandler} (OpenViBE::CString sharedMemoryName)
+\item 
+\hyperlink{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a190f07d2f88b05e012c5a87d5efe3b3c}{$\sim$SharedVariableHandler} ()
+\item 
+OpenViBE::IObject $\ast$ \hyperlink{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a9fc5074281b94f353e1bd02fbbcb250d}{front} (OpenViBE::uint32 inputIndex)
+\item 
+OpenViBE::IObject $\ast$ \hyperlink{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a084c0dee9e76f22e9684e982a482e8fb}{pop\_\-front} (OpenViBE::uint32 inputIndex)
+\item 
+void \hyperlink{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a3d5c4312d65e6feafeb7ebe217f0991e}{clear} (OpenViBE::uint32 inputIndex)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std::vector$<$ \hyperlink{classOpenViBEApplications_1_1ISharedMemoryReader}{ISharedMemoryReader} $\ast$ $>$ $\ast$ \hyperlink{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a917fa226452689369512d88779ecca5d}{m\_\-vSharedMemoryVariables}
+\item 
+OpenViBE::boolean \hyperlink{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a786e8776654876e573480d8a01ca9def}{m\_\-bFailedToOpen}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This nested class will handle/create the appropriate readers (implementations of \hyperlink{classOpenViBEApplications_1_1ISharedMemoryReader}{ISharedMemoryReader}) for all variables in the shared memory sharedMemoryName. The variables can either be vectors of stimulations or vectors of streamed matrices. In shared memory there will be a variable MetaInfo that indicates the name of the variables (so we can access it) and what the type of each variable is. The values are accessed by calling front or pop\_\-front on the correct index. The index identifies the reader corresponding to that variable in shared memory. So if the SharedMemoryWriterBox in the designer has two inputs, the first for stimulations, the second for streamed matrices, then the stimuli can be accessed by calling front(0) and the streamed matrices by calling front(1) 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_abc7ac61cf1b8e626819446395721d9ce}{
+\index{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}!SharedVariableHandler@{SharedVariableHandler}}
+\index{SharedVariableHandler@{SharedVariableHandler}!OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}}
+\subsubsection[{SharedVariableHandler}]{\setlength{\rightskip}{0pt plus 5cm}ISharedMemoryReader::SharedVariableHandler::SharedVariableHandler (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::CString}]{sharedMemoryName}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_abc7ac61cf1b8e626819446395721d9ce}
+Based on the variable MetaInfo in shared memory with name sharedMemoryName approriate readers (either for stimuli or for streamed matrices) will be created and stored in m\_\-vSharedMemoryVariables. Each of these readers will map a vector in shared memory of its corresponding type. 
+\begin{DoxyParams}{Parameters}
+{\em sharedMemoryName} & name of the shared memory as indicated in the SharedMemoryWriterBox in the openvibe designer \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a190f07d2f88b05e012c5a87d5efe3b3c}{
+\index{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}!$\sim$SharedVariableHandler@{$\sim$SharedVariableHandler}}
+\index{$\sim$SharedVariableHandler@{$\sim$SharedVariableHandler}!OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}}
+\subsubsection[{$\sim$SharedVariableHandler}]{\setlength{\rightskip}{0pt plus 5cm}ISharedMemoryReader::SharedVariableHandler::$\sim$SharedVariableHandler (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a190f07d2f88b05e012c5a87d5efe3b3c}
+Destructor 
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a3d5c4312d65e6feafeb7ebe217f0991e}{
+\index{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}!clear@{clear}}
+\index{clear@{clear}!OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}}
+\subsubsection[{clear}]{\setlength{\rightskip}{0pt plus 5cm}void OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler::clear (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32}]{inputIndex}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a3d5c4312d65e6feafeb7ebe217f0991e}
+clears the vector variable at index inputIndex 
+\begin{DoxyParams}{Parameters}
+{\em inputIndex} & \\
+\hline
+\end{DoxyParams}
+\hypertarget{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a9fc5074281b94f353e1bd02fbbcb250d}{
+\index{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}!front@{front}}
+\index{front@{front}!OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}}
+\subsubsection[{front}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::IObject$\ast$ OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler::front (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32}]{inputIndex}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a9fc5074281b94f353e1bd02fbbcb250d}
+returns the first element of the vector at index inputIndex 
+\begin{DoxyParams}{Parameters}
+{\em inputIndex} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+OpenViBE StimulationSet or StreamedMatrix depending on the type of the variable at index inputIndex 
+\end{DoxyReturn}
+\hypertarget{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a084c0dee9e76f22e9684e982a482e8fb}{
+\index{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}!pop\_\-front@{pop\_\-front}}
+\index{pop\_\-front@{pop\_\-front}!OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}}
+\subsubsection[{pop\_\-front}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::IObject$\ast$ OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler::pop\_\-front (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32}]{inputIndex}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a084c0dee9e76f22e9684e982a482e8fb}
+returns the first element of the vector at index inputIndex and deletes it 
+\begin{DoxyParams}{Parameters}
+{\em inputIndex} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+OpenViBE's IStimulationSet or IMatrix depending on the type of the variable at index inputIndex 
+\end{DoxyReturn}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a786e8776654876e573480d8a01ca9def}{
+\index{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}!m\_\-bFailedToOpen@{m\_\-bFailedToOpen}}
+\index{m\_\-bFailedToOpen@{m\_\-bFailedToOpen}!OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}}
+\subsubsection[{m\_\-bFailedToOpen}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::boolean {\bf OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler::m\_\-bFailedToOpen}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a786e8776654876e573480d8a01ca9def}
+\hypertarget{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a917fa226452689369512d88779ecca5d}{
+\index{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}!m\_\-vSharedMemoryVariables@{m\_\-vSharedMemoryVariables}}
+\index{m\_\-vSharedMemoryVariables@{m\_\-vSharedMemoryVariables}!OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler@{OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler}}
+\subsubsection[{m\_\-vSharedMemoryVariables}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<${\bf ISharedMemoryReader}$\ast$$>$$\ast$ {\bf OpenViBEApplications::ISharedMemoryReader::SharedVariableHandler::m\_\-vSharedMemoryVariables}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ISharedMemoryReader_1_1SharedVariableHandler_a917fa226452689369512d88779ecca5d}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/iocommunication/\hyperlink{ovexISharedMemoryReader_8h}{ovexISharedMemoryReader.h}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/iocommunication/\hyperlink{ovexISharedMemoryReader_8cpp}{ovexISharedMemoryReader.cpp}\end{DoxyCompactItemize}

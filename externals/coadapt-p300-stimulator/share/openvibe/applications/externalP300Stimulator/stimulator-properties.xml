@@ -1,0 +1,12 @@
+<ExternelP300Stimulator>
+	<SharedMemoryName>SharedMemory_P300Stimulator</SharedMemoryName>
+	<TargetWord>${WordToSpell}</TargetWord>
+	<InitialNumberOfGroups>${NumberOfGroups}</InitialNumberOfGroups>
+	<MinRepetitions>2</MinRepetitions>
+	<MaxRepetitions>${NrOfRepetitions}</MaxRepetitions>
+	<NumberOfTrials>${WordLength}</NumberOfTrials>
+	<FlashDuration>${FlashDuration}</FlashDuration>
+	<InterStimulusOnset>${InterStimulusOnset}</InterStimulusOnset>
+	<InterRepetitionDelay>${InterRepDuration}</InterRepetitionDelay>
+	<InterTrialDelay>5</InterTrialDelay>
+</ExternelP300Stimulator>

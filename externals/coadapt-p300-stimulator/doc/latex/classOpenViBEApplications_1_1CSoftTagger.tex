@@ -1,0 +1,133 @@
+\hypertarget{classOpenViBEApplications_1_1CSoftTagger}{
+\section{OpenViBEApplications::CSoftTagger Class Reference}
+\label{classOpenViBEApplications_1_1CSoftTagger}\index{OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}}
+}
+
+
+{\ttfamily \#include $<$ovexCSoftTagger.h$>$}
+
+Inheritance diagram for OpenViBEApplications::CSoftTagger:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classOpenViBEApplications_1_1CSoftTagger}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1CSoftTagger_a72a02e6ee1dbcdc7eaa4c9f463ab2ab0}{CSoftTagger} (std::string queueName=\char`\"{}openvibeExternalStimulations\char`\"{})
+\item 
+virtual \hyperlink{classOpenViBEApplications_1_1CSoftTagger_a472109314f2637786cd305cc61ebe4a5}{$\sim$CSoftTagger} ()
+\item 
+virtual int \hyperlink{classOpenViBEApplications_1_1CSoftTagger_a64bd7fa740f00445dd984803f3194a15}{open} ()
+\item 
+virtual int \hyperlink{classOpenViBEApplications_1_1CSoftTagger_a8cc4b6a6b5fb0cd00ecd07dd0f955120}{write} (OpenViBE::uint32 value)
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual int \hyperlink{classOpenViBEApplications_1_1CSoftTagger_a0cf05bebd1bb99269681c8a5ef0e8e14}{close} ()
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std::string \hyperlink{classOpenViBEApplications_1_1CSoftTagger_a65fb264b86640b26e4e1a78092e69f28}{m\_\-messageQueueName}
+\item 
+int \hyperlink{classOpenViBEApplications_1_1CSoftTagger_a37a5eb61b3329e4b0e59b251a54e374c}{m\_\-chunkLength}
+\item 
+int \hyperlink{classOpenViBEApplications_1_1CSoftTagger_a8e23c425a355cc0064f6c87d507084e5}{m\_\-maxMessages}
+\item 
+boost::interprocess::message\_\-queue $\ast$ \hyperlink{classOpenViBEApplications_1_1CSoftTagger_aff273e78a785a463d60890e7d86ec862}{m\_\-messageQueue}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1CSoftTagger_a72a02e6ee1dbcdc7eaa4c9f463ab2ab0}{
+\index{OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}!CSoftTagger@{CSoftTagger}}
+\index{CSoftTagger@{CSoftTagger}!OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}}
+\subsubsection[{CSoftTagger}]{\setlength{\rightskip}{0pt plus 5cm}CSoftTagger::CSoftTagger (
+\begin{DoxyParamCaption}
+\item[{std::string}]{queueName = {\ttfamily \char`\"{}openvibeExternalStimulations\char`\"{}}}
+\end{DoxyParamCaption}
+)}}
+\label{classOpenViBEApplications_1_1CSoftTagger_a72a02e6ee1dbcdc7eaa4c9f463ab2ab0}
+\hypertarget{classOpenViBEApplications_1_1CSoftTagger_a472109314f2637786cd305cc61ebe4a5}{
+\index{OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}!$\sim$CSoftTagger@{$\sim$CSoftTagger}}
+\index{$\sim$CSoftTagger@{$\sim$CSoftTagger}!OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}}
+\subsubsection[{$\sim$CSoftTagger}]{\setlength{\rightskip}{0pt plus 5cm}CSoftTagger::$\sim$CSoftTagger (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1CSoftTagger_a472109314f2637786cd305cc61ebe4a5}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1CSoftTagger_a0cf05bebd1bb99269681c8a5ef0e8e14}{
+\index{OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}!close@{close}}
+\index{close@{close}!OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}int CSoftTagger::close (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1CSoftTagger_a0cf05bebd1bb99269681c8a5ef0e8e14}
+
+
+Implements \hyperlink{classOpenViBEApplications_1_1ITagger_a4be8c6343e35cd485c16d2359402a607}{OpenViBEApplications::ITagger}.
+
+\hypertarget{classOpenViBEApplications_1_1CSoftTagger_a64bd7fa740f00445dd984803f3194a15}{
+\index{OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}!open@{open}}
+\index{open@{open}!OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}}
+\subsubsection[{open}]{\setlength{\rightskip}{0pt plus 5cm}int CSoftTagger::open (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1CSoftTagger_a64bd7fa740f00445dd984803f3194a15}
+
+
+Implements \hyperlink{classOpenViBEApplications_1_1ITagger_a9fdb783454b71a6c69db8a1cfc8ebe30}{OpenViBEApplications::ITagger}.
+
+\hypertarget{classOpenViBEApplications_1_1CSoftTagger_a8cc4b6a6b5fb0cd00ecd07dd0f955120}{
+\index{OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}!write@{write}}
+\index{write@{write}!OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}int CSoftTagger::write (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32}]{value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1CSoftTagger_a8cc4b6a6b5fb0cd00ecd07dd0f955120}
+
+
+Implements \hyperlink{classOpenViBEApplications_1_1ITagger_a986aae0747ce120c9fa789bda4ff0178}{OpenViBEApplications::ITagger}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1CSoftTagger_a37a5eb61b3329e4b0e59b251a54e374c}{
+\index{OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}!m\_\-chunkLength@{m\_\-chunkLength}}
+\index{m\_\-chunkLength@{m\_\-chunkLength}!OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}}
+\subsubsection[{m\_\-chunkLength}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf OpenViBEApplications::CSoftTagger::m\_\-chunkLength}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1CSoftTagger_a37a5eb61b3329e4b0e59b251a54e374c}
+\hypertarget{classOpenViBEApplications_1_1CSoftTagger_a8e23c425a355cc0064f6c87d507084e5}{
+\index{OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}!m\_\-maxMessages@{m\_\-maxMessages}}
+\index{m\_\-maxMessages@{m\_\-maxMessages}!OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}}
+\subsubsection[{m\_\-maxMessages}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf OpenViBEApplications::CSoftTagger::m\_\-maxMessages}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1CSoftTagger_a8e23c425a355cc0064f6c87d507084e5}
+\hypertarget{classOpenViBEApplications_1_1CSoftTagger_aff273e78a785a463d60890e7d86ec862}{
+\index{OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}!m\_\-messageQueue@{m\_\-messageQueue}}
+\index{m\_\-messageQueue@{m\_\-messageQueue}!OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}}
+\subsubsection[{m\_\-messageQueue}]{\setlength{\rightskip}{0pt plus 5cm}boost::interprocess::message\_\-queue$\ast$ {\bf OpenViBEApplications::CSoftTagger::m\_\-messageQueue}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1CSoftTagger_aff273e78a785a463d60890e7d86ec862}
+\hypertarget{classOpenViBEApplications_1_1CSoftTagger_a65fb264b86640b26e4e1a78092e69f28}{
+\index{OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}!m\_\-messageQueueName@{m\_\-messageQueueName}}
+\index{m\_\-messageQueueName@{m\_\-messageQueueName}!OpenViBEApplications::CSoftTagger@{OpenViBEApplications::CSoftTagger}}
+\subsubsection[{m\_\-messageQueueName}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf OpenViBEApplications::CSoftTagger::m\_\-messageQueueName}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classOpenViBEApplications_1_1CSoftTagger_a65fb264b86640b26e4e1a78092e69f28}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/\hyperlink{ovexCSoftTagger_8h}{ovexCSoftTagger.h}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/\hyperlink{ovexCSoftTagger_8cpp}{ovexCSoftTagger.cpp}\end{DoxyCompactItemize}

@@ -1,0 +1,232 @@
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator}{
+\section{OpenViBEApplications::P300SequenceGenerator Class Reference}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator}\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+}
+
+
+{\ttfamily \#include $<$ovexP300SequenceGenerator.h$>$}
+
+Inheritance diagram for OpenViBEApplications::P300SequenceGenerator:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classOpenViBEApplications_1_1P300SequenceGenerator}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a08d681a56d0d687515ef58c12d5fe88e}{P300SequenceGenerator} (OpenViBE::uint32 numberOfSymbols, OpenViBE::uint32 numberOfGroups, OpenViBE::uint32 nrOfRepetitions)
+\item 
+virtual \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_ad1df59d4ed25b3ebd0389adc949cbd65}{$\sim$P300SequenceGenerator} ()
+\item 
+virtual std::vector$<$ std::vector$<$ OpenViBE::uint32 $>$ $\ast$ $>$ $\ast$ \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a29143168551c2355d07befd1fe13e1b2}{generateSequence} ()
+\item 
+void \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a7e57f5de7708f11a3a5986f96d694c15}{setSequenceWriter} (\hyperlink{classOpenViBEApplications_1_1P300SequenceWriter}{P300SequenceWriter} $\ast$l\_\-wSequenceWriter)
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a657340d199fda2516bc7e35f32f9f630}{changeNumberOfSymbols} (OpenViBE::uint32 numberOfSymbols)=0
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_adc636f0a0d1dee0a0b429ef91f1fa57f}{changeNumberOfGroups} (OpenViBE::uint32 numberOfGroups)=0
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_ae2b26947433e2a16c4007da82781458f}{getNumberOfRepetitions} ()
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_aa89e135d54fbfc81fbbcc195a74191eb}{getNumberOfSymbols} ()
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a7cfdd3b3a28a38e81ec94cffc0b5ca3a}{getNumberOfGroups} ()
+\item 
+std::vector$<$ OpenViBE::uint32 $>$ $\ast$ \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a658f72d73104923ab74ed102283d5419}{getNextFlashGroup} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+OpenViBE::float64 \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a2d44c436cc1f61e6e6dffad60ea0a420}{round} (OpenViBE::float64 x)
+\item 
+OpenViBE::float64 \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a496c6ce0f9c388fa8b4c24999c0df38e}{log2} (OpenViBE::float64 x)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a73799a32089d8471dd8d27585a204f50}{m\_\-ui32NumberOfSymbols}
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a08dd649d08d9720bfab1dccb582062bc}{m\_\-ui32NumberOfGroups}
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a127e878b3eb5bb49dd5aea97ff1b4a16}{m\_\-ui32MaxNumberOfRepetitions}
+\item 
+OpenViBE::uint32 \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_aedc788a8119d3f0fb94a0dcbd63dc21d}{m\_\-ui32FlashCount}
+\item 
+std::vector$<$ std::vector$<$ OpenViBE::uint32 $>$ $\ast$ $>$ $\ast$ \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a75766827412e3e9c5934387adbca1ec8}{m\_\-lSequence}
+\item 
+\hyperlink{classOpenViBEApplications_1_1P300SequenceWriter}{P300SequenceWriter} $\ast$ \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a24647523b5cad20e5f8d4ae40251373a}{m\_\-wSequenceWriter}
+\item 
+OpenViBE::uint64 \hyperlink{classOpenViBEApplications_1_1P300SequenceGenerator_a221d4dda210b33fe4f447313187c833a}{m\_\-ui64TrialIndex}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a08d681a56d0d687515ef58c12d5fe88e}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!P300SequenceGenerator@{P300SequenceGenerator}}
+\index{P300SequenceGenerator@{P300SequenceGenerator}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{P300SequenceGenerator}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBEApplications::P300SequenceGenerator::P300SequenceGenerator (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32}]{numberOfSymbols, }
+\item[{OpenViBE::uint32}]{numberOfGroups, }
+\item[{OpenViBE::uint32}]{nrOfRepetitions}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a08d681a56d0d687515ef58c12d5fe88e}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_ad1df59d4ed25b3ebd0389adc949cbd65}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!$\sim$P300SequenceGenerator@{$\sim$P300SequenceGenerator}}
+\index{$\sim$P300SequenceGenerator@{$\sim$P300SequenceGenerator}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{$\sim$P300SequenceGenerator}]{\setlength{\rightskip}{0pt plus 5cm}virtual OpenViBEApplications::P300SequenceGenerator::$\sim$P300SequenceGenerator (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_ad1df59d4ed25b3ebd0389adc949cbd65}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_adc636f0a0d1dee0a0b429ef91f1fa57f}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!changeNumberOfGroups@{changeNumberOfGroups}}
+\index{changeNumberOfGroups@{changeNumberOfGroups}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{changeNumberOfGroups}]{\setlength{\rightskip}{0pt plus 5cm}virtual void OpenViBEApplications::P300SequenceGenerator::changeNumberOfGroups (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32}]{numberOfGroups}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_adc636f0a0d1dee0a0b429ef91f1fa57f}
+
+
+Implemented in \hyperlink{classOpenViBEApplications_1_1P300RipRandSequenceGenerator_a4d43617d54ee9301832baa766436f575}{OpenViBEApplications::P300RipRandSequenceGenerator}, and \hyperlink{classOpenViBEApplications_1_1P300RowColumnSequenceGenerator_a25c3a52a4e2bf3907f3cf2f2efc0923c}{OpenViBEApplications::P300RowColumnSequenceGenerator}.
+
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a657340d199fda2516bc7e35f32f9f630}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!changeNumberOfSymbols@{changeNumberOfSymbols}}
+\index{changeNumberOfSymbols@{changeNumberOfSymbols}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{changeNumberOfSymbols}]{\setlength{\rightskip}{0pt plus 5cm}virtual void OpenViBEApplications::P300SequenceGenerator::changeNumberOfSymbols (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::uint32}]{numberOfSymbols}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a657340d199fda2516bc7e35f32f9f630}
+
+
+Implemented in \hyperlink{classOpenViBEApplications_1_1P300RipRandSequenceGenerator_a666993b80976acb68867fd76238e4e34}{OpenViBEApplications::P300RipRandSequenceGenerator}, and \hyperlink{classOpenViBEApplications_1_1P300RowColumnSequenceGenerator_a247bf27e9f76d6127688e425e25b018b}{OpenViBEApplications::P300RowColumnSequenceGenerator}.
+
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a29143168551c2355d07befd1fe13e1b2}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!generateSequence@{generateSequence}}
+\index{generateSequence@{generateSequence}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{generateSequence}]{\setlength{\rightskip}{0pt plus 5cm}virtual std::vector$<$ std::vector$<$OpenViBE::uint32$>$$\ast$ $>$$\ast$ OpenViBEApplications::P300SequenceGenerator::generateSequence (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a29143168551c2355d07befd1fe13e1b2}
+
+
+Reimplemented in \hyperlink{classOpenViBEApplications_1_1P300RipRandSequenceGenerator_ac4d8f5278614d29953921fb9ee752b90}{OpenViBEApplications::P300RipRandSequenceGenerator}, and \hyperlink{classOpenViBEApplications_1_1P300RowColumnSequenceGenerator_ae6c55f653e229ffa3083b7c238451ee5}{OpenViBEApplications::P300RowColumnSequenceGenerator}.
+
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a658f72d73104923ab74ed102283d5419}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!getNextFlashGroup@{getNextFlashGroup}}
+\index{getNextFlashGroup@{getNextFlashGroup}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{getNextFlashGroup}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$OpenViBE::uint32$>$$\ast$ OpenViBEApplications::P300SequenceGenerator::getNextFlashGroup (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a658f72d73104923ab74ed102283d5419}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a7cfdd3b3a28a38e81ec94cffc0b5ca3a}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!getNumberOfGroups@{getNumberOfGroups}}
+\index{getNumberOfGroups@{getNumberOfGroups}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{getNumberOfGroups}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 OpenViBEApplications::P300SequenceGenerator::getNumberOfGroups (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a7cfdd3b3a28a38e81ec94cffc0b5ca3a}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_ae2b26947433e2a16c4007da82781458f}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!getNumberOfRepetitions@{getNumberOfRepetitions}}
+\index{getNumberOfRepetitions@{getNumberOfRepetitions}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{getNumberOfRepetitions}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 OpenViBEApplications::P300SequenceGenerator::getNumberOfRepetitions (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_ae2b26947433e2a16c4007da82781458f}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_aa89e135d54fbfc81fbbcc195a74191eb}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!getNumberOfSymbols@{getNumberOfSymbols}}
+\index{getNumberOfSymbols@{getNumberOfSymbols}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{getNumberOfSymbols}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 OpenViBEApplications::P300SequenceGenerator::getNumberOfSymbols (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_aa89e135d54fbfc81fbbcc195a74191eb}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a496c6ce0f9c388fa8b4c24999c0df38e}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!log2@{log2}}
+\index{log2@{log2}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{log2}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::float64 OpenViBEApplications::P300SequenceGenerator::log2 (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::float64}]{x}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a496c6ce0f9c388fa8b4c24999c0df38e}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a2d44c436cc1f61e6e6dffad60ea0a420}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!round@{round}}
+\index{round@{round}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{round}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::float64 OpenViBEApplications::P300SequenceGenerator::round (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::float64}]{x}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a2d44c436cc1f61e6e6dffad60ea0a420}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a7e57f5de7708f11a3a5986f96d694c15}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!setSequenceWriter@{setSequenceWriter}}
+\index{setSequenceWriter@{setSequenceWriter}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{setSequenceWriter}]{\setlength{\rightskip}{0pt plus 5cm}void OpenViBEApplications::P300SequenceGenerator::setSequenceWriter (
+\begin{DoxyParamCaption}
+\item[{{\bf P300SequenceWriter} $\ast$}]{l\_\-wSequenceWriter}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a7e57f5de7708f11a3a5986f96d694c15}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a75766827412e3e9c5934387adbca1ec8}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!m\_\-lSequence@{m\_\-lSequence}}
+\index{m\_\-lSequence@{m\_\-lSequence}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{m\_\-lSequence}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$ std::vector$<$OpenViBE::uint32$>$$\ast$ $>$$\ast$ {\bf OpenViBEApplications::P300SequenceGenerator::m\_\-lSequence}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a75766827412e3e9c5934387adbca1ec8}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_aedc788a8119d3f0fb94a0dcbd63dc21d}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!m\_\-ui32FlashCount@{m\_\-ui32FlashCount}}
+\index{m\_\-ui32FlashCount@{m\_\-ui32FlashCount}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{m\_\-ui32FlashCount}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 {\bf OpenViBEApplications::P300SequenceGenerator::m\_\-ui32FlashCount}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_aedc788a8119d3f0fb94a0dcbd63dc21d}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a127e878b3eb5bb49dd5aea97ff1b4a16}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!m\_\-ui32MaxNumberOfRepetitions@{m\_\-ui32MaxNumberOfRepetitions}}
+\index{m\_\-ui32MaxNumberOfRepetitions@{m\_\-ui32MaxNumberOfRepetitions}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{m\_\-ui32MaxNumberOfRepetitions}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 {\bf OpenViBEApplications::P300SequenceGenerator::m\_\-ui32MaxNumberOfRepetitions}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a127e878b3eb5bb49dd5aea97ff1b4a16}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a08dd649d08d9720bfab1dccb582062bc}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!m\_\-ui32NumberOfGroups@{m\_\-ui32NumberOfGroups}}
+\index{m\_\-ui32NumberOfGroups@{m\_\-ui32NumberOfGroups}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{m\_\-ui32NumberOfGroups}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 {\bf OpenViBEApplications::P300SequenceGenerator::m\_\-ui32NumberOfGroups}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a08dd649d08d9720bfab1dccb582062bc}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a73799a32089d8471dd8d27585a204f50}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!m\_\-ui32NumberOfSymbols@{m\_\-ui32NumberOfSymbols}}
+\index{m\_\-ui32NumberOfSymbols@{m\_\-ui32NumberOfSymbols}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{m\_\-ui32NumberOfSymbols}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint32 {\bf OpenViBEApplications::P300SequenceGenerator::m\_\-ui32NumberOfSymbols}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a73799a32089d8471dd8d27585a204f50}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a221d4dda210b33fe4f447313187c833a}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!m\_\-ui64TrialIndex@{m\_\-ui64TrialIndex}}
+\index{m\_\-ui64TrialIndex@{m\_\-ui64TrialIndex}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{m\_\-ui64TrialIndex}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::uint64 {\bf OpenViBEApplications::P300SequenceGenerator::m\_\-ui64TrialIndex}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a221d4dda210b33fe4f447313187c833a}
+\hypertarget{classOpenViBEApplications_1_1P300SequenceGenerator_a24647523b5cad20e5f8d4ae40251373a}{
+\index{OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}!m\_\-wSequenceWriter@{m\_\-wSequenceWriter}}
+\index{m\_\-wSequenceWriter@{m\_\-wSequenceWriter}!OpenViBEApplications::P300SequenceGenerator@{OpenViBEApplications::P300SequenceGenerator}}
+\subsubsection[{m\_\-wSequenceWriter}]{\setlength{\rightskip}{0pt plus 5cm}{\bf P300SequenceWriter}$\ast$ {\bf OpenViBEApplications::P300SequenceGenerator::m\_\-wSequenceWriter}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1P300SequenceGenerator_a24647523b5cad20e5f8d4ae40251373a}
+
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/\hyperlink{ovexP300SequenceGenerator_8h}{ovexP300SequenceGenerator.h}\end{DoxyCompactItemize}

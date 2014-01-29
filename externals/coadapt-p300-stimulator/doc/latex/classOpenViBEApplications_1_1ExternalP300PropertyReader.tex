@@ -1,0 +1,194 @@
+\hypertarget{classOpenViBEApplications_1_1ExternalP300PropertyReader}{
+\section{OpenViBEApplications::ExternalP300PropertyReader Class Reference}
+\label{classOpenViBEApplications_1_1ExternalP300PropertyReader}\index{OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}}
+}
+
+
+{\ttfamily \#include $<$ovexP300PropertyReader.h$>$}
+
+Inheritance diagram for OpenViBEApplications::ExternalP300PropertyReader:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.138211cm]{classOpenViBEApplications_1_1ExternalP300PropertyReader}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader_a310646db1656369da0d1f214f0c7d3b4}{ExternalP300PropertyReader} (OpenViBE::Kernel::IKernelContext $\ast$kernelContext)
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader_a8a191585eae83876f09c53c1f7b42cc3}{readPropertiesFromFile} (OpenViBE::CString propertyFile)
+\item 
+virtual OpenViBE::Kernel::IKernelContext $\ast$ \hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader_a04eff583d40452b888b0fb685771e56c}{getKernelContext} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader_a8a8d1f72afaf3f2f54115578a3d15ac8}{openChild} (const char $\ast$sName, const char $\ast$$\ast$sAttributeName, const char $\ast$$\ast$sAttributeValue, XML::uint64 ui64AttributeCount)
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader_a924d8d7fcedebd489a0b4b20d8c639e0}{processChildData} (const char $\ast$sData)
+\item 
+virtual void \hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader_ad0ec527001193fe02a6017b870043f52}{closeChild} (void)
+\item 
+void \hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader_afacc10c480337882a0e71bef65b0fc2a}{writeAttribute} (const char $\ast$sName, const char $\ast$$\ast$sAttributeName, const char $\ast$$\ast$sAttributeValue, XML::uint64 ui64AttributeCount)
+\item 
+void \hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader_a3fa76c60d9c683d8be053910db63a9e0}{writeElement} (const char $\ast$sName, const char $\ast$sData)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+OpenViBE::Kernel::IKernelContext $\ast$ \hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader_afc976fc78245cb44a0e66f93dcd543cb}{m\_\-pKernelContext}
+\item 
+std::stack$<$ OpenViBE::CString $>$ \hyperlink{classOpenViBEApplications_1_1ExternalP300PropertyReader_ae1eb64666a2b0da436dffb55d0e79177}{m\_\-vNode}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This is the base class from which all other property readers will derive. \par
+ This class is responsible for reading the file and creating an IReader. \par
+ The derived class has to implement openChild, processChildData and closeChild which will process the xml files 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300PropertyReader_a310646db1656369da0d1f214f0c7d3b4}{
+\index{OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}!ExternalP300PropertyReader@{ExternalP300PropertyReader}}
+\index{ExternalP300PropertyReader@{ExternalP300PropertyReader}!OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}}
+\subsubsection[{ExternalP300PropertyReader}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBEApplications::ExternalP300PropertyReader::ExternalP300PropertyReader (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::Kernel::IKernelContext $\ast$}]{kernelContext}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300PropertyReader_a310646db1656369da0d1f214f0c7d3b4}
+
+\begin{DoxyParams}{Parameters}
+{\em kernelContext} & we need the kernel context to expand the variables in the xml files \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300PropertyReader_ad0ec527001193fe02a6017b870043f52}{
+\index{OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}!closeChild@{closeChild}}
+\index{closeChild@{closeChild}!OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}}
+\subsubsection[{closeChild}]{\setlength{\rightskip}{0pt plus 5cm}virtual void OpenViBEApplications::ExternalP300PropertyReader::closeChild (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300PropertyReader_ad0ec527001193fe02a6017b870043f52}
+To be implemented in the derived reader classes 
+
+Reimplemented in \hyperlink{classOpenViBEApplications_1_1P300InterfacePropertyReader_ae3adb6d018131428c4dbda2123307d1f}{OpenViBEApplications::P300InterfacePropertyReader}, \hyperlink{classOpenViBEApplications_1_1P300ScreenLayoutReader_a8a2a08c1b3c8fba576088894b9be9c22}{OpenViBEApplications::P300ScreenLayoutReader}, and \hyperlink{classOpenViBEApplications_1_1P300StimulatorPropertyReader_aa1cb7db4ca2e2f40b10b6441a80b8fc3}{OpenViBEApplications::P300StimulatorPropertyReader}.
+
+\hypertarget{classOpenViBEApplications_1_1ExternalP300PropertyReader_a04eff583d40452b888b0fb685771e56c}{
+\index{OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}!getKernelContext@{getKernelContext}}
+\index{getKernelContext@{getKernelContext}!OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}}
+\subsubsection[{getKernelContext}]{\setlength{\rightskip}{0pt plus 5cm}virtual OpenViBE::Kernel::IKernelContext$\ast$ OpenViBEApplications::ExternalP300PropertyReader::getKernelContext (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300PropertyReader_a04eff583d40452b888b0fb685771e56c}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300PropertyReader_a8a8d1f72afaf3f2f54115578a3d15ac8}{
+\index{OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}!openChild@{openChild}}
+\index{openChild@{openChild}!OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}}
+\subsubsection[{openChild}]{\setlength{\rightskip}{0pt plus 5cm}virtual void OpenViBEApplications::ExternalP300PropertyReader::openChild (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{sName, }
+\item[{const char $\ast$$\ast$}]{sAttributeName, }
+\item[{const char $\ast$$\ast$}]{sAttributeValue, }
+\item[{XML::uint64}]{ui64AttributeCount}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300PropertyReader_a8a8d1f72afaf3f2f54115578a3d15ac8}
+To be implemented in the derived reader classes 
+\begin{DoxyParams}{Parameters}
+{\em sName} & name of the element tag \\
+\hline
+{\em sAttributeName} & name of an attribute in the element tag \\
+\hline
+{\em sAttributeValue} & value of that attribute \\
+\hline
+{\em ui64AttributeCount} & number of attributes in the element \\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented in \hyperlink{classOpenViBEApplications_1_1P300InterfacePropertyReader_acf3e4c17683b6f9c7e1ae57fd3d4c2ce}{OpenViBEApplications::P300InterfacePropertyReader}, \hyperlink{classOpenViBEApplications_1_1P300ScreenLayoutReader_aa3bfbdacafec5b5d2e2e564769c21e64}{OpenViBEApplications::P300ScreenLayoutReader}, and \hyperlink{classOpenViBEApplications_1_1P300StimulatorPropertyReader_afc6827ab2fa7eda4889c22de8de1bbda}{OpenViBEApplications::P300StimulatorPropertyReader}.
+
+\hypertarget{classOpenViBEApplications_1_1ExternalP300PropertyReader_a924d8d7fcedebd489a0b4b20d8c639e0}{
+\index{OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}!processChildData@{processChildData}}
+\index{processChildData@{processChildData}!OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}}
+\subsubsection[{processChildData}]{\setlength{\rightskip}{0pt plus 5cm}virtual void OpenViBEApplications::ExternalP300PropertyReader::processChildData (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{sData}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected, virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300PropertyReader_a924d8d7fcedebd489a0b4b20d8c639e0}
+To be implemented in the derived reader classes 
+\begin{DoxyParams}{Parameters}
+{\em sData} & the data between opening and closing of element \\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented in \hyperlink{classOpenViBEApplications_1_1P300InterfacePropertyReader_a8ea3d7870d0986c734459016b1ff0cd3}{OpenViBEApplications::P300InterfacePropertyReader}, \hyperlink{classOpenViBEApplications_1_1P300ScreenLayoutReader_a652b6100d2e3957b7d306b514bb22330}{OpenViBEApplications::P300ScreenLayoutReader}, and \hyperlink{classOpenViBEApplications_1_1P300StimulatorPropertyReader_aa68c21ade60195b825050a1f13593af1}{OpenViBEApplications::P300StimulatorPropertyReader}.
+
+\hypertarget{classOpenViBEApplications_1_1ExternalP300PropertyReader_a8a191585eae83876f09c53c1f7b42cc3}{
+\index{OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}!readPropertiesFromFile@{readPropertiesFromFile}}
+\index{readPropertiesFromFile@{readPropertiesFromFile}!OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}}
+\subsubsection[{readPropertiesFromFile}]{\setlength{\rightskip}{0pt plus 5cm}virtual void OpenViBEApplications::ExternalP300PropertyReader::readPropertiesFromFile (
+\begin{DoxyParamCaption}
+\item[{OpenViBE::CString}]{propertyFile}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300PropertyReader_a8a191585eae83876f09c53c1f7b42cc3}
+This methods opens and reads the file into a buffer. This buffer pointer is then used to create a XML reader object. The process function is called on this object which will consequently call the functions openChild, processChildData and closeChild implemented in the derived classes 
+\begin{DoxyParams}{Parameters}
+{\em propertyFile} & the xml file from which we wish to read the properties \\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented in \hyperlink{classOpenViBEApplications_1_1P300ScreenLayoutReader_a47dc35b731aacc8ef67646324fbc1455}{OpenViBEApplications::P300ScreenLayoutReader}.
+
+\hypertarget{classOpenViBEApplications_1_1ExternalP300PropertyReader_afacc10c480337882a0e71bef65b0fc2a}{
+\index{OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}!writeAttribute@{writeAttribute}}
+\index{writeAttribute@{writeAttribute}!OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}}
+\subsubsection[{writeAttribute}]{\setlength{\rightskip}{0pt plus 5cm}void ExternalP300PropertyReader::writeAttribute (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{sName, }
+\item[{const char $\ast$$\ast$}]{sAttributeName, }
+\item[{const char $\ast$$\ast$}]{sAttributeValue, }
+\item[{XML::uint64}]{ui64AttributeCount}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300PropertyReader_afacc10c480337882a0e71bef65b0fc2a}
+for debuggin purposes \hypertarget{classOpenViBEApplications_1_1ExternalP300PropertyReader_a3fa76c60d9c683d8be053910db63a9e0}{
+\index{OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}!writeElement@{writeElement}}
+\index{writeElement@{writeElement}!OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}}
+\subsubsection[{writeElement}]{\setlength{\rightskip}{0pt plus 5cm}void ExternalP300PropertyReader::writeElement (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{sName, }
+\item[{const char $\ast$}]{sData}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300PropertyReader_a3fa76c60d9c683d8be053910db63a9e0}
+for debuggin purposes 
+
+\subsection{Member Data Documentation}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300PropertyReader_afc976fc78245cb44a0e66f93dcd543cb}{
+\index{OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}!m\_\-pKernelContext@{m\_\-pKernelContext}}
+\index{m\_\-pKernelContext@{m\_\-pKernelContext}!OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}}
+\subsubsection[{m\_\-pKernelContext}]{\setlength{\rightskip}{0pt plus 5cm}OpenViBE::Kernel::IKernelContext$\ast$ {\bf OpenViBEApplications::ExternalP300PropertyReader::m\_\-pKernelContext}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300PropertyReader_afc976fc78245cb44a0e66f93dcd543cb}
+\hypertarget{classOpenViBEApplications_1_1ExternalP300PropertyReader_ae1eb64666a2b0da436dffb55d0e79177}{
+\index{OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}!m\_\-vNode@{m\_\-vNode}}
+\index{m\_\-vNode@{m\_\-vNode}!OpenViBEApplications::ExternalP300PropertyReader@{OpenViBEApplications::ExternalP300PropertyReader}}
+\subsubsection[{m\_\-vNode}]{\setlength{\rightskip}{0pt plus 5cm}std::stack$<$OpenViBE::CString$>$ {\bf OpenViBEApplications::ExternalP300PropertyReader::m\_\-vNode}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classOpenViBEApplications_1_1ExternalP300PropertyReader_ae1eb64666a2b0da436dffb55d0e79177}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/properties/\hyperlink{ovexP300PropertyReader_8h}{ovexP300PropertyReader.h}\item 
+/home/ddevlami/openvibe2/externals/coadapt-\/p300-\/stimulator/src/properties/\hyperlink{ovexP300PropertyReader_8cpp}{ovexP300PropertyReader.cpp}\end{DoxyCompactItemize}
