@@ -251,6 +251,9 @@ namespace OpenViBE
 			std::vector<CInput> m_vInput;
 			std::vector<COutput> m_vOutput;
 			std::vector<CSetting> m_vSetting;
+			//to avoid having to recheck every setting every time
+			//careful to update at each setting modification
+			std::vector<OpenViBE::uint32> m_vModifiableSettingIndexes;
 
 			//only the name of the in/output are stored for message socket
 			std::vector<CMessageInput> m_vMessageInput;

@@ -259,11 +259,9 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 	  m_oWidget(NULL)
 {
 	m_vSettingValue.clear();
-	m_rKernelContext.getLogManager() << LogLevel_Warning << "m_sGUISettingsFilename is " << m_sGUISettingsFilename << "\n";
 
 	//modUI, get if we are in a running scenario
 	boolean l_bIsScenarioRunning = bMode;
-	boolean l_bModified=false;
 	m_oHelper = new CSettingCollectionHelper(m_rKernelContext, m_sGUISettingsFilename.toASCIIString());
 	if(m_rBox.getSettingCount())
 	{

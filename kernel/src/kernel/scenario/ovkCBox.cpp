@@ -241,11 +241,11 @@ boolean CBox::initializeFromExistingBox(
 		CString l_sDefaultValue;
 		boolean l_bModifiability;
 
-		rExisitingBox.getSettingType(i, l_oType);
-		rExisitingBox.getSettingName(i, l_sName);
-		rExisitingBox.getSettingValue(i, l_sValue);
-		rExisitingBox.getSettingDefaultValue(i, l_sDefaultValue);
-		rExisitingBox.getSettingMod(i, l_bModifiability);
+		rExistingBox.getSettingType(i, l_oType);
+		rExistingBox.getSettingName(i, l_sName);
+		rExistingBox.getSettingValue(i, l_sValue);
+		rExistingBox.getSettingDefaultValue(i, l_sDefaultValue);
+		rExistingBox.getSettingMod(i, l_bModifiability);
 		addSetting(l_sName, l_oType, l_sDefaultValue, l_bModifiability);
 		setSettingValue(i, l_sValue);
 	}
@@ -619,6 +619,12 @@ boolean CBox::addSetting(
 
 	m_vSetting.push_back(s);
 
+	//if this setting is modifiable, keep its index
+	if(bModifiability)
+	{
+		m_vModifiableSettingIndexes.push_back(m_vSetting.size()-1);
+	}
+
 	this->notify(BoxModification_SettingAdded, m_vSetting.size()-1);
 
 	return true;
@@ -638,6 +644,21 @@ boolean CBox::removeSetting(
 		return false;
 	}
 	it=m_vSetting.erase(it);
+
+	//update the modifiable setting indexes
+	vector<uint32>::iterator it2=m_vModifiableSettingIndexes.begin();
+	for (i=0; i<m_vSetting.size(); i++)
+	{
+		if(m_vModifiableSettingIndexes[i]==ui32SettingIndex)
+		{
+			m_vModifiableSettingIndexes.erase(it2);
+		}
+		else if(m_vModifiableSettingIndexes[i]>ui32SettingIndex)
+		{
+			m_vModifiableSettingIndexes[i]-=1;
+		}
+		it2++;
+	}
 
 	this->notify(BoxModification_SettingRemoved, ui32SettingIndex);
 

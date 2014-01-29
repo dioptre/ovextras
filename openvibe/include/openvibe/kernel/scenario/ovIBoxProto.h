@@ -90,13 +90,14 @@ namespace OpenViBE
 			 * \return The created setting index.
 			 */
 
+			/*
 			virtual OpenViBE::boolean addSetting(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier,
 				const OpenViBE::CString& sDefaultValue)=0;
 				//*/
 
-			virtual OpenViBE::uint32 addSetting(
+			virtual OpenViBE::boolean addSetting(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier,
 				const OpenViBE::CString& sDefaultValue,
