@@ -394,15 +394,37 @@ namespace OpenViBE
 				const OpenViBE::CString& rValue)=0;
 
 
-
+			/**
+			 * \brief Gets the setting modifiability
+			 * \param ui32SettingIndex [in] : The setting index
+			 * \param rValue [out] : The value
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 */
 			virtual OpenViBE::boolean getSettingMod(
 				const OpenViBE::uint32 ui32SettingIndex,
 				OpenViBE::boolean& rValue) const=0;
+
+			/**
+			 * \brief Sets the setting modifiability
+			 * \param ui32SettingIndex [in] : The setting index
+			 * \param rValue [in] : The value
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 */
 			virtual OpenViBE::boolean setSettingMod(
 				const OpenViBE::uint32 ui32SettingIndex,
 				const OpenViBE::boolean rValue)=0;
 
+			/**
+			 * \brief Inform if the box possess a modifiable interface
+			 * \return \e true if it does.
+			 * \return \e false otherwise.
+			 */
 			virtual OpenViBE::boolean hasModUI(void)const=0;
+
+
+			virtual OpenViBE::uint32* getModifiableSettings(OpenViBE::uint32& rCount)const =0;
 
 			//@}
 

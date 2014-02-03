@@ -7,9 +7,6 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <gdk/gdk.h>
-#include <gtk/gtk.h>
-
 // The unique identifiers for the box and its descriptor.
 // Identifier are randomly chosen by the skeleton-generator.
 #define OVP_ClassId_BoxAlgorithm_ModUI OpenViBE::CIdentifier(0x4AB0DD05, 0x32155D41)
@@ -60,10 +57,8 @@ namespace OpenViBEPlugins
 			// Stimulation stream encoder
 			OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmModUI > m_oAlgo2_StimulationEncoder;
 
-
-			::GtkWidget * m_pWidget;
-			::GtkWidget * m_pEntry;
 			OpenViBE::uint64 m_ui64Factor;
+			OpenViBE::uint64 m_ui64StimulationCode;
 
 		};
 
@@ -160,7 +155,7 @@ namespace OpenViBEPlugins
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
 				
-				rBoxAlgorithmPrototype.addSetting("LogLevel",OV_TypeId_LogLevel,"Trace");
+				rBoxAlgorithmPrototype.addSetting("Stimulation",OV_TypeId_Stimulations,"OVTK_GDF_Incorrect");
 
 				//add true at the end to mark a setting as modifiable
 				rBoxAlgorithmPrototype.addSetting("Int",OV_TypeId_Integer,"1", true);

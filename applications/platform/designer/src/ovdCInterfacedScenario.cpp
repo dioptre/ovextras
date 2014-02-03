@@ -1415,7 +1415,7 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 		m_vCurrentObject[l_oBoxIdentifier]=true;
 
 		// If a visualisation box was dropped, add it in window manager
-		if((l_pPOD && l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization)||(l_pBox->hasModUI())))
+		if((l_pPOD && l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization))||(l_pBox->hasModUI()))
 		{
 			// Let window manager know about new box
 			m_pDesignerVisualisation->onVisualisationBoxAdded(l_pBox);

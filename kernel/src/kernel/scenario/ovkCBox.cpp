@@ -818,6 +818,16 @@ boolean CBox::hasModUI(void)const
 	return rValue;
 }
 
+uint32* CBox::getModifiableSettings(uint32& rCount)const
+{
+	uint32* l_pReturn = NULL;
+	rCount = m_vModifiableSettingIndexes.size();
+
+	return l_pReturn;
+
+}
+
+
 //*/
 
 //___________________________________________________________________//
