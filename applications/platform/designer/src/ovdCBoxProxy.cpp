@@ -112,61 +112,64 @@ void CBoxProxy::apply(void)
 
 const char* CBoxProxy::getLabel(void) const
 {
-	boolean l_bBoxCanChangeInput  (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyInput)  ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddInput));
-	boolean l_bBoxCanChangeOutput (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyOutput) ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddOutput));
-	boolean l_bBoxCanChangeSetting(m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifySetting)||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddSetting));
-	boolean l_bBoxIsUpToDate      (this->isBoxAlgorithmPluginPresent()  ? this->isUpToDate() : true);
-	boolean l_bBoxIsDeprecated    (this->isBoxAlgorithmPluginPresent() && this->isDeprecated());
-	boolean l_bBoxIsUnstable      (this->isBoxAlgorithmPluginPresent() && this->isUnstable());
-	boolean l_bIsMuted            (this->getMute());
-	const IPluginObjectDesc* l_pDesc=m_rKernelContext.getPluginManager().getPluginObjectDescCreating(m_pConstBox->getAlgorithmClassIdentifier());
+   if (m_sLabel.size()==0)
+   {
+	    boolean l_bBoxCanChangeInput  (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyInput)  ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddInput));
+	    boolean l_bBoxCanChangeOutput (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyOutput) ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddOutput));
+	    boolean l_bBoxCanChangeSetting(m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifySetting)||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddSetting));
+	    boolean l_bBoxIsUpToDate      (this->isBoxAlgorithmPluginPresent()  ? this->isUpToDate() : true);
+	    boolean l_bBoxIsDeprecated    (this->isBoxAlgorithmPluginPresent() && this->isDeprecated());
+	    boolean l_bBoxIsUnstable      (this->isBoxAlgorithmPluginPresent() && this->isUnstable());
+	    boolean l_bIsMuted            (this->getMute());
+	    const IPluginObjectDesc* l_pDesc=m_rKernelContext.getPluginManager().getPluginObjectDescCreating(m_pConstBox->getAlgorithmClassIdentifier());
 
-	string l_sBoxName(m_pConstBox->getName());
-	string l_sBoxIden(m_pConstBox->getIdentifier().toString());
+	    string l_sBoxName(m_pConstBox->getName());
+	    string l_sBoxIden(m_pConstBox->getIdentifier().toString());
 
-	const string l_sRed("#602020");
-	const string l_sGreen("#206020");
-	const string l_sBlue("#202060");
-	const string l_sGrey("#404040");
+	    const string l_sRed("#602020");
+	    const string l_sGreen("#206020");
+	    const string l_sBlue("#202060");
+	    const string l_sGrey("#404040");
 
-	m_sLabel=l_sBoxName;
+	    m_sLabel=l_sBoxName;
 
-	if(m_pConstBox->getSettingCount()!=0)
-	{
-		m_sLabel="<span weight=\"bold\">"+m_sLabel+"</span>";
-	}
+	    if(m_pConstBox->getSettingCount()!=0)
+	    {
+		    m_sLabel="<span weight=\"bold\">"+m_sLabel+"</span>";
+	    }
 
-	if(m_bShowOriginalNameWhenModified)
-	{
-		string l_sBoxOriginalName(l_pDesc?string(l_pDesc->getName()):l_sBoxName);
-		if(l_sBoxOriginalName!=l_sBoxName)
-		{
-			m_sLabel="<small><i><span foreground=\""+l_sGrey+"\">"+l_sBoxOriginalName+"</span></i></small>\n"+m_sLabel;
-		}
-	}
+	    if(m_bShowOriginalNameWhenModified)
+	    {
+		    string l_sBoxOriginalName(l_pDesc?string(l_pDesc->getName()):l_sBoxName);
+		    if(l_sBoxOriginalName!=l_sBoxName)
+		    {
+			    m_sLabel="<small><i><span foreground=\""+l_sGrey+"\">"+l_sBoxOriginalName+"</span></i></small>\n"+m_sLabel;
+		    }
+	    }
 
-	if(l_bBoxCanChangeInput || l_bBoxCanChangeOutput || l_bBoxCanChangeSetting)
-	{
-		m_sLabel+="\n";
-		m_sLabel+="<span size=\"smaller\">";
-		m_sLabel+="<span foreground=\""+(l_bBoxCanChangeInput?l_sGreen:l_sRed)+"\">In</span>";
-		m_sLabel+="|";
-		m_sLabel+="<span foreground=\""+(l_bBoxCanChangeOutput?l_sGreen:l_sRed)+"\">Out</span>";
-		m_sLabel+="|";
-		m_sLabel+="<span foreground=\""+(l_bBoxCanChangeSetting?l_sGreen:l_sRed)+"\">Set</span>";
-		m_sLabel+="</span>";
-	}
+	    if(l_bBoxCanChangeInput || l_bBoxCanChangeOutput || l_bBoxCanChangeSetting)
+	    {
+		    m_sLabel+="\n";
+		    m_sLabel+="<span size=\"smaller\">";
+		    m_sLabel+="<span foreground=\""+(l_bBoxCanChangeInput?l_sGreen:l_sRed)+"\">In</span>";
+		    m_sLabel+="|";
+		    m_sLabel+="<span foreground=\""+(l_bBoxCanChangeOutput?l_sGreen:l_sRed)+"\">Out</span>";
+		    m_sLabel+="|";
+		    m_sLabel+="<span foreground=\""+(l_bBoxCanChangeSetting?l_sGreen:l_sRed)+"\">Set</span>";
+		    m_sLabel+="</span>";
+	    }
 
-	if(l_bBoxIsDeprecated || l_bBoxIsUnstable || !l_bBoxIsUpToDate || l_bIsMuted)
-	{
-		m_sLabel+="\n";
-		m_sLabel+="<span size=\"smaller\" foreground=\""+l_sBlue+"\">";
-		if(l_bBoxIsDeprecated) m_sLabel+=" <span style=\"italic\">deprecated</span>";
-		if(l_bBoxIsUnstable)   m_sLabel+=" <span style=\"italic\">unstable</span>";
-		if(!l_bBoxIsUpToDate)  m_sLabel+=" <span style=\"italic\">update</span>";
-		if(l_bIsMuted)         m_sLabel+=" <span style=\"italic\">muted</span>";
+	    if(l_bBoxIsDeprecated || l_bBoxIsUnstable || !l_bBoxIsUpToDate || l_bIsMuted)
+	    {
+		    m_sLabel+="\n";
+		    m_sLabel+="<span size=\"smaller\" foreground=\""+l_sBlue+"\">";
+		    if(l_bBoxIsDeprecated) m_sLabel+=" <span style=\"italic\">deprecated</span>";
+		    if(l_bBoxIsUnstable)   m_sLabel+=" <span style=\"italic\">unstable</span>";
+		    if(!l_bBoxIsUpToDate)  m_sLabel+=" <span style=\"italic\">update</span>";
+		    if(l_bIsMuted)         m_sLabel+=" <span style=\"italic\">muted</span>";
 
-		m_sLabel+=" </span>";
+		    m_sLabel+=" </span>";
+	    }
 	}
 
 	return m_sLabel.c_str();

@@ -5,6 +5,14 @@ if [ "$1" == "--debug" ]; then
 	ov_build_type=Debug
 	shift
 fi
+if [ "$1" == "--debug_symbols" ]; then
+	ov_build_type=RelWithDebInfo
+	shift
+fi
+if [ "$1" == "--profile" ]; then
+	ov_build_type=RelWithDebInfo -DCMAKE_C_FLAGS_RELWITHDEBINFO='-O2 -g -DNDEBUG -pg' -DCMAKE_CXX_FLAGS_RELWITHDEBINFO='-O2 -g -DNDEBUG -pg' -DCMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO='-pgq'
+	shift
+fi
 
 echo ""
 echo "_______________________________________________________________________________"
