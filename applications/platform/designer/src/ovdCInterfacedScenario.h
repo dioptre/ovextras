@@ -52,6 +52,9 @@ namespace OpenViBEDesigner
 		void pasteSelection(void);
 		void deleteSelection(void);
 
+		void setScale(OpenViBE::float64 rScale);
+		OpenViBE::float64 getScale();
+
 		void muteSelection(void);
 
 		void contextMenuBoxRenameCB(OpenViBE::Kernel::IBox& rBox);
@@ -145,6 +148,8 @@ namespace OpenViBEDesigner
 		OpenViBE::int32 m_i32ViewOffsetX;
 		OpenViBE::int32 m_i32ViewOffsetY;
 		OpenViBE::uint32 m_ui32CurrentMode;
+		OpenViBE::float64 m_f64CurrentScale;
+		OpenViBE::uint32 m_ui32NormalFontSize;
 
 		OpenViBE::uint32 m_ui32BoxCount;
 		OpenViBE::uint32 m_ui32CommentCount;

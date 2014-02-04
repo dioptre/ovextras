@@ -11,14 +11,14 @@ CCommentProxy::CCommentProxy(const IKernelContext& rKernelContext, const ICommen
 	,m_pConstComment(&rComment)
 	,m_pComment(NULL)
 	,m_bApplied(false)
-	,m_iXCenter(0)
-	,m_iYCenter(0)
+	,m_f64XCenter(0)
+	,m_f64YCenter(0)
 {
 	if(m_pConstComment)
 	{
 		TAttributeHandler l_oAttributeHandler(*m_pConstComment);
-		m_iXCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Comment_XCenterPosition);
-		m_iYCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Comment_YCenterPosition);
+		m_f64XCenter=l_oAttributeHandler.getAttributeValue<double>(OV_AttributeId_Comment_XCenterPosition);
+		m_f64YCenter=l_oAttributeHandler.getAttributeValue<double>(OV_AttributeId_Comment_YCenterPosition);
 	}
 }
 
@@ -26,14 +26,14 @@ CCommentProxy::CCommentProxy(const IKernelContext& rKernelContext, IScenario& rS
 	:m_rKernelContext(rKernelContext)
 	,m_pConstComment(rScenario.getCommentDetails(rCommentIdentifier))
 	,m_pComment(rScenario.getCommentDetails(rCommentIdentifier))
-	,m_iXCenter(0)
-	,m_iYCenter(0)
+	,m_f64XCenter(0)
+	,m_f64YCenter(0)
 {
 	if(m_pConstComment)
 	{
 		TAttributeHandler l_oAttributeHandler(*m_pConstComment);
-		m_iXCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Comment_XCenterPosition);
-		m_iYCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Comment_YCenterPosition);
+		m_f64XCenter=l_oAttributeHandler.getAttributeValue<double>(OV_AttributeId_Comment_XCenterPosition);
+		m_f64YCenter=l_oAttributeHandler.getAttributeValue<double>(OV_AttributeId_Comment_YCenterPosition);
 	}
 }
 
@@ -69,20 +69,20 @@ int32 CCommentProxy::getHeight(::GtkWidget* pWidget) const
 	return y;
 }
 
-int32 CCommentProxy::getXCenter(void) const
+float64 CCommentProxy::getXCenter(void) const
 {
-	return m_iXCenter;
+	return m_f64XCenter;
 }
 
-int32 CCommentProxy::getYCenter(void) const
+float64 CCommentProxy::getYCenter(void) const
 {
-	return m_iYCenter;
+	return m_f64YCenter;
 }
 
-void CCommentProxy::setCenter(int32 i32XCenter, int32 i32YCenter)
+void CCommentProxy::setCenter(float64 f64XCenter, float64 f64YCenter)
 {
-	m_iXCenter=i32XCenter;
-	m_iYCenter=i32YCenter;
+	m_f64XCenter=f64XCenter;
+	m_f64YCenter=f64YCenter;
 	m_bApplied=false;
 }
 
@@ -93,14 +93,14 @@ void CCommentProxy::apply(void)
 		TAttributeHandler l_oAttributeHandler(*m_pComment);
 
 		if(l_oAttributeHandler.hasAttribute(OV_AttributeId_Comment_XCenterPosition))
-			l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Comment_XCenterPosition, m_iXCenter);
+			l_oAttributeHandler.setAttributeValue<double>(OV_AttributeId_Comment_XCenterPosition, m_f64XCenter);
 		else
-			l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Comment_XCenterPosition, m_iXCenter);
+			l_oAttributeHandler.addAttribute<double>(OV_AttributeId_Comment_XCenterPosition, m_f64XCenter);
 
 		if(l_oAttributeHandler.hasAttribute(OV_AttributeId_Comment_YCenterPosition))
-			l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Comment_YCenterPosition, m_iYCenter);
+			l_oAttributeHandler.setAttributeValue<double>(OV_AttributeId_Comment_YCenterPosition, m_f64YCenter);
 		else
-			l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Comment_YCenterPosition, m_iYCenter);
+			l_oAttributeHandler.addAttribute<double>(OV_AttributeId_Comment_YCenterPosition, m_f64YCenter);
 		m_bApplied=true;
 	}
 }

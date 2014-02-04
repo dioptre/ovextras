@@ -69,6 +69,10 @@ namespace OpenViBEDesigner
 		void closeScenarioCB(
 			OpenViBEDesigner::CInterfacedScenario* pInterfacedScenario);
 
+		void zoomInCB(void);//Call when a zoom in is required
+		void zoomOutCB(void);//Call when a zoom out is required
+		void spinnerZoomChangedCB(OpenViBE::uint32 scaleDelta);
+
 		void stopScenarioCB(void);
 		void pauseScenarioCB(void);
 		void nextScenarioCB(void);
@@ -154,6 +158,7 @@ namespace OpenViBEDesigner
 		::GtkTreeView* m_pBoxAlgorithmTreeView;
 		::GtkTreeStore* m_pAlgorithmTreeModel;
 		::GtkTreeView* m_pAlgorithmTreeView;
+		::GtkSpinButton* m_pZoomSpinner;
 		gint m_giFilterTimeout;
 
 		const gchar* m_sSearchTerm;

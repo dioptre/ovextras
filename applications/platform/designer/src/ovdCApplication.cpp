@@ -203,6 +203,22 @@ namespace
 		static_cast<CApplication*>(pUserData)->forwardScenarioCB();
 	}
 
+	void zoom_in_scenario_cb(::GtkButton* pButton, gpointer pUserData)
+	{
+		static_cast<CApplication*>(pUserData)->zoomInCB();
+	}
+
+	void zoom_out_scenario_cb(::GtkButton* pButton, gpointer pUserData)
+	{
+		static_cast<CApplication*>(pUserData)->zoomOutCB();
+	}
+
+
+	void spinner_zoom_changed_cb(::GtkSpinButton* pButton, gpointer pUserData)
+	{
+		static_cast<CApplication*>(pUserData)->spinnerZoomChangedCB(gtk_spin_button_get_value(pButton));
+	}
+
 	gboolean button_quit_application_cb(::GtkWidget* pWidget, ::GdkEvent* pEvent, gpointer pUserData)
 	{
 		if(static_cast<CApplication*>(pUserData)->quitApplicationCB())
@@ -584,6 +600,11 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_next")),       "clicked",  G_CALLBACK(next_scenario_cb),          this);
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_forward")),    "clicked",  G_CALLBACK(forward_scenario_cb),       this);
 
+	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_zoomin")),    "clicked",  G_CALLBACK(zoom_in_scenario_cb),       this);
+	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_zoomout")),    "clicked",  G_CALLBACK(zoom_out_scenario_cb),       this);
+
+	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-zoom_spinner")),    "value-changed",  G_CALLBACK(spinner_zoom_changed_cb),       this);
+
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-box_algorithm_title_button_expand")),   "clicked", G_CALLBACK(box_algorithm_title_button_expand_cb),   this);
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-box_algorithm_title_button_collapse")), "clicked", G_CALLBACK(box_algorithm_title_button_collapse_cb), this);
 
@@ -765,6 +786,8 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 
 		gtk_widget_show(m_pMainWindow);
 	}
+
+	m_pZoomSpinner = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-zoom_spinner"));
 }
 
 boolean CApplication::openScenario(const char* sFileName)
@@ -1550,6 +1573,23 @@ void CApplication::aboutLinkClickedCB(const gchar *url)
 	{
 		m_rKernelContext.getLogManager() << LogLevel_Warning << "Could not launch command " << l_sCommand << "\n";
 	}
+}
+
+//Increase the zoom of the current scenario
+void CApplication::zoomInCB(void)
+{
+	gtk_spin_button_set_value(m_pZoomSpinner, getCurrentInterfacedScenario()->getScale()*100 + 5);
+}
+
+//Decrease the zoom of the current scenario
+void CApplication::zoomOutCB(void)
+{
+	gtk_spin_button_set_value(m_pZoomSpinner, getCurrentInterfacedScenario()->getScale()*100 - 5);
+}
+
+void CApplication::spinnerZoomChangedCB(uint32 scalePercentage)
+{
+	getCurrentInterfacedScenario()->setScale(((float64)scalePercentage)/100);
 }
 
 void CApplication::browseDocumentationCB(void)
