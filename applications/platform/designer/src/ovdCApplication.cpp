@@ -521,6 +521,7 @@ CApplication::CApplication(const IKernelContext& rKernelContext)
 	,m_giFilterTimeout(0)
 	,m_ui64LastTimeRefresh(0)
 	,m_bIsQuitting(false)
+	,m_i32CurrentScenarioPage(-1)
 {
 	m_pPluginManager=&m_rKernelContext.getPluginManager();
 	m_pScenarioManager=&m_rKernelContext.getScenarioManager();
@@ -784,6 +785,11 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		m_rKernelContext.getLogManager().addListener(m_pLogListenerDesigner);
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_clear")),       "clicked",  G_CALLBACK(clear_messages_cb), m_pLogListenerDesigner);
 
+		int32 lastScenarioPage = m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_CurrentScenarioPage}", -1);
+		if(lastScenarioPage>=0 && lastScenarioPage<(int32)m_vInterfacedScenario.size())
+		{
+			gtk_notebook_set_current_page(m_pScenarioNotebook, lastScenarioPage);
+		}
 		gtk_widget_show(m_pMainWindow);
 	}
 
@@ -1864,6 +1870,7 @@ boolean CApplication::quitApplicationCB(void)
 					i++;
 				}
 			}
+			::fprintf(l_pFile, "Designer_CurrentScenarioPage = %d\n", m_i32CurrentScenarioPage);
 			::fclose(l_pFile);
 		}
 		else 
@@ -1984,6 +1991,8 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		g_signal_handlers_disconnect_by_func(l_pWindowManagerButton, G_CALLBACK2(button_toggle_window_manager_cb), this);
 		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(l_pWindowManagerButton), false);
 		g_signal_connect(l_pWindowManagerButton, "toggled", G_CALLBACK(button_toggle_window_manager_cb), this);
+	
+		m_i32CurrentScenarioPage = -1;
 	}
 	//switching to an existing scenario
 	else if(i32PageIndex<(int32)m_vInterfacedScenario.size())
@@ -2020,6 +2029,8 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		g_signal_handlers_disconnect_by_func(l_pWindowManagerButton, G_CALLBACK2(button_toggle_window_manager_cb), this);
 		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(l_pWindowManagerButton), m_vInterfacedScenario[i32PageIndex]->isDesignerVisualisationToggled() ? true : false);
 		g_signal_connect(l_pWindowManagerButton, "toggled", G_CALLBACK(button_toggle_window_manager_cb), this);
+		
+		m_i32CurrentScenarioPage = i32PageIndex;
 	}
 	//first scenario is created (or a scenario is opened and replaces first unnamed unmodified scenario)
 	else
@@ -2040,5 +2051,8 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		g_signal_handlers_disconnect_by_func(l_pWindowManagerButton, G_CALLBACK2(button_toggle_window_manager_cb), this);
 		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(l_pWindowManagerButton), false);
 		g_signal_connect(l_pWindowManagerButton, "toggled", G_CALLBACK(button_toggle_window_manager_cb), this);
+		
+		m_i32CurrentScenarioPage = 0;
 	}
+
 }

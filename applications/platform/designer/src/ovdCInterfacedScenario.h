@@ -125,6 +125,7 @@ namespace OpenViBEDesigner
 		::GtkWidget* m_pNotebookPageTitle;
 		::GtkWidget* m_pNotebookPageContent;
 		::GtkViewport* m_pScenarioViewport;
+		::GtkScrolledWindow* m_pScrolledWindow;//designer trim arrow scrolling
 		::GtkDrawingArea* m_pScenarioDrawingArea;
 		::GdkPixmap* m_pStencilBuffer;
 		OpenViBE::boolean m_bHasFileName;
@@ -160,6 +161,7 @@ namespace OpenViBEDesigner
 		std::map<OpenViBE::CIdentifier, OpenViBE::boolean> m_vCurrentObject;
 		OpenViBEDesigner::CInterfacedObject m_oCurrentObject;
 
+		//these variables do not appear anywhere (!?)
 		OpenViBE::float64 m_f64HPanInitialPosition;
 		OpenViBE::float64 m_f64VPanInitialPosition;
 
