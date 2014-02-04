@@ -556,6 +556,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	gtk_builder_connect_signals(m_pBuilderInterface, NULL);
 
 	m_pMainWindow=GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe"));
+	m_pZoomSpinner = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-zoom_spinner"));
 
 	// Catch delete events when close button is clicked
 	g_signal_connect(m_pMainWindow, "delete_event", G_CALLBACK(button_quit_application_cb), this);
@@ -792,8 +793,6 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		}
 		gtk_widget_show(m_pMainWindow);
 	}
-
-	m_pZoomSpinner = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-zoom_spinner"));
 }
 
 boolean CApplication::openScenario(const char* sFileName)
@@ -1039,12 +1038,11 @@ boolean CApplication::hasUnsavedScenario(void)
 
 CInterfacedScenario* CApplication::getCurrentInterfacedScenario(void)
 {
-	uint32 l_ui32Index=(uint32)gtk_notebook_get_current_page(m_pScenarioNotebook);
-	if(l_ui32Index<m_vInterfacedScenario.size())
+	if(m_i32CurrentScenarioPage<(int32)m_vInterfacedScenario.size())
 	{
-		return m_vInterfacedScenario[l_ui32Index];
+		return m_vInterfacedScenario[m_i32CurrentScenarioPage];
 	}
-	return NULL;
+	return NULL;;
 }
 
 void CApplication::dragDataGetCB(::GtkWidget* pWidget, ::GdkDragContext* pDragContex, ::GtkSelectionData* pSelectionData, guint uiInfo, guint uiT)
@@ -1595,7 +1593,10 @@ void CApplication::zoomOutCB(void)
 
 void CApplication::spinnerZoomChangedCB(uint32 scalePercentage)
 {
-	getCurrentInterfacedScenario()->setScale(((float64)scalePercentage)/100);
+	if(getCurrentInterfacedScenario() != NULL)
+	{
+		getCurrentInterfacedScenario()->setScale(((float64)scalePercentage)/100);
+	}
 }
 
 void CApplication::browseDocumentationCB(void)
@@ -1993,6 +1994,7 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		g_signal_connect(l_pWindowManagerButton, "toggled", G_CALLBACK(button_toggle_window_manager_cb), this);
 	
 		m_i32CurrentScenarioPage = -1;
+		this->spinnerZoomChangedCB(100);
 	}
 	//switching to an existing scenario
 	else if(i32PageIndex<(int32)m_vInterfacedScenario.size())
@@ -2031,6 +2033,7 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		g_signal_connect(l_pWindowManagerButton, "toggled", G_CALLBACK(button_toggle_window_manager_cb), this);
 		
 		m_i32CurrentScenarioPage = i32PageIndex;
+		gtk_spin_button_set_value(m_pZoomSpinner, m_vInterfacedScenario[m_i32CurrentScenarioPage]->getScale()*100);
 	}
 	//first scenario is created (or a scenario is opened and replaces first unnamed unmodified scenario)
 	else
@@ -2053,6 +2056,7 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		g_signal_connect(l_pWindowManagerButton, "toggled", G_CALLBACK(button_toggle_window_manager_cb), this);
 		
 		m_i32CurrentScenarioPage = 0;
+		gtk_spin_button_set_value(m_pZoomSpinner, 100);
 	}
 
 }
