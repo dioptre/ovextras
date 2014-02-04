@@ -360,6 +360,9 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 
 	m_pScenarioDrawingArea=GTK_DRAWING_AREA(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookClient, "openvibe-scenario_drawing_area"));
 	m_pScenarioViewport=GTK_VIEWPORT(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookClient, "openvibe-scenario_viewport"));
+	//get scrolled window for arrow keys scrolling
+	m_pScrolledWindow = GTK_SCROLLED_WINDOW(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookClient, "openvibe_scenario_notebook_scrolledwindow"));
+
 	gtk_drag_dest_set(GTK_WIDGET(m_pScenarioDrawingArea), GTK_DEST_DEFAULT_ALL, g_vTargetEntry, sizeof(g_vTargetEntry)/sizeof(::GtkTargetEntry), GDK_ACTION_COPY);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "expose_event", G_CALLBACK(scenario_drawing_area_expose_cb), this);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "drag_data_received", G_CALLBACK(scenario_drawing_area_drag_data_received_cb), this);
@@ -1228,6 +1231,7 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 
 void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 {
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaExposeCB\n";
 	if(m_ui32CurrentMode==Mode_None)
 	{
 		gint l_iViewportX=-1;
@@ -1273,9 +1277,11 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		{
 			if(l_iOldScenarioSizeX!=l_iNewScenarioSizeX+2*l_iMarginX || l_iOldScenarioSizeY!=l_iNewScenarioSizeY+2*l_iMarginY)
 			{
+				//the scenario change size
 				gtk_widget_set_size_request(GTK_WIDGET(m_pScenarioDrawingArea), l_iNewScenarioSizeX+2*l_iMarginX, l_iNewScenarioSizeY+2*l_iMarginY);
 			}
 
+			//if a box enlarge the scenario, we have to recalculate the ViewOffset
 			if(l_iMaxX+m_i32ViewOffsetX>-l_iMarginX+max(l_iViewportX, l_iNewScenarioSizeX+2*l_iMarginX)) { m_i32ViewOffsetX=-l_iMaxX-l_iMarginX+max(l_iViewportX, l_iNewScenarioSizeX+2*l_iMarginX); }
 			if(l_iMinX+m_i32ViewOffsetX< l_iMarginX)                                                     { m_i32ViewOffsetX=-l_iMinX+l_iMarginX; }
 			if(l_iMaxY+m_i32ViewOffsetY>-l_iMarginY+max(l_iViewportY, l_iNewScenarioSizeY+2*l_iMarginY)) { m_i32ViewOffsetY=-l_iMaxY-l_iMarginY+max(l_iViewportY, l_iNewScenarioSizeY+2*l_iMarginY); }
@@ -1442,7 +1448,7 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 }
 void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget, ::GdkEventMotion* pEvent)
 {
-	// m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaMotionNotifyCB\n";
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaMotionNotifyCB\n";
 
 	if(this->isLocked()) return;
 
@@ -2290,6 +2296,95 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 	{
 		m_rApplication.stopScenarioCB();
 	}
+
+	//Designer trim : arrow keys scrolling
+	if((pEvent->keyval==GDK_Left)||(pEvent->keyval==GDK_Right))
+	{
+		//get the parameters of the current adjustement
+		GtkAdjustment* l_pOldAdjustement = gtk_scrolled_window_get_hadjustment(m_pScrolledWindow);//gtk_viewport_get_vadjustment(m_pScenarioViewport);
+		gdouble upper;
+		gdouble lower;
+		gdouble step;
+		gdouble page;
+		gdouble pagesize;
+		gdouble value;
+		g_object_get(l_pOldAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
+		//get the size of the current viewport
+		gint l_iViewportX = -1;
+		gint l_iViewportY = -1;
+		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
+
+		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
+		upper-=l_iViewportX;
+
+		//crete a new adjustement with the correct value since we can not change the upper bound of the old adjustement
+		GtkAdjustment* l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
+		//shift + right or left keys gives the equivalent of page up page down
+		if (m_bShiftPressed&&(pEvent->keyval==GDK_Left))
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)-page);
+			gtk_scrolled_window_set_hadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if (m_bShiftPressed&&(pEvent->keyval==GDK_Right))
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)+page);
+			gtk_scrolled_window_set_hadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if(pEvent->keyval==GDK_Left)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)-step);
+			gtk_scrolled_window_set_hadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if(pEvent->keyval==GDK_Right)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)+step);
+			gtk_scrolled_window_set_hadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+
+	}
+
+	if((pEvent->keyval==GDK_Up)||(pEvent->keyval==GDK_Down)||(pEvent->keyval==GDK_Page_Up)||(pEvent->keyval==GDK_Page_Down))
+	{
+		//get the parameters of the current adjustement
+		GtkAdjustment* l_pOldAdjustement = gtk_scrolled_window_get_vadjustment(m_pScrolledWindow);//gtk_viewport_get_vadjustment(m_pScenarioViewport);
+		gdouble upper;
+		gdouble lower;
+		gdouble step;
+		gdouble page;
+		gdouble pagesize;
+		gdouble value;
+		g_object_get(l_pOldAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
+		//get the size of the current viewport
+		gint l_iViewportX = -1;
+		gint l_iViewportY = -1;
+		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
+		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
+		upper-=l_iViewportY;
+
+		//crete a new adjustement with the correct value since we can not change the upper bound of the old adjustement
+		GtkAdjustment* l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
+		if(pEvent->keyval==GDK_Up)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)-step);
+			gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if(pEvent->keyval==GDK_Down)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)+step);
+			gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if(pEvent->keyval==GDK_Page_Up)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)-page);
+			gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if(pEvent->keyval==GDK_Page_Down)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)+page);
+			gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+	}
+
 
 	m_rKernelContext.getLogManager() << LogLevel_Debug
 		<< "scenarioDrawingAreaKeyPressEventCB ("
