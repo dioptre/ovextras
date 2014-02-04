@@ -160,6 +160,7 @@ namespace OpenViBEDesigner
 		
 		OpenViBE::uint64 m_ui64LastTimeRefresh;
 		OpenViBE::boolean m_bIsQuitting;
+		OpenViBE::int32 m_i32CurrentScenarioPage;
 
 		std::vector < OpenViBEDesigner::CInterfacedScenario* > m_vInterfacedScenario;
 	};
