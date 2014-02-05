@@ -360,6 +360,9 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 
 	m_pScenarioDrawingArea=GTK_DRAWING_AREA(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookClient, "openvibe-scenario_drawing_area"));
 	m_pScenarioViewport=GTK_VIEWPORT(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookClient, "openvibe-scenario_viewport"));
+	//get scrolled window for arrow keys scrolling
+	m_pScrolledWindow = GTK_SCROLLED_WINDOW(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookClient, "openvibe_scenario_notebook_scrolledwindow"));
+
 	gtk_drag_dest_set(GTK_WIDGET(m_pScenarioDrawingArea), GTK_DEST_DEFAULT_ALL, g_vTargetEntry, sizeof(g_vTargetEntry)/sizeof(::GtkTargetEntry), GDK_ACTION_COPY);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "expose_event", G_CALLBACK(scenario_drawing_area_expose_cb), this);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "drag_data_received", G_CALLBACK(scenario_drawing_area_drag_data_received_cb), this);
@@ -377,10 +380,17 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	//create window manager
 	m_pDesignerVisualisation = new CDesignerVisualisation(m_rKernelContext, *m_pVisualisationTree, *this);
 	m_pDesignerVisualisation->init(string(sGUIFilename));
-
 	this->snapshotCB();
 	m_bHasBeenModified=false;
 	this->updateScenarioLabel();
+
+	//By default there is no zoom
+	m_f64CurrentScale = 1;
+
+	//We store the normal size of the font, to handle scaling.
+	PangoContext* l_pPongoContext = gtk_widget_get_pango_context(GTK_WIDGET(m_pScenarioDrawingArea));
+	PangoFontDescription *l_pPangoFontDescription = pango_context_get_font_description(l_pPongoContext);
+	m_ui32NormalFontSize = pango_font_description_get_size(l_pPangoFontDescription);
 }
 
 CInterfacedScenario::~CInterfacedScenario(void)
@@ -451,23 +461,23 @@ void CInterfacedScenario::redraw(IBox& rBox)
 	vector<pair<int32, int32> > l_vOutputPosition;
 
 	uint32 i;
-	const int xMargin=5;
-	const int yMargin=5;
-	const int iCircleSize=11;
-	const int iCircleSpace=4;
+	const int xMargin=5*m_f64CurrentScale;
+	const int yMargin=5*m_f64CurrentScale;
+	const int iCircleSize=11*m_f64CurrentScale;
+	const int iCircleSpace=4*m_f64CurrentScale;
 
 	CBoxProxy l_oBoxProxy(m_rKernelContext, rBox);
-	int xSize=l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))+xMargin*2;
-	int ySize=l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))+yMargin*2;
-	int xStart=l_oBoxProxy.getXCenter()+m_i32ViewOffsetX-(xSize>>1);
-	int yStart=l_oBoxProxy.getYCenter()+m_i32ViewOffsetY-(ySize>>1);
+	int xSize=l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + xMargin*2;
+	int ySize=l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + yMargin*2;
+	int xStart=l_oBoxProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1);
+	int yStart=l_oBoxProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1);
 
 	updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
 	gdk_draw_rounded_rectangle(
 		GDK_DRAWABLE(m_pStencilBuffer),
 		l_pStencilGC,
 		TRUE,
-		xStart, yStart, xSize, ySize);
+		xStart, yStart, xSize, ySize, 8*m_f64CurrentScale);
 	m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier());
 
 	boolean l_bCanCreate =l_oBoxProxy.isBoxAlgorithmPluginPresent();
@@ -545,13 +555,13 @@ void CInterfacedScenario::redraw(IBox& rBox)
 		l_pWidget->window,
 		l_pDrawGC,
 		TRUE,
-		xStart, yStart, xSize, ySize);
+		xStart, yStart, xSize, ySize, 8*m_f64CurrentScale);
 	gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[m_vCurrentObject[rBox.getIdentifier()]?Color_BoxBorderSelected:Color_BoxBorder]);
 	gdk_draw_rounded_rectangle(
 		l_pWidget->window,
 		l_pDrawGC,
 		FALSE,
-		xStart, yStart, xSize, ySize);
+		xStart, yStart, xSize, ySize, 8*m_f64CurrentScale);
 
 	TAttributeHandler l_oAttributeHandler(rBox);
 
@@ -876,21 +886,21 @@ void CInterfacedScenario::redraw(IComment& rComment)
 	::GdkGC* l_pDrawGC=gdk_gc_new(l_pWidget->window);
 
 	// uint32 i;
-	const int xMargin=16;
-	const int yMargin=16;
+	const int xMargin=16*m_f64CurrentScale;
+	const int yMargin=16*m_f64CurrentScale;
 
 	CCommentProxy l_oCommentProxy(m_rKernelContext, rComment);
-	int xSize=l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))+xMargin*2;
-	int ySize=l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))+yMargin*2;
-	int xStart=l_oCommentProxy.getXCenter()+m_i32ViewOffsetX-(xSize>>1);
-	int yStart=l_oCommentProxy.getYCenter()+m_i32ViewOffsetY-(ySize>>1);
+	int xSize=l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))*m_f64CurrentScale+xMargin*2;
+	int ySize=l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))*m_f64CurrentScale+yMargin*2;
+	int xStart=l_oCommentProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1);
+	int yStart=l_oCommentProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1);
 
 	updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
 	gdk_draw_rounded_rectangle(
 		GDK_DRAWABLE(m_pStencilBuffer),
 		l_pStencilGC,
 		TRUE,
-		xStart, yStart, xSize, ySize, 16);
+		xStart, yStart, xSize, ySize, 16*m_f64CurrentScale);
 	m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rComment.getIdentifier());
 
 	gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[m_vCurrentObject[rComment.getIdentifier()]?Color_CommentBackgroundSelected:Color_CommentBackground]);
@@ -898,13 +908,13 @@ void CInterfacedScenario::redraw(IComment& rComment)
 		l_pWidget->window,
 		l_pDrawGC,
 		TRUE,
-		xStart, yStart, xSize, ySize, 16);
+		xStart, yStart, xSize, ySize, 16*m_f64CurrentScale);
 	gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[m_vCurrentObject[rComment.getIdentifier()]?Color_CommentBorderSelected:Color_CommentBorder]);
 	gdk_draw_rounded_rectangle(
 		l_pWidget->window,
 		l_pDrawGC,
 		FALSE,
-		xStart, yStart, xSize, ySize, 16);
+		xStart, yStart, xSize, ySize, 16*m_f64CurrentScale);
 
 	::PangoContext* l_pPangoContext=NULL;
 	::PangoLayout* l_pPangoLayout=NULL;
@@ -1121,6 +1131,24 @@ void CInterfacedScenario::undoCB(boolean bManageModifiedStatusFlag)
 	}
 }
 
+void CInterfacedScenario::setScale(OpenViBE::float64 rScale)
+{
+	m_f64CurrentScale = rScale;
+	if(m_f64CurrentScale < 0.1)
+		m_f64CurrentScale=0.1;
+
+	PangoContext* l_pPongoContext = gtk_widget_get_pango_context(GTK_WIDGET(m_pScenarioDrawingArea));
+	PangoFontDescription *l_pPangoFontDescription = pango_context_get_font_description(l_pPongoContext);
+	pango_font_description_set_size(l_pPangoFontDescription, m_ui32NormalFontSize*m_f64CurrentScale);
+
+	this->redraw();
+}
+
+float64 CInterfacedScenario::getScale()
+{
+	return m_f64CurrentScale;
+}
+
 void CInterfacedScenario::redoCB(boolean bManageModifiedStatusFlag)
 {
 	if(m_oStateStack.redo())
@@ -1204,8 +1232,8 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 
 	// Aligns comemnts on grid
 	l_oCommentProxy.setCenter(
-		((l_oCommentProxy.getXCenter()+8)&0xfffffff0),
-		((l_oCommentProxy.getYCenter()+8)&0xfffffff0));
+		(((int32)l_oCommentProxy.getXCenter()+8)&0xfffffff0),
+		(((int32)l_oCommentProxy.getYCenter()+8)&0xfffffff0));
 
 	// Applies modifications before snapshot
 	l_oCommentProxy.apply();
@@ -1228,6 +1256,7 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 
 void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 {
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaExposeCB\n";
 	if(m_ui32CurrentMode==Mode_None)
 	{
 		gint l_iViewportX=-1;
@@ -1238,8 +1267,8 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		gint l_iMinY= 0x7fff;
 		gint l_iMaxY=-0x7fff;
 
-		gint l_iMarginX=32;
-		gint l_iMarginY=32;
+		gint l_iMarginX=32 * m_f64CurrentScale;
+		gint l_iMarginY=32 * m_f64CurrentScale;
 
 		CIdentifier l_oBoxIdentifier;
 		while((l_oBoxIdentifier=m_rScenario.getNextBoxIdentifier(l_oBoxIdentifier))!=OV_UndefinedIdentifier)
@@ -1261,6 +1290,11 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 			if(l_iMaxY<l_oCommentProxy.getYCenter()-l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2) l_iMaxY=l_oCommentProxy.getYCenter()+l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2;
 		}
 
+		//Now we apply scale on drawing area dimension
+		l_iMaxX *= m_f64CurrentScale;
+		l_iMaxY *= m_f64CurrentScale;
+		l_iMinX *= m_f64CurrentScale;
+		l_iMinY *= m_f64CurrentScale;
 		gint l_iNewScenarioSizeX=l_iMaxX-l_iMinX;
 		gint l_iNewScenarioSizeY=l_iMaxY-l_iMinY;
 		gint l_iOldScenarioSizeX=-1;
@@ -1273,15 +1307,18 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		{
 			if(l_iOldScenarioSizeX!=l_iNewScenarioSizeX+2*l_iMarginX || l_iOldScenarioSizeY!=l_iNewScenarioSizeY+2*l_iMarginY)
 			{
+				//the scenario change size
 				gtk_widget_set_size_request(GTK_WIDGET(m_pScenarioDrawingArea), l_iNewScenarioSizeX+2*l_iMarginX, l_iNewScenarioSizeY+2*l_iMarginY);
 			}
 
+			//if a box enlarge the scenario, we have to recalculate the ViewOffset
 			if(l_iMaxX+m_i32ViewOffsetX>-l_iMarginX+max(l_iViewportX, l_iNewScenarioSizeX+2*l_iMarginX)) { m_i32ViewOffsetX=-l_iMaxX-l_iMarginX+max(l_iViewportX, l_iNewScenarioSizeX+2*l_iMarginX); }
 			if(l_iMinX+m_i32ViewOffsetX< l_iMarginX)                                                     { m_i32ViewOffsetX=-l_iMinX+l_iMarginX; }
 			if(l_iMaxY+m_i32ViewOffsetY>-l_iMarginY+max(l_iViewportY, l_iNewScenarioSizeY+2*l_iMarginY)) { m_i32ViewOffsetY=-l_iMaxY-l_iMarginY+max(l_iViewportY, l_iNewScenarioSizeY+2*l_iMarginY); }
 			if(l_iMinY+m_i32ViewOffsetY< l_iMarginY)                                                     { m_i32ViewOffsetY=-l_iMinY+l_iMarginY; }
 		}
 	}
+
 
 	gint x,y;
 
@@ -1395,6 +1432,7 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 			(int)m_f64CurrentMouseX, (int)m_f64CurrentMouseY);
 		g_object_unref(l_pDrawGC);
 	}
+
 }
 void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext* pDragContext, gint iX, gint iY, ::GtkSelectionData* pSelectionData, guint uiInfo, guint uiT)
 {
@@ -1428,8 +1466,8 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 
 		// Aligns boxes on grid
 		l_oBoxProxy.setCenter(
-			((l_oBoxProxy.getXCenter()+8)&0xfffffff0),
-			((l_oBoxProxy.getYCenter()+8)&0xfffffff0));
+			(((int32)l_oBoxProxy.getXCenter()+8)&0xfffffff0),
+			(((int32)l_oBoxProxy.getYCenter()+8)&0xfffffff0));
 
 		// Applies modifications before snapshot
 		l_oBoxProxy.apply();
@@ -1442,7 +1480,7 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 }
 void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget, ::GdkEventMotion* pEvent)
 {
-	// m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaMotionNotifyCB\n";
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaMotionNotifyCB\n";
 
 	if(this->isLocked()) return;
 
@@ -1525,15 +1563,15 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 				{
 					CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, i->first);
 					l_oBoxProxy.setCenter(
-						l_oBoxProxy.getXCenter()+(int32)(pEvent->x-m_f64CurrentMouseX),
-						l_oBoxProxy.getYCenter()+(int32)(pEvent->y-m_f64CurrentMouseY));
+						l_oBoxProxy.getXCenter()+ (pEvent->x-m_f64CurrentMouseX) / m_f64CurrentScale,
+						l_oBoxProxy.getYCenter()+ (pEvent->y-m_f64CurrentMouseY) / m_f64CurrentScale);
 				}
 				if(i->second && m_rScenario.isComment(i->first))
 				{
 					CCommentProxy l_oCommentProxy(m_rKernelContext, m_rScenario, i->first);
 					l_oCommentProxy.setCenter(
-						l_oCommentProxy.getXCenter()+(int32)(pEvent->x-m_f64CurrentMouseX),
-						l_oCommentProxy.getYCenter()+(int32)(pEvent->y-m_f64CurrentMouseY));
+						l_oCommentProxy.getXCenter()+ (pEvent->x-m_f64CurrentMouseX) / m_f64CurrentScale,
+						l_oCommentProxy.getYCenter()+ (pEvent->y-m_f64CurrentMouseY) / m_f64CurrentScale);
 				}
 			}
 		}
@@ -2130,15 +2168,15 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 					{
 						CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, i->first);
 						l_oBoxProxy.setCenter(
-							((l_oBoxProxy.getXCenter()+8)&0xfffffff0),
-							((l_oBoxProxy.getYCenter()+8)&0xfffffff0));
+							(((int32)l_oBoxProxy.getXCenter()+8)&0xfffffff0),
+							(((int32)l_oBoxProxy.getYCenter()+8)&0xfffffff0));
 					}
 					if(i->second && m_rScenario.isComment(i->first))
 					{
 						CCommentProxy l_oCommentProxy(m_rKernelContext, m_rScenario, i->first);
 						l_oCommentProxy.setCenter(
-							((l_oCommentProxy.getXCenter()+8)&0xfffffff0),
-							((l_oCommentProxy.getYCenter()+8)&0xfffffff0));
+							(((int32)l_oCommentProxy.getXCenter()+8)&0xfffffff0),
+							(((int32)l_oCommentProxy.getYCenter()+8)&0xfffffff0));
 					}
 				}
 				this->snapshotCB();
@@ -2247,8 +2285,8 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 			if(l_sFullURL!=CString(""))
 			{
 				browseURL(l_sFullURL);
-			} 
-			else 
+			}
+			else
 			{
 				m_rKernelContext.getLogManager() << LogLevel_Info << "The scenario does not define a documentation page.\n";
 			}
@@ -2290,6 +2328,95 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 	{
 		m_rApplication.stopScenarioCB();
 	}
+
+	//Designer trim : arrow keys scrolling
+	if((pEvent->keyval==GDK_Left)||(pEvent->keyval==GDK_Right))
+	{
+		//get the parameters of the current adjustement
+		GtkAdjustment* l_pOldAdjustement = gtk_scrolled_window_get_hadjustment(m_pScrolledWindow);//gtk_viewport_get_vadjustment(m_pScenarioViewport);
+		gdouble upper;
+		gdouble lower;
+		gdouble step;
+		gdouble page;
+		gdouble pagesize;
+		gdouble value;
+		g_object_get(l_pOldAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
+		//get the size of the current viewport
+		gint l_iViewportX = -1;
+		gint l_iViewportY = -1;
+		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
+
+		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
+		upper-=l_iViewportX;
+
+		//crete a new adjustement with the correct value since we can not change the upper bound of the old adjustement
+		GtkAdjustment* l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
+		//shift + right or left keys gives the equivalent of page up page down
+		if (m_bShiftPressed&&(pEvent->keyval==GDK_Left))
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)-page);
+			gtk_scrolled_window_set_hadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if (m_bShiftPressed&&(pEvent->keyval==GDK_Right))
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)+page);
+			gtk_scrolled_window_set_hadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if(pEvent->keyval==GDK_Left)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)-step);
+			gtk_scrolled_window_set_hadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if(pEvent->keyval==GDK_Right)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)+step);
+			gtk_scrolled_window_set_hadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+
+	}
+
+	if((pEvent->keyval==GDK_Up)||(pEvent->keyval==GDK_Down)||(pEvent->keyval==GDK_Page_Up)||(pEvent->keyval==GDK_Page_Down))
+	{
+		//get the parameters of the current adjustement
+		GtkAdjustment* l_pOldAdjustement = gtk_scrolled_window_get_vadjustment(m_pScrolledWindow);//gtk_viewport_get_vadjustment(m_pScenarioViewport);
+		gdouble upper;
+		gdouble lower;
+		gdouble step;
+		gdouble page;
+		gdouble pagesize;
+		gdouble value;
+		g_object_get(l_pOldAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
+		//get the size of the current viewport
+		gint l_iViewportX = -1;
+		gint l_iViewportY = -1;
+		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
+		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
+		upper-=l_iViewportY;
+
+		//crete a new adjustement with the correct value since we can not change the upper bound of the old adjustement
+		GtkAdjustment* l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
+		if(pEvent->keyval==GDK_Up)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)-step);
+			gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if(pEvent->keyval==GDK_Down)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)+step);
+			gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if(pEvent->keyval==GDK_Page_Up)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)-page);
+			gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+		else if(pEvent->keyval==GDK_Page_Down)
+		{
+			gtk_adjustment_set_value(l_pAdjustement, gtk_adjustment_get_value(l_pAdjustement)+page);
+			gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
+		}
+	}
+
 
 	m_rKernelContext.getLogManager() << LogLevel_Debug
 		<< "scenarioDrawingAreaKeyPressEventCB ("
@@ -2516,8 +2643,8 @@ void CInterfacedScenario::pasteSelection(void)
 
 				// Aligns boxes on grid
 				l_oBoxProxy.setCenter(
-					((l_oBoxProxy.getXCenter()+8)&0xfffffff0),
-					((l_oBoxProxy.getYCenter()+8)&0xfffffff0));
+					(((int32)l_oBoxProxy.getXCenter()+8)&0xfffffff0),
+					(((int32)l_oBoxProxy.getYCenter()+8)&0xfffffff0));
 			}
 
 			if(m_rScenario.isComment(it->second))
@@ -2531,8 +2658,8 @@ void CInterfacedScenario::pasteSelection(void)
 
 				// Aligns commentes on grid
 				l_oCommentProxy.setCenter(
-					((l_oCommentProxy.getXCenter()+8)&0xfffffff0),
-					((l_oCommentProxy.getYCenter()+8)&0xfffffff0));
+					(((int32)l_oCommentProxy.getXCenter()+8)&0xfffffff0),
+					(((int32)l_oCommentProxy.getYCenter()+8)&0xfffffff0));
 			}
 		}
 	}

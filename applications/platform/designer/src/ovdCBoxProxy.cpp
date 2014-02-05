@@ -12,16 +12,16 @@ CBoxProxy::CBoxProxy(const IKernelContext& rKernelContext, const IBox& rBox)
 	,m_pConstBox(&rBox)
 	,m_pBox(NULL)
 	,m_bApplied(false)
-	,m_iXCenter(0)
-	,m_iYCenter(0)
 	,m_iWidth(-1)
 	,m_iHeight(-1)
+	,m_f64XCenter(0)
+	,m_f64YCenter(0)
 {
 	if(m_pConstBox)
 	{
 		TAttributeHandler l_oAttributeHandler(*m_pConstBox);
-		m_iXCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Box_XCenterPosition);
-		m_iYCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Box_YCenterPosition);
+		m_f64XCenter=l_oAttributeHandler.getAttributeValue<OpenViBE::float64>(OV_AttributeId_Box_XCenterPosition);
+		m_f64YCenter=l_oAttributeHandler.getAttributeValue<double>(OV_AttributeId_Box_YCenterPosition);
 	}
 	m_bShowOriginalNameWhenModified=m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_ShowOriginalBoxName}", true);
 }
@@ -31,14 +31,14 @@ CBoxProxy::CBoxProxy(const IKernelContext& rKernelContext, IScenario& rScenario,
 	,m_pConstBox(rScenario.getBoxDetails(rBoxIdentifier))
 	,m_pBox(rScenario.getBoxDetails(rBoxIdentifier))
 	,m_bApplied(false)
-	,m_iXCenter(0)
-	,m_iYCenter(0)
+	,m_f64XCenter(0)
+	,m_f64YCenter(0)
 {
 	if(m_pConstBox)
 	{
 		TAttributeHandler l_oAttributeHandler(*m_pConstBox);
-		m_iXCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Box_XCenterPosition);
-		m_iYCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Box_YCenterPosition);
+		m_f64XCenter=l_oAttributeHandler.getAttributeValue<double>(OV_AttributeId_Box_XCenterPosition);
+		m_f64YCenter=l_oAttributeHandler.getAttributeValue<double>(OV_AttributeId_Box_YCenterPosition);
 	}
 	m_bShowOriginalNameWhenModified=m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_ShowOriginalBoxName}", true);
 }
@@ -75,20 +75,20 @@ int32 CBoxProxy::getHeight(::GtkWidget* pWidget) const
 	return m_iHeight;
 }
 
-int32 CBoxProxy::getXCenter(void) const
+float64 CBoxProxy::getXCenter(void) const
 {
-	return m_iXCenter;
+	return m_f64XCenter;
 }
 
-int32 CBoxProxy::getYCenter(void) const
+float64 CBoxProxy::getYCenter(void) const
 {
-	return m_iYCenter;
+	return m_f64YCenter;
 }
 
-void CBoxProxy::setCenter(int32 i32XCenter, int32 i32YCenter)
+void CBoxProxy::setCenter(float64 f64XCenter, float64 f64YCenter)
 {
-	m_iXCenter=i32XCenter;
-	m_iYCenter=i32YCenter;
+	m_f64XCenter=f64XCenter;
+	m_f64YCenter=f64YCenter;
 	m_bApplied=false;
 }
 
@@ -99,14 +99,14 @@ void CBoxProxy::apply(void)
 		TAttributeHandler l_oAttributeHandler(*m_pBox);
 
 		if(l_oAttributeHandler.hasAttribute(OV_AttributeId_Box_XCenterPosition))
-			l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Box_XCenterPosition, m_iXCenter);
+			l_oAttributeHandler.setAttributeValue<double>(OV_AttributeId_Box_XCenterPosition, m_f64XCenter);
 		else
-			l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Box_XCenterPosition, m_iXCenter);
+			l_oAttributeHandler.addAttribute<double>(OV_AttributeId_Box_XCenterPosition, m_f64XCenter);
 
 		if(l_oAttributeHandler.hasAttribute(OV_AttributeId_Box_YCenterPosition))
-			l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Box_YCenterPosition, m_iYCenter);
+			l_oAttributeHandler.setAttributeValue<double>(OV_AttributeId_Box_YCenterPosition, m_f64YCenter);
 		else
-			l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Box_YCenterPosition, m_iYCenter);
+			l_oAttributeHandler.addAttribute<double>(OV_AttributeId_Box_YCenterPosition, m_f64YCenter);
 
 		m_bApplied=true;
 	}

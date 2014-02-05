@@ -20,11 +20,23 @@ boolean CDownsamplingBoxAlgorithm::initialize(void)
 	getStaticBoxContext().getInputType(0, l_oInputTypeIdentifier);
 	if(l_oInputTypeIdentifier==OV_TypeId_Signal)
 	{
-		m_pStreamDecoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoderDesc));
-		m_pStreamEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoderDesc));
+		CIdentifier l_oAlgorithmIdentifier = getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder);
+		if(l_oAlgorithmIdentifier == OV_UndefinedIdentifier) {
+			this->getLogManager() << LogLevel_Error << "Unable to find algorithm " << OVP_GD_ClassId_Algorithm_SignalStreamDecoder << "\n";
+			return false;
+		}
+		m_pStreamDecoder=&getAlgorithmManager().getAlgorithm(l_oAlgorithmIdentifier);
+
+		l_oAlgorithmIdentifier = getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoder);
+		if(l_oAlgorithmIdentifier == OV_UndefinedIdentifier) {
+			this->getLogManager() << LogLevel_Error << "Unable to find algorithm " << OVP_GD_ClassId_Algorithm_SignalStreamEncoder << "\n";
+			return false;
+		}
+		m_pStreamEncoder=&getAlgorithmManager().getAlgorithm(l_oAlgorithmIdentifier);
 	}
 	else
 	{
+		this->getLogManager() << LogLevel_Error << "Only 'signal' input type is supported\n";
 		return false;
 	}
 	m_pStreamDecoder->initialize();

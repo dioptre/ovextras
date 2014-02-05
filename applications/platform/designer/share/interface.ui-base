@@ -111,6 +111,13 @@ Contributions also from :
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="zoom_adjustement">
+    <property name="lower">10</property>
+    <property name="upper">1000</property>
+    <property name="value">100</property>
+    <property name="step_increment">5</property>
+    <property name="page_increment">25</property>
+  </object>
   <object class="GtkDialog" id="box_configuration">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -2054,6 +2061,17 @@ Contributions also from :
       </row>
     </data>
   </object>
+  <object class="GtkListStore" id="zoom_model">
+    <columns>
+      <!-- column-name gchararray -->
+      <column type="gint"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">100</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkWindow" id="openvibe">
     <property name="width_request">320</property>
     <property name="height_request">240</property>
@@ -2492,6 +2510,61 @@ the information about the scenario...</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSeparatorToolItem" id="openvibe-separator9">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="openvibe-button_zoomin">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Zoom in the scenarios</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="label" translatable="yes">zoom in</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-zoom-in</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolButton" id="openvibe-button_zoomout">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Zoom out the scenarios</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="label" translatable="yes">zoom out</property>
+                        <property name="use_underline">True</property>
+                        <property name="stock_id">gtk-zoom-out</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToolItem" id="toolItem">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                        <object class="GtkSpinButton" id="openvibe-zoom_spinner">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="adjustment">zoom_adjustement</property>
+                              </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
                       </packing>
                     </child>
                     <child>

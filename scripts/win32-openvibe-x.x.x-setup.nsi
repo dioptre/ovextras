@@ -111,7 +111,8 @@ no_need_to_install_directx:
 	File ..\dependencies\arch\freealut-1.1.0-bin-runtime.zip
 	File ..\dependencies\arch\libvorbis-1.3.2-vs100-runtime.zip
 	File ..\dependencies\arch\libogg-1.2.1-vs100-runtime.zip
-
+	File ..\dependencies\arch\liblsl-1.04-vs100-runtime.zip
+	
 	SetOutPath "$INSTDIR\dependencies"
 	ExecWait '"arch\openvibe-vcredist-2005-sp1.exe" /q'
 	ExecWait '"arch\openvibe-vcredist-2008-sp1.exe" /q'
@@ -131,7 +132,8 @@ no_need_to_install_directx:
 	ZipDLL::extractall "arch\freealut-1.1.0-bin-runtime.zip" "freealut"
 	ZipDLL::extractall "arch\libvorbis-1.3.2-vs100-runtime.zip" "libvorbis"
 	ZipDLL::extractall "arch\libogg-1.2.1-vs100-runtime.zip" "libogg"
-
+	ZipDLL::extractall "arch\liblsl-1.04-vs100-runtime.zip" "liblsl"
+	
 	SetOutPath "$INSTDIR"
 	; Export binaries
 	File /nonfatal /r ..\dist\bin
@@ -178,6 +180,7 @@ no_need_to_patch_3d_functionnality:
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\freealut\lib;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libvorbis\win32\bin\release;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libogg\win32\bin\release\;%PATH%$\r$\n"
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\liblsl\lib\;%PATH%$\r$\n"
 	FileClose $0
 	
 	FileOpen $0 "$INSTDIR\dependencies\cegui\resources.cfg" w

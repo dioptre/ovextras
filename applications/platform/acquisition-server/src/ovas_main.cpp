@@ -67,6 +67,15 @@ int main(int argc, char ** argv)
 
 				// gtk_rc_parse(OpenViBE::Directories::getDataDir() + "/applications/designer/interface.gtkrc");
 
+#ifdef TARGET_OS_Linux
+				// Replace the gtk signal handlers with the default ones. As a result, 
+				// the following exits on terminating signals won't be graceful, 
+				// but its better than not exiting at all (gtk default on Linux apparently)
+				signal(SIGHUP, SIG_DFL);
+				signal(SIGINT, SIG_DFL);
+				signal(SIGQUIT, SIG_DFL);
+#endif
+
 #if 0 // This is not needed in the acquisition server
 				if(l_rConfigurationManager.expandAsBoolean("${Kernel_3DVisualisationEnabled}"))
 				{

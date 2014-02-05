@@ -951,6 +951,8 @@ ov_package_url_vrpn=http://openvibe.inria.fr/dependencies/linux-x86/vrpn_07_26.z
 ov_package_url_openmask4=http://www.irisa.fr/bunraku/OpenViBE/dependencies/src/openmask4~dotsceneloader-src-164.tar.bz2
 ov_package_url_openmask4tutorial=http://www.irisa.fr/bunraku/OpenViBE/dependencies/src/openmask4-tutorial-src-164.tar.bz2
 
+ov_package_url_liblsl=http://openvibe.inria.fr/dependencies/linux-x86/liblsl-1.04-src.tar.bz2
+
 # Scripting packages
 ov_package_url_readline=$ov_gnu_mirror/readline/readline-5.2.tar.gz
 ov_package_url_ncurses=$ov_gnu_mirror/ncurses/ncurses-5.7.tar.gz
@@ -1041,6 +1043,8 @@ ov_package_archive_ogre=`echo "$ov_package_url_ogre" | $ov_sed 's#.*/##g'`
 ov_package_archive_vrpn=`echo "$ov_package_url_vrpn" | $ov_sed 's#.*/##g'`
 ov_package_archive_openmask4=`echo "$ov_package_url_openmask4" | $ov_sed 's#.*/##g'`
 ov_package_archive_openmask4tutorial=`echo "$ov_package_url_openmask4tutorial" | $ov_sed 's#.*/##g'`
+
+ov_package_archive_liblsl=`echo "$ov_package_url_liblsl" | $ov_sed 's#.*/##g'`
 
 # Scripting packages
 ov_package_archive_readline=`echo "$ov_package_url_readline" | $ov_sed 's#.*/##g'`
@@ -1350,6 +1354,23 @@ ov_package_install_hook_openmask4tutorial='
 	pushd * &&
 	popd'
 
+ov_package_configure_hook_liblsl='
+	pushd * &&
+	mkdir liblsl/build && 
+	cd liblsl/build &&
+	cmake .. &&
+	popd'
+ov_package_make_hook_liblsl='
+	pushd * &&
+	cd liblsl/build &&
+	make &&
+	popd'
+ov_package_install_hook_liblsl='
+	pushd * &&
+	cp liblsl/build/src/liblsl.so $ov_target_folder_lib &&
+	cp -R liblsl/include/* $ov_target_folder_include &&
+	popd'
+	
 ov_package_configure_hook_lua='
 	pushd * &&
 	$ov_sed -i "s#^INSTALL_TOP.*#INSTALL_TOP=$ov_target_folder#g" Makefile &&
@@ -1473,6 +1494,9 @@ fi;
 	ov_install_package "ogre"
 	ov_install_package "cegui"
 
+	# Lab Streaming Layer, this is an optional dependence that enables LSL output plugin
+	ov_install_package "liblsl"
+	
 # If you want BLiFF++
 # ov_install_package "gsl"
 # ov_install_package "torch"
@@ -1480,6 +1504,8 @@ fi;
 
 ov_install_package "vrpn"
 # ov_install_package "obt"
+
+
 
 # Scripting packages
 #ov_install_package "readline"

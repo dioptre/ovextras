@@ -203,6 +203,22 @@ namespace
 		static_cast<CApplication*>(pUserData)->forwardScenarioCB();
 	}
 
+	void zoom_in_scenario_cb(::GtkButton* pButton, gpointer pUserData)
+	{
+		static_cast<CApplication*>(pUserData)->zoomInCB();
+	}
+
+	void zoom_out_scenario_cb(::GtkButton* pButton, gpointer pUserData)
+	{
+		static_cast<CApplication*>(pUserData)->zoomOutCB();
+	}
+
+
+	void spinner_zoom_changed_cb(::GtkSpinButton* pButton, gpointer pUserData)
+	{
+		static_cast<CApplication*>(pUserData)->spinnerZoomChangedCB(gtk_spin_button_get_value(pButton));
+	}
+
 	gboolean button_quit_application_cb(::GtkWidget* pWidget, ::GdkEvent* pEvent, gpointer pUserData)
 	{
 		if(static_cast<CApplication*>(pUserData)->quitApplicationCB())
@@ -505,6 +521,7 @@ CApplication::CApplication(const IKernelContext& rKernelContext)
 	,m_giFilterTimeout(0)
 	,m_ui64LastTimeRefresh(0)
 	,m_bIsQuitting(false)
+	,m_i32CurrentScenarioPage(-1)
 {
 	m_pPluginManager=&m_rKernelContext.getPluginManager();
 	m_pScenarioManager=&m_rKernelContext.getScenarioManager();
@@ -539,6 +556,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	gtk_builder_connect_signals(m_pBuilderInterface, NULL);
 
 	m_pMainWindow=GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe"));
+	m_pZoomSpinner = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-zoom_spinner"));
 
 	// Catch delete events when close button is clicked
 	g_signal_connect(m_pMainWindow, "delete_event", G_CALLBACK(button_quit_application_cb), this);
@@ -583,6 +601,11 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), "clicked",  G_CALLBACK(play_pause_scenario_cb),    this);
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_next")),       "clicked",  G_CALLBACK(next_scenario_cb),          this);
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_forward")),    "clicked",  G_CALLBACK(forward_scenario_cb),       this);
+
+	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_zoomin")),    "clicked",  G_CALLBACK(zoom_in_scenario_cb),       this);
+	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_zoomout")),    "clicked",  G_CALLBACK(zoom_out_scenario_cb),       this);
+
+	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-zoom_spinner")),    "value-changed",  G_CALLBACK(spinner_zoom_changed_cb),       this);
 
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-box_algorithm_title_button_expand")),   "clicked", G_CALLBACK(box_algorithm_title_button_expand_cb),   this);
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-box_algorithm_title_button_collapse")), "clicked", G_CALLBACK(box_algorithm_title_button_collapse_cb), this);
@@ -739,23 +762,14 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	refresh_search_no_data_cb(NULL, this);
 	// Add the designer log listener
 
-	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug")), m_rKernelContext.getLogManager().isActive(LogLevel_Debug));
-	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench")), m_rKernelContext.getLogManager().isActive(LogLevel_Benchmark));
-	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace")), m_rKernelContext.getLogManager().isActive(LogLevel_Trace));
-	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info")), m_rKernelContext.getLogManager().isActive(LogLevel_Info));
-	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_warning")), m_rKernelContext.getLogManager().isActive(LogLevel_Warning));
-	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning")), m_rKernelContext.getLogManager().isActive(LogLevel_ImportantWarning));
-	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error")), m_rKernelContext.getLogManager().isActive(LogLevel_Error));
-	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal")), m_rKernelContext.getLogManager().isActive(LogLevel_Fatal));
-
-	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug")), m_rKernelContext.getLogManager().isActive(LogLevel_Debug));
-	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench")), m_rKernelContext.getLogManager().isActive(LogLevel_Benchmark));
-	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace")), m_rKernelContext.getLogManager().isActive(LogLevel_Trace));
-	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info")), m_rKernelContext.getLogManager().isActive(LogLevel_Info));
-	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_warning")), m_rKernelContext.getLogManager().isActive(LogLevel_Warning));
-	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning")), m_rKernelContext.getLogManager().isActive(LogLevel_ImportantWarning));
-	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error")), m_rKernelContext.getLogManager().isActive(LogLevel_Error));
-	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal")), m_rKernelContext.getLogManager().isActive(LogLevel_Fatal));
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"), LogLevel_Debug, "${Designer_DebugCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench"), LogLevel_Benchmark, "${Designer_BenchCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace"), LogLevel_Trace, "${Designer_TraceCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info"), LogLevel_Info, "${Designer_InfoCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_warning"), LogLevel_Warning, "${Designer_WarningCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning"), LogLevel_ImportantWarning, "${Designer_ImportantWarningCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"), LogLevel_Error, "${Designer_ErrorCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"), LogLevel_Fatal, "${Designer_FatalCanal}");
 
 	if(!(m_eCommandLineFlags&CommandLineFlag_NoGui))
 	{
@@ -763,6 +777,11 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		m_rKernelContext.getLogManager().addListener(m_pLogListenerDesigner);
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_clear")),       "clicked",  G_CALLBACK(clear_messages_cb), m_pLogListenerDesigner);
 
+		int32 lastScenarioPage = m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_CurrentScenarioPage}", -1);
+		if(lastScenarioPage>=0 && lastScenarioPage<(int32)m_vInterfacedScenario.size())
+		{
+			gtk_notebook_set_current_page(m_pScenarioNotebook, lastScenarioPage);
+		}
 		gtk_widget_show(m_pMainWindow);
 	}
 }
@@ -1010,12 +1029,11 @@ boolean CApplication::hasUnsavedScenario(void)
 
 CInterfacedScenario* CApplication::getCurrentInterfacedScenario(void)
 {
-	uint32 l_ui32Index=(uint32)gtk_notebook_get_current_page(m_pScenarioNotebook);
-	if(l_ui32Index<m_vInterfacedScenario.size())
+	if(m_i32CurrentScenarioPage<(int32)m_vInterfacedScenario.size())
 	{
-		return m_vInterfacedScenario[l_ui32Index];
+		return m_vInterfacedScenario[m_i32CurrentScenarioPage];
 	}
-	return NULL;
+	return NULL;;
 }
 
 void CApplication::dragDataGetCB(::GtkWidget* pWidget, ::GdkDragContext* pDragContex, ::GtkSelectionData* pSelectionData, guint uiInfo, guint uiT)
@@ -1552,6 +1570,26 @@ void CApplication::aboutLinkClickedCB(const gchar *url)
 	}
 }
 
+//Increase the zoom of the current scenario
+void CApplication::zoomInCB(void)
+{
+	gtk_spin_button_set_value(m_pZoomSpinner, getCurrentInterfacedScenario()->getScale()*100 + 5);
+}
+
+//Decrease the zoom of the current scenario
+void CApplication::zoomOutCB(void)
+{
+	gtk_spin_button_set_value(m_pZoomSpinner, getCurrentInterfacedScenario()->getScale()*100 - 5);
+}
+
+void CApplication::spinnerZoomChangedCB(uint32 scalePercentage)
+{
+	if(getCurrentInterfacedScenario() != NULL)
+	{
+		getCurrentInterfacedScenario()->setScale(((float64)scalePercentage)/100);
+	}
+}
+
 void CApplication::browseDocumentationCB(void)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "CApplication::browseDocumentationCB\n";
@@ -1824,6 +1862,17 @@ boolean CApplication::quitApplicationCB(void)
 					i++;
 				}
 			}
+			::fprintf(l_pFile, "Designer_CurrentScenarioPage = %d\n", m_i32CurrentScenarioPage);
+
+			::fprintf(l_pFile, "Designer_DebugCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"))));
+			::fprintf(l_pFile, "Designer_BenchCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench"))));
+			::fprintf(l_pFile, "Designer_TraceCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace"))));
+			::fprintf(l_pFile, "Designer_InfoCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info"))));
+			::fprintf(l_pFile, "Designer_WarningCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_warning"))));
+			::fprintf(l_pFile, "Designer_ImportantWarningCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning"))));
+			::fprintf(l_pFile, "Designer_ErrorCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"))));
+			::fprintf(l_pFile, "Designer_FatalCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"))));
+
 			::fclose(l_pFile);
 		}
 		else 
@@ -1944,6 +1993,9 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		g_signal_handlers_disconnect_by_func(l_pWindowManagerButton, G_CALLBACK2(button_toggle_window_manager_cb), this);
 		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(l_pWindowManagerButton), false);
 		g_signal_connect(l_pWindowManagerButton, "toggled", G_CALLBACK(button_toggle_window_manager_cb), this);
+	
+		m_i32CurrentScenarioPage = -1;
+		this->spinnerZoomChangedCB(100);
 	}
 	//switching to an existing scenario
 	else if(i32PageIndex<(int32)m_vInterfacedScenario.size())
@@ -1980,6 +2032,9 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		g_signal_handlers_disconnect_by_func(l_pWindowManagerButton, G_CALLBACK2(button_toggle_window_manager_cb), this);
 		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(l_pWindowManagerButton), m_vInterfacedScenario[i32PageIndex]->isDesignerVisualisationToggled() ? true : false);
 		g_signal_connect(l_pWindowManagerButton, "toggled", G_CALLBACK(button_toggle_window_manager_cb), this);
+		
+		m_i32CurrentScenarioPage = i32PageIndex;
+		gtk_spin_button_set_value(m_pZoomSpinner, m_vInterfacedScenario[m_i32CurrentScenarioPage]->getScale()*100);
 	}
 	//first scenario is created (or a scenario is opened and replaces first unnamed unmodified scenario)
 	else
@@ -2000,5 +2055,16 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		g_signal_handlers_disconnect_by_func(l_pWindowManagerButton, G_CALLBACK2(button_toggle_window_manager_cb), this);
 		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(l_pWindowManagerButton), false);
 		g_signal_connect(l_pWindowManagerButton, "toggled", G_CALLBACK(button_toggle_window_manager_cb), this);
+		
+		m_i32CurrentScenarioPage = 0;
+		gtk_spin_button_set_value(m_pZoomSpinner, 100);
 	}
+}
+
+void CApplication::logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLevel level, const char* configName)
+{
+	boolean isActive;
+	isActive = m_rKernelContext.getConfigurationManager().expandAsBoolean(configName, m_rKernelContext.getLogManager().isActive(level));
+	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(ToolButton), isActive);
+	gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), m_rKernelContext.getLogManager().isActive(level));
 }

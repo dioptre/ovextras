@@ -69,6 +69,10 @@ namespace OpenViBEDesigner
 		void closeScenarioCB(
 			OpenViBEDesigner::CInterfacedScenario* pInterfacedScenario);
 
+		void zoomInCB(void);//Call when a zoom in is required
+		void zoomOutCB(void);//Call when a zoom out is required
+		void spinnerZoomChangedCB(OpenViBE::uint32 scaleDelta);
+
 		void stopScenarioCB(void);
 		void pauseScenarioCB(void);
 		void nextScenarioCB(void);
@@ -120,6 +124,7 @@ namespace OpenViBEDesigner
 
 		void logLevelCB(void);
 		void logLevelMessagesCB(void);
+		void logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLevel level, const char* configName);
 
 		//@}
 
@@ -154,12 +159,14 @@ namespace OpenViBEDesigner
 		::GtkTreeView* m_pBoxAlgorithmTreeView;
 		::GtkTreeStore* m_pAlgorithmTreeModel;
 		::GtkTreeView* m_pAlgorithmTreeView;
+		::GtkSpinButton* m_pZoomSpinner;
 		gint m_giFilterTimeout;
 
 		const gchar* m_sSearchTerm;
 		
 		OpenViBE::uint64 m_ui64LastTimeRefresh;
 		OpenViBE::boolean m_bIsQuitting;
+		OpenViBE::int32 m_i32CurrentScenarioPage;
 
 		std::vector < OpenViBEDesigner::CInterfacedScenario* > m_vInterfacedScenario;
 	};

@@ -52,6 +52,9 @@ namespace OpenViBEDesigner
 		void pasteSelection(void);
 		void deleteSelection(void);
 
+		void setScale(OpenViBE::float64 rScale);
+		OpenViBE::float64 getScale();
+
 		void muteSelection(void);
 
 		void contextMenuBoxRenameCB(OpenViBE::Kernel::IBox& rBox);
@@ -122,6 +125,7 @@ namespace OpenViBEDesigner
 		::GtkWidget* m_pNotebookPageTitle;
 		::GtkWidget* m_pNotebookPageContent;
 		::GtkViewport* m_pScenarioViewport;
+		::GtkScrolledWindow* m_pScrolledWindow;//designer trim arrow scrolling
 		::GtkDrawingArea* m_pScenarioDrawingArea;
 		::GdkPixmap* m_pStencilBuffer;
 		OpenViBE::boolean m_bHasFileName;
@@ -145,6 +149,8 @@ namespace OpenViBEDesigner
 		OpenViBE::int32 m_i32ViewOffsetX;
 		OpenViBE::int32 m_i32ViewOffsetY;
 		OpenViBE::uint32 m_ui32CurrentMode;
+		OpenViBE::float64 m_f64CurrentScale;
+		OpenViBE::uint32 m_ui32NormalFontSize;
 
 		OpenViBE::uint32 m_ui32BoxCount;
 		OpenViBE::uint32 m_ui32CommentCount;
@@ -155,6 +161,7 @@ namespace OpenViBEDesigner
 		std::map<OpenViBE::CIdentifier, OpenViBE::boolean> m_vCurrentObject;
 		OpenViBEDesigner::CInterfacedObject m_oCurrentObject;
 
+		//these variables do not appear anywhere (!?)
 		OpenViBE::float64 m_f64HPanInitialPosition;
 		OpenViBE::float64 m_f64VPanInitialPosition;
 
