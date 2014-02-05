@@ -715,6 +715,14 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 
 	}
 
+	GtkHPaned *l_paned = GTK_HPANED(gtk_builder_get_object(m_pBuilderInterface, "openvibe-horizontal_container"));
+	int l_iPosition = m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_HorizontalContainerPosition}", -1);
+	if(l_iPosition != -1)
+	{
+		gtk_paned_set_position(GTK_PANED(l_paned), l_iPosition);
+	}
+
+
 	// Prepares drag & drop for box creation
 	gtk_drag_source_set(GTK_WIDGET(m_pBoxAlgorithmTreeView), GDK_BUTTON1_MASK, g_vTargetEntry, sizeof(g_vTargetEntry)/sizeof(::GtkTargetEntry), GDK_ACTION_COPY);
 	g_signal_connect(
@@ -1872,6 +1880,8 @@ boolean CApplication::quitApplicationCB(void)
 			::fprintf(l_pFile, "Designer_ImportantWarningCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning"))));
 			::fprintf(l_pFile, "Designer_ErrorCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"))));
 			::fprintf(l_pFile, "Designer_FatalCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"))));
+
+			::fprintf(l_pFile, "Designer_HorizontalContainerPosition = %d\n",gtk_paned_get_position(GTK_PANED(gtk_builder_get_object(m_pBuilderInterface, "openvibe-horizontal_container"))));
 
 			::fclose(l_pFile);
 		}
