@@ -504,13 +504,13 @@ void CInterfacedScenario::redraw(IBox& rBox)
 		{
 			gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_BoxBackgroundNeedsUpdate]);
 		}
-		else if(l_bUnstable)
-		{
-			gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_BoxBackgroundUnstable]);
-		}
 		else if(l_bMuted)
 		{
 			gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_BoxBackgroundMuted]);
+		}
+		else if(l_bUnstable)
+		{
+			gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_BoxBackgroundUnstable]);
 		}
 		else
 		{
