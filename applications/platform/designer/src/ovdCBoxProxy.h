@@ -64,6 +64,8 @@ namespace OpenViBEDesigner
 		OpenViBE::boolean m_bShowOriginalNameWhenModified;
 		int m_iXCenter;
 		int m_iYCenter;
+		mutable int m_iWidth;
+		mutable int m_iHeight;
 		mutable std::string m_sLabel;
 	};
 };

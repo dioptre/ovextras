@@ -14,6 +14,8 @@ CBoxProxy::CBoxProxy(const IKernelContext& rKernelContext, const IBox& rBox)
 	,m_bApplied(false)
 	,m_iXCenter(0)
 	,m_iYCenter(0)
+	,m_iWidth(-1)
+	,m_iHeight(-1)
 {
 	if(m_pConstBox)
 	{
@@ -61,16 +63,16 @@ CBoxProxy::operator const IBox* (void)
 
 int32 CBoxProxy::getWidth(::GtkWidget* pWidget) const
 {
-	int x, y;
-	updateSize(pWidget, getLabel(), &x, &y);
-	return x;
+	if((m_iWidth==-1) or (m_iHeight==-1))
+	    updateSize(pWidget, getLabel(), &m_iWidth, &m_iHeight);
+	return m_iWidth;
 }
 
 int32 CBoxProxy::getHeight(::GtkWidget* pWidget) const
 {
-	int x, y;
-	updateSize(pWidget, getLabel(), &x, &y);
-	return y;
+	if((m_iWidth==-1) or (m_iHeight==-1))
+	    updateSize(pWidget, getLabel(), &m_iWidth, &m_iHeight);
+	return m_iHeight;
 }
 
 int32 CBoxProxy::getXCenter(void) const
