@@ -457,7 +457,7 @@ namespace
 					if(l_pCurrentInterfacedScenario->m_pPlayer&&l_pCurrentInterfacedScenario->m_bDebugCPUUsage)
 					{
 						// redraws scenario
-						l_pCurrentInterfacedScenario->redraw();
+						l_pCurrentInterfacedScenario->forceRedraw();
 					}
 				}
 			}
@@ -1037,7 +1037,7 @@ boolean CApplication::hasUnsavedScenario(void)
 
 CInterfacedScenario* CApplication::getCurrentInterfacedScenario(void)
 {
-	if(m_i32CurrentScenarioPage<(int32)m_vInterfacedScenario.size())
+	if(m_i32CurrentScenarioPage<(int32)m_vInterfacedScenario.size() && m_i32CurrentScenarioPage >= 0)
 	{
 		return m_vInterfacedScenario[m_i32CurrentScenarioPage];
 	}
@@ -1658,7 +1658,7 @@ OpenViBE::boolean CApplication::createPlayer(void)
 		__g_idle_add__(idle_scenario_loop, l_pCurrentInterfacedScenario);
 
 		// redraws scenario
-		l_pCurrentInterfacedScenario->redraw();
+		l_pCurrentInterfacedScenario->forceRedraw();
 	}
 	return true;
 }
@@ -1687,7 +1687,7 @@ void CApplication::releasePlayer(void)
 		l_pCurrentInterfacedScenario->releasePlayerVisualisation();
 
 		// redraws scenario
-		l_pCurrentInterfacedScenario->redraw();
+		l_pCurrentInterfacedScenario->forceRedraw();
 	}
 }
 
@@ -1969,7 +1969,7 @@ void CApplication::CPUUsageCB(void)
 	if(l_pCurrentInterfacedScenario)
 	{
 		l_pCurrentInterfacedScenario->m_bDebugCPUUsage=(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-togglebutton_cpu_usage")))?true:false);
-		l_pCurrentInterfacedScenario->redraw();
+		l_pCurrentInterfacedScenario->forceRedraw();
 	}
 }
 

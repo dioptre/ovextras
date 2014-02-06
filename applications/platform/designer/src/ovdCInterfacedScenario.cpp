@@ -320,6 +320,7 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	,m_pScenarioViewport(NULL)
 	,m_pScenarioDrawingArea(NULL)
 	,m_pStencilBuffer(NULL)
+	,m_bScenarioModified(true)
 	,m_bHasFileName(false)
 	,m_bHasBeenModified(false)
 	,m_bButtonPressed(false)
@@ -377,13 +378,6 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	m_oVisualisationTreeIdentifier = m_rScenario.getVisualisationTreeIdentifier();
 	m_pVisualisationTree = &m_rKernelContext.getVisualisationManager().getVisualisationTree(m_oVisualisationTreeIdentifier);
 
-	//create window manager
-	m_pDesignerVisualisation = new CDesignerVisualisation(m_rKernelContext, *m_pVisualisationTree, *this);
-	m_pDesignerVisualisation->init(string(sGUIFilename));
-	this->snapshotCB();
-	m_bHasBeenModified=false;
-	this->updateScenarioLabel();
-
 	//By default there is no zoom
 	m_f64CurrentScale = 1;
 
@@ -391,6 +385,15 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	PangoContext* l_pPongoContext = gtk_widget_get_pango_context(GTK_WIDGET(m_pScenarioDrawingArea));
 	PangoFontDescription *l_pPangoFontDescription = pango_context_get_font_description(l_pPongoContext);
 	m_ui32NormalFontSize = pango_font_description_get_size(l_pPangoFontDescription);
+
+	//create window manager
+	m_pDesignerVisualisation = new CDesignerVisualisation(m_rKernelContext, *m_pVisualisationTree, *this);
+	m_pDesignerVisualisation->init(string(sGUIFilename));
+	this->snapshotCB();
+	m_bHasBeenModified=false;
+	this->updateScenarioLabel();
+
+
 }
 
 CInterfacedScenario::~CInterfacedScenario(void)
@@ -418,6 +421,12 @@ CInterfacedScenario::~CInterfacedScenario(void)
 boolean CInterfacedScenario::isLocked(void) const
 {
 	return m_pPlayer!=NULL?true:false;
+}
+
+void CInterfacedScenario::forceRedraw(void)
+{
+	m_bScenarioModified = true;
+	this->redraw();
 }
 
 void CInterfacedScenario::redraw(void)
@@ -453,9 +462,8 @@ void CInterfacedScenario::updateScenarioLabel(void)
 
 void CInterfacedScenario::redraw(IBox& rBox)
 {
-	::GtkWidget* l_pWidget=GTK_WIDGET(m_pScenarioDrawingArea);
 	::GdkGC* l_pStencilGC=gdk_gc_new(GDK_DRAWABLE(m_pStencilBuffer));
-	::GdkGC* l_pDrawGC=gdk_gc_new(l_pWidget->window);
+	::GdkGC* l_pDrawGC=gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
 
 	vector<pair<int32, int32> > l_vInputPosition;
 	vector<pair<int32, int32> > l_vOutputPosition;
@@ -552,13 +560,13 @@ void CInterfacedScenario::redraw(IBox& rBox)
 		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oColor);
 	}
 	gdk_draw_rounded_rectangle(
-		l_pWidget->window,
+		GDK_DRAWABLE(m_pBufferedDrawingArea),
 		l_pDrawGC,
 		TRUE,
 		xStart, yStart, xSize, ySize, 8*m_f64CurrentScale);
 	gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[m_vCurrentObject[rBox.getIdentifier()]?Color_BoxBorderSelected:Color_BoxBorder]);
 	gdk_draw_rounded_rectangle(
-		l_pWidget->window,
+		GDK_DRAWABLE(m_pBufferedDrawingArea),
 		l_pDrawGC,
 		FALSE,
 		xStart, yStart, xSize, ySize, 8*m_f64CurrentScale);
@@ -606,14 +614,14 @@ void CInterfacedScenario::redraw(IBox& rBox)
 
 		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oInputColor);
 		gdk_draw_polygon(
-			l_pWidget->window,
+			GDK_DRAWABLE(m_pBufferedDrawingArea),
 			l_pDrawGC,
 			TRUE,
 			l_vPoint,
 			3);
 		gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_BoxInputBorder]);
 		gdk_draw_polygon(
-			l_pWidget->window,
+			GDK_DRAWABLE(m_pBufferedDrawingArea),
 			l_pDrawGC,
 			FALSE,
 			l_vPoint,
@@ -680,7 +688,7 @@ void CInterfacedScenario::redraw(IBox& rBox)
 
 		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oMessageInputColor);
 		gdk_draw_polygon(
-			l_pWidget->window,
+			GDK_DRAWABLE(m_pBufferedDrawingArea),
 			l_pDrawGC,
 			TRUE,
 			l_vPoint,
@@ -746,7 +754,7 @@ void CInterfacedScenario::redraw(IBox& rBox)
 
 		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oMessageOutputColor);
 		gdk_draw_polygon(
-			l_pWidget->window,
+			GDK_DRAWABLE(m_pBufferedDrawingArea),
 			l_pDrawGC,
 			TRUE,
 			l_vPoint,
@@ -810,14 +818,14 @@ void CInterfacedScenario::redraw(IBox& rBox)
 
 		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oOutputColor);
 		gdk_draw_polygon(
-			l_pWidget->window,
+			GDK_DRAWABLE(m_pBufferedDrawingArea),
 			l_pDrawGC,
 			TRUE,
 			l_vPoint,
 			3);
 		gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_BoxOutputBorder]);
 		gdk_draw_polygon(
-			l_pWidget->window,
+			GDK_DRAWABLE(m_pBufferedDrawingArea),
 			l_pDrawGC,
 			FALSE,
 			l_vPoint,
@@ -858,13 +866,13 @@ void CInterfacedScenario::redraw(IBox& rBox)
 
 	::PangoContext* l_pPangoContext=NULL;
 	::PangoLayout* l_pPangoLayout=NULL;
-	l_pPangoContext=gtk_widget_get_pango_context(l_pWidget);
+	l_pPangoContext=gtk_widget_get_pango_context(GTK_WIDGET(m_pScenarioDrawingArea));
 	l_pPangoLayout=pango_layout_new(l_pPangoContext);
 	pango_layout_set_alignment(l_pPangoLayout, PANGO_ALIGN_CENTER);
 	pango_layout_set_markup(l_pPangoLayout, l_oBoxProxy.getLabel(), -1);
 	gdk_draw_layout(
-		l_pWidget->window,
-		l_pWidget->style->text_gc[GTK_WIDGET_STATE(l_pWidget)],
+		GDK_DRAWABLE(m_pBufferedDrawingArea),
+		GTK_WIDGET(m_pScenarioDrawingArea)->style->text_gc[GTK_WIDGET_STATE(GTK_WIDGET(m_pScenarioDrawingArea))],
 		xStart+xMargin, yStart+yMargin, l_pPangoLayout);
 	g_object_unref(l_pPangoLayout);
 
@@ -881,9 +889,8 @@ void CInterfacedScenario::redraw(IBox& rBox)
 
 void CInterfacedScenario::redraw(IComment& rComment)
 {
-	::GtkWidget* l_pWidget=GTK_WIDGET(m_pScenarioDrawingArea);
 	::GdkGC* l_pStencilGC=gdk_gc_new(GDK_DRAWABLE(m_pStencilBuffer));
-	::GdkGC* l_pDrawGC=gdk_gc_new(l_pWidget->window);
+	::GdkGC* l_pDrawGC=gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
 
 	// uint32 i;
 	const int xMargin=16*m_f64CurrentScale;
@@ -905,20 +912,20 @@ void CInterfacedScenario::redraw(IComment& rComment)
 
 	gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[m_vCurrentObject[rComment.getIdentifier()]?Color_CommentBackgroundSelected:Color_CommentBackground]);
 	gdk_draw_rounded_rectangle(
-		l_pWidget->window,
+		GDK_DRAWABLE(m_pBufferedDrawingArea),
 		l_pDrawGC,
 		TRUE,
 		xStart, yStart, xSize, ySize, 16*m_f64CurrentScale);
 	gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[m_vCurrentObject[rComment.getIdentifier()]?Color_CommentBorderSelected:Color_CommentBorder]);
 	gdk_draw_rounded_rectangle(
-		l_pWidget->window,
+		GDK_DRAWABLE(m_pBufferedDrawingArea),
 		l_pDrawGC,
 		FALSE,
 		xStart, yStart, xSize, ySize, 16*m_f64CurrentScale);
 
 	::PangoContext* l_pPangoContext=NULL;
 	::PangoLayout* l_pPangoLayout=NULL;
-	l_pPangoContext=gtk_widget_get_pango_context(l_pWidget);
+	l_pPangoContext=gtk_widget_get_pango_context(GTK_WIDGET(m_pScenarioDrawingArea));
 	l_pPangoLayout=pango_layout_new(l_pPangoContext);
 	pango_layout_set_alignment(l_pPangoLayout, PANGO_ALIGN_CENTER);
 	if(pango_parse_markup(rComment.getText().toASCIIString(), -1, 0, NULL, NULL, NULL, NULL))
@@ -930,8 +937,8 @@ void CInterfacedScenario::redraw(IComment& rComment)
 		pango_layout_set_text(l_pPangoLayout, rComment.getText().toASCIIString(), -1);
 	}
 	gdk_draw_layout(
-		l_pWidget->window,
-		l_pWidget->style->text_gc[GTK_WIDGET_STATE(l_pWidget)],
+		GDK_DRAWABLE(m_pBufferedDrawingArea),
+		GTK_WIDGET(m_pScenarioDrawingArea)->style->text_gc[GTK_WIDGET_STATE(GTK_WIDGET(m_pScenarioDrawingArea))],
 		xStart+xMargin, yStart+yMargin, l_pPangoLayout);
 	g_object_unref(l_pPangoLayout);
 
@@ -941,9 +948,8 @@ void CInterfacedScenario::redraw(IComment& rComment)
 
 void CInterfacedScenario::redraw(ILink& rLink)
 {
-	::GtkWidget* l_pWidget=GTK_WIDGET(m_pScenarioDrawingArea);
 	::GdkGC* l_pStencilGC=gdk_gc_new(GDK_DRAWABLE(m_pStencilBuffer));
-	::GdkGC* l_pDrawGC=gdk_gc_new(l_pWidget->window);
+	::GdkGC* l_pDrawGC=gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
 
 	CLinkProxy l_oLinkProxy(rLink);
 
@@ -984,7 +990,7 @@ void CInterfacedScenario::redraw(ILink& rLink)
 		l_oLinkProxy.getXSource()+m_i32ViewOffsetX, l_oLinkProxy.getYSource()+m_i32ViewOffsetY,
 		l_oLinkProxy.getXTarget()+m_i32ViewOffsetX, l_oLinkProxy.getYTarget()+m_i32ViewOffsetY);
 	gdk_draw_line(
-		l_pWidget->window,
+		GDK_DRAWABLE(m_pBufferedDrawingArea),
 		l_pDrawGC,
 		l_oLinkProxy.getXSource()+m_i32ViewOffsetX, l_oLinkProxy.getYSource()+m_i32ViewOffsetY,
 		l_oLinkProxy.getXTarget()+m_i32ViewOffsetX, l_oLinkProxy.getYTarget()+m_i32ViewOffsetY);
@@ -1033,6 +1039,7 @@ uint32 CInterfacedScenario::pickInterfacedObject(int x, int y)
 	return l_ui32InterfacedObjectId;
 }
 
+//Return true if new object have been add to m_vCurrentObject
 boolean CInterfacedScenario::pickInterfacedObject(int x, int y, int iSizeX, int iSizeY)
 {
 	if(!GDK_DRAWABLE(m_pStencilBuffer))
@@ -1044,6 +1051,7 @@ boolean CInterfacedScenario::pickInterfacedObject(int x, int y, int iSizeX, int 
 	int i,j;
 	int l_iMaxX;
 	int l_iMaxY;
+	bool l_bRes = false;
 	gdk_drawable_get_size(GDK_DRAWABLE(m_pStencilBuffer), &l_iMaxX, &l_iMaxY);
 
 	int iStartX=x;
@@ -1094,13 +1102,14 @@ boolean CInterfacedScenario::pickInterfacedObject(int x, int y, int iSizeX, int 
 				if(!m_vCurrentObject[m_vInterfacedObject[l_ui32InterfacedObjectId].m_oIdentifier])
 				{
 					m_vCurrentObject[m_vInterfacedObject[l_ui32InterfacedObjectId].m_oIdentifier]=true;
+					l_bRes=true;
 				}
 			}
 		}
 	}
 
 	g_object_unref(l_pPixbuf);
-	return true;
+	return l_bRes;
 }
 
 #define OV_ClassId_Selected OpenViBE::CIdentifier(0xC67A01DC, 0x28CE06C1)
@@ -1123,6 +1132,7 @@ void CInterfacedScenario::undoCB(boolean bManageModifiedStatusFlag)
 		{
 			m_bHasBeenModified=true;
 		}
+		m_bScenarioModified = true;
 		this->redraw();
 	}
 	else
@@ -1141,6 +1151,7 @@ void CInterfacedScenario::setScale(OpenViBE::float64 rScale)
 	PangoFontDescription *l_pPangoFontDescription = pango_context_get_font_description(l_pPongoContext);
 	pango_font_description_set_size(l_pPangoFontDescription, m_ui32NormalFontSize*m_f64CurrentScale);
 
+	m_bScenarioModified = true;
 	this->redraw();
 }
 
@@ -1167,6 +1178,7 @@ void CInterfacedScenario::redoCB(boolean bManageModifiedStatusFlag)
 		{
 			m_bHasBeenModified=true;
 		}
+		m_bScenarioModified = true;
 		this->redraw();
 	}
 	else
@@ -1251,12 +1263,15 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 		this->snapshotCB();
 	}
 
+	m_bScenarioModified = true;
 	this->redraw();
 }
 
 void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaExposeCB\n";
+	gint x = -1;
+	gint y = -1;
 	if(m_ui32CurrentMode==Mode_None)
 	{
 		gint l_iViewportX=-1;
@@ -1305,10 +1320,12 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 
 		if(l_iNewScenarioSizeX>=0 && l_iNewScenarioSizeY>=0)
 		{
-			if(l_iOldScenarioSizeX!=l_iNewScenarioSizeX+2*l_iMarginX || l_iOldScenarioSizeY!=l_iNewScenarioSizeY+2*l_iMarginY)
+			x = max(l_iNewScenarioSizeX+2*l_iMarginX, l_iViewportX);
+			y = max(l_iNewScenarioSizeY+2*l_iMarginY, l_iViewportY);
+			if(l_iOldScenarioSizeX!=x || l_iOldScenarioSizeY!=y)
 			{
 				//the scenario change size
-				gtk_widget_set_size_request(GTK_WIDGET(m_pScenarioDrawingArea), l_iNewScenarioSizeX+2*l_iMarginX, l_iNewScenarioSizeY+2*l_iMarginY);
+				gtk_widget_set_size_request(GTK_WIDGET(m_pScenarioDrawingArea), x, y);
 			}
 
 			//if a box enlarge the scenario, we have to recalculate the ViewOffset
@@ -1317,81 +1334,104 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 			if(l_iMaxY+m_i32ViewOffsetY>-l_iMarginY+max(l_iViewportY, l_iNewScenarioSizeY+2*l_iMarginY)) { m_i32ViewOffsetY=-l_iMaxY-l_iMarginY+max(l_iViewportY, l_iNewScenarioSizeY+2*l_iMarginY); }
 			if(l_iMinY+m_i32ViewOffsetY< l_iMarginY)                                                     { m_i32ViewOffsetY=-l_iMinY+l_iMarginY; }
 		}
+		else
+		{
+			//If scenario has no size, let's say we gonna print nothing
+			x = 0;
+			y = 0;
+		}
 	}
 
-
-	gint x,y;
-
-	gdk_window_get_size(GTK_WIDGET(m_pScenarioDrawingArea)->window, &x, &y);
-	if(m_pStencilBuffer) g_object_unref(m_pStencilBuffer);
-	m_pStencilBuffer=gdk_pixmap_new(GTK_WIDGET(m_pScenarioDrawingArea)->window, x, y, -1);
-
-	::GdkGC* l_pStencilGC=gdk_gc_new(m_pStencilBuffer);
-	::GdkColor l_oColor={0, 0, 0, 0};
-	gdk_gc_set_rgb_fg_color(l_pStencilGC, &l_oColor);
-	gdk_draw_rectangle(
-		GDK_DRAWABLE(m_pStencilBuffer),
-		l_pStencilGC,
-		TRUE,
-		0, 0, x, y);
-	g_object_unref(l_pStencilGC);
-
-	if(this->isLocked())
+	::GdkGC* l_pDrawGC= gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
+	//The scenario needs to be redraw entirely so let's go
+	if(m_bScenarioModified)
 	{
-		::GdkColor l_oColor;
-		l_oColor.pixel=0;
-		l_oColor.red  =0x0f00;
-		l_oColor.green=0x0f00;
-		l_oColor.blue =0x0f00;
 
-		::GdkGC* l_pDrawGC=gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
-		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oColor);
-		gdk_gc_set_function(l_pDrawGC, GDK_XOR);
+		if(m_pStencilBuffer) g_object_unref(m_pStencilBuffer);
+		m_pStencilBuffer=gdk_pixmap_new(GTK_WIDGET(m_pScenarioDrawingArea)->window, x, y, -1);
+		m_pBufferedDrawingArea = gdk_pixmap_new(GTK_WIDGET(m_pScenarioDrawingArea)->window, x, y, -1);
+
+		::GdkGC* l_pStencilGC=gdk_gc_new(m_pStencilBuffer);
+		::GdkColor l_oColor={0, 0, 0, 0};
+		gdk_gc_set_rgb_fg_color(l_pStencilGC, &l_oColor);
 		gdk_draw_rectangle(
-			GTK_WIDGET(m_pScenarioDrawingArea)->window,
+			GDK_DRAWABLE(m_pStencilBuffer),
+			l_pStencilGC,
+			TRUE,
+			0, 0, x, y);
+		g_object_unref(l_pStencilGC);
+
+		l_oColor.pixel=0;
+		l_oColor.red  =0xf000;
+		l_oColor.green=0xf000;
+		l_oColor.blue =0xf000;
+		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oColor);
+		gdk_draw_rectangle(
+			GDK_DRAWABLE(m_pBufferedDrawingArea),
 			l_pDrawGC,
 			TRUE,
 			0, 0, x, y);
-		g_object_unref(l_pDrawGC);
+
+		if(this->isLocked())
+		{
+			::GdkColor l_oColor;
+			l_oColor.pixel=0;
+			l_oColor.red  =0x0f00;
+			l_oColor.green=0x0f00;
+			l_oColor.blue =0x0f00;
+
+			::GdkGC* l_pDrawGC=gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
+			gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oColor);
+			gdk_gc_set_function(l_pDrawGC, GDK_XOR);
+			gdk_draw_rectangle(
+				GDK_DRAWABLE(m_pBufferedDrawingArea),
+				l_pDrawGC,
+				TRUE,
+				0, 0, x, y);
+			g_object_unref(l_pDrawGC);
+		}
+
+		m_ui32InterfacedObjectId=0;
+		m_vInterfacedObject.clear();
+
+		uint32 l_ui32CommentCount=0;
+		CIdentifier l_oCommentIdentifier;
+		while((l_oCommentIdentifier=m_rScenario.getNextCommentIdentifier(l_oCommentIdentifier))!=OV_UndefinedIdentifier)
+		{
+			redraw(*m_rScenario.getCommentDetails(l_oCommentIdentifier));
+			l_ui32CommentCount++;
+		}
+		m_ui32CommentCount=l_ui32CommentCount;
+
+		uint32 l_ui32BoxCount=0;
+		CIdentifier l_oBoxIdentifier;
+		while((l_oBoxIdentifier=m_rScenario.getNextBoxIdentifier(l_oBoxIdentifier))!=OV_UndefinedIdentifier)
+		{
+			redraw(*m_rScenario.getBoxDetails(l_oBoxIdentifier));
+			l_ui32BoxCount++;
+		}
+		m_ui32BoxCount=l_ui32BoxCount;
+
+		uint32 l_ui32LinkCount=0;
+		CIdentifier l_oLinkIdentifier;
+		while((l_oLinkIdentifier=m_rScenario.getNextLinkIdentifier(l_oLinkIdentifier))!=OV_UndefinedIdentifier)
+		{
+			redraw(*m_rScenario.getLinkDetails(l_oLinkIdentifier));
+			l_ui32LinkCount++;
+		}
+		m_ui32LinkCount=l_ui32LinkCount;
+
+		uint32 l_ui32MessageLinkCount=0;
+		CIdentifier l_oMessageLinkIdentifier;
+		while((l_oMessageLinkIdentifier=m_rScenario.getNextMessageLinkIdentifier(l_oMessageLinkIdentifier))!=OV_UndefinedIdentifier)
+		{
+			redraw(*m_rScenario.getMessageLinkDetails(l_oMessageLinkIdentifier));
+			l_ui32MessageLinkCount++;
+		}
+		m_bScenarioModified = false;
 	}
 
-	m_ui32InterfacedObjectId=0;
-	m_vInterfacedObject.clear();
-
-	uint32 l_ui32CommentCount=0;
-	CIdentifier l_oCommentIdentifier;
-	while((l_oCommentIdentifier=m_rScenario.getNextCommentIdentifier(l_oCommentIdentifier))!=OV_UndefinedIdentifier)
-	{
-		redraw(*m_rScenario.getCommentDetails(l_oCommentIdentifier));
-		l_ui32CommentCount++;
-	}
-	m_ui32CommentCount=l_ui32CommentCount;
-
-	uint32 l_ui32BoxCount=0;
-	CIdentifier l_oBoxIdentifier;
-	while((l_oBoxIdentifier=m_rScenario.getNextBoxIdentifier(l_oBoxIdentifier))!=OV_UndefinedIdentifier)
-	{
-		redraw(*m_rScenario.getBoxDetails(l_oBoxIdentifier));
-		l_ui32BoxCount++;
-	}
-	m_ui32BoxCount=l_ui32BoxCount;
-
-	uint32 l_ui32LinkCount=0;
-	CIdentifier l_oLinkIdentifier;
-	while((l_oLinkIdentifier=m_rScenario.getNextLinkIdentifier(l_oLinkIdentifier))!=OV_UndefinedIdentifier)
-	{
-		redraw(*m_rScenario.getLinkDetails(l_oLinkIdentifier));
-		l_ui32LinkCount++;
-	}
-	m_ui32LinkCount=l_ui32LinkCount;
-
-	uint32 l_ui32MessageLinkCount=0;
-	CIdentifier l_oMessageLinkIdentifier;
-	while((l_oMessageLinkIdentifier=m_rScenario.getNextMessageLinkIdentifier(l_oMessageLinkIdentifier))!=OV_UndefinedIdentifier)
-	{
-		redraw(*m_rScenario.getMessageLinkDetails(l_oMessageLinkIdentifier));
-		l_ui32MessageLinkCount++;
-	}
+	gdk_draw_drawable(GTK_WIDGET(m_pScenarioDrawingArea)->window, l_pDrawGC, m_pBufferedDrawingArea, 0, 0, 0, 0, -1, -1);
 
 	if(m_ui32CurrentMode==Mode_Selection || m_ui32CurrentMode==Mode_SelectionAdd)
 	{
@@ -1432,7 +1472,6 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 			(int)m_f64CurrentMouseX, (int)m_f64CurrentMouseY);
 		g_object_unref(l_pDrawGC);
 	}
-
 }
 void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext* pDragContext, gint iX, gint iY, ::GtkSelectionData* pSelectionData, guint uiInfo, guint uiT)
 {
@@ -1471,6 +1510,7 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 
 		// Applies modifications before snapshot
 		l_oBoxProxy.apply();
+		m_bScenarioModified = true;
 
 		this->snapshotCB();
 	}
@@ -1541,6 +1581,7 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 		{
 			m_i32ViewOffsetX+=(int32)(pEvent->x-m_f64CurrentMouseX);
 			m_i32ViewOffsetY+=(int32)(pEvent->y-m_f64CurrentMouseY);
+			m_bScenarioModified = true;
 		}
 		if(m_ui32CurrentMode==Mode_MoveSelection)
 		{
@@ -1574,8 +1615,8 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 						l_oCommentProxy.getYCenter()+ (pEvent->y-m_f64CurrentMouseY) / m_f64CurrentScale);
 				}
 			}
+			m_bScenarioModified = true;
 		}
-
 		this->redraw();
 	}
 	m_f64CurrentMouseX=pEvent->x;
@@ -1601,6 +1642,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 	switch(pEvent->button)
 	{
 		case 1:
+			m_bScenarioModified = true;
 			switch(pEvent->type)
 			{
 				case GDK_BUTTON_PRESS:
@@ -1620,7 +1662,10 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 							{
 								m_ui32CurrentMode=Mode_Selection;
 							}
+
 						}
+						//In this case we don't have to modify something in the scenario
+						m_bScenarioModified = false;
 					}
 					else
 					{
@@ -1646,6 +1691,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 				case GDK_2BUTTON_PRESS:
 					if(m_oCurrentObject.m_oIdentifier!=OV_UndefinedIdentifier)
 					{
+
 						m_ui32CurrentMode=Mode_EditSettings;
 						m_bShiftPressed=false;
 						m_bControlPressed=false;
@@ -1716,7 +1762,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 									}
 								}
 							}
-							if(m_rScenario.isComment(m_oCurrentObject.m_oIdentifier))
+							else if(m_rScenario.isComment(m_oCurrentObject.m_oIdentifier))
 							{
 								IComment* l_pComment=m_rScenario.getCommentDetails(m_oCurrentObject.m_oIdentifier);
 								if(l_pComment)
@@ -1728,10 +1774,16 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 									}
 								}
 							}
+
 						}
+					}
+					else
+					{
+						m_bScenarioModified = false;
 					}
 					break;
 				default:
+					m_bScenarioModified = false;
 					break;
 			}
 			break;
@@ -1740,6 +1792,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 			break;
 
 		case 3:
+			m_bScenarioModified = true;
 			switch(pEvent->type)
 			{
 				case GDK_BUTTON_PRESS:
@@ -2037,7 +2090,6 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 		default:
 			break;
 	}
-
 	this->redraw();
 }
 void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidget, ::GdkEventButton* pEvent)
@@ -2052,6 +2104,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 
 	if(m_ui32CurrentMode!=Mode_None)
 	{
+
 		int l_iStartX=(int)min(m_f64PressMouseX, m_f64CurrentMouseX);
 		int l_iStartY=(int)min(m_f64PressMouseY, m_f64CurrentMouseY);
 		int l_iSizeX=(int)max(m_f64PressMouseX-m_f64CurrentMouseX, m_f64CurrentMouseX-m_f64PressMouseX);
@@ -2059,11 +2112,27 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 
 		if(m_ui32CurrentMode==Mode_Selection || m_ui32CurrentMode==Mode_SelectionAdd)
 		{
+			bool l_bEmpty = true;
+			map < CIdentifier, boolean >::const_iterator it;
 			if(m_ui32CurrentMode==Mode_Selection)
 			{
-				m_vCurrentObject.clear();
+				for(it=m_vCurrentObject.begin(); it!=m_vCurrentObject.end(); it++)
+				{
+					if(it->second)
+					{
+						l_bEmpty = false;
+					}
+				}
+				if(!l_bEmpty)
+				{
+					m_vCurrentObject.clear();
+					m_bScenarioModified = true;
+				}
 			}
-			pickInterfacedObject(l_iStartX, l_iStartY, l_iSizeX, l_iSizeY);
+			if(pickInterfacedObject(l_iStartX, l_iStartY, l_iSizeX, l_iSizeY))
+			{
+				m_bScenarioModified = true;
+			}
 		}
 		if(m_ui32CurrentMode==Mode_Connect)
 		{
@@ -2078,12 +2147,14 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				l_oSourceObject=l_oCurrentObject;
 				l_oTargetObject=m_oCurrentObject;
 				l_bIsActuallyConnecting=true;
+				m_bScenarioModified = true;
 			}
 			if(l_oCurrentObject.m_ui32ConnectorType==Connector_Input && m_oCurrentObject.m_ui32ConnectorType==Connector_Output)
 			{
 				l_oSourceObject=m_oCurrentObject;
 				l_oTargetObject=l_oCurrentObject;
 				l_bIsActuallyConnecting=true;
+				m_bScenarioModified = true;
 			}
 			//
 			if(l_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput && m_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput)
@@ -2092,6 +2163,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				l_oTargetObject=m_oCurrentObject;
 				l_bIsActuallyConnecting=true;
 				l_bConnectionIsMessage = true;
+				m_bScenarioModified = true;
 			}
 			if(l_oCurrentObject.m_ui32ConnectorType==Connector_MessageInput && m_oCurrentObject.m_ui32ConnectorType==Connector_MessageOutput)
 			{
@@ -2099,6 +2171,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				l_oTargetObject=l_oCurrentObject;
 				l_bIsActuallyConnecting=true;
 				l_bConnectionIsMessage = true;
+				m_bScenarioModified = true;
 			}
 			//
 			if(l_bIsActuallyConnecting)
@@ -2121,6 +2194,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 							l_oTargetObject.m_oIdentifier,
 							l_oTargetObject.m_ui32ConnectorIndex,
 							l_oLinkIdentifier);
+						m_bScenarioModified = true;
 						this->snapshotCB();
 					}
 
@@ -2135,6 +2209,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 							l_oTargetObject.m_oIdentifier,
 							l_oTargetObject.m_ui32ConnectorIndex,
 							l_oLinkIdentifier);
+						m_bScenarioModified = true;
 						this->snapshotCB();
 					}
 					//
@@ -2147,6 +2222,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 		}
 		if(m_ui32CurrentMode==Mode_MoveSelection)
 		{
+			m_bScenarioModified = true;
 			if(l_iSizeX==0 && l_iSizeY==0)
 			{
 				if(m_bControlPressed)
@@ -2182,6 +2258,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 				this->snapshotCB();
 			}
 		}
+
 		this->redraw();
 	}
 
@@ -2215,6 +2292,7 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 		{
 			it->second = true;
 		}
+		m_bScenarioModified = true;
 		this->redraw();
 	}
 
@@ -2251,7 +2329,7 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 				l_pBox->addAttribute(OV_AttributeId_Box_InitialPrototypeHashValue, l_oHashValue.toString());
 			}
 		}
-
+		m_bScenarioModified = true;
 		this->redraw();
 		this->snapshotCB();
 	}
@@ -2432,6 +2510,7 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 	if(pEvent->keyval==GDK_Delete || pEvent->keyval==GDK_KP_Delete)
 	{
 		this->deleteSelection();
+		m_bScenarioModified = true;
 		this->redraw();
 	}
 }
@@ -2663,7 +2742,7 @@ void CInterfacedScenario::pasteSelection(void)
 			}
 		}
 	}
-
+	m_bScenarioModified = true;
 	this->redraw();
 	this->snapshotCB();
 }
@@ -2702,7 +2781,7 @@ void CInterfacedScenario::deleteSelection(void)
 		}
 	}
 	m_vCurrentObject.clear();
-
+	m_bScenarioModified = true;
 	this->redraw();
 	this->snapshotCB();
 }
@@ -2724,7 +2803,7 @@ void CInterfacedScenario::muteSelection(void)
 		}
 	}
 	m_vCurrentObject.clear();
-
+	m_bScenarioModified = true;
 	this->redraw();
 	this->snapshotCB();
 }
@@ -2825,6 +2904,7 @@ void CInterfacedScenario::contextMenuBoxDeleteCB(IBox& rBox)
 	m_pDesignerVisualisation->onVisualisationBoxRemoved(rBox.getIdentifier());
 	m_rScenario.removeBox(rBox.getIdentifier());
 	this->snapshotCB();
+	m_bScenarioModified = true;
 	this->redraw();
 }
 void CInterfacedScenario::contextMenuBoxAddInputCB(IBox& rBox)
@@ -3098,7 +3178,7 @@ void CInterfacedScenario::contextMenuBoxMuteCB(IBox& rBox)
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "was " <<  l_bIsmuted <<"\n";
 	//l_oBoxProxy.setMute( l_bNewValue );
 	l_oAttributeHandler.setAttributeValue<bool>(OV_AttributeId_Box_Muted, l_bNewValue);
-
+	m_bScenarioModified = true;
 	this->redraw();
 	this->snapshotCB();
 }
