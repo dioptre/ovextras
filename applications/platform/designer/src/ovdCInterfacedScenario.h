@@ -26,6 +26,7 @@ namespace OpenViBEDesigner
 		virtual ~CInterfacedScenario(void);
 
 		virtual OpenViBE::boolean isLocked(void) const;
+		virtual void forceRedraw(void);
 		virtual void redraw(void);
 		virtual void redraw(OpenViBE::Kernel::IBox& rBox);
 		virtual void redraw(OpenViBE::Kernel::IComment& rComment);
@@ -51,6 +52,9 @@ namespace OpenViBEDesigner
 		void cutSelection(void);
 		void pasteSelection(void);
 		void deleteSelection(void);
+
+		void setScale(OpenViBE::float64 rScale);
+		OpenViBE::float64 getScale();
 
 		void muteSelection(void);
 
@@ -124,7 +128,9 @@ namespace OpenViBEDesigner
 		::GtkViewport* m_pScenarioViewport;
 		::GtkScrolledWindow* m_pScrolledWindow;//designer trim arrow scrolling
 		::GtkDrawingArea* m_pScenarioDrawingArea;
+		::GdkPixmap* m_pBufferedDrawingArea;
 		::GdkPixmap* m_pStencilBuffer;
+		OpenViBE::boolean m_bScenarioModified;
 		OpenViBE::boolean m_bHasFileName;
 		OpenViBE::boolean m_bHasBeenModified;
 		OpenViBE::boolean m_bButtonPressed;
@@ -146,6 +152,8 @@ namespace OpenViBEDesigner
 		OpenViBE::int32 m_i32ViewOffsetX;
 		OpenViBE::int32 m_i32ViewOffsetY;
 		OpenViBE::uint32 m_ui32CurrentMode;
+		OpenViBE::float64 m_f64CurrentScale;
+		OpenViBE::uint32 m_ui32NormalFontSize;
 
 		OpenViBE::uint32 m_ui32BoxCount;
 		OpenViBE::uint32 m_ui32CommentCount;

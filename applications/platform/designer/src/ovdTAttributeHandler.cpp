@@ -67,6 +67,20 @@ namespace OpenViBEDesigner
 	template <>
 	boolean TAttributeHandler::addAttribute(
 		const CIdentifier& rAttributeIdentifier,
+		const double& rValue) const
+	{
+		if(!m_pAttributable)
+		{
+			return false;
+		}
+		char l_sValue[1024];
+		sprintf(l_sValue, "%lf", rValue);
+		return m_pAttributable->addAttribute(rAttributeIdentifier, l_sValue);
+	}
+
+	template <>
+	boolean TAttributeHandler::addAttribute(
+		const CIdentifier& rAttributeIdentifier,
 		const bool& rValue) const
 	{
 		if(!m_pAttributable)
@@ -82,6 +96,13 @@ namespace OpenViBEDesigner
 		const CIdentifier& rAttributeIdentifier) const
 	{
 		return atoi(m_pConstAttributable->getAttributeValue(rAttributeIdentifier));
+	}
+
+	template <>
+	double TAttributeHandler::getAttributeValue<double>(
+		const CIdentifier& rAttributeIdentifier) const
+	{
+		return atof(m_pConstAttributable->getAttributeValue(rAttributeIdentifier));
 	}
 
 	template <>
@@ -109,6 +130,20 @@ namespace OpenViBEDesigner
 		}
 		char l_sValue[1024];
 		sprintf(l_sValue, "%i", rValue);
+		return m_pAttributable->setAttributeValue(rAttributeIdentifier, l_sValue);
+	}
+
+	template <>
+	boolean TAttributeHandler::setAttributeValue(
+		const CIdentifier& rAttributeIdentifier,
+		const double& rValue)
+	{
+		if(!m_pAttributable)
+		{
+			return false;
+		}
+		char l_sValue[1024];
+		sprintf(l_sValue, "%lf", rValue);
 		return m_pAttributable->setAttributeValue(rAttributeIdentifier, l_sValue);
 	}
 
