@@ -153,6 +153,10 @@ static void scenario_drawing_area_key_release_event_cb(::GtkWidget* pWidget, ::G
 {
 	static_cast<CInterfacedScenario*>(pUserData)->scenarioDrawingAreaKeyReleaseEventCB(pWidget, pEvent);
 }
+static void scenario_drawing_area_leave_notify_event_cb(::GtkWidget* pWidget, ::GdkEventKey* pEvent, gpointer pUserData)
+{
+	static_cast<CInterfacedScenario*>(pUserData)->scenarioDrawingAreaLeaveNotifyCB(pWidget, pEvent);
+}
 
 static void context_menu_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 {
@@ -321,6 +325,7 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	,m_pScenarioDrawingArea(NULL)
 	,m_pBufferedDrawingArea(NULL)
 	,m_pStencilBuffer(NULL)
+	,m_pTooltip(NULL)
 	,m_bScenarioModified(true)
 	,m_bHasFileName(false)
 	,m_bHasBeenModified(false)
@@ -373,6 +378,7 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "button_release_event", G_CALLBACK(scenario_drawing_area_button_released_cb), this);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "key-press-event", G_CALLBACK(scenario_drawing_area_key_press_event_cb), this);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "key-release-event", G_CALLBACK(scenario_drawing_area_key_release_event_cb), this);
+	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "leave-notify-event", G_CALLBACK(scenario_drawing_area_leave_notify_event_cb), this);
 	g_signal_connect(G_OBJECT(m_pNotebookPageContent), "scroll-event", G_CALLBACK(scenario_scrolledwindow_scroll_event_cb), this);
 
 	//retrieve visualisation tree
@@ -394,7 +400,8 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	m_bHasBeenModified=false;
 	this->updateScenarioLabel();
 
-
+	m_pTooltip=GTK_WIDGET(gtk_builder_get_object(m_pBuilderTooltip, "tooltip"));
+	gtk_widget_set_name(m_pTooltip, "gtk-tooltips");
 }
 
 CInterfacedScenario::~CInterfacedScenario(void)
@@ -1522,8 +1529,6 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 
 	if(this->isLocked()) return;
 
-	::GtkWidget* l_pTooltip=GTK_WIDGET(gtk_builder_get_object(m_pBuilderTooltip, "tooltip"));
-	gtk_widget_set_name(l_pTooltip, "gtk-tooltips");
 	uint32 l_ui32InterfacedObjectId=pickInterfacedObject((int)pEvent->x, (int)pEvent->y);
 	CInterfacedObject& l_rObject=m_vInterfacedObject[l_ui32InterfacedObjectId];
 	if(l_rObject.m_oIdentifier!=OV_UndefinedIdentifier
@@ -1564,13 +1569,13 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 			l_sType=CString("[")+l_sType+CString("]");
 			gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(m_pBuilderTooltip, "tooltip-label_name_content")), l_sName);
 			gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(m_pBuilderTooltip, "tooltip-label_type_content")), l_sType);
-			gtk_window_move(GTK_WINDOW(l_pTooltip), (gint)pEvent->x_root, (gint)pEvent->y_root+40);
-			gtk_widget_show(l_pTooltip);
+			gtk_window_move(GTK_WINDOW(m_pTooltip), (gint)pEvent->x_root, (gint)pEvent->y_root+40);
+			gtk_widget_show(m_pTooltip);
 		}
 	}
 	else
 	{
-		gtk_widget_hide(l_pTooltip);
+		gtk_widget_hide(m_pTooltip);
 	}
 
 	if(m_ui32CurrentMode!=Mode_None)
@@ -2540,6 +2545,11 @@ void CInterfacedScenario::scenarioDrawingAreaKeyReleaseEventCB(::GtkWidget* pWid
 	if(this->isLocked()) return;
 
 	// ...
+}
+
+void CInterfacedScenario::scenarioDrawingAreaLeaveNotifyCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent)
+{
+	gtk_widget_hide(m_pTooltip);
 }
 
 void CInterfacedScenario::copySelection(void)

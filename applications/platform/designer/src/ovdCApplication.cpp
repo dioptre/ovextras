@@ -1042,7 +1042,7 @@ void CApplication::updateWorkingDirectoryToken(const OpenViBE::CIdentifier &oSce
 
 	const CString l_sLocalPathToken("__volatile_ScenarioDir");
 	const CString l_sOldPath = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenValue(l_sLocalPathToken);
-	cout << l_sWorkingDir << endl;
+
 	if(l_sOldPath == CString(""))
 	{
 		m_rKernelContext.getConfigurationManager().createConfigurationToken(l_sLocalPathToken,l_sWorkingDir);
