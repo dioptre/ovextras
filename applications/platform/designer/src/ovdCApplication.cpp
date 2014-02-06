@@ -1039,6 +1039,30 @@ void CApplication::updateWorkingDirectoryToken(const OpenViBE::CIdentifier &oSce
 		m_rKernelContext.getConfigurationManager().setConfigurationTokenValue( m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sGlobalToken), l_sWorkingDir);
 	}
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "Scenario ( " << oScenarioIdentifier.toString() << " ) working directory changed to "  << l_sWorkingDir << "\n";
+
+	const CString l_sLocalPathToken("__volatile_ScenarioDir");
+	const CString l_sOldPath = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenValue(l_sLocalPathToken);
+	cout << l_sWorkingDir << endl;
+	if(l_sOldPath == CString(""))
+	{
+		m_rKernelContext.getConfigurationManager().createConfigurationToken(l_sLocalPathToken,l_sWorkingDir);
+	}
+	else
+	{
+		m_rKernelContext.getConfigurationManager().setConfigurationTokenValue( m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sLocalPathToken), l_sWorkingDir);
+	}
+}
+
+void CApplication::removeScenarioDirectoryToken(const CIdentifier &oScenarioIdentifier)
+{
+	OpenViBE::CString l_sGlobalToken = "__volatile_Scenario" + oScenarioIdentifier.toString() + "Dir";
+	m_rKernelContext.getConfigurationManager().releaseConfigurationToken(m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sGlobalToken));
+}
+
+void CApplication::resetVolatileScenarioDirectoryToken()
+{
+	OpenViBE::CString l_sGlobalToken = "__volatile_ScenarioDir";
+	m_rKernelContext.getConfigurationManager().releaseConfigurationToken(m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sGlobalToken));
 }
 
 boolean CApplication::hasRunningScenario(void)
@@ -1538,9 +1562,12 @@ void CApplication::closeScenarioCB(CInterfacedScenario* pInterfacedScenario)
 		CIdentifier l_oScenarioIdentifier=pInterfacedScenario->m_oScenarioIdentifier;
 		delete pInterfacedScenario;
 		m_pScenarioManager->releaseScenario(l_oScenarioIdentifier);
+		this->removeScenarioDirectoryToken(l_oScenarioIdentifier);
 		//when closing last open scenario, no "switch-page" event is triggered so we manually handle this case
 		if(m_vInterfacedScenario.empty() == true)
 		{
+			//This is the last, we need to reset the volatile scenario dir
+			resetVolatileScenarioDirectoryToken();
 			changeCurrentScenario(-1);
 		}
 	}
@@ -2009,6 +2036,8 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 {
 	if(m_bIsQuitting) return;
 
+
+
 	//hide window manager of previously active scenario, if any
 	int i = gtk_notebook_get_current_page(m_pScenarioNotebook);
 	if(i >= 0 && i < (int)m_vInterfacedScenario.size())
@@ -2042,6 +2071,7 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 	//switching to an existing scenario
 	else if(i32PageIndex<(int32)m_vInterfacedScenario.size())
 	{
+
 		CInterfacedScenario* l_pCurrentInterfacedScenario=m_vInterfacedScenario[i32PageIndex];
 		EPlayerStatus l_ePlayerStatus=(l_pCurrentInterfacedScenario->m_pPlayer?l_pCurrentInterfacedScenario->m_pPlayer->getStatus():PlayerStatus_Stop);
 
@@ -2077,6 +2107,7 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		
 		m_i32CurrentScenarioPage = i32PageIndex;
 		gtk_spin_button_set_value(m_pZoomSpinner, m_vInterfacedScenario[m_i32CurrentScenarioPage]->getScale()*100);
+		updateWorkingDirectoryToken(m_vInterfacedScenario[m_i32CurrentScenarioPage]->m_oScenarioIdentifier);
 	}
 	//first scenario is created (or a scenario is opened and replaces first unnamed unmodified scenario)
 	else
@@ -2107,6 +2138,10 @@ void CApplication::logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLe
 {
 	boolean isActive;
 	isActive = m_rKernelContext.getConfigurationManager().expandAsBoolean(configName, m_rKernelContext.getLogManager().isActive(level));
-	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(ToolButton), isActive);
+	//If the level is inactive, we don't active the button because it may crash
+	if(m_rKernelContext.getLogManager().isActive(level))
+	{
+		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(ToolButton), isActive);
+	}
 	gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), m_rKernelContext.getLogManager().isActive(level));
 }
