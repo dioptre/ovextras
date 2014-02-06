@@ -319,6 +319,7 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	,m_pNotebookPageContent(NULL)
 	,m_pScenarioViewport(NULL)
 	,m_pScenarioDrawingArea(NULL)
+	,m_pBufferedDrawingArea(NULL)
 	,m_pStencilBuffer(NULL)
 	,m_bScenarioModified(true)
 	,m_bHasFileName(false)
@@ -1272,7 +1273,9 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaExposeCB\n";
 	gint x = -1;
 	gint y = -1;
-	if(m_ui32CurrentMode==Mode_None)
+	::GdkGC* l_pDrawGC= gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
+	//The scenario needs to be redraw entirely so let's go
+	if(m_bScenarioModified)
 	{
 		gint l_iViewportX=-1;
 		gint l_iViewportY=-1;
@@ -1337,18 +1340,12 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		else
 		{
 			//If scenario has no size, let's say we gonna print nothing
-			x = 0;
-			y = 0;
+			return;
 		}
-	}
-
-	::GdkGC* l_pDrawGC= gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
-	//The scenario needs to be redraw entirely so let's go
-	if(m_bScenarioModified)
-	{
 
 		if(m_pStencilBuffer) g_object_unref(m_pStencilBuffer);
 		m_pStencilBuffer=gdk_pixmap_new(GTK_WIDGET(m_pScenarioDrawingArea)->window, x, y, -1);
+		if(m_pBufferedDrawingArea) g_object_unref(m_pBufferedDrawingArea);
 		m_pBufferedDrawingArea = gdk_pixmap_new(GTK_WIDGET(m_pScenarioDrawingArea)->window, x, y, -1);
 
 		::GdkGC* l_pStencilGC=gdk_gc_new(m_pStencilBuffer);
@@ -1362,9 +1359,9 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		g_object_unref(l_pStencilGC);
 
 		l_oColor.pixel=0;
-		l_oColor.red  =0xf000;
-		l_oColor.green=0xf000;
-		l_oColor.blue =0xf000;
+		l_oColor.red  =0xf600;
+		l_oColor.green=0xf600;
+		l_oColor.blue =0xf600;
 		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oColor);
 		gdk_draw_rectangle(
 			GDK_DRAWABLE(m_pBufferedDrawingArea),
@@ -1395,7 +1392,6 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		m_vInterfacedObject.clear();
 
 		uint32 l_ui32CommentCount=0;
-		CIdentifier l_oCommentIdentifier;
 		while((l_oCommentIdentifier=m_rScenario.getNextCommentIdentifier(l_oCommentIdentifier))!=OV_UndefinedIdentifier)
 		{
 			redraw(*m_rScenario.getCommentDetails(l_oCommentIdentifier));
@@ -1404,7 +1400,6 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		m_ui32CommentCount=l_ui32CommentCount;
 
 		uint32 l_ui32BoxCount=0;
-		CIdentifier l_oBoxIdentifier;
 		while((l_oBoxIdentifier=m_rScenario.getNextBoxIdentifier(l_oBoxIdentifier))!=OV_UndefinedIdentifier)
 		{
 			redraw(*m_rScenario.getBoxDetails(l_oBoxIdentifier));
@@ -1504,9 +1499,11 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 		l_oBoxProxy.setCenter(iX-m_i32ViewOffsetX, iY-m_i32ViewOffsetY);
 
 		// Aligns boxes on grid
-		l_oBoxProxy.setCenter(
-			(((int32)l_oBoxProxy.getXCenter()+8)&0xfffffff0),
-			(((int32)l_oBoxProxy.getYCenter()+8)&0xfffffff0));
+		int32 l_i32CenterX = (int32)l_oBoxProxy.getXCenter()+8;
+		l_i32CenterX = l_i32CenterX - l_i32CenterX%16;
+		int32 l_i32CenterY = (int32)l_oBoxProxy.getYCenter()+8;
+		l_i32CenterY = l_i32CenterY - l_i32CenterY%16;
+		l_oBoxProxy.setCenter(l_i32CenterX,l_i32CenterY);
 
 		// Applies modifications before snapshot
 		l_oBoxProxy.apply();
@@ -1625,7 +1622,6 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidget, ::GdkEventButton* pEvent)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaButtonPressedCB\n";
-
 	if(this->isLocked()) return;
 
 	::GtkWidget* l_pTooltip=GTK_WIDGET(gtk_builder_get_object(m_pBuilderTooltip, "tooltip"));
@@ -1662,10 +1658,9 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 							{
 								m_ui32CurrentMode=Mode_Selection;
 							}
-
+							m_bScenarioModified = false;
 						}
 						//In this case we don't have to modify something in the scenario
-						m_bScenarioModified = false;
 					}
 					else
 					{
@@ -1687,6 +1682,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 							}
 						}
 					}
+
 					break;
 				case GDK_2BUTTON_PRESS:
 					if(m_oCurrentObject.m_oIdentifier!=OV_UndefinedIdentifier)
@@ -2243,16 +2239,20 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 					if(i->second && m_rScenario.isBox(i->first))
 					{
 						CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, i->first);
-						l_oBoxProxy.setCenter(
-							(((int32)l_oBoxProxy.getXCenter()+8)&0xfffffff0),
-							(((int32)l_oBoxProxy.getYCenter()+8)&0xfffffff0));
+						int32 l_i32CenterX = (int32)l_oBoxProxy.getXCenter()+8;
+						l_i32CenterX = l_i32CenterX - l_i32CenterX%16;
+						int32 l_i32CenterY = (int32)l_oBoxProxy.getYCenter()+8;
+						l_i32CenterY = l_i32CenterY - l_i32CenterY%16;
+						l_oBoxProxy.setCenter(l_i32CenterX, l_i32CenterY);
 					}
 					if(i->second && m_rScenario.isComment(i->first))
 					{
 						CCommentProxy l_oCommentProxy(m_rKernelContext, m_rScenario, i->first);
-						l_oCommentProxy.setCenter(
-							(((int32)l_oCommentProxy.getXCenter()+8)&0xfffffff0),
-							(((int32)l_oCommentProxy.getYCenter()+8)&0xfffffff0));
+						int32 l_i32CenterX = (int32)l_oCommentProxy.getXCenter()+8;
+						l_i32CenterX = l_i32CenterX - l_i32CenterX%16;
+						int32 l_i32CenterY = (int32)l_oCommentProxy.getYCenter()+8;
+						l_i32CenterY = l_i32CenterY - l_i32CenterY%16;
+						l_oCommentProxy.setCenter(l_i32CenterX, l_i32CenterY);
 					}
 				}
 				this->snapshotCB();
