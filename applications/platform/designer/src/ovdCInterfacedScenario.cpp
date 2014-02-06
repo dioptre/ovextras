@@ -196,7 +196,7 @@ static void context_menu_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 	}
 	// Redraw in any case, as some of the actual callbacks can forget to redraw. As this callback is only called after the user has accessed
 	// the right-click menu, so its not a large overhead to do it in general. @TODO might remove the individual redraws.
-	l_pContextMenuCB->pInterfacedScenario->redraw();
+	l_pContextMenuCB->pInterfacedScenario->forceRedraw();
 }
 
 static void gdk_draw_rounded_rectangle(::GdkDrawable* pDrawable, ::GdkGC* pDrawGC, ::gboolean bFill, gint x, gint y, gint width, gint height, gint radius=8)
@@ -1425,47 +1425,48 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		}
 		m_bScenarioModified = false;
 	}
+	if (m_pBufferedDrawingArea != NULL){
+		gdk_draw_drawable(GTK_WIDGET(m_pScenarioDrawingArea)->window, l_pDrawGC, m_pBufferedDrawingArea, 0, 0, 0, 0, -1, -1);
 
-	gdk_draw_drawable(GTK_WIDGET(m_pScenarioDrawingArea)->window, l_pDrawGC, m_pBufferedDrawingArea, 0, 0, 0, 0, -1, -1);
+		if(m_ui32CurrentMode==Mode_Selection || m_ui32CurrentMode==Mode_SelectionAdd)
+		{
+			int l_iStartX=(int)min(m_f64PressMouseX, m_f64CurrentMouseX);
+			int l_iStartY=(int)min(m_f64PressMouseY, m_f64CurrentMouseY);
+			int l_iSizeX=(int)max(m_f64PressMouseX-m_f64CurrentMouseX, m_f64CurrentMouseX-m_f64PressMouseX);
+			int l_iSizeY=(int)max(m_f64PressMouseY-m_f64CurrentMouseY, m_f64CurrentMouseY-m_f64PressMouseY);
 
-	if(m_ui32CurrentMode==Mode_Selection || m_ui32CurrentMode==Mode_SelectionAdd)
-	{
-		int l_iStartX=(int)min(m_f64PressMouseX, m_f64CurrentMouseX);
-		int l_iStartY=(int)min(m_f64PressMouseY, m_f64CurrentMouseY);
-		int l_iSizeX=(int)max(m_f64PressMouseX-m_f64CurrentMouseX, m_f64CurrentMouseX-m_f64PressMouseX);
-		int l_iSizeY=(int)max(m_f64PressMouseY-m_f64CurrentMouseY, m_f64CurrentMouseY-m_f64PressMouseY);
+			::GtkWidget* l_pWidget=GTK_WIDGET(m_pScenarioDrawingArea);
+			::GdkGC* l_pDrawGC=gdk_gc_new(l_pWidget->window);
+			gdk_gc_set_function(l_pDrawGC, GDK_OR);
+			gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_SelectionArea]);
+			gdk_draw_rectangle(
+				l_pWidget->window,
+				l_pDrawGC,
+				TRUE,
+				l_iStartX, l_iStartY, l_iSizeX, l_iSizeY);
+			gdk_gc_set_function(l_pDrawGC, GDK_COPY);
+			gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_SelectionAreaBorder]);
+			gdk_draw_rectangle(
+				l_pWidget->window,
+				l_pDrawGC,
+				FALSE,
+				l_iStartX, l_iStartY, l_iSizeX, l_iSizeY);
+			g_object_unref(l_pDrawGC);
+		}
 
-		::GtkWidget* l_pWidget=GTK_WIDGET(m_pScenarioDrawingArea);
-		::GdkGC* l_pDrawGC=gdk_gc_new(l_pWidget->window);
-		gdk_gc_set_function(l_pDrawGC, GDK_OR);
-		gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_SelectionArea]);
-		gdk_draw_rectangle(
-			l_pWidget->window,
-			l_pDrawGC,
-			TRUE,
-			l_iStartX, l_iStartY, l_iSizeX, l_iSizeY);
-		gdk_gc_set_function(l_pDrawGC, GDK_COPY);
-		gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_SelectionAreaBorder]);
-		gdk_draw_rectangle(
-			l_pWidget->window,
-			l_pDrawGC,
-			FALSE,
-			l_iStartX, l_iStartY, l_iSizeX, l_iSizeY);
-		g_object_unref(l_pDrawGC);
-	}
+		if(m_ui32CurrentMode==Mode_Connect)
+		{
+			::GtkWidget* l_pWidget=GTK_WIDGET(m_pScenarioDrawingArea);
+			::GdkGC* l_pDrawGC=gdk_gc_new(l_pWidget->window);
 
-	if(m_ui32CurrentMode==Mode_Connect)
-	{
-		::GtkWidget* l_pWidget=GTK_WIDGET(m_pScenarioDrawingArea);
-		::GdkGC* l_pDrawGC=gdk_gc_new(l_pWidget->window);
-
-		gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_Link]);
-		gdk_draw_line(
-			l_pWidget->window,
-			l_pDrawGC,
-			(int)m_f64PressMouseX, (int)m_f64PressMouseY,
-			(int)m_f64CurrentMouseX, (int)m_f64CurrentMouseY);
-		g_object_unref(l_pDrawGC);
+			gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[Color_Link]);
+			gdk_draw_line(
+				l_pWidget->window,
+				l_pDrawGC,
+				(int)m_f64PressMouseX, (int)m_f64PressMouseY,
+				(int)m_f64CurrentMouseX, (int)m_f64CurrentMouseY);
+			g_object_unref(l_pDrawGC);
+		}
 	}
 }
 void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext* pDragContext, gint iX, gint iY, ::GtkSelectionData* pSelectionData, guint uiInfo, guint uiT)
@@ -2093,6 +2094,11 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaButtonReleasedCB\n";
 
 	if(this->isLocked()) return;
+
+	if(pEvent->button == 3)
+	{
+		return;
+	}
 
 	m_bButtonPressed&=!((pEvent->type==GDK_BUTTON_RELEASE)&&(pEvent->button==1));
 	m_f64ReleaseMouseX=pEvent->x;
