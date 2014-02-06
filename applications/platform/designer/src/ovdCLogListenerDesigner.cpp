@@ -32,6 +32,8 @@ CLogListenerDesigner::CLogListenerDesigner(const IKernelContext& rKernelContext,
 	,m_ui32CountMessages( 0 )
 	,m_ui32CountWarnings( 0 )
 	,m_ui32CountErrors( 0 )
+	,m_bNonFilteredBuffer( false )
+	,m_oCurrentLog( NULL )
 {
 	m_pTextView = GTK_TEXT_VIEW(gtk_builder_get_object(m_pBuilderInterface, "openvibe-textview_messages"));
 	m_pAlertWindow = GTK_WINDOW(gtk_builder_get_object(m_pBuilderInterface, "dialog_error_popup"));
@@ -75,6 +77,9 @@ CLogListenerDesigner::CLogListenerDesigner(const IKernelContext& rKernelContext,
 	gtk_text_buffer_create_tag(m_pBuffer, "c_aqua", "foreground", "#00FFFF", NULL); // number
 	gtk_text_buffer_create_tag(m_pBuffer, "c_darkViolet", "foreground", "#6900D7", NULL); // warning
 	gtk_text_buffer_create_tag(m_pBuffer, "c_blueChill", "foreground", "#3d889b", NULL); // information
+
+	//copy of the displayed buffer
+	m_pNonFilteredBuffer = gtk_text_buffer_new(gtk_text_buffer_get_tag_table(m_pBuffer));
 
 	m_bConsoleLogWithHexa = rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_ConsoleLogWithHexa}",false);
 	m_bConsoleLogTimeInSecond = rKernelContext.getConfigurationManager().expandAsBoolean("${Kernel_ConsoleLogTimeInSecond}",false);
@@ -141,8 +146,14 @@ void CLogListenerDesigner::log(const time64 time64Value)
 	}
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	//m_oCurrentLog->copyFromBuffer(&l_oTextIter, &l_oEndTextIter);
 }
 
 void CLogListenerDesigner::log(const uint64 ui64Value)
@@ -157,8 +168,13 @@ void CLogListenerDesigner::log(const uint64 ui64Value)
 	}
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 }
 
 void CLogListenerDesigner::log(const uint32 ui32Value)
@@ -172,8 +188,13 @@ void CLogListenerDesigner::log(const uint32 ui32Value)
 		l_sText << " (0x" << hex << ui32Value << ")";
 	}
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 }
 
 void CLogListenerDesigner::log(const uint16 ui16Value)
@@ -188,8 +209,13 @@ void CLogListenerDesigner::log(const uint16 ui16Value)
 	}
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 }
 
 void CLogListenerDesigner::log(const uint8 ui8Value)
@@ -204,8 +230,13 @@ void CLogListenerDesigner::log(const uint8 ui8Value)
 	}
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 }
 
 void CLogListenerDesigner::log(const int64 i64Value)
@@ -220,8 +251,13 @@ void CLogListenerDesigner::log(const int64 i64Value)
 	}
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 }
 
 void CLogListenerDesigner::log(const int32 i32Value)
@@ -236,8 +272,13 @@ void CLogListenerDesigner::log(const int32 i32Value)
 	}
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 }
 
 void CLogListenerDesigner::log(const int16 i16Value)
@@ -252,8 +293,13 @@ void CLogListenerDesigner::log(const int16 i16Value)
 	}
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 }
 
 void CLogListenerDesigner::log(const int8 i8Value)
@@ -268,8 +314,13 @@ void CLogListenerDesigner::log(const int8 i8Value)
 	}
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 }
 
 void CLogListenerDesigner::log(const float32 f32Value)
@@ -280,8 +331,13 @@ void CLogListenerDesigner::log(const float32 f32Value)
 	l_sText << f32Value;
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 }
 
 void CLogListenerDesigner::log(const float64 f64Value)
@@ -292,9 +348,13 @@ void CLogListenerDesigner::log(const float64 f64Value)
 	l_sText << f64Value;
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 }
 
 void CLogListenerDesigner::log(const boolean bValue)
@@ -305,8 +365,13 @@ void CLogListenerDesigner::log(const boolean bValue)
 	l_sText << (bValue ? "true" : "false");
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, l_sText.str().data(), -1, "c_watercourse", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, l_sText.str().data(), -1, "c_watercourse", NULL);
 }
 
 void CLogListenerDesigner::log(const CIdentifier& rValue)
@@ -314,8 +379,13 @@ void CLogListenerDesigner::log(const CIdentifier& rValue)
 	if(m_bIngnoreMessages) return;
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, rValue.toString(), -1, "f_mono", "c_blueChill", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, rValue.toString(), -1, "f_mono", "c_blueChill", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, rValue.toString(), -1, "f_mono", "c_blueChill", NULL);
 }
 
 void CLogListenerDesigner::log(const CString& rValue)
@@ -323,8 +393,13 @@ void CLogListenerDesigner::log(const CString& rValue)
 	if(m_bIngnoreMessages) return;
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, rValue.toASCIIString(), -1, "f_mono", "c_blueChill", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, rValue.toASCIIString(), -1, "f_mono", "c_blueChill", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, rValue.toASCIIString(), -1, "f_mono", "c_blueChill", NULL);
 }
 
 void CLogListenerDesigner::log(const char* pValue)
@@ -332,14 +407,50 @@ void CLogListenerDesigner::log(const char* pValue)
 	if(m_bIngnoreMessages) return;
 
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
-	gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, pValue, -1, "f_mono", NULL);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, pValue, -1, "f_mono", NULL);
+
+	//copy this newly added content in the current log
+	GtkTextIter l_oEndLogIter;
+	gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter);
+	gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, pValue, -1, "f_mono", NULL);
 }
 
 void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 {
+	//a new log is defined when a log level arrive
+	//manage the old one
+	//if the current log passes the filter add it to the m_pBuffer to be displayed
+	if(m_oCurrentLog!=NULL)
+	{
+		if(m_oCurrentLog->Filter(m_sSearchTerm))
+		{
+			//cout << "this log passes the filter " << m_sSearchTerm.toASCIIString() << endl;
+			//copy it to m_pBuffer to be displayed
+			GtkTextIter l_oBufferEnd, l_oLogBegin, l_oLogEnd;
+			gtk_text_buffer_get_end_iter(m_pBuffer, &l_oBufferEnd);
+			gtk_text_buffer_get_start_iter(m_oCurrentLog->getTextBuffer(), &l_oLogBegin);
+			gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oLogEnd);
+			gtk_text_buffer_insert_range(m_pBuffer, &l_oBufferEnd, &l_oLogBegin, &l_oLogEnd );
+		}
+		/*debug purposes
+		else
+		{
+			GtkTextIter l_oLogBegin, l_oLogEnd;
+			gtk_text_buffer_get_start_iter(m_oCurrentLog->getTextBuffer(), &l_oLogBegin);
+			gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oLogEnd);
+			cout << "this " << gtk_text_buffer_get_text(m_oCurrentLog->getTextBuffer(), &l_oLogBegin, &l_oLogEnd, true ) << " does not pass the filter" << endl;
+		}
+		//*/
+	}
+	//delete it
+	delete m_oCurrentLog;
+	m_oCurrentLog = NULL;
+	//new one
+	m_oCurrentLog = new CLogObject(m_pNonFilteredBuffer);
+
 	GtkTextIter l_oTextIter;
-	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oTextIter);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oTextIter);
 
 	switch(eLogLevel)
 	{
@@ -349,9 +460,9 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 
 			m_ui32CountMessages++;
 
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "[ ", -1, "w_bold", "f_mono", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "DEBUG", -1, "w_bold", "f_mono", "c_blue", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, " ] ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "[ ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "DEBUG", -1, "w_bold", "f_mono", "c_blue", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, " ] ", -1, "w_bold", "f_mono", NULL);
 			break;
 
 		case LogLevel_Benchmark:
@@ -360,9 +471,9 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 
 			m_ui32CountMessages++;
 
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "[ ", -1, "w_bold", "f_mono", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "BENCH", -1, "w_bold", "f_mono", "c_magenta", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, " ] ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "[ ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "BENCH", -1, "w_bold", "f_mono", "c_magenta", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, " ] ", -1, "w_bold", "f_mono", NULL);
 			break;
 
 		case LogLevel_Trace:
@@ -371,9 +482,9 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 
 			m_ui32CountMessages++;
 
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "[ ", -1, "w_bold", "f_mono", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "TRACE", -1, "w_bold", "f_mono", "c_watercourse", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, " ] ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "[ ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "TRACE", -1, "w_bold", "f_mono", "c_watercourse", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, " ] ", -1, "w_bold", "f_mono", NULL);
 			break;
 
 		case LogLevel_Info:
@@ -382,9 +493,9 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 
 			m_ui32CountMessages++;
 
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "[  ", -1, "w_bold", "f_mono", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "INF", -1, "w_bold", "f_mono", "c_blueChill", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "  ] ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "[  ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "INF", -1, "w_bold", "f_mono", "c_blueChill", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "  ] ", -1, "w_bold", "f_mono", NULL);
 			break;
 
 		case LogLevel_Warning:
@@ -393,9 +504,9 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 
 			m_ui32CountWarnings++;
 
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "[", -1, "w_bold", "f_mono", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "WARNING", -1, "w_bold", "f_mono", "c_darkViolet", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "] ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "[", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "WARNING", -1, "w_bold", "f_mono", "c_darkViolet", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "] ", -1, "w_bold", "f_mono", NULL);
 			break;
 
 		case LogLevel_ImportantWarning:
@@ -404,9 +515,9 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 
 			m_ui32CountWarnings++;
 
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "[", -1, "w_bold", "f_mono", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "WARNING", -1, "w_bold", "f_mono", "c_darkOrange", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "] ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "[", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "WARNING", -1, "w_bold", "f_mono", "c_darkOrange", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "] ", -1, "w_bold", "f_mono", NULL);
 			break;
 
 		case LogLevel_Error:
@@ -415,9 +526,9 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 
 			m_ui32CountErrors++;
 
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "[ ", -1, "w_bold", "f_mono", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "ERROR", -1, "w_bold", "f_mono", "c_red", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, " ] ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "[ ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "ERROR", -1, "w_bold", "f_mono", "c_red", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, " ] ", -1, "w_bold", "f_mono", NULL);
 			break;
 
 		case LogLevel_Fatal:
@@ -426,9 +537,9 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 
 			m_ui32CountErrors++;
 
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "[ ", -1, "w_bold", "f_mono", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "FATAL", -1, "w_bold", "f_mono", "c_red", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, " ] ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "[ ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "FATAL", -1, "w_bold", "f_mono", "c_red", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, " ] ", -1, "w_bold", "f_mono", NULL);
 			break;
 
 		default:
@@ -436,11 +547,23 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 
 			m_ui32CountMessages++;
 
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "[", -1, "w_bold", "f_mono", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "UNKNOWN", -1, "w_bold", "f_mono", NULL);
-			gtk_text_buffer_insert_with_tags_by_name(m_pBuffer, &l_oTextIter, "] ", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "[", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "UNKNOWN", -1, "w_bold", "f_mono", NULL);
+			gtk_text_buffer_insert_with_tags_by_name(m_pNonFilteredBuffer, &l_oTextIter, "] ", -1, "w_bold", "f_mono", NULL);
 			break;
 	}
+
+	//copy this newly added content in the current log
+	//get part to copy
+	//end of buffer
+	GtkTextIter l_oEndTextIter;
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &l_oEndTextIter);
+	//start_match will give the "["
+	GtkTextIter start_match, end_match;
+	gtk_text_iter_backward_search(&l_oEndTextIter, "[", GTK_TEXT_SEARCH_TEXT_ONLY, &start_match, &end_match, NULL);
+	//copy
+	m_oCurrentLog->copyFromBuffer(&start_match, &l_oEndTextIter);
+
 
 	if(gtk_toggle_button_get_active(m_pToggleButtonPopup) && (eLogLevel == LogLevel_Warning || eLogLevel == LogLevel_ImportantWarning || eLogLevel == LogLevel_Error || eLogLevel == LogLevel_Fatal))
 	{
@@ -528,6 +651,102 @@ void CLogListenerDesigner::clearMessages()
 	gtk_widget_set_visible(GTK_WIDGET(m_pLabelCountErrors), false);
 
 	gtk_text_buffer_set_text(m_pBuffer, "", -1);
+	gtk_text_buffer_set_text(m_pNonFilteredBuffer, "", -1);
+}
+
+void CLogListenerDesigner::restoreOldBuffer()
+{
+	m_sSearchTerm = CString("");
+	//non filtered buffer bounds
+		GtkTextIter start_find, end_find;
+		gtk_text_buffer_get_start_iter(m_pNonFilteredBuffer, &start_find);
+		gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &end_find);
+		//clear displayed buffer
+		gtk_text_buffer_set_text(m_pBuffer, "", -1);
+
+		//start of displayed buffer
+		GtkTextIter l_pOldBufferBegin;	
+		gtk_text_buffer_get_start_iter(m_pBuffer, &l_pOldBufferBegin);
+		//copy
+		gtk_text_buffer_insert_range(m_pBuffer, &l_pOldBufferBegin, &start_find, &end_find);
+
+}
+
+void CLogListenerDesigner::searchMessages(CString l_sSearchTerm)
+{
+	m_sSearchTerm = l_sSearchTerm;
+	//std::cout << "CLogListenerDesigner::searchMessages with search term " << l_sSearchTerm.toASCIIString() << "\n";
+
+	GtkTextIter start_find, end_find;
+
+	//SearchAnswer will contain all the lines matching the query
+	GtkTextBuffer* l_SearchAnswer = gtk_text_buffer_new(gtk_text_buffer_get_tag_table(m_pNonFilteredBuffer));
+	//get the beginning
+	GtkTextIter start_answer;
+	gtk_text_buffer_get_start_iter(l_SearchAnswer, &start_answer);
+
+	//tag for highlighting the search term
+	GtkTextTag* tag = gtk_text_tag_table_lookup(gtk_text_buffer_get_tag_table(l_SearchAnswer), "gray_bg");
+	if(tag==NULL)
+	{
+		gtk_text_buffer_create_tag(l_SearchAnswer, "gray_bg", "background", "gray", NULL);
+	}
+
+
+	GtkTextIter start_match, end_match;
+	const gchar *text = l_sSearchTerm.toASCIIString();
+
+	gtk_text_buffer_get_start_iter(m_pNonFilteredBuffer, &start_find);
+	gtk_text_buffer_get_end_iter(m_pNonFilteredBuffer, &end_find);
+
+	while ( gtk_text_iter_forward_search(&start_find, text, GTK_TEXT_SEARCH_TEXT_ONLY, &start_match, &end_match, NULL) )
+	{
+	  //gtk_text_buffer_apply_tag_by_name(m_pBuffer, "gray_bg", &start_match, &end_match);
+	  GtkTextIter start_line, end_line = start_match;
+	  //find the nearest endline\n;
+	  gboolean end = gtk_text_iter_forward_to_line_end(&end_line);
+	  start_line = end_line;
+	  gtk_text_iter_backward_line(&start_line);//move to start of the previous line
+	  gboolean bg = gtk_text_iter_forward_to_line_end(&start_line);//move to end of the previous line
+
+	  if(bg&&end)
+	  {
+		  //insert found line in the search answer
+		gtk_text_buffer_insert_range(l_SearchAnswer,&start_answer, &start_line, &end_line );
+		//higlhlight the term queried
+		gtk_text_buffer_get_end_iter(l_SearchAnswer, &start_answer);
+		GtkTextIter limit_answer = start_answer;
+		gtk_text_iter_backward_chars(&limit_answer, l_sSearchTerm.length());
+		gtk_text_buffer_apply_tag_by_name(l_SearchAnswer, "gray_bg", &limit_answer, &start_answer);
+		//next search
+		gtk_text_buffer_get_end_iter(l_SearchAnswer, &start_answer);
+	  }
+	  if(!bg)
+	  {
+		  cout << "no bg found\n";
+	  }
+	  if(!end)
+	  {
+		  cout << "no end found\n";
+	  }
+	  //offset to end_match
+	  int offset = gtk_text_iter_get_offset(&end_match);
+	  //begin next search at end match
+	  gtk_text_buffer_get_iter_at_offset(m_pNonFilteredBuffer, &start_find, offset);
+	}
+
+	//bound of the search answer
+	gtk_text_buffer_get_start_iter(l_SearchAnswer, &start_find);
+	gtk_text_buffer_get_end_iter(l_SearchAnswer, &end_find);
+
+	//clear displayed buffer
+	gtk_text_buffer_set_text(m_pBuffer, "", -1);
+
+	GtkTextIter l_pDisplayedBufferBegin;
+	gtk_text_buffer_get_start_iter(m_pBuffer, &l_pDisplayedBufferBegin);
+	//copy in displayed buffer
+	gtk_text_buffer_insert_range(m_pBuffer, &l_pDisplayedBufferBegin, &start_find, &end_find);
+
 }
 
 void CLogListenerDesigner::focusMessageWindow()

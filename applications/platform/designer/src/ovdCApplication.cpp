@@ -256,6 +256,30 @@ namespace
 		static_cast<CLogListenerDesigner*>(pUserData)->clearMessages();
 	}
 
+	void search_messages_cb(::GtkButton* pButton, gpointer pUserData)
+	{
+		cout << "search_messages_cb\n";
+
+		CApplication* l_pApplication=static_cast<CApplication*>(pUserData);
+		CString l_sSearchTerm((const char*)l_pApplication->m_sLogSearchTerm);
+		if(l_sSearchTerm==CString(""))
+		{
+			cout << "restore old buffer" << endl;
+			l_pApplication->m_pLogListenerDesigner->restoreOldBuffer();
+		}
+		else
+		{
+			cout << "search message for " << l_sSearchTerm.toASCIIString() << endl;
+			l_pApplication->m_pLogListenerDesigner->searchMessages(l_sSearchTerm);
+		}
+
+	}
+
+	void refresh_search_log_entry(::GtkEntry* pTextfield, CApplication* pApplication)
+	{
+		pApplication->m_sLogSearchTerm = gtk_entry_get_text(pTextfield);
+	}
+
 	string strtoupper(string str)
 	{
 		int leng=str.length();
@@ -526,6 +550,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 {
 	m_eCommandLineFlags=eCommandLineFlags;
 	m_sSearchTerm = "";
+	m_sLogSearchTerm = "";
 
 	// Prepares scenario clipboard
 	CIdentifier l_oClipboardScenarioIdentifier;
@@ -595,6 +620,9 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-box_algorithm_searchbox")), "focus-out-event", G_CALLBACK(searchbox_focus_out_cb), this);
 
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-show_unstable")), "toggled", G_CALLBACK(refresh_search_no_data_cb), this);
+
+	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "searchEntry")),		"changed", G_CALLBACK(refresh_search_log_entry), this);
+	//m_pSearchEntry = GTK_ENTRY(gtk_builder_get_object(m_pBuilderInterface, "searchEntry"));
 
 #if defined(TARGET_OS_Windows)
 #if GTK_CHECK_VERSION(2,24,0)
@@ -757,12 +785,16 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error")), m_rKernelContext.getLogManager().isActive(LogLevel_Error));
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal")), m_rKernelContext.getLogManager().isActive(LogLevel_Fatal));
 
+
+
 	if(!(m_eCommandLineFlags&CommandLineFlag_NoGui))
 	{
 		m_pLogListenerDesigner = new CLogListenerDesigner(m_rKernelContext, m_pBuilderInterface);
 		m_rKernelContext.getLogManager().addListener(m_pLogListenerDesigner);
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_clear")),       "clicked",  G_CALLBACK(clear_messages_cb), m_pLogListenerDesigner);
 
+		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_search")),       "clicked",  G_CALLBACK(search_messages_cb), this);
+		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "searchEntry")),		"activate", G_CALLBACK(search_messages_cb), this);
 		gtk_widget_show(m_pMainWindow);
 	}
 }
@@ -779,7 +811,7 @@ boolean CApplication::openScenario(const char* sFileName)
 
 		if(::strcmp(sFileName, "-")==0)
 		{
-			m_rKernelContext.getLogManager() << LogLevel_Trace << "Reading from standard input...\n";
+			m_rKernelContext.getLogManager() << LogLevel_Info << "Reading from standard input...\n";
 			unsigned int l_uiSize=0;
 			FILE* l_pFile=stdin;
 			while(1)

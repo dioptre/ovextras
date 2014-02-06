@@ -154,9 +154,11 @@ namespace OpenViBEDesigner
 		::GtkTreeView* m_pBoxAlgorithmTreeView;
 		::GtkTreeStore* m_pAlgorithmTreeModel;
 		::GtkTreeView* m_pAlgorithmTreeView;
+		::GtkEntry* m_pSearchEntry;//for search in log
 		gint m_giFilterTimeout;
 
 		const gchar* m_sSearchTerm;
+		const gchar* m_sLogSearchTerm;
 		
 		OpenViBE::uint64 m_ui64LastTimeRefresh;
 		OpenViBE::boolean m_bIsQuitting;
