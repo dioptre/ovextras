@@ -215,7 +215,7 @@ void CPlayerVisualisation::init(void)
 			gtk_window_set_title(GTK_WINDOW(l_pTreeWidget), (const char*)pVisualisationWidget->getName());
 
 			//set it transient for main window
-			gtk_window_set_transient_for(GTK_WINDOW(l_pTreeWidget), GTK_WINDOW(m_rInterfacedScenario.m_rApplication.m_pMainWindow));
+			//gtk_window_set_transient_for(GTK_WINDOW(l_pTreeWidget), GTK_WINDOW(m_rInterfacedScenario.m_rApplication.m_pMainWindow));
 
 			//centered on the main window
 			if(m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_WindowManager_Center}", false))
@@ -475,7 +475,7 @@ boolean CPlayerVisualisation::parentWidgetBox(IVisualisationWidget* pWidget, ::G
 		//set its title
 		gtk_window_set_title(GTK_WINDOW(l_pWindow), (const char*)pWidget->getName());
 		//set it transient for main window
-		gtk_window_set_transient_for(GTK_WINDOW(l_pWindow), GTK_WINDOW(m_rInterfacedScenario.m_rApplication.m_pMainWindow));
+		//gtk_window_set_transient_for(GTK_WINDOW(l_pWindow), GTK_WINDOW(m_rInterfacedScenario.m_rApplication.m_pMainWindow));
 		//insert box in top level window
 		gtk_container_add(GTK_CONTAINER(l_pWindow), (::GtkWidget*)pWidgetBox);
 		//prevent user from closing this window

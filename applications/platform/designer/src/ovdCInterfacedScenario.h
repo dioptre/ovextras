@@ -26,6 +26,7 @@ namespace OpenViBEDesigner
 		virtual ~CInterfacedScenario(void);
 
 		virtual OpenViBE::boolean isLocked(void) const;
+		virtual void forceRedraw(void);
 		virtual void redraw(void);
 		virtual void redraw(OpenViBE::Kernel::IBox& rBox);
 		virtual void redraw(OpenViBE::Kernel::IComment& rComment);
@@ -46,6 +47,7 @@ namespace OpenViBEDesigner
 		void scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidget, ::GdkEventButton* pEvent);
 		void scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent);
 		void scenarioDrawingAreaKeyReleaseEventCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent);
+		void scenarioDrawingAreaLeaveNotifyCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent);
 
 		void copySelection(void);
 		void cutSelection(void);
@@ -127,7 +129,10 @@ namespace OpenViBEDesigner
 		::GtkViewport* m_pScenarioViewport;
 		::GtkScrolledWindow* m_pScrolledWindow;//designer trim arrow scrolling
 		::GtkDrawingArea* m_pScenarioDrawingArea;
+		::GdkPixmap* m_pBufferedDrawingArea;
 		::GdkPixmap* m_pStencilBuffer;
+		::GtkWidget* m_pTooltip;
+		OpenViBE::boolean m_bScenarioModified;
 		OpenViBE::boolean m_bHasFileName;
 		OpenViBE::boolean m_bHasBeenModified;
 		OpenViBE::boolean m_bButtonPressed;
