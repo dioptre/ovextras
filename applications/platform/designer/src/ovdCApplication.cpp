@@ -13,6 +13,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <algorithm>
+#include <cmath>
 
 #include <openvibe/ovITimeArithmetics.h>
 
@@ -1573,20 +1574,20 @@ void CApplication::aboutLinkClickedCB(const gchar *url)
 //Increase the zoom of the current scenario
 void CApplication::zoomInCB(void)
 {
-	gtk_spin_button_set_value(m_pZoomSpinner, getCurrentInterfacedScenario()->getScale()*100 + 5);
+	gtk_spin_button_set_value(m_pZoomSpinner, round(getCurrentInterfacedScenario()->getScale()*100.0) + 5);
 }
 
 //Decrease the zoom of the current scenario
 void CApplication::zoomOutCB(void)
 {
-	gtk_spin_button_set_value(m_pZoomSpinner, getCurrentInterfacedScenario()->getScale()*100 - 5);
+	gtk_spin_button_set_value(m_pZoomSpinner, round(getCurrentInterfacedScenario()->getScale()*100.0) - 5);
 }
 
 void CApplication::spinnerZoomChangedCB(uint32 scalePercentage)
 {
 	if(getCurrentInterfacedScenario() != NULL)
 	{
-		getCurrentInterfacedScenario()->setScale(((float64)scalePercentage)/100);
+		getCurrentInterfacedScenario()->setScale(((float64)scalePercentage)/100.0);
 	}
 }
 
@@ -2034,7 +2035,7 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		g_signal_connect(l_pWindowManagerButton, "toggled", G_CALLBACK(button_toggle_window_manager_cb), this);
 		
 		m_i32CurrentScenarioPage = i32PageIndex;
-		gtk_spin_button_set_value(m_pZoomSpinner, m_vInterfacedScenario[m_i32CurrentScenarioPage]->getScale()*100);
+		gtk_spin_button_set_value(m_pZoomSpinner, round(m_vInterfacedScenario[m_i32CurrentScenarioPage]->getScale()*100.0));
 	}
 	//first scenario is created (or a scenario is opened and replaces first unnamed unmodified scenario)
 	else
