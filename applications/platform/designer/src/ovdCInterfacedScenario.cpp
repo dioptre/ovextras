@@ -1676,16 +1676,19 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 						}
 						else
 						{
-							m_ui32CurrentMode=Mode_MoveSelection;
 							if(m_bControlPressed)
 							{
-								// m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=!m_vCurrentObject[m_oCurrentObject.m_oIdentifier];
+								m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=!m_vCurrentObject[m_oCurrentObject.m_oIdentifier];
 							}
 							else
 							{
-								// m_vCurrentObject.clear();
-								// m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=true;
+								if(!m_vCurrentObject[m_oCurrentObject.m_oIdentifier])
+								{
+									m_vCurrentObject.clear();
+									m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=true;
+								}
 							}
+							m_ui32CurrentMode=Mode_MoveSelection;
 						}
 					}
 
@@ -2230,19 +2233,8 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 		if(m_ui32CurrentMode==Mode_MoveSelection)
 		{
 			m_bScenarioModified = true;
-			if(l_iSizeX==0 && l_iSizeY==0)
-			{
-				if(m_bControlPressed)
-				{
-					m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=!m_vCurrentObject[m_oCurrentObject.m_oIdentifier];
-				}
-				else
-				{
-					m_vCurrentObject.clear();
-					m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=true;
-				}
-			}
-			else
+			//If we move the mouse since the initial pressed, we need to move the selection
+			if(l_iSizeX!=0 && l_iSizeY!=0)
 			{
 				map<CIdentifier, boolean>::const_iterator i;
 				for(i=m_vCurrentObject.begin(); i!=m_vCurrentObject.end(); i++)
