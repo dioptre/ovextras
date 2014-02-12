@@ -571,6 +571,46 @@ boolean CBox::setOutputName(
 	return true;
 }
 
+boolean CBox::addInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	m_vSupportInputType.push_back(rTypeIdentifier);
+	return true;
+}
+
+boolean CBox::hasInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	//If there is no type specify, we allow all
+	if(m_vSupportInputType.empty())
+		return true;
+
+	for(size_t i =0; i < m_vSupportInputType.size(); ++i)
+	{
+		if(m_vSupportInputType[i] == rTypeIdentifier)
+			return true;
+	}
+	return false;
+}
+
+boolean CBox::addOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	m_vSupportInputType.push_back(rTypeIdentifier);
+	return true;
+}
+
+boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	//If there is no type specify, we allow all
+	if(m_vSupportOutputType.empty())
+		return true;
+
+	for(size_t i =0; i < m_vSupportOutputType.size(); ++i)
+	{
+		if(m_vSupportOutputType[i] == rTypeIdentifier)
+			return true;
+	}
+	return false;
+}
+
 //___________________________________________________________________//
 //                                                                   //
 
