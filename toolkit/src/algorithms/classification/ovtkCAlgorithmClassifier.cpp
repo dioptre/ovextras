@@ -88,7 +88,6 @@ boolean CAlgorithmClassifier::process(void)
 		}
 		else
 		{
-			l_pConfiguration->setSize(0, true);
 			if(this->saveConfiguration(*l_pConfiguration))
 			{
 				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);

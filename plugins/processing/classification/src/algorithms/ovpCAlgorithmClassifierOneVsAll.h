@@ -40,7 +40,7 @@ namespace OpenViBEPlugins
 
             virtual void write(const char* sString); // XML IWriterCallback
 
-            virtual void getClassifierConfiguration(OpenViBE::Kernel::IAlgorithmProxy* classifier, OpenViBE::CString& rConfiguration);
+            virtual void getClassifierConfiguration(OpenViBE::Kernel::IAlgorithmProxy* classifier, OpenViBE::IMemoryBuffer& rConfiguration);
             virtual void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount); // XML IReaderCallback
             virtual void processChildData(const char* sData); // XML IReaderCallback
             virtual void closeChild(void); // XML ReaderCallback

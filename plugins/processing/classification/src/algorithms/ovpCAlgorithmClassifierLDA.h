@@ -53,6 +53,7 @@ namespace OpenViBEPlugins
 
 			OpenViBE::CMemoryBuffer m_oConfiguration;
 			itpp::vec m_oCoefficients;
+            XML::IReader *m_pIReader;
 		};
 
 		class CAlgorithmClassifierLDADesc : public OpenViBEToolkit::CAlgorithmClassifierDesc

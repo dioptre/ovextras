@@ -4,6 +4,7 @@
 
 #include <map>
 #include <sstream>
+#include <cmath>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -24,8 +25,8 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 	}
 
 	if(l_vClassLabels.size() != 2)
-	{
-		this->getLogManager() << LogLevel_Error << "A LDA classifier can only be trained with 2 classes, not more, not less - got " << (uint32)l_vClassLabels.size() << "\n";
+    {
+        this->getLogManager() << LogLevel_Error << "A LDA classifier can only be trained with 2 classes, not more, not less - got " << (uint32)l_vClassLabels.size() << "\n";
 		return false;
 	}
 
@@ -148,9 +149,9 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 
 uint32 CAlgorithmClassifierLDA::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
 {
-    if(rFirstClassificationValue[0]  < rSecondClassificationValue[0] )
+    if(::fabs(rFirstClassificationValue[0])  < ::fabs(rSecondClassificationValue[0]) )
         return -1;
-    else if(rFirstClassificationValue[0] == rSecondClassificationValue[0])
+    else if(::fabs(rFirstClassificationValue[0]) == ::fabs(rSecondClassificationValue[0]))
         return 0;
     else
        return 1;
@@ -158,7 +159,6 @@ uint32 CAlgorithmClassifierLDA::getBestClassification(IMatrix& rFirstClassificat
 
 boolean CAlgorithmClassifierLDA::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
 {
-	rMemoryBuffer.setSize(0, true);
 	rMemoryBuffer.append(m_oConfiguration);
 	return true;
 }
@@ -168,6 +168,7 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(const IMemoryBuffer& rMemoryB
 	m_f64Class1=0;
 	m_f64Class2=0;
 
+    m_pIReader = NULL;
 	XML::IReader* l_pReader=XML::createReader(*this);
 	l_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
 	l_pReader->release();

@@ -102,6 +102,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
     //Now, we determine the best classification
     std::pair<float64, IMatrix*> best = std::pair<float64, IMatrix*>(-1, NULL);
     IAlgorithmProxy* l_pSubClassifier = this->m_oSubClassifierList[0];
+    rf64Class = -1;
 
     for(uint32 l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
     {
@@ -125,6 +126,13 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 
     }
 
+    //If no one recognize the class, let's take a random one
+    if(rf64Class == -1)
+    {
+        uint32 l_iClassificationCount = rand()%l_oClassificationVector.size();
+        rf64Class=1+l_iClassificationCount;
+        best = l_oClassificationVector[l_iClassificationCount];
+    }
     rClassificationValues.setSize(best.second->getBufferElementCount());
     System::Memory::copy(rClassificationValues.getBuffer(), best.second->getBuffer(), best.second->getBufferElementCount()*sizeof(float64));
     return true;
@@ -163,18 +171,12 @@ boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &
     return true;
 }
 
-void CAlgorithmClassifierOneVsAll::getClassifierConfiguration(IAlgorithmProxy* rClassifier, CString &rConfiguration)
+void CAlgorithmClassifierOneVsAll::getClassifierConfiguration(IAlgorithmProxy* rClassifier, IMemoryBuffer &rConfiguration)
 {
-    CMemoryBuffer l_oConfiguration;
     TParameterHandler < IMemoryBuffer* > op_pConfiguration(rClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
-    TParameterHandler < IMemoryBuffer* > ip_pConfiguration(rClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
-    op_pConfiguration=&l_oConfiguration;
-    ip_pConfiguration=&l_oConfiguration;
+    op_pConfiguration=&rConfiguration;
 
     rClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration);
-    l_oConfiguration.getDirectPointer();
-    std::string l_sConfiguration = std::string((char*)l_oConfiguration.getDirectPointer(), (size_t)l_oConfiguration.getSize());
-    rConfiguration.set(l_sConfiguration.c_str());
 }
 
 boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
@@ -185,7 +187,7 @@ boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBu
     std::stringstream l_sClassIdentifier;
     l_sClassIdentifier << this->m_oSubClassifierAlgorithmIdentifier.toUInteger();
 
-    m_oConfiguration.setSize(0, true);
+    m_oConfiguration = rMemoryBuffer;
     XML::IWriter* l_pWriter=XML::createWriter(*this);
     l_pWriter->openChild("OpenViBE-Classifier");
      l_pWriter->openChild("OneVsAll");
@@ -200,9 +202,8 @@ boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBu
      for(uint64 i = 0; i<m_oSubClassifierList.size(); ++i)
      {
          l_pWriter->openChild("SubClassifier");
-         CString l_oSubCLassifierConfiguration = CString();
-         this->getClassifierConfiguration(m_oSubClassifierList[i], l_oSubCLassifierConfiguration);
-         l_pWriter->setChildData(l_oSubCLassifierConfiguration.toASCIIString());
+         l_pWriter->setChildData("");
+         this->getClassifierConfiguration(m_oSubClassifierList[i], rMemoryBuffer);
          l_pWriter->closeChild();
      }
 
@@ -211,10 +212,6 @@ boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBu
     l_pWriter->release();
     l_pWriter=NULL;
 
-
-
-    rMemoryBuffer.setSize(0, true);
-    rMemoryBuffer.append(m_oConfiguration);
     return true;
 }
 
@@ -246,11 +243,7 @@ void CAlgorithmClassifierOneVsAll::processChildData(const char* sData)
     if(m_vNode.top() == CString("SubClassifier"))
     {
         //We should be able to load configuration from scratch or to load it in an existing configuration
-        CMemoryBuffer l_oConfiguration;
-        TParameterHandler < IMemoryBuffer* > ip_pConfiguration(m_oSubClassifierList[this->m_iClassCounter]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
-        ip_pConfiguration=&l_oConfiguration;
-        l_oConfiguration.append((const uint8*)sData, ::strlen(sData));
-        m_oSubClassifierList[this->m_iClassCounter]->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
+        ((CAlgorithmClassifier*)m_oSubClassifierList[this->m_iClassCounter])->loadConfiguration(m_oConfiguration);
         ++(this->m_iClassCounter);
     }
     else if(m_vNode.top() == CString("SubClassifierIdentifier"))

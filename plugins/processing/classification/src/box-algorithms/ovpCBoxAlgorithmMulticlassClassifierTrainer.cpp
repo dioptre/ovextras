@@ -405,6 +405,7 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::train(const size_t uiStartInde
     uint32 l_ui32FeatureVectorSize=m_vFeatureVector[0].m_pFeatureVectorMatrix->getBufferElementCount();
 
     TParameterHandler < IMatrix* > ip_pFeatureVectorSet(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
+    TParameterHandler < IMemoryBuffer* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
     ip_pFeatureVectorSet->setDimensionCount(2);
     ip_pFeatureVectorSet->setDimensionSize(0, l_ui32FeatureVectorCount);
     ip_pFeatureVectorSet->setDimensionSize(1, l_ui32FeatureVectorSize+1);
@@ -424,6 +425,8 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::train(const size_t uiStartInde
     }
 
     m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Train);
+
+    op_pConfiguration->setSize(0, true);
     m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration);
 
     return true;
@@ -464,6 +467,8 @@ float64 CBoxAlgorithmMulticlassClassifierTrainer::getAccuracy(const size_t uiSta
         {
             l_iSuccessfullTrainerCount++;
         }
+//        else
+//            this->getLogManager() << LogLevel_Warning << "Bad classification" << op_f64ClassificationStateClass << " in place of " << l_f64TrainerClass << "\n";
     }
 
     return (float64)(l_iSuccessfullTrainerCount*100.0)/(uiStopIndex-uiStartIndex);
