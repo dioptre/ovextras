@@ -21,6 +21,8 @@ namespace OpenViBEDesigner
 
 		void init();
 
+		std::vector < ::GtkWindow* > getTopLevelWindows(void);
+
 		/** \name ITreeViewCB interface implementation */
 		//@{
 		::GtkWidget* loadTreeWidget(
@@ -38,10 +40,20 @@ namespace OpenViBEDesigner
 		void showTopLevelWindows();
 		void hideTopLevelWindows();
 
+
+
 	protected:
 		OpenViBE::boolean parentWidgetBox(
 			OpenViBE::Kernel::IVisualisationWidget* pWidget,
 			::GtkBox* pWidgetBox);
+
+		static gboolean hide_window_cb(
+			::GtkWidget* pWidget,
+			::GdkEvent  *event,
+			gpointer user_data);
+		void hideWindowCB(
+			::GtkWidget* pWidget,
+			gpointer pUserData);
 
 		static gboolean configure_event_cb(
 			::GtkWidget* widget,
@@ -83,6 +95,7 @@ namespace OpenViBEDesigner
       gpointer   user_data);
 		OpenViBE::boolean deleteToolbarCB(::GtkWidget* pWidget);
 
+
 	private:
 
 		const OpenViBE::Kernel::IKernelContext&	m_rKernelContext;
@@ -93,6 +106,11 @@ namespace OpenViBEDesigner
 		 * \brief Vector of top level windows
 		 */
 		std::vector < ::GtkWindow* > m_vWindows;
+
+		/**
+		 * \brief vector of status of top level windows (showed or hidden)
+		 */
+//		std::vector <gboolean> m_vIsShowed;
 
 		/**
 		 * \brief Map of split (paned) widgets associated to their identifiers

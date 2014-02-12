@@ -219,6 +219,11 @@ namespace
 		static_cast<CApplication*>(pUserData)->spinnerZoomChangedCB(gtk_spin_button_get_value(pButton));
 	}
 
+static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, gpointer pUserData)
+	{
+		static_cast<CApplication*>(pUserData)->windowItemToggledCB(pCheckMenuItem);
+	}
+
 	gboolean button_quit_application_cb(::GtkWidget* pWidget, ::GdkEvent* pEvent, gpointer pUserData)
 	{
 		if(static_cast<CApplication*>(pUserData)->quitApplicationCB())
@@ -544,6 +549,8 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	m_eCommandLineFlags=eCommandLineFlags;
 	m_sSearchTerm = "";
 
+	m_vCheckItems.clear();
+
 	// Prepares scenario clipboard
 	CIdentifier l_oClipboardScenarioIdentifier;
 	if(m_pScenarioManager->createScenario(l_oClipboardScenarioIdentifier))
@@ -557,6 +564,8 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 
 	m_pMainWindow=GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe"));
 	m_pZoomSpinner = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-zoom_spinner"));
+
+	gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), false);
 
 	// Catch delete events when close button is clicked
 	g_signal_connect(m_pMainWindow, "delete_event", G_CALLBACK(button_quit_application_cb), this);
@@ -590,6 +599,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_save")),      "clicked",  G_CALLBACK(button_save_scenario_cb),    this);
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_save_as")),   "clicked",  G_CALLBACK(button_save_scenario_as_cb), this);
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_close")),     "clicked",  G_CALLBACK(button_close_scenario_cb),   this);
+
 
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_log_level")),     "clicked",  G_CALLBACK(log_level_cb),                    this);
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_windowmanager")), "toggled",  G_CALLBACK(button_toggle_window_manager_cb), this);
@@ -792,6 +802,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		}
 		gtk_widget_show(m_pMainWindow);
 	}
+
 }
 
 boolean CApplication::openScenario(const char* sFileName)
@@ -1529,7 +1540,7 @@ void CApplication::deleteDesignerVisualisationCB()
 void CApplication::toggleDesignerVisualisationCB()
 {
 	CInterfacedScenario* l_pCurrentInterfacedScenario = getCurrentInterfacedScenario();
-	if(l_pCurrentInterfacedScenario != NULL && l_pCurrentInterfacedScenario->isLocked() == false)
+	if(l_pCurrentInterfacedScenario != NULL  && l_pCurrentInterfacedScenario->isLocked() == false)
 	{
 		uint32 l_ui32Index=(uint32)gtk_notebook_get_current_page(m_pScenarioNotebook);
 		if(l_ui32Index<m_vInterfacedScenario.size())
@@ -1596,6 +1607,43 @@ void CApplication::spinnerZoomChangedCB(uint32 scalePercentage)
 	{
 		getCurrentInterfacedScenario()->setScale(((float64)scalePercentage)/100);
 	}
+}
+
+void CApplication::windowItemToggledCB(::GtkCheckMenuItem* pCheckMenuItem)
+{
+	uint32 l_ui32Index = 0;
+	// Look for item corresponding index
+	for(unsigned int i=0; i<m_vCheckItems.size(); i++)
+	{
+		if (m_vCheckItems[i]==GTK_WIDGET(pCheckMenuItem))
+		{
+			l_ui32Index = i;
+		}
+	}
+
+	if (gtk_check_menu_item_get_active(pCheckMenuItem))
+	{
+		this->getCurrentInterfacedScenario()->onItemToggledOn(l_ui32Index);
+	}
+	else
+	{
+		this->getCurrentInterfacedScenario()->onItemToggledOff(l_ui32Index);
+	}
+}
+
+void CApplication::toggleOnWindowItem(uint32 ui32Index)
+{
+	//block callback to prevent from showing windows twice
+	g_signal_handlers_block_by_func(G_OBJECT(m_vCheckItems[ui32Index]), (gpointer)G_CALLBACK(window_menu_check_item_toggled_cb), this);
+
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(m_vCheckItems[ui32Index]),true);
+	//unblock
+	g_signal_handlers_unblock_by_func(G_OBJECT(m_vCheckItems[ui32Index]), (gpointer)G_CALLBACK(window_menu_check_item_toggled_cb), this);
+}
+
+void CApplication::toggleOffWindowItem(uint32 ui32Index)
+{
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(m_vCheckItems[ui32Index]),false);
 }
 
 void CApplication::browseDocumentationCB(void)
@@ -1686,8 +1734,19 @@ void CApplication::releasePlayer(void)
 		// destroy player windows
 		l_pCurrentInterfacedScenario->releasePlayerVisualisation();
 
+		// destroy window menu
+		destroyWindowMenu();
+
 		// redraws scenario
 		l_pCurrentInterfacedScenario->redraw();
+	}
+}
+
+void CApplication::destroyWindowMenu(void)
+{
+	for(unsigned int i=0; i<m_vCheckItems.size(); i++)
+	{
+		gtk_widget_destroy(m_vCheckItems[i]);
 	}
 }
 
@@ -1707,6 +1766,7 @@ void CApplication::stopScenarioCB(void)
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_forward")),       true);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_windowmanager")), true);
 		gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), GTK_STOCK_MEDIA_PLAY);
+		gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), false);
 	}
 }
 
@@ -1744,6 +1804,7 @@ void CApplication::nextScenarioCB(void)
 
 void CApplication::playScenarioCB(void)
 {
+
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "playScenarioCB\n";
 
 	if(!this->createPlayer()) 
@@ -1760,6 +1821,24 @@ void CApplication::playScenarioCB(void)
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_forward")),       true);
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_windowmanager")), false);
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), GTK_STOCK_MEDIA_PAUSE);
+
+	gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), true);
+
+	//Add top level window item in menu_window
+	std::vector < ::GtkWindow* > l_vTopLevelWindows = this->getCurrentInterfacedScenario()->m_pPlayerVisualisation->getTopLevelWindows();
+	m_vCheckItems.resize(l_vTopLevelWindows.size());
+	for(unsigned int i=0; i<l_vTopLevelWindows.size(); i++)
+	{
+		const gchar* l_cTitle = gtk_window_get_title(l_vTopLevelWindows[i]);
+		m_vCheckItems[i] = gtk_check_menu_item_new_with_label (l_cTitle);
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(m_vCheckItems[i]), true);
+		gtk_menu_append(GTK_MENU(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_show_content")),m_vCheckItems[i]);
+		gtk_widget_show(m_vCheckItems[i]);
+
+		g_signal_connect(G_OBJECT(m_vCheckItems[i]), "toggled", G_CALLBACK(window_menu_check_item_toggled_cb), this);
+
+	}
+
 }
 
 void CApplication::forwardScenarioCB(void)
