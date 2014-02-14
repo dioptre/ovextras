@@ -7,40 +7,47 @@
 
 namespace XML
 {
-class OV_API IXMLNodeImpl: public IXMLNode
-{
-public:
-    virtual ~IXMLNodeImpl(void);
-    IXMLNodeImpl(const char* sName);
+	class OV_API IXMLNodeImpl: public IXMLNode
+	{
+	public:
+		IXMLNodeImpl(const char* sName);
 
-    //Attribute
-    virtual XML::boolean addAttribute(const char* sAttributeName, const char* sAttributeValue);
-    virtual XML::boolean hasAttribute(const char* sAttributeName);
-    virtual std::string getAttribute(const char* sAttributeName);
+		virtual std::string getName();
 
-    //PCDATA
-    virtual XML::boolean setPCData(const char* childData);
-    virtual std::string &getPCData(void);
+		virtual void release(void);
 
-    //Child
-    virtual void addChild(XML::IXMLNode* pChildNode);
-    virtual XML::IXMLNode* getChild(XML::uint32 iChildIndex);
-    virtual XML::uint32 getChildCount(void);
+		//Attribute
+		virtual XML::boolean addAttribute(const char* sAttributeName, const char* sAttributeValue);
+		virtual XML::boolean hasAttribute(const char* sAttributeName);
+		virtual std::string getAttribute(const char* sAttributeName);
 
-    //XMl generation
-    virtual std::string getXML(XML::uint32 depth=0);
+		//PCDATA
+		virtual void setPCData(const char* childData);
+		virtual std::string &getPCData(void);
 
-private:
-    std::string sanitize(std::string& sString);
-    void applyIndentation(std::string &sString, XML::uint32 depth);
+		//Child
+		virtual void addChild(XML::IXMLNode* pChildNode);
+		virtual XML::IXMLNode* getChild(XML::uint32 iChildIndex);
+		virtual XML::IXMLNode* getChildByName(const char* sName);
+		virtual XML::uint32 getChildCount(void);
+
+		//XMl generation
+		virtual std::string getXML(XML::uint32 depth=0);
+
+	protected:
+		virtual ~IXMLNodeImpl(void);
+
+	private:
+		std::string sanitize(std::string& sString);
+		void applyIndentation(std::string &sString, XML::uint32 depth);
 
 
-    std::vector<XML::IXMLNode *> m_oNodeVector;
-    std::map<std::string, std::string> m_mAttibuteMap;
-    std::string m_sNodeName;
-    std::string m_sPCData;
-    XML::boolean m_bHasPCData;
-};
+		std::vector<XML::IXMLNode *> m_oNodeVector;
+		std::map<std::string, std::string> m_mAttibuteMap;
+		std::string m_sNodeName;
+		std::string m_sPCData;
+		XML::boolean m_bHasPCData;
+	};
 }
 
 using namespace std;
@@ -50,12 +57,22 @@ IXMLNodeImpl::~IXMLNodeImpl(void)
 {
 }
 
+void IXMLNodeImpl::release(void)
+{
+	delete this;
+}
+
 IXMLNodeImpl::IXMLNodeImpl(const char *sName):
     m_sNodeName(sName)
   ,m_sPCData("")
   ,m_bHasPCData(false)
 {
 
+}
+
+string IXMLNodeImpl::getName()
+{
+	return m_sNodeName;
 }
 
 boolean IXMLNodeImpl::addAttribute(const char* sAttributeName, const char* sAttributeValue)
@@ -74,7 +91,7 @@ string IXMLNodeImpl::getAttribute(const char *sAttributeName)
     return m_mAttibuteMap[sAttributeName];
 }
 
-XML::boolean IXMLNodeImpl::setPCData(const char *childData)
+void IXMLNodeImpl::setPCData(const char *childData)
 {
     m_sPCData = childData;
     m_bHasPCData = true;
@@ -92,7 +109,19 @@ void IXMLNodeImpl::addChild(IXMLNode *pChildNode)
 
 IXMLNode *IXMLNodeImpl::getChild(XML::uint32 iChildIndex)
 {
-    return m_oNodeVector[iChildIndex];
+	return m_oNodeVector[iChildIndex];
+}
+
+IXMLNode *IXMLNodeImpl::getChildByName(const char *sName)
+{
+	string l_sName(sName);
+	for (vector<XML::IXMLNode*>::iterator it=m_oNodeVector.begin(); it!=m_oNodeVector.end(); ++it)
+	{
+		IXMLNode *l_sTempNode = (IXMLNode *)(*it);
+		if(!l_sTempNode->getName().compare(l_sName))
+			return l_sTempNode;
+	}
+	return NULL;
 }
 
 XML::uint32 IXMLNodeImpl::getChildCount(void)
@@ -148,21 +177,21 @@ string IXMLNodeImpl::getXML(XML::uint32 depth)
         return l_sRes;
     }
 
-    l_sRes = l_sRes + string(">\n");
+	l_sRes = l_sRes + string(">");
 
     if(m_bHasPCData)
     {
-        applyIndentation(l_sRes, depth+1);
-        l_sRes = l_sRes + sanitize(m_sPCData) + string("\n");
+		l_sRes = l_sRes + sanitize(m_sPCData);
     }
 
     for (vector<XML::IXMLNode*>::iterator it=m_oNodeVector.begin(); it!=m_oNodeVector.end(); ++it)
     {
         IXMLNode *l_sTempNode = (IXMLNode *)(*it);
-        l_sRes = l_sRes + l_sTempNode->getXML(depth+1);
+		l_sRes = l_sRes + string("\n") + l_sTempNode->getXML(depth+1);
     }
 
-    applyIndentation(l_sRes, depth);
+	if(!m_oNodeVector.empty())
+		applyIndentation(l_sRes, depth);
     l_sRes = l_sRes + "</" + m_sNodeName + ">\n";
     return l_sRes;
 }
