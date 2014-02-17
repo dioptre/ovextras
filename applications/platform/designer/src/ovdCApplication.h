@@ -15,6 +15,16 @@ namespace OpenViBEDesigner
 	class CApplication
 	{
 	public:
+		/**
+		 * \brief Replay modes
+		 */
+		enum EReplayMode
+		{
+			EReplayMode_None,
+			EReplayMode_Play,
+			EReplayMode_Forward
+		};
+
 		CApplication(const OpenViBE::Kernel::IKernelContext& rKernelContext);
 		~CApplication(void);
 
@@ -182,6 +192,9 @@ namespace OpenViBEDesigner
 		OpenViBE::int32 m_i32CurrentScenarioPage;
 
 		std::vector < OpenViBEDesigner::CInterfacedScenario* > m_vInterfacedScenario;
+
+		// Keeps track of the used playing mode so the playback can be restarted in the same mode.
+		EReplayMode m_eReplayMode;
 	};
 };
 

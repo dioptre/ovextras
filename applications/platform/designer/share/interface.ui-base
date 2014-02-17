@@ -2693,6 +2693,22 @@ possible...</property>
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkToggleToolButton" id="openvibe-toggle_button_replay">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">restart playing the scenario
+when it has finished
+playing...</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="label">loop</property>
+                        <property name="stock_id">gtk-refresh</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkSeparatorToolItem" id="openvibe-separator5">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>

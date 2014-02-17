@@ -156,10 +156,10 @@ boolean CBoxProto::addFlag(
 
 boolean CBoxProto::addInputSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
 {
-	m_rBox.addInputSupport(rTypeIdentifier);
+	return m_rBox.addInputSupport(rTypeIdentifier);
 }
 
 boolean CBoxProto::addOutputSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
 {
-	m_rBox.addOutputSupport(rTypeIdentifier);
+	return m_rBox.addOutputSupport(rTypeIdentifier);
 }

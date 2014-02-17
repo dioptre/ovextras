@@ -448,7 +448,27 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 			{
 				switch(l_pApplication->getPlayer()->getStatus())
 				{
-					case PlayerStatus_Stop:    gtk_signal_emit_by_name(GTK_OBJECT(gtk_builder_get_object(l_pApplication->m_pBuilderInterface, "openvibe-button_stop")), "clicked"); break;
+					case PlayerStatus_Stop:
+						switch(l_pCurrentInterfacedScenario->m_ePlayerStatus)
+						{
+						case PlayerStatus_Play:
+							l_pApplication->m_eReplayMode = CApplication::EReplayMode_Play;
+							break;
+						case PlayerStatus_Forward:
+							l_pApplication->m_eReplayMode = CApplication::EReplayMode_Forward;
+							break;
+						// case PlayerStatus_Stop:
+						// case PlayerStatus_Uninitialized:
+						// case PlayerStatus_Pause:
+						// case PlayerStatus_Step:
+						default:
+							// don't care
+							l_pApplication->m_rKernelContext.getLogManager() << LogLevel_Trace << "Ran into unhandled status " << l_pCurrentInterfacedScenario->m_ePlayerStatus << "\n";
+							break;
+						}
+						
+						gtk_signal_emit_by_name(GTK_OBJECT(gtk_builder_get_object(l_pApplication->m_pBuilderInterface, "openvibe-button_stop")), "clicked");
+						break;
 					case PlayerStatus_Pause:   while(l_pCurrentInterfacedScenario->m_ePlayerStatus != PlayerStatus_Pause) gtk_signal_emit_by_name(GTK_OBJECT(gtk_builder_get_object(l_pApplication->m_pBuilderInterface, "openvibe-button_play_pause")), "clicked"); break;
 					case PlayerStatus_Play:    while(l_pCurrentInterfacedScenario->m_ePlayerStatus != PlayerStatus_Play)  gtk_signal_emit_by_name(GTK_OBJECT(gtk_builder_get_object(l_pApplication->m_pBuilderInterface, "openvibe-button_play_pause")), "clicked"); break;
 					case PlayerStatus_Forward: gtk_signal_emit_by_name(GTK_OBJECT(gtk_builder_get_object(l_pApplication->m_pBuilderInterface, "openvibe-button_forward")), "clicked"); break;
@@ -551,6 +571,7 @@ CApplication::CApplication(const IKernelContext& rKernelContext)
 	,m_ui64LastTimeRefresh(0)
 	,m_bIsQuitting(false)
 	,m_i32CurrentScenarioPage(-1)
+	,m_eReplayMode(EReplayMode_None)
 {
 	m_pPluginManager=&m_rKernelContext.getPluginManager();
 	m_pScenarioManager=&m_rKernelContext.getScenarioManager();
@@ -1821,6 +1842,24 @@ void CApplication::stopScenarioCB(void)
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_forward")),       true);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_windowmanager")), true);
 		gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), GTK_STOCK_MEDIA_PLAY);
+
+		if(gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-toggle_button_replay"))))
+		{
+			switch(m_eReplayMode)
+			{
+			case EReplayMode_Play: playScenarioCB(); break;
+			case EReplayMode_Forward: forwardScenarioCB(); break;
+			case EReplayMode_None:
+				// nop
+				break;
+			default:
+				m_rKernelContext.getLogManager() << LogLevel_Error << "Unsupported replaymode " << m_eReplayMode << "\n";
+				break;
+			}
+		}
+
+		m_eReplayMode = EReplayMode_None;
+		
 		gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), false);
 	}
 }
