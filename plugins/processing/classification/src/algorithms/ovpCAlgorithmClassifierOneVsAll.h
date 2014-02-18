@@ -10,6 +10,7 @@
 
 #include <xml/IWriter.h>
 #include <xml/IReader.h>
+#include <xml/IXMLNode.h>
 
 #include <stack>
 #include <vector>
@@ -40,7 +41,7 @@ namespace OpenViBEPlugins
 
 			virtual void write(const char* sString); // XML IWriterCallback
 
-			virtual void getClassifierConfiguration(OpenViBE::Kernel::IAlgorithmProxy* classifier, OpenViBE::IMemoryBuffer& rConfiguration);
+			XML::IXMLNode* getClassifierConfiguration(OpenViBE::Kernel::IAlgorithmProxy* classifier);
 			virtual void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount); // XML IReaderCallback
 			virtual void processChildData(const char* sData); // XML IReaderCallback
 			virtual void closeChild(void); // XML ReaderCallback
@@ -52,10 +53,13 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_iClassCounter; //This variable is use during configuration loading
 
 			OpenViBE::CMemoryBuffer m_oConfiguration;
+			XML::IXMLNode *m_pConfigurationNode;
 
 		private:
 			void addNewClassifierAtBack(void);
 			void removeClassifierAtBack(void);
+
+			void loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 		};
 
 		class CAlgorithmClassifierOneVsAllDesc : public OpenViBEToolkit::CAlgorithmPairingStrategyDesc
