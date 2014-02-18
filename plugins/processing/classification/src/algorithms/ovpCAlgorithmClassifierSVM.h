@@ -5,8 +5,7 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <xml/IWriter.h>
-#include <xml/IReader.h>
+#include <xml/IXMLNode.h>
 
 #include <stack>
 #include "../../../contrib/packages/libSVM/svm.h"
@@ -36,7 +35,7 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		class CAlgorithmClassifierSVM : public OpenViBEToolkit::CAlgorithmClassifier, public XML::IWriterCallback, public XML::IReaderCallback
+		class CAlgorithmClassifierSVM : public OpenViBEToolkit::CAlgorithmClassifier
 		{
 		public:
 
@@ -47,24 +46,16 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
 			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
 
-			virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer);
-			virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer);
+			virtual XML::IXMLNode* saveConfiguration(void);
+			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
 			virtual OpenViBE::CString paramToString(svm_parameter *pParam);
 			virtual OpenViBE::CString modelToString();
 			virtual OpenViBE::CString problemToString(svm_problem *pProb);
 
-            virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix &rFirstClassificationValue, OpenViBE::IMatrix &rSecondClassificationValue);
+			virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix &rFirstClassificationValue, OpenViBE::IMatrix &rSecondClassificationValue);
 			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierSVM);
 
 		protected:
-
-			virtual void write(const char* sString); // XML IWriterCallback
-
-			virtual void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount); // XML IReaderCallback
-			virtual void processChildData(const char* sData); // XML IReaderCallback
-			virtual void closeChild(void); // XML ReaderCallback
-			std::stack<OpenViBE::CString> m_vNode;
-
 			std::vector <OpenViBE::float64> m_vClass;
 			struct svm_parameter m_oParam;
 
@@ -76,6 +67,13 @@ namespace OpenViBEPlugins
 			OpenViBE::CMemoryBuffer m_oConfiguration;
 			//todo a modifier en fonction de svn_save_model
 			//vector m_oCoefficients;
+
+			XML::IXMLNode *m_pConfigurationNode;
+
+		private:
+			void loadParamNodeConfiguration(XML::IXMLNode *pParamNode);
+			void loadModelNodeConfiguration(XML::IXMLNode *pModelNode);
+			void loadModelSVsNodeConfiguration(XML::IXMLNode* pSVsNodeParam);
 		};
 
 		class CAlgorithmClassifierSVMDesc : public OpenViBEToolkit::CAlgorithmClassifierDesc

@@ -179,7 +179,7 @@ void CAlgorithmClassifierOneVsAll::getClassifierConfiguration(IAlgorithmProxy* r
     rClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration);
 }
 
-boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
+XML::IXMLNode* CAlgorithmClassifierOneVsAll::saveConfiguration(void)
 {
     std::stringstream l_sAmountClasses;
     l_sAmountClasses << this->m_iAmountClass;
@@ -187,7 +187,7 @@ boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBu
     std::stringstream l_sClassIdentifier;
     l_sClassIdentifier << this->m_oSubClassifierAlgorithmIdentifier.toUInteger();
 
-    m_oConfiguration = rMemoryBuffer;
+	//m_oConfiguration = rMemoryBuffer;
     XML::IWriter* l_pWriter=XML::createWriter(*this);
     l_pWriter->openChild("OpenViBE-Classifier");
      l_pWriter->openChild("OneVsAll");
@@ -203,7 +203,7 @@ boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBu
      {
          l_pWriter->openChild("SubClassifier");
          l_pWriter->setChildData("");
-         this->getClassifierConfiguration(m_oSubClassifierList[i], rMemoryBuffer);
+		 //this->getClassifierConfiguration(m_oSubClassifierList[i], rMemoryBuffer);
          l_pWriter->closeChild();
      }
 
@@ -212,14 +212,14 @@ boolean CAlgorithmClassifierOneVsAll::saveConfiguration(IMemoryBuffer& rMemoryBu
     l_pWriter->release();
     l_pWriter=NULL;
 
-    return true;
+	return NULL;
 }
 
-boolean CAlgorithmClassifierOneVsAll::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
+boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
     this->m_iClassCounter = 0;
     XML::IReader* l_pReader=XML::createReader(*this);
-    l_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
+	//l_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
     l_pReader->release();
     l_pReader=NULL;
 
@@ -243,7 +243,7 @@ void CAlgorithmClassifierOneVsAll::processChildData(const char* sData)
     if(m_vNode.top() == CString("SubClassifier"))
     {
         //We should be able to load configuration from scratch or to load it in an existing configuration
-        ((CAlgorithmClassifier*)m_oSubClassifierList[this->m_iClassCounter])->loadConfiguration(m_oConfiguration);
+		//((CAlgorithmClassifier*)m_oSubClassifierList[this->m_iClassCounter])->loadConfiguration(m_oConfiguration);
         ++(this->m_iClassCounter);
     }
     else if(m_vNode.top() == CString("SubClassifierIdentifier"))

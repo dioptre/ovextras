@@ -6,6 +6,9 @@
 #include <cmath>
 #include <algorithm>
 
+#include <xml/IXMLHandler.h>
+#include <xml/IXMLNode.h>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -263,11 +266,7 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 				this->getLogManager() << LogLevel_Trace << "For information, we have " << m_vFeatureCount[i] << " feature vector(s) for input " << i << "\n";
 			}
 
-			CMemoryBuffer l_oConfiguration;
-			TParameterHandler < IMemoryBuffer* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
-			TParameterHandler < IMemoryBuffer* > ip_pConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
-			op_pConfiguration=&l_oConfiguration;
-			ip_pConfiguration=&l_oConfiguration;
+			TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
 
 			float64 l_f64PartitionAccuracy=0;
 			float64 l_f64FinalAccuracy=0;
@@ -331,14 +330,10 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 
 			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << this->getAccuracy(0, m_vFeatureVector.size()) << "% (optimistic)\n";
 
+			XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
 			CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1));
-			std::ofstream l_oFile(l_sConfigurationFilename.toASCIIString(), ios::binary);
-			if(l_oFile.is_open())
-			{
-				l_oFile.write((char*)l_oConfiguration.getDirectPointer(), (std::streamsize)l_oConfiguration.getSize());
-				l_oFile.close();
-			}
-			else
+
+			if(!l_pHandler->writeXMLInFile(*op_pConfiguration, l_sConfigurationFilename.toASCIIString()))
 			{
 				this->getLogManager() << LogLevel_Error << "Could not save configuration to file [" << l_sConfigurationFilename << "]\n";
 				return false;
@@ -379,6 +374,7 @@ boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const s
 	}
 
 	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Train);
+
 	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration);
 
 	return true;
@@ -394,6 +390,11 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 	}
 
 	uint32 l_ui32FeatureVectorSize=m_vFeatureVector[0].m_pFeatureVectorMatrix->getBufferElementCount();
+
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	XML::IXMLNode * l_pNode = op_pConfiguration;//Requested for affectation
+	TParameterHandler < XML::IXMLNode* > ip_pConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
+	ip_pConfiguration = l_pNode;
 
 	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
 

@@ -21,47 +21,47 @@
 
 namespace OpenViBEToolkit
 {
-    class OV_API CAlgorithmPairingStrategy : public CAlgorithmClassifier
-    {
-    public:
+	class OV_API CAlgorithmPairingStrategy : public CAlgorithmClassifier
+	{
+	public:
 
-        virtual OpenViBE::boolean process(void);
-        virtual void release(void) { delete this; }
+		virtual OpenViBE::boolean process(void);
+		virtual void release(void) { delete this; }
 
-        virtual OpenViBE::boolean designArchitecture(OpenViBE::CIdentifier &rId, OpenViBE::uint64& rClassAmount) = 0;
+		virtual OpenViBE::boolean designArchitecture(OpenViBE::CIdentifier &rId, OpenViBE::uint64& rClassAmount) = 0;
 
-        virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet)=0;
-        virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValue)=0;
+		virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet)=0;
+		virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValue)=0;
 
-        virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer)=0;
-        virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer)=0;
-        _IsDerivedFromClass_(CAlgorithmClassifier, OVTK_ClassId_Algorithm_PairingStrategy);
+		virtual XML::IXMLNode* saveConfiguration(void)=0;
+		virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode* pConfiguratioNode)=0;
+		_IsDerivedFromClass_(CAlgorithmClassifier, OVTK_ClassId_Algorithm_PairingStrategy);
 
 
-    protected:
-        //  std::vector <OpenViBE::float64> m_fClasses;
-        //The vector will be use when the user will be able to specify class label
-        OpenViBE::CIdentifier m_oSubClassifierAlgorithmIdentifier;
-        OpenViBE::uint64 m_iAmountClass;
-    };
+	protected:
+		//  std::vector <OpenViBE::float64> m_fClasses;
+		//The vector will be use when the user will be able to specify class label
+		OpenViBE::CIdentifier m_oSubClassifierAlgorithmIdentifier;
+		OpenViBE::uint64 m_iAmountClass;
+	};
 
-    class OV_API CAlgorithmPairingStrategyDesc: public OpenViBEToolkit::CAlgorithmClassifierDesc
-    {
-    public:
+	class OV_API CAlgorithmPairingStrategyDesc: public OpenViBEToolkit::CAlgorithmClassifierDesc
+	{
+	public:
 
-        virtual OpenViBE::boolean getAlgorithmPrototype(
-            OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
-        {
-            CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
-            rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm,        "Algorithm Identifier",        OpenViBE::Kernel::ParameterType_Identifier);
-            rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount,                   "Amount of class",             OpenViBE::Kernel::ParameterType_Matrix);
+		virtual OpenViBE::boolean getAlgorithmPrototype(
+				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
+		{
+			CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
+			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm,        "Algorithm Identifier",        OpenViBE::Kernel::ParameterType_Identifier);
+			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount,                   "Amount of class",             OpenViBE::Kernel::ParameterType_Matrix);
 
-            rAlgorithmPrototype.addInputTrigger   (OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture,              "Design Architecture");
-            return true;
-        }
+			rAlgorithmPrototype.addInputTrigger   (OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture,              "Design Architecture");
+			return true;
+		}
 
-        _IsDerivedFromClass_(OpenViBEToolkit::CAlgorithmClassifierDesc, OVTK_ClassId_Algorithm_PairingStrategyDesc);
-    };
+		_IsDerivedFromClass_(OpenViBEToolkit::CAlgorithmClassifierDesc, OVTK_ClassId_Algorithm_PairingStrategyDesc);
+	};
 };
 
 #endif // OVTKCALGORITHMPAIRINGSTRATEGY_H

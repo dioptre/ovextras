@@ -56,12 +56,12 @@ uint32 CAlgorithmClassifierNULL::getBestClassification(IMatrix& rFirstClassifica
     return 0;
 }
 
-boolean CAlgorithmClassifierNULL::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
+XML::IXMLNode* CAlgorithmClassifierNULL::saveConfiguration(void)
 {
-	return true;
+	return NULL;
 }
 
-boolean CAlgorithmClassifierNULL::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
+boolean CAlgorithmClassifierNULL::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
 	return true;
 }

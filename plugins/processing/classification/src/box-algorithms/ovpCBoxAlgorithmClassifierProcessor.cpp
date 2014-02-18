@@ -2,6 +2,9 @@
 
 #include <fstream>
 
+#include <xml/IXMLHandler.h>
+#include <xml/IXMLNode.h>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -48,24 +51,12 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)->setReferenceTarget(m_pFeaturesDecoder->getOutputParameter(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputParameterId_Matrix));
 	m_pClassificationStateEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
 
-	TParameterHandler < IMemoryBuffer* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
-	IMemoryBuffer* l_pConfigurationFile=ip_pClassificationConfiguration;
-	ifstream l_oFile(l_sConfigurationFilename.toASCIIString(), ios::binary);
-	if(l_oFile.is_open())
-	{
-		size_t l_iFileLen;
-		l_oFile.seekg(0, ios::end);
-		l_iFileLen=(size_t)l_oFile.tellg();
-		l_oFile.seekg(0, ios::beg);
-		l_pConfigurationFile->setSize(l_iFileLen, true);
-		l_oFile.read((char*)l_pConfigurationFile->getDirectPointer(), l_iFileLen);
-		l_oFile.close();
-		m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
-	}
-	else
-	{
-		this->getLogManager() << LogLevel_Warning << "Could not load configuration from file [" << l_sConfigurationFilename << "]\n";
-	}
+	TParameterHandler < XML::IXMLNode* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
+	XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
+	XML::IXMLNode *l_pNode = l_pHandler->parseFile(l_sConfigurationFilename.toASCIIString());
+	ip_pClassificationConfiguration = l_pNode;
+	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
+
 
 	m_bOutputHeaderSent=false;
 	return true;

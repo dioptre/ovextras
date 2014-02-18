@@ -18,7 +18,7 @@ namespace XML
 		virtual XML::IXMLNode* parseString(const char* sString, const uint32& uiSize);
 
 		//XML extraction
-		virtual void writeXMLInFile(IXMLNode &rNode, const char* sPath);
+		virtual XML::boolean writeXMLInFile(IXMLNode &rNode, const char* sPath);
 
 		//Internal function for parsing
 		virtual void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, uint64 ui64AttributeCount);
@@ -119,8 +119,16 @@ IXMLNode *IXMLHandlerImpl::parseString(const char *sString, const uint32& uiSize
 	return m_pRootNode;
 }
 
-void IXMLHandlerImpl::writeXMLInFile(IXMLNode &rNode, const char *sPath)
+boolean IXMLHandlerImpl::writeXMLInFile(IXMLNode &rNode, const char *sPath)
 {
+	std::ofstream l_oFile(sPath, ios::binary);
+	if(l_oFile.is_open())
+	{
+		l_oFile.write(rNode.getXML().c_str(), rNode.getXML().length());
+		l_oFile.close();
+		return true;
+	}
+	return false;
 }
 
 void IXMLHandlerImpl::openChild(const char *sName, const char **sAttributeName, const char **sAttributeValue, uint64 ui64AttributeCount)

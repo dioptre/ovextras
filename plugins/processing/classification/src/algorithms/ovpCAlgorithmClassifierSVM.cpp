@@ -7,6 +7,8 @@
 #include <string>
 #include <cstdlib>
 
+#include <xml/IXMLHandler.h>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -250,126 +252,143 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 	}
 
 	//std::cout<<"xml save"<<std::endl;
-	m_oConfiguration.setSize(0, true);
-	XML::IWriter* l_pWriter=XML::createWriter(*this);
-	l_pWriter->openChild("OpenViBE-Classifier");
-	 l_pWriter->openChild("SVM");
-	  l_pWriter->openChild("Param");
-	   l_pWriter->openChild("svm_type");
-	    l_pWriter->setChildData(get_svm_type(m_pModel->param.svm_type));
-	   l_pWriter->closeChild();
-	   l_pWriter->openChild("kernel_type");
-	    l_pWriter->setChildData(get_kernel_type(m_pModel->param.kernel_type));
-	   l_pWriter->closeChild();
-	   if(m_pModel->param.kernel_type == POLY)
-	   {
-	       l_pWriter->openChild("degree");
-	       std::stringstream l_sParamDegree;
-	       l_sParamDegree << m_pModel->param.degree;
-	       l_pWriter->setChildData(l_sParamDegree.str().c_str());
-	       l_pWriter->closeChild();
-	   }
-	   if(m_pModel->param.kernel_type == POLY || m_pModel->param.kernel_type == RBF || m_pModel->param.kernel_type == SIGMOID)
-	   {
-	       l_pWriter->openChild("gamma");
-	       std::stringstream l_sParamGamma;
-	       l_sParamGamma << m_pModel->param.gamma;
-	       l_pWriter->setChildData(l_sParamGamma.str().c_str());
-	       l_pWriter->closeChild();
-	   }
-	   if(m_pModel->param.kernel_type == POLY || m_pModel->param.kernel_type == SIGMOID)
-	   {
-	       l_pWriter->openChild("coef0");
-	       std::stringstream l_sParamCoef0;
-	       l_sParamCoef0 << m_pModel->param.coef0;
-	       l_pWriter->setChildData(l_sParamCoef0.str().c_str());
-	       l_pWriter->closeChild();
-	   }
-	  l_pWriter->closeChild();
-	  l_pWriter->openChild("Model");
-	   l_pWriter->openChild("nr_class");
-	    std::stringstream l_sModelNrClass;
-	    l_sModelNrClass << m_pModel->nr_class;
-	    l_pWriter->setChildData(l_sModelNrClass.str().c_str());
-	   l_pWriter->closeChild();
-	   l_pWriter->openChild("total_sv");
-	    std::stringstream l_sModelTotalSV;
-	    l_sModelTotalSV << m_pModel->l;
-	    l_pWriter->setChildData(l_sModelTotalSV.str().c_str());
-	   l_pWriter->closeChild();
-	   l_pWriter->openChild("rho");
-	    l_pWriter->setChildData(l_sRho.str().c_str());
-	   l_pWriter->closeChild();
-	   if(m_pModel->label)
-	   {
-	       l_pWriter->openChild("label");
-	       //std::cout<<"model save: label"<<std::endl;
-	       std::stringstream l_sLabel;
-	       l_sLabel << m_pModel->label[0];
-	       for(int i=1;i<m_pModel->nr_class;i++)
-	       {
-	           l_sLabel << " " << m_pModel->label[i];
-	       }
-	        l_pWriter->setChildData(l_sLabel.str().c_str());
-	       l_pWriter->closeChild();
-	   }
-	   if(m_pModel->probA)
-	   {
-	       l_pWriter->openChild("probA");
-	       //std::cout<<"model save: probA"<<std::endl;
-	       std::stringstream l_sProbA;
-	       for(int i=1;i<m_pModel->nr_class*(m_pModel->nr_class-1)/2;i++)
-	       {
-	           l_sProbA << " " << m_pModel->probA[i];
-	       }
-	       l_sProbA << std::scientific << m_pModel->probA[0];
-	       l_pWriter->setChildData(l_sProbA.str().c_str());
-	       l_pWriter->closeChild();
-	   }
-	   if(m_pModel->probB)
-	   {
-	       l_pWriter->openChild("probB");
-	       //std::cout<<"model save: probB"<<std::endl;
-	       std::stringstream l_sProbB;
-	       for(int i=1;i<m_pModel->nr_class*(m_pModel->nr_class-1)/2;i++)
-	       {
-	       		l_sProbB << " " << m_pModel->probB[i];
-	       }
-	       l_sProbB << std::scientific << m_pModel->probB[0];
-	       l_pWriter->setChildData(l_sProbB.str().c_str());
-	       l_pWriter->closeChild();
-	   }
-	   if(m_pModel->nSV)
-	   {
-	       l_pWriter->openChild("nr_sv");
-	       //std::cout<<"model save: nSV"<<std::endl;
-	       std::stringstream l_sNrSV;
-	       l_sNrSV << m_pModel->nSV[0];
-	       for(int i=1;i<m_pModel->nr_class;i++)
-	       {
-	           l_sNrSV << " " << m_pModel->nSV[i];
-	       }
-	        l_pWriter->setChildData(l_sNrSV.str().c_str());
-	       l_pWriter->closeChild();
-	   }
-	   l_pWriter->openChild("SVs");
-	   for(int i=0;i<m_pModel->l;i++)
-	   {
-	       l_pWriter->openChild("SV");
-	        l_pWriter->openChild("coef");
-	         l_pWriter->setChildData(l_vSVCoef[i]);
-	        l_pWriter->closeChild();
-	        l_pWriter->openChild("value");
-	         l_pWriter->setChildData(l_vSVValue[i]);
-	        l_pWriter->closeChild();
-	       l_pWriter->closeChild();
-	   }
-	   l_pWriter->closeChild();
-	  l_pWriter->closeChild();
-	 l_pWriter->closeChild();
-	l_pWriter->closeChild();
-	l_pWriter->release();
-	l_pWriter=NULL;
+	m_pConfigurationNode = XML::createNode("OpenViBE-Classifier");
+
+	XML::IXMLNode *l_pSVMNode = XML::createNode("SVM");
+
+	//Param node
+	XML::IXMLNode *l_pParamNode = XML::createNode("Param");
+	XML::IXMLNode *l_pTempNode = XML::createNode("svm_type");
+	l_pTempNode->setPCData(get_svm_type(m_pModel->param.svm_type));
+	l_pParamNode->addChild(l_pTempNode);
+
+	l_pTempNode = XML::createNode("kernel_type");
+	l_pTempNode->setPCData(get_kernel_type(m_pModel->param.kernel_type));
+	l_pParamNode->addChild(l_pTempNode);
+
+	if(m_pModel->param.kernel_type == POLY)
+	{
+		std::stringstream l_sParamDegree;
+		l_sParamDegree << m_pModel->param.degree;
+
+		l_pTempNode = XML::createNode("degree");
+		l_pTempNode->setPCData(l_sParamDegree.str().c_str());
+		l_pParamNode->addChild(l_pTempNode);
+	}
+	if(m_pModel->param.kernel_type == POLY || m_pModel->param.kernel_type == RBF || m_pModel->param.kernel_type == SIGMOID)
+	{
+		std::stringstream l_sParamGamma;
+		l_sParamGamma << m_pModel->param.gamma;
+
+		l_pTempNode = XML::createNode("gamma");
+		l_pTempNode->setPCData(l_sParamGamma.str().c_str());
+		l_pParamNode->addChild(l_pTempNode);
+	}
+	if(m_pModel->param.kernel_type == POLY || m_pModel->param.kernel_type == SIGMOID)
+	{
+		std::stringstream l_sParamCoef0;
+		l_sParamCoef0 << m_pModel->param.coef0;
+
+		l_pTempNode = XML::createNode("coef0");
+		l_pTempNode->setPCData(l_sParamCoef0.str().c_str());
+		l_pParamNode->addChild(l_pTempNode);
+	}
+	l_pSVMNode->addChild(l_pParamNode);
+	//End param node
+
+	//Model Node
+	XML::IXMLNode * l_pModelNode = XML::createNode("Model");
+	{
+		l_pTempNode = XML::createNode("nr_class");
+		std::stringstream l_sModelNrClass;
+		l_sModelNrClass << m_pModel->nr_class;
+		l_pTempNode->setPCData(l_sModelNrClass.str().c_str());
+		l_pModelNode->addChild(l_pTempNode);
+
+		l_pTempNode = XML::createNode("total_sv");
+		std::stringstream l_sModelTotalSV;
+		l_sModelTotalSV << m_pModel->l;
+		l_pTempNode->setPCData(l_sModelTotalSV.str().c_str());
+		l_pModelNode->addChild(l_pTempNode);
+
+		l_pTempNode = XML::createNode("rho");
+		l_pTempNode->setPCData(l_sRho.str().c_str());
+		l_pModelNode->addChild(l_pTempNode);
+
+		if(m_pModel->label)
+		{
+			std::stringstream l_sLabel;
+			l_sLabel << m_pModel->label[0];
+			for(int i=1;i<m_pModel->nr_class;i++)
+			{
+				l_sLabel << " " << m_pModel->label[i];
+			}
+
+			l_pTempNode = XML::createNode("label");
+			l_pTempNode->setPCData(l_sLabel.str().c_str());
+			l_pModelNode->addChild(l_pTempNode);
+		}
+		if(m_pModel->probA)
+		{
+			std::stringstream l_sProbA;
+			for(int i=1;i<m_pModel->nr_class*(m_pModel->nr_class-1)/2;i++)
+			{
+				l_sProbA << " " << m_pModel->probA[i];
+			}
+			l_sProbA << std::scientific << m_pModel->probA[0];
+
+			l_pTempNode = XML::createNode("probA");
+			l_pTempNode->setPCData(l_sProbA.str().c_str());
+			l_pModelNode->addChild(l_pTempNode);
+		}
+		if(m_pModel->probB)
+		{
+			std::stringstream l_sProbB;
+			for(int i=1;i<m_pModel->nr_class*(m_pModel->nr_class-1)/2;i++)
+			{
+				 l_sProbB << " " << m_pModel->probB[i];
+			}
+			l_sProbB << std::scientific << m_pModel->probB[0];
+
+			l_pTempNode = XML::createNode("probB");
+			l_pTempNode->setPCData(l_sProbB.str().c_str());
+			l_pModelNode->addChild(l_pTempNode);
+		}
+		if(m_pModel->nSV)
+		{
+			std::stringstream l_sNrSV;
+			l_sNrSV << m_pModel->nSV[0];
+			for(int i=1;i<m_pModel->nr_class;i++)
+			{
+				l_sNrSV << " " << m_pModel->nSV[i];
+			}
+
+			l_pTempNode = XML::createNode("nr_sv");
+			l_pTempNode->setPCData(l_sNrSV.str().c_str());
+			l_pModelNode->addChild(l_pTempNode);
+		}
+
+		XML::IXMLNode * l_pSVsNode = XML::createNode("SVs");
+		{
+			for(int i=0;i<m_pModel->l;i++)
+			{
+				XML::IXMLNode * l_pSVNode = XML::createNode("SV");
+				{
+					l_pTempNode = XML::createNode("coef");
+					l_pTempNode->setPCData(l_vSVCoef[i]);
+					l_pSVNode->addChild(l_pTempNode);
+
+					l_pTempNode = XML::createNode("value");
+					l_pTempNode->setPCData(l_vSVValue[i]);
+					l_pSVNode->addChild(l_pTempNode);
+				}
+				l_pSVsNode->addChild(l_pSVNode);
+			}
+		}
+		l_pModelNode->addChild(l_pSVsNode);
+	}
+	l_pSVMNode->addChild(l_pModelNode);
+	m_pConfigurationNode->addChild(l_pSVMNode);
 
 	for(int i=0;i<l_oProb.l;i++)
 	{
@@ -451,15 +470,12 @@ uint32 CAlgorithmClassifierSVM::getBestClassification(IMatrix& rFirstClassificat
        return 1;
 }
 
-boolean CAlgorithmClassifierSVM::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
+XML::IXMLNode* CAlgorithmClassifierSVM::saveConfiguration(void)
 {
-	//std::cout<<"save config"<<std::endl;
-	rMemoryBuffer.setSize(0, true);
-	rMemoryBuffer.append(m_oConfiguration);
-	return true;
+	return m_pConfigurationNode;
 }
 
-boolean CAlgorithmClassifierSVM::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
+boolean CAlgorithmClassifierSVM::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
 	if(m_pModel)
 	{
@@ -475,171 +491,183 @@ boolean CAlgorithmClassifierSVM::loadConfiguration(const IMemoryBuffer& rMemoryB
 	m_pModel->label = NULL;
 	m_pModel->nSV = NULL;
 	m_i32IndexSV=-1;
-	XML::IReader* l_pReader=XML::createReader(*this);
-	l_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
-	l_pReader->release();
-	l_pReader=NULL;
-	//std::cout<<"load config fin"<<std::endl;
+
+	loadParamNodeConfiguration(pConfigurationNode->getChild(0)->getChildByName("Param"));
+	loadModelNodeConfiguration(pConfigurationNode->getChild(0)->getChildByName("Model"));
+
 	this->getLogManager() << LogLevel_Trace << modelToString();
 	return true;
 }
 
-void CAlgorithmClassifierSVM::write(const char* sString)
+void CAlgorithmClassifierSVM::loadParamNodeConfiguration(XML::IXMLNode *pParamNode)
 {
-	m_oConfiguration.append((const uint8*)sString, ::strlen(sString));
-}
+	//svm_type
+	XML::IXMLNode* l_pTempNode = pParamNode->getChildByName("svm_type");
+	for(int i =0; get_svm_type(i);i++)
+	{
+		if ( strcmp(get_svm_type(i),l_pTempNode->getPCData().c_str())==0)
+		{
+			m_pModel->param.svm_type=i;
+		}
+	}
+	if(get_svm_type(m_pModel->param.svm_type) == NULL)
+	{
+		this->getLogManager() << LogLevel_Error << "load configuration error: bad value for the parameter svm_type\n";
+	}
 
-void CAlgorithmClassifierSVM::openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
-{
-	m_vNode.push(sName);
-	if( CString(sName) == CString("SVs"))
+	//kernel_type
+	l_pTempNode = pParamNode->getChildByName("kernel_type");
+	for(int i =0; get_kernel_type(i);i++)
 	{
-		m_pModel->sv_coef = new double*[m_pModel->nr_class-1];
-		for(int i=0;i<m_pModel->nr_class-1;i++)
+		if ( strcmp(get_kernel_type(i), l_pTempNode->getPCData().c_str())==0)
 		{
-			m_pModel->sv_coef[i]=new double[m_pModel->l];
+			m_pModel->param.kernel_type=i;
 		}
-		m_pModel->SV = new svm_node*[m_pModel->l];
 	}
-	if(CString(sName) == CString("SV"))
+	if(get_kernel_type(m_pModel->param.kernel_type) == NULL)
 	{
-		m_i32IndexSV++;
+		this->getLogManager() << LogLevel_Error << "load configuration error: bad value for the parameter kernel_type\n";
 	}
-}
 
-void CAlgorithmClassifierSVM::processChildData(const char* sData)
-{
-	std::stringstream l_sData(sData);
-	// param
-	if(m_vNode.top()==CString("svm_type"))
+	//Following parameters aren't required
+
+	//degree
+	l_pTempNode = pParamNode->getChildByName("degree");
+	if(l_pTempNode != NULL)
 	{
-		for(int i =0; get_svm_type(i);i++)
-		{
-			if ( strcmp(get_svm_type(i),l_sData.str().c_str())==0)
-			{
-				m_pModel->param.svm_type=i;
-			}
-		}
-		if(get_svm_type(m_pModel->param.svm_type) == NULL)
-		{
-			this->getLogManager() << LogLevel_Error << "load configuration error: bad value for the parameter svm_type\n";
-		}
-	}
-	if(m_vNode.top()==CString("kernel_type"))
-	{
-		for(int i =0; get_kernel_type(i);i++)
-		{
-			if ( strcmp(get_kernel_type(i),l_sData.str().c_str())==0)
-			{
-				m_pModel->param.kernel_type=i;
-			}
-		}
-		if(get_kernel_type(m_pModel->param.kernel_type) == NULL)
-		{
-			this->getLogManager() << LogLevel_Error << "load configuration error: bad value for the parameter kernel_type\n";
-		}
-	}
-	if(m_vNode.top()==CString("degree"))
-	{
+		std::stringstream l_sData(l_pTempNode->getPCData());
 		l_sData >> m_pModel->param.degree;
 	}
-	if(m_vNode.top()==CString("gamma"))
+
+	//gamma
+	l_pTempNode = pParamNode->getChildByName("gamma");
+	if(l_pTempNode != NULL)
 	{
+		std::stringstream l_sData(l_pTempNode->getPCData());
 		l_sData >> m_pModel->param.gamma;
 	}
-	if(m_vNode.top()==CString("coef0"))
+
+	//coef0
+	l_pTempNode = pParamNode->getChildByName("coef0");
+	if(l_pTempNode != NULL)
 	{
+		std::stringstream l_sData(l_pTempNode->getPCData());
 		l_sData >> m_pModel->param.coef0;
 	}
+}
 
-	//model
-	if(m_vNode.top()==CString("nr_class"))
+void CAlgorithmClassifierSVM::loadModelNodeConfiguration(XML::IXMLNode *pModelNode)
+{
+
+	//nr_class
+	XML::IXMLNode* l_pTempNode = pModelNode->getChildByName("nr_class");
+	std::stringstream l_sModelNrClass(l_pTempNode->getPCData());
+	l_sModelNrClass >> m_pModel->nr_class;
+	//total_sv
+	l_pTempNode = pModelNode->getChildByName("total_sv");
+	std::stringstream l_sModelTotalSv(l_pTempNode->getPCData());
+	l_sModelTotalSv >> m_pModel->l;
+	//rho
+	l_pTempNode = pModelNode->getChildByName("rho");
+	std::stringstream l_sModelRho(l_pTempNode->getPCData());
+	m_pModel->rho = new double[m_pModel->nr_class*(m_pModel->nr_class-1)/2];
+	for(int i=0;i<m_pModel->nr_class*(m_pModel->nr_class-1)/2;i++)
 	{
-		l_sData >> m_pModel->nr_class;
+		l_sModelRho >> m_pModel->rho[i];
 	}
-	if(m_vNode.top()==CString("total_sv"))
+
+	//label
+	l_pTempNode = pModelNode->getChildByName("label");
+	if(l_pTempNode != NULL)
 	{
-		l_sData >> m_pModel->l;
-	}
-	if(m_vNode.top()==CString("rho"))
-	{
-		m_pModel->rho = new double[m_pModel->nr_class*(m_pModel->nr_class-1)/2];
-		for(int i=0;i<m_pModel->nr_class*(m_pModel->nr_class-1)/2;i++)
-		{
-			l_sData >> m_pModel->rho[i];
-		}
-	}
-	if(m_vNode.top()==CString("label"))
-	{
+		std::stringstream l_sData(l_pTempNode->getPCData());
 		m_pModel->label = new int[m_pModel->nr_class];
 		for(int i=0;i<m_pModel->nr_class;i++)
 		{
 			l_sData >> m_pModel->label[i];
 		}
 	}
-	if(m_vNode.top()==CString("probA"))
+	//probA
+	l_pTempNode = pModelNode->getChildByName("probA");
+	if(l_pTempNode != NULL)
 	{
+		std::stringstream l_sData(l_pTempNode->getPCData());
 		m_pModel->probA = new double[m_pModel->nr_class*(m_pModel->nr_class-1)/2];
 		for(int i=0;i<m_pModel->nr_class*(m_pModel->nr_class-1)/2;i++)
 		{
 			l_sData >> m_pModel->probA[i];
 		}
 	}
-	if(m_vNode.top()==CString("probB"))
+	//probB
+	l_pTempNode = pModelNode->getChildByName("probB");
+	if(l_pTempNode != NULL)
 	{
+		std::stringstream l_sData(l_pTempNode->getPCData());
 		m_pModel->probB = new double[m_pModel->nr_class*(m_pModel->nr_class-1)/2];
 		for(int i=0;i<m_pModel->nr_class*(m_pModel->nr_class-1)/2;i++)
 		{
 			l_sData >> m_pModel->probB[i];
 		}
 	}
-	if(m_vNode.top()==CString("nr_sv"))
+	//nr_sv
+	l_pTempNode = pModelNode->getChildByName("nr_sv");
+	if(l_pTempNode != NULL)
 	{
+		std::stringstream l_sData(l_pTempNode->getPCData());
 		m_pModel->nSV = new int[m_pModel->nr_class];
 		for(int i=0;i<m_pModel->nr_class;i++)
 		{
 			l_sData >> m_pModel->nSV[i];
 		}
 	}
-	if(m_vNode.top()==CString("coef"))
+
+	loadModelSVsNodeConfiguration(pModelNode->getChildByName("SVs"));
+}
+
+void CAlgorithmClassifierSVM::loadModelSVsNodeConfiguration(XML::IXMLNode *pSVsNodeParam)
+{
+	//Reserve all memory space required
+	m_pModel->sv_coef = new double*[m_pModel->nr_class-1];
+	for(int i=0;i<m_pModel->nr_class-1;i++)
 	{
+		m_pModel->sv_coef[i]=new double[m_pModel->l];
+	}
+	m_pModel->SV = new svm_node*[m_pModel->l];
+
+	//Now fill SV
+	for(uint32 i = 0; i < pSVsNodeParam->getChildCount(); ++i)
+	{
+		XML::IXMLNode *l_pTempNode = pSVsNodeParam->getChild(i);
+		std::stringstream l_sCoefData(l_pTempNode->getChildByName("coef")->getPCData());
 		for(int j=0;j<m_pModel->nr_class-1;j++)
 		{
-			l_sData >> m_pModel->sv_coef[j][m_i32IndexSV];
+			l_sCoefData >> m_pModel->sv_coef[j][i];
 		}
-	}
-	if(m_vNode.top()==CString("value"))
-	{
+
+		std::stringstream l_sValueData(l_pTempNode->getChildByName("value")->getPCData());
 		std::vector <int> l_vSVMIndex;
 		std::vector <double> l_vSVMValue;
 		char l_cSeparateChar;
-		while(!l_sData.eof())
+		while(!l_sValueData.eof())
 		{
 			int l_iIndex;
 			double l_dValue;
-			l_sData >> l_iIndex;
-			l_sData >> l_cSeparateChar;
-			l_sData >> l_dValue;
+			l_sValueData >> l_iIndex;
+			l_sValueData >> l_cSeparateChar;
+			l_sValueData >> l_dValue;
 			l_vSVMIndex.push_back(l_iIndex);
 			l_vSVMValue.push_back(l_dValue);
 		}
-		m_ui32NumberOfFeatures=l_vSVMIndex.size();
-		m_pModel->SV[m_i32IndexSV] = new svm_node[l_vSVMIndex.size()+1];
-		//std::stringstream l_sdata;
-		for(size_t i=0;i<l_vSVMIndex.size();i++)
-		{
-			m_pModel->SV[m_i32IndexSV][i].index=l_vSVMIndex[i];
-			m_pModel->SV[m_i32IndexSV][i].value=l_vSVMValue[i];
-			//l_sdata << m_pModel->SV[m_i32IndexSV][i].value <<" ";
-		}
-		//this->getLogManager() << LogLevel_Info << l_sdata.str().c_str()<<"\n";
-		m_pModel->SV[m_i32IndexSV][l_vSVMIndex.size()].index=-1;
-	}
-}
 
-void CAlgorithmClassifierSVM::closeChild(void)
-{
-	m_vNode.pop();
+		m_ui32NumberOfFeatures=l_vSVMIndex.size();
+		m_pModel->SV[i] = new svm_node[l_vSVMIndex.size()+1];
+		for(size_t j=0;j<l_vSVMIndex.size();j++)
+		{
+			m_pModel->SV[i][j].index=l_vSVMIndex[j];
+			m_pModel->SV[i][j].value=l_vSVMValue[j];
+		}
+		m_pModel->SV[i][l_vSVMIndex.size()].index=-1;
+	}
 }
 
 CString CAlgorithmClassifierSVM::paramToString(svm_parameter *pParam)

@@ -16,7 +16,7 @@ namespace XML
 		virtual XML::IXMLNode* parseString(const char* sString, const uint32& uiSize)=0;
 
 		//XML extraction
-		virtual void writeXMLInFile(IXMLNode &rNode, const char* sPath)=0;
+		virtual XML::boolean writeXMLInFile(IXMLNode &rNode, const char* sPath)=0;
 
 	protected:
 		virtual ~IXMLHandler() { }

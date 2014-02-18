@@ -8,11 +8,9 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <xml/IWriter.h>
-#include <xml/IReader.h>
+#include <xml/IXMLNode.h>
 
-#include <stack>
-
+#define TARGET_HAS_ThirdPartyITPP
 #if defined TARGET_HAS_ThirdPartyITPP
 
 #include <itpp/itbase.h>
@@ -24,15 +22,15 @@ namespace OpenViBEPlugins
 {
 	namespace Local
 	{
-		class CAlgorithmClassifierLDA : public OpenViBEToolkit::CAlgorithmClassifier, public XML::IWriterCallback, public XML::IReaderCallback
+		class CAlgorithmClassifierLDA : public OpenViBEToolkit::CAlgorithmClassifier
 		{
 		public:
 
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
 			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
 
-			virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer);
-			virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer);
+			virtual XML::IXMLNode* saveConfiguration(void);
+			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode* pConfiguratioNode);
 
             virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
@@ -40,20 +38,16 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			virtual void write(const char* sString); // XML IWriterCallback
-
-			virtual void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount); // XML IReaderCallback
-			virtual void processChildData(const char* sData); // XML IReaderCallback
-			virtual void closeChild(void); // XML ReaderCallback
-
-			std::stack<OpenViBE::CString> m_vNode;
-
 			OpenViBE::float64 m_f64Class1;
 			OpenViBE::float64 m_f64Class2;
 
-			OpenViBE::CMemoryBuffer m_oConfiguration;
 			itpp::vec m_oCoefficients;
-            XML::IReader *m_pIReader;
+
+			XML::IXMLNode *m_pConfigurationNode;
+
+		private:
+			void loadClassesFromNode(XML::IXMLNode *pNode);
+			void loadCoefficientsFromNode(XML::IXMLNode *pNode);
 		};
 
 		class CAlgorithmClassifierLDADesc : public OpenViBEToolkit::CAlgorithmClassifierDesc

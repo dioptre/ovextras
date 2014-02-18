@@ -3,6 +3,8 @@
 #include "ovtkCFeatureVectorSet.hpp"
 #include "ovtkCVector.hpp"
 
+#include <xml/IXMLHandler.h>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -12,12 +14,12 @@ using namespace OpenViBEToolkit;
 boolean CAlgorithmClassifier::process(void)
 {
 	TParameterHandler < IMatrix* > ip_pFeatureVector(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
-	TParameterHandler < IMemoryBuffer* > ip_pConfiguration(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
+	TParameterHandler < XML::IXMLNode* > ip_pConfiguration(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 	TParameterHandler < float64 > op_pClass(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
 	TParameterHandler < IMatrix* > op_pClassificationValues(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
 
 	TParameterHandler < IMatrix* > ip_pFeatureVectorSet(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
-	TParameterHandler < IMemoryBuffer* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
 
     //this->getLogManager() << LogLevel_ImportantWarning << "Algorithm\n";
 	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_Train))
@@ -80,36 +82,30 @@ boolean CAlgorithmClassifier::process(void)
 
 	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration))
 	{
-		IMemoryBuffer* l_pConfiguration=op_pConfiguration;
-		if(!l_pConfiguration)
+		XML::IXMLNode *l_pNode = this->saveConfiguration();
+		op_pConfiguration = l_pNode;
+		if(!l_pNode)
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Configuration memory buffer is NULL\n";
 			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
 		}
 		else
 		{
-			if(this->saveConfiguration(*l_pConfiguration))
-			{
-				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
-			}
-			else
-			{
-				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
-			}
+			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
 		}
 	}
 
 	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration))
 	{
-		IMemoryBuffer* l_pConfiguration=ip_pConfiguration;
-		if(!l_pConfiguration)
+		XML::IXMLNode *l_pNode = ip_pConfiguration;
+		if(!l_pNode)
 		{
 			this->getLogManager() << LogLevel_ImportantWarning << "Configuration memory buffer is NULL\n";
 			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
 		}
 		else
 		{
-			if(this->loadConfiguration(*l_pConfiguration))
+
+			if(this->loadConfiguration(l_pNode))
 			{
 				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
 			}
