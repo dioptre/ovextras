@@ -74,9 +74,10 @@
     <span class="kw">import</span> os
     ov_binany_path=os.environ[<span class="str">'OV_BINARY_PATH'</span>]
     self.terminal = App.open(<span class="str">"xterm"</span>)
-    <span class="skw">wait</span>(<span class="dig">1</span>)
+    <span class="kw">while</span> <span class="kw">not</span> self.terminal.window():
+        <span class="skw">wait</span>(<span class="dig">1</span>)
     <span class="skw">type</span>(ov_binany_path +<span class="str">"/openvibe-designer.sh --no-session-management"</span>+ Key.ENTER)
-    <span class="skw">wait</span>(<img src="StartInterface.png" />,<span class="dig">20000</span>)
+    <span class="skw">wait</span>(<img src="HletdltLBEEK.png" />,<span class="dig">10</span>)
 <span class="kw">def</span> test_createSimpleScenarioAndRun(self):
     <span class="skw">click</span>(Pattern(<img src="Datagenerati.png" />).targetOffset(-<span class="dig">70</span>,-<span class="dig">1</span>))
     <span class="skw">dragDrop</span>(<img src="Sinusoscilla-1.png" />,Pattern(<img src="InterfaceWithSignal.png" />).similar(<span class="dig">0.16</span>).targetOffset(-<span class="dig">232</span>,-<span class="dig">180</span>))

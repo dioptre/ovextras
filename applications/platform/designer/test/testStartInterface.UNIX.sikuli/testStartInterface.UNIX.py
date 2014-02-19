@@ -2,9 +2,10 @@ def setUp(self):
     import os
     ov_binany_path=os.environ['OV_BINARY_PATH']
     self.terminal = App.open("xterm")
-    wait(1)
+    while not self.terminal.window():
+        wait(1)
     type(ov_binany_path +"/openvibe-designer.sh --no-session-management"+ Key.ENTER)
-    wait("StartInterface.png",20000)
+    wait("HletdltLBEEK.png",10)
 def test_createSimpleScenarioAndRun(self):
     click(Pattern("Datagenerati.png").targetOffset(-70,-1))
     dragDrop("Sinusoscilla-1.png",Pattern("InterfaceWithSignal.png").similar(0.16).targetOffset(-232,-180))
