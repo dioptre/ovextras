@@ -5,10 +5,10 @@ def setUp(self):
     while not self.terminal.window():
         wait(1)
     type(ov_binany_path +"/openvibe-designer.sh --no-session-management"+ Key.ENTER)
-    wait("HletdltLBEEK.png",10)
+    wait("StartInterface.png",10)
 def test_createSimpleScenarioAndRun(self):
     click(Pattern("Datagenerati.png").targetOffset(-70,-1))
-    dragDrop("Sinusoscilla-1.png",Pattern("InterfaceWithSignal.png").similar(0.16).targetOffset(-232,-180))
+    dragDrop("Sinusoscilla-1.png",Pattern("EEKLBTime001.png").similar(0.19).targetOffset(-233,-163))
     assert(exists("SinusOscillatorBoxSelected.png"))
     click(Pattern("Visualisatio.png").targetOffset(-62,0))
     click(Pattern("Basic.png").targetOffset(-50,-1))
