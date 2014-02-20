@@ -2,21 +2,23 @@ def setUp(self):
     import os
     ov_binany_path=os.environ['OV_BINARY_PATH']
     self.terminal = App.open("xterm")
-    wait(1)
+    while not self.terminal.window():
+        wait(1)
     type(ov_binany_path +"/openvibe-designer.sh --no-session-management"+ Key.ENTER)
-    wait("StartInterface.png",20000)
+    wait("StartInterface.png",10)
 def test_createSimpleScenarioAndRun(self):
     click(Pattern("Datagenerati.png").targetOffset(-70,-1))
-    dragDrop("Sinusoscilla-1.png",Pattern("InterfaceWithSignal.png").similar(0.16).targetOffset(-232,-180))
+    dragDrop("Sinusoscilla-1.png",Pattern("DesignerDataGenOpen.png").targetOffset(-233,-163))
     assert(exists("SinusOscillatorBoxSelected.png"))
     click(Pattern("Visualisatio.png").targetOffset(-62,0))
     click(Pattern("Basic.png").targetOffset(-50,-1))
-    dragDrop("ESignaldispl.png", Pattern("itENEExlJEll.png").similar(0.16).targetOffset(-288,-26))
+    dragDrop("Signaldisplay.png", Pattern("designerSinusGenPlaced.png").targetOffset(-197,-16))
     assert(exists("SignalDisplayBoxSelected.png"))
     dragDrop("outputSignalConnector.png", "imputSingnalConnector.png")
     click(Pattern("playButton.png").similar(0.95))
     wait(6)
-    assert(exists(Pattern("SignalDisplayWindow.png").similar(0.58)))
+    assert(exists(Pattern("SignalDisplayWindow.png").similar(0.46)))
+    dragDrop(Pattern("SignalDisplayWindow.png").similar(0.46).targetOffset(2,-157),Pattern("SignalDisplayWindow.png").similar(0.46))
     click("stopButton.png")
     waitVanish(Pattern("SignalDisplayWindow.png").similar(0.58))
              
