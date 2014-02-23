@@ -18,7 +18,7 @@ def test_createSimpleScenarioAndRun(self):
     click(Pattern("playButton.png").similar(0.95))
     wait(6)
     assert(exists(Pattern("SignalDisplayWindow.png").similar(0.46)))
-    dragDrop(Pattern("SignalDisplayWindow.png").similar(0.46).targetOffset(2,-157),Pattern("SignalDisplayWindow.png").similar(0.46))
+    dragDrop(Pattern("SignalDisplayWindow.png").similar(0.46).targetOffset(2,-157),Pattern("SignalDisplayWindow.png").similar(0.46).targetOffset(-102,137))
     click("stopButton.png")
     waitVanish(Pattern("SignalDisplayWindow.png").similar(0.58))
     type("w",KeyModifier.CTRL)

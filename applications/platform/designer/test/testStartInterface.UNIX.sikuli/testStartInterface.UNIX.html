@@ -90,7 +90,7 @@
     <span class="skw">click</span>(Pattern(<img src="playButton.png" />).similar(<span class="dig">0.95</span>))
     <span class="skw">wait</span>(<span class="dig">6</span>)
     <span class="kw">assert</span>(exists(Pattern(<img src="SignalDisplayWindow.png" />).similar(<span class="dig">0.46</span>)))
-    <span class="skw">dragDrop</span>(Pattern(<img src="SignalDisplayWindow.png" />).similar(<span class="dig">0.46</span>).targetOffset(<span class="dig">2</span>,-<span class="dig">157</span>),Pattern(<img src="SignalDisplayWindow.png" />).similar(<span class="dig">0.46</span>))
+    <span class="skw">dragDrop</span>(Pattern(<img src="SignalDisplayWindow.png" />).similar(<span class="dig">0.46</span>).targetOffset(<span class="dig">2</span>,-<span class="dig">157</span>),Pattern(<img src="SignalDisplayWindow.png" />).similar(<span class="dig">0.46</span>).targetOffset(-<span class="dig">102</span>,<span class="dig">137</span>))
     <span class="skw">click</span>(<img src="stopButton.png" />)
     waitVanish(Pattern(<img src="SignalDisplayWindow.png" />).similar(<span class="dig">0.58</span>))
     <span class="skw">type</span>(<span class="str">"w"</span>,KeyModifier.CTRL)
