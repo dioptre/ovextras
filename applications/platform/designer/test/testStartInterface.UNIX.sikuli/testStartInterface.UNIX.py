@@ -21,7 +21,20 @@ def test_createSimpleScenarioAndRun(self):
     dragDrop(Pattern("SignalDisplayWindow.png").similar(0.46).targetOffset(2,-157),Pattern("SignalDisplayWindow.png").similar(0.46))
     click("stopButton.png")
     waitVanish(Pattern("SignalDisplayWindow.png").similar(0.58))
-             
+    type("w",KeyModifier.CTRL)
+    assert(exists("SavechangePopup.png"))
+    click(Pattern("SavechangePopup.png").targetOffset(-170,56))
+def test_boxSetAtributes(self):
+    click("SearchBoxBar.png")
+    type("sinus")
+    dragDrop("Sinusoscilla-1.png",Pattern("DesignerDataGenOpen.png").similar(0.40).targetOffset(-233,-163))
+    rightClick("SinusOscillatorBoxSelected.png")
+    click(Pattern("contextualBoxMenu.png").targetOffset(-51,16))
+    assert(exists("renameBoxPopUp.png"))
+    type("XXXX XXXX XXXX"+ Key.ENTER)
+    assert(exists("SinusOscillatorNewNameXXX.png"))
+    
 def tearDown(self):
     App.close(self.terminal)
+    self.terminal= None
 
