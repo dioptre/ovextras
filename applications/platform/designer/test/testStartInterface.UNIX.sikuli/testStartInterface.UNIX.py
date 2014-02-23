@@ -1,10 +1,9 @@
 def setUp(self):
     import os
     ov_binany_path=os.environ['OV_BINARY_PATH']
-    self.terminal = App.open("xterm")
+    self.terminal = App.open("xterm -e " + ov_binany_path +"/openvibe-designer.sh --no-session-management")
     while not self.terminal.window():
         wait(1)
-    type(ov_binany_path +"/openvibe-designer.sh --no-session-management"+ Key.ENTER)
     wait("StartInterface.png",10)
 def test_createSimpleScenarioAndRun(self):
     click(Pattern("Datagenerati.png").targetOffset(-70,-1))
@@ -26,7 +25,7 @@ def test_createSimpleScenarioAndRun(self):
     click(Pattern("SavechangePopup.png").targetOffset(-170,56))
 def test_boxSetAtributes(self):
     click("SearchBoxBar.png")
-    type("sinus")
+    paste("sinus")
     dragDrop("Sinusoscilla-1.png",Pattern("DesignerDataGenOpen.png").similar(0.40).targetOffset(-233,-163))
     rightClick("SinusOscillatorBoxSelected.png")
     click(Pattern("contextualBoxMenu.png").targetOffset(-51,16))

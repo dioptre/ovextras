@@ -73,10 +73,9 @@
 <span class="kw">def</span> setUp(self):
     <span class="kw">import</span> os
     ov_binany_path=os.environ[<span class="str">'OV_BINARY_PATH'</span>]
-    self.terminal = App.open(<span class="str">"xterm"</span>)
+    self.terminal = App.open(<span class="str">"xterm -e "</span> + ov_binany_path +<span class="str">"/openvibe-designer.sh --no-session-management"</span>)
     <span class="kw">while</span> <span class="kw">not</span> self.terminal.window():
         <span class="skw">wait</span>(<span class="dig">1</span>)
-    <span class="skw">type</span>(ov_binany_path +<span class="str">"/openvibe-designer.sh --no-session-management"</span>+ Key.ENTER)
     <span class="skw">wait</span>(<img src="StartInterface.png" />,<span class="dig">10</span>)
 <span class="kw">def</span> test_createSimpleScenarioAndRun(self):
     <span class="skw">click</span>(Pattern(<img src="Datagenerati.png" />).targetOffset(-<span class="dig">70</span>,-<span class="dig">1</span>))
@@ -98,7 +97,7 @@
     <span class="skw">click</span>(Pattern(<img src="SavechangePopup.png" />).targetOffset(-<span class="dig">170</span>,<span class="dig">56</span>))
 <span class="kw">def</span> test_boxSetAtributes(self):
     <span class="skw">click</span>(<img src="SearchBoxBar.png" />)
-    <span class="skw">type</span>(<span class="str">"sinus"</span>)
+    paste(<span class="str">"sinus"</span>)
     <span class="skw">dragDrop</span>(<img src="Sinusoscilla-1.png" />,Pattern(<img src="DesignerDataGenOpen.png" />).similar(<span class="dig">0.40</span>).targetOffset(-<span class="dig">233</span>,-<span class="dig">163</span>))
     <span class="skw">rightClick</span>(<img src="SinusOscillatorBoxSelected.png" />)
     <span class="skw">click</span>(Pattern(<img src="contextualBoxMenu.png" />).targetOffset(-<span class="dig">51</span>,<span class="dig">16</span>))
