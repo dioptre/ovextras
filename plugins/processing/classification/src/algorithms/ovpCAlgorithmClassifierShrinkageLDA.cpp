@@ -66,7 +66,26 @@ boolean CAlgorithmClassifierShrinkageLDA::uninitialize(void)
 
 boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
+	//Let's set the extra settings
+	TParameterHandler < std::map<CString, CString>* > ip_pExtraParameter(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+	std::map<CString, CString>* l_pExtraParameter = ip_pExtraParameter;
+
+	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierShrinkageLDA));
+	l_pAlgoProxy->initialize();
+
+	//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage
+	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage);
+	TParameterHandler < float64 > ip_pShrinkage(getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage));
+	ip_pShrinkage = this->getAlgorithmContext().getConfigurationManager().expandAsFloat((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov);
 	TParameterHandler< boolean > ip_bDiagonalCov(getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov));
+	ip_bDiagonalCov = this->getAlgorithmContext().getConfigurationManager().expandAsFloat((*l_pExtraParameter)[l_pParameterName]);
+
+	l_pAlgoProxy->uninitialize();
+	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
+
 
 	// IO to the covariance alg
 	TParameterHandler < OpenViBE::IMatrix* > op_pMean(m_pCovarianceAlgorithm->getOutputParameter(OVP_Algorithm_ConditionedCovariance_OutputParameterId_Mean));

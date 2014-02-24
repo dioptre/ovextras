@@ -1,6 +1,6 @@
 #include "ovpCAlgorithmClassifierSVM.h"
 
-//#include <map>
+#include <map>
 #include <sstream>
 #include <iostream>
 #include <cstring>
@@ -62,27 +62,92 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 {
 	// default Param values
 	//std::cout<<"param config"<<std::endl;
+	TParameterHandler < std::map<CString, CString>* > ip_pExtraParameter(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+	std::map<CString, CString>* l_pExtraParameter = ip_pExtraParameter;
 
-	TParameterHandler < int64 > ip_i64SVMType(this->getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMType));
-	TParameterHandler < int64 > ip_i64SVMKernelType(this->getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMKernelType));
-	TParameterHandler < int64 > ip_i64Degree(this->getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMDegree));
-	TParameterHandler < float64 > ip_f64Gamma(this->getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMGamma));
-	TParameterHandler < float64 > ip_f64Coef0(this->getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMCoef0));
-	TParameterHandler < float64 > ip_f64Cost(this->getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMCost));
-	TParameterHandler < float64 > ip_f64Nu(this->getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMNu));
-	TParameterHandler < float64 > ip_f64Epsilon(this->getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMEpsilon));
-	TParameterHandler < float64 > ip_f64CacheSize(this->getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMCacheSize));
-	TParameterHandler < float64 > ip_f64EpsilonTolerance(this->getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMTolerance));
-	TParameterHandler < boolean > ip_bShrinking(this->getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMShrinking));
-	//TParameterHandler < boolean > ip_bProbabilityEstimate(this->getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMProbabilityEstimate));
-	TParameterHandler < CString* > ip_sWeight(this->getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMweight));
-	TParameterHandler < CString* > ip_sWeightLabel(this->getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMWeightLabel));
+	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierSVM));
+	l_pAlgoProxy->initialize();
+
+	//Extract OVP_Algorithm_ClassifierSVM_InputParameterId_SVMType
+	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMType);
+	TParameterHandler < int64 > ip_i64SVMType(getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMType));
+	ip_i64SVMType = this->getAlgorithmContext().getConfigurationManager().expandAsInteger((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_Algorithm_ClassifierSVM_InputParameterId_SVMKernelType
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMKernelType);
+	TParameterHandler < int64 > ip_i64SVMKernelType(getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMKernelType));
+	ip_i64SVMKernelType = this->getAlgorithmContext().getConfigurationManager().expandAsInteger((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_Algorithm_ClassifierSVM_InputParameterId_SVMDegree
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMDegree);
+	TParameterHandler < int64 > ip_i64Degree(getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMDegree));
+	ip_i64Degree = this->getAlgorithmContext().getConfigurationManager().expandAsInteger((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_Algorithm_ClassifierSVM_InputParameterId_SVMGamma
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMGamma);
+	TParameterHandler < float64 > ip_f64Gamma(getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMGamma));
+	ip_f64Gamma = this->getAlgorithmContext().getConfigurationManager().expandAsFloat((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_Algorithm_ClassifierSVM_InputParameterId_SVMCoef0
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMCoef0);
+	TParameterHandler < float64 > ip_f64Coef0(getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMCoef0));
+	ip_f64Coef0 = this->getAlgorithmContext().getConfigurationManager().expandAsFloat((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMCost
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMCost);
+	TParameterHandler < float64 > ip_f64Cost(getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMCost));
+	ip_f64Cost = this->getAlgorithmContext().getConfigurationManager().expandAsFloat((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMNu
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMNu);
+	TParameterHandler < float64 > ip_f64Nu(getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMNu));
+	ip_f64Nu = this->getAlgorithmContext().getConfigurationManager().expandAsFloat((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMEpsilon
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMEpsilon);
+	TParameterHandler < float64 > ip_f64Epsilon(getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMEpsilon));
+	ip_f64Epsilon = this->getAlgorithmContext().getConfigurationManager().expandAsFloat((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMCacheSize
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMCacheSize);
+	TParameterHandler < float64 > ip_f64CacheSize(getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMCacheSize));
+	ip_f64CacheSize = this->getAlgorithmContext().getConfigurationManager().expandAsFloat((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMTolerance
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMTolerance);
+	TParameterHandler < float64 > ip_f64EpsilonTolerance(getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMTolerance));
+	ip_f64EpsilonTolerance = this->getAlgorithmContext().getConfigurationManager().expandAsFloat((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMShrinking
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMShrinking);
+	TParameterHandler < boolean > ip_bShrinking(getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMShrinking));
+	ip_bShrinking = this->getAlgorithmContext().getConfigurationManager().expandAsBoolean((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMProbabilityEstimate
+//	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMProbabilityEstimate);
+//	TParameterHandler < boolean > ip_bProbabilityEstimate(getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMProbabilityEstimate));
+//	ip_bProbabilityEstimate = this->getAlgorithmContext().getConfigurationManager().expandAsBoolean((*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMweight
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMweight);
+	TParameterHandler < CString * > ip_sWeight(getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMweight));
+	ip_sWeight = &(*l_pExtraParameter)[l_pParameterName];
+
+	//Extract OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMweight
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMweight);
+	TParameterHandler < CString * > ip_sWeightLabel(getInputParameter(OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMweight));
+	ip_sWeightLabel = &(*l_pExtraParameter)[l_pParameterName];
+
+
+	l_pAlgoProxy->uninitialize();
+	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
 
 	boolean ip_bProbabilityEstimate=true;
 
 	m_oParam.svm_type = (int)ip_i64SVMType;//C_SVC;
 	m_oParam.kernel_type = (int)ip_i64SVMKernelType;//LINEAR;
 	m_oParam.degree = (int)ip_i64Degree;//3;
+	std::cout << "Degree " << m_oParam.degree << std::endl;
 	m_oParam.gamma = ip_f64Gamma;//0;	// 1/num_features
 	m_oParam.coef0 = ip_f64Coef0;//0;
 	m_oParam.nu = ip_f64Nu;//0.5;

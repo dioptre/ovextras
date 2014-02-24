@@ -1,6 +1,7 @@
 #ifndef __OpenViBEPlugins_Defines_H__
 #define __OpenViBEPlugins_Defines_H__
 
+
 //___________________________________________________________________//
 //                                                                   //
 // Plugin Object Descriptor Class Identifiers                        //

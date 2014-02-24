@@ -148,6 +148,11 @@ void CAlgorithmClassifierOneVsAll::addNewClassifierAtBack(void)
 {
 	IAlgorithmProxy* l_pSubClassifier = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(this->m_oSubClassifierAlgorithmIdentifier));
 	l_pSubClassifier->initialize();
+
+	//Set a references to the extra parameters input of the pairing strategy
+	TParameterHandler< std::map<CString, CString>* > ip_pExtraParameters(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+	ip_pExtraParameters.setReferenceTarget(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+
 	this->m_oSubClassifierList.push_back(l_pSubClassifier);
 	++(this->m_iAmountClass);
 }
@@ -212,7 +217,6 @@ XML::IXMLNode* CAlgorithmClassifierOneVsAll::saveConfiguration(void)
 
 	m_pConfigurationNode->addChild(l_pOneVsAllNode);
 
-	std::cout << m_pConfigurationNode->getXML() << std::endl;
 	return m_pConfigurationNode;
 }
 
@@ -221,7 +225,6 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 	this->m_iClassCounter = 0;
 
 	XML::IXMLNode *l_pOneVsAllNode = pConfigurationNode->getChild(0);
-	std::cout << l_pOneVsAllNode->getXML() << std::cout;
 
 	XML::IXMLNode *l_pTempNode = l_pOneVsAllNode->getChildByName("SubClassifierIdentifier");
 	std::stringstream l_sIdentifierData(l_pTempNode->getPCData());
@@ -256,7 +259,7 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 		}
 	}
 
-	l_pTempNode = l_pOneVsAllNode->getChildByName("SubClassifiers");
+	loadSubClassifierConfiguration(l_pOneVsAllNode->getChildByName("SubClassifiers"));
 
 	return true;
 }
@@ -265,6 +268,7 @@ void CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNode 
 {
 	for( uint32 i = 0; i < pSubClassifiersNode->getChildCount() ; ++i)
 	{
+		std::cout << "Load configuration" << std::endl;
 		XML::IXMLNode *l_pSubClassifierNode = pSubClassifiersNode->getChild(i);
 		TParameterHandler < XML::IXMLNode* > ip_pConfiguration(m_oSubClassifierList[i]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 		ip_pConfiguration = l_pSubClassifierNode->getChild(0);

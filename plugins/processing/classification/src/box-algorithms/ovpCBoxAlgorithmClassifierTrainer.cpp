@@ -6,6 +6,8 @@
 #include <cmath>
 #include <algorithm>
 
+#include <map>
+
 #include <xml/IXMLHandler.h>
 #include <xml/IXMLNode.h>
 
@@ -55,55 +57,71 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
 	m_pClassifier->initialize();
 
-	CIdentifier l_oIdentifier;
+//	CIdentifier l_oIdentifier;
 	i = OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount; // number of settings when no additional setting is added
-	while(i < l_rStaticBoxContext.getSettingCount() && (l_oIdentifier=m_pClassifier->getNextInputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
+
+	m_pExtraParemeter = new map<CString , CString> ();
+	while(i < l_rStaticBoxContext.getSettingCount())
 	{
-		if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
-		&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet)
-		&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_Configuration))
-		{
-			IParameter* l_pParameter=m_pClassifier->getInputParameter(l_oIdentifier);
-			TParameterHandler < int64 > ip_i64Parameter(l_pParameter);
-			TParameterHandler < uint64 > ip_ui64Parameter(l_pParameter);
-			TParameterHandler < float64 > ip_f64Parameter(l_pParameter);
-			TParameterHandler < boolean > ip_bParameter(l_pParameter);
-			TParameterHandler < CString* > ip_sParameter(l_pParameter);
-			CString l_sParam;
-			bool l_bValid=true;
-			switch(l_pParameter->getType())
-			{
-				case ParameterType_Enumeration:
-				case ParameterType_UInteger:
-					ip_ui64Parameter=(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-					break;
+		CString l_pInputName;
+		CString l_pInputValue;
+		l_rStaticBoxContext.getSettingName(i, l_pInputName);
+		l_rStaticBoxContext.getSettingValue(i, l_pInputValue);
+		(*m_pExtraParemeter)[l_pInputName] = l_pInputValue;
 
-				case ParameterType_Integer:
-					ip_i64Parameter=(int64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-					break;
-
-				case ParameterType_Boolean:
-					ip_bParameter=(boolean)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-					break;
-
-				case ParameterType_Float:
-					ip_f64Parameter=(float64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-					break;
-
-				case ParameterType_String:
-					l_sParam=(CString)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-					*ip_sParameter=l_sParam;
-					break;
-				default:
-					l_bValid=false;
-					break;
-			}
-			if(l_bValid)
-			{
-				i++;
-			}
-		}
+		++i;
 	}
+	TParameterHandler < map<CString , CString> * > ip_pExtraParameter(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+	ip_pExtraParameter = m_pExtraParemeter;
+
+//	i = OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount; // number of settings when no additional setting is added
+//	while(i < l_rStaticBoxContext.getSettingCount() && (l_oIdentifier=m_pClassifier->getNextInputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
+//	{
+//		if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
+//		&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet)
+//		&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_Configuration))
+//		{
+//			IParameter* l_pParameter=m_pClassifier->getInputParameter(l_oIdentifier);
+//			TParameterHandler < int64 > ip_i64Parameter(l_pParameter);
+//			TParameterHandler < uint64 > ip_ui64Parameter(l_pParameter);
+//			TParameterHandler < float64 > ip_f64Parameter(l_pParameter);
+//			TParameterHandler < boolean > ip_bParameter(l_pParameter);
+//			TParameterHandler < CString* > ip_sParameter(l_pParameter);
+//			CString l_sParam;
+//			bool l_bValid=true;
+//			switch(l_pParameter->getType())
+//			{
+//				case ParameterType_Enumeration:
+//				case ParameterType_UInteger:
+//					ip_ui64Parameter=(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+//					break;
+
+//				case ParameterType_Integer:
+//					ip_i64Parameter=(int64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+//					break;
+
+//				case ParameterType_Boolean:
+//					ip_bParameter=(boolean)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+//					break;
+
+//				case ParameterType_Float:
+//					ip_f64Parameter=(float64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+//					break;
+
+//				case ParameterType_String:
+//					l_sParam=(CString)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+//					*ip_sParameter=l_sParam;
+//					break;
+//				default:
+//					l_bValid=false;
+//					break;
+//			}
+//			if(l_bValid)
+//			{
+//				i++;
+//			}
+//		}
+//	}
 
 	m_vFeatureCount.clear();
 
@@ -139,6 +157,11 @@ boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
 	}
 	m_vFeatureVector.clear();
 	m_vFeatureVectorIndex.clear();
+
+//	if(m_pExtraParemeter != NULL)
+//	{
+//		delete m_pExtraParemeter;
+//	}
 
 	return true;
 }

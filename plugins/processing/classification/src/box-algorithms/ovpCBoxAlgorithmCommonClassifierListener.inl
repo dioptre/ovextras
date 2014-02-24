@@ -116,7 +116,8 @@ namespace OpenViBEPlugins
 				{
 					if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
 					&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet)
-					&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_Configuration))
+					&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_Configuration)
+					&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter))
 					{
 						OpenViBE::CIdentifier l_oTypeIdentifier;
 						OpenViBE::CString l_sParameterName=m_pClassifier->getInputParameterName(l_oIdentifier);
@@ -172,9 +173,9 @@ namespace OpenViBEPlugins
 								if(l_oOldTypeIdentifier != l_oTypeIdentifier)
 								{
 									rBox.setSettingType(i, l_oTypeIdentifier);
-									rBox.setSettingValue(i, l_sBuffer);
 								}
 								rBox.setSettingName(i, l_sParameterName);
+								rBox.setSettingValue(i, l_sBuffer);
 							}
 							i++;
 						}
@@ -190,7 +191,7 @@ namespace OpenViBEPlugins
 			}
 
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier)
 
 		protected:
 

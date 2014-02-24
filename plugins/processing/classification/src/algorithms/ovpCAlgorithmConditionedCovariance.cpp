@@ -8,6 +8,7 @@
  */
 
 #if defined TARGET_HAS_ThirdPartyEIGEN
+#include <iostream>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -59,6 +60,7 @@ OpenViBE::boolean CAlgorithmConditionedCovariance::process(void)
 	TParameterHandler< IMatrix* > op_pMean(getOutputParameter(OVP_Algorithm_ConditionedCovariance_OutputParameterId_Mean));
 	TParameterHandler< IMatrix* > op_pCovarianceMatrix(getOutputParameter(OVP_Algorithm_ConditionedCovariance_OutputParameterId_CovarianceMatrix));
 	float64 l_f64Shrinkage = ip_f64Shrinkage;
+	std::cout << l_f64Shrinkage << std::endl;
 	if(l_f64Shrinkage>1.0) {
 		this->getLogManager() << LogLevel_Error << "Max shrinkage parameter value is 1.0\n";
 		return false;

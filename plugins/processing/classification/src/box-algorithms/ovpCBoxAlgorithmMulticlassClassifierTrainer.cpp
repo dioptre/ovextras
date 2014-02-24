@@ -66,58 +66,6 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::initialize(void)
 		m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
 		m_pClassifier->initialize();
 
-		CIdentifier l_oIdentifier;
-		i = OVP_BoxAlgorithm_MulticlassClassifierTrainer_CommonSettingsCount; // number of settings when no additional setting is added
-		while(i < l_rStaticBoxContext.getSettingCount() && (l_oIdentifier=m_pClassifier->getNextInputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
-		{
-			if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
-					&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet)
-					&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_Configuration))
-			{
-				IParameter* l_pParameter=m_pClassifier->getInputParameter(l_oIdentifier);
-				TParameterHandler < int64 > ip_i64Parameter(l_pParameter);
-				TParameterHandler < uint64 > ip_ui64Parameter(l_pParameter);
-				TParameterHandler < float64 > ip_f64Parameter(l_pParameter);
-				TParameterHandler < boolean > ip_bParameter(l_pParameter);
-				TParameterHandler < CString* > ip_sParameter(l_pParameter);
-				CString l_sParam;
-				bool l_bValid=true;
-				switch(l_pParameter->getType())
-				{
-				case ParameterType_Enumeration:
-				case ParameterType_UInteger:
-					ip_ui64Parameter=(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-					break;
-
-				case ParameterType_Integer:
-					ip_i64Parameter=(int64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-					break;
-
-				case ParameterType_Boolean:
-					ip_bParameter=(boolean)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-					break;
-
-				case ParameterType_Float:
-					ip_f64Parameter=(float64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-					break;
-
-				case ParameterType_String:
-					l_sParam=(CString)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-					*ip_sParameter=l_sParam;
-					break;
-				default:
-					l_bValid=false;
-					break;
-				}
-				if(l_bValid)
-				{
-					i++;
-				}
-			}
-		}
-		m_vFeatureCount.clear();
-
-
 	} else {
 		this->getLogManager() << LogLevel_Info << "Got more than 2 class, let's use a pairing strategy\n";
 		CString l_sPairingStrategyClassIdentifier;
@@ -129,10 +77,6 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::initialize(void)
 			this->getLogManager() << LogLevel_Error << "Unknown pairing strategy [" << l_sPairingStrategyClassIdentifier << "]\n";
 			return false;
 		}
-
-		this->getLogManager() << LogLevel_Error << "Known pairing\n";
-
-
 		m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oPairingStrategyClassIdentifier));
 		m_pClassifier->initialize();
 
@@ -143,9 +87,24 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::initialize(void)
 		*ip_pClassAmount = l_iClassCount;
 
 		m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture);
-		//The vector will be use later (rename classes)
 	}
 
+	i = OVP_BoxAlgorithm_MulticlassClassifierTrainer_CommonSettingsCount; // number of settings when no additional setting is added
+
+	m_pExtraParemeter = new map<CString , CString> ();
+	while(i < l_rStaticBoxContext.getSettingCount())
+	{
+		CString l_pInputName;
+		CString l_pInputValue;
+		l_rStaticBoxContext.getSettingName(i, l_pInputName);
+		l_rStaticBoxContext.getSettingValue(i, l_pInputValue);
+		(*m_pExtraParemeter)[l_pInputName] = l_pInputValue;
+
+		cout << "Extra parameter " << l_pInputName << " (" << (*m_pExtraParemeter)[l_pInputName] << ")" << endl;
+		++i;
+	}
+	TParameterHandler < map<CString , CString> * > ip_pExtraParameter(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+	ip_pExtraParameter = m_pExtraParemeter;
 
 	return true;
 }
@@ -440,6 +399,8 @@ float64 CBoxAlgorithmMulticlassClassifierTrainer::getAccuracy(const size_t uiSta
 	XML::IXMLNode * l_pNode = op_pConfiguration;//Requested for affectation
 	TParameterHandler < XML::IXMLNode* > ip_pConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 	ip_pConfiguration = l_pNode;
+
+	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
 
 	TParameterHandler < IMatrix* > ip_pFeatureVector(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
 	TParameterHandler < float64 > op_f64ClassificationStateClass(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));

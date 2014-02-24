@@ -15,6 +15,7 @@
 #define OVTK_Algorithm_Classifier_InputParameterId_FeatureVector         OpenViBE::CIdentifier(0x6D69BF98, 0x1EB9EE66)
 #define OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet      OpenViBE::CIdentifier(0x27C05927, 0x5DE9103A)
 #define OVTK_Algorithm_Classifier_InputParameterId_Configuration         OpenViBE::CIdentifier(0xA705428E, 0x5BB1CADD)
+#define OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter        OpenViBE::CIdentifier(0x42AD6BE3, 0xF483DE3F)
 
 #define OVTK_Algorithm_Classifier_OutputParameterId_Class                OpenViBE::CIdentifier(0x8A39A7EA, 0xF2EE45C4)
 #define OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues OpenViBE::CIdentifier(0xDA77D7E4, 0x766B48EA)
@@ -60,6 +61,7 @@ namespace OpenViBEToolkit
 			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_Classifier_InputParameterId_FeatureVector,         "Feature vector",        OpenViBE::Kernel::ParameterType_Matrix);
 			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet,      "Feature vector set",    OpenViBE::Kernel::ParameterType_Matrix);
 			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_Classifier_InputParameterId_Configuration,         "Configuration",         OpenViBE::Kernel::ParameterType_Pointer);
+			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter,        "Extra parameter",       OpenViBE::Kernel::ParameterType_Pointer);
 
 			rAlgorithmPrototype.addOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class,                "Class",                 OpenViBE::Kernel::ParameterType_Float);
 			rAlgorithmPrototype.addOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues, "Classification values", OpenViBE::Kernel::ParameterType_Matrix);

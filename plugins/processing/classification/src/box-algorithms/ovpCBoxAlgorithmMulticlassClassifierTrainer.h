@@ -50,6 +50,7 @@ namespace OpenViBEPlugins
             OpenViBE::uint64 m_ui64PartitionCount;
 
             OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationsEncoder;
+			std::map < OpenViBE::CString, OpenViBE::CString> *m_pExtraParemeter;
 
             typedef struct
             {
@@ -93,7 +94,7 @@ namespace OpenViBEPlugins
                 rBoxAlgorithmPrototype.addSetting("Filename to save configuration to",    OV_TypeId_Filename,                  "");
                 rBoxAlgorithmPrototype.addSetting("Train trigger",                        OV_TypeId_Stimulation,               "OVTK_StimulationId_Train");
                 rBoxAlgorithmPrototype.addSetting("Number of partitions for k-fold test", OV_TypeId_Integer,                   "10");
-                rBoxAlgorithmPrototype.addSetting("Pairing type",                         OVTK_TypeId_PairingClassification,                   "");
+				rBoxAlgorithmPrototype.addSetting("Pairing type",                         OVTK_TypeId_PairingClassification,                   "");
 
                 rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddInput);
                 return true;
