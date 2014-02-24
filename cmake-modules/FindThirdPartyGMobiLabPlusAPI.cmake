@@ -1,7 +1,8 @@
- #
- # The gMobilab driver was contributed
- # by Lucie Daubigney from Supelec Metz
- #
+#
+# The gMobilab driver (Linux) was contributed by Lucie Daubigney from Supelec Metz
+#
+# Windows-compatibility added by Jussi T. Lindgren / Inria
+#
 
 # ---------------------------------
 # Finds GTecMobiLabPlus+
@@ -10,7 +11,32 @@
 # ---------------------------------
 
 IF(WIN32)
-	MESSAGE(STATUS "  Skipping MobiLabPlus, not supported on Windows")
+	# note that the API must be 32bit with OpenViBE
+	FIND_PATH(PATH_GMobiLabCAPI GMobiLabPlus.h PATHS 
+		"C:/Program Files/gtec/GMobiLabCAPI/Lib" 
+		"C:/Program Files (x86)/gtec/GMobiLabCAPI/Lib" 
+		${OV_CUSTOM_DEPENDENCIES_PATH})
+	# We need to copy the DLL on install
+	FIND_PATH(PATH_GMobiLabDLL gMOBIlabplus.dll PATHS 
+		"C:/Windows/System32" 
+		"C:/Windows/SysWOW64" 
+		${OV_CUSTOM_DEPENDENCIES_PATH})		
+	FIND_LIBRARY(LIB_GMobiLabCAPI GMobiLabplus PATHS ${PATH_GMobiLabCAPI}/x86)
+		
+	IF(PATH_GMobiLabCAPI AND PATH_GMobiLabDLL AND LIB_GMobiLabCAPI)
+		MESSAGE(STATUS "  Found GMobiLabCAPI ...")
+		MESSAGE(STATUS "    [  OK  ] lib ${LIB_GMobiLabCAPI}")
+			
+		INCLUDE_DIRECTORIES(${PATH_GMobiLabCAPI})
+				
+		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_GMobiLabCAPI} )
+			
+		INSTALL(PROGRAMS ${PATH_GMobiLabLIB}/gMOBIlabplus.dll DESTINATION "bin")
+		
+		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyGMobiLabPlusAPI)
+	ELSE(PATH_GMobiLabCAPI AND PATH_GMobiLabDLL AND LIB_GMobiLabCAPI)
+		MESSAGE(STATUS "  FAILED to find GMobiLabPlusAPI + lib + dll")
+	ENDIF(PATH_GMobiLabCAPI AND PATH_GMobiLabDLL AND LIB_GMobiLabCAPI)
 ENDIF(WIN32)
 
 IF(UNIX)

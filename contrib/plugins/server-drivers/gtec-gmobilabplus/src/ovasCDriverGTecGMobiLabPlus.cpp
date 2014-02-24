@@ -1,6 +1,8 @@
 /**
- * The gMobilab driver was contributed
- * by Lucie Daubigney from Supelec Metz
+ * The gMobilab Linux driver was contributed by Lucie Daubigney from Supelec Metz
+ *
+ * Windows compatibility added by Jussi T. Lindgren / Inria
+ *
  */
 
 #include "ovasCDriverGTecGMobiLabPlus.h"
@@ -39,6 +41,7 @@ CDriverGTecGMobiLabPlus::CDriverGTecGMobiLabPlus(IDriverContext& rDriverContext)
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
+	,m_bTestMode(false)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGTecGMobiLabPlus::CDriverGTecGMobiLabPlus\n";
 
@@ -49,7 +52,11 @@ CDriverGTecGMobiLabPlus::CDriverGTecGMobiLabPlus(IDriverContext& rDriverContext)
 	m_oBuffer.pBuffer = NULL;
 	m_oBuffer.size = 0;
 	m_oBuffer.validPoints = 0;
+#if defined(TARGET_OS_Windows)
+	m_oPortName="//./COM1";
+#else
 	m_oPortName="/dev/rfcomm0";
+#endif
 
 	//initialisation of the analog channels of the gTec module : by default no analog exchange are allowed
 	m_oAnalogIn.ain1 = false;
@@ -63,6 +70,7 @@ CDriverGTecGMobiLabPlus::CDriverGTecGMobiLabPlus(IDriverContext& rDriverContext)
 
 	m_oSettings.add("Header", m_pHeader);
 	m_oSettings.add("PortName", &m_oPortName);
+	m_oSettings.add("TestMode", &m_bTestMode);
 	m_oSettings.load();
 }
 
@@ -80,7 +88,7 @@ void CDriverGTecGMobiLabPlus::release(void)
 const char* CDriverGTecGMobiLabPlus::getName(void)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGTecGMobiLabPlus::getName\n";
-	return "gTec gMOBIlab+";
+	return "g.Tec gMOBIlab+";
 }
 
 //___________________________________________________________________//
@@ -103,7 +111,7 @@ boolean CDriverGTecGMobiLabPlus::configure(void)
 	// We use CConfigurationGTecMobilabPlus configuration which is a class that inheritate from the CConfigurationBuilder class
 	// The difference between these two classes is the addition of a member of class. This member allows to change the port where is connected the device.
 	CConfigurationGTecGMobiLabPlus m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-GTec-GMobiLabPlus.ui",
-		m_oPortName.c_str());
+		m_oPortName, m_bTestMode);
 
 	// We configure the Header with it...
 	if(!m_oConfiguration.configure(*m_pHeader))
@@ -111,8 +119,10 @@ boolean CDriverGTecGMobiLabPlus::configure(void)
 		return false;
 	}
 
-	//...and the port name
-	m_oPortName=m_oConfiguration.getPortName();
+	if(m_pHeader->getChannelCount()>g_ui32AcquiredChannelCount) 
+	{
+		m_pHeader->setChannelCount(g_ui32AcquiredChannelCount);
+	}
 
 	m_oSettings.save();
 
@@ -155,6 +165,12 @@ boolean CDriverGTecGMobiLabPlus::initialize(const uint32 ui32SampleCountPerSentB
 	m_oBuffer.size=l_ui32ChannelCount*sizeof(short int);
 	m_oBuffer.validPoints=0;
 
+#if defined(TARGET_OS_Windows)
+	m_oOverlap.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_oOverlap.Offset = 0;
+	m_oOverlap.OffsetHigh = 0;
+#endif
+
 	// allocates enough space for m_pSample
 	m_pSample=new float32[ui32SampleCountPerSentBlock*l_ui32ChannelCount];
 
@@ -172,7 +188,11 @@ boolean CDriverGTecGMobiLabPlus::initialize(const uint32 ui32SampleCountPerSentB
 	// initializes hardware and get
 	// available header information
 	// from it
+#if defined(TARGET_OS_Windows)
+	m_oDevice=::GT_OpenDevice((LPSTR)m_oPortName.c_str());
+#else
 	m_oDevice=::GT_OpenDevice(m_oPortName.c_str());
+#endif
 	if(m_oDevice==0)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Unable to connect to [" << m_oPortName.c_str() << "]\n";
@@ -258,6 +278,9 @@ boolean CDriverGTecGMobiLabPlus::start(void)
 		return false;
 	}
 
+	// are we interested in test signal?
+	GT_SetTestmode(m_oDevice, m_bTestMode);
+
 	// requests hardware to start sending data
 	if(!::GT_StartAcquisition(m_oDevice))
 	{
@@ -269,7 +292,7 @@ boolean CDriverGTecGMobiLabPlus::start(void)
 
 boolean CDriverGTecGMobiLabPlus::loop(void)
 {
-	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGTecGMobiLabPlus::loop\n";
+	// m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGTecGMobiLabPlus::loop\n";
 
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(!m_rDriverContext.isStarted()) { return true; }
@@ -282,25 +305,38 @@ boolean CDriverGTecGMobiLabPlus::loop(void)
 	// the acquisition is reapeted m_ui32SampleCountPerSendBlock times to fill in the array "m_pSample"
 	for(i=0 ; i<m_ui32SampleCountPerSentBlock ; i++)
 	{
-		if (!::GT_GetData(m_oDevice, &m_oBuffer))// receive samples from hardware (one per channel)
+#if defined(TARGET_OS_Windows)
+		if (!::GT_GetData(m_oDevice, &m_oBuffer, &m_oOverlap))// receive samples from hardware (one per channel)
 		{
-			m_rDriverContext.getLogManager() << LogLevel_Trace << "GT_GetData failed\n";
+			m_rDriverContext.getLogManager() << LogLevel_Error << "GT_GetData failed\n";
 			return false;
 		}
+		if (WaitForSingleObject(m_oOverlap.hEvent, 1000) == WAIT_TIMEOUT)
+		{
+			m_rDriverContext.getLogManager() << LogLevel_Warning << "Timeout in reading from the device\n";
+			return false;
+		}
+#else
+		if (!::GT_GetData(m_oDevice, &m_oBuffer))// receive samples from hardware (one per channel)
+		{
+			m_rDriverContext.getLogManager() << LogLevel_Error << "GT_GetData failed\n";
+			return false;
+		}
+#endif
 
 		// here the "l_ui32ChannelCount" measures just acquired are stored in m_pSample not to be deleted by the next acquisition
-		m_rDriverContext.getLogManager() << LogLevel_Debug << "Here are the " << l_ui32ChannelCount << " measures of the " << i << " th sample\n" << LogLevel_Debug;
+		// m_rDriverContext.getLogManager() << LogLevel_Debug << "Here are the " << l_ui32ChannelCount << " measures of the " << i << " th sample\n" << LogLevel_Debug;
 		for(j=0; j<l_ui32ChannelCount; j++)
 		{
-			m_rDriverContext.getLogManager() << (m_oBuffer.pBuffer[j]*0.5)/32768. << " ";
+			// m_rDriverContext.getLogManager() << (m_oBuffer.pBuffer[j]*0.5)/32768. << " ";
 			//operation made to modify the short int in a number between 0 and 500mV (in Volt)
-			m_pSample[m_ui32SampleCountPerSentBlock*j+i] = (m_oBuffer.pBuffer[j]*0.5)/32768.;
+			m_pSample[m_ui32SampleCountPerSentBlock*j+i] = static_cast<float32>((m_oBuffer.pBuffer[j]*0.5)/32768.);
 		}
-		m_rDriverContext.getLogManager() << "\n";
+		// m_rDriverContext.getLogManager() << "\n";
 	}
 
 	// the buffer is full : it is send to the acquisition server
-	m_pCallback->setSamples(m_pSample);
+	m_pCallback->setSamples(m_pSample,m_ui32SampleCountPerSentBlock);
 	m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
 
 	return true;
