@@ -136,6 +136,9 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean onCustomVerticalScaleChangedCB(
 				::GtkSpinButton* pSpinButton);
 
+			OpenViBE::boolean onAutoTranslationToggledCB(
+					GtkToggleButton* pToggleButton);
+
 			/**
 			 * \brief Get a channel display object
 			 * \param ui32ChannelIndex Index of channel display
@@ -204,6 +207,9 @@ namespace OpenViBEPlugins
 			//!Show bottom time ruler when true
 			OpenViBE::boolean m_bShowBottomRuler;
 
+			//!Show background grid when true
+			OpenViBE::boolean m_bShowGrid;
+
 			//! Time of displayed signals at the left of channel displays
 			OpenViBE::uint64 m_ui64LeftmostDisplayedTime;
 
@@ -232,6 +238,7 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 m_f64CustomVerticalScaleValue;
 			//@}
 
+
 			//! The database that contains the information to use to draw the signals
 			CBufferDatabase * m_pBufferDatabase;
 
@@ -246,6 +253,9 @@ namespace OpenViBEPlugins
 
 			//! Flag set to true once multi view configuration dialog is initialized
 			OpenViBE::boolean m_bMultiViewInitialized;
+
+			OpenViBE::boolean m_bAutoTranslation;
+
 			//! Vector of indices of selected channels
 			std::map<OpenViBE::uint32, OpenViBE::boolean> m_vMultiViewSelectedChannels;
 

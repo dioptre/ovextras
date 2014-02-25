@@ -202,7 +202,10 @@ namespace OpenViBEPlugins
 		 * \return Y coordinate of sample
 		 */
 		OpenViBE::float64 getSampleYCoordinate(
-			OpenViBE::float64 f64Value);
+            OpenViBE::float64 f64Value, OpenViBE::uint32 ui32ChannelIndex, bool debug=false);
+
+		OpenViBE::float64 getSampleYMultiViewCoordinate(
+			OpenViBE::float64 f64Value, OpenViBE::uint32 ui32ChannelIndex, bool debug=false);
 
 		/**
 		 * \brief Draw signals (and stimulations, if any) displayed by this channel
@@ -230,6 +233,15 @@ namespace OpenViBEPlugins
 		 * \brief Draw Y=0 line
 		 */
 		void drawZeroLine();
+
+		/**
+		 * \brief Draw grid in background
+		 * \param f64 X_Step step between vertical lines of the grid
+		 * \param f64 Y_Step step between horizontal lines of the grid
+		 */
+		void drawGridLines(
+			OpenViBE::float64 X_Step,
+			OpenViBE::float64 Y_Step);
 
 	public:
 		//! Left ruler displaying signal scale
@@ -287,6 +299,11 @@ namespace OpenViBEPlugins
 		OpenViBE::uint64 m_ui64LatestDisplayedTime;
 		//! Should the whole window be redrawn at next redraw?
 		OpenViBE::boolean m_bRedrawAll;
+
+        OpenViBE::boolean m_bUseOffset;
+        OpenViBE::float64 m_f64VerticalScale;
+
+        OpenViBE::boolean m_bMultiView;
 	};
 
 	}
