@@ -15,6 +15,16 @@ namespace OpenViBEDesigner
 	class CApplication
 	{
 	public:
+		/**
+		 * \brief Replay modes
+		 */
+		enum EReplayMode
+		{
+			EReplayMode_None,
+			EReplayMode_Play,
+			EReplayMode_Forward
+		};
+
 		CApplication(const OpenViBE::Kernel::IKernelContext& rKernelContext);
 		~CApplication(void);
 
@@ -75,6 +85,10 @@ namespace OpenViBEDesigner
 		void zoomOutCB(void);//Call when a zoom out is required
 		void spinnerZoomChangedCB(OpenViBE::uint32 scaleDelta);
 
+		void windowItemToggledCB(GtkCheckMenuItem* pCheckMenuItem);
+		void toggleOnWindowItem(OpenViBE::uint32 ui32Index);
+		void toggleOffWindowItem(OpenViBE::uint32 ui32Index);
+
 		void stopScenarioCB(void);
 		void pauseScenarioCB(void);
 		void nextScenarioCB(void);
@@ -106,6 +120,8 @@ namespace OpenViBEDesigner
 		OpenViBE::boolean createPlayer(void);
 
 		void releasePlayer(void);
+
+		void destroyWindowMenu(void);
 
 		//@}
 
@@ -165,6 +181,9 @@ namespace OpenViBEDesigner
 		::GtkSpinButton* m_pZoomSpinner;
 		gint m_giFilterTimeout;
 
+		// List of items in Menu->window->Show that appear while playing a scenario
+		std::vector < ::GtkWidget* > m_vCheckItems;
+
 		const gchar* m_sSearchTerm;
 		const gchar* m_sLogSearchTerm;
 		
@@ -173,6 +192,9 @@ namespace OpenViBEDesigner
 		OpenViBE::int32 m_i32CurrentScenarioPage;
 
 		std::vector < OpenViBEDesigner::CInterfacedScenario* > m_vInterfacedScenario;
+
+		// Keeps track of the used playing mode so the playback can be restarted in the same mode.
+		EReplayMode m_eReplayMode;
 	};
 };
 

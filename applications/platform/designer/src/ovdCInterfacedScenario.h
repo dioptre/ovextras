@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <iostream>
 
 namespace OpenViBEDesigner
@@ -98,6 +99,14 @@ namespace OpenViBEDesigner
 		void createPlayerVisualisation(void);
 		void releasePlayerVisualisation(void);
 
+		void onWindowClosed(const char* title);
+		void toggleOnItem(OpenViBE::uint32 ui32Index);
+		void onItemToggledOn(OpenViBE::uint32 ui32Index);
+		void onItemToggledOff(OpenViBE::uint32 ui32Index);
+		void hideWindowMenu(void);
+		void showWindowMenu(void);
+
+
 		OpenViBE::boolean hasSelection(void);
 /*
 	private:
@@ -156,6 +165,7 @@ namespace OpenViBEDesigner
 		OpenViBE::uint32 m_ui32CurrentMode;
 		OpenViBE::float64 m_f64CurrentScale;
 		OpenViBE::uint32 m_ui32NormalFontSize;
+
 
 		OpenViBE::uint32 m_ui32BoxCount;
 		OpenViBE::uint32 m_ui32CommentCount;

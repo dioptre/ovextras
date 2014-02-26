@@ -343,6 +343,9 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	,m_ui32CurrentMode(Mode_None)
 	,m_oStateStack(rKernelContext, rApplication, rScenario)
 {
+	//empty status vector
+//	m_vIsShowed.clear();
+
 	m_pBuilderDummyScenarioNotebookTitle=gtk_builder_new(); // glade_xml_new(m_sGUIFilename.c_str(), "openvibe_scenario_notebook_title", NULL);
 	gtk_builder_add_from_file(m_pBuilderDummyScenarioNotebookTitle, m_sGUIFilename.c_str(), NULL);
 	gtk_builder_connect_signals(m_pBuilderDummyScenarioNotebookTitle, NULL);
@@ -1681,16 +1684,19 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 						}
 						else
 						{
-							m_ui32CurrentMode=Mode_MoveSelection;
 							if(m_bControlPressed)
 							{
-								// m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=!m_vCurrentObject[m_oCurrentObject.m_oIdentifier];
+								m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=!m_vCurrentObject[m_oCurrentObject.m_oIdentifier];
 							}
 							else
 							{
-								// m_vCurrentObject.clear();
-								// m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=true;
+								if(!m_vCurrentObject[m_oCurrentObject.m_oIdentifier])
+								{
+									m_vCurrentObject.clear();
+									m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=true;
+								}
 							}
+							m_ui32CurrentMode=Mode_MoveSelection;
 						}
 					}
 
@@ -2235,19 +2241,8 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 		if(m_ui32CurrentMode==Mode_MoveSelection)
 		{
 			m_bScenarioModified = true;
-			if(l_iSizeX==0 && l_iSizeY==0)
-			{
-				if(m_bControlPressed)
-				{
-					m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=!m_vCurrentObject[m_oCurrentObject.m_oIdentifier];
-				}
-				else
-				{
-					m_vCurrentObject.clear();
-					m_vCurrentObject[m_oCurrentObject.m_oIdentifier]=true;
-				}
-			}
-			else
+			//If we move the mouse since the initial pressed, we need to move the selection
+			if(l_iSizeX!=0 && l_iSizeY!=0)
 			{
 				map<CIdentifier, boolean>::const_iterator i;
 				for(i=m_vCurrentObject.begin(); i!=m_vCurrentObject.end(); i++)
@@ -3289,6 +3284,64 @@ void CInterfacedScenario::releasePlayerVisualisation(void)
 	if(m_bDesignerVisualisationToggled == true)
 	{
 		m_pDesignerVisualisation->show();
+	}
+}
+
+//Called when a visualisation window is closed in Player Visualisation
+void CInterfacedScenario::onWindowClosed(const char* title)
+{
+	//Get list of displayed windows
+	std::vector < ::GtkWindow* > l_vWindows = m_pPlayerVisualisation->getTopLevelWindows();
+	uint32 l_ui32Index = 0;
+	//Look for index of closed window
+	for(unsigned int i = 0; i<l_vWindows.size();i++)
+	{
+		const char* l_cWindowName = (char*) gtk_window_get_title(l_vWindows[i]);
+		// if title are the same
+		if(strcmp (l_cWindowName, title) == 0)
+		{
+			l_ui32Index = i;
+		}
+	}
+	// toggle corresponding check menu item in application
+	m_rApplication.toggleOffWindowItem(l_ui32Index);
+}
+
+void CInterfacedScenario::toggleOnItem(uint32 ui32Index)
+{
+	m_rApplication.toggleOnWindowItem(ui32Index);
+}
+
+//Called when menu (Windows->Show) item  is toggled
+void CInterfacedScenario::onItemToggledOn(uint32 ui32Index)
+{
+	//Get list of displayed windows
+	std::vector < ::GtkWindow* > l_vWindows = m_pPlayerVisualisation->getTopLevelWindows();
+	gtk_widget_show(GTK_WIDGET(l_vWindows[ui32Index]));
+}
+void CInterfacedScenario::onItemToggledOff(uint32 ui32Index)
+{
+	//Get list of displayed windows
+	std::vector < ::GtkWindow* > l_vWindows = m_pPlayerVisualisation->getTopLevelWindows();
+	gtk_widget_hide(GTK_WIDGET(l_vWindows[ui32Index]));
+
+}
+
+//Hide window menu when switching scenario
+void CInterfacedScenario::hideWindowMenu(void)
+{
+	for (unsigned int i = 0; i<m_rApplication.m_vCheckItems.size();i++)
+	{
+		gtk_widget_hide(m_rApplication.m_vCheckItems[i]);
+	}
+
+}
+//Show window menu when switching back to running scenario
+void CInterfacedScenario::showWindowMenu(void)
+{
+	for (unsigned int i = 0; i<m_rApplication.m_vCheckItems.size();i++)
+	{
+		gtk_widget_show(m_rApplication.m_vCheckItems[i]);
 	}
 }
 
