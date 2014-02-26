@@ -88,17 +88,12 @@
 
     <span class="kw">while</span> <span class="kw">not</span> exists(<img src="Signaldisplay400Boxes.png" />):
         wheel( WHEEL_DOWN , <span class="dig">20</span>)
-    <span class="kw">print</span> <span class="str">"ok scroll up"</span>
     <span class="kw">while</span> <span class="kw">not</span> exists(Pattern(<img src="SinusOscillatorChained.png" />).similar(<span class="dig">0.75</span>)):
         wheel( WHEEL_UP , <span class="dig">20</span>)
-
-    <span class="kw">print</span> <span class="str">"ok scroll down"</span>
     <span class="kw">while</span> <span class="kw">not</span> exists(<img src="Signaldisplay400Boxes.png" />):
         wheel( WHEEL_DOWN , <span class="dig">20</span>)
-    <span class="kw">print</span> <span class="str">"ok scroll up"</span>
     <span class="kw">while</span> <span class="kw">not</span> exists(Pattern(<img src="SinusOscillatorChained.png" />).similar(<span class="dig">0.75</span>)):
         wheel( WHEEL_UP , <span class="dig">20</span>)
-    <span class="kw">print</span> <span class="str">"ok scroll down"</span>
     stop=time.time()
     <span class="kw">print</span> <span class="str">"time to scroll= "</span>+ str(stop-start)
 

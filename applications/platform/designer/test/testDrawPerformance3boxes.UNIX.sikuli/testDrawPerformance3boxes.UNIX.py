@@ -15,7 +15,6 @@ def test_drawBoxes(self):
     
     start=time.time()
     click(Pattern("SinusOscillatorChained.png").targetOffset(51,-37))
-   
     while not exists("Signaldisplay400Boxes.png"):
         wheel( WHEEL_DOWN , 20)
     while not exists(Pattern("SinusOscillatorChained.png").similar(0.75)):

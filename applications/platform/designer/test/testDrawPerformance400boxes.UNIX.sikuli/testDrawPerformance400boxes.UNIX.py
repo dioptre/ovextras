@@ -18,17 +18,12 @@ def test_drawBoxes(self):
    
     while not exists("Signaldisplay400Boxes.png"):
         wheel( WHEEL_DOWN , 20)
-    print "ok scroll up"
     while not exists(Pattern("SinusOscillatorChained.png").similar(0.75)):
         wheel( WHEEL_UP , 20)
-
-    print "ok scroll down"
     while not exists("Signaldisplay400Boxes.png"):
         wheel( WHEEL_DOWN , 20)
-    print "ok scroll up"
     while not exists(Pattern("SinusOscillatorChained.png").similar(0.75)):
         wheel( WHEEL_UP , 20)
-    print "ok scroll down"
     stop=time.time()
     print "time to scroll= "+ str(stop-start)
    
