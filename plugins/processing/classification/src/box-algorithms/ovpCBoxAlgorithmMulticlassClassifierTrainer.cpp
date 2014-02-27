@@ -28,7 +28,7 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::initialize(void)
 
 	m_ui64TrainStimulation=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
-	l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
+	l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAndPairingAlgorithm, l_sClassifierAlgorithmClassIdentifier);
 
 	if(l_oClassifierAlgorithmClassIdentifier==OV_UndefinedIdentifier)
 	{
@@ -59,36 +59,13 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::initialize(void)
 	}
 
 	uint32 l_iClassCount = l_rStaticBoxContext.getInputCount() -1;
-	if(l_iClassCount <= 2)
-	{
-		this->getLogManager() << LogLevel_Info << "Got only 2 classes so let's use classic trainer\n";
 
-		m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
-		m_pClassifier->initialize();
+	this->getLogManager() << LogLevel_Info << "Got only 2 classes so let's use classic trainer\n";
 
-	} else {
-		this->getLogManager() << LogLevel_Info << "Got more than 2 class, let's use a pairing strategy\n";
-		CString l_sPairingStrategyClassIdentifier;
-		l_rStaticBoxContext.getSettingValue(4, l_sPairingStrategyClassIdentifier);
-		CIdentifier l_oPairingStrategyClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_PairingClassification, l_sPairingStrategyClassIdentifier);
+	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
+	m_pClassifier->initialize();
 
-		if(l_oPairingStrategyClassIdentifier==OV_UndefinedIdentifier)
-		{
-			this->getLogManager() << LogLevel_Error << "Unknown pairing strategy [" << l_sPairingStrategyClassIdentifier << "]\n";
-			return false;
-		}
-		m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oPairingStrategyClassIdentifier));
-		m_pClassifier->initialize();
-
-		TParameterHandler < CIdentifier* > ip_pClassifierId(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
-		ip_pClassifierId = &l_oClassifierAlgorithmClassIdentifier;
-
-		TParameterHandler < uint64* > ip_pClassAmount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount));
-		*ip_pClassAmount = l_iClassCount;
-
-		m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture);
-	}
-
+	//Format extra settings to give them to the box
 	i = OVP_BoxAlgorithm_MulticlassClassifierTrainer_CommonSettingsCount; // number of settings when no additional setting is added
 
 	m_pExtraParemeter = new map<CString , CString> ();
@@ -105,6 +82,15 @@ boolean CBoxAlgorithmMulticlassClassifierTrainer::initialize(void)
 	}
 	TParameterHandler < map<CString , CString> * > ip_pExtraParameter(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
 	ip_pExtraParameter = m_pExtraParemeter;
+
+
+	//If we have to deal with a pairing strategy we have to pass argument
+	if(m_pClassifier->isAlgorithmDerivedFrom(OVTK_ClassId_Algorithm_PairingStrategy))
+	{
+		TParameterHandler < uint64* > ip_pClassAmount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount));
+		*ip_pClassAmount = l_iClassCount;
+		m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture);
+	}
 
 	return true;
 }

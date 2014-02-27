@@ -35,7 +35,7 @@ namespace OpenViBEToolkit
 
 		virtual XML::IXMLNode* saveConfiguration(void)=0;
 		virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode* pConfiguratioNode)=0;
-		_IsDerivedFromClass_(CAlgorithmClassifier, OVTK_ClassId_Algorithm_PairingStrategy);
+		_IsDerivedFromClass_(CAlgorithmClassifier, OVTK_ClassId_Algorithm_PairingStrategy)
 
 
 	protected:
@@ -62,8 +62,8 @@ namespace OpenViBEToolkit
 			return true;
 		}
 
-		_IsDerivedFromClass_(OpenViBEToolkit::CAlgorithmClassifierDesc, OVTK_ClassId_Algorithm_PairingStrategyDesc);
+		_IsDerivedFromClass_(OpenViBEToolkit::CAlgorithmClassifierDesc, OVTK_ClassId_Algorithm_PairingStrategyDesc)
 	};
-};
+}
 
 #endif // OVTKCALGORITHMPAIRINGSTRATEGY_H

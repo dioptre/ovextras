@@ -14,9 +14,12 @@
 
 #include <stack>
 #include <vector>
+#include <iostream>
 
 #define OVP_ClassId_Algorithm_ClassifierOneVsAll                                        OpenViBE::CIdentifier(0xD7183FC6, 0xBD74F297)
 #define OVP_ClassId_Algorithm_ClassifierOneVsAllDesc                                    OpenViBE::CIdentifier(0xD42D5449, 0x7A28DDB0)
+
+#define OVP_Algorithm_ClassifierOneVsAll_SubClassifierId                                OpenViBE::CIdentifier(0x2ABAA20F, 0xB5C375EF)
 
 namespace OpenViBEPlugins
 {
@@ -35,7 +38,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
 			virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
-			_IsDerivedFromClass_Final_(CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsAll);
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsAll)
 
 		protected:
 
@@ -83,6 +86,8 @@ namespace OpenViBEPlugins
 					OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
 				CAlgorithmPairingStrategyDesc::getAlgorithmPrototype(rAlgorithmPrototype);
+
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierOneVsAll_SubClassifierId,"Sub Classifier type",OpenViBE::Kernel::ParameterType_Enumeration, OVTK_TypeId_ClassificationAlgorithm);
 				return true;
 			}
 

@@ -168,7 +168,18 @@ void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
 
 boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &rId, uint64 &rClassAmount)
 {
-	m_oSubClassifierAlgorithmIdentifier = CIdentifier(rId);
+	TParameterHandler< std::map<CString, CString>* > ip_pExtraParameters(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+	std::map<CString, CString> *l_pExtraParameters = ip_pExtraParameters;
+
+	IAlgorithmProxy* l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierOneVsAll));
+	l_pAlgoProxy->initialize();
+
+	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierOneVsAll_SubClassifierId);
+	CString l_sSubCLassifierName = (*l_pExtraParameters)[l_pParameterName];
+	m_oSubClassifierAlgorithmIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sSubCLassifierName);
+
+	l_pAlgoProxy->uninitialize();
+	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
 
 	for(uint64 i = 1 ; i <= rClassAmount ; ++i)
 	{
@@ -268,7 +279,6 @@ void CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNode 
 {
 	for( uint32 i = 0; i < pSubClassifiersNode->getChildCount() ; ++i)
 	{
-		std::cout << "Load configuration" << std::endl;
 		XML::IXMLNode *l_pSubClassifierNode = pSubClassifiersNode->getChild(i);
 		TParameterHandler < XML::IXMLNode* > ip_pConfiguration(m_oSubClassifierList[i]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 		ip_pConfiguration = l_pSubClassifierNode->getChild(0);

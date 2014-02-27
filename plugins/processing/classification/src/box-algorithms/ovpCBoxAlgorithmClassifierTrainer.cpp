@@ -27,7 +27,7 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	CIdentifier l_oClassifierAlgorithmClassIdentifier;
 	CString l_sClassifierAlgorithmClassIdentifier;
 	l_rStaticBoxContext.getSettingValue(0, l_sClassifierAlgorithmClassIdentifier);
-	l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
+	l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAndPairingAlgorithm, l_sClassifierAlgorithmClassIdentifier);
 
 	if(l_oClassifierAlgorithmClassIdentifier==OV_UndefinedIdentifier)
 	{
@@ -56,8 +56,8 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 
 	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
 	m_pClassifier->initialize();
+	std::cout << m_pClassifier->isAlgorithmDerivedFrom(OVTK_ClassId_Algorithm_Classifier) << std::endl;
 
-//	CIdentifier l_oIdentifier;
 	i = OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount; // number of settings when no additional setting is added
 
 	m_pExtraParemeter = new map<CString , CString> ();
@@ -74,54 +74,13 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	TParameterHandler < map<CString , CString> * > ip_pExtraParameter(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
 	ip_pExtraParameter = m_pExtraParemeter;
 
-//	i = OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount; // number of settings when no additional setting is added
-//	while(i < l_rStaticBoxContext.getSettingCount() && (l_oIdentifier=m_pClassifier->getNextInputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
-//	{
-//		if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
-//		&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet)
-//		&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_Configuration))
-//		{
-//			IParameter* l_pParameter=m_pClassifier->getInputParameter(l_oIdentifier);
-//			TParameterHandler < int64 > ip_i64Parameter(l_pParameter);
-//			TParameterHandler < uint64 > ip_ui64Parameter(l_pParameter);
-//			TParameterHandler < float64 > ip_f64Parameter(l_pParameter);
-//			TParameterHandler < boolean > ip_bParameter(l_pParameter);
-//			TParameterHandler < CString* > ip_sParameter(l_pParameter);
-//			CString l_sParam;
-//			bool l_bValid=true;
-//			switch(l_pParameter->getType())
-//			{
-//				case ParameterType_Enumeration:
-//				case ParameterType_UInteger:
-//					ip_ui64Parameter=(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-//					break;
-
-//				case ParameterType_Integer:
-//					ip_i64Parameter=(int64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-//					break;
-
-//				case ParameterType_Boolean:
-//					ip_bParameter=(boolean)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-//					break;
-
-//				case ParameterType_Float:
-//					ip_f64Parameter=(float64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-//					break;
-
-//				case ParameterType_String:
-//					l_sParam=(CString)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-//					*ip_sParameter=l_sParam;
-//					break;
-//				default:
-//					l_bValid=false;
-//					break;
-//			}
-//			if(l_bValid)
-//			{
-//				i++;
-//			}
-//		}
-//	}
+	//If we have to deal with a pairing strategy we have to pass argument
+	if(m_pClassifier->isAlgorithmDerivedFrom(OVTK_ClassId_Algorithm_PairingStrategy))
+	{
+		TParameterHandler < uint64* > ip_pClassAmount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount));
+		*ip_pClassAmount = l_rStaticBoxContext.getInputCount() -1;
+		m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture);
+	}
 
 	m_vFeatureCount.clear();
 

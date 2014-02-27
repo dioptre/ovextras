@@ -10,7 +10,6 @@
 
 #include <xml/IXMLNode.h>
 
-#define TARGET_HAS_ThirdPartyITPP
 #if defined TARGET_HAS_ThirdPartyITPP
 
 #include <itpp/itbase.h>
@@ -34,7 +33,7 @@ namespace OpenViBEPlugins
 
             virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
-			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierLDA);
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierLDA);
 
 		protected:
 

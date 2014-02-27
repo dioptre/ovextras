@@ -25,7 +25,9 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize(void)
 			{
 				m_oClassifierClassIdentifier=OV_UndefinedIdentifier;
+				m_oSubClassifierClassIdentifier=OV_UndefinedIdentifier;
 				m_pClassifier=NULL;
+				m_pSubClassifier=NULL;
 				return true;
 			}
 
@@ -36,6 +38,12 @@ namespace OpenViBEPlugins
 					m_pClassifier->uninitialize();
 					this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
 					m_pClassifier=NULL;
+				}
+				if(m_pSubClassifier)
+				{
+					m_pSubClassifier->uninitialize();
+					this->getAlgorithmManager().releaseAlgorithm(*m_pSubClassifier);
+					m_pSubClassifier=NULL;
 				}
 				return true;
 			}
@@ -66,15 +74,24 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onInitialized(OpenViBE::Kernel::IBox& rBox)
 			{
-				return this->onAlgorithmClassIdentifierChanged(rBox);
+				return this->onAlgorithmClassifierChanged(rBox);
 			}
 
 			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				return ui32Index==0?this->onAlgorithmClassIdentifierChanged(rBox):true;
+				OpenViBE::boolean l_bRes = true;
+				if(ui32Index == 0)
+				{
+					l_bRes = l_bRes && this->onAlgorithmClassifierChanged(rBox);
+				}
+				else if(ui32Index == 4 && m_bPairingStrategy)
+				{
+					l_bRes = l_bRes && this->onAlgorithmSubClassIdentifierChanged(rBox);
+				}
+				return l_bRes;
 			}
 
-			virtual OpenViBE::boolean onAlgorithmClassIdentifierChanged(OpenViBE::Kernel::IBox& rBox)
+			virtual OpenViBE::boolean onAlgorithmClassifierChanged(OpenViBE::Kernel::IBox& rBox)
 			{
 				OpenViBE::CString l_sClassifierName;
 				OpenViBE::CIdentifier l_oClassifierIdentifier;
@@ -83,7 +100,7 @@ namespace OpenViBEPlugins
 
 				rBox.getSettingValue(0, l_sClassifierName);
 
-				l_oClassifierIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierName);
+				l_oClassifierIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAndPairingAlgorithm, l_sClassifierName);
 				if(l_oClassifierIdentifier != m_oClassifierClassIdentifier)
 				{
 					if(m_pClassifier)
@@ -97,6 +114,14 @@ namespace OpenViBEPlugins
 					{
 						m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierIdentifier));
 						m_pClassifier->initialize();
+						if(m_pClassifier->isAlgorithmDerivedFrom(OVTK_ClassId_Algorithm_PairingStrategy))
+						{
+							m_bPairingStrategy = true;
+						}
+						else
+						{
+							m_bPairingStrategy = false;
+						}
 						m_oClassifierClassIdentifier=l_oClassifierIdentifier;
 					}
 
@@ -174,8 +199,126 @@ namespace OpenViBEPlugins
 								{
 									rBox.setSettingType(i, l_oTypeIdentifier);
 								}
-								rBox.setSettingName(i, l_sParameterName);
 								rBox.setSettingValue(i, l_sBuffer);
+								rBox.setSettingName(i, l_sParameterName);
+							}
+							i++;
+						}
+					}
+				}
+
+				while(i<rBox.getSettingCount())
+				{
+					rBox.removeSetting(i);
+				}
+				}
+
+				return true;
+			}
+
+
+			virtual OpenViBE::boolean onAlgorithmSubClassIdentifierChanged(OpenViBE::Kernel::IBox& rBox)
+			{
+				OpenViBE::CString l_sClassifierName;
+				OpenViBE::CIdentifier l_oClassifierIdentifier;
+				OpenViBE::CIdentifier l_oOldClassifierIdentifier=m_oSubClassifierClassIdentifier;
+				OpenViBE::CIdentifier l_oIdentifier;
+
+				rBox.getSettingValue(4, l_sClassifierName);
+
+				l_oClassifierIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierName);
+				if(l_oClassifierIdentifier != m_oSubClassifierClassIdentifier)
+				{
+					if(m_pSubClassifier)
+					{
+						m_pSubClassifier->uninitialize();
+						this->getAlgorithmManager().releaseAlgorithm(*m_pSubClassifier);
+						m_pSubClassifier=NULL;
+						m_oSubClassifierClassIdentifier=OV_UndefinedIdentifier;
+					}
+					if(l_oClassifierIdentifier != OV_UndefinedIdentifier)
+					{
+						m_pSubClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierIdentifier));
+						m_pSubClassifier->initialize();
+						m_oSubClassifierClassIdentifier=l_oClassifierIdentifier;
+					}
+
+					if(l_oOldClassifierIdentifier != OV_UndefinedIdentifier)
+					{
+						while(rBox.getSettingCount()>m_ui32CustomSettingBase+1)
+						{
+							rBox.removeSetting(m_ui32CustomSettingBase+1);
+						}
+					}
+				}
+
+				if(m_pSubClassifier)
+				{
+				OpenViBE::uint32 i=m_ui32CustomSettingBase+1;
+				while((l_oIdentifier=m_pSubClassifier->getNextInputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
+				{
+					if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
+					&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet)
+					&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_Configuration)
+					&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter))
+					{
+						OpenViBE::CIdentifier l_oTypeIdentifier;
+						OpenViBE::CString l_sParameterName=m_pSubClassifier->getInputParameterName(l_oIdentifier);
+						OpenViBE::Kernel::IParameter* l_pParameter=m_pSubClassifier->getInputParameter(l_oIdentifier);
+						OpenViBE::Kernel::TParameterHandler < OpenViBE::int64 > ip_i64Parameter(l_pParameter);
+						OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64Parameter(l_pParameter);
+						OpenViBE::Kernel::TParameterHandler < OpenViBE::float64 > ip_f64Parameter(l_pParameter);
+						OpenViBE::Kernel::TParameterHandler < OpenViBE::boolean > ip_bParameter(l_pParameter);
+						OpenViBE::Kernel::TParameterHandler < OpenViBE::CString* > ip_sParameter(l_pParameter);
+						char l_sBuffer[1024];
+						bool l_bValid=true;
+						switch(l_pParameter->getType())
+						{
+							case OpenViBE::Kernel::ParameterType_Enumeration:
+								::strcpy(l_sBuffer, this->getTypeManager().getEnumerationEntryNameFromValue(l_pParameter->getSubTypeIdentifier(), ip_ui64Parameter).toASCIIString());
+								l_oTypeIdentifier=l_pParameter->getSubTypeIdentifier();
+								break;
+
+							case OpenViBE::Kernel::ParameterType_Integer:
+							case OpenViBE::Kernel::ParameterType_UInteger:
+								::sprintf(l_sBuffer, "%lli", (OpenViBE::int64)ip_i64Parameter);
+								l_oTypeIdentifier=OV_TypeId_Integer;
+								break;
+
+							case OpenViBE::Kernel::ParameterType_Boolean:
+								::sprintf(l_sBuffer, "%s", ((OpenViBE::boolean)ip_bParameter)?"true":"false");
+								l_oTypeIdentifier=OV_TypeId_Boolean;
+								break;
+
+							case OpenViBE::Kernel::ParameterType_Float:
+								::sprintf(l_sBuffer, "%lf", (OpenViBE::float64)ip_f64Parameter);
+								l_oTypeIdentifier=OV_TypeId_Float;
+								break;
+							case OpenViBE::Kernel::ParameterType_String:
+								::sprintf(l_sBuffer, "%s", ((OpenViBE::CString*)ip_sParameter)->toASCIIString());
+								l_oTypeIdentifier=OV_TypeId_String;
+								break;
+							default:
+								l_bValid=false;
+								break;
+						}
+
+						if(l_bValid)
+						{
+							if(i>=rBox.getSettingCount())
+							{
+								rBox.addSetting(l_sParameterName, l_oTypeIdentifier, l_sBuffer);
+							}
+							else
+							{
+								OpenViBE::CIdentifier l_oOldTypeIdentifier;
+								rBox.getSettingType(i, l_oOldTypeIdentifier);
+								if(l_oOldTypeIdentifier != l_oTypeIdentifier)
+								{
+									rBox.setSettingValue(i, l_sBuffer);
+								}
+								rBox.setSettingType(i, l_oTypeIdentifier);
+								rBox.setSettingName(i, l_sParameterName);
 							}
 							i++;
 						}
@@ -188,6 +331,7 @@ namespace OpenViBEPlugins
 				}
 				}
 				return true;
+				return true;
 			}
 
 
@@ -196,10 +340,13 @@ namespace OpenViBEPlugins
 		protected:
 
 			OpenViBE::CIdentifier m_oClassifierClassIdentifier;
+			OpenViBE::CIdentifier m_oSubClassifierClassIdentifier;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pClassifier;
+			OpenViBE::Kernel::IAlgorithmProxy* m_pSubClassifier;
 			const OpenViBE::uint32 m_ui32CustomSettingBase;
+			OpenViBE::boolean m_bPairingStrategy;
 		};
-	};
-};
+	}
+}
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_CommonClassifierListener_INL__
