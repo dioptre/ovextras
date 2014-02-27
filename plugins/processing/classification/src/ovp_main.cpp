@@ -10,7 +10,6 @@
 
 #include "box-algorithms/ovpCBoxAlgorithmVotingClassifier.h"
 #include "box-algorithms/ovpCBoxAlgorithmClassifierTrainer.h"
-#include "box-algorithms/ovpCBoxAlgorithmMulticlassClassifierTrainer.h"
 #include "box-algorithms/ovpCBoxAlgorithmClassifierProcessor.h"
 #include "box-algorithms/ovpCBoxAlgorithmConfusionMatrix.h"
 
@@ -32,8 +31,6 @@ OVP_Declare_Begin();
 
 //	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "NULL Classifier (does nothing)",OVP_ClassId_Algorithm_ClassifierNULL.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "Support Vector Machine (SVM)",OVP_ClassId_Algorithm_ClassifierSVM.toUInteger());
-
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_PairingClassification, "1 vs All",OVP_ClassId_Algorithm_ClassifierOneVsAll.toUInteger());
 
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAndPairingAlgorithm, "Support Vector Machine (SVM)",OVP_ClassId_Algorithm_ClassifierSVM.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAndPairingAlgorithm, "1 vs All",OVP_ClassId_Algorithm_ClassifierOneVsAll.toUInteger());
@@ -58,11 +55,10 @@ OVP_Declare_Begin();
 
     OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmVotingClassifierDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierTrainerDesc);
-    OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmMulticlassClassifierTrainerDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmConfusionMatrixDesc);
 
-    OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierOneVsAllDesc);
+	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierOneVsAllDesc);
 
 #if defined TARGET_HAS_ThirdPartyBLiFF
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "BLiFF - Linear Discrimimant Analysis (LDA)", OVP_ClassId_Algorithm_ClassifierBliffLDA.toUInteger());

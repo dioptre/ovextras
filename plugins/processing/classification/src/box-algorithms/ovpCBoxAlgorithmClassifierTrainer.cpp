@@ -56,7 +56,6 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 
 	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
 	m_pClassifier->initialize();
-	std::cout << m_pClassifier->isAlgorithmDerivedFrom(OVTK_ClassId_Algorithm_Classifier) << std::endl;
 
 	i = OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount; // number of settings when no additional setting is added
 
