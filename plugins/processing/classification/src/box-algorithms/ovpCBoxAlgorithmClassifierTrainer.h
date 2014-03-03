@@ -1,27 +1,27 @@
-#ifndef __OpenViBEPlugins_BoxAlgorithm_ClassifierTrainerDeprecated_H__
-#define __OpenViBEPlugins_BoxAlgorithm_ClassifierTrainerDeprecated_H__
+#ifndef __OpenViBEPlugins_BoxAlgorithm_ClassifierTrainer_H__
+#define __OpenViBEPlugins_BoxAlgorithm_ClassifierTrainer_H__
 
-#include "../../ovp_defines.h"
+#include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include "ovpCBoxAlgorithmCommonClassifierListenerDeprecated.inl"
+#include "ovpCBoxAlgorithmCommonClassifierListener.inl"
 
 #include <map>
 #include <vector>
 #include <iostream>
 
 
-#define OVP_ClassId_BoxAlgorithm_ClassifierTrainerDeprecated     OpenViBE::CIdentifier(0x128703B1, 0x0E2441F6)
-#define OVP_ClassId_BoxAlgorithm_ClassifierTrainerDeprecatedDesc OpenViBE::CIdentifier(0x0A0A3F0A, 0x17C8569F)
+#define OVP_ClassId_BoxAlgorithm_ClassifierTrainer       OpenViBE::CIdentifier(0xF3DAE8A8, 0x3B444154)
+#define OVP_ClassId_BoxAlgorithm_ClassifierTrainerDesc   OpenViBE::CIdentifier(0xFE277C91, 0x1593B824)
 
-#define OVP_BoxAlgorithm_ClassifierTrainerDeprecated_CommonSettingsCount 5
+#define OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount 5
 
 namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		class CBoxAlgorithmClassifierTrainerDeprecated : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
+		class CBoxAlgorithmClassifierTrainer : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
 		public:
 
@@ -32,7 +32,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process(void);
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierTrainerDeprecated)
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierTrainer)
 
 		protected:
 
@@ -60,16 +60,16 @@ namespace OpenViBEPlugins
 				OpenViBE::uint32 m_ui32InputIndex;
 			} SFeatureVector;
 
-			std::vector < CBoxAlgorithmClassifierTrainerDeprecated::SFeatureVector > m_vFeatureVector;
+			std::vector < CBoxAlgorithmClassifierTrainer::SFeatureVector > m_vFeatureVector;
 		};
 
-		class CBoxAlgorithmClassifierTrainerDeprecatedDesc : virtual public OpenViBE::Plugins::IBoxAlgorithmDesc
+		class CBoxAlgorithmClassifierTrainerDesc : virtual public OpenViBE::Plugins::IBoxAlgorithmDesc
 		{
 		public:
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Classifier trainer (deprected)"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Classifier trainer"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Generic classifier trainer, relying on several box algorithms"); }
@@ -78,8 +78,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-apply"); }
 
-			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ClassifierTrainerDeprecated; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Classification::CBoxAlgorithmClassifierTrainerDeprecated; }
+			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ClassifierTrainer; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Classification::CBoxAlgorithmClassifierTrainer; }
 
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
@@ -100,10 +100,10 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const { return new CBoxAlgorithmCommonClassifierListenerDeprecated(OVP_BoxAlgorithm_ClassifierTrainerDeprecated_CommonSettingsCount); }
+			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const { return new CBoxAlgorithmCommonClassifierListener(OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount); }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) { delete pBoxListener; }
 
-			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_ClassifierTrainerDeprecatedDesc)
+			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_ClassifierTrainerDesc)
 		};
 	};
 };

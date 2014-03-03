@@ -1,7 +1,7 @@
-#ifndef __OpenViBEPlugins_BoxAlgorithm_CommonClassifierListenerDeprecated_INL__
-#define __OpenViBEPlugins_BoxAlgorithm_CommonClassifierListenerDeprecated_INL__
+#ifndef __OpenViBEPlugins_BoxAlgorithm_CommonClassifierListener_INL__
+#define __OpenViBEPlugins_BoxAlgorithm_CommonClassifierListener_INL__
 
-#include "../../ovp_defines.h"
+#include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 #include <cstdio>
@@ -13,11 +13,11 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		class CBoxAlgorithmCommonClassifierListenerDeprecated : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
+		class CBoxAlgorithmCommonClassifierListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
 		{
 		public:
 
-			CBoxAlgorithmCommonClassifierListenerDeprecated(const OpenViBE::uint32 ui32CustomSettingBase)
+			CBoxAlgorithmCommonClassifierListener(const OpenViBE::uint32 ui32CustomSettingBase)
 				:m_ui32CustomSettingBase(ui32CustomSettingBase)
 			{
 			}

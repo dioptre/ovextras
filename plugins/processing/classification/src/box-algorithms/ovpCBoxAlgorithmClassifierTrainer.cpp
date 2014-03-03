@@ -1,4 +1,4 @@
-#include "ovpCBoxAlgorithmClassifierTrainerDeprecated.h"
+#include "ovpCBoxAlgorithmClassifierTrainer.h"
 
 #include <system/Memory.h>
 
@@ -19,7 +19,7 @@ using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Classification;
 using namespace std;
 
-boolean CBoxAlgorithmClassifierTrainerDeprecated::initialize(void)
+boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 {
 	uint32 i;
 	boolean l_bIsPairing=false;
@@ -70,7 +70,7 @@ boolean CBoxAlgorithmClassifierTrainerDeprecated::initialize(void)
 	m_pStimulationsDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
 	m_pStimulationsDecoder->initialize();
 
-	i = OVP_BoxAlgorithm_ClassifierTrainerDeprecated_CommonSettingsCount; // number of settings when no additional setting is added
+	i = OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount; // number of settings when no additional setting is added
 
 	m_pExtraParemeter = new map<CString , CString> ();
 	while(i < l_rStaticBoxContext.getSettingCount())
@@ -104,7 +104,7 @@ boolean CBoxAlgorithmClassifierTrainerDeprecated::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierTrainerDeprecated::uninitialize(void)
+boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	// IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
@@ -139,14 +139,14 @@ boolean CBoxAlgorithmClassifierTrainerDeprecated::uninitialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierTrainerDeprecated::processInput(uint32 ui32InputIndex)
+boolean CBoxAlgorithmClassifierTrainer::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierTrainerDeprecated::process(void)
+boolean CBoxAlgorithmClassifierTrainer::process(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
@@ -225,7 +225,7 @@ boolean CBoxAlgorithmClassifierTrainerDeprecated::process(void)
 			}
 			if(m_vFeatureVectorsDecoder[i-1]->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedBuffer))
 			{
-				CBoxAlgorithmClassifierTrainerDeprecated::SFeatureVector l_oFeatureVector;
+				CBoxAlgorithmClassifierTrainer::SFeatureVector l_oFeatureVector;
 				l_oFeatureVector.m_pFeatureVectorMatrix=new CMatrix();
 				l_oFeatureVector.m_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(i, j);
 				l_oFeatureVector.m_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(i, j);
@@ -340,7 +340,7 @@ boolean CBoxAlgorithmClassifierTrainerDeprecated::process(void)
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierTrainerDeprecated::train(const size_t uiStartIndex, const size_t uiStopIndex)
+boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const size_t uiStopIndex)
 {
 	if(uiStopIndex-uiStartIndex-1==0)
 	{
@@ -376,7 +376,7 @@ boolean CBoxAlgorithmClassifierTrainerDeprecated::train(const size_t uiStartInde
 	return true;
 }
 
-float64 CBoxAlgorithmClassifierTrainerDeprecated::getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex)
+float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex)
 {
 	size_t l_iSuccessfullTrainerCount=0;
 
