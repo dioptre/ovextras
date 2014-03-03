@@ -64,16 +64,48 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
+				//ui32Index represent the numero of the class (because of rejected offset)
+				char l_sBuffer[64];
+				sprintf(l_sBuffer, "Class %d label", ui32Index);
+				char l_sStimulation[64];
+				sprintf(l_sStimulation, "OVTK_StimulationId_Label_%02X", ui32Index);
+				rBox.addSetting(l_sBuffer, OV_TypeId_Stimulation, l_sStimulation, m_ui32CustomSettingBase+ui32Index);
+
+				//Rename input
 				return this->onInputAddedOrRemoved(rBox);
 			}
 
 			virtual OpenViBE::boolean onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
+				//First remove the removed input from settings
+				rBox.removeSetting(m_ui32CustomSettingBase + ui32Index);
+
+				//Then rename the remains inputs in settings
+				for(OpenViBE::uint32 i=1 ; i<rBox.getInputCount() ; ++i)
+				{
+					char l_sBuffer[64];
+					sprintf(l_sBuffer, "Class %d label", i);
+					rBox.setSettingName(m_ui32CustomSettingBase + i, l_sBuffer);
+				}
+
+				//Then rename input
 				return this->onInputAddedOrRemoved(rBox);
 			}
 
 			virtual OpenViBE::boolean onInitialized(OpenViBE::Kernel::IBox& rBox)
 			{
+				//First add the rejected label class
+				rBox.addSetting("Reject class label", OV_TypeId_Stimulation, "OVTK_StimulationId_Label_00");
+
+				//Now added Settings for classes
+				for(OpenViBE::uint32 i = 1 ; i< rBox.getInputCount() ; ++i)
+				{
+					char l_sBuffer[64];
+					sprintf(l_sBuffer, "Class %d label", i);
+					char l_sStimulation[64];
+					sprintf(l_sStimulation, "OVTK_StimulationId_Label_%02X", i);
+					rBox.addSetting(l_sBuffer, OV_TypeId_Stimulation, l_sStimulation);
+				}
 				return this->onAlgorithmClassifierChanged(rBox);
 			}
 
@@ -110,16 +142,16 @@ namespace OpenViBEPlugins
 
 					if(l_oOldClassifierIdentifier != OV_UndefinedIdentifier)
 					{
-						while(rBox.getSettingCount()>m_ui32CustomSettingBase)
+						while(rBox.getSettingCount()>m_ui32CustomSettingBase+rBox.getInputCount())
 						{
-							rBox.removeSetting(m_ui32CustomSettingBase);
+							rBox.removeSetting(m_ui32CustomSettingBase + rBox.getInputCount());
 						}
 					}
 				}
 
 				if(m_pClassifier)
 				{
-				OpenViBE::uint32 i=m_ui32CustomSettingBase;
+				OpenViBE::uint32 i=m_ui32CustomSettingBase + rBox.getInputCount();
 				while((l_oIdentifier=m_pClassifier->getNextInputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
 				{
 					if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
