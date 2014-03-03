@@ -20,7 +20,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	CIdentifier l_oClassifierAlgorithmClassIdentifier;
 	CString l_sClassifierAlgorithmClassIdentifier;
 	l_rStaticBoxContext.getSettingValue(0, l_sClassifierAlgorithmClassIdentifier);
-	l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
+	l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAndPairingAlgorithm, l_sClassifierAlgorithmClassIdentifier);
 
 	if(l_oClassifierAlgorithmClassIdentifier==OV_UndefinedIdentifier)
 	{
@@ -46,7 +46,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	m_pFeaturesDecoder->initialize();
 	m_pLabelsEncoder->initialize();
 	m_pClassificationStateEncoder->initialize();
-    m_pClassifier->initialize();
+	m_pClassifier->initialize();
 
 	m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)->setReferenceTarget(m_pFeaturesDecoder->getOutputParameter(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputParameterId_Matrix));
 	m_pClassificationStateEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
@@ -56,7 +56,6 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	XML::IXMLNode *l_pNode = l_pHandler->parseFile(l_sConfigurationFilename.toASCIIString());
 	ip_pClassificationConfiguration = l_pNode;
 	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
-
 
 	m_bOutputHeaderSent=false;
 	return true;

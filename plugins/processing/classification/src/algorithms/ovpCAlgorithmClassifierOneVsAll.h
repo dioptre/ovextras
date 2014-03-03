@@ -25,7 +25,7 @@ namespace OpenViBEPlugins
 {
 	namespace Local
 	{
-		class CAlgorithmClassifierOneVsAll : public OpenViBEToolkit::CAlgorithmPairingStrategy, public XML::IWriterCallback, public XML::IReaderCallback
+		class CAlgorithmClassifierOneVsAll : public OpenViBEToolkit::CAlgorithmPairingStrategy
 		{
 		public:
 
@@ -41,15 +41,6 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsAll)
 
 		protected:
-
-			virtual void write(const char* sString); // XML IWriterCallback
-
-			XML::IXMLNode* getClassifierConfiguration(OpenViBE::Kernel::IAlgorithmProxy* classifier);
-			virtual void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount); // XML IReaderCallback
-			virtual void processChildData(const char* sData); // XML IReaderCallback
-			virtual void closeChild(void); // XML ReaderCallback
-
-
 			std::stack<OpenViBE::CString> m_vNode;
 
 			std::vector<OpenViBE::Kernel::IAlgorithmProxy*> m_oSubClassifierList;
@@ -59,6 +50,7 @@ namespace OpenViBEPlugins
 			XML::IXMLNode *m_pConfigurationNode;
 
 		private:
+			XML::IXMLNode* getClassifierConfiguration(OpenViBE::Kernel::IAlgorithmProxy* classifier);
 			void addNewClassifierAtBack(void);
 			void removeClassifierAtBack(void);
 
@@ -87,7 +79,6 @@ namespace OpenViBEPlugins
 			{
 				CAlgorithmPairingStrategyDesc::getAlgorithmPrototype(rAlgorithmPrototype);
 
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierOneVsAll_SubClassifierId,"Sub Classifier type",OpenViBE::Kernel::ParameterType_Enumeration, OVTK_TypeId_ClassificationAlgorithm);
 				return true;
 			}
 

@@ -1,7 +1,7 @@
 #ifndef __OpenViBEPlugins_BoxAlgorithm_ClassifierTrainer_H__
 #define __OpenViBEPlugins_BoxAlgorithm_ClassifierTrainer_H__
 
-#include "../ovp_defines.h"
+#include "../../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
@@ -15,7 +15,7 @@
 #define OVP_ClassId_BoxAlgorithm_ClassifierTrainer     OpenViBE::CIdentifier(0x128703B1, 0x0E2441F6)
 #define OVP_ClassId_BoxAlgorithm_ClassifierTrainerDesc OpenViBE::CIdentifier(0x0A0A3F0A, 0x17C8569F)
 
-#define OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount 4
+#define OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount 5
 
 namespace OpenViBEPlugins
 {
@@ -90,7 +90,8 @@ namespace OpenViBEPlugins
 
 				rBoxAlgorithmPrototype.addOutput ("Train-completed Flag",                 OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addSetting("Classifier to use",                    OVTK_TypeId_ClassificationAndPairingAlgorithm, "");
+				rBoxAlgorithmPrototype.addSetting("Strategy to apply",                    OVP_TypeId_ClassificationStrategy, "");
+				rBoxAlgorithmPrototype.addSetting("Algorithm to use",                     OVP_TypeId_ClassificationAlgorithm, "");
 				rBoxAlgorithmPrototype.addSetting("Filename to save configuration to",    OV_TypeId_Filename,                  "");
 				rBoxAlgorithmPrototype.addSetting("Train trigger",                        OV_TypeId_Stimulation,               "OVTK_StimulationId_Train");
 				rBoxAlgorithmPrototype.addSetting("Number of partitions for k-fold test", OV_TypeId_Integer,                   "10");

@@ -9,9 +9,10 @@
 #include "algorithms/ovpCAlgorithmConfusionMatrix.h"
 
 #include "box-algorithms/ovpCBoxAlgorithmVotingClassifier.h"
-#include "box-algorithms/ovpCBoxAlgorithmClassifierTrainer.h"
 #include "box-algorithms/ovpCBoxAlgorithmClassifierProcessor.h"
 #include "box-algorithms/ovpCBoxAlgorithmConfusionMatrix.h"
+
+#include "box-algorithms/deprecated/ovpCBoxAlgorithmClassifierTrainer.h"
 
 #if defined TARGET_HAS_ThirdPartyBLiFF
 #include "algorithms/classification/ovpCAlgorithmClassifierBliffLDA.h"
@@ -28,6 +29,16 @@
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
 OVP_Declare_Begin();
+
+	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_ClassificationStrategy, "Classification strategy");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ClassificationStrategy, "Native", OV_UndefinedIdentifier.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ClassificationStrategy, "OneVsAll", OVP_ClassId_Algorithm_ClassifierOneVsAll.toUInteger());
+
+	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_ClassificationAlgorithm, "Classification algorithm");
+
+
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ClassificationAlgorithm, "Support Vector Machine (SVM)",OVP_ClassId_Algorithm_ClassifierSVM.toUInteger());
+
 
 //	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "NULL Classifier (does nothing)",OVP_ClassId_Algorithm_ClassifierNULL.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "Support Vector Machine (SVM)",OVP_ClassId_Algorithm_ClassifierSVM.toUInteger());
@@ -82,6 +93,7 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Linear Discrimimant Analysis (LDA)", OVP_ClassId_Algorithm_ClassifierLDA.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAndPairingAlgorithm,   "Linear Discrimimant Analysis (LDA)", OVP_ClassId_Algorithm_ClassifierLDA.toUInteger());
 
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ClassificationAlgorithm,   "Linear Discrimimant Analysis (LDA)", OVP_ClassId_Algorithm_ClassifierLDA.toUInteger());
 
 	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierLDADesc);
 #endif // TARGET_HAS_ThirdPartyITPP
@@ -90,6 +102,7 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmConditionedCovarianceDesc);
 
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Shrinkage LDA", OVP_ClassId_Algorithm_ClassifierShrinkageLDA.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ClassificationAlgorithm,   "Shrinkage LDA", OVP_ClassId_Algorithm_ClassifierShrinkageLDA.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAndPairingAlgorithm,   "Shrinkage LDA", OVP_ClassId_Algorithm_ClassifierShrinkageLDA.toUInteger());
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierShrinkageLDADesc);
 

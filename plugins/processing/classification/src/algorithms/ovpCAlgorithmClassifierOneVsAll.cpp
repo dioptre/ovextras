@@ -136,6 +136,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	}
 	rClassificationValues.setSize(best.second->getBufferElementCount());
 	System::Memory::copy(rClassificationValues.getBuffer(), best.second->getBuffer(), best.second->getBufferElementCount()*sizeof(float64));
+	std::cout << "Classification " << rf64Class << std::endl;
 	return true;
 }
 
@@ -168,18 +169,7 @@ void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
 
 boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &rId, uint64 &rClassAmount)
 {
-	TParameterHandler< std::map<CString, CString>* > ip_pExtraParameters(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
-	std::map<CString, CString> *l_pExtraParameters = ip_pExtraParameters;
-
-	IAlgorithmProxy* l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierOneVsAll));
-	l_pAlgoProxy->initialize();
-
-	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierOneVsAll_SubClassifierId);
-	CString l_sSubCLassifierName = (*l_pExtraParameters)[l_pParameterName];
-	m_oSubClassifierAlgorithmIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sSubCLassifierName);
-
-	l_pAlgoProxy->uninitialize();
-	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
+	m_oSubClassifierAlgorithmIdentifier = rId;
 
 	for(uint64 i = 1 ; i <= rClassAmount ; ++i)
 	{
@@ -233,8 +223,6 @@ XML::IXMLNode* CAlgorithmClassifierOneVsAll::saveConfiguration(void)
 
 boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
-	this->m_iClassCounter = 0;
-
 	XML::IXMLNode *l_pOneVsAllNode = pConfigurationNode->getChild(0);
 
 	XML::IXMLNode *l_pTempNode = l_pOneVsAllNode->getChildByName("SubClassifierIdentifier");
@@ -284,69 +272,5 @@ void CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNode 
 		ip_pConfiguration = l_pSubClassifierNode->getChild(0);
 		m_oSubClassifierList[i]->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
 	}
-}
-
-void CAlgorithmClassifierOneVsAll::write(const char* sString)
-{
-	m_oConfiguration.append((const uint8*)sString, ::strlen(sString));
-}
-
-void CAlgorithmClassifierOneVsAll::openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
-{
-	m_vNode.push(sName);
-}
-
-void CAlgorithmClassifierOneVsAll::processChildData(const char* sData)
-{
-
-
-	if(m_vNode.top() == CString("SubClassifier"))
-	{
-		//We should be able to load configuration from scratch or to load it in an existing configuration
-		//((CAlgorithmClassifier*)m_oSubClassifierList[this->m_iClassCounter])->loadConfiguration(m_oConfiguration);
-		++(this->m_iClassCounter);
-	}
-	else if(m_vNode.top() == CString("SubClassifierIdentifier"))
-	{
-		std::stringstream l_sData(sData);
-		uint64 l_iIdentifier;
-		l_sData >> l_iIdentifier;
-		//We are in this case if we create the configuration of if we change the algorithm previously used by the pairing strategy
-		if(m_oSubClassifierAlgorithmIdentifier.toUInteger() != l_iIdentifier)
-		{
-			while(!m_oSubClassifierList.empty())
-			{
-				this->removeClassifierAtBack();
-			}
-			m_oSubClassifierAlgorithmIdentifier = CIdentifier(l_iIdentifier);
-		}
-	}
-	else if(m_vNode.top() == CString("SubClassifierCount"))
-	{
-		std::stringstream l_sData(sData);
-		uint64 l_iAmountClass;
-		l_sData >> l_iAmountClass;
-
-		if(l_iAmountClass < this->m_iAmountClass)
-		{
-			while(this->m_iAmountClass > l_iAmountClass)
-			{
-				this->removeClassifierAtBack();
-			}
-		}
-		else if(l_iAmountClass > this->m_iAmountClass)
-		{
-			while(this->m_iAmountClass < l_iAmountClass)
-			{
-				this->addNewClassifierAtBack();
-			}
-		}
-	}
-
-}
-
-void CAlgorithmClassifierOneVsAll::closeChild(void)
-{
-	m_vNode.pop();
 }
 
