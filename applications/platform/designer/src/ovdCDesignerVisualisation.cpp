@@ -525,6 +525,8 @@ static gboolean s_iconFill = TRUE;
 				char* l_pVisualisationPanelName = NULL;
 				m_rVisualisationTree.getStringValueFromTreeIter(&l_oParentIter, l_pVisualisationPanelName, EVisualisationTreeColumn_StringName);
 				gtk_notebook_append_page(GTK_NOTEBOOK(l_pNotebook), l_pTreeWidget, gtk_label_new(l_pVisualisationPanelName));
+				//set the child reorderable
+				gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(l_pNotebook), l_pTreeWidget, true);
 			}
 			else if(l_pParentVisualisationWidget->getType() == EVisualisationWidget_VerticalSplit || l_pParentVisualisationWidget->getType() == EVisualisationWidget_HorizontalSplit)
 			{

@@ -3283,3 +3283,48 @@ boolean CInterfacedScenario::hasSelection(void)
 	}
 	return false;
 }
+
+boolean CInterfacedScenario::centerOnBox(CIdentifier rIdentifier)
+{
+	//m_rKernelContext.getLogManager() << LogLevel_Fatal << "CInterfacedScenario::centerOnBox" << endl;
+	boolean ret_val = false;
+	if(m_rScenario.isBox(rIdentifier))
+	{
+		IBox* rBox = m_rScenario.getBoxDetails(rIdentifier);
+		CBoxProxy l_oBoxProxy(m_rKernelContext, *rBox);
+		int x = l_oBoxProxy.getXCenter();
+		int y = l_oBoxProxy.getYCenter();
+
+		//get the parameters of the current adjustement
+		GtkAdjustment* l_pOldHAdjustement = gtk_scrolled_window_get_hadjustment(m_pScrolledWindow);//gtk_viewport_get_vadjustment(m_pScenarioViewport);
+		GtkAdjustment* l_pOldVAdjustement = gtk_scrolled_window_get_vadjustment(m_pScrolledWindow);
+		gdouble upper;
+		gdouble lower;
+		gdouble step;
+		gdouble page;
+		gdouble pagesize;
+		gdouble value;
+		g_object_get(l_pOldHAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
+		//get the size of the current viewport
+		gint l_iViewportX = -1;
+		gint l_iViewportY = -1;
+		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
+
+		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
+		upper-=l_iViewportX;
+
+		//crete a new adjustement with the correct value since we can not change the upper bound of the old adjustement
+		GtkAdjustment* l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
+		gtk_adjustment_set_value(l_pAdjustement, x);
+		gtk_scrolled_window_set_hadjustment(m_pScrolledWindow, l_pAdjustement);
+
+		g_object_get(l_pOldVAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
+		upper-=l_iViewportY;
+		l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
+		gtk_adjustment_set_value(l_pAdjustement, y);
+		gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
+
+	}
+
+	return ret_val;
+}

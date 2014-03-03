@@ -296,6 +296,21 @@ namespace
 		pApplication->m_sLogSearchTerm = gtk_entry_get_text(pTextfield);
 	}
 
+	void searchlog_focus_in_cb(::GtkWidget* pWidget, ::GdkEventKey* pEvent, CApplication* pApplication)
+	{
+		cout << "searchlog_focus_in_cb" << endl;
+		//if CTRL + F is pressed
+		/*
+		if((pEvent->keyval==GDK_Control_L || pEvent->keyval==GDK_Control_R)&&(pEvent->keyval==GDK_f || pEvent->keyval==GDK_F))
+		{
+			gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pApplication->m_pBuilderInterface, "searchEntry")), true);
+
+		}
+		//*/
+		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pApplication->m_pBuilderInterface, "searchEntry")), true);
+
+	}
+
 	string strtoupper(string str)
 	{
 		int leng=str.length();
@@ -421,6 +436,7 @@ namespace
 
 	static gboolean searchbox_focus_in_cb(::GtkWidget* pWidget, ::GdkEvent* pEvent, CApplication* pApplication)
 	{
+		cout << "searchbox_focus_in_cb" << endl;
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pApplication->m_pBuilderInterface, "openvibe-menu_edit")), false);
 
 		return false;
@@ -428,6 +444,7 @@ namespace
 
 	static gboolean searchbox_focus_out_cb(::GtkWidget* pWidget, ::GdkEvent* pEvent, CApplication* pApplication)
 	{
+		cout << "searchbox_focus_out_cb" << endl;
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pApplication->m_pBuilderInterface, "openvibe-menu_edit")), true);
 
 		return false;
@@ -521,6 +538,56 @@ namespace
 		}
 		return TRUE;
 	}
+
+	void click_callback(::GtkWidget* pWidget, GdkEventButton *event, gpointer pData)
+	{
+		cout << "clicked" << endl;
+		CApplication* l_pApplication=static_cast<CApplication*>(pData);
+		//if left click
+		if (event->button == 1)
+		{
+			GtkTextView* l_pTextView = GTK_TEXT_VIEW(pWidget);
+			GtkTextWindowType pp = gtk_text_view_get_window_type(l_pTextView, event->window);
+			gint buffer_x, buffer_y;
+			//convert event coord (mouse position) in buffer coord (character in buffer)
+			gtk_text_view_window_to_buffer_coords(l_pTextView, pp, event->x, event->y, &buffer_x, &buffer_y);
+			//get the text iter corresponding to that position
+			GtkTextIter iter;
+			gtk_text_view_get_iter_at_location(l_pTextView, &iter, buffer_x, buffer_y);
+
+			//if this position is not tagged, exit
+			GtkTextTag* tag = (GtkTextTag*)(l_pApplication->m_pCIdentifierTag);
+			if(!gtk_text_iter_has_tag(&iter, tag))
+			{
+				return;
+			}
+			else //if the position is tagged, we are on a CIdentifier
+			{
+				GtkTextIter start, end;
+				start = iter;
+				end = iter;
+				while(gtk_text_iter_has_tag(&end, tag))
+				{
+					gtk_text_iter_forward_char(&end);
+				}
+				while(gtk_text_iter_has_tag(&start, tag))
+				{
+					gtk_text_iter_backward_char(&start);
+				}
+				//we went one char to far for start
+				gtk_text_iter_forward_char(&start);
+				//this contains the CIdentifier
+				gchar * link=gtk_text_iter_get_text(&start, &end);
+				//cout << "cid is |" << link << "|" << endl;
+				CIdentifier id;
+				id.fromString(CString(link));
+				l_pApplication->getCurrentInterfacedScenario()->centerOnBox(id);
+			}
+
+		}
+
+
+	}
 }
 
 static ::GtkTargetEntry g_vTargetEntry[]= {
@@ -568,6 +635,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	m_eCommandLineFlags=eCommandLineFlags;
 	m_sSearchTerm = "";
 	m_sLogSearchTerm = "";
+	m_pCIdentifierTag = NULL;
 
 	// Prepares scenario clipboard
 	CIdentifier l_oClipboardScenarioIdentifier;
@@ -645,6 +713,8 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-show_unstable")), "toggled", G_CALLBACK(refresh_search_no_data_cb), this);
 
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "searchEntry")),		"changed", G_CALLBACK(refresh_search_log_entry), this);
+	//g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "searchEntry")),		"focus-in-event", G_CALLBACK(searchlog_focus_in_cb), this);
+	//g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-textview_messages")),		"focus-in-event", G_CALLBACK(searchlog_focus_in_cb), this);
 	//m_pSearchEntry = GTK_ENTRY(gtk_builder_get_object(m_pBuilderInterface, "searchEntry"));
 
 #if defined(TARGET_OS_Windows)
@@ -817,6 +887,22 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_search")),       "clicked",  G_CALLBACK(search_messages_cb), this);
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "searchEntry")),		"activate", G_CALLBACK(search_messages_cb), this);
+
+
+		GtkTextView* m_pTextView = GTK_TEXT_VIEW(gtk_builder_get_object(m_pBuilderInterface, "openvibe-textview_messages"));
+		GtkTextBuffer* buffer =  gtk_text_view_get_buffer( m_pTextView );
+		GtkTextTagTable* tagtable =  gtk_text_buffer_get_tag_table(buffer);
+		//GtkTextTag* url
+		m_pCIdentifierTag = gtk_text_tag_table_lookup(tagtable, "link");
+		if(m_pCIdentifierTag!=NULL)
+		{
+			//g_object_set_data (url, "tag", url);
+			//g_object_set_data (url, "application", this);
+			//m_pCIdentifierTag =url;
+			g_signal_connect(G_OBJECT(m_pTextView), "button_press_event", G_CALLBACK(click_callback), this);
+		}
+
+
 		int32 lastScenarioPage = m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_CurrentScenarioPage}", -1);
 		if(lastScenarioPage>=0 && lastScenarioPage<(int32)m_vInterfacedScenario.size())
 		{
