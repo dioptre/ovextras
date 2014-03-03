@@ -39,6 +39,9 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean train(const size_t uiStartIndex, const size_t uiStopIndex);
 			virtual OpenViBE::float64 getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex);
 
+		private:
+			OpenViBE::boolean saveConfiguration(void);
+
 		protected:
 
 			std::map < OpenViBE::uint32, OpenViBE::uint32 > m_vFeatureCount;

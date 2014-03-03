@@ -70,7 +70,7 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	m_pStimulationsDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
 	m_pStimulationsDecoder->initialize();
 
-	i = OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount; // number of settings when no additional setting is added
+	i = OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount + l_rStaticBoxContext.getInputCount(); // number of settings when no additional setting is added
 
 	m_pExtraParemeter = new map<CString , CString> ();
 	while(i < l_rStaticBoxContext.getSettingCount())
@@ -262,8 +262,6 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 				this->getLogManager() << LogLevel_Trace << "For information, we have " << m_vFeatureCount[i] << " feature vector(s) for input " << i << "\n";
 			}
 
-			TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
-
 			float64 l_f64PartitionAccuracy=0;
 			float64 l_f64FinalAccuracy=0;
 			vector<float64> l_vPartitionAccuracies((unsigned int)m_ui64PartitionCount);
@@ -325,15 +323,8 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 			this->train(0, 0);
 
 			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << this->getAccuracy(0, m_vFeatureVector.size()) << "% (optimistic)\n";
-
-			XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
-			CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1));
-
-			if(!l_pHandler->writeXMLInFile(*op_pConfiguration, l_sConfigurationFilename.toASCIIString()))
-			{
-				this->getLogManager() << LogLevel_Error << "Could not save configuration to file [" << l_sConfigurationFilename << "]\n";
+			if(!this->saveConfiguration())
 				return false;
-			}
 		}
 	}
 
@@ -419,4 +410,55 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 	}
 
 	return (float64)(l_iSuccessfullTrainerCount*100.0)/(uiStopIndex-uiStartIndex);
+}
+
+
+
+boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
+{
+	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
+	CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2));
+
+	CString l_sClassifierAlgorithmClassIdentifier, l_sStrategyClassIdentifier;
+	l_rStaticBoxContext.getSettingValue(0, l_sStrategyClassIdentifier);
+	l_rStaticBoxContext.getSettingValue(1, l_sClassifierAlgorithmClassIdentifier);
+
+	XML::IXMLNode *root = XML::createNode("OpenViBE-Classifier-Box");
+
+	XML::IXMLNode *l_pTempNode = XML::createNode("Strategy-Identifier");
+	l_pTempNode->setPCData(l_sStrategyClassIdentifier);
+	root->addChild(l_pTempNode);
+
+	l_pTempNode = XML::createNode("Algorithm-Identifier");
+	l_pTempNode->setPCData(l_sClassifierAlgorithmClassIdentifier.toASCIIString());
+	root->addChild(l_pTempNode);
+
+
+	XML::IXMLNode *l_pStimulationsNode = XML::createNode("Stimulations");
+
+	for(OpenViBE::uint32 i =1 ; i < l_rStaticBoxContext.getInputCount() ; ++i)
+	{
+		CString l_sStimulationName;
+		l_rStaticBoxContext.getSettingValue(OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount + i, l_sStimulationName);
+
+		l_pTempNode = XML::createNode("Class-stimulations");
+		char l_sBuffer[8];
+		sprintf(l_sBuffer, "%d", i);
+		l_pTempNode->addAttribute("class-id", l_sBuffer);
+		l_pTempNode->setPCData(l_sStimulationName.toASCIIString());
+		l_pStimulationsNode->addChild(l_pTempNode);
+	}
+	root->addChild(l_pStimulationsNode);
+
+	root->addChild((XML::IXMLNode*)op_pConfiguration);
+
+	if(!l_pHandler->writeXMLInFile(*root, l_sConfigurationFilename.toASCIIString()))
+	{
+		this->getLogManager() << LogLevel_Error << "Could not save configuration to file [" << l_sConfigurationFilename << "]\n";
+		return false;
+	}
+	return true;
 }

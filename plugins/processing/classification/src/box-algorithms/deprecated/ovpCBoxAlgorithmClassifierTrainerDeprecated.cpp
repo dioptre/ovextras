@@ -327,7 +327,7 @@ boolean CBoxAlgorithmClassifierTrainerDeprecated::process(void)
 			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << this->getAccuracy(0, m_vFeatureVector.size()) << "% (optimistic)\n";
 
 			XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
-			CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1));
+			CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2));
 
 			if(!l_pHandler->writeXMLInFile(*op_pConfiguration, l_sConfigurationFilename.toASCIIString()))
 			{
