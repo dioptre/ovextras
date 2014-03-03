@@ -53,7 +53,8 @@ namespace OpenViBEPlugins
 		 * \brief Get ruler widget
 		 * \return Pointer to ruler widget
 		 */
-		::GtkWidget* getRulerWidget() const;
+//		 ::GtkWidget* getRulerWidget() const;
+		::GtkWidget* getRulerWidget(OpenViBE::uint32 ui32Index) const;
 
 		/**
 		 * \brief Get signal display widget
@@ -244,8 +245,9 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 Y_Step);
 
 	public:
-		//! Left ruler displaying signal scale
-		CSignalDisplayLeftRuler* m_pLeftRuler;
+		//! Left rulers displaying signals scale
+//		CSignalDisplayLeftRuler* m_pLeftRuler;
+		std::vector<CSignalDisplayLeftRuler*> m_oLeftRuler;
 		//! The drawing area where the signal is to be drawn
 		GtkWidget * m_pDrawingArea;
 		//! Drawing area dimensions, in pixels
@@ -292,6 +294,8 @@ namespace OpenViBEPlugins
 		OpenViBE::float64 m_f64MinimumTopMargin;
 		OpenViBE::float64 m_f64MinimumBottomMargin;
 		//@}
+
+		OpenViBE::uint32 m_i32LeftRulerWidthRequest, m_i32LeftRulerHeightRequest;
 
 		//! Current signal display mode
 		OpenViBEPlugins::SimpleVisualisation::EDisplayMode m_eCurrentSignalMode;

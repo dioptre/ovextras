@@ -105,6 +105,9 @@ namespace OpenViBEPlugins
 				OpenViBE::uint32 ui32ChannelIndex,
 				OpenViBE::boolean bActive);
 
+			void toggleChannelMultiView(
+				OpenViBE::boolean bActive);
+
 			void changeMultiView(void);
 
 			void updateMainTableStatus(void);
@@ -270,6 +273,9 @@ namespace OpenViBEPlugins
 
 			//! Bottom time ruler
 			CBottomTimeRuler * m_pBottomRuler;
+
+			//! Widgets for left rulers
+			std::vector <GtkWidget *> m_oLeftRulers;
 		};
 	}
 }

@@ -26,8 +26,8 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 	int32 i32ChannelDisplayHeightRequest,
 	int32 i32LeftRulerWidthRequest,
 	int32 i32LeftRulerHeightRequest)
-	:m_pLeftRuler(NULL)
-	,m_pDrawingArea(NULL)
+//	:m_pLeftRuler(NULL)
+	:m_pDrawingArea(NULL)
 	,m_ui32Width(0)
 	,m_ui32Height(0)
 	,m_f64WidthPerBuffer(0)
@@ -49,6 +49,8 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 	,m_f64MaximumBottomMargin(0)
 	,m_f64MinimumTopMargin(0)
 	,m_f64MinimumBottomMargin(0)
+	,m_i32LeftRulerWidthRequest(i32LeftRulerWidthRequest)
+	,m_i32LeftRulerHeightRequest(i32LeftRulerHeightRequest)
 	,m_eCurrentSignalMode(DisplayMode_GlobalBestFit)
 	,m_ui64LatestDisplayedTime(0)
 	,m_bRedrawAll(false)
@@ -66,7 +68,16 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 	gtk_widget_modify_bg(m_pDrawingArea, GTK_STATE_NORMAL, &l_oBackgroundColor);
 
 	//creates the left ruler
-	m_pLeftRuler = new CSignalDisplayLeftRuler(i32LeftRulerWidthRequest, i32LeftRulerHeightRequest);
+/*	for(uint32 i = 0; i<m_oChannelList.size(); i++)
+	{
+		m_oLeftRuler.push_back(new CSignalDisplayLeftRuler(i32LeftRulerWidthRequest, i32LeftRulerHeightRequest));
+	}*/
+
+
+//	cout<< "channel = "<<m_oChannelList.size()<<endl;
+
+	//creates the left ruler
+//	m_pLeftRuler = new CSignalDisplayLeftRuler(i32LeftRulerWidthRequest, i32LeftRulerHeightRequest);
 
 	//connects the signals
 	gtk_widget_add_events(GTK_WIDGET(m_pDrawingArea), GDK_BUTTON_PRESS_MASK);
@@ -82,14 +93,23 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 
 CSignalChannelDisplay::~CSignalChannelDisplay()
 {
-	delete m_pLeftRuler;
-	m_pLeftRuler=NULL;
+	for(uint32 i = 0; i<m_oLeftRuler.size(); i++)
+	{
+			delete m_oLeftRuler[i];
+			m_oLeftRuler[i]=NULL;
+	}
+//	delete m_pLeftRuler;
+//	m_pLeftRuler=NULL;
 }
 
-GtkWidget* CSignalChannelDisplay::getRulerWidget() const
+GtkWidget* CSignalChannelDisplay::getRulerWidget(uint32 ui32Index) const
+{
+	return m_oLeftRuler[ui32Index]->getWidget();
+}
+/*GtkWidget* CSignalChannelDisplay::getRulerWidget() const
 {
 	return m_pLeftRuler->getWidget();
-}
+}*/
 
 GtkWidget* CSignalChannelDisplay::getSignalDisplayWidget() const
 {
@@ -132,6 +152,7 @@ void CSignalChannelDisplay::resetChannelList()
 void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
 {
 	m_oChannelList.push_back(ui32Channel);
+	m_oLeftRuler.push_back(new CSignalDisplayLeftRuler(m_i32LeftRulerWidthRequest, m_i32LeftRulerHeightRequest));
 }
 
 uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
@@ -275,6 +296,12 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 		return;
 	}
 
+	float64 l_f64MaximumDisplayedValue = 0;
+	float64 l_f64MinimumDisplayedValue = 0;
+
+	float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
+	float64 l_f64nChannel = m_oChannelList.size();
+
 	//draw grid if grid toggled
 /*	if(m_pParentDisplayView->m_bShowGrid)
 	{
@@ -282,10 +309,35 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 	}*/
 
 
-	//updates the left ruler
-	float64 l_f64MaximumDisplayedValue = m_f64TranslateY - ( (0 - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
-	float64 l_f64MinimumDisplayedValue = m_f64TranslateY - ( (m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
-	m_pLeftRuler->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
+	//updates the left rulers
+	if(m_pParentDisplayView->m_bAutoTranslation && !m_bMultiView)
+	{
+		l_f64MaximumDisplayedValue = m_f64TranslateY - ( (0 - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * l_f64sizePerChannel) );
+		l_f64MinimumDisplayedValue = m_f64TranslateY - ( (l_f64sizePerChannel - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * l_f64sizePerChannel) );
+	}
+	else if(!m_pParentDisplayView->m_bAutoTranslation && !m_bMultiView)
+	{
+		l_f64MaximumDisplayedValue = ((((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * l_f64sizePerChannel) );
+		l_f64MinimumDisplayedValue = -((l_f64sizePerChannel - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * l_f64sizePerChannel) );
+	}
+	else if(m_pParentDisplayView->m_bAutoTranslation && m_bMultiView)
+	{
+		l_f64MaximumDisplayedValue = m_f64TranslateY - ( (0 - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
+		l_f64MinimumDisplayedValue = m_f64TranslateY - ( (m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
+	}
+	else
+	{
+		l_f64MaximumDisplayedValue = ((((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
+		l_f64MinimumDisplayedValue = -((m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
+	}
+
+//	m_pLeftRuler->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
+
+	//for each channel
+	for(uint32 i =0 ; i<m_oLeftRuler.size(); i++)
+	{
+		m_oLeftRuler[i]->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
+	}
 
 	//determine index and position of first (in the sense of leftmost) buffer to display, and index of first sample to display
 	uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
@@ -888,7 +940,11 @@ void drawingAreaClickedEventCallback(GtkWidget *widget, GdkEventButton *pEvent, 
 	{
 		m_pChannelDisplay->redrawAllAtNextRefresh();
 		if(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window) gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window, NULL, true);
-		if(GTK_WIDGET(m_pChannelDisplay->m_pLeftRuler->getWidget())->window) gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_pLeftRuler->getWidget())->window, NULL, true);
+//		if(GTK_WIDGET(m_pChannelDisplay->m_pLeftRuler->getWidget())->window) gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_pLeftRuler->getWidget())->window, NULL, true);
+		for(uint32 i = 0; i<m_pChannelDisplay->m_oLeftRuler.size();i++)
+		{
+			if(GTK_WIDGET(m_pChannelDisplay->m_oLeftRuler[i]->getWidget())->window) gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_oLeftRuler[i]->getWidget())->window, NULL, true);
+		}
 	}
 }
 

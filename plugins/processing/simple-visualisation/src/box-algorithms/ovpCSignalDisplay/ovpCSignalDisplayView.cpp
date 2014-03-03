@@ -242,7 +242,7 @@ namespace OpenViBEPlugins
 			{
 				//hides the multiview display (last one in the list)
 				l_pChannelDisplay->resetChannelList();
-				toggleChannel(m_oChannelDisplay.size() - 1, false);
+				toggleChannelMultiView(false);
 			}
 			//there are channels to display in the multiview
 			else
@@ -255,7 +255,7 @@ namespace OpenViBEPlugins
 
 				if(isChannelDisplayVisible(m_oChannelDisplay.size()-1) == false)
 				{
-					toggleChannel(m_oChannelDisplay.size() - 1, true);
+					toggleChannelMultiView(true);
 				}
 
 				//updates channels to display list
@@ -381,12 +381,12 @@ namespace OpenViBEPlugins
 				l_pChannelDisplay->addChannel(i);
 			}
 
-			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
+/*			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
 				l_pChannelDisplay->getRulerWidget(),
 				2, 3, //third column
 				0, 1,
 				GTK_FILL, GTK_FILL,
-				0, 0);
+				0, 0);*/
 			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
 				l_pChannelDisplay->getSignalDisplayWidget(),
 				3, 4, //fourth column
@@ -411,7 +411,7 @@ namespace OpenViBEPlugins
 			l_pSeparator = ::gtk_hseparator_new();
 			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable), l_pSeparator,
 				0, 4, //whole width of the table
-				1, 2, //ith line (bottom)
+				1, 2, //2nd line (bottom)
 				static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), GTK_SHRINK, 0, 0);
 			::gtk_widget_show(l_pSeparator);
 //			m_vSeparator[i]=l_pSeparator;
@@ -424,8 +424,6 @@ namespace OpenViBEPlugins
 				2, 3,
 				GTK_FILL, GTK_SHRINK,
 				0, 0);
-//			gtk_box_pack_start (GTK_BOX(l_pLabelVBox),m_oChannelLabel[l_ui32ChannelCount], FALSE, FALSE, 0);
-//			gtk_widget_show(l_pLabel);
 			::gtk_size_group_add_widget(l_pSizeGroup, l_pLabel);
 
 			//create and attach display widget
@@ -435,8 +433,8 @@ namespace OpenViBEPlugins
 				l_i32LeftRulerWidthRequest, l_i32LeftRulerHeightRequest);
 			m_oChannelDisplay[1] = l_pChannelDisplayMulti;
 			l_pChannelDisplayMulti->addChannel(0);
-			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
-				l_pChannelDisplayMulti->getRulerWidget(),
+		::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
+				l_pChannelDisplayMulti->getRulerWidget(0),
 				2, 3, //third column
 				2, 3,
 				GTK_FILL, GTK_FILL,
@@ -470,7 +468,27 @@ namespace OpenViBEPlugins
 			//resize the vector of raw points
 			m_pRawPoints.resize((size_t)(m_pBufferDatabase->m_pDimensionSizes[1]*m_pBufferDatabase->m_ui64NumberOfBufferToDisplay));
 
-			//Don't display left ruler (default) -- modified december2013 -> display left ruler by default
+			//Don't display left ruler (default)
+			//Vertical box containing left ruler widget in third column of SignalDisplayMainTable
+			::GtkWidget* l_pLeftRulerVBox = GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface,"LeftRulerVerticalBox"));
+
+			for(uint32 j = 0; j<m_oChannelDisplay.size();j++)
+			{
+				for(uint32 i = 0; i<m_oChannelDisplay[j]->m_oLeftRuler.size();i++)
+				{
+					::GtkWidget* l_pLeftRuler = m_oChannelDisplay[j]->getRulerWidget(i);
+					m_oLeftRulers.push_back(l_pLeftRuler);
+
+					//Add left ruler in vertical box container only for the main channel display
+					if(j==0)
+					{
+						gtk_box_pack_start (GTK_BOX(l_pLeftRulerVBox),l_pLeftRuler, true, true, 0);
+						::gtk_size_group_add_widget(l_pSizeGroup, l_pLeftRuler);
+					}
+
+				}
+			}
+
 			m_bShowLeftRulers = false;
 			toggleLeftRulers(m_bShowLeftRulers);
 			::gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleLeftRulerButton")), m_bShowLeftRulers);
@@ -628,7 +646,7 @@ namespace OpenViBEPlugins
 
 			for(size_t i=0 ; i<m_oChannelDisplay.size() ; i++)
 			{
-				if(isChannelDisplayVisible(i) == true)
+/*				if(isChannelDisplayVisible(i) == true)
 				{
 					if(bActive)
 					{
@@ -637,6 +655,21 @@ namespace OpenViBEPlugins
 					else
 					{
 						::gtk_widget_hide(m_oChannelDisplay[i]->getRulerWidget());
+					}
+				}*/
+
+				for(uint32 j = 0 ; j<m_oChannelDisplay[i]->m_oLeftRuler.size();j++)
+				{
+					if(isChannelDisplayVisible(i) == true)
+					{
+						if(bActive)
+						{
+							::gtk_widget_show(m_oChannelDisplay[i]->getRulerWidget(j));
+						}
+						else
+						{
+							::gtk_widget_hide(m_oChannelDisplay[i]->getRulerWidget(j));
+						}
 					}
 				}
 			}
@@ -659,23 +692,42 @@ namespace OpenViBEPlugins
 		void CSignalDisplayView::toggleChannel(uint32 ui32ChannelIndex, boolean bActive)
 		{
 			CSignalChannelDisplay* l_pChannelDisplay = getChannelDisplay(ui32ChannelIndex);
-
 			if(bActive)
 			{
 				::gtk_widget_show(m_oChannelLabel[ui32ChannelIndex]);
 				if(m_bShowLeftRulers == true)
 				{
-					::gtk_widget_show(l_pChannelDisplay->getRulerWidget());
+					::gtk_widget_show(l_pChannelDisplay->getRulerWidget(ui32ChannelIndex));
 				}
 				::gtk_widget_show(l_pChannelDisplay->getSignalDisplayWidget());
-			//	::gtk_widget_show(m_vSeparator[ui32ChannelIndex]);
 			}
 			else
 			{
 				::gtk_widget_hide(m_oChannelLabel[ui32ChannelIndex]);
-				::gtk_widget_hide(l_pChannelDisplay->getRulerWidget());
+				::gtk_widget_hide(l_pChannelDisplay->getRulerWidget(ui32ChannelIndex));
 				::gtk_widget_hide(l_pChannelDisplay->getSignalDisplayWidget());
-			//	::gtk_widget_hide(m_vSeparator[ui32ChannelIndex]);
+
+			}
+		}
+
+		void CSignalDisplayView::toggleChannelMultiView(boolean bActive)
+		{
+			CSignalChannelDisplay* l_pChannelDisplay = getChannelDisplay(m_oChannelDisplay.size()-1);
+			if(bActive)
+			{
+				::gtk_widget_show(m_oChannelLabel[m_oChannelDisplay.size()-1]);
+				if(m_bShowLeftRulers == true)
+				{
+					::gtk_widget_show(l_pChannelDisplay->getRulerWidget(0));
+				}
+				::gtk_widget_show(l_pChannelDisplay->getSignalDisplayWidget());
+			}
+			else
+			{
+				::gtk_widget_hide(m_oChannelLabel[m_oChannelDisplay.size()-1]);
+				::gtk_widget_hide(l_pChannelDisplay->getRulerWidget(0));
+				::gtk_widget_hide(l_pChannelDisplay->getSignalDisplayWidget());
+
 			}
 		}
 
@@ -1089,10 +1141,15 @@ namespace OpenViBEPlugins
 					{
 						l_pView->m_oChannelDisplay[0]->addChannel(l_ui32Index);
 						gtk_widget_show(l_pView->m_oChannelLabel[l_ui32Index]);
+						if(l_pView->m_bShowLeftRulers == true)
+						{
+							gtk_widget_show(l_pView->m_oLeftRulers[l_ui32Index]);
+						}
 					}
 					else
 					{
 						gtk_widget_hide(l_pView->m_oChannelLabel[l_ui32Index]);
+						gtk_widget_hide(l_pView->m_oLeftRulers[l_ui32Index]);
 					}
 					l_ui32Index++;
 				}
