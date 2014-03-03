@@ -1,4 +1,4 @@
-#include "ovpCBoxAlgorithmClassifierTrainer.h"
+#include "ovpCBoxAlgorithmClassifierTrainerDeprecated.h"
 
 #include <system/Memory.h>
 
@@ -19,7 +19,7 @@ using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Classification;
 using namespace std;
 
-boolean CBoxAlgorithmClassifierTrainer::initialize(void)
+boolean CBoxAlgorithmClassifierTrainerDeprecated::initialize(void)
 {
 	uint32 i;
 	boolean l_bIsPairing=false;
@@ -104,7 +104,7 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
+boolean CBoxAlgorithmClassifierTrainerDeprecated::uninitialize(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	// IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
@@ -139,14 +139,14 @@ boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierTrainer::processInput(uint32 ui32InputIndex)
+boolean CBoxAlgorithmClassifierTrainerDeprecated::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierTrainer::process(void)
+boolean CBoxAlgorithmClassifierTrainerDeprecated::process(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
@@ -225,7 +225,7 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 			}
 			if(m_vFeatureVectorsDecoder[i-1]->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedBuffer))
 			{
-				CBoxAlgorithmClassifierTrainer::SFeatureVector l_oFeatureVector;
+				CBoxAlgorithmClassifierTrainerDeprecated::SFeatureVector l_oFeatureVector;
 				l_oFeatureVector.m_pFeatureVectorMatrix=new CMatrix();
 				l_oFeatureVector.m_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(i, j);
 				l_oFeatureVector.m_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(i, j);
@@ -340,7 +340,7 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const size_t uiStopIndex)
+boolean CBoxAlgorithmClassifierTrainerDeprecated::train(const size_t uiStartIndex, const size_t uiStopIndex)
 {
 	if(uiStopIndex-uiStartIndex-1==0)
 	{
@@ -376,7 +376,7 @@ boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const s
 	return true;
 }
 
-float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex)
+float64 CBoxAlgorithmClassifierTrainerDeprecated::getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex)
 {
 	size_t l_iSuccessfullTrainerCount=0;
 

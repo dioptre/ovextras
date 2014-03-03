@@ -13,11 +13,11 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		class CBoxAlgorithmCommonClassifierListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
+		class CBoxAlgorithmCommonClassifierListenerDeprecated : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
 		{
 		public:
 
-			CBoxAlgorithmCommonClassifierListener(const OpenViBE::uint32 ui32CustomSettingBase)
+			CBoxAlgorithmCommonClassifierListenerDeprecated(const OpenViBE::uint32 ui32CustomSettingBase)
 				:m_ui32CustomSettingBase(ui32CustomSettingBase)
 			{
 			}

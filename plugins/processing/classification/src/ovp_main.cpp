@@ -12,7 +12,7 @@
 #include "box-algorithms/ovpCBoxAlgorithmClassifierProcessor.h"
 #include "box-algorithms/ovpCBoxAlgorithmConfusionMatrix.h"
 
-#include "box-algorithms/deprecated/ovpCBoxAlgorithmClassifierTrainer.h"
+#include "box-algorithms/deprecated/ovpCBoxAlgorithmClassifierTrainerDeprecated.h"
 
 #if defined TARGET_HAS_ThirdPartyBLiFF
 #include "algorithms/classification/ovpCAlgorithmClassifierBliffLDA.h"
@@ -65,7 +65,7 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmConfusionMatrixDesc);
 
     OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmVotingClassifierDesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierTrainerDesc);
+	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierTrainerDeprecatedDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmConfusionMatrixDesc);
 
