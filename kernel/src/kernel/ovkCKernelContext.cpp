@@ -201,7 +201,7 @@ boolean CKernelContext::initialize(void)
 
 	this->getLogManager() << LogLevel_Info << "Adding kernel configuration file [" << m_sConfigurationFile << "]\n";
 	if(!m_pConfigurationManager->addConfigurationFromFile(m_sConfigurationFile)) {
-		this->getLogManager() << LogLevel_Error << "Problem parsing '" << m_sConfigurationFile << "'. This will not work.\n";
+		this->getLogManager() << LogLevel_Error << "Problem parsing config file [" << m_sConfigurationFile << "]. This will not work.\n";
 		// Since OpenViBE components usually don't react to return value of initialize(), we just quit here
 		this->getLogManager() << LogLevel_Error << "Forcing an exit.\n";
 		exit(-1);
