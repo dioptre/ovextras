@@ -1,20 +1,20 @@
-#ifndef __OpenViBEPlugins_BoxAlgorithm_ClassifierProcessor_H__
-#define __OpenViBEPlugins_BoxAlgorithm_ClassifierProcessor_H__
+#ifndef __OpenViBEPlugins_BoxAlgorithm_ClassifierProcessorDeprecated_H__
+#define __OpenViBEPlugins_BoxAlgorithm_ClassifierProcessorDeprecated_H__
 
-#include "../ovp_defines.h"
+#include "../../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
 #include <map>
 
-#define OVP_ClassId_BoxAlgorithm_ClassifierProcessor       OpenViBE::CIdentifier(0x5FE23D17, 0x95B0452C)
-#define OVP_ClassId_BoxAlgorithm_ClassifierProcessorDesc   OpenViBE::CIdentifier(0x29B66B00, 0xB4683D49)
+#define OVP_ClassId_BoxAlgorithm_ClassifierProcessorDeprecated       OpenViBE::CIdentifier(0x40AB4835, 0x1AE96E9E)
+#define OVP_ClassId_BoxAlgorithm_ClassifierProcessorDeprecatedDesc   OpenViBE::CIdentifier(0x786B436B, 0x5B327327)
 
 namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		class CBoxAlgorithmClassifierProcessor : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
+		class CBoxAlgorithmClassifierProcessorDeprecated : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
 		public:
 
@@ -25,7 +25,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process(void);
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierProcessor)
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierProcessorDeprecated)
 
 		protected:
 
@@ -38,7 +38,7 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bOutputHeaderSent;
 		};
 
-		class CBoxAlgorithmClassifierProcessorDesc : virtual public OpenViBE::Plugins::IBoxAlgorithmDesc
+		class CBoxAlgorithmClassifierProcessorDeprecatedDesc : virtual public OpenViBE::Plugins::IBoxAlgorithmDesc
 		{
 		public:
 
@@ -53,8 +53,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-apply"); }
 
-			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ClassifierProcessor; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessor; }
+			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ClassifierProcessorDeprecated; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorDeprecated; }
 
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
@@ -73,7 +73,7 @@ namespace OpenViBEPlugins
 			// virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const { return new CBoxAlgorithmCommonClassifierListener(5); }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) { delete pBoxListener; }
 
-			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_ClassifierProcessorDesc)
+			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_ClassifierProcessorDeprecatedDesc)
 		};
 	}
 }
