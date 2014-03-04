@@ -150,12 +150,6 @@ boolean CKernelContext::initialize(void)
 	m_pLogManager=new CLogManager(m_rMasterKernelContext);
 	m_pLogManager->activate(true);
 
-	this->getLogManager() << LogLevel_Trace << "Creating and configuring file log listener\n";
-	FS::Files::createPath(OpenViBE::Directories::getLogDir().toASCIIString());
-	m_pLogListenerFile=new CLogListenerFile(m_rMasterKernelContext, m_sApplicationName, OpenViBE::Directories::getLogDir() + "/openvibe-"+m_sApplicationName+".log");
-	m_pLogListenerFile->activate(true);
-	this->getLogManager().addListener(m_pLogListenerFile);
-
 	this->getLogManager() << LogLevel_Trace << "Creating and configuring console log listener\n";
 	m_pLogListenerConsole=new CLogListenerConsole(m_rMasterKernelContext, m_sApplicationName);
 	m_pLogListenerConsole->activate(false);
@@ -214,12 +208,19 @@ boolean CKernelContext::initialize(void)
 	FS::Files::createPath(l_sPathTmp.toASCIIString());
 	l_sPathTmp = m_pConfigurationManager->expand("${Path_Tmp}");
 	FS::Files::createPath(l_sPathTmp.toASCIIString());
-	l_sPathTmp = m_pConfigurationManager->expand("${Path_Log}");
-	FS::Files::createPath(l_sPathTmp.toASCIIString());
 	l_sPathTmp = m_pConfigurationManager->expand("${CustomConfiguration}");
 	FS::Files::createParentPath(l_sPathTmp.toASCIIString());
 	l_sPathTmp = m_pConfigurationManager->expand("${CustomConfigurationApplication}");
 	FS::Files::createParentPath(l_sPathTmp.toASCIIString());
+	l_sPathTmp = m_pConfigurationManager->expand("${Path_Log}");
+	FS::Files::createPath(l_sPathTmp);
+	CString l_sLogFile = l_sPathTmp + "/openvibe-" + m_sApplicationName + ".log";
+
+	// We do this here to allow user to set the Path_Log in the .conf. The downside is that earlier log messages will not appear in the file log.
+	this->getLogManager() << LogLevel_Trace << "Creating and configuring file log listener\n";
+	m_pLogListenerFile=new CLogListenerFile(m_rMasterKernelContext, m_sApplicationName, l_sLogFile);
+	m_pLogListenerFile->activate(true);
+	this->getLogManager().addListener(m_pLogListenerFile);
 
 	ELogLevel l_eMainLogLevel   =this->earlyGetLogLevel(m_pConfigurationManager->expand("${Kernel_MainLogLevel}"));
 	ELogLevel l_eConsoleLogLevel=this->earlyGetLogLevel(m_pConfigurationManager->expand("${Kernel_ConsoleLogLevel}"));
