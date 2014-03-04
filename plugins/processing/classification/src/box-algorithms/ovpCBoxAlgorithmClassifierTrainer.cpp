@@ -32,7 +32,6 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	l_rStaticBoxContext.getSettingValue(0, l_sStrategyClassIdentifier);
 
 	l_oStrategyClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationStrategy, l_sStrategyClassIdentifier);
-	std::cout << l_sStrategyClassIdentifier << " " << l_oStrategyClassIdentifier.toString() << std::endl;
 
 	//Get the classifier
 	l_rStaticBoxContext.getSettingValue(1, l_sClassifierAlgorithmClassIdentifier);
@@ -439,12 +438,18 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 
 	XML::IXMLNode *l_pStimulationsNode = XML::createNode("Stimulations");
 
+	l_pTempNode = XML::createNode("Rejected-Class");
+	CString l_sRejectedStimulationName;
+	l_rStaticBoxContext.getSettingValue(OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount, l_sRejectedStimulationName);
+	l_pTempNode->setPCData(l_sRejectedStimulationName.toASCIIString());
+	l_pStimulationsNode->addChild(l_pTempNode);
+
 	for(OpenViBE::uint32 i =1 ; i < l_rStaticBoxContext.getInputCount() ; ++i)
 	{
 		CString l_sStimulationName;
 		l_rStaticBoxContext.getSettingValue(OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount + i, l_sStimulationName);
 
-		l_pTempNode = XML::createNode("Class-stimulations");
+		l_pTempNode = XML::createNode("Class-Stimulation");
 		char l_sBuffer[8];
 		sprintf(l_sBuffer, "%d", i);
 		l_pTempNode->addAttribute("class-id", l_sBuffer);

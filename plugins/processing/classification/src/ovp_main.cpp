@@ -10,6 +10,7 @@
 
 #include "box-algorithms/ovpCBoxAlgorithmVotingClassifier.h"
 #include "box-algorithms/ovpCBoxAlgorithmClassifierTrainer.h"
+#include "box-algorithms/ovpCBoxAlgorithmClassifierProcessor.h"
 #include "box-algorithms/ovpCBoxAlgorithmConfusionMatrix.h"
 
 #include "box-algorithms/deprecated/ovpCBoxAlgorithmClassifierProcessorDeprecated.h"
@@ -67,6 +68,7 @@ OVP_Declare_Begin();
 
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmVotingClassifierDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierTrainerDesc);
+	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmConfusionMatrixDesc);
 

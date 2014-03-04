@@ -22,7 +22,6 @@ boolean CAlgorithmClassifierOneVsAll::uninitialize(void)
 {
 	while(!m_oSubClassifierList.empty())
 	{
-		this->getLogManager() << LogLevel_Warning << "Release classifier " << m_oSubClassifierList.size() <<"\n";
 		this->removeClassifierAtBack();
 	}
 	return true;
@@ -128,6 +127,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	}
 
 	//If no one recognize the class, let's take a random one
+	//FIXME should take the most relevant
 	if(rf64Class == -1)
 	{
 		uint32 l_iClassificationCount = rand()%l_oClassificationVector.size();
@@ -136,7 +136,6 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	}
 	rClassificationValues.setSize(best.second->getBufferElementCount());
 	System::Memory::copy(rClassificationValues.getBuffer(), best.second->getBuffer(), best.second->getBufferElementCount()*sizeof(float64));
-	std::cout << "Classification " << rf64Class << std::endl;
 	return true;
 }
 

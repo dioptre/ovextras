@@ -1,6 +1,8 @@
 #include "ovpCBoxAlgorithmClassifierProcessor.h"
 
 #include <fstream>
+#include <iostream>
+#include <sstream>
 
 #include <xml/IXMLHandler.h>
 #include <xml/IXMLNode.h>
@@ -17,31 +19,57 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
-	CIdentifier l_oClassifierAlgorithmClassIdentifier;
-	CString l_sClassifierAlgorithmClassIdentifier;
-	l_rStaticBoxContext.getSettingValue(0, l_sClassifierAlgorithmClassIdentifier);
-	l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAndPairingAlgorithm, l_sClassifierAlgorithmClassIdentifier);
+	//First of all, let's get the XML file for configuration
+	CString l_sConfigurationFilename;
+	l_rStaticBoxContext.getSettingValue(0, l_sConfigurationFilename);
 
-	if(l_oClassifierAlgorithmClassIdentifier==OV_UndefinedIdentifier)
-	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Unknown classifier algorithm [" << l_sClassifierAlgorithmClassIdentifier << "]\n";
-		return false;
+	XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
+	XML::IXMLNode *l_pRootNode = l_pHandler->parseFile(l_sConfigurationFilename.toASCIIString());
+
+	XML::IXMLNode * l_pTempNode = l_pRootNode->getChildByName("Strategy-Identifier");
+	CString l_sStrategyName(l_pTempNode->getPCData().c_str());
+	CIdentifier l_oAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationStrategy, l_sStrategyName);
+
+	//If the Identifier is undefined, that means we need to load a native algorithm
+	if(l_oAlgorithmClassIdentifier == OV_UndefinedIdentifier){
+		l_pTempNode = l_pRootNode->getChildByName("Algorithm-Identifier");
+		CString l_sAlgorithmName(l_pTempNode->getPCData().c_str());
+		l_oAlgorithmClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationAlgorithm, l_sAlgorithmName);
+
+		//If the algorithm is still unknown, that means that we face an error
+		if(l_oAlgorithmClassIdentifier==OV_UndefinedIdentifier)
+		{
+			this->getLogManager() << LogLevel_ImportantWarning << "Unknown classifier algorithm [" << l_sAlgorithmName << "]\n";
+			return false;
+		}
 	}
 
-	CString l_sConfigurationFilename;
-	l_rStaticBoxContext.getSettingValue(1, l_sConfigurationFilename);
+	//Now loading all stimulations output
+	XML::IXMLNode *l_pStimulationsNode = l_pRootNode->getChildByName("Stimulations");
 
-	for(uint32 i=2; i<l_rStaticBoxContext.getSettingCount(); i++)
+	//Load Rejected class label and put it as the entry for class 0
+	l_pTempNode = l_pStimulationsNode->getChildByName("Rejected-Class");
+	CString l_sRejectedLabel(l_pTempNode->getPCData().c_str());
+	m_vStimulation[0]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sRejectedLabel);
+
+	//Now load every stimulation and store them in the map with the right class id
+	for(uint32 i=1; i<l_pStimulationsNode->getChildCount(); i++)
 	{
-		CString l_sStimulationName;
-		l_rStaticBoxContext.getSettingValue(i, l_sStimulationName);
-		m_vStimulation[i-2]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sStimulationName);
+		l_pTempNode = l_pStimulationsNode->getChild(i);
+		CString l_sStimulationName(l_pTempNode->getPCData().c_str());
+
+		OpenViBE::float64 l_f64ClassId;
+		std::stringstream l_sIdentifierData(l_pTempNode->getAttribute("class-id"));
+		l_sIdentifierData >> l_f64ClassId ;
+
+		m_vStimulation[l_f64ClassId]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sStimulationName);
 	}
 
 	m_pFeaturesDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_FeatureVectorStreamDecoder));
 	m_pLabelsEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
 	m_pClassificationStateEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamEncoder));
-	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
+	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oAlgorithmClassIdentifier));
+
 
 	m_pFeaturesDecoder->initialize();
 	m_pLabelsEncoder->initialize();
@@ -52,9 +80,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	m_pClassificationStateEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
 
 	TParameterHandler < XML::IXMLNode* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
-	XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
-	XML::IXMLNode *l_pNode = l_pHandler->parseFile(l_sConfigurationFilename.toASCIIString());
-	ip_pClassificationConfiguration = l_pNode;
+	ip_pClassificationConfiguration = l_pRootNode->getChildByName("OpenViBE-Classifier");
 	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
 
 	m_bOutputHeaderSent=false;

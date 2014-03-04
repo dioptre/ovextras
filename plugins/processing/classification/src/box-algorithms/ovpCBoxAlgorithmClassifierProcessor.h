@@ -62,11 +62,9 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput  ("Features",                            OV_TypeId_FeatureVector);
 				rBoxAlgorithmPrototype.addOutput ("Labels",                              OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addOutput ("Classification state",                OV_TypeId_StreamedMatrix);
-				rBoxAlgorithmPrototype.addSetting("Classifier to use",                   OVTK_TypeId_ClassificationAndPairingAlgorithm, "");
+
+				//We load everything in the save filed
 				rBoxAlgorithmPrototype.addSetting("Filename to load configuration from", OV_TypeId_Filename,    "");
-				rBoxAlgorithmPrototype.addSetting("Reject class label",                  OV_TypeId_Stimulation, "OVTK_StimulationId_Label_00");
-				rBoxAlgorithmPrototype.addSetting("Class 1 label",                       OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");
-				rBoxAlgorithmPrototype.addSetting("Class 2 label",                       OV_TypeId_Stimulation, "OVTK_StimulationId_Label_02");
 				return true;
 			}
 
