@@ -300,7 +300,7 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 	float64 l_f64MinimumDisplayedValue = 0;
 
 	float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
-	float64 l_f64nChannel = m_oChannelList.size();
+//	float64 l_f64nChannel = m_oChannelList.size();
 
 	//draw grid if grid toggled
 /*	if(m_pParentDisplayView->m_bShowGrid)
@@ -317,8 +317,8 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 	}
 	else if(!m_pParentDisplayView->m_bAutoTranslation && !m_bMultiView)
 	{
-		l_f64MaximumDisplayedValue = ((((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * l_f64sizePerChannel) );
-		l_f64MinimumDisplayedValue = -((l_f64sizePerChannel - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * l_f64sizePerChannel) );
+		l_f64MaximumDisplayedValue = ((((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * l_f64sizePerChannel) );
+		l_f64MinimumDisplayedValue = -((l_f64sizePerChannel - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * l_f64sizePerChannel) );
 	}
 	else if(m_pParentDisplayView->m_bAutoTranslation && m_bMultiView)
 	{
@@ -327,8 +327,8 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 	}
 	else
 	{
-		l_f64MaximumDisplayedValue = ((((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
-		l_f64MinimumDisplayedValue = -((m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
+		l_f64MaximumDisplayedValue = ((((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
+		l_f64MinimumDisplayedValue = -((m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
 	}
 
 //	m_pLeftRuler->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
@@ -640,7 +640,7 @@ float64 CSignalChannelDisplay::getSampleYCoordinate(float64 f64Value, uint32 ui3
 	//Autotranslation off
 	else
 	{
-		return m_f64ScaleY*m_f64ZoomScaleY*l_f64sizePerChannel*(-f64Value)+(l_f64nChannel-ui32ChannelIndex)*l_f64sizePerChannel*m_f64ZoomScaleY - m_f64ZoomScaleY - l_f64sizePerChannel/2;
+		return m_f64ScaleY*m_f64ZoomScaleY*l_f64sizePerChannel*(-f64Value)+(l_f64nChannel-ui32ChannelIndex)*l_f64sizePerChannel*m_f64ZoomScaleY - m_f64ZoomTranslateY*m_f64ZoomScaleY - l_f64sizePerChannel/2;
 	}
 }
 
@@ -654,7 +654,7 @@ float64 CSignalChannelDisplay::getSampleYMultiViewCoordinate(float64 f64Value, u
 	//Autotranslation off
 	else
 	{
-		return m_f64ScaleY*m_f64ZoomScaleY*m_ui32Height* (-f64Value) + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomScaleY;
+		return m_f64ScaleY*m_f64ZoomScaleY*m_ui32Height* (-f64Value) + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
 	}
 
 }

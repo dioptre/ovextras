@@ -222,8 +222,6 @@ namespace OpenViBEPlugins
 
 		void CSignalDisplayView::changeMultiView()
 		{
-			OpenViBE::uint32 l_ui32ChannelCount = (uint32)m_pBufferDatabase->getChannelCount();
-
 			if(!m_bMultiViewInitialized)
 			{
 				return;
@@ -235,12 +233,22 @@ namespace OpenViBEPlugins
 			boolean l_bMultiView=false;
 			for(uint32 i=0; i<m_oChannelLabel.size(); i++)
 			{
-				l_bMultiView|=m_vMultiViewSelectedChannels[i];
+				//Check if None is selected
+				if(i == m_oChannelLabel.size()-1)
+				{
+					//Disable Multiview if only None is selected
+					l_bMultiView |= !m_vMultiViewSelectedChannels[i];
+				}
+				else
+				{
+					l_bMultiView|=m_vMultiViewSelectedChannels[i];
+				}
 			}
-			//if there are no channels to display in the multiview
+
+			//if there are no channels to display in the multiview (None selected only)
 			if(!l_bMultiView)
 			{
-				//hides the multiview display (last one in the list)
+				//hides the multiview display
 				l_pChannelDisplay->resetChannelList();
 				toggleChannelMultiView(false);
 			}
@@ -261,7 +269,7 @@ namespace OpenViBEPlugins
 				//updates channels to display list
 				l_pChannelDisplay->resetChannelList();
 
-				for(size_t i=0 ; i<m_vMultiViewSelectedChannels.size() ; i++)
+				for(size_t i=0 ; i<m_vMultiViewSelectedChannels.size()-1 ; i++)
 				{
 					if(m_vMultiViewSelectedChannels[i])
 					{
@@ -269,7 +277,6 @@ namespace OpenViBEPlugins
 					}
 				}
 				m_oChannelDisplay[1]->m_bMultiView = true;
-				gtk_widget_show(m_oChannelLabel[l_ui32ChannelCount]);
 
 				//request a redraw
 				if(l_pChannelDisplay->getSignalDisplayWidget()->window) gdk_window_invalidate_rect(l_pChannelDisplay->getSignalDisplayWidget()->window, NULL, false);
@@ -335,6 +342,9 @@ namespace OpenViBEPlugins
 			::GtkListStore* l_pChannelListStore=::gtk_list_store_new(1, G_TYPE_STRING);
 			::GtkTreeIter l_oChannelIter;
 
+			::GtkListStore* l_pMultiViewChannelListStore=::gtk_list_store_new(1, G_TYPE_STRING);
+			::GtkTreeIter l_oMultiViewChannelIter;
+
 			for(uint32 i=0 ; i<l_ui32ChannelCount ; i++)
 			{
 				//add channel label
@@ -361,6 +371,8 @@ namespace OpenViBEPlugins
 				//-------------------------------------
 				::gtk_list_store_append(l_pChannelListStore, &l_oChannelIter);
 				::gtk_list_store_set(l_pChannelListStore, &l_oChannelIter, 0, l_oChannelName[i].c_str(), -1);
+				::gtk_list_store_append(l_pMultiViewChannelListStore, &l_oMultiViewChannelIter);
+				::gtk_list_store_set(l_pMultiViewChannelListStore, &l_oMultiViewChannelIter, 0, l_oChannelName[i].c_str(), -1);
 
 				//a channel is selected by default
 				m_vSelectedChannels[i]=true;
@@ -381,12 +393,6 @@ namespace OpenViBEPlugins
 				l_pChannelDisplay->addChannel(i);
 			}
 
-/*			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
-				l_pChannelDisplay->getRulerWidget(),
-				2, 3, //third column
-				0, 1,
-				GTK_FILL, GTK_FILL,
-				0, 0);*/
 			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
 				l_pChannelDisplay->getSignalDisplayWidget(),
 				3, 4, //fourth column
@@ -399,9 +405,12 @@ namespace OpenViBEPlugins
 			::gtk_tree_selection_set_mode(::gtk_tree_view_get_selection(GTK_TREE_VIEW(l_pChannelSelectList)), GTK_SELECTION_MULTIPLE);
 			::gtk_tree_view_append_column(GTK_TREE_VIEW(l_pChannelSelectList), ::gtk_tree_view_column_new_with_attributes("Channel", ::gtk_cell_renderer_text_new(), "text", 0, NULL));
 			::gtk_tree_view_set_model(GTK_TREE_VIEW(l_pChannelSelectList), GTK_TREE_MODEL(l_pChannelListStore));
+
+			::gtk_list_store_append(l_pMultiViewChannelListStore, &l_oMultiViewChannelIter);
+			::gtk_list_store_set(l_pMultiViewChannelListStore, &l_oMultiViewChannelIter, 0, "None", -1);
 			::gtk_tree_selection_set_mode(::gtk_tree_view_get_selection(GTK_TREE_VIEW(l_pMultiViewSelectList)), GTK_SELECTION_MULTIPLE);
 			::gtk_tree_view_append_column(GTK_TREE_VIEW(l_pMultiViewSelectList), ::gtk_tree_view_column_new_with_attributes("Channel", ::gtk_cell_renderer_text_new(), "text", 0, NULL));
-			::gtk_tree_view_set_model(GTK_TREE_VIEW(l_pMultiViewSelectList), GTK_TREE_MODEL(l_pChannelListStore));
+			::gtk_tree_view_set_model(GTK_TREE_VIEW(l_pMultiViewSelectList), GTK_TREE_MODEL(l_pMultiViewChannelListStore));
 
 			//multiview channel
 			//-----------------
@@ -468,7 +477,7 @@ namespace OpenViBEPlugins
 			//resize the vector of raw points
 			m_pRawPoints.resize((size_t)(m_pBufferDatabase->m_pDimensionSizes[1]*m_pBufferDatabase->m_ui64NumberOfBufferToDisplay));
 
-			//Don't display left ruler (default)
+
 			//Vertical box containing left ruler widget in third column of SignalDisplayMainTable
 			::GtkWidget* l_pLeftRulerVBox = GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface,"LeftRulerVerticalBox"));
 
@@ -488,7 +497,7 @@ namespace OpenViBEPlugins
 
 				}
 			}
-
+			//Don't display left ruler (default)
 			m_bShowLeftRulers = false;
 			toggleLeftRulers(m_bShowLeftRulers);
 			::gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleLeftRulerButton")), m_bShowLeftRulers);
@@ -715,7 +724,7 @@ namespace OpenViBEPlugins
 			CSignalChannelDisplay* l_pChannelDisplay = getChannelDisplay(m_oChannelDisplay.size()-1);
 			if(bActive)
 			{
-				::gtk_widget_show(m_oChannelLabel[m_oChannelDisplay.size()-1]);
+				::gtk_widget_show(m_oChannelLabel[m_oChannelLabel.size()-1]);
 				if(m_bShowLeftRulers == true)
 				{
 					::gtk_widget_show(l_pChannelDisplay->getRulerWidget(0));
@@ -724,7 +733,7 @@ namespace OpenViBEPlugins
 			}
 			else
 			{
-				::gtk_widget_hide(m_oChannelLabel[m_oChannelDisplay.size()-1]);
+				::gtk_widget_hide(m_oChannelLabel[m_oChannelLabel.size()-1]);
 				::gtk_widget_hide(l_pChannelDisplay->getRulerWidget(0));
 				::gtk_widget_hide(l_pChannelDisplay->getSignalDisplayWidget());
 
@@ -749,10 +758,6 @@ namespace OpenViBEPlugins
 			for(uint32 i=0; i<m_oChannelLabel.size(); i++)
 			{
 				l_bChannels|=m_vSelectedChannels[i];
-				/*if(m_vSelectedChannels[i])
-				{
-					l_ui32Index=i;
-				}*/
 			}
 
 			//if nothing has been selected
