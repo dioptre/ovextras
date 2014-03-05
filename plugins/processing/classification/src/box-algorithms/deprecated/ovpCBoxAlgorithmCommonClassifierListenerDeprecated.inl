@@ -79,7 +79,11 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				return this->onAlgorithmClassifierChanged(rBox);
+				if(ui32Index == 0){
+					return this->onAlgorithmClassifierChanged(rBox);
+				}
+				else
+					return true;
 			}
 
 			virtual OpenViBE::boolean onAlgorithmClassifierChanged(OpenViBE::Kernel::IBox& rBox)
@@ -89,7 +93,7 @@ namespace OpenViBEPlugins
 				OpenViBE::CIdentifier l_oOldClassifierIdentifier=m_oClassifierClassIdentifier;
 				OpenViBE::CIdentifier l_oIdentifier;
 
-				rBox.getSettingValue(1, l_sClassifierName);
+				rBox.getSettingValue(0, l_sClassifierName);
 
 				l_oClassifierIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationAlgorithm, l_sClassifierName);
 				if(l_oClassifierIdentifier != m_oClassifierClassIdentifier)
@@ -115,6 +119,10 @@ namespace OpenViBEPlugins
 							rBox.removeSetting(m_ui32CustomSettingBase);
 						}
 					}
+				}
+				else
+				{
+					return true;
 				}
 
 				if(m_pClassifier)

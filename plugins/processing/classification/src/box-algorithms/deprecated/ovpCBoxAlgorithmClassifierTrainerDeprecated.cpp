@@ -22,86 +22,64 @@ using namespace std;
 boolean CBoxAlgorithmClassifierTrainerDeprecated::initialize(void)
 {
 	uint32 i;
-	boolean l_bIsPairing=false;
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+		IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
-	CIdentifier l_oStrategyClassIdentifier, l_oClassifierAlgorithmClassIdentifier;
-	CString l_sClassifierAlgorithmClassIdentifier, l_sStrategyClassIdentifier;
+		CIdentifier l_oClassifierAlgorithmClassIdentifier;
+		CString l_sClassifierAlgorithmClassIdentifier;
+		l_rStaticBoxContext.getSettingValue(0, l_sClassifierAlgorithmClassIdentifier);
+		l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
 
-	//Get the strategy
-	l_rStaticBoxContext.getSettingValue(0, l_sStrategyClassIdentifier);
+		if(l_oClassifierAlgorithmClassIdentifier==OV_UndefinedIdentifier)
+		{
+			this->getLogManager() << LogLevel_Error << "Unknown classifier algorithm [" << l_sClassifierAlgorithmClassIdentifier << "]\n";
+			return false;
+		}
 
-	l_oStrategyClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationStrategy, l_sStrategyClassIdentifier);
-	std::cout << l_sStrategyClassIdentifier << " " << l_oStrategyClassIdentifier.toString() << std::endl;
+		m_ui64TrainStimulation=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
-	//Get the classifier
-	l_rStaticBoxContext.getSettingValue(1, l_sClassifierAlgorithmClassIdentifier);
-	l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
+		int64 l_i64PartitionCount=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+		if(l_i64PartitionCount<0)
+		{
+			this->getLogManager() << LogLevel_Error << "Partition count can not be less than 0 (was " << l_i64PartitionCount << ")\n";
+			return false;
+		}
+		m_ui64PartitionCount=uint64(l_i64PartitionCount);
 
-	if(l_oStrategyClassIdentifier==OV_UndefinedIdentifier)
-	{
-		//That means that we want to use a classical algorithm so just let create it
+		for(i=1; i<l_rStaticBoxContext.getInputCount(); i++)
+		{
+			m_vFeatureVectorsDecoder[i-1]=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_FeatureVectorStreamDecoder));
+			m_vFeatureVectorsDecoder[i-1]->initialize();
+		}
+
+		m_pStimulationsDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
+		m_pStimulationsDecoder->initialize();
+
 		m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
 		m_pClassifier->initialize();
-	}
-	else
-	{
-		l_bIsPairing = true;
-		m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oStrategyClassIdentifier));
-		m_pClassifier->initialize();
-	}
 
-	m_ui64TrainStimulation=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+	//	CIdentifier l_oIdentifier;
+		i = OVP_BoxAlgorithm_ClassifierTrainerDeprecated_CommonSettingsCount; // number of settings when no additional setting is added
 
-	int64 l_i64PartitionCount=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
-	if(l_i64PartitionCount<0)
-	{
-		this->getLogManager() << LogLevel_Error << "Partition count can not be less than 0 (was " << l_i64PartitionCount << ")\n";
-		return false;
-	}
-	m_ui64PartitionCount=uint64(l_i64PartitionCount);
+		m_pExtraParemeter = new map<CString , CString> ();
+		while(i < l_rStaticBoxContext.getSettingCount())
+		{
+			CString l_pInputName;
+			CString l_pInputValue;
+			l_rStaticBoxContext.getSettingName(i, l_pInputName);
+			l_rStaticBoxContext.getSettingValue(i, l_pInputValue);
+			(*m_pExtraParemeter)[l_pInputName] = l_pInputValue;
 
-	for(i=1; i<l_rStaticBoxContext.getInputCount(); i++)
-	{
-		m_vFeatureVectorsDecoder[i-1]=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_FeatureVectorStreamDecoder));
-		m_vFeatureVectorsDecoder[i-1]->initialize();
-	}
+			++i;
+		}
+		TParameterHandler < map<CString , CString> * > ip_pExtraParameter(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+		ip_pExtraParameter = m_pExtraParemeter;
 
-	m_pStimulationsDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-	m_pStimulationsDecoder->initialize();
+		m_vFeatureCount.clear();
 
-	i = OVP_BoxAlgorithm_ClassifierTrainerDeprecated_CommonSettingsCount; // number of settings when no additional setting is added
+		m_pStimulationsEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
+		m_pStimulationsEncoder->initialize();
 
-	m_pExtraParemeter = new map<CString , CString> ();
-	while(i < l_rStaticBoxContext.getSettingCount())
-	{
-		CString l_pInputName;
-		CString l_pInputValue;
-		l_rStaticBoxContext.getSettingName(i, l_pInputName);
-		l_rStaticBoxContext.getSettingValue(i, l_pInputValue);
-		(*m_pExtraParemeter)[l_pInputName] = l_pInputValue;
-
-		++i;
-	}
-	TParameterHandler < map<CString , CString> * > ip_pExtraParameter(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
-	ip_pExtraParameter = m_pExtraParemeter;
-
-	//If we have to deal with a pairing strategy we have to pass argument
-	if(l_bIsPairing)
-	{
-		TParameterHandler < uint64* > ip_pClassAmount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount));
-		*ip_pClassAmount = l_rStaticBoxContext.getInputCount() -1;
-		TParameterHandler < CIdentifier* > ip_oClassId(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
-		ip_oClassId = &l_oClassifierAlgorithmClassIdentifier;
-		m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture);
-	}
-
-	m_vFeatureCount.clear();
-
-	m_pStimulationsEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
-	m_pStimulationsEncoder->initialize();
-
-	return true;
+		return true;
 }
 
 boolean CBoxAlgorithmClassifierTrainerDeprecated::uninitialize(void)
@@ -130,11 +108,6 @@ boolean CBoxAlgorithmClassifierTrainerDeprecated::uninitialize(void)
 	}
 	m_vFeatureVector.clear();
 	m_vFeatureVectorIndex.clear();
-
-//	if(m_pExtraParemeter != NULL)
-//	{
-//		delete m_pExtraParemeter;
-//	}
 
 	return true;
 }
@@ -327,7 +300,7 @@ boolean CBoxAlgorithmClassifierTrainerDeprecated::process(void)
 			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << this->getAccuracy(0, m_vFeatureVector.size()) << "% (optimistic)\n";
 
 			XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
-			CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2));
+			CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1));
 
 			if(!l_pHandler->writeXMLInFile(*op_pConfiguration, l_sConfigurationFilename.toASCIIString()))
 			{
