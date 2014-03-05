@@ -289,27 +289,17 @@ void P300KeyboardHandler::setGButtonFromSLabel(GButton* gbutton, uint32 keyIndex
 
 GLabel* P300KeyboardHandler::constructGLabelFromDescriptor(uint32 keyIndex, VisualState state)
 {
+	//std::cout << "key " << keyIndex <<  " for state " << state << std::endl;
 	P300KeyDescriptor* descriptor = m_pLayoutObject->getP300KeyboardLayout()->at(keyIndex);
 	GLabel* l_pGLabel;
 	if (descriptor->isTextSymbol(state))
 	{
-		//TODO a resource manager should be written for the fonts just as the texture manager for the GPictureSymbol
-		boost::shared_ptr<FTFont> l_ftglFont;
-        FontID l_pFontId = {descriptor->getSource(state),descriptor->getScaleSize(state),keyIndex};
-        std::map< FontID, boost::shared_ptr<FTFont> >::iterator l_pIterator;
-        l_pIterator = m_mFontSourceMap.find(l_pFontId);
-		if (l_pIterator!=m_mFontSourceMap.end())
-		    l_pGLabel = new GSymbol(descriptor->getLabel(state).c_str(), l_pIterator->second, descriptor->getScaleSize(state));
-		else
-		{
-			l_ftglFont = boost::shared_ptr<FTFont>(new FTGLPolygonFont(descriptor->getSource(state).toASCIIString()));
-			l_ftglFont->UseDisplayList(false);
-			m_mFontSourceMap.insert(std::make_pair(l_pFontId,l_ftglFont));
-			l_pGLabel = new GSymbol(descriptor->getLabel(state).c_str(), l_ftglFont, descriptor->getScaleSize(state));
-		}
+		l_pGLabel = new GSymbol(descriptor->getLabel(state).c_str(), descriptor->getSource(state).toASCIIString(), descriptor->getScaleSize(state));
 	}
 	else
 		l_pGLabel = new GPictureSymbol(descriptor->getSource(state), descriptor->getScaleSize(state));
+
+	//std::cout << "key " << keyIndex <<  " for state " << state << "--------------------done" << std::endl;
 	return l_pGLabel;
 }
 

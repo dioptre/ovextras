@@ -6,6 +6,9 @@
 
 #include "glGLabel.h"
 
+#include <gdk/gdk.h>//pango stuff
+#include <cairo.h>
+
 namespace OpenViBEApplications
 {
 	/**
@@ -25,7 +28,7 @@ namespace OpenViBEApplications
 		 * @param font a shared pointer to a font object of the FTGL library
 		 * @param fontScaleSize a number between 0 and 1 to define its size (1 almost filling up the entire label box)
 		 */
-		GSymbol(const char * symbol, boost::shared_ptr<FTFont> font, OpenViBE::float32 fontScaleSize);	
+		//GSymbol(const char * symbol, boost::shared_ptr<FTFont> font, OpenViBE::float32 fontScaleSize);
 		/**
 		 * @param symbol the string (word or character) that should be displayed
 		 * @param fontPath the path to the ttf file which defines the font and from which a FTFont object will be created
@@ -58,12 +61,10 @@ namespace OpenViBEApplications
 		//virtual void setLabelScaleSize(OpenViBE::float32 labelScaleSize);
 		
 		//additional setters
-		//virtual void setFont(boost::shared_ptr<FTFont> font) { this->m_ftglFont = font; }
 		virtual void setTextLabel(const char * symbol);
 		
 		//additional getters
 		virtual std::string getTextLabel() const { return m_sTextLabel; }	
-		virtual boost::shared_ptr<FTFont> getFont() const { return m_ftglFont; }	
 		
 	protected:
 		//inherited functions
@@ -78,20 +79,21 @@ namespace OpenViBEApplications
 		 */
 		virtual void computeMaximumLabelSize();
 		virtual void generateGLDisplayLists();
+
+		cairo_t* create_layout_context();
+		void get_text_size (PangoLayout *layout, int *width, int *height, PangoRectangle* ink, PangoRectangle* logical);
+		void render_text(const char *text, int *text_width, int *text_height, unsigned int *texture_id);
+
+		unsigned int create_texture ( int width,int height,unsigned char *pixels);
 		
 	private:
 		void assignHelper(GSymbol const& gsymbol);
-		boost::shared_ptr<FTFont> createFont(const char* fontPath)
-		{
-			//return boost::shared_ptr<FTFont>(new FTGLPixmapFont(fontPath)); 
-			return boost::shared_ptr<FTFont>(new FTGLPolygonFont(fontPath));
-		}
 		
 		//void setFontSize();
 		
 	protected:
 		std::string m_sTextLabel;
-		boost::shared_ptr<FTFont> m_ftglFont;	
+		PangoLayout *m_olayout;
 	};
 };
 

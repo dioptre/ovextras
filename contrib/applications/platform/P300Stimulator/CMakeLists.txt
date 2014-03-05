@@ -17,6 +17,7 @@ INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyLibrariesForExternalStimulator")
+INCLUDE("FindThirdPartyGTK")#to use gtk package content i.e cairo pango frretype
 
 #so that boost won't need to link against DateTime when using the interprocess communication library
 ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)

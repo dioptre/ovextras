@@ -210,7 +210,7 @@ namespace OpenViBEApplications
 		/**
 		 * see FontID
 		 */
-		std::map<FontID,boost::shared_ptr<FTFont> > m_mFontSourceMap;
+		//std::map<FontID,boost::shared_ptr<FTFont> > m_mFontSourceMap;
 	};
 };
 #endif

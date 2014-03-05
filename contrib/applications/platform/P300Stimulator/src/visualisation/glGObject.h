@@ -14,7 +14,7 @@
 	#include <GL/glu.h>
 #endif
 
-#include "FTGL/ftgl.h"
+//#include "FTGL/ftgl.h"
 
 namespace OpenViBEApplications
 {
