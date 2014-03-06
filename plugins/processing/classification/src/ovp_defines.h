@@ -1,11 +1,6 @@
 #ifndef __OpenViBEPlugins_Defines_H__
 #define __OpenViBEPlugins_Defines_H__
 
-
-
-#define OVP_TypeId_ClassificationStrategy                   OpenViBE::CIdentifier(0xBE9EBA5C, 0xA8415D37)
-#define OVP_TypeId_ClassificationAlgorithm                  OpenViBE::CIdentifier(0xD765A736, 0xED708C65)
-
 //___________________________________________________________________//
 //                                                                   //
 // Plugin Object Descriptor Class Identifiers                        //

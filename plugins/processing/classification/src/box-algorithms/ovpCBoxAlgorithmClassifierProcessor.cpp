@@ -28,13 +28,13 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 
 	XML::IXMLNode * l_pTempNode = l_pRootNode->getChildByName("Strategy-Identifier");
 	CString l_sStrategyName(l_pTempNode->getPCData().c_str());
-	CIdentifier l_oAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationStrategy, l_sStrategyName);
+	CIdentifier l_oAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationStrategy, l_sStrategyName);
 
 	//If the Identifier is undefined, that means we need to load a native algorithm
 	if(l_oAlgorithmClassIdentifier == OV_UndefinedIdentifier){
 		l_pTempNode = l_pRootNode->getChildByName("Algorithm-Identifier");
 		CString l_sAlgorithmName(l_pTempNode->getPCData().c_str());
-		l_oAlgorithmClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationAlgorithm, l_sAlgorithmName);
+		l_oAlgorithmClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sAlgorithmName);
 
 		//If the algorithm is still unknown, that means that we face an error
 		if(l_oAlgorithmClassIdentifier==OV_UndefinedIdentifier)

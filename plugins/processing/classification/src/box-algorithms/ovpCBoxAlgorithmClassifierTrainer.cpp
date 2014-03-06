@@ -31,11 +31,11 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	//Get the strategy
 	l_rStaticBoxContext.getSettingValue(0, l_sStrategyClassIdentifier);
 
-	l_oStrategyClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationStrategy, l_sStrategyClassIdentifier);
+	l_oStrategyClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationStrategy, l_sStrategyClassIdentifier);
 
 	//Get the classifier
 	l_rStaticBoxContext.getSettingValue(1, l_sClassifierAlgorithmClassIdentifier);
-	l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
+	l_oClassifierAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
 
 	if(l_oStrategyClassIdentifier==OV_UndefinedIdentifier)
 	{

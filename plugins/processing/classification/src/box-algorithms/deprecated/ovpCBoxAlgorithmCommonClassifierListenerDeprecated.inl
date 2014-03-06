@@ -95,7 +95,7 @@ namespace OpenViBEPlugins
 
 				rBox.getSettingValue(0, l_sClassifierName);
 
-				l_oClassifierIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationAlgorithm, l_sClassifierName);
+				l_oClassifierIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierName);
 				if(l_oClassifierIdentifier != m_oClassifierClassIdentifier)
 				{
 					if(m_pClassifier)
