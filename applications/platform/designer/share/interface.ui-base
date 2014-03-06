@@ -111,13 +111,6 @@ Contributions also from :
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkAdjustment" id="zoom_adjustement">
-    <property name="lower">10</property>
-    <property name="upper">1000</property>
-    <property name="value">100</property>
-    <property name="step_increment">5</property>
-    <property name="page_increment">25</property>
-  </object>
   <object class="GtkDialog" id="box_configuration">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -2074,17 +2067,6 @@ Contributions also from :
     <data>
       <row>
         <col id="0" translatable="yes">dummy</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkListStore" id="zoom_model">
-    <columns>
-      <!-- column-name gchararray -->
-      <column type="gint"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">100</col>
       </row>
     </data>
   </object>

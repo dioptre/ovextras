@@ -403,10 +403,8 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	m_bHasBeenModified=false;
 	this->updateScenarioLabel();
 
-
 	m_pTooltip=GTK_WIDGET(gtk_builder_get_object(m_pBuilderTooltip, "tooltip"));
 	gtk_widget_set_name(m_pTooltip, "gtk-tooltips");
-
 }
 
 CInterfacedScenario::~CInterfacedScenario(void)
@@ -1165,7 +1163,6 @@ void CInterfacedScenario::setScale(OpenViBE::float64 rScale)
 	pango_font_description_set_size(l_pPangoFontDescription, m_ui32NormalFontSize*m_f64CurrentScale);
 
 	m_bScenarioModified = true;
-
 	this->redraw();
 }
 
@@ -1284,7 +1281,6 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaExposeCB\n";
-
 	gint x = -1;
 	gint y = -1;
 	::GdkGC* l_pDrawGC= gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
@@ -1482,7 +1478,6 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 			g_object_unref(l_pDrawGC);
 		}
 	}
-
 }
 void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext* pDragContext, gint iX, gint iY, ::GtkSelectionData* pSelectionData, guint uiInfo, guint uiT)
 {
