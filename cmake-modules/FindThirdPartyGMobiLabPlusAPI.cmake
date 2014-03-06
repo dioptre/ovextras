@@ -10,6 +10,7 @@
 # Adds include path
 # ---------------------------------
 
+
 IF(WIN32)
 	# note that the API must be 32bit with OpenViBE
 	FIND_PATH(PATH_GMobiLabCAPI GMobiLabPlus.h PATHS 
@@ -31,7 +32,7 @@ IF(WIN32)
 				
 		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_GMobiLabCAPI} )
 			
-		INSTALL(PROGRAMS ${PATH_GMobiLabLIB}/gMOBIlabplus.dll DESTINATION "bin")
+		INSTALL(PROGRAMS ${PATH_GMobiLabDLL}/gMOBIlabplus.dll DESTINATION "bin")
 		
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyGMobiLabPlusAPI)
 	ELSE(PATH_GMobiLabCAPI AND PATH_GMobiLabDLL AND LIB_GMobiLabCAPI)

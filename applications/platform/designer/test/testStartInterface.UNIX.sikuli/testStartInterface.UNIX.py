@@ -36,4 +36,5 @@ def test_boxSetAtributes(self):
 def tearDown(self):
     App.close(self.terminal)
     self.terminal= None
+    wait(2)
 
