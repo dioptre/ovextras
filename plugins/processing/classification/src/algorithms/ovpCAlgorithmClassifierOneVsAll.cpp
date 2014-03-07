@@ -198,7 +198,8 @@ XML::IXMLNode* CAlgorithmClassifierOneVsAll::saveConfiguration(void)
 	XML::IXMLNode *l_pOneVsAllNode = XML::createNode("OneVsAll");
 
 	XML::IXMLNode *l_pTempNode = XML::createNode("SubClassifierIdentifier");
-	l_pTempNode->setPCData(l_sClassIdentifier.str().c_str());
+	l_pTempNode->addAttribute("algorithm-id",l_sClassIdentifier.str().c_str());
+	l_pTempNode->setPCData(this->getTypeManager().getEnumerationEntryNameFromValue(OVTK_TypeId_ClassificationAlgorithm, m_oSubClassifierAlgorithmIdentifier.toUInteger()).toASCIIString());
 	l_pOneVsAllNode->addChild(l_pTempNode);
 
 	l_pTempNode = XML::createNode("SubClassifierCount");
@@ -225,7 +226,7 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 	XML::IXMLNode *l_pOneVsAllNode = pConfigurationNode->getChild(0);
 
 	XML::IXMLNode *l_pTempNode = l_pOneVsAllNode->getChildByName("SubClassifierIdentifier");
-	std::stringstream l_sIdentifierData(l_pTempNode->getPCData());
+	std::stringstream l_sIdentifierData(l_pTempNode->getAttribute("algorithm-id"));
 	uint64 l_iIdentifier;
 	l_sIdentifierData >> l_iIdentifier;
 	if(m_oSubClassifierAlgorithmIdentifier.toUInteger() != l_iIdentifier)
