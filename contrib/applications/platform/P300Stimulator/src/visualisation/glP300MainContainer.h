@@ -17,6 +17,8 @@
 
 #include "glGTable.h"
 
+#include <GLFW/glfw3.h>
+
 #define WORDPREDICTION
 
 namespace OpenViBEApplications
@@ -103,6 +105,8 @@ namespace OpenViBEApplications
 		 * @param height height of the window
 		 */
 		static void initializeGL(OpenViBE::boolean fullScreen, OpenViBE::float32 width, OpenViBE::float32 height);
+
+		static GLFWwindow*  getWindow(void) {return m_oGLFWWindow;};
 	private:
 		/**
 		 * This function is used by drawAndSync
@@ -134,10 +138,11 @@ namespace OpenViBEApplications
 		 */		
 		void initializeDiodeArea();
 	
-		static void do_ortho(OpenViBE::float32 width, OpenViBE::float32 height);	
+		static void do_ortho(OpenViBE::float32 width, OpenViBE::float32 height);
 		
 	private:
-		static SDL_Surface* m_oSDLSurface;
+		//static SDL_Surface* m_oSDLSurface;
+		static GLFWwindow* m_oGLFWWindow;
 		
 		#ifdef WORDPREDICTION
 		P300PredictionboardHandler* m_pP300PredictionHandler;

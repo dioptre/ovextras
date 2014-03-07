@@ -6,12 +6,15 @@
 
 #include "../handlers/ovexP300KeyboardHandler.h"
 
+
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
 using namespace std;
 
-SDL_Surface* P300MainContainer::m_oSDLSurface;
+//SDL_Surface* P300MainContainer::m_oSDLSurface;
+GLFWwindow* P300MainContainer::m_oGLFWWindow;
 
 P300MainContainer::P300MainContainer(P300InterfacePropertyReader* propertyObject, P300ScreenLayoutReader* layoutPropObject) : 
 GContainer(0.0f,0.0f,propertyObject->getWidth(),propertyObject->getHeight()), m_pInterfacePropertyObject(propertyObject),
@@ -50,7 +53,8 @@ P300MainContainer::P300MainContainer(const P300MainContainer& gcontainer) : GCon
 P300MainContainer::~P300MainContainer()
 {
 	std::cout << "P300MainContainer deconstructor called\n";
-	SDL_FreeSurface(m_oSDLSurface);
+	//SDL_FreeSurface(m_oSDLSurface);
+	glfwDestroyWindow(m_oGLFWWindow);
 	#ifdef WORDPREDICTION
 	delete m_pP300PredictionHandler;
 	#endif
@@ -105,13 +109,31 @@ void P300MainContainer::initialize(uint32 nGridCells)
 	#endif
 }
 
+
+
 void P300MainContainer::initializeGL(OpenViBE::boolean fullScreen, OpenViBE::float32 width, OpenViBE::float32 height)
 {
+
+	if(!glfwInit())
+	{
+		std::cout << "Failed to init GLFW\n";
+	}
+
+	//GLFWwindow*
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	m_oGLFWWindow = glfwCreateWindow((int)width, (int)height, "My Title", NULL, NULL);
+	glfwMakeContextCurrent(m_oGLFWWindow);
+
+
+
+	/*
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0) 
 	{
 		std::cout << "Failed to init SDL\n";
 		//return false;
 	}
+
+
 
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE,    	    8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,  	    8);
@@ -138,6 +160,7 @@ void P300MainContainer::initializeGL(OpenViBE::boolean fullScreen, OpenViBE::flo
 		//return false;
 		std::cout << "Failed to create SDL surface\n";
 	}
+	//*/
 
 	glClearColor(0, 0, 0, 0);
 
@@ -272,7 +295,8 @@ void P300MainContainer::draw()
 	fprintf(timingFile, "%f\n",l_f64TimeAfter);
 	#endif
 	
-	SDL_GL_SwapBuffers();
+	//SDL_GL_SwapBuffers();
+	glfwSwapBuffers(this->getWindow());
 	glFinish();
 }
 

@@ -41,24 +41,28 @@ GPictureSymbol::~GPictureSymbol()
 // TODO maybe this should be moved to the OpenGLTextureManager
 void GPictureSymbol::initializeOpenGLTexture()
 {
-	SDL_Surface* l_pSurface = IMG_Load(m_sSourceFile);
+	//SDL_Surface* l_pSurface = IMG_Load(m_sSourceFile);
+	GdkPixbuf* l_pPixBuff = gdk_pixbuf_new_from_file(m_sSourceFile, NULL);
 	m_bImageLoaded = true;
-	if (!l_pSurface) 
+	if (!l_pPixBuff)
 	{
 		std::cout << "GPictureSymbol: could not load picture " << m_sSourceFile.toASCIIString() << "\n";
 		m_bImageLoaded = false;
-		SDL_FreeSurface(l_pSurface);
+		//SDL_FreeSurface(l_pSurface);
+		g_object_unref(l_pPixBuff);
 	}
 	else
 	{
-		if (l_pSurface->format->BytesPerPixel == 3)
+		//std::cout << "image mode " << gdk_pixbuf_get_bits_per_sample(l_pPixBuff) << " " << (int)l_pSurface->format->BytesPerPixel << std::endl << " has alpha " << gdk_pixbuf_get_has_alpha(l_pPixBuff) << std::endl;
+		if (gdk_pixbuf_get_bits_per_sample(l_pPixBuff)/2==3)//(l_pSurface->format->BytesPerPixel == 3)
 			m_iMode = GL_RGB;
-		else if (l_pSurface->format->BytesPerPixel == 4)
+		else if (gdk_pixbuf_get_bits_per_sample(l_pPixBuff)/2==4)//(l_pSurface->format->BytesPerPixel == 4)
 			m_iMode = GL_RGBA;
 		else 
 		{
 			m_bImageLoaded = false;
-			SDL_FreeSurface(l_pSurface);
+			//SDL_FreeSurface(l_pSurface);
+			g_object_unref(l_pPixBuff);
 			std::cout << "Something went wrong when trying to determine BMP mode\n";
 		}
 		//create one texture name
@@ -70,7 +74,8 @@ void GPictureSymbol::initializeOpenGLTexture()
 			glBindTexture(GL_TEXTURE_2D, m_pTextureManager->getResource(0));
 
 			//this reads from the sdl surface and puts it into an opengl texture
-			glTexImage2D(GL_TEXTURE_2D, 0, m_iMode, l_pSurface->w, l_pSurface->h, 0, m_iMode, GL_UNSIGNED_BYTE, l_pSurface->pixels);
+			glTexImage2D(GL_TEXTURE_2D, 0, m_iMode, gdk_pixbuf_get_width(l_pPixBuff), gdk_pixbuf_get_height(l_pPixBuff), 0, m_iMode, GL_UNSIGNED_BYTE, gdk_pixbuf_get_pixels(l_pPixBuff));
+			//glTexImage2D(GL_TEXTURE_2D, 0, m_iMode, l_pSurface->w, l_pSurface->h, 0, m_iMode, GL_UNSIGNED_BYTE, l_pSurface->pixels);
 
 			//these affect how this texture is drawn later on...
 			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -78,7 +83,7 @@ void GPictureSymbol::initializeOpenGLTexture()
 			
 			glBindTexture(GL_TEXTURE_2D, 0);
 			
-			SDL_FreeSurface(l_pSurface);
+			g_object_unref(l_pPixBuff);//SDL_FreeSurface(l_pSurface);
 		}
 	}
 }

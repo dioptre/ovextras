@@ -294,7 +294,9 @@ void ExternalP300Stimulator::run()
 		l_ui64CurrentTime += l_ui64TimeStep;
 		m_ui64StimulatedCycleTime += l_ui64TimeStep;
 
-		SDL_PollEvent(&m_eKeyEvent);
+		//SDL_PollEvent(&m_eKeyEvent);
+		//std::cout << "Stimulator waiting 0 " << std::endl;
+		m_funcVisualiserWaitCallback(0);
 		if(checkForQuitEvent())
 			m_ui32TrialIndex = UINT_MAX;
 		
@@ -311,9 +313,14 @@ void ExternalP300Stimulator::run()
 	//to monitor for certain events
 	if (m_ui32TrialIndex != UINT_MAX)
 	{
-		SDL_WaitEvent(&m_eKeyEvent);
-		while (!checkForQuitEvent() && SDL_WaitEvent(&m_eKeyEvent)) 
+		//SDL_WaitEvent(&m_eKeyEvent);
+		std::cout << "Stimulator waiting " << std::endl;
+		m_funcVisualiserWaitCallback(1);
+		while (!checkForQuitEvent())// && SDL_WaitEvent(&m_eKeyEvent))
+		{
+			m_funcVisualiserWaitCallback(1);
 			System::Time::sleep(50);
+		}
 	}
 	m_funcVisualiserCallback(OVA_StimulationId_ExperimentStop);
 }
@@ -321,6 +328,7 @@ void ExternalP300Stimulator::run()
 boolean ExternalP300Stimulator::checkForQuitEvent()
 {
 	boolean l_bQuitEventReceived = false;
+	/*
 	switch (m_eKeyEvent.type) {
 		case SDL_KEYDOWN:
 			if(m_eKeyEvent.key.keysym.sym==SDLK_ESCAPE)
@@ -332,5 +340,7 @@ boolean ExternalP300Stimulator::checkForQuitEvent()
 		default:
 			break;
 	}
+	//*/
+	l_bQuitEventReceived = m_quitevent();
 	return l_bQuitEventReceived;
 }

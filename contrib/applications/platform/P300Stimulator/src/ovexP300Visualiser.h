@@ -65,6 +65,9 @@ namespace OpenViBEApplications
 			 */
 			static void processCallback(OpenViBE::uint32 event);
 
+			static void processWaitCallback(OpenViBE::uint32 event);
+			static OpenViBE::boolean areWeQuitting(void);
+
 			/**
 			 * Initializes the OpenViBE kernel so that we can use some facilities such as the LogManager
 			 */
@@ -79,6 +82,8 @@ namespace OpenViBEApplications
 			 * 
 			 */
 			OpenViBE::uint32 getNumberOfKeys() { return m_pScreenLayoutReader->getNumberOfKeys(); }
+
+			const P300MainContainer* getMainContainer() { return m_pMainContainer;}
 
 		private:
 			

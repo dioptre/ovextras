@@ -2,7 +2,8 @@
 
 #include <system/Time.h>
 
-#include "SDL.h"
+//#include "SDL.h"
+#include <GLFW/glfw3.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -83,6 +84,9 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	//create the stimulator object and register the callback function that is implemented above.
 	this->m_oStimulator = new ExternalP300Stimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator); 
 	this->m_oStimulator->setCallBack(ExternalP300Visualiser::processCallback);	
+	this->m_oStimulator->setWaitCallBack(ExternalP300Visualiser::processWaitCallback);
+	this->m_oStimulator->setQuitEventCheck(ExternalP300Visualiser::areWeQuitting);
+
 
 	//initialize the OpenGL context and the main container that is needed to draw everything on the screen by calling the drawAndSync function
 	P300MainContainer::initializeGL(this->m_pInterfacePropReader->getFullScreen(),
@@ -156,6 +160,25 @@ void ExternalP300Visualiser::initializeOpenViBEKernel()
 void ExternalP300Visualiser::processCallback(OpenViBE::uint32 eventID) 
 {
 	externalVisualiser->process(eventID);				
+}
+
+void ExternalP300Visualiser::processWaitCallback(OpenViBE::uint32 eventID)
+{
+	//std::cout << "ExternalP300Visualiser::processWaitCallback" << std::endl;
+	if(eventID==0)
+	{
+		glfwPollEvents();
+	}
+	else
+	{
+		glfwWaitEvents();
+	}
+		//externalVisualiser->process(eventID);
+}
+boolean ExternalP300Visualiser::areWeQuitting(void)
+{
+	GLFWwindow* window = externalVisualiser->getMainContainer()->getWindow();
+	return (boolean)glfwWindowShouldClose(window);
 }
 
 void ExternalP300Visualiser::process(uint32 eventID)
@@ -398,13 +421,38 @@ void ExternalP300Visualiser::changeStates(uint32* states, VisualState ifState, V
 	}	
 }
 
+
+static void error_callback(int error, const char* description)
+{
+	std::cout << "GLFW " << description << std::endl;
+}
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	std::cout << "key pressed " << std::endl;
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	{
+		std::cout << "ESCAPE key pressed " << std::endl;
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+	if (key == GLFW_KEY_S && action == GLFW_PRESS)
+	{
+		std::cout << "START key pressed " << std::endl;
+	}
+}
+
+
 /**
 MAIN: press 's' to start the stimulator
 */
 int main (int argc, char *argv[])
 {	
+	glfwSetErrorCallback(error_callback);
+
 	//create the main visualiser object
 	externalVisualiser = new ExternalP300Visualiser();
+
+	GLFWwindow* window = externalVisualiser->getMainContainer()->getWindow();
+	glfwSetKeyCallback(window, key_callback);
 
 	//variable for the symbol probabilities
 	s_pResetSymbolProbabilities = new float64[externalVisualiser->getNumberOfKeys()];
@@ -412,9 +460,13 @@ int main (int argc, char *argv[])
 		s_pResetSymbolProbabilities[i] = 1.0/externalVisualiser->getNumberOfKeys();
 	
 	//listen for an key event. If 's' is pressed the stimulator is started.
-	SDL_Event event;
+	//SDL_Event event;
+	//int key;
 	boolean l_bEventReceived = false;
-	while (!l_bEventReceived && SDL_WaitEvent(&event)) {
+	while (!l_bEventReceived && glfwGetKey(window, GLFW_KEY_S)!=GLFW_PRESS)//SDL_WaitEvent(&event))
+	{
+		glfwWaitEvents();
+		/*
 		switch (event.type) {
 			case SDL_KEYDOWN:
 				if(event.key.keysym.sym==SDLK_s)
@@ -426,13 +478,23 @@ int main (int argc, char *argv[])
 			default:
 				break;
 		}
+		//*/
+		std::cout << "waiting" << std::endl;
+		if(glfwGetKey(window, GLFW_KEY_S)==GLFW_PRESS)
+		{
+			l_bEventReceived = true;
+			externalVisualiser->start();
+		}
+
 		System::Time::sleep(10);
 	}
 	
 	//clean up
 	delete externalVisualiser;
 	delete[] s_pResetSymbolProbabilities;
-	SDL_Quit();
+
+	glfwTerminate();
+	//SDL_Quit();
 
 	return 0;
 }

@@ -6,6 +6,7 @@
 
 #include "glGLabel.h"
 #include "OpenGLManagers/OpenGLTextureManager.h"
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
 namespace OpenViBEApplications
 {

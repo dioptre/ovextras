@@ -198,7 +198,7 @@ void GSymbol::render_text(const char *text, int *text_width, int *text_height, u
 		//cairo_set_operator(render_context, CAIRO_OPERATOR_OVER);
 		//cairo_set_source_rgba (render_context, 0.5, 1, 0.5, 1);
 		//*
-		GColor back = this->getBackgroundColor();
+		//GColor back = this->getBackgroundColor();
 		GColor fore = this->getForegroundColor();
 		cairo_set_source_rgba (render_context, fore.red, fore.green, fore.blue, 0);
 		//cairo_rectangle(render_context, 0, 0, *text_width, *text_height);
@@ -223,7 +223,7 @@ void GSymbol::render_text(const char *text, int *text_width, int *text_height, u
 			float32 size =  float32(m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE)/1.387535079;
 			pango_font_description_set_size(desc,size);//*10000);
 			//std::cout << m_f32LabelScaleSize << " m_f32LabelScaleSize " << std::endl;
-			//std::cout << m_f32MaxLabelSize << " m_f32MaxLabelSize " << std::endl;
+		//	std::cout << m_f32MaxLabelSize << " m_f32MaxLabelSize " << std::endl;
 			//std::cout << m_f32LabelScaleSize*m_f32MaxLabelSize << " * " << (int)PANGO_SCALE << std::endl;
 			pango_layout_set_font_description(layout, desc);			// assign the previous font description to the layout
 			pango_font_description_free(desc);					// free the description
@@ -263,7 +263,7 @@ void GSymbol::render_text(const char *text, int *text_width, int *text_height, u
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glPopMatrix ();
-		SDL_GL_SwapBuffers();
+		//SDL_GL_SwapBuffers();
 		/* Clean up */
 		//*
 		free (surface_data);

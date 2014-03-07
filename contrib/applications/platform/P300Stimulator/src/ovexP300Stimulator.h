@@ -16,11 +16,12 @@
 #include "ovexP300SequenceGenerator.h"
 
 //TODO get rid of the SDL dependency, should not be in the stimulator, create a separate SDL_thread that listens for key events
-#include "SDL.h"
+//#include "SDL.h"
 
 namespace OpenViBEApplications
 {		
 		typedef void (*Callback2Visualiser)(OpenViBE::uint32);	
+		typedef OpenViBE::boolean (*getFromVisualiser)(void);
 
 		/**
 		 * States of the stimulator (depends on the time within a trial)
@@ -66,6 +67,10 @@ namespace OpenViBEApplications
 				 * The callback that the stimulator will call to notify the ExternalP300Visualiser that the state has changed and the display should be updated
 				 */
 				void setCallBack( Callback2Visualiser callback) { m_funcVisualiserCallback = callback; }
+
+
+				void setWaitCallBack( Callback2Visualiser callback) { m_funcVisualiserWaitCallback = callback; }
+				void setQuitEventCheck( getFromVisualiser callback) { m_quitevent = callback; }
 				
 				/**
 				 * At the beginning of the the next trial, generate the whole sequence of letters that have to be flashed in the trial
@@ -130,6 +135,8 @@ namespace OpenViBEApplications
 				OpenViBE::uint32 m_ui32TrialIndex;
 
 				Callback2Visualiser m_funcVisualiserCallback;
+				Callback2Visualiser m_funcVisualiserWaitCallback;
+				getFromVisualiser m_quitevent;
 
 				std::map < OpenViBE::uint64, OpenViBE::uint64 > m_vRow;
 				std::map < OpenViBE::uint64, OpenViBE::uint64 > m_vColumn;
@@ -137,7 +144,7 @@ namespace OpenViBEApplications
 				OpenViBE::uint64 m_ui64Prediction;
 				std::queue< OpenViBE::uint64 >* m_oTargetStimuli;
 				
-				SDL_Event m_eKeyEvent;
+				//SDL_Event m_eKeyEvent;
 
 				#ifdef OUTPUT_TIMING
                 FILE* timingFile;
