@@ -1,6 +1,7 @@
 #include "ovd_base.h"
 
 #include <system/Time.h>
+#include <system/CMath.h>
 
 #include <stack>
 #include <vector>
@@ -351,6 +352,10 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		{
 			l_oConfiguration.m_eNoManageSession=CommandLineFlag_NoManageSession;
 		}
+		else if(*it=="--random-seed")
+		{
+			l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed] = *++it;
+		}
 //		else if(*it=="--define")
 //		{
 //			l_oConfiguration.m_oFlag.push_back(std::make_pair(Flag_NoGui, *++it));
@@ -397,12 +402,13 @@ int go(int argc, char ** argv)
 		cout << "  --config filename       : path to config file\n";
 		cout << "  --help                  : displays this help message and exits\n";
 		cout << "  --kernel filename       : path to openvibe kernel library\n";
-		cout << "  --no-gui                : hides the designer graphical user interface (assumes --no-color-depth-test)\n";
+		cout << "  --no-gui                : hides the designer graphical user interface (assumes --no-check-color-depth)\n";
 		cout << "  --no-check-color-depth  : does not check 24/32 bits color depth\n";
 		cout << "  --no-session-management : neither restore last used scenarios nor saves them at exit\n";
 		cout << "  --open filename         : opens a scenario (see also --no-session-management)\n";
 		cout << "  --play filename         : plays the opened scenario (see also --no-session-management)\n";
 		cout << "  --play-fast filename    : plays fast forward the opened scenario (see also --no-session-management)\n";
+		cout << "  --random-seed uint      : initialize random number generator with value, default=time(NULL)\n";
 //					l_rLogManager << LogLevel_Info << "  --define                : defines a variable in the configuration manager\n";
 		return -1;
 	}
@@ -510,6 +516,15 @@ int go(int argc, char ** argv)
 				if(l_rConfigurationManager.expandAsBoolean("${Kernel_3DVisualisationEnabled}"))
 				{
 					l_pKernelContext->getVisualisationManager().initialize3DContext();
+				}
+
+				if(l_oConfiguration.m_oFlag.count(CommandLineFlag_RandomSeed)) 
+				{
+					System::Math::initializeRandomMachine(atol(l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed].c_str()));
+				} 
+				else
+				{
+					System::Math::initializeRandomMachine(time(NULL));
 				}
 
 				{
