@@ -23,7 +23,7 @@ def test_createSimpleScenarioAndRun(self):
     type("w",KeyModifier.CTRL)
     assert(exists("SavechangePopup.png"))
     click(Pattern("SavechangePopup.png").targetOffset(-170,56))
-    waitVanish(Pattern("SavechangePopup.png").targetOffset(-170,56))
+    waitVanish(Pattern("SavechangePopup.png").targetOffset(-170,56),3)
     
 def tearDown(self):
     App.close(self.terminal)

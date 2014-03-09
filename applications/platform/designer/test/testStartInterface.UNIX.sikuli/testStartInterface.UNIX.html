@@ -95,7 +95,7 @@
     <span class="skw">type</span>(<span class="str">"w"</span>,KeyModifier.CTRL)
     <span class="kw">assert</span>(exists(<img src="SavechangePopup.png" />))
     <span class="skw">click</span>(Pattern(<img src="SavechangePopup.png" />).targetOffset(-<span class="dig">170</span>,<span class="dig">56</span>))
-    waitVanish(Pattern(<img src="SavechangePopup.png" />).targetOffset(-<span class="dig">170</span>,<span class="dig">56</span>))
+    waitVanish(Pattern(<img src="SavechangePopup.png" />).targetOffset(-<span class="dig">170</span>,<span class="dig">56</span>),<span class="dig">3</span>)
 
 <span class="kw">def</span> tearDown(self):
     App.close(self.terminal)
