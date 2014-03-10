@@ -416,6 +416,7 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 
 boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 {
+	CIdentifier l_oStrategyClassIdentifier, l_oClassifierAlgorithmClassIdentifier;
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
@@ -431,11 +432,20 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 	l_sVersion << OVP_Classification_BoxTrainerXMLVersion;
 	root->addAttribute("XMLVersion", l_sVersion.str().c_str());
 
+
 	XML::IXMLNode *l_pTempNode = XML::createNode("Strategy-Identifier");
+	l_oStrategyClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationStrategy, l_sStrategyClassIdentifier);
+	std::stringstream l_sStrategyIdentifier;
+	l_sStrategyIdentifier << l_oStrategyClassIdentifier.toUInteger();
+	l_pTempNode->addAttribute("class_id", l_sStrategyIdentifier.str().c_str());
 	l_pTempNode->setPCData(l_sStrategyClassIdentifier);
 	root->addChild(l_pTempNode);
 
 	l_pTempNode = XML::createNode("Algorithm-Identifier");
+	l_oClassifierAlgorithmClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
+	std::stringstream l_sAlgorithmIdentifier;
+	l_sAlgorithmIdentifier << l_oClassifierAlgorithmClassIdentifier.toUInteger();
+	l_pTempNode->addAttribute("class_id", l_sAlgorithmIdentifier.str().c_str());
 	l_pTempNode->setPCData(l_sClassifierAlgorithmClassIdentifier.toASCIIString());
 	root->addChild(l_pTempNode);
 
