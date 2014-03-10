@@ -42,7 +42,6 @@ namespace OpenViBEToolkit
 		//  std::vector <OpenViBE::float64> m_fClasses;
 		//The vector will be use when the user will be able to specify class label
 		OpenViBE::CIdentifier m_oSubClassifierAlgorithmIdentifier;
-		OpenViBE::uint64 m_iAmountClass;
 	};
 
 	class OV_API CAlgorithmPairingStrategyDesc: public OpenViBEToolkit::CAlgorithmClassifierDesc
@@ -53,7 +52,6 @@ namespace OpenViBEToolkit
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 		{
 			CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
-			//rAlgorithmPrototype.addSetting("Pairing type",                         OVTK_TypeId_PairingClassification,                   "");
 
 			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm,        "Algorithm Identifier",        OpenViBE::Kernel::ParameterType_Identifier);
 			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount,                   "Amount of class",             OpenViBE::Kernel::ParameterType_Matrix);

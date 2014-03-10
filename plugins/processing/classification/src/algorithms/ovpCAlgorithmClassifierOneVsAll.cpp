@@ -154,7 +154,6 @@ void CAlgorithmClassifierOneVsAll::addNewClassifierAtBack(void)
 	ip_pExtraParameters.setReferenceTarget(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
 
 	this->m_oSubClassifierList.push_back(l_pSubClassifier);
-	++(this->m_iAmountClass);
 }
 
 void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
@@ -163,14 +162,12 @@ void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
 	l_pSubClassifier->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*l_pSubClassifier);
 	this->m_oSubClassifierList.pop_back();
-	--(this->m_iAmountClass);
 }
 
 boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &rId, uint64 &rClassAmount)
 {
 	m_oSubClassifierAlgorithmIdentifier = rId;
-
-	for(uint64 i = 1 ; i <= rClassAmount ; ++i)
+	for(uint64 i = 0 ; i < rClassAmount ; ++i)
 	{
 		this->addNewClassifierAtBack();
 	}
@@ -188,7 +185,7 @@ XML::IXMLNode* CAlgorithmClassifierOneVsAll::getClassifierConfiguration(IAlgorit
 XML::IXMLNode* CAlgorithmClassifierOneVsAll::saveConfiguration(void)
 {
 	std::stringstream l_sAmountClasses;
-	l_sAmountClasses << this->m_iAmountClass;
+	l_sAmountClasses << getClassAmount();
 
 	std::stringstream l_sClassIdentifier;
 	l_sClassIdentifier << this->m_oSubClassifierAlgorithmIdentifier.toUInteger();
@@ -243,16 +240,13 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 	uint64 l_iAmountClass;
 	l_sCountData >> l_iAmountClass;
 
-	if(l_iAmountClass < this->m_iAmountClass)
+	while(l_iAmountClass != getClassAmount())
 	{
-		while(this->m_iAmountClass > l_iAmountClass)
+		if(l_iAmountClass < getClassAmount())
 		{
 			this->removeClassifierAtBack();
 		}
-	}
-	else if(l_iAmountClass > this->m_iAmountClass)
-	{
-		while(this->m_iAmountClass < l_iAmountClass)
+		else
 		{
 			this->addNewClassifierAtBack();
 		}
@@ -272,5 +266,10 @@ void CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNode 
 		ip_pConfiguration = l_pSubClassifierNode->getChild(0);
 		m_oSubClassifierList[i]->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
 	}
+}
+
+uint32 CAlgorithmClassifierOneVsAll::getClassAmount(void) const
+{
+	return m_oSubClassifierList.size();
 }
 

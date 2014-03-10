@@ -44,7 +44,6 @@ namespace OpenViBEPlugins
 			std::stack<OpenViBE::CString> m_vNode;
 
 			std::vector<OpenViBE::Kernel::IAlgorithmProxy*> m_oSubClassifierList;
-			OpenViBE::uint64 m_iClassCounter; //This variable is use during configuration loading
 
 			OpenViBE::CMemoryBuffer m_oConfiguration;
 			XML::IXMLNode *m_pConfigurationNode;
@@ -53,6 +52,7 @@ namespace OpenViBEPlugins
 			XML::IXMLNode* getClassifierConfiguration(OpenViBE::Kernel::IAlgorithmProxy* classifier);
 			void addNewClassifierAtBack(void);
 			void removeClassifierAtBack(void);
+			OpenViBE::uint32 getClassAmount(void) const;
 
 			void loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 		};

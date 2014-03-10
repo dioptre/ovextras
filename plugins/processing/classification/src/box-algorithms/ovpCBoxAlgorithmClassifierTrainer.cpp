@@ -3,6 +3,7 @@
 #include <system/Memory.h>
 
 #include <fstream>
+#include <sstream>
 #include <cmath>
 #include <algorithm>
 
@@ -426,6 +427,9 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 	l_rStaticBoxContext.getSettingValue(1, l_sClassifierAlgorithmClassIdentifier);
 
 	XML::IXMLNode *root = XML::createNode("OpenViBE-Classifier-Box");
+	std::stringstream l_sVersion;
+	l_sVersion << OVP_Classification_BoxTrainerXMLVersion;
+	root->addAttribute("XMLVersion", l_sVersion.str().c_str());
 
 	XML::IXMLNode *l_pTempNode = XML::createNode("Strategy-Identifier");
 	l_pTempNode->setPCData(l_sStrategyClassIdentifier);
@@ -450,9 +454,9 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 		l_rStaticBoxContext.getSettingValue(OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount + i, l_sStimulationName);
 
 		l_pTempNode = XML::createNode("Class-Stimulation");
-		char l_sBuffer[8];
-		sprintf(l_sBuffer, "%d", i);
-		l_pTempNode->addAttribute("class-id", l_sBuffer);
+		std::stringstream l_sBuffer;
+		l_sBuffer << i;
+		l_pTempNode->addAttribute("class-id", l_sBuffer.str().c_str());
 		l_pTempNode->setPCData(l_sStimulationName.toASCIIString());
 		l_pStimulationsNode->addChild(l_pTempNode);
 	}

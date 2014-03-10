@@ -26,6 +26,24 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
 	XML::IXMLNode *l_pRootNode = l_pHandler->parseFile(l_sConfigurationFilename.toASCIIString());
 
+	//Now check the version, and let's display a message if the version is not good
+	string l_sVersion;
+	if(l_pRootNode->hasAttribute("XMLVersion"))
+	{
+		l_sVersion = l_pRootNode->getAttribute("XMLVersion");
+		std::stringstream l_sData(l_sVersion);
+		uint32 l_ui32Version;
+		l_sData >> l_ui32Version;
+		if(l_ui32Version != OVP_Classification_BoxTrainerXMLVersion)
+		{
+			this->getLogManager() << LogLevel_Warning << "The configuration file doesn't have the same version numero than the box. Trouble may appeared in loading process.\n";
+		}
+	}
+	else
+	{
+		this->getLogManager() << LogLevel_Warning << "The configuration file has no version information. Trouble may appeared in loading process.\n";
+	}
+
 	XML::IXMLNode * l_pTempNode = l_pRootNode->getChildByName("Strategy-Identifier");
 	CString l_sStrategyName(l_pTempNode->getPCData().c_str());
 	CIdentifier l_oAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationStrategy, l_sStrategyName);
