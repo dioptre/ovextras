@@ -121,8 +121,7 @@ void CAlgorithmClassifierSVM::setParameter(void)
 
 	//Extract OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMweightLabel
 	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMWeightLabel);
-	TParameterHandler < CString * > ip_sWeightLabel(getInputParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMWeightLabel));
-	ip_sWeightLabel = &(*l_pExtraParameter)[l_pParameterName];
+	CString l_sParamWeightLabel = *this->getCStringParameter(OVP_Algorithm_ClassifierSVM_InputParameterId_SVMWeightLabel, (*l_pExtraParameter)[l_pParameterName]);
 
 	l_pAlgoProxy->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
@@ -143,7 +142,6 @@ void CAlgorithmClassifierSVM::setParameter(void)
 	m_oParam.weight = l_pWeight;//NULL;
 
 	std::vector<int64> l_vWeightLabel;
-	CString l_sParamWeightLabel=*ip_sWeightLabel;
 	std::stringstream l_oStreamStringLabel((const char*)l_sParamWeightLabel);
 	int64 l_i64CurrentValue;
 	while(l_oStreamStringLabel>>l_i64CurrentValue)
