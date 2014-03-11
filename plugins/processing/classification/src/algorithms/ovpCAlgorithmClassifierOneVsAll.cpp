@@ -164,10 +164,10 @@ void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
 	this->m_oSubClassifierList.pop_back();
 }
 
-boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &rId, uint64 &rClassAmount)
+boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &rId, int64 &rClassAmount)
 {
 	m_oSubClassifierAlgorithmIdentifier = rId;
-	for(uint64 i = 0 ; i < rClassAmount ; ++i)
+	for(int64 i = 0 ; i < rClassAmount ; ++i)
 	{
 		this->addNewClassifierAtBack();
 	}

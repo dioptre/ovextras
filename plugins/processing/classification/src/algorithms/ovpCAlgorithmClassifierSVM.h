@@ -74,6 +74,8 @@ namespace OpenViBEPlugins
 			void loadParamNodeConfiguration(XML::IXMLNode *pParamNode);
 			void loadModelNodeConfiguration(XML::IXMLNode *pModelNode);
 			void loadModelSVsNodeConfiguration(XML::IXMLNode* pSVsNodeParam);
+
+			void setParameter(void);
 		};
 
 		class CAlgorithmClassifierSVMDesc : public OpenViBEToolkit::CAlgorithmClassifierDesc

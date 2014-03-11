@@ -75,13 +75,11 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 
 	//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage
 	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage);
-	TParameterHandler < float64 > ip_pShrinkage(getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage));
-	ip_pShrinkage = this->getAlgorithmContext().getConfigurationManager().expandAsFloat((*l_pExtraParameter)[l_pParameterName]);
+	this->getFloat64Parameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage, (*l_pExtraParameter)[l_pParameterName]);
 
 	//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov
 	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov);
-	TParameterHandler< boolean > ip_bDiagonalCov(getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov));
-	ip_bDiagonalCov = this->getAlgorithmContext().getConfigurationManager().expandAsFloat((*l_pExtraParameter)[l_pParameterName]);
+	boolean l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov, (*l_pExtraParameter)[l_pParameterName]);
 
 	l_pAlgoProxy->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
@@ -158,7 +156,7 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 		Map<MatrixXdRowMajor> l_oCovMapper(op_pCovarianceMatrix->getBuffer(), l_ui32nCols, l_ui32nCols);
 		l_aCov[l_ui32classIdx] = l_oCovMapper;
 
-		if(ip_bDiagonalCov) 
+		if(l_pDiagonalCov)
 		{
 			for(uint32 i=0;i<l_ui32nCols;i++) 
 			{

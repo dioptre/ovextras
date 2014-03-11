@@ -89,8 +89,8 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	//If we have to deal with a pairing strategy we have to pass argument
 	if(l_bIsPairing)
 	{
-		TParameterHandler < uint64* > ip_pClassAmount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount));
-		*ip_pClassAmount = l_rStaticBoxContext.getInputCount() -1;
+		TParameterHandler < uint64 > ip_pClassAmount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount));
+		ip_pClassAmount = l_rStaticBoxContext.getInputCount() -1;
 		TParameterHandler < CIdentifier* > ip_oClassId(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
 		ip_oClassId = &l_oClassifierAlgorithmClassIdentifier;
 		m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture);

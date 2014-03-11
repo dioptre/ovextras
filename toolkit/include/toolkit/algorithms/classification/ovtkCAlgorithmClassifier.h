@@ -48,6 +48,12 @@ namespace OpenViBEToolkit
 
 		virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)=0;
 
+		OpenViBE::int64 getInt64Parameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CString& rParameterValue);
+		OpenViBE::float64 getFloat64Parameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CString& rParameterValue);
+		OpenViBE::boolean getBooleanParameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CString& rParameterValue);
+		OpenViBE::CString* getCStringParameter(const OpenViBE::CIdentifier& rParameterIdentifier, OpenViBE::CString& rParameterValue);
+		OpenViBE::int64 getEnumerationParameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CIdentifier& rEnumerationIdentifier,  const OpenViBE::CString& rParameterValue);
+
 		_IsDerivedFromClass_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVTK_ClassId_Algorithm_Classifier);
 	};
 
