@@ -18,6 +18,14 @@ using namespace OpenViBEPlugins::Local;
 
 using namespace OpenViBEToolkit;
 
+boolean CAlgorithmClassifierLDA::initialize(void)
+{
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	op_pConfiguration=NULL;
+
+	return CAlgorithmClassifier::initialize();
+}
+
 boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
 	uint32 i;
@@ -93,28 +101,6 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 	m_oCoefficients=l_oSigmaInverse * (l_oMeanFeatureVector1 - l_oMeanFeatureVector2);
 	m_oCoefficients.ins(0, -0.5 * ((l_oMeanFeatureVector1+l_oMeanFeatureVector2).transpose() * m_oCoefficients)[0]);
 
-	std::stringstream l_sClasses;
-	std::stringstream l_sCoefficients;
-
-	l_sClasses << m_f64Class1 << " " << m_f64Class2;
-	l_sCoefficients << std::scientific << m_oCoefficients[0];
-	for(int i=1; i<m_oCoefficients.size(); i++)
-	{
-		l_sCoefficients << " " << m_oCoefficients[i];
-	}
-
-	XML::IXMLNode *l_pClassesNode = XML::createNode("Classes");
-	l_pClassesNode->setPCData(l_sClasses.str().c_str());
-	XML::IXMLNode *l_pCoefficientsNode = XML::createNode("Coefficients");
-	l_pCoefficientsNode->setPCData(l_sCoefficients.str().c_str());
-
-	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode("LDA");
-	l_pAlgorithmNode->addChild(l_pClassesNode);
-	l_pAlgorithmNode->addChild(l_pCoefficientsNode);
-
-	m_pConfigurationNode = XML::createNode("OpenViBE-Classifier");
-	m_pConfigurationNode->addChild(l_pAlgorithmNode);
-
 	return true;
 }
 
@@ -157,8 +143,34 @@ uint32 CAlgorithmClassifierLDA::getBestClassification(IMatrix& rFirstClassificat
 		return 1;
 }
 
+void CAlgorithmClassifierLDA::generateConfigurationNode(void)
+{
+	std::stringstream l_sClasses;
+	std::stringstream l_sCoefficients;
+
+	l_sClasses << m_f64Class1 << " " << m_f64Class2;
+	l_sCoefficients << std::scientific << m_oCoefficients[0];
+	for(int i=1; i<m_oCoefficients.size(); i++)
+	{
+		l_sCoefficients << " " << m_oCoefficients[i];
+	}
+
+	XML::IXMLNode *l_pClassesNode = XML::createNode("Classes");
+	l_pClassesNode->setPCData(l_sClasses.str().c_str());
+	XML::IXMLNode *l_pCoefficientsNode = XML::createNode("Coefficients");
+	l_pCoefficientsNode->setPCData(l_sCoefficients.str().c_str());
+
+	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode("LDA");
+	l_pAlgorithmNode->addChild(l_pClassesNode);
+	l_pAlgorithmNode->addChild(l_pCoefficientsNode);
+
+	m_pConfigurationNode = XML::createNode("OpenViBE-Classifier");
+	m_pConfigurationNode->addChild(l_pAlgorithmNode);
+}
+
 XML::IXMLNode* CAlgorithmClassifierLDA::saveConfiguration(void)
 {
+	this->generateConfigurationNode();
 	return m_pConfigurationNode;
 }
 

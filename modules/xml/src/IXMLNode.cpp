@@ -55,6 +55,10 @@ using namespace XML;
 
 IXMLNodeImpl::~IXMLNodeImpl(void)
 {
+	for(uint32 i =0; i < getChildCount() ; ++i)
+	{
+		getChild(i)->release();
+	}
 }
 
 void IXMLNodeImpl::release(void)

@@ -18,6 +18,14 @@ using namespace OpenViBEPlugins::Local;
 using namespace OpenViBEToolkit;
 
 
+boolean CAlgorithmClassifierOneVsAll::initialize()
+{
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	op_pConfiguration=NULL;
+
+	return CAlgorithmPairingStrategy::initialize();
+}
+
 boolean CAlgorithmClassifierOneVsAll::uninitialize(void)
 {
 	while(!m_oSubClassifierList.empty())
@@ -182,7 +190,7 @@ XML::IXMLNode* CAlgorithmClassifierOneVsAll::getClassifierConfiguration(IAlgorit
 	return l_pRes;
 }
 
-XML::IXMLNode* CAlgorithmClassifierOneVsAll::saveConfiguration(void)
+void CAlgorithmClassifierOneVsAll::generateConfigurationNode(void)
 {
 	std::stringstream l_sAmountClasses;
 	l_sAmountClasses << getClassAmount();
@@ -214,7 +222,11 @@ XML::IXMLNode* CAlgorithmClassifierOneVsAll::saveConfiguration(void)
 	l_pOneVsAllNode->addChild(l_pSubClassifersNode);
 
 	m_pConfigurationNode->addChild(l_pOneVsAllNode);
+}
 
+XML::IXMLNode* CAlgorithmClassifierOneVsAll::saveConfiguration(void)
+{
+	generateConfigurationNode();
 	return m_pConfigurationNode;
 }
 

@@ -101,6 +101,9 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	ip_pClassificationConfiguration = l_pRootNode->getChildByName("OpenViBE-Classifier");
 	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
 
+	l_pRootNode->release();
+	l_pHandler->release();
+
 	m_bOutputHeaderSent=false;
 	return true;
 }

@@ -362,6 +362,14 @@ boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const s
 
 	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Train);
 
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	XML::IXMLNode *l_pTempNode = (XML::IXMLNode*)op_pConfiguration;
+	std::cout << l_pTempNode << std::endl;
+	if(l_pTempNode != NULL){
+		l_pTempNode->release();
+	}
+	op_pConfiguration = NULL;
+
 	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration);
 
 	return true;
@@ -479,5 +487,9 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 		this->getLogManager() << LogLevel_Error << "Could not save configuration to file [" << l_sConfigurationFilename << "]\n";
 		return false;
 	}
+
+	l_pHandler->release();
+	root->release();
+	op_pConfiguration=NULL;
 	return true;
 }

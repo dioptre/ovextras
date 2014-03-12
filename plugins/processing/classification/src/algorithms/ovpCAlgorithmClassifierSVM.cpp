@@ -55,7 +55,29 @@ boolean CAlgorithmClassifierSVM::initialize(void)
 	*ip_sWeight="";
 	*ip_sWeightLabel="";
 
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	op_pConfiguration=NULL;
+	m_oProb.y=NULL;
+	m_oProb.x=NULL;
+
 	return CAlgorithmClassifier::initialize();
+}
+
+boolean CAlgorithmClassifierSVM::uninitialize(void)
+{
+	if(m_oProb.x != NULL && m_oProb.y != NULL)
+	{
+		for(int i=0;i<m_oProb.l;i++)
+		{
+			delete[] m_oProb.x[i];
+		}
+		delete[] m_oProb.y;
+		delete[] m_oProb.x;
+		m_oProb.y=NULL;
+		m_oProb.x=NULL;
+	}
+
+	return CAlgorithmClassifier::uninitialize();
 }
 
 void CAlgorithmClassifierSVM::setParameter(void)
@@ -165,6 +187,18 @@ void CAlgorithmClassifierSVM::setParameter(void)
 
 boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
+
+	if(m_oProb.x != NULL && m_oProb.y != NULL)
+	{
+		for(int i=0;i<m_oProb.l;i++)
+		{
+			delete[] m_oProb.x[i];
+		}
+		delete[] m_oProb.y;
+		delete[] m_oProb.x;
+		m_oProb.y=NULL;
+		m_oProb.x=NULL;
+	}
 	// default Param values
 	//std::cout<<"param config"<<std::endl;
 	this->setParameter();
@@ -172,25 +206,24 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 
 	//configure m_oProb
 	//std::cout<<"prob config"<<std::endl;
-	struct svm_problem l_oProb;
-	l_oProb.l=rFeatureVectorSet.getFeatureVectorCount();
+	m_oProb.l=rFeatureVectorSet.getFeatureVectorCount();
 	m_ui32NumberOfFeatures=rFeatureVectorSet[0].getSize();
 
-	l_oProb.y = new double[l_oProb.l];
-	l_oProb.x = new svm_node*[l_oProb.l];
+	m_oProb.y = new double[m_oProb.l];
+	m_oProb.x = new svm_node*[m_oProb.l];
 
 	//std::cout<< "number vector:"<<l_oProb.l<<" size of vector:"<<m_ui32NumberOfFeatures<<std::endl;
 
-	for(int i=0;i<l_oProb.l;i++)
+	for(int i=0;i<m_oProb.l;i++)
 	{
-		l_oProb.x[i] = new svm_node[m_ui32NumberOfFeatures+1];
-		l_oProb.y[i] = rFeatureVectorSet[i].getLabel();
+		m_oProb.x[i] = new svm_node[m_ui32NumberOfFeatures+1];
+		m_oProb.y[i] = rFeatureVectorSet[i].getLabel();
 		for(uint32 j=0;j<m_ui32NumberOfFeatures;j++)
 		{
-			l_oProb.x[i][j].index=j;
-			l_oProb.x[i][j].value=rFeatureVectorSet[i].getBuffer()[j];
+			m_oProb.x[i][j].index=j;
+			m_oProb.x[i][j].value=rFeatureVectorSet[i].getBuffer()[j];
 		}
-		l_oProb.x[i][m_ui32NumberOfFeatures].index=-1;
+		m_oProb.x[i][m_ui32NumberOfFeatures].index=-1;
 	}
 	if(m_oParam.gamma == 0 && m_ui32NumberOfFeatures > 0)
 	{
@@ -199,14 +232,14 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 
 	if(m_oParam.kernel_type == PRECOMPUTED)
 	{
-		for(int i=0;i<l_oProb.l;i++)
+		for(int i=0;i<m_oProb.l;i++)
 		{
-			if(l_oProb.x[i][0].index!=0)
+			if(m_oProb.x[i][0].index!=0)
 			{
 				this->getLogManager() << LogLevel_Error << "Wrong input format: first column must be 0:sample_serial_number\n";
 				return false;
 			}
-			if(l_oProb.x[i][0].value <= 0 || l_oProb.x[i][0].value > m_ui32NumberOfFeatures)
+			if(m_oProb.x[i][0].value <= 0 || m_oProb.x[i][0].value > m_ui32NumberOfFeatures)
 			{
 				this->getLogManager() << LogLevel_Error << "Wrong input format: sample_serial_number out of range\n";
 				return false;
@@ -214,7 +247,7 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 		}
 	}
 
-	this->getLogManager() << LogLevel_Trace << problemToString(&l_oProb);
+	this->getLogManager() << LogLevel_Trace << problemToString(&m_oProb);
 
 	//make a model
 	//std::cout<<"svm_train"<<std::endl;
@@ -224,7 +257,7 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 		delete m_pModel;
 		m_pModel=NULL;
 	}
-	m_pModel=svm_train(&l_oProb,&m_oParam);
+	m_pModel=svm_train(&m_oProb,&m_oParam);
 
 	if(m_pModel == NULL)
 	{
@@ -235,6 +268,85 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 	//std::cout<<"log model"<<std::endl;
 	this->getLogManager() << LogLevel_Trace << modelToString();
 
+	return true;
+}
+
+boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
+{
+	//std::cout<<"classify"<<std::endl;
+	if(m_pModel==NULL)
+	{
+		this->getLogManager() << LogLevel_Error << "classify impossible with a model equal NULL\n";
+		return false;
+	}
+	if(m_pModel->nr_class==0||m_pModel->rho==NULL)
+	{
+		this->getLogManager() << LogLevel_Error << "the model wasn't load correctly\n";
+		return false;
+	}
+	//std::cout<<"create l_pX"<<std::endl;
+	svm_node* l_pX=new svm_node[rFeatureVector.getSize()+1];
+	//std::cout<<"rFeatureVector.getSize():"<<rFeatureVector.getSize()<<"m_ui32NumberOfFeatures"<<m_ui32NumberOfFeatures<<std::endl;
+	for(unsigned int i=0;i<rFeatureVector.getSize();i++)
+	{
+		l_pX[i].index=i;
+		l_pX[i].value=rFeatureVector.getBuffer()[i];
+		//std::cout<< l_pX[i].index << ";"<<l_pX[i].value<<" ";
+	}
+	l_pX[rFeatureVector.getSize()].index=-1;
+
+	//std::cout<<"create l_pProbEstimates"<<std::endl;
+	double *l_pProbEstimates=NULL;
+	l_pProbEstimates = new double[m_pModel->nr_class];
+	for(int i=0;i<m_pModel->nr_class;i++)
+	{
+		l_pProbEstimates[i]=0;
+	}
+
+	rf64Class=svm_predict_probability(m_pModel,l_pX,l_pProbEstimates);
+	//std::cout<<rf64Class<<std::endl;
+	//std::cout<<"probability"<<std::endl;
+
+	//If we are not in these mode, label is NULL and there is no probability
+	if(m_pModel->param.svm_type == C_SVC || m_pModel->param.svm_type == NU_SVC)
+	{
+		this->getLogManager() << LogLevel_Trace <<"Label predict: "<<rf64Class<<"\n";
+
+		for(int i=0;i<m_pModel->nr_class;i++)
+		{
+			this->getLogManager() << LogLevel_Trace << "index:"<<i<<" label:"<< m_pModel->label[i]<<" probability:"<<l_pProbEstimates[i]<<"\n";
+			if( m_pModel->label[i] == 1 )
+			{
+				rClassificationValues.setSize(1);
+				rClassificationValues[0]=1-l_pProbEstimates[i];
+
+			}
+		}
+	}
+	else
+		rClassificationValues.setSize(0);
+
+	//std::cout<<";"<<rf64Class<<";"<<rClassificationValues[0] <<";"<<l_pProbEstimates[0]<<";"<<l_pProbEstimates[1]<<std::endl;
+	//std::cout<<"Label predict "<<rf64Class<< " proba:"<<rClassificationValues[0]<<std::endl;
+	//std::cout<<"end classify"<<std::endl;
+	delete[] l_pX;
+	delete[] l_pProbEstimates;
+
+	return true;
+}
+
+uint32 CAlgorithmClassifierSVM::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
+{
+	if(rFirstClassificationValue[0]  < rSecondClassificationValue[0] )
+		return -1;
+	else if(rFirstClassificationValue[0] == rSecondClassificationValue[0])
+		return 0;
+	else
+		return 1;
+}
+
+void CAlgorithmClassifierSVM::generateConfigurationNode(void)
+{
 	//xml file
 	//std::cout<<"model save"<<std::endl;
 
@@ -284,7 +396,6 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 		l_vSVCoef.push_back(CString(l_sSVCoef.str().c_str()));
 		l_vSVValue.push_back(CString(l_sSVValue.str().c_str()));
 	}
-
 	//std::cout<<"xml save"<<std::endl;
 	m_pConfigurationNode = XML::createNode("OpenViBE-Classifier");
 
@@ -351,7 +462,6 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 
 		if(m_pModel->label)
 		{
-			std::cout << "Save label" << std::endl;
 			std::stringstream l_sLabel;
 			l_sLabel << m_pModel->label[0];
 			for(int i=1;i<m_pModel->nr_class;i++)
@@ -424,95 +534,11 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 	}
 	l_pSVMNode->addChild(l_pModelNode);
 	m_pConfigurationNode->addChild(l_pSVMNode);
-
-	for(int i=0;i<l_oProb.l;i++)
-	{
-		delete[] l_oProb.x[i];
-	}
-	delete[] l_oProb.y;
-	delete[] l_oProb.x;
-	l_oProb.y=NULL;
-	l_oProb.x=NULL;
-
-	return true;
-}
-
-boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
-{
-	//std::cout<<"classify"<<std::endl;
-	if(m_pModel==NULL)
-	{
-		this->getLogManager() << LogLevel_Error << "classify impossible with a model equal NULL\n";
-		return false;
-	}
-	if(m_pModel->nr_class==0||m_pModel->rho==NULL)
-	{
-		this->getLogManager() << LogLevel_Error << "the model wasn't load correctly\n";
-		return false;
-	}
-	//std::cout<<"create l_pX"<<std::endl;
-	svm_node* l_pX=new svm_node[rFeatureVector.getSize()+1];
-	//std::cout<<"rFeatureVector.getSize():"<<rFeatureVector.getSize()<<"m_ui32NumberOfFeatures"<<m_ui32NumberOfFeatures<<std::endl;
-	for(unsigned int i=0;i<rFeatureVector.getSize();i++)
-	{
-		l_pX[i].index=i;
-		l_pX[i].value=rFeatureVector.getBuffer()[i];
-		//std::cout<< l_pX[i].index << ";"<<l_pX[i].value<<" ";
-	}
-	l_pX[rFeatureVector.getSize()].index=-1;
-
-	//std::cout<<"create l_pProbEstimates"<<std::endl;
-	double *l_pProbEstimates=NULL;
-	l_pProbEstimates = new double[m_pModel->nr_class];
-	for(int i=0;i<m_pModel->nr_class;i++)
-	{
-		l_pProbEstimates[i]=0;
-	}
-
-	rf64Class=svm_predict_probability(m_pModel,l_pX,l_pProbEstimates);
-	//std::cout<<rf64Class<<std::endl;
-	//std::cout<<"probability"<<std::endl;
-
-	//If we are not in these mode, label is NULL and there is no probability
-	if(m_pModel->param.svm_type == C_SVC || m_pModel->param.svm_type == NU_SVC)
-	{
-		this->getLogManager() << LogLevel_Trace <<"Label predict: "<<rf64Class<<"\n";
-
-		for(int i=0;i<m_pModel->nr_class;i++)
-		{
-			this->getLogManager() << LogLevel_Trace << "index:"<<i<<" label:"<< m_pModel->label[i]<<" probability:"<<l_pProbEstimates[i]<<"\n";
-			if( m_pModel->label[i] == 1 )
-			{
-				rClassificationValues.setSize(1);
-				rClassificationValues[0]=1-l_pProbEstimates[i];
-
-			}
-		}
-	}
-	else
-		rClassificationValues.setSize(0);
-
-	//std::cout<<";"<<rf64Class<<";"<<rClassificationValues[0] <<";"<<l_pProbEstimates[0]<<";"<<l_pProbEstimates[1]<<std::endl;
-	//std::cout<<"Label predict "<<rf64Class<< " proba:"<<rClassificationValues[0]<<std::endl;
-	//std::cout<<"end classify"<<std::endl;
-	delete[] l_pX;
-	delete[] l_pProbEstimates;
-
-	return true;
-}
-
-uint32 CAlgorithmClassifierSVM::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
-{
-    if(rFirstClassificationValue[0]  < rSecondClassificationValue[0] )
-        return -1;
-    else if(rFirstClassificationValue[0] == rSecondClassificationValue[0])
-        return 0;
-    else
-       return 1;
 }
 
 XML::IXMLNode* CAlgorithmClassifierSVM::saveConfiguration(void)
 {
+	generateConfigurationNode();
 	return m_pConfigurationNode;
 }
 

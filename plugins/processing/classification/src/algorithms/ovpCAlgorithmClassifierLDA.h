@@ -25,13 +25,15 @@ namespace OpenViBEPlugins
 		{
 		public:
 
+			virtual OpenViBE::boolean initialize(void);
+
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
 			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
 
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode* pConfiguratioNode);
 
-            virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
+			virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierLDA);
 
@@ -47,6 +49,8 @@ namespace OpenViBEPlugins
 		private:
 			void loadClassesFromNode(XML::IXMLNode *pNode);
 			void loadCoefficientsFromNode(XML::IXMLNode *pNode);
+
+			void generateConfigurationNode(void);
 		};
 
 		class CAlgorithmClassifierLDADesc : public OpenViBEToolkit::CAlgorithmClassifierDesc
