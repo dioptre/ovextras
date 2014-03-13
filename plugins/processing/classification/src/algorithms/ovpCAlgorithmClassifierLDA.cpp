@@ -14,7 +14,7 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Local;
+using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
 
@@ -164,7 +164,7 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 	l_pAlgorithmNode->addChild(l_pClassesNode);
 	l_pAlgorithmNode->addChild(l_pCoefficientsNode);
 
-	m_pConfigurationNode = XML::createNode("OpenViBE-Classifier");
+	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 	m_pConfigurationNode->addChild(l_pAlgorithmNode);
 }
 

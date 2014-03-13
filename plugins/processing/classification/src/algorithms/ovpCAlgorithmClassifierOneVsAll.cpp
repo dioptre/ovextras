@@ -13,7 +13,7 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Local;
+using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
 

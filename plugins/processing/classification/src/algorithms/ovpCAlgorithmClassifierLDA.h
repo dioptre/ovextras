@@ -9,7 +9,7 @@
 #include <toolkit/ovtk_all.h>
 
 #include <xml/IXMLNode.h>
-
+#define TARGET_HAS_ThirdPartyITPP
 #if defined TARGET_HAS_ThirdPartyITPP
 
 #include <itpp/itbase.h>
@@ -19,7 +19,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Local
+	namespace Classification
 	{
 		class CAlgorithmClassifierLDA : public OpenViBEToolkit::CAlgorithmClassifier
 		{
@@ -68,7 +68,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ClassifierLDA; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Local::CAlgorithmClassifierLDA; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Classification::CAlgorithmClassifierLDA; }
 
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const

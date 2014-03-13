@@ -12,6 +12,14 @@
 #include <xml/IXMLHandler.h>
 #include <xml/IXMLNode.h>
 
+namespace OpenViBEPlugins
+{
+	namespace Classification
+	{
+		const char* c_sClassifierRoot = "OpenViBE-Classifier";
+	}
+}
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
