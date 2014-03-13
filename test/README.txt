@@ -53,6 +53,14 @@ For a local test in your machine with not cdash rapport :
 
  ctest 
 
+Run Test for a specific branch :
+-------------------------------
+
+XXXXX = {Nightly,,Experimental,Continuous}
+
+ ctest -VV -S openVibeTests.cmake,XXXXX -DCTEST_BRANCH="my_remote_branch"
+
+
 
 How to add new test:
 -------------------
@@ -91,7 +99,35 @@ SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}}
 
 
+
+Test GUI using sikuli-ide :
+-------------------------
+
+If you have installed sikuli-ide in your linux machine them some GUI test are launch.
+
+For GUI test with sikuli we need a complete gtk windows manager. Actually, we only test with gnome whole package.
+
+You need to set the same GTK icon theme between machine that generate test and slave.
+
+You can install (on ubuntu) :
+
+sudo aptitude install gnome-tweak-tool  ubuntu-mono ttf-ubuntu-font-family light-themes dmz-cursor-theme
+
+them lanch :
+
+gnome-tweak-tool
+
+    switch icon theme to Ubuntu-Mono-Dark
+    switch GTK+ theme to Ambiance
+    if there is Windows theme then switch to Ambiance
+    switch Cursor theme to DMZ-White 
+
+
+
+
+
 Some Remarks :
+------------
 
     This test run designer with no GUI, but in Linux it still need a X11 context. So you need to be sure that test can access to a X server. That will be do by a automatic start-up of "Xorg -ac&" command to ensure that X server is launched at test moment. 
     That's why we need to define DISPLAY environment variable before launch test.
