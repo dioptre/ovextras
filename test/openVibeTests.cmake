@@ -71,7 +71,7 @@ ENDIF(${MODEL} MATCHES Continuous)
 set(CTEST_SOURCE_DIRECTORY              "${OV_ROOT_DIR}/trunk")
 
 ## -- BIN Dir
-set(CTEST_BINARY_DIRECTORY              "${OV_ROOT_DIR}/dist") 
+set(CTEST_BINARY_DIRECTORY	              "${OV_ROOT_DIR}/dist") 
 
 ## -- DashBoard Root
 set(CTEST_DASHBOARD_ROOT                "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -87,7 +87,7 @@ find_program(CTEST_GIT_COMMAND NAMES git)
 
 ## -- Checkout command
 if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}")
-	set(CTEST_CHECKOUT_COMMAND     "${CTEST_GIT_COMMAND} clone -b {CTEST_BRANCH} git://scm.gforge.inria.fr/openvibe/openvibe.git ${CTEST_SOURCE_DIRECTORY}")
+	set(CTEST_CHECKOUT_COMMAND     "${CTEST_GIT_COMMAND} clone -b ${CTEST_BRANCH} git://scm.gforge.inria.fr/openvibe/openvibe.git ${CTEST_SOURCE_DIRECTORY}")
 endif(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}")
 
 ## -- Update Command
