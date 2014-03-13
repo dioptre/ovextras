@@ -96,11 +96,14 @@
     <span class="kw">assert</span>(exists(<img src="SavechangePopup.png" />))
     <span class="skw">click</span>(Pattern(<img src="SavechangePopup.png" />).targetOffset(-<span class="dig">170</span>,<span class="dig">56</span>))
     waitVanish(Pattern(<img src="SavechangePopup.png" />).targetOffset(-<span class="dig">170</span>,<span class="dig">56</span>),<span class="dig">3</span>)
+    <span class="skw">type</span>(<span class="str">"n"</span>,KeyModifier.CTRL)
+    <span class="skw">wait</span>(<span class="dig">1</span>)
+
 
 <span class="kw">def</span> tearDown(self):
-    App.close(self.terminal)
-    self.terminal= None
-    <span class="skw">wait</span>(<span class="dig">2</span>)
+    <span class="kw">if</span> self.terminal.window():
+        App.close(self.terminal)
+        self.terminal= None
 </pre>
 </body>
 </html>
