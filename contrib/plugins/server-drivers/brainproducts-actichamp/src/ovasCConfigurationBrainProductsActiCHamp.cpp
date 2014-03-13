@@ -41,12 +41,12 @@ namespace
 
 	void button_module_toggled_cb(::GtkToggleButton* pToggleButton, gpointer pUserData)
 	{
-		reinterpret_cast<CConfigurationBrainProductsActiCHamp*>(pUserData)->buttonModuleToggledCB(gtk_toggle_button_get_active(pToggleButton));
+		reinterpret_cast<CConfigurationBrainProductsActiCHamp*>(pUserData)->buttonModuleToggledCB(gtk_toggle_button_get_active(pToggleButton) != 0);
 	}
 
 	void button_aux_channels_toggled_cb(::GtkToggleButton* pToggleButton, gpointer pUserData)
 	{
-		reinterpret_cast<CConfigurationBrainProductsActiCHamp*>(pUserData)->buttonAuxChannelsToggledCB(gtk_toggle_button_get_active(pToggleButton));
+		reinterpret_cast<CConfigurationBrainProductsActiCHamp*>(pUserData)->buttonAuxChannelsToggledCB(gtk_toggle_button_get_active(pToggleButton) != 0);
 	}
 }
 
@@ -127,6 +127,11 @@ boolean CConfigurationBrainProductsActiCHamp::preConfigure(void)
 		}
 	}
 
+	if(l_ui32DeviceCount ==0)
+	{
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels), 0);
+	}
+
 	if(!l_bSelected && l_ui32DeviceCount != 0)
 	{
 		::gtk_combo_box_set_active(m_pComboBoxDeviceId, 0);
@@ -149,9 +154,9 @@ boolean CConfigurationBrainProductsActiCHamp::postConfigure(void)
 
 	if(m_bApplyConfiguration)
 	{
-		gtk_spin_button_update(GTK_SPIN_BUTTON(m_rActiveShieldGain));
-		gtk_spin_button_update(GTK_SPIN_BUTTON(m_rGoodImpedanceLimit));
-		gtk_spin_button_update(GTK_SPIN_BUTTON(m_rBadImpedanceLimit));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pSpinButtonActiveShieldGain));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pSpinButtonGoodImpedanceLimit));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pSpinButtonBadImpedanceLimit));
 
 		m_rDeviceId=::gtk_combo_box_get_active(m_pComboBoxDeviceId);
 		m_rMode=::gtk_combo_box_get_active(m_pComboBoxMode);
@@ -161,7 +166,7 @@ boolean CConfigurationBrainProductsActiCHamp::postConfigure(void)
 		m_rActiveShieldGain=uint32(::gtk_spin_button_get_value(m_pSpinButtonActiveShieldGain));
 		m_rGoodImpedanceLimit=uint32(::gtk_spin_button_get_value(m_pSpinButtonGoodImpedanceLimit));
 		m_rBadImpedanceLimit=uint32(::gtk_spin_button_get_value(m_pSpinButtonBadImpedanceLimit));
-		m_rUseAuxChannels=::gtk_toggle_button_get_active(m_pCheckButtonUseAuxChannels);
+		m_rUseAuxChannels=::gtk_toggle_button_get_active(m_pCheckButtonUseAuxChannels) != 0;
 		m_rModuleEnabled=0x01
 			|(::gtk_toggle_button_get_active(m_pToggleModule1)?0x02:0x00)
 			|(::gtk_toggle_button_get_active(m_pToggleModule2)?0x04:0x00)

@@ -95,7 +95,17 @@
     <span class="skw">type</span>(<span class="str">"w"</span>,KeyModifier.CTRL)
     <span class="kw">assert</span>(exists(<img src="SavechangePopup.png" />))
     <span class="skw">click</span>(Pattern(<img src="SavechangePopup.png" />).targetOffset(-<span class="dig">170</span>,<span class="dig">56</span>))
-    waitVanish(Pattern(<img src="SavechangePopup.png" />).targetOffset(-<span class="dig">170</span>,<span class="dig">56</span>),<span class="dig">3</span>)
+    waitVanish(Pattern(<img src="SavechangePopup.png" />).targetOffset(-<span class="dig">170</span>,<span class="dig">56</span>))
+
+<span class="kw">def</span> test_boxSetAtributes(self):
+    <span class="skw">click</span>(<img src="SearchBoxBar.png" />)
+    paste(<span class="str">"sinus"</span>)
+    <span class="skw">dragDrop</span>(<img src="Sinusoscilla-1.png" />,Pattern(<img src="DesignerDataGenOpen.png" />).similar(<span class="dig">0.40</span>).targetOffset(-<span class="dig">233</span>,-<span class="dig">163</span>))
+    <span class="skw">rightClick</span>(<img src="SinusOscillatorBoxSelected.png" />)
+    <span class="skw">click</span>(Pattern(<img src="contextualBoxMenu.png" />).targetOffset(-<span class="dig">51</span>,<span class="dig">16</span>))
+    <span class="kw">assert</span>(exists(<img src="renameBoxPopUp.png" />))
+    <span class="skw">type</span>(<span class="str">"XXXX XXXX XXXX"</span>+ Key.ENTER)
+    <span class="kw">assert</span>(exists(<img src="SinusOscillatorNewNameXXX.png" />))
 
 <span class="kw">def</span> tearDown(self):
     App.close(self.terminal)
