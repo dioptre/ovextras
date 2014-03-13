@@ -68,6 +68,7 @@ CLogListenerDesigner::CLogListenerDesigner(const IKernelContext& rKernelContext,
 
 	m_pBuffer = gtk_text_view_get_buffer( m_pTextView );
 	gtk_text_buffer_set_text(m_pBuffer, "", -1);
+	m_sSearchTerm = CString("");
 
 	gtk_text_buffer_create_tag(m_pBuffer, "f_mono", "family", "monospace", NULL);
 	gtk_text_buffer_create_tag(m_pBuffer, "w_bold", "weight", PANGO_WEIGHT_BOLD, NULL);
@@ -508,24 +509,7 @@ void CLogListenerDesigner::log(const char* pValue)
 
 void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 {
-	//a new log is defined when a log level arrive
-	//manage the old one
-	//if the current log passes the filter add it to the m_pBuffer to be displayed
-	//*/TODO : might be redundant and removable
-	if(m_oCurrentLog!=NULL)
-	{
-		if(m_oCurrentLog->Filter(m_sSearchTerm))
-		{
-			//copy it to m_pBuffer to be displayed
-			GtkTextIter l_oBufferEnd, l_oLogBegin, l_oLogEnd;
-			gtk_text_buffer_get_end_iter(m_pBuffer, &l_oBufferEnd);
-			gtk_text_buffer_get_start_iter(m_oCurrentLog->getTextBuffer(), &l_oLogBegin);
-			gtk_text_buffer_get_end_iter(m_oCurrentLog->getTextBuffer(), &l_oLogEnd);
-			gtk_text_buffer_insert_range(m_pBuffer, &l_oBufferEnd, &l_oLogBegin, &l_oLogEnd );
-		}
-	}
-	//*/
-	//new one
+	//new log
 	m_oCurrentLog = new CLogObject(m_pBuffer);//m_pNonFilteredBuffer);
 	m_vStoredLog.push_back(m_oCurrentLog);
 

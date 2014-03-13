@@ -3286,14 +3286,19 @@ boolean CInterfacedScenario::hasSelection(void)
 
 boolean CInterfacedScenario::centerOnBox(CIdentifier rIdentifier)
 {
-	//m_rKernelContext.getLogManager() << LogLevel_Fatal << "CInterfacedScenario::centerOnBox" << endl;
+	//m_rKernelContext.getLogManager() << LogLevel_Fatal << "CInterfacedScenario::centerOnBox" << "\n";
 	boolean ret_val = false;
 	if(m_rScenario.isBox(rIdentifier))
 	{
+		//m_rKernelContext.getLogManager() << LogLevel_Fatal << "CInterfacedScenario::centerOnBox is box" << "\n";
 		IBox* rBox = m_rScenario.getBoxDetails(rIdentifier);
 		CBoxProxy l_oBoxProxy(m_rKernelContext, *rBox);
-		int x = l_oBoxProxy.getXCenter();
-		int y = l_oBoxProxy.getYCenter();
+		const int xMargin=5*m_f64CurrentScale;
+		const int yMargin=5*m_f64CurrentScale;
+		int xSize=l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + xMargin*2;
+		int ySize=l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + yMargin*2;
+		int x = l_oBoxProxy.getXCenter() + 3*xSize/4;
+		int y = l_oBoxProxy.getYCenter() + 3*ySize/4;
 
 		//get the parameters of the current adjustement
 		GtkAdjustment* l_pOldHAdjustement = gtk_scrolled_window_get_hadjustment(m_pScrolledWindow);//gtk_viewport_get_vadjustment(m_pScenarioViewport);
@@ -3323,8 +3328,7 @@ boolean CInterfacedScenario::centerOnBox(CIdentifier rIdentifier)
 		l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
 		gtk_adjustment_set_value(l_pAdjustement, y);
 		gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
-
+		ret_val = true;
 	}
-
 	return ret_val;
 }

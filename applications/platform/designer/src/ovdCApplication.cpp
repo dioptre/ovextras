@@ -1799,6 +1799,7 @@ void CApplication::releasePlayer(void)
 		l_pCurrentInterfacedScenario->m_pPlayer=NULL;
 
 		// restore the snapshot so settings override does not modify the scenario !
+		//commenting this line make centerOnBox still valid after stop
 		l_pCurrentInterfacedScenario->undoCB(false);
 
 		// destroy player windows
