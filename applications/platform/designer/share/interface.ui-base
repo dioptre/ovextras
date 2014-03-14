@@ -2792,7 +2792,7 @@ playing...</property>
                   <object class="GtkScrolledWindow" id="openvibe_scenario_notebook_scrolledwindow">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="events">GDK_STRUCTURE_MASK | GDK_SCROLL_MASK</property>
+                    <property name="events">GDK_ALL_EVENTS_MASK</property>
                     <property name="hscrollbar_policy">automatic</property>
                     <property name="vscrollbar_policy">automatic</property>
                     <child>
