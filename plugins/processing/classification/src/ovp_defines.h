@@ -29,11 +29,17 @@
  #include "ovp_global_defines.h"
 #endif // TARGET_HAS_ThirdPartyOpenViBEPluginsGlobalDefines
 
-namespace OpenViBEPlugins{
-	namespace Classification{
-		extern const char* c_sClassifierRoot;
-	}
-}
 
+extern const char* const c_sXmlVersionAttributeName;
+extern const char* const c_sIdentifierAttributeName;
+
+extern const char* const c_sStrategyNodeName;
+extern const char* const c_sAlgorithmNodeName;
+extern const char* const c_sStimulationsNodeName;
+extern const char* const c_sRejectedClassNodeName;
+extern const char* const c_sClassStimulationNodeName;
+
+extern const char* const c_sClassificationBoxRoot;
+extern const char* const c_sClassifierRoot;
 
 #endif // __OpenViBEPlugins_Defines_H__

@@ -13,6 +13,13 @@
 
 #include "../algorithms/ovpCAlgorithmConditionedCovariance.h"
 
+static const char* const c_sTypeNodeName = "LDA";
+static const char* const c_sCreatorNodeName = "Creator";
+static const char* const c_sClassesNodeName = "Classes";
+static const char* const c_sCoefficientsNodeName = "Coefficients";
+
+extern const char* const c_sClassifierRoot;
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -274,19 +281,19 @@ void CAlgorithmClassifierShrinkageLDA::generateConfigurationNode(void)
 		l_sCoefficients << " " << m_oCoefficients(0,i);
 	}
 
-	XML::IXMLNode *l_pCreatorNode = XML::createNode("Creator");
+	XML::IXMLNode *l_pCreatorNode = XML::createNode(c_sCreatorNodeName);
 	l_pCreatorNode->setPCData("ShrinkageLDA");
-	XML::IXMLNode *l_pClassesNode = XML::createNode("Classes");
+	XML::IXMLNode *l_pClassesNode = XML::createNode(c_sClassesNodeName);
 	l_pClassesNode->setPCData(l_sClasses.str().c_str());
-	XML::IXMLNode *l_pCoefficientsNode = XML::createNode("Coefficients");
+	XML::IXMLNode *l_pCoefficientsNode = XML::createNode(c_sCoefficientsNodeName);
 	l_pCoefficientsNode->setPCData(l_sCoefficients.str().c_str());
 
-	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode("LDA");
+	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode(c_sTypeNodeName);
 	l_pAlgorithmNode->addChild(l_pCreatorNode);
 	l_pAlgorithmNode->addChild(l_pClassesNode);
 	l_pAlgorithmNode->addChild(l_pCoefficientsNode);
 
-	m_pConfigurationNode = XML::createNode("OpenViBE-Classifier");
+	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 	m_pConfigurationNode->addChild(l_pAlgorithmNode);
 }
 

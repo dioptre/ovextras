@@ -9,6 +9,12 @@
 #include <xml/IXMLNode.h>
 #include <xml/IXMLHandler.h>
 
+static const char* const c_sTypeNodeName = "LDA";
+static const char* const c_sClassesNodeName = "Classes";
+static const char* const c_sCoeffNodeName = "Coefficients";
+
+extern const char* const c_sClassifierRoot;
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -155,12 +161,12 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 		l_sCoefficients << " " << m_oCoefficients[i];
 	}
 
-	XML::IXMLNode *l_pClassesNode = XML::createNode("Classes");
+	XML::IXMLNode *l_pClassesNode = XML::createNode(c_sClassesNodeName);
 	l_pClassesNode->setPCData(l_sClasses.str().c_str());
-	XML::IXMLNode *l_pCoefficientsNode = XML::createNode("Coefficients");
+	XML::IXMLNode *l_pCoefficientsNode = XML::createNode(c_sCoeffNodeName);
 	l_pCoefficientsNode->setPCData(l_sCoefficients.str().c_str());
 
-	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode("LDA");
+	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode(c_sTypeNodeName);
 	l_pAlgorithmNode->addChild(l_pClassesNode);
 	l_pAlgorithmNode->addChild(l_pCoefficientsNode);
 
@@ -179,8 +185,8 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguratioN
 	m_f64Class1=0;
 	m_f64Class2=0;
 
-	loadClassesFromNode(pConfiguratioNode->getChild(0)->getChildByName("Classes"));
-	loadCoefficientsFromNode(pConfiguratioNode->getChild(0)->getChildByName("Coefficients"));
+	loadClassesFromNode(pConfiguratioNode->getChild(0)->getChildByName(c_sClassesNodeName));
+	loadCoefficientsFromNode(pConfiguratioNode->getChild(0)->getChildByName(c_sCoeffNodeName));
 
 	return true;
 }

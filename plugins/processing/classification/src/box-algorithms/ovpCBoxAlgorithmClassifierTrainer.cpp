@@ -12,13 +12,18 @@
 #include <xml/IXMLHandler.h>
 #include <xml/IXMLNode.h>
 
-namespace OpenViBEPlugins
-{
-	namespace Classification
-	{
-		const char* c_sClassifierRoot = "OpenViBE-Classifier";
-	}
-}
+const char* const c_sClassifierRoot = "OpenViBE-Classifier";
+
+const char* const c_sXmlVersionAttributeName = "XMLVersion";
+const char* const c_sIdentifierAttributeName = "class-id";
+
+const char* const c_sStrategyNodeName = "Strategy-Identifier";
+const char* const c_sAlgorithmNodeName = "Algorithm-Identifier";
+const char* const c_sStimulationsNodeName = "Stimulations";
+const char* const c_sRejectedClassNodeName = "Rejected-Class";
+const char* const c_sClassStimulationNodeName = "Class-Stimulation";
+
+const char* const c_sClassificationBoxRoot = "OpenViBE-Classifier-Box";
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -443,32 +448,32 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 	l_rStaticBoxContext.getSettingValue(0, l_sStrategyClassIdentifier);
 	l_rStaticBoxContext.getSettingValue(1, l_sClassifierAlgorithmClassIdentifier);
 
-	XML::IXMLNode *root = XML::createNode("OpenViBE-Classifier-Box");
+	XML::IXMLNode *root = XML::createNode(c_sClassificationBoxRoot);
 	std::stringstream l_sVersion;
 	l_sVersion << OVP_Classification_BoxTrainerXMLVersion;
-	root->addAttribute("XMLVersion", l_sVersion.str().c_str());
+	root->addAttribute(c_sXmlVersionAttributeName, l_sVersion.str().c_str());
 
 
-	XML::IXMLNode *l_pTempNode = XML::createNode("Strategy-Identifier");
+	XML::IXMLNode *l_pTempNode = XML::createNode(c_sStrategyNodeName);
 	l_oStrategyClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationStrategy, l_sStrategyClassIdentifier);
 	std::stringstream l_sStrategyIdentifier;
 	l_sStrategyIdentifier << l_oStrategyClassIdentifier.toUInteger();
-	l_pTempNode->addAttribute("class_id", l_sStrategyIdentifier.str().c_str());
+	l_pTempNode->addAttribute(c_sIdentifierAttributeName, l_sStrategyIdentifier.str().c_str());
 	l_pTempNode->setPCData(l_sStrategyClassIdentifier);
 	root->addChild(l_pTempNode);
 
-	l_pTempNode = XML::createNode("Algorithm-Identifier");
+	l_pTempNode = XML::createNode(c_sAlgorithmNodeName);
 	l_oClassifierAlgorithmClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
 	std::stringstream l_sAlgorithmIdentifier;
 	l_sAlgorithmIdentifier << l_oClassifierAlgorithmClassIdentifier.toUInteger();
-	l_pTempNode->addAttribute("class_id", l_sAlgorithmIdentifier.str().c_str());
+	l_pTempNode->addAttribute(c_sIdentifierAttributeName, l_sAlgorithmIdentifier.str().c_str());
 	l_pTempNode->setPCData(l_sClassifierAlgorithmClassIdentifier.toASCIIString());
 	root->addChild(l_pTempNode);
 
 
-	XML::IXMLNode *l_pStimulationsNode = XML::createNode("Stimulations");
+	XML::IXMLNode *l_pStimulationsNode = XML::createNode(c_sStimulationsNodeName);
 
-	l_pTempNode = XML::createNode("Rejected-Class");
+	l_pTempNode = XML::createNode(c_sRejectedClassNodeName);
 	CString l_sRejectedStimulationName;
 	l_rStaticBoxContext.getSettingValue(OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount, l_sRejectedStimulationName);
 	l_pTempNode->setPCData(l_sRejectedStimulationName.toASCIIString());
@@ -479,10 +484,10 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 		CString l_sStimulationName;
 		l_rStaticBoxContext.getSettingValue(OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount + i, l_sStimulationName);
 
-		l_pTempNode = XML::createNode("Class-Stimulation");
+		l_pTempNode = XML::createNode(c_sClassStimulationNodeName);
 		std::stringstream l_sBuffer;
 		l_sBuffer << i;
-		l_pTempNode->addAttribute("class-id", l_sBuffer.str().c_str());
+		l_pTempNode->addAttribute(c_sIdentifierAttributeName, l_sBuffer.str().c_str());
 		l_pTempNode->setPCData(l_sStimulationName.toASCIIString());
 		l_pStimulationsNode->addChild(l_pTempNode);
 	}

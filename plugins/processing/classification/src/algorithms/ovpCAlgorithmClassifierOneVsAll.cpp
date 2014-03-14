@@ -8,6 +8,15 @@
 #include <iostream>
 
 
+static const char* const c_sTypeNodeName = "OneVsAll";
+static const char* const c_sSubClassifierIdentifierNodeName = "SubClassifierIdentifier";
+static const char* const c_sAlgorithmIdAttribute = "algorithm-id";
+static const char* const c_sSubClassifierCountNodeName = "SubClassifierCount";
+static const char* const c_sSubClassifiersNodeName = "SubClassifiers";
+static const char* const c_sSubClassifierNodeName = "SubClassifier";
+
+extern const char* const c_sClassifierRoot;
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -16,7 +25,6 @@ using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
-
 
 boolean CAlgorithmClassifierOneVsAll::initialize()
 {
@@ -198,24 +206,24 @@ void CAlgorithmClassifierOneVsAll::generateConfigurationNode(void)
 	std::stringstream l_sClassIdentifier;
 	l_sClassIdentifier << this->m_oSubClassifierAlgorithmIdentifier.toUInteger();
 
-	m_pConfigurationNode = XML::createNode("OpenViBE-Classifier");
+	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 
-	XML::IXMLNode *l_pOneVsAllNode = XML::createNode("OneVsAll");
+	XML::IXMLNode *l_pOneVsAllNode = XML::createNode(c_sTypeNodeName);
 
-	XML::IXMLNode *l_pTempNode = XML::createNode("SubClassifierIdentifier");
-	l_pTempNode->addAttribute("algorithm-id",l_sClassIdentifier.str().c_str());
+	XML::IXMLNode *l_pTempNode = XML::createNode(c_sSubClassifierIdentifierNodeName);
+	l_pTempNode->addAttribute(c_sAlgorithmIdAttribute,l_sClassIdentifier.str().c_str());
 	l_pTempNode->setPCData(this->getTypeManager().getEnumerationEntryNameFromValue(OVTK_TypeId_ClassificationAlgorithm, m_oSubClassifierAlgorithmIdentifier.toUInteger()).toASCIIString());
 	l_pOneVsAllNode->addChild(l_pTempNode);
 
-	l_pTempNode = XML::createNode("SubClassifierCount");
+	l_pTempNode = XML::createNode(c_sSubClassifierCountNodeName);
 	l_pTempNode->setPCData(l_sAmountClasses.str().c_str());
 	l_pOneVsAllNode->addChild(l_pTempNode);
 
-	XML::IXMLNode *l_pSubClassifersNode = XML::createNode("SubClassifiers");
+	XML::IXMLNode *l_pSubClassifersNode = XML::createNode(c_sSubClassifiersNodeName);
 
 	for(uint64 i = 0; i<m_oSubClassifierList.size(); ++i)
 	{
-		l_pTempNode = XML::createNode("SubClassifier");
+		l_pTempNode = XML::createNode(c_sSubClassifierNodeName);
 		l_pTempNode->addChild(getClassifierConfiguration(m_oSubClassifierList[i]));
 		l_pSubClassifersNode->addChild(l_pTempNode);
 	}
@@ -234,8 +242,8 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 {
 	XML::IXMLNode *l_pOneVsAllNode = pConfigurationNode->getChild(0);
 
-	XML::IXMLNode *l_pTempNode = l_pOneVsAllNode->getChildByName("SubClassifierIdentifier");
-	std::stringstream l_sIdentifierData(l_pTempNode->getAttribute("algorithm-id"));
+	XML::IXMLNode *l_pTempNode = l_pOneVsAllNode->getChildByName(c_sSubClassifierIdentifierNodeName);
+	std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sAlgorithmIdAttribute));
 	uint64 l_iIdentifier;
 	l_sIdentifierData >> l_iIdentifier;
 	if(m_oSubClassifierAlgorithmIdentifier.toUInteger() != l_iIdentifier)
@@ -247,7 +255,7 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 		m_oSubClassifierAlgorithmIdentifier = CIdentifier(l_iIdentifier);
 	}
 
-	l_pTempNode = l_pOneVsAllNode->getChildByName("SubClassifierCount");
+	l_pTempNode = l_pOneVsAllNode->getChildByName(c_sSubClassifierCountNodeName);
 	std::stringstream l_sCountData(l_pTempNode->getPCData());
 	uint64 l_iAmountClass;
 	l_sCountData >> l_iAmountClass;
@@ -264,7 +272,7 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 		}
 	}
 
-	loadSubClassifierConfiguration(l_pOneVsAllNode->getChildByName("SubClassifiers"));
+	loadSubClassifierConfiguration(l_pOneVsAllNode->getChildByName(c_sSubClassifiersNodeName));
 
 	return true;
 }

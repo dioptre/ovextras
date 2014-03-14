@@ -28,9 +28,9 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 
 	//Now check the version, and let's display a message if the version is not good
 	string l_sVersion;
-	if(l_pRootNode->hasAttribute("XMLVersion"))
+	if(l_pRootNode->hasAttribute(c_sXmlVersionAttributeName))
 	{
-		l_sVersion = l_pRootNode->getAttribute("XMLVersion");
+		l_sVersion = l_pRootNode->getAttribute(c_sXmlVersionAttributeName);
 		std::stringstream l_sData(l_sVersion);
 		uint32 l_ui32Version;
 		l_sData >> l_ui32Version;
@@ -44,29 +44,32 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		this->getLogManager() << LogLevel_Warning << "The configuration file has no version information. Trouble may appeared in loading process.\n";
 	}
 
-	XML::IXMLNode * l_pTempNode = l_pRootNode->getChildByName("Strategy-Identifier");
-	CString l_sStrategyName(l_pTempNode->getPCData().c_str());
-	CIdentifier l_oAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationStrategy, l_sStrategyName);
+	XML::IXMLNode * l_pTempNode = l_pRootNode->getChildByName(c_sStrategyNodeName);
+	std::stringstream l_sStrategyData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
+	uint64 l_iIdentifier;
+	l_sStrategyData >> l_iIdentifier;
+	CIdentifier l_oAlgorithmClassIdentifier(l_iIdentifier);
 
 	//If the Identifier is undefined, that means we need to load a native algorithm
 	if(l_oAlgorithmClassIdentifier == OV_UndefinedIdentifier){
-		l_pTempNode = l_pRootNode->getChildByName("Algorithm-Identifier");
-		CString l_sAlgorithmName(l_pTempNode->getPCData().c_str());
-		l_oAlgorithmClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sAlgorithmName);
+		l_pTempNode = l_pRootNode->getChildByName(c_sAlgorithmNodeName);
+		std::stringstream l_sAlgorithmData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
+		l_sAlgorithmData >> l_iIdentifier;
+		l_oAlgorithmClassIdentifier = CIdentifier(l_iIdentifier);
 
 		//If the algorithm is still unknown, that means that we face an error
 		if(l_oAlgorithmClassIdentifier==OV_UndefinedIdentifier)
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Unknown classifier algorithm [" << l_sAlgorithmName << "]\n";
+			this->getLogManager() << LogLevel_ImportantWarning << "Unknown classifier algorithm [" << l_pTempNode->getPCData().c_str() << "]\n";
 			return false;
 		}
 	}
 
 	//Now loading all stimulations output
-	XML::IXMLNode *l_pStimulationsNode = l_pRootNode->getChildByName("Stimulations");
+	XML::IXMLNode *l_pStimulationsNode = l_pRootNode->getChildByName(c_sStimulationsNodeName);
 
 	//Load Rejected class label and put it as the entry for class 0
-	l_pTempNode = l_pStimulationsNode->getChildByName("Rejected-Class");
+	l_pTempNode = l_pStimulationsNode->getChildByName(c_sRejectedClassNodeName);
 	CString l_sRejectedLabel(l_pTempNode->getPCData().c_str());
 	m_vStimulation[0]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sRejectedLabel);
 
@@ -77,7 +80,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		CString l_sStimulationName(l_pTempNode->getPCData().c_str());
 
 		OpenViBE::float64 l_f64ClassId;
-		std::stringstream l_sIdentifierData(l_pTempNode->getAttribute("class-id"));
+		std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
 		l_sIdentifierData >> l_f64ClassId ;
 
 		m_vStimulation[l_f64ClassId]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sStimulationName);
@@ -98,7 +101,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	m_pClassificationStateEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
 
 	TParameterHandler < XML::IXMLNode* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
-	ip_pClassificationConfiguration = l_pRootNode->getChildByName("OpenViBE-Classifier");
+	ip_pClassificationConfiguration = l_pRootNode->getChildByName(c_sClassifierRoot);
 	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
 
 	l_pRootNode->release();
