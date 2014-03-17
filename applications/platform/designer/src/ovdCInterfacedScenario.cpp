@@ -153,10 +153,15 @@ static void scenario_drawing_area_key_release_event_cb(::GtkWidget* pWidget, ::G
 {
 	static_cast<CInterfacedScenario*>(pUserData)->scenarioDrawingAreaKeyReleaseEventCB(pWidget, pEvent);
 }
+static void scenario_drawing_area_configure_event_cb(::GtkWidget *pWidget, ::GdkRectangle *pRectangle, gpointer pUserData)
+{
+	static_cast<CInterfacedScenario*>(pUserData)->scenarioDrawingAreaConfigureEventCB(pWidget, pRectangle);
+}
 static void scenario_drawing_area_leave_notify_event_cb(::GtkWidget* pWidget, ::GdkEventKey* pEvent, gpointer pUserData)
 {
 	static_cast<CInterfacedScenario*>(pUserData)->scenarioDrawingAreaLeaveNotifyCB(pWidget, pEvent);
 }
+
 
 static void context_menu_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 {
@@ -299,6 +304,7 @@ static void gdk_draw_rounded_rectangle(::GdkDrawable* pDrawable, ::GdkGC* pDrawG
 #endif
 }
 
+
 void scenario_title_button_close_cb(::GtkButton* pButton, gpointer pUserData)
 {
 	static_cast<CInterfacedScenario*>(pUserData)->m_rApplication.closeScenarioCB(static_cast<CInterfacedScenario*>(pUserData));
@@ -383,6 +389,7 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "key-release-event", G_CALLBACK(scenario_drawing_area_key_release_event_cb), this);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "leave-notify-event", G_CALLBACK(scenario_drawing_area_leave_notify_event_cb), this);
 	g_signal_connect(G_OBJECT(m_pNotebookPageContent), "scroll-event", G_CALLBACK(scenario_scrolledwindow_scroll_event_cb), this);
+	g_signal_connect(G_OBJECT(m_pScrolledWindow), "size-allocate", G_CALLBACK(scenario_drawing_area_configure_event_cb), this);
 
 	//retrieve visualisation tree
 	m_oVisualisationTreeIdentifier = m_rScenario.getVisualisationTreeIdentifier();
@@ -1338,6 +1345,8 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 			if(l_iOldScenarioSizeX!=x || l_iOldScenarioSizeY!=y)
 			{
 				//the scenario change size
+				m_iCurrentWidth = x;
+				m_iCurrentHeight = y;
 				gtk_widget_set_size_request(GTK_WIDGET(m_pScenarioDrawingArea), x, y);
 			}
 
@@ -2545,6 +2554,13 @@ void CInterfacedScenario::scenarioDrawingAreaKeyReleaseEventCB(::GtkWidget* pWid
 void CInterfacedScenario::scenarioDrawingAreaLeaveNotifyCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent)
 {
 	gtk_widget_hide(m_pTooltip);
+}
+
+void CInterfacedScenario::scenarioDrawingAreaConfigureEventCB(GtkWidget *pWidget, GdkRectangle *pEvent)
+{
+	if(pEvent->width != m_iCurrentWidth || pEvent->height != m_iCurrentHeight){
+		this->forceRedraw();
+	}
 }
 
 void CInterfacedScenario::copySelection(void)

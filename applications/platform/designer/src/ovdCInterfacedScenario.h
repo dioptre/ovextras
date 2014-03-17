@@ -49,6 +49,8 @@ namespace OpenViBEDesigner
 		void scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent);
 		void scenarioDrawingAreaKeyReleaseEventCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent);
 		void scenarioDrawingAreaLeaveNotifyCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent);
+		void scenarioDrawingAreaConfigureEventCB(::GtkWidget* pWidget, GdkRectangle *pEvent);
+
 
 		void copySelection(void);
 		void cutSelection(void);
@@ -165,6 +167,9 @@ namespace OpenViBEDesigner
 		OpenViBE::uint32 m_ui32CurrentMode;
 		OpenViBE::float64 m_f64CurrentScale;
 		OpenViBE::uint32 m_ui32NormalFontSize;
+
+		gint m_iCurrentWidth;
+		gint m_iCurrentHeight;
 
 
 		OpenViBE::uint32 m_ui32BoxCount;
