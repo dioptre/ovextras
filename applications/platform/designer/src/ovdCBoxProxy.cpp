@@ -63,14 +63,14 @@ CBoxProxy::operator const IBox* (void)
 
 int32 CBoxProxy::getWidth(::GtkWidget* pWidget) const
 {
-	if((m_iWidth==-1) or (m_iHeight==-1))
+	if(m_iWidth==-1)
 	    updateSize(pWidget, getLabel(), &m_iWidth, &m_iHeight);
 	return m_iWidth;
 }
 
 int32 CBoxProxy::getHeight(::GtkWidget* pWidget) const
 {
-	if((m_iWidth==-1) or (m_iHeight==-1))
+	if(m_iHeight==-1)
 	    updateSize(pWidget, getLabel(), &m_iWidth, &m_iHeight);
 	return m_iHeight;
 }
