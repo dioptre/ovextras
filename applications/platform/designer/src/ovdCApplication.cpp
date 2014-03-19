@@ -858,8 +858,8 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_search")),       "clicked",  G_CALLBACK(search_messages_cb), this);
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "searchEntry")),		"activate", G_CALLBACK(search_messages_cb), this);
 
-		int32 lastScenarioPage = m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_CurrentScenarioPage}", -1);
-		if(lastScenarioPage>=0 && lastScenarioPage<(int32)m_vInterfacedScenario.size())
+		int64 lastScenarioPage = m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_CurrentScenarioPage}", -1);
+		if(lastScenarioPage>=0 && lastScenarioPage<(int64)m_vInterfacedScenario.size())
 		{
 			gtk_notebook_set_current_page(m_pScenarioNotebook, lastScenarioPage);
 		}
