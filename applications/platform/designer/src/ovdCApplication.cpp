@@ -226,7 +226,7 @@ namespace
 
 	void spinner_zoom_changed_cb(::GtkSpinButton* pButton, gpointer pUserData)
 	{
-		static_cast<CApplication*>(pUserData)->spinnerZoomChangedCB(gtk_spin_button_get_value(pButton));
+		static_cast<CApplication*>(pUserData)->spinnerZoomChangedCB((uint32)gtk_spin_button_get_value(pButton));
 	}
 
 static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, gpointer pUserData)
@@ -784,10 +784,10 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	}
 
 	GtkHPaned *l_paned = GTK_HPANED(gtk_builder_get_object(m_pBuilderInterface, "openvibe-horizontal_container"));
-	int l_iPosition = m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_HorizontalContainerPosition}", -1);
+	int64 l_iPosition = m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_HorizontalContainerPosition}", -1);
 	if(l_iPosition != -1)
 	{
-		gtk_paned_set_position(GTK_PANED(l_paned), l_iPosition);
+		gtk_paned_set_position(GTK_PANED(l_paned), (gint)l_iPosition);
 	}
 
 
