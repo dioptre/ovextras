@@ -1,12 +1,28 @@
 #include "ovtkCAlgorithmClassifier.h"
 #include "ovtkCAlgorithmPairingStrategy.h"
 
+#include <map>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEToolkit;
 
+std::map<uint64, fClassifierComparison> mComparisionFunctionMap;
+
+void OpenViBEToolkit::registerClassificationComparisionFunction(const OpenViBE::CIdentifier& rClassIdentifier, fClassifierComparison pComparision)
+{
+	mComparisionFunctionMap[rClassIdentifier.toUInteger()] = pComparision;
+}
+
+fClassifierComparison OpenViBEToolkit::getClassificationComparisonFunction(const OpenViBE::CIdentifier& rClassIdentifier)
+{
+	if(mComparisionFunctionMap.count(rClassIdentifier.toUInteger()) == 0)
+		return NULL;
+	else
+		return mComparisionFunctionMap[rClassIdentifier.toUInteger()];
+}
 
 boolean CAlgorithmPairingStrategy::process(void)
 {

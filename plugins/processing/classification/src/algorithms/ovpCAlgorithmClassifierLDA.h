@@ -20,6 +20,8 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
+		OpenViBE::int32 getLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
+
 		class CAlgorithmClassifierLDA : public OpenViBEToolkit::CAlgorithmClassifier
 		{
 		public:
@@ -31,8 +33,6 @@ namespace OpenViBEPlugins
 
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode* pConfiguratioNode);
-
-			virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierLDA);
 

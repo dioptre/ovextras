@@ -20,6 +20,16 @@ static const char* const c_sCoefficientsNodeName = "Coefficients";
 
 extern const char* const c_sClassifierRoot;
 
+OpenViBE::int32 OpenViBEPlugins::Classification::getShrinkageLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
+{
+	if(::fabs(rFirstClassificationValue[0]) < ::fabs(rSecondClassificationValue[0]) )
+		return -1;
+	else if(::fabs(rFirstClassificationValue[0]) == ::fabs(rSecondClassificationValue[0]))
+		return 0;
+	else
+		return 1;
+}
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -255,16 +265,6 @@ boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatur
 	}
 
 	return true;
-}
-
-uint32 CAlgorithmClassifierShrinkageLDA::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
-{
-	if(rFirstClassificationValue[0]  < rSecondClassificationValue[0] )
-		return -1;
-	else if(rFirstClassificationValue[0] == rSecondClassificationValue[0])
-		return 0;
-	else
-		return 1;
 }
 
 void CAlgorithmClassifierShrinkageLDA::generateConfigurationNode(void)

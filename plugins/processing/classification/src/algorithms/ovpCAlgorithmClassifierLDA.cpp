@@ -15,6 +15,16 @@ static const char* const c_sCoeffNodeName = "Coefficients";
 
 extern const char* const c_sClassifierRoot;
 
+OpenViBE::int32 OpenViBEPlugins::Classification::getLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
+{
+	if(::fabs(rFirstClassificationValue[0])  < ::fabs(rSecondClassificationValue[0]) )
+		return -1;
+	else if(::fabs(rFirstClassificationValue[0]) == ::fabs(rSecondClassificationValue[0]))
+		return 0;
+	else
+		return 1;
+}
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -23,6 +33,7 @@ using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
+
 
 boolean CAlgorithmClassifierLDA::initialize(void)
 {
@@ -136,17 +147,6 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 		rf64Class=m_f64Class2;
 	}
 	return true;
-}
-
-
-uint32 CAlgorithmClassifierLDA::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
-{
-	if(::fabs(rFirstClassificationValue[0])  < ::fabs(rSecondClassificationValue[0]) )
-		return -1;
-	else if(::fabs(rFirstClassificationValue[0]) == ::fabs(rSecondClassificationValue[0]))
-		return 0;
-	else
-		return 1;
 }
 
 void CAlgorithmClassifierLDA::generateConfigurationNode(void)

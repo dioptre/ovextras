@@ -23,6 +23,8 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
+		OpenViBE::int32 getShrinkageLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
+
 		class CAlgorithmClassifierShrinkageLDA : public OpenViBEToolkit::CAlgorithmClassifier
 		{
 		typedef Eigen::Matrix< double , Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor > MatrixXdRowMajor;
@@ -37,7 +39,6 @@ namespace OpenViBEPlugins
 
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
-			virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
 			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierShrinkageLDA);
 

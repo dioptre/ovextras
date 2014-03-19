@@ -6,6 +6,7 @@
 #include <cstring>
 #include <string>
 #include <cstdlib>
+#include <cmath>
 
 #include <xml/IXMLHandler.h>
 
@@ -30,6 +31,16 @@ static const char* const c_sCoefNodeName = "coef";
 static const char* const c_sValueNodeName = "value";
 
 extern const char* const c_sClassifierRoot;
+
+OpenViBE::int32 OpenViBEPlugins::Classification::getSVMBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
+{
+	if(::fabs(rFirstClassificationValue[0])  < ::fabs(rSecondClassificationValue[0]) )
+		return -1;
+	else if(::fabs(rFirstClassificationValue[0]) == ::fabs(rSecondClassificationValue[0]))
+		return 0;
+	else
+		return 1;
+}
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -355,16 +366,6 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 	delete[] l_pProbEstimates;
 
 	return true;
-}
-
-uint32 CAlgorithmClassifierSVM::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
-{
-	if(rFirstClassificationValue[0]  < rSecondClassificationValue[0] )
-		return -1;
-	else if(rFirstClassificationValue[0] == rSecondClassificationValue[0])
-		return 0;
-	else
-		return 1;
 }
 
 void CAlgorithmClassifierSVM::generateConfigurationNode(void)

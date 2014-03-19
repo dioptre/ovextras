@@ -32,8 +32,6 @@ namespace OpenViBEPlugins
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
 
-            virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix &rFirstClassificationValue, OpenViBE::IMatrix &rSecondClassificationValue);
-
 			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierNULL);
 
 		protected:

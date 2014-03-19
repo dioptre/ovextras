@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include <iostream>
+#include <system/Memory.h>
 
 
 static const char* const c_sTypeNodeName = "OneVsAll";
@@ -117,12 +118,11 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 
 	//Now, we determine the best classification
 	std::pair<float64, IMatrix*> best = std::pair<float64, IMatrix*>(-1, NULL);
-	IAlgorithmProxy* l_pSubClassifier = this->m_oSubClassifierList[0];
 	rf64Class = -1;
 
 	for(uint32 l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
 	{
-		std::pair<float64, IMatrix*> l_pTemp = l_oClassificationVector[l_iClassificationCount];
+		std::pair<float64, IMatrix*>&   l_pTemp = l_oClassificationVector[l_iClassificationCount];
 		if(l_pTemp.first==1)
 		{
 			if(best.second == NULL)
@@ -132,32 +132,40 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 			}
 			else
 			{
-				if(((CAlgorithmClassifier*)l_pSubClassifier)->getBestClassification(*(best.second), *(l_pTemp.second)))
+				if((*m_fAlgorithmComparison)((*best.second), *(l_pTemp.second)) < 0)
 				{
 					best = l_pTemp;
 					rf64Class = ((float64)l_iClassificationCount)+1;
 				}
 			}
 		}
-
 	}
 
 	//If no one recognize the class, let's take a random one
 	//FIXME should take the most relevant
 	if(rf64Class == -1)
 	{
-		uint32 l_iClassificationCount = rand()%l_oClassificationVector.size();
-		rf64Class=1+l_iClassificationCount;
-		best = l_oClassificationVector[l_iClassificationCount];
+		for(uint32 l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
+		{
+			std::pair<float64, IMatrix*>& l_pTemp = l_oClassificationVector[l_iClassificationCount];
+			if(best.second == NULL)
+			{
+				best = l_pTemp;
+				rf64Class = ((float64)l_iClassificationCount)+1;
+			}
+			else
+			{
+				if((*m_fAlgorithmComparison)((*best.second), *(l_pTemp.second)) > 0)
+				{
+					best = l_pTemp;
+					rf64Class = ((float64)l_iClassificationCount)+1;
+				}
+			}
+		}
 	}
 	rClassificationValues.setSize(best.second->getBufferElementCount());
 	System::Memory::copy(rClassificationValues.getBuffer(), best.second->getBuffer(), best.second->getBufferElementCount()*sizeof(float64));
 	return true;
-}
-
-uint32 CAlgorithmClassifierOneVsAll::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
-{
-	return 0;
 }
 
 void CAlgorithmClassifierOneVsAll::addNewClassifierAtBack(void)
@@ -183,6 +191,7 @@ void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
 boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &rId, int64 &rClassAmount)
 {
 	m_oSubClassifierAlgorithmIdentifier = rId;
+	m_fAlgorithmComparison = getClassificationComparisonFunction(rId);
 	for(int64 i = 0 ; i < rClassAmount ; ++i)
 	{
 		this->addNewClassifierAtBack();
@@ -253,6 +262,7 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 			this->removeClassifierAtBack();
 		}
 		m_oSubClassifierAlgorithmIdentifier = CIdentifier(l_iIdentifier);
+		m_fAlgorithmComparison = getClassificationComparisonFunction(m_oSubClassifierAlgorithmIdentifier);
 	}
 
 	l_pTempNode = l_pOneVsAllNode->getChildByName(c_sSubClassifierCountNodeName);
@@ -291,5 +301,16 @@ void CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNode 
 uint32 CAlgorithmClassifierOneVsAll::getClassAmount(void) const
 {
 	return m_oSubClassifierList.size();
+}
+
+void CAlgorithmClassifierOneVsAll::setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId)
+{
+	m_oSubClassifierAlgorithmIdentifier = rId;
+	m_fAlgorithmComparison = getClassificationComparisonFunction(rId);
+
+	if(m_fAlgorithmComparison == NULL)
+	{
+		this->getLogManager() << LogLevel_Error << "Cannot find the comparison function, this may "
+	}
 }
 

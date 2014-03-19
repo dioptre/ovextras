@@ -46,8 +46,6 @@ namespace OpenViBEToolkit
 		virtual XML::IXMLNode* saveConfiguration(void)=0;
 		virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode * pConfigurationRoot)=0;
 
-		virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)=0;
-
 		OpenViBE::int64 getInt64Parameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CString& rParameterValue);
 		OpenViBE::float64 getFloat64Parameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CString& rParameterValue);
 		OpenViBE::boolean getBooleanParameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CString& rParameterValue);

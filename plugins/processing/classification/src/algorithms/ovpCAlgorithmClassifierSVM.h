@@ -35,6 +35,9 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
+		OpenViBE::int32 getSVMBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
+
+
 		class CAlgorithmClassifierSVM : public OpenViBEToolkit::CAlgorithmClassifier
 		{
 		public:
@@ -53,7 +56,6 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString modelToString();
 			virtual OpenViBE::CString problemToString(svm_problem *pProb);
 
-			virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix &rFirstClassificationValue, OpenViBE::IMatrix &rSecondClassificationValue);
 			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierSVM);
 
 		protected:

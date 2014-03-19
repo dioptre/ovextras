@@ -1,5 +1,5 @@
-#ifndef __OpenViBEPlugins_Algorithm_OneVsAll_H__
-#define __OpenViBEPlugins_Algorithm_OneVsAll_H__
+#ifndef __OpenViBEPlugins_Algorithm_OneVsOne_H__
+#define __OpenViBEPlugins_Algorithm_OneVsOne_H__
 
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
@@ -9,14 +9,14 @@
 
 #include <vector>
 
-#define OVP_ClassId_Algorithm_ClassifierOneVsAll                                        OpenViBE::CIdentifier(0xD7183FC6, 0xBD74F297)
-#define OVP_ClassId_Algorithm_ClassifierOneVsAllDesc                                    OpenViBE::CIdentifier(0xD42D5449, 0x7A28DDB0)
+#define OVP_ClassId_Algorithm_ClassifierOneVsOne                             OpenViBE::CIdentifier(0x638C2F90, 0xEAE10226)
+#define OVP_ClassId_Algorithm_ClassifierOneVsOneDesc                         OpenViBE::CIdentifier(0xE78E7CDB, 0x369AA9EF)
 
 namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		class CAlgorithmClassifierOneVsAll : public OpenViBEToolkit::CAlgorithmPairingStrategy
+		class CAlgorithmClassifierOneVsOne : public OpenViBEToolkit::CAlgorithmPairingStrategy
 		{
 		public:
 
@@ -29,31 +29,28 @@ namespace OpenViBEPlugins
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsAll)
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsOne)
+
+		protected:
+			std::vector<OpenViBE::Kernel::IAlgorithmProxy*> m_oSubClassifierList;
+
+			XML::IXMLNode *m_pConfigurationNode;
 
 		private:
 			XML::IXMLNode* getClassifierConfiguration(OpenViBE::Kernel::IAlgorithmProxy* classifier);
-			void addNewClassifierAtBack(void);
-			void removeClassifierAtBack(void);
-			void setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId);
 			OpenViBE::uint32 getClassAmount(void) const;
 
 			void loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
-
 			void generateConfigurationNode(void);
-
-			std::vector<OpenViBE::Kernel::IAlgorithmProxy*> m_oSubClassifierList;
-			XML::IXMLNode *m_pConfigurationNode;
-			fClassifierComparison m_fAlgorithmComparison;
 		};
 
-		class CAlgorithmClassifierOneVsAllDesc : public OpenViBEToolkit::CAlgorithmPairingStrategyDesc
+		class CAlgorithmClassifierOneVsOneDesc : public OpenViBEToolkit::CAlgorithmPairingStrategyDesc
 		{
 		public:
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("OneVsAll pairing classifier"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("OneVsOne pairing classifier"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Guillaume Serriere"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/Loria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
@@ -61,8 +58,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 
-			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ClassifierOneVsAll; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Classification::CAlgorithmClassifierOneVsAll; }
+			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ClassifierOneVsOne; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Classification::CAlgorithmClassifierOneVsOne; }
 
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 					OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
@@ -72,7 +69,7 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			_IsDerivedFromClass_Final_(CAlgorithmPairingStrategyDesc, OVP_ClassId_Algorithm_ClassifierOneVsAllDesc)
+			_IsDerivedFromClass_Final_(CAlgorithmPairingStrategyDesc, OVP_ClassId_Algorithm_ClassifierOneVsOneDesc)
 		};
 	}
 }
