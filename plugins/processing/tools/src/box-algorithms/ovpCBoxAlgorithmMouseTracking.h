@@ -48,14 +48,15 @@ namespace OpenViBEPlugins
 
 		protected:
 			// Feature vector stream encoder
-			OpenViBEToolkit::TFeatureVectorEncoder < CBoxAlgorithmMouseTracking > m_oAlgo0_FeatureVectorEncoder;
+			OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmMouseTracking > m_oAlgo0_SignalEncoder;
 			// Feature vector stream encoder
-			OpenViBEToolkit::TFeatureVectorEncoder < CBoxAlgorithmMouseTracking > m_oAlgo1_FeatureVectorEncoder;
+			OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmMouseTracking > m_oAlgo1_SignalEncoder;
 
 			// To check if the header was sent or not
 			OpenViBE::boolean m_bHeaderSent;
 			// Process clock frequency
 			OpenViBE::float64 m_f64Frequency;
+			OpenViBE::float64 m_f64ClockFrequency;
 			//Length of output chunks
 			OpenViBE::uint64 m_ui32GeneratedEpochSampleCount;
 			// Absolute coordinates of the mouse pointer, that is, relative to the window in fullscreen
@@ -65,6 +66,10 @@ namespace OpenViBEPlugins
 
 			OpenViBE::uint32 m_ui32SentSampleCount;
 			::GtkWidget* m_myWindow;
+
+			OpenViBE::float64 m_f64Previous_x;
+			OpenViBE::float64 m_f64Previous_y;
+
 
 		public:
 
@@ -117,11 +122,11 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				
-				rBoxAlgorithmPrototype.addOutput("Absolute coordinate",OV_TypeId_FeatureVector);
-				rBoxAlgorithmPrototype.addOutput("Previous relative coordinate",OV_TypeId_FeatureVector);
+				rBoxAlgorithmPrototype.addOutput("Absolute coordinate",OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutput("Previous relative coordinate",OV_TypeId_Signal);
 
-				rBoxAlgorithmPrototype.addSetting("Sampling Frequency",OV_TypeId_Float,"128");
-				rBoxAlgorithmPrototype.addSetting("Generated epoch sample count",OV_TypeId_Integer,"32");
+				rBoxAlgorithmPrototype.addSetting("Sampling Frequency",OV_TypeId_Float,"512");
+//				rBoxAlgorithmPrototype.addSetting("Generated epoch sample count",OV_TypeId_Integer,"32");
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 				
