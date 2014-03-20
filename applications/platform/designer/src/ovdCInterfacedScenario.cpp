@@ -478,6 +478,12 @@ void CInterfacedScenario::updateScenarioLabel(void)
 
 #define updateStencilIndex(id,stencilgc) { id++; ::GdkColor sc={0, (guint16)((id&0xff0000)>>8), (guint16)(id&0xff00), (guint16)((id&0xff)<<8) }; gdk_gc_set_rgb_fg_color(stencilgc, &sc); }
 
+
+// round is defined in <cmath> on c++11
+inline int ov_round(double dbl)
+{ return dbl >= 0.0 ? (int)(dbl + 0.5) : ((dbl - (double)(int)dbl) <= -0.5 ? (int)dbl : (int)(dbl - 0.5));
+}
+
 void CInterfacedScenario::redraw(IBox& rBox)
 {
 	::GdkGC* l_pStencilGC=gdk_gc_new(GDK_DRAWABLE(m_pStencilBuffer));
@@ -487,23 +493,23 @@ void CInterfacedScenario::redraw(IBox& rBox)
 	vector<pair<int32, int32> > l_vOutputPosition;
 
 	uint32 i;
-	const int xMargin=5*m_f64CurrentScale;
-	const int yMargin=5*m_f64CurrentScale;
-	const int iCircleSize=11*m_f64CurrentScale;
-	const int iCircleSpace=4*m_f64CurrentScale;
+	const int xMargin=ov_round(5.0*m_f64CurrentScale);
+	const int yMargin=ov_round(5.0*m_f64CurrentScale);
+	const int iCircleSize=ov_round(11.0*m_f64CurrentScale);
+	const int iCircleSpace=ov_round(4.0*m_f64CurrentScale);
 
 	CBoxProxy l_oBoxProxy(m_rKernelContext, rBox);
-	int xSize=l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + xMargin*2;
-	int ySize=l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + yMargin*2;
-	int xStart=l_oBoxProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1);
-	int yStart=l_oBoxProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1);
+	int xSize=ov_round(l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + xMargin*2.0);
+	int ySize=ov_round(l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + yMargin*2.0);
+	int xStart=ov_round(l_oBoxProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1));
+	int yStart=ov_round(l_oBoxProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1));
 
 	updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
 	gdk_draw_rounded_rectangle(
 		GDK_DRAWABLE(m_pStencilBuffer),
 		l_pStencilGC,
 		TRUE,
-		xStart, yStart, xSize, ySize, 8*m_f64CurrentScale);
+		xStart, yStart, xSize, ySize, ov_round(8.0*m_f64CurrentScale));
 	m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier());
 
 	boolean l_bCanCreate =l_oBoxProxy.isBoxAlgorithmPluginPresent();
@@ -581,13 +587,13 @@ void CInterfacedScenario::redraw(IBox& rBox)
 		GDK_DRAWABLE(m_pBufferedDrawingArea),
 		l_pDrawGC,
 		TRUE,
-		xStart, yStart, xSize, ySize, 8*m_f64CurrentScale);
+		xStart, yStart, xSize, ySize, ov_round(8.0*m_f64CurrentScale));
 	gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[m_vCurrentObject[rBox.getIdentifier()]?Color_BoxBorderSelected:Color_BoxBorder]);
 	gdk_draw_rounded_rectangle(
 		GDK_DRAWABLE(m_pBufferedDrawingArea),
 		l_pDrawGC,
 		FALSE,
-		xStart, yStart, xSize, ySize, 8*m_f64CurrentScale);
+		xStart, yStart, xSize, ySize, ov_round(8.0*m_f64CurrentScale));
 
 	TAttributeHandler l_oAttributeHandler(rBox);
 
@@ -911,21 +917,21 @@ void CInterfacedScenario::redraw(IComment& rComment)
 	::GdkGC* l_pDrawGC=gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
 
 	// uint32 i;
-	const int xMargin=16*m_f64CurrentScale;
-	const int yMargin=16*m_f64CurrentScale;
+	const int xMargin=ov_round(16.0*m_f64CurrentScale);
+	const int yMargin=ov_round(16.0*m_f64CurrentScale);
 
 	CCommentProxy l_oCommentProxy(m_rKernelContext, rComment);
-	int xSize=l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))*m_f64CurrentScale+xMargin*2;
-	int ySize=l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))*m_f64CurrentScale+yMargin*2;
-	int xStart=l_oCommentProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1);
-	int yStart=l_oCommentProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1);
+	int xSize=ov_round(l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))*m_f64CurrentScale+xMargin*2.0);
+	int ySize=ov_round(l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))*m_f64CurrentScale+yMargin*2.0);
+	int xStart=ov_round(l_oCommentProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1));
+	int yStart=ov_round(l_oCommentProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1));
 
 	updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
 	gdk_draw_rounded_rectangle(
 		GDK_DRAWABLE(m_pStencilBuffer),
 		l_pStencilGC,
 		TRUE,
-		xStart, yStart, xSize, ySize, 16*m_f64CurrentScale);
+		xStart, yStart, xSize, ySize, ov_round(16.0*m_f64CurrentScale));
 	m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rComment.getIdentifier());
 
 	gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[m_vCurrentObject[rComment.getIdentifier()]?Color_CommentBackgroundSelected:Color_CommentBackground]);
@@ -933,13 +939,13 @@ void CInterfacedScenario::redraw(IComment& rComment)
 		GDK_DRAWABLE(m_pBufferedDrawingArea),
 		l_pDrawGC,
 		TRUE,
-		xStart, yStart, xSize, ySize, 16*m_f64CurrentScale);
+		xStart, yStart, xSize, ySize, ov_round(16.0*m_f64CurrentScale));
 	gdk_gc_set_rgb_fg_color(l_pDrawGC, &g_vColors[m_vCurrentObject[rComment.getIdentifier()]?Color_CommentBorderSelected:Color_CommentBorder]);
 	gdk_draw_rounded_rectangle(
 		GDK_DRAWABLE(m_pBufferedDrawingArea),
 		l_pDrawGC,
 		FALSE,
-		xStart, yStart, xSize, ySize, 16*m_f64CurrentScale);
+		xStart, yStart, xSize, ySize, ov_round(16.0*m_f64CurrentScale));
 
 	::PangoContext* l_pPangoContext=NULL;
 	::PangoLayout* l_pPangoLayout=NULL;
@@ -1167,7 +1173,7 @@ void CInterfacedScenario::setScale(OpenViBE::float64 rScale)
 
 	PangoContext* l_pPongoContext = gtk_widget_get_pango_context(GTK_WIDGET(m_pScenarioDrawingArea));
 	PangoFontDescription *l_pPangoFontDescription = pango_context_get_font_description(l_pPongoContext);
-	pango_font_description_set_size(l_pPangoFontDescription, m_ui32NormalFontSize*m_f64CurrentScale);
+	pango_font_description_set_size(l_pPangoFontDescription, ov_round(m_ui32NormalFontSize*m_f64CurrentScale));
 
 	m_bScenarioModified = true;
 	this->redraw();
@@ -1302,8 +1308,8 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		gint l_iMinY= 0x7fff;
 		gint l_iMaxY=-0x7fff;
 
-		gint l_iMarginX=32 * m_f64CurrentScale;
-		gint l_iMarginY=32 * m_f64CurrentScale;
+		gint l_iMarginX=ov_round(32.0 * m_f64CurrentScale);
+		gint l_iMarginY=ov_round(32.0 * m_f64CurrentScale);
 
 		CIdentifier l_oBoxIdentifier;
 		while((l_oBoxIdentifier=m_rScenario.getNextBoxIdentifier(l_oBoxIdentifier))!=OV_UndefinedIdentifier)
@@ -1326,10 +1332,10 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		}
 
 		//Now we apply scale on drawing area dimension
-		l_iMaxX *= m_f64CurrentScale;
-		l_iMaxY *= m_f64CurrentScale;
-		l_iMinX *= m_f64CurrentScale;
-		l_iMinY *= m_f64CurrentScale;
+		l_iMaxX = ov_round(l_iMaxX *m_f64CurrentScale);
+		l_iMaxY = ov_round(l_iMaxY *m_f64CurrentScale);
+		l_iMinX = ov_round(l_iMinX *m_f64CurrentScale);
+		l_iMinY = ov_round(l_iMinY *m_f64CurrentScale);
 		gint l_iNewScenarioSizeX=l_iMaxX-l_iMinX;
 		gint l_iNewScenarioSizeY=l_iMaxY-l_iMinY;
 		gint l_iOldScenarioSizeX=-1;
@@ -1619,15 +1625,15 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 				{
 					CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, i->first);
 					l_oBoxProxy.setCenter(
-						l_oBoxProxy.getXCenter()+ (pEvent->x-m_f64CurrentMouseX) / m_f64CurrentScale,
-						l_oBoxProxy.getYCenter()+ (pEvent->y-m_f64CurrentMouseY) / m_f64CurrentScale);
+						ov_round(l_oBoxProxy.getXCenter()+ (pEvent->x-m_f64CurrentMouseX) / m_f64CurrentScale),
+						ov_round(l_oBoxProxy.getYCenter()+ (pEvent->y-m_f64CurrentMouseY) / m_f64CurrentScale));
 				}
 				if(i->second && m_rScenario.isComment(i->first))
 				{
 					CCommentProxy l_oCommentProxy(m_rKernelContext, m_rScenario, i->first);
 					l_oCommentProxy.setCenter(
-						l_oCommentProxy.getXCenter()+ (pEvent->x-m_f64CurrentMouseX) / m_f64CurrentScale,
-						l_oCommentProxy.getYCenter()+ (pEvent->y-m_f64CurrentMouseY) / m_f64CurrentScale);
+						ov_round(l_oCommentProxy.getXCenter()+ (pEvent->x-m_f64CurrentMouseX) / m_f64CurrentScale),
+						ov_round(l_oCommentProxy.getYCenter()+ (pEvent->y-m_f64CurrentMouseY) / m_f64CurrentScale));
 				}
 			}
 			m_bScenarioModified = true;
@@ -2659,8 +2665,9 @@ void CInterfacedScenario::pasteSelection(void)
 	CIdentifier l_oIdentifier;
 	map < CIdentifier, CIdentifier > l_vIdMapping;
 	map < CIdentifier, CIdentifier >::const_iterator it;
-	int32 l_iCenterX=0;
-	int32 l_iCenterY=0;
+	// TODO: this code below CenterX and CenterY seems to be innused
+	//float64 l_f64CenterX=0;
+	//float64 l_f64CenterY=0;
 	int32 l_iBoxCount=0;
 
 	// Pastes boxes from clipboard
@@ -2685,9 +2692,9 @@ void CInterfacedScenario::pasteSelection(void)
 		}
 
 		// Computes average box location
-		CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, l_oNewIdentifier);
-		l_iCenterX+=l_oBoxProxy.getXCenter();
-		l_iCenterY+=l_oBoxProxy.getYCenter();
+		//CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, l_oNewIdentifier);
+		//l_f64CenterX+=l_oBoxProxy.getXCenter();
+		//l_f64CenterY+=l_oBoxProxy.getYCenter();
 		l_iBoxCount++;
 	}
 

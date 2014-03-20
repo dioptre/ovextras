@@ -861,7 +861,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		int64 lastScenarioPage = m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_CurrentScenarioPage}", -1);
 		if(lastScenarioPage>=0 && lastScenarioPage<(int64)m_vInterfacedScenario.size())
 		{
-			gtk_notebook_set_current_page(m_pScenarioNotebook, lastScenarioPage);
+			gtk_notebook_set_current_page(m_pScenarioNotebook, (gint)lastScenarioPage);
 		}
 		gtk_widget_show(m_pMainWindow);
 	}
