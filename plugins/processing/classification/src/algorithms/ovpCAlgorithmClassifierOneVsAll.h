@@ -35,7 +35,7 @@ namespace OpenViBEPlugins
 			XML::IXMLNode* getClassifierConfiguration(OpenViBE::Kernel::IAlgorithmProxy* classifier);
 			void addNewClassifierAtBack(void);
 			void removeClassifierAtBack(void);
-			void setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId);
+			OpenViBE::boolean setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId);
 			OpenViBE::uint32 getClassAmount(void) const;
 
 			void loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);

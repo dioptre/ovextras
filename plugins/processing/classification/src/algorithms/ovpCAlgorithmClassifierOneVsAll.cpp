@@ -190,8 +190,10 @@ void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
 
 boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &rId, int64 &rClassAmount)
 {
-	m_oSubClassifierAlgorithmIdentifier = rId;
-	m_fAlgorithmComparison = getClassificationComparisonFunction(rId);
+	if(!this->setSubClassifierIdentifier(rId))
+	{
+		return false;
+	}
 	for(int64 i = 0 ; i < rClassAmount ; ++i)
 	{
 		this->addNewClassifierAtBack();
@@ -261,8 +263,10 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 		{
 			this->removeClassifierAtBack();
 		}
-		m_oSubClassifierAlgorithmIdentifier = CIdentifier(l_iIdentifier);
-		m_fAlgorithmComparison = getClassificationComparisonFunction(m_oSubClassifierAlgorithmIdentifier);
+		if(!this->setSubClassifierIdentifier(l_iIdentifier)){
+			//if the sub classifier doesn't have comparison function it is an error
+			return false;
+		}
 	}
 
 	l_pTempNode = l_pOneVsAllNode->getChildByName(c_sSubClassifierCountNodeName);
@@ -303,14 +307,16 @@ uint32 CAlgorithmClassifierOneVsAll::getClassAmount(void) const
 	return m_oSubClassifierList.size();
 }
 
-void CAlgorithmClassifierOneVsAll::setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId)
+boolean CAlgorithmClassifierOneVsAll::setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId)
 {
 	m_oSubClassifierAlgorithmIdentifier = rId;
 	m_fAlgorithmComparison = getClassificationComparisonFunction(rId);
 
 	if(m_fAlgorithmComparison == NULL)
 	{
-		this->getLogManager() << LogLevel_Error << "Cannot find the comparison function, this may "
+		this->getLogManager() << LogLevel_Error << "Cannot find the comparison function for the sub classifier\n";
+		return false;
 	}
+	return true;
 }
 

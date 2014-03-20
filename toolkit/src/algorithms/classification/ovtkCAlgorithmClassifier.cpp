@@ -4,6 +4,7 @@
 #include "ovtkCVector.hpp"
 
 #include <xml/IXMLHandler.h>
+#include <iostream>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -21,7 +22,6 @@ boolean CAlgorithmClassifier::process(void)
 	TParameterHandler < IMatrix* > ip_pFeatureVectorSet(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
 
-    //this->getLogManager() << LogLevel_ImportantWarning << "Algorithm\n";
 	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_Train))
 	{
 		IMatrix* l_pFeatureVectorSet=ip_pFeatureVectorSet;
@@ -40,6 +40,7 @@ boolean CAlgorithmClassifier::process(void)
 			else
 			{
 				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+				return false;
 			}
 		}
 	}
@@ -76,6 +77,7 @@ boolean CAlgorithmClassifier::process(void)
 			else
 			{
 				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+				return false;
 			}
 		}
 	}
@@ -91,6 +93,7 @@ boolean CAlgorithmClassifier::process(void)
 		else
 		{
 			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
+			return false;
 		}
 	}
 
@@ -99,7 +102,7 @@ boolean CAlgorithmClassifier::process(void)
 		XML::IXMLNode *l_pNode = ip_pConfiguration;
 		if(!l_pNode)
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Configuration memory buffer is NULL\n";
+			this->getLogManager() << LogLevel_ImportantWarning << "Configuration XML node is NULL\n";
 			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
 		}
 		else
@@ -112,6 +115,7 @@ boolean CAlgorithmClassifier::process(void)
 			else
 			{
 				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+				return false;
 			}
 		}
 	}

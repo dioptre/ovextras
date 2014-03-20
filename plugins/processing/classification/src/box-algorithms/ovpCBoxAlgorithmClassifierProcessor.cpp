@@ -102,7 +102,9 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 
 	TParameterHandler < XML::IXMLNode* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 	ip_pClassificationConfiguration = l_pRootNode->getChildByName(c_sClassifierRoot);
-	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
+	if(!m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration)){
+		return false;
+	}
 
 	l_pRootNode->release();
 	l_pHandler->release();

@@ -53,7 +53,7 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 
 	if(l_oStrategyClassIdentifier==OV_UndefinedIdentifier)
 	{
-		//That means that we want to use a classical algorithm so just let create it
+		//That means that we want to use a classical algorithm so just let's create it
 		m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
 		m_pClassifier->initialize();
 	}
@@ -99,6 +99,11 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	TParameterHandler < map<CString , CString> * > ip_pExtraParameter(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
 	ip_pExtraParameter = m_pExtraParemeter;
 
+	m_pStimulationsEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
+	m_pStimulationsEncoder->initialize();
+
+	m_vFeatureCount.clear();
+
 	//If we have to deal with a pairing strategy we have to pass argument
 	if(l_bIsPairing)
 	{
@@ -106,13 +111,12 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 		ip_pClassAmount = l_rStaticBoxContext.getInputCount() -1;
 		TParameterHandler < CIdentifier* > ip_oClassId(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
 		ip_oClassId = &l_oClassifierAlgorithmClassIdentifier;
-		m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture);
+		if(!m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture))
+		{
+			//This call can return false if there is no function to compare to classification register
+			return false;
+		}
 	}
-
-	m_vFeatureCount.clear();
-
-	m_pStimulationsEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
-	m_pStimulationsEncoder->initialize();
 
 	return true;
 }

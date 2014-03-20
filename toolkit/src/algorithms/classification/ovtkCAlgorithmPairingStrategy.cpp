@@ -9,7 +9,7 @@ using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEToolkit;
 
-std::map<uint64, fClassifierComparison> mComparisionFunctionMap;
+static std::map<uint64, fClassifierComparison> mComparisionFunctionMap;
 
 void OpenViBEToolkit::registerClassificationComparisionFunction(const OpenViBE::CIdentifier& rClassIdentifier, fClassifierComparison pComparision)
 {
@@ -33,11 +33,19 @@ boolean CAlgorithmPairingStrategy::process(void)
 
 		int64 l_iClassCount = (int64) ip_pClassAmount;
 		CIdentifier l_oClassifierIdentifier = *((CIdentifier*)ip_pClassifierIdentifier);
-		this->designArchitecture(l_oClassifierIdentifier, l_iClassCount);
+		if(this->designArchitecture(l_oClassifierIdentifier, l_iClassCount))
+		{
+			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
+		}
+		else
+		{
+			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+			return false;
+		}
 	}
 	else
 	{
-		CAlgorithmClassifier::process();
+		return CAlgorithmClassifier::process();
 	}
 	return true;
 }
