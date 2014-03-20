@@ -1319,20 +1319,24 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		while((l_oBoxIdentifier=m_rScenario.getNextBoxIdentifier(l_oBoxIdentifier))!=OV_UndefinedIdentifier)
 		{
 			CBoxProxy l_oBoxProxy(m_rKernelContext, *m_rScenario.getBoxDetails(l_oBoxIdentifier));
-			if(l_iMinX>l_oBoxProxy.getXCenter()-l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))/2)  l_iMinX=l_oBoxProxy.getXCenter()-l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))/2;
-			if(l_iMaxX<l_oBoxProxy.getXCenter()+l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))/2)  l_iMaxX=l_oBoxProxy.getXCenter()+l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))/2;
-			if(l_iMinY>l_oBoxProxy.getYCenter()-l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2) l_iMinY=l_oBoxProxy.getYCenter()-l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2;
-			if(l_iMaxY<l_oBoxProxy.getYCenter()+l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2) l_iMaxY=l_oBoxProxy.getYCenter()+l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2;
+			gint l_w = l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))/2;
+			gint l_h = l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2;
+			if(l_iMinX>l_oBoxProxy.getXCenter()-l_w) l_iMinX=ov_round(l_oBoxProxy.getXCenter()-l_w);
+			if(l_iMaxX<l_oBoxProxy.getXCenter()+l_w) l_iMaxX=ov_round(l_oBoxProxy.getXCenter()+l_w);
+			if(l_iMinY>l_oBoxProxy.getYCenter()-l_h) l_iMinY=ov_round(l_oBoxProxy.getYCenter()-l_h);
+			if(l_iMaxY<l_oBoxProxy.getYCenter()+l_h) l_iMaxY=ov_round(l_oBoxProxy.getYCenter()+l_h);
 		}
 
 		CIdentifier l_oCommentIdentifier;
 		while((l_oCommentIdentifier=m_rScenario.getNextCommentIdentifier(l_oCommentIdentifier))!=OV_UndefinedIdentifier)
 		{
 			CCommentProxy l_oCommentProxy(m_rKernelContext, *m_rScenario.getCommentDetails(l_oCommentIdentifier));
-			if(l_iMinX>l_oCommentProxy.getXCenter()-l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))/2) l_iMinX=l_oCommentProxy.getXCenter()-l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))/2;
-			if(l_iMaxX<l_oCommentProxy.getXCenter()+l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))/2) l_iMaxX=l_oCommentProxy.getXCenter()+l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))/2;
-			if(l_iMinY>l_oCommentProxy.getYCenter()-l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2) l_iMinY=l_oCommentProxy.getYCenter()-l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2;
-			if(l_iMaxY<l_oCommentProxy.getYCenter()-l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2) l_iMaxY=l_oCommentProxy.getYCenter()+l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2;
+			gint l_w = l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))/2;
+			gint l_h = l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))/2;
+			if(l_iMinX>l_oCommentProxy.getXCenter()-l_w) l_iMinX=ov_round(l_oCommentProxy.getXCenter()-l_w);
+			if(l_iMaxX<l_oCommentProxy.getXCenter()+l_w) l_iMaxX=ov_round(l_oCommentProxy.getXCenter()+l_w);
+			if(l_iMinY>l_oCommentProxy.getYCenter()-l_h) l_iMinY=ov_round(l_oCommentProxy.getYCenter()-l_h);
+			if(l_iMaxY<l_oCommentProxy.getYCenter()-l_h) l_iMaxY=ov_round(l_oCommentProxy.getYCenter()+l_h);
 		}
 
 		//Now we apply scale on drawing area dimension
