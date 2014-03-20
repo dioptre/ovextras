@@ -28,6 +28,13 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEDesigner;
 using namespace std;
 
+
+// round is defined in <cmath> on c++11
+inline int ov_round(double dbl)
+{ return dbl >= 0.0 ? (int)(dbl + 0.5) : ((dbl - (double)(int)dbl) <= -0.5 ? (int)dbl : (int)(dbl - 0.5));
+}
+
+
 extern map<uint32, ::GdkColor> g_vColors;
 
 static ::GtkTargetEntry g_vTargetEntry[]= {
@@ -478,11 +485,6 @@ void CInterfacedScenario::updateScenarioLabel(void)
 
 #define updateStencilIndex(id,stencilgc) { id++; ::GdkColor sc={0, (guint16)((id&0xff0000)>>8), (guint16)(id&0xff00), (guint16)((id&0xff)<<8) }; gdk_gc_set_rgb_fg_color(stencilgc, &sc); }
 
-
-// round is defined in <cmath> on c++11
-inline int ov_round(double dbl)
-{ return dbl >= 0.0 ? (int)(dbl + 0.5) : ((dbl - (double)(int)dbl) <= -0.5 ? (int)dbl : (int)(dbl - 0.5));
-}
 
 void CInterfacedScenario::redraw(IBox& rBox)
 {
@@ -970,6 +972,8 @@ void CInterfacedScenario::redraw(IComment& rComment)
 	g_object_unref(l_pStencilGC);
 }
 
+
+
 void CInterfacedScenario::redraw(ILink& rLink)
 {
 	::GdkGC* l_pStencilGC=gdk_gc_new(GDK_DRAWABLE(m_pStencilBuffer));
@@ -1011,13 +1015,13 @@ void CInterfacedScenario::redraw(ILink& rLink)
 	gdk_draw_line(
 		GDK_DRAWABLE(m_pStencilBuffer),
 		l_pStencilGC,
-		l_oLinkProxy.getXSource()+m_i32ViewOffsetX, l_oLinkProxy.getYSource()+m_i32ViewOffsetY,
-		l_oLinkProxy.getXTarget()+m_i32ViewOffsetX, l_oLinkProxy.getYTarget()+m_i32ViewOffsetY);
+		ov_round(l_oLinkProxy.getXSource()+m_i32ViewOffsetX), ov_round(l_oLinkProxy.getYSource()+m_i32ViewOffsetY),
+		ov_round(l_oLinkProxy.getXTarget()+m_i32ViewOffsetX), ov_round(l_oLinkProxy.getYTarget()+m_i32ViewOffsetY));
 	gdk_draw_line(
 		GDK_DRAWABLE(m_pBufferedDrawingArea),
 		l_pDrawGC,
-		l_oLinkProxy.getXSource()+m_i32ViewOffsetX, l_oLinkProxy.getYSource()+m_i32ViewOffsetY,
-		l_oLinkProxy.getXTarget()+m_i32ViewOffsetX, l_oLinkProxy.getYTarget()+m_i32ViewOffsetY);
+		ov_round(l_oLinkProxy.getXSource()+m_i32ViewOffsetX), ov_round(l_oLinkProxy.getYSource()+m_i32ViewOffsetY),
+		ov_round(l_oLinkProxy.getXTarget()+m_i32ViewOffsetX), ov_round(l_oLinkProxy.getYTarget()+m_i32ViewOffsetY));
 	m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rLink.getIdentifier(), Connector_Link, 0);
 
 	g_object_unref(l_pDrawGC);
@@ -2665,7 +2669,7 @@ void CInterfacedScenario::pasteSelection(void)
 	CIdentifier l_oIdentifier;
 	map < CIdentifier, CIdentifier > l_vIdMapping;
 	map < CIdentifier, CIdentifier >::const_iterator it;
-	// TODO: this code below CenterX and CenterY seems to be innused
+	// TODO: this code below CenterX and CenterY seems to be useless
 	//float64 l_f64CenterX=0;
 	//float64 l_f64CenterY=0;
 	int32 l_iBoxCount=0;
@@ -2691,6 +2695,7 @@ void CInterfacedScenario::pasteSelection(void)
 			m_pDesignerVisualisation->onVisualisationBoxAdded(m_rScenario.getBoxDetails(l_oNewIdentifier));
 		}
 
+		// TODO: computes average box location seem to be useless
 		// Computes average box location
 		//CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, l_oNewIdentifier);
 		//l_f64CenterX+=l_oBoxProxy.getXCenter();
