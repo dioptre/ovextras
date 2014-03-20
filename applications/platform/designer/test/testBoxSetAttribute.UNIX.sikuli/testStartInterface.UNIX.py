@@ -23,13 +23,20 @@ def test_createSimpleScenarioAndRun(self):
     type("w",KeyModifier.CTRL)
     assert(exists("SavechangePopup.png"))
     click(Pattern("SavechangePopup.png").targetOffset(-170,56))
-    waitVanish(Pattern("SavechangePopup.png").targetOffset(-170,56),3)
-    type("n",KeyModifier.CTRL)
-    wait(1)
+    waitVanish(Pattern("SavechangePopup.png").targetOffset(-170,56))
     
+def test_boxSetAtributes(self):
+    click("SearchBoxBar.png")
+    paste("sinus")
+    dragDrop("Sinusoscilla-1.png",Pattern("DesignerDataGenOpen.png").similar(0.40).targetOffset(-233,-163))
+    rightClick("SinusOscillatorBoxSelected.png")
+    click(Pattern("contextualBoxMenu.png").targetOffset(-51,16))
+    assert(exists("renameBoxPopUp.png"))
+    type("XXXX XXXX XXXX"+ Key.ENTER)
+    assert(exists("SinusOscillatorNewNameXXX.png"))
     
 def tearDown(self):
-    if self.terminal.window():
-        App.close(self.terminal)
-        self.terminal= None
+    App.close(self.terminal)
+    self.terminal= None
+    wait(2)
 
