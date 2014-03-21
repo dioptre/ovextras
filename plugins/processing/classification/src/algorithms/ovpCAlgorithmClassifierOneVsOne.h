@@ -16,6 +16,13 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
+		typedef struct{
+			OpenViBE::float64 m_f64FirstClass;
+			OpenViBE::float64 m_f64SecondClass;
+			OpenViBE::Kernel::IAlgorithmProxy* m_pSubClassifierProxy;
+		} SSubClassifierDescriptor;
+
+
 		class CAlgorithmClassifierOneVsOne : public OpenViBEToolkit::CAlgorithmPairingStrategy
 		{
 		public:
@@ -32,8 +39,7 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsOne)
 
 		protected:
-			std::vector<OpenViBE::Kernel::IAlgorithmProxy*> m_oSubClassifierList;
-
+			std::vector<SSubClassifierDescriptor> m_oSubClassifierDescriptorList;
 			XML::IXMLNode *m_pConfigurationNode;
 
 		private:
@@ -42,6 +48,8 @@ namespace OpenViBEPlugins
 
 			void loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 			void generateConfigurationNode(void);
+
+			SSubClassifierDescriptor& getSubClassifierDescriptor(const OpenViBE::uint32 f64FirstClass, const OpenViBE::uint32 f64SecondClass);
 		};
 
 		class CAlgorithmClassifierOneVsOneDesc : public OpenViBEToolkit::CAlgorithmPairingStrategyDesc

@@ -83,6 +83,27 @@ void CAlgorithmClassifierOneVsOne::loadSubClassifierConfiguration(XML::IXMLNode 
 
 uint32 CAlgorithmClassifierOneVsOne::getClassAmount(void) const
 {
-	return -1;
+	//We use a formula because the list as the reponsability ot the count of subClassifier and by extention of amount of classes
+	uint32 l_ui32DeltaCarre = 1+8*m_oSubClassifierDescriptorList.size();
+	return (1+l_ui32DeltaCarre/l_ui32DeltaCarre)/2;
+}
+
+//The function take int because we don't take the "label" of the class but only the numero of declaration
+SSubClassifierDescriptor &CAlgorithmClassifierOneVsOne::getSubClassifierDescriptor(const uint32 ui32FirstClass, const uint32 ui32SecondClass)
+{
+	uint32 ui32Max, ui32Min;
+	if(ui32FirstClass > ui32SecondClass)
+	{
+		ui32Max = ui32FirstClass;
+		ui32Min = ui32SecondClass;
+	}
+	else
+	{
+		ui32Max = ui32FirstClass;
+		ui32Min = ui32SecondClass;
+	}
+	//TODO explanation of formula
+	uint32 index = getClassAmount()*(ui32Max-1) - ((ui32Max -1)*ui32Max)/2 + ui32Min -ui32Max -1;
+	return this->m_oSubClassifierDescriptorList[index];
 }
 
