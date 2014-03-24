@@ -356,6 +356,7 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	gtk_notebook_remove_page(GTK_NOTEBOOK(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookTitle, "openvibe-scenario_notebook")), 0);
 	gtk_notebook_remove_page(GTK_NOTEBOOK(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookClient, "openvibe-scenario_notebook")), 0);
 	gtk_notebook_append_page(&m_rNotebook, m_pNotebookPageContent, m_pNotebookPageTitle);
+	gtk_notebook_set_tab_reorderable(&m_rNotebook, m_pNotebookPageContent, true);
 
 	GtkWidget* l_pCloseWidget=GTK_WIDGET(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookTitle, "openvibe-scenario_button_close"));
 	g_signal_connect(G_OBJECT(l_pCloseWidget), "clicked", G_CALLBACK(scenario_title_button_close_cb), this);
