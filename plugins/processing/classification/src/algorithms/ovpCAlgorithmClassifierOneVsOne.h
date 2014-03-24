@@ -44,7 +44,7 @@ namespace OpenViBEPlugins
 			fClassifierComparison m_fAlgorithmComparison;
 
 		private:
-			XML::IXMLNode* getClassifierConfiguration(OpenViBE::Kernel::IAlgorithmProxy* classifier);
+			XML::IXMLNode* getClassifierConfiguration(SSubClassifierDescriptor &rDescriptor);
 			OpenViBE::uint32 getClassAmount(void) const;
 
 			void loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
