@@ -2,8 +2,10 @@
 #include "ovpCAlgorithmClassifierOneVsOne.h"
 
 #include <map>
+#include <cmath>
 #include <sstream>
 #include <cstring>
+#include <cstdlib>
 #include <string>
 #include <utility>
 #include <iostream>
@@ -45,6 +47,51 @@ boolean CAlgorithmClassifierOneVsOne::uninitialize(void)
 
 boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
+	//Calculate the amount of sample for each class
+	std::map < float64, size_t > l_vClassLabels;
+	for(uint32 i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
+	{
+		if(!l_vClassLabels.count(rFeatureVectorSet[i].getLabel()))
+		{
+			l_vClassLabels[rFeatureVectorSet[i].getLabel()] = 0;
+		}
+		l_vClassLabels[rFeatureVectorSet[i].getLabel()]++;
+	}
+
+	//Now let's train each classifier
+	for(size_t l_iFirstClass=1 ; l_iFirstClass <= getClassAmount(); ++l_iFirstClass)
+	{
+		for(size_t l_iSecondClass = l_iFirstClass+1 ; l_iSecondClass <= getClassAmount() ; ++l_iSecondClass)
+		{
+			size_t l_iFeatureVectorSize=rFeatureVectorSet[0].getSize();
+			size_t l_iFeatureCount = l_vClassLabels[(float64)l_iFirstClass] + l_vClassLabels[(float64)l_iSecondClass];
+
+			IAlgorithmProxy* l_pSubClassifier = getSubClassifierDescriptor(l_iFirstClass, l_iSecondClass).m_pSubClassifierProxy;
+
+			TParameterHandler < IMatrix* > ip_pFeatureVectorSet(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
+			ip_pFeatureVectorSet->setDimensionCount(2);
+			ip_pFeatureVectorSet->setDimensionSize(0, l_iFeatureCount);
+			ip_pFeatureVectorSet->setDimensionSize(1, l_iFeatureVectorSize+1);
+
+			float64* l_pFeatureVectorSetBuffer=ip_pFeatureVectorSet->getBuffer();
+			for(size_t j=0; j<rFeatureVectorSet.getFeatureVectorCount(); j++)
+			{
+				float64 l_f64TempClass = rFeatureVectorSet[j].getLabel();
+				if(l_f64TempClass == (float64)l_iFirstClass || l_f64TempClass == (float64)l_iSecondClass)
+				{
+					System::Memory::copy(
+								l_pFeatureVectorSetBuffer,
+								rFeatureVectorSet[j].getBuffer(),
+								l_iFeatureVectorSize*sizeof(float64));
+
+					l_pFeatureVectorSetBuffer[l_iFeatureVectorSize]=l_f64TempClass;
+					l_pFeatureVectorSetBuffer+=(l_iFeatureVectorSize+1);
+				}
+			}
+			l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Train);
+
+		}
+	}
 	return true;
 }
 
@@ -106,7 +153,7 @@ uint32 CAlgorithmClassifierOneVsOne::getClassAmount(void) const
 {
 	//We use a formula because the list as the reponsability ot the count of subClassifier and by extention of amount of classes
 	uint32 l_ui32DeltaCarre = 1+8*m_oSubClassifierDescriptorList.size();
-	return (1+l_ui32DeltaCarre/l_ui32DeltaCarre)/2;
+	return (1+::sqrt(l_ui32DeltaCarre))/2;
 }
 
 //The function take int because we don't take the "label" of the class but only the numero of declaration
