@@ -113,11 +113,11 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 					rFeatureVector.getBuffer(),
 					l_ui32FeatureVectorSize*sizeof(float64));
 		l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
-		l_oClassificationVector.push_back(std::pair< float64, IMatrix*>(op_f64ClassificationStateClass, op_pClassificationValues));
+		l_oClassificationVector.push_back(std::pair< float64, IMatrix*>((float64)op_f64ClassificationStateClass, (IMatrix*)op_pClassificationValues));
 	}
 
 	//Now, we determine the best classification
-	std::pair<float64, IMatrix*> best = std::pair<float64, IMatrix*>(-1, NULL);
+	std::pair<float64, IMatrix*> best = std::pair<float64, IMatrix*>(-1.0, NULL);
 	rf64Class = -1;
 
 	for(uint32 l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
@@ -162,6 +162,11 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 				}
 			}
 		}
+	}
+
+	if(best.second == NULL)
+	{
+		return false;
 	}
 	rClassificationValues.setSize(best.second->getBufferElementCount());
 	System::Memory::copy(rClassificationValues.getBuffer(), best.second->getBuffer(), best.second->getBufferElementCount()*sizeof(float64));
@@ -232,7 +237,7 @@ void CAlgorithmClassifierOneVsAll::generateConfigurationNode(void)
 
 	XML::IXMLNode *l_pSubClassifersNode = XML::createNode(c_sSubClassifiersNodeName);
 
-	for(uint64 i = 0; i<m_oSubClassifierList.size(); ++i)
+	for(size_t i = 0; i<m_oSubClassifierList.size(); ++i)
 	{
 		l_pTempNode = XML::createNode(c_sSubClassifierNodeName);
 		l_pTempNode->addChild(getClassifierConfiguration(m_oSubClassifierList[i]));

@@ -115,7 +115,7 @@ namespace OpenViBE
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier,
 				const OpenViBE::CString& sDefaultValue,
-				OpenViBE::int32 i32Index=-1);
+				const OpenViBE::int32 i32Index=-1);
 			virtual OpenViBE::boolean removeSetting(
 				const OpenViBE::uint32 ui32Index);
 			virtual OpenViBE::uint32 getSettingCount(void) const;

@@ -576,7 +576,7 @@ boolean CBox::setOutputName(
 
 boolean CBox::addSetting(const CString& sName,
 	const CIdentifier& rTypeIdentifier,
-	const CString& sDefaultValue, int32 i32Index)
+	const CString& sDefaultValue, const int32 i32Index)
 {
 	CString l_sValue(sDefaultValue);
 	if(this->getTypeManager().isEnumeration(rTypeIdentifier))

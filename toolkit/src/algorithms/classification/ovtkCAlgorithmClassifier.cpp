@@ -139,9 +139,9 @@ float64 CAlgorithmClassifier::getFloat64Parameter(const CIdentifier &rParameterI
 
 boolean CAlgorithmClassifier::getBooleanParameter(const CIdentifier &rParameterIdentifier, const CString &rParameterValue)
 {
-	TParameterHandler < float64 > ip_f64Temp(getInputParameter(rParameterIdentifier));
-	ip_f64Temp = this->getAlgorithmContext().getConfigurationManager().expandAsFloat(rParameterValue);
-	return (float64)ip_f64Temp;
+	TParameterHandler < boolean > ip_bTemp(getInputParameter(rParameterIdentifier));
+	ip_bTemp = this->getAlgorithmContext().getConfigurationManager().expandAsBoolean(rParameterValue);
+	return (boolean)ip_bTemp;
 }
 
 CString *CAlgorithmClassifier::getCStringParameter(const CIdentifier &rParameterIdentifier, CString &rParameterValue)
