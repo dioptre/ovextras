@@ -55,6 +55,27 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 
 boolean CAlgorithmClassifierOneVsOne::designArchitecture(OpenViBE::CIdentifier &rId, int64 &rClassAmount)
 {
+	if(!setSubClassifierIdentifier(rId))
+	{
+		return false;
+	}
+
+	//Now let's instantiate all the sub_classifier
+	for(int64 l_iFirstClass=1 ; l_iFirstClass <= rClassAmount; ++l_iFirstClass)
+	{
+		for(int64 l_iSecondClass = l_iFirstClass+1 ; l_iSecondClass <= rClassAmount ; ++l_iSecondClass)
+		{
+			IAlgorithmProxy* l_pSubClassifier = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(this->m_oSubClassifierAlgorithmIdentifier));
+			l_pSubClassifier->initialize();
+
+			//Set a references to the extra parameters input of the pairing strategy
+			TParameterHandler< std::map<CString, CString>* > ip_pExtraParameters(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+			ip_pExtraParameters.setReferenceTarget(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+
+			SSubClassifierDescriptor l_pTempDesc = {(float64)l_iFirstClass, (float64)l_iSecondClass, l_pSubClassifier};
+			this->m_oSubClassifierDescriptorList.push_back(l_pTempDesc);
+		}
+	}
 	return true;
 }
 
@@ -105,5 +126,18 @@ SSubClassifierDescriptor &CAlgorithmClassifierOneVsOne::getSubClassifierDescript
 	//TODO explanation of formula
 	uint32 index = getClassAmount()*(ui32Max-1) - ((ui32Max -1)*ui32Max)/2 + ui32Min -ui32Max -1;
 	return this->m_oSubClassifierDescriptorList[index];
+}
+
+boolean CAlgorithmClassifierOneVsOne::setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId)
+{
+	m_oSubClassifierAlgorithmIdentifier = rId;
+	m_fAlgorithmComparison = getClassificationComparisonFunction(rId);
+
+	if(m_fAlgorithmComparison == NULL)
+	{
+		this->getLogManager() << LogLevel_Error << "Cannot find the comparison function for the sub classifier\n";
+		return false;
+	}
+	return true;
 }
 

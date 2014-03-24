@@ -48,14 +48,6 @@ boolean CAlgorithmClassifierOneVsAll::uninitialize(void)
 
 boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
-
-	uint32 i;
-	std::map < float64, uint64 > l_vClassLabels;
-	for(i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
-	{
-		l_vClassLabels[rFeatureVectorSet[i].getLabel()]++;
-	}
-
 	//We send new set of data to each classifer. They will all use two different classes 1 and 2. 1 is for the class it should recognize, 2 for the others
 	for(uint32 l_iClassifierCounter = 1 ; l_iClassifierCounter <= m_oSubClassifierList.size() ; ++l_iClassifierCounter )
 	{
