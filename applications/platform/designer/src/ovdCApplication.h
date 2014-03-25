@@ -135,6 +135,9 @@ namespace OpenViBEDesigner
 
 		//@}
 
+		// to know which GtkEntry should be fu=ocused on when doing CTRL+F
+		OpenViBE::boolean isLogAreaClicked();
+
 	public:
 
 		const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
@@ -160,6 +163,7 @@ namespace OpenViBEDesigner
 		::GtkTreeStore* m_pAlgorithmTreeModel;
 		::GtkTreeView* m_pAlgorithmTreeView;
 		::GtkEntry* m_pSearchEntry;//for search in log
+		::GtkTextView* m_pTextView;//for search log
 		::GtkTextTag* m_pCIdentifierTag;
 		::GtkSpinButton* m_pZoomSpinner;
 		gint m_giFilterTimeout;

@@ -68,7 +68,16 @@ namespace
 	}
 	void menu_focus_search_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 	{
-		gtk_widget_grab_focus(GTK_WIDGET(gtk_builder_get_object(static_cast<CApplication*>(pUserData)->m_pBuilderInterface, "openvibe-box_algorithm_searchbox")));
+		CApplication* l_pApplication = static_cast<CApplication*>(pUserData);
+		//if we want the log area GtkEntry to be able to grab the focus, this one must not grab it
+		if(!(l_pApplication->isLogAreaClicked()))
+		{
+			gtk_widget_grab_focus(GTK_WIDGET(gtk_builder_get_object(static_cast<CApplication*>(pUserData)->m_pBuilderInterface, "openvibe-box_algorithm_searchbox")));
+		}
+		else
+		{
+			gtk_widget_grab_focus(GTK_WIDGET(gtk_builder_get_object(static_cast<CApplication*>(pUserData)->m_pBuilderInterface, "searchEntry")));
+		}
 	}
 	void menu_copy_selection_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 	{
@@ -274,18 +283,14 @@ namespace
 
 	void search_messages_cb(::GtkButton* pButton, gpointer pUserData)
 	{
-		cout << "search_messages_cb\n";
-
 		CApplication* l_pApplication=static_cast<CApplication*>(pUserData);
 		CString l_sSearchTerm((const char*)l_pApplication->m_sLogSearchTerm);
 		if(l_sSearchTerm==CString(""))
 		{
-			cout << "restore old buffer" << endl;
 			l_pApplication->m_pLogListenerDesigner->restoreOldBuffer();
 		}
 		else
 		{
-			cout << "search message for " << l_sSearchTerm.toASCIIString() << endl;
 			l_pApplication->m_pLogListenerDesigner->searchMessages(l_sSearchTerm);
 		}
 
@@ -294,21 +299,6 @@ namespace
 	void refresh_search_log_entry(::GtkEntry* pTextfield, CApplication* pApplication)
 	{
 		pApplication->m_sLogSearchTerm = gtk_entry_get_text(pTextfield);
-	}
-
-	void searchlog_focus_in_cb(::GtkWidget* pWidget, ::GdkEventKey* pEvent, CApplication* pApplication)
-	{
-		cout << "searchlog_focus_in_cb" << endl;
-		//if CTRL + F is pressed
-		/*
-		if((pEvent->keyval==GDK_Control_L || pEvent->keyval==GDK_Control_R)&&(pEvent->keyval==GDK_f || pEvent->keyval==GDK_F))
-		{
-			gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pApplication->m_pBuilderInterface, "searchEntry")), true);
-
-		}
-		//*/
-		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pApplication->m_pBuilderInterface, "searchEntry")), true);
-
 	}
 
 	string strtoupper(string str)
@@ -436,7 +426,6 @@ namespace
 
 	static gboolean searchbox_focus_in_cb(::GtkWidget* pWidget, ::GdkEvent* pEvent, CApplication* pApplication)
 	{
-		cout << "searchbox_focus_in_cb" << endl;
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pApplication->m_pBuilderInterface, "openvibe-menu_edit")), false);
 
 		return false;
@@ -444,7 +433,6 @@ namespace
 
 	static gboolean searchbox_focus_out_cb(::GtkWidget* pWidget, ::GdkEvent* pEvent, CApplication* pApplication)
 	{
-		cout << "searchbox_focus_out_cb" << endl;
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pApplication->m_pBuilderInterface, "openvibe-menu_edit")), true);
 
 		return false;
@@ -541,8 +529,11 @@ namespace
 
 	void click_callback(::GtkWidget* pWidget, GdkEventButton *event, gpointer pData)
 	{
-		cout << "clicked" << endl;
+		//log text view grab the focus so isLogAreaClicked() return true and CTRL+F will focus on the log searchEntry
+		gtk_widget_grab_focus(pWidget);
+
 		CApplication* l_pApplication=static_cast<CApplication*>(pData);
+
 		//if left click
 		if (event->button == 1)
 		{
@@ -618,6 +609,7 @@ CApplication::CApplication(const IKernelContext& rKernelContext)
 	m_pScenarioManager=&m_rKernelContext.getScenarioManager();
 	m_pVisualisationManager=&m_rKernelContext.getVisualisationManager();
 	m_pLogListenerDesigner = NULL;
+	m_pTextView = NULL;
 }
 
 CApplication::~CApplication(void) 
@@ -713,9 +705,6 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-show_unstable")), "toggled", G_CALLBACK(refresh_search_no_data_cb), this);
 
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "searchEntry")),		"changed", G_CALLBACK(refresh_search_log_entry), this);
-	//g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "searchEntry")),		"focus-in-event", G_CALLBACK(searchlog_focus_in_cb), this);
-	//g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-textview_messages")),		"focus-in-event", G_CALLBACK(searchlog_focus_in_cb), this);
-	//m_pSearchEntry = GTK_ENTRY(gtk_builder_get_object(m_pBuilderInterface, "searchEntry"));
 
 #if defined(TARGET_OS_Windows)
 #if GTK_CHECK_VERSION(2,24,0)
@@ -889,7 +878,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "searchEntry")),		"activate", G_CALLBACK(search_messages_cb), this);
 
 
-		GtkTextView* m_pTextView = GTK_TEXT_VIEW(gtk_builder_get_object(m_pBuilderInterface, "openvibe-textview_messages"));
+		m_pTextView = GTK_TEXT_VIEW(gtk_builder_get_object(m_pBuilderInterface, "openvibe-textview_messages"));
 		GtkTextBuffer* buffer =  gtk_text_view_get_buffer( m_pTextView );
 		GtkTextTagTable* tagtable =  gtk_text_buffer_get_tag_table(buffer);
 		//GtkTextTag* url
@@ -1800,7 +1789,7 @@ void CApplication::releasePlayer(void)
 
 		// restore the snapshot so settings override does not modify the scenario !
 		//commenting this line make centerOnBox still valid after stop
-		l_pCurrentInterfacedScenario->undoCB(false);
+		//l_pCurrentInterfacedScenario->undoCB(false);
 
 		// destroy player windows
 		l_pCurrentInterfacedScenario->releasePlayerVisualisation();
@@ -2196,4 +2185,12 @@ void CApplication::logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLe
 	isActive = m_rKernelContext.getConfigurationManager().expandAsBoolean(configName, m_rKernelContext.getLogManager().isActive(level));
 	gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(ToolButton), isActive);
 	gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), m_rKernelContext.getLogManager().isActive(level));
+}
+
+boolean CApplication::isLogAreaClicked()
+{
+	if(m_pTextView!=NULL)
+	{
+		return gtk_widget_is_focus(GTK_WIDGET(m_pTextView));
+	}
 }

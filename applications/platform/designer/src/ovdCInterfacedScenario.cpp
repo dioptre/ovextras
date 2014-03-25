@@ -3293,6 +3293,14 @@ boolean CInterfacedScenario::centerOnBox(CIdentifier rIdentifier)
 	{
 		//m_rKernelContext.getLogManager() << LogLevel_Fatal << "CInterfacedScenario::centerOnBox is box" << "\n";
 		IBox* rBox = m_rScenario.getBoxDetails(rIdentifier);
+
+		//clear previous selection
+		m_vCurrentObject.clear();
+		//to select the box
+		m_vCurrentObject[rIdentifier] = true;
+		//redraw it in yellow to show it is selected
+		redraw(*rBox);
+
 		CBoxProxy l_oBoxProxy(m_rKernelContext, *rBox);
 		const int xMargin=5*m_f64CurrentScale;
 		const int yMargin=5*m_f64CurrentScale;
