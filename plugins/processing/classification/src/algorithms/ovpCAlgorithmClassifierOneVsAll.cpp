@@ -109,7 +109,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	}
 
 	//Now, we determine the best classification
-	std::pair<float64, IMatrix*> best = std::pair<float64, IMatrix*>(-1.0, NULL);
+	std::pair<float64, IMatrix*> best = std::pair<float64, IMatrix*>(-1.0, (IMatrix*)NULL);
 	rf64Class = -1;
 
 	for(uint32 l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)

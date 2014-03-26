@@ -107,6 +107,7 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 
 boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
 {
+	exit(0);
 	return true;
 }
 
@@ -192,11 +193,75 @@ XML::IXMLNode* CAlgorithmClassifierOneVsOne::saveConfiguration(void)
 
 boolean CAlgorithmClassifierOneVsOne::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
+	XML::IXMLNode *l_pOneVsOneNode = pConfigurationNode->getChild(0);
+
+	XML::IXMLNode *l_pTempNode = l_pOneVsOneNode->getChildByName(c_sSubClassifierIdentifierNodeName);
+	std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sAlgorithmIdAttribute));
+	uint64 l_iIdentifier;
+	l_sIdentifierData >> l_iIdentifier;
+	if(m_oSubClassifierAlgorithmIdentifier.toUInteger() != l_iIdentifier)
+	{
+		while(!m_oSubClassifierDescriptorList.empty())
+		{
+			IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierDescriptorList.back().m_pSubClassifierProxy;
+			l_pSubClassifier->uninitialize();
+			this->getAlgorithmManager().releaseAlgorithm(*l_pSubClassifier);
+			this->m_oSubClassifierDescriptorList.pop_back();
+		}
+		if(!this->setSubClassifierIdentifier(l_iIdentifier)){
+			//if the sub classifier doesn't have comparison function it is an error
+			return false;
+		}
+	}
+
+	l_pTempNode = l_pOneVsOneNode->getChildByName(c_sSubClassifierCountNodeName);
+	std::stringstream l_sCountData(l_pTempNode->getPCData());
+	uint64 l_iAmountClass;
+	l_sCountData >> l_iAmountClass;
+
+	while(l_iAmountClass != getClassAmount())
+	{
+		if(l_iAmountClass < getClassAmount())
+		{
+			IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierDescriptorList.back().m_pSubClassifierProxy;
+			l_pSubClassifier->uninitialize();
+			this->getAlgorithmManager().releaseAlgorithm(*l_pSubClassifier);
+			this->m_oSubClassifierDescriptorList.pop_back();
+		}
+		else
+		{
+			IAlgorithmProxy* l_pSubClassifier = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(this->m_oSubClassifierAlgorithmIdentifier));
+			l_pSubClassifier->initialize();
+
+			//Set a references to the extra parameters input of the pairing strategy
+			TParameterHandler< std::map<CString, CString>* > ip_pExtraParameters(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+			ip_pExtraParameters.setReferenceTarget(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+
+			SSubClassifierDescriptor l_pTempDesc = {1, 2, l_pSubClassifier};
+			this->m_oSubClassifierDescriptorList.push_back(l_pTempDesc);
+		}
+	}
+
+	loadSubClassifierConfiguration(l_pOneVsOneNode->getChildByName(c_sSubClassifiersNodeName));
 	return true;
 }
 
 void CAlgorithmClassifierOneVsOne::loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode)
 {
+	for( uint32 i = 0; i < pSubClassifiersNode->getChildCount() ; ++i)
+	{
+		XML::IXMLNode *l_pSubClassifierNode = pSubClassifiersNode->getChild(i);
+		IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierDescriptorList[i].m_pSubClassifierProxy;
+		TParameterHandler < XML::IXMLNode* > ip_pConfiguration(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
+		ip_pConfiguration = l_pSubClassifierNode->getChild(0);
+		l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
+
+		//Now we have to restore classes name
+		std::stringstream l_sFirstClass(l_pSubClassifierNode->getAttribute(c_sFirstClassAtrributeName));
+		l_sFirstClass >> m_oSubClassifierDescriptorList[i].m_f64FirstClass;
+		std::stringstream l_sSecondClass(l_pSubClassifierNode->getAttribute(c_sSecondClassAttributeName));
+		l_sSecondClass >> m_oSubClassifierDescriptorList[i].m_f64SecondClass;
+	}
 }
 
 uint32 CAlgorithmClassifierOneVsOne::getClassAmount(void) const
