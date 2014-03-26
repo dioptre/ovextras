@@ -298,6 +298,8 @@ boolean CBoxConfigurationDialog::run(void)
 
 		//action buttons can't be unparented from builder interface and added to dialog, which is why they are added at dialog creation time
 #endif
+		::GtkScrolledWindow * l_pScrolledWindow=GTK_SCROLLED_WINDOW(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-scrolledwindow"));
+		::GtkViewport * l_pViewPort=GTK_VIEWPORT(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-viewport"));
 		::GtkTable* l_pSettingTable=GTK_TABLE(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-table"));
 		::GtkContainer* l_pFileOverrideContainer=GTK_CONTAINER(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-hbox_filename_override"));
 		::GtkCheckButton* l_pFileOverrideCheck=GTK_CHECK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-checkbutton_filename_override"));
@@ -347,6 +349,20 @@ boolean CBoxConfigurationDialog::run(void)
 			l_oHelper.setValue(l_oSettingType, l_pSettingValue, l_oSettingValue);
 			gtk_label_set_text(GTK_LABEL(l_pSettingName), l_oSettingName);
 		}
+	
+		// Resize the window to fit as much of the table as possible, but keep the max size
+		// limited so it doesn't get outside the screen. For safety, we cap to 800x600
+		// anyway to hopefully prevent the window from going under things such as the gnome toolbar.
+		// The ui file at the moment does not allow resize of this window because the result 
+		// looked ugly if the window was made overly large, and no satisfying solution at the time was
+		// found by the limited intellectual resources available. 
+		uint32 l_ui32MaxWidth = std::min(800,gdk_screen_get_width(gdk_screen_get_default()));
+		uint32 l_ui32MaxHeight = std::min(600,gdk_screen_get_height(gdk_screen_get_default()));
+		GtkRequisition l_oSize;
+    		gtk_widget_size_request(GTK_WIDGET(l_pViewPort), &l_oSize);
+    		gtk_widget_set_size_request(GTK_WIDGET(l_pScrolledWindow), 
+			std::min(l_ui32MaxWidth,(uint32)l_oSize.width), 
+			std::min(l_ui32MaxHeight,(uint32)l_oSize.height));
 
 #if 1
 		string l_sSettingOverrideWidgetName=l_oHelper.getSettingWidgetName(OV_TypeId_Filename).toASCIIString();

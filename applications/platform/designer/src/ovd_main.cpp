@@ -1,6 +1,7 @@
 #include "ovd_base.h"
 
 #include <system/Time.h>
+#include <system/CMath.h>
 
 #include <stack>
 #include <vector>
@@ -289,7 +290,7 @@ typedef struct _SConfiguration
 		return OpenViBEDesigner::ECommandLineFlag(m_eNoGui|m_eNoCheckColorDepth|m_eNoManageSession);
 	}
 
-	std::vector < std::pair < ECommandLineFlag, std::string > > m_vFlag;
+	std::map < ECommandLineFlag, std::string > m_oFlag;
 	OpenViBEDesigner::ECommandLineFlag m_eNoGui;
 	OpenViBEDesigner::ECommandLineFlag m_eNoCheckColorDepth;
 	OpenViBEDesigner::ECommandLineFlag m_eNoManageSession;
@@ -313,21 +314,29 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		if(*it=="")
 		{
 		}
+		else if(*it=="-c" || *it=="--config")
+		{
+			l_oConfiguration.m_oFlag[CommandLineFlag_Config] = *++it;
+		}
 		else if(*it=="-h" || *it=="--help")
 		{
 			return false;
 		}
+		else if(*it=="-k" || *it=="--kernel")
+		{
+			l_oConfiguration.m_oFlag[CommandLineFlag_Kernel] = *++it;
+		}
 		else if(*it=="-o" || *it=="--open")
 		{
-			l_oConfiguration.m_vFlag.push_back(std::make_pair(CommandLineFlag_Open, *++it));
+			l_oConfiguration.m_oFlag[CommandLineFlag_Open] = *++it;
 		}
 		else if(*it=="-p" || *it=="--play")
 		{
-			l_oConfiguration.m_vFlag.push_back(std::make_pair(CommandLineFlag_Play, *++it));
+			l_oConfiguration.m_oFlag[CommandLineFlag_Play] = *++it;
 		}
 		else if(*it=="-pf" || *it=="--play-fast")
 		{
-			l_oConfiguration.m_vFlag.push_back(std::make_pair(CommandLineFlag_PlayFast, *++it));
+			l_oConfiguration.m_oFlag[CommandLineFlag_PlayFast] = *++it;
 		}
 		else if(*it=="--no-gui")
 		{
@@ -343,22 +352,26 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		{
 			l_oConfiguration.m_eNoManageSession=CommandLineFlag_NoManageSession;
 		}
+		else if(*it=="--random-seed")
+		{
+			l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed] = *++it;
+		}
 //		else if(*it=="--define")
 //		{
-//			l_oConfiguration.m_vFlag.push_back(std::make_pair(Flag_NoGui, *++it));
+//			l_oConfiguration.m_oFlag.push_back(std::make_pair(Flag_NoGui, *++it));
 //		}
 		else
 		{
 #if 0
 			// Assumes we just open a scenario - this is for retro compatibility and should not be supported in the future
-			l_oConfiguration.m_vFlag.push_back(std::make_pair(CommandLineFlag_Open, *++it));
+			l_oConfiguration.m_oFlag.push_back(std::make_pair(CommandLineFlag_Open, *++it));
 #endif
 			return false;
 		}
 	}
 
 #if 0
-	rConfiguration.m_vFlag=l_oConfiguration.m_vFlag;
+	rConfiguration.m_oFlag=l_oConfiguration.m_oFlag;
 	rConfiguration.m_bCheckColorDepth=l_oConfiguration.m_bCheckColorDepth;
 	rConfiguration.m_bShowGui=l_oConfiguration.m_bShowGui;
 #else
@@ -380,6 +393,25 @@ int go(int argc, char ** argv)
 		{ 0, 49151, 49151, 49151 },
 		{ 0, 65535, 65535, 65535 },
 	*/
+
+	SConfiguration l_oConfiguration;
+	if(!parse_arguments(argc, argv, l_oConfiguration))
+	{
+		cout << "Syntax : " << argv[0] << " [ switches ]\n";
+		cout << "Possible switches :\n";
+		cout << "  --config filename       : path to config file\n";
+		cout << "  --help                  : displays this help message and exits\n";
+		cout << "  --kernel filename       : path to openvibe kernel library\n";
+		cout << "  --no-gui                : hides the designer graphical user interface (assumes --no-check-color-depth)\n";
+		cout << "  --no-check-color-depth  : does not check 24/32 bits color depth\n";
+		cout << "  --no-session-management : neither restore last used scenarios nor saves them at exit\n";
+		cout << "  --open filename         : opens a scenario (see also --no-session-management)\n";
+		cout << "  --play filename         : plays the opened scenario (see also --no-session-management)\n";
+		cout << "  --play-fast filename    : plays fast forward the opened scenario (see also --no-session-management)\n";
+		cout << "  --random-seed uint      : initialize random number generator with value, default=time(NULL)\n";
+//					l_rLogManager << LogLevel_Info << "  --define                : defines a variable in the configuration manager\n";
+		return -1;
+	}
 
 	#define gdk_color_set(c, r, g, b) { c.pixel=0; c.red=r; c.green=g; c.blue=b; }
 	gdk_color_set(g_vColors[Color_BackgroundPlayerStarted],  32767, 32767, 32767);
@@ -425,9 +457,13 @@ int go(int argc, char ** argv)
 #else
 	CString l_sKernelFile = OpenViBE::Directories::getLibDir() + "/libopenvibe-kernel.so";
 #endif
+	if(l_oConfiguration.m_oFlag.count(CommandLineFlag_Kernel)) 
+	{
+		l_sKernelFile = CString(l_oConfiguration.m_oFlag[CommandLineFlag_Kernel].c_str());
+	}
 	if(!l_oKernelLoader.load(l_sKernelFile, &l_sError))
 	{
-		cout<<"[ FAILED ] Error loading kernel ("<<l_sError<<")" << " from [" << l_sKernelFile << "]\n";
+		cout<<"[ FAILED ] Error loading kernel from [" << l_sKernelFile << "]: " << l_sError << "\n";
 	}
 	else
 	{
@@ -444,7 +480,13 @@ int go(int argc, char ** argv)
 		{
 			cout<<"[  INF  ] Got kernel descriptor, trying to create kernel"<<"\n";
 
-			l_pKernelContext=l_pKernelDesc->createKernel("designer", OpenViBE::Directories::getDataDir() + "/kernel/openvibe.conf");
+			CString l_sConfigFile = CString(OpenViBE::Directories::getDataDir() + "/kernel/openvibe.conf");
+			if(l_oConfiguration.m_oFlag.count(CommandLineFlag_Config)) 
+			{
+				l_sConfigFile = CString(l_oConfiguration.m_oFlag[CommandLineFlag_Config].c_str());
+			}
+
+			l_pKernelContext=l_pKernelDesc->createKernel("designer", l_sConfigFile);
 			if(!l_pKernelContext)
 			{
 				cout<<"[ FAILED ] No kernel created by kernel descriptor"<<"\n";
@@ -478,109 +520,101 @@ int go(int argc, char ** argv)
 				signal(SIGINT, SIG_DFL);
 				signal(SIGQUIT, SIG_DFL);
 #endif
-
-				SConfiguration l_oConfiguration;
-				if(!parse_arguments(argc, argv, l_oConfiguration))
+				if(l_rConfigurationManager.expandAsBoolean("${Kernel_3DVisualisationEnabled}"))
 				{
-					l_rLogManager << LogLevel_Info << "Syntax : " << argv[0] << " [ switches ]\n";
-					l_rLogManager << LogLevel_Info << "Possible switches :\n";
-					l_rLogManager << LogLevel_Info << "  --help                  : displays this help message and exits\n";
-					l_rLogManager << LogLevel_Info << "  --open filename         : opens a scenario (see also --no-session-management)\n";
-					l_rLogManager << LogLevel_Info << "  --play filename         : plays the opened scenario (see also --no-session-management)\n";
-					l_rLogManager << LogLevel_Info << "  --play-fast filename    : plays fast forward the opened scenario (see also --no-session-management)\n";
-					l_rLogManager << LogLevel_Info << "  --no-gui                : hides the designer graphical user interface (assumes --no-color-depth-test)\n";
-					l_rLogManager << LogLevel_Info << "  --no-check-color-depth  : does not check 24/32 bits color depth\n";
-					l_rLogManager << LogLevel_Info << "  --no-session-management : neither restore last used scenarios nor saves them at exit\n";
-//					l_rLogManager << LogLevel_Info << "  --define                : defines a variable in the configuration manager\n";
+					l_pKernelContext->getVisualisationManager().initialize3DContext();
 				}
+
+				if(l_oConfiguration.m_oFlag.count(CommandLineFlag_RandomSeed)) 
+				{
+					System::Math::initializeRandomMachine(atol(l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed].c_str()));
+				} 
 				else
 				{
-					if(l_rConfigurationManager.expandAsBoolean("${Kernel_3DVisualisationEnabled}"))
+					System::Math::initializeRandomMachine(time(NULL));
+				}
+
+				{
+					::CApplication app(*l_pKernelContext);
+					app.initialize(l_oConfiguration.getFlags());
+
+					// FIXME is it necessary to keep next line uncomment ?
+					//boolean l_bIsScreenValid=true;
+					if(!l_oConfiguration.m_eNoCheckColorDepth)
 					{
-						l_pKernelContext->getVisualisationManager().initialize3DContext();
+						if(GDK_IS_DRAWABLE(GTK_WIDGET(app.m_pMainWindow)->window))
+						{
+							// FIXME is it necessary to keep next line uncomment ?
+							//l_bIsScreenValid=false;
+							switch(gdk_drawable_get_depth(GTK_WIDGET(app.m_pMainWindow)->window))
+							{
+								case 24:
+								case 32:
+									// FIXME is it necessary to keep next line uncomment ?
+									//l_bIsScreenValid=true;
+									break;
+								default:
+									l_rLogManager << LogLevel_Error << "Please change the color depth of your screen to either 24 or 32 bits\n";
+									// TODO find a way to break
+									break;
+							}
+						}
+					}
+
+					std::map < ECommandLineFlag, std::string >::iterator it;
+					for(it=l_oConfiguration.m_oFlag.begin(); it!=l_oConfiguration.m_oFlag.end(); it++)
+					{
+						switch(it->first)
+						{
+							case CommandLineFlag_Open:
+								l_rLogManager << LogLevel_Info << "Opening scenario [" << CString(it->second.c_str()) << "]\n";
+								app.openScenario(it->second.c_str());
+								break;
+							case CommandLineFlag_Play:
+								l_rLogManager << LogLevel_Info << "Opening and playing scenario [" << CString(it->second.c_str()) << "]\n";
+								if(app.openScenario(it->second.c_str()))
+								{
+									app.playScenarioCB();
+								}
+								break;
+							case CommandLineFlag_PlayFast:
+								l_rLogManager << LogLevel_Info << "Opening and fast playing scenario [" << CString(it->second.c_str()) << "]\n";
+								if(app.openScenario(it->second.c_str()))
+								{
+									app.forwardScenarioCB();
+								}
+								break;
+//								case CommandLineFlag_Define:
+//									break;
+							default:
+								break;
+						}
+					}
+
+					if(app.m_vInterfacedScenario.empty())
+					{
+						app.newScenarioCB();
 					}
 
 					{
-						::CApplication app(*l_pKernelContext);
-						app.initialize(l_oConfiguration.getFlags());
-
-						// FIXME is it necessary to keep next line uncomment ?
-						//boolean l_bIsScreenValid=true;
-						if(!l_oConfiguration.m_eNoCheckColorDepth)
-						{
-							if(GDK_IS_DRAWABLE(GTK_WIDGET(app.m_pMainWindow)->window))
-							{
-								// FIXME is it necessary to keep next line uncomment ?
-								//l_bIsScreenValid=false;
-								switch(gdk_drawable_get_depth(GTK_WIDGET(app.m_pMainWindow)->window))
-								{
-									case 24:
-									case 32:
-										// FIXME is it necessary to keep next line uncomment ?
-										//l_bIsScreenValid=true;
-										break;
-									default:
-										l_rLogManager << LogLevel_Error << "Please change the color depth of your screen to either 24 or 32 bits\n";
-										// TODO find a way to break
-										break;
-								}
-							}
-						}
-
-						for(size_t i=0; i<l_oConfiguration.m_vFlag.size(); i++)
-						{
-							switch(l_oConfiguration.m_vFlag[i].first)
-							{
-								case CommandLineFlag_Open:
-									l_rLogManager << LogLevel_Info << "Opening scenario [" << CString(l_oConfiguration.m_vFlag[i].second.c_str()) << "]\n";
-									app.openScenario(l_oConfiguration.m_vFlag[i].second.c_str());
-									break;
-								case CommandLineFlag_Play:
-									l_rLogManager << LogLevel_Info << "Opening and playing scenario [" << CString(l_oConfiguration.m_vFlag[i].second.c_str()) << "]\n";
-									if(app.openScenario(l_oConfiguration.m_vFlag[i].second.c_str()))
-									{
-										app.playScenarioCB();
-									}
-									break;
-								case CommandLineFlag_PlayFast:
-									l_rLogManager << LogLevel_Info << "Opening and fast playing scenario [" << CString(l_oConfiguration.m_vFlag[i].second.c_str()) << "]\n";
-									if(app.openScenario(l_oConfiguration.m_vFlag[i].second.c_str()))
-									{
-										app.forwardScenarioCB();
-									}
-									break;
-//								case CommandLineFlag_Define:
-//									break;
-								default:
-									break;
-							}
-						}
-
-						if(app.m_vInterfacedScenario.empty())
-						{
-							app.newScenarioCB();
-						}
-
-						{
-							CPluginObjectDescCollector cb_collector1(*l_pKernelContext);
-							CPluginObjectDescCollector cb_collector2(*l_pKernelContext);
-							CPluginObjectDescLogger cb_logger(*l_pKernelContext);
-							cb_logger.enumeratePluginObjectDesc();
-							cb_collector1.enumeratePluginObjectDesc(OV_ClassId_Plugins_BoxAlgorithmDesc);
-							cb_collector2.enumeratePluginObjectDesc(OV_ClassId_Plugins_AlgorithmDesc);
-							insertPluginObjectDesc_to_GtkTreeStore(*l_pKernelContext, cb_collector1.getPluginObjectDescMap(), app.m_pBoxAlgorithmTreeModel);
-							insertPluginObjectDesc_to_GtkTreeStore(*l_pKernelContext, cb_collector2.getPluginObjectDescMap(), app.m_pAlgorithmTreeModel);
+						CPluginObjectDescCollector cb_collector1(*l_pKernelContext);
+						CPluginObjectDescCollector cb_collector2(*l_pKernelContext);
+						CPluginObjectDescLogger cb_logger(*l_pKernelContext);
+						cb_logger.enumeratePluginObjectDesc();
+						cb_collector1.enumeratePluginObjectDesc(OV_ClassId_Plugins_BoxAlgorithmDesc);
+						cb_collector2.enumeratePluginObjectDesc(OV_ClassId_Plugins_AlgorithmDesc);
+						insertPluginObjectDesc_to_GtkTreeStore(*l_pKernelContext, cb_collector1.getPluginObjectDescMap(), app.m_pBoxAlgorithmTreeModel);
+						insertPluginObjectDesc_to_GtkTreeStore(*l_pKernelContext, cb_collector2.getPluginObjectDescMap(), app.m_pAlgorithmTreeModel);
 	
-							l_pKernelContext->getLogManager() << LogLevel_Info << "Initialization took " << l_pKernelContext->getConfigurationManager().expand("$Core{real-time}") << " ms\n";
+						l_pKernelContext->getLogManager() << LogLevel_Info << "Initialization took " << l_pKernelContext->getConfigurationManager().expand("$Core{real-time}") << " ms\n";
 	
-							try
-							{
-								gtk_main();
-							}
-							catch(...)
-							{
-								l_pKernelContext->getLogManager() << LogLevel_Fatal << "Catched top level exception\n";
-							}
+						try
+						{
+							gtk_main();
+						}
+						catch(...)
+						{
+							l_pKernelContext->getLogManager() << LogLevel_Fatal << "Catched top level exception\n";
 						}
 					}
 				}

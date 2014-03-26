@@ -60,11 +60,11 @@ namespace
 	//
 	// The following filters have roughly 50ms delay as described in "2.1.4 What is the
 	// delay of a linear-phase FIR?" at http://www.dspguru.com/book/export/html/3 :
-	// n =   500, Fs =   5000, delay = (n-1)/(2*Fs) = 0.04995
+	// n =   500, Fs =   5000, delay = (n-1)/(2*Fs) = 0.04990
 	// n =  1000, Fs =  10000, delay = (n-1)/(2*Fs) = 0.04995
-	// n =  2500, Fs =  25000, delay = (n-1)/(2*Fs) = 0.04995
-	// n =  5000, Fs =  50000, delay = (n-1)/(2*Fs) = 0.04995
-	// n = 10000, Fs = 100000, delay = (n-1)/(2*Fs) = 0.04995
+	// n =  2500, Fs =  25000, delay = (n-1)/(2*Fs) = 0.04998
+	// n =  5000, Fs =  50000, delay = (n-1)/(2*Fs) = 0.04999
+	// n = 10000, Fs = 100000, delay = (n-1)/(2*Fs) = 0.049995
 	//
 	// In order to correct this delay, filtering should be done as a two steps process with a forward filter
 	// followed by a backward filter. However, this leads to an n square complexity where a linear complexity is
@@ -168,6 +168,7 @@ CDriverBrainProductsActiCHamp::CDriverBrainProductsActiCHamp(IDriverContext& rDr
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "Number of attached devices : " << uint32(::champGetCount()) << "\n";
 
 	m_oHeader.setSamplingFrequency(512);
+	m_oHeader.setChannelCount(32);
 }
 
 void CDriverBrainProductsActiCHamp::release(void)
@@ -276,7 +277,6 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 	m_ui32ChannelCount=m_ui32CountEEG+m_ui32CountAux;
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "Channel counts are  [EEG: "<<m_ui32CountEEG<<"] [AUX: "<<m_ui32CountAux<<"]\n";
 
-
 	m_oHeader.setChannelCount(m_ui32ChannelCount);
 
 	m_vImpedance.resize(m_ui32CountEEG+1);
@@ -289,8 +289,8 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "Sampling rate in Hz  [Physical: "<<m_ui32PhysicalSampleRateHz<<"] [Driver: "<<m_oHeader.getSamplingFrequency()<<"]\n";
 
 	uint32 i,j=0;
-	for(i=0; i<m_ui32CountEEG; i++, j++) m_vResolution[j]=l_oProperties.ResolutionEeg*1E6f; // converts to ?V
-	for(i=0; i<m_ui32CountAux; i++, j++) m_vResolution[j]=l_oProperties.ResolutionAux*1E6f; // converts to ?V
+	for(i=0; i<m_ui32CountEEG; i++, j++) m_vResolution[j]=l_oProperties.ResolutionEeg*1E6f; // converts to microvolts
+	for(i=0; i<m_ui32CountAux; i++, j++) m_vResolution[j]=l_oProperties.ResolutionAux*1E6f; // converts to microvolts
 
 	// Sets data pointers
 	// the amplifier model is depending on the number of channels, always including AUX
@@ -368,8 +368,8 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 	// Prepares low pass filter
 
 #define __set_filter__(f,f_decim) \
-	if(m_ui32ADCDataDecimation==CHAMP_DECIMATION_0)	loadFilter(OpenViBE::Directories::getDataDir() + "/openvibe-applications/acquisition-server/filters/"f".bin", m_vFilter); \
-	else loadFilter(OpenViBE::Directories::getDataDir() + "/openvibe-applications/acquisition-server/filters/"f_decim".bin", m_vFilter);\
+	if(m_ui32ADCDataDecimation==CHAMP_DECIMATION_0)	loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/"f".bin", m_vFilter); \
+	else loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/"f_decim".bin", m_vFilter);\
 	l_bValid=true;
 
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "Setting up the FIR filter for signal decimation (physical rate > driver rate).\n";
@@ -470,7 +470,7 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 	// Setting the inner latency as described in the beginning of the file
 	m_i64DriftOffsetSampleCount=int64(m_oHeader.getSamplingFrequency()*50)/1000;
 	m_rDriverContext.setInnerLatencySampleCount(-m_i64DriftOffsetSampleCount);
-	m_rDriverContext.getLogManager() << LogLevel_Trace << "Driver inner latency set to 50ms.\n";
+	m_rDriverContext.getLogManager() << LogLevel_Trace << "Driver inner latency set to 50ms to compensate FIR filtering.\n";
 
 	if(m_rDriverContext.isImpedanceCheckRequested())
 	{
@@ -623,7 +623,7 @@ boolean CDriverBrainProductsActiCHamp::loop(void)
 
 					// Filters last samples
 					std::deque<std::vector < OpenViBE::float32 > >::iterator it;
-					for(i=0; i<m_ui32ChannelCount; i++)
+					for(i=0; i<m_vSample.size(); i++)
 					{
 						m_vSample[i]=0;
 						it = m_vSampleCache.begin();
@@ -658,7 +658,6 @@ boolean CDriverBrainProductsActiCHamp::loop(void)
 				// Digital inputs (bits 0 - 7) + output (bits 8 - 15) state + 15 MSB reserved bits + MyButton bit (bit 31)
 				// apply a mask to silence any modification on the output and reserved parts
 				(*l_pTrigger) &= 0x800000ff;
-			
 
 				// Now we can test for modification on the interesting part (input triggers and MyButton)
 				if(*l_pTrigger != m_uiLastTriggers)
@@ -680,7 +679,6 @@ boolean CDriverBrainProductsActiCHamp::loop(void)
 					// The value received is in [0-255]
 					// The MyButton bit is set to 0 to ensure this range.
 				
-
 					// The date is relative to the last buffer start time (cf the setSamples before setStimulationSet)
 					uint64 l_ui64Date = m_ui64SampleCount * (1LL<<32) / m_ui32PhysicalSampleRateHz;
 					m_oStimulationSet.appendStimulation(OVTK_StimulationId_Label((*l_pTrigger)&0x000000ff), l_ui64Date, 0);
@@ -715,7 +713,7 @@ boolean CDriverBrainProductsActiCHamp::loop(void)
 			else
 			{
 				// Updates impedances
-				m_rDriverContext.getLogManager() << LogLevel_Trace << "Impedances are [ ";
+				m_rDriverContext.getLogManager() << LogLevel_Debug << "Impedances are [ ";
 				for(uint32 j=0; j<m_ui32CountEEG; j++)
 				{
 					m_rDriverContext.updateImpedance(j, m_vImpedance[j]);
@@ -724,7 +722,7 @@ boolean CDriverBrainProductsActiCHamp::loop(void)
 				m_rDriverContext.getLogManager() << "\n";
 
 				// Drops data
-				while((::champGetData(m_pHandle, &Buffer, m_uiSize)) > 0);
+				while((::champGetData(m_pHandle, &Buffer, m_uiSize*NB_MAX_BUFFER_IN_CACHE)) > 0);
 			}
 		}
 	}

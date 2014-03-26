@@ -62,6 +62,8 @@ namespace OpenViBEDesigner
 		OpenViBE::Kernel::IBox* m_pBox;
 		OpenViBE::boolean m_bApplied;
 		OpenViBE::boolean m_bShowOriginalNameWhenModified;
+		mutable int m_iWidth;
+		mutable int m_iHeight;
 		OpenViBE::float64 m_f64XCenter;
 		OpenViBE::float64 m_f64YCenter;
 		mutable std::string m_sLabel;

@@ -35,9 +35,12 @@ boolean CBoxAlgorithmAcquisitionClient::initialize(void)
 
 boolean CBoxAlgorithmAcquisitionClient::uninitialize(void)
 {
-	m_pConnectionClient->close();
-	m_pConnectionClient->release();
-	m_pConnectionClient=NULL;
+	if(m_pConnectionClient)
+	{
+		m_pConnectionClient->close();
+		m_pConnectionClient->release();
+		m_pConnectionClient=NULL;
+	}
 
 	op_pChannelLocalisationMemoryBuffer.uninitialize();
 	op_pStimulationMemoryBuffer.uninitialize();

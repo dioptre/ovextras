@@ -101,6 +101,22 @@ namespace OpenViBE
 			 */
 			virtual OpenViBE::boolean addFlag(
 				const OpenViBE::Kernel::EBoxFlag eBoxFlag)=0;
+			/**
+			 * \brief Adds a new type supported by inputs of the box
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true in case of success.
+			  * \return \e false in case of error.
+			  */
+			virtual OpenViBE::boolean addInputSupport(
+				const OpenViBE::CIdentifier &rTypeIdentifier)=0;
+			/**
+			 * \brief Adds a new type supported by outputs of the box
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true in case of success.
+			  * \return \e false in case of error.
+			  */
+			virtual OpenViBE::boolean addOutputSupport(
+				const OpenViBE::CIdentifier &rTypeIdentifier)=0;
 
 			_IsDerivedFromClass_(OpenViBE::Kernel::IKernelObject, OV_ClassId_Kernel_Scenario_BoxProto)
 		};

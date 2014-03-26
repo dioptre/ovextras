@@ -113,6 +113,7 @@ Contributions also from :
   <object class="GtkDialog" id="box_configuration">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
+    <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
@@ -309,13 +310,28 @@ Contributions also from :
           </packing>
         </child>
         <child>
-          <object class="GtkTable" id="box_configuration-table">
+          <object class="GtkScrolledWindow" id="box_configuration-scrolledwindow">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="column_spacing">4</property>
-            <property name="row_spacing">8</property>
+            <property name="can_focus">True</property>
+            <property name="hscrollbar_policy">automatic</property>
+            <property name="vscrollbar_policy">automatic</property>
             <child>
-              <placeholder/>
+              <object class="GtkViewport" id="box_configuration-viewport">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="shadow_type">none</property>
+                <child>
+                  <object class="GtkTable" id="box_configuration-table">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="column_spacing">4</property>
+                    <property name="row_spacing">8</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+              </object>
             </child>
             <child>
               <placeholder/>
@@ -2030,6 +2046,7 @@ Contributions also from :
     <property name="width_request">320</property>
     <property name="height_request">240</property>
     <property name="can_focus">False</property>
+    <property name="events">GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_STRUCTURE_MASK</property>
     <property name="title" translatable="yes">OpenViBE Designer</property>
     <property name="window_position">center</property>
     <property name="default_width">1024</property>
@@ -2260,6 +2277,36 @@ Contributions also from :
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">False</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+             <child>
+              <object class="GtkMenuItem" id="openvibe-menu_window">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">_Window</property>
+                <property name="use_underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="openvibe-menu_window_content">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkMenuItem" id="openvibe-menu_show">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="label" translatable="yes">_Show</property>
+                        <property name="use_underline">True</property>
+                        <child type="submenu">
+                          <object class="GtkMenu" id="openvibe-menu_show_content">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -2578,6 +2625,22 @@ possible...</property>
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkToggleToolButton" id="openvibe-toggle_button_replay">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">restart playing the scenario
+when it has finished
+playing...</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="label">loop</property>
+                        <property name="stock_id">gtk-refresh</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkSeparatorToolItem" id="openvibe-separator5">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -2659,7 +2722,9 @@ possible...</property>
                   <object class="GtkScrolledWindow" id="openvibe_scenario_notebook_scrolledwindow">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="events">GDK_STRUCTURE_MASK | GDK_SCROLL_MASK</property>
+                    <property name="events">GDK_ALL_EVENTS_MASK</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkViewport" id="openvibe-scenario_viewport">
                         <property name="visible">True</property>
@@ -2670,6 +2735,7 @@ possible...</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_STRUCTURE_MASK</property>
+                            <property name="has_tooltip">True</property>
                           </object>
                         </child>
                       </object>
@@ -3026,6 +3092,7 @@ possible...</property>
                       <object class="GtkToolButton" id="openvibe-messages_tb_search">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="is_important">True</property>
                         <property name="label" translatable="yes">Search</property>
                         <property name="use_underline">True</property>

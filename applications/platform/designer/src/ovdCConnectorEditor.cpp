@@ -28,6 +28,7 @@ boolean CConnectorEditor::run(void)
 	t_setConnectorName setConnectorName=NULL;
 	t_getConnectorType getConnectorType=NULL;
 	t_setConnectorType setConnectorType=NULL;
+	t_isTypeSupport isTypeSupport=NULL;
 
 	switch(m_ui32ConnectorType)
 	{
@@ -36,6 +37,7 @@ boolean CConnectorEditor::run(void)
 			setConnectorName=&IBox::setInputName;
 			getConnectorType=&IBox::getInputType;
 			setConnectorType=&IBox::setInputType;
+			isTypeSupport=&IBox::hasInputSupport;
 			break;
 
 		case Connector_Output:
@@ -43,6 +45,7 @@ boolean CConnectorEditor::run(void)
 			setConnectorName=&IBox::setOutputName;
 			getConnectorType=&IBox::getOutputType;
 			setConnectorType=&IBox::setOutputType;
+			isTypeSupport=&IBox::hasOutputSupport;
 			break;
 
 		default:
@@ -68,17 +71,23 @@ boolean CConnectorEditor::run(void)
 	map<string, CIdentifier> m_vStreamTypes;
 	CIdentifier l_oCurrentTypeIdentifier;
 	gint l_iActive=-1;
+
 	while((l_oCurrentTypeIdentifier=m_rKernelContext.getTypeManager().getNextTypeIdentifier(l_oCurrentTypeIdentifier))!=OV_UndefinedIdentifier)
 	{
-		if(m_rKernelContext.getTypeManager().isStream(l_oCurrentTypeIdentifier))
+		//First check if the type is support by the connector
+		if((m_rBox.*isTypeSupport)(l_oCurrentTypeIdentifier))
 		{
-			gtk_combo_box_append_text(l_pConnectorTypeComboBox, m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString());
-			if(l_oCurrentTypeIdentifier==l_oConnectorType)
+			//If the input type is support by the connector, let's add it to the list
+			if(m_rKernelContext.getTypeManager().isStream(l_oCurrentTypeIdentifier))
 			{
-				l_iActive=m_vStreamTypes.size();
-				gtk_combo_box_set_active(l_pConnectorTypeComboBox, l_iActive);
+				gtk_combo_box_append_text(l_pConnectorTypeComboBox, m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString());
+				if(l_oCurrentTypeIdentifier==l_oConnectorType)
+				{
+					l_iActive=m_vStreamTypes.size();
+					gtk_combo_box_set_active(l_pConnectorTypeComboBox, l_iActive);
+				}
+				m_vStreamTypes[m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString()]=l_oCurrentTypeIdentifier;
 			}
-			m_vStreamTypes[m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString()]=l_oCurrentTypeIdentifier;
 		}
 	}
 

@@ -35,6 +35,11 @@ uint64 Math::randomUInteger64(void)
 	return (r1<<24)^(r2<<16)^(r3<<8)^(r4);
 }
 
+uint32 Math::randomUInteger32WithCeiling(uint32 ui32upperLimit)
+{
+	return static_cast<int32>(randomUInteger64()) % ui32upperLimit;
+}
+
 int8 Math::randomSInterger8(void)
 {
 	return static_cast<int8>(randomUInteger64());

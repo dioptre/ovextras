@@ -394,6 +394,44 @@ namespace OpenViBE
 
 			//@}
 
+
+			/** \name Message input management */
+			//@{
+			/**
+			  * \brief Adds a type support by inputs
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true in case of success.
+			  * \return \e false in case of error.
+			  */
+			virtual OpenViBE::boolean addInputSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+			/**
+			  * \brief Indicates if a type is support by inputs
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true if type is support.
+			  * \return \e false if type isn't support.
+			  */
+			virtual OpenViBE::boolean hasInputSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+
+			/**
+			  * \brief Adds a type support by outputs
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true in case of success.
+			  * \return \e false in case of error.
+			  */
+			virtual OpenViBE::boolean addOutputSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+			/**
+			  * \brief Indicates if a type is support by outputs
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true if type is support.
+			  * \return \e false if type isn't support.
+			  */
+			virtual OpenViBE::boolean hasOutputSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+			//@}
+
             /** \name Message input management */
             //@{
             /**
