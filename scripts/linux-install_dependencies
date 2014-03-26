@@ -955,6 +955,7 @@ ov_package_url_lua=http://www.lua.org/ftp/lua-5.1.4.tar.gz
 ov_package_url_swig=http://prdownloads.sourceforge.net/swig/swig-1.3.36.tar.gz
 
 ov_package_url_presage=$ov_sourceforge_mirror/presage/files/presage/0.8.9/presage-0.8.9.tar.gz
+ov_package_url_glfw=http://sourceforge.net/projects/glfw/files/glfw/3.0.4/glfw-3.0.4.zip
 
 #svn://scm.gforge.inria.fr/svn/obt
 #svn://scm.gforge.inria.fr/svn/openmask4/OpenMASK
@@ -1050,6 +1051,8 @@ ov_package_archive_swig=`echo "$ov_package_url_swig" | $ov_sed 's#.*/##g'`
 #Presage
 ov_package_archive_presage=`echo "$ov_package_url_presage" | $ov_sed 's#.*/##g'`
 
+ov_package_archive_glfw=`echo "$ov_package_url_glfw" | $ov_sed 's#.*/##g'`
+
 ###########################################
 ##                                       ##
 ##  several hooks for specific archives  ##
@@ -1140,6 +1143,17 @@ ov_package_install_hook_presage='
 	pushd * &&
 	make install &&
 	popd'
+
+ov_package_configure_hook_glfw='
+	pushd * &&
+	cmake . -DCMAKE_INSTALL_PREFIX:PATH=$ov_target_folder -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF &&
+	popd'
+
+ov_package_install_hook_glfw='
+	pushd * &&
+	make install &&
+	popd'
+
 
 if [ "$ov_machine" == "x86_64" ]; then
 ov_package_configure_hook_torch='
@@ -1499,11 +1513,12 @@ ov_install_package "vrpn"
 #ov_install_package "lua"
 #ov_install_package "swig"
 
-	ov_install_package "SDL"
-	ov_install_package "SDL_image"
-	ov_install_package "ftgl"
+	#ov_install_package "SDL"
+	#ov_install_package "SDL_image"
+	#ov_install_package "ftgl"
 	ov_install_package "sqlite"
 	ov_install_package "presage"
+	ov_install_package "glfw"
 
 #rm -f linux-dependencies 2> /dev/null
 #ln -sf $ov_environment_configuration_script linux-dependencies
