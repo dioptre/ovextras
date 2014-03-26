@@ -3403,12 +3403,12 @@ boolean CInterfacedScenario::centerOnBox(CIdentifier rIdentifier)
 		redraw(*rBox);
 
 		CBoxProxy l_oBoxProxy(m_rKernelContext, *rBox);
-		const int xMargin=5*m_f64CurrentScale;
-		const int yMargin=5*m_f64CurrentScale;
-		int xSize=l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + xMargin*2;
-		int ySize=l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + yMargin*2;
-		int x = l_oBoxProxy.getXCenter() + 3*xSize/4;
-		int y = l_oBoxProxy.getYCenter() + 3*ySize/4;
+		const int xMargin=ov_round(5.0*m_f64CurrentScale);
+		const int yMargin=ov_round(5.0*m_f64CurrentScale);
+		int xSize=ov_round(l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + xMargin*2.0);
+		int ySize=ov_round(l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + yMargin*2.0);
+		int x = ov_round(l_oBoxProxy.getXCenter() + 3*xSize/4);
+		int y = ov_round(l_oBoxProxy.getYCenter() + 3*ySize/4);
 
 		//get the parameters of the current adjustement
 		GtkAdjustment* l_pOldHAdjustement = gtk_scrolled_window_get_hadjustment(m_pScrolledWindow);//gtk_viewport_get_vadjustment(m_pScenarioViewport);

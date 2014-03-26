@@ -576,7 +576,7 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 			GtkTextWindowType pp = gtk_text_view_get_window_type(l_pTextView, event->window);
 			gint buffer_x, buffer_y;
 			//convert event coord (mouse position) in buffer coord (character in buffer)
-			gtk_text_view_window_to_buffer_coords(l_pTextView, pp, event->x, event->y, &buffer_x, &buffer_y);
+			gtk_text_view_window_to_buffer_coords(l_pTextView, pp, ov_round(event->x), ov_round(event->y), &buffer_x, &buffer_y);
 			//get the text iter corresponding to that position
 			GtkTextIter iter;
 			gtk_text_view_get_iter_at_location(l_pTextView, &iter, buffer_x, buffer_y);
@@ -2346,6 +2346,8 @@ boolean CApplication::isLogAreaClicked()
 {
 	if(m_pTextView!=NULL)
 	{
-		return gtk_widget_is_focus(GTK_WIDGET(m_pTextView));
+		return gtk_widget_is_focus(GTK_WIDGET(m_pTextView))==TRUE;
 	}
+	else
+		return false;
 }

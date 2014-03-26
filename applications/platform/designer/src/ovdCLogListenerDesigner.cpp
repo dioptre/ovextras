@@ -725,7 +725,7 @@ void CLogListenerDesigner::restoreOldBuffer()
 
 	//clear displayed buffer
 	gtk_text_buffer_set_text(m_pBuffer, "", -1);
-	for(int log=0; log<m_vStoredLog.size(); log++)
+	for(uint32 log=0; log<m_vStoredLog.size(); log++)
 	{
 		m_vStoredLog[log]->Filter(m_sSearchTerm);
 		if(m_vStoredLog[log]->getPassFilter())
@@ -769,7 +769,7 @@ void CLogListenerDesigner::searchMessages(CString l_sSearchTerm)
 	//clear displayed buffer
 	gtk_text_buffer_set_text(m_pBuffer, "", -1);
 	m_sSearchTerm = l_sSearchTerm;
-	for(int log=0; log<m_vStoredLog.size(); log++)
+	for(uint32 log=0; log<m_vStoredLog.size(); log++)
 	{
 		m_vStoredLog[log]->Filter(l_sSearchTerm);
 		if(m_vStoredLog[log]->getPassFilter())
