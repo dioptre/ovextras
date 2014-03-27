@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="2.16"/>
-  <!-- interface-naming-policy project-wide -->
+  <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkAboutDialog" id="about">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -77,13 +76,13 @@ Contributions also from :
  - Guillaume Gibert, INSERM
  - Emmanuel Maby, INSERM</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="about-dialog-vbox">
+      <object class="GtkBox" id="about-dialog-vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="about-dialog_action_area">
+          <object class="GtkButtonBox" id="about-dialog_action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
@@ -120,13 +119,13 @@ Contributions also from :
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="box_configuration-vbox">
+      <object class="GtkBox" id="box_configuration-vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="box_configuration-action_area">
+          <object class="GtkButtonBox" id="box_configuration-action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
@@ -136,7 +135,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkHBox" id="box_configuration-button_load_current_from_file-hbox">
                     <property name="visible">True</property>
@@ -179,7 +177,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkHBox" id="box_configuration-button_save_current_to_file-hbox">
                     <property name="visible">True</property>
@@ -222,7 +219,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkHBox" id="box_configuration-button_default_hbox">
                     <property name="visible">True</property>
@@ -266,7 +262,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -281,7 +276,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="KP_Enter" signal="clicked"/>
                 <accelerator key="Return" signal="clicked"/>
@@ -298,7 +292,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -340,6 +333,12 @@ Contributions also from :
                 </child>
               </object>
             </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -380,7 +379,7 @@ Contributions also from :
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="use_action_appearance">False</property>
+                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
@@ -432,12 +431,12 @@ Contributions also from :
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox12">
+      <object class="GtkBox" id="dialog-vbox12">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area12">
+          <object class="GtkButtonBox" id="dialog-action_area12">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -447,7 +446,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Return" signal="clicked"/>
                 <accelerator key="KP_Enter" signal="clicked"/>
@@ -464,7 +462,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -487,7 +484,6 @@ Contributions also from :
             <property name="height_request">240</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="hscrollbar_policy">automatic</property>
             <child>
               <object class="GtkTextView" id="comment-textview_description">
                 <property name="visible">True</property>
@@ -516,12 +512,12 @@ Contributions also from :
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="configuration_manager-vbox">
+      <object class="GtkBox" id="configuration_manager-vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="configuration_manager-action_area">
+          <object class="GtkButtonBox" id="configuration_manager-action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -531,7 +527,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
                 <accelerator key="Return" signal="clicked"/>
@@ -548,7 +543,6 @@ Contributions also from :
                 <property name="label">gtk-open</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -569,8 +563,6 @@ Contributions also from :
           <object class="GtkScrolledWindow" id="configuration_manager-scrolledwindow">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="hscrollbar_policy">automatic</property>
-            <property name="vscrollbar_policy">automatic</property>
             <child>
               <object class="GtkTreeView" id="configuration_manager-treeview">
                 <property name="width_request">640</property>
@@ -578,6 +570,9 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="rules_hint">True</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="treeview-selection1"/>
+                </child>
               </object>
             </child>
           </object>
@@ -603,13 +598,13 @@ Contributions also from :
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="connector_editor-vbox">
+      <object class="GtkBox" id="connector_editor-vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="connector_editor-action_area">
+          <object class="GtkButtonBox" id="connector_editor-action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
@@ -620,7 +615,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -635,7 +629,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="KP_Enter" signal="clicked"/>
                 <accelerator key="Return" signal="clicked"/>
@@ -652,7 +645,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -693,8 +685,6 @@ Contributions also from :
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -742,7 +732,6 @@ Contributions also from :
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -758,7 +747,6 @@ Contributions also from :
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -790,12 +778,12 @@ Contributions also from :
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox21">
+      <object class="GtkBox" id="dialog-vbox21">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area21">
+          <object class="GtkButtonBox" id="dialog-action_area21">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -804,7 +792,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkHBox" id="hbox5">
                     <property name="visible">True</property>
@@ -848,7 +835,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <accelerator key="Return" signal="clicked"/>
                 <accelerator key="KP_Enter" signal="clicked"/>
               </object>
@@ -964,12 +950,12 @@ Contributions also from :
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">normal</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox16">
+      <object class="GtkBox" id="dialog-vbox16">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area16">
+          <object class="GtkButtonBox" id="dialog-action_area16">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -979,7 +965,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Return" signal="clicked"/>
                 <accelerator key="KP_Enter" signal="clicked"/>
@@ -1080,12 +1065,12 @@ Contributions also from :
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox18">
+      <object class="GtkBox" id="dialog-vbox18">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area18">
+          <object class="GtkButtonBox" id="dialog-action_area18">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -1095,7 +1080,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Return" signal="clicked"/>
                 <accelerator key="KP_Enter" signal="clicked"/>
@@ -1196,12 +1180,12 @@ Contributions also from :
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox1">
+      <object class="GtkBox" id="dialog-vbox1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area1">
+          <object class="GtkButtonBox" id="dialog-action_area1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -1211,7 +1195,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1226,7 +1209,6 @@ Contributions also from :
                 <property name="can_focus">True</property>
                 <property name="has_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -1241,7 +1223,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -1342,12 +1323,12 @@ Contributions also from :
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox20">
+      <object class="GtkBox" id="dialog-vbox20">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area20">
+          <object class="GtkButtonBox" id="dialog-action_area20">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -1357,7 +1338,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1372,7 +1352,6 @@ Contributions also from :
                 <property name="can_focus">True</property>
                 <property name="has_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -1387,7 +1366,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -1486,13 +1464,13 @@ Contributions also from :
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="input-vbox">
+      <object class="GtkBox" id="input-vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="input-action_area">
+          <object class="GtkButtonBox" id="input-action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
@@ -1503,7 +1481,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Return" signal="clicked"/>
                 <accelerator key="KP_Enter" signal="clicked"/>
@@ -1520,7 +1497,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -1559,8 +1535,6 @@ Contributions also from :
                 <property name="can_focus">True</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -1592,13 +1566,13 @@ Contributions also from :
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="loglevel-vbox">
+      <object class="GtkBox" id="loglevel-vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="loglevel-action_area">
+          <object class="GtkButtonBox" id="loglevel-action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -1609,7 +1583,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="KP_Enter" signal="clicked"/>
                 <accelerator key="Return" signal="clicked"/>
@@ -1626,7 +1599,6 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -1676,7 +1648,7 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
+                <property name="xalign">0.5</property>
                 <property name="draw_indicator">True</property>
                 <child>
                   <object class="GtkHBox" id="loglevel-hbox_loglevel_fatal">
@@ -1720,7 +1692,7 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
+                <property name="xalign">0.5</property>
                 <property name="draw_indicator">True</property>
                 <child>
                   <object class="GtkHBox" id="loglevel-hbox_loglevel_error">
@@ -1764,7 +1736,7 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
+                <property name="xalign">0.5</property>
                 <property name="draw_indicator">True</property>
                 <child>
                   <object class="GtkHBox" id="loglevel-hbox_loglevel_important_warning">
@@ -1808,7 +1780,7 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
+                <property name="xalign">0.5</property>
                 <property name="draw_indicator">True</property>
                 <child>
                   <object class="GtkHBox" id="loglevel-hbox_loglevel_warning">
@@ -1852,7 +1824,7 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
+                <property name="xalign">0.5</property>
                 <property name="draw_indicator">True</property>
                 <child>
                   <object class="GtkHBox" id="loglevel-hbox_loglevel_info">
@@ -1896,7 +1868,7 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
+                <property name="xalign">0.5</property>
                 <property name="draw_indicator">True</property>
                 <child>
                   <object class="GtkHBox" id="loglevel-hbox_loglevel_trace">
@@ -1940,7 +1912,7 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
+                <property name="xalign">0.5</property>
                 <property name="draw_indicator">True</property>
                 <child>
                   <object class="GtkHBox" id="loglevel-hbox_loglevel_benchmark">
@@ -1984,7 +1956,7 @@ Contributions also from :
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
+                <property name="xalign">0.5</property>
                 <property name="draw_indicator">True</property>
                 <child>
                   <object class="GtkHBox" id="loglevel-hbox_loglevel_debug">
@@ -2092,7 +2064,6 @@ Contributions also from :
               <object class="GtkMenuItem" id="openvibe-menu_file">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">_File</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
@@ -2104,7 +2075,6 @@ Contributions also from :
                         <property name="label">gtk-new</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="n" signal="activate" modifiers="GDK_CONTROL_MASK"/>
@@ -2115,7 +2085,6 @@ Contributions also from :
                         <property name="label">gtk-open</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="o" signal="activate" modifiers="GDK_CONTROL_MASK"/>
@@ -2126,7 +2095,6 @@ Contributions also from :
                         <property name="label">gtk-save</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="s" signal="activate" modifiers="GDK_CONTROL_MASK"/>
@@ -2137,7 +2105,6 @@ Contributions also from :
                         <property name="label">gtk-save-as</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -2153,7 +2120,6 @@ Contributions also from :
                         <property name="label">gtk-close</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -2163,7 +2129,6 @@ Contributions also from :
                         <property name="label">gtk-quit</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -2176,7 +2141,6 @@ Contributions also from :
               <object class="GtkMenuItem" id="openvibe-menu_edit">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">_Edit</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
@@ -2188,7 +2152,6 @@ Contributions also from :
                         <property name="label">gtk-find</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="f" signal="activate" modifiers="GDK_CONTROL_MASK"/>
@@ -2199,7 +2162,6 @@ Contributions also from :
                         <property name="label">gtk-undo</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="z" signal="activate" modifiers="GDK_CONTROL_MASK"/>
@@ -2210,7 +2172,6 @@ Contributions also from :
                         <property name="label">gtk-redo</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="y" signal="activate" modifiers="GDK_CONTROL_MASK"/>
@@ -2227,7 +2188,6 @@ Contributions also from :
                         <property name="label">gtk-cut</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="x" signal="activate" modifiers="GDK_CONTROL_MASK"/>
@@ -2238,7 +2198,6 @@ Contributions also from :
                         <property name="label">gtk-copy</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
@@ -2249,7 +2208,6 @@ Contributions also from :
                         <property name="label">gtk-paste</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="v" signal="activate" modifiers="GDK_CONTROL_MASK"/>
@@ -2260,7 +2218,6 @@ Contributions also from :
                         <property name="label">gtk-delete</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="Delete" signal="activate"/>
@@ -2277,7 +2234,6 @@ Contributions also from :
                         <property name="label">gtk-preferences</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -2290,7 +2246,6 @@ Contributions also from :
               <object class="GtkMenuItem" id="openvibe-menu_help">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">_Help</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
@@ -2302,7 +2257,6 @@ Contributions also from :
                         <property name="label" translatable="yes">About this _scenario</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">False</property>
                       </object>
@@ -2312,7 +2266,6 @@ Contributions also from :
                         <property name="label">_About OpenViBE</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">False</property>
                       </object>
@@ -2322,7 +2275,6 @@ Contributions also from :
                         <property name="label" translatable="yes">Browse documentation _website</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">False</property>
                       </object>
@@ -2385,14 +2337,12 @@ Contributions also from :
                     <property name="toolbar_style">both-horiz</property>
                     <property name="show_arrow">False</property>
                     <property name="icon_size">1</property>
-                    <property name="icon_size_set">True</property>
                     <child>
                       <object class="GtkToolButton" id="openvibe-button_new">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">creates a new
 scenario...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label">new</property>
                         <property name="stock_id">gtk-new</property>
                       </object>
@@ -2407,7 +2357,6 @@ scenario...</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">opens an existing
 scenario...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label">open</property>
                         <property name="stock_id">gtk-open</property>
                       </object>
@@ -2422,7 +2371,6 @@ scenario...</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">saves the current
 scenario...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label">save</property>
                         <property name="stock_id">gtk-save</property>
                       </object>
@@ -2438,7 +2386,6 @@ scenario...</property>
                         <property name="tooltip_text" translatable="yes">saves the current
 scenario letting you
 choose a filename...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label">save as ...</property>
                         <property name="stock_id">gtk-save-as</property>
                       </object>
@@ -2453,7 +2400,6 @@ choose a filename...</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">closes the current
 scenario...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label">close</property>
                         <property name="stock_id">gtk-close</property>
                       </object>
@@ -2477,7 +2423,6 @@ scenario...</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">toggles the window
 manager...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">window manager</property>
                         <property name="stock_id">gtk-preferences</property>
                       </object>
@@ -2492,7 +2437,6 @@ manager...</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">allows you to modify the
 active log levels...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label">log levels...</property>
                         <property name="stock_id">gtk-edit</property>
                       </object>
@@ -2516,7 +2460,6 @@ active log levels...</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">allows you to add a new
 comment in the scenario...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">add comment</property>
                         <property name="stock_id">gtk-index</property>
                       </object>
@@ -2531,7 +2474,6 @@ comment in the scenario...</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">allows you to read / modify
 the information about the scenario...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">about scenario</property>
                         <property name="use_underline">True</property>
                         <property name="stock_id">gtk-about</property>
@@ -2555,7 +2497,6 @@ the information about the scenario...</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Zoom in the scenarios</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">zoom in</property>
                         <property name="use_underline">True</property>
                         <property name="stock_id">gtk-zoom-in</property>
@@ -2570,7 +2511,6 @@ the information about the scenario...</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">Zoom out the scenarios</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">zoom out</property>
                         <property name="use_underline">True</property>
                         <property name="stock_id">gtk-zoom-out</property>
@@ -2584,15 +2524,12 @@ the information about the scenario...</property>
                       <object class="GtkToolItem" id="toolItem">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <child>
                           <object class="GtkSpinButton" id="openvibe-zoom_spinner">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="secondary_icon_activatable">False</property>
-                            <property name="primary_icon_sensitive">True</property>
-                            <property name="secondary_icon_sensitive">True</property>
                             <property name="adjustment">zoom_adjustement</property>
                           </object>
                         </child>
@@ -2630,14 +2567,12 @@ the information about the scenario...</property>
                     <property name="toolbar_style">both-horiz</property>
                     <property name="show_arrow">False</property>
                     <property name="icon_size">1</property>
-                    <property name="icon_size_set">True</property>
                     <child>
                       <object class="GtkToolButton" id="openvibe-button_stop">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">stops the execution of
 the current scenario...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label">stop</property>
                         <property name="stock_id">gtk-media-stop</property>
                       </object>
@@ -2652,7 +2587,6 @@ the current scenario...</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">steps a fraction of time on
 the current scenario...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label">one step</property>
                         <property name="stock_id">gtk-media-next</property>
                       </object>
@@ -2667,7 +2601,6 @@ the current scenario...</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">starts / pauses the execution
 of the current scenario...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label">play</property>
                         <property name="stock_id">gtk-media-play</property>
                       </object>
@@ -2683,7 +2616,6 @@ of the current scenario...</property>
                         <property name="tooltip_text" translatable="yes">executes the current
 scenario as fast as
 possible...</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label">start</property>
                         <property name="stock_id">gtk-media-forward</property>
                       </object>
@@ -2721,7 +2653,6 @@ playing...</property>
                       <object class="GtkToolItem" id="toolbutton1">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <child>
                           <object class="GtkLabel" id="openvibe-label_current_time">
                             <property name="visible">True</property>
@@ -2763,7 +2694,6 @@ playing...</property>
                 <property name="can_focus">False</property>
                 <property name="show_arrow">False</property>
                 <property name="icon_size">1</property>
-                <property name="icon_size_set">True</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
@@ -2845,7 +2775,6 @@ playing...</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="relief">none</property>
                         <child>
                           <object class="GtkImage" id="openvibe-scenario_button_close_image">
@@ -2891,10 +2820,7 @@ playing...</property>
                             <property name="can_focus">True</property>
                             <property name="invisible_char">•</property>
                             <property name="primary_icon_stock">gtk-find</property>
-                            <property name="primary_icon_activatable">True</property>
                             <property name="secondary_icon_activatable">False</property>
-                            <property name="primary_icon_sensitive">True</property>
-                            <property name="secondary_icon_sensitive">True</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -2908,7 +2834,7 @@ playing...</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
-                            <property name="use_action_appearance">False</property>
+                            <property name="xalign">0.5</property>
                             <property name="draw_indicator">True</property>
                           </object>
                           <packing>
@@ -2928,8 +2854,6 @@ playing...</property>
                       <object class="GtkScrolledWindow" id="openvibe-box_algorithm_scrolledwindow">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">automatic</property>
-                        <property name="vscrollbar_policy">automatic</property>
                         <child>
                           <object class="GtkTreeView" id="openvibe-box_algorithm_tree">
                             <property name="visible">True</property>
@@ -2937,6 +2861,9 @@ playing...</property>
                             <property name="search_column">0</property>
                             <property name="enable_grid_lines">vertical</property>
                             <property name="enable_tree_lines">True</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="treeview-selection2"/>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -2981,7 +2908,6 @@ playing...</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="relief">none</property>
                         <child>
                           <object class="GtkImage" id="openvibe-box_algorithm_title_button_expand_image">
@@ -3003,7 +2929,6 @@ playing...</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="relief">none</property>
                         <child>
                           <object class="GtkImage" id="openvibe-box_algorithm_title_button_callapse_image">
@@ -3029,8 +2954,6 @@ playing...</property>
                   <object class="GtkScrolledWindow" id="openvibe-algorithm_scrolledwindow">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="openvibe-algorithm_tree">
                         <property name="visible">True</property>
@@ -3038,6 +2961,9 @@ playing...</property>
                         <property name="search_column">0</property>
                         <property name="enable_grid_lines">vertical</property>
                         <property name="enable_tree_lines">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection3"/>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -3078,7 +3004,6 @@ playing...</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="relief">none</property>
                         <child>
                           <object class="GtkImage" id="openvibe-algorithm_title_button_expand_image">
@@ -3100,7 +3025,6 @@ playing...</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="relief">none</property>
                         <child>
                           <object class="GtkImage" id="openvibe-algorithm_title_button_callapse_image">
@@ -3154,7 +3078,6 @@ playing...</property>
                       <object class="GtkToolButton" id="openvibe-messages_tb_clear">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="is_important">True</property>
                         <property name="label" translatable="yes">Clear</property>
                         <property name="use_underline">True</property>
@@ -3184,7 +3107,6 @@ playing...</property>
                       <object class="GtkToggleToolButton" id="openvibe-messages_tb_debug">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="is_important">True</property>
                         <property name="label" translatable="yes">DEBUG</property>
                         <property name="stock_id">gtk-info</property>
@@ -3198,7 +3120,6 @@ playing...</property>
                       <object class="GtkToggleToolButton" id="openvibe-messages_tb_bench">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="is_important">True</property>
                         <property name="label" translatable="yes">BENCH</property>
                         <property name="use_underline">True</property>
@@ -3213,7 +3134,6 @@ playing...</property>
                       <object class="GtkToggleToolButton" id="openvibe-messages_tb_trace">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="is_important">True</property>
                         <property name="label" translatable="yes">TRACE</property>
                         <property name="use_underline">True</property>
@@ -3228,7 +3148,6 @@ playing...</property>
                       <object class="GtkToggleToolButton" id="openvibe-messages_tb_info">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="is_important">True</property>
                         <property name="label" translatable="yes">INF</property>
                         <property name="use_underline">True</property>
@@ -3243,7 +3162,6 @@ playing...</property>
                       <object class="GtkToggleToolButton" id="openvibe-messages_tb_warning">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="is_important">True</property>
                         <property name="label" translatable="yes">WARNING</property>
                         <property name="use_underline">True</property>
@@ -3258,7 +3176,6 @@ playing...</property>
                       <object class="GtkToggleToolButton" id="openvibe-messages_tb_impwarning">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="is_important">True</property>
                         <property name="label" translatable="yes">IMPORTANT WARNING</property>
                         <property name="use_underline">True</property>
@@ -3273,7 +3190,6 @@ playing...</property>
                       <object class="GtkToggleToolButton" id="openvibe-messages_tb_error">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="is_important">True</property>
                         <property name="label" translatable="yes">ERROR</property>
                         <property name="use_underline">True</property>
@@ -3288,7 +3204,6 @@ playing...</property>
                       <object class="GtkToggleToolButton" id="openvibe-messages_tb_fatal">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="is_important">True</property>
                         <property name="label" translatable="yes">FATAL</property>
                         <property name="use_underline">True</property>
@@ -3303,7 +3218,6 @@ playing...</property>
                       <object class="GtkToolItem" id="Alert">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <child>
                           <object class="GtkCheckButton" id="openvibe-messages_alert_on_error">
                             <property name="label" translatable="yes">Show pop-up
@@ -3311,7 +3225,7 @@ on Warnings and Errors</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
-                            <property name="use_action_appearance">False</property>
+                            <property name="xalign">0.5</property>
                             <property name="draw_indicator">True</property>
                           </object>
                         </child>
@@ -3329,14 +3243,32 @@ on Warnings and Errors</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="searchEntry">
+                  <object class="GtkHPaned" id="paned1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="invisible_char">●</property>
-                    <property name="primary_icon_activatable">False</property>
-                    <property name="secondary_icon_activatable">False</property>
-                    <property name="primary_icon_sensitive">True</property>
-                    <property name="secondary_icon_sensitive">True</property>
+                    <child>
+                      <object class="GtkLabel" id="searchLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">search for : </property>
+                      </object>
+                      <packing>
+                        <property name="resize">False</property>
+                        <property name="shrink">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="searchEntry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">●</property>
+                        <property name="invisible_char_set">True</property>
+                      </object>
+                      <packing>
+                        <property name="resize">False</property>
+                        <property name="shrink">False</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -3348,8 +3280,6 @@ on Warnings and Errors</property>
                   <object class="GtkScrolledWindow" id="scrolledwindow1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTextView" id="openvibe-textview_messages">
                         <property name="height_request">250</property>
@@ -3506,7 +3436,6 @@ on Warnings and Errors</property>
                     <property name="height_request">32</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="orientation">bottom-to-top</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -3520,7 +3449,6 @@ on Warnings and Errors</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="yalign">0.49000000953674316</property>
                     <child>
                       <object class="GtkHBox" id="openvibe-togglebutton_cpu_usage-hbox">
@@ -3573,12 +3501,12 @@ on Warnings and Errors</property>
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="plugin_about-vbox">
+      <object class="GtkBox" id="plugin_about-vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="plugin_about-action_area">
+          <object class="GtkButtonBox" id="plugin_about-action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -3588,7 +3516,6 @@ on Warnings and Errors</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
                 <accelerator key="Return" signal="clicked"/>
@@ -3622,8 +3549,6 @@ on Warnings and Errors</property>
                 <property name="editable">False</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -3639,8 +3564,6 @@ on Warnings and Errors</property>
                 <property name="editable">False</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -3656,8 +3579,6 @@ on Warnings and Errors</property>
                 <property name="editable">False</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -3673,8 +3594,6 @@ on Warnings and Errors</property>
                 <property name="editable">False</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -3690,8 +3609,6 @@ on Warnings and Errors</property>
                 <property name="editable">False</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -3770,8 +3687,6 @@ on Warnings and Errors</property>
                 <property name="editable">False</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -3872,12 +3787,12 @@ on Warnings and Errors</property>
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="rename-vbox">
+      <object class="GtkBox" id="rename-vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="rename-action_area">
+          <object class="GtkButtonBox" id="rename-action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -3886,7 +3801,6 @@ on Warnings and Errors</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkHBox" id="rename-button_default_hbox">
                     <property name="visible">True</property>
@@ -3930,7 +3844,6 @@ on Warnings and Errors</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -3945,7 +3858,6 @@ on Warnings and Errors</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="KP_Enter" signal="clicked"/>
                 <accelerator key="Return" signal="clicked"/>
@@ -3962,7 +3874,6 @@ on Warnings and Errors</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -4002,8 +3913,6 @@ on Warnings and Errors</property>
                 <property name="can_focus">True</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -4034,12 +3943,12 @@ on Warnings and Errors</property>
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox13">
+      <object class="GtkBox" id="dialog-vbox13">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area13">
+          <object class="GtkButtonBox" id="dialog-action_area13">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -4049,7 +3958,6 @@ on Warnings and Errors</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
                 <accelerator key="Return" signal="clicked"/>
@@ -4101,8 +4009,6 @@ on Warnings and Errors</property>
                 <property name="invisible_char">●</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -4118,8 +4024,6 @@ on Warnings and Errors</property>
                 <property name="invisible_char">●</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -4144,8 +4048,6 @@ on Warnings and Errors</property>
                 <property name="invisible_char">●</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -4183,8 +4085,6 @@ on Warnings and Errors</property>
                 <property name="invisible_char">●</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -4200,8 +4100,6 @@ on Warnings and Errors</property>
                 <property name="invisible_char">●</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -4228,8 +4126,6 @@ on Warnings and Errors</property>
                 <property name="invisible_char">●</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -4260,13 +4156,13 @@ on Warnings and Errors</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="setting_editor-vbox">
+      <object class="GtkBox" id="setting_editor-vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="setting_editor-action_area">
+          <object class="GtkButtonBox" id="setting_editor-action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
@@ -4277,7 +4173,6 @@ on Warnings and Errors</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -4292,7 +4187,6 @@ on Warnings and Errors</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="KP_Enter" signal="clicked"/>
                 <accelerator key="Return" signal="clicked"/>
@@ -4309,7 +4203,6 @@ on Warnings and Errors</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -4336,6 +4229,9 @@ on Warnings and Errors</property>
             <property name="column_spacing">4</property>
             <property name="row_spacing">8</property>
             <child>
+              <placeholder/>
+            </child>
+            <child>
               <object class="GtkLabel" id="setting_editor-setting_name_label">
                 <property name="width_request">150</property>
                 <property name="visible">True</property>
@@ -4350,8 +4246,6 @@ on Warnings and Errors</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -4411,7 +4305,6 @@ on Warnings and Errors</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -4427,7 +4320,6 @@ on Warnings and Errors</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -4445,7 +4337,6 @@ on Warnings and Errors</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -4454,9 +4345,6 @@ on Warnings and Errors</property>
                 <property name="top_attach">2</property>
                 <property name="bottom_attach">3</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
           <packing>
@@ -4659,7 +4547,6 @@ on Warnings and Errors</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="receives_default">False</property>
-            <property name="use_action_appearance">False</property>
           </object>
           <packing>
             <property name="left_attach">1</property>

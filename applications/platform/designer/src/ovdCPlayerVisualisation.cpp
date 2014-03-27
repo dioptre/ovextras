@@ -22,6 +22,17 @@ static ::GtkTargetEntry targets [] =
 }*/
 
 
+
+//when the widget is in the visualisation manager, it does not have the focus and the key pressed are not detected
+//so when clicked, give the focus back to the widget, then the key pressed will be correctly handled by the widget's callback (define in box code)
+static gboolean KeyboardStimulator_KeyPressCallback(GtkWidget *widget, GdkEventKey *thisEvent, gpointer data)
+{
+	//std::cout << "button pressed, grab focus\n";
+	gtk_widget_grab_focus(widget);
+	return true;//do not propagate the event further
+}
+
+
 CPlayerVisualisation::CPlayerVisualisation(const IKernelContext& rKernelContext, IVisualisationTree& rVisualisationTree, CInterfacedScenario& rInterfacedScenario) :
 	m_rKernelContext(rKernelContext),
 	m_rVisualisationTree(rVisualisationTree),
@@ -413,6 +424,10 @@ boolean CPlayerVisualisation::setWidget(const CIdentifier& rBoxIdentifier, ::Gtk
 	//set up toolbar button as drag source as well
 	gtk_drag_source_set(GTK_WIDGET(l_pButton), GDK_BUTTON1_MASK, targets, sizeof(targets)/sizeof(::GtkTargetEntry), GDK_ACTION_COPY);
 	g_signal_connect(G_OBJECT(l_pButton), "drag_data_get", G_CALLBACK(drag_data_get_from_widget_cb), this);
+
+	g_signal_connect(G_OBJECT(pWidget), "button-press-event", G_CALLBACK(KeyboardStimulator_KeyPressCallback), NULL);
+
+
 
 	//store plugin widget and toolbar button
 	CIdentifier l_oIdentifier = l_pVisualisationWidget->getIdentifier();

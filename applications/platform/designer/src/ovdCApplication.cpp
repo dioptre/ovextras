@@ -78,7 +78,16 @@ namespace
 	}
 	void menu_focus_search_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 	{
-		gtk_widget_grab_focus(GTK_WIDGET(gtk_builder_get_object(static_cast<CApplication*>(pUserData)->m_pBuilderInterface, "openvibe-box_algorithm_searchbox")));
+		CApplication* l_pApplication = static_cast<CApplication*>(pUserData);
+		//if we want the log area GtkEntry to be able to grab the focus, this one must not grab it
+		if(!(l_pApplication->isLogAreaClicked()))
+		{
+			gtk_widget_grab_focus(GTK_WIDGET(gtk_builder_get_object(static_cast<CApplication*>(pUserData)->m_pBuilderInterface, "openvibe-box_algorithm_searchbox")));
+		}
+		else
+		{
+			gtk_widget_grab_focus(GTK_WIDGET(gtk_builder_get_object(static_cast<CApplication*>(pUserData)->m_pBuilderInterface, "searchEntry")));
+		}
 	}
 	void menu_copy_selection_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 	{
@@ -289,18 +298,14 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 
 	void search_messages_cb(::GtkButton* pButton, gpointer pUserData)
 	{
-		cout << "search_messages_cb\n";
-
 		CApplication* l_pApplication=static_cast<CApplication*>(pUserData);
 		CString l_sSearchTerm((const char*)l_pApplication->m_sLogSearchTerm);
 		if(l_sSearchTerm==CString(""))
 		{
-			cout << "restore old buffer" << endl;
 			l_pApplication->m_pLogListenerDesigner->restoreOldBuffer();
 		}
 		else
 		{
-			cout << "search message for " << l_sSearchTerm.toASCIIString() << endl;
 			l_pApplication->m_pLogListenerDesigner->searchMessages(l_sSearchTerm);
 		}
 
@@ -556,6 +561,59 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 		}
 		return TRUE;
 	}
+
+	void click_callback(::GtkWidget* pWidget, GdkEventButton *event, gpointer pData)
+	{
+		//log text view grab the focus so isLogAreaClicked() return true and CTRL+F will focus on the log searchEntry
+		gtk_widget_grab_focus(pWidget);
+
+		CApplication* l_pApplication=static_cast<CApplication*>(pData);
+
+		//if left click
+		if (event->button == 1)
+		{
+			GtkTextView* l_pTextView = GTK_TEXT_VIEW(pWidget);
+			GtkTextWindowType pp = gtk_text_view_get_window_type(l_pTextView, event->window);
+			gint buffer_x, buffer_y;
+			//convert event coord (mouse position) in buffer coord (character in buffer)
+			gtk_text_view_window_to_buffer_coords(l_pTextView, pp, ov_round(event->x), ov_round(event->y), &buffer_x, &buffer_y);
+			//get the text iter corresponding to that position
+			GtkTextIter iter;
+			gtk_text_view_get_iter_at_location(l_pTextView, &iter, buffer_x, buffer_y);
+
+			//if this position is not tagged, exit
+			GtkTextTag* tag = (GtkTextTag*)(l_pApplication->m_pCIdentifierTag);
+			if(!gtk_text_iter_has_tag(&iter, tag))
+			{
+				return;
+			}
+			else //if the position is tagged, we are on a CIdentifier
+			{
+				GtkTextIter start, end;
+				start = iter;
+				end = iter;
+				while(gtk_text_iter_has_tag(&end, tag))
+				{
+					gtk_text_iter_forward_char(&end);
+				}
+				while(gtk_text_iter_has_tag(&start, tag))
+				{
+					gtk_text_iter_backward_char(&start);
+				}
+				//we went one char to far for start
+				gtk_text_iter_forward_char(&start);
+				//this contains the CIdentifier
+				gchar * link=gtk_text_iter_get_text(&start, &end);
+				//cout << "cid is |" << link << "|" << endl;
+				CIdentifier id;
+				id.fromString(CString(link));
+				l_pApplication->getCurrentInterfacedScenario()->centerOnBox(id);
+			}
+
+		}
+
+
+	}
 }
 
 static ::GtkTargetEntry g_vTargetEntry[]= {
@@ -587,6 +645,7 @@ CApplication::CApplication(const IKernelContext& rKernelContext)
 	m_pScenarioManager=&m_rKernelContext.getScenarioManager();
 	m_pVisualisationManager=&m_rKernelContext.getVisualisationManager();
 	m_pLogListenerDesigner = NULL;
+	m_pTextView = NULL;
 }
 
 CApplication::~CApplication(void) 
@@ -604,6 +663,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	m_eCommandLineFlags=eCommandLineFlags;
 	m_sSearchTerm = "";
 	m_sLogSearchTerm = "";
+	m_pCIdentifierTag = NULL;
 
 	m_vCheckItems.clear();
 
@@ -685,7 +745,6 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-show_unstable")), "toggled", G_CALLBACK(refresh_search_no_data_cb), this);
 
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "searchEntry")),		"changed", G_CALLBACK(refresh_search_log_entry), this);
-	//m_pSearchEntry = GTK_ENTRY(gtk_builder_get_object(m_pBuilderInterface, "searchEntry"));
 
 #if defined(TARGET_OS_Windows)
 #if GTK_CHECK_VERSION(2,24,0)
@@ -857,6 +916,19 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_search")),       "clicked",  G_CALLBACK(search_messages_cb), this);
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "searchEntry")),		"activate", G_CALLBACK(search_messages_cb), this);
+
+		m_pTextView = GTK_TEXT_VIEW(gtk_builder_get_object(m_pBuilderInterface, "openvibe-textview_messages"));
+		GtkTextBuffer* buffer =  gtk_text_view_get_buffer( m_pTextView );
+		GtkTextTagTable* tagtable =  gtk_text_buffer_get_tag_table(buffer);
+		//GtkTextTag* url
+		m_pCIdentifierTag = gtk_text_tag_table_lookup(tagtable, "link");
+		if(m_pCIdentifierTag!=NULL)
+		{
+			//g_object_set_data (url, "tag", url);
+			//g_object_set_data (url, "application", this);
+			//m_pCIdentifierTag =url;
+			g_signal_connect(G_OBJECT(m_pTextView), "button_press_event", G_CALLBACK(click_callback), this);
+		}
 
 		int64 lastScenarioPage = m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_CurrentScenarioPage}", -1);
 		if(lastScenarioPage>=0 && lastScenarioPage<(int64)m_vInterfacedScenario.size())
@@ -1818,7 +1890,8 @@ void CApplication::releasePlayer(void)
 		l_pCurrentInterfacedScenario->m_pPlayer=NULL;
 
 		// restore the snapshot so settings override does not modify the scenario !
-		l_pCurrentInterfacedScenario->undoCB(false);
+		//commenting this line make centerOnBox still valid after stop
+		//l_pCurrentInterfacedScenario->undoCB(false);
 
 		// destroy player windows
 		l_pCurrentInterfacedScenario->releasePlayerVisualisation();
@@ -2269,3 +2342,12 @@ void CApplication::logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLe
 	gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), m_rKernelContext.getLogManager().isActive(level));
 }
 
+boolean CApplication::isLogAreaClicked()
+{
+	if(m_pTextView!=NULL)
+	{
+		return gtk_widget_is_focus(GTK_WIDGET(m_pTextView))==TRUE;
+	}
+	else
+		return false;
+}

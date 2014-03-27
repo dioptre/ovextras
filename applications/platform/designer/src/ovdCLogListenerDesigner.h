@@ -23,6 +23,7 @@ namespace OpenViBEDesigner
 				CLogObject(GtkTextBuffer* pBuffer)
 				{
 					m_pBuffer = gtk_text_buffer_new(gtk_text_buffer_get_tag_table(pBuffer));
+					m_bPassedFilter = false;//by default the log does not pass the filter;
 				}
 
 				::GtkTextBuffer* getTextBuffer()
@@ -31,24 +32,19 @@ namespace OpenViBEDesigner
 				}
 
 
+				/*
 				bool copyFromBuffer(GtkTextIter* range_begin, GtkTextIter* range_end)
 				{
 					GtkTextIter l_oEndLogIter;
 					gtk_text_buffer_get_end_iter(m_pBuffer, &l_oEndLogIter);
 					gtk_text_buffer_insert_range(m_pBuffer, &l_oEndLogIter, range_begin, range_end);
 					return true;
-				}
+				}//*/
 
 				//determine if the log contains the sSearchTerm and tag the part with the sSerachTerm in gray
 				bool Filter(OpenViBE::CString sSearchTerm)
 				{
 					bool ret_val = false;
-					//no term means no research so no filter we let all pass
-					if(sSearchTerm==OpenViBE::CString(""))
-					{
-						return true;
-					}
-
 					GtkTextIter start_find, end_find;
 					gtk_text_buffer_get_start_iter(m_pBuffer, &start_find);
 					gtk_text_buffer_get_end_iter(m_pBuffer, &end_find);
@@ -58,6 +54,16 @@ namespace OpenViBEDesigner
 					if(tag==NULL)
 					{
 						gtk_text_buffer_create_tag(m_pBuffer, "gray_bg", "background", "gray", NULL);
+					}
+
+					//remove previous tagging
+					gtk_text_buffer_remove_tag_by_name(m_pBuffer, "gray_bg", &start_find, &end_find);
+
+					//no term means no research so no filter we let all pass
+					if(sSearchTerm==OpenViBE::CString(""))
+					{
+						m_bPassedFilter = true;
+						return true;
 					}
 
 
@@ -72,11 +78,21 @@ namespace OpenViBEDesigner
 						gtk_text_buffer_get_iter_at_offset(m_pBuffer, &start_find, offset);
 						ret_val = true;
 					}
+					m_bPassedFilter = ret_val;
 					return ret_val;
+				}
+
+				OpenViBE::boolean getPassFilter()
+				{
+					return m_bPassedFilter;
 				}
 
 				public:
 					::GtkTextBuffer* m_pBuffer;
+					OpenViBE::boolean m_bPassedFilter;
+					::GtkTreeIter m_oTreeIter;
+					OpenViBE::boolean m_bIsPrinted;
+
 
 			};
 
@@ -116,11 +132,17 @@ namespace OpenViBEDesigner
 			void restoreOldBuffer();
 			void focusMessageWindow();
 
+			void displayLog(CLogObject* oLog);
+			void appendLog(CLogObject* oLog);
+
 			_IsDerivedFromClass_Final_(OpenViBE::Kernel::ILogListener, OV_UndefinedIdentifier);
 
 		protected:
 
 			std::map<OpenViBE::Kernel::ELogLevel, OpenViBE::boolean> m_vActiveLevel;
+
+			//logs
+			std::vector<CLogObject*> m_vStoredLog;
 
 		private:
 
@@ -129,8 +151,6 @@ namespace OpenViBEDesigner
 			::GtkTextView* m_pTextView;
 			//text buffer that is actually displayed
 			::GtkTextBuffer* m_pBuffer;
-			//buffer containing all the logs wether or not they pass the search term filter
-			::GtkTextBuffer* m_pNonFilteredBuffer;
 
 
 			::GtkToggleButton* m_pToggleButtonPopup;
@@ -166,9 +186,6 @@ namespace OpenViBEDesigner
 			OpenViBE::boolean m_bConsoleLogWithHexa;
 			OpenViBE::boolean m_bConsoleLogTimeInSecond;
 			OpenViBE::uint32 m_ui32ConsoleLogTimePrecision;
-
-
-			OpenViBE::boolean m_bNonFilteredBuffer;
 
 			CLogObject* m_oCurrentLog;
 			OpenViBE::CString m_sSearchTerm;

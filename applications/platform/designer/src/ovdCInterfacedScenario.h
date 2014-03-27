@@ -110,6 +110,8 @@ namespace OpenViBEDesigner
 
 
 		OpenViBE::boolean hasSelection(void);
+
+		OpenViBE::boolean centerOnBox(OpenViBE::CIdentifier rIdentifier);
 /*
 	private:
 

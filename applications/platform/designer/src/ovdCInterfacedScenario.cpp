@@ -377,6 +377,7 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	gtk_notebook_remove_page(GTK_NOTEBOOK(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookTitle, "openvibe-scenario_notebook")), 0);
 	gtk_notebook_remove_page(GTK_NOTEBOOK(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookClient, "openvibe-scenario_notebook")), 0);
 	gtk_notebook_append_page(&m_rNotebook, m_pNotebookPageContent, m_pNotebookPageTitle);
+	gtk_notebook_set_tab_reorderable(&m_rNotebook, m_pNotebookPageContent, true);
 
 	GtkWidget* l_pCloseWidget=GTK_WIDGET(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookTitle, "openvibe-scenario_button_close"));
 	g_signal_connect(G_OBJECT(l_pCloseWidget), "clicked", G_CALLBACK(scenario_title_button_close_cb), this);
@@ -3383,4 +3384,61 @@ boolean CInterfacedScenario::hasSelection(void)
 		}
 	}
 	return false;
+}
+
+boolean CInterfacedScenario::centerOnBox(CIdentifier rIdentifier)
+{
+	//m_rKernelContext.getLogManager() << LogLevel_Fatal << "CInterfacedScenario::centerOnBox" << "\n";
+	boolean ret_val = false;
+	if(m_rScenario.isBox(rIdentifier))
+	{
+		//m_rKernelContext.getLogManager() << LogLevel_Fatal << "CInterfacedScenario::centerOnBox is box" << "\n";
+		IBox* rBox = m_rScenario.getBoxDetails(rIdentifier);
+
+		//clear previous selection
+		m_vCurrentObject.clear();
+		//to select the box
+		m_vCurrentObject[rIdentifier] = true;
+		//redraw it in yellow to show it is selected
+		redraw(*rBox);
+
+		CBoxProxy l_oBoxProxy(m_rKernelContext, *rBox);
+		const int xMargin=ov_round(5.0*m_f64CurrentScale);
+		const int yMargin=ov_round(5.0*m_f64CurrentScale);
+		int xSize=ov_round(l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + xMargin*2.0);
+		int ySize=ov_round(l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + yMargin*2.0);
+		int x = ov_round(l_oBoxProxy.getXCenter() + 3*xSize/4);
+		int y = ov_round(l_oBoxProxy.getYCenter() + 3*ySize/4);
+
+		//get the parameters of the current adjustement
+		GtkAdjustment* l_pOldHAdjustement = gtk_scrolled_window_get_hadjustment(m_pScrolledWindow);//gtk_viewport_get_vadjustment(m_pScenarioViewport);
+		GtkAdjustment* l_pOldVAdjustement = gtk_scrolled_window_get_vadjustment(m_pScrolledWindow);
+		gdouble upper;
+		gdouble lower;
+		gdouble step;
+		gdouble page;
+		gdouble pagesize;
+		gdouble value;
+		g_object_get(l_pOldHAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
+		//get the size of the current viewport
+		gint l_iViewportX = -1;
+		gint l_iViewportY = -1;
+		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
+
+		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
+		upper-=l_iViewportX;
+
+		//crete a new adjustement with the correct value since we can not change the upper bound of the old adjustement
+		GtkAdjustment* l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
+		gtk_adjustment_set_value(l_pAdjustement, x);
+		gtk_scrolled_window_set_hadjustment(m_pScrolledWindow, l_pAdjustement);
+
+		g_object_get(l_pOldVAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
+		upper-=l_iViewportY;
+		l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
+		gtk_adjustment_set_value(l_pAdjustement, y);
+		gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
+		ret_val = true;
+	}
+	return ret_val;
 }
