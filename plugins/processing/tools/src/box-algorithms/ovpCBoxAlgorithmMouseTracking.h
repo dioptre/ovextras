@@ -125,8 +125,8 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addOutput("Absolute coordinate",OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addOutput("Previous relative coordinate",OV_TypeId_Signal);
 
-				rBoxAlgorithmPrototype.addSetting("Sampling Frequency",OV_TypeId_Float,"512");
-//				rBoxAlgorithmPrototype.addSetting("Generated epoch sample count",OV_TypeId_Integer,"32");
+				rBoxAlgorithmPrototype.addSetting("Sampling Frequency",OV_TypeId_Float,"16");
+				rBoxAlgorithmPrototype.addSetting("Generated epoch sample count",OV_TypeId_Integer,"1");
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 				

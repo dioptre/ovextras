@@ -29,8 +29,8 @@ boolean CBoxAlgorithmMouseTracking::initialize(void)
 
 	// Retrieves settings
 	m_f64Frequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-//	m_ui32GeneratedEpochSampleCount = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),1);
-    	m_ui32GeneratedEpochSampleCount = 1;
+	m_ui32GeneratedEpochSampleCount = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),1);
+//	m_ui32GeneratedEpochSampleCount = 1;
 	m_ui32SentSampleCount = 0;
 
 	m_f64Previous_x = 0;

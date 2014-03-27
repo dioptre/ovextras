@@ -537,7 +537,7 @@ namespace OpenViBEPlugins
 					for(uint32 i=0; i<l_ui32WindowCount; i++)
 					{
 						getBoxAlgorithmContext()->getPlayerContext()->getLogManager()
-							<< LogLevel_Trace
+							<< LogLevel_Info
 							<< "Score estimation window " << i << " : [fail:success:ratio]=["
 							<< m_vWindowFailCount[i] << ":"
 							<< m_vWindowSuccessCount[i] << ":"
