@@ -157,12 +157,12 @@ void ExternalP300Visualiser::initializeOpenViBEKernel()
 	}
 }
 
-void ExternalP300Visualiser::processCallback(OpenViBE::uint32 eventID) 
+void ExternalP300Visualiser::processCallback(uint32 eventID) 
 {
 	externalVisualiser->process(eventID);				
 }
 
-void ExternalP300Visualiser::processWaitCallback(OpenViBE::uint32 eventID)
+void ExternalP300Visualiser::processWaitCallback(uint32 eventID)
 {
 	//std::cout << "ExternalP300Visualiser::processWaitCallback" << std::endl;
 	if(eventID==0)
@@ -214,6 +214,10 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			//m_pMainContainer->setChanged(true);
 			m_bChanged = true;
 			m_qEventQueue.push(eventID);
+			if (m_pInterfacePropReader->isPhotoDiodeEnabled())//add that because segment end on flash
+			{
+				m_pMainContainer->DiodeAreaFlash(false);
+			}
 			break;
 		case OVA_StimulationId_RestStop:
 			#ifdef OUTPUT_TIMING
@@ -237,7 +241,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
 		case OVA_StimulationId_TrialStop:	
 			m_pTagger->write(eventID);
 			break;
-		case OVA_StimulationId_SegmentStop:	
+		case OVA_StimulationId_SegmentStop:
 			break;
 		case OVA_StimulationId_RestStart:
 			m_pTagger->write(eventID);
@@ -268,10 +272,12 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			}
 			break;
 		case OVA_StimulationId_FlashStop:
-			/*TODO: should use the screen layout property reader to find out the background color
+			//*TODO: should use the screen layout property reader to find out the background color
 			if (m_pInterfacePropReader->isPhotoDiodeEnabled())
-				m_pMainContainer->changeBackgroundColorDiodeArea(m_pInterfacePropReader->getNoFlashBackgroundColor());
-			*/
+			{
+				m_pMainContainer->DiodeAreaFlash(false);
+			}
+			//*/
 		
 			//reset the child states, but only the ones that have been flashed for the longest (in case of overlapping stimuli), 
 			//the others should stay in their current state
@@ -280,9 +286,12 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			m_qEventQueue.push(eventID);			
 			break;
 		case OVA_StimulationId_Flash:
-			/* TODO: should use the screen layout property reader to find out the foreground color
-			 * if (m_pInterfacePropReader->isPhotoDiodeEnabled())
-				m_pMainContainer->changeBackgroundColorDiodeArea(m_pInterfacePropReader->getFlashForegroundColor());*/
+			//* TODO: should use the screen layout property reader to find out the foreground color
+			if (m_pInterfacePropReader->isPhotoDiodeEnabled())
+			{
+				m_pMainContainer->DiodeAreaFlash(true);	
+			}
+				//*/
 			
 			m_qEventQueue.push(eventID);
 			
@@ -479,7 +488,7 @@ int main (int argc, char *argv[])
 				break;
 		}
 		//*/
-		std::cout << "waiting" << std::endl;
+		//std::cout << "waiting" << std::endl;
 		if(glfwGetKey(window, GLFW_KEY_S)==GLFW_PRESS)
 		{
 			l_bEventReceived = true;

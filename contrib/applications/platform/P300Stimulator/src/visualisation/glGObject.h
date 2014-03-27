@@ -6,17 +6,6 @@
 #include "OpenGLManagers/OpenGLDListManager.h"
 
 #include <GLFW/glfw3.h>
-//#include <SDL.h>
-//#include <SDL_image.h>
-/*
-#if defined TARGET_OS_Windows
-	#include <SDL_OpenGL.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glu.h>
-#endif
-//*/
-//#include "FTGL/ftgl.h"
 
 namespace OpenViBEApplications
 {

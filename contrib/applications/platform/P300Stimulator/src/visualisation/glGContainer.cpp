@@ -26,6 +26,7 @@ GContainer::GContainer(const GContainer& gcontainer) : GObject(gcontainer)
 		GObject* child = gcontainer.getChild(i)->clone();
 		m_lChildren->push_back(child);
 	}
+	generateGLDisplayLists();//lm I added that
 }
 
 GContainer::~GContainer()
@@ -65,7 +66,6 @@ void GContainer::draw()
 		glScissor(static_cast<GLint>(getX()), static_cast<GLint>(getY()), static_cast<GLsizei>(getWidth()), static_cast<GLsizei>(getHeight()));
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 		glDisable(GL_SCISSOR_TEST);*/
-		
 		glCallList(getGLResourceID(0));
 	}
 	

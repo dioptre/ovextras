@@ -6,40 +6,18 @@ using namespace OpenViBEApplications;
 
 #define REFFONTSIZE 10
 
-/*
-GSymbol::GSymbol(const char * symbol, boost::shared_ptr<FTFont> font, OpenViBE::float32 fontScaleSize) : GLabel("", fontScaleSize) 
-{		
-	m_sTextLabel = std::string(symbol);
-	m_ftglFont = font;
-	m_ftglFont->FaceSize(static_cast<uint32>(m_f32LabelScaleSize*m_f32MaxLabelSize));
-	//m_ftglFont->UseDisplayList(false); //fonts should by default use the display lists
-
-	cairo_t *layout_context = create_layout_context();
-	m_olayout = pango_cairo_create_layout(layout_context);
-	std::cout << "creating pango layout (from ptr)" << std::endl;
-	if (m_olayout==NULL)
-	{
-		std::cout << "is NULL" << std::endl;
-	}
-
-
-	generateGLDisplayLists();
-}
-//*/
-
 GSymbol::GSymbol(const char * symbol, OpenViBE::CString fontPath, OpenViBE::float32 fontScaleSize) : GLabel(fontPath, fontScaleSize) 
 {		
 	m_sTextLabel = std::string(symbol);	
-	//m_ftglFont = createFont(fontPath.toASCIIString());
-	//m_ftglFont->FaceSize(static_cast<uint32>(m_f32LabelScaleSize*m_f32MaxLabelSize));
-	//m_ftglFont->UseDisplayList(false);
 
 	cairo_t *layout_context = create_layout_context();
 	m_olayout = pango_cairo_create_layout(layout_context);
 	cairo_destroy (layout_context);
 	/* Load the font */
 	PangoFontDescription *desc;
-	desc = pango_font_description_from_string (fontPath.toASCIIString());
+
+	m_sFontFile = std::string(fontPath.toASCIIString());
+	desc = pango_font_description_from_string (m_sFontFile.c_str());
 	pango_font_description_set_size(desc, m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE);
 	pango_layout_set_font_description (m_olayout, desc);
 	pango_font_description_free (desc);
@@ -146,7 +124,7 @@ void GSymbol::get_text_size (PangoLayout *layout, int *width, int *height, Pango
 	if (layout!=NULL)
 	{
 		//PangoRectangle ink, logical;
-		pango_layout_get_size (layout, width, height);
+		pango_layout_get_size(layout, width, height);
 		if(ink!=NULL)
 		{
 			pango_layout_get_extents(layout, ink, NULL);
@@ -167,30 +145,11 @@ void GSymbol::render_text(const char *text, int *text_width, int *text_height, u
 		cairo_surface_t *surface;
 		unsigned char* surface_data = NULL;
 
-		//PangoLayout *layout;
-
-		//layout_context = create_layout_context ();
-
-		/* Create a PangoLayout, set the font and text */
-		//layout = pango_cairo_create_layout (layout_context);
-
 		pango_layout_set_text(m_olayout, text, -1);
 
-/*
-		PangoFontDescription *desc;
-		desc = pango_font_description_from_string("Sans Bold 10"); //(fontPath.toASCIIString());
-		pango_font_description_set_size(desc, m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE);
-		pango_layout_set_font_description (m_olayout, desc);
-		pango_font_description_free (desc);
-		//*/
-
-		/* Get text dimensions and create a context to render to */
-		//get_text_size(m_olayout, text_width, text_height, NULL, NULL);
-		//std::cout << "render text calls get text size and got " << *text_width << " " << *text_height << std::endl;
-
 		surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, (*text_width), (*text_height));
-
 		render_context = cairo_create(surface);
+
 		//surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, *text_width, *text_height);
 		//render_context = cairo_create(surface);
 
@@ -222,9 +181,6 @@ void GSymbol::render_text(const char *text, int *text_width, int *text_height, u
 			desc = pango_font_description_from_string(pango_font_description_to_string(pango_layout_get_font_description(m_olayout)));//("Sans Bold 100");		// specify the font that would be ideal for your particular use
 			float32 size =  float32(m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE)/1.387535079;
 			pango_font_description_set_size(desc,size);//*10000);
-			//std::cout << m_f32LabelScaleSize << " m_f32LabelScaleSize " << std::endl;
-		//	std::cout << m_f32MaxLabelSize << " m_f32MaxLabelSize " << std::endl;
-			//std::cout << m_f32LabelScaleSize*m_f32MaxLabelSize << " * " << (int)PANGO_SCALE << std::endl;
 			pango_layout_set_font_description(layout, desc);			// assign the previous font description to the layout
 			pango_font_description_free(desc);					// free the description
 
@@ -248,29 +204,24 @@ void GSymbol::render_text(const char *text, int *text_width, int *text_height, u
 		//glClear (GL_COLOR_BUFFER_BIT);
 		glPushMatrix ();
 
-
-		glBindTexture(GL_TEXTURE_2D, *texture_id);
 		glEnable(GL_BLEND);//enable transparancy
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glBegin (GL_QUADS);
+		glBindTexture(GL_TEXTURE_2D, *texture_id);
+		
 
+		glBegin(GL_QUADS);
 			glTexCoord2i(0, 0);glVertex3f(m_pLabelPosition.first, m_pLabelPosition.second+(*text_height), getDepth()+0.01f);
 			glTexCoord2i(1, 0);glVertex3f(m_pLabelPosition.first+(*text_width), m_pLabelPosition.second+(*text_height), getDepth()+0.01f);
 			glTexCoord2i(1, 1);glVertex3f(m_pLabelPosition.first+(*text_width), m_pLabelPosition.second, getDepth()+0.01f);
 			glTexCoord2i(0, 1);glVertex3f(m_pLabelPosition.first, m_pLabelPosition.second, getDepth()+0.01f);
-		glEnd ();
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glEnd();
+		glBindTexture(GL_TEXTURE_2D, 0);//bind back, to default texture, otherwise only the current letter is drawn
 
 		glPopMatrix ();
-		//SDL_GL_SwapBuffers();
 		/* Clean up */
 		//*
-		free (surface_data);
-		//g_object_unref (layout);
-		//cairo_destroy (layout_context);
 		cairo_destroy(render_context);
-		//cairo_surface_destroy(surface);
 		//*/
 
 }
@@ -282,30 +233,17 @@ unsigned int GSymbol::create_texture ( int width, int height, unsigned char *pix
 	glEnable(GL_TEXTURE_2D);
 	glGenTextures(1, &texture_id);
 	glBindTexture(GL_TEXTURE_2D, texture_id);
-
-	{
-		/*
-		glErr = glGetError();
-			std::cout <<  "	" <<  gluErrorString(glErr)<<std::endl;
-
-		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA, width, height);
-		//*
-		glErr = glGetError();
-			std::cout <<  "		" <<  gluErrorString(glErr)<<std::endl;
-
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
-		//*
-		glErr = glGetError();
-			std::cout << "			"  << gluErrorString(glErr)<<std::endl;
-		//*/
-	}
 	//*
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-	glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
-
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+	//
+	#if defined TARGET_OS_Windows
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
+	#else
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+	#endif
 	return texture_id;
 }
 
@@ -328,7 +266,7 @@ void GSymbol::computeMaximumLabelSize()
 
 	//*/
 	PangoFontDescription *desc;
-	desc = pango_font_description_from_string(pango_font_description_to_string(pango_layout_get_font_description(m_olayout)));//("Sans Bold 100");		// specify the font that would be ideal for your particular use
+	desc = pango_font_description_from_string(m_sFontFile.c_str());//pango_font_description_to_string(pango_layout_get_font_description(m_olayout)));//("Sans Bold 100");		// specify the font that would be ideal for your particular use
 	pango_font_description_set_size(desc, REFFONTSIZE*PANGO_SCALE);
 	pango_layout_set_font_description(m_olayout, desc);			// assign the previous font description to the layout
 	//pango_font_description_free(desc);
@@ -338,7 +276,9 @@ void GSymbol::computeMaximumLabelSize()
 	 int text_height;
 	 PangoRectangle ink, logical;
 	get_text_size (m_olayout, &text_width, &text_height, &ink, &logical);
-	float32 ratio = 1.387535079*getWidth()/((float32)text_width);//my best explanation is taht 1.387535079 is the pango/ftgl ratio since their respective point for font size do not match
+	//float32 ratio = 1.387535079*getWidth()/((float32)text_width);
+	float32 ratio = getWidth()/((float32)text_width);
+	//my best explanation is taht 1.387535079 is the pango/ftgl ratio since their respective point for font size do not match
 	m_f32MaxLabelSize = 0.9f*REFFONTSIZE*ratio;
 
 	//*/
@@ -377,10 +317,11 @@ void GSymbol::computeLabelPosition()
 	PangoRectangle ink, logical;
 
 
-	//std::cout << "\nGSymbol::computeLabelPosition() for label " << m_sTextLabel.c_str() << std::endl;
+	
 
-	pango_layout_set_text (m_olayout, m_sTextLabel.c_str(), -1);
-	get_text_size (m_olayout, &text_width, &text_height, &ink, &logical);//get the layout?
+	pango_layout_set_text(m_olayout, m_sTextLabel.c_str(), -1);
+	pango_layout_get_size(m_olayout, NULL, NULL);
+	get_text_size(m_olayout, &text_width, &text_height, &ink, &logical);//get the layout?
 
 	float32	l_fxOffset = (getWidth()-(text_width))/2.0f - ink.x/PANGO_SCALE;//l_oBoundingBox.Lower().Xf();
 	float32 l_fyOffset = (getHeight()-(text_height))/2.0f - (ink.y)/PANGO_SCALE;//l_oBoundingBox.Lower().Yf();
@@ -402,7 +343,7 @@ void GSymbol::generateGLDisplayLists()
 	GLabel::generateGLDisplayLists();
 	float32 size =  float32(m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE)/1.387535079;//mysterious pango to ftgl font point ratio
 	PangoFontDescription *desc;
-	desc = pango_font_description_from_string(pango_font_description_to_string(pango_layout_get_font_description(m_olayout)));//("Sans Bold 100");		// specify the font that would be ideal for your particular use
+	desc = pango_font_description_from_string(m_sFontFile.c_str());//("Sans Bold 100");		// specify the font that would be ideal for your particular use
 	pango_font_description_set_size(desc, size);
 	pango_layout_set_font_description(m_olayout, desc);			// assign the previous font description to the layout
 	pango_font_description_free(desc);
@@ -413,10 +354,8 @@ void GSymbol::generateGLDisplayLists()
 	int text_width = getWidth()-2*offx;
 	int text_height = getHeight()-2*offy;
 
-	//FTPoint l_ftPoint(m_pLabelPosition.first, m_pLabelPosition.second, this->getDepth()+0.01);
 	glNewList(getGLResourceID(1),GL_COMPILE); 
 		glLoadIdentity();
-		//m_ftglFont->Render(m_sTextLabel.c_str(), -1, l_ftPoint);
 		render_text(m_sTextLabel.c_str(), &text_width, &text_height, &texture_id);
 	glEndList();
 }
@@ -424,7 +363,6 @@ void GSymbol::generateGLDisplayLists()
 void GSymbol::assignHelper(GSymbol const& gsymbol)
 {
 	this->m_sTextLabel = std::string(gsymbol.m_sTextLabel);
-	//this->m_ftglFont = gsymbol.m_ftglFont;
 	this->m_olayout = gsymbol.m_olayout;
 }
 

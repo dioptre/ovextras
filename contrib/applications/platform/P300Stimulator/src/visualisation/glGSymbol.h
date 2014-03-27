@@ -93,6 +93,7 @@ namespace OpenViBEApplications
 		
 	protected:
 		std::string m_sTextLabel;
+		std::string m_sFontFile;
 		PangoLayout *m_olayout;
 	};
 };

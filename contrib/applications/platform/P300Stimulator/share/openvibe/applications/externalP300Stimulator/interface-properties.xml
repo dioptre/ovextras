@@ -25,7 +25,7 @@
 	<Tagging method="software">
 		<!-- 0x378 for the windows laptops/docks of the hospital, 0xE060 for the INRIA desktop at the lab and 0 for linux -->
 		<ParallelPortNumber>0x378</ParallelPortNumber>
-		<PhotoDiode>no</PhotoDiode><!-- the code for enabling the photo diode is deprecated, should be redone -->
+		<PhotoDiode>yes</PhotoDiode><!-- the code for enabling the photo diode is deprecated, should be redone -->
 		<!-- only need to specify this in case of hardware tagging, the parallel port of the TMSI device is sampled at the same frequencey as the EEG -->
 		<SampleFrequency>256</SampleFrequency>
 	</Tagging>

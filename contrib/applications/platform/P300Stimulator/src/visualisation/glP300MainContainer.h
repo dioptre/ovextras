@@ -78,6 +78,7 @@ namespace OpenViBEApplications
 		 * With this function you can change its background color
 		 */
 		void changeBackgroundColorDiodeArea(GColor bColor);
+		void DiodeAreaFlash(OpenViBE::boolean bFlash);
 		
 		/**
 		 * @return the keyboard handler, this object gives you the ability to make changes to the screen (symbols flashed, symbols not flashed...)
@@ -160,6 +161,7 @@ namespace OpenViBEApplications
 		GTable* m_gResultArea;
 		GTable* m_gPredictionArea;
 		GContainer* m_gDiodeArea;
+		GContainer* m_gLitDiodeArea;
 		
 		P300InterfacePropertyReader* m_pInterfacePropertyObject; //responsibility of the caller to clean this up
 		P300ScreenLayoutReader* m_pScreenLayoutObject;

@@ -1,5 +1,4 @@
 #include "ovexP300InterfacePropertyReader.h"
-#include "FTGL/ftgl.h"
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;

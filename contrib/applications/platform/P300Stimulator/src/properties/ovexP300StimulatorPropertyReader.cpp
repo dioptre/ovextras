@@ -54,6 +54,7 @@ void P300StimulatorPropertyReader::processChildData(const char* sData)
 	if(m_vNode.top()==CString("InterTrialDelay"))
 	{
 		uint64 l_ui64InterTrialDelay = _AutoCast_(sData);
+		m_pKernelContext->getLogManager() << LogLevel_Warning << "Inter trial delay is " << l_ui64InterTrialDelay << "\n";
 		if (l_ui64InterTrialDelay>= (4LL<<32))
 			m_ui64InterTrialDuration = l_ui64InterTrialDelay;
 		else

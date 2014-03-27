@@ -6,13 +6,7 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#if defined TARGET_OS_Windows
-	#include <SDL_OpenGL.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glu.h>
-#endif
-
+#include <GLFW/glfw3.h>
 #include <iostream>
 #include <map>
 

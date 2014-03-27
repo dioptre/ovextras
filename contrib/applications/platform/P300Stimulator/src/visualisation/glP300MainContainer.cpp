@@ -52,7 +52,7 @@ P300MainContainer::P300MainContainer(const P300MainContainer& gcontainer) : GCon
 
 P300MainContainer::~P300MainContainer()
 {
-	std::cout << "P300MainContainer deconstructor called\n";
+	//std::cout << "P300MainContainer deconstructor called\n";
 	//SDL_FreeSurface(m_oSDLSurface);
 	glfwDestroyWindow(m_oGLFWWindow);
 	#ifdef WORDPREDICTION
@@ -240,6 +240,7 @@ void P300MainContainer::initializeResultArea()
 }
 void P300MainContainer::initializeTargetArea()
 {
+	//std::cout << "initializeTargetArea\n";
 	m_gTargetArea = new GTable((uint32)1,(uint32)30);	
 	m_gTargetArea->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
 	BoxDimensions dim = m_pScreenLayoutObject->getTargetAreaDimensions();
@@ -248,7 +249,7 @@ void P300MainContainer::initializeTargetArea()
 void P300MainContainer::initializePredictionArea()
 {
 	//std::cout << "initializePredictionArea\n";
-	m_gPredictionArea = new GTable(m_pScreenLayoutObject->getPredictionAreaRows(),m_pScreenLayoutObject->getPredictionAreaColumns());	
+	m_gPredictionArea = new GTable(m_pScreenLayoutObject->getPredictionAreaRows(),m_pScreenLayoutObject->getPredictionAreaColumns());
 	m_gPredictionArea->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
 	BoxDimensions dim = m_pScreenLayoutObject->getPredictionAreaDimensions();
 	this->addChild(m_gPredictionArea, dim.x, dim.y, dim.width, dim.height, 0.05f);		
@@ -256,15 +257,51 @@ void P300MainContainer::initializePredictionArea()
 
 void P300MainContainer::initializeDiodeArea()
 {
-	//std::cout << "initializePredictionArea\n";
-	m_gDiodeArea = new GContainer();	
-	m_gDiodeArea->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
-	this->addChild(m_gDiodeArea, 0.75f, 0.05f, 0.2f, 0.15f, 0.05f);		
+	//std::cout << "initializeDiodeArea\n";
+
+	GContainer* l_container = new GContainer();
+	//since the generateDisplayList is called on construction, the setBackground color will not be taken into account
+	//so we create a dummy, set its color and then copy it in the objects we want
+
+	//copy for dark background 
+	l_container->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
+	m_gDiodeArea = new GContainer(*l_container);	
+
+	//we could parameter that but a constrast with withe is the most efficient
+	GColor white;
+	white.red = 1.0;
+	white.green = 1.0;
+	white.blue = 1.0;
+
+	//copy for light background
+	l_container->setBackgroundColor(white);//m_pScreenLayoutObject->getDefaultForegroundColor(FLASH));
+	m_gLitDiodeArea = new GContainer(*l_container);
+
+	//add to get the container to compute its size, then remove it to let the slot for the other one
+	this->addChild(m_gDiodeArea, 0.75f, 0.05f, 0.2f, 0.15f, 0.05f);	
+	this->removeChild(this->getNumberOfChildren());
+	this->addChild(m_gLitDiodeArea, 0.75f, 0.05f, 0.2f, 0.15f, 0.05f);	
+
+	//delete dummy
+	delete l_container;
 }
 
 void P300MainContainer::changeBackgroundColorDiodeArea(GColor bColor)
 {
-	m_gDiodeArea->setBackgroundColor(bColor);
+}
+
+void P300MainContainer::DiodeAreaFlash(OpenViBE::boolean bFlash)
+{
+	//the third child is the diode area
+	if(bFlash)
+	{
+		(this->getChild(3)) = m_gLitDiodeArea;
+	}
+	else
+	{
+		(this->getChild(3)) = m_gDiodeArea;
+	}
+
 }
 
 void P300MainContainer::drawAndSync(ITagger * tagger, queue<OpenViBE::uint32> &l_qEventQueue)

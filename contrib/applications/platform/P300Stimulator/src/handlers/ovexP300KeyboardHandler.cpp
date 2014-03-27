@@ -12,7 +12,7 @@ using namespace OpenViBEApplications;
 
 P300KeyboardHandler::P300KeyboardHandler(GContainer* container, GContainer* container2, P300InterfacePropertyReader* propertyObject, P300ScreenLayoutReader* layoutPropObject) :
 m_pSymbolContainer(container), m_pPredictionContainer(container2), m_pPropertyObject(propertyObject), m_pLayoutObject(layoutPropObject)
-{			
+{
 	this->initializeColorMap(propertyObject->getFeedbackStartColor(), propertyObject->getFeedbackEndColor(), 
 						propertyObject->getColorFeedbackSteps(), propertyObject->getFeedbackStartValue());
 	
