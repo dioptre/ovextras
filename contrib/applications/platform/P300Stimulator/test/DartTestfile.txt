@@ -1,0 +1,8 @@
+FIND_PROGRAM(SIKULI NAMES sikuli-ide)
+IF(SIKULI)
+	IF(UNIX)
+		ADD_TEST(basic_external_stimulator "${SIKULI}" -t testBasicExternalStimulator.UNIX.sikuli)
+	ENDIF(UNIX)
+ENDIF(SIKULI)
+
+

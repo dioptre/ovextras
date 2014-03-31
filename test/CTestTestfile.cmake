@@ -78,5 +78,5 @@ SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/socket/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/fs/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/system/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/scripts/software/tmp/vrpn/java_vrpn/test")
-
+SUBDIRS("${CTEST_SOURCE_DIRECTORY}/contrib/applications/platform/P300Stimulator/test")
 
