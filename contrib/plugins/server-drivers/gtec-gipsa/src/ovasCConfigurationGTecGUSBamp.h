@@ -7,6 +7,7 @@
 
 #include <gtk/gtk.h>
 #include <string.h>
+#include <vector>
 using namespace std;
 
 namespace OpenViBEAcquisitionServer
@@ -42,6 +43,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean& m_rTriggerInput;
 		vector<string> m_rDevicesSerials;
 		string& m_rMasterDeviceIndex;
+		vector<OpenViBE::uint32> m_vComboBoxBandPassFilterIndex;
+		vector<OpenViBE::uint32> m_vComboBoxNotchFilterIndex;
 		
 	private:
 		::GtkWidget* m_pCalibrateDialog;

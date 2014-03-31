@@ -15,6 +15,7 @@
 #include "generic-raw-reader/ovasCDriverGenericRawTelnetReader.h"
 #include "brainproducts-brainampseries/ovasCDriverBrainProductsBrainampSeries.h"
 #include "brainproducts-vamp/ovasCDriverBrainProductsVAmp.h"
+#include "egi-ampserver/ovasCDriverEGIAmpServer.h"
 #include "emotiv-epoc/ovasCDriverEmotivEPOC.h"
 #include "micromed-systemplusevolution/ovasCDriverMicromedSystemPlusEvolution.h"
 #include "mindmedia-nexus32b/ovasCDriverMindMediaNeXus32B.h"
@@ -102,6 +103,19 @@ static void combobox_sample_count_per_sent_block_changed_cb(::GtkComboBox* pComb
 	static_cast<CAcquisitionServerGUI*>(pUserData)->comboBoxSampleCountPerSentBlockChanged(pComboBox);
 }
 
+static bool compare_driver_names(OpenViBEAcquisitionServer::IDriver* a,
+	OpenViBEAcquisitionServer::IDriver* b) 
+{
+	std::string l_sA = a->getName();
+	std::string l_sB = b->getName();
+
+	std::transform(l_sA.begin(), l_sA.end(), l_sA.begin(), ::tolower);
+	std::transform(l_sB.begin(), l_sB.end(), l_sB.begin(), ::tolower);
+
+	return l_sA < l_sB;
+}
+
+
 //___________________________________________________________________//
 //                                                                   //
 
@@ -132,6 +146,8 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	m_vDriver.push_back(new CDriverBrainProductsBrainampSeries(m_pAcquisitionServer->getDriverContext()));
 #endif
 
+	m_vDriver.push_back(new CDriverEGIAmpServer(m_pAcquisitionServer->getDriverContext()));
+
 #if defined TARGET_HAS_ThirdPartyUSBFirstAmpAPI
 	m_vDriver.push_back(new CDriverBrainProductsVAmp(m_pAcquisitionServer->getDriverContext()));
 #endif
@@ -146,8 +162,11 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	OpenViBEContributions::initiateContributions(this, m_pAcquisitionServer, rKernelContext, &m_vDriver);
 #endif
 
+	std::sort(m_vDriver.begin(), m_vDriver.end(), compare_driver_names);
+
 	scanPluginSettings();
 
+#ifdef OV_BOOST_SETTINGS
 	// Load plugin settings
 
 	for (size_t setting_index = 0; setting_index < m_vPluginSettings.size(); ++setting_index)
@@ -176,7 +195,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 			}
 		}
 	}
-
+#endif
 	m_pAcquisitionServerThread=new CAcquisitionServerThread(m_rKernelContext, *this, *m_pAcquisitionServer);
 
 	// Initialize GTK objects as the thread started below may refer to them quickly
@@ -189,6 +208,8 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 {
 	m_pAcquisitionServerThread->terminate();
 	m_pThread->join();
+
+	savePluginSettings();
 
 	// Saves current configuration
 	FILE* l_pFile=::fopen(m_rKernelContext.getConfigurationManager().expand("${CustomConfigurationApplication}").toASCIIString(), "wt");
@@ -208,9 +229,34 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 		::fprintf(l_pFile, "AcquisitionServer_OverSamplingFactor = %llu\n", m_pAcquisitionServer->getOversamplingFactor());
 		::fprintf(l_pFile, "AcquisitionServer_CheckImpedance = %s\n", (m_pAcquisitionServer->isImpedanceCheckRequested() ? "True" : "False"));
 		::fprintf(l_pFile, "AcquisitionServer_NaNReplacementPolicy = %s\n", m_pAcquisitionServer->getNaNReplacementPolicyStr().toASCIIString());
-		::fprintf(l_pFile, "# Path to emotiv SDK\n");
-		::fprintf(l_pFile, "AcquisitionServer_PathToEmotivResearchSDK = %s\n", (const char *)m_rKernelContext.getConfigurationManager().expand("${AcquisitionServer_PathToEmotivResearchSDK}"));
 
+		::fprintf(l_pFile, "# Settings for various device drivers\n");
+		std::vector<std::string> l_vTokens;
+		IConfigurationManager* l_pConfigurationManager = &m_rKernelContext.getConfigurationManager();
+		CIdentifier l_oTokenIdentifier; // defaults to OV_UndefinedIdentifier
+		// Collect token names
+		while((l_oTokenIdentifier=l_pConfigurationManager->getNextConfigurationTokenIdentifier(l_oTokenIdentifier)) != OV_UndefinedIdentifier)
+		{
+			const std::string prefix("AcquisitionServer_Driver_");
+			const std::string prefix2("AcquisitionServer_Plugin_");
+			CString tokenName = l_pConfigurationManager->getConfigurationTokenName(l_oTokenIdentifier);
+			if(std::string(tokenName.toASCIIString()).compare(0,prefix.length(), prefix) == 0 ||
+				std::string(tokenName.toASCIIString()).compare(0,prefix.length(), prefix2) == 0) 
+			{
+				std::string token = std::string(tokenName.toASCIIString());
+				l_vTokens.push_back(token);
+			}
+		}
+		std::sort(l_vTokens.begin(), l_vTokens.end());
+		// Write out as sorted
+		for(size_t i=0;i<l_vTokens.size();i++) {
+			CString tokenValue = l_pConfigurationManager->lookUpConfigurationTokenValue(l_vTokens[i].c_str());
+
+			::fprintf(l_pFile, "%s = %s\n", l_vTokens[i].c_str(), tokenValue.toASCIIString());
+		}
+
+#ifdef OV_BOOST_SETTINGS
+		::fprintf(l_pFile, "# Settings for server plugins\n");
 		for (size_t setting_index = 0; setting_index < m_vPluginSettings.size(); ++setting_index)
 		{
 			PluginSetting* l_pCurrentSetting = m_vPluginSettings[setting_index].setting_ptr;
@@ -232,7 +278,7 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 				// in the case where no valid type is defined we do nothing
 			}
 		}
-
+#endif
 
 		::fclose(l_pFile);
 	}
@@ -666,6 +712,8 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 
 	::GtkTable* l_pSettingsTable = GTK_TABLE(::gtk_builder_get_object(l_pInterface, "table-pluginsettings"));
 
+#ifdef OV_BOOST_SETTINGS
+
 	gtk_table_resize(l_pSettingsTable, m_vPluginSettings.size(), 2);
 
 	for (size_t setting_index = 0; setting_index < m_vPluginSettings.size(); ++setting_index)
@@ -713,7 +761,6 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 		gtk_widget_show(l_pSettingControl);
 	}
 
-	
 	gint l_iResponseId=::gtk_dialog_run(l_pDialog);
 	switch(l_iResponseId)
 	{
@@ -755,6 +802,105 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 		case GTK_RESPONSE_NO:
 			break;
 	}
+
+#else
+
+	gtk_table_resize(l_pSettingsTable, m_vPluginProperties.size(), 2);
+
+	for (size_t setting_index = 0; setting_index < m_vPluginProperties.size(); ++setting_index)
+	{
+		Property* l_pCurrentProperty = m_vPluginProperties[setting_index].m_pProperty;
+
+		// Create the setting controller widget
+		::GtkWidget* l_pSettingControl = NULL;
+
+		if ( const TypedProperty<boolean>* r = dynamic_cast< const TypedProperty<boolean>* >(l_pCurrentProperty)) 
+		{
+			// cout << "bool\n";
+			l_pSettingControl = gtk_check_button_new();
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pSettingControl), *(r->getData()));
+		} 
+		else if( const TypedProperty<CString>* r = dynamic_cast< const TypedProperty<CString>* >(l_pCurrentProperty)) 
+		{
+			// cout << "string\n";
+			l_pSettingControl = gtk_entry_new();
+			gtk_entry_append_text(GTK_ENTRY(l_pSettingControl), r->getData()->toASCIIString());
+		} 
+		else if( const TypedProperty<int64>* r = dynamic_cast< const TypedProperty<int64>* >(l_pCurrentProperty)) 
+		{
+			// cout << "integer\n";
+			l_pSettingControl = gtk_spin_button_new_with_range((gdouble)std::numeric_limits<int64>::min(), (gdouble)std::numeric_limits<int64>::max(), 1.0);
+			gtk_spin_button_set_value(GTK_SPIN_BUTTON(l_pSettingControl), (gdouble)*(r->getData()));
+		} 
+		else 
+		{
+			// cout << "unknown\n";
+			l_pSettingControl = gtk_label_new("Undefined Type");
+		}
+
+		if(l_pSettingControl) {
+			// Create label
+			::GtkWidget* l_pSettingLabel = gtk_label_new( l_pCurrentProperty->getName().toASCIIString() );
+
+			// insert the settings into the table
+			gtk_table_attach_defaults(l_pSettingsTable, l_pSettingLabel, 0, 1, setting_index, setting_index+1);
+			gtk_table_attach_defaults(l_pSettingsTable, l_pSettingControl, 1, 2, setting_index, setting_index+1);
+
+			m_vPluginProperties[setting_index].m_pWidget = l_pSettingControl;
+			gtk_widget_show(l_pSettingLabel);
+			gtk_widget_show(l_pSettingControl);
+		}
+	}
+
+	gint l_iResponseId=::gtk_dialog_run(l_pDialog);
+	switch(l_iResponseId)
+	{
+		case GTK_RESPONSE_APPLY:
+		case GTK_RESPONSE_OK:
+		case GTK_RESPONSE_YES:
+			m_pAcquisitionServer->setNaNReplacementPolicy((ENaNReplacementPolicy)::gtk_combo_box_get_active(l_pNaNReplacementPolicy));
+			m_pAcquisitionServer->setDriftCorrectionPolicy((EDriftCorrectionPolicy)::gtk_combo_box_get_active(l_pDriftCorrectionPolicy));
+			m_pAcquisitionServer->setDriftToleranceDuration(::gtk_spin_button_get_value_as_int(l_pDriftTolerance));
+			m_pAcquisitionServer->setJitterEstimationCountForDrift(::gtk_spin_button_get_value_as_int(l_pJitterMeasureCount));
+			m_pAcquisitionServer->setOversamplingFactor(::gtk_spin_button_get_value_as_int(l_pOverSamplingFactor));
+			m_pAcquisitionServer->setImpedanceCheckRequest(::gtk_toggle_button_get_active(l_pImpedanceCheck)?true:false);
+
+			for (size_t setting_index = 0; setting_index < m_vPluginProperties.size(); ++setting_index)
+			{
+				Property* l_pCurrentProperty = m_vPluginProperties[setting_index].m_pProperty;
+
+				if ( TypedProperty<boolean>* r = dynamic_cast< TypedProperty<boolean>* >(l_pCurrentProperty)) 
+				{
+					// cout << "bool\n";
+					boolean tmp = ::gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_vPluginProperties[setting_index].m_pWidget)) ? true : false;
+					r->replaceData(tmp);
+				} 
+				else if( TypedProperty<CString>* r = dynamic_cast< TypedProperty<CString>* >(l_pCurrentProperty)) 
+				{
+					CString tmp = CString(::gtk_entry_get_text(GTK_ENTRY(m_vPluginProperties[setting_index].m_pWidget)));
+					// cout << "string: " << tmp.toASCIIString() << "\n";
+					r->replaceData( tmp );
+				} 
+				else if( TypedProperty<int64>* r = dynamic_cast< TypedProperty<int64>* >(l_pCurrentProperty)) 
+				{
+					// cout << "integer\n";
+					int64 tmp = static_cast<int64>(::gtk_spin_button_get_value(GTK_SPIN_BUTTON(m_vPluginProperties[setting_index].m_pWidget)));
+					r->replaceData( tmp );
+				} 
+				else 
+				{
+					// cout << "unknown\n";
+				}
+			}
+
+
+			break;
+		case GTK_RESPONSE_CANCEL:
+		case GTK_RESPONSE_NO:
+			break;
+	}
+#endif
+
 	::gtk_widget_destroy(GTK_WIDGET(l_pDialog));
 	g_object_unref(l_pInterface);
 }
@@ -808,6 +954,8 @@ void CAcquisitionServerGUI::scanPluginSettings()
 {
 	vector<IAcquisitionServerPlugin*> l_vPlugins = m_pAcquisitionServer->getPlugins();
 
+#ifdef OV_BOOST_SETTINGS
+
 	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
 	{
 		IAcquisitionServerPlugin* l_pPlugin = dynamic_cast<IAcquisitionServerPlugin*>(*itp);
@@ -826,9 +974,47 @@ void CAcquisitionServerGUI::scanPluginSettings()
 				&((*settings_it).second));
 
 			m_vPluginSettings.push_back(l_sSettingReference);
+
+		}
+
+		SettingsHelper& tmp = l_pPlugin->getSettingsHelper();
+		const std::map<OpenViBE::CString, Property*>& props = tmp.getAllProperties();
+
+		std::map<OpenViBE::CString, Property*>::const_iterator prop_it = props.begin();
+		for(;prop_it!=props.end();++prop_it) {
+			m_vPluginProperties.push_back( PropertyAndWidget(prop_it->second, NULL) );
+		}
+
+	}
+#endif
+
+	m_vPluginProperties.clear();
+
+	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
+	{
+		IAcquisitionServerPlugin* l_pPlugin = dynamic_cast<IAcquisitionServerPlugin*>(*itp);
+
+		SettingsHelper& tmp = l_pPlugin->getSettingsHelper();
+		const std::map<OpenViBE::CString, Property*>& props = tmp.getAllProperties();
+
+		std::map<OpenViBE::CString, Property*>::const_iterator prop_it = props.begin();
+		for(;prop_it!=props.end();++prop_it) {
+			m_vPluginProperties.push_back( PropertyAndWidget(prop_it->second, NULL) );
 		}
 
 	}
 
+}
 
+void CAcquisitionServerGUI::savePluginSettings()
+{
+	vector<IAcquisitionServerPlugin*> l_vPlugins = m_pAcquisitionServer->getPlugins();
+
+	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
+	{
+		IAcquisitionServerPlugin* l_pPlugin = dynamic_cast<IAcquisitionServerPlugin*>(*itp);
+
+		SettingsHelper& tmp = l_pPlugin->getSettingsHelper();
+		tmp.save();
+	}
 }

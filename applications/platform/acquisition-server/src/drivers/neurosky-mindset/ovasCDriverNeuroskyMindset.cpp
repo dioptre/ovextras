@@ -20,6 +20,7 @@ using namespace std;
 
 CDriverNeuroskyMindset::CDriverNeuroskyMindset(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_NeuroSkyMindSet", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_ui32TotalSampleCount(0)
@@ -35,10 +36,19 @@ CDriverNeuroskyMindset::CDriverNeuroskyMindset(IDriverContext& rDriverContext)
 
 	m_ui32ComPort = OVAS_MINDSET_INVALID_COM_PORT;
 
-	m_bESenseChannels       = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_ESenseValues}", false);
-	m_bBandPowerChannels    = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_PowerBands}", false);
-	m_bBlinkStimulations    = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_Blink}", false);
-	m_bBlinkStrenghtChannel = m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NeuroskyMindset_BlinkStrength}", false);
+	m_bESenseChannels       = false; 
+	m_bBandPowerChannels    = false;
+	m_bBlinkStimulations    = false;
+	m_bBlinkStrenghtChannel = false;
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("ComPort", &m_ui32ComPort);
+	m_oSettings.add("ESenseChannels", &m_bESenseChannels);
+	m_oSettings.add("BandPowerChannels", &m_bBandPowerChannels);
+	m_oSettings.add("Stimulations", &m_bBlinkStimulations);
+	m_oSettings.add("StrenghtChannel", &m_bBlinkStrenghtChannel);
+	m_oSettings.load();
+
 }
 
 CDriverNeuroskyMindset::~CDriverNeuroskyMindset(void)
@@ -527,6 +537,8 @@ boolean CDriverNeuroskyMindset::configure(void)
 	{
 		return false;
 	}
+
+	m_oSettings.save();
 
 	return true;
 }

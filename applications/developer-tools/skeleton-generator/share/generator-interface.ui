@@ -1613,8 +1613,8 @@ a name, a type and a default value for each setting&lt;/big&gt;</property>
               <object class="GtkTable" id="table11">
                 <property name="visible">True</property>
                 <property name="border_width">3</property>
-                <property name="n_rows">3</property>
-                <property name="n_columns">3</property>
+                <property name="n_rows">2</property>
+                <property name="n_columns">2</property>
                 <property name="column_spacing">5</property>
                 <property name="row_spacing">5</property>
                 <child>
@@ -1698,7 +1698,7 @@ has to be done manually.&lt;/span&gt;
                     <property name="right_attach">3</property>
                     <property name="top_attach">1</property>
                     <property name="bottom_attach">2</property>
-                    <property name="x_options">GTK_EXPAND</property>
+                    <property name="x_options"></property>
                     <property name="y_options">GTK_EXPAND</property>
                   </packing>
                 </child>
@@ -1736,6 +1736,7 @@ has to be done manually.&lt;/span&gt;
                     <property name="bottom_attach">2</property>
                   </packing>
                 </child>
+<!--
                 <child>
                   <object class="GtkCheckButton" id="sg-box-algorithms-toolkit-checkbutton">
                     <property name="label" translatable="yes">Use the Codec Toolkit in the implementation (recommended)</property>
@@ -1771,6 +1772,7 @@ has to be done manually.&lt;/span&gt;
                 <child>
                   <placeholder/>
                 </child>
+-->
               </object>
               <packing>
                 <property name="position">4</property>

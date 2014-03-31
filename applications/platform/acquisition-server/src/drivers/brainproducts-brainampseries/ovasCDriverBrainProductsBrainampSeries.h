@@ -24,6 +24,9 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
+#include "../ovasCSettingsHelper.h"
+#include "../ovasCSettingsHelperOperators.h"
+
 #if defined TARGET_OS_Windows
 
 #include "ovas_defines_brainamp_series.h"
@@ -71,6 +74,8 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
+		SettingsHelper m_oSettings;
+
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 		OpenViBEAcquisitionServer::CHeaderAdapterBrainProductsBrainampSeries m_oHeaderAdapter;
@@ -101,7 +106,50 @@ namespace OpenViBEAcquisitionServer
 		OpenViBEAcquisitionServer::EParameter m_eResolution;
 		OpenViBEAcquisitionServer::EParameter m_eDCCoupling;
 		OpenViBEAcquisitionServer::EParameter m_eImpedance;
+
 	};
+
+	inline std::ostream& operator<< (std::ostream& out, const OpenViBEAcquisitionServer::EParameter& var)
+	{
+		out << (int)var;
+
+		return out;
+	}
+
+	inline std::istream& operator>> (std::istream& in, OpenViBEAcquisitionServer::EParameter& var)
+	{
+		int l_iTmp;
+
+		in >> l_iTmp;
+
+		var = (EParameter)l_iTmp;
+
+		return in;
+	}
+
+	inline std::ostream& operator<< (std::ostream& out, const EParameter var[256])
+	{
+		for(int i=0;i<256;i++) {
+			out << (int)var[i];
+			out << " ";
+		}
+
+		return out;
+	}
+
+	inline std::istream& operator>> (std::istream& in, EParameter var[256])
+	{
+		int l_iTmp;
+
+		for(int i=0;i<256;i++) {
+			in >> l_iTmp;
+			var[i] = (EParameter)l_iTmp;
+		}
+
+		return in;
+	}
+
+
 };
 
 #endif // TARGET_OS_Windows

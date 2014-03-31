@@ -68,6 +68,7 @@ SUBDIRS("${CTEST_SOURCE_DIRECTORY}/applications/developer-tools/plugin-inspector
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/documentation/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/toolkit/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/scenarios/test")
+SUBDIRS("${CTEST_SOURCE_DIRECTORY}/openvibe/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/kernel/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/xml/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/automaton/test")

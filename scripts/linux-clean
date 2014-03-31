@@ -43,6 +43,7 @@ if [ $[$BASH_ARGC] -eq 0 ] ; then
 	
 	dirDebug="$OV_LOCALTMP/linux-Debug"
 	dirRelease="$OV_LOCALTMP/linux-Release"
+	dirRelWithDebInfo="$OV_LOCALTMP/linux-RelWithDebInfo"
 
 	if [ -e "$dirDebug" ]; then
 		pushd "$dirDebug" 1> /dev/null
@@ -52,6 +53,12 @@ if [ $[$BASH_ARGC] -eq 0 ] ; then
 
 	if [ -e "$dirRelease" ]; then
 		pushd "$dirRelease" 1> /dev/null
+		make clean
+		popd 1> /dev/null
+	fi
+	
+	if [ -e "$dirRelWithDebInfo" ]; then
+		pushd "$dirRelWithDebInfo" 1> /dev/null
 		make clean
 		popd 1> /dev/null
 	fi

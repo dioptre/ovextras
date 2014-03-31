@@ -20,7 +20,7 @@ function process(box)
 
 	box:log("Info", box:get_config("Generating '${__volatile_ScenarioDir}/appconf/application-configuration.conf'"))
 
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/appconf/application-configuration.conf"), "w")
+	cfg_file = assert(io.open(box:get_config("${__volatile_ScenarioDir}/appconf/application-configuration.conf"), "w"))
 
 	cfg_file:write("# This file was automatically generated!\n\n")
 	cfg_file:write("# If you want to change the SSVEP configuration\n")

@@ -709,6 +709,43 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
+Section "LSL"
+
+	; LabStreamingLayer
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\liblsl-1.04-$suffix-dev.zip" no_need_to_download_lsl_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/liblsl-1.04-$suffix-dev.zip "arch\liblsl-1.04-$suffix-dev.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_lsl_dev:
+	ZipDLL::extractall "arch\liblsl-1.04-$suffix-dev.zip" "liblsl"
+	
+	IfFileExists "arch\liblsl-1.04-$suffix-runtime.zip" no_need_to_download_lsl_runtime
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/liblsl-1.04-$suffix-runtime.zip "arch\liblsl-1.04-$suffix-runtime.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_lsl_runtime:
+	ZipDLL::extractall "arch\liblsl-1.04-$suffix-runtime.zip" "liblsl"
+
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\liblsl\lib\;%PATH%$\r$\n"
+	FileClose $0
+
+SectionEnd
+
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
 Section "Uninstall"
 
 	RMDir /r "$INSTDIR\gtk"
@@ -723,6 +760,7 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\alut"
 	RMDir /r "$INSTDIR\libogg"
 	RMDir /r "$INSTDIR\libvorbis"
+	RMDir /r "$INSTDIR\liblsl"
 	RMDir /r "$INSTDIR\tmp"
 	RMDir /r "$INSTDIR\pthreads"
 

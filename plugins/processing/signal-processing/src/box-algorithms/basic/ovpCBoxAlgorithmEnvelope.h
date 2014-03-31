@@ -127,7 +127,7 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Envelope"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Envelope (deprecated)"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Guillermo Andrade B."); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Compute envelope of signal using Hilbert transform"); }
@@ -163,7 +163,8 @@ namespace OpenViBEPlugins
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
-				
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsDeprecated);
+
 				return true;
 			}
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_EnvelopeDesc);

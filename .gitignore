@@ -12,4 +12,6 @@ CMakeLists_COADAPT.txt
 coadapt.patch
 coadapt.patch.fc19
 externals/*/
+*~
+*.swp
 

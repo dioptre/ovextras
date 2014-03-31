@@ -20,6 +20,7 @@ using namespace OpenViBE::Kernel;
 
 CDriverEGIAmpServer::CDriverEGIAmpServer(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_EGIAmpServer", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_ui32SampleIndex(0)
@@ -31,6 +32,12 @@ CDriverEGIAmpServer::CDriverEGIAmpServer(IDriverContext& rDriverContext)
 
 	m_oHeader.setSamplingFrequency(1000);
 	m_oHeader.setChannelCount(280);
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("AmpServerHostName", &m_sAmpServerHostName);
+	m_oSettings.add("CommandPort", &m_ui32CommandPort);
+	m_oSettings.add("StreamPort", &m_ui32StreamPort);
+	m_oSettings.load();
 }
 
 void CDriverEGIAmpServer::release(void)
@@ -292,7 +299,7 @@ boolean CDriverEGIAmpServer::isConfigurable(void)
 boolean CDriverEGIAmpServer::configure(void)
 {
 	CConfigurationEGIAmpServer m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-egi-ampserver.ui" );
-
+	
 	m_oConfiguration.setHostName(m_sAmpServerHostName);
 	m_oConfiguration.setCommandPort(m_ui32CommandPort);
 	m_oConfiguration.setStreamPort(m_ui32StreamPort);
@@ -302,6 +309,7 @@ boolean CDriverEGIAmpServer::configure(void)
 		m_sAmpServerHostName=m_oConfiguration.getHostName();
 		m_ui32CommandPort=m_oConfiguration.getCommandPort();
 		m_ui32StreamPort=m_oConfiguration.getStreamPort();
+		m_oSettings.save();
 		return true;
 	}
 	return false;

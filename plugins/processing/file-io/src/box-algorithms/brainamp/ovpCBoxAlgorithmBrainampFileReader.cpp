@@ -43,6 +43,7 @@ boolean CBoxAlgorithmBrainampFileReader::initialize(void)
 	TParameterHandler < CString* > ip_sFilename(m_pBrainampFileReader->getInputParameter(OVP_Algorithm_BrainampFileReader_InputParameterId_Filename));
 	TParameterHandler < float64 > ip_f64EpochDuration(m_pBrainampFileReader->getInputParameter(OVP_Algorithm_BrainampFileReader_InputParameterId_EpochDuration));
 	TParameterHandler < uint64 > ip_ui64SeekTime(m_pBrainampFileReader->getInputParameter(OVP_Algorithm_BrainampFileReader_InputParameterId_SeekTime));
+	TParameterHandler < boolean > ip_bConvertStimuli(m_pBrainampFileReader->getInputParameter(OVP_Algorithm_BrainampFileReader_InputParameterId_ConvertStimuli));
 	TParameterHandler < uint64 > op_ui64CurrentStartTime(m_pBrainampFileReader->getOutputParameter(OVP_Algorithm_BrainampFileReader_OutputParameterId_CurrentStartTime));
 	TParameterHandler < uint64 > op_ui64CurrentEndTime(m_pBrainampFileReader->getOutputParameter(OVP_Algorithm_BrainampFileReader_OutputParameterId_CurrentEndTime));
 	TParameterHandler < uint64 > op_ui64SamplingRate(m_pBrainampFileReader->getOutputParameter(OVP_Algorithm_BrainampFileReader_OutputParameterId_SamplingRate));
@@ -69,6 +70,8 @@ boolean CBoxAlgorithmBrainampFileReader::initialize(void)
 
 	l_rStaticBoxContext.getSettingValue(1, l_sSettingValue);
 	ip_f64EpochDuration=atof(l_sSettingValue.toASCIIString());
+
+	ip_bConvertStimuli=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
 	m_bHeaderSent=false;
 
@@ -141,7 +144,10 @@ boolean CBoxAlgorithmBrainampFileReader::process(void)
 	if(!m_bHeaderSent)
 	{
 		// Opens file
-		m_pBrainampFileReader->process(OVP_Algorithm_BrainampFileReader_InputTriggerId_Open);
+		if(!m_pBrainampFileReader->process(OVP_Algorithm_BrainampFileReader_InputTriggerId_Open))
+		{
+			return false;
+		}
 
 		// Produces header
 		m_pExperimentInformationStreamEncoder->process(OVP_GD_Algorithm_ExperimentInformationStreamEncoder_InputTriggerId_EncodeHeader);
@@ -157,7 +163,11 @@ boolean CBoxAlgorithmBrainampFileReader::process(void)
 		m_bHeaderSent=true;
 	}
 
-	m_pBrainampFileReader->process(OVP_Algorithm_BrainampFileReader_InputTriggerId_Next);
+	if(!m_pBrainampFileReader->process(OVP_Algorithm_BrainampFileReader_InputTriggerId_Next))
+	{
+		return false;
+	}
+
 	if(m_pBrainampFileReader->isOutputTriggerActive(OVP_Algorithm_BrainampFileReader_OutputTriggerId_DataProduced))
 	{
 		// Produces buffer

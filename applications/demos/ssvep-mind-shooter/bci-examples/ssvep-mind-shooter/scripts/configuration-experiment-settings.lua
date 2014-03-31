@@ -48,7 +48,7 @@ function process(box)
 
 	box:log("Info", box:get_config("Creating materials in '${__volatile_ScenarioDir}/appconf/materials/flickering.material'"))
 
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/appconf/materials/flickering.material"), "w")
+	cfg_file = assert(io.open(box:get_config("${__volatile_ScenarioDir}/appconf/materials/flickering.material"), "w"))
 
 	cfg_file:write("material target_bright\n")
 	cfg_file:write("{\n")
@@ -85,7 +85,7 @@ function process(box)
 
 	box:log("Info", box:get_config("Writing additional configuration to '${__volatile_ScenarioDir}/appconf/application-configuration.conf'"))
 
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/appconf/application-configuration.conf"), "a")
+	cfg_file = assert(io.open(box:get_config("${__volatile_ScenarioDir}/appconf/application-configuration.conf"), "a"))
 
 	for i=1,frequency_count do
 		cfg_file:write("SSVEP_Frequency_", i, " = ", string.format("%g", stimulation_frequencies[i]), "\n")
@@ -109,7 +109,7 @@ function process(box)
 	for i=1,frequency_count do
 		box:log("Info", string.format(box:get_config("Writing file '${__volatile_ScenarioDir}/configuration/temporal-filter-freq-%db.cfg'"), i))
 
-		cfg_file = io.open(string.format(box:get_config("${__volatile_ScenarioDir}/configuration/temporal-filter-freq-%db.cfg"), i), "w")
+		cfg_file = assert(io.open(string.format(box:get_config("${__volatile_ScenarioDir}/configuration/temporal-filter-freq-%db.cfg"), i), "w"))
 
 		cfg_file:write("<OpenViBE-SettingsOverride>\n")
 		cfg_file:write("<SettingValue>Butterworth</SettingValue>\n")
@@ -124,7 +124,7 @@ function process(box)
 
 		box:log("Info", string.format(box:get_config("Writing file '${__volatile_ScenarioDir}/configuration/temporal-filter-freq-%dh1.cfg'"), i))
 
-		cfg_file = io.open(string.format(box:get_config("${__volatile_ScenarioDir}/configuration/temporal-filter-freq-%dh1.cfg"), i), "w")
+		cfg_file = assert(io.open(string.format(box:get_config("${__volatile_ScenarioDir}/configuration/temporal-filter-freq-%dh1.cfg"), i), "w"))
 
 		cfg_file:write("<OpenViBE-SettingsOverride>\n")
 		cfg_file:write("<SettingValue>Butterworth</SettingValue>\n")
@@ -139,7 +139,7 @@ function process(box)
 
 		box:log("Info", string.format(box:get_config("Writing file '${__volatile_ScenarioDir}/configuration/csp-spatial-filter-trainer-%db.cfg'"), i))
 
-		cfg_file = io.open(string.format(box:get_config("${__volatile_ScenarioDir}/configuration/csp-spatial-filter-trainer-%db.cfg"), i), "w")
+		cfg_file = assert(io.open(string.format(box:get_config("${__volatile_ScenarioDir}/configuration/csp-spatial-filter-trainer-%db.cfg"), i), "w"))
 		cfg_file:write("<OpenViBE-SettingsOverride>\n")
 		cfg_file:write("	<SettingValue>OVTK_StimulationId_ExperimentStop</SettingValue>\n")
 		cfg_file:write(string.format(box:get_config("	<SettingValue>${__volatile_ScenarioDir}/classifiers/csp-%db</SettingValue>\n"), i))
@@ -149,7 +149,7 @@ function process(box)
 
 		box:log("Info", string.format(box:get_config("Writing file '${__volatile_ScenarioDir}/configuration/csp-spatial-filter-trainer-%dh1.cfg'"), i))
 
-		cfg_file = io.open(string.format(box:get_config("${__volatile_ScenarioDir}/configuration/csp-spatial-filter-trainer-%dh1.cfg"), i), "w")
+		cfg_file = assert(io.open(string.format(box:get_config("${__volatile_ScenarioDir}/configuration/csp-spatial-filter-trainer-%dh1.cfg"), i), "w"))
 		cfg_file:write("<OpenViBE-SettingsOverride>\n")
 		cfg_file:write("	<SettingValue>OVTK_StimulationId_ExperimentStop</SettingValue>\n")
 		cfg_file:write(string.format(box:get_config("	<SettingValue>${__volatile_ScenarioDir}/classifiers/csp-%dh1</SettingValue>\n"), i))
@@ -162,7 +162,7 @@ function process(box)
 	-- create configuration file for time based epoching
 	box:log("Info", box:get_config("Writing file '${__volatile_ScenarioDir}/configuration/time-based-epoching.cfg'"))
 
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/configuration/time-based-epoching.cfg"), "w")
+	cfg_file = assert(io.open(box:get_config("${__volatile_ScenarioDir}/configuration/time-based-epoching.cfg"), "w"))
 	cfg_file:write("<OpenViBE-SettingsOverride>\n")
 	cfg_file:write(string.format("<SettingValue>%g</SettingValue>\n", processing_epoch_duration))
 	cfg_file:write(string.format("<SettingValue>%g</SettingValue>\n", processing_epoch_interval))
@@ -172,7 +172,7 @@ function process(box)
 	-- create the file writer configuration
 	box:log("Info", box:get_config("Writing file '${__volatile_ScenarioDir}/configuration/file-writer.cfg'"))
 
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/configuration/file-writer.cfg"), "w")
+	cfg_file = assert(io.open(box:get_config("${__volatile_ScenarioDir}/configuration/file-writer.cfg"), "w"))
 	cfg_file:write("<OpenViBE-SettingsOverride>\n")
 	cfg_file:write(string.format("<SettingValue>%s/eeg-data-[$core{date}-$core{time}].ov</SettingValue>\n", foldername))
 	cfg_file:write("<SettingValue>false</SettingValue>\n")

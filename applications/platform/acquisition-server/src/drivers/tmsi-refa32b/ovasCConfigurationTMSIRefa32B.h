@@ -4,6 +4,7 @@
 #include "../ovasCConfigurationBuilder.h"
 #include <gtk/gtk.h>
 #include <string.h>
+#include <iostream>
 
 namespace OpenViBEAcquisitionServer
 {
@@ -25,6 +26,31 @@ namespace OpenViBEAcquisitionServer
 		std::vector <std::string> *m_vDeviceSlaves;
 		std::vector <std::string> m_vDeviceSlavesTemp;
 	};
+
+	// Translates a vector of strings to a stream for storing configuration. Used strings cannot contain ';'.
+	inline std::ostream& operator<< (std::ostream& out, const std::vector<std::string>& var)
+	{
+		std::vector<std::string>::const_iterator it = var.begin();
+		for(;it!=var.end();++it) {
+			out << (*it);
+			out << ";";
+		}
+
+		return out;
+	}
+
+	inline std::istream& operator>> (std::istream& in, std::vector<std::string>& var)
+	{
+		var.clear();
+		std::string token;
+
+		while( std::getline(in, token, ';'))
+		{
+			var.push_back(token);
+		}
+
+		return in;
+	}
 };
 
 #endif // __OpenViBE_AcquisitionServer_CConfigurationTMSIRefa32B_H__

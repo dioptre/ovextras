@@ -20,10 +20,15 @@ CDriverCtfVsmMeg::CDriverCtfVsmMeg(IDriverContext& rDriverContext)
 	,m_pConnectionClient(NULL)
 	,m_sServerHostName("localhost")
 	,m_ui32ServerHostPort(9999)
+	,m_oSettings("AcquisitionServer_Driver_CtfVsmMeg", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
 {
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("ServerHostName", &m_sServerHostName);
+	m_oSettings.add("ServerHostPort", &m_ui32ServerHostPort);
+	m_oSettings.load();
 }
 
 CDriverCtfVsmMeg::~CDriverCtfVsmMeg(void)
@@ -383,6 +388,9 @@ boolean CDriverCtfVsmMeg::configure(void)
 	{
 		m_sServerHostName=l_oConfiguration.getHostName();
 		m_ui32ServerHostPort=l_oConfiguration.getHostPort();
+
+		m_oSettings.save();
+
 		return true;
 	}
 

@@ -28,13 +28,20 @@ using namespace OpenViBE::Kernel;
 //                                                                   //
 
 CDriverMitsarEEG202A::CDriverMitsarEEG202A(IDriverContext& rDriverContext)
-	:IDriver(rDriverContext),
-	m_pCallback(NULL),
-	m_ui32RefIndex(0),
-	m_bEventAndBioChannelsState(false)
+	:IDriver(rDriverContext)
+	,m_oSettings("AcquisitionServer_Driver_MitsarEEG202A", m_rDriverContext.getConfigurationManager())
+	,m_pCallback(NULL)
+	,m_ui32RefIndex(0)
+	,m_bEventAndBioChannelsState(false)
 {
 	m_oHeader.setChannelCount(CHANNEL_NB);
 	m_oHeader.setSamplingFrequency(SAMPLING_RATE);
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("RefIndex", &m_ui32RefIndex);
+	m_oSettings.add("EventAndBioChannelsState", &m_bEventAndBioChannelsState);
+	m_oSettings.load();
+
 }
 
 void CDriverMitsarEEG202A::release(void)
@@ -390,12 +397,15 @@ boolean CDriverMitsarEEG202A::configure(void)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverMitsarEEG202A::configure\n";
 	
-	CConfigurationMitsarEEG202A m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Mitsar-EEG202.ui", m_ui32RefIndex, m_bEventAndBioChannelsState);
+	CConfigurationMitsarEEG202A m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Mitsar-EEG202.ui", 
+		m_ui32RefIndex, m_bEventAndBioChannelsState);
 	
 	if(!m_oConfiguration.configure(m_oHeader))
 	{
 		return false;
 	}
+
+	m_oSettings.save();
 
 	return true;
 }

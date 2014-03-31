@@ -66,15 +66,7 @@ boolean CConfigurationEmotivEPOC::postConfigure(void)
 		l_sTempTargetDirectory.push_back('/');
 		m_rPathToEmotivResearchSDK = CString(l_sTempTargetDirectory.c_str());
 
-		if(m_rDriverContext.getConfigurationManager().lookUpConfigurationTokenIdentifier("AcquisitionServer_PathToEmotivResearchSDK") == OV_UndefinedIdentifier)
-		{
-			//it's possible at first start of the acquisition server/ emotiv driver selection
-			m_rDriverContext.getConfigurationManager().createConfigurationToken("AcquisitionServer_PathToEmotivResearchSDK","");
-		}
-		
-
-		m_rDriverContext.getConfigurationManager().setConfigurationTokenValue(m_rDriverContext.getConfigurationManager().lookUpConfigurationTokenIdentifier("AcquisitionServer_PathToEmotivResearchSDK"),m_rPathToEmotivResearchSDK);
-		m_rDriverContext.getLogManager() << LogLevel_Info << "Path to Emotiv Research SDK is set to ["<< m_rDriverContext.getConfigurationManager().expand("${AcquisitionServer_PathToEmotivResearchSDK}")<< "]\n";
+		m_rDriverContext.getLogManager() << LogLevel_Info << "Path to Emotiv Research SDK is set to ["<< m_rPathToEmotivResearchSDK.toASCIIString() << "]\n";
 
 	}
 

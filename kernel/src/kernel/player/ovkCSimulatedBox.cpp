@@ -1348,7 +1348,7 @@ boolean CSimulatedBox::receiveMessage(const IMessageWithData &msg, uint32 inputI
 
 boolean CSimulatedBox::cleanupMessages() {
 	// ...
-	this->getLogManager() << LogLevel_Debug << "cleaning messages " << "\n";
+//	this->getLogManager() << LogLevel_Debug << "cleaning messages " << "\n";
 	
 	for(std::vector<OpenViBE::Kernel::CMessageWithData*>::iterator it = m_vPreparedMessages.begin();
 		it!=m_vPreparedMessages.end(); it++) 

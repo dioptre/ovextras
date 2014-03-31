@@ -179,6 +179,7 @@ uint32 m_ui32BufferSize;
 
 CDriverTMSiRefa32B::CDriverTMSiRefa32B(IDriverContext& rDriverContext)
 :IDriver(rDriverContext)
+ ,m_oSettings("AcquisitionServer_Driver_TMSIRefa32B", m_rDriverContext.getConfigurationManager())
  ,m_pCallback(NULL)
  ,m_ui32SampleCountPerSentBlock(0)
  ,m_ui32SampleIndex(0)
@@ -226,7 +227,13 @@ CDriverTMSiRefa32B::CDriverTMSiRefa32B(IDriverContext& rDriverContext)
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "Succeeded in loading DLL: " << CString(l_sPath) << "\n";
 	m_pDevicePathMaster = "";
 	m_lNrOfDevicesOpen=0;
-	m_bCheckImpedance=m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_CheckImpedance}", false);
+	m_bCheckImpedance=false;
+
+	m_oSettings.add("Header", &m_oHeader);
+	m_oSettings.add("CheckImpedance", &m_bCheckImpedance);
+	m_oSettings.add("DevicePathMaster", &m_pDevicePathMaster);
+	m_oSettings.add("DevicePathSlave", &m_vDevicePathSlave);
+	m_oSettings.load();
 }
 
 CDriverTMSiRefa32B::~CDriverTMSiRefa32B(void)
@@ -631,7 +638,7 @@ boolean CDriverTMSiRefa32B::configure(void)
 
 	CConfigurationTMSIRefa32B l_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-TMSI-Refa32B.ui");
 	//create a vector with all name of device connected
-	std::vector<string> l_vDevicePath;
+	std::vector<std::string> l_vDevicePath;
 	for(map<PSP_DEVICE_PATH, std::string>::iterator  i=m_vDevicePathMap.begin();i!=m_vDevicePathMap.end();i++)
 	{
 		l_vDevicePath.push_back((*i).second);
@@ -639,8 +646,16 @@ boolean CDriverTMSiRefa32B::configure(void)
 
 	//call configuration frame
 	l_oConfiguration.setDeviceList(l_vDevicePath, &m_pDevicePathMaster, &m_vDevicePathSlave);
+
 	bool result=l_oConfiguration.configure(m_oHeader);
-	return result;
+	if(!result) 
+	{
+		return false;
+	}
+
+	m_oSettings.save();
+
+	return true;
 }
 
 boolean CDriverTMSiRefa32B::refreshDevicePath(void)

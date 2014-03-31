@@ -123,13 +123,13 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Box clock frequency in Hz",   OV_TypeId_Integer, "64");
 				
 #if defined TARGET_OS_Linux
-				rBoxAlgorithmPrototype.addSetting("Matlab executable (path)",      OV_TypeId_String, "[ssh user@host] /path/to/matlab");
+				rBoxAlgorithmPrototype.addSetting("Matlab executable (path)",      OV_TypeId_Filename, "[ssh user@host] /path/to/matlab");
 #elif defined TARGET_OS_Windows
 				// On Windows, the executable is not actually used, but its path is parsed from it and added to PATH. 
 				// Background: Matlab's engOpen() takes a different argument on Windows and on Linux. On Windows, we need to have Matlab
 				// on PATH, in Linux we need to provide a full path of the executable. However, we'd like our example scenarios to give
 				// correct instructions to the user on both platforms, hence we use a setting that contains the information for both use-cases.
-				rBoxAlgorithmPrototype.addSetting("Matlab executable (path)",      OV_TypeId_String, "C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe");
+				rBoxAlgorithmPrototype.addSetting("Matlab executable (path)",      OV_TypeId_Filename, "C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe");
 #else
 #endif
 				rBoxAlgorithmPrototype.addSetting("Matlab working directory",   OV_TypeId_String, "${__volatile_ScenarioDir}");

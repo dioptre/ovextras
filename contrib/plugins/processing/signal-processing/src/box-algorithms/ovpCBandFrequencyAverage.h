@@ -99,7 +99,7 @@ namespace OpenViBEPlugins
 		public:
 
 			virtual void release(void) { }
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Band Frequency average"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Band Frequency average (deprecated)"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Guillaume Gibert"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INSERM"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Computes the average of a band frequency."); }

@@ -353,7 +353,7 @@ boolean CBoxAlgorithmLuaStimulator::initialize(void)
 	l_sLuaScriptFilename=this->getConfigurationManager().expand(l_sLuaScriptFilename);
 
 	m_ui32State=State_Unstarted;
-	m_pLuaState=lua_open();
+	m_pLuaState=luaL_newstate();
 
 	luaL_openlibs(m_pLuaState);
 

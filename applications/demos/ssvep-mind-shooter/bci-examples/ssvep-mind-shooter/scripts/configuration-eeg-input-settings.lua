@@ -45,7 +45,7 @@ function process(box)
 
 	box:log("Info", box:get_config("Writing file '${__volatile_ScenarioDir}/configuration/file-reader-training.cfg'"))
 
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/configuration/file-reader-training.cfg"), "w")
+	cfg_file = assert(io.open(box:get_config("${__volatile_ScenarioDir}/configuration/file-reader-training.cfg"), "w"))
 
 	cfg_file:write("<OpenViBE-SettingsOverride>\n")
 	cfg_file:write(string.format("<SettingValue>%s</SettingValue>\n", training_datafile))
@@ -56,7 +56,7 @@ function process(box)
 
 	box:log("Info", box:get_config("Writing file '${__volatile_ScenarioDir}/configuration/file-reader-testing.cfg'"))
 
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/configuration/file-reader-testing.cfg"), "w")
+	cfg_file = assert(io.open(box:get_config("${__volatile_ScenarioDir}/configuration/file-reader-testing.cfg"), "w"))
 
 	cfg_file:write("<OpenViBE-SettingsOverride>\n")
 	cfg_file:write(string.format("<SettingValue>%s</SettingValue>\n", testing_datafile))

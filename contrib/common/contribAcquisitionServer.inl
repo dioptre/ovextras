@@ -1,9 +1,7 @@
 /*
-#include "gtec-gmobilabplus/src/ovasCDriverGTecGMobiLabPlus.h"
 #include "openeeg-modulareeg/src/ovasCDriverOpenEEGModularEEG.h"
 #include "field-trip-protocol/src/ovasCDriverFieldtrip.h"
 #include "brainproducts-brainvisionrecorder/src/ovasCDriverBrainProductsBrainVisionRecorder.h"
-#include "egi-ampserver/src/ovasCDriverEGIAmpServer.h"
 */
 
 #include "ovasCPluginExternalStimulations.h"
@@ -14,6 +12,7 @@
 #include "ovasCDriverCtfVsmMeg.h"
 #include "ovasCDriverGTecGUSBamp.h"
 #include "ovasCDriverGTecGUSBampLegacy.h"
+#include "ovasCDriverGTecGMobiLabPlus.h"
 #include "ovasCDriverFieldtrip.h"
 #include "ovasCDriverMitsarEEG202A.h"
 #include "ovasCDriverOpenALAudioCapture.h"
@@ -32,6 +31,9 @@ namespace OpenViBEContributions {
 #if defined TARGET_HAS_ThirdPartyGUSBampCAPI
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverGTecGUSBamp(pAcquisitionServer->getDriverContext()));
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverGTecGUSBampLegacy(pAcquisitionServer->getDriverContext()));
+#endif
+#if defined TARGET_HAS_ThirdPartyGMobiLabPlusAPI
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverGTecGMobiLabPlus(pAcquisitionServer->getDriverContext()));
 #endif
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverFieldtrip(pAcquisitionServer->getDriverContext()));
 #if defined TARGET_OS_Windows

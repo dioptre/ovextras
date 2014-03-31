@@ -67,6 +67,7 @@ boolean COgreScene::init()
 	//initialize once only
 	if(m_pSceneManager != NULL)
 	{
+		m_rKernelContext.getLogManager() << LogLevel_Debug << "Warning: tried to init ogre scene twice\n";
 		return true;
 	}
 
@@ -74,7 +75,7 @@ boolean COgreScene::init()
 	Ogre::Root* l_pRoot = m_pOgreVis->getOgreRoot();
 	if(l_pRoot == NULL)
 	{
-		//TODO : display error msg
+		m_rKernelContext.getLogManager() << LogLevel_Error << "getOgreRoot() failed\n";
 		return false;
 	}
 
