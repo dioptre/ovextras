@@ -52,12 +52,14 @@ static void on_configure_event(GtkWidget *widget, GdkEventConfigure *event, gpoi
         event_handler(widget, event->width, event->height, data);
 }
 
+/*
 static gboolean on_resize_event(GtkWidget *widget,  GdkRectangle * event, gpointer data)
 {
         //std::cout << "on_resize_event" << "\n";
 	event_handler(widget, event->width, event->height, data);
 	return TRUE;
 }
+//*/
 
 static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
@@ -93,7 +95,7 @@ void Graph::resizeAxis(gint width, gint height, int nrOfGraphs)
 {
 	uint32 l_ui32NrOfRows = ceil(sqrt((double)nrOfGraphs));
 	uint32 l_ui32NrOfColumns = l_ui32NrOfRows;
-	if (nrOfGraphs<=(l_ui32NrOfRows-1)*l_ui32NrOfRows)
+	if ( (uint32)nrOfGraphs<=(l_ui32NrOfRows-1)*l_ui32NrOfRows)
 		l_ui32NrOfRows--;
 	this->m_dGraphWidth = ((double)(width))/(double)l_ui32NrOfColumns;
 	this->m_dGraphHeight = ((double)(height))/(double)l_ui32NrOfRows;
@@ -268,7 +270,7 @@ void Graph::drawCurves(cairo_t * cairoContext)
 	    ux = uy;
 	cairo_set_line_width (cairoContext, ux);
 
-	for(int gi=0; gi<m_lCurves.size(); gi++)
+	for(uint32 gi=0; gi<m_lCurves.size(); gi++)
 	{
 		cairo_set_source_rgb(cairoContext, (double)m_cLineColor[gi].red/65535.0, 
 				(double)m_cLineColor[gi].green/65535.0, 
@@ -304,7 +306,7 @@ void Graph::drawVar(cairo_t *cairoContext)
         ux = uy;
     cairo_set_line_width (cairoContext, ux);
 
-    for(int gi=0; gi<m_lCurves.size(); gi++)
+	for(uint32 gi=0; gi<m_lCurves.size(); gi++)
     {
         cairo_set_source_rgba(cairoContext, (double)m_cLineColor[gi].red/65535.0,
                         (double)m_cLineColor[gi].green/65535.0,
@@ -356,7 +358,7 @@ void Graph::drawLegend(cairo_t * cairoContext)
 
 
       cairo_set_font_size(cairoContext, 0.015);
-    for(int gi=0; gi<m_lCurves.size(); gi++)
+	for(uint32 gi=0; gi<m_lCurves.size(); gi++)
     {
         cairo_set_source_rgb(cairoContext, (double)m_cLineColor[gi].red/65535.0,
                         (double)m_cLineColor[gi].green/65535.0,
@@ -400,7 +402,7 @@ void Graph::updateCurves(OpenViBE::float64* curve, unsigned int curveIndex)
 
 	m_pMaximum = -FLT_MAX;
 	m_pMinimum = FLT_MAX;
-	for (int j=0; j<m_lCurves.size(); j++)
+	for (uint32 j=0; j<m_lCurves.size(); j++)
 		for(int i = 0; i<curveSize; i++)
 		{
                         //m_pMaximum = m_lCurves[j][i]>m_pMaximum ? m_lCurves[j][i]:m_pMaximum;
@@ -446,7 +448,7 @@ boolean CBoxAlgorithmErpPlot::initialize(void)
         m_lGraphList = new std::list<Graph*>;
 
 	//should be a Graph per channel/electrode not per input (should be done when first header is received)
-        for (int i=1; i<l_rStaticBoxContext.getInputCount(); i++)
+		for (uint32 i=1; i<l_rStaticBoxContext.getInputCount(); i++)
         {
             if ((i%2)==1)
             {

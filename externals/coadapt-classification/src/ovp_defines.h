@@ -8,23 +8,6 @@ enum { FULL=0, DIAG=1, SHRINK_TO_DIAG=2, SHRINK_TO_UNITY=3 };
 // Plugin Object Descriptor Class Identifiers                        //
 //___________________________________________________________________//
 //                                                                   //
-
-#define OVP_ClassId_BoxAlgorithm_ClassifierProcessorWithUpdate OpenViBE::CIdentifier(0xADF3B87A, 0x875B6EB0)
-#define OVP_ClassId_BoxAlgorithm_ClassifierProcessorWithUpdateDesc OpenViBE::CIdentifier(0xBE9EBA5C, 0xA8415D37)
-
-#define OV_ClassId_BoxAlgorithm_PGTrainer                                    OpenViBE::CIdentifier(0x64641646, 0x378102DC)
-#define OV_ClassId_BoxAlgorithm_PGTrainerDesc                                OpenViBE::CIdentifier(0x5895213D, 0x564304E2)
-
-
-#define OVP_ClassId_BoxAlgorithm_SupErrP OpenViBE::CIdentifier(0x168D0871, 0x549D67FE)
-#define OVP_ClassId_BoxAlgorithm_SupErrPDesc OpenViBE::CIdentifier(0x168D0871, 0x549D67FE)
-
-#define OVP_ClassId_BoxAlgorithm_TargetArray OpenViBE::CIdentifier(0x3CE5498C, 0x40D670E8)
-#define OVP_ClassId_BoxAlgorithm_TargetArrayDesc OpenViBE::CIdentifier(0x15D062F1, 0x76747FEA)
-
-#define OVP_ClassId_BoxAlgorithm_Normalization OpenViBE::CIdentifier(0x77D80420, 0x04162E79)
-#define OVP_ClassId_BoxAlgorithm_NormalizationDesc OpenViBE::CIdentifier(0x26723751, 0x3FC344EC)
-
 #define OVP_ClassId_BoxAlgorithm_EvidenceAccumulator 			OpenViBE::CIdentifier(0x47BC41D5, 0x94D9F146)
 #define OVP_ClassId_BoxAlgorithm_EvidenceAccumulatorDesc 		OpenViBE::CIdentifier(0x47BC41D5, 0x94D9F146)
 

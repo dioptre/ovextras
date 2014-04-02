@@ -1,11 +1,5 @@
 #include "ovp_defines.h"
 
-#include "box-algorithms/classification/ovpCBoxAlgorithmSupErrP.h"
-#include "box-algorithms/classification/ovpCBoxAlgorithmTargetArray.h"
-#include "box-algorithms/classification/ovpCBoxAlgorithmDynamicVotingClassifier.h"
-#include "box-algorithms/classification/ovpCBoxAlgorithmNormalization.h"
-#include "box-algorithms/classification/ovpCBoxAlgorithmPGTrainer.h"
-#include "box-algorithms/classification/ovpCBoxAlgorithmClassifierProcessorWithUpdate.h"
 #include "box-algorithms/classification/ovpCBoxAlgorithmEvidenceAccumulator.h"
 //#include "box-algorithms/classification/ovpCDynamicNaiveBayesComputeBoxAlgorithm.h"
 #include "box-algorithms/classification/ovpCBoxAlgorithmAdaptiveP300Classifier.h"
@@ -56,12 +50,7 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Shrink to diagonal",SHRINK_TO_DIAG);
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Diagonal",DIAG);
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Shrink to unity",SHRINK_TO_UNITY);
-	
-	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorWithUpdateDesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmSupErrPDesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmDynamicVotingClassifierDesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmNormalizationDesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmPGTrainerDesc);	
+		
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierNULLDesc);
 	//OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CLikelihoodComputeFunctionDesc);
 	//OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CDynamicNaiveBayesComputeBoxAlgorithmDesc);

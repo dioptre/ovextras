@@ -6,9 +6,6 @@
 // Plugin Object Class Identifiers                        //
 //___________________________________________________________________//
 //                                                                   //
-
-#define OVP_ClassId_BoxAlgorithm_P300SpellerVisualisationSplotch     	OpenViBE::CIdentifier(0x915E41D6, 0xE6684D47)
-#define OVP_ClassId_BoxAlgorithm_SerialP300SpellerVisualisation      	OpenViBE::CIdentifier(0x2558CB57, 0x3A6245D5)
 #define OVP_ClassId_BoxAlgorithm_ErpPlot 				OpenViBE::CIdentifier(0x10DC6917, 0x2B29B2A0)
 //___________________________________________________________________//
 //                                                                   //
@@ -16,8 +13,6 @@
 //___________________________________________________________________//
 //                                                                   //
 
-#define OVP_ClassId_BoxAlgorithm_P300SpellerVisualisationSplotchDesc 	OpenViBE::CIdentifier(0x13DE2B0D, 0x208202E7)
-#define OVP_ClassId_BoxAlgorithm_SerialP300SpellerVisualisationDesc  	OpenViBE::CIdentifier(0x76AC40CA, 0x1556B357)
 #define OVP_ClassId_BoxAlgorithm_ErpPlotDesc 			     	OpenViBE::CIdentifier(0x10DC6917, 0x2B29B2A0)
 
 //___________________________________________________________________//

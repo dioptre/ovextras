@@ -34,7 +34,7 @@ namespace OpenViBEPlugins
 				{
 					m_lCurves.resize(lineColor.size());
                                         m_pStandardDeviation.resize(lineColor.size());
-					for (int i=0; i<m_lCurves.size(); i++)
+					for (unsigned int i=0; i<m_lCurves.size(); i++)
 					{
 						m_lCurves[i] = new OpenViBE::float64[curveSize];
 						memset(m_lCurves[i], 0, sizeof(OpenViBE::float64) * curveSize);
@@ -47,7 +47,7 @@ namespace OpenViBEPlugins
 					pointCounter = new int[lineColor.size()];
 					m_pMaximum = -FLT_MAX;
 					m_pMinimum = FLT_MAX;
-					for (int i=0; i<lineColor.size(); i++)
+					for (unsigned int i=0; i<lineColor.size(); i++)
 					{ 
 						pointCounter[i] = 0;
 					}
