@@ -1,7 +1,7 @@
 // author: Dieter Devlaminck
 // affiliation: INRIA
 // date: 26/01/2013
-
+#if defined TARGET_OS_Linux || (defined TARGET_OS_Windows && defined TARGET_HAS_ThirdPartyInpout)
 
 #include "ovexParallelPort.h"
 
@@ -162,3 +162,6 @@ int ParallelPort::write(uint32 value)
 	else
 		return 1;
 }
+
+
+#endif

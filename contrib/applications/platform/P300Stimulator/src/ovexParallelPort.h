@@ -1,7 +1,7 @@
 // author: Dieter Devlaminck
 // affiliation: INRIA 
 // date: 26/01/2013
-
+#if defined TARGET_OS_Linux || (defined TARGET_OS_Windows && defined TARGET_HAS_ThirdPartyInpout)
 
 
 #ifndef __ParallelPort_H__
@@ -30,8 +30,9 @@
 	#include <unistd.h>
 	#define PARALLELBASE 0x378
 #elif defined TARGET_OS_Windows
-
 #endif
+
+
 
 namespace OpenViBEApplications
 {
@@ -52,4 +53,5 @@ namespace OpenViBEApplications
 	};
 };
 
+#endif
 #endif //__ParallelPort_H__
