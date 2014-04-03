@@ -35,7 +35,8 @@ namespace OpenViBEPlugins
 			EGrazVisualizationState_Idle,
 			EGrazVisualizationState_Reference,
 			EGrazVisualizationState_Cue,
-			EGrazVisualizationState_ContinousFeedback
+			EGrazVisualizationState_ContinousFeedback,
+			EGrazVisualizationState_End
 		};
 
 		/**

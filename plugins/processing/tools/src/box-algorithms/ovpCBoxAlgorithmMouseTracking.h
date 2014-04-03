@@ -65,7 +65,7 @@ namespace OpenViBEPlugins
 			OpenViBE::IMatrix* m_pRelativeCoordinateBuffer;
 
 			OpenViBE::uint32 m_ui32SentSampleCount;
-			::GtkWidget* m_myWindow;
+			::GtkWidget* m_pWindow;
 
 			OpenViBE::float64 m_f64Previous_x;
 			OpenViBE::float64 m_f64Previous_y;

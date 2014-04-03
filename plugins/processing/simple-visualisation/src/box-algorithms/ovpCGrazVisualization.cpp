@@ -103,6 +103,12 @@ namespace OpenViBEPlugins
 #endif
 					l_bStateUpdated = true;
 					break;
+
+				case OVTK_StimulationId_ExperimentStop:
+					m_eCurrentState = EGrazVisualizationState_End;
+					//l_bStateUpdated = true;
+					break;
+
 			}
 
 			if(l_bStateUpdated)
@@ -529,11 +535,15 @@ namespace OpenViBEPlugins
 
 			if(m_eCurrentState==EGrazVisualizationState_ContinousFeedback)
 			{
-				if(!m_ui32WindowIndex)
+//			    cout<<"Window Index = "<<m_ui32WindowIndex<<endl;
+			    if(!m_ui32WindowIndex)
 				{
-					uint32 l_ui32WindowCount=
+//				cout<<"Window Index = "<<m_ui32WindowIndex<<endl;
+				uint32 l_ui32WindowCount=
 						m_vWindowSuccessCount.size()>m_vWindowFailCount.size()?
 						m_vWindowSuccessCount.size():m_vWindowFailCount.size();
+//					cout<<"Window Count = "<<l_ui32WindowCount<<endl;
+//					cout<<"Window Success count (size) ="<<m_vWindowSuccessCount.size()<<" and fail = "<<m_vWindowFailCount.size();
 					for(uint32 i=0; i<l_ui32WindowCount; i++)
 					{
 						getBoxAlgorithmContext()->getPlayerContext()->getLogManager()
@@ -570,6 +580,30 @@ namespace OpenViBEPlugins
 						NULL,
 						true);
 			}
+
+			if(m_eCurrentState == EGrazVisualizationState_End)
+			  {
+//			    cout<<"m_ui32WindowIndex = "<< m_ui32WindowIndex<<endl;
+			    if(m_ui32WindowIndex == 60)
+				{
+			    uint32 l_ui32WindowCount=
+					    m_vWindowSuccessCount.size()>m_vWindowFailCount.size()?
+					    m_vWindowSuccessCount.size():m_vWindowFailCount.size();
+//					cout<<"Window Count = "<<l_ui32WindowCount<<endl;
+//					cout<<"Window Success count (size) ="<<m_vWindowSuccessCount.size()<<" and fail = "<<m_vWindowFailCount.size();
+				    for(uint32 i=0; i<l_ui32WindowCount; i++)
+				    {
+					    getBoxAlgorithmContext()->getPlayerContext()->getLogManager()
+						    << LogLevel_Info
+						    << "Score estimation window " << i << " : [fail:success:ratio]=["
+						    << m_vWindowFailCount[i] << ":"
+						    << m_vWindowSuccessCount[i] << ":"
+						    << (((m_vWindowSuccessCount[i]*10000)/(m_vWindowSuccessCount[i]+m_vWindowFailCount[i])))/100.0<<"%]\n";
+				    }
+			      }
+			    m_ui32WindowIndex = 0;
+			  }
+
 #endif
 		}
 

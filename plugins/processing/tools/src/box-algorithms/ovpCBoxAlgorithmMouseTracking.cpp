@@ -37,12 +37,12 @@ boolean CBoxAlgorithmMouseTracking::initialize(void)
 	m_f64Previous_y = 0;
 
 	// Creates empty window to get mouse position
-	m_myWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_widget_add_events(m_myWindow, GDK_POINTER_MOTION_MASK);
-	gtk_window_fullscreen(GTK_WINDOW(m_myWindow));
-	gtk_widget_show_all(m_myWindow);
+	m_pWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_widget_add_events(m_pWindow, GDK_POINTER_MOTION_MASK);
+	gtk_window_fullscreen(GTK_WINDOW(m_pWindow));
+	gtk_widget_show_all(m_pWindow);
 
-	g_signal_connect(m_myWindow, "motion-notify-event", G_CALLBACK(motion_event_handler), this);
+	g_signal_connect(m_pWindow, "motion-notify-event", G_CALLBACK(motion_event_handler), this);
 
 	m_bHeaderSent=false;
 	
@@ -64,7 +64,8 @@ boolean CBoxAlgorithmMouseTracking::uninitialize(void)
 	delete m_pRelativeCoordinateBuffer;
 	m_pRelativeCoordinateBuffer=NULL;
 
-	gtk_widget_destroy(m_myWindow);
+	gtk_widget_destroy(m_pWindow);
+	m_pWindow = NULL;
 
 	return true;
 }
@@ -128,7 +129,7 @@ boolean CBoxAlgorithmMouseTracking::process(void)
 		uint32 l_ui32SentSampleCount=m_ui32SentSampleCount;
 
 
-		for(uint32 i=0; i<m_ui32GeneratedEpochSampleCount; i=i++)
+		for(uint32 i=0; i<m_ui32GeneratedEpochSampleCount; i++)
 		{
 			m_pAbsoluteCoordinateBuffer->getBuffer()[0*m_ui32GeneratedEpochSampleCount+i] = m_Mouse_x;
 			m_pAbsoluteCoordinateBuffer->getBuffer()[1*m_ui32GeneratedEpochSampleCount+i] = m_Mouse_y;
