@@ -8,6 +8,7 @@
  */
 
 #if defined TARGET_HAS_ThirdPartyEIGEN
+#include <iostream>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;

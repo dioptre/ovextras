@@ -204,6 +204,7 @@ boolean OpenViBEToolkit::initialize(const IKernelContext& rKernelContext)
 	l_rTypeManager.registerEnumerationEntry(OV_TypeId_Stimulation, "OVTK_GDF_Non_Equidistant_Sampling_Value", OVTK_GDF_Non_Equidistant_Sampling_Value);
 
 	l_rTypeManager.registerEnumerationType(OVTK_TypeId_ClassificationAlgorithm, "Classification algorithm");
+	l_rTypeManager.registerEnumerationType(OVTK_TypeId_ClassificationStrategy, "Classification strategy");
 
 	return true;
 }
