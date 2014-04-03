@@ -52,6 +52,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 
 	//If the Identifier is undefined, that means we need to load a native algorithm
 	if(l_oAlgorithmClassIdentifier == OV_UndefinedIdentifier){
+		this->getLogManager() << LogLevel_Trace << "Using Native algorithm\n";
 		l_pTempNode = l_pRootNode->getChildByName(c_sAlgorithmNodeName);
 		std::stringstream l_sAlgorithmData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
 		l_sAlgorithmData >> l_iIdentifier;
