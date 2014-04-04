@@ -159,7 +159,17 @@ boolean CBoxProto::addInputSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
 	return m_rBox.addInputSupport(rTypeIdentifier);
 }
 
+boolean CBoxProto::addInputAndDerivedSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
+{
+	return m_rBox.addInputAndDerivedSupport(rTypeIdentifier);
+}
+
 boolean CBoxProto::addOutputSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
 {
 	return m_rBox.addOutputSupport(rTypeIdentifier);
+}
+
+boolean CBoxProto::addOutputAndDerivedSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
+{
+	return m_rBox.addOutputAndDerivedSupport(rTypeIdentifier);
 }

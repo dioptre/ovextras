@@ -395,15 +395,25 @@ namespace OpenViBE
 			//@}
 
 
-			/** \name Message input management */
+			/** \name Input/Output management */
 			//@{
 			/**
-			  * \brief Adds a type support by inputs
+			  * \brief Marks this type as supported by inputs
 			  * \param rTypeIdentifier [in] : The type identifier
 			  * \return \e true in case of success.
 			  * \return \e false in case of error.
 			  */
 			virtual OpenViBE::boolean addInputSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+
+			/**
+			  * \brief Marks this type support and all types derived
+			  * from it as supported by inputs
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true in case of success.
+			  * \return \e false in case of error.
+			  */
+			virtual OpenViBE::boolean addInputAndDerivedSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
 			/**
 			  * \brief Indicates if a type is support by inputs
@@ -415,13 +425,24 @@ namespace OpenViBE
 					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
 
 			/**
-			  * \brief Adds a type support by outputs
+			  * \brief Marks this type as supported by outputs
 			  * \param rTypeIdentifier [in] : The type identifier
 			  * \return \e true in case of success.
 			  * \return \e false in case of error.
 			  */
 			virtual OpenViBE::boolean addOutputSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+
+			/**
+			  * \brief Marks this type support and all types derived
+			  * from it as supported by outputs
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true in case of success.
+			  * \return \e false in case of error.
+			  */
+			virtual OpenViBE::boolean addOutputAndDerivedSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+
 			/**
 			  * \brief Indicates if a type is support by outputs
 			  * \param rTypeIdentifier [in] : The type identifier
@@ -432,117 +453,117 @@ namespace OpenViBE
 					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
 			//@}
 
-            /** \name Message input management */
-            //@{
-            /**
-             * \brief Adds a message input to this box
-             * \param sName [in] : The message input name
-             * \return \e true in case of success.
-             * \return \e false in case of error.
-             *
-             * The message input is always added after the last
-             * already existing message input.
-             */
-            virtual OpenViBE::boolean addMessageInput(
-                const OpenViBE::CString& sName)=0;
-            /**
-             * \brief Removes a message input for this box
-             * \param ui32InputIndex [in] : The index
-             *        of the message input to be removed
-             * \return \e true in case of success.
-             * \return \e false in case of error.
-             *
-             * Message inputs coming after the removed message input
-             * have their indices changing after this,
-             * they all decrease by 1.
-             */
-            virtual OpenViBE::boolean removeMessageInput(
-                const OpenViBE::uint32 ui32InputIndex)=0;
-            /**
-             * \brief Gets the number of message inputs for this box
-             * \return The number of message inputs for this box.
-             */
-            virtual OpenViBE::uint32 getMessageInputCount(void) const=0;
+			/** \name Message input management */
+			//@{
+			/**
+			 * \brief Adds a message input to this box
+			 * \param sName [in] : The message input name
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 *
+			 * The message input is always added after the last
+			 * already existing message input.
+			 */
+			virtual OpenViBE::boolean addMessageInput(
+					const OpenViBE::CString& sName)=0;
+			/**
+			 * \brief Removes a message input for this box
+			 * \param ui32InputIndex [in] : The index
+			 *        of the message input to be removed
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 *
+			 * Message inputs coming after the removed message input
+			 * have their indices changing after this,
+			 * they all decrease by 1.
+			 */
+			virtual OpenViBE::boolean removeMessageInput(
+					const OpenViBE::uint32 ui32InputIndex)=0;
+			/**
+			 * \brief Gets the number of message inputs for this box
+			 * \return The number of message inputs for this box.
+			 */
+			virtual OpenViBE::uint32 getMessageInputCount(void) const=0;
 
-            /**
-             * \brief Gets a message input name
-             * \param ui32InputIndex [in] : The message input index
-             * \param rName [out] : The name of this message input
-             * \return \e true in case of success.
-             * \return \e false in case of error. In such case,
-             *         \c rName remains unchanged.
-             */
-            virtual OpenViBE::boolean getMessageInputName(
-                const OpenViBE::uint32 ui32InputIndex,
-                OpenViBE::CString& rName) const=0;
+			/**
+			 * \brief Gets a message input name
+			 * \param ui32InputIndex [in] : The message input index
+			 * \param rName [out] : The name of this message input
+			 * \return \e true in case of success.
+			 * \return \e false in case of error. In such case,
+			 *         \c rName remains unchanged.
+			 */
+			virtual OpenViBE::boolean getMessageInputName(
+					const OpenViBE::uint32 ui32InputIndex,
+					OpenViBE::CString& rName) const=0;
 
-            /**
-             * \brief Sets a message input name
-             * \param ui32InputIndex [in] : The message input index
-             * \param rName [in] : The name of this message input
-             * \return \e true in case of success.
-             * \return \e false in case of error.
-             */
-            virtual OpenViBE::boolean setMessageInputName(
-                const OpenViBE::uint32 ui32InputIndex,
-                const OpenViBE::CString& rName)=0;
-            //@}
+			/**
+			 * \brief Sets a message input name
+			 * \param ui32InputIndex [in] : The message input index
+			 * \param rName [in] : The name of this message input
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 */
+			virtual OpenViBE::boolean setMessageInputName(
+					const OpenViBE::uint32 ui32InputIndex,
+					const OpenViBE::CString& rName)=0;
+			//@}
 
-            /** \name Message output management */
-            //@{
-		/**
-             * \brief Adds a message output to this box
-             * \param sName [in] : The message output name
-             * \return \e true in case of success.
-             * \return \e false in case of error.
-             *
-             * The message output is always added after the last
-             * already existing message output.
-             */
-            virtual OpenViBE::boolean addMessageOutput(
-                const OpenViBE::CString& sName)=0;
-            /**
-             * \brief Removes an message output for this box
-             * \param ui32OutputIndex [in] : The index
-             *        of the message output to be removed
-             * \return \e true in case of success.
-             * \return \e false in case of error.
-             *
-             * Message outputs coming after the removed message output
-             * have their indices changing after this,
-             * they all decrease by 1.
-             */
-            virtual OpenViBE::boolean removeMessageOutput(
-                const OpenViBE::uint32 ui32OutputIndex)=0;
-            /**
-             * \brief Gets the number of message outputs for this box
-             * \return The number of message outputs for this box.
-             */
-            virtual OpenViBE::uint32 getMessageOutputCount(void) const=0;
+			/** \name Message output management */
+			//@{
+			/**
+			 * \brief Adds a message output to this box
+			 * \param sName [in] : The message output name
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 *
+			 * The message output is always added after the last
+			 * already existing message output.
+			 */
+			virtual OpenViBE::boolean addMessageOutput(
+					const OpenViBE::CString& sName)=0;
+			/**
+			 * \brief Removes an message output for this box
+			 * \param ui32OutputIndex [in] : The index
+			 *        of the message output to be removed
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 *
+			 * Message outputs coming after the removed message output
+			 * have their indices changing after this,
+			 * they all decrease by 1.
+			 */
+			virtual OpenViBE::boolean removeMessageOutput(
+					const OpenViBE::uint32 ui32OutputIndex)=0;
+			/**
+			 * \brief Gets the number of message outputs for this box
+			 * \return The number of message outputs for this box.
+			 */
+			virtual OpenViBE::uint32 getMessageOutputCount(void) const=0;
 
-            /**
-             * \brief Gets a message output name
-             * \param ui32OutputIndex [in] : The message output index
-             * \param rName [out] : The name of this message output
-             * \return \e true in case of success.
-             * \return \e false in case of error. In such case,
-             *         \c rName remains unchanged.
-             */
-            virtual OpenViBE::boolean getMessageOutputName(
-                const OpenViBE::uint32 ui32OutputIndex,
-                OpenViBE::CString& rName) const=0;
+			/**
+			 * \brief Gets a message output name
+			 * \param ui32OutputIndex [in] : The message output index
+			 * \param rName [out] : The name of this message output
+			 * \return \e true in case of success.
+			 * \return \e false in case of error. In such case,
+			 *         \c rName remains unchanged.
+			 */
+			virtual OpenViBE::boolean getMessageOutputName(
+					const OpenViBE::uint32 ui32OutputIndex,
+					OpenViBE::CString& rName) const=0;
 
-            /**
-             * \brief Sets a message output name
-             * \param ui32OutputIndex [in] : The message output index
-             * \param rName [in] : The name of this message output
-             * \return \e true in case of success.
-             * \return \e false in case of error.
-             */
-            virtual OpenViBE::boolean setMessageOutputName(
-                const OpenViBE::uint32 ui32OutputIndex,
-                const OpenViBE::CString& rName)=0;
-            //@}
+			/**
+			 * \brief Sets a message output name
+			 * \param ui32OutputIndex [in] : The message output index
+			 * \param rName [in] : The name of this message output
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 */
+			virtual OpenViBE::boolean setMessageOutputName(
+					const OpenViBE::uint32 ui32OutputIndex,
+					const OpenViBE::CString& rName)=0;
+			//@}
 
 			_IsDerivedFromClass_(OpenViBE::Kernel::IAttributable, OV_ClassId_Kernel_Scenario_Box)
 		};

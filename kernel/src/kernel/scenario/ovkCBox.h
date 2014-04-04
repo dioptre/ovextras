@@ -63,9 +63,13 @@ namespace OpenViBE
 			//Connector type
 			virtual OpenViBE::boolean addInputSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier);
+			virtual OpenViBE::boolean addInputAndDerivedSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier);
 			virtual OpenViBE::boolean hasInputSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier);
 			virtual OpenViBE::boolean addOutputSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier);
+			virtual OpenViBE::boolean addOutputAndDerivedSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier);
 			virtual OpenViBE::boolean hasOutputSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier);
