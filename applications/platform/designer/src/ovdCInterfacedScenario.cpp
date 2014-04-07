@@ -477,11 +477,24 @@ void CInterfacedScenario::updateScenarioLabel(void)
 		l_sTempFileName[l_iBackSlashIndex]='/';
 	}
 	l_sLabel+=m_bHasBeenModified?"*":"";
-	l_sLabel+=" ";
+	if(this->m_ePlayerStatus == PlayerStatus_Play)
+	{
+		l_sLabel+=" &#9656; ";
+	}
+	else if(this->m_ePlayerStatus == PlayerStatus_Pause)
+	{
+		l_sLabel+="<b> &#8403; &#8403;</b> ";
+	}
+	else if(this->m_ePlayerStatus == PlayerStatus_Forward)
+	{
+		l_sLabel+=" &#9656;&#9656; ";
+	}
+	else
+		l_sLabel += " ";
 	l_sLabel+=m_bHasFileName?l_sTempFileName.substr(l_sTempFileName.rfind('/')+1):"(untitled)";
 	l_sLabel+=" ";
 	l_sLabel+=m_bHasBeenModified?"*":"";
-	gtk_label_set_text(l_pTitleLabel, l_sLabel.c_str());
+	gtk_label_set_markup(l_pTitleLabel, l_sLabel.c_str());
 }
 
 #define updateStencilIndex(id,stencilgc) { id++; ::GdkColor sc={0, (guint16)((id&0xff0000)>>8), (guint16)(id&0xff00), (guint16)((id&0xff)<<8) }; gdk_gc_set_rgb_fg_color(stencilgc, &sc); }

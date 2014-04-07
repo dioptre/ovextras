@@ -1920,6 +1920,7 @@ void CApplication::stopScenarioCB(void)
 	{
 		this->getPlayer()->stop();
 		this->getCurrentInterfacedScenario()->m_ePlayerStatus=this->getPlayer()->getStatus();
+		this->getCurrentInterfacedScenario()->updateScenarioLabel();
 		this->releasePlayer();
 
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_stop")),          false);
@@ -1957,6 +1958,7 @@ void CApplication::pauseScenarioCB(void)
 	this->createPlayer();
 	this->getPlayer()->pause();
 	this->getCurrentInterfacedScenario()->m_ePlayerStatus=this->getPlayer()->getStatus();
+	this->getCurrentInterfacedScenario()->updateScenarioLabel();
 
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_stop")),          true);
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")),    true);
@@ -1993,6 +1995,7 @@ void CApplication::playScenarioCB(void)
 	}
 	this->getPlayer()->play();
 	this->getCurrentInterfacedScenario()->m_ePlayerStatus=this->getPlayer()->getStatus();
+	this->getCurrentInterfacedScenario()->updateScenarioLabel();
 
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_stop")),          true);
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")),    true);
@@ -2032,6 +2035,7 @@ void CApplication::forwardScenarioCB(void)
 
 	this->getPlayer()->forward();
 	this->getCurrentInterfacedScenario()->m_ePlayerStatus=this->getPlayer()->getStatus();
+	this->getCurrentInterfacedScenario()->updateScenarioLabel();
 
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_stop")),          true);
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")),    true);
