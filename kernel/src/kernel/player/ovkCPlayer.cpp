@@ -109,14 +109,16 @@ boolean CPlayer::initialize(void)
 	{
 		//create an easily named local token that scenarios can use to read their own current directory. Note that the value of this token will often be overwritten by OpenViBE.
 		const CString l_sLocalPathToken("__volatile_ScenarioDir");
-		const CString l_sOldPath = getKernelContext().getConfigurationManager().lookUpConfigurationTokenValue(l_sLocalPathToken);
-		if(l_sOldPath == CString(""))
+		//We set a local __volatile_ScenarioDir to avoid it to change during execution (the global change each time we switch of tab)
+		const CIdentifier l_sOldIdentifier = m_pLocalConfigurationManager->lookUpConfigurationTokenIdentifier(l_sLocalPathToken, false);
+		//const CString l_sOldPath = getKernelContext().getConfigurationManager().lookUpConfigurationTokenValue(l_sLocalPathToken);
+		if(l_sOldIdentifier == OV_UndefinedIdentifier)
 		{
-			getKernelContext().getConfigurationManager().createConfigurationToken(l_sLocalPathToken,l_sWorkingDir);
+			m_pLocalConfigurationManager->createConfigurationToken(l_sLocalPathToken,l_sWorkingDir);
 		}
 		else
 		{
-			getKernelContext().getConfigurationManager().setConfigurationTokenValue(getKernelContext().getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sLocalPathToken, true), l_sWorkingDir);
+			m_pLocalConfigurationManager->setConfigurationTokenValue( m_pLocalConfigurationManager->lookUpConfigurationTokenIdentifier(l_sLocalPathToken), l_sWorkingDir);
 		}
 
 		//load local, scenario-specific configuration file
