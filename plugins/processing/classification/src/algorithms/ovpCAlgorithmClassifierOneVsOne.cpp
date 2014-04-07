@@ -268,7 +268,7 @@ uint32 CAlgorithmClassifierOneVsOne::getClassAmount(void) const
 {
 	//We use a formula because the list as the reponsability ot the count of subClassifier and by extention of amount of classes
 	uint32 l_ui32DeltaCarre = 1+8*m_oSubClassifierDescriptorList.size();
-	return (1+::sqrt(l_ui32DeltaCarre))/2;
+	return (int)(1+::sqrt((double)l_ui32DeltaCarre))/2;
 }
 
 //The function take int because we don't take the "label" of the class but only the numero of declaration
