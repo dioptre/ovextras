@@ -441,6 +441,7 @@ namespace OpenViBEPlugins
 					drawReferenceCross();
 					drawClassImages();
 					drawArrow(m_bShowInstruction?m_eCurrentDirection:EArrowDirection_None);
+//					drawRectangle(m_bShowInstruction?m_eCurrentDirection:EArrowDirection_None);
 
 					break;
 
@@ -448,6 +449,7 @@ namespace OpenViBEPlugins
 					drawReferenceCross();
 					drawClassImages();
 					if(m_bShowFeedback) drawBar();
+					//drawRectangle(m_bShowInstruction?m_eCurrentDirection:EArrowDirection_None);
 					break;
 
 				default:
@@ -522,6 +524,15 @@ namespace OpenViBEPlugins
 			gint l_iX = 0;
 			gint l_iY = 0;
 
+			GdkColor l_oRed;
+
+                        l_oRed.pixel =0;
+                        l_oRed.red = 0xFFFF;
+                        l_oRed.green = 0;
+                        l_oRed.blue = 0;
+
+                        gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_NORMAL, &l_oRed);
+
 			switch(eDirection)
 			{
 				case EArrowDirection_None:
@@ -570,6 +581,7 @@ namespace OpenViBEPlugins
 				default:
 					break;
 			}
+						gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_NORMAL, &m_oForegroundColor);
 
 		}
 
@@ -588,7 +600,6 @@ namespace OpenViBEPlugins
 			gint l_iRectangleTopLeftY = (l_iWindowHeight/2)-(l_iRectangleHeight/2);
 
 
-
 			if(m_f64BarScale<0 && m_eCurrentDirection==EArrowDirection_Left && m_ui64RecognizedClassLabel == m_vClassLabel[0])
 			{
 				l_iRectangleTopLeftX -= l_iRectangleWidth;
@@ -598,21 +609,78 @@ namespace OpenViBEPlugins
 						l_iRectangleTopLeftX, l_iRectangleTopLeftY, l_iRectangleWidth, l_iRectangleHeight,
 						GDK_RGB_DITHER_NONE, 0, 0);
 			}
-			else if(m_f64BarScale<0 && m_eCurrentDirection==EArrowDirection_Right && m_ui64RecognizedClassLabel == m_vClassLabel[1])
+			else if(m_f64BarScale<0 && m_eCurrentDirection==EArrowDirection_Right && m_ui64RecognizedClassLabel == m_vClassLabel[2])
 			{
 				gdk_pixbuf_render_to_drawable(m_pRightBar, m_pDrawingArea->window, NULL, 0, 0, l_iRectangleTopLeftX, l_iRectangleTopLeftY, l_iRectangleWidth, l_iRectangleHeight, GDK_RGB_DITHER_NONE, 0, 0);
 
 			}
-			else if (m_f64BarScale<0 && m_eCurrentDirection==EArrowDirection_Up && m_ui64RecognizedClassLabel == m_vClassLabel[2])
+			else if (m_f64BarScale<0 && m_eCurrentDirection==EArrowDirection_Up && m_ui64RecognizedClassLabel == m_vClassLabel[1])
 			{
+
 			    gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pOriginalVerticalBar, 0, l_iRectangleWidth, l_iWindowWidth/2 - gdk_pixbuf_get_width(m_pOriginalVerticalBar)/2, l_iWindowHeight/2 - l_iRectangleWidth, -1, l_iRectangleWidth, GDK_RGB_DITHER_NONE, 0, 0);
 			}
+
 		}
 
 		void CGrazVisualization::drawPositiveBar()
 		{
 
 		}
+
+/*		void CGrazVisualization::drawRectangle(EArrowDirection eDirection)
+		{
+
+		  GdkColor l_oRed;
+
+		  l_oRed.pixel =0;
+		  l_oRed.red = 0xFFFF;
+		  l_oRed.green = 0;
+		  l_oRed.blue = 0;
+
+		  gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_NORMAL, &l_oRed);
+
+		  gint l_iWindowWidth = m_pDrawingArea->allocation.width;
+		  gint l_iWindowHeight = m_pDrawingArea->allocation.height;
+
+		  gint l_iX = 0;
+		  gint l_iY = 0;
+
+		  switch(eDirection)
+		  {
+			  case EArrowDirection_None:
+				  break;
+
+			  case EArrowDirection_Left:
+				  l_iX = (l_iWindowWidth/2) - gdk_pixbuf_get_width(m_pLeftArrow) - 1;
+				  l_iY = (l_iWindowHeight/2) - (gdk_pixbuf_get_height(m_pLeftArrow)/2);
+
+				  gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
+						     l_iX - (gdk_pixbuf_get_width(m_pLeftArrow)/2) - gdk_pixbuf_get_width(m_pImageLeft)/2, l_iY,
+						     gdk_pixbuf_get_width(m_pImageLeft), gdk_pixbuf_get_height(m_pImageLeft));
+				  break;
+
+			  case EArrowDirection_Right:
+				  l_iX = (l_iWindowWidth/2) + 2;
+				  l_iY = (l_iWindowHeight/2) - (gdk_pixbuf_get_height(m_pRightArrow)/2);
+
+				  gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
+						     l_iX + (gdk_pixbuf_get_width(m_pRightArrow)/2) + gdk_pixbuf_get_width(m_pImageRight)/2 , l_iY,
+						     gdk_pixbuf_get_width(m_pImageRight), gdk_pixbuf_get_height(m_pImageLeft));
+				  break;
+
+			  case EArrowDirection_Up:
+
+				  gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
+						     (l_iWindowWidth/2) - (l_iWindowWidth/16) - 25 - 10, (l_iWindowHeight/4) - gdk_pixbuf_get_height(m_pUpArrow)*3/4 - 10,
+						     gdk_pixbuf_get_width(m_pImageRight)*3/4, gdk_pixbuf_get_height(m_pImageRight)/2);
+				  break;
+
+			  default:
+				  break;
+		    }
+
+		  gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_NORMAL, &m_oForegroundColor);
+		}*/
 
 		void CGrazVisualization::setMatrixDimensionCount(const uint32 ui32DimensionCount)
 		{
@@ -681,16 +749,16 @@ namespace OpenViBEPlugins
 				}
 
 			    if((m_eCurrentDirection==EArrowDirection_Left && m_ui64RecognizedClassLabel != m_vClassLabel[0] )
-				|| (m_eCurrentDirection==EArrowDirection_Right && m_ui64RecognizedClassLabel != m_vClassLabel[1])
-			       || (m_eCurrentDirection==EArrowDirection_Up && m_ui64RecognizedClassLabel != m_vClassLabel[2])
+				|| (m_eCurrentDirection==EArrowDirection_Right && m_ui64RecognizedClassLabel != m_vClassLabel[2])
+			       || (m_eCurrentDirection==EArrowDirection_Up && m_ui64RecognizedClassLabel != m_vClassLabel[1])
 			       || (l_f64CurrentAmplitude > 0))
 				{
 					m_vWindowFailCount[m_ui32WindowIndex]++;
 				}
 
 				if((m_eCurrentDirection==EArrowDirection_Left && m_ui64RecognizedClassLabel == m_vClassLabel[0] && l_f64CurrentAmplitude<0)
-				|| (m_eCurrentDirection==EArrowDirection_Right && m_ui64RecognizedClassLabel == m_vClassLabel[1] && l_f64CurrentAmplitude<0)
-				|| (m_eCurrentDirection==EArrowDirection_Up && m_ui64RecognizedClassLabel == m_vClassLabel[2] && l_f64CurrentAmplitude<0))
+				|| (m_eCurrentDirection==EArrowDirection_Right && m_ui64RecognizedClassLabel == m_vClassLabel[2] && l_f64CurrentAmplitude<0)
+				|| (m_eCurrentDirection==EArrowDirection_Up && m_ui64RecognizedClassLabel == m_vClassLabel[1] && l_f64CurrentAmplitude<0))
 				{
 					m_vWindowSuccessCount[m_ui32WindowIndex]++;
 				}
