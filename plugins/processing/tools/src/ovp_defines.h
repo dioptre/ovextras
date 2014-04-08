@@ -13,8 +13,8 @@
 #define OVP_ClassId_BoxAlgorithm_MouseTracking OpenViBE::CIdentifier(0x1E386EE5, 0x203E13C6)
 #define OVP_ClassId_BoxAlgorithm_MouseTrackingDesc OpenViBE::CIdentifier(0x7A31C11B, 0xF522262E)
 
-#define OVP_ClassId_BoxAlgorithm_AngleSpeed OpenViBE::CIdentifier(0xBC1CC0FE, 0x1098054C)
-#define OVP_ClassId_BoxAlgorithm_AngleSpeedDesc OpenViBE::CIdentifier(0xEA9ABFC9, 0x0F5C8608)
+#define OVP_ClassId_BoxAlgorithm_MotionQuantities OpenViBE::CIdentifier(0xBC1CC0FE, 0x1098054C)
+#define OVP_ClassId_BoxAlgorithm_MotionQuantitiesDesc OpenViBE::CIdentifier(0xEA9ABFC9, 0x0F5C8608)
 
 //___________________________________________________________________//
 //                                                                   //
