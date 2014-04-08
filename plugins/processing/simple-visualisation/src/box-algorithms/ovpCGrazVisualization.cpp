@@ -441,7 +441,7 @@ namespace OpenViBEPlugins
 					drawReferenceCross();
 					drawClassImages();
 					drawArrow(m_bShowInstruction?m_eCurrentDirection:EArrowDirection_None);
-//					drawRectangle(m_bShowInstruction?m_eCurrentDirection:EArrowDirection_None);
+					drawRectangle(m_bShowInstruction?m_eCurrentDirection:EArrowDirection_None);
 
 					break;
 
@@ -449,7 +449,7 @@ namespace OpenViBEPlugins
 					drawReferenceCross();
 					drawClassImages();
 					if(m_bShowFeedback) drawBar();
-					//drawRectangle(m_bShowInstruction?m_eCurrentDirection:EArrowDirection_None);
+					drawRectangle(m_bShowInstruction?m_eCurrentDirection:EArrowDirection_None);
 					break;
 
 				default:
@@ -524,15 +524,6 @@ namespace OpenViBEPlugins
 			gint l_iX = 0;
 			gint l_iY = 0;
 
-			GdkColor l_oRed;
-
-                        l_oRed.pixel =0;
-                        l_oRed.red = 0xFFFF;
-                        l_oRed.green = 0;
-                        l_oRed.blue = 0;
-
-                        gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_NORMAL, &l_oRed);
-
 			switch(eDirection)
 			{
 				case EArrowDirection_None:
@@ -547,41 +538,32 @@ namespace OpenViBEPlugins
 					l_iY = (l_iWindowHeight/2) - (gdk_pixbuf_get_height(m_pLeftArrow)/2);
 					gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pLeftArrow, 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
 
-					gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
-							   l_iX - (gdk_pixbuf_get_width(m_pLeftArrow)/2) - gdk_pixbuf_get_width(m_pImageLeft)/2, l_iY,
-							   gdk_pixbuf_get_width(m_pImageLeft), gdk_pixbuf_get_height(m_pImageLeft));
 					break;
 
 				case EArrowDirection_Right:
 					l_iX = (l_iWindowWidth/2) + 2;
 					l_iY = (l_iWindowHeight/2) - (gdk_pixbuf_get_height(m_pRightArrow)/2);
 					gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pRightArrow, 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
-					//gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pImageRight, 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
-					gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
-							   l_iX + (gdk_pixbuf_get_width(m_pRightArrow)/2) + gdk_pixbuf_get_width(m_pImageRight)/2 , l_iY,
-							   gdk_pixbuf_get_width(m_pImageRight), gdk_pixbuf_get_height(m_pImageLeft));
+
 					break;
 
 				case EArrowDirection_Up:
 					l_iX = (l_iWindowWidth/2) - (gdk_pixbuf_get_width(m_pUpArrow)/2);
 					l_iY = (l_iWindowHeight/2) - gdk_pixbuf_get_height(m_pUpArrow) - 1;
 					gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pUpArrow, 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
-					gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
-							   (l_iWindowWidth/2) - (l_iWindowWidth/16) - 25 - 10, (l_iWindowHeight/4) - gdk_pixbuf_get_height(m_pUpArrow)*3/4 - 10,
-							   gdk_pixbuf_get_width(m_pImageRight)*3/4, gdk_pixbuf_get_height(m_pImageRight)/2);
-//					gdk_draw_layout(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], l_iTextX, l_iTextY, l_pText);
+
 					break;
 
 				case EArrowDirection_Down:
 					l_iX = (l_iWindowWidth/2) - (gdk_pixbuf_get_width(m_pDownArrow)/2);
 					l_iY = (l_iWindowHeight/2) + 2;
 					gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pDownArrow, 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
+
 					break;
 
 				default:
 					break;
 			}
-						gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_NORMAL, &m_oForegroundColor);
 
 		}
 
@@ -617,7 +599,7 @@ namespace OpenViBEPlugins
 			else if (m_f64BarScale<0 && m_eCurrentDirection==EArrowDirection_Up && m_ui64RecognizedClassLabel == m_vClassLabel[1])
 			{
 
-			    gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pOriginalVerticalBar, 0, l_iRectangleWidth, l_iWindowWidth/2 - gdk_pixbuf_get_width(m_pOriginalVerticalBar)/2, l_iWindowHeight/2 - l_iRectangleWidth, -1, l_iRectangleWidth, GDK_RGB_DITHER_NONE, 0, 0);
+			    gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pUpBar, 0, l_iRectangleWidth, l_iWindowWidth/2 - gdk_pixbuf_get_width(m_pUpBar)/2, l_iWindowHeight/2 - l_iRectangleWidth, -1, l_iRectangleWidth, GDK_RGB_DITHER_NONE, 0, 0);
 			}
 
 		}
@@ -627,17 +609,9 @@ namespace OpenViBEPlugins
 
 		}
 
-/*		void CGrazVisualization::drawRectangle(EArrowDirection eDirection)
+		void CGrazVisualization::drawRectangle(EArrowDirection eDirection)
 		{
 
-		  GdkColor l_oRed;
-
-		  l_oRed.pixel =0;
-		  l_oRed.red = 0xFFFF;
-		  l_oRed.green = 0;
-		  l_oRed.blue = 0;
-
-		  gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_NORMAL, &l_oRed);
 
 		  gint l_iWindowWidth = m_pDrawingArea->allocation.width;
 		  gint l_iWindowHeight = m_pDrawingArea->allocation.height;
@@ -655,8 +629,8 @@ namespace OpenViBEPlugins
 				  l_iY = (l_iWindowHeight/2) - (gdk_pixbuf_get_height(m_pLeftArrow)/2);
 
 				  gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
-						     l_iX - (gdk_pixbuf_get_width(m_pLeftArrow)/2) - gdk_pixbuf_get_width(m_pImageLeft)/2, l_iY,
-						     gdk_pixbuf_get_width(m_pImageLeft), gdk_pixbuf_get_height(m_pImageLeft));
+						     l_iX - (gdk_pixbuf_get_width(m_pLeftArrow)/2) - gdk_pixbuf_get_width(m_pImageLeft)/2 + 10, l_iY,
+						     gdk_pixbuf_get_width(m_pImageLeft)-10, gdk_pixbuf_get_height(m_pImageLeft));
 				  break;
 
 			  case EArrowDirection_Right:
@@ -665,13 +639,13 @@ namespace OpenViBEPlugins
 
 				  gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
 						     l_iX + (gdk_pixbuf_get_width(m_pRightArrow)/2) + gdk_pixbuf_get_width(m_pImageRight)/2 , l_iY,
-						     gdk_pixbuf_get_width(m_pImageRight), gdk_pixbuf_get_height(m_pImageLeft));
+						     gdk_pixbuf_get_width(m_pImageRight) - 15, gdk_pixbuf_get_height(m_pImageLeft));
 				  break;
 
 			  case EArrowDirection_Up:
 
 				  gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
-						     (l_iWindowWidth/2) - (l_iWindowWidth/16) - 25 - 10, (l_iWindowHeight/4) - gdk_pixbuf_get_height(m_pUpArrow)*3/4 - 10,
+						     (l_iWindowWidth/2) - (l_iWindowWidth/16) - 25 - 20, (l_iWindowHeight/4) - gdk_pixbuf_get_height(m_pUpArrow)*3/4 - 15,
 						     gdk_pixbuf_get_width(m_pImageRight)*3/4, gdk_pixbuf_get_height(m_pImageRight)/2);
 				  break;
 
@@ -679,8 +653,7 @@ namespace OpenViBEPlugins
 				  break;
 		    }
 
-		  gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_NORMAL, &m_oForegroundColor);
-		}*/
+		}
 
 		void CGrazVisualization::setMatrixDimensionCount(const uint32 ui32DimensionCount)
 		{
@@ -857,7 +830,7 @@ namespace OpenViBEPlugins
 			m_pRightBar = gdk_pixbuf_scale_simple(m_pOriginalBar, ui32Width, ui32Height/6, GDK_INTERP_BILINEAR);
 			m_pLeftBar = gdk_pixbuf_flip(m_pRightBar, true);
 
-			m_pDownBar = gdk_pixbuf_scale_simple(m_pOriginalVerticalBar, ui32Width/4, ui32Height, GDK_INTERP_BILINEAR);
+			m_pDownBar = gdk_pixbuf_scale_simple(m_pOriginalVerticalBar, ui32Height/6, ui32Width, GDK_INTERP_BILINEAR);
 			m_pUpBar = gdk_pixbuf_flip(m_pDownBar, true);
 		}
 	};

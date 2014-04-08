@@ -74,7 +74,7 @@ namespace OpenViBEPlugins
 			virtual void drawArrow(EArrowDirection eDirection);
 			virtual void drawBar();
 			virtual void drawPositiveBar();
-			//virtual void drawRectangle(EArrowDirection eDirection);
+			virtual void drawRectangle(EArrowDirection eDirection);
 
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_GrazVisualization)
 
