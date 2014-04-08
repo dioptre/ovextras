@@ -54,10 +54,13 @@ namespace OpenViBEPlugins
 
 			// To check if the header was sent or not
 			OpenViBE::boolean m_bHeaderSent;
-			// Process clock frequency
+
+			// Requested Sampling frequency
 			OpenViBE::float64 m_f64Frequency;
+			// Process clock frequency
 			OpenViBE::float64 m_f64ClockFrequency;
-			//Length of output chunks
+
+			// Length of output chunks
 			OpenViBE::uint64 m_ui32GeneratedEpochSampleCount;
 			// Absolute coordinates of the mouse pointer, that is, relative to the window in fullscreen
 			OpenViBE::IMatrix* m_pAbsoluteCoordinateBuffer;
@@ -65,15 +68,21 @@ namespace OpenViBEPlugins
 			OpenViBE::IMatrix* m_pRelativeCoordinateBuffer;
 
 			OpenViBE::uint32 m_ui32SentSampleCount;
+
+			// Gtk window to track mouse position
 			::GtkWidget* m_pWindow;
 
+			// X coordinate from the previous position (in pixel, reference is upper left corner of window)
 			OpenViBE::float64 m_f64Previous_x;
+			// Y coordinate from the previous position (in pixel, reference is upper left corner of window)
 			OpenViBE::float64 m_f64Previous_y;
 
 
 		public:
 
+			// X coordinate of mouse current position
 			gdouble m_Mouse_x ;
+			// Y coordinate of mouse current position
 			gdouble m_Mouse_y ;
 
 		};
@@ -108,7 +117,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Track mouse position within the screen"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Return absolute and relative to the previous one mouse position"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tools"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-index"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_MouseTracking; }

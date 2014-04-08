@@ -30,24 +30,23 @@ boolean CBoxAlgorithmMouseTracking::initialize(void)
 	// Retrieves settings
 	m_f64Frequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_ui32GeneratedEpochSampleCount = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),1);
-//	m_ui32GeneratedEpochSampleCount = 1;
-	m_ui32SentSampleCount = 0;
 
+	m_ui32SentSampleCount = 0;
 	m_f64Previous_x = 0;
 	m_f64Previous_y = 0;
 
 	// Creates empty window to get mouse position
 	m_pWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_widget_add_events(m_pWindow, GDK_POINTER_MOTION_MASK);
-	gtk_window_fullscreen(GTK_WINDOW(m_pWindow));
+	gtk_window_maximize(GTK_WINDOW(m_pWindow));
 	gtk_widget_show_all(m_pWindow);
 
 	g_signal_connect(m_pWindow, "motion-notify-event", G_CALLBACK(motion_event_handler), this);
 
-	m_bHeaderSent=false;
+	m_bHeaderSent = false;
 	
-	m_oAlgo0_SignalEncoder.getInputSamplingRate()=m_f64Frequency;
-	m_oAlgo1_SignalEncoder.getInputSamplingRate()=m_f64Frequency;
+	m_oAlgo0_SignalEncoder.getInputSamplingRate() = m_f64Frequency;
+	m_oAlgo1_SignalEncoder.getInputSamplingRate() = m_f64Frequency;
 
 	return true;
 }
@@ -82,9 +81,6 @@ boolean CBoxAlgorithmMouseTracking::processClock(IMessageClock& rMessageClock)
 
 uint64 CBoxAlgorithmMouseTracking::getClockFrequency(void)
 {
-	// Note that the time is coded on a 64 bits unsigned integer, fixed decimal point (32:32)
-//	return (uint64)((double)(1LL<<32) * m_f64Frequency); // the box clock frequency chosen by user
-
 	// Intentional parameter swap to get the frequency
 	m_f64ClockFrequency = ITimeArithmetics::sampleCountToTime(m_ui32GeneratedEpochSampleCount, m_f64Frequency);
 	
