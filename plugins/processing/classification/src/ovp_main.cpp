@@ -25,6 +25,7 @@
 
 #if defined TARGET_HAS_ThirdPartyITPP
 #include "algorithms/ovpCAlgorithmClassifierLDA.h"
+#include "algorithms/ovpCAlgorithmClassifierPLDA.h"
 #endif // TARGET_HAS_ThirdPartyITPP
 
 #if defined TARGET_HAS_ThirdPartyEIGEN
@@ -92,9 +93,13 @@ OVP_Declare_Begin();
 
 #if defined TARGET_HAS_ThirdPartyITPP
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Linear Discrimimant Analysis (LDA)", OVP_ClassId_Algorithm_ClassifierLDA.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Probabilistic Linear Discrimimant Analysis (PLDA)", OVP_ClassId_Algorithm_ClassifierPLDA.toUInteger());
+
 	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierLDA, OpenViBEPlugins::Classification::getLDABestClassification);
+	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierPLDA, OpenViBEPlugins::Classification::getPLDABestClassification);
 
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierLDADesc);
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierPLDADesc);
 #endif // TARGET_HAS_ThirdPartyITPP
 	
 #if defined TARGET_HAS_ThirdPartyEIGEN
