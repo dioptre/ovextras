@@ -269,6 +269,12 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 		return TRUE;
 	}
 
+	gboolean reorder_scenario_cb(::GtkNotebook* pNotebook, ::GtkNotebookPage* pNotebookPage, guint uiPageNumber, gpointer pUserData)
+	{
+		static_cast<CApplication*>(pUserData)->reorderCurrentScenario((int32)uiPageNumber);
+		return TRUE;
+	}
+
 	void box_algorithm_title_button_expand_cb(::GtkButton* pButton, gpointer pUserData)
 	{
 		gtk_tree_view_expand_all(GTK_TREE_VIEW(gtk_builder_get_object(static_cast<CApplication*>(pUserData)->m_pBuilderInterface, "openvibe-box_algorithm_tree")));
@@ -760,6 +766,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	// Prepares main notebooks
 	m_pScenarioNotebook=GTK_NOTEBOOK(gtk_builder_get_object(m_pBuilderInterface, "openvibe-scenario_notebook"));
 	g_signal_connect(G_OBJECT(m_pScenarioNotebook), "switch-page", G_CALLBACK(change_current_scenario_cb), this);
+	g_signal_connect(G_OBJECT(m_pScenarioNotebook), "page-reordered", G_CALLBACK(reorder_scenario_cb), this);
 	m_pResourceNotebook=GTK_NOTEBOOK(gtk_builder_get_object(m_pBuilderInterface, "openvibe-resource_notebook"));
 
 	// Creates an empty scnenario
@@ -2332,6 +2339,14 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		m_i32CurrentScenarioPage = 0;
 		gtk_spin_button_set_value(m_pZoomSpinner, 100);
 	}
+}
+
+void CApplication::reorderCurrentScenario(OpenViBE::uint32 i32NewPageIndex)
+{
+	CInterfacedScenario* temp = m_vInterfacedScenario[m_i32CurrentScenarioPage];
+	m_vInterfacedScenario[m_i32CurrentScenarioPage] = m_vInterfacedScenario[i32NewPageIndex];
+	m_vInterfacedScenario[i32NewPageIndex] = temp;
+	this->changeCurrentScenario(i32NewPageIndex);
 }
 
 void CApplication::logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLevel level, const char* configName)

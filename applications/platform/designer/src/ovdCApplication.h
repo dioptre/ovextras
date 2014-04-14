@@ -100,6 +100,8 @@ namespace OpenViBEDesigner
 
 		void changeCurrentScenario(
 			OpenViBE::int32 i32PageIndex);
+		void reorderCurrentScenario(
+			OpenViBE::uint32 i32NewPageIndex);
 
 		//@}
 
