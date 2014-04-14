@@ -866,11 +866,18 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		this);
 
 	// Shows main window
+	gint width, height;
 	gtk_builder_connect_signals(m_pBuilderInterface, NULL);
 	if(m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_FullscreenEditor}"))
 	{
 		gtk_window_maximize(GTK_WINDOW(m_pMainWindow));
 	}
+	else if ((width=(m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_WindowWidth}", -1)))!=-1
+			 && (height = (m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_WindowHeight}", -1)))!=-1)
+	{
+		gtk_window_resize(GTK_WINDOW(m_pMainWindow), width, height);
+	}
+
 	if(!m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_ShowAlgorithms}"))
 	{
 		gtk_notebook_remove_page(GTK_NOTEBOOK(gtk_builder_get_object(m_pBuilderInterface, "openvibe-resource_notebook")), 1);
@@ -902,9 +909,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		while(l_oTokenIdentifier!=OV_UndefinedIdentifier);
 	}
 	refresh_search_no_data_cb(NULL, this);
-	// Add the designer log listener
-
-	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"), LogLevel_Debug, "${Designer_DebugCanal}");
+	// Add the designer log listenerLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"), LogLevel_Debug, "${Designer_DebugCanal}");
 	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench"), LogLevel_Benchmark, "${Designer_BenchCanal}");
 	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace"), LogLevel_Trace, "${Designer_TraceCanal}");
 	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info"), LogLevel_Info, "${Designer_InfoCanal}");
@@ -2151,7 +2156,10 @@ boolean CApplication::quitApplicationCB(void)
 			::fprintf(l_pFile, "Designer_FatalCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"))));
 
 			::fprintf(l_pFile, "Designer_HorizontalContainerPosition = %d\n",gtk_paned_get_position(GTK_PANED(gtk_builder_get_object(m_pBuilderInterface, "openvibe-horizontal_container"))));
-
+			gint width=0, height = 0;
+			gtk_window_get_size (GTK_WINDOW(this->m_pMainWindow) ,&width, &height);
+			::fprintf(l_pFile, "Designer_WindowWidth = %d\n",width);
+			::fprintf(l_pFile, "Designer_WindowHeight = %d\n",height);
 			::fclose(l_pFile);
 		}
 		else 
