@@ -14,9 +14,9 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "ovexP300SharedMemoryReader.h"
-#include "properties/ovexP300StimulatorPropertyReader.h"
-#include "sequence/ovexP300SequenceGenerator.h"
+#include "../ovexP300SharedMemoryReader.h"
+#include "../properties/ovexP300StimulatorPropertyReader.h"
+#include "../sequence/ovexP300SequenceGenerator.h"
 
 //TODO get rid of the SDL dependency, should not be in the stimulator, create a separate SDL_thread that listens for key events
 //#include "SDL.h"
@@ -75,7 +75,9 @@ namespace OpenViBEApplications
 
 
 				virtual void setWaitCallBack( Callback2Visualiser callback) {m_funcVisualiserWaitCallback = callback;}
-				virtual void setQuitEventCheck( getFromVisualiser callback) {m_quitevent = callback;}
+				virtual void setQuitEventCheck( getFromVisualiser callback) {
+					std::cout << "quit callback set\n";
+					m_quitevent = callback;}
 				
 				/**
 				 * At the beginning of the the next trial, generate the whole sequence of letters that have to be flashed in the trial
@@ -92,7 +94,7 @@ namespace OpenViBEApplications
 				 */
 				virtual ExternalP300SharedMemoryReader* getSharedMemoryReader() { return &m_oSharedMemoryReader; }
 
-		private:
+		protected:
 			/**
 			 * If you stop early then it will adjust the variables such as m_ui64TrialStartTime so that the next
 			 * trial can begin
@@ -104,6 +106,7 @@ namespace OpenViBEApplications
 			 */
 			virtual OpenViBE::boolean checkForQuitEvent()
 			{
+					std::cout << "check for quit here\n";
 				OpenViBE::boolean l_bQuitEventReceived = false;
 				l_bQuitEventReceived = m_quitevent();
 				return l_bQuitEventReceived;

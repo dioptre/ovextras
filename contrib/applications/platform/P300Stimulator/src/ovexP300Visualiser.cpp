@@ -109,6 +109,7 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	this->m_oStimulator->setQuitEventCheck(ExternalP300Visualiser::areWeQuitting);
 
 
+
 	//initialize the OpenGL context and the main container that is needed to draw everything on the screen by calling the drawAndSync function
 	P300MainContainer::initializeGL(this->m_pInterfacePropReader->getFullScreen(),
 						this->m_pInterfacePropReader->getWidth(),
@@ -198,6 +199,7 @@ void ExternalP300Visualiser::processWaitCallback(uint32 eventID)
 }
 boolean ExternalP300Visualiser::areWeQuitting(void)
 {
+	cout << "ExternalP300Visualiser::areWeQuitting" << std::endl;
 	GLFWwindow* window = externalVisualiser->getMainContainer()->getWindow();
 	return (boolean)glfwWindowShouldClose(window);
 }

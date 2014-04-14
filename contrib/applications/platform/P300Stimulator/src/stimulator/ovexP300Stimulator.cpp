@@ -1,5 +1,5 @@
 #include "ovexP300Stimulator.h"
-#include "ova_defines.h"
+#include "../ova_defines.h"
 #include <system/Time.h>
 
 //#include <boost/thread.hpp>
@@ -343,22 +343,3 @@ void ExternalP300Stimulator::run()
 	m_funcVisualiserCallback(OVA_StimulationId_ExperimentStop);
 }
 
-boolean ExternalP300Stimulator::checkForQuitEvent()
-{
-	boolean l_bQuitEventReceived = false;
-	/*
-	switch (m_eKeyEvent.type) {
-		case SDL_KEYDOWN:
-			if(m_eKeyEvent.key.keysym.sym==SDLK_ESCAPE)
-				l_bQuitEventReceived = true;
-			break;
-		case SDL_QUIT:
-			l_bQuitEventReceived = true;
-			break;
-		default:
-			break;
-	}
-	//*/
-	l_bQuitEventReceived = m_quitevent();
-	return l_bQuitEventReceived;
-}

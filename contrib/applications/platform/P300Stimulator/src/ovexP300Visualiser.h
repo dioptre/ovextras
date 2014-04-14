@@ -10,12 +10,12 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "ovexP300Stimulator.h"
-#include "ovexP300NULLStimulator.h"
-#include "ovexCSoftTagger.h"
+#include "stimulator/ovexP300Stimulator.h"
+#include "stimulator/ovexP300NULLStimulator.h"
+#include "tagging/ovexCSoftTagger.h"
 
 #ifdef TARGET_HAS_ThirdPartyInpout
-#include "ovexParallelPort.h"
+#include "tagging/ovexParallelPort.h"
 #endif
 
 
@@ -27,7 +27,7 @@
 #include "sequence/ovexP300RowColumnSequenceGenerator.h"
 #include "ovexP300SequenceFileWriter.h"
 
-#include "sequence//ovexP300CSVReader.h"
+#include "sequence/ovexP300CSVReader.h"
 
 #include "ova_defines.h"
 

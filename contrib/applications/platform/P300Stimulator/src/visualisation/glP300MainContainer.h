@@ -7,7 +7,7 @@
 
 #include "../properties/ovexP300InterfacePropertyReader.h"
 #include "../properties/ovexP300ScreenLayoutReader.h"
-#include "../ovexITagger.h"
+#include "../tagging/ovexITagger.h"
 #include "../handlers/ovexP300KeyboardHandler.h"
 #include "../handlers/ovexP300ResultAreaHandler.h"
 #include "../handlers/ovexUndoHandler.h"
