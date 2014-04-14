@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 
-#include "ova_defines.h"
+#include "../ova_defines.h"
 
 namespace OpenViBEApplications
 {	
@@ -18,6 +18,7 @@ namespace OpenViBEApplications
 	class WordPredictionInterface
 	{	
 	public:
+		virtual ~WordPredictionInterface(){};
 		/**
 		 * @param prefix the letters or words previously spelled on which we need to base our predictions for the next word or the word to complete
 		 * @param nWords number of words we want to get back in the result vector

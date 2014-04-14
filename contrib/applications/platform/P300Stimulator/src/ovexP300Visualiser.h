@@ -11,15 +11,23 @@
 #include <cstdlib>
 
 #include "ovexP300Stimulator.h"
+#include "ovexP300NULLStimulator.h"
 #include "ovexCSoftTagger.h"
+
+#ifdef TARGET_HAS_ThirdPartyInpout
 #include "ovexParallelPort.h"
+#endif
+
+
 #include "visualisation/glP300MainContainer.h"
 #include "properties/ovexP300InterfacePropertyReader.h"
 #include "properties/ovexP300StimulatorPropertyReader.h"
 #include "properties/ovexP300ScreenLayoutReader.h"
-#include "ovexP300RipRandSequenceGenerator.h"
-#include "ovexP300RowColumnSequenceGenerator.h"
+#include "sequence/ovexP300RipRandSequenceGenerator.h"
+#include "sequence/ovexP300RowColumnSequenceGenerator.h"
 #include "ovexP300SequenceFileWriter.h"
+
+#include "sequence//ovexP300CSVReader.h"
 
 #include "ova_defines.h"
 
@@ -99,7 +107,7 @@ namespace OpenViBEApplications
 			/**
 			 * The stimulator object that generates the stimuli/events given a certain timing
 			 */
-			ExternalP300Stimulator * m_oStimulator;
+			ExternalP300IStimulator * m_oStimulator;
 			
 			/**
 			 * The tagger to write the stimuli either to OpenViBE's acquisition server or to the parallel port

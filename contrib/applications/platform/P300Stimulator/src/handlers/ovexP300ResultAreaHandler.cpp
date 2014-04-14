@@ -171,7 +171,7 @@ void P300ResultAreaHandler::update(GObservable* observable, const void * pUserDa
 			}
 
 			l_i32UndoSize = l_i32UndoSize<=m_ui32ResultCounter?l_i32UndoSize:m_ui32ResultCounter;
-			for (uint32 i=1; i<=l_i32UndoSize; i++)
+			for (uint32 i=1; i<=(uint32)l_i32UndoSize; i++)
 			{
 				m_pSymbolContainer->removeChild(m_ui32ResultCounter-i);
 			}

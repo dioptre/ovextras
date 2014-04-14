@@ -23,6 +23,8 @@ namespace OpenViBEApplications
 		}
 		
 		virtual void writeSequence(OpenViBE::uint64 trialIndex, std::vector< std::vector<OpenViBE::uint32>* >* l_lSequence) = 0;
+
+		virtual OpenViBE::CString getFilename(){return m_sFileName;}
 		
 	protected:
 		OpenViBE::CString m_sFileName;

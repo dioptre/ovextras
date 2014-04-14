@@ -41,6 +41,8 @@ namespace OpenViBEApplications
 			 * @return the index of the letter predicted
 			 */
 			OpenViBE::uint64 readNextPrediction();
+
+			OpenViBE::IStimulationSet* readStimulation();
 			
 			/** 
 			 * returns the matrix with probabilities for all symbols in the keyboard, in order of appearance in the keyboard layout xml file 

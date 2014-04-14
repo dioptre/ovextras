@@ -42,14 +42,7 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	this->m_pStimulatorPropReader->readPropertiesFromFile(this->m_pInterfacePropReader->getStimulatorConfigFile());	
 	
 	//In case hardware of software tagging is enable a different object for tagging is constructed
-	if (this->m_pInterfacePropReader->getHardwareTagging())
-	{
-		this->m_pTagger = new ParallelPort(this->m_pInterfacePropReader->getParallelPortNumber(),
-									this->m_pInterfacePropReader->getSampleFrequency());
-		if (this->m_pTagger->open())
-			this->m_pKernelContext->getLogManager() << LogLevel_Info << "Opened parallel port\n";
-	}
-	else
+	if (!this->m_pInterfacePropReader->getHardwareTagging())
 	{
 		try
 		{
@@ -61,28 +54,56 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 		}
 		if (this->m_pTagger->open())
 			this->m_pKernelContext->getLogManager() << LogLevel_Info << "Opened software tagger\n";
-	}		
+	}
+#ifdef TARGET_HAS_ThirdPartyInpout
+	else if (this->m_pInterfacePropReader->getHardwareTagging())
+	{
+		this->m_pTagger = new ParallelPort(this->m_pInterfacePropReader->getParallelPortNumber(),
+									this->m_pInterfacePropReader->getSampleFrequency());
+		if (this->m_pTagger->open())
+			this->m_pKernelContext->getLogManager() << LogLevel_Info << "Opened parallel port\n";
+	}
+#endif
 	
 	//this is a file writer that will write the generated flash groups to a file when they are generator by the sequence generator
 	m_pSequenceWriter = new P300SequenceFileWriter(this->m_pInterfacePropReader->getFlashGroupDefinitionFile()); 
 	
 	//this will create a sequence generator that is responsible for defining which symbols are in each flash. This is either row-column or RIPRAND
-	P300SequenceGenerator* m_pSequenceGenerator;
+	//P300SequenceGenerator* m_pSequenceGenerator;
 	if (this->m_pInterfacePropReader->getFlashMode()==CString("rowcol"))
 		m_pSequenceGenerator = new P300RowColumnSequenceGenerator(
 			this->m_pScreenLayoutReader->getNumberOfKeys(), 
 			this->m_pStimulatorPropReader->getNumberOfGroups(), 
 			this->m_pStimulatorPropReader->getNumberOfRepetitions());		
+	else if(this->m_pInterfacePropReader->getFlashMode()==CString("file"))
+		m_pSequenceGenerator = new ovexP300CSVReader(
+					this->m_pScreenLayoutReader->getNumberOfKeys(),
+					this->m_pStimulatorPropReader->getNumberOfGroups(),
+					this->m_pStimulatorPropReader->getNumberOfRepetitions());
 	else
 		m_pSequenceGenerator = new P300RipRandSequenceGenerator(
 			this->m_pScreenLayoutReader->getNumberOfKeys(), 
 			this->m_pStimulatorPropReader->getNumberOfGroups(), 
 			this->m_pStimulatorPropReader->getNumberOfRepetitions());
+
 	//register the file write with the sequence generator
 	m_pSequenceGenerator->setSequenceWriter(m_pSequenceWriter);
 	
 	//create the stimulator object and register the callback function that is implemented above.
-	this->m_oStimulator = new ExternalP300Stimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator); 
+	//if we are in replay, create a NULLStimulator
+	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
+	if(m_pInterfacePropReader->getStimulatorMode()==CString("Replay"))
+	{
+		this->m_pKernelContext->getLogManager() << LogLevel_Info << " REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() <<"\n";
+		this->m_oStimulator = new ExternalP300NULLStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
+		this->m_pSequenceGenerator->generateSequence();//to test csv reading
+	}
+	else
+	{
+		this->m_pKernelContext->getLogManager() << LogLevel_Info << " NOT REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() << "\n";
+		this->m_oStimulator = new ExternalP300Stimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
+	}
+	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
 	this->m_oStimulator->setCallBack(ExternalP300Visualiser::processCallback);	
 	this->m_oStimulator->setWaitCallBack(ExternalP300Visualiser::processWaitCallback);
 	this->m_oStimulator->setQuitEventCheck(ExternalP300Visualiser::areWeQuitting);
@@ -297,7 +318,8 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			
 			//get the next flash group which is a vector, the size of the number of symbols on the keyboard, with one or zero to indicate
 			//whether it is flashed or not
-			l_lSymbolChangeList = m_oStimulator->getNextFlashGroup()->data();
+			m_pKernelContext->getLogManager() << LogLevel_Info << "Flash " << eventID << " getting group \n";
+			l_lSymbolChangeList = m_oStimulator->getNextFlashGroup()->data();//to uncomment when not in replay
 			changeStates(l_lSymbolChangeList,FLASH);
 			m_pMainContainer->getKeyboardHandler()->updateChildStates(l_lSymbolChangeList);	
 					
@@ -314,6 +336,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			break;
 		default:
 			eventID--;
+			m_pKernelContext->getLogManager() << LogLevel_Info << "Default (label) received, eventID " << eventID << "\n";
 			m_qEventQueue.push(eventID+1);
 			l_lSymbolChangeList = new uint32[m_pScreenLayoutReader->getNumberOfKeys()]();
 			//we are in the period where feedback is presented
@@ -369,6 +392,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			//we are in the period where the target is displayed
 			else if(m_bInTarget && m_pInterfacePropReader->getSpellingMode()!=FREE_MODE) 
 			{
+				m_pKernelContext->getLogManager() << LogLevel_Info << "Target displayed, eventID " << eventID << "\n";
 				l_lSymbolChangeList[eventID] = 1;	
 				changeStates(l_lSymbolChangeList,TARGET,NOFLASH);
 				

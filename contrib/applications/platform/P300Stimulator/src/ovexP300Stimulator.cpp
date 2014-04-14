@@ -87,6 +87,10 @@ void ExternalP300Stimulator::run()
 	uint32 l_ui32StimulatorFrequency = 250; //TODO should be a configurable parameter
 	uint64 l_ui64TimeStep = static_cast<uint64>((1LL<<32)/l_ui32StimulatorFrequency);
 	uint64 l_ui64CurrentTime = 0;
+
+	uint64 MyInterFlash = 0;
+	uint64 MyLastFlash = 0;
+	uint64 lastCurrentTime = 0;
 	
 	while (m_ui32TrialIndex<=m_ui32TrialCount)
 	{
@@ -96,8 +100,16 @@ void ExternalP300Stimulator::run()
 		#endif
 		
 		//very often one cycle of this loop does not take much time, so we just put the program to sleep until the next time step
+		//*
 		if (m_ui64RealCycleTime<m_ui64StimulatedCycleTime)
-			System::Time::sleep(static_cast<uint32>(std::ceil(1000.0*((m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep)>>22)/1024.0)));		
+		{
+			uint32 WaitFor = static_cast<uint32>(std::ceil(1000.0*((m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep)>>22)/1024.0));
+			//uint32 WaitFor = static_cast<uint32>(std::ceil(1000.0*((m_ui64StimulatedCycleTime-m_ui64RealCycleTime)>>22)/1024.0));
+			System::Time::sleep(WaitFor);
+			//m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Too fast, sleeping for " << WaitFor << "\n";
+		}
+		//*/
+		//m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Adding " << time64(l_ui64TimeStep) << "\n";
             
 		uint64 l_ui64Prediction = m_oSharedMemoryReader.readNextPrediction();
 		IMatrix * l_pLetterProbabilities;
@@ -154,7 +166,8 @@ void ExternalP300Stimulator::run()
 				{
 					l_ui32State=State_RepetitionRest;
 					m_ui64TimeToNextFlash = 0;
-					m_ui64TimeToNextFlashStop = m_ui64TimeToNextFlash + m_ui64FlashDuration;					
+					m_ui64TimeToNextFlashStop = m_ui64TimeToNextFlash + m_ui64FlashDuration;
+					m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Warning << "Rep rest\n";
 				}
 				else
 				{
@@ -165,7 +178,11 @@ void ExternalP300Stimulator::run()
 					{
 						l_ui32State = State_Flash;
 						m_ui64TimeToNextFlash += m_ui64InterStimulusOnset;
-						m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Debug << "Flash at " << l_ui64CurrentTimeInRepetition << " next flash at " << m_ui64TimeToNextFlash << "\n";
+						MyLastFlash = System::Time::zgetTime();
+						m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Flash at real " << time64(MyLastFlash) << " diff is " << time64(MyLastFlash-MyInterFlash) << "\n";
+						m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Flash at " << time64(l_ui64CurrentTime) << " diff is " << time64(l_ui64CurrentTime-lastCurrentTime) << "\n";// next flash at " << time64(m_ui64TimeToNextFlash) << "\n";
+						MyInterFlash = MyLastFlash;
+						lastCurrentTime = l_ui64CurrentTime;
 					}
 					if (l_ui64CurrentTimeInRepetition>=m_ui64TimeToNextFlashStop && m_ui32LastState!=State_NoFlash)
 					{
@@ -302,6 +319,7 @@ void ExternalP300Stimulator::run()
 		
 		uint64 l_ui64TimeDifference = System::Time::zgetTime()-l_ui64TimeBefore;
 		m_ui64RealCycleTime += l_ui64TimeDifference;
+
 
 		#ifdef OUTPUT_TIMING
 		fprintf(timingFile, "%f \n",float64((System::Time::zgetTime()>>22)/1024.0));	

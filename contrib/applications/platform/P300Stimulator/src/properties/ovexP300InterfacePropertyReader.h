@@ -36,6 +36,7 @@ namespace OpenViBEApplications
 		OpenViBE::boolean getCentralFeedbackFreeMode() { return m_bCentralFeedbackFreeMode; }
 		OpenViBE::boolean getCentralFeedbackCopyMode() { return m_bCentralFeedbackCopyMode; }
 		SpellingMode getSpellingMode() { return m_eSpellingMode; }
+		OpenViBE::CString getStimulatorMode() {return m_sStimulatorMode; }
 		OpenViBE::boolean getHardwareTagging() { return m_bHardwareTagging; }
 		/**
 		 * TODO for now the code enabling the use of the photo diode is deprecated
@@ -104,6 +105,8 @@ namespace OpenViBEApplications
 		OpenViBE::uint32 m_ui32ColorFeedbackSteps;
 		OpenViBE::float32 m_f32FeedbackStartValue;
 		OpenViBE::boolean m_bContinuousFeedback;
+
+		OpenViBE::CString m_sStimulatorMode;
 		
 	};
 };

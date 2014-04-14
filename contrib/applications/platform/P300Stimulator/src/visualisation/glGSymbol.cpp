@@ -294,7 +294,7 @@ void GSymbol::computeMaximumLabelSize()
 		m_f32MaxLabelSize = 0.9f*m_f32MaxLabelSize*l_fHeightRatio;
 		//std::cout << "height"  << m_f32MaxLabelSize << std::endl;
 	}
-	/*
+
 	pango_font_description_set_size(desc, m_f32MaxLabelSize*PANGO_SCALE);
 	pango_layout_set_font_description(m_olayout, desc);
 	get_text_size (m_olayout, &text_width, &text_height, &ink, &logical);

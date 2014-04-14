@@ -16,6 +16,7 @@ P300InterfacePropertyReader::P300InterfacePropertyReader(OpenViBE::Kernel::IKern
 	m_sSymbolDefinitionFile = CString("");
 	m_AdditionalConfigurationFile = CString("");
 	m_sFlashGroupDefinitionFile = CString("");
+	m_sStimulatorMode = CString("");
 	m_bFullScreen = false;
 	m_bCentralFeedbackFreeMode = true;
 	m_bCentralFeedbackCopyMode = true;
@@ -88,6 +89,13 @@ void P300InterfacePropertyReader::processChildData(const char* sData)
 			m_eSpellingMode = FREE_MODE;
 		else if(l_sExpandedString==CString("Oddball"))
 			m_eSpellingMode = ODDBALL;	
+	}
+	if(m_vNode.top()==CString("StimulatorMode"))
+	{
+		if(l_sExpandedString==CString("Online"))
+			m_sStimulatorMode = CString("Online");
+		else if(l_sExpandedString==CString("Replay"))
+			m_sStimulatorMode = CString("Replay");
 	}
 	if(m_vNode.top()==CString("StimulatorConfigFile"))
 	{

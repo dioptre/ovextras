@@ -60,7 +60,8 @@ namespace OpenViBEApplications
 		ODDBALL,
 		CALIBRATION_MODE,
 		COPY_MODE,
-		FREE_MODE
+		FREE_MODE,
+		REPLAY_MODE
 	};	
 		
 	/**

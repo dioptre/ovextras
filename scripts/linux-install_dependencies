@@ -689,9 +689,6 @@ if [[ ! -e "$ov_target_folder_hit/no-native-packages.hit" ]]; then
 			ov_hit_package "ogre"
 			ov_hit_package "cegui"
 
-			ov_hit_package "SDL"
-			ov_hit_package "SDL_image"
-			ov_hit_package "ftgl"
 			ov_hit_package "sqlite"
 
 #			mkdir "$ov_target_folder_lib/OGRE" 2> /dev/null
@@ -1547,9 +1544,6 @@ ov_install_package "vrpn"
 #ov_install_package "lua"
 #ov_install_package "swig"
 
-	#ov_install_package "SDL"
-	#ov_install_package "SDL_image"
-	#ov_install_package "ftgl"
 	ov_install_package "sqlite"
 	ov_install_package "presage"
 	ov_install_package "glfw"

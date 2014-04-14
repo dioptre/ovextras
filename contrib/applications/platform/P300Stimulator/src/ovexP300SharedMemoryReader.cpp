@@ -2,6 +2,10 @@
 
 #include <utility>
 
+
+
+#include <iostream>//to rm
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
@@ -22,7 +26,12 @@ uint64 ExternalP300SharedMemoryReader::readNextPrediction()
 	
 	if (l_pStimulationSet!=NULL && l_pStimulationSet->getStimulationCount()>0)
 	{
+		//std::cout << "ExternalP300SharedMemoryReader::readNextPrediction\n";
 		l_ui64Result = l_pStimulationSet->getStimulationIdentifier(0);
+		for(int i=0; i<l_pStimulationSet->getStimulationCount(); i++)
+		{
+			std::cout << "ExternalP300SharedMemoryReader::readNextPrediction " << i <<  " " <<  l_pStimulationSet->getStimulationIdentifier(i) << "\n";
+		}
 		m_pSharedVariableHandler->clear(0); //tricky: if outside if-clause this could delete all elements before it has been read (between reading and clearing processes can be put on hold by OS scheduler)
 		delete l_pStimulationSet;
 	}
@@ -54,4 +63,26 @@ void ExternalP300SharedMemoryReader::clearSymbolProbabilities()
 void ExternalP300SharedMemoryReader::closeSharedMemory()
 {
 	delete m_pSharedVariableHandler;
+}
+
+IStimulationSet * ExternalP300SharedMemoryReader::readStimulation()
+{
+	CStimulationSet* l_pStimulusSet=NULL;
+
+	IStimulationSet* l_pStimulationSet = dynamic_cast<IStimulationSet*>(m_pSharedVariableHandler->front(0));
+	while(l_pStimulationSet!=NULL)
+	{
+		if(l_pStimulusSet==NULL)
+		{
+			std::cout << " >:Ffront: ";
+			l_pStimulusSet = new CStimulationSet();
+		}
+		OpenViBEToolkit::Tools::StimulationSet::append(*l_pStimulusSet, *l_pStimulationSet);
+		std::cout << " pop: ";
+		m_pSharedVariableHandler->pop_front(0);
+		std::cout << " front: ";
+		l_pStimulationSet = dynamic_cast<IStimulationSet*>(m_pSharedVariableHandler->front(0));
+	}
+	m_pSharedVariableHandler->clear(0);
+	return l_pStimulusSet;
 }

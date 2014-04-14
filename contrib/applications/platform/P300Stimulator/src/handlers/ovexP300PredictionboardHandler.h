@@ -2,8 +2,8 @@
 #define __P300PredictionboardHandler_H__
 
 #include "../visualisation/glGContainer.h"
-#include "../ovexWordPredictionEngine.h"
-#include "../ovexPresagePredictionEngine.h"
+#include "../prediction/ovexWordPredictionEngine.h"
+#include "../prediction/ovexPresagePredictionEngine.h"
 
 namespace OpenViBEApplications
 {	
