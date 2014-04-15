@@ -17,6 +17,7 @@ INCLUDE_DIRECTORIES(include)
 ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
 
 INCLUDE("FindThirdPartyVRPN")
+INCLUDE("FindThirdPartyPThread") # needed on Linux for VRPN
 
 # ---------------------------------
 # Target macros
