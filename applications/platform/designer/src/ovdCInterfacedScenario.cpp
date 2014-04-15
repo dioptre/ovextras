@@ -515,8 +515,8 @@ void CInterfacedScenario::redraw(IBox& rBox)
 	const int iCircleSpace=ov_round(4.0*m_f64CurrentScale);
 
 	CBoxProxy l_oBoxProxy(m_rKernelContext, rBox);
-	int xSize=l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) + xMargin*2.0;
-	int ySize=l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) + yMargin*2.0;
+	int xSize=(int)l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) + xMargin*2;
+	int ySize=(int)l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) + yMargin*2;
 	int xStart=ov_round(l_oBoxProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1));
 	int yStart=ov_round(l_oBoxProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1));
 
@@ -937,8 +937,8 @@ void CInterfacedScenario::redraw(IComment& rComment)
 	const int yMargin=ov_round(16.0*m_f64CurrentScale);
 
 	CCommentProxy l_oCommentProxy(m_rKernelContext, rComment);
-	int xSize=l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))+xMargin*2.0;
-	int ySize=l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))+yMargin*2.0;
+	int xSize=(int)l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))+xMargin*2;
+	int ySize=(int)l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))+yMargin*2;
 	int xStart=ov_round(l_oCommentProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1));
 	int yStart=ov_round(l_oCommentProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1));
 
@@ -1191,7 +1191,7 @@ void CInterfacedScenario::setScale(OpenViBE::float64 rScale)
 
 	PangoContext* l_pPongoContext = gtk_widget_get_pango_context(GTK_WIDGET(m_pScenarioDrawingArea));
 	PangoFontDescription *l_pPangoFontDescription = pango_context_get_font_description(l_pPongoContext);
-	pango_font_description_set_size(l_pPangoFontDescription, (gint)m_ui32NormalFontSize*m_f64CurrentScale);
+	pango_font_description_set_size(l_pPangoFontDescription, (gint)(m_ui32NormalFontSize*m_f64CurrentScale));
 
 	m_bScenarioModified = true;
 	this->redraw();
