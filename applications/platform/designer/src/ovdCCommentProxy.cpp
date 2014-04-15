@@ -116,7 +116,7 @@ void CCommentProxy::updateSize(::GtkWidget* pWidget, const char* sText, int* pXS
 	::PangoContext* l_pPangoContext=NULL;
 	::PangoLayout* l_pPangoLayout=NULL;
 	::PangoRectangle l_oPangoRectangle;
-	l_pPangoContext=gtk_widget_create_pango_context(pWidget);
+	l_pPangoContext=gtk_widget_get_pango_context(pWidget);
 	l_pPangoLayout=pango_layout_new(l_pPangoContext);
 	pango_layout_set_alignment(l_pPangoLayout, PANGO_ALIGN_CENTER);
 	if(pango_parse_markup(sText, -1, 0, NULL, NULL, NULL, NULL))
@@ -131,5 +131,4 @@ void CCommentProxy::updateSize(::GtkWidget* pWidget, const char* sText, int* pXS
 	*pXSize=l_oPangoRectangle.width;
 	*pYSize=l_oPangoRectangle.height;
 	g_object_unref(l_pPangoLayout);
-	g_object_unref(l_pPangoContext);
 }
