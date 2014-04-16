@@ -106,7 +106,6 @@ namespace OpenViBEApplications
 			 */
 			virtual OpenViBE::boolean checkForQuitEvent()
 			{
-					std::cout << "check for quit here\n";
 				OpenViBE::boolean l_bQuitEventReceived = false;
 				l_bQuitEventReceived = m_quitevent();
 				return l_bQuitEventReceived;

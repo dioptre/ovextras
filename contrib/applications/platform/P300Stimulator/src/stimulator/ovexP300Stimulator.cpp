@@ -99,17 +99,21 @@ void ExternalP300Stimulator::run()
             fprintf(timingFile, "%f \n",float64((System::Time::zgetTime()>>22)/1024.0));
 		#endif
 		
+		//m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "real " << time64(m_ui64RealCycleTime) << " simulated " << time64(l_ui64CurrentTime) << "\n";
 		//very often one cycle of this loop does not take much time, so we just put the program to sleep until the next time step
 		//*
-		if (m_ui64RealCycleTime<m_ui64StimulatedCycleTime)
+		if (m_ui64RealCycleTime<l_ui64CurrentTime)
 		{
-			uint32 WaitFor = static_cast<uint32>(std::ceil(1000.0*((m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep)>>22)/1024.0));
-			//uint32 WaitFor = static_cast<uint32>(std::ceil(1000.0*((m_ui64StimulatedCycleTime-m_ui64RealCycleTime)>>22)/1024.0));
+			uint32 WaitFor = static_cast<uint32>(std::ceil(1000.0*((l_ui64CurrentTime-m_ui64RealCycleTime+l_ui64TimeStep)>>22)/1024.0));
 			System::Time::sleep(WaitFor);
-			//m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Too fast, sleeping for " << WaitFor << "\n";
+		}
+		else if(m_ui64RealCycleTime-l_ui64CurrentTime>l_ui64TimeStep)//if the simulated time is behind real time, we make up for lost time by skipping the necessary amount of cycles
+		{
+			uint64 NumberOfCycles = ceil((double)(m_ui64RealCycleTime-l_ui64CurrentTime)/l_ui64TimeStep);
+			l_ui64CurrentTime+=NumberOfCycles*l_ui64TimeStep;
+
 		}
 		//*/
-		//m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Adding " << time64(l_ui64TimeStep) << "\n";
             
 		uint64 l_ui64Prediction = m_oSharedMemoryReader.readNextPrediction();
 		IMatrix * l_pLetterProbabilities;
@@ -167,7 +171,7 @@ void ExternalP300Stimulator::run()
 					l_ui32State=State_RepetitionRest;
 					m_ui64TimeToNextFlash = 0;
 					m_ui64TimeToNextFlashStop = m_ui64TimeToNextFlash + m_ui64FlashDuration;
-					m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Warning << "Rep rest\n";
+					//m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Warning << "Rep rest\n";
 				}
 				else
 				{
@@ -201,8 +205,10 @@ void ExternalP300Stimulator::run()
 
 		if(l_ui32State!=m_ui32LastState)
 		{
-			m_ui64RealCycleTime = 0;
-			m_ui64StimulatedCycleTime = 0;
+			//why reset? unnecessary
+			//m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "reset times\n";
+			//m_ui64RealCycleTime = 0;
+			//m_ui64StimulatedCycleTime = 0;
 
 			switch(m_ui32LastState)
 			{
@@ -311,8 +317,6 @@ void ExternalP300Stimulator::run()
 		l_ui64CurrentTime += l_ui64TimeStep;
 		m_ui64StimulatedCycleTime += l_ui64TimeStep;
 
-		//SDL_PollEvent(&m_eKeyEvent);
-		//std::cout << "Stimulator waiting 0 " << std::endl;
 		m_funcVisualiserWaitCallback(0);
 		if(checkForQuitEvent())
 			m_ui32TrialIndex = UINT_MAX;
@@ -327,14 +331,10 @@ void ExternalP300Stimulator::run()
 	}
 	
 	//in case it is not stopped in the middle of the stimulation process we want to wait on an event before quitting the application
-	//TODO this is SDL code and should be separated from the stimulator code, a new SDL thread with the same openGL context should be created
-	//to monitor for certain events
 	if (m_ui32TrialIndex != UINT_MAX)
 	{
-		//SDL_WaitEvent(&m_eKeyEvent);
-		std::cout << "Stimulator waiting " << std::endl;
 		m_funcVisualiserWaitCallback(1);
-		while (!checkForQuitEvent())// && SDL_WaitEvent(&m_eKeyEvent))
+		while (!checkForQuitEvent())
 		{
 			m_funcVisualiserWaitCallback(1);
 			System::Time::sleep(50);
