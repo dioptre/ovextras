@@ -61,7 +61,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		//If the algorithm is still unknown, that means that we face an error
 		if(l_oAlgorithmClassIdentifier==OV_UndefinedIdentifier)
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Unknown classifier algorithm [" << l_pTempNode->getPCData().c_str() << "]\n";
+			this->getLogManager() << LogLevel_ImportantWarning << "Unknown classifier algorithm [" << l_pTempNode->getPCData() << "]\n";
 			return false;
 		}
 	}
@@ -71,14 +71,14 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 
 	//Load Rejected class label and put it as the entry for class 0
 	l_pTempNode = l_pStimulationsNode->getChildByName(c_sRejectedClassNodeName);
-	CString l_sRejectedLabel(l_pTempNode->getPCData().c_str());
+	CString l_sRejectedLabel(l_pTempNode->getPCData());
 	m_vStimulation[0]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sRejectedLabel);
 
 	//Now load every stimulation and store them in the map with the right class id
 	for(uint32 i=1; i<l_pStimulationsNode->getChildCount(); i++)
 	{
 		l_pTempNode = l_pStimulationsNode->getChild(i);
-		CString l_sStimulationName(l_pTempNode->getPCData().c_str());
+		CString l_sStimulationName(l_pTempNode->getPCData());
 
 		OpenViBE::float64 l_f64ClassId;
 		std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));

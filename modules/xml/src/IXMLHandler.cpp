@@ -1,6 +1,7 @@
 #include "IXMLHandler.h"
 
 #include <expat.h>
+#include <cstring>
 #include <stack>
 #include <fstream>
 #include <iostream>
@@ -18,7 +19,7 @@ namespace XML
 		virtual XML::IXMLNode* parseString(const char* sString, const uint32& uiSize);
 
 		//XML extraction
-		virtual XML::boolean writeXMLInFile(IXMLNode &rNode, const char* sPath);
+		virtual XML::boolean writeXMLInFile(const IXMLNode &rNode, const char* sPath) const;
 
 		//Internal function for parsing
 		virtual void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, uint64 ui64AttributeCount);
@@ -119,13 +120,15 @@ IXMLNode *IXMLHandlerImpl::parseString(const char *sString, const uint32& uiSize
 	return m_pRootNode;
 }
 
-boolean IXMLHandlerImpl::writeXMLInFile(IXMLNode &rNode, const char *sPath)
+boolean IXMLHandlerImpl::writeXMLInFile(const IXMLNode &rNode, const char *sPath) const
 {
 	std::ofstream l_oFile(sPath, ios::binary);
 	if(l_oFile.is_open())
 	{
-		l_oFile.write(rNode.getXML().c_str(), rNode.getXML().length());
+		char* l_sXML = rNode.getXML();
+		l_oFile.write(l_sXML, ::strlen(l_sXML));
 		l_oFile.close();
+		free(l_sXML);
 		return true;
 	}
 	return false;

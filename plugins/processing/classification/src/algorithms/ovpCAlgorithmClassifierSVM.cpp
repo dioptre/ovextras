@@ -595,7 +595,7 @@ void CAlgorithmClassifierSVM::loadParamNodeConfiguration(XML::IXMLNode *pParamNo
 	XML::IXMLNode* l_pTempNode = pParamNode->getChildByName(c_sSvmTypeNodeName);
 	for(int i =0; get_svm_type(i);i++)
 	{
-		if ( strcmp(get_svm_type(i),l_pTempNode->getPCData().c_str())==0)
+		if ( strcmp(get_svm_type(i),l_pTempNode->getPCData())==0)
 		{
 			m_pModel->param.svm_type=i;
 		}
@@ -609,7 +609,7 @@ void CAlgorithmClassifierSVM::loadParamNodeConfiguration(XML::IXMLNode *pParamNo
 	l_pTempNode = pParamNode->getChildByName(c_sKernelTypeNodeName);
 	for(int i =0; get_kernel_type(i);i++)
 	{
-		if ( strcmp(get_kernel_type(i), l_pTempNode->getPCData().c_str())==0)
+		if ( strcmp(get_kernel_type(i), l_pTempNode->getPCData())==0)
 		{
 			m_pModel->param.kernel_type=i;
 		}

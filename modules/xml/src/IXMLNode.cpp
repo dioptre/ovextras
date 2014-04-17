@@ -1,6 +1,8 @@
 #include "IXMLNode.h"
 
 #include <string>
+#include <cstring>
+#include <stdexcept>
 #include <stack>
 #include <vector>
 #include <map>
@@ -12,34 +14,34 @@ namespace XML
 	public:
 		IXMLNodeImpl(const char* sName);
 
-		virtual std::string getName();
+		virtual const char* getName() const;
 
 		virtual void release(void);
 
 		//Attribute
 		virtual XML::boolean addAttribute(const char* sAttributeName, const char* sAttributeValue);
-		virtual XML::boolean hasAttribute(const char* sAttributeName);
-		virtual std::string getAttribute(const char* sAttributeName);
+		virtual XML::boolean hasAttribute(const char* sAttributeName) const;
+		virtual const char* getAttribute(const char* sAttributeName) const;
 
 		//PCDATA
 		virtual void setPCData(const char* childData);
-		virtual std::string &getPCData(void);
+		virtual const char* getPCData(void) const;
 
 		//Child
 		virtual void addChild(XML::IXMLNode* pChildNode);
-		virtual XML::IXMLNode* getChild(XML::uint32 iChildIndex);
-		virtual XML::IXMLNode* getChildByName(const char* sName);
-		virtual XML::uint32 getChildCount(void);
+		virtual XML::IXMLNode* getChild(const XML::uint32 iChildIndex) const;
+		virtual XML::IXMLNode* getChildByName(const char* sName) const;
+		virtual XML::uint32 getChildCount(void) const;
 
 		//XMl generation
-		virtual std::string getXML(XML::uint32 depth=0);
+		virtual char* getXML(const XML::uint32 depth=0) const;
 
 	protected:
 		virtual ~IXMLNodeImpl(void);
 
 	private:
-		std::string sanitize(std::string& sString);
-		void applyIndentation(std::string &sString, XML::uint32 depth);
+		std::string sanitize(const std::string& sString) const;
+		void applyIndentation(std::string &sString, XML::uint32 depth) const;
 
 
 		std::vector<XML::IXMLNode *> m_oNodeVector;
@@ -74,9 +76,9 @@ IXMLNodeImpl::IXMLNodeImpl(const char *sName):
 
 }
 
-string IXMLNodeImpl::getName()
+const char* IXMLNodeImpl::getName() const
 {
-	return m_sNodeName;
+	return m_sNodeName.c_str();
 }
 
 boolean IXMLNodeImpl::addAttribute(const char* sAttributeName, const char* sAttributeValue)
@@ -85,14 +87,22 @@ boolean IXMLNodeImpl::addAttribute(const char* sAttributeName, const char* sAttr
 	return true;
 }
 
-XML::boolean IXMLNodeImpl::hasAttribute(const char *sAttributeName)
+XML::boolean IXMLNodeImpl::hasAttribute(const char *sAttributeName) const
 {
 	return m_mAttibuteMap.count(sAttributeName) != 0;
 }
 
-string IXMLNodeImpl::getAttribute(const char *sAttributeName)
+const char* IXMLNodeImpl::getAttribute(const char *sAttributeName) const
 {
-	return m_mAttibuteMap[sAttributeName];
+	const char* res = NULL;
+	try
+	{
+		res = m_mAttibuteMap.at(sAttributeName).c_str();
+	}
+	catch (const std::out_of_range& oor)
+	{
+	}
+	return res;
 }
 
 void IXMLNodeImpl::setPCData(const char *childData)
@@ -101,9 +111,9 @@ void IXMLNodeImpl::setPCData(const char *childData)
 	m_bHasPCData = true;
 }
 
-string &IXMLNodeImpl::getPCData(void)
+const char* IXMLNodeImpl::getPCData(void) const
 {
-	return m_sPCData;
+	return m_sPCData.c_str();
 }
 
 void IXMLNodeImpl::addChild(IXMLNode *pChildNode)
@@ -111,29 +121,28 @@ void IXMLNodeImpl::addChild(IXMLNode *pChildNode)
 	m_oNodeVector.push_back(pChildNode);
 }
 
-IXMLNode *IXMLNodeImpl::getChild(XML::uint32 iChildIndex)
+IXMLNode *IXMLNodeImpl::getChild(const XML::uint32 iChildIndex) const
 {
 	return m_oNodeVector[iChildIndex];
 }
 
-IXMLNode *IXMLNodeImpl::getChildByName(const char *sName)
+IXMLNode *IXMLNodeImpl::getChildByName(const char *sName) const
 {
-	string l_sName(sName);
-	for (vector<XML::IXMLNode*>::iterator it=m_oNodeVector.begin(); it!=m_oNodeVector.end(); ++it)
+	for (vector<XML::IXMLNode*>::const_iterator it=m_oNodeVector.begin(); it!=m_oNodeVector.end(); ++it)
 	{
 		IXMLNode *l_sTempNode = (IXMLNode *)(*it);
-		if(!l_sTempNode->getName().compare(l_sName))
+		if(::strcmp(l_sTempNode->getName(), sName) == 0)
 			return l_sTempNode;
 	}
 	return NULL;
 }
 
-XML::uint32 IXMLNodeImpl::getChildCount(void)
+XML::uint32 IXMLNodeImpl::getChildCount(void) const
 {
 	return m_oNodeVector.size();
 }
 
-std::string IXMLNodeImpl::sanitize(string &sString)
+std::string IXMLNodeImpl::sanitize(const string &sString) const
 {
 	string::size_type i;
 	string l_sRes(sString);
@@ -153,13 +162,13 @@ std::string IXMLNodeImpl::sanitize(string &sString)
 	return l_sRes;
 }
 
-void IXMLNodeImpl::applyIndentation(string &sString, XML::uint32 depth)
+void IXMLNodeImpl::applyIndentation(string &sString, XML::uint32 depth) const
 {
 	string l_sIndent(depth, '\t');
 	sString.append(l_sIndent);
 }
 
-string IXMLNodeImpl::getXML(XML::uint32 depth)
+char* IXMLNodeImpl::getXML(const XML::uint32 depth) const
 {
 	string l_sRes;
 	applyIndentation(l_sRes, depth);
@@ -168,7 +177,7 @@ string IXMLNodeImpl::getXML(XML::uint32 depth)
 	//Add attributes if we have some
 	if(!m_mAttibuteMap.empty())
 	{
-		for (map<string,string>::iterator it=m_mAttibuteMap.begin(); it!=m_mAttibuteMap.end(); ++it)
+		for (map<string,string>::const_iterator it=m_mAttibuteMap.begin(); it!=m_mAttibuteMap.end(); ++it)
 		{
 
 			l_sRes = l_sRes + string(" ")+ it->first + string("=\"") + sanitize(it->second) + string("\"");
@@ -178,7 +187,8 @@ string IXMLNodeImpl::getXML(XML::uint32 depth)
 	if(!m_bHasPCData && m_oNodeVector.empty())
 	{
 		l_sRes = l_sRes + string("/>\n");
-		return l_sRes;
+		char* l_pRes = ::strdup(l_sRes.c_str());
+		return l_pRes;
 	}
 
 	l_sRes = l_sRes + string(">");
@@ -188,7 +198,7 @@ string IXMLNodeImpl::getXML(XML::uint32 depth)
 		l_sRes = l_sRes + sanitize(m_sPCData);
 	}
 
-	for (vector<XML::IXMLNode*>::iterator it=m_oNodeVector.begin(); it!=m_oNodeVector.end(); ++it)
+	for (vector<XML::IXMLNode*>::const_iterator it=m_oNodeVector.begin(); it!=m_oNodeVector.end(); ++it)
 	{
 		IXMLNode *l_sTempNode = (IXMLNode *)(*it);
 		l_sRes = l_sRes + string("\n") + l_sTempNode->getXML(depth+1);
@@ -200,7 +210,9 @@ string IXMLNodeImpl::getXML(XML::uint32 depth)
 		applyIndentation(l_sRes, depth);
 	}
 	l_sRes = l_sRes + "</" + m_sNodeName + ">";
-	return l_sRes;
+
+	char* l_pRes = ::strdup(l_sRes.c_str());
+	return l_pRes;
 }
 
 OV_API IXMLNode* XML::createNode(const char* sName)

@@ -11,25 +11,25 @@ namespace XML
 	public:
 		virtual void release(void)=0;
 
-		virtual std::string getName()=0;
+		virtual const char* getName() const =0;
 
 		//Attribute
 		virtual XML::boolean addAttribute(const char* sAttributeName, const char* sAttributeValue)=0;
-		virtual XML::boolean hasAttribute(const char* sAttributeName)=0;
-		virtual std::string getAttribute(const char* sAttributeName)=0;
+		virtual XML::boolean hasAttribute(const char* sAttributeName) const =0;
+		virtual const char* getAttribute(const char* sAttributeName) const =0;
 
 		//PCDATA
 		virtual void setPCData(const char* childData)=0;
-		virtual std::string &getPCData(void)=0;
+		virtual const char* getPCData(void) const =0;
 
 		//Child
 		virtual void addChild(XML::IXMLNode* ChildNode)=0;
-		virtual XML::IXMLNode* getChild(XML::uint32 iChildIndex)=0;
-		virtual XML::IXMLNode* getChildByName(const char* sName)=0;
-		virtual XML::uint32 getChildCount(void)=0;
+		virtual XML::IXMLNode* getChild(const XML::uint32 iChildIndex) const =0;
+		virtual XML::IXMLNode* getChildByName(const char* sName) const =0;
+		virtual XML::uint32 getChildCount(void) const =0;
 
 		//XML generation
-		virtual std::string getXML(XML::uint32 depth=0)=0;
+		virtual char* getXML(const XML::uint32 depth=0) const =0;
 
 	protected:
 		virtual ~IXMLNode(void) {}
