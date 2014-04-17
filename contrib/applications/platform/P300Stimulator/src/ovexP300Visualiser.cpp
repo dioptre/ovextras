@@ -55,7 +55,7 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 		if (this->m_pTagger->open())
 			this->m_pKernelContext->getLogManager() << LogLevel_Info << "Opened software tagger\n";
 	}
-#ifdef TARGET_HAS_ThirdPartyInpout
+#if defined TARGET_OS_Linux || (defined TARGET_OS_Windows && defined TARGET_HAS_ThirdPartyInpout)
 	else if (this->m_pInterfacePropReader->getHardwareTagging())
 	{
 		this->m_pTagger = new ParallelPort(this->m_pInterfacePropReader->getParallelPortNumber(),

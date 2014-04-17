@@ -14,7 +14,7 @@
 #include "stimulator/ovexP300NULLStimulator.h"
 #include "tagging/ovexCSoftTagger.h"
 
-#ifdef TARGET_HAS_ThirdPartyInpout
+#if defined TARGET_OS_Linux || (defined TARGET_OS_Windows && defined TARGET_HAS_ThirdPartyInpout)
 #include "tagging/ovexParallelPort.h"
 #endif
 
