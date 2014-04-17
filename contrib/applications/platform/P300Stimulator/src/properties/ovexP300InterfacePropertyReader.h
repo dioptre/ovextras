@@ -74,6 +74,8 @@ namespace OpenViBEApplications
 		 */
 		OpenViBE::CString getNGramDatabaseName() { return m_sNGramDatabaseName; }
 
+		OpenViBE::uint32 getMonitorIndex() { return m_ui32MonitorIndex;}
+
 	protected:
 		void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount); // XML IReaderCallback
 		void processChildData(const char* sData); // XML IReaderCallback
@@ -107,6 +109,7 @@ namespace OpenViBEApplications
 		OpenViBE::boolean m_bContinuousFeedback;
 
 		OpenViBE::CString m_sStimulatorMode;
+		OpenViBE::uint32 m_ui32MonitorIndex;
 		
 	};
 };

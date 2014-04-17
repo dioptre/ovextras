@@ -113,8 +113,23 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	//initialize the OpenGL context and the main container that is needed to draw everything on the screen by calling the drawAndSync function
 	P300MainContainer::initializeGL(this->m_pInterfacePropReader->getFullScreen(),
 						this->m_pInterfacePropReader->getWidth(),
-						this->m_pInterfacePropReader->getHeight());
-	this->m_pMainContainer = new P300MainContainer(this->m_pInterfacePropReader, this->m_pScreenLayoutReader);
+						this->m_pInterfacePropReader->getHeight(),
+						this->m_pInterfacePropReader->getMonitorIndex());
+	//if fullscreen, size has been computed by initializeGL, otherwise, it returns the value defined in the file
+	int width, height;
+	GLFWwindow* window = P300MainContainer::getWindow();
+	if(window!=NULL)
+	{
+		std::cout << "glfw window ok\n";
+		glfwGetWindowSize(window, &width, &height);
+	}
+	else
+	{
+		//should not go there, if window is NULL something else will fail anyway
+		width = this->m_pInterfacePropReader->getWidth();
+		height = this->m_pInterfacePropReader->getHeight();
+	}
+	this->m_pMainContainer = new P300MainContainer(this->m_pInterfacePropReader, this->m_pScreenLayoutReader, width, height);
 				
 	//draw everything on the screen			
 	this->m_pMainContainer->drawAndSync(this->m_pTagger,this->m_qEventQueue);		
@@ -199,7 +214,6 @@ void ExternalP300Visualiser::processWaitCallback(uint32 eventID)
 }
 boolean ExternalP300Visualiser::areWeQuitting(void)
 {
-	cout << "ExternalP300Visualiser::areWeQuitting" << std::endl;
 	GLFWwindow* window = externalVisualiser->getMainContainer()->getWindow();
 	return (boolean)glfwWindowShouldClose(window);
 }
@@ -338,6 +352,10 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			break;
 		default:
 			eventID--;
+			if(m_pInterfacePropReader->getStimulatorMode()==CString("Replay"))
+			{
+				eventID++;
+			}
 			m_pKernelContext->getLogManager() << LogLevel_Info << "Default (label) received, eventID " << eventID << "\n";
 			m_qEventQueue.push(eventID+1);
 			l_lSymbolChangeList = new uint32[m_pScreenLayoutReader->getNumberOfKeys()]();

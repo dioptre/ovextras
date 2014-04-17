@@ -13,7 +13,7 @@
 	<!-- The name of the database used by Presage for word prediction -->
 	<NGramDatabase>openvibe/applications/externalP300Stimulator/fr.db</NGramDatabase>
 	<!-- width and height of the window, full screen or nofull screen-->
-	<Screen width="800" height="600">nofull</Screen>
+	<Screen index="${MonitorIndex}" width="${MonitorWidth}" height="${MonitorHeight}">full</Screen>
 	<!-- riprand or rowcol -->
 	<FlashMode>${FlashMode}</FlashMode>
 	<!-- specifies where the feedback is presented in free mode -->

@@ -41,8 +41,11 @@ namespace OpenViBEApplications
 		 * @param propertyObject this is the property reader that reads from interface-properties.xml
 		 * @param layoutPropObject the reader that contains all information/properties of all keys as specified in for example
 		 * the 5by10grid-abc-gray.xml file
+		 (added the two following param because it originally took them from the file but in fullscreen mode they are automatically computed by glfw)
+		 * @param width
+		 * @param height
 		 */
-		P300MainContainer(P300InterfacePropertyReader* propertyObject, P300ScreenLayoutReader* layoutPropObject);	
+		P300MainContainer(P300InterfacePropertyReader* propertyObject, P300ScreenLayoutReader* layoutPropObject, int width, int height);
 		P300MainContainer(const P300MainContainer& gcontainer);
 		virtual ~P300MainContainer();		
 		
@@ -104,9 +107,11 @@ namespace OpenViBEApplications
 		 * @param width width of window (also needs to be specified for full screen, TODO in full screen mode the width and 
 		 * height should be detected automatically)
 		 * @param height height of the window
+		 * @param monitorIndex index of the monitor the app appears on (only relevant in fullscreen mode, count start at 0)
 		 */
-		static void initializeGL(OpenViBE::boolean fullScreen, OpenViBE::float32 width, OpenViBE::float32 height);
+		static void initializeGL(OpenViBE::boolean fullScreen, OpenViBE::float32 width, OpenViBE::float32 height, OpenViBE::uint32 monitorIndex);
 
+		//getter to the window (should it be made const?)
 		static GLFWwindow*  getWindow(void) {return m_oGLFWWindow;};
 	private:
 		/**
@@ -160,8 +165,8 @@ namespace OpenViBEApplications
 		GTable* m_gTargetArea;
 		GTable* m_gResultArea;
 		GTable* m_gPredictionArea;
-		GContainer* m_gDiodeArea;
-		GContainer* m_gLitDiodeArea;
+		GContainer* m_gDiodeArea;//diode area when it is dark
+		GContainer* m_gLitDiodeArea;//diode area when it is light
 		
 		P300InterfacePropertyReader* m_pInterfacePropertyObject; //responsibility of the caller to clean this up
 		P300ScreenLayoutReader* m_pScreenLayoutObject;

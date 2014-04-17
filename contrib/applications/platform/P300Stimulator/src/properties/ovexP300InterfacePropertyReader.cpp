@@ -36,7 +36,9 @@ P300InterfacePropertyReader::P300InterfacePropertyReader(OpenViBE::Kernel::IKern
 	m_oFeedbackEndColor = l_cDefaultColor;
 	m_ui32ColorFeedbackSteps = 0;
 	m_f32FeedbackStartValue = 0;
-	m_bContinuousFeedback = false;			
+	m_bContinuousFeedback = false;
+
+	m_ui32MonitorIndex=0;
 }
 
 void P300InterfacePropertyReader::openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
@@ -61,6 +63,8 @@ void P300InterfacePropertyReader::openChild(const char* sName, const char** sAtt
 			else if(CString(*(sAttributeName+it))==CString("height"))
 				//m_ui32WindowHeight = strtoul(*(sAttributeValue+it),NULL,0);
 				m_f32WindowHeight = static_cast<float32>(m_pKernelContext->getConfigurationManager().expandAsUInteger(CString(*(sAttributeValue+it))));
+			else if(CString(*(sAttributeName+it))==CString("index"))
+				m_ui32MonitorIndex = static_cast<float32>(m_pKernelContext->getConfigurationManager().expandAsUInteger(CString(*(sAttributeValue+it))));
 		}
 	}
 	if (CString(sName)==CString("FeedbackPresentation"))

@@ -16,8 +16,8 @@ using namespace std;
 //SDL_Surface* P300MainContainer::m_oSDLSurface;
 GLFWwindow* P300MainContainer::m_oGLFWWindow;
 
-P300MainContainer::P300MainContainer(P300InterfacePropertyReader* propertyObject, P300ScreenLayoutReader* layoutPropObject) : 
-GContainer(0.0f,0.0f,propertyObject->getWidth(),propertyObject->getHeight()), m_pInterfacePropertyObject(propertyObject),
+P300MainContainer::P300MainContainer(P300InterfacePropertyReader* propertyObject, P300ScreenLayoutReader* layoutPropObject, int width, int height) :
+GContainer(0.0f,0.0f,width,height), m_pInterfacePropertyObject(propertyObject),
 m_pScreenLayoutObject(layoutPropObject)
 {
 	#ifdef OUTPUT_TIMING
@@ -111,7 +111,7 @@ void P300MainContainer::initialize(uint32 nGridCells)
 
 
 
-void P300MainContainer::initializeGL(OpenViBE::boolean fullScreen, OpenViBE::float32 width, OpenViBE::float32 height)
+void P300MainContainer::initializeGL(OpenViBE::boolean fullScreen, OpenViBE::float32 width, OpenViBE::float32 height, OpenViBE::uint32 monitorIndex)
 {
 
 	if(!glfwInit())
@@ -121,7 +121,52 @@ void P300MainContainer::initializeGL(OpenViBE::boolean fullScreen, OpenViBE::flo
 
 	//GLFWwindow*
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	m_oGLFWWindow = glfwCreateWindow((int)width, (int)height, "My Title", NULL, NULL);
+	if(!fullScreen)
+	{
+		m_oGLFWWindow = glfwCreateWindow((int)width, (int)height, "My Title", NULL, NULL);
+	}
+	else
+	{
+		int index=monitorIndex;
+
+		//get available monitors
+		int count;
+		GLFWmonitor** monitors = glfwGetMonitors(&count);
+		GLFWmonitor* primary = NULL;
+
+		std::cout << "got " << count << " monitors, requesting monitor " << index << "\n";
+
+		if(count!=0)
+		{
+			if(index>count-1)
+			{
+				std::cout << "Requesting a monitor that does not exist!!!\n";
+				//default to primary monitor
+				primary = glfwGetPrimaryMonitor();
+			}
+			else
+			{
+				primary = *(monitors+index);
+			}
+
+		}
+		else
+		{
+			std::cout << "No monitor available\n";
+			return;
+		}
+
+
+		//*
+		const GLFWvidmode* mode = glfwGetVideoMode(primary);
+		//ignore whatever width and height were given and use the screen size
+		width = mode->width;
+		height = mode->height;
+		std::cout << "index " << index << " mode width " << width << " mode height " << height << "\n";
+		//*/
+
+		m_oGLFWWindow = glfwCreateWindow((int)width, (int)height, "My Title", primary, NULL);
+	}
 	glfwMakeContextCurrent(m_oGLFWWindow);
 
 
