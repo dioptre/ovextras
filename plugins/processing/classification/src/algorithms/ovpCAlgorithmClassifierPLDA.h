@@ -9,7 +9,6 @@
 #include <toolkit/ovtk_all.h>
 
 #include <xml/IXMLNode.h>
-#define TARGET_HAS_ThirdPartyITPP
 #if defined TARGET_HAS_ThirdPartyITPP
 
 #include <itpp/itbase.h>

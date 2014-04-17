@@ -31,6 +31,7 @@
 #if defined TARGET_HAS_ThirdPartyEIGEN
 #include "algorithms/ovpCAlgorithmConditionedCovariance.h"
 #include "algorithms/ovpCAlgorithmClassifierShrinkageLDA.h"
+#include "algorithms/ovpCAlgorithmClassifierPShrinkageLDA.h"
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
 OVP_Declare_Begin();
@@ -108,6 +109,10 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Shrinkage LDA", OVP_ClassId_Algorithm_ClassifierShrinkageLDA.toUInteger());
 	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierShrinkageLDA, OpenViBEPlugins::Classification::getShrinkageLDABestClassification);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierShrinkageLDADesc);
+
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Probabilistic Shrinkage LDA", OVP_ClassId_Algorithm_ClassifierPShrinkageLDA.toUInteger());
+	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierPShrinkageLDA, OpenViBEPlugins::Classification::getPShrinkageLDABestClassification);
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierPShrinkageLDADesc);
 
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
