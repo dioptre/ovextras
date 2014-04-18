@@ -4,6 +4,7 @@
 #include "GenericVRPNServer.h"
 #include <iostream>
 #include <cmath>
+#include <unistd.h>
 
 #define DEFAULT_PORT 50555
 
