@@ -1135,12 +1135,12 @@ int64 CAcquisitionServer::getInnerLatencySampleCount(void) const
 
 boolean CAcquisitionServer::updateImpedance(const uint32 ui32ChannelIndex, const float64 f64Impedance)
 {
-	if(ui32ChannelIndex >= m_vImpedance.size())
-	{
-		return false;
-	}
-	m_vImpedance[ui32ChannelIndex]=f64Impedance;
-	return true;
+    for (OpenViBE::uint32 i=0;i<m_vSelectedChannels.size();++i)
+        if (ui32ChannelIndex==m_vSelectedChannels[i]) {
+            m_vImpedance[i] = f64Impedance;
+            return true;
+        }
+    return false;
 }
 
 // ____________________________________________________________________________
