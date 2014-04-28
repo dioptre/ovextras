@@ -12,6 +12,12 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEAcquisitionServer;
 
+static void button_apply_filters_pressed_cb(::GtkButton* pButton, void* pUserData)
+{
+	CConfigurationGTecGUSBamp* l_pConfig=static_cast<CConfigurationGTecGUSBamp*>(pUserData);
+	l_pConfig->buttonFiltersApplyPressedCB();
+}
+
 static void button_calibrate_pressed_cb(::GtkButton* pButton, void* pUserData)
 {
 	CConfigurationGTecGUSBamp* l_pConfig=static_cast<CConfigurationGTecGUSBamp*>(pUserData);
@@ -38,7 +44,7 @@ static void button_filters_pressed_cb(::GtkButton* pButton, void* pUserData)
 }
 
 CConfigurationGTecGUSBamp::CConfigurationGTecGUSBamp(
-	            const char* sGtkBuilderFileName,uint32& rUSBIndex,uint8& rCommonGndAndRefBitmap, int32& rNotchFilterIndex, int32& rBandPassFilterIndex,OpenViBE::boolean& rTriggerInput,vector<string> rDevicesSerials,string& rMasterDeviceIndex)
+	            const char* sGtkBuilderFileName,uint32& rUSBIndex,uint8& rCommonGndAndRefBitmap, int32& rNotchFilterIndex, int32& rBandPassFilterIndex,OpenViBE::boolean& rTriggerInput,vector<string> rDevicesSerials,string& rMasterDeviceIndex, OpenViBE::boolean& rBipolar)
 	: CConfigurationBuilder(sGtkBuilderFileName)
 	,m_rUSBIndex(rUSBIndex)
 	,m_rCommonGndAndRefBitmap(rCommonGndAndRefBitmap)
@@ -47,6 +53,7 @@ CConfigurationGTecGUSBamp::CConfigurationGTecGUSBamp(
 	,m_rTriggerInput(rTriggerInput)
 	,m_rDevicesSerials(rDevicesSerials)
 	,m_rMasterDeviceIndex(rMasterDeviceIndex)
+	,m_rBipolarEnabled(rBipolar)
 {
 }
 
@@ -59,6 +66,9 @@ OpenViBE::boolean CConfigurationGTecGUSBamp::preConfigure(void)
 
     ::GtkCheckButton* l_pCheckButton_HardwareTagging=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_EventChannel"));
 	::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pCheckButton_HardwareTagging), m_rTriggerInput);
+
+	::GtkCheckButton* l_pCheckButton_Bipolar=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_Bipolar"));
+	::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pCheckButton_Bipolar), m_rBipolarEnabled);
 
 	::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_master_device"));
 
@@ -120,9 +130,12 @@ OpenViBE::boolean CConfigurationGTecGUSBamp::preConfigure(void)
 		GTK_RESPONSE_CANCEL);
 
 	l_pDialog = GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "dialog-filters"));
-	gtk_dialog_add_button (GTK_DIALOG (l_pDialog),
+	
+	::GtkWidget * buttonApplyFilters = gtk_dialog_add_button (GTK_DIALOG (l_pDialog),
 		GTK_STOCK_APPLY,
 		GTK_RESPONSE_APPLY);
+	g_signal_connect(buttonApplyFilters, "pressed", G_CALLBACK(button_apply_filters_pressed_cb), this);
+
 
 	gtk_dialog_add_button (GTK_DIALOG (l_pDialog),
 		GTK_STOCK_CANCEL,
@@ -147,98 +160,8 @@ OpenViBE::boolean CConfigurationGTecGUSBamp::preConfigure(void)
 	l_pCheckBox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton-ref-blockD"));
 	gtk_toggle_button_set_active(l_pCheckBox,(m_rCommonGndAndRefBitmap & (1<<7)));
 
-	// To check for available filters in the amplifier, we must connect to it.
-	if(l_iCount != 0)
-	{
-		::HANDLE l_pHandle=::GT_OpenDevice(l_iCount);
-
-		int l_iNbBandPassFilters, l_iNbNotchFilters;
-		if(!GT_GetNumberOfFilter(&l_iNbBandPassFilters)) { std::cout << "err GT_GetNumberOfFilter\n"; }
-		if(!GT_GetNumberOfNotch(&l_iNbNotchFilters)) { std::cout << "err GT_GetNumberOfNotch\n"; }
-		
-		::FILT * l_pBandPassFilterSpec = new ::FILT[l_iNbBandPassFilters];
-		::FILT * l_pNotchFilterSpec = new ::FILT[l_iNbNotchFilters];
-
-		if(!::GT_GetFilterSpec(l_pBandPassFilterSpec)) { std::cout << "err GT_GetFilterSpec\n"; }
-		if(!::GT_GetNotchSpec(l_pNotchFilterSpec)) { std::cout << "err GT_GetNotchSpec\n"; }
-
-		//Set BandPass filter list
-		m_vComboBoxBandPassFilterIndex.clear();
-		GtkComboBox * l_pComboBoxBandPass = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox-band-pass"));
-		GtkTreeModel * l_pBandPassListStore = gtk_combo_box_get_model(l_pComboBoxBandPass);
-		std::stringstream l_sFilterDescription;  l_sFilterDescription << "no band pass filter.";
-		GtkTreeIter l_iter;
-		gtk_list_store_append(GTK_LIST_STORE(l_pBandPassListStore), &l_iter);
-		gtk_list_store_set (GTK_LIST_STORE(l_pBandPassListStore), &l_iter, 0, l_sFilterDescription.str().c_str(),-1);
-		l_sFilterDescription.clear();
-		l_sFilterDescription.str("");
-
-		gchar* l_sSamplingFrequency=gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pSamplingFrequency));
-		uint32 ui32SamplingFrequency = (l_sSamplingFrequency?atoi(l_sSamplingFrequency):0);
-
-		int32 cbBandPassSelectedIndex = -1;
-		for(int32 i = 0 ; i < l_iNbBandPassFilters ; i++)
-		{
-			if (ui32SamplingFrequency == (int32)l_pBandPassFilterSpec[i].fs)
-			{
-				if(l_pBandPassFilterSpec[i].type == 1) l_sFilterDescription << "Butterworth - ";
-				if(l_pBandPassFilterSpec[i].type == 2) l_sFilterDescription << "Chebyshev   - ";
-				l_sFilterDescription << l_pBandPassFilterSpec[i].order << " - [";
-				l_sFilterDescription << l_pBandPassFilterSpec[i].fu << "; ";
-				l_sFilterDescription << l_pBandPassFilterSpec[i].fo << "] - ";
-				l_sFilterDescription << l_pBandPassFilterSpec[i].fs;
-				GtkTreeIter l_iter;
-				gtk_list_store_append(GTK_LIST_STORE(l_pBandPassListStore), &l_iter);
-				gtk_list_store_set (GTK_LIST_STORE(l_pBandPassListStore), &l_iter, 0, l_sFilterDescription.str().c_str(),-1);
-				l_sFilterDescription.clear();
-				l_sFilterDescription.str("");
-
-				m_vComboBoxBandPassFilterIndex.push_back(i);
-
-				if (cbBandPassSelectedIndex == -1 && i == m_rBandPassFilterIndex) cbBandPassSelectedIndex = m_vComboBoxBandPassFilterIndex.size()-1; 
-			}
-		}
-		gtk_combo_box_set_active(l_pComboBoxBandPass,cbBandPassSelectedIndex+1); // +1 because -1 is for "no filter".
-
-		//Set Notch filter List
-		m_vComboBoxNotchFilterIndex.clear();
-		GtkComboBox * l_pComboBoxNotch = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox-notch"));
-		GtkTreeModel * l_pNotchListStore = gtk_combo_box_get_model(l_pComboBoxNotch);
-		l_sFilterDescription << "no notch filter.";
-		gtk_list_store_append(GTK_LIST_STORE(l_pNotchListStore), &l_iter);
-		gtk_list_store_set (GTK_LIST_STORE(l_pNotchListStore), &l_iter, 0, l_sFilterDescription.str().c_str(),-1);
-		l_sFilterDescription.clear();
-		l_sFilterDescription.str("");
-		int32 cbNotchSelectedIndex = -1;
-
-		for(int32 i = 0 ; i < l_iNbNotchFilters ; i++)
-		{
-			if (ui32SamplingFrequency == (int32)l_pNotchFilterSpec[i].fs)
-			{
-				if(l_pNotchFilterSpec[i].type == 1) l_sFilterDescription << "Butterworth - ";
-				if(l_pNotchFilterSpec[i].type == 2) l_sFilterDescription << "Chebyshev   - ";
-				l_sFilterDescription << l_pNotchFilterSpec[i].order << " - [";
-				l_sFilterDescription << l_pNotchFilterSpec[i].fu << "; ";
-				l_sFilterDescription << l_pNotchFilterSpec[i].fo << "] - ";
-				l_sFilterDescription << l_pNotchFilterSpec[i].fs;
-				GtkTreeIter l_iter;
-				gtk_list_store_append(GTK_LIST_STORE(l_pNotchListStore), &l_iter);
-				gtk_list_store_set (GTK_LIST_STORE(l_pNotchListStore), &l_iter, 0, l_sFilterDescription.str().c_str(),-1);
-				l_sFilterDescription.clear();
-				l_sFilterDescription.str("");
-
-				m_vComboBoxNotchFilterIndex.push_back(i);
-
-				if (cbNotchSelectedIndex == -1 && i == m_rNotchFilterIndex) cbNotchSelectedIndex = m_vComboBoxNotchFilterIndex.size()-1; 
-			}
-		}
-		gtk_combo_box_set_active(l_pComboBoxNotch,cbNotchSelectedIndex+1); // +1 because -1 is for "no filter".
-
-		delete l_pBandPassFilterSpec;
-		delete l_pNotchFilterSpec;
-		::GT_CloseDevice(&l_pHandle);
-	}
-	else
+	
+	if (l_iCount==0)
 	{
 		// deactivate the buttons
 		::GtkWidget * l_pButton = GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "button-filters"));
@@ -296,6 +219,9 @@ OpenViBE::boolean CConfigurationGTecGUSBamp::postConfigure(void)
 
 		::GtkCheckButton* l_pCheckButton_HardwareTagging=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_EventChannel"));
 		m_rTriggerInput=(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButton_HardwareTagging)) ? true : false);
+
+		::GtkCheckButton* l_pCheckButton_Bipolar=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_Bipolar"));
+		m_rBipolarEnabled=(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButton_Bipolar)) ? true : false);
 	}
 
 	if(!CConfigurationBuilder::postConfigure())
@@ -374,9 +300,144 @@ void CConfigurationGTecGUSBamp::buttonFiltersPressedCB(void)
 {
 	::GtkWidget * l_pDialog = GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "dialog-filters"));
 	
+	setHardwareFiltersDialog();
+
 	gint resp = gtk_dialog_run(GTK_DIALOG(l_pDialog));
 
 	gtk_widget_hide(l_pDialog);
 }
+
+void CConfigurationGTecGUSBamp::setHardwareFiltersDialog()
+{
+	m_vComboBoxBandPassFilterIndex.clear();
+	m_vComboBoxNotchFilterIndex.clear();
+
+	GtkComboBox * l_pComboBoxBandPass = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox-band-pass"));
+	GtkTreeModel * l_pBandPassListStore = gtk_combo_box_get_model(l_pComboBoxBandPass);
+	gtk_list_store_clear(GTK_LIST_STORE(l_pBandPassListStore));
+
+	GtkComboBox * l_pComboBoxNotch = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox-notch"));
+	GtkTreeModel * l_pNotchListStore = gtk_combo_box_get_model(l_pComboBoxNotch);
+	gtk_list_store_clear(GTK_LIST_STORE(l_pNotchListStore));
+
+
+	// To check for available filters in the amplifier, we must connect to it.
+	if (m_rDevicesSerials[0].size()>0)
+	{
+		LPSTR serial = const_cast<char *>(m_rDevicesSerials[0].c_str());
+		::HANDLE l_pHandle=::GT_OpenDeviceEx(serial);
+
+		int l_iNbBandPassFilters, l_iNbNotchFilters;
+		if(!GT_GetNumberOfFilter(&l_iNbBandPassFilters)) { std::cout << "err GT_GetNumberOfFilter\n"; }
+		if (l_iNbBandPassFilters == 0)
+		{
+			std::cout << "err No band pass filters foundatt all!\n";
+		}
+		if(!GT_GetNumberOfNotch(&l_iNbNotchFilters)) { std::cout << "err GT_GetNumberOfNotch\n"; }
+		if (l_iNbNotchFilters==0)
+		{
+			std::cout << "err No notch filters found at all!\n";
+		}
+		
+		::FILT * l_pBandPassFilterSpec = new ::FILT[l_iNbBandPassFilters];
+		::FILT * l_pNotchFilterSpec = new ::FILT[l_iNbNotchFilters];
+
+		if(!::GT_GetFilterSpec(l_pBandPassFilterSpec)) { std::cout << "err GT_GetFilterSpec\n"; }
+		if(!::GT_GetNotchSpec(l_pNotchFilterSpec)) { std::cout << "err GT_GetNotchSpec\n"; }
+
+		//Set BandPass filter list
+		
+		std::stringstream l_sFilterDescription;  l_sFilterDescription << "no band pass filter.";
+		GtkTreeIter l_iter;
+		gtk_list_store_append(GTK_LIST_STORE(l_pBandPassListStore), &l_iter);
+		gtk_list_store_set (GTK_LIST_STORE(l_pBandPassListStore), &l_iter, 0, l_sFilterDescription.str().c_str(),-1);
+		l_sFilterDescription.clear();
+		l_sFilterDescription.str("");
+
+		gchar* l_sSamplingFrequency=gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pSamplingFrequency));
+		uint32 ui32SamplingFrequency = (l_sSamplingFrequency?atoi(l_sSamplingFrequency):0);
+
+		int32 cbBandPassSelectedIndex = -1;
+		
+		if (l_iNbBandPassFilters > 0)
+		{
+			for(int32 i = 0 ; i < l_iNbBandPassFilters ; i++)
+			{
+				if (ui32SamplingFrequency == (int32)l_pBandPassFilterSpec[i].fs)
+				{
+					if(l_pBandPassFilterSpec[i].type == 1) l_sFilterDescription << "Butterworth - ";
+					if(l_pBandPassFilterSpec[i].type == 2) l_sFilterDescription << "Chebyshev   - ";
+					l_sFilterDescription << l_pBandPassFilterSpec[i].order << " - [";
+					l_sFilterDescription << l_pBandPassFilterSpec[i].fu << "; ";
+					l_sFilterDescription << l_pBandPassFilterSpec[i].fo << "] - ";
+					l_sFilterDescription << l_pBandPassFilterSpec[i].fs;
+					GtkTreeIter l_iter;
+					gtk_list_store_append(GTK_LIST_STORE(l_pBandPassListStore), &l_iter);
+					gtk_list_store_set (GTK_LIST_STORE(l_pBandPassListStore), &l_iter, 0, l_sFilterDescription.str().c_str(),-1);
+					l_sFilterDescription.clear();
+					l_sFilterDescription.str("");
+
+					m_vComboBoxBandPassFilterIndex.push_back(i);
+
+					//here a previous selection is loaded
+					if (cbBandPassSelectedIndex == -1 && i == m_rBandPassFilterIndex) cbBandPassSelectedIndex = m_vComboBoxBandPassFilterIndex.size()-1; 
+				}
+			}
+		}
+		gtk_combo_box_set_active(l_pComboBoxBandPass,cbBandPassSelectedIndex+1); // +1 because -1 is for "no filter".
+
+
+		//Set Notch filter List
+
+		l_sFilterDescription << "no notch filter.";
+		gtk_list_store_append(GTK_LIST_STORE(l_pNotchListStore), &l_iter);
+		gtk_list_store_set (GTK_LIST_STORE(l_pNotchListStore), &l_iter, 0, l_sFilterDescription.str().c_str(),-1);
+		l_sFilterDescription.clear();
+		l_sFilterDescription.str("");
+
+		int32 cbNotchSelectedIndex = -1;
+		
+		if (l_iNbNotchFilters > 0)
+		{
+			for(int32 i = 0 ; i < l_iNbNotchFilters ; i++)
+			{
+				if (ui32SamplingFrequency == (int32)l_pNotchFilterSpec[i].fs)
+				{
+					if(l_pNotchFilterSpec[i].type == 1) l_sFilterDescription << "Butterworth - ";
+					if(l_pNotchFilterSpec[i].type == 2) l_sFilterDescription << "Chebyshev   - ";
+					l_sFilterDescription << l_pNotchFilterSpec[i].order << " - [";
+					l_sFilterDescription << l_pNotchFilterSpec[i].fu << "; ";
+					l_sFilterDescription << l_pNotchFilterSpec[i].fo << "] - ";
+					l_sFilterDescription << l_pNotchFilterSpec[i].fs;
+					GtkTreeIter l_iter;
+					gtk_list_store_append(GTK_LIST_STORE(l_pNotchListStore), &l_iter);
+					gtk_list_store_set (GTK_LIST_STORE(l_pNotchListStore), &l_iter, 0, l_sFilterDescription.str().c_str(),-1);
+					l_sFilterDescription.clear();
+					l_sFilterDescription.str("");
+
+					m_vComboBoxNotchFilterIndex.push_back(i);
+
+					//here a previous selection is loaded
+					if (cbNotchSelectedIndex == -1 && i == m_rNotchFilterIndex) cbNotchSelectedIndex = m_vComboBoxNotchFilterIndex.size()-1; 
+				}
+			}
+		}
+		gtk_combo_box_set_active(l_pComboBoxNotch,cbNotchSelectedIndex+1); // +1 because -1 is for "no filter".
+
+		delete l_pBandPassFilterSpec;
+		delete l_pNotchFilterSpec;
+		::GT_CloseDevice(&l_pHandle);
+	}
+	
+}
+void CConfigurationGTecGUSBamp::buttonFiltersApplyPressedCB(void)
+{
+	GtkComboBox * l_pComboBoxBandPass = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox-band-pass"));
+	m_rBandPassFilterIndex = (gtk_combo_box_get_active(l_pComboBoxBandPass)==-1 || gtk_combo_box_get_active(l_pComboBoxBandPass)==0) ? -1 : m_vComboBoxBandPassFilterIndex[gtk_combo_box_get_active(l_pComboBoxBandPass)-1];//-1 because there is one more in the beginning
+
+	GtkComboBox * l_pComboBoxNotch = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox-notch"));
+	m_rNotchFilterIndex = (gtk_combo_box_get_active(l_pComboBoxNotch)==-1 || gtk_combo_box_get_active(l_pComboBoxNotch)==0) ? -1 : m_vComboBoxNotchFilterIndex[gtk_combo_box_get_active(l_pComboBoxNotch)-1];//-1 because there is one more in the beginning
+}
+
 
 #endif // TARGET_HAS_ThirdPartyGUSBampCAPI

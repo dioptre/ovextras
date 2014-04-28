@@ -68,6 +68,11 @@ float32 Math::randomFloat32(void)
 	return fr;
 }
 
+float32 Math::randomFloat32BetweenZeroAndOne(void) {
+	float32 fr = static_cast<float32>(rand()) / static_cast<float32>(RAND_MAX);
+	return fr;
+}
+
 float64 Math::randomFloat64(void)
 {
 	uint64 r=randomUInteger64();
@@ -75,3 +80,5 @@ float64 Math::randomFloat64(void)
 	::memcpy(&fr, &r, sizeof(fr));
 	return fr;
 }
+
+
