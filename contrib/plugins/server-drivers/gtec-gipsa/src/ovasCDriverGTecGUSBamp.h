@@ -112,6 +112,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::int32 m_i32BandPassFilterIndex;
 
 		OpenViBE::boolean m_bTriggerInputEnabled;
+		OpenViBE::boolean m_bBipolarEnabled; //electrodes are substracted in sepecific sequence 1-2=1, ... 15-16=15 which results in 8 instead of 16 electrodes - used for EMG
 
 		OpenViBE::uint32 m_ui32AcquiredChannelCount;      //number of channels 1..16 specified bu user
 

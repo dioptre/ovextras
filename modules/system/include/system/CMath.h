@@ -25,6 +25,7 @@ namespace System
 		static System::int64 randomSInterger64(void);
 
 		static System::float32 randomFloat32(void);
+		static System::float32 randomFloat32BetweenZeroAndOne(void);
 		static System::float64 randomFloat64(void);
 
 	private:
