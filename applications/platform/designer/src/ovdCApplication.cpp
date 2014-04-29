@@ -866,16 +866,18 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		this);
 
 	// Shows main window
-	gint width, height;
 	gtk_builder_connect_signals(m_pBuilderInterface, NULL);
 	if(m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_FullscreenEditor}"))
 	{
 		gtk_window_maximize(GTK_WINDOW(m_pMainWindow));
 	}
-	else if ((width=(m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_WindowWidth}", -1)))!=-1
-			 && (height = (m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_WindowHeight}", -1)))!=-1)
-	{
-		gtk_window_resize(GTK_WINDOW(m_pMainWindow), width, height);
+	else {
+		gint width = static_cast<gint>(m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_WindowWidth}", -1));
+		gint height = static_cast<gint>(m_rKernelContext.getConfigurationManager().expandAsInteger("${Designer_WindowHeight}", -1));
+		if (width != -1 && height != -1)
+		{
+			gtk_window_resize(GTK_WINDOW(m_pMainWindow), width, height);
+		}
 	}
 
 	if(!m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_ShowAlgorithms}"))
@@ -2373,7 +2375,7 @@ boolean CApplication::isLogAreaClicked()
 {
 	if(m_pTextView!=NULL)
 	{
-		return gtk_widget_is_focus(GTK_WIDGET(m_pTextView))==TRUE;
+		return gtk_widget_is_focus(GTK_WIDGET(m_pTextView))!=FALSE;
 	}
 	else
 		return false;
