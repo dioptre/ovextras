@@ -22,6 +22,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 
+			virtual OpenViBE::boolean classify(void);
+
 			virtual OpenViBE::boolean process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVP_ClassId_Algorithm_PairwiseStrategy_PKPD)
@@ -50,6 +52,9 @@ namespace OpenViBEPlugins
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix, "Probability Matrix", OpenViBE::Kernel::ParameterType_Matrix);
 
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector, "Output Probability Matrix", OpenViBE::Kernel::ParameterType_Matrix);
+
+
+				rAlgorithmPrototype.addInputTrigger(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Classifiy, "Classify");
 				return true;
 			}
 

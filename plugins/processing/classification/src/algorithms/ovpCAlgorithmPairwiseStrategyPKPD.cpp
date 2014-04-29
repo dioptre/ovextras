@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#define PKPD_DEBUG 0
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -11,32 +13,43 @@ using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
 
-OpenViBE::boolean OpenViBEPlugins::Classification::CAlgorithmPairwiseStrategyPKPD::initialize()
+boolean CAlgorithmPairwiseStrategyPKPD::initialize()
 {
 	return true;
 }
 
-OpenViBE::boolean OpenViBEPlugins::Classification::CAlgorithmPairwiseStrategyPKPD::uninitialize()
+boolean CAlgorithmPairwiseStrategyPKPD::uninitialize()
 {
 	return true;
 }
 
-OpenViBE::boolean OpenViBEPlugins::Classification::CAlgorithmPairwiseStrategyPKPD::process()
+boolean CAlgorithmPairwiseStrategyPKPD::process()
 {
-//	std::cout << "Lala" << std::endl;
+	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_Train))
+	{
+		return this->classify();
+	}
+	return true;
+}
+
+boolean CAlgorithmPairwiseStrategyPKPD::classify()
+{
 	TParameterHandler<IMatrix *> ip_pProbabilityMatrix = this->getInputParameter(OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix);
 	IMatrix * l_pProbabilityMatrix = (IMatrix *)ip_pProbabilityMatrix;
 
 	OpenViBE::uint32 l_ui32AmountClass = l_pProbabilityMatrix->getDimensionSize(0);
-//	std::cout << l_pProbabilityMatrix->getDimensionSize(0) << std::endl;
 
-//	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
+#if PKPD_DEBUG
+	std::cout << l_pProbabilityMatrix->getDimensionSize(0) << std::endl;
 
-//		for(OpenViBE::uint32 j = 0 ; j<l_ui32AmountClass ; ++j){
-//			std::cout << l_pProbabilityMatrix->getBuffer()[i*l_ui32AmountClass + j] << " ";
-//		}
-//		std::cout << std::endl;
-//	}
+	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
+
+		for(OpenViBE::uint32 j = 0 ; j<l_ui32AmountClass ; ++j){
+			std::cout << l_pProbabilityMatrix->getBuffer()[i*l_ui32AmountClass + j] << " ";
+		}
+		std::cout << std::endl;
+	}
+#endif
 
 	float64* l_pMatrixBuffer = l_pProbabilityMatrix->getBuffer();
 	float64* l_pProbVector = new float64[l_ui32AmountClass];
@@ -60,11 +73,13 @@ OpenViBE::boolean OpenViBEPlugins::Classification::CAlgorithmPairwiseStrategyPKP
 		l_pProbVector[i] /= l_pProbVectorSum;
 	}
 
-//	for(OpenViBE::uint32 i = 0; i<l_ui32AmountClass ; ++i)
-//	{
-//		std::cout << l_pProbVector[i] << " ";
-//	}
-//	std::cout << std::endl;
+#if PKPD_DEBUG
+	for(OpenViBE::uint32 i = 0; i<l_ui32AmountClass ; ++i)
+	{
+		std::cout << l_pProbVector[i] << " ";
+	}
+	std::cout << std::endl;
+#endif
 
 	TParameterHandler<IMatrix*> op_pProbablityVector = this->getOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector);
 	op_pProbablityVector->setDimensionCount(1);
