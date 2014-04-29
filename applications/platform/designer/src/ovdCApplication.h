@@ -15,6 +15,16 @@ namespace OpenViBEDesigner
 	class CApplication
 	{
 	public:
+		/**
+		 * \brief Replay modes
+		 */
+		enum EReplayMode
+		{
+			EReplayMode_None,
+			EReplayMode_Play,
+			EReplayMode_Forward
+		};
+
 		CApplication(const OpenViBE::Kernel::IKernelContext& rKernelContext);
 		~CApplication(void);
 
@@ -55,6 +65,8 @@ namespace OpenViBEDesigner
 
 		// changes the working dir config token to reflect the current working directory of the scenario
 		void updateWorkingDirectoryToken(const OpenViBE::CIdentifier &oScenarioIdentifier);	
+		void removeScenarioDirectoryToken(const OpenViBE::CIdentifier &oScenarioIdentifier);
+		void resetVolatileScenarioDirectoryToken();
 
 		OpenViBE::boolean hasRunningScenario(void);
 		OpenViBE::boolean hasUnsavedScenario(void);
@@ -69,6 +81,14 @@ namespace OpenViBEDesigner
 		void closeScenarioCB(
 			OpenViBEDesigner::CInterfacedScenario* pInterfacedScenario);
 
+		void zoomInCB(void);//Call when a zoom in is required
+		void zoomOutCB(void);//Call when a zoom out is required
+		void spinnerZoomChangedCB(OpenViBE::uint32 scaleDelta);
+
+		void windowItemToggledCB(GtkCheckMenuItem* pCheckMenuItem);
+		void toggleOnWindowItem(OpenViBE::uint32 ui32Index);
+		void toggleOffWindowItem(OpenViBE::uint32 ui32Index);
+
 		void stopScenarioCB(void);
 		void pauseScenarioCB(void);
 		void nextScenarioCB(void);
@@ -80,6 +100,8 @@ namespace OpenViBEDesigner
 
 		void changeCurrentScenario(
 			OpenViBE::int32 i32PageIndex);
+		void reorderCurrentScenario(
+			OpenViBE::uint32 i32NewPageIndex);
 
 		//@}
 
@@ -101,6 +123,8 @@ namespace OpenViBEDesigner
 
 		void releasePlayer(void);
 
+		void destroyWindowMenu(void);
+
 		//@}
 
 		/** \name Application management */
@@ -120,6 +144,7 @@ namespace OpenViBEDesigner
 
 		void logLevelCB(void);
 		void logLevelMessagesCB(void);
+		void logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLevel level, const char* configName);
 
 		//@}
 
@@ -129,6 +154,9 @@ namespace OpenViBEDesigner
 		void CPUUsageCB(void);
 
 		//@}
+
+		// to know which GtkEntry should be fu=ocused on when doing CTRL+F
+		OpenViBE::boolean isLogAreaClicked();
 
 	public:
 
@@ -154,14 +182,26 @@ namespace OpenViBEDesigner
 		::GtkTreeView* m_pBoxAlgorithmTreeView;
 		::GtkTreeStore* m_pAlgorithmTreeModel;
 		::GtkTreeView* m_pAlgorithmTreeView;
+		::GtkEntry* m_pSearchEntry;//for search in log
+		::GtkTextView* m_pTextView;//for search log
+		::GtkTextTag* m_pCIdentifierTag;
+		::GtkSpinButton* m_pZoomSpinner;
 		gint m_giFilterTimeout;
 
+		// List of items in Menu->window->Show that appear while playing a scenario
+		std::vector < ::GtkWidget* > m_vCheckItems;
+
 		const gchar* m_sSearchTerm;
+		const gchar* m_sLogSearchTerm;
 		
 		OpenViBE::uint64 m_ui64LastTimeRefresh;
 		OpenViBE::boolean m_bIsQuitting;
+		OpenViBE::int32 m_i32CurrentScenarioPage;
 
 		std::vector < OpenViBEDesigner::CInterfacedScenario* > m_vInterfacedScenario;
+
+		// Keeps track of the used playing mode so the playback can be restarted in the same mode.
+		EReplayMode m_eReplayMode;
 	};
 };
 

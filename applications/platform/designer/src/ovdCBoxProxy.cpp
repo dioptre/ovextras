@@ -12,14 +12,16 @@ CBoxProxy::CBoxProxy(const IKernelContext& rKernelContext, const IBox& rBox)
 	,m_pConstBox(&rBox)
 	,m_pBox(NULL)
 	,m_bApplied(false)
-	,m_iXCenter(0)
-	,m_iYCenter(0)
+	,m_iWidth(-1)
+	,m_iHeight(-1)
+	,m_f64XCenter(0)
+	,m_f64YCenter(0)
 {
 	if(m_pConstBox)
 	{
 		TAttributeHandler l_oAttributeHandler(*m_pConstBox);
-		m_iXCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Box_XCenterPosition);
-		m_iYCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Box_YCenterPosition);
+		m_f64XCenter=l_oAttributeHandler.getAttributeValue<OpenViBE::float64>(OV_AttributeId_Box_XCenterPosition);
+		m_f64YCenter=l_oAttributeHandler.getAttributeValue<double>(OV_AttributeId_Box_YCenterPosition);
 	}
 	m_bShowOriginalNameWhenModified=m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_ShowOriginalBoxName}", true);
 }
@@ -29,14 +31,14 @@ CBoxProxy::CBoxProxy(const IKernelContext& rKernelContext, IScenario& rScenario,
 	,m_pConstBox(rScenario.getBoxDetails(rBoxIdentifier))
 	,m_pBox(rScenario.getBoxDetails(rBoxIdentifier))
 	,m_bApplied(false)
-	,m_iXCenter(0)
-	,m_iYCenter(0)
+	,m_f64XCenter(0)
+	,m_f64YCenter(0)
 {
 	if(m_pConstBox)
 	{
 		TAttributeHandler l_oAttributeHandler(*m_pConstBox);
-		m_iXCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Box_XCenterPosition);
-		m_iYCenter=l_oAttributeHandler.getAttributeValue<int>(OV_AttributeId_Box_YCenterPosition);
+		m_f64XCenter=l_oAttributeHandler.getAttributeValue<double>(OV_AttributeId_Box_XCenterPosition);
+		m_f64YCenter=l_oAttributeHandler.getAttributeValue<double>(OV_AttributeId_Box_YCenterPosition);
 	}
 	m_bShowOriginalNameWhenModified=m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_ShowOriginalBoxName}", true);
 }
@@ -61,32 +63,32 @@ CBoxProxy::operator const IBox* (void)
 
 int32 CBoxProxy::getWidth(::GtkWidget* pWidget) const
 {
-	int x, y;
-	updateSize(pWidget, getLabel(), &x, &y);
-	return x;
+	if(m_iWidth==-1)
+	    updateSize(pWidget, getLabel(), &m_iWidth, &m_iHeight);
+	return m_iWidth;
 }
 
 int32 CBoxProxy::getHeight(::GtkWidget* pWidget) const
 {
-	int x, y;
-	updateSize(pWidget, getLabel(), &x, &y);
-	return y;
+	if(m_iHeight==-1)
+	    updateSize(pWidget, getLabel(), &m_iWidth, &m_iHeight);
+	return m_iHeight;
 }
 
-int32 CBoxProxy::getXCenter(void) const
+float64 CBoxProxy::getXCenter(void) const
 {
-	return m_iXCenter;
+	return m_f64XCenter;
 }
 
-int32 CBoxProxy::getYCenter(void) const
+float64 CBoxProxy::getYCenter(void) const
 {
-	return m_iYCenter;
+	return m_f64YCenter;
 }
 
-void CBoxProxy::setCenter(int32 i32XCenter, int32 i32YCenter)
+void CBoxProxy::setCenter(float64 f64XCenter, float64 f64YCenter)
 {
-	m_iXCenter=i32XCenter;
-	m_iYCenter=i32YCenter;
+	m_f64XCenter=f64XCenter;
+	m_f64YCenter=f64YCenter;
 	m_bApplied=false;
 }
 
@@ -97,14 +99,14 @@ void CBoxProxy::apply(void)
 		TAttributeHandler l_oAttributeHandler(*m_pBox);
 
 		if(l_oAttributeHandler.hasAttribute(OV_AttributeId_Box_XCenterPosition))
-			l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Box_XCenterPosition, m_iXCenter);
+			l_oAttributeHandler.setAttributeValue<double>(OV_AttributeId_Box_XCenterPosition, m_f64XCenter);
 		else
-			l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Box_XCenterPosition, m_iXCenter);
+			l_oAttributeHandler.addAttribute<double>(OV_AttributeId_Box_XCenterPosition, m_f64XCenter);
 
 		if(l_oAttributeHandler.hasAttribute(OV_AttributeId_Box_YCenterPosition))
-			l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Box_YCenterPosition, m_iYCenter);
+			l_oAttributeHandler.setAttributeValue<double>(OV_AttributeId_Box_YCenterPosition, m_f64YCenter);
 		else
-			l_oAttributeHandler.addAttribute<int>(OV_AttributeId_Box_YCenterPosition, m_iYCenter);
+			l_oAttributeHandler.addAttribute<double>(OV_AttributeId_Box_YCenterPosition, m_f64YCenter);
 
 		m_bApplied=true;
 	}
@@ -112,61 +114,64 @@ void CBoxProxy::apply(void)
 
 const char* CBoxProxy::getLabel(void) const
 {
-	boolean l_bBoxCanChangeInput  (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyInput)  ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddInput));
-	boolean l_bBoxCanChangeOutput (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyOutput) ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddOutput));
-	boolean l_bBoxCanChangeSetting(m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifySetting)||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddSetting));
-	boolean l_bBoxIsUpToDate      (this->isBoxAlgorithmPluginPresent()  ? this->isUpToDate() : true);
-	boolean l_bBoxIsDeprecated    (this->isBoxAlgorithmPluginPresent() && this->isDeprecated());
-	boolean l_bBoxIsUnstable      (this->isBoxAlgorithmPluginPresent() && this->isUnstable());
-	boolean l_bIsMuted            (this->getMute());
-	const IPluginObjectDesc* l_pDesc=m_rKernelContext.getPluginManager().getPluginObjectDescCreating(m_pConstBox->getAlgorithmClassIdentifier());
+   if (m_sLabel.size()==0)
+   {
+	    boolean l_bBoxCanChangeInput  (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyInput)  ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddInput));
+	    boolean l_bBoxCanChangeOutput (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyOutput) ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddOutput));
+	    boolean l_bBoxCanChangeSetting(m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifySetting)||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddSetting));
+	    boolean l_bBoxIsUpToDate      (this->isBoxAlgorithmPluginPresent()  ? this->isUpToDate() : true);
+	    boolean l_bBoxIsDeprecated    (this->isBoxAlgorithmPluginPresent() && this->isDeprecated());
+	    boolean l_bBoxIsUnstable      (this->isBoxAlgorithmPluginPresent() && this->isUnstable());
+	    boolean l_bIsMuted            (this->getMute());
+	    const IPluginObjectDesc* l_pDesc=m_rKernelContext.getPluginManager().getPluginObjectDescCreating(m_pConstBox->getAlgorithmClassIdentifier());
 
-	string l_sBoxName(m_pConstBox->getName());
-	string l_sBoxIden(m_pConstBox->getIdentifier().toString());
+	    string l_sBoxName(m_pConstBox->getName());
+	    string l_sBoxIden(m_pConstBox->getIdentifier().toString());
 
-	const string l_sRed("#602020");
-	const string l_sGreen("#206020");
-	const string l_sBlue("#202060");
-	const string l_sGrey("#404040");
+	    const string l_sRed("#602020");
+	    const string l_sGreen("#206020");
+	    const string l_sBlue("#202060");
+	    const string l_sGrey("#404040");
 
-	m_sLabel=l_sBoxName;
+	    m_sLabel=l_sBoxName;
 
-	if(m_pConstBox->getSettingCount()!=0)
-	{
-		m_sLabel="<span weight=\"bold\">"+m_sLabel+"</span>";
-	}
+	    if(m_pConstBox->getSettingCount()!=0)
+	    {
+		    m_sLabel="<span weight=\"bold\">"+m_sLabel+"</span>";
+	    }
 
-	if(m_bShowOriginalNameWhenModified)
-	{
-		string l_sBoxOriginalName(l_pDesc?string(l_pDesc->getName()):l_sBoxName);
-		if(l_sBoxOriginalName!=l_sBoxName)
-		{
-			m_sLabel="<small><i><span foreground=\""+l_sGrey+"\">"+l_sBoxOriginalName+"</span></i></small>\n"+m_sLabel;
-		}
-	}
+	    if(m_bShowOriginalNameWhenModified)
+	    {
+		    string l_sBoxOriginalName(l_pDesc?string(l_pDesc->getName()):l_sBoxName);
+		    if(l_sBoxOriginalName!=l_sBoxName)
+		    {
+			    m_sLabel="<small><i><span foreground=\""+l_sGrey+"\">"+l_sBoxOriginalName+"</span></i></small>\n"+m_sLabel;
+		    }
+	    }
 
-	if(l_bBoxCanChangeInput || l_bBoxCanChangeOutput || l_bBoxCanChangeSetting)
-	{
-		m_sLabel+="\n";
-		m_sLabel+="<span size=\"smaller\">";
-		m_sLabel+="<span foreground=\""+(l_bBoxCanChangeInput?l_sGreen:l_sRed)+"\">In</span>";
-		m_sLabel+="|";
-		m_sLabel+="<span foreground=\""+(l_bBoxCanChangeOutput?l_sGreen:l_sRed)+"\">Out</span>";
-		m_sLabel+="|";
-		m_sLabel+="<span foreground=\""+(l_bBoxCanChangeSetting?l_sGreen:l_sRed)+"\">Set</span>";
-		m_sLabel+="</span>";
-	}
+	    if(l_bBoxCanChangeInput || l_bBoxCanChangeOutput || l_bBoxCanChangeSetting)
+	    {
+		    m_sLabel+="\n";
+		    m_sLabel+="<span size=\"smaller\">";
+		    m_sLabel+="<span foreground=\""+(l_bBoxCanChangeInput?l_sGreen:l_sRed)+"\">In</span>";
+		    m_sLabel+="|";
+		    m_sLabel+="<span foreground=\""+(l_bBoxCanChangeOutput?l_sGreen:l_sRed)+"\">Out</span>";
+		    m_sLabel+="|";
+		    m_sLabel+="<span foreground=\""+(l_bBoxCanChangeSetting?l_sGreen:l_sRed)+"\">Set</span>";
+		    m_sLabel+="</span>";
+	    }
 
-	if(l_bBoxIsDeprecated || l_bBoxIsUnstable || !l_bBoxIsUpToDate || l_bIsMuted)
-	{
-		m_sLabel+="\n";
-		m_sLabel+="<span size=\"smaller\" foreground=\""+l_sBlue+"\">";
-		if(l_bBoxIsDeprecated) m_sLabel+=" <span style=\"italic\">deprecated</span>";
-		if(l_bBoxIsUnstable)   m_sLabel+=" <span style=\"italic\">unstable</span>";
-		if(!l_bBoxIsUpToDate)  m_sLabel+=" <span style=\"italic\">update</span>";
-		if(l_bIsMuted)         m_sLabel+=" <span style=\"italic\">muted</span>";
+	    if(l_bBoxIsDeprecated || l_bBoxIsUnstable || !l_bBoxIsUpToDate || l_bIsMuted)
+	    {
+		    m_sLabel+="\n";
+		    m_sLabel+="<span size=\"smaller\" foreground=\""+l_sBlue+"\">";
+		    if(l_bBoxIsDeprecated) m_sLabel+=" <span style=\"italic\">deprecated</span>";
+		    if(l_bBoxIsUnstable)   m_sLabel+=" <span style=\"italic\">unstable</span>";
+		    if(!l_bBoxIsUpToDate)  m_sLabel+=" <span style=\"italic\">update</span>";
+		    if(l_bIsMuted)         m_sLabel+=" <span style=\"italic\">muted</span>";
 
-		m_sLabel+=" </span>";
+		    m_sLabel+=" </span>";
+	    }
 	}
 
 	return m_sLabel.c_str();
@@ -201,7 +206,7 @@ void CBoxProxy::updateSize(::GtkWidget* pWidget, const char* sText, int* pXSize,
 	::PangoContext* l_pPangoContext=NULL;
 	::PangoLayout* l_pPangoLayout=NULL;
 	::PangoRectangle l_oPangoRectangle;
-	l_pPangoContext=gtk_widget_create_pango_context(pWidget);
+	l_pPangoContext=gtk_widget_get_pango_context(pWidget);
 	l_pPangoLayout=pango_layout_new(l_pPangoContext);
 	pango_layout_set_alignment(l_pPangoLayout, PANGO_ALIGN_CENTER);
 	pango_layout_set_markup(l_pPangoLayout, sText, -1);
@@ -209,7 +214,6 @@ void CBoxProxy::updateSize(::GtkWidget* pWidget, const char* sText, int* pXSize,
 	*pXSize=l_oPangoRectangle.width;
 	*pYSize=l_oPangoRectangle.height;
 	g_object_unref(l_pPangoLayout);
-	g_object_unref(l_pPangoContext);
 }
 
 boolean CBoxProxy::getMute() const

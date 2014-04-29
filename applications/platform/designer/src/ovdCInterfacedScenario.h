@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <iostream>
 
 namespace OpenViBEDesigner
@@ -26,6 +27,7 @@ namespace OpenViBEDesigner
 		virtual ~CInterfacedScenario(void);
 
 		virtual OpenViBE::boolean isLocked(void) const;
+		virtual void forceRedraw(void);
 		virtual void redraw(void);
 		virtual void redraw(OpenViBE::Kernel::IBox& rBox);
 		virtual void redraw(OpenViBE::Kernel::IComment& rComment);
@@ -46,11 +48,17 @@ namespace OpenViBEDesigner
 		void scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidget, ::GdkEventButton* pEvent);
 		void scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent);
 		void scenarioDrawingAreaKeyReleaseEventCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent);
+		void scenarioDrawingAreaLeaveNotifyCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent);
+		void scenarioDrawingAreaConfigureEventCB(::GtkWidget* pWidget, GdkRectangle *pEvent);
+
 
 		void copySelection(void);
 		void cutSelection(void);
 		void pasteSelection(void);
 		void deleteSelection(void);
+
+		void setScale(OpenViBE::float64 rScale);
+		OpenViBE::float64 getScale();
 
 		void muteSelection(void);
 
@@ -93,7 +101,17 @@ namespace OpenViBEDesigner
 		void createPlayerVisualisation(void);
 		void releasePlayerVisualisation(void);
 
+		void onWindowClosed(const char* title);
+		void toggleOnItem(OpenViBE::uint32 ui32Index);
+		void onItemToggledOn(OpenViBE::uint32 ui32Index);
+		void onItemToggledOff(OpenViBE::uint32 ui32Index);
+		void hideWindowMenu(void);
+		void showWindowMenu(void);
+
+
 		OpenViBE::boolean hasSelection(void);
+
+		OpenViBE::boolean centerOnBox(OpenViBE::CIdentifier rIdentifier);
 /*
 	private:
 
@@ -122,8 +140,12 @@ namespace OpenViBEDesigner
 		::GtkWidget* m_pNotebookPageTitle;
 		::GtkWidget* m_pNotebookPageContent;
 		::GtkViewport* m_pScenarioViewport;
+		::GtkScrolledWindow* m_pScrolledWindow;//designer trim arrow scrolling
 		::GtkDrawingArea* m_pScenarioDrawingArea;
+		::GdkPixmap* m_pBufferedDrawingArea;
 		::GdkPixmap* m_pStencilBuffer;
+		::GtkWidget* m_pTooltip;
+		OpenViBE::boolean m_bScenarioModified;
 		OpenViBE::boolean m_bHasFileName;
 		OpenViBE::boolean m_bHasBeenModified;
 		OpenViBE::boolean m_bButtonPressed;
@@ -145,6 +167,12 @@ namespace OpenViBEDesigner
 		OpenViBE::int32 m_i32ViewOffsetX;
 		OpenViBE::int32 m_i32ViewOffsetY;
 		OpenViBE::uint32 m_ui32CurrentMode;
+		OpenViBE::float64 m_f64CurrentScale;
+		OpenViBE::uint32 m_ui32NormalFontSize;
+
+		gint m_iCurrentWidth;
+		gint m_iCurrentHeight;
+
 
 		OpenViBE::uint32 m_ui32BoxCount;
 		OpenViBE::uint32 m_ui32CommentCount;
@@ -155,6 +183,7 @@ namespace OpenViBEDesigner
 		std::map<OpenViBE::CIdentifier, OpenViBE::boolean> m_vCurrentObject;
 		OpenViBEDesigner::CInterfacedObject m_oCurrentObject;
 
+		//these variables do not appear anywhere (!?)
 		OpenViBE::float64 m_f64HPanInitialPosition;
 		OpenViBE::float64 m_f64VPanInitialPosition;
 

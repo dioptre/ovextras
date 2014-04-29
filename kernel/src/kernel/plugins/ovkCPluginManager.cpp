@@ -324,6 +324,38 @@ namespace
 			m_oHash=m_oHash.toUInteger()^v;
 			return true;
 		}
+		virtual OpenViBE::boolean addInputSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
+		{
+			uint64 v=rTypeIdentifier.toUInteger();
+			swap_byte(v, m_ui64OutputCountHash);
+			swap_byte(m_ui64OutputCountHash, 0xCBB66A5B893AA4E9LL);
+			m_oHash=m_oHash.toUInteger()^v;
+			return true;
+		}
+		virtual OpenViBE::boolean addInputAndDerivedSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
+		{
+			uint64 v=rTypeIdentifier.toUInteger();
+			swap_byte(v, m_ui64OutputCountHash);
+			swap_byte(m_ui64OutputCountHash, 0xCBB66A5B893AA4E9LL);
+			m_oHash=m_oHash.toUInteger()^v;
+			return true;
+		}
+		virtual OpenViBE::boolean addOutputSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
+		{
+			uint64 v=rTypeIdentifier.toUInteger();
+			swap_byte(v, m_ui64OutputCountHash);
+			swap_byte(m_ui64OutputCountHash, 0xCBB66A5B893AA4E9LL);
+			m_oHash=m_oHash.toUInteger()^v;
+			return true;
+		}
+		virtual OpenViBE::boolean addOutputAndDerivedSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
+		{
+			uint64 v=rTypeIdentifier.toUInteger();
+			swap_byte(v, m_ui64OutputCountHash);
+			swap_byte(m_ui64OutputCountHash, 0xCBB66A5B893AA4E9LL);
+			m_oHash=m_oHash.toUInteger()^v;
+			return true;
+		}
 		virtual boolean addFlag(const EBoxFlag eBoxFlag)
 		{
 			switch(eBoxFlag)
