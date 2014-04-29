@@ -147,7 +147,6 @@ boolean CAlgorithmClassifierPShrinkageLDA::train(const IFeatureVectorSet& rFeatu
 	const float64 l_f64Labels[] = {m_f64Class1,m_f64Class2};
 	MatrixXd l_aCov[l_ui32nClasses];
 	MatrixXd l_aMean[l_ui32nClasses];
-	MatrixXd l_oGlobalCov = MatrixXd::Zero(l_ui32nCols,l_ui32nCols);
 
 	for(uint32 l_ui32classIdx=0;l_ui32classIdx<l_ui32nClasses;l_ui32classIdx++)
 	{
@@ -192,49 +191,52 @@ boolean CAlgorithmClassifierPShrinkageLDA::train(const IFeatureVectorSet& rFeatu
 			}
 		}
 
-		l_oGlobalCov += l_aCov[l_ui32classIdx];
-
 		dumpMatrix(this->getLogManager(), l_aMean[l_ui32classIdx], "Mean");
 		dumpMatrix(this->getLogManager(), l_aCov[l_ui32classIdx], "Shrinked cov");
 	}
 
-	l_oGlobalCov /= (double)l_ui32nClasses;
-	this->getLogManager() << LogLevel_Info << "Start eigen truc\n";
 	// Get the pseudoinverse of the global cov using eigen decomposition for self-adjoint matrices
 	const float64 l_f64Tolerance = 1e-10;
-	SelfAdjointEigenSolver<MatrixXd> l_oEigenSolver;
-	l_oEigenSolver.compute(l_oGlobalCov);
-	VectorXd l_oEigenValues = l_oEigenSolver.eigenvalues();
+	SelfAdjointEigenSolver<MatrixXd> l_oEigenSolverClass1;
+	l_oEigenSolverClass1.compute(l_aCov[0]);
+	VectorXd l_oEigenValuesClass1 = l_oEigenSolverClass1.eigenvalues();
 	for(uint32 i=0;i<l_ui32nCols;i++) {
-		if(l_oEigenValues(i) >= l_f64Tolerance) {
-			l_oEigenValues(i) = 1.0/l_oEigenValues(i);
+		if(l_oEigenValuesClass1(i) >= l_f64Tolerance) {
+			l_oEigenValuesClass1(i) = 1.0/l_oEigenValuesClass1(i);
 		}
 	}
+	const MatrixXd l_oCovInvClass1 = l_oEigenSolverClass1.eigenvectors() * l_oEigenValuesClass1.asDiagonal() * l_oEigenSolverClass1.eigenvectors().inverse();
 
-	// Build LDA model for 2 classes. This is a special case of the multiclass version.
-	const MatrixXd l_oGlobalCovInv = l_oEigenSolver.eigenvectors() * l_oEigenValues.asDiagonal() * l_oEigenSolver.eigenvectors().inverse();
-	this->getLogManager() << LogLevel_Info << "Finish inv\n";
+	SelfAdjointEigenSolver<MatrixXd> l_oEigenSolverClass2;
+	l_oEigenSolverClass2.compute(l_aCov[1]);
+	VectorXd l_oEigenValuesClass2 = l_oEigenSolverClass2.eigenvalues();
+	for(uint32 i=0;i<l_ui32nCols;i++) {
+		if(l_oEigenValuesClass2(i) >= l_f64Tolerance) {
+			l_oEigenValuesClass2(i) = 1.0/l_oEigenValuesClass2(i);
+		}
+	}
+	const MatrixXd l_oCovInvClass2 = l_oEigenSolverClass2.eigenvectors() * l_oEigenValuesClass2.asDiagonal() * l_oEigenSolverClass2.eigenvectors().inverse();
 
 
-	const MatrixXd l_oBiasClass1 = -0.5 * l_aMean[0].transpose() * l_oGlobalCovInv * l_aMean[0];
-	const MatrixXd l_oBiasClass2 = -0.5 * l_aMean[1].transpose() * l_oGlobalCovInv * l_aMean[1];
+	const MatrixXd l_oBiasClass1 = -0.5 * l_aMean[0].transpose() * l_oCovInvClass1 * l_aMean[0];
+	const MatrixXd l_oBiasClass2 = -0.5 * l_aMean[1].transpose() * l_oCovInvClass2 * l_aMean[1];
 	// Catenate the bias term and the weights
 
 	m_oCoefficientsClass1.resize(1, l_ui32nCols+1 );
 	m_oCoefficientsClass1(0,0) = l_oBiasClass1(0,0);
-	m_oCoefficientsClass1.block(0,1,1,l_ui32nCols) = l_oGlobalCovInv * l_aMean[0];
+	m_oCoefficientsClass1.block(0,1,1,l_ui32nCols) = l_oCovInvClass1 * l_aMean[0];
 
 	m_oCoefficientsClass2.resize(1, l_ui32nCols+1 );
 	m_oCoefficientsClass2(0,0) = l_oBiasClass2(0,0);
-	m_oCoefficientsClass2.block(0,1,1,l_ui32nCols) = l_oGlobalCovInv * l_aMean[1];
+	m_oCoefficientsClass2.block(0,1,1,l_ui32nCols) = l_oCovInvClass2 * l_aMean[1];
 
 	m_ui32NumCols = l_ui32nCols;
 
 	// Debug output
-	dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
-	dumpMatrix(this->getLogManager(), l_oEigenValues, "Eigenvalues");
-	dumpMatrix(this->getLogManager(), l_oEigenSolver.eigenvectors(), "Eigenvectors");
-	dumpMatrix(this->getLogManager(), l_oGlobalCovInv, "Global cov inverse");
+//	dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
+//	dumpMatrix(this->getLogManager(), l_oEigenValues, "Eigenvalues");
+//	dumpMatrix(this->getLogManager(), l_oEigenSolver.eigenvectors(), "Eigenvectors");
+//	dumpMatrix(this->getLogManager(), l_oGlobalCovInv, "Global cov inverse");
 	//dumpMatrix(this->getLogManager(), m_oCoefficients, "Hyperplane weights");
 	this->getLogManager() << LogLevel_Info << "Finish training\n";
 
@@ -243,8 +245,6 @@ boolean CAlgorithmClassifierPShrinkageLDA::train(const IFeatureVectorSet& rFeatu
 
 boolean CAlgorithmClassifierPShrinkageLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
 {
-	this->getLogManager() << LogLevel_Info << "Enter classify\n";
-
 	const uint32 l_ui32nColsWithBiasTerm = m_oCoefficientsClass1.size();
 
 	if(rFeatureVector.getSize()+1!=l_ui32nColsWithBiasTerm)
@@ -254,18 +254,32 @@ boolean CAlgorithmClassifierPShrinkageLDA::classify(const IFeatureVector& rFeatu
 	}
 
 	const Map<MatrixXdRowMajor> l_oFeatureVec(const_cast<float64*>(rFeatureVector.getBuffer()), 1, rFeatureVector.getSize());
-	this->getLogManager() << LogLevel_Info << "Start weight creation\n";
 
 	// Catenate 1.0 to match the bias term
 	MatrixXd l_oWeights(1, l_ui32nColsWithBiasTerm);
 	l_oWeights(0,0) = 1.0;
 	l_oWeights.block(0,1,1,l_ui32nColsWithBiasTerm-1) = l_oFeatureVec;
-	float64 l_f64PClass1 = (l_oWeights*m_oCoefficientsClass1).col(0)(0);
-	float64 l_f64PClass2 = (l_oWeights*m_oCoefficientsClass2).col(0)(0);
-	this->getLogManager() << LogLevel_Info << l_f64PClass1 << " " << l_f64PClass2 << "\n";
+	float64 l_f64PClass1 = std::exp((l_oWeights*m_oCoefficientsClass1).col(0)(0));
+	float64 l_f64PClass2 = std::exp((l_oWeights*m_oCoefficientsClass2).col(0)(0));
 
-	const float64 l_f64Result = std::exp(l_f64PClass1)/
-			(std::exp(l_f64PClass1) + std::exp(l_f64PClass2));
+	//this->getLogManager() << l_f64PClass1 << " " << std::exp(l_f64PClass1) << " " << l_f64PClass2 << " " << std::exp(l_f64PClass2) << "\n";
+	float64 l_f64Result=0;
+	if(l_f64PClass1 != std::numeric_limits<float64>::infinity())
+	{
+		l_f64Result = l_f64PClass1/(l_f64PClass1 + l_f64PClass2);
+	}
+	else
+	{
+		if((l_oWeights*m_oCoefficientsClass1).col(0)(0) > (l_oWeights*m_oCoefficientsClass2).col(0)(0))
+		{
+			l_f64Result = 1.0;
+		}
+		else
+		{
+			l_f64Result = 0.0;
+		}
+	}
+
 	rClassificationValues.setSize(1);
 	rClassificationValues[0]= l_f64Result;
 

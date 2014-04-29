@@ -8,6 +8,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 
 namespace OpenViBEPlugins
 {
@@ -25,9 +26,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize(void)
 			{
 				m_oClassifierClassIdentifier=OV_UndefinedIdentifier;
-				m_oSubClassifierClassIdentifier=OV_UndefinedIdentifier;
 				m_pClassifier=NULL;
-				m_pSubClassifier=NULL;
+
+				m_oStrategyClassIdentifier=OV_UndefinedIdentifier;
+				m_pStrategy = NULL;
+
+				m_ui32StrategyAmountSettings = 0;
 				return true;
 			}
 
@@ -39,11 +43,11 @@ namespace OpenViBEPlugins
 					this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
 					m_pClassifier=NULL;
 				}
-				if(m_pSubClassifier)
+				if(m_pStrategy)
 				{
-					m_pSubClassifier->uninitialize();
-					this->getAlgorithmManager().releaseAlgorithm(*m_pSubClassifier);
-					m_pSubClassifier=NULL;
+					m_pStrategy->uninitialize();
+					this->getAlgorithmManager().releaseAlgorithm(*m_pStrategy);
+					m_pStrategy=NULL;
 				}
 				return true;
 			}
@@ -114,8 +118,137 @@ namespace OpenViBEPlugins
 				if(ui32Index == 1){
 					return this->onAlgorithmClassifierChanged(rBox);
 				}
+				else if(ui32Index == 0){
+					return this->onStrategyChanged(rBox);
+				}
 				else
 					return true;
+			}
+
+			virtual OpenViBE::boolean onStrategyChanged(OpenViBE::Kernel::IBox& rBox)
+			{
+				OpenViBE::CString l_sStrategyName;
+				OpenViBE::CIdentifier l_oStrategyIdentifier;
+				OpenViBE::CIdentifier l_oIdentifier;
+				OpenViBE::CIdentifier l_oOldStrategyIdentifier=m_oStrategyClassIdentifier;
+				OpenViBE::int32 l_OldStrategySettings=m_ui32StrategyAmountSettings;
+
+				rBox.getSettingValue(0, l_sStrategyName);
+
+				l_oStrategyIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationStrategy, l_sStrategyName);
+
+				if(l_oStrategyIdentifier != m_oStrategyClassIdentifier)
+				{
+					if(m_pStrategy)
+					{
+						m_pStrategy->uninitialize();
+						this->getAlgorithmManager().releaseAlgorithm(*m_pStrategy);
+						m_pStrategy=NULL;
+						m_oStrategyClassIdentifier=OV_UndefinedIdentifier;
+					}
+					if(l_oStrategyIdentifier != OV_UndefinedIdentifier)
+					{
+						m_pStrategy=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oStrategyIdentifier));
+						m_pStrategy->initialize();
+						m_oStrategyClassIdentifier=l_oStrategyIdentifier;
+					}
+
+					if(l_oOldStrategyIdentifier != OV_UndefinedIdentifier)
+					{
+						std::cout << m_ui32StrategyAmountSettings << std::endl;
+						for(OpenViBE::uint32 i = m_ui32CustomSettingBase+rBox.getInputCount() + m_ui32StrategyAmountSettings ; i > m_ui32CustomSettingBase+rBox.getInputCount() ; --i)
+						{
+							rBox.removeSetting(i-1);
+						}
+					}
+					l_OldStrategySettings = m_ui32StrategyAmountSettings;
+					m_ui32StrategyAmountSettings = 0;
+				}
+				else//If we don't change the strategy we just have to return
+				{
+					return true;
+				}
+
+				if(m_pStrategy)
+				{
+					OpenViBE::uint32 i=m_ui32CustomSettingBase + rBox.getInputCount();
+					while((l_oIdentifier=m_pStrategy->getNextInputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
+					{
+						if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
+						&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet)
+						&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_Configuration)
+						&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter)
+						&& (l_oIdentifier!=OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount)
+						&& (l_oIdentifier!=OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm))
+						{
+							OpenViBE::CIdentifier l_oTypeIdentifier;
+							OpenViBE::CString l_sParameterName=m_pStrategy->getInputParameterName(l_oIdentifier);
+							OpenViBE::Kernel::IParameter* l_pParameter=m_pStrategy->getInputParameter(l_oIdentifier);
+							OpenViBE::Kernel::TParameterHandler < OpenViBE::int64 > ip_i64Parameter(l_pParameter);
+							OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64Parameter(l_pParameter);
+							OpenViBE::Kernel::TParameterHandler < OpenViBE::float64 > ip_f64Parameter(l_pParameter);
+							OpenViBE::Kernel::TParameterHandler < OpenViBE::boolean > ip_bParameter(l_pParameter);
+							OpenViBE::Kernel::TParameterHandler < OpenViBE::CString* > ip_sParameter(l_pParameter);
+							char l_sBuffer[1024];
+							bool l_bValid=true;
+							switch(l_pParameter->getType())
+							{
+								case OpenViBE::Kernel::ParameterType_Enumeration:
+									::strcpy(l_sBuffer, this->getTypeManager().getEnumerationEntryNameFromValue(l_pParameter->getSubTypeIdentifier(), ip_ui64Parameter).toASCIIString());
+									l_oTypeIdentifier=l_pParameter->getSubTypeIdentifier();
+									break;
+
+								case OpenViBE::Kernel::ParameterType_Integer:
+								case OpenViBE::Kernel::ParameterType_UInteger:
+									::sprintf(l_sBuffer, "%lli", (OpenViBE::int64)ip_i64Parameter);
+									l_oTypeIdentifier=OV_TypeId_Integer;
+									break;
+
+								case OpenViBE::Kernel::ParameterType_Boolean:
+									::sprintf(l_sBuffer, "%s", ((OpenViBE::boolean)ip_bParameter)?"true":"false");
+									l_oTypeIdentifier=OV_TypeId_Boolean;
+									break;
+
+								case OpenViBE::Kernel::ParameterType_Float:
+									::sprintf(l_sBuffer, "%lf", (OpenViBE::float64)ip_f64Parameter);
+									l_oTypeIdentifier=OV_TypeId_Float;
+									break;
+								case OpenViBE::Kernel::ParameterType_String:
+									::sprintf(l_sBuffer, "%s", ((OpenViBE::CString*)ip_sParameter)->toASCIIString());
+									l_oTypeIdentifier=OV_TypeId_String;
+									break;
+								default:
+									l_bValid=false;
+									break;
+							}
+
+							if(l_bValid)
+							{
+								++m_ui32StrategyAmountSettings;
+								--l_OldStrategySettings;
+								std::cout << m_ui32StrategyAmountSettings << " " << i << std::endl;
+								if(l_OldStrategySettings < 0)
+								{
+									rBox.addSetting(l_sParameterName, l_oTypeIdentifier, l_sBuffer, i);
+								}
+								else
+								{
+									OpenViBE::CIdentifier l_oOldTypeIdentifier;
+									rBox.getSettingType(i, l_oOldTypeIdentifier);
+									if(l_oOldTypeIdentifier != l_oTypeIdentifier)
+									{
+										rBox.setSettingType(i, l_oTypeIdentifier);
+									}
+									rBox.setSettingValue(i, l_sBuffer);
+									rBox.setSettingName(i, l_sParameterName);
+								}
+								i++;
+							}
+						}
+					}
+				}
+
+				return true;
 			}
 
 			virtual OpenViBE::boolean onAlgorithmClassifierChanged(OpenViBE::Kernel::IBox& rBox)
@@ -146,9 +279,9 @@ namespace OpenViBEPlugins
 
 					if(l_oOldClassifierIdentifier != OV_UndefinedIdentifier)
 					{
-						while(rBox.getSettingCount()>m_ui32CustomSettingBase+rBox.getInputCount())
+						while(rBox.getSettingCount()>m_ui32CustomSettingBase+rBox.getInputCount() + m_ui32StrategyAmountSettings)
 						{
-							rBox.removeSetting(m_ui32CustomSettingBase + rBox.getInputCount());
+							rBox.removeSetting(m_ui32CustomSettingBase + rBox.getInputCount() + m_ui32StrategyAmountSettings);
 						}
 					}
 				}
@@ -159,7 +292,7 @@ namespace OpenViBEPlugins
 
 				if(m_pClassifier)
 				{
-					OpenViBE::uint32 i=m_ui32CustomSettingBase + rBox.getInputCount();
+					OpenViBE::uint32 i=m_ui32CustomSettingBase + rBox.getInputCount() + m_ui32StrategyAmountSettings;
 					while((l_oIdentifier=m_pClassifier->getNextInputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
 					{
 						if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
@@ -244,10 +377,11 @@ namespace OpenViBEPlugins
 		protected:
 
 			OpenViBE::CIdentifier m_oClassifierClassIdentifier;
-			OpenViBE::CIdentifier m_oSubClassifierClassIdentifier;
+			OpenViBE::CIdentifier m_oStrategyClassIdentifier;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pClassifier;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pSubClassifier;
+			OpenViBE::Kernel::IAlgorithmProxy* m_pStrategy;
 			const OpenViBE::uint32 m_ui32CustomSettingBase;
+			OpenViBE::uint32 m_ui32StrategyAmountSettings;
 		};
 	}
 }

@@ -105,6 +105,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 					rFeatureVector.getBuffer(),
 					l_ui32FeatureVectorSize*sizeof(float64));
 		l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
+		//this->getLogManager() << LogLevel_Info << l_iClassifierCounter << " " << (float64)op_f64ClassificationStateClass << " " << (*op_pClassificationValues)[0] << "\n";
 		l_oClassificationVector.push_back(std::pair< float64, IMatrix*>((float64)op_f64ClassificationStateClass, (IMatrix*)op_pClassificationValues));
 	}
 

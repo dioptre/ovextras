@@ -9,8 +9,10 @@
 
 #include <vector>
 
-#define OVP_ClassId_Algorithm_ClassifierOneVsOne                             OpenViBE::CIdentifier(0x638C2F90, 0xEAE10226)
-#define OVP_ClassId_Algorithm_ClassifierOneVsOneDesc                         OpenViBE::CIdentifier(0xE78E7CDB, 0x369AA9EF)
+#define OVP_ClassId_Algorithm_ClassifierOneVsOne								OpenViBE::CIdentifier(0x638C2F90, 0xEAE10226)
+#define OVP_ClassId_Algorithm_ClassifierOneVsOneDesc							OpenViBE::CIdentifier(0xE78E7CDB, 0x369AA9EF)
+
+#define OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType			OpenViBE::CIdentifier(0x0C347BBA, 0x180577F9)
 
 namespace OpenViBEPlugins
 {
@@ -42,6 +44,8 @@ namespace OpenViBEPlugins
 			std::vector<SSubClassifierDescriptor> m_oSubClassifierDescriptorList;
 			XML::IXMLNode *m_pConfigurationNode;
 			fClassifierComparison m_fAlgorithmComparison;
+
+			OpenViBE::Kernel::IAlgorithmProxy* m_pDecisionStrategyAlgorithm;
 
 		private:
 			XML::IXMLNode* getClassifierConfiguration(SSubClassifierDescriptor &rDescriptor);
@@ -75,7 +79,8 @@ namespace OpenViBEPlugins
 					OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
 				CAlgorithmPairingStrategyDesc::getAlgorithmPrototype(rAlgorithmPrototype);
-
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType,"Decision type",
+													  OpenViBE::Kernel::ParameterType_Enumeration, OVP_TypeId_ClassificationPairwiseStrategy);
 				return true;
 			}
 

@@ -640,6 +640,7 @@ boolean CBox::removeSetting(
 	{
 		return false;
 	}
+
 	it=m_vSetting.erase(it);
 
 	this->notify(BoxModification_SettingRemoved, ui32SettingIndex);

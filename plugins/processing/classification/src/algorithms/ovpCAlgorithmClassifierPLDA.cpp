@@ -136,9 +136,26 @@ boolean CAlgorithmClassifierPLDA::classify(const IFeatureVector& rFeatureVector,
 
 	itpp::vec l_oFeatures(rFeatureVector.getBuffer(), rFeatureVector.getSize());
 	l_oFeatures.ins(0, 1);
+	float64 l_f64PClass1 = std::exp(l_oFeatures*m_oCoefficientsClass1);
+	float64 l_f64PClass2 = std::exp(l_oFeatures*m_oCoefficientsClass2);
+//	std::cout << l_f64PClass1 << " " << l_oFeatures*m_oCoefficientsClass1 << " " << l_f64PClass2 << " " << l_oFeatures*m_oCoefficientsClass2 << std::endl;
 
-	float64 l_f64Result=std::exp(l_oFeatures*m_oCoefficientsClass1)
-			/(std::exp(l_oFeatures*m_oCoefficientsClass1)+std::exp(l_oFeatures*m_oCoefficientsClass2));
+	float64 l_f64Result=0;
+	if(l_f64PClass1 != std::numeric_limits<float64>::infinity() && (l_f64PClass1 !=0 && l_f64PClass2 != 0))
+	{
+		l_f64Result = l_f64PClass1/(l_f64PClass1 + l_f64PClass2);
+	}
+	else
+	{
+		if(l_oFeatures*m_oCoefficientsClass1 > l_oFeatures*m_oCoefficientsClass2)
+		{
+			l_f64Result = 1.0;
+		}
+		else
+		{
+			l_f64Result = 0.0;
+		}
+	}
 
 	rClassificationValues.setSize(1);
 	rClassificationValues[0]=l_f64Result;
