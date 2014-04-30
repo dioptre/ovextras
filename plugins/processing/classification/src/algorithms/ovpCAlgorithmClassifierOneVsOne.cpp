@@ -41,6 +41,7 @@ boolean CAlgorithmClassifierOneVsOne::initialize()
 	op_pConfiguration=NULL;
 
 	m_pDecisionStrategyAlgorithm = NULL;
+	m_oPairwiseDecisionIdentifier = OV_UndefinedIdentifier;
 
 	return CAlgorithmPairingStrategy::initialize();
 }
@@ -51,6 +52,7 @@ boolean CAlgorithmClassifierOneVsOne::uninitialize(void)
 	{
 		m_pDecisionStrategyAlgorithm->uninitialize();
 		this->getAlgorithmManager().releaseAlgorithm(*m_pDecisionStrategyAlgorithm);
+		m_pDecisionStrategyAlgorithm = NULL;
 	}
 	while(!m_oSubClassifierDescriptorList.empty())
 	{
@@ -77,9 +79,14 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 
 	TParameterHandler< std::map<CString, CString>* > ip_pExtraParameters(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
 	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType);
-	CIdentifier l_oDecisionClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationPairwiseStrategy,
+	m_oPairwiseDecisionIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationPairwiseStrategy,
 																											  ip_pExtraParameters->at(l_pParameterName));
-	m_pDecisionStrategyAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oDecisionClassIdentifier));
+	if(m_pDecisionStrategyAlgorithm != NULL){
+		m_pDecisionStrategyAlgorithm->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pDecisionStrategyAlgorithm);
+		m_pDecisionStrategyAlgorithm = NULL;
+	}
+	m_pDecisionStrategyAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(m_oPairwiseDecisionIdentifier));
 	m_pDecisionStrategyAlgorithm->initialize();
 
 	l_pAlgoProxy->uninitialize();
@@ -247,6 +254,20 @@ XML::IXMLNode* CAlgorithmClassifierOneVsOne::getClassifierConfiguration(SSubClas
 	return l_pRes;
 }
 
+XML::IXMLNode* CAlgorithmClassifierOneVsOne::getPairwiseDecisionConfiguration()
+{
+	XML::IXMLNode *l_pTempNode = XML::createNode(c_sPairwiseDecisionName);
+
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pDecisionStrategyAlgorithm->getOutputParameter(OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration));
+	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_SaveConfiguration);
+	l_pTempNode->addChild((XML::IXMLNode*)op_pConfiguration);
+
+	l_pTempNode->addAttribute(c_sAlgorithmIdAttribute, m_oPairwiseDecisionIdentifier.toString());
+
+	return l_pTempNode;
+}
+
+
 void CAlgorithmClassifierOneVsOne::generateConfigurationNode(void)
 {
 	std::stringstream l_sAmountClasses;
@@ -268,11 +289,7 @@ void CAlgorithmClassifierOneVsOne::generateConfigurationNode(void)
 	l_pTempNode->setPCData(l_sAmountClasses.str().c_str());
 	l_pOneVsOneNode->addChild(l_pTempNode);
 
-	l_pTempNode = XML::createNode(c_sPairwiseDecisionName);
-	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pDecisionStrategyAlgorithm->getOutputParameter(OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration));
-	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_SaveConfiguration);
-	l_pTempNode->addChild((XML::IXMLNode*)op_pConfiguration);
-	l_pOneVsOneNode->addChild(l_pTempNode);
+	l_pOneVsOneNode->addChild(this->getPairwiseDecisionConfiguration());
 
 	XML::IXMLNode *l_pSubClassifersNode = XML::createNode(c_sSubClassifiersNodeName);
 	for(size_t i = 0; i<m_oSubClassifierDescriptorList.size(); ++i)
@@ -312,6 +329,23 @@ boolean CAlgorithmClassifierOneVsOne::loadConfiguration(XML::IXMLNode *pConfigur
 			return false;
 		}
 	}
+
+	l_pTempNode = l_pOneVsOneNode->getChildByName(c_sPairwiseDecisionName);
+	CIdentifier l_pPairwiseIdentifier;
+	l_pPairwiseIdentifier.fromString(l_pTempNode->getAttribute(c_sAlgorithmIdAttribute));
+	if(l_pPairwiseIdentifier != m_oPairwiseDecisionIdentifier)
+	{
+		if(m_pDecisionStrategyAlgorithm != NULL){
+			m_pDecisionStrategyAlgorithm->uninitialize();
+			this->getAlgorithmManager().releaseAlgorithm(*m_pDecisionStrategyAlgorithm);
+			m_pDecisionStrategyAlgorithm = NULL;
+		}
+		&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(m_oPairwiseDecisionIdentifier));
+		m_pDecisionStrategyAlgorithm->initialize();
+	}
+	TParameterHandler < XML::IXMLNode* > ip_pConfiguration(m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_Configuration));
+	ip_pConfiguration = l_pTempNode->getChild(0);
+	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_LoadConfiguration);
 
 	l_pTempNode = l_pOneVsOneNode->getChildByName(c_sSubClassifierCountNodeName);
 	std::stringstream l_sCountData(l_pTempNode->getPCData());
