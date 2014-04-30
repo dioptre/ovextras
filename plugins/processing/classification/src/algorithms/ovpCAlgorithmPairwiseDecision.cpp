@@ -1,5 +1,4 @@
-#include "ovpCAlgorithmPairwiseStrategy.h"
-
+#include "ovpCAlgorithmPairwiseDecision.h"
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -10,9 +9,9 @@ using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
 
-CAlgorithmPairwiseDecision::process()
+boolean CAlgorithmPairwiseDecision::process()
 {
-	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_Train))
+	if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Classifiy))
 	{
 		return this->classify();
 	}

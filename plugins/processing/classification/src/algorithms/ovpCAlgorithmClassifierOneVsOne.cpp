@@ -165,7 +165,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 						l_pFeatureVectorBuffer,
 						rFeatureVector.getBuffer(),
 						l_ui32FeatureVectorSize*sizeof(float64));
-			l_pTempProxy->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
+			l_pTempProxy->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Classifiy);
 
 			//We have only probability here
 			float64 l_f64Prob = op_pClassificationValues->getBuffer()[0];
@@ -173,7 +173,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 			l_pProbabilityMatrix->getBuffer()[j*l_ui32AmountClass + i] = 1-l_f64Prob;
 		}
 	}
-	m_pDecisionStrategyAlgorithm->process();
+	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Classifiy);
 
 	TParameterHandler<IMatrix*> op_pProbabilityVector = m_pDecisionStrategyAlgorithm->getOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector);
 	float64 l_f64MaxProb = -1;

@@ -23,15 +23,6 @@ boolean CAlgorithmPairwiseStrategyPKPD::uninitialize()
 	return true;
 }
 
-boolean CAlgorithmPairwiseStrategyPKPD::process()
-{
-	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_Train))
-	{
-		return this->classify();
-	}
-	return true;
-}
-
 boolean CAlgorithmPairwiseStrategyPKPD::classify()
 {
 	TParameterHandler<IMatrix *> ip_pProbabilityMatrix = this->getInputParameter(OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix);

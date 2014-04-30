@@ -1,5 +1,5 @@
-#ifndef __OpenViBEPlugins_Algorithm_PairwiseStrategy_PKPD_H__
-#define __OpenViBEPlugins_Algorithm_PairwiseStrategy_PKPD_H__
+#ifndef __OpenViBEPlugins_Algorithm_PairwiseDecision_H__
+#define __OpenViBEPlugins_Algorithm_PairwiseDecision_H__
 
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>

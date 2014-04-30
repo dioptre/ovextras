@@ -5,6 +5,8 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
+#include "ovpCAlgorithmPairwiseDecision.h"
+
 #define OVP_ClassId_Algorithm_PairwiseStrategy_PKPD												OpenViBE::CIdentifier(0x26EF6DDA, 0xF137053C)
 #define OVP_ClassId_Algorithm_PairwiseStrategy_PKPDDesc											OpenViBE::CIdentifier(0x191EB02A, 0x6866214A)
 
@@ -12,7 +14,7 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		class CAlgorithmPairwiseStrategyPKPD : virtual public OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >
+		class CAlgorithmPairwiseStrategyPKPD : virtual public OpenViBEPlugins::Classification::CAlgorithmPairwiseDecision
 		{
 
 		public:
@@ -24,12 +26,10 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean classify(void);
 
-			virtual OpenViBE::boolean process(void);
-
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVP_ClassId_Algorithm_PairwiseStrategy_PKPD)
 		};
 
-		class CAlgorithmPairwiseStrategyPKPDDesc : virtual public OpenViBE::Plugins::IAlgorithmDesc
+		class CAlgorithmPairwiseStrategyPKPDDesc : virtual public OpenViBEPlugins::Classification::CAlgorithmPairwiseDecisionDesc
 		{
 		public:
 
@@ -49,12 +49,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix, "Probability Matrix", OpenViBE::Kernel::ParameterType_Matrix);
-
-				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector, "Output Probability Matrix", OpenViBE::Kernel::ParameterType_Matrix);
-
-
-				rAlgorithmPrototype.addInputTrigger(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Classifiy, "Classify");
+				CAlgorithmPairwiseDecisionDesc::getAlgorithmPrototype(rAlgorithmPrototype);
 				return true;
 			}
 
