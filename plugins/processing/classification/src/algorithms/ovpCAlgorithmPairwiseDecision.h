@@ -8,6 +8,17 @@
 #define OVP_ClassId_Algorithm_PairwiseDecision												OpenViBE::CIdentifier(0x26EF6DDA, 0xF137053C)
 #define OVP_ClassId_Algorithm_PairwiseDecisionDesc											OpenViBE::CIdentifier(0x191EB02A, 0x6866214A)
 
+#define OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix							OpenViBE::CIdentifier(0xF48D35AD, 0xB8EFF834)
+#define OVP_Algorithm_Classifier_Pairwise_InputParameterId_Configuration					OpenViBE::CIdentifier(0x10EBAC09, 0x80926A63)
+
+#define OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector							OpenViBE::CIdentifier(0x883599FE, 0x2FDB32FF)
+#define OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration					OpenViBE::CIdentifier(0x69F05A61, 0x25C94515)
+
+#define OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Train								OpenViBE::CIdentifier(0x32219D21, 0xD3BE6105)
+#define OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Classifiy							OpenViBE::CIdentifier(0x3637344B, 0x05D03D7E)
+#define OVP_Algorithm_Classifier_Pairwise_InputTriggerId_SaveConfiguration					OpenViBE::CIdentifier(0xF19574AD, 0x024045A7)
+#define OVP_Algorithm_Classifier_Pairwise_InputTriggerId_LoadConfiguration					OpenViBE::CIdentifier(0x97AF6C6C, 0x670A12E6)
+
 namespace OpenViBEPlugins
 {
 	namespace Classification
@@ -23,6 +34,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean uninitialize(void)=0;
 
 			virtual OpenViBE::boolean classify(void) =0;
+			virtual OpenViBE::boolean saveConfiguration(void) = 0;
 
 			virtual OpenViBE::boolean process(void);
 
@@ -36,11 +48,15 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix, "Probability Matrix", OpenViBE::Kernel::ParameterType_Matrix);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_Configuration, "Configuration node", OpenViBE::Kernel::ParameterType_Pointer);
 
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector, "Output Probability Matrix", OpenViBE::Kernel::ParameterType_Matrix);
+				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration, "Configuration node", OpenViBE::Kernel::ParameterType_Pointer);
 
 
 				rAlgorithmPrototype.addInputTrigger(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Classifiy, "Classify");
+				rAlgorithmPrototype.addInputTrigger(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_SaveConfiguration, "Save configuration");
+				rAlgorithmPrototype.addInputTrigger(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_LoadConfiguration, "Load configuration");
 				return true;
 			}
 

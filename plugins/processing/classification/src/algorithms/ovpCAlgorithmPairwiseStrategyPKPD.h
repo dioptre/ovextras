@@ -25,6 +25,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean uninitialize(void);
 
 			virtual OpenViBE::boolean classify(void);
+			virtual OpenViBE::boolean saveConfiguration(void);
+			virtual OpenViBE::boolean loadConfiguration(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVP_ClassId_Algorithm_PairwiseStrategy_PKPD)
 		};

@@ -10,6 +10,7 @@
 #include "algorithms/ovpCAlgorithmClassifierOneVsOne.h"
 #include "algorithms/ovpCAlgorithmConfusionMatrix.h"
 
+#include "algorithms/ovpCAlgorithmPairwiseDecision.h"
 #include "algorithms/ovpCAlgorithmPairwiseStrategyPKPD.h"
 
 #include "box-algorithms/ovpCBoxAlgorithmVotingClassifier.h"

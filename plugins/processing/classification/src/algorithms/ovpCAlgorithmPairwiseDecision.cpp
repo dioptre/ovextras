@@ -15,5 +15,9 @@ boolean CAlgorithmPairwiseDecision::process()
 	{
 		return this->classify();
 	}
+	else if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_SaveConfiguration))
+	{
+		return this->saveConfiguration();
+	}
 	return true;
 }

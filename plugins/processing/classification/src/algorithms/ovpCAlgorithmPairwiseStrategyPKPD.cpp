@@ -1,8 +1,14 @@
+#define PKPD_DEBUG 0
 #include "ovpCAlgorithmPairwiseStrategyPKPD.h"
 
 #include <iostream>
 
-#define PKPD_DEBUG 0
+
+#include <xml/IXMLNode.h>
+#include <xml/IXMLHandler.h>
+
+static const char* const c_sTypeNodeName = "PairwiseDecision_PKDP";
+
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -22,6 +28,8 @@ boolean CAlgorithmPairwiseStrategyPKPD::uninitialize()
 {
 	return true;
 }
+
+
 
 boolean CAlgorithmPairwiseStrategyPKPD::classify()
 {
@@ -82,5 +90,18 @@ boolean CAlgorithmPairwiseStrategyPKPD::classify()
 	}
 
 	delete[] l_pProbVector;
+	return true;
+}
+
+boolean CAlgorithmPairwiseStrategyPKPD::saveConfiguration()
+{
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration));
+	XML::IXMLNode* l_pRootNode = XML::createNode(c_sTypeNodeName);
+	op_pConfiguration = l_pRootNode;
+	return true;
+}
+
+boolean CAlgorithmPairwiseStrategyPKPD::loadConfiguration()
+{
 	return true;
 }

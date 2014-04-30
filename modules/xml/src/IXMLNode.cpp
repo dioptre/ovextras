@@ -186,7 +186,7 @@ char* IXMLNodeImpl::getXML(const XML::uint32 depth) const
 	//If we have nothing else to print let's close the node and return
 	if(!m_bHasPCData && m_oNodeVector.empty())
 	{
-		l_sRes = l_sRes + string("/>\n");
+		l_sRes = l_sRes + string("/>");
 		char* l_pRes = ::strdup(l_sRes.c_str());
 		return l_pRes;
 	}

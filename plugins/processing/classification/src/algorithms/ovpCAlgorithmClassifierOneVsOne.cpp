@@ -1,5 +1,6 @@
 
 #include "ovpCAlgorithmClassifierOneVsOne.h"
+#include "ovpCAlgorithmPairwiseDecision.h"
 
 #include <map>
 #include <cmath>
@@ -14,6 +15,7 @@
 
 static const char* const c_sTypeNodeName = "OneVsOne";
 static const char* const c_sSubClassifierIdentifierNodeName = "SubClassifierIdentifier";
+static const char* const c_sPairwiseDecisionName = "PairwiseDecision";
 static const char* const c_sAlgorithmIdAttribute = "algorithm-id";
 static const char* const c_sSubClassifierCountNodeName = "SubClassifierCount";
 static const char* const c_sSubClassifiersNodeName = "SubClassifiers";
@@ -165,7 +167,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 						l_pFeatureVectorBuffer,
 						rFeatureVector.getBuffer(),
 						l_ui32FeatureVectorSize*sizeof(float64));
-			l_pTempProxy->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Classifiy);
+			l_pTempProxy->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 
 			//We have only probability here
 			float64 l_f64Prob = op_pClassificationValues->getBuffer()[0];
@@ -258,6 +260,12 @@ void CAlgorithmClassifierOneVsOne::generateConfigurationNode(void)
 
 	l_pTempNode = XML::createNode(c_sSubClassifierCountNodeName);
 	l_pTempNode->setPCData(l_sAmountClasses.str().c_str());
+	l_pOneVsOneNode->addChild(l_pTempNode);
+
+	l_pTempNode = XML::createNode(c_sPairwiseDecisionName);
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pDecisionStrategyAlgorithm->getOutputParameter(OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration));
+	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_SaveConfiguration);
+	l_pTempNode->addChild((XML::IXMLNode*)op_pConfiguration);
 	l_pOneVsOneNode->addChild(l_pTempNode);
 
 	XML::IXMLNode *l_pSubClassifersNode = XML::createNode(c_sSubClassifiersNodeName);
