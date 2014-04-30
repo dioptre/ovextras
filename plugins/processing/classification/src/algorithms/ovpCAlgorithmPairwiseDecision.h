@@ -5,6 +5,8 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
+#include <xml/IXMLNode.h>
+
 #define OVP_ClassId_Algorithm_PairwiseDecision												OpenViBE::CIdentifier(0x26EF6DDA, 0xF137053C)
 #define OVP_ClassId_Algorithm_PairwiseDecisionDesc											OpenViBE::CIdentifier(0x191EB02A, 0x6866214A)
 
@@ -15,7 +17,7 @@
 #define OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration					OpenViBE::CIdentifier(0x69F05A61, 0x25C94515)
 
 #define OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Train								OpenViBE::CIdentifier(0x32219D21, 0xD3BE6105)
-#define OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Classifiy							OpenViBE::CIdentifier(0x3637344B, 0x05D03D7E)
+#define OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute							OpenViBE::CIdentifier(0x3637344B, 0x05D03D7E)
 #define OVP_Algorithm_Classifier_Pairwise_InputTriggerId_SaveConfiguration					OpenViBE::CIdentifier(0xF19574AD, 0x024045A7)
 #define OVP_Algorithm_Classifier_Pairwise_InputTriggerId_LoadConfiguration					OpenViBE::CIdentifier(0x97AF6C6C, 0x670A12E6)
 
@@ -33,8 +35,9 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize(void)=0;
 			virtual OpenViBE::boolean uninitialize(void)=0;
 
-			virtual OpenViBE::boolean classify(void) =0;
-			virtual OpenViBE::boolean saveConfiguration(void) = 0;
+			virtual OpenViBE::boolean compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector) =0;
+			virtual XML::IXMLNode* saveConfiguration(void) = 0;
+			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode& rNode) = 0;
 
 			virtual OpenViBE::boolean process(void);
 
@@ -54,7 +57,7 @@ namespace OpenViBEPlugins
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration, "Configuration node", OpenViBE::Kernel::ParameterType_Pointer);
 
 
-				rAlgorithmPrototype.addInputTrigger(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Classifiy, "Classify");
+				rAlgorithmPrototype.addInputTrigger(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute, "Compute");
 				rAlgorithmPrototype.addInputTrigger(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_SaveConfiguration, "Save configuration");
 				rAlgorithmPrototype.addInputTrigger(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_LoadConfiguration, "Load configuration");
 				return true;

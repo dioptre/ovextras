@@ -24,9 +24,9 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 
-			virtual OpenViBE::boolean classify(void);
-			virtual OpenViBE::boolean saveConfiguration(void);
-			virtual OpenViBE::boolean loadConfiguration(void);
+			virtual OpenViBE::boolean compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector);
+			virtual XML::IXMLNode* saveConfiguration(void);
+			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode& rNode);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVP_ClassId_Algorithm_PairwiseStrategy_PKPD)
 		};

@@ -31,12 +31,9 @@ boolean CAlgorithmPairwiseStrategyPKPD::uninitialize()
 
 
 
-boolean CAlgorithmPairwiseStrategyPKPD::classify()
+boolean CAlgorithmPairwiseStrategyPKPD::compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector)
 {
-	TParameterHandler<IMatrix *> ip_pProbabilityMatrix = this->getInputParameter(OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix);
-	IMatrix * l_pProbabilityMatrix = (IMatrix *)ip_pProbabilityMatrix;
-
-	OpenViBE::uint32 l_ui32AmountClass = l_pProbabilityMatrix->getDimensionSize(0);
+	OpenViBE::uint32 l_ui32AmountClass = pSubClassifierMatrix->getDimensionSize(0);
 
 #if PKPD_DEBUG
 	std::cout << l_pProbabilityMatrix->getDimensionSize(0) << std::endl;
@@ -50,7 +47,7 @@ boolean CAlgorithmPairwiseStrategyPKPD::classify()
 	}
 #endif
 
-	float64* l_pMatrixBuffer = l_pProbabilityMatrix->getBuffer();
+	float64* l_pMatrixBuffer = pSubClassifierMatrix->getBuffer();
 	float64* l_pProbVector = new float64[l_ui32AmountClass];
 	float64 l_pProbVectorSum = 0;
 	for(OpenViBE::uint32 l_ui32ClassIndex = 0 ; l_ui32ClassIndex < l_ui32AmountClass ; ++l_ui32ClassIndex)
@@ -80,28 +77,25 @@ boolean CAlgorithmPairwiseStrategyPKPD::classify()
 	std::cout << std::endl;
 #endif
 
-	TParameterHandler<IMatrix*> op_pProbablityVector = this->getOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector);
-	op_pProbablityVector->setDimensionCount(1);
-	op_pProbablityVector->setDimensionSize(0,l_ui32AmountClass);
+	pProbabiltyVector->setDimensionCount(1);
+	pProbabiltyVector->setDimensionSize(0,l_ui32AmountClass);
 
 	for(OpenViBE::uint32 i = 0 ; i<l_ui32AmountClass ; ++i)
 	{
-		op_pProbablityVector->getBuffer()[i] = l_pProbVector[i];
+		pProbabiltyVector->getBuffer()[i] = l_pProbVector[i];
 	}
 
 	delete[] l_pProbVector;
 	return true;
 }
 
-boolean CAlgorithmPairwiseStrategyPKPD::saveConfiguration()
+XML::IXMLNode* CAlgorithmPairwiseStrategyPKPD::saveConfiguration()
 {
-	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration));
 	XML::IXMLNode* l_pRootNode = XML::createNode(c_sTypeNodeName);
-	op_pConfiguration = l_pRootNode;
-	return true;
+	return l_pRootNode;
 }
 
-boolean CAlgorithmPairwiseStrategyPKPD::loadConfiguration()
+boolean CAlgorithmPairwiseStrategyPKPD::loadConfiguration(XML::IXMLNode& rNode)
 {
 	return true;
 }

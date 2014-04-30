@@ -52,7 +52,13 @@ boolean CAlgorithmClassifierOneVsOne::uninitialize(void)
 		m_pDecisionStrategyAlgorithm->uninitialize();
 		this->getAlgorithmManager().releaseAlgorithm(*m_pDecisionStrategyAlgorithm);
 	}
-
+	while(!m_oSubClassifierDescriptorList.empty())
+	{
+		IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierDescriptorList.back().m_pSubClassifierProxy;
+		l_pSubClassifier->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*l_pSubClassifier);
+		this->m_oSubClassifierDescriptorList.pop_back();
+	}
 	return CAlgorithmPairingStrategy::uninitialize();
 }
 
@@ -175,7 +181,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 			l_pProbabilityMatrix->getBuffer()[j*l_ui32AmountClass + i] = 1-l_f64Prob;
 		}
 	}
-	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Classifiy);
+	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute);
 
 	TParameterHandler<IMatrix*> op_pProbabilityVector = m_pDecisionStrategyAlgorithm->getOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector);
 	float64 l_f64MaxProb = -1;
