@@ -1,5 +1,6 @@
-#define PKPD_DEBUG 0
-#include "ovpCAlgorithmPairwiseStrategyPKPD.h"
+
+#define VOTING_DEBUG 1
+#include "ovpCAlgorithmPairwiseDecisionVoting.h"
 
 #include <iostream>
 
@@ -7,7 +8,7 @@
 #include <xml/IXMLNode.h>
 #include <xml/IXMLHandler.h>
 
-static const char* const c_sTypeNodeName = "PairwiseDecision_PKDP";
+static const char* const c_sTypeNodeName = "PairwiseDecision_Voting";
 
 
 using namespace OpenViBE;
@@ -19,23 +20,23 @@ using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
 
-boolean CAlgorithmPairwiseStrategyPKPD::initialize()
+boolean CAlgorithmPairwiseDecisionVoting::initialize()
 {
 	return true;
 }
 
-boolean CAlgorithmPairwiseStrategyPKPD::uninitialize()
+boolean CAlgorithmPairwiseDecisionVoting::uninitialize()
 {
 	return true;
 }
 
 
 
-boolean CAlgorithmPairwiseStrategyPKPD::compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector)
+boolean CAlgorithmPairwiseDecisionVoting::compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector)
 {
 	OpenViBE::uint32 l_ui32AmountClass = pSubClassifierMatrix->getDimensionSize(0);
 
-#if PKPD_DEBUG
+#if VOTING_DEBUG
 	std::cout << pSubClassifierMatrix->getDimensionSize(0) << std::endl;
 
 	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
@@ -49,19 +50,23 @@ boolean CAlgorithmPairwiseStrategyPKPD::compute(OpenViBE::IMatrix* pSubClassifie
 
 	float64* l_pMatrixBuffer = pSubClassifierMatrix->getBuffer();
 	float64* l_pProbVector = new float64[l_ui32AmountClass];
-	float64 l_pProbVectorSum = 0;
+	uint32 l_pProbVectorSum = 0;
 	for(OpenViBE::uint32 l_ui32ClassIndex = 0 ; l_ui32ClassIndex < l_ui32AmountClass ; ++l_ui32ClassIndex)
 	{
-		float64 l_pTempSum = 0;
+		uint32 l_pTempSum = 0;
 		for(OpenViBE::uint32 l_ui32SecondClass = 0 ; l_ui32SecondClass<l_ui32AmountClass ; ++l_ui32SecondClass)
 		{
 			if(l_ui32SecondClass != l_ui32ClassIndex)
 			{
-				l_pTempSum += 1/l_pMatrixBuffer[l_ui32AmountClass*l_ui32ClassIndex + l_ui32SecondClass];
+				if(l_pMatrixBuffer[l_ui32AmountClass*l_ui32ClassIndex + l_ui32SecondClass] >
+						l_pMatrixBuffer[l_ui32AmountClass*l_ui32SecondClass + l_ui32ClassIndex])
+				{
+					++l_pTempSum;
+				}
 			}
 		}
-		l_pProbVector[l_ui32ClassIndex] = 1 /(l_pTempSum - (l_ui32AmountClass -2));
-		l_pProbVectorSum += l_pProbVector[l_ui32ClassIndex];
+		l_pProbVector[l_ui32ClassIndex] = l_pTempSum;
+		l_pProbVectorSum += l_pTempSum;
 	}
 
 	for(OpenViBE::uint32 i = 0; i<l_ui32AmountClass ; ++i)
@@ -69,7 +74,7 @@ boolean CAlgorithmPairwiseStrategyPKPD::compute(OpenViBE::IMatrix* pSubClassifie
 		l_pProbVector[i] /= l_pProbVectorSum;
 	}
 
-#if PKPD_DEBUG
+#if VOTING_DEBUG
 	for(OpenViBE::uint32 i = 0; i<l_ui32AmountClass ; ++i)
 	{
 		std::cout << l_pProbVector[i] << " ";
@@ -89,13 +94,13 @@ boolean CAlgorithmPairwiseStrategyPKPD::compute(OpenViBE::IMatrix* pSubClassifie
 	return true;
 }
 
-XML::IXMLNode* CAlgorithmPairwiseStrategyPKPD::saveConfiguration()
+XML::IXMLNode* CAlgorithmPairwiseDecisionVoting::saveConfiguration()
 {
 	XML::IXMLNode* l_pRootNode = XML::createNode(c_sTypeNodeName);
 	return l_pRootNode;
 }
 
-boolean CAlgorithmPairwiseStrategyPKPD::loadConfiguration(XML::IXMLNode& rNode)
+boolean CAlgorithmPairwiseDecisionVoting::loadConfiguration(XML::IXMLNode& rNode)
 {
 	return true;
 }

@@ -68,10 +68,6 @@ boolean CAlgorithmClassifierOneVsOne::uninitialize(void)
 
 boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
-	if(m_pDecisionStrategyAlgorithm != NULL){
-		m_pDecisionStrategyAlgorithm->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pDecisionStrategyAlgorithm);
-	}
 	//Create the decision strategy
 	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierOneVsOne));
 	l_pAlgoProxy->initialize();
