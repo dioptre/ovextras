@@ -188,9 +188,6 @@ namespace OpenViBEDesigner
 		::GtkSpinButton* m_pZoomSpinner;
 		gint m_giFilterTimeout;
 
-		// List of items in Menu->window->Show that appear while playing a scenario
-		std::vector < ::GtkWidget* > m_vCheckItems;
-
 		const gchar* m_sSearchTerm;
 		const gchar* m_sLogSearchTerm;
 		

@@ -197,6 +197,9 @@ namespace OpenViBEDesigner
 		std::map < OpenViBE::uint32, BoxContextMenuCB > m_vBoxContextMenuCB;
 
 		OpenViBEDesigner::CScenarioStateStack m_oStateStack;
+
+		// List of items in Menu->window->Show that appear while playing a scenario
+		std::vector < ::GtkWidget* > m_vCheckItems;
 	};
 };
 

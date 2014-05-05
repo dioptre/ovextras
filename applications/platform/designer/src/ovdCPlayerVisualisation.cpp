@@ -621,8 +621,8 @@ void CPlayerVisualisation::showTopLevelWindows(void)
 	{
 		gtk_widget_show(GTK_WIDGET(m_vWindows[i]));
 		//enable and toggle on all window menu check item
-		m_rInterfacedScenario.toggleOnItem(i);
 		m_rInterfacedScenario.showWindowMenu();
+		m_rInterfacedScenario.toggleOnItem(i);
 	}
 	if(m_pActiveToolbarButton != NULL)
 	{

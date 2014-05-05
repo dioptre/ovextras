@@ -356,8 +356,8 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	,m_ui32CurrentMode(Mode_None)
 	,m_oStateStack(rKernelContext, rApplication, rScenario)
 {
-	//empty status vector
-//	m_vIsShowed.clear();
+	//empty Window-menu
+	m_vCheckItems.clear();
 
 	m_pBuilderDummyScenarioNotebookTitle=gtk_builder_new(); // glade_xml_new(m_sGUIFilename.c_str(), "openvibe_scenario_notebook_title", NULL);
 	gtk_builder_add_from_file(m_pBuilderDummyScenarioNotebookTitle, m_sGUIFilename.c_str(), NULL);
@@ -1284,7 +1284,7 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 	CCommentProxy l_oCommentProxy(m_rKernelContext, m_rScenario, l_oIdentifier);
 	l_oCommentProxy.setCenter(x-m_i32ViewOffsetX, y-m_i32ViewOffsetY);
 
-	// Aligns comemnts on grid
+	// Aligns comments on grid
 	l_oCommentProxy.setCenter(
 		(((int32)l_oCommentProxy.getXCenter()+8)&0xfffffff0),
 		(((int32)l_oCommentProxy.getYCenter()+8)&0xfffffff0));
@@ -3371,18 +3371,18 @@ void CInterfacedScenario::onItemToggledOff(uint32 ui32Index)
 //Hide window menu when switching scenario
 void CInterfacedScenario::hideWindowMenu(void)
 {
-	for (unsigned int i = 0; i<m_rApplication.m_vCheckItems.size();i++)
+	for (unsigned int i = 0; i<m_vCheckItems.size();i++)
 	{
-		gtk_widget_hide(m_rApplication.m_vCheckItems[i]);
+		gtk_widget_hide(m_vCheckItems[i]);
 	}
 
 }
 //Show window menu when switching back to running scenario
 void CInterfacedScenario::showWindowMenu(void)
 {
-	for (unsigned int i = 0; i<m_rApplication.m_vCheckItems.size();i++)
+	for (unsigned int i = 0; i<m_vCheckItems.size();i++)
 	{
-		gtk_widget_show(m_rApplication.m_vCheckItems[i]);
+		gtk_widget_show(m_vCheckItems[i]);
 	}
 }
 
