@@ -171,6 +171,78 @@ namespace OpenViBEPlugins
 			};
 
 			/**
+			 * An helper class to manipulate GDF2.51 fixed-size headers
+			 */
+			class CFixedGDF251Header : public CFixedGDFHeader
+			{
+			public:
+
+				CFixedGDF251Header();
+
+				virtual ~CFixedGDF251Header(){}
+
+				/**
+				* Reads a GDF2 fixed Header from a file
+				* \param oFile The input file.
+				* \return true if the operation was successful
+				 */
+				virtual OpenViBE::boolean read(std::ifstream& oFile);
+
+				/**
+				 * Saves a GDF2 fixed Header in a file
+				 * \param oFile The output file.
+				 * \return true if the operation was successful
+				 */
+				virtual OpenViBE::boolean save(std::ofstream& oFile);
+
+				/**
+				 * Updates the number of data records field in
+				 * a GDF2 fixed Header in a file
+				 * \param oFile The output file.
+				 * \return true if the operation was successful
+				 */
+				virtual OpenViBE::boolean update(std::ofstream& oFile){ return true;}
+
+				virtual std::string getExperimentDate();
+				virtual std::string getSubjectName();
+				virtual OpenViBE::uint64 getSubjectSex();
+				virtual OpenViBE::uint64 getSubjectAge();
+
+				virtual OpenViBE::float64 getDataRecordDuration();
+				virtual OpenViBE::uint64 getNumberOfDataRecords();
+				virtual OpenViBE::uint64 getChannelCount();
+
+				typedef struct gdfFixedHeader1 {
+					char m_sVersionId[8];
+					char m_sPatientId[66];
+
+					OpenViBE::uint8 m_ui8Reserved[10];
+					OpenViBE::uint8 m_ui8HealthInformation; //smoking...
+					OpenViBE::uint8 m_ui8Weight;
+					OpenViBE::uint8 m_ui8Height;
+					OpenViBE::uint8 m_ui8SubjectInformation;//gender...
+
+					char m_sRecordingId[64];
+					OpenViBE::uint32 m_ui32RecordingLocation[4];
+					OpenViBE::uint32 m_ui32StartDateAndTimeOfRecording[2];
+					OpenViBE::uint32 m_ui32Birthday[2];
+					OpenViBE::uint16 m_ui16HeaderLength;
+					char m_sPatientClassification[6];
+					OpenViBE::uint64 m_ui64EquipmentProviderId;
+					OpenViBE::uint8 m_ui8Reserved1[6];
+					OpenViBE::uint16 m_ui16HeadSize[3];
+					OpenViBE::float32 m_f32PositionReferenceElectrode[3];
+					OpenViBE::float32 m_f32GroundElectrode[3];
+					OpenViBE::int64 m_i64NumberOfDataRecords;
+					OpenViBE::float64 m_f64Duration;			// Not float64 in the 2.51 spec document at the time of writing this, but seems to be so in practice?
+					OpenViBE::uint16 m_ui16NumberOfSignals;
+					OpenViBE::uint16 m_ui16Reserved2;
+				};
+
+				gdfFixedHeader1 m_oHeader1;
+			};
+
+			/**
 			* Base class for GDF file's variable headers
 			*/
 			class CVariableGDFHeader

@@ -1,5 +1,7 @@
 #include "ovpCGDFFileReader.h"
 
+// @fixme memory leaks on errors
+
 #include <openvibe/ovITimeArithmetics.h>
 
 #include <system/Memory.h>
@@ -128,7 +130,7 @@ boolean CGDFFileReader::initialize()
 		m_oFile.open(m_sFileName.toASCIIString(), ios::binary);
 		if(!m_oFile.good())
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFileName << "]\n";
+			this->getLogManager() << LogLevel_Error << "Could not open file [" << m_sFileName << "]\n";
 			return false;
 		}
 	}
@@ -136,6 +138,8 @@ boolean CGDFFileReader::initialize()
 	m_oFile.seekg(0, ios::end);
 	m_ui64FileSize = (uint64)m_oFile.tellg();
 	m_oFile.seekg(0, ios::beg);
+
+	m_ui64Header3Length = 0;
 
 	//reads the gdf headers and sends the corresponding buffers
 	return readFileHeader();
@@ -186,7 +190,7 @@ boolean CGDFFileReader::uninitialize()
 boolean CGDFFileReader::processClock(CMessageClock& rMessageClock)
 {
 	if(m_pSignalDescription.m_ui32SamplingRate==0) {
-		this->getLogManager() << LogLevel_Error << "Sampling rate is 0.\n";
+		this->getLogManager() << LogLevel_Error << "Sampling rate is 0 - not supported.\n";
 		return false;
 	}
 
@@ -318,7 +322,11 @@ boolean CGDFFileReader::readFileHeader()
 		{
 			GDF::CFixedGDFHeader * l_oFixedHeader = NULL;
 
-			if(m_f32FileVersion > 1.90)
+			if(m_f32FileVersion > 2.50) 
+			{
+				l_oFixedHeader = new GDF::CFixedGDF251Header;
+			}
+			else if(m_f32FileVersion > 1.90)
 			{
 				l_oFixedHeader = new GDF::CFixedGDF2Header;
 			}
@@ -329,6 +337,8 @@ boolean CGDFFileReader::readFileHeader()
 
 			if(!l_oFixedHeader->read(m_oFile))
 			{
+				getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error <<
+					"Failure to parse fixed header\n";
 				m_bErrorOccurred = true;
 				delete l_oFixedHeader;
 				return false;
@@ -370,8 +380,10 @@ boolean CGDFFileReader::readFileHeader()
 		else
 		{
 			//Not a known GDF File version
+			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "GDF file version " << m_f32FileVersion << " is not supported.\n";
 			//Error handling
 			m_bErrorOccurred = true;
+			return false;
 		}
 	}//END of ExperimentHeader
 
@@ -379,13 +391,18 @@ boolean CGDFFileReader::readFileHeader()
 	{
 		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Trace <<"Reading signal description\n";
 
+		// this->getLogManager() << LogLevel_Info << "Before variable header, file is at " << m_oFile.tellg() << "\n";
+
 		//reads the whole variable header
 		char * l_pVariableHeaderBuffer = new char[m_ui16NumberOfChannels*256];
 		m_oFile.read(l_pVariableHeaderBuffer, m_ui16NumberOfChannels*256);
 
+		// this->getLogManager() << LogLevel_Info << "After variable header, file is at " << m_oFile.tellg() << "\n";
+
 		if(m_oFile.bad())
 		{
 			//Handle error
+			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Read error.\n";
 			m_bErrorOccurred = true;
 			return false;
 		}
@@ -428,7 +445,7 @@ boolean CGDFFileReader::readFileHeader()
 				} 
 				else 
 				{
-					getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Can't handle GDF files with channels having different sampling rates!\n";
+					getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Can't handle GDF files with channels having different sampling rates!\n";
 				}
 				m_bErrorOccurred = true;
 				return false;
@@ -465,7 +482,9 @@ boolean CGDFFileReader::readFileHeader()
 
 		if(m_pSignalDescription.m_ui32SamplingRate==0) 
 		{
-			this->getLogManager() << LogLevel_Error << "Sampling rate is 0\n";
+			this->getLogManager() << LogLevel_Error << "Sampling rate is 0 - not supported\n";
+			m_bErrorOccurred = true;
+			return false;
 		}
 
 		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Debug <<"Sample count per buffer : " << m_ui32SamplesPerBuffer << "\n";
@@ -488,6 +507,39 @@ boolean CGDFFileReader::readFileHeader()
 
 			// Intentional parameter swap to get the frequency
 			m_ui64ClockFrequency = ITimeArithmetics::sampleCountToTime(m_ui32SamplesPerBuffer, m_pSignalDescription.m_ui32SamplingRate);
+		}
+
+		// We may need to skip header3 with its tags and take its size into account
+		if(m_f32FileVersion > 2.50) 
+		{
+			// this->getLogManager() << LogLevel_Info << "Before header3, file is at " << m_oFile.tellg() << "\n";
+
+			while(true) {
+				char l_sBuffer[4];
+				m_oFile.read((char*)&l_sBuffer,4);
+				if(m_oFile.bad()) 
+				{
+					break;
+				}
+				m_ui64Header3Length += 4;
+
+				// @fixme: potential endianness problem with uint24 length
+				uint32 l_ui32Tag =    l_sBuffer[0];
+				uint32 l_ui32Length = (l_sBuffer[1]<<0) + (l_sBuffer[2]<<8) + (l_sBuffer[3]<<16);
+				if(l_ui32Tag == 0)
+				{
+					break;
+				}
+				// Skip content (and padding)
+				if(l_ui32Length<256-4) 
+				{
+					l_ui32Length = 256-4;
+				}
+				m_oFile.seekg(l_ui32Length, SEEK_CUR);
+				m_ui64Header3Length += l_ui32Length;
+			}
+
+			// this->getLogManager() << LogLevel_Info << "After header3, file is at " << m_oFile.tellg() << "\n";
 		}
 
 		//Send the data to the output
@@ -595,6 +647,8 @@ boolean CGDFFileReader::process()
 	//for instance, if the file has channels with different sampling rates
 	if(m_bErrorOccurred)
 	{
+		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error <<
+			"Some error occurred, aborting.";
 		return false;
 	}
 
@@ -625,6 +679,8 @@ boolean CGDFFileReader::process()
 			if(m_oFile.bad())
 			{
 				//Handle error
+				getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error <<
+					"Read error\n";
 				m_bErrorOccurred = true;
 				return false;
 			}
@@ -691,6 +747,8 @@ boolean CGDFFileReader::process()
 					if(m_oFile.bad())
 					{
 						//Handle error
+						getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error <<
+							"Read error\n";
 						m_bErrorOccurred = true;
 						return false;
 					}
@@ -737,6 +795,8 @@ boolean CGDFFileReader::process()
 					if(m_oFile.bad())
 					{
 						//Handle error
+						getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error <<
+							"Read error\n";
 						m_bErrorOccurred = true;
 						return false;
 					}
@@ -766,7 +826,7 @@ boolean CGDFFileReader::process()
 		{
 			std::streamoff l_oBackupPosition = m_oFile.tellg();
 
-			std::streamoff l_oEventDataPosition = (std::streamoff)((256 * (m_ui16NumberOfChannels+1)) + (m_ui64NumberOfDataRecords*m_ui64DataRecordSize));
+			std::streamoff l_oEventDataPosition = (std::streamoff)((256 * (m_ui16NumberOfChannels+1)) + m_ui64Header3Length + (m_ui64NumberOfDataRecords*m_ui64DataRecordSize));
 
 			//checks if there are event information
 			if((uint64)l_oEventDataPosition+1 < m_ui64FileSize)

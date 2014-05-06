@@ -107,6 +107,7 @@ namespace OpenViBEPlugins
 			OpenViBE::CString m_sFileName;
 			std::ifstream m_oFile;
 			OpenViBE::uint64 m_ui64FileSize;
+			OpenViBE::uint64 m_ui64Header3Length;
 
 			OpenViBE::float32 m_f32FileVersion;
 
