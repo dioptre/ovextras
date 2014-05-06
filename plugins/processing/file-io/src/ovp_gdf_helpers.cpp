@@ -617,7 +617,7 @@ boolean GDF::CFixedGDF251Header::read(std::ifstream& oFile)
 {
 	// Due to issues with data alignment and platform-specific padding, we can't trivially read the struct to memory with one go.
 
-	oFile.seekg(0, SEEK_SET);
+	oFile.seekg(0, ios_base::beg);
 
 	uint8 l_pHeaderBuffer[256];
 

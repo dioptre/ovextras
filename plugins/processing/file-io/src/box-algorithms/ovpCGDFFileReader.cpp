@@ -535,7 +535,7 @@ boolean CGDFFileReader::readFileHeader()
 				{
 					l_ui32Length = 256-4;
 				}
-				m_oFile.seekg(l_ui32Length, SEEK_CUR);
+				m_oFile.seekg(static_cast<std::streamoff>(l_ui32Length), ios_base::cur);
 				m_ui64Header3Length += l_ui32Length;
 			}
 

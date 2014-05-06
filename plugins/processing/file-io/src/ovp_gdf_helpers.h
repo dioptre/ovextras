@@ -212,7 +212,7 @@ namespace OpenViBEPlugins
 				virtual OpenViBE::uint64 getNumberOfDataRecords();
 				virtual OpenViBE::uint64 getChannelCount();
 
-				typedef struct gdfFixedHeader1 {
+				struct gdfFixedHeader1 {
 					char m_sVersionId[8];
 					char m_sPatientId[66];
 
