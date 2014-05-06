@@ -1,5 +1,4 @@
-
-#define VOTING_DEBUG 1
+#define VOTING_DEBUG 0
 #include "ovpCAlgorithmPairwiseDecisionVoting.h"
 
 #include <iostream>

@@ -12,6 +12,8 @@
 
 #define OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix							OpenViBE::CIdentifier(0xF48D35AD, 0xB8EFF834)
 #define OVP_Algorithm_Classifier_Pairwise_InputParameterId_Configuration					OpenViBE::CIdentifier(0x10EBAC09, 0x80926A63)
+#define OVP_Algorithm_Classifier_Pairwise_InputParameterId_SetRepartition					OpenViBE::CIdentifier(0xBE71BE18, 0x82A0E018)
+
 
 #define OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector							OpenViBE::CIdentifier(0x883599FE, 0x2FDB32FF)
 #define OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration					OpenViBE::CIdentifier(0x69F05A61, 0x25C94515)
@@ -52,8 +54,9 @@ namespace OpenViBEPlugins
 			{
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix, "Probability Matrix", OpenViBE::Kernel::ParameterType_Matrix);
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_Configuration, "Configuration node", OpenViBE::Kernel::ParameterType_Pointer);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_SetRepartition, "Set repartition", OpenViBE::Kernel::ParameterType_Matrix);
 
-				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector, "Output Probability Matrix", OpenViBE::Kernel::ParameterType_Matrix);
+				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector, "Probability Vector", OpenViBE::Kernel::ParameterType_Matrix);
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration, "Configuration node", OpenViBE::Kernel::ParameterType_Pointer);
 
 

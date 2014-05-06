@@ -68,6 +68,7 @@ boolean CAlgorithmClassifierOneVsOne::uninitialize(void)
 
 boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
+	const uint32 l_ui32AmountClass = getClassAmount();
 	//Create the decision strategy
 	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierOneVsOne));
 	l_pAlgoProxy->initialize();
@@ -99,10 +100,17 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 		l_vClassLabels[rFeatureVectorSet[i].getLabel()]++;
 	}
 
+	//Now we create the corresponding repartition set
+	TParameterHandler<IMatrix*> ip_pRepartitionSet = m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_SetRepartition);
+	ip_pRepartitionSet->setDimensionCount(1);
+	ip_pRepartitionSet->setDimensionSize(0, l_ui32AmountClass);
+
 	//Now let's train each classifier
-	for(size_t l_iFirstClass=1 ; l_iFirstClass <= getClassAmount(); ++l_iFirstClass)
+	for(size_t l_iFirstClass=1 ; l_iFirstClass <= l_ui32AmountClass; ++l_iFirstClass)
 	{
-		for(size_t l_iSecondClass = l_iFirstClass+1 ; l_iSecondClass <= getClassAmount() ; ++l_iSecondClass)
+		ip_pRepartitionSet->getBuffer()[l_iFirstClass-1] = l_vClassLabels[(float64)l_iFirstClass];
+
+		for(size_t l_iSecondClass = l_iFirstClass+1 ; l_iSecondClass <= l_ui32AmountClass ; ++l_iSecondClass)
 		{
 			size_t l_iFeatureVectorSize=rFeatureVectorSet[0].getSize();
 			size_t l_iFeatureCount = l_vClassLabels[(float64)l_iFirstClass] + l_vClassLabels[(float64)l_iSecondClass];

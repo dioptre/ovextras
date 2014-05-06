@@ -1,4 +1,3 @@
-#define TARGET_HAS_ThirdPartyEIGEN
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
 #ifndef __OpenViBEPlugins_Algorithm_ClassifierPShrinkageLDA_H__
