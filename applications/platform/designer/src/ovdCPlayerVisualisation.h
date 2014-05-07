@@ -38,6 +38,7 @@ namespace OpenViBEDesigner
 		//@}
 
 		void showTopLevelWindows();
+		void showSelectedWindow(OpenViBE::uint32 ui32Index);
 		void hideTopLevelWindows();
 
 
@@ -106,11 +107,6 @@ namespace OpenViBEDesigner
 		 * \brief Vector of top level windows
 		 */
 		std::vector < ::GtkWindow* > m_vWindows;
-
-		/**
-		 * \brief vector of status of top level windows (showed or hidden)
-		 */
-//		std::vector <gboolean> m_vIsShowed;
 
 		/**
 		 * \brief Map of split (paned) widgets associated to their identifiers

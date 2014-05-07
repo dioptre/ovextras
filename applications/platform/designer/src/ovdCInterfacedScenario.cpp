@@ -3348,11 +3348,6 @@ void CInterfacedScenario::onWindowClosed(const char* title)
 	m_rApplication.toggleOffWindowItem(l_ui32Index);
 }
 
-void CInterfacedScenario::toggleOnItem(uint32 ui32Index)
-{
-	m_rApplication.toggleOnWindowItem(ui32Index);
-}
-
 //Called when menu (Windows->Show) item  is toggled
 void CInterfacedScenario::onItemToggledOn(uint32 ui32Index)
 {

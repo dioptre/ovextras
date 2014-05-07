@@ -86,7 +86,7 @@ namespace OpenViBEDesigner
 		void spinnerZoomChangedCB(OpenViBE::uint32 scaleDelta);
 
 		void windowItemToggledCB(GtkCheckMenuItem* pCheckMenuItem);
-		void toggleOnWindowItem(OpenViBE::uint32 ui32Index);
+		void toggleOnWindowItem(OpenViBE::uint32 ui32Index, OpenViBE::int32 i32PageIndex);
 		void toggleOffWindowItem(OpenViBE::uint32 ui32Index);
 
 		void stopScenarioCB(void);

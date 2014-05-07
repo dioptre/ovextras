@@ -1806,15 +1806,16 @@ void CApplication::windowItemToggledCB(::GtkCheckMenuItem* pCheckMenuItem)
 	}
 }
 
-void CApplication::toggleOnWindowItem(uint32 ui32Index)
+void CApplication::toggleOnWindowItem(uint32 ui32Index, int32 i32PageIndex)
 {
+
        //block callback to prevent from showing windows twice
-        g_signal_handlers_block_by_func(G_OBJECT(this->getCurrentInterfacedScenario()->m_vCheckItems[ui32Index]), (gpointer)G_CALLBACK(window_menu_check_item_toggled_cb), this);
+        g_signal_handlers_block_by_func(G_OBJECT(m_vInterfacedScenario[i32PageIndex]->m_vCheckItems[ui32Index]), (gpointer)G_CALLBACK(window_menu_check_item_toggled_cb), this);
 
-        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(this->getCurrentInterfacedScenario()->m_vCheckItems[ui32Index]),true);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(m_vInterfacedScenario[i32PageIndex]->m_vCheckItems[ui32Index]),true);
 
-      //unblock
-        g_signal_handlers_unblock_by_func(G_OBJECT(this->getCurrentInterfacedScenario()->m_vCheckItems[ui32Index]), (gpointer)G_CALLBACK(window_menu_check_item_toggled_cb), this);
+       //unblock
+        g_signal_handlers_unblock_by_func(G_OBJECT(m_vInterfacedScenario[i32PageIndex]->m_vCheckItems[ui32Index]), (gpointer)G_CALLBACK(window_menu_check_item_toggled_cb), this);
 
 }
 
@@ -1963,7 +1964,7 @@ void CApplication::stopScenarioCB(void)
 
 		m_eReplayMode = EReplayMode_None;
 		
-		if(this->hasRunningScenario() == false) // if stoping last running scenario, hide window menu
+		if(this->hasRunningScenario() == false) // if stopping last running scenario, hide window menu
 		{
 		    gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), false);
 		}
@@ -2320,6 +2321,11 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		else
 		{
 			m_vInterfacedScenario[i32PageIndex]->showCurrentVisualisation();
+			m_vInterfacedScenario[i32PageIndex]->showWindowMenu();
+			for(unsigned int i=0; i<m_vInterfacedScenario[i32PageIndex]->m_vCheckItems.size(); i++)
+			  {
+			    toggleOnWindowItem(i,i32PageIndex);
+			  }
 		}
 
 		//update window manager button state

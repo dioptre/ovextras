@@ -620,9 +620,6 @@ void CPlayerVisualisation::showTopLevelWindows(void)
 	for(unsigned int i=0; i<m_vWindows.size(); i++)
 	{
 		gtk_widget_show(GTK_WIDGET(m_vWindows[i]));
-		//enable and toggle on all window menu check item
-		m_rInterfacedScenario.showWindowMenu();
-		m_rInterfacedScenario.toggleOnItem(i);
 	}
 	if(m_pActiveToolbarButton != NULL)
 	{
@@ -638,6 +635,23 @@ void CPlayerVisualisation::showTopLevelWindows(void)
 		}
 		it++;
 	}
+}
+
+//called when a visualisation window is open from window-menu
+void CPlayerVisualisation::showSelectedWindow(OpenViBE::uint32 ui32Index)
+{
+    gtk_widget_show(GTK_WIDGET(m_vWindows[ui32Index]));
+
+    std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
+    while(it!=m_mPlugins.end())
+    {
+            if(GTK_IS_WIDGET(it->second.m_pWidget))
+            {
+                    gtk_widget_show(it->second.m_pWidget);
+            }
+            it++;
+    }
+
 }
 
 //called upon Player stop -- called when change current scenario

@@ -102,7 +102,6 @@ namespace OpenViBEDesigner
 		void releasePlayerVisualisation(void);
 
 		void onWindowClosed(const char* title);
-		void toggleOnItem(OpenViBE::uint32 ui32Index);
 		void onItemToggledOn(OpenViBE::uint32 ui32Index);
 		void onItemToggledOff(OpenViBE::uint32 ui32Index);
 		void hideWindowMenu(void);
