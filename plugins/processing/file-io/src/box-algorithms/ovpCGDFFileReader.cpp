@@ -578,7 +578,7 @@ boolean CGDFFileReader::readFileHeader()
 				{
 					break;
 				}
-				m_oFile.seekg(l_ui32Length, ios::cur);
+				m_oFile.seekg(static_cast<std::streamoff>(l_ui32Length), ios_base::cur);
 				m_ui64Header3Length += l_ui32Length;
 			}
 			// Skip possible padding
