@@ -26,6 +26,8 @@ using namespace std;
 #define _NoValueI_ 0xffffffff
 #define _NoValueS_ "_unspecified_"
 
+// #define DEBUG_FILE_POSITIONS 1
+
 //Writer Methods
 void CGDFFileReader::writeExperimentOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize)
 {
@@ -77,7 +79,8 @@ CGDFFileReader::CGDFFileReader(void):
 	m_pExperimentInfoHeader(NULL),
 	m_bExperimentInformationSent(false),
 	m_bSignalDescriptionSent(false),
-	m_ui64ClockFrequency(0)
+	m_ui64ClockFrequency(0),
+	m_bTranslateByMinimum(false)
 {
 }
 
@@ -89,10 +92,13 @@ boolean CGDFFileReader::initialize()
 {
 	const IBox* l_pBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
 
+	// Parses box settings to find filename
+	m_sFileName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+
 	// Gets the size of output buffers
-	CString l_sParam;
-	l_pBoxContext->getSettingValue(1, l_sParam);
-	m_ui32SamplesPerBuffer = static_cast<uint32>(atoi((const char*)l_sParam));
+	m_ui32SamplesPerBuffer = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+
+	m_bTranslateByMinimum = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
 	if(m_ui32SamplesPerBuffer==0) 
 	{
@@ -121,9 +127,6 @@ boolean CGDFFileReader::initialize()
 	//allocate the structure used to store the experiment information
 	m_pExperimentInfoHeader = new CExperimentInfoHeader;
 
-	// Parses box settings to find filename
-	l_pBoxContext->getSettingValue(0, m_sFileName);
-
 	//opens the gdf file
 	if(m_sFileName != CString(""))
 	{
@@ -142,7 +145,13 @@ boolean CGDFFileReader::initialize()
 	m_ui64Header3Length = 0;
 
 	//reads the gdf headers and sends the corresponding buffers
-	return readFileHeader();
+	boolean l_bReturnValue = readFileHeader();
+
+#ifdef DEBUG_FILE_POSITIONS
+	this->getLogManager() << LogLevel_Info << "After all headers, file is at " << m_oFile.tellg() << "\n";
+#endif
+
+	return l_bReturnValue;
 }
 
 boolean CGDFFileReader::uninitialize()
@@ -295,7 +304,7 @@ boolean CGDFFileReader::readFileHeader()
 
 		//First reads the file type
 		char l_pFileType[3];
-		char l_pFileVersion[5];
+		char l_pFileVersion[6];	// field has size 5, we add +1 for terminating NULL
 		m_oFile.read(l_pFileType, 3);
 
 		//if not a gdf file
@@ -308,7 +317,10 @@ boolean CGDFFileReader::readFileHeader()
 		}
 
 		m_oFile.read(l_pFileVersion, 5);
-		m_f32FileVersion = (float32)atof(l_pFileVersion);
+		l_pFileVersion[5]=0;	// The version is not NULL-terminated in the file, we terminate with NULL manually for atof.
+		m_f32FileVersion = static_cast<float32>(atof(&l_pFileVersion[1]));
+
+		this->getLogManager() << LogLevel_Debug << "File version parsed as " << m_f32FileVersion << "\n";
 
 		if(m_oFile.bad())
 		{
@@ -342,6 +354,12 @@ boolean CGDFFileReader::readFileHeader()
 				m_bErrorOccurred = true;
 				delete l_oFixedHeader;
 				return false;
+			}
+
+			// kludge: header should be 256 bytes long, make sure the file position is there now.
+			if(m_f32FileVersion > 1.90) 
+			{
+				m_oFile.seekg(256, std::ios_base::beg);
 			}
 
 			m_pExperimentInfoHeader->m_ui64ExperimentId = l_oFixedHeader->getExperimentIdentifier();
@@ -391,13 +409,17 @@ boolean CGDFFileReader::readFileHeader()
 	{
 		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Trace <<"Reading signal description\n";
 
-		// this->getLogManager() << LogLevel_Info << "Before variable header, file is at " << m_oFile.tellg() << "\n";
+#ifdef DEBUG_FILE_POSITIONS
+		this->getLogManager() << LogLevel_Info << "Before variable header, file is at " << m_oFile.tellg() << "\n";
+#endif
 
 		//reads the whole variable header
 		char * l_pVariableHeaderBuffer = new char[m_ui16NumberOfChannels*256];
 		m_oFile.read(l_pVariableHeaderBuffer, m_ui16NumberOfChannels*256);
 
-		// this->getLogManager() << LogLevel_Info << "After variable header, file is at " << m_oFile.tellg() << "\n";
+#ifdef DEBUG_FILE_POSITIONS
+		this->getLogManager() << LogLevel_Info << "After variable header, file is at " << m_oFile.tellg() << "\n";
+#endif
 
 		if(m_oFile.bad())
 		{
@@ -413,19 +435,38 @@ boolean CGDFFileReader::readFileHeader()
 		m_pChannelScale = new float64[m_ui16NumberOfChannels];
 		m_pChannelTranslate = new float64[m_ui16NumberOfChannels];
 
-		float64 * l_pPhysicalMinimun = reinterpret_cast<float64*>(l_pVariableHeaderBuffer+(104*m_ui16NumberOfChannels));
+		float64 * l_pPhysicalMinimum = reinterpret_cast<float64*>(l_pVariableHeaderBuffer+(104*m_ui16NumberOfChannels));
 
-		float64 * l_pPhysicalMaximun = reinterpret_cast<float64*>(l_pVariableHeaderBuffer+(112*m_ui16NumberOfChannels));
+		float64 * l_pPhysicalMaximum = reinterpret_cast<float64*>(l_pVariableHeaderBuffer+(112*m_ui16NumberOfChannels));
 
-		int64 * l_pDigitalMinimun = reinterpret_cast<int64*>(l_pVariableHeaderBuffer+(120*m_ui16NumberOfChannels));
-
-		int64 * l_pDigitalMaximun = reinterpret_cast<int64*>(l_pVariableHeaderBuffer+(128*m_ui16NumberOfChannels));
+		int64 * l_pDigitalMinimum = reinterpret_cast<int64*>(l_pVariableHeaderBuffer+(120*m_ui16NumberOfChannels));				// v1?
+		int64 * l_pDigitalMaximum = reinterpret_cast<int64*>(l_pVariableHeaderBuffer+(128*m_ui16NumberOfChannels));
+		float64 * l_pDigitalMinimumFloat = reinterpret_cast<float64*>(l_pVariableHeaderBuffer+(120*m_ui16NumberOfChannels));	// v2+
+		float64 * l_pDigitalMaximumFloat = reinterpret_cast<float64*>(l_pVariableHeaderBuffer+(128*m_ui16NumberOfChannels));
 
 		for(int i=0 ; i<m_ui16NumberOfChannels ; i++)
 		{
-			m_pChannelScale[i] = (l_pPhysicalMaximun[i]-l_pPhysicalMinimun[i])/(l_pDigitalMaximun[i]-l_pDigitalMinimun[i]);
+			if(m_f32FileVersion>1.90) 
+			{
+				m_pChannelScale[i] = (l_pPhysicalMaximum[i]-l_pPhysicalMinimum[i])/(l_pDigitalMaximumFloat[i]-l_pDigitalMinimumFloat[i]);
+			} 
+			else
+			{
+				m_pChannelScale[i] = (l_pPhysicalMaximum[i]-l_pPhysicalMinimum[i])/(l_pDigitalMaximum[i]-l_pDigitalMinimum[i]);
+			}
 
-			m_pChannelTranslate[i] = (l_pPhysicalMaximun[i]+l_pPhysicalMinimun[i])/2;
+			if(m_bTranslateByMinimum)
+			{
+				m_pChannelTranslate[i] = l_pPhysicalMinimum[i];
+			}
+			else
+			{
+				m_pChannelTranslate[i] = (l_pPhysicalMaximum[i]+l_pPhysicalMinimum[i])/2.0;
+			}
+			this->getLogManager() << LogLevel_Debug << "Channel " << i << " physMin " << l_pPhysicalMinimum[i] << " physMax " << l_pPhysicalMaximum[i] 
+				<< " digMin " << l_pDigitalMinimum[i] << " digMax " << l_pDigitalMaximum[i] 
+				<< " digMinF " << l_pDigitalMinimumFloat[i] << " digMaxF " << l_pDigitalMaximumFloat[i] 
+				<< " scale " << m_pChannelScale[i] << " trans " << m_pChannelTranslate[i] << "\n";
 		}
 
 		//Check if all the channels have the same sampling rate
@@ -438,7 +479,7 @@ boolean CGDFFileReader::readFileHeader()
 			//If all the channels don't have the same sampling rate
 			if(m_ui32NumberOfSamplesPerRecord != l_pNumberOfSamplesPerRecordArray[i])
 			{
-				if(m_f32FileVersion >= 2.51) 
+				if(m_f32FileVersion > 1.90) 
 				{
 					getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Interpreted GDF file to have channels with varying sampling rates, which is not supported.\n";
 					getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "This can be a misinterpretation of the newer GDF subformats. File claims to follow GDF " << m_f32FileVersion << ".\n";
@@ -510,9 +551,13 @@ boolean CGDFFileReader::readFileHeader()
 		}
 
 		// We may need to skip header3 with its tags and take its size into account
-		if(m_f32FileVersion > 2.50) 
+		if(m_f32FileVersion > 1.90) 
 		{
-			// this->getLogManager() << LogLevel_Info << "Before header3, file is at " << m_oFile.tellg() << "\n";
+#ifdef DEBUG_FILE_POSITIONS
+			this->getLogManager() << LogLevel_Info << "Before header3, file is at " << m_oFile.tellg() << "\n";
+#endif
+
+			m_ui64Header3Length = 0;
 
 			while(true) {
 				char l_sBuffer[4];
@@ -526,20 +571,24 @@ boolean CGDFFileReader::readFileHeader()
 				// @fixme: potential endianness problem with uint24 length
 				uint32 l_ui32Tag =    l_sBuffer[0];
 				uint32 l_ui32Length = (l_sBuffer[1]<<0) + (l_sBuffer[2]<<8) + (l_sBuffer[3]<<16);
+
+				this->getLogManager() << LogLevel_Info << "Found tag " << l_ui32Tag << " at pos " << m_oFile.tellg()-std::streamsize(4) << " [length " << l_ui32Length << "], skipping content.\n";
+
 				if(l_ui32Tag == 0)
 				{
 					break;
 				}
-				// Skip content (and padding)
-				if(l_ui32Length<256-4) 
-				{
-					l_ui32Length = 256-4;
-				}
-				m_oFile.seekg(l_ui32Length, SEEK_CUR);
+				m_oFile.seekg(l_ui32Length, ios::cur);
 				m_ui64Header3Length += l_ui32Length;
 			}
+			// Skip possible padding
+			int m_ui64PaddingRequired = (256-m_ui64Header3Length) % 256;
+			m_ui64Header3Length += m_ui64PaddingRequired;
+			m_oFile.seekg(m_ui64PaddingRequired, ios::cur);
 
-			// this->getLogManager() << LogLevel_Info << "After header3, file is at " << m_oFile.tellg() << "\n";
+#ifdef DEBUG_FILE_POSITIONS
+			this->getLogManager() << LogLevel_Info << "After header3, file is at " << m_oFile.tellg() << "\n";
+#endif
 		}
 
 		//Send the data to the output

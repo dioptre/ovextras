@@ -100,7 +100,6 @@ namespace OpenViBEPlugins
 				OpenViBE::uint32 m_ui32NumberOfSignals;
 			};
 
-
 			/**
 			 * An helper class to manipulate GDF2 fixed-size headers
 			 */
@@ -169,6 +168,7 @@ namespace OpenViBEPlugins
 				OpenViBE::uint16 m_ui16NumberOfSignals;
 				OpenViBE::uint16 m_ui16Reserved3;
 			};
+
 
 			/**
 			 * An helper class to manipulate GDF2.51 fixed-size headers

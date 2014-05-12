@@ -747,3 +747,4 @@ uint64 GDF::CFixedGDF251Header::getChannelCount()
 	return m_oHeader1.m_ui16NumberOfSignals;
 }
 
+
