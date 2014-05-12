@@ -90,8 +90,6 @@ void CGDFFileReader::release(void)
 
 boolean CGDFFileReader::initialize()
 {
-	const IBox* l_pBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
-
 	// Parses box settings to find filename
 	m_sFileName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
@@ -572,7 +570,7 @@ boolean CGDFFileReader::readFileHeader()
 				uint32 l_ui32Tag =    l_sBuffer[0];
 				uint32 l_ui32Length = (l_sBuffer[1]<<0) + (l_sBuffer[2]<<8) + (l_sBuffer[3]<<16);
 
-				this->getLogManager() << LogLevel_Info << "Found tag " << l_ui32Tag << " at pos " << m_oFile.tellg()-std::streamsize(4) << " [length " << l_ui32Length << "], skipping content.\n";
+				this->getLogManager() << LogLevel_Info << "Found tag " << l_ui32Tag << " at pos " << m_oFile.tellg()-std::streamoff(4) << " [length " << l_ui32Length << "], skipping content.\n";
 
 				if(l_ui32Tag == 0)
 				{
