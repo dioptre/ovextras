@@ -21,6 +21,8 @@ P300ResultAreaHandler::P300ResultAreaHandler(GTable* container, P300ScreenLayout
 {
 	#ifdef OUTPUT_TIMING
 	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/gl_result_move_timing.txt","w");
+	//for testing purposes, make the result area dump the spleed letters in a file for comparison with a reference
+	stackFile = fopen(OpenViBE::Directories::getDataDir() + "/../../../contrib/applications/platform/P300Stimulator/test/resultStack.txt","w");
 	#endif
 	
 	m_oLastAddedLabel = NULL;
@@ -32,6 +34,7 @@ P300ResultAreaHandler::~P300ResultAreaHandler()
 {
 	#ifdef OUTPUT_TIMING
 	fclose(timingFile);
+	fclose(stackFile);
 	#endif
 }
 
@@ -264,6 +267,12 @@ void P300ResultAreaHandler::updateResultBuffer()
 		}
 	}
 	std::cout << "P300ResultAreaHandler:: Spelled letters #" << m_sSpelledLetters << "#" << m_ui32ResultCounter << "\n";
+	//save state of what has been spelled
+	m_vStates.push_back(m_sSpelledLetters);
+
+	#ifdef OUTPUT_TIMING
+	fprintf(stackFile, "%s\n",m_sSpelledLetters.c_str());
+	#endif
 }
 
 std::string P300ResultAreaHandler::eraseLastCharacter()

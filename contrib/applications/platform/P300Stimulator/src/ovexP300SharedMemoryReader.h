@@ -42,6 +42,10 @@ namespace OpenViBEApplications
 			 */
 			OpenViBE::uint64 readNextPrediction();
 
+			/**
+			 * returns the stimulations currently in the shared memory and erase them
+			 * @return StimulationSet with all the stimulation currently in the shared memory
+			 */
 			OpenViBE::IStimulationSet* readStimulation();
 			
 			/** 

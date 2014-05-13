@@ -1,8 +1,6 @@
 #include "ovexP300Visualiser.h"
 
 #include <system/Time.h>
-
-//#include "SDL.h"
 #include <GLFW/glfw3.h>
 
 using namespace OpenViBE;
@@ -25,8 +23,11 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	m_ui32FeedbackResultCounter = 0;
 	m_ui32PreviousFeedbackResultCounter = 0;
 
+	m_bReplayMode=false;
+
 	#ifdef OUTPUT_TIMING
-	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/symbol_update_timing.txt","w");		
+	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/../../../contrib/applications/platform/P300Stimulator/test/symbol_update_timing.txt","w");
+	fprintf(timingFile, "%s \n","beforeUpdate;afterUpdate;");
 	timingFile3 = fopen(OpenViBE::Directories::getDataDir() + "/generate_sequence_timing.txt","w");	
 	#endif
 	
@@ -41,6 +42,8 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	this->m_pStimulatorPropReader = new P300StimulatorPropertyReader(this->m_pKernelContext, this->m_pScreenLayoutReader->getSymbolList());
 	this->m_pStimulatorPropReader->readPropertiesFromFile(this->m_pInterfacePropReader->getStimulatorConfigFile());	
 	
+
+
 	//In case hardware of software tagging is enable a different object for tagging is constructed
 	if (!this->m_pInterfacePropReader->getHardwareTagging())
 	{
@@ -97,17 +100,19 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 		this->m_pKernelContext->getLogManager() << LogLevel_Info << " REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() <<"\n";
 		this->m_oStimulator = new ExternalP300NULLStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
 		this->m_pSequenceGenerator->generateSequence();//to test csv reading
+		m_bReplayMode=true;
 	}
 	else
 	{
 		this->m_pKernelContext->getLogManager() << LogLevel_Info << " NOT REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() << "\n";
 		this->m_oStimulator = new ExternalP300Stimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
+		m_bReplayMode=false;
 	}
+
 	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
 	this->m_oStimulator->setCallBack(ExternalP300Visualiser::processCallback);	
 	this->m_oStimulator->setWaitCallBack(ExternalP300Visualiser::processWaitCallback);
 	this->m_oStimulator->setQuitEventCheck(ExternalP300Visualiser::areWeQuitting);
-
 
 
 	//initialize the OpenGL context and the main container that is needed to draw everything on the screen by calling the drawAndSync function
@@ -139,7 +144,7 @@ ExternalP300Visualiser::~ExternalP300Visualiser()
 {
 	delete m_oStimulator;
 	delete m_pTagger;
-	//delete m_pMainContainer; //should be delete before m_pScreenLayoutReader is deleted (needed to iterate over buttons)
+	delete m_pMainContainer; //should be delete before m_pScreenLayoutReader is deleted (needed to iterate over buttons) (why was it commented?)
 	delete m_pInterfacePropReader; 
 	delete m_pScreenLayoutReader; 
 	delete m_pStimulatorPropReader;
@@ -204,14 +209,16 @@ void ExternalP300Visualiser::processWaitCallback(uint32 eventID)
 	//std::cout << "ExternalP300Visualiser::processWaitCallback" << std::endl;
 	if(eventID==0)
 	{
+		//process events and return immediately (do not wait)
 		glfwPollEvents();
 	}
 	else
 	{
+		//wait for events
 		glfwWaitEvents();
 	}
-		//externalVisualiser->process(eventID);
 }
+
 boolean ExternalP300Visualiser::areWeQuitting(void)
 {
 	GLFWwindow* window = externalVisualiser->getMainContainer()->getWindow();
@@ -274,6 +281,8 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			break;
 		case OVA_StimulationId_ExperimentStop:
 			m_pTagger->write(eventID);
+			//exit when we receive experiment stop (useful when we want replay to stop automatically)
+			glfwSetWindowShouldClose(this->getMainContainer()->getWindow(), GL_TRUE);
 			break;
 		case OVA_StimulationId_TrialStop:	
 			m_pTagger->write(eventID);
@@ -334,7 +343,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			
 			//get the next flash group which is a vector, the size of the number of symbols on the keyboard, with one or zero to indicate
 			//whether it is flashed or not
-			m_pKernelContext->getLogManager() << LogLevel_Info << "Flash " << eventID << " getting group \n";
+			//m_pKernelContext->getLogManager() << LogLevel_Info << "Flash " << eventID << " getting group \n";
 			l_lSymbolChangeList = m_oStimulator->getNextFlashGroup()->data();//to uncomment when not in replay
 			changeStates(l_lSymbolChangeList,FLASH);
 			m_pMainContainer->getKeyboardHandler()->updateChildStates(l_lSymbolChangeList);	
@@ -352,11 +361,12 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			break;
 		default:
 			eventID--;
+			//the first recorded files index letter from 0
 			if(m_pInterfacePropReader->getStimulatorMode()==CString("Replay"))
 			{
 				eventID++;
 			}
-			m_pKernelContext->getLogManager() << LogLevel_Info << "Default (label) received, eventID " << eventID << "\n";
+			//m_pKernelContext->getLogManager() << LogLevel_Info << "Default (label) received, eventID " << eventID << "\n";
 			m_qEventQueue.push(eventID+1);
 			l_lSymbolChangeList = new uint32[m_pScreenLayoutReader->getNumberOfKeys()]();
 			//we are in the period where feedback is presented
@@ -432,7 +442,8 @@ void ExternalP300Visualiser::process(uint32 eventID)
 	{
 		#ifdef OUTPUT_TIMING
             l_f64TimeBefore = float64((System::Time::zgetTime()>>22)/1024.0);
-            fprintf(timingFile, "%f \n",l_f64TimeBefore);
+			//fprintf(timingFile, "%f \n",l_f64TimeBefore);
+			fprintf(timingFile, "%f;",l_f64TimeBefore);
 		#endif
 
 		//this will notify all listeners/observers of the keyboard buttons that they should be updated	
@@ -440,7 +451,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
 
 		#ifdef OUTPUT_TIMING
             l_f64TimeAfter = float64((System::Time::zgetTime()>>22)/1024.0);
-            fprintf(timingFile, "%f \n",l_f64TimeAfter);
+			fprintf(timingFile, "%f;\n",l_f64TimeAfter);
 		#endif
 		
 		//send a stimulus to openvibe in order to train the XDAWN and the classifier 
@@ -474,11 +485,11 @@ void ExternalP300Visualiser::changeStates(uint32* states, VisualState ifState, V
 	}	
 }
 
-
 static void error_callback(int error, const char* description)
 {
 	std::cout << "GLFW " << description << std::endl;
 }
+
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	std::cout << "key pressed " << std::endl;
@@ -492,7 +503,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		std::cout << "START key pressed " << std::endl;
 	}
 }
-
 
 /**
 MAIN: press 's' to start the stimulator
@@ -513,35 +523,27 @@ int main (int argc, char *argv[])
 		s_pResetSymbolProbabilities[i] = 1.0/externalVisualiser->getNumberOfKeys();
 	
 	//listen for an key event. If 's' is pressed the stimulator is started.
-	//SDL_Event event;
-	//int key;
-	boolean l_bEventReceived = false;
-	while (!l_bEventReceived && glfwGetKey(window, GLFW_KEY_S)!=GLFW_PRESS)//SDL_WaitEvent(&event))
+	if(!externalVisualiser->getReplayMode())
 	{
-		glfwWaitEvents();
-		/*
-		switch (event.type) {
-			case SDL_KEYDOWN:
-				if(event.key.keysym.sym==SDLK_s)
-				{
-					l_bEventReceived = true;
-					externalVisualiser->start();
-				}
-				break;
-			default:
-				break;
-		}
-		//*/
-		//std::cout << "waiting" << std::endl;
-		if(glfwGetKey(window, GLFW_KEY_S)==GLFW_PRESS)
+		std::cout << "waitingfor s key" << std::endl;
+		boolean l_bEventReceived = false;
+		while (!l_bEventReceived && glfwGetKey(window, GLFW_KEY_S)!=GLFW_PRESS)//SDL_WaitEvent(&event))
 		{
-			l_bEventReceived = true;
-			externalVisualiser->start();
-		}
+			glfwWaitEvents();
+			if(glfwGetKey(window, GLFW_KEY_S)==GLFW_PRESS)
+			{
+				l_bEventReceived = true;
+				externalVisualiser->start();
+			}
 
-		System::Time::sleep(10);
+			System::Time::sleep(10);
+		}
 	}
-	
+	else
+	{
+		//in replay mode we do not wait for the user to press 's
+		externalVisualiser->start();
+	}
 	//clean up
 	delete externalVisualiser;
 	delete[] s_pResetSymbolProbabilities;

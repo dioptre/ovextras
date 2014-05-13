@@ -22,9 +22,8 @@ namespace OpenViBEApplications
 {		
 
 		/**
-		 * The stimulator class is the main loop of the program. Based on stimulated time steps it will go from one state to another
-		 * (e.g. if the duration of flash is over then it will go to the noflash state). Each time it changes to another state it notifies the 
-		 * main ExternalP300Visualiser class by means of a stimulation id as defined in ova_defines.h
+		 * The stimulator class is the main loop of the program. This NULL stimulator does nothing exept transmit stimulations from
+		 * the openvibe data (via shared memory) to the visualizer. It is used when replaying data
 		 */
 		class ExternalP300NULLStimulator : public ExternalP300IStimulator
 		{
@@ -63,63 +62,21 @@ namespace OpenViBEApplications
 				 */
 				virtual ExternalP300SharedMemoryReader* getSharedMemoryReader() { return &m_oSharedMemoryReader; }
 				
-			private:
-				/**
-				 * If you stop early then it will adjust the variables such as m_ui64TrialStartTime so that the next
-				 * trial can begin
-				 */
-				virtual void adjustForNextTrial(OpenViBE::uint64 currentTime);
-				
-
 			protected:
-				OpenViBE::uint64 m_ui64StartStimulation;
-				OpenViBE::uint32 m_ui32RepetitionCountInTrial;
-				OpenViBE::uint32 m_ui32MinRepetitions;
-				OpenViBE::uint32 m_ui32TrialCount;
-				OpenViBE::uint64 m_ui64FlashDuration;
-				OpenViBE::uint64 m_ui64InterRepetitionDuration;
-				OpenViBE::uint64 m_ui64InterTrialDuration;
-				OpenViBE::uint64 m_ui64InterStimulusOnset;
-				OpenViBE::uint64 m_ui64TimeToNextFlash;
-				OpenViBE::uint64 m_ui64TimeToNextFlashStop;
-				OpenViBE::CString m_sTargetWord;
-
 				OpenViBE::CString m_sSharedMemoryName;
 				ExternalP300SharedMemoryReader m_oSharedMemoryReader;
 				P300SequenceGenerator* m_pSequenceGenerator;
 				P300StimulatorPropertyReader* m_pPropertyObject;
 
 			private:
-
-				OpenViBE::uint64 m_ui64LastTime;
-				OpenViBE::boolean m_bStopReceived;
-
-				OpenViBE::uint32 m_ui32LastState;
-				OpenViBE::uint64 m_ui64TrialStartTime;
-				OpenViBE::uint64 m_ui64NextTargetStartTime;
-				OpenViBE::uint64 m_ui64NextTargetEndTime;
-				OpenViBE::uint64 m_ui64NextFeedbackStartTime;
-				OpenViBE::uint64 m_ui64NextFeedbackEndTime;
-
-				OpenViBE::uint32 m_ui32FlashCountInRepetition;
-				OpenViBE::uint64 m_ui64RepetitionDuration;
-				OpenViBE::uint64 m_ui64TrialDuration;
-				OpenViBE::uint32 m_ui32TrialIndex;
-
-				std::map < OpenViBE::uint64, OpenViBE::uint64 > m_vRow;
-				std::map < OpenViBE::uint64, OpenViBE::uint64 > m_vColumn;
-
-				OpenViBE::uint64 m_ui64Prediction;
-				std::queue< OpenViBE::uint64 >* m_oTargetStimuli;
-				
-				//SDL_Event m_eKeyEvent;
-
 				#ifdef OUTPUT_TIMING
                 FILE* timingFile;
 				#endif
 				
 				OpenViBE::uint64 m_ui64StimulatedCycleTime;
 				OpenViBE::uint64 m_ui64RealCycleTime;
+				OpenViBE::uint32 m_ui32TrialCount;
+				OpenViBE::uint32 m_ui32TrialIndex;
 
 		};
 

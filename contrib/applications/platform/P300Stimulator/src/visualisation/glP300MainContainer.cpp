@@ -21,7 +21,8 @@ GContainer(0.0f,0.0f,width,height), m_pInterfacePropertyObject(propertyObject),
 m_pScreenLayoutObject(layoutPropObject)
 {
 	#ifdef OUTPUT_TIMING
-	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/gl_draw_timing.txt","w");
+	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/../../../contrib/applications/platform/P300Stimulator/test/gl_draw_timing.txt","w");
+	fprintf(timingFile, "%s\n","beforedrawing;afterdrawing;");
 	#endif
 	initialize(layoutPropObject->getNumberOfStandardKeys());
 }
@@ -52,7 +53,7 @@ P300MainContainer::P300MainContainer(const P300MainContainer& gcontainer) : GCon
 
 P300MainContainer::~P300MainContainer()
 {
-	//std::cout << "P300MainContainer deconstructor called\n";
+	std::cout << "P300MainContainer deconstructor called\n";
 	//SDL_FreeSurface(m_oSDLSurface);
 	glfwDestroyWindow(m_oGLFWWindow);
 	#ifdef WORDPREDICTION
@@ -67,6 +68,7 @@ P300MainContainer::~P300MainContainer()
 	#ifdef OUTPUT_TIMING
       fclose(timingFile);
 	#endif
+
 }		
 
 void P300MainContainer::initialize(uint32 nGridCells)
@@ -123,10 +125,11 @@ void P300MainContainer::initializeGL(OpenViBE::boolean fullScreen, OpenViBE::flo
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	if(!fullScreen)
 	{
-		m_oGLFWWindow = glfwCreateWindow((int)width, (int)height, "My Title", NULL, NULL);
+		m_oGLFWWindow = glfwCreateWindow((int)width, (int)height, "P300 Speller", NULL, NULL);
 	}
 	else
 	{
+		glfwWindowHint(GLFW_DECORATED, GL_FALSE);
 		int index=monitorIndex;
 
 		//get available monitors
@@ -312,7 +315,7 @@ void P300MainContainer::initializeDiodeArea()
 	l_container->setBackgroundColor(m_pScreenLayoutObject->getDefaultBackgroundColor(NOFLASH));
 	m_gDiodeArea = new GContainer(*l_container);	
 
-	//we could parameter that but a constrast with withe is the most efficient
+	//we could parameter that but a constrast with white is the most efficient
 	GColor white;
 	white.red = 1.0;
 	white.green = 1.0;
@@ -367,14 +370,14 @@ void P300MainContainer::draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	#ifdef OUTPUT_TIMING
       float64 l_f64TimeBefore = float64((System::Time::zgetTime()>>22)/1024.0);
-	fprintf(timingFile, "%f\n",l_f64TimeBefore);	
+	fprintf(timingFile, "%f;",l_f64TimeBefore);
 	#endif
 	
 	GContainer::draw();
 	
 	#ifdef OUTPUT_TIMING
 	float64 l_f64TimeAfter = float64((System::Time::zgetTime()>>22)/1024.0);
-	fprintf(timingFile, "%f\n",l_f64TimeAfter);
+	fprintf(timingFile, "%f;\n",l_f64TimeAfter);
 	#endif
 	
 	//SDL_GL_SwapBuffers();

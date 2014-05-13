@@ -22,29 +22,9 @@ ExternalP300NULLStimulator::ExternalP300NULLStimulator(P300StimulatorPropertyRea
 {
 	m_pSequenceGenerator = l_pSequenceGenerator;
 	
-	m_ui32RepetitionCountInTrial = m_pSequenceGenerator->getNumberOfRepetitions();
-	m_ui32MinRepetitions = propertyObject->getMinNumberOfRepetitions();
-	m_ui32TrialCount = propertyObject->getNumberOfTrials();
-	m_ui64FlashDuration = propertyObject->getFlashDuration();
-	m_ui64InterStimulusOnset = propertyObject->getInterStimulusOnset();
-	m_ui64InterRepetitionDuration = propertyObject->getInterRepetitionDelay();
-	m_ui64InterTrialDuration = propertyObject->getInterTrialDuration();
-	m_oTargetStimuli = propertyObject->getTargetStimuli();
 	m_sSharedMemoryName = propertyObject->getSharedMemoryName();
-	
-	m_ui64LastTime=0;
-	m_bStopReceived = false;
-
-	m_ui32LastState=State_None;
-	adjustForNextTrial(0);
-
-	m_ui32FlashCountInRepetition=m_pSequenceGenerator->getNumberOfGroups();
-	m_ui64RepetitionDuration = (m_ui32FlashCountInRepetition-1)*m_ui64InterStimulusOnset+m_ui64FlashDuration;
-	m_ui64TrialDuration=m_ui32RepetitionCountInTrial*(m_ui64RepetitionDuration+m_ui64InterRepetitionDuration);
-	m_ui32TrialIndex=0;					
-
-	m_oSharedMemoryReader.openSharedMemory(m_sSharedMemoryName);
-	m_ui64Prediction = 0;				
+					
+	m_oSharedMemoryReader.openSharedMemory(m_sSharedMemoryName);			
 	
 	#ifdef OUTPUT_TIMING
 	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/stimulator_round_timing.txt","w");
@@ -52,6 +32,8 @@ ExternalP300NULLStimulator::ExternalP300NULLStimulator(P300StimulatorPropertyRea
 	
 	m_ui64RealCycleTime = 0;
 	m_ui64StimulatedCycleTime = 0;
+	m_ui32TrialCount=0;
+	m_ui32TrialIndex=0;
 
 }
 
@@ -63,26 +45,8 @@ ExternalP300NULLStimulator::~ExternalP300NULLStimulator()
 	#endif
 }
 
-//*
-void ExternalP300NULLStimulator::adjustForNextTrial(uint64 currentTime)
-{
-	m_ui64TrialStartTime=currentTime+m_ui64InterTrialDuration;
-	uint64 l_ui64InterTrialPartition = m_ui64InterTrialDuration >> 3;
-	m_ui64NextFeedbackStartTime = m_ui64TrialStartTime-m_ui64InterTrialDuration+(l_ui64InterTrialPartition<<1);
-	m_ui64NextFeedbackEndTime = m_ui64NextFeedbackStartTime+(l_ui64InterTrialPartition<<1);
-	m_ui64NextTargetStartTime = m_ui64NextFeedbackEndTime+l_ui64InterTrialPartition;
-	m_ui64NextTargetEndTime = m_ui64NextTargetStartTime+(l_ui64InterTrialPartition<<1);
-	
-	m_ui64TimeToNextFlash = 0;
-	m_ui64TimeToNextFlashStop = m_ui64TimeToNextFlash + m_ui64FlashDuration;
-
-	m_ui32TrialIndex++;	
-}
-//*/
-
 void ExternalP300NULLStimulator::run()
 {
-	uint32 l_ui32State=State_NoFlash;
 
 	if (m_ui32TrialCount==0)
 		m_ui32TrialCount = UINT_MAX-1;
@@ -103,7 +67,7 @@ void ExternalP300NULLStimulator::run()
 		
 		//very often one cycle of this loop does not take much time, so we just put the program to sleep until the next time step
 		if (m_ui64RealCycleTime<m_ui64StimulatedCycleTime)
-			System::Time::sleep(static_cast<uint32>(std::ceil(1000.0*((m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep)>>22)/1024.0)));		
+			System::Time::sleep(static_cast<uint32>(std::ceil(1000.0*((m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep)>>22)/1024.0)));
 
 		//uint64 l_ui64Prediction = m_oSharedMemoryReader.readNextPrediction();
 		IStimulationSet* l_pStimSet = m_oSharedMemoryReader.readStimulation();
@@ -114,8 +78,15 @@ void ExternalP300NULLStimulator::run()
 		{
 			for(int i=0; i<l_pStimSet->getStimulationCount(); i++)
 			{
+				//int j = l_pStimSet->getStimulationCount()-1 - i;
+				//std::cout << i << "/" << l_pStimSet->getStimulationCount() << std::endl;
 				int l_ui64Prediction = l_pStimSet->getStimulationIdentifier(i);
-				std::cout << "\n		Stimulator callback on visu for  " << int(l_ui64Prediction) <<  std::endl;
+
+				//the first recorded file index letters from 0
+				//but since the visualizer now consider 0 to be an error
+				if(l_ui64Prediction==0)
+					l_ui64Prediction=1;
+				//std::cout << "\n		Stimulator callback on visu for  " << int(l_ui64Prediction) <<  std::endl;
 				m_funcVisualiserCallback(l_ui64Prediction);
 			}
 		}
@@ -148,7 +119,7 @@ void ExternalP300NULLStimulator::run()
 		while (!checkForQuitEvent())// && SDL_WaitEvent(&m_eKeyEvent))
 		{
 			m_funcVisualiserWaitCallback(1);
-			System::Time::sleep(50);
+			//System::Time::sleep(50);
 		}
 	}
 	m_funcVisualiserCallback(OVA_StimulationId_ExperimentStop);

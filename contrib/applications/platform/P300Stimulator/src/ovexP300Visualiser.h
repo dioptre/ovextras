@@ -12,22 +12,23 @@
 
 #include "stimulator/ovexP300Stimulator.h"
 #include "stimulator/ovexP300NULLStimulator.h"
-#include "tagging/ovexCSoftTagger.h"
 
+#include "tagging/ovexCSoftTagger.h"
 #if defined TARGET_OS_Linux || (defined TARGET_OS_Windows && defined TARGET_HAS_ThirdPartyInpout)
 #include "tagging/ovexParallelPort.h"
 #endif
 
-
 #include "visualisation/glP300MainContainer.h"
+
 #include "properties/ovexP300InterfacePropertyReader.h"
 #include "properties/ovexP300StimulatorPropertyReader.h"
 #include "properties/ovexP300ScreenLayoutReader.h"
+
 #include "sequence/ovexP300RipRandSequenceGenerator.h"
 #include "sequence/ovexP300RowColumnSequenceGenerator.h"
-#include "ovexP300SequenceFileWriter.h"
-
 #include "sequence/ovexP300CSVReader.h"
+
+#include "ovexP300SequenceFileWriter.h"
 
 #include "ova_defines.h"
 
@@ -73,7 +74,17 @@ namespace OpenViBEApplications
 			 */
 			static void processCallback(OpenViBE::uint32 event);
 
-			static void processWaitCallback(OpenViBE::uint32 event);
+			/**
+			 * This is the callback function called when we have to wait for events
+			 * @param 0 if we immediately process all queued events, otherwise we wait for an event
+			 */
+			static void processWaitCallback(OpenViBE::uint32 waiting);
+
+
+			/**
+			 * This function checks for the order to quit the application (from the user or the stimulator)
+			 * @return true if we quit, false otherwise
+			 */
 			static OpenViBE::boolean areWeQuitting(void);
 
 			/**
@@ -92,6 +103,8 @@ namespace OpenViBEApplications
 			OpenViBE::uint32 getNumberOfKeys() { return m_pScreenLayoutReader->getNumberOfKeys(); }
 
 			const P300MainContainer* getMainContainer() { return m_pMainContainer;}
+
+			const OpenViBE::boolean getReplayMode() {return m_bReplayMode;}
 
 		private:
 			
@@ -164,6 +177,8 @@ namespace OpenViBEApplications
 			OpenViBE::uint32 m_ui32FeedbackCueCounter;
 			OpenViBE::uint32 m_ui32FeedbackResultCounter;
 			OpenViBE::uint32 m_ui32PreviousFeedbackResultCounter;
+
+			OpenViBE::boolean m_bReplayMode;
 
 			#ifdef OUTPUT_TIMING
             FILE* timingFile;
