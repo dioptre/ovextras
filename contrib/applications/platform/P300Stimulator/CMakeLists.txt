@@ -22,6 +22,11 @@ INCLUDE("FindThirdPartyGTK")#to use gtk package content i.e cairo pango fretype
 #so that boost won't need to link against DateTime when using the interprocess communication library
 ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
 
+#compile output timing to file for tests
+IF(OV_COMPILE_TESTS)
+	ADD_DEFINITIONS(-DOUTPUT_TIMING)
+ENDIF(OV_COMPILE_TESTS)
+
 # ---------------------------------
 # Target macros
 # Defines target operating system
