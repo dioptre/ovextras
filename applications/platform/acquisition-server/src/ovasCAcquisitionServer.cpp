@@ -966,7 +966,7 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 							m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Correct, l_ui64StimulationTime, 0);
 							m_bReplacementInProgress = false;
 						}
-						m_vSwapBuffer[j]=alpha*pSample[channel*ui32SampleCount+i]+(1-alpha)*m_vOverSamplingSwapBuffer[channel];
+						m_vSwapBuffer[j]=alpha*pSample[channel*ui32SampleCount+i]+(1-alpha)*m_vOverSamplingSwapBuffer[j];
 					}
 				}
 				m_vPendingBuffer.push_back(m_vSwapBuffer);
