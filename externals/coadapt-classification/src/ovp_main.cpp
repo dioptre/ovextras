@@ -1,6 +1,5 @@
 #include "ovp_defines.h"
 
-#include "box-algorithms/classification/ovpCBoxAlgorithmEvidenceAccumulator.h"
 //#include "box-algorithms/classification/ovpCDynamicNaiveBayesComputeBoxAlgorithm.h"
 #include "box-algorithms/classification/ovpCBoxAlgorithmAdaptiveP300Classifier.h"
 
@@ -40,11 +39,13 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EvidenceAccumulationAlgorithmInputType, "Distance to hyperplane", OVP_InputType_EvidenceAccumulationDistance.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EvidenceAccumulationAlgorithmInputType, "Class probabilities", OVP_InputType_EvidenceAccumulationProbability.toUInteger());
 	
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Mixture of Experts", OVP_ClassId_Algorithm_ClassifierMixtureOfExperts.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Relearn Probabilistic LDA", OVP_ClassId_Algorithm_ClassifierRelearnPLDA.toUInteger());
+	//*
+	//rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Mixture of Experts", OVP_ClassId_Algorithm_ClassifierMixtureOfExperts.toUInteger());
+	//rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Relearn Probabilistic LDA", OVP_ClassId_Algorithm_ClassifierRelearnPLDA.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Probabilistic LDA", OVP_ClassId_Algorithm_ClassifierPLDA.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Adaptive Gradient Descent LDA", OVP_ClassId_Algorithm_ClassifierAdaptiveGradientDescentLDA.toUInteger());
-	
+	//rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Adaptive Gradient Descent LDA", OVP_ClassId_Algorithm_ClassifierAdaptiveGradientDescentLDA.toUInteger());
+	//*/
+
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_ShrinkageType,"Shrinkage");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Full covariance",FULL);
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Shrink to diagonal",SHRINK_TO_DIAG);
@@ -54,10 +55,9 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierNULLDesc);
 	//OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CLikelihoodComputeFunctionDesc);
 	//OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CDynamicNaiveBayesComputeBoxAlgorithmDesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmEvidenceAccumulatorDesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierMixtureOfExpertsDesc);
+	//OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierMixtureOfExpertsDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmAdaptiveP300ClassifierDesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierRelearnPLDADesc);
+	//OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierRelearnPLDADesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierPLDADesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierAdaptiveGradientDescentLDADesc);
+	//OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierAdaptiveGradientDescentLDADesc);
 OVP_Declare_End()
