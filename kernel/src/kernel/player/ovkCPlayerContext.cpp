@@ -111,6 +111,8 @@ namespace OpenViBE
 
 				void log(const ELogLevel eLogLevel)
 				{
+					CIdentifier l_idBoxId;
+					m_pSimulatedBox->getBoxIdentifier(l_idBoxId);
 					getKernelContext().getLogManager()
 						<< eLogLevel
 						<< "At time "
@@ -121,6 +123,8 @@ namespace OpenViBE
 						<< "Box algorithm"
 						<< LogColor_PopStateBit
 						<< "::"
+						<< l_idBoxId
+						<< " aka "
 						<< m_pSimulatedBox->getName()
 						<< "> ";
 				}
