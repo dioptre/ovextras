@@ -43,7 +43,7 @@ namespace OpenViBEApplications
 		/**
 		 * @return the letters in the result region
 		 */
-		std::string& getResultBuffer() { return m_sSpelledLetters; };
+		std::string& getResultBuffer() { return m_sSpelledLetters; }
 		
 	private:
 		/**
@@ -83,9 +83,13 @@ namespace OpenViBEApplications
 		OpenViBE::uint32 m_ui32ResultCounter;
 		#ifdef OUTPUT_TIMING
 		FILE * timingFile;
+		FILE* stackFile;
 		#endif
 		GLabel* m_oLastAddedLabel;
 		OpenViBE::float64 m_f32LastFontSize;
+
+		//keep states of buffer in memory for undo/redo
+		std::vector< std::string > m_vStates;
 	};
 };
 #endif
