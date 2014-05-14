@@ -18,6 +18,7 @@
 #include "tagging/ovexParallelPort.h"
 #endif
 
+
 #include "visualisation/glP300MainContainer.h"
 
 #include "properties/ovexP300InterfacePropertyReader.h"
@@ -29,6 +30,8 @@
 #include "sequence/ovexP300CSVReader.h"
 
 #include "ovexP300SequenceFileWriter.h"
+
+#include "evidence-accumulation/ovexP300EvidenceAccumulator.h"
 
 #include "ova_defines.h"
 
@@ -161,6 +164,8 @@ namespace OpenViBEApplications
 			 * 
 			 */
 			P300SequenceGenerator* m_pSequenceGenerator;
+
+			ExternalP300IEvidenceAccumulator* evAcc;
 
 		private:
 			/**

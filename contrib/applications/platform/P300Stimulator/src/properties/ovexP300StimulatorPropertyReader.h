@@ -43,6 +43,9 @@ namespace OpenViBEApplications
 		std::queue< OpenViBE::uint64 > * getTargetStimuli() { return m_oTargetStimuli; }
 		OpenViBE::CString getSharedMemoryName() { return m_sSharedMemoryName; }
 
+		OpenViBE::uint32 getStopCondition() { return m_ui32StopCondition; }
+		OpenViBE::boolean getEarlyStopping() { return m_bEarlyStopping; }
+
 	protected:
 		void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount); // XML IReaderCallback
 		void processChildData(const char* sData); // XML IReaderCallback
@@ -68,6 +71,9 @@ namespace OpenViBEApplications
 		std::list<std::string> * m_lSymbolList;
 
 		OpenViBE::CString m_sSharedMemoryName;	
+
+		OpenViBE::uint32 m_ui32StopCondition;
+		OpenViBE::boolean m_bEarlyStopping;
 		
 	private:
 		OpenViBE::uint64 findSymbolIndex(std::string symbol);

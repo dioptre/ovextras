@@ -18,8 +18,7 @@
 #include "../properties/ovexP300StimulatorPropertyReader.h"
 #include "../sequence/ovexP300SequenceGenerator.h"
 
-//TODO get rid of the SDL dependency, should not be in the stimulator, create a separate SDL_thread that listens for key events
-//#include "SDL.h"
+#include "../evidence-accumulation/ovexP300IEvidenceAccumulator.h"
 
 namespace OpenViBEApplications
 {		
@@ -75,9 +74,9 @@ namespace OpenViBEApplications
 
 
 				virtual void setWaitCallBack( Callback2Visualiser callback) {m_funcVisualiserWaitCallback = callback;}
-				virtual void setQuitEventCheck( getFromVisualiser callback) {
-					std::cout << "quit callback set\n";
-					m_quitevent = callback;}
+				virtual void setQuitEventCheck( getFromVisualiser callback) {m_quitevent = callback;}
+
+				virtual void setEvidenceAccumulator(ExternalP300IEvidenceAccumulator* evAcc){m_oEvidenceAcc = evAcc;}
 				
 				/**
 				 * At the beginning of the the next trial, generate the whole sequence of letters that have to be flashed in the trial
@@ -102,7 +101,7 @@ namespace OpenViBEApplications
 			//virtual void adjustForNextTrial(OpenViBE::uint64 currentTime);
 
 			/**
-			 * Checks if the escape button is pressed TODO should be in separate SDL_thread
+			 * Checks if the escape button is pressed
 			 */
 			virtual OpenViBE::boolean checkForQuitEvent()
 			{
@@ -111,10 +110,12 @@ namespace OpenViBEApplications
 				return l_bQuitEventReceived;
 			}
 
-				getFromVisualiser m_quitevent;
-				Callback2Visualiser m_funcVisualiserCallback;
-				Callback2Visualiser m_funcVisualiserWaitCallback;
-				ExternalP300SharedMemoryReader m_oSharedMemoryReader;
+			getFromVisualiser m_quitevent;
+			Callback2Visualiser m_funcVisualiserCallback;
+			Callback2Visualiser m_funcVisualiserWaitCallback;
+			ExternalP300SharedMemoryReader m_oSharedMemoryReader;
+
+			ExternalP300IEvidenceAccumulator* m_oEvidenceAcc;
 				
 		};
 

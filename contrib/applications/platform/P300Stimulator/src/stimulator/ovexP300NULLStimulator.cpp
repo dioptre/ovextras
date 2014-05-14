@@ -70,9 +70,8 @@ void ExternalP300NULLStimulator::run()
 			System::Time::sleep(static_cast<uint32>(std::ceil(1000.0*((m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep)>>22)/1024.0)));
 
 		//uint64 l_ui64Prediction = m_oSharedMemoryReader.readNextPrediction();
+		m_oEvidenceAcc->update();//
 		IStimulationSet* l_pStimSet = m_oSharedMemoryReader.readStimulation();
-		IMatrix * l_pLetterProbabilities;
-		l_pLetterProbabilities = m_oSharedMemoryReader.readNextSymbolProbabilities();
 
 		if(l_pStimSet!=NULL)//&&(l_ui64Prediction!=OVA_StimulationId_Flash))
 		{

@@ -114,8 +114,13 @@ void ExternalP300Stimulator::run()
 
 		}
 		//*/
-            
-		uint64 l_ui64Prediction = m_oSharedMemoryReader.readNextPrediction();
+		m_oEvidenceAcc->update();//update with data from the scenario classifier
+
+		uint64 l_ui64Prediction = m_oEvidenceAcc->getPrediction(); //m_oSharedMemoryReader.readNextPrediction();
+
+
+
+		/*
 		IMatrix * l_pLetterProbabilities;
 		l_pLetterProbabilities = m_oSharedMemoryReader.readNextSymbolProbabilities();
 
@@ -124,11 +129,13 @@ void ExternalP300Stimulator::run()
 			m_funcVisualiserCallback(OVA_StimulationId_LetterColorFeedback);
 			delete l_pLetterProbabilities;
 		}
+		//*/
 			
 		if (l_ui64Prediction!=0 && l_ui32State!=State_TrialRest && l_ui32State!=State_Feedback && l_ui32State!=State_Target ) //induce early stopping
 		{
 			this->adjustForNextTrial(l_ui64CurrentTime);
 			m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Prediction received that is different from zero, induce early stopping...\n";
+			m_oEvidenceAcc->flushEvidence();//flush
 		}
 
 		//rest, target or feedback
@@ -143,6 +150,7 @@ void ExternalP300Stimulator::run()
 					m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Forced prediction from OpenViBE " << l_ui64Prediction << "\n";// << (uint32)currentLTime.tv_sec << "," << (uint32)currentLTime.tv_usec << "\n";
 					m_ui64Prediction=l_ui64Prediction;
 					l_ui32State=State_TrialRest;
+					m_oEvidenceAcc->flushEvidence();//flush
 				}
 			}
 			//showing targets on screen

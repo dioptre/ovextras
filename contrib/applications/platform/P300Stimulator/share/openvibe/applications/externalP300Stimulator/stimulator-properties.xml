@@ -9,4 +9,6 @@
 	<InterStimulusOnset>${InterStimulusOnset}</InterStimulusOnset>
 	<InterRepetitionDelay>${InterRepDuration}</InterRepetitionDelay>
 	<InterTrialDelay>5</InterTrialDelay>
+	<EarlyStopping>${EarlyStopping}</EarlyStopping>
+	<StopCondition>${StopCondition}</StopCondition>
 </ExternelP300Stimulator>

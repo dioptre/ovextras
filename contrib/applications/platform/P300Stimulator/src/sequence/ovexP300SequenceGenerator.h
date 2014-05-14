@@ -61,8 +61,14 @@ namespace OpenViBEApplications
 		OpenViBE::uint32 getNumberOfGroups() { return m_ui32NumberOfGroups; }
 		std::vector<OpenViBE::uint32>* getNextFlashGroup()
 		{
-			std::cout << "m_ui32FlashCount " << (int)m_ui32FlashCount << " on " << m_lSequence->size() <<  std::endl;
 			return m_lSequence->at(m_ui32FlashCount++);
+		}
+
+
+		//for evidence accumulator
+		std::vector<OpenViBE::uint32>* getFlashGroupAt(OpenViBE::uint32 index)
+		{
+			return m_lSequence->at(index);
 		}
 		
 		
