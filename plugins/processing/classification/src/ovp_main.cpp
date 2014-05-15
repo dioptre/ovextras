@@ -21,7 +21,7 @@
 #if defined TARGET_HAS_ThirdPartyITPP
 #include "algorithms/ovpCAlgorithmClassifierLDA.h"
 #include "algorithms/ovpCAlgorithmClassifierPLDA.h"
-#include "algorithms/ovpCAlgorithmClassifierRelearnPLDA.h"
+//#include "algorithms/ovpCAlgorithmClassifierRelearnPLDA.h"
 #endif // TARGET_HAS_ThirdPartyITPP
 
 #if defined TARGET_HAS_ThirdPartyEIGEN
@@ -80,7 +80,7 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Probabilistic LDA", OVP_ClassId_Algorithm_ClassifierPLDA.toUInteger());
 
 	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierLDADesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierPLDADesc);
+	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierPLDADesc);
 	//OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierRelearnPLDADesc);
 #endif // TARGET_HAS_ThirdPartyITPP
 	

@@ -49,7 +49,8 @@ namespace
 	}
 };
 
-namespace itppext
+//*//defined as itppext in original box, renamed until code duplication can be avoided
+namespace itppextCoadapt
 {
 	bool eig(const itpp::mat &A, const itpp::mat &B, itpp::vec &d, itpp::mat &V)
 	{
@@ -94,6 +95,7 @@ namespace itppext
 		return l_oResult.transpose();
 	}
 }
+//*/
 
 boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::initialize(void)
 {
@@ -339,12 +341,12 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		itpp::mat l_oSignalMatrix(l_ui32ChannelCount, l_ui32ChunkCount*l_ui32SampleCountPerChunk);
 		for(i=0, it=l_vSignalChunk.begin(); it!=l_vSignalChunk.end(); it++, i++)
 		{
-			itpp::mat l_oMatrix=itppext::convert(*it->m_pMatrix);
+			itpp::mat l_oMatrix=itppextCoadapt::convert(*it->m_pMatrix);
 			l_oSignalMatrix.set_submatrix(0, i*l_ui32SampleCountPerChunk, l_oMatrix);
 		}
 
 		itpp::mat l_oAveragedERPMatrix(l_ui32ChannelCount, l_ui32SampleCountPerERP);
-		l_oAveragedERPMatrix=itppext::convert(l_oAveragedERPMatrixOV);
+		l_oAveragedERPMatrix=itppextCoadapt::convert(l_oAveragedERPMatrixOV);
 
 		itpp::mat l_oDMatrix(l_ui32ChunkCount*l_ui32SampleCountPerChunk, l_ui32SampleCountPerERP);
 		l_oDMatrix.clear();
@@ -398,7 +400,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		itpp::vec l_oEigenValue;
 
 		std::map < double, itpp::vec > l_vEigenVector;
-		if(itppext::eig(A, B, l_oEigenValue, l_oEigenVector))
+		if(itppextCoadapt::eig(A, B, l_oEigenValue, l_oEigenVector))
 		{
 			for(i=0; i<l_ui32ChannelCount; i++)
 			{
