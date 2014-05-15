@@ -12,15 +12,15 @@ IF(UNIX)
 		MESSAGE(STATUS "    [  OK  ] lib ${LIB_Boost_Filesystem}")
 		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_Boost_Filesystem} )
 	ELSE(LIB_Boost_Filesystem)
-		MESSAGE(STATUS "    [FAILED] lib boost_Filesystem-mt")
-		# Fedora 20 and Ubuntu 13.10 have no more multi-thread boost libs ( *-mt ) so try if there are non -mt libs to link
+		# Fedora 20 and Ubuntu 13.10,14.04 have no more multi-thread boost libs ( *-mt ) so try if there are non -mt libs to link
 		FIND_LIBRARY(LIB_Boost_Filesystem NAMES "boost_filesystem" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib NO_DEFAULT_PATH)
 		FIND_LIBRARY(LIB_Boost_Filesystem NAMES "boost_filesystem" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib)
 		IF(LIB_Boost_Filesystem)
 			MESSAGE(STATUS "    [  OK  ] lib ${LIB_Boost_Filesystem}")
 			TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_Boost_Filesystem})
 		ELSE(LIB_Boost_Filesystem)
-			MESSAGE(STATUS "    [FAILED] lib boost_Filesystem")
+			MESSAGE(STATUS "    [FAILED] lib boost_filesystem-mt")		
+			MESSAGE(STATUS "    [FAILED] lib boost_filesystem")
 		ENDIF(LIB_Boost_Filesystem)
 	ENDIF(LIB_Boost_Filesystem)
 
