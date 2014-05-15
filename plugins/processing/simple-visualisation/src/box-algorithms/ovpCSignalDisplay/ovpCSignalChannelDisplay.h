@@ -141,7 +141,7 @@ namespace OpenViBEPlugins
 		 * \param[out] rDisplayedValueRange Returns updated value range displayed by this channel
 		 */
 		void checkTranslation(
-			OpenViBE::float64& rDisplayedValueRange);
+				std::vector<OpenViBE::float64>& rDisplayedValueRange);
 
 		/**
 		 * \brief Sets latest global best fit parameters
@@ -265,16 +265,23 @@ namespace OpenViBEPlugins
 
 		/** \ name Extrema of displayed values for this channel */
 		//@{
-		OpenViBE::float64 m_f64LocalMaximum;
-		OpenViBE::float64 m_f64LocalMinimum;
+		//OpenViBE::float64 m_f64LocalMaximum;
+		//OpenViBE::float64 m_f64LocalMinimum;
+
+		std::vector<OpenViBE::float64> m_oLocalMaximum;
+		std::vector<OpenViBE::float64> m_oLocalMinimum;
+
 		//@}
 
 		/** \name Auto scaling parameters */
 		//@{
 		OpenViBE::float64 m_f64ScaleX;
-		OpenViBE::float64 m_f64ScaleY;
+		//OpenViBE::float64 m_f64ScaleY;
 		OpenViBE::float64 m_f64TranslateX;
-		OpenViBE::float64 m_f64TranslateY;
+		//OpenViBE::float64 m_f64TranslateY;
+
+		std::vector<OpenViBE::float64> m_f64ScaleY;
+		std::vector<OpenViBE::float64> m_oTranslateY;
 		//@}
 
 		/** \name Zooming parameters (user controlled) */
@@ -289,10 +296,16 @@ namespace OpenViBEPlugins
 
 		/** \name Scale margin parameters */
 		//@{
-		OpenViBE::float64 m_f64MaximumTopMargin;
+		/*OpenViBE::float64 m_f64MaximumTopMargin;
 		OpenViBE::float64 m_f64MaximumBottomMargin;
 		OpenViBE::float64 m_f64MinimumTopMargin;
-		OpenViBE::float64 m_f64MinimumBottomMargin;
+		OpenViBE::float64 m_f64MinimumBottomMargin;*/
+
+		std::vector<OpenViBE::float64> m_f64MaximumTopMargin;
+		std::vector<OpenViBE::float64> m_f64MaximumBottomMargin;
+		std::vector<OpenViBE::float64> m_f64MinimumTopMargin;
+		std::vector<OpenViBE::float64> m_f64MinimumBottomMargin;
+
 		//@}
 
 		OpenViBE::uint32 m_i32LeftRulerWidthRequest, m_i32LeftRulerHeightRequest;
@@ -308,6 +321,9 @@ namespace OpenViBEPlugins
         OpenViBE::float64 m_f64VerticalScale;
 
         OpenViBE::boolean m_bMultiView;
+
+
+
 	};
 
 	}

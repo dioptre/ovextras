@@ -39,7 +39,8 @@ namespace OpenViBEPlugins
 			,m_pSignalDisplayTable(NULL)
 			,m_bShowLeftRulers(true)
 			,m_bShowBottomRuler(true)
-			,m_bShowGrid(false)
+			,m_bShowVerticalGrid(false)
+			,m_bShowHorizontalGrid(false)
 			,m_ui64LeftmostDisplayedTime(0)
 			,m_f64LargestDisplayedValueRange(0)
 			,m_f64ValueRangeMargin(0)
@@ -68,7 +69,8 @@ namespace OpenViBEPlugins
 			,m_pSignalDisplayTable(NULL)
 			,m_bShowLeftRulers(true)
 			,m_bShowBottomRuler(true)
-			,m_bShowGrid(false)
+			,m_bShowVerticalGrid(false)
+			,m_bShowHorizontalGrid(false)
 			,m_ui64LeftmostDisplayedTime(0)
 			,m_f64LargestDisplayedValueRange(0)
 			,m_f64ValueRangeMargin(0)
@@ -533,11 +535,11 @@ namespace OpenViBEPlugins
 				//FIXME : should hidden channels be taken into account when computing largest value range?
 				if(GTK_WIDGET_VISIBLE(m_oChannelDisplay[i]->getSignalDisplayWidget()))
 				{
-					float64 l_f64ValueRange;
+					vector<float64> l_f64ValueRange;
 					m_oChannelDisplay[i]->checkTranslation(l_f64ValueRange);
-					if(l_f64ValueRange > l_f64LargestDisplayedValueRange)
+					if(l_f64ValueRange[i] > l_f64LargestDisplayedValueRange)
 					{
-						l_f64LargestDisplayedValueRange = l_f64ValueRange;
+						l_f64LargestDisplayedValueRange = l_f64ValueRange[i];
 					}
 				}
 			}

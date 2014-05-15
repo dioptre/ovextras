@@ -211,7 +211,9 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bShowBottomRuler;
 
 			//!Show background grid when true
-			OpenViBE::boolean m_bShowGrid;
+			// OpenViBE::boolean m_bShowGrid;
+	        OpenViBE::boolean m_bShowHorizontalGrid;
+	        OpenViBE::boolean m_bShowVerticalGrid;
 
 			//! Time of displayed signals at the left of channel displays
 			OpenViBE::uint64 m_ui64LeftmostDisplayedTime;
