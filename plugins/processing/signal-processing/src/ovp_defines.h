@@ -130,6 +130,43 @@
 #define OVP_ClassId_OverlappingEpochAverage                                            OpenViBE::CIdentifier(0x0042232E, 0x6F5B5E21)
 #define OVP_ClassId_BoxAlgorithm_QuadraticForm                                         OpenViBE::CIdentifier(0x54E73B81, 0x1AD356C6)
 
+//Dieter p300 stuff
+#define OVP_ClassId_BoxAlgorithm_TwoSampleTTestDesc		OpenViBE::CIdentifier(0x020300BF, 0xB4BAC0A1)
+#define OVP_ClassId_BoxAlgorithm_LikelinessDistributorDesc      OpenViBE::CIdentifier(0xE5103C63, 0x08D825E0)
+#define OVP_ClassId_BoxAlgorithm_EpochVarianceDesc              OpenViBE::CIdentifier(0xA15EAEC5, 0xAB0CE73D)
+#define OVP_ClassId_Algorithm_MatrixVarianceDesc 		OpenViBE::CIdentifier(0xE405260B, 0x59EEFAE4)
+
+#define OVP_ClassId_BoxAlgorithm_TwoSampleTTest			OpenViBE::CIdentifier(0x16DFF805, 0x0BC431BF)
+#define OVP_ClassId_BoxAlgorithm_LikelinessDistributor		OpenViBE::CIdentifier(0x781F51CA, 0xE6E3B0B8)
+#define OVP_ClassId_BoxAlgorithm_EpochVariance                  OpenViBE::CIdentifier(0x335384EA, 0x88C917D9)
+#define OVP_ClassId_Algorithm_MatrixVariance 			OpenViBE::CIdentifier(0x7FEFDCA9, 0x816ED903)
+
+#define OVP_Algorithm_MatrixVariance_InputParameterId_Matrix			OpenViBE::CIdentifier(0x781F51CA, 0xE6E3B0B8)
+#define OVP_Algorithm_MatrixVariance_InputParameterId_MatrixCount		OpenViBE::CIdentifier(0xE5103C63, 0x08D825E0)
+#define OVP_Algorithm_MatrixVariance_InputParameterId_AveragingMethod		OpenViBE::CIdentifier(0x043A1BC4, 0x925D3CD6)
+#define OVP_Algorithm_MatrixVariance_InputParameterId_SignificanceLevel		OpenViBE::CIdentifier(0x1E1065B2, 0x2CA32013)
+#define OVP_Algorithm_MatrixVariance_OutputParameterId_AveragedMatrix		OpenViBE::CIdentifier(0x5CF66A73, 0xF5BBF0BF)
+#define OVP_Algorithm_MatrixVariance_OutputParameterId_Variance			OpenViBE::CIdentifier(0x1BD67420, 0x587600E6)
+#define OVP_Algorithm_MatrixVariance_OutputParameterId_ConfidenceBound		OpenViBE::CIdentifier(0x1E1065B2, 0x2CA32013)
+#define OVP_Algorithm_MatrixVariance_InputTriggerId_Reset			OpenViBE::CIdentifier(0xD5C5EF91, 0xE1B1C4F4)
+#define OVP_Algorithm_MatrixVariance_InputTriggerId_FeedMatrix			OpenViBE::CIdentifier(0xEBAEB213, 0xDD4735A0)
+#define OVP_Algorithm_MatrixVariance_InputTriggerId_ForceAverage		OpenViBE::CIdentifier(0x344A52F5, 0x489DB439)
+#define OVP_Algorithm_MatrixVariance_OutputTriggerId_AveragePerformed		OpenViBE::CIdentifier(0x2F9ECA0B, 0x8D3CA7BD)
+
+#define OVP_ClassId_BoxAlgorithm_XDAWNSpatialFilterTrainerCoAdapt     OpenViBE::CIdentifier(0xEE31A115, 0x00B25FE1)
+#define OVP_ClassId_BoxAlgorithm_XDAWNSpatialFilterTrainerCoAdaptDesc OpenViBE::CIdentifier(0xB59256B0, 0xC3389515)
+#define OVP_ClassId_BoxAlgorithm_SpatialFilterWithUpdate     OpenViBE::CIdentifier(0x8E7CD4B3, 0xDAAD41C1)
+#define OVP_ClassId_BoxAlgorithm_SpatialFilterWithUpdateDesc OpenViBE::CIdentifier(0xE2E6A1D6, 0xCBCEEE3A)
+
+#define OVP_ClassId_ConditionalIdentity OpenViBE::CIdentifier(0xE4CE5D77, 0xBCC64C3F)
+#define OVP_ClassId_ConditionalIdentityDesc OpenViBE::CIdentifier(0xDDE86CE9, 0xE75B0A29)
+
+#define OVP_ClassId_BoxAlgorithm_MultipleSpatialFilters	 	OpenViBE::CIdentifier(0x04C1466C, 0xFC89B739)
+#define OVP_ClassId_BoxAlgorithm_MultipleSpatialFiltersDesc	OpenViBE::CIdentifier(0xB1A96C51, 0xD75136A6)
+//*/End of Dieter's stuff
+
+
+
 //___________________________________________________________________//
 //                                                                   //
 // Global defines                                                   //
