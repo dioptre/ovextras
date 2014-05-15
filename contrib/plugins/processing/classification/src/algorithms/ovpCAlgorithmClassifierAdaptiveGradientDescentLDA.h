@@ -4,7 +4,7 @@
 #ifndef __OpenViBEPlugins_Algorithm_ClassifierAdaptiveGradientDescentLDA_H__
 #define __OpenViBEPlugins_Algorithm_ClassifierAdaptiveGradientDescentLDA_H__
 
-#include "../../ovp_defines.h"
+#include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
@@ -17,6 +17,12 @@
 #if defined TARGET_HAS_ThirdPartyITPP
 
 #include <itpp/itbase.h>
+
+#define OVP_ClassId_Algorithm_ClassifierAdaptiveGradientDescentLDA			OpenViBE::CIdentifier(0x7D13B924, 0xF194DA09)
+#define OVP_ClassId_Algorithm_ClassifierAdaptiveGradientDescentLDADesc		OpenViBE::CIdentifier(0x2397E74F, 0xCAC8F95C)
+
+#define OVP_Algorithm_ClassifierGradientDescentLDA_InputParameterId_Lambda	OpenViBE::CIdentifier(0xD6E1AC79, 0xBE50C28F)
+#define OVP_Algorithm_ClassifierGradientDescentLDA_InputParameterId_Eta		OpenViBE::CIdentifier(0x5E8D9B97, 0xF82F92D7)
 
 namespace OpenViBEPlugins
 {

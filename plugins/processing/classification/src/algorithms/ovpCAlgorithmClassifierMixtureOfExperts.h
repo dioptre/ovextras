@@ -4,7 +4,7 @@
 #ifndef __OpenViBEPlugins_Algorithm_ClassifierMixtureOfExperts_H__
 #define __OpenViBEPlugins_Algorithm_ClassifierMixtureOfExperts_H__
 
-#include "../../ovp_defines.h"
+#include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
@@ -16,6 +16,9 @@
 #if defined TARGET_HAS_ThirdPartyITPP
 
 #include <itpp/itbase.h>
+
+#define OVP_ClassId_Algorithm_ClassifierMixtureOfExperts                                        OpenViBE::CIdentifier(0xDF828072, 0x22C0CF5F)
+#define OVP_ClassId_Algorithm_ClassifierMixtureOfExpertsDesc                                    OpenViBE::CIdentifier(0x68595043, 0x6D981FC2)
 
 namespace OpenViBEPlugins
 {

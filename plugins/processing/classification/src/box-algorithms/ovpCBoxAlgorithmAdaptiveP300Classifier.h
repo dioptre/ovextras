@@ -2,7 +2,7 @@
 #define __OpenViBEPlugins_BoxAlgorithm_AdaptiveP300Classifier_H__
 
 //You may have to change this path to match your folder organisation
-#include "../../ovp_defines.h"
+#include "../ovp_defines.h"
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
@@ -13,7 +13,6 @@
 
 #include <xml/IWriter.h>
 #include <xml/IReader.h>
-#include <itpp/itbase.h>
 
 #include "ovpCBoxAlgorithmCommonClassifierListener.inl"
 
@@ -21,6 +20,8 @@
 
 // The unique identifiers for the box and its descriptor.
 // Identifier are randomly chosen by the skeleton-generator.
+#define OVP_ClassId_BoxAlgorithm_AdaptiveP300Classifier 		OpenViBE::CIdentifier(0x73C8A153, 0x6537A7E2)
+#define OVP_ClassId_BoxAlgorithm_AdaptiveP300ClassifierDesc 	OpenViBE::CIdentifier(0xBA56CFE0, 0x7EBBE949)
 
 namespace OpenViBEPlugins
 {
@@ -93,8 +94,8 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 m_f64Class1;
 			OpenViBE::float64 m_f64Class2;
 
-			itpp::vec m_oCoefficientsClass1;
-			itpp::vec m_oCoefficientsClass2;	
+			//itpp::vec m_oCoefficientsClass1;
+			//itpp::vec m_oCoefficientsClass2;	
 			
 			OpenViBE::CMemoryBuffer m_oConfiguration;
 			

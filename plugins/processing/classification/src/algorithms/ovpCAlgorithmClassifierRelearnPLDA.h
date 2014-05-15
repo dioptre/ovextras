@@ -4,7 +4,7 @@
 #ifndef __OpenViBEPlugins_Algorithm_ClassifierRelearnPLDA_H__
 #define __OpenViBEPlugins_Algorithm_ClassifierRelearnPLDA_H__
 
-#include "../../ovp_defines.h"
+#include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
@@ -17,6 +17,9 @@
 #if defined TARGET_HAS_ThirdPartyITPP
 
 #include <itpp/itbase.h>
+
+#define OVP_ClassId_Algorithm_ClassifierRelearnPLDA                 OpenViBE::CIdentifier(0x5CF66A73, 0xF5BBF0BF)
+#define OVP_ClassId_Algorithm_ClassifierRelearnPLDADesc             OpenViBE::CIdentifier(0xD5C5EF91, 0xE1B1C4F4)
 
 namespace OpenViBEPlugins
 {

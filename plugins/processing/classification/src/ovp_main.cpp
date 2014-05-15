@@ -20,6 +20,8 @@
 
 #if defined TARGET_HAS_ThirdPartyITPP
 #include "algorithms/ovpCAlgorithmClassifierLDA.h"
+#include "algorithms/ovpCAlgorithmClassifierPLDA.h"
+#include "algorithms/ovpCAlgorithmClassifierRelearnPLDA.h"
 #endif // TARGET_HAS_ThirdPartyITPP
 
 #if defined TARGET_HAS_ThirdPartyEIGEN
@@ -75,8 +77,11 @@ OVP_Declare_Begin();
 
 #if defined TARGET_HAS_ThirdPartyITPP
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Linear Discrimimant Analysis (LDA)", OVP_ClassId_Algorithm_ClassifierLDA.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Probabilistic LDA", OVP_ClassId_Algorithm_ClassifierPLDA.toUInteger());
 
 	OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierLDADesc);
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierPLDADesc);
+	//OVP_Declare_New(OpenViBEPlugins::Local::CAlgorithmClassifierRelearnPLDADesc);
 #endif // TARGET_HAS_ThirdPartyITPP
 	
 #if defined TARGET_HAS_ThirdPartyEIGEN
@@ -86,5 +91,13 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierShrinkageLDADesc);
 
 #endif // TARGET_HAS_ThirdPartyEIGEN
+
+
+
+rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_ShrinkageType,"Shrinkage");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Full covariance",FULL);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Shrink to diagonal",SHRINK_TO_DIAG);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Diagonal",DIAG);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ShrinkageType,"Shrink to unity",SHRINK_TO_UNITY);
 
 OVP_Declare_End();
