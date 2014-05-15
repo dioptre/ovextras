@@ -78,7 +78,8 @@
             ov_binany_path +<span class="str">"/share/openvibe/scenarios/box-tutorials/crop.xml"</span>)
     <span class="kw">while</span> <span class="kw">not</span> self.terminal.window():
         <span class="skw">wait</span>(<span class="dig">1</span>)
-<span class="kw">def</span> testRunOgreVisual(self):
+    <span class="skw">wait</span>(Pattern(<img src="scenarioScreen.png" />).similar(<span class="dig">0.50</span>),<span class="dig">10</span>)
+<span class="kw">def</span> testRunCrop(self):
     <span class="kw">assert</span>(exists(<img src="timesignal.png" />))
 <span class="kw">def</span> tearDown(self):
     <span class="kw">if</span> self.terminal.window():
