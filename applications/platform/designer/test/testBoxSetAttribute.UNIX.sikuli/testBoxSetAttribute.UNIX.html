@@ -86,7 +86,7 @@
     <span class="skw">click</span>(Pattern(<img src="contextualBoxMenu.png" />).targetOffset(-<span class="dig">51</span>,<span class="dig">16</span>))
     <span class="kw">assert</span>(exists(<img src="renameBoxPopUp.png" />))
     <span class="skw">type</span>(<span class="str">"XXXX XXXX XXXX"</span>+ Key.ENTER)
-    <span class="kw">assert</span>(exists(<img src="SinusOscillatorNewNameXXX.png" />))
+    <span class="kw">assert</span>(exists(Pattern(<img src="SinusOscillatorNewNameXXX.png" />).similar(<span class="dig">0.50</span>)))
 
 <span class="kw">def</span> tearDown(self):
     App.close(self.terminal)

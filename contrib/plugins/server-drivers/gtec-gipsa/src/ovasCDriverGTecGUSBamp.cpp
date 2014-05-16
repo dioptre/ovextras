@@ -45,6 +45,7 @@ CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 	,m_ui32AcquiredChannelCount(GTEC_NUM_CHANNELS)
 	,m_flagIsFirstLoop(true)
 	,m_masterSerial("")
+	,m_bBipolarEnabled(false)
 {
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(GTEC_NUM_CHANNELS);	
@@ -57,6 +58,7 @@ CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 	m_oSettings.add("TriggerInputEnabled", &m_bTriggerInputEnabled);
 	m_oSettings.add("DeviceSerials", &m_vDevicesSerials);
 	m_oSettings.add("MasterSerial", &m_masterSerial);
+	m_oSettings.add("Bipolar", &m_bBipolarEnabled);
 	m_oSettings.load();
 
 	m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();	
@@ -159,11 +161,11 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 	{
 		if(::GT_SetSlave(m_callSequenceHandles[0], false)) 
 		{
-			    char serial[16];
-		        ::GT_GetSerial(m_callSequenceHandles[0], serial, 16);
-		        m_masterSerial = serial;
-				m_rDriverContext.getLogManager() << LogLevel_Info << "Configured as MASTER device: " << m_masterSerial.c_str() << " \n";
-				m_mastersCnt++;
+			char serial[16];
+		    ::GT_GetSerial(m_callSequenceHandles[0], serial, 16);
+		    m_masterSerial = serial;
+			m_rDriverContext.getLogManager() << LogLevel_Info << "Configured as MASTER device: " << m_masterSerial.c_str() << " \n";
+			m_mastersCnt++;
 		}
 		else m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetSlave\n";
 	}
@@ -228,13 +230,55 @@ OpenViBE::boolean CDriverGTecGUSBamp::ConfigureDevice(OpenViBE::uint32 deviceNum
        
     if(!::GT_EnableTriggerLine(o_pDevice, TRUE)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_EnableTriggerLine - the extra input trigger channel is disabled\n";
     // GT_EnableSC
-    // GT_SetBipolar
 
-    /* for(uint32 i=0; i<m_ui32AcquiredChannelCount; i++)
-    {
-        if(!::GT_SetBandPass(o_pDevice, i+1, m_i32BandPassFilterIndex)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetBandPass for channel " << i << "\n";
-        if(!::GT_SetNotch(o_pDevice, i+1, m_i32NotchFilterIndex)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetNotch for channel " << i << "\n";
-    }*/
+	// GT_SetBipolar
+	CHANNEL _bipolarSettings;	
+	if (this->m_bBipolarEnabled)
+	{
+		//the following configurations produces 8 bipolar: 1,3,5,7,9,11,13,15 and 8 unipolar 2,4,6,8,10,12,14,16 
+		
+		_bipolarSettings.Channel1 = 2;
+		_bipolarSettings.Channel2 = 0;
+		_bipolarSettings.Channel3 = 4;
+		_bipolarSettings.Channel4 = 0;
+		_bipolarSettings.Channel5 = 6;
+		_bipolarSettings.Channel6 = 0;
+		_bipolarSettings.Channel7 = 8;
+		_bipolarSettings.Channel8 = 0;
+		_bipolarSettings.Channel9 = 10;
+		_bipolarSettings.Channel10 = 0;
+		_bipolarSettings.Channel11 = 12;
+		_bipolarSettings.Channel12 = 0;
+		_bipolarSettings.Channel13 = 14;
+		_bipolarSettings.Channel14 = 0;
+		_bipolarSettings.Channel15 = 16;
+		_bipolarSettings.Channel16 = 0;
+
+	}
+	else
+	{
+		_bipolarSettings.Channel1 = 0;
+		_bipolarSettings.Channel2 = 0;
+		_bipolarSettings.Channel3 = 0;
+		_bipolarSettings.Channel4 = 0;
+		_bipolarSettings.Channel5 = 0;
+		_bipolarSettings.Channel6 = 0;
+		_bipolarSettings.Channel7 = 0;
+		_bipolarSettings.Channel8 = 0;
+		_bipolarSettings.Channel9 = 0;
+		_bipolarSettings.Channel10 = 0;
+		_bipolarSettings.Channel11 = 0;
+		_bipolarSettings.Channel12 = 0;
+		_bipolarSettings.Channel13 = 0;
+		_bipolarSettings.Channel14 = 0;
+		_bipolarSettings.Channel15 = 0;
+		_bipolarSettings.Channel16 = 0;
+	}
+	if (!GT_SetBipolar(o_pDevice, _bipolarSettings))
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Error on GT_SetBipolar: Couldn't set unipolar derivation for device " << current_serial;
+	else if (this->m_bBipolarEnabled) m_rDriverContext.getLogManager() << LogLevel_Info << "Bipolar configuration is active.\n";
+
+
 	ConfigFiltering(o_pDevice);
 
     if(!::GT_SetSampleRate(o_pDevice, m_oHeader.getSamplingFrequency())) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetSampleRate\n";
@@ -299,12 +343,12 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 			try
 			{
 				if (m_bufferOverrun)
-					{
-						m_RingBuffer.Reset();
-						m_bufferOverrun = false;
-						m_ui32TotalRingBufferOverruns++;
-						return true;
-					}
+				{
+					m_RingBuffer.Reset();
+					m_bufferOverrun = false;
+					m_ui32TotalRingBufferOverruns++;
+					return true;
+				}
 
 				m_RingBuffer.Read(m_bufferReceivedData, validPoints);
 			}
@@ -581,9 +625,9 @@ OpenViBE::boolean CDriverGTecGUSBamp::stop(void)
 	m_ThreadPtr->join(); //wait until the thread has stopped data acquisition
 
 	m_rDriverContext.getLogManager() << LogLevel_Debug   << "Total number of hardware stimulations acquired: " << m_ui32TotalHardwareStimulations << "\n";
-	m_rDriverContext.getLogManager() << LogLevel_Warning << "Total chunks lost: " << m_ui32TotalDriverChunksLost << "\n";
-	m_rDriverContext.getLogManager() << LogLevel_Warning << "Total internal ring buffer overruns: " << m_ui32TotalRingBufferOverruns << "\n";
-	m_rDriverContext.getLogManager() << LogLevel_Warning << "Total times GTEC ring data buffer was empty: " << 	m_ui32TotalDataUnavailable << "\n";
+	m_rDriverContext.getLogManager() << LogLevel_Debug << "Total chunks lost: " << m_ui32TotalDriverChunksLost << "\n";
+	m_rDriverContext.getLogManager() << LogLevel_Debug << "Total internal ring buffer overruns: " << m_ui32TotalRingBufferOverruns << "\n";
+	m_rDriverContext.getLogManager() << LogLevel_Debug << "Total times GTEC ring data buffer was empty: " << 	m_ui32TotalDataUnavailable << "\n";
 
 	return true;
 }
@@ -745,7 +789,8 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 		m_i32BandPassFilterIndex,
 		m_bTriggerInputEnabled,
 		m_vDevicesSerials,
-		targetMasterSerial);
+		targetMasterSerial,
+		m_bBipolarEnabled);
 
 	//reduce from number of channels for all devices to the number of channels for one device
 	m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
@@ -808,7 +853,7 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 {
 	OpenViBE::boolean status;
 	int32 nrOfFilters;
-	float32 mySamplingRate = m_oHeader.getSamplingFrequency();
+	float32 mySamplingRate = static_cast<float32>(m_oHeader.getSamplingFrequency());
 
 	//Set BandPass
 	

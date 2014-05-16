@@ -11,7 +11,7 @@ def test_createSimpleScenarioAndRun(self):
     assert(exists("SinusOscillatorBoxSelected.png"))
     click(Pattern("Visualisatio.png").targetOffset(-62,0))
     click(Pattern("Basic.png").targetOffset(-50,-1))
-    dragDrop("Signaldisplay.png", Pattern("designerSinusGenPlaced.png").targetOffset(-197,-16))
+    dragDrop("Signaldisplay.png", Pattern("designerSinusGenPlaced.png").similar(0.60).targetOffset(-197,-16))
     assert(exists("SignalDisplayBoxSelected.png"))
     dragDrop("outputSignalConnector.png", "imputSingnalConnector.png")
     click(Pattern("playButton.png").similar(0.95))

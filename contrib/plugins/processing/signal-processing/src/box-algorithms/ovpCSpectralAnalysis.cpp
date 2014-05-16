@@ -1,3 +1,6 @@
+
+#if defined TARGET_HAS_ThirdPartyITPP
+
 #include "ovpCSpectralAnalysis.h"
 
 #include <iostream>
@@ -311,3 +314,5 @@ boolean CSpectralAnalysis::process()
 	}
 	return true;
 }
+
+#endif
