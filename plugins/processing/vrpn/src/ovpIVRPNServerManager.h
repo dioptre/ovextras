@@ -20,6 +20,7 @@ namespace OpenViBEPlugins
 			virtual ~IVRPNServerManager(void) { }
 
 			virtual OpenViBE::boolean initialize(void)=0;
+			virtual OpenViBE::boolean initialize(OpenViBE::uint32 ui32port)=0;
 			virtual OpenViBE::boolean uninitialize(void)=0;
 
 			virtual OpenViBE::boolean process(void)=0;

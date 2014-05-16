@@ -15,6 +15,7 @@ CVRPNAnalogServer::CVRPNAnalogServer()
 {
 }
 
+
 boolean CVRPNAnalogServer::initialize()
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
@@ -22,6 +23,8 @@ boolean CVRPNAnalogServer::initialize()
 	// Gets server name, and creates an analog server for this server
 	CString l_oServerName;
 	l_rStaticBoxContext.getSettingValue(0, l_oServerName);
+
+	uint64 l_ui64Port=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1); 
 
 	// Creates the stream decoders
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
@@ -31,7 +34,11 @@ boolean CVRPNAnalogServer::initialize()
 	}
 
 	// Creates the peripheral
-	IVRPNServerManager::getInstance().initialize();
+	if(!IVRPNServerManager::getInstance().initialize(static_cast<uint32>(l_ui64Port)))
+	{
+		this->getLogManager() << LogLevel_Error << "Server init failed\n";
+		return false;
+	}
 	IVRPNServerManager::getInstance().addServer(l_oServerName, m_oServerIdentifier);
 
 	return true;

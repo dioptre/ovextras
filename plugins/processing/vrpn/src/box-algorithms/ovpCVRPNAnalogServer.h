@@ -91,6 +91,7 @@ namespace OpenViBEPlugins
 			{
 				rPrototype.addInput  ("Input 1",         OV_TypeId_StreamedMatrix);
 				rPrototype.addSetting("Peripheral name", OV_TypeId_String,        "openvibe-vrpn");
+				rPrototype.addSetting("Server port",     OV_TypeId_Integer,       "3883");
 				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddInput);
 				return true;
 			}

@@ -49,6 +49,7 @@ namespace OpenViBEPlugins
 
 			//Pairs of start/stop stimulations id
 			std::map<OpenViBE::uint32, std::pair<OpenViBE::uint64, OpenViBE::uint64> > m_vStimulationPair;
+
 		};
 
 		class CVRPNButtonServerListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
@@ -70,12 +71,12 @@ namespace OpenViBEPlugins
 				for(i=0; i<rBox.getInputCount(); i++)
 				{
 					sprintf(l_sName, "Button %u ON", i+1);
-					rBox.setSettingName(i*2+1, l_sName);
-					rBox.setSettingType(i*2+1, OV_TypeId_Stimulation);
+					rBox.setSettingName(i*2+2+0, l_sName);
+					rBox.setSettingType(i*2+2+0, OV_TypeId_Stimulation);
 
 					sprintf(l_sName, "Button %u OFF", i+1);
-					rBox.setSettingName(i*2+2, l_sName);
-					rBox.setSettingType(i*2+2, OV_TypeId_Stimulation);
+					rBox.setSettingName(i*2+2+1, l_sName);
+					rBox.setSettingType(i*2+2+1, OV_TypeId_Stimulation);
 				}
 
 				return true;
@@ -83,8 +84,9 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				rBox.removeSetting(ui32Index*2+1);
-				rBox.removeSetting(ui32Index*2+1);
+				// Note that we have the same index in both removes because the first remove changes the indexing
+				rBox.removeSetting(ui32Index*2+2+0);
+				rBox.removeSetting(ui32Index*2+2+0);
 
 				return this->check(rBox);
 			};
@@ -122,6 +124,7 @@ namespace OpenViBEPlugins
 			{
 				rPrototype.addInput  ("Input 1",                    OVTK_TypeId_Stimulations);
 				rPrototype.addSetting("Peripheral name",            OV_TypeId_String,      "openvibe-vrpn");
+				rPrototype.addSetting("Server port",                OV_TypeId_Integer,       "3883");
 				rPrototype.addSetting("Button 1 ON",  OV_TypeId_Stimulation, "OVTK_GDF_Feedback_Continuous");
 				rPrototype.addSetting("Button 1 OFF", OV_TypeId_Stimulation, "OVTK_GDF_End_Of_Trial");
 				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddInput);

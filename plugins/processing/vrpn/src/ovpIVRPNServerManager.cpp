@@ -34,6 +34,7 @@ namespace OpenViBEPlugins
 				virtual ~CVRPNServerManager(void);
 
 				virtual boolean initialize(void);
+				virtual boolean initialize(uint32 ui32port);
 				virtual boolean uninitialize(void);
 
 				virtual boolean process(void);
@@ -90,6 +91,7 @@ namespace OpenViBEPlugins
 				map<CIdentifier, vector<boolean> > m_vButtonCache;
 
 				uint32 m_ui32InitializeCount;
+				uint32 m_ui32Port;
 			};
 		};
 
@@ -104,6 +106,7 @@ namespace OpenViBEPlugins
 CVRPNServerManager::CVRPNServerManager(void)
 	:m_pConnection(NULL)
 	,m_ui32InitializeCount(0)
+	,m_ui32Port(0)
 {
 }
 
@@ -113,17 +116,42 @@ CVRPNServerManager::~CVRPNServerManager(void)
 
 boolean CVRPNServerManager::initialize(void)
 {
+	return initialize(vrpn_DEFAULT_LISTEN_PORT_NO);
+}
+
+boolean CVRPNServerManager::initialize(uint32 ui32port)
+{
 	if(!m_ui32InitializeCount)
 	{
 		//m_pConnection=new vrpn_Connection;
-		m_pConnection=vrpn_create_server_connection();
-	}
+		m_pConnection=vrpn_create_server_connection(static_cast<int>(ui32port));
+		if(!m_pConnection) {
+			cout << "Error: Unable to create server at port " << ui32port << "\n";
+			return false;
+		}
+		m_ui32Port = ui32port;
+	} 
+
 	m_ui32InitializeCount++;
+
+	if(ui32port != m_ui32Port)
+	{
+		cout << "Error: All servers running under a single openvibe Designer instance must have the same port.\n";
+		cout << "Requested port: " << ui32port << " Allocated port: " << m_ui32Port << "\n";
+		cout << "Consider using different server names instead to differentiate.\n";
+		return false;
+	}
+
 	return true;
 }
 
 boolean CVRPNServerManager::uninitialize(void)
 {
+	if(m_ui32InitializeCount==0) {
+		cout << "Error: uninitialize() called without corresp. init\n";
+		return false;
+	}
+
 	m_ui32InitializeCount--;
 	if(!m_ui32InitializeCount)
 	{

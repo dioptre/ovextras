@@ -30,7 +30,14 @@ boolean CVRPNButtonServer::initialize()
 	CString l_oServerName;
 	l_pBox->getSettingValue(0, l_oServerName);
 
-	IVRPNServerManager::getInstance().initialize();
+	uint64 l_ui64Port=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1); 
+
+	if(!IVRPNServerManager::getInstance().initialize(static_cast<uint32>(l_ui64Port)))
+	{
+		this->getLogManager() << LogLevel_Error << "Server init failed\n";
+		return false;
+	}
+
 	IVRPNServerManager::getInstance().addServer(l_oServerName, m_oServerIdentifier);
 	IVRPNServerManager::getInstance().setButtonCount(m_oServerIdentifier, l_pBox->getInputCount());
 
@@ -39,8 +46,8 @@ boolean CVRPNButtonServer::initialize()
 	{
 		CString l_sOnStimulationIdentifier;
 		CString l_sOffStimulationIdentifier;
-		l_pBox->getSettingValue(1+i*2, l_sOnStimulationIdentifier);
-		l_pBox->getSettingValue(2+i*2, l_sOffStimulationIdentifier);
+		l_pBox->getSettingValue(2+i*2, l_sOnStimulationIdentifier);
+		l_pBox->getSettingValue(3+i*2, l_sOffStimulationIdentifier);
 		m_vStimulationPair[i]=
 			pair<uint64, uint64>(
 				getBoxAlgorithmContext()->getPlayerContext()->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_Stimulation, l_sOnStimulationIdentifier),
