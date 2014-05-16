@@ -40,7 +40,7 @@ namespace OpenViBEPlugins
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
 
-			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierPShrinkageLDA);
+			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierPShrinkageLDA)
 
 		protected:
 			// Debug method. Prints the matrix to the logManager. May be disabled in implementation.
@@ -49,9 +49,9 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 m_f64Class1;
 			OpenViBE::float64 m_f64Class2;
 
-			Eigen::MatrixXd m_oCoefficients;
-			Eigen::MatrixXd m_oCoefficientsClass1;
-			Eigen::MatrixXd m_oCoefficientsClass2;
+			OpenViBE::float64 m_f64w0;
+			Eigen::MatrixXd m_oW;
+
 			OpenViBE::uint32 m_ui32NumCols;
 
 			XML::IXMLNode *m_pConfigurationNode;
@@ -72,12 +72,12 @@ namespace OpenViBEPlugins
 			virtual void release(void) { }
 
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Probabilistic Shrinkage LDA Classifier"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Jussi T. Lindgren"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Jussi T. Lindgren / Serrière Guillaume"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Estimates LDA using regularized covariances"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ClassifierPShrinkageLDA; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Classification::CAlgorithmClassifierPShrinkageLDA; }
@@ -92,10 +92,10 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			_IsDerivedFromClass_Final_(CAlgorithmClassifierDesc, OVP_ClassId_Algorithm_ClassifierPShrinkageLDADesc);
+			_IsDerivedFromClass_Final_(CAlgorithmClassifierDesc, OVP_ClassId_Algorithm_ClassifierPShrinkageLDADesc)
 		};
-	};
-};
+	}
+}
 
 #endif // __OpenViBEPlugins_Algorithm_ClassifierShrinkageLDA_H__
 

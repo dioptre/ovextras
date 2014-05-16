@@ -5,6 +5,7 @@
 
 #include <map>
 #include <sstream>
+
 #include <cmath>
 
 #include <xml/IXMLNode.h>
@@ -12,9 +13,10 @@
 
 static const char* const c_sTypeNodeName = "PLDA";
 static const char* const c_sClassesNodeName = "Classes";
+static const char* const c_sInvClassNodeName = "Invariant";
 static const char* const c_sCoeffNodeName = "Coefficients";
-static const char* const c_sCoeffClass1NodeName = "CoefficientsClass1";
-static const char* const c_sCoeffClass2NodeName = "CoefficientsClass2";
+static const char* const c_sCoeffWNodeName = "CoefficientsW";
+static const char* const c_sCoeffW0NodeName = "CoefficientsW0";
 
 extern const char* const c_sClassifierRoot;
 
@@ -49,9 +51,13 @@ boolean CAlgorithmClassifierPLDA::initialize(void)
 boolean CAlgorithmClassifierPLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
 	uint32 i;
-	std::map < float64, uint64 > l_vClassLabels;
-	for(i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
+	std::map < float64, size_t > l_vClassLabels;
+	for(uint32 i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
 	{
+		if(!l_vClassLabels.count(rFeatureVectorSet[i].getLabel()))
+		{
+			l_vClassLabels[rFeatureVectorSet[i].getLabel()] = 0;
+		}
 		l_vClassLabels[rFeatureVectorSet[i].getLabel()]++;
 	}
 
@@ -115,52 +121,34 @@ boolean CAlgorithmClassifierPLDA::train(const IFeatureVectorSet& rFeatureVectorS
 			l_oSigma+=itpp::outer_product(l_oDiff, l_oDiff) / (l_ui32NumberOfFeatureVectors-2.);
 		}
 	}
+	itpp::mat l_oSigmaInverse = itpp::inv(l_oSigma);
 
-	itpp::mat l_oSigmaInverse=itpp::inv(l_oSigma);
+	m_f64w0 = -0.5 * (l_oMeanFeatureVector1.transpose() * l_oSigmaInverse * l_oMeanFeatureVector1)[0]
+			+ 0.5*(l_oMeanFeatureVector2.transpose() * l_oSigmaInverse * l_oMeanFeatureVector2)[0] +
+			std::log((double)l_vClassLabels[m_f64Class1]/(double)l_vClassLabels[m_f64Class2]);
 
-	m_oCoefficientsClass1=l_oSigmaInverse * l_oMeanFeatureVector1;
-	m_oCoefficientsClass1.ins(0, -0.5 * (l_oMeanFeatureVector1.transpose() * l_oSigmaInverse * l_oMeanFeatureVector1));
-	m_oCoefficientsClass2=l_oSigmaInverse * l_oMeanFeatureVector2;
-	m_oCoefficientsClass2.ins(0, -0.5 * (l_oMeanFeatureVector2.transpose() * l_oSigmaInverse * l_oMeanFeatureVector2));
+	m_oW = l_oSigmaInverse * (l_oMeanFeatureVector1 - l_oMeanFeatureVector2);
 
 	return true;
 }
 
 boolean CAlgorithmClassifierPLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
 {
-	if(rFeatureVector.getSize()+1!=(unsigned int)m_oCoefficientsClass1.size())
+	if(rFeatureVector.getSize()!=(unsigned int)m_oW.size())
 	{
-		this->getLogManager() << LogLevel_Warning << "Feature vector size " << rFeatureVector.getSize() << " and hyperplane parameter size " << (uint32) m_oCoefficientsClass1.size() << " does not match\n";
+		this->getLogManager() << LogLevel_Warning << "Feature vector size " << rFeatureVector.getSize() << " and hyperplane parameter size " << (uint32) m_oW.size() << " does not match\n";
 		return false;
 	}
 
 	itpp::vec l_oFeatures(rFeatureVector.getBuffer(), rFeatureVector.getSize());
-	l_oFeatures.ins(0, 1);
-	float64 l_f64PClass1 = std::exp(l_oFeatures*m_oCoefficientsClass1);
-	float64 l_f64PClass2 = std::exp(l_oFeatures*m_oCoefficientsClass2);
-//	std::cout << l_f64PClass1 << " " << l_oFeatures*m_oCoefficientsClass1 << " " << l_f64PClass2 << " " << l_oFeatures*m_oCoefficientsClass2 << std::endl;
 
-	float64 l_f64Result=0;
-	if(l_f64PClass1 != std::numeric_limits<float64>::infinity() && (l_f64PClass1 !=0 && l_f64PClass2 != 0))
-	{
-		l_f64Result = l_f64PClass1/(l_f64PClass1 + l_f64PClass2);
-	}
-	else
-	{
-		if(l_oFeatures*m_oCoefficientsClass1 > l_oFeatures*m_oCoefficientsClass2)
-		{
-			l_f64Result = 1.0;
-		}
-		else
-		{
-			l_f64Result = 0.0;
-		}
-	}
+	float64 l_f64a = (m_oW.transpose() * l_oFeatures)[0] + m_f64w0;
+	float64 l_f64P1 = 1 / (1 + exp(-l_f64a));
 
 	rClassificationValues.setSize(1);
-	rClassificationValues[0]=l_f64Result;
+	rClassificationValues[0]=l_f64P1;
 
-	if(l_f64Result >= 0.5)
+	if(l_f64P1 >= 0.5)
 	{
 		rf64Class=m_f64Class1;
 	}
@@ -174,17 +162,16 @@ boolean CAlgorithmClassifierPLDA::classify(const IFeatureVector& rFeatureVector,
 void CAlgorithmClassifierPLDA::generateConfigurationNode(void)
 {
 	std::stringstream l_sClasses;
-	std::stringstream l_sCoefficientsClass1;
-	std::stringstream l_sCoefficientsClass2;
+	std::stringstream l_sCoefficientsW;
+	std::stringstream l_sCoefficientsW0;
 
 	l_sClasses << m_f64Class1 << " " << m_f64Class2;
-	l_sCoefficientsClass1 << std::scientific << m_oCoefficientsClass1[0];
-	l_sCoefficientsClass2 << std::scientific << m_oCoefficientsClass2[0];
+	l_sCoefficientsW0 << std::scientific << m_f64w0;
+	l_sCoefficientsW << std::scientific << m_oW[0];
 
-	for(int i=1; i<m_oCoefficientsClass1.size(); i++)
+	for(int i=1; i<m_oW.size(); i++)
 	{
-		l_sCoefficientsClass1 << " " << m_oCoefficientsClass1[i];
-		l_sCoefficientsClass2 << " " << m_oCoefficientsClass2[i];
+		l_sCoefficientsW << " " << m_oW[i];
 	}
 
 	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode(c_sTypeNodeName);
@@ -195,12 +182,12 @@ void CAlgorithmClassifierPLDA::generateConfigurationNode(void)
 
 	//Create coeff Node
 	XML::IXMLNode *l_pCoeffNode = XML::createNode(c_sCoeffNodeName);
-	l_pTempNode = XML::createNode(c_sCoeffClass1NodeName);
-	l_pTempNode->setPCData(l_sCoefficientsClass1.str().c_str());
+	l_pTempNode = XML::createNode(c_sCoeffW0NodeName);
+	l_pTempNode->setPCData(l_sCoefficientsW0.str().c_str());
 	l_pCoeffNode->addChild(l_pTempNode);
 
-	l_pTempNode = XML::createNode(c_sCoeffClass2NodeName);
-	l_pTempNode->setPCData(l_sCoefficientsClass2.str().c_str());
+	l_pTempNode = XML::createNode(c_sCoeffWNodeName);
+	l_pTempNode->setPCData(l_sCoefficientsW.str().c_str());
 	l_pCoeffNode->addChild(l_pTempNode);
 
 	l_pAlgorithmNode->addChild(l_pCoeffNode);
@@ -237,26 +224,24 @@ void CAlgorithmClassifierPLDA::loadClassesFromNode(XML::IXMLNode *pNode)
 void CAlgorithmClassifierPLDA::loadCoefficientsFromNode(XML::IXMLNode *pNode)
 {
 
-	std::stringstream l_sDataClass1(pNode->getChildByName(c_sCoeffClass1NodeName)->getPCData());
-	std::stringstream l_sDataClass2(pNode->getChildByName(c_sCoeffClass2NodeName)->getPCData());
+	std::stringstream l_sDataCoeffW0(pNode->getChildByName(c_sCoeffW0NodeName)->getPCData());
+	std::stringstream l_sDataCoeffW(pNode->getChildByName(c_sCoeffWNodeName)->getPCData());
 
-	std::vector < float64 > l_vCoefficientsClass1;
-	std::vector < float64 > l_vCoefficientsClass2;
-	while(!l_sDataClass1.eof())
+	float64 l_f64Value;
+
+	l_sDataCoeffW0 >> m_f64w0;
+
+	std::vector < float64 > l_vCoefficientsW;
+	while(!l_sDataCoeffW.eof())
 	{
-		float64 l_f64Value;
-		l_sDataClass1 >> l_f64Value;
-		l_vCoefficientsClass1.push_back(l_f64Value);
-		l_sDataClass2 >> l_f64Value;
-		l_vCoefficientsClass2.push_back(l_f64Value);
+		l_sDataCoeffW >> l_f64Value;
+		l_vCoefficientsW.push_back(l_f64Value);
 	}
 
-	m_oCoefficientsClass1.set_size(l_vCoefficientsClass1.size());
-	m_oCoefficientsClass2.set_size(l_vCoefficientsClass2.size());
-	for(size_t i=0; i<l_vCoefficientsClass1.size(); i++)
+	m_oW.set_size(l_vCoefficientsW.size());
+	for(size_t i=0; i<l_vCoefficientsW.size(); i++)
 	{
-		m_oCoefficientsClass1[i]=l_vCoefficientsClass1[i];
-		m_oCoefficientsClass2[i]=l_vCoefficientsClass2[i];
+		m_oW[i]=l_vCoefficientsW[i];
 	}
 }
 

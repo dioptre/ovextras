@@ -4,12 +4,14 @@
 #include "ovpCAlgorithmPairwiseDecisionHT.h"
 
 #include <iostream>
+#include <sstream>
 
 
 #include <xml/IXMLNode.h>
 #include <xml/IXMLHandler.h>
 
 static const char* const c_sTypeNodeName = "PairwiseDecision_HT";
+static const char* const c_sRepartitionNodeName = "Repartition";
 
 
 using namespace OpenViBE;
@@ -202,10 +204,41 @@ boolean CAlgorithmPairwiseDecisionHT::compute(OpenViBE::IMatrix* pSubClassifierM
 XML::IXMLNode* CAlgorithmPairwiseDecisionHT::saveConfiguration()
 {
 	XML::IXMLNode* l_pRootNode = XML::createNode(c_sTypeNodeName);
+
+	TParameterHandler<IMatrix*> ip_pRepartitionSetVector = this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_SetRepartition);
+	const uint32 l_ui32AmountClass = ip_pRepartitionSetVector->getDimensionSize(0);
+
+	std::stringstream l_sRepartition;
+	for(size_t i=0; i<l_ui32AmountClass ; i++)
+	{
+		l_sRepartition << ip_pRepartitionSetVector->getBuffer()[i] << " " ;
+	}
+	XML::IXMLNode* l_pRepartition = XML::createNode(c_sRepartitionNodeName);
+	l_pRepartition->setPCData(l_sRepartition.str().c_str());
+	l_pRootNode->addChild(l_pRepartition);
+
 	return l_pRootNode;
 }
 
 boolean CAlgorithmPairwiseDecisionHT::loadConfiguration(XML::IXMLNode& rNode)
 {
+	std::stringstream l_sData(rNode.getChildByName(c_sRepartitionNodeName)->getPCData());
+	TParameterHandler<IMatrix*> ip_pRepartitionSetVector = this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_SetRepartition);
+
+
+	std::vector < float64 > l_vRepartition;
+	while(!l_sData.eof())
+	{
+		uint32 l_ui32Value;
+		l_sData >> l_ui32Value;
+		l_vRepartition.push_back(l_ui32Value);
+	}
+
+	ip_pRepartitionSetVector->setDimensionCount(1);
+	ip_pRepartitionSetVector->setDimensionSize(0, l_vRepartition.size());
+	for(size_t i=0; i<l_vRepartition.size(); i++)
+	{
+		ip_pRepartitionSetVector->getBuffer()[i]=l_vRepartition[i];
+	}
 	return true;
 }

@@ -41,8 +41,8 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 m_f64Class1;
 			OpenViBE::float64 m_f64Class2;
 
-			itpp::vec m_oCoefficientsClass1;
-			itpp::vec m_oCoefficientsClass2;
+			OpenViBE::float64 m_f64w0;
+			itpp::vec m_oW;
 
 			XML::IXMLNode *m_pConfigurationNode;
 
@@ -60,12 +60,12 @@ namespace OpenViBEPlugins
 			virtual void release(void) { }
 
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Probabilistic LDA classifier"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard / Fabien Lotte"); }
-			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA / INSA/IRISA"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Serrière Guilaume"); }
+			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ClassifierPLDA; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Classification::CAlgorithmClassifierPLDA; }

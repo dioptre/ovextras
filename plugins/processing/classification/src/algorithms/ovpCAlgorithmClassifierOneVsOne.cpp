@@ -145,7 +145,6 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 				}
 			}
 			l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Train);
-
 		}
 	}
 	return true;
@@ -208,10 +207,10 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 		}
 	}
 
-
 	rf64Class = (float64)l_i32IndexSelectedClass;
 	rClassificationValues.setSize(1);
 	rClassificationValues[0]=l_f64MaxProb;
+	//exit(0);
 	return true;
 }
 
@@ -344,7 +343,8 @@ boolean CAlgorithmClassifierOneVsOne::loadConfiguration(XML::IXMLNode *pConfigur
 			this->getAlgorithmManager().releaseAlgorithm(*m_pDecisionStrategyAlgorithm);
 			m_pDecisionStrategyAlgorithm = NULL;
 		}
-		&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(m_oPairwiseDecisionIdentifier));
+		m_oPairwiseDecisionIdentifier = l_pPairwiseIdentifier;
+		m_pDecisionStrategyAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(m_oPairwiseDecisionIdentifier));
 		m_pDecisionStrategyAlgorithm->initialize();
 	}
 	TParameterHandler < XML::IXMLNode* > ip_pConfiguration(m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_Configuration));
