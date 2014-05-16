@@ -6,7 +6,6 @@
  * Ledoit & Wolf: "A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices", 2004.
  *
  */
-#define TARGET_HAS_ThirdPartyEIGEN
 #if defined TARGET_HAS_ThirdPartyEIGEN
 #include <iostream>
 
@@ -35,7 +34,7 @@ void CAlgorithmConditionedCovariance::dumpMatrix(OpenViBE::Kernel::ILogManager &
 	}
 }
 #else 
-void CAlgorithmConditionedCovariance::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { };
+void CAlgorithmConditionedCovariance::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { }
 #endif
 
 OpenViBE::boolean CAlgorithmConditionedCovariance::initialize(void) 

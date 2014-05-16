@@ -212,15 +212,12 @@ void CAlgorithmClassifierOneVsAll::generateConfigurationNode(void)
 	std::stringstream l_sAmountClasses;
 	l_sAmountClasses << getClassAmount();
 
-	std::stringstream l_sClassIdentifier;
-	l_sClassIdentifier << this->m_oSubClassifierAlgorithmIdentifier.toUInteger();
-
 	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 
 	XML::IXMLNode *l_pOneVsAllNode = XML::createNode(c_sTypeNodeName);
 
 	XML::IXMLNode *l_pTempNode = XML::createNode(c_sSubClassifierIdentifierNodeName);
-	l_pTempNode->addAttribute(c_sAlgorithmIdAttribute,l_sClassIdentifier.str().c_str());
+	l_pTempNode->addAttribute(c_sAlgorithmIdAttribute,this->m_oSubClassifierAlgorithmIdentifier.toString());
 	l_pTempNode->setPCData(this->getTypeManager().getEnumerationEntryNameFromValue(OVTK_TypeId_ClassificationAlgorithm, m_oSubClassifierAlgorithmIdentifier.toUInteger()).toASCIIString());
 	l_pOneVsAllNode->addChild(l_pTempNode);
 
@@ -252,16 +249,15 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 	XML::IXMLNode *l_pOneVsAllNode = pConfigurationNode->getChild(0);
 
 	XML::IXMLNode *l_pTempNode = l_pOneVsAllNode->getChildByName(c_sSubClassifierIdentifierNodeName);
-	std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sAlgorithmIdAttribute));
-	uint64 l_iIdentifier;
-	l_sIdentifierData >> l_iIdentifier;
-	if(m_oSubClassifierAlgorithmIdentifier.toUInteger() != l_iIdentifier)
+	CIdentifier l_oIdentifier;
+	l_oIdentifier.fromString(l_pTempNode->getAttribute(c_sAlgorithmIdAttribute));
+	if(m_oSubClassifierAlgorithmIdentifier.toUInteger() != l_oIdentifier)
 	{
 		while(!m_oSubClassifierList.empty())
 		{
 			this->removeClassifierAtBack();
 		}
-		if(!this->setSubClassifierIdentifier(l_iIdentifier)){
+		if(!this->setSubClassifierIdentifier(l_oIdentifier)){
 			//if the sub classifier doesn't have comparison function it is an error
 			return false;
 		}

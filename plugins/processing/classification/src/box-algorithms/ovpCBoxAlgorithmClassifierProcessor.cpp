@@ -45,18 +45,15 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	}
 
 	XML::IXMLNode * l_pTempNode = l_pRootNode->getChildByName(c_sStrategyNodeName);
-	std::stringstream l_sStrategyData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
 	uint64 l_iIdentifier;
-	l_sStrategyData >> l_iIdentifier;
-	CIdentifier l_oAlgorithmClassIdentifier(l_iIdentifier);
+	CIdentifier l_oAlgorithmClassIdentifier;
+	l_oAlgorithmClassIdentifier.fromString(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
 
 	//If the Identifier is undefined, that means we need to load a native algorithm
 	if(l_oAlgorithmClassIdentifier == OV_UndefinedIdentifier){
 		this->getLogManager() << LogLevel_Trace << "Using Native algorithm\n";
 		l_pTempNode = l_pRootNode->getChildByName(c_sAlgorithmNodeName);
-		std::stringstream l_sAlgorithmData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
-		l_sAlgorithmData >> l_iIdentifier;
-		l_oAlgorithmClassIdentifier = CIdentifier(l_iIdentifier);
+		l_oAlgorithmClassIdentifier.fromString(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
 
 		//If the algorithm is still unknown, that means that we face an error
 		if(l_oAlgorithmClassIdentifier==OV_UndefinedIdentifier)
