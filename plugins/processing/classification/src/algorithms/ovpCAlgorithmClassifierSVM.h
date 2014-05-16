@@ -11,6 +11,7 @@
 #include "../../../contrib/packages/libSVM/svm.h"
 
 #define OVP_ClassId_Algorithm_ClassifierSVM                                        OpenViBE::CIdentifier(0x50486EC2, 0x6F2417FC)
+#define OVP_ClassId_Algorithm_ClassifierSVM_DecisionAvailable                      OpenViBE::CIdentifier(0x21A61E69, 0xD522CE01)
 #define OVP_ClassId_Algorithm_ClassifierSVMDesc                                    OpenViBE::CIdentifier(0x272B056E, 0x0C6502AC)
 
 #define OVP_Algorithm_ClassifierSVM_InputParameterId_SVMType					   OpenViBE::CIdentifier(0x0C347BBA, 0x180577F9)

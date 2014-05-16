@@ -381,7 +381,7 @@ boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const s
 
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
 	XML::IXMLNode *l_pTempNode = (XML::IXMLNode*)op_pConfiguration;
-	std::cout << l_pTempNode << std::endl;
+
 	if(l_pTempNode != NULL){
 		l_pTempNode->release();
 	}
@@ -429,7 +429,6 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 //		std::cout << "Expecting " << l_f64TrainerClass << "\n";
 		m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 //		std::cout << "get " << op_f64ClassificationStateClass << "\n";
-
 
 		if(op_f64ClassificationStateClass==l_f64TrainerClass)
 		{

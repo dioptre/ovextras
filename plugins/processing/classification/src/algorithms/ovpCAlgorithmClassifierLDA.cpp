@@ -1,6 +1,5 @@
 #include "ovpCAlgorithmClassifierLDA.h"
 
-#define TARGET_HAS_ThirdPartyITPP
 #if defined TARGET_HAS_ThirdPartyITPP
 
 #include <map>

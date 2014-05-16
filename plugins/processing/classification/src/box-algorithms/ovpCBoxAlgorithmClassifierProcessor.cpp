@@ -45,7 +45,6 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	}
 
 	XML::IXMLNode * l_pTempNode = l_pRootNode->getChildByName(c_sStrategyNodeName);
-	uint64 l_iIdentifier;
 	CIdentifier l_oAlgorithmClassIdentifier;
 	l_oAlgorithmClassIdentifier.fromString(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
 

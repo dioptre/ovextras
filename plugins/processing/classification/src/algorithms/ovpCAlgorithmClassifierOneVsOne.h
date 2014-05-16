@@ -18,6 +18,10 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
+		extern OV_API void registerAvailableDecisionEnumeration(const OpenViBE::CIdentifier& rAlgorithmIdentifier, OpenViBE::CIdentifier pDecision);
+		extern OV_API OpenViBE::CIdentifier getAvailableDecisionEnumeration(const OpenViBE::CIdentifier& rAlgorithmIdentifier);
+
+
 		typedef struct{
 			OpenViBE::float64 m_f64FirstClass;
 			OpenViBE::float64 m_f64SecondClass;

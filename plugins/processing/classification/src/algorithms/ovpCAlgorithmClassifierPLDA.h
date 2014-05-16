@@ -14,6 +14,7 @@
 #include <itpp/itbase.h>
 
 #define OVP_ClassId_Algorithm_ClassifierPLDA                                        OpenViBE::CIdentifier(0xA7A8FB40, 0xD85B90B8)
+#define OVP_ClassId_Algorithm_ClassifierPLDA_DecisionAvailable                      OpenViBE::CIdentifier(0xDA5F0B8A, 0x66AC2DD9)
 #define OVP_ClassId_Algorithm_ClassifierPLDADesc                                    OpenViBE::CIdentifier(0x27C51B3C, 0x0907ECEA)
 
 namespace OpenViBEPlugins

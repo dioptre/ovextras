@@ -2,6 +2,7 @@
 #define __OpenViBEPlugins_BoxAlgorithm_CommonClassifierListener_INL__
 
 #include "../ovp_defines.h"
+#include "../algorithms/ovpCAlgorithmClassifierOneVsOne.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 #include <cstdio>
@@ -125,13 +126,41 @@ namespace OpenViBEPlugins
 					return true;
 			}
 
+			virtual OpenViBE::boolean updateDecision(OpenViBE::Kernel::IBox& rBox){
+				OpenViBE::uint32 i=m_ui32CustomSettingBase + rBox.getInputCount();
+				if(m_oStrategyClassIdentifier == OVP_ClassId_Algorithm_ClassifierOneVsOne){
+					OpenViBE::CIdentifier l_oEnum = getAvailableDecisionEnumeration(m_oClassifierClassIdentifier);
+					if(l_oEnum == OV_UndefinedIdentifier){
+						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Unable to find Pariwise Decision for the algorithm" << m_oClassifierClassIdentifier.toString() << "\n";
+						return false;
+					}
+					else
+					{
+						OpenViBE::Kernel::IParameter* l_pParameter=m_pStrategy->getInputParameter(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType);
+						OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64Parameter(l_pParameter);
+						char l_sBuffer[1024];
+						OpenViBE::CString l_sParameterName=this->getTypeManager().getTypeName(l_oEnum);
+						::strcpy(l_sBuffer, this->getTypeManager().getEnumerationEntryNameFromValue(l_oEnum, ip_ui64Parameter).toASCIIString());
+
+						OpenViBE::CIdentifier l_oOldTypeIdentifier;
+						rBox.getSettingType(i, l_oOldTypeIdentifier);
+
+						if(l_oOldTypeIdentifier != l_oEnum)
+						{
+							rBox.setSettingType(i, l_oEnum);
+						}
+						rBox.setSettingValue(i, l_sBuffer);
+						rBox.setSettingName(i, l_sParameterName);
+					}
+				}
+				return true;
+			}
+
 			virtual OpenViBE::boolean onStrategyChanged(OpenViBE::Kernel::IBox& rBox)
 			{
 				OpenViBE::CString l_sStrategyName;
 				OpenViBE::CIdentifier l_oStrategyIdentifier;
-				OpenViBE::CIdentifier l_oIdentifier;
 				OpenViBE::CIdentifier l_oOldStrategyIdentifier=m_oStrategyClassIdentifier;
-				OpenViBE::int32 l_OldStrategySettings=m_ui32StrategyAmountSettings;
 
 				rBox.getSettingValue(0, l_sStrategyName);
 
@@ -161,7 +190,6 @@ namespace OpenViBEPlugins
 							rBox.removeSetting(i-1);
 						}
 					}
-					l_OldStrategySettings = m_ui32StrategyAmountSettings;
 					m_ui32StrategyAmountSettings = 0;
 				}
 				else//If we don't change the strategy we just have to return
@@ -171,79 +199,27 @@ namespace OpenViBEPlugins
 
 				if(m_pStrategy)
 				{
+					OpenViBE::CString l_sClassifierName;
+					rBox.getSettingValue(1, l_sClassifierName);
+					OpenViBE::CIdentifier l_oClassifierIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierName);
+
 					OpenViBE::uint32 i=m_ui32CustomSettingBase + rBox.getInputCount();
-					while((l_oIdentifier=m_pStrategy->getNextInputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
-					{
-						if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
-						&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet)
-						&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_Configuration)
-						&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter)
-						&& (l_oIdentifier!=OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount)
-						&& (l_oIdentifier!=OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm))
+					if(m_oStrategyClassIdentifier == OVP_ClassId_Algorithm_ClassifierOneVsOne){
+						OpenViBE::CIdentifier l_oEnum = getAvailableDecisionEnumeration(l_oClassifierIdentifier);
+						if(l_oEnum == OV_UndefinedIdentifier){
+							this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Unable to find Pariwise Decision for the algorithm " << m_oClassifierClassIdentifier.toString() << "\n";
+							return false;
+						}
+						else
 						{
-							OpenViBE::CIdentifier l_oTypeIdentifier;
-							OpenViBE::CString l_sParameterName=m_pStrategy->getInputParameterName(l_oIdentifier);
-							OpenViBE::Kernel::IParameter* l_pParameter=m_pStrategy->getInputParameter(l_oIdentifier);
-							OpenViBE::Kernel::TParameterHandler < OpenViBE::int64 > ip_i64Parameter(l_pParameter);
+							OpenViBE::Kernel::IParameter* l_pParameter=m_pStrategy->getInputParameter(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType);
 							OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64Parameter(l_pParameter);
-							OpenViBE::Kernel::TParameterHandler < OpenViBE::float64 > ip_f64Parameter(l_pParameter);
-							OpenViBE::Kernel::TParameterHandler < OpenViBE::boolean > ip_bParameter(l_pParameter);
-							OpenViBE::Kernel::TParameterHandler < OpenViBE::CString* > ip_sParameter(l_pParameter);
 							char l_sBuffer[1024];
-							bool l_bValid=true;
-							switch(l_pParameter->getType())
-							{
-								case OpenViBE::Kernel::ParameterType_Enumeration:
-									::strcpy(l_sBuffer, this->getTypeManager().getEnumerationEntryNameFromValue(l_pParameter->getSubTypeIdentifier(), ip_ui64Parameter).toASCIIString());
-									l_oTypeIdentifier=l_pParameter->getSubTypeIdentifier();
-									break;
+							OpenViBE::CString l_sParameterName=this->getTypeManager().getTypeName(l_oEnum);
+							::strcpy(l_sBuffer, this->getTypeManager().getEnumerationEntryNameFromValue(l_oEnum, ip_ui64Parameter).toASCIIString());
 
-								case OpenViBE::Kernel::ParameterType_Integer:
-								case OpenViBE::Kernel::ParameterType_UInteger:
-									::sprintf(l_sBuffer, "%lli", (OpenViBE::int64)ip_i64Parameter);
-									l_oTypeIdentifier=OV_TypeId_Integer;
-									break;
-
-								case OpenViBE::Kernel::ParameterType_Boolean:
-									::sprintf(l_sBuffer, "%s", ((OpenViBE::boolean)ip_bParameter)?"true":"false");
-									l_oTypeIdentifier=OV_TypeId_Boolean;
-									break;
-
-								case OpenViBE::Kernel::ParameterType_Float:
-									::sprintf(l_sBuffer, "%lf", (OpenViBE::float64)ip_f64Parameter);
-									l_oTypeIdentifier=OV_TypeId_Float;
-									break;
-								case OpenViBE::Kernel::ParameterType_String:
-									::sprintf(l_sBuffer, "%s", ((OpenViBE::CString*)ip_sParameter)->toASCIIString());
-									l_oTypeIdentifier=OV_TypeId_String;
-									break;
-								default:
-									l_bValid=false;
-									break;
-							}
-
-							if(l_bValid)
-							{
-								++m_ui32StrategyAmountSettings;
-								--l_OldStrategySettings;
-								std::cout << m_ui32StrategyAmountSettings << " " << i << std::endl;
-								if(l_OldStrategySettings < 0)
-								{
-									rBox.addSetting(l_sParameterName, l_oTypeIdentifier, l_sBuffer, i);
-								}
-								else
-								{
-									OpenViBE::CIdentifier l_oOldTypeIdentifier;
-									rBox.getSettingType(i, l_oOldTypeIdentifier);
-									if(l_oOldTypeIdentifier != l_oTypeIdentifier)
-									{
-										rBox.setSettingType(i, l_oTypeIdentifier);
-									}
-									rBox.setSettingValue(i, l_sBuffer);
-									rBox.setSettingName(i, l_sParameterName);
-								}
-								i++;
-							}
+							rBox.addSetting(l_sParameterName, l_oEnum, l_sBuffer, i);
+							++m_ui32StrategyAmountSettings;
 						}
 					}
 				}
@@ -259,7 +235,6 @@ namespace OpenViBEPlugins
 				OpenViBE::CIdentifier l_oIdentifier;
 
 				rBox.getSettingValue(1, l_sClassifierName);
-
 				l_oClassifierIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierName);
 				if(l_oClassifierIdentifier != m_oClassifierClassIdentifier)
 				{
@@ -368,7 +343,7 @@ namespace OpenViBEPlugins
 						rBox.removeSetting(i);
 					}
 				}
-
+				updateDecision(rBox);
 				return true;
 			}
 

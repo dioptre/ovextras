@@ -14,6 +14,7 @@
 #include <Eigen/Dense> 
 
 #define OVP_ClassId_Algorithm_ClassifierShrinkageLDA                                        OpenViBE::CIdentifier(0x2BA17A3C, 0x1BD46D83)
+#define OVP_ClassId_Algorithm_ClassifierShrinkageLDA_DecisionAvailable                      OpenViBE::CIdentifier(0x79146976, 0xD7F01A25)
 #define OVP_ClassId_Algorithm_ClassifierShrinkageLDADesc                                    OpenViBE::CIdentifier(0x78FE2929, 0x644945B4)
 
 #define OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage                   OpenViBE::CIdentifier(0x01357534, 0x028312A1)

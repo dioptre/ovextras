@@ -35,6 +35,22 @@ using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
 
+
+static std::map<uint64, CIdentifier> mDecisionMap;
+
+void OpenViBEPlugins::Classification::registerAvailableDecisionEnumeration(const CIdentifier& rAlgorithmIdentifier, CIdentifier pDecision)
+{
+	mDecisionMap[rAlgorithmIdentifier.toUInteger()] = pDecision;
+}
+
+CIdentifier OpenViBEPlugins::Classification::getAvailableDecisionEnumeration(const OpenViBE::CIdentifier& rAlgorithmIdentifier)
+{
+	if(mDecisionMap.count(rAlgorithmIdentifier.toUInteger()) == 0)
+		return OV_UndefinedIdentifier;
+	else
+		return mDecisionMap[rAlgorithmIdentifier.toUInteger()];
+}
+
 boolean CAlgorithmClassifierOneVsOne::initialize()
 {
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
