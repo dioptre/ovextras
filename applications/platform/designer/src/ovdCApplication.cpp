@@ -911,7 +911,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		while(l_oTokenIdentifier!=OV_UndefinedIdentifier);
 	}
 	refresh_search_no_data_cb(NULL, this);
-	// Add the designer log listenerLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"), LogLevel_Debug, "${Designer_DebugCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"), LogLevel_Debug, "${Designer_DebugCanal}");
 	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench"), LogLevel_Benchmark, "${Designer_BenchCanal}");
 	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace"), LogLevel_Trace, "${Designer_TraceCanal}");
 	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info"), LogLevel_Info, "${Designer_InfoCanal}");
