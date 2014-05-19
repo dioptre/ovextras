@@ -85,7 +85,7 @@ boolean CDownsampling::process(void)
 	{
 		l_f64BlocDuration = (float64)l_ui32SignalInputMatrixDimensionSizeEpoch/l_f64InputSamplingFrequency;
 		l_f64EndTime = m_f64LastTimeOrigSignal+l_f64BlocDuration;
-		float l_f64TimePassed = l_f64EndTime - m_f64LastTimeNewSignal;
+		float64 l_f64TimePassed = l_f64EndTime - m_f64LastTimeNewSignal;
 		l_ui32SignalOutputMatrixDimensionSizeEpoch = (uint32)floor(l_f64TimePassed*l_f64OutputSamplingFrequency);
 	}
 	
