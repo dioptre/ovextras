@@ -45,10 +45,11 @@ namespace OpenViBEPlugins
 			//retrieve settings
 			CString l_sTimeScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 			CString l_sDisplayModeSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+			CString l_sIsEEGMode=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 			CString l_sManualVerticalScaleSettingValue="false";
 			CString l_sVerticalScaleSettingValue="100.";
-			if(this->getStaticBoxContext().getSettingCount() > 2) l_sManualVerticalScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
-			if(this->getStaticBoxContext().getSettingCount() > 3) l_sVerticalScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+			if(this->getStaticBoxContext().getSettingCount() > 3) l_sManualVerticalScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+			if(this->getStaticBoxContext().getSettingCount() > 4) l_sVerticalScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 
 			this->getLogManager() << LogLevel_Debug << "l_sManualVerticalScaleSettingValue=" << l_sManualVerticalScaleSettingValue << "\n";
 			this->getLogManager() << LogLevel_Debug << "l_sVerticalScaleSettingValue=" << l_sVerticalScaleSettingValue << "\n";
@@ -58,6 +59,7 @@ namespace OpenViBEPlugins
 				*m_pBufferDatabase,
 				::atof(l_sTimeScaleSettingValue),
 				CIdentifier(getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_SignalDisplayMode, l_sDisplayModeSettingValue)),
+				this->getConfigurationManager().expandAsBoolean(l_sIsEEGMode),
 				!this->getConfigurationManager().expandAsBoolean(l_sManualVerticalScaleSettingValue),
 				::atof(l_sVerticalScaleSettingValue));
 

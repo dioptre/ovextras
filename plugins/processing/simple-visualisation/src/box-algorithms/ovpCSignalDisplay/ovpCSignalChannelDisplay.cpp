@@ -302,13 +302,6 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 	float64 l_f64MinimumDisplayedValue = 0;
 
 	float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
-//	float64 l_f64nChannel = m_oChannelList.size();
-
-	//draw grid if toggled on
-	if(m_pParentDisplayView->m_bShowHorizontalGrid || m_pParentDisplayView->m_bShowVerticalGrid)
-	{
-		drawGridLines(m_ui32Height/10,m_ui32Width/5);
-	}
 
 	//updates the left rulers
 	//for each channel
@@ -513,18 +506,15 @@ void CSignalChannelDisplay::checkTranslation(std::vector<float64> & rDisplayedVa
 		if(l_f64CurrentMinimum < m_oLocalMinimum[k])
 		{
 			m_oLocalMinimum[k] = l_f64CurrentMinimum;
-//			std::cout<<"Local Minimum = "<<m_oLocalMinimum[k]<<std::endl;
 		}
 		if(l_f64CurrentMaximum > m_oLocalMaximum[k])
 		{
 			m_oLocalMaximum[k] = l_f64CurrentMaximum;
-//			std::cout<<"Local Maximum = "<<m_oLocalMaximum[k]<<std::endl;
 		}
 
 	//set parameter to recomputed range
 	rDisplayedValueRange[k] = m_oLocalMaximum[k] - m_oLocalMinimum[k];
 
-	std::cout<<"Range = "<<m_oLocalMaximum[k]<<" - "<<m_oLocalMinimum[k]<<" = "<<rDisplayedValueRange[k]<<std::endl;
 	}
 
 	//in global best fit mode, translate signals if necessary
@@ -555,9 +545,9 @@ void CSignalChannelDisplay::setGlobalBestFitParameters(const float64& rRange, co
 {
 	m_f64ScaleX = 1;
 
-	m_f64VerticalScale = rRange;
-	float64 l_f64LocalMaximum = -DBL_MAX;
-	float64 l_f64LocalMinimum = DBL_MAX;
+	m_f64VerticalScale = rRange/2;
+//	float64 l_f64LocalMaximum = -DBL_MAX;
+//	float64 l_f64LocalMinimum = DBL_MAX;
 
 	for(uint32 i = 0; i<m_oChannelList.size();i++)
 	{
@@ -854,47 +844,6 @@ void CSignalChannelDisplay::drawZeroLine()
 	//switch back to normal line
 	gdk_gc_set_line_attributes(m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 1, GDK_LINE_SOLID, GDK_CAP_BUTT, GDK_JOIN_BEVEL);
 }
-
-void CSignalChannelDisplay::drawGridLines(float64 X_Step, float64 Y_Step)
-{
-	//set color of grid
-	GdkColor l_oGridColor;
-	l_oGridColor.red = 254*65535/255; l_oGridColor.green = 195*65535/255; l_oGridColor.blue = 172*65535/255;
-	gdk_gc_set_rgb_fg_color(m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE(m_pDrawingArea)], &l_oGridColor);
-
-	//draw grid
-	for(uint32 k = 0; k< m_oChannelList.size();k++)
-	{
-		gint l_iZeroY = (gint)getSampleYCoordinate(0,k);
-
-		if(m_pParentDisplayView->m_bShowHorizontalGrid)
-		{
-			//draw horizontal lines
-			for(uint32 i = 0; i< m_ui32Height; i++)
-			{
-				gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY+i*Y_Step, m_ui32Width ,l_iZeroY+i*Y_Step);
-				gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY-i*Y_Step, m_ui32Width ,l_iZeroY-i*Y_Step);
-			}
-		}
-
-		if(m_pParentDisplayView->m_bShowVerticalGrid)
-		{
-			//draw vertical lines
-			for(uint32 i = 0; i< m_ui32Width; i++)
-			{
-				gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], i*X_Step, 0, i*X_Step , m_ui32Height);
-			}
-		}
-	}
-
-	//set color back to default (black)
-	GdkColor l_oBlack;
-	l_oBlack.red = 0; l_oBlack.green = 0; l_oBlack.blue = 0;
-	gdk_gc_set_rgb_fg_color(m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE(m_pDrawingArea)], &l_oBlack);
-}
-
-
-
 
 //
 //CALLBACKS

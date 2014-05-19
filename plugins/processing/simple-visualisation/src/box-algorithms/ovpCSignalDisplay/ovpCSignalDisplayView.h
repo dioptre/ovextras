@@ -37,7 +37,8 @@ namespace OpenViBEPlugins
 			CSignalDisplayView(
 				CBufferDatabase& rBufferDatabase,
 				OpenViBE::float64 f64TimeScale,
-				OpenViBE::CIdentifier oDisplayMode);
+				OpenViBE::CIdentifier oDisplayMode,
+				OpenViBE::boolean bIsEEG);
 			/**
 			 * \brief Constructor
 			 * \param [in] rBufferDatabase Signal database
@@ -50,6 +51,7 @@ namespace OpenViBEPlugins
 				CBufferDatabase& rBufferDatabase,
 				OpenViBE::float64 f64TimeScale,
 				OpenViBE::CIdentifier oDisplayMode,
+				OpenViBE::boolean bIsEEG,
 				OpenViBE::boolean bAutoVerticalScale,
 				OpenViBE::float64 f64VerticalScale);
 
@@ -84,6 +86,11 @@ namespace OpenViBEPlugins
 			 * Invalidates the window's content and tells it to redraw itself.
 			 */
 			virtual void redraw(void);
+			/**
+			 * Create gtk table widget of the signal display
+			 */
+			void createChannelsDisplayWidget(void);
+
 			/**
 			* Toggle left rulers on/off
 			* \param bActive Show rulers if true.
@@ -210,11 +217,6 @@ namespace OpenViBEPlugins
 			//!Show bottom time ruler when true
 			OpenViBE::boolean m_bShowBottomRuler;
 
-			//!Show background grid when true
-			// OpenViBE::boolean m_bShowGrid;
-	        OpenViBE::boolean m_bShowHorizontalGrid;
-	        OpenViBE::boolean m_bShowVerticalGrid;
-
 			//! Time of displayed signals at the left of channel displays
 			OpenViBE::uint64 m_ui64LeftmostDisplayedTime;
 
@@ -242,6 +244,8 @@ namespace OpenViBEPlugins
 			//! Value of custom vertical scale
 			OpenViBE::float64 m_f64CustomVerticalScaleValue;
 			//@}
+
+			OpenViBE::boolean m_bIsEEGSignal;
 
 
 			//! The database that contains the information to use to draw the signals

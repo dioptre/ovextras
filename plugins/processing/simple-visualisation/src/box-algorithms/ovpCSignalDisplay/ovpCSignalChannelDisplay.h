@@ -235,14 +235,6 @@ namespace OpenViBEPlugins
 		 */
 		void drawZeroLine();
 
-		/**
-		 * \brief Draw grid in background
-		 * \param f64 X_Step step between vertical lines of the grid
-		 * \param f64 Y_Step step between horizontal lines of the grid
-		 */
-		void drawGridLines(
-			OpenViBE::float64 X_Step,
-			OpenViBE::float64 Y_Step);
 
 	public:
 		//! Left rulers displaying signals scale
