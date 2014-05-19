@@ -7,9 +7,14 @@
 #include <vector>
 #include <map>
 
+//This is to remove the warning on windows about strdup
+#if defined TARGET_OS_Windows
+#define strdup _strdup
+#endif
+
 namespace XML
 {
-	class OV_API IXMLNodeImpl: public IXMLNode
+	class IXMLNodeImpl: public IXMLNode
 	{
 	public:
 		IXMLNodeImpl(const char* sName);
@@ -99,7 +104,7 @@ const char* IXMLNodeImpl::getAttribute(const char *sAttributeName) const
 	{
 		res = m_mAttibuteMap.at(sAttributeName).c_str();
 	}
-	catch (const std::out_of_range& oor)
+	catch (const std::out_of_range&)
 	{
 	}
 	return res;

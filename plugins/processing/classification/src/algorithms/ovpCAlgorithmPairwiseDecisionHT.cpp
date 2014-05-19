@@ -120,7 +120,7 @@ boolean CAlgorithmPairwiseDecisionHT::compute(OpenViBE::IMatrix* pSubClassifierM
 		{
 			if(j != l_ui32Index)
 			{
-				const uint32 l_ui32Temp = ip_pRepartitionSetVector->getBuffer()[l_ui32Index]+ip_pRepartitionSetVector->getBuffer()[j];
+				const uint32 l_ui32Temp = (uint32)(ip_pRepartitionSetVector->getBuffer()[l_ui32Index]+ip_pRepartitionSetVector->getBuffer()[j]);
 
 				l_f64FirstSum += l_ui32Temp * pSubClassifierMatrix->getBuffer()[l_ui32Index*l_ui32AmountClass + j];
 				l_f64SecondSum += l_ui32Temp * l_pMu[l_ui32Index][j];

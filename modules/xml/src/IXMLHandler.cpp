@@ -8,7 +8,7 @@
 
 namespace XML
 {
-	class OV_API IXMLHandlerImpl: public IXMLHandler
+	class IXMLHandlerImpl: public IXMLHandler
 	{
 	public:
 		virtual void release(void);

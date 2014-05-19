@@ -291,7 +291,6 @@ void CAlgorithmClassifierOneVsOne::generateConfigurationNode(void)
 {
 	std::stringstream l_sAmountClasses;
 	l_sAmountClasses << getClassAmount();
-
 	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 
 	XML::IXMLNode *l_pOneVsOneNode = XML::createNode(c_sTypeNodeName);
