@@ -5,6 +5,7 @@
 #include "ovpCScenarioExporterSVG.h"
 
 #include "box-algorithms/ovpCCrashingBox.h"
+#include "box-algorithms/ovpCBoxAlgorithmNoiseGenerator.h"
 #include "box-algorithms/ovpCSinusSignalGenerator.h"
 #include "box-algorithms/ovpCTimeSignalGenerator.h"
 #include "box-algorithms/ovpCIdentity.h"
@@ -44,6 +45,7 @@ OVP_Declare_Begin();
 	// OVP_Declare_New(OpenViBEPlugins::Samples::CCrashingBoxDesc);
 	// OVP_Declare_New(OpenViBEPlugins::Samples::CBoxAlgorithmProducerDesc);
 	// OVP_Declare_New(OpenViBEPlugins::Samples::CBoxAlgorithmConsumerDesc);
+	OVP_Declare_New(OpenViBEPlugins::Samples::CNoiseGeneratorDesc);
 	OVP_Declare_New(OpenViBEPlugins::Samples::CSinusSignalGeneratorDesc);
 	OVP_Declare_New(OpenViBEPlugins::Samples::CTimeSignalGeneratorDesc);
 	OVP_Declare_New(OpenViBEPlugins::Samples::CIdentityDesc);

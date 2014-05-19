@@ -45,6 +45,7 @@ namespace OpenViBEPlugins
 
 			OpenViBE::uint64 m_ui64LastEndTime;
 			OpenViBE::boolean m_bFlagFirstTime;
+			OpenViBE::boolean m_bWarned;
 			OpenViBE::uint64 m_ui64LastBufferSize;
 			OpenViBE::uint64 m_ui64CurrentBufferSize;
 			OpenViBE::uint64 m_ui64SignalType;

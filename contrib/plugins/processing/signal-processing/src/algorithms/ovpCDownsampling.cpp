@@ -55,15 +55,18 @@ boolean CDownsampling::process(void)
 	uint32 l_ui32SignalInputMatrixDimensionNbChannels=ip_pSignalMatrix->getDimensionSize(0);
 	uint32 l_ui32SignalInputMatrixDimensionSizeEpoch=ip_pSignalMatrix->getDimensionSize(1);
 
+	const float64 l_f64InputSamplingFrequency = static_cast<float64>(ip_ui64SamplingFrequency);
+	const float64 l_f64OutputSamplingFrequency = static_cast<float64>(ip_ui64NewSamplingFrequency);
+	
 	// signal output vars
 	IMatrix* l_pSignalOutputMatrix=op_pSignalMatrix;
 	l_pSignalOutputMatrix->setDimensionCount(ip_pSignalMatrix->getDimensionCount());
 	uint32 l_ui32SignalOutputMatrixDimensionNbChannels=l_ui32SignalInputMatrixDimensionNbChannels;
 	if ((m_bFirst)||(isInputTriggerActive(OVP_Algorithm_Downsampling_InputTriggerId_Resample)))
 	{
-		l_ui32SignalOutputMatrixDimensionSizeEpoch= (uint32)floor(l_ui32SignalInputMatrixDimensionSizeEpoch * ((float64)ip_ui64NewSamplingFrequency/(float64)ip_ui64SamplingFrequency));
+		l_ui32SignalOutputMatrixDimensionSizeEpoch= (uint32)floor(l_ui32SignalInputMatrixDimensionSizeEpoch * (l_f64OutputSamplingFrequency/l_f64InputSamplingFrequency));
 		
-		l_f64BlocDuration = (float64)(l_ui32SignalInputMatrixDimensionSizeEpoch-1)/(float64)ip_ui64SamplingFrequency;
+		l_f64BlocDuration = (float64)(l_ui32SignalInputMatrixDimensionSizeEpoch-1)/l_f64InputSamplingFrequency;
 		l_f64EndTime = l_f64BlocDuration;
 		
 		m_f64LastTimeOrigSignal = 0;
@@ -80,11 +83,19 @@ boolean CDownsampling::process(void)
 	}
 	else
 	{
-		l_f64BlocDuration = (float64)l_ui32SignalInputMatrixDimensionSizeEpoch/(float64)ip_ui64SamplingFrequency;
+		l_f64BlocDuration = (float64)l_ui32SignalInputMatrixDimensionSizeEpoch/l_f64InputSamplingFrequency;
 		l_f64EndTime = m_f64LastTimeOrigSignal+l_f64BlocDuration;
-		l_ui32SignalOutputMatrixDimensionSizeEpoch = (uint32)floor((l_f64EndTime-m_f64LastTimeNewSignal)*(float64)ip_ui64NewSamplingFrequency);
+		float l_f64TimePassed = l_f64EndTime - m_f64LastTimeNewSignal;
+		l_ui32SignalOutputMatrixDimensionSizeEpoch = (uint32)floor(l_f64TimePassed*l_f64OutputSamplingFrequency);
 	}
 	
+	if(l_ui32SignalOutputMatrixDimensionSizeEpoch==0) {
+		this->getLogManager() << LogLevel_Error << "Output epoch size is 0. Increase input epoch size.\n";
+		return false;
+	}
+
+	// this->getLogManager() << LogLevel_Info << "blockDur " << l_f64BlocDuration << " et " << l_f64EndTime << " lt " << m_f64LastTimeNewSignal << " td " << l_f64TimeDiff << " dim " << l_ui32SignalOutputMatrixDimensionSizeEpoch << "\n";
+
 	l_pSignalOutputMatrix->setDimensionSize(0, l_ui32SignalOutputMatrixDimensionNbChannels);
 	l_pSignalOutputMatrix->setDimensionSize(1, l_ui32SignalOutputMatrixDimensionSizeEpoch);
 	float64* l_pSignalOutput = l_pSignalOutputMatrix->getBuffer();
@@ -143,7 +154,7 @@ boolean CDownsampling::process(void)
 					j = l_ui32SignalOutputMatrixDimensionSizeEpoch;
 				}
 				
-				l_f64CountNew += 1.0/(float64)ip_ui64NewSamplingFrequency;
+				l_f64CountNew += 1.0/l_f64OutputSamplingFrequency;
 			}
 			
 			if (l_ui32SignalOutputMatrixDimensionSizeEpoch > 0)
@@ -153,7 +164,7 @@ boolean CDownsampling::process(void)
 		}
 		if (l_ui32SignalOutputMatrixDimensionSizeEpoch > 0)
 		{
-			m_f64LastTimeNewSignal = l_f64CountNew - (1.0/(float64)ip_ui64NewSamplingFrequency);
+			m_f64LastTimeNewSignal = l_f64CountNew - (1.0/l_f64OutputSamplingFrequency);
 			m_f64LastTimeOrigSignal = l_f64EndTime;
 		}
 		if (m_bFirst)

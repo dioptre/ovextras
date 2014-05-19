@@ -382,14 +382,14 @@ Section "eigen"
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
 
-	IfFileExists "arch\eigen-3.0.5-dev.zip" no_need_to_download_eigen
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/eigen-3.0.5-dev.zip "arch\eigen-3.0.5-dev.zip"
+	IfFileExists "arch\eigen-3.2.1-dev.zip" no_need_to_download_eigen
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/eigen-3.2.1-dev.zip "arch\eigen-3.2.1-dev.zip"
 	Pop $R0 ; Get the return value
 		StrCmp $R0 "success" +3
 			MessageBox MB_OK "Download failed: $R0" /SD IDOK
 			Quit
 no_need_to_download_eigen:
-	ZipDLL::extractall "arch\eigen-3.0.5-dev.zip" ""
+	ZipDLL::extractall "arch\eigen-3.2.1-dev.zip" ""
 
 	; Eigen doesn't need path or vars set
 

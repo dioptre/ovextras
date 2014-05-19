@@ -40,6 +40,9 @@
 #define OVP_ClassId_AlgorithmAdditionDesc                   OpenViBE::CIdentifier(0x842E0B85, 0xA59FABC1)
 #define OVP_ClassId_BoxAlgorithmAdditionTestDesc            OpenViBE::CIdentifier(0xB33EC315, 0xF63BC0C5)
 
+#define OVP_ClassId_NoiseGeneratorDesc			            OpenViBE::CIdentifier(0x7237458A, 0x1F312C4A)
+#define OVP_ClassId_NoiseGenerator			                OpenViBE::CIdentifier(0x0E3929F1, 0x15AF76B9)
+
 //___________________________________________________________________//
 //                                                                   //
 // Plugin Object Class Identifiers                                   //

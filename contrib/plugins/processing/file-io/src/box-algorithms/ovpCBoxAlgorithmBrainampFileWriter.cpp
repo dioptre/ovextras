@@ -261,7 +261,7 @@ OpenViBE::boolean CBoxAlgorithmBrainampFileWriter::writeHeaderFile()
 	OpenViBE::uint32 l_uint32ChannelCount = m_pMatrix->getDimensionSize(0);
 	// OpenViBE::uint32 l_uint32SamplesPerChunk = m_pMatrix->getDimensionSize(1);
 
-	OpenViBE::uint32 l_f32Sampling_Interval = (OpenViBE::uint32) (1000000.0 / (OpenViBE::float32)op_ui64SamplingFrequency);
+	OpenViBE::float64 l_f64Sampling_Interval = 1000000.0 / static_cast<float64>(op_ui64SamplingFrequency);
 
 	CString format("UNKNOWN");
 	switch (m_ui32BinaryFormat)
@@ -295,7 +295,7 @@ OpenViBE::boolean CBoxAlgorithmBrainampFileWriter::writeHeaderFile()
 		<< "DataOrientation=MULTIPLEXED" << std::endl
 		<< "NumberOfChannels=" << l_uint32ChannelCount << std::endl 
 		<< "; Sampling interval in microseconds" << std::endl
-		<< "SamplingInterval=" << l_f32Sampling_Interval << std::endl
+		<< "SamplingInterval=" << std::fixed << std::setprecision(5) << l_f64Sampling_Interval << std::endl
 		<< std::endl
 		<< "[Binary Infos]" << std::endl
 		<< "BinaryFormat=" << format.toASCIIString() << std::endl
@@ -321,7 +321,7 @@ OpenViBE::boolean CBoxAlgorithmBrainampFileWriter::writeHeaderFile()
 		<< "============================" << std::endl
 		<< "Number of channels: " << l_uint32ChannelCount << std::endl 
 		<< "Sampling Rate [Hz]: " << (uint64)op_ui64SamplingFrequency << std::endl 
-		<< "Interval [µS]: "<< (uint32)l_f32Sampling_Interval << std::endl 
+		<< "Interval [µS]: " << std::fixed << std::setprecision(5) << l_f64Sampling_Interval << std::endl
 		<< std::endl;
 	
 		return true;
