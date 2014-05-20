@@ -1,6 +1,8 @@
 #ifndef __OpenViBEPlugins_BoxAlgorithm_TCPWriter_H__
 #define __OpenViBEPlugins_BoxAlgorithm_TCPWriter_H__
 
+#ifdef TARGET_HAS_Boost
+
 #include "../ovp_defines.h"
 
 #include <openvibe/ov_all.h>
@@ -183,3 +185,5 @@ namespace OpenViBEPlugins
 };
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_TCPWriter_H__
+
+#endif // TARGET_HAS_Boost
