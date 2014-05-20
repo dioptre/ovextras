@@ -120,7 +120,7 @@ namespace OpenViBEDesigner
 		OpenViBE::Kernel::IPlayer* getPlayer(void);
 
 		OpenViBE::boolean createPlayer(void);
-
+		OpenViBE::boolean isPlayerExisting(void);
 		void releasePlayer(void);
 
 		void destroyWindowMenu(void);

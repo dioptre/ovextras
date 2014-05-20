@@ -645,7 +645,7 @@ void CPlayerVisualisation::showSelectedWindow(OpenViBE::uint32 ui32Index)
     std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
     while(it!=m_mPlugins.end())
     {
-            if(GTK_IS_WIDGET(it->second.m_pWidget))
+			if(GTK_IS_WIDGET(it->second.m_pWidget))
             {
                     gtk_widget_show(it->second.m_pWidget);
             }

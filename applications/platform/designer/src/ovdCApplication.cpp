@@ -1889,6 +1889,15 @@ OpenViBE::boolean CApplication::createPlayer(void)
 	return true;
 }
 
+boolean CApplication::isPlayerExisting(void)
+{
+	CInterfacedScenario* l_pCurrentInterfacedScenario=getCurrentInterfacedScenario();
+	if(l_pCurrentInterfacedScenario && !l_pCurrentInterfacedScenario->m_pPlayer){
+		return false;
+	}
+	return true;
+}
+
 void CApplication::releasePlayer(void)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "releasePlayer\n";
@@ -1991,9 +2000,21 @@ void CApplication::pauseScenarioCB(void)
 
 void CApplication::nextScenarioCB(void)
 {
+	boolean isAlreadyStart = false;
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "nextScenarioCB\n";
 
-	this->createPlayer();
+	if(!this->isPlayerExisting())
+	{
+		if(!this->createPlayer())
+		{
+			m_rKernelContext.getLogManager() << LogLevel_Error << "CreatePlayer failed\n";
+			return;
+		}
+	}
+	else
+	{
+		isAlreadyStart = true;
+	}
 	this->getPlayer()->step();
 	this->getCurrentInterfacedScenario()->m_ePlayerStatus=this->getPlayer()->getStatus();
 
@@ -2003,16 +2024,43 @@ void CApplication::nextScenarioCB(void)
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_forward")),       true);
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_windowmanager")), false);
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), GTK_STOCK_MEDIA_PLAY);
+
+	gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), true);
+	if(!isAlreadyStart)
+	{
+		//Add top level window item in menu_window
+		std::vector < ::GtkWindow* > l_vTopLevelWindows = this->getCurrentInterfacedScenario()->m_pPlayerVisualisation->getTopLevelWindows();
+		this->getCurrentInterfacedScenario()->m_vCheckItems.resize(l_vTopLevelWindows.size());
+		for(unsigned int i=0; i<l_vTopLevelWindows.size(); i++)
+		{
+			const gchar* l_cTitle = gtk_window_get_title(l_vTopLevelWindows[i]);
+			this->getCurrentInterfacedScenario()->m_vCheckItems[i] = gtk_check_menu_item_new_with_label (l_cTitle);
+			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(this->getCurrentInterfacedScenario()->m_vCheckItems[i]), true);
+			gtk_menu_append(GTK_MENU(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_show_content")),this->getCurrentInterfacedScenario()->m_vCheckItems[i]);
+			gtk_widget_show(this->getCurrentInterfacedScenario()->m_vCheckItems[i]);
+
+			g_signal_connect(G_OBJECT(this->getCurrentInterfacedScenario()->m_vCheckItems[i]), "toggled", G_CALLBACK(window_menu_check_item_toggled_cb), this);
+
+		}
+	}
 }
 
 void CApplication::playScenarioCB(void)
 {
+	boolean isAlreadyStart = false;
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "playScenarioCB\n";
 
-	if(!this->createPlayer()) 
+	if(!this->isPlayerExisting())
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Error << "CreatePlayer failed\n";
-		return;
+		if(!this->createPlayer())
+		{
+			m_rKernelContext.getLogManager() << LogLevel_Error << "CreatePlayer failed\n";
+			return;
+		}
+	}
+	else
+	{
+		isAlreadyStart = true;
 	}
 	this->getPlayer()->play();
 	this->getCurrentInterfacedScenario()->m_ePlayerStatus=this->getPlayer()->getStatus();
@@ -2027,31 +2075,42 @@ void CApplication::playScenarioCB(void)
 
 	gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), true);
 
-	//Add top level window item in menu_window
-	std::vector < ::GtkWindow* > l_vTopLevelWindows = this->getCurrentInterfacedScenario()->m_pPlayerVisualisation->getTopLevelWindows();
-	this->getCurrentInterfacedScenario()->m_vCheckItems.resize(l_vTopLevelWindows.size());
-	for(unsigned int i=0; i<l_vTopLevelWindows.size(); i++)
+	if(!isAlreadyStart)
 	{
-		const gchar* l_cTitle = gtk_window_get_title(l_vTopLevelWindows[i]);
-		this->getCurrentInterfacedScenario()->m_vCheckItems[i] = gtk_check_menu_item_new_with_label (l_cTitle);
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(this->getCurrentInterfacedScenario()->m_vCheckItems[i]), true);
-		gtk_menu_append(GTK_MENU(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_show_content")),this->getCurrentInterfacedScenario()->m_vCheckItems[i]);
-		gtk_widget_show(this->getCurrentInterfacedScenario()->m_vCheckItems[i]);
+		//Add top level window item in menu_window
+		std::vector < ::GtkWindow* > l_vTopLevelWindows = this->getCurrentInterfacedScenario()->m_pPlayerVisualisation->getTopLevelWindows();
+		this->getCurrentInterfacedScenario()->m_vCheckItems.resize(l_vTopLevelWindows.size());
+		for(unsigned int i=0; i<l_vTopLevelWindows.size(); i++)
+		{
+			const gchar* l_cTitle = gtk_window_get_title(l_vTopLevelWindows[i]);
+			this->getCurrentInterfacedScenario()->m_vCheckItems[i] = gtk_check_menu_item_new_with_label (l_cTitle);
+			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(this->getCurrentInterfacedScenario()->m_vCheckItems[i]), true);
+			gtk_menu_append(GTK_MENU(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_show_content")),this->getCurrentInterfacedScenario()->m_vCheckItems[i]);
+			gtk_widget_show(this->getCurrentInterfacedScenario()->m_vCheckItems[i]);
 
-		g_signal_connect(G_OBJECT(this->getCurrentInterfacedScenario()->m_vCheckItems[i]), "toggled", G_CALLBACK(window_menu_check_item_toggled_cb), this);
+			g_signal_connect(G_OBJECT(this->getCurrentInterfacedScenario()->m_vCheckItems[i]), "toggled", G_CALLBACK(window_menu_check_item_toggled_cb), this);
 
+		}
 	}
 
 }
 
 void CApplication::forwardScenarioCB(void)
 {
+	boolean isAlreadyStart = false;
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "forwardScenarioCB\n";
 
-	if(!this->createPlayer())
+	if(!this->isPlayerExisting())
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Error << "CreatePlayer failed\n";
-		return;
+		if(!this->createPlayer())
+		{
+			m_rKernelContext.getLogManager() << LogLevel_Error << "CreatePlayer failed\n";
+			return;
+		}
+	}
+	else
+	{
+		isAlreadyStart = true;
 	}
 
 	this->getPlayer()->forward();
@@ -2064,6 +2123,25 @@ void CApplication::forwardScenarioCB(void)
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_forward")),       false);
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_windowmanager")), false);
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), GTK_STOCK_MEDIA_PLAY);
+
+	gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), true);
+	if(!isAlreadyStart)
+	{
+		//Add top level window item in menu_window
+		std::vector < ::GtkWindow* > l_vTopLevelWindows = this->getCurrentInterfacedScenario()->m_pPlayerVisualisation->getTopLevelWindows();
+		this->getCurrentInterfacedScenario()->m_vCheckItems.resize(l_vTopLevelWindows.size());
+		for(unsigned int i=0; i<l_vTopLevelWindows.size(); i++)
+		{
+			const gchar* l_cTitle = gtk_window_get_title(l_vTopLevelWindows[i]);
+			this->getCurrentInterfacedScenario()->m_vCheckItems[i] = gtk_check_menu_item_new_with_label (l_cTitle);
+			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(this->getCurrentInterfacedScenario()->m_vCheckItems[i]), true);
+			gtk_menu_append(GTK_MENU(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_show_content")),this->getCurrentInterfacedScenario()->m_vCheckItems[i]);
+			gtk_widget_show(this->getCurrentInterfacedScenario()->m_vCheckItems[i]);
+
+			g_signal_connect(G_OBJECT(this->getCurrentInterfacedScenario()->m_vCheckItems[i]), "toggled", G_CALLBACK(window_menu_check_item_toggled_cb), this);
+
+		}
+	}
 }
 
 boolean CApplication::quitApplicationCB(void)
@@ -2322,10 +2400,6 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		{
 			m_vInterfacedScenario[i32PageIndex]->showCurrentVisualisation();
 			m_vInterfacedScenario[i32PageIndex]->showWindowMenu();
-			for(unsigned int i=0; i<m_vInterfacedScenario[i32PageIndex]->m_vCheckItems.size(); i++)
-			  {
-			    toggleOnWindowItem(i,i32PageIndex);
-			  }
 		}
 
 		//update window manager button state

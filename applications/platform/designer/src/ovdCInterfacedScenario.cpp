@@ -3265,7 +3265,13 @@ void CInterfacedScenario::showCurrentVisualisation()
 	{
 		if(m_pPlayerVisualisation != NULL)
 		{
-			m_pPlayerVisualisation->showTopLevelWindows();
+			for(unsigned int i=0; i<this->m_vCheckItems.size(); i++)
+			{
+				if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(this->m_vCheckItems[i])))
+				{
+					m_pPlayerVisualisation->showSelectedWindow(i);
+				}
+			}
 		}
 	}
 	else
@@ -3353,7 +3359,8 @@ void CInterfacedScenario::onItemToggledOn(uint32 ui32Index)
 {
 	//Get list of displayed windows
 	std::vector < ::GtkWindow* > l_vWindows = m_pPlayerVisualisation->getTopLevelWindows();
-	gtk_widget_show(GTK_WIDGET(l_vWindows[ui32Index]));
+	m_pPlayerVisualisation->showSelectedWindow(ui32Index);
+	//gtk_widget_show(GTK_WIDGET(l_vWindows[ui32Index]));
 }
 void CInterfacedScenario::onItemToggledOff(uint32 ui32Index)
 {
