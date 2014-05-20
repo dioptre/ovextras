@@ -12,10 +12,10 @@
 #include <iostream>
 
 
-#define OVP_ClassId_BoxAlgorithm_ClassifierTrainer     OpenViBE::CIdentifier(0x128703B1, 0x0E2441F6)
-#define OVP_ClassId_BoxAlgorithm_ClassifierTrainerDesc OpenViBE::CIdentifier(0x0A0A3F0A, 0x17C8569F)
+#define OVP_ClassId_BoxAlgorithm_ClassifierTrainer       OpenViBE::CIdentifier(0xF3DAE8A8, 0x3B444154)
+#define OVP_ClassId_BoxAlgorithm_ClassifierTrainerDesc   OpenViBE::CIdentifier(0xFE277C91, 0x1593B824)
 
-#define OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount 4
+#define OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount 5
 
 namespace OpenViBEPlugins
 {
@@ -32,12 +32,15 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process(void);
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierTrainer);
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierTrainer)
 
 		protected:
 
 			virtual OpenViBE::boolean train(const size_t uiStartIndex, const size_t uiStopIndex);
 			virtual OpenViBE::float64 getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex);
+
+		private:
+			OpenViBE::boolean saveConfiguration(void);
 
 		protected:
 
@@ -50,6 +53,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64PartitionCount;
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationsEncoder;
+			std::map < OpenViBE::CString, OpenViBE::CString> *m_pExtraParemeter;
 
 			typedef struct
 			{
@@ -89,7 +93,8 @@ namespace OpenViBEPlugins
 
 				rBoxAlgorithmPrototype.addOutput ("Train-completed Flag",                 OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addSetting("Classifier to use",                    OVTK_TypeId_ClassificationAlgorithm, "");
+				rBoxAlgorithmPrototype.addSetting("Strategy to apply",                    OVTK_TypeId_ClassificationStrategy, "");
+				rBoxAlgorithmPrototype.addSetting("Algorithm to use",                     OVTK_TypeId_ClassificationAlgorithm, "");
 				rBoxAlgorithmPrototype.addSetting("Filename to save configuration to",    OV_TypeId_Filename,                  "");
 				rBoxAlgorithmPrototype.addSetting("Train trigger",                        OV_TypeId_Stimulation,               "OVTK_StimulationId_Train");
 				rBoxAlgorithmPrototype.addSetting("Number of partitions for k-fold test", OV_TypeId_Integer,                   "10");
@@ -101,7 +106,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const { return new CBoxAlgorithmCommonClassifierListener(OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount); }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) { delete pBoxListener; }
 
-			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_ClassifierTrainerDesc);
+			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_ClassifierTrainerDesc)
 		};
 	};
 };

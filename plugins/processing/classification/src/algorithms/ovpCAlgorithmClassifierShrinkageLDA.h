@@ -1,4 +1,3 @@
-
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
 #ifndef __OpenViBEPlugins_Algorithm_ClassifierShrinkageLDA_H__
@@ -8,14 +7,14 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <xml/IWriter.h>
-#include <xml/IReader.h>
+#include <xml/IXMLNode.h>
 
 #include <stack>
 
 #include <Eigen/Dense> 
 
 #define OVP_ClassId_Algorithm_ClassifierShrinkageLDA                                        OpenViBE::CIdentifier(0x2BA17A3C, 0x1BD46D83)
+#define OVP_ClassId_Algorithm_ClassifierShrinkageLDA_DecisionAvailable                      OpenViBE::CIdentifier(0x79146976, 0xD7F01A25)
 #define OVP_ClassId_Algorithm_ClassifierShrinkageLDADesc                                    OpenViBE::CIdentifier(0x78FE2929, 0x644945B4)
 
 #define OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage                   OpenViBE::CIdentifier(0x01357534, 0x028312A1)
@@ -25,7 +24,9 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		class CAlgorithmClassifierShrinkageLDA : public OpenViBEToolkit::CAlgorithmClassifier, public XML::IWriterCallback, public XML::IReaderCallback
+		OpenViBE::int32 getShrinkageLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
+
+		class CAlgorithmClassifierShrinkageLDA : public OpenViBEToolkit::CAlgorithmClassifier
 		{
 		typedef Eigen::Matrix< double , Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor > MatrixXdRowMajor;
 
@@ -37,31 +38,30 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
 			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
 
-			virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer);
-			virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer);
+			virtual XML::IXMLNode* saveConfiguration(void);
+			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
 
 			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierShrinkageLDA);
 
 		protected:
-
-			virtual void write(const char* sString); // XML IWriterCallback
-
-			virtual void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount); // XML IReaderCallback
-			virtual void processChildData(const char* sData); // XML IReaderCallback
-			virtual void closeChild(void); // XML ReaderCallback
-
 			// Debug method. Prints the matrix to the logManager. May be disabled in implementation.
 			void dumpMatrix(OpenViBE::Kernel::ILogManager& pMgr, const MatrixXdRowMajor& mat, const OpenViBE::CString& desc);
-
-			std::stack<OpenViBE::CString> m_vNode;
 
 			OpenViBE::float64 m_f64Class1;
 			OpenViBE::float64 m_f64Class2;
 
-			OpenViBE::CMemoryBuffer m_oConfiguration;
 			Eigen::MatrixXd m_oCoefficients;
+			OpenViBE::uint32 m_ui32NumCols;
+
+			XML::IXMLNode *m_pConfigurationNode;
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pCovarianceAlgorithm;
+
+		private:
+			void loadClassesFromNode(XML::IXMLNode *pNode);
+			void loadCoefficientsFromNode(XML::IXMLNode *pNode);
+
+			void generateConfigurationNode(void);
 		};
 
 		class CAlgorithmClassifierShrinkageLDADesc : public OpenViBEToolkit::CAlgorithmClassifierDesc

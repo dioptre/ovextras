@@ -385,6 +385,7 @@ boolean CBoxConfigurationDialog::run(void)
 			gint l_iResult=gtk_dialog_run(GTK_DIALOG(l_pSettingDialog));
 			if(l_iResult==GTK_RESPONSE_APPLY)
 			{
+				//FIXME should only call for changed argument to avoid to overwrite some value
 				for(i=0; i<m_rBox.getSettingCount() && i<l_vSettingValue.size(); i++)
 				{
 					m_rBox.getSettingType(i, l_oSettingType);

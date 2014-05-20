@@ -4,15 +4,44 @@
 
 #include <map>
 #include <sstream>
+#include <cmath>
+
+#include <xml/IXMLNode.h>
+#include <xml/IXMLHandler.h>
+
+static const char* const c_sTypeNodeName = "LDA";
+static const char* const c_sClassesNodeName = "Classes";
+static const char* const c_sCoeffNodeName = "Coefficients";
+
+extern const char* const c_sClassifierRoot;
+
+OpenViBE::int32 OpenViBEPlugins::Classification::getLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
+{
+	if(::fabs(rFirstClassificationValue[0])  < ::fabs(rSecondClassificationValue[0]) )
+		return -1;
+	else if(::fabs(rFirstClassificationValue[0]) == ::fabs(rSecondClassificationValue[0]))
+		return 0;
+	else
+		return 1;
+}
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Local;
+using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
+
+
+boolean CAlgorithmClassifierLDA::initialize(void)
+{
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	op_pConfiguration=NULL;
+
+	return CAlgorithmClassifier::initialize();
+}
 
 boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
@@ -89,31 +118,6 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 	m_oCoefficients=l_oSigmaInverse * (l_oMeanFeatureVector1 - l_oMeanFeatureVector2);
 	m_oCoefficients.ins(0, -0.5 * ((l_oMeanFeatureVector1+l_oMeanFeatureVector2).transpose() * m_oCoefficients)[0]);
 
-	std::stringstream l_sClasses;
-	std::stringstream l_sCoefficients;
-
-	l_sClasses << m_f64Class1 << " " << m_f64Class2;
-	l_sCoefficients << std::scientific << m_oCoefficients[0];
-	for(int i=1; i<m_oCoefficients.size(); i++)
-	{
-		l_sCoefficients << " " << m_oCoefficients[i];
-	}
-
-	m_oConfiguration.setSize(0, true);
-	XML::IWriter* l_pWriter=XML::createWriter(*this);
-	l_pWriter->openChild("OpenViBE-Classifier");
-	 l_pWriter->openChild("LDA");
-	  l_pWriter->openChild("Classes");
-	   l_pWriter->setChildData(l_sClasses.str().c_str());
-	  l_pWriter->closeChild();
-	  l_pWriter->openChild("Coefficients");
-	   l_pWriter->setChildData(l_sCoefficients.str().c_str());
-	  l_pWriter->closeChild();
-	 l_pWriter->closeChild();
-	l_pWriter->closeChild();
-	l_pWriter->release();
-	l_pWriter=NULL;
-
 	return true;
 }
 
@@ -142,71 +146,76 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 	{
 		rf64Class=m_f64Class2;
 	}
-
 	return true;
 }
 
-boolean CAlgorithmClassifierLDA::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
+void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 {
-	rMemoryBuffer.setSize(0, true);
-	rMemoryBuffer.append(m_oConfiguration);
-	return true;
+	std::stringstream l_sClasses;
+	std::stringstream l_sCoefficients;
+
+	l_sClasses << m_f64Class1 << " " << m_f64Class2;
+	l_sCoefficients << std::scientific << m_oCoefficients[0];
+	for(int i=1; i<m_oCoefficients.size(); i++)
+	{
+		l_sCoefficients << " " << m_oCoefficients[i];
+	}
+
+	XML::IXMLNode *l_pClassesNode = XML::createNode(c_sClassesNodeName);
+	l_pClassesNode->setPCData(l_sClasses.str().c_str());
+	XML::IXMLNode *l_pCoefficientsNode = XML::createNode(c_sCoeffNodeName);
+	l_pCoefficientsNode->setPCData(l_sCoefficients.str().c_str());
+
+	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode(c_sTypeNodeName);
+	l_pAlgorithmNode->addChild(l_pClassesNode);
+	l_pAlgorithmNode->addChild(l_pCoefficientsNode);
+
+	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
+	m_pConfigurationNode->addChild(l_pAlgorithmNode);
 }
 
-boolean CAlgorithmClassifierLDA::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
+XML::IXMLNode* CAlgorithmClassifierLDA::saveConfiguration(void)
+{
+	this->generateConfigurationNode();
+	return m_pConfigurationNode;
+}
+
+boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguratioNode)
 {
 	m_f64Class1=0;
 	m_f64Class2=0;
 
-	XML::IReader* l_pReader=XML::createReader(*this);
-	l_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
-	l_pReader->release();
-	l_pReader=NULL;
+	loadClassesFromNode(pConfiguratioNode->getChild(0)->getChildByName(c_sClassesNodeName));
+	loadCoefficientsFromNode(pConfiguratioNode->getChild(0)->getChildByName(c_sCoeffNodeName));
 
 	return true;
 }
 
-void CAlgorithmClassifierLDA::write(const char* sString)
+void CAlgorithmClassifierLDA::loadClassesFromNode(XML::IXMLNode *pNode)
 {
-	m_oConfiguration.append((const uint8*)sString, ::strlen(sString));
+	std::stringstream l_sData(pNode->getPCData());
+
+	l_sData >> m_f64Class1;
+	l_sData >> m_f64Class2;
 }
 
-void CAlgorithmClassifierLDA::openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
+void CAlgorithmClassifierLDA::loadCoefficientsFromNode(XML::IXMLNode *pNode)
 {
-	m_vNode.push(sName);
-}
+	std::stringstream l_sData(pNode->getPCData());
 
-void CAlgorithmClassifierLDA::processChildData(const char* sData)
-{
-	std::stringstream l_sData(sData);
-
-	if(m_vNode.top()==CString("Classes"))
+	std::vector < float64 > l_vCoefficients;
+	while(!l_sData.eof())
 	{
-		l_sData >> m_f64Class1;
-		l_sData >> m_f64Class2;
+		float64 l_f64Value;
+		l_sData >> l_f64Value;
+		l_vCoefficients.push_back(l_f64Value);
 	}
 
-	if(m_vNode.top()==CString("Coefficients"))
+	m_oCoefficients.set_size(l_vCoefficients.size());
+	for(size_t i=0; i<l_vCoefficients.size(); i++)
 	{
-		std::vector < float64 > l_vCoefficients;
-		while(!l_sData.eof())
-		{
-			float64 l_f64Value;
-			l_sData >> l_f64Value;
-			l_vCoefficients.push_back(l_f64Value);
-		}
-
-		m_oCoefficients.set_size(l_vCoefficients.size());
-		for(size_t i=0; i<l_vCoefficients.size(); i++)
-		{
-			m_oCoefficients[i]=l_vCoefficients[i];
-		}
+		m_oCoefficients[i]=l_vCoefficients[i];
 	}
-}
-
-void CAlgorithmClassifierLDA::closeChild(void)
-{
-	m_vNode.pop();
 }
 
 #endif // TARGET_HAS_ThirdPartyITPP

@@ -80,7 +80,7 @@ namespace OpenViBE
 				virtual __BridgeImplFunc2__((*m_pBox), boolean, setOutputType, , return false, const uint32, ui32OutputIndex, const CIdentifier&, rTypeIdentifier);
 				virtual __BridgeImplFunc2__((*m_pBox), boolean, setOutputName, , return false, const uint32, ui32OutputIndex, const CString&, rName);
 
-				virtual __BridgeImplFunc3__((*m_pBox), boolean, addSetting, , return false, const CString&, sName, const CIdentifier&, rTypeIdentifier, const CString&, sDefaultValue);
+				virtual __BridgeImplFunc4__((*m_pBox), boolean, addSetting, , return false, const CString&, sName, const CIdentifier&, rTypeIdentifier, const CString&, sDefaultValue, const int32, i32Index);
 				virtual __BridgeImplFunc1__((*m_pBox), boolean, removeSetting, , return false, const uint32, ui32Index);
 				virtual __BridgeBindFunc0__((*m_pBox), uint32, getSettingCount, const);
 				virtual __BridgeBindFunc2__((*m_pBox), boolean, getSettingType, const, const uint32, ui32SettingIndex, CIdentifier&, rTypeIdentifier);

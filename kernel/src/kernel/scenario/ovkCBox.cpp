@@ -574,10 +574,9 @@ boolean CBox::setOutputName(
 //___________________________________________________________________//
 //                                                                   //
 
-boolean CBox::addSetting(
-	const CString& sName,
+boolean CBox::addSetting(const CString& sName,
 	const CIdentifier& rTypeIdentifier,
-	const CString& sDefaultValue)
+	const CString& sDefaultValue, const int32 i32Index)
 {
 	CString l_sValue(sDefaultValue);
 	if(this->getTypeManager().isEnumeration(rTypeIdentifier))
@@ -612,7 +611,16 @@ boolean CBox::addSetting(
 	s.m_sDefaultValue=l_sValue;
 	s.m_sValue=l_sValue;
 
-	m_vSetting.push_back(s);
+	if(i32Index < 0 || i32Index >= (int32)m_vSetting.size())
+	{
+		m_vSetting.push_back(s);
+	}
+	else
+	{
+		vector<CSetting>::iterator l_it = m_vSetting.begin();
+		l_it += i32Index;
+		m_vSetting.insert(l_it, s);
+	}
 
 	this->notify(BoxModification_SettingAdded, m_vSetting.size()-1);
 
@@ -632,6 +640,7 @@ boolean CBox::removeSetting(
 	{
 		return false;
 	}
+
 	it=m_vSetting.erase(it);
 
 	this->notify(BoxModification_SettingRemoved, ui32SettingIndex);

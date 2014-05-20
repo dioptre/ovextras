@@ -189,6 +189,12 @@ boolean CAlgorithmClassifierBliffCFIS::classify(const IFeatureVector& rFeatureVe
 	return true;
 }
 
+
+uint32 CAlgorithmClassifierBliffCFIS::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
+{
+    return 0;
+}
+
 boolean CAlgorithmClassifierBliffCFIS::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
 {
 	rMemoryBuffer.setSize(0, true);
