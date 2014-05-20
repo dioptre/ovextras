@@ -21,7 +21,7 @@ ENDIF(NOT DEFINED CTEST_SITE)
 
 IF(NOT DEFINED CTEST_GIT_URL)
 	SET(CTEST_GIT_URL                          "git://scm.gforge.inria.fr/openvibe/openvibe.git")
-ENDIF(NOT DEFINED CTEST_BRANCH)
+ENDIF(NOT DEFINED CTEST_GIT_URL)
 
 IF(NOT DEFINED CTEST_BRANCH)
 	SET(CTEST_BRANCH                          "master")
