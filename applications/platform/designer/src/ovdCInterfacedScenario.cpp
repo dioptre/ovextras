@@ -1668,11 +1668,13 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidget, ::GdkEventButton* pEvent)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaButtonPressedCB\n";
+	gtk_widget_grab_focus(pWidget);
+
 	if(this->isLocked()) return;
 
 	::GtkWidget* l_pTooltip=GTK_WIDGET(gtk_builder_get_object(m_pBuilderTooltip, "tooltip"));
 	gtk_widget_hide(l_pTooltip);
-	gtk_widget_grab_focus(pWidget);
+
 
 	m_bButtonPressed|=((pEvent->type==GDK_BUTTON_PRESS)&&(pEvent->button==1));
 	m_f64PressMouseX=pEvent->x;
