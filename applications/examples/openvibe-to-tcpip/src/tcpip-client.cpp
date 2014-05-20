@@ -36,15 +36,16 @@ public:
 		signalBytesRead(0) 
 	{
 
+		boost::system::error_code error;
 		tcp::resolver resolver(ioService);
 
 		// Signal port
 		tcp::resolver::query query = tcp::resolver::query(tcp::v4(), "localhost", "5678"); 
-		boost::asio::connect(signalSocket, resolver.resolve(query));
+		signalSocket.connect(*resolver.resolve(query), error);
 
 		// Stimulus port
 		query = tcp::resolver::query(tcp::v4(), "localhost", "5679");
-		boost::asio::connect(stimulusSocket, resolver.resolve(query));
+		stimulusSocket.connect(*resolver.resolve(query), error);
 
 		// Tell ASIO to read a stimulus
 		boost::asio::async_read_until(stimulusSocket, stimulusStream, "\n",
@@ -53,7 +54,7 @@ public:
 
 		// Tell ASIO to read the signal header
 		boost::asio::async_read(signalSocket, boost::asio::buffer(signalBuffer.data(), bufferSize),
-			boost::asio::transfer_exactly(headerSize),
+			boost::asio::transfer_at_least(headerSize),
 			boost::bind(&TCPWriterClient::signalHeaderHandler, this,
 			boost::asio::placeholders::error));
 
@@ -126,7 +127,7 @@ public:
 		const double* signalData = reinterpret_cast<const double*>(buf);
 
 		// Use this to fill your data matrix with the signal...
-		signalData; 
+		(void)signalData; 
 
 		signalBytesRead += bufferSize;
 

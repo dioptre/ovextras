@@ -12,6 +12,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
 
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyBoost_System")
+INCLUDE("FindThirdPartyPThread")	# for ubuntu
 
 # ---------------------------------
 # Target macros
