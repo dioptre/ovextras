@@ -327,6 +327,8 @@ boolean GDF::CFixedGDF2Header::read(std::ifstream& oFile)
 
 	System::Memory::littleEndianToHost(l_pHeaderBuffer+32, &m_ui16NumberOfBlocksInHeader);
 
+	// +34	patient classification 6 bytes
+
 	System::Memory::littleEndianToHost(l_pHeaderBuffer+40, &m_ui64EquipmentProviderId);
 
 	for(int i=0 ; i<6 ; i++)
@@ -605,3 +607,144 @@ uint16 GDF::GDFDataSize(uint32 ui32ChannelType)
 	}
 	return l_ui16Size;
 }
+
+GDF::CFixedGDF251Header::CFixedGDF251Header()
+{
+	memset(&m_oHeader1, 0, sizeof(m_oHeader1));
+}
+
+boolean GDF::CFixedGDF251Header::read(std::ifstream& oFile)
+{
+	// Due to issues with data alignment and platform-specific padding, we can't trivially read the struct to memory with one go.
+
+	oFile.seekg(0, ios_base::beg);
+
+	uint8 l_pHeaderBuffer[256];
+
+	oFile.read(reinterpret_cast<char*>(l_pHeaderBuffer), 256);
+
+	strncpy(m_oHeader1.m_sVersionId, (char*)&l_pHeaderBuffer[0], 8);
+	strncpy(m_oHeader1.m_sPatientId, (char*)&l_pHeaderBuffer[8], 66);
+
+	m_oHeader1.m_ui8HealthInformation = l_pHeaderBuffer[84];
+	m_oHeader1.m_ui8Weight = l_pHeaderBuffer[85];
+	m_oHeader1.m_ui8Height = l_pHeaderBuffer[86];
+	m_oHeader1.m_ui8SubjectInformation = l_pHeaderBuffer[87];
+
+	strncpy(m_oHeader1.m_sRecordingId, (char *)&l_pHeaderBuffer[88], 64);
+
+	for(int i=0 ; i<4 ; i++)
+	{
+		System::Memory::littleEndianToHost(l_pHeaderBuffer+152+i*sizeof(uint32), &m_oHeader1.m_ui32RecordingLocation[i]);
+	}
+
+	System::Memory::littleEndianToHost(l_pHeaderBuffer+168, &m_oHeader1.m_ui32StartDateAndTimeOfRecording[0]);
+	System::Memory::littleEndianToHost(l_pHeaderBuffer+172, &m_oHeader1.m_ui32StartDateAndTimeOfRecording[1]);
+
+	System::Memory::littleEndianToHost(l_pHeaderBuffer+176, &m_oHeader1.m_ui32Birthday[0]);
+	System::Memory::littleEndianToHost(l_pHeaderBuffer+180, &m_oHeader1.m_ui32Birthday[1]);
+
+	System::Memory::littleEndianToHost(l_pHeaderBuffer+184, &m_oHeader1.m_ui16HeaderLength);
+
+	// +34	patient classification 6 bytes
+
+	System::Memory::littleEndianToHost(l_pHeaderBuffer+192, &m_oHeader1.m_ui64EquipmentProviderId);
+
+	for(int i=0 ; i<6 ; i++)
+	{
+		m_oHeader1.m_ui8Reserved1[i] = l_pHeaderBuffer[200+i];
+	}
+
+	for(int i=0 ; i<3 ; i++)
+	{
+		System::Memory::littleEndianToHost(l_pHeaderBuffer+206+i*sizeof(uint16), &m_oHeader1.m_ui16HeadSize[i]);
+		System::Memory::littleEndianToHost(l_pHeaderBuffer+212+i*sizeof(float32), &m_oHeader1.m_f32PositionReferenceElectrode[i]);
+		System::Memory::littleEndianToHost(l_pHeaderBuffer+224+i*sizeof(float32), &m_oHeader1.m_f32GroundElectrode[i]);
+	}
+
+	System::Memory::littleEndianToHost(l_pHeaderBuffer+236, reinterpret_cast<uint64*>(&m_oHeader1.m_i64NumberOfDataRecords));
+	System::Memory::littleEndianToHost(l_pHeaderBuffer+244, &m_oHeader1.m_f64Duration);
+	System::Memory::littleEndianToHost(l_pHeaderBuffer+252, &m_oHeader1.m_ui16NumberOfSignals);
+
+	System::Memory::littleEndianToHost(l_pHeaderBuffer+254, &m_oHeader1.m_ui16Reserved2);
+
+	if(oFile.bad())
+	{
+		return false;
+	}
+	return true;
+}
+
+boolean GDF::CFixedGDF251Header::save(std::ofstream& oFile)
+{
+	return false;
+	//TODO complete
+	/*
+	uint8 l_pTempBuffer[sizeof(uint64)];
+
+	oFile.seekp(0,ios::beg);
+
+	oFile<<m_sVersionId<<m_sPatientId;
+	*/
+}
+
+std::string GDF::CFixedGDF251Header::getSubjectName()
+{
+	// extracts the PID and Patient name from the m_sPatientId
+	char * l_pToken = strtok(m_oHeader1.m_sPatientId, " ");
+	if(l_pToken)
+	{
+		//The PId is not a numerical value in GDF, it is useless for us
+		l_pToken = strtok(NULL, " ");
+	}
+
+	if(l_pToken)
+	{
+		return l_pToken;
+	}
+	else
+	{
+		return _NoValueS_;
+	}
+}
+
+uint64 GDF::CFixedGDF251Header::getSubjectSex()
+{
+	return m_oHeader1.m_ui8SubjectInformation & 0x03;
+}
+
+std::string GDF::CFixedGDF251Header::getExperimentDate()
+{
+	//computes the experiment date
+	//uint64 l_ui32TempDate= *(reinterpret_cast<uint64*>(m_ui32StartDateAndTimeOfRecording));
+
+	//time_t l_sStartDateAndTimeOfRecordingInSeconds = ((l_ui32TempDate/2^32) - 719529) * (3600*24);
+	//tm * l_sStartDateAndTimeOfRecording = gmtime(&l_sStartDateAndTimeOfRecordingInSeconds);
+
+	//TODO check how date is coded in openvibe Date not good?
+	//(l_sStartDateAndTimeOfRecording->mon+1)<<8 + (l_sStartDateAndTimeOfRecording->day)
+
+	return _NoValueS_;
+}
+
+uint64 GDF::CFixedGDF251Header::getSubjectAge()
+{
+	return static_cast<uint64>( floor(static_cast<double>((m_oHeader1.m_ui32StartDateAndTimeOfRecording[1] - m_oHeader1.m_ui32Birthday[1]) / 365.242189813)));
+}
+
+float64 GDF::CFixedGDF251Header::getDataRecordDuration()
+{
+	return m_oHeader1.m_f64Duration;
+}
+
+uint64 GDF::CFixedGDF251Header::getNumberOfDataRecords()
+{
+	return m_oHeader1.m_i64NumberOfDataRecords;
+}
+
+uint64 GDF::CFixedGDF251Header::getChannelCount()
+{
+	return m_oHeader1.m_ui16NumberOfSignals;
+}
+
+

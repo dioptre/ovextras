@@ -107,6 +107,7 @@ namespace OpenViBEPlugins
 			OpenViBE::CString m_sFileName;
 			std::ifstream m_oFile;
 			OpenViBE::uint64 m_ui64FileSize;
+			OpenViBE::uint64 m_ui64Header3Length;
 
 			OpenViBE::float32 m_f32FileVersion;
 
@@ -177,6 +178,8 @@ namespace OpenViBEPlugins
 
 			OpenViBE::uint64 m_ui64ClockFrequency;
 
+			OpenViBE::boolean m_bTranslateByMinimum;
+
 		private:
 
 			void writeExperimentInformation();
@@ -185,7 +188,7 @@ namespace OpenViBEPlugins
 
 			template<class T> OpenViBE::float64 GDFTypeToFloat64(T val, OpenViBE::uint32 ui32Channel)
 			{
-				return static_cast<OpenViBE::float64>((m_pChannelScale[ui32Channel] * val) + m_pChannelTranslate[ui32Channel]);
+				return m_pChannelScale[ui32Channel] * static_cast<OpenViBE::float64>(val) + m_pChannelTranslate[ui32Channel];
 			}
 
 			template<class T> void GDFTypeBufferToFloat64Buffer(OpenViBE::float64 * out, T * in, OpenViBE::uint64 inputBufferSize, OpenViBE::uint32 ui32Channel)
@@ -232,6 +235,7 @@ namespace OpenViBEPlugins
 				// Adds settings
 				rPrototype.addSetting("Filename", OV_TypeId_Filename, "");
 				rPrototype.addSetting("Samples per buffer", OV_TypeId_Integer, "32");
+				rPrototype.addSetting("Subtract physical minimum", OV_TypeId_Boolean, "False");
 
 				return true;
 			}
