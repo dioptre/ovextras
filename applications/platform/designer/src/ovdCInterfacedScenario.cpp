@@ -1680,6 +1680,9 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 	m_f64PressMouseX=pEvent->x;
 	m_f64PressMouseY=pEvent->y;
 
+	m_f64CurrentMouseX=pEvent->x;
+	m_f64CurrentMouseY=pEvent->y;
+
 	uint32 l_ui32InterfacedObjectId=pickInterfacedObject((int)m_f64PressMouseX, (int)m_f64PressMouseY);
 	m_oCurrentObject=m_vInterfacedObject[l_ui32InterfacedObjectId];
 
