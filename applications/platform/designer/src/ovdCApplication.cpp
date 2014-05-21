@@ -1155,7 +1155,7 @@ void CApplication::updateWorkingDirectoryToken(const OpenViBE::CIdentifier &oSce
 	// Store unique token for the working directory of the scenario. Note that OpenViBE will change the token value by itself.
 	OpenViBE::CString l_sWorkingDir = getWorkingDirectory();
 
-	OpenViBE::CString l_sGlobalToken = "__volatile_Scenario" + oScenarioIdentifier.toString() + "Dir";
+	OpenViBE::CString l_sGlobalToken = "Player_ScenarioDirectory" + oScenarioIdentifier.toString();
 	OpenViBE::CString l_sOldDir = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenValue(l_sGlobalToken);
 	if (l_sOldDir == CString("")) 
 	{

@@ -14,7 +14,7 @@ def test_boxSetAttributes(self):
     click(Pattern("contextualBoxMenu.png").targetOffset(-51,16))
     assert(exists("renameBoxPopUp.png"))
     type("XXXX XXXX XXXX"+ Key.ENTER)
-    assert(exists("SinusOscillatorNewNameXXX.png"))
+    assert(exists(Pattern("SinusOscillatorNewNameXXX.png").similar(0.50)))
     
 def tearDown(self):
     App.close(self.terminal)
