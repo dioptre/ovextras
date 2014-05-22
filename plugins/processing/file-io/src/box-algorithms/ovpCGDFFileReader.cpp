@@ -332,7 +332,7 @@ boolean CGDFFileReader::readFileHeader()
 		{
 			GDF::CFixedGDFHeader * l_oFixedHeader = NULL;
 
-			if(m_f32FileVersion > 2.50) 
+			if(m_f32FileVersion > 2.12) 
 			{
 				l_oFixedHeader = new GDF::CFixedGDF251Header;
 			}
@@ -566,9 +566,10 @@ boolean CGDFFileReader::readFileHeader()
 				}
 				m_ui64Header3Length += 4;
 
-				// @fixme: potential endianness problem with uint24 length
 				uint32 l_ui32Tag =    l_sBuffer[0];
-				uint32 l_ui32Length = (l_sBuffer[1]<<0) + (l_sBuffer[2]<<8) + (l_sBuffer[3]<<16);
+				uint32 l_ui32Length = (static_cast<uint32>(l_sBuffer[1])<<0)
+									+ (static_cast<uint32>(l_sBuffer[2])<<8)
+									+ (static_cast<uint32>(l_sBuffer[3])<<16);	// src is uint24
 
 				this->getLogManager() << LogLevel_Info << "Found tag " << l_ui32Tag << " at pos " << (OpenViBE::int64)(m_oFile.tellg()-std::streamoff(4)) << " [length " << l_ui32Length << "], skipping content.\n";
 
