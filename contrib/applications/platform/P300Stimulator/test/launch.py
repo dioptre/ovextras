@@ -39,10 +39,10 @@ class P300Test:
 if __name__ == "__main__":
 	Test = P300Test()
 	#launch openvibe first to have the shared memory
-	ovprocess = Test.startScenario("ExternalStimulatorReferenceComparator.xml", False)
+	ovprocess = Test.startScenario("p300-speller-replay.xml", False)
 	#if we do not wait long enough(5 sec maybe less but more than one), the shared memory seem filled with random stuff and the external app behaves weirdly
 	#changing this value will change the timings and make the tests fails
-	time.sleep(2)
+	time.sleep(2)#14.152
 	#launch external app
 	exprocess = Test.startExternalStimulator()
 	exprocess.wait()

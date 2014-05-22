@@ -20,6 +20,15 @@ ELSE(WIN32)
 	SET(OS_FLAGS "")
 ENDIF(WIN32)
 
+
+#the goal here is to run an entire protocol
+#first we begin with the calibration phase
+#the calibration folder contains the 2 scenarios and the calibration data needed
+#and write the configuration files necessary for the other tests
+ADD_TEST(calibration_XDawn "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" "./Calibration/p300-speller-2-train-xdawn.xml")
+ADD_TEST(calibration_classifier "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" "./Calibration/p300-speller-3-train-classifier.xml")
+
+
 ADD_TEST(clean_resultBuffer "rm" "-f" "resultStack.txt")
 #we use a python script to launch first the openvibe scenario then the external app, see the script itself for more details
 ADD_TEST(run_${TEST_NAME} "python" "launch.py" "../../../../../dist/")
