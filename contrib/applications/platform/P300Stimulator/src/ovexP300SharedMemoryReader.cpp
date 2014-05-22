@@ -22,7 +22,7 @@ uint64 ExternalP300SharedMemoryReader::readNextPrediction()
 	uint64 l_ui64Result;
 	l_ui64Result = 0;
 	
-	IStimulationSet* l_pStimulationSet = dynamic_cast<IStimulationSet*>(m_pSharedVariableHandler->front(0));
+	IStimulationSet* l_pStimulationSet = dynamic_cast<IStimulationSet*>(m_pSharedVariableHandler->front(1));
 	
 	if (l_pStimulationSet!=NULL && l_pStimulationSet->getStimulationCount()>0)
 	{
@@ -32,7 +32,7 @@ uint64 ExternalP300SharedMemoryReader::readNextPrediction()
 		{
 			//std::cout << "ExternalP300SharedMemoryReader::readNextPrediction " << i <<  " " <<  l_pStimulationSet->getStimulationIdentifier(i) << "\n";
 		}
-		m_pSharedVariableHandler->clear(0); //tricky: if outside if-clause this could delete all elements before it has been read (between reading and clearing processes can be put on hold by OS scheduler)
+		m_pSharedVariableHandler->clear(1); //tricky: if outside if-clause this could delete all elements before it has been read (between reading and clearing processes can be put on hold by OS scheduler)
 		delete l_pStimulationSet;
 	}
 
@@ -42,12 +42,16 @@ uint64 ExternalP300SharedMemoryReader::readNextPrediction()
 //caller should clean up the returned pointer
 IMatrix* ExternalP300SharedMemoryReader::readNextSymbolProbabilities()
 {
-	IMatrix* l_pMatrix = dynamic_cast<IMatrix*>(m_pSharedVariableHandler->front(1));
+	//std::cout << "ExternalP300SharedMemoryReader::readNextSymbolProbabilities" << std::endl;
+	IMatrix* l_pMatrix = dynamic_cast<IMatrix*>(m_pSharedVariableHandler->front(0));
 	IMatrix* l_pReturnMatrix = NULL;
 	if (l_pMatrix!=NULL)
 	{
 		l_pReturnMatrix = new CMatrix();
 		OpenViBEToolkit::Tools::Matrix::copy(*l_pReturnMatrix, *l_pMatrix);
+		float64* buffer = l_pMatrix->getBuffer();
+		std::cout << "ExternalP300SharedMemoryReader::readNextSymbolProbabilities" << std::endl;
+		std::cout << buffer[0] << std::endl;
 		delete l_pMatrix;
 	}
 	
@@ -56,7 +60,7 @@ IMatrix* ExternalP300SharedMemoryReader::readNextSymbolProbabilities()
 
 void ExternalP300SharedMemoryReader::clearSymbolProbabilities()
 {
-	m_pSharedVariableHandler->clear(1);
+	m_pSharedVariableHandler->clear(0);
 }
 
 //it should be the creating application that handles the removal of the shared memory variables
@@ -69,7 +73,7 @@ IStimulationSet * ExternalP300SharedMemoryReader::readStimulation()
 {
 	CStimulationSet* l_pStimulusSet=NULL;
 
-	IStimulationSet* l_pStimulationSet = dynamic_cast<IStimulationSet*>(m_pSharedVariableHandler->pop_front(0));
+	IStimulationSet* l_pStimulationSet = dynamic_cast<IStimulationSet*>(m_pSharedVariableHandler->pop_front(1));
 	while(l_pStimulationSet!=NULL)
 	{
 		if(l_pStimulusSet==NULL)
@@ -78,8 +82,8 @@ IStimulationSet * ExternalP300SharedMemoryReader::readStimulation()
 		}
 		OpenViBEToolkit::Tools::StimulationSet::append(*l_pStimulusSet, *l_pStimulationSet);
 		//m_pSharedVariableHandler->pop_front(0);
-		l_pStimulationSet = dynamic_cast<IStimulationSet*>(m_pSharedVariableHandler->pop_front(0));
+		l_pStimulationSet = dynamic_cast<IStimulationSet*>(m_pSharedVariableHandler->pop_front(1));
 	}
-	m_pSharedVariableHandler->clear(0);
+	m_pSharedVariableHandler->clear(1);
 	return l_pStimulusSet;
 }

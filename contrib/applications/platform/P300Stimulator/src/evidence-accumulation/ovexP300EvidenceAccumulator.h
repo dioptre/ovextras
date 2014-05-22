@@ -50,7 +50,7 @@ namespace OpenViBEApplications
 				/**
 				 * @return The shared memory reader that is created during construction of the EvidenceAccumulator
 				 */
-				virtual ExternalP300SharedMemoryReader* getSharedMemoryReader() { return &m_oSharedMemoryReader; }
+				//virtual ExternalP300SharedMemoryReader* getSharedMemoryReader() { return &m_oSharedMemoryReader; }
 
 
 

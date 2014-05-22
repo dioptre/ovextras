@@ -43,7 +43,7 @@ ExternalP300Stimulator::ExternalP300Stimulator(P300StimulatorPropertyReader* pro
 	m_ui64TrialDuration=m_ui32RepetitionCountInTrial*(m_ui64RepetitionDuration+m_ui64InterRepetitionDuration);
 	m_ui32TrialIndex=0;					
 
-	m_oSharedMemoryReader.openSharedMemory(m_sSharedMemoryName);
+	//m_oSharedMemoryReader.openSharedMemory(m_sSharedMemoryName);
 	m_ui64Prediction = 0;				
 	
 	#ifdef OUTPUT_TIMING
@@ -56,7 +56,7 @@ ExternalP300Stimulator::ExternalP300Stimulator(P300StimulatorPropertyReader* pro
 
 ExternalP300Stimulator::~ExternalP300Stimulator()
 {
-	m_oSharedMemoryReader.closeSharedMemory();
+	//m_oSharedMemoryReader.closeSharedMemory();
 	#ifdef OUTPUT_TIMING
 	fclose(timingFile);
 	#endif

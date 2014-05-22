@@ -18,13 +18,13 @@ using namespace std;
 #define time2ms(x,y) ((x) * 1000 + y/1000.0) + 0.5
 
 ExternalP300NULLStimulator::ExternalP300NULLStimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator)
-				: ExternalP300IStimulator(), m_oSharedMemoryReader(), m_pPropertyObject(propertyObject)
+				: ExternalP300IStimulator(), m_pPropertyObject(propertyObject)
 {
 	m_pSequenceGenerator = l_pSequenceGenerator;
 	
-	m_sSharedMemoryName = propertyObject->getSharedMemoryName();
+	//m_sSharedMemoryName = propertyObject->getSharedMemoryName();
 					
-	m_oSharedMemoryReader.openSharedMemory(m_sSharedMemoryName);			
+	//m_oSharedMemoryReader.openSharedMemory(m_sSharedMemoryName);
 	
 	#ifdef OUTPUT_TIMING
 	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/stimulator_round_timing.txt","w");
@@ -39,7 +39,7 @@ ExternalP300NULLStimulator::ExternalP300NULLStimulator(P300StimulatorPropertyRea
 
 ExternalP300NULLStimulator::~ExternalP300NULLStimulator()
 {
-	m_oSharedMemoryReader.closeSharedMemory();
+	//m_oSharedMemoryReader.closeSharedMemory();
 	#ifdef OUTPUT_TIMING
 	fclose(timingFile);
 	#endif
@@ -55,7 +55,6 @@ void ExternalP300NULLStimulator::run()
 	uint64 l_ui64TimeStep = static_cast<uint64>((1LL<<32)/l_ui32StimulatorFrequency);
 	uint64 l_ui64CurrentTime = 0;
 	
-	//m_oSharedMemoryReader
 
 
 	while (m_ui32TrialIndex<=m_ui32TrialCount)
@@ -69,9 +68,9 @@ void ExternalP300NULLStimulator::run()
 		if (m_ui64RealCycleTime<m_ui64StimulatedCycleTime)
 			System::Time::sleep(static_cast<uint32>(std::ceil(1000.0*((m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep)>>22)/1024.0)));
 
-		//uint64 l_ui64Prediction = m_oSharedMemoryReader.readNextPrediction();
+		//std::cout << "NULL stim ev acc update\n";
 		m_oEvidenceAcc->update();//
-		IStimulationSet* l_pStimSet = m_oSharedMemoryReader.readStimulation();
+		IStimulationSet* l_pStimSet = m_oEvidenceAcc->getSharedMemoryReader()->readStimulation();
 
 		if(l_pStimSet!=NULL)//&&(l_ui64Prediction!=OVA_StimulationId_Flash))
 		{

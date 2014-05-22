@@ -17,7 +17,7 @@ boolean SharedMatrixReader::open()
 			m_bFailedToFind = true;
 	}	
 	
-	return m_bFailedToFind;
+	return !m_bFailedToFind;
 }
 
 boolean SharedMatrixReader::open(CString sharedMemoryName, CString sharedVariableName)

@@ -60,11 +60,11 @@ namespace OpenViBEApplications
 				/**
 				 * @return The shared memory reader that is created during construction of the stimulator
 				 */
-				virtual ExternalP300SharedMemoryReader* getSharedMemoryReader() { return &m_oSharedMemoryReader; }
+				//virtual ExternalP300SharedMemoryReader* getSharedMemoryReader() { return &m_oSharedMemoryReader; }
 				
 			protected:
-				OpenViBE::CString m_sSharedMemoryName;
-				ExternalP300SharedMemoryReader m_oSharedMemoryReader;
+				//OpenViBE::CString m_sSharedMemoryName;
+				//xternalP300SharedMemoryReader m_oSharedMemoryReader;
 				P300SequenceGenerator* m_pSequenceGenerator;
 				P300StimulatorPropertyReader* m_pPropertyObject;
 

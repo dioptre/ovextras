@@ -39,6 +39,9 @@ namespace OpenViBEApplications
 					m_bStopCondition = propertyObject->getStopCondition();
 					earlyStoppingEnabled = propertyObject->getEarlyStopping();
 					maxRepetition = propertyObject->getNumberOfRepetitions();
+					m_oSharedMemoryReader = new ExternalP300SharedMemoryReader();
+					OpenViBE::CString l_sSharedMemoryName = propertyObject->getSharedMemoryName();
+					m_oSharedMemoryReader->openSharedMemory(l_sSharedMemoryName);
 
 				}
 				
@@ -48,6 +51,7 @@ namespace OpenViBEApplications
 				{
 					m_opropertyObject=NULL;
 					m_pSequenceGenerator=NULL;
+					m_oSharedMemoryReader->closeSharedMemory();
 				}
 
 				
@@ -86,24 +90,29 @@ namespace OpenViBEApplications
 				//function called at each loop of the stimulator
 				virtual void update()
 				{
+					//std::cout << "Evidence Acc update " << std::endl;
 					//get the evidence from shared memory
-					OpenViBE::IMatrix* currentEvidence = m_oSharedMemoryReader.readNextSymbolProbabilities();
-					//the matrix should only contain a single value, the proba of the gorup containing a p300
-					OpenViBE::float64* proba = currentEvidence->getBuffer();
-					//match to the current flash group
-					std::cout << "Evidence Acc update with proba " << proba[0] << std::endl;
-					OpenViBE::IMatrix* evidenceToAdd = matchProbaLetters(proba[0]);
-					accumulate(evidenceToAdd);
-					if(earlyStoppingEnabled)//get the token wich says if early stopping is enabled or not
+					OpenViBE::IMatrix* currentEvidence = m_oSharedMemoryReader->readNextSymbolProbabilities();
+					
+					if(currentEvidence!=NULL)
 					{
-						m_bIsReadyToPredict = stopEarly();
+						//the matrix should only contain a single value, the proba of the gorup containing a p300
+						OpenViBE::float64* proba = currentEvidence->getBuffer();
+						//match to the current flash group
+						std::cout << "Evidence Acc update with proba " << proba[0] << std::endl;
+						OpenViBE::IMatrix* evidenceToAdd = matchProbaLetters(proba[0]);
+						accumulate(evidenceToAdd);
+						if(earlyStoppingEnabled)//get the token wich says if early stopping is enabled or not
+						{
+							m_bIsReadyToPredict = stopEarly();
+						}
+						//there is NumberOfGroup flashes by repetition so if we have more than NumberOfGroup*maxRepetition flashes, we force a predicition
+						if(m_ui32CurrentFlashIndex*m_pSequenceGenerator->getNumberOfGroups()>=maxRepetition)
+						{
+							m_bIsReadyToPredict=true;
+						}
+						m_oSharedMemoryReader->clearSymbolProbabilities();//clear to avoid reading it again
 					}
-					//there is NumberOfGroup flashes by repetition so if we have more than NumberOfGroup*maxRepetition flashes, we force a predicition
-					if(m_ui32CurrentFlashIndex*m_pSequenceGenerator->getNumberOfGroups()>=maxRepetition)
-					{
-						m_bIsReadyToPredict=true;
-					}
-					m_oSharedMemoryReader.clearSymbolProbabilities();//clear to avoid reading it again
 				}
 				
 				/**
@@ -114,7 +123,7 @@ namespace OpenViBEApplications
 				/**
 				 * @return The shared memory reader that is created during construction of the EvidenceAccumulator
 				 */
-				virtual ExternalP300SharedMemoryReader* getSharedMemoryReader() { return &m_oSharedMemoryReader; }
+				virtual ExternalP300SharedMemoryReader* getSharedMemoryReader() { return m_oSharedMemoryReader; }
 
 		protected:
 
@@ -189,7 +198,7 @@ namespace OpenViBEApplications
 					return rValue;
 				}
 
-				ExternalP300SharedMemoryReader m_oSharedMemoryReader;
+				ExternalP300SharedMemoryReader* m_oSharedMemoryReader;
 				OpenViBE::IMatrix* m_pAccumulatedEvidence;
 				OpenViBE::uint32 m_ui64Prediction;
 				OpenViBE::uint32 m_ui32CurrentFlashIndex;
