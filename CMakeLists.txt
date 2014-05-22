@@ -10,7 +10,6 @@ SET(OV_GLOBAL_VERSION_PATCH "Y")
 
 # Default is to build to dist/. If you wish a custom install, set your own MAKE_INSTALL_PREFIX when you call CMake. Safest to do under a fakeroot.
 #IF(NOT CMAKE_INSTALL_PREFIX)
-	SET(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/dist")
 #ENDIF(NOT CMAKE_INSTALL_PREFIX)
 
 MESSAGE(STATUS "Appending compilation flags...")

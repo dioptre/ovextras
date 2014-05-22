@@ -5,29 +5,7 @@ SET(PROJECT_VERSION_MINOR ${OV_GLOBAL_VERSION_MINOR})
 SET(PROJECT_VERSION_PATCH ${OV_GLOBAL_VERSION_PATCH})
 SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
-#FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
-set(source_files src/ovp_main.cpp)
-set(BOX_ALGORITHMS
-    ovpCInputChannel.cpp ovpCSteadyStateFrequencyComparison.cpp ovpCBoxAlgorithmUnivariateStatistics.cpp
-    ovpCSpatialFilterBoxAlgorithm.cpp ovpCOutputChannel.cpp ovpCDownsamplingBoxAlgorithm.cpp
-    ovpCTemporalFilterBoxAlgorithm.cpp ovpCEpoching.cpp ovpCDetectingMinMaxBoxAlgorithm.cpp
-    ovpCBoxAlgorithmSynchro.cpp ovpCBandFrequencyAverage.cpp)
-if (TARGET_HAS_ThirdPartyITPP)
-    set(BOX_ALGORITHMS ${BOX_ALGORITHMS} ovpCBoxAlgorithmCSPSpatialFilterTrainer.cpp ovpCFastICA.cpp ovpCSpectralAnalysisCospectra.cpp
-        ovpCSpectralAnalysis.cpp ovpCTemporalFilter.cpp ovpCWindowingFunctions.cpp)
-endif()
-foreach (i ${BOX_ALGORITHMS})
-    set(source_files ${source_files} src/box-algorithms/${i})
-endforeach()
-
-set(ALGORITHMS
-    ovpCApplySpatialFilter.cpp ovpCAlgorithmUnivariateStatistics.cpp ovpCDetectingMinMax.cpp ovpCDownsampling.cpp)
-if (TARGET_HAS_ThirdPartyITPP)
-    set(ALGORITHMS ${ALGORITHMS} ovpCApplyTemporalFilter.cpp ovpCComputeTemporalFilterCoefficients.cpp)
-endif()
-foreach (i ${ALGORITHMS})
-    set(source_files ${source_files} src/algorithms/${i})
-endforeach()
+FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
 
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
