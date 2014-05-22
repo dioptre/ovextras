@@ -2,9 +2,11 @@
 #include "ovp_defines.h"
 
 #include "box-algorithms/ovpCBoxAlgorithmTCPWriter.h"
+#include "box-algorithms/ovpCBoxAlgorithmSharedMemoryWriter.h"
 
 OVP_Declare_Begin();
 	
+	OVP_Declare_New(OpenViBEPlugins::FileReadingAndWriting::CBoxAlgorithmSharedMemoryWriterDesc);
 	OVP_Declare_New(OpenViBEPlugins::NetworkIO::CBoxAlgorithmTCPWriterDesc);
 
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeID_TCPWriter_OutputStyle,"Stimulus output");

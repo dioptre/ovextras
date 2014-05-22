@@ -1,1 +1,0 @@
-libOpenViBE-plugins-coadapt-fileio-dynamic.so.x.x.x
