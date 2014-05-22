@@ -74,7 +74,7 @@ void ExternalP300NULLStimulator::run()
 
 		if(l_pStimSet!=NULL)//&&(l_ui64Prediction!=OVA_StimulationId_Flash))
 		{
-			for(int i=0; i<l_pStimSet->getStimulationCount(); i++)
+			for(unsigned int i=0; i<l_pStimSet->getStimulationCount(); i++)
 			{
 				//int j = l_pStimSet->getStimulationCount()-1 - i;
 				//std::cout << i << "/" << l_pStimSet->getStimulationCount() << std::endl;

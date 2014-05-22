@@ -93,7 +93,7 @@ static void rendertext(cairo_t *cr, const char* text, double x, double y) {
 
 void Graph::resizeAxis(gint width, gint height, int nrOfGraphs)
 {
-	uint32 l_ui32NrOfRows = ceil(sqrt((double)nrOfGraphs));
+	uint32 l_ui32NrOfRows = (uint32)ceil(sqrt((double)nrOfGraphs));
 	uint32 l_ui32NrOfColumns = l_ui32NrOfRows;
 	if ( (uint32)nrOfGraphs<=(l_ui32NrOfRows-1)*l_ui32NrOfRows)
 		l_ui32NrOfRows--;
@@ -209,7 +209,7 @@ void Graph::drawAxisLabels(cairo_t * cairoContext)
             cairo_user_to_device(cairoContext, &cx, &cy);
             //std::cout<<"device current point "<<cx<<" "<<cy<<"\n";
 
-            float YtoPrint = adjustValueToScale( Y );
+			float64 YtoPrint = adjustValueToScale( Y );
 
             std::string Ystr = boost::lexical_cast<std::string>( YtoPrint );
             Ystr.resize(4);//2 significant numbers after the comma
@@ -221,7 +221,7 @@ void Graph::drawAxisLabels(cairo_t * cairoContext)
             rendertext(cairoContext, Ychar, cx, cy);
             cairo_restore(cairoContext);
 
-            Y += 0.1;
+			Y += (float)0.1;
         }
 
         uint64 XBegin = this->StartTime;
@@ -239,7 +239,7 @@ void Graph::drawAxisLabels(cairo_t * cairoContext)
 
 
             //X value to print range from XBegin to XEnd
-            uint64 XtoPrint = (XEnd - XBegin)*X + XBegin ;
+			uint64 XtoPrint = (XEnd - XBegin)*(uint64)X + XBegin ;
             float64 l_f64Time = (XtoPrint>>22)/1024.0;
             std::string Xstr = boost::lexical_cast<std::string>( l_f64Time );
 
@@ -257,7 +257,7 @@ void Graph::drawAxisLabels(cairo_t * cairoContext)
             rendertext(cairoContext, Xchar, cx, cy);
             cairo_restore(cairoContext);
 
-            X += 0.2;
+			X += (float)0.2;
         }
 
 }

@@ -80,7 +80,7 @@ namespace OpenViBEApplications
 					m_bIsReadyToPredict=false;
 					//clear buffer
 					OpenViBE::float64* buffer = m_pAccumulatedEvidence->getBuffer();
-					for(int i=0; i<m_pAccumulatedEvidence->getBufferElementCount(); i++)
+					for(unsigned int i=0; i<m_pAccumulatedEvidence->getBufferElementCount(); i++)
 					{
 						buffer[i]=0;
 					}
@@ -134,7 +134,7 @@ namespace OpenViBEApplications
 				{
 					l_f32Maximum = std::numeric_limits<int>::min();
 					l_ui32MaximumIndex = 0;
-					for (int j=0; j<m_pAccumulatedEvidence->getBufferElementCount(); j++)
+					for (unsigned int j=0; j<m_pAccumulatedEvidence->getBufferElementCount(); j++)
 						if (*(vector+j)>l_f32Maximum)
 						{
 							l_f32Maximum = *(vector+j);
@@ -178,7 +178,7 @@ namespace OpenViBEApplications
 					bool rValue = false;
 					OpenViBE::uint32 argmax;
 					OpenViBE::float32 max;
-					int j=0;
+					unsigned int j=0;
 					OpenViBE::float64* buffer = m_pAccumulatedEvidence->getBuffer();
 					findMaximum(buffer, argmax, max);
 
@@ -206,7 +206,7 @@ namespace OpenViBEApplications
 				P300SequenceGenerator* m_pSequenceGenerator;
 				bool m_bIsReadyToPredict;
 				bool earlyStoppingEnabled;
-				int maxRepetition;//number of repetition before we force the accumulator to make a prediction
+				OpenViBE::uint32 maxRepetition;//number of repetition before we force the accumulator to make a prediction
 				OpenViBE::float64 m_bStopCondition;
 				
 		};

@@ -197,7 +197,7 @@ boolean CMatrixVariance::process(void)
 			}
 			else
 			{
-				l_oStudentDistribution = students_t_distribution<double>(ip_ui64MatrixCount-1);
+				l_oStudentDistribution = students_t_distribution<double>((double)ip_ui64MatrixCount-1);
 
 				OpenViBEToolkit::Tools::Matrix::clearContent(*op_pMatrixVariance);
 				OpenViBEToolkit::Tools::Matrix::clearContent(*op_pAveragedMatrix);

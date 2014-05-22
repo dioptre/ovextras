@@ -57,19 +57,19 @@ namespace OpenViBEPlugins
 					delete [] pointCounter;
 					while(!m_lCurves.empty()) delete [] m_lCurves.back(), m_lCurves.pop_back();
 				}
-				virtual void resizeAxis(gint width, gint height, int nrOfGraphs);
-                                virtual void draw(GtkWidget * widget);
-				virtual void drawAxis(cairo_t * cairoContext);
-                                virtual void drawLine(cairo_t * cairoContext, double* Xo, double* Yo, double* Xe, double* Ye);
-                                virtual void drawAxisLabels(cairo_t * cairoContext);
-				virtual void drawCurves(cairo_t * cairoContext);
-                                virtual void drawLegend(cairo_t * cairoContext);
-                                virtual void drawVar(cairo_t * cairoContext);
-				virtual void updateCurves(OpenViBE::float64* curve, unsigned int curveIndex);
-                                virtual void setVariance(OpenViBE::float64* Variance, unsigned int curveIndex);
-                                virtual void snapCoords(cairo_t * cairoContext, double* x, double* y);
-				virtual OpenViBE::float64* begin(int curveIndex);
-                                virtual OpenViBE::float64 adjustValueToScale(OpenViBE::float64 value);
+				void resizeAxis(gint width, gint height, int nrOfGraphs);
+								 void draw(GtkWidget * widget);
+				void drawAxis(cairo_t * cairoContext);
+								void drawLine(cairo_t * cairoContext, double* Xo, double* Yo, double* Xe, double* Ye);
+								 void drawAxisLabels(cairo_t * cairoContext);
+				void drawCurves(cairo_t * cairoContext);
+								void drawLegend(cairo_t * cairoContext);
+								 void drawVar(cairo_t * cairoContext);
+				void updateCurves(OpenViBE::float64* curve, unsigned int curveIndex);
+								void setVariance(OpenViBE::float64* Variance, unsigned int curveIndex);
+								 void snapCoords(cairo_t * cairoContext, double* x, double* y);
+				OpenViBE::float64* begin(int curveIndex);
+								 OpenViBE::float64 adjustValueToScale(OpenViBE::float64 value);
 
 				std::vector <OpenViBE::float64*> m_lCurves; //private
 				std::vector< ::GdkColor>& m_cLineColor; //private

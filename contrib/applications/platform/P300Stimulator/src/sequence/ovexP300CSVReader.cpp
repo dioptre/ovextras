@@ -84,7 +84,7 @@ std::vector< std::vector<OpenViBE::uint32>* >* ovexP300CSVReader::generateSequen
 		readFile();
 		fileRead = true;
 	}
-	for(int i=m_uiFlashIndex; i<m_flashes.size(); i++)
+	for(unsigned int i=m_uiFlashIndex; i<m_flashes.size(); i++)
 	{
 		m_lSequence->push_back(m_flashes.at(i));
 	}

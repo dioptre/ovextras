@@ -28,7 +28,7 @@ uint64 ExternalP300SharedMemoryReader::readNextPrediction()
 	{
 		//std::cout << "ExternalP300SharedMemoryReader::readNextPrediction\n";
 		l_ui64Result = l_pStimulationSet->getStimulationIdentifier(0);
-		for(int i=0; i<l_pStimulationSet->getStimulationCount(); i++)
+		for(unsigned int i=0; i<l_pStimulationSet->getStimulationCount(); i++)
 		{
 			//std::cout << "ExternalP300SharedMemoryReader::readNextPrediction " << i <<  " " <<  l_pStimulationSet->getStimulationIdentifier(i) << "\n";
 		}
