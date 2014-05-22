@@ -69,5 +69,8 @@ __________________________________________________________________
  The box writes to all the sockets synchronously in the process() call and drops no data. If the connection is too slow to accommodate the data flow, the box will lag.
  
  Detected transmission errors will cause a disconnection of the client.
+ 
+ Streamed Matrix can be recognized from the TCPWriter header by the sampling rate 0. If the stream is a signal, the sampling rate is a positive number.
+ 
  * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Miscellaneous|
  */

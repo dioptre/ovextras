@@ -1,3 +1,6 @@
+
+#ifdef TARGET_HAS_Boost
+
 #include "ovpCBoxAlgorithmTCPWriter.h"
 
 #include <ctime>
@@ -252,14 +255,14 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 		{
 			if(m_pActiveDecoder == &m_MatrixDecoder) 
 			{
-				m_ui32NumberOfChannels = (int) m_MatrixDecoder.getOutputMatrix()->getDimensionSize(0);
-				m_ui32NumberOfSamplesPerChunk = (int) m_MatrixDecoder.getOutputMatrix()->getDimensionSize(1);
+				m_ui32NumberOfChannels = static_cast<uint32> (m_MatrixDecoder.getOutputMatrix()->getDimensionSize(0) );
+				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> (m_MatrixDecoder.getOutputMatrix()->getDimensionSize(1) );
 			} 
 			else if(m_pActiveDecoder == &m_SignalDecoder)
 			{
-				m_ui32Frequency = (int) m_SignalDecoder.getOutputSamplingRate();
-				m_ui32NumberOfChannels = (int) m_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
-				m_ui32NumberOfSamplesPerChunk = (int) m_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
+				m_ui32Frequency = static_cast<uint32> ( m_SignalDecoder.getOutputSamplingRate() );
+				m_ui32NumberOfChannels = static_cast<uint32> ( m_SignalDecoder.getOutputMatrix()->getDimensionSize(0) );
+				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> ( m_SignalDecoder.getOutputMatrix()->getDimensionSize(1) );
 			}
 			else
 			{
@@ -320,3 +323,5 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 
 	return true;
 }
+
+#endif // TARGET_HAS_Boost
