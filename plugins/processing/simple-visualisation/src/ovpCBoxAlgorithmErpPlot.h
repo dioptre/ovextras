@@ -22,7 +22,7 @@
 
 namespace OpenViBEPlugins
 {
-        namespace VisualisationPresentation
+		namespace SimpleVisualisation
 	{
 
 		class Graph
@@ -209,7 +209,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ErpPlot; }
-                        virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::VisualisationPresentation::CBoxAlgorithmErpPlot; }
+						virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmErpPlot; }
                         virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const { return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization; }
 			
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmErpPlotListener; }

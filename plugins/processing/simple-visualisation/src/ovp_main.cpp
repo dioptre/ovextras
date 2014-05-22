@@ -23,6 +23,8 @@
 #include "box-algorithms/ovpCTopographicMap3DDisplay.h"
 #include "box-algorithms/ovpCVoxelDisplay.h"
 
+#include "ovpCBoxAlgorithmErpPlot.h"
+
 OVP_Declare_Begin()
 
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_SphericalLinearInterpolationType, "Spherical linear interpolation type");
@@ -53,5 +55,7 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CTopographicMap3DDisplayDesc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CVoxelDisplayDesc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmP300IdentifierCardVisualisationDesc)
+
+	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmErpPlotDesc)
 
 OVP_Declare_End()
