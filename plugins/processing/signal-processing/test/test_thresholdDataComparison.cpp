@@ -32,18 +32,35 @@ std::vector<float64> fileToBuffer(const CString sFileName)
 	if ( ! l_file.is_open() ) {
 	       cout << "Error : could not open file "<<sFileName<<"\n";
 	    }
+	
+	bool firstLineRead = false;
 
 	while(l_file.good())
 	{
 		string l_sData;
-
-		getline(l_file, l_sData,';');
+		if(!firstLineRead)
+		{
+			getline(l_file, l_sData);
+			firstLineRead = true;
+		}
+		else
+			getline(l_file, l_sData,';');
 		l_vsData.push_back(l_sData);
 	}
 
 	l_file.close();
 
-	for(uint32 i = 3; i<l_vsData.size();i++)
+	//use the first line to identify how many columns there are
+	int columns=0;
+	size_t found = l_vsData[0].find(';');
+	while(found!=std::string::npos)
+	{
+		columns++;
+		found = l_vsData[0].find(';', found+1);
+	}
+	cout << "Found "<<columns<<" columns\n";
+
+	for(uint32 i = 1; i<l_vsData.size();i++)
 	{
 
 		ss.str(l_vsData[i]);
@@ -62,6 +79,7 @@ boolean compareBuffers (const std::vector<float64>& rInVector, const std::vector
 	float64 l_f64Error;
 	uint32 l_ui32NbError = 0;
 	bool hadError = false;
+	std::vector<float64> difference;
 
 	// Compare size
 	if(rInVector.size() == 0 || rOutVector.size()==0)
@@ -89,11 +107,13 @@ boolean compareBuffers (const std::vector<float64>& rInVector, const std::vector
 		         }
 //		         break;
 		      }
+			difference.push_back(rInVector[i]-rOutVector[i]);
 		}
 
 		if(hadError)
 		{
 			cout<<"Comparison failed, "<<l_ui32NbError<<" data differ, the largest difference is "<<l_f64Error<< " at value ["<<cpt<<"]\n"<<endl;
+			cout << rInVector[cpt] << " ins of " << rOutVector[cpt] << endl;
 		}
 
 	}
@@ -103,6 +123,18 @@ boolean compareBuffers (const std::vector<float64>& rInVector, const std::vector
 		hadError = true;
 		cout<<"Error : Files have different size, check input data"<<endl;
 	}
+
+	float mean=0;
+	float var=0;
+	for(int i=0; i<difference.size(); i++)
+	{
+		mean+=difference[i];
+		var+=difference[i]*difference[i];
+	}
+	mean/=difference.size();
+	var/=difference.size();
+	var-=mean*mean;
+	cout << "mean " << mean << " var " << var << endl;
 
 	return !hadError;
 }
