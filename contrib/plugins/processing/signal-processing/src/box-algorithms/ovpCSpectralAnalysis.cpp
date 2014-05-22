@@ -1,4 +1,3 @@
-
 #if defined TARGET_HAS_ThirdPartyITPP
 
 #include "ovpCSpectralAnalysis.h"
