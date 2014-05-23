@@ -15,8 +15,6 @@
 
 // @END inserm-gpl
 
-#include "algorithms/ovpCAlgorithmClassifierAdaptiveGradientDescentLDA.h"
-
 OVP_Declare_Begin();
 
 // @BEGIN inserm-gpl
@@ -28,8 +26,6 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CNaiveBayesApplyFunctionDesc);			// Requires ITPP
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CNaiveBayesApplyBoxAlgorithmDesc);		// Depends on the previous
 
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Adaptive Gradient Descent LDA", OVP_ClassId_Algorithm_ClassifierAdaptiveGradientDescentLDA.toUInteger());
-	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierAdaptiveGradientDescentLDADesc);			// Requires ITPP
 #endif // TARGET_HAS_ThirdPartyITPP
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CLDABoxAlgorithmDesc);
