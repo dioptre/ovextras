@@ -18,9 +18,9 @@ end
 function process(box)
 	dofile(box:get_config("${Path_Data}") .. "/plugins/stimulation/lua-stimulator-stim-codes.lua")
 
-	box:log("Info", box:get_config("Generating '${__volatile_ScenarioDir}/appconf/application-configuration.conf'"))
+	box:log("Info", box:get_config("Generating '${Player_ScenarioDirectory}/appconf/application-configuration.conf'"))
 
-	cfg_file = assert(io.open(box:get_config("${__volatile_ScenarioDir}/appconf/application-configuration.conf"), "w"))
+	cfg_file = assert(io.open(box:get_config("${Player_ScenarioDirectory}/appconf/application-configuration.conf"), "w"))
 
 	cfg_file:write("# This file was automatically generated!\n\n")
 	cfg_file:write("# If you want to change the SSVEP configuration\n")
@@ -32,9 +32,9 @@ function process(box)
 
 --	cfg_file:close()
 
---	box:log("Info", box:get_config("Generating '${__volatile_ScenarioDir}/appconf/ogre-configuration.conf'"))
+--	box:log("Info", box:get_config("Generating '${Player_ScenarioDirectory}/appconf/ogre-configuration.conf'"))
 
---	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/appconf/ogre-configuration.conf"), "w")
+--	cfg_file = io.open(box:get_config("${Player_ScenarioDirectory}/appconf/ogre-configuration.conf"), "w")
 
 --	cfg_file:write("# This file was automatically generated!\n\n")
 --	cfg_file:write("# If you want to change the SSVEP configuration\n")

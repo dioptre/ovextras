@@ -6,7 +6,8 @@ def setUp(self):
             ov_binany_path +"/share/openvibe/scenarios/box-tutorials/crop.xml")
     while not self.terminal.window():
         wait(1)
-def testRunOgreVisual(self):
+    wait(Pattern("scenarioScreen.png").similar(0.50),10)
+def testRunCrop(self):
     assert(exists("timesignal.png"))    
 def tearDown(self):
     if self.terminal.window():

@@ -273,7 +273,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue>record-[$core{date}-$core{time}].ov</DefaultValue>
-					<Value>${__volatile_ScenarioDir}/signals/ssvep-record-current.ov</Value>
+					<Value>${Player_ScenarioDirectory}/signals/ssvep-record-current.ov</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>
@@ -380,7 +380,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/file-writer.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/file-writer.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -687,7 +687,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/scripts/generic-acquisition-controller.lua</Value>
+					<Value>${Player_ScenarioDirectory}/scripts/generic-acquisition-controller.lua</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
@@ -968,7 +968,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Command 1</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${External_Application_Launcher} openvibe-ssvep-mind-shooter --run-bg generic ${__volatile_ScenarioDir}</Value>
+					<Value>${External_Application_Launcher} openvibe-ssvep-mind-shooter --run-bg generic ${Player_ScenarioDirectory}</Value>
 				</Setting>
 			</Settings>
 			<Attributes>
@@ -1025,7 +1025,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/scripts/start-stimulator.lua</Value>
+					<Value>${Player_ScenarioDirectory}/scripts/start-stimulator.lua</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>

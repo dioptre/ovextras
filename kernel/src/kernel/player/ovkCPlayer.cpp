@@ -97,21 +97,20 @@ boolean CPlayer::initialize(void)
 
 	//get scenario path from the global configuration manager and insert it to the local manager.
 	//after having the path, try to see if there's a scenario specific config file
-	OpenViBE::CString l_sGlobalPathToken = "__volatile_Scenario" + m_oScenarioIdentifier.toString() + "Dir";
+	OpenViBE::CString l_sGlobalPathToken = "Player_ScenarioDirectory" + m_oScenarioIdentifier.toString();
 	OpenViBE::CString l_sWorkingDir = this->getKernelContext().getConfigurationManager().lookUpConfigurationTokenValue(l_sGlobalPathToken);
 
 	if(l_sWorkingDir == CString(""))
 	{
-		this->getLogManager() << LogLevel_Warning << "Warning: Token " << l_sGlobalPathToken << " did not exist in the configuration manager. The token should have been set when the scenario was loaded or saved. If you're working on a new scenario that has never been saved, ignore this warning.\n";
-		this->getLogManager() << LogLevel_Warning << "Warning: Will not attempt to load any scenario specific configuration file.\n";
+		this->getLogManager() << LogLevel_Debug << "Token " << l_sGlobalPathToken << " did not exist in the configuration manager. The token should have been set when the scenario was loaded or saved. If you're working on a new scenario that has never been saved, ignore this warning.\n";
+		this->getLogManager() << LogLevel_Debug << "Will not attempt to load any scenario specific configuration file.\n";
 	}
 	else
 	{
 		//create an easily named local token that scenarios can use to read their own current directory. Note that the value of this token will often be overwritten by OpenViBE.
-		const CString l_sLocalPathToken("__volatile_ScenarioDir");
-		//We set a local __volatile_ScenarioDir to avoid it to change during execution (the global change each time we switch of tab)
+		const CString l_sLocalPathToken("Player_ScenarioDirectory");
+		//We set a local Player_ScenarioDirectory to avoid it from changing during execution (the global change each time we switch a tab)
 		const CIdentifier l_sOldIdentifier = m_pLocalConfigurationManager->lookUpConfigurationTokenIdentifier(l_sLocalPathToken, false);
-		//const CString l_sOldPath = getKernelContext().getConfigurationManager().lookUpConfigurationTokenValue(l_sLocalPathToken);
 		if(l_sOldIdentifier == OV_UndefinedIdentifier)
 		{
 			m_pLocalConfigurationManager->createConfigurationToken(l_sLocalPathToken,l_sWorkingDir);
@@ -119,6 +118,18 @@ boolean CPlayer::initialize(void)
 		else
 		{
 			m_pLocalConfigurationManager->setConfigurationTokenValue( m_pLocalConfigurationManager->lookUpConfigurationTokenIdentifier(l_sLocalPathToken), l_sWorkingDir);
+		}
+
+		//Old scenario token, deprecated. Here for completeness, if some scenarios still use it.
+		const CString l_sLocalPathTokenDeprecated("__volatile_ScenarioDir");
+		const CIdentifier l_sOldIdentifierDeprecated = m_pLocalConfigurationManager->lookUpConfigurationTokenIdentifier(l_sLocalPathTokenDeprecated, false);
+		if(l_sOldIdentifierDeprecated == OV_UndefinedIdentifier)
+		{
+			m_pLocalConfigurationManager->createConfigurationToken(l_sLocalPathTokenDeprecated,l_sWorkingDir);
+		}
+		else
+		{
+			m_pLocalConfigurationManager->setConfigurationTokenValue( m_pLocalConfigurationManager->lookUpConfigurationTokenIdentifier(l_sLocalPathTokenDeprecated), l_sWorkingDir);
 		}
 
 		//load local, scenario-specific configuration file
