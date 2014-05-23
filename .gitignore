@@ -8,4 +8,6 @@ CMakeLists.txt.*
 externals/*/
 *~
 *.swp
+.project
+.cproject
 

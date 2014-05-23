@@ -37,7 +37,8 @@ namespace OpenViBEPlugins
 			CSignalDisplayView(
 				CBufferDatabase& rBufferDatabase,
 				OpenViBE::float64 f64TimeScale,
-				OpenViBE::CIdentifier oDisplayMode);
+				OpenViBE::CIdentifier oDisplayMode,
+				OpenViBE::boolean bIsEEG);
 			/**
 			 * \brief Constructor
 			 * \param [in] rBufferDatabase Signal database
@@ -50,6 +51,7 @@ namespace OpenViBEPlugins
 				CBufferDatabase& rBufferDatabase,
 				OpenViBE::float64 f64TimeScale,
 				OpenViBE::CIdentifier oDisplayMode,
+				OpenViBE::boolean bIsEEG,
 				OpenViBE::boolean bAutoVerticalScale,
 				OpenViBE::float64 f64VerticalScale);
 
@@ -85,6 +87,11 @@ namespace OpenViBEPlugins
 			 */
 			virtual void redraw(void);
 			/**
+			 * Create gtk table widget of the signal display
+			 */
+			void createChannelsDisplayWidget(void);
+
+			/**
 			* Toggle left rulers on/off
 			* \param bActive Show rulers if true.
 			*/
@@ -103,6 +110,9 @@ namespace OpenViBEPlugins
 			 */
 			void toggleChannel(
 				OpenViBE::uint32 ui32ChannelIndex,
+				OpenViBE::boolean bActive);
+
+			void toggleChannelMultiView(
 				OpenViBE::boolean bActive);
 
 			void changeMultiView(void);
@@ -135,6 +145,9 @@ namespace OpenViBEPlugins
 			 */
 			OpenViBE::boolean onCustomVerticalScaleChangedCB(
 				::GtkSpinButton* pSpinButton);
+
+			OpenViBE::boolean onAutoTranslationToggledCB(
+					GtkToggleButton* pToggleButton);
 
 			/**
 			 * \brief Get a channel display object
@@ -232,6 +245,9 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 m_f64CustomVerticalScaleValue;
 			//@}
 
+			OpenViBE::boolean m_bIsEEGSignal;
+
+
 			//! The database that contains the information to use to draw the signals
 			CBufferDatabase * m_pBufferDatabase;
 
@@ -246,6 +262,9 @@ namespace OpenViBEPlugins
 
 			//! Flag set to true once multi view configuration dialog is initialized
 			OpenViBE::boolean m_bMultiViewInitialized;
+
+			OpenViBE::boolean m_bAutoTranslation;
+
 			//! Vector of indices of selected channels
 			std::map<OpenViBE::uint32, OpenViBE::boolean> m_vMultiViewSelectedChannels;
 
@@ -260,6 +279,9 @@ namespace OpenViBEPlugins
 
 			//! Bottom time ruler
 			CBottomTimeRuler * m_pBottomRuler;
+
+			//! Widgets for left rulers
+			std::vector <GtkWidget *> m_oLeftRulers;
 		};
 	}
 }

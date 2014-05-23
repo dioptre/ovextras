@@ -189,8 +189,14 @@ void CSignalDisplayLeftRuler::draw()
 			gdk_draw_layout(m_pLeftRuler->window, m_pLeftRuler->style->fg_gc[GTK_WIDGET_STATE (m_pLeftRuler)],
 					0, l_iTextY-(l_iTextH/2), l_pText);
 
-			gdk_draw_line(m_pLeftRuler->window, m_pLeftRuler->style->fg_gc[GTK_WIDGET_STATE (m_pLeftRuler)], l_iLeftRulerWidth-4, l_iTextY, l_iLeftRulerWidth, l_iTextY);
-
+			if(i < 0.5e-10 && i> -0.5e-10)
+			{
+				gdk_draw_line(m_pLeftRuler->window, m_pLeftRuler->style->fg_gc[GTK_WIDGET_STATE (m_pLeftRuler)], l_iLeftRulerWidth-6, l_iTextY, l_iLeftRulerWidth, l_iTextY);
+			}
+			else
+			{
+				gdk_draw_line(m_pLeftRuler->window, m_pLeftRuler->style->fg_gc[GTK_WIDGET_STATE (m_pLeftRuler)], l_iLeftRulerWidth-4, l_iTextY, l_iLeftRulerWidth, l_iTextY);
+			}
 		}
 	}
 
