@@ -2467,13 +2467,13 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 		gdouble pagesize;
 		gdouble value;
 		g_object_get(l_pOldAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
-		//get the size of the current viewport
-		gint l_iViewportX = -1;
-		gint l_iViewportY = -1;
-		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
+//		//get the size of the current viewport
+//		gint l_iViewportX = -1;
+//		gint l_iViewportY = -1;
+//		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
 
-		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
-		upper-=l_iViewportX;
+//		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
+//		upper-=l_iViewportX;
 
 		//crete a new adjustement with the correct value since we can not change the upper bound of the old adjustement
 		GtkAdjustment* l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
@@ -2513,11 +2513,11 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 		gdouble value;
 		g_object_get(l_pOldAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
 		//get the size of the current viewport
-		gint l_iViewportX = -1;
-		gint l_iViewportY = -1;
-		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
-		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
-		upper-=l_iViewportY;
+//		gint l_iViewportX = -1;
+//		gint l_iViewportY = -1;
+//		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
+//		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
+//		upper-=l_iViewportY;
 
 		//crete a new adjustement with the correct value since we can not change the upper bound of the old adjustement
 		GtkAdjustment* l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);

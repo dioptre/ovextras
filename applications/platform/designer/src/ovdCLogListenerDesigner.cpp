@@ -703,11 +703,11 @@ void CLogListenerDesigner::clearMessages()
 	m_ui32CountWarnings = 0;
 	m_ui32CountErrors = 0;
 
-	gtk_label_set_markup(m_pLabelCountMessages, "<b>0</b> Messages");
-	gtk_label_set_markup(m_pLabelCountWarnings, "<b>0</b> Warnings");
-	gtk_label_set_markup(m_pLabelCountErrors, "<b>0</b> Errors");
-	gtk_label_set_markup(m_pLabelDialogCountWarnings, "<b>0</b> Warnings");
-	gtk_label_set_markup(m_pLabelDialogCountErrors, "<b>0</b> Errors");
+	gtk_label_set_markup(m_pLabelCountMessages, "<b>0</b> Message");
+	gtk_label_set_markup(m_pLabelCountWarnings, "<b>0</b> Warning");
+	gtk_label_set_markup(m_pLabelCountErrors, "<b>0</b> Error");
+	gtk_label_set_markup(m_pLabelDialogCountWarnings, "<b>0</b> Warning");
+	gtk_label_set_markup(m_pLabelDialogCountErrors, "<b>0</b> Error");
 
 	gtk_widget_set_visible(m_pImageWarnings, false);
 	gtk_widget_set_visible(GTK_WIDGET(m_pLabelCountWarnings), false);
