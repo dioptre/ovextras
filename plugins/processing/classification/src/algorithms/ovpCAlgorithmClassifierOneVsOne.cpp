@@ -116,6 +116,12 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 		l_vClassLabels[rFeatureVectorSet[i].getLabel()]++;
 	}
 
+	if(l_vClassLabels.size() != l_ui32AmountClass)
+	{
+		this->getLogManager() << LogLevel_Error << "There is sample for " << (uint32)l_vClassLabels.size() << " classes but expected for " << l_ui32AmountClass << ".\n";
+		return false;
+	}
+
 	//Now we create the corresponding repartition set
 	TParameterHandler<IMatrix*> ip_pRepartitionSet = m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_SetRepartition);
 	ip_pRepartitionSet->setDimensionCount(1);

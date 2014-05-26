@@ -48,6 +48,23 @@ boolean CAlgorithmClassifierOneVsAll::uninitialize(void)
 
 boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
+	const uint32 l_ui32AmountClass = m_oSubClassifierList.size();
+	std::map < float64, size_t > l_vClassLabels;
+	for(uint32 i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
+	{
+		if(!l_vClassLabels.count(rFeatureVectorSet[i].getLabel()))
+		{
+			l_vClassLabels[rFeatureVectorSet[i].getLabel()] = 0;
+		}
+		l_vClassLabels[rFeatureVectorSet[i].getLabel()]++;
+	}
+
+	if(l_vClassLabels.size() != l_ui32AmountClass)
+	{
+		this->getLogManager() << LogLevel_Error << "There is sample for " << (uint32)l_vClassLabels.size() << " classes but expected for " << l_ui32AmountClass << ".\n";
+		return false;
+	}
+
 	//We send new set of data to each classifer. They will all use two different classes 1 and 2. 1 is for the class it should recognize, 2 for the others
 	for(uint32 l_iClassifierCounter = 1 ; l_iClassifierCounter <= m_oSubClassifierList.size() ; ++l_iClassifierCounter )
 	{
