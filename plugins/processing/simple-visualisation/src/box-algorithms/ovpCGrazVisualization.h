@@ -45,6 +45,7 @@ namespace OpenViBEPlugins
 			virtual public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>,
 			virtual public OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback::ICallback,
 			virtual public OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback::ICallback
+			// virtual public OpenViBEToolkit::IBoxAlgorithmSignalInputReaderCallback::ICallback
 		{
 		public:
 
@@ -73,8 +74,8 @@ namespace OpenViBEPlugins
 			virtual void drawClassImages();
 			virtual void drawArrow(EArrowDirection eDirection);
 			virtual void drawBar();
-			virtual void drawPositiveBar();
 			virtual void drawRectangle(EArrowDirection eDirection);
+			virtual void drawSpot();
 
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_GrazVisualization)
 
@@ -91,6 +92,10 @@ namespace OpenViBEPlugins
 			OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback* m_pStimulationReaderCallBack;
 			OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback* m_pClassReaderCallBack;
 			OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback* m_pStreamedMatrixReaderCallBack;
+//			OpenViBEToolkit::IBoxAlgorithmSignalInputReaderCallback* m_pSignalReaderCallBack;
+
+			OpenViBEToolkit::TSignalDecoder < CGrazVisualization > m_oSignalDecoder;
+
 
 			EGrazVisualizationState m_eCurrentState;
 			EArrowDirection m_eCurrentDirection;
@@ -127,6 +132,14 @@ namespace OpenViBEPlugins
 			GdkPixbuf * m_pImageLeft;
 			GdkPixbuf * m_pImageRight;
 
+			GdkPixbuf * m_pOriginalGreenSpot;
+			GdkPixbuf * m_pOriginalOrangeSpot;
+			GdkPixbuf * m_pOriginalRedSpot;
+
+			GdkPixbuf * m_pGreenSpot;
+			GdkPixbuf * m_pOrangeSpot;
+			GdkPixbuf * m_pRedSpot;
+
 			GdkColor m_oBackgroundColor;
 			GdkColor m_oForegroundColor;
 
@@ -139,12 +152,20 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bShowInstruction;
 			OpenViBE::boolean m_bShowFeedback;
 			OpenViBE::boolean m_bOnlyPositiveFeedback;
+			OpenViBE::boolean m_bShowRelaxationStateFeedback;
 
 			OpenViBE::uint64 m_ui64RecognizedClassLabel;
 			std::vector < OpenViBE::uint64 > m_vClassLabel;
 
 			OpenViBE::uint32 m_ui32FirstNb;
 			OpenViBE::uint32 m_ui32SecondNb;
+
+			OpenViBE::uint32 cpt1;
+			OpenViBE::uint32 cpt2;
+
+			OpenViBE::float64 m_f64Threshold1;
+			OpenViBE::float64 m_f64Threshold2;
+
 		};
 
 		/**
@@ -175,10 +196,14 @@ namespace OpenViBEPlugins
 				rPrototype.addInput("Stimulations", OV_TypeId_Stimulations);
 				rPrototype.addInput("Class label", OV_TypeId_Stimulations);
 				rPrototype.addInput("Amplitude", OV_TypeId_StreamedMatrix);
+				rPrototype.addInput("Muscle activity", OV_TypeId_Signal);
 
 				rPrototype.addSetting("Show instruction", OV_TypeId_Boolean, "true");
 				rPrototype.addSetting("Show feedback", OV_TypeId_Boolean, "false");
 				rPrototype.addSetting("Only positive feedback", OV_TypeId_Boolean, "false");
+				rPrototype.addSetting("Show relaxation state feedback", OV_TypeId_Boolean, "true");
+				rPrototype.addSetting("Threshold 1", OV_TypeId_Float, "0");
+				rPrototype.addSetting("Threshold 2", OV_TypeId_Float, "0");
 
 				rPrototype.addSetting("Label for Class 1", OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");
 				rPrototype.addSetting("Label for Class 2", OV_TypeId_Stimulation, "OVTK_StimulationId_Label_02");
