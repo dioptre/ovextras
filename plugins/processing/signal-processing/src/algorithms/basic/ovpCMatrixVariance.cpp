@@ -229,7 +229,7 @@ boolean CMatrixVariance::process(void)
 			}
 
 			//computing confidence bounds
-			float32 l_f32Quantile = quantile(complement(l_oStudentDistribution,ip_f64SignificanceLevel/2.0f));
+			float32 l_f32Quantile = (float32)quantile(complement(l_oStudentDistribution,ip_f64SignificanceLevel/2.0f));
 			getLogManager() << LogLevel_Debug << "Quantile at " <<  ip_f64SignificanceLevel << " is " << l_f32Quantile << "\n";
 			Vec<float64> l_f64Bound;
 			if(ip_ui64AveragingMethod==OVP_TypeId_EpochAverageMethod_CumulativeAverage.toUInteger())

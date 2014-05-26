@@ -18,7 +18,7 @@ GSymbol::GSymbol(const char * symbol, OpenViBE::CString fontPath, OpenViBE::floa
 
 	m_sFontFile = std::string(fontPath.toASCIIString());
 	desc = pango_font_description_from_string (m_sFontFile.c_str());
-	pango_font_description_set_size(desc, m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE);
+	pango_font_description_set_size(desc, gint(m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE));
 	pango_layout_set_font_description (m_olayout, desc);
 	pango_font_description_free (desc);
 	generateGLDisplayLists();
@@ -179,7 +179,7 @@ void GSymbol::render_text(const char *text, int *text_width, int *text_height, u
 			pango_layout_set_text(layout, text, -1);			// sets the text to be associated with the layout (final arg is length, -1
 																					// to calculate automatically when passing a nul-terminated string)
 			desc = pango_font_description_from_string(pango_font_description_to_string(pango_layout_get_font_description(m_olayout)));//("Sans Bold 100");		// specify the font that would be ideal for your particular use
-			float32 size =  float32(m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE)/1.387535079;
+			gint size =  gint(m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE);
 			pango_font_description_set_size(desc,size);//*10000);
 			pango_layout_set_font_description(layout, desc);			// assign the previous font description to the layout
 			pango_font_description_free(desc);					// free the description
@@ -341,7 +341,7 @@ void GSymbol::generateGLDisplayLists()
 {
 	unsigned int texture_id;
 	GLabel::generateGLDisplayLists();
-	float32 size =  float32(m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE)/1.387535079;//mysterious pango to ftgl font point ratio
+	gint size =  gint(m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE);
 	PangoFontDescription *desc;
 	desc = pango_font_description_from_string(m_sFontFile.c_str());//("Sans Bold 100");		// specify the font that would be ideal for your particular use
 	pango_font_description_set_size(desc, size);
@@ -349,10 +349,10 @@ void GSymbol::generateGLDisplayLists()
 	pango_font_description_free(desc);
 	computeLabelPosition();
 
-	int offx = m_pLabelPosition.first - getX();
-	int offy = m_pLabelPosition.second-getY();
-	int text_width = getWidth()-2*offx;
-	int text_height = getHeight()-2*offy;
+	int offx = (int)(m_pLabelPosition.first - getX());
+	int offy = (int)(m_pLabelPosition.second-getY());
+	int text_width = (int)(getWidth()-2*offx);
+	int text_height = (int)(getHeight()-2*offy);
 
 	glNewList(getGLResourceID(1),GL_COMPILE); 
 		glLoadIdentity();

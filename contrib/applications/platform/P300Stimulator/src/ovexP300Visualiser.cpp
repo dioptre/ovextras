@@ -225,7 +225,7 @@ void ExternalP300Visualiser::processWaitCallback(uint32 eventID)
 boolean ExternalP300Visualiser::areWeQuitting(void)
 {
 	GLFWwindow* window = externalVisualiser->getMainContainer()->getWindow();
-	return (boolean)glfwWindowShouldClose(window);
+	return ( glfwWindowShouldClose(window)!=0 );
 }
 
 void ExternalP300Visualiser::process(uint32 eventID)

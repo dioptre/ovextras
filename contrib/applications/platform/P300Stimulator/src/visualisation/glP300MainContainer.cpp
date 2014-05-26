@@ -17,7 +17,7 @@ using namespace std;
 GLFWwindow* P300MainContainer::m_oGLFWWindow;
 
 P300MainContainer::P300MainContainer(P300InterfacePropertyReader* propertyObject, P300ScreenLayoutReader* layoutPropObject, int width, int height) :
-GContainer(0.0f,0.0f,width,height), m_pInterfacePropertyObject(propertyObject),
+GContainer(0.0f,0.0f,(float32)width,(float32)height), m_pInterfacePropertyObject(propertyObject),
 m_pScreenLayoutObject(layoutPropObject)
 {
 	#ifdef OUTPUT_TIMING
@@ -163,8 +163,8 @@ void P300MainContainer::initializeGL(OpenViBE::boolean fullScreen, OpenViBE::flo
 		//*
 		const GLFWvidmode* mode = glfwGetVideoMode(primary);
 		//ignore whatever width and height were given and use the screen size
-		width = mode->width;
-		height = mode->height;
+		width = (float32)mode->width;
+		height = (float32)mode->height;
 		std::cout << "index " << index << " mode width " << width << " mode height " << height << "\n";
 		//*/
 

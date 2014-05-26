@@ -272,7 +272,7 @@ void P300ScreenLayoutReader::readPropertiesFromFile(CString propertyFile)
 		{
 			m_lSymbolList->push_back(m_lKeyList->at(i)->getLabel(NOFLASH));
 		}
-		catch (exception& e)
+		catch (exception& )
 		{
 			m_lSymbolList->push_back(std::string("DUMMY"));
 		}

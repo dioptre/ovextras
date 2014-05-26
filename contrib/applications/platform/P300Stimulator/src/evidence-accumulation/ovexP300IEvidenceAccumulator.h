@@ -164,7 +164,7 @@ namespace OpenViBEApplications
 					if(!(fproba->getBufferElementCount()==currentFlashGroup->size()))
 						return NULL;
 
-					for(int i=0; i<currentFlashGroup->size(); i++)
+					for(unsigned int i=0; i<currentFlashGroup->size(); i++)
 					{
 						(*(buffer+i))=proba*currentFlashGroup->at(i);
 					}

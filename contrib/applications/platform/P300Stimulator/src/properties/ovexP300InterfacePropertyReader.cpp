@@ -64,7 +64,7 @@ void P300InterfacePropertyReader::openChild(const char* sName, const char** sAtt
 				//m_ui32WindowHeight = strtoul(*(sAttributeValue+it),NULL,0);
 				m_f32WindowHeight = static_cast<float32>(m_pKernelContext->getConfigurationManager().expandAsUInteger(CString(*(sAttributeValue+it))));
 			else if(CString(*(sAttributeName+it))==CString("index"))
-				m_ui32MonitorIndex = static_cast<float32>(m_pKernelContext->getConfigurationManager().expandAsUInteger(CString(*(sAttributeValue+it))));
+				m_ui32MonitorIndex = static_cast<uint32>(m_pKernelContext->getConfigurationManager().expandAsUInteger(CString(*(sAttributeValue+it))));
 		}
 	}
 	if (CString(sName)==CString("FeedbackPresentation"))

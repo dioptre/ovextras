@@ -76,7 +76,7 @@ void GLabel::computeLabelPosition()
 
 void GLabel::computeMaximumLabelSize()
 {
-	m_f32MaxLabelSize = 0.9*std::min(getHeight(),getWidth());	
+	m_f32MaxLabelSize = float32(0.9*std::min(getHeight(),getWidth()));
 }
 
 void GLabel::generateGLDisplayLists()

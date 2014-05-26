@@ -586,7 +586,7 @@ boolean CBoxAlgorithmErpPlot::process(void)
                         if(m_vDecoders[inputi/2]->isHeaderReceived() && !m_bFirstHeaderReceived)
                         {
                                 uint32 l_ui32NrOfElectrodes = m_vDecoders[inputi/2]->getOutputMatrix()->getDimensionSize(0);
-                                uint32 l_ui32NrOfColumns = ceil(sqrt((double)l_ui32NrOfElectrodes));
+								uint32 l_ui32NrOfColumns = (uint32)ceil(sqrt((double)l_ui32NrOfElectrodes));
 
                                 //create list of graph subplots
                                 for (uint32 dimi=0; dimi<l_ui32NrOfElectrodes; dimi++)

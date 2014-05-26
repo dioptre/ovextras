@@ -17,7 +17,7 @@ void ExternalP300PropertyReader::readPropertiesFromFile(CString propertyFile)
 	{
 		int l_iFileLen;
 		l_oPropertiesStream.seekg(0, ios::end);
-		l_iFileLen=l_oPropertiesStream.tellg();
+		l_iFileLen=(int)l_oPropertiesStream.tellg();
 		l_oPropertiesStream.seekg(0, ios::beg);
 
 		l_PropertiesBuffer.setSize(l_iFileLen, true);//set size and discard true
