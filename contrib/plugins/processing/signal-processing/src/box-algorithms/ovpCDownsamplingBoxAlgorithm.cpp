@@ -20,11 +20,23 @@ boolean CDownsamplingBoxAlgorithm::initialize(void)
 	getStaticBoxContext().getInputType(0, l_oInputTypeIdentifier);
 	if(l_oInputTypeIdentifier==OV_TypeId_Signal)
 	{
-		m_pStreamDecoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoderDesc));
-		m_pStreamEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoderDesc));
+		CIdentifier l_oAlgorithmIdentifier = getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder);
+		if(l_oAlgorithmIdentifier == OV_UndefinedIdentifier) {
+			this->getLogManager() << LogLevel_Error << "Unable to find algorithm " << OVP_GD_ClassId_Algorithm_SignalStreamDecoder << "\n";
+			return false;
+		}
+		m_pStreamDecoder=&getAlgorithmManager().getAlgorithm(l_oAlgorithmIdentifier);
+
+		l_oAlgorithmIdentifier = getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoder);
+		if(l_oAlgorithmIdentifier == OV_UndefinedIdentifier) {
+			this->getLogManager() << LogLevel_Error << "Unable to find algorithm " << OVP_GD_ClassId_Algorithm_SignalStreamEncoder << "\n";
+			return false;
+		}
+		m_pStreamEncoder=&getAlgorithmManager().getAlgorithm(l_oAlgorithmIdentifier);
 	}
 	else
 	{
+		this->getLogManager() << LogLevel_Error << "Only 'signal' input type is supported\n";
 		return false;
 	}
 	m_pStreamDecoder->initialize();
@@ -110,6 +122,7 @@ boolean CDownsamplingBoxAlgorithm::initialize(void)
 
 	m_ui64LastEndTime = (uint64)-1;
 	m_bFlagFirstTime = true;
+	m_bWarned = false;
 	m_ui64LastBufferSize = 0;
 	m_ui64CurrentBufferSize = 0;
 
@@ -163,15 +176,22 @@ boolean CDownsamplingBoxAlgorithm::process(void)
 		}
 		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
 		{
+			bool l_bSuccess = true;
 			if (m_ui64LastEndTime==l_ui64StartTime)
 			{
-				m_pApplyTemporalFilter->process(OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_ApplyFilterWithHistoric);
-				m_pDownsampling->process(OVP_Algorithm_Downsampling_InputTriggerId_ResampleWithHistoric);
+				l_bSuccess &= m_pApplyTemporalFilter->process(OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_ApplyFilterWithHistoric);
+				l_bSuccess &= m_pDownsampling->process(OVP_Algorithm_Downsampling_InputTriggerId_ResampleWithHistoric);
 			}
 			else
 			{
-				m_pApplyTemporalFilter->process(OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_ApplyFilter);
-				m_pDownsampling->process(OVP_Algorithm_Downsampling_InputTriggerId_Resample);
+				l_bSuccess &= m_pApplyTemporalFilter->process(OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_ApplyFilter);
+				l_bSuccess &= m_pDownsampling->process(OVP_Algorithm_Downsampling_InputTriggerId_Resample);
+			}
+
+			if(!l_bSuccess) 
+			{
+				this->getLogManager() << LogLevel_Error << "Subalgorithm failed, returning\n";
+				return false;
 			}
 
 			TParameterHandler < IMatrix* > l_pTempOutputSignal(m_pDownsampling->getOutputParameter(OVP_Algorithm_Downsampling_OutputParameterId_SignalMatrix));
@@ -179,11 +199,12 @@ boolean CDownsamplingBoxAlgorithm::process(void)
 
 			if ((m_bFlagFirstTime) || (m_ui64CurrentBufferSize != m_ui64LastBufferSize))
 			{
-				if (!m_bFlagFirstTime)
+				if(!m_bFlagFirstTime && !m_bWarned)
 				{
-					this->getLogManager() << LogLevel_Warning << "This box is flagged as unstable !\n";
-					this->getLogManager() << LogLevel_ImportantWarning << "The original sampling frenquency is not an exact multiple of the new sampling frequency resulting in creation of size varying output chunks. This may cause crash for next boxes.\n";
-					this->getLogManager() << LogLevel_Trace << "(current block size is " << m_ui64CurrentBufferSize << ", new block size is " << m_ui64LastBufferSize << ")\n";
+					// this->getLogManager() << LogLevel_Warning << "This box is flagged as unstable !\n";
+					this->getLogManager() << LogLevel_Warning << "The input sampling frequency is not an integer multiple of the output sampling frequency, or the input epoch size is unsuitable. This results in creation of size varying output chunks. This may cause crash in downstream boxes.\n";
+					this->getLogManager() << LogLevel_Debug << "(current block size is " << m_ui64CurrentBufferSize << ", new block size is " << m_ui64LastBufferSize << ")\n";
+					m_bWarned = true;
 				}
 
 				m_pOutputSignalDescription->setDimensionCount(2);

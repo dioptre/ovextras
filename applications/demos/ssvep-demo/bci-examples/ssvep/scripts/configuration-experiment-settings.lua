@@ -68,7 +68,7 @@ function process(box)
 	
 	-- create configuration files for temporal filters
 
-	scenario_path = box:get_config("${__volatile_ScenarioDir}")
+	scenario_path = box:get_config("${Player_ScenarioDirectory}")
 		
 	for i=1,frequency_count do
 		cfg_file_name = scenario_path .. string.format("/configuration/temporal-filter-freq-%d.cfg", i)

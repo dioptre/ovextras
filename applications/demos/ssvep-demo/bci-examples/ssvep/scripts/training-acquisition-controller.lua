@@ -101,7 +101,7 @@ function initialize(box)
 
 	-- create the configuration file for the stimulation-based-epoching
 	-- this file is used during classifier training only
-	cfg_file_name = box:get_config("${__volatile_ScenarioDir}/configuration/stimulation-based-epoching.cfg")
+	cfg_file_name = box:get_config("${Player_ScenarioDirectory}/configuration/stimulation-based-epoching.cfg")
 	cfg_file = io.open(cfg_file_name, "w")
 	if cfg_file == nil then
 		box:log("Error", "Cannot write to [" .. cfg_file_name .. "]")
