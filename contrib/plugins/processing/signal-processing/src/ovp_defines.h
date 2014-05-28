@@ -109,6 +109,11 @@
 #define OVP_ClassId_Box_TemporalFilterBoxAlgorithm                                      OpenViBE::CIdentifier(0xB4F9D042, 0x9D79F2E5)
 #define OVP_ClassId_Box_TemporalFilterBoxAlgorithmDesc                                  OpenViBE::CIdentifier(0x7BF6BA62, 0xAF829A37)
 
+#define OVP_ClassId_Box_ModTemporalFilterBoxAlgorithm                                      OpenViBE::CIdentifier(0xBF49D042, 0x9D79FE52)
+#define OVP_ClassId_Box_ModTemporalFilterBoxAlgorithmDesc                                  OpenViBE::CIdentifier(0x7BF4BA62, 0xAF829A73)
+
+
+
 #define OVP_ClassId_Algorithm_FeatureExtractionLda                                      OpenViBE::CIdentifier(0xD1AA6C72, 0x0432E1C5)
 #define OVP_ClassId_Algorithm_FeatureExtractionLdaDesc                                  OpenViBE::CIdentifier(0x2109D46A, 0x9A45E1DC)
 #define OVP_Algorithm_FeatureExtractionLda_InputParameterId_EpochTable                  OpenViBE::CIdentifier(0xA7BE9AE6, 0xD09FAD58)
