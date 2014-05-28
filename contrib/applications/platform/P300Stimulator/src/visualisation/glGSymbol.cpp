@@ -179,7 +179,7 @@ void GSymbol::render_text(const char *text, int *text_width, int *text_height, u
 			pango_layout_set_text(layout, text, -1);			// sets the text to be associated with the layout (final arg is length, -1
 																					// to calculate automatically when passing a nul-terminated string)
 			desc = pango_font_description_from_string(pango_font_description_to_string(pango_layout_get_font_description(m_olayout)));//("Sans Bold 100");		// specify the font that would be ideal for your particular use
-			gint size =  gint(m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE);
+			gint size =  gint( (m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE)/1.387535079);
 			pango_font_description_set_size(desc,size);//*10000);
 			pango_layout_set_font_description(layout, desc);			// assign the previous font description to the layout
 			pango_font_description_free(desc);					// free the description
@@ -255,18 +255,8 @@ void GSymbol::computeMaximumLabelSize()
 	for (uint32 i=0; i<m_sTextLabel.length(); i++)
 		l_sRefString += "X";
 	
-	/*
-	m_ftglFont->FaceSize(REFFONTSIZE);
-	FTBBox l_oBoundingBox = m_ftglFont->BBox(l_sRefString.c_str());
-	float32 l_fBoundingWidth = l_oBoundingBox.Upper().Xf()-l_oBoundingBox.Lower().Xf();
-	float32 l_fWidthRatio = getWidth()/l_fBoundingWidth;
-	m_f32MaxLabelSize = 0.9f*REFFONTSIZE*l_fWidthRatio;
-
-	//*/
-
-	//*/
 	PangoFontDescription *desc;
-	desc = pango_font_description_from_string(m_sFontFile.c_str());//pango_font_description_to_string(pango_layout_get_font_description(m_olayout)));//("Sans Bold 100");		// specify the font that would be ideal for your particular use
+	desc = pango_font_description_from_string(m_sFontFile.c_str());
 	pango_font_description_set_size(desc, REFFONTSIZE*PANGO_SCALE);
 	pango_layout_set_font_description(m_olayout, desc);			// assign the previous font description to the layout
 	//pango_font_description_free(desc);
@@ -281,20 +271,6 @@ void GSymbol::computeMaximumLabelSize()
 	//my best explanation is taht 1.387535079 is the pango/ftgl ratio since their respective point for font size do not match
 	m_f32MaxLabelSize = 0.9f*REFFONTSIZE*ratio;
 
-	//*/
-	
-	/*/for texture and vector fonts one opengl unit should be one point (1 pixel - 1 point, point is unit for font size)
-	//see FAQ FTGL, notice "should", it seems it is only approximate
-	m_ftglFont->FaceSize(static_cast<uint32>(m_f32MaxLabelSize));
-	l_oBoundingBox = m_ftglFont->BBox(l_sRefString.c_str());
-	float32 l_fBoundingHeight = l_oBoundingBox.Upper().Yf()-l_oBoundingBox.Lower().Yf();
-	float32 l_fHeightRatio = getHeight()/l_fBoundingHeight;
-	if (l_fHeightRatio<1)
-	{
-		m_f32MaxLabelSize = 0.9f*m_f32MaxLabelSize*l_fHeightRatio;
-		//std::cout << "height"  << m_f32MaxLabelSize << std::endl;
-	}
-
 	pango_font_description_set_size(desc, m_f32MaxLabelSize*PANGO_SCALE);
 	pango_layout_set_font_description(m_olayout, desc);
 	get_text_size (m_olayout, &text_width, &text_height, &ink, &logical);
@@ -302,16 +278,11 @@ void GSymbol::computeMaximumLabelSize()
 	if(heightratio<1)
 	{
 		m_f32MaxLabelSize = 0.9f*m_f32MaxLabelSize*heightratio;
-		std::cout << "height (pango)"  << m_f32MaxLabelSize << std::endl;
 	}
-	//*/
-	//std::cout <<  "\n" << m_f32MaxLabelSize << " m_f32MaxLabelSize (ftgl) "  << std::endl;
-	//std::cout << m_f32MaxLabelSize << " m_f32MaxLabelSize (pango)" << std::endl;
 }
 
 void GSymbol::computeLabelPosition()
 {
-	//FTBBox l_oBoundingBox = m_ftglFont->BBox(m_sTextLabel.c_str());
 	int text_width;
 	int text_height;
 	PangoRectangle ink, logical;
@@ -341,7 +312,7 @@ void GSymbol::generateGLDisplayLists()
 {
 	unsigned int texture_id;
 	GLabel::generateGLDisplayLists();
-	gint size =  gint(m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE);
+	gint size =  gint( (m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE)/1.387535079);
 	PangoFontDescription *desc;
 	desc = pango_font_description_from_string(m_sFontFile.c_str());//("Sans Bold 100");		// specify the font that would be ideal for your particular use
 	pango_font_description_set_size(desc, size);
