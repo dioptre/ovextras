@@ -911,21 +911,21 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		while(l_oTokenIdentifier!=OV_UndefinedIdentifier);
 	}
 	refresh_search_no_data_cb(NULL, this);
-	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"), LogLevel_Debug, "${Designer_DebugCanal}");
-	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench"), LogLevel_Benchmark, "${Designer_BenchCanal}");
-	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace"), LogLevel_Trace, "${Designer_TraceCanal}");
-	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info"), LogLevel_Info, "${Designer_InfoCanal}");
-	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_warning"), LogLevel_Warning, "${Designer_WarningCanal}");
-	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning"), LogLevel_ImportantWarning, "${Designer_ImportantWarningCanal}");
-	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"), LogLevel_Error, "${Designer_ErrorCanal}");
-	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"), LogLevel_Fatal, "${Designer_FatalCanal}");
-
-
 
 	if(!(m_eCommandLineFlags&CommandLineFlag_NoGui))
 	{
 		m_pLogListenerDesigner = new CLogListenerDesigner(m_rKernelContext, m_pBuilderInterface);
 		m_rKernelContext.getLogManager().addListener(m_pLogListenerDesigner);
+
+		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"), LogLevel_Debug, "${Designer_DebugCanal}");
+		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench"), LogLevel_Benchmark, "${Designer_BenchCanal}");
+		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace"), LogLevel_Trace, "${Designer_TraceCanal}");
+		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info"), LogLevel_Info, "${Designer_InfoCanal}");
+		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_warning"), LogLevel_Warning, "${Designer_WarningCanal}");
+		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning"), LogLevel_ImportantWarning, "${Designer_ImportantWarningCanal}");
+		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"), LogLevel_Error, "${Designer_ErrorCanal}");
+		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"), LogLevel_Fatal, "${Designer_FatalCanal}");
+
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_clear")),       "clicked",  G_CALLBACK(clear_messages_cb), m_pLogListenerDesigner);
 
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_search")),       "clicked",  G_CALLBACK(search_messages_cb), this);
@@ -2233,14 +2233,14 @@ boolean CApplication::quitApplicationCB(void)
 			}
 			::fprintf(l_pFile, "Designer_CurrentScenarioPage = %d\n", m_i32CurrentScenarioPage);
 
-			::fprintf(l_pFile, "Designer_DebugCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"))));
-			::fprintf(l_pFile, "Designer_BenchCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench"))));
-			::fprintf(l_pFile, "Designer_TraceCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace"))));
-			::fprintf(l_pFile, "Designer_InfoCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info"))));
-			::fprintf(l_pFile, "Designer_WarningCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_warning"))));
-			::fprintf(l_pFile, "Designer_ImportantWarningCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning"))));
-			::fprintf(l_pFile, "Designer_ErrorCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"))));
-			::fprintf(l_pFile, "Designer_FatalCanal = %d\n",gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"))));
+			::fprintf(l_pFile, "Designer_DebugCanal = %d\n",getLogState("openvibe-messages_tb_debug"));
+			::fprintf(l_pFile, "Designer_BenchCanal = %d\n",getLogState("openvibe-messages_tb_bench"));
+			::fprintf(l_pFile, "Designer_TraceCanal = %d\n",getLogState("openvibe-messages_tb_trace"));
+			::fprintf(l_pFile, "Designer_InfoCanal = %d\n",getLogState("openvibe-messages_tb_info"));
+			::fprintf(l_pFile, "Designer_WarningCanal = %d\n",getLogState("openvibe-messages_tb_warning"));
+			::fprintf(l_pFile, "Designer_ImportantWarningCanal = %d\n",getLogState("openvibe-messages_tb_impwarning"));
+			::fprintf(l_pFile, "Designer_ErrorCanal = %d\n",getLogState("openvibe-messages_tb_error"));
+			::fprintf(l_pFile, "Designer_FatalCanal = %d\n",getLogState("openvibe-messages_tb_fatal"));
 
 			::fprintf(l_pFile, "Designer_HorizontalContainerPosition = %d\n",gtk_paned_get_position(GTK_PANED(gtk_builder_get_object(m_pBuilderInterface, "openvibe-horizontal_container"))));
 			gint width=0, height = 0;
@@ -2282,6 +2282,19 @@ boolean CApplication::quitApplicationCB(void)
 
 	// OK to kill app
 	return true;
+}
+
+uint32 CApplication::getLogState(const char* sButtonName)
+{
+	if(!gtk_widget_get_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, sButtonName))))
+	{
+		return Log_NotAvailabe;
+	}
+	else if(!gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, sButtonName))))
+	{
+		return Log_AvailableNotActivate;
+	}
+	return Log_AvailableActivate;
 }
 
 void CApplication::logLevelCB(void)
@@ -2447,14 +2460,31 @@ void CApplication::reorderCurrentScenario(OpenViBE::uint32 i32NewPageIndex)
 
 void CApplication::logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLevel level, const char* configName)
 {
-	boolean isActive;
-	isActive = m_rKernelContext.getConfigurationManager().expandAsBoolean(configName, m_rKernelContext.getLogManager().isActive(level));
-	//If the level is inactive, we don't active the button because it may crash
-	if(m_rKernelContext.getLogManager().isActive(level))
+	uint32 l_ui32Active;
+	l_ui32Active = m_rKernelContext.getConfigurationManager().expandAsUInteger(configName, m_rKernelContext.getLogManager().isActive(level)?Log_AvailableActivate:Log_NotAvailabe);
+	//At the beginning all buttons are sensitive and not active
+	switch(l_ui32Active)
 	{
-		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(ToolButton), isActive);
+	case Log_NotAvailabe:
+		gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), false);
+		m_rKernelContext.getLogManager().activate(level, false);
+		break;
+
+	case Log_AvailableActivate:
+		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(ToolButton), true);
+		m_rKernelContext.getLogManager().activate(level, true);
+		break;
+
+	case Log_AvailableNotActivate:
+		m_rKernelContext.getLogManager().activate(level, true);
+		break;
+
+	default:
+		m_rKernelContext.getLogManager() << LogLevel_Warning << "Unknown log state " << l_ui32Active << "\n";
+		m_rKernelContext.getLogManager().activate(level, false);
+		gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), false);
+		break;
 	}
-	gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), m_rKernelContext.getLogManager().isActive(level));
 }
 
 boolean CApplication::isLogAreaClicked()

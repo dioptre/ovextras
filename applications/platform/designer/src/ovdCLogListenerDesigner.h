@@ -135,6 +135,8 @@ namespace OpenViBEDesigner
 			void displayLog(CLogObject* oLog);
 			void appendLog(CLogObject* oLog);
 
+			void scrollToBottom(void);
+
 			_IsDerivedFromClass_Final_(OpenViBE::Kernel::ILogListener, OV_UndefinedIdentifier);
 
 		protected:
@@ -174,6 +176,8 @@ namespace OpenViBEDesigner
 			::GtkWidget* m_pImageErrors;
 
 			::GtkWindow* m_pAlertWindow;
+
+			::GtkExpander* m_pExpander;
 
 			OpenViBE::boolean m_bIngnoreMessages;
 

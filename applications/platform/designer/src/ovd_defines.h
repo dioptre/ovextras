@@ -128,6 +128,13 @@ namespace OpenViBEDesigner
 		Mode_Connect,
 		Mode_EditSettings,
 	};
+
+	enum
+	{
+		Log_NotAvailabe = 0,
+		Log_AvailableNotActivate = 1,
+		Log_AvailableActivate = 2
+	};
 };
 
 //___________________________________________________________________//

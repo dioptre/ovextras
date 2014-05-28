@@ -24,6 +24,13 @@ namespace
 		static_cast<CLogListenerDesigner*>(pUserData)->focusMessageWindow();
 	}
 
+	void expander_expand_cb(::GtkExpander* pExpander, GParamSpec *param_spec, gpointer pUserData)
+	{
+		if(gtk_expander_get_expanded(pExpander))
+		{
+			static_cast<CLogListenerDesigner*>(pUserData)->scrollToBottom();
+		}
+	}
 
 }
 
@@ -58,6 +65,9 @@ CLogListenerDesigner::CLogListenerDesigner(const IKernelContext& rKernelContext,
 	m_pToggleButtonActive_ImportantWarning = GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning"));
 	m_pToggleButtonActive_Error = GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"));
 	m_pToggleButtonActive_Fatal = GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"));
+
+	m_pExpander = GTK_EXPANDER(gtk_builder_get_object(m_pBuilderInterface, "openvibe-expander_messages"));
+	g_signal_connect(G_OBJECT(m_pExpander), "notify::expanded", G_CALLBACK(::expander_expand_cb), this);
 
 	// set the popup-on-error checkbox according to the configuration token
 	gtk_toggle_button_set_active(m_pToggleButtonPopup, (OpenViBE::boolean)(rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_PopUpOnError}")));
@@ -641,9 +651,10 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 
 	this->updateMessageCounts();
 
-	::GtkTextMark l_oMark;
-	l_oMark = *(gtk_text_buffer_get_mark (gtk_text_view_get_buffer( m_pTextView ), "insert"));
-	gtk_text_view_scroll_to_mark (GTK_TEXT_VIEW (m_pTextView), &l_oMark, 0.0, FALSE, 0.0, 0.0);
+	if(gtk_expander_get_expanded(m_pExpander))
+	{
+		scrollToBottom();
+	}
 }
 
 void CLogListenerDesigner::log(const ELogColor eLogColor)
@@ -785,4 +796,10 @@ void CLogListenerDesigner::focusMessageWindow()
 	cout << "focus in message window " << endl;
 	gtk_widget_hide(GTK_WIDGET(m_pAlertWindow));
 	gtk_expander_set_expanded(GTK_EXPANDER(gtk_builder_get_object(m_pBuilderInterface, "openvibe-expander_messages")), true);
+}
+
+void CLogListenerDesigner::scrollToBottom(void){
+	::GtkTextMark l_oMark;
+	l_oMark = *(gtk_text_buffer_get_mark (gtk_text_view_get_buffer( m_pTextView ), "insert"));
+	gtk_text_view_scroll_to_mark (GTK_TEXT_VIEW (m_pTextView), &l_oMark, 0.0, FALSE, 0.0, 0.0);
 }

@@ -145,6 +145,8 @@ namespace OpenViBEDesigner
 		void logLevelCB(void);
 		void logLevelMessagesCB(void);
 		void logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLevel level, const char* configName);
+		OpenViBE::uint32 getLogState(const char* sButtonName);
+
 
 		//@}
 

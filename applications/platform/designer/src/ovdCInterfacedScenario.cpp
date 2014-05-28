@@ -1309,9 +1309,11 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 	this->redraw();
 }
 
+// @Important No log should be displayed in this method because it could lead to a crash of gtk
 void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 {
-	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaExposeCB\n";
+	// @fixme uncomment this log will create a crash of gtk
+	//m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaExposeCB\n";
 	gint x = -1;
 	gint y = -1;
 	::GdkGC* l_pDrawGC= gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
