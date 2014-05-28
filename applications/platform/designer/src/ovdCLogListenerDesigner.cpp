@@ -521,7 +521,6 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 {
 	//new log
 	m_oCurrentLog = new CLogObject(m_pBuffer);//m_pNonFilteredBuffer);
-	m_vStoredLog.push_back(m_oCurrentLog);
 
 	//copy this newly added content in the current log
 	GtkTextIter l_oEndLogIter;
@@ -627,6 +626,9 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 			gtk_text_buffer_insert_with_tags_by_name(m_oCurrentLog->getTextBuffer(), &l_oEndLogIter, "] ", -1, "w_bold", "f_mono", NULL);
 			break;
 	}
+	if(m_bIngnoreMessages) return;
+
+	m_vStoredLog.push_back(m_oCurrentLog);
 
 	//see if the log passes the filter
 	m_oCurrentLog->Filter(m_sSearchTerm);

@@ -1309,7 +1309,7 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 	this->redraw();
 }
 
-// @Important No log should be displayed in this method because it could lead to a crash of gtk
+// @Important No log should be displayed in this method because it could lead to a crash of gtk during the expand of the log section
 void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 {
 	// @fixme uncomment this log will create a crash of gtk
