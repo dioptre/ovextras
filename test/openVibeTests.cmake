@@ -180,6 +180,13 @@ IF(${MODEL} MATCHES Continuous)
 	ENDIF(NOT EXISTS "lock")
 ENDIF(${MODEL} MATCHES Continuous)
 
+## -- 'CLEAN UP' leftover processes, a hack
+IF(UNIX)
+    message(" -- Terminating any leftover designers ${MODEL} - ${CTEST_BUILD_NAME} --")
+	find_program(KILLALL NAMES killall)
+	exec_program("${KILLALL}" ARGS "-KILL openvibe-designer.sh" OUTPUT_VARIABLE "KILLALL_RESULT")
+ENDIF(UNIX)
+
 set(ALL_OK TRUE)
 ## -- Update
 IF(ALL_OK)
