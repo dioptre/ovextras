@@ -158,7 +158,16 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Stimulation",OV_TypeId_Stimulations,"OVTK_GDF_Incorrect");
 
 				//add true at the end to mark a setting as modifiable
+				//we have every kind of settings to test visual diaplay but only the Int is actually used (for now)
 				rBoxAlgorithmPrototype.addSetting("Int",OV_TypeId_Integer,"1", true);
+				rBoxAlgorithmPrototype.addSetting("Float",OV_TypeId_Float,"1", true);
+				rBoxAlgorithmPrototype.addSetting("Bool",OV_TypeId_Boolean,"false", true);
+				rBoxAlgorithmPrototype.addSetting("String",OV_TypeId_String,"string", true);
+				rBoxAlgorithmPrototype.addSetting("filename",OV_TypeId_Filename, "", true);
+				rBoxAlgorithmPrototype.addSetting("script",OV_TypeId_Script, "", true);
+				rBoxAlgorithmPrototype.addSetting("color",OV_TypeId_Color, "", true);
+				rBoxAlgorithmPrototype.addSetting("colorgradient",OV_TypeId_ColorGradient, "", true);
+
 
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);

@@ -375,18 +375,70 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 					gtk_table_attach(l_pSettingTable, l_pSettingRevert,  3, 4, j, j+1, ::GtkAttachOptions(GTK_SHRINK),          ::GtkAttachOptions(GTK_SHRINK),          0, 0);
 					gtk_table_attach(l_pSettingTable, l_pSettingDefault, 2, 3, j, j+1, ::GtkAttachOptions(GTK_SHRINK),          ::GtkAttachOptions(GTK_SHRINK),          0, 0);
 				}
-				else
+				else//we retrieve the GtkEntry (it take most of the place in the widget) and squeeze it
 				{
-					//the GtkEntry takes too much place so this will shrink its size
-					//first get the entry
-					//get the widget name, abnd modify it to get the entry name
-					std::string l_sEntryWidgetName = std::string(l_sWidgetName.c_str());
-					l_sEntryWidgetName.append("_string");
-					l_sEntryWidgetName.replace(l_sEntryWidgetName.find("hbox"),4, "entry");
-					::GtkWidget* l_pWEntry=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceSettingCollection, l_sEntryWidgetName.c_str()));
-					::GtkEntry* l_pEntry = (GtkEntry*)l_pWEntry;
-					//if a scenario is rumming, we do not expand the widget
-					gtk_entry_set_width_chars(l_pEntry, 5);
+					bool l_bSqueezEntry = false;
+					std::string l_sEntryWidgetName;//name of the gtk entry depends of the setting type
+
+					if((l_oSettingType==OV_TypeId_Integer)||(l_oSettingType==OV_TypeId_Float))
+					{
+						//the GtkEntry takes too much place so this will shrink its size
+						//get the widget name, and modify it to get the entry name
+						l_sEntryWidgetName = std::string(l_sWidgetName.c_str());
+						l_sEntryWidgetName.append("_string");
+						l_sEntryWidgetName.replace(l_sEntryWidgetName.find("hbox"),4, "entry");
+						l_bSqueezEntry=true;
+					}
+					else if(l_oSettingType==OV_TypeId_String)
+					{
+						l_sEntryWidgetName = std::string("settings_collection-entry_setting_string");
+						l_bSqueezEntry=true;
+					}
+					else if(l_oSettingType==OV_TypeId_Filename)
+					{
+						l_sEntryWidgetName = std::string("settings_collection-entry_setting_filename_string");
+						l_bSqueezEntry=true;
+					}
+					else if(l_oSettingType==OV_TypeId_Boolean)
+					{
+						l_sEntryWidgetName = std::string("settings_collection-entry_setting_boolean");
+						l_bSqueezEntry=true;
+					}
+					else if(l_oSettingType==OV_TypeId_Color)
+					{
+						l_sEntryWidgetName = std::string("settings_collection-hbox_setting_color_string");
+						l_bSqueezEntry=true;
+					}
+					else if(l_oSettingType==OV_TypeId_ColorGradient)
+					{
+						l_sEntryWidgetName = std::string("settings_collection-hbox_setting_color_gradient_string");
+						l_bSqueezEntry=true;
+					}
+					else if(l_oSettingType==OV_TypeId_Script)
+					{
+						l_sEntryWidgetName = std::string("settings_collection-entry_setting_script_string");
+						l_bSqueezEntry=true;
+					}
+
+					//enumeration are to be treated separately
+					if(std::string("settings_collection-comboboxentry_setting_enumeration").compare(l_sWidgetName)==0)
+					{
+						//enumeration settings comes in a GtkComboBoxEntry, the entry is not directly accessible
+						//we have to retrieve ot from the GtkComboBoxEntry
+						::GtkWidget* l_pWEntry=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceSettingCollection, l_sWidgetName.c_str()));
+						gtk_entry_set_width_chars((GtkEntry*)gtk_bin_get_child((GtkBin*)l_pWEntry), 7);
+					}
+
+
+					if(l_bSqueezEntry)
+					{
+						// get the entry
+						::GtkWidget* l_pWEntry=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceSettingCollection, l_sEntryWidgetName.c_str()));
+						::GtkEntry* l_pEntry = (GtkEntry*)l_pWEntry;
+						//squeeze
+						gtk_entry_set_width_chars(l_pEntry, 7);
+					}
+
 					gtk_table_attach(l_pSettingTable, l_pSettingValue,   1, 2, j, j+1, ::GtkAttachOptions(GTK_SHRINK), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
 
 				}
