@@ -367,11 +367,28 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 				}
 
 				gtk_table_attach(l_pSettingTable, l_pSettingName,    0, 1, j, j+1, ::GtkAttachOptions(GTK_FILL),            ::GtkAttachOptions(GTK_FILL),            0, 0);
-				gtk_table_attach(l_pSettingTable, l_pSettingValue,   1, 2, j, j+1, ::GtkAttachOptions(GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_FILL|GTK_EXPAND), 0, 0);
+				//
+
 				if (!l_bIsScenarioRunning)
 				{
+					gtk_table_attach(l_pSettingTable, l_pSettingValue,   1, 2, j, j+1, ::GtkAttachOptions(GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_FILL|GTK_EXPAND), 0, 0);
 					gtk_table_attach(l_pSettingTable, l_pSettingRevert,  3, 4, j, j+1, ::GtkAttachOptions(GTK_SHRINK),          ::GtkAttachOptions(GTK_SHRINK),          0, 0);
 					gtk_table_attach(l_pSettingTable, l_pSettingDefault, 2, 3, j, j+1, ::GtkAttachOptions(GTK_SHRINK),          ::GtkAttachOptions(GTK_SHRINK),          0, 0);
+				}
+				else
+				{
+					//the GtkEntry takes too much place so this will shrink its size
+					//first get the entry
+					//get the widget name, abnd modify it to get the entry name
+					std::string l_sEntryWidgetName = std::string(l_sWidgetName.c_str());
+					l_sEntryWidgetName.append("_string");
+					l_sEntryWidgetName.replace(l_sEntryWidgetName.find("hbox"),4, "entry");
+					::GtkWidget* l_pWEntry=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceSettingCollection, l_sEntryWidgetName.c_str()));
+					::GtkEntry* l_pEntry = (GtkEntry*)l_pWEntry;
+					//if a scenario is rumming, we do not expand the widget
+					gtk_entry_set_width_chars(l_pEntry, 5);
+					gtk_table_attach(l_pSettingTable, l_pSettingValue,   1, 2, j, j+1, ::GtkAttachOptions(GTK_SHRINK), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
+
 				}
 				g_object_unref(l_pBuilderInterfaceDummy);
 				g_object_unref(l_pBuilderInterfaceSettingCollection);
