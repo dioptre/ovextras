@@ -54,7 +54,7 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 	,m_eCurrentSignalMode(DisplayMode_GlobalBestFit)
 	,m_ui64LatestDisplayedTime(0)
 	,m_bRedrawAll(false)
-    ,m_bUseOffset(true)
+	,m_bUseOffset(true)
 	,m_bMultiView(false)
 {
 	//creates the drawing area
@@ -526,7 +526,7 @@ void CSignalChannelDisplay::checkTranslation(std::vector<float64> & rDisplayedVa
 	        gint l_iMaxY = (gint)getSampleYCoordinate(m_oLocalMaximum[k], k);
 	        gint l_iMinY = (gint)getSampleYCoordinate(m_oLocalMinimum[k], k);
 
-			//translate signal if some data is plotted out of the window
+	      //translate signal if some data is plotted out of the window
 	        // translate signal to center it in his spot
 //			if(l_iMaxY < 0 || l_iMinY > (int32)(m_ui32Height/m_oChannelList.size())-1)
 	        if(l_iMaxY > (int32)(m_ui32Height/m_oChannelList.size())-1 || l_iMinY< 0)
