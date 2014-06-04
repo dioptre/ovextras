@@ -1,7 +1,5 @@
 #include "ovdCBoxConfigurationDialog.h"
 
-
-
 #include <string>
 #include <fstream>
 
@@ -13,20 +11,8 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBEDesigner;
 using namespace std;
 
-#include <iostream>
 namespace
 {
-	/*// moved to header
-	typedef struct
-	{
-		const IKernelContext& m_rKernelContext;
-		vector< ::GtkWidget* >& m_vSettingValue;
-		CSettingCollectionHelper& m_rHelper;
-		::GtkWidget* m_pSettingOverrideValue;
-		IBox& m_rBox;
-	} SButtonCB;
-	//*/
-
 	class CXMLWriterCallback : public XML::IWriterCallback
 	{
 	public:
@@ -255,7 +241,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 	,m_rBox(rBox)
 	,m_sGUIFilename(sGUIFilename)
 	,m_sGUISettingsFilename(sGUISettingsFilename),
-	  m_Mode(bMode),
+	  m_bMode(bMode),
 	  m_oWidget(NULL)
 {
 	m_vSettingValue.clear();
@@ -265,7 +251,6 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 	m_oHelper = new CSettingCollectionHelper(m_rKernelContext, m_sGUISettingsFilename.toASCIIString());
 	if(m_rBox.getSettingCount())
 	{
-		uint32 i;
 		CString l_oSettingName;
 		CString l_oSettingValue;
 		CIdentifier l_oSettingType;
@@ -309,7 +294,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 
 		//modUI
 		uint32 l_ui32TableSize = 0;
-		for(i=0; i<m_rBox.getSettingCount(); i++)
+		for(uint32 i=0; i<m_rBox.getSettingCount(); i++)
 		{
 			if (l_bIsScenarioRunning)
 			{
@@ -322,11 +307,10 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 				l_ui32TableSize++;
 		}
 		gtk_table_resize(l_pSettingTable, l_ui32TableSize, 4);
-		//gtk_table_resize(l_pSettingTable, m_rBox.getSettingCount(), 4);
 
 		uint32 j=0;
 		//vector< ::GtkWidget* > l_vSettingValue;
-		for(i=0; i<m_rBox.getSettingCount(); i++)
+		for(uint32 i=0; i<m_rBox.getSettingCount(); i++)
 		{
 			m_rBox.getSettingName(i, l_oSettingName);
 			m_rBox.getSettingValue(i, l_oSettingValue);
@@ -351,11 +335,6 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 				gtk_builder_connect_signals(l_pBuilderInterfaceSettingCollection, NULL);
 
 				::GtkWidget* l_pSettingValue=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceSettingCollection, l_sWidgetName.c_str()));
-
-				if(l_pSettingName==NULL)
-				{
-					m_rKernelContext.getLogManager() << LogLevel_Warning << "l_pSettingName is NULL\n";
-				}
 
 				gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(l_pSettingName)), l_pSettingName);
 				gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(l_pSettingValue)), l_pSettingValue);
@@ -439,7 +418,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 						gtk_entry_set_width_chars(l_pEntry, 7);
 					}
 
-					gtk_table_attach(l_pSettingTable, l_pSettingValue,   1, 2, j, j+1, ::GtkAttachOptions(GTK_SHRINK), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
+					gtk_table_attach(l_pSettingTable, l_pSettingValue,   1, 4, j, j+1, ::GtkAttachOptions(GTK_SHRINK|GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
 
 				}
 				g_object_unref(l_pBuilderInterfaceDummy);
@@ -454,7 +433,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 		}
 
 #if 1
-		if (!m_Mode)
+		if (!m_bMode)
 		{
 			string l_sSettingOverrideWidgetName=m_oHelper->getSettingWidgetName(OV_TypeId_Filename).toASCIIString();
 			::GtkBuilder* l_pBuilderInterfaceSettingCollection=gtk_builder_new(); // glade_xml_new(m_sGUIFilename.toASCIIString(), l_sSettingOverrideWidgetName.c_str(), NULL);
@@ -489,24 +468,18 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 		}
 		}
 #endif
-\
-
-
 
 		//if we are in a running scenario, we just need the WidgetToReturn and can destroy the rest
-		if (m_Mode)
+		if (m_bMode)
 		{
-			if(true)//unparent
+			//unparent widget
+			::GtkWidget* l_pWidgetParent = gtk_widget_get_parent(m_oWidgetToReturn);
+			if(GTK_IS_CONTAINER(l_pWidgetParent))
 			{
-				::GtkWidget* l_pWidgetParent = gtk_widget_get_parent(m_oWidgetToReturn);
-				if(GTK_IS_CONTAINER(l_pWidgetParent))
-				{
-					g_object_ref(m_oWidgetToReturn);
-					gtk_container_remove(GTK_CONTAINER(l_pWidgetParent), m_oWidgetToReturn);
-					gtk_widget_destroy(m_oWidget);
-				}
+				g_object_ref(m_oWidgetToReturn);
+				gtk_container_remove(GTK_CONTAINER(l_pWidgetParent), m_oWidgetToReturn);
+				gtk_widget_destroy(m_oWidget);
 			}
-
 		}
 
 	}
@@ -515,7 +488,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 
 CBoxConfigurationDialog::~CBoxConfigurationDialog(void)
 {
-	if (m_Mode)
+	if (m_bMode)
 		//g_object_unref(m_oWidgetToReturn);
 		gtk_widget_destroy(m_oWidgetToReturn);
 	else
@@ -526,23 +499,15 @@ CBoxConfigurationDialog::~CBoxConfigurationDialog(void)
 boolean CBoxConfigurationDialog::run(bool bMode)
 {
 	boolean l_bModified=false;
-	//CSettingCollectionHelper l_oHelper(m_rKernelContext, m_sGUISettingsFilename.toASCIIString());
 
-	//CString l_oSettingName;
 	CString l_oSettingValue;
 	CIdentifier l_oSettingType;
-	//boolean l_oSettingMod;
-
-	uint32 i;
 
 	::GtkBuilder* l_pBuilderInterfaceSetting=gtk_builder_new(); // glade_xml_new(m_sGUIFilename.toASCIIString(), "box_configuration", NULL);
 	gtk_builder_add_from_file(l_pBuilderInterfaceSetting, m_sGUIFilename.toASCIIString(), NULL);
 
 	::GtkTable* l_pSettingTable=GTK_TABLE(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-table"));
-	//::GtkContainer* l_pFileOverrideContainer=GTK_CONTAINER(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-hbox_filename_override"));
 	::GtkCheckButton* l_pFileOverrideCheck=GTK_CHECK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-checkbutton_filename_override"));
-	//::GtkButton* l_pButtonLoad=GTK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-button_load_current_from_file"));
-	//::GtkButton* l_pButtonSave=GTK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-button_save_current_to_file"));
 	g_object_unref(l_pBuilderInterfaceSetting);
 
 
@@ -552,7 +517,7 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 			gint l_iResult=gtk_dialog_run(GTK_DIALOG(m_oWidget));
 			if(l_iResult==GTK_RESPONSE_APPLY)
 			{
-				for(i=0; i<m_rBox.getSettingCount() && i<m_vSettingValue.size(); i++)
+				for(uint32 i=0; i<m_rBox.getSettingCount() && i<m_vSettingValue.size(); i++)
 				{
 					m_rBox.getSettingType(i, l_oSettingType);
 					m_rBox.setSettingValue(i, m_oHelper->getValue(l_oSettingType, m_vSettingValue[i]));
@@ -581,7 +546,7 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 			}
 			else if(l_iResult==1) // default
 			{
-				for(i=0; i<m_rBox.getSettingCount(); i++)
+				for(uint32 i=0; i<m_rBox.getSettingCount(); i++)
 				{
 					m_rBox.getSettingType(i, l_oSettingType);
 					m_rBox.getSettingDefaultValue(i, l_oSettingValue);
@@ -594,7 +559,7 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 			}
 			else if(l_iResult==2) // revert
 			{
-				for(i=0; i<m_rBox.getSettingCount(); i++)
+				for(uint32 i=0; i<m_rBox.getSettingCount(); i++)
 				{
 					m_rBox.getSettingType(i, l_oSettingType);
 					m_rBox.getSettingValue(i, l_oSettingValue);
@@ -620,8 +585,6 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 			}
 		}
 
-		//gtk_widget_destroy(m_oWidget);//moved to destructor?
-
 	return l_bModified;
 }
 
@@ -634,10 +597,9 @@ boolean CBoxConfigurationDialog::update()
 {
 	CIdentifier l_oSettingType;
 	boolean l_oSettingMod;
-	uint32 j=0;
 	for(uint32 i=0; i<m_rBox.getSettingCount() && i<m_vSettingValue.size(); i++)
 	{
-		j = m_vModSettingIndex[i];
+		uint32 j = m_vModSettingIndex[i];
 		m_rBox.getSettingType(j, l_oSettingType);
 		m_rBox.getSettingMod(j, l_oSettingMod);
 		if (l_oSettingMod)//if this setting is modifiable (this check should be redundant)

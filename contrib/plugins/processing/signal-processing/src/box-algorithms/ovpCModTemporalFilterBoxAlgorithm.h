@@ -28,7 +28,12 @@ namespace OpenViBEPlugins
 
 		protected:
 
-				bool updateSettings();
+			//update the settings value from the UI
+			//return true if any setting has changed
+			bool updateSettings();
+
+			//compute the filter coeff
+			//return false if failed
 			bool compute();
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamDecoder;
@@ -38,15 +43,14 @@ namespace OpenViBEPlugins
 
 			OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* > ip_pMemoryBufferToDecode;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pEncodedMemoryBuffer;
-//			OpenViBE::uint64 m_ui64LastStartTime;
 			OpenViBE::uint64 m_ui64LastEndTime;
 
 			//setting last value to avoid recompute if they haven't changed
 			OpenViBE::CString m_sFilterMethod;
 			OpenViBE::CString m_sFilterType;
 			OpenViBE::CString m_sFilterOrder;
-			OpenViBE::CString lowBand;
-			OpenViBE::CString highBand;
+			OpenViBE::CString m_sLowBand;
+			OpenViBE::CString m_sHighBand;
 			OpenViBE::CString m_sPassBandRiple;
 		};
 
@@ -57,9 +61,9 @@ namespace OpenViBEPlugins
 			virtual void release(void) { }
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Modifiable Temporal filter"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Guillaume Gibert / lmahe"); }
-			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INSERM/U821"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Applies temporal filtering on time signal"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("The user can choose among a variety of filter types to process the signal"); }
+			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INSERM/U821 INRIA"); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Applies temporal filtering on time signal, modifiable parameters"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("The user can choose among a variety of filter types to process the signal and change the settings online"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Filtering"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }

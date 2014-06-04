@@ -335,7 +335,6 @@ boolean	CVisualisationTree::unparentVisualisationWidget(const CIdentifier& rIden
 
 boolean CVisualisationTree::parentVisualisationWidget(const CIdentifier& rIdentifier, const CIdentifier& rParentIdentifier, uint32 ui32Index)
 {
-	this->getLogManager() << LogLevel_Info << "CVisualisationTree::parentVisualisationWidget\n";
 	if(rParentIdentifier == OV_UndefinedIdentifier)
 	{
 		return false;

@@ -46,8 +46,8 @@ boolean CModTemporalFilterBoxAlgorithm::initialize(void)
 	m_sFilterMethod=CString("");
 	m_sFilterType=CString("");
 	m_sFilterOrder=CString("");
-	lowBand=CString("");
-	highBand=CString("");
+	m_sLowBand=CString("");
+	m_sHighBand=CString("");
 	m_sPassBandRiple=CString("");
 	updateSettings();
 
@@ -66,7 +66,6 @@ bool CModTemporalFilterBoxAlgorithm::updateSettings()
 {
 	bool retVal = false;
 	//get the settings
-	// only low and high band are modifiable for mow
 	CString l_oNameFilter;
 	CString l_oKindFilter;
 	CString l_oFilterOrder;
@@ -105,19 +104,19 @@ bool CModTemporalFilterBoxAlgorithm::updateSettings()
 		retVal=true;
 	}
 
-	if(lowBand!=l_oLowPassBandEdge)
+	if(m_sLowBand!=l_oLowPassBandEdge)
 	{
 		TParameterHandler<float64> ip_f64LowCutFrequency(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_LowCutFrequency));
 		ip_f64LowCutFrequency=atof(l_oLowPassBandEdge);
-		lowBand=l_oLowPassBandEdge;
+		m_sLowBand=l_oLowPassBandEdge;
 		retVal=true;
 	}
 
-	if(highBand!=l_oHighPassBandEdge)
+	if(m_sHighBand!=l_oHighPassBandEdge)
 	{
 		TParameterHandler<float64> ip_f64HighCutFrequency(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_HighCutFrequency));
 		ip_f64HighCutFrequency=atof(l_oHighPassBandEdge);
-		highBand=l_oHighPassBandEdge;
+		m_sHighBand=l_oHighPassBandEdge;
 		retVal=true;
 	}
 
@@ -190,7 +189,6 @@ boolean CModTemporalFilterBoxAlgorithm::process(void)
 				if(!m_pStreamEncoder->process(OVP_GD_Algorithm_SignalStreamEncoder_InputTriggerId_EncodeHeader)) return false;
 
 				l_rDynamicBoxContext.markOutputAsReadyToSend(i, l_ui64StartTime, l_ui64EndTime);
-				this->getLogManager() << LogLevel_Error << "initialized\n";
 			}
 			if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
 			{
@@ -222,7 +220,6 @@ boolean CModTemporalFilterBoxAlgorithm::process(void)
 				l_rDynamicBoxContext.markOutputAsReadyToSend(i, l_ui64StartTime, l_ui64EndTime);
 			}
 
-//			m_ui64LastStartTime=l_ui64StartTime;
 			m_ui64LastEndTime=l_ui64EndTime;
 			l_rDynamicBoxContext.markInputAsDeprecated(i, j);
 		}

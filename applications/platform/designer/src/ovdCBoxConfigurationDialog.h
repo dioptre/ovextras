@@ -36,12 +36,12 @@ namespace OpenViBEDesigner
 		OpenViBE::CString m_sGUIFilename;
 		OpenViBE::CString m_sGUISettingsFilename;
 		//
-		::GtkWidget* m_oWidget;
-		::GtkWidget* m_oWidgetToReturn;
+		::GtkWidget* m_oWidget;//widget with the dialog for configuration (used whole for box config when no scenario is running)
+		::GtkWidget* m_oWidgetToReturn; //child of m_oWidget, if we are running a scenario, this is the widget we need, the rest can be discarded
 		::GtkWidget* m_pSettingOverrideValue;
-		bool m_Mode;
+		bool m_bMode; // true if the scenario is running, false otherwise
 		std::vector< ::GtkWidget* > m_vSettingValue;
-		std::vector< OpenViBE::uint32> m_vModSettingIndex;
+		std::vector< OpenViBE::uint32> m_vModSettingIndex;//vector of the indexes of the settings that are modifiable
 		CSettingCollectionHelper *m_oHelper;
 		SButtonCB *m_oButton;
 	};

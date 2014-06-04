@@ -335,7 +335,7 @@ void CDesignerVisualisation::onVisualisationBoxAdded(const IBox* pBox)
 	//if this is a mod UI box
 	if (pBox->hasModUI())
 	{
-		m_rKernelContext.getLogManager() <<  LogLevel_Fatal << "box has MODUI\n";
+		m_rKernelContext.getLogManager() <<  LogLevel_Debug << "box has MODUI\n";
 		//if there was no mod UI box previously, this is the first one so we need to add the config tab
 		if (m_ui32ModUIBoxes==0)
 		{
@@ -429,28 +429,19 @@ void CDesignerVisualisation::onVisualisationBoxAdded(const IBox* pBox)
 				//widget corresponding to this last child
 				void* l_pDstWidget = NULL;
 				//since the widget was just added, it should be unaffected thus the check is redundant
-				//otehrwise check with
-				/*
-				//if widget is unaffected, just drag n drop it
-				::GtkTreeIter l_oUnaffectedIter = l_oSrcIter;
-				if(m_rVisualisationTree.findParentNode(&l_oUnaffectedIter, EVisualisationTreeNode_Unaffected) == true)
-				//*/
 				::GtkTreeIter l_oDstIter;
 
-				//get iterator to src widget
-				if(true)
+				//get iterator to src widget	
+				if(m_rVisualisationTree.findChildNodeFromRoot(&l_oDstIter, l_oLastChildID) == false)
 				{
-					if(m_rVisualisationTree.findChildNodeFromRoot(&l_oDstIter, l_oLastChildID) == false)
-					{
-						m_rKernelContext.getLogManager() <<  LogLevel_Fatal << "			did not found destination node\n";
-						return;
-					}
-					//get actual dst widget (item being dropped) and ensure it isn't being dropped in its own table
-					m_rVisualisationTree.getPointerValueFromTreeIter(&l_oDstIter, l_pDstWidget, EVisualisationTreeColumn_PointerWidget);
-					if (l_pDstWidget==NULL)
-					{
-						m_rKernelContext.getLogManager() <<  LogLevel_Fatal << "			did not found destination widget\n";
-					}
+					m_rKernelContext.getLogManager() <<  LogLevel_Fatal << "			did not found destination node\n";
+					return;
+				}
+				//get actual dst widget (item being dropped) and ensure it isn't being dropped in its own table
+				m_rVisualisationTree.getPointerValueFromTreeIter(&l_oDstIter, l_pDstWidget, EVisualisationTreeColumn_PointerWidget);
+				if (l_pDstWidget==NULL)
+				{
+					m_rKernelContext.getLogManager() <<  LogLevel_Fatal << "			did not found destination widget\n";
 				}
 				GtkWidget* l_oDstVisuWidget = this->getVisualisationWidget((::GtkWidget*)l_pDstWidget);
 				m_rVisualisationTree.dragDataReceivedOutsideWidgetCB(l_oVisualisationWidgetIdentifier, l_oDstVisuWidget, EDragData_Right);//could be replaced with EDragData_Bottom

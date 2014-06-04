@@ -1640,7 +1640,9 @@ void CApplication::releasePlayer(void)
 		l_pCurrentInterfacedScenario->m_pPlayer=NULL;
 
 		// restore the snapshot so settings override does not modify the scenario !
-		l_pCurrentInterfacedScenario->undoCB(false);
+		//commenting this line allow modified (by UI) settings to be saved (however, the scenario is not marked as changed)
+		//should already be commented in wip-all-designer branch
+		//l_pCurrentInterfacedScenario->undoCB(false);
 
 		// destroy player windows
 		l_pCurrentInterfacedScenario->releasePlayerVisualisation();

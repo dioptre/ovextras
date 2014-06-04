@@ -7,6 +7,8 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
+#include <vector>
+
 // The unique identifiers for the box and its descriptor.
 // Identifier are randomly chosen by the skeleton-generator.
 #define OVP_ClassId_BoxAlgorithm_ModUI OpenViBE::CIdentifier(0x4AB0DD05, 0x32155D41)
@@ -33,14 +35,16 @@ namespace OpenViBEPlugins
 				
 			//Here is the different process callbacks possible
 			// - On clock ticks :
-			//virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
+			virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
 			// - On new input received (the most common behaviour for signal processing) :
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			//virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			
 			// If you want to use processClock, you must provide the clock frequency.
-			//virtual OpenViBE::uint64 getClockFrequency(void);
+			virtual OpenViBE::uint64 getClockFrequency(void);
 			
 			virtual OpenViBE::boolean process(void);
+
+
 
 			// As we do with any class in openvibe, we use the macro below 
 			// to associate this box to an unique identifier. 
@@ -49,16 +53,10 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ModUI);
 
 		protected:
-			// Codec algorithms specified in the skeleton-generator:
-			// Signal stream decoder
-			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmModUI > m_oSignalDecoder;
-			// Signal stream encoder
-			OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmModUI > m_oSignalEncoder;
-			// Stimulation stream encoder
-			OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmModUI > m_oAlgo2_StimulationEncoder;
+			OpenViBE::boolean updateSettings(void);
 
-			OpenViBE::uint64 m_ui64Factor;
-			OpenViBE::uint64 m_ui64StimulationCode;
+			std::vector<OpenViBE::CString> m_vSettingsValue;
+			OpenViBE::uint64 m_ui64LastTime;
 
 		};
 
@@ -119,11 +117,11 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("ModUI"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Modifiable Interface example"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("lmahe"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Modifiable interface example, settings are modifiable and values are displayed in log every 5 seconds"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This box purpose is to test and exhibit the modifiable interface feature\n It possess a setting of each type and all are modifiable.\n"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Examples"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
@@ -144,21 +142,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addInput("input",OV_TypeId_Signal);
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddInput);
-				
-				rBoxAlgorithmPrototype.addOutput("output",OV_TypeId_Signal);
-				rBoxAlgorithmPrototype.addOutput("stims",OV_TypeId_Stimulations);
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
-				
-				rBoxAlgorithmPrototype.addSetting("Stimulation",OV_TypeId_Stimulations,"OVTK_GDF_Incorrect");
-
 				//add true at the end to mark a setting as modifiable
-				//we have every kind of settings to test visual diaplay but only the Int is actually used (for now)
+				//we have every kind of settings to test visual display
 				rBoxAlgorithmPrototype.addSetting("Int",OV_TypeId_Integer,"1", true);
 				rBoxAlgorithmPrototype.addSetting("Float",OV_TypeId_Float,"1", true);
 				rBoxAlgorithmPrototype.addSetting("Bool",OV_TypeId_Boolean,"false", true);
@@ -167,10 +152,6 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("script",OV_TypeId_Script, "", true);
 				rBoxAlgorithmPrototype.addSetting("color",OV_TypeId_Color, "", true);
 				rBoxAlgorithmPrototype.addSetting("colorgradient",OV_TypeId_ColorGradient, "", true);
-
-
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 				
