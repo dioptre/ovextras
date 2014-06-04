@@ -1173,6 +1173,7 @@ void CInterfacedScenario::undoCB(boolean bManageModifiedStatusFlag)
 		if(bManageModifiedStatusFlag)
 		{
 			m_bHasBeenModified=true;
+			this->updateScenarioLabel();
 		}
 		m_bScenarioModified = true;
 		this->redraw();
@@ -1219,6 +1220,7 @@ void CInterfacedScenario::redoCB(boolean bManageModifiedStatusFlag)
 		if(bManageModifiedStatusFlag)
 		{
 			m_bHasBeenModified=true;
+			this->updateScenarioLabel();
 		}
 		m_bScenarioModified = true;
 		this->redraw();
