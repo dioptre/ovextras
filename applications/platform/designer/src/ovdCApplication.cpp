@@ -1178,6 +1178,18 @@ void CApplication::updateWorkingDirectoryToken(const OpenViBE::CIdentifier &oSce
 	{
 		m_rKernelContext.getConfigurationManager().setConfigurationTokenValue( m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sLocalPathToken), l_sWorkingDir);
 	}
+
+	const CString l_sLocalPathTokenPlayer("Player_ScenarioDirectory");
+	const CString l_sOldPathPlayer = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenValue(l_sLocalPathTokenPlayer);
+
+	if(l_sOldPath == CString(""))
+	{
+		m_rKernelContext.getConfigurationManager().createConfigurationToken(l_sLocalPathTokenPlayer,l_sWorkingDir);
+	}
+	else
+	{
+		m_rKernelContext.getConfigurationManager().setConfigurationTokenValue(m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sLocalPathTokenPlayer), l_sWorkingDir);
+	}
 }
 
 void CApplication::removeScenarioDirectoryToken(const CIdentifier &oScenarioIdentifier)
@@ -1519,8 +1531,6 @@ void CApplication::saveScenarioCB(CInterfacedScenario* pScenario)
 
 				l_bSuccess=(l_oMemoryBuffer.getSize()!=0);
 
-				l_pCurrentInterfacedScenario->snapshotCB();
-				l_pCurrentInterfacedScenario->m_bHasFileName=true;
 				l_pCurrentInterfacedScenario->m_bHasBeenModified=false;
 				l_pCurrentInterfacedScenario->updateScenarioLabel();
 
@@ -1603,9 +1613,6 @@ void CApplication::saveScenarioAsCB(CInterfacedScenario* pScenario)
 				::strcat(l_sFileName, ".xml");
 			}
 		}
-
-		l_pCurrentInterfacedScenario->m_sFileName=l_sFileName;
-		l_pCurrentInterfacedScenario->m_bHasFileName=true;
 		l_pCurrentInterfacedScenario->m_bHasBeenModified=false;
 		l_pCurrentInterfacedScenario->updateScenarioLabel();
 
