@@ -42,19 +42,19 @@ namespace OpenViBEPlugins
 			,m_ui64LeftmostDisplayedTime(0)
 			,m_f64LargestDisplayedValueRange(0)
 			,m_f64ValueRangeMargin(0)
-			,m_f64MarginFactor(0.1f) //add 10% space above and below extrema
+			,m_f64MarginFactor(0.4f) //add 40% space above and below extrema
 			,m_bVerticalScaleChanged(false)
 			,m_bAutoVerticalScale(false)
 			,m_f64CustomVerticalScaleValue(1.)
 			,m_pBufferDatabase(&oBufferDatabase)
 			,m_bMultiViewInitialized(false)
-			,m_bAutoTranslation(false)
 			,m_pBottomBox(NULL)
 			,m_pBottomRuler(NULL)
 		{
 			m_bIsEEGSignal = bIsEEG;
 			m_bAutoVerticalScale=bAutoVerticalScale;
 			m_bVerticalScaleChanged=!bAutoVerticalScale;
+			m_bAutoTranslation = !bIsEEG;
 			if(!bAutoVerticalScale)
 			{
 				m_f64CustomVerticalScaleValue=f64VerticalScale;
@@ -71,17 +71,18 @@ namespace OpenViBEPlugins
 			,m_ui64LeftmostDisplayedTime(0)
 			,m_f64LargestDisplayedValueRange(0)
 			,m_f64ValueRangeMargin(0)
-			,m_f64MarginFactor(0.1f) //add 10% space above and below extrema
-			,m_bVerticalScaleChanged(false)
-			,m_bAutoVerticalScale(false)
+			,m_f64MarginFactor(0.4f) //add 40% space above and below extrema
+		//	,m_bVerticalScaleChanged(false)
 			,m_f64CustomVerticalScaleValue(1.)
 			,m_pBufferDatabase(&oBufferDatabase)
 			,m_bMultiViewInitialized(false)
-			,m_bAutoTranslation(false)
 			,m_pBottomBox(NULL)
 			,m_pBottomRuler(NULL)
 		{
 			m_bIsEEGSignal = bIsEEG;
+			m_bAutoTranslation = !bIsEEG;
+			m_bAutoVerticalScale = !bIsEEG;
+			m_bVerticalScaleChanged = bIsEEG;
 			construct(oBufferDatabase,f64TimeScale,oDisplayMode);
 		}
 
@@ -295,8 +296,6 @@ namespace OpenViBEPlugins
 			else
 			{
 			    l_ui32TableSize = l_ui32ChannelCount+1;
-			    m_bAutoVerticalScale = true;
-			    m_bAutoTranslation = true;
 			}
 
 			//allocate channel labels and channel displays arrays accordingly
@@ -580,9 +579,9 @@ namespace OpenViBEPlugins
 					m_oLeftRulers.push_back(l_pLeftRuler);
 
 					//Add left ruler in vertical box container only for the main channel display
-					if(j==0)
+					if(m_bIsEEGSignal && j==0)
 					{
-						gtk_box_pack_start (GTK_BOX(l_pLeftRulerVBox),l_pLeftRuler, true, true, 0);
+						gtk_box_pack_start(GTK_BOX(l_pLeftRulerVBox),l_pLeftRuler, true, true, 0);
 						::gtk_size_group_add_widget(l_pSizeGroup, l_pLeftRuler);
 					}
 
@@ -646,7 +645,7 @@ namespace OpenViBEPlugins
 					for(uint32 i=0; i<m_oChannelDisplay.size(); i++)
 					{
 						//set new parameters
-						m_oChannelDisplay[i]->setGlobalBestFitParameters(m_f64LargestDisplayedValueRange/2, m_f64ValueRangeMargin/2);
+						m_oChannelDisplay[i]->setGlobalBestFitParameters(m_f64LargestDisplayedValueRange, m_f64ValueRangeMargin);
 					}
 				}
 			}
