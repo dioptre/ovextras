@@ -31,7 +31,7 @@ uint64 CBoxAlgorithmModUI::getClockFrequency(void)
 
 boolean CBoxAlgorithmModUI::processClock(OpenViBE::Kernel::IMessageClock& /* rMessageClock */)
 {
-	uint64 l_ui64Time = ITimeArithmetics::timeToSeconds(this->getPlayerContext().getCurrentTime());
+	uint64 l_ui64Time = (uint64)ITimeArithmetics::timeToSeconds(this->getPlayerContext().getCurrentTime());
 
 	if(l_ui64Time-m_ui64LastTime>=5)
 	{

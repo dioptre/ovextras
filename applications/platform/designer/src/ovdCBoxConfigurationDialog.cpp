@@ -241,8 +241,8 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 	,m_rBox(rBox)
 	,m_sGUIFilename(sGUIFilename)
 	,m_sGUISettingsFilename(sGUISettingsFilename),
-	  m_bMode(bMode),
-	  m_oWidget(NULL)
+	  m_oWidget(NULL),
+	  m_bMode(bMode)
 {
 	m_vSettingValue.clear();
 
