@@ -6,6 +6,7 @@
 
 #include "ovasCPluginExternalStimulations.h"
 
+#include "ovasCDriverBioSemiActiveTwo.h"
 #include "ovasCDriverBrainmasterDiscovery.h"
 #include "ovasCDriverBrainProductsActiCHamp.h"
 #include "ovasCDriverBrainProductsBrainVisionRecorder.h"
@@ -26,6 +27,9 @@ namespace OpenViBEContributions {
 
 	void initiateContributions(OpenViBEAcquisitionServer::CAcquisitionServerGUI* pGUI, OpenViBEAcquisitionServer::CAcquisitionServer* pAcquisitionServer, const OpenViBE::Kernel::IKernelContext& rKernelContext, std::vector<OpenViBEAcquisitionServer::IDriver*>* vDriver)
 	{
+#if defined TARGET_HAS_ThirdPartyBioSemiAPI
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBioSemiActiveTwo(pAcquisitionServer->getDriverContext()));
+#endif
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder(pAcquisitionServer->getDriverContext()));
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverCtfVsmMeg(pAcquisitionServer->getDriverContext()));
 #if defined TARGET_HAS_ThirdPartyGUSBampCAPI
@@ -37,12 +41,12 @@ namespace OpenViBEContributions {
 #endif
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverFieldtrip(pAcquisitionServer->getDriverContext()));
 #if defined TARGET_OS_Windows
-#if defined TARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI
+ #if defined TARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBrainmasterDiscovery(pAcquisitionServer->getDriverContext()));
-#endif
-#if defined TARGET_HAS_ThirdPartyActiCHampAPI
+ #endif
+ #if defined TARGET_HAS_ThirdPartyActiCHampAPI
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBrainProductsActiCHamp(pAcquisitionServer->getDriverContext()));
-#endif
+ #endif
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverMitsarEEG202A(pAcquisitionServer->getDriverContext()));
 #endif
 
