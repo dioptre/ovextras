@@ -131,7 +131,7 @@ namespace OpenViBEDesigner
 
 	enum
 	{
-		Log_NotAvailabe = 0,
+		Log_NotAvailable = 0,
 		Log_AvailableNotActivate = 1,
 		Log_AvailableActivate = 2
 	};

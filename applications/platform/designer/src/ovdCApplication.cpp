@@ -1806,12 +1806,12 @@ void CApplication::toggleOnWindowItem(uint32 ui32Index, int32 i32PageIndex)
 {
 
        //block callback to prevent from showing windows twice
-        g_signal_handlers_block_by_func(G_OBJECT(m_vInterfacedScenario[i32PageIndex]->m_vCheckItems[ui32Index]), static_cast<gpointer>(G_CALLBACK(window_menu_check_item_toggled_cb)), this);
+        g_signal_handlers_block_by_func(G_OBJECT(m_vInterfacedScenario[i32PageIndex]->m_vCheckItems[ui32Index]), reinterpret_cast<gpointer>(G_CALLBACK(window_menu_check_item_toggled_cb)), this);
 
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(m_vInterfacedScenario[i32PageIndex]->m_vCheckItems[ui32Index]),true);
 
        //unblock
-        g_signal_handlers_unblock_by_func(G_OBJECT(m_vInterfacedScenario[i32PageIndex]->m_vCheckItems[ui32Index]), static_cast<gpointer>(G_CALLBACK(window_menu_check_item_toggled_cb)), this);
+        g_signal_handlers_unblock_by_func(G_OBJECT(m_vInterfacedScenario[i32PageIndex]->m_vCheckItems[ui32Index]), reinterpret_cast<gpointer>(G_CALLBACK(window_menu_check_item_toggled_cb)), this);
 
 }
 
@@ -2284,7 +2284,7 @@ uint32 CApplication::getLogState(const char* sButtonName)
 {
 	if(!gtk_widget_get_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, sButtonName))))
 	{
-		return Log_NotAvailabe;
+		return Log_NotAvailable;
 	}
 	else if(!gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, sButtonName))))
 	{
@@ -2457,11 +2457,11 @@ void CApplication::reorderCurrentScenario(OpenViBE::uint32 i32NewPageIndex)
 void CApplication::logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLevel level, const char* configName)
 {
 	uint32 l_ui32Active;
-	l_ui32Active = m_rKernelContext.getConfigurationManager().expandAsUInteger(configName, m_rKernelContext.getLogManager().isActive(level)?Log_AvailableActivate:Log_NotAvailabe);
+	l_ui32Active = static_cast<uint32>(m_rKernelContext.getConfigurationManager().expandAsUInteger(configName, m_rKernelContext.getLogManager().isActive(level)?Log_AvailableActivate:Log_NotAvailable));
 	//At the beginning all buttons are sensitive and not active
 	switch(l_ui32Active)
 	{
-	case Log_NotAvailabe:
+	case Log_NotAvailable:
 		gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), false);
 		m_rKernelContext.getLogManager().activate(level, false);
 		break;
