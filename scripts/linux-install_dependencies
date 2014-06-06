@@ -369,14 +369,15 @@ if [[ ! -e "$ov_target_folder_hit/no-native-packages.hit" ]]; then
 	if [[ "`grep -E 'Ubuntu|LinuxMint' /etc/lsb-release 2> /dev/null`" != "" || "`grep -E 'Raspbian' /etc/os-release 2> /dev/null`" != "" || "`grep Debian /etc/issue 2> /dev/null`" != "" ]]; then
 		ov_native_package_installed=true
 		ov_native_package_log_file="$ov_target_folder_log/native-packages.log"
-		if [[ "`grep -E 'Ubuntu' /etc/lsb-release 2> /dev/null`" != "" && "`grep DISTRIB_RELEASE /etc/lsb-release 2> /dev/null | sed -e s/DISTRIB_RELEASE=//g`" == "13.10" ]]; then
-			# at the time of writing this, there was a conflict between libogre-dev and libboost-thread-dev dependencies in 13.10
-			echo "  Ubuntu 13.10 detected, suggesting specific set of packages..."
-			echo
-			ov_ubuntu_packages="subversion doxygen make automake autoconf cmake unzip gcc g++ libgtk2.0-dev libglade2-dev gfortran libgsl0-dev libexpat1-dev libreadline-dev libzzip-dev libtool libxaw7-dev libpcre3-dev libfreeimage-dev libglu1-mesa-dev libalut-dev libvorbis-dev libncurses5-dev python-dev python-numpy libeigen3-dev libogre-dev libcegui-mk2-dev libois-dev libboost1.49-dev libboost-thread1.49-dev liblua5.1-0-dev libboost-regex1.49-dev libboost-filesystem1.49-dev libitpp-dev"
+		
+		if [[ "`grep -E '14.04|13.10' /etc/lsb-release 2> /dev/null`" != "" ]]; then
+			# at the time of writing this, there was a conflict between libogre-dev and libboost-thread-dev dependencies in 13.10 and 14.04
+			echo "  Ubuntu 13.10 or 14.04 detected, suggesting specific set of packages..."
+			ov_lib_ogre_dev=libogre-1.8-dev
 		else
-			ov_ubuntu_packages="subversion doxygen make automake autoconf cmake unzip gcc g++ libgtk2.0-dev libglade2-dev gfortran libgsl0-dev libexpat1-dev libreadline-dev libzzip-dev libtool libxaw7-dev libpcre3-dev libfreeimage-dev libglu1-mesa-dev libalut-dev libvorbis-dev libncurses5-dev python-dev python-numpy libeigen3-dev libogre-dev libcegui-mk2-dev libois-dev libboost-dev libboost-thread-dev liblua5.1-0-dev libboost-regex-dev libboost-filesystem-dev libitpp-dev"
+			ov_lib_ogre_dev=libogre-dev
 		fi;
+		ov_ubuntu_packages="subversion doxygen make automake autoconf cmake unzip gcc g++ libgtk2.0-dev libglade2-dev gfortran libgsl0-dev libexpat1-dev libreadline-dev libzzip-dev libtool libxaw7-dev libpcre3-dev libfreeimage-dev libglu1-mesa-dev libalut-dev libvorbis-dev libncurses5-dev python-dev python-numpy libeigen3-dev $ov_lib_ogre_dev libcegui-mk2-dev libois-dev libboost-dev libboost-thread-dev liblua5.1-0-dev libboost-regex-dev libboost-filesystem-dev libitpp-dev"
 			
 		for package in $ov_ubuntu_packages; do
 			ov_dpkg_output=`dpkg -l $package 2>&1 | grep "^ii"`
@@ -951,6 +952,8 @@ ov_package_url_vrpn=http://openvibe.inria.fr/dependencies/linux-x86/vrpn_07_26.z
 ov_package_url_openmask4=http://www.irisa.fr/bunraku/OpenViBE/dependencies/src/openmask4~dotsceneloader-src-164.tar.bz2
 ov_package_url_openmask4tutorial=http://www.irisa.fr/bunraku/OpenViBE/dependencies/src/openmask4-tutorial-src-164.tar.bz2
 
+ov_package_url_liblsl=http://openvibe.inria.fr/dependencies/linux-x86/liblsl-1.04-src.tar.bz2
+
 # Scripting packages
 ov_package_url_readline=$ov_gnu_mirror/readline/readline-5.2.tar.gz
 ov_package_url_ncurses=$ov_gnu_mirror/ncurses/ncurses-5.7.tar.gz
@@ -1041,6 +1044,8 @@ ov_package_archive_ogre=`echo "$ov_package_url_ogre" | $ov_sed 's#.*/##g'`
 ov_package_archive_vrpn=`echo "$ov_package_url_vrpn" | $ov_sed 's#.*/##g'`
 ov_package_archive_openmask4=`echo "$ov_package_url_openmask4" | $ov_sed 's#.*/##g'`
 ov_package_archive_openmask4tutorial=`echo "$ov_package_url_openmask4tutorial" | $ov_sed 's#.*/##g'`
+
+ov_package_archive_liblsl=`echo "$ov_package_url_liblsl" | $ov_sed 's#.*/##g'`
 
 # Scripting packages
 ov_package_archive_readline=`echo "$ov_package_url_readline" | $ov_sed 's#.*/##g'`
@@ -1350,6 +1355,23 @@ ov_package_install_hook_openmask4tutorial='
 	pushd * &&
 	popd'
 
+ov_package_configure_hook_liblsl='
+	pushd * &&
+	mkdir liblsl/build && 
+	cd liblsl/build &&
+	cmake .. &&
+	popd'
+ov_package_make_hook_liblsl='
+	pushd * &&
+	cd liblsl/build &&
+	make &&
+	popd'
+ov_package_install_hook_liblsl='
+	pushd * &&
+	cp liblsl/build/src/liblsl.so $ov_target_folder_lib &&
+	cp -R liblsl/include/* $ov_target_folder_include &&
+	popd'
+	
 ov_package_configure_hook_lua='
 	pushd * &&
 	$ov_sed -i "s#^INSTALL_TOP.*#INSTALL_TOP=$ov_target_folder#g" Makefile &&
@@ -1473,6 +1495,9 @@ fi;
 	ov_install_package "ogre"
 	ov_install_package "cegui"
 
+	# Lab Streaming Layer, this is an optional dependence that enables LSL output plugin
+	ov_install_package "liblsl"
+	
 # If you want BLiFF++
 # ov_install_package "gsl"
 # ov_install_package "torch"
@@ -1480,6 +1505,8 @@ fi;
 
 ov_install_package "vrpn"
 # ov_install_package "obt"
+
+
 
 # Scripting packages
 #ov_install_package "readline"

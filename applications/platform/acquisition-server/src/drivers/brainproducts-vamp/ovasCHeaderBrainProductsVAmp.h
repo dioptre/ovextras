@@ -26,7 +26,7 @@ namespace OpenViBEAcquisitionServer
 	{
 	public:
 
-		CHeaderBrainProductsVAmp(OpenViBE::boolean bAcquireAuxiliaryAsEEG, OpenViBE::boolean bAcquireTriggerAsEEG);
+		CHeaderBrainProductsVAmp(void);
 		virtual ~CHeaderBrainProductsVAmp(void);
 		virtual void reset(void);
 

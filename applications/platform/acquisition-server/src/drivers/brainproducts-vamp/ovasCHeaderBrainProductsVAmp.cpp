@@ -30,11 +30,8 @@ namespace
 //___________________________________________________________________//
 //                                                                   //
 
-CHeaderBrainProductsVAmp::CHeaderBrainProductsVAmp(boolean bAcquireAuxiliaryAsEEG, boolean bAcquireTriggerAsEEG)
+CHeaderBrainProductsVAmp::CHeaderBrainProductsVAmp(void)
 {
-	System::Memory::set(g_vAuxiliaryChannelCount, sizeof(g_vAuxiliaryChannelCount)*(bAcquireAuxiliaryAsEEG?0:1), 0);
-	System::Memory::set(g_vTriggerChannelCount, sizeof(g_vTriggerChannelCount)*(bAcquireTriggerAsEEG?0:1), 0);
-
 	m_pBasicHeader = new CHeader();
 
 	// additional information
@@ -64,17 +61,17 @@ void CHeaderBrainProductsVAmp::reset(void)
 
 uint32 CHeaderBrainProductsVAmp::getEEGChannelCount(uint32 ui32AcquisitionMode)
 {
-	return g_vEEGChannelCount[ui32AcquisitionMode];
+	return ::g_vEEGChannelCount[ui32AcquisitionMode];
 }
 
 uint32 CHeaderBrainProductsVAmp::getAuxiliaryChannelCount(uint32 ui32AcquisitionMode)
 {
-	return g_vAuxiliaryChannelCount[ui32AcquisitionMode];
+	return ::g_vAuxiliaryChannelCount[ui32AcquisitionMode];
 }
 
 uint32 CHeaderBrainProductsVAmp::getTriggerChannelCount(uint32 ui32AcquisitionMode)
 {
-	return g_vTriggerChannelCount[ui32AcquisitionMode];
+	return ::g_vTriggerChannelCount[ui32AcquisitionMode];
 }
 
 // Pair information

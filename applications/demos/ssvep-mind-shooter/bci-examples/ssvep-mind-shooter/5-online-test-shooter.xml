@@ -600,7 +600,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/time-based-epoching.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/time-based-epoching.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -821,7 +821,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/temporal-filter-freq-3h1.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/temporal-filter-freq-3h1.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -914,7 +914,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/temporal-filter-freq-3b.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/temporal-filter-freq-3b.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -987,7 +987,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/time-based-epoching.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/time-based-epoching.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1070,7 +1070,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/classifiers/csp-1h1</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/csp-1h1</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1176,7 +1176,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename to load configuration from</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/classifiers/classifier-3</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/classifier-3</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x2c132d6e, 0x44ab0d97)</TypeIdentifier>
@@ -1305,7 +1305,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/temporal-filter-freq-1h1.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/temporal-filter-freq-1h1.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1524,7 +1524,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename to load configuration from</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/classifiers/classifier-1</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/classifier-1</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x2c132d6e, 0x44ab0d97)</TypeIdentifier>
@@ -1609,7 +1609,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/scripts/shooter-combination-classifier.lua</Value>
+					<Value>${Player_ScenarioDirectory}/scripts/shooter-combination-classifier.lua</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
@@ -1809,7 +1809,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/temporal-filter-freq-2h1.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/temporal-filter-freq-2h1.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2000,7 +2000,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/classifiers/csp-1b</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/csp-1b</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2211,7 +2211,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/temporal-filter-freq-1b.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/temporal-filter-freq-1b.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2339,7 +2339,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/time-based-epoching.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/time-based-epoching.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2660,7 +2660,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/time-based-epoching.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/time-based-epoching.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2918,7 +2918,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/classifiers/csp-1h1</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/csp-1h1</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2959,7 +2959,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/scripts/shooter-controller.lua</Value>
+					<Value>${Player_ScenarioDirectory}/scripts/shooter-controller.lua</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
@@ -3254,7 +3254,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/channel-selector.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/channel-selector.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -3538,7 +3538,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/scripts/start-stimulator.lua</Value>
+					<Value>${Player_ScenarioDirectory}/scripts/start-stimulator.lua</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
@@ -3647,7 +3647,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/time-based-epoching.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/time-based-epoching.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -3688,7 +3688,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Command 1</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${External_Application_Launcher} openvibe-ssvep-mind-shooter --run-bg impact-shooter ${__volatile_ScenarioDir}</Value>
+					<Value>${External_Application_Launcher} openvibe-ssvep-mind-shooter --run-bg impact-shooter ${Player_ScenarioDirectory}</Value>
 				</Setting>
 			</Settings>
 			<Attributes>
@@ -3844,7 +3844,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/classifiers/csp-1b</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/csp-1b</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -3988,7 +3988,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/time-based-epoching.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/time-based-epoching.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -4081,7 +4081,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/configuration/temporal-filter-freq-2b.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/configuration/temporal-filter-freq-2b.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -4282,7 +4282,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/classifiers/csp-1h1</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/csp-1h1</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -4333,7 +4333,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename to load configuration from</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/classifiers/classifier-2</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/classifier-2</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x2c132d6e, 0x44ab0d97)</TypeIdentifier>
@@ -4544,7 +4544,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/scripts/shooter-button-simplifier.lua</Value>
+					<Value>${Player_ScenarioDirectory}/scripts/shooter-button-simplifier.lua</Value>
 				</Setting>
 			</Settings>
 			<Attributes>
@@ -4657,7 +4657,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/classifiers/csp-1b</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/csp-1b</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>

@@ -221,9 +221,6 @@ boolean CConfigurationBrainProductsVAmp::preConfigure(void)
 
 	m_iDeviceCount = l_uint32DeviceCount;
 
-	// acquisition mode
-	gtk_combo_box_set_active(GTK_COMBO_BOX(m_pAcquisitionMode), m_pHeaderBrainProductsVAmp->getAcquisitionMode());
-
 	//SETTINGS:
 	//Adding all possible settings : 7/8/9/10 and -1
 	// and setting active text
@@ -433,9 +430,9 @@ void CConfigurationBrainProductsVAmp::comboBoxAcquisitionModeCB(::GtkComboBox* p
 {
 	gint l_iAcquisitionMode=gtk_combo_box_get_active(pComboBox);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels),
-		m_pHeaderBrainProductsVAmp->getEEGChannelCount(l_iAcquisitionMode)+
+		m_pHeaderBrainProductsVAmp->getEEGChannelCount(l_iAcquisitionMode)/*+
 		m_pHeaderBrainProductsVAmp->getAuxiliaryChannelCount(l_iAcquisitionMode)+
-		m_pHeaderBrainProductsVAmp->getTriggerChannelCount(l_iAcquisitionMode));
+		m_pHeaderBrainProductsVAmp->getTriggerChannelCount(l_iAcquisitionMode)*/); // we do not need to add trigger and Aux channels, this is done at initialization time as it is a token configuration.
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "button_change_channel_names")), l_iAcquisitionMode!=AcquisitionMode_VAmp4Fast);
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "button_fast_mode_settings")), l_iAcquisitionMode==AcquisitionMode_VAmp4Fast);
 }
