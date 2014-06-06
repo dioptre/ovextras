@@ -60,11 +60,15 @@ void CPlayerVisualisation::init(void)
 
 	m_pActiveToolbarButton = NULL;
 
+
 	//register towards tree store
 	m_rVisualisationTree.setTreeViewCB(this);
 
-	//rebuild widgets
+	//rebuild widgets;
 	m_rVisualisationTree.reloadTree();
+
+	//must be called after the previous call to reload tree
+	m_rInterfacedScenario.setModUIWidgets();
 }
 
 ::GtkWidget* CPlayerVisualisation::loadTreeWidget(IVisualisationWidget* pVisualisationWidget)
@@ -593,7 +597,7 @@ boolean CPlayerVisualisation::parentWidgetBox(IVisualisationWidget* pWidget, ::G
 }
 
 //called upon Player start
-void CPlayerVisualisation::showTopLevelWindows(void)
+void CPlayerVisualisation::showTopLevelWindows()
 {
 	for(unsigned int i=0; i<m_vWindows.size(); i++)
 	{

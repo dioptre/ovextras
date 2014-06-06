@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<interface>
+  <object class="GtkWindow" id="modUI-window">
+  <!--
+    <child>
+      <object class="GtkEventBox" id="modUI-eventbox">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="has_focus">True</property>
+        <property name="is_focus">True</property>
+        <property name="can_default">True</property>
+        <property name="has_default">True</property>
+        <property name="receives_default">True</property>
+        <property name="events">GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
+	  </object>
+	</child>
+	-->
+	<child>
+          <object class="GtkHBox" id="settings_collection-hbox_setting_integer">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkEntry" id="settings_collection-entry_setting_integer_string">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">&#x25CF;</property>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="settings_collection-button_setting_integer_up">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <child>
+                  <object class="GtkImage" id="settings_collection-image_setting_integer_up">
+                    <property name="visible">True</property>
+                    <property name="stock">gtk-go-up</property>
+                    <property name="icon-size">1</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="settings_collection-button_setting_integer_down">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <child>
+                  <object class="GtkImage" id="settings_collection-image_setting_integer_down">
+                    <property name="visible">True</property>
+                    <property name="stock">gtk-go-down</property>
+                    <property name="icon-size">1</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+	</child>
+  </object>
+</interface>

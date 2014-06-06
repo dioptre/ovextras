@@ -239,11 +239,14 @@ boolean CBox::initializeFromExistingBox(
 		CString l_sName;
 		CString l_sValue;
 		CString l_sDefaultValue;
+		boolean l_bModifiability;
+
 		rExistingBox.getSettingType(i, l_oType);
 		rExistingBox.getSettingName(i, l_sName);
 		rExistingBox.getSettingValue(i, l_sValue);
 		rExistingBox.getSettingDefaultValue(i, l_sDefaultValue);
-		addSetting(l_sName, l_oType, l_sDefaultValue);
+		rExistingBox.getSettingMod(i, l_bModifiability);
+		addSetting(l_sName, l_oType, l_sDefaultValue, l_bModifiability);
 		setSettingValue(i, l_sValue);
 	}
 
@@ -576,7 +579,8 @@ boolean CBox::setOutputName(
 
 boolean CBox::addSetting(const CString& sName,
 	const CIdentifier& rTypeIdentifier,
-	const CString& sDefaultValue, const int32 i32Index)
+	const CString& sDefaultValue, const int32 i32Index,
+	const boolean bModifiability)
 {
 	CString l_sValue(sDefaultValue);
 	if(this->getTypeManager().isEnumeration(rTypeIdentifier))
@@ -610,6 +614,7 @@ boolean CBox::addSetting(const CString& sName,
 	s.m_oTypeIdentifier=rTypeIdentifier;
 	s.m_sDefaultValue=l_sValue;
 	s.m_sValue=l_sValue;
+	s.m_bMod=bModifiability;
 
 	if(i32Index < 0 || i32Index >= (int32)m_vSetting.size())
 	{
@@ -620,6 +625,12 @@ boolean CBox::addSetting(const CString& sName,
 		vector<CSetting>::iterator l_it = m_vSetting.begin();
 		l_it += i32Index;
 		m_vSetting.insert(l_it, s);
+	}
+
+	//if this setting is modifiable, keep its index
+	if(bModifiability)
+	{
+		m_vModifiableSettingIndexes.push_back(m_vSetting.size()-1);
 	}
 
 	this->notify(BoxModification_SettingAdded, m_vSetting.size()-1);
@@ -642,6 +653,21 @@ boolean CBox::removeSetting(
 	}
 
 	it=m_vSetting.erase(it);
+
+	//update the modifiable setting indexes
+	vector<uint32>::iterator it2=m_vModifiableSettingIndexes.begin();
+	for (i=0; i<m_vSetting.size(); i++)
+	{
+		if(m_vModifiableSettingIndexes[i]==ui32SettingIndex)
+		{
+			m_vModifiableSettingIndexes.erase(it2);
+		}
+		else if(m_vModifiableSettingIndexes[i]>ui32SettingIndex)
+		{
+			m_vModifiableSettingIndexes[i]-=1;
+		}
+		it2++;
+	}
 
 	this->notify(BoxModification_SettingRemoved, ui32SettingIndex);
 
@@ -760,6 +786,58 @@ boolean CBox::setSettingValue(
 
 	return true;
 }
+
+//*
+boolean CBox::getSettingMod(
+	const OpenViBE::uint32 ui32SettingIndex,
+	OpenViBE::boolean& rValue) const
+{
+	if(ui32SettingIndex>=m_vSetting.size())
+	{
+		return false;
+	}
+	rValue=m_vSetting[ui32SettingIndex].m_bMod;
+	return true;
+}
+
+
+boolean CBox::setSettingMod(
+	const OpenViBE::uint32 ui32SettingIndex,
+	const OpenViBE::boolean rValue)
+{
+	if(ui32SettingIndex>=m_vSetting.size())
+	{
+		return false;
+	}
+	m_vSetting[ui32SettingIndex].m_bMod=rValue;
+
+	//this->notify(BoxModification_SettingNameChanged, ui32SettingIndex);
+	return true;
+}
+
+boolean CBox::hasModUI(void)const
+{
+	uint32 i=0;
+	boolean rValue = false;
+	while((i<m_vSetting.size())&&(!rValue))
+	{
+		rValue = m_vSetting[i].m_bMod;
+		i++;
+	}
+	return rValue;
+}
+
+uint32* CBox::getModifiableSettings(uint32& rCount)const
+{
+	uint32* l_pReturn = NULL;
+	rCount = m_vModifiableSettingIndexes.size();
+
+	return l_pReturn;
+
+}
+
+
+//*/
 
 //___________________________________________________________________//
 //                                                                   //

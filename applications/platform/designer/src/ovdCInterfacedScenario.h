@@ -6,6 +6,10 @@
 #include "ovdCInterfacedObject.h"
 #include "ovdCScenarioStateStack.h"
 
+//moved here for modUI
+#include <vector>
+#include "ovdCBoxConfigurationDialog.h"
+
 #include <map>
 #include <vector>
 #include <string>
@@ -94,6 +98,10 @@ namespace OpenViBEDesigner
 		void releasePlayerVisualisation(void);
 
 		OpenViBE::boolean hasSelection(void);
+
+		OpenViBE::boolean updateModUIBoxes(void);
+		OpenViBE::boolean deleteModUIBoxes(void);
+		OpenViBE::boolean setModUIWidgets(void);
 /*
 	private:
 
@@ -168,6 +176,8 @@ namespace OpenViBEDesigner
 		std::map < OpenViBE::uint32, BoxContextMenuCB > m_vBoxContextMenuCB;
 
 		OpenViBEDesigner::CScenarioStateStack m_oStateStack;
+
+		std::vector<CBoxConfigurationDialog*> m_vBoxConfigurationDialog;
 	};
 };
 

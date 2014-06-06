@@ -22,6 +22,8 @@
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Name                         OpenViBE::CIdentifier(0xF653238C, 0xCF13CC1E)
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_DefaultValue                 OpenViBE::CIdentifier(0x22B803B1, 0xB99EB29C)
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Value                        OpenViBE::CIdentifier(0x4B157087, 0xA17AC752)
+#define OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Modifiability				OpenViBE::CIdentifier(0x7F87A192, 0x16534D27)
+
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Box_Attributes                           OpenViBE::CIdentifier(0x5A512182, 0xEA975174)
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Box_Attribute                            OpenViBE::CIdentifier(0xAAE1C0BA, 0x0CCB4F6E)
 #define OVTK_Algorithm_ScenarioExporter_NodeId_Box_Attribute_Identifier                 OpenViBE::CIdentifier(0xFDE975E7, 0x9EE828E5)

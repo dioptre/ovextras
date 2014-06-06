@@ -659,7 +659,6 @@ void CSettingCollectionHelper::setValueInteger(::GtkWidget* pWidget, const CStri
 
 	g_signal_connect(G_OBJECT(l_vWidget[1]), "clicked", G_CALLBACK(on_button_setting_integer_up_pressed), this);
 	g_signal_connect(G_OBJECT(l_vWidget[2]), "clicked", G_CALLBACK(on_button_setting_integer_down_pressed), this);
-
 	gtk_entry_set_text(l_pWidget, rValue);
 }
 

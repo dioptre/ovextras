@@ -467,6 +467,8 @@ namespace
 		uint64 l_ui64CurrentTime=System::Time::zgetTime();
 		l_pInterfacedScenario->m_pPlayer->loop(l_ui64CurrentTime-l_pInterfacedScenario->m_ui64LastLoopTime);
 		l_pInterfacedScenario->m_ui64LastLoopTime=l_ui64CurrentTime;
+		//for modUI boxes
+		l_pInterfacedScenario->updateModUIBoxes();
 		return TRUE;
 	}
 
@@ -860,7 +862,7 @@ boolean CApplication::openScenario(const char* sFileName)
 					const IBox* l_pBox = l_rScenario.getBoxDetails(l_oBoxIdentifier);
 					CIdentifier l_oAlgorithmIdentifier = l_pBox->getAlgorithmClassIdentifier();
 					const IPluginObjectDesc* l_pPOD = m_rKernelContext.getPluginManager().getPluginObjectDescCreating(l_oAlgorithmIdentifier);
-					if(l_pPOD != NULL && l_pPOD->hasFunctionality(PluginFunctionality_Visualization))
+					if((l_pPOD != NULL && l_pPOD->hasFunctionality(PluginFunctionality_Visualization))||(l_pBox->hasModUI()))
 					{
 						//a visualisation widget was found in scenario : manually add it to visualisation tree
 						l_rVisualisationTree.addVisualisationWidget(
@@ -1629,13 +1631,18 @@ void CApplication::releasePlayer(void)
 
 		l_pCurrentInterfacedScenario->m_pPlayer->uninitialize();
 
+		//must delete the CBoxCOnfiguration dialog of the mod UI boxes here before the undoCB
+		l_pCurrentInterfacedScenario->deleteModUIBoxes();
+
 		m_rKernelContext.getPlayerManager().releasePlayer(l_pCurrentInterfacedScenario->m_oPlayerIdentifier);
 
 		l_pCurrentInterfacedScenario->m_oPlayerIdentifier=OV_UndefinedIdentifier;
 		l_pCurrentInterfacedScenario->m_pPlayer=NULL;
 
 		// restore the snapshot so settings override does not modify the scenario !
-		l_pCurrentInterfacedScenario->undoCB(false);
+		//commenting this line allow modified (by UI) settings to be saved (however, the scenario is not marked as changed)
+		//should already be commented in wip-all-designer branch
+		//l_pCurrentInterfacedScenario->undoCB(false);
 
 		// destroy player windows
 		l_pCurrentInterfacedScenario->releasePlayerVisualisation();

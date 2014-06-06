@@ -25,10 +25,20 @@ namespace OpenViBE
 			virtual OpenViBE::boolean addOutput(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier);
+
+			/*
 			virtual OpenViBE::boolean addSetting(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier,
 				const OpenViBE::CString& sDefaultValue);
+				//*/
+
+			virtual OpenViBE::boolean addSetting(
+				const OpenViBE::CString& sName,
+				const OpenViBE::CIdentifier& rTypeIdentifier,
+				const OpenViBE::CString& sDefaultValue,
+				const OpenViBE::boolean bModifiable = false);
+
 			virtual OpenViBE::boolean addFlag(
 				const OpenViBE::Kernel::EBoxFlag eBoxFlag);
 

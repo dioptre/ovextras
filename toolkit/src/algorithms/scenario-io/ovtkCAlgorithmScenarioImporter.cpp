@@ -52,11 +52,13 @@ namespace OpenViBEToolkit
 
 		typedef struct _SSetting
 		{
-			_default_and_copy_constructor_4_(_SSetting, m_oTypeIdentifier, m_sName, m_sDefaultValue, m_sValue);
+			//_default_and_copy_constructor_4_(_SSetting, m_oTypeIdentifier, m_sName, m_sDefaultValue, m_sValue);
+			_default_and_copy_constructor_5_(_SSetting, m_oTypeIdentifier, m_sName, m_sDefaultValue, m_sValue, m_bModifiability);
 			CIdentifier m_oTypeIdentifier;
 			CString m_sName;
 			CString m_sDefaultValue;
 			CString m_sValue;
+			boolean m_bModifiability;
 		} SSetting;
 		typedef struct _SAttribute
 		{
@@ -247,7 +249,8 @@ boolean CAlgorithmScenarioImporter::process(void)
 				l_pBox->addSetting(
 					s->m_sName,
 					s->m_oTypeIdentifier,
-					s->m_sDefaultValue);
+					s->m_sDefaultValue,
+					s->m_bModifiability);
 				l_pBox->setSettingValue(
 					l_pBox->getSettingCount()-1,
 					s->m_sValue);
@@ -465,6 +468,7 @@ boolean CAlgorithmScenarioImporterContext::processString(const CIdentifier& rIde
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Name)                         { m_oSymbolicScenario.m_vBox.back().m_vSetting.back().m_sName=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_DefaultValue)                 { m_oSymbolicScenario.m_vBox.back().m_vSetting.back().m_sDefaultValue=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Value)                        { m_oSymbolicScenario.m_vBox.back().m_vSetting.back().m_sValue=rValue; }
+	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Modifiability)				  { m_oSymbolicScenario.m_vBox.back().m_vSetting.back().m_bModifiability=(rValue==CString("true"))?true:false; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Comment_Text)                             { m_oSymbolicScenario.m_vComment.back().m_sText=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Comment_Attribute_Value)                  { m_oSymbolicScenario.m_vComment.back().m_vAttribute.back().m_sValue=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Link_Attribute_Value)                     { m_oSymbolicScenario.m_vLink.back().m_vAttribute.back().m_sValue=rValue; }

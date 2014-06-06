@@ -4176,7 +4176,7 @@ on Warnings and Errors</property>
           <object class="GtkTable" id="setting_editor-table">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="n_rows">3</property>
+			<property name="n_rows">4</property>
             <property name="n_columns">3</property>
             <property name="column_spacing">4</property>
             <property name="row_spacing">8</property>
@@ -4248,6 +4248,33 @@ on Warnings and Errors</property>
                 <property name="bottom_attach">3</property>
               </packing>
             </child>
+			<!-- this section is if we want a setting modifiability to be accessible from designer
+			<child>
+			  <object class="GtkLabel" id="setting_editor-setting_modifiability">
+				<property name="width_request">150</property>
+				<property name="visible">True</property>
+				<property name="can_focus">False</property>
+				<property name="label" translatable="yes">Mod :</property>
+			  </object>
+			  <packing>
+				<property name="top_attach">3</property>
+				<property name="bottom_attach">4</property>
+			  </packing>
+			</child>
+			<child>
+			  <object class="GtkCheckButton" id="settings_editor-checkbutton_setting_modifiability">
+				<property name="visible">True</property>
+				<property name="can_focus">True</property>
+				<property name="receives_default">False</property>
+				<property name="draw_indicator">True</property>
+			  </object>
+			  <packing>
+				  <property name="top_attach">3</property>
+				  <property name="left_attach">1</property>
+				  <property name="bottom_attach">4</property>
+			  </packing>
+			</child>
+			-->
             <child>
               <object class="GtkButton" id="setting_editor-setting_name_revert_button">
                 <property name="label">gtk-revert-to-saved</property>

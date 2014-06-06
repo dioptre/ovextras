@@ -25,6 +25,7 @@
 #include "algorithms/ovpCApplyTemporalFilter.h"
 #include "algorithms/ovpCComputeTemporalFilterCoefficients.h"
 #include "box-algorithms/ovpCTemporalFilterBoxAlgorithm.h"
+#include "box-algorithms/ovpCModTemporalFilterBoxAlgorithm.h"
 
 #include "algorithms/ovpCDownsampling.h"
 #include "box-algorithms/ovpCDownsamplingBoxAlgorithm.h"
@@ -98,6 +99,7 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CWindowingFunctionsDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CComputeTemporalFilterCoefficientsDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CTemporalFilterBoxAlgorithmDesc);
+OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CModTemporalFilterBoxAlgorithmDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CApplyTemporalFilterDesc);
 #endif // TARGET_HAS_ThirdPartyITPP
 

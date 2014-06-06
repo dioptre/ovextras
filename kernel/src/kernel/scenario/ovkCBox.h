@@ -115,7 +115,8 @@ namespace OpenViBE
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier,
 				const OpenViBE::CString& sDefaultValue,
-				const OpenViBE::int32 i32Index=-1);
+				const OpenViBE::int32 i32Index=-1,
+				const OpenViBE::boolean bModifiability = false);
 			virtual OpenViBE::boolean removeSetting(
 				const OpenViBE::uint32 ui32Index);
 			virtual OpenViBE::uint32 getSettingCount(void) const;
@@ -143,6 +144,18 @@ namespace OpenViBE
 			virtual OpenViBE::boolean setSettingValue(
 				const OpenViBE::uint32 ui32SettingIndex,
 				const OpenViBE::CString& rValue);
+
+			//*
+			virtual OpenViBE::boolean getSettingMod(
+				const OpenViBE::uint32 ui32SettingIndex,
+				OpenViBE::boolean& rValue) const;
+			virtual OpenViBE::boolean setSettingMod(
+				const OpenViBE::uint32 ui32SettingIndex,
+				const OpenViBE::boolean rValue);
+			virtual OpenViBE::boolean hasModUI(void)const;
+
+			virtual OpenViBE::uint32* getModifiableSettings(OpenViBE::uint32& rCount)const;
+			//*/
 
 			virtual OpenViBE::boolean acceptVisitor(
 				OpenViBE::IObjectVisitor& rObjectVisitor);
@@ -196,11 +209,13 @@ namespace OpenViBE
 					:m_sName(s.m_sName)
 					,m_oTypeIdentifier(s.m_oTypeIdentifier)
 					,m_sDefaultValue(s.m_sDefaultValue)
-					,m_sValue(s.m_sValue) { }
+					,m_sValue(s.m_sValue)
+					,m_bMod(s.m_bMod) { }
 				OpenViBE::CString m_sName;
 				OpenViBE::CIdentifier m_oTypeIdentifier;
 				OpenViBE::CString m_sDefaultValue;
 				OpenViBE::CString m_sValue;
+				OpenViBE::boolean m_bMod;
 			};
 
 			class CMessageInput
@@ -239,6 +254,9 @@ namespace OpenViBE
 			std::vector<CInput> m_vInput;
 			std::vector<COutput> m_vOutput;
 			std::vector<CSetting> m_vSetting;
+			//to avoid having to recheck every setting every time
+			//careful to update at each setting modification
+			std::vector<OpenViBE::uint32> m_vModifiableSettingIndexes;
 
 			//only the name of the in/output are stored for message socket
 			std::vector<CMessageInput> m_vMessageInput;

@@ -35,6 +35,7 @@ namespace OpenViBE
 				virtual __BridgeBindFunc1__((*m_pBox), CIdentifier, getNextAttributeIdentifier, const, const CIdentifier&, rPreviousIdentifier);
 
 				// IBox
+				virtual __BridgeBindFunc0__((*m_pBox), boolean, hasModUI, const);
 
 				virtual __BridgeBindFunc0__((*m_pBox), CIdentifier, getIdentifier, const);
 				virtual __BridgeBindFunc0__((*m_pBox), CString, getName, const);
@@ -80,12 +81,16 @@ namespace OpenViBE
 				virtual __BridgeImplFunc2__((*m_pBox), boolean, setOutputType, , return false, const uint32, ui32OutputIndex, const CIdentifier&, rTypeIdentifier);
 				virtual __BridgeImplFunc2__((*m_pBox), boolean, setOutputName, , return false, const uint32, ui32OutputIndex, const CString&, rName);
 
-				virtual __BridgeImplFunc4__((*m_pBox), boolean, addSetting, , return false, const CString&, sName, const CIdentifier&, rTypeIdentifier, const CString&, sDefaultValue, const int32, i32Index);
+				virtual __BridgeImplFunc5__((*m_pBox), boolean, addSetting, , return false, const CString&, sName, const CIdentifier&, rTypeIdentifier, const CString&, sDefaultValue, const int32, i32Index, const boolean, bModifiability);
+				
 				virtual __BridgeImplFunc1__((*m_pBox), boolean, removeSetting, , return false, const uint32, ui32Index);
 				virtual __BridgeBindFunc0__((*m_pBox), uint32, getSettingCount, const);
 				virtual __BridgeBindFunc2__((*m_pBox), boolean, getSettingType, const, const uint32, ui32SettingIndex, CIdentifier&, rTypeIdentifier);
 				virtual __BridgeBindFunc2__((*m_pBox), boolean, getSettingName, const, const uint32, ui32SettingIndex, CString&, rName);
 				virtual __BridgeBindFunc2__((*m_pBox), boolean, getSettingDefaultValue, const, const uint32, ui32SettingIndex, CString&, rDefaultValue);
+//lmlm//
+				virtual __BridgeBindFunc2__((*m_pBox), boolean, getSettingMod, const, const uint32, ui32SettingIndex, boolean&, rValue);
+				virtual __BridgeImplFunc1__((*m_pBox), uint32*, getModifiableSettings, const , return NULL, uint32&, rCount);
 #if 0
 				virtual __BridgeBindFunc2__((*m_pBox), boolean, getSettingValue, const, const uint32, ui32SettingIndex, CString&, rValue);
 #else
@@ -121,6 +126,8 @@ namespace OpenViBE
 				virtual __BridgeImplFunc2__((*m_pBox), boolean, setSettingName, , return false, const uint32, ui32SettingIndex, const CString&, rName);
 				virtual __BridgeImplFunc2__((*m_pBox), boolean, setSettingDefaultValue, , return false, const uint32, ui32SettingIndex, const CString&, rDefaultValue);
 				virtual __BridgeImplFunc2__((*m_pBox), boolean, setSettingValue, , return false, const uint32, ui32SettingIndex, const CString&, rValue);
+				//lnln//
+				virtual __BridgeImplFunc2__((*m_pBox), boolean, setSettingMod, , return false, const uint32, ui32SettingIndex, const boolean, rValue);
 
 				_IsDerivedFromClass_Final_(TKernelObject<IBox>, OVK_ClassId_Kernel_Player_StaticBoxContext)
 

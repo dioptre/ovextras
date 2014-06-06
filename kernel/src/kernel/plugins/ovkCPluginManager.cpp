@@ -324,6 +324,11 @@ namespace
 			m_oHash=m_oHash.toUInteger()^v;
 			return true;
 		}
+		virtual boolean addSetting(const CString& sName,const CIdentifier& rTypeIdentifier,const CString& sDefaultValue, const boolean bModifiable)
+		{
+			return addSetting(sName, rTypeIdentifier, sDefaultValue);
+		}
+
 		virtual boolean addFlag(const EBoxFlag eBoxFlag)
 		{
 			switch(eBoxFlag)
