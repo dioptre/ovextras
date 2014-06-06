@@ -108,29 +108,12 @@ boolean CPlayer::initialize(void)
 	else
 	{
 		//create an easily named local token that scenarios can use to read their own current directory. Note that the value of this token will often be overwritten by OpenViBE.
-		const CString l_sLocalPathToken("Player_ScenarioDirectory");
-		//We set a local Player_ScenarioDirectory to avoid it from changing during execution (the global change each time we switch a tab)
-		const CIdentifier l_sOldIdentifier = m_pLocalConfigurationManager->lookUpConfigurationTokenIdentifier(l_sLocalPathToken, false);
-		if(l_sOldIdentifier == OV_UndefinedIdentifier)
-		{
-			m_pLocalConfigurationManager->createConfigurationToken(l_sLocalPathToken,l_sWorkingDir);
-		}
-		else
-		{
-			m_pLocalConfigurationManager->setConfigurationTokenValue( m_pLocalConfigurationManager->lookUpConfigurationTokenIdentifier(l_sLocalPathToken), l_sWorkingDir);
-		}
+		
+		//We set a local Player_ScenarioDirectory to avoid it from changing during execution (the global changes each time we switch a tab)
+		m_pLocalConfigurationManager->addOrReplaceConfigurationToken(CString("Player_ScenarioDirectory"), l_sWorkingDir);
 
 		//Old scenario token, deprecated. Here for completeness, if some scenarios still use it.
-		const CString l_sLocalPathTokenDeprecated("__volatile_ScenarioDir");
-		const CIdentifier l_sOldIdentifierDeprecated = m_pLocalConfigurationManager->lookUpConfigurationTokenIdentifier(l_sLocalPathTokenDeprecated, false);
-		if(l_sOldIdentifierDeprecated == OV_UndefinedIdentifier)
-		{
-			m_pLocalConfigurationManager->createConfigurationToken(l_sLocalPathTokenDeprecated,l_sWorkingDir);
-		}
-		else
-		{
-			m_pLocalConfigurationManager->setConfigurationTokenValue( m_pLocalConfigurationManager->lookUpConfigurationTokenIdentifier(l_sLocalPathTokenDeprecated), l_sWorkingDir);
-		}
+		m_pLocalConfigurationManager->addOrReplaceConfigurationToken(CString("__volatile_ScenarioDir"), l_sWorkingDir);
 
 		//load local, scenario-specific configuration file
 		CString l_sConfigPath = l_sWorkingDir + "/scenario.conf";
