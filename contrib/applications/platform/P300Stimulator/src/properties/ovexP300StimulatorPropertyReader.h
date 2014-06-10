@@ -34,7 +34,7 @@ namespace OpenViBEApplications
 		//OpenViBE::uint64 getGroup2Size() { return m_ui32Group2Size; }
 		OpenViBE::uint32 getNumberOfRepetitions() { return m_ui32RepetitionCountInTrial; }
 		OpenViBE::uint32 getMinNumberOfRepetitions() { return m_ui32MinRepetitions; }
-		OpenViBE::uint32 getNumberOfTrials() { return m_ui32TrialCount; }
+		OpenViBE::uint32 getNumberOfTrials() { return m_sTargetWord.size(); }
 		OpenViBE::uint64 getFlashDuration() { return m_ui64FlashDuration; }
 		//OpenViBE::uint64 getNoFlashDuration() { return m_ui64NoFlashDuration; }
 		OpenViBE::uint64 getInterStimulusOnset() { return m_ui64InterStimulusOnset; }

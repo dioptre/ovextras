@@ -42,6 +42,7 @@ namespace OpenViBEApplications
 					m_oSharedMemoryReader = new ExternalP300SharedMemoryReader();
 					OpenViBE::CString l_sSharedMemoryName = propertyObject->getSharedMemoryName();
 					m_oSharedMemoryReader->openSharedMemory(l_sSharedMemoryName);
+					m_ui64Prediction=0;
 
 				}
 				

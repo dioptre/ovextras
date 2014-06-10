@@ -25,6 +25,7 @@ ExternalP300Stimulator::ExternalP300Stimulator(P300StimulatorPropertyReader* pro
 	m_ui32RepetitionCountInTrial = m_pSequenceGenerator->getNumberOfRepetitions();
 	m_ui32MinRepetitions = propertyObject->getMinNumberOfRepetitions();
 	m_ui32TrialCount = propertyObject->getNumberOfTrials();
+	m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << m_ui32TrialCount << " trials\n";
 	m_ui64FlashDuration = propertyObject->getFlashDuration();
 	m_ui64InterStimulusOnset = propertyObject->getInterStimulusOnset();
 	m_ui64InterRepetitionDuration = propertyObject->getInterRepetitionDelay();
@@ -135,6 +136,7 @@ void ExternalP300Stimulator::run()
 		{
 			this->adjustForNextTrial(l_ui64CurrentTime);
 			m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Prediction received that is different from zero, induce early stopping...\n";
+			m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Prediction received " << l_ui64Prediction << "\n";
 			m_oEvidenceAcc->flushEvidence();//flush
 		}
 
@@ -217,6 +219,7 @@ void ExternalP300Stimulator::run()
 			//m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "reset times\n";
 			//m_ui64RealCycleTime = 0;
 			//m_ui64StimulatedCycleTime = 0;
+			m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Switch states from " << m_ui32LastState << " to " << l_ui32State << "\n";
 
 			switch(m_ui32LastState)
 			{

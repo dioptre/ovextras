@@ -100,11 +100,11 @@ namespace OpenViBEApplications
 						OpenViBE::float64 l_f64ProbabilityEstimate = 0.0;
 						OpenViBE::float64 l_f64InputValue = *(l_pInputMatrix->getBuffer()+j);
 						double m_bScaleFactor=0.5;
-						if (true)//(m_oInputType==OVP_InputType_EvidenceAccumulationDistance)
+						if (false)//(m_oInputType==OVP_InputType_EvidenceAccumulationDistance)
 						{
 							l_f64ProbabilityEstimate = std::exp(m_bScaleFactor*l_f64InputValue) /(1+std::exp(m_bScaleFactor*l_f64RealPredictionValue));
 						}
-						else if (false)//(m_oInputType==OVP_InputType_EvidenceAccumulationProbability)
+						else if (true)//(m_oInputType==OVP_InputType_EvidenceAccumulationProbability)
 						{
 							l_f64ProbabilityEstimate = l_f64InputValue==0?1.0-l_f64InputValue:l_f64InputValue;
 						}
