@@ -15,7 +15,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/scripts/configuration-peripheral-settings.lua</Value>
+					<Value>${Player_ScenarioDirectory}/scripts/configuration-peripheral-settings.lua</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
@@ -114,7 +114,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/scripts/configuration-experiment-settings.lua</Value>
+					<Value>${Player_ScenarioDirectory}/scripts/configuration-experiment-settings.lua</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x7f45a2a9, 0x7db12219)</TypeIdentifier>
@@ -233,7 +233,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/scripts/configuration-eeg-input-settings.lua</Value>
+					<Value>${Player_ScenarioDirectory}/scripts/configuration-eeg-input-settings.lua</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
@@ -256,14 +256,14 @@
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Training Data File</Name>
-					<DefaultValue>${__volatile_ScenarioDir}/signals/ssvep-record-current.ov</DefaultValue>
-					<Value>${__volatile_ScenarioDir}/signals/ssvep-record-current.ov</Value>
+					<DefaultValue>${Player_ScenarioDirectory}/signals/ssvep-record-current.ov</DefaultValue>
+					<Value>${Player_ScenarioDirectory}/signals/ssvep-record-current.ov</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Testing Data File</Name>
-					<DefaultValue>${__volatile_ScenarioDir}/signals/ssvep-record-current.ov</DefaultValue>
-					<Value>${__volatile_ScenarioDir}/signals/ssvep-record-current.ov</Value>
+					<DefaultValue>${Player_ScenarioDirectory}/signals/ssvep-record-current.ov</DefaultValue>
+					<Value>${Player_ScenarioDirectory}/signals/ssvep-record-current.ov</Value>
 				</Setting>
 			</Settings>
 			<Attributes>

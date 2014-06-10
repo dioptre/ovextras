@@ -17,7 +17,7 @@ function initialize(box)
 	end
 	
 	-- create the configuration file for the shooter application
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/appconf/impact-configuration.conf"), "w")
+	cfg_file = io.open(box:get_config("${Player_ScenarioDirectory}/appconf/impact-configuration.conf"), "w")
 
 	cfg_file:write("SSVEP_EnemyOrder = ", s_sequence_types, "\n")
 	cfg_file:write("SSVEP_TargetLockdown = ", s_target_lockdown, "\n")

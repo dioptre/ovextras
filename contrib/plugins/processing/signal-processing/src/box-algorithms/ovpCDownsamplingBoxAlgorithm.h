@@ -45,6 +45,7 @@ namespace OpenViBEPlugins
 
 			OpenViBE::uint64 m_ui64LastEndTime;
 			OpenViBE::boolean m_bFlagFirstTime;
+			OpenViBE::boolean m_bWarned;
 			OpenViBE::uint64 m_ui64LastBufferSize;
 			OpenViBE::uint64 m_ui64CurrentBufferSize;
 			OpenViBE::uint64 m_ui64SignalType;
@@ -72,7 +73,7 @@ namespace OpenViBEPlugins
 			{
 				rPrototype.addInput  ("Input signal",           OV_TypeId_Signal);
 				rPrototype.addOutput ("Output signal",          OV_TypeId_Signal);
-				rPrototype.addSetting("New sampling rate (Hz)", OV_TypeId_Integer, "40");
+				rPrototype.addSetting("New sampling rate (Hz)", OV_TypeId_Integer, "32");
 				rPrototype.addSetting("Frequency cutoff ratio", OVP_TypeId_FrequencyCutOffRatio, "1/4");
 				rPrototype.addSetting("Name of filter",         OVP_TypeId_FilterMethod, "Butterworth");
 				rPrototype.addSetting("Filter order",           OV_TypeId_Integer, "4");

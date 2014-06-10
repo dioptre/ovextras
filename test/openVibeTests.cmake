@@ -15,7 +15,17 @@ find_program(HOSTNAME_CMD NAMES hostname)
 exec_program(${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
 IF(NOT DEFINED CTEST_SITE)
 	SET(CTEST_SITE                          "${HOSTNAME}")
-ENDIF(NOT DEFINED CTEST_SITE)	
+ENDIF(NOT DEFINED CTEST_SITE)
+
+# SET GIT parameters
+
+IF(NOT DEFINED CTEST_GIT_URL)
+	SET(CTEST_GIT_URL                          "git://scm.gforge.inria.fr/openvibe/openvibe.git")
+ENDIF(NOT DEFINED CTEST_GIT_URL)
+
+IF(NOT DEFINED CTEST_BRANCH)
+	SET(CTEST_BRANCH                          "master")
+ENDIF(NOT DEFINED CTEST_BRANCH)
 
 ## -- Set site / build name
 ## --------------------------
@@ -38,7 +48,7 @@ getuname(osname -s)
 getuname(osrel  -r)
 getuname(cpu    -m)
 
-set(CTEST_BUILD_NAME                    "${osname}_${cpu}_${distrib}${distrib-release}")
+set(CTEST_BUILD_NAME                    "${CTEST_BRANCH}_${osname}_${cpu}_${distrib}${distrib-release}")
 
 
 # -----------------------------------------------------------  
@@ -67,7 +77,7 @@ ENDIF(${MODEL} MATCHES Continuous)
 set(CTEST_SOURCE_DIRECTORY              "${OV_ROOT_DIR}/trunk")
 
 ## -- BIN Dir
-set(CTEST_BINARY_DIRECTORY              "${OV_ROOT_DIR}/dist") 
+set(CTEST_BINARY_DIRECTORY	              "${OV_ROOT_DIR}/dist") 
 
 ## -- DashBoard Root
 set(CTEST_DASHBOARD_ROOT                "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -83,7 +93,7 @@ find_program(CTEST_GIT_COMMAND NAMES git)
 
 ## -- Checkout command
 if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}")
-	set(CTEST_CHECKOUT_COMMAND     "${CTEST_GIT_COMMAND} clone git://scm.gforge.inria.fr/openvibe/openvibe.git ${CTEST_SOURCE_DIRECTORY}")
+	set(CTEST_CHECKOUT_COMMAND     "${CTEST_GIT_COMMAND} clone -b ${CTEST_BRANCH} ${CTEST_GIT_URL} ${CTEST_SOURCE_DIRECTORY}")
 endif(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}")
 
 ## -- Update Command
@@ -169,6 +179,14 @@ IF(${MODEL} MATCHES Continuous)
 		RETURN()
 	ENDIF(NOT EXISTS "lock")
 ENDIF(${MODEL} MATCHES Continuous)
+
+## -- 'CLEAN UP' leftover processes, a hack
+## this may not be safe unless we know that no concurrent test runs are performed - do we?
+#IF(UNIX)
+#    message(" -- Terminating any leftover designers ${MODEL} - ${CTEST_BUILD_NAME} --")
+#	find_program(KILLALL NAMES killall)
+#	exec_program("${KILLALL}" ARGS "-KILL openvibe-designer" OUTPUT_VARIABLE "KILLALL_RESULT")
+#ENDIF(UNIX)
 
 set(ALL_OK TRUE)
 ## -- Update

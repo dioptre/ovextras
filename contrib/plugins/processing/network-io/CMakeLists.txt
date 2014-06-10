@@ -1,4 +1,4 @@
-PROJECT(openvibe-plugins-turbofieldtrip)
+PROJECT(openvibe-plugins-contrib-network-io)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})
 SET(PROJECT_VERSION_MINOR ${OV_GLOBAL_VERSION_MINOR})
@@ -15,7 +15,9 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
 INCLUDE("FindOpenViBEToolkit")
+# INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleSystem")
+INCLUDE("FindThirdPartyLSL")
 
 # ---------------------------------
 # Target macros

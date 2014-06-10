@@ -9,6 +9,7 @@
 #include "ovasCDriverBrainmasterDiscovery.h"
 #include "ovasCDriverBrainProductsActiCHamp.h"
 #include "ovasCDriverBrainProductsBrainVisionRecorder.h"
+#include "ovasCDriverCognionics.h"
 #include "ovasCDriverCtfVsmMeg.h"
 #include "ovasCDriverGTecGUSBamp.h"
 #include "ovasCDriverGTecGUSBampLegacy.h"
@@ -27,6 +28,9 @@ namespace OpenViBEContributions {
 	void initiateContributions(OpenViBEAcquisitionServer::CAcquisitionServerGUI* pGUI, OpenViBEAcquisitionServer::CAcquisitionServer* pAcquisitionServer, const OpenViBE::Kernel::IKernelContext& rKernelContext, std::vector<OpenViBEAcquisitionServer::IDriver*>* vDriver)
 	{
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder(pAcquisitionServer->getDriverContext()));
+#if defined WIN32
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverCognionics(pAcquisitionServer->getDriverContext()));
+#endif
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverCtfVsmMeg(pAcquisitionServer->getDriverContext()));
 #if defined TARGET_HAS_ThirdPartyGUSBampCAPI
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverGTecGUSBamp(pAcquisitionServer->getDriverContext()));

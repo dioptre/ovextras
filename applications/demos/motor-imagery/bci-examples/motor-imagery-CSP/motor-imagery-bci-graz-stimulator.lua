@@ -84,9 +84,14 @@ function process(box)
 
 	end
 
-	box:send_stimulation(1, OVTK_StimulationId_ExperimentStop, t, 0)
+	-- send end for completeness	
+	box:send_stimulation(1, OVTK_GDF_End_Of_Session, t, 0)
 	t = t + 5
 
 	box:send_stimulation(1, OVTK_StimulationId_Train, t, 0)
-
+	t = t + 1
+	
+	-- used to cause the acquisition scenario to stop
+	box:send_stimulation(1, OVTK_StimulationId_ExperimentStop, t, 0)
+	
 end
