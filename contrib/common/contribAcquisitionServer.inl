@@ -17,7 +17,7 @@
 #include "ovasCDriverMitsarEEG202A.h"
 #include "ovasCDriverOpenALAudioCapture.h"
 #include "ovasCDriverOpenEEGModularEEG.h"
-
+#include "ovasCDriverTMSi.h"
 
 namespace OpenViBEContributions {
 
@@ -52,6 +52,10 @@ namespace OpenViBEContributions {
 
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverOpenEEGModularEEG(pAcquisitionServer->getDriverContext()));
 
+#if defined TARGET_OS_Windows
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverTMSi(pAcquisitionServer->getDriverContext()));
+#endif
+		
 		pGUI->registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginExternalStimulations(rKernelContext));
 	}
 
