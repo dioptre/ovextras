@@ -508,17 +508,16 @@ void CInterfacedScenario::redraw(IBox& rBox)
 	vector<pair<int32, int32> > l_vInputPosition;
 	vector<pair<int32, int32> > l_vOutputPosition;
 
-	uint32 i;
 	const int xMargin=ov_round(5.0*m_f64CurrentScale);
 	const int yMargin=ov_round(5.0*m_f64CurrentScale);
 	const int iCircleSize=ov_round(11.0*m_f64CurrentScale);
 	const int iCircleSpace=ov_round(4.0*m_f64CurrentScale);
 
 	CBoxProxy l_oBoxProxy(m_rKernelContext, rBox);
-	int xSize=(int)l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) + xMargin*2;
-	int ySize=(int)l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) + yMargin*2;
-	int xStart=ov_round(l_oBoxProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1));
-	int yStart=ov_round(l_oBoxProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1));
+	const int xSize=(int)l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) + xMargin*2;
+	const int ySize=(int)l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) + yMargin*2;
+	const int xStart=ov_round(l_oBoxProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1));
+	const int yStart=ov_round(l_oBoxProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1));
 
 	updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
 	gdk_draw_rounded_rectangle(
@@ -528,11 +527,11 @@ void CInterfacedScenario::redraw(IBox& rBox)
 		xStart, yStart, xSize, ySize, ov_round(8.0*m_f64CurrentScale));
 	m_vInterfacedObject[m_ui32InterfacedObjectId]=CInterfacedObject(rBox.getIdentifier());
 
-	boolean l_bCanCreate =l_oBoxProxy.isBoxAlgorithmPluginPresent();
-	boolean l_bUpToDate  =l_bCanCreate ?  l_oBoxProxy.isUpToDate() : true;
-	boolean l_bDeprecated=l_bCanCreate && l_oBoxProxy.isDeprecated();
-	boolean l_bUnstable  =l_bCanCreate && l_oBoxProxy.isUnstable();
-	boolean l_bMuted     =l_oBoxProxy.getMute();
+	const boolean l_bCanCreate =l_oBoxProxy.isBoxAlgorithmPluginPresent();
+	const boolean l_bUpToDate  =l_bCanCreate ?  l_oBoxProxy.isUpToDate() : true;
+	const boolean l_bDeprecated=l_bCanCreate && l_oBoxProxy.isDeprecated();
+	const boolean l_bUnstable  =l_bCanCreate && l_oBoxProxy.isUnstable();
+	const boolean l_bMuted     =l_oBoxProxy.getMute();
 
 	if(!this->isLocked() || !m_bDebugCPUUsage)
 	{
@@ -569,8 +568,10 @@ void CInterfacedScenario::redraw(IBox& rBox)
 	{
 		CIdentifier l_oComputationTime;
 		l_oComputationTime.fromString(rBox.getAttributeValue(OV_AttributeId_Box_ComputationTimeLastSecond));
-		uint64 l_ui64ComputationTime=(l_oComputationTime==OV_UndefinedIdentifier?0:l_oComputationTime.toUInteger());
-		uint64 l_ui64ComputationTimeReference=(1LL<<32)/(m_ui32BoxCount==0?1:m_ui32BoxCount);
+		
+		// FIXME use timearithmetics.h?
+		const uint64 l_ui64ComputationTime=(l_oComputationTime==OV_UndefinedIdentifier?0:l_oComputationTime.toUInteger());
+		const uint64 l_ui64ComputationTimeReference=(1LL<<32)/(m_ui32BoxCount==0?1:m_ui32BoxCount);
 
 		::GdkColor l_oColor;
 		if(l_ui64ComputationTime<l_ui64ComputationTimeReference)
@@ -623,8 +624,8 @@ void CInterfacedScenario::redraw(IBox& rBox)
 	else
 		l_oAttributeHandler.setAttributeValue<int>(OV_AttributeId_Box_YSize, ySize);
 
-	int l_iInputOffset=xSize/2-rBox.getInputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize/4;
-	for(i=0; i<rBox.getInputCount(); i++)
+	const int l_iInputOffset=xSize/2-rBox.getInputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize/4;
+	for(uint32 i=0; i<rBox.getInputCount(); i++)
 	{
 		CIdentifier l_oInputIdentifier;
 		rBox.getInputType(i, l_oInputIdentifier);
@@ -667,8 +668,8 @@ void CInterfacedScenario::redraw(IBox& rBox)
 			l_vPoint,
 			3);
 
-		int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iInputOffset;
-		int32 y=yStart-(iCircleSize>>1)-m_i32ViewOffsetY;
+		const int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iInputOffset;
+		const int32 y=yStart-(iCircleSize>>1)-m_i32ViewOffsetY;
 		CIdentifier l_oLinkIdentifier=m_rScenario.getNextLinkIdentifierToBoxInput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
 		while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
 		{
@@ -692,11 +693,11 @@ void CInterfacedScenario::redraw(IBox& rBox)
 	}
 	//m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "message input "<< " / " << rBox.getMessageInputCount() <<"\n";
 	//draw messages input
-	int l_iMessageInputOffset=ySize/2-rBox.getMessageInputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize;
+	const int l_iMessageInputOffset=ySize/2-rBox.getMessageInputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize;
 	//int minput = 3;
 	//int l_iMessageInputOffset=ySize/2-minput*(iCircleSpace+iCircleSize)/2+iCircleSize;
 		//for(i=0; i<minput; i++)
-	for(i=0; i<rBox.getMessageInputCount(); i++)
+	for(uint32 i=0; i<rBox.getMessageInputCount(); i++)
 	{
 		::GdkColor l_oMessageInputColor;
 		l_oMessageInputColor.pixel=(guint16)0;
@@ -737,8 +738,8 @@ void CInterfacedScenario::redraw(IBox& rBox)
 
 		//int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iMessageInputOffset;
 		//int32 y=yStart-(iCircleSize>>1)-m_i32ViewOffsetY;
-		int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX - iCircleSize;
-		int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageInputOffset - iCircleSize/2;
+		const int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX - iCircleSize;
+		const int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageInputOffset - iCircleSize/2;
 		CIdentifier l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierToBoxInput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
 		while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
 		{
@@ -761,8 +762,8 @@ void CInterfacedScenario::redraw(IBox& rBox)
 		}
 
 	}
-	int l_iMessageOutputOffset=ySize/2-rBox.getMessageOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize;
-	for(i=0; i<rBox.getMessageOutputCount(); i++)
+	const int l_iMessageOutputOffset=ySize/2-rBox.getMessageOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize;
+	for(uint32 i=0; i<rBox.getMessageOutputCount(); i++)
 	{
 		::GdkColor l_oMessageOutputColor;
 		l_oMessageOutputColor.pixel=(guint16)0;
@@ -802,9 +803,9 @@ void CInterfacedScenario::redraw(IBox& rBox)
 
 		//int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iMessageOutputOffset;
 		//int32 y=yStart+ySize+(iCircleSize>>1)+1-m_i32ViewOffsetY;
-		int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX + xSize;
+		const int32 x=xStart+(iCircleSize>>1)-m_i32ViewOffsetX + xSize;
 		//int32 y=yStart+i*(iCircleSpace+iCircleSize)+ySize-m_i32ViewOffsetY+l_iMessageOutputOffset-iCircleSize;
-		int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageOutputOffset - iCircleSize/2;
+		const int32 y=yStart+i*(iCircleSpace+iCircleSize)-m_i32ViewOffsetY+l_iMessageOutputOffset - iCircleSize/2;
 		CIdentifier l_oLinkIdentifier=m_rScenario.getNextMessageLinkIdentifierFromBoxOutput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
 		while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
 		{
@@ -827,8 +828,8 @@ void CInterfacedScenario::redraw(IBox& rBox)
 		}
 
 	}
-	int l_iOutputOffset=xSize/2-rBox.getOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize/4;
-	for(i=0; i<rBox.getOutputCount(); i++)
+	const int l_iOutputOffset=xSize/2-rBox.getOutputCount()*(iCircleSpace+iCircleSize)/2+iCircleSize/4;
+	for(uint32 i=0; i<rBox.getOutputCount(); i++)
 	{
 		CIdentifier l_oOutputIdentifier;
 		rBox.getOutputType(i, l_oOutputIdentifier);
@@ -871,8 +872,8 @@ void CInterfacedScenario::redraw(IBox& rBox)
 			l_vPoint,
 			3);
 
-		int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iOutputOffset;
-		int32 y=yStart+ySize+(iCircleSize>>1)+1-m_i32ViewOffsetY;
+		const int32 x=xStart+i*(iCircleSpace+iCircleSize)+(iCircleSize>>1)-m_i32ViewOffsetX+l_iOutputOffset;
+		const int32 y=yStart+ySize+(iCircleSize>>1)+1-m_i32ViewOffsetY;
 		CIdentifier l_oLinkIdentifier=m_rScenario.getNextLinkIdentifierFromBoxOutput(OV_UndefinedIdentifier, rBox.getIdentifier(), i);
 		while(l_oLinkIdentifier!=OV_UndefinedIdentifier)
 		{
@@ -937,10 +938,10 @@ void CInterfacedScenario::redraw(IComment& rComment)
 	const int yMargin=ov_round(16.0*m_f64CurrentScale);
 
 	CCommentProxy l_oCommentProxy(m_rKernelContext, rComment);
-	int xSize=(int)l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))+xMargin*2;
-	int ySize=(int)l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))+yMargin*2;
-	int xStart=ov_round(l_oCommentProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1));
-	int yStart=ov_round(l_oCommentProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1));
+	const int xSize=(int)l_oCommentProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea))+xMargin*2;
+	const int ySize=(int)l_oCommentProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea))+yMargin*2;
+	const int xStart=ov_round(l_oCommentProxy.getXCenter()*m_f64CurrentScale+m_i32ViewOffsetX-(xSize>>1));
+	const int yStart=ov_round(l_oCommentProxy.getYCenter()*m_f64CurrentScale+m_i32ViewOffsetY-(ySize>>1));
 
 	updateStencilIndex(m_ui32InterfacedObjectId, l_pStencilGC);
 	gdk_draw_rounded_rectangle(
@@ -1129,8 +1130,8 @@ boolean CInterfacedScenario::pickInterfacedObject(int x, int y, int iSizeX, int 
 		return false;
 	}
 
-	int l_iRowBytesCount=gdk_pixbuf_get_rowstride(l_pPixbuf);
-	int l_iChannelCount=gdk_pixbuf_get_n_channels(l_pPixbuf);
+	const int l_iRowBytesCount=gdk_pixbuf_get_rowstride(l_pPixbuf);
+	const int l_iChannelCount=gdk_pixbuf_get_n_channels(l_pPixbuf);
 	for(j=0; j<iSizeY; j++)
 	{
 		for(i=0; i<iSizeX; i++)
@@ -1328,8 +1329,8 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		gint l_iMinY= 0x7fff;
 		gint l_iMaxY=-0x7fff;
 
-		gint l_iMarginX=ov_round(32.0 * m_f64CurrentScale);
-		gint l_iMarginY=ov_round(32.0 * m_f64CurrentScale);
+		const gint l_iMarginX=ov_round(32.0 * m_f64CurrentScale);
+		const gint l_iMarginY=ov_round(32.0 * m_f64CurrentScale);
 
 		CIdentifier l_oBoxIdentifier;
 		while((l_oBoxIdentifier=m_rScenario.getNextBoxIdentifier(l_oBoxIdentifier))!=OV_UndefinedIdentifier)
@@ -1479,10 +1480,10 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 
 		if(m_ui32CurrentMode==Mode_Selection || m_ui32CurrentMode==Mode_SelectionAdd)
 		{
-			int l_iStartX=(int)min(m_f64PressMouseX, m_f64CurrentMouseX);
-			int l_iStartY=(int)min(m_f64PressMouseY, m_f64CurrentMouseY);
-			int l_iSizeX=(int)max(m_f64PressMouseX-m_f64CurrentMouseX, m_f64CurrentMouseX-m_f64PressMouseX);
-			int l_iSizeY=(int)max(m_f64PressMouseY-m_f64CurrentMouseY, m_f64CurrentMouseY-m_f64PressMouseY);
+			const int l_iStartX=(int)min(m_f64PressMouseX, m_f64CurrentMouseX);
+			const int l_iStartY=(int)min(m_f64PressMouseY, m_f64CurrentMouseY);
+			const int l_iSizeX=(int)max(m_f64PressMouseX-m_f64CurrentMouseX, m_f64CurrentMouseX-m_f64PressMouseX);
+			const int l_iSizeY=(int)max(m_f64PressMouseY-m_f64CurrentMouseY, m_f64CurrentMouseY-m_f64PressMouseY);
 
 			::GtkWidget* l_pWidget=GTK_WIDGET(m_pScenarioDrawingArea);
 			::GdkGC* l_pDrawGC=gdk_gc_new(l_pWidget->window);
@@ -1571,7 +1572,7 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 
 	if(this->isLocked()) return;
 
-	uint32 l_ui32InterfacedObjectId=pickInterfacedObject((int)pEvent->x, (int)pEvent->y);
+	const uint32 l_ui32InterfacedObjectId=pickInterfacedObject((int)pEvent->x, (int)pEvent->y);
 	CInterfacedObject& l_rObject=m_vInterfacedObject[l_ui32InterfacedObjectId];
 	if(l_rObject.m_oIdentifier!=OV_UndefinedIdentifier
 	&& l_rObject.m_ui32ConnectorType!=Connector_Link
@@ -1913,8 +1914,8 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 
 								// -------------- INPUTS --------------
 
-								boolean l_bFlagCanAddInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddInput);
-								boolean l_bFlagCanModifyInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyInput);
+								const boolean l_bFlagCanAddInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddInput);
+								const boolean l_bFlagCanModifyInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyInput);
 								if(l_bFlagCanAddInput || l_bFlagCanModifyInput)
 								{
 									uint32 l_ui32FixedInputCount=0;
@@ -1948,8 +1949,8 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 								}
 
 								// -------------- MESSAGE INPUTS -----------------
-								boolean l_bFlagCanAddMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddMessageInput);
-								boolean l_bFlagCanModifyMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageInput);
+								const boolean l_bFlagCanAddMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddMessageInput);
+								const boolean l_bFlagCanModifyMessageInput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageInput);
 								//m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can add message input " << l_bFlagCanAddMessageInput    <<"\n";
 								//m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message input " << l_bFlagCanModifyMessageInput    <<"\n";
 
@@ -1987,8 +1988,8 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 
 								// -------------- OUTPUTS --------------
 
-								boolean l_bFlagCanAddOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddOutput);
-								boolean l_bFlagCanModifyOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyOutput);
+								const boolean l_bFlagCanAddOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddOutput);
+								const boolean l_bFlagCanModifyOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyOutput);
 								if(l_bFlagCanAddOutput || l_bFlagCanModifyOutput)
 								{
 									uint32 l_ui32FixedOutputCount=0;
@@ -2022,8 +2023,8 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 								}
 
 								// -------------- MESSAGE OUTPUTS -----------------
-								boolean l_bFlagCanAddMessageOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddMessageOutput);
-								boolean l_bFlagCanModifyMessageOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageOutput);
+								const boolean l_bFlagCanAddMessageOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddMessageOutput);
+								const boolean l_bFlagCanModifyMessageOutput=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyMessageOutput);
 								//m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can add message Output " << l_bFlagCanAddMessageOutput    <<"\n";
 								//m_rKernelContext.getLogManager() << LogLevel_Fatal << "box "<< l_pBox->getName() << " can Modify message Output " << l_bFlagCanModifyMessageOutput    <<"\n";
 
@@ -2061,8 +2062,8 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 
 								// -------------- SETTINGS --------------
 
-								boolean l_bFlagCanAddSetting=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddSetting);
-								boolean l_bFlagCanModifySetting=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifySetting);
+								const boolean l_bFlagCanAddSetting=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanAddSetting);
+								const boolean l_bFlagCanModifySetting=l_pBox->hasAttribute(OV_AttributeId_Box_FlagCanModifySetting);
 								if(l_bFlagCanAddSetting || l_bFlagCanModifySetting)
 								{
 									uint32 l_ui32FixedSettingCount=0;
@@ -2162,10 +2163,10 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 	if(m_ui32CurrentMode!=Mode_None)
 	{
 
-		int l_iStartX=(int)min(m_f64PressMouseX, m_f64CurrentMouseX);
-		int l_iStartY=(int)min(m_f64PressMouseY, m_f64CurrentMouseY);
-		int l_iSizeX=(int)max(m_f64PressMouseX-m_f64CurrentMouseX, m_f64CurrentMouseX-m_f64PressMouseX);
-		int l_iSizeY=(int)max(m_f64PressMouseY-m_f64CurrentMouseY, m_f64CurrentMouseY-m_f64PressMouseY);
+		const int l_iStartX=(int)min(m_f64PressMouseX, m_f64CurrentMouseX);
+		const int l_iStartY=(int)min(m_f64PressMouseY, m_f64CurrentMouseY);
+		const int l_iSizeX=(int)max(m_f64PressMouseX-m_f64CurrentMouseX, m_f64CurrentMouseX-m_f64PressMouseX);
+		const int l_iSizeY=(int)max(m_f64PressMouseY-m_f64CurrentMouseY, m_f64CurrentMouseY-m_f64PressMouseY);
 
 		if(m_ui32CurrentMode==Mode_Selection || m_ui32CurrentMode==Mode_SelectionAdd)
 		{
@@ -2195,7 +2196,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 		{
 			boolean l_bIsActuallyConnecting=false;
 			boolean l_bConnectionIsMessage=false;
-			uint32 l_ui32InterfacedObjectId=pickInterfacedObject((int)m_f64ReleaseMouseX, (int)m_f64ReleaseMouseY);
+			const uint32 l_ui32InterfacedObjectId=pickInterfacedObject((int)m_f64ReleaseMouseX, (int)m_f64ReleaseMouseY);
 			CInterfacedObject l_oCurrentObject=m_vInterfacedObject[l_ui32InterfacedObjectId];
 			CInterfacedObject l_oSourceObject;
 			CInterfacedObject l_oTargetObject;
@@ -3167,16 +3168,16 @@ void CInterfacedScenario::contextMenuBoxAboutCB(IBox& rBox)
 }
 
 bool CInterfacedScenario::browseURL(CString sURL)  {
-	CString l_sWebBrowser=m_rKernelContext.getConfigurationManager().expand("${Designer_WebBrowserCommand}");
+	const CString l_sWebBrowser=m_rKernelContext.getConfigurationManager().expand("${Designer_WebBrowserCommand}");
 
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "Requesting web browser on URL " << sURL << "\n";
 #if TARGET_OS_Linux
-	CString l_sCommand = l_sWebBrowser+CString(" ")+sURL+CString(" &");
+	const CString l_sCommand = l_sWebBrowser+CString(" ")+sURL+CString(" &");
 #else
-	CString l_sCommand = l_sWebBrowser+CString(" ")+sURL;
+	const CString l_sCommand = l_sWebBrowser+CString(" ")+sURL;
 #endif
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "Launching '" << l_sCommand << "'\n";
-	int l_iResult=::system(l_sCommand.toASCIIString());
+	const int l_iResult=::system(l_sCommand.toASCIIString());
 	if(l_iResult<0)
 	{
 		m_rKernelContext.getLogManager() << LogLevel_Warning << "Could not launch command " << l_sWebBrowser+CString(" ")+sURL << "\n";
@@ -3189,11 +3190,11 @@ bool CInterfacedScenario::browseBoxDocumentation(CIdentifier oBoxId)
 {
 	if(oBoxId!=OV_UndefinedIdentifier && m_rKernelContext.getPluginManager().canCreatePluginObject(oBoxId))
 	{
-		CString l_sURLBase=m_rKernelContext.getConfigurationManager().expand("${Designer_WebBrowserHelpURLBase}");
+		const CString l_sURLBase=m_rKernelContext.getConfigurationManager().expand("${Designer_WebBrowserHelpURLBase}");
 
 		const IPluginObjectDesc* l_pPluginObjectDesc=m_rKernelContext.getPluginManager().getPluginObjectDescCreating(oBoxId);
-		CString l_sHTMLName=CString("Doc_BoxAlgorithm_")+CString(getBoxAlgorithmURL(l_pPluginObjectDesc->getName().toASCIIString()).c_str())+CString(".html");
-		CString l_sFullURL=l_sURLBase+CString("/")+l_sHTMLName;
+		const CString l_sHTMLName=CString("Doc_BoxAlgorithm_")+CString(getBoxAlgorithmURL(l_pPluginObjectDesc->getName().toASCIIString()).c_str())+CString(".html");
+		const CString l_sFullURL=l_sURLBase+CString("/")+l_sHTMLName;
 
 		return browseURL(l_sFullURL);
 	} else {
@@ -3236,8 +3237,8 @@ void CInterfacedScenario::contextMenuBoxMuteCB(IBox& rBox)
 		rBox.addAttribute(OV_AttributeId_Box_Muted, "false");
 	}
 
-	bool l_bIsmuted = l_oBoxProxy.getMute();
-	boolean l_bNewValue = !l_bIsmuted;
+	const boolean l_bIsmuted = l_oBoxProxy.getMute();
+	const boolean l_bNewValue = !l_bIsmuted;
 
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "was " <<  l_bIsmuted <<"\n";
 	//l_oBoxProxy.setMute( l_bNewValue );
@@ -3427,10 +3428,10 @@ boolean CInterfacedScenario::centerOnBox(CIdentifier rIdentifier)
 		CBoxProxy l_oBoxProxy(m_rKernelContext, *rBox);
 		const int xMargin=ov_round(5.0*m_f64CurrentScale);
 		const int yMargin=ov_round(5.0*m_f64CurrentScale);
-		int xSize=ov_round(l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + xMargin*2.0);
-		int ySize=ov_round(l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + yMargin*2.0);
-		int x = ov_round(l_oBoxProxy.getXCenter() + 3*xSize/4);
-		int y = ov_round(l_oBoxProxy.getYCenter() + 3*ySize/4);
+		const int xSize=ov_round(l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + xMargin*2.0);
+		const int ySize=ov_round(l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + yMargin*2.0);
+		const int x = ov_round(l_oBoxProxy.getXCenter() + 3*xSize/4);
+		const int y = ov_round(l_oBoxProxy.getYCenter() + 3*ySize/4);
 
 		//get the parameters of the current adjustement
 		GtkAdjustment* l_pOldHAdjustement = gtk_scrolled_window_get_hadjustment(m_pScrolledWindow);//gtk_viewport_get_vadjustment(m_pScenarioViewport);

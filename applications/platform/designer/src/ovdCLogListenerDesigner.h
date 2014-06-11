@@ -179,7 +179,7 @@ namespace OpenViBEDesigner
 
 			::GtkExpander* m_pExpander;
 
-			OpenViBE::boolean m_bIngnoreMessages;
+			OpenViBE::boolean m_bIgnoreMessages;
 
 			OpenViBE::uint32 m_ui32CountMessages;
 			OpenViBE::uint32 m_ui32CountWarnings;

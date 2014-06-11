@@ -595,9 +595,9 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 			}
 			else //if the position is tagged, we are on a CIdentifier
 			{
-				GtkTextIter l_oStart, l_oEnd;
-				l_oStart = l_oIter;
-				l_oEnd = l_oIter;
+				GtkTextIter l_oStart = l_oIter;
+				GtkTextIter l_oEnd = l_oIter;
+
 				while(gtk_text_iter_has_tag(&l_oEnd, l_pTag))
 				{
 					gtk_text_iter_forward_char(&l_oEnd);
@@ -1996,7 +1996,7 @@ void CApplication::pauseScenarioCB(void)
 
 void CApplication::nextScenarioCB(void)
 {
-	boolean isAlreadyStart = false;
+	boolean l_bIsAlreadyStarted = false;
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "nextScenarioCB\n";
 
 	if(!this->isPlayerExisting())
@@ -2009,7 +2009,7 @@ void CApplication::nextScenarioCB(void)
 	}
 	else
 	{
-		isAlreadyStart = true;
+		l_bIsAlreadyStarted = true;
 	}
 	this->getPlayer()->step();
 	this->getCurrentInterfacedScenario()->m_ePlayerStatus=this->getPlayer()->getStatus();
@@ -2022,7 +2022,7 @@ void CApplication::nextScenarioCB(void)
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), GTK_STOCK_MEDIA_PLAY);
 
 	gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), true);
-	if(!isAlreadyStart)
+	if(!l_bIsAlreadyStarted)
 	{
 		//Add top level window item in menu_window
 		std::vector < ::GtkWindow* > l_vTopLevelWindows = this->getCurrentInterfacedScenario()->m_pPlayerVisualisation->getTopLevelWindows();
@@ -2043,7 +2043,7 @@ void CApplication::nextScenarioCB(void)
 
 void CApplication::playScenarioCB(void)
 {
-	boolean isAlreadyStart = false;
+	boolean l_bIsAlreadyStarted = false;
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "playScenarioCB\n";
 
 	if(!this->isPlayerExisting())
@@ -2056,7 +2056,7 @@ void CApplication::playScenarioCB(void)
 	}
 	else
 	{
-		isAlreadyStart = true;
+		l_bIsAlreadyStarted = true;
 	}
 	this->getPlayer()->play();
 	this->getCurrentInterfacedScenario()->m_ePlayerStatus=this->getPlayer()->getStatus();
@@ -2071,7 +2071,7 @@ void CApplication::playScenarioCB(void)
 
 	gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), true);
 
-	if(!isAlreadyStart)
+	if(!l_bIsAlreadyStarted)
 	{
 		//Add top level window item in menu_window
 		std::vector < ::GtkWindow* > l_vTopLevelWindows = this->getCurrentInterfacedScenario()->m_pPlayerVisualisation->getTopLevelWindows();
@@ -2093,7 +2093,7 @@ void CApplication::playScenarioCB(void)
 
 void CApplication::forwardScenarioCB(void)
 {
-	boolean isAlreadyStart = false;
+	boolean l_bIsAlreadyStarted = false;
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "forwardScenarioCB\n";
 
 	if(!this->isPlayerExisting())
@@ -2106,7 +2106,7 @@ void CApplication::forwardScenarioCB(void)
 	}
 	else
 	{
-		isAlreadyStart = true;
+		l_bIsAlreadyStarted = true;
 	}
 
 	this->getPlayer()->forward();
@@ -2121,7 +2121,7 @@ void CApplication::forwardScenarioCB(void)
 	gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), GTK_STOCK_MEDIA_PLAY);
 
 	gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), true);
-	if(!isAlreadyStart)
+	if(!l_bIsAlreadyStarted)
 	{
 		//Add top level window item in menu_window
 		std::vector < ::GtkWindow* > l_vTopLevelWindows = this->getCurrentInterfacedScenario()->m_pPlayerVisualisation->getTopLevelWindows();
@@ -2456,30 +2456,29 @@ void CApplication::reorderCurrentScenario(OpenViBE::uint32 i32NewPageIndex)
 
 void CApplication::logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLevel level, const char* configName)
 {
-	uint32 l_ui32Active;
-	l_ui32Active = static_cast<uint32>(m_rKernelContext.getConfigurationManager().expandAsUInteger(configName, m_rKernelContext.getLogManager().isActive(level)?Log_AvailableActivate:Log_NotAvailable));
+	const uint32 l_ui32Active = static_cast<const uint32>(m_rKernelContext.getConfigurationManager().expandAsUInteger(configName, m_rKernelContext.getLogManager().isActive(level)?Log_AvailableActivate:Log_NotAvailable));
 	//At the beginning all buttons are sensitive and not active
 	switch(l_ui32Active)
 	{
-	case Log_NotAvailable:
-		gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), false);
-		m_rKernelContext.getLogManager().activate(level, false);
-		break;
+		case Log_NotAvailable:
+			gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), false);
+			m_rKernelContext.getLogManager().activate(level, false);
+			break;
 
-	case Log_AvailableActivate:
-		gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(ToolButton), true);
-		m_rKernelContext.getLogManager().activate(level, true);
-		break;
+		case Log_AvailableActivate:
+			gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(ToolButton), true);
+			m_rKernelContext.getLogManager().activate(level, true);
+			break;
 
-	case Log_AvailableNotActivate:
-		m_rKernelContext.getLogManager().activate(level, true);
-		break;
+		case Log_AvailableNotActivate:
+			m_rKernelContext.getLogManager().activate(level, true);
+			break;
 
-	default:
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "Unknown log state " << l_ui32Active << "\n";
-		m_rKernelContext.getLogManager().activate(level, false);
-		gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), false);
-		break;
+		default:
+			m_rKernelContext.getLogManager() << LogLevel_Warning << "Unknown log state " << l_ui32Active << "\n";
+			m_rKernelContext.getLogManager().activate(level, false);
+			gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), false);
+			break;
 	}
 }
 
