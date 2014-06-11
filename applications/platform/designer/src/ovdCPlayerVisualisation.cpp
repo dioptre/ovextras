@@ -29,7 +29,7 @@ static gboolean KeyboardStimulator_KeyPressCallback(GtkWidget *widget, GdkEventK
 {
 	//std::cout << "button pressed, grab focus\n";
 	gtk_widget_grab_focus(widget);
-	return true;//do not propagate the event further
+	return false; // the event propagates further, this is needed e.g. for mouse control of 3D widgets
 }
 
 
