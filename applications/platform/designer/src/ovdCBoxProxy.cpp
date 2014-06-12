@@ -116,17 +116,17 @@ const char* CBoxProxy::getLabel(void) const
 {
    if (m_sLabel.size()==0)
    {
-	    boolean l_bBoxCanChangeInput  (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyInput)  ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddInput));
-	    boolean l_bBoxCanChangeOutput (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyOutput) ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddOutput));
-	    boolean l_bBoxCanChangeSetting(m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifySetting)||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddSetting));
-	    boolean l_bBoxIsUpToDate      (this->isBoxAlgorithmPluginPresent()  ? this->isUpToDate() : true);
-	    boolean l_bBoxIsDeprecated    (this->isBoxAlgorithmPluginPresent() && this->isDeprecated());
-	    boolean l_bBoxIsUnstable      (this->isBoxAlgorithmPluginPresent() && this->isUnstable());
-	    boolean l_bIsMuted            (this->getMute());
+	    const boolean l_bBoxCanChangeInput  (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyInput)  ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddInput));
+	    const boolean l_bBoxCanChangeOutput (m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifyOutput) ||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddOutput));
+	    const boolean l_bBoxCanChangeSetting(m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanModifySetting)||m_pConstBox->hasAttribute(OV_AttributeId_Box_FlagCanAddSetting));
+	    const boolean l_bBoxIsUpToDate      (this->isBoxAlgorithmPluginPresent()  ? this->isUpToDate() : true);
+	    const boolean l_bBoxIsDeprecated    (this->isBoxAlgorithmPluginPresent() && this->isDeprecated());
+	    const boolean l_bBoxIsUnstable      (this->isBoxAlgorithmPluginPresent() && this->isUnstable());
+	    const boolean l_bIsMuted            (this->getMute());
 	    const IPluginObjectDesc* l_pDesc=m_rKernelContext.getPluginManager().getPluginObjectDescCreating(m_pConstBox->getAlgorithmClassIdentifier());
 
-	    string l_sBoxName(m_pConstBox->getName());
-	    string l_sBoxIden(m_pConstBox->getIdentifier().toString());
+	    const string l_sBoxName(m_pConstBox->getName());
+	    const string l_sBoxIden(m_pConstBox->getIdentifier().toString());
 
 	    const string l_sRed("#602020");
 	    const string l_sGreen("#206020");
@@ -142,7 +142,7 @@ const char* CBoxProxy::getLabel(void) const
 
 	    if(m_bShowOriginalNameWhenModified)
 	    {
-		    string l_sBoxOriginalName(l_pDesc?string(l_pDesc->getName()):l_sBoxName);
+		    const string l_sBoxOriginalName(l_pDesc?string(l_pDesc->getName()):l_sBoxName);
 		    if(l_sBoxOriginalName!=l_sBoxName)
 		    {
 			    m_sLabel="<small><i><span foreground=\""+l_sGrey+"\">"+l_sBoxOriginalName+"</span></i></small>\n"+m_sLabel;

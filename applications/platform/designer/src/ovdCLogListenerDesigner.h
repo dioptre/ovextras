@@ -42,9 +42,9 @@ namespace OpenViBEDesigner
 				}//*/
 
 				//determine if the log contains the sSearchTerm and tag the part with the sSerachTerm in gray
-				bool Filter(OpenViBE::CString sSearchTerm)
+				const OpenViBE::boolean Filter(OpenViBE::CString sSearchTerm)
 				{
-					bool ret_val = false;
+					m_bPassedFilter = false;
 					GtkTextIter start_find, end_find;
 					gtk_text_buffer_get_start_iter(m_pBuffer, &start_find);
 					gtk_text_buffer_get_end_iter(m_pBuffer, &end_find);
@@ -63,7 +63,7 @@ namespace OpenViBEDesigner
 					if(sSearchTerm==OpenViBE::CString(""))
 					{
 						m_bPassedFilter = true;
-						return true;
+						return m_bPassedFilter;
 					}
 
 
@@ -76,14 +76,8 @@ namespace OpenViBEDesigner
 						int offset = gtk_text_iter_get_offset(&end_match);
 						//begin next search at end match
 						gtk_text_buffer_get_iter_at_offset(m_pBuffer, &start_find, offset);
-						ret_val = true;
+						m_bPassedFilter = true;
 					}
-					m_bPassedFilter = ret_val;
-					return ret_val;
-				}
-
-				OpenViBE::boolean getPassFilter()
-				{
 					return m_bPassedFilter;
 				}
 
@@ -97,6 +91,7 @@ namespace OpenViBEDesigner
 			};
 
 			CLogListenerDesigner(const OpenViBE::Kernel::IKernelContext& rKernelContext, ::GtkBuilder* pBuilderInterface);
+			~CLogListenerDesigner(void);
 
 			virtual OpenViBE::boolean isActive(OpenViBE::Kernel::ELogLevel eLogLevel);
 			virtual OpenViBE::boolean activate(OpenViBE::Kernel::ELogLevel eLogLevel, OpenViBE::boolean bActive);
@@ -129,7 +124,6 @@ namespace OpenViBEDesigner
 
 			void clearMessages();
 			void searchMessages(OpenViBE::CString l_sSearchTerm);
-			void restoreOldBuffer();
 			void focusMessageWindow();
 
 			void displayLog(CLogObject* oLog);
@@ -157,14 +151,7 @@ namespace OpenViBEDesigner
 
 			::GtkToggleButton* m_pToggleButtonPopup;
 
-			::GtkToggleToolButton* m_pToggleButtonActive_Debug;
-			::GtkToggleToolButton* m_pToggleButtonActive_Benchmark;
-			::GtkToggleToolButton* m_pToggleButtonActive_Trace;
-			::GtkToggleToolButton* m_pToggleButtonActive_Info;
-			::GtkToggleToolButton* m_pToggleButtonActive_Warning;
-			::GtkToggleToolButton* m_pToggleButtonActive_ImportantWarning;
-			::GtkToggleToolButton* m_pToggleButtonActive_Error;
-			::GtkToggleToolButton* m_pToggleButtonActive_Fatal;
+			::GtkToggleToolButton* m_vToggleLogButtons[OpenViBE::Kernel::LogLevel_Last];	// Array of togglebuttons, one per log level
 
 			::GtkLabel* m_pLabelCountMessages;
 			::GtkLabel* m_pLabelCountWarnings;
@@ -179,19 +166,20 @@ namespace OpenViBEDesigner
 
 			::GtkExpander* m_pExpander;
 
-			OpenViBE::boolean m_bIngnoreMessages;
+			OpenViBE::boolean m_bIgnoreMessages;	// skip messages of the current log level?
 
 			OpenViBE::uint32 m_ui32CountMessages;
 			OpenViBE::uint32 m_ui32CountWarnings;
 			OpenViBE::uint32 m_ui32CountErrors;
 
 			void updateMessageCounts();
+			void appendToCurrentLog(const char *textColor, const char *logMessage, bool bIsLink = false);
 
 			OpenViBE::boolean m_bConsoleLogWithHexa;
 			OpenViBE::boolean m_bConsoleLogTimeInSecond;
 			OpenViBE::uint32 m_ui32ConsoleLogTimePrecision;
 
-			CLogObject* m_oCurrentLog;
+			CLogObject* m_pCurrentLog;
 			OpenViBE::CString m_sSearchTerm;
 
 	};
