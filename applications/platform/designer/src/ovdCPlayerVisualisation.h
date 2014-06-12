@@ -39,6 +39,7 @@ namespace OpenViBEDesigner
 
 		void showTopLevelWindows();
 		void showSelectedWindow(OpenViBE::uint32 ui32Index);
+		void hideSelectedWindow(OpenViBE::uint32 ui32Index);
 		void hideTopLevelWindows();
 
 

@@ -640,18 +640,38 @@ void CPlayerVisualisation::showTopLevelWindows(void)
 //called when a visualisation window is open from window-menu
 void CPlayerVisualisation::showSelectedWindow(OpenViBE::uint32 ui32Index)
 {
-    gtk_widget_show(GTK_WIDGET(m_vWindows[ui32Index]));
+	// printf("Show %p\n", GTK_WIDGET(m_vWindows[ui32Index]));
+	gtk_widget_show(GTK_WIDGET(m_vWindows[ui32Index]));
 
-    std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
-    while(it!=m_mPlugins.end())
-    {
-			if(GTK_IS_WIDGET(it->second.m_pWidget))
-            {
-                    gtk_widget_show(it->second.m_pWidget);
-            }
-            it++;
-    }
+	std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
+	while(it!=m_mPlugins.end())
+	{
+		if(GTK_IS_WIDGET(it->second.m_pWidget))
+		{
+			// printf("ShowPlugin %p\n", it->second.m_pWidget);
+			gtk_widget_show(it->second.m_pWidget);
+		}
+		it++;
+	}
 
+}
+
+//called when a visualisation window is open from window-menu
+void CPlayerVisualisation::hideSelectedWindow(OpenViBE::uint32 ui32Index)
+{
+	// printf("Hide %p\n", GTK_WIDGET(m_vWindows[ui32Index]));
+	gtk_widget_hide(GTK_WIDGET(m_vWindows[ui32Index]));
+
+	std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
+	while(it!=m_mPlugins.end())
+	{
+		if(GTK_IS_WIDGET(it->second.m_pWidget))
+		{
+			// printf("hideX %p\n", it->second.m_pWidget);
+			gtk_widget_hide(it->second.m_pWidget);
+		}
+		it++;
+	}
 }
 
 //called upon Player stop -- called when change current scenario
@@ -697,6 +717,7 @@ void CPlayerVisualisation::hideWindowCB(::GtkWidget* pWidget, gpointer pUserData
 {
 	const char* l_cWindowTitle = (char*) gtk_window_get_title(GTK_WINDOW(pWidget));
 	m_rInterfacedScenario.onWindowClosed(l_cWindowTitle);
+//	printf("HideCB for %p\n", pWidget);
 	gtk_widget_hide(pWidget);
 }
 
