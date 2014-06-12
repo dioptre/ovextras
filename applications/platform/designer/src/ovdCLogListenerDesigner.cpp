@@ -403,12 +403,12 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 	m_vStoredLog.push_back(m_pCurrentLog);
 
 	//see if the log passes the filter
-	m_pCurrentLog->Filter(m_sSearchTerm);
+	boolean l_bPassFilter = m_pCurrentLog->Filter(m_sSearchTerm);
 	//if it does mark this position and insert the log in the text buffer displayed
 	GtkTextIter l_oEndDisplayedTextIter;
 	gtk_text_buffer_get_end_iter(m_pBuffer, &l_oEndDisplayedTextIter);
 	gtk_text_buffer_create_mark(m_pBuffer, "current_log", &l_oEndDisplayedTextIter, true );//creating a mark will erase the previous one with the same name so no worry here
-	if(m_pCurrentLog->getPassFilter())
+	if(l_bPassFilter)
 	{
 		displayLog(m_pCurrentLog);
 	}
@@ -505,8 +505,7 @@ void CLogListenerDesigner::appendToCurrentLog(const char *textColor, const char 
 		gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, logMessage, -1, "f_mono", textColor, NULL);
 	}
 
-	m_pCurrentLog->Filter(m_sSearchTerm);
-	if(m_pCurrentLog->getPassFilter())
+	if(m_pCurrentLog->Filter(m_sSearchTerm))
 	{
 		displayLog(m_pCurrentLog);
 	}
@@ -537,24 +536,6 @@ void CLogListenerDesigner::clearMessages()
 	m_vStoredLog.clear();
 
 	m_pCurrentLog = NULL;
-}
-
-void CLogListenerDesigner::restoreOldBuffer()
-{
-	m_sSearchTerm = CString("");
-
-
-	//clear displayed buffer
-	gtk_text_buffer_set_text(m_pBuffer, "", -1);
-	for(uint32 log=0; log<m_vStoredLog.size(); log++)
-	{
-		m_vStoredLog[log]->Filter(m_sSearchTerm);
-		if(m_vStoredLog[log]->getPassFilter())
-		{
-			//display the log
-			appendLog(m_vStoredLog[log]);
-		}
-	}
 }
 
 void CLogListenerDesigner::displayLog(CLogObject *oLog)
@@ -592,8 +573,7 @@ void CLogListenerDesigner::searchMessages(CString l_sSearchTerm)
 	m_sSearchTerm = l_sSearchTerm;
 	for(uint32 log=0; log<m_vStoredLog.size(); log++)
 	{
-		m_vStoredLog[log]->Filter(l_sSearchTerm);
-		if(m_vStoredLog[log]->getPassFilter())
+		if(m_vStoredLog[log]->Filter(l_sSearchTerm))
 		{
 			//display the log
 			appendLog(m_vStoredLog[log]);

@@ -306,20 +306,14 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 	{
 		CApplication* l_pApplication=static_cast<CApplication*>(pUserData);
 		CString l_sSearchTerm(static_cast<const char*>(l_pApplication->m_sLogSearchTerm));
-		if(l_sSearchTerm==CString(""))
-		{
-			l_pApplication->m_pLogListenerDesigner->restoreOldBuffer();
-		}
-		else
-		{
-			l_pApplication->m_pLogListenerDesigner->searchMessages(l_sSearchTerm);
-		}
-
+		l_pApplication->m_pLogListenerDesigner->searchMessages(l_sSearchTerm);
 	}
 
 	void refresh_search_log_entry(::GtkEntry* pTextfield, CApplication* pApplication)
 	{
 		pApplication->m_sLogSearchTerm = gtk_entry_get_text(pTextfield);
+		//immediately redo the search to refresh log field
+		pApplication->m_pLogListenerDesigner->searchMessages(pApplication->m_sLogSearchTerm);
 	}
 
 	string strtoupper(string str)

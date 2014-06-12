@@ -42,9 +42,9 @@ namespace OpenViBEDesigner
 				}//*/
 
 				//determine if the log contains the sSearchTerm and tag the part with the sSerachTerm in gray
-				bool Filter(OpenViBE::CString sSearchTerm)
+				const OpenViBE::boolean Filter(OpenViBE::CString sSearchTerm)
 				{
-					bool ret_val = false;
+					m_bPassedFilter = false;
 					GtkTextIter start_find, end_find;
 					gtk_text_buffer_get_start_iter(m_pBuffer, &start_find);
 					gtk_text_buffer_get_end_iter(m_pBuffer, &end_find);
@@ -63,7 +63,7 @@ namespace OpenViBEDesigner
 					if(sSearchTerm==OpenViBE::CString(""))
 					{
 						m_bPassedFilter = true;
-						return true;
+						return m_bPassedFilter;
 					}
 
 
@@ -76,14 +76,8 @@ namespace OpenViBEDesigner
 						int offset = gtk_text_iter_get_offset(&end_match);
 						//begin next search at end match
 						gtk_text_buffer_get_iter_at_offset(m_pBuffer, &start_find, offset);
-						ret_val = true;
+						m_bPassedFilter = true;
 					}
-					m_bPassedFilter = ret_val;
-					return ret_val;
-				}
-
-				OpenViBE::boolean getPassFilter()
-				{
 					return m_bPassedFilter;
 				}
 
@@ -130,7 +124,6 @@ namespace OpenViBEDesigner
 
 			void clearMessages();
 			void searchMessages(OpenViBE::CString l_sSearchTerm);
-			void restoreOldBuffer();
 			void focusMessageWindow();
 
 			void displayLog(CLogObject* oLog);
