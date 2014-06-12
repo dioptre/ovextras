@@ -41,7 +41,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename to save configuration to</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/p300-classifier.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier.cfg</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x2c132d6e, 0x44ab0d97)</TypeIdentifier>
@@ -229,7 +229,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -443,7 +443,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-speller-visualisation.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-speller-visualisation.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -750,7 +750,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>

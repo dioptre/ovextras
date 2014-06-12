@@ -798,7 +798,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename to load configuration from</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/motor-imagery-bci-config-classifier.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/motor-imagery-bci-config-classifier.cfg</Value>
 				</Setting>
 			</Settings>
 			<Attributes>
