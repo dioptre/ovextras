@@ -376,7 +376,7 @@ if [[ ! -e "$ov_target_folder_hit/no-native-packages.hit" ]]; then
 		else
 			ov_lib_ogre_dev=libogre-dev
 		fi;
-		ov_ubuntu_packages="subversion doxygen make automake autoconf cmake unzip gcc g++ libgtk2.0-dev libglade2-dev gfortran libgsl0-dev libexpat1-dev libreadline-dev libzzip-dev libtool libxaw7-dev libpcre3-dev libfreeimage-dev libglu1-mesa-dev libalut-dev libvorbis-dev libncurses5-dev python-dev python-numpy libeigen3-dev $ov_lib_ogre_dev libcegui-mk2-dev libois-dev libboost-dev libboost-thread-dev liblua5.1-0-dev libboost-regex-dev libboost-filesystem-dev libitpp-dev sqlite"
+		ov_ubuntu_packages="subversion doxygen make automake autoconf cmake unzip gcc g++ libgtk2.0-dev libglade2-dev gfortran libgsl0-dev libexpat1-dev libreadline-dev libzzip-dev libtool libxaw7-dev libpcre3-dev libfreeimage-dev libglu1-mesa-dev libalut-dev libvorbis-dev libncurses5-dev python-dev python-numpy libeigen3-dev $ov_lib_ogre_dev libcegui-mk2-dev libois-dev libboost-dev libboost-thread-dev liblua5.1-0-dev libboost-regex-dev libboost-filesystem-dev libitpp-dev sqlite libsqlite0-dev"
 			
 		for package in $ov_ubuntu_packages; do
 			ov_dpkg_output=`dpkg -l $package 2>&1 | grep "^ii"`
