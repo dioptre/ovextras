@@ -56,18 +56,18 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bHeaderSent;
 
 			// Requested Sampling frequency
-			OpenViBE::float64 m_f64Frequency;
+			OpenViBE::uint64 m_ui64Frequency;
 			// Process clock frequency
-			OpenViBE::float64 m_f64ClockFrequency;
+			OpenViBE::uint64 m_ui64ClockFrequency;
 
 			// Length of output chunks
-			OpenViBE::uint64 m_ui32GeneratedEpochSampleCount;
+			OpenViBE::uint64 m_ui64GeneratedEpochSampleCount;
 			// Absolute coordinates of the mouse pointer, that is, relative to the window in fullscreen
 			OpenViBE::IMatrix* m_pAbsoluteCoordinateBuffer;
 			// Relative coordinates of the mouse pointer, the coordinates is relative to the previous point
 			OpenViBE::IMatrix* m_pRelativeCoordinateBuffer;
 
-			OpenViBE::uint32 m_ui32SentSampleCount;
+			OpenViBE::uint64 m_ui64SentSampleCount;
 
 			// Gtk window to track mouse position
 			::GtkWidget* m_pWindow;
@@ -81,9 +81,9 @@ namespace OpenViBEPlugins
 		public:
 
 			// X coordinate of mouse current position
-			gdouble m_Mouse_x ;
+			OpenViBE::float64 m_f64Mouse_x ;
 			// Y coordinate of mouse current position
-			gdouble m_Mouse_y ;
+			OpenViBE::float64 m_f64Mouse_y ;
 
 		};
 
@@ -134,7 +134,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addOutput("Absolute coordinate",OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addOutput("Previous relative coordinate",OV_TypeId_Signal);
 
-				rBoxAlgorithmPrototype.addSetting("Sampling Frequency",OV_TypeId_Float,"16");
+				rBoxAlgorithmPrototype.addSetting("Sampling Frequency",OV_TypeId_Integer,"16");
 				rBoxAlgorithmPrototype.addSetting("Generated epoch sample count",OV_TypeId_Integer,"1");
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);

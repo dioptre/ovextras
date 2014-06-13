@@ -28,10 +28,12 @@ boolean CBoxAlgorithmMouseTracking::initialize(void)
 	m_pRelativeCoordinateBuffer=new CMatrix();
 
 	// Retrieves settings
-	m_f64Frequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-	m_ui32GeneratedEpochSampleCount = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),1);
+	m_ui64Frequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	m_ui64GeneratedEpochSampleCount = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),1);
 
-	m_ui32SentSampleCount = 0;
+	m_ui64SentSampleCount = 0;
+	m_f64Mouse_x = 0;
+	m_f64Mouse_y = 0;
 	m_f64Previous_x = 0;
 	m_f64Previous_y = 0;
 
@@ -45,8 +47,8 @@ boolean CBoxAlgorithmMouseTracking::initialize(void)
 
 	m_bHeaderSent = false;
 	
-	m_oAlgo0_SignalEncoder.getInputSamplingRate() = m_f64Frequency;
-	m_oAlgo1_SignalEncoder.getInputSamplingRate() = m_f64Frequency;
+	m_oAlgo0_SignalEncoder.getInputSamplingRate() = m_ui64Frequency;
+	m_oAlgo1_SignalEncoder.getInputSamplingRate() = m_ui64Frequency;
 
 	return true;
 }
@@ -82,9 +84,9 @@ boolean CBoxAlgorithmMouseTracking::processClock(IMessageClock& rMessageClock)
 uint64 CBoxAlgorithmMouseTracking::getClockFrequency(void)
 {
 	// Intentional parameter swap to get the frequency
-	m_f64ClockFrequency = ITimeArithmetics::sampleCountToTime(m_ui32GeneratedEpochSampleCount, m_f64Frequency);
+	m_ui64ClockFrequency = ITimeArithmetics::sampleCountToTime(m_ui64GeneratedEpochSampleCount, m_ui64Frequency);
 	
-	return m_f64ClockFrequency;
+	return m_ui64ClockFrequency;
 }
 
 /*******************************************************************************/
@@ -94,20 +96,18 @@ boolean CBoxAlgorithmMouseTracking::process(void)
 
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 	
-	uint32 l_ui32NbChannel = 2;
-
 	//Send header and initialize Matrix
 	if(!m_bHeaderSent)
 	{
 		m_pAbsoluteCoordinateBuffer->setDimensionCount(2);
 		m_pAbsoluteCoordinateBuffer->setDimensionSize(0,2);
-		m_pAbsoluteCoordinateBuffer->setDimensionSize(1, m_ui32GeneratedEpochSampleCount);
+		m_pAbsoluteCoordinateBuffer->setDimensionSize(1, static_cast<uint32>(m_ui64GeneratedEpochSampleCount));
 		m_pAbsoluteCoordinateBuffer->setDimensionLabel(0,0, "x");
 		m_pAbsoluteCoordinateBuffer->setDimensionLabel(0,1, "y");
 
 		m_pRelativeCoordinateBuffer->setDimensionCount(2);
 		m_pRelativeCoordinateBuffer->setDimensionSize(0,2);
-		m_pRelativeCoordinateBuffer->setDimensionSize(1, m_ui32GeneratedEpochSampleCount);
+		m_pRelativeCoordinateBuffer->setDimensionSize(1, static_cast<uint32>(m_ui64GeneratedEpochSampleCount));
 		m_pRelativeCoordinateBuffer->setDimensionLabel(0,0, "x");
 		m_pRelativeCoordinateBuffer->setDimensionLabel(0,1, "y");
 
@@ -122,25 +122,26 @@ boolean CBoxAlgorithmMouseTracking::process(void)
 	}
 	else //Do the process and send coordinates to output
 	{
-		uint32 l_ui32SentSampleCount=m_ui32SentSampleCount;
+		uint64 l_ui64SentSampleCount=m_ui64SentSampleCount;
 
 
-		for(uint32 i=0; i<m_ui32GeneratedEpochSampleCount; i++)
+		for(uint64 i=0; i<m_ui64GeneratedEpochSampleCount; i++)
 		{
-			m_pAbsoluteCoordinateBuffer->getBuffer()[0*m_ui32GeneratedEpochSampleCount+i] = m_Mouse_x;
-			m_pAbsoluteCoordinateBuffer->getBuffer()[1*m_ui32GeneratedEpochSampleCount+i] = m_Mouse_y;
+			m_pAbsoluteCoordinateBuffer->getBuffer()[0*m_ui64GeneratedEpochSampleCount+i] = m_f64Mouse_x;
+			m_pAbsoluteCoordinateBuffer->getBuffer()[1*m_ui64GeneratedEpochSampleCount+i] = m_f64Mouse_y;
 
-			m_pRelativeCoordinateBuffer->getBuffer()[0*m_ui32GeneratedEpochSampleCount+i] = m_Mouse_x - m_f64Previous_x;
-			m_pRelativeCoordinateBuffer->getBuffer()[1*m_ui32GeneratedEpochSampleCount+i] = m_Mouse_y - m_f64Previous_y;
+			m_pRelativeCoordinateBuffer->getBuffer()[0*m_ui64GeneratedEpochSampleCount+i] = m_f64Mouse_x - m_f64Previous_x;
+			m_pRelativeCoordinateBuffer->getBuffer()[1*m_ui64GeneratedEpochSampleCount+i] = m_f64Mouse_y - m_f64Previous_y;
 		}
 
-		m_f64Previous_x = m_Mouse_x;
-		m_f64Previous_y = m_Mouse_y;
 
-		m_ui32SentSampleCount+=m_ui32GeneratedEpochSampleCount;
+		m_f64Previous_x = m_f64Mouse_x;
+		m_f64Previous_y = m_f64Mouse_y;
 
-		uint64 l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_f64Frequency, l_ui32SentSampleCount);
-		uint64 l_ui64EndTime = ITimeArithmetics::sampleCountToTime(m_f64Frequency, m_ui32SentSampleCount);
+		m_ui64SentSampleCount+=m_ui64GeneratedEpochSampleCount;
+
+		uint64 l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_ui64Frequency, l_ui64SentSampleCount);
+		uint64 l_ui64EndTime = ITimeArithmetics::sampleCountToTime(m_ui64Frequency, m_ui64SentSampleCount);
 
 		m_oAlgo0_SignalEncoder.encodeBuffer(0);
 		m_oAlgo1_SignalEncoder.encodeBuffer(1);
@@ -156,8 +157,8 @@ boolean CBoxAlgorithmMouseTracking::process(void)
 void motion_event_handler(GtkWidget* widget, GdkEventMotion* event, gpointer data)
 {
 	CBoxAlgorithmMouseTracking* l_pBox = static_cast < CBoxAlgorithmMouseTracking* >(data);
-	l_pBox->m_Mouse_x = event->x;
-	l_pBox->m_Mouse_y = event->y;
+	l_pBox->m_f64Mouse_x = static_cast<float64>(event->x);
+	l_pBox->m_f64Mouse_y = static_cast<float64>(event->y);
 }
 
 

@@ -8,7 +8,6 @@
 
 #include "box-algorithms/ovpCBoxAlgorithmMessageSpy.h"
 #include "box-algorithms/ovpCBoxAlgorithmMouseTracking.h"
-#include "box-algorithms/ovpCBoxAlgorithmMotionQuantities.h"
 
 OVP_Declare_Begin();
 
