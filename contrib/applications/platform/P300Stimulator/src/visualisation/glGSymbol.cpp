@@ -271,10 +271,10 @@ void GSymbol::computeMaximumLabelSize()
 	//my best explanation is taht 1.387535079 is the pango/ftgl ratio since their respective point for font size do not match
 	m_f32MaxLabelSize = 0.9f*REFFONTSIZE*ratio;
 
-	pango_font_description_set_size(desc, m_f32MaxLabelSize*PANGO_SCALE);
+	pango_font_description_set_size(desc, (gint)m_f32MaxLabelSize*PANGO_SCALE);
 	pango_layout_set_font_description(m_olayout, desc);
 	get_text_size (m_olayout, &text_width, &text_height, &ink, &logical);
-	float32 heightratio = 1.387535079*getHeight()/(float32)(text_height);
+	float32 heightratio = (float32)1.387535079*getHeight()/(float32)(text_height);
 	if(heightratio<1)
 	{
 		m_f32MaxLabelSize = 0.9f*m_f32MaxLabelSize*heightratio;
