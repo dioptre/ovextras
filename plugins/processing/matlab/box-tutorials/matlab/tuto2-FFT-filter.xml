@@ -301,7 +301,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Matlab working directory</Name>
 					<DefaultValue>[path-to-my-matlab-workspace]</DefaultValue>
-					<Value>${__volatile_ScenarioDir}</Value>
+					<Value>${Player_ScenarioDirectory}</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>

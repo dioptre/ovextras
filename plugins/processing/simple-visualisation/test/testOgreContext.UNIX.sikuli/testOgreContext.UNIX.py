@@ -9,7 +9,6 @@ def testRunOgreVisual(self):
     click("play.png")
     
     wait("Simple3Dview.png",10)
-    assert(exists("Simple3Dview.png"))
     waitVanish("Simple3Dview.png",10)
     assert(exists("designerScreen.png"))
 def tearDown(self):

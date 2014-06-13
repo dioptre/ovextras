@@ -57,7 +57,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -408,7 +408,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -479,7 +479,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -678,7 +678,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -956,7 +956,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1037,7 +1037,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1092,7 +1092,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1345,7 +1345,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1502,7 +1502,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1752,7 +1752,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1884,7 +1884,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1939,7 +1939,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2057,7 +2057,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2138,7 +2138,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2282,7 +2282,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2414,7 +2414,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2644,7 +2644,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2858,7 +2858,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-speller-visualisation.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-speller-visualisation.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xac367a9c, 0x2da95abe)</Identifier>
@@ -2917,7 +2917,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2998,7 +2998,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -3595,7 +3595,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-spatial-filter.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-spatial-filter.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -3672,7 +3672,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -3727,7 +3727,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -3798,7 +3798,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -3869,7 +3869,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-classifier-processor.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-classifier-processor.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -4131,7 +4131,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/p300-epoch-average.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/p300-epoch-average.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>

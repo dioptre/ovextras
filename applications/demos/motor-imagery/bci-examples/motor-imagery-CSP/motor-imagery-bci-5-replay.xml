@@ -21,7 +21,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/motor-imagery-bci-epoch-selector.lua</Value>
+					<Value>${Player_ScenarioDirectory}/motor-imagery-bci-epoch-selector.lua</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x512a166f, 0x5c3ef83f)</TypeIdentifier>
@@ -779,7 +779,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename to load configuration from</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/motor-imagery-bci-config-classifier.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/motor-imagery-bci-config-classifier.cfg</Value>
 				</Setting>
 			</Settings>
 			<Attributes>
@@ -1250,7 +1250,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${__volatile_ScenarioDir}/csp-spatial-filter.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/csp-spatial-filter.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
