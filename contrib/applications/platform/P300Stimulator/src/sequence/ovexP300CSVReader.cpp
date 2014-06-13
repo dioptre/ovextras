@@ -42,30 +42,32 @@ void ovexP300CSVReader::readFile()
 		std::cout << "file openend\n";
 		while ( getline (m_sStream,line) )
 		{
-			//std::cout << "line " << m_uiFlashIndex << std::endl;
-			if(line!="")
+			if(line.size()/2==m_ui32NumberOfSymbols)
 			{
-			std::vector<unsigned int>* currentGroup = new std::vector<unsigned int>();
-			//std::stringstream iss(line);
+				std::vector<unsigned int>* currentGroup = new std::vector<unsigned int>();
+				//std::stringstream iss(line);
 
-			unsigned int value;
+				unsigned int value;
 
-			std::istringstream l_LineBuffer(line);
-			l_LineBuffer.imbue(std::locale(std::locale(), new csvReader()));
+				std::istringstream l_LineBuffer(line);
+				l_LineBuffer.imbue(std::locale(std::locale(), new csvReader()));
 
-			while(l_LineBuffer >> value)
+				while(l_LineBuffer >> value)
+				{
+					//std::cout << value << '\n';
+					currentGroup->push_back(value);
+				}
+				m_flashes.push_back(currentGroup);
+				m_uiFlashIndex++;
+			}
+			else
 			{
-				//std::cout << value << '\n';
-				currentGroup->push_back(value);
+				std::cout << "invalid line size " << line.size() << " instead of " << m_ui32NumberOfSymbols << '\n';
 			}
-			m_flashes.push_back(currentGroup);
-			}
-			//cout << line << '\n';
-			m_uiFlashIndex++;
 
 		}
 		m_sStream.close();
-		std::cout << "read " << m_uiFlashIndex <<" lines\n";
+		std::cout << "read " << m_flashes.size() <<" lines\n";
 	}
 	else
 		std::cout << "Unable to open file";
