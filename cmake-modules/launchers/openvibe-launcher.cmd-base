@@ -32,5 +32,5 @@ CALL "%OV_ENVIRONMENT_FILE%"
 	
 :EndOfScript
 
-REM %OV_PAUSE%
+%OV_PAUSE%
 
