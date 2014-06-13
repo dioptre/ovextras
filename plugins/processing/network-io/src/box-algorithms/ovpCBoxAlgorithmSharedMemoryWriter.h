@@ -181,7 +181,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				//rBoxAlgorithmPrototype.addInput("prediction1",OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addInput("prediction1",OV_TypeId_StreamedMatrix);
 				//rBoxAlgorithmPrototype.addInput("prediction2",OV_TypeId_Stimulations);
 
 

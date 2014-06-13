@@ -207,11 +207,19 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 						m_pInputStreamedMatrix->clear();*/
 						
 						offset_ptr<SMatrix> l_ShmMatrix= static_cast<SMatrix*>(m_oSharedMemoryArray.allocate(sizeof(SMatrix)));
-						l_ShmMatrix->rowDimension = l_pMatrix->getDimensionSize(1);
+
+						//if we receive a vector (second dimension to 0) we force to one otherwise no memory will be allocated
+						uint32 row = (l_pMatrix->getDimensionSize(1)==0)?1:l_pMatrix->getDimensionSize(1);
+
+						l_ShmMatrix->rowDimension = row;
 						l_ShmMatrix->columnDimension = l_pMatrix->getDimensionSize(0);
+
+						this->getLogManager() << LogLevel_Trace  << "dimensions " << l_pMatrix->getDimensionCount()
+											  << "row " << l_pMatrix->getDimensionSize(1) << " by "
+												<< " columns " << l_pMatrix->getDimensionSize(0) << "\n";
 						
 						l_ShmMatrix->data = static_cast<float64*>(m_oSharedMemoryArray.allocate(
-							l_pMatrix->getDimensionSize(0)*l_pMatrix->getDimensionSize(1)*sizeof(float64)));
+							l_pMatrix->getDimensionSize(0)*row*sizeof(float64)));
 						for (uint32 di=0; di<l_pMatrix->getBufferElementCount(); di++)
 						{
 							*(l_ShmMatrix->data+di) = *(l_pMatrix->getBuffer()+di);
