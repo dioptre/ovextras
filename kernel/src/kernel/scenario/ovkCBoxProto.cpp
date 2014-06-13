@@ -111,7 +111,7 @@ boolean CBoxProto::addSetting(
 	const CString& sDefaultValue,
 	const OpenViBE::boolean bModifiable)
 {
-	if(!m_rBox.addSetting(sName, rTypeIdentifier, sDefaultValue, -1, bModifiable))
+	if(!m_rBox.addSetting(sName, rTypeIdentifier, sDefaultValue, bModifiable))
 	{
 		return false;
 	}
