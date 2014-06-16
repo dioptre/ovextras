@@ -29,6 +29,7 @@ def test_drawBoxes(self):
    
 def tearDown(self):
     mouseMove(Location(0,0))
-    App.close(self.terminal)
-    self.terminal= None
+    if self.terminal.window():
+        App.close(self.terminal)
+        self.terminal= None
 

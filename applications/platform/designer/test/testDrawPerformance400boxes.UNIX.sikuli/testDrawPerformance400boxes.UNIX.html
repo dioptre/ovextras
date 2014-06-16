@@ -99,8 +99,9 @@
 
 <span class="kw">def</span> tearDown(self):
     mouseMove(Location(<span class="dig">0</span>,<span class="dig">0</span>))
-    App.close(self.terminal)
-    self.terminal= None
+    <span class="kw">if</span> self.terminal.window():
+        App.close(self.terminal)
+        self.terminal= None
 </pre>
 </body>
 </html>
