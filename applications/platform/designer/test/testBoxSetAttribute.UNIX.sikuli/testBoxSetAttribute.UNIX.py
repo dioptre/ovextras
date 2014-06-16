@@ -17,6 +17,7 @@ def test_boxSetAttributes(self):
     assert(exists(Pattern("SinusOscillatorNewNameXXX.png").similar(0.50)))
     
 def tearDown(self):
+    mouseMove(Location(0,0))
     App.close(self.terminal)
     self.terminal= None
     wait(2)

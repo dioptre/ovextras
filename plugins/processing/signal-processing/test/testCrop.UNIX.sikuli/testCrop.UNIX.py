@@ -12,7 +12,8 @@ def testRunCrop(self):
     click("play.png")
     wait("timesignal.png",10)
 def tearDown(self):
-     if self.terminal.window():
+    mouseMove(Location(0,0))
+    if self.terminal.window():
         App.close(self.terminal)
         self.terminal= None
 

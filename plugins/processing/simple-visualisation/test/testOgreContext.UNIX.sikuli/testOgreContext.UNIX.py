@@ -12,6 +12,7 @@ def testRunOgreVisual(self):
     waitVanish("Simple3Dview.png",10)
     assert(exists("designerScreen.png"))
 def tearDown(self):
+    mouseMove(Location(0,0))
     if self.terminal.window():
         App.close(self.terminal)
         self.terminal= None

@@ -28,6 +28,7 @@ def test_drawBoxes(self):
     print "time to scroll= "+ str(stop-start)
    
 def tearDown(self):
+    mouseMove(Location(0,0))
     App.close(self.terminal)
     self.terminal= None
 

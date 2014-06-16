@@ -84,6 +84,7 @@
     waitVanish(<img src="Simple3Dview.png" />,<span class="dig">10</span>)
     <span class="kw">assert</span>(exists(<img src="designerScreen.png" />))
 <span class="kw">def</span> tearDown(self):
+    mouseMove(Location(<span class="dig">0</span>,<span class="dig">0</span>))
     <span class="kw">if</span> self.terminal.window():
         App.close(self.terminal)
         self.terminal= None

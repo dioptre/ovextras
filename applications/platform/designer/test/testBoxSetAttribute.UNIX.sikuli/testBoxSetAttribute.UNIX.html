@@ -89,6 +89,7 @@
     <span class="kw">assert</span>(exists(Pattern(<img src="SinusOscillatorNewNameXXX.png" />).similar(<span class="dig">0.50</span>)))
 
 <span class="kw">def</span> tearDown(self):
+    mouseMove(Location(<span class="dig">0</span>,<span class="dig">0</span>))
     App.close(self.terminal)
     self.terminal= None
     <span class="skw">wait</span>(<span class="dig">2</span>)

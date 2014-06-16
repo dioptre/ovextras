@@ -17,7 +17,7 @@ def test_createSimpleScenarioAndRun(self):
     click(Pattern("playButton.png").similar(0.95))
     wait(6)
     assert(exists("SignalDisplayWindow.png"))
-    dragDrop(Pattern("SignalDisplayWindow.png").similar(0.46).targetOffset(2,-157),Pattern("SignalDisplayWindow.png").similar(0.46).targetOffset(-102,137))
+    dragDrop(Pattern("SignalDisplayWindow.png").similar(0.46).targetOffset(-18,-168),Pattern("SignalDisplayWindow.png").similar(0.46).targetOffset(-102,137))
     click("stopButton.png")
     waitVanish(Pattern("SignalDisplayWindow.png").similar(0.58))
     type("w",KeyModifier.CTRL)
@@ -29,6 +29,7 @@ def test_createSimpleScenarioAndRun(self):
     
     
 def tearDown(self):
+    mouseMove(Location(0,0))
     if self.terminal.window():
         App.close(self.terminal)
         self.terminal= None
