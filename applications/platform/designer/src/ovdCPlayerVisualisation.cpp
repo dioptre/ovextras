@@ -661,7 +661,7 @@ void CPlayerVisualisation::showSelectedWindow(OpenViBE::uint32 ui32Index)
 
 }
 
-//called when a visualisation window is open from window-menu
+//called when a visualisation window is closed from window-menu
 void CPlayerVisualisation::hideSelectedWindow(OpenViBE::uint32 ui32Index)
 {
 	// printf("Hide %p\n", GTK_WIDGET(m_vWindows[ui32Index]));
