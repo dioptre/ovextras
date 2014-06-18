@@ -16,8 +16,8 @@ m_pSymbolContainer(container), m_pPredictionContainer(container2), m_pPropertyOb
 	this->initializeColorMap(propertyObject->getFeedbackStartColor(), propertyObject->getFeedbackEndColor(), 
 						propertyObject->getColorFeedbackSteps(), propertyObject->getFeedbackStartValue());
 	
-	m_vButtons = new std::vector< std::vector<GButton*>* >(8);
-	for (uint32 i=0; i<8; i++)
+	m_vButtons = new std::vector< std::vector<GButton*>* >(NONE);
+	for (uint32 i=0; i<NONE; i++)
 		m_vButtons->at(i) = new std::vector<GButton*>();
 
 	//In the key descriptor (in the xml file) we don't have states for NONCENTRAL feedback for example. So to create GButtons for
@@ -41,7 +41,7 @@ m_pSymbolContainer(container), m_pPredictionContainer(container2), m_pPropertyOb
 
 P300KeyboardHandler::~P300KeyboardHandler()
 {
-	for (OpenViBE::uint32 i=0; i<8; i++)
+	for (OpenViBE::uint32 i=0; i<NONE; i++)
 	{
 		for (OpenViBE::uint32 j=0; j<m_pLayoutObject->getNumberOfKeys(); j++)
 			delete m_vButtons->at(i)->at(j);
@@ -56,7 +56,7 @@ void P300KeyboardHandler::addObserver(GObserver * observer)
 	for (uint32 j=0; j<m_pSymbolContainer->getNumberOfChildren(); j++)
 		m_pSymbolContainer->getChild(j)->addObserver(observer);
 	for (uint32 j=0; j<m_pLayoutObject->getNumberOfKeys(); j++)
-		for (uint32 i=0; i<8; i++)
+		for (uint32 i=0; i<NONE; i++)
 			m_vButtons->at(i)->at(j)->addObserver(observer);	
 	for (uint32 j=0; j<m_pPredictionContainer->getNumberOfChildren(); j++)
 		m_pPredictionContainer->getChild(j)->addObserver(observer);
@@ -70,7 +70,7 @@ void P300KeyboardHandler::addActionObserver(CString action, GObserver * observer
 	{
 		if (l_lKeyDefinitions->at(j)->isActionEnabled(action))
 		{
-			for (uint32 i=2; i<8; i++)
+			for (uint32 i=2; i<NONE; i++)
 				m_vButtons->at(i)->at(j)->addObserver(observer);
 		}
 	}
@@ -97,7 +97,7 @@ void P300KeyboardHandler::update(GObservable* observable, const void * pUserData
 		{
 			GButton* l_pButton = dynamic_cast<GButton*>(m_pPredictionContainer->getChild(j));
 			GSymbol* l_pSymbol = dynamic_cast<GSymbol*>(l_pButton->getLabel());
-			for (uint32 i=0; i<8; i++)
+			for (uint32 i=0; i<NONE; i++)
 			{
 				l_pSymbol = dynamic_cast<GSymbol*>(m_vButtons->at(i)->at(k)->getLabel());
 				if (l_pSymbol!=NULL)
@@ -238,7 +238,7 @@ void P300KeyboardHandler::initializeKeyboard()
 		m_vButtons->at(0)->push_back(l_Button->clone());
 	}
 	
-	for (uint32 i=1; i<8; i++)
+	for (uint32 i=1; i<NONE; i++)
 	{
 		for (uint32 it=0; it<l_ui32NumberOfSymbols; it++)
 		{	
