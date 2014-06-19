@@ -1,6 +1,6 @@
 #ifndef __OpenGLTextureManager_OV_H__
 #define __OpenGLTextureManager_OV_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "OpenGLResourceManager.h"
 //#include <set>
 
@@ -52,4 +52,5 @@ namespace OpenViBEApplications
 
 };
 
+#endif
 #endif

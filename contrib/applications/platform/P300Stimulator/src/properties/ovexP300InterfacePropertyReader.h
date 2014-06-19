@@ -1,6 +1,7 @@
 #ifndef __ovExternalP300InterfacePropertyReader__
 #define __ovExternalP300InterfacePropertyReader__
 
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "ovexP300PropertyReader.h"
 
 namespace OpenViBEApplications
@@ -85,7 +86,7 @@ namespace OpenViBEApplications
 		SpellingMode m_eSpellingMode;
 		OpenViBE::CString m_sStimulatorConfigFile;
 		OpenViBE::CString m_sSymbolDefinitionFile;
-		OpenViBE::CString m_AdditionalConfigurationFile;
+		OpenViBE::CString m_sAdditionalConfigurationFile;
 		OpenViBE::CString m_sFlashGroupDefinitionFile;
 		OpenViBE::boolean m_bFullScreen;
 		OpenViBE::boolean m_bCentralFeedbackFreeMode;
@@ -113,5 +114,5 @@ namespace OpenViBEApplications
 		
 	};
 };
-
+#endif
 #endif

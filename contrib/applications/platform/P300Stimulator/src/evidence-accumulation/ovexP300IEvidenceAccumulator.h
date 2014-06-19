@@ -67,7 +67,7 @@ namespace OpenViBEApplications
 					if(m_bIsReadyToPredict)
 					{
 						OpenViBE::float32 max;
-						findMaximum(m_pAccumulatedEvidence->getBuffer(), m_ui64Prediction, max);
+						findMaximum(m_pAccumulatedEvidence->getBuffer(), &m_ui64Prediction, &max);
 					}
 					//if we are not ready, the prediction will be 0 and ignored
 					return m_ui64Prediction;
@@ -76,6 +76,7 @@ namespace OpenViBEApplications
 				//reset all accumulated evidence, used when a new trial start
 				virtual void flushEvidence()
 				{
+					std::cout <<"flush\n";
 					m_ui64Prediction=0;
 					m_ui32CurrentFlashIndex=0;
 					m_bIsReadyToPredict=false;
@@ -131,18 +132,18 @@ namespace OpenViBEApplications
 				virtual void accumulate(OpenViBE::IMatrix* mEvidenceToAdd)=0;
 
 				//find maximum
-				void findMaximum(OpenViBE::float64* vector, OpenViBE::uint32& l_ui32MaximumIndex, OpenViBE::float32& l_f32Maximum)
+				void findMaximum(OpenViBE::float64* vector, OpenViBE::uint32* l_ui32MaximumIndex, OpenViBE::float32* l_f32Maximum)
 				{
-					l_f32Maximum = std::numeric_limits<int>::min();
-					l_ui32MaximumIndex = 0;
+					*l_f32Maximum = std::numeric_limits<int>::min();
+					*l_ui32MaximumIndex = 0;
 					for (unsigned int j=0; j<m_pAccumulatedEvidence->getBufferElementCount(); j++)
-						if (*(vector+j)>l_f32Maximum)
+						if (*(vector+j)>(*l_f32Maximum))
 						{
-							l_f32Maximum = *(vector+j);
-							l_ui32MaximumIndex = j;
+							*l_f32Maximum = *(vector+j);
+							*l_ui32MaximumIndex = j;
 						}
 					//if an index of 0 is a mistake, we must start to count at 1
-					l_ui32MaximumIndex++;
+					(*l_ui32MaximumIndex)++;
 
 					//return  l_ui32MaximumIndex;
 				}
@@ -181,7 +182,7 @@ namespace OpenViBEApplications
 					OpenViBE::float32 max;
 					unsigned int j=0;
 					OpenViBE::float64* buffer = m_pAccumulatedEvidence->getBuffer();
-					findMaximum(buffer, argmax, max);
+					findMaximum(buffer, &argmax, &max);
 
 
 					bool m_bEarlyStoppingConditionMet = true;

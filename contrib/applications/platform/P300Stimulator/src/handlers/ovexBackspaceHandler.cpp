@@ -1,6 +1,7 @@
 #include <vector>
 
 #include "ovexBackspaceHandler.h"
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "ovexP300ResultAreaHandler.h"
 #include "ovexP300KeyboardHandler.h"
 #include "../visualisation/glGButton.h"
@@ -36,3 +37,4 @@ void P300BackspaceHandler::update(GObservable* observable, const void * pUserDat
 		}
 	}
 }
+#endif

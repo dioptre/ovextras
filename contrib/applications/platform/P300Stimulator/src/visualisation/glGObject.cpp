@@ -1,5 +1,5 @@
 #include "glGObject.h"
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
@@ -118,3 +118,4 @@ void GObject::assignHelper(GObject const& gobject)
 	this->m_bUsingDisplayLists = gobject.m_bUsingDisplayLists;
 	m_pGLResourceManager = gobject.m_pGLResourceManager->clone();
 }
+#endif

@@ -1,5 +1,5 @@
 #include "glGPictureSymbol.h"
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;	
@@ -172,3 +172,4 @@ std::string GPictureSymbol::toString() const
 	text = GLabel::toString() + std::string("picture ");
 	return text;
 }
+#endif

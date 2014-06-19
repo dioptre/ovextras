@@ -1,4 +1,6 @@
+
 #include "ovexP300ScreenLayoutReader.h"
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <stdexcept>
 
 using namespace OpenViBE;
@@ -278,3 +280,4 @@ void P300ScreenLayoutReader::readPropertiesFromFile(CString propertyFile)
 		}
 	}
 }
+#endif

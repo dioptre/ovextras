@@ -1,4 +1,5 @@
 #include "ovexP300TargetAreaHandler.h"
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "ovexUndoHandler.h"
 #include "../visualisation/glGButton.h"
 #include "../visualisation/glGSymbol.h"
@@ -56,3 +57,4 @@ void P300TargetAreaHandler::moveSymbolsLeft(OpenViBE::uint32 nshift)
 	for(uint32 i=0;i<nshift;i++)
 		m_pSymbolContainer->removeChild(0);	
 }
+#endif

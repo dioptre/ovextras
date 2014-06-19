@@ -1,5 +1,5 @@
 #include "ovexP300InterfacePropertyReader.h"
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
@@ -14,7 +14,7 @@ P300InterfacePropertyReader::P300InterfacePropertyReader(OpenViBE::Kernel::IKern
 	m_eSpellingMode = COPY_MODE;
 	m_sStimulatorConfigFile = CString("");
 	m_sSymbolDefinitionFile = CString("");
-	m_AdditionalConfigurationFile = CString("");
+	m_sAdditionalConfigurationFile = CString("");
 	m_sFlashGroupDefinitionFile = CString("");
 	m_sStimulatorMode = CString("");
 	m_bFullScreen = false;
@@ -107,7 +107,7 @@ void P300InterfacePropertyReader::processChildData(const char* sData)
 	}
 	if(m_vNode.top()==CString("AdditionalConfigurationFile"))
 	{
-		m_AdditionalConfigurationFile = OpenViBE::Directories::getDistRootDir() + "/share/" + l_sExpandedString;
+		m_sAdditionalConfigurationFile = OpenViBE::Directories::getDistRootDir() + "/share/" + l_sExpandedString;
 	}	
 	if(m_vNode.top()==CString("SymbolDefinitionFile"))
 	{
@@ -183,3 +183,4 @@ void P300InterfacePropertyReader::closeChild(void)
 {
 	m_vNode.pop();
 }
+#endif

@@ -12,7 +12,9 @@
 #include <stdlib.h>
 #include <stack>
 
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "../visualisation/glGObject.h"
+
 
 namespace
 {
@@ -125,5 +127,5 @@ namespace OpenViBEApplications
 		std::stack<OpenViBE::CString> m_vNode;
 	};
 };
-
+#endif
 #endif

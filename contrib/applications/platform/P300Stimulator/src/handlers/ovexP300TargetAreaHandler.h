@@ -1,6 +1,6 @@
 #ifndef __P300TargetAreaHandler_H__
 #define __P300TargetAreaHandler_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <cstring>
 
 #include "../visualisation/glGTable.h"
@@ -38,4 +38,5 @@ namespace OpenViBEApplications
 		P300ScreenLayoutReader* m_pScreenLayoutObject;
 	};
 };
+#endif
 #endif

@@ -1,5 +1,5 @@
 #include "glGTable.h"
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
@@ -63,3 +63,4 @@ std::string GTable::toString() const
 {
 	return std::string("GTable");
 }
+#endif

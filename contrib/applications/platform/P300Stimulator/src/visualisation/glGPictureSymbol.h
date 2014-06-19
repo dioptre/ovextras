@@ -1,6 +1,6 @@
 #ifndef __GPictureSymbol_H__
 #define __GPictureSymbol_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <string>
 #include <boost/shared_ptr.hpp>
 
@@ -67,4 +67,5 @@ namespace OpenViBEApplications
 	};
 };
 
+#endif
 #endif

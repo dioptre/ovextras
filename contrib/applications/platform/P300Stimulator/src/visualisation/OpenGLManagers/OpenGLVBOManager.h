@@ -1,6 +1,6 @@
 #ifndef __OpenGLVBOManager_OV_H__
 #define __OpenGLVBOManager_OV_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "OpenGLResourceManager.h"
 
 namespace OpenViBEApplications
@@ -27,4 +27,5 @@ namespace OpenViBEApplications
 
 };
 
+#endif
 #endif

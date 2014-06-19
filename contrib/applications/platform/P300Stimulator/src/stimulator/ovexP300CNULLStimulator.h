@@ -1,3 +1,4 @@
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
@@ -25,7 +26,7 @@ namespace OpenViBEApplications
 		 * The stimulator class is the main loop of the program. This NULL stimulator does nothing exept transmit stimulations from
 		 * the openvibe data (via shared memory) to the visualizer. It is used when replaying data
 		 */
-		class ExternalP300NULLStimulator : public ExternalP300IStimulator
+		class ExternalP300CNULLStimulator : public ExternalP300IStimulator
 		{
 			public:
 
@@ -41,9 +42,9 @@ namespace OpenViBEApplications
 				 * @param propertyObject the object containing the properties for the stimulator such as flash duration, interflash duration, intertrial...
 				 * @param l_pSequenceGenerator the sequence generator that defines which letters are flashed at one single point in time (does that for the whole trial)
 				 */
-				ExternalP300NULLStimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator);
+				ExternalP300CNULLStimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator);
 				
-				~ExternalP300NULLStimulator();
+				~ExternalP300CNULLStimulator();
 
 				/**
 				 * At the beginning of the the next trial, generate the whole sequence of letters that have to be flashed in the trial
@@ -81,3 +82,4 @@ namespace OpenViBEApplications
 		};
 
 };
+#endif

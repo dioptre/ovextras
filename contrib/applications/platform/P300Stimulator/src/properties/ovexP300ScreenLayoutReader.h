@@ -1,6 +1,7 @@
 #ifndef __ovExternalP300LetterGroupReader__
 #define __ovExternalP300LetterGroupReader__
 
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "ovexP300PropertyReader.h"
 #include "ovexP300KeyDescriptor.h"
 
@@ -151,4 +152,5 @@ namespace OpenViBEApplications
 	};
 };
 
+#endif
 #endif

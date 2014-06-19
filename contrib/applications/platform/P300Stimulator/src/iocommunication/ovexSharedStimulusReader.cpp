@@ -34,8 +34,6 @@ IStimulationSet* SharedStimulusReader::_front()
 	if (!m_bFailedToFind && m_vStimulusVector->size()>0)
 	{
 		uint64 l_sStimulusId = m_vStimulusVector->front();
-		for (uint32 i=0; i<m_vStimulusVector->size();i++)
-			std::cout << " " << m_vStimulusVector->at(i);
 
 		l_pStimulusSet = new CStimulationSet();
 		l_pStimulusSet->appendStimulation(l_sStimulusId, 0, 0);

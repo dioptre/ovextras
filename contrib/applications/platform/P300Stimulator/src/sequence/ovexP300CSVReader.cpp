@@ -24,8 +24,8 @@ ovexP300CSVReader::ovexP300CSVReader(OpenViBE::uint32 numberOfSymbols, OpenViBE:
 {
 	std::cout << "creating CSV reader\n";
 	m_uiFlashIndex = 0;
-	fileRead = false;
-	trialIndex = 0;
+	m_bFileRead = false;
+	m_uiTrialIndex = 0;
 
 
 }
@@ -57,7 +57,7 @@ void ovexP300CSVReader::readFile()
 					//std::cout << value << '\n';
 					currentGroup->push_back(value);
 				}
-				m_flashes.push_back(currentGroup);
+				m_lFlashes.push_back(currentGroup);
 				m_uiFlashIndex++;
 			}
 			else
@@ -67,7 +67,7 @@ void ovexP300CSVReader::readFile()
 
 		}
 		m_sStream.close();
-		std::cout << "read " << m_flashes.size() <<" lines\n";
+		std::cout << "read " << m_lFlashes.size() <<" lines\n";
 	}
 	else
 		std::cout << "Unable to open file";
@@ -80,15 +80,15 @@ std::vector< std::vector<OpenViBE::uint32>* >* ovexP300CSVReader::generateSequen
 {
 	m_uiFlashIndex+=m_ui32FlashCount;
 	P300SequenceGenerator::generateSequence();
-	if(!fileRead)
+	if(!m_bFileRead)
 	{
 		std::cout << "\n			READING FILE\n";
 		readFile();
-		fileRead = true;
+		m_bFileRead = true;
 	}
-	for(unsigned int i=m_uiFlashIndex; i<m_flashes.size(); i++)
+	for(unsigned int i=m_uiFlashIndex; i<m_lFlashes.size(); i++)
 	{
-		m_lSequence->push_back(m_flashes.at(i));
+		m_lSequence->push_back(m_lFlashes.at(i));
 	}
 
 

@@ -1,7 +1,10 @@
 #include "ovexP300Visualiser.h"
 
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <system/Time.h>
 #include <GLFW/glfw3.h>
+
+#include <openvibe/ovITimeArithmetics.h>//if debug?
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -9,8 +12,7 @@ using namespace OpenViBEApplications;
 
 using namespace std;
 
-ExternalP300Visualiser * externalVisualiser;
-OpenViBE::float64* s_pResetSymbolProbabilities;
+ExternalP300Visualiser * g_externalVisualiser;
 
 ExternalP300Visualiser::ExternalP300Visualiser()
 {
@@ -98,23 +100,23 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	if(m_pInterfacePropReader->getStimulatorMode()==CString("Replay"))
 	{
 		this->m_pKernelContext->getLogManager() << LogLevel_Info << " REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() <<"\n";
-		this->m_oStimulator = new ExternalP300NULLStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
+		this->m_oStimulator = new ExternalP300CNULLStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
 		this->m_pSequenceGenerator->generateSequence();//to test csv reading
 		m_bReplayMode=true;
 	}
 	else
 	{
 		this->m_pKernelContext->getLogManager() << LogLevel_Info << " NOT REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() << "\n";
-		this->m_oStimulator = new ExternalP300Stimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
+		this->m_oStimulator = new ExternalP300CStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
 		m_bReplayMode=false;
 	}
 
-	this->evAcc = new ExternalP300EvidenceAccumulator(m_pStimulatorPropReader,m_pSequenceGenerator);
+	this->m_oEvidenceAccumulator = new ExternalP300CEvidenceAccumulator(m_pStimulatorPropReader,m_pSequenceGenerator);
 	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
 	this->m_oStimulator->setCallBack(ExternalP300Visualiser::processCallback);	
 	this->m_oStimulator->setWaitCallBack(ExternalP300Visualiser::processWaitCallback);
 	this->m_oStimulator->setQuitEventCheck(ExternalP300Visualiser::areWeQuitting);
-	this->m_oStimulator->setEvidenceAccumulator(evAcc);
+	this->m_oStimulator->setEvidenceAccumulator(m_oEvidenceAccumulator);
 
 
 	//initialize the OpenGL context and the main container that is needed to draw everything on the screen by calling the drawAndSync function
@@ -158,7 +160,7 @@ ExternalP300Visualiser::~ExternalP300Visualiser()
 	
 	delete m_pSequenceWriter;
 	delete m_pSequenceGenerator;
-	delete evAcc;
+	delete m_oEvidenceAccumulator;
 }
 
 void ExternalP300Visualiser::initializeOpenViBEKernel()
@@ -204,7 +206,7 @@ void ExternalP300Visualiser::initializeOpenViBEKernel()
 
 void ExternalP300Visualiser::processCallback(uint32 eventID) 
 {
-	externalVisualiser->process(eventID);				
+	g_externalVisualiser->process(eventID);
 }
 
 void ExternalP300Visualiser::processWaitCallback(uint32 eventID)
@@ -224,7 +226,7 @@ void ExternalP300Visualiser::processWaitCallback(uint32 eventID)
 
 boolean ExternalP300Visualiser::areWeQuitting(void)
 {
-	GLFWwindow* window = externalVisualiser->getMainContainer()->getWindow();
+	GLFWwindow* window = g_externalVisualiser->getMainContainer()->getWindow();
 	return ( glfwWindowShouldClose(window)!=0 );
 }
 
@@ -295,8 +297,6 @@ void ExternalP300Visualiser::process(uint32 eventID)
 		case OVA_StimulationId_RestStart:
 			m_pTagger->write(eventID);
 			m_bInRest = true;
-			//reset the color of all symbols by setting the probabilities to the uniform distribution
-			m_pMainContainer->getKeyboardHandler()->updateChildProbabilities(s_pResetSymbolProbabilities);
 			break;
 		case OVA_StimulationId_TargetCue:
 			m_bInFeedback = false;
@@ -474,7 +474,7 @@ void ExternalP300Visualiser::process(uint32 eventID)
 
 void ExternalP300Visualiser::start()
 {
-	externalVisualiser->m_oStimulator->run();
+	g_externalVisualiser->m_oStimulator->run();
 }
 
 void ExternalP300Visualiser::changeStates(uint32* states, VisualState ifState, VisualState elseState)
@@ -506,27 +506,24 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		std::cout << "START key pressed " << std::endl;
 	}
 }
+#endif
 
 /**
 MAIN: press 's' to start the stimulator
 */
 int main (int argc, char *argv[])
 {	
+	#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 	glfwSetErrorCallback(error_callback);
 
 	//create the main visualiser object
-	externalVisualiser = new ExternalP300Visualiser();
+	g_externalVisualiser = new ExternalP300Visualiser();
 
-	GLFWwindow* window = externalVisualiser->getMainContainer()->getWindow();
+	GLFWwindow* window = g_externalVisualiser->getMainContainer()->getWindow();
 	glfwSetKeyCallback(window, key_callback);
-
-	//variable for the symbol probabilities
-	s_pResetSymbolProbabilities = new float64[externalVisualiser->getNumberOfKeys()];
-	for (uint32 i=0;i<externalVisualiser->getNumberOfKeys();i++)
-		s_pResetSymbolProbabilities[i] = 1.0/externalVisualiser->getNumberOfKeys();
 	
 	//listen for an key event. If 's' is pressed the stimulator is started.
-	if(!externalVisualiser->getReplayMode())
+	if(!g_externalVisualiser->getReplayMode())
 	{
 		std::cout << "waitingfor s key" << std::endl;
 		boolean l_bEventReceived = false;
@@ -536,7 +533,7 @@ int main (int argc, char *argv[])
 			if(glfwGetKey(window, GLFW_KEY_S)==GLFW_PRESS)
 			{
 				l_bEventReceived = true;
-				externalVisualiser->start();
+				g_externalVisualiser->start();
 			}
 
 			System::Time::sleep(10);
@@ -545,14 +542,14 @@ int main (int argc, char *argv[])
 	else
 	{
 		//in replay mode we do not wait for the user to press 's
-		externalVisualiser->start();
+		g_externalVisualiser->start();
 	}
 	//clean up
-	delete externalVisualiser;
-	delete[] s_pResetSymbolProbabilities;
+	delete g_externalVisualiser;
 
 	glfwTerminate();
 	//SDL_Quit();
-
+#endif
 	return 0;
 }
+//#endif//TARGET_HAS_ThirdPartyModulesForExternalStimulator

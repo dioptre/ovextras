@@ -1,5 +1,5 @@
 #include "OpenGLVBOManager.h"
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
@@ -47,3 +47,4 @@ void OpenGLVBOManager::_deleteResource(GLuint* resource_id)
 /*void forwarder(OpenGLResourceManager* context) {
     dynamic_cast<OpenGLVBOManager*>(context)->generateOpenGLResources();
 }*/
+#endif

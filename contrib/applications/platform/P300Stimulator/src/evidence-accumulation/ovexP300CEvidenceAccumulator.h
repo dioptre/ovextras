@@ -1,5 +1,5 @@
-#ifndef __EvidenceAccumulator_H__
-#define __EvidenceAccumulator_H__
+#ifndef __EvidenceCAccumulator_H__
+#define __EvidenceCAccumulator_H__
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
@@ -25,17 +25,18 @@ namespace OpenViBEApplications
 		/**
 		 * The EvidenceAccumulator class takes evidence from OpenVibe (via shared memory) and determines which symbol is selected
 		 */
-		class ExternalP300EvidenceAccumulator : public ExternalP300IEvidenceAccumulator
+		class ExternalP300CEvidenceAccumulator : public ExternalP300IEvidenceAccumulator
 		{
 			public:
 				
-				ExternalP300EvidenceAccumulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator):ExternalP300IEvidenceAccumulator(propertyObject, l_pSequenceGenerator)
+				ExternalP300CEvidenceAccumulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator):ExternalP300IEvidenceAccumulator(propertyObject, l_pSequenceGenerator)
 				{
 					m_pNormalizedAccumulatedEvidence = new OpenViBE::CMatrix();
 					m_ui32CurrentFlashIndex=0;
+					std::cout <<"evAcc created\n";
 				}
 				
-				virtual ~ExternalP300EvidenceAccumulator(){}
+				virtual ~ExternalP300CEvidenceAccumulator(){}
 				
 				/**
 				 * At the beginning of the the next trial, generate the whole sequence of letters that have to be flashed in the trial
@@ -116,7 +117,7 @@ namespace OpenViBEApplications
 
 					OpenViBE::float32 l_f32Maximum;
 					OpenViBE::uint32 m_ui32MaximumIndex;
-					findMaximum(m_pAccumulatedEvidence->getBuffer(), m_ui32MaximumIndex, l_f32Maximum);
+					findMaximum(m_pAccumulatedEvidence->getBuffer(), &m_ui32MaximumIndex, &l_f32Maximum);
 
 					OpenViBE::float64 l_f64Sum = 0.0;
 					for (OpenViBE::uint32 j=0; j<l_pInputMatrix->getBufferElementCount(); j++)

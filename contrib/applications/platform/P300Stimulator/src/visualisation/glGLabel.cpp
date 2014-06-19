@@ -1,5 +1,5 @@
 #include "glGLabel.h"
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
@@ -106,3 +106,4 @@ std::string GLabel::toString() const
 {
 	return std::string("label ");
 }
+#endif

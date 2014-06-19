@@ -1,6 +1,6 @@
 #ifndef __P300BackspaceHandler_H__
 #define __P300BackspaceHandler_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <list>
 #include <cstring>
 
@@ -45,4 +45,5 @@ namespace OpenViBEApplications
 		std::string m_sSpeltLetters;
 	};
 };
+#endif
 #endif

@@ -1,5 +1,5 @@
 #include "OpenGLDListManager.h"
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
@@ -46,3 +46,4 @@ void OpenGLDListManager::_deleteResource(GLuint* resource_id)
 	//std::cout << "OpenGLDListManager:: Deleting opengl resource with id " << *resource_id << "\n";
 	glDeleteLists(*resource_id,1);
 }
+#endif

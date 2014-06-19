@@ -1,6 +1,8 @@
 #ifndef __GP300MainContainer_OV_H__
 #define __GP300MainContainer_OV_H__
 
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+
 #include <list>
 #include <vector>
 #include <queue>
@@ -177,5 +179,6 @@ namespace OpenViBEApplications
 	};
 	
 };
-
+#endif//TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #endif
+

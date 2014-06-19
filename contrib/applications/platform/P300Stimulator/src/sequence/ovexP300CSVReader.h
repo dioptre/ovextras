@@ -31,9 +31,9 @@ private :
 	void readFile();
 
 	unsigned int m_uiFlashIndex;
-	std::vector< std::vector <unsigned int>* > m_flashes;
-	bool fileRead;
-	unsigned int trialIndex;
+	std::vector< std::vector <unsigned int>* > m_lFlashes;
+	bool m_bFileRead;
+	unsigned int m_uiTrialIndex;
 };
 }
 #endif // OVEXP300CSVREADER_H

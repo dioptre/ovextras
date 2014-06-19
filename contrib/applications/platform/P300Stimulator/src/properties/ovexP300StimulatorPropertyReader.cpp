@@ -1,4 +1,6 @@
 #include "ovexP300StimulatorPropertyReader.h"
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -55,12 +57,12 @@ void P300StimulatorPropertyReader::processChildData(const char* sData)
 	{
 		uint64 l_ui64InterTrialDelay = _AutoCast_(sData);
 		m_pKernelContext->getLogManager() << LogLevel_Warning << "Inter trial delay is " << l_ui64InterTrialDelay << "\n";
-		if (l_ui64InterTrialDelay>= (4LL<<32))
+		if (l_ui64InterTrialDelay>= ITimeArithmetics::sampleCountToTime(1, 4LL))//(4LL<<32))
 			m_ui64InterTrialDuration = l_ui64InterTrialDelay;
 		else
 		{
 			m_pKernelContext->getLogManager() << LogLevel_Warning << "Inter trial delay should be bigger than 4 seconds; setting it to 4 seconds\n";
-			m_ui64InterTrialDuration = (4LL<<32);
+			m_ui64InterTrialDuration = ITimeArithmetics::sampleCountToTime(1, 4LL);
 		}
 	}
 	if(m_vNode.top()==CString("TargetWord"))
@@ -104,3 +106,4 @@ uint64 P300StimulatorPropertyReader::findSymbolIndex(std::string symbol)
 
 	return 0;
 }
+#endif

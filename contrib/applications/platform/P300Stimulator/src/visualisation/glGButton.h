@@ -1,6 +1,6 @@
 #ifndef __GButton_H__
 #define __GButton_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <cstring>
 
 #include "glGLabel.h"
@@ -145,4 +145,5 @@ namespace OpenViBEApplications
 	};
 };
 
+#endif
 #endif

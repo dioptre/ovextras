@@ -1,4 +1,5 @@
 #include "ovexP300ResultAreaHandler.h"
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "ovexP300TargetAreaHandler.h"
 #include "ovexUndoHandler.h"
 #include "ovexBackspaceHandler.h"
@@ -288,3 +289,4 @@ std::string P300ResultAreaHandler::eraseLastCharacter()
 	m_pSymbolContainer->removeChild(m_ui32ResultCounter-1);
 	return l_sCharacterRemoved;
 }
+#endif

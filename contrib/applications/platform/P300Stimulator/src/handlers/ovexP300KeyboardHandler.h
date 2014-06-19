@@ -1,6 +1,6 @@
 #ifndef __P300KeyboardHandler_H__
 #define __P300KeyboardHandler_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <map>
 #include <cstring>
 #include <list>
@@ -213,4 +213,5 @@ namespace OpenViBEApplications
 		//std::map<FontID,boost::shared_ptr<FTFont> > m_mFontSourceMap;
 	};
 };
+#endif
 #endif

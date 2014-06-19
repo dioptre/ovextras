@@ -1,5 +1,5 @@
 #include "glGButton.h"
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
@@ -204,3 +204,4 @@ std::string GButton::toString() const
 	text += std::string(m_pLabel->toString());
 	return text;	
 }
+#endif

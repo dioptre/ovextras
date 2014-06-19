@@ -1,6 +1,6 @@
 #ifndef __P300PredictionboardHandler_H__
 #define __P300PredictionboardHandler_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "../visualisation/glGContainer.h"
 #include "../prediction/ovexWordPredictionEngine.h"
 #include "../prediction/ovexPresagePredictionEngine.h"
@@ -50,4 +50,5 @@ namespace OpenViBEApplications
 		OpenViBE::uint32 m_ui32NPredictions;
 	};
 };
+#endif
 #endif

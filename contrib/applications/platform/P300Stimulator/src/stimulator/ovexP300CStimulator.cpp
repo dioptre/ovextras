@@ -1,11 +1,9 @@
-#include "ovexP300Stimulator.h"
+#include "ovexP300CStimulator.h"
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "../ova_defines.h"
 #include <system/Time.h>
 
-//#include <boost/thread.hpp>
-//#include <sys/time.h>
-//#include "boost/thread/thread.hpp"
-//#include "boost/date_time/posix_time/posix_time.hpp"
+#include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -15,10 +13,10 @@ using namespace std;
 
 //struct timeval currentLTime;
 
-#define time2ms(x,y) ((x) * 1000 + y/1000.0) + 0.5
+//#define time2ms(x,y) ((x) * 1000 + y/1000.0) + 0.5
 
-ExternalP300Stimulator::ExternalP300Stimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator) 
-				: m_oSharedMemoryReader(), m_pPropertyObject(propertyObject)
+ExternalP300CStimulator::ExternalP300CStimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator) 
+				: m_pPropertyObject(propertyObject)
 {
 	m_pSequenceGenerator = l_pSequenceGenerator;
 	
@@ -44,7 +42,6 @@ ExternalP300Stimulator::ExternalP300Stimulator(P300StimulatorPropertyReader* pro
 	m_ui64TrialDuration=m_ui32RepetitionCountInTrial*(m_ui64RepetitionDuration+m_ui64InterRepetitionDuration);
 	m_ui32TrialIndex=0;					
 
-	//m_oSharedMemoryReader.openSharedMemory(m_sSharedMemoryName);
 	m_ui64Prediction = 0;				
 	
 	#ifdef OUTPUT_TIMING
@@ -55,15 +52,14 @@ ExternalP300Stimulator::ExternalP300Stimulator(P300StimulatorPropertyReader* pro
 	m_ui64StimulatedCycleTime = 0;
 }
 
-ExternalP300Stimulator::~ExternalP300Stimulator()
+ExternalP300CStimulator::~ExternalP300CStimulator()
 {
-	//m_oSharedMemoryReader.closeSharedMemory();
 	#ifdef OUTPUT_TIMING
 	fclose(timingFile);
 	#endif
 }
 
-void ExternalP300Stimulator::adjustForNextTrial(uint64 currentTime)
+void ExternalP300CStimulator::adjustForNextTrial(uint64 currentTime)
 {
 	m_ui64TrialStartTime=currentTime+m_ui64InterTrialDuration;
 	uint64 l_ui64InterTrialPartition = m_ui64InterTrialDuration >> 3;
@@ -78,7 +74,7 @@ void ExternalP300Stimulator::adjustForNextTrial(uint64 currentTime)
 	m_ui32TrialIndex++;	
 }
 
-void ExternalP300Stimulator::run()
+void ExternalP300CStimulator::run()
 {
 	uint32 l_ui32State=State_NoFlash;
 
@@ -86,7 +82,7 @@ void ExternalP300Stimulator::run()
 		m_ui32TrialCount = UINT_MAX-1;
 
 	uint32 l_ui32StimulatorFrequency = 250; //TODO should be a configurable parameter
-	uint64 l_ui64TimeStep = static_cast<uint64>((1LL<<32)/l_ui32StimulatorFrequency);
+	uint64 l_ui64TimeStep = static_cast<uint64>(ITimeArithmetics::sampleCountToTime(l_ui32StimulatorFrequency, 1LL));
 	uint64 l_ui64CurrentTime = 0;
 
 	uint64 MyInterFlash = 0;
@@ -97,7 +93,7 @@ void ExternalP300Stimulator::run()
 	{
 		uint64 l_ui64TimeBefore = System::Time::zgetTime();
 		#ifdef OUTPUT_TIMING
-            fprintf(timingFile, "%f \n",float64((System::Time::zgetTime()>>22)/1024.0));
+			fprintf(timingFile, "%f \n",float64(ITimeArithmetics::timeToSeconds(System::Time::zgetTime())));
 		#endif
 		
 		//m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "real " << time64(m_ui64RealCycleTime) << " simulated " << time64(l_ui64CurrentTime) << "\n";
@@ -105,32 +101,19 @@ void ExternalP300Stimulator::run()
 		//*
 		if (m_ui64RealCycleTime<l_ui64CurrentTime)
 		{
-			uint32 WaitFor = static_cast<uint32>(std::ceil(1000.0*((l_ui64CurrentTime-m_ui64RealCycleTime+l_ui64TimeStep)>>22)/1024.0));
-			System::Time::sleep(WaitFor);
+			uint32 l_ui32WaitFor = static_cast<uint32>(std::ceil(1000.0*ITimeArithmetics::timeToSeconds(m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep)));
+			System::Time::sleep(l_ui32WaitFor);
 		}
 		else if(m_ui64RealCycleTime-l_ui64CurrentTime>l_ui64TimeStep)//if the simulated time is behind real time, we make up for lost time by skipping the necessary amount of cycles
 		{
-			uint64 NumberOfCycles = ceil((double)(m_ui64RealCycleTime-l_ui64CurrentTime)/l_ui64TimeStep);
-			l_ui64CurrentTime+=NumberOfCycles*l_ui64TimeStep;
+			uint64 l_ui64NumberOfCycles = ceil((double)(m_ui64RealCycleTime-l_ui64CurrentTime)/l_ui64TimeStep);
+			l_ui64CurrentTime+=l_ui64NumberOfCycles*l_ui64TimeStep;
 
 		}
 		//*/
 		m_oEvidenceAcc->update();//update with data from the scenario classifier
 
-		uint64 l_ui64Prediction = m_oEvidenceAcc->getPrediction(); //m_oSharedMemoryReader.readNextPrediction();
-
-
-
-		/*
-		IMatrix * l_pLetterProbabilities;
-		l_pLetterProbabilities = m_oSharedMemoryReader.readNextSymbolProbabilities();
-
-		if (l_pLetterProbabilities!=NULL)
-		{
-			m_funcVisualiserCallback(OVA_StimulationId_LetterColorFeedback);
-			delete l_pLetterProbabilities;
-		}
-		//*/
+		uint64 l_ui64Prediction = m_oEvidenceAcc->getPrediction();
 			
 		if (l_ui64Prediction!=0 && l_ui32State!=State_TrialRest && l_ui32State!=State_Feedback && l_ui32State!=State_Target ) //induce early stopping
 		{
@@ -237,10 +220,10 @@ void ExternalP300Stimulator::run()
 				case State_TrialRest:
 					if (l_ui32State!=State_Target && l_ui32State!=State_Feedback)
 					{
-						m_funcVisualiserCallback(OVA_StimulationId_RestStop);
+						m_oFuncVisualiserCallback(OVA_StimulationId_RestStop);
 						if (l_ui32State!=State_None)
 						{
-							m_funcVisualiserCallback(OVA_StimulationId_TrialStart);
+							m_oFuncVisualiserCallback(OVA_StimulationId_TrialStart);
 							//m_funcVisualiserCallback(OVA_StimulationId_SegmentStart);
 						}
 					}
@@ -255,7 +238,7 @@ void ExternalP300Stimulator::run()
 					break;
 
 				case State_None:
-					m_funcVisualiserCallback(OVA_StimulationId_ExperimentStart);
+					m_oFuncVisualiserCallback(OVA_StimulationId_ExperimentStart);
 					break;
 
 				default:
@@ -265,26 +248,26 @@ void ExternalP300Stimulator::run()
 			switch(l_ui32State)
 			{
 				case State_Flash:
-					m_funcVisualiserCallback(OVA_StimulationId_Flash);
+					m_oFuncVisualiserCallback(OVA_StimulationId_Flash);
 					break;
 
 				case State_NoFlash:
-					m_funcVisualiserCallback(OVA_StimulationId_FlashStop);
+					m_oFuncVisualiserCallback(OVA_StimulationId_FlashStop);
 					break;
 
 				case State_RepetitionRest:
-					m_funcVisualiserCallback(OVA_StimulationId_VisualStimulationStop);
+					m_oFuncVisualiserCallback(OVA_StimulationId_VisualStimulationStop);
 					break;
 
 				case State_TrialRest:
 					if (m_ui32LastState==State_Target || m_ui32LastState==State_Feedback)
 					{
-						m_funcVisualiserCallback(OVA_StimulationId_VisualStimulationStop);
+						m_oFuncVisualiserCallback(OVA_StimulationId_VisualStimulationStop);
 					}
 					if(m_ui32LastState!=State_None && m_ui32LastState!=State_Target && m_ui32LastState!=State_Feedback)
 					{
-						m_funcVisualiserCallback(OVA_StimulationId_TrialStop);
-						m_funcVisualiserCallback(OVA_StimulationId_RestStart);
+						m_oFuncVisualiserCallback(OVA_StimulationId_TrialStop);
+						m_oFuncVisualiserCallback(OVA_StimulationId_RestStart);
 					}
 					break;
 
@@ -293,8 +276,8 @@ void ExternalP300Stimulator::run()
 					{
 						targetStimulus = static_cast<uint32>(m_oTargetStimuli->front()); //TODO: we should type all stimuli consistently as either uint64 or uint32
 						m_oTargetStimuli->pop();
-						m_funcVisualiserCallback(OVA_StimulationId_TargetCue);
-						m_funcVisualiserCallback(targetStimulus);
+						m_oFuncVisualiserCallback(OVA_StimulationId_TargetCue);
+						m_oFuncVisualiserCallback(targetStimulus);
 					}
 					break;
 
@@ -302,12 +285,12 @@ void ExternalP300Stimulator::run()
 					if(m_ui64Prediction==0)
 					{		
 						m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Stimulator forces feedback in OpenViBE at time\n ";// << (uint32)currentLTime.tv_sec << "," << (uint32)currentLTime.tv_usec << "\n";
-						m_funcVisualiserCallback(OVA_StimulationId_FeedbackCue);
+						m_oFuncVisualiserCallback(OVA_StimulationId_FeedbackCue);
 					}
 					else
 					{		
 						m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Received feedback: \n";// << m_ui64Prediction << " at time " << (uint32)currentLTime.tv_sec << "," << (uint32)currentLTime.tv_usec <<  "\n";
-						m_funcVisualiserCallback(static_cast<uint32>(m_ui64Prediction));//TODO: we should type all stimuli consistently as either uint64 or uint32
+						m_oFuncVisualiserCallback(static_cast<uint32>(m_ui64Prediction));//TODO: we should type all stimuli consistently as either uint64 or uint32
 						m_ui64Prediction=0;
 					}
 					break;
@@ -315,7 +298,7 @@ void ExternalP300Stimulator::run()
 				case State_None:
 					if(m_ui32LastState!=State_RepetitionRest && m_ui32LastState!=State_TrialRest)
 						m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Warning << "We should not reach this state\n";
-					m_funcVisualiserCallback(OVA_StimulationId_TrialStop);
+					m_oFuncVisualiserCallback(OVA_StimulationId_TrialStop);
 					break;
 
 				default:
@@ -328,7 +311,7 @@ void ExternalP300Stimulator::run()
 		l_ui64CurrentTime += l_ui64TimeStep;
 		m_ui64StimulatedCycleTime += l_ui64TimeStep;
 
-		m_funcVisualiserWaitCallback(0);
+		m_oFuncVisualiserWaitCallback(0);
 		if(checkForQuitEvent())
 			m_ui32TrialIndex = UINT_MAX;
 		
@@ -337,20 +320,20 @@ void ExternalP300Stimulator::run()
 
 
 		#ifdef OUTPUT_TIMING
-		fprintf(timingFile, "%f \n",float64((System::Time::zgetTime()>>22)/1024.0));	
+		fprintf(timingFile, "%f \n",float64(ITimeArithmetics::timeToSeconds(System::Time::zgetTime())));
 		#endif
 	}
 	
 	//in case it is not stopped in the middle of the stimulation process we want to wait on an event before quitting the application
 	if (m_ui32TrialIndex != UINT_MAX)
 	{
-		m_funcVisualiserWaitCallback(1);
+		m_oFuncVisualiserWaitCallback(1);
 		while (!checkForQuitEvent())
 		{
-			m_funcVisualiserWaitCallback(1);
+			m_oFuncVisualiserWaitCallback(1);
 			System::Time::sleep(50);
 		}
 	}
-	m_funcVisualiserCallback(OVA_StimulationId_ExperimentStop);
+	m_oFuncVisualiserCallback(OVA_StimulationId_ExperimentStop);
 }
-
+#endif

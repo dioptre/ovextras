@@ -1,6 +1,6 @@
 #ifndef __GTable_H__
 #define __GTable_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <cmath>
 
 #include "glGContainer.h"
@@ -73,4 +73,5 @@ namespace OpenViBEApplications
 	};
 };
 
+#endif
 #endif

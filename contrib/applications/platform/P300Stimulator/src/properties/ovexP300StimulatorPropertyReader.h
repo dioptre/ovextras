@@ -5,7 +5,7 @@
 #include <list>
 #include <string>
 #include <cmath>
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "ovexP300PropertyReader.h"
 
 namespace OpenViBEApplications
@@ -26,17 +26,11 @@ namespace OpenViBEApplications
 		}
 		
 		OpenViBE::uint64 getStimulationBase() { return m_ui64StimulationBase; }
-		//OpenViBE::uint64 getBaseStimulationGroup2() { return m_ui64StimulationBaseGroup2; }
-		//OpenViBE::uint64 getGroupSize() { return m_ui32GroupSize; }
-		//OpenViBE::uint64 getNumberOfFlashesInRepetition() { return std::floor(m_lSymbolList->size()/m_ui32GroupSize); }
-		//OpenViBE::uint64 getNumberOfFlashesInRepetition() { return 2*m_ui32InitialNumberOfGroups; }
 		OpenViBE::uint32 getNumberOfGroups() { return m_ui32InitialNumberOfGroups; }
-		//OpenViBE::uint64 getGroup2Size() { return m_ui32Group2Size; }
 		OpenViBE::uint32 getNumberOfRepetitions() { return m_ui32RepetitionCountInTrial; }
 		OpenViBE::uint32 getMinNumberOfRepetitions() { return m_ui32MinRepetitions; }
 		OpenViBE::uint32 getNumberOfTrials() { return m_sTargetWord.size(); }
 		OpenViBE::uint64 getFlashDuration() { return m_ui64FlashDuration; }
-		//OpenViBE::uint64 getNoFlashDuration() { return m_ui64NoFlashDuration; }
 		OpenViBE::uint64 getInterStimulusOnset() { return m_ui64InterStimulusOnset; }
 		OpenViBE::uint64 getInterRepetitionDelay() { return m_ui64InterRepetitionDuration; }
 		OpenViBE::uint64 getInterTrialDuration() { return m_ui64InterTrialDuration; }
@@ -53,16 +47,13 @@ namespace OpenViBEApplications
 
 	protected:
 		OpenViBE::uint64 m_ui64StimulationBase;
-		//OpenViBE::uint64 m_ui64StimulationBaseGroup2;
 
-		//OpenViBE::uint32 m_ui32Group2Size;
 		OpenViBE::uint32 m_ui32InitialNumberOfGroups;
 
 		OpenViBE::uint32 m_ui32RepetitionCountInTrial;
 		OpenViBE::uint32 m_ui32MinRepetitions;
 		OpenViBE::uint32 m_ui32TrialCount;
 		OpenViBE::uint64 m_ui64FlashDuration;
-		//OpenViBE::uint64 m_ui64NoFlashDuration;
 		OpenViBE::uint64 m_ui64InterStimulusOnset;
 		OpenViBE::uint64 m_ui64InterRepetitionDuration;
 		OpenViBE::uint64 m_ui64InterTrialDuration;
@@ -80,5 +71,5 @@ namespace OpenViBEApplications
 	
 	};
 };
-
+#endif
 #endif

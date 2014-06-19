@@ -1,6 +1,6 @@
 #ifndef __P300ResultAreaHandler_H__
 #define __P300ResultAreaHandler_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <cstring>
 
 #include "../visualisation/glGTable.h"
@@ -92,4 +92,5 @@ namespace OpenViBEApplications
 		std::vector< std::string > m_vStates;
 	};
 };
+#endif
 #endif

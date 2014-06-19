@@ -49,9 +49,6 @@ IMatrix* ExternalP300SharedMemoryReader::readNextSymbolProbabilities()
 	{
 		l_pReturnMatrix = new CMatrix();
 		OpenViBEToolkit::Tools::Matrix::copy(*l_pReturnMatrix, *l_pMatrix);
-		float64* buffer = l_pMatrix->getBuffer();
-		std::cout << "ExternalP300SharedMemoryReader::readNextSymbolProbabilities" << std::endl;
-		std::cout << buffer[0] << std::endl;
 		delete l_pMatrix;
 	}
 	

@@ -3,7 +3,7 @@
 
 #ifndef __IStimulator_H__
 #define __IStimulator_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <map>
 #include <queue>
 #include <vector>
@@ -41,6 +41,7 @@ namespace OpenViBEApplications
 		};		
 		
 		/**
+		 * @author : Dieter Devlaminck / Loic Mahe
 		 * The stimulator class is the main loop of the program. Based on stimulated time steps it will go from one state to another
 		 * (e.g. if the duration of flash is over then it will go to the noflash state). Each time it changes to another state it notifies the 
 		 * main ExternalP300Visualiser class by means of a stimulation id as defined in ova_defines.h
@@ -70,11 +71,11 @@ namespace OpenViBEApplications
 				/**
 				 * The callback that the stimulator will call to notify the ExternalP300Visualiser that the state has changed and the display should be updated
 				 */
-				virtual void setCallBack( Callback2Visualiser callback) {m_funcVisualiserCallback = callback;}
+				virtual void setCallBack( Callback2Visualiser callback) {m_oFuncVisualiserCallback = callback;}
 
 
-				virtual void setWaitCallBack( Callback2Visualiser callback) {m_funcVisualiserWaitCallback = callback;}
-				virtual void setQuitEventCheck( getFromVisualiser callback) {m_quitevent = callback;}
+				virtual void setWaitCallBack( Callback2Visualiser callback) {m_oFuncVisualiserWaitCallback = callback;}
+				virtual void setQuitEventCheck( getFromVisualiser callback) {m_oQuitEvent = callback;}
 
 				virtual void setEvidenceAccumulator(ExternalP300IEvidenceAccumulator* evAcc){m_oEvidenceAcc = evAcc;}
 				
@@ -106,13 +107,13 @@ namespace OpenViBEApplications
 			virtual OpenViBE::boolean checkForQuitEvent()
 			{
 				OpenViBE::boolean l_bQuitEventReceived = false;
-				l_bQuitEventReceived = m_quitevent();
+				l_bQuitEventReceived = m_oQuitEvent();
 				return l_bQuitEventReceived;
 			}
 
-			getFromVisualiser m_quitevent;
-			Callback2Visualiser m_funcVisualiserCallback;
-			Callback2Visualiser m_funcVisualiserWaitCallback;
+			getFromVisualiser m_oQuitEvent;
+			Callback2Visualiser m_oFuncVisualiserCallback;
+			Callback2Visualiser m_oFuncVisualiserWaitCallback;
 			ExternalP300SharedMemoryReader m_oSharedMemoryReader;
 
 			ExternalP300IEvidenceAccumulator* m_oEvidenceAcc;
@@ -120,4 +121,5 @@ namespace OpenViBEApplications
 		};
 
 };
+#endif
 #endif

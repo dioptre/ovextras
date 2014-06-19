@@ -1,5 +1,5 @@
 #include "glGSymbol.h"
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
@@ -345,3 +345,4 @@ std::string GSymbol::toString() const
 	text += std::string(" ");
 	return text;
 }
+#endif

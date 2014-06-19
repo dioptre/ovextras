@@ -1,6 +1,7 @@
 #include <vector>
 
 #include "ovexUndoHandler.h"
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "ovexBackspaceHandler.h"
 #include "ovexP300ResultAreaHandler.h"
 #include "ovexP300KeyboardHandler.h"
@@ -28,14 +29,14 @@ void P300UndoHandler::update(GObservable* observable, const void * pUserData)
 
 
 		//clicking undo button
-		if (l_pButton->getState()==GButton_Clicked && m_sUndoStack->size()>0 && l_eAction==GButton_Undo)
+		if (l_pButton->getState()==GButton_Clicked && m_lUndoStack->size()>0 && l_eAction==GButton_Undo)
 		{
-			std::string l_sStringToUndo = m_sUndoStack->back();
+			std::string l_sStringToUndo = m_lUndoStack->back();
 			std::cout <<"string to undo" <<  l_sStringToUndo.c_str() << "\n";
-			uint32 l_ui32UndoSize = m_sUndoStack->back().length();			
+			uint32 l_ui32UndoSize = m_lUndoStack->back().length();
 			//what is undone goes to the redo stack
-			m_sUndoStack->pop_back();
-			m_sRedoStack->push_back(l_sStringToUndo);
+			m_lUndoStack->pop_back();
+			m_lRedoStack->push_back(l_sStringToUndo);
 			std::string l_CharToRestore;
 			//if we undo backspace
 			if (l_sStringToUndo.find("<")!=std::string::npos)
@@ -51,15 +52,15 @@ void P300UndoHandler::update(GObservable* observable, const void * pUserData)
 			this->notifyObservers(&l_oUserData);
 			std::cout <<"done ...\n";
 		}
-		else if (l_pButton->getState()==GButton_Clicked && m_sRedoStack->size()>0 && l_eAction==GButton_Redo)
+		else if (l_pButton->getState()==GButton_Clicked && m_lRedoStack->size()>0 && l_eAction==GButton_Redo)
 		{
 			std::cout <<"redoing\n";
-			std::string l_sStringToRedo = m_sRedoStack->back();
+			std::string l_sStringToRedo = m_lRedoStack->back();
 			int32 l_i64RedoSize = l_sStringToRedo.size();
 			l_i64RedoSize = -l_i64RedoSize;
 			//what is redone goes to the undo stack
-			m_sRedoStack->pop_back();
-			m_sUndoStack->push_back(l_sStringToRedo);
+			m_lRedoStack->pop_back();
+			m_lUndoStack->push_back(l_sStringToRedo);
 			std::cout <<"redoing" << l_sStringToRedo.c_str() << "\n";
 
 			std::cout <<"undo handler (redo) notifying\n";
@@ -81,10 +82,11 @@ void P300UndoHandler::update(GObservable* observable, const void * pUserData)
 		//	l_sNewLabelStack->push(l_sNewLabelVector->at(i)->clone());
 			//std::cout << "Adding " << l_sNewLabelStack->top()->toString() << " to the undo stack, current stack size " << m_sUndoStack->size()+1 << "\n";
 		//}
-		m_sUndoStack->push_back(std::string(l_sNewString));
-		if (m_sUndoStack->size()>15)
-			m_sUndoStack->pop_front();
-		if (m_sRedoStack->size()>15)
-			m_sRedoStack->pop_front();
+		m_lUndoStack->push_back(std::string(l_sNewString));
+		if (m_lUndoStack->size()>15)
+			m_lUndoStack->pop_front();
+		if (m_lRedoStack->size()>15)
+			m_lRedoStack->pop_front();
 	}
 }
+#endif

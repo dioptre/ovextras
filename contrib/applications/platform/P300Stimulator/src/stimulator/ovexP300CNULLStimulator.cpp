@@ -1,11 +1,9 @@
-#include "ovexP300NULLStimulator.h"
+#include "ovexP300CNULLStimulator.h"
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "../ova_defines.h"
 #include <system/Time.h>
 
-//#include <boost/thread.hpp>
-//#include <sys/time.h>
-//#include "boost/thread/thread.hpp"
-//#include "boost/date_time/posix_time/posix_time.hpp"
+#include <openvibe/ovITimeArithmetics.h>//if debug?
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -15,9 +13,9 @@ using namespace std;
 
 //struct timeval currentLTime;
 
-#define time2ms(x,y) ((x) * 1000 + y/1000.0) + 0.5
+//#define time2ms(x,y) ((x) * 1000 + y/1000.0) + 0.5
 
-ExternalP300NULLStimulator::ExternalP300NULLStimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator)
+ExternalP300CNULLStimulator::ExternalP300CNULLStimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator)
 				: ExternalP300IStimulator(), m_pPropertyObject(propertyObject)
 {
 	m_pSequenceGenerator = l_pSequenceGenerator;
@@ -37,7 +35,7 @@ ExternalP300NULLStimulator::ExternalP300NULLStimulator(P300StimulatorPropertyRea
 
 }
 
-ExternalP300NULLStimulator::~ExternalP300NULLStimulator()
+ExternalP300CNULLStimulator::~ExternalP300CNULLStimulator()
 {
 	//m_oSharedMemoryReader.closeSharedMemory();
 	#ifdef OUTPUT_TIMING
@@ -45,14 +43,14 @@ ExternalP300NULLStimulator::~ExternalP300NULLStimulator()
 	#endif
 }
 
-void ExternalP300NULLStimulator::run()
+void ExternalP300CNULLStimulator::run()
 {
 
 	if (m_ui32TrialCount==0)
 		m_ui32TrialCount = UINT_MAX-1;
 
 	uint32 l_ui32StimulatorFrequency = 250; //TODO should be a configurable parameter
-	uint64 l_ui64TimeStep = static_cast<uint64>((1LL<<32)/l_ui32StimulatorFrequency);
+	uint64 l_ui64TimeStep = static_cast<uint64>(ITimeArithmetics::sampleCountToTime(l_ui32StimulatorFrequency, 1LL));
 	uint64 l_ui64CurrentTime = 0;
 	
 
@@ -61,12 +59,12 @@ void ExternalP300NULLStimulator::run()
 	{
 		uint64 l_ui64TimeBefore = System::Time::zgetTime();
 		#ifdef OUTPUT_TIMING
-            fprintf(timingFile, "%f \n",float64((System::Time::zgetTime()>>22)/1024.0));
+			fprintf(timingFile, "%f \n",float64(ITimeArithmetics::timeToSeconds(System::Time::zgetTime())));
 		#endif
 		
 		//very often one cycle of this loop does not take much time, so we just put the program to sleep until the next time step
 		if (m_ui64RealCycleTime<m_ui64StimulatedCycleTime)
-			System::Time::sleep(static_cast<uint32>(std::ceil(1000.0*((m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep)>>22)/1024.0)));
+			System::Time::sleep(static_cast<uint32>(std::ceil(1000.0*ITimeArithmetics::timeToSeconds(m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep))));
 
 		//std::cout << "NULL stim ev acc update\n";
 		m_oEvidenceAcc->update();//
@@ -82,10 +80,10 @@ void ExternalP300NULLStimulator::run()
 
 				//the first recorded file index letters from 0
 				//but since the visualizer now consider 0 to be an error
-				if(l_ui64Prediction==0)
-					l_ui64Prediction=1;
+				//if(l_ui64Prediction==0)
+					///l_ui64Prediction=1;
 				//std::cout << "\n		Stimulator callback on visu for  " << int(l_ui64Prediction) <<  std::endl;
-				m_funcVisualiserCallback(l_ui64Prediction);
+				m_oFuncVisualiserCallback(l_ui64Prediction);
 			}
 		}
 		
@@ -94,7 +92,7 @@ void ExternalP300NULLStimulator::run()
 
 		//SDL_PollEvent(&m_eKeyEvent);
 		//std::cout << "Stimulator waiting 0 " << std::endl;
-		m_funcVisualiserWaitCallback(0);
+		m_oFuncVisualiserWaitCallback(0);
 		if(checkForQuitEvent())
 			m_ui32TrialIndex = UINT_MAX;
 		
@@ -102,7 +100,7 @@ void ExternalP300NULLStimulator::run()
 		m_ui64RealCycleTime += l_ui64TimeDifference;
 
 		#ifdef OUTPUT_TIMING
-		fprintf(timingFile, "%f \n",float64((System::Time::zgetTime()>>22)/1024.0));	
+		fprintf(timingFile, "%f \n",float64(ITimeArithmetics::timeToSeconds(System::Time::zgetTime())));
 		#endif
 	}
 	
@@ -113,12 +111,13 @@ void ExternalP300NULLStimulator::run()
 	{
 		//SDL_WaitEvent(&m_eKeyEvent);
 		std::cout << "Stimulator waiting " << std::endl;
-		m_funcVisualiserWaitCallback(1);
+		m_oFuncVisualiserWaitCallback(1);
 		while (!checkForQuitEvent())// && SDL_WaitEvent(&m_eKeyEvent))
 		{
-			m_funcVisualiserWaitCallback(1);
+			m_oFuncVisualiserWaitCallback(1);
 			//System::Time::sleep(50);
 		}
 	}
-	m_funcVisualiserCallback(OVA_StimulationId_ExperimentStop);
+	m_oFuncVisualiserCallback(OVA_StimulationId_ExperimentStop);
 }
+#endif

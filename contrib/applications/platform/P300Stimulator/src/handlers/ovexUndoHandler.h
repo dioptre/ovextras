@@ -1,6 +1,6 @@
 #ifndef __P300UndoHandler_H__
 #define __P300UndoHandler_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <list>
 #include <cstring>
 
@@ -17,8 +17,8 @@ namespace OpenViBEApplications
 		
 		P300UndoHandler()//(GTable* container) : m_pSymbolContainer(container)
 		{
-			m_sUndoStack = new std::list< std::string >();
-			m_sRedoStack = new std::list< std::string >();
+			m_lUndoStack = new std::list< std::string >();
+			m_lRedoStack = new std::list< std::string >();
 		}
 		
 		~P300UndoHandler()
@@ -33,8 +33,8 @@ namespace OpenViBEApplications
 				delete m_sUndoStack->top();
 				m_sUndoStack->pop();
 			}*/
-			delete m_sUndoStack;
-			delete m_sRedoStack;
+			delete m_lUndoStack;
+			delete m_lRedoStack;
 		}
 		
 		//inherited from GObserver
@@ -43,8 +43,9 @@ namespace OpenViBEApplications
 	protected:
 		//GTable* m_pSymbolContainer;
 		//std::stack< std::stack<GLabel*>* >* m_sUndoStack;
-		std::list< std::string >* m_sUndoStack;
-		std::list< std::string >* m_sRedoStack;
+		std::list< std::string >* m_lUndoStack;
+		std::list< std::string >* m_lRedoStack;
 	};
 };
+#endif
 #endif

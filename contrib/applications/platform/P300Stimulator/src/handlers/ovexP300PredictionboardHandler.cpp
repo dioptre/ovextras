@@ -1,6 +1,7 @@
 #include <vector>
 
 #include "ovexP300PredictionboardHandler.h"
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "ovexUndoHandler.h"
 #include "ovexP300ResultAreaHandler.h"
 #include "ovexP300KeyboardHandler.h"
@@ -38,3 +39,4 @@ void P300PredictionboardHandler::update(GObservable* observable, const void * pU
 	std::vector<std::string>* l_lWords = m_pWordPredictionEngine->getMostProbableWords(m_sSpelledLetters, m_ui32NPredictions);
 	this->notifyObservers(l_lWords);	
 }
+#endif

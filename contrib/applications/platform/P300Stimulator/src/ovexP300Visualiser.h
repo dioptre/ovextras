@@ -1,5 +1,8 @@
+
 #ifndef __ovExternalP300Visualiser__
 #define __ovExternalP300Visualiser__
+
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
@@ -10,8 +13,8 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "stimulator/ovexP300Stimulator.h"
-#include "stimulator/ovexP300NULLStimulator.h"
+#include "stimulator/ovexP300CStimulator.h"
+#include "stimulator/ovexP300CNULLStimulator.h"
 
 #include "tagging/ovexCSoftTagger.h"
 #if defined TARGET_OS_Linux || (defined TARGET_OS_Windows && defined TARGET_HAS_ThirdPartyInpout)
@@ -31,7 +34,7 @@
 
 #include "ovexP300SequenceFileWriter.h"
 
-#include "evidence-accumulation/ovexP300EvidenceAccumulator.h"
+#include "evidence-accumulation/ovexP300CEvidenceAccumulator.h"
 
 #include "ova_defines.h"
 
@@ -165,7 +168,7 @@ namespace OpenViBEApplications
 			 */
 			P300SequenceGenerator* m_pSequenceGenerator;
 
-			ExternalP300IEvidenceAccumulator* evAcc;
+			ExternalP300IEvidenceAccumulator* m_oEvidenceAccumulator;
 
 		private:
 			/**
@@ -191,5 +194,7 @@ namespace OpenViBEApplications
 			#endif
 		};
 };
+#endif//TARGET_HAS_ThirdPartyModulesForExternalStimulator
 
 #endif
+

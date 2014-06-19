@@ -1,6 +1,6 @@
 #ifndef __GLabel_H__
 #define __GLabel_H__
-
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <cstring>
 
 #include "glGObject.h"
@@ -83,4 +83,5 @@ namespace OpenViBEApplications
 	};
 };
 
+#endif
 #endif
