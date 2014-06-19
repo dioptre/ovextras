@@ -20,6 +20,16 @@ boolean CBoxAlgorithmClockStimulator::initialize(void)
 	float64 l_f64InterstimulationInterval=0;
 	getStaticBoxContext().getSettingValue(0, l_sSettingValue);
 	l_f64InterstimulationInterval=::atof(l_sSettingValue.toASCIIString());
+	
+	const float64 l_f64MinInterstimulationInterval= 0.0001;
+	if ( l_f64InterstimulationInterval < l_f64MinInterstimulationInterval )
+	{
+		getLogManager() << OpenViBE::Kernel::LogLevel_Error << ": " 
+				<< "Stimulation Interval " << l_f64InterstimulationInterval 
+				<<" is too small, them caped to "  <<  l_f64MinInterstimulationInterval <<"\n";
+		l_f64InterstimulationInterval=l_f64MinInterstimulationInterval;
+	}
+	
 	m_ui64InterstimulationInterval=(uint64)(l_f64InterstimulationInterval*(1LL<<32));
 
 	getStaticBoxContext().getSettingValue(1, l_sSettingValue);
