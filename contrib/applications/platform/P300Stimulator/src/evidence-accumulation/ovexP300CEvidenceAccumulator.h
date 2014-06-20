@@ -32,6 +32,7 @@ namespace OpenViBEApplications
 				ExternalP300CEvidenceAccumulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator):ExternalP300IEvidenceAccumulator(propertyObject, l_pSequenceGenerator)
 				{
 					m_pNormalizedAccumulatedEvidence = new OpenViBE::CMatrix();
+					OpenViBEToolkit::Tools::Matrix::copy(*m_pNormalizedAccumulatedEvidence, *m_pAccumulatedEvidence);
 					m_ui32CurrentFlashIndex=0;
 					std::cout <<"evAcc created\n";
 				}

@@ -36,6 +36,8 @@ namespace OpenViBEApplications
 				ExternalP300IEvidenceAccumulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator):m_opropertyObject(propertyObject),m_pSequenceGenerator(l_pSequenceGenerator),m_bIsReadyToPredict(false)
 				{
 					m_pAccumulatedEvidence = new OpenViBE::CMatrix();
+					m_pAccumulatedEvidence->setDimensionCount(1);
+					m_pAccumulatedEvidence->setDimensionSize(0, l_pSequenceGenerator->getNumberOfSymbols());
 					m_bStopCondition = propertyObject->getStopCondition();
 					earlyStoppingEnabled = propertyObject->getEarlyStopping();
 					maxRepetition = propertyObject->getNumberOfRepetitions();
