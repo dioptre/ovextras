@@ -27,18 +27,24 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 
 	m_bReplayMode=false;
 
-	#ifdef OUTPUT_TIMING
-	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/../../../contrib/applications/platform/P300Stimulator/test/symbol_update_timing.txt","w");
-	fprintf(timingFile, "%s \n","beforeUpdate;afterUpdate;");
-	timingFile3 = fopen(OpenViBE::Directories::getDataDir() + "/generate_sequence_timing.txt","w");	
-	#endif
-	
 	//initializes openvibe kernel
 	this->initializeOpenViBEKernel();
+
+	#ifdef OUTPUT_TIMING
+	CString l_sPathData = m_pKernelContext->getConfigurationManager().expand(CString("${Path_Data}"));
+	timingFile = fopen(l_sPathData + "/../../../contrib/applications/platform/P300Stimulator/test/symbol_update_timing.txt","w");
+	fprintf(timingFile, "%s \n","beforeUpdate;afterUpdate;");
+	timingFile3 = fopen(l_sPathData + "/generate_sequence_timing.txt","w");
+	#endif
+	
+
 	
 	//this will read all configuration files, interface-properties.xml, stimulator-properties.xml and the keyboard layout in share/openvibe/applications/externalP300Stimulator/
 	this->m_pInterfacePropReader = new P300InterfacePropertyReader(this->m_pKernelContext);
-	this->m_pInterfacePropReader->readPropertiesFromFile(OpenViBE::Directories::getDistRootDir() + "/share/openvibe/applications/externalP300Stimulator/interface-properties.xml");
+
+	CString l_sPathRoot = m_pKernelContext->getConfigurationManager().expand(CString("${Path_Root}"));
+
+	this->m_pInterfacePropReader->readPropertiesFromFile(l_sPathRoot + "/share/openvibe/applications/externalP300Stimulator/interface-properties.xml");
 	this->m_pScreenLayoutReader = new P300ScreenLayoutReader(this->m_pKernelContext);
 	this->m_pScreenLayoutReader->readPropertiesFromFile(this->m_pInterfacePropReader->getScreenDefinitionFile());
 	this->m_pStimulatorPropReader = new P300StimulatorPropertyReader(this->m_pKernelContext, this->m_pScreenLayoutReader->getSymbolList());
