@@ -250,6 +250,7 @@ boolean CAlgorithmScenarioImporter::process(void)
 					s->m_sName,
 					s->m_oTypeIdentifier,
 					s->m_sDefaultValue,
+                    -1,
 					s->m_bModifiability);
 				l_pBox->setSettingValue(
 					l_pBox->getSettingCount()-1,

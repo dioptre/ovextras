@@ -2882,7 +2882,7 @@ void CInterfacedScenario::contextMenuBoxRemoveSettingCB(IBox& rBox, uint32 ui32I
 }
 void CInterfacedScenario::contextMenuBoxConfigureCB(IBox& rBox)
 {
-	m_rKernelContext.getLogManager() << LogLevel_Fatal << "contextMenuBoxConfigureCB\n";
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "contextMenuBoxConfigureCB\n";
 	CBoxConfigurationDialog l_oBoxConfigurationDialog(m_rKernelContext, rBox, m_sGUIFilename.c_str(), m_sGUISettingsFilename.c_str());
 	l_oBoxConfigurationDialog.run(false);//modUI
 	this->snapshotCB();

@@ -246,7 +246,7 @@ boolean CBox::initializeFromExistingBox(
 		rExistingBox.getSettingValue(i, l_sValue);
 		rExistingBox.getSettingDefaultValue(i, l_sDefaultValue);
 		rExistingBox.getSettingMod(i, l_bModifiability);
-		addSetting(l_sName, l_oType, l_sDefaultValue, l_bModifiability);
+        addSetting(l_sName, l_oType, l_sDefaultValue, -1 ,l_bModifiability);
 		setSettingValue(i, l_sValue);
 	}
 
@@ -616,24 +616,27 @@ boolean CBox::addSetting(const CString& sName,
 	s.m_sValue=l_sValue;
 	s.m_bMod=bModifiability;
 
-	if(i32Index < 0 || i32Index >= (int32)m_vSetting.size())
+    int32 l_i32Index = i32Index;
+
+    if(l_i32Index < 0 || l_i32Index >= (int32)m_vSetting.size())
 	{
 		m_vSetting.push_back(s);
+        l_i32Index=m_vSetting.size() -1;
 	}
 	else
 	{
 		vector<CSetting>::iterator l_it = m_vSetting.begin();
-		l_it += i32Index;
+        l_it += l_i32Index;
 		m_vSetting.insert(l_it, s);
 	}
 
 	//if this setting is modifiable, keep its index
 	if(bModifiability)
 	{
-		m_vModifiableSettingIndexes.push_back(m_vSetting.size()-1);
+        m_vModifiableSettingIndexes.push_back(l_i32Index);
 	}
 
-	this->notify(BoxModification_SettingAdded, m_vSetting.size()-1);
+    this->notify(BoxModification_SettingAdded, l_i32Index);
 
 	return true;
 }
