@@ -13,6 +13,11 @@ SET "OV_PATH_DATA=%OV_PATH_ROOT%\share\openvibe"
 SET "OV_PATH_LIB=%OV_PATH_ROOT%\bin"
 SET "PATH=%OV_PATH_ROOT%\bin;%PATH%"
 
-REM for visual studio express...
+REM Choose Visual Studio, try the non-free version first ...
 
-"%VSINSTALLDIR%\Common7\IDE\VCExpress.exe" ..\local-tmp\visual\OpenViBE.sln
+IF EXIST "%VSINSTALLDIR%\Common7\IDE\devenv.exe" (
+    "%VSINSTALLDIR%\Common7\IDE\devenv.exe" ..\local-tmp\visual\OpenViBE.sln
+) else (
+    "%VSINSTALLDIR%\Common7\IDE\VCExpress.exe" ..\local-tmp\visual\OpenViBE.sln
+)
+
