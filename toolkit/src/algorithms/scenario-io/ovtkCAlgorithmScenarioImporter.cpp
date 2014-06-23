@@ -58,7 +58,7 @@ namespace OpenViBEToolkit
 			CString m_sName;
 			CString m_sDefaultValue;
 			CString m_sValue;
-			boolean m_bModifiability;
+            boolean m_bModifiability=false;
 		} SSetting;
 		typedef struct _SAttribute
 		{
