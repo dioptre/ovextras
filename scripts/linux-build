@@ -5,7 +5,7 @@ if [ "$1" == "--debug" ]; then
 	ov_build_type=Debug
 	shift
 fi
-if [ "$1" == "--debug_symbols" ]; then
+if [ "$1" == "--debug-symbols" ]; then
 	ov_build_type=RelWithDebInfo
 	shift
 fi
