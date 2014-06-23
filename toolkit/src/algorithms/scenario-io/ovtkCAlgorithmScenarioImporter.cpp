@@ -53,12 +53,17 @@ namespace OpenViBEToolkit
 		typedef struct _SSetting
 		{
 			//_default_and_copy_constructor_4_(_SSetting, m_oTypeIdentifier, m_sName, m_sDefaultValue, m_sValue);
-			_default_and_copy_constructor_5_(_SSetting, m_oTypeIdentifier, m_sName, m_sDefaultValue, m_sValue, m_bModifiability);
+            _SSetting(void) :m_bModifiability(false) { }
+            _SSetting(const _SSetting& r) : m_oTypeIdentifier(r.m_oTypeIdentifier),
+                m_sName(r.m_sName),
+                m_sDefaultValue(r.m_sDefaultValue),
+                m_sValue(r.m_sValue),
+                m_bModifiability(r.m_bModifiability) { }
 			CIdentifier m_oTypeIdentifier;
 			CString m_sName;
 			CString m_sDefaultValue;
 			CString m_sValue;
-            boolean m_bModifiability=false;
+            boolean m_bModifiability;
 		} SSetting;
 		typedef struct _SAttribute
 		{
