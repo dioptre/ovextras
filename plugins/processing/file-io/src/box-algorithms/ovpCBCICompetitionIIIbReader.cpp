@@ -320,7 +320,7 @@ namespace OpenViBEPlugins
 				l_oStringStream.str(l_oLine);
 
 				l_oStringStream>>l_f64Sample;
-				if(isnan(l_f64Sample))
+                if(std::isnan(l_f64Sample))
 				{
 					m_oMatrixBuffer[i] = (i != 0) ? m_oMatrixBuffer[i-1] : 0.0;
 				}
@@ -330,7 +330,7 @@ namespace OpenViBEPlugins
 				}
 
 				l_oStringStream>>l_f64Sample;
-				if(isnan(l_f64Sample))
+                if(std::isnan(l_f64Sample))
 				{
 					m_oMatrixBuffer[i+m_ui32SamplesPerBuffer] = (i != 0) ? m_oMatrixBuffer[i+m_ui32SamplesPerBuffer-1] : 0.0;
 				}

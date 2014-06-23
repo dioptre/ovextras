@@ -22,6 +22,18 @@ IF(WIN32)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4355")
 	SET(OV_WIN32_BOOST_VERSION "1_47")
 ELSEIF(UNIX)
+        # check for c++11 support
+        INCLUDE(CheckCXXCompilerFlag)
+        CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+        CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+        IF(COMPILER_SUPPORTS_CXX11)
+                SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+        ELSEIF(COMPILER_SUPPORTS_CXX0X)
+                SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+        ELSE(COMPILER_SUPPORTS_CXX0X)
+                MESSAGE(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+        ENDIF(COMPILER_SUPPORTS_CXX11)
+
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 	# This ENV var is needed to locate our custom IT++ on Linux
 	SET(ENV{PKG_CONFIG_PATH} "${OV_CUSTOM_DEPENDENCIES_PATH}/lib/pkgconfig")	

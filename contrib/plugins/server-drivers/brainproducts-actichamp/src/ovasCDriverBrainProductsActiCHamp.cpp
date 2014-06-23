@@ -368,8 +368,8 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 	// Prepares low pass filter
 
 #define __set_filter__(f,f_decim) \
-	if(m_ui32ADCDataDecimation==CHAMP_DECIMATION_0)	loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/"f".bin", m_vFilter); \
-	else loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/"f_decim".bin", m_vFilter);\
+    if(m_ui32ADCDataDecimation==CHAMP_DECIMATION_0)	loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/" f ".bin", m_vFilter); \
+    else loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/" f_decim ".bin", m_vFilter);\
 	l_bValid=true;
 
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "Setting up the FIR filter for signal decimation (physical rate > driver rate).\n";
