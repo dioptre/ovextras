@@ -58,7 +58,7 @@ namespace OpenViBEToolkit
 			CString m_sName;
 			CString m_sDefaultValue;
 			CString m_sValue;
-			boolean m_bModifiability;
+			boolean m_bModifiability = false;//initialize to false in case the OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Modifiability node is absent
 		} SSetting;
 		typedef struct _SAttribute
 		{
