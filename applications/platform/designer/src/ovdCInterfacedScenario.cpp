@@ -3374,8 +3374,7 @@ void CInterfacedScenario::onItemToggledOff(uint32 ui32Index)
 {
 	//Get list of displayed windows
 	std::vector < ::GtkWindow* > l_vWindows = m_pPlayerVisualisation->getTopLevelWindows();
-	gtk_widget_hide(GTK_WIDGET(l_vWindows[ui32Index]));
-
+	m_pPlayerVisualisation->hideSelectedWindow(ui32Index);
 }
 
 //Hide window menu when switching scenario
