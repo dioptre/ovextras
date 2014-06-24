@@ -4,6 +4,16 @@
 #include <cmath>
 #include <iostream>
 
+// the boost version used at the moment of writing this caused 4800 by internal call to "int _isnan" in a bool-returning function.
+#if defined(WIN32)
+  #pragma warning (disable : 4800)
+#endif
+
+#include <boost/math/distributions/students_t.hpp>
+#include <itpp/base/vec.h>
+#include <itpp/base/math/elem_math.h>
+#include <itpp/base/math/min_max.h>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;

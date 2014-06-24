@@ -6,10 +6,7 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <boost/math/distributions/students_t.hpp>
 #include <itpp/base/vec.h>
-#include <itpp/base/math/elem_math.h>
-#include <itpp/base/math/min_max.h>
 #include <deque>
 
 using namespace itpp;
