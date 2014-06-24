@@ -113,6 +113,12 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Channel Matching Method",  OVP_TypeId_MatchMethod,     OVP_TypeId_MatchMethod_Smart.toString());
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
+
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Spectrum);
+
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Spectrum);
 				return true;
 			}
 

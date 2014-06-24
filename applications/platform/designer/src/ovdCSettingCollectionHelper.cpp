@@ -171,7 +171,6 @@ namespace
 		vector< ::GtkWidget* > l_vWidget;
 		gtk_container_foreach(GTK_CONTAINER(gtk_widget_get_parent(GTK_WIDGET(pButton))), collect_widget_cb, &l_vWidget);
 		::GtkEntry* l_pWidget=GTK_ENTRY(l_vWidget[0]);
-
 		CString l_sFileName=l_rKernelContext.getConfigurationManager().expand(gtk_entry_get_text(l_pWidget));
 		CString l_sEditorCommand=l_rKernelContext.getConfigurationManager().expand("${Designer_ScriptEditorCommand}");
 

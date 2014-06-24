@@ -310,6 +310,21 @@ boolean CConfigurationManager::setConfigurationTokenValue(
 	return true;
 }
 
+boolean CConfigurationManager::addOrReplaceConfigurationToken(
+	const CString& rConfigurationTokenName,
+	const CString& rConfigurationTokenValue)
+{
+	const CIdentifier l_oOldIdentifier = this->lookUpConfigurationTokenIdentifier(rConfigurationTokenName, false);
+	if(l_oOldIdentifier == OV_UndefinedIdentifier)
+	{
+		return OV_UndefinedIdentifier != this->createConfigurationToken(rConfigurationTokenName,rConfigurationTokenValue);
+	}
+	else
+	{
+		return this->setConfigurationTokenValue(l_oOldIdentifier, rConfigurationTokenValue);
+	}
+}
+
 // ----------------------------------------------------------------------------------------------------------------------------
 
 CIdentifier CConfigurationManager::lookUpConfigurationTokenIdentifier(

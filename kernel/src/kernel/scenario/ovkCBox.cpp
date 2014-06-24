@@ -574,6 +574,90 @@ boolean CBox::setOutputName(
 	return true;
 }
 
+boolean CBox::addInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	m_vSupportInputType.push_back(rTypeIdentifier);
+	return true;
+}
+
+boolean CBox::addInputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	CIdentifier l_oCurrentTypeIdentifier;
+	this->addInputSupport(rTypeIdentifier);
+	while((l_oCurrentTypeIdentifier=this->getKernelContext().getTypeManager().getNextTypeIdentifier(l_oCurrentTypeIdentifier))!=OV_UndefinedIdentifier)
+	{
+		//First check if it is a stream
+		if(this->getKernelContext().getTypeManager().isStream(l_oCurrentTypeIdentifier))
+		{
+			if(!this->hasInputSupport(l_oCurrentTypeIdentifier))
+			{
+				//Now check if the type is derived from the accepted
+				if(this->getKernelContext().getTypeManager().isDerivedFromStream(l_oCurrentTypeIdentifier, rTypeIdentifier))
+				{
+					this->addInputSupport(l_oCurrentTypeIdentifier);
+				}
+			}
+		}
+	}
+	return true;
+}
+
+boolean CBox::hasInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	//If there is no type specify, we allow all
+	if(m_vSupportInputType.empty())
+		return true;
+
+	for(size_t i =0; i < m_vSupportInputType.size(); ++i)
+	{
+		if(m_vSupportInputType[i] == rTypeIdentifier)
+			return true;
+	}
+	return false;
+}
+
+boolean CBox::addOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	m_vSupportOutputType.push_back(rTypeIdentifier);
+	return true;
+}
+
+boolean CBox::addOutputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	CIdentifier l_oCurrentTypeIdentifier;
+	this->addOutputSupport(rTypeIdentifier);
+	while((l_oCurrentTypeIdentifier=this->getKernelContext().getTypeManager().getNextTypeIdentifier(l_oCurrentTypeIdentifier))!=OV_UndefinedIdentifier)
+	{
+		//First check if it is a stream
+		if(this->getKernelContext().getTypeManager().isStream(l_oCurrentTypeIdentifier))
+		{
+			if(!this->hasOutputSupport(l_oCurrentTypeIdentifier))
+			{
+				//Now check if the type is derived from the accepted
+				if(this->getKernelContext().getTypeManager().isDerivedFromStream(l_oCurrentTypeIdentifier, rTypeIdentifier))
+				{
+					this->addOutputSupport(l_oCurrentTypeIdentifier);
+				}
+			}
+		}
+	}
+	return true;
+}
+
+boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	//If there is no type specify, we allow all
+	if(m_vSupportOutputType.empty())
+		return true;
+
+	for(size_t i =0; i < m_vSupportOutputType.size(); ++i)
+	{
+		if(m_vSupportOutputType[i] == rTypeIdentifier)
+			return true;
+	}
+	return false;
+}
+
 //___________________________________________________________________//
 //                                                                   //
 

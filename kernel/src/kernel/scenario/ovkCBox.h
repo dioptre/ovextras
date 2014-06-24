@@ -60,6 +60,21 @@ namespace OpenViBE
 				const OpenViBE::CString& rName);
 
 
+			//Connector type
+			virtual OpenViBE::boolean addInputSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier);
+			virtual OpenViBE::boolean addInputAndDerivedSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier);
+			virtual OpenViBE::boolean hasInputSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier);
+			virtual OpenViBE::boolean addOutputSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier);
+			virtual OpenViBE::boolean addOutputAndDerivedSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier);
+			virtual OpenViBE::boolean hasOutputSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier);
+
+
 			//messages input
 			virtual OpenViBE::boolean addMessageInput(
 				const OpenViBE::CString& sName);
@@ -257,6 +272,9 @@ namespace OpenViBE
 			//to avoid having to recheck every setting every time
 			//careful to update at each setting modification
 			std::vector<OpenViBE::uint32> m_vModifiableSettingIndexes;
+
+			std::vector<CIdentifier> m_vSupportInputType;
+			std::vector<CIdentifier> m_vSupportOutputType;
 
 			//only the name of the in/output are stored for message socket
 			std::vector<CMessageInput> m_vMessageInput;
