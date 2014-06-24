@@ -29,7 +29,7 @@ static gboolean KeyboardStimulator_KeyPressCallback(GtkWidget *widget, GdkEventK
 {
 	//std::cout << "button pressed, grab focus\n";
 	gtk_widget_grab_focus(widget);
-	return true;//do not propagate the event further
+	return false; // the event propagates further, this is needed e.g. for mouse control of 3D widgets
 }
 
 
@@ -640,18 +640,48 @@ void CPlayerVisualisation::showTopLevelWindows(void)
 //called when a visualisation window is open from window-menu
 void CPlayerVisualisation::showSelectedWindow(OpenViBE::uint32 ui32Index)
 {
-    gtk_widget_show(GTK_WIDGET(m_vWindows[ui32Index]));
+	// printf("Show %p\n", GTK_WIDGET(m_vWindows[ui32Index]));
+	gtk_widget_show(GTK_WIDGET(m_vWindows[ui32Index]));
 
-    std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
-    while(it!=m_mPlugins.end())
-    {
-			if(GTK_IS_WIDGET(it->second.m_pWidget))
-            {
-                    gtk_widget_show(it->second.m_pWidget);
-            }
-            it++;
-    }
+	// Show widgets which are in the window
+	std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
+	while(it!=m_mPlugins.end())
+	{
+		if(GTK_IS_WIDGET(it->second.m_pWidget))
+		{
+			GtkWidget *l_pTopLevelWidget = gtk_widget_get_toplevel(it->second.m_pWidget);
+			if(l_pTopLevelWidget == GTK_WIDGET(m_vWindows[ui32Index]))
+			{
+				// printf("ShowPlugin %p\n", it->second.m_pWidget);
+				gtk_widget_show(it->second.m_pWidget);
+			}
+		}
+		it++;
+	}
 
+}
+
+//called when a visualisation window is closed from window-menu
+void CPlayerVisualisation::hideSelectedWindow(OpenViBE::uint32 ui32Index)
+{
+	// printf("Hide %p\n", GTK_WIDGET(m_vWindows[ui32Index]));
+	gtk_widget_hide(GTK_WIDGET(m_vWindows[ui32Index]));
+
+	// Hide widgets which are in the window
+	std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
+	while(it!=m_mPlugins.end())
+	{
+		if(GTK_IS_WIDGET(it->second.m_pWidget))
+		{
+			GtkWidget *l_pTopLevelWidget = gtk_widget_get_toplevel(it->second.m_pWidget);
+			if(l_pTopLevelWidget == GTK_WIDGET(m_vWindows[ui32Index]))
+			{
+				// printf("HidePlugin %p\n", it->second.m_pWidget);
+				gtk_widget_hide(it->second.m_pWidget);
+			}
+		}
+		it++;
+	}
 }
 
 //called upon Player stop -- called when change current scenario
@@ -697,6 +727,7 @@ void CPlayerVisualisation::hideWindowCB(::GtkWidget* pWidget, gpointer pUserData
 {
 	const char* l_cWindowTitle = (char*) gtk_window_get_title(GTK_WINDOW(pWidget));
 	m_rInterfacedScenario.onWindowClosed(l_cWindowTitle);
+//	printf("HideCB for %p\n", pWidget);
 	gtk_widget_hide(pWidget);
 }
 

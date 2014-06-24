@@ -183,8 +183,8 @@ namespace OpenViBEDesigner
 		OpenViBEDesigner::CInterfacedObject m_oCurrentObject;
 
 		//these variables do not appear anywhere (!?)
-		OpenViBE::float64 m_f64HPanInitialPosition;
-		OpenViBE::float64 m_f64VPanInitialPosition;
+		// OpenViBE::float64 m_f64HPanInitialPosition;
+		// OpenViBE::float64 m_f64VPanInitialPosition;
 
 		typedef struct _BoxContextMenuCB
 		{

@@ -28,7 +28,7 @@ boolean CConnectorEditor::run(void)
 	t_setConnectorName setConnectorName=NULL;
 	t_getConnectorType getConnectorType=NULL;
 	t_setConnectorType setConnectorType=NULL;
-	t_isTypeSupport isTypeSupport=NULL;
+	t_isTypeSupported isTypeSupported=NULL;
 
 	switch(m_ui32ConnectorType)
 	{
@@ -37,7 +37,7 @@ boolean CConnectorEditor::run(void)
 			setConnectorName=&IBox::setInputName;
 			getConnectorType=&IBox::getInputType;
 			setConnectorType=&IBox::setInputType;
-			isTypeSupport=&IBox::hasInputSupport;
+			isTypeSupported=&IBox::hasInputSupport;
 			break;
 
 		case Connector_Output:
@@ -45,7 +45,7 @@ boolean CConnectorEditor::run(void)
 			setConnectorName=&IBox::setOutputName;
 			getConnectorType=&IBox::getOutputType;
 			setConnectorType=&IBox::setOutputType;
-			isTypeSupport=&IBox::hasOutputSupport;
+			isTypeSupported=&IBox::hasOutputSupport;
 			break;
 
 		default:
@@ -75,7 +75,7 @@ boolean CConnectorEditor::run(void)
 	while((l_oCurrentTypeIdentifier=m_rKernelContext.getTypeManager().getNextTypeIdentifier(l_oCurrentTypeIdentifier))!=OV_UndefinedIdentifier)
 	{
 		//First check if the type is support by the connector
-		if((m_rBox.*isTypeSupport)(l_oCurrentTypeIdentifier))
+		if((m_rBox.*isTypeSupported)(l_oCurrentTypeIdentifier))
 		{
 			//If the input type is support by the connector, let's add it to the list
 			if(m_rKernelContext.getTypeManager().isStream(l_oCurrentTypeIdentifier))

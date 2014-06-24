@@ -356,11 +356,11 @@ boolean CBoxConfigurationDialog::run(void)
 		// The ui file at the moment does not allow resize of this window because the result 
 		// looked ugly if the window was made overly large, and no satisfying solution at the time was
 		// found by the limited intellectual resources available. 
-		uint32 l_ui32MaxWidth = std::min(800,gdk_screen_get_width(gdk_screen_get_default()));
-		uint32 l_ui32MaxHeight = std::min(600,gdk_screen_get_height(gdk_screen_get_default()));
+		const uint32 l_ui32MaxWidth = std::min(800,gdk_screen_get_width(gdk_screen_get_default()));
+		const uint32 l_ui32MaxHeight = std::min(600,gdk_screen_get_height(gdk_screen_get_default()));
 		GtkRequisition l_oSize;
-    		gtk_widget_size_request(GTK_WIDGET(l_pViewPort), &l_oSize);
-    		gtk_widget_set_size_request(GTK_WIDGET(l_pScrolledWindow), 
+    	gtk_widget_size_request(GTK_WIDGET(l_pViewPort), &l_oSize);
+    	gtk_widget_set_size_request(GTK_WIDGET(l_pScrolledWindow), 
 			std::min(l_ui32MaxWidth,(uint32)l_oSize.width), 
 			std::min(l_ui32MaxHeight,(uint32)l_oSize.height));
 
