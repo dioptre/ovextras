@@ -1159,29 +1159,8 @@ void CApplication::updateWorkingDirectoryToken(const OpenViBE::CIdentifier &oSce
 	// We also need to save the token with the deprecated name as some scenarios might rely on it.
 	// This token we do not need to save with an ID as the new token subsumes. 
 	const CString l_sDeprecatedPathToken("__volatile_ScenarioDir");
-	const CString l_sOldPath = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenValue(l_sDeprecatedPathToken);
 	m_rKernelContext.getConfigurationManager().addOrReplaceConfigurationToken(l_sDeprecatedPathToken, l_sWorkingDir);
 
-	if(l_sOldPath == CString(""))
-	{
-		m_rKernelContext.getConfigurationManager().createConfigurationToken(l_sDeprecatedPathToken,l_sWorkingDir);
-	}
-	else
-	{
-		m_rKernelContext.getConfigurationManager().setConfigurationTokenValue( m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sDeprecatedPathToken), l_sWorkingDir);
-	}
-
-	const CString l_sLocalPathTokenPlayer("Player_ScenarioDirectory");
-	const CString l_sOldPathPlayer = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenValue(l_sLocalPathTokenPlayer);
-
-	if(l_sOldPathPlayer == CString(""))
-	{
-		m_rKernelContext.getConfigurationManager().createConfigurationToken(l_sLocalPathTokenPlayer,l_sWorkingDir);
-	}
-	else
-	{
-		m_rKernelContext.getConfigurationManager().setConfigurationTokenValue(m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sLocalPathTokenPlayer), l_sWorkingDir);
-	}
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "Scenario ( " << oScenarioIdentifier.toString() << " ) working directory changed to "  << l_sWorkingDir << "\n";
 }
 
