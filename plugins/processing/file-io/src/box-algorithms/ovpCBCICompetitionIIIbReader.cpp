@@ -18,9 +18,7 @@ using namespace OpenViBEToolkit;
 using namespace std;
 
 #define BCICompetitionIIIbReader_UndefinedClass 0xFFFFFFFFFFLL
-#if defined TARGET_OS_Windows
-#define isnan _isnan
-#endif
+
 
 namespace OpenViBEPlugins
 {
@@ -320,7 +318,11 @@ namespace OpenViBEPlugins
 				l_oStringStream.str(l_oLine);
 
 				l_oStringStream>>l_f64Sample;
+#ifdef TARGET_OS_Windows
+                if(_isnan(l_f64Sample))
+#else
                 if(std::isnan(l_f64Sample))
+#endif
 				{
 					m_oMatrixBuffer[i] = (i != 0) ? m_oMatrixBuffer[i-1] : 0.0;
 				}
@@ -330,7 +332,11 @@ namespace OpenViBEPlugins
 				}
 
 				l_oStringStream>>l_f64Sample;
+#ifdef TARGET_OS_Windows
+                if(_isnan(l_f64Sample))
+#else
                 if(std::isnan(l_f64Sample))
+#endif
 				{
 					m_oMatrixBuffer[i+m_ui32SamplesPerBuffer] = (i != 0) ? m_oMatrixBuffer[i+m_ui32SamplesPerBuffer-1] : 0.0;
 				}

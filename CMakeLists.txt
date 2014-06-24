@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-	
+
 PROJECT(OpenVIBE)
 
 # These versions are used by the subprojects by default.
@@ -13,8 +13,8 @@ SET(OV_GLOBAL_VERSION_PATCH 1)
 #ENDIF(NOT CMAKE_INSTALL_PREFIX)
 
 MESSAGE(STATUS "Appending compilation flags...")
-	
-SET(OV_CUSTOM_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")	
+
+SET(OV_CUSTOM_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
 
 IF(WIN32)
@@ -22,26 +22,26 @@ IF(WIN32)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4355")
 	SET(OV_WIN32_BOOST_VERSION "1_47")
 ELSEIF(UNIX)
-        # check for c++11 support
-        INCLUDE(CheckCXXCompilerFlag)
-        CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-        CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-        IF(COMPILER_SUPPORTS_CXX11)
-            # TODO after release 0.19 next line will be uncommnent
-            # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-        ELSEIF(COMPILER_SUPPORTS_CXX0X)
-            # TODO after release 0.19 next line will be uncommnent
-            # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-        ELSE(COMPILER_SUPPORTS_CXX0X)
-                MESSAGE(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. For the release 0.19 and after, the compiler will need to support C++11.")
-        ENDIF(COMPILER_SUPPORTS_CXX11)
+	# check for c++11 support
+	INCLUDE(CheckCXXCompilerFlag)
+	CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+	CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+	IF(COMPILER_SUPPORTS_CXX11)
+	    # TODO after release 0.19 next line will be uncommnent
+	    # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+	ELSEIF(COMPILER_SUPPORTS_CXX0X)
+	    # TODO after release 0.19 next line will be uncommnent
+	    # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+	ELSE(COMPILER_SUPPORTS_CXX0X)
+		MESSAGE(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. For the release 0.19 and after, the compiler will need to support C++11.")
+	ENDIF(COMPILER_SUPPORTS_CXX11)
 
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 	# This ENV var is needed to locate our custom IT++ on Linux
-	SET(ENV{PKG_CONFIG_PATH} "${OV_CUSTOM_DEPENDENCIES_PATH}/lib/pkgconfig")	
+	SET(ENV{PKG_CONFIG_PATH} "${OV_CUSTOM_DEPENDENCIES_PATH}/lib/pkgconfig")
 ELSE(WIN32)
 	MESSAGE(WARNING "Warning: unknown platform")
-ENDIF(WIN32)	
+ENDIF(WIN32)
 
 IF(NOT CMAKE_BUILD_TYPE)
 	MESSAGE(STATUS "Setting default build type to Release")
@@ -67,8 +67,8 @@ SET(SKIP_DOCUMENTATION "1")
 
 IF(UNIX)
 	# On Linux, the presence of matlab plugin .so can cause crashes in Simple DSP box as the two may use different versions of boost which are
-	# then wrongly exposed to the other party due to the dlopen() flag RTLD_GLOBAL. Unfortunately this flag is needed or the python plugin 
-	# imports no longer work... You may enable the Matlab plugin compilation and possibly set the flag to RTLD_LOCAL in ovCKernelLoader.cpp, 
+	# then wrongly exposed to the other party due to the dlopen() flag RTLD_GLOBAL. Unfortunately this flag is needed or the python plugin
+	# imports no longer work... You may enable the Matlab plugin compilation and possibly set the flag to RTLD_LOCAL in ovCKernelLoader.cpp,
 	# but be aware of the consequences.
 	MESSAGE(STATUS "Note: Disabling Matlab plugin compilation by default")
 	SET(SKIP_PLUGINS_PROCESSING_MATLAB "1")
@@ -91,7 +91,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
 #INCLUDE("OVCustomSettings")
 
 # a list of all project which will be filled by the directory traversal. This is needed to generate the documentation.
-SET_PROPERTY(GLOBAL PROPERTY OV_PROP_CURRENT_PROJECTS "") 	
+SET_PROPERTY(GLOBAL PROPERTY OV_PROP_CURRENT_PROJECTS "")
 SET_PROPERTY(GLOBAL PROPERTY OV_PROP_CURRENT_PROJECTS_BUILD_DIR "")
 
 # Used by the various Find* scripts to locate OpenViBE modules
@@ -111,14 +111,14 @@ INCLUDE("OvLinkBoostLib")
 # Setup knowledge of GNU-style install path variables
 INCLUDE("GNUInstallDirs")
 SET(CMAKE_INSTALL_FULL_DOCDIR "${CMAKE_INSTALL_FULL_BINDIR}/../doc/html")
-	
+
 # Add directories that OpenViBE will use to look for its components runtime, unless overridden by environment variables in the launch scripts.
 # These defines should only be used in "openvibe/ov_directories.h".
 ADD_DEFINITIONS(-DOV_CMAKE_PATH_ROOT="${CMAKE_INSTALL_PREFIX}")
-ADD_DEFINITIONS(-DOV_CMAKE_PATH_BIN="${CMAKE_INSTALL_FULL_BINDIR}")	
+ADD_DEFINITIONS(-DOV_CMAKE_PATH_BIN="${CMAKE_INSTALL_FULL_BINDIR}")
 ADD_DEFINITIONS(-DOV_CMAKE_PATH_DATA="${CMAKE_INSTALL_FULL_DATADIR}/openvibe")
 ADD_DEFINITIONS(-DOV_CMAKE_PATH_LIB="${CMAKE_INSTALL_FULL_LIBDIR}")
-	
+
 # Traverse these directories and build their components
 ADD_SUBDIRECTORY("common/")
 ADD_SUBDIRECTORY("openvibe/")

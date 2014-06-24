@@ -323,14 +323,14 @@ CAcquisitionServer::~CAcquisitionServer(void)
 		m_pConnectionServer=NULL;
 	}
 
-/* -- should already be empty after call to stop -- */
-/*
-	list < pair < Socket::IConnection*, SConnectionInfo > >::iterator itConnection=m_vConnection.begin();
-	while(itConnection!=m_vConnection.end())
-	{
-		itConnection->first->release();
-		itConnection=m_vConnection.erase(itConnection);
-	}
+	/* -- should already be empty after call to stop -- */
+	/*
+    list < pair < Socket::IConnection*, SConnectionInfo > >::iterator itConnection=m_vConnection.begin();
+    while(itConnection!=m_vConnection.end())
+    {
+	itConnection->first->release();
+	itConnection=m_vConnection.erase(itConnection);
+    }
 */
 
 	ip_ui64SubjectIdentifier.uninitialize();
@@ -526,7 +526,7 @@ boolean CAcquisitionServer::loop(void)
 	while(m_vPendingBuffer.size() >= m_ui32SampleCountPerSentBlock*2)
 	{
 		uint64 start;
-	    uint64 end;
+		uint64 end;
 
 		for(itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); itConnection++)
 		{
@@ -550,8 +550,8 @@ boolean CAcquisitionServer::loop(void)
 
 				// Stimulation buffer
 				CStimulationSet l_oStimulationSet;
-//				int l = l_oStimulationSet.getStimulationCount();
-				
+				//				int l = l_oStimulationSet.getStimulationCount();
+
 				int64 p = m_ui64SampleCount-m_vPendingBuffer.size()+l_rInfo.m_ui64SignalSampleCountToSkip;
 				if (p < 0)
 					m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << "\n";
@@ -562,9 +562,9 @@ boolean CAcquisitionServer::loop(void)
 				end   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, (m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock) + l_rInfo.m_ui64SignalSampleCountToSkip);
 
 				OpenViBEToolkit::Tools::StimulationSet::appendRange(
-					l_oStimulationSet,
-					m_oPendingStimulationSet,
-					start,end);
+							l_oStimulationSet,
+							m_oPendingStimulationSet,
+							start,end);
 
 				//m_rKernelContext.getLogManager() << LogLevel_Info << "start: " << time64(start) << "end: " << time64(end) << "\n";
 
@@ -594,10 +594,10 @@ boolean CAcquisitionServer::loop(void)
 
 		// Clears pending stimulations
 		OpenViBEToolkit::Tools::StimulationSet::removeRange(
-			m_oPendingStimulationSet,
-			ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size()),
-			ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock)
-			);
+					m_oPendingStimulationSet,
+					ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size()),
+					ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock)
+					);
 
 		// Clears pending signal
 		m_vPendingBuffer.erase(m_vPendingBuffer.begin(), m_vPendingBuffer.begin()+m_ui32SampleCountPerSentBlock);
@@ -637,32 +637,32 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 	m_ui32ChannelCount=rHeaderCopy.getChannelCount();
 	m_ui32SamplingFrequency=(uint32)(rHeaderCopy.getSamplingFrequency()*m_ui64OverSamplingFactor);
 
-    m_vSelectedChannels.clear();
-    if (m_bIsChannelSelectionRequested)
-    {
-        for (OpenViBE::uint32 i=0,l=0;i<m_ui32ChannelCount;++i) {
-            const std::string name = rHeaderCopy.getChannelName(i);
-            if (name!="") {
-                m_vSelectedChannels.push_back(i);
-                rHeaderCopy.setChannelName(l++,name.c_str());
-            }
-        }
-        rHeaderCopy.setChannelCount(m_vSelectedChannels.size());
-        m_ui32ChannelCount = rHeaderCopy.getChannelCount();
+	m_vSelectedChannels.clear();
+	if (m_bIsChannelSelectionRequested)
+	{
+		for (OpenViBE::uint32 i=0,l=0;i<m_ui32ChannelCount;++i) {
+			const std::string name = rHeaderCopy.getChannelName(i);
+			if (name!="") {
+				m_vSelectedChannels.push_back(i);
+				rHeaderCopy.setChannelName(l++,name.c_str());
+			}
+		}
+		rHeaderCopy.setChannelCount(m_vSelectedChannels.size());
+		m_ui32ChannelCount = rHeaderCopy.getChannelCount();
 
-    } else {
+	} else {
 
-        for (OpenViBE::uint32 i=0;i<m_ui32ChannelCount;++i)
-            m_vSelectedChannels.push_back(i);
-    }
+		for (OpenViBE::uint32 i=0;i<m_ui32ChannelCount;++i)
+			m_vSelectedChannels.push_back(i);
+	}
 
 	if(m_ui32ChannelCount==0)
 	{
-        std::stringstream ss;
-        ss << "Driver claimed to have " << uint32(0) << " channel";
-        if (isChannelSelectionRequested())
-            ss << "(check whether the property `Select only named channel' is set).\n";
-        m_rKernelContext.getLogManager() << LogLevel_Error << ss.str().c_str();
+		std::stringstream ss;
+		ss << "Driver claimed to have " << uint32(0) << " channel";
+		if (isChannelSelectionRequested())
+			ss << "(check whether the property `Select only named channel' is set).\n";
+		m_rKernelContext.getLogManager() << LogLevel_Error << ss.str().c_str();
 		return false;
 	}
 
@@ -926,11 +926,11 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 				float32 alpha=float32(k+1)/m_ui64OverSamplingFactor;
 				for(uint32 j=0; j<m_ui32ChannelCount; j++)
 				{
-                    const uint32 channel = m_vSelectedChannels[j];
+					const uint32 channel = m_vSelectedChannels[j];
 #ifdef TARGET_OS_Windows
 					if(_isnan(pSample[channel*ui32SampleCount+i]) || !_finite(pSample[channel*ui32SampleCount+i])) // NaN or infinite values
 #else
-					if(isnan(pSample[channel*ui32SampleCount+i]) || !finite(pSample[channel*ui32SampleCount+i])) // NaN or infinite values
+					if(std::isnan(pSample[channel*ui32SampleCount+i]) || !finite(pSample[channel*ui32SampleCount+i])) // NaN or infinite values
 #endif
 					{
 						if(!m_bReplacementInProgress)
@@ -1135,12 +1135,12 @@ int64 CAcquisitionServer::getInnerLatencySampleCount(void) const
 
 boolean CAcquisitionServer::updateImpedance(const uint32 ui32ChannelIndex, const float64 f64Impedance)
 {
-    for (OpenViBE::uint32 i=0;i<m_vSelectedChannels.size();++i)
-        if (ui32ChannelIndex==m_vSelectedChannels[i]) {
-            m_vImpedance[i] = f64Impedance;
-            return true;
-        }
-    return false;
+	for (OpenViBE::uint32 i=0;i<m_vSelectedChannels.size();++i)
+		if (ui32ChannelIndex==m_vSelectedChannels[i]) {
+			m_vImpedance[i] = f64Impedance;
+			return true;
+		}
+	return false;
 }
 
 // ____________________________________________________________________________
