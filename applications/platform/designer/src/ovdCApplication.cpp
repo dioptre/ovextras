@@ -1159,15 +1159,16 @@ void CApplication::updateWorkingDirectoryToken(const OpenViBE::CIdentifier &oSce
 	// We also need to save the token with the deprecated name as some scenarios might rely on it.
 	// This token we do not need to save with an ID as the new token subsumes. 
 	const CString l_sDeprecatedPathToken("__volatile_ScenarioDir");
+	const CString l_sOldPath = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenValue(l_sDeprecatedPathToken);
 	m_rKernelContext.getConfigurationManager().addOrReplaceConfigurationToken(l_sDeprecatedPathToken, l_sWorkingDir);
 
 	if(l_sOldPath == CString(""))
 	{
-		m_rKernelContext.getConfigurationManager().createConfigurationToken(l_sLocalPathToken,l_sWorkingDir);
+		m_rKernelContext.getConfigurationManager().createConfigurationToken(l_sDeprecatedPathToken,l_sWorkingDir);
 	}
 	else
 	{
-		m_rKernelContext.getConfigurationManager().setConfigurationTokenValue( m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sLocalPathToken), l_sWorkingDir);
+		m_rKernelContext.getConfigurationManager().setConfigurationTokenValue( m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sDeprecatedPathToken), l_sWorkingDir);
 	}
 
 	const CString l_sLocalPathTokenPlayer("Player_ScenarioDirectory");
@@ -2476,11 +2477,11 @@ void CApplication::reorderCurrentScenario(OpenViBE::uint32 i32NewPageIndex)
 void CApplication::logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLevel level, const char* configName)
 {
 	uint64 l_ui64Active;
-	l_ui64Active = m_rKernelContext.getConfigurationManager().expandAsUInteger(configName, m_rKernelContext.getLogManager().isActive(level)?Log_AvailableActivate:Log_NotAvailabe);
+	l_ui64Active = m_rKernelContext.getConfigurationManager().expandAsUInteger(configName, m_rKernelContext.getLogManager().isActive(level)?Log_AvailableActivate:Log_NotAvailable);
 	//At the beginning all buttons are sensitive and not active
 	switch(l_ui64Active)
 	{
-	case Log_NotAvailabe:
+	case Log_NotAvailable:
 		gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), false);
 		m_rKernelContext.getLogManager().activate(level, false);
 		break;
