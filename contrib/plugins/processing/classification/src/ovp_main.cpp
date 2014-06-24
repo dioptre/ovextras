@@ -15,7 +15,6 @@
 
 // @END inserm-gpl
 
-
 OVP_Declare_Begin();
 
 // @BEGIN inserm-gpl
@@ -26,6 +25,7 @@ OVP_Declare_Begin();
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CNaiveBayesApplyFunctionDesc);			// Requires ITPP
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CNaiveBayesApplyBoxAlgorithmDesc);		// Depends on the previous
+
 #endif // TARGET_HAS_ThirdPartyITPP
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CLDABoxAlgorithmDesc);

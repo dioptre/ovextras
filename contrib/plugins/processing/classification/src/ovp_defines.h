@@ -49,6 +49,8 @@
 #define OVP_Algorithm_NaiveBayesApplyFunction_InputTriggerId_Apply			OpenViBE::CIdentifier(0x622D05B7, 0x002F601F)
 // @END inserm-gpl
 
+#define OVP_Algorithm_ClassifierPLDA_InputParameterId_BufferSize	OpenViBE::CIdentifier(0xB083614E, 0x26C6B4BD)//already defined but not accessible from here
+
 //___________________________________________________________________//
 //                                                                   //
 // Global defines                                                   //

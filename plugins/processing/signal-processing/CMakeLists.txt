@@ -20,6 +20,9 @@ INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyEigen")
 INCLUDE("FindThirdPartyITPP")
+#for additionnal coadapt plugins, the following
+INCLUDE("FindThirdPartyBoost_Math")
+INCLUDE("FindOpenViBEModuleXML")
 
 # ---------------------------------
 # Target macros

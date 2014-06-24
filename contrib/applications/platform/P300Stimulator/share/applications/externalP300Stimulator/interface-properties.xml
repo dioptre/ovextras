@@ -1,0 +1,49 @@
+<ExternelP300Stimulator>
+	<!-- can be Cal, Cop or Fr, value is expanded and specified in P300AcquisitionConfig.conf -->
+	<Mode>${AcquisitionMode}</Mode> 
+	<!-- can be Replay or Online, value is expanded and specified in P300AcquisitionConfig.conf -->
+	<StimulatorMode>${StimulatorMode}</StimulatorMode> 
+	<!-- specifies the keyboard layout file, value is expanded and specified in P300AcquisitionConfig.conf -->
+	<SymbolDefinitionFile>${KeyboardLayout}</SymbolDefinitionFile>
+	<!-- specifies the property file containing the stimulator properties/timings -->
+	<StimulatorConfigFile>openvibe/applications/externalP300Stimulator/stimulator-properties.xml</StimulatorConfigFile>
+	<!--AdditionalConfigurationFile>/P300AcquisitionConfig.conf</AdditionalConfigurationFile -->
+	<!-- the file name where the stimulator will save the symbols that are flashed during the experiment, value is expanded and specified in P300AcquisitionConfig.conf -->
+	<FlashGroupDefinitionFile>${FlashGroupDefinitionFile}</FlashGroupDefinitionFile>
+	<!-- The name of the database used by Presage for word prediction -->
+	<NGramDatabase>openvibe/applications/externalP300Stimulator/fr.db</NGramDatabase>
+	<!-- width and height of the window, full screen or nofull screen-->
+	<Screen index="${MonitorIndex}" width="${MonitorWidth}" height="${MonitorHeight}">nofull</Screen>
+	<!-- riprand or rowcol -->
+	<FlashMode>${FlashMode}</FlashMode>
+	<!-- specifies where the feedback is presented in free mode -->
+	<!-- central: feedback is presented in the center of the screen, color: if the symbol in the keyboard itself is highlighted -->
+	<FeedbackPresentation mode="free">central</FeedbackPresentation>
+	<!-- specifies where the feedback is presented in free mode -->
+	<!-- central: feedback is presented in the center of the screen, color: if the symbol in the keyboard itself is highlighted -->
+	<FeedbackPresentation mode="copy">color</FeedbackPresentation>
+	<!-- software: use software tagging in OpenViBE through shared memory (you have to enable this in the acquisition server application) 
+	 or you can use hardware: uses the parallel port to tag the data directly in the amplifier/device-->
+	<Tagging method="software">
+		<!-- 0x378 for the windows laptops/docks of the hospital, 0xE060 for the INRIA desktop at the lab and 0 for linux -->
+		<ParallelPortNumber>0x378</ParallelPortNumber>
+		<PhotoDiode>yes</PhotoDiode><!-- the code for enabling the photo diode is deprecated, should be redone -->
+		<!-- only need to specify this in case of hardware tagging, the parallel port of the TMSI device is sampled at the same frequencey as the EEG -->
+		<SampleFrequency>256</SampleFrequency>
+	</Tagging>
+	<!-- whether continuous feedback during flashing is enabled (during flashing the colors are changed for the most probable symbols)
+		 The color gives the user an indication of how confident the system is in the symbols 
+		 TODO the code is deprecated and should be redone -->
+	<ContinuousFeedback mode="disabled">
+		<!-- start color of the most probable symbols when the minimum probability threshold is reached as specified by FeedbackStartValue -->
+		<FeedbackStartColor>25,50,30</FeedbackStartColor>
+		<!-- end color of the most probable symbols, for the symbol reaching probability one -->
+		<FeedbackEndColor>0,100,25</FeedbackEndColor>
+		<!-- The probability from which we want to start giving the most probable symbols a color during flashing -->
+		<FeedbackStartValue>0.8</FeedbackStartValue>
+		<!-- number of steps for the gradient to go from start color to end color -->
+		<ColorFeedbackSteps>100</ColorFeedbackSteps>
+		<!-- number of most probable symbols that should be highlighted during flashing -->
+		<MaxFeedbackSymbols>3</MaxFeedbackSymbols>
+	</ContinuousFeedback>
+</ExternelP300Stimulator>

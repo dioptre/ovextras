@@ -18,6 +18,7 @@ INCLUDE("FindOpenViBEToolkit")
 INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindThirdPartyITPP")
+INCLUDE("FindOpenViBEModuleXML")#for gragient descent lda
 
 # ---------------------------------
 # Target macros
