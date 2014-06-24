@@ -1182,7 +1182,7 @@ void CApplication::updateWorkingDirectoryToken(const OpenViBE::CIdentifier &oSce
 	const CString l_sLocalPathTokenPlayer("Player_ScenarioDirectory");
 	const CString l_sOldPathPlayer = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenValue(l_sLocalPathTokenPlayer);
 
-	if(l_sOldPath == CString(""))
+	if(l_sOldPathPlayer == CString(""))
 	{
 		m_rKernelContext.getConfigurationManager().createConfigurationToken(l_sLocalPathTokenPlayer,l_sWorkingDir);
 	}
@@ -2479,10 +2479,10 @@ void CApplication::reorderCurrentScenario(OpenViBE::uint32 i32NewPageIndex)
 
 void CApplication::logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLevel level, const char* configName)
 {
-	uint32 l_ui32Active;
-	l_ui32Active = m_rKernelContext.getConfigurationManager().expandAsUInteger(configName, m_rKernelContext.getLogManager().isActive(level)?Log_AvailableActivate:Log_NotAvailabe);
+	uint64 l_ui64Active;
+	l_ui64Active = m_rKernelContext.getConfigurationManager().expandAsUInteger(configName, m_rKernelContext.getLogManager().isActive(level)?Log_AvailableActivate:Log_NotAvailabe);
 	//At the beginning all buttons are sensitive and not active
-	switch(l_ui32Active)
+	switch(l_ui64Active)
 	{
 	case Log_NotAvailabe:
 		gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), false);
@@ -2499,7 +2499,7 @@ void CApplication::logLevelRestore(GObject* ToolButton, OpenViBE::Kernel::ELogLe
 		break;
 
 	default:
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "Unknown log state " << l_ui32Active << "\n";
+		m_rKernelContext.getLogManager() << LogLevel_Warning << "Unknown log state " << l_ui64Active << "\n";
 		m_rKernelContext.getLogManager().activate(level, false);
 		gtk_widget_set_sensitive(GTK_WIDGET(ToolButton), false);
 		break;

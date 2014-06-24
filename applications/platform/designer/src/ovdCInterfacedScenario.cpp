@@ -1569,7 +1569,7 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 }
 void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget, ::GdkEventMotion* pEvent)
 {
-	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaMotionNotifyCB\n";
+	//m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaMotionNotifyCB\n";
 
 	if(this->isLocked()) return;
 
@@ -2778,33 +2778,32 @@ void CInterfacedScenario::pasteSelection(void)
 			m_vCurrentObject[it->second]=true;
 
 			if(m_rScenario.isBox(it->second))
-			{
+		{
 				// Moves boxes under cursor
 				CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, it->second);
-				l_oBoxProxy.setCenter(
-					(int32)(l_oBoxProxy.getXCenter()),
-					(int32)(l_oBoxProxy.getYCenter()-32));
-				// Ok, why 32 would you ask, just because it is fine
 
+				//TODO: Factorize boxes alignment process
 				// Aligns boxes on grid
-				l_oBoxProxy.setCenter(
-					(((int32)l_oBoxProxy.getXCenter()+8)&0xfffffff0),
-					(((int32)l_oBoxProxy.getYCenter()+8)&0xfffffff0));
+				int32 l_i32CenterX = (int32)l_oBoxProxy.getXCenter()+8;
+				l_i32CenterX = l_i32CenterX - l_i32CenterX%16;
+				int32 l_i32CenterY = (int32)l_oBoxProxy.getYCenter()+8-32;
+				// Ok, why 32 would you ask, just because it is fine
+				l_i32CenterY = l_i32CenterY - l_i32CenterY%16;
+				l_oBoxProxy.setCenter(l_i32CenterX,l_i32CenterY);
 			}
 
 			if(m_rScenario.isComment(it->second))
 			{
 				// Moves commentes under cursor
 				CCommentProxy l_oCommentProxy(m_rKernelContext, m_rScenario, it->second);
-				l_oCommentProxy.setCenter(
-					(int32)(l_oCommentProxy.getXCenter()),
-					(int32)(l_oCommentProxy.getYCenter()-32));
-				// Ok, why 32 would you ask, just because it is fine
 
-				// Aligns commentes on grid
-				l_oCommentProxy.setCenter(
-					(((int32)l_oCommentProxy.getXCenter()+8)&0xfffffff0),
-					(((int32)l_oCommentProxy.getYCenter()+8)&0xfffffff0));
+				// Aligns boxes on grid
+				int32 l_i32CenterX = (int32)l_oCommentProxy.getXCenter()+8;
+				l_i32CenterX = l_i32CenterX - l_i32CenterX%16;
+				int32 l_i32CenterY = (int32)l_oCommentProxy.getYCenter()+8-32;
+				// Ok, why 32 would you ask, just because it is fine
+				l_i32CenterY = l_i32CenterY - l_i32CenterY%16;
+				l_oCommentProxy.setCenter(l_i32CenterX,l_i32CenterY);
 			}
 		}
 	}
@@ -3423,16 +3422,18 @@ boolean CInterfacedScenario::centerOnBox(CIdentifier rIdentifier)
 		m_vCurrentObject.clear();
 		//to select the box
 		m_vCurrentObject[rIdentifier] = true;
-		//redraw it in yellow to show it is selected
-		redraw(*rBox);
+		m_bScenarioModified=true;
+		this->redraw();
 
 		CBoxProxy l_oBoxProxy(m_rKernelContext, *rBox);
-		const int xMargin=ov_round(5.0*m_f64CurrentScale);
-		const int yMargin=ov_round(5.0*m_f64CurrentScale);
-		int xSize=ov_round(l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + xMargin*2.0);
-		int ySize=ov_round(l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) * m_f64CurrentScale + yMargin*2.0);
-		int x = ov_round(l_oBoxProxy.getXCenter() + 3*xSize/4);
-		int y = ov_round(l_oBoxProxy.getYCenter() + 3*ySize/4);
+		const float64 xMargin = 5.0 * m_f64CurrentScale;
+		const float64 yMargin = 5.0 * m_f64CurrentScale;
+		int xSize=ov_round(l_oBoxProxy.getWidth(GTK_WIDGET(m_pScenarioDrawingArea)) + xMargin * 2.0 );
+		int ySize=ov_round(l_oBoxProxy.getHeight(GTK_WIDGET(m_pScenarioDrawingArea)) + yMargin * 2.0);
+		const float64 l_f64XCenter = l_oBoxProxy.getXCenter() * m_f64CurrentScale;
+		const float64 l_f64YCenter = l_oBoxProxy.getYCenter() * m_f64CurrentScale;
+		int x;
+		int y;
 
 		//get the parameters of the current adjustement
 		GtkAdjustment* l_pOldHAdjustement = gtk_scrolled_window_get_hadjustment(m_pScrolledWindow);//gtk_viewport_get_vadjustment(m_pScenarioViewport);
@@ -3445,21 +3446,40 @@ boolean CInterfacedScenario::centerOnBox(CIdentifier rIdentifier)
 		gdouble value;
 		g_object_get(l_pOldHAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
 		//get the size of the current viewport
-		gint l_iViewportX = -1;
-		gint l_iViewportY = -1;
-		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
+//		gint l_iViewportX = -1;
+//		gint l_iViewportY = -1;
+//		gdk_window_get_size(GTK_WIDGET(m_pScenarioViewport)->window, &l_iViewportX, &l_iViewportY);
 
-		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
-		upper-=l_iViewportX;
+//		//the upper bound of the adjustement is too big, we must substract the current size of the viewport
+//		upper-=l_iViewportX;
 
 		//crete a new adjustement with the correct value since we can not change the upper bound of the old adjustement
 		GtkAdjustment* l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
+		if(l_f64XCenter + m_i32ViewOffsetX < m_iCurrentWidth/2)
+		{
+			x = ov_round(l_f64XCenter - 2*xSize) + m_i32ViewOffsetX;
+		}
+		else{
+			x = ov_round(l_f64XCenter + 2*xSize) + m_i32ViewOffsetX;
+			x = ov_round( (x/(float64)m_iCurrentWidth) * upper - pagesize);
+		}
+
+
 		gtk_adjustment_set_value(l_pAdjustement, x);
 		gtk_scrolled_window_set_hadjustment(m_pScrolledWindow, l_pAdjustement);
 
 		g_object_get(l_pOldVAdjustement, "upper", &upper, "lower", &lower, "step-increment", &step, "page-increment", &page, "page-size", &pagesize, "value", &value, NULL);
-		upper-=l_iViewportY;
+		//upper-=l_iViewportY;
 		l_pAdjustement = (GtkAdjustment*)gtk_adjustment_new(value, lower, upper, step, page, pagesize);
+		if(l_f64YCenter + m_i32ViewOffsetY < m_iCurrentHeight/2)
+		{
+			y = ov_round(l_f64YCenter - 2*ySize) + m_i32ViewOffsetY;
+		}
+		else{
+			y = ov_round(l_f64YCenter + 2*ySize) + m_i32ViewOffsetY;
+			//Here the formula is different because we need to align the other side of the scroll bar
+			y = ov_round((y / (float64)m_iCurrentHeight) * upper - pagesize);
+		}
 		gtk_adjustment_set_value(l_pAdjustement, y);
 		gtk_scrolled_window_set_vadjustment(m_pScrolledWindow, l_pAdjustement);
 		ret_val = true;
