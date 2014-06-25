@@ -279,11 +279,14 @@ namespace OpenViBE
 			 *        setting type identifier
 			 * \param sDefaultValue [in] : The default
 			 *        value for this setting
+			 * \param i32Index [in] : The index where to
+			 *        add the setting
 			 * \return \e true in case of success.
 			 * \return \e false in case of error.
 			 *
-			 * The setting is always added after the last
-			 * already existing setting.
+			 * The setting is added to the index required.
+			 * The default value -1 means that the setting
+			 * will be add to the end.
 			 */
 			virtual OpenViBE::boolean addSetting(
 				const OpenViBE::CString& sName,

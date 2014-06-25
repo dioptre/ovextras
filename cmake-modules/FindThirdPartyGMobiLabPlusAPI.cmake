@@ -10,6 +10,15 @@
 # Adds include path
 # ---------------------------------
 
+# We have the following block to make sure gUSBAmp is not on the system. It will always override 
+# mobilab by default until we can figure out how to have both gUSBAmp and gMobilab drivers built 
+# in at the same time.
+INCLUDE("FindThirdPartyGUSBampCAPI")
+IF(OV_ThirdPartyGUSBAmp)
+	MESSAGE(STATUS "  NOTE gtec USBAmp has been found, cannot have gMobilab driver in the same executable")
+	MESSAGE(STATUS "    [ SKIP ] GMobiLabCAPI ...")
+	RETURN()
+ENDIF(OV_ThirdPartyGUSBAmp)
 
 IF(WIN32)
 	# note that the API must be 32bit with OpenViBE
@@ -35,6 +44,8 @@ IF(WIN32)
 		INSTALL(PROGRAMS ${PATH_GMobiLabDLL}/gMOBIlabplus.dll DESTINATION "bin")
 		
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyGMobiLabPlusAPI)
+		SET(OV_ThirdPartyGMobilab "YES")
+
 	ELSE(PATH_GMobiLabCAPI AND PATH_GMobiLabDLL AND LIB_GMobiLabCAPI)
 		MESSAGE(STATUS "  FAILED to find GMobiLabPlusAPI + lib + dll")
 	ENDIF(PATH_GMobiLabCAPI AND PATH_GMobiLabDLL AND LIB_GMobiLabCAPI)
