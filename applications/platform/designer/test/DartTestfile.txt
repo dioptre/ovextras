@@ -5,7 +5,7 @@ ELSE(WIN32)
 	SET(EXT sh)
 	SET(OS_FLAGS "")
 ENDIF(WIN32)
-ADD_TEST(basic_run_designer "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play" "basicScenarioTest.xml")
+ADD_TEST(basic_run_designer "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-session-management" "--no-gui" "--play" "basicScenarioTest.xml")
 
 
 IF(WIN32)
@@ -22,6 +22,7 @@ IF(SIKULI)
 		ADD_TEST(boxSetAttribute "${SIKULI}" -t testBoxSetAttribute.UNIX.sikuli)
 		ADD_TEST(DrawPerformance3Boxes_designer "${SIKULI}" -t testDrawPerformance3boxes.UNIX.sikuli)
 		ADD_TEST(DrawPerformance400Boxes_designer "${SIKULI}" -t testDrawPerformance400boxes.UNIX.sikuli)
+		ADD_TEST(ChangeSettingsOnLine "${SIKULI}" -t testModUI.UNIX.sikuli)
 	ENDIF(UNIX)
 ENDIF(SIKULI)
 
