@@ -13,18 +13,33 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
 ## --------------------------
 find_program(HOSTNAME_CMD NAMES hostname)
 exec_program(${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
+
+# env variables are checked because ubuntu 12.04 ctest doesn't let pass vars from command line it seems?
+
 IF(NOT DEFINED CTEST_SITE)
-	SET(CTEST_SITE                          "${HOSTNAME}")
+	IF(DEFINED ENV{CTEST_SITE})
+		SET(CTEST_SITE $ENV{CTEST_SITE})
+	ELSE(DEFINED ENV{CTEST_SITE})
+		SET(CTEST_SITE                          "${HOSTNAME}")
+	ENDIF(DEFINED ENV{CTEST_SITE})
 ENDIF(NOT DEFINED CTEST_SITE)
 
 # SET GIT parameters
 
 IF(NOT DEFINED CTEST_GIT_URL)
-	SET(CTEST_GIT_URL                          "git://scm.gforge.inria.fr/openvibe/openvibe.git")
+	IF(DEFINED ENV{CTEST_GIT_URL})
+		SET(CTEST_GIT_URL $ENV{CTEST_GIT_URL})
+	ELSE(DEFINED ENV{CTEST_GIT_URL})
+		SET(CTEST_GIT_URL                          "git://scm.gforge.inria.fr/openvibe/openvibe.git")
+	ENDIF(DEFINED ENV{CTEST_GIT_URL})
 ENDIF(NOT DEFINED CTEST_GIT_URL)
 
 IF(NOT DEFINED CTEST_BRANCH)
-	SET(CTEST_BRANCH                          "master")
+        IF(DEFINED ENV{CTEST_BRANCH})
+                SET(CTEST_BRANCH $ENV{CTEST_BRANCH})
+        ELSE(DEFINED ENV{CTEST_BRANCH})
+                SET(CTEST_BRANCH                          "master")
+        ENDIF(DEFINED ENV{CTEST_BRANCH})
 ENDIF(NOT DEFINED CTEST_BRANCH)
 
 ## -- Set site / build name
