@@ -52,34 +52,12 @@ namespace OpenViBEPlugins
 				}
 				else
 				{
-					for (OpenViBE::uint32 i=0; i<rBox.getOutputCount(); i++)
-					{
-						rBox.getOutputType(i, l_oTypeIdentifier);
-						rBox.setInputType(i, l_oTypeIdentifier);
-					}
+					// shouldn't get here
+					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Unsupported input stream type " << l_oTypeIdentifier << "\n";
+					return false;
 				}
 				return true;
 			}
-
-			virtual OpenViBE::boolean onOutputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
-			{
-				OpenViBE::CIdentifier l_oTypeIdentifier;
-				rBox.getOutputType(ui32Index, l_oTypeIdentifier);
-				if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
-				{
-					for (OpenViBE::uint32 i=0; i<rBox.getOutputCount(); i++)
-						rBox.setInputType(i, l_oTypeIdentifier);
-				}
-				else
-				{
-					for (OpenViBE::uint32 i=0; i<rBox.getOutputCount(); i++)
-					{
-						rBox.getInputType(i, l_oTypeIdentifier);
-						rBox.setOutputType(i, l_oTypeIdentifier);
-					}
-				}
-				return true;
-			};
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 		};
@@ -113,8 +91,13 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Averaging type",  OVP_TypeId_EpochAverageMethod, OVP_TypeId_EpochAverageMethod_MovingAverage.toString());
 				rPrototype.addSetting("Epoch count",     OV_TypeId_Integer, "4");
 				rPrototype.addSetting("Significance level",     OV_TypeId_Float, "0.01");
-				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyInput);
+
+				rPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+				rPrototype.addInputSupport(OV_TypeId_FeatureVector);
+				rPrototype.addInputSupport(OV_TypeId_Signal);
+				rPrototype.addInputSupport(OV_TypeId_Spectrum);
+
 				return true;
 			}
 
