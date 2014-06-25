@@ -20,7 +20,7 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 ADD_TEST(clean_${TEST_NAME} "rm" "-f" "${SUBTEST1_NAME}.csv" "${SUBTEST2_NAME}.csv" "${SUBTEST3_NAME}.csv")
-ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play" ${SCENARIO_TO_TEST})
+ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-session-management" "--no-gui" "--play" ${SCENARIO_TO_TEST})
 # ADD_TEST(comparator_${SUBTEST1_NAME} "$ENV{OV_BINARY_PATH}/test_thresholdDataComparison.${EXT}" ${OS_FLAGS} "${SUBTEST1_NAME}_${TEST_NAME}.csv" "${SUBTEST1_NAME}_${TEST_NAME}.ref.csv" 0.1)
 # ADD_TEST(comparator_${SUBTEST2_NAME} "$ENV{OV_BINARY_PATH}/test_thresholdDataComparison.${EXT}" ${OS_FLAGS} "${SUBTEST2_NAME}_${TEST_NAME}.csv" "${SUBTEST2_NAME}_${TEST_NAME}.ref.csv" 0.1)
 # ADD_TEST(comparator_${SUBTEST3_NAME} "$ENV{OV_BINARY_PATH}/test_thresholdDataComparison.${EXT}" ${OS_FLAGS} "${SUBTEST3_NAME}_${TEST_NAME}.csv" "${SUBTEST3_NAME}_${TEST_NAME}.ref.csv" 0.1)
@@ -46,7 +46,7 @@ ENDIF(WIN32)
 #SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 #ADD_TEST(clean_${TEST_NAME} "rm" "-f" "${TEST_NAME}.csv")
-#ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play" ${SCENARIO_TO_TEST})
+#ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-session-management" "--no-gui" "--play" ${SCENARIO_TO_TEST})
 #ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_thresholdDataComparison.${EXT}" ${OS_FLAGS} "${TEST_NAME}.csv" "${TEST_NAME}.ref.csv" 0.1)
 
 ## add some properties that help to debug
@@ -68,7 +68,7 @@ SET(TEST_NAME "ARFeatures")
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(clean_${TEST_NAME} "rm" "-f" "${TEST_NAME}.csv")
-ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play" ${SCENARIO_TO_TEST})
+ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-session-management" "--no-gui" "--play" ${SCENARIO_TO_TEST})
 ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_thresholdDataComparison.${EXT}" ${OS_FLAGS} "${TEST_NAME}.csv" "${TEST_NAME}.ref.csv" 0.1)
 
 ## add some properties that help to debug
