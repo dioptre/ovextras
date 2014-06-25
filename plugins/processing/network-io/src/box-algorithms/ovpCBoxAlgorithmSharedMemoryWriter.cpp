@@ -12,6 +12,8 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::FileReadingAndWriting;
 
+
+
 //using namespace std;
 
 //struct timeval currentLTime;
@@ -42,32 +44,34 @@ boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{	
-		CIdentifier l_TypeIndentifier;
+		CIdentifier l_oTypeIdentifier;
 		std::ostringstream convert;   // stream used for the conversion
 		convert << i; 		
 		
-		l_rStaticBoxContext.getInputType(i,l_TypeIndentifier);
-		if (l_TypeIndentifier==OVTK_TypeId_StreamedMatrix)
+		l_rStaticBoxContext.getInputType(i,l_oTypeIdentifier);
+		if (l_oTypeIdentifier==OVTK_TypeId_StreamedMatrix)
 		{
 			ShmString l_sShmVariableName("Matrix", alloc_inst_string);
 			l_sShmVariableName += ShmString(convert.str().c_str(), alloc_inst_string);
-			l_vMetaInfoVector->insert(std::make_pair<const ShmString,CIdentifier>(l_sShmVariableName,l_TypeIndentifier));
+			l_vMetaInfoVector->insert(std::make_pair<const ShmString,CIdentifier>(l_sShmVariableName,l_oTypeIdentifier));
 
 			const ShmemAllocatorMatrix alloc_inst(m_oSharedMemoryArray.get_segment_manager());
 			m_vStreamedMatrix.push_back(m_oSharedMemoryArray.construct<MyVectorStreamedMatrix>(l_sShmVariableName.c_str())(alloc_inst));
 			
 			this->getLogManager() << LogLevel_Info  << "Constructed variable in shared memory of type matrix with name " << l_sShmVariableName.c_str() << "\n";
 		}
-		else if (l_TypeIndentifier==OVTK_TypeId_Stimulations)
+		else if (l_oTypeIdentifier==OVTK_TypeId_Stimulations)
 		{
 			ShmString l_sShmVariableName("Stimuli", alloc_inst_string);
 			l_sShmVariableName += ShmString(convert.str().c_str(), alloc_inst_string);
-			l_vMetaInfoVector->insert(std::make_pair<const ShmString,CIdentifier>(l_sShmVariableName,l_TypeIndentifier));
+			l_vMetaInfoVector->insert(std::make_pair<const ShmString,CIdentifier>(l_sShmVariableName,l_oTypeIdentifier));
 			
 			const ShmemAllocatorStimulation alloc_inst(m_oSharedMemoryArray.get_segment_manager());
 			m_vStimuliSet.push_back(m_oSharedMemoryArray.construct<MyVectorStimulation>(l_sShmVariableName.c_str())(alloc_inst));
 			
 			this->getLogManager() << LogLevel_Info  << "Constructed variable in shared memory of type stimulation with name " << l_sShmVariableName.c_str() << "\n"; 
+		} else {
+			this->getLogManager() << LogLevel_Warning  << "Input type " << l_oTypeIdentifier << " is not supported\n";
 		}
 	}
 
@@ -83,12 +87,12 @@ boolean CBoxAlgorithmSharedMemoryWriter::uninitialize(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	for(int i=l_rStaticBoxContext.getInputCount()-1; i>=0; i--)
 	{
-		CIdentifier l_TypeIndentifier;
-		l_rStaticBoxContext.getInputType(i,l_TypeIndentifier);
+		CIdentifier l_oTypeIdentifier;
+		l_rStaticBoxContext.getInputType(i,l_oTypeIdentifier);
 		std::ostringstream convert;   // stream used for the conversion
 		convert << i; 		
 		
-		if (l_TypeIndentifier==OVTK_TypeId_StreamedMatrix)
+		if (l_oTypeIdentifier==OVTK_TypeId_StreamedMatrix)
 		{
 			this->getLogManager() << LogLevel_Debug << "Uninitialize shared memory variable associated with input " << i << "\n";
 			for (uint32 it=0; it<m_vStreamedMatrix.back()->size(); it++)
@@ -104,7 +108,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::uninitialize(void)
 			
 			//TODO: pop_back()?
 		}
-		else if (l_TypeIndentifier==OVTK_TypeId_Stimulations)
+		else if (l_oTypeIdentifier==OVTK_TypeId_Stimulations)
 		{
 			m_vStimuliSet.back()->clear();	
 			m_oSharedMemoryArray.destroy<MyVectorStimulation>((std::string("Stimuli")+convert.str()).c_str());
@@ -137,9 +141,9 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 	
 	for(uint32 j=0; j<l_rStaticBoxContext.getInputCount(); j++)
 	{
-		CIdentifier l_TypeIndentifier;
-		l_rStaticBoxContext.getInputType(j,l_TypeIndentifier);		
-		if (l_TypeIndentifier==OVTK_TypeId_Stimulations)
+		CIdentifier l_oTypeIdentifier;
+		l_rStaticBoxContext.getInputType(j,l_oTypeIdentifier);		
+		if (l_oTypeIdentifier==OVTK_TypeId_Stimulations)
 		{		
 			for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(j); i++)
 			{			
@@ -184,7 +188,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 			}
 			l_ui32StimulusInputCounter++;
 		}
-		else if (l_TypeIndentifier==OVTK_TypeId_StreamedMatrix)
+		else if (l_oTypeIdentifier==OVTK_TypeId_StreamedMatrix)
 		{
 			for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(j); i++)
 			{				

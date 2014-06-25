@@ -16,7 +16,6 @@
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/containers/string.hpp>
 
-
 using namespace boost::interprocess;
 
 // The unique identifiers for the box and its descriptor.
@@ -189,19 +188,13 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddInput);
 				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanRemoveInput);
 				
-				//No output specified.To add outputs use :
-//rBoxAlgorithmPrototype.addOutput("Output Name",OV_TypeId_XXXX);
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
-				
 				rBoxAlgorithmPrototype.addSetting("SharedMemoryName",OV_TypeId_String,"SharedMemory_P300Stimulator");
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 				
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Stimulations);
+
 				return true;
 			}
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_SharedMemoryWriterDesc);
