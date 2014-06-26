@@ -76,10 +76,10 @@ void P300StimulatorPropertyReader::processChildData(const char* sData)
 	if(m_vNode.top()==CString("EarlyStopping"))
 	{
 		m_bEarlyStopping = false;
-		if(CString(sData)==CString("True"))
+		if(l_sExpandedValue==CString("True"))
 				m_bEarlyStopping=true;
 	}
-	if(m_vNode.top()==CString("StopCOndition"))
+	if(m_vNode.top()==CString("StopCondition"))
 	{
 		m_ui32StopCondition = static_cast<uint32>(m_pKernelContext->getConfigurationManager().expandAsUInteger(l_sExpandedValue));
 	}
