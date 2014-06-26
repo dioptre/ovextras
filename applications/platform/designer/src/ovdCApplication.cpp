@@ -1169,7 +1169,11 @@ void CApplication::updateWorkingDirectoryToken(const OpenViBE::CIdentifier &oSce
 void CApplication::removeScenarioDirectoryToken(const CIdentifier &oScenarioIdentifier)
 {
 	const OpenViBE::CString l_sGlobalToken = "Player_ScenarioDirectory" + oScenarioIdentifier.toString();
-	m_rKernelContext.getConfigurationManager().releaseConfigurationToken(m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sGlobalToken));
+	CIdentifier l_oToken = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sGlobalToken);
+	if(l_oToken != OV_UndefinedIdentifier)
+	{
+		m_rKernelContext.getConfigurationManager().releaseConfigurationToken(l_oToken);
+	}
 
 	// No need to handle the old __volatile_ScenarioDir with the id postfix as that token is no longer created
 }
@@ -1177,7 +1181,11 @@ void CApplication::removeScenarioDirectoryToken(const CIdentifier &oScenarioIden
 void CApplication::resetVolatileScenarioDirectoryToken()
 {
 	const OpenViBE::CString l_sGlobalToken = "Player_ScenarioDirectory";
-	m_rKernelContext.getConfigurationManager().releaseConfigurationToken(m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sGlobalToken));
+	CIdentifier l_oToken = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(l_sGlobalToken);
+	if(l_oToken != OV_UndefinedIdentifier)
+	{
+		m_rKernelContext.getConfigurationManager().releaseConfigurationToken(l_oToken);
+	}
 
 	// No need to handle the old __volatile_ScenarioDir with the id postfix as that token is no longer created
 }
