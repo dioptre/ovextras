@@ -1390,6 +1390,22 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		else
 		{
 			//If scenario has no size, let's say we gonna print nothing
+			gtk_widget_set_size_request(GTK_WIDGET(m_pScenarioDrawingArea), l_iViewportX, l_iViewportY);
+			if(m_pBufferedDrawingArea) g_object_unref(m_pBufferedDrawingArea);
+			m_pBufferedDrawingArea = gdk_pixmap_new(GTK_WIDGET(m_pScenarioDrawingArea)->window, l_iViewportX, l_iViewportY, -1);
+
+			::GdkColor l_oColor;
+			l_oColor.pixel=0;
+			l_oColor.red  =0xf000;
+			l_oColor.green=0xf000;
+			l_oColor.blue =0xf000;
+			gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oColor);
+			gdk_draw_rectangle(
+				GDK_DRAWABLE(m_pBufferedDrawingArea),
+				l_pDrawGC,
+				TRUE,
+				0, 0, l_iViewportX, l_iViewportY);
+			gdk_draw_drawable(GTK_WIDGET(m_pScenarioDrawingArea)->window, l_pDrawGC, m_pBufferedDrawingArea, 0, 0, 0, 0, -1, -1);
 			return;
 		}
 
@@ -1408,35 +1424,26 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 			0, 0, x, y);
 		g_object_unref(l_pStencilGC);
 
-		l_oColor.pixel=0;
-		l_oColor.red  =0xf600;
-		l_oColor.green=0xf600;
-		l_oColor.blue =0xf600;
+		if(this->isLocked())
+		{
+			l_oColor.pixel=0;
+			l_oColor.red  =0xf700;
+			l_oColor.green=0xf000;
+			l_oColor.blue =0xf000;
+		}
+		else
+		{
+			l_oColor.pixel=0;
+			l_oColor.red  =0xf000;
+			l_oColor.green=0xf000;
+			l_oColor.blue =0xf000;
+		}
 		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oColor);
 		gdk_draw_rectangle(
 			GDK_DRAWABLE(m_pBufferedDrawingArea),
 			l_pDrawGC,
 			TRUE,
 			0, 0, x, y);
-
-		if(this->isLocked())
-		{
-			::GdkColor l_oColor;
-			l_oColor.pixel=0;
-			l_oColor.red  =0x0f00;
-			l_oColor.green=0x0f00;
-			l_oColor.blue =0x0f00;
-
-			::GdkGC* l_pDrawGC=gdk_gc_new(GTK_WIDGET(m_pScenarioDrawingArea)->window);
-			gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oColor);
-			gdk_gc_set_function(l_pDrawGC, GDK_XOR);
-			gdk_draw_rectangle(
-				GDK_DRAWABLE(m_pBufferedDrawingArea),
-				l_pDrawGC,
-				TRUE,
-				0, 0, x, y);
-			g_object_unref(l_pDrawGC);
-		}
 
 		m_ui32InterfacedObjectId=0;
 		m_vInterfacedObject.clear();
