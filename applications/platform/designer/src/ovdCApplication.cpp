@@ -459,6 +459,7 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 		CInterfacedScenario* l_pCurrentInterfacedScenario=l_pApplication->getCurrentInterfacedScenario();
 		if(l_pCurrentInterfacedScenario)
 		{
+
 			if(l_pApplication->getPlayer() && l_pCurrentInterfacedScenario->m_ePlayerStatus != l_pApplication->getPlayer()->getStatus())
 			{
 				switch(l_pApplication->getPlayer()->getStatus())
@@ -494,10 +495,9 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 			{
 				float64 l_f64Time=(l_pCurrentInterfacedScenario->m_pPlayer 
 					? ITimeArithmetics::timeToSeconds(l_pCurrentInterfacedScenario->m_pPlayer->getCurrentSimulatedTime()) : 0);
-				if(l_pApplication->m_ui64LastTimeRefresh!=l_f64Time)
+				if(l_pApplication->m_f64LastTimeRefresh!=l_f64Time)
 				{
-					l_pApplication->m_ui64LastTimeRefresh=(uint64)l_f64Time;
-
+					l_pApplication->m_f64LastTimeRefresh=l_f64Time;
 					uint32 l_ui32Milli  = ((uint32)(l_f64Time*1000)%1000);
 					uint32 l_ui32Seconds=  ((uint32)l_f64Time)%60;
 					uint32 l_ui32Minutes= (((uint32)l_f64Time)/60)%60;
@@ -636,7 +636,7 @@ CApplication::CApplication(const IKernelContext& rKernelContext)
 	,m_pAlgorithmTreeModel(NULL)
 	,m_pAlgorithmTreeView(NULL)
 	,m_giFilterTimeout(0)
-	,m_ui64LastTimeRefresh(0)
+	,m_f64LastTimeRefresh(0.0)
 	,m_bIsQuitting(false)
 	,m_i32CurrentScenarioPage(-1)
 	,m_eReplayMode(EReplayMode_None)

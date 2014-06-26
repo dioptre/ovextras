@@ -193,7 +193,7 @@ namespace OpenViBEDesigner
 		const gchar* m_sSearchTerm;
 		const gchar* m_sLogSearchTerm;
 		
-		OpenViBE::uint64 m_ui64LastTimeRefresh;
+		OpenViBE::float64 m_f64LastTimeRefresh;
 		OpenViBE::boolean m_bIsQuitting;
 		OpenViBE::int32 m_i32CurrentScenarioPage;
 
