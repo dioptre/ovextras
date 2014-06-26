@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 			}
 
 			float64* l_pBuffer = l_pMatrix->getBuffer();
-			for(int c=0; c<l_pMatrix->getBufferElementCount(); c++)
+			for(uint32 c=0; c<l_pMatrix->getBufferElementCount(); c++)
 			{
 				cout << l_pBuffer[c] << "	";
 			}

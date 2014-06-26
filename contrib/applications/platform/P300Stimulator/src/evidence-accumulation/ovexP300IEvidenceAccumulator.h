@@ -165,7 +165,7 @@ namespace OpenViBEApplications
 					std::vector<OpenViBE::uint32>* currentFlashGroup = this->getNextFlashGroup();
 					m_ui32CurrentFlashIndex++;
 					std::cout << " got group  " << m_ui32CurrentFlashIndex << std::endl;
-					for(int i=0; i<currentFlashGroup->size(); i++)
+					for(OpenViBE::uint32 i=0; i<currentFlashGroup->size(); i++)
 					{
 						std::cout << currentFlashGroup->at(i) << ", ";
 					}
