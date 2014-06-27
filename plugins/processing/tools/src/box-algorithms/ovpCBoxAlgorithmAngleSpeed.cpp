@@ -15,6 +15,10 @@ using namespace OpenViBEPlugins::Tools;
 
 using namespace std;
 
+#ifndef M_PI
+#define M_PI 3.1415926535897932384626433832795
+#endif
+
 struct Sort_by_second
 {
    bool operator() (const std::pair<float64,int> & left, const std::pair<float64,int> & right) const
