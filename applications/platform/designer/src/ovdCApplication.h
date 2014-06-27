@@ -95,6 +95,8 @@ namespace OpenViBEDesigner
 		void playScenarioCB(void);
 		void forwardScenarioCB(void);
 
+		void keyPressEventCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent);
+
 		void addCommentCB(
 			OpenViBEDesigner::CInterfacedScenario* pScenario);
 

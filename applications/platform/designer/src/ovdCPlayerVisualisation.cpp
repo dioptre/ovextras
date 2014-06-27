@@ -21,6 +21,14 @@ static ::GtkTargetEntry targets [] =
 {
 }*/
 
+//This callback transmits signal to the application to handle global shortcuts
+//data contains a pointer to Application
+static gboolean key_pressed_callback(GtkWidget *pWidget, GdkEventKey *pEvent, gpointer pData)
+{
+	static_cast<CApplication*>(pData)->keyPressEventCB(pWidget, pEvent);
+	return false;
+}
+
 
 
 //when the widget is in the visualisation manager, it does not have the focus and the key pressed are not detected
@@ -240,6 +248,7 @@ void CPlayerVisualisation::init(void)
 			gtk_signal_connect(GTK_OBJECT(l_pTreeWidget), "configure_event", G_CALLBACK(configure_event_cb), this);
 			//FIXME wrong spelling (-)
 			g_signal_connect(l_pTreeWidget, "delete_event", G_CALLBACK(hide_window_cb), this);
+			g_signal_connect(l_pTreeWidget, "key-press-event", G_CALLBACK(key_pressed_callback), &(m_rInterfacedScenario.m_rApplication));
 		}
 
 	}
@@ -429,6 +438,7 @@ boolean CPlayerVisualisation::setWidget(const CIdentifier& rBoxIdentifier, ::Gtk
 
 
 
+
 	//store plugin widget and toolbar button
 	CIdentifier l_oIdentifier = l_pVisualisationWidget->getIdentifier();
 	m_mPlugins[l_oIdentifier].m_pWidget = pWidget;
@@ -501,6 +511,7 @@ boolean CPlayerVisualisation::parentWidgetBox(IVisualisationWidget* pWidget, ::G
 		gtk_container_add(GTK_CONTAINER(l_pWindow), (::GtkWidget*)pWidgetBox);
 		//prevent user from closing this window
 		g_signal_connect(l_pWindow, "delete_event", G_CALLBACK(hide_window_cb), this);
+		g_signal_connect(l_pWindow, "key-press-event", G_CALLBACK(key_pressed_callback), &(m_rInterfacedScenario.m_rApplication));
 
 		//position: centered in the main window
 		if(m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_WindowManager_Center}", false))
