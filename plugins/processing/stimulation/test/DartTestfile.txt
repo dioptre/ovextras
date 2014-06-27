@@ -41,7 +41,7 @@ ELSE(WIN32)
 ENDIF(WIN32)
 ADD_TEST(clean_${TEST_NAME} "rm" "-f" "${SCENARIO_BASE}.txt")
 ADD_TEST(run_${TEST_NAME} "${CMAKE_COMMAND}" "-D" "SCENARIO_BASE:STRING=${SCENARIO_BASE}" "-P" "run-command-with-spaces-wrap.cmake")
-ADD_TEST(compare_${TEST_NAME} "diff" "${SCENARIO_BASE}.ref.txt" "${SCENARIO_BASE}.txt")
+ADD_TEST(compare_${TEST_NAME} "diff" "--strip-trailing-cr" "${SCENARIO_BASE}.ref.txt" "${SCENARIO_BASE}.txt")
 
 ## add some properties that help to debug 
 IF(WIN32)
