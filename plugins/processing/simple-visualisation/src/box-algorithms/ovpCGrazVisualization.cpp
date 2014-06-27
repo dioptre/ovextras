@@ -563,6 +563,15 @@ namespace OpenViBEPlugins
 			gint l_iX = 0;
 			gint l_iY = 0;
 
+/*			GdkColor l_oRed;
+
+                        l_oRed.pixel =0;
+                        l_oRed.red = 0xFFFF;
+                        l_oRed.green = 0;
+                        l_oRed.blue = 0;*/
+
+//                        gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_NORMAL, &l_oRed);
+
 			switch(eDirection)
 			{
 				case EArrowDirection_None:
@@ -577,6 +586,9 @@ namespace OpenViBEPlugins
 					l_iY = (l_iWindowHeight/2) - (gdk_pixbuf_get_height(m_pLeftArrow)/2);
 					gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pLeftArrow, 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
 
+					// gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
+							   // l_iX - (gdk_pixbuf_get_width(m_pLeftArrow)/2) - gdk_pixbuf_get_width(m_pImageLeft)/2, l_iY,
+							   // gdk_pixbuf_get_width(m_pImageLeft), gdk_pixbuf_get_height(m_pImageLeft));
 					break;
 
 				case EArrowDirection_Right:
@@ -584,6 +596,10 @@ namespace OpenViBEPlugins
 					l_iY = (l_iWindowHeight/2) - (gdk_pixbuf_get_height(m_pRightArrow)/2);
 					gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pRightArrow, 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
 
+					//gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pImageRight, 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
+					// gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
+							   // l_iX + (gdk_pixbuf_get_width(m_pRightArrow)/2) + gdk_pixbuf_get_width(m_pImageRight)/2 , l_iY,
+							   // gdk_pixbuf_get_width(m_pImageRight), gdk_pixbuf_get_height(m_pImageLeft));
 					break;
 
 				case EArrowDirection_Up:
@@ -591,6 +607,10 @@ namespace OpenViBEPlugins
 					l_iY = (l_iWindowHeight/2) - gdk_pixbuf_get_height(m_pUpArrow) - 1;
 					gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pUpArrow, 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
 
+					// gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], false,
+							   // (l_iWindowWidth/2) - (l_iWindowWidth/16) - 25 - 10, (l_iWindowHeight/4) - gdk_pixbuf_get_height(m_pUpArrow)*3/4 - 10,
+							   // gdk_pixbuf_get_width(m_pImageRight)*3/4, gdk_pixbuf_get_height(m_pImageRight)/2);
+//					gdk_draw_layout(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], l_iTextX, l_iTextY, l_pText);
 					break;
 
 				case EArrowDirection_Down:
@@ -603,6 +623,8 @@ namespace OpenViBEPlugins
 				default:
 					break;
 			}
+
+//						gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_NORMAL, &m_oForegroundColor);
 
 		}
 
@@ -646,6 +668,14 @@ namespace OpenViBEPlugins
 		void CGrazVisualization::drawRectangle(EArrowDirection eDirection)
 		{
 
+	/* 	  GdkColor l_oRed;
+
+		  l_oRed.pixel =0;
+		  l_oRed.red = 0xFFFF;
+		  l_oRed.green = 0;
+		  l_oRed.blue = 0;
+
+		  gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_NORMAL, &l_oRed); */
 
 		  gint l_iWindowWidth = m_pDrawingArea->allocation.width;
 		  gint l_iWindowHeight = m_pDrawingArea->allocation.height;
@@ -686,7 +716,6 @@ namespace OpenViBEPlugins
 			  default:
 				  break;
 		    }
-
 		}
 
 
@@ -839,13 +868,20 @@ namespace OpenViBEPlugins
 			// To get the score of last trial
 /*			if(m_eCurrentState == EGrazVisualizationState_End)
 			  {
+<<<<<<< Updated upstream
 			    uint32 l_ui32WindowCount=
 					    m_vWindowSuccessCount.size()>m_vWindowFailCount.size()?
 					    m_vWindowSuccessCount.size():m_vWindowFailCount.size();
+=======
+			  		uint32 l_ui32WindowCount=
+						m_vWindowSuccessCount.size()>m_vWindowFailCount.size()?
+						m_vWindowSuccessCount.size():m_vWindowFailCount.size();
+>>>>>>> Stashed changes
 			    if(m_ui32WindowIndex == l_ui32WindowCount)
 				{
 				    for(uint32 i=0; i<l_ui32WindowCount; i++)
 				    {
+					cout<<"index = "<<m_ui32WindowIndex<<" and "<<l_ui32WindowCount<<endl;
 					    getBoxAlgorithmContext()->getPlayerContext()->getLogManager()
 						    << LogLevel_Info
 						    << "Score estimation window " << i << " : [fail:success:ratio]=["
@@ -853,7 +889,7 @@ namespace OpenViBEPlugins
 						    << m_vWindowSuccessCount[i] << ":"
 						    << (((m_vWindowSuccessCount[i]*10000)/(m_vWindowSuccessCount[i]+m_vWindowFailCount[i])))/100.0<<"%]\n";
 				    }
-			      }
+			    }
 			    m_ui32WindowIndex = 0;
 			  }*/
 

@@ -77,6 +77,7 @@ namespace OpenViBEPlugins
 			virtual void drawRectangle(EArrowDirection eDirection);
 			virtual void drawSpot();
 
+
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_GrazVisualization)
 
 		public:
