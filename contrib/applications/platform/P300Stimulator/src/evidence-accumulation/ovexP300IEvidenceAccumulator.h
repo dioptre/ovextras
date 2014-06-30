@@ -70,6 +70,7 @@ namespace OpenViBEApplications
 					{
 						OpenViBE::float32 max;
 						findMaximum(m_pAccumulatedEvidence->getBuffer(), &m_ui64Prediction, &max);
+						m_bIsReadyToPredict=false;
 					}
 					//if we are not ready, the prediction will be 0 and ignored
 					return m_ui64Prediction;
@@ -92,15 +93,14 @@ namespace OpenViBEApplications
 				}
 
 				//function called at each loop of the stimulator
-				virtual void update()
+				virtual OpenViBE::boolean update()
 				{
-					//std::cout << "Evidence Acc update " << std::endl;
 					//get the evidence from shared memory
 					OpenViBE::IMatrix* currentEvidence = m_oSharedMemoryReader->readNextSymbolProbabilities();
 					
 					if(currentEvidence!=NULL)
 					{
-						//the matrix should only contain a single value, the proba of the gorup containing a p300
+						//the matrix should only contain a single value, the proba of the group containing a p300
 						OpenViBE::float64* proba = currentEvidence->getBuffer();
 						//match to the current flash group
 						std::cout << "Evidence Acc update with proba " << proba[0] << std::endl;
@@ -109,14 +109,22 @@ namespace OpenViBEApplications
 						if(earlyStoppingEnabled)//get the token wich says if early stopping is enabled or not
 						{
 							m_bIsReadyToPredict = stopEarly();
+							std::cout << "Early stop enabled and early stop condition is ";
+							if(!m_bIsReadyToPredict)
+								std::cout << " not ";
+							std::cout << "met" <<  std::endl;
 						}
 						//there is NumberOfGroup flashes by repetition so if we have more than NumberOfGroup*maxRepetition flashes, we force a predicition
-						if(m_ui32CurrentFlashIndex*m_pSequenceGenerator->getNumberOfGroups()>=maxRepetition)
+						if(m_ui32CurrentFlashIndex>=maxRepetition*m_pSequenceGenerator->getNumberOfGroups())
 						{
+							std::cout << "Waited more than " << maxRepetition*m_pSequenceGenerator->getNumberOfGroups() << " (" <<  m_ui32CurrentFlashIndex << ")" << std::endl;
 							m_bIsReadyToPredict=true;
 						}
+						std::cout << "Evidence Accumulator clear " << std::endl;
 						m_oSharedMemoryReader->clearSymbolProbabilities();//clear to avoid reading it again
+						return true;//we updated
 					}
+					return false;//nothing in input to update with
 				}
 				
 				/**
@@ -156,7 +164,12 @@ namespace OpenViBEApplications
 					//get letter in the current flash
 					std::vector<OpenViBE::uint32>* currentFlashGroup = this->getNextFlashGroup();
 					m_ui32CurrentFlashIndex++;
-					std::cout << " getting group  " << m_ui32CurrentFlashIndex << std::endl;
+					std::cout << " got group  " << m_ui32CurrentFlashIndex << std::endl;
+					for(OpenViBE::uint32 i=0; i<currentFlashGroup->size(); i++)
+					{
+						std::cout << currentFlashGroup->at(i) << ", ";
+					}
+					std::cout << std::endl;
 
 					OpenViBE::CMatrix* fproba = new OpenViBE::CMatrix();
 					fproba->setDimensionCount(2);
@@ -179,27 +192,26 @@ namespace OpenViBEApplications
 				//check against early stopping criteria
 				OpenViBE::boolean stopEarly()
 				{
-					bool rValue = false;
-					OpenViBE::uint32 argmax;
-					OpenViBE::float32 max;
+					OpenViBE::uint32 l_ui32Argmax;
+					OpenViBE::float32 l_f32Max;
 					unsigned int j=0;
-					OpenViBE::float64* buffer = m_pAccumulatedEvidence->getBuffer();
-					findMaximum(buffer, &argmax, &max);
+					OpenViBE::float64* l_pBuffer = m_pAccumulatedEvidence->getBuffer();
+					findMaximum(l_pBuffer, &l_ui32Argmax, &l_f32Max);
 
 
-					bool m_bEarlyStoppingConditionMet = true;
-					while((m_bEarlyStoppingConditionMet))
+					bool l_bEarlyStoppingConditionMet = true;
+					while((l_bEarlyStoppingConditionMet))
 					{
-						if((buffer[j]>max-m_bStopCondition)&&(j!=argmax))
-							m_bEarlyStoppingConditionMet=false;
+						if((l_pBuffer[j]>l_f32Max-m_bStopCondition)&&(j!=l_ui32Argmax))
+							l_bEarlyStoppingConditionMet=false;
 						j++;
 					}
-					rValue = m_bEarlyStoppingConditionMet;
-					if(rValue)
+
+					if(l_bEarlyStoppingConditionMet)
 					{
-						m_ui64Prediction = argmax;
+						m_ui64Prediction = l_ui32Argmax;
 					}
-					return rValue;
+					return l_bEarlyStoppingConditionMet;
 				}
 
 				ExternalP300SharedMemoryReader* m_oSharedMemoryReader;

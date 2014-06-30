@@ -6,7 +6,7 @@ SET(PROJECT_VERSION_PATCH ${OV_GLOBAL_VERSION_PATCH})
 SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h)
-ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
+ADD_EXECUTABLE(${PROJECT_NAME} ${source_files} ovexP300Visualiser.h ovexP300Visualiser.cpp)
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
@@ -26,7 +26,7 @@ ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
 IF(OV_COMPILE_TESTS)
         ADD_DEFINITIONS(-DOUTPUT_TIMING)
 ENDIF(OV_COMPILE_TESTS)
-
+ADD_SUBDIRECTORY("test")#to compile some test executables
 # ---------------------------------
 # Target macros
 # Defines target operating system
@@ -52,7 +52,7 @@ ENDIF(UNIX)
 # ----------------------
 # Generate launch script
 # ----------------------
-OV_INSTALL_LAUNCH_SCRIPT("ov-externalP300Stimulator")
+OV_INSTALL_LAUNCH_SCRIPT("openvibe-external-p300-stimulator")
 
 # -----------------------------
 # Install files

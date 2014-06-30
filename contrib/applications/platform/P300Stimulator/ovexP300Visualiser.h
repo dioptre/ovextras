@@ -13,30 +13,30 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "stimulator/ovexP300CStimulator.h"
-#include "stimulator/ovexP300CNULLStimulator.h"
+#include "src/stimulator/ovexP300CStimulator.h"
+#include "src/stimulator/ovexP300CNULLStimulator.h"
 
-#include "tagging/ovexCSoftTagger.h"
+#include "src/tagging/ovexCSoftTagger.h"
 #if defined TARGET_OS_Linux || (defined TARGET_OS_Windows && defined TARGET_HAS_ThirdPartyInpout)
-#include "tagging/ovexParallelPort.h"
+#include "src/tagging/ovexParallelPort.h"
 #endif
 
 
-#include "visualisation/glP300MainContainer.h"
+#include "src/visualisation/glP300MainContainer.h"
 
-#include "properties/ovexP300InterfacePropertyReader.h"
-#include "properties/ovexP300StimulatorPropertyReader.h"
-#include "properties/ovexP300ScreenLayoutReader.h"
+#include "src/properties/ovexP300InterfacePropertyReader.h"
+#include "src/properties/ovexP300StimulatorPropertyReader.h"
+#include "src/properties/ovexP300ScreenLayoutReader.h"
 
-#include "sequence/ovexP300RipRandSequenceGenerator.h"
-#include "sequence/ovexP300RowColumnSequenceGenerator.h"
-#include "sequence/ovexP300CSVReader.h"
+#include "src/sequence/ovexP300RipRandSequenceGenerator.h"
+#include "src/sequence/ovexP300RowColumnSequenceGenerator.h"
+#include "src/sequence/ovexP300CSVReader.h"
 
-#include "ovexP300SequenceFileWriter.h"
+#include "src/ovexP300SequenceFileWriter.h"
 
-#include "evidence-accumulation/ovexP300CEvidenceAccumulator.h"
+#include "src/evidence-accumulation/ovexP300CEvidenceAccumulator.h"
 
-#include "ova_defines.h"
+#include "src/ova_defines.h"
 
 namespace OpenViBEApplications
 {
