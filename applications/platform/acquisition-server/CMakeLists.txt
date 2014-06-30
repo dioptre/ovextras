@@ -29,7 +29,7 @@ INCLUDE("FindThirdPartyGMobiLabPlusAPI")
 INCLUDE("FindThirdPartyUSBFirstAmpAPI")
 INCLUDE("FindThirdPartyThinkGearAPI")
 INCLUDE("FindThirdPartyEmotivAPI")
-INCLUDE("FindThirdPartyNeuroElectricsEnobio3G")
+INCLUDE("FindThirdPartyNeuroelectricsEnobio3G")
 
 INCLUDE("FindThirdPartyOpenAL")
 INCLUDE("FindThirdPartyBoost")

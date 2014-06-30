@@ -720,6 +720,41 @@ no_need_to_download_lsl_runtime:
 
 SectionEnd
 
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section "Enobio3G"
+
+	; Neuroelectrics Enobio 3G driver
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\enobio3g-1.2.1-$suffix-dev.zip" no_need_to_download_enobio_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/enobio3g-1.2.1-$suffix-dev.zip "arch\enobio3g-1.2.1-$suffix-dev.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_enobio_dev:
+	ZipDLL::extractall "arch\enobio3g-1.2.1-$suffix-dev.zip" ""
+	
+	IfFileExists "arch\enobio3g-1.2.1-$suffix-runtime.zip" no_need_to_download_enobio_runtime
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/enobio3g-1.2.1-$suffix-runtime.zip "arch\enobio3g-1.2.1-$suffix-runtime.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_enobio_runtime:
+	ZipDLL::extractall "arch\enobio3g-1.2.1-$suffix-runtime.zip" ""
+
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\enobio3g\MSVC\;%PATH%$\r$\n"
+	FileClose $0
+
+SectionEnd
 
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
@@ -742,7 +777,8 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\liblsl"
 	RMDir /r "$INSTDIR\tmp"
 	RMDir /r "$INSTDIR\pthreads"
-
+	RMDir /r "$INSTDIR\enobio3g"
+	
 	Delete "$INSTDIR\..\scripts\win32-dependencies.cmd"
 
 	Delete "$INSTDIR\Uninstall.exe"
