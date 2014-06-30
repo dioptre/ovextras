@@ -1,6 +1,8 @@
 #ifndef __OpenViBE_AcquisitionServer_CDriverEnobio3G_H__
 #define __OpenViBE_AcquisitionServer_CDriverEnobio3G_H__
 
+#if defined(TARGET_HAS_ThirdPartyEnobioAPI)
+
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 #include <openvibe/ov_all.h>
@@ -91,8 +93,12 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32currentBuffer; // current buffer in use
 		OpenViBE::uint32 m_ui32lastBufferFilled; // last buffer filled with data ready to be submitted
 		OpenViBE::boolean m_bNewData; // if there is a new buffer with data ready to be submitted
+		
 		QMutex m_wMutex;
 	};
 };
 
+#endif
+
 #endif // __OpenViBE_AcquisitionServer_CDriverEnobio3G_H__
+

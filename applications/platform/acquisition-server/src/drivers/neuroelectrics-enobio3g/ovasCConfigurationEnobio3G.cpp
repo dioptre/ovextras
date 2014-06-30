@@ -1,3 +1,5 @@
+#if defined(TARGET_HAS_ThirdPartyEnobioAPI)
+
 #include "ovasCConfigurationEnobio3G.h"
 #include <gtk/gtk.h>
 #include <stdlib.h>
@@ -37,10 +39,10 @@ CConfigurationEnobio3G::CConfigurationEnobio3G(IDriverContext& rDriverContext, c
 	:CConfigurationBuilder(sGtkBuilderFileName)
 	,m_rDriverContext(rDriverContext)
 {
-  for(int i=0;i<6;i++)
-    {
-      m_macAddress[i]=0x00;
-    }
+	for(int i=0;i<6;i++)
+	{
+		m_macAddress[i]=0x00;
+	}
 }
 
 boolean CConfigurationEnobio3G::preConfigure(void)
@@ -68,8 +70,8 @@ bool from_string(T& t,
                  const std::string& s, 
                  std::ios_base& (*f)(std::ios_base&))
 {
-  std::istringstream iss(s);
-  return !(iss >> f >> t).fail();
+	std::istringstream iss(s);
+	return !(iss >> f >> t).fail();
 }
 
 boolean CConfigurationEnobio3G::postConfigure(void)
@@ -96,9 +98,9 @@ boolean CConfigurationEnobio3G::postConfigure(void)
 	std::vector<std::string> v;
 	std::istringstream buf(l_sMac);
 	for(std::string token; getline(buf, token, ':'); )
-	  {
-	    v.push_back(token);
-	  }
+	{
+		v.push_back(token);
+	}
 
 	// each token from the string, parse it as HEX values
 	int a;
@@ -124,3 +126,5 @@ unsigned char* CConfigurationEnobio3G::getMacAddress(){
 
   return m_macAddress;
 }
+
+#endif

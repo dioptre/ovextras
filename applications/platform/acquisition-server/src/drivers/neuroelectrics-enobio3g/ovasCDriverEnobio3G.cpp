@@ -1,3 +1,5 @@
+#if defined(TARGET_HAS_ThirdPartyEnobioAPI)
+
 #include "ovasCDriverEnobio3G.h"
 #include "ovasCConfigurationEnobio3G.h"
 #include <string.h>
@@ -18,7 +20,7 @@ CDriverEnobio3G::CDriverEnobio3G(IDriverContext& rDriverContext)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
 {
-  m_oHeader.setSamplingFrequency(_ENOBIO_SAMPLE_RATE_);
+	m_oHeader.setSamplingFrequency(_ENOBIO_SAMPLE_RATE_);
 	m_oHeader.setChannelCount(32);
 	
 	// The following class allows saving and loading driver settings from the acquisition server .conf file
@@ -42,12 +44,12 @@ CDriverEnobio3G::CDriverEnobio3G(IDriverContext& rDriverContext)
 CDriverEnobio3G::~CDriverEnobio3G(void)
 {
 
-  if(m_pSample!=NULL)
-    {
-      delete m_pSample;
-    }
-  delete m_macAddress;
-  m_enobioDevice.closeDevice();
+	if(m_pSample!=NULL)
+	{
+		delete m_pSample;
+	}
+	delete m_macAddress;
+	m_enobioDevice.closeDevice();
 }
 
 const char* CDriverEnobio3G::getName(void)
@@ -66,13 +68,13 @@ boolean CDriverEnobio3G::initialize(
 
 	// open the BT connection to the device
 	if(m_enobioDevice.openDevice(m_macAddress))
-	  {
-	    m_ui32nChannels = m_enobioDevice.numOfChannels();
-	  }
+	{
+		m_ui32nChannels = m_enobioDevice.numOfChannels();
+	}
 	else
-	  {
-	    return false;
-	  }
+	{
+		return false;
+	}
 
 	m_oHeader.setChannelCount(m_ui32nChannels);
 	if(!m_oHeader.isChannelCountSet()||!m_oHeader.isSamplingFrequencySet()) return false;
@@ -83,18 +85,21 @@ boolean CDriverEnobio3G::initialize(
 	// server later...
 	// number of cycling buffers we will use
 	m_ui32nBuffers = 32;
-	printf(" %d Buffers of %d size for %d channels\n",m_ui32nBuffers,m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock,m_ui32nChannels);
+	m_rDriverContext.getLogManager() << LogLevel_Debug << "Need " 
+		<< m_ui32nBuffers << " buffers of " 
+		<< m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock << " size for " 
+		<< m_ui32nChannels << " channels\n";
 	m_pSample = new float32*[m_ui32nBuffers];
 	for(unsigned int i=0;i<m_ui32nBuffers;++i)
-	  {
-	    // each buffer will be of length samplecountpersentblock, defined by the configuration interface
-	    m_pSample[i]=new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
-	  }
-	printf(" %d m_pSamples allocated with size %d\n",m_ui32nBuffers,m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock);
+	{
+		// each buffer will be of length samplecountpersentblock, defined by the configuration interface
+		m_pSample[i]=new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
+	}
 	m_bNewData = false;
 
 	if(!m_pSample)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Memory allocation error\n";
 		delete [] m_pSample;
 		m_pSample=NULL;
 		return false;
@@ -141,24 +146,25 @@ boolean CDriverEnobio3G::loop(void) {
 	if(!m_rDriverContext.isStarted()) return true;
 
 	// query new data flag state
+
 	m_wMutex.lock();
 	OpenViBE::boolean l_bNewData = m_bNewData;
 	m_wMutex.unlock();
 
 	// if new data flag is raised it means there's a buffer with new data ready to be submitted
 	if(l_bNewData)
-	  {
-	    // submit new data on the buffer pointed by the lastbufferfilled variable
-	    m_pCallback->setSamples(m_pSample[m_ui32lastBufferFilled]);
+	{
+		// submit new data on the buffer pointed by the lastbufferfilled variable
+		m_pCallback->setSamples(m_pSample[m_ui32lastBufferFilled]);
 		// lower new data flag
-	    m_wMutex.lock();
-	    m_bNewData = false;
-	    m_wMutex.unlock();
-	    // When your sample buffer is fully loaded, 
-	    // it is advised to ask the acquisition server 
-	    // to correct any drift in the acquisition automatically.
-	    m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
-	  }
+		m_wMutex.lock();
+		m_bNewData = false;
+		m_wMutex.unlock();
+		// When your sample buffer is fully loaded, 
+		// it is advised to ask the acquisition server 
+		// to correct any drift in the acquisition automatically.
+		m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
+	}
 
 
 	// ...
@@ -194,15 +200,16 @@ boolean CDriverEnobio3G::uninitialize(void)
 	// uninitialize hardware here
 	// ...
 
-	if(!m_pSample)
-	  {
-	    for(unsigned int i=0;i<m_ui32nBuffers;++i)
-	      {
-		delete m_pSample[i];
-	      }
-	  }
-	delete [] m_pSample;
-	m_pSample=NULL;
+	if(m_pSample)
+	{
+		for(unsigned int i=0;i<m_ui32nBuffers;++i)
+		{
+			delete m_pSample[i];
+		}
+		delete [] m_pSample;
+		m_pSample=NULL;
+	}
+
 	m_pCallback=NULL;
 	// close BT connection with the Enobio device
 	m_enobioDevice.closeDevice();
@@ -229,12 +236,10 @@ boolean CDriverEnobio3G::configure(void)
 	m_oSettings.save();
 	unsigned char *l_macAddress = m_oConfiguration.getMacAddress();
 	for(int i=0;i<6;++i)
-	  {
-	    m_macAddress[i] = (unsigned char)*(l_macAddress+i);
-	  }
+	{
+		m_macAddress[i] = (unsigned char)*(l_macAddress+i);
+	}
 
-	
-	
 	return true;
 }
 /**
@@ -245,37 +250,40 @@ void CDriverEnobio3G::receiveData(const PData &data){
   // We'll need to iterate through channels instead of memcpy because we need 
   // to cast from int to float. will also convert to microvolts
 
-  int *samples;
-  samples = _receivedData->data();
-  OpenViBE::float32 l_sample;
-  for(unsigned int i=0;i<m_ui32nChannels;i++)
-    {
-      l_sample = samples[i]/1000.0;
-      m_pSample[m_ui32currentBuffer][i*m_ui32SampleCountPerSentBlock+m_ui32bufHead] = l_sample;
-    }
+	int *samples;
+	samples = _receivedData->data();
+	OpenViBE::float64 l_sample;
+	for(unsigned int i=0;i<m_ui32nChannels;i++)
+	{
+		l_sample = samples[i]/1000.0;
+		m_pSample[m_ui32currentBuffer][i*m_ui32SampleCountPerSentBlock+m_ui32bufHead] = static_cast<float32>(l_sample);
+	}
 
-  // mutex for writting header and new data flag
-  m_wMutex.lock();
-  m_ui32bufHead++;
-  // if we already filled the current buffer we need to raise the new data flag
-  // and cycle to the next buffer
-  if(m_ui32bufHead>=m_ui32SampleCountPerSentBlock)
-    {
-	  // update the pointer to the last buffer filled
-      m_ui32lastBufferFilled = m_ui32currentBuffer;
-	  // reset the buffer writing head to the beginning. 
-      m_ui32bufHead=0;
-	  // we update pointer to the current buffer
-      m_ui32currentBuffer++;
-	  // if we are at the end of the buffers set, cycle to the first one
-      if(m_ui32currentBuffer>=m_ui32nBuffers)
+	// mutex for writting header and new data flag
+	m_wMutex.lock();
+
+	m_ui32bufHead++;
+	// if we already filled the current buffer we need to raise the new data flag
+	// and cycle to the next buffer
+	if(m_ui32bufHead>=m_ui32SampleCountPerSentBlock)
+	{
+		// update the pointer to the last buffer filled
+		m_ui32lastBufferFilled = m_ui32currentBuffer;
+		// reset the buffer writing head to the beginning. 
+		m_ui32bufHead=0;
+		// we update pointer to the current buffer
+		m_ui32currentBuffer++;
+		// if we are at the end of the buffers set, cycle to the first one
+		if(m_ui32currentBuffer>=m_ui32nBuffers)
 		{
 			m_ui32currentBuffer=0;
 		}
-	  // raise the flag to mark existence of new data to be submittted
-      m_bNewData = true;
-    }
-  m_wMutex.unlock();
+		// raise the flag to mark existence of new data to be submittted
+		m_bNewData = true;
+	}
+	
+	m_wMutex.unlock();
+
 }
 
 /**
@@ -287,3 +295,5 @@ void CDriverEnobio3G::newStatusFromDevice(const PData &data){
 
 
 
+
+#endif
