@@ -9,7 +9,8 @@ ENDIF(UNIX)
 ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
 ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
 
-ADD_EXECUTABLE(${PROJECT_NAME} test_sharedMemory.cpp)
+FILE(GLOB_RECURSE source_files ../../src/*.cpp ../../src/*.h)
+ADD_EXECUTABLE(${PROJECT_NAME} ${source_files} test_sharedMemory.cpp)
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
@@ -21,7 +22,6 @@ INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyLibrariesForExternalStimulator")
 INCLUDE("FindThirdPartyGTK")#to use gtk package content i.e cairo pango fretype
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} libopenvibe-external-p300-stimulator)
 
 
 #INCLUDE_DIRECTORIES(../src)

@@ -518,7 +518,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 MAIN: press 's' to start the stimulator
 */
 int main (int argc, char *argv[])
-{	
+{
 	#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 	glfwSetErrorCallback(error_callback);
 
@@ -527,7 +527,7 @@ int main (int argc, char *argv[])
 
 	GLFWwindow* window = g_externalVisualiser->getMainContainer()->getWindow();
 	glfwSetKeyCallback(window, key_callback);
-	
+
 	//listen for an key event. If 's' is pressed the stimulator is started.
 	if(!g_externalVisualiser->getReplayMode())
 	{
