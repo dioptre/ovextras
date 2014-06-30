@@ -146,10 +146,13 @@ boolean CDriverEnobio3G::loop(void) {
 	if(!m_rDriverContext.isStarted()) return true;
 
 	// query new data flag state
+	OpenViBE::boolean l_bNewData;
+	{
+		boost::mutex::scoped_lock lock(m_oMutex);
+		l_bNewData = m_bNewData;
+	}
 
-	m_wMutex.lock();
-	OpenViBE::boolean l_bNewData = m_bNewData;
-	m_wMutex.unlock();
+
 
 	// if new data flag is raised it means there's a buffer with new data ready to be submitted
 	if(l_bNewData)
@@ -157,9 +160,10 @@ boolean CDriverEnobio3G::loop(void) {
 		// submit new data on the buffer pointed by the lastbufferfilled variable
 		m_pCallback->setSamples(m_pSample[m_ui32lastBufferFilled]);
 		// lower new data flag
-		m_wMutex.lock();
-		m_bNewData = false;
-		m_wMutex.unlock();
+		{
+			boost::mutex::scoped_lock lock(m_oMutex);
+			m_bNewData = false;
+		}
 		// When your sample buffer is fully loaded, 
 		// it is advised to ask the acquisition server 
 		// to correct any drift in the acquisition automatically.
@@ -259,30 +263,30 @@ void CDriverEnobio3G::receiveData(const PData &data){
 		m_pSample[m_ui32currentBuffer][i*m_ui32SampleCountPerSentBlock+m_ui32bufHead] = static_cast<float32>(l_sample);
 	}
 
-	// mutex for writting header and new data flag
-	m_wMutex.lock();
-
-	m_ui32bufHead++;
-	// if we already filled the current buffer we need to raise the new data flag
-	// and cycle to the next buffer
-	if(m_ui32bufHead>=m_ui32SampleCountPerSentBlock)
+	// mutex for writing header and new data flag
 	{
-		// update the pointer to the last buffer filled
-		m_ui32lastBufferFilled = m_ui32currentBuffer;
-		// reset the buffer writing head to the beginning. 
-		m_ui32bufHead=0;
-		// we update pointer to the current buffer
-		m_ui32currentBuffer++;
-		// if we are at the end of the buffers set, cycle to the first one
-		if(m_ui32currentBuffer>=m_ui32nBuffers)
+		boost::mutex::scoped_lock lock(m_oMutex);
+
+		m_ui32bufHead++;
+		// if we already filled the current buffer we need to raise the new data flag
+		// and cycle to the next buffer
+		if(m_ui32bufHead>=m_ui32SampleCountPerSentBlock)
 		{
-			m_ui32currentBuffer=0;
+			// update the pointer to the last buffer filled
+			m_ui32lastBufferFilled = m_ui32currentBuffer;
+			// reset the buffer writing head to the beginning. 
+			m_ui32bufHead=0;
+			// we update pointer to the current buffer
+			m_ui32currentBuffer++;
+			// if we are at the end of the buffers set, cycle to the first one
+			if(m_ui32currentBuffer>=m_ui32nBuffers)
+			{
+				m_ui32currentBuffer=0;
+			}
+			// raise the flag to mark existence of new data to be submittted
+			m_bNewData = true;
 		}
-		// raise the flag to mark existence of new data to be submittted
-		m_bNewData = true;
 	}
-	
-	m_wMutex.unlock();
 
 }
 
