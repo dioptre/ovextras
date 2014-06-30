@@ -101,7 +101,7 @@ void ExternalP300CStimulator::run()
 		//*
 		if (m_ui64RealCycleTime<l_ui64CurrentTime)
 		{
-			uint32 l_ui32WaitFor = static_cast<uint32>(std::ceil(1000.0*ITimeArithmetics::timeToSeconds(m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep)));
+			uint32 l_ui32WaitFor = static_cast<uint32>(std::ceil(1000.0*ITimeArithmetics::timeToSeconds(l_ui64CurrentTime-m_ui64RealCycleTime+l_ui64TimeStep)));
 			System::Time::sleep(l_ui32WaitFor);
 		}
 		else if(m_ui64RealCycleTime-l_ui64CurrentTime>l_ui64TimeStep)//if the simulated time is behind real time, we make up for lost time by skipping the necessary amount of cycles
