@@ -136,6 +136,9 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean onCustomVerticalScaleChangedCB(
 				::GtkSpinButton* pSpinButton);
 
+            OpenViBE::boolean onAutoTranslationToggledCB(
+                    GtkToggleButton* pToggleButton);
+
 			/**
 			 * \brief Get a channel display object
 			 * \param ui32ChannelIndex Index of channel display
@@ -231,6 +234,8 @@ namespace OpenViBEPlugins
 			//! Value of custom vertical scale
 			OpenViBE::float64 m_f64CustomVerticalScaleValue;
 			//@}
+
+            OpenViBE::boolean m_bAutoTranslation;
 
 			//! The database that contains the information to use to draw the signals
 			CBufferDatabase * m_pBufferDatabase;

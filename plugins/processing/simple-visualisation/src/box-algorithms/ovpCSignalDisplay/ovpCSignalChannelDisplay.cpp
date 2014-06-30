@@ -60,6 +60,12 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 	//creates the left ruler
 	m_pLeftRuler = new CSignalDisplayLeftRuler(i32LeftRulerWidthRequest, i32LeftRulerHeightRequest);
 
+    //Set background color (White)
+    GdkColor l_oBackgroundColor;
+    l_oBackgroundColor.red = 65535;l_oBackgroundColor.green = 65535;l_oBackgroundColor.blue = 65535;
+
+    gtk_widget_modify_bg(m_pDrawingArea, GTK_STATE_NORMAL, &l_oBackgroundColor);
+
 	//connects the signals
 	gtk_widget_add_events(GTK_WIDGET(m_pDrawingArea), GDK_BUTTON_PRESS_MASK);
 	gtk_widget_add_events(GTK_WIDGET(m_pDrawingArea), GDK_ENTER_NOTIFY_MASK);
