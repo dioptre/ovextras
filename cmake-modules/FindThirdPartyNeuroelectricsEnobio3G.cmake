@@ -1,51 +1,78 @@
 # ---------------------------------
-# Finds STARLAB ENOBIO library
+# Finds the ENOBIO API & library
 # Adds library to target
 # Adds include path
 # ---------------------------------
 IF(WIN32)
-SET(QTCORE_INCLUDE_PREFIX C:/Qt/4.8.6/include)
-SET(QTCORE_LIB_PREFIX C:/Qt/4.8.6/lib)
-SET(ENOBIOAPI_DIR ${OV_BASE_DIR}/contrib/plugins/server-drivers/enobio3G/Enobio3GAPI.win32/enobio3G)
-  	FIND_PATH(PATH_ENOBIOAPI enobio3g.h PATHS $ENV{OpenViBE_dependencies} ${ENOBIOAPI_DIR})
-	IF(PATH_ENOBIOAPI)
-		MESSAGE(STATUS "  Found ENOBIO API...")
-		INCLUDE_DIRECTORIES(${PATH_ENOBIOAPI})
-		FIND_LIBRARY(LIB_ENOBIOAPI Enobio3GAPI PATHS ${PATH_ENOBIOAPI}/../ )
-		FIND_LIBRARY(LIB_QT QtCore4 ${QTCORE_LIB_PREFIX})
-		IF(LIB_ENOBIOAPI)
-			MESSAGE(STATUS "    [  OK  ] lib ${LIB_ENOBIOAPI}")
-			TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_ENOBIOAPI} )
-			TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_QT} )
-		ELSE(LIB_ENOBIOAPI)
-			MESSAGE(STATUS "    [FAILED] lib ENOBIO")
-		ENDIF(LIB_ENOBIOAPI)
+	SET(QTCORE_INCLUDE_PREFIX C:/Qt/4.8.6/include)
+	SET(QTCORE_LIB_PREFIX C:/Qt/4.8.6/lib)
+	SET(ENOBIOAPI_DIR ${OV_CUSTOM_DEPENDENCIES_PATH}/Enobio3GAPI.win32/enobio3G)
 
-		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyEnobioAPI)
+  	FIND_PATH(PATH_ENOBIOAPI enobio3g.h PATHS ${ENOBIOAPI_DIR})
+	IF(NOT PATH_ENOBIOAPI)
+		MESSAGE(STATUS "  FAILED to find ENOBIO API - cmake looked in '${ENOBIOAPI_DIR}', skipping Enobio.")
+		RETURN()
+	ENDIF(NOT PATH_ENOBIOAPI)
+	
+	MESSAGE(STATUS "  Found ENOBIO API...")
 
-		FIND_PATH( PATH_QTINCLUDE QtCore/QMutex ${QTCORE_INCLUDE_PREFIX})
-		IF(PATH_QTINCLUDE)
-			MESSAGE(STATUS "  Found QT Include")
-			INCLUDE_DIRECTORIES(${PATH_QTINCLUDE})
-		ELSE(PATH_QTINCLUDE)
-			MESSAGE(STATUS "	[FAILED] to find QT Include")
-		ENDIF(PATH_QTINCLUDE)
+	FIND_LIBRARY(LIB_ENOBIOAPI Enobio3GAPI PATHS ${PATH_ENOBIOAPI}/../MSVC/ )
+	IF(NOT LIB_ENOBIOAPI)
+		MESSAGE(STATUS "    [FAILED] Enobio libs not found, skipping Enobio.")	
+		RETURN()
+	ENDIF(NOT LIB_ENOBIOAPI)
+	
+	FIND_PATH( PATH_QTINCLUDE QtCore/QMutex ${QTCORE_INCLUDE_PREFIX})
+	IF(NOT PATH_QTINCLUDE)
+		MESSAGE(STATUS "	[FAILED] to find QT Include, required for Enobio3G, skipping Enobio.")
+		RETURN()
+	ENDIF(NOT PATH_QTINCLUDE)		
+	
+	FIND_LIBRARY(LIB_QT QtCore4 ${QTCORE_LIB_PREFIX})
+	IF(NOT LIB_QT)
+		MESSAGE(STATUS "    [FAILED] Qt libs not found, required for Enobio3G, skipping Enobio.")	
+		RETURN()
+	ENDIF(NOT LIB_QT)
+	
+	INCLUDE_DIRECTORIES(${PATH_ENOBIOAPI})			
+	INCLUDE_DIRECTORIES(${PATH_QTINCLUDE})
+			
+	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_ENOBIOAPI} )
+	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_QT} )
+	
+	ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyEnobioAPI)	
+	
+	ADD_CUSTOM_COMMAND(
+		TARGET ${PROJECT_NAME}
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND}
+		ARGS -E copy "${PATH_ENOBIOAPI}/../MSVC/Enobio3GAPI.dll" "${CMAKE_INSTALL_FULL_BINDIR}"
+		COMMENT "      --->   Copying dll file ${PATH_ENOBIOAPI}/EnobioAPI.dll for the Enobio driver to bin/"
+		VERBATIM)	
+	ADD_CUSTOM_COMMAND(
+		TARGET ${PROJECT_NAME}
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND}
+		ARGS -E copy "${PATH_ENOBIOAPI}/../MSVC/WinBluetoothAPI.dll" "${CMAKE_INSTALL_FULL_BINDIR}"
+		COMMENT "      --->   Copying dll file ${PATH_ENOBIOAPI}/WinBluetoothAPI.dll for the Enobio driver to bin/"
+		VERBATIM)						
+	ADD_CUSTOM_COMMAND(
+		TARGET ${PROJECT_NAME}
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND}
+		ARGS -E copy "${PATH_QTINCLUDE}/../bin/QtCore4.dll" "${CMAKE_INSTALL_FULL_BINDIR}"
+		COMMENT "      --->   Copying dll file ${PATH_QTINCLUDE}/../bin/QtCore4.dll for the Enobio driver to bin/"
+		VERBATIM)	
 		
-		ADD_CUSTOM_COMMAND(
-				TARGET ${PROJECT_NAME}
-				POST_BUILD
-				COMMAND ${CMAKE_COMMAND}
-				ARGS -E copy "${PATH_ENOBIOAPI}/../Enobio3GAPI.dll" "${PROJECT_SOURCE_DIR}/bin"
-				COMMENT "      --->   Copying dll file ${PATH_ENOBIOAPI}/EnobioAPI.dll for the STARLAB Enobio driver to ${PROJECT_SOURCE_DIR}/dependencies/lib."
-			VERBATIM)
-	ELSE(PATH_ENOBIOAPI)
-		MESSAGE(STATUS "  FAILED to find ENOBIO API - cmake looked in '${ENOBIOAPI_DIR}' and '$ENV{OpenViBE_dependencies}'")
-	ENDIF(PATH_ENOBIOAPI)
+	MESSAGE(STATUS "    [  OK  ] lib ${LIB_QT}")		
+	MESSAGE(STATUS "    [  OK  ] lib ${LIB_ENOBIOAPI}")
+
 ENDIF(WIN32)
 
 IF(UNIX)
-SET(QTCORE_INCLUDE_PREFIX /usr/share/qt4/include/)
-SET(QTCORE_LIB_PREFIX /usr/lib/x86_64-linux-gnu/)
+	SET(QTCORE_INCLUDE_PREFIX /usr/share/qt4/include/)
+	SET(QTCORE_LIB_PREFIX /usr/lib/x86_64-linux-gnu/)
+	
 	FIND_PATH(PATH_ENOBIOAPI enobio3g.h PATHS $ENV{OpenViBE_dependencies} ${OV_BASE_DIR}/contrib/plugins/server-drivers/enobio3G/Enobio3GAPI.linux/)
 	IF(PATH_ENOBIOAPI)
 		MESSAGE(STATUS "  Found ENOBIO API...")
