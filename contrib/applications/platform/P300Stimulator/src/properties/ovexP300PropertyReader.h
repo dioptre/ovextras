@@ -14,7 +14,7 @@
 
 #if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "../visualisation/glGObject.h"
-
+#endif
 
 namespace
 {
@@ -25,6 +25,8 @@ namespace
 	{
 	public:
 		_AutoCast_(const char * settingValue) : m_sSettingValue(settingValue) {  }
+
+		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 		/**
 		 * Convert the string to a GColor
 		 */
@@ -38,6 +40,7 @@ namespace
 			l_oColor.blue=(GLfloat)b/100.0f;
 			return l_oColor;
 		}
+		#endif
 		
 		 /**
 		 * Convert time in milliseconds to OpenViBE time, encoded as uint64
@@ -128,4 +131,4 @@ namespace OpenViBEApplications
 	};
 };
 #endif
-#endif
+

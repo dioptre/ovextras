@@ -5,7 +5,7 @@
 #include <list>
 #include <string>
 #include <cmath>
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+//#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include "ovexP300PropertyReader.h"
 
 namespace OpenViBEApplications
@@ -72,4 +72,4 @@ namespace OpenViBEApplications
 	};
 };
 #endif
-#endif
+//#endif
