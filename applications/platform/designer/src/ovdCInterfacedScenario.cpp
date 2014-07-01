@@ -58,6 +58,7 @@ static ::GdkColor colorFromIdentifier(const CIdentifier& rIdentifier)
 	l_ui64Result+=l_ui32Value2;
 
 	l_oGdkColor.pixel=(guint16)0;
+	//TODO: check if the or is relevant or just introduce a possibility of bug
 	l_oGdkColor.red  =(guint16)(((l_ui64Result    )&0xffff)|0x8000);
 	l_oGdkColor.green=(guint16)(((l_ui64Result>>16)&0xffff)|0x8000);
 	l_oGdkColor.blue =(guint16)(((l_ui64Result>>32)&0xffff)|0x8000);
@@ -1291,11 +1292,7 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 
 	CCommentProxy l_oCommentProxy(m_rKernelContext, m_rScenario, l_oIdentifier);
 	l_oCommentProxy.setCenter(x-m_i32ViewOffsetX, y-m_i32ViewOffsetY);
-
-	// Aligns comments on grid
-	l_oCommentProxy.setCenter(
-		(((int32)l_oCommentProxy.getXCenter()+8)&0xfffffff0),
-		(((int32)l_oCommentProxy.getYCenter()+8)&0xfffffff0));
+	this->alignCommentOnGrid(l_oCommentProxy);
 
 	// Applies modifications before snapshot
 	l_oCommentProxy.apply();
@@ -1819,6 +1816,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 									CBoxConfigurationDialog l_oBoxConfigurationDialog(m_rKernelContext, *l_pBox, m_sGUIFilename.c_str(), m_sGUISettingsFilename.c_str());
 									if(l_oBoxConfigurationDialog.run())
 									{
+										m_bScenarioModified = true;
 										this->snapshotCB();
 									}
 								}
@@ -1832,6 +1830,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 									if(l_oCommentEditorDialog.run())
 									{
 										this->snapshotCB();
+										m_bScenarioModified = true;
 									}
 								}
 							}
