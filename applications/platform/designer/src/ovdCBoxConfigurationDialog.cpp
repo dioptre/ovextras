@@ -499,7 +499,6 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 		}
 
 	}
-
 }
 
 CBoxConfigurationDialog::~CBoxConfigurationDialog(void)
@@ -507,7 +506,7 @@ CBoxConfigurationDialog::~CBoxConfigurationDialog(void)
 	if (m_bMode)
 		//g_object_unref(m_oWidgetToReturn);
 		gtk_widget_destroy(m_oWidgetToReturn);
-	else
+	else if(m_oWidget!=NULL)//if widget is NULL, destroying it cause a gtk warning
 		gtk_widget_destroy(m_oWidget);
 	m_oWidgetToReturn=NULL;
 }
@@ -515,6 +514,12 @@ CBoxConfigurationDialog::~CBoxConfigurationDialog(void)
 boolean CBoxConfigurationDialog::run(bool bMode)
 {
 	boolean l_bModified=false;
+	if(m_oWidget==NULL)
+	{
+		//m_oWidget NULL means no widget (probably a box with no settings) so no need to run, quit now
+		return l_bModified;//return false is default case
+	}
+
 
 	CString l_oSettingValue;
 	CIdentifier l_oSettingType;
