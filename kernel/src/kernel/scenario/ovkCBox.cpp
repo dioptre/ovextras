@@ -743,7 +743,7 @@ boolean CBox::removeSetting(
 
 	//update the modifiable setting indexes
 	vector<uint32>::iterator it2=m_vModifiableSettingIndexes.begin();
-	for (i=0; i<m_vSetting.size(); i++)
+	for (i=0; i<m_vModifiableSettingIndexes.size(); i++)
 	{
 		if(m_vModifiableSettingIndexes[i]==ui32SettingIndex)
 		{
