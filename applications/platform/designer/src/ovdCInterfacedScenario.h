@@ -17,6 +17,8 @@ namespace OpenViBEDesigner
 	class CApplication;
 	class CDesignerVisualisation;
 	class CPlayerVisualisation;
+	class CBoxProxy;
+	class CCommentProxy;
 
 	class CInterfacedScenario
 	{
@@ -111,6 +113,10 @@ namespace OpenViBEDesigner
 		OpenViBE::boolean hasSelection(void);
 
 		OpenViBE::boolean centerOnBox(OpenViBE::CIdentifier rIdentifier);
+
+
+		void alignBoxOnGrid(CBoxProxy& rProxy);
+		void alignCommentOnGrid(CCommentProxy& rProxy);
 /*
 	private:
 
