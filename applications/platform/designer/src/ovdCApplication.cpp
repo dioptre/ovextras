@@ -14,6 +14,8 @@
 #include <cstdlib>
 #include <algorithm>
 
+#include <gdk/gdkkeysyms.h>
+
 
 
 // round is defined in <cmath> on c++11
@@ -459,6 +461,7 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 		CInterfacedScenario* l_pCurrentInterfacedScenario=l_pApplication->getCurrentInterfacedScenario();
 		if(l_pCurrentInterfacedScenario)
 		{
+
 			if(l_pApplication->getPlayer() && l_pCurrentInterfacedScenario->m_ePlayerStatus != l_pApplication->getPlayer()->getStatus())
 			{
 				switch(l_pApplication->getPlayer()->getStatus())
@@ -494,10 +497,9 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 			{
 				float64 l_f64Time=(l_pCurrentInterfacedScenario->m_pPlayer 
 					? ITimeArithmetics::timeToSeconds(l_pCurrentInterfacedScenario->m_pPlayer->getCurrentSimulatedTime()) : 0);
-				if(l_pApplication->m_ui64LastTimeRefresh!=l_f64Time)
+				if(l_pApplication->m_f64LastTimeRefresh!=l_f64Time)
 				{
-					l_pApplication->m_ui64LastTimeRefresh=(uint64)l_f64Time;
-
+					l_pApplication->m_f64LastTimeRefresh=l_f64Time;
 					uint32 l_ui32Milli  = ((uint32)(l_f64Time*1000)%1000);
 					uint32 l_ui32Seconds=  ((uint32)l_f64Time)%60;
 					uint32 l_ui32Minutes= (((uint32)l_f64Time)/60)%60;
@@ -618,6 +620,12 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 	}
 }
 
+static gboolean key_press_event_cb(::GtkWidget* pWidget, ::GdkEventKey* pEvent, gpointer pUserData)
+{
+	static_cast<CApplication*>(pUserData)->keyPressEventCB(pWidget, pEvent);
+	return false;
+}
+
 static ::GtkTargetEntry g_vTargetEntry[]= {
 	{ (gchar*)"STRING", 0, 0 },
 	{ (gchar*)"text/plain", 0, 0 } };
@@ -638,7 +646,7 @@ CApplication::CApplication(const IKernelContext& rKernelContext)
 	,m_pAlgorithmTreeModel(NULL)
 	,m_pAlgorithmTreeView(NULL)
 	,m_giFilterTimeout(0)
-	,m_ui64LastTimeRefresh(0)
+	,m_f64LastTimeRefresh(0.0)
 	,m_bIsQuitting(false)
 	,m_i32CurrentScenarioPage(-1)
 	,m_eReplayMode(EReplayMode_None)
@@ -681,6 +689,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	gtk_builder_connect_signals(m_pBuilderInterface, NULL);
 
 	m_pMainWindow=GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe"));
+	g_signal_connect(G_OBJECT(m_pMainWindow), "key-press-event", G_CALLBACK(key_press_event_cb), this);
 	m_pZoomSpinner = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-zoom_spinner"));
 
 	gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-menu_window")), false);
@@ -1600,16 +1609,11 @@ void CApplication::saveScenarioAsCB(CInterfacedScenario* pScenario)
 			}
 		}
 		l_pCurrentInterfacedScenario->m_bHasBeenModified=false;
+		l_pCurrentInterfacedScenario->m_sFileName=l_sFileName;
+		l_pCurrentInterfacedScenario->m_bHasFileName=true;
 		l_pCurrentInterfacedScenario->updateScenarioLabel();
 
-		if(true /* l_pFileFilter==l_pFileFilterSVG */)
-		{
-			l_pCurrentInterfacedScenario->m_oExporterIdentifier=OVP_GD_ClassId_Algorithm_XMLScenarioExporter;
-		}
-		else
-		{
-			l_pCurrentInterfacedScenario->m_oExporterIdentifier=OVP_GD_ClassId_Algorithm_XMLScenarioExporter;
-		}
+		l_pCurrentInterfacedScenario->m_oExporterIdentifier=OVP_GD_ClassId_Algorithm_XMLScenarioExporter;
 
 		saveScenarioCB(l_pCurrentInterfacedScenario);
 
@@ -2150,6 +2154,39 @@ void CApplication::forwardScenarioCB(void)
 			g_signal_connect(G_OBJECT(this->getCurrentInterfacedScenario()->m_vCheckItems[i]), "toggled", G_CALLBACK(window_menu_check_item_toggled_cb), this);
 
 		}
+	}
+}
+
+void CApplication::keyPressEventCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent)
+{
+	//The shortcuts respect the order in the toolbar
+
+	// F7 :play/pause
+	if(pEvent->keyval==GDK_F7)
+	{
+		if(this->getCurrentInterfacedScenario()->m_ePlayerStatus == PlayerStatus_Play)
+		{
+			this->pauseScenarioCB();
+		}
+		else
+		{
+			this->playScenarioCB();
+		}
+	}
+	// F6 : step
+	if(pEvent->keyval==GDK_F6)
+	{
+		this->nextScenarioCB();
+	}
+	// F8 :fastforward
+	if(pEvent->keyval==GDK_F8)
+	{
+		this->forwardScenarioCB();
+	}
+	// F5 : stop
+	if(pEvent->keyval==GDK_F5)
+	{
+		this->stopScenarioCB();
 	}
 }
 

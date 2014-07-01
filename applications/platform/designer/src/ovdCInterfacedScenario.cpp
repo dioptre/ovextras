@@ -26,6 +26,10 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEDesigner;
 using namespace std;
 
+namespace{
+	const int32 gridSize = 16;
+}
+
 
 // round is defined in <cmath> on c++11
 inline int ov_round(double dbl)
@@ -52,6 +56,7 @@ static ::GdkColor colorFromIdentifier(const CIdentifier& rIdentifier)
 	l_ui64Result+=l_ui32Value2;
 
 	l_oGdkColor.pixel=(guint16)0;
+	//TODO: check if the or is relevant or just introduce a possibility of bug
 	l_oGdkColor.red  =(guint16)(((l_ui64Result    )&0xffff)|0x8000);
 	l_oGdkColor.green=(guint16)(((l_ui64Result>>16)&0xffff)|0x8000);
 	l_oGdkColor.blue =(guint16)(((l_ui64Result>>32)&0xffff)|0x8000);
@@ -150,9 +155,10 @@ static void scenario_drawing_area_button_released_cb(::GtkWidget* pWidget, ::Gdk
 {
 	static_cast<CInterfacedScenario*>(pUserData)->scenarioDrawingAreaButtonReleasedCB(pWidget, pEvent);
 }
-static void scenario_drawing_area_key_press_event_cb(::GtkWidget* pWidget, ::GdkEventKey* pEvent, gpointer pUserData)
+static gboolean scenario_drawing_area_key_press_event_cb(::GtkWidget* pWidget, ::GdkEventKey* pEvent, gpointer pUserData)
 {
 	static_cast<CInterfacedScenario*>(pUserData)->scenarioDrawingAreaKeyPressEventCB(pWidget, pEvent);
+	return true;
 }
 static void scenario_drawing_area_key_release_event_cb(::GtkWidget* pWidget, ::GdkEventKey* pEvent, gpointer pUserData)
 {
@@ -1284,11 +1290,7 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 
 	CCommentProxy l_oCommentProxy(m_rKernelContext, m_rScenario, l_oIdentifier);
 	l_oCommentProxy.setCenter(x-m_i32ViewOffsetX, y-m_i32ViewOffsetY);
-
-	// Aligns comments on grid
-	l_oCommentProxy.setCenter(
-		(((int32)l_oCommentProxy.getXCenter()+8)&0xfffffff0),
-		(((int32)l_oCommentProxy.getYCenter()+8)&0xfffffff0));
+	this->alignCommentOnGrid(l_oCommentProxy);
 
 	// Applies modifications before snapshot
 	l_oCommentProxy.apply();
@@ -1555,14 +1557,8 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 		}
 
 		CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, l_oBoxIdentifier);
-		l_oBoxProxy.setCenter(iX-m_i32ViewOffsetX, iY-m_i32ViewOffsetY);
-
-		// Aligns boxes on grid
-		int32 l_i32CenterX = (int32)l_oBoxProxy.getXCenter()+8;
-		l_i32CenterX = l_i32CenterX - l_i32CenterX%16;
-		int32 l_i32CenterY = (int32)l_oBoxProxy.getYCenter()+8;
-		l_i32CenterY = l_i32CenterY - l_i32CenterY%16;
-		l_oBoxProxy.setCenter(l_i32CenterX,l_i32CenterY);
+		l_oBoxProxy.setCenter((iX-m_i32ViewOffsetX) / m_f64CurrentScale, (iY-m_i32ViewOffsetY) / m_f64CurrentScale);
+		alignBoxOnGrid(l_oBoxProxy);
 
 		// Applies modifications before snapshot
 		l_oBoxProxy.apply();
@@ -1658,15 +1654,15 @@ void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget
 				{
 					CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, i->first);
 					l_oBoxProxy.setCenter(
-						ov_round(l_oBoxProxy.getXCenter()+ (pEvent->x-m_f64CurrentMouseX) / m_f64CurrentScale),
-						ov_round(l_oBoxProxy.getYCenter()+ (pEvent->y-m_f64CurrentMouseY) / m_f64CurrentScale));
+						l_oBoxProxy.getXCenter()+ (pEvent->x-m_f64CurrentMouseX) / m_f64CurrentScale,
+						l_oBoxProxy.getYCenter()+ (pEvent->y-m_f64CurrentMouseY) / m_f64CurrentScale);
 				}
 				if(i->second && m_rScenario.isComment(i->first))
 				{
 					CCommentProxy l_oCommentProxy(m_rKernelContext, m_rScenario, i->first);
 					l_oCommentProxy.setCenter(
-						ov_round(l_oCommentProxy.getXCenter()+ (pEvent->x-m_f64CurrentMouseX) / m_f64CurrentScale),
-						ov_round(l_oCommentProxy.getYCenter()+ (pEvent->y-m_f64CurrentMouseY) / m_f64CurrentScale));
+						l_oCommentProxy.getXCenter()+ (pEvent->x-m_f64CurrentMouseX) / m_f64CurrentScale,
+						l_oCommentProxy.getYCenter()+ (pEvent->y-m_f64CurrentMouseY) / m_f64CurrentScale);
 				}
 			}
 			m_bScenarioModified = true;
@@ -1819,6 +1815,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 									CBoxConfigurationDialog l_oBoxConfigurationDialog(m_rKernelContext, *l_pBox, m_sGUIFilename.c_str(), m_sGUISettingsFilename.c_str(), false);
 									if(l_oBoxConfigurationDialog.run(false))//modUI
 									{
+										m_bScenarioModified = true;
 										this->snapshotCB();
 									}
 								}
@@ -1832,6 +1829,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 									if(l_oCommentEditorDialog.run())
 									{
 										this->snapshotCB();
+										m_bScenarioModified = true;
 									}
 								}
 							}
@@ -2298,20 +2296,12 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 					if(i->second && m_rScenario.isBox(i->first))
 					{
 						CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, i->first);
-						int32 l_i32CenterX = (int32)l_oBoxProxy.getXCenter()+8;
-						l_i32CenterX = l_i32CenterX - l_i32CenterX%16;
-						int32 l_i32CenterY = (int32)l_oBoxProxy.getYCenter()+8;
-						l_i32CenterY = l_i32CenterY - l_i32CenterY%16;
-						l_oBoxProxy.setCenter(l_i32CenterX, l_i32CenterY);
+						this->alignBoxOnGrid(l_oBoxProxy);
 					}
 					if(i->second && m_rScenario.isComment(i->first))
 					{
 						CCommentProxy l_oCommentProxy(m_rKernelContext, m_rScenario, i->first);
-						int32 l_i32CenterX = (int32)l_oCommentProxy.getXCenter()+8;
-						l_i32CenterX = l_i32CenterX - l_i32CenterX%16;
-						int32 l_i32CenterY = (int32)l_oCommentProxy.getYCenter()+8;
-						l_i32CenterY = l_i32CenterY - l_i32CenterY%16;
-						l_oCommentProxy.setCenter(l_i32CenterX, l_i32CenterY);
+						this->alignCommentOnGrid(l_oCommentProxy);
 					}
 				}
 				this->snapshotCB();
@@ -2323,6 +2313,32 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 
 	m_ui32CurrentMode=Mode_None;
 }
+
+int32 alignCoordinate(float64 f64Coordinate){
+	int32 i32Coordinate = static_cast<int32>(f64Coordinate);
+	if(i32Coordinate >= 0)
+	{
+		i32Coordinate = i32Coordinate + gridSize/2;
+		i32Coordinate = i32Coordinate - i32Coordinate % gridSize;
+	}
+	else
+	{
+		i32Coordinate = i32Coordinate - gridSize/2;
+		i32Coordinate = i32Coordinate - i32Coordinate % gridSize;
+	}
+	return i32Coordinate;
+}
+
+void CInterfacedScenario::alignBoxOnGrid(CBoxProxy& rProxy)
+{
+	rProxy.setCenter(alignCoordinate(rProxy.getXCenter()), alignCoordinate(rProxy.getYCenter()));
+}
+
+void CInterfacedScenario::alignCommentOnGrid(CCommentProxy& rProxy)
+{
+	rProxy.setCenter(alignCoordinate(rProxy.getXCenter()), alignCoordinate(rProxy.getYCenter()));
+}
+
 void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent)
 {
 	m_bShiftPressed  |=(pEvent->keyval==GDK_Shift_L   || pEvent->keyval==GDK_Shift_R);
@@ -2434,36 +2450,6 @@ void CInterfacedScenario::scenarioDrawingAreaKeyPressEventCB(::GtkWidget* pWidge
 	if(pEvent->keyval==GDK_F2)
 	{
 		contextMenuBoxRenameAllCB();
-	}
-
-	//The shortcuts respect the order in the toolbar
-
-	// F7 :play/pause
-	if(pEvent->keyval==GDK_F7)
-	{
-		if(m_rApplication.getCurrentInterfacedScenario()->m_ePlayerStatus == PlayerStatus_Play)
-		{
-			m_rApplication.pauseScenarioCB();
-		}
-		else
-		{
-			m_rApplication.playScenarioCB();
-		}
-	}
-	// F6 : step
-	if(pEvent->keyval==GDK_F6)
-	{
-		m_rApplication.nextScenarioCB();
-	}
-	// F8 :fastforward
-	if(pEvent->keyval==GDK_F8)
-	{
-		m_rApplication.forwardScenarioCB();
-	}
-	// F5 : stop
-	if(pEvent->keyval==GDK_F5)
-	{
-		m_rApplication.stopScenarioCB();
 	}
 
 	//Designer trim : arrow keys scrolling
@@ -2785,32 +2771,19 @@ void CInterfacedScenario::pasteSelection(void)
 			m_vCurrentObject[it->second]=true;
 
 			if(m_rScenario.isBox(it->second))
-		{
+			{
 				// Moves boxes under cursor
 				CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, it->second);
-
-				//TODO: Factorize boxes alignment process
-				// Aligns boxes on grid
-				int32 l_i32CenterX = (int32)l_oBoxProxy.getXCenter()+8;
-				l_i32CenterX = l_i32CenterX - l_i32CenterX%16;
-				int32 l_i32CenterY = (int32)l_oBoxProxy.getYCenter()+8-32;
-				// Ok, why 32 would you ask, just because it is fine
-				l_i32CenterY = l_i32CenterY - l_i32CenterY%16;
-				l_oBoxProxy.setCenter(l_i32CenterX,l_i32CenterY);
+				l_oBoxProxy.setCenter(l_oBoxProxy.getXCenter(), l_oBoxProxy.getYCenter()-32);
+				this->alignBoxOnGrid(l_oBoxProxy);
 			}
 
 			if(m_rScenario.isComment(it->second))
 			{
 				// Moves commentes under cursor
 				CCommentProxy l_oCommentProxy(m_rKernelContext, m_rScenario, it->second);
-
-				// Aligns boxes on grid
-				int32 l_i32CenterX = (int32)l_oCommentProxy.getXCenter()+8;
-				l_i32CenterX = l_i32CenterX - l_i32CenterX%16;
-				int32 l_i32CenterY = (int32)l_oCommentProxy.getYCenter()+8-32;
-				// Ok, why 32 would you ask, just because it is fine
-				l_i32CenterY = l_i32CenterY - l_i32CenterY%16;
-				l_oCommentProxy.setCenter(l_i32CenterX,l_i32CenterY);
+				l_oCommentProxy.setCenter(l_oCommentProxy.getXCenter(), l_oCommentProxy.getYCenter()-32);
+				this->alignCommentOnGrid(l_oCommentProxy);
 			}
 		}
 	}
