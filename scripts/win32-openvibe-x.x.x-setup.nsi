@@ -5,8 +5,8 @@
 	!include "zipdll.nsh"
 
 	;Name and file
-	Name "OpenViBE 0.17.1"
-	OutFile "openvibe-0.17.1-setup.exe"
+	Name "OpenViBE 0.18.0"
+	OutFile "openvibe-0.18.0-setup.exe"
 
 	;Default installation folder
 	InstallDir "$PROGRAMFILES\openvibe"
@@ -100,6 +100,7 @@ no_need_to_install_directx:
 	File ..\dependencies\arch\openvibe-vcredist-2010.exe
 	File ..\dependencies\arch\lua-5.1.4-30.zip
 	File ..\dependencies\arch\expat-2.0.1.zip
+	File ..\dependencies\arch\glfw-3.0.4-vs100.zip	
 	File ..\dependencies\arch\gtk-2.22.1-runtime.zip
 	File ..\dependencies\arch\gtk-themes-2009.09.07.zip
 	File ..\dependencies\arch\itpp-4.0.7-runtime.zip
@@ -121,6 +122,7 @@ no_need_to_install_directx:
 	SetOutPath "$INSTDIR\dependencies"
 	ZipDLL::extractall "arch\lua-5.1.4-30.zip" "lua"
 	ZipDLL::extractall "arch\expat-2.0.1.zip" "expat"
+	ZipDLL::extractall "arch\glfw-3.0.4-vs100.zip" ""	
 	ZipDLL::extractall "arch\gtk-2.22.1-runtime.zip" "gtk"
 	ZipDLL::extractall "arch\gtk-themes-2009.09.07.zip" "gtk"
 	ZipDLL::extractall "arch\itpp-4.0.7-runtime.zip" "itpp"
@@ -170,6 +172,7 @@ no_need_to_patch_3d_functionnality:
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\lua\lib;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\itpp\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\expat\bin;%PATH%$\r$\n"
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\glfw\lib\;%PATH%$\r$\n"		
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\gtk\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\itpp\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\cegui\bin;%PATH%$\r$\n"
