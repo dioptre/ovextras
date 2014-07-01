@@ -1,7 +1,7 @@
 #ifndef __ovExternalP300InterfacePropertyReader__
 #define __ovExternalP300InterfacePropertyReader__
 
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+
 #include "ovexP300PropertyReader.h"
 
 namespace OpenViBEApplications
@@ -48,6 +48,8 @@ namespace OpenViBEApplications
 		 * number of most probable symbols that should be highlighted during flashing
 		 */
 		OpenViBE::uint32 getMaxFeedbackSymbols() { return m_ui32MaxFeedbackSymbols; }
+
+		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 		/**
 		 * start color of the most probable symbols when the minimum probability threshold is reached as specified by getFeedbackStartValue
 		 */
@@ -56,6 +58,7 @@ namespace OpenViBEApplications
 		 * end color of the most probable symbols, for the symbol reaching probability one
 		 */		
 		GColor getFeedbackEndColor() { return m_oFeedbackEndColor;}
+		#endif
 		/**
 		 * number of steps for the gradient to go from start color to end color
 		 */
@@ -103,8 +106,10 @@ namespace OpenViBEApplications
 		OpenViBE::boolean m_bEnablePhotoDiode;
 		
 		OpenViBE::uint32 m_ui32MaxFeedbackSymbols;
+		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 		GColor m_oFeedbackStartColor;
 		GColor m_oFeedbackEndColor;
+		#endif
 		OpenViBE::uint32 m_ui32ColorFeedbackSteps;
 		OpenViBE::float32 m_f32FeedbackStartValue;
 		OpenViBE::boolean m_bContinuousFeedback;
@@ -114,5 +119,4 @@ namespace OpenViBEApplications
 		
 	};
 };
-#endif
 #endif

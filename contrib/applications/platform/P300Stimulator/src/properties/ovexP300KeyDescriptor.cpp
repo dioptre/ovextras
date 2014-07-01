@@ -1,5 +1,5 @@
 #include "ovexP300KeyDescriptor.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
@@ -12,6 +12,7 @@ void P300KeyDescriptor::addScaleSize(const VisualState event, const OpenViBE::fl
 { 
 	m_vEventMapScaleSize->insert(std::pair<VisualState, OpenViBE::float32>(event, value));
 }
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 void P300KeyDescriptor::addForegroundColor(const VisualState event, const GColor& value) 
 { 
 	m_vEventMapForegroundColor->insert(std::pair<VisualState, GColor>(event, value));
@@ -20,6 +21,7 @@ void P300KeyDescriptor::addBackgroundColor(const VisualState event, const GColor
 { 
 	m_vEventMapBackgroundColor->insert(std::pair<VisualState, GColor>(event, value));
 }
+#endif
 void P300KeyDescriptor::addSource(const VisualState event, const OpenViBE::CString& value) 
 { 
 	m_vEventMapSource->insert(std::pair<VisualState, OpenViBE::CString>(event, value));
@@ -58,6 +60,7 @@ const float32 P300KeyDescriptor::getScaleSize(const VisualState event) const
 	else
 		throw noSuchEventException;
 }
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 const GColor& P300KeyDescriptor::getForegroundColor(const VisualState event) const 
 { 
 	std::map<VisualState, GColor>::iterator iterator = m_vEventMapForegroundColor->find(event);
@@ -75,7 +78,7 @@ const GColor& P300KeyDescriptor::getBackgroundColor(const VisualState event) con
 	else
 		throw noSuchEventException;
 }
-
+#endif
 const CString& P300KeyDescriptor::getSource(const VisualState event) const 
 { 
 	std::map<VisualState, OpenViBE::CString>::iterator iterator = m_vEventMapSource->find(event);
@@ -102,4 +105,3 @@ const boolean P300KeyDescriptor::isTextSymbol(const VisualState event) const
 	else
 		throw noSuchEventException;
 }
-#endif
