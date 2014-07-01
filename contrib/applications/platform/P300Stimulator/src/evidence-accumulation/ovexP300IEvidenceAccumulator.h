@@ -1,5 +1,8 @@
 #ifndef __IEvidenceAccumulator_H__
 #define __IEvidenceAccumulator_H__
+
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 #include <map>
@@ -228,4 +231,6 @@ namespace OpenViBEApplications
 		};
 
 };
+#endif
+
 #endif

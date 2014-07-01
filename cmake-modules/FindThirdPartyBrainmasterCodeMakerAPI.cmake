@@ -29,6 +29,6 @@ IF(WIN32)
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI)
 	ELSE(PATH_BrainmasterCodeMakerAPI)
-		MESSAGE(STATUS "  FAILED to find Brainmaster Code Maker API")
+		MESSAGE(STATUS "  FAILED to find Brainmaster Code Maker API (optional)")
 	ENDIF(PATH_BrainmasterCodeMakerAPI)
 ENDIF(WIN32)

@@ -1,3 +1,6 @@
+
+#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+
 #include "../../src/evidence-accumulation/ovexP300CEvidenceAccumulator.h"
 
 #include "../../src/sequence/ovexP300RipRandSequenceGenerator.h"
@@ -10,7 +13,6 @@
 #include <system/Time.h>
 
 #include <openvibe/ovITimeArithmetics.h>
-
 
 #include "../../src/properties/ovexP300InterfacePropertyReader.h"
 #include "../../src/properties/ovexP300StimulatorPropertyReader.h"
@@ -179,3 +181,10 @@ int main(int argc, char *argv[])
 	
 
 }
+
+#else
+int main(int argc, char *argv[])
+{
+	return 1;
+}
+#endif

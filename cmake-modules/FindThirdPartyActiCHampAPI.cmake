@@ -53,6 +53,6 @@ IF(WIN32)
 		
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyActiCHampAPI)
 	ELSE(PATH_ActiCHampAPI)
-		MESSAGE(STATUS "  FAILED to find actiCHamp API - cmake looked in 'C:/Program Files/actichamp' and 'C:/Program Files (x86)/actichamp'")
+		MESSAGE(STATUS "  FAILED to find actiCHamp API (optional) - cmake looked in 'C:/Program Files/actichamp' and 'C:/Program Files (x86)/actichamp'")
 	ENDIF(PATH_ActiCHampAPI)
 ENDIF(WIN32)
