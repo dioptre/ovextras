@@ -235,15 +235,19 @@ Section "GLFW"
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
 
-	IfFileExists "arch\glfw-3.0.4-ov.zip" no_need_to_download_boost
+	IfFileExists "arch\glfw-3.0.4-$suffix.zip" no_need_to_download_glfw
 	NSISdl::download http://openvibe.inria.fr/dependencies/win32/glfw-3.0.4-$suffix.zip "arch\glfw-3.0.4-$suffix.zip"
 	Pop $R0 ; Get the return value
 		StrCmp $R0 "success" +3
 			MessageBox MB_OK "Download failed: $R0" /SD IDOK
 			Quit
-no_need_to_download_boost:
+no_need_to_download_glfw:
 	ZipDLL::extractall "arch\glfw-3.0.4-$suffix.zip" ""
 
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\glfw\lib;%PATH%$\r$\n"
+	FileClose $0	
 
 SectionEnd
 
