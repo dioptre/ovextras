@@ -1,7 +1,7 @@
 #ifndef __ovExternalP300LetterGroupReader__
 #define __ovExternalP300LetterGroupReader__
 
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+
 #include "ovexP300PropertyReader.h"
 #include "ovexP300KeyDescriptor.h"
 
@@ -28,6 +28,7 @@ namespace OpenViBEApplications
 		
 		virtual void readPropertiesFromFile(OpenViBE::CString propertyFile);
 		
+		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 		/**
 		 * Dimensions of the area where the predictions are shown
 		 * @return the box dimensions are numbers between 0 and 1. (0,0) is the left lower corner of the window
@@ -40,6 +41,7 @@ namespace OpenViBEApplications
 		BoxDimensions getPredictionAreaDimensions() { return m_dPredictionAreaDimensions; }
 		BoxDimensions getP300KeyboardDimensions() { return m_dKeyboardDimensions; }
 		BoxDimensions getTargetAreaDimensions() { return m_dTargetAreaDimensions; }
+		#endif
 		/**
 		 * @return vector of P300KeyDescriptor objects that describe the properties of each key in the keyboard for each state
 		 */
@@ -68,6 +70,8 @@ namespace OpenViBEApplications
 		 *  some default properties that can be overridden per key
 		 */
 		const OpenViBE::float32 getDefaultScaleSize(const VisualState event) const { return m_mDefaultEventMapScaleSize->find(event)->second; }
+
+		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 		/**
 		 *  some default properties that can be overridden per key
 		 */
@@ -78,7 +82,8 @@ namespace OpenViBEApplications
 		const GColor& getDefaultBackgroundColor(const VisualState event) const { return m_mDefaultEventMapBackgroundColor->find(event)->second; }
 		//const OpenViBE::CString& getDefaultSource(const VisualState event) const;// { return eventMapSource->find(event)->second; }
 		//const std::string& getDefaultLabel(const VisualState event) const;// { return eventMapLabel->find(event)->second; }
-		//const OpenViBE::boolean isDefaultTextSymbol(const VisualState event) const;// { return eventMapIsTextSymbol->find(event)->second; }		
+		//const OpenViBE::boolean isDefaultTextSymbol(const VisualState event) const;// { return eventMapIsTextSymbol->find(event)->second; }
+		#endif
 
 	protected:
 		void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount); // XML IReaderCallback
@@ -86,16 +91,20 @@ namespace OpenViBEApplications
 		void closeChild(void); // XML ReaderCallback
 		
 	private:
+		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 		void parseDimensions(BoxDimensions& dimensions, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount);
+		#endif
 		void parseKeyLabels(const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount);
 
 	protected:
 		OpenViBE::uint32 m_ui32NumberOfStandardKeys;
 		//OpenViBE::uint32 m_ui32NumberOfPredictiveKeys;
+		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 		BoxDimensions m_dKeyboardDimensions;
 		BoxDimensions m_dPredictionAreaDimensions;
 		BoxDimensions m_dResultAreaDimensions;
 		BoxDimensions m_dTargetAreaDimensions;
+		#endif
 		/**
 		 * vector of P300KeyDescriptor objects that describe the properties of each key in the keyboard for each state
 		 */
@@ -107,6 +116,8 @@ namespace OpenViBEApplications
 		 * these default values are then used to fill in the properties that have not been specified
 		 */
 		std::map<OpenViBE::uint32, OpenViBE::float32>* m_mDefaultEventMapScaleSize;
+
+		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 		/**
 		 * This default map variable maps each state, that a key can be in, into a property, here the foreground color
 		 * these default values are then used to fill in the properties that have not been specified
@@ -117,6 +128,8 @@ namespace OpenViBEApplications
 		 * these default values are then used to fill in the properties that have not been specified
 		 */			
 		std::map<OpenViBE::uint32, GColor>* m_mDefaultEventMapBackgroundColor;
+		#endif
+
 		/**
 		 * This default map variable maps each state, that a key can be in, into a property, here the source of the key, either a font file or a png file
 		 * these default values are then used to fill in the properties that have not been specified
@@ -152,5 +165,4 @@ namespace OpenViBEApplications
 	};
 };
 
-#endif
 #endif

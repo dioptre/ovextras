@@ -1,5 +1,5 @@
 #include "ovexP300StimulatorPropertyReader.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+//#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;
@@ -106,4 +106,4 @@ uint64 P300StimulatorPropertyReader::findSymbolIndex(std::string symbol)
 
 	return 0;
 }
-#endif
+//#endif

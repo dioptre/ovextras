@@ -1,5 +1,5 @@
 #include "ovexP300PropertyReader.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+//#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
 #include <string>
 
 using namespace OpenViBE;
@@ -60,4 +60,4 @@ void ExternalP300PropertyReader::writeElement(const char* sName, const char* sDa
 	else
 		m_pKernelContext->getLogManager() << LogLevel_Trace << "End property " << sName << "\n";
 }
-#endif
+//#endif

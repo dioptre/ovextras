@@ -1,6 +1,3 @@
-
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
-
 #include "../../src/evidence-accumulation/ovexP300CEvidenceAccumulator.h"
 
 #include "../../src/sequence/ovexP300RipRandSequenceGenerator.h"
@@ -181,10 +178,3 @@ int main(int argc, char *argv[])
 	
 
 }
-
-#else
-int main(int argc, char *argv[])
-{
-	return 1;
-}
-#endif
