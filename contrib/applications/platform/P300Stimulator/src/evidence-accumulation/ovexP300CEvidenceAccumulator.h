@@ -34,7 +34,6 @@ namespace OpenViBEApplications
 					m_pNormalizedAccumulatedEvidence = new OpenViBE::CMatrix();
 					OpenViBEToolkit::Tools::Matrix::copy(*m_pNormalizedAccumulatedEvidence, *m_pAccumulatedEvidence);
 					m_ui32CurrentFlashIndex=0;
-					std::cout <<"evAcc created\n";
 				}
 				
 				virtual ~ExternalP300CEvidenceAccumulator(){}
