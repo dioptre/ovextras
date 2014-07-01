@@ -31,10 +31,10 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	this->initializeOpenViBEKernel();
 
 	#ifdef OUTPUT_TIMING
-	CString l_sPathData = m_pKernelContext->getConfigurationManager().expand(CString("${Path_Data}"));
-	timingFile = fopen(l_sPathData + "/../../../contrib/applications/platform/P300Stimulator/test/symbol_update_timing.txt","w");
+	const CString l_sPathUserData = m_pKernelContext->getConfigurationManager().expand(CString("${Path_UserData}"));
+	timingFile = fopen(l_sPathUserData + "/xP300-symbol_update_timing.txt","w");
 	fprintf(timingFile, "%s \n","beforeUpdate;afterUpdate;");
-	timingFile3 = fopen(l_sPathData + "/generate_sequence_timing.txt","w");
+	timingFile3 = fopen(l_sPathUserData + "/xP300-generate_sequence_timing.txt","w");
 	#endif
 	
 

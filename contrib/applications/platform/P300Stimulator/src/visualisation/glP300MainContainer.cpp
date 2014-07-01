@@ -22,7 +22,7 @@ GContainer(0.0f,0.0f,(float32)width,(float32)height), m_pInterfacePropertyObject
 m_pScreenLayoutObject(layoutPropObject)
 {
 	#ifdef OUTPUT_TIMING
-	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/../../../contrib/applications/platform/P300Stimulator/test/gl_draw_timing.txt","w");
+	timingFile = fopen(OpenViBE::Directories::getUserDataDir() + "/xP300-gl_draw_timing.txt","w");
 	fprintf(timingFile, "%s\n","beforedrawing;afterdrawing;");
 	#endif
 	initialize(layoutPropObject->getNumberOfStandardKeys());

@@ -21,9 +21,9 @@ P300ResultAreaHandler::P300ResultAreaHandler(GTable* container, P300ScreenLayout
 : m_pSymbolContainer(container), m_pScreenLayoutObject(propertyObject), m_sSpelledLetters(""), m_ui32ResultCounter(0)
 {
 	#ifdef OUTPUT_TIMING
-	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/gl_result_move_timing.txt","w");
+	timingFile = fopen(OpenViBE::Directories::getUserDataDir() + "/xP300-gl_result_move_timing.txt","w");
 	//for testing purposes, make the result area dump the spleed letters in a file for comparison with a reference
-	stackFile = fopen(OpenViBE::Directories::getDataDir() + "/../../../contrib/applications/platform/P300Stimulator/test/resultStack.txt","w");
+	stackFile = fopen(OpenViBE::Directories::getUserDataDir() + "/xP300-resultStack.txt","w");
 	#endif
 	
 	m_oLastAddedLabel = NULL;

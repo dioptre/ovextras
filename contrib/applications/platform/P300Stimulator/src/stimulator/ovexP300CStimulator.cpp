@@ -45,7 +45,7 @@ ExternalP300CStimulator::ExternalP300CStimulator(P300StimulatorPropertyReader* p
 	m_ui64Prediction = 0;				
 	
 	#ifdef OUTPUT_TIMING
-	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/stimulator_round_timing.txt","w");
+	timingFile = fopen(OpenViBE::Directories::getUserDataDir() + "/xP300-stimulator_round_timing.txt","w");
 	#endif
 	
 	m_ui64RealCycleTime = 0;

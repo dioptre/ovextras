@@ -30,6 +30,13 @@ IF(NOT (LOCAL MATCHES "FALSE"))
 	set(CTEST_SOURCE_DIRECTORY		"${OV_ROOT_DIR}")
 	set(ENV{OV_BINARY_PATH} "${OV_ROOT_DIR}/dist")
 	message("running local test here= $ENV{OV_BINARY_PATH}")
+
+	IF(WIN32)
+	  SET(ENV{OV_USERDATA} "$ENV{APPDATA}/openvibe/")
+	ELSE(WIN32)
+	  SET(ENV{OV_USERDATA} "$ENV{HOME}/.config/openvibe/")
+	ENDIF(WIN32)
+	  
 ENDIF(NOT (LOCAL MATCHES "FALSE"))
 
 get_cmake_property(_variableNames VARIABLES)
