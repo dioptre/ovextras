@@ -1599,16 +1599,11 @@ void CApplication::saveScenarioAsCB(CInterfacedScenario* pScenario)
 			}
 		}
 		l_pCurrentInterfacedScenario->m_bHasBeenModified=false;
+		l_pCurrentInterfacedScenario->m_sFileName=l_sFileName;
+		l_pCurrentInterfacedScenario->m_bHasFileName=true;
 		l_pCurrentInterfacedScenario->updateScenarioLabel();
 
-		if(true /* l_pFileFilter==l_pFileFilterSVG */)
-		{
-			l_pCurrentInterfacedScenario->m_oExporterIdentifier=OVP_GD_ClassId_Algorithm_XMLScenarioExporter;
-		}
-		else
-		{
-			l_pCurrentInterfacedScenario->m_oExporterIdentifier=OVP_GD_ClassId_Algorithm_XMLScenarioExporter;
-		}
+		l_pCurrentInterfacedScenario->m_oExporterIdentifier=OVP_GD_ClassId_Algorithm_XMLScenarioExporter;
 
 		saveScenarioCB(l_pCurrentInterfacedScenario);
 

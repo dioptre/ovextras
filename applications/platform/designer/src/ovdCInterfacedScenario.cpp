@@ -2772,7 +2772,7 @@ void CInterfacedScenario::pasteSelection(void)
 			m_vCurrentObject[it->second]=true;
 
 			if(m_rScenario.isBox(it->second))
-		{
+			{
 				// Moves boxes under cursor
 				CBoxProxy l_oBoxProxy(m_rKernelContext, m_rScenario, it->second);
 				l_oBoxProxy.setCenter(l_oBoxProxy.getXCenter(), l_oBoxProxy.getYCenter()-32);
