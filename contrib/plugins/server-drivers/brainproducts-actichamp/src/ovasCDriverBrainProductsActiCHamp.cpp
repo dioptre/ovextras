@@ -50,7 +50,7 @@ namespace
 
 	const uint32 NB_MAX_BUFFER_IN_CACHE = 1000;
 	UBuffer Buffer[NB_MAX_BUFFER_IN_CACHE];
-	
+
 	// Low pass FIR filters before downsampling
 	//
 	// Computed with python and scipy
@@ -189,10 +189,23 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 	IDriverCallback& rCallback)
 {
 	if(m_rDriverContext.isConnected()) { return false; }
+	
 	// Opens device
+	// We change the working directory to be sure to have ActiChamp.bit in it
+	if(!SetCurrentDirectory(Directories::getBinDir()))
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Can not change current working directory!" << m_ui32DeviceId << "\n";
+		return false;
+	}
 	if((m_pHandle=::champOpen(m_ui32DeviceId))==NULL)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Can not open actiCHamp device id " << m_ui32DeviceId << "\n";
+		return false;
+	}
+	// set back to previous working directory
+	if(!SetCurrentDirectory(Directories::getDistRootDir()))
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Can not change current working directory!" << m_ui32DeviceId << "\n";
 		return false;
 	}
 
@@ -282,10 +295,10 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 	m_vImpedance.resize(m_ui32CountEEG+1);
 	m_vSample.resize(m_ui32ChannelCount);
 	m_vResolution.resize(m_ui32ChannelCount);
-	
+
 	m_ui32PhysicalSampleRateHz = (uint32)l_oProperties.Rate;
 	m_ui64CounterStep=(uint64(m_oHeader.getSamplingFrequency())<<32) / uint64(m_ui32PhysicalSampleRateHz);
-	
+
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "Sampling rate in Hz  [Physical: "<<m_ui32PhysicalSampleRateHz<<"] [Driver: "<<m_oHeader.getSamplingFrequency()<<"]\n";
 
 	uint32 i,j=0;
@@ -368,8 +381,14 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 	// Prepares low pass filter
 
 #define __set_filter__(f,f_decim) \
-    if(m_ui32ADCDataDecimation==CHAMP_DECIMATION_0)	loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/" f ".bin", m_vFilter); \
-    else loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/" f_decim ".bin", m_vFilter);\
+	if(m_ui32ADCDataDecimation==CHAMP_DECIMATION_0) \
+	{ \
+		if(! loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/"f".bin", m_vFilter)) { m_rDriverContext.getLogManager() << LogLevel_Error << "Failed to load filter !\n"; } \
+	} \
+	else \
+	{ \
+		if(!loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/"f_decim".bin", m_vFilter)) { m_rDriverContext.getLogManager() << LogLevel_Error << "Failed to load filter !\n"; } \
+	}\
 	l_bValid=true;
 
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "Setting up the FIR filter for signal decimation (physical rate > driver rate).\n";
@@ -466,7 +485,7 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 
 	m_pCallback=&rCallback;
 	m_ui64Counter=0;
-	
+
 	// Setting the inner latency as described in the beginning of the file
 	m_i64DriftOffsetSampleCount=int64(m_oHeader.getSamplingFrequency()*50)/1000;
 	m_rDriverContext.setInnerLatencySampleCount(-m_i64DriftOffsetSampleCount);
@@ -488,7 +507,7 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 			return false;
 		}
 		m_rDriverContext.getLogManager() << LogLevel_Trace << "Impedance check is requested. Setting the acquisition to [CHAMP_MODE_IMPEDANCE].\n";
-		
+
 		// Sets impedance setup manually
 		t_champImpedanceSetup l_oImpedanceSetup;
 		l_oImpedanceSetup.Good=m_ui32GoodImpedanceLimit;// 5000; // 5kOhm
@@ -503,7 +522,7 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 			return false;
 		}
 		m_rDriverContext.getLogManager() << LogLevel_Trace << "Impedance limits are set to [GREEN < "<<m_ui32GoodImpedanceLimit<<"Ohm < YELLOW < "<<m_ui32BadImpedanceLimit<<"Ohm < RED].\n";
-		
+
 		// Gets/Sets impedance mode
 		t_champImpedanceMode l_oImpedanceMode;
 		if(::champImpedanceGetMode(m_pHandle, &l_oImpedanceMode))
@@ -513,7 +532,7 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 			m_pHandle=NULL;
 			return false;
 		}
-		
+
 		l_oImpedanceMode.Splitter=l_oImpedanceMode.Splitters;
 		if(::champImpedanceSetMode(m_pHandle, &l_oImpedanceMode))
 		{
@@ -583,14 +602,14 @@ boolean CDriverBrainProductsActiCHamp::loop(void)
 		::champGetDataStatus(m_pHandle, &l_oDataStatus);
 		//m_rDriverContext.getLogManager() << LogLevel_Trace << "Status : Samples:" << uint32(l_oDataStatus.Samples) << " Errors:" << uint32(l_oDataStatus.Errors) << " Rate:" << float32(l_oDataStatus.Rate) << " Speed:" << float32(l_oDataStatus.Speed) << "\n";
 
-		// Reads all the data. 
+		// Reads all the data.
 		// Buffers are aligned : with one call to champGetData we get as much buffers as possible
-		int iCode;
-		while((iCode = ::champGetData(m_pHandle, &Buffer[0], m_uiSize*NB_MAX_BUFFER_IN_CACHE)) > 0)
+		int l_iCode;
+		while((l_iCode = ::champGetData(m_pHandle, &Buffer[0], m_uiSize*NB_MAX_BUFFER_IN_CACHE)) > 0)
 		{
-			m_rDriverContext.getLogManager() << LogLevel_Debug << "Received " << ((float32)iCode)/m_uiSize << " new buffers with champGetData.\n";
-			
-			for(int32 buf=0; buf < (int32)(iCode/m_uiSize); buf++)
+			m_rDriverContext.getLogManager() << LogLevel_Debug << "Received " << ((float32)l_iCode)/m_uiSize << " new buffers with champGetData.\n";
+
+			for(int32 buf=0; buf < (int32)(l_iCode/m_uiSize); buf++)
 			{
 				uint32 i, j=0;
 
@@ -599,7 +618,7 @@ boolean CDriverBrainProductsActiCHamp::loop(void)
 				signed int * l_pAux = m_pAux+buf*(m_uiSize/sizeof(signed int));
 				signed int * l_pEEG = m_pEEG+buf*(m_uiSize/sizeof(signed int));
 				// m_rDriverContext.getLogManager() << LogLevel_Debug << "AUX ptr = " << (uint32)l_pAux << " EEG ptr = "<< (uint32)l_pEEG <<"\n";
-				
+
 				// Scales data according to respective resolution
 				for(i=0; i<m_ui32CountEEG; i++, j++) m_vSample[j]=m_vResolution[j]*l_pEEG[i];
 				if(m_bUseAuxChannels)
@@ -672,13 +691,13 @@ boolean CDriverBrainProductsActiCHamp::loop(void)
 					m_rDriverContext.getLogManager() << ((*l_pTrigger & 0x00000040) >> 6) << " ";
 					m_rDriverContext.getLogManager() << ((*l_pTrigger & 0x00000080) >> 7) << "] MyButton [";
 					m_rDriverContext.getLogManager() << m_bMyButtonstate << "]\n";
-				
+
 					// Every time that a trigger has changed, we send a stimulation.
 					// code of stimulation = OVTK_StimulationId_LabelStart + value of the trigger bytes.
 					// This supposes that the user knows the structure of the triggers bit by bit and can process it in a Lua box for example.
 					// The value received is in [0-255]
 					// The MyButton bit is set to 0 to ensure this range.
-				
+
 					// The date is relative to the last buffer start time (cf the setSamples before setStimulationSet)
 					uint64 l_ui64Date = m_ui64SampleCount * (1LL<<32) / m_ui32PhysicalSampleRateHz;
 					m_oStimulationSet.appendStimulation(OVTK_StimulationId_Label((*l_pTrigger)&0x000000ff), l_ui64Date, 0);
@@ -693,6 +712,11 @@ boolean CDriverBrainProductsActiCHamp::loop(void)
 				}
 				m_uiLastTriggers = * l_pTrigger;
 			}
+		}
+		if(l_iCode < 0)
+		{
+			m_rDriverContext.getLogManager() << LogLevel_Error << "An error occured with last sample request - Got error [" << l_iCode << "]\n";
+			return false;
 		}
 
 		// As described in at the beginning of this file, the drift

@@ -79,7 +79,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32ActiveShieldGain;
 		OpenViBE::uint32 m_ui32ModuleEnabled;
 		OpenViBE::boolean m_bUseAuxChannels;
-		
+
 		OpenViBE::uint32 m_ui32PhysicalSampleRateHz;
 
 		OpenViBE::uint32 m_ui32ChannelCount;
