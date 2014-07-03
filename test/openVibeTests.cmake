@@ -159,7 +159,6 @@ ctest_read_custom_files("${CTEST_BINARY_DIRECTORY}")
 
 # this is the folder where test scenarios can be run under
 SET(ENV{OV_TEST_DEPLOY_PATH} "${CTEST_SOURCE_DIRECTORY}/local-tmp/test-deploy/")
-file(MAKE_DIRECTORY $ENV{OV_TEST_DEPLOY_PATH})
 MESSAGE("Set the test deploy path to $ENV{OV_TEST_DEPLOY_PATH}")
 
 #~ SET(CTEST_PROJECT_NAME "OpenViBe")
