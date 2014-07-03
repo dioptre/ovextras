@@ -26,39 +26,31 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 	int32 i32ChannelDisplayHeightRequest,
 	int32 i32LeftRulerWidthRequest,
 	int32 i32LeftRulerHeightRequest)
-	:m_pLeftRuler(NULL)
-	,m_pDrawingArea(NULL)
+    :m_pDrawingArea(NULL)
 	,m_ui32Width(0)
 	,m_ui32Height(0)
 	,m_f64WidthPerBuffer(0)
 	,m_f64PointStep(0)
 	,m_pParentDisplayView(pDisplayView)
 	,m_pDatabase(pDisplayView->m_pBufferDatabase)
-	,m_f64LocalMaximum(0)
-	,m_f64LocalMinimum(0)
 	,m_f64ScaleX(1)
-	,m_f64ScaleY(1)
 	,m_f64TranslateX(0)
-	,m_f64TranslateY(0)
 	,m_f64ZoomTranslateX(0)
 	,m_f64ZoomTranslateY(0)
 	,m_f64ZoomScaleX(1)
 	,m_f64ZoomScaleY(1)
 	,m_f64ZoomFactor(1.5)
-	,m_f64MaximumTopMargin(0)
-	,m_f64MaximumBottomMargin(0)
-	,m_f64MinimumTopMargin(0)
-	,m_f64MinimumBottomMargin(0)
+	,m_i32LeftRulerWidthRequest(i32LeftRulerWidthRequest)
+	,m_i32LeftRulerHeightRequest(i32LeftRulerHeightRequest)
 	,m_eCurrentSignalMode(DisplayMode_GlobalBestFit)
 	,m_ui64LatestDisplayedTime(0)
 	,m_bRedrawAll(false)
+    ,m_bMultiView(false)
 {
-	//creates the drawing area
+
+    //creates the drawing area
 	m_pDrawingArea = gtk_drawing_area_new();
 	gtk_widget_set_size_request(m_pDrawingArea, i32ChannelDisplayWidthRequest, i32ChannelDisplayHeightRequest);
-
-	//creates the left ruler
-	m_pLeftRuler = new CSignalDisplayLeftRuler(i32LeftRulerWidthRequest, i32LeftRulerHeightRequest);
 
     //Set background color (White)
     GdkColor l_oBackgroundColor;
@@ -80,13 +72,16 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 
 CSignalChannelDisplay::~CSignalChannelDisplay()
 {
-	delete m_pLeftRuler;
-	m_pLeftRuler=NULL;
+    for(uint32 i = 0; i<m_oLeftRuler.size(); i++)
+    {
+            delete m_oLeftRuler[i];
+            m_oLeftRuler[i]=NULL;
+    }
 }
 
-GtkWidget* CSignalChannelDisplay::getRulerWidget() const
+GtkWidget* CSignalChannelDisplay::getRulerWidget(uint32 ui32Index) const
 {
-	return m_pLeftRuler->getWidget();
+    return m_oLeftRuler[ui32Index]->getWidget();
 }
 
 GtkWidget* CSignalChannelDisplay::getSignalDisplayWidget() const
@@ -125,11 +120,29 @@ void CSignalChannelDisplay::updateScale()
 void CSignalChannelDisplay::resetChannelList()
 {
 	m_oChannelList.clear();
+    m_oLeftRuler.clear();
+    m_vLocalMaximum.clear();
+    m_vLocalMinimum.clear();
+    m_vTranslateY.clear();
+    m_vMaximumBottomMargin.clear();
+    m_vMaximumTopMargin.clear();
+    m_vMinimumBottomMargin.clear();
+    m_vMinimumTopMargin.clear();
+    m_vScaleY.clear();
 }
 
 void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
 {
 	m_oChannelList.push_back(ui32Channel);
+    m_oLeftRuler.push_back(new CSignalDisplayLeftRuler(m_i32LeftRulerWidthRequest, m_i32LeftRulerHeightRequest));
+    m_vLocalMaximum.push_back(-DBL_MAX);
+    m_vLocalMinimum.push_back(DBL_MAX);
+    m_vTranslateY.push_back(0);
+    m_vMaximumBottomMargin.push_back(0);
+    m_vMaximumTopMargin.push_back(0);
+    m_vMinimumBottomMargin.push_back(0);
+    m_vMinimumTopMargin.push_back(0);
+    m_vScaleY.push_back(1);
 }
 
 uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
@@ -273,10 +286,39 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 		return;
 	}
 
+
+    float64 l_f64MaximumDisplayedValue = 0;
+    float64 l_f64MinimumDisplayedValue = 0;
+
+    float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
+
 	//updates the left ruler
-	float64 l_f64MaximumDisplayedValue = m_f64TranslateY - ( (0 - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
-	float64 l_f64MinimumDisplayedValue = m_f64TranslateY - ( (m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_f64ScaleY * m_f64ZoomScaleY * m_ui32Height) );
-	m_pLeftRuler->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
+    //for each channel
+    for(uint32 i =0 ; i<m_oLeftRuler.size(); i++)
+    {
+        if(m_pParentDisplayView->m_bAutoTranslation && !m_bMultiView)
+        {
+            l_f64MaximumDisplayedValue = m_vTranslateY[i] - ( (0 - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
+            l_f64MinimumDisplayedValue = m_vTranslateY[i] - ( (l_f64sizePerChannel - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
+        }
+        else if(!m_pParentDisplayView->m_bAutoTranslation && !m_bMultiView)
+        {
+            l_f64MaximumDisplayedValue = ((((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
+            l_f64MinimumDisplayedValue = -((l_f64sizePerChannel - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
+        }
+        else if(m_pParentDisplayView->m_bAutoTranslation && m_bMultiView)
+        {
+            l_f64MaximumDisplayedValue = m_vTranslateY[i] - ( (0 - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * m_ui32Height) );
+            l_f64MinimumDisplayedValue = m_vTranslateY[i] - ( (m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * m_ui32Height) );
+        }
+        else
+        {
+            l_f64MaximumDisplayedValue = ((((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * m_ui32Height) );
+            l_f64MinimumDisplayedValue = -((m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * m_ui32Height) );
+        }
+
+        m_oLeftRuler[i]->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
+    }
 
 	//determine index and position of first (in the sense of leftmost) buffer to display, and index of first sample to display
 	uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
@@ -433,61 +475,66 @@ void CSignalChannelDisplay::computeZoom(OpenViBE::boolean bZoomIn, OpenViBE::flo
 	}
 }
 
-void CSignalChannelDisplay::checkTranslation(float64& rDisplayedValueRange)
+void CSignalChannelDisplay::checkTranslation(std::vector<float64> & rDisplayedValueRange)
 {
 	//update maximum and minimum values displayed by this channel
-	m_f64LocalMaximum = -DBL_MAX;
-	m_f64LocalMinimum = +DBL_MAX;
 	float64 l_f64CurrentMaximum;
 	float64 l_f64CurrentMinimum;
+
+    float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
+    rDisplayedValueRange.resize(m_oChannelList.size());
 
 	for(size_t k=0 ; k<m_oChannelList.size() ; k++)
 	{
 		//get local min/max
 		m_pDatabase->getDisplayedChannelLocalMinMaxValue(m_oChannelList[k], l_f64CurrentMinimum, l_f64CurrentMaximum);
 
-		if(l_f64CurrentMinimum < m_f64LocalMinimum)
+        if(l_f64CurrentMinimum < m_vLocalMinimum[k])
 		{
-			m_f64LocalMinimum = l_f64CurrentMinimum;
+            m_vLocalMinimum[k] = l_f64CurrentMinimum;
 		}
-		if(l_f64CurrentMaximum > m_f64LocalMaximum)
+        if(l_f64CurrentMaximum > m_vLocalMaximum[k])
 		{
-			m_f64LocalMaximum = l_f64CurrentMaximum;
+            m_vLocalMaximum[k] = l_f64CurrentMaximum;
 		}
-	}
 
-	//set parameter to recomputed range
-	rDisplayedValueRange = m_f64LocalMaximum - m_f64LocalMinimum;
+        //set parameter to recomputed range
+        rDisplayedValueRange[k] = m_vLocalMaximum[k] - m_vLocalMinimum[k];
 
-	//in global best fit mode, translate signals if necessary
-	if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
-	{
-		//compute Y coord of local max and min
-		gint l_iMaxY = (gint)getSampleYCoordinate(m_f64LocalMaximum);
-		gint l_iMinY = (gint)getSampleYCoordinate(m_f64LocalMinimum);
+        //in global best fit mode, translate signals if necessary
+        if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
+        {
+            //compute Y coord of local max and min
+            gint l_iMaxY = (gint)getSampleYCoordinate(m_vLocalMaximum[k],k);
+            gint l_iMinY = (gint)getSampleYCoordinate(m_vLocalMinimum[k],k);
 
-		//translate signal if some data is plotted out of the window
-		if(l_iMaxY < 0 || l_iMinY > (int32)m_ui32Height-1)
-		{
-			m_f64TranslateY = (m_f64LocalMaximum + m_f64LocalMinimum) / 2;
+            //translate signal if some data is plotted out of the window
+            if(l_iMaxY < 0 || l_iMinY > (int32)m_ui32Height-1)
+            {
+                m_vTranslateY[k] = (m_vLocalMaximum[k] + m_vLocalMinimum[k]) / 2;
 
-			//reflect changes
-			redrawAllAtNextRefresh();
-		}
-	}
+                //reflect changes
+                redrawAllAtNextRefresh();
+            }
+        }
+    }
 }
 
 void CSignalChannelDisplay::setGlobalBestFitParameters(const float64& rRange, const float64& rMargin)
 {
 	m_f64ScaleX = 1;
+    m_f64VerticalScale = rRange/2;
 
-	float64 l_f64LocalMediumValue = (m_f64LocalMaximum + m_f64LocalMinimum) / 2;
+    for(size_t k = 0; k<m_oChannelList.size(); k++)
+    {
+        float64 l_f64LocalMediumValue = (m_vLocalMaximum[k] + m_vLocalMinimum[k]) / 2;
 
-	m_f64MaximumTopMargin = l_f64LocalMediumValue + rRange/2 + rMargin;
-	m_f64MaximumBottomMargin = l_f64LocalMediumValue + rRange/2 - rMargin;
+        m_vMaximumTopMargin[k] = l_f64LocalMediumValue + rRange/2 + rMargin;
+        m_vMaximumBottomMargin[k] = l_f64LocalMediumValue + rRange/2 - rMargin;
 
-	m_f64MinimumTopMargin = l_f64LocalMediumValue - rRange/2 + rMargin;
-	m_f64MinimumBottomMargin = l_f64LocalMediumValue - rRange/2 - rMargin;
+        m_vMinimumTopMargin[k] = l_f64LocalMediumValue - rRange/2 + rMargin;
+        m_vMinimumBottomMargin[k] = l_f64LocalMediumValue - rRange/2 - rMargin;
+    }
 
 	if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
 	{
@@ -497,18 +544,22 @@ void CSignalChannelDisplay::setGlobalBestFitParameters(const float64& rRange, co
 
 void CSignalChannelDisplay::updateDisplayParameters()
 {
-	if(m_f64MaximumTopMargin == m_f64MinimumBottomMargin)
-	{
-		m_f64ScaleY = 1;
-	}
-	else
-	{
-		m_f64ScaleY =  1 / (m_f64MaximumTopMargin - m_f64MinimumBottomMargin);
-	}
+    //compute the translation needed to center the signal correctly in the window
+    m_f64TranslateX = 0;
 
-	//compute the translation needed to center the signal correctly in the window
-	m_f64TranslateX = 0;
-	m_f64TranslateY =  (m_f64MaximumTopMargin + m_f64MinimumBottomMargin) / 2;
+    for(size_t k = 0; k<m_oChannelList.size(); k++)
+        {
+
+            if(m_vMaximumTopMargin[k] == m_vMinimumBottomMargin[k])
+            {
+                m_vScaleY[k] = 1;
+            }
+            else
+            {
+                m_vScaleY[k] =  1 / (m_vMaximumTopMargin[k] - m_vMinimumBottomMargin[k]);
+            }
+            m_vTranslateY[k] =  (m_vMaximumTopMargin[k] + m_vMinimumBottomMargin[k]) / (2*(m_oChannelList.size())) ;
+        }
 
 	//reflect changes
 	redrawAllAtNextRefresh();
@@ -563,10 +614,35 @@ float64 CSignalChannelDisplay::getSampleXCoordinate(uint32 ui32BufferPosition, u
 	return (f64XOffset + ui32BufferPosition*m_f64WidthPerBuffer + ui32SampleIndex*m_f64PointStep - m_f64TranslateX) * m_f64ScaleX;
 }
 
-float64 CSignalChannelDisplay::getSampleYCoordinate(float64 f64Value)
+float64 CSignalChannelDisplay::getSampleYCoordinate(float64 f64Value, uint32 ui32ChannelIndex)
 {
 	//TODO : precompute some factors!
-	return m_f64ScaleY*m_f64ZoomScaleY*m_ui32Height* (m_f64TranslateY-f64Value) + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
+    float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
+
+    //Autotranslation on
+    if(m_pParentDisplayView->m_bAutoTranslation)
+    {
+        return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*l_f64sizePerChannel*(m_vTranslateY[ui32ChannelIndex]-f64Value)+(ui32ChannelIndex+1)*l_f64sizePerChannel*m_f64ZoomScaleY - m_f64ZoomTranslateY*m_f64ZoomScaleY - l_f64sizePerChannel/2;
+    }
+    //Autotranslation off
+    else
+    {
+        return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*l_f64sizePerChannel*(-f64Value)+(ui32ChannelIndex+1)*l_f64sizePerChannel*m_f64ZoomScaleY - m_f64ZoomTranslateY*m_f64ZoomScaleY - l_f64sizePerChannel/2;
+    }
+}
+
+float64 CSignalChannelDisplay::getSampleYMultiViewCoordinate(float64 f64Value, uint32 ui32ChannelIndex)
+{
+    //Autotranslation on
+    if(m_pParentDisplayView->m_bAutoTranslation)
+    {
+        return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*m_ui32Height* (m_vTranslateY[ui32ChannelIndex]-f64Value) + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
+    }
+    //Autotranslation off
+    else
+    {
+        return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*m_ui32Height* (-f64Value) + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
+    }
 }
 
 boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint32 ui32LastBufferToDisplay, uint32 ui32FirstSampleToDisplay, float64 f64FirstBufferStartX)
@@ -583,7 +659,7 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 
 	for(size_t k=0; k<m_oChannelList.size(); k++)
 	{
-		if(m_oChannelList.size()!=1)
+        if(m_bMultiView)
 		{
 			m_pParentDisplayView->getMultiViewColor(m_oChannelList[k], l_oLineColor);
 		}
@@ -613,8 +689,16 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 			//for all samples in current buffer
 			for(uint32 i = (j==ui32FirstBufferToDisplay)?ui32FirstSampleToDisplay:0; i<l_ui32SamplesPerBuffer; i++, l_ui64PointIndex++)
 			{
-				(m_pParentDisplayView->m_pRawPoints)[l_ui64PointIndex].first = getSampleXCoordinate(j - ui32FirstBufferToDisplay, i, f64FirstBufferStartX);
-				(m_pParentDisplayView->m_pRawPoints)[l_ui64PointIndex].second = getSampleYCoordinate(l_pCurrentChannelSampleBuffer[i]);
+                if(m_bMultiView)
+                {
+                    (m_pParentDisplayView->m_pRawPoints)[l_ui64PointIndex].first = getSampleXCoordinate(j - ui32FirstBufferToDisplay, i, f64FirstBufferStartX);
+                    (m_pParentDisplayView->m_pRawPoints)[l_ui64PointIndex].second = getSampleYMultiViewCoordinate(l_pCurrentChannelSampleBuffer[i], k);
+                }
+                else
+                {
+                    (m_pParentDisplayView->m_pRawPoints)[l_ui64PointIndex].first = getSampleXCoordinate(j - ui32FirstBufferToDisplay, i, f64FirstBufferStartX);
+                    (m_pParentDisplayView->m_pRawPoints)[l_ui64PointIndex].second = getSampleYCoordinate(l_pCurrentChannelSampleBuffer[i], k);
+                }
 			}
 		}
 
@@ -716,8 +800,19 @@ void CSignalChannelDisplay::drawZeroLine()
 	gdk_gc_set_line_attributes(m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 1, GDK_LINE_ON_OFF_DASH, GDK_CAP_BUTT, GDK_JOIN_BEVEL);
 
 	//draw Y=0 line
-	gint l_iZeroY = (gint)getSampleYCoordinate(0);
-	gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY, m_ui32Width ,l_iZeroY);
+    if(m_bMultiView)
+    {
+        gint l_iZeroY = (gint)getSampleYMultiViewCoordinate(0,0);
+        gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY, m_ui32Width ,l_iZeroY);
+    }
+    else
+    {
+        for(uint32 k = 0; k< m_oChannelList.size();k++)
+        {
+            gint l_iZeroY = (gint)getSampleYCoordinate(0,k);
+            gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY, m_ui32Width ,l_iZeroY);
+        }
+    }
 
 	//switch back to normal line
 	gdk_gc_set_line_attributes(m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 1, GDK_LINE_SOLID, GDK_CAP_BUTT, GDK_JOIN_BEVEL);
@@ -793,7 +888,11 @@ void drawingAreaClickedEventCallback(GtkWidget *widget, GdkEventButton *pEvent, 
 	{
 		m_pChannelDisplay->redrawAllAtNextRefresh();
 		if(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window) gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window, NULL, true);
-		if(GTK_WIDGET(m_pChannelDisplay->m_pLeftRuler->getWidget())->window) gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_pLeftRuler->getWidget())->window, NULL, true);
+
+        for(uint32 i = 0; i<m_pChannelDisplay->m_oLeftRuler.size();i++)
+        {
+            if(GTK_WIDGET(m_pChannelDisplay->m_oLeftRuler[i]->getWidget())->window) gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_oLeftRuler[i]->getWidget())->window, NULL, true);
+        }
 	}
 }
 
