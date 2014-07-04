@@ -151,8 +151,8 @@ ULONG m_ulBufferSize ;
 
 //  device
 //----------
-map <PSP_DEVICE_PATH,string> m_vDevicePathMap; //m_vDevicePathMap contains all connected devicePath and their name
-string m_pDevicePathMaster; //the name of the Master devicePath chosen
+map <PSP_DEVICE_PATH,OpenViBE::CString> m_vDevicePathMap; //m_vDevicePathMap contains all connected devicePath and their name
+OpenViBE::CString m_pDevicePathMaster; //the name of the Master devicePath chosen
 vector <string> m_vDevicePathSlave; //a list with the name of the Slave devicePath chosen
 ULONG m_lNrOfDevicesConnected; // Number of devices on this PC
 ULONG m_lNrOfDevicesOpen; //total of Master/slaves device open
@@ -227,10 +227,9 @@ CDriverTMSiRefa32B::CDriverTMSiRefa32B(IDriverContext& rDriverContext)
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "Succeeded in loading DLL: " << CString(l_sPath) << "\n";
 	m_pDevicePathMaster = "";
 	m_lNrOfDevicesOpen=0;
-	m_bCheckImpedance=false;
+	m_bCheckImpedance=m_rDriverContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_CheckImpedance}", false);//m_bCheckImpedance=false;
 
 	m_oSettings.add("Header", &m_oHeader);
-	m_oSettings.add("CheckImpedance", &m_bCheckImpedance);
 	m_oSettings.add("DevicePathMaster", &m_pDevicePathMaster);
 	m_oSettings.add("DevicePathSlave", &m_vDevicePathSlave);
 	m_oSettings.load();
@@ -279,11 +278,11 @@ boolean CDriverTMSiRefa32B::initialize(
 	}
 
 	//open master
-	map<PSP_DEVICE_PATH, string>::iterator iter=m_vDevicePathMap.begin();
+	map<PSP_DEVICE_PATH, OpenViBE::CString>::iterator iter=m_vDevicePathMap.begin();
 	bool l_bMasterFind=false;
-	while(m_pDevicePathMaster.compare("")!=0 && !l_bMasterFind && iter!=m_vDevicePathMap.end())
+	while(m_pDevicePathMaster!=OpenViBE::CString("") && !l_bMasterFind && iter!=m_vDevicePathMap.end())
 	{
-		if((*iter).second.compare(m_pDevicePathMaster)==0)
+		if((*iter).second==m_pDevicePathMaster)
 		{
 			l_bMasterFind=true;
 			m_HandleMaster = m_oFpOpen((*iter).first);
@@ -309,12 +308,12 @@ boolean CDriverTMSiRefa32B::initialize(
 	//open slave
 	for(uint32 i=0;i<m_vDevicePathSlave.size();i++)
 	{
-		map<PSP_DEVICE_PATH, string>::iterator j=m_vDevicePathMap.begin();
+		map<PSP_DEVICE_PATH, OpenViBE::CString>::iterator j=m_vDevicePathMap.begin();
 		bool find=false;
 		while(!find&&j!=m_vDevicePathMap.end())
 		{
-			if((*j).second.compare(m_pDevicePathMaster)!=0&&
-					m_vDevicePathSlave[i].compare((*j).second)==0)
+			if((*j).second==m_pDevicePathMaster&&
+				m_vDevicePathSlave[i]==((*j).second).toASCIIString())
 			{
 				find=true;
 
@@ -639,13 +638,13 @@ boolean CDriverTMSiRefa32B::configure(void)
 	CConfigurationTMSIRefa32B l_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-TMSI-Refa32B.ui");
 	//create a vector with all name of device connected
 	std::vector<std::string> l_vDevicePath;
-	for(map<PSP_DEVICE_PATH, std::string>::iterator  i=m_vDevicePathMap.begin();i!=m_vDevicePathMap.end();i++)
+	for(map<PSP_DEVICE_PATH, OpenViBE::CString>::iterator  i=m_vDevicePathMap.begin();i!=m_vDevicePathMap.end();i++)
 	{
-		l_vDevicePath.push_back((*i).second);
+		l_vDevicePath.push_back(std::string((*i).second.toASCIIString()));
 	}
 
 	//call configuration frame
-	l_oConfiguration.setDeviceList(l_vDevicePath, &m_pDevicePathMaster, &m_vDevicePathSlave);
+	l_oConfiguration.setDeviceList(l_vDevicePath, &std::string(m_pDevicePathMaster.toASCIIString()), &m_vDevicePathSlave);
 
 	bool result=l_oConfiguration.configure(m_oHeader);
 	if(!result) 
@@ -654,7 +653,6 @@ boolean CDriverTMSiRefa32B::configure(void)
 	}
 
 	m_oSettings.save();
-
 	return true;
 }
 
@@ -705,13 +703,14 @@ boolean CDriverTMSiRefa32B::refreshDevicePath(void)
 
 	//verify if the device Master is connected
 	string l_sDevicePathMaster=m_pDevicePathMaster;
-	m_pDevicePathMaster="";
+	m_pDevicePathMaster=OpenViBE::CString("");
 	if(l_sDevicePathMaster.compare("")!=0)
 	{
-		map<PSP_DEVICE_PATH,string>::iterator index=m_vDevicePathMap.begin();
-		while(m_pDevicePathMaster.compare("")==0&&index!=m_vDevicePathMap.end())
+		map<PSP_DEVICE_PATH,OpenViBE::CString>::iterator index=m_vDevicePathMap.begin();
+		while(m_pDevicePathMaster==OpenViBE::CString("")&&index!=m_vDevicePathMap.end())
 		{
-			m_pDevicePathMaster=(l_sDevicePathMaster.compare((*index).second)==0) ? l_sDevicePathMaster : NULL;
+			std::string l_sDeviceName = (*index).second.toASCIIString();
+			m_pDevicePathMaster=(l_sDevicePathMaster.compare(l_sDeviceName)==0) ? OpenViBE::CString(l_sDevicePathMaster.c_str()) : NULL;
 			index++;
 		}
 	}
@@ -720,9 +719,9 @@ boolean CDriverTMSiRefa32B::refreshDevicePath(void)
 	std::vector<string> l_vDevicePathSlave;
 	for(uint32 i=0;i<m_vDevicePathSlave.size();i++)
 	{
-		for(map<PSP_DEVICE_PATH,string>::iterator j=m_vDevicePathMap.begin() ; j!=m_vDevicePathMap.end() ; j++)
+		for(map<PSP_DEVICE_PATH,OpenViBE::CString>::iterator j=m_vDevicePathMap.begin() ; j!=m_vDevicePathMap.end() ; j++)
 		{
-			if((*j).second.compare(m_vDevicePathSlave[i])==0)
+			if((*j).second==OpenViBE::CString(m_vDevicePathSlave[i].c_str()))
 			{
 				l_vDevicePathSlave.push_back(m_vDevicePathSlave[i]);
 				break;
