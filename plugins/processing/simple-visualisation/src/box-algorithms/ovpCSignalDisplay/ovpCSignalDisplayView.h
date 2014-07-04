@@ -87,11 +87,6 @@ namespace OpenViBEPlugins
 			 */
 			virtual void redraw(void);
 			/**
-			 * Create gtk table widget of the signal display
-			 */
-			void createChannelsDisplayWidget(void);
-
-			/**
 			* Toggle left rulers on/off
 			* \param bActive Show rulers if true.
 			*/
@@ -245,8 +240,11 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 m_f64CustomVerticalScaleValue;
 			//@}
 
-			OpenViBE::boolean m_bIsEEGSignal;
+			//! Flag set to true when auto translation is on (center signal in his spot)
+            OpenViBE::boolean m_bAutoTranslation;
 
+			//! Flage set to true when eeg settings mode is on 
+			OpenViBE::boolean m_bIsEEGSignal;
 
 			//! The database that contains the information to use to draw the signals
 			CBufferDatabase * m_pBufferDatabase;
@@ -262,9 +260,6 @@ namespace OpenViBEPlugins
 
 			//! Flag set to true once multi view configuration dialog is initialized
 			OpenViBE::boolean m_bMultiViewInitialized;
-
-			OpenViBE::boolean m_bAutoTranslation;
-
 			//! Vector of indices of selected channels
 			std::map<OpenViBE::uint32, OpenViBE::boolean> m_vMultiViewSelectedChannels;
 
