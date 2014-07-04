@@ -699,7 +699,7 @@ namespace OpenViBEPlugins
 
 		void CSignalDisplayView::toggleLeftRulers(boolean bActive)
 		{
-			m_bShowLeftRulers = bActive;
+            m_bShowLeftRulers = bActive;
 
            for(size_t i=0 ; i<m_oChannelDisplay.size() ; i++)
 			{
@@ -709,11 +709,11 @@ namespace OpenViBEPlugins
 					{
                         if(bActive && m_vSelectedChannels[j])
 						{
-                            ::gtk_widget_show(m_oLeftRulers[j]);
+                            ::gtk_widget_show(m_oChannelDisplay[i]->getRulerWidget(j));
 						}
 						else
 						{
-                            ::gtk_widget_hide(m_oLeftRulers[j]);
+                            ::gtk_widget_hide(m_oChannelDisplay[i]->getRulerWidget(j));
                         }
 					}
 				}
