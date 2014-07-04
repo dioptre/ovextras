@@ -7,9 +7,9 @@ def setUp(self):
     wait("designerScreen.png",10)
 def testRunOgreVisual(self):
     click("play.png")
+    mouseMove(Location(0,0))
     
     wait("Simple3Dview.png",10)
-    mouseMove(Location(0,0))
     waitVanish("Simple3Dview.png",10)
     assert(exists("designerScreen.png"))
 def tearDown(self):
