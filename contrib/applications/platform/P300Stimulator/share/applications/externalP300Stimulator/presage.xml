@@ -17,37 +17,6 @@
         <PREDICTORS>DefaultSmoothedNgramPredictor</PREDICTORS>
     </PredictorRegistry>
     <Predictors>
-        <!--DefaultARPAPredictor>
-            <ARPAFILENAME>C:\MinGW\msys\1.0\home\ddevlami\presage_compiled\share\presage/arpa_en.arpa</ARPAFILENAME>
-            <LOGGER>ERROR</LOGGER>
-            <PREDICTOR>ARPAPredictor</PREDICTOR>
-            <TIMEOUT>100</TIMEOUT>
-            <VOCABFILENAME>C:\MinGW\msys\1.0\home\ddevlami\presage_compiled\share\presage/arpa_en.vocab</VOCABFILENAME>
-        </DefaultARPAPredictor>
-        <DefaultAbbreviationExpansionPredictor>
-            <ABBREVIATIONS>C:\MinGW\msys\1.0\home\ddevlami\presage_compiled\share\presage/abbreviations_en.txt</ABBREVIATIONS>
-            <LOGGER>ERROR</LOGGER>
-            <PREDICTOR>AbbreviationExpansionPredictor</PREDICTOR>
-        </DefaultAbbreviationExpansionPredictor>
-        <DefaultDejavuPredictor>
-            <LOGGER>ERROR</LOGGER>
-            <MEMORY>C:\MinGW\msys\1.0\home\ddevlami\presage_compiled\share\presage/dejavu_memory_en.txt</MEMORY>
-            <PREDICTOR>DejavuPredictor</PREDICTOR>
-            <TRIGGER>3</TRIGGER>
-        </DefaultDejavuPredictor>
-        <DefaultDictionaryPredictor>
-            <DICTIONARY>/usr/share/dict/words</DICTIONARY>
-            <LOGGER>ERROR</LOGGER>
-            <PREDICTOR>DictionaryPredictor</PREDICTOR>
-            <PROBABILITY>0.000001</PROBABILITY>
-        </DefaultDictionaryPredictor>
-        <DefaultRecencyPredictor>
-            <CUTOFF_THRESHOLD>20</CUTOFF_THRESHOLD>
-            <LAMBDA>1</LAMBDA>
-            <LOGGER>ERROR</LOGGER>
-            <N_0>1</N_0>
-            <PREDICTOR>RecencyPredictor</PREDICTOR>
-        </DefaultRecencyPredictor-->
         <DefaultSmoothedNgramPredictor>
             <DBFILENAME>dummy.db</DBFILENAME>
             <DELTAS>0.01 0.1 0.89</DELTAS>
@@ -58,16 +27,6 @@
             <LOGGER>ERROR</LOGGER>
             <PREDICTOR>SmoothedNgramPredictor</PREDICTOR>
         </DefaultSmoothedNgramPredictor>
-        <!--UserSmoothedNgramPredictor>
-            <DBFILENAME>${HOME}/.presage/lm.db</DBFILENAME>
-            <DELTAS>0.01 0.1 0.89</DELTAS>
-            <DatabaseConnector>
-                <LOGGER>ERROR</LOGGER>
-            </DatabaseConnector>
-            <LEARN>true</LEARN>
-            <LOGGER>ERROR</LOGGER>
-            <PREDICTOR>SmoothedNgramPredictor</PREDICTOR>
-        </UserSmoothedNgramPredictor-->
     </Predictors>
     <ProfileManager>
         <AUTOPERSIST>false</AUTOPERSIST>
