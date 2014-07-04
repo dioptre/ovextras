@@ -259,7 +259,7 @@ int CBridgeBioSemiActiveTwo::read()
 {
 	int l_iBytesRead;
 	int l_iCurrentRingBufferByteIndex;
-	bool l_bStatus = READ_POINTER(m_hDevice, &l_iCurrentRingBufferByteIndex);
+	bool l_bStatus = (READ_POINTER(m_hDevice, &l_iCurrentRingBufferByteIndex) != FALSE);
 
 	if(!l_bStatus)
 	{

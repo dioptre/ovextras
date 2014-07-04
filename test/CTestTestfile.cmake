@@ -39,6 +39,10 @@ IF(NOT (LOCAL MATCHES "FALSE"))
 	  
 ENDIF(NOT (LOCAL MATCHES "FALSE"))
 
+# this is the folder where test scenarios can be run under
+SET(ENV{OV_TEST_DEPLOY_PATH} "${CTEST_SOURCE_DIRECTORY}/local-tmp/test-deploy/")
+MESSAGE("Set the test deploy path to $ENV{OV_TEST_DEPLOY_PATH}")
+
 get_cmake_property(_variableNames VARIABLES)
 foreach (_variableName ${_variableNames})
     message(STATUS "${_variableName}=${${_variableName}}")

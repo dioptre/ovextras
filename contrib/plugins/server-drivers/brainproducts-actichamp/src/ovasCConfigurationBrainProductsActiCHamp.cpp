@@ -144,7 +144,7 @@ boolean CConfigurationBrainProductsActiCHamp::preConfigure(void)
 	::gtk_spin_button_set_value(m_pSpinButtonActiveShieldGain, m_rActiveShieldGain);
 	::gtk_spin_button_set_value(m_pSpinButtonGoodImpedanceLimit, m_rGoodImpedanceLimit);
 	::gtk_spin_button_set_value(m_pSpinButtonBadImpedanceLimit, m_rBadImpedanceLimit);
-	
+
 	return true;
 }
 
@@ -198,7 +198,7 @@ void CConfigurationBrainProductsActiCHamp::comboBoxDeviceChangedCB(void)
 		//m_pHeader->setSamplingFrequency(uint32(l_oProperties.Rate));
 		//m_pHeader->setChannelCount(l_oProperties.CountEeg + l_oProperties.CountAux);
 		//gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels), l_oProperties.CountEeg + l_oProperties.CountAux);
-		
+
 		// The channel count is updated with the toggled button callbacks.
 		m_pHeader->setChannelCount(0);
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels), 0);
@@ -233,7 +233,7 @@ void CConfigurationBrainProductsActiCHamp::buttonModuleToggledCB(boolean bToggle
 	{
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels), l_ui32CurrentChannelCount + (l_ui32CurrentChannelCount == 1 ? 31 : 32)); // there is minimum 1 channel.
 	}
-	else 
+	else
 	{
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels), l_ui32CurrentChannelCount - (l_ui32CurrentChannelCount == 1 ? 31 : 32));
 	}
@@ -247,7 +247,7 @@ void CConfigurationBrainProductsActiCHamp::buttonAuxChannelsToggledCB(boolean bT
 	{
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels), l_ui32CurrentChannelCount + (l_ui32CurrentChannelCount == 1 ? 7 : 8));
 	}
-	else 
+	else
 	{
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels), l_ui32CurrentChannelCount - (l_ui32CurrentChannelCount == 1 ? 7 : 8));
 	}

@@ -1,7 +1,6 @@
 # Basic Template Test for automatic run a scenario that produce a file to be compared to a reference file
 # You need to set the name of the test according to name of scenario file and reference file
 SET(TEST_NAME SinusOscillator)
-SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 IF(WIN32)
 	SET(EXT cmd)
@@ -11,16 +10,42 @@ ELSE(WIN32)
 	SET(OS_FLAGS "")
 ENDIF(WIN32)
 
-ADD_TEST(clean_${TEST_NAME} "rm" "-f" "${TEST_NAME}.csv")
+# Copies all files to a directory where the scenario .xml is launched from. The scenario should write to this dir (${Player_ScenarioDirectory} in openvibe).
+# Note that the function will clean the target directory contents, so the dir should only be used for one test.
+FUNCTION(OV_DEPLOY_TEST SUBDIR_NAME FILES_TO_DEPLOY DEPLOYPATH)
+	IF(NOT (DEFINED ENV{OV_TEST_DEPLOY_PATH}))
+		MESSAGE(ERROR  "ENV variable OV_TEST_DEPLOY_PATH does not exist")
+		SET(DEPLOYPATH "-NotFound" PARENT_SCOPE)
+		RETURN()
+	ENDIF(NOT (DEFINED ENV{OV_TEST_DEPLOY_PATH}))
+
+	SET(DEPLOYPATH $ENV{OV_TEST_DEPLOY_PATH}/${SUBDIR_NAME})	
+	SET(DEPLOYPATH $ENV{OV_TEST_DEPLOY_PATH}/${SUBDIR_NAME} PARENT_SCOPE)
+	
+	MESSAGE("Cleaning up ${DEPLOYPATH} ...")
+	
+	FILE(REMOVE_RECURSE ${DEPLOYPATH})
+	FILE(MAKE_DIRECTORY ${DEPLOYPATH})
+	
+	# get absolute paths
+	FILE(GLOB_RECURSE FILES_TO_DEPLOY_ABSPATH ${FILES_TO_DEPLOY})
+
+	MESSAGE("Deploying ${FILES_TO_DEPLOY_ABSPATH} to ${DEPLOYPATH}")
+
+	FILE(COPY ${FILES_TO_DEPLOY_ABSPATH} DESTINATION ${DEPLOYPATH})	
+ENDFUNCTION(OV_DEPLOY_TEST)
+
+OV_DEPLOY_TEST(${TEST_NAME} "${TEST_NAME}.xml" DEPLOYPATH)
+
+SET(SCENARIO_TO_TEST "${DEPLOYPATH}/${TEST_NAME}.xml")
+
+# ADD_TEST(clean_${TEST_NAME} "rm" "-f" "${TEST_NAME}.csv")
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "diff" "--strip-trailing-cr" "${TEST_NAME}.csv" "${TEST_NAME}.ref.csv")
+ADD_TEST(comparator_${TEST_NAME} "diff" "--strip-trailing-cr" "${DEPLOYPATH}/${TEST_NAME}.csv" "${TEST_NAME}.ref.csv")
 
 ## add some properties that help to debug
-IF(WIN32)
-	SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{APPDATA}/openvibe/log/openvibe-designer.log")
-ELSE(WIN32)
-	SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-ENDIF(WIN32)
-SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${TEST_NAME}.csv")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{OV_USERDATA}/log/openvibe-designer.log")
+
+SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${DEPLOYPATH}/${TEST_NAME}.csv")
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME})
 SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES DEPENDS clean_${TEST_NAME})
