@@ -87,6 +87,9 @@ namespace OpenViBEPlugins
 		void addChannel(
 			OpenViBE::uint32 ui32Channel);
 
+        void addChannelList(
+            OpenViBE::uint32 ui32Channel);
+
 		/**
 		 * \brief Get rectangle to clear and redraw based on latest signal data received
 		 * \param[out] rRect Rectangle holding part of drawing area to clear and update

@@ -77,6 +77,16 @@ CSignalChannelDisplay::~CSignalChannelDisplay()
             delete m_oLeftRuler[i];
             m_oLeftRuler[i]=NULL;
     }
+
+/*  m_vLocalMaximum.clear();
+    m_vLocalMinimum.clear();
+    m_vTranslateY.clear();
+    m_vMaximumBottomMargin.clear();
+    m_vMaximumTopMargin.clear();
+    m_vMinimumBottomMargin.clear();
+    m_vMinimumTopMargin.clear();
+    m_vScaleY.clear();*/
+
 }
 
 GtkWidget* CSignalChannelDisplay::getRulerWidget(uint32 ui32Index) const
@@ -120,15 +130,6 @@ void CSignalChannelDisplay::updateScale()
 void CSignalChannelDisplay::resetChannelList()
 {
 	m_oChannelList.clear();
-    m_oLeftRuler.clear();
-    m_vLocalMaximum.clear();
-    m_vLocalMinimum.clear();
-    m_vTranslateY.clear();
-    m_vMaximumBottomMargin.clear();
-    m_vMaximumTopMargin.clear();
-    m_vMinimumBottomMargin.clear();
-    m_vMinimumTopMargin.clear();
-    m_vScaleY.clear();
 }
 
 void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
@@ -143,6 +144,11 @@ void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
     m_vMinimumBottomMargin.push_back(0);
     m_vMinimumTopMargin.push_back(0);
     m_vScaleY.push_back(1);
+}
+
+void CSignalChannelDisplay::addChannelList(uint32 ui32Channel)
+{
+    m_oChannelList.push_back(ui32Channel);
 }
 
 uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
@@ -508,8 +514,8 @@ void CSignalChannelDisplay::checkTranslation(std::vector<float64> & rDisplayedVa
             gint l_iMaxY = (gint)getSampleYCoordinate(m_vLocalMaximum[k],k);
             gint l_iMinY = (gint)getSampleYCoordinate(m_vLocalMinimum[k],k);
 
-            //translate signal if some data is plotted out of the window
-            if(l_iMaxY < 0 || l_iMinY > (int32)m_ui32Height-1)
+            //translate signal if some data is plotted out of the window and to center it in his spot
+            if(l_iMaxY < (int32)((k-1)*l_f64sizePerChannel) || l_iMinY > (int32)(k*l_f64sizePerChannel))
             {
                 m_vTranslateY[k] = (m_vLocalMaximum[k] + m_vLocalMinimum[k]) / 2;
 
