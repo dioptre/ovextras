@@ -78,7 +78,7 @@ namespace OpenViBEPlugins
 		/**
 		 * \brief Reset list of channels displayed by this object
 		 */
-		void resetChannelList();
+        void resetChannelList();
 
 		/**
 		 * \brief Add a channel to the list of channels to be displayed
@@ -213,7 +213,7 @@ namespace OpenViBEPlugins
          * \return Y coordinate of sample
          */
         OpenViBE::float64 getSampleYMultiViewCoordinate(
-            OpenViBE::float64 f64Value, OpenViBE::uint32 ui32ChannelIndex);
+            OpenViBE::float64 f64Value);
 
 		/**
 		 * \brief Draw signals (and stimulations, if any) displayed by this channel

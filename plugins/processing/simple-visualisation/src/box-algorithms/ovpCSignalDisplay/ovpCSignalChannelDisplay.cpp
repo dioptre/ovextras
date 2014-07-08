@@ -129,7 +129,7 @@ void CSignalChannelDisplay::updateScale()
 
 void CSignalChannelDisplay::resetChannelList()
 {
-	m_oChannelList.clear();
+    m_oChannelList.clear();
 }
 
 void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
@@ -637,17 +637,17 @@ float64 CSignalChannelDisplay::getSampleYCoordinate(float64 f64Value, uint32 ui3
     }
 }
 
-float64 CSignalChannelDisplay::getSampleYMultiViewCoordinate(float64 f64Value, uint32 ui32ChannelIndex)
+float64 CSignalChannelDisplay::getSampleYMultiViewCoordinate(float64 f64Value)
 {
     //Autotranslation on
     if(m_pParentDisplayView->m_bAutoTranslation)
     {
-        return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*m_ui32Height* (m_vTranslateY[ui32ChannelIndex]-f64Value) + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
+        return m_vScaleY[0]*m_f64ZoomScaleY*m_ui32Height* (m_vTranslateY[0]-f64Value) + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
     }
     //Autotranslation off
     else
     {
-        return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*m_ui32Height* (-f64Value) + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
+        return m_vScaleY[0]*m_f64ZoomScaleY*m_ui32Height* (-f64Value) + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
     }
 }
 
@@ -698,7 +698,7 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
                 if(m_bMultiView)
                 {
                     (m_pParentDisplayView->m_pRawPoints)[l_ui64PointIndex].first = getSampleXCoordinate(j - ui32FirstBufferToDisplay, i, f64FirstBufferStartX);
-                    (m_pParentDisplayView->m_pRawPoints)[l_ui64PointIndex].second = getSampleYMultiViewCoordinate(l_pCurrentChannelSampleBuffer[i], k);
+                    (m_pParentDisplayView->m_pRawPoints)[l_ui64PointIndex].second = getSampleYMultiViewCoordinate(l_pCurrentChannelSampleBuffer[i]);
                 }
                 else
                 {
@@ -808,7 +808,7 @@ void CSignalChannelDisplay::drawZeroLine()
 	//draw Y=0 line
     if(m_bMultiView)
     {
-        gint l_iZeroY = (gint)getSampleYMultiViewCoordinate(0,0);
+        gint l_iZeroY = (gint)getSampleYMultiViewCoordinate(0);
         gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY, m_ui32Width ,l_iZeroY);
     }
     else
