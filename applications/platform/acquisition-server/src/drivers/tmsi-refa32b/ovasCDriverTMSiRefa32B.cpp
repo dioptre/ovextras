@@ -313,7 +313,7 @@ boolean CDriverTMSiRefa32B::initialize(
 		while(!find&&j!=m_vDevicePathMap.end())
 		{
 			if((*j).second==m_pDevicePathMaster&&
-				m_vDevicePathSlave[i]==((*j).second).toASCIIString())
+				(*j).second==OpenViBE::CString(m_vDevicePathSlave[i].c_str()))
 			{
 				find=true;
 
