@@ -12,42 +12,50 @@
 #ADD_TEST(LS_BINARY_PATH "ls" "-all")
 #ADD_TEST(PWD_BINARY_PATH "pwd")
 
-
-
 ## -- Other Tests : Place a file named DartTestfile.txt in path with tests.
 
-# ${TEST_LOCAL} is repleased by "FALSE" only by automatic test call, else {TEST_LOCAL} is not defined
-SET(LOCAL ${TEST_LOCAL})
-IF(NOT (LOCAL MATCHES "FALSE"))
+# ${TEST_AUTOMATIC} is replaced by "TRUE" only by automatic test call (via "openVibeTests.cmake")
+IF(${TEST_AUTOMATIC} MATCHES "TRUE")
+	# for automatic tests, no changes (at the moment
+	MESSAGE("Mode 'automatic', OV_ROOT_DIR is ${OV_ROOT_DIR}")
+	
+ELSE(${TEST_AUTOMATIC} MATCHES "TRUE")
+	# for local tests, we rework some paths
+	
 	IF(WIN32)
-		# triky way to get absolute path for ../. directory in windows with cygwin
+		# tricky way to get absolute path for ../. directory in windows with cygwin
 		# todo: try to find a cmake way to get this for simple call to ctest in OV_ROOT_DIR\test directory in the aim to run all test
 		exec_program("cygpath" ARGS "-a -w ../." OUTPUT_VARIABLE "OV_ROOT_DIR")
 	ELSE(WIN32)
 		set(OV_ROOT_DIR              "$ENV{PWD}/..")
 	ENDIF(WIN32)
 	
-	set(CTEST_SOURCE_DIRECTORY		"${OV_ROOT_DIR}")
-	set(ENV{OV_BINARY_PATH} "${OV_ROOT_DIR}/dist")
-	message("running local test here= $ENV{OV_BINARY_PATH}")
+	set(CTEST_SOURCE_DIRECTORY      "${OV_ROOT_DIR}")
 
-	IF(WIN32)
-	  SET(ENV{OV_USERDATA} "$ENV{APPDATA}/openvibe/")
-	ELSE(WIN32)
-	  SET(ENV{OV_USERDATA} "$ENV{HOME}/.config/openvibe/")
-	ENDIF(WIN32)
-	  
-ENDIF(NOT (LOCAL MATCHES "FALSE"))
+	MESSAGE("Mode 'local', OV_ROOT_DIR is ${OV_ROOT_DIR}")	
+ENDIF(${TEST_AUTOMATIC} MATCHES "TRUE")
+
+# passthrough a environment variable to binary path to tests
+SET(ENV{OV_BINARY_PATH} "${CTEST_SOURCE_DIRECTORY}/dist")
+MESSAGE("Running test executables from $ENV{OV_BINARY_PATH}")
+	
+# This is the userspace path for openvibe logs etc	
+IF(WIN32)
+  SET(ENV{OV_USERDATA} "$ENV{APPDATA}/openvibe/")
+ELSE(WIN32)
+  SET(ENV{OV_USERDATA} "$ENV{HOME}/.config/openvibe/")
+ENDIF(WIN32)
+MESSAGE("OpenViBE logs are expected in $ENV{OV_USERDATA}")
 
 # this is the folder where test scenarios can be run under
-SET(ENV{OV_TEST_DEPLOY_PATH} "${CTEST_SOURCE_DIRECTORY}/local-tmp/test-deploy/")
-MESSAGE("Set the test deploy path to $ENV{OV_TEST_DEPLOY_PATH}")
+SET(ENV{OV_TEST_DEPLOY_PATH} "${OV_ROOT_DIR}/local-tmp/test-deploy/")
+MESSAGE("Test temporary files should be written to $ENV{OV_TEST_DEPLOY_PATH}")
 
 get_cmake_property(_variableNames VARIABLES)
+message("Dumping cmake variables...")
 foreach (_variableName ${_variableNames})
-    message(STATUS "${_variableName}=${${_variableName}}")
+    message("  ${_variableName}=${${_variableName}}")
 endforeach()
-
 
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/acquisition/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/turbofieldtrip/test")

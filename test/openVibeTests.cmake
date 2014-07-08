@@ -79,24 +79,21 @@ IF(${CTEST_SCRIPT_ARG} MATCHES Continuous)
 ENDIF(${CTEST_SCRIPT_ARG} MATCHES Continuous)
 
 IF(${MODEL} MATCHES Continuous)
-	set(OV_ROOT_DIR              "${CMAKE_CURRENT_SOURCE_DIR}")
+	# Do everything in the current directory
+	
+	set(OV_ROOT_DIR                         "${CMAKE_CURRENT_SOURCE_DIR}")
+	set(CTEST_SOURCE_DIRECTORY              "${OV_ROOT_DIR}")	
+	set(CTEST_BINARY_DIRECTORY	            "${OV_ROOT_DIR}/dist") 
+	set(CTEST_DASHBOARD_ROOT                "${OV_ROOT_DIR}")
 ELSE(${MODEL} MATCHES Continuous)
-	# create a temporary directory with very short name to host build
+	# Nightly build, do a fresh clone to a temporary dir
+	
+	# create a temporary directory with very short name to host the build
 	exec_program("mktemp" ARGS "--tmpdir -d ov.XXX" OUTPUT_VARIABLE OV_ROOT_DIR)
+	set(CTEST_SOURCE_DIRECTORY              "${OV_ROOT_DIR}/repo")	
+	set(CTEST_BINARY_DIRECTORY	            "${OV_ROOT_DIR}/repo/dist") 
+	set(CTEST_DASHBOARD_ROOT                "${OV_ROOT_DIR}")	
 ENDIF(${MODEL} MATCHES Continuous)
-
-####
-
-## -- SRC Dir
-set(CTEST_SOURCE_DIRECTORY              "${OV_ROOT_DIR}/trunk")
-
-## -- BIN Dir
-set(CTEST_BINARY_DIRECTORY	              "${OV_ROOT_DIR}/dist") 
-
-## -- DashBoard Root
-set(CTEST_DASHBOARD_ROOT                "${CMAKE_CURRENT_SOURCE_DIR}")
-
-
 
 # -----------------------------------------------------------  
 # -- commands
@@ -139,8 +136,8 @@ ENDIF(WIN32)
 # -- Configure CTest
 # -----------------------------------------------------------  
 
-## set for automatic test, not for in place local test 
-SET(TEST_LOCAL FALSE)
+## set for automatic test, not for in-place local test 
+SET(TEST_AUTOMATIC TRUE)
 
 ## -- CTest Config
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestConfig.cmake  ${CTEST_BINARY_DIRECTORY}/CTestConfig.cmake)
@@ -151,15 +148,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestConfig.cmake  ${CTEST_BINARY_DIR
 ## -- CTest Testfile
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestTestfile.cmake ${CTEST_BINARY_DIRECTORY}/CTestTestfile.cmake)
 
-
-# passthrow a environnement variable to binary path to tests
-SET(ENV{OV_BINARY_PATH} "${CTEST_SOURCE_DIRECTORY}/dist")
 ## -- read CTestCustom.cmake file
 ctest_read_custom_files("${CTEST_BINARY_DIRECTORY}")
-
-# this is the folder where test scenarios can be run under
-SET(ENV{OV_TEST_DEPLOY_PATH} "${CTEST_SOURCE_DIRECTORY}/local-tmp/test-deploy/")
-MESSAGE("Set the test deploy path to $ENV{OV_TEST_DEPLOY_PATH}")
 
 #~ SET(CTEST_PROJECT_NAME "OpenViBe")
 #~ # set time for update 
