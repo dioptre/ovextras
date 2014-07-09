@@ -159,7 +159,7 @@ CDesignerVisualisation::CDesignerVisualisation(const IKernelContext& rKernelCont
 	m_pUndefinedItemFactory(NULL),
 	m_pSplitItemFactory(NULL)
 {
-		m_ui32ModUIBoxes = 0;
+		m_ui32ModifiableSettingsBoxes = 0;
 
 		//we have to check the number of mod UI boxes
 		IScenario& m_rScenario =  m_rInterfacedScenario.m_rScenario;
@@ -167,9 +167,9 @@ CDesignerVisualisation::CDesignerVisualisation(const IKernelContext& rKernelCont
 		while (l_oId!=OV_UndefinedIdentifier)
 		{
 			IBox* l_oBox = m_rScenario.getBoxDetails (l_oId);
-			if(l_oBox->hasModUI())
+			if(l_oBox->hasModifiableSettings())
 			{
-				m_ui32ModUIBoxes++;
+				m_ui32ModifiableSettingsBoxes++;
 			}
 			l_oId = m_rScenario.getNextBoxIdentifier(l_oId);
 		}
@@ -333,17 +333,17 @@ void CDesignerVisualisation::onVisualisationBoxAdded(const IBox* pBox)
 	}
 
 	//if this is a mod UI box
-	if (pBox->hasModUI())
+	if (pBox->hasModifiableSettings())
 	{
 		m_rKernelContext.getLogManager() <<  LogLevel_Debug << "box has MODUI\n";
 		//if there was no mod UI box previously, this is the first one so we need to add the config tab
-		if (m_ui32ModUIBoxes==0)
+		if (m_ui32ModifiableSettingsBoxes==0)
 		{
 			m_rKernelContext.getLogManager() <<  LogLevel_Debug << "adding config tab\n";
 			this->newVisualisationPanel("config");
 		}
 		//new mod UI box
-		m_ui32ModUIBoxes++;
+		m_ui32ModifiableSettingsBoxes++;
 	}
 
 	CIdentifier l_oVisualisationWidgetIdentifier;
@@ -359,7 +359,7 @@ void CDesignerVisualisation::onVisualisationBoxAdded(const IBox* pBox)
 	m_rVisualisationTree.reloadTree();
 
 	//to add the mod UI widget to the config tab we have to wait after the addVisualisationWidget + reloadTree
-	if (pBox->hasModUI())
+	if (pBox->hasModifiableSettings())
 	{
 		CString l_PanelName("config");
 		CIdentifier l_oIdentifier = OV_UndefinedIdentifier;
@@ -384,7 +384,7 @@ void CDesignerVisualisation::onVisualisationBoxAdded(const IBox* pBox)
 		if(l_bFound)
 		{
 			//put the widget we just created in the panel
-			if (m_ui32ModUIBoxes==1)//first modUI widget to put in the tab
+			if (m_ui32ModifiableSettingsBoxes==1)//first modUI widget to put in the tab
 			{
 				m_rKernelContext.getLogManager() <<  LogLevel_Debug << "			adding first modUI widget\n";
 				//put the widget in the empty config tab in position 0
@@ -398,18 +398,18 @@ void CDesignerVisualisation::onVisualisationBoxAdded(const IBox* pBox)
 				//find the last child of the config tab and add this widget to its right
 				CIdentifier l_oLastChildID;
 
-				//to try to even out the tab, we add the new widget on the first or second child of the tab accroding to the oddness of m_ui32ModUIBoxes
+				//to try to even out the tab, we add the new widget on the first or second child of the tab accroding to the oddness of m_ui32ModifiableSettingsBoxes
 
 				//first always the child 0 which is the split child of the tab
 				l_oPanel->getChildIdentifier(0, l_oLastChildID);
 				//l_oLastChildID now contains the ID of the first root split
 
 				//this split has 1 to 2 children and so on ...
-				if (m_ui32ModUIBoxes>=2)
+				if (m_ui32ModifiableSettingsBoxes>=2)
 				{
 					IVisualisationWidget* l_oSplit = NULL;
 					l_oSplit = m_rVisualisationTree.getVisualisationWidget(l_oLastChildID);
-					uint32 count = m_ui32ModUIBoxes-1;
+					uint32 count = m_ui32ModifiableSettingsBoxes-1;
 					while (count>1)
 					{
 						//0 is left 1 is right (could be top/bottom)
@@ -475,11 +475,11 @@ void CDesignerVisualisation::onVisualisationBoxRemoved(const CIdentifier& rBoxId
 	{
 		//retrieve box details
 		const IBox* l_pBox = m_rInterfacedScenario.m_rScenario.getBoxDetails(rBoxIdentifier);
-		if (l_pBox->hasModUI())
+		if (l_pBox->hasModifiableSettings())
 		{
-			m_ui32ModUIBoxes--;
+			m_ui32ModifiableSettingsBoxes--;
 			//if this was the last modUI box, remove the config tab(?)
-			if (m_ui32ModUIBoxes==0)
+			if (m_ui32ModifiableSettingsBoxes==0)
 			{
 				//that works if the user did not mess with the tab
 				CString l_oActivePanel(m_oActiveVisualisationPanelName);
