@@ -1,4 +1,4 @@
-#include "ovpCBoxAlgorithmModUI.h"
+#include "ovpCBoxAlgorithmModifiableSettings.h"
 #include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;

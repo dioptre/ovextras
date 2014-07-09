@@ -2,7 +2,7 @@
 
 #include "box-algorithms/ovpCHelloWorld.h"
 #include "box-algorithms/ovpCHelloWorldWithInput.h"
-#include "box-algorithms/ovpCBoxAlgorithmModUI.h"
+#include "box-algorithms/ovpCBoxAlgorithmModifiableSettings.h"
 #include "box-algorithms/ovpCBoxAlgorithmMessageSender.h"
 #include "box-algorithms/ovpCBoxAlgorithmMessageReceiver.h"
 
