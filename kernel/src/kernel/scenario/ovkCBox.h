@@ -151,7 +151,7 @@ namespace OpenViBE
 			virtual OpenViBE::boolean setSettingMod(
 				const OpenViBE::uint32 ui32SettingIndex,
 				const OpenViBE::boolean rValue);
-			virtual OpenViBE::boolean hasModUI(void)const;
+			virtual OpenViBE::boolean hasModifiableSettings(void)const;
 
 			virtual OpenViBE::uint32* getModifiableSettings(OpenViBE::uint32& rCount)const;
 			//*/

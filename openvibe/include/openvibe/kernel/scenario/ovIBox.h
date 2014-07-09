@@ -421,7 +421,7 @@ namespace OpenViBE
 			 * \return \e true if it does.
 			 * \return \e false otherwise.
 			 */
-			virtual OpenViBE::boolean hasModUI(void)const=0;
+			virtual OpenViBE::boolean hasModifiableSettings(void)const=0;
 
 
 			virtual OpenViBE::uint32* getModifiableSettings(OpenViBE::uint32& rCount)const =0;

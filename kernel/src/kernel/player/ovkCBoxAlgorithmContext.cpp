@@ -35,7 +35,7 @@ namespace OpenViBE
 				virtual __BridgeBindFunc1__((*m_pBox), CIdentifier, getNextAttributeIdentifier, const, const CIdentifier&, rPreviousIdentifier);
 
 				// IBox
-				virtual __BridgeBindFunc0__((*m_pBox), boolean, hasModUI, const);
+				virtual __BridgeBindFunc0__((*m_pBox), boolean, hasModifiableSettings, const);
 
 				virtual __BridgeBindFunc0__((*m_pBox), CIdentifier, getIdentifier, const);
 				virtual __BridgeBindFunc0__((*m_pBox), CString, getName, const);

@@ -1415,7 +1415,7 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 		m_vCurrentObject[l_oBoxIdentifier]=true;
 
 		// If a visualisation box was dropped, add it in window manager
-		if((l_pPOD && l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization))||(l_pBox->hasModUI()))
+		if((l_pPOD && l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization))||(l_pBox->hasModifiableSettings()))
 		{
 			// Let window manager know about new box
 			m_pDesignerVisualisation->onVisualisationBoxAdded(l_pBox);
@@ -2444,7 +2444,7 @@ void CInterfacedScenario::pasteSelection(void)
 		const IPluginObjectDesc* l_pPOD = m_rKernelContext.getPluginManager().getPluginObjectDescCreating(l_oBoxAlgorithmIdentifier);
 
 		// If a visualisation box was dropped, add it in window manager
-		if((l_pPOD && l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization))||(l_pBox->hasModUI()))
+		if((l_pPOD && l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization))||(l_pBox->hasModifiableSettings()))
 		{
 			// Let window manager know about new box
 			m_pDesignerVisualisation->onVisualisationBoxAdded(m_rScenario.getBoxDetails(l_oNewIdentifier));
@@ -2615,7 +2615,7 @@ void CInterfacedScenario::contextMenuBoxRenameCB(IBox& rBox)
 		const IPluginObjectDesc* l_pPOD = m_rKernelContext.getPluginManager().getPluginObjectDescCreating(l_oId);
 
 		//if a visualisation box was renamed, tell window manager about it
-		if((l_pPOD && l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization))||(rBox.hasModUI()))
+		if((l_pPOD && l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization))||(rBox.hasModifiableSettings()))
 		{
 			m_pDesignerVisualisation->onVisualisationBoxRenamed(rBox.getIdentifier());
 		}
@@ -2676,7 +2676,7 @@ void CInterfacedScenario::contextMenuBoxRenameAllCB()
 						const IPluginObjectDesc* l_pPOD = m_rKernelContext.getPluginManager().getPluginObjectDescCreating(l_oId);
 
 						//if a visualisation box was renamed, tell window manager about it
-						if((l_pPOD && l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization))||(l_pBox->hasModUI()))
+						if((l_pPOD && l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization))||(l_pBox->hasModifiableSettings()))
 						{
 							m_pDesignerVisualisation->onVisualisationBoxRenamed(l_pBox->getIdentifier());
 						}
@@ -3047,7 +3047,7 @@ void CInterfacedScenario::createPlayerVisualisation()
 		while (l_oId!=OV_UndefinedIdentifier)
 		{
 			IBox* l_oBox = m_rScenario.getBoxDetails (l_oId);
-			if(l_oBox->hasModUI())//if the box has modUI
+			if(l_oBox->hasModifiableSettings())//if the box has modUI
 			{
 				//create a BoxConfigurationDialog in mode true
 				CBoxConfigurationDialog* l_oBoxConfigurationDialog = new CBoxConfigurationDialog(m_rKernelContext,*l_oBox,m_sGUIFilename.c_str(), m_sGUISettingsFilename.c_str(), true);
@@ -3094,7 +3094,7 @@ boolean CInterfacedScenario::hasSelection(void)
 }
 
 //this function is called by the g_idle_loop (see CApplication class) and update the boxes' settings with the value in the UI
-boolean CInterfacedScenario::updateModUIBoxes(void)
+boolean CInterfacedScenario::updateModifiableSettingsBoxes(void)
 {
 	for (uint32 i=0; i<m_vBoxConfigurationDialog.size(); i++)
 	{
@@ -3105,7 +3105,7 @@ boolean CInterfacedScenario::updateModUIBoxes(void)
 }
 
 
-boolean CInterfacedScenario::deleteModUIBoxes(void)
+boolean CInterfacedScenario::deleteModifiableSettingsBoxes(void)
 {
 	for (uint32 i=0; i<m_vBoxConfigurationDialog.size(); i++)
 	{
@@ -3118,7 +3118,7 @@ boolean CInterfacedScenario::deleteModUIBoxes(void)
 }
 
 //give the PlayerVisualisation the matching between the GtkWidget created by the CBoxConfigurationDialog and the Box CIdentifier
-boolean CInterfacedScenario::setModUIWidgets(void)
+boolean CInterfacedScenario::setModifiableSettingsWidgets(void)
 {
 	for (uint32 i=0; i<m_vBoxConfigurationDialog.size(); i++)
 	{

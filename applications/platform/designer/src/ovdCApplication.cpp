@@ -468,7 +468,7 @@ namespace
 		l_pInterfacedScenario->m_pPlayer->loop(l_ui64CurrentTime-l_pInterfacedScenario->m_ui64LastLoopTime);
 		l_pInterfacedScenario->m_ui64LastLoopTime=l_ui64CurrentTime;
 		//for modUI boxes
-		l_pInterfacedScenario->updateModUIBoxes();
+		l_pInterfacedScenario->updateModifiableSettingsBoxes();
 		return TRUE;
 	}
 
@@ -862,7 +862,7 @@ boolean CApplication::openScenario(const char* sFileName)
 					const IBox* l_pBox = l_rScenario.getBoxDetails(l_oBoxIdentifier);
 					CIdentifier l_oAlgorithmIdentifier = l_pBox->getAlgorithmClassIdentifier();
 					const IPluginObjectDesc* l_pPOD = m_rKernelContext.getPluginManager().getPluginObjectDescCreating(l_oAlgorithmIdentifier);
-					if((l_pPOD != NULL && l_pPOD->hasFunctionality(PluginFunctionality_Visualization))||(l_pBox->hasModUI()))
+					if((l_pPOD != NULL && l_pPOD->hasFunctionality(PluginFunctionality_Visualization))||(l_pBox->hasModifiableSettings()))
 					{
 						//a visualisation widget was found in scenario : manually add it to visualisation tree
 						l_rVisualisationTree.addVisualisationWidget(
@@ -1632,7 +1632,7 @@ void CApplication::releasePlayer(void)
 		l_pCurrentInterfacedScenario->m_pPlayer->uninitialize();
 
 		//must delete the CBoxCOnfiguration dialog of the mod UI boxes here before the undoCB
-		l_pCurrentInterfacedScenario->deleteModUIBoxes();
+		l_pCurrentInterfacedScenario->deleteModifiableSettingsBoxes();
 
 		m_rKernelContext.getPlayerManager().releasePlayer(l_pCurrentInterfacedScenario->m_oPlayerIdentifier);
 
