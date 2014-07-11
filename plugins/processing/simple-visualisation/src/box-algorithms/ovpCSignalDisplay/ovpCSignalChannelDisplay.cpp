@@ -481,13 +481,13 @@ void CSignalChannelDisplay::computeZoom(OpenViBE::boolean bZoomIn, OpenViBE::flo
 	}
 }
 
-void CSignalChannelDisplay::checkTranslation(std::vector<float64> & rDisplayedValueRange)
+void CSignalChannelDisplay::updateDisplayedValueRange(std::vector<float64> & rDisplayedValueRange)
 {
 	//update maximum and minimum values displayed by this channel
 	float64 l_f64CurrentMaximum;
 	float64 l_f64CurrentMinimum;
 
-    float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
+//    float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
     rDisplayedValueRange.resize(m_oChannelList.size());
 
 	for(size_t k=0 ; k<m_oChannelList.size() ; k++)
@@ -507,8 +507,8 @@ void CSignalChannelDisplay::checkTranslation(std::vector<float64> & rDisplayedVa
         //set parameter to recomputed range
         rDisplayedValueRange[k] = m_vLocalMaximum[k] - m_vLocalMinimum[k];
 
-        //in global best fit mode, translate signals if necessary
-        if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
+        //in global best fit mode, translate signals if necessary // Commenting out this since it's already done in CSignalChannelDisplay::updateDisplayParameters()
+/*        if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
         {
             //compute Y coord of local max and min
             gint l_iMaxY = (gint)getSampleYCoordinate(m_vLocalMaximum[k],k);
@@ -522,7 +522,7 @@ void CSignalChannelDisplay::checkTranslation(std::vector<float64> & rDisplayedVa
                 //reflect changes
                 redrawAllAtNextRefresh();
             }
-        }
+        }*/
     }
 }
 
@@ -546,6 +546,26 @@ void CSignalChannelDisplay::setGlobalBestFitParameters(const float64& rRange, co
 	{
 		updateDisplayParameters();
 	}
+}
+
+void CSignalChannelDisplay::setMultiViewBestFitParameters(const float64& rRange, const float64& rMargin)
+{
+    m_f64ScaleX = 1;
+    m_f64VerticalScale = rRange/2;
+
+        float64 l_f64LocalMediumValue = (m_vLocalMaximum[0] + m_vLocalMinimum[0]) / 2;
+
+        m_vMaximumTopMargin[0] = l_f64LocalMediumValue + rRange/2 + rMargin;
+        m_vMaximumBottomMargin[0] = l_f64LocalMediumValue + rRange/2 - rMargin;
+
+        m_vMinimumTopMargin[0] = l_f64LocalMediumValue - rRange/2 + rMargin;
+        m_vMinimumBottomMargin[0] = l_f64LocalMediumValue - rRange/2 - rMargin;
+
+
+    if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
+    {
+        updateDisplayParameters();
+    }
 }
 
 void CSignalChannelDisplay::updateDisplayParameters()

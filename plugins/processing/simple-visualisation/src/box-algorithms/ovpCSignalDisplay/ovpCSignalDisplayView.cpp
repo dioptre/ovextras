@@ -582,7 +582,7 @@ namespace OpenViBEPlugins
 				if(GTK_WIDGET_VISIBLE(m_oChannelDisplay[i]->getSignalDisplayWidget()))
 				{
                     vector<float64> l_vValueRange;
-                    m_oChannelDisplay[i]->checkTranslation(l_vValueRange);
+                    m_oChannelDisplay[i]->updateDisplayedValueRange(l_vValueRange);
                     if(m_bIsEEGSignal)
                     {
                         for(uint32 j=0 ; j<m_oChannelDisplay[i]->m_oChannelList.size(); j++)
