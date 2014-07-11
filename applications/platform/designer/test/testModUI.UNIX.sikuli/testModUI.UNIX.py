@@ -11,7 +11,7 @@ def setUp(self):
 def testChangeParametersOnline(self):
     click("play.png")
     wait("InitialStateSignalDisplay.png",10)
-    dragDrop(Pattern("InitialStateSignalDisplay.png").targetOffset(-126,-164), Pattern("InitialStateSignalDisplay.png").targetOffset(159,-172))
+    dragDrop(Pattern("InitialStateSignalDisplay.png").targetOffset(-126,-164), Pattern("InitialStateSignalDisplay.png").targetOffset(-89,194))
     wait(Pattern("Config.png").similar(0.90).targetOffset(43,0),2)
     click(Pattern("Config.png").similar(0.90).targetOffset(43,0))
     wait(Pattern("Filtertype.png").targetOffset(210,0),2)
