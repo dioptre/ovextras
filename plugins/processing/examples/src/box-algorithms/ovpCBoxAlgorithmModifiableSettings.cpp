@@ -1,4 +1,4 @@
-#include "ovpCBoxAlgorithmModUI.h"
+#include "ovpCBoxAlgorithmModifiableSettings.h"
 #include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;
@@ -8,7 +8,7 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Examples;
 
-boolean CBoxAlgorithmModUI::initialize(void)
+boolean CBoxAlgorithmModifiableSettings::initialize(void)
 {
 	m_ui64LastTime = 0;
 	
@@ -16,20 +16,20 @@ boolean CBoxAlgorithmModUI::initialize(void)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmModUI::uninitialize(void)
+boolean CBoxAlgorithmModifiableSettings::uninitialize(void)
 {
 	return true;
 }
 /*******************************************************************************/
 
 
-uint64 CBoxAlgorithmModUI::getClockFrequency(void)
+uint64 CBoxAlgorithmModifiableSettings::getClockFrequency(void)
 {
 	// Once every 5 second
 	return 	(uint64)( double( (uint64)1<<32 ) * 5);
 }
 
-boolean CBoxAlgorithmModUI::processClock(OpenViBE::Kernel::IMessageClock& /* rMessageClock */)
+boolean CBoxAlgorithmModifiableSettings::processClock(OpenViBE::Kernel::IMessageClock& /* rMessageClock */)
 {
 	uint64 l_ui64Time = (uint64)ITimeArithmetics::timeToSeconds(this->getPlayerContext().getCurrentTime());
 
@@ -50,7 +50,7 @@ boolean CBoxAlgorithmModUI::processClock(OpenViBE::Kernel::IMessageClock& /* rMe
 
 /*******************************************************************************/
 
-boolean CBoxAlgorithmModUI::updateSettings()
+boolean CBoxAlgorithmModifiableSettings::updateSettings()
 {
 	m_vSettingsValue.clear();
 	IBox& l_rStaticBoxContext = this->getStaticBoxContext();
@@ -64,7 +64,7 @@ boolean CBoxAlgorithmModUI::updateSettings()
 }
 
 
-boolean CBoxAlgorithmModUI::process(void)
+boolean CBoxAlgorithmModifiableSettings::process(void)
 {
 
 

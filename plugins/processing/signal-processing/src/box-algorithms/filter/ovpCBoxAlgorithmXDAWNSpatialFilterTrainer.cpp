@@ -161,10 +161,9 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 
 	boolean l_bShouldTrain=false;
 	uint64 l_ui64TrainDate=0, l_ui64TrainChunkStartTime=0, l_ui64TrainChunkEndTime=0;
-	uint32 i, j, k;
 	std::vector < SChunk >::const_iterator it;
 
-	for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
+	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
 		TParameterHandler < const IMemoryBuffer* > ip_pMemoryBuffer(m_pStimulationDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
 		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
@@ -177,15 +176,16 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		if(m_pStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
 		{
 			TParameterHandler < IStimulationSet* > op_pStimulationSet(m_pStimulationDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
-			for(j=0; j<op_pStimulationSet->getStimulationCount(); j++)
+			// See if there is a training stimulation. If several, accept the first one.
+			for(uint32 j=0;j<op_pStimulationSet->getStimulationCount(); j++)
 			{
-				l_bShouldTrain |= (op_pStimulationSet->getStimulationIdentifier(j)==m_ui64StimulationIdentifier);
-			}
-			if(l_bShouldTrain)
-			{
-				l_ui64TrainDate = op_pStimulationSet->getStimulationDate(j);
-				l_ui64TrainChunkStartTime = l_rDynamicBoxContext.getInputChunkStartTime(0, i);
-				l_ui64TrainChunkEndTime = l_rDynamicBoxContext.getInputChunkEndTime(0, i);
+				if(op_pStimulationSet->getStimulationIdentifier(j)==m_ui64StimulationIdentifier) {
+					l_ui64TrainDate = op_pStimulationSet->getStimulationDate(j);	// date of the last matching stimulus in the set
+					l_ui64TrainChunkStartTime = l_rDynamicBoxContext.getInputChunkStartTime(0, i);
+					l_ui64TrainChunkEndTime = l_rDynamicBoxContext.getInputChunkEndTime(0, i);
+					l_bShouldTrain = true;
+					break;
+				}
 			}
 		}
 		if(m_pStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
@@ -207,7 +207,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		// uint64 l_ui64StartTime=uint64(-1);
 		uint64 l_ui64EndTime=uint64(-1);
 		std::vector < SChunk > l_vSignalChunk;
-		for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
+		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
 		{
 			TParameterHandler<const IMemoryBuffer*> ip_pMemoryBuffer(m_pSignalDecoder->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
 			ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(1, i);
@@ -251,7 +251,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		this->getLogManager() << LogLevel_Trace << "Decoding evoked response potential...\n";
 
 		std::vector < SChunk > l_vEvokedPotential;
-		for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(2); i++)
+		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(2); i++)
 		{
 			TParameterHandler<const IMemoryBuffer*> ip_pMemoryBuffer(m_pEvokedPotentialDecoder->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
 			ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(2, i);
@@ -302,13 +302,13 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		{
 			const float64* l_pEvokedPotentialBuffer=it->m_pMatrix->getBuffer();
 			float64* l_pAveragedBuffer=l_oAveragedERPMatrixOV.getBuffer();
-			for(j=0; j<l_oAveragedERPMatrixOV.getBufferElementCount(); j++)
+			for(uint32 j=0; j<l_oAveragedERPMatrixOV.getBufferElementCount(); j++)
 			{
 				*(l_pAveragedBuffer++)+=*(l_pEvokedPotentialBuffer++);
 			}
 		}
 		float64* l_pAveragedBuffer=l_oAveragedERPMatrixOV.getBuffer();
-		for(j=0; j<l_oAveragedERPMatrixOV.getBufferElementCount(); j++)
+		for(uint32 j=0; j<l_oAveragedERPMatrixOV.getBufferElementCount(); j++)
 		{
 			(*l_pAveragedBuffer++)/=l_vEvokedPotential.size();
 		}
@@ -325,7 +325,8 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		uint64 l_ui64SignalEndTime=l_vSignalChunk.rbegin()->m_ui64EndTime;
 
 		itpp::mat l_oSignalMatrix(l_ui32ChannelCount, l_ui32ChunkCount*l_ui32SampleCountPerChunk);
-		for(i=0, it=l_vSignalChunk.begin(); it!=l_vSignalChunk.end(); it++, i++)
+		it=l_vSignalChunk.begin();
+		for(uint32 i=0; it!=l_vSignalChunk.end(); it++, i++)
 		{
 			itpp::mat l_oMatrix=itppext::convert(*it->m_pMatrix);
 			l_oSignalMatrix.set_submatrix(0, i*l_ui32SampleCountPerChunk, l_oMatrix);
@@ -340,7 +341,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		{
 			uint64 l_ui64ERPStartTime=it->m_ui64StartTime;
 			uint32 l_ui32ERPStartIndex=(uint32)(((l_ui64ERPStartTime-l_ui64SignalStartTime)*(l_ui32SampleCountPerChunk*l_ui32ChunkCount))/(l_ui64SignalEndTime-l_ui64SignalStartTime));
-			for(k=0; k<l_ui32SampleCountPerERP; k++)
+			for(uint32 k=0; k<l_ui32SampleCountPerERP; k++)
 			{
 				l_oDMatrix(l_ui32ERPStartIndex+k,k)=1;
 			}
@@ -386,7 +387,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		if(itppext::eig(A, B, l_oEigenValue, l_oEigenVector))
 		{
 			std::map < double, itpp::vec > l_vEigenVector;
-			for(i=0; i<l_ui32ChannelCount; i++)
+			for(uint32 i=0; i<l_ui32ChannelCount; i++)
 			{
 				itpp::vec l_oVector=l_oEigenVector.get_col(i);
 				l_vEigenVector[l_oEigenValue[i]]=l_oVector/itpp::norm(l_oVector);
@@ -413,9 +414,10 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 
 			::fprintf(l_pFile, "<OpenViBE-SettingsOverride>\n");
 			::fprintf(l_pFile, "\t<SettingValue>");
-			for(it=l_vEigenVector.rbegin(), i=0; it!=l_vEigenVector.rend() && i<m_ui64FilterDimension; it++, i++)
+			it=l_vEigenVector.rbegin();
+			for(uint32 i=0; it!=l_vEigenVector.rend() && i<m_ui64FilterDimension; it++, i++)
 			{
-				for(j=0; j<l_ui32ChannelCount; j++)
+				for(uint32 j=0; j<l_ui32ChannelCount; j++)
 				{
 					::fprintf(l_pFile, "%e ", it->second[j]);
 				}
@@ -427,7 +429,8 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 			::fclose(l_pFile);
 
 			this->getLogManager() << LogLevel_Info << "Training finished... Eigen values are ";
-			for(it=l_vEigenVector.rbegin(), i=0; it!=l_vEigenVector.rend() && i<m_ui64FilterDimension; it++, i++)
+			it=l_vEigenVector.rbegin();
+			for(uint32 i=0; it!=l_vEigenVector.rend() && i<m_ui64FilterDimension; it++, i++)
 			{
 				this->getLogManager() << " | " << float64(it->first);
 			}

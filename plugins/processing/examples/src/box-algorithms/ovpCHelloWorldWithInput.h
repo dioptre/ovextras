@@ -7,7 +7,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Samples
+	namespace Examples
 	{
 		class CHelloWorldWithInput : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
@@ -74,7 +74,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-copy"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_HelloWorldWithInput; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CHelloWorldWithInput(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Examples::CHelloWorldWithInput(); }
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CHelloWorldWithInputListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 

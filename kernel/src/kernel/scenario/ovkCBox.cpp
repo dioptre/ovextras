@@ -902,7 +902,7 @@ boolean CBox::setSettingMod(
 	return true;
 }
 
-boolean CBox::hasModUI(void)const
+boolean CBox::hasModifiableSettings(void)const
 {
 	uint32 i=0;
 	boolean rValue = false;

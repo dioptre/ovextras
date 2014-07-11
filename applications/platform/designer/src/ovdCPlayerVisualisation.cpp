@@ -88,8 +88,7 @@ void CPlayerVisualisation::init(void)
 	m_rVisualisationTree.reloadTree();
 
 	//must be called after the previous call to reload tree
-	m_rInterfacedScenario.setModUIWidgets();
-
+	m_rInterfacedScenario.setModifiableSettingsWidgets();
 }
 
 ::GtkWidget* CPlayerVisualisation::loadTreeWidget(IVisualisationWidget* pVisualisationWidget)

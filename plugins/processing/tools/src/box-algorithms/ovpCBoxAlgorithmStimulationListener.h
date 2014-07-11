@@ -68,7 +68,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Prints stimulation codes in the log manager"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("blah"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Prints each received stimulationto the log using the log level specified in the box config."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tools"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-info"); }
