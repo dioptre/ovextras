@@ -156,3 +156,10 @@ OVP_Declare_Begin();
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
 OVP_Declare_End();
+
+#include<cmath>
+bool ov_float_equal(double f64First, double f64Second)
+{
+	const double c_f64Epsilon = 0.000001;
+	return c_f64Epsilon > ::fabs(f64First - f64Second);
+}

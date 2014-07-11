@@ -12,6 +12,7 @@
 #include <xml/IXMLHandler.h>
 #include <xml/IXMLNode.h>
 
+//This needs to reachable from outside
 const char* const c_sClassifierRoot = "OpenViBE-Classifier";
 
 const char* const c_sXmlVersionAttributeName = "XMLVersion";
@@ -426,9 +427,7 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 			m_vFeatureVector[k].m_pFeatureVectorMatrix->getBuffer(),
 			l_ui32FeatureVectorSize*sizeof(float64));
 
-//		std::cout << "Expecting " << l_f64TrainerClass << "\n";
 		m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
-//		std::cout << "get " << op_f64ClassificationStateClass << "\n";
 
 		if(op_f64ClassificationStateClass==l_f64TrainerClass)
 		{
@@ -436,7 +435,7 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 		}
 	}
 
-	return (float64)(l_iSuccessfullTrainerCount*100.0)/(uiStopIndex-uiStartIndex);
+	return static_cast<float64>((l_iSuccessfullTrainerCount*100.0)/(uiStopIndex-uiStartIndex));
 }
 
 

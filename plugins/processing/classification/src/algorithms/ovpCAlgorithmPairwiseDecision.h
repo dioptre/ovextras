@@ -27,6 +27,10 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
+		/**
+		 * @brief The CAlgorithmPairwiseDecision class
+		 * This is the default class for every decision usable with the One Vs One pairwise strategy.
+		 */
 		class CAlgorithmPairwiseDecision : virtual public OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >
 		{
 

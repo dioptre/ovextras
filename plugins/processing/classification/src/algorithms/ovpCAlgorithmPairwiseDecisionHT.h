@@ -13,7 +13,12 @@
 namespace OpenViBEPlugins
 {
 	namespace Classification
-	{
+	{	/**
+		 * @brief The CAlgorithmPairwiseDecisionHT class is a decision strategy for the One Vs One pairwise decision that implement the
+		 * method describe in the article Hastie, Trevor; Tibshirani, Robert. Classification by pairwise coupling. The Annals of Statistics 26 (1998), no. 2, 451--471
+		 *
+		 * Probability required
+		 */
 		class CAlgorithmPairwiseDecisionHT : virtual public OpenViBEPlugins::Classification::CAlgorithmPairwiseDecision
 		{
 
@@ -41,7 +46,9 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Serrière Guillaume"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("."); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This method is based on the method describe in the article "
+																									"Hastie, Trevor; Tibshirani, Robert. Classification by pairwise coupling."
+																									"The Annals of Statistics 26 (1998), no. 2, 451--471"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 

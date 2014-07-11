@@ -133,9 +133,9 @@ IXMLNode *IXMLNodeImpl::getChild(const XML::uint32 iChildIndex) const
 
 IXMLNode *IXMLNodeImpl::getChildByName(const char *sName) const
 {
-	for (vector<XML::IXMLNode*>::const_iterator it=m_oNodeVector.begin(); it!=m_oNodeVector.end(); ++it)
+	for (vector<IXMLNode*>::const_iterator it=m_oNodeVector.begin(); it!=m_oNodeVector.end(); ++it)
 	{
-		IXMLNode *l_sTempNode = (IXMLNode *)(*it);
+		IXMLNode *l_sTempNode = static_cast<IXMLNode*>(*it);
 		if(::strcmp(l_sTempNode->getName(), sName) == 0)
 			return l_sTempNode;
 	}
@@ -205,7 +205,7 @@ char* IXMLNodeImpl::getXML(const XML::uint32 depth) const
 
 	for (vector<XML::IXMLNode*>::const_iterator it=m_oNodeVector.begin(); it!=m_oNodeVector.end(); ++it)
 	{
-		IXMLNode *l_sTempNode = (IXMLNode *)(*it);
+		IXMLNode *l_sTempNode = static_cast<IXMLNode *>(*it);
 		l_sRes = l_sRes + string("\n") + l_sTempNode->getXML(depth+1);
 	}
 

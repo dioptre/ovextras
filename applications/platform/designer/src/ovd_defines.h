@@ -140,4 +140,6 @@ namespace OpenViBEDesigner
  #include "ovp_global_defines.h"
 #endif // TARGET_HAS_ThirdPartyOpenViBEPluginsGlobalDefines
 
+
+
 #endif // __OpenViBEDesigner_defines_H__

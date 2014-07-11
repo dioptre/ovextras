@@ -8,13 +8,14 @@
 #include <iostream>
 #include <system/Memory.h>
 
-
-static const char* const c_sTypeNodeName = "OneVsAll";
-static const char* const c_sSubClassifierIdentifierNodeName = "SubClassifierIdentifier";
-static const char* const c_sAlgorithmIdAttribute = "algorithm-id";
-static const char* const c_sSubClassifierCountNodeName = "SubClassifierCount";
-static const char* const c_sSubClassifiersNodeName = "SubClassifiers";
-static const char* const c_sSubClassifierNodeName = "SubClassifier";
+namespace{
+	const char* const c_sTypeNodeName = "OneVsAll";
+	const char* const c_sSubClassifierIdentifierNodeName = "SubClassifierIdentifier";
+	const char* const c_sAlgorithmIdAttribute = "algorithm-id";
+	const char* const c_sSubClassifierCountNodeName = "SubClassifierCount";
+	const char* const c_sSubClassifiersNodeName = "SubClassifiers";
+	const char* const c_sSubClassifierNodeName = "SubClassifier";
+}
 
 extern const char* const c_sClassifierRoot;
 
@@ -50,7 +51,8 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
 {
 	const uint32 l_ui32AmountClass = m_oSubClassifierList.size();
 	std::map < float64, size_t > l_vClassLabels;
-	for(uint32 i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
+
+	for(size_t i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
 	{
 		if(!l_vClassLabels.count(rFeatureVectorSet[i].getLabel()))
 		{
@@ -61,31 +63,40 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
 
 	if(l_vClassLabels.size() != l_ui32AmountClass)
 	{
-		this->getLogManager() << LogLevel_Error << "There is sample for " << (uint32)l_vClassLabels.size() << " classes but expected for " << l_ui32AmountClass << ".\n";
+		this->getLogManager() << LogLevel_Error << "There is sample for " << l_vClassLabels.size() << " classes but expected for " << l_ui32AmountClass << ".\n";
 		return false;
 	}
 
-	//We send new set of data to each classifer. They will all use two different classes 1 and 2. 1 is for the class it should recognize, 2 for the others
-	for(uint32 l_iClassifierCounter = 1 ; l_iClassifierCounter <= m_oSubClassifierList.size() ; ++l_iClassifierCounter )
-	{
-		uint32 l_ui32FeatureVectorSize=rFeatureVectorSet[0].getSize();
+	//We set the IMatrix fo the first classifier
+	const uint32 l_ui32FeatureVectorSize=rFeatureVectorSet[0].getSize();
+	TParameterHandler < IMatrix* > ip_pFeatureVectorSetReference(m_oSubClassifierList[0]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
+	ip_pFeatureVectorSetReference->setDimensionCount(2);
+	ip_pFeatureVectorSetReference->setDimensionSize(0, rFeatureVectorSet.getFeatureVectorCount());
+	ip_pFeatureVectorSetReference->setDimensionSize(1, l_ui32FeatureVectorSize+1);
 
+	float64* l_pFeatureVectorSetBuffer=ip_pFeatureVectorSetReference->getBuffer();
+	for(size_t j=0; j<rFeatureVectorSet.getFeatureVectorCount(); j++)
+	{
+		System::Memory::copy(
+					l_pFeatureVectorSetBuffer,
+					rFeatureVectorSet[j].getBuffer(),
+					l_ui32FeatureVectorSize*sizeof(float64));
+		//We let the space for the label
+		l_pFeatureVectorSetBuffer+=(l_ui32FeatureVectorSize+1);
+	}
+
+	//And then we just change adapt the label for each feature vector but we don't copy them anymore
+	for(size_t l_iClassifierCounter = 1 ; l_iClassifierCounter <= m_oSubClassifierList.size() ; ++l_iClassifierCounter )
+	{
 		TParameterHandler < IMatrix* > ip_pFeatureVectorSet(m_oSubClassifierList[l_iClassifierCounter-1]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
-		ip_pFeatureVectorSet->setDimensionCount(2);
-		ip_pFeatureVectorSet->setDimensionSize(0, rFeatureVectorSet.getFeatureVectorCount());
-		ip_pFeatureVectorSet->setDimensionSize(1, l_ui32FeatureVectorSize+1);
+		ip_pFeatureVectorSet = (IMatrix*)ip_pFeatureVectorSetReference;
 
 		float64* l_pFeatureVectorSetBuffer=ip_pFeatureVectorSet->getBuffer();
 		for(size_t j=0; j<rFeatureVectorSet.getFeatureVectorCount(); j++)
 		{
-			System::Memory::copy(
-						l_pFeatureVectorSetBuffer,
-						rFeatureVectorSet[j].getBuffer(),
-						l_ui32FeatureVectorSize*sizeof(float64));
-
 			//Modify the class of each featureVector
-			float64 l_f64Class = rFeatureVectorSet[j].getLabel();
-			if((uint32)l_f64Class == l_iClassifierCounter)
+			const float64 l_f64Class = rFeatureVectorSet[j].getLabel();
+			if(static_cast<uint32>(l_f64Class) == l_iClassifierCounter)
 			{
 				l_pFeatureVectorSetBuffer[l_ui32FeatureVectorSize]=1;
 			}
@@ -105,9 +116,9 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 {
 	std::vector< std::pair < float64, IMatrix*> > l_oClassificationVector;
 
-	uint32 l_ui32FeatureVectorSize=rFeatureVector.getSize();
+	const uint32 l_ui32FeatureVectorSize=rFeatureVector.getSize();
 
-	for(uint32 l_iClassifierCounter = 0 ; l_iClassifierCounter < m_oSubClassifierList.size() ; ++l_iClassifierCounter )
+	for(size_t l_iClassifierCounter = 0 ; l_iClassifierCounter < m_oSubClassifierList.size() ; ++l_iClassifierCounter )
 	{
 		IAlgorithmProxy* l_pSubClassifier = this->m_oSubClassifierList[l_iClassifierCounter];
 		TParameterHandler < IMatrix* > ip_pFeatureVector(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
@@ -123,63 +134,64 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 					l_ui32FeatureVectorSize*sizeof(float64));
 		l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 		//this->getLogManager() << LogLevel_Info << l_iClassifierCounter << " " << (float64)op_f64ClassificationStateClass << " " << (*op_pClassificationValues)[0] << "\n";
-		l_oClassificationVector.push_back(std::pair< float64, IMatrix*>((float64)op_f64ClassificationStateClass, (IMatrix*)op_pClassificationValues));
+		l_oClassificationVector.push_back(std::pair< float64, IMatrix*>(static_cast<float64>(op_f64ClassificationStateClass),
+																		static_cast<IMatrix*>(op_pClassificationValues)));
 	}
 
 	//Now, we determine the best classification
-	std::pair<float64, IMatrix*> best = std::pair<float64, IMatrix*>(-1.0, (IMatrix*)NULL);
+	std::pair<float64, IMatrix*> l_oBest = std::pair<float64, IMatrix*>(-1.0, static_cast<IMatrix*>(NULL));
 	rf64Class = -1;
 
-	for(uint32 l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
+	for(size_t l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
 	{
 		std::pair<float64, IMatrix*>&   l_pTemp = l_oClassificationVector[l_iClassificationCount];
 		if(l_pTemp.first==1)
 		{
-			if(best.second == NULL)
+			if(l_oBest.second == NULL)
 			{
-				best = l_pTemp;
-				rf64Class = ((float64)l_iClassificationCount)+1;
+				l_oBest = l_pTemp;
+				rf64Class = l_iClassificationCount+1;
 			}
 			else
 			{
-				if((*m_fAlgorithmComparison)((*best.second), *(l_pTemp.second)) < 0)
+				if((*m_fAlgorithmComparison)((*l_oBest.second), *(l_pTemp.second)) < 0)
 				{
-					best = l_pTemp;
-					rf64Class = ((float64)l_iClassificationCount)+1;
+					l_oBest = l_pTemp;
+					rf64Class = l_iClassificationCount+1;
 				}
 			}
 		}
 	}
 
-	//If no one recognize the class, let's take a random one
-	//FIXME should take the most relevant
+	//If no one recognize the class, let's take the more relevant
 	if(rf64Class == -1)
 	{
 		for(uint32 l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
 		{
 			std::pair<float64, IMatrix*>& l_pTemp = l_oClassificationVector[l_iClassificationCount];
-			if(best.second == NULL)
+			if(l_oBest.second == NULL)
 			{
-				best = l_pTemp;
-				rf64Class = ((float64)l_iClassificationCount)+1;
+				l_oBest = l_pTemp;
+				rf64Class = (static_cast<float64>(l_iClassificationCount))+1;
 			}
 			else
 			{
-				if((*m_fAlgorithmComparison)((*best.second), *(l_pTemp.second)) > 0)
+				if((*m_fAlgorithmComparison)((*l_oBest.second), *(l_pTemp.second)) > 0)
 				{
-					best = l_pTemp;
-					rf64Class = ((float64)l_iClassificationCount)+1;
+					l_oBest = l_pTemp;
+					rf64Class = (static_cast<float64>(l_iClassificationCount))+1;
 				}
 			}
 		}
 	}
 
-	if(best.second == NULL)
+	//If we still don't have a better classification, we face an error
+	if(l_oBest.second == NULL)
 	{
 		return false;
 	}
-	rClassificationValues.setSize(best.second->getBufferElementCount());
-	System::Memory::copy(rClassificationValues.getBuffer(), best.second->getBuffer(), best.second->getBufferElementCount()*sizeof(float64));
+	rClassificationValues.setSize(l_oBest.second->getBufferElementCount());
+	System::Memory::copy(rClassificationValues.getBuffer(), l_oBest.second->getBuffer(), l_oBest.second->getBufferElementCount()*sizeof(float64));
 	return true;
 }
 
@@ -209,7 +221,7 @@ boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier &
 	{
 		return false;
 	}
-	for(int64 i = 0 ; i < rClassAmount ; ++i)
+	for(size_t i = 0 ; i < rClassAmount ; ++i)
 	{
 		this->addNewClassifierAtBack();
 	}
@@ -244,6 +256,7 @@ void CAlgorithmClassifierOneVsAll::generateConfigurationNode(void)
 
 	XML::IXMLNode *l_pSubClassifersNode = XML::createNode(c_sSubClassifiersNodeName);
 
+	//We now add configuration of each subclassifiers
 	for(size_t i = 0; i<m_oSubClassifierList.size(); ++i)
 	{
 		l_pTempNode = XML::createNode(c_sSubClassifierNodeName);
@@ -304,7 +317,7 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 
 void CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode)
 {
-	for( uint32 i = 0; i < pSubClassifiersNode->getChildCount() ; ++i)
+	for( size_t i = 0; i < pSubClassifiersNode->getChildCount() ; ++i)
 	{
 		XML::IXMLNode *l_pSubClassifierNode = pSubClassifiersNode->getChild(i);
 		TParameterHandler < XML::IXMLNode* > ip_pConfiguration(m_oSubClassifierList[i]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
