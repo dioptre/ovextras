@@ -3,7 +3,7 @@ def setUp(self):
     ov_binany_path=os.environ['OV_BINARY_PATH']
     self.terminal = App.open("xterm -e " +
              ov_binany_path +"/openvibe-designer.sh --no-session-management --open " +
-            ov_binany_path +"/share/openvibe/scenarios/box-tutorials/modifiable-temporal-filter.xml")
+            ov_binany_path +"/share/openvibe/scenarios/box-tutorials/online-modifiable-temporal-filter.xml")
     while not self.terminal.window():
         wait(1)
     wait("play.png",10)
@@ -11,7 +11,7 @@ def setUp(self):
 def testChangeParametersOnline(self):
     click("play.png")
     wait("InitialStateSignalDisplay.png",10)
-    dragDrop(Pattern("InitialStateSignalDisplay.png").targetOffset(-126,-164), Pattern("InitialStateSignalDisplay.png").targetOffset(-89,194))
+    dragDrop(Pattern("InitialStateSignalDisplay.png").targetOffset(-42,-161), Pattern("InitialStateSignalDisplay.png").targetOffset(-89,194))
     wait(Pattern("Config.png").similar(0.90).targetOffset(43,0),2)
     click(Pattern("Config.png").similar(0.90).targetOffset(43,0))
     wait(Pattern("Filtertype.png").targetOffset(210,0),2)
