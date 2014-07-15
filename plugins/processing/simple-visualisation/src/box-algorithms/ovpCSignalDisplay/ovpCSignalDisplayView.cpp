@@ -245,7 +245,6 @@ namespace OpenViBEPlugins
 					l_bMultiView|=m_vMultiViewSelectedChannels[i];
 				}
 			}
-            cout<<l_bMultiView<<endl;
 
 			//if there are no channels to display in the multiview (None selected only)
 			if(!l_bMultiView)
