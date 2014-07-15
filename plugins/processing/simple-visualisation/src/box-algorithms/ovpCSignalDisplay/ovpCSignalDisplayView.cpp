@@ -104,6 +104,9 @@ namespace OpenViBEPlugins
 			::gtk_toggle_tool_button_set_active(
 				GTK_TOGGLE_TOOL_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrollModeButton")),
 				oDisplayMode == OVP_TypeId_SignalDisplayMode_Scroll);
+            ::gtk_toggle_tool_button_set_active(
+                GTK_TOGGLE_TOOL_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScanModeButton")),
+                oDisplayMode == OVP_TypeId_SignalDisplayMode_Scan);
 
 			//connect display mode callbacks
 			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrollModeButton")), "toggled", G_CALLBACK (scrollModeButtonCallback), this);
@@ -225,7 +228,6 @@ namespace OpenViBEPlugins
 				return;
 			}
 
-//			CSignalChannelDisplay* l_pChannelDisplay = getChannelDisplay(m_oChannelDisplay.size()-1);
             CSignalChannelDisplay* l_pChannelDisplay = m_oChannelDisplay[m_oChannelDisplay.size()-1];
 
 			//check if there are channels to display in multiview
@@ -243,6 +245,7 @@ namespace OpenViBEPlugins
 					l_bMultiView|=m_vMultiViewSelectedChannels[i];
 				}
 			}
+            cout<<l_bMultiView<<endl;
 
 			//if there are no channels to display in the multiview (None selected only)
 			if(!l_bMultiView)
@@ -579,14 +582,25 @@ namespace OpenViBEPlugins
 				if(GTK_WIDGET_VISIBLE(m_oChannelDisplay[i]->getSignalDisplayWidget()))
 				{
                     vector<float64> l_vValueRange;
-                    m_oChannelDisplay[i]->checkTranslation(l_vValueRange);
-				    for(uint32 j=0 ; j<m_oChannelDisplay[i]->m_oChannelList.size(); j++)
-				    {
-                        if(l_vValueRange[j] > l_f64LargestDisplayedValueRange)
+                    m_oChannelDisplay[i]->updateDisplayedValueRange(l_vValueRange);
+                    if(m_bIsEEGSignal)
+                    {
+                        for(uint32 j=0 ; j<m_oChannelDisplay[i]->m_oChannelList.size(); j++)
                         {
-                            l_f64LargestDisplayedValueRange = l_vValueRange[j];
+                            if(l_vValueRange[j] > l_f64LargestDisplayedValueRange)
+                            {
+                                l_f64LargestDisplayedValueRange = l_vValueRange[j];
+                            }
                         }
-				    }
+                    }
+                    else
+                    {
+                        if(l_vValueRange[0] > l_f64LargestDisplayedValueRange)
+                        {
+                            l_f64LargestDisplayedValueRange = l_vValueRange[0];
+                        }
+                    }
+
 				}
 			}
 
@@ -600,11 +614,21 @@ namespace OpenViBEPlugins
 					m_f64LargestDisplayedValueRange = l_f64LargestDisplayedValueRange;
 					m_f64ValueRangeMargin = m_f64MarginFactor * l_f64LargestDisplayedValueRange;
 
-					for(uint32 i=0; i<m_oChannelDisplay.size(); i++)
+                    for(uint32 i=0; i<m_oChannelDisplay.size()-1; i++)
 					{
 						//set new parameters
 						m_oChannelDisplay[i]->setGlobalBestFitParameters(m_f64LargestDisplayedValueRange, m_f64ValueRangeMargin);
 					}
+                    //set new parameters for multiview
+                    if(m_bIsEEGSignal)
+                    {
+                        m_oChannelDisplay[m_oChannelDisplay.size()-1]->setGlobalBestFitParameters(m_f64LargestDisplayedValueRange, m_f64ValueRangeMargin);
+                    }
+                    else
+                    {
+                        m_oChannelDisplay[m_oChannelDisplay.size()-1]->setMultiViewBestFitParameters(m_f64LargestDisplayedValueRange, m_f64ValueRangeMargin);
+                    }
+
 				}
 			}
 			else //fixed scale
@@ -612,12 +636,23 @@ namespace OpenViBEPlugins
 				//tell all channels about new fixed range if it just changed
 				if(m_bVerticalScaleChanged == true)
 				{
-					for(uint32 i=0; i<m_oChannelDisplay.size(); i++)
+                    for(uint32 i=0; i<m_oChannelDisplay.size()-1; i++)
 					{
 						//set new parameters
 						float64 l_f64Margin = 0;
 						m_oChannelDisplay[i]->setGlobalBestFitParameters(m_f64CustomVerticalScaleValue, l_f64Margin);
 					}
+                    //set new parameters for multiview
+                    float64 l_f64Margin = 0;
+
+                    if(m_bIsEEGSignal)
+                    {
+                        m_oChannelDisplay[m_oChannelDisplay.size()-1]->setGlobalBestFitParameters(m_f64CustomVerticalScaleValue, l_f64Margin);
+                    }
+                    else
+                    {
+                        m_oChannelDisplay[m_oChannelDisplay.size()-1]->setMultiViewBestFitParameters(m_f64CustomVerticalScaleValue, l_f64Margin);
+                    }
 				}
 			}
 

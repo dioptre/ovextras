@@ -6,8 +6,9 @@ Detailed description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_SignalDisplay_Description|
-This plugin displays incoming signals using one 2D graph per channel where values are plotted on the vertical axis while the horizontal axis represents
+This plugin displays incoming signals where values are plotted on the vertical axis while the horizontal axis represents
 time.
+Two modes are available : one using one 2D graph per channel (eeg display disabled in settings) and one using one 2D graph for all channels (eeg display enabled)
  * |OVP_DocEnd_BoxAlgorithm_SignalDisplay_Description|
 __________________________________________________________________
 
@@ -41,6 +42,10 @@ Type of display, could be either Scan mode or Scroll mode. In Scan mode, the new
 from left to right and the displayed data does not move. In Scroll mode, the new data always
 arrives on the right and all displayed data moves right to left.
  * |OVP_DocEnd_BoxAlgorithm_SignalDisplay_Setting2|
+ 
+ * |OVP_DocBegin_BoxAlgorithm_SignalDisplay_Setting1|
+ Mode of display, eeg display uses one 2D graph for all channels, and the settings are optimal for filtered eeg signals.
+ * |OVP_DocEnd_BoxAlgorithm_SignalDisplay_Setting1|
 
  * |OVP_DocBegin_BoxAlgorithm_SignalDisplay_Setting1|
 Tells the signal display whether vertical scale should be automatically updated or not.
@@ -61,13 +66,14 @@ Online settings :
 
   The first 4 icons are used to select the signal's scaling mode. Each signal can be scaled individually, by clicking a scaling button and then the channel to apply it on.
 
-  - Zoom In/Out : Increase/decrease the ordinate scale of a channel, and center it vertically at the location of the click.
-  - Best Fit : Change the ordinate scale of a channel so it takes up all the available vertical space.
-  - Normal Size : Scale the signal considering that the maximum and minimum values displayed in the window are those of the whole signal.
+  - Scan/scroll mode : these buttons switch type of display (scan or scroll)
   - Left/Bottom Ruler : these buttons toggle channel labels and amplitude values on/off.
+  - Best Fit : Change the ordinate scale of a channel so it takes up all the available vertical space.
   - Time Scale : this setting adjusts the time span displayed by the plugin, in seconds.
+  - Center : this setting allow to choose automatic center. When this button is on, the signal is centered in the plot. When it is off, the plot is centered at zero. Be aware that if the signal is not around zero and the scale is too small, the signal plot can be out of the window. 
   - Select Channels : clicking this button pops up a dialog that allows to show/hide some of the channels by checking/unchecking each channel.
   - Multi-View : clicking this button pops up a dialog that configures what channels should be plotted in an extra graph at the bottom of the Signal Display window. When no channels are selected (default) this extra graph is not displayed.
+  - Stimulation colors : display stimulation name corresponding to colors.
   - Information : this button displays information about sampled data (min/max values and so on).
 
  \image html signaldisplay_toolbar.png "Signal Display toolbar"

@@ -78,7 +78,7 @@ namespace OpenViBEPlugins
 		/**
 		 * \brief Reset list of channels displayed by this object
 		 */
-		void resetChannelList();
+        void resetChannelList();
 
 		/**
 		 * \brief Add a channel to the list of channels to be displayed
@@ -142,7 +142,7 @@ namespace OpenViBEPlugins
 		 * If the value range has changed too much, the scale will be recomputed at next redraw.
          * \param[out] rDisplayedValueRange Returns vector of updated value range displayed by the channels
 		 */
-		void checkTranslation(
+        void updateDisplayedValueRange(
             std::vector<OpenViBE::float64> & rDisplayedValueRange);
 
 		/**
@@ -160,6 +160,9 @@ namespace OpenViBEPlugins
 			const OpenViBE::float64& rRange,
 			const OpenViBE::float64& rMargin);
 
+        void setMultiViewBestFitParameters(
+            const OpenViBE::float64& rRange,
+            const OpenViBE::float64& rMargin);
 		/**
 		 * \brief Updates signal scale and translation based on latest global range and margin
 		 * Called from setGlobalBestFitParameters when in global best fit mode, and when
@@ -213,7 +216,7 @@ namespace OpenViBEPlugins
          * \return Y coordinate of sample
          */
         OpenViBE::float64 getSampleYMultiViewCoordinate(
-            OpenViBE::float64 f64Value, OpenViBE::uint32 ui32ChannelIndex);
+            OpenViBE::float64 f64Value);
 
 		/**
 		 * \brief Draw signals (and stimulations, if any) displayed by this channel
