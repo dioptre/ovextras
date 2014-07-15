@@ -55,7 +55,7 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 
 	if(l_vClassLabels.size() != 2)
 	{
-		this->getLogManager() << LogLevel_Error << "A LDA classifier can only be trained with 2 classes, not more, not less - got " << l_vClassLabels.size() << "\n";
+		this->getLogManager() << LogLevel_Error << "A LDA classifier can only be trained with 2 classes, not more, not less - got " << static_cast<uint32>(l_vClassLabels.size()) << "\n";
 		return false;
 	}
 

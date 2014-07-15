@@ -63,7 +63,7 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
 
 	if(l_vClassLabels.size() != l_ui32AmountClass)
 	{
-		this->getLogManager() << LogLevel_Error << "There is sample for " << l_vClassLabels.size() << " classes but expected for " << l_ui32AmountClass << ".\n";
+		this->getLogManager() << LogLevel_Error << "There is sample for " << static_cast<uint32>(l_vClassLabels.size()) << " classes but expected for " << l_ui32AmountClass << ".\n";
 		return false;
 	}
 
