@@ -39,6 +39,15 @@ namespace OpenViBEApplications
 					m_pAccumulatedEvidence = new OpenViBE::CMatrix();
 					m_pAccumulatedEvidence->setDimensionCount(1);
 					m_pAccumulatedEvidence->setDimensionSize(0, l_pSequenceGenerator->getNumberOfSymbols());
+
+					m_pCurrentEvidence = new OpenViBE::CMatrix();
+					m_pCurrentEvidence->setDimensionCount(1);
+					m_pCurrentEvidence->setDimensionSize(0, l_pSequenceGenerator->getNumberOfSymbols());
+
+					//this should fill the matrix with 0
+					OpenViBEToolkit::Tools::MatrixManipulation::clearContent(*m_pAccumulatedEvidence);
+					OpenViBEToolkit::Tools::MatrixManipulation::clearContent(*m_pCurrentEvidence);
+
 					m_bStopCondition = propertyObject->getStopCondition();
 					earlyStoppingEnabled = propertyObject->getEarlyStopping();
 					maxRepetition = propertyObject->getNumberOfRepetitions();
@@ -48,8 +57,6 @@ namespace OpenViBEApplications
 					m_ui64Prediction=0;
 
 				}
-				
-				//ExternalP300IEvidenceAccumulator(){}
 
 				virtual ~ExternalP300IEvidenceAccumulator()
 				{
@@ -60,24 +67,18 @@ namespace OpenViBEApplications
 
 				
 				/**
-				 *
-				 */ 
-				virtual void generateNewSequence()=0;
+				 * At the beginning of the the next trial, generate the whole sequence of letters that have to be flashed in the trial
+				 */
+				virtual void generateNewSequence() { m_pSequenceGenerator->generateSequence(); }
 
-				//a prediction equal to 0 is used to indicate an error
-				virtual OpenViBE::uint64 getPrediction()
-				{
-					if(m_bIsReadyToPredict)
-					{
-						OpenViBE::float32 max;
-						findMaximum(m_pAccumulatedEvidence->getBuffer(), &m_ui64Prediction, &max);
-						m_bIsReadyToPredict=false;
-					}
-					//if we are not ready, the prediction will be 0 and ignored
-					return m_ui64Prediction;
-				}
+				/**
+				* @return the index of the predicted symbol, starts at 1. A prediction equal to 0 is ignored (not enough evidence for a prediction)
+				*/
+				virtual OpenViBE::uint64 getPrediction()=0;
+
 
 				//reset all accumulated evidence, used when a new trial start
+				//implement another in the derived class if you have additionnal evidence data holder
 				virtual void flushEvidence()
 				{
 					std::cout <<"flush\n";
@@ -85,11 +86,7 @@ namespace OpenViBEApplications
 					m_ui32CurrentFlashIndex=0;
 					m_bIsReadyToPredict=false;
 					//clear buffer
-					OpenViBE::float64* buffer = m_pAccumulatedEvidence->getBuffer();
-					for(unsigned int i=0; i<m_pAccumulatedEvidence->getBufferElementCount(); i++)
-					{
-						buffer[i]=0;
-					}
+					OpenViBEToolkit::Tools::MatrixManipulation::clearContent(*m_pAccumulatedEvidence);
 
 				}
 
@@ -131,7 +128,7 @@ namespace OpenViBEApplications
 				/**
 				 * @return return vector of zeros and ones defining which letters will be flashed next
 				 */
-				virtual std::vector<OpenViBE::uint32>* getNextFlashGroup()=0;
+				virtual std::vector<OpenViBE::uint32>* getNextFlashGroup() { return m_pSequenceGenerator->getFlashGroupAt(m_ui32CurrentFlashIndex); }
 				
 				/**
 				 * @return The shared memory reader that is created during construction of the EvidenceAccumulator
@@ -172,14 +169,11 @@ namespace OpenViBEApplications
 					}
 					std::cout << std::endl;
 
-					OpenViBE::CMatrix* fproba = new OpenViBE::CMatrix();
-					fproba->setDimensionCount(2);
-					fproba->setDimensionSize(0,1);
-					fproba->setDimensionSize(1,m_pSequenceGenerator->getNumberOfSymbols());
-					OpenViBE::float64* buffer = fproba->getBuffer();
+					OpenViBEToolkit::Tools::MatrixManipulation::clearContent(*m_pCurrentEvidence);
+					OpenViBE::float64* buffer = m_pCurrentEvidence->getBuffer();
 
 					//check
-					if(!(fproba->getBufferElementCount()==currentFlashGroup->size()))
+					if(!(m_pCurrentEvidence->getBufferElementCount()==currentFlashGroup->size()))
 						return NULL;
 
 					for(unsigned int i=0; i<currentFlashGroup->size(); i++)
@@ -187,36 +181,17 @@ namespace OpenViBEApplications
 						(*(buffer+i))=proba*currentFlashGroup->at(i);
 					}
 
-					return fproba;
+					return m_pCurrentEvidence;
 				}
 
-				//check against early stopping criteria
-				OpenViBE::boolean stopEarly()
-				{
-					OpenViBE::uint32 l_ui32Argmax;
-					OpenViBE::float32 l_f32Max;
-					unsigned int j=0;
-					OpenViBE::float64* l_pBuffer = m_pAccumulatedEvidence->getBuffer();
-					findMaximum(l_pBuffer, &l_ui32Argmax, &l_f32Max);
+				//check against early stopping criteria, implementation details left to derived class
+				//return true if we can stop, false if we have to wait for more evidence
+				virtual OpenViBE::boolean stopEarly()=0;
 
-
-					bool l_bEarlyStoppingConditionMet = true;
-					while((l_bEarlyStoppingConditionMet))
-					{
-						if((l_pBuffer[j]>l_f32Max-m_bStopCondition)&&(j!=l_ui32Argmax))
-							l_bEarlyStoppingConditionMet=false;
-						j++;
-					}
-
-					if(l_bEarlyStoppingConditionMet)
-					{
-						m_ui64Prediction = l_ui32Argmax;
-					}
-					return l_bEarlyStoppingConditionMet;
-				}
 
 				ExternalP300SharedMemoryReader* m_oSharedMemoryReader;
 				OpenViBE::IMatrix* m_pAccumulatedEvidence;
+				OpenViBE::IMatrix* m_pCurrentEvidence;
 				OpenViBE::uint32 m_ui64Prediction;
 				OpenViBE::uint32 m_ui32CurrentFlashIndex;
 				P300StimulatorPropertyReader* m_opropertyObject;
