@@ -113,6 +113,7 @@ no_need_to_install_directx:
 	File ..\dependencies\arch\libvorbis-1.3.2-vs100-runtime.zip
 	File ..\dependencies\arch\libogg-1.2.1-vs100-runtime.zip
 	File ..\dependencies\arch\liblsl-1.04-vs100-runtime.zip
+	File ..\dependencies\arch\enobio3g-1.2.1-vs100-runtime.zip	
 	
 	SetOutPath "$INSTDIR\dependencies"
 	ExecWait '"arch\openvibe-vcredist-2005-sp1.exe" /q'
@@ -135,6 +136,7 @@ no_need_to_install_directx:
 	ZipDLL::extractall "arch\libvorbis-1.3.2-vs100-runtime.zip" "libvorbis"
 	ZipDLL::extractall "arch\libogg-1.2.1-vs100-runtime.zip" "libogg"
 	ZipDLL::extractall "arch\liblsl-1.04-vs100-runtime.zip" "liblsl"
+	ZipDLL::extractall "arch\enobio3g-1.2.1-vs100-runtime.zip" ""
 	
 	SetOutPath "$INSTDIR"
 	; Export binaries
@@ -184,6 +186,7 @@ no_need_to_patch_3d_functionnality:
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libvorbis\win32\bin\release;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libogg\win32\bin\release\;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\liblsl\lib\;%PATH%$\r$\n"
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\enobio3g\MSVC\;%PATH%$\r$\n"	
 	FileClose $0
 	
 	FileOpen $0 "$INSTDIR\dependencies\cegui\resources.cfg" w

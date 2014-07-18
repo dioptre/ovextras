@@ -24,10 +24,13 @@ INCLUDE("FindOpenViBEModuleSocket")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleFS")
 INCLUDE("FindThirdPartyGTK")
+
 INCLUDE("FindThirdPartyGMobiLabPlusAPI")
 INCLUDE("FindThirdPartyUSBFirstAmpAPI")
 INCLUDE("FindThirdPartyThinkGearAPI")
 INCLUDE("FindThirdPartyEmotivAPI")
+INCLUDE("FindThirdPartyNeuroelectricsEnobio3G")
+
 INCLUDE("FindThirdPartyOpenAL")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyBoost_Thread")
@@ -36,6 +39,7 @@ INCLUDE("FindThirdPartyPThreadsVCE2")	# for Windows Fieldtrip
 IF(PATH_OPENVIBE_CONTRIBUTIONS)
 	INCLUDE("${CMAKE_SOURCE_DIR}/contrib/common/contribAcquisitionServerLinkLibs.cmake")
 ENDIF(PATH_OPENVIBE_CONTRIBUTIONS)
+
 
 # ---------------------------------
 # Target macros
