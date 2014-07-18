@@ -85,7 +85,7 @@ void ExternalP300CStimulator::run()
 	uint64 l_ui64TimeStep = static_cast<uint64>(ITimeArithmetics::sampleCountToTime(l_ui32StimulatorFrequency, 1LL));
 	uint64 l_ui64CurrentTime = 0;
 
-	uint64 MyInterFlash = 0;
+	//uint64 MyInterFlash = 0;
 	uint64 MyLastFlash = 0;
 	uint64 lastCurrentTime = 0;
 	

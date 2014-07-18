@@ -15,6 +15,8 @@
 #include "../../src/properties/ovexP300StimulatorPropertyReader.h"
 #include "../../src/properties/ovexP300ScreenLayoutReader.h"
 
+#include "../../src/ovexP300SequenceFileWriter.h"
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;
@@ -44,7 +46,7 @@ class test_evidenceAccumulation
 		else
 			m_pKernelContext->getLogManager() << LogLevel_Info << "Early Stop false\n";
 
-		m_pSequenceWriter = new P300SequenceWriter(this->m_pInterfacePropReader->getFlashGroupDefinitionFile());
+		m_pSequenceWriter = new P300SequenceFileWriter(this->m_pInterfacePropReader->getFlashGroupDefinitionFile());
 
 		//sequence generator
 		if (this->m_pInterfacePropReader->getFlashMode()==CString("rowcol"))
