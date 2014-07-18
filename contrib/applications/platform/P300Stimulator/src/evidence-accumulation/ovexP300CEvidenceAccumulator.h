@@ -34,25 +34,51 @@ namespace OpenViBEApplications
 					m_pNormalizedAccumulatedEvidence = new OpenViBE::CMatrix();
 					OpenViBEToolkit::Tools::Matrix::copy(*m_pNormalizedAccumulatedEvidence, *m_pAccumulatedEvidence);
 					m_ui32CurrentFlashIndex=0;
-					std::cout <<"evAcc created\n";
 				}
 				
 				virtual ~ExternalP300CEvidenceAccumulator(){}
 				
-				/**
-				 * At the beginning of the the next trial, generate the whole sequence of letters that have to be flashed in the trial
-				 */ 
-				virtual void generateNewSequence() { m_pSequenceGenerator->generateSequence(); }
-				
-				/**
-				 * @return return vector of zeros and ones defining which letters will be flashed next
-				 */
-				virtual std::vector<OpenViBE::uint32>* getNextFlashGroup() { return m_pSequenceGenerator->getFlashGroupAt(m_ui32CurrentFlashIndex); }
-				
-				/**
-				 * @return The shared memory reader that is created during construction of the EvidenceAccumulator
-				 */
-				//virtual ExternalP300SharedMemoryReader* getSharedMemoryReader() { return &m_oSharedMemoryReader; }
+				virtual OpenViBE::uint64 getPrediction()
+				{
+					if(m_bIsReadyToPredict)
+					{
+						OpenViBE::float32 max;
+						findMaximum(m_pNormalizedAccumulatedEvidence->getBuffer(), &m_ui64Prediction, &max);
+						m_bIsReadyToPredict=false;
+					}
+					//if we are not ready, the prediction will be 0 and ignored
+					return m_ui64Prediction;
+				}
+
+				virtual OpenViBE::boolean stopEarly()
+				{
+					OpenViBE::uint32 l_ui32Argmax;
+					OpenViBE::float32 l_f32Max;
+					unsigned int j=0;
+					OpenViBE::float64* l_pBuffer = m_pNormalizedAccumulatedEvidence->getBuffer();
+					findMaximum(l_pBuffer, &l_ui32Argmax, &l_f32Max);
+
+
+					bool l_bEarlyStoppingConditionMet = true;
+					while((l_bEarlyStoppingConditionMet))
+					{
+						if((l_pBuffer[j]>l_f32Max-m_bStopCondition)&&(j!=l_ui32Argmax))
+							l_bEarlyStoppingConditionMet=false;
+						j++;
+					}
+
+					if(l_bEarlyStoppingConditionMet)
+					{
+						m_ui64Prediction = l_ui32Argmax;
+					}
+					return l_bEarlyStoppingConditionMet;
+				}
+
+				virtual void flushEvidence()
+				{
+					//clear buffer
+					OpenViBEToolkit::Tools::MatrixManipulation::clearContent(*m_pNormalizedAccumulatedEvidence);
+				}
 
 
 
