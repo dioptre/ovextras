@@ -176,8 +176,7 @@ void ExternalP300CStimulator::run()
 						l_ui32State = State_Flash;
 						m_ui64TimeToNextFlash += m_ui64InterStimulusOnset;
 						MyLastFlash = System::Time::zgetTime();
-						m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Flash at real " << time64(MyLastFlash) << " diff is " << time64(MyLastFlash-MyInterFlash) << "\n";
-						m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Flash at " << time64(l_ui64CurrentTime) << " diff is " << time64(l_ui64CurrentTime-lastCurrentTime) << "\n";// next flash at " << time64(m_ui64TimeToNextFlash) << "\n";
+						m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Debug << "Flash at " << time64(l_ui64CurrentTime) << " diff is " << time64(l_ui64CurrentTime-lastCurrentTime) << "\n";// next flash at " << time64(m_ui64TimeToNextFlash) << "\n";
 						MyInterFlash = MyLastFlash;
 						lastCurrentTime = l_ui64CurrentTime;
 					}
@@ -202,7 +201,7 @@ void ExternalP300CStimulator::run()
 			//m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "reset times\n";
 			//m_ui64RealCycleTime = 0;
 			//m_ui64StimulatedCycleTime = 0;
-			m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Switch states from " << m_ui32LastState << " to " << l_ui32State << "\n";
+			m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Debug << "Switch states from " << m_ui32LastState << " to " << l_ui32State << "\n";
 
 			switch(m_ui32LastState)
 			{

@@ -44,6 +44,8 @@ class test_evidenceAccumulation
 		else
 			m_pKernelContext->getLogManager() << LogLevel_Info << "Early Stop false\n";
 
+		m_pSequenceWriter = new P300SequenceWriter(this->m_pInterfacePropReader->getFlashGroupDefinitionFile());
+
 		//sequence generator
 		if (this->m_pInterfacePropReader->getFlashMode()==CString("rowcol"))
 			m_pSequenceGenerator = new P300RowColumnSequenceGenerator(

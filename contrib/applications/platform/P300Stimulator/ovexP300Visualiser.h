@@ -174,7 +174,9 @@ namespace OpenViBEApplications
 			/**
 			 * A queue with events that should be written by the ITagger
 			 */
-			std::queue<OpenViBE::uint32> m_qEventQueue;			
+			std::queue<OpenViBE::uint32> m_qEventQueue;
+
+			std::vector<OpenViBE::uint32>* m_vCurrentFlashGroup;
 			
 			OpenViBE::boolean m_bChanged;
 			OpenViBE::boolean m_bInRest;

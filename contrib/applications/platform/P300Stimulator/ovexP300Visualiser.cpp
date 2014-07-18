@@ -26,6 +26,7 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	m_ui32PreviousFeedbackResultCounter = 0;
 
 	m_bReplayMode=false;
+	m_vCurrentFlashGroup = new std::vector<OpenViBE::uint32>();
 
 	//initializes openvibe kernel
 	this->initializeOpenViBEKernel();
@@ -353,7 +354,8 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			//get the next flash group which is a vector, the size of the number of symbols on the keyboard, with one or zero to indicate
 			//whether it is flashed or not
 			//m_pKernelContext->getLogManager() << LogLevel_Info << "Flash " << eventID << " getting group \n";
-			l_lSymbolChangeList = m_oStimulator->getNextFlashGroup()->data();//to uncomment when not in replay
+			*m_vCurrentFlashGroup = *(m_oStimulator->getNextFlashGroup());
+			l_lSymbolChangeList = m_vCurrentFlashGroup->data();
 			changeStates(l_lSymbolChangeList,FLASH);
 			m_pMainContainer->getKeyboardHandler()->updateChildStates(l_lSymbolChangeList);	
 					
