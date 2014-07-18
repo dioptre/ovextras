@@ -93,9 +93,18 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 
 
 	TParameterHandler< std::map<CString, CString>* > ip_pExtraParameters(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+
+	std::map<CString,CString>* l_pExtraParameters = ip_pExtraParameters;
+
 	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType);
 	m_oPairwiseDecisionIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationPairwiseStrategy,
-																											  ip_pExtraParameters->at(l_pParameterName));
+																											  l_pExtraParameters->at(l_pParameterName));
+	if(m_oPairwiseDecisionIdentifier==OV_UndefinedIdentifier) {
+		this->getLogManager() << LogLevel_Error << "Tried to get algorithm id for pairwise decision strategy " << OVP_TypeId_ClassificationPairwiseStrategy << " and " << l_pParameterName << " -> " 
+			<<  ip_pExtraParameters->at(l_pParameterName) << " but failed\n";
+		return false;
+	}
+	
 	if(m_pDecisionStrategyAlgorithm != NULL){
 		m_pDecisionStrategyAlgorithm->uninitialize();
 		this->getAlgorithmManager().releaseAlgorithm(*m_pDecisionStrategyAlgorithm);
@@ -176,6 +185,11 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 
 boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
 {
+	if(!m_pDecisionStrategyAlgorithm) {
+		this->getLogManager() << LogLevel_Error << "Called without decision strategy algorithm\n";
+		return false;
+	}
+
 //	std::cout << "Starting Classification" << std::endl;
 	const OpenViBE::uint32 l_ui32AmountClass = this->getClassAmount();
 	uint32 l_ui32FeatureVectorSize=rFeatureVector.getSize();
@@ -241,7 +255,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 	return true;
 }
 
-boolean CAlgorithmClassifierOneVsOne::designArchitecture(OpenViBE::CIdentifier &rId, int64 &rClassAmount)
+boolean CAlgorithmClassifierOneVsOne::designArchitecture(OpenViBE::CIdentifier& rId, OpenViBE::uint64& rClassAmount)
 {
 	if(!setSubClassifierIdentifier(rId))
 	{
@@ -286,6 +300,10 @@ XML::IXMLNode* CAlgorithmClassifierOneVsOne::getClassifierConfiguration(SSubClas
 
 XML::IXMLNode* CAlgorithmClassifierOneVsOne::getPairwiseDecisionConfiguration()
 {
+	if(!m_pDecisionStrategyAlgorithm) {
+		return NULL;
+	}
+
 	XML::IXMLNode *l_pTempNode = XML::createNode(c_sPairwiseDecisionName);
 
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pDecisionStrategyAlgorithm->getOutputParameter(OVP_Algorithm_Classifier_Pairwise_OutputParameterId_Configuration));

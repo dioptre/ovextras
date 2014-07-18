@@ -11,6 +11,14 @@
 #include <vector>
 #include <iostream>
 
+// #define OV_DEBUG_CLASSIFIER_LISTENER
+
+#ifdef OV_DEBUG_CLASSIFIER_LISTENER
+#define DEBUG_PRINT(x) x
+#else
+#define DEBUG_PRINT(x) 
+#endif
+
 namespace OpenViBEPlugins
 {
 	namespace Classification
@@ -110,6 +118,7 @@ namespace OpenViBEPlugins
 					char l_sStimulation[64];
 					sprintf(l_sStimulation, "OVTK_StimulationId_Label_%02X", i);
 					rBox.addSetting(l_sBuffer, OV_TypeId_Stimulation, l_sStimulation);
+					DEBUG_PRINT(std::cout << "Add setting (type D) " << l_sBuffer << " " << l_sStimulation << "\n";)
 				}
 				return this->onAlgorithmClassifierChanged(rBox);
 			}
@@ -131,26 +140,33 @@ namespace OpenViBEPlugins
 				if(m_oStrategyClassIdentifier == OVP_ClassId_Algorithm_ClassifierOneVsOne){
 					OpenViBE::CIdentifier l_oEnum = getAvailableDecisionEnumeration(m_oClassifierClassIdentifier);
 					if(l_oEnum == OV_UndefinedIdentifier){
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Unable to find Pariwise Decision for the algorithm" << m_oClassifierClassIdentifier.toString() << "\n";
+						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Unable to find Pairwise Decision for the algorithm" << m_oClassifierClassIdentifier.toString() << "\n";
 						return false;
 					}
 					else
 					{
 						OpenViBE::Kernel::IParameter* l_pParameter=m_pStrategy->getInputParameter(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType);
 						OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64Parameter(l_pParameter);
-						char l_sBuffer[1024];
-						OpenViBE::CString l_sParameterName=this->getTypeManager().getTypeName(l_oEnum);
-						::strcpy(l_sBuffer, this->getTypeManager().getEnumerationEntryNameFromValue(l_oEnum, ip_ui64Parameter).toASCIIString());
 
-						OpenViBE::CIdentifier l_oOldTypeIdentifier;
-						rBox.getSettingType(i, l_oOldTypeIdentifier);
-
-						if(l_oOldTypeIdentifier != l_oEnum)
+						OpenViBE::CString l_sEnumTypeName=this->getTypeManager().getTypeName(l_oEnum);
+						OpenViBE::uint64 l_ui64EnumValue = ip_ui64Parameter;
+						OpenViBE::CString l_sEnumValue;
+						if(l_ui64EnumValue) 
 						{
-							rBox.setSettingType(i, l_oEnum);
+							l_sEnumValue = this->getTypeManager().getEnumerationEntryNameFromValue(l_oEnum, l_ui64EnumValue);
 						}
-						rBox.setSettingValue(i, l_sBuffer);
-						rBox.setSettingName(i, l_sParameterName);
+						else
+						{
+							// @fixme Initialize. This is the second place with this check (search INITDECISIONENUM). 
+							// This either may not be the right place to initialize this. However, if the enum value here is 0, the
+							// gui will get an empty default value...
+							this->getTypeManager().getEnumerationEntry(l_oEnum, 0, l_sEnumValue, l_ui64EnumValue);
+							ip_ui64Parameter = l_ui64EnumValue;
+						}
+
+						rBox.setSettingType(i, l_oEnum);
+						rBox.setSettingName(i, l_sEnumTypeName);
+						rBox.setSettingValue(i, l_sEnumValue);
 					}
 				}
 				return true;
@@ -182,11 +198,12 @@ namespace OpenViBEPlugins
 						m_oStrategyClassIdentifier=l_oStrategyIdentifier;
 					}
 
-					if(l_oOldStrategyIdentifier != OV_UndefinedIdentifier)
+					if(m_ui32StrategyAmountSettings > 0)
 					{
-						std::cout << m_ui32StrategyAmountSettings << std::endl;
+						// std::cout << m_ui32StrategyAmountSettings << std::endl;
 						for(OpenViBE::uint32 i = m_ui32CustomSettingBase+rBox.getInputCount() + m_ui32StrategyAmountSettings ; i > m_ui32CustomSettingBase+rBox.getInputCount() ; --i)
 						{
+							DEBUG_PRINT(std::cout << "Remove pairing strategy setting at idx " << i-1 << "\n";)
 							rBox.removeSetting(i-1);
 						}
 					}
@@ -214,11 +231,26 @@ namespace OpenViBEPlugins
 						{
 							OpenViBE::Kernel::IParameter* l_pParameter=m_pStrategy->getInputParameter(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType);
 							OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64Parameter(l_pParameter);
-							char l_sBuffer[1024];
-							OpenViBE::CString l_sParameterName=this->getTypeManager().getTypeName(l_oEnum);
-							::strcpy(l_sBuffer, this->getTypeManager().getEnumerationEntryNameFromValue(l_oEnum, ip_ui64Parameter).toASCIIString());
+							OpenViBE::uint64 l_ui64EnumValue = ip_ui64Parameter;
+							OpenViBE::CString l_sEnumName;
+							if(l_ui64EnumValue == 0) // Parameter value has not yet been set?
+							{
+								// @fixme This may not be the right place to initialize this (search INITDECISIONENUM), but if we don't, the default value
+								// in the gui will be "", leading to trouble. We cannot initialize the param except in a place that
+								// knows the classifier type and can ask which strategies work for it.
+								this->getTypeManager().getEnumerationEntry(l_oEnum, 0, l_sEnumName, l_ui64EnumValue);
+								ip_ui64Parameter = l_ui64EnumValue;	// initialize
+							}
+							else
+							{
+								l_sEnumName = this->getTypeManager().getEnumerationEntryNameFromValue(l_oEnum, l_ui64EnumValue);
+							}
 
-							rBox.addSetting(l_sParameterName, l_oEnum, l_sBuffer, i);
+							OpenViBE::CString l_sParameterName=this->getTypeManager().getTypeName(l_oEnum);
+
+							DEBUG_PRINT(std::cout << "Adding setting (case C) " << l_sParameterName << " : '" << l_sEnumName << "' to index " << i << "\n";)
+							rBox.addSetting(l_sParameterName, l_oEnum, l_sEnumName, i);
+
 							++m_ui32StrategyAmountSettings;
 						}
 					}
@@ -312,6 +344,7 @@ namespace OpenViBEPlugins
 									l_oTypeIdentifier=OV_TypeId_String;
 									break;
 								default:
+									std::cout << "Invalid parameter type " << l_pParameter->getType() << "\n";
 									l_bValid=false;
 									break;
 							}
@@ -321,6 +354,7 @@ namespace OpenViBEPlugins
 								if(i>=rBox.getSettingCount())
 								{
 									rBox.addSetting(l_sParameterName, l_oTypeIdentifier, l_sBuffer);
+									DEBUG_PRINT(std::cout << "Adding setting (case A) " << l_sParameterName << " : " << l_sBuffer << "\n";)
 								}
 								else
 								{
@@ -332,6 +366,8 @@ namespace OpenViBEPlugins
 									}
 									rBox.setSettingValue(i, l_sBuffer);
 									rBox.setSettingName(i, l_sParameterName);
+									OpenViBE::CString tmpName;  rBox.getSettingName(i, tmpName);
+									DEBUG_PRINT(std::cout << "Replacing setting " << i << " : " << tmpName << " with " << l_sParameterName << " : " << l_sBuffer << "\n";)
 								}
 								i++;
 							}
@@ -340,10 +376,15 @@ namespace OpenViBEPlugins
 
 					while(i<rBox.getSettingCount())
 					{
+						DEBUG_PRINT(OpenViBE::CString tmpName;  rBox.getSettingName(i, tmpName); std::cout << "Removing setting " << i << " : " << tmpName << "\n";)
 						rBox.removeSetting(i);
 					}
 				}
+
+				// This changes the pairwise strategy decision voting type of the box settings allowing
+				// designer to list the correct choices in the combo box.
 				updateDecision(rBox);
+
 				return true;
 			}
 

@@ -37,7 +37,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean uninitialize(void);
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
 			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
-			virtual OpenViBE::boolean designArchitecture(OpenViBE::CIdentifier &rId, OpenViBE::int64& rClassAmount);
+			virtual OpenViBE::boolean designArchitecture(OpenViBE::CIdentifier& rId, OpenViBE::uint64& rClassAmount);
 
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);

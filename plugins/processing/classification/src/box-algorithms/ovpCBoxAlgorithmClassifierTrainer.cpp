@@ -36,9 +36,19 @@ using namespace std;
 
 boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 {
-	uint32 i;
+	m_pClassifier = NULL;
+	m_pStimulationsDecoder = NULL;
+	m_pStimulationsEncoder = NULL;
+
 	boolean l_bIsPairing=false;
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+
+	CString l_sConfigurationFilename(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2));
+	if(l_sConfigurationFilename == CString(""))
+	{
+		this->getLogManager() << LogLevel_Error << "An output filename is required\n";
+		return false;
+	}
 
 	CIdentifier l_oStrategyClassIdentifier, l_oClassifierAlgorithmClassIdentifier;
 	CString l_sClassifierAlgorithmClassIdentifier, l_sStrategyClassIdentifier;
@@ -75,7 +85,7 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	}
 	m_ui64PartitionCount=uint64(l_i64PartitionCount);
 
-	for(i=1; i<l_rStaticBoxContext.getInputCount(); i++)
+	for(uint32 i=1; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
 		m_vFeatureVectorsDecoder[i-1]=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_FeatureVectorStreamDecoder));
 		m_vFeatureVectorsDecoder[i-1]->initialize();
@@ -84,21 +94,20 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	m_pStimulationsDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
 	m_pStimulationsDecoder->initialize();
 
-	i = OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount + l_rStaticBoxContext.getInputCount(); // number of settings when no additional setting is added
-
-	m_pExtraParemeter = new map<CString , CString> ();
-	while(i < l_rStaticBoxContext.getSettingCount())
+	m_pExtraParameter = new map<CString , CString> ();
+	for(uint32 i = OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount + l_rStaticBoxContext.getInputCount(); // number of settings when no additional setting is added
+		i < l_rStaticBoxContext.getSettingCount() ;
+		++i)
 	{
 		CString l_pInputName;
 		CString l_pInputValue;
 		l_rStaticBoxContext.getSettingName(i, l_pInputName);
 		l_rStaticBoxContext.getSettingValue(i, l_pInputValue);
-		(*m_pExtraParemeter)[l_pInputName] = l_pInputValue;
+		(*m_pExtraParameter)[l_pInputName] = l_pInputValue;
 
-		++i;
 	}
 	TParameterHandler < map<CString , CString> * > ip_pExtraParameter(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
-	ip_pExtraParameter = m_pExtraParemeter;
+	ip_pExtraParameter = m_pExtraParameter;
 
 	m_pStimulationsEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
 	m_pStimulationsEncoder->initialize();
@@ -109,7 +118,13 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	if(l_bIsPairing)
 	{
 		TParameterHandler < uint64 > ip_pClassAmount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount));
-		ip_pClassAmount = l_rStaticBoxContext.getInputCount() -1;
+		if(l_rStaticBoxContext.getInputCount()==0)
+		{
+			// This shouldn't happen.
+			this->getLogManager() << LogLevel_Error << "Must have more than 0 inputs\n";
+			return false;
+		}
+		ip_pClassAmount = l_rStaticBoxContext.getInputCount() -1;	 // >=0 by above test. -1 because one input connector is for stimulations.
 		TParameterHandler < CIdentifier* > ip_oClassId(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
 		ip_oClassId = &l_oClassifierAlgorithmClassIdentifier;
 		if(!m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture))
@@ -124,21 +139,29 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 
 boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
 {
+
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	// IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
-
-	m_pClassifier->uninitialize();
-	m_pStimulationsDecoder->uninitialize();
-	m_pStimulationsEncoder->uninitialize();
-
-	this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
-	this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationsDecoder);
-	this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationsEncoder);
-
-	for(uint32 i=1; i<l_rStaticBoxContext.getInputCount(); i++)
+	if(m_pClassifier) 
 	{
-		m_vFeatureVectorsDecoder[i-1]->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_vFeatureVectorsDecoder[i-1]);
+		m_pClassifier->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
+	}
+	if(m_pStimulationsDecoder)
+	{
+		m_pStimulationsDecoder->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationsDecoder);
+	}
+	if(m_pStimulationsEncoder)
+	{
+		m_pStimulationsEncoder->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationsEncoder);
+	}
+
+	for(uint32 i=0; i<m_vFeatureVectorsDecoder.size(); i++)
+	{
+		m_vFeatureVectorsDecoder[i]->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_vFeatureVectorsDecoder[i]);
 	}
 	m_vFeatureVectorsDecoder.clear();
 
@@ -149,10 +172,14 @@ boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
 	m_vFeatureVector.clear();
 	m_vFeatureVectorIndex.clear();
 
-//	if(m_pExtraParemeter != NULL)
-//	{
-//		delete m_pExtraParemeter;
-//	}
+	// @fixme who frees this? freeing here -> crash
+	/*
+	if(m_pExtraParameter != NULL)
+	{
+		delete m_pExtraParameter;
+		m_pExtraParameter = NULL;
+	}
+	*/
 
 	return true;
 }
@@ -315,6 +342,9 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 						l_f64PartitionAccuracy=this->getAccuracy(l_uiStartIndex, l_uiStopIndex);
 						l_vPartitionAccuracies[(unsigned int)i]=l_f64PartitionAccuracy;
 						l_f64FinalAccuracy+=l_f64PartitionAccuracy;
+					} else {
+						this->getLogManager() << LogLevel_Error << "Bailing out (from xval)...\n";
+						return false;
 					}
 					this->getLogManager() << LogLevel_Info << "Finished with partition " << i+1 << " / " << m_ui64PartitionCount << " (performance : " << l_f64PartitionAccuracy << "%)\n";
 				}
@@ -338,7 +368,11 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 			}
 
 			this->getLogManager() << LogLevel_Trace << "Training final classifier on the whole set...\n";
-			this->train(0, 0);
+			if(!this->train(0, 0))
+			{
+				this->getLogManager() << LogLevel_Error << "Bailing out (from whole set training)...\n";
+				return false;
+			}
 
 			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << this->getAccuracy(0, m_vFeatureVector.size()) << "% (optimistic)\n";
 			if(!this->saveConfiguration())
@@ -351,8 +385,9 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 
 boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const size_t uiStopIndex)
 {
-	if(uiStopIndex-uiStartIndex-1==0)
+	if(uiStopIndex-uiStartIndex==1)
 	{
+		this->getLogManager() << LogLevel_Error << "stopIndex-trainIndex=1\n";
 		return false;
 	}
 
@@ -378,7 +413,11 @@ boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const s
 		l_pFeatureVectorSetBuffer+=(l_ui32FeatureVectorSize+1);
 	}
 
-	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Train);
+	if(m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Train) == false)
+	{
+		this->getLogManager() << LogLevel_Error << "Training failed.\n";
+		return false;
+	}
 
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
 	XML::IXMLNode *l_pTempNode = (XML::IXMLNode*)op_pConfiguration;
@@ -388,9 +427,9 @@ boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const s
 	}
 	op_pConfiguration = NULL;
 
-	m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration);
+	bool l_bReturnValue = m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration);
 
-	return true;
+	return l_bReturnValue;
 }
 
 float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex)

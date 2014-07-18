@@ -50,7 +50,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64PartitionCount;
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationsEncoder;
-			std::map < OpenViBE::CString, OpenViBE::CString> *m_pExtraParemeter;
+			std::map < OpenViBE::CString, OpenViBE::CString> *m_pExtraParameter;
 
 			typedef struct
 			{
