@@ -449,7 +449,7 @@
 		</Box>
 		<Box>
 			<Identifier>(0x0b40e554, 0x36a2452d)</Identifier>
-			<Name>Spatial Filter</Name>
+			<Name>Spatial Filter 1h1</Name>
 			<AlgorithmClassIdentifier>(0xdd332c6c, 0x195b4fd4)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -688,7 +688,7 @@
 		</Box>
 		<Box>
 			<Identifier>(0x110b492c, 0x42b9cadb)</Identifier>
-			<Name>Spatial Filter</Name>
+			<Name>Spatial Filter 3h1</Name>
 			<AlgorithmClassIdentifier>(0xdd332c6c, 0x195b4fd4)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -749,7 +749,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${Player_ScenarioDirectory}/classifiers/csp-1h1</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/csp-3h1</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1282,7 +1282,7 @@
 		</Box>
 		<Box>
 			<Identifier>(0x28a355ea, 0x4de9e404)</Identifier>
-			<Name>Spatial Filter</Name>
+			<Name>Spatial Filter 1b</Name>
 			<AlgorithmClassIdentifier>(0xdd332c6c, 0x195b4fd4)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -2035,7 +2035,7 @@
 		</Box>
 		<Box>
 			<Identifier>(0x4693cd41, 0x52eb47c1)</Identifier>
-			<Name>Spatial Filter</Name>
+			<Name>Spatial Filter 2b</Name>
 			<AlgorithmClassIdentifier>(0xdd332c6c, 0x195b4fd4)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -2096,7 +2096,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${Player_ScenarioDirectory}/classifiers/csp-1b</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/csp-2b</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -2702,7 +2702,7 @@
 		</Box>
 		<Box>
 			<Identifier>(0x519d6ce8, 0x7a78d342)</Identifier>
-			<Name>Spatial Filter</Name>
+			<Name>Spatial Filter 3b</Name>
 			<AlgorithmClassIdentifier>(0xdd332c6c, 0x195b4fd4)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -2763,7 +2763,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${Player_ScenarioDirectory}/classifiers/csp-1b</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/csp-3b</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -3244,7 +3244,7 @@
 		</Box>
 		<Box>
 			<Identifier>(0x62486763, 0x18ec289f)</Identifier>
-			<Name>Spatial Filter</Name>
+			<Name>Spatial Filter 2h1</Name>
 			<AlgorithmClassIdentifier>(0xdd332c6c, 0x195b4fd4)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -3305,7 +3305,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${Player_ScenarioDirectory}/classifiers/csp-1h1</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/csp-2h1</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
