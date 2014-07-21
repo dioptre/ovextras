@@ -643,7 +643,7 @@ void CPlayerVisualisation::showTopLevelWindows(void)
 	std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
 	while(it!=m_mPlugins.end())
 	{
-		if(GTK_IS_WIDGET(it->second.m_pWidget))
+		if((GTK_IS_WIDGET(it->second.m_pWidget))&&(!it->second.m_Muted))
 		{
 			gtk_widget_show(it->second.m_pWidget);
 		}
@@ -656,21 +656,29 @@ void CPlayerVisualisation::showSelectedWindow(OpenViBE::uint32 ui32Index)
 {
 	// printf("Show %p\n", GTK_WIDGET(m_vWindows[ui32Index]));
 	gtk_widget_show(GTK_WIDGET(m_vWindows[ui32Index]));
+	boolean l_bShowWindow = false;
 
-	// Show widgets which are in the window
+	// Show widgets which are in the window (unless muted)
 	std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
 	while(it!=m_mPlugins.end())
 	{
-		if(GTK_IS_WIDGET(it->second.m_pWidget))
+		if((GTK_IS_WIDGET(it->second.m_pWidget))&&(!it->second.m_Muted))
 		{
 			GtkWidget *l_pTopLevelWidget = gtk_widget_get_toplevel(it->second.m_pWidget);
 			if(l_pTopLevelWidget == GTK_WIDGET(m_vWindows[ui32Index]))
 			{
 				// printf("ShowPlugin %p\n", it->second.m_pWidget);
 				gtk_widget_show(it->second.m_pWidget);
+				l_bShowWindow = true;
 			}
 		}
 		it++;
+	}
+
+	//if the window contains no widget to show, hide it back
+	if(!l_bShowWindow)
+	{
+		gtk_widget_hide(GTK_WIDGET(m_vWindows[ui32Index]));
 	}
 
 }
