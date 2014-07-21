@@ -6,6 +6,10 @@ Detailed description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainerDeprecated_Description|
+Note: This box is likely to be tagged as deprecated and/or removed after v0.18.
+For a transition period, we have only changed the name. We recommend upgrading
+to the new, non-deprecated box with the same name.
+
 The <em>Classifier Trainer</em> box is a generic box for classification training purpose. It works
 in conjunction with the \ref Doc_BoxAlgorithm_ClassifierProcessor box.
 This box' role is to expose a generic interface to the rest of the BCI pipelines. The tasks

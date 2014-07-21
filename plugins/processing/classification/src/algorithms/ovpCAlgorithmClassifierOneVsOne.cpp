@@ -192,7 +192,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 
 //	std::cout << "Starting Classification" << std::endl;
 	const OpenViBE::uint32 l_ui32AmountClass = this->getClassAmount();
-	uint32 l_ui32FeatureVectorSize=rFeatureVector.getSize();
+	const uint32 l_ui32FeatureVectorSize=rFeatureVector.getSize();
 
 	TParameterHandler<IMatrix*> ip_pProbabilityMatrix = m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix);
 	IMatrix * l_pProbabilityMatrix = (IMatrix*)ip_pProbabilityMatrix;
@@ -201,9 +201,9 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 	l_pProbabilityMatrix->setDimensionSize(0, l_ui32AmountClass);
 	l_pProbabilityMatrix->setDimensionSize(1, l_ui32AmountClass);
 
-	for(OpenViBE::uint32 i =0; i < l_ui32AmountClass ; ++i)
+	for(OpenViBE::uint32 i =0; i < l_pProbabilityMatrix->getBufferElementCount() ; ++i)
 	{
-		l_pProbabilityMatrix->getBuffer()[i*l_ui32AmountClass + i] = 0.0;
+		l_pProbabilityMatrix->getBuffer()[i] = 0.0;
 	}
 
 	//Let's generate the matrix of confidence score

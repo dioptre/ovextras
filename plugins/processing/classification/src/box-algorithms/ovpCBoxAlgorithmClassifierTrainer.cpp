@@ -438,6 +438,7 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 
 	if(uiStopIndex-uiStartIndex==0)
 	{
+		this->getLogManager() << LogLevel_Error << "Start and stop indexes are the same (" << uiStartIndex << ")\n";
 		return 0;
 	}
 
@@ -457,10 +458,10 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 
 	for(size_t j=uiStartIndex; j<uiStopIndex; j++)
 	{
-		size_t k = m_vFeatureVectorIndex[j];
+		const size_t k = m_vFeatureVectorIndex[j];
 
 		float64* l_pFeatureVectorBuffer=ip_pFeatureVector->getBuffer();
-		float64 l_f64TrainerClass=(float64)m_vFeatureVector[k].m_ui32InputIndex;
+		const float64 l_f64CorrectValue=(float64)m_vFeatureVector[k].m_ui32InputIndex;
 		System::Memory::copy(
 			l_pFeatureVectorBuffer,
 			m_vFeatureVector[k].m_pFeatureVectorMatrix->getBuffer(),
@@ -468,7 +469,8 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 
 		m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 
-		if(op_f64ClassificationStateClass==l_f64TrainerClass)
+		const float64 l_f64PredictedValue = op_f64ClassificationStateClass;
+		if(l_f64PredictedValue==l_f64CorrectValue)
 		{
 			l_iSuccessfullTrainerCount++;
 		}

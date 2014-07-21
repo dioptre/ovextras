@@ -50,21 +50,21 @@ boolean CAlgorithmPairwiseDecisionVoting::compute(OpenViBE::IMatrix* pSubClassif
 	float64* l_pMatrixBuffer = pSubClassifierMatrix->getBuffer();
 	float64* l_pProbVector = new float64[l_ui32AmountClass];
 	uint32 l_pProbVectorSum = 0;
-	for(OpenViBE::uint32 l_ui32ClassIndex = 0 ; l_ui32ClassIndex < l_ui32AmountClass ; ++l_ui32ClassIndex)
+	for(OpenViBE::uint32 l_ui32FirstClass = 0 ; l_ui32FirstClass < l_ui32AmountClass ; ++l_ui32FirstClass)
 	{
 		uint32 l_pTempSum = 0;
 		for(OpenViBE::uint32 l_ui32SecondClass = 0 ; l_ui32SecondClass<l_ui32AmountClass ; ++l_ui32SecondClass)
 		{
-			if(l_ui32SecondClass != l_ui32ClassIndex)
+			if(l_ui32SecondClass != l_ui32FirstClass)
 			{
-				if(l_pMatrixBuffer[l_ui32AmountClass*l_ui32ClassIndex + l_ui32SecondClass] >
-						l_pMatrixBuffer[l_ui32AmountClass*l_ui32SecondClass + l_ui32ClassIndex])
+				if(l_pMatrixBuffer[l_ui32AmountClass*l_ui32FirstClass + l_ui32SecondClass] >
+						l_pMatrixBuffer[l_ui32AmountClass*l_ui32SecondClass + l_ui32FirstClass])
 				{
 					++l_pTempSum;
 				}
 			}
 		}
-		l_pProbVector[l_ui32ClassIndex] = l_pTempSum;
+		l_pProbVector[l_ui32FirstClass] = l_pTempSum;
 		l_pProbVectorSum += l_pTempSum;
 	}
 
