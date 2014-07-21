@@ -85,9 +85,9 @@ void ExternalP300CStimulator::run()
 	uint64 l_ui64TimeStep = static_cast<uint64>(ITimeArithmetics::sampleCountToTime(l_ui32StimulatorFrequency, 1LL));
 	uint64 l_ui64CurrentTime = 0;
 
-	//uint64 MyInterFlash = 0;
-	uint64 MyLastFlash = 0;
-	uint64 lastCurrentTime = 0;
+	//uint64 l_ui64MyInterFlash = 0;
+	//uint64 l_ui64MyLastFlash = 0;
+	uint64 l_ui64LastCurrentTime = 0;
 	
 	while (m_ui32TrialIndex<=m_ui32TrialCount)
 	{
@@ -175,10 +175,10 @@ void ExternalP300CStimulator::run()
 					{
 						l_ui32State = State_Flash;
 						m_ui64TimeToNextFlash += m_ui64InterStimulusOnset;
-						MyLastFlash = System::Time::zgetTime();
-						m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Debug << "Flash at " << time64(l_ui64CurrentTime) << " diff is " << time64(l_ui64CurrentTime-lastCurrentTime) << "\n";// next flash at " << time64(m_ui64TimeToNextFlash) << "\n";
-						MyInterFlash = MyLastFlash;
-						lastCurrentTime = l_ui64CurrentTime;
+						// l_ui64MyLastFlash = System::Time::zgetTime();
+						m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Debug << "Flash at " << time64(l_ui64CurrentTime) << " diff is " << time64(l_ui64CurrentTime-l_ui64LastCurrentTime) << "\n";// next flash at " << time64(m_ui64TimeToNextFlash) << "\n";
+						// l_ui64MyInterFlash = l_ui64MyLastFlash;
+						l_ui64LastCurrentTime = l_ui64CurrentTime;
 					}
 					if (l_ui64CurrentTimeInRepetition>=m_ui64TimeToNextFlashStop && m_ui32LastState!=State_NoFlash)
 					{
