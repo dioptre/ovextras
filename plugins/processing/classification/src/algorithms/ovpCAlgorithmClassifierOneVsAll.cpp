@@ -63,7 +63,7 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
 
 	if(l_vClassLabels.size() != l_ui32AmountClass)
 	{
-		this->getLogManager() << LogLevel_Error << "There is sample for " << static_cast<uint32>(l_vClassLabels.size()) << " classes but expected for " << l_ui32AmountClass << ".\n";
+		this->getLogManager() << LogLevel_Error << "There are samples for " << static_cast<uint32>(l_vClassLabels.size()) << " classes but expected for " << l_ui32AmountClass << " classes.\n";
 		return false;
 	}
 
@@ -215,7 +215,7 @@ void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
 	this->m_oSubClassifierList.pop_back();
 }
 
-boolean CAlgorithmClassifierOneVsAll::designArchitecture(OpenViBE::CIdentifier& rId, OpenViBE::uint64& rClassAmount)
+boolean CAlgorithmClassifierOneVsAll::designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassAmount)
 {
 	if(!this->setSubClassifierIdentifier(rId))
 	{

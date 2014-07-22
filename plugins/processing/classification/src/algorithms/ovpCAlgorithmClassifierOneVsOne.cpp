@@ -129,7 +129,7 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 
 	if(l_vClassLabels.size() != l_ui32AmountClass)
 	{
-		this->getLogManager() << LogLevel_Error << "There is sample for " << (uint32)l_vClassLabels.size() << " classes but expected for " << l_ui32AmountClass << ".\n";
+		this->getLogManager() << LogLevel_Error << "There are samples for " << (uint32)l_vClassLabels.size() << " classes but expected for " << l_ui32AmountClass << " classes.\n";
 		return false;
 	}
 
@@ -142,11 +142,11 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 	//Now let's train each classifier
 	for(size_t l_iFirstClass=1 ; l_iFirstClass <= l_ui32AmountClass; ++l_iFirstClass)
 	{
-		ip_pRepartitionSet->getBuffer()[l_iFirstClass-1] = l_vClassLabels[(float64)l_iFirstClass];
+		ip_pRepartitionSet->getBuffer()[l_iFirstClass-1] = l_vClassLabels[static_cast<float64>(l_iFirstClass)];
 
 		for(size_t l_iSecondClass = l_iFirstClass+1 ; l_iSecondClass <= l_ui32AmountClass ; ++l_iSecondClass)
 		{
-			size_t l_iFeatureCount = l_vClassLabels[(float64)l_iFirstClass] + l_vClassLabels[(float64)l_iSecondClass];
+			size_t l_iFeatureCount = l_vClassLabels[(float64)l_iFirstClass] + l_vClassLabels[static_cast<float64>(l_iSecondClass)];
 
 			IAlgorithmProxy* l_pSubClassifier = getSubClassifierDescriptor(l_iFirstClass, l_iSecondClass).m_pSubClassifierProxy;
 
@@ -255,7 +255,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 	return true;
 }
 
-boolean CAlgorithmClassifierOneVsOne::designArchitecture(OpenViBE::CIdentifier& rId, OpenViBE::uint64& rClassAmount)
+boolean CAlgorithmClassifierOneVsOne::designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassAmount)
 {
 	if(!setSubClassifierIdentifier(rId))
 	{

@@ -176,7 +176,7 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CString l_sStrategyName;
 				OpenViBE::CIdentifier l_oStrategyIdentifier;
-				OpenViBE::CIdentifier l_oOldStrategyIdentifier=m_oStrategyClassIdentifier;
+				// OpenViBE::CIdentifier l_oOldStrategyIdentifier=m_oStrategyClassIdentifier;
 
 				rBox.getSettingValue(0, l_sStrategyName);
 

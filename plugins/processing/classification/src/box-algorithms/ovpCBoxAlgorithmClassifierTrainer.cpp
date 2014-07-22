@@ -140,7 +140,7 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
 {
 
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	// IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 	if(m_pClassifier) 
 	{

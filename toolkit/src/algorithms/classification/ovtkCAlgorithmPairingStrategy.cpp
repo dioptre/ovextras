@@ -31,9 +31,9 @@ boolean CAlgorithmPairingStrategy::process(void)
 		TParameterHandler < CIdentifier* > ip_pClassifierIdentifier(this->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
 		TParameterHandler < uint64 > ip_pClassAmount(this->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount));
 
-		uint64 l_ui64ClassCount = (uint64) ip_pClassAmount;
-		CIdentifier l_oClassifierIdentifier = *((CIdentifier*)ip_pClassifierIdentifier);
-		if(this->designArchitecture(l_oClassifierIdentifier, l_ui64ClassCount))
+		const uint64 l_ui64ClassCount = (uint64) ip_pClassAmount;
+		const CIdentifier l_oClassifierIdentifier = *((CIdentifier*)ip_pClassifierIdentifier);
+		if(this->designArchitecture(l_oClassifierIdentifier, static_cast<uint32>(l_ui64ClassCount)))
 		{
 			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
 		}

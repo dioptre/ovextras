@@ -34,7 +34,7 @@ namespace OpenViBEToolkit
 		virtual OpenViBE::boolean process(void);
 		virtual void release(void) { delete this; }
 
-		virtual OpenViBE::boolean designArchitecture(OpenViBE::CIdentifier& rId, OpenViBE::uint64& rClassAmount) = 0;
+		virtual OpenViBE::boolean designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassAmount) = 0;
 
 		virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet)=0;
 		virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValue)=0;
