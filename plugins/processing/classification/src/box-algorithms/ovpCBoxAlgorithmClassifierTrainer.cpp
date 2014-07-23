@@ -438,7 +438,7 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 
 	if(uiStopIndex-uiStartIndex==0)
 	{
-		this->getLogManager() << LogLevel_Error << "Start and stop indexes are the same (" << uiStartIndex << ")\n";
+		this->getLogManager() << LogLevel_Error << "Start and stop indexes are the same (" << static_cast<uint64>(uiStartIndex) << ")\n";
 		return 0;
 	}
 
