@@ -5,18 +5,31 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include "ovdCSettingCollectionHelper.h"
 
 namespace OpenViBEDesigner
 {
-	typedef struct
+	struct SButtonCB
 	{
+		SButtonCB(const OpenViBE::Kernel::IKernelContext& rKernelContext,
+			std::map< OpenViBE::CString, ::GtkWidget* >& rSettingWidget,
+			CSettingCollectionHelper& rHelper,
+			::GtkWidget* pSettingOverrideValue,
+			OpenViBE::Kernel::IBox& rBox) : 
+				m_rKernelContext(rKernelContext),
+				m_rSettingWidget(rSettingWidget), 
+				m_rHelper(rHelper), 
+				m_pSettingOverrideValue(pSettingOverrideValue),
+				m_rBox(rBox)
+		{ } ;
+
 		const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
-		std::vector< ::GtkWidget* >& m_vSettingValue;
+		std::map< OpenViBE::CString, ::GtkWidget* >& m_rSettingWidget;
 		CSettingCollectionHelper& m_rHelper;
 		::GtkWidget* m_pSettingOverrideValue;
 		OpenViBE::Kernel::IBox& m_rBox;
-	} SButtonCB;
+	};
 
 	class CBoxConfigurationDialog
 	{
@@ -36,14 +49,13 @@ namespace OpenViBEDesigner
 		OpenViBE::CString m_sGUIFilename;
 		OpenViBE::CString m_sGUISettingsFilename;
 		//
-		::GtkWidget* m_oWidget;//widget with the dialog for configuration (used whole for box config when no scenario is running)
-		::GtkWidget* m_oWidgetToReturn; //child of m_oWidget, if we are running a scenario, this is the widget we need, the rest can be discarded
+		::GtkWidget* m_pWidget;//widget with the dialog for configuration (used whole for box config when no scenario is running)
+		::GtkWidget* m_pWidgetToReturn; //child of m_oWidget, if we are running a scenario, this is the widget we need, the rest can be discarded
 		::GtkWidget* m_pSettingOverrideValue;
-		bool m_bMode; // true if the scenario is running, false otherwise
-		std::vector< ::GtkWidget* > m_vSettingValue;
-		std::vector< OpenViBE::uint32> m_vModSettingIndex;//vector of the indexes of the settings that are modifiable
-		CSettingCollectionHelper *m_oHelper;
-		SButtonCB *m_oButton;
+		bool m_bIsScenarioRunning; // true if the scenario is running, false otherwise
+		std::map< OpenViBE::CString, ::GtkWidget* > m_mSettingWidget;
+		CSettingCollectionHelper *m_pHelper;
+		SButtonCB *m_pButtonCB;
 	};
 };
 

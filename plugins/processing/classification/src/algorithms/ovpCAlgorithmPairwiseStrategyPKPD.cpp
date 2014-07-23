@@ -7,7 +7,9 @@
 #include <xml/IXMLNode.h>
 #include <xml/IXMLHandler.h>
 
-static const char* const c_sTypeNodeName = "PairwiseDecision_PKDP";
+namespace{
+	const char* const c_sTypeNodeName = "PairwiseDecision_PKDP";
+}
 
 
 using namespace OpenViBE;

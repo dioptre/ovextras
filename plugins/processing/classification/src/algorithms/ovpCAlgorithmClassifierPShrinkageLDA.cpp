@@ -25,10 +25,10 @@ extern const char* const c_sClassifierRoot;
 
 OpenViBE::int32 OpenViBEPlugins::Classification::getPShrinkageLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
 {
-	if(rFirstClassificationValue[0] > rSecondClassificationValue[0])
-		return -1;
-	else if(rFirstClassificationValue[0] == rSecondClassificationValue[0])
+	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
 		return 0;
+	else if(::fabs(rFirstClassificationValue[0]) > ::fabs(rSecondClassificationValue[0]))
+		return -1;
 	else
 		return 1;
 }
@@ -196,7 +196,7 @@ boolean CAlgorithmClassifierPShrinkageLDA::train(const IFeatureVectorSet& rFeatu
 //		dumpMatrix(this->getLogManager(), l_aCov[l_ui32classIdx], "Shrinked cov");
 	}
 
-	l_oGlobalCov /= (double)l_ui32nClasses;
+	l_oGlobalCov /= static_cast<float64>(l_ui32nClasses);
 
 	const float64 l_f64Tolerance = 1e-10;
 	// Get the pseudoinverse of the global cov using eigen decomposition for self-adjoint matrices
@@ -217,7 +217,7 @@ boolean CAlgorithmClassifierPShrinkageLDA::train(const IFeatureVectorSet& rFeatu
 	// Catenate the bias term and the weights
 
 	m_f64w0 = l_oClass1(0,0) + l_oClass2(0,0) +
-			std::log((double)l_vClassLabels[m_f64Class1]/(double)l_vClassLabels[m_f64Class2]);
+			std::log(static_cast<double>(l_vClassLabels[m_f64Class1])/static_cast<double>(l_vClassLabels[m_f64Class2]));
 	m_oW = (l_oGlobalCovInv * (l_aMean[0] - l_aMean[1]).transpose()).transpose();
 
 	m_ui32NumCols = l_ui32nCols;
@@ -250,8 +250,8 @@ boolean CAlgorithmClassifierPShrinkageLDA::classify(const IFeatureVector& rFeatu
 	MatrixXd l_oWeights(1, l_ui32nCols);
 	l_oWeights.block(0,0,1, l_ui32nCols) = l_oFeatureVec;
 
-	float64 l_f64a =(m_oW * l_oWeights.transpose()).col(0)(0) + m_f64w0;
-	float64 l_f64P1 = 1 / (1 + exp(-l_f64a));
+	const float64 l_f64a =(m_oW * l_oWeights.transpose()).col(0)(0) + m_f64w0;
+	const float64 l_f64P1 = 1 / (1 + exp(-l_f64a));
 
 	rClassificationValues.setSize(1);
 	rClassificationValues[0]= l_f64P1;

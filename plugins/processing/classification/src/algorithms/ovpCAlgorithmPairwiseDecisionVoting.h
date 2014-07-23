@@ -14,6 +14,13 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
+		/**
+		 * @brief The CAlgorithmPairwiseDecisionVoting class
+		 * This strategy relies on a basic voting system. If class A beats class B, class A win 1 point and B 0 point. At the end, the vector of
+		 * probability is composed by the normalized score of each class.
+		 *
+		 * Probability required.
+		 */
 		class CAlgorithmPairwiseDecisionVoting : virtual public OpenViBEPlugins::Classification::CAlgorithmPairwiseDecision
 		{
 

@@ -80,5 +80,11 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_TemporalFilter_Miscellaneous|
  * This plugin filters the input signal. Several filtering are available.
+ *
+ * The box is able to use filter orders that are larger than the input chunk
+ * size. However, with high order filters in general, remember to check that the 
+ * filtered output of the box remains stable and meaningful.  If not, 
+ * try decreasing the filter order.
+ *
  * |OVP_DocEnd_BoxAlgorithm_TemporalFilter_Miscellaneous|
  */

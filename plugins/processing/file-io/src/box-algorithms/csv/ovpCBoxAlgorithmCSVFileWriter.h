@@ -111,7 +111,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput  ("Streamed matrix",  OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addSetting("Filename",         OV_TypeId_Filename, "record-[$core{date}-$core{time}].csv");
 				rBoxAlgorithmPrototype.addSetting("Column separator", OV_TypeId_String, ";");
-				rBoxAlgorithmPrototype.addSetting("Use compression",  OV_TypeId_Boolean, "true");
+				rBoxAlgorithmPrototype.addSetting("Use compression",  OV_TypeId_Boolean, "false");
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				return true;
 			}
