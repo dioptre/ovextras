@@ -54,8 +54,8 @@ namespace OpenViBEDesigner
 		::GtkWidget* m_pSettingOverrideValue;
 		bool m_bIsScenarioRunning; // true if the scenario is running, false otherwise
 		std::map< OpenViBE::CString, ::GtkWidget* > m_mSettingWidget;
-		CSettingCollectionHelper *m_pHelper;
-		SButtonCB *m_pButtonCB;
+		CSettingCollectionHelper* m_pHelper;
+		SButtonCB* m_pButtonCB;
 	};
 };
 

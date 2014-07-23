@@ -267,8 +267,8 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 	,m_sGUISettingsFilename(sGUISettingsFilename)
 	,m_pWidget(NULL)
 	,m_pWidgetToReturn(NULL)
-	,m_pButtonCB(NULL)
 	,m_bIsScenarioRunning(bMode)
+	,m_pButtonCB(NULL)
 {
 	m_mSettingWidget.clear();
 	
