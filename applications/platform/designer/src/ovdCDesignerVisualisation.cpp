@@ -2055,7 +2055,7 @@ void CDesignerVisualisation::dragDataReceivedInWidgetCB(::GtkWidget* pDstWidget,
 
 void CDesignerVisualisation::drag_data_received_in_event_box_cb(::GtkWidget* pDstWidget,GdkDragContext*,gint,gint,::GtkSelectionData* pSelectionData,guint,guint,gpointer pData)
 {
-	std::cout << "drag_data_received_in_event_box_cb\n";
+	// std::cout << "drag_data_received_in_event_box_cb\n";
 	char buf[1024];
 	void* pDesignerVisualisation = NULL;
 	sscanf((const char*)pData, "%p %s", &pDesignerVisualisation, buf);
