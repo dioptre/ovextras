@@ -212,8 +212,8 @@ boolean CAlgorithmClassifierPShrinkageLDA::train(const IFeatureVectorSet& rFeatu
 	// Build LDA model for 2 classes. This is a special case of the multiclass version.
 	const MatrixXd l_oGlobalCovInv = l_oEigenSolver.eigenvectors() * l_oEigenValues.asDiagonal() * l_oEigenSolver.eigenvectors().inverse();
 
-	const MatrixXd l_oClass1 = -0.5 * l_aMean[0].transpose() * l_oGlobalCovInv * l_aMean[0];
-	const MatrixXd l_oClass2 = 0.5 * l_aMean[1].transpose() * l_oGlobalCovInv * l_aMean[1];
+	const MatrixXd l_oClass1 = -0.5 * l_aMean[0] * l_oGlobalCovInv * l_aMean[0].transpose();
+	const MatrixXd l_oClass2 = 0.5 * l_aMean[1] * l_oGlobalCovInv * l_aMean[1].transpose();
 	// Catenate the bias term and the weights
 
 	m_f64w0 = l_oClass1(0,0) + l_oClass2(0,0) +
