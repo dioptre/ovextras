@@ -17,6 +17,11 @@ GSymbol::GSymbol(const char * symbol, OpenViBE::CString fontPath, OpenViBE::floa
 	PangoFontDescription *desc;
 
 	m_sFontFile = std::string(fontPath.toASCIIString());
+
+#if defined TARGET_OS_Windows
+	m_sFontFile = std::string("Sans 100");//can't just use a ttf file on windows, need to register the font. That'll do for now
+#endif
+
 	desc = pango_font_description_from_string (m_sFontFile.c_str());
 	pango_font_description_set_size(desc, gint(m_f32LabelScaleSize*m_f32MaxLabelSize*PANGO_SCALE));
 	pango_layout_set_font_description (m_olayout, desc);
