@@ -81,7 +81,7 @@ void P300StimulatorPropertyReader::processChildData(const char* sData)
 	}
 	if(m_vNode.top()==CString("StopCondition"))
 	{
-		m_ui32StopCondition = static_cast<uint32>(m_pKernelContext->getConfigurationManager().expandAsUInteger(l_sExpandedValue));
+		m_f64StopCondition = ::atof(l_sExpandedValue.toASCIIString());
 	}
 }
 

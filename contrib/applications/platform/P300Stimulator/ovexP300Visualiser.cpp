@@ -117,12 +117,19 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 		m_bReplayMode=false;
 	}
 
-	this->m_oEvidenceAccumulator = new ExternalP300CEvidenceAccumulator(m_pStimulatorPropReader,m_pSequenceGenerator);
+	if(m_pInterfacePropReader->getSpellingMode()!=CALIBRATION_MODE)
+	{
+		this->m_oEvidenceAccumulator = new ExternalP300CEvidenceAccumulator(m_pStimulatorPropReader,m_pSequenceGenerator);
+		this->m_oStimulator->setEvidenceAccumulator(m_oEvidenceAccumulator);
+	}
+	else
+	{
+		this->m_oStimulator->setEvidenceAccumulator(NULL);
+	}
 	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
 	this->m_oStimulator->setCallBack(ExternalP300Visualiser::processCallback);	
 	this->m_oStimulator->setWaitCallBack(ExternalP300Visualiser::processWaitCallback);
 	this->m_oStimulator->setQuitEventCheck(ExternalP300Visualiser::areWeQuitting);
-	this->m_oStimulator->setEvidenceAccumulator(m_oEvidenceAccumulator);
 
 
 	//initialize the OpenGL context and the main container that is needed to draw everything on the screen by calling the drawAndSync function
@@ -166,7 +173,8 @@ ExternalP300Visualiser::~ExternalP300Visualiser()
 	
 	delete m_pSequenceWriter;
 	delete m_pSequenceGenerator;
-	delete m_oEvidenceAccumulator;
+	if(m_oEvidenceAccumulator!=NULL)
+		delete m_oEvidenceAccumulator;
 }
 
 void ExternalP300Visualiser::initializeOpenViBEKernel()

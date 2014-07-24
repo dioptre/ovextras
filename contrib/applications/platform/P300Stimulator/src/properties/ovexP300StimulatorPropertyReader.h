@@ -37,7 +37,7 @@ namespace OpenViBEApplications
 		std::queue< OpenViBE::uint64 > * getTargetStimuli() { return m_oTargetStimuli; }
 		OpenViBE::CString getSharedMemoryName() { return m_sSharedMemoryName; }
 
-		OpenViBE::uint32 getStopCondition() { return m_ui32StopCondition; }
+		OpenViBE::float64 getStopCondition() { return m_f64StopCondition; }
 		OpenViBE::boolean getEarlyStopping() { return m_bEarlyStopping; }
 
 	protected:
@@ -63,7 +63,7 @@ namespace OpenViBEApplications
 
 		OpenViBE::CString m_sSharedMemoryName;	
 
-		OpenViBE::uint32 m_ui32StopCondition;
+		OpenViBE::float64 m_f64StopCondition;
 		OpenViBE::boolean m_bEarlyStopping;
 		
 	private:
