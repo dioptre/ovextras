@@ -114,7 +114,8 @@ void ExternalP300CStimulator::run()
 
 		if(m_oEvidenceAcc!=NULL)
 		{
-			m_oEvidenceAcc->getPrediction();//update with data from the scenario classifier
+			m_oEvidenceAcc->update();//update with data from the scenario classifier
+			m_oEvidenceAcc->getPrediction();
 			l_ui64Prediction = m_oEvidenceAcc->getPrediction();
 		}
 			
