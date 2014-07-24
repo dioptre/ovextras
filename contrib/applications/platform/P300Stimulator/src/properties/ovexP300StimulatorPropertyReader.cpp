@@ -35,6 +35,12 @@ void P300StimulatorPropertyReader::processChildData(const char* sData)
 	if(m_vNode.top()==CString("MaxRepetitions"))
 	{
 		m_ui32RepetitionCountInTrial = static_cast<uint32>(m_pKernelContext->getConfigurationManager().expandAsUInteger(l_sExpandedValue));
+		if(m_ui32RepetitionCountInTrial<=m_ui32MinRepetitions)
+		{
+			m_pKernelContext->getLogManager() << LogLevel_Info << "Tried to set MaxRepetitions to " << m_ui32RepetitionCountInTrial << " when min repetitions is"
+											  << m_ui32MinRepetitions << " MaxRepetitions will be " << m_ui32MinRepetitions+1 << "\n";
+			m_ui32RepetitionCountInTrial=m_ui32MinRepetitions+1;
+		}
 	}
 	if(m_vNode.top()==CString("NumberOfTrials"))
 	{

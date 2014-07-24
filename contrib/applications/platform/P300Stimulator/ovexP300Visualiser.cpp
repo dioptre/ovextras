@@ -102,7 +102,6 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	
 	//create the stimulator object and register the callback function that is implemented above.
 	//if we are in replay, create a NULLStimulator
-	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
 	if(m_pInterfacePropReader->getStimulatorMode()==CString("Replay"))
 	{
 		this->m_pKernelContext->getLogManager() << LogLevel_Info << " REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() <<"\n";
@@ -112,7 +111,7 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	}
 	else
 	{
-		this->m_pKernelContext->getLogManager() << LogLevel_Info << " NOT REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() << "\n";
+		this->m_pKernelContext->getLogManager() << LogLevel_Info << " ONLINE MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() << "\n";
 		this->m_oStimulator = new ExternalP300CStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
 		m_bReplayMode=false;
 	}
@@ -126,7 +125,6 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	{
 		this->m_oStimulator->setEvidenceAccumulator(NULL);
 	}
-	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
 	this->m_oStimulator->setCallBack(ExternalP300Visualiser::processCallback);	
 	this->m_oStimulator->setWaitCallBack(ExternalP300Visualiser::processWaitCallback);
 	this->m_oStimulator->setQuitEventCheck(ExternalP300Visualiser::areWeQuitting);
@@ -349,19 +347,17 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			m_qEventQueue.push(eventID);			
 			break;
 		case OVA_StimulationId_Flash:
-			//* TODO: should use the screen layout property reader to find out the foreground color
 			if (m_pInterfacePropReader->isPhotoDiodeEnabled())
 			{
 				m_pMainContainer->DiodeAreaFlash(true);	
 			}
-				//*/
 			
 			m_qEventQueue.push(eventID);
 			
 			//get the next flash group which is a vector, the size of the number of symbols on the keyboard, with one or zero to indicate
 			//whether it is flashed or not
 			//m_pKernelContext->getLogManager() << LogLevel_Info << "Flash " << eventID << " getting group \n";
-			l_lSymbolChangeList = m_oStimulator->getNextFlashGroup()->data();//to uncomment when not in replay
+			l_lSymbolChangeList = m_oStimulator->getNextFlashGroup()->data();
 			changeStates(l_lSymbolChangeList,FLASH);
 			m_pMainContainer->getKeyboardHandler()->updateChildStates(l_lSymbolChangeList);	
 					
@@ -562,8 +558,6 @@ int main (int argc, char *argv[])
 	delete g_externalVisualiser;
 
 	glfwTerminate();
-	//SDL_Quit();
 #endif
 	return 0;
 }
-//#endif//TARGET_HAS_ThirdPartyModulesForExternalStimulator

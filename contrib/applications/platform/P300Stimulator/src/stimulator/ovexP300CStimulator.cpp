@@ -23,7 +23,6 @@ ExternalP300CStimulator::ExternalP300CStimulator(P300StimulatorPropertyReader* p
 	m_ui32RepetitionCountInTrial = m_pSequenceGenerator->getNumberOfRepetitions();
 	m_ui32MinRepetitions = propertyObject->getMinNumberOfRepetitions();
 	m_ui32TrialCount = propertyObject->getNumberOfTrials();
-	m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << m_ui32TrialCount << " trials\n";
 	m_ui64FlashDuration = propertyObject->getFlashDuration();
 	m_ui64InterStimulusOnset = propertyObject->getInterStimulusOnset();
 	m_ui64InterRepetitionDuration = propertyObject->getInterRepetitionDelay();
