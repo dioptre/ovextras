@@ -23,7 +23,6 @@ ExternalP300CStimulator::ExternalP300CStimulator(P300StimulatorPropertyReader* p
 	m_ui32RepetitionCountInTrial = m_pSequenceGenerator->getNumberOfRepetitions();
 	m_ui32MinRepetitions = propertyObject->getMinNumberOfRepetitions();
 	m_ui32TrialCount = propertyObject->getNumberOfTrials();
-	m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << m_ui32TrialCount << " trials\n";
 	m_ui64FlashDuration = propertyObject->getFlashDuration();
 	m_ui64InterStimulusOnset = propertyObject->getInterStimulusOnset();
 	m_ui64InterRepetitionDuration = propertyObject->getInterRepetitionDelay();
@@ -111,16 +110,19 @@ void ExternalP300CStimulator::run()
 
 		}
 		//*/
-		m_oEvidenceAcc->update();//update with data from the scenario classifier
+		uint64 l_ui64Prediction = 0;
 
-		uint64 l_ui64Prediction = m_oEvidenceAcc->getPrediction();
+		if(m_oEvidenceAcc!=NULL)
+		{
+			m_oEvidenceAcc->getPrediction();//update with data from the scenario classifier
+			l_ui64Prediction = m_oEvidenceAcc->getPrediction();
+		}
 			
 		if (l_ui64Prediction!=0 && l_ui32State!=State_TrialRest && l_ui32State!=State_Feedback && l_ui32State!=State_Target ) //induce early stopping
 		{
 			this->adjustForNextTrial(l_ui64CurrentTime);
 			m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Prediction received that is different from zero, induce early stopping...\n";
 			m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Prediction received " << l_ui64Prediction << "\n";
-			m_oEvidenceAcc->flushEvidence();//flush
 		}
 
 		//rest, target or feedback
@@ -135,7 +137,10 @@ void ExternalP300CStimulator::run()
 					m_pPropertyObject->getKernelContext()->getLogManager() << LogLevel_Info << "Forced prediction from OpenViBE " << l_ui64Prediction << "\n";// << (uint32)currentLTime.tv_sec << "," << (uint32)currentLTime.tv_usec << "\n";
 					m_ui64Prediction=l_ui64Prediction;
 					l_ui32State=State_TrialRest;
-					m_oEvidenceAcc->flushEvidence();//flush
+					if(m_oEvidenceAcc!=NULL)
+					{
+						m_oEvidenceAcc->flushEvidence();//flush
+					}
 				}
 			}
 			//showing targets on screen

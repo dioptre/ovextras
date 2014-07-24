@@ -103,7 +103,6 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	
 	//create the stimulator object and register the callback function that is implemented above.
 	//if we are in replay, create a NULLStimulator
-	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
 	if(m_pInterfacePropReader->getStimulatorMode()==CString("Replay"))
 	{
 		this->m_pKernelContext->getLogManager() << LogLevel_Info << " REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() <<"\n";
@@ -113,17 +112,23 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	}
 	else
 	{
-		this->m_pKernelContext->getLogManager() << LogLevel_Info << " NOT REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() << "\n";
+		this->m_pKernelContext->getLogManager() << LogLevel_Info << " ONLINE MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() << "\n";
 		this->m_oStimulator = new ExternalP300CStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
 		m_bReplayMode=false;
 	}
 
-	this->m_oEvidenceAccumulator = new ExternalP300CEvidenceAccumulator(m_pStimulatorPropReader,m_pSequenceGenerator);
-	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
+	if(m_pInterfacePropReader->getSpellingMode()!=CALIBRATION_MODE)
+	{
+		this->m_oEvidenceAccumulator = new ExternalP300CEvidenceAccumulator(m_pStimulatorPropReader,m_pSequenceGenerator);
+		this->m_oStimulator->setEvidenceAccumulator(m_oEvidenceAccumulator);
+	}
+	else
+	{
+		this->m_oStimulator->setEvidenceAccumulator(NULL);
+	}
 	this->m_oStimulator->setCallBack(ExternalP300Visualiser::processCallback);	
 	this->m_oStimulator->setWaitCallBack(ExternalP300Visualiser::processWaitCallback);
 	this->m_oStimulator->setQuitEventCheck(ExternalP300Visualiser::areWeQuitting);
-	this->m_oStimulator->setEvidenceAccumulator(m_oEvidenceAccumulator);
 
 
 	//initialize the OpenGL context and the main container that is needed to draw everything on the screen by calling the drawAndSync function
@@ -167,7 +172,8 @@ ExternalP300Visualiser::~ExternalP300Visualiser()
 	
 	delete m_pSequenceWriter;
 	delete m_pSequenceGenerator;
-	delete m_oEvidenceAccumulator;
+	if(m_oEvidenceAccumulator!=NULL)
+		delete m_oEvidenceAccumulator;
 }
 
 void ExternalP300Visualiser::initializeOpenViBEKernel()
@@ -342,12 +348,10 @@ void ExternalP300Visualiser::process(uint32 eventID)
 			m_qEventQueue.push(eventID);			
 			break;
 		case OVA_StimulationId_Flash:
-			//* TODO: should use the screen layout property reader to find out the foreground color
 			if (m_pInterfacePropReader->isPhotoDiodeEnabled())
 			{
 				m_pMainContainer->DiodeAreaFlash(true);	
 			}
-				//*/
 			
 			m_qEventQueue.push(eventID);
 			
@@ -556,8 +560,6 @@ int main (int argc, char *argv[])
 	delete g_externalVisualiser;
 
 	glfwTerminate();
-	//SDL_Quit();
 #endif
 	return 0;
 }
-//#endif//TARGET_HAS_ThirdPartyModulesForExternalStimulator

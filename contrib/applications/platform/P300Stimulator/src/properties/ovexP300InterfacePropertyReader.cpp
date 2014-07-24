@@ -18,7 +18,7 @@ P300InterfacePropertyReader::P300InterfacePropertyReader(OpenViBE::Kernel::IKern
 	m_sSymbolDefinitionFile = CString("");
 	m_sAdditionalConfigurationFile = CString("");
 	m_sFlashGroupDefinitionFile = CString("");
-	m_sStimulatorMode = CString("");
+	m_sStimulatorMode = CString("Online");
 	m_bFullScreen = false;
 	m_bCentralFeedbackFreeMode = true;
 	m_bCentralFeedbackCopyMode = true;

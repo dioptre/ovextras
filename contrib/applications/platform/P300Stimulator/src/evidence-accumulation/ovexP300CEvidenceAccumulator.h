@@ -60,9 +60,9 @@ namespace OpenViBEApplications
 
 
 					bool l_bEarlyStoppingConditionMet = true;
-					while((l_bEarlyStoppingConditionMet))
+					while((l_bEarlyStoppingConditionMet)&&(j<m_pNormalizedAccumulatedEvidence->getBufferElementCount()))
 					{
-						if((l_pBuffer[j]>l_f32Max-m_bStopCondition)&&(j!=l_ui32Argmax))
+						if((l_pBuffer[j]>l_f32Max-m_bStopCondition)&&(j!=l_ui32Argmax-1))
 							l_bEarlyStoppingConditionMet=false;
 						j++;
 					}
@@ -76,6 +76,7 @@ namespace OpenViBEApplications
 
 				virtual void flushEvidence()
 				{
+					ExternalP300IEvidenceAccumulator::flushEvidence();
 					//clear buffer
 					OpenViBEToolkit::Tools::MatrixManipulation::clearContent(*m_pNormalizedAccumulatedEvidence);
 				}
