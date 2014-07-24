@@ -56,6 +56,7 @@ namespace OpenViBEDesigner
 		std::map< OpenViBE::CString, ::GtkWidget* > m_mSettingWidget;
 		CSettingCollectionHelper* m_pHelper;
 		SButtonCB* m_pButtonCB;
+		::GtkCheckButton* m_pFileOverrideCheck;
 	};
 };
 
