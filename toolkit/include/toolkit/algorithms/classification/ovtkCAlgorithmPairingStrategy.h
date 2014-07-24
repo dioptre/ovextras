@@ -34,7 +34,7 @@ namespace OpenViBEToolkit
 		virtual OpenViBE::boolean process(void);
 		virtual void release(void) { delete this; }
 
-		virtual OpenViBE::boolean designArchitecture(OpenViBE::CIdentifier &rId, OpenViBE::int64& rClassAmount) = 0;
+		virtual OpenViBE::boolean designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassAmount) = 0;
 
 		virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet)=0;
 		virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValue)=0;
@@ -60,7 +60,7 @@ namespace OpenViBEToolkit
 			CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
 
 			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm,        "Algorithm Identifier",        OpenViBE::Kernel::ParameterType_Identifier);
-			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount,                   "Amount of class",             OpenViBE::Kernel::ParameterType_Integer);
+			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount,                   "Number of classes",           OpenViBE::Kernel::ParameterType_UInteger);
 
 			rAlgorithmPrototype.addInputTrigger   (OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture,              "Design Architecture");
 			return true;

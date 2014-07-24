@@ -86,13 +86,14 @@ boolean CAlgorithmClassifier::process(void)
 	{
 		XML::IXMLNode *l_pNode = this->saveConfiguration();
 		op_pConfiguration = l_pNode;
-		if(!l_pNode)
+		if(l_pNode)
 		{
-			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
 		}
 		else
 		{
-			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
+			this->getLogManager() << LogLevel_Error << "Unable to save configuration\n";
+			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
 			return false;
 		}
 	}
@@ -104,6 +105,7 @@ boolean CAlgorithmClassifier::process(void)
 		{
 			this->getLogManager() << LogLevel_ImportantWarning << "Configuration XML node is NULL\n";
 			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+			return false;
 		}
 		else
 		{

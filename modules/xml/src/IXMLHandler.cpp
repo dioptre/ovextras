@@ -96,6 +96,7 @@ IXMLNode *IXMLHandlerImpl::parseFile(const char *sPath)
 		delete[] l_sBuffer;
 		return l_pRes;
 	}
+	std::cout << "Error : unable to open the file" << sPath << "." << std::endl;
 	return NULL;
 }
 
@@ -107,6 +108,7 @@ IXMLNode *IXMLHandlerImpl::parseString(const char *sString, const uint32& uiSize
 	//We delete what is still in the stack
 	while(!m_oNodeStack.empty())
 	{
+		std::cout << "Warning : the file has been parsed but some tags are not closed. The file is probably not well-formed." << std::endl;
 		IXMLNode * l_pNode = m_oNodeStack.top();
 		l_pNode->release();
 		m_oNodeStack.pop();
@@ -131,6 +133,7 @@ boolean IXMLHandlerImpl::writeXMLInFile(const IXMLNode &rNode, const char *sPath
 		free(l_sXML);
 		return true;
 	}
+	std::cout << "Error : unable to open the file " << sPath << "." << std::endl;
 	return false;
 }
 
@@ -170,7 +173,7 @@ void IXMLHandlerImpl::closeChild()
 
 static void XMLCALL XML::expat_xml_start(void* pData, const char* pElement, const char** ppAttribute)
 {
-	uint64 i, l_ui64AttributeCount=0;
+	uint64 l_ui64AttributeCount=0;
 	while(ppAttribute[l_ui64AttributeCount++]);
 	l_ui64AttributeCount>>=1;
 
@@ -178,7 +181,7 @@ static void XMLCALL XML::expat_xml_start(void* pData, const char* pElement, cons
 	const char** l_pAttributeName=new const char*[static_cast<size_t>(l_ui64AttributeCount)];
 	const char** l_pAttributeValue=new const char*[static_cast<size_t>(l_ui64AttributeCount)];
 
-	for(i=0; i<l_ui64AttributeCount; i++)
+	for(uint64 i=0; i<l_ui64AttributeCount; i++)
 	{
 		l_pAttributeName[i]=ppAttribute[(i<<1)];
 		l_pAttributeValue[i]=ppAttribute[(i<<1)+1];

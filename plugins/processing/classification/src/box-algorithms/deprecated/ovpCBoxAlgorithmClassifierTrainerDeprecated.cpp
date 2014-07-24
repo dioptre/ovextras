@@ -60,19 +60,19 @@ boolean CBoxAlgorithmClassifierTrainerDeprecated::initialize(void)
 	//	CIdentifier l_oIdentifier;
 		i = OVP_BoxAlgorithm_ClassifierTrainerDeprecated_CommonSettingsCount; // number of settings when no additional setting is added
 
-		m_pExtraParemeter = new map<CString , CString> ();
+		m_pExtraParameter = new map<CString , CString> ();
 		while(i < l_rStaticBoxContext.getSettingCount())
 		{
 			CString l_pInputName;
 			CString l_pInputValue;
 			l_rStaticBoxContext.getSettingName(i, l_pInputName);
 			l_rStaticBoxContext.getSettingValue(i, l_pInputValue);
-			(*m_pExtraParemeter)[l_pInputName] = l_pInputValue;
+			(*m_pExtraParameter)[l_pInputName] = l_pInputValue;
 
 			++i;
 		}
 		TParameterHandler < map<CString , CString> * > ip_pExtraParameter(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
-		ip_pExtraParameter = m_pExtraParemeter;
+		ip_pExtraParameter = m_pExtraParameter;
 
 		m_vFeatureCount.clear();
 

@@ -678,12 +678,12 @@ boolean CBox::addSetting(const CString& sName,
 				uint64 l_ui64Value=0;
 				this->getTypeManager().getEnumerationEntry(rTypeIdentifier, 0, l_sValue, l_ui64Value);
 
-				// Find if the default value string actually is an identifier
+				// Find if the default value string actually is an identifier, otherwise just keep the zero index name as default.
 				CIdentifier l_oIdentifier;
 				l_oIdentifier.fromString(sDefaultValue);
 
 				// Finally, if it is an identifier, then a name should be found
-				// from the type manager !
+				// from the type manager ! Otherwise l_sValue is left to the default.
 				CString l_sCandidateValue=this->getTypeManager().getEnumerationEntryNameFromValue(rTypeIdentifier, l_oIdentifier.toUInteger());
 				if(l_sCandidateValue!=CString(""))
 				{
@@ -702,16 +702,26 @@ boolean CBox::addSetting(const CString& sName,
 
 	int32 l_i32Index = i32Index;
 
-	if(l_i32Index < 0 || l_i32Index >= (int32)m_vSetting.size())
+	if(i32Index>static_cast<int32>(m_vSetting.size())) {
+		// Don't accept pushes that are not either inside the existing array or an append right at the end
+		this->getLogManager() << LogLevel_Error << "Tried to push '" << sName << "' to slot " << i32Index << " with the array size being " << static_cast<int32>(m_vSetting.size()) << "\n";
+		return false;
+	}
+
+	int32 l_i32InsertLocation;
+
+	if(i32Index < 0 || i32Index == static_cast<int32>(m_vSetting.size()))
 	{
 		m_vSetting.push_back(s);
-		l_i32Index=m_vSetting.size() -1;
+		l_i32InsertLocation = (static_cast<int32>(m_vSetting.size()))-1;
 	}
 	else
 	{
 		vector<CSetting>::iterator l_it = m_vSetting.begin();
 		l_it += l_i32Index;
 		m_vSetting.insert(l_it, s);
+		l_i32InsertLocation = i32Index;
+		
 	}
 
 	//if this setting is modifiable, keep its index
@@ -720,7 +730,9 @@ boolean CBox::addSetting(const CString& sName,
 		m_vModifiableSettingIndexes.push_back(l_i32Index);
 	}
 
-	this->notify(BoxModification_SettingAdded, l_i32Index);
+	this->getLogManager() << LogLevel_Debug << "Pushed '" << m_vSetting[l_i32InsertLocation].m_sName << "' : '" << m_vSetting[l_i32InsertLocation].m_sValue << "' to slot " << l_i32InsertLocation << " with the array size now " << static_cast<int32>(m_vSetting.size()) << "\n";
+
+	this->notify(BoxModification_SettingAdded, l_i32InsertLocation);
 
 	return true;
 }
@@ -822,6 +834,12 @@ boolean CBox::setSettingType(
 	{
 		return false;
 	}
+	if(m_vSetting[ui32SettingIndex].m_oTypeIdentifier == rTypeIdentifier)
+	{
+		// no change, don't bother notifying
+		return true;
+	}
+
 	m_vSetting[ui32SettingIndex].m_oTypeIdentifier=rTypeIdentifier;
 
 	this->notify(BoxModification_SettingTypeChanged, ui32SettingIndex);

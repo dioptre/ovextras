@@ -11,6 +11,12 @@ easy to read by the machine and easy to read by the human. CSV files are text fi
 with different values separated by a special character such as a colon, a semicolon
 or a tabulation. This basic syntax makes them very easy to read for both machine and
 human. The purpose of this box is to quickly import some data from other softwares.
+
+!NOTE! The file format the box accepts is NOT the usual N times M matrix. There
+must be a few extra items: the first column must be the time, and the first line must 
+have one more value than the other lines. This last value should be the sampling rate. 
+See below for details. 
+
  * |OVP_DocEnd_BoxAlgorithm_CSVFileReader_Description|
 __________________________________________________________________
 

@@ -10,8 +10,10 @@
 #include <xml/IXMLNode.h>
 #include <xml/IXMLHandler.h>
 
-static const char* const c_sTypeNodeName = "PairwiseDecision_HT";
-static const char* const c_sRepartitionNodeName = "Repartition";
+namespace{
+	const char* const c_sTypeNodeName = "PairwiseDecision_HT";
+	const char* const c_sRepartitionNodeName = "Repartition";
+}
 
 
 using namespace OpenViBE;
@@ -58,7 +60,7 @@ boolean CAlgorithmPairwiseDecisionHT::compute(OpenViBE::IMatrix* pSubClassifierM
 	}
 
 	for(size_t i=0; i<l_ui32AmountClass ; ++i){
-		l_ui32AmountSample += (uint32)ip_pRepartitionSetVector->getBuffer()[i];
+		l_ui32AmountSample += static_cast<uint32>(ip_pRepartitionSetVector->getBuffer()[i]);
 	}
 
 	for(size_t i=0; i<l_ui32AmountClass ; ++i){
@@ -120,7 +122,7 @@ boolean CAlgorithmPairwiseDecisionHT::compute(OpenViBE::IMatrix* pSubClassifierM
 		{
 			if(j != l_ui32Index)
 			{
-				const uint32 l_ui32Temp = (uint32)(ip_pRepartitionSetVector->getBuffer()[l_ui32Index]+ip_pRepartitionSetVector->getBuffer()[j]);
+				const uint32 l_ui32Temp = static_cast<uint32>(ip_pRepartitionSetVector->getBuffer()[l_ui32Index]+ip_pRepartitionSetVector->getBuffer()[j]);
 
 				l_f64FirstSum += l_ui32Temp * pSubClassifierMatrix->getBuffer()[l_ui32Index*l_ui32AmountClass + j];
 				l_f64SecondSum += l_ui32Temp * l_pMu[l_ui32Index][j];

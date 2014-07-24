@@ -53,7 +53,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64PartitionCount;
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationsEncoder;
-			std::map < OpenViBE::CString, OpenViBE::CString> *m_pExtraParemeter;
+			std::map < OpenViBE::CString, OpenViBE::CString> *m_pExtraParameter;
 
 			typedef struct
 			{
@@ -93,9 +93,9 @@ namespace OpenViBEPlugins
 
 				rBoxAlgorithmPrototype.addOutput ("Train-completed Flag",                 OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addSetting("Strategy to apply",                    OVTK_TypeId_ClassificationStrategy, "");
-				rBoxAlgorithmPrototype.addSetting("Algorithm to use",                     OVTK_TypeId_ClassificationAlgorithm, "");
-				rBoxAlgorithmPrototype.addSetting("Filename to save configuration to",    OV_TypeId_Filename,                  "");
+				rBoxAlgorithmPrototype.addSetting("Strategy to apply",                    OVTK_TypeId_ClassificationStrategy, "Native");
+				rBoxAlgorithmPrototype.addSetting("Algorithm to use",                     OVTK_TypeId_ClassificationAlgorithm, "Linear Discrimimant Analysis (LDA)");
+				rBoxAlgorithmPrototype.addSetting("Filename to save configuration to",    OV_TypeId_Filename,                  "${Path_UserData}/my-classifier.xml");
 				rBoxAlgorithmPrototype.addSetting("Train trigger",                        OV_TypeId_Stimulation,               "OVTK_StimulationId_Train");
 				rBoxAlgorithmPrototype.addSetting("Number of partitions for k-fold test", OV_TypeId_Integer,                   "10");
 
@@ -108,7 +108,7 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_ClassifierTrainerDesc)
 		};
-	};
-};
+	}
+}
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_ClassifierTrainer_H__

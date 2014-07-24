@@ -35,7 +35,7 @@ namespace OpenViBEPlugins
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode* pConfiguratioNode);
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierLDA);
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierLDA)
 
 		protected:
 

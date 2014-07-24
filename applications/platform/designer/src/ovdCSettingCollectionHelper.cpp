@@ -579,7 +579,10 @@ CString CSettingCollectionHelper::getValueColorGradient(::GtkWidget* pWidget)
 
 CString CSettingCollectionHelper::getValueEnumeration(const CIdentifier& rTypeIdentifier, ::GtkWidget* pWidget)
 {
-	if(!GTK_IS_COMBO_BOX(pWidget)) return "";
+	if(!GTK_IS_COMBO_BOX(pWidget)) 
+	{
+		return "";
+	}
 	::GtkComboBox* l_pWidget=GTK_COMBO_BOX(pWidget);
 	return CString(gtk_combo_box_get_active_text(l_pWidget));
 }
@@ -745,7 +748,7 @@ void CSettingCollectionHelper::setValueEnumeration(const CIdentifier& rTypeIdent
 	if(rTypeIdentifier==OV_TypeId_Stimulation)
 	{
 #endif
-		std::map < CString, uint64 > m_vListEntries;
+		std::map < CString, uint64 > l_mListEntries;
 		std::map < CString, uint64 >::const_iterator it;
 
 		for(i=0; i<m_rKernelContext.getTypeManager().getEnumerationEntryCount(rTypeIdentifier); i++)
@@ -754,13 +757,13 @@ void CSettingCollectionHelper::setValueEnumeration(const CIdentifier& rTypeIdent
 			uint64 l_ui64EntryValue;
 			if(m_rKernelContext.getTypeManager().getEnumerationEntry(rTypeIdentifier, i, l_sEntryName, l_ui64EntryValue))
 			{
-				m_vListEntries[l_sEntryName]=l_ui64EntryValue;
+				l_mListEntries[l_sEntryName]=l_ui64EntryValue;
 			}
 		}
 
 		gtk_combo_box_set_wrap_width(l_pWidget, 0);
 		gtk_list_store_clear(l_pList);
-		for(i=0, it=m_vListEntries.begin(); it!=m_vListEntries.end(); it++, i++)
+		for(i=0, it=l_mListEntries.begin(); it!=l_mListEntries.end(); it++, i++)
 		{
 			gtk_list_store_append(l_pList, &l_oListIter);
 			gtk_list_store_set(l_pList, &l_oListIter, 0, it->first.toASCIIString(), -1);

@@ -68,7 +68,8 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Class 1 label",                       OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");
 				rBoxAlgorithmPrototype.addSetting("Class 2 label",                       OV_TypeId_Stimulation, "OVTK_StimulationId_Label_02");
 
-				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsDeprecated);
+				// We'll deprecate this properly in 0.19 after we are confident about the replacement component introduced in 0.18.
+				// rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsDeprecated);
 				return true;
 			}
 

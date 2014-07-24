@@ -36,12 +36,12 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		l_sData >> l_ui32Version;
 		if(l_ui32Version != OVP_Classification_BoxTrainerXMLVersion)
 		{
-			this->getLogManager() << LogLevel_Warning << "The configuration file doesn't have the same version numero than the box. Trouble may appeared in loading process.\n";
+			this->getLogManager() << LogLevel_Warning << "The configuration file doesn't have the same version numero than the box. Trouble may appear in loading process.\n";
 		}
 	}
 	else
 	{
-		this->getLogManager() << LogLevel_Warning << "The configuration file has no version information. Trouble may appeared in loading process.\n";
+		this->getLogManager() << LogLevel_Warning << "The configuration file has no version information. Trouble may appear in loading process.\n";
 	}
 
 	XML::IXMLNode * l_pTempNode = l_pRootNode->getChildByName(c_sStrategyNodeName);

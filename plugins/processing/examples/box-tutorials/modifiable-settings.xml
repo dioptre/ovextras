@@ -1,8 +1,8 @@
 <OpenViBE-Scenario>
 	<Boxes>
 		<Box>
-			<Identifier>(0x097cea6b, 0x6cdb6b3e)</Identifier>
-			<Name>Modifiable Interface example</Name>
+			<Identifier>(0x00001ae1, 0x0000543a)</Identifier>
+			<Name>Modifiable Settings example</Name>
 			<AlgorithmClassIdentifier>(0x4ab0dd05, 0x32155d41)</AlgorithmClassIdentifier>
 			<Settings>
 				<Setting>
@@ -15,8 +15,8 @@
 				<Setting>
 					<TypeIdentifier>(0x512a166f, 0x5c3ef83f)</TypeIdentifier>
 					<Name>Float</Name>
-					<DefaultValue>1</DefaultValue>
-					<Value>1</Value>
+					<DefaultValue>1.3</DefaultValue>
+					<Value>1.3</Value>
 					<Modifiability>true</Modifiability>
 				</Setting>
 				<Setting>
@@ -36,44 +36,44 @@
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>filename</Name>
-					<DefaultValue></DefaultValue>
-					<Value></Value>
+					<DefaultValue>somefile.txt</DefaultValue>
+					<Value>somefile.txt</Value>
 					<Modifiability>true</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>script</Name>
-					<DefaultValue></DefaultValue>
-					<Value></Value>
+					<DefaultValue>somescript.lua</DefaultValue>
+					<Value>somescript.lua</Value>
 					<Modifiability>true</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x7f45a2a9, 0x7db12219)</TypeIdentifier>
 					<Name>color</Name>
-					<DefaultValue></DefaultValue>
-					<Value></Value>
+					<DefaultValue>20,65,90</DefaultValue>
+					<Value>20,65,90</Value>
 					<Modifiability>true</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x3d3c7c7f, 0xef0e7129)</TypeIdentifier>
 					<Name>colorgradient</Name>
-					<DefaultValue></DefaultValue>
-					<Value></Value>
+					<DefaultValue>0:0,0,0; 100:60,40,40</DefaultValue>
+					<Value>0:0,0,0; 100:60,40,40</Value>
 					<Modifiability>true</Modifiability>
 				</Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
-					<Value>128</Value>
+					<Value>128.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>48</Value>
+					<Value>33</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>416</Value>
+					<Value>416.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
@@ -81,11 +81,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>217</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xc67a01dc, 0x28ce06c1)</Identifier>
-					<Value></Value>
+					<Value>193</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
@@ -102,7 +98,7 @@
 	<MessageLinks></MessageLinks>
 	<Comments>
 		<Comment>
-			<Identifier>(0x403e1ce4, 0x3011d520)</Identifier>
+			<Identifier>(0x00004034, 0x00002caa)</Identifier>
 			<Text>This box has a setting of each type and each is
  marked as a modifiable parameter. It means
  that during run, a widget will appear where
@@ -124,7 +120,7 @@ chanfes accordingly.</Text>
 	</Comments>
 	<VisualisationTree>
 		<VisualisationWidget>
-			<Identifier>(0x0ad07271, 0x0dc96090)</Identifier>
+			<Identifier>(0x00002cca, 0x000017dc)</Identifier>
 			<Name>Default window</Name>
 			<Type>1</Type>
 			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
@@ -137,26 +133,52 @@ chanfes accordingly.</Text>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7b814cca, 0x271df6dd)</Identifier>
-					<Value>619</Value>
+					<Value>614</Value>
 				</Attribute>
 			</Attributes>
 		</VisualisationWidget>
 		<VisualisationWidget>
-			<Identifier>(0x2f320b01, 0x28268cb2)</Identifier>
+			<Identifier>(0x00002075, 0x000044ac)</Identifier>
 			<Name>config</Name>
 			<Type>2</Type>
-			<ParentIdentifier>(0x0ad07271, 0x0dc96090)</ParentIdentifier>
+			<ParentIdentifier>(0x00002cca, 0x000017dc)</ParentIdentifier>
 			<Index>0</Index>
 			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
 			<NumChildren>1</NumChildren>
 		</VisualisationWidget>
 		<VisualisationWidget>
-			<Identifier>(0x68df281b, 0x31a3771d)</Identifier>
+			<Identifier>(0x00000bb8, 0x00001270)</Identifier>
 			<Type>3</Type>
-			<ParentIdentifier>(0x2f320b01, 0x28268cb2)</ParentIdentifier>
+			<ParentIdentifier>(0x00002075, 0x000044ac)</ParentIdentifier>
 			<Index>0</Index>
-			<BoxIdentifier>(0x097cea6b, 0x6cdb6b3e)</BoxIdentifier>
+			<BoxIdentifier>(0x00001ae1, 0x0000543a)</BoxIdentifier>
 			<NumChildren>0</NumChildren>
 		</VisualisationWidget>
 	</VisualisationTree>
+	<Attributes>
+		<Attribute>
+			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>
+			<Value>Loic Mahe</Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0x8c1fc55b, 0x7b433dc2)</Identifier>
+			<Value>1.0</Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0x9f5c4075, 0x4a0d3666)</Identifier>
+			<Value>Modifiable Settings example</Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0xf36a1567, 0xd13c53da)</Identifier>
+			<Value>http://openvibe.inria.fr/modifiable-box-settings/</Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0xf6b2e3fa, 0x7bd43926)</Identifier>
+			<Value>box-tutorials</Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0xf8034a49, 0x8b3f37cc)</Identifier>
+			<Value>Inria</Value>
+		</Attribute>
+	</Attributes>
 </OpenViBE-Scenario>

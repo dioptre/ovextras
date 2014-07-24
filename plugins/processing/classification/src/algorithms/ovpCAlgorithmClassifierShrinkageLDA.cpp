@@ -13,19 +13,21 @@
 
 #include "../algorithms/ovpCAlgorithmConditionedCovariance.h"
 
-static const char* const c_sTypeNodeName = "LDA";
-static const char* const c_sCreatorNodeName = "Creator";
-static const char* const c_sClassesNodeName = "Classes";
-static const char* const c_sCoefficientsNodeName = "Coefficients";
+namespace{
+	const char* const c_sTypeNodeName = "LDA";
+	const char* const c_sCreatorNodeName = "Creator";
+	const char* const c_sClassesNodeName = "Classes";
+	const char* const c_sCoefficientsNodeName = "Coefficients";
+}
 
 extern const char* const c_sClassifierRoot;
 
 OpenViBE::int32 OpenViBEPlugins::Classification::getShrinkageLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
 {
-	if(::fabs(rFirstClassificationValue[0]) < ::fabs(rSecondClassificationValue[0]) )
-		return -1;
-	else if(::fabs(rFirstClassificationValue[0]) == ::fabs(rSecondClassificationValue[0]))
+	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
 		return 0;
+	else if(::fabs(rFirstClassificationValue[0]) < ::fabs(rSecondClassificationValue[0]))
+		return -1;
 	else
 		return 1;
 }

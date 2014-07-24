@@ -15,12 +15,14 @@ static const char* const c_sCoeffNodeName = "Coefficients";
 
 extern const char* const c_sClassifierRoot;
 
+
+
 OpenViBE::int32 OpenViBEPlugins::Classification::getLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
 {
-	if(::fabs(rFirstClassificationValue[0])  < ::fabs(rSecondClassificationValue[0]) )
-		return -1;
-	else if(::fabs(rFirstClassificationValue[0]) == ::fabs(rSecondClassificationValue[0]))
+	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
 		return 0;
+	else if(::fabs(rFirstClassificationValue[0]) < ::fabs(rSecondClassificationValue[0]))
+		return -1;
 	else
 		return 1;
 }
@@ -45,16 +47,15 @@ boolean CAlgorithmClassifierLDA::initialize(void)
 
 boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
-	uint32 i;
 	std::map < float64, uint64 > l_vClassLabels;
-	for(i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
+	for(size_t i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
 	{
 		l_vClassLabels[rFeatureVectorSet[i].getLabel()]++;
 	}
 
 	if(l_vClassLabels.size() != 2)
 	{
-		this->getLogManager() << LogLevel_Error << "A LDA classifier can only be trained with 2 classes, not more, not less - got " << (uint32)l_vClassLabels.size() << "\n";
+		this->getLogManager() << LogLevel_Error << "A LDA classifier can only be trained with 2 classes, not more, not less - got " << static_cast<uint32>(l_vClassLabels.size()) << "\n";
 		return false;
 	}
 
@@ -70,11 +71,10 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 	l_oMeanFeatureVector1.zeros();
 	l_oMeanFeatureVector2.zeros();
 
-	for(i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
+	for(size_t i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
 	{
 		const IFeatureVector& l_rFeatureVector=rFeatureVectorSet[i];
-
-		float64 l_f64Label=l_rFeatureVector.getLabel();
+		const float64 l_f64Label=l_rFeatureVector.getLabel();
 
 		if(l_f64Label==m_f64Class1)
 		{
@@ -87,14 +87,14 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		}
 	}
 
-	l_oMeanFeatureVector1/=(double)l_vClassLabels[m_f64Class1];
-	l_oMeanFeatureVector2/=(double)l_vClassLabels[m_f64Class2];
+	l_oMeanFeatureVector1/=static_cast<float64>(l_vClassLabels[m_f64Class1]);
+	l_oMeanFeatureVector2/=static_cast<float64>(l_vClassLabels[m_f64Class2]);
 
 	itpp::vec l_oDiff;
 	itpp::mat l_oSigma(l_ui32NumberOfFeatures, l_ui32NumberOfFeatures);
 	l_oSigma.zeros();
 
-	for(i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
+	for(size_t i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
 	{
 		const IFeatureVector& l_rFeatureVector=rFeatureVectorSet[i];
 
@@ -133,7 +133,7 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 
 	l_oFeatures.ins(0, 1);
 
-	float64 l_f64Result=-l_oFeatures*m_oCoefficients;
+	const float64 l_f64Result=-l_oFeatures*m_oCoefficients;
 
 	rClassificationValues.setSize(1);
 	rClassificationValues[0]=l_f64Result;

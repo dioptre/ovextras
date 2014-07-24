@@ -14,6 +14,12 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
+		/**
+		 * @brief The CAlgorithmPairwiseStrategyPKPD class
+		 * This strategy relies on the algorithm describe in the article . Price, S. Knerr, L. Personnaz, and G. Dreyfus.
+		 * Pairwise neural network classifiers with probabilistic outputs. In G. Tesauro, D. Touretzky, and T. Leen (eds.)
+		 * Advances in Neural Information Processing Systems 7 (NIPS-94), pp. 1109-1116. MIT Press, 1995.
+		 */
 		class CAlgorithmPairwiseStrategyPKPD : virtual public OpenViBEPlugins::Classification::CAlgorithmPairwiseDecision
 		{
 
@@ -41,7 +47,11 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Serrière Guillaume"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("."); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Price, S. Knerr, L. Personnaz, and G. Dreyfus."
+																									"Pairwise neural network classifiers with probabilistic outputs."
+																									" In G. Tesauro, D. Touretzky, and T. Leen (eds.)"
+																									"Advances in Neural Information Processing Systems 7 (NIPS-94), pp."
+																									" 1109-1116. MIT Press, 1995."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 

@@ -17,11 +17,11 @@ namespace OpenViBE
 		enum EParameterType
 		{
 			ParameterType_None,           //!< No parameter
-			ParameterType_Integer,        //!< Integer parameter
-			ParameterType_UInteger,       //!< Unsigned integer parameter
+			ParameterType_Integer,        //!< Integer parameter, 64bit
+			ParameterType_UInteger,       //!< Unsigned integer parameter, 64bit
 			ParameterType_Enumeration,    //!< Enumeration integer parameter
 			ParameterType_Boolean,        //!< Boolean parameter
-			ParameterType_Float,          //!< Float parameter
+			ParameterType_Float,          //!< Float parameter, 64bit
 			ParameterType_String,         //!< String parameter
 			ParameterType_Identifier,     //!< Identifier parameter
 			ParameterType_Matrix,         //!< Matrix pointer parameter

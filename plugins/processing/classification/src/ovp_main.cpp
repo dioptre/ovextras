@@ -44,18 +44,15 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationStrategy, "OneVsAll", OVP_ClassId_Algorithm_ClassifierOneVsAll.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationStrategy, "OneVsOne", OVP_ClassId_Algorithm_ClassifierOneVsOne.toUInteger());
 
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "Support Vector Machine (SVM)",OVP_ClassId_Algorithm_ClassifierSVM.toUInteger());
-
 //	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "NULL Classifier (does nothing)",OVP_ClassId_Algorithm_ClassifierNULL.toUInteger());
+//	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierNULLDesc);
+
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "Support Vector Machine (SVM)",OVP_ClassId_Algorithm_ClassifierSVM.toUInteger());
 	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierSVM, OpenViBEPlugins::Classification::getSVMBestClassification);
-
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "Support Vector Machine (SVM)",OVP_ClassId_Algorithm_ClassifierSVM.toUInteger());
-
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierSVMDesc);
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_ClassId_Algorithm_ClassifierSVM_DecisionAvailable, "Pairwise Decision Strategy");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_ClassId_Algorithm_ClassifierSVM_DecisionAvailable, "Voting", OVP_ClassId_Algorithm_PairwiseDecision_Voting.toUInteger());
 	OpenViBEPlugins::Classification::registerAvailableDecisionEnumeration(OVP_ClassId_Algorithm_ClassifierSVM, OVP_ClassId_Algorithm_ClassifierSVM_DecisionAvailable);
-
 
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_SVMType,"SVM Type");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SVMType,"C-SVC",C_SVC);
@@ -67,8 +64,6 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SVMKernelType,"Radial basis function",RBF);
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SVMKernelType,"Sigmoid",SIGMOID);
 
-	//OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierNULLDesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierSVMDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmConfusionMatrixDesc);
 
@@ -81,6 +76,7 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierOneVsAllDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierOneVsOneDesc);
 
+	// Functions related to deciding winner in OneVsOne multiclass decision strategy
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_ClassificationPairwiseStrategy, "Pairwise Decision Strategy");
 
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmPairwiseStrategyPKPDDesc);
@@ -115,23 +111,21 @@ OVP_Declare_Begin();
 
 #if defined TARGET_HAS_ThirdPartyITPP
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Linear Discrimimant Analysis (LDA)", OVP_ClassId_Algorithm_ClassifierLDA.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Probabilistic Linear Discrimimant Analysis (PLDA)", OVP_ClassId_Algorithm_ClassifierPLDA.toUInteger());
-
 	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierLDA, OpenViBEPlugins::Classification::getLDABestClassification);
-	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierPLDA, OpenViBEPlugins::Classification::getPLDABestClassification);
-
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierLDADesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierPLDADesc);
-
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_ClassId_Algorithm_ClassifierLDA_DecisionAvailable, "Pairwise Decision Strategy");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_ClassId_Algorithm_ClassifierLDA_DecisionAvailable, "Voting", OVP_ClassId_Algorithm_PairwiseDecision_Voting.toUInteger());
 	OpenViBEPlugins::Classification::registerAvailableDecisionEnumeration(OVP_ClassId_Algorithm_ClassifierLDA, OVP_ClassId_Algorithm_ClassifierLDA_DecisionAvailable);
 
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Probabilistic Linear Discrimimant Analysis (PLDA)", OVP_ClassId_Algorithm_ClassifierPLDA.toUInteger());
+	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierPLDA, OpenViBEPlugins::Classification::getPLDABestClassification);
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierPLDADesc);
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_ClassId_Algorithm_ClassifierPLDA_DecisionAvailable, "Pairwise Decision Strategy");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_ClassId_Algorithm_ClassifierPLDA_DecisionAvailable, "PKPD", OVP_ClassId_Algorithm_PairwiseStrategy_PKPD.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_ClassId_Algorithm_ClassifierPLDA_DecisionAvailable, "Voting", OVP_ClassId_Algorithm_PairwiseDecision_Voting.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_ClassId_Algorithm_ClassifierPLDA_DecisionAvailable, "HT", OVP_ClassId_Algorithm_PairwiseDecision_HT.toUInteger());
 	OpenViBEPlugins::Classification::registerAvailableDecisionEnumeration(OVP_ClassId_Algorithm_ClassifierPLDA, OVP_ClassId_Algorithm_ClassifierPLDA_DecisionAvailable);
+
 #endif // TARGET_HAS_ThirdPartyITPP
 	
 #if defined TARGET_HAS_ThirdPartyEIGEN
@@ -156,3 +150,10 @@ OVP_Declare_Begin();
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
 OVP_Declare_End();
+
+#include<cmath>
+bool ov_float_equal(double f64First, double f64Second)
+{
+	const double c_f64Epsilon = 0.000001;
+	return c_f64Epsilon > ::fabs(f64First - f64Second);
+}
