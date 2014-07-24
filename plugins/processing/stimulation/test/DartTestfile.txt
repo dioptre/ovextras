@@ -10,7 +10,7 @@ ENDIF(WIN32)
 
 
 # Simple Test of run-command box
-SET(TEST_NAME run-command)
+SET(TEST_NAME test-run-command)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 ADD_TEST(clean_${TEST_NAME} "rm" "-f" "${TEST_NAME}.txt")
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play" ${SCENARIO_TO_TEST})
@@ -53,7 +53,7 @@ SET_TESTS_PROPERTIES(exist_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES DEPENDS clean_${TEST_NAME}})
 
 # Simple Test of timeout box
-SET(TEST_NAME timeout)
+SET(TEST_NAME test-timeout)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 ADD_TEST(clean_${TEST_NAME} "rm" "-f" "${TEST_NAME}.txt")
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play" ${SCENARIO_TO_TEST})
