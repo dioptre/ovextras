@@ -1,5 +1,5 @@
-#ifndef __ovExternalP300PropertyReader__
-#define __ovExternalP300PropertyReader__
+#ifndef __ovCoAdaptP300PropertyReader__
+#define __ovCoAdaptP300PropertyReader__
 
 
 #include <openvibe/ov_all.h>
@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <stack>
 
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "../visualisation/glGObject.h"
 #endif
 
@@ -26,7 +26,7 @@ namespace
 	public:
 		_AutoCast_(const char * settingValue) : m_sSettingValue(settingValue) {  }
 
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		/**
 		 * Convert the string to a GColor
 		 */
@@ -74,14 +74,14 @@ namespace OpenViBEApplications
 	 * reading the file and creating an IReader. \n The derived class has to implement
 	 * openChild, processChildData and closeChild which will process the xml files
 	 */
-	class ExternalP300PropertyReader : public XML::IReaderCallback
+	class CoAdaptP300PropertyReader : public XML::IReaderCallback
 	{
 				
 	public:	
 		/**
 		 * @param kernelContext we need the kernel context to expand the variables in the xml files
 		 */
-		ExternalP300PropertyReader(OpenViBE::Kernel::IKernelContext* kernelContext) : m_pKernelContext(kernelContext) {}
+		CoAdaptP300PropertyReader(OpenViBE::Kernel::IKernelContext* kernelContext) : m_pKernelContext(kernelContext) {}
 
 		/**
 		 * This methods opens and reads the file into a buffer. This buffer pointer is then used to create

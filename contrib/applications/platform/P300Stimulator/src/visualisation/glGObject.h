@@ -1,6 +1,6 @@
 #ifndef __GObject_OV_H__
 #define __GObject_OV_H__
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "glGObservable.h"
 #include "OpenGLManagers/OpenGLVBOManager.h"
 #include "OpenGLManagers/OpenGLDListManager.h"
@@ -220,5 +220,5 @@ namespace OpenViBEApplications
 	};
 };
 
-#endif//TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#endif//TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #endif

@@ -1,6 +1,6 @@
 #ifndef __OpenGLTextureManager_OV_H__
 #define __OpenGLTextureManager_OV_H__
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "OpenGLResourceManager.h"
 //#include <set>
 

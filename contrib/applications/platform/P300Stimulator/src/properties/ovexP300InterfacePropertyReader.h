@@ -1,5 +1,5 @@
-#ifndef __ovExternalP300InterfacePropertyReader__
-#define __ovExternalP300InterfacePropertyReader__
+#ifndef __ovCoAdaptP300InterfacePropertyReader__
+#define __ovCoAdaptP300InterfacePropertyReader__
 
 
 #include "ovexP300PropertyReader.h"
@@ -10,7 +10,7 @@ namespace OpenViBEApplications
 	/**
 	* Class that reads the xml file specifying the general interface properties in the file interface-properties.xml
 	*/		
-	class P300InterfacePropertyReader : public ExternalP300PropertyReader
+	class P300InterfacePropertyReader : public CoAdaptP300PropertyReader
 	{	
 		
 	public:	
@@ -49,7 +49,7 @@ namespace OpenViBEApplications
 		 */
 		OpenViBE::uint32 getMaxFeedbackSymbols() { return m_ui32MaxFeedbackSymbols; }
 
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		/**
 		 * start color of the most probable symbols when the minimum probability threshold is reached as specified by getFeedbackStartValue
 		 */
@@ -106,7 +106,7 @@ namespace OpenViBEApplications
 		OpenViBE::boolean m_bEnablePhotoDiode;
 		
 		OpenViBE::uint32 m_ui32MaxFeedbackSymbols;
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		GColor m_oFeedbackStartColor;
 		GColor m_oFeedbackEndColor;
 		#endif

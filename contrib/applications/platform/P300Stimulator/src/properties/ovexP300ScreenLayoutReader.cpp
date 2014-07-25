@@ -10,12 +10,12 @@ using namespace std;
 
 CString P300ScreenLayoutReader::KeyEventStrings[5] = {"flash","noflash","wrong_feedback", "correct_feedback","target"};
 
-P300ScreenLayoutReader::P300ScreenLayoutReader(OpenViBE::Kernel::IKernelContext* kernelContext) : ExternalP300PropertyReader(kernelContext) 
+P300ScreenLayoutReader::P300ScreenLayoutReader(OpenViBE::Kernel::IKernelContext* kernelContext) : CoAdaptP300PropertyReader(kernelContext) 
 {
 	m_lKeyList = new std::vector<P300KeyDescriptor*>();
 	m_lSymbolList = new std::list<std::string>();
 	m_mDefaultEventMapScaleSize = new std::map<OpenViBE::uint32, OpenViBE::float32>();
-	#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+	#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 	m_mDefaultEventMapForegroundColor = new std::map<OpenViBE::uint32, GColor>();
 	m_mDefaultEventMapBackgroundColor = new std::map<OpenViBE::uint32, GColor>();
 	#endif
@@ -47,7 +47,7 @@ P300ScreenLayoutReader::~P300ScreenLayoutReader()
 	delete m_lKeyList;
 	delete m_lSymbolList;
 	delete m_mDefaultEventMapScaleSize;
-	#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+	#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 	delete m_mDefaultEventMapForegroundColor;
 	delete m_mDefaultEventMapBackgroundColor;
 	#endif
@@ -64,7 +64,7 @@ void P300ScreenLayoutReader::openChild(const char* sName, const char** sAttribut
 	
 	if (CString(sName)==CString("DefaultKeyProperties"))
 		m_bDefaultKeyProperties = true;
-	#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+	#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 	if (CString(sName)==CString("TargetArea"))
 		parseDimensions(m_dTargetAreaDimensions, sAttributeName, sAttributeValue,ui64AttributeCount);	
 	if (CString(sName)==CString("ResultArea"))
@@ -72,7 +72,7 @@ void P300ScreenLayoutReader::openChild(const char* sName, const char** sAttribut
 	#endif
 	if (CString(sName)==CString("PredictionArea"))
 	{
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		parseDimensions(m_dPredictionAreaDimensions, sAttributeName, sAttributeValue,ui64AttributeCount);	
 		#endif
 		for (uint32 it=0; it<ui64AttributeCount; it++)
@@ -86,7 +86,7 @@ void P300ScreenLayoutReader::openChild(const char* sName, const char** sAttribut
 	}
 	if (CString(sName)==CString("P300Keyboard"))
 	{
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		parseDimensions(m_dKeyboardDimensions, sAttributeName, sAttributeValue,ui64AttributeCount);
 		#endif
 		for (uint32 it=0; it<ui64AttributeCount; it++)
@@ -118,7 +118,7 @@ void P300ScreenLayoutReader::openChild(const char* sName, const char** sAttribut
 		P300KeyDescriptor* l_pKey = new P300KeyDescriptor();
 		m_pKey = l_pKey;
 		m_lKeyList->push_back(l_pKey);
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		BoxDimensions dim; dim.x = 0; dim.y = 0; dim.height = 0; dim.width=0; dim.depth=0;
 		parseDimensions(dim, sAttributeName, sAttributeValue, ui64AttributeCount);
 		if (dim.x==0 && dim.y==0 && dim.height==0 && dim.width==0)
@@ -161,7 +161,7 @@ void P300ScreenLayoutReader::processChildData(const char* sData)
 			float32 l_f32AttributeValue = static_cast<float32>(m_pKernelContext->getConfigurationManager().expandAsFloat(CString(sData)));
 			m_mDefaultEventMapScaleSize->insert(std::pair<VisualState,float32>(m_iState,l_f32AttributeValue));
 		}
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		if (m_vNode.top()==CString("ForegroundColor"))
 			m_mDefaultEventMapForegroundColor->insert(std::pair<VisualState,GColor>(m_iState,_AutoCast_(sData)));
 		if (m_vNode.top()==CString("BackgroundColor"))
@@ -185,7 +185,7 @@ void P300ScreenLayoutReader::processChildData(const char* sData)
 			float32 l_f32AttributeValue = static_cast<float32>(m_pKernelContext->getConfigurationManager().expandAsFloat(CString(sData)));
 			m_pKey->addScaleSize(m_iState,l_f32AttributeValue);
 		}
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		if (m_vNode.top()==CString("ForegroundColor"))
 		{
 			m_bForegroundColor = true;
@@ -228,7 +228,7 @@ void P300ScreenLayoutReader::closeChild(void)
 			{
 				m_pKey->addScaleSize(l_State,m_mDefaultEventMapScaleSize->at(l_State));
 			}
-			#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+			#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 			try { m_pKey->getForegroundColor(l_State); }
 			catch (exception&)
 			{
@@ -266,7 +266,7 @@ void P300ScreenLayoutReader::closeChild(void)
 	m_vNode.pop();
 }
 
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 void P300ScreenLayoutReader::parseDimensions(BoxDimensions& dim, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
 {
 	for (uint32 it=0; it<ui64AttributeCount; it++)
@@ -286,7 +286,7 @@ void P300ScreenLayoutReader::parseDimensions(BoxDimensions& dim, const char** sA
 
 void P300ScreenLayoutReader::readPropertiesFromFile(CString propertyFile)
 {
-	ExternalP300PropertyReader::readPropertiesFromFile(propertyFile);
+	CoAdaptP300PropertyReader::readPropertiesFromFile(propertyFile);
 	for (uint32 i=0; i<m_lKeyList->size(); i++)
 	{
 		try

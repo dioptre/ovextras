@@ -1,21 +1,21 @@
-#ifndef __ovExternalP300StimulatorPropertyReader__
-#define __ovExternalP300StimulatorPropertyReader__
+#ifndef __ovCoAdaptP300StimulatorPropertyReader__
+#define __ovCoAdaptP300StimulatorPropertyReader__
 
 #include <queue>
 #include <list>
 #include <string>
 #include <cmath>
-//#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+//#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "ovexP300PropertyReader.h"
 
 namespace OpenViBEApplications
 {
 
-	class P300StimulatorPropertyReader : public ExternalP300PropertyReader
+	class P300StimulatorPropertyReader : public CoAdaptP300PropertyReader
 	{
 	public:	
 		P300StimulatorPropertyReader(OpenViBE::Kernel::IKernelContext* kernelContext, std::list<std::string> * symbolList)
-		: ExternalP300PropertyReader(kernelContext), m_lSymbolList(symbolList) 
+		: CoAdaptP300PropertyReader(kernelContext), m_lSymbolList(symbolList) 
 		{
 			m_oTargetStimuli = new std::queue< OpenViBE::uint64 >();
 		}

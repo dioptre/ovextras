@@ -34,7 +34,7 @@ class test_evidenceAccumulation
 		//this will read all configuration files, interface-properties.xml, stimulator-properties.xml and the keyboard layout in share/openvibe/applications/externalP300Stimulator/
 		CString l_sPathRoot = m_pKernelContext->getConfigurationManager().expand(CString("${Path_Root}"));
 		this->m_pInterfacePropReader = new P300InterfacePropertyReader(this->m_pKernelContext);
-		this->m_pInterfacePropReader->readPropertiesFromFile(l_sPathRoot + "/share/openvibe/applications/externalP300Stimulator/interface-properties.xml");
+		this->m_pInterfacePropReader->readPropertiesFromFile(l_sPathRoot + "/share/openvibe/applications/CoAdaptP300Stimulator/interface-properties.xml");
 		this->m_pScreenLayoutReader = new P300ScreenLayoutReader(this->m_pKernelContext);
 		this->m_pScreenLayoutReader->readPropertiesFromFile(this->m_pInterfacePropReader->getScreenDefinitionFile());
 		this->m_pStimulatorPropReader = new P300StimulatorPropertyReader(this->m_pKernelContext, this->m_pScreenLayoutReader->getSymbolList());
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 {
 	test_evidenceAccumulation* l_oTest = new test_evidenceAccumulation();
 
-	ExternalP300CEvidenceAccumulator* l_oEvidenceAccumulator = new ExternalP300CEvidenceAccumulator(l_oTest->m_pStimulatorPropReader, l_oTest->m_pSequenceGenerator);
+	CoAdaptP300CEvidenceAccumulator* l_oEvidenceAccumulator = new CoAdaptP300CEvidenceAccumulator(l_oTest->m_pStimulatorPropReader, l_oTest->m_pSequenceGenerator);
 	l_oTest->m_pSequenceGenerator->generateSequence();
 
 

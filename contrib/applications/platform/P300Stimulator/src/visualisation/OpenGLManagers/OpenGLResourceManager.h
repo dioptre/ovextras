@@ -1,7 +1,7 @@
 #ifndef __OpenGLResourceManager_OV_H__
 #define __OpenGLResourceManager_OV_H__
 
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "../../ova_defines.h"
 
 #include <openvibe/ov_all.h>
@@ -111,5 +111,5 @@ namespace OpenViBEApplications
 
 };
 
-#endif//TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#endif//TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #endif

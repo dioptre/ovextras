@@ -1,5 +1,5 @@
-#ifndef ExternalP300StimulatorDefinitions2
-#define ExternalP300StimulatorDefinitions2
+#ifndef CoAdaptP300StimulatorDefinitions2
+#define CoAdaptP300StimulatorDefinitions2
 
 #ifndef StimulationIdDefinitions
 #define StimulationIdDefinitions

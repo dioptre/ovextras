@@ -6,9 +6,9 @@ using namespace OpenViBEApplications;
 
 using namespace std;
 
-P300InterfacePropertyReader::P300InterfacePropertyReader(OpenViBE::Kernel::IKernelContext* kernelContext) : ExternalP300PropertyReader(kernelContext) 
+P300InterfacePropertyReader::P300InterfacePropertyReader(OpenViBE::Kernel::IKernelContext* kernelContext) : CoAdaptP300PropertyReader(kernelContext)
 {
-	#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+	#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 	GColor l_cDefaultColor;
 	l_cDefaultColor.red = 0; l_cDefaultColor.green = 0; l_cDefaultColor.blue = 0;
 	#endif
@@ -34,7 +34,7 @@ P300InterfacePropertyReader::P300InterfacePropertyReader(OpenViBE::Kernel::IKern
 	m_bEnablePhotoDiode = false;
 	
 	m_ui32MaxFeedbackSymbols = 0;
-	#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+	#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 	m_oFeedbackStartColor = l_cDefaultColor;
 	m_oFeedbackEndColor = l_cDefaultColor;
 	#endif
@@ -85,7 +85,7 @@ void P300InterfacePropertyReader::openChild(const char* sName, const char** sAtt
 
 void P300InterfacePropertyReader::processChildData(const char* sData)
 {
-	ExternalP300PropertyReader::writeElement(m_vNode.top().toASCIIString(), sData);
+	CoAdaptP300PropertyReader::writeElement(m_vNode.top().toASCIIString(), sData);
 	CString l_sExpandedString = m_pKernelContext->getConfigurationManager().expand(CString(sData));
 
 	if(m_vNode.top()==CString("Mode"))
@@ -173,7 +173,7 @@ void P300InterfacePropertyReader::processChildData(const char* sData)
 	{
 		if(m_vNode.top()==CString("MaxFeedbackSymbols"))
 			m_ui32MaxFeedbackSymbols = static_cast<uint32>(m_pKernelContext->getConfigurationManager().expandAsUInteger(l_sExpandedString));
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		if(m_vNode.top()==CString("FeedbackStartColor"))
 			m_oFeedbackStartColor = _AutoCast_(sData);
 		if(m_vNode.top()==CString("FeedbackEndColor"))

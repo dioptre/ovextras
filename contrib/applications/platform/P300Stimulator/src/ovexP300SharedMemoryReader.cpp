@@ -12,12 +12,12 @@ using namespace OpenViBEApplications;
 
 using namespace std;
 
-void ExternalP300SharedMemoryReader::openSharedMemory(OpenViBE::CString sharedMemoryName)
+void CoAdaptP300SharedMemoryReader::openSharedMemory(OpenViBE::CString sharedMemoryName)
 {
 	m_pSharedVariableHandler = new ISharedMemoryReader::SharedVariableHandler(sharedMemoryName);
 }
 
-uint64 ExternalP300SharedMemoryReader::readNextPrediction()
+uint64 CoAdaptP300SharedMemoryReader::readNextPrediction()
 {
 	uint64 l_ui64Result;
 	l_ui64Result = 0;
@@ -26,12 +26,7 @@ uint64 ExternalP300SharedMemoryReader::readNextPrediction()
 	
 	if (l_pStimulationSet!=NULL && l_pStimulationSet->getStimulationCount()>0)
 	{
-		//std::cout << "ExternalP300SharedMemoryReader::readNextPrediction\n";
 		l_ui64Result = l_pStimulationSet->getStimulationIdentifier(0);
-		for(unsigned int i=0; i<l_pStimulationSet->getStimulationCount(); i++)
-		{
-			//std::cout << "ExternalP300SharedMemoryReader::readNextPrediction " << i <<  " " <<  l_pStimulationSet->getStimulationIdentifier(i) << "\n";
-		}
 		m_pSharedVariableHandler->clear(1); //tricky: if outside if-clause this could delete all elements before it has been read (between reading and clearing processes can be put on hold by OS scheduler)
 		delete l_pStimulationSet;
 	}
@@ -40,9 +35,8 @@ uint64 ExternalP300SharedMemoryReader::readNextPrediction()
 }
 
 //caller should clean up the returned pointer
-IMatrix* ExternalP300SharedMemoryReader::readNextSymbolProbabilities()
+IMatrix* CoAdaptP300SharedMemoryReader::readNextSymbolProbabilities()
 {
-	//std::cout << "ExternalP300SharedMemoryReader::readNextSymbolProbabilities" << std::endl;
 	IMatrix* l_pMatrix = dynamic_cast<IMatrix*>(m_pSharedVariableHandler->front(0));
 	IMatrix* l_pReturnMatrix = NULL;
 	if (l_pMatrix!=NULL)
@@ -55,18 +49,18 @@ IMatrix* ExternalP300SharedMemoryReader::readNextSymbolProbabilities()
 	return l_pReturnMatrix;
 }
 
-void ExternalP300SharedMemoryReader::clearSymbolProbabilities()
+void CoAdaptP300SharedMemoryReader::clearSymbolProbabilities()
 {
 	m_pSharedVariableHandler->clear(0);
 }
 
 //it should be the creating application that handles the removal of the shared memory variables
-void ExternalP300SharedMemoryReader::closeSharedMemory()
+void CoAdaptP300SharedMemoryReader::closeSharedMemory()
 {
 	delete m_pSharedVariableHandler;
 }
 
-IStimulationSet * ExternalP300SharedMemoryReader::readStimulation()
+IStimulationSet * CoAdaptP300SharedMemoryReader::readStimulation()
 {
 	CStimulationSet* l_pStimulusSet=NULL;
 

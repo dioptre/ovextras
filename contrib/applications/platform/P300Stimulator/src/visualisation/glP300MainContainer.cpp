@@ -1,5 +1,5 @@
 #include "glP300MainContainer.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "glGButton.h"
 #include "glGSymbol.h"
 
@@ -395,4 +395,4 @@ std::string P300MainContainer::toString() const
 {
 	return std::string("P300MainContainer");
 }
-#endif//TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#endif//TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator

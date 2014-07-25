@@ -7,7 +7,7 @@
 
 
 #include "../ova_defines.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "../visualisation/glGObject.h"
 #endif
 
@@ -34,7 +34,7 @@ namespace OpenViBEApplications
 		{
 			m_vActions = new std::vector<OpenViBE::CString>();
 			m_vEventMapScaleSize = new std::map<VisualState, OpenViBE::float32>();
-			#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+			#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 			m_vEventMapForegroundColor = new std::map<VisualState, GColor>();
 			m_vEventMapBackgroundColor = new std::map<VisualState, GColor>();
 			#endif
@@ -46,7 +46,7 @@ namespace OpenViBEApplications
 		~P300KeyDescriptor()
 		{
 			m_vEventMapScaleSize->clear();
-			#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+			#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 			m_vEventMapForegroundColor->clear();
 			m_vEventMapBackgroundColor->clear();
 			#endif
@@ -55,7 +55,7 @@ namespace OpenViBEApplications
 			m_vActions->clear();
 			m_vEventMapIsTextSymbol->clear();
 			delete m_vEventMapScaleSize;
-			#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+			#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 			delete m_vEventMapForegroundColor;
 			delete m_vEventMapBackgroundColor;
 			#endif
@@ -69,7 +69,7 @@ namespace OpenViBEApplications
 		{
 			std::map<VisualState, OpenViBE::float32>::iterator iteratorScaleSize = m_vEventMapScaleSize->begin();
 			//std::vector<OpenViBE::CString>* actions;
-			#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+			#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 			std::map<VisualState, GColor>::iterator iteratorForeground = m_vEventMapForegroundColor->begin();
 			std::map<VisualState, GColor>::iterator iteratorBackground = m_vEventMapBackgroundColor->begin();
 			#endif
@@ -86,7 +86,7 @@ namespace OpenViBEApplications
 				std::cout << "Source file in state " << iteratorSource->first << " is " << iteratorSource->second.toASCIIString() << "\n";			
 			for (;iteratorScaleSize!=m_vEventMapScaleSize->end(); iteratorScaleSize++)
 				std::cout << "Scale size in state " << iteratorScaleSize->first << " is " << iteratorScaleSize->second << "\n";
-			#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+			#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 			for (;iteratorBackground!=m_vEventMapBackgroundColor->end(); iteratorBackground++)
 				std::cout << "Background color in state " << iteratorBackground->first << " is " << iteratorBackground->second.red <<
 				", " << iteratorBackground->second.green << ", " << iteratorBackground->second.blue << "\n";			
@@ -99,7 +99,7 @@ namespace OpenViBEApplications
 		
 		//modifiers
 		void addScaleSize(const VisualState event, const OpenViBE::float32& value);
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		void addForegroundColor(const VisualState event, const GColor& value);
 		void addBackgroundColor(const VisualState event, const GColor& value);
 		#endif
@@ -108,13 +108,13 @@ namespace OpenViBEApplications
 		void setIfTextSymbol(const VisualState event, const OpenViBE::boolean value);	
 		
 		void addAction(const OpenViBE::CString& action) { m_vActions->push_back(action); }
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		void setDimensions(BoxDimensions& dim) { m_oDimensions = dim; }
 		#endif
 		
 		//getters
 		const OpenViBE::float32 getScaleSize(const VisualState event) const;
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		const GColor& getForegroundColor(const VisualState event) const;
 		const GColor& getBackgroundColor(const VisualState event) const;
 		#endif
@@ -124,18 +124,18 @@ namespace OpenViBEApplications
 		const OpenViBE::boolean isActionEnabled(OpenViBE::CString action);
 		const std::vector<OpenViBE::CString>* getActions() const { return m_vActions; }
 		const OpenViBE::CString getAction() const { return m_vActions->at(0); }
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		const BoxDimensions& getBoxDimensions() const { return m_oDimensions; }
 		#endif
 		
 	
 	private:
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		BoxDimensions m_oDimensions;
 		#endif
 		std::vector<OpenViBE::CString>* m_vActions;
 		std::map<VisualState, OpenViBE::float32>* m_vEventMapScaleSize;
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		std::map<VisualState, GColor>* m_vEventMapForegroundColor;
 		std::map<VisualState, GColor>* m_vEventMapBackgroundColor;
 		#endif

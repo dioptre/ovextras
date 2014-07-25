@@ -1,6 +1,6 @@
 #ifndef __GSymbol_H__
 #define __GSymbol_H__
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include <cstring>
 #include <boost/shared_ptr.hpp>
 

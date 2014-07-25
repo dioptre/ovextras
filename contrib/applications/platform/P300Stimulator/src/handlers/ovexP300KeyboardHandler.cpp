@@ -1,5 +1,5 @@
 #include "ovexP300KeyboardHandler.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "ovexP300PredictionboardHandler.h"
 
 #include <utility> 

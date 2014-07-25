@@ -1,6 +1,6 @@
 #ifndef __P300PredictionboardHandler_H__
 #define __P300PredictionboardHandler_H__
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "../visualisation/glGContainer.h"
 #include "../prediction/ovexWordPredictionEngine.h"
 #include "../prediction/ovexPresagePredictionEngine.h"

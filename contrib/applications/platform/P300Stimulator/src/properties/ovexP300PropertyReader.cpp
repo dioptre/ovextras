@@ -1,5 +1,5 @@
 #include "ovexP300PropertyReader.h"
-//#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+//#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include <string>
 
 using namespace OpenViBE;
@@ -8,7 +8,7 @@ using namespace OpenViBEApplications;
 
 using namespace std;
 
-void ExternalP300PropertyReader::readPropertiesFromFile(CString propertyFile)
+void CoAdaptP300PropertyReader::readPropertiesFromFile(CString propertyFile)
 {
 	CMemoryBuffer l_PropertiesBuffer;
 	ifstream l_oPropertiesStream(propertyFile.toASCIIString(), ios::binary);
@@ -36,7 +36,7 @@ void ExternalP300PropertyReader::readPropertiesFromFile(CString propertyFile)
 	}
 }
 
-void ExternalP300PropertyReader::writeAttribute(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
+void CoAdaptP300PropertyReader::writeAttribute(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
 {
 	m_pKernelContext->getLogManager() << LogLevel_Trace << "Reading property " << sName;
 
@@ -48,7 +48,7 @@ void ExternalP300PropertyReader::writeAttribute(const char* sName, const char** 
 	m_pKernelContext->getLogManager() << "\n";
 }
 
-void ExternalP300PropertyReader::writeElement(const char* sName, const char* sData)
+void CoAdaptP300PropertyReader::writeElement(const char* sName, const char* sData)
 {
 	std::string s(sData);
 	s.erase(s.find_last_not_of(" \n\r\t")+1);

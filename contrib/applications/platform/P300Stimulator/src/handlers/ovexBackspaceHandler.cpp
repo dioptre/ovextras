@@ -1,7 +1,7 @@
 #include <vector>
 
 #include "ovexBackspaceHandler.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "ovexP300ResultAreaHandler.h"
 #include "ovexP300KeyboardHandler.h"
 #include "../visualisation/glGButton.h"

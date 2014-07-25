@@ -169,7 +169,7 @@ IF(foundIncludeDir)
 
 	IF(required_libs_found)
 		MESSAGE(STATUS  "  Ok, found all the required headers and libs for the External P300 Stimulator...")	
-		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyModulesForExternalStimulator -D_GNU_SOURCE=1 -D_REENTRANT)
+		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyModulesForCoAdaptStimulator -D_GNU_SOURCE=1 -D_REENTRANT)
 	ENDIF(required_libs_found)
 ENDIF(foundIncludeDir)
 
