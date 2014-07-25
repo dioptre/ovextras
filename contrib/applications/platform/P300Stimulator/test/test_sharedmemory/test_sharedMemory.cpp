@@ -14,7 +14,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	ExternalP300SharedMemoryReader* m_oSharedMemoryReader = new ExternalP300SharedMemoryReader();
+	CoAdaptP300SharedMemoryReader* m_oSharedMemoryReader = new CoAdaptP300SharedMemoryReader();
 	m_oSharedMemoryReader->openSharedMemory("SharedMemory_P300Stimulator");//TODO retrieve from configuration
 
 	boolean l_bQuit=false;

@@ -1,5 +1,5 @@
-#ifndef __ovExternalP300SharedMemoryReader__
-#define __ovExternalP300SharedMemoryReader__
+#ifndef __ovCoAdaptP300SharedMemoryReader__
+#define __ovCoAdaptP300SharedMemoryReader__
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
@@ -25,7 +25,7 @@ namespace OpenViBEApplications
 	 * This class uses the ISharedMemoryReader 'library'/interface to read predictions and letter probabilities
 	 * as computed by the P300 scenario from the shared memory
 	 */
-	class ExternalP300SharedMemoryReader
+	class CoAdaptP300SharedMemoryReader
 	{
 		public:
 			/**

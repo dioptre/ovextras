@@ -27,7 +27,7 @@ namespace OpenViBEApplications
 		 * (e.g. if the duration of flash is over then it will go to the noflash state). Each time it changes to another state it notifies the 
 		 * main ExternalP300Visualiser class by means of a stimulation id as defined in ova_defines.h
 		 */
-		class ExternalP300EvidenceAccumulator : public ExternalP300IEvidenceAccumulator
+		class ExternalP300EvidenceAccumulator : public CoAdaptP300IEvidenceAccumulator
 		{
 			public:
 
@@ -60,7 +60,7 @@ namespace OpenViBEApplications
 				/**
 				 * @return The shared memory reader that is created during construction of the EvidenceAccumulator
 				 */
-				virtual ExternalP300SharedMemoryReader* getSharedMemoryReader() { return &m_oSharedMemoryReader; }
+				virtual CoAdaptP300SharedMemoryReader* getSharedMemoryReader() { return &m_oSharedMemoryReader; }
 				
 			private:
 
@@ -68,7 +68,7 @@ namespace OpenViBEApplications
 			protected:
 
 				OpenViBE::CString m_sSharedMemoryName;
-				ExternalP300SharedMemoryReader m_oSharedMemoryReader;
+				CoAdaptP300SharedMemoryReader m_oSharedMemoryReader;
 				P300SequenceGenerator* m_pSequenceGenerator;
 				P300StimulatorPropertyReader* m_pPropertyObject;
 

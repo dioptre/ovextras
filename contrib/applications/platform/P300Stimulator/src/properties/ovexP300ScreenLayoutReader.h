@@ -1,5 +1,5 @@
-#ifndef __ovExternalP300LetterGroupReader__
-#define __ovExternalP300LetterGroupReader__
+#ifndef __ovCoAdaptP300LetterGroupReader__
+#define __ovCoAdaptP300LetterGroupReader__
 
 
 #include "ovexP300PropertyReader.h"
@@ -17,7 +17,7 @@ namespace OpenViBEApplications
 	/**
 	* Class that reads the xml file specifying the keyboard layout, files such as 5by10grid-abc-gray.xml
 	*/	
-	class P300ScreenLayoutReader : public ExternalP300PropertyReader
+	class P300ScreenLayoutReader : public CoAdaptP300PropertyReader
 	{
 		
 	public:
@@ -28,7 +28,7 @@ namespace OpenViBEApplications
 		
 		virtual void readPropertiesFromFile(OpenViBE::CString propertyFile);
 		
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		/**
 		 * Dimensions of the area where the predictions are shown
 		 * @return the box dimensions are numbers between 0 and 1. (0,0) is the left lower corner of the window
@@ -71,7 +71,7 @@ namespace OpenViBEApplications
 		 */
 		const OpenViBE::float32 getDefaultScaleSize(const VisualState event) const { return m_mDefaultEventMapScaleSize->find(event)->second; }
 
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		/**
 		 *  some default properties that can be overridden per key
 		 */
@@ -91,7 +91,7 @@ namespace OpenViBEApplications
 		void closeChild(void); // XML ReaderCallback
 		
 	private:
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		void parseDimensions(BoxDimensions& dimensions, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount);
 		#endif
 		void parseKeyLabels(const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount);
@@ -99,7 +99,7 @@ namespace OpenViBEApplications
 	protected:
 		OpenViBE::uint32 m_ui32NumberOfStandardKeys;
 		//OpenViBE::uint32 m_ui32NumberOfPredictiveKeys;
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		BoxDimensions m_dKeyboardDimensions;
 		BoxDimensions m_dPredictionAreaDimensions;
 		BoxDimensions m_dResultAreaDimensions;
@@ -117,7 +117,7 @@ namespace OpenViBEApplications
 		 */
 		std::map<OpenViBE::uint32, OpenViBE::float32>* m_mDefaultEventMapScaleSize;
 
-		#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+		#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 		/**
 		 * This default map variable maps each state, that a key can be in, into a property, here the foreground color
 		 * these default values are then used to fill in the properties that have not been specified

@@ -1,5 +1,5 @@
-#ifndef __ovExternalP300RipRandSequenceGenerator__
-#define __ovExternalP300RipRandSequenceGenerator__
+#ifndef __ovCoAdaptP300RipRandSequenceGenerator__
+#define __ovCoAdaptP300RipRandSequenceGenerator__
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>

@@ -20,7 +20,7 @@ INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindThirdPartyBoost")
-INCLUDE("FindThirdPartyLibrariesForExternalStimulator")
+INCLUDE("FindThirdPartyLibrariesForCoAdaptStimulator")
 INCLUDE("FindThirdPartyGTK")#to use gtk package content i.e cairo pango fretype
 
 

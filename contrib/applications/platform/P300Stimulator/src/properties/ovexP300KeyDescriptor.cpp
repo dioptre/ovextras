@@ -12,7 +12,7 @@ void P300KeyDescriptor::addScaleSize(const VisualState event, const OpenViBE::fl
 { 
 	m_vEventMapScaleSize->insert(std::pair<VisualState, OpenViBE::float32>(event, value));
 }
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 void P300KeyDescriptor::addForegroundColor(const VisualState event, const GColor& value) 
 { 
 	m_vEventMapForegroundColor->insert(std::pair<VisualState, GColor>(event, value));
@@ -60,7 +60,7 @@ const float32 P300KeyDescriptor::getScaleSize(const VisualState event) const
 	else
 		throw noSuchEventException;
 }
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 const GColor& P300KeyDescriptor::getForegroundColor(const VisualState event) const 
 { 
 	std::map<VisualState, GColor>::iterator iterator = m_vEventMapForegroundColor->find(event);

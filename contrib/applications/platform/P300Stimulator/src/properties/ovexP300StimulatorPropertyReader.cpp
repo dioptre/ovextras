@@ -1,5 +1,5 @@
 #include "ovexP300StimulatorPropertyReader.h"
-//#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+//#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;

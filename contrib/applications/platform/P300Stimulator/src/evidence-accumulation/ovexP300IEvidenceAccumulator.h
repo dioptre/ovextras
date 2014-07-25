@@ -25,7 +25,7 @@ namespace OpenViBEApplications
 		 *	Each time data is received from the openvibe scenario, the probabilities are updated
 		 *
 		 */
-		class ExternalP300IEvidenceAccumulator
+		class CoAdaptP300IEvidenceAccumulator
 		{
 			public:
 				
@@ -33,7 +33,7 @@ namespace OpenViBEApplications
 				 * @param propertyObject the object containing the properties for the EvidenceAccumulator such as flash duration, interflash duration, intertrial...
 				 * @param l_pSequenceGenerator the sequence generator that defines which letters are flashed at one single point in time (does that for the whole trial)
 				 */
-				ExternalP300IEvidenceAccumulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator):m_opropertyObject(propertyObject),m_pSequenceGenerator(l_pSequenceGenerator),m_bIsReadyToPredict(false)
+				CoAdaptP300IEvidenceAccumulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator):m_opropertyObject(propertyObject),m_pSequenceGenerator(l_pSequenceGenerator),m_bIsReadyToPredict(false)
 				{
 					m_pAccumulatedEvidence = new OpenViBE::CMatrix();
 					m_pAccumulatedEvidence->setDimensionCount(1);
@@ -50,14 +50,14 @@ namespace OpenViBEApplications
 					m_bStopCondition = propertyObject->getStopCondition();
 					earlyStoppingEnabled = propertyObject->getEarlyStopping();
 					maxRepetition = propertyObject->getNumberOfRepetitions();
-					m_oSharedMemoryReader = new ExternalP300SharedMemoryReader();
+					m_oSharedMemoryReader = new CoAdaptP300SharedMemoryReader();
 					OpenViBE::CString l_sSharedMemoryName = propertyObject->getSharedMemoryName();
 					m_oSharedMemoryReader->openSharedMemory(l_sSharedMemoryName);
 					m_ui64Prediction=0;
 
 				}
 
-				virtual ~ExternalP300IEvidenceAccumulator()
+				virtual ~CoAdaptP300IEvidenceAccumulator()
 				{
 					m_opropertyObject=NULL;
 					m_pSequenceGenerator=NULL;
@@ -132,7 +132,7 @@ namespace OpenViBEApplications
 				/**
 				 * @return The shared memory reader that is created during construction of the EvidenceAccumulator
 				 */
-				virtual ExternalP300SharedMemoryReader* getSharedMemoryReader() { return m_oSharedMemoryReader; }
+				virtual CoAdaptP300SharedMemoryReader* getSharedMemoryReader() { return m_oSharedMemoryReader; }
 
 		protected:
 
@@ -188,7 +188,7 @@ namespace OpenViBEApplications
 				virtual OpenViBE::boolean stopEarly()=0;
 
 
-				ExternalP300SharedMemoryReader* m_oSharedMemoryReader;
+				CoAdaptP300SharedMemoryReader* m_oSharedMemoryReader;
 				OpenViBE::IMatrix* m_pAccumulatedEvidence;
 				OpenViBE::IMatrix* m_pCurrentEvidence;
 				OpenViBE::uint32 m_ui64Prediction;

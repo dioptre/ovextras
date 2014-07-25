@@ -124,15 +124,15 @@ boolean compareBuffers (const std::vector<float64>& rInVector, const std::vector
 		cout<<"Error : Files have different size, check input data"<<endl;
 	}
 
-	float mean=0;
-	float var=0;
-	for(int i=0; i<difference.size(); i++)
+	double mean=0;
+	double var=0;
+	for(unsigned int i=0; i<difference.size(); i++)
 	{
 		mean+=difference[i];
 		var+=difference[i]*difference[i];
 	}
-	mean/=difference.size();
-	var/=difference.size();
+	mean/=(double)difference.size();
+	var/=(double)difference.size();
 	var-=mean*mean;
 	cout << "mean " << mean << " var " << var << endl;
 

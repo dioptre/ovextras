@@ -1,5 +1,5 @@
 #include "ovexP300CNULLStimulator.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "../ova_defines.h"
 #include <system/Time.h>
 
@@ -15,8 +15,8 @@ using namespace std;
 
 //#define time2ms(x,y) ((x) * 1000 + y/1000.0) + 0.5
 
-ExternalP300CNULLStimulator::ExternalP300CNULLStimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator)
-				: ExternalP300IStimulator(), m_pPropertyObject(propertyObject)
+CoAdaptP300CNULLStimulator::CoAdaptP300CNULLStimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator)
+				: CoAdaptP300IStimulator(), m_pPropertyObject(propertyObject)
 {
 	m_pSequenceGenerator = l_pSequenceGenerator;
 	
@@ -35,7 +35,7 @@ ExternalP300CNULLStimulator::ExternalP300CNULLStimulator(P300StimulatorPropertyR
 
 }
 
-ExternalP300CNULLStimulator::~ExternalP300CNULLStimulator()
+CoAdaptP300CNULLStimulator::~CoAdaptP300CNULLStimulator()
 {
 	//m_oSharedMemoryReader.closeSharedMemory();
 	#ifdef OUTPUT_TIMING
@@ -43,7 +43,7 @@ ExternalP300CNULLStimulator::~ExternalP300CNULLStimulator()
 	#endif
 }
 
-void ExternalP300CNULLStimulator::run()
+void CoAdaptP300CNULLStimulator::run()
 {
 
 	if (m_ui32TrialCount==0)

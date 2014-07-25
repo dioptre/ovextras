@@ -1,5 +1,5 @@
-#ifndef __ovExternalP300RowColumnSequenceGenerator__
-#define __ovExternalP300RowColumnSequenceGenerator__
+#ifndef __ovCoAdaptP300RowColumnSequenceGenerator__
+#define __ovCoAdaptP300RowColumnSequenceGenerator__
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>

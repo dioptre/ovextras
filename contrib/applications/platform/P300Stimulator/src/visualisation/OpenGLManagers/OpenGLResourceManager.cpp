@@ -1,4 +1,4 @@
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "OpenGLResourceManager.h"
 
 using namespace OpenViBE;
@@ -69,4 +69,4 @@ void OpenGLResourceManager::deleteResources(OpenGLResourceManager* context)
 			context->_deleteResource(context->m_uiGLResourceIds+i);
 	}	
 }
-#endif//TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#endif//TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator

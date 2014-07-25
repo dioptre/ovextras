@@ -1,5 +1,5 @@
 #include "ovexP300ResultAreaHandler.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "ovexP300TargetAreaHandler.h"
 #include "ovexUndoHandler.h"
 #include "ovexBackspaceHandler.h"

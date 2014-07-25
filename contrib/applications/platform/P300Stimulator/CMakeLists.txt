@@ -1,4 +1,4 @@
-PROJECT(openvibe-external-p300-stimulator)
+PROJECT(openvibe-coadapt-p300-stimulator)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})
 SET(PROJECT_VERSION_MINOR ${OV_GLOBAL_VERSION_MINOR})
@@ -16,7 +16,7 @@ INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindThirdPartyBoost")
-INCLUDE("FindThirdPartyLibrariesForExternalStimulator")
+INCLUDE("FindThirdPartyLibrariesForCoAdaptStimulator")
 INCLUDE("FindThirdPartyGTK")#to use gtk package content i.e cairo pango fretype
 
 #so that boost won't need to link against DateTime when using the interprocess communication library
@@ -51,7 +51,7 @@ ENDIF(UNIX)
 # ----------------------
 # Generate launch script
 # ----------------------
-OV_INSTALL_LAUNCH_SCRIPT("openvibe-external-p300-stimulator")
+OV_INSTALL_LAUNCH_SCRIPT("openvibe-coadapt-p300-stimulator")
 
 # -----------------------------
 # Install files

@@ -76,7 +76,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Channel List</Name>
 					<DefaultValue>:</DefaultValue>
-					<Value>${externalP300_Channels}</Value>
+					<Value>${CoAdaptP300_Channels}</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x3bcf9e67, 0x0c23994d)</TypeIdentifier>
@@ -305,7 +305,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename to load configuration from</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Player_ScenarioDirectory}/${externalP300_paramFile}-classifier.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/${CoAdaptP300_paramFile}-classifier.cfg</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x2c132d6e, 0x44ab0d97)</TypeIdentifier>
@@ -633,7 +633,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${Player_ScenarioDirectory}/${externalP300_paramFile}-spatial-filter.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/${CoAdaptP300_paramFile}-spatial-filter.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xac367a9c, 0x2da95abe)</Identifier>
@@ -741,7 +741,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue>record-[$core{date}-$core{time}].ov</DefaultValue>
-					<Value>${Player_ScenarioDirectory}/signals/${externalP300_SubjectName}-${AcquisitionMode}-${SessionID}_$core{date}_$core{time}.ov</Value>
+					<Value>${Player_ScenarioDirectory}/signals/${CoAdaptP300_SubjectName}-${AcquisitionMode}-${SessionID}_$core{date}_$core{time}.ov</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>

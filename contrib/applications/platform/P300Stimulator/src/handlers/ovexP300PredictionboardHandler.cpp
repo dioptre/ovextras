@@ -1,7 +1,7 @@
 #include <vector>
 
 #include "ovexP300PredictionboardHandler.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "ovexUndoHandler.h"
 #include "ovexP300ResultAreaHandler.h"
 #include "ovexP300KeyboardHandler.h"

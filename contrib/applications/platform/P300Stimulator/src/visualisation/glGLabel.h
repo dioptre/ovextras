@@ -1,6 +1,6 @@
 #ifndef __GLabel_H__
 #define __GLabel_H__
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include <cstring>
 
 #include "glGObject.h"

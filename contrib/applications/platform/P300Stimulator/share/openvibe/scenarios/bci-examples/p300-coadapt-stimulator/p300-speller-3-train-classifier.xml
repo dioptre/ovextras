@@ -259,7 +259,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${externalP300_TrainFile}</Value>
+					<Value>${CoAdaptP300_TrainFile}</Value>
 				</Setting>
 			</Settings>
 			<Attributes>
@@ -419,7 +419,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
-					<Value>${Player_ScenarioDirectory}/${externalP300_paramFile}-spatial-filter.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/${CoAdaptP300_paramFile}-spatial-filter.cfg</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -734,7 +734,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename to save configuration to</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Player_ScenarioDirectory}/${externalP300_paramFile}-classifier.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/${CoAdaptP300_paramFile}-classifier.cfg</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x2c132d6e, 0x44ab0d97)</TypeIdentifier>

@@ -35,7 +35,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Spatial filter configuration</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Player_ScenarioDirectory}/${externalP300_paramFile}-spatial-filter.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/${CoAdaptP300_paramFile}-spatial-filter.cfg</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
@@ -409,7 +409,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${externalP300_TrainFile}</Value>
+					<Value>${CoAdaptP300_TrainFile}</Value>
 				</Setting>
 			</Settings>
 			<Attributes>

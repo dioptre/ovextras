@@ -1,5 +1,5 @@
 #include "ovexP300CStimulator.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "../ova_defines.h"
 #include <system/Time.h>
 
@@ -15,7 +15,7 @@ using namespace std;
 
 //#define time2ms(x,y) ((x) * 1000 + y/1000.0) + 0.5
 
-ExternalP300CStimulator::ExternalP300CStimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator) 
+CoAdaptP300CStimulator::CoAdaptP300CStimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator)
 				: m_pPropertyObject(propertyObject)
 {
 	m_pSequenceGenerator = l_pSequenceGenerator;
@@ -52,14 +52,14 @@ ExternalP300CStimulator::ExternalP300CStimulator(P300StimulatorPropertyReader* p
 	m_ui64StimulatedCycleTime = 0;
 }
 
-ExternalP300CStimulator::~ExternalP300CStimulator()
+CoAdaptP300CStimulator::~CoAdaptP300CStimulator()
 {
 	#ifdef OUTPUT_TIMING
 	fclose(timingFile);
 	#endif
 }
 
-void ExternalP300CStimulator::adjustForNextTrial(uint64 currentTime)
+void CoAdaptP300CStimulator::adjustForNextTrial(uint64 currentTime)
 {
 	m_ui64TrialStartTime=currentTime+m_ui64InterTrialDuration;
 	uint64 l_ui64InterTrialPartition = m_ui64InterTrialDuration >> 3;
@@ -74,7 +74,7 @@ void ExternalP300CStimulator::adjustForNextTrial(uint64 currentTime)
 	m_ui32TrialIndex++;	
 }
 
-void ExternalP300CStimulator::run()
+void CoAdaptP300CStimulator::run()
 {
 	uint32 l_ui32State=State_NoFlash;
 

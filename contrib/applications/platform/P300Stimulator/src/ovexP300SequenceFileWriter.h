@@ -1,5 +1,5 @@
-#ifndef __ovExternalP300SequenceFileWriter__
-#define __ovExternalP300SequenceFileWriter__
+#ifndef __ovCoAdaptP300SequenceFileWriter__
+#define __ovCoAdaptP300SequenceFileWriter__
 
 #include <sstream>
 #include <fstream>

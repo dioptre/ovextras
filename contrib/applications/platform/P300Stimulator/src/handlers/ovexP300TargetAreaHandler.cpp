@@ -1,5 +1,5 @@
 #include "ovexP300TargetAreaHandler.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "ovexUndoHandler.h"
 #include "../visualisation/glGButton.h"
 #include "../visualisation/glGSymbol.h"

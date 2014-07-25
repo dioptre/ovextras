@@ -1,6 +1,6 @@
 #ifndef __GButton_H__
 #define __GButton_H__
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include <cstring>
 
 #include "glGLabel.h"

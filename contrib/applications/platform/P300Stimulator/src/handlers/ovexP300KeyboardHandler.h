@@ -1,6 +1,6 @@
 #ifndef __P300KeyboardHandler_H__
 #define __P300KeyboardHandler_H__
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include <map>
 #include <cstring>
 #include <list>
@@ -20,8 +20,8 @@ namespace OpenViBEApplications
 	 * The P300KeyboardHandler listens to its own keys, e.g. when a key is in a flashed state the keyboard handler is notified of this event 
 	 * so that it can change the key with its flashed version. It is also observed by other handlers such as P300ResultAreaHandler in case a symbol 
 	 * is selected for example.
-	 * It is the ExternalP300Visualiser that will communicate with this class in order to update the states of the keys depending on
-	 * the stimuli the ExternalP300Visualiser gets from the ExternalP300Stimulator.
+	 * It is the CoAdaptP300Visualiser that will communicate with this class in order to update the states of the keys depending on
+	 * the stimuli the CoAdaptP300Visualiser gets from the CoAdaptP300Stimulator.
 	 * In the background it will create vectors of GButtons for all keys specified in the keyboard layout (letters, undo, backspace, word predictions...)
 	 * and make tweaked copies for all the possible states the button can be in. This takes up quite a bit of main memory, but that way
 	 * the OpenGL code embedded in the GObjects can persist in graphical memory (improving performance) without having to be recreated/recompiled every time

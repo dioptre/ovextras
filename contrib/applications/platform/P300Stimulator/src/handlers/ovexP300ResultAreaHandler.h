@@ -1,6 +1,6 @@
 #ifndef __P300ResultAreaHandler_H__
 #define __P300ResultAreaHandler_H__
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include <cstring>
 
 #include "../visualisation/glGTable.h"

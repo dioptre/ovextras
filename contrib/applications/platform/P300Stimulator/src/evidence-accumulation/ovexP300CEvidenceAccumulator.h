@@ -25,18 +25,18 @@ namespace OpenViBEApplications
 		/**
 		 * The EvidenceAccumulator class takes evidence from OpenVibe (via shared memory) and determines which symbol is selected
 		 */
-		class ExternalP300CEvidenceAccumulator : public ExternalP300IEvidenceAccumulator
+		class CoAdaptP300CEvidenceAccumulator : public CoAdaptP300IEvidenceAccumulator
 		{
 			public:
 				
-				ExternalP300CEvidenceAccumulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator):ExternalP300IEvidenceAccumulator(propertyObject, l_pSequenceGenerator)
+				CoAdaptP300CEvidenceAccumulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator):CoAdaptP300IEvidenceAccumulator(propertyObject, l_pSequenceGenerator)
 				{
 					m_pNormalizedAccumulatedEvidence = new OpenViBE::CMatrix();
 					OpenViBEToolkit::Tools::Matrix::copy(*m_pNormalizedAccumulatedEvidence, *m_pAccumulatedEvidence);
 					m_ui32CurrentFlashIndex=0;
 				}
 				
-				virtual ~ExternalP300CEvidenceAccumulator(){}
+				virtual ~CoAdaptP300CEvidenceAccumulator(){}
 				
 				virtual OpenViBE::uint64 getPrediction()
 				{

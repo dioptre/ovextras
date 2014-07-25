@@ -12,9 +12,9 @@ using namespace OpenViBEApplications;
 
 using namespace std;
 
-ExternalP300Visualiser * g_externalVisualiser;
+CoAdaptP300Visualiser * g_CoAdaptVisualiser;
 
-ExternalP300Visualiser::ExternalP300Visualiser()
+CoAdaptP300Visualiser::CoAdaptP300Visualiser()
 {
 	m_bChanged = false;
 	m_bInRest = true;
@@ -39,12 +39,12 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	
 
 	
-	//this will read all configuration files, interface-properties.xml, stimulator-properties.xml and the keyboard layout in share/openvibe/applications/externalP300Stimulator/
+	//this will read all configuration files, interface-properties.xml, stimulator-properties.xml and the keyboard layout in share/openvibe/applications/CoAdaptP300Stimulator/
 	this->m_pInterfacePropReader = new P300InterfacePropertyReader(this->m_pKernelContext);
 
 	CString l_sPathRoot = m_pKernelContext->getConfigurationManager().expand(CString("${Path_Root}"));
 
-	this->m_pInterfacePropReader->readPropertiesFromFile(l_sPathRoot + "/share/openvibe/applications/externalP300Stimulator/interface-properties.xml");
+	this->m_pInterfacePropReader->readPropertiesFromFile(l_sPathRoot + "/share/openvibe/applications/CoAdaptP300Stimulator/interface-properties.xml");
 	this->m_pScreenLayoutReader = new P300ScreenLayoutReader(this->m_pKernelContext);
 	this->m_pScreenLayoutReader->readPropertiesFromFile(this->m_pInterfacePropReader->getScreenDefinitionFile());
 	this->m_pStimulatorPropReader = new P300StimulatorPropertyReader(this->m_pKernelContext, this->m_pScreenLayoutReader->getSymbolList());
@@ -106,22 +106,22 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	if(m_pInterfacePropReader->getStimulatorMode()==CString("Replay"))
 	{
 		this->m_pKernelContext->getLogManager() << LogLevel_Info << " REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() <<"\n";
-		this->m_oStimulator = new ExternalP300CNULLStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
+		this->m_oStimulator = new CoAdaptP300CNULLStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
 		this->m_pSequenceGenerator->generateSequence();//to test csv reading
 		m_bReplayMode=true;
 	}
 	else
 	{
 		this->m_pKernelContext->getLogManager() << LogLevel_Info << " NOT REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() << "\n";
-		this->m_oStimulator = new ExternalP300CStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
+		this->m_oStimulator = new CoAdaptP300CStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
 		m_bReplayMode=false;
 	}
 
-	this->m_oEvidenceAccumulator = new ExternalP300CEvidenceAccumulator(m_pStimulatorPropReader,m_pSequenceGenerator);
+	this->m_oEvidenceAccumulator = new CoAdaptP300CEvidenceAccumulator(m_pStimulatorPropReader,m_pSequenceGenerator);
 	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
-	this->m_oStimulator->setCallBack(ExternalP300Visualiser::processCallback);	
-	this->m_oStimulator->setWaitCallBack(ExternalP300Visualiser::processWaitCallback);
-	this->m_oStimulator->setQuitEventCheck(ExternalP300Visualiser::areWeQuitting);
+	this->m_oStimulator->setCallBack(CoAdaptP300Visualiser::processCallback);
+	this->m_oStimulator->setWaitCallBack(CoAdaptP300Visualiser::processWaitCallback);
+	this->m_oStimulator->setQuitEventCheck(CoAdaptP300Visualiser::areWeQuitting);
 	this->m_oStimulator->setEvidenceAccumulator(m_oEvidenceAccumulator);
 
 
@@ -150,7 +150,7 @@ ExternalP300Visualiser::ExternalP300Visualiser()
 	this->m_pMainContainer->drawAndSync(this->m_pTagger,this->m_qEventQueue);		
 }
 
-ExternalP300Visualiser::~ExternalP300Visualiser()
+CoAdaptP300Visualiser::~CoAdaptP300Visualiser()
 {
 	delete m_oStimulator;
 	delete m_pTagger;
@@ -169,7 +169,7 @@ ExternalP300Visualiser::~ExternalP300Visualiser()
 	delete m_oEvidenceAccumulator;
 }
 
-void ExternalP300Visualiser::initializeOpenViBEKernel()
+void CoAdaptP300Visualiser::initializeOpenViBEKernel()
 {
 	CKernelLoader l_oKernelLoader;
 
@@ -197,7 +197,7 @@ void ExternalP300Visualiser::initializeOpenViBEKernel()
 		else
 		{
 			cout<<"[  INF  ] Got kernel descriptor, trying to create kernel"<<"\n";
-			m_pKernelContext=l_pKernelDesc->createKernel("externalP300Stimulator", OpenViBE::Directories::getDataDir() + "/kernel/openvibe.conf");
+			m_pKernelContext=l_pKernelDesc->createKernel("CoAdaptP300Stimulator", OpenViBE::Directories::getDataDir() + "/kernel/openvibe.conf");
 			if(!m_pKernelContext)
 			{
 				cout<<"[ FAILED ] No kernel created by kernel descriptor"<<"\n";
@@ -210,14 +210,14 @@ void ExternalP300Visualiser::initializeOpenViBEKernel()
 	}
 }
 
-void ExternalP300Visualiser::processCallback(uint32 eventID) 
+void CoAdaptP300Visualiser::processCallback(uint32 eventID)
 {
-	g_externalVisualiser->process(eventID);
+	g_CoAdaptVisualiser->process(eventID);
 }
 
-void ExternalP300Visualiser::processWaitCallback(uint32 eventID)
+void CoAdaptP300Visualiser::processWaitCallback(uint32 eventID)
 {
-	//std::cout << "ExternalP300Visualiser::processWaitCallback" << std::endl;
+	//std::cout << "CoAdaptP300Visualiser::processWaitCallback" << std::endl;
 	if(eventID==0)
 	{
 		//process events and return immediately (do not wait)
@@ -230,13 +230,13 @@ void ExternalP300Visualiser::processWaitCallback(uint32 eventID)
 	}
 }
 
-boolean ExternalP300Visualiser::areWeQuitting(void)
+boolean CoAdaptP300Visualiser::areWeQuitting(void)
 {
-	GLFWwindow* window = g_externalVisualiser->getMainContainer()->getWindow();
+	GLFWwindow* window = g_CoAdaptVisualiser->getMainContainer()->getWindow();
 	return ( glfwWindowShouldClose(window)!=0 );
 }
 
-void ExternalP300Visualiser::process(uint32 eventID)
+void CoAdaptP300Visualiser::process(uint32 eventID)
 {
 	m_bChanged = false;
 	//std::vector<uint32>* l_lSymbolChangeList;
@@ -478,12 +478,12 @@ void ExternalP300Visualiser::process(uint32 eventID)
 	}
 }
 
-void ExternalP300Visualiser::start()
+void CoAdaptP300Visualiser::start()
 {
-	g_externalVisualiser->m_oStimulator->run();
+	g_CoAdaptVisualiser->m_oStimulator->run();
 }
 
-void ExternalP300Visualiser::changeStates(uint32* states, VisualState ifState, VisualState elseState)
+void CoAdaptP300Visualiser::changeStates(uint32* states, VisualState ifState, VisualState elseState)
 {
 	for(uint32 it=0; it<m_pScreenLayoutReader->getNumberOfKeys() ; it++)
 	{
@@ -523,13 +523,13 @@ int main (int argc, char *argv[])
 	glfwSetErrorCallback(error_callback);
 
 	//create the main visualiser object
-	g_externalVisualiser = new ExternalP300Visualiser();
+	g_CoAdaptVisualiser = new CoAdaptP300Visualiser();
 
-	GLFWwindow* window = g_externalVisualiser->getMainContainer()->getWindow();
+	GLFWwindow* window = g_CoAdaptVisualiser->getMainContainer()->getWindow();
 	glfwSetKeyCallback(window, key_callback);
 
 	//listen for an key event. If 's' is pressed the stimulator is started.
-	if(!g_externalVisualiser->getReplayMode())
+	if(!g_CoAdaptVisualiser->getReplayMode())
 	{
 		std::cout << "waitingfor s key" << std::endl;
 		boolean l_bEventReceived = false;
@@ -539,7 +539,7 @@ int main (int argc, char *argv[])
 			if(glfwGetKey(window, GLFW_KEY_S)==GLFW_PRESS)
 			{
 				l_bEventReceived = true;
-				g_externalVisualiser->start();
+				g_CoAdaptVisualiser->start();
 			}
 
 			System::Time::sleep(10);
@@ -548,10 +548,10 @@ int main (int argc, char *argv[])
 	else
 	{
 		//in replay mode we do not wait for the user to press 's
-		g_externalVisualiser->start();
+		g_CoAdaptVisualiser->start();
 	}
 	//clean up
-	delete g_externalVisualiser;
+	delete g_CoAdaptVisualiser;
 
 	glfwTerminate();
 	//SDL_Quit();

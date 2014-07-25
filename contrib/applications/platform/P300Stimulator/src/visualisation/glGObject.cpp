@@ -1,5 +1,5 @@
 #include "glGObject.h"
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEApplications;

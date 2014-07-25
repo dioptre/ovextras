@@ -1,5 +1,5 @@
-#ifndef __ovExternalP300SequenceWriter__
-#define __ovExternalP300SequenceWriter__
+#ifndef __ovCoAdaptP300SequenceWriter__
+#define __ovCoAdaptP300SequenceWriter__
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>

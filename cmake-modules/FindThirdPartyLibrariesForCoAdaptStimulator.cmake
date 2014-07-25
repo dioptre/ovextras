@@ -143,7 +143,7 @@ IF(foundIncludeDir)
 	ENDIF(WIN32)
 
 	IF(required_libs_found)
-		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyModulesForExternalStimulator -D_GNU_SOURCE=1 -D_REENTRANT)
+		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyModulesForCoAdaptStimulator -D_GNU_SOURCE=1 -D_REENTRANT)
 	ENDIF(required_libs_found)
 ENDIF(foundIncludeDir)
 

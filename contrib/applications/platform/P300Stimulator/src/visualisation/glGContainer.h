@@ -1,6 +1,6 @@
 #ifndef __GContainer_OV_H__
 #define __GContainer_OV_H__
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "glGObject.h"
 
 #include <vector>
