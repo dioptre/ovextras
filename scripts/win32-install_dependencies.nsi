@@ -251,7 +251,60 @@ no_need_to_download_glfw:
 
 SectionEnd
 
+;
+##########################################################################################################################################################
 ;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section "presage"
+
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\presage-0.8.9-$suffix.zip" no_need_to_download_presage
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/presage-0.8.9-$suffix.zip "arch\presage-0.8.9-$suffix.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_presage:
+	ZipDLL::extractall "arch\presage-0.8.9-$suffix.zip" ""
+
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\presage\lib;%PATH%$\r$\n"
+	FileClose $0	
+
+SectionEnd
+
+;
+##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section "inpout32"
+
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\inpout32-$suffix.zip" no_need_to_download_inpout32
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/inpout32-$suffix.zip "arch\inpout32-$suffix.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_inpout32:
+	ZipDLL::extractall "arch\inpout32-$suffix.zip" ""
+
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\inpout32\lib;%PATH%$\r$\n"
+	FileClose $0	
+
+SectionEnd
+
+;
+####################################################################################################################################################################################################################################################################################################################
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
