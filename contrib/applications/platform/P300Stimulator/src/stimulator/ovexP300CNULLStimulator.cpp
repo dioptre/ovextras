@@ -11,18 +11,10 @@ using namespace OpenViBEApplications;
 
 using namespace std;
 
-//struct timeval currentLTime;
-
-//#define time2ms(x,y) ((x) * 1000 + y/1000.0) + 0.5
-
 CoAdaptP300CNULLStimulator::CoAdaptP300CNULLStimulator(P300StimulatorPropertyReader* propertyObject, P300SequenceGenerator* l_pSequenceGenerator)
 				: CoAdaptP300IStimulator(), m_pPropertyObject(propertyObject)
 {
 	m_pSequenceGenerator = l_pSequenceGenerator;
-	
-	//m_sSharedMemoryName = propertyObject->getSharedMemoryName();
-					
-	//m_oSharedMemoryReader.openSharedMemory(m_sSharedMemoryName);
 	
 	#ifdef OUTPUT_TIMING
 	timingFile = fopen(OpenViBE::Directories::getDataDir() + "/stimulator_round_timing.txt","w");
@@ -37,7 +29,6 @@ CoAdaptP300CNULLStimulator::CoAdaptP300CNULLStimulator(P300StimulatorPropertyRea
 
 CoAdaptP300CNULLStimulator::~CoAdaptP300CNULLStimulator()
 {
-	//m_oSharedMemoryReader.closeSharedMemory();
 	#ifdef OUTPUT_TIMING
 	fclose(timingFile);
 	#endif
@@ -66,8 +57,6 @@ void CoAdaptP300CNULLStimulator::run()
 		if (m_ui64RealCycleTime<m_ui64StimulatedCycleTime)
 			System::Time::sleep(static_cast<uint32>(std::ceil(1000.0*ITimeArithmetics::timeToSeconds(m_ui64StimulatedCycleTime-m_ui64RealCycleTime+l_ui64TimeStep))));
 
-		//std::cout << "NULL stim ev acc update\n";
-		m_oEvidenceAcc->update();//
 		IStimulationSet* l_pStimSet = m_oEvidenceAcc->getSharedMemoryReader()->readStimulation();
 
 		if(l_pStimSet!=NULL)//&&(l_ui64Prediction!=OVA_StimulationId_Flash))
@@ -90,8 +79,6 @@ void CoAdaptP300CNULLStimulator::run()
 		l_ui64CurrentTime += l_ui64TimeStep;
 		m_ui64StimulatedCycleTime += l_ui64TimeStep;
 
-		//SDL_PollEvent(&m_eKeyEvent);
-		//std::cout << "Stimulator waiting 0 " << std::endl;
 		m_oFuncVisualiserWaitCallback(0);
 		if(checkForQuitEvent())
 			m_ui32TrialIndex = UINT_MAX;
@@ -105,17 +92,13 @@ void CoAdaptP300CNULLStimulator::run()
 	}
 	
 	//in case it is not stopped in the middle of the stimulation process we want to wait on an event before quitting the application
-	//TODO this is SDL code and should be separated from the stimulator code, a new SDL thread with the same openGL context should be created
-	//to monitor for certain events
 	if (m_ui32TrialIndex != UINT_MAX)
 	{
-		//SDL_WaitEvent(&m_eKeyEvent);
 		std::cout << "Stimulator waiting " << std::endl;
 		m_oFuncVisualiserWaitCallback(1);
-		while (!checkForQuitEvent())// && SDL_WaitEvent(&m_eKeyEvent))
+		while (!checkForQuitEvent())
 		{
 			m_oFuncVisualiserWaitCallback(1);
-			//System::Time::sleep(50);
 		}
 	}
 	m_oFuncVisualiserCallback(OVA_StimulationId_ExperimentStop);

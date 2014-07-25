@@ -102,7 +102,6 @@ CoAdaptP300Visualiser::CoAdaptP300Visualiser()
 	
 	//create the stimulator object and register the callback function that is implemented above.
 	//if we are in replay, create a NULLStimulator
-	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
 	if(m_pInterfacePropReader->getStimulatorMode()==CString("Replay"))
 	{
 		this->m_pKernelContext->getLogManager() << LogLevel_Info << " REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() <<"\n";
@@ -112,17 +111,23 @@ CoAdaptP300Visualiser::CoAdaptP300Visualiser()
 	}
 	else
 	{
-		this->m_pKernelContext->getLogManager() << LogLevel_Info << " NOT REPLAY MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() << "\n";
+		this->m_pKernelContext->getLogManager() << LogLevel_Info << " ONLINE MODE " << m_pInterfacePropReader->getStimulatorMode().toASCIIString() << "\n";
 		this->m_oStimulator = new CoAdaptP300CStimulator(this->m_pStimulatorPropReader, m_pSequenceGenerator);
 		m_bReplayMode=false;
 	}
 
-	this->m_oEvidenceAccumulator = new CoAdaptP300CEvidenceAccumulator(m_pStimulatorPropReader,m_pSequenceGenerator);
-	this->m_pKernelContext->getLogManager() << LogLevel_Info << " \n\n\n";
-	this->m_oStimulator->setCallBack(CoAdaptP300Visualiser::processCallback);
+	if(m_pInterfacePropReader->getSpellingMode()!=CALIBRATION_MODE)
+	{
+		this->m_oEvidenceAccumulator = new CoAdaptP300CEvidenceAccumulator(m_pStimulatorPropReader,m_pSequenceGenerator);
+		this->m_oStimulator->setEvidenceAccumulator(m_oEvidenceAccumulator);
+	}
+	else
+	{
+		this->m_oStimulator->setEvidenceAccumulator(NULL);
+	}
+	this->m_oStimulator->setCallBack(CoAdaptP300Visualiser::processCallback);	
 	this->m_oStimulator->setWaitCallBack(CoAdaptP300Visualiser::processWaitCallback);
 	this->m_oStimulator->setQuitEventCheck(CoAdaptP300Visualiser::areWeQuitting);
-	this->m_oStimulator->setEvidenceAccumulator(m_oEvidenceAccumulator);
 
 
 	//initialize the OpenGL context and the main container that is needed to draw everything on the screen by calling the drawAndSync function
@@ -166,7 +171,8 @@ CoAdaptP300Visualiser::~CoAdaptP300Visualiser()
 	
 	delete m_pSequenceWriter;
 	delete m_pSequenceGenerator;
-	delete m_oEvidenceAccumulator;
+	if(m_oEvidenceAccumulator!=NULL)
+		delete m_oEvidenceAccumulator;
 }
 
 void CoAdaptP300Visualiser::initializeOpenViBEKernel()
@@ -341,19 +347,17 @@ void CoAdaptP300Visualiser::process(uint32 eventID)
 			m_qEventQueue.push(eventID);			
 			break;
 		case OVA_StimulationId_Flash:
-			//* TODO: should use the screen layout property reader to find out the foreground color
 			if (m_pInterfacePropReader->isPhotoDiodeEnabled())
 			{
 				m_pMainContainer->DiodeAreaFlash(true);	
 			}
-				//*/
 			
 			m_qEventQueue.push(eventID);
 			
 			//get the next flash group which is a vector, the size of the number of symbols on the keyboard, with one or zero to indicate
 			//whether it is flashed or not
 			//m_pKernelContext->getLogManager() << LogLevel_Info << "Flash " << eventID << " getting group \n";
-			l_lSymbolChangeList = m_oStimulator->getNextFlashGroup()->data();//to uncomment when not in replay
+			l_lSymbolChangeList = m_oStimulator->getNextFlashGroup()->data();
 			changeStates(l_lSymbolChangeList,FLASH);
 			m_pMainContainer->getKeyboardHandler()->updateChildStates(l_lSymbolChangeList);	
 					
@@ -554,8 +558,6 @@ int main (int argc, char *argv[])
 	delete g_CoAdaptVisualiser;
 
 	glfwTerminate();
-	//SDL_Quit();
 #endif
 	return 0;
 }
-//#endif//TARGET_HAS_ThirdPartyModulesForExternalStimulator
