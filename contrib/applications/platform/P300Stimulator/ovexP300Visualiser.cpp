@@ -1,6 +1,6 @@
 #include "ovexP300Visualiser.h"
 
-#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include <system/Time.h>
 #include <GLFW/glfw3.h>
 
@@ -525,7 +525,7 @@ MAIN: press 's' to start the stimulator
 */
 int main (int argc, char *argv[])
 {
-	#if defined TARGET_HAS_ThirdPartyModulesForExternalStimulator
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 	glfwSetErrorCallback(error_callback);
 
 	//create the main visualiser object
@@ -560,6 +560,8 @@ int main (int argc, char *argv[])
 	delete g_CoAdaptVisualiser;
 
 	glfwTerminate();
+#else
+	std::cout << "You do not have the required libraries for the CoAdapt stimulator " << std::endl;
 #endif
 	return 0;
 }
