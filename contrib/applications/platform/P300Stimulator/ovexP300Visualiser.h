@@ -2,6 +2,8 @@
 #ifndef __ovCoAdaptP300Visualiser__
 #define __ovCoAdaptP300Visualiser__
 
+#include <iostream>
+
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 
 #include <openvibe/ov_all.h>
@@ -9,7 +11,6 @@
 
 #include <queue>
 
-#include <iostream>
 #include <cstdio>
 #include <cstdlib>
 

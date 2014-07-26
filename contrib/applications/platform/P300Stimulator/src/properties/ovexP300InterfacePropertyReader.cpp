@@ -108,15 +108,15 @@ void P300InterfacePropertyReader::processChildData(const char* sData)
 	}
 	if(m_vNode.top()==CString("StimulatorConfigFile"))
 	{
-		m_sStimulatorConfigFile = OpenViBE::Directories::getDistRootDir() + "/share/" + l_sExpandedString;
+		m_sStimulatorConfigFile = l_sExpandedString;
 	}
 	if(m_vNode.top()==CString("AdditionalConfigurationFile"))
 	{
-		m_sAdditionalConfigurationFile = OpenViBE::Directories::getDistRootDir() + "/share/" + l_sExpandedString;
+		m_sAdditionalConfigurationFile = l_sExpandedString;
 	}	
 	if(m_vNode.top()==CString("SymbolDefinitionFile"))
 	{
-		m_sSymbolDefinitionFile = OpenViBE::Directories::getDistRootDir() + "/share/" + l_sExpandedString;
+		m_sSymbolDefinitionFile = l_sExpandedString;
 	}
 	if(m_vNode.top()==CString("FlashGroupDefinitionFile"))
 	{

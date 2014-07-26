@@ -6,7 +6,7 @@
 				<ScaleSize>0.7</ScaleSize>
 				<ForegroundColor>20,20,20</ForegroundColor>
 				<BackgroundColor>10,10,10</BackgroundColor>
-				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/CoAdaptP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>
@@ -15,7 +15,7 @@
 				<ScaleSize>0.8</ScaleSize>
 				<ForegroundColor>90,90,90</ForegroundColor>
 				<BackgroundColor>10,10,10</BackgroundColor>
-				<Source>openvibe/applications/externalP300Stimulator/smiley.png</Source>
+				<Source>openvibe/applications/CoAdaptP300Stimulator/smiley.png</Source>
 			</PictureSymbol>
 		</Event>	
 		<Event id="target">
@@ -23,7 +23,7 @@
 				<ScaleSize>0.7</ScaleSize>
 				<ForegroundColor>20,20,20</ForegroundColor>
 				<BackgroundColor>10,10,65</BackgroundColor>
-				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/CoAdaptP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>	
@@ -32,7 +32,7 @@
 				<ScaleSize>0.7</ScaleSize>
 				<ForegroundColor>10,20,10</ForegroundColor>
 				<BackgroundColor>0,40,0</BackgroundColor>
-				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/CoAdaptP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>
@@ -41,7 +41,7 @@
 				<ScaleSize>0.7</ScaleSize>
 				<ForegroundColor>50,20,20</ForegroundColor>
 				<BackgroundColor>92,5,5</BackgroundColor>
-				<Source>openvibe/applications/externalP300Stimulator/VeraMono-Bold.ttf</Source>
+				<Source>openvibe/applications/CoAdaptP300Stimulator/VeraMono-Bold.ttf</Source>
 				<Label>A</Label>
 			</TextSymbol>
 		</Event>			
