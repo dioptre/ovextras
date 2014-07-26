@@ -1,14 +1,14 @@
 <ExternelP300Stimulator>
 	<SharedMemoryName>SharedMemory_P300Stimulator</SharedMemoryName>
-	<TargetWord>${externalP300_WordToSpell}</TargetWord>
-	<InitialNumberOfGroups>${externalP300_NumberOfGroups}</InitialNumberOfGroups>
+	<TargetWord>${CoAdaptP300_WordToSpell}</TargetWord>
+	<InitialNumberOfGroups>${CoAdaptP300_NumberOfGroups}</InitialNumberOfGroups>
 	<MinRepetitions>2</MinRepetitions>
-	<MaxRepetitions>${externalP300_NrOfRepetitions}</MaxRepetitions>
-	<NumberOfTrials>${externalP300_WordLength}</NumberOfTrials>
-	<FlashDuration>${externalP300_FlashDuration}</FlashDuration>
-	<InterStimulusOnset>${externalP300_InterStimulusOnset}</InterStimulusOnset>
-	<InterRepetitionDelay>${externalP300_InterRepDuration}</InterRepetitionDelay>
+	<MaxRepetitions>${CoAdaptP300_NrOfRepetitions}</MaxRepetitions>
+	<NumberOfTrials>${CoAdaptP300_WordLength}</NumberOfTrials>
+	<FlashDuration>${CoAdaptP300_FlashDuration}</FlashDuration>
+	<InterStimulusOnset>${CoAdaptP300_InterStimulusOnset}</InterStimulusOnset>
+	<InterRepetitionDelay>${CoAdaptP300_InterRepDuration}</InterRepetitionDelay>
 	<InterTrialDelay>5</InterTrialDelay>
-	<EarlyStopping>${externalP300_EarlyStopping}</EarlyStopping>
-	<StopCondition>${externalP300_StopCondition}</StopCondition>
+	<EarlyStopping>${CoAdaptP300_EarlyStopping}</EarlyStopping>
+	<StopCondition>${CoAdaptP300_StopCondition}</StopCondition>
 </ExternelP300Stimulator>

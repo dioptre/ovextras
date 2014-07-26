@@ -1,21 +1,21 @@
 <ExternelP300Stimulator>
 	<!-- can be Cal, Cop or Fr, value is expanded and specified in P300AcquisitionConfig.conf -->
-	<Mode>${externalP300_AcquisitionMode}</Mode> 
+	<Mode>${CoAdaptP300_AcquisitionMode}</Mode> 
 	<!-- can be Replay or Online, value is expanded and specified in P300AcquisitionConfig.conf -->
-	<StimulatorMode>${externalP300_StimulatorMode}</StimulatorMode> 
+	<StimulatorMode>${CoAdaptP300_StimulatorMode}</StimulatorMode> 
 	<!-- specifies the keyboard layout file, value is expanded and specified in P300AcquisitionConfig.conf -->
-	<SymbolDefinitionFile>${externalP300_KeyboardLayout}</SymbolDefinitionFile>
+	<SymbolDefinitionFile>${CoAdaptP300_KeyboardLayout}</SymbolDefinitionFile>
 	<!-- specifies the property file containing the stimulator properties/timings -->
-	<StimulatorConfigFile>openvibe/applications/externalP300Stimulator/stimulator-properties.xml</StimulatorConfigFile>
+	<StimulatorConfigFile>openvibe/applications/CoAdaptP300Stimulator/stimulator-properties.xml</StimulatorConfigFile>
 	<!--AdditionalConfigurationFile>/P300AcquisitionConfig.conf</AdditionalConfigurationFile -->
 	<!-- the file name where the stimulator will save the symbols that are flashed during the experiment, value is expanded and specified in P300AcquisitionConfig.conf -->
-	<FlashGroupDefinitionFile>${externalP300_FlashGroupDefinitionFile}</FlashGroupDefinitionFile>
+	<FlashGroupDefinitionFile>${CoAdaptP300_FlashGroupDefinitionFile}</FlashGroupDefinitionFile>
 	<!-- The name of the database used by Presage for word prediction -->
-	<NGramDatabase>openvibe/applications/externalP300Stimulator/fr.db</NGramDatabase>
+	<NGramDatabase>openvibe/applications/CoAdaptP300Stimulator/fr.db</NGramDatabase>
 	<!-- width and height of the window, full screen or nofull screen-->
-	<Screen index="${externalP300_MonitorIndex}" width="${externalP300_MonitorWidth}" height="${externalP300_MonitorHeight}">nofull</Screen>
+	<Screen index="${CoAdaptP300_MonitorIndex}" width="${CoAdaptP300_MonitorWidth}" height="${CoAdaptP300_MonitorHeight}">nofull</Screen>
 	<!-- riprand or rowcol -->
-	<FlashMode>${externalP300_FlashMode}</FlashMode>
+	<FlashMode>${CoAdaptP300_FlashMode}</FlashMode>
 	<!-- specifies where the feedback is presented in free mode -->
 	<!-- central: feedback is presented in the center of the screen, color: if the symbol in the keyboard itself is highlighted -->
 	<FeedbackPresentation mode="free">central</FeedbackPresentation>
