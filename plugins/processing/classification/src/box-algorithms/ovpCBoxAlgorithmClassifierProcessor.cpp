@@ -17,6 +17,11 @@ using namespace std;
 
 boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 {
+	m_pFeaturesDecoder = NULL;
+	m_pLabelsEncoder = NULL;
+	m_pClassificationStateEncoder = NULL;
+	m_pClassifier = NULL;
+
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	//First of all, let's get the XML file for configuration
@@ -44,43 +49,74 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		this->getLogManager() << LogLevel_Warning << "The configuration file has no version information. Trouble may appear in loading process.\n";
 	}
 
+	CIdentifier l_oAlgorithmClassIdentifier = OV_UndefinedIdentifier;
+
 	XML::IXMLNode * l_pTempNode = l_pRootNode->getChildByName(c_sStrategyNodeName);
-	CIdentifier l_oAlgorithmClassIdentifier;
-	l_oAlgorithmClassIdentifier.fromString(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
+	if(l_pTempNode) {
+		l_oAlgorithmClassIdentifier.fromString(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
+	} else {
+		this->getLogManager() << LogLevel_Warning << "The configuration file had no node " << c_sStrategyNodeName << ". Trouble may appear later.\n";
+	}
 
 	//If the Identifier is undefined, that means we need to load a native algorithm
 	if(l_oAlgorithmClassIdentifier == OV_UndefinedIdentifier){
 		this->getLogManager() << LogLevel_Trace << "Using Native algorithm\n";
 		l_pTempNode = l_pRootNode->getChildByName(c_sAlgorithmNodeName);
-		l_oAlgorithmClassIdentifier.fromString(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
+		if(l_pTempNode)
+		{
+			l_oAlgorithmClassIdentifier.fromString(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
+		}
+		else
+		{
+			this->getLogManager() << LogLevel_Warning << "The configuration file had no node " << c_sAlgorithmNodeName << ". Trouble may appear later.\n";
+		}
 
 		//If the algorithm is still unknown, that means that we face an error
 		if(l_oAlgorithmClassIdentifier==OV_UndefinedIdentifier)
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Unknown classifier algorithm [" << l_pTempNode->getPCData() << "]\n";
+			this->getLogManager() << LogLevel_Error << "Couldn't restore a classifier from the file [" << l_sConfigurationFilename << "].\n";
 			return false;
 		}
 	}
 
 	//Now loading all stimulations output
 	XML::IXMLNode *l_pStimulationsNode = l_pRootNode->getChildByName(c_sStimulationsNodeName);
-
-	//Load Rejected class label and put it as the entry for class 0
-	l_pTempNode = l_pStimulationsNode->getChildByName(c_sRejectedClassNodeName);
-	CString l_sRejectedLabel(l_pTempNode->getPCData());
-	m_vStimulation[0]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sRejectedLabel);
-
-	//Now load every stimulation and store them in the map with the right class id
-	for(uint32 i=1; i<l_pStimulationsNode->getChildCount(); i++)
+	if(l_pStimulationsNode)
 	{
-		l_pTempNode = l_pStimulationsNode->getChild(i);
-		CString l_sStimulationName(l_pTempNode->getPCData());
+		//Load Rejected class label and put it as the entry for class 0
+		l_pTempNode = l_pStimulationsNode->getChildByName(c_sRejectedClassNodeName);
+		if(l_pTempNode)
+		{
+			CString l_sRejectedLabel(l_pTempNode->getPCData());
+		
+			m_vStimulation[0]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sRejectedLabel);
 
-		OpenViBE::float64 l_f64ClassId;
-		std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
-		l_sIdentifierData >> l_f64ClassId ;
+			//Now load every stimulation and store them in the map with the right class id
+			for(uint32 i=1; i<l_pStimulationsNode->getChildCount(); i++)
+			{
+				l_pTempNode = l_pStimulationsNode->getChild(i);
+				if(!l_pTempNode)
+				{
+					this->getLogManager() << LogLevel_Error << "Expected child node " << i << " for node " << c_sStimulationsNodeName << ". Output labels not known. Aborting.\n";
+					return false;
+				}
+				CString l_sStimulationName(l_pTempNode->getPCData());
+	
+				OpenViBE::float64 l_f64ClassId;
+				std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
+				l_sIdentifierData >> l_f64ClassId ;
 
-		m_vStimulation[l_f64ClassId]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sStimulationName);
+				m_vStimulation[l_f64ClassId]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sStimulationName);
+			}
+		} 
+		else
+		{
+			this->getLogManager() << LogLevel_Warning << "The configuration file had no subnode " << c_sRejectedClassNodeName << ". Trouble may appear later.\n";
+		}
+	}
+	else
+	{
+		this->getLogManager() << LogLevel_Warning << "The configuration file had no node " << c_sStimulationsNodeName << ". Trouble may appear later.\n";
 	}
 
 	m_pFeaturesDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_FeatureVectorStreamDecoder));
@@ -112,15 +148,33 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 
 boolean CBoxAlgorithmClassifierProcessor::uninitialize(void)
 {
-	m_pClassifier->uninitialize();
-	m_pClassificationStateEncoder->uninitialize();
-	m_pLabelsEncoder->uninitialize();
-	m_pFeaturesDecoder->uninitialize();
+	if(m_pClassifier)
+	{
+		m_pClassifier->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
+		m_pClassifier = NULL;
+	}
 
-	this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
-	this->getAlgorithmManager().releaseAlgorithm(*m_pClassificationStateEncoder);
-	this->getAlgorithmManager().releaseAlgorithm(*m_pLabelsEncoder);
-	this->getAlgorithmManager().releaseAlgorithm(*m_pFeaturesDecoder);
+	if(m_pClassificationStateEncoder)
+	{
+		m_pClassificationStateEncoder->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pClassificationStateEncoder);
+		m_pClassificationStateEncoder = NULL;
+	}
+
+	if(m_pLabelsEncoder)
+	{
+		m_pLabelsEncoder->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pLabelsEncoder);
+		m_pLabelsEncoder = NULL;
+	}
+
+	if(m_pFeaturesDecoder)
+	{
+		m_pFeaturesDecoder->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pFeaturesDecoder);
+		m_pFeaturesDecoder = NULL;
+	}
 
 	return true;
 }
