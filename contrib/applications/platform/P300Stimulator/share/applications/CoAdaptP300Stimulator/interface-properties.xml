@@ -6,7 +6,7 @@
 	<!-- specifies the keyboard layout file, value is expanded and specified in P300AcquisitionConfig.conf -->
 	<SymbolDefinitionFile>${CoAdaptP300_KeyboardLayout}</SymbolDefinitionFile>
 	<!-- specifies the property file containing the stimulator properties/timings -->
-	<StimulatorConfigFile>openvibe/applications/CoAdaptP300Stimulator/stimulator-properties.xml</StimulatorConfigFile>
+	<StimulatorConfigFile>${Path_Data}/applications/CoAdaptP300Stimulator/stimulator-properties.xml</StimulatorConfigFile>
 	<!--AdditionalConfigurationFile>/P300AcquisitionConfig.conf</AdditionalConfigurationFile -->
 	<!-- the file name where the stimulator will save the symbols that are flashed during the experiment, value is expanded and specified in P300AcquisitionConfig.conf -->
 	<FlashGroupDefinitionFile>${CoAdaptP300_FlashGroupDefinitionFile}</FlashGroupDefinitionFile>
