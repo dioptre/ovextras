@@ -120,12 +120,15 @@ CoAdaptP300Visualiser::CoAdaptP300Visualiser()
 	if(m_pInterfacePropReader->getSpellingMode()!=CALIBRATION_MODE)
 	{
 		this->m_oEvidenceAccumulator = new CoAdaptP300CEvidenceAccumulator(m_pStimulatorPropReader,m_pSequenceGenerator);
-		this->m_oStimulator->setEvidenceAccumulator(m_oEvidenceAccumulator);
+
 	}
 	else
 	{
-		this->m_oStimulator->setEvidenceAccumulator(NULL);
+		this->m_oEvidenceAccumulator = NULL;
 	}
+
+	this->m_oStimulator->setEvidenceAccumulator(m_oEvidenceAccumulator);
+
 	this->m_oStimulator->setCallBack(CoAdaptP300Visualiser::processCallback);	
 	this->m_oStimulator->setWaitCallBack(CoAdaptP300Visualiser::processWaitCallback);
 	this->m_oStimulator->setQuitEventCheck(CoAdaptP300Visualiser::areWeQuitting);
