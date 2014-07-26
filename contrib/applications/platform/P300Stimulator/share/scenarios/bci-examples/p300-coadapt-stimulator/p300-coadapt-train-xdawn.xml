@@ -819,11 +819,11 @@
 		</Attribute>
 		<Attribute>
 			<Identifier>(0xf36a1567, 0xd13c53da)</Identifier>
-			<Value>http://openvibe.inria.fr/p300-with-external-stimulator-tutorial/</Value>
+			<Value>http://openvibe.inria.fr/coadapt-p300-stimulator-tutorial/</Value>
 		</Attribute>
 		<Attribute>
 			<Identifier>(0xf6b2e3fa, 0x7bd43926)</Identifier>
-			<Value>p300-with-external-stimulator</Value>
+			<Value>coadapt-p300-stimulator</Value>
 		</Attribute>
 		<Attribute>
 			<Identifier>(0xf8034a49, 0x8b3f37cc)</Identifier>
