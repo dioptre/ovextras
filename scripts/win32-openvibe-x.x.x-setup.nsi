@@ -103,11 +103,13 @@ no_need_to_install_directx:
 	File ..\dependencies\arch\glfw-3.0.4-vs100.zip	
 	File ..\dependencies\arch\gtk-2.22.1-runtime.zip
 	File ..\dependencies\arch\gtk-themes-2009.09.07.zip
+	File ..\dependencies\arch\inpout32-vs100.zip	
 	File ..\dependencies\arch\itpp-4.0.7-runtime.zip
 	File ..\dependencies\arch\ogre-1.7.1-vs100-runtime.zip
 	File ..\dependencies\arch\cegui-0.7.2-vs100-runtime.zip
 	File ..\dependencies\arch\vrpn-7.26-runtime.zip
 	File ..\dependencies\arch\pthreads-2.8.0-runtime.zip
+	File ..\dependencies\arch\presage-0.8.9-vs100.zip		
 	File ..\dependencies\arch\openal-1.1-runtime.zip
 	File ..\dependencies\arch\freealut-1.1.0-bin-runtime.zip
 	File ..\dependencies\arch\libvorbis-1.3.2-vs100-runtime.zip
@@ -126,11 +128,13 @@ no_need_to_install_directx:
 	ZipDLL::extractall "arch\glfw-3.0.4-vs100.zip" ""	
 	ZipDLL::extractall "arch\gtk-2.22.1-runtime.zip" "gtk"
 	ZipDLL::extractall "arch\gtk-themes-2009.09.07.zip" "gtk"
+	ZipDLL::extractall "arch\inpout32-vs100.zip" ""	
 	ZipDLL::extractall "arch\itpp-4.0.7-runtime.zip" "itpp"
 	ZipDLL::extractall "arch\ogre-1.7.1-vs100-runtime.zip" "ogre"
 	ZipDLL::extractall "arch\cegui-0.7.2-vs100-runtime.zip" "cegui"
 	ZipDLL::extractall "arch\vrpn-7.26-runtime.zip" "vrpn"
 	ZipDLL::extractall "arch\pthreads-2.8.0-runtime.zip" "pthreads"
+	ZipDLL::extractall "arch\presage-0.8.9-vs100.zip" ""
 	ZipDLL::extractall "arch\openal-1.1-runtime.zip" "openal"
 	ZipDLL::extractall "arch\freealut-1.1.0-bin-runtime.zip" "freealut"
 	ZipDLL::extractall "arch\libvorbis-1.3.2-vs100-runtime.zip" "libvorbis"
@@ -176,11 +180,13 @@ no_need_to_patch_3d_functionnality:
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\expat\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\glfw\lib\;%PATH%$\r$\n"		
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\gtk\bin;%PATH%$\r$\n"
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\inpout32\lib;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\itpp\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\cegui\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=%OGRE_HOME%\bin\release;%OGRE_HOME%\bin\debug;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=%VRPNROOT%\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\pthreads\lib;%PATH%$\r$\n"
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\presage\lib;%PATH%$\r$\n"	
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\openal\libs\Win32;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\freealut\lib;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libvorbis\win32\bin\release;%PATH%$\r$\n"
