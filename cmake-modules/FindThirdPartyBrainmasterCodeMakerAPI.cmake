@@ -4,7 +4,10 @@
 # Adds include path
 # ---------------------------------
 IF(WIN32)
+	# note that ampersands in paths below passed through cmake mess up Visual Studio IDE. If you get this problem, rename the dll folder under Program Files/
 	FIND_PATH(PATH_BrainmasterCodeMakerAPI CMKRDLLU.H PATHS 
+		"C:/Program Files/Atlantis and Discovery SW DLL 1-11-12" 
+		"C:/Program Files (x86)/Atlantis and Discovery SW DLL 1-11-12" 	
 		"C:/Program Files/Atlantis & Discovery SW DLL 1-11-12" 
 		"C:/Program Files (x86)/Atlantis & Discovery SW DLL 1-11-12" 
 		${OV_CUSTOM_DEPENDENCIES_PATH})
