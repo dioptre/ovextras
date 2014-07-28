@@ -7,8 +7,13 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_SignalDisplay_Description|
 This plugin displays incoming signals where values are plotted on the vertical axis while the horizontal axis represents
-time.
-Two modes are available : one using one 2D graph per channel (eeg display disabled in settings) and one using one 2D graph for all channels (eeg display enabled)
+time. 
+
+Two modes are available : 
+
+	- 1) use one 2D graph per channel (EEG Display disabled in box settings) and 
+	- 2) use one 2D graph for all channels (EEG Display enabled)
+	
  * |OVP_DocEnd_BoxAlgorithm_SignalDisplay_Description|
 __________________________________________________________________
 
@@ -38,13 +43,13 @@ Size of time window to display, in seconds.
  * |OVP_DocEnd_BoxAlgorithm_SignalDisplay_Setting1|
 
  * |OVP_DocBegin_BoxAlgorithm_SignalDisplay_Setting2|
-Type of display, could be either Scan mode or Scroll mode. In Scan mode, the new data arrives
+Type of display, can be either Scan mode or Scroll mode. In Scan mode, the new data arrives
 from left to right and the displayed data does not move. In Scroll mode, the new data always
 arrives on the right and all displayed data moves right to left.
  * |OVP_DocEnd_BoxAlgorithm_SignalDisplay_Setting2|
  
  * |OVP_DocBegin_BoxAlgorithm_SignalDisplay_Setting1|
- Mode of display, eeg display uses one 2D graph for all channels, and the settings are optimal for filtered eeg signals.
+ Mode of display, EEG display uses one 2D graph for all channels, and the settings are optimized for filtered EEG signals.
  * |OVP_DocEnd_BoxAlgorithm_SignalDisplay_Setting1|
 
  * |OVP_DocBegin_BoxAlgorithm_SignalDisplay_Setting1|
@@ -86,9 +91,9 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_SignalDisplay_Examples|
 Practical example :
 
- This example is based on the following scenario file : tutorials/visualisation/sample_signal_display
+ OpenViBE has a tutorial scenario bundled : box-tutorials/signal-display.xml
 
- An easy way to test this plugin consists in generating signals with the Sinus Oscillator plugin (found under 'Samples'), then connecting its signal output to the signal input of the Signal Display plugin.
+ An easy way to test this box consists of generating signals with the Sinus Oscillator plugin (found under 'Data generation' in Designer), and then connecting its signal output to the signal input of the Signal Display plugin.
 
  \image html signaldisplay_online.png "Visualising 2 channels using the Signal Display plugin."
  * |OVP_DocEnd_BoxAlgorithm_SignalDisplay_Examples|

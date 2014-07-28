@@ -163,9 +163,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("SharedMemoryWriter"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Dieter Devlaminck"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("write something to shared memory"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { 
-				return OpenViBE::CString("write something to shared memory so that it can be read by another process. It can write stimuli and streamed matrices, which are transformed in a format that can be written in shared memory. Based on the input types a metainfo variable will be created in shared memory that will specify which variables have which type in shared memory. This way the client knows what it will be reading"); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Stream input to shared memory"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("The box writes input to shared memory so that it can be read by another process. Stimuli and streamed matrices are supported, and transformed into a format that can be written into shared memory. Based on the input types, a metainfo variable will be created in shared memory that will specify which variables have which type. This way the client can know what it will be reading."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("File reading and writing"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
