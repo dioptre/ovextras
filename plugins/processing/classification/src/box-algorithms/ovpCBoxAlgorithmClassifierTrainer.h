@@ -73,12 +73,12 @@ namespace OpenViBEPlugins
 			virtual void release(void) { }
 
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Classifier trainer"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard, Guillaume Serriere"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Generic classifier trainer, relying on several box algorithms"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Performs multiple training on the feature vector set leaving a single feature vector each time and tests this feature vector on the trained classifier"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Performs classifier training with cross-validation -based error estimation"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Classification"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("2.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-apply"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ClassifierTrainer; }

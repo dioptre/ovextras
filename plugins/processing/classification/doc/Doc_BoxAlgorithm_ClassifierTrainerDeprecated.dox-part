@@ -17,7 +17,7 @@ specific to a given classifier are forwarded to one of the registered \c OVTK_Ty
 algorithms. The behavior is simple, the box collects a number of feature vectors. Those feature vectors
 are labelled depending on the input they arrive on. When a specific stimulation arrives, a training
 process is triggered. This process can take some time so this box should be used offline. Depending on the
-settings you enter, you will be able to perform a k-fold test in order to train a better classifier. When
+settings you enter, you will be able to perform a k-fold test to estimate the accuracy of the classifier. When
 this training stimulation is received, the box requests the selected classification algorithm to generate
 a configuration file that will be usable online by the \ref Doc_BoxAlgorithm_ClassifierProcessor box. 
 Finally, the box releases a particular stimulation (OVTK_StimulationId_TrainCompleted) on its ouput, 
@@ -92,8 +92,8 @@ This is the stimulation to consider to trigger the training process.
  * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainerDeprecated_Setting4|
 If you want to perform a k-fold test, you should enter something else than 0 or 1 here. A k-fold test generally allows
 better classification rates. The idea is to divide the set of feature vectors in a number of partitions. The classification
-algorithm is trained on some of the partitions and its accuracy is tested on the others. The classifier with the best results
-is selected as the trained classifier. See the miscellaneous section for details on how the k-fold test is done in this box.
+algorithm is trained on some of the partitions and its accuracy is tested on the others. See the miscellaneous section for 
+details on how the k-fold test is done in this box.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainerDeprecated_Setting4|
  
 __________________________________________________________________
@@ -174,10 +174,7 @@ The same process if performed on all the partitions :
 
 Important things to consider :
 - The more partitions you have, the more feature vector you have in your training sets... and the less examples you'll have to
-test on. This means that the result of the test will probably be less reliable. But you will be able to choose the best classifier
-among a more consequent list.
-- The less partitions you have, the less feature vector you have in your training sets... and the more examples you'll have to
-test on. This means that the online use of the trained classifier is more likely to be consistent with the trained classifier accuracy.
+test on. This means that the result of the test will probably be less reliable.
 
 In conclusion, be carefull when choosing this k-fold test setting. Typical value range from 4 partitions (train on 75% of the feature vectors and
 test on 25% - 4 times) to 10 partitions (train on 90% of the feature vectors and test on 10% - 10 times).

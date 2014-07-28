@@ -15,9 +15,9 @@ algorithm selected.
 The behavior is simple, the box collects a number of feature vectors. Those feature vectors
 are labelled depending on the input they arrive on. When a specific stimulation arrives, a training
 process is triggered. This process can take some time so this box should be used offline. Depending on the
-settings you enter, you will be able to perform a k-fold test in order to train a better classifier. When
-this training stimulation is received, the box generates a configuration file that will be usable online by the
-\ref Doc_BoxAlgorithm_ClassifierProcessor box. 
+settings you enter, you will be able to perform a k-fold test to estimate the accuracy of the learned
+classifier. When this training stimulation is received, the box generates a configuration file that will 
+be usable online by the \ref Doc_BoxAlgorithm_ClassifierProcessor box. 
 Finally, the box outputs a particular stimulation (OVTK_StimulationId_TrainCompleted) 
 on its output, that can be used to trigger further treatments in the scenario.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Description|
