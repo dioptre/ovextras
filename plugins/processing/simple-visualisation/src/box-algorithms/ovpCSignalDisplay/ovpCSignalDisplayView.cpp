@@ -978,12 +978,6 @@ namespace OpenViBEPlugins
 				updateStimulationColorsDialog(rStimulationName, l_oColor);
 			}
 
-			//force full redraw of all channels when display mode changes
-			for(size_t i=0 ; i<m_oChannelDisplay.size(); i++)
-			{
-				m_oChannelDisplay[i]->redrawAllAtNextRefresh();
-			}
-
 			//redraw channels
 			redraw();
 		}
