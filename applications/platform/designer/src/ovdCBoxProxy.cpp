@@ -125,7 +125,8 @@ const char* CBoxProxy::getLabel(void) const
 	    const boolean l_bIsMuted            (this->getMute());
 	    const IPluginObjectDesc* l_pDesc=m_rKernelContext.getPluginManager().getPluginObjectDescCreating(m_pConstBox->getAlgorithmClassIdentifier());
 
-	    const string l_sBoxName(m_pConstBox->getName());
+		//not const need to change the & to &amp; (see below)
+		string l_sBoxName(m_pConstBox->getName());
 	    const string l_sBoxIden(m_pConstBox->getIdentifier().toString());
 
 	    const string l_sRed("#602020");
@@ -133,7 +134,15 @@ const char* CBoxProxy::getLabel(void) const
 	    const string l_sBlue("#202060");
 	    const string l_sGrey("#404040");
 
-	    m_sLabel=l_sBoxName;
+		//replace & by &amp; so the markup will not mess up the display
+		size_t l_oIterator = l_sBoxName.find('&');
+		while(l_oIterator!=std::string::npos)
+		{
+			l_sBoxName.insert(l_oIterator+1, "amp;");
+			l_oIterator = l_sBoxName.find('&', l_oIterator+1);
+		}
+
+		m_sLabel=l_sBoxName;
 
 	    if(m_pConstBox->getSettingCount()!=0)
 	    {
