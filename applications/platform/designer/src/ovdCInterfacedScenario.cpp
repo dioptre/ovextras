@@ -392,6 +392,9 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	m_pScrolledWindow = GTK_SCROLLED_WINDOW(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookClient, "openvibe_scenario_notebook_scrolledwindow"));
 
 	gtk_drag_dest_set(GTK_WIDGET(m_pScenarioDrawingArea), GTK_DEST_DEFAULT_ALL, g_vTargetEntry, sizeof(g_vTargetEntry)/sizeof(::GtkTargetEntry), GDK_ACTION_COPY);
+	//gtk_drag_dest_add_text_targets(GTK_WIDGET(m_pScenarioDrawingArea));
+	gtk_drag_dest_add_uri_targets(GTK_WIDGET(m_pScenarioDrawingArea));
+
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "expose_event", G_CALLBACK(scenario_drawing_area_expose_cb), this);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "drag_data_received", G_CALLBACK(scenario_drawing_area_drag_data_received_cb), this);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "motion_notify_event", G_CALLBACK(scenario_drawing_area_motion_notify_cb), this);
@@ -1313,9 +1316,10 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 }
 
 // @Important No log should be displayed in this method because it could lead to a crash of gtk during the expand of the log section
+//not true anymore on fedora 17 TODO check all platform
 void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 {
-	// @fixme uncomment this log will create a crash of gtk
+	// @fixme uncomment this log will create a crash of gtk (not on fedora 17)
 	//m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaExposeCB\n";
 	gint x = -1;
 	gint y = -1;
@@ -1530,13 +1534,20 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 }
 void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext* pDragContext, gint iX, gint iY, ::GtkSelectionData* pSelectionData, guint uiInfo, guint uiT)
 {
+	//check if I need to free later
+	const char* l_sSelectionText = (const char*)gtk_selection_data_get_text(pSelectionData);
+	gchar** l_sSelectionUri = gtk_selection_data_get_uris(pSelectionData);
+
+
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaDragDataReceivedCB [" << (const char*)gtk_selection_data_get_text(pSelectionData) << "]\n";
 
 	if(this->isLocked()) return;
 
 	CIdentifier l_oBoxIdentifier;
-	CIdentifier l_oBoxAlgorithmClassIdentifier;
-	l_oBoxAlgorithmClassIdentifier.fromString((const char*)gtk_selection_data_get_text(pSelectionData));
+	CIdentifier l_oBoxAlgorithmClassIdentifier = OV_UndefinedIdentifier;
+	if(l_sSelectionText!=NULL)
+		l_oBoxAlgorithmClassIdentifier.fromString(l_sSelectionText);
+
 	if(l_oBoxAlgorithmClassIdentifier!=OV_UndefinedIdentifier)
 	{
 		m_rScenario.addBox(l_oBoxAlgorithmClassIdentifier, l_oBoxIdentifier);
@@ -1565,6 +1576,24 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 		m_bScenarioModified = true;
 
 		this->snapshotCB();
+	}
+	else
+	{
+		m_rKernelContext.getLogManager() << LogLevel_Debug << "not a box, might be a scenario\n";
+		std::string l_sFilename;
+		if(l_sSelectionText!=NULL)
+		{
+			l_sFilename = l_sSelectionText;
+		}
+		else if (*l_sSelectionUri!=NULL)
+		{
+			l_sFilename = *l_sSelectionUri;
+		}
+		m_rKernelContext.getLogManager() << LogLevel_Fatal <<  "filename " << l_sFilename.c_str() << "\n";
+		l_sFilename.erase(l_sFilename.begin(), l_sFilename.begin()+7);//erase the file:// at the begining
+		l_sFilename.erase(l_sFilename.begin()+l_sFilename.find(".xml")+4, l_sFilename.end());//erase \n at the end
+		m_rKernelContext.getLogManager() << LogLevel_Fatal <<  "filename " << l_sFilename.c_str() << "\n";
+		m_rApplication.openScenario(l_sFilename.c_str());
 	}
 
 	m_f64CurrentMouseX=iX;
