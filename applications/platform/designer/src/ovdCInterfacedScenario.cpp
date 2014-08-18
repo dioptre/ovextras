@@ -393,7 +393,7 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 
 	gtk_drag_dest_set(GTK_WIDGET(m_pScenarioDrawingArea), GTK_DEST_DEFAULT_ALL, g_vTargetEntry, sizeof(g_vTargetEntry)/sizeof(::GtkTargetEntry), GDK_ACTION_COPY);
 	//gtk_drag_dest_add_text_targets(GTK_WIDGET(m_pScenarioDrawingArea));
-	gtk_drag_dest_add_uri_targets(GTK_WIDGET(m_pScenarioDrawingArea));
+	gtk_drag_dest_add_uri_targets(GTK_WIDGET(m_pScenarioDrawingArea));//for drag&drop scenario file, on windows we get file uri so we need to enable this
 
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "expose_event", G_CALLBACK(scenario_drawing_area_expose_cb), this);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "drag_data_received", G_CALLBACK(scenario_drawing_area_drag_data_received_cb), this);
@@ -1538,8 +1538,12 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 	const char* l_sSelectionText = (const char*)gtk_selection_data_get_text(pSelectionData);
 	gchar** l_sSelectionUri = gtk_selection_data_get_uris(pSelectionData);
 
-
-	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaDragDataReceivedCB [" << (const char*)gtk_selection_data_get_text(pSelectionData) << "]\n";
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaDragDataReceivedCB [";
+	if(l_sSelectionText!=NULL)
+		m_rKernelContext.getLogManager() << LogLevel_Debug << l_sSelectionText;
+	else if (*l_sSelectionUri!=NULL)
+		m_rKernelContext.getLogManager() << LogLevel_Debug << *l_sSelectionUri;
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "]\n";
 
 	if(this->isLocked()) return;
 
@@ -1591,6 +1595,9 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 		}
 		m_rKernelContext.getLogManager() << LogLevel_Fatal <<  "filename " << l_sFilename.c_str() << "\n";
 		l_sFilename.erase(l_sFilename.begin(), l_sFilename.begin()+7);//erase the file:// at the begining
+#if defined TARGET_OS_Windows
+		l_sFilename.erase(l_sFilename.begin(), l_sFilename.begin()+1);//we have an additionnal / to erase before the uri starts
+#endif
 		l_sFilename.erase(l_sFilename.begin()+l_sFilename.find(".xml")+4, l_sFilename.end());//erase \n at the end
 		m_rKernelContext.getLogManager() << LogLevel_Fatal <<  "filename " << l_sFilename.c_str() << "\n";
 		m_rApplication.openScenario(l_sFilename.c_str());
