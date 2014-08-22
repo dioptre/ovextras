@@ -31,7 +31,7 @@ namespace OpenViBEDesigner
 		OpenViBE::Kernel::IBox& m_rBox;
 	};
 
-	class CBoxConfigurationDialog
+	class CBoxConfigurationDialog : public OpenViBE::IObserver
 	{
 	public:
 
@@ -41,6 +41,8 @@ namespace OpenViBEDesigner
 		virtual ::GtkWidget* getWidget();
 		virtual OpenViBE::boolean update(void);
 		virtual const OpenViBE::CIdentifier getBoxID() const;
+
+		virtual void update(OpenViBE::CObservable &o, void* data);
 
 	protected:
 

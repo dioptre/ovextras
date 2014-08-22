@@ -35,8 +35,8 @@ namespace OpenViBE
 				__BridgeBindFunc1__(getKernelContext().getLogManager(), void, log, , const boolean, bValue)
 
 				__BridgeBindFunc1__(getKernelContext().getLogManager(), void, log, , const CIdentifier&, rValue)
-				__BridgeBindFunc1__(getKernelContext().getLogManager(), void, log, , const CString&, rValue);
-				__BridgeBindFunc1__(getKernelContext().getLogManager(), void, log, , const char*, rValue);
+				__BridgeBindFunc1__(getKernelContext().getLogManager(), void, log, , const CString&, rValue)
+				__BridgeBindFunc1__(getKernelContext().getLogManager(), void, log, , const char*, rValue)
 
 				// __BridgeBindFunc1__(getKernelContext().getLogManager(), void, log, , const ELogLevel, eLogLevel)
 				__BridgeBindFunc1__(getKernelContext().getLogManager(), void, log, , const ELogColor, eLogColor)
@@ -72,15 +72,9 @@ namespace OpenViBE
 
 			CBoxListenerContext(const OpenViBE::Kernel::IKernelContext& rKernelContext, OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index) : TKernelObject<IBoxListenerContext>(rKernelContext), m_oLogManager(rKernelContext, rBox), m_rBox(rBox), m_ui32Index(ui32Index) {}
 
-			virtual OpenViBE::Kernel::IAlgorithmManager& getAlgorithmManager(void) const { return this->getKernelContext().getAlgorithmManager(); }
-			virtual OpenViBE::Kernel::IPlayerManager& getPlayerManager(void) const { return this->getKernelContext().getPlayerManager(); }
-			virtual OpenViBE::Kernel::IPluginManager& getPluginManager(void) const { return this->getKernelContext().getPluginManager(); }
-			virtual OpenViBE::Kernel::IScenarioManager& getScenarioManager(void) const { return this->getKernelContext().getScenarioManager(); }
-			virtual OpenViBE::Kernel::ITypeManager& getTypeManager(void) const { return this->getKernelContext().getTypeManager(); }
 			virtual OpenViBE::Kernel::ILogManager& getLogManager(void) const { return m_oLogManager; }
-			virtual OpenViBE::Kernel::IVisualisationManager& getVisualisationManager(void) const { return this->getKernelContext().getVisualisationManager(); }
-
 			virtual OpenViBE::Kernel::IBox& getBox(void) const { return m_rBox; }
+
 			virtual OpenViBE::Kernel::IScenario& getScenario(void) const
 			{
 				this->getKernelContext().getLogManager() << OpenViBE::Kernel::LogLevel_Fatal << "Getting scenario from box listener context is not yet implemented\n"; // $$$

@@ -26,6 +26,7 @@ CBox::CBox(const IKernelContext& rKernelContext, CScenario& rOwnerScenario)
 	,m_oAlgorithmClassIdentifier(OV_UndefinedIdentifier)
 	,m_oProcessingUnitIdentifier(OV_UndefinedIdentifier)
 	,m_sName("unnamed")
+	,m_pSavedState(NULL)
 {
 	if(this->hasAttribute(OV_AttributeId_Box_Muted))
 	{
@@ -40,6 +41,11 @@ CBox::~CBox(void)
 		CBoxListenerContext l_oContext(this->getKernelContext(), *this, 0xffffffff);
 		m_pBoxListener->uninitialize(l_oContext);
 		m_pBoxAlgorithmDescriptor->releaseBoxListener(m_pBoxListener);
+	}
+
+	if(m_pSavedState)
+	{
+		delete m_pSavedState;
 	}
 }
 
@@ -1215,5 +1221,17 @@ boolean CBox::setMessageOutputName(
 
 	return true;
 }
+
+void CBox::storeState(void)
+{
+	m_pSavedState = new CBox(getKernelContext(), m_rOwnerScenario);
+	m_pSavedState->initializeFromExistingBox(*this);
+}
+
+void CBox::restoreState(void)
+{
+	this->initializeFromExistingBox(*m_pSavedState);
+}
+
 //
 

@@ -274,7 +274,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 	,m_pFileOverrideCheck(NULL)
 {
 	m_mSettingWidget.clear();
-	
+
 	m_pHelper = new CSettingCollectionHelper(m_rKernelContext, m_sGUISettingsFilename.toASCIIString());
 	if(m_rBox.getSettingCount())
 	{
@@ -282,6 +282,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 		gtk_builder_add_from_file(l_pBuilderInterfaceSetting, m_sGUIFilename.toASCIIString(), NULL);
 		gtk_builder_connect_signals(l_pBuilderInterfaceSetting, NULL);
 
+		m_rBox.addObserver(this);
 #if 1 // this approach fails to set a modal dialog
 
 
@@ -554,6 +555,8 @@ CBoxConfigurationDialog::~CBoxConfigurationDialog(void)
 		delete m_pButtonCB;
 		m_pButtonCB = NULL;
 	}
+
+	m_rBox.deleteObserver(this);
 }
 
 boolean CBoxConfigurationDialog::run(bool bMode)
@@ -724,6 +727,11 @@ boolean CBoxConfigurationDialog::update()
 		}
 	}
 	return true;
+}
+
+void CBoxConfigurationDialog::update(OpenViBE::CObservable &o, void* data)
+{
+	std::cout << "update" << std::endl;
 }
 
 const CIdentifier CBoxConfigurationDialog::getBoxID() const

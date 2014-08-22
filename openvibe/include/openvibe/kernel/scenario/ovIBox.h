@@ -2,6 +2,7 @@
 #define __OpenViBE_Kernel_Scenario_IBox_H__
 
 #include "ovIAttributable.h"
+#include "../../ovCObservable.h"
 
 namespace OpenViBE
 {
@@ -19,7 +20,7 @@ namespace OpenViBE
 		 * OpenViBE black box. It describes its identification values,
 		 * its inputs, its outputs and its settings.
 		 */
-		class OV_API IBox : public OpenViBE::Kernel::IAttributable
+		class OV_API IBox : public OpenViBE::Kernel::IAttributable, public OpenViBE::CObservable
 		{
 		public:
 
@@ -602,6 +603,10 @@ namespace OpenViBE
 					const OpenViBE::uint32 ui32OutputIndex,
 					const OpenViBE::CString& rName)=0;
 			//@}
+
+			virtual void storeState(void)=0;
+
+			virtual void restoreState(void)=0;
 
 			_IsDerivedFromClass_(OpenViBE::Kernel::IAttributable, OV_ClassId_Kernel_Scenario_Box)
 		};

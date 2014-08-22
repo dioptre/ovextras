@@ -175,6 +175,10 @@ namespace OpenViBE
 			virtual OpenViBE::boolean acceptVisitor(
 				OpenViBE::IObjectVisitor& rObjectVisitor);
 
+			virtual void storeState(void);
+
+			virtual void restoreState(void);
+
 			_IsDerivedFromClass_Final_(OpenViBE::Kernel::TAttributable < OpenViBE::Kernel::TKernelObject < OpenViBE::Kernel::IBox > >, OVK_ClassId_Kernel_Scenario_Box)
 
 		protected:
@@ -279,6 +283,8 @@ namespace OpenViBE
 			//only the name of the in/output are stored for message socket
 			std::vector<CMessageInput> m_vMessageInput;
 			std::vector<CMessageOutput> m_vMessageOutput;
+
+			OpenViBE::Kernel::CBox *m_pSavedState;
 		};
 	};
 };
