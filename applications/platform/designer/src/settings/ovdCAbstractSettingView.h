@@ -10,7 +10,7 @@ namespace OpenViBEDesigner
 		class CAbstractSettingView{
 
 		public:
-			virtual OpenViBE::CString OpenVigetSettingWidgetName(void);
+			virtual OpenViBE::CString OpenWigetSettingWidgetName(void);
 
 			virtual void getValue(OpenViBE::CString &rValue) const = 0;
 			virtual void setValue(const OpenViBE::CString &rValue) = 0;

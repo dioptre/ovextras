@@ -4,7 +4,7 @@ using namespace OpenViBE;
 using namespace OpenViBEDesigner;
 using namespace OpenViBEDesigner::Setting;
 
-OpenViBE::CString CAbstractSettingView::OpenVigetSettingWidgetName(void)
+OpenViBE::CString CAbstractSettingView::OpenWigetSettingWidgetName(void)
 {
 	return m_sSettingWidgetName;
 }
