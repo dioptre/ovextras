@@ -10,10 +10,15 @@ namespace OpenViBEDesigner
 		class CAbstractSettingView{
 
 		public:
-			virtual OpenViBE::CString OpenWigetSettingWidgetName(void);
+			virtual OpenViBE::CString getSettingWidgetName(void);
+
+			virtual ~CAbstractSettingView(void);
 
 			virtual void getValue(OpenViBE::CString &rValue) const = 0;
 			virtual void setValue(const OpenViBE::CString &rValue) = 0;
+
+			virtual ::GtkWidget* getNameWidget(void);
+			virtual ::GtkWidget* getEntryWidget(void);
 
 		protected:
 			CAbstractSettingView(OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index);
@@ -22,12 +27,17 @@ namespace OpenViBEDesigner
 
 			virtual OpenViBE::uint32 getSettingsIndex(void);
 
-			virtual void setSettingWidgetName(OpenViBE::CString & rWidgetName);
+			virtual void setSettingWidgetName(const OpenViBE::CString & rWidgetName);
+
+			virtual void setNameWidget(::GtkWidget* pWidget);
+			virtual void setEntryWidget(::GtkWidget* pWidget);
 
 		private:
 			OpenViBE::Kernel::IBox& m_rBox;
 			OpenViBE::uint32 m_ui32Index;
 			OpenViBE::CString m_sSettingWidgetName;
+			::GtkWidget* m_pNameWidget;
+			::GtkWidget* m_pEntryWidget;
 		};
 	}
 

@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include "ovdCSettingCollectionHelper.h"
+#include "settings/ovdCAbstractSettingView.h"
 
 namespace OpenViBEDesigner
 {
@@ -56,6 +57,8 @@ namespace OpenViBEDesigner
 		::GtkWidget* m_pSettingOverrideValue;
 		bool m_bIsScenarioRunning; // true if the scenario is running, false otherwise
 		std::map< OpenViBE::CString, ::GtkWidget* > m_mSettingWidget;
+
+		std::map< OpenViBE::CString, Setting::CAbstractSettingView* > m_mSettingViewMap;//Temporary need to be remove
 		CSettingCollectionHelper* m_pHelper;
 		SButtonCB* m_pButtonCB;
 		::GtkCheckButton* m_pFileOverrideCheck;

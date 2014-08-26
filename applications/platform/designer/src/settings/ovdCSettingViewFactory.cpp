@@ -1,18 +1,28 @@
 #include "ovdCSettingViewFactory.h"
 
+#include "ovdCBooleanSettingView.h"
+
 using namespace OpenViBEDesigner;
 using namespace OpenViBE;
 using namespace OpenViBEDesigner::Setting;
 
+CSettingViewFactory::CSettingViewFactory(const CString &rBuilderName): m_sBuilderName(rBuilderName)
+{
+	m_pBuilder = gtk_builder_new();
+	gtk_builder_add_from_file(m_pBuilder, rBuilderName.toASCIIString(), NULL);
+	gtk_builder_connect_signals(m_pBuilder, NULL);
+
+}
+
 CAbstractSettingView *CSettingViewFactory::getSettingView(Kernel::IBox &rBox,
 														  uint32 ui32Index,
-														  Kernel::IKernelContext& kernelContext)
+														  const Kernel::IKernelContext& kernelContext)
 {
 	CIdentifier l_oSettingType;
 	rBox.getSettingType(ui32Index, l_oSettingType);
 
 	if(l_oSettingType==OV_TypeId_Boolean)
-		return NULL;
+		return new CBooleanSettingView(rBox, ui32Index, m_sBuilderName);
 	if(l_oSettingType==OV_TypeId_Integer)
 		return NULL;
 	if(l_oSettingType==OV_TypeId_Float)
