@@ -4,11 +4,12 @@ def setUp(self):
     self.terminal = App.open("xterm -e " + ov_binany_path +"/openvibe-designer.sh --no-session-management")
     while not self.terminal.window():
         wait(1)
-    wait("StartInterface.png",10)
+    wait("StartInterface.png",100)
 
 def test_boxSetAttributes(self):
     click("SearchBoxBar.png")
     paste("sinus")
+    wait(3)
     dragDrop("Sinusoscilla-1.png",Pattern("DesignerDataGenOpen.png").similar(0.40).targetOffset(-233,-163))
     rightClick("SinusOscillatorBoxSelected.png")
     click(Pattern("contextualBoxMenu.png").targetOffset(-51,16))
