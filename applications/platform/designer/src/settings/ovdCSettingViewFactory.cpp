@@ -1,6 +1,7 @@
 #include "ovdCSettingViewFactory.h"
 
 #include "ovdCBooleanSettingView.h"
+#include "ovdCIntegerSettingView.h"
 
 using namespace OpenViBEDesigner;
 using namespace OpenViBE;
@@ -16,7 +17,7 @@ CSettingViewFactory::CSettingViewFactory(const CString &rBuilderName): m_sBuilde
 
 CAbstractSettingView *CSettingViewFactory::getSettingView(Kernel::IBox &rBox,
 														  uint32 ui32Index,
-														  const Kernel::IKernelContext& kernelContext)
+														  const Kernel::IKernelContext& rKernelContext)
 {
 	CIdentifier l_oSettingType;
 	rBox.getSettingType(ui32Index, l_oSettingType);
@@ -24,7 +25,7 @@ CAbstractSettingView *CSettingViewFactory::getSettingView(Kernel::IBox &rBox,
 	if(l_oSettingType==OV_TypeId_Boolean)
 		return new CBooleanSettingView(rBox, ui32Index, m_sBuilderName);
 	if(l_oSettingType==OV_TypeId_Integer)
-		return NULL;
+		return new CIntegerSettingView(rBox, ui32Index, m_sBuilderName, rKernelContext);
 	if(l_oSettingType==OV_TypeId_Float)
 		return NULL;
 	if(l_oSettingType==OV_TypeId_String)
@@ -37,9 +38,9 @@ CAbstractSettingView *CSettingViewFactory::getSettingView(Kernel::IBox &rBox,
 		return NULL;
 	if(l_oSettingType==OV_TypeId_ColorGradient)
 		return NULL;
-	if(kernelContext.getTypeManager().isEnumeration(l_oSettingType))
+	if(rKernelContext.getTypeManager().isEnumeration(l_oSettingType))
 		return NULL;
-	if(kernelContext.getTypeManager().isBitMask(l_oSettingType))
+	if(rKernelContext.getTypeManager().isBitMask(l_oSettingType))
 		return NULL;
 
 

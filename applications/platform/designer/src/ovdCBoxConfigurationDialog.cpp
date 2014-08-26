@@ -358,7 +358,8 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 			//otherwise, we take only the modifiable ones
 			if( (!m_bIsScenarioRunning) || (m_bIsScenarioRunning && l_bSettingModifiable) )
 			{
-				if(l_oSettingType != OV_TypeId_Boolean)
+				Setting::CAbstractSettingView* l_oView = l_oSettingFactory.getSettingView(m_rBox, i, rKernelContext);
+				if(l_oView == NULL)
 				{
 
 					::GtkBuilder* l_pBuilderInterfaceDummy=gtk_builder_new(); // glade_xml_new(m_sGUIFilename.toASCIIString(), "settings_collection-dummy_setting_content", NULL);
@@ -470,10 +471,9 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 					m_pHelper->setValue(l_oSettingType, l_pSettingWidget, l_sSettingValue);
 					gtk_label_set_text(GTK_LABEL(l_pSettingName), l_sSettingName);
 				}
-
-				if(l_oSettingType == OV_TypeId_Boolean)
+				else
 				{
-					Setting::CAbstractSettingView* l_oView = l_oSettingFactory.getSettingView(m_rBox, i, rKernelContext);
+
 					std::cout << "Here " << l_sSettingName << " " << j << std::endl;
 					gtk_table_attach(l_pSettingTable, l_oView->getNameWidget() ,   0, 1, j, j+1, ::GtkAttachOptions(GTK_FILL), ::GtkAttachOptions(GTK_FILL), 0, 0);
 					gtk_table_attach(l_pSettingTable, l_oView->getEntryWidget(),   1, 4, j, j+1, ::GtkAttachOptions(GTK_SHRINK|GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
