@@ -21,7 +21,7 @@ namespace OpenViBEDesigner
 			virtual ::GtkWidget* getEntryWidget(void);
 
 		protected:
-			CAbstractSettingView(OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index);
+			CAbstractSettingView(OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index, OpenViBE::CString &rBuilderName);
 
 			virtual OpenViBE::Kernel::IBox& getBox(void);
 
@@ -32,12 +32,21 @@ namespace OpenViBEDesigner
 			virtual void setNameWidget(::GtkWidget* pWidget);
 			virtual void setEntryWidget(::GtkWidget* pWidget);
 
+			virtual void generateNameWidget(void);
+			virtual ::GtkWidget* generateEntryWidget(void);
+			virtual void initializeValue();
+
+			virtual void extractWidget(::GtkWidget* pWidget, std::vector< ::GtkWidget * > &rVector);
+
 		private:
 			OpenViBE::Kernel::IBox& m_rBox;
 			OpenViBE::uint32 m_ui32Index;
 			OpenViBE::CString m_sSettingWidgetName;
 			::GtkWidget* m_pNameWidget;
 			::GtkWidget* m_pEntryWidget;
+
+			//If we don't store the builder, the setting name will be free when we'll unref the builder
+			::GtkBuilder *m_pBuilder;
 		};
 	}
 
