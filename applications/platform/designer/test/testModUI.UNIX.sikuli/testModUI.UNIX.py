@@ -9,9 +9,10 @@ def setUp(self):
     wait("play.png",100)
     
 def testChangeParametersOnline(self):
+    hover("play.png")
     click("play.png")
-    wait("InitialStateSignalDisplay.png",100)
-    dragDrop(Pattern("InitialStateSignalDisplay.png").targetOffset(-42,-161), Pattern("InitialStateSignalDisplay.png").targetOffset(-89,194))
+    wait(Pattern("InitialStateSignalDisplay.png").similar(0.55),100)
+    dragDrop(Pattern("InitialStateSignalDisplay.png").similar(0.57).targetOffset(-42,-161), Pattern("InitialStateSignalDisplay.png").similar(0.57).targetOffset(-89,194))
     wait(Pattern("Config.png").similar(0.90).targetOffset(43,0),2)
     click(Pattern("Config.png").similar(0.90).targetOffset(43,0))
     wait(Pattern("Filtertype.png").targetOffset(210,0),2)
