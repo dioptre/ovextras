@@ -23,7 +23,6 @@ namespace OpenViBEDesigner
 
 
 		private:
-			::GtkTable* m_pTable;
 			::GtkEntry* m_pEntry;
 
 			const OpenViBE::Kernel::IKernelContext& m_rKernelContext;

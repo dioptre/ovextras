@@ -3,6 +3,7 @@
 #include "ovdCBooleanSettingView.h"
 #include "ovdCIntegerSettingView.h"
 #include "ovdCFloatSettingView.h"
+#include "ovdCStringSettingView.h"
 
 using namespace OpenViBEDesigner;
 using namespace OpenViBE;
@@ -30,7 +31,7 @@ CAbstractSettingView *CSettingViewFactory::getSettingView(Kernel::IBox &rBox,
 	if(l_oSettingType==OV_TypeId_Float)
 		return new CFloatSettingView(rBox, ui32Index, m_sBuilderName, rKernelContext);
 	if(l_oSettingType==OV_TypeId_String)
-		return NULL;
+		return new CStringSettingView(rBox, ui32Index, m_sBuilderName);
 	if(l_oSettingType==OV_TypeId_Filename)
 		return NULL;
 	if(l_oSettingType==OV_TypeId_Script)

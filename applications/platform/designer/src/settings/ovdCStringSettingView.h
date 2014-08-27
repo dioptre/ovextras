@@ -1,5 +1,5 @@
-#ifndef OVDCBOOLEANSETTINGVIEW_H
-#define OVDCBOOLEANSETTINGVIEW_H
+#ifndef OVDCSTRINGSETTINGVIEW_H
+#define OVDCSTRINGSETTINGVIEW_H
 
 #include "../ovd_base.h"
 #include "ovdCAbstractSettingView.h"
@@ -8,10 +8,10 @@ namespace OpenViBEDesigner
 {
 	namespace Setting
 	{
-		class CBooleanSettingView : public CAbstractSettingView
+		class CStringSettingView : public CAbstractSettingView
 		{
 		public:
-			CBooleanSettingView(OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index, OpenViBE::CString &rBuilderName);
+			CStringSettingView(OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index, OpenViBE::CString &rBuilderName);
 
 			virtual void getValue(OpenViBE::CString &rValue) const;
 			virtual void setValue(const OpenViBE::CString &rValue);
@@ -20,12 +20,10 @@ namespace OpenViBEDesigner
 
 
 		private:
-			::GtkToggleButton* m_pToggle;
 			::GtkEntry* m_pEntry;
 		};
 	}
 
 }
 
-
-#endif // OVDCBOOLEANSETTINGVIEW_H
+#endif // OVDCSTRINGSETTINGVIEW_H
