@@ -6,6 +6,7 @@
 #include "ovdCStringSettingView.h"
 #include "ovdCFilenameSettingView.h"
 #include "ovdCScriptSettingView.h"
+#include "ovdCColorSettingView.h"
 
 using namespace OpenViBEDesigner;
 using namespace OpenViBE;
@@ -39,7 +40,7 @@ CAbstractSettingView *CSettingViewFactory::getSettingView(Kernel::IBox &rBox,
 	if(l_oSettingType==OV_TypeId_Script)
 		return new CScriptSettingView(rBox, ui32Index, m_sBuilderName, rKernelContext);
 	if(l_oSettingType==OV_TypeId_Color)
-		return NULL;
+		return new CColorSettingView(rBox, ui32Index, m_sBuilderName, rKernelContext);
 	if(l_oSettingType==OV_TypeId_ColorGradient)
 		return NULL;
 	if(rKernelContext.getTypeManager().isEnumeration(l_oSettingType))
