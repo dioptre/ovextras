@@ -9,6 +9,7 @@
 #include "ovdCColorSettingView.h"
 #include "ovdCColorGradientSettingView.h"
 #include "ovdCEnumerationSettingView.h"
+#include "ovdCBitMaskSettingView.h"
 
 using namespace OpenViBEDesigner;
 using namespace OpenViBE;
@@ -47,9 +48,8 @@ CAbstractSettingView *CSettingViewFactory::getSettingView(Kernel::IBox &rBox,
 		return new CColorGradientSettingView(rBox, ui32Index, m_sBuilderName, rKernelContext);
 	if(rKernelContext.getTypeManager().isEnumeration(l_oSettingType))
 		return new CEnumerationSettingView(rBox, ui32Index, m_sBuilderName, rKernelContext, l_oSettingType);
-		//return NULL;
 	if(rKernelContext.getTypeManager().isBitMask(l_oSettingType))
-		return NULL;
+		return new CBitMaskSettingView(rBox, ui32Index, m_sBuilderName, rKernelContext, l_oSettingType);
 
 
 	return NULL;
