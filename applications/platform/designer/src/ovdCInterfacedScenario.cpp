@@ -1064,9 +1064,51 @@ uint32 CInterfacedScenario::pickInterfacedObject(int x, int y)
 	int l_iMaxY;
 	uint32 l_ui32InterfacedObjectId=0xffffffff;
 	gdk_drawable_get_size(GDK_DRAWABLE(m_pStencilBuffer), &l_iMaxX, &l_iMaxY);
+
+	//to congigure : conf manager token?
+	int xSizeOfSelection = 50;
+	int ySizeOfSelection = 50;
+
+	//we want a zone around the click
+	//gdk_pixbuf_get_from_drawable(NULL, GDK_DRAWABLE(m_pStencilBuffer), NULL, x, y, 0, 0, xSizeOfSelection, ySizeOfSelection);
+	//return a pixbuf origin (x,y) of the required size
+	//	(x,y) - - -|
+	//	  |	       |
+	//    |		   |
+	//    | _ _ _ _|
+	//we want a zone centered around the click
+	//thus origin of the zone is x-xSizeOfSelection/2, y-ySizeOfSelection/2
+	x-=xSizeOfSelection/2;
+	y-=ySizeOfSelection/2;
+
+	//we have to consider limit case near the y=0 and x=0 borders
+	if(x<0)
+	{
+		xSizeOfSelection+=x; // we decrease xSizeOfSelection (x is negative)
+		x=0;//origin of the zone is x=0
+
+	}
+	if(y<0)
+	{
+		ySizeOfSelection+=y; // we decrease ySizeOfSelection (y is negative)
+		y=0;//origin of the zone is y=0
+	}
+
+
 	if(x>=0 && y>=0 && x<l_iMaxX && y<l_iMaxY)
 	{
-		::GdkPixbuf* l_pPixbuf=gdk_pixbuf_get_from_drawable(NULL, GDK_DRAWABLE(m_pStencilBuffer), NULL, x, y, 0, 0, 1, 1);
+		//to avoid going out of pixbuff bounds
+		//we want
+		xSizeOfSelection = (xSizeOfSelection+x>l_iMaxX)?l_iMaxX-x:xSizeOfSelection;
+		ySizeOfSelection = (ySizeOfSelection+y>l_iMaxY)?l_iMaxY-y:ySizeOfSelection;
+
+		m_rKernelContext.getLogManager() << LogLevel_Debug << x << " " << y
+										 << " for " << xSizeOfSelection << " by " << ySizeOfSelection <<  "\n";
+
+
+
+		//::GdkPixbuf* l_pPixbuf=gdk_pixbuf_get_from_drawable(NULL, GDK_DRAWABLE(m_pStencilBuffer), NULL, x, y, 0, 0, 1, 1);
+		::GdkPixbuf* l_pPixbuf=gdk_pixbuf_get_from_drawable(NULL, GDK_DRAWABLE(m_pStencilBuffer), NULL, x, y, 0, 0, xSizeOfSelection, ySizeOfSelection);
 		if(!l_pPixbuf)
 		{
 			m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "Could not get pixbuf from stencil buffer - couldn't pick object... this should never happen !\n";
@@ -1080,10 +1122,52 @@ uint32 CInterfacedScenario::pickInterfacedObject(int x, int y)
 			return 0xffffffff;
 		}
 
+
+		//here comes the tricky part
+		//we have to check xSizeOfSelection*ySizeOfSelection pixels. If we start from 0 a go incrementaly, we will begin to check the upper left pixel
+		//in case there are several objects in the pixbuf, we want the one closer to the center (the click) so we have to go through the pixels in a spiral fashion
+		//see http://stackoverflow.com/questions/398299/looping-in-a-spiral slightly modified here
+		//first we made the change of variable x=x+X/2 and y=y+Y/2 because our table start from (0.0) and we changed some variables name
+
+		//get some infos from the pixbuf
+		int rowstride = gdk_pixbuf_get_rowstride (l_pPixbuf);
+		int n_channels = gdk_pixbuf_get_n_channels (l_pPixbuf);
 		l_ui32InterfacedObjectId=0;
-		l_ui32InterfacedObjectId+=(l_pPixels[0]<<16);
-		l_ui32InterfacedObjectId+=(l_pPixels[1]<<8);
-		l_ui32InterfacedObjectId+=(l_pPixels[2]);
+
+		int px,py;//coordinates of the pixels we are currently looking at in the pixbuf
+		px=xSizeOfSelection/2;
+		py=ySizeOfSelection/2;
+		int dx,dy;
+		dx=0;
+		dy=-1;
+		int t = std::max(xSizeOfSelection,ySizeOfSelection);
+		int maxI = t*t;
+		uint32 l_ui32Counter=0;
+
+		while((l_ui32InterfacedObjectId==0)&&(l_ui32Counter<maxI))
+		{
+			if((0<=px)&&(px<=xSizeOfSelection)&&(0<=py)&&(py<=ySizeOfSelection))
+			{
+				//see gdk pixbuf strucutre documentation for clarification as to why we go through the pixbuf that way
+				guchar* p = l_pPixels + px*n_channels + py*rowstride;
+				l_ui32InterfacedObjectId+=(p[0]<<16);
+				l_ui32InterfacedObjectId+=(p[1]<<8);
+				l_ui32InterfacedObjectId+=(p[2]);
+			}
+			if((px-xSizeOfSelection/2==py-ySizeOfSelection/2)||((px<xSizeOfSelection/2)&&(px-xSizeOfSelection/2==-py+ySizeOfSelection/2))||((px>xSizeOfSelection/2)&&(px-xSizeOfSelection/2==1-py+ySizeOfSelection/2)))
+			{
+				t = dx;
+				dx = -dy;
+				dy=t;
+			}
+			px+=dx;
+			py+=dy;
+			l_ui32Counter++;
+		}
+
+		m_rKernelContext.getLogManager() << LogLevel_Debug << "Found " << l_ui32InterfacedObjectId << " on pixel  " << l_ui32Counter << "/"  << xSizeOfSelection*ySizeOfSelection << " \n";
+
+
 		g_object_unref(l_pPixbuf);
 	}
 	return l_ui32InterfacedObjectId;
