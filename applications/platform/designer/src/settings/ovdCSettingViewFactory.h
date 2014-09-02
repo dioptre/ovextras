@@ -10,15 +10,16 @@ namespace OpenViBEDesigner
 	{
 		class CSettingViewFactory{
 		public:
-			CSettingViewFactory(const OpenViBE::CString & rBuilderName);
+			CSettingViewFactory(const OpenViBE::CString & rBuilderName,
+								const OpenViBE::Kernel::IKernelContext& rKernelContext);
 
 			CAbstractSettingView* getSettingView(OpenViBE::Kernel::IBox &rBox,
-												 OpenViBE::uint32 ui32Index,
-												 const OpenViBE::Kernel::IKernelContext& rKernelContext);
+												 OpenViBE::uint32 ui32Index);
 
 		private:
 			::GtkBuilder* m_pBuilder;
 			OpenViBE::CString m_sBuilderName;
+			const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
 		};
 	}
 

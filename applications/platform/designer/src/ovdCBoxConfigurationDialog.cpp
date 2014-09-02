@@ -272,11 +272,10 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 	,m_pWidget(NULL)
 	,m_pWidgetToReturn(NULL)
 	,m_bIsScenarioRunning(bMode)
+	,m_oSettingFactory(m_sGUISettingsFilename.toASCIIString(), rKernelContext)
 	,m_pButtonCB(NULL)
 	,m_pFileOverrideCheck(NULL)
 {
-	m_mSettingWidget.clear();
-	Setting::CSettingViewFactory l_oSettingFactory(m_sGUISettingsFilename.toASCIIString());
 	m_pHelper = new CSettingCollectionHelper(m_rKernelContext, m_sGUISettingsFilename.toASCIIString());
 
 	if(m_rBox.getSettingCount())
@@ -313,177 +312,14 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 #endif
 		::GtkScrolledWindow * l_pScrolledWindow=GTK_SCROLLED_WINDOW(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-scrolledwindow"));
 		::GtkViewport * l_pViewPort=GTK_VIEWPORT(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-viewport"));
-		::GtkTable* l_pSettingTable=GTK_TABLE(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-table"));
+		m_pSettingsTable=GTK_TABLE(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-table"));
 		::GtkContainer* l_pFileOverrideContainer=GTK_CONTAINER(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-hbox_filename_override"));
 		::GtkButton* l_pButtonLoad=GTK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-button_load_current_from_file"));
 		::GtkButton* l_pButtonSave=GTK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-button_save_current_to_file"));
 		m_pFileOverrideCheck=GTK_CHECK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-checkbutton_filename_override"));
 		g_object_unref(l_pBuilderInterfaceSetting);
 
-		// count the number of modifiable settings
-		uint32 l_ui32TableSize = 0;
-		for(uint32 i=0; i<m_rBox.getSettingCount(); i++)
-		{
-			if (m_bIsScenarioRunning)
-			{
-				boolean l_IsMod = false;
-				m_rBox.getSettingMod(i, l_IsMod);
-				if (l_IsMod)
-				{
-					l_ui32TableSize++;
-				}
-			}
-			else
-			{
-				l_ui32TableSize++;
-			}
-		}
-		gtk_table_resize(l_pSettingTable, l_ui32TableSize+2, 4);
-
-		// Iterate over box settings, generate corresponding gtk widgets. If the scenario is running, we are making a
-		// 'modifiable settings' dialog and use a subset of widgets with a slightly different layout and buttons.
-		for(uint32 i=0,j=0; i<m_rBox.getSettingCount(); i++)
-		{
-			CString l_sSettingName;
-			CString l_sSettingValue;
-			boolean l_bSettingModifiable;
-			CIdentifier l_oSettingType;
-
-			m_rBox.getSettingName(i, l_sSettingName);
-			m_rBox.getSettingValue(i, l_sSettingValue);
-			m_rBox.getSettingType(i, l_oSettingType);
-			m_rBox.getSettingMod(i, l_bSettingModifiable);
-
-			//if the scenario is not running we take all the settings
-			//otherwise, we take only the modifiable ones
-			if( (!m_bIsScenarioRunning) || (m_bIsScenarioRunning && l_bSettingModifiable) )
-			{
-				Setting::CAbstractSettingView* l_oView = l_oSettingFactory.getSettingView(m_rBox, i, rKernelContext);
-				if(l_oView == NULL)
-				{
-
-					::GtkBuilder* l_pBuilderInterfaceDummy=gtk_builder_new(); // glade_xml_new(m_sGUIFilename.toASCIIString(), "settings_collection-dummy_setting_content", NULL);
-					gtk_builder_add_from_file(l_pBuilderInterfaceDummy, m_sGUISettingsFilename.toASCIIString(), NULL);
-					gtk_builder_connect_signals(l_pBuilderInterfaceDummy, NULL);
-
-					::GtkWidget* l_pSettingName=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceDummy, "settings_collection-label_setting_name"));
-					::GtkWidget* l_pSettingRevert=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceDummy, "settings_collection-button_setting_revert"));
-					::GtkWidget* l_pSettingDefault=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceDummy, "settings_collection-button_setting_default"));
-
-					string l_sWidgetName=m_pHelper->getSettingWidgetName(l_oSettingType).toASCIIString();
-					::GtkBuilder* l_pBuilderInterfaceSettingCollection=gtk_builder_new(); // glade_xml_new(m_sGUIFilename.toASCIIString(), l_sWidgetName.c_str(), NULL);
-					gtk_builder_add_from_file(l_pBuilderInterfaceSettingCollection, m_sGUISettingsFilename.toASCIIString(), NULL);
-					gtk_builder_connect_signals(l_pBuilderInterfaceSettingCollection, NULL);
-
-					::GtkWidget* l_pSettingWidget=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceSettingCollection, l_sWidgetName.c_str()));
-
-					gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(l_pSettingName)), l_pSettingName);
-					gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(l_pSettingWidget)), l_pSettingWidget);
-					//we do not need those buttons if the scenario is running
-					if (!m_bIsScenarioRunning)
-					{
-						gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(l_pSettingRevert)), l_pSettingRevert);
-						gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(l_pSettingDefault)), l_pSettingDefault);
-					}
-
-					gtk_table_attach(l_pSettingTable, l_pSettingName,    0, 1, j, j+1, ::GtkAttachOptions(GTK_FILL),            ::GtkAttachOptions(GTK_FILL),            0, 0);
-					//
-
-					if (!m_bIsScenarioRunning)
-					{
-						gtk_table_attach(l_pSettingTable, l_pSettingWidget,   1, 2, j, j+1, ::GtkAttachOptions(GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_FILL|GTK_EXPAND), 0, 0);
-						gtk_table_attach(l_pSettingTable, l_pSettingDefault, 2, 3, j, j+1, ::GtkAttachOptions(GTK_SHRINK),          ::GtkAttachOptions(GTK_SHRINK),          0, 0);
-						gtk_table_attach(l_pSettingTable, l_pSettingRevert,  3, 4, j, j+1, ::GtkAttachOptions(GTK_SHRINK),          ::GtkAttachOptions(GTK_SHRINK),          0, 0);
-					}
-					else//we retrieve the GtkEntry (it take most of the place in the widget) and squeeze it
-					{
-						bool l_bSqueezEntry = false;
-						std::string l_sEntryWidgetName;//name of the gtk entry depends of the setting type
-
-						if((l_oSettingType==OV_TypeId_Integer)||(l_oSettingType==OV_TypeId_Float))
-						{
-							//the GtkEntry takes too much place so this will shrink its size
-							//get the widget name, and modify it to get the entry name
-							l_sEntryWidgetName = std::string(l_sWidgetName.c_str());
-							l_sEntryWidgetName.append("_string");
-							l_sEntryWidgetName.replace(l_sEntryWidgetName.find("hbox"),4, "entry");
-							l_bSqueezEntry=true;
-						}
-						else if(l_oSettingType==OV_TypeId_String)
-						{
-							l_sEntryWidgetName = std::string("settings_collection-entry_setting_string");
-							l_bSqueezEntry=true;
-						}
-						else if(l_oSettingType==OV_TypeId_Filename)
-						{
-							l_sEntryWidgetName = std::string("settings_collection-entry_setting_filename_string");
-							l_bSqueezEntry=true;
-						}
-						else if(l_oSettingType==OV_TypeId_Boolean)
-						{
-							l_sEntryWidgetName = std::string("settings_collection-entry_setting_boolean");
-							l_bSqueezEntry=true;
-						}
-						else if(l_oSettingType==OV_TypeId_Color)
-						{
-							l_sEntryWidgetName = std::string("settings_collection-hbox_setting_color_string");
-							l_bSqueezEntry=true;
-						}
-						else if(l_oSettingType==OV_TypeId_ColorGradient)
-						{
-							l_sEntryWidgetName = std::string("settings_collection-hbox_setting_color_gradient_string");
-							l_bSqueezEntry=true;
-						}
-						else if(l_oSettingType==OV_TypeId_Script)
-						{
-							l_sEntryWidgetName = std::string("settings_collection-entry_setting_script_string");
-							l_bSqueezEntry=true;
-						}
-
-						//enumeration are to be treated separately
-						if(std::string("settings_collection-comboboxentry_setting_enumeration").compare(l_sWidgetName)==0)
-						{
-							//enumeration settings comes in a GtkComboBoxEntry, the entry is not directly accessible
-							//we have to retrieve ot from the GtkComboBoxEntry
-							::GtkWidget* l_pWEntry=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceSettingCollection, l_sWidgetName.c_str()));
-							gtk_entry_set_width_chars((GtkEntry*)gtk_bin_get_child((GtkBin*)l_pWEntry), 7);
-						}
-
-
-						if(l_bSqueezEntry)
-						{
-							// get the entry
-							::GtkWidget* l_pWEntry=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceSettingCollection, l_sEntryWidgetName.c_str()));
-							::GtkEntry* l_pEntry = (GtkEntry*)l_pWEntry;
-							//squeeze
-							gtk_entry_set_width_chars(l_pEntry, 7);
-						}
-
-						gtk_table_attach(l_pSettingTable, l_pSettingWidget,   1, 4, j, j+1, ::GtkAttachOptions(GTK_SHRINK|GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
-
-					}
-					g_object_unref(l_pBuilderInterfaceDummy);
-					g_object_unref(l_pBuilderInterfaceSettingCollection);
-
-					DEBUG_PRINT(cout << "Add setting " << l_sSettingName << " == " << l_sSettingValue << "\n";)
-
-					m_mSettingWidget[l_sSettingName] = l_pSettingWidget;
-					m_pHelper->setValue(l_oSettingType, l_pSettingWidget, l_sSettingValue);
-					gtk_label_set_text(GTK_LABEL(l_pSettingName), l_sSettingName);
-				}
-				else
-				{
-
-					std::cout << "Here " << l_sSettingName << " " << j << std::endl;
-					gtk_table_attach(l_pSettingTable, l_oView->getNameWidget() ,   0, 1, j, j+1, ::GtkAttachOptions(GTK_FILL), ::GtkAttachOptions(GTK_FILL), 0, 0);
-					gtk_table_attach(l_pSettingTable, l_oView->getEntryWidget(),   1, 4, j, j+1, ::GtkAttachOptions(GTK_SHRINK|GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
-
-					m_mSettingViewMap[l_sSettingName] = l_oView;
-					//++j;
-				}
-				j++;
-			}
-		}
+		generateSettingsTable();
 	
 		// Resize the window to fit as much of the table as possible, but keep the max size
 		// limited so it doesn't get outside the screen. For safety, we cap to 800x600
@@ -518,7 +354,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 			DEBUG_PRINT(cout << "Creating CB\n";)
 			m_pButtonCB = new SButtonCB(m_rKernelContext, m_mSettingWidget, *m_pHelper, m_pSettingOverrideValue, m_rBox);
 
-			g_signal_connect(G_OBJECT(m_pFileOverrideCheck), "toggled", G_CALLBACK(on_file_override_check_toggled), GTK_WIDGET(l_pSettingTable));
+			g_signal_connect(G_OBJECT(m_pFileOverrideCheck), "toggled", G_CALLBACK(on_file_override_check_toggled), GTK_WIDGET(m_pSettingsTable));
 			g_signal_connect(G_OBJECT(l_pButtonLoad),        "clicked", G_CALLBACK(on_button_load_clicked), m_pButtonCB);
 			g_signal_connect(G_OBJECT(l_pButtonSave),        "clicked", G_CALLBACK(on_button_save_clicked), m_pButtonCB);
 
@@ -526,7 +362,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 			{
 				m_pHelper->setValue(OV_TypeId_Filename, m_pSettingOverrideValue, m_rBox.getAttributeValue(OV_AttributeId_Box_SettingOverrideFilename));
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_pFileOverrideCheck), true);
-				gtk_widget_set_sensitive(GTK_WIDGET(l_pSettingTable), false);
+				gtk_widget_set_sensitive(GTK_WIDGET(m_pSettingsTable), false);
 			}
 			else
 			{
@@ -613,34 +449,22 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 			{
 				CString l_sSettingName;
 				CString l_sSettingValue;
-				CIdentifier l_oSettingType;
 
 				m_rBox.getSettingName(i, l_sSettingName);
 
-				if(m_mSettingWidget[l_sSettingName]) 
+				if(m_mSettingViewMap[l_sSettingName])
 				{
-					// If the GUI has the value, write it to the box
-					m_rBox.getSettingType(i, l_oSettingType);
-
-					DEBUG_PRINT(cout << "Set " << i << " " << l_sSettingName << " -> " << m_pHelper->getValue(l_oSettingType, m_mSettingWidget[l_sSettingName]) << "\n";)
-					m_rBox.setSettingValue(i, m_pHelper->getValue(l_oSettingType, m_mSettingWidget[l_sSettingName]));
+					CString l_sValue;
+					Setting::CAbstractSettingView *l_pView =  m_mSettingViewMap[l_sSettingName];
+					l_pView->getValue(l_sValue);
+					m_rBox.setSettingValue(i, l_sValue);
 				}
 				else
 				{
-
-					if(m_mSettingViewMap[l_sSettingName])
-					{
-						CString l_sValue;
-						Setting::CAbstractSettingView *l_pView =  m_mSettingViewMap[l_sSettingName];
-						l_pView->getValue(l_sValue);
-						m_rBox.setSettingValue(i, l_sValue);
-					}
-					else
-					{
-						DEBUG_PRINT(cout << "Setting no " << i << " '" << l_sSettingName << "' not found in the param map, this means new params were added after gtk constructed the param widget...\n";)
-						DEBUG_PRINT(m_rBox.getSettingValue(i, l_sSettingValue); cout << "Old value is " << l_sSettingValue << "\n";)
-					}
+					DEBUG_PRINT(cout << "Setting no " << i << " '" << l_sSettingName << "' not found in the param map, this means new params were added after gtk constructed the param widget...\n";)
+					DEBUG_PRINT(m_rBox.getSettingValue(i, l_sSettingValue); cout << "Old value is " << l_sSettingValue << "\n";)
 				}
+
 				if(m_rBox.getSettingCount() != l_ui32InitialSettingCount) 
 				{
 					// Do again, setting values changed the amount of entries
@@ -679,18 +503,12 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 			{
 				CString l_sSettingName;
 				CString l_sSettingValue;
-				CIdentifier l_oSettingType;
 
 				m_rBox.getSettingName(i, l_sSettingName);
-				m_rBox.getSettingType(i, l_oSettingType);
 				m_rBox.getSettingDefaultValue(i, l_sSettingValue);
-				if(m_mSettingWidget[l_sSettingName]){
-					m_pHelper->setValue(l_oSettingType, m_mSettingWidget[l_sSettingName], l_sSettingValue);
-				}
-				else{
-					m_mSettingViewMap[l_sSettingName]->setValue(l_sSettingValue);
-				}
+				m_mSettingViewMap[l_sSettingName]->setValue(l_sSettingValue);
 			}
+
 			m_pHelper->setValue(OV_TypeId_Filename, m_pSettingOverrideValue, "");
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_pFileOverrideCheck), false);
 			gtk_widget_set_sensitive(GTK_WIDGET(l_pSettingTable), true);
@@ -704,17 +522,11 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 			{
 				CString l_sSettingName;
 				CString l_sSettingValue;
-				CIdentifier l_oSettingType;
 
 				m_rBox.getSettingName(i, l_sSettingName);
-				m_rBox.getSettingType(i, l_oSettingType);
 				m_rBox.getSettingValue(i, l_sSettingValue);
-				if(m_mSettingWidget[l_sSettingName]){
-					m_pHelper->setValue(l_oSettingType, m_mSettingWidget[l_sSettingName], l_sSettingValue);
-				}
-				else{
-					m_mSettingViewMap[l_sSettingName]->setValue(l_sSettingValue);
-				}
+
+				m_mSettingViewMap[l_sSettingName]->setValue(l_sSettingValue);
 			}
 			if(m_rBox.hasAttribute(OV_AttributeId_Box_SettingOverrideFilename))
 			{
@@ -757,12 +569,12 @@ boolean CBoxConfigurationDialog::update()
 		if (l_bSettingModifiable) //if this setting is modifiable (this check should be redundant)
 		{
 			CString l_sSettingName;
-			CIdentifier l_oSettingType;
+			CString l_sSettingValue;
 
 			m_rBox.getSettingName(i, l_sSettingName);
-			m_rBox.getSettingType(i, l_oSettingType);
+			m_rBox.getSettingValue(i, l_sSettingValue);
 
-			m_rBox.setSettingValue(i, m_pHelper->getValue(l_oSettingType, m_mSettingWidget[l_sSettingName]));
+			m_mSettingViewMap[l_sSettingName]->setValue(l_sSettingValue);
 		}
 	}
 	return true;
@@ -771,6 +583,53 @@ boolean CBoxConfigurationDialog::update()
 void CBoxConfigurationDialog::update(OpenViBE::CObservable &o, void* data)
 {
 	std::cout << "update" << std::endl;
+}
+
+void CBoxConfigurationDialog::generateSettingsTable()
+{
+	// count the number of modifiable settings
+	uint32 l_ui32TableSize = 0;
+	for(uint32 i=0; i<m_rBox.getSettingCount(); i++)
+	{
+		if (m_bIsScenarioRunning)
+		{
+			boolean l_IsMod = false;
+			m_rBox.getSettingMod(i, l_IsMod);
+			if (l_IsMod)
+			{
+				l_ui32TableSize++;
+			}
+		}
+		else
+		{
+			l_ui32TableSize++;
+		}
+	}
+	gtk_table_resize(m_pSettingsTable, l_ui32TableSize+2, 4);
+
+	// Iterate over box settings, generate corresponding gtk widgets. If the scenario is running, we are making a
+	// 'modifiable settings' dialog and use a subset of widgets with a slightly different layout and buttons.
+	for(uint32 i=0,j=0; i<m_rBox.getSettingCount(); i++)
+	{
+		CString l_sSettingName;
+		boolean l_bSettingModifiable;
+
+		m_rBox.getSettingName(i, l_sSettingName);
+		m_rBox.getSettingMod(i, l_bSettingModifiable);
+
+		//if the scenario is not running we take all the settings
+		//otherwise, we take only the modifiable ones
+		if( (!m_bIsScenarioRunning) || (m_bIsScenarioRunning && l_bSettingModifiable) )
+		{
+			Setting::CAbstractSettingView* l_oView = m_oSettingFactory.getSettingView(m_rBox, i);
+
+			gtk_table_attach(m_pSettingsTable, l_oView->getNameWidget() ,   0, 1, j, j+1, ::GtkAttachOptions(GTK_FILL), ::GtkAttachOptions(GTK_FILL), 0, 0);
+			gtk_table_attach(m_pSettingsTable, l_oView->getEntryWidget(),   1, 4, j, j+1, ::GtkAttachOptions(GTK_SHRINK|GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
+
+			m_mSettingViewMap[l_sSettingName] = l_oView;
+			++j;
+		}
+	}
 }
 
 const CIdentifier CBoxConfigurationDialog::getBoxID() const

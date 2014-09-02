@@ -8,6 +8,7 @@
 #include <map>
 #include "ovdCSettingCollectionHelper.h"
 #include "settings/ovdCAbstractSettingView.h"
+#include "settings/ovdCSettingViewFactory.h"
 
 namespace OpenViBEDesigner
 {
@@ -46,6 +47,7 @@ namespace OpenViBEDesigner
 		virtual void update(OpenViBE::CObservable &o, void* data);
 
 	protected:
+		void generateSettingsTable(void);
 
 		const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
 		OpenViBE::Kernel::IBox& m_rBox;
@@ -55,9 +57,12 @@ namespace OpenViBEDesigner
 		::GtkWidget* m_pWidget;//widget with the dialog for configuration (used whole for box config when no scenario is running)
 		::GtkWidget* m_pWidgetToReturn; //child of m_oWidget, if we are running a scenario, this is the widget we need, the rest can be discarded
 		::GtkWidget* m_pSettingOverrideValue;
+
+		::GtkTable *m_pSettingsTable;
 		bool m_bIsScenarioRunning; // true if the scenario is running, false otherwise
 		std::map< OpenViBE::CString, ::GtkWidget* > m_mSettingWidget;
 
+		Setting::CSettingViewFactory m_oSettingFactory;
 		std::map< OpenViBE::CString, Setting::CAbstractSettingView* > m_mSettingViewMap;//Temporary need to be remove
 		CSettingCollectionHelper* m_pHelper;
 		SButtonCB* m_pButtonCB;

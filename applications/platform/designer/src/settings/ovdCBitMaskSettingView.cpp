@@ -54,7 +54,6 @@ void CBitMaskSettingView::getValue(OpenViBE::CString &rValue) const
 			l_sResult += gtk_button_get_label(GTK_BUTTON(m_vToggleButton[i]));
 		}
 	}
-	std::cout << l_sResult << std::endl;
 	rValue = CString(l_sResult.c_str());
 }
 
@@ -67,10 +66,8 @@ void CBitMaskSettingView::setValue(const OpenViBE::CString &rValue)
 	for(size_t i = 0 ; i < m_vToggleButton.size() ; ++i)
 	{
 		const gchar* l_sLabel = gtk_button_get_label(GTK_BUTTON(m_vToggleButton[i]));
-		std::cout << l_sLabel << std::endl;
 		if(l_sValue.find(l_sLabel)!=std::string::npos)
 		{
-			std::cout << "Find active" << std::endl;
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_vToggleButton[i]), true);
 		}
 		else
