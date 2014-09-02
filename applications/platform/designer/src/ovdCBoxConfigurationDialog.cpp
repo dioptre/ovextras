@@ -417,6 +417,7 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 {
 	DEBUG_PRINT(cout << "run dialog\n";)
 
+
 	boolean l_bModified=false;
 	if(m_pWidget==NULL)
 	{
@@ -424,6 +425,7 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 		return l_bModified;//return false is default case
 	}
 
+	m_rBox.storeState();
 	::GtkBuilder* l_pBuilderInterfaceSetting=gtk_builder_new(); // glade_xml_new(m_sGUIFilename.toASCIIString(), "box_configuration", NULL);
 	gtk_builder_add_from_file(l_pBuilderInterfaceSetting, m_sGUIFilename.toASCIIString(), NULL);
 
@@ -518,16 +520,18 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 		{
 			DEBUG_PRINT(cout << "Revert\n";)
 
-			for(uint32 i=0; i<m_rBox.getSettingCount(); i++)
-			{
-				CString l_sSettingName;
-				CString l_sSettingValue;
+//			for(uint32 i=0; i<m_rBox.getSettingCount(); i++)
+//			{
+//				CString l_sSettingName;
+//				CString l_sSettingValue;
 
-				m_rBox.getSettingName(i, l_sSettingName);
-				m_rBox.getSettingValue(i, l_sSettingValue);
+//				m_rBox.getSettingName(i, l_sSettingName);
+//				m_rBox.getSettingValue(i, l_sSettingValue);
 
-				m_mSettingViewMap[l_sSettingName]->setValue(l_sSettingValue);
-			}
+//				m_mSettingViewMap[l_sSettingName]->setValue(l_sSettingValue);
+//			}
+			m_rBox.restoreState();
+			//this->generateSettingsTable();
 			if(m_rBox.hasAttribute(OV_AttributeId_Box_SettingOverrideFilename))
 			{
 				m_pHelper->setValue(OV_TypeId_Filename, m_pSettingOverrideValue, m_rBox.getAttributeValue(OV_AttributeId_Box_SettingOverrideFilename));
@@ -582,7 +586,17 @@ boolean CBoxConfigurationDialog::update()
 
 void CBoxConfigurationDialog::update(OpenViBE::CObservable &o, void* data)
 {
-	std::cout << "update" << std::endl;
+	const BoxEventMessage *l_pEvent = static_cast< BoxEventMessage * > (data);
+
+	switch(l_pEvent->m_eType)
+	{
+		case SettingsAllChange:
+			generateSettingsTable();
+			break;
+
+		default:
+		std::cout << "Unhandle box event" << std::endl;
+	}
 }
 
 void CBoxConfigurationDialog::generateSettingsTable()

@@ -60,13 +60,11 @@ void CEnumerationSettingView::setValue(const OpenViBE::CString &rValue)
 		gtk_list_store_clear(l_pList);
 		for(i=0, it=l_mListEntries.begin(); it!=l_mListEntries.end(); it++, i++)
 		{
-			std::cout << it->first.toASCIIString() << std::endl;
 			gtk_list_store_append(l_pList, &l_oListIter);
 			gtk_list_store_set(l_pList, &l_oListIter, 0, it->first.toASCIIString(), -1);
 
 			if(l_ui64Value==it->second)
 			{
-				std::cout << "Selected " << i << std::endl;
 				gtk_combo_box_set_active(m_pComboBox, (gint)i);
 			}
 		}

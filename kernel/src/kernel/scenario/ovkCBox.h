@@ -159,6 +159,9 @@ namespace OpenViBE
 			virtual OpenViBE::boolean setSettingValue(
 				const OpenViBE::uint32 ui32SettingIndex,
 				const OpenViBE::CString& rValue);
+			virtual void notifySettingChange(BoxEventMessageType eType,
+					OpenViBE::int32 i32FirstIndex = -1,
+					OpenViBE::int32 i32SecondIndex = -1);
 
 			//*
 			virtual OpenViBE::boolean getSettingMod(

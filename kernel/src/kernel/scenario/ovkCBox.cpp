@@ -267,6 +267,8 @@ boolean CBox::initializeFromExistingBox(
 
 	this->notify(BoxModification_Initialized);
 
+	this->notifySettingChange(SettingsAllChange);
+
 	return true;
 }
 
@@ -739,6 +741,7 @@ boolean CBox::addSetting(const CString& sName,
 	this->getLogManager() << LogLevel_Debug << "Pushed '" << m_vSetting[l_i32InsertLocation].m_sName << "' : '" << m_vSetting[l_i32InsertLocation].m_sValue << "' to slot " << l_i32InsertLocation << " with the array size now " << static_cast<int32>(m_vSetting.size()) << "\n";
 
 	this->notify(BoxModification_SettingAdded, l_i32InsertLocation);
+	this->notifySettingChange(SettingAdd, l_i32InsertLocation);
 
 	return true;
 }
@@ -898,6 +901,20 @@ boolean CBox::setSettingValue(
 	return true;
 }
 
+void CBox::notifySettingChange(BoxEventMessageType eType, int32 i32FirstIndex, int32 i32SecondIndex)
+{
+	if( m_bIsNotificationActive)
+	{
+		BoxEventMessage l_oEvent;
+		l_oEvent.m_eType = eType;
+		l_oEvent.m_i32FirstIndex = i32FirstIndex;
+		l_oEvent.m_i32SecondIndex = i32SecondIndex;
+
+		this->setChanged();
+		this->notifyObservers(&l_oEvent);
+	}
+}
+
 //*
 boolean CBox::getSettingMod(
 		const OpenViBE::uint32 ui32SettingIndex,
@@ -955,6 +972,13 @@ uint32* CBox::getModifiableSettings(uint32& rCount)const
 
 void CBox::clear(void)
 {
+	if(m_pBoxAlgorithmDescriptor && m_pBoxListener)
+	{
+		CBoxListenerContext l_oContext(this->getKernelContext(), *this, 0xffffffff);
+		m_pBoxListener->uninitialize(l_oContext);
+		m_pBoxAlgorithmDescriptor->releaseBoxListener(m_pBoxListener);
+	}
+
 	m_pBoxAlgorithmDescriptor=NULL;
 	m_oAlgorithmClassIdentifier=OV_UndefinedIdentifier;
 	m_sName="";
@@ -1224,6 +1248,10 @@ boolean CBox::setMessageOutputName(
 
 void CBox::storeState(void)
 {
+	if(m_pSavedState != NULL)
+	{
+		delete m_pSavedState;
+	}
 	m_pSavedState = new CBox(getKernelContext(), m_rOwnerScenario);
 	m_pSavedState->initializeFromExistingBox(*this);
 }

@@ -8,6 +8,23 @@ namespace OpenViBE
 {
 	namespace Kernel
 	{
+
+		enum BoxEventMessageType{
+			SettingValueUpdate,
+			SettingChange,
+			SettingDelete,
+			SettingAdd,
+			SettingsReorder,
+			SettingsAllChange
+		};
+
+		class OV_API BoxEventMessage{
+		public:
+			BoxEventMessageType m_eType;
+			OpenViBE::int32 m_i32FirstIndex;
+			OpenViBE::int32 m_i32SecondIndex;
+		};
+
 		/**
 		 * \class IBox
 		 * \author Yann Renard (IRISA/INRIA)
