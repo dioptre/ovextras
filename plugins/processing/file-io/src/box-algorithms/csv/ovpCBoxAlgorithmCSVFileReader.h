@@ -143,7 +143,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addOutput ("Streamed matrix", OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutput ("Output signal", OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addSetting("Filename", OV_TypeId_Filename, "");
 				rBoxAlgorithmPrototype.addSetting("Column separator", OV_TypeId_String, ";");
 				rBoxAlgorithmPrototype.addSetting("don't use the file time",OV_TypeId_Boolean, "false");
@@ -152,6 +152,10 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsUnstable);
+
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Stimulations);
 				return true;
 			}
 
