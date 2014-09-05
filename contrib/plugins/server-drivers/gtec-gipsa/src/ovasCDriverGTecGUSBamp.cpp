@@ -581,8 +581,6 @@ OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 				WaitForSingleObject(m_overlapped[i][m_ui32CurrentQueueIndex].hEvent, 1000);
 				CloseHandle(m_overlapped[i][m_ui32CurrentQueueIndex].hEvent);
 
-				delete [] m_buffers[i][m_ui32CurrentQueueIndex];
-
 				//increment queue index
 				m_ui32CurrentQueueIndex = (m_ui32CurrentQueueIndex + 1) % QUEUE_SIZE;
 			}
@@ -599,6 +597,11 @@ OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 			{
 				::GT_GetSerial(m_callSequenceHandles[numDevices-1], serial, 16);
 				m_rDriverContext.getLogManager() << LogLevel_Error << "Reset data transfer failed! Serial = " << serial << "\n";
+			}
+
+			// Sometimes when the amplifier is jammed, freeing the buffer causes heap corruption if its done before stop and reset. So we free the buffers here.
+			for (int j=0; j<QUEUE_SIZE; j++) {
+				delete [] m_buffers[i][j];
 			}
 
 			delete [] m_overlapped[i];
