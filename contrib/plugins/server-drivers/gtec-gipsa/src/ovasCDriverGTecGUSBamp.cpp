@@ -20,6 +20,10 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace std;
 
+#if defined(TARGET_OS_Windows)
+#pragma warning(disable: 4800) // disable "forcing value to bool 'true' or 'false' (performance warning)" nag coming from BOOL->bool cast on e.g. VS2010
+#endif
+
 const DWORD CDriverGTecGUSBamp::bufferSizeBytes = HEADER_SIZE + nPoints * sizeof(float);
 
 /*
@@ -390,13 +394,22 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 		{
 			HANDLE o_pDevice = m_callSequenceHandles[0];//works only for one device
 
-			double l_dImpedance=0;
-			::GT_GetImpedance(o_pDevice, m_ui32ActualImpedanceIndex+1, &l_dImpedance);
-			if(l_dImpedance<0) l_dImpedance*=-1;
+			double l_dImpedance=DBL_MAX;
+			if(!::GT_GetImpedance(o_pDevice, m_ui32ActualImpedanceIndex+1, &l_dImpedance)) 
+			{
+				m_rDriverContext.getLogManager() << LogLevel_Error << "Impedance check failed for channel " << m_ui32ActualImpedanceIndex+1 << ". The amp may need a reset.\n";
+			}
+			else 
+			{
+				m_rDriverContext.getLogManager() << LogLevel_Trace << "Channel " << m_ui32ActualImpedanceIndex+1 << " - " << CString(m_oHeader.getChannelName(m_ui32ActualImpedanceIndex)) << " : " << l_dImpedance << "\n";
+			}
+			
+			if(l_dImpedance<0) 
+			{
+				l_dImpedance*=-1;
+			}
 
 			m_rDriverContext.updateImpedance(m_ui32ActualImpedanceIndex, l_dImpedance);
-
-			m_rDriverContext.getLogManager() << LogLevel_Trace << "Channel " << m_ui32ActualImpedanceIndex << " - " << CString(m_oHeader.getChannelName(m_ui32ActualImpedanceIndex)) << " : " << l_dImpedance << "\n";
 
 			m_ui32ActualImpedanceIndex++;
 			m_ui32ActualImpedanceIndex%=m_oHeader.getChannelCount();
@@ -709,7 +722,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::setMasterDevice(string targetMasterSerial)
 		    if (numDevices==1) {isSlave = false;}
 
 			char serial[16];
-	        ::GT_GetSerial(m_callSequenceHandles[i], serial, 16);
+			::GT_GetSerial(m_callSequenceHandles[i], serial, 16);
 
 			if (isSlave)
 			{
@@ -761,6 +774,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::verifySyncMode()
 		//Test that the master device is the last in the sequence
 		char serial[16];
 		::GT_GetSerial(m_callSequenceHandles[numDevices-1], serial, 16);
+
 		if (string(serial) != m_masterSerial && string(serial) == m_vDevicesSerials[numDevices-1])
 		{
 			m_rDriverContext.getLogManager() << LogLevel_Error << "Master device is not the last one! serial=" << serial << " master=" << m_masterSerial.c_str() << " .\n";
@@ -862,22 +876,27 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 	
 	// get the number of available filters
 	status = GT_GetNumberOfFilter(&nrOfFilters);
+	if (status==false) 
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the number of dsp filters! Filtering is disabled.\n";	
+		return;
+	}
 
 	// create array of FILT structures to store the filter settings
 	FILT *filters = new FILT[nrOfFilters];
 
 	// fill array with filter settings
 	status = GT_GetFilterSpec(filters);
-	if (status==0) 
+	if (status==false) 
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the list of dsp filters! Filtering is disabled.\n";
-	    return;
+		return;
 	}
 	
 	for(int i=1; i<=GTEC_NUM_CHANNELS; i++)  //channels must be [1..16]
 	{
 		status = GT_SetBandPass(o_pDevice, i, m_i32BandPassFilterIndex);
-		if (status==0) 
+		if (status==false) 
 		{ 
 			char serial[20];
 		    ::GT_GetSerial(o_pDevice, serial, 20);
@@ -893,16 +912,21 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 
 	// get the number of available filters
 	status = GT_GetNumberOfNotch(&nrOfFilters);
+	if (status==false) 
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the number of notch filters! Filtering is disabled.\n";
+		return;
+	}
 
 	// create array of FILT structures to store the filter settings
 	filters = new FILT[nrOfFilters];
 
 	// fill array with filter settings
 	status = GT_GetNotchSpec(filters);
-	if (status==0) 
+	if (status==false) 
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the list of notch filters! Filtering is disabled.\n";
-	    return;
+		return;
 	}
 	
 	for(int i=1; i<=GTEC_NUM_CHANNELS; i++)  //channels must be [1..16]
