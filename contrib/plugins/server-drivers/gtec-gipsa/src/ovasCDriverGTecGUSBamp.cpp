@@ -50,6 +50,7 @@ CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 	,m_flagIsFirstLoop(true)
 	,m_masterSerial("")
 	,m_bBipolarEnabled(false)
+	,m_bReconfigurationRequired(false)
 {
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(GTEC_NUM_CHANNELS);	
@@ -300,6 +301,16 @@ OpenViBE::boolean CDriverGTecGUSBamp::start(void)
 	if(!m_rDriverContext.isConnected()) return false;
 	if(m_rDriverContext.isStarted()) return false;
 
+	if(m_bReconfigurationRequired) 
+	{	
+		// Impedance checking or some other GT_ call has changed the device configuration, so we need to reconf
+		for(uint32 i=0;i<numDevices;i++)
+		{
+			ConfigureDevice(i);
+		}
+		m_bReconfigurationRequired = false;
+	}
+
 	//new set process priority
 	HANDLE hProcess = GetCurrentProcess();
     SetPriorityClass(hProcess, HIGH_PRIORITY_CLASS);
@@ -415,6 +426,8 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 			m_ui32ActualImpedanceIndex%=m_oHeader.getChannelCount();
 
 			m_rDriverContext.updateImpedance(m_ui32ActualImpedanceIndex, -1);
+
+			m_bReconfigurationRequired = true;
 		}
 		else
 		{
@@ -870,7 +883,9 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 {
 	OpenViBE::boolean status;
 	int32 nrOfFilters;
-	float32 mySamplingRate = static_cast<float32>(m_oHeader.getSamplingFrequency());
+	const float32 mySamplingRate = static_cast<float32>(m_oHeader.getSamplingFrequency());
+
+	// note: the only reason to ask the filter specs here seems to be to be able to print some details to the LogManager().
 
 	//Set BandPass
 	
@@ -890,6 +905,7 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 	if (status==false) 
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the list of dsp filters! Filtering is disabled.\n";
+		delete[] filters;
 		return;
 	}
 	
@@ -901,6 +917,7 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 			char serial[20];
 		    ::GT_GetSerial(o_pDevice, serial, 20);
 			m_rDriverContext.getLogManager() << LogLevel_Error << "Could not set band pass filter on channel " << i << " on device " << serial << "\n";
+			delete[] filters;
 			return;
 		}
 	}
@@ -908,6 +925,8 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 	if (m_i32BandPassFilterIndex ==-1) m_rDriverContext.getLogManager() << LogLevel_Info << "No BandPass filter applied.\n";
 	else m_rDriverContext.getLogManager() << LogLevel_Info << "Bandpass filter applied: between " << filters[m_i32BandPassFilterIndex].fu << " and " << filters[m_i32BandPassFilterIndex].fo << ", order = " << filters[m_i32BandPassFilterIndex].order << ", type = " << ((filters[m_i32BandPassFilterIndex].type == 1) ? "butterworth" : "chebyshev") << ", frequency = " << mySamplingRate << "\n";
 	
+	delete[] filters;
+
 	//Set Notch
 
 	// get the number of available filters
@@ -926,6 +945,7 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 	if (status==false) 
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the list of notch filters! Filtering is disabled.\n";
+		delete[] filters;
 		return;
 	}
 	
@@ -937,12 +957,15 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 			char serial[20];
 		    ::GT_GetSerial(o_pDevice, serial, 20);
 			m_rDriverContext.getLogManager() << LogLevel_Error << "Could not set notch filter on channel " << i << " on device " << serial << "\n";
+			delete[] filters;
 			return;
 		}
 	}
 	
 	if (m_i32NotchFilterIndex ==-1) m_rDriverContext.getLogManager() << LogLevel_Info << "No Notch filter applied.\n";
 	else m_rDriverContext.getLogManager() << LogLevel_Info << "Notch filter applied: " << (filters[m_i32NotchFilterIndex].fo +  filters[m_i32NotchFilterIndex].fu) /2 << " Hz.\n";	
+
+	delete[] filters;
 }
 
 namespace OpenViBEAcquisitionServer {
