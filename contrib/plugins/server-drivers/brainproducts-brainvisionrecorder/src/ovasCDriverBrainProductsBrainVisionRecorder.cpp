@@ -30,6 +30,8 @@ CDriverBrainProductsBrainVisionRecorder::CDriverBrainProductsBrainVisionRecorder
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
 {
+	m_pStructRDA_MessageHeader = NULL;
+
 	m_oSettings.add("Header", &m_oHeader);
 	m_oSettings.add("ServerHostName", &m_sServerHostName);
 	m_oSettings.add("ServerHostPort", &m_ui32ServerHostPort);
@@ -82,7 +84,6 @@ boolean CDriverBrainProductsBrainVisionRecorder::initialize(
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "> Client connected\n";
 
 	// Initialize vars for reception
-	m_pStructRDA_MessageHeader = NULL;
 	RDA_MessageHeader l_structRDA_MessageHeader;
 	m_pcharStructRDA_MessageHeader = (char*)&l_structRDA_MessageHeader;
 
@@ -116,8 +117,14 @@ boolean CDriverBrainProductsBrainVisionRecorder::initialize(
 		return false;
 	}
 
+	if(m_pStructRDA_MessageHeader) {
+		free(m_pStructRDA_MessageHeader);
+		m_pStructRDA_MessageHeader = NULL;
+	}
+
 	// Retrieve rest of data
-	if (!(*(&m_pStructRDA_MessageHeader) = (RDA_MessageHeader*)malloc(l_structRDA_MessageHeader.nSize)))
+	m_pStructRDA_MessageHeader = (RDA_MessageHeader*)malloc(l_structRDA_MessageHeader.nSize);
+	if(!m_pStructRDA_MessageHeader)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Couldn't allocate memory\n";
 		return false;
@@ -203,7 +210,6 @@ boolean CDriverBrainProductsBrainVisionRecorder::loop(void)
 	);
 
 	// Initialize var to receive buffer of data
-	m_pStructRDA_MessageHeader = NULL;
 	RDA_MessageHeader l_structRDA_MessageHeader;
 	m_pcharStructRDA_MessageHeader = (char*)&l_structRDA_MessageHeader;
 	uint32 l_ui32Received = 0;
@@ -243,8 +249,14 @@ boolean CDriverBrainProductsBrainVisionRecorder::loop(void)
 		return false;
 	}
 
+	if(m_pStructRDA_MessageHeader) {
+		free(m_pStructRDA_MessageHeader);
+		m_pStructRDA_MessageHeader = NULL;
+	}
+
 	// Retrieve rest of block.
-	if (!(*(&m_pStructRDA_MessageHeader) = (RDA_MessageHeader*)malloc(l_structRDA_MessageHeader.nSize)))
+	m_pStructRDA_MessageHeader = (RDA_MessageHeader*)malloc(l_structRDA_MessageHeader.nSize);
+	if(!m_pStructRDA_MessageHeader)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Couldn't allocate memory\n";
 		return false;
@@ -293,11 +305,16 @@ boolean CDriverBrainProductsBrainVisionRecorder::loop(void)
 		{
 			char* pszType = m_pStructRDA_Marker->sTypeDesc;
 			char* pszDescription = pszType + strlen(pszType) + 1;
+			 
+			// To find the next marker, we don't use/trust the m_pStructRDA_Marker->nSize field but consider the next marker to start after 
+			// the present description ends. This seems to address issues with situations where multiple markers are present. Other implementations
+			// also extract the markers in a similar streaming fashion rather than relying on the nSize.
+			const uint32 l_ui32DescriptionLength = strlen(pszDescription);
 
 			m_vStimulationIdentifier[i] = atoi(strtok (pszDescription,"S"));
 			m_vStimulationDate[i] = ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_pStructRDA_Marker->nPosition );
 			m_vStimulationSample[i] = m_pStructRDA_Marker->nPosition;
-			m_pStructRDA_Marker = (RDA_Marker*)((char*)m_pStructRDA_Marker + m_pStructRDA_Marker->nSize);
+			m_pStructRDA_Marker = (RDA_Marker*)(pszDescription + l_ui32DescriptionLength + 1);
 		}
 
 		m_ui32MarkerCount += m_pStructRDA_MessageData32->nMarkers;
@@ -329,6 +346,12 @@ boolean CDriverBrainProductsBrainVisionRecorder::loop(void)
 
 	m_ui32NumberOfMarkers = 0;
 
+	if(m_pSample)
+	{
+		delete m_pSample;
+		m_pSample = NULL;
+	}
+
 	return true;
 
 }
@@ -347,15 +370,23 @@ boolean CDriverBrainProductsBrainVisionRecorder::uninitialize(void)
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(m_rDriverContext.isStarted()) { return false; }
 
-	if (m_pcharStructRDA_MessageHeader!=NULL) m_pcharStructRDA_MessageHeader=NULL;
-	if (m_pStructRDA_MessageHeader!=NULL) m_pStructRDA_MessageHeader= NULL;
-	if (m_pStructRDA_MessageStart!=NULL) m_pStructRDA_MessageStart=NULL;
-	if (m_pStructRDA_MessageStop!=NULL) m_pStructRDA_MessageStop=NULL;
-	if (m_pStructRDA_MessageData32!=NULL) m_pStructRDA_MessageData32=NULL;
-	if (m_pStructRDA_Marker!=NULL) m_pStructRDA_Marker=NULL;
+	if(m_pStructRDA_MessageHeader) 
+	{
+		free(m_pStructRDA_MessageHeader);
+		m_pStructRDA_MessageHeader = NULL;
+	}
 
-	delete [] m_pSample;
-	m_pSample=NULL;
+	m_pcharStructRDA_MessageHeader=NULL;
+	m_pStructRDA_MessageStart=NULL;
+	m_pStructRDA_MessageStop=NULL;
+	m_pStructRDA_MessageData32=NULL;
+	m_pStructRDA_Marker=NULL;
+
+	if(m_pSample) 
+	{
+		delete [] m_pSample;
+		m_pSample=NULL;
+	}
 	m_pCallback=NULL;
 
 	// Cleans up client connection
