@@ -82,12 +82,8 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				//get value of "Name box after channel list"
-				OpenViBE::CString l_sRename;
-				rBox.getSettingValue(3, l_sRename);
-
 				//we are only interested in the setting 0
-				if((ui32Index==0)&&(l_sRename==OpenViBE::CString("true")))
+				if((ui32Index==0)&&(!m_bHasUserSetName))
 				{
 					OpenViBE::CString l_sSettings;
 					rBox.getSettingValue(0, l_sSettings);
@@ -95,6 +91,28 @@ namespace OpenViBEPlugins
 				}
 				return true;
 			}
+
+			virtual OpenViBE::boolean onNameChanged(OpenViBE::Kernel::IBox &rBox)//when user set box name manually
+			{
+				if(m_bHasUserSetName)
+				{
+					OpenViBE::CString l_sRename;
+					l_sRename = rBox.getName();
+					if(l_sRename==OpenViBE::CString("Channel Selector"))//default name, we switch back to default behaviour
+						m_bHasUserSetName=false;
+				}
+				else
+					m_bHasUserSetName=true;
+				return true;
+			}
+
+			virtual OpenViBE::boolean initialize()
+			{
+				m_bHasUserSetName=false;//need to initialize this value
+			}
+
+		private:
+			OpenViBE::boolean m_bHasUserSetName;
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 		};
@@ -127,7 +145,6 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Channel List",             OV_TypeId_String, ":");
 				rBoxAlgorithmPrototype.addSetting("Action",                   OVP_TypeId_SelectionMethod, OVP_TypeId_SelectionMethod_Select.toString());
 				rBoxAlgorithmPrototype.addSetting("Channel Matching Method",  OVP_TypeId_MatchMethod,     OVP_TypeId_MatchMethod_Smart.toString());
-				rBoxAlgorithmPrototype.addSetting("Name box after channel list ",  OV_TypeId_Boolean  ,     "false");
 
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
