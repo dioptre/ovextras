@@ -20,7 +20,7 @@ namespace OpenViBEDesigner
 			virtual void setValue(const OpenViBE::CString &rValue);
 
 			void adjustValue(int amount);
-			void onInsertionCB();
+			void onChange();
 
 
 		private:

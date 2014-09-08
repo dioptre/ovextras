@@ -20,6 +20,7 @@ namespace OpenViBEDesigner
 			virtual void setValue(const OpenViBE::CString &rValue);
 
 			void adjustValue(OpenViBE::float64 amount);
+			void onChange();
 
 
 		private:

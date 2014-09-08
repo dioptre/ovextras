@@ -19,7 +19,7 @@ static void on_button_setting_integer_down_pressed(::GtkButton* pButton, gpointe
 
 static void on_insertion(::GtkEntry *entry, gpointer pUserData)
 {
-	static_cast<CIntegerSettingView *>(pUserData)->onInsertionCB();
+	static_cast<CIntegerSettingView *>(pUserData)->onChange();
 }
 
 
@@ -66,7 +66,7 @@ void CIntegerSettingView::adjustValue(int amount)
 	getBox().setSettingValue(getSettingsIndex(), l_sValue);
 }
 
-void CIntegerSettingView::onInsertionCB()
+void CIntegerSettingView::onChange()
 {
 	const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
 	getBox().setSettingValue(getSettingsIndex(), l_sValue);
