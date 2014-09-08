@@ -66,6 +66,7 @@ void CFloatSettingView::adjustValue(float64 amount)
 
 	getBox().setSettingValue(getSettingsIndex(), l_sValue);
 }
+
 void CFloatSettingView::onChange()
 {
 	const gchar* l_sValue = gtk_entry_get_text(m_pEntry);

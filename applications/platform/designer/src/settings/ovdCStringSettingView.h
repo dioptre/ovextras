@@ -16,6 +16,8 @@ namespace OpenViBEDesigner
 			virtual void getValue(OpenViBE::CString &rValue) const;
 			virtual void setValue(const OpenViBE::CString &rValue);
 
+			void onChange();
+
 		private:
 			::GtkEntry* m_pEntry;
 		};
