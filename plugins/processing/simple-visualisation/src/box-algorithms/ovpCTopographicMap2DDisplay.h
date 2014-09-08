@@ -6,8 +6,6 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/IReader.h>
-
 #include "../ovpCTopographicMapDatabase.h"
 #include "ovpCTopographicMap2DDisplay/ovpCTopographicMap2DView.h"
 
@@ -15,8 +13,7 @@ namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
 	{
-		class CTopographicMap2DDisplay : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >,
-		virtual public OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback::ICallback
+		class CTopographicMap2DDisplay : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
 		public:
 			CTopographicMap2DDisplay(void);
@@ -34,23 +31,9 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_TopographicMap2DDisplay)
 
-			//IBoxAlgorithmStreamedMatrixInputReaderCallback::ICallback implementation
-			virtual void setMatrixDimensionCount(const OpenViBE::uint32 ui32DimensionCount);
-			virtual void setMatrixDimensionSize(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionSize);
-			virtual void setMatrixDimensionLabel(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionEntryIndex, const char* sDimensionLabel);
-			virtual void setMatrixBuffer(const OpenViBE::float64* pBuffer);
-			/*
-			virtual void setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
-			virtual void setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
-			virtual void setSampleCountPerBuffer(const OpenViBE::uint32 ui32SampleCountPerBuffer);
-			virtual void setSamplingRate(const OpenViBE::uint32 ui32SamplingFrequency);
-			virtual void setSampleBuffer(const OpenViBE::float64* pBuffer);
-			*/
 		protected:
-			//ebml
-			EBML::IReader* m_pStreamedMatrixReader;
-
-			OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback* m_pStreamedMatrixReaderCallBack;
+			OpenViBEToolkit::TStreamedMatrixDecoder < CTopographicMap2DDisplay >* m_pDecoder;
+			OpenViBE::boolean m_bFirstBufferReceived;
 
 			//Start and end time of the last buffer
 			OpenViBE::uint64 m_ui64StartTime;

@@ -318,12 +318,13 @@ void CBufferDatabase::setMatrixDimensionLabel(const uint32 ui32DimensionIndex, c
 	m_pDimensionLabels[ui32DimensionIndex][ui32DimensionEntryIndex] = sDimensionLabel;
 }
 
-void CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTime, uint64 ui64EndTime)
+boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTime, uint64 ui64EndTime)
 {
+	boolean l_bChannelLookupTable=true;
 	//if an error has occurred, do nothing
 	if(m_bError)
 	{
-		return;
+		return !m_bError;
 	}
 
 	//if this the first buffer, perform some precomputations
@@ -337,7 +338,7 @@ void CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTi
 			m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Error : buffer start time and end time are equal : " << ui64StartTime << "\n";
 
 			m_bError = true;
-			return;
+			return !m_bError;
 		}
 
 		//computes the sampling frequency
@@ -353,7 +354,7 @@ void CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTi
 
 	if(m_bChannelLookupTableInitialized == false)
 	{
-		fillChannelLookupTable();
+		l_bChannelLookupTable = fillChannelLookupTable(); //to retrieve the unrecognized electrode warning
 	}
 	else
 	{
@@ -369,7 +370,7 @@ void CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTi
 	}
 
 #ifdef ELAN_VALIDATION
-	return;
+	return !m_bError;
 #endif
 
 	float64* l_pBufferToWrite = NULL;
@@ -465,6 +466,8 @@ void CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTi
 	{
 		m_pDrawable->redraw();
 	}
+
+	return !m_bError&&l_bChannelLookupTable;
 }
 
 void CBufferDatabase::getDisplayedChannelLocalMinMaxValue(uint32 ui32Channel, float64& f64Min, float64& f64Max)
@@ -748,7 +751,7 @@ boolean CBufferDatabase::fillChannelLookupTable()
 		//unrecognized electrode!
 		if(l_bLabelRecognized == false)
 		{
-			m_oParentPlugin.getLogManager() << LogLevel_Trace
+			m_oParentPlugin.getLogManager() << LogLevel_Warning
 				<< "Unrecognized electrode name (index=" << (uint32)i
 				<< ", name=" << m_pDimensionLabels[0][i].c_str()
 				<< ")!\n";
