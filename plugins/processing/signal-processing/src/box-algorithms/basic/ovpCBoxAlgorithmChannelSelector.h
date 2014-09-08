@@ -109,6 +109,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize()
 			{
 				m_bHasUserSetName=false;//need to initialize this value
+				return true;
 			}
 
 		private:
