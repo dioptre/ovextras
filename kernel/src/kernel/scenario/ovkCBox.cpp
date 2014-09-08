@@ -897,6 +897,7 @@ boolean CBox::setSettingValue(
 	m_vSetting[ui32SettingIndex].m_sValue=rValue;
 
 	this->notify(BoxModification_SettingValueChanged, ui32SettingIndex);
+	this->notifySettingChange(SettingValueUpdate, ui32SettingIndex);
 
 	return true;
 }

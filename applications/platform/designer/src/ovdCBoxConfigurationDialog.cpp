@@ -284,7 +284,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 		gtk_builder_add_from_file(l_pBuilderInterfaceSetting, m_sGUIFilename.toASCIIString(), NULL);
 		gtk_builder_connect_signals(l_pBuilderInterfaceSetting, NULL);
 
-		m_rBox.addObserver(this);
+
 #if 1 // this approach fails to set a modal dialog
 
 
@@ -425,6 +425,7 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 		return l_bModified;//return false is default case
 	}
 
+	m_rBox.addObserver(this);
 	m_rBox.storeState();
 	::GtkBuilder* l_pBuilderInterfaceSetting=gtk_builder_new(); // glade_xml_new(m_sGUIFilename.toASCIIString(), "box_configuration", NULL);
 	gtk_builder_add_from_file(l_pBuilderInterfaceSetting, m_sGUIFilename.toASCIIString(), NULL);
@@ -554,6 +555,7 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 			l_bFinished=true;
 		}
 	}
+	m_rBox.deleteObserver(this);
 
 	return l_bModified;
 }
@@ -586,6 +588,7 @@ boolean CBoxConfigurationDialog::update()
 
 void CBoxConfigurationDialog::update(OpenViBE::CObservable &o, void* data)
 {
+	std::cout << "Entering update" << std::endl;
 	const BoxEventMessage *l_pEvent = static_cast< BoxEventMessage * > (data);
 
 	switch(l_pEvent->m_eType)
@@ -593,6 +596,18 @@ void CBoxConfigurationDialog::update(OpenViBE::CObservable &o, void* data)
 		case SettingsAllChange:
 			generateSettingsTable();
 			break;
+
+		case SettingValueUpdate:
+		{
+			CString l_sSettingName;
+			CString l_sSettingValue;
+
+			m_rBox.getSettingName(l_pEvent->m_i32FirstIndex, l_sSettingName);
+			m_rBox.getSettingValue(l_pEvent->m_i32FirstIndex, l_sSettingValue);
+
+			m_mSettingViewMap[l_sSettingName]->setValue(l_sSettingValue);
+			break;
+		}
 
 		default:
 		std::cout << "Unhandle box event" << std::endl;
