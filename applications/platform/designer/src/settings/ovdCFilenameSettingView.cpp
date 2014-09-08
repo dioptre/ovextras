@@ -14,6 +14,12 @@ static void on_button_setting_filename_browse_pressed(::GtkButton* pButton, gpoi
 	static_cast< CFilenameSettingView * >(pUserData)->browse();
 }
 
+static void on_change(::GtkEntry *entry, gpointer pUserData)
+{
+	static_cast<CFilenameSettingView *>(pUserData)->onChange();
+}
+
+
 CFilenameSettingView::CFilenameSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName, const Kernel::IKernelContext &rKernelContext):
 	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_rKernelContext(rKernelContext)
 {
@@ -25,6 +31,9 @@ CFilenameSettingView::CFilenameSettingView(OpenViBE::Kernel::IBox &rBox, OpenViB
 	std::vector< ::GtkWidget* > l_vWidget;
 	extractWidget(l_pSettingWidget, l_vWidget);
 	m_pEntry = GTK_ENTRY(l_vWidget[0]);
+
+	g_signal_connect(G_OBJECT(m_pEntry), "changed", G_CALLBACK(on_change), this);
+
 
 	g_signal_connect(G_OBJECT(l_vWidget[1]), "clicked", G_CALLBACK(on_button_setting_filename_browse_pressed), this);
 
@@ -76,8 +85,14 @@ void CFilenameSettingView::browse()
 		{
 			*l_pBackslash = '/';
 		}
-		gtk_entry_set_text(m_pEntry, l_sFileName);
+		getBox().setSettingValue(getSettingsIndex(), l_sFileName);
 		g_free(l_sFileName);
 	}
 	gtk_widget_destroy(l_pWidgetDialogOpen);
+}
+
+void CFilenameSettingView::onChange()
+{
+	const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
+	getBox().setSettingValue(getSettingsIndex(), l_sValue);
 }
