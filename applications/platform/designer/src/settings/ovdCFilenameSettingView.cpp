@@ -33,8 +33,6 @@ CFilenameSettingView::CFilenameSettingView(OpenViBE::Kernel::IBox &rBox, OpenViB
 	m_pEntry = GTK_ENTRY(l_vWidget[0]);
 
 	g_signal_connect(G_OBJECT(m_pEntry), "changed", G_CALLBACK(on_change), this);
-
-
 	g_signal_connect(G_OBJECT(l_vWidget[1]), "clicked", G_CALLBACK(on_button_setting_filename_browse_pressed), this);
 
 

@@ -22,6 +22,9 @@ namespace OpenViBEDesigner
 			void browse();
 			void edit();
 
+			void onChange();
+
+
 		private:
 			::GtkEntry* m_pEntry;
 

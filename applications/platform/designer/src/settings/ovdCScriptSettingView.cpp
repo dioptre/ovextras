@@ -19,6 +19,11 @@ static void on_button_setting_script_edit_pressed(::GtkButton* pButton, gpointer
 	static_cast< CScriptSettingView * >(pUserData)->edit();
 }
 
+static void on_change(::GtkEntry *entry, gpointer pUserData)
+{
+	static_cast<CScriptSettingView *>(pUserData)->onChange();
+}
+
 CScriptSettingView::CScriptSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName, const Kernel::IKernelContext &rKernelContext):
 	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_rKernelContext(rKernelContext)
 {
@@ -31,6 +36,7 @@ CScriptSettingView::CScriptSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::u
 	extractWidget(l_pSettingWidget, l_vWidget);
 	m_pEntry = GTK_ENTRY(l_vWidget[0]);
 
+	g_signal_connect(G_OBJECT(m_pEntry), "changed", G_CALLBACK(on_change), this);
 	g_signal_connect(G_OBJECT(l_vWidget[1]), "clicked", G_CALLBACK(on_button_setting_script_edit_pressed), this);
 	g_signal_connect(G_OBJECT(l_vWidget[2]), "clicked", G_CALLBACK(on_button_setting_filename_browse_pressed), this);
 
@@ -106,4 +112,10 @@ void CScriptSettingView::edit()
 			m_rKernelContext.getLogManager() << Kernel::LogLevel_Warning << "Could not run command " << l_sFullCommand << "\n";
 		}
 	}
+}
+
+void CScriptSettingView::onChange()
+{
+	const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
+	getBox().setSettingValue(getSettingsIndex(), l_sValue);
 }
