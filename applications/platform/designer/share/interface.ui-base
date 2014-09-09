@@ -2021,7 +2021,6 @@ Contributions also from :
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">dummy</col>
       </row>
     </data>
   </object>
@@ -2032,7 +2031,7 @@ Contributions also from :
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">dummy</col>
+
       </row>
     </data>
   </object>
@@ -2043,7 +2042,7 @@ Contributions also from :
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">dummy</col>
+
       </row>
     </data>
   </object>

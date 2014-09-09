@@ -115,6 +115,7 @@ void CAbstractSettingView::initializeValue()
 {
 	CString l_sSettingValue;
 	getBox().getSettingValue(m_ui32Index, l_sSettingValue);
+	std::cout << l_sSettingValue << std::endl;
 	setValue(l_sSettingValue);
 }
 

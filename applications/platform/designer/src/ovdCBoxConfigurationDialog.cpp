@@ -460,6 +460,7 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 					CString l_sValue;
 					Setting::CAbstractSettingView *l_pView =  m_mSettingViewMap[l_sSettingName];
 					l_pView->getValue(l_sValue);
+					std::cout << "Value set : " << l_sValue << std::endl;
 					m_rBox.setSettingValue(i, l_sValue);
 				}
 				else

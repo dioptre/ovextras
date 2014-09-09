@@ -4,6 +4,8 @@
 #include "../ovd_base.h"
 #include "ovdCAbstractSettingView.h"
 
+#include <map>
+
 namespace OpenViBEDesigner
 {
 	namespace Setting
@@ -20,10 +22,15 @@ namespace OpenViBEDesigner
 			virtual void getValue(OpenViBE::CString &rValue) const;
 			virtual void setValue(const OpenViBE::CString &rValue);
 
+			void onChange();
+
 
 		private:
 			::GtkComboBox* m_pComboBox;
 			OpenViBE::CIdentifier m_oTypeIdentifier;
+			OpenViBE::boolean p;
+
+			std::map < OpenViBE::CString, OpenViBE::uint64 > m_mEntriesIndex;
 
 			const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
 		};
