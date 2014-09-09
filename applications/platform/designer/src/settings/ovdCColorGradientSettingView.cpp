@@ -49,6 +49,11 @@ static void on_color_gradient_spin_button_value_changed(::GtkSpinButton* pButton
 	static_cast< CColorGradientSettingView *>(pUserData)->spinChange(pButton);
 }
 
+static void on_change(::GtkEntry *entry, gpointer pUserData)
+{
+	static_cast<CColorGradientSettingView *>(pUserData)->onChange();
+}
+
 
 
 CColorGradientSettingView::CColorGradientSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName, const Kernel::IKernelContext &rKernelContext):
@@ -63,6 +68,7 @@ CColorGradientSettingView::CColorGradientSettingView(OpenViBE::Kernel::IBox &rBo
 	extractWidget(l_pSettingWidget, l_vWidget);
 	m_pEntry = GTK_ENTRY(l_vWidget[0]);
 
+	g_signal_connect(G_OBJECT(m_pEntry), "changed", G_CALLBACK(on_change), this);
 	g_signal_connect(G_OBJECT(l_vWidget[1]), "clicked", G_CALLBACK(on_button_setting_color_gradient_configure_pressed), this);
 
 	initializeValue();
@@ -125,7 +131,8 @@ void CColorGradientSettingView::configurePressed()
 			l_oFinalGradient[i*4+3] = vColorGradient[i].oColor.blue  * 100. / 65535.;
 		}
 		OpenViBEToolkit::Tools::ColorGradient::format(l_sFinalGradient, l_oFinalGradient);
-		gtk_entry_set_text(m_pEntry, l_sFinalGradient.toASCIIString());
+		getBox().setSettingValue(getSettingsIndex(), l_sFinalGradient.toASCIIString());
+		//gtk_entry_set_text(m_pEntry, l_sFinalGradient.toASCIIString());
 	}
 
 	gtk_widget_destroy(pDialog);
@@ -279,6 +286,12 @@ void CColorGradientSettingView::colorChange(GtkColorButton *pButton)
 	vColorGradient[vColorButtonMap[pButton]].oColor=l_oColor;
 
 	refreshColorGradient();
+}
+
+void CColorGradientSettingView::onChange()
+{
+	const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
+	getBox().setSettingValue(getSettingsIndex(), l_sValue);
 }
 
 

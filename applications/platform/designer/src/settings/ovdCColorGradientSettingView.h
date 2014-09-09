@@ -42,6 +42,8 @@ namespace OpenViBEDesigner
 			void spinChange(::GtkSpinButton *pButton);
 			void colorChange(::GtkColorButton *pButton);
 
+			void onChange();
+
 
 		private:
 			::GtkEntry* m_pEntry;
