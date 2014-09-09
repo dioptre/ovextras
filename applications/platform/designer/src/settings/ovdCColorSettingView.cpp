@@ -12,6 +12,11 @@ static void on_button_setting_color_choose_pressed(::GtkColorButton* pButton, gp
 	static_cast< CColorSettingView *>(pUserData)->selectColor();
 }
 
+static void on_change(::GtkEntry *entry, gpointer pUserData)
+{
+	static_cast<CColorSettingView *>(pUserData)->onChange();
+}
+
 
 CColorSettingView::CColorSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName, const Kernel::IKernelContext &rKernelContext):
 	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_rKernelContext(rKernelContext)
@@ -26,6 +31,7 @@ CColorSettingView::CColorSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uin
 	m_pEntry = GTK_ENTRY(l_vWidget[0]);
 	m_pButton = GTK_COLOR_BUTTON(l_vWidget[1]);
 
+	g_signal_connect(G_OBJECT(m_pEntry), "changed", G_CALLBACK(on_change), this);
 	g_signal_connect(G_OBJECT(m_pButton), "color-set", G_CALLBACK(on_button_setting_color_choose_pressed), this);
 
 	initializeValue();
@@ -61,6 +67,12 @@ void CColorSettingView::selectColor()
 	char l_sBuffer[1024];
 	sprintf(l_sBuffer, "%i,%i,%i", (l_oColor.red*100)/65535, (l_oColor.green*100)/65535, (l_oColor.blue*100)/65535);
 
-	gtk_entry_set_text(m_pEntry, l_sBuffer);
+	getBox().setSettingValue(getSettingsIndex(), l_sBuffer);
+}
+
+void CColorSettingView::onChange()
+{
+	const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
+	getBox().setSettingValue(getSettingsIndex(), l_sValue);
 }
 

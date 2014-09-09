@@ -20,6 +20,7 @@ namespace OpenViBEDesigner
 			virtual void setValue(const OpenViBE::CString &rValue);
 
 			void selectColor();
+			void onChange();
 
 		private:
 			::GtkEntry* m_pEntry;
