@@ -584,7 +584,10 @@ CString CSettingCollectionHelper::getValueEnumeration(const CIdentifier& rTypeId
 		return "";
 	}
 	::GtkComboBox* l_pWidget=GTK_COMBO_BOX(pWidget);
-	return CString(gtk_combo_box_get_active_text(l_pWidget));
+	gchar* l_sValueName = gtk_combo_box_get_active_text(l_pWidget);
+	CString l_sRetVal(l_sValueName);
+	g_free(l_sValueName);
+	return l_sRetVal;
 }
 
 CString CSettingCollectionHelper::getValueBitMask(const CIdentifier& rTypeIdentifier, ::GtkWidget* pWidget)

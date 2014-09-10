@@ -12,8 +12,6 @@ using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::SimpleVisualisation;
 
 CTopographicMap2DDisplay::CTopographicMap2DDisplay(void) :
-	m_pStreamedMatrixReader(NULL),
-	m_pStreamedMatrixReaderCallBack(NULL),
 	m_pSphericalSplineInterpolation(NULL),
 	m_pTopographicMapDatabase(NULL),
 	m_pTopographicMap2DView(NULL)
@@ -27,9 +25,9 @@ uint64 CTopographicMap2DDisplay::getClockFrequency(void)
 
 boolean CTopographicMap2DDisplay::initialize(void)
 {
-	//initializes the ebml input
-	m_pStreamedMatrixReaderCallBack = createBoxAlgorithmStreamedMatrixInputReaderCallback(*this);
-	m_pStreamedMatrixReader=EBML::createReader(*m_pStreamedMatrixReaderCallBack);
+	m_bFirstBufferReceived=false;
+	m_pDecoder = new OpenViBEToolkit::TStreamedMatrixDecoder < CTopographicMap2DDisplay >;
+	m_pDecoder->initialize(*this);
 
 	m_pSphericalSplineInterpolation = &getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_SphericalSplineInterpolation));
 	m_pSphericalSplineInterpolation->initialize();
@@ -69,12 +67,11 @@ boolean CTopographicMap2DDisplay::initialize(void)
 
 boolean CTopographicMap2DDisplay::uninitialize(void)
 {
-	//release the ebml reader
-	releaseBoxAlgorithmStreamedMatrixInputReaderCallback(m_pStreamedMatrixReaderCallBack);
-	m_pStreamedMatrixReaderCallBack=NULL;
-
-	m_pStreamedMatrixReader->release();
-	m_pStreamedMatrixReader=NULL;
+	if(m_pDecoder)
+	{
+		m_pDecoder->uninitialize();
+		delete m_pDecoder;
+	}
 
 	delete m_pTopographicMap2DView;
 	m_pTopographicMap2DView = NULL;
@@ -108,13 +105,32 @@ boolean CTopographicMap2DDisplay::process(void)
 	//decode signal data
 	for(i=0; i<l_pDynamicBoxContext->getInputChunkCount(0); i++)
 	{
-		uint64 l_ui64ChunkSize=0;
-		const uint8* l_pChunkBuffer=NULL;
-
-		if(l_pDynamicBoxContext->getInputChunk(0, i, m_ui64StartTime, m_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer))
+		m_pDecoder->decode(0, i);
+		if(m_pDecoder->isBufferReceived())
 		{
-			m_pStreamedMatrixReader->processData(l_pChunkBuffer, l_ui64ChunkSize);
-			l_pDynamicBoxContext->markInputAsDeprecated(0, i);
+			IMatrix* l_pInputMatrix=m_pDecoder->getOutputMatrix();
+
+			//do we need to recopy this for each chunk?
+			if(!m_bFirstBufferReceived)
+			{
+				m_pTopographicMapDatabase->setMatrixDimensionCount(l_pInputMatrix->getDimensionCount());
+				for(uint32 dimension=0; dimension<l_pInputMatrix->getDimensionCount(); dimension++)
+				{
+					m_pTopographicMapDatabase->setMatrixDimensionSize(dimension, l_pInputMatrix->getDimensionSize(dimension));
+					for(uint32 entryIndex=0; entryIndex<l_pInputMatrix->getDimensionSize(dimension); entryIndex++)
+					{
+						m_pTopographicMapDatabase->setMatrixDimensionLabel(dimension, entryIndex, l_pInputMatrix->getDimensionLabel(dimension, entryIndex));
+					}
+				}
+				m_bFirstBufferReceived=true;
+			}
+			//
+
+			if(!m_pTopographicMapDatabase->setMatrixBuffer(l_pInputMatrix->getBuffer(), l_pDynamicBoxContext->getInputChunkStartTime(0,i), l_pDynamicBoxContext->getInputChunkEndTime(0,i)))
+			{
+				return false;
+			}
+
 		}
 	}
 
@@ -133,24 +149,4 @@ boolean CTopographicMap2DDisplay::process(void)
 
 	//disable plugin upon errors
 	return l_bProcessValues;
-}
-
-void CTopographicMap2DDisplay::setMatrixDimensionCount(const uint32 ui32DimensionCount)
-{
-	m_pTopographicMapDatabase->setMatrixDimensionCount(ui32DimensionCount);
-}
-
-void CTopographicMap2DDisplay::setMatrixDimensionSize(const uint32 ui32DimensionIndex, const uint32 ui32DimensionSize)
-{
-	m_pTopographicMapDatabase->setMatrixDimensionSize(ui32DimensionIndex, ui32DimensionSize);
-}
-
-void CTopographicMap2DDisplay::setMatrixDimensionLabel(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex, const char* sDimensionLabel)
-{
-	m_pTopographicMapDatabase->setMatrixDimensionLabel(ui32DimensionIndex, ui32DimensionEntryIndex, sDimensionLabel);
-}
-
-void CTopographicMap2DDisplay::setMatrixBuffer(const float64* pBuffer)
-{
-	m_pTopographicMapDatabase->setMatrixBuffer(pBuffer, m_ui64StartTime, m_ui64EndTime);
 }

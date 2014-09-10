@@ -6,8 +6,6 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/IReader.h>
-
 #include <gtk/gtk.h>
 
 #include "../ovpCTopographicMapDatabase.h"
@@ -19,7 +17,6 @@ namespace OpenViBEPlugins
 		class CTopographicMap3DView;
 
 		class CTopographicMap3DDisplay : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >,
-		virtual public OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback::ICallback,
 		virtual public CTopographicMapDrawable
 		{
 		public:
@@ -37,14 +34,6 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_TopographicMap3DDisplay)
-
-			/** \name IBoxAlgorithmStreamedMatrixInputReaderCallback::ICallback implementation */
-			//@{
-			virtual void setMatrixDimensionCount(const OpenViBE::uint32 ui32DimensionCount);
-			virtual void setMatrixDimensionSize(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionSize);
-			virtual void setMatrixDimensionLabel(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionEntryIndex, const char* sDimensionLabel);
-			virtual void setMatrixBuffer(const OpenViBE::float64* pBuffer);
-			//@}
 
 			/** \name CSignalDisplayDrawable implementation */
 			//@{
@@ -145,10 +134,10 @@ namespace OpenViBEPlugins
 
 			//channel localisation decoder
 			OpenViBE::Kernel::IAlgorithmProxy* m_pChannelLocalisationStreamDecoder;
+			//streamed matrix decoder
+			OpenViBEToolkit::TStreamedMatrixDecoder < CTopographicMap3DDisplay >* m_pDecoder;
 
-			//ebml
-			EBML::IReader* m_pStreamedMatrixReader;
-			OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback* m_pStreamedMatrixReaderCallBack;
+			OpenViBE::boolean m_bFirstBufferReceived;
 
 			//Name of file containing face mesh
 			OpenViBE::CString m_oFaceMeshFilename;
@@ -156,11 +145,6 @@ namespace OpenViBEPlugins
 			OpenViBE::CString m_oScalpMeshFilename;
 			//Name of file containing sphere on which scalp vertices are mapped
 			OpenViBE::CString m_oProjectionSphereMeshFilename;
-
-			//Start time of last buffer
-			OpenViBE::uint64 m_ui64StartTime;
-			//end time of last buffer
-			OpenViBE::uint64 m_ui64EndTime;
 
 			//interpolation algorithm
 			OpenViBE::Kernel::IAlgorithmProxy* m_pSphericalSplineInterpolation;
