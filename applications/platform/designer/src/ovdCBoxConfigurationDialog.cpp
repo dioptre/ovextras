@@ -615,8 +615,19 @@ void CBoxConfigurationDialog::update(OpenViBE::CObservable &o, void* data)
 	}
 }
 
+void remove_widgets(GtkWidget *widget, gpointer data)
+{
+	gtk_container_remove(GTK_CONTAINER(data), widget);
+}
+
+void remove_rows(GtkWidget* data)
+{
+	gtk_container_foreach(GTK_CONTAINER(data), remove_widgets, data);
+}
+
 void CBoxConfigurationDialog::generateSettingsTable()
 {
+	remove_rows(GTK_WIDGET(m_pSettingsTable));
 	// count the number of modifiable settings
 	uint32 l_ui32TableSize = 0;
 	for(uint32 i=0; i<m_rBox.getSettingCount(); i++)

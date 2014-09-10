@@ -7,10 +7,15 @@ using namespace OpenViBE;
 using namespace OpenViBEDesigner;
 using namespace OpenViBEDesigner::Setting;
 
+static void on_checkbutton__pressed(::GtkToggleButton* pButton, gpointer pUserData)
+{
+	static_cast<CBitMaskSettingView *>(pUserData)->onChange();
+}
+
 CBitMaskSettingView::CBitMaskSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index,
 										 CString &rBuilderName, const Kernel::IKernelContext &rKernelContext,
 										 const OpenViBE::CIdentifier &rTypeIdentifier):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_oTypeIdentifier(rTypeIdentifier), m_rKernelContext(rKernelContext)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_oTypeIdentifier(rTypeIdentifier), m_rKernelContext(rKernelContext), m_bOnValueSetting(false)
 {
 	setSettingWidgetName("settings_collection-table_setting_bitmask");
 
@@ -31,6 +36,7 @@ CBitMaskSettingView::CBitMaskSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE:
 			gtk_table_attach_defaults(l_pBitMaskTable, l_pSettingButton, (guint)(i&1), (guint)((i&1)+1), (guint)(i>>1), (guint)((i>>1)+1));
 			gtk_button_set_label(GTK_BUTTON(l_pSettingButton), (const char*)l_sEntryName);
 			m_vToggleButton.push_back(GTK_TOGGLE_BUTTON(l_pSettingButton));
+			g_signal_connect(G_OBJECT(l_pSettingButton), "toggled", G_CALLBACK(on_checkbutton__pressed), this);
 		}
 	}
 	gtk_widget_show_all(GTK_WIDGET(l_pBitMaskTable));
@@ -60,6 +66,7 @@ void CBitMaskSettingView::getValue(OpenViBE::CString &rValue) const
 
 void CBitMaskSettingView::setValue(const OpenViBE::CString &rValue)
 {
+	m_bOnValueSetting = true;
 	std::string l_sValue(rValue);
 	std::cout << rValue << std::endl;
 
@@ -74,5 +81,17 @@ void CBitMaskSettingView::setValue(const OpenViBE::CString &rValue)
 		{
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_vToggleButton[i]), false);
 		}
+	}
+
+	m_bOnValueSetting =false;
+}
+
+void CBitMaskSettingView::onChange()
+{
+	if(!m_bOnValueSetting)
+	{
+		CString l_sValue;
+		this->getValue(l_sValue);
+		getBox().setSettingValue(getSettingsIndex(), l_sValue);
 	}
 }

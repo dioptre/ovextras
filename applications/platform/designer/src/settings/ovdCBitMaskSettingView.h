@@ -22,9 +22,13 @@ namespace OpenViBEDesigner
 			virtual void getValue(OpenViBE::CString &rValue) const;
 			virtual void setValue(const OpenViBE::CString &rValue);
 
+			void onChange();
+
 		private:
 			OpenViBE::CIdentifier m_oTypeIdentifier;
 			const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
+
+			OpenViBE::boolean m_bOnValueSetting;
 
 
 			std::vector < ::GtkToggleButton *> m_vToggleButton;
