@@ -256,7 +256,7 @@ boolean CTopographicMap3DDisplay::process(void)
 			}
 			//
 
-			if(!m_pTopographicMapDatabase->setMatrixBuffer(l_pInputMatrix->getBuffer(), m_ui64StartTime, m_ui64EndTime))
+			if(!m_pTopographicMapDatabase->setMatrixBuffer(l_pInputMatrix->getBuffer(), l_pDynamicBoxContext->getInputChunkStartTime(0,i), l_pDynamicBoxContext->getInputChunkEndTime(0,i)))
 			{
 				return false;
 			}

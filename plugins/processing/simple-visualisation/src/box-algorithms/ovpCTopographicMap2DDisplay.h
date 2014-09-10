@@ -35,10 +35,6 @@ namespace OpenViBEPlugins
 			OpenViBEToolkit::TStreamedMatrixDecoder < CTopographicMap2DDisplay >* m_pDecoder;
 			OpenViBE::boolean m_bFirstBufferReceived;
 
-			//Start and end time of the last buffer
-			OpenViBE::uint64 m_ui64StartTime;
-			OpenViBE::uint64 m_ui64EndTime;
-
 			OpenViBE::Kernel::IAlgorithmProxy* m_pSphericalSplineInterpolation;
 			CTopographicMapDatabase* m_pTopographicMapDatabase;
 			CSignalDisplayDrawable* m_pTopographicMap2DView; //main object used for the display (contains all the GUI code)

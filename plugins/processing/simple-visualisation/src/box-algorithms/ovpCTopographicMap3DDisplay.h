@@ -146,11 +146,6 @@ namespace OpenViBEPlugins
 			//Name of file containing sphere on which scalp vertices are mapped
 			OpenViBE::CString m_oProjectionSphereMeshFilename;
 
-			//Start time of last buffer
-			OpenViBE::uint64 m_ui64StartTime;
-			//end time of last buffer
-			OpenViBE::uint64 m_ui64EndTime;
-
 			//interpolation algorithm
 			OpenViBE::Kernel::IAlgorithmProxy* m_pSphericalSplineInterpolation;
 			//signal database object
