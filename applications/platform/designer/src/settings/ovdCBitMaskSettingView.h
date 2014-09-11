@@ -28,10 +28,8 @@ namespace OpenViBEDesigner
 			OpenViBE::CIdentifier m_oTypeIdentifier;
 			const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
 
-			OpenViBE::boolean m_bOnValueSetting;
-
-
 			std::vector < ::GtkToggleButton *> m_vToggleButton;
+			OpenViBE::boolean m_bOnValueSetting;
 		};
 	}
 

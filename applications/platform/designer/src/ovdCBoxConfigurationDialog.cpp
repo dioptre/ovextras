@@ -310,8 +310,8 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 
 		//action buttons can't be unparented from builder interface and added to dialog, which is why they are added at dialog creation time
 #endif
-		::GtkScrolledWindow * l_pScrolledWindow=GTK_SCROLLED_WINDOW(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-scrolledwindow"));
-		::GtkViewport * l_pViewPort=GTK_VIEWPORT(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-viewport"));
+		m_pScrolledWindow=GTK_SCROLLED_WINDOW(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-scrolledwindow"));
+		m_pViewPort=GTK_VIEWPORT(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-viewport"));
 		m_pSettingsTable=GTK_TABLE(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-table"));
 		::GtkContainer* l_pFileOverrideContainer=GTK_CONTAINER(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-hbox_filename_override"));
 		::GtkButton* l_pButtonLoad=GTK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-button_load_current_from_file"));
@@ -320,20 +320,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 		g_object_unref(l_pBuilderInterfaceSetting);
 
 		generateSettingsTable();
-	
-		// Resize the window to fit as much of the table as possible, but keep the max size
-		// limited so it doesn't get outside the screen. For safety, we cap to 800x600
-		// anyway to hopefully prevent the window from going under things such as the gnome toolbar.
-		// The ui file at the moment does not allow resize of this window because the result 
-		// looked ugly if the window was made overly large, and no satisfying solution at the time was
-		// found by the limited intellectual resources available. 
-		const uint32 l_ui32MaxWidth = std::min(800,gdk_screen_get_width(gdk_screen_get_default()));
-		const uint32 l_ui32MaxHeight = std::min(600,gdk_screen_get_height(gdk_screen_get_default()));
-		GtkRequisition l_oSize;
-    	gtk_widget_size_request(GTK_WIDGET(l_pViewPort), &l_oSize);
-    	gtk_widget_set_size_request(GTK_WIDGET(l_pScrolledWindow), 
-			std::min(l_ui32MaxWidth,(uint32)l_oSize.width), 
-			std::min(l_ui32MaxHeight,(uint32)l_oSize.height));
+		updateSize();
 
 		// If a scenario is not running, we add the buttons to save/load etc
 		if (!m_bIsScenarioRunning)
@@ -596,10 +583,12 @@ void CBoxConfigurationDialog::update(OpenViBE::CObservable &o, void* data)
 	{
 		case SettingsAllChange:
 			generateSettingsTable();
+			updateSize();
 			break;
 
 		case SettingValueUpdate:
 		{
+			std::cout << "**** Value : " << l_pEvent->m_i32FirstIndex<< " " << std::endl;
 			CString l_sSettingName;
 			CString l_sSettingValue;
 
@@ -607,11 +596,29 @@ void CBoxConfigurationDialog::update(OpenViBE::CObservable &o, void* data)
 			m_rBox.getSettingValue(l_pEvent->m_i32FirstIndex, l_sSettingValue);
 
 			m_mSettingViewMap[l_sSettingName]->setValue(l_sSettingValue);
+			std::cout << " Fin de value" <<  std::endl<< std::endl;
 			break;
 		}
 
+		case SettingDelete:
+		std::cout << "**** Delete" << std::endl;
+			removeSetting(l_pEvent->m_i32FirstIndex);
+			std::cout << " Fin de delete" <<  std::endl << std::endl;
+			break;
+
+		case SettingAdd:
+			generateSettingsTable();
+			updateSize();
+			break;
+
+		case SettingChange:
+			std::cout << "**** Changement" << std::endl;
+			settingChange(l_pEvent->m_i32FirstIndex);
+			std::cout << " Fin de changement" <<  std::endl<< std::endl;
+			break;
+
 		default:
-		std::cout << "Unhandle box event" << std::endl;
+		std::cout << "Unhandle box event " << l_pEvent->m_eType << std::endl;
 	}
 }
 
@@ -627,7 +634,9 @@ void remove_rows(GtkWidget* data)
 
 void CBoxConfigurationDialog::generateSettingsTable()
 {
+	clearSettingWrappersVector();
 	remove_rows(GTK_WIDGET(m_pSettingsTable));
+
 	// count the number of modifiable settings
 	uint32 l_ui32TableSize = 0;
 	for(uint32 i=0; i<m_rBox.getSettingCount(); i++)
@@ -648,29 +657,130 @@ void CBoxConfigurationDialog::generateSettingsTable()
 	}
 	gtk_table_resize(m_pSettingsTable, l_ui32TableSize+2, 4);
 
+
 	// Iterate over box settings, generate corresponding gtk widgets. If the scenario is running, we are making a
 	// 'modifiable settings' dialog and use a subset of widgets with a slightly different layout and buttons.
 	for(uint32 i=0,j=0; i<m_rBox.getSettingCount(); i++)
 	{
-		CString l_sSettingName;
-		boolean l_bSettingModifiable;
-
-		m_rBox.getSettingName(i, l_sSettingName);
-		m_rBox.getSettingMod(i, l_bSettingModifiable);
-
-		//if the scenario is not running we take all the settings
-		//otherwise, we take only the modifiable ones
-		if( (!m_bIsScenarioRunning) || (m_bIsScenarioRunning && l_bSettingModifiable) )
+		if(this->addSettingsToView(i, j))
 		{
-			Setting::CAbstractSettingView* l_oView = m_oSettingFactory.getSettingView(m_rBox, i);
-
-			gtk_table_attach(m_pSettingsTable, l_oView->getNameWidget() ,   0, 1, j, j+1, ::GtkAttachOptions(GTK_FILL), ::GtkAttachOptions(GTK_FILL), 0, 0);
-			gtk_table_attach(m_pSettingsTable, l_oView->getEntryWidget(),   1, 4, j, j+1, ::GtkAttachOptions(GTK_SHRINK|GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
-
-			m_mSettingViewMap[l_sSettingName] = l_oView;
 			++j;
 		}
 	}
+	std::cout << "Number of setting display " << m_vSettingWrappers.size() << std::endl;
+}
+
+boolean CBoxConfigurationDialog::addSettingsToView(uint32 ui32SettingIndex, OpenViBE::uint32 ui32TableIndex)
+{
+	boolean l_bSettingModifiable;
+	m_rBox.getSettingMod(ui32SettingIndex, l_bSettingModifiable);
+
+	//if the scenario is not running we take all the settings
+	//otherwise, we take only the modifiable ones
+	if( (!m_bIsScenarioRunning) || (m_bIsScenarioRunning && l_bSettingModifiable) )
+	{
+		CString l_sSettingName;
+
+		m_rBox.getSettingName(ui32SettingIndex, l_sSettingName);
+		Setting::CAbstractSettingView* l_oView = m_oSettingFactory.getSettingView(m_rBox, ui32SettingIndex);
+
+		gtk_table_attach(m_pSettingsTable, l_oView->getNameWidget() ,   0, 1, ui32TableIndex, ui32TableIndex+1, ::GtkAttachOptions(GTK_FILL), ::GtkAttachOptions(GTK_FILL), 0, 0);
+		gtk_table_attach(m_pSettingsTable, l_oView->getEntryWidget(),   1, 4, ui32TableIndex, ui32TableIndex+1, ::GtkAttachOptions(GTK_SHRINK|GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
+
+		m_mSettingViewMap[l_sSettingName] = l_oView;
+		m_mSettingViewIndexMap[l_sSettingName] = ui32TableIndex;
+
+		m_vSettingWrappers.insert(m_vSettingWrappers.begin()+ui32TableIndex, CSettingViewWrapper(ui32SettingIndex, l_oView));
+
+		return true;
+	}
+	return false;
+}
+
+void CBoxConfigurationDialog::settingChange(uint32 ui32SettingIndex)
+{
+	//We remeber the place to add the new setting at the same place
+	uint32 l_ui32IndexTable = getTableIndex(ui32SettingIndex);
+
+	removeSetting(ui32SettingIndex, false);
+	addSettingsToView(ui32SettingIndex, l_ui32IndexTable);
+}
+
+void CBoxConfigurationDialog::clearSettingWrappersVector(void)
+{
+	for (std::vector<CSettingViewWrapper>::iterator it = m_vSettingWrappers.begin() ; it != m_vSettingWrappers.end(); ++it)
+	{
+		CSettingViewWrapper &l_oView = *it;
+		delete l_oView.m_pView;
+	}
+	m_vSettingWrappers.clear();
+}
+
+
+void CBoxConfigurationDialog::removeSetting(uint32 ui32SettingIndex, boolean bShift)
+{
+	uint32 ui32TableIndex = getTableIndex(ui32SettingIndex);
+
+	CSettingViewWrapper &l_rViewWrapper = m_vSettingWrappers[ui32TableIndex];
+	::GtkWidget* l_pName = l_rViewWrapper.m_pView->getNameWidget();
+	::GtkWidget* l_pEntry = l_rViewWrapper.m_pView->getEntryWidget();
+
+	gtk_container_remove(GTK_CONTAINER(m_pSettingsTable), l_pName);
+	gtk_container_remove(GTK_CONTAINER(m_pSettingsTable), l_pEntry);
+
+	delete l_rViewWrapper.m_pView;
+	m_vSettingWrappers.erase(m_vSettingWrappers.begin() + ui32TableIndex);
+
+	//Now if we need to do it we shift everything to avoid an empty row in the table
+	if(bShift){
+
+		for(size_t i = ui32TableIndex; i < m_vSettingWrappers.size() ; ++i)
+		{
+			Setting::CAbstractSettingView *l_oView = m_vSettingWrappers[i].m_pView;
+			--(m_vSettingWrappers[i].m_ui32SettingIndex);
+
+			gtk_container_remove(GTK_CONTAINER(m_pSettingsTable), l_oView->getNameWidget());
+			gtk_table_attach(m_pSettingsTable, l_oView->getNameWidget() ,   0, 1, i, i+1, ::GtkAttachOptions(GTK_FILL), ::GtkAttachOptions(GTK_FILL), 0, 0);
+
+			gtk_container_remove(GTK_CONTAINER(m_pSettingsTable), l_oView->getEntryWidget());
+			gtk_table_attach(m_pSettingsTable, l_oView->getEntryWidget(),   1, 4, i, i+1, ::GtkAttachOptions(GTK_SHRINK|GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
+		}
+		//Now let's resize everything
+		updateSize();
+	}
+}
+
+uint32 CBoxConfigurationDialog::getTableIndex(uint32 ui32SettingIndex)
+{
+	uint32 ui32TableIndex=0;
+	for (std::vector<CSettingViewWrapper>::iterator it = m_vSettingWrappers.begin() ; it != m_vSettingWrappers.end(); ++it, ++ui32TableIndex)
+	{
+		CSettingViewWrapper &l_rViewWrapper = *it;
+		if(l_rViewWrapper.m_ui32SettingIndex == ui32SettingIndex){
+			return ui32SettingIndex;
+		}
+	}
+
+	return 0xFFFFFFF;
+}
+
+
+
+void CBoxConfigurationDialog::updateSize()
+{
+	// Resize the window to fit as much of the table as possible, but keep the max size
+	// limited so it doesn't get outside the screen. For safety, we cap to 800x600
+	// anyway to hopefully prevent the window from going under things such as the gnome toolbar.
+	// The ui file at the moment does not allow resize of this window because the result
+	// looked ugly if the window was made overly large, and no satisfying solution at the time was
+	// found by the limited intellectual resources available.
+	const uint32 l_ui32MaxWidth = std::min(800,gdk_screen_get_width(gdk_screen_get_default()));
+	const uint32 l_ui32MaxHeight = std::min(600,gdk_screen_get_height(gdk_screen_get_default()));
+	GtkRequisition l_oSize;
+	gtk_widget_size_request(GTK_WIDGET(m_pViewPort), &l_oSize);
+	gtk_widget_set_size_request(GTK_WIDGET(m_pScrolledWindow),
+		std::min(l_ui32MaxWidth,(uint32)l_oSize.width),
+		std::min(l_ui32MaxHeight,(uint32)l_oSize.height));
 }
 
 const CIdentifier CBoxConfigurationDialog::getBoxID() const

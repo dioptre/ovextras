@@ -22,6 +22,7 @@ namespace OpenViBEDesigner
 		private:
 			::GtkToggleButton* m_pToggle;
 			::GtkEntry* m_pEntry;
+			OpenViBE::boolean m_bOnValueSetting;
 		};
 	}
 

@@ -33,6 +33,16 @@ namespace OpenViBEDesigner
 		OpenViBE::Kernel::IBox& m_rBox;
 	};
 
+	class CSettingViewWrapper{
+	public:
+		CSettingViewWrapper(OpenViBE::uint32 ui32SettingIndex,	Setting::CAbstractSettingView *pView):
+			m_ui32SettingIndex(ui32SettingIndex), m_pView(pView)
+		{}
+
+		OpenViBE::uint32 m_ui32SettingIndex;
+		Setting::CAbstractSettingView *m_pView;
+	};
+
 	class CBoxConfigurationDialog : public OpenViBE::IObserver
 	{
 	public:
@@ -46,8 +56,17 @@ namespace OpenViBEDesigner
 
 		virtual void update(OpenViBE::CObservable &o, void* data);
 
+		void updateSize();
+
 	protected:
 		void generateSettingsTable(void);
+		OpenViBE::boolean addSettingsToView(OpenViBE::uint32 ui32SettingIndex, OpenViBE::uint32 ui32TableIndex);
+
+		void settingChange(OpenViBE::uint32 ui32SettingIndex);
+
+		void clearSettingWrappersVector(void);
+		void removeSetting(OpenViBE::uint32 ui32SettingIndex, OpenViBE::boolean bShift = true);
+		OpenViBE::uint32 getTableIndex(OpenViBE::uint32 ui32SettingIndex);
 
 		const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
 		OpenViBE::Kernel::IBox& m_rBox;
@@ -59,11 +78,18 @@ namespace OpenViBEDesigner
 		::GtkWidget* m_pSettingOverrideValue;
 
 		::GtkTable *m_pSettingsTable;
+		::GtkViewport *m_pViewPort;
+		::GtkScrolledWindow * m_pScrolledWindow;
+
 		bool m_bIsScenarioRunning; // true if the scenario is running, false otherwise
 		std::map< OpenViBE::CString, ::GtkWidget* > m_mSettingWidget;
 
 		Setting::CSettingViewFactory m_oSettingFactory;
 		std::map< OpenViBE::CString, Setting::CAbstractSettingView* > m_mSettingViewMap;//Temporary need to be remove
+		std::map< OpenViBE::CString, OpenViBE::uint32 > m_mSettingViewIndexMap;
+
+		std::vector<CSettingViewWrapper> m_vSettingWrappers;
+
 		CSettingCollectionHelper* m_pHelper;
 		SButtonCB* m_pButtonCB;
 		::GtkCheckButton* m_pFileOverrideCheck;

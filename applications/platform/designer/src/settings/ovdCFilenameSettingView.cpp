@@ -21,7 +21,7 @@ static void on_change(::GtkEntry *entry, gpointer pUserData)
 
 
 CFilenameSettingView::CFilenameSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName, const Kernel::IKernelContext &rKernelContext):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_rKernelContext(rKernelContext)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_rKernelContext(rKernelContext), m_bOnValueSetting(false)
 {
 	setSettingWidgetName("settings_collection-hbox_setting_filename");
 
@@ -48,7 +48,9 @@ void CFilenameSettingView::getValue(OpenViBE::CString &rValue) const
 
 void CFilenameSettingView::setValue(const OpenViBE::CString &rValue)
 {
+	m_bOnValueSetting = true;
 	gtk_entry_set_text(m_pEntry, rValue);
+	m_bOnValueSetting =false;
 }
 
 void CFilenameSettingView::browse()
@@ -91,6 +93,9 @@ void CFilenameSettingView::browse()
 
 void CFilenameSettingView::onChange()
 {
-	const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
-	getBox().setSettingValue(getSettingsIndex(), l_sValue);
+	if(!m_bOnValueSetting)
+	{
+		const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
+		getBox().setSettingValue(getSettingsIndex(), l_sValue);
+	}
 }

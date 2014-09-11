@@ -778,6 +778,7 @@ boolean CBox::removeSetting(
 	}
 
 	this->notify(BoxModification_SettingRemoved, ui32SettingIndex);
+	this->notifySettingChange(SettingDelete, ui32SettingIndex);
 
 	return true;
 }
@@ -852,6 +853,7 @@ boolean CBox::setSettingType(
 	m_vSetting[ui32SettingIndex].m_oTypeIdentifier=rTypeIdentifier;
 
 	this->notify(BoxModification_SettingTypeChanged, ui32SettingIndex);
+	this->notifySettingChange(SettingChange, ui32SettingIndex);
 
 	return true;
 }
@@ -867,6 +869,7 @@ boolean CBox::setSettingName(
 	m_vSetting[ui32SettingIndex].m_sName=rName;
 
 	this->notify(BoxModification_SettingNameChanged, ui32SettingIndex);
+	this->notifySettingChange(SettingChange, ui32SettingIndex);
 
 	return true;
 }

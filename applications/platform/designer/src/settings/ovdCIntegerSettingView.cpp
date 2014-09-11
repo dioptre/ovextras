@@ -24,7 +24,7 @@ static void on_insertion(::GtkEntry *entry, gpointer pUserData)
 
 
 CIntegerSettingView::CIntegerSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName, const Kernel::IKernelContext &rKernelContext):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_rKernelContext(rKernelContext)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_rKernelContext(rKernelContext), m_bOnValueSetting(false)
 {
 	setSettingWidgetName("settings_collection-hbox_setting_integer");
 
@@ -53,7 +53,9 @@ void CIntegerSettingView::getValue(OpenViBE::CString &rValue) const
 
 void CIntegerSettingView::setValue(const OpenViBE::CString &rValue)
 {
+	m_bOnValueSetting = true;
 	gtk_entry_set_text(m_pEntry, rValue);
+	m_bOnValueSetting =false;
 }
 
 void CIntegerSettingView::adjustValue(int amount)
@@ -68,6 +70,9 @@ void CIntegerSettingView::adjustValue(int amount)
 
 void CIntegerSettingView::onChange()
 {
-	const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
-	getBox().setSettingValue(getSettingsIndex(), l_sValue);
+	if(!m_bOnValueSetting)
+	{
+		const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
+		getBox().setSettingValue(getSettingsIndex(), l_sValue);
+	}
 }

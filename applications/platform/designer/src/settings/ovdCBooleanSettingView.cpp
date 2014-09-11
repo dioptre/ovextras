@@ -13,7 +13,7 @@ static void on_checkbutton_setting_boolean_pressed(::GtkToggleButton* pButton, g
 }
 
 CBooleanSettingView::CBooleanSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_bOnValueSetting(false)
 {
 	setSettingWidgetName("settings_collection-hbox_setting_boolean");
 
@@ -40,6 +40,7 @@ void CBooleanSettingView::getValue(OpenViBE::CString &rValue) const
 
 void CBooleanSettingView::setValue(const OpenViBE::CString &rValue)
 {
+	m_bOnValueSetting = true;
 	if(rValue==CString("true"))
 	{
 		gtk_toggle_button_set_active(m_pToggle, true);
@@ -54,18 +55,22 @@ void CBooleanSettingView::setValue(const OpenViBE::CString &rValue)
 	}
 
 	gtk_entry_set_text(m_pEntry, rValue);
+	m_bOnValueSetting =false;
 }
 
 
 void CBooleanSettingView::toggleButtonClick()
 {
-	if(::gtk_toggle_button_get_active(m_pToggle))
+	if(!m_bOnValueSetting)
 	{
-		getBox().setSettingValue(getSettingsIndex(), "true");
-	}
-	else
-	{
-		getBox().setSettingValue(getSettingsIndex(), "false");
+		if(::gtk_toggle_button_get_active(m_pToggle))
+		{
+			getBox().setSettingValue(getSettingsIndex(), "true");
+		}
+		else
+		{
+			getBox().setSettingValue(getSettingsIndex(), "false");
+		}
 	}
 
 }

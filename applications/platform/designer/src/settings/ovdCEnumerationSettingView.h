@@ -33,6 +33,7 @@ namespace OpenViBEDesigner
 			std::map < OpenViBE::CString, OpenViBE::uint64 > m_mEntriesIndex;
 
 			const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
+			OpenViBE::boolean m_bOnValueSetting;
 		};
 	}
 

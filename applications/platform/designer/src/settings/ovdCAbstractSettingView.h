@@ -47,6 +47,7 @@ namespace OpenViBEDesigner
 
 			//If we don't store the builder, the setting name will be free when we'll unref the builder
 			::GtkBuilder *m_pBuilder;
+			OpenViBE::boolean m_bOnValueSetting;
 		};
 	}
 

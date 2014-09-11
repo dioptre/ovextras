@@ -57,7 +57,7 @@ static void on_change(::GtkEntry *entry, gpointer pUserData)
 
 
 CColorGradientSettingView::CColorGradientSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName, const Kernel::IKernelContext &rKernelContext):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_rKernelContext(rKernelContext), m_sBuilderName(rBuilderName)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_rKernelContext(rKernelContext), m_sBuilderName(rBuilderName), m_bOnValueSetting(false)
 {
 	setSettingWidgetName("settings_collection-hbox_setting_color_gradient");
 
@@ -83,7 +83,9 @@ void CColorGradientSettingView::getValue(OpenViBE::CString &rValue) const
 
 void CColorGradientSettingView::setValue(const OpenViBE::CString &rValue)
 {
+	m_bOnValueSetting = true;
 	gtk_entry_set_text(m_pEntry, rValue);
+	m_bOnValueSetting =false;
 }
 
 void CColorGradientSettingView::configurePressed()
@@ -131,7 +133,10 @@ void CColorGradientSettingView::configurePressed()
 			l_oFinalGradient[i*4+3] = vColorGradient[i].oColor.blue  * 100. / 65535.;
 		}
 		OpenViBEToolkit::Tools::ColorGradient::format(l_sFinalGradient, l_oFinalGradient);
-		getBox().setSettingValue(getSettingsIndex(), l_sFinalGradient.toASCIIString());
+		if(!m_bOnValueSetting)
+		{
+			getBox().setSettingValue(getSettingsIndex(), l_sFinalGradient.toASCIIString());
+		}
 		//gtk_entry_set_text(m_pEntry, l_sFinalGradient.toASCIIString());
 	}
 

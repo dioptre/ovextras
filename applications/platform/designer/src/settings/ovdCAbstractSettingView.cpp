@@ -19,10 +19,10 @@ OpenViBE::CString CAbstractSettingView::getSettingWidgetName(void)
 
 CAbstractSettingView::~CAbstractSettingView()
 {
-	if(m_pNameWidget){
+	if(GTK_IS_WIDGET(m_pNameWidget)){
 		gtk_widget_destroy(m_pNameWidget);
 	}
-	if(m_pEntryWidget){
+	if(GTK_IS_WIDGET(m_pEntryWidget)){
 		gtk_widget_destroy(m_pEntryWidget);
 	}
 }
@@ -32,7 +32,8 @@ CAbstractSettingView::CAbstractSettingView(OpenViBE::Kernel::IBox& rBox, OpenViB
 	m_ui32Index(ui32Index),
 	m_sSettingWidgetName(""),
 	m_pNameWidget(NULL),
-	m_pEntryWidget(NULL)
+	m_pEntryWidget(NULL),
+	m_bOnValueSetting(false)
 {
 	m_pBuilder = gtk_builder_new();
 	gtk_builder_add_from_file(m_pBuilder, rBuilderName.toASCIIString(), NULL);
@@ -108,6 +109,8 @@ GtkWidget *CAbstractSettingView::generateEntryWidget(void)
 
 	setEntryWidget(GTK_WIDGET(m_pTable));
 	gtk_widget_set_visible(getEntryWidget(), true);
+	//If we don't increase the ref counter it will cause trouble when we gonna move it later
+	g_object_ref(G_OBJECT(m_pTable));
 	return l_pSettingWidget;
 }
 
@@ -115,7 +118,6 @@ void CAbstractSettingView::initializeValue()
 {
 	CString l_sSettingValue;
 	getBox().getSettingValue(m_ui32Index, l_sSettingValue);
-	std::cout << l_sSettingValue << std::endl;
 	setValue(l_sSettingValue);
 }
 

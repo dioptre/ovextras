@@ -20,6 +20,7 @@ namespace OpenViBEDesigner
 
 		private:
 			::GtkEntry* m_pEntry;
+			OpenViBE::boolean m_bOnValueSetting;
 		};
 	}
 

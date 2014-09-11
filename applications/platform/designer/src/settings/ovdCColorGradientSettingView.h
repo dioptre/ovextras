@@ -56,6 +56,8 @@ namespace OpenViBEDesigner
 			std::vector < SColorGradientDataNode > vColorGradient;
 			std::map < ::GtkColorButton*, OpenViBE::uint32 > vColorButtonMap;
 			std::map < ::GtkSpinButton*, OpenViBE::uint32 > vSpinButtonMap;
+
+			OpenViBE::boolean m_bOnValueSetting;
 		};
 	}
 

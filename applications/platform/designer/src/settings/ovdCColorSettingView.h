@@ -27,6 +27,7 @@ namespace OpenViBEDesigner
 			::GtkColorButton *m_pButton;
 
 			const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
+			OpenViBE::boolean m_bOnValueSetting;
 		};
 	}
 

@@ -16,7 +16,7 @@ static void on_change(::GtkEntry *entry, gpointer pUserData)
 CEnumerationSettingView::CEnumerationSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index,
 												 CString &rBuilderName, const Kernel::IKernelContext &rKernelContext,
 												 const OpenViBE::CIdentifier &rTypeIdentifier):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_oTypeIdentifier(rTypeIdentifier), m_rKernelContext(rKernelContext)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_oTypeIdentifier(rTypeIdentifier), m_rKernelContext(rKernelContext), m_bOnValueSetting(false)
 {
 	p=false;
 	setSettingWidgetName("settings_collection-comboboxentry_setting_enumeration");
@@ -59,12 +59,17 @@ void CEnumerationSettingView::getValue(OpenViBE::CString &rValue) const
 
 void CEnumerationSettingView::setValue(const OpenViBE::CString &rValue)
 {
+	m_bOnValueSetting = true;
 	gtk_combo_box_set_active(m_pComboBox, (gint)m_mEntriesIndex[rValue]);
+	m_bOnValueSetting =false;
 }
 
 void CEnumerationSettingView::onChange()
 {
-	const gchar* l_sValue = gtk_combo_box_get_active_text(m_pComboBox);
-	getBox().setSettingValue(getSettingsIndex(), l_sValue);
+	if(!m_bOnValueSetting)
+	{
+		const gchar* l_sValue = gtk_combo_box_get_active_text(m_pComboBox);
+		getBox().setSettingValue(getSettingsIndex(), l_sValue);
+	}
 }
 

@@ -13,7 +13,7 @@ static void on_change(::GtkEntry *entry, gpointer pUserData)
 }
 
 CStringSettingView::CStringSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_bOnValueSetting(false)
 {
 	setSettingWidgetName("settings_collection-entry_setting_string");
 
@@ -35,11 +35,16 @@ void CStringSettingView::getValue(OpenViBE::CString &rValue) const
 
 void CStringSettingView::setValue(const OpenViBE::CString &rValue)
 {
+	m_bOnValueSetting = true;
 	gtk_entry_set_text(m_pEntry, rValue);
+	m_bOnValueSetting =false;
 }
 
 void CStringSettingView::onChange()
 {
-	const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
-	getBox().setSettingValue(getSettingsIndex(), l_sValue);
+	if(!m_bOnValueSetting)
+	{
+		const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
+		getBox().setSettingValue(getSettingsIndex(), l_sValue);
+	}
 }
