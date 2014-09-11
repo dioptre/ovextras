@@ -489,15 +489,22 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 		else if(l_iResult==1) // default
 		{
 			DEBUG_PRINT(cout << "default\n";)
-
-			for(uint32 i=0; i<m_rBox.getSettingCount(); i++)
+			uint32 ui32SettingCount = m_rBox.getSettingCount();
+			//Find an other solution to do this
+			for(uint32 i=0; i<ui32SettingCount; i++)
 			{
 				CString l_sSettingName;
 				CString l_sSettingValue;
 
 				m_rBox.getSettingName(i, l_sSettingName);
 				m_rBox.getSettingDefaultValue(i, l_sSettingValue);
-				m_mSettingViewMap[l_sSettingName]->setValue(l_sSettingValue);
+				m_rBox.setSettingValue(i, l_sSettingValue);
+
+				if(m_rBox.getSettingCount() != ui32SettingCount)
+				{
+					ui32SettingCount = m_rBox.getSettingCount();
+					i=0;
+				}
 			}
 
 			m_pHelper->setValue(OV_TypeId_Filename, m_pSettingOverrideValue, "");
@@ -509,18 +516,7 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 		{
 			DEBUG_PRINT(cout << "Revert\n";)
 
-//			for(uint32 i=0; i<m_rBox.getSettingCount(); i++)
-//			{
-//				CString l_sSettingName;
-//				CString l_sSettingValue;
-
-//				m_rBox.getSettingName(i, l_sSettingName);
-//				m_rBox.getSettingValue(i, l_sSettingValue);
-
-//				m_mSettingViewMap[l_sSettingName]->setValue(l_sSettingValue);
-//			}
 			m_rBox.restoreState();
-			//this->generateSettingsTable();
 			if(m_rBox.hasAttribute(OV_AttributeId_Box_SettingOverrideFilename))
 			{
 				m_pHelper->setValue(OV_TypeId_Filename, m_pSettingOverrideValue, m_rBox.getAttributeValue(OV_AttributeId_Box_SettingOverrideFilename));
@@ -746,6 +742,7 @@ void CBoxConfigurationDialog::removeSetting(uint32 ui32SettingIndex, boolean bSh
 			gtk_table_attach(m_pSettingsTable, l_oView->getEntryWidget(),   1, 4, i, i+1, ::GtkAttachOptions(GTK_SHRINK|GTK_FILL|GTK_EXPAND), ::GtkAttachOptions(GTK_SHRINK), 0, 0);
 		}
 		//Now let's resize everything
+		gtk_table_resize(m_pSettingsTable, m_vSettingWrappers.size()+2, 4);
 		updateSize();
 	}
 }
