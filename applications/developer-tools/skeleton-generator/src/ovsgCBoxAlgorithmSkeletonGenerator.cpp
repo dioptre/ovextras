@@ -464,7 +464,7 @@ void CBoxAlgorithmSkeletonGenerator::buttonCheckCB(void)
 
 void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 {
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Generating files... \n";
+	m_rKernelContext.getLogManager() << LogLevel_Info << "Generating files, please wait ... \n";
 	CString l_sLogMessages = "Generating files...\n";
 	::GtkWidget * l_pTooltipTextview = GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "sg-box-tooltips-textview"));
 	::GtkTextBuffer * l_pTextBuffer  = gtk_text_view_get_buffer(GTK_TEXT_VIEW(l_pTooltipTextview));
