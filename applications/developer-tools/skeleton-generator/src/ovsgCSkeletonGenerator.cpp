@@ -10,6 +10,19 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBESkeletonGenerator;
 
+// Wraps system() call to handle spaces on Windows
+int systemWrapper(const CString& command)
+{
+#if defined(TARGET_OS_Windows)
+	// If both command and its arguments have spaces on Windows, the whole thing needs to be padded with double quotes
+	CString l_sPadded = "\"" + command + "\"";
+	return system(l_sPadded.toASCIIString());
+#else
+	// On Linux we leave it as-is.
+	return system(command.toASCIIString());
+#endif
+}
+
 CSkeletonGenerator::CSkeletonGenerator(IKernelContext & rKernelContext, ::GtkBuilder * pBuilderInterface)
 	:m_rKernelContext(rKernelContext)
 	,m_pBuilderInterface(pBuilderInterface)
@@ -186,7 +199,7 @@ boolean CSkeletonGenerator::executeSedCommand(CString sTemplateFile, CString sCo
 	CString l_sMove;
 	CString l_sNull;
 #ifdef TARGET_OS_Windows
-	l_sSed = m_rKernelContext.getConfigurationManager().expand("${Path_Data}/applications/skeleton-generator/sed");
+	l_sSed = m_rKernelContext.getConfigurationManager().expand("\"${Path_Data}/applications/skeleton-generator/sed\"");
 	l_sMove = "move";
 	l_sNull = "NULL";
 #else
@@ -203,18 +216,18 @@ boolean CSkeletonGenerator::executeSedCommand(CString sTemplateFile, CString sCo
 	if(string(sDestinationFile) != string(""))
 	{
 		l_sCommandSed =  l_sCommandSed + " > \"" + sDestinationFile + "\"";
-		l_bSuccess = (system(((string)l_sCommandSed).c_str()) == 0);
+		l_bSuccess = (systemWrapper(l_sCommandSed) == 0);
 	}
 	else
 	{
 		l_sCommandSed =  l_sCommandSed + " > tmp-sed";
-		l_bSuccess = (system(l_sCommandSed) == 0);
+		l_bSuccess = (systemWrapper(l_sCommandSed) == 0);
 		CString l_sMoveCommand = l_sMove + " tmp-sed \"" + sTemplateFile + "\" >> "+l_sNull;
-		l_bSuccess &= (system(l_sMoveCommand) == 0);
+		l_bSuccess &= (systemWrapper(l_sMoveCommand) == 0);
 		m_rKernelContext.getLogManager() << LogLevel_Trace << " -- Move command : [" << l_sMoveCommand << "]\n";
 	}
 	
-	l_bSuccess = (system(((string)l_sCommandSed).c_str()) == 0);
+	l_bSuccess = (systemWrapper(l_sCommandSed) == 0);
 
 	if(l_bSuccess)
 	{
@@ -235,7 +248,7 @@ boolean CSkeletonGenerator::executeSedSubstitution(CString sTemplateFile, CStrin
 	CString l_sMove;
 	CString l_sNull;
 #ifdef TARGET_OS_Windows
-	l_sSed = m_rKernelContext.getConfigurationManager().expand("${Path_Data}/applications/skeleton-generator/sed");
+	l_sSed = m_rKernelContext.getConfigurationManager().expand("\"${Path_Data}/applications/skeleton-generator/sed\"");
 	l_sMove = "move";
 	l_sNull = "NULL";
 #else
@@ -254,17 +267,17 @@ boolean CSkeletonGenerator::executeSedSubstitution(CString sTemplateFile, CStrin
 	if(string(sDestinationFile) != string(""))
 	{
 		l_sCommandSed =  l_sCommandSed + " > \"" + sDestinationFile + "\"";
-		l_bSuccess = (system(((string)l_sCommandSed).c_str()) == 0);
+		l_bSuccess = (systemWrapper(l_sCommandSed) == 0);
 	}
 	else
 	{
 		l_sCommandSed =  l_sCommandSed + " > tmp-sed";
-		l_bSuccess = (system(l_sCommandSed) == 0);
+		l_bSuccess = (systemWrapper(l_sCommandSed) == 0);
 		CString l_sMoveCommand = l_sMove + " tmp-sed \"" + sTemplateFile + "\" >> "+l_sNull;
-		l_bSuccess &= (system(l_sMoveCommand) == 0);
+		l_bSuccess &= (systemWrapper(l_sMoveCommand) == 0);
 		m_rKernelContext.getLogManager() << LogLevel_Trace << " -- Move command : [" << l_sMoveCommand << "]\n";
 #ifdef TARGET_OS_Windows
-		l_bSuccess &= (system("del NULL") == 0);
+		l_bSuccess &= (systemWrapper("del NULL") == 0);
 #endif
 	}
 
