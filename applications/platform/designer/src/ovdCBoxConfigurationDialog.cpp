@@ -23,131 +23,11 @@ using namespace std;
 #define DEBUG_PRINT(x)
 #endif
 
-static const char * const c_sRootName = "OpenViBE-SettingsOverride";
-static const char *const c_sSettingName = "SettingValue";
-
 namespace
 {
-	// These callbacks are used for loading and saving the parameters to/from xml files
-	class CXMLWriterCallback : public XML::IWriterCallback
-	{
-	public:
-
-		CXMLWriterCallback(const string& sFilename)
-		{
-			m_pFile=fopen(sFilename.c_str(), "wt");
-			if(!m_pFile)
-			{
-				cout << "Error opening " << sFilename << " for writing\n";
-			}
-		}
-
-		virtual ~CXMLWriterCallback(void)
-		{
-			if(m_pFile)
-			{
-				fclose(m_pFile);
-			}
-		}
-
-		virtual void write(const char* sString)
-		{
-			if(m_pFile)
-			{
-				fprintf(m_pFile, "%s", sString);
-			}
-		}
-
-	protected:
-
-		FILE* m_pFile;
-	};
-
-	class CXMLReaderCallback : public XML::IReaderCallback
-	{
-	public:
-
-		CXMLReaderCallback(SButtonCB& rButtonCB)
-			:m_ui32Status(Status_ParsingNone)
-			,m_rButtonCB(rButtonCB)
-		{
-		}
-
-		virtual ~CXMLReaderCallback(void)
-		{
-		}
-
-		virtual void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
-		{
-			string l_sName(sName);
-			switch(m_ui32Status)
-			{
-				case Status_ParsingNone:
-					if(l_sName=="OpenViBE-SettingsOverride")
-					{
-						m_ui32Status=Status_ParsingSettingsOverride;
-						m_ui32SettingIndex=(uint32)-1;
-					}
-					break;
-
-				case Status_ParsingSettingsOverride:
-					if(l_sName=="SettingValue")
-					{
-						m_ui32Status=Status_ParsingSettingValue;
-						m_ui32SettingIndex++;
-					}
-					break;
-			}
-		}
-
-		virtual void processChildData(const char* sData)
-		{
-			switch(m_ui32Status)
-			{
-				case Status_ParsingSettingValue:
-					if(m_ui32SettingIndex<m_rButtonCB.m_rBox.getSettingCount())
-					{
-						CString l_sSettingName;
-						CIdentifier l_oSettingType;
-
-						m_rButtonCB.m_rBox.getSettingName(m_ui32SettingIndex, l_sSettingName);
-						m_rButtonCB.m_rBox.getSettingType(m_ui32SettingIndex, l_oSettingType);
-						m_rButtonCB.m_rHelper.setValue(l_oSettingType, m_rButtonCB.m_rSettingWidget[l_sSettingName], sData);
-
-						m_rButtonCB.m_rBox.setSettingValue(m_ui32SettingIndex,sData);
-					}
-					break;
-			}
-		}
-
-		virtual void closeChild(void)
-		{
-			switch(m_ui32Status)
-			{
-				case Status_ParsingSettingValue:
-					m_ui32Status=Status_ParsingSettingsOverride;
-					break;
-
-				case Status_ParsingSettingsOverride:
-					m_ui32Status=Status_ParsingNone;
-					break;
-			}
-		}
-
-	protected:
-
-		enum
-		{
-			Status_ParsingNone,
-			Status_ParsingSettingsOverride,
-			Status_ParsingSettingValue,
-		};
-
-		uint32 m_ui32Status;
-		uint32 m_ui32SettingIndex;
-		SButtonCB& m_rButtonCB;
-	};
-};
+	const char * const c_sRootName = "OpenViBE-SettingsOverride";
+	const char *const c_sSettingName = "SettingValue";
+}
 
 // This callback is used to gray out the settings if file override is selected
 static void on_file_override_check_toggled(::GtkToggleButton* pToggleButton, gpointer pUserData)
@@ -177,7 +57,6 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 	,m_pWidgetToReturn(NULL)
 	,m_bIsScenarioRunning(bMode)
 	,m_oSettingFactory(m_sGUISettingsFilename.toASCIIString(), rKernelContext)
-	,m_pButtonCB(NULL)
 	,m_pFileOverrideCheck(NULL)
 {
 	m_pHelper = new CSettingCollectionHelper(m_rKernelContext, m_sGUISettingsFilename.toASCIIString());
@@ -221,7 +100,6 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 		::GtkButton* l_pButtonLoad=GTK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-button_load_current_from_file"));
 		::GtkButton* l_pButtonSave=GTK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-button_save_current_to_file"));
 		m_pFileOverrideCheck=GTK_CHECK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-checkbutton_filename_override"));
-		g_object_unref(l_pBuilderInterfaceSetting);
 
 		generateSettingsTable();
 		updateSize();
@@ -240,17 +118,15 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 			gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(m_pSettingOverrideValue)), m_pSettingOverrideValue);
 			gtk_container_add(l_pFileOverrideContainer, m_pSettingOverrideValue);
 
-			g_object_unref(l_pBuilderInterfaceSettingCollection);
-
-			DEBUG_PRINT(cout << "Creating CB\n";)
-			m_pButtonCB = new SButtonCB(m_rKernelContext, m_mSettingWidget, m_mSettingViewMap, *m_pHelper, m_pSettingOverrideValue, m_rBox);
-
 			g_signal_connect(G_OBJECT(m_pFileOverrideCheck), "toggled", G_CALLBACK(on_file_override_check_toggled), GTK_WIDGET(m_pSettingsTable));
 			g_signal_connect(G_OBJECT(l_pButtonLoad),        "clicked", G_CALLBACK(on_button_load_clicked), this);
 			g_signal_connect(G_OBJECT(l_pButtonSave),        "clicked", G_CALLBACK(on_button_save_clicked), this);
 
 			if(m_rBox.hasAttribute(OV_AttributeId_Box_SettingOverrideFilename))
 			{
+				::GtkExpander *l_pExpander = GTK_EXPANDER(gtk_builder_get_object(l_pBuilderInterfaceSetting, "box_configuration-expander"));
+				gtk_expander_set_expanded(l_pExpander, true);
+
 				m_pHelper->setValue(OV_TypeId_Filename, m_pSettingOverrideValue, m_rBox.getAttributeValue(OV_AttributeId_Box_SettingOverrideFilename));
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_pFileOverrideCheck), true);
 				gtk_widget_set_sensitive(GTK_WIDGET(m_pSettingsTable), false);
@@ -259,6 +135,9 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 			{
 				m_pHelper->setValue(OV_TypeId_Filename, m_pSettingOverrideValue, "");
 			}
+
+			g_object_unref(l_pBuilderInterfaceSetting);
+			g_object_unref(l_pBuilderInterfaceSettingCollection);
 		}
 
 		//if we are in a running scenario, we just need the WidgetToReturn and can destroy the rest
@@ -294,11 +173,6 @@ CBoxConfigurationDialog::~CBoxConfigurationDialog(void)
 	{
 		delete m_pHelper;
 		m_pHelper = NULL;
-	}
-	if(m_pButtonCB) 
-	{
-		delete m_pButtonCB;
-		m_pButtonCB = NULL;
 	}
 
 	m_rBox.deleteObserver(this);

@@ -12,30 +12,6 @@
 
 namespace OpenViBEDesigner
 {
-	struct SButtonCB
-	{
-		SButtonCB(const OpenViBE::Kernel::IKernelContext& rKernelContext,
-			std::map< OpenViBE::CString, ::GtkWidget* >& rSettingWidget,
-			std::map< OpenViBE::CString, Setting::CAbstractSettingView* >& mSettingViewMap,
-			CSettingCollectionHelper& rHelper,
-			::GtkWidget* pSettingOverrideValue,
-			OpenViBE::Kernel::IBox& rBox) : 
-				m_rKernelContext(rKernelContext),
-				m_rSettingWidget(rSettingWidget), 
-				m_mSettingViewMap(mSettingViewMap),
-				m_rHelper(rHelper), 
-				m_pSettingOverrideValue(pSettingOverrideValue),
-				m_rBox(rBox)
-		{ } ;
-
-		const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
-		std::map< OpenViBE::CString, ::GtkWidget* >& m_rSettingWidget;
-		std::map< OpenViBE::CString, Setting::CAbstractSettingView* >& m_mSettingViewMap;
-		CSettingCollectionHelper& m_rHelper;
-		::GtkWidget* m_pSettingOverrideValue;
-		OpenViBE::Kernel::IBox& m_rBox;
-	};
-
 	class CSettingViewWrapper{
 	public:
 		CSettingViewWrapper(OpenViBE::uint32 ui32SettingIndex,	Setting::CAbstractSettingView *pView):
@@ -98,7 +74,6 @@ namespace OpenViBEDesigner
 		std::vector<CSettingViewWrapper> m_vSettingWrappers;
 
 		CSettingCollectionHelper* m_pHelper;
-		SButtonCB* m_pButtonCB;
 		::GtkCheckButton* m_pFileOverrideCheck;
 	};
 };
