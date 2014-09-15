@@ -60,6 +60,7 @@ namespace OpenViBEDesigner
 		virtual void update(OpenViBE::CObservable &o, void* data);
 
 		void updateSize();
+		void saveConfiguration();
 
 	protected:
 		void generateSettingsTable(void);

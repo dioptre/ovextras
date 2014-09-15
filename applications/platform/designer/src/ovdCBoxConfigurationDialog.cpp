@@ -8,6 +8,8 @@
 
 #include <xml/IReader.h>
 #include <xml/IWriter.h>
+#include <xml/IXMLHandler.h>
+#include <xml/IXMLNode.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -20,6 +22,9 @@ using namespace std;
 #else
 #define DEBUG_PRINT(x)
 #endif
+
+static const char * const c_sRootName = "OpenViBE-SettingsOverride";
+static const char *const c_sSettingName = "SettingValue";
 
 namespace
 {
@@ -200,7 +205,7 @@ static void on_button_load_clicked(::GtkButton* pButton, gpointer pUserData)
 				l_bStatusOk=l_pReader->processData(l_sBuffer, l_iBufferLen);
 			}
 			l_oFile.close();
-		} 
+		}
 		else
 		{
 			cout << "Error opening " << l_sFileName << " for reading\n";
@@ -214,54 +219,7 @@ static void on_button_load_clicked(::GtkButton* pButton, gpointer pUserData)
 
 static void on_button_save_clicked(::GtkButton* pButton, gpointer pUserData)
 {
-	SButtonCB* l_pUserData=static_cast < SButtonCB* >(pUserData);
-
-	::GtkWidget* l_pWidgetDialogOpen=gtk_file_chooser_dialog_new(
-		"Select file to save settings to...",
-		NULL,
-		GTK_FILE_CHOOSER_ACTION_SAVE,
-		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-		NULL);
-
-	CString l_sInitialFileNameToExpand = l_pUserData->m_rHelper.getValue(OV_TypeId_Filename, l_pUserData->m_pSettingOverrideValue);
-	CString l_sInitialFileName=l_pUserData->m_rKernelContext.getConfigurationManager().expand(l_sInitialFileNameToExpand);
-	if(g_path_is_absolute(l_sInitialFileName.toASCIIString()))
-	{
-		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen), l_sInitialFileName.toASCIIString());
-	}
-	else
-	{
-		char* l_sFullPath=g_build_filename(g_get_current_dir(), l_sInitialFileName.toASCIIString(), NULL);
-		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen), l_sFullPath);
-		g_free(l_sFullPath);
-	}
-
-	if(gtk_dialog_run(GTK_DIALOG(l_pWidgetDialogOpen))==GTK_RESPONSE_ACCEPT)
-	{
-		char* l_sFileName=gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen));
-
-		CXMLWriterCallback l_oCB(l_sFileName);
-		XML::IWriter* l_pWriter=XML::createWriter(l_oCB);
-		l_pWriter->openChild("OpenViBE-SettingsOverride");
-		for(size_t i=0; i<l_pUserData->m_rBox.getSettingCount(); i++)
-		{
-			CIdentifier l_oSettingType;
-			l_pUserData->m_rBox.getSettingType(i, l_oSettingType);
-
-			CString l_sSettingName;
-			l_pUserData->m_rBox.getSettingName(i, l_sSettingName);
-
-			l_pWriter->openChild("SettingValue");
-			l_pWriter->setChildData(l_pUserData->m_rHelper.getValue(l_oSettingType, l_pUserData->m_rSettingWidget[l_sSettingName]));
-			l_pWriter->closeChild();
-		}
-		l_pWriter->closeChild();
-		l_pWriter->release();
-
-		g_free(l_sFileName);
-	}
-	gtk_widget_destroy(l_pWidgetDialogOpen);
+	static_cast<CBoxConfigurationDialog *>(pUserData)->saveConfiguration();
 }
 
 // ----------- ----------- ----------- ----------- ----------- ----------- ----------- ----------- ----------- -----------
@@ -345,7 +303,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 
 			g_signal_connect(G_OBJECT(m_pFileOverrideCheck), "toggled", G_CALLBACK(on_file_override_check_toggled), GTK_WIDGET(m_pSettingsTable));
 			g_signal_connect(G_OBJECT(l_pButtonLoad),        "clicked", G_CALLBACK(on_button_load_clicked), m_pButtonCB);
-			g_signal_connect(G_OBJECT(l_pButtonSave),        "clicked", G_CALLBACK(on_button_save_clicked), m_pButtonCB);
+			g_signal_connect(G_OBJECT(l_pButtonSave),        "clicked", G_CALLBACK(on_button_save_clicked), this);
 
 			if(m_rBox.hasAttribute(OV_AttributeId_Box_SettingOverrideFilename))
 			{
@@ -827,7 +785,56 @@ void CBoxConfigurationDialog::updateSize()
 	gtk_widget_size_request(GTK_WIDGET(m_pViewPort), &l_oSize);
 	gtk_widget_set_size_request(GTK_WIDGET(m_pScrolledWindow),
 		std::min(l_ui32MaxWidth,(uint32)l_oSize.width),
-		std::min(l_ui32MaxHeight,(uint32)l_oSize.height));
+								std::min(l_ui32MaxHeight,(uint32)l_oSize.height));
+}
+
+void CBoxConfigurationDialog::saveConfiguration()
+{
+	::GtkWidget* l_pWidgetDialogOpen=gtk_file_chooser_dialog_new(
+		"Select file to save settings to...",
+		NULL,
+		GTK_FILE_CHOOSER_ACTION_SAVE,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+		NULL);
+
+	CString l_sInitialFileNameToExpand = m_pHelper->getValue(OV_TypeId_Filename, m_pSettingOverrideValue);
+	CString l_sInitialFileName=m_rKernelContext.getConfigurationManager().expand(l_sInitialFileNameToExpand);
+	if(g_path_is_absolute(l_sInitialFileName.toASCIIString()))
+	{
+		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen), l_sInitialFileName.toASCIIString());
+	}
+	else
+	{
+		char* l_sFullPath=g_build_filename(g_get_current_dir(), l_sInitialFileName.toASCIIString(), NULL);
+		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen), l_sFullPath);
+		g_free(l_sFullPath);
+	}
+
+	if(gtk_dialog_run(GTK_DIALOG(l_pWidgetDialogOpen))==GTK_RESPONSE_ACCEPT)
+	{
+		char* l_sFileName=gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen));
+
+		XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
+		XML::IXMLNode *l_pRootNode = XML::createNode(c_sRootName);
+		for(size_t i = 0; i < m_rBox.getSettingCount() ; ++i)
+		{
+			XML::IXMLNode *l_pTempNode = XML::createNode(c_sSettingName);
+			CString l_sValue;
+			m_rBox.getSettingValue(i, l_sValue);
+			l_pTempNode->setPCData(l_sValue.toASCIIString());
+
+			l_pRootNode->addChild(l_pTempNode);
+		}
+
+		l_pHandler->writeXMLInFile(*l_pRootNode, l_sFileName);
+
+		l_pHandler->release();
+		l_pRootNode->release();
+		g_free(l_sFileName);
+
+	}
+	gtk_widget_destroy(l_pWidgetDialogOpen);
 }
 
 const CIdentifier CBoxConfigurationDialog::getBoxID() const
