@@ -158,63 +158,7 @@ static void on_file_override_check_toggled(::GtkToggleButton* pToggleButton, gpo
 
 static void on_button_load_clicked(::GtkButton* pButton, gpointer pUserData)
 {
-	SButtonCB* l_pUserData=static_cast < SButtonCB* >(pUserData);
-
-	::GtkWidget* l_pWidgetDialogOpen=gtk_file_chooser_dialog_new(
-		"Select file to load settings from...",
-		NULL,
-		GTK_FILE_CHOOSER_ACTION_OPEN,
-		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-		NULL);
-
-	CString l_sInitialFileName=l_pUserData->m_rKernelContext.getConfigurationManager().expand(l_pUserData->m_rHelper.getValue(OV_TypeId_Filename, l_pUserData->m_pSettingOverrideValue));
-	if(g_path_is_absolute(l_sInitialFileName.toASCIIString()))
-	{
-		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen), l_sInitialFileName.toASCIIString());
-	}
-	else
-	{
-		char* l_sFullPath=g_build_filename(g_get_current_dir(), l_sInitialFileName.toASCIIString(), NULL);
-		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen), l_sFullPath);
-		g_free(l_sFullPath);
-	}
-
-	if(gtk_dialog_run(GTK_DIALOG(l_pWidgetDialogOpen))==GTK_RESPONSE_ACCEPT)
-	{
-		char* l_sFileName=gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen));
-
-		CXMLReaderCallback l_oCB(*l_pUserData);
-		XML::IReader* l_pReader=XML::createReader(l_oCB);
-
-		ifstream l_oFile(l_sFileName, ios::binary);
-		if(l_oFile.is_open())
-		{
-			bool l_bStatusOk=true;
-			char l_sBuffer[1024];
-			size_t l_iBufferLen=0;
-			size_t l_iFileLen;
-			l_oFile.seekg(0, ios::end);
-			l_iFileLen=(size_t)l_oFile.tellg();
-			l_oFile.seekg(0, ios::beg);
-			while(l_iFileLen && l_bStatusOk)
-			{
-				l_iBufferLen=(l_iFileLen>sizeof(l_sBuffer)?sizeof(l_sBuffer):l_iFileLen);
-				l_oFile.read(l_sBuffer, l_iBufferLen);
-				l_iFileLen-=l_iBufferLen;
-				l_bStatusOk=l_pReader->processData(l_sBuffer, l_iBufferLen);
-			}
-			l_oFile.close();
-		}
-		else
-		{
-			cout << "Error opening " << l_sFileName << " for reading\n";
-		}
-		l_pReader->release();
-
-		g_free(l_sFileName);
-	}
-	gtk_widget_destroy(l_pWidgetDialogOpen);
+	static_cast<CBoxConfigurationDialog *>(pUserData)->loadConfiguration();
 }
 
 static void on_button_save_clicked(::GtkButton* pButton, gpointer pUserData)
@@ -302,7 +246,7 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 			m_pButtonCB = new SButtonCB(m_rKernelContext, m_mSettingWidget, m_mSettingViewMap, *m_pHelper, m_pSettingOverrideValue, m_rBox);
 
 			g_signal_connect(G_OBJECT(m_pFileOverrideCheck), "toggled", G_CALLBACK(on_file_override_check_toggled), GTK_WIDGET(m_pSettingsTable));
-			g_signal_connect(G_OBJECT(l_pButtonLoad),        "clicked", G_CALLBACK(on_button_load_clicked), m_pButtonCB);
+			g_signal_connect(G_OBJECT(l_pButtonLoad),        "clicked", G_CALLBACK(on_button_load_clicked), this);
 			g_signal_connect(G_OBJECT(l_pButtonSave),        "clicked", G_CALLBACK(on_button_save_clicked), this);
 
 			if(m_rBox.hasAttribute(OV_AttributeId_Box_SettingOverrideFilename))
@@ -831,6 +775,50 @@ void CBoxConfigurationDialog::saveConfiguration()
 
 		l_pHandler->release();
 		l_pRootNode->release();
+		g_free(l_sFileName);
+
+	}
+	gtk_widget_destroy(l_pWidgetDialogOpen);
+}
+
+void CBoxConfigurationDialog::loadConfiguration()
+{
+	::GtkWidget* l_pWidgetDialogOpen=gtk_file_chooser_dialog_new(
+		"Select file to save settings to...",
+		NULL,
+		GTK_FILE_CHOOSER_ACTION_SAVE,
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+		NULL);
+
+	CString l_sInitialFileNameToExpand = m_pHelper->getValue(OV_TypeId_Filename, m_pSettingOverrideValue);
+	CString l_sInitialFileName=m_rKernelContext.getConfigurationManager().expand(l_sInitialFileNameToExpand);
+	if(g_path_is_absolute(l_sInitialFileName.toASCIIString()))
+	{
+		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen), l_sInitialFileName.toASCIIString());
+	}
+	else
+	{
+		char* l_sFullPath=g_build_filename(g_get_current_dir(), l_sInitialFileName.toASCIIString(), NULL);
+		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen), l_sFullPath);
+		g_free(l_sFullPath);
+	}
+
+	if(gtk_dialog_run(GTK_DIALOG(l_pWidgetDialogOpen))==GTK_RESPONSE_ACCEPT)
+	{
+		char* l_sFileName=gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(l_pWidgetDialogOpen));
+
+		XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
+		XML::IXMLNode *l_pRootNode = l_pHandler->parseFile(l_sFileName);
+
+		for(size_t i = 0 ; i<l_pRootNode->getChildCount() ; ++i)
+		{
+			//Hope everything will fit in the right place
+			m_rBox.setSettingValue(i, l_pRootNode->getChild(i)->getPCData());
+		}
+
+		l_pRootNode->release();
+		l_pHandler->release();
 		g_free(l_sFileName);
 
 	}

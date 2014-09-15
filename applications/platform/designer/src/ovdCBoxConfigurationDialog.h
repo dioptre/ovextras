@@ -61,6 +61,7 @@ namespace OpenViBEDesigner
 
 		void updateSize();
 		void saveConfiguration();
+		void loadConfiguration();
 
 	protected:
 		void generateSettingsTable(void);
