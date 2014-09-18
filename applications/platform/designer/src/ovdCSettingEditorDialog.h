@@ -1,14 +1,17 @@
 #ifndef __OpenViBEDesigner_CSettingEditorDialog_H__
 #define __OpenViBEDesigner_CSettingEditorDialog_H__
 
-#include "ovdCSettingCollectionHelper.h"
+#include "settings/ovdCSettingViewFactory.h"
+#include "settings/ovdCAbstractSettingView.h"
+
+#include "ovd_base.h"
 
 #include <string>
 #include <map>
 
 namespace OpenViBEDesigner
 {
-	class CSettingEditorDialog
+	class CSettingEditorDialog : public OpenViBE::IObserver
 	{
 	public:
 
@@ -17,12 +20,14 @@ namespace OpenViBEDesigner
 		virtual OpenViBE::boolean run(void);
 
 		virtual void typeChangedCB(void);
+		virtual void update(OpenViBE::CObservable &o, void* data);
+
 
 	protected:
 
 		const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
 		OpenViBE::Kernel::IBox& m_rBox;
-		OpenViBEDesigner::CSettingCollectionHelper m_oHelper;
+		Setting::CSettingViewFactory m_oSettingFactory;
 		OpenViBE::uint32 m_ui32SettingIndex;
 		OpenViBE::CString m_sGUIFilename;
 		OpenViBE::CString m_sGUISettingsFilename;
@@ -31,6 +36,8 @@ namespace OpenViBEDesigner
 		::GtkWidget* m_pType;
 		::GtkWidget* m_pDefaultValue;
 		std::map<std::string, OpenViBE::CIdentifier> m_vSettingTypes;
+		Setting::CAbstractSettingView * m_pSettingView;
+
 	};
 };
 
