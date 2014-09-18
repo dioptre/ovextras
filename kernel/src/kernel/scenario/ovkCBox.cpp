@@ -22,6 +22,7 @@ CBox::CBox(const IKernelContext& rKernelContext, CScenario& rOwnerScenario)
 	,m_pBoxListener(NULL)
 	,m_bIsNotifyingDescriptor(false)
 	,m_bIsNotificationActive(true)
+	,m_bIsObserverNotificationActive(true)
 	,m_oIdentifier(OV_UndefinedIdentifier)
 	,m_oAlgorithmClassIdentifier(OV_UndefinedIdentifier)
 	,m_oProcessingUnitIdentifier(OV_UndefinedIdentifier)
@@ -202,6 +203,7 @@ boolean CBox::initializeFromExistingBox(
 	uint32 i;
 
 	this->disableNotification();
+	m_bIsObserverNotificationActive = false;
 
 	clear();
 	setName(rExistingBox.getName());
@@ -267,6 +269,7 @@ boolean CBox::initializeFromExistingBox(
 
 	this->notify(BoxModification_Initialized);
 
+	m_bIsObserverNotificationActive = true;
 	this->notifySettingChange(SettingsAllChange);
 
 	return true;
@@ -907,7 +910,7 @@ boolean CBox::setSettingValue(
 
 void CBox::notifySettingChange(BoxEventMessageType eType, int32 i32FirstIndex, int32 i32SecondIndex)
 {
-	if( m_bIsNotificationActive)
+	if( m_bIsNotificationActive && m_bIsObserverNotificationActive)
 	{
 		BoxEventMessage l_oEvent;
 		l_oEvent.m_eType = eType;

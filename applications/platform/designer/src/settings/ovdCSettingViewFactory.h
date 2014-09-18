@@ -16,6 +16,8 @@ namespace OpenViBEDesigner
 			CAbstractSettingView* getSettingView(OpenViBE::Kernel::IBox &rBox,
 												 OpenViBE::uint32 ui32Index);
 
+			CAbstractSettingView* getSettingView(OpenViBE::CIdentifier &rIdentifierType);
+
 		private:
 			::GtkBuilder* m_pBuilder;
 			OpenViBE::CString m_sBuilderName;

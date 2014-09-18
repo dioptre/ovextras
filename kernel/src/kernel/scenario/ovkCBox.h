@@ -267,6 +267,7 @@ namespace OpenViBE
 			OpenViBE::Plugins::IBoxListener* m_pBoxListener;
 			OpenViBE::boolean m_bIsNotifyingDescriptor;
 			OpenViBE::boolean m_bIsNotificationActive;
+			OpenViBE::boolean m_bIsObserverNotificationActive;
 
 			OpenViBE::CIdentifier m_oIdentifier;
 			OpenViBE::CIdentifier m_oAlgorithmClassIdentifier;

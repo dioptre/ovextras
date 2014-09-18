@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "ovdCSettingCollectionHelper.h"
 #include "settings/ovdCAbstractSettingView.h"
 #include "settings/ovdCSettingViewFactory.h"
 
@@ -38,6 +37,7 @@ namespace OpenViBEDesigner
 		void updateSize();
 		void saveConfiguration();
 		void loadConfiguration();
+		void onOverrideBrowse(void);
 
 	protected:
 		void generateSettingsTable(void);
@@ -51,6 +51,8 @@ namespace OpenViBEDesigner
 		OpenViBE::uint32 getTableIndex(OpenViBE::uint32 ui32SettingIndex);
 		OpenViBE::uint32 getTableSize(void);
 
+
+
 		const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
 		OpenViBE::Kernel::IBox& m_rBox;
 		OpenViBE::CString m_sGUIFilename;
@@ -58,7 +60,8 @@ namespace OpenViBEDesigner
 		//
 		::GtkWidget* m_pWidget;//widget with the dialog for configuration (used whole for box config when no scenario is running)
 		::GtkWidget* m_pWidgetToReturn; //child of m_oWidget, if we are running a scenario, this is the widget we need, the rest can be discarded
-		::GtkWidget* m_pSettingOverrideValue;
+
+		::GtkEntry* m_pOverrideEntry;
 
 		::GtkTable *m_pSettingsTable;
 		::GtkViewport *m_pViewPort;
@@ -73,9 +76,8 @@ namespace OpenViBEDesigner
 
 		std::vector<CSettingViewWrapper> m_vSettingWrappers;
 
-		CSettingCollectionHelper* m_pHelper;
 		::GtkCheckButton* m_pFileOverrideCheck;
 	};
-};
+}
 
 #endif // __OpenViBEDesigner_CBoxConfigurationDialog_H__
