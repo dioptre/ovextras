@@ -17,6 +17,7 @@
 #ifdef TARGET_HAS_Boost
 
 #include <iostream>
+#include <cstdlib>
 
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
@@ -30,7 +31,7 @@ using boost::asio::ip::tcp;
  */
 class TCPWriterClient {
 public:
-	TCPWriterClient(boost::asio::io_service& ioService) :
+	TCPWriterClient(boost::asio::io_service& ioService, const char* sAddress, const char* sSignalPort, const char* sStimulusPort) :
 		stimulusSocket(ioService),
 		signalSocket(ioService),
 		signalBytesRead(0) 
@@ -40,11 +41,11 @@ public:
 		tcp::resolver resolver(ioService);
 
 		// Signal port
-		tcp::resolver::query query = tcp::resolver::query(tcp::v4(), "localhost", "5678"); 
+		tcp::resolver::query query = tcp::resolver::query(tcp::v4(), sAddress, sSignalPort);
 		signalSocket.connect(*resolver.resolve(query), error);
 
 		// Stimulus port
-		query = tcp::resolver::query(tcp::v4(), "localhost", "5679");
+		query = tcp::resolver::query(tcp::v4(), sAddress, sStimulusPort);
 		stimulusSocket.connect(*resolver.resolve(query), error);
 
 		// Tell ASIO to read a stimulus
@@ -126,7 +127,7 @@ public:
 		const char *buf = signalBuffer.data();
 		const double* signalData = reinterpret_cast<const double*>(buf);
 
-		// Use this to fill your data matrix with the signal...
+		// Use this to fill your data matrix with the signal...Bordel
 		(void)signalData; 
 
 		signalBytesRead += bufferSize;
@@ -145,8 +146,22 @@ int main(int argc, char** argv)
 {
 	try
 	{
+		if(strcmp(argv[1], "-h") == 0)
+		{
+			std::cout << "usage: " << argv[0] << " ip_address signal_port stimulus_port" << std::endl;
+			std::cout << "If no argument is given, the program try to communicate on localhost using default port value." << std::endl;
+			return EXIT_SUCCESS;
+		}
 		boost::asio::io_service ioService;
-		TCPWriterClient client(ioService);
+		if(argc == 4)
+		{
+			TCPWriterClient client(ioService, argv[1], argv[2], argv[3]);
+		}
+		else
+
+		{
+			TCPWriterClient client(ioService, "localhost", "5678", "5679");
+		}
 		ioService.run();
 	}
 	catch (std::exception& e)
