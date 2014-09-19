@@ -575,7 +575,7 @@ void CInterfacedScenario::redraw(IBox& rBox)
 	{
 		CIdentifier l_oComputationTime;
 		l_oComputationTime.fromString(rBox.getAttributeValue(OV_AttributeId_Box_ComputationTimeLastSecond));
-		
+
 		// FIXME use timearithmetics.h?
 		const uint64 l_ui64ComputationTime=(l_oComputationTime==OV_UndefinedIdentifier?0:l_oComputationTime.toUInteger());
 		const uint64 l_ui64ComputationTimeReference=(1LL<<32)/(m_ui32BoxCount==0?1:m_ui32BoxCount);
@@ -1141,7 +1141,7 @@ uint32 CInterfacedScenario::pickInterfacedObject(int x, int y)
 		dx=0;
 		dy=-1;
 		int t = std::max(xSizeOfSelection,ySizeOfSelection);
-		int maxI = t*t;
+		unsigned int maxI = t*t;
 		uint32 l_ui32Counter=0;
 
 		while((l_ui32InterfacedObjectId==0)&&(l_ui32Counter<maxI))
@@ -2686,7 +2686,7 @@ void CInterfacedScenario::scenarioDrawingAreaKeyReleaseEventCB(::GtkWidget* pWid
 	m_bAltPressed    &=!(pEvent->keyval==GDK_Alt_L     || pEvent->keyval==GDK_Alt_R);
 	m_bAPressed      &=!(pEvent->keyval==GDK_A         || pEvent->keyval==GDK_a);
 	m_bWPressed      &=!(pEvent->keyval==GDK_W         || pEvent->keyval==GDK_w);
-	
+
 	m_rKernelContext.getLogManager() << LogLevel_Debug
 		<< "scenarioDrawingAreaKeyReleaseEventCB ("
 		<< (m_bShiftPressed?"true":"false") << "|"
@@ -3286,7 +3286,7 @@ bool CInterfacedScenario::browseURL(CString sURL)  {
 	return true;
 }
 
-bool CInterfacedScenario::browseBoxDocumentation(CIdentifier oBoxId) 
+bool CInterfacedScenario::browseBoxDocumentation(CIdentifier oBoxId)
 {
 	if(oBoxId!=OV_UndefinedIdentifier && m_rKernelContext.getPluginManager().canCreatePluginObject(oBoxId))
 	{
