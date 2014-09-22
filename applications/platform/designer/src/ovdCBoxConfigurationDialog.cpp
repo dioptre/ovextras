@@ -212,41 +212,7 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 		if(l_iResult==GTK_RESPONSE_APPLY)
 		{
 			DEBUG_PRINT(cout << "Apply\n";)
-
-//			// Here we go through the box settings of the GUI, and set them to the box. As changing the value in the
-//			// box may change the number of settings, we redo until the setting count stays the same. This probably
-//			// has to be reworked later...
-//			//FIXME should only call for changed argument to avoid to overwrite some value
-			uint32 l_ui32InitialSettingCount = m_rBox.getSettingCount();
-			for(uint32 i=0; i<l_ui32InitialSettingCount; i++)
-			{
-				CString l_sSettingName;
-				CString l_sSettingValue;
-
-				m_rBox.getSettingName(i, l_sSettingName);
-
-				if(m_mSettingViewMap[l_sSettingName])
-				{
-					CString l_sValue;
-					Setting::CAbstractSettingView *l_pView =  m_mSettingViewMap[l_sSettingName];
-					l_pView->getValue(l_sValue);
-					std::cout << "Value set : " << l_sValue << std::endl;
-					m_rBox.setSettingValue(i, l_sValue);
-				}
-				else
-				{
-					DEBUG_PRINT(cout << "Setting no " << i << " '" << l_sSettingName << "' not found in the param map, this means new params were added after gtk constructed the param widget...\n";)
-					DEBUG_PRINT(m_rBox.getSettingValue(i, l_sSettingValue); cout << "Old value is " << l_sSettingValue << "\n";)
-				}
-
-				if(m_rBox.getSettingCount() != l_ui32InitialSettingCount)
-				{
-					// Do again, setting values changed the amount of entries
-					i = 0;
-					l_ui32InitialSettingCount = m_rBox.getSettingCount();
-				}
-			}
-
+			//We do not apply dynamically the override parameter, so we need to handle it now
 			if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_pFileOverrideCheck)))
 			{
 				const gchar* l_sFilename = gtk_entry_get_text(m_pOverrideEntry);
@@ -277,10 +243,8 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 			//Find an other solution to do this
 			for(uint32 i=0; i<ui32SettingCount; i++)
 			{
-				CString l_sSettingName;
 				CString l_sSettingValue;
 
-				m_rBox.getSettingName(i, l_sSettingName);
 				m_rBox.getSettingDefaultValue(i, l_sSettingValue);
 				m_rBox.setSettingValue(i, l_sSettingValue);
 
@@ -307,6 +271,12 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_pFileOverrideCheck), true);
 				gtk_widget_set_sensitive(GTK_WIDGET(l_pSettingTable), false);
 			}
+			else
+			{
+				gtk_entry_set_text(m_pOverrideEntry, "");
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_pFileOverrideCheck), false);
+				gtk_widget_set_sensitive(GTK_WIDGET(l_pSettingTable), true);
+			}
 		}
 		else if(l_iResult==3) // load
 		{
@@ -316,6 +286,25 @@ boolean CBoxConfigurationDialog::run(bool bMode)
 		else if(l_iResult==4) // save
 		{
 			DEBUG_PRINT(cout << "Save\n";)
+		}
+		else if(l_iResult == GTK_RESPONSE_CANCEL)
+		{
+			DEBUG_PRINT(cout << "Cancel\n";)
+
+			m_rBox.restoreState();
+			if(m_rBox.hasAttribute(OV_AttributeId_Box_SettingOverrideFilename))
+			{
+				gtk_entry_set_text(m_pOverrideEntry, m_rBox.getAttributeValue(OV_AttributeId_Box_SettingOverrideFilename).toASCIIString());
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_pFileOverrideCheck), true);
+				gtk_widget_set_sensitive(GTK_WIDGET(l_pSettingTable), false);
+			}
+			else
+			{
+				gtk_entry_set_text(m_pOverrideEntry, "");
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_pFileOverrideCheck), false);
+				gtk_widget_set_sensitive(GTK_WIDGET(l_pSettingTable), true);
+			}
+			l_bFinished=true;
 		}
 		else
 		{
@@ -560,7 +549,7 @@ void CBoxConfigurationDialog::removeSetting(uint32 ui32SettingIndex, boolean bSh
 {
 	int32 i32TableIndex = getTableIndex(ui32SettingIndex);
 
-	if(ui32SettingIndex != -1)
+	if(i32TableIndex != -1)
 	{
 		CSettingViewWrapper &l_rViewWrapper = m_vSettingWrappers[i32TableIndex];
 		::GtkWidget* l_pName = l_rViewWrapper.m_pView->getNameWidget();
