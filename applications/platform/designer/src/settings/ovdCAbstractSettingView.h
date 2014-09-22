@@ -20,6 +20,9 @@ namespace OpenViBEDesigner
 			virtual ::GtkWidget* getNameWidget(void);
 			virtual ::GtkWidget* getEntryWidget(void);
 
+			//This function is use to update the setting index when a setting is suppressed or inserted
+			virtual void setSettingIndex(OpenViBE::uint32 m_ui32NewIndex);
+
 		protected:
 			CAbstractSettingView(OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index, OpenViBE::CString &rBuilderName);
 

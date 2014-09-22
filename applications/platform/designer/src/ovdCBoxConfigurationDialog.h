@@ -48,7 +48,7 @@ namespace OpenViBEDesigner
 
 		void clearSettingWrappersVector(void);
 		void removeSetting(OpenViBE::uint32 ui32SettingIndex, OpenViBE::boolean bShift = true);
-		OpenViBE::uint32 getTableIndex(OpenViBE::uint32 ui32SettingIndex);
+		OpenViBE::int32 getTableIndex(OpenViBE::uint32 ui32SettingIndex);
 		OpenViBE::uint32 getTableSize(void);
 
 

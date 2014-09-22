@@ -130,3 +130,9 @@ void CAbstractSettingView::extractWidget(GtkWidget *pWidget, std::vector< ::GtkW
 {
 	return m_pEntryWidget;
 }
+
+
+void CAbstractSettingView::setSettingIndex(uint32 m_ui32NewIndex)
+{
+	m_ui32Index = m_ui32NewIndex;
+}
