@@ -232,18 +232,25 @@ namespace OpenViBEPlugins
 
 			//check if there are channels to display in multiview
 			boolean l_bMultiView=false;
+            boolean l_bNoneSelected=false;
 			for(uint32 i=0; i<m_oChannelLabel.size(); i++)
 			{
 				//Check if None is selected
-				if(i == m_oChannelLabel.size()-1)
+                if(i == m_oChannelLabel.size()-1)
 				{
-					//Disable Multiview if only None is selected
-					l_bMultiView |= !m_vMultiViewSelectedChannels[i];
+                    l_bNoneSelected = m_vMultiViewSelectedChannels[i];
 				}
-				else
+
+                if(!l_bNoneSelected)
 				{
+                    //Enable Multiview only if None item isn't selected and at list one channel is selected
 					l_bMultiView|=m_vMultiViewSelectedChannels[i];
 				}
+                else
+                {
+                    //Disable Multiview if None is selected
+                    l_bMultiView = false;
+                }
 			}
             cout<<l_bMultiView<<endl;
 
