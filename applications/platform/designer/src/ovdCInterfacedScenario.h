@@ -116,7 +116,6 @@ namespace OpenViBEDesigner
 
 		OpenViBE::boolean hasSelection(void);
 
-		OpenViBE::boolean updateModifiableSettingsBoxes(void);
 		OpenViBE::boolean deleteModifiableSettingsBoxes(void);
 		OpenViBE::boolean setModifiableSettingsWidgets(void);
 		OpenViBE::boolean centerOnBox(OpenViBE::CIdentifier rIdentifier);

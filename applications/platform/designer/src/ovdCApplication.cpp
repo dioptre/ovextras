@@ -549,8 +549,6 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 		uint64 l_ui64CurrentTime=System::Time::zgetTime();
 		l_pInterfacedScenario->m_pPlayer->loop(l_ui64CurrentTime-l_pInterfacedScenario->m_ui64LastLoopTime);
 		l_pInterfacedScenario->m_ui64LastLoopTime=l_ui64CurrentTime;
-		//for modUI boxes
-		l_pInterfacedScenario->updateModifiableSettingsBoxes();
 		return TRUE;
 	}
 

@@ -3405,17 +3405,6 @@ boolean CInterfacedScenario::hasSelection(void)
 	return false;
 }
 
-//this function is called by the g_idle_loop (see CApplication class) and update the boxes' settings with the value in the UI
-boolean CInterfacedScenario::updateModifiableSettingsBoxes(void)
-{
-	for (uint32 i=0; i<m_vBoxConfigurationDialog.size(); i++)
-	{
-		m_vBoxConfigurationDialog[i]->update();
-	}
-
-	return true;
-}
-
 
 boolean CInterfacedScenario::deleteModifiableSettingsBoxes(void)
 {

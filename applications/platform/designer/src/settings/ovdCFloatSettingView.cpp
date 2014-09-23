@@ -66,7 +66,7 @@ void CFloatSettingView::adjustValue(float64 amount)
 	l_f64lValue+=amount;
 	::sprintf(l_sValue, "%lf", l_f64lValue);
 
-	getBox().setSettingValue(getSettingsIndex(), l_sValue);
+	getBox().setSettingValue(getSettingIndex(), l_sValue);
 }
 
 void CFloatSettingView::onChange()
@@ -74,7 +74,7 @@ void CFloatSettingView::onChange()
 	if(!m_bOnValueSetting)
 	{
 		const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
-		getBox().setSettingValue(getSettingsIndex(), l_sValue);
+		getBox().setSettingValue(getSettingIndex(), l_sValue);
 	}
 
 }

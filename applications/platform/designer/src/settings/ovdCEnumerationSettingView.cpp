@@ -69,7 +69,7 @@ void CEnumerationSettingView::onChange()
 	if(!m_bOnValueSetting)
 	{
 		gchar* l_sValue = gtk_combo_box_get_active_text(m_pComboBox);
-		getBox().setSettingValue(getSettingsIndex(), l_sValue);
+		getBox().setSettingValue(getSettingIndex(), l_sValue);
 		g_free(l_sValue);
 	}
 }

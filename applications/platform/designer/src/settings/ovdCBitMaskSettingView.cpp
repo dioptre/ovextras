@@ -92,6 +92,6 @@ void CBitMaskSettingView::onChange()
 	{
 		CString l_sValue;
 		this->getValue(l_sValue);
-		getBox().setSettingValue(getSettingsIndex(), l_sValue);
+		getBox().setSettingValue(getSettingIndex(), l_sValue);
 	}
 }

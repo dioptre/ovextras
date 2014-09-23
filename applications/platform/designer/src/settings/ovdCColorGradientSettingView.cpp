@@ -135,7 +135,7 @@ void CColorGradientSettingView::configurePressed()
 		OpenViBEToolkit::Tools::ColorGradient::format(l_sFinalGradient, l_oFinalGradient);
 		if(!m_bOnValueSetting)
 		{
-			getBox().setSettingValue(getSettingsIndex(), l_sFinalGradient.toASCIIString());
+			getBox().setSettingValue(getSettingIndex(), l_sFinalGradient.toASCIIString());
 		}
 		//gtk_entry_set_text(m_pEntry, l_sFinalGradient.toASCIIString());
 	}
@@ -295,8 +295,12 @@ void CColorGradientSettingView::colorChange(GtkColorButton *pButton)
 
 void CColorGradientSettingView::onChange()
 {
-	const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
-	getBox().setSettingValue(getSettingsIndex(), l_sValue);
+	if(!m_bOnValueSetting)
+	{
+		const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
+		getBox().setSettingValue(getSettingIndex(), l_sValue);
+	}
+
 }
 
 

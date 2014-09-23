@@ -11,16 +11,6 @@
 
 namespace OpenViBEDesigner
 {
-	class CSettingViewWrapper{
-	public:
-		CSettingViewWrapper(OpenViBE::uint32 ui32SettingIndex,	Setting::CAbstractSettingView *pView):
-			m_ui32SettingIndex(ui32SettingIndex), m_pView(pView)
-		{}
-
-		OpenViBE::uint32 m_ui32SettingIndex;
-		Setting::CAbstractSettingView *m_pView;
-	};
-
 	class CBoxConfigurationDialog : public OpenViBE::IObserver
 	{
 	public:
@@ -29,7 +19,6 @@ namespace OpenViBEDesigner
 		virtual ~CBoxConfigurationDialog(void);
 		virtual OpenViBE::boolean run(bool bMode);
 		virtual ::GtkWidget* getWidget();
-		virtual OpenViBE::boolean update(void);
 		virtual const OpenViBE::CIdentifier getBoxID() const;
 
 		virtual void update(OpenViBE::CObservable &o, void* data);
@@ -51,8 +40,6 @@ namespace OpenViBEDesigner
 		OpenViBE::int32 getTableIndex(OpenViBE::uint32 ui32SettingIndex);
 		OpenViBE::uint32 getTableSize(void);
 
-
-
 		const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
 		OpenViBE::Kernel::IBox& m_rBox;
 		OpenViBE::CString m_sGUIFilename;
@@ -68,13 +55,10 @@ namespace OpenViBEDesigner
 		::GtkScrolledWindow * m_pScrolledWindow;
 
 		bool m_bIsScenarioRunning; // true if the scenario is running, false otherwise
-		std::map< OpenViBE::CString, ::GtkWidget* > m_mSettingWidget;
 
 		Setting::CSettingViewFactory m_oSettingFactory;
-		std::map< OpenViBE::CString, Setting::CAbstractSettingView* > m_mSettingViewMap;//Temporary need to be remove
-		std::map< OpenViBE::CString, OpenViBE::uint32 > m_mSettingViewIndexMap;
 
-		std::vector<CSettingViewWrapper> m_vSettingWrappers;
+		std::vector<Setting::CAbstractSettingView* > m_vSettingViewVector;
 
 		::GtkCheckButton* m_pFileOverrideCheck;
 	};

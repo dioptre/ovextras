@@ -65,7 +65,7 @@ void CIntegerSettingView::adjustValue(int amount)
 	l_i64lValue+=amount;
 	::sprintf(l_sValue, "%lli", l_i64lValue);
 
-	getBox().setSettingValue(getSettingsIndex(), l_sValue);
+	getBox().setSettingValue(getSettingIndex(), l_sValue);
 }
 
 void CIntegerSettingView::onChange()
@@ -73,6 +73,6 @@ void CIntegerSettingView::onChange()
 	if(!m_bOnValueSetting)
 	{
 		const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
-		getBox().setSettingValue(getSettingsIndex(), l_sValue);
+		getBox().setSettingValue(getSettingIndex(), l_sValue);
 	}
 }

@@ -22,13 +22,14 @@ namespace OpenViBEDesigner
 
 			//This function is use to update the setting index when a setting is suppressed or inserted
 			virtual void setSettingIndex(OpenViBE::uint32 m_ui32NewIndex);
+			virtual OpenViBE::uint32 getSettingIndex(void);
 
 		protected:
 			CAbstractSettingView(OpenViBE::Kernel::IBox& rBox, OpenViBE::uint32 ui32Index, OpenViBE::CString &rBuilderName);
 
 			virtual OpenViBE::Kernel::IBox& getBox(void);
 
-			virtual OpenViBE::uint32 getSettingsIndex(void);
+
 
 			virtual void setSettingWidgetName(const OpenViBE::CString & rWidgetName);
 

@@ -69,7 +69,7 @@ void CColorSettingView::selectColor()
 	char l_sBuffer[1024];
 	sprintf(l_sBuffer, "%i,%i,%i", (l_oColor.red*100)/65535, (l_oColor.green*100)/65535, (l_oColor.blue*100)/65535);
 
-	getBox().setSettingValue(getSettingsIndex(), l_sBuffer);
+	getBox().setSettingValue(getSettingIndex(), l_sBuffer);
 }
 
 void CColorSettingView::onChange()
@@ -77,7 +77,7 @@ void CColorSettingView::onChange()
 	if(!m_bOnValueSetting)
 	{
 		const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
-		getBox().setSettingValue(getSettingsIndex(), l_sValue);
+		getBox().setSettingValue(getSettingIndex(), l_sValue);
 	}
 }
 

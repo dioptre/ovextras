@@ -85,7 +85,7 @@ void CFilenameSettingView::browse()
 		{
 			*l_pBackslash = '/';
 		}
-		getBox().setSettingValue(getSettingsIndex(), l_sFileName);
+		getBox().setSettingValue(getSettingIndex(), l_sFileName);
 		g_free(l_sFileName);
 	}
 	gtk_widget_destroy(l_pWidgetDialogOpen);
@@ -96,6 +96,6 @@ void CFilenameSettingView::onChange()
 	if(!m_bOnValueSetting)
 	{
 		const gchar* l_sValue = gtk_entry_get_text(m_pEntry);
-		getBox().setSettingValue(getSettingsIndex(), l_sValue);
+		getBox().setSettingValue(getSettingIndex(), l_sValue);
 	}
 }

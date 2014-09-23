@@ -47,7 +47,7 @@ OpenViBE::Kernel::IBox& CAbstractSettingView::getBox(void)
 	return m_rBox;
 }
 
-OpenViBE::uint32 CAbstractSettingView::getSettingsIndex(void)
+OpenViBE::uint32 CAbstractSettingView::getSettingIndex(void)
 {
 	return m_ui32Index;
 }
