@@ -6,6 +6,8 @@
 #include <vector>
 #include <iostream>
 
+#include <stdio.h>  // sprintf on Linux
+
 #include <openvibe/ovITimeArithmetics.h>
 
 #include "../ovasCSettingsHelper.h"
