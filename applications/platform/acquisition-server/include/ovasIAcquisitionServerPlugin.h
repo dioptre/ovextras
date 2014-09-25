@@ -46,8 +46,9 @@ namespace OpenViBEAcquisitionServer
 			/// Hook called at the end of the AcquisitionServer constructor
 			virtual void createHook() {}
 
-			/// Hook called at the end of the start() function of AcquisitionServer
-			virtual void startHook() {}
+			/// Hook called at the end of the start() function of AcquisitionServer. At this point the device has been connected to,
+			/// and signal properties should already be correct.
+			virtual void startHook(const std::vector<OpenViBE::CString>& vSelectedChannelNames, OpenViBE::uint32 ui32SamplingFrequency, OpenViBE::uint32 ui32ChannelCount, OpenViBE::uint32 ui32SampleCountPerSentBlock) {}
 
 			/// Hook called at the end of the stop() function of AcquisitionServer
 			virtual void stopHook() {}
@@ -55,10 +56,13 @@ namespace OpenViBEAcquisitionServer
 
 			/** \brief Hook called in the loop() function of AcquisitionServer
 			  *
-			  * This hook is called after injecting the signal matrix and before sending the stimulations.
-			  * It gets a reference to the current stimulation set with its start and end dates.
+			  * This hook is called before sending the stimulations or signal to the connected clients.
+			  * It gets a reference to the current signal buffer and the stimulation set with its start and end dates.
 			  */
-			virtual void loopHook(OpenViBE::CStimulationSet&, OpenViBE::uint64, OpenViBE::uint64) {}
+			virtual void loopHook(std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer, 
+								  OpenViBE::CStimulationSet& oStimulationSet, 
+								  OpenViBE::uint64 start, 
+								  OpenViBE::uint64 end) {}
 
 			/// Hook called at the end of the acceptNewConnection() function of AcquisitionServer
 			virtual void acceptNewConnectionHook() {}

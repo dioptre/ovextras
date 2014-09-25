@@ -49,7 +49,7 @@ CPluginExternalStimulations::~CPluginExternalStimulations()
 // Hooks
 
 
-void CPluginExternalStimulations::startHook()
+void CPluginExternalStimulations::startHook(const std::vector<OpenViBE::CString>& /*vSelectedChannelNames*/, OpenViBE::uint32 /* ui32SamplingFrequency */, OpenViBE::uint32 /* ui32ChannelCount */, OpenViBE::uint32 /* ui32SampleCountPerSentBlock */)
 {
 #ifdef OV_BOOST_SETTINGS
 	m_bIsExternalStimulationsEnabled = getSetting<boolean>("Enable External Stimulations");
@@ -77,7 +77,7 @@ void CPluginExternalStimulations::startHook()
 
 }
 
-void CPluginExternalStimulations::loopHook(CStimulationSet &stimulationSet, uint64 start, uint64 end)
+void CPluginExternalStimulations::loopHook(std::vector < std::vector < OpenViBE::float32 > >& /* vPendingBuffer */, CStimulationSet &stimulationSet, uint64 start, uint64 end)
 {
 	if (m_bIsExternalStimulationsEnabled)
 	{

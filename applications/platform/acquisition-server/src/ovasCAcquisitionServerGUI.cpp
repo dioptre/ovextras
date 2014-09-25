@@ -8,6 +8,7 @@
 #include "contribAcquisitionServer.inl"
 #endif
 
+#include "ovasCPluginLSLOutput.h"
 
 #include "generic-oscilator/ovasCDriverGenericOscilator.h"
 #include "generic-sawtooth/ovasCDriverGenericSawTooth.h"
@@ -164,6 +165,12 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 
 #if defined TARGET_HAS_OpenViBEContributions
 	OpenViBEContributions::initiateContributions(this, m_pAcquisitionServer, rKernelContext, &m_vDriver);
+#endif
+
+	// Plugins that just send out data must be the last in list (since other plugins may modify the data)
+
+#if defined TARGET_HAS_ThirdPartyLSL
+	registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginLSLOutput(rKernelContext));
 #endif
 
 	std::sort(m_vDriver.begin(), m_vDriver.end(), compare_driver_names);

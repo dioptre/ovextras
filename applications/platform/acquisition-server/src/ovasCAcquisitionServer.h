@@ -140,6 +140,7 @@ namespace OpenViBEAcquisitionServer
 		std::vector < OpenViBE::float32 > m_vOverSamplingSwapBuffer;
 		std::vector < OpenViBE::float64 > m_vImpedance;
 		std::vector < OpenViBE::uint32 >  m_vSelectedChannels;
+		std::vector < OpenViBE::CString >  m_vSelectedChannelNames;
 		Socket::IConnectionServer* m_pConnectionServer;
 
 		OpenViBEAcquisitionServer::EDriftCorrectionPolicy m_eDriftCorrectionPolicy;

@@ -525,9 +525,20 @@ boolean CAcquisitionServer::loop(void)
 	// sends data to connected client(s)
 	while(m_vPendingBuffer.size() >= m_ui32SampleCountPerSentBlock*2)
 	{
-		uint64 start;
-		uint64 end;
+		const int64 p = m_ui64SampleCount-m_vPendingBuffer.size();
+		if (p < 0)
+			m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << " (case A)\n";
 
+		const uint64 bufferStart = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size());
+		const uint64 bufferEnd   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock);
+
+		// Pass the stimuli and buffer to all plugins; note that they may modify them
+		for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
+		{
+			(*itp)->loopHook(m_vPendingBuffer, m_oPendingStimulationSet, bufferStart, bufferEnd);
+		}
+
+		// Handle connections
 		for(itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); itConnection++)
 		{
 			// Socket::IConnection* l_pConnection=itConnection->first;
@@ -548,43 +559,32 @@ boolean CAcquisitionServer::loop(void)
 					}
 				}
 
-				// Stimulation buffer
-				CStimulationSet l_oStimulationSet;
 				//				int l = l_oStimulationSet.getStimulationCount();
 
-				int64 p = m_ui64SampleCount-m_vPendingBuffer.size()+l_rInfo.m_ui64SignalSampleCountToSkip;
+				const int64 p = bufferStart+l_rInfo.m_ui64SignalSampleCountToSkip;
 				if (p < 0)
-					m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << "\n";
+					m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << " (case B)\n";
 
-				//l_rInfo.m_ui64SignalSampleCountToSkip = 0;
-
-				start = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, (m_ui64SampleCount-m_vPendingBuffer.size()+0                            ) + l_rInfo.m_ui64SignalSampleCountToSkip);
-				end   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, (m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock) + l_rInfo.m_ui64SignalSampleCountToSkip);
-
-				OpenViBEToolkit::Tools::StimulationSet::appendRange(
-							l_oStimulationSet,
-							m_oPendingStimulationSet,
-							start,end);
+				const uint64 connBlockStart = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, bufferStart + l_rInfo.m_ui64SignalSampleCountToSkip);
+				const uint64 connBlockEnd   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, bufferEnd   + l_rInfo.m_ui64SignalSampleCountToSkip);
 
 				//m_rKernelContext.getLogManager() << LogLevel_Info << "start: " << time64(start) << "end: " << time64(end) << "\n";
 
-				for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
-				{
-					(*itp)->loopHook(l_oStimulationSet, start, end);
-				}
-				OpenViBEToolkit::Tools::StimulationSet::copy(*ip_pStimulationSet, l_oStimulationSet, -int64(l_rInfo.m_ui64StimulationTimeOffset));
+				// Stimulation buffer
+				CStimulationSet l_oStimulationSet;
 
+				// Take the stimuli range valid for the connection
+				OpenViBEToolkit::Tools::StimulationSet::appendRange(
+							l_oStimulationSet,
+							m_oPendingStimulationSet,
+							connBlockStart,connBlockEnd);
+
+				OpenViBEToolkit::Tools::StimulationSet::copy(*ip_pStimulationSet, l_oStimulationSet, -int64(l_rInfo.m_ui64StimulationTimeOffset));
 
 				op_pEncodedMemoryBuffer->setSize(0, true);
 				m_pStreamEncoder->process(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputTriggerId_EncodeBuffer);
 
-#if 0
-				uint64 l_ui64MemoryBufferSize=op_pEncodedMemoryBuffer->getSize();
-				l_pConnection->sendBufferBlocking(&l_ui64MemoryBufferSize, sizeof(l_ui64MemoryBufferSize));
-				l_pConnection->sendBufferBlocking(op_pEncodedMemoryBuffer->getDirectPointer(), (uint32)op_pEncodedMemoryBuffer->getSize());
-#else
 				l_rInfo.m_pConnectionClientHandlerThread->scheduleBuffer(*op_pEncodedMemoryBuffer);
-#endif
 			}
 			else
 			{
@@ -595,8 +595,8 @@ boolean CAcquisitionServer::loop(void)
 		// Clears pending stimulations
 		OpenViBEToolkit::Tools::StimulationSet::removeRange(
 					m_oPendingStimulationSet,
-					ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size()),
-					ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock)
+					ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, bufferStart),
+					ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, bufferEnd)
 					);
 
 		// Clears pending signal
@@ -654,6 +654,13 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 
 		for (OpenViBE::uint32 i=0;i<m_ui32ChannelCount;++i)
 			m_vSelectedChannels.push_back(i);
+	}
+	
+	// These are passed to plugins
+	m_vSelectedChannelNames.clear();
+	for(uint32 i=0;i<rHeaderCopy.getChannelCount();i++) 
+	{
+		m_vSelectedChannelNames.push_back(CString(rHeaderCopy.getChannelName(i)));
 	}
 
 	if(m_ui32ChannelCount==0)
@@ -789,7 +796,7 @@ boolean CAcquisitionServer::start(void)
 
 	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
 	{
-		(*itp)->startHook();
+		(*itp)->startHook(m_vSelectedChannelNames, m_ui32SamplingFrequency, m_ui32ChannelCount, m_ui32SampleCountPerSentBlock);
 	}
 
 	m_bStarted=true;
