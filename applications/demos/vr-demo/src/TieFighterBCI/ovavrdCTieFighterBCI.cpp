@@ -70,7 +70,7 @@ CTieFighterBCI::CTieFighterBCI(string s_localization) :
 bool CTieFighterBCI::initialise()
 {
 	//----------- LIGHTS -------------//
-	m_poSceneManager->setAmbientLight(Ogre::ColourValue(0.4f, 0.4f, 0.4f));
+	m_poSceneManager->setAmbientLight(Ogre::ColourValue(0.6f, 0.6f, 0.6f));
 	m_poSceneManager->setShadowTechnique(SHADOWTYPE_TEXTURE_MODULATIVE);
 
 	Ogre::Light* l_poLight1 = m_poSceneManager->createLight("Light1");
@@ -81,10 +81,10 @@ bool CTieFighterBCI::initialise()
 	//----------- CAMERA -------------//
 	m_poCamera->setNearClipDistance(0.1f);
 	m_poCamera->setFarClipDistance(50000.0f);
-	m_poCamera->setFOVy(Radian(Degree(100.f)));
+	m_poCamera->setFOVy(Radian(Degree(70.f)));
 	m_poCamera->setProjectionType(PT_PERSPECTIVE);
 
-	m_poCamera->setPosition(-2.f,0.9f,0.f);
+	m_poCamera->setPosition(-10.f,0.9f,0.f);
 	m_poCamera->setOrientation(Quaternion(0.707107f,0.f,-0.707107f,0.f));
 	
 	//----------- HANGAR -------------//
@@ -217,23 +217,16 @@ void CTieFighterBCI::loadHangar()
 }
 void CTieFighterBCI::loadTieFighter()
 {
-	Entity *l_poTieFighterEntity = m_poSceneManager->createEntity( "TieFighter", "tieNode.mesh" );
+	Entity *l_poTieFighterEntity = m_poSceneManager->createEntity( "TieFighter", "vaisseau.mesh" );
 	l_poTieFighterEntity->setCastShadows(true);
-	l_poTieFighterEntity->getSubEntity(0)->setMaterialName("tie-surface01");
-	l_poTieFighterEntity->getSubEntity(1)->setMaterialName("tie-surface02");
-	l_poTieFighterEntity->getSubEntity(2)->setMaterialName("tie-surface03");
-	l_poTieFighterEntity->getSubEntity(3)->setMaterialName("tie-surface04");
-	l_poTieFighterEntity->getSubEntity(4)->setMaterialName("tie-surface05");
-	l_poTieFighterEntity->getSubEntity(5)->setMaterialName("tie-surface06");
-	l_poTieFighterEntity->getSubEntity(6)->setMaterialName("tie-surface07");
 
     SceneNode *l_poTieFighterNode = m_poSceneManager->getRootSceneNode()->createChildSceneNode( "TieFighterNode" );
 	l_poTieFighterNode->attachObject( l_poTieFighterEntity );
 
-	l_poTieFighterNode->setScale(0.6f,0.6f,0.6f);
+	l_poTieFighterNode->setScale(0.008f,0.008f,0.008f);
 	float l_fOffset = (m_bVador ? 0:g_fOffsetWithoutVador);
 	l_poTieFighterNode->setPosition(4.5f,g_fMinHeight,-2.f+l_fOffset); 
-	l_poTieFighterNode->rotate(Vector3::UNIT_Y,Radian(Math::PI/2.f));
+	l_poTieFighterNode->rotate(Vector3::UNIT_Y,-Radian(Math::PI/2.f));
 	
 	m_vTieOrientation[0] = l_poTieFighterNode->getOrientation().x;
 	m_vTieOrientation[1] = l_poTieFighterNode->getOrientation().y;
@@ -481,9 +474,9 @@ bool CTieFighterBCI::process(double timeSinceLastProcess)
 				ss << "Temps moyen par essai :\n" << m_dStat_TieFighterLiftTime/l_iCount << " secondes.\n\n";
 				ss << "------------\n";
 				ss << "Votre rang : \n";
-				l_sRang = "- Apprenti Jedi -";
-				if(m_dStat_TieFighterLiftTime/l_iCount > 1.0 ) l_sRang = "{ Chevalier Jedi }";
-				if(m_dStat_TieFighterLiftTime/l_iCount > 2.0 ) l_sRang = "-oO Maitre Jedi Oo-";
+				l_sRang = "- Apprenti -";
+				if(m_dStat_TieFighterLiftTime/l_iCount > 1.0 ) l_sRang = "{ Chevalier }";
+				if(m_dStat_TieFighterLiftTime/l_iCount > 2.0 ) l_sRang = "-oO Maitre Oo-";
 				ss << l_sRang << "\n";
 			}
 			else
@@ -494,9 +487,9 @@ bool CTieFighterBCI::process(double timeSinceLastProcess)
 				ss << "Mean time per attempt :\n" << m_dStat_TieFighterLiftTime/l_iCount << " seconds.\n\n";
 				ss << "------------\n";
 				ss << "Rank : \n";
-				l_sRang = "- Jedi Apprentice -";
-				if(m_dStat_TieFighterLiftTime/l_iCount > 1.0 ) l_sRang = "{ Jedi Knight }";
-				if(m_dStat_TieFighterLiftTime/l_iCount > 2.0 ) l_sRang = "-oO Jedi Master Oo-";
+				l_sRang = "- Apprentice -";
+				if(m_dStat_TieFighterLiftTime/l_iCount > 1.0 ) l_sRang = "{ Knight }";
+				if(m_dStat_TieFighterLiftTime/l_iCount > 2.0 ) l_sRang = "-oO Master Oo-";
 				ss << l_sRang << "\n";
 			}
 

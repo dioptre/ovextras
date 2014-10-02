@@ -42,21 +42,16 @@ int main(int argc, char **argv)
 			printf("WARNING: if the language keyword is not found, default language will be loaded (eng).\n\n");
 		}
 		printf("\n");
-		printf("  _                       _  \n");
-		printf(" | |                     | | \n");
-		printf(" | |                     | | \n");
-		printf(" | |                     | | \n");
-		printf(" | |                     | | \n");
-		printf(" | |        .---.        | | \n");
-		printf(" | |     _.'\\   /'._     | | \n");
+
+
+		printf(" ___     _.'\\   /'._     ___ \n");
 		printf("/  b__--- | .'\"'. | ---__d  \\\n");
 		printf("\\  p\"\"---_| '._.' |_---\"\"q  /\n");
-		printf(" | |       ./   \\.       | | \n");
-		printf(" | |        '---'        | | \n");
-		printf(" | |                     | | \n");
-		printf(" | |                     | | \n");
-		printf(" |_|                     |_| \n\n");
-		printf("Tie-fighter application started ! \nMay the Force be with you, young padawan.\n\n");
+		printf("     / /   ./   \\.   \\ \\    \n");
+		printf("    / /     '---'     \\ \\   \n");
+		printf("   /_/                 \\_\\  \n");
+		printf("                             \n\n");
+		printf("Application started! Lift 'em!\n\n");
 		
 		app = new OpenViBEVRDemos::CTieFighterBCI(l_slocalization);
 	}
