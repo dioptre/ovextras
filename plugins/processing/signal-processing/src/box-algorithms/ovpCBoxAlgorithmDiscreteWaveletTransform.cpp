@@ -62,6 +62,11 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::uninitialize(void)
         m_oAlgoX_SignalEncoder[o].uninitialize();
     }
 
+	if(m_oAlgoX_SignalEncoder) {
+		delete[] m_oAlgoX_SignalEncoder;
+		m_oAlgoX_SignalEncoder = NULL;
+	}
+	
 	return true;
 }
 
@@ -159,7 +164,8 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
                   for (uint32 o = 0; o < l_rStaticBoxContext.getOutputCount()-1; o++)
                   {
                   //m_oAlgoX_SignalEncoder[o].getInputSamplingRate().setReferenceTarget(m_oAlgo0_SignalDecoder.getOutputSamplingRate());
-                  m_oAlgoX_SignalEncoder[o].getInputSamplingRate() = std::floor((float)(m_oAlgo0_SignalDecoder.getOutputSamplingRate()/std::pow(2.0,static_cast<int32>(o))));
+					const float64 l_f64SamplingRate = static_cast<float64>(m_oAlgo0_SignalDecoder.getOutputSamplingRate()) / std::pow(2.0,static_cast<int32>(o));
+					m_oAlgoX_SignalEncoder[o].getInputSamplingRate() = static_cast<uint64>(std::floor(l_f64SamplingRate));
                   }
 
                   uint32 l_infolength = (length[0].size()+flag[0].size()+2);

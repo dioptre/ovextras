@@ -23,7 +23,7 @@ namespace OpenViBEPlugins
 	{
 		/**
 		 * \class CBoxAlgorithmInverse_DWT
-		 * \author JP (Inria)
+		 * \author Joao-Pedro Berti-Ligabo / Inria
 		 * \date Thu Jul 24 10:57:05 2014
 		 * \brief The class CBoxAlgorithmInverse_DWT describes the box Inverse DWT.
 		 *
@@ -31,6 +31,8 @@ namespace OpenViBEPlugins
 		class CBoxAlgorithmInverse_DWT : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
 		public:
+			CBoxAlgorithmInverse_DWT(void) : m_oAlgoX_SignalDecoder(NULL) { };
+
 			virtual void release(void) { delete this; }
 
 			virtual OpenViBE::boolean initialize(void);

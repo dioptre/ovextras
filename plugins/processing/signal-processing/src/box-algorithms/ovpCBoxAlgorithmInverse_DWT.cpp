@@ -56,6 +56,12 @@ boolean CBoxAlgorithmInverse_DWT::uninitialize(void)
         m_oAlgoX_SignalDecoder[o].uninitialize();
     }
 
+	if(m_oAlgoX_SignalDecoder)
+	{
+		delete[] m_oAlgoX_SignalDecoder;
+		m_oAlgoX_SignalDecoder = NULL;
+	}
+
     m_oAlgo0_SignalEncoder.uninitialize();
 
     return true;

@@ -24,7 +24,7 @@ namespace OpenViBEPlugins
 	{
 		/**
 		 * \class CBoxAlgorithmDiscreteWaveletTransform
-		 * \author JP (Inria)
+		 * \author Joao-Pedro Berti-Ligabo / Inria
 		 * \date Wed Jul 16 15:05:16 2014
 		 * \brief The class CBoxAlgorithmDiscreteWaveletTransform describes the box DiscreteWaveletTransform.
 		 *
@@ -32,6 +32,8 @@ namespace OpenViBEPlugins
 		class CBoxAlgorithmDiscreteWaveletTransform : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
 		public:
+			CBoxAlgorithmDiscreteWaveletTransform(void) : m_oAlgoX_SignalEncoder(NULL) { };
+
 			virtual void release(void) { delete this; }
 
 			virtual OpenViBE::boolean initialize(void);
