@@ -101,9 +101,8 @@ namespace OpenViBEPlugins
 
             OpenViBE::uint64 m_ui64StimulationIdentifier;
 
-
-            //OpenViBE::CString m_sSaveEEGDataFilename;
-            //OpenViBE::CString m_sSaveEOGDataFilename;
+			OpenViBE::CString m_sEEGTempFilename;
+			OpenViBE::CString m_sEOGTempFilename;
 
 		};
 

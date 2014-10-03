@@ -3,7 +3,6 @@
 
 #include "ovpCBoxAlgorithmEOG_Denoising_Calibration.h"
 
-// Verify Eigen Path
 #include <Eigen/Dense>
 
 using namespace OpenViBE;
@@ -36,9 +35,31 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::initialize(void)
     m_uint32Start_time_Chunks=0;
     m_uint32End_time_Chunks=0;
 
-    m_fstreamEEG_File.open ("EEG", std::ios::out | std::ios::in |std::ios::trunc );
-    m_fstreamEOG_File.open ("EOG", std::ios::out | std::ios::in |std::ios::trunc );
+	// Random id for tmp token, clash possible if multiple boxes run in parallel (but unlikely)
+	const CString l_sRandomToken = CIdentifier::random().toString();
+	m_sEEGTempFilename = this->getConfigurationManager().expand("${Path_Tmp}/denoising_") + l_sRandomToken + "_EEG_tmp.dat";
+	m_sEOGTempFilename = this->getConfigurationManager().expand("${Path_Tmp}/denoising_") + l_sRandomToken + "_EOG_tmp.dat";
+
+    m_fstreamEEG_File.open (m_sEEGTempFilename, std::ios::out | std::ios::in |std::ios::trunc );
+	if(m_fstreamEEG_File.fail())
+	{
+		this->getLogManager() << LogLevel_Error << "Opening [" << m_sEEGTempFilename << "] for r/w failed\n";
+		return false;
+	}
+
+    m_fstreamEOG_File.open (m_sEOGTempFilename, std::ios::out | std::ios::in |std::ios::trunc );
+	if(m_fstreamEOG_File.fail())
+	{
+		this->getLogManager() << LogLevel_Error << "Opening [" << m_sEOGTempFilename << "] for r/w failed\n";
+		return false;
+	}
+
     m_fMatrixFile.open(m_sRegressionDenoisingCalibrationFilename.toASCIIString(),std::ios::out | std::ios::trunc);
+	if(m_fMatrixFile.fail())
+	{
+		this->getLogManager() << LogLevel_Error << "Opening [" << m_sRegressionDenoisingCalibrationFilename << "] for writing failed\n";
+		return false;
+	}
 
     return true;
 }
@@ -51,6 +72,27 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::uninitialize(void)
     m_iStimulationDecoder0.uninitialize();
     m_oStimulationEncoder1.uninitialize();
 
+	// Clean up temporary files
+	if(m_fstreamEEG_File.is_open())
+	{
+		m_fstreamEEG_File.close();
+	}
+	if(m_sEEGTempFilename!=CString("")) {
+		std::remove(m_sEEGTempFilename);
+	}
+
+	if(m_fstreamEOG_File.is_open())
+	{
+		m_fstreamEOG_File.close();
+	}
+	if(m_sEOGTempFilename!=CString("")) {
+		std::remove(m_sEOGTempFilename);
+	}
+
+    if(m_fMatrixFile.is_open())
+	{
+		m_fMatrixFile.close();
+	}
 
     return true;
 }
@@ -81,7 +123,8 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::processClock(IMessageClock& rMes
         {
             this->getLogManager() << LogLevel_Warning << "Verify time interval of sampling" << "\n";
             this->getLogManager() << LogLevel_Warning << "Total time of your sample: " << m_float64Time << "\n";
-            this->getLogManager() << LogLevel_Warning << "b Matrix was not successfully calculated" << "\n";
+            this->getLogManager() << LogLevel_Warning << "b Matrix was NOT successfully calculated" << "\n";
+
             m_oStimulationEncoder1.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
             m_oStimulationEncoder1.encodeBuffer(0);
             l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, 0),l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
@@ -92,12 +135,24 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::processClock(IMessageClock& rMes
         }
         else
         {
-            this->getLogManager() << LogLevel_Warning << "End of data gathering...calculating b matrix" << "\n";
-            m_fstreamEEG_File.close();
+            this->getLogManager() << LogLevel_Info << "End of data gathering...calculating b matrix" << "\n";
+            
+			m_fstreamEEG_File.close();
             m_fstreamEOG_File.close();
 
-            m_fstreamEEG_File.open ("EEG", std::ios::in | std::ios::app);
-            m_fstreamEOG_File.open ("EOG", std::ios::in | std::ios::app);
+            m_fstreamEEG_File.open (m_sEEGTempFilename, std::ios::in | std::ios::app);
+			if(m_fstreamEEG_File.fail())
+			{
+				this->getLogManager() << LogLevel_Error << "Opening [" << m_sEEGTempFilename << "] for reading failed\n";
+				return false;
+			}
+
+            m_fstreamEOG_File.open (m_sEOGTempFilename, std::ios::in | std::ios::app);
+			if(m_fstreamEOG_File.fail())
+			{
+				this->getLogManager() << LogLevel_Error << "Opening [" << m_sEOGTempFilename << "] for reading failed\n";
+				return false;
+			}
 
             //Process to extract the Matrix B
             float64 l_laux;
@@ -297,7 +352,9 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::processClock(IMessageClock& rMes
             m_bEndProcess = true;
 
 
-            this->getLogManager() << LogLevel_Warning << "b Matrix was successfully calculated" << "\n";
+            this->getLogManager() << LogLevel_Info << "b Matrix was successfully calculated" << "\n";
+            this->getLogManager() << LogLevel_Info << "Wrote the matrix to [" << m_sRegressionDenoisingCalibrationFilename << "]\n";
+
             //this->getLogManager() << LogLevel_Warning << "You can stop this scenario " <<"\n";
 
             m_oStimulationEncoder1.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
@@ -348,7 +405,9 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
 
     if (m_bEndProcess)
     {
-        return false;
+		// We have done our stuff and have sent out a stimuli that we're done. However, if we're called again, we just do nothing,
+		// but do not return false (==error) as this state is normal after training.
+        return true;
     }
 
 
@@ -408,13 +467,13 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
             if (m_iStimulationDecoder0.getOutputStimulationSet()->getStimulationIdentifier(j) == 33025)
             {
                 m_float64Start_time=m_float64Time;
-                this->getLogManager() << LogLevel_Warning << "Start time: " << m_float64Start_time <<"\n";
+                this->getLogManager() << LogLevel_Info << "Start time: " << m_float64Start_time <<"\n";
             }
 
             if (m_iStimulationDecoder0.getOutputStimulationSet()->getStimulationIdentifier(j) == 33031)
             {
                 m_float64End_time=m_float64Time;
-                this->getLogManager() << LogLevel_Warning << "End time: " << m_float64End_time <<"\n";
+                this->getLogManager() << LogLevel_Info << "End time: " << m_float64End_time <<"\n";
 
             }
 

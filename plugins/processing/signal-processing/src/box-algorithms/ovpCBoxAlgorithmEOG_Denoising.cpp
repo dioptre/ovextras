@@ -26,7 +26,7 @@ boolean CBoxAlgorithmEOG_Denoising::initialize(void)
     m_fBMatrixFile.open(m_stringFilename.toASCIIString(),std::ios::in);
 	if(m_fBMatrixFile.fail())
 	{
-		this->getLogManager() << "Failed to open [" << m_stringFilename << "]\n";
+		this->getLogManager() << LogLevel_Error << "Failed to open [" << m_stringFilename << "] for reading\n";
 		return false;
 	}
 
@@ -34,12 +34,18 @@ boolean CBoxAlgorithmEOG_Denoising::initialize(void)
     m_fBMatrixFile >> m_uint32NbChannels1;
     m_fBMatrixFile >> m_uint32NbSamples0;
 
-    m_uint32NbSamples1 = m_uint32NbSamples0;
+	if(m_fBMatrixFile.fail())
+	{
+		this->getLogManager() << LogLevel_Error << "Not able to successfully read dims from [" << m_stringFilename << "]\n";
+		m_fBMatrixFile.close();
+		return false;
+	}
 
+
+    m_uint32NbSamples1 = m_uint32NbSamples0;
 
     l_oNoiseCoeff.resize(m_uint32NbChannels0,m_uint32NbChannels1);   //Noise Coefficients Matrix (Dim: Channels EEG x Channels EOG)
     l_oNoiseCoeff.setZero(m_uint32NbChannels0,m_uint32NbChannels1);
-
 
     for(uint32 i=0; i<m_uint32NbChannels0; i++)    //Number of channels
     {
@@ -49,6 +55,12 @@ boolean CBoxAlgorithmEOG_Denoising::initialize(void)
         }
     }
 
+	if(m_fBMatrixFile.fail())
+	{
+		this->getLogManager() << LogLevel_Error << "Not able to successfully read coefficients from [" << m_stringFilename << "]\n";
+		m_fBMatrixFile.close();
+		return false;
+	}
 
     m_fBMatrixFile.close();
 
