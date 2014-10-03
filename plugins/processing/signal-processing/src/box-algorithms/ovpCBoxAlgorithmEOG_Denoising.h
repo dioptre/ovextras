@@ -26,7 +26,7 @@ namespace SignalProcessing
 {
 /**
          * \class CBoxAlgorithmEOG_Denoising
-         * \author JP (Inria)
+         * \author Joao-Pedro Berti-Ligabo / Inria
          * \date Tue May 20 15:33:22 2014
          * \brief The class CBoxAlgorithmEOG_Denoising describes the box Test.
          *

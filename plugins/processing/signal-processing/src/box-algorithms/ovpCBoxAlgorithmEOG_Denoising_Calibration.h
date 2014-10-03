@@ -24,7 +24,7 @@ namespace OpenViBEPlugins
 	{
 		/**
 		 * \class CBoxAlgorithmEOG_Denoising_Calibration
-		 * \author JP (Inria)
+		 * \author Joao-Pedro Berti-Ligabo / Inria
 		 * \date Fri May 23 15:30:58 2014
 		 * \brief The class CBoxAlgorithmEOG_Denoising_Calibration describes the box EOG_Denoising_Calibration.
 		 *
