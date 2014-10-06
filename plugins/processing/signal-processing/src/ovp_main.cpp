@@ -25,19 +25,13 @@
 #include "algorithms/basic/ovpCHilbertTransform.h"
 
 #include "box-algorithms/ovpCTimeBasedEpoching.h"
-#include "box-algorithms/ovpCReferenceChannel.h"
-#include "box-algorithms/ovpCChannelSelector.h"
 #include "box-algorithms/ovpCSimpleDSP.h"
 #include "box-algorithms/ovpCSignalAverage.h"
-#include "box-algorithms/ovpCSignalConcat.h"
-#include "box-algorithms/ovpCFirstDifferenceDetrending.h"
-#include "box-algorithms/ovpCSecondDifferenceDetrending.h"
 #include "box-algorithms/ovpCBoxAlgorithmQuadraticForm.h"
 
 #include "box-algorithms/filter/ovpCBoxAlgorithmXDAWNSpatialFilterTrainer.h"
 
 #include "box-algorithms/basic/ovpCBoxAlgorithmIFFTbox.h"
-#include "box-algorithms/basic/ovpCBoxAlgorithmEnvelope.h"
 
 #include "algorithms/basic/ovpCAlgorithmARBurgMethod.h"
 #include "box-algorithms/basic/ovpCBoxAlgorithmARCoefficients.h"
@@ -104,13 +98,8 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmCommonAverageReferenceDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmSpatialFilterDesc)
 
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CReferenceChannelOldDesc)
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CChannelSelectorDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSimpleDSPDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSignalAverageDesc)
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSignalConcatenationDesc)
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CFirstDifferenceDetrendingDesc)
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSecondDifferenceDetrendingDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmQuadraticFormDesc)
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmFrequencyBandSelectorDesc)
@@ -120,7 +109,6 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CBoxAlgorithmXDAWNSpatialFilterTrainerDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingBasic::CBoxAlgorithmIFFTboxDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingBasic::CBoxAlgorithmEnvelopeDesc);
 
 #endif // TARGET_HAS_ThirdPartyITPP
 
