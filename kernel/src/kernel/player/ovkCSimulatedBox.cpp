@@ -728,6 +728,7 @@ boolean CSimulatedBox::handleButtonReleaseEvent(GtkWidget* /* pOVCustomWidget */
 
 CIdentifier CSimulatedBox::create3DWidget(::GtkWidget*& /* p3DWidget */)
 {
+	this->getLogManager() << LogLevel_Error << "3D support has not been compiled into this version of the OpenViBE kernel\n";
 	return false;
 }
 
