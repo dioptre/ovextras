@@ -455,15 +455,15 @@ boolean CBoxAlgorithmErpPlot::initialize(void)
                 uint32 l_ui32Class = i/2 +1;
                 m_oLegendColors.push_back(_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 2*l_ui32Class));
                 m_oLegend.push_back(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1+l_ui32Class*2));
-		m_vDecoders.push_back( new TStreamedMatrixDecoder<CBoxAlgorithmErpPlot>(*this) );
+				m_vDecoders.push_back( new TStreamedMatrixDecoder<CBoxAlgorithmErpPlot>(*this,i) );
             }
             else
             {
-                m_vVarianceDecoders.push_back( new TStreamedMatrixDecoder<CBoxAlgorithmErpPlot>(*this) );
+				m_vVarianceDecoders.push_back( new TStreamedMatrixDecoder<CBoxAlgorithmErpPlot>(*this,i) );
             }
         }
 
-	m_oStimulationDecoder = new TStimulationDecoder<CBoxAlgorithmErpPlot>(*this);
+	m_oStimulationDecoder = new TStimulationDecoder<CBoxAlgorithmErpPlot>(*this,0);
 
         //*
         //initialize graphic component
@@ -560,7 +560,7 @@ boolean CBoxAlgorithmErpPlot::process(void)
 	//listen for stimulation input
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		m_oStimulationDecoder->decode(0,i);
+		m_oStimulationDecoder->decode(i);
 		if(m_oStimulationDecoder->isBufferReceived())
 		{
 			IStimulationSet * l_sStimSet = m_oStimulationDecoder->getOutputStimulationSet();
@@ -580,7 +580,7 @@ boolean CBoxAlgorithmErpPlot::process(void)
                 {
                     if( (inputi)%2 ==1 )
                     {
-                        m_vDecoders[inputi/2]->decode(inputi,i);
+						m_vDecoders[inputi/2]->decode(i);
 
 
                         if(m_vDecoders[inputi/2]->isHeaderReceived() && !m_bFirstHeaderReceived)
@@ -657,7 +657,7 @@ boolean CBoxAlgorithmErpPlot::process(void)
                     else
                     {
                         //std::cout<<" variance input"<<(inputi/2-1)<<"\n";
-                        m_vVarianceDecoders[inputi/2-1]->decode(inputi,i);
+						m_vVarianceDecoders[inputi/2-1]->decode(i);
 
 
                         if(m_vVarianceDecoders[inputi/2-1]->isBufferReceived())

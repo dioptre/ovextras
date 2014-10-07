@@ -10,7 +10,7 @@ using namespace OpenViBEPlugins::Stimulation;
 boolean CBoxAlgorithmTimeout::initialize(void)
 {
 	m_bTimeoutReached = false;
-	m_oStimulationEncoder.initialize(*this);
+	m_oStimulationEncoder.initialize(*this,0);
 	
 	m_ui64Timeout = static_cast<uint64>(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0)) << 32;
 	m_ui64StimulationToSend = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
@@ -83,7 +83,7 @@ boolean CBoxAlgorithmTimeout::process(void)
 		l_pStimulationSet->appendStimulation(m_ui64StimulationToSend, l_ui64StimulationDate, 0);
 
 		// encoding the stimulation
-		m_oStimulationEncoder.encodeBuffer(0);
+		m_oStimulationEncoder.encodeBuffer();
 		this->getDynamicBoxContext().markOutputAsReadyToSend(0, m_ui64LastTimePolled, l_ui64StimulationDate);
 	}
 

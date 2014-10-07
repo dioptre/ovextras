@@ -16,9 +16,9 @@ void motion_event_handler(GtkWidget* widget, GdkEventMotion* event, gpointer dat
 boolean CBoxAlgorithmMouseTracking::initialize(void)
 {
 	// Feature vector stream encoder
-	m_oAlgo0_SignalEncoder.initialize(*this);
+	m_oAlgo0_SignalEncoder.initialize(*this,0);
 	// Feature vector stream encoder
-	m_oAlgo1_SignalEncoder.initialize(*this);
+	m_oAlgo1_SignalEncoder.initialize(*this,1);
 
 	m_oAlgo0_SignalEncoder.getInputMatrix().setReferenceTarget(m_pAbsoluteCoordinateBuffer);
 	m_oAlgo1_SignalEncoder.getInputMatrix().setReferenceTarget(m_pRelativeCoordinateBuffer);
@@ -112,8 +112,8 @@ boolean CBoxAlgorithmMouseTracking::process(void)
 		m_pRelativeCoordinateBuffer->setDimensionLabel(0,1, "y");
 
 
-		m_oAlgo0_SignalEncoder.encodeHeader(0);
-		m_oAlgo1_SignalEncoder.encodeHeader(1);
+		m_oAlgo0_SignalEncoder.encodeHeader();
+		m_oAlgo1_SignalEncoder.encodeHeader();
 
 		m_bHeaderSent=true;
 
@@ -143,8 +143,8 @@ boolean CBoxAlgorithmMouseTracking::process(void)
 		uint64 l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_ui64Frequency, l_ui64SentSampleCount);
 		uint64 l_ui64EndTime = ITimeArithmetics::sampleCountToTime(m_ui64Frequency, m_ui64SentSampleCount);
 
-		m_oAlgo0_SignalEncoder.encodeBuffer(0);
-		m_oAlgo1_SignalEncoder.encodeBuffer(1);
+		m_oAlgo0_SignalEncoder.encodeBuffer();
+		m_oAlgo1_SignalEncoder.encodeBuffer();
 
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 		l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
