@@ -8,7 +8,6 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
-#include <ebml/TWriterCallbackProxy.h>
 
 namespace OpenViBEPlugins
 {
@@ -55,14 +54,7 @@ namespace OpenViBEPlugins
 
 			OpenViBE::boolean (OpenViBEPlugins::FileIO::CBoxAlgorithmCSVFileReader::*m_fpRealProcess)(void);
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pAlgorithmEncoder;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pMemoryBuffer;
-
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pMatrix;
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::boolean> ip_pDynamic; //channelLocalisation stream
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pMinMaxFrequencyBands; //spectrum stream
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_pSamplingRate; //signals stream
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::IStimulationSet*> ip_pStimulationSet; // stimulation stream
+			OpenViBEToolkit::TEncoder < CBoxAlgorithmCSVFileReader >* m_pAlgorithmEncoder;
 
 			OpenViBE::boolean m_bHeaderSent;
 			std::vector<std::string> m_vLastLineSplit;
