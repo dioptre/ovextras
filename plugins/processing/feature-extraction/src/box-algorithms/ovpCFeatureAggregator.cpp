@@ -19,103 +19,7 @@ namespace OpenViBEPlugins
 {
 	namespace FeatureExtraction
 	{
-
-		void CFeatureAggregator::setMatrixDimensionCount(const OpenViBE::uint32 ui32DimensionCount)
-		{
-			//resizes to the number of dimensions for the current input
-			m_oDimensionSize[m_ui32CurrentInput].resize(ui32DimensionCount);
-			m_oFeatureNames[m_ui32CurrentInput].resize(ui32DimensionCount);
-
-			// initilizes the total input buffer size
-			m_oInputBufferSizes[m_ui32CurrentInput] = 1;
-		}
-
-		void CFeatureAggregator::setMatrixDimensionSize(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionSize)
-		{
-			//sets this dimension size
-			m_oDimensionSize[m_ui32CurrentInput][ui32DimensionIndex] = ui32DimensionSize;
-
-			m_oFeatureNames[m_ui32CurrentInput][ui32DimensionIndex].resize(ui32DimensionSize);
-
-			// taking the dimension size into account in the input buffer size
-			m_oInputBufferSizes[m_ui32CurrentInput] *= ui32DimensionSize;
-
-
-			//if it's the last input
-			if(m_ui32CurrentInput == m_ui32NumberOfInput-1 && ui32DimensionIndex == m_oDimensionSize[m_ui32CurrentInput].size()-1)
-			{
-				//computes the feature vector size
-				for(uint32 i=0 ; i<m_oInputBufferSizes.size() ; i++)
-				{
-					m_ui32VectorSize+=(OpenViBE::uint32)m_oInputBufferSizes[i];
-				}
-
-				//allocates the vector
-				m_pVectorBuffer = new float64[m_ui32VectorSize];
-
-				//sends the header
-				m_pFeatureVectorOutputWriterHelper->setFeatureCount(m_ui32VectorSize);
-
-				//generates features names based on inputs dimensions' names
-				uint32 l_ui32CurrentFeature = 0;
-				//for each input
-				for(uint32 i=0 ; i<m_ui32NumberOfInput ; i++)
-				{
-					//for all the elements from that input
-					for(uint32 elt=0 ; elt<m_oInputBufferSizes[i] ; elt++, l_ui32CurrentFeature++)
-					{
-						//creates feature's name by concatenating labels
-						string l_oLabel;
-						uint32 l_ui32ElementIndex = elt;
-
-						for(int32 k=m_oDimensionSize[i].size()-1 ; k>=0 ; k--)
-						{
-							l_oLabel += m_oFeatureNames[(size_t)i][(size_t)(m_oDimensionSize[i].size()-k-1)][(size_t)(l_ui32ElementIndex / m_oDimensionSize[i][k])];
-							l_ui32ElementIndex = l_ui32ElementIndex % m_oDimensionSize[i][k];
-						}
-						m_pFeatureVectorOutputWriterHelper->setFeatureName(l_ui32CurrentFeature, l_oLabel.c_str());
-					}
-				}
-				//writes the header
-				m_pFeatureVectorOutputWriterHelper->writeHeader(*m_pWriter);
-				getBoxAlgorithmContext()->getDynamicBoxContext()->markOutputAsReadyToSend(0, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-			}
-		}
-
-		void CFeatureAggregator::setMatrixDimensionLabel(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionEntryIndex, const char* sDimensionLabel)
-		{
-			m_oFeatureNames[m_ui32CurrentInput][ui32DimensionIndex][ui32DimensionEntryIndex] = sDimensionLabel;
-		}
-
-		void CFeatureAggregator::setMatrixBuffer(const OpenViBE::float64* pBuffer)
-		{
-			float64 * l_pDestinationAddress = (m_ui32CurrentInput==0)
-				? m_pVectorBuffer
-				: m_pVectorBuffer + (m_ui32CurrentInput * m_oInputBufferSizes[m_ui32CurrentInput-1]);
-
-			System::Memory::copy(l_pDestinationAddress, pBuffer, m_oInputBufferSizes[m_ui32CurrentInput] * sizeof(float64));
-
-			//if it's the last input
-			if(m_ui32CurrentInput == m_ui32NumberOfInput-1)
-			{
-				//sends vector
-				m_pFeatureVectorOutputWriterHelper->setFeatureVector(m_pVectorBuffer);
-				m_pFeatureVectorOutputWriterHelper->writeBuffer(*m_pWriter);
-				getBoxAlgorithmContext()->getDynamicBoxContext()->markOutputAsReadyToSend(0, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-			}
-		}
-
-		void CFeatureAggregator::writeFeatureVectorOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize)
-		{
-			appendOutputChunkData<0>(pBuffer, ui64BufferSize);
-		}
-
 		CFeatureAggregator::CFeatureAggregator(void) :
-			m_pWriter(NULL),
-			m_pOutputWriterCallbackProxy(NULL),
-			m_pFeatureVectorOutputWriterHelper(NULL),
-			m_pReader(NULL),
-			m_pMatrixReaderCallBack(NULL),
 			m_ui64LastChunkStartTime(0),
 			m_ui64LastChunkEndTime(0),
 			m_ui32CurrentInput(0),
@@ -127,51 +31,44 @@ namespace OpenViBEPlugins
 
 		OpenViBE::boolean CFeatureAggregator::initialize()
 		{
-
-			// Prepares EBML reader
-			m_pMatrixReaderCallBack = createBoxAlgorithmStreamedMatrixInputReaderCallback(*this);
-			m_pReader=EBML::createReader(*m_pMatrixReaderCallBack);
-
-			//EBML writer, ...
-			m_pOutputWriterCallbackProxy = new EBML::TWriterCallbackProxy1<OpenViBEPlugins::FeatureExtraction::CFeatureAggregator>(*this, &CFeatureAggregator::writeFeatureVectorOutput);
-
-			m_pWriter=EBML::createWriter(*m_pOutputWriterCallbackProxy);
-
-			m_pFeatureVectorOutputWriterHelper=createBoxAlgorithmFeatureVectorOutputWriter();
-
 			m_ui32NumberOfInput = getBoxAlgorithmContext()->getStaticBoxContext()->getInputCount();
+
+			// Prepares decoders
+			for(uint32 i=0; i<m_ui32NumberOfInput; i++)
+			{
+				TStreamedMatrixDecoder<CFeatureAggregator>* l_pStreamedMatrixDecoder = new TStreamedMatrixDecoder<CFeatureAggregator>();
+				m_pStreamedMatrixDecoder.push_back(l_pStreamedMatrixDecoder);
+				m_pStreamedMatrixDecoder.back()->initialize(*this, i);
+			}
+			m_pFeatureVectorEncoder = new TFeatureVectorEncoder<CFeatureAggregator>;
+			m_pFeatureVectorEncoder->initialize(*this,0);
 
 			//resizes everything as needed
 			m_oInputBufferSizes.resize(m_ui32NumberOfInput);
 			m_oDimensionSize.resize(m_ui32NumberOfInput);
 			m_oFeatureNames.resize(m_ui32NumberOfInput);
 
+			m_bHeaderSent=false;
+
 			return true;
 		}
 
 		OpenViBE::boolean CFeatureAggregator::uninitialize()
 		{
-			//Cleans up the writer ...
-			delete m_pOutputWriterCallbackProxy;
-			m_pOutputWriterCallbackProxy= NULL;
-
-			if(m_pWriter)
+			for(uint32 i=0; i<m_ui32NumberOfInput; i++)
 			{
-				m_pWriter->release();
-				m_pWriter = NULL;
+				if(m_pStreamedMatrixDecoder.back())
+				{
+					m_pStreamedMatrixDecoder.back()->uninitialize();
+					m_pStreamedMatrixDecoder.pop_back();
+				}
 			}
 
-			if(m_pFeatureVectorOutputWriterHelper)
+			if(m_pFeatureVectorEncoder)
 			{
-				releaseBoxAlgorithmFeatureVectorOutputWriter(m_pFeatureVectorOutputWriterHelper);
-				m_pFeatureVectorOutputWriterHelper=NULL;
+				m_pFeatureVectorEncoder->uninitialize();
+				delete m_pFeatureVectorEncoder;
 			}
-
-			// Cleans up EBML reader
-			releaseBoxAlgorithmStreamedMatrixInputReaderCallback(m_pMatrixReaderCallBack);
-
-			m_pReader->release();
-			m_pReader=NULL;
 
 			//deletes the vector
 			delete[] m_pVectorBuffer;
@@ -252,18 +149,65 @@ namespace OpenViBEPlugins
 
 		OpenViBE::boolean CFeatureAggregator::process()
 		{
+			IBox* l_pStaticBoxContext = getBoxAlgorithmContext()->getStaticBoxContext();
 			IBoxIO* l_pBoxIO=getBoxAlgorithmContext()->getDynamicBoxContext();
 
-			//process the first buffer of every input. We are sure there is one else process wouldn't have been called
-			for(m_ui32CurrentInput=0 ; m_ui32CurrentInput<m_ui32NumberOfInput ; m_ui32CurrentInput++)
-			{
-					uint64 l_ui64ChunkSize;
-					const uint8* l_pBuffer;
+			IMatrix* l_pOutputMatrix = m_pFeatureVectorEncoder->getInputMatrix();
+			std::vector<float64> l_vBufferElements;
+			uint64 l_ui64TotalBufferSize=0;
+			boolean l_bBufferReceived=false;
 
-					l_pBoxIO->getInputChunk(m_ui32CurrentInput, 0, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime, l_ui64ChunkSize, l_pBuffer);
-					l_pBoxIO->markInputAsDeprecated(m_ui32CurrentInput, 0);
-					m_pReader->processData(l_pBuffer, l_ui64ChunkSize);
+			for(uint32 input=0; input<l_pStaticBoxContext->getInputCount(); input++)
+			{
+
+				m_pStreamedMatrixDecoder[input]->decode(0);
+				//*
+				if((m_pStreamedMatrixDecoder[input]->isHeaderReceived())&&!m_bHeaderSent)
+				{
+					//getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "header " << input << "\n";
+					IMatrix* l_pInputMatrix=m_pStreamedMatrixDecoder[input]->getOutputMatrix();
+					l_ui64TotalBufferSize+=l_pInputMatrix->getBufferElementCount();
+					if(input==l_pStaticBoxContext->getInputCount()-1)
+					{
+						l_pOutputMatrix->setDimensionCount(2);
+						l_pOutputMatrix->setDimensionSize(0, 1);
+						l_pOutputMatrix->setDimensionSize(1, l_ui64TotalBufferSize);
+						m_pFeatureVectorEncoder->encodeHeader();
+						l_pBoxIO->markOutputAsReadyToSend(0,m_ui64LastChunkStartTime,m_ui64LastChunkEndTime);
+						m_bHeaderSent=true;
+					}
+				}
+				//*/
+				if(m_pStreamedMatrixDecoder[input]->isBufferReceived())
+				{
+					l_bBufferReceived=true;
+					IMatrix* l_pInputMatrix=m_pStreamedMatrixDecoder[input]->getOutputMatrix();
+					uint32 l_ui32BufferSize = l_pInputMatrix->getBufferElementCount();
+
+					float64* l_pBuffer = l_pInputMatrix->getBuffer();
+					for(uint32 i=0; i<l_ui32BufferSize; i++)
+					{
+						l_vBufferElements.push_back(l_pBuffer[i]);
+					}
+
+
+				}
 			}
+
+
+			if(m_bHeaderSent&&l_bBufferReceived)
+			{
+				float64* l_pOutputBuffer = l_pOutputMatrix->getBuffer();
+				for(uint32 i=0; i<l_vBufferElements.size(); i++)
+				{
+					l_pOutputBuffer[i]  = l_vBufferElements[i];
+				}
+				m_pFeatureVectorEncoder->encodeBuffer();
+				l_pBoxIO->markOutputAsReadyToSend(0,m_ui64LastChunkStartTime,m_ui64LastChunkEndTime);
+			}
+
+
+
 			return true;
 		}
 	};
