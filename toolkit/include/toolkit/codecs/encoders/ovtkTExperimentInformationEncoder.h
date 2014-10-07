@@ -162,10 +162,10 @@ namespace OpenViBEToolkit
 		TExperimentInformationEncoder()
 		{
 		}
-		TExperimentInformationEncoder(T& rBoxAlgorithm)
+		TExperimentInformationEncoder(T& rBoxAlgorithm, OpenViBE::uint32 ui32ConnectorIndex)
 		{
 			m_pBoxAlgorithm = NULL;
-			this->initialize(rBoxAlgorithm);
+			this->initialize(rBoxAlgorithm, ui32ConnectorIndex);
 		}
 		virtual ~TExperimentInformationEncoder()
 		{
