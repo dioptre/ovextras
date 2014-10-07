@@ -1,7 +1,11 @@
 #include "ovkCVisualisationTree.h"
 #include "ovkCVisualisationManager.h"
-#include "../player/ovkCOgreVisualisation.h"
 #include "../ovkGtkOVCustom.h"
+
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+#include "../player/ovkCOgreVisualisation.h"
+#endif
 
 #if defined TARGET_OS_Windows
 #  include <gdk/gdkwin32.h>
@@ -20,11 +24,15 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 using namespace OpenViBE::Tools;
 
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 typedef Ogre::Real ogre_float;
 typedef Ogre::uint32 ogre_uint32;
 typedef Ogre::uint64 ogre_uint64;
 typedef Ogre::uint16 ogre_uint16;
 typedef Ogre::uint8  ogre_uint8;
+#endif
+
 #define uint8  OpenViBE::uint8
 #define uint16 OpenViBE::uint16
 #define uint32 OpenViBE::uint32
@@ -45,14 +53,16 @@ CVisualisationManager::~CVisualisationManager()
 		//destroy Gtk widget only - the primary RenderWindow it contains will be deleted by Ogre
 		gtk_widget_destroy(GTK_WIDGET(m_pPrimaryRenderWindowWidget));
 	}
-
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 	delete m_pOgreVisualisation;
+#endif
 }
 
 boolean CVisualisationManager::initialize3DContext(void)
 {
 	try
 	{
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 		//initialize Ogre
 		//---------------
 		m_pOgreVisualisation = new COgreVisualisation(getKernelContext());
@@ -62,6 +72,11 @@ boolean CVisualisationManager::initialize3DContext(void)
 			this->getLogManager() << LogLevel_Warning << "Ogre initialization failed, 3D rendering disabled!\n";
 			return false;
 		}
+#else
+		this->getLogManager() << LogLevel_Info << "Ogre was not available or was disabled during compilation.\n";
+		this->getLogManager() << LogLevel_Info << "3D rendering is not available.\n";
+		return false;
+#endif
 	}
 	catch(std::exception& e)
 	{
@@ -99,16 +114,21 @@ boolean CVisualisationManager::initialize3DContext(void)
 
 boolean CVisualisationManager::createResourceGroup(CIdentifier& rResourceGroupIdentifier, const CString& rResourceGroupName)
 {
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 	if(m_pOgreVisualisation == NULL)
 	{
 		return false;
 	}
 	m_pOgreVisualisation->createResourceGroup(rResourceGroupIdentifier, rResourceGroupName.toASCIIString());
 	return true;
+#else
+	return false;
+#endif
 }
 
 boolean CVisualisationManager::addResourceLocation(const CIdentifier& rResourceGroupIdentifier, const CString& rPath, EResourceType type,	bool bRecursive)
 {
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 	if(m_pOgreVisualisation == NULL)
 	{
 		return false;
@@ -124,24 +144,35 @@ boolean CVisualisationManager::addResourceLocation(const CIdentifier& rResourceG
 			break;
 	}
 	return false;
+#else
+	return false;
+#endif
 }
 
 boolean CVisualisationManager::initializeResourceGroup(const CIdentifier& rResourceGroupIdentifier)
 {
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 	if(m_pOgreVisualisation == NULL || m_pOgreVisualisation->ogreInitialized() == false)
 	{
 		return false;
 	}
 	return m_pOgreVisualisation->initializeResourceGroup(rResourceGroupIdentifier);
+#else
+	return false;
+#endif
 }
 
 boolean CVisualisationManager::destroyResourceGroup(const CIdentifier& rResourceGroupIdentifier)
 {
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 	if(m_pOgreVisualisation == NULL || m_pOgreVisualisation->ogreInitialized() == false)
 	{
 		return false;
 	}
 	return m_pOgreVisualisation->destroyResourceGroup(rResourceGroupIdentifier);
+#else
+	return false;
+#endif
 }
 
 COgreVisualisation* CVisualisationManager::getOgreVisualisation()
@@ -151,8 +182,9 @@ COgreVisualisation* CVisualisationManager::getOgreVisualisation()
 
 boolean CVisualisationManager::handleRealizeEvent(::GtkWidget* pOVCustomWidget)
 {
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 	//ensure Ogre could be initialized
-	if(m_pOgreVisualisation->ogreInitialized() == false)
+	if(m_pOgreVisualisation == NULL || m_pOgreVisualisation->ogreInitialized() == false)
 	{
 		return false;
 	}
@@ -227,6 +259,9 @@ boolean CVisualisationManager::handleRealizeEvent(::GtkWidget* pOVCustomWidget)
 	}
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 boolean CVisualisationManager::createVisualisationTree(CIdentifier& rVisualisationTreeIdentifier)

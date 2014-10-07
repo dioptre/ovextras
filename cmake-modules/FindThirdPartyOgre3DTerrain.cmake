@@ -14,6 +14,11 @@
 # Adds include path
 # ---------------------------------
 
+IF(OV_DISABLE_OGRE)
+	MESSAGE(STATUS "  SKIPPED Ogre3D (Terrain), disabled, no 3D ...")
+	RETURN()
+ENDIF(OV_DISABLE_OGRE)
+
 IF(WIN32)
 	FIND_PATH(PATH_Ogre3DTerrain include/OGRE/Ogre.h PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/ogre $ENV{OGRE_HOME})
 	IF(PATH_Ogre3DTerrain)

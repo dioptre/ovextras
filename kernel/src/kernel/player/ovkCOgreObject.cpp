@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include <sstream>
 #include <locale>
 #if defined TARGET_OS_Windows
@@ -1046,3 +1049,6 @@ boolean COgreObject::getWorldBoundingBox(float32& rMinX, float32& rMinY, float32
 
 	return true;
 }
+
+
+#endif

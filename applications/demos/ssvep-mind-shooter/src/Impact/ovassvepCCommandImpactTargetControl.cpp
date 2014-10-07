@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCCommandImpactTargetControl.h"
 #include "ovassvepCImpactApplication.h"
 
@@ -37,3 +40,5 @@ void CCommandImpactTargetControl::execute(int iButton, int iState)
 	m_poApplication->getLogManager() << LogLevel_Info << "Adding target, position : " << iButton << "\n";
 	dynamic_cast<CImpactApplication*>(m_poApplication)->addTarget(iButton);
 }
+
+#endif

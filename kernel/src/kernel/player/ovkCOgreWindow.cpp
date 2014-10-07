@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "OgreRoot.h"
 #include "OgreRenderWindow.h"
 #include "OgreRenderSystem.h"
@@ -449,3 +452,5 @@ boolean COgreWindow::updateCamera()
 
 	return true;
 }
+
+#endif

@@ -8,11 +8,14 @@
 #include "ovkCMessageSignal.h"
 
 #include "../visualisation/ovkCVisualisationManager.h"
+#include "../ovkGtkOVCustom.h"
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 #include "ovkCOgreVisualisation.h"
 #include "ovkCOgreObject.h"
 #include "ovkCOgreWindow.h"
 #include "ovkCOgreScene.h"
-#include "../ovkGtkOVCustom.h"
+#endif
 
 #include <openvibe/ovITimeArithmetics.h>
 
@@ -32,11 +35,15 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 typedef Ogre::Real ogre_float;
 typedef Ogre::uint32 ogre_uint32;
 typedef Ogre::uint64 ogre_uint64;
 typedef Ogre::uint16 ogre_uint16;
 typedef Ogre::uint8  ogre_uint8;
+#endif
+
 #define uint8  OpenViBE::uint8
 #define uint16 OpenViBE::uint16
 #define uint32 OpenViBE::uint32
@@ -120,11 +127,16 @@ CSimulatedBox::~CSimulatedBox(void)
 	m_mSimulatedObjects.clear();
 
 	//delete OgreScene
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 	if(m_pOgreVis)
 	{
 		m_pOgreVis->deleteScene(m_oSceneIdentifier);
 	}
+#endif
 }
+
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 
 boolean CSimulatedBox::handleDestroyEvent(GtkWidget* pOVCustomWidget)
 {
@@ -528,6 +540,7 @@ boolean CSimulatedBox::setObjectTransparency(const CIdentifier& rIdentifier, flo
 
 boolean CSimulatedBox::setObjectVertexColorArray(const CIdentifier& rIdentifier, const uint32 ui32VertexColorCount, const float32* pVertexColorArray)
 {
+	
 	COgreObject* l_pOgreObject = m_pOgreVis->getOgreScene(m_oSceneIdentifier)->getOgreObject(rIdentifier);
 	if(l_pOgreObject == NULL)
 	{
@@ -669,6 +682,176 @@ CIdentifier CSimulatedBox::createOgreWindow()
 
 	return l_oWindowIdentifier;
 }
+
+#else
+	// NO ogre
+
+boolean CSimulatedBox::handleDestroyEvent(GtkWidget* /* pOVCustomWidget*/ )
+{
+	return false;
+}
+
+boolean CSimulatedBox::handleRealizeEvent(GtkWidget* /* pOVCustomWidget */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::handleUnrealizeEvent(GtkWidget* /* pOVCustomWidget */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::handleSizeAllocateEvent(GtkWidget* /* pOVCustomWidget */, unsigned int /* uiWidth */, unsigned int /* uiHeight */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::handleExposeEvent(GtkWidget* /* pOVCustomWidget */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::handleMotionEvent(GtkWidget* /* pOVCustomWidget */, int /* i32X */, int /* i32Y */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::handleButtonPressEvent(GtkWidget* /* pOVCustomWidget */, unsigned int /* uiButton */, int /* i32X */, int /* i32Y */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::handleButtonReleaseEvent(GtkWidget* /* pOVCustomWidget */, unsigned int /* uiButton */, int /* i32X */, int /* i32Y */)
+{
+	return false;
+}
+
+CIdentifier CSimulatedBox::create3DWidget(::GtkWidget*& /* p3DWidget */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::is3DWidgetRealized(
+	const CIdentifier& /* rWidgetIdentifier */) const
+{
+	return false;
+}
+
+boolean CSimulatedBox::update3DWidget(const CIdentifier& /* rWindowIdentifier */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::setBackgroundColor(const CIdentifier& /* rWindowIdentifier */, float32 /* f32ColorRed */, float32  /* f32ColorGreen */, float32 /* f32ColorBlue */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::setCameraToEncompassObjects(const CIdentifier& /* rWindowIdentifier */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::setCameraSphericalCoordinates(const CIdentifier& /* rWindowIdentifier */, float32 /* f32Theta */, float32 /* f32Phi */, float32 /* f32Radius */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::getCameraSphericalCoordinates(const CIdentifier& /* rWindowIdentifier */, float32& /* rTheta */, float32& /* rPhi */, float32& /* rRadius */)
+{
+	return false;
+}
+
+CIdentifier CSimulatedBox::createObject(const CString& /* rObjectFileName */, const CNameValuePairList* /* pObjectParams */)
+{
+	return false;
+}
+
+CIdentifier CSimulatedBox::createObject(const EStandard3DObject /* eStandard3DObject */, const CNameValuePairList* /* pObjectParams */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::removeObject(const CIdentifier& /* rObjectIdentifier */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::setObjectVisible(const CIdentifier& /* rIdentifier */, boolean /* bVisible */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::setObjectScale(const CIdentifier& /* rIdentifier */, float32 /* f32ScaleX */, float32 /* f32ScaleY */, float32 /* f32ScaleZ */)
+{
+		return false;
+}
+
+boolean CSimulatedBox::setObjectScale(const CIdentifier& /* rIdentifier */, float32 /* f32Scale */)
+{
+		return false;
+}
+
+boolean CSimulatedBox::setObjectPosition(const CIdentifier& /* rIdentifier */, float32 /* f32PositionX */, float32 /* f32PositionY */, float32 /* f32PositionZ */)
+{
+		return false;
+}
+
+boolean CSimulatedBox::setObjectOrientation(const CIdentifier& /* rIdentifier */, float32 /* f32OrientationX */, float32 /* f32OrientationY */,
+	float32 /* f32OrientationZ */, float32 /* f32OrientationW */)
+{
+		return false;
+}
+
+boolean CSimulatedBox::setObjectColor(const CIdentifier& /* rIdentifier */, float32 /* f32ColorRed */, float32 /* f32ColorGreen */, float32 /* f32ColorBlue */)
+{
+		return false;
+}
+
+boolean CSimulatedBox::setObjectTransparency(const CIdentifier& /* rIdentifier */, float32 /* f32Transparency */)
+{
+		return false;
+}
+
+boolean CSimulatedBox::setObjectVertexColorArray(const CIdentifier& /* rIdentifier */, const uint32 /* ui32VertexColorCount */, const float32* /* pVertexColorArray */)
+{
+
+		return false;
+
+}
+
+boolean CSimulatedBox::getObjectAxisAlignedBoundingBox(const CIdentifier& /* rIdentifier */, float32* /* pMinimum */, float32* /* pMaximum */)
+{
+	return false;
+}
+
+boolean CSimulatedBox::getObjectVertexCount(const CIdentifier& /* rIdentifier */, uint32& /* ui32VertexCount */) const
+{
+
+	return false;
+}
+
+boolean CSimulatedBox::getObjectVertexPositionArray( const CIdentifier& /* rIdentifier */, const uint32 /* ui32VertexCount */, float32* /* pVertexPositionArray */) const
+{
+	return false;
+}
+
+boolean CSimulatedBox::getObjectTriangleCount(const CIdentifier& /* rIdentifier */, uint32& /* ui32TriangleCount */) const
+{
+	return false;
+}
+
+boolean CSimulatedBox::getObjectTriangleIndexArray(const CIdentifier& /* rIdentifier */, uint32 /* ui32TriangleCount */, uint32* /* pTriangleIndexArray */) const
+{
+	return false;
+}
+
+CIdentifier CSimulatedBox::createOgreWindow()
+{
+	return false;
+}
+
+#endif
 
 CIdentifier CSimulatedBox::getUnusedIdentifier(void) const
 {

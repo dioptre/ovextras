@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovavrdCTieFighterBCI.h"
 
 #include <openvibe/ov_directories.h>
@@ -651,3 +654,5 @@ void CTieFighterBCI::processStageFreetime(double timeSinceLastProcess)
 	Vector3 l_v3MiniTie3Position = m_poSceneManager->getSceneNode("Mini3Node")->getPosition();
 	m_poSceneManager->getSceneNode("Mini3Node")->setPosition(l_v3MiniTie3Position.x, m_vfSmallObjectHeight[2], l_v3MiniTie3Position.z);
 }
+
+#endif

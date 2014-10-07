@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCVRPNServer.h"
 #include "ovassvepCApplication.h"
 
@@ -57,3 +60,5 @@ int CVRPNServer::getButtonState(std::string sName, int iIndex)
 {
 	return m_oButtonCache[sName][iIndex];
 }
+
+#endif

@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCCommandReceiveTarget.h"
 #include "ovassvepCTrainerApplication.h"
 
@@ -12,3 +15,5 @@ void CCommandReceiveTarget::execute(int iButton, int iState)
 {
 	dynamic_cast<CTrainerApplication*>(m_poApplication)->setTarget(iButton);
 }
+
+#endif

@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "OgreRoot.h"
 #include "OgreRenderWindow.h"
 #include "OgreRenderSystem.h"
@@ -236,3 +239,5 @@ COgreObject* COgreScene::getOgreObject(CIdentifier rObjectIdentifier)
 	}
 	return m_mOgreObjectIds[rObjectIdentifier];
 }
+
+#endif

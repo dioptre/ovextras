@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCImpactEnemyShip.h"
 #include "ovassvepCImpactApplication.h"
 
@@ -293,3 +296,5 @@ void CImpactEnemyShip::processHit(Ogre::Vector2 oPoint)
 
 	m_vExplosions.push_back(l_poExplosion);
 }
+
+#endif
