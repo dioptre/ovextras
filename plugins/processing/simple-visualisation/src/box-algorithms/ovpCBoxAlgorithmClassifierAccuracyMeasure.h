@@ -30,20 +30,17 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			// we need an algorithm to decode the EBML stream (memory buffer) into a StimulationSet
-
+			//codecs
 			// for the TARGET
-			OpenViBE::Kernel::IAlgorithmProxy* m_pTargetStimulationDecoder;
-			OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* > ip_pTargetMemoryBuffer;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > op_pTargetStimulationSet;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmClassifierAccuracyMeasure >* m_pTargetStimulationDecoder;
+			// For the CLASSIFIERS
+			std::vector<OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmClassifierAccuracyMeasure >* > m_vpClassifierStimulationDecoder;
+
+
 			// deduced timeline:
 			std::map<OpenViBE::uint64,OpenViBE::uint64> m_mTargetsTimeLine;
 			OpenViBE::uint64 m_ui64CurrentProcessingTimeLimit;
 
-			// For the CLASSIFIERS
-			std::vector<OpenViBE::Kernel::IAlgorithmProxy*> m_vpClassifierStimulationDecoder;
-			std::vector<OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* > > m_vInputClassifierMemoryBuffer;
-			std::vector<OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > > m_vOutputClassifierStimulationSet;
 
 			// Outputs: visualization in a gtk window
 			::GtkBuilder* m_pMainWidgetInterface;

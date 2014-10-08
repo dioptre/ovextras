@@ -112,13 +112,12 @@ uint64 CTopographicMap3DDisplay::getClockFrequency(void)
 boolean CTopographicMap3DDisplay::initialize(void)
 {
 	//initialize chanloc decoder
-	m_pChannelLocalisationStreamDecoder = &getAlgorithmManager().getAlgorithm(
-		getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_ChannelLocalisationStreamDecoder));
-	m_pChannelLocalisationStreamDecoder->initialize();
+	m_pChannelLocalisationStreamDecoder = new TChannelLocalisationDecoder < CTopographicMap3DDisplay >;
+	m_pChannelLocalisationStreamDecoder->initialize(*this,1);
 
 	//initializes the ebml input
 	m_pDecoder = new TStreamedMatrixDecoder < CTopographicMap3DDisplay >;
-	m_pDecoder->initialize(*this);
+	m_pDecoder->initialize(*this,0);
 
 	m_bFirstBufferReceived=false;
 
@@ -176,8 +175,12 @@ boolean CTopographicMap3DDisplay::initialize(void)
 boolean CTopographicMap3DDisplay::uninitialize(void)
 {
 	//delete decoder algorithm
-	m_pChannelLocalisationStreamDecoder->uninitialize();
-	getAlgorithmManager().releaseAlgorithm(*m_pChannelLocalisationStreamDecoder);
+	if(m_pChannelLocalisationStreamDecoder)
+	{
+		m_pChannelLocalisationStreamDecoder->uninitialize();
+		delete m_pChannelLocalisationStreamDecoder;
+	}
+
 
 	if(m_pDecoder)
 	{

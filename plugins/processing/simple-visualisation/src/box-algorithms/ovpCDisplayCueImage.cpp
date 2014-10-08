@@ -94,8 +94,8 @@ namespace OpenViBEPlugins
 			}
 
 			//>>>> Initialisation
-			m_oStimulationDecoder.initialize(*this);
-			m_oStimulationEncoder.initialize(*this);
+			m_oStimulationDecoder.initialize(*this,0);
+			m_oStimulationEncoder.initialize(*this,0);
 
 			//load the gtk builder interface
 			m_pBuilderInterface=gtk_builder_new();
@@ -234,7 +234,7 @@ namespace OpenViBEPlugins
 				}
 			}
 
-			m_oStimulationEncoder.encodeBuffer(0);
+			m_oStimulationEncoder.encodeBuffer();
 			l_pBoxIO->markOutputAsReadyToSend(0, m_ui64LastOutputChunkDate, this->getPlayerContext().getCurrentTime());
 			m_ui64LastOutputChunkDate = this->getPlayerContext().getCurrentTime();
 
@@ -311,11 +311,11 @@ namespace OpenViBEPlugins
 			{
 				for(uint32 chunk=0; chunk < l_pBoxIO->getInputChunkCount(input); chunk++)
 				{
-					m_oStimulationDecoder.decode(0,chunk,true);
+					m_oStimulationDecoder.decode(chunk,true);
 					if(m_oStimulationDecoder.isHeaderReceived())
 					{
 						m_ui64LastOutputChunkDate = this->getPlayerContext().getCurrentTime();
-						m_oStimulationEncoder.encodeHeader(0);
+						m_oStimulationEncoder.encodeHeader();
 						l_pBoxIO->markOutputAsReadyToSend(0, 0, m_ui64LastOutputChunkDate);
 					}
 					if(m_oStimulationDecoder.isBufferReceived())

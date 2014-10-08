@@ -133,7 +133,7 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bError;
 
 			//channel localisation decoder
-			OpenViBE::Kernel::IAlgorithmProxy* m_pChannelLocalisationStreamDecoder;
+			OpenViBEToolkit::TChannelLocalisationDecoder < CTopographicMap3DDisplay >* m_pChannelLocalisationStreamDecoder;
 			//streamed matrix decoder
 			OpenViBEToolkit::TStreamedMatrixDecoder < CTopographicMap3DDisplay >* m_pDecoder;
 
