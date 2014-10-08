@@ -65,8 +65,8 @@ boolean CBoxAlgorithmChannelSelector::initialize(void)
 	{
 		TSignalEncoder < CBoxAlgorithmChannelSelector >* l_pEncoder=new TSignalEncoder < CBoxAlgorithmChannelSelector >;
 		TSignalDecoder < CBoxAlgorithmChannelSelector >* l_pDecoder=new TSignalDecoder < CBoxAlgorithmChannelSelector >;
-		l_pEncoder->initialize(*this);
-		l_pDecoder->initialize(*this);
+		l_pEncoder->initialize(*this,0);
+		l_pDecoder->initialize(*this,0);
 		l_pEncoder->getInputSamplingRate().setReferenceTarget(l_pDecoder->getOutputSamplingRate());
 		m_pDecoder=l_pDecoder;
 		m_pEncoder=l_pEncoder;
@@ -77,8 +77,8 @@ boolean CBoxAlgorithmChannelSelector::initialize(void)
 	{
 		TSpectrumEncoder < CBoxAlgorithmChannelSelector >* l_pEncoder=new TSpectrumEncoder < CBoxAlgorithmChannelSelector >;
 		TSpectrumDecoder < CBoxAlgorithmChannelSelector >* l_pDecoder=new TSpectrumDecoder < CBoxAlgorithmChannelSelector >;
-		l_pEncoder->initialize(*this);
-		l_pDecoder->initialize(*this);
+		l_pEncoder->initialize(*this,0);
+		l_pDecoder->initialize(*this,0);
 		l_pEncoder->getInputMinMaxFrequencyBands().setReferenceTarget(l_pDecoder->getOutputMinMaxFrequencyBands());
 		m_pDecoder=l_pDecoder;
 		m_pEncoder=l_pEncoder;
@@ -124,7 +124,7 @@ boolean CBoxAlgorithmChannelSelector::process(void)
 
 	for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		m_pDecoder->decode(0, i);
+		m_pDecoder->decode(i);
 		if(m_pDecoder->isHeaderReceived())
 		{
 			CString l_sSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
@@ -240,7 +240,7 @@ boolean CBoxAlgorithmChannelSelector::process(void)
 					m_pOutputMatrix->setDimensionLabel(0, j, "Missing channel");
 				}
 			}
-			m_pEncoder->encodeHeader(0);
+			m_pEncoder->encodeHeader();
 		}
 		if(m_pDecoder->isBufferReceived())
 		{
@@ -261,11 +261,11 @@ boolean CBoxAlgorithmChannelSelector::process(void)
 						l_ui32SampleCount*sizeof(float64));
 				}
 			}
-			m_pEncoder->encodeBuffer(0);
+			m_pEncoder->encodeBuffer();
 		}
 		if(m_pDecoder->isEndReceived())
 		{
-			m_pEncoder->encodeEnd(0);
+			m_pEncoder->encodeEnd();
 		}
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 	}

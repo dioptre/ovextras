@@ -102,16 +102,11 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::initialize(void)
 	// float64 l_f64SettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 	// ...
 
-	m_pStimulationDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-	m_pStimulationDecoder->initialize();
+	m_pStimulationDecoder.initialize(*this,0);
+	m_pSignalDecoder.initialize(*this,1);
+	m_pEvokedPotentialDecoder.initialize(*this,2);
 
-	m_pSignalDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-	m_pSignalDecoder->initialize();
-
-	m_pEvokedPotentialDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-	m_pEvokedPotentialDecoder->initialize();
-
-	m_oStimulationEncoder.initialize(*this);
+	m_oStimulationEncoder.initialize(*this,0);
 
 	m_ui64StimulationIdentifier=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sSpatialFilterConfigurationFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
@@ -122,19 +117,11 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::initialize(void)
 
 boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::uninitialize(void)
 {
-	m_pEvokedPotentialDecoder->uninitialize();
-	m_pSignalDecoder->uninitialize();
-	m_pStimulationDecoder->uninitialize();
-
-	this->getAlgorithmManager().releaseAlgorithm(*m_pEvokedPotentialDecoder);
-	this->getAlgorithmManager().releaseAlgorithm(*m_pSignalDecoder);
-	this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationDecoder);
+	m_pEvokedPotentialDecoder.uninitialize();
+	m_pSignalDecoder.uninitialize();
+	m_pStimulationDecoder.uninitialize();
 
 	m_oStimulationEncoder.uninitialize();
-
-	m_pEvokedPotentialDecoder=NULL;
-	m_pSignalDecoder=NULL;
-	m_pStimulationDecoder=NULL;
 
 	return true;
 }
@@ -165,17 +152,15 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		TParameterHandler < const IMemoryBuffer* > ip_pMemoryBuffer(m_pStimulationDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
-		m_pStimulationDecoder->process();
-		if(m_pStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+		m_pStimulationDecoder.decode(i);
+		if(m_pStimulationDecoder.isHeaderReceived())
 		{
-			m_oStimulationEncoder.encodeHeader(0);
+			m_oStimulationEncoder.encodeHeader();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, i),l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
-		if(m_pStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_pStimulationDecoder.isBufferReceived())
 		{
-			TParameterHandler < IStimulationSet* > op_pStimulationSet(m_pStimulationDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+			IStimulationSet* op_pStimulationSet = m_pStimulationDecoder.getOutputStimulationSet();
 			// See if there is a training stimulation. If several, accept the first one.
 			for(uint32 j=0;j<op_pStimulationSet->getStimulationCount(); j++)
 			{
@@ -188,9 +173,9 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 				}
 			}
 		}
-		if(m_pStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if(m_pStimulationDecoder.isEndReceived())
 		{
-			m_oStimulationEncoder.encodeEnd(0);
+			m_oStimulationEncoder.encodeEnd();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, i),l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
 		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
@@ -209,10 +194,8 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		std::vector < SChunk > l_vSignalChunk;
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
 		{
-			TParameterHandler<const IMemoryBuffer*> ip_pMemoryBuffer(m_pSignalDecoder->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(1, i);
-			m_pSignalDecoder->process();
-			if(m_pSignalDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedHeader))
+			m_pSignalDecoder.decode(i);
+			if(m_pSignalDecoder.isHeaderReceived())
 			{
 				for(it=l_vSignalChunk.begin(); it!=l_vSignalChunk.end(); it++) delete it->m_pMatrix;
 				l_vSignalChunk.clear();
@@ -222,9 +205,9 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 				//l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(1, i);
 				l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(1, i);
 			}
-			if(m_pSignalDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_pSignalDecoder.isBufferReceived())
 			{
-				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+				IMatrix* ip_pMatrix = m_pSignalDecoder.getOutputMatrix();
 				SChunk l_oChunk;
 				l_oChunk.m_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(1, i);
 				l_oChunk.m_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(1, i);
@@ -242,7 +225,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 				//l_ui64StartTime=l_oChunk.m_ui64StartTime;
 				l_ui64EndTime=l_oChunk.m_ui64EndTime;
 			}
-			if(m_pSignalDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_pSignalDecoder.isEndReceived())
 			{
 			}
 			l_rDynamicBoxContext.markInputAsDeprecated(1, i);
@@ -253,17 +236,15 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		std::vector < SChunk > l_vEvokedPotential;
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(2); i++)
 		{
-			TParameterHandler<const IMemoryBuffer*> ip_pMemoryBuffer(m_pEvokedPotentialDecoder->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(2, i);
-			m_pEvokedPotentialDecoder->process();
-			if(m_pSignalDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedHeader))
+			m_pEvokedPotentialDecoder.decode(i);
+			if(m_pSignalDecoder.isHeaderReceived())
 			{
 				for(it=l_vEvokedPotential.begin(); it!=l_vEvokedPotential.end(); it++) delete it->m_pMatrix;
 				l_vEvokedPotential.clear();
 			}
-			if(m_pEvokedPotentialDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_pEvokedPotentialDecoder.isBufferReceived())
 			{
-				TParameterHandler<IMatrix*> ip_pMatrix(m_pEvokedPotentialDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+				IMatrix* ip_pMatrix = m_pEvokedPotentialDecoder.getOutputMatrix();
 				SChunk l_oChunk;
 				l_oChunk.m_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(2, i);
 				l_oChunk.m_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(2, i);
@@ -273,7 +254,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 					*ip_pMatrix);
 				l_vEvokedPotential.push_back(l_oChunk);
 			}
-			if(m_pEvokedPotentialDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_pEvokedPotentialDecoder.isEndReceived())
 			{
 			}
 			l_rDynamicBoxContext.markInputAsDeprecated(2, i);
@@ -444,7 +425,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 
 		this->getLogManager() << LogLevel_Info << "xDAWN Spatial filter trained successfully.\n";
 		m_oStimulationEncoder.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, l_ui64TrainDate, 0);
-		m_oStimulationEncoder.encodeBuffer(0);
+		m_oStimulationEncoder.encodeBuffer();
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_ui64TrainChunkStartTime, l_ui64TrainChunkEndTime);
 	}
 

@@ -16,11 +16,11 @@ using namespace OpenViBEPlugins::SignalProcessingBasic;
 boolean CBoxAlgorithmIFFTbox::initialize(void)
 {
 	// Spectrum stream real part decoder
-	m_oAlgo0_SpectrumDecoder[0].initialize(*this);
+	m_oAlgo0_SpectrumDecoder[0].initialize(*this,0);
 	// Spectrum stream imaginary part decoder
-	m_oAlgo0_SpectrumDecoder[1].initialize(*this);
+	m_oAlgo0_SpectrumDecoder[1].initialize(*this,1);
 	// Signal stream encoder
-	m_oAlgo1_SignalEncoder.initialize(*this);
+	m_oAlgo1_SignalEncoder.initialize(*this,0);
 	
 	
 	// If you need to, you can manually set the reference targets to link the codecs input and output. To do so, you can use :
@@ -129,7 +129,7 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 
 	for(i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		m_oAlgo0_SpectrumDecoder[i].decode(i,0);
+		m_oAlgo0_SpectrumDecoder[i].decode(0);
 		if(m_oAlgo0_SpectrumDecoder[i].isHeaderReceived())
 		{
 			//detect if header of other input is already received 
@@ -192,7 +192,7 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 		}
 
 		// Pass the header to the next boxes, by encoding a header on the output 0:
-		m_oAlgo1_SignalEncoder.encodeHeader(outputNumber);
+		m_oAlgo1_SignalEncoder.encodeHeader();
 		// send the output chunk containing the header. The dates are the same as the input chunk:
 		l_rDynamicBoxContext.markOutputAsReadyToSend(outputNumber, l_rDynamicBoxContext.getInputChunkStartTime(i, 0), 
 																							l_rDynamicBoxContext.getInputChunkEndTime(i, 0));
@@ -220,7 +220,7 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 				}
 			}
 					// Encode the output buffer :
-			m_oAlgo1_SignalEncoder.encodeBuffer(outputNumber);
+			m_oAlgo1_SignalEncoder.encodeBuffer();
 					// and send it to the next boxes :
 			l_rDynamicBoxContext.markOutputAsReadyToSend(outputNumber, l_rDynamicBoxContext.getInputChunkStartTime(0, 0), 	
 																									 l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
@@ -229,7 +229,7 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 	if(l_ui32EndCount)
 	{
 				// End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
-			m_oAlgo1_SignalEncoder.encodeEnd(outputNumber);
+			m_oAlgo1_SignalEncoder.encodeEnd();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(outputNumber, l_rDynamicBoxContext.getInputChunkStartTime(0, 0),
 																									 l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
 	}																								
