@@ -30,8 +30,8 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			std::vector < OpenViBE::Kernel::IAlgorithmProxy* > m_vStreamDecoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamEncoder;
+			//std::vector < OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmStreamedMatrixMultiplexer >* > m_vStreamDecoder;
+			//OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmStreamedMatrixMultiplexer >* m_pStreamEncoder;
 			OpenViBE::uint64 m_ui64LastStartTime;
 			OpenViBE::uint64 m_ui64LastEndTime;
 

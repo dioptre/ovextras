@@ -28,7 +28,7 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			std::vector < OpenViBE::Kernel::IAlgorithmProxy* > m_vStreamDecoder;
+			std::vector < OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmMatrixValidityChecker >*  > m_vStreamDecoder;
 			OpenViBE::Kernel::ELogLevel m_eLogLevel;
 		};
 

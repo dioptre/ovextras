@@ -15,17 +15,10 @@ boolean CBoxAlgorithmSignalMerger::initialize(void)
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		IAlgorithmProxy* l_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-		l_pStreamDecoder->initialize();
-		m_vStreamDecoder.push_back(l_pStreamDecoder);
+		m_vStreamDecoder.push_back(new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmSignalMerger >(*this,i));
 	}
 
-	m_pStreamEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoder));
-	m_pStreamEncoder->initialize();
-
-	TParameterHandler < uint64 > ip_ui64SamplingRate(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_SamplingRate));
-	TParameterHandler < uint64 > op_ui64SamplingRate(m_vStreamDecoder[0]->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
-	ip_ui64SamplingRate.setReferenceTarget(op_ui64SamplingRate);
+	m_pStreamEncoder=new OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmSignalMerger >(*this,0);
 
 	return true;
 }
@@ -35,13 +28,11 @@ boolean CBoxAlgorithmSignalMerger::uninitialize(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_pStreamEncoder->uninitialize();
-	this->getAlgorithmManager().releaseAlgorithm(*m_pStreamEncoder);
+	delete m_pStreamEncoder;
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		IAlgorithmProxy* l_pStreamDecoder=m_vStreamDecoder[i];
-		l_pStreamDecoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*l_pStreamDecoder);
+		m_vStreamDecoder[i]->uninitialize();
 	}
 	m_vStreamDecoder.clear();
 
@@ -88,13 +79,10 @@ boolean CBoxAlgorithmSignalMerger::process(void)
 
 	for(i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		TParameterHandler < const IMemoryBuffer* > ip_pMemoryBuffer(m_vStreamDecoder[i]->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		TParameterHandler < IMatrix* > op_pMatrix(m_vStreamDecoder[i]->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+		m_vStreamDecoder[i]->decode(0);
 
-		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(i, 0);
-
-		m_vStreamDecoder[i]->process();
-		if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedHeader))
+		IMatrix* op_pMatrix = m_vStreamDecoder[i]->getOutputMatrix();
+		if(m_vStreamDecoder[i]->isHeaderReceived())
 		{
 			l_ui32HeaderCount++;
 			if(i==0)
@@ -108,11 +96,11 @@ boolean CBoxAlgorithmSignalMerger::process(void)
 				l_ui32ChannelCount+=op_pMatrix->getDimensionSize(0);
 			}
 		}
-		if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_vStreamDecoder[i]->isBufferReceived())
 		{
 			l_ui32BufferCount++;
 		}
-		if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if(m_vStreamDecoder[i]->isEndReceived())
 		{
 			l_ui32EndCount++;
 		}
@@ -124,10 +112,7 @@ boolean CBoxAlgorithmSignalMerger::process(void)
 	if(l_ui32BufferCount && l_ui32BufferCount!=l_rStaticBoxContext.getInputCount()) { return false; }
 	if(l_ui32EndCount && l_ui32EndCount!=l_rStaticBoxContext.getInputCount()) { return false; }
 
-	TParameterHandler < IMatrix* > ip_pMatrix(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_Matrix));
-	TParameterHandler < IMemoryBuffer* > op_pMemoryBuffer(m_pStreamEncoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-	op_pMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
-
+	IMatrix* ip_pMatrix = m_pStreamEncoder->getInputMatrix();
 	if(l_ui32HeaderCount)
 	{
 		k=0;
@@ -136,13 +121,13 @@ boolean CBoxAlgorithmSignalMerger::process(void)
 		ip_pMatrix->setDimensionSize(1, l_ui32SampleCountPerSentBlock);
 		for(i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 		{
-			TParameterHandler < IMatrix* > op_pMatrix(m_vStreamDecoder[i]->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+			IMatrix* op_pMatrix = m_vStreamDecoder[i]->getOutputMatrix();
 			for(j=0; j<op_pMatrix->getDimensionSize(0); j++, k++)
 			{
 				ip_pMatrix->setDimensionLabel(0, k, op_pMatrix->getDimensionLabel(0, j));
 			}
 		}
-		m_pStreamEncoder->process(OVP_GD_Algorithm_SignalStreamEncoder_InputTriggerId_EncodeHeader);
+		m_pStreamEncoder->encodeHeader();
 	}
 
 	l_ui32SampleCountPerSentBlock=ip_pMatrix->getDimensionSize(1);
@@ -152,18 +137,18 @@ boolean CBoxAlgorithmSignalMerger::process(void)
 		k=0;
 		for(i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 		{
-			TParameterHandler < IMatrix* > op_pMatrix(m_vStreamDecoder[i]->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+			IMatrix* op_pMatrix = m_vStreamDecoder[i]->getOutputMatrix();
 			for(j=0; j<op_pMatrix->getDimensionSize(0); j++, k++)
 			{
 				System::Memory::copy(ip_pMatrix->getBuffer() + k*l_ui32SampleCountPerSentBlock, op_pMatrix->getBuffer() + j*l_ui32SampleCountPerSentBlock, l_ui32SampleCountPerSentBlock*sizeof(float64));
 			}
 		}
-		m_pStreamEncoder->process(OVP_GD_Algorithm_SignalStreamEncoder_InputTriggerId_EncodeBuffer);
+		m_pStreamEncoder->encodeBuffer();
 	}
 
 	if(l_ui32EndCount)
 	{
-		m_pStreamEncoder->process(OVP_GD_Algorithm_SignalStreamEncoder_InputTriggerId_EncodeEnd);
+		m_pStreamEncoder->encodeEnd();
 	}
 
 	if(l_ui32HeaderCount!=0 || l_ui32BufferCount!=0 || l_ui32EndCount!=0)
