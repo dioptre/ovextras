@@ -12,84 +12,84 @@ using namespace OpenViBEToolkit;
 boolean CTestCodecToolkit::initialize(void)
 {
 	// You can also manipulate pointers to Codec object. Creation and destruction must be done like that :	
-	TStreamedMatrixDecoder < CTestCodecToolkit > * l_oStreamedMatrixDecoder = new TStreamedMatrixDecoder < CTestCodecToolkit >(*this);
+	TStreamedMatrixDecoder < CTestCodecToolkit > * l_oStreamedMatrixDecoder = new TStreamedMatrixDecoder < CTestCodecToolkit >(*this,0);
 	delete l_oStreamedMatrixDecoder;
-	TStreamedMatrixEncoder < CTestCodecToolkit > * l_oStreamedMatrixEncoder = new TStreamedMatrixEncoder < CTestCodecToolkit >(*this);
+	TStreamedMatrixEncoder < CTestCodecToolkit > * l_oStreamedMatrixEncoder = new TStreamedMatrixEncoder < CTestCodecToolkit >(*this,0);
 	delete l_oStreamedMatrixEncoder;
 
-	TChannelLocalisationDecoder < CTestCodecToolkit > * l_oChannelLocalisationDecoder = new TChannelLocalisationDecoder < CTestCodecToolkit >(*this);
+	TChannelLocalisationDecoder < CTestCodecToolkit > * l_oChannelLocalisationDecoder = new TChannelLocalisationDecoder < CTestCodecToolkit >(*this,1);
 	delete l_oChannelLocalisationDecoder;
-	TChannelLocalisationEncoder < CTestCodecToolkit > * l_oChannelLocalisationEncoder = new TChannelLocalisationEncoder < CTestCodecToolkit >(*this);
+	TChannelLocalisationEncoder < CTestCodecToolkit > * l_oChannelLocalisationEncoder = new TChannelLocalisationEncoder < CTestCodecToolkit >(*this,1);
 	delete l_oChannelLocalisationEncoder;
 
-	TFeatureVectorDecoder < CTestCodecToolkit > * l_oTFeatureVectorDecoder = new TFeatureVectorDecoder < CTestCodecToolkit >(*this);
+	TFeatureVectorDecoder < CTestCodecToolkit > * l_oTFeatureVectorDecoder = new TFeatureVectorDecoder < CTestCodecToolkit >(*this,2);
 	delete l_oTFeatureVectorDecoder;
-	TFeatureVectorEncoder < CTestCodecToolkit > * l_oTFeatureVectorEncoder = new TFeatureVectorEncoder < CTestCodecToolkit >(*this);
+	TFeatureVectorEncoder < CTestCodecToolkit > * l_oTFeatureVectorEncoder = new TFeatureVectorEncoder < CTestCodecToolkit >(*this,2);
 	delete l_oTFeatureVectorEncoder;
 
-	TSpectrumDecoder < CTestCodecToolkit > * l_oTSpectrumDecoder = new TSpectrumDecoder < CTestCodecToolkit >(*this);
+	TSpectrumDecoder < CTestCodecToolkit > * l_oTSpectrumDecoder = new TSpectrumDecoder < CTestCodecToolkit >(*this,3);
 	delete l_oTSpectrumDecoder;
-	TSpectrumEncoder < CTestCodecToolkit > * l_oTSpectrumEncoder = new TSpectrumEncoder < CTestCodecToolkit >(*this);
+	TSpectrumEncoder < CTestCodecToolkit > * l_oTSpectrumEncoder = new TSpectrumEncoder < CTestCodecToolkit >(*this,3);
 	delete l_oTSpectrumEncoder;
 
-	TSignalDecoder < CTestCodecToolkit > * l_oTSignalDecoder = new TSignalDecoder < CTestCodecToolkit >(*this);
+	TSignalDecoder < CTestCodecToolkit > * l_oTSignalDecoder = new TSignalDecoder < CTestCodecToolkit >(*this,4);
 	delete l_oTSignalDecoder;
-	TSignalEncoder < CTestCodecToolkit > * l_oTSignalEncoder = new TSignalEncoder < CTestCodecToolkit >(*this);
+	TSignalEncoder < CTestCodecToolkit > * l_oTSignalEncoder = new TSignalEncoder < CTestCodecToolkit >(*this,4);
 	delete l_oTSignalEncoder;
 
-	TStimulationDecoder < CTestCodecToolkit > * l_oTStimulationDecoder = new TStimulationDecoder < CTestCodecToolkit >(*this);
+	TStimulationDecoder < CTestCodecToolkit > * l_oTStimulationDecoder = new TStimulationDecoder < CTestCodecToolkit >(*this,5);
 	delete l_oTStimulationDecoder;
-	TStimulationEncoder < CTestCodecToolkit > * l_oTStimulationEncoder = new TStimulationEncoder < CTestCodecToolkit >(*this);
+	TStimulationEncoder < CTestCodecToolkit > * l_oTStimulationEncoder = new TStimulationEncoder < CTestCodecToolkit >(*this,5);
 	delete l_oTStimulationEncoder;
 
-	TExperimentInformationDecoder < CTestCodecToolkit > * l_oTExperimentInformationDecoder = new TExperimentInformationDecoder < CTestCodecToolkit >(*this);
+	TExperimentInformationDecoder < CTestCodecToolkit > * l_oTExperimentInformationDecoder = new TExperimentInformationDecoder < CTestCodecToolkit >(*this,6);
 	delete l_oTExperimentInformationDecoder;
-	TExperimentInformationEncoder < CTestCodecToolkit > * l_oTExperimentInformationEncoder = new TExperimentInformationEncoder < CTestCodecToolkit >(*this);
+	TExperimentInformationEncoder < CTestCodecToolkit > * l_oTExperimentInformationEncoder = new TExperimentInformationEncoder < CTestCodecToolkit >(*this,6);
 	delete l_oTExperimentInformationEncoder;
 
 	//-----------------------------------------------------------------------------------------
 
-	m_oStreamedMatrixDecoder.initialize(*this);
-	m_oStreamedMatrixEncoder.initialize(*this);
+	m_oStreamedMatrixDecoder.initialize(*this,0);
+	m_oStreamedMatrixEncoder.initialize(*this,0);
 	m_oStreamedMatrixEncoder.getInputMatrix().setReferenceTarget(m_oStreamedMatrixDecoder.getOutputMatrix());
 	m_vDecoders.push_back(&m_oStreamedMatrixDecoder);
 	m_vEncoders.push_back(&m_oStreamedMatrixEncoder);
 
-	m_oChannelLocalisationDecoder.initialize(*this);
-	m_oChannelLocalisationEncoder.initialize(*this);
+	m_oChannelLocalisationDecoder.initialize(*this,1);
+	m_oChannelLocalisationEncoder.initialize(*this,1);
 	m_oChannelLocalisationEncoder.getInputMatrix().setReferenceTarget(m_oChannelLocalisationDecoder.getOutputMatrix());
 	m_oChannelLocalisationEncoder.getInputDynamic().setReferenceTarget(m_oChannelLocalisationDecoder.getOutputDynamic());
 	m_vDecoders.push_back(&m_oChannelLocalisationDecoder);
 	m_vEncoders.push_back(&m_oChannelLocalisationEncoder);
 
-	m_oFeatureVectorDecoder.initialize(*this);
-	m_oFeatureVectorEncoder.initialize(*this);
+	m_oFeatureVectorDecoder.initialize(*this,2);
+	m_oFeatureVectorEncoder.initialize(*this,2);
 	m_oFeatureVectorEncoder.getInputMatrix().setReferenceTarget(m_oFeatureVectorDecoder.getOutputMatrix());
 	m_vDecoders.push_back(&m_oFeatureVectorDecoder);
 	m_vEncoders.push_back(&m_oFeatureVectorEncoder);
 
-	m_oSpectrumDecoder.initialize(*this);
-	m_oSpectrumEncoder.initialize(*this);
+	m_oSpectrumDecoder.initialize(*this,3);
+	m_oSpectrumEncoder.initialize(*this,3);
 	m_oSpectrumEncoder.getInputMatrix().setReferenceTarget(m_oSpectrumDecoder.getOutputMatrix());
 	m_oSpectrumEncoder.getInputMinMaxFrequencyBands().setReferenceTarget(m_oSpectrumDecoder.getOutputMinMaxFrequencyBands());
 	m_vDecoders.push_back(&m_oSpectrumDecoder);
 	m_vEncoders.push_back(&m_oSpectrumEncoder);
 
-	m_oSignalDecoder.initialize(*this);
-	m_oSignalEncoder.initialize(*this);
+	m_oSignalDecoder.initialize(*this,4);
+	m_oSignalEncoder.initialize(*this,4);
 	m_oSignalEncoder.getInputMatrix().setReferenceTarget(m_oSignalDecoder.getOutputMatrix());
 	m_oSignalEncoder.getInputSamplingRate().setReferenceTarget(m_oSignalDecoder.getOutputSamplingRate());
 	m_vDecoders.push_back(&m_oSignalDecoder);
 	m_vEncoders.push_back(&m_oSignalEncoder);
 
-	m_oStimDecoder.initialize(*this);
-	m_oStimEncoder.initialize(*this);
+	m_oStimDecoder.initialize(*this,5);
+	m_oStimEncoder.initialize(*this,5);
 	m_oStimEncoder.getInputStimulationSet().setReferenceTarget(m_oStimDecoder.getOutputStimulationSet());
 	m_vDecoders.push_back(&m_oStimDecoder);
 	m_vEncoders.push_back(&m_oStimEncoder);
 
-	m_oExperimentInformationDecoder.initialize(*this);
-	m_oExperimentInformationEncoder.initialize(*this);
+	m_oExperimentInformationDecoder.initialize(*this,6);
+	m_oExperimentInformationEncoder.initialize(*this,6);
 	m_oExperimentInformationEncoder.getInputExperimentIdentifier().setReferenceTarget(m_oExperimentInformationDecoder.getOutputExperimentIdentifier());
 	m_oExperimentInformationEncoder.getInputExperimentDate().setReferenceTarget(m_oExperimentInformationDecoder.getOutputExperimentDate());
 	m_oExperimentInformationEncoder.getInputSubjectIdentifier().setReferenceTarget(m_oExperimentInformationDecoder.getOutputSubjectIdentifier());
@@ -137,11 +137,11 @@ boolean CTestCodecToolkit::process(void)
 		for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
 			// we can manipulate decoders and encoders without knowing their types
-			m_vDecoders[i]->decode(i,j);
+			m_vDecoders[i]->decode(j);
 
 			if(m_vDecoders[i]->isHeaderReceived())
 			{
-				m_vEncoders[i]->encodeHeader(i);
+				m_vEncoders[i]->encodeHeader();
 			}
 			if(m_vDecoders[i]->isBufferReceived())
 			{
@@ -195,11 +195,11 @@ boolean CTestCodecToolkit::process(void)
 					this->getLogManager() << LogLevel_Error << "Undefined input type.\n";
 					return true;
 				}
-				m_vEncoders[i]->encodeBuffer(i);
+				m_vEncoders[i]->encodeBuffer();
 			}
 			if(m_vDecoders[i]->isEndReceived())
 			{
-				m_vEncoders[i]->encodeEnd(i);
+				m_vEncoders[i]->encodeEnd();
 			}
 			l_rDynamicBoxContext.markOutputAsReadyToSend(i,l_rDynamicBoxContext.getInputChunkStartTime(i, j), l_rDynamicBoxContext.getInputChunkEndTime(i, j));
 		}
