@@ -61,11 +61,10 @@ template<typename RealSTD, typename RealOv> void convert_ov_to_std(RealSTD std_v
 CTopographicMap3DDisplay::CTopographicMap3DDisplay(void) :
 	m_bError(false),
 	m_pChannelLocalisationStreamDecoder(NULL),
-	m_pStreamedMatrixReader(NULL),
-	m_pStreamedMatrixReaderCallBack(NULL),
 	m_pSphericalSplineInterpolation(NULL),
 	m_pTopographicMapDatabase(NULL),
 	m_pTopographicMap3DView(NULL),
+	m_oResourceGroupIdentifier(OV_UndefinedIdentifier),
 	m_bSkullCreated(false),
 	m_bCameraPositioned(false),
 	m_bScalpDataInitialized(false),
@@ -119,8 +118,10 @@ boolean CTopographicMap3DDisplay::initialize(void)
 	m_pChannelLocalisationStreamDecoder->initialize();
 
 	//initializes the ebml input
-	m_pStreamedMatrixReaderCallBack = createBoxAlgorithmStreamedMatrixInputReaderCallback(*this);
-	m_pStreamedMatrixReader=EBML::createReader(*m_pStreamedMatrixReaderCallBack);
+	m_pDecoder = new TStreamedMatrixDecoder < CTopographicMap3DDisplay >;
+	m_pDecoder->initialize(*this);
+
+	m_bFirstBufferReceived=false;
 
 	//initialize spline interpolation algorithm
 	m_pSphericalSplineInterpolation = &getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_SphericalSplineInterpolation));
@@ -153,10 +154,13 @@ boolean CTopographicMap3DDisplay::initialize(void)
 	//send widget pointers to visualisation context for parenting
 	::GtkWidget* l_pWidget=NULL;
 	m_o3DWidgetIdentifier = getBoxAlgorithmContext()->getVisualisationContext()->create3DWidget(l_pWidget);
-	if(l_pWidget != NULL)
+	if(!l_pWidget)
 	{
-		getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
+		this->getLogManager() << LogLevel_Error << "Unable to create 3D rendering widget.\n";
+		return false;
 	}
+
+	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
 
 	::GtkWidget* l_pToolbarWidget=NULL;
 	m_pTopographicMap3DView->getToolbar(l_pToolbarWidget);
@@ -179,12 +183,11 @@ boolean CTopographicMap3DDisplay::uninitialize(void)
 	m_pChannelLocalisationStreamDecoder->uninitialize();
 	getAlgorithmManager().releaseAlgorithm(*m_pChannelLocalisationStreamDecoder);
 
-	//release the ebml reader
-	releaseBoxAlgorithmStreamedMatrixInputReaderCallback(m_pStreamedMatrixReaderCallBack);
-	m_pStreamedMatrixReaderCallBack=NULL;
-
-	m_pStreamedMatrixReader->release();
-	m_pStreamedMatrixReader=NULL;
+	if(m_pDecoder)
+	{
+		m_pDecoder->uninitialize();
+		delete m_pDecoder;
+	}
 
 	//release algorithm
 	m_pSphericalSplineInterpolation->uninitialize();
@@ -203,7 +206,11 @@ boolean CTopographicMap3DDisplay::uninitialize(void)
 	}
 
 	//destroy resource group
-	getVisualisationContext().destroyResourceGroup(m_oResourceGroupIdentifier);
+	if(m_oResourceGroupIdentifier!=OV_UndefinedIdentifier)
+	{
+		getVisualisationContext().destroyResourceGroup(m_oResourceGroupIdentifier);
+		m_oResourceGroupIdentifier = OV_UndefinedIdentifier;
+	}
 
 	return true;
 }
@@ -236,13 +243,32 @@ boolean CTopographicMap3DDisplay::process(void)
 	//decode signal data
 	for(i=0; i<l_pDynamicBoxContext->getInputChunkCount(0); i++)
 	{
-		uint64 l_ui64ChunkSize=0;
-		const uint8* l_pChunkBuffer=NULL;
-
-		if(l_pDynamicBoxContext->getInputChunk(0, i, m_ui64StartTime, m_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer))
+		m_pDecoder->decode(0, i);
+		if(m_pDecoder->isBufferReceived())
 		{
-			m_pStreamedMatrixReader->processData(l_pChunkBuffer, l_ui64ChunkSize);
-			l_pDynamicBoxContext->markInputAsDeprecated(0, i);
+			IMatrix* l_pInputMatrix=m_pDecoder->getOutputMatrix();
+
+			//do we need to recopy this for each chunk?
+			if(!m_bFirstBufferReceived)
+			{
+				m_pTopographicMapDatabase->setMatrixDimensionCount(l_pInputMatrix->getDimensionCount());
+				for(uint32 dimension=0; dimension<l_pInputMatrix->getDimensionCount(); dimension++)
+				{
+					m_pTopographicMapDatabase->setMatrixDimensionSize(dimension, l_pInputMatrix->getDimensionSize(dimension));
+					for(uint32 entryIndex=0; entryIndex<l_pInputMatrix->getDimensionSize(dimension); entryIndex++)
+					{
+						m_pTopographicMapDatabase->setMatrixDimensionLabel(dimension, entryIndex, l_pInputMatrix->getDimensionLabel(dimension, entryIndex));
+					}
+				}
+				m_bFirstBufferReceived=true;
+			}
+			//
+
+			if(!m_pTopographicMapDatabase->setMatrixBuffer(l_pInputMatrix->getBuffer(), l_pDynamicBoxContext->getInputChunkStartTime(0,i), l_pDynamicBoxContext->getInputChunkEndTime(0,i)))
+			{
+				return false;
+			}
+
 		}
 	}
 
@@ -267,26 +293,6 @@ boolean CTopographicMap3DDisplay::process(void)
 		//disable plugin upon errors
 		return false;
 	}
-}
-
-void CTopographicMap3DDisplay::setMatrixDimensionCount(const uint32 ui32DimensionCount)
-{
-	m_pTopographicMapDatabase->setMatrixDimensionCount(ui32DimensionCount);
-}
-
-void CTopographicMap3DDisplay::setMatrixDimensionSize(const uint32 ui32DimensionIndex, const uint32 ui32DimensionSize)
-{
-	m_pTopographicMapDatabase->setMatrixDimensionSize(ui32DimensionIndex, ui32DimensionSize);
-}
-
-void CTopographicMap3DDisplay::setMatrixDimensionLabel(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex, const char* sDimensionLabel)
-{
-	m_pTopographicMapDatabase->setMatrixDimensionLabel(ui32DimensionIndex, ui32DimensionEntryIndex, sDimensionLabel);
-}
-
-void CTopographicMap3DDisplay::setMatrixBuffer(const float64* pBuffer)
-{
-	m_pTopographicMapDatabase->setMatrixBuffer(pBuffer, m_ui64StartTime, m_ui64EndTime);
 }
 
 //CSignalDisplayDrawable implementation

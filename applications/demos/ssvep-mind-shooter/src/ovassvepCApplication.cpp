@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCApplication.h"
 #include <cmath>
 #include <algorithm>
@@ -377,3 +380,5 @@ void CApplication::stopExperiment()
 	this->exit();
 }
 
+
+#endif

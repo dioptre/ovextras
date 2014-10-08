@@ -928,8 +928,8 @@ ov_package_url_libglade=$ov_gnome_mirror/sources/libglade/2.6/libglade-2.6.3.tar
 ov_package_url_glade=$ov_gnome_mirror/sources/glade3/3.5/glade3-3.5.2.tar.bz2
 
 # Computation and signal processing packages
-ov_package_url_itpp_external=$ov_sourceforge_mirror/itpp/files/itpp-external/3.0.0/itpp-external-3.0.0.tar.bz2
-ov_package_url_itpp=$ov_sourceforge_mirror/itpp/files/itpp/4.0.7/itpp-4.0.7.tar.bz2
+ov_package_url_itpp_external=http://openvibe.inria.fr/dependencies/linux-x86/itpp-external-3.0.0.tar.bz2
+ov_package_url_itpp=http://openvibe.inria.fr/dependencies/linux-x86/itpp-4.0.7.tar.bz2
 ov_package_url_gsl=$ov_gnu_mirror/gsl/gsl-1.9.tar.gz
 ov_package_url_torch=http://www.torch.ch/archives/Torch3src.tgz
 ov_package_url_bliff=http://www.irisa.fr/bunraku/OpenViBE/dependencies/src/bliff-src-16.tar.bz2
@@ -961,7 +961,7 @@ ov_package_url_lua=http://www.lua.org/ftp/lua-5.1.4.tar.gz
 ov_package_url_swig=http://prdownloads.sourceforge.net/swig/swig-1.3.36.tar.gz
 
 ov_package_url_presage=$ov_sourceforge_mirror/presage/files/presage/0.8.9/presage-0.8.9.tar.gz
-ov_package_url_glfw=http://sourceforge.net/projects/glfw/files/glfw/3.0.4/glfw-3.0.4.zip
+ov_package_url_glfw=http://openvibe.inria.fr/dependencies/linux-x86/glfw-3.0.4.zip
 
 #svn://scm.gforge.inria.fr/svn/obt
 #svn://scm.gforge.inria.fr/svn/openmask4/OpenMASK

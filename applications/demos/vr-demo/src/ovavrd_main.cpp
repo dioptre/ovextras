@@ -1,3 +1,7 @@
+
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovavrdCOgreVRApplication.h"
 
 #include "HandballBCI/ovavrdCHandballBCI.h"
@@ -79,3 +83,14 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+
+#else
+#include <stdio.h>
+
+int main(int argc, char** argv)
+{
+	printf("VR demo has not been compiled as it depends on Ogre (missing/disabled)\n");
+
+	return -1;
+}
+#endif

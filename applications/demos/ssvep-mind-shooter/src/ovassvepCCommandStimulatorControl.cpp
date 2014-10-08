@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCCommandStimulatorControl.h"
 #include "ovassvepCApplication.h"
 
@@ -38,3 +41,5 @@ void CCommandStimulatorControl::execute(int iButton, int iState)
 	}
 
 }
+
+#endif

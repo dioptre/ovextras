@@ -1,3 +1,8 @@
+
+
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovkMaterialAction.h"
 
 using namespace Ogre;
@@ -315,3 +320,5 @@ void MaterialSetShader::subEntityAction( SubEntityMaterial* subEntity ) const
 }
 
 //===========================================================================
+
+#endif
