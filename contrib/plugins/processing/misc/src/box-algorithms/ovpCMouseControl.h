@@ -5,12 +5,6 @@
 
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/IReader.h>
-#include <ebml/IReaderHelper.h>
-
-#include <ebml/TReaderCallbackProxy.h>
-#include <ebml/TWriterCallbackProxy.h>
-
 #include <vector>
 #include <string>
 #include <map>
@@ -39,17 +33,11 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, OVP_ClassId_MouseControl)
 
-			virtual void setMatrixDimensionCount(const OpenViBE::uint32 ui32DimensionCount);
-			virtual void setMatrixDimensionSize(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionSize);
-			virtual void setMatrixDimensionLabel(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionEntryIndex, const char* sDimensionLabel);
-			virtual void setMatrixBuffer(const OpenViBE::float64* pBuffer);
-
 		protected:
 
-			//ebml
-			EBML::IReader* m_pReader;
-			OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback* m_pStreamedMatrixReaderCallBack;
-			OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback::TCallbackProxy1<OpenViBEPlugins::Tools::CMouseControl> m_oStreamedMatrixReaderCallBackProxy;
+			//codec
+			OpenViBEToolkit::TStreamedMatrixDecoder < CMouseControl >* m_pStreamedMatrixDecoder;
+
 
 			//Start and end time of the last buffer
 			OpenViBE::uint64 m_ui64StartTime;

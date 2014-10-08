@@ -15,15 +15,7 @@ using namespace OpenViBEToolkit;
 using namespace std;
 
 CMouseControl::CMouseControl(void)
-	:m_pReader(NULL)
-	,m_pStreamedMatrixReaderCallBack(NULL)
-	,m_oStreamedMatrixReaderCallBackProxy(
-		*this,
-		&CMouseControl::setMatrixDimensionCount,
-		&CMouseControl::setMatrixDimensionSize,
-		&CMouseControl::setMatrixDimensionLabel,
-		&CMouseControl::setMatrixBuffer)
-	,m_ui64StartTime(0)
+	:m_ui64StartTime(0)
 	,m_ui64EndTime(0)
 	,m_bError(false)
 #if defined TARGET_OS_Linux
@@ -39,8 +31,7 @@ void CMouseControl::release(void)
 
 boolean CMouseControl::initialize(void)
 {
-	m_pStreamedMatrixReaderCallBack = createBoxAlgorithmStreamedMatrixInputReaderCallback(m_oStreamedMatrixReaderCallBackProxy);
-	m_pReader = EBML::createReader(*m_pStreamedMatrixReaderCallBack);
+	m_pStreamedMatrixDecoder = new OpenViBEToolkit::TStreamedMatrixDecoder < CMouseControl >(*this,0);
 
 	m_pInputBuffer = NULL;
 
@@ -54,11 +45,8 @@ boolean CMouseControl::initialize(void)
 
 boolean CMouseControl::uninitialize(void)
 {
-	//release the ebml reader
-	releaseBoxAlgorithmStreamedMatrixInputReaderCallback(m_pStreamedMatrixReaderCallBack);
-	m_pReader->release();
-	m_pStreamedMatrixReaderCallBack = NULL;
-	m_pReader=NULL;
+	m_pStreamedMatrixDecoder->uninitialize();
+	delete m_pStreamedMatrixDecoder;
 
 	return true;
 }
@@ -74,34 +62,6 @@ boolean CMouseControl::processInput(uint32 ui32InputIndex)
 	return true;
 }
 
-void CMouseControl::setMatrixDimensionCount(const uint32 ui32DimensionCount)
-{
-}
-
-void CMouseControl::setMatrixDimensionSize(const uint32 ui32DimensionIndex, const uint32 ui32DimensionSize)
-{
-	if(ui32DimensionSize != 1)
-	{
-		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning <<"Error, dimension size isn't 1 for Amplitude input !\n";
-		m_bError = true;
-	}
-}
-
-void CMouseControl::setMatrixDimensionLabel(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex, const char* sDimensionLabel)
-{
-	/* nothing to do */
-}
-
-void CMouseControl::setMatrixBuffer(const float64* pBuffer)
-{
-	if(m_bError)
-	{
-		return;
-	}
-
-	m_pInputBuffer = pBuffer;
-}
-
 boolean CMouseControl::process()
 {
 	IBoxIO * l_pDynamicContext = getBoxAlgorithmContext()->getDynamicBoxContext();
@@ -114,12 +74,17 @@ boolean CMouseControl::process()
 
 		if(l_pDynamicContext->getInputChunk(0, i, m_ui64StartTime, m_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer))
 		{
-			m_pReader->processData(l_pChunkBuffer, l_ui64ChunkSize);
-			if(m_pInputBuffer == NULL) //dealing with the signal header
+			m_pStreamedMatrixDecoder->decode(i);
+			if(m_pStreamedMatrixDecoder->isBufferReceived())
 			{
-			}
-			else
-			{
+				IMatrix* l_pMatrix = m_pStreamedMatrixDecoder->getOutputMatrix();
+				if(l_pMatrix->getBufferElementCount()!=1)
+				{
+					getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning <<"Error, dimension size isn't 1 for Amplitude input !\n";
+					m_bError = true;
+					return !m_bError;
+				}
+				m_pInputBuffer = l_pMatrix->getBuffer();
 #if defined TARGET_OS_Linux
 				m_pMainDisplay=::XOpenDisplay(NULL);
 				if (!m_pMainDisplay)
@@ -145,5 +110,5 @@ boolean CMouseControl::process()
 			l_pDynamicContext->markInputAsDeprecated(0, i);
 		}
 	}
-	return true;
+	return !m_bError;
 }
