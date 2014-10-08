@@ -92,7 +92,7 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	{
 		m_pActiveDecoder = &m_StimulationDecoder;
 	}
-	m_pActiveDecoder->initialize(*this);
+	m_pActiveDecoder->initialize(*this,0);
 
 	uint64 l_ui64Port = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_ui64OutputStyle = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
