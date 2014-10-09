@@ -21,35 +21,35 @@ boolean CBoxAlgorithmEOG_Denoising::initialize(void)
 
     m_oAlgo2_SignalEncoder.getInputSamplingRate().setReferenceTarget(m_oAlgo0_SignalDecoder.getOutputSamplingRate());
 
-    m_stringFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+    m_sFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
-    m_fBMatrixFile.open(m_stringFilename.toASCIIString(),std::ios::in);
+    m_fBMatrixFile.open(m_sFilename.toASCIIString(),std::ios::in);
 	if(m_fBMatrixFile.fail())
 	{
-		this->getLogManager() << LogLevel_Error << "Failed to open [" << m_stringFilename << "] for reading\n";
+		this->getLogManager() << LogLevel_Error << "Failed to open [" << m_sFilename << "] for reading\n";
 		return false;
 	}
 
-    m_fBMatrixFile >> m_uint32NbChannels0;
-    m_fBMatrixFile >> m_uint32NbChannels1;
-    m_fBMatrixFile >> m_uint32NbSamples0;
+    m_fBMatrixFile >> m_ui32NbChannels0;
+    m_fBMatrixFile >> m_ui32NbChannels1;
+    m_fBMatrixFile >> m_ui32NbSamples0;
 
 	if(m_fBMatrixFile.fail())
 	{
-		this->getLogManager() << LogLevel_Error << "Not able to successfully read dims from [" << m_stringFilename << "]\n";
+		this->getLogManager() << LogLevel_Error << "Not able to successfully read dims from [" << m_sFilename << "]\n";
 		m_fBMatrixFile.close();
 		return false;
 	}
 
 
-    m_uint32NbSamples1 = m_uint32NbSamples0;
+    m_ui32NbSamples1 = m_ui32NbSamples0;
 
-    l_oNoiseCoeff.resize(m_uint32NbChannels0,m_uint32NbChannels1);   //Noise Coefficients Matrix (Dim: Channels EEG x Channels EOG)
-    l_oNoiseCoeff.setZero(m_uint32NbChannels0,m_uint32NbChannels1);
+    l_oNoiseCoeff.resize(m_ui32NbChannels0,m_ui32NbChannels1);   //Noise Coefficients Matrix (Dim: Channels EEG x Channels EOG)
+    l_oNoiseCoeff.setZero(m_ui32NbChannels0,m_ui32NbChannels1);
 
-    for(uint32 i=0; i<m_uint32NbChannels0; i++)    //Number of channels
+    for(uint32 i=0; i<m_ui32NbChannels0; i++)    //Number of channels
     {
-        for(uint32 j=0; j<m_uint32NbChannels1; j++)    //Number of Samples per Chunk
+        for(uint32 j=0; j<m_ui32NbChannels1; j++)    //Number of Samples per Chunk
         {
             m_fBMatrixFile >> l_oNoiseCoeff(i,j);
         }
@@ -57,7 +57,7 @@ boolean CBoxAlgorithmEOG_Denoising::initialize(void)
 
 	if(m_fBMatrixFile.fail())
 	{
-		this->getLogManager() << LogLevel_Error << "Not able to successfully read coefficients from [" << m_stringFilename << "]\n";
+		this->getLogManager() << LogLevel_Error << "Not able to successfully read coefficients from [" << m_sFilename << "]\n";
 		m_fBMatrixFile.close();
 		return false;
 	}
@@ -103,9 +103,9 @@ boolean CBoxAlgorithmEOG_Denoising::process(void)
     IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 
-    Eigen::MatrixXd l_oData0(m_uint32NbChannels0,m_uint32NbSamples0);   //EEG data
-    Eigen::MatrixXd l_oData1(m_uint32NbChannels1,m_uint32NbSamples1);   //EOG data
-    Eigen::MatrixXd l_oEEGc(m_uint32NbChannels0,m_uint32NbSamples0);   //Corrected Matrix
+    Eigen::MatrixXd l_oData0(m_ui32NbChannels0,m_ui32NbSamples0);   //EEG data
+    Eigen::MatrixXd l_oData1(m_ui32NbChannels1,m_ui32NbSamples1);   //EOG data
+    Eigen::MatrixXd l_oEEGc(m_ui32NbChannels0,m_ui32NbSamples0);   //Corrected Matrix
 
 
     if (l_rDynamicBoxContext.getInputChunkCount(0)!=0)
@@ -117,50 +117,39 @@ boolean CBoxAlgorithmEOG_Denoising::process(void)
             // decode the chunk ii on input 0
             m_oAlgo0_SignalDecoder.decode(0,ii);
 
-
-
-
             IMatrix* l_pMatrix_0 = m_oAlgo0_SignalDecoder.getOutputMatrix();
-
             float64* l_pBuffer0 = l_pMatrix_0->getBuffer();
 
-
-
-            for(uint32 i=0; i<m_uint32NbChannels0; i++)    //Number of channels
+            for(uint32 i=0; i<m_ui32NbChannels0; i++)    //Number of channels
             {
-                for(uint32 j=0; j<m_uint32NbSamples0; j++)    //Number of Samples per Chunk
+                for(uint32 j=0; j<m_ui32NbSamples0; j++)    //Number of Samples per Chunk
                 {
-                    l_oData0(i,j) = l_pBuffer0[j+i*m_uint32NbSamples0];
+                    l_oData0(i,j) = l_pBuffer0[j+i*m_ui32NbSamples0];
                 }
             }
-
 
             //Signal EOG
             m_oAlgo1_SignalDecoder.decode(1,ii);
 
-
-
             IMatrix* l_pMatrix_1 = m_oAlgo1_SignalDecoder.getOutputMatrix();
-
             float64* l_pBuffer1 = l_pMatrix_1->getBuffer();
 
-
-            for(uint32 i=0; i<m_uint32NbChannels1; i++)    //Number of channels
+            for(uint32 i=0; i<m_ui32NbChannels1; i++)    //Number of channels
             {
-                for(uint32 j=0; j<m_uint32NbSamples1; j++)    //Number of Samples per Chunk
+                for(uint32 j=0; j<m_ui32NbSamples1; j++)    //Number of Samples per Chunk
                 {
-                    l_oData1(i,j) = l_pBuffer1[j+i*m_uint32NbSamples1];
+                    l_oData1(i,j) = l_pBuffer1[j+i*m_ui32NbSamples1];
                 }
             }
 
 
             //Set the output (corrected EEG) to the same structure as the EEG input
             m_oAlgo2_SignalEncoder.getInputMatrix()->setDimensionCount(2);
-            m_oAlgo2_SignalEncoder.getInputMatrix()->setDimensionSize(0,m_uint32NbChannels0);
-            m_oAlgo2_SignalEncoder.getInputMatrix()->setDimensionSize(1,m_uint32NbSamples0);
+            m_oAlgo2_SignalEncoder.getInputMatrix()->setDimensionSize(0,m_ui32NbChannels0);
+            m_oAlgo2_SignalEncoder.getInputMatrix()->setDimensionSize(1,m_ui32NbSamples0);
 
 
-            for (uint32 d_i=0; d_i<m_uint32NbChannels0; d_i++)
+            for (uint32 d_i=0; d_i<m_ui32NbChannels0; d_i++)
             {
                 m_oAlgo2_SignalEncoder.getInputMatrix()->setDimensionLabel(0,d_i,m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionLabel(0,d_i));
             }
@@ -170,11 +159,11 @@ boolean CBoxAlgorithmEOG_Denoising::process(void)
             l_oEEGc = l_oData0 - (l_oNoiseCoeff*l_oData1);
 
 
-            for(uint32 i=0; i<m_uint32NbChannels0; i++)    //Number of EEG channels
+            for(uint32 i=0; i<m_ui32NbChannels0; i++)    //Number of EEG channels
             {
-                for(uint32 j=0; j<m_uint32NbSamples0; j++)    //Number of Samples per Chunk
+                for(uint32 j=0; j<m_ui32NbSamples0; j++)    //Number of Samples per Chunk
                 {
-                    m_oAlgo2_SignalEncoder.getInputMatrix()->getBuffer()[j+i*m_uint32NbSamples0] = l_oEEGc(i,j);
+                    m_oAlgo2_SignalEncoder.getInputMatrix()->getBuffer()[j+i*m_ui32NbSamples0] = l_oEEGc(i,j);
                 }
             }
 

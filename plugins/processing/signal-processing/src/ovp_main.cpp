@@ -61,9 +61,6 @@
 #include "box-algorithms/ovpCBoxAlgorithmEOG_Denoising_Calibration.h"
 #include "box-algorithms/ovpCBoxAlgorithmDiscreteWaveletTransform.h"
 #include "box-algorithms/ovpCBoxAlgorithmInverse_DWT.h"
-
-//#include "algorithms/JP_Algo/ovpCRegressionAnalysis.h"
-//#include "algorithms/JP_Algo/ovpCRegressionAnalysisCalibration.h"
 // @END JP
 
 
@@ -179,10 +176,8 @@ OVP_Declare_Begin()
     // @BEGIN JP
 #if defined(__OpenViBEPlugins_BoxAlgorithm_EOG_Denoising_Calibration_H__)
     OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmEOG_DenoisingDesc);
-    //OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmRegressionAnalysisDesc);
 
     OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmEOG_Denoising_CalibrationDesc);
-    //OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmRegressionAnalysisCalibrationDesc);
 #endif
 
 #if defined(__OpenViBEPlugins_BoxAlgorithm_DiscreteWaveletTransform_H__)

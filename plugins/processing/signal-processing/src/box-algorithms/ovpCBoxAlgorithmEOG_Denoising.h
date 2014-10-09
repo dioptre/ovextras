@@ -25,12 +25,12 @@ namespace OpenViBEPlugins
 namespace SignalProcessing
 {
 /**
-         * \class CBoxAlgorithmEOG_Denoising
-         * \author Joao-Pedro Berti-Ligabo / Inria
-         * \date Tue May 20 15:33:22 2014
-         * \brief The class CBoxAlgorithmEOG_Denoising describes the box Test.
-         *
-         */
+ * \class CBoxAlgorithmEOG_Denoising
+ * \author Joao-Pedro Berti-Ligabo / Inria
+ * \date Tue May 20 15:33:22 2014
+ * \brief The class CBoxAlgorithmEOG_Denoising describes the box Test.
+ *
+ */
 class CBoxAlgorithmEOG_Denoising : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 {
 public:
@@ -76,72 +76,27 @@ protected:
     // Signal stream encoder
     OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmEOG_Denoising > m_oAlgo2_SignalEncoder;
 
-    OpenViBE::CString m_stringFilename;
+    OpenViBE::CString m_sFilename;
     std::ifstream m_fBMatrixFile;
     Eigen::MatrixXd l_oNoiseCoeff;
 
+    OpenViBE::uint32 m_ui32NbChannels0;
+    OpenViBE::uint32 m_ui32NbChannels1;
 
-
-
-    OpenViBE::uint32 m_uint32NbChannels0;
-    OpenViBE::uint32 m_uint32NbChannels1;
-
-    OpenViBE::uint32 m_uint32NbSamples0;
-    OpenViBE::uint32 m_uint32NbSamples1;
+    OpenViBE::uint32 m_ui32NbSamples0;
+    OpenViBE::uint32 m_ui32NbSamples1;
 
 };
 
 
-// If you need to implement a box Listener, here is a sekeleton for you.
-// Use only the callbacks you need.
-// For example, if your box has a variable number of input, but all of them must be stimulation inputs.
-// The following listener callback will ensure that any newly added input is stimulations :
-/*
-        virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
-        {
-            rBox.setInputType(ui32Index, OV_TypeId_Stimulations);
-        };
-        */
-
-/*
-        // The box listener can be used to call specific callbacks whenever the box structure changes : input added, name changed, etc.
-        // Please uncomment below the callbacks you want to use.
-        class CBoxAlgorithmEOG_DenoisingListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
-        {
-        public:
-
-            //virtual OpenViBE::boolean onInitialized(OpenViBE::Kernel::IBox& rBox) { return true; };
-            //virtual OpenViBE::boolean onNameChanged(OpenViBE::Kernel::IBox& rBox) { return true; };
-            //virtual OpenViBE::boolean onInputConnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onInputDisconnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onInputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onOutputConnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onOutputDisconnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onOutputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onOutputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onOutputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onOutputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onSettingAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onSettingRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onSettingTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onSettingNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onSettingDefaultValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-            //virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-
-            _IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
-        };
-        */
 
 /**
-         * \class CBoxAlgorithmEOG_DenoisingDesc
-         * \author JP (Inria)
-         * \date Tue May 20 15:33:22 2014
-         * \brief Descriptor of the box Test.
-         *
-         */
+ * \class CBoxAlgorithmEOG_DenoisingDesc
+ * \author Joao-Pedro Berti-Ligabo / Inria
+ * \date Tue May 20 15:33:22 2014
+ * \brief Descriptor of the box Test.
+ *
+ */
 class CBoxAlgorithmEOG_DenoisingDesc : virtual public OpenViBE::Plugins::IBoxAlgorithmDesc
 {
 public:
@@ -160,10 +115,6 @@ public:
     virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_Test; }
     virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CBoxAlgorithmEOG_Denoising; }
 
-    /*
-            virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmEOG_DenoisingListener; }
-            virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
-            */
     virtual OpenViBE::boolean getBoxPrototype(
             OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
     {
@@ -171,32 +122,8 @@ public:
         rBoxAlgorithmPrototype.addInput("EEG",OV_TypeId_Signal);
         rBoxAlgorithmPrototype.addInput("EOG",OV_TypeId_Signal);
 
-        //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
-        //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddInput);
-
         rBoxAlgorithmPrototype.addOutput("EEG_Corrected",OV_TypeId_Signal);
         rBoxAlgorithmPrototype.addSetting("Filename b Matrix", OV_TypeId_Filename, "b-Matrix-EEG.txt");
-
-        //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
-        //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
-
-        //No Message input specified.To add Message inputs use :
-        //rBoxAlgorithmPrototype.addMessageInput("Input Name");
-
-        //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyMessageInput);
-        //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageInput);
-
-        //No Message output specified.To add Message outputs use :
-        //rBoxAlgorithmPrototype.addMessageOutput("Output Name");
-
-        //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyMessageOutput);
-        //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageOutput);
-
-        //No setting specified.To add settings use :
-        //rBoxAlgorithmPrototype.addSetting("Setting Name",OV_TypeId_XXXX,"default value");
-
-        //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
-        //rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 
         rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 
@@ -207,6 +134,6 @@ public:
 };
 };
 
-#endif // __OpenViBEPlugins_BoxAlgorithm_Test_H__
+#endif // __OpenViBEPlugins_BoxAlgorithm_EOG_Denoising_
 
 #endif

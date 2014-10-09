@@ -54,8 +54,8 @@ namespace OpenViBEPlugins
             OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmInverse_DWT > m_AlgoInfo_SignalDecoder;
             OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmInverse_DWT >  *m_oAlgoX_SignalDecoder;
 
-            OpenViBE::CString m_CStringWaveletType;
-            OpenViBE::CString m_CStringDecompositionLevel;
+            OpenViBE::CString m_sWaveletType;
+            OpenViBE::CString m_sDecompositionLevel;
 
 		};
 
@@ -120,7 +120,7 @@ namespace OpenViBEPlugins
 
 		/**
 		 * \class CBoxAlgorithmInverse_DWTDesc
-		 * \author JP (Inria)
+		 * \author Joao-Pedro Berti-Ligabo / Inria
 		 * \date Thu Jul 24 10:57:05 2014
 		 * \brief Descriptor of the box Inverse DWT.
 		 *

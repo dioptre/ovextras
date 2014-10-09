@@ -19,43 +19,43 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::initialize(void)
     // Signal stream decoder
     m_oAlgo1_SignalDecoder.initialize(*this);
 
-    m_iStimulationDecoder0.initialize(*this);
+    m_oStimulationDecoder0.initialize(*this);
 
     m_oStimulationEncoder1.initialize(*this);
 
     m_sRegressionDenoisingCalibrationFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-    m_float64Start_time=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-    m_float64End_time=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+    m_f64StartTime=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+    m_f64EndTime=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
     m_ui64StimulationIdentifier=FSettingValueAutoCast(*this->getBoxAlgorithmContext(),3);
 
-    m_uint32ChunksCount = 0;
-    m_uint32ChunksVerify = -1;
+    m_ui32ChunksCount = 0;
+    m_ui32ChunksVerify = -1;
     m_bEndProcess = false;
-    m_float64Time=0;
-    m_uint32Start_time_Chunks=0;
-    m_uint32End_time_Chunks=0;
+    m_f64Time=0;
+    m_ui32StartTimeChunks=0;
+    m_ui32EndTimeChunks=0;
 
 	// Random id for tmp token, clash possible if multiple boxes run in parallel (but unlikely)
 	const CString l_sRandomToken = CIdentifier::random().toString();
 	m_sEEGTempFilename = this->getConfigurationManager().expand("${Path_Tmp}/denoising_") + l_sRandomToken + "_EEG_tmp.dat";
 	m_sEOGTempFilename = this->getConfigurationManager().expand("${Path_Tmp}/denoising_") + l_sRandomToken + "_EOG_tmp.dat";
 
-    m_fstreamEEG_File.open (m_sEEGTempFilename, std::ios::out | std::ios::in |std::ios::trunc );
-	if(m_fstreamEEG_File.fail())
+    m_oEEGFile.open (m_sEEGTempFilename, std::ios::out | std::ios::in |std::ios::trunc );
+	if(m_oEEGFile.fail())
 	{
 		this->getLogManager() << LogLevel_Error << "Opening [" << m_sEEGTempFilename << "] for r/w failed\n";
 		return false;
 	}
 
-    m_fstreamEOG_File.open (m_sEOGTempFilename, std::ios::out | std::ios::in |std::ios::trunc );
-	if(m_fstreamEOG_File.fail())
+    m_oEOGFile.open (m_sEOGTempFilename, std::ios::out | std::ios::in |std::ios::trunc );
+	if(m_oEOGFile.fail())
 	{
 		this->getLogManager() << LogLevel_Error << "Opening [" << m_sEOGTempFilename << "] for r/w failed\n";
 		return false;
 	}
 
-    m_fMatrixFile.open(m_sRegressionDenoisingCalibrationFilename.toASCIIString(),std::ios::out | std::ios::trunc);
-	if(m_fMatrixFile.fail())
+    m_oMatrixFile.open(m_sRegressionDenoisingCalibrationFilename.toASCIIString(),std::ios::out | std::ios::trunc);
+	if(m_oMatrixFile.fail())
 	{
 		this->getLogManager() << LogLevel_Error << "Opening [" << m_sRegressionDenoisingCalibrationFilename << "] for writing failed\n";
 		return false;
@@ -69,29 +69,29 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::uninitialize(void)
 {
     m_oAlgo0_SignalDecoder.uninitialize();
     m_oAlgo1_SignalDecoder.uninitialize();
-    m_iStimulationDecoder0.uninitialize();
+    m_oStimulationDecoder0.uninitialize();
     m_oStimulationEncoder1.uninitialize();
 
 	// Clean up temporary files
-	if(m_fstreamEEG_File.is_open())
+	if(m_oEEGFile.is_open())
 	{
-		m_fstreamEEG_File.close();
+		m_oEEGFile.close();
 	}
 	if(m_sEEGTempFilename!=CString("")) {
 		std::remove(m_sEEGTempFilename);
 	}
 
-	if(m_fstreamEOG_File.is_open())
+	if(m_oEOGFile.is_open())
 	{
-		m_fstreamEOG_File.close();
+		m_oEOGFile.close();
 	}
 	if(m_sEOGTempFilename!=CString("")) {
 		std::remove(m_sEOGTempFilename);
 	}
 
-    if(m_fMatrixFile.is_open())
+    if(m_oMatrixFile.is_open())
 	{
-		m_fMatrixFile.close();
+		m_oMatrixFile.close();
 	}
 
     return true;
@@ -101,272 +101,272 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::uninitialize(void)
 
 boolean CBoxAlgorithmEOG_Denoising_Calibration::processClock(IMessageClock& rMessageClock)
 {
-    IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
+	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-    if (m_uint32ChunksCount!=m_uint32ChunksVerify && m_bEndProcess == false)
-    {
-        m_uint32ChunksVerify = m_uint32ChunksCount;
-        if (m_float64Time==m_float64Start_time)
-        {
-            m_uint32Start_time_Chunks=m_uint32ChunksCount;
-        }
+	if (m_ui32ChunksCount!=m_ui32ChunksVerify && m_bEndProcess == false)
+	{
+		m_ui32ChunksVerify = m_ui32ChunksCount;
+		if (m_f64Time==m_f64StartTime)
+		{
+			m_ui32StartTimeChunks=m_ui32ChunksCount;
+		}
 
-        if (m_float64Time==m_float64End_time)
-        {
-            m_uint32End_time_Chunks=m_uint32ChunksCount;
-        }
+		if (m_f64Time==m_f64EndTime)
+		{
+			m_ui32EndTimeChunks=m_ui32ChunksCount;
+		}
 
-    }
-    else if (m_uint32ChunksCount==m_uint32ChunksVerify && m_bEndProcess == false)
-    {
-        if ( (m_float64Start_time>=m_float64End_time) || (m_float64End_time>=m_float64Time) )
-        {
-            this->getLogManager() << LogLevel_Warning << "Verify time interval of sampling" << "\n";
-            this->getLogManager() << LogLevel_Warning << "Total time of your sample: " << m_float64Time << "\n";
-            this->getLogManager() << LogLevel_Warning << "b Matrix was NOT successfully calculated" << "\n";
+	}
+	else if (m_ui32ChunksCount==m_ui32ChunksVerify && m_bEndProcess == false)
+	{
+		if ( (m_f64StartTime>=m_f64EndTime) || (m_f64EndTime>=m_f64Time) )
+		{
+			this->getLogManager() << LogLevel_Warning << "Verify time interval of sampling" << "\n";
+			this->getLogManager() << LogLevel_Warning << "Total time of your sample: " << m_f64Time << "\n";
+			this->getLogManager() << LogLevel_Warning << "b Matrix was NOT successfully calculated" << "\n";
 
-            m_oStimulationEncoder1.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
-            m_oStimulationEncoder1.encodeBuffer(0);
-            l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, 0),l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
+			m_oStimulationEncoder1.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
+			m_oStimulationEncoder1.encodeBuffer(0);
+			l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, 0),l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
 
-            //this->getLogManager() << LogLevel_Warning << "You can stop this scenario " <<"\n";
-            m_uint32ChunksVerify = -1;
-            m_bEndProcess = true;
-        }
-        else
-        {
-            this->getLogManager() << LogLevel_Info << "End of data gathering...calculating b matrix" << "\n";
-            
-			m_fstreamEEG_File.close();
-            m_fstreamEOG_File.close();
+			//this->getLogManager() << LogLevel_Warning << "You can stop this scenario " <<"\n";
+			m_ui32ChunksVerify = -1;
+			m_bEndProcess = true;
+		}
+		else
+		{
+			this->getLogManager() << LogLevel_Info << "End of data gathering...calculating b matrix" << "\n";
+			
+			m_oEEGFile.close();
+			m_oEOGFile.close();
 
-            m_fstreamEEG_File.open (m_sEEGTempFilename, std::ios::in | std::ios::app);
-			if(m_fstreamEEG_File.fail())
+			m_oEEGFile.open (m_sEEGTempFilename, std::ios::in | std::ios::app);
+			if(m_oEEGFile.fail())
 			{
 				this->getLogManager() << LogLevel_Error << "Opening [" << m_sEEGTempFilename << "] for reading failed\n";
 				return false;
 			}
 
-            m_fstreamEOG_File.open (m_sEOGTempFilename, std::ios::in | std::ios::app);
-			if(m_fstreamEOG_File.fail())
+			m_oEOGFile.open (m_sEOGTempFilename, std::ios::in | std::ios::app);
+			if(m_oEOGFile.fail())
 			{
 				this->getLogManager() << LogLevel_Error << "Opening [" << m_sEOGTempFilename << "] for reading failed\n";
 				return false;
 			}
 
-            //Process to extract the Matrix B
-            float64 l_laux;
+			//Process to extract the Matrix B
+			float64 l_f64Aux;
 
-            Eigen::MatrixXd l_oData0((int)m_uint32NbChannels0,(int)m_uint32NbSamples0*(int)m_uint32ChunksCount);   //EEG data
-            Eigen::MatrixXd l_oData1((int)m_uint32NbChannels1,(int)m_uint32NbSamples1*(int)m_uint32ChunksCount);   //EOG data
+			Eigen::MatrixXd l_oData0((int)m_ui32NbChannels0,(int)m_ui32NbSamples0*(int)m_ui32ChunksCount);   //EEG data
+			Eigen::MatrixXd l_oData1((int)m_ui32NbChannels1,(int)m_ui32NbSamples1*(int)m_ui32ChunksCount);   //EOG data
 
-            for (uint32 k=0; k<m_uint32ChunksCount;k++)
-            {
-                for(uint32 i=0; i<m_uint32NbChannels0; i++)    //Number of channels
-                {
-                    for(uint32 j=0; j<m_uint32NbSamples0; j++)    //Number of Samples per Chunk
-                    {
-                        m_fstreamEEG_File >> l_laux;
-                        l_oData0(i,j+k*(int)m_uint32NbSamples0)=l_laux;
-                    }
-                }
-            }
+			for (uint32 k=0; k<m_ui32ChunksCount;k++)
+			{
+				for(uint32 i=0; i<m_ui32NbChannels0; i++)    //Number of channels
+				{
+					for(uint32 j=0; j<m_ui32NbSamples0; j++)    //Number of Samples per Chunk
+					{
+						m_oEEGFile >> l_f64Aux;
+						l_oData0(i,j+k*(int)m_ui32NbSamples0)=l_f64Aux;
+					}
+				}
+			}
 
-            for (uint32 k=0; k<m_uint32ChunksCount;k++)
-            {
-                for(uint32 i=0; i<m_uint32NbChannels1; i++)    //Number of channels
-                {
-                    for(uint32 j=0; j<m_uint32NbSamples1; j++)    //Number of Samples per Chunk
-                    {
-                        m_fstreamEOG_File >> l_laux;
-                        l_oData1(i,j+k*(int)m_uint32NbSamples1)=l_laux;
-                    }
-                }
-            }
+			for (uint32 k=0; k<m_ui32ChunksCount;k++)
+			{
+				for(uint32 i=0; i<m_ui32NbChannels1; i++)    //Number of channels
+				{
+					for(uint32 j=0; j<m_ui32NbSamples1; j++)    //Number of Samples per Chunk
+					{
+						m_oEOGFile >> l_f64Aux;
+						l_oData1(i,j+k*(int)m_ui32NbSamples1)=l_f64Aux;
+					}
+				}
+			}
 
-            // We will eliminate the firsts and lasts chunks of each channel
+			// We will eliminate the firsts and lasts chunks of each channel
 
-            Eigen::MatrixXd l_oData0n((int)m_uint32NbChannels0,(int)m_uint32NbSamples0*((int)m_uint32ChunksCount));   //EEG data
-            Eigen::MatrixXd l_oData1n((int)m_uint32NbChannels1,(int)m_uint32NbSamples1*((int)m_uint32ChunksCount));   //EOG data
+			Eigen::MatrixXd l_oData0n((int)m_ui32NbChannels0,(int)m_ui32NbSamples0*((int)m_ui32ChunksCount));   //EEG data
+			Eigen::MatrixXd l_oData1n((int)m_ui32NbChannels1,(int)m_ui32NbSamples1*((int)m_ui32ChunksCount));   //EOG data
 
-            uint32 l_uint32ValidChunks = m_uint32End_time_Chunks - m_uint32Start_time_Chunks;
+			uint32 l_ui32ValidChunks = m_ui32EndTimeChunks - m_ui32StartTimeChunks;
 
-            uint32 l_uint32iblockeeg=0;
-            uint32 l_uint32jblockeeg=m_uint32Start_time_Chunks*(int)m_uint32NbSamples0-1;
-            uint32 l_uint32pblockeeg=(int)m_uint32NbChannels0;
-            uint32 l_uint32qblockeeg=(int)m_uint32NbSamples0*(l_uint32ValidChunks);
-            uint32 l_uint32iblockeog=0;
-            uint32 l_uint32jblockeog=m_uint32Start_time_Chunks*(int)m_uint32NbSamples1-1;
-            uint32 l_uint32pblockeog=(int)m_uint32NbChannels1;
-            uint32 l_uint32qblockeog=(int)m_uint32NbSamples1*(l_uint32ValidChunks);
-
-
-            l_oData0n = l_oData0.block(l_uint32iblockeeg,l_uint32jblockeeg,l_uint32pblockeeg,l_uint32qblockeeg);
-            l_oData1n = l_oData1.block(l_uint32iblockeog,l_uint32jblockeog,l_uint32pblockeog,l_uint32qblockeog);
+			uint32 l_ui32iblockeeg=0;
+			uint32 l_ui32jblockeeg=m_ui32StartTimeChunks*(int)m_ui32NbSamples0-1;
+			uint32 l_ui32pblockeeg=(int)m_ui32NbChannels0;
+			uint32 l_ui32qblockeeg=(int)m_ui32NbSamples0*(l_ui32ValidChunks);
+			uint32 l_ui32iblockeog=0;
+			uint32 l_ui32jblockeog=m_ui32StartTimeChunks*(int)m_ui32NbSamples1-1;
+			uint32 l_ui32pblockeog=(int)m_ui32NbChannels1;
+			uint32 l_ui32qblockeog=(int)m_ui32NbSamples1*(l_ui32ValidChunks);
 
 
-            float64 nbval = 0;
-            float64 l_min = 1e-6;
-            float64 l_max = 1e6;
-
-            Eigen::VectorXd mean_row_eeg(m_uint32NbChannels0);
-            Eigen::VectorXd mean_row_eog(m_uint32NbChannels1);
-
-            mean_row_eeg.setZero(m_uint32NbChannels0,1);
-            mean_row_eog.setZero(m_uint32NbChannels1,1);
+			l_oData0n = l_oData0.block(l_ui32iblockeeg,l_ui32jblockeeg,l_ui32pblockeeg,l_ui32qblockeeg);
+			l_oData1n = l_oData1.block(l_ui32iblockeog,l_ui32jblockeog,l_ui32pblockeog,l_ui32qblockeog);
 
 
-            for(uint32 i=0; i<m_uint32NbChannels0; i++)    //Number of channels
-            {
-                nbval = 0;
-                for(uint32 j=0; j<m_uint32NbSamples0*l_uint32ValidChunks; j++)    //Number of Samples per Chunk
-                {
-                    if ((l_oData0n(i,j)>-l_max && l_oData0n(i,j)<-l_min) || (l_oData0n(i,j)>l_min && l_oData0n(i,j)<l_max))
+			float64 l_f64nbval = 0;
+			float64 l_f64min = 1e-6;
+			float64 l_f64max = 1e6;
 
-                    {
-                        //Valid Interval
-                        mean_row_eeg(i) = mean_row_eeg(i) + l_oData0n(i,j);
-                        nbval=nbval+1;
+			Eigen::VectorXd mean_row_eeg(m_ui32NbChannels0);
+			Eigen::VectorXd mean_row_eog(m_ui32NbChannels1);
 
-                    }
-                }
-                if (nbval!=0)
-                {
-                    mean_row_eeg(i)=mean_row_eeg(i)/nbval;
-                }
-                else
-                {
-                    mean_row_eeg(i)=0;
-                }
-            }
+			mean_row_eeg.setZero(m_ui32NbChannels0,1);
+			mean_row_eog.setZero(m_ui32NbChannels1,1);
 
 
+			for(uint32 i=0; i<m_ui32NbChannels0; i++)    //Number of channels
+			{
+				l_f64nbval = 0;
+				for(uint32 j=0; j<m_ui32NbSamples0*l_ui32ValidChunks; j++)    //Number of Samples per Chunk
+				{
+					if ((l_oData0n(i,j)>-l_f64max && l_oData0n(i,j)<-l_f64min) || (l_oData0n(i,j)>l_f64min && l_oData0n(i,j)<l_f64max))
 
-            for(uint32 i=0; i<m_uint32NbChannels1; i++)    //Number of channels
-            {
-                nbval = 0;
-                for(uint32 j=0; j<m_uint32NbSamples1*l_uint32ValidChunks; j++)    //Number of Samples per Chunk
-                {
-                    if ((l_oData1n(i,j)>-l_max && l_oData1n(i,j)<-l_min) || (l_oData1n(i,j)>l_min && l_oData1n(i,j)<l_max))
-                    {
-                        //Valid Interval
-                        mean_row_eog(i) = mean_row_eog(i) + l_oData1n(i,j);
-                        nbval=nbval+1;
-                    }
+					{
+						//Valid Interval
+						mean_row_eeg(i) = mean_row_eeg(i) + l_oData0n(i,j);
+						l_f64nbval=l_f64nbval+1;
 
-                }
-                if (nbval!=0)
-                {
-                    mean_row_eog(i)=mean_row_eog(i)/nbval;
-                }
-                else
-                {
-                    mean_row_eog(i)=0;
-                }
-
-            }
-
-
-            // The values which are not valid (very large or very small) will be set to the mean value
-            // So these values will not influence to the covariance calcul because the covariance is centered (value - mean)
-
-
-            for(uint32 i=0; i<m_uint32NbChannels0; i++)    //Number of channels
-            {
-                for(uint32 j=0; j<m_uint32NbSamples0*l_uint32ValidChunks; j++)   //Number of total samples
-                {
-                    if ((l_oData0n(i,j)>-l_max && l_oData0n(i,j)<-l_min) || (l_oData0n(i,j)>l_min && l_oData0n(i,j)<l_max))
-                    {
-                        //Valid Interval
-                        l_oData0n(i,j)=l_oData0n(i,j)-mean_row_eeg(i);
-                    }
-                    else
-                    {
-                        //Invalid
-                        l_oData0n(i,j)=0;
-                    }
-                }
-            }
+					}
+				}
+				if (l_f64nbval!=0)
+				{
+					mean_row_eeg(i)=mean_row_eeg(i)/l_f64nbval;
+				}
+				else
+				{
+					mean_row_eeg(i)=0;
+				}
+			}
 
 
 
-            for (uint32 i=0; i<m_uint32NbChannels1; i++)    //Number of channels
-            {
-                for (uint32 j=0; j<m_uint32NbSamples1*l_uint32ValidChunks; j++)    //Number of total samples
-                {
-                    if ((l_oData1n(i,j)>-l_max && l_oData1n(i,j)<-l_min) || (l_oData1n(i,j)>l_min && l_oData1n(i,j)<l_max))
-                    {
-                        //Valid Interval
-                        l_oData1n(i,j)=l_oData1n(i,j)-mean_row_eog(i);
-                    }
-                    else
-                    {
-                        //Invalid
-                        l_oData1n(i,j)=0;
-                    }
+			for(uint32 i=0; i<m_ui32NbChannels1; i++)    //Number of channels
+			{
+				l_f64nbval = 0;
+				for(uint32 j=0; j<m_ui32NbSamples1*l_ui32ValidChunks; j++)    //Number of Samples per Chunk
+				{
+					if ((l_oData1n(i,j)>-l_f64max && l_oData1n(i,j)<-l_f64min) || (l_oData1n(i,j)>l_f64min && l_oData1n(i,j)<l_f64max))
+					{
+						//Valid Interval
+						mean_row_eog(i) = mean_row_eog(i) + l_oData1n(i,j);
+						l_f64nbval=l_f64nbval+1;
+					}
 
-                }
+				}
+				if (l_f64nbval!=0)
+				{
+					mean_row_eog(i)=mean_row_eog(i)/l_f64nbval;
+				}
+				else
+				{
+					mean_row_eog(i)=0;
+				}
 
-            }
-
-
-            //Now we need to calculate the matrix b (which tells us the correct weights to be stored in b matrix)
-
-
-            Eigen::MatrixXd l_oNoiseCoeff((int)m_uint32NbChannels0,(int)m_uint32NbChannels1);   //Noise Coefficients Matrix (Dim: Channels EEG x Channels EOG)
-
-            Eigen::MatrixXd l_oCovEog((int)m_uint32NbChannels1,(int)m_uint32NbChannels1);
-
-            Eigen::MatrixXd l_oCovEogInv((int)m_uint32NbChannels1,(int)m_uint32NbChannels1);
-
-            Eigen::MatrixXd l_oCovEEGandEOG((int)m_uint32NbChannels0,(int)m_uint32NbChannels1);
-
-            l_oCovEog = (l_oData1n * l_oData1n.transpose());
-
-            l_oCovEogInv = l_oCovEog.inverse();
-
-            l_oCovEEGandEOG = l_oData0n*(l_oData1n.transpose());
-
-            l_oNoiseCoeff =  l_oCovEEGandEOG * l_oCovEogInv;
+			}
 
 
-            // Save Matrix b to the file specified in the parameters
+			// The values which are not valid (very large or very small) will be set to the mean value
+			// So these values will not influence to the covariance calcul because the covariance is centered (value - mean)
 
 
-            m_fMatrixFile << m_uint32NbChannels0 << " " << m_uint32NbChannels1 << " " << m_uint32NbSamples0 <<"\n";
-
-            for(uint32 i=0; i<m_uint32NbChannels0; i++)    //Number of channels EEG
-            {
-                for(uint32 j=0; j<m_uint32NbChannels1; j++)    //Number of channels EOG
-                {
-                    m_fMatrixFile << l_oNoiseCoeff(i,j) <<"\n";
-                }
-            }
-
-
-            m_fstreamEEG_File.close();
-            m_fstreamEOG_File.close();
-            m_fMatrixFile.close();
-
-            m_uint32ChunksVerify = -1;
-            m_bEndProcess = true;
-
-
-            this->getLogManager() << LogLevel_Info << "b Matrix was successfully calculated" << "\n";
-            this->getLogManager() << LogLevel_Info << "Wrote the matrix to [" << m_sRegressionDenoisingCalibrationFilename << "]\n";
-
-            //this->getLogManager() << LogLevel_Warning << "You can stop this scenario " <<"\n";
-
-            m_oStimulationEncoder1.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
-            m_oStimulationEncoder1.encodeBuffer(0);
-            l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, 0),l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
-
-        }
-    }
+			for(uint32 i=0; i<m_ui32NbChannels0; i++)    //Number of channels
+			{
+				for(uint32 j=0; j<m_ui32NbSamples0*l_ui32ValidChunks; j++)   //Number of total samples
+				{
+					if ((l_oData0n(i,j)>-l_f64max && l_oData0n(i,j)<-l_f64min) || (l_oData0n(i,j)>l_f64min && l_oData0n(i,j)<l_f64max))
+					{
+						//Valid Interval
+						l_oData0n(i,j)=l_oData0n(i,j)-mean_row_eeg(i);
+					}
+					else
+					{
+						//Invalid
+						l_oData0n(i,j)=0;
+					}
+				}
+			}
 
 
-    m_float64Time++;
-    return true;
+
+			for (uint32 i=0; i<m_ui32NbChannels1; i++)    //Number of channels
+			{
+				for (uint32 j=0; j<m_ui32NbSamples1*l_ui32ValidChunks; j++)    //Number of total samples
+				{
+					if ((l_oData1n(i,j)>-l_f64max && l_oData1n(i,j)<-l_f64min) || (l_oData1n(i,j)>l_f64min && l_oData1n(i,j)<l_f64max))
+					{
+						//Valid Interval
+						l_oData1n(i,j)=l_oData1n(i,j)-mean_row_eog(i);
+					}
+					else
+					{
+						//Invalid
+						l_oData1n(i,j)=0;
+					}
+
+				}
+
+			}
+
+
+			//Now we need to calculate the matrix b (which tells us the correct weights to be stored in b matrix)
+
+
+			Eigen::MatrixXd l_oNoiseCoeff((int)m_ui32NbChannels0,(int)m_ui32NbChannels1);   //Noise Coefficients Matrix (Dim: Channels EEG x Channels EOG)
+
+			Eigen::MatrixXd l_oCovEog((int)m_ui32NbChannels1,(int)m_ui32NbChannels1);
+
+			Eigen::MatrixXd l_oCovEogInv((int)m_ui32NbChannels1,(int)m_ui32NbChannels1);
+
+			Eigen::MatrixXd l_oCovEEGandEOG((int)m_ui32NbChannels0,(int)m_ui32NbChannels1);
+
+			l_oCovEog = (l_oData1n * l_oData1n.transpose());
+
+			l_oCovEogInv = l_oCovEog.inverse();
+
+			l_oCovEEGandEOG = l_oData0n*(l_oData1n.transpose());
+
+			l_oNoiseCoeff =  l_oCovEEGandEOG * l_oCovEogInv;
+
+
+			// Save Matrix b to the file specified in the parameters
+
+
+			m_oMatrixFile << m_ui32NbChannels0 << " " << m_ui32NbChannels1 << " " << m_ui32NbSamples0 <<"\n";
+
+			for(uint32 i=0; i<m_ui32NbChannels0; i++)    //Number of channels EEG
+			{
+				for(uint32 j=0; j<m_ui32NbChannels1; j++)    //Number of channels EOG
+				{
+					m_oMatrixFile << l_oNoiseCoeff(i,j) <<"\n";
+				}
+			}
+
+
+			m_oEEGFile.close();
+			m_oEOGFile.close();
+			m_oMatrixFile.close();
+
+			m_ui32ChunksVerify = -1;
+			m_bEndProcess = true;
+
+
+			this->getLogManager() << LogLevel_Info << "b Matrix was successfully calculated" << "\n";
+			this->getLogManager() << LogLevel_Info << "Wrote the matrix to [" << m_sRegressionDenoisingCalibrationFilename << "]\n";
+
+			//this->getLogManager() << LogLevel_Warning << "You can stop this scenario " <<"\n";
+
+			m_oStimulationEncoder1.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
+			m_oStimulationEncoder1.encodeBuffer(0);
+			l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, 0),l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
+
+		}
+	}
+
+
+	m_f64Time++;
+	return true;
 }
 
 
@@ -417,10 +417,10 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
 
         m_oAlgo0_SignalDecoder.decode(0,ii);
 
-        m_uint32NbChannels0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
-        m_uint32NbSamples0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
+        m_ui32NbChannels0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
+        m_ui32NbSamples0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
 
-        //this->getLogManager() << LogLevel_Warning << "samples0" << m_uint32NbSamples0 << "\n";
+        //this->getLogManager() << LogLevel_Warning << "samples0" << m_ui32NbSamples0 << "\n";
 
 
         IMatrix* l_pMatrix_0 = m_oAlgo0_SignalDecoder.getOutputMatrix();
@@ -431,7 +431,7 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
 
         for (uint32 jj=0; jj<l_pMatrix_0->getBufferElementCount(); jj++)
         {
-            m_fstreamEEG_File << l_pBuffer0[jj] <<"\n";
+            m_oEEGFile << l_pBuffer0[jj] <<"\n";
         }
 
     }
@@ -441,8 +441,8 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
 
         m_oAlgo1_SignalDecoder.decode(1,ii);
 
-        m_uint32NbChannels1 = m_oAlgo1_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
-        m_uint32NbSamples1 = m_oAlgo1_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
+        m_ui32NbChannels1 = m_oAlgo1_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
+        m_ui32NbSamples1 = m_oAlgo1_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
 
         IMatrix* l_pMatrix_1 = m_oAlgo1_SignalDecoder.getOutputMatrix();
 
@@ -450,10 +450,10 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
 
         for(uint32 jj=0; jj<l_pMatrix_1->getBufferElementCount(); jj++)
         {
-            m_fstreamEOG_File << l_pBuffer1[jj] <<"\n";
+            m_oEOGFile << l_pBuffer1[jj] <<"\n";
         }
 
-        m_uint32ChunksCount++;
+        m_ui32ChunksCount++;
 
     }
 
@@ -461,27 +461,27 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
 
     for (uint32 chunk = 0; chunk<l_rDynamicBoxContext.getInputChunkCount(2); chunk++)
     {
-        m_iStimulationDecoder0.decode(2,chunk);
-        for(uint32 j=0; j<m_iStimulationDecoder0.getOutputStimulationSet()->getStimulationCount(); j++)
+        m_oStimulationDecoder0.decode(2,chunk);
+        for(uint32 j=0; j<m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationCount(); j++)
         {
-            if (m_iStimulationDecoder0.getOutputStimulationSet()->getStimulationIdentifier(j) == 33025)
+            if (m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationIdentifier(j) == 33025)
             {
-                m_float64Start_time=m_float64Time;
-                this->getLogManager() << LogLevel_Info << "Start time: " << m_float64Start_time <<"\n";
+                m_f64StartTime=m_f64Time;
+                this->getLogManager() << LogLevel_Info << "Start time: " << m_f64StartTime <<"\n";
             }
 
-            if (m_iStimulationDecoder0.getOutputStimulationSet()->getStimulationIdentifier(j) == 33031)
+            if (m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationIdentifier(j) == 33031)
             {
-                m_float64End_time=m_float64Time;
-                this->getLogManager() << LogLevel_Info << "End time: " << m_float64End_time <<"\n";
+                m_f64EndTime=m_f64Time;
+                this->getLogManager() << LogLevel_Info << "End time: " << m_f64EndTime <<"\n";
 
             }
 
-            // m_ui64TrainDate = m_iStimulationDecoder0.getOutputStimulationSet()->getStimulationDate(m_iStimulationDecoder0.getOutputStimulationSet()->getStimulationCount());
-            m_ui64TrainDate = m_iStimulationDecoder0.getOutputStimulationSet()->getStimulationDate(j);
+            // m_ui64TrainDate = m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationDate(m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationCount());
+            m_ui64TrainDate = m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationDate(j);
 
 
-//            if(m_iStimulationDecoder0.isHeaderReceived()) // ->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+//            if(m_oStimulationDecoder0.isHeaderReceived()) // ->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
 //            {
 //                m_oStimulationEncoder1.encodeHeader(0);
 //                l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, chunk),l_rDynamicBoxContext.getInputChunkEndTime(0, chunk));
@@ -493,7 +493,7 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
 
 
 
-//            if (m_iStimulationDecoder0.isBufferReceived())
+//            if (m_oStimulationDecoder0.isBufferReceived())
 //            {
 //                //m_oStimulationEncoder1.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
 //                m_oStimulationEncoder1.encodeBuffer(0);
@@ -502,7 +502,7 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
 //            }
 
 
-//            if (m_iStimulationDecoder0.isEndReceived())
+//            if (m_oStimulationDecoder0.isEndReceived())
 //            {
 //                m_oStimulationEncoder1.encodeEnd(0);
 //                l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, chunk),l_rDynamicBoxContext.getInputChunkEndTime(0, chunk));

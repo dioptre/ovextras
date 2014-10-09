@@ -53,11 +53,11 @@ namespace OpenViBEPlugins
 			// Signal stream decoder
 			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmDiscreteWaveletTransform > m_oAlgo0_SignalDecoder;
 
-            OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmDiscreteWaveletTransform > m_AlgoInfo_SignalEncoder;
-            OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmDiscreteWaveletTransform >  *m_oAlgoX_SignalEncoder;
+			OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmDiscreteWaveletTransform > m_oAlgoInfo_SignalEncoder;
+			OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmDiscreteWaveletTransform >  *m_oAlgoX_SignalEncoder;
 
-            OpenViBE::CString m_CStringWaveletType;
-            OpenViBE::CString m_CStringDecompositionLevel;
+			OpenViBE::CString m_sWaveletType;
+			OpenViBE::CString m_sDecompositionLevel;
 
 
 
@@ -71,54 +71,53 @@ namespace OpenViBEPlugins
 		{
 		public:
 
-            virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
-            {
+			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			{
 
-                if (ui32Index==0)
-                {
-                    return true;
-                }
+				if (ui32Index==0)
+				{
+					return true;
+				}
 
+				if (ui32Index==1)
+				{
+					OpenViBE::uint32 l_ui32OutputsCount = rBox.getOutputCount();
 
-                if (ui32Index==1)
-                {
-                OpenViBE::uint32 l_OutputsCount = rBox.getOutputCount();
+					OpenViBE::CIdentifier l_oLevelsIdentifier;
+					OpenViBE::CString l_sNumberDecompositionLevels;
 
-                OpenViBE::CIdentifier l_LevelsIdentifier;
-                OpenViBE::CString l_NumberDecompositionLevels;
+					rBox.getSettingValue(1,l_sNumberDecompositionLevels);
 
-                rBox.getSettingValue(1,l_NumberDecompositionLevels);
+					OpenViBE::uint32 l_ui32NbDecompositionLevels;
 
-                OpenViBE::uint32 l_uintNbDecompositionLevels;
+					l_ui32NbDecompositionLevels = atoi(l_sNumberDecompositionLevels);
 
-                l_uintNbDecompositionLevels = atoi(l_NumberDecompositionLevels);
+					if (l_ui32OutputsCount!=l_ui32NbDecompositionLevels+2)
+					{
+						for (OpenViBE::uint32 i=0; i<l_ui32OutputsCount; i++)
+						{
+							rBox.removeOutput(l_ui32OutputsCount-i-1);
+						}
 
-                if (l_OutputsCount!=l_uintNbDecompositionLevels+2)
-                {
-                for (OpenViBE::uint32 i=0; i<l_OutputsCount; i++)
-                {
-                    rBox.removeOutput(l_OutputsCount-i-1);
-                }
+						rBox.addOutput("Info",OV_TypeId_Signal);
+						rBox.addOutput("A",OV_TypeId_Signal);
+						std::string l_sLevel;
+						std::string l_sLevelName;
+						for (OpenViBE::uint32 i=l_ui32NbDecompositionLevels;i>0;i--)
+						{
+							std::ostringstream l_ostringstreamConvert;
+							l_ostringstreamConvert << i;
+							l_sLevel = l_ostringstreamConvert.str();
+							l_sLevelName = "D";
+							l_sLevelName=l_sLevelName + l_sLevel;
+							rBox.addOutput(l_sLevelName.c_str(),OV_TypeId_Signal);
 
-                rBox.addOutput("Info",OV_TypeId_Signal);
-                rBox.addOutput("A",OV_TypeId_Signal);
-                std::string l_stringLevel;
-                std::string l_stringLevelName;
-                for (OpenViBE::uint32 i=l_uintNbDecompositionLevels;i>0;i--)
-                {
-                    std::ostringstream l_ostringstreamConvert;
-                    l_ostringstreamConvert << i;
-                    l_stringLevel = l_ostringstreamConvert.str();
-                    l_stringLevelName = "D";
-                    l_stringLevelName=l_stringLevelName + l_stringLevel;
-                    rBox.addOutput(l_stringLevelName.c_str(),OV_TypeId_Signal);
+						}
+					}
+				}
 
-                }
-                }
-                }
-
-                return true;
-            };
+				return true;
+			};
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 		};
@@ -126,7 +125,7 @@ namespace OpenViBEPlugins
 
 		/**
 		 * \class CBoxAlgorithmDiscreteWaveletTransformDesc
-		 * \author JP (Inria)
+		 * \author Joao-Pedro Berti-Ligabo / Inria
 		 * \date Wed Jul 16 15:05:16 2014
 		 * \brief Descriptor of the box DiscreteWaveletTransform.
 		 *

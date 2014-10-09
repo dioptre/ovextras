@@ -68,36 +68,36 @@ namespace OpenViBEPlugins
        //     OpenViBE::Kernel::IAlgorithmProxy* m_pMatrixRegressionAlgorithmCalibration;
        //     OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > ip_pMatrixRegressionAlgorithmCalibration_Matrix0;
        //     OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > ip_pMatrixRegressionAlgorithmCalibration_Matrix1;
-            OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmEOG_Denoising_Calibration > m_iStimulationDecoder0;
+            OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmEOG_Denoising_Calibration > m_oStimulationDecoder0;
 
             OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmEOG_Denoising_Calibration > m_oStimulationEncoder1;
 
             OpenViBE::CString m_sRegressionDenoisingCalibrationFilename;
 
-            OpenViBE::uint32 m_uint32ChunksVerify;
-            OpenViBE::uint32 m_uint32ChunksCount;
+            OpenViBE::uint32 m_ui32ChunksVerify;
+            OpenViBE::uint32 m_ui32ChunksCount;
             OpenViBE::boolean m_bEndProcess;
-            std::fstream m_fstreamEEG_File;
-            std::fstream m_fstreamEOG_File;
-            std::ofstream m_fMatrixFile;
+            std::fstream m_oEEGFile;
+            std::fstream m_oEOGFile;
+            std::ofstream m_oMatrixFile;
 
-            OpenViBE::float64 m_float64Start_time;
-            OpenViBE::float64 m_float64End_time;
+            OpenViBE::float64 m_f64StartTime;
+            OpenViBE::float64 m_f64EndTime;
 
-            OpenViBE::uint32 m_uint32Start_time_Chunks;
-            OpenViBE::uint32 m_uint32End_time_Chunks;
+            OpenViBE::uint32 m_ui32StartTimeChunks;
+            OpenViBE::uint32 m_ui32EndTimeChunks;
 
             OpenViBE::uint64 m_ui64TrainDate;
             OpenViBE::uint64 m_ui64TrainChunkStartTime;
             OpenViBE::uint64 m_ui64TrainChunkEndTime;
 
-            OpenViBE::float64 m_float64Time;
+            OpenViBE::float64 m_f64Time;
 
-            OpenViBE::uint32 m_uint32NbChannels0;
-            OpenViBE::uint32 m_uint32NbChannels1;
+            OpenViBE::uint32 m_ui32NbChannels0;
+            OpenViBE::uint32 m_ui32NbChannels1;
 
-            OpenViBE::uint32 m_uint32NbSamples0;
-            OpenViBE::uint32 m_uint32NbSamples1;
+            OpenViBE::uint32 m_ui32NbSamples0;
+            OpenViBE::uint32 m_ui32NbSamples1;
 
             OpenViBE::uint64 m_ui64StimulationIdentifier;
 
@@ -106,53 +106,9 @@ namespace OpenViBEPlugins
 
 		};
 
-
-		// If you need to implement a box Listener, here is a sekeleton for you.
-		// Use only the callbacks you need.
-		// For example, if your box has a variable number of input, but all of them must be stimulation inputs.
-		// The following listener callback will ensure that any newly added input is stimulations :
-		/*		
-		virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
-		{
-			rBox.setInputType(ui32Index, OV_TypeId_Stimulations);
-		};
-		*/
-		
-		/*
-		// The box listener can be used to call specific callbacks whenever the box structure changes : input added, name changed, etc.
-		// Please uncomment below the callbacks you want to use.
-		class CBoxAlgorithmEOG_Denoising_CalibrationListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
-		{
-		public:
-
-			//virtual OpenViBE::boolean onInitialized(OpenViBE::Kernel::IBox& rBox) { return true; };
-			//virtual OpenViBE::boolean onNameChanged(OpenViBE::Kernel::IBox& rBox) { return true; };
-			//virtual OpenViBE::boolean onInputConnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onInputDisconnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onInputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputConnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputDisconnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingDefaultValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
-		};
-		*/
-
 		/**
 		 * \class CBoxAlgorithmEOG_Denoising_CalibrationDesc
-		 * \author JP (Inria)
+		 * \author Joao-Pedro Berti-Ligabo / Inria
 		 * \date Fri May 23 15:30:58 2014
 		 * \brief Descriptor of the box EOG_Denoising_Calibration.
 		 *
@@ -194,36 +150,8 @@ namespace OpenViBEPlugins
 
                 rBoxAlgorithmPrototype.addSetting("End trigger", OV_TypeId_Stimulation, "OVTK_GDF_End_Of_Session");
 
-
                 rBoxAlgorithmPrototype.addOutput ("Train-completed Flag",OV_TypeId_Stimulations);
 
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddInput);
-				
-				//No output specified.To add outputs use :
-//rBoxAlgorithmPrototype.addOutput("Output Name",OV_TypeId_XXXX);
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
-
-				//No Message input specified.To add Message inputs use :
-//rBoxAlgorithmPrototype.addMessageInput("Input Name");
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyMessageInput);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageInput);
-
-				//No Message output specified.To add Message outputs use :
-//rBoxAlgorithmPrototype.addMessageOutput("Output Name");
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyMessageOutput);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddMessageOutput);
-
-				//No setting specified.To add settings use :
-//rBoxAlgorithmPrototype.addSetting("Setting Name",OV_TypeId_XXXX,"default value");
-
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
-				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 				
 				return true;
