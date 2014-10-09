@@ -34,14 +34,7 @@ void CTemporalFilter::setChannelCount(const uint32 ui32ChannelCount)
 			}
 			else
 			{
-				if (m_ui64FilterMethod==OVP_TypeId_FilterMethod_YuleWalker)
-				{
-					m_oCurrentStates[i] = zeros(m_ui32FilterOrder);
-				}
-				else
-				{
-					m_oCurrentStates[i] = zeros(2*m_ui32FilterOrder);
-				}
+				m_oCurrentStates[i] = zeros(2*m_ui32FilterOrder);
 			}
 		}
 	}
@@ -773,77 +766,6 @@ void CTemporalFilter::setSampleBuffer(const float64* pBuffer)
 
 			findSPlanePolesAndZeros();
 			convertSPlanePolesAndZerosToZPlane();
-
-			m_bCoefComputed = true;
-		}
-		else if (m_ui64FilterMethod==OVP_TypeId_FilterMethod_YuleWalker)
-		{
-			// Compute RII Band Pass Filter coefs
-			m_vecDenomCoefFilter = zeros(m_ui32FilterOrder+1);
-			m_vecNumCoefFilter = zeros(m_ui32FilterOrder+1);
-			vec l_vecFrecuency;
-			vec l_vecAmplitude;
-			vec l_vecResultAutocorr;
-
-			if (m_ui64FilterType==OVP_TypeId_FilterType_LowPass)
-			{
-				//frequency table
-				l_vecFrecuency = zeros(4);
-				l_vecFrecuency[0] = 0;
-				l_vecFrecuency[1] = (2*(double)m_float64HighPassBandEdge)/(double)m_pSignalDescription->m_ui32SamplingRate;
-				l_vecFrecuency[2] = (2*((double)m_float64HighPassBandEdge+1))/(double)m_pSignalDescription->m_ui32SamplingRate;
-				l_vecFrecuency[3] = 1;
-				//amplitude table
-				l_vecAmplitude= zeros(4);
-				l_vecAmplitude[0] = 1;
-				l_vecAmplitude[1] = 1;
-
-			} else if (m_ui64FilterType==OVP_TypeId_FilterType_HighPass)
-			{
-				//frequency table
-				l_vecFrecuency = zeros(4);
-				l_vecFrecuency[0] = 0;
-				l_vecFrecuency[1] = (2*(double)m_float64LowPassBandEdge)/(double)(m_pSignalDescription->m_ui32SamplingRate);
-				l_vecFrecuency[2] = (2*((double)m_float64LowPassBandEdge+1))/(double)(m_pSignalDescription->m_ui32SamplingRate);
-				l_vecFrecuency[3] = 1;
-				//amplitude table
-				l_vecAmplitude= zeros(4);
-				l_vecAmplitude[2] = 1;
-				l_vecAmplitude[3] = 1;
-
-			} else if (m_ui64FilterType==OVP_TypeId_FilterType_BandPass)
-			{
-				//frequency table
-				l_vecFrecuency = zeros(6);
-				l_vecFrecuency[0] = 0;
-				l_vecFrecuency[1] = (2*((double)m_float64LowPassBandEdge-1))/(double)m_pSignalDescription->m_ui32SamplingRate;
-				l_vecFrecuency[2] = (2*(double)m_float64LowPassBandEdge)/(double)m_pSignalDescription->m_ui32SamplingRate;
-				l_vecFrecuency[3] = (2*(double)m_float64HighPassBandEdge)/(double)m_pSignalDescription->m_ui32SamplingRate;
-				l_vecFrecuency[4] = (2*((double)m_float64HighPassBandEdge+1))/(double)m_pSignalDescription->m_ui32SamplingRate;
-				l_vecFrecuency[5] = 1;
-				//amplitude table
-				l_vecAmplitude= zeros(6);
-				l_vecAmplitude[2] = 1;
-				l_vecAmplitude[3] = 1;
-
-			} else if (m_ui64FilterType==OVP_TypeId_FilterType_BandStop)
-			{
-				//frequency table
-				l_vecFrecuency = zeros(6);
-				l_vecFrecuency[0] = 0;
-				l_vecFrecuency[1] = (2*((double)m_float64LowPassBandEdge-1))/(double)m_pSignalDescription->m_ui32SamplingRate;
-				l_vecFrecuency[2] = (2*(double)m_float64LowPassBandEdge)/(double)m_pSignalDescription->m_ui32SamplingRate;
-				l_vecFrecuency[3] = (2*(double)m_float64HighPassBandEdge)/(double)m_pSignalDescription->m_ui32SamplingRate;
-				l_vecFrecuency[4] = (2*((double)m_float64HighPassBandEdge+1))/(double)m_pSignalDescription->m_ui32SamplingRate;
-				l_vecFrecuency[5] = 1;
-				//amplitude table
-				l_vecAmplitude= ones(6);
-				l_vecAmplitude[2] = 0;
-				l_vecAmplitude[3] = 0;
-			}
-
-			filter_design_autocorrelation(4*m_ui32FilterOrder, l_vecFrecuency, l_vecAmplitude, l_vecResultAutocorr);
-			arma_estimator(m_ui32FilterOrder, m_ui32FilterOrder, l_vecResultAutocorr, m_vecDenomCoefFilter, m_vecNumCoefFilter);
 
 			m_bCoefComputed = true;
 		}

@@ -7,7 +7,7 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_TemporalFilter_Description|
  * This plugin is used to filter the input signal. This plugin allows
- * the selection of the kinf of filter (Butterworth, Chebychev, Yule-Walker),
+ * the selection of the kind of filter (Butterworth or Chebychev),
  * the kind of filter (low pass, high pass, band pass, band stop), the low
  * or/and the high passband edge and the passband ripple for the Chebychev filter.
  * |OVP_DocEnd_BoxAlgorithm_TemporalFilter_Description|
@@ -41,7 +41,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_TemporalFilter_Settings|
  *
  * |OVP_DocBegin_BoxAlgorithm_TemporalFilter_Setting1|
- * Select the name of filter between Butterworth, Chebychev and Yule-Walker.
+ * Select the name of filter between Butterworth and Chebychev.
  * |OVP_DocEnd_BoxAlgorithm_TemporalFilter_Setting1|
  *
  * |OVP_DocBegin_BoxAlgorithm_TemporalFilter_Setting2|
