@@ -579,85 +579,85 @@
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/arkanoid.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/arkanoid.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/01.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/01.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/bomberman.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/bomberman.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/02.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/02.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/doom.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/doom.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/03.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/03.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/dott.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/dott.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/04.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/04.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/lemmings.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/lemmings.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/05.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/05.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/mario.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/mario.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/06.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/06.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/megaman.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/megaman.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/07.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/07.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/pacman.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/pacman.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/08.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/08.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/sonic.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/sonic.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/09.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/09.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/space-invaders.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/space-invaders.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/10.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/10.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/worms.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/worms.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/11.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/11.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Card filename</Name>
-					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/zelda.png</DefaultValue>
-					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/zelda.png</Value>
+					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/12.png</DefaultValue>
+					<Value>${Path_Data}/plugins/simple-visualisation/p300-magic-card/12.png</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>

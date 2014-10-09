@@ -5,7 +5,7 @@
 #include "ovavrdCOgreVRApplication.h"
 
 #include "HandballBCI/ovavrdCHandballBCI.h"
-#include "TieFighterBCI/ovavrdCTieFighterBCI.h"
+#include "SpaceshipBCI/ovavrdCSpaceshipBCI.h"
 
 #if 0
 #if defined TARGET_OS_Linux
@@ -26,13 +26,13 @@ int main(int argc, char **argv)
 		printf("Syntax: %s demo-name\n", argv[0]);
 		printf("\n");
 		printf("where demo-name could be one of the following :\n");
-		printf("  - tie-fighter\n");
+		printf("  - spaceship\n");
 		printf("  - handball\n");
 		return 1;
 	}
 
 	OpenViBEVRDemos::COgreVRApplication * app;
-	if(strcmp(argv[1],"tie-fighter") == 0)
+	if(strcmp(argv[1],"spaceship") == 0)
 	{
 		std::string l_slocalization = "eng";
 		if( argc != 3 )
@@ -46,23 +46,18 @@ int main(int argc, char **argv)
 			printf("WARNING: if the language keyword is not found, default language will be loaded (eng).\n\n");
 		}
 		printf("\n");
-		printf("  _                       _  \n");
-		printf(" | |                     | | \n");
-		printf(" | |                     | | \n");
-		printf(" | |                     | | \n");
-		printf(" | |                     | | \n");
-		printf(" | |        .---.        | | \n");
-		printf(" | |     _.'\\   /'._     | | \n");
+
+
+		printf(" ___     _.'\\   /'._     ___ \n");
 		printf("/  b__--- | .'\"'. | ---__d  \\\n");
 		printf("\\  p\"\"---_| '._.' |_---\"\"q  /\n");
-		printf(" | |       ./   \\.       | | \n");
-		printf(" | |        '---'        | | \n");
-		printf(" | |                     | | \n");
-		printf(" | |                     | | \n");
-		printf(" |_|                     |_| \n\n");
-		printf("Tie-fighter application started ! \nMay the Force be with you, young padawan.\n\n");
+		printf("     / /   ./   \\.   \\ \\    \n");
+		printf("    / /     '---'     \\ \\   \n");
+		printf("   /_/                 \\_\\  \n");
+		printf("                             \n\n");
+		printf("Application started! Lift 'em!\n\n");
 		
-		app = new OpenViBEVRDemos::CTieFighterBCI(l_slocalization);
+		app = new OpenViBEVRDemos::CSpaceshipBCI(l_slocalization);
 	}
 	else if(strcmp(argv[1],"handball") == 0)
 	{
@@ -73,7 +68,7 @@ int main(int argc, char **argv)
 	{
 		printf("ERROR: the application specified does not exist (%s).\n",argv[1]);
 		printf("Please use one of the following applications:\n");
-		printf("  - tie-fighter\n");
+		printf("  - spaceship\n");
 		printf("  - handball\n");
 		return 2;
 	}
