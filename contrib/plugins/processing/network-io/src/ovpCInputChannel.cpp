@@ -48,34 +48,22 @@ boolean CInputChannel::initialize(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plu
 	m_oIStimulationSet              = 0;
 	m_pTBoxAlgorithm                = pTBoxAlgorithm;
 
-	m_pStreamDecoderSignal          = &m_pTBoxAlgorithm->getAlgorithmManager().getAlgorithm(m_pTBoxAlgorithm->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-	m_pStreamDecoderSignal->initialize();
-	ip_pMemoryBufferSignal.initialize(m_pStreamDecoderSignal->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
-	op_pMatrixSignal.initialize(m_pStreamDecoderSignal->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
-	op_ui64SamplingRateSignal.initialize(m_pStreamDecoderSignal->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
+	m_pStreamDecoderSignal          = new OpenViBEToolkit::TSignalDecoder <OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm> >();
+	m_pStreamDecoderSignal->initialize(*m_pTBoxAlgorithm,0);
 
-	m_pStreamDecoderStimulation     = &m_pTBoxAlgorithm->getAlgorithmManager().getAlgorithm(m_pTBoxAlgorithm->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-	m_pStreamDecoderStimulation->initialize();
-	ip_pMemoryBufferStimulation.initialize(m_pStreamDecoderStimulation->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-	op_pStimulationSetStimulation.initialize(m_pStreamDecoderStimulation->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+	m_pStreamDecoderStimulation     = new OpenViBEToolkit::TStimulationDecoder <OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm> >();
+	m_pStreamDecoderStimulation->initialize(*m_pTBoxAlgorithm,1);
 
 	return true;
 }
 
 boolean CInputChannel::uninitialize()
 {
-	op_pStimulationSetStimulation.uninitialize();
-	ip_pMemoryBufferStimulation.uninitialize();
 	m_pStreamDecoderStimulation->uninitialize();
-	m_pTBoxAlgorithm->getAlgorithmManager().releaseAlgorithm(*m_pStreamDecoderStimulation);
-
+	delete m_pStreamDecoderStimulation;
 	
-	op_ui64SamplingRateSignal.uninitialize();
-	op_pMatrixSignal.uninitialize();
-	ip_pMemoryBufferSignal.uninitialize();
 	m_pStreamDecoderSignal->uninitialize();
-	m_pTBoxAlgorithm->getAlgorithmManager().releaseAlgorithm(*m_pStreamDecoderSignal);
-
+	delete m_pStreamDecoderSignal;
 
 	return true;
 }
@@ -86,10 +74,9 @@ boolean CInputChannel::waitForSignalHeader()
 
 	if(l_rDynamicBoxContext.getInputChunkCount(m_ui32SignalChannel))
 	{
-		ip_pMemoryBufferSignal    = l_rDynamicBoxContext.getInputChunk(m_ui32SignalChannel, 0);
-		m_pStreamDecoderSignal->process();
+		m_pStreamDecoderSignal->decode(0);
 
-		if(m_pStreamDecoderSignal->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedHeader))
+		if(m_pStreamDecoderSignal->isHeaderReceived())
 		{
 			m_bIsWorking          = true;
 
@@ -123,9 +110,8 @@ OpenViBE::IStimulationSet* CInputChannel::getStimulation(OpenViBE::uint64& start
 {
 	IBoxIO& l_rDynamicBoxContext  = m_pTBoxAlgorithm->getDynamicBoxContext();
 
-	ip_pMemoryBufferStimulation   = l_rDynamicBoxContext.getInputChunk(m_ui32StimulationChannel, stimulationIndex);
-	m_pStreamDecoderStimulation->process();
-	m_oIStimulationSet            = op_pStimulationSetStimulation;
+	m_pStreamDecoderStimulation->decode(stimulationIndex);
+	m_oIStimulationSet            = m_pStreamDecoderStimulation->getOutputStimulationSet();
 
 	startTimestamp                = l_rDynamicBoxContext.getInputChunkStartTime(m_ui32StimulationChannel, stimulationIndex);
 	endTimestamp                  = l_rDynamicBoxContext.getInputChunkEndTime(m_ui32StimulationChannel, stimulationIndex);
@@ -139,9 +125,8 @@ OpenViBE::IStimulationSet* CInputChannel::discardStimulation(const OpenViBE::uin
 {
 	IBoxIO& l_rDynamicBoxContext  = m_pTBoxAlgorithm->getDynamicBoxContext();
 
-	ip_pMemoryBufferStimulation   = l_rDynamicBoxContext.getInputChunk(m_ui32StimulationChannel, stimulationIndex);
-	m_pStreamDecoderStimulation->process();
-	m_oIStimulationSet            = op_pStimulationSetStimulation;
+	m_pStreamDecoderStimulation->decode(stimulationIndex);
+	m_oIStimulationSet            = m_pStreamDecoderStimulation->getOutputStimulationSet();
 
 	l_rDynamicBoxContext.markInputAsDeprecated(m_ui32StimulationChannel, stimulationIndex);
 	
@@ -152,9 +137,8 @@ OpenViBE::IStimulationSet* CInputChannel::discardStimulation(const OpenViBE::uin
 OpenViBE::float64* CInputChannel::getSignal(OpenViBE::uint64& startTimestamp, OpenViBE::uint64& endTimestamp, const OpenViBE::uint32 signalIndex)
 {
 	IBoxIO& l_rDynamicBoxContext  = m_pTBoxAlgorithm->getDynamicBoxContext();
-	ip_pMemoryBufferSignal        = l_rDynamicBoxContext.getInputChunk(m_ui32SignalChannel, signalIndex);
-	m_pStreamDecoderSignal->process();
-	if(!m_pStreamDecoderSignal->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
+	m_pStreamDecoderSignal->decode(signalIndex);
+	if(!m_pStreamDecoderSignal->isBufferReceived())
 		return 0;
 
 	startTimestamp                = l_rDynamicBoxContext.getInputChunkStartTime(m_ui32SignalChannel, signalIndex);
@@ -162,21 +146,20 @@ OpenViBE::float64* CInputChannel::getSignal(OpenViBE::uint64& startTimestamp, Op
 
 	l_rDynamicBoxContext.markInputAsDeprecated(m_ui32SignalChannel, signalIndex);
 
-	return op_pMatrixSignal->getBuffer();
+	return m_pStreamDecoderSignal->getOutputMatrix()->getBuffer();
 }
 
 
 OpenViBE::float64* CInputChannel::discardSignal(const OpenViBE::uint32 signalIndex)
 {
 	IBoxIO& l_rDynamicBoxContext  = m_pTBoxAlgorithm->getDynamicBoxContext();
-	ip_pMemoryBufferSignal        = l_rDynamicBoxContext.getInputChunk(m_ui32SignalChannel, signalIndex);
-	m_pStreamDecoderSignal->process();
-	if(!m_pStreamDecoderSignal->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
+	m_pStreamDecoderSignal->decode(signalIndex);
+	if(!m_pStreamDecoderSignal->isBufferReceived())
 		return 0;
 
 	l_rDynamicBoxContext.markInputAsDeprecated(m_ui32SignalChannel, signalIndex);
 
-	return op_pMatrixSignal->getBuffer();
+	return m_pStreamDecoderSignal->getOutputMatrix()->getBuffer();
 }
 
 #if 0
@@ -184,7 +167,7 @@ void CInputChannel::copyData(const OpenViBE::boolean copyFirstBlock, OpenViBE::u
 {
 	OpenViBE::CMatrix*&    l_pMatrixBuffer = m_oMatrixBuffer[matrixIndex & 1];
 
-	OpenViBE::float64*     l_pSrcData = op_pMatrixSignal->getBuffer() + (copyFirstBlock ? 0 : m_ui64FirstBlock);
+	OpenViBE::float64*     l_pSrcData = m_pStreamDecoderSignal->getOutputMatrix()->getBuffer() + (copyFirstBlock ? 0 : m_ui64FirstBlock);
 	OpenViBE::float64*     l_pDstData = l_pMatrixBuffer->getBuffer()  + (copyFirstBlock ? m_ui64SecondBlock : 0);
 	OpenViBE::uint64       l_ui64Size = (copyFirstBlock ? m_ui64FirstBlock : m_ui64SecondBlock)*sizeof(OpenViBE::float64);
 
