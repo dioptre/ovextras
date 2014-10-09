@@ -250,7 +250,7 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 
 	for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(0); j++)
 	{
-		m_pActiveDecoder->decode(0,j);
+		m_pActiveDecoder->decode(j);
 		if(m_pActiveDecoder->isHeaderReceived())
 		{
 			if(m_pActiveDecoder == &m_MatrixDecoder) 

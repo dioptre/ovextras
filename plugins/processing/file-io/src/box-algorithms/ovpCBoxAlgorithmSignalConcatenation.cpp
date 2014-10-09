@@ -144,7 +144,7 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 			{
 				if(m_ui32HeaderReceivedCount < l_rStaticBoxContext.getInputCount()>>1)
 				{
-					m_vSignalDecoders[input>>1]->decode(input,chunk);
+					m_vSignalDecoders[input>>1]->decode(chunk);
 					
 					if(m_vSignalDecoders[input>>1]->isHeaderReceived())
 					{

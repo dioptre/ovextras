@@ -171,7 +171,7 @@ namespace OpenViBEPlugins
 					{
 						l_pOutputMatrix->setDimensionCount(2);
 						l_pOutputMatrix->setDimensionSize(0, 1);
-						l_pOutputMatrix->setDimensionSize(1, l_ui64TotalBufferSize);
+						l_pOutputMatrix->setDimensionSize(1, (uint32)l_ui64TotalBufferSize);
 						m_pFeatureVectorEncoder->encodeHeader();
 						l_pBoxIO->markOutputAsReadyToSend(0,m_ui64LastChunkStartTime,m_ui64LastChunkEndTime);
 						m_bHeaderSent=true;

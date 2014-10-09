@@ -426,7 +426,7 @@ boolean CGDFFileWriter::process()
 			{
 				setChannelName(i, l_pOutputMatrix->getDimensionLabel(0,i));
 			}
-			setSamplingRate(m_pSignalDecoder->getOutputSamplingRate());
+			setSamplingRate((uint32)m_pSignalDecoder->getOutputSamplingRate());
 			setSampleCountPerBuffer(l_pOutputMatrix->getDimensionSize(1));
 
 		}

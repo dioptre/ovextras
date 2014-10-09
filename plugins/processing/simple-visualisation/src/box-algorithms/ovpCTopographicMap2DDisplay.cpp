@@ -105,7 +105,7 @@ boolean CTopographicMap2DDisplay::process(void)
 	//decode signal data
 	for(i=0; i<l_pDynamicBoxContext->getInputChunkCount(0); i++)
 	{
-		m_pDecoder->decode(0, i);
+		m_pDecoder->decode(i);
 		if(m_pDecoder->isBufferReceived())
 		{
 			IMatrix* l_pInputMatrix=m_pDecoder->getOutputMatrix();
