@@ -1,19 +1,19 @@
-#ifndef __OpenViBEApplication_CTieFighterBCI_H__
-#define __OpenViBEApplication_CTieFighterBCI_H__
+#ifndef __OpenViBEApplication_CSpaceshipBCI_H__
+#define __OpenViBEApplication_CSpaceshipBCI_H__
 
 #include "../ovavrdCOgreVRApplication.h"
 
 namespace OpenViBEVRDemos {
 
 	/**
-	 * \class CTieFighterBCI
+	 * \class CSpaceshipBCI
 	 * \author Laurent Bonnet (INRIA/IRISA)
 	 * \date 2010-02-16
 	 * \brief Ogre application for the application "Use-The-Force".
 	 *
-	 * \details The TieFighterBCI application is based on motor imagery of the feet. 
+	 * \details The SpaceshipBCI application is based on motor imagery of the feet. 
 	 * The 3D scene is a hangar, with few barrels stored. 
-	 * A spaceship (tie-fighter) is parked on the center of the screen.
+	 * A spaceship is parked on the center of the screen.
 	 * The subject has to move his feet to lift the spaceship.
 	 * The feedback is computed according to the bounce of beta 
 	 * detected in the EEG, after the movement.
@@ -24,14 +24,14 @@ namespace OpenViBEVRDemos {
 	 * - NoMove: the subject stops.
 	 * The subject scores if the spaceship is lifted in the NoMove phase.
 	 */
-	class CTieFighterBCI : public COgreVRApplication
+	class CSpaceshipBCI : public COgreVRApplication
 	{
 		public:
 
 			/**
 			* \brief constructor.
 			*/
-			CTieFighterBCI(std::string s_localization="eng");
+			CSpaceshipBCI(std::string s_localization="eng");
 
 		private:
 
@@ -55,19 +55,14 @@ namespace OpenViBEVRDemos {
 			*/
 			void loadHangarBarrels(void);
 			
-			bool m_bVador; //!< Tells if whether or not Dark Vador model should be added in the scene.
-			/**
-			* \brief Loads Dark Vador model.
-			*/
-			void loadDarkVador(void);
 			/**
 			* \brief Loads the movable spaceship.
 			*/
-			void loadTieFighter(void);
+			void loadShip(void);
 			/**
 			* \brief Loads the movable barrels in front of the ship.
 			*/
-			void loadTieBarrels(void);
+			void loadBarrels(void);
 			
 			/**
 			* \brief Lifts the barrels and spaceship according to the feedback received from the analog server.
@@ -89,15 +84,15 @@ namespace OpenViBEVRDemos {
 			double m_dLastFeedback;            //!<Previous feedback value.
 			bool m_bShouldScore;               //!<Tells if the subject is in condition of scoring.
 
-			float m_fTieHeight;                //!<Current spaceship height in the scene.
-			Ogre::Vector3 m_vTieOrientation;   //!<Current Orientation of the tie-fighter.
+			float m_fShipHeight;                //!<Current spaceship height in the scene.
+			Ogre::Vector3 m_vShipOrientation;   //!<Current Orientation of the spaceship.
 
 			double m_dMinimumFeedback;         //!<Minimum feedback value ever received.
 			
 			std::vector<float> m_vfSmallObjectHeight;              //!<Current mini-barrels height in the scene.
 			std::vector<Ogre::Vector3> m_voSmallObjectOrientation; //!<Current Orientation of the mini-barrels.
 
-			double m_dStat_TieFighterLiftTime;
+			double m_dStat_SpaceshipLiftTime;
 			bool m_bShouldIncrementStat;
 			
 			/**
@@ -138,4 +133,4 @@ namespace OpenViBEVRDemos {
 		
 	};
 };
-#endif //__OpenViBEApplication_CTieFighterBCI_H__
+#endif //__OpenViBEApplication_CSpaceshipBCI_H__

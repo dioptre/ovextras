@@ -710,7 +710,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Path_Samples}/signals/tie-fighter-freetime.gdf</Value>
+					<Value>${Path_Samples}/signals/spaceship-freetime.gdf</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
@@ -1582,7 +1582,7 @@ activity on the Cz electrode, and one for the band power in
 the beta activity,related to (imagined) feet movement.
 
 An external feedback is possible through VRPN:
-launch the &lt;b&gt;vr-demo-tie-fighter&lt;/b&gt; to see  a spaceship
+launch the &lt;b&gt;vr-demo-spaceship&lt;/b&gt; to see  a spaceship
 lifted when a spike of Beta activity is detected.
 
 For more information on the processing pipeline,
@@ -1601,7 +1601,7 @@ please look at the scenario &lt;i&gt;neurofeedback/neurofeedback.xml&lt;/i&gt;.<
 		<Comment>
 			<Identifier>(0x0000644f, 0x00007dfb)</Identifier>
 			<Text>&lt;b&gt;VRPN&lt;/b&gt;
-The &lt;b&gt;button Server&lt;/b&gt; tells the tie-fighter application 
+The &lt;b&gt;button Server&lt;/b&gt; tells the spaceship application 
 in which step the experiment is. It also triggers 
 the instructions given to the user.
 

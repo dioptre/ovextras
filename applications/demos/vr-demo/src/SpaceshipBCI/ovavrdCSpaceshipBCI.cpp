@@ -1,4 +1,4 @@
-#include "ovavrdCTieFighterBCI.h"
+#include "ovavrdCSpaceshipBCI.h"
 
 #include <openvibe/ov_directories.h>
 
@@ -23,14 +23,14 @@ static const float g_fAttenuation=.99f;
 static const float g_fRotationSpeed=0.50f;
 static const float g_fMoveSpeed=0.01f; // 0.004;
 
-static const float g_fOffsetWithoutVador = 2.0f;
+static const float g_fOffset = 2.0f;
 
 #if defined TARGET_OS_Linux
  #define _strcmpi strcasecmp
 #endif
 
-CTieFighterBCI::CTieFighterBCI(string s_localization) : 
-	COgreVRApplication(OpenViBE::Directories::getDataDir() + "/applications/vr-demo/tie-fighter")
+CSpaceshipBCI::CSpaceshipBCI(string s_localization) : 
+	COgreVRApplication(OpenViBE::Directories::getDataDir() + "/applications/vr-demo/spaceship")
 {
 	m_iScore=0;
 	m_iAttemptCount = 0;
@@ -40,11 +40,10 @@ CTieFighterBCI::CTieFighterBCI(string s_localization) :
 	m_dFeedback=0;
 	m_dLastFeedback=0;
 	m_bShouldScore=false;
-	m_fTieHeight=0;
+	m_fShipHeight=0;
 	m_dMinimumFeedback = 0;
-	m_bVador = false;
 
-	m_dStat_TieFighterLiftTime = 0;
+	m_dStat_SpaceshipLiftTime = 0;
 	m_bShouldIncrementStat = false;
 
 	m_dBetaOffset = 0;
@@ -67,7 +66,7 @@ CTieFighterBCI::CTieFighterBCI(string s_localization) :
 	}
 }
 
-bool CTieFighterBCI::initialise()
+bool CSpaceshipBCI::initialise()
 {
 	//----------- LIGHTS -------------//
 	m_poSceneManager->setAmbientLight(Ogre::ColourValue(0.6f, 0.6f, 0.6f));
@@ -91,7 +90,7 @@ bool CTieFighterBCI::initialise()
 	loadHangar();
 
 	//----------- PARTICLES -------------//
-	/*ParticleSystem* l_poParticleSystem  = m_poSceneManager->createParticleSystem("spark-particles","tie-fighter/spark");
+	/*ParticleSystem* l_poParticleSystem  = m_poSceneManager->createParticleSystem("spark-particles","spaceship/spark");
 	SceneNode* l_poParticleNode = m_poSceneManager->getRootSceneNode()->createChildSceneNode("ParticleNode");
 	l_poParticleNode->attachObject(l_poParticleSystem);
 	l_poParticleNode->setPosition(9.f,5.f,-13.f);*/
@@ -99,18 +98,11 @@ bool CTieFighterBCI::initialise()
 	// populate the hangar with barrels near the walls
 	loadHangarBarrels();
 
-	//----------- LORD VADOR -------------//
-	if(m_bVador)
-	{
-		loadDarkVador();
-	}
-	// if no vador, offset needed to center tie+mini-objects
-
-	//----------- TIE FIGHTER -------------//
-	loadTieFighter();
+	//----------- Ship -------------//
+	loadShip();
 
 	//----------- SMALL OBJECTS -------------//
-	loadTieBarrels();
+	loadBarrels();
 
 	//----------- GUI -------------//
 	loadGUI();
@@ -118,7 +110,7 @@ bool CTieFighterBCI::initialise()
 	return true;
 }
 
-void CTieFighterBCI::loadGUI()
+void CSpaceshipBCI::loadGUI()
 {
 	const string l_sMoveImage= m_mLocalizedFilenames["phase-move"];
 	const string l_sStopImage= m_mLocalizedFilenames["phase-stop"];
@@ -199,7 +191,7 @@ void CTieFighterBCI::loadGUI()
 	l_poThreshold->setText(ss.str());
 }
 
-void CTieFighterBCI::loadHangar()
+void CSpaceshipBCI::loadHangar()
 {
 	Entity *l_poHangarEntity = m_poSceneManager->createEntity( "Hangar", "hangar.mesh" );
 	l_poHangarEntity->setCastShadows(false);
@@ -215,41 +207,24 @@ void CTieFighterBCI::loadHangar()
 	l_poHangarNode->setPosition(159.534f,3.22895f,0.0517212f);
 	l_poHangarNode->setOrientation(Quaternion(0.5f,0.5f,-0.5f,0.5f));
 }
-void CTieFighterBCI::loadTieFighter()
+void CSpaceshipBCI::loadShip()
 {
-	Entity *l_poTieFighterEntity = m_poSceneManager->createEntity( "TieFighter", "vaisseau.mesh" );
-	l_poTieFighterEntity->setCastShadows(true);
+	Entity *l_poSpaceshipEntity = m_poSceneManager->createEntity( "Ship", "vaisseau.mesh" );
+	l_poSpaceshipEntity->setCastShadows(true);
 
-    SceneNode *l_poTieFighterNode = m_poSceneManager->getRootSceneNode()->createChildSceneNode( "TieFighterNode" );
-	l_poTieFighterNode->attachObject( l_poTieFighterEntity );
+    SceneNode *l_poSpaceshipNode = m_poSceneManager->getRootSceneNode()->createChildSceneNode( "ShipNode" );
+	l_poSpaceshipNode->attachObject( l_poSpaceshipEntity );
 
-	l_poTieFighterNode->setScale(0.008f,0.008f,0.008f);
-	float l_fOffset = (m_bVador ? 0:g_fOffsetWithoutVador);
-	l_poTieFighterNode->setPosition(4.5f,g_fMinHeight,-2.f+l_fOffset); 
-	l_poTieFighterNode->rotate(Vector3::UNIT_Y,-Radian(Math::PI/2.f));
+	l_poSpaceshipNode->setScale(0.008f,0.008f,0.008f);
+	float l_fOffset = g_fOffset;
+	l_poSpaceshipNode->setPosition(4.5f,g_fMinHeight,-2.f+l_fOffset); 
+	l_poSpaceshipNode->rotate(Vector3::UNIT_Y,-Radian(Math::PI/2.f));
 	
-	m_vTieOrientation[0] = l_poTieFighterNode->getOrientation().x;
-	m_vTieOrientation[1] = l_poTieFighterNode->getOrientation().y;
-	m_vTieOrientation[2] = l_poTieFighterNode->getOrientation().z;
+	m_vShipOrientation[0] = l_poSpaceshipNode->getOrientation().x;
+	m_vShipOrientation[1] = l_poSpaceshipNode->getOrientation().y;
+	m_vShipOrientation[2] = l_poSpaceshipNode->getOrientation().z;
 }
-void CTieFighterBCI::loadDarkVador(void)
-{
-	Entity *l_poVadorEntity = m_poSceneManager->createEntity( "Vador", "vador.mesh" );
-	l_poVadorEntity->setCastShadows(true);
-	l_poVadorEntity->getSubEntity(0)->setMaterialName("vador-surface04");
-	l_poVadorEntity->getSubEntity(1)->setMaterialName("vador-surface01");
-	l_poVadorEntity->getSubEntity(2)->setMaterialName("vador-surface02");
-	l_poVadorEntity->getSubEntity(3)->setMaterialName("vador-surface03");
-	l_poVadorEntity->getSubEntity(4)->setMaterialName("vador-surface05");
-
-    SceneNode *l_poVadorNode = m_poSceneManager->getRootSceneNode()->createChildSceneNode( "VadorNode" );
-	l_poVadorNode->attachObject( l_poVadorEntity );
-
-	l_poVadorNode->setScale(1.f,1.f,1.f);
-	l_poVadorNode->setPosition(5.f,0.f,3.f); 
-	l_poVadorNode->setOrientation(Quaternion(1.f,0.f,0.f,0.f));
-}
-void CTieFighterBCI::loadTieBarrels()
+void CSpaceshipBCI::loadBarrels()
 {
 
 	for(unsigned int i = 0; i<3; i++)
@@ -258,7 +233,7 @@ void CTieFighterBCI::loadTieBarrels()
 		m_voSmallObjectOrientation.push_back(Vector3(0,0,0));
 	}	
 
-	float l_fOffset = (m_bVador ? 0:g_fOffsetWithoutVador);
+	float l_fOffset = g_fOffset;
 
 	//-- 1st
 	Entity *l_poBarrel1Entity = m_poSceneManager->createEntity( "Mini1", "barrel.mesh" );
@@ -297,7 +272,7 @@ void CTieFighterBCI::loadTieBarrels()
 	l_poBarrel3Node->rotate(Vector3::UNIT_X,Radian(Math::PI/2.f));
 }
 
-void CTieFighterBCI::loadHangarBarrels()
+void CSpaceshipBCI::loadHangarBarrels()
 {
 
 	//-- 1st
@@ -349,7 +324,7 @@ void CTieFighterBCI::loadHangarBarrels()
 	l_poBarrel4Node->rotate(Vector3::UNIT_X,Radian(Math::PI));
 }
 
-bool CTieFighterBCI::process(double timeSinceLastProcess)
+bool CSpaceshipBCI::process(double timeSinceLastProcess)
 {
 	while(!m_poVrpnPeripheral->m_vButton.empty())
 	{
@@ -470,26 +445,26 @@ bool CTieFighterBCI::process(double timeSinceLastProcess)
 			{
 				ss << " Merci d'avoir participe !" << "\n------------\n";
 
-				ss << "Le vaisseau s'est souleve pendant :\n" << m_dStat_TieFighterLiftTime << " secondes.\n\n";
-				ss << "Temps moyen par essai :\n" << m_dStat_TieFighterLiftTime/l_iCount << " secondes.\n\n";
+				ss << "Le vaisseau s'est souleve pendant :\n" << m_dStat_SpaceshipLiftTime << " secondes.\n\n";
+				ss << "Temps moyen par essai :\n" << m_dStat_SpaceshipLiftTime/l_iCount << " secondes.\n\n";
 				ss << "------------\n";
 				ss << "Votre rang : \n";
 				l_sRang = "- Apprenti -";
-				if(m_dStat_TieFighterLiftTime/l_iCount > 1.0 ) l_sRang = "{ Chevalier }";
-				if(m_dStat_TieFighterLiftTime/l_iCount > 2.0 ) l_sRang = "-oO Maitre Oo-";
+				if(m_dStat_SpaceshipLiftTime/l_iCount > 1.0 ) l_sRang = "{ Chevalier }";
+				if(m_dStat_SpaceshipLiftTime/l_iCount > 2.0 ) l_sRang = "-oO Maitre Oo-";
 				ss << l_sRang << "\n";
 			}
 			else
 			{
 				ss << " Thanks for your participation" << "\n------------\n";
 
-				ss << "You lifted the spaceship during :\n" << m_dStat_TieFighterLiftTime << " seconds.\n\n";
-				ss << "Mean time per attempt :\n" << m_dStat_TieFighterLiftTime/l_iCount << " seconds.\n\n";
+				ss << "You lifted the spaceship during :\n" << m_dStat_SpaceshipLiftTime << " seconds.\n\n";
+				ss << "Mean time per attempt :\n" << m_dStat_SpaceshipLiftTime/l_iCount << " seconds.\n\n";
 				ss << "------------\n";
 				ss << "Rank : \n";
 				l_sRang = "- Apprentice -";
-				if(m_dStat_TieFighterLiftTime/l_iCount > 1.0 ) l_sRang = "{ Knight }";
-				if(m_dStat_TieFighterLiftTime/l_iCount > 2.0 ) l_sRang = "-oO Master Oo-";
+				if(m_dStat_SpaceshipLiftTime/l_iCount > 1.0 ) l_sRang = "{ Knight }";
+				if(m_dStat_SpaceshipLiftTime/l_iCount > 2.0 ) l_sRang = "-oO Master Oo-";
 				ss << l_sRang << "\n";
 			}
 
@@ -512,17 +487,17 @@ bool CTieFighterBCI::process(double timeSinceLastProcess)
 	return m_bContinue;
 }
 // -------------------------------------------------------------------------------
-bool CTieFighterBCI::keyPressed(const OIS::KeyEvent& evt)
+bool CSpaceshipBCI::keyPressed(const OIS::KeyEvent& evt)
 {
 	if(evt.key == OIS::KC_ESCAPE)
 	{
 		cout<<"[ESC] pressed, user termination."<<endl;
 		cout<<"      Saving statistics..."<<endl;
 		std::stringstream l_ssPath(OpenViBE::Directories::getLogDir().toASCIIString());
-		l_ssPath << "/openvibe-vr-demo-tie-fighter-stats.txt";
+		l_ssPath << "/openvibe-vr-demo-spaceship-stats.txt";
 		remove( l_ssPath.str().c_str() );
 		ofstream l_ofsSubjectConf(l_ssPath.str().c_str());
-		l_ofsSubjectConf << "Temps total = " << m_dStat_TieFighterLiftTime << "\n";
+		l_ofsSubjectConf << "Temps total = " << m_dStat_SpaceshipLiftTime << "\n";
 		m_bContinue = false;
 	}
 	if(evt.key == OIS::KC_END)
@@ -545,34 +520,34 @@ bool CTieFighterBCI::keyPressed(const OIS::KeyEvent& evt)
 }
 
 // -------------------------------------------------------------------------------
-void CTieFighterBCI::processStageFreetime(double timeSinceLastProcess)
+void CSpaceshipBCI::processStageFreetime(double timeSinceLastProcess)
 {
 	// -------------------------------------------------------------------------------
-	// Tie 
+	// Ship 
 
 	if(m_dFeedback <= m_dBetaOffset)
 	{
-		m_vTieOrientation[0] *= g_fAttenuation;
-		m_vTieOrientation[1] *= g_fAttenuation;
-		m_vTieOrientation[2] *= g_fAttenuation;
-		m_fTieHeight *= g_fAttenuation;
+		m_vShipOrientation[0] *= g_fAttenuation;
+		m_vShipOrientation[1] *= g_fAttenuation;
+		m_vShipOrientation[2] *= g_fAttenuation;
+		m_fShipHeight *= g_fAttenuation;
 		m_bShouldIncrementStat = false;
 	}
 	else
 	{
-		m_vTieOrientation[0] += g_fRotationSpeed *((rand()&1)==0?-1:1);
-		m_vTieOrientation[1] += g_fRotationSpeed *((rand()&1)==0?-1:1);
-		m_vTieOrientation[2] += g_fRotationSpeed *((rand()&1)==0?-1:1);
-		m_fTieHeight += (float)((m_dFeedback-m_dBetaOffset)* g_fMoveSpeed);
-		if(m_bShouldIncrementStat) m_dStat_TieFighterLiftTime += timeSinceLastProcess;
+		m_vShipOrientation[0] += g_fRotationSpeed *((rand()&1)==0?-1:1);
+		m_vShipOrientation[1] += g_fRotationSpeed *((rand()&1)==0?-1:1);
+		m_vShipOrientation[2] += g_fRotationSpeed *((rand()&1)==0?-1:1);
+		m_fShipHeight += (float)((m_dFeedback-m_dBetaOffset)* g_fMoveSpeed);
+		if(m_bShouldIncrementStat) m_dStat_SpaceshipLiftTime += timeSinceLastProcess;
 
-		if(m_vTieOrientation[0]>5)  m_vTieOrientation[0]=5;
-		if(m_vTieOrientation[1]>5)  m_vTieOrientation[1]=5;
-		if(m_vTieOrientation[2]>5)  m_vTieOrientation[2]=5;
-		if(m_vTieOrientation[0]<-5) m_vTieOrientation[0]=-5;
-		if(m_vTieOrientation[1]<-5) m_vTieOrientation[1]=-5;
-		if(m_vTieOrientation[2]<-5) m_vTieOrientation[2]=-5;
-		if(m_fTieHeight>g_fMaxHeight) m_fTieHeight=g_fMaxHeight;
+		if(m_vShipOrientation[0]>5)  m_vShipOrientation[0]=5;
+		if(m_vShipOrientation[1]>5)  m_vShipOrientation[1]=5;
+		if(m_vShipOrientation[2]>5)  m_vShipOrientation[2]=5;
+		if(m_vShipOrientation[0]<-5) m_vShipOrientation[0]=-5;
+		if(m_vShipOrientation[1]<-5) m_vShipOrientation[1]=-5;
+		if(m_vShipOrientation[2]<-5) m_vShipOrientation[2]=-5;
+		if(m_fShipHeight>g_fMaxHeight) m_fShipHeight=g_fMaxHeight;
 		m_bShouldIncrementStat = true;
 
 	}
@@ -581,7 +556,7 @@ void CTieFighterBCI::processStageFreetime(double timeSinceLastProcess)
 	// Mini Objects
 	// For n mini-objects, each one has its own threshold, in a regular n+1 partition.
 	// First mini-object starts lifting on the second part (nothing happens in the first part).
-	// The threshold for tie is 0+m_dBetaOffset.
+	// The threshold for Ship is 0+m_dBetaOffset.
 	//
 	// MIN=T0         T1          T2        Tn BetaOffset 
 	// ---|--nothing--|--1st mini--|--/~~/---|-----|----
@@ -619,12 +594,12 @@ void CTieFighterBCI::processStageFreetime(double timeSinceLastProcess)
 	// Object translations / rotations
 
 	//height
-	Vector3 l_v3TiePosition = m_poSceneManager->getSceneNode("TieFighterNode")->getPosition();
-	m_poSceneManager->getSceneNode("TieFighterNode")->setPosition(l_v3TiePosition.x, g_fMinHeight + m_fTieHeight, l_v3TiePosition.z);
+	Vector3 l_v3ShipPosition = m_poSceneManager->getSceneNode("ShipNode")->getPosition();
+	m_poSceneManager->getSceneNode("ShipNode")->setPosition(l_v3ShipPosition.x, g_fMinHeight + m_fShipHeight, l_v3ShipPosition.z);
 
 	//orientation
-	m_poSceneManager->getSceneNode("TieFighterNode")->setOrientation(Quaternion(1,m_vTieOrientation[0]*Math::PI/180,m_vTieOrientation[1]*Math::PI/180,m_vTieOrientation[2]*Math::PI/180));
-	m_poSceneManager->getSceneNode("TieFighterNode")->rotate(Vector3::UNIT_Y,Radian(Math::PI/2.f));
+	m_poSceneManager->getSceneNode("ShipNode")->setOrientation(Quaternion(1,m_vShipOrientation[0]*Math::PI/180,m_vShipOrientation[1]*Math::PI/180,m_vShipOrientation[2]*Math::PI/180));
+	m_poSceneManager->getSceneNode("ShipNode")->rotate(Vector3::UNIT_Y,Radian(Math::PI/2.f));
 
 	//score
 // 	CEGUI::Window * l_poWidget  = m_poGUIWindowManager->getWindow("score");
@@ -633,14 +608,14 @@ void CTieFighterBCI::processStageFreetime(double timeSinceLastProcess)
 // 	l_poWidget->setText(ss.str());
 
 	m_poSceneManager->getSceneNode("Mini1Node")->setOrientation(Quaternion(1,m_voSmallObjectOrientation[0][0],m_voSmallObjectOrientation[0][1],m_voSmallObjectOrientation[0][2]));
-	Vector3 l_v3MiniTie1Position = m_poSceneManager->getSceneNode("Mini1Node")->getPosition();
-	m_poSceneManager->getSceneNode("Mini1Node")->setPosition(l_v3MiniTie1Position.x, m_vfSmallObjectHeight[0], l_v3MiniTie1Position.z);
+	Vector3 l_v3MiniShip1Position = m_poSceneManager->getSceneNode("Mini1Node")->getPosition();
+	m_poSceneManager->getSceneNode("Mini1Node")->setPosition(l_v3MiniShip1Position.x, m_vfSmallObjectHeight[0], l_v3MiniShip1Position.z);
 
 	m_poSceneManager->getSceneNode("Mini2Node")->setOrientation(Quaternion(1,m_voSmallObjectOrientation[1][0],m_voSmallObjectOrientation[1][1],m_voSmallObjectOrientation[1][2]));
-	Vector3 l_v3MiniTie2Position = m_poSceneManager->getSceneNode("Mini2Node")->getPosition();
-	m_poSceneManager->getSceneNode("Mini2Node")->setPosition(l_v3MiniTie2Position.x, m_vfSmallObjectHeight[1], l_v3MiniTie2Position.z);
+	Vector3 l_v3MiniShip2Position = m_poSceneManager->getSceneNode("Mini2Node")->getPosition();
+	m_poSceneManager->getSceneNode("Mini2Node")->setPosition(l_v3MiniShip2Position.x, m_vfSmallObjectHeight[1], l_v3MiniShip2Position.z);
 
 	m_poSceneManager->getSceneNode("Mini3Node")->setOrientation(Quaternion(1,m_voSmallObjectOrientation[2][0],m_voSmallObjectOrientation[2][1],m_voSmallObjectOrientation[2][2]));
-	Vector3 l_v3MiniTie3Position = m_poSceneManager->getSceneNode("Mini3Node")->getPosition();
-	m_poSceneManager->getSceneNode("Mini3Node")->setPosition(l_v3MiniTie3Position.x, m_vfSmallObjectHeight[2], l_v3MiniTie3Position.z);
+	Vector3 l_v3MiniShip3Position = m_poSceneManager->getSceneNode("Mini3Node")->getPosition();
+	m_poSceneManager->getSceneNode("Mini3Node")->setPosition(l_v3MiniShip3Position.x, m_vfSmallObjectHeight[2], l_v3MiniShip3Position.z);
 }
