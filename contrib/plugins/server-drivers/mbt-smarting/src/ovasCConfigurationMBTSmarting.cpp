@@ -39,7 +39,7 @@ boolean CConfigurationMBTSmarting::preConfigure(void)
 	
 	gtk_combo_box_set_model(l_pComboBox, GTK_TREE_MODEL(m_pListStore));
 
-	char l_sBuffer[1024];
+	//char l_sBuffer[1024];
 	boolean l_bSelected=false;
 
 	char lpTargetPath[50]; // buffer to store the path of the COMPORTS
@@ -84,15 +84,22 @@ boolean CConfigurationMBTSmarting::postConfigure(void)
 	if(m_bApplyConfiguration)
 	{		
 		const gchar* port=gtk_combo_box_get_active_text (l_pComboBox);
-		int l_iUSBIndex = 0;
-		char* port1 = (char*) port;
-		if(strlen(port1)>4)
-			l_iUSBIndex = 10*((int)port[3] - '0') + (int)port[4] - '0' ;
-		else
-			l_iUSBIndex = (int)port[3] - '0';
-		if(l_iUSBIndex>=0)
+		if(!port)
 		{
-			m_rUSBIndex=(uint32)l_iUSBIndex;
+			std::cout << "Error: Port not specified or invalid\n";
+		}
+		else
+		{
+			int l_iUSBIndex = 0;
+			char* port1 = (char*) port;
+			if(strlen(port1)>4)
+				l_iUSBIndex = 10*((int)port[3] - '0') + (int)port[4] - '0' ;
+			else
+				l_iUSBIndex = (int)port[3] - '0';
+			if(l_iUSBIndex>=0)
+			{
+				m_rUSBIndex=(uint32)l_iUSBIndex;
+			}
 		}
 
 	}
