@@ -802,9 +802,9 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section "Enobio3G"
+Section "Device SDK: Enobio3G"
 
-	; Neuroelectrics Enobio 3G driver
+	; For Neuroelectrics Enobio 3G driver
 	
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
@@ -838,6 +838,28 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
+Section "Device SDK: MCS NVX"
+
+	; For MCS NVX driver
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\mcs-$suffix-dev.zip" no_need_to_download_mcs_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/mcs-$suffix-dev.zip "arch\mcs-$suffix-dev.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_mcs_dev:
+	ZipDLL::extractall "arch\mcs-$suffix-dev.zip" ""
+	
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
 Section "Uninstall"
 
 	RMDir /r "$INSTDIR\gtk"
@@ -856,6 +878,7 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\tmp"
 	RMDir /r "$INSTDIR\pthreads"
 	RMDir /r "$INSTDIR\enobio3g"
+	RMDir /r "$INSTDIR\mcs"
 	
 	Delete "$INSTDIR\..\scripts\win32-dependencies.cmd"
 
