@@ -42,7 +42,9 @@ CDriverMKSNVXDriver::CDriverMKSNVXDriver(IDriverContext& rDriverContext)
 	// The following class allows saving and loading driver settings from the acquisition server .conf file
 	m_oSettings.add("Header", &m_oHeader);
 	// To save your custom driver settings, register each variable to the SettingsHelper
-	//m_oSettings.add("SettingName", &variable);
+	m_oSettings.add("dataMode", &dataMode_);
+	m_oSettings.add("showAuxChannels", &showAuxChannels_);
+
 	m_oSettings.load();	
 }
 
