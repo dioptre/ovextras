@@ -1,6 +1,7 @@
 #ifndef __OpenViBE_AcquisitionServer_CConfigurationMitsarEEG202A_H__
 #define __OpenViBE_AcquisitionServer_CConfigurationMitsarEEG202A_H__
 
+#if defined(TARGET_HAS_ThirdPartyMitsar)
 #if defined TARGET_OS_Windows
 
 #include "../ovasCConfigurationBuilder.h"
@@ -35,3 +36,4 @@ namespace OpenViBEAcquisitionServer
 #endif
 
 #endif // __OpenViBE_AcquisitionServer_CConfigurationMitsarEEG202A_H__
+#endif
