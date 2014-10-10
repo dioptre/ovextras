@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyNeXus)
+
 #include "ovasCDriverMindMediaNeXus32B.h"
 #include "../ovasCConfigurationBuilder.h"
 
@@ -280,3 +283,5 @@ void CDriverMindMediaNeXus32B::processData(
 }
 
 #endif // defined TARGET_OS_Windows
+
+#endif
