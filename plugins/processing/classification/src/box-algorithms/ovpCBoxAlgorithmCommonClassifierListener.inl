@@ -150,19 +150,23 @@ namespace OpenViBEPlugins
 
 						OpenViBE::CString l_sEnumTypeName=this->getTypeManager().getTypeName(l_oEnum);
 						OpenViBE::uint64 l_ui64EnumValue = ip_ui64Parameter;
+						OpenViBE::uint64 l_ui64EnumIndex;
 						OpenViBE::CString l_sEnumValue;
-						if(l_ui64EnumValue) 
+
+						rBox.getSettingValue(i, l_sEnumValue);
+
+						OpenViBE::uint64 l_ui64OldId = this->getTypeManager().getEnumerationEntryValueFromName(l_oEnum, l_sEnumValue);
+						if(l_ui64OldId == 0xffffffffffffffffLL)//The previous strategy does not exists in the new enum, let's switch to the default value (the first)
 						{
-							l_sEnumValue = this->getTypeManager().getEnumerationEntryNameFromValue(l_oEnum, l_ui64EnumValue);
+							l_ui64EnumIndex = 0;
 						}
 						else
 						{
-							// @fixme Initialize. This is the second place with this check (search INITDECISIONENUM). 
-							// This either may not be the right place to initialize this. However, if the enum value here is 0, the
-							// gui will get an empty default value...
-							this->getTypeManager().getEnumerationEntry(l_oEnum, 0, l_sEnumValue, l_ui64EnumValue);
-							ip_ui64Parameter = l_ui64EnumValue;
+							l_ui64EnumIndex = l_ui64OldId;
 						}
+
+						this->getTypeManager().getEnumerationEntry(l_oEnum, l_ui64EnumIndex, l_sEnumValue, l_ui64EnumValue);
+						ip_ui64Parameter = l_ui64EnumValue;
 
 						rBox.setSettingType(i, l_oEnum);
 						rBox.setSettingName(i, l_sEnumTypeName);
@@ -229,22 +233,12 @@ namespace OpenViBEPlugins
 						}
 						else
 						{
+							//As we just switch to this strategy, we take the default value set in the strategy to initialize the value
 							OpenViBE::Kernel::IParameter* l_pParameter=m_pStrategy->getInputParameter(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType);
 							OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64Parameter(l_pParameter);
 							OpenViBE::uint64 l_ui64EnumValue = ip_ui64Parameter;
 							OpenViBE::CString l_sEnumName;
-							if(l_ui64EnumValue == 0) // Parameter value has not yet been set?
-							{
-								// @fixme This may not be the right place to initialize this (search INITDECISIONENUM), but if we don't, the default value
-								// in the gui will be "", leading to trouble. We cannot initialize the param except in a place that
-								// knows the classifier type and can ask which strategies work for it.
-								this->getTypeManager().getEnumerationEntry(l_oEnum, 0, l_sEnumName, l_ui64EnumValue);
-								ip_ui64Parameter = l_ui64EnumValue;	// initialize
-							}
-							else
-							{
-								l_sEnumName = this->getTypeManager().getEnumerationEntryNameFromValue(l_oEnum, l_ui64EnumValue);
-							}
+							l_sEnumName = this->getTypeManager().getEnumerationEntryNameFromValue(l_oEnum, l_ui64EnumValue);
 
 							OpenViBE::CString l_sParameterName=this->getTypeManager().getTypeName(l_oEnum);
 

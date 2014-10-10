@@ -1,5 +1,6 @@
 #include "ovpCAlgorithmPairwiseDecision.h"
 
+#include <iostream>
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -33,6 +34,10 @@ boolean CAlgorithmPairwiseDecision::process()
 		TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_Configuration));
 		XML::IXMLNode* l_pTempNode = (XML::IXMLNode*)op_pConfiguration;
 		return this->loadConfiguration(*l_pTempNode);
+	}
+	else if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize))
+	{
+		this->parametrize();
 	}
 	return true;
 }

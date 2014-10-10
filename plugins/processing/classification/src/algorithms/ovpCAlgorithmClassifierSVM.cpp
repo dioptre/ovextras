@@ -36,7 +36,7 @@ OpenViBE::int32 OpenViBEPlugins::Classification::getSVMBestClassification(OpenVi
 {
 	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
 		return 0;
-	else if(::fabs(rFirstClassificationValue[0]) < ::fabs(rSecondClassificationValue[0]))
+	else if(::fabs(rFirstClassificationValue[0]) > ::fabs(rSecondClassificationValue[0]))
 		return -1;
 	else
 		return 1;
@@ -351,7 +351,7 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 			if( m_pModel->label[i] == 1 )
 			{
 				rClassificationValues.setSize(1);
-				rClassificationValues[0]=1-l_pProbEstimates[i];
+				rClassificationValues[0]=l_pProbEstimates[i];
 
 			}
 		}
