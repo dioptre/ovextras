@@ -20,6 +20,7 @@
 #include "ovasCDriverOpenALAudioCapture.h"
 #include "ovasCDriverOpenEEGModularEEG.h"
 #include "ovasCDriverTMSi.h"
+#include "ovasCDriverMBTSmarting.h"
 
 namespace OpenViBEContributions {
 
@@ -64,6 +65,10 @@ namespace OpenViBEContributions {
 
 #if defined TARGET_OS_Windows
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverTMSi(pAcquisitionServer->getDriverContext()));
+#endif
+
+#if defined TARGET_OS_Windows
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverMBTSmarting(pAcquisitionServer->getDriverContext()));
 #endif
 
 		pGUI->registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginExternalStimulations(rKernelContext));
