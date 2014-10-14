@@ -59,7 +59,7 @@ boolean CAlgorithmClassifierOneVsOne::initialize()
 	op_pConfiguration=NULL;
 
 	TParameterHandler < uint64 > ip_pPairwise(this->getInputParameter(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType));
-	ip_pPairwise=0;
+	ip_pPairwise = OV_UndefinedIdentifier.toUInteger();
 
 	m_pDecisionStrategyAlgorithm = NULL;
 	m_oPairwiseDecisionIdentifier = OV_UndefinedIdentifier;
