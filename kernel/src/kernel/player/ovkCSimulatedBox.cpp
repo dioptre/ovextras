@@ -759,6 +759,7 @@ boolean CSimulatedBox::initialize(void)
 				{
 					getLogManager() << LogLevel_ImportantWarning << "Box algorithm <" << m_pBox->getName() << "> has been deactivated because initialize() function returned error\n";
 					m_bSuspended=true;
+					return false;
 				}
 			}
 			catch (...)

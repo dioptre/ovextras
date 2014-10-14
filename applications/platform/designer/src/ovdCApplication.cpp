@@ -326,6 +326,7 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 				str[i]-=32;
 		return str;
 	}
+
 	static gboolean box_algorithm_search_func(GtkTreeModel *model, GtkTreeIter *iter, gpointer pUserData)
 	{
 		CApplication* l_pApplication=static_cast<CApplication*>(pUserData);
@@ -647,6 +648,7 @@ CApplication::CApplication(const IKernelContext& rKernelContext)
 	,m_f64LastTimeRefresh(0.0)
 	,m_bIsQuitting(false)
 	,m_i32CurrentScenarioPage(-1)
+	,m_pInitAlert(NULL)
 	,m_eReplayMode(EReplayMode_None)
 {
 	m_pPluginManager=&m_rKernelContext.getPluginManager();
@@ -771,6 +773,8 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	g_signal_connect(G_OBJECT(m_pScenarioNotebook), "switch-page", G_CALLBACK(change_current_scenario_cb), this);
 	g_signal_connect(G_OBJECT(m_pScenarioNotebook), "page-reordered", G_CALLBACK(reorder_scenario_cb), this);
 	m_pResourceNotebook=GTK_NOTEBOOK(gtk_builder_get_object(m_pBuilderInterface, "openvibe-resource_notebook"));
+
+	m_pInitAlert = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_init_alert"));
 
 	// Creates an empty scnenario
 	gtk_notebook_remove_page(m_pScenarioNotebook, 0);
@@ -1865,13 +1869,37 @@ OpenViBE::boolean CApplication::createPlayer(void)
 		CIdentifier l_oPlayerIdentifier=l_pCurrentInterfacedScenario->m_oPlayerIdentifier;
 		l_pCurrentInterfacedScenario->m_pPlayer=&m_rKernelContext.getPlayerManager().getPlayer(l_oPlayerIdentifier);
 		l_pCurrentInterfacedScenario->m_pPlayer->setScenario(l_oScenarioIdentifier);
-		if(!l_pCurrentInterfacedScenario->m_pPlayer->initialize()) 
+
+		EPlayerReturnCode l_eCode = l_pCurrentInterfacedScenario->m_pPlayer->initialize();
+		if(l_eCode == PlayerReturnCode_Failed)
 		{
 			m_rKernelContext.getLogManager() << LogLevel_Error << "Failed to initialize player\n";
 			l_pCurrentInterfacedScenario->m_oPlayerIdentifier = OV_UndefinedIdentifier;
 			l_pCurrentInterfacedScenario->m_pPlayer=NULL;
 			m_rKernelContext.getPlayerManager().releasePlayer(l_oPlayerIdentifier);
 			return false;
+		}
+		else if(l_eCode == PlayerReturnCode_BoxInitializationFailed){
+			gint res = 1;
+			if(gtk_toggle_button_get_active(m_pInitAlert))
+			{
+				::GtkBuilder* l_pBuilder=gtk_builder_new(); // glade_xml_new(OVD_GUI_File, "about", NULL);
+				gtk_builder_add_from_file(l_pBuilder, OVD_GUI_File, NULL);
+				gtk_builder_connect_signals(l_pBuilder, NULL);
+				::GtkWidget* l_pDialog=GTK_WIDGET(gtk_builder_get_object(l_pBuilder, "dialog_init_error_popup"));
+
+				res = gtk_dialog_run(GTK_DIALOG(l_pDialog));
+
+				gtk_widget_destroy(l_pDialog);
+				g_object_unref(l_pBuilder);
+			}
+			if(res == 0)
+			{
+				l_pCurrentInterfacedScenario->m_oPlayerIdentifier = OV_UndefinedIdentifier;
+				l_pCurrentInterfacedScenario->m_pPlayer=NULL;
+				m_rKernelContext.getPlayerManager().releasePlayer(l_oPlayerIdentifier);
+				return false;
+			}
 		}
 		l_pCurrentInterfacedScenario->m_ui64LastLoopTime=System::Time::zgetTime();
 

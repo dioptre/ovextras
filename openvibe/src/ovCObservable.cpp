@@ -22,7 +22,6 @@ void CObservable::deleteObserver(IObserver *o)
 	for(std::vector<IObserver *>::iterator it = m_vObservers.begin(); it != m_vObservers.end() ; ++it)
 	{
 		if((*it) == o){
-			std::cout << "here" << std::endl;
 			m_vObservers.erase(it);
 			//We only suppress the first occurence, no need to continue
 			return;

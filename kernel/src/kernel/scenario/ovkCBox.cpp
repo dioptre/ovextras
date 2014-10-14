@@ -910,7 +910,7 @@ boolean CBox::setSettingValue(
 
 void CBox::notifySettingChange(BoxEventMessageType eType, int32 i32FirstIndex, int32 i32SecondIndex)
 {
-	if( m_bIsNotificationActive && m_bIsObserverNotificationActive)
+	if( m_bIsObserverNotificationActive)
 	{
 		BoxEventMessage l_oEvent;
 		l_oEvent.m_eType = eType;
