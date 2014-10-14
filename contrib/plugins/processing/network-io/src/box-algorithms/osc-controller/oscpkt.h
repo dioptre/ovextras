@@ -1,4 +1,5 @@
-/** @mainpage OSCPKT : a minimalistic OSC ( http://opensoundcontrol.org ) c++ library 
+/** 
+  OSCPKT : a minimalistic OSC ( http://opensoundcontrol.org ) c++ library 
 
   Before using this file please take the time to read the OSC spec, it
   is short and not complicated: http://opensoundcontrol.org/spec-1_0
@@ -28,8 +29,8 @@
   And optionaly:
     - oscpkt::UdpSocket     : read/write OSC packets over UDP.
 
-  @example: oscpkt_demo.cc
-  @example: oscpkt_test.cc
+  example: oscpkt_demo.cc
+  example: oscpkt_test.cc
 */
 
 /* Copyright (C) 2010  Julien Pommier
