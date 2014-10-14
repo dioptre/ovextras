@@ -28,8 +28,8 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamDecoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamEncoder;
+			OpenViBEToolkit::TSignalDecoder < CTemporalFilterBoxAlgorithm >* m_pStreamDecoder;
+			OpenViBEToolkit::TSignalEncoder < CTemporalFilterBoxAlgorithm >* m_pStreamEncoder;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pComputeTemporalFilterCoefficients;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pApplyTemporalFilter;
 
