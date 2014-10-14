@@ -21,35 +21,35 @@ using namespace std;
 
 void CWindowingFunctions::setSampleBuffer(const float64* pBuffer)
 {
-	vec l_vecWindow(m_ui64SamplesPerBuffer);
+	vec l_vecWindow((int)m_ui64SamplesPerBuffer);
 
 	if (m_ui64WindowMethod==OVP_TypeId_WindowMethod_Hamming)
 	{
-		l_vecWindow = hamming(m_ui64SamplesPerBuffer);
+		l_vecWindow = hamming((int)m_ui64SamplesPerBuffer);
 	}
 	else if (m_ui64WindowMethod==OVP_TypeId_WindowMethod_Hanning)
 	{
-		l_vecWindow = hanning(m_ui64SamplesPerBuffer);
+		l_vecWindow = hanning((int)m_ui64SamplesPerBuffer);
 	}
 	else if (m_ui64WindowMethod==OVP_TypeId_WindowMethod_Hann)
 	{
-		l_vecWindow = hann(m_ui64SamplesPerBuffer);
+		l_vecWindow = hann((int)m_ui64SamplesPerBuffer);
 	}
 	else if (m_ui64WindowMethod==OVP_TypeId_WindowMethod_Blackman)
 	{
-		l_vecWindow = blackman(m_ui64SamplesPerBuffer);
+		l_vecWindow = blackman((int)m_ui64SamplesPerBuffer);
 	}
 	else if (m_ui64WindowMethod==OVP_TypeId_WindowMethod_Triangular)
 	{
-		l_vecWindow = triang(m_ui64SamplesPerBuffer);
+		l_vecWindow = triang((int)m_ui64SamplesPerBuffer);
 	}
 	else if (m_ui64WindowMethod==OVP_TypeId_WindowMethod_SquareRoot)
 	{
-		l_vecWindow = sqrt_win(m_ui64SamplesPerBuffer);
+		l_vecWindow = sqrt_win((int)m_ui64SamplesPerBuffer);
 	}
 	else
 	{
-		l_vecWindow = ones(m_ui64SamplesPerBuffer);
+		l_vecWindow = ones((int)m_ui64SamplesPerBuffer);
 	}
 
 	for (uint64 i=0;  i < m_ui64ChannelCount; i++)
