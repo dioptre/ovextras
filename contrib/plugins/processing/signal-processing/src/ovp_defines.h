@@ -29,7 +29,6 @@
 #define OVP_TypeId_FilterMethod                                                         OpenViBE::CIdentifier(0x2F2C606C, 0x8512ED68)
 #define OVP_TypeId_FilterMethod_Butterworth                                             OpenViBE::CIdentifier(0x00E4EADE, 0x9586A50E)
 #define OVP_TypeId_FilterMethod_Chebychev                                               OpenViBE::CIdentifier(0x0C3F5301, 0x7397A7FB)
-#define OVP_TypeId_FilterMethod_YuleWalker                                              OpenViBE::CIdentifier(0x7BF59C86, 0xB6D459BA)
 
 #define OVP_TypeId_FilterType                                                           OpenViBE::CIdentifier(0xFA20178E, 0x4CBA62E9)
 #define OVP_TypeId_FilterType_LowPass                                                   OpenViBE::CIdentifier(0x0C33A568, 0xE2BD46D2)

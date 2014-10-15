@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCGenericStimulatorApplication.h"
 
 #include "../log/ovkCLogListenerFileBuffered.h"
@@ -139,3 +142,5 @@ void CGenericStimulatorApplication::stopFlickering()
 
 	this->setTarget( -1 );
 }
+
+#endif

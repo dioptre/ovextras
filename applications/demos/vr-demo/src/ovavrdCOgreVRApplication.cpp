@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovavrdCOgreVRApplication.h"
 
 #include <system/Time.h>
@@ -404,3 +407,5 @@ void COgreVRApplication::windowResized(RenderWindow* rw)
 {
 	CEGUI::System::getSingleton().notifyDisplaySizeChanged(CEGUI::Size((float)rw->getWidth(), (float)rw->getHeight()));
 }
+
+#endif

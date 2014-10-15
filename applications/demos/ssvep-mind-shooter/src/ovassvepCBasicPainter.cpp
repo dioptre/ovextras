@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCBasicPainter.h"
 #include "ovassvepCApplication.h"
 
@@ -265,3 +268,5 @@ void CBasicPainter::paintText(
 
 
 
+
+#endif

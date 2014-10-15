@@ -51,6 +51,11 @@ namespace OpenViBEPlugins
 				}
 
 				//allocates the vector
+				if(m_pVectorBuffer)
+				{
+					delete[] m_pVectorBuffer;
+					m_pVectorBuffer = NULL;
+				}
 				m_pVectorBuffer = new float64[m_ui32VectorSize];
 
 				//sends the header

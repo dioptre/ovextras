@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovkCColorAnimator.h"
 
 using namespace OpenViBE;
@@ -89,3 +92,6 @@ void CColorAnimator::setTransparency(Ogre::Real t)
 #endif
 	}
 }
+
+
+#endif

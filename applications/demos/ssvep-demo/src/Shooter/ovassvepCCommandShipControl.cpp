@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCCommandShipControl.h"
 #include "ovassvepCShooterApplication.h"
 
@@ -25,3 +28,5 @@ void CCommandShipControl::execute(int iButton, int iState)
 			break;
 	}
 }
+
+#endif
