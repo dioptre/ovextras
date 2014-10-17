@@ -401,24 +401,24 @@ boolean CAcquisitionServer::loop(void)
 				// acq server is started, send the header
 
 				// Computes inner data to skip
-				int64 l_i64SignedTheoricalSampleCountToSkip=0;
+				int64 l_i64SignedTheoreticalSampleCountToSkip=0;
 				if(m_bDriftCorrectionCalled)
 				{
-					l_i64SignedTheoricalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64StartTime)*m_ui32SamplingFrequency)>>32)-m_ui64SampleCount+m_vPendingBuffer.size();
+					l_i64SignedTheoreticalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64StartTime)*m_ui32SamplingFrequency)>>32)-m_ui64SampleCount+m_vPendingBuffer.size();
 				}
 				else
 				{
-					l_i64SignedTheoricalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64LastDeliveryTime)*m_ui32SamplingFrequency)>>32)+m_vPendingBuffer.size();
+					l_i64SignedTheoreticalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64LastDeliveryTime)*m_ui32SamplingFrequency)>>32)+m_vPendingBuffer.size();
 				}
 
-				uint64 l_ui64TheoricalSampleCountToSkip=(l_i64SignedTheoricalSampleCountToSkip<0?0:uint64(l_i64SignedTheoricalSampleCountToSkip));
+				uint64 l_ui64TheoreticalSampleCountToSkip=(l_i64SignedTheoreticalSampleCountToSkip<0?0:uint64(l_i64SignedTheoreticalSampleCountToSkip));
 
-				m_rKernelContext.getLogManager() << LogLevel_Trace << "Sample count offset at connection : " << l_ui64TheoricalSampleCountToSkip << "\n";
+				m_rKernelContext.getLogManager() << LogLevel_Trace << "Sample count offset at connection : " << l_ui64TheoreticalSampleCountToSkip << "\n";
 
 				SConnectionInfo l_oInfo;
 				l_oInfo.m_ui64ConnectionTime=itConnection->second.m_ui64ConnectionTime;
-				l_oInfo.m_ui64StimulationTimeOffset=ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64TheoricalSampleCountToSkip+m_ui64SampleCount-m_vPendingBuffer.size());
-				l_oInfo.m_ui64SignalSampleCountToSkip=l_ui64TheoricalSampleCountToSkip;
+				l_oInfo.m_ui64StimulationTimeOffset=ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64TheoreticalSampleCountToSkip+m_ui64SampleCount-m_vPendingBuffer.size());
+				l_oInfo.m_ui64SignalSampleCountToSkip=l_ui64TheoreticalSampleCountToSkip;
 				l_oInfo.m_pConnectionClientHandlerThread=new CConnectionClientHandlerThread(*this, *l_pConnection);
 				l_oInfo.m_pConnectionClientHandlerBoostThread=new boost::thread(boost::bind(&start_connection_client_handler_thread, l_oInfo.m_pConnectionClientHandlerThread));
 				//applyPriority(l_oInfo.m_pConnectionClientHandlerBoostThread,15);
@@ -529,13 +529,15 @@ boolean CAcquisitionServer::loop(void)
 		if (p < 0)
 			m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << " (case A)\n";
 
-		const uint64 bufferStart = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size());
-		const uint64 bufferEnd   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock);
+		const uint64 l_ui64BufferStartSamples = m_ui64SampleCount-m_vPendingBuffer.size();
+		const uint64 l_ui64BufferEndSamples   = m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock;
+		const uint64 l_ui64BufferStartTime    = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferStartSamples);
+		const uint64 l_ui64BufferEndTime      = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferEndSamples);
 
 		// Pass the stimuli and buffer to all plugins; note that they may modify them
 		for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
 		{
-			(*itp)->loopHook(m_vPendingBuffer, m_oPendingStimulationSet, bufferStart, bufferEnd);
+			(*itp)->loopHook(m_vPendingBuffer, m_oPendingStimulationSet, l_ui64BufferStartTime, l_ui64BufferEndTime);
 		}
 
 		// Handle connections
@@ -561,12 +563,12 @@ boolean CAcquisitionServer::loop(void)
 
 				//				int l = l_oStimulationSet.getStimulationCount();
 
-				const int64 p = bufferStart+l_rInfo.m_ui64SignalSampleCountToSkip;
+				const int64 p = l_ui64BufferStartSamples+l_rInfo.m_ui64SignalSampleCountToSkip;
 				if (p < 0)
 					m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << " (case B)\n";
 
-				const uint64 connBlockStart = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, bufferStart + l_rInfo.m_ui64SignalSampleCountToSkip);
-				const uint64 connBlockEnd   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, bufferEnd   + l_rInfo.m_ui64SignalSampleCountToSkip);
+				const uint64 l_ui64ConnBlockStartTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferStartSamples + l_rInfo.m_ui64SignalSampleCountToSkip);
+				const uint64 l_ui64ConnBlockEndTime   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferEndSamples   + l_rInfo.m_ui64SignalSampleCountToSkip);
 
 				//m_rKernelContext.getLogManager() << LogLevel_Info << "start: " << time64(start) << "end: " << time64(end) << "\n";
 
@@ -577,7 +579,7 @@ boolean CAcquisitionServer::loop(void)
 				OpenViBEToolkit::Tools::StimulationSet::appendRange(
 							l_oStimulationSet,
 							m_oPendingStimulationSet,
-							connBlockStart,connBlockEnd);
+							l_ui64ConnBlockStartTime,l_ui64ConnBlockEndTime);
 
 				OpenViBEToolkit::Tools::StimulationSet::copy(*ip_pStimulationSet, l_oStimulationSet, -int64(l_rInfo.m_ui64StimulationTimeOffset));
 
@@ -595,8 +597,8 @@ boolean CAcquisitionServer::loop(void)
 		// Clears pending stimulations
 		OpenViBEToolkit::Tools::StimulationSet::removeRange(
 					m_oPendingStimulationSet,
-					ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, bufferStart),
-					ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, bufferEnd)
+					l_ui64BufferStartTime,
+					l_ui64BufferEndTime
 					);
 
 		// Clears pending signal
@@ -810,7 +812,7 @@ boolean CAcquisitionServer::stop(void)
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Stopping the acquisition.\n";
 
 	int64 l_i64DriftSampleCount=m_i64DriftSampleCount-(m_i64DriftCorrectionSampleCountAdded-m_i64DriftCorrectionSampleCountRemoved);
-	uint64 l_ui64TheoricalSampleCount=m_ui64SampleCount-m_i64DriftSampleCount;
+	uint64 l_ui64TheoreticalSampleCount=m_ui64SampleCount-m_i64DriftSampleCount;
 	uint64 l_ui64ReceivedSampleCount=m_ui64SampleCount-(m_i64DriftCorrectionSampleCountAdded-m_i64DriftCorrectionSampleCountRemoved);
 	float64 l_f64DriftRatio=(l_ui64ReceivedSampleCount?((l_i64DriftSampleCount*10000)/int64(l_ui64ReceivedSampleCount))/100.:0);
 	float64 l_f64AddedRatio=(l_ui64ReceivedSampleCount?((m_i64DriftCorrectionSampleCountAdded*10000)/int64(l_ui64ReceivedSampleCount))/100.:0);
@@ -819,20 +821,20 @@ boolean CAcquisitionServer::stop(void)
 	{
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "For information, after " << (((System::Time::zgetTime()-m_ui64StartTime) * 1000) >> 32) * .001f << " seconds we got the following statistics :\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Received : " << l_ui64ReceivedSampleCount << " samples\n";
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Should have received : " << l_ui64TheoricalSampleCount << " samples\n";
+		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Should have received : " << l_ui64TheoreticalSampleCount << " samples\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Drift was : " << l_i64DriftSampleCount << " samples (" << l_f64DriftRatio << "%)\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Added : " << m_i64DriftCorrectionSampleCountAdded << " samples (" << l_f64AddedRatio << "%)\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Removed : " << m_i64DriftCorrectionSampleCountRemoved << " samples (" << l_f64RemovedRatio << "%)\n";
 	}
 	else
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "After " << (((System::Time::zgetTime()-m_ui64StartTime) * 1000) >> 32) * .001f << " seconds, theorical samples per second does not match real samples per second\n";
+		m_rKernelContext.getLogManager() << LogLevel_Warning << "After " << (((System::Time::zgetTime()-m_ui64StartTime) * 1000) >> 32) * .001f << " seconds, theoretical samples per second does not match real samples per second\n";
 		m_rKernelContext.getLogManager() << LogLevel_Warning << "  Received : " << l_ui64ReceivedSampleCount << " samples\n";
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "  Should have received : " << l_ui64TheoricalSampleCount << " samples\n";
+		m_rKernelContext.getLogManager() << LogLevel_Warning << "  Should have received : " << l_ui64TheoreticalSampleCount << " samples\n";
 		m_rKernelContext.getLogManager() << LogLevel_Warning << "  Drift was : " << l_i64DriftSampleCount << " samples (" << l_f64DriftRatio << "%)\n";
 		if(m_i64DriftCorrectionSampleCountAdded==0 && m_i64DriftCorrectionSampleCountRemoved==0)
 		{
-			m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "  The driver did not try to correct this difference\n";
+			m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "  The driver did not try to correct this difference. This may be a feature of the driver.\n";
 		}
 		else
 		{
@@ -840,7 +842,7 @@ boolean CAcquisitionServer::stop(void)
 			m_rKernelContext.getLogManager() << LogLevel_Warning << "  Removed : " << m_i64DriftCorrectionSampleCountRemoved << " samples (" << l_f64RemovedRatio << "%)\n";
 			m_rKernelContext.getLogManager() << LogLevel_Warning << "  The driver obviously tried to correct this difference\n";
 		}
-		m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "  Please submit a bug report (including the acquisition server log file or at least this complete message) for the driver you are using\n";
+		// m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "  Please submit a bug report (including the acquisition server log file or at least this complete message) for the driver you are using\n";
 	}
 
 	// Stops driver
@@ -983,8 +985,8 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 		m_ui64SampleCount+=ui32SampleCount*m_ui64OverSamplingFactor;
 
 		{
-			uint64 l_ui64TheoricalSampleCount=(m_ui32SamplingFrequency * (System::Time::zgetTime()-m_ui64StartTime))>>32;
-			int64 l_i64JitterSampleCount=int64(m_ui64SampleCount-l_ui64TheoricalSampleCount)+m_i64InnerLatencySampleCount;
+			uint64 l_ui64TheoreticalSampleCount=(m_ui32SamplingFrequency * (System::Time::zgetTime()-m_ui64StartTime))>>32;
+			int64 l_i64JitterSampleCount=int64(m_ui64SampleCount-l_ui64TheoreticalSampleCount)+m_i64InnerLatencySampleCount;
 
 			m_vJitterSampleCount.push_back(l_i64JitterSampleCount);
 			if(m_vJitterSampleCount.size() > m_ui64JitterEstimationCountForDrift)
