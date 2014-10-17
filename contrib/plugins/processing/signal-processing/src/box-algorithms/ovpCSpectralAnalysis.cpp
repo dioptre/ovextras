@@ -100,7 +100,7 @@ boolean CSpectralAnalysis::process()
 			//get signal info
 			m_ui32SampleCount = m_pSignalDecoder->getOutputMatrix()->getDimensionSize(1);
 			m_ui32ChannelCount = m_pSignalDecoder->getOutputMatrix()->getDimensionSize(0);
-			m_ui32SamplingRate = m_pSignalDecoder->getOutputSamplingRate();
+			m_ui32SamplingRate = (uint32)m_pSignalDecoder->getOutputSamplingRate();
 
 			if (!m_bCoefComputed)
 			{
@@ -178,6 +178,8 @@ boolean CSpectralAnalysis::process()
 		}
 		if(m_pSignalDecoder->isBufferReceived())
 		{
+			//get input buffer
+			float64* l_pBuffer = m_pSignalDecoder->getOutputMatrix()->getBuffer();
 			//do the processing
 			vec x(m_ui32SampleCount);
 			cvec y(m_ui32SampleCount);
