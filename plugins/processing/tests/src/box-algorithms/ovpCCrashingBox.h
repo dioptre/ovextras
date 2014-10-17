@@ -12,7 +12,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Samples
+	namespace Tests
 	{
 		class CCrashingBox : public OpenViBE::Plugins::IBoxAlgorithm
 		{
@@ -48,11 +48,11 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("A box which code launches exceptions"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This box illustrates the behavior of the platform given a crashing plugin code"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Samples"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tests and examples"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_CrashingBox; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CCrashingBox(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Tests::CCrashingBox(); }
 
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rPrototype) const

@@ -9,7 +9,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Samples
+	namespace Tests
 	{
 		class CAlgorithmAddition : public OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >
 		{
@@ -41,11 +41,11 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Computes and outputs the sum of two inputs"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Samples"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tests and examples"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_AlgorithmAddition; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CAlgorithmAddition(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Tests::CAlgorithmAddition(); }
 
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const

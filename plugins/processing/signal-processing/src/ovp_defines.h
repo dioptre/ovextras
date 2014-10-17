@@ -7,6 +7,9 @@
 //___________________________________________________________________//
 //                                                                   //
 
+#define OVP_ClassId_Identity                                                           OpenViBE::CIdentifier(0x5DFFE431, 0x35215C50)
+#define OVP_ClassId_IdentityDesc                                                       OpenViBE::CIdentifier(0x54743810, 0x6A1A88CC)
+
 #define OVP_ClassId_TimeBasedEpoching                                                  OpenViBE::CIdentifier(0x00777FA0, 0x5DC3F560)
 #define OVP_ClassId_TimeBasedEpochingDesc                                              OpenViBE::CIdentifier(0x00ABDABE, 0x41381683)
 

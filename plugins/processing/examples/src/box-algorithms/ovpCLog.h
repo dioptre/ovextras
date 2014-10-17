@@ -7,7 +7,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Samples
+	namespace Examples
 	{
 		class CLog : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
@@ -72,11 +72,11 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Logs stuffs (init, uninit, input, clock, process)"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This sample box shows how stuffs could be logged in the log manager"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Samples"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tests and examples"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Log; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CLog(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Examples::CLog(); }
 
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rPrototype) const

@@ -1,13 +1,13 @@
 #ifndef __SamplePlugin_CIdentity_H__
 #define __SamplePlugin_CIdentity_H__
 
-#include "../ovp_defines.h"
+#include "../../ovp_defines.h"
 #include <toolkit/ovtk_all.h>
 #include <cstdio>
 
 namespace OpenViBEPlugins
 {
-	namespace Samples
+	namespace SignalProcessing
 	{
 		class CIdentity : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
@@ -103,7 +103,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-copy"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Identity; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CIdentity(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CIdentity(); }
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CIdentityListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 

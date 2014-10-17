@@ -9,7 +9,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Samples
+	namespace Tests
 	{
 		class CBoxAlgorithmAdditionTest : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
@@ -52,11 +52,11 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("This box illustrates how an algorithm can be used in a box"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This specific sample computes 4 random numbers and uses 3 sum operator algorithms in order to get the total"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Samples"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tests and examples"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithmAdditionTest; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CBoxAlgorithmAdditionTest(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Tests::CBoxAlgorithmAdditionTest(); }
 
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rPrototype) const

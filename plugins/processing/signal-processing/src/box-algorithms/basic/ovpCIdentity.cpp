@@ -6,7 +6,7 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Samples;
+using namespace OpenViBEPlugins::SignalProcessing;
 using namespace OpenViBEToolkit;
 using namespace std;
 

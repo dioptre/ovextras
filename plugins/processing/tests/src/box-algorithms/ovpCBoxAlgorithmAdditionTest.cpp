@@ -4,7 +4,7 @@
 #include <cmath>
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Samples;
+using namespace OpenViBEPlugins::Tests;
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;

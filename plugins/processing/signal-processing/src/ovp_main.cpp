@@ -3,6 +3,8 @@
 #include "algorithms/epoching/ovpCAlgorithmStimulationBasedEpoching.h"
 //#include "algorithms/filters/ovpCApplySpatialFilter.h"
 
+#include "box-algorithms/basic/ovpCIdentity.h"
+
 #include "box-algorithms/basic/ovpCBoxAlgorithmChannelRename.h"
 #include "box-algorithms/basic/ovpCBoxAlgorithmChannelSelector.h"
 #include "box-algorithms/basic/ovpCBoxAlgorithmEpochAverage.h"
@@ -79,6 +81,8 @@ OVP_Declare_Begin()
 
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_ClassId_ConnectivityAlgorithm, "Connectivity measure method");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_ClassId_ConnectivityAlgorithm, "Single-Trial Phase Locking Value", OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue.toUInteger());
+
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CIdentityDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CTimeBasedEpochingDesc);
 
