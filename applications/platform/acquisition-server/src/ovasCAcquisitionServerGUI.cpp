@@ -23,6 +23,7 @@
 #include "neurosky-mindset/ovasCDriverNeuroskyMindset.h"
 #include "tmsi-refa32b/ovasCDriverTMSiRefa32B.h"
 #include "neuroelectrics-enobio3g/ovasCDriverEnobio3G.h"
+#include "labstreaminglayer/ovasCDriverLabStreamingLayer.h"
 
 #include <system/Memory.h>
 #include <system/Time.h>
@@ -166,6 +167,10 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 #if defined TARGET_HAS_ThirdPartyEnobioAPI
 	m_vDriver.push_back(new CDriverEnobio3G(m_pAcquisitionServer->getDriverContext()));
 #endif
+#if defined TARGET_HAS_ThirdPartyLSL
+	m_vDriver.push_back(new CDriverLabStreamingLayer(m_pAcquisitionServer->getDriverContext()));
+#endif
+
 
 #if defined TARGET_HAS_OpenViBEContributions
 	OpenViBEContributions::initiateContributions(this, m_pAcquisitionServer, rKernelContext, &m_vDriver);
