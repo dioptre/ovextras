@@ -1,4 +1,4 @@
-PROJECT(openvibe-plugins-samples)
+PROJECT(openvibe-plugins-data-generation)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})
 SET(PROJECT_VERSION_MINOR ${OV_GLOBAL_VERSION_MINOR})
