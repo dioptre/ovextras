@@ -51,7 +51,9 @@ namespace OpenViBEContributions {
  #if defined TARGET_HAS_ThirdPartyActiCHampAPI
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBrainProductsActiCHamp(pAcquisitionServer->getDriverContext()));
  #endif
+ #if defined(TARGET_HAS_ThirdPartyMitsar)
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverMitsarEEG202A(pAcquisitionServer->getDriverContext()));
+ #endif
 #endif
 
 #if defined TARGET_HAS_ThirdPartyOpenAL
@@ -63,7 +65,7 @@ namespace OpenViBEContributions {
 #if defined TARGET_OS_Windows
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverTMSi(pAcquisitionServer->getDriverContext()));
 #endif
-		
+
 		pGUI->registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginExternalStimulations(rKernelContext));
 	}
 

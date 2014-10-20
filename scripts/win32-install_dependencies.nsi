@@ -802,6 +802,71 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
+Section "Device SDK: Mitsar"
+
+	; For mitsar driver
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-mitsar.zip" no_need_to_download_mitsar_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-mitsar.zip "arch\sdk-mitsar.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_mitsar_dev:
+	ZipDLL::extractall "arch\sdk-mitsar.zip" ""
+	
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section "Device SDK: Micromed"
+
+	; For Micromed driver
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-micromed.zip" no_need_to_download_micromed_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-micromed.zip "arch\sdk-micromed.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_micromed_dev:
+	ZipDLL::extractall "arch\sdk-micromed.zip" ""
+
+SectionEnd
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section "Device SDK: MindMedia NeXus"
+
+	; For NeXus driver
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-nexus.zip" no_need_to_download_nexus_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-nexus.zip "arch\sdk-nexus.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_nexus_dev:
+	ZipDLL::extractall "arch\sdk-nexus.zip" ""	
+
+	
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
 Section "Enobio3G"
 
 	; Neuroelectrics Enobio 3G driver

@@ -27,13 +27,13 @@ ELSEIF(UNIX)
 	CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 	CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 	IF(COMPILER_SUPPORTS_CXX11)
-	    # TODO after release 0.19 next line will be uncommnent
+	    # TODO maybe in future the next line will be uncommented
 	    # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 	ELSEIF(COMPILER_SUPPORTS_CXX0X)
-	    # TODO after release 0.19 next line will be uncommnent
+	    # TODO maybe in future the next line will be uncommented
 	    # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 	ELSE(COMPILER_SUPPORTS_CXX0X)
-		MESSAGE(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. For the release 0.19 and after, the compiler will need to support C++11.")
+		MESSAGE(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. In the future this may be required.")
 	ENDIF(COMPILER_SUPPORTS_CXX11)
 
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
@@ -56,14 +56,22 @@ MESSAGE(STATUS "  CMAKE_CXX_FLAGS = '${CMAKE_CXX_FLAGS}'")
 MESSAGE(STATUS "  CMAKE_CXX_FLAGS_RELEASE = '${CMAKE_CXX_FLAGS_RELEASE}'")
 MESSAGE(STATUS "  CMAKE_CXX_FLAGS_DEBUG = '${CMAKE_CXX_FLAGS_DEBUG}'")
 
-# if no specific branch has been given for an openvibe component, default is to compile its trunk folder
-## SET(OV_TRUNK "trunc")
-
+# if want to compile tests, use the following.
 SET(OV_COMPILE_TESTS "true")
 
+# if you don't want an Ogre dependency, use the following. All 3D visualizations and 3D apps will be unavailable. The result will also compile faster.
+# SET(OV_DISABLE_OGRE "true")
+
 # By setting SKIP[_FOLDER]* you can skip a subtree (example: SKIP_A_B_C skips folder a/b/c and all its subfolders if any)
+
+# Skip building documentation
 SET(SKIP_DOCUMENTATION "1")
+
+# Python plugin sometimes causes problems; use the following to disable it
 #SET(SKIP_CONTRIB_PLUGINS_PROCESSING_PYTHON "1")
+
+# Skipping demos can speed up compilation a lot, if you don't need them
+#SET(SKIP_APPLICATIONS_DEMOS "1")
 
 IF(UNIX)
 	# On Linux, the presence of matlab plugin .so can cause crashes in Simple DSP box as the two may use different versions of boost which are

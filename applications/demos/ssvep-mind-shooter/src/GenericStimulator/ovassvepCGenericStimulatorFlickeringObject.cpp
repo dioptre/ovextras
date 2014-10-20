@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCGenericStimulatorFlickeringObject.h"
 #include "ovassvepCGenericStimulatorApplication.h"
 
@@ -140,3 +143,5 @@ void CGenericStimulatorFlickeringObject::setTarget( bool bIsTarget )
 }
 
 
+
+#endif

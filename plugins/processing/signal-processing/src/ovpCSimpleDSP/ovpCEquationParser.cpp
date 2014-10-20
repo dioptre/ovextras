@@ -88,9 +88,9 @@ CEquationParser::CEquationParser(TBoxAlgorithm<IBoxAlgorithm>& oPlugin, float64*
 
 CEquationParser::~CEquationParser()
 {
-	delete m_pFunctionListBase;
-	delete m_pFunctionContextListBase;
-	delete m_pStack;
+	delete[] m_pFunctionListBase;
+	delete[] m_pFunctionContextListBase;
+	delete[] m_pStack;
 	delete m_pTree;
 }
 

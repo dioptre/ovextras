@@ -166,6 +166,117 @@
 #define OVP_Algorithm_MatrixVariance_OutputTriggerId_AveragePerformed		OpenViBE::CIdentifier(0x2F9ECA0B, 0x8D3CA7BD)
 
 
+// @BEGIN JP
+
+/*
+#define OVP_ClassId_Algorithm_RegressionAnalysis                                       OpenViBE::CIdentifier(0xFBFC00F8, 0x2D962BC0)
+#define OVP_ClassId_Algorithm_RegressionAnalysisDesc                                   OpenViBE::CIdentifier(0x46C3A63E, 0x849E9890)
+
+#define OVP_Algorithm_RegressionAnalysis_InputParameterId_Matrix0                      OpenViBE::CIdentifier(0x97DD0514, 0x5DD4E799)
+#define OVP_Algorithm_RegressionAnalysis_InputParameterId_Matrix1                      OpenViBE::CIdentifier(0xBA8FFD91, 0x99B00152)
+#define OVP_Algorithm_RegressionAnalysis_OutputParameterId_Matrix                      OpenViBE::CIdentifier(0x14EE5B8F, 0xE9A7C9DD)
+#define OVP_Algorithm_RegressionAnalysis_InputTriggerId_Initialize                     OpenViBE::CIdentifier(0x9D9615C1, 0xDDD91FAF)
+#define OVP_Algorithm_RegressionAnalysis_InputTriggerId_Process                        OpenViBE::CIdentifier(0xEB8827CE, 0xD5FFE7E6)
+#define OVP_Algorithm_RegressionAnalysis_OutputTriggerId_ProcessDone                   OpenViBE::CIdentifier(0x260CA56C, 0x66B98B64)
+#define OVP_Algorithm_RegressionAnalysis_InputParameterFilename                        OpenViBE::CIdentifier(0xA6CE7CD8, 0xB2788B53)
+*/
+
+
+#define OVP_ClassId_BoxAlgorithm_EOG_Denoising_Calibration                             OpenViBE::CIdentifier(0xE8DFE002, 0x70389932)
+#define OVP_ClassId_BoxAlgorithm_EOG_Denoising_CalibrationDesc                         OpenViBE::CIdentifier(0xF4D74831, 0x88B80DCF)
+
+/*
+#define OVP_ClassId_Algorithm_RegressionAnalysisCalibration                            OpenViBE::CIdentifier(0x2AB3E6DC, 0x1DC3E29D)
+#define OVP_ClassId_Algorithm_RegressionAnalysisCalibrationDesc                        OpenViBE::CIdentifier(0x1F1C316C, 0xAF7E5BDC)
+
+#define OVP_Algorithm_RegressionAnalysisCalibration_InputParameterId_Matrix0           OpenViBE::CIdentifier(0x6D68A402, 0x27B4F10E)
+#define OVP_Algorithm_RegressionAnalysisCalibration_InputParameterId_Matrix1           OpenViBE::CIdentifier(0xF0B8ABE9, 0x3D2DE4DF)
+#define OVP_Algorithm_RegressionAnalysisCalibration_InputTriggerId_Initialize          OpenViBE::CIdentifier(0xECE6CADD, 0x128912F7)
+#define OVP_Algorithm_RegressionAnalysisCalibration_InputTriggerId_Process             OpenViBE::CIdentifier(0xB7E93840, 0x13A8CCE1)
+#define OVP_Algorithm_RegressionAnalysisCalibration_OutputTriggerId_ProcessDone        OpenViBE::CIdentifier(0x3CC023B2, 0xFEC907D2)
+*/
+
+
+
+
+
+/*
+#define OVP_ClassId_Algorithm_MatrixMaximum                     OpenViBE::CIdentifier(0x3B7723EC, 0x16C30A39)
+#define OVP_ClassId_Algorithm_MatrixMaximumDesc                 OpenViBE::CIdentifier(0x11BE2168, 0x5B444BBB)
+#define OVP_Algorithm_MatrixMaximum_InputParameterId_Matrix     OpenViBE::CIdentifier(0x56254223, 0x42180588)
+#define OVP_Algorithm_MatrixMaximum_OutputParameterId_Matrix    OpenViBE::CIdentifier(0x025A4450, 0x6DFD17DB)
+#define OVP_Algorithm_MatrixMaximum_InputTriggerId_Initialize   OpenViBE::CIdentifier(0x41803B07, 0x667A69BC)
+#define OVP_Algorithm_MatrixMaximum_InputTriggerId_Process      OpenViBE::CIdentifier(0x641A59C0, 0x12FB7F74)
+#define OVP_Algorithm_MatrixMaximum_OutputTriggerId_ProcessDone OpenViBE::CIdentifier(0x37802521, 0x785D51FD)
+*/
+
+#define OVP_ClassId_BoxAlgorithm_Inverse_DWT                        OpenViBE::CIdentifier(0x5B5B8468, 0x212CF963)
+#define OVP_ClassId_BoxAlgorithm_Inverse_DWTDesc                    OpenViBE::CIdentifier(0x01B9BC9A, 0x34766AE9)
+
+#define OVP_ClassId_BoxAlgorithm_DiscreteWaveletTransform           OpenViBE::CIdentifier(0x824194C5, 0x46D7FDE9)
+#define OVP_ClassId_BoxAlgorithm_DiscreteWaveletTransformDesc       OpenViBE::CIdentifier(0x6744711B, 0xF21B59EC)
+#define OVP_TypeId_WaveletType                                      OpenViBE::CIdentifier(0x393EAC3E, 0x793C0F1D)
+#define OVP_TypeId_WaveletType_Haar                                 OpenViBE::CIdentifier(0xECEBCD83, 0x55F416B2)
+#define OVP_TypeId_WaveletType_db1                                  OpenViBE::CIdentifier(0x2B47E7A4, 0x684A7356)
+#define OVP_TypeId_WaveletType_db2                                  OpenViBE::CIdentifier(0x876B44BD, 0xC0F101AC)
+#define OVP_TypeId_WaveletType_db3                                  OpenViBE::CIdentifier(0x1660F693, 0x7D3A84EE)
+#define OVP_TypeId_WaveletType_db4                                  OpenViBE::CIdentifier(0x8C7586D0, 0x03D2EAD3)
+#define OVP_TypeId_WaveletType_db5                                  OpenViBE::CIdentifier(0xD7C497DB, 0x86C9C4B0)
+#define OVP_TypeId_WaveletType_db6                                  OpenViBE::CIdentifier(0x655EDCBD, 0xDB629E9C)
+#define OVP_TypeId_WaveletType_db7                                  OpenViBE::CIdentifier(0x88FB549E, 0xADBAF914)
+#define OVP_TypeId_WaveletType_db8                                  OpenViBE::CIdentifier(0x768486EF, 0xDC41A1CB)
+#define OVP_TypeId_WaveletType_db9                                  OpenViBE::CIdentifier(0x6E93448B, 0x1522F5FE)
+#define OVP_TypeId_WaveletType_db10                                 OpenViBE::CIdentifier(0x8948D613, 0xF7AA9FA8)
+#define OVP_TypeId_WaveletType_db11                                 OpenViBE::CIdentifier(0xCCA674E4, 0x2496591B)
+#define OVP_TypeId_WaveletType_db12                                 OpenViBE::CIdentifier(0xAAB48F2E, 0x732CAE6C)
+#define OVP_TypeId_WaveletType_db13                                 OpenViBE::CIdentifier(0xF532049B, 0x6FE27D70)
+#define OVP_TypeId_WaveletType_db14                                 OpenViBE::CIdentifier(0x6D62C0F3, 0xF4BA32C9)
+#define OVP_TypeId_WaveletType_db15                                 OpenViBE::CIdentifier(0xF40DB692, 0xCD6E80A4)
+#define OVP_TypeId_WaveletType_bior11                               OpenViBE::CIdentifier(0xF89E2927, 0x120E240C)
+#define OVP_TypeId_WaveletType_bior13                               OpenViBE::CIdentifier(0x01DC3924, 0x919CE5D5)
+#define OVP_TypeId_WaveletType_bior15                               OpenViBE::CIdentifier(0x318E5D28, 0xD189E902)
+#define OVP_TypeId_WaveletType_bior22                               OpenViBE::CIdentifier(0xB1B67B9B, 0x212F5C6A)
+#define OVP_TypeId_WaveletType_bior24                               OpenViBE::CIdentifier(0x0AC9945B, 0x0AD7FFFC)
+#define OVP_TypeId_WaveletType_bior26                               OpenViBE::CIdentifier(0x98F77AB9, 0x7D6C0659)
+#define OVP_TypeId_WaveletType_bior28                               OpenViBE::CIdentifier(0x3BAD7227, 0x39222FBA)
+#define OVP_TypeId_WaveletType_bior31                               OpenViBE::CIdentifier(0x28B90690, 0xB05F2157)
+#define OVP_TypeId_WaveletType_bior33                               OpenViBE::CIdentifier(0x2FB7C26D, 0x45633194)
+#define OVP_TypeId_WaveletType_bior35                               OpenViBE::CIdentifier(0xFB91D6FF, 0x17692D1F)
+#define OVP_TypeId_WaveletType_bior37                               OpenViBE::CIdentifier(0x3427E8F2, 0x1622E5DD)
+#define OVP_TypeId_WaveletType_bior39                               OpenViBE::CIdentifier(0x648D3751, 0x42486F57)
+#define OVP_TypeId_WaveletType_bior44                               OpenViBE::CIdentifier(0x649EAB0A, 0xCAEF44DB)
+#define OVP_TypeId_WaveletType_bior55                               OpenViBE::CIdentifier(0x3F04FF6B, 0x87201FE0)
+#define OVP_TypeId_WaveletType_bior68                               OpenViBE::CIdentifier(0xEFB334E8, 0x6F4AD8AC)
+#define OVP_TypeId_WaveletType_coif1                                OpenViBE::CIdentifier(0x435DEE7C, 0x1985545B)
+#define OVP_TypeId_WaveletType_coif2                                OpenViBE::CIdentifier(0xD80C8600, 0x28A4D449)
+#define OVP_TypeId_WaveletType_coif3                                OpenViBE::CIdentifier(0x2CADE482, 0xF1FDB654)
+#define OVP_TypeId_WaveletType_coif4                                OpenViBE::CIdentifier(0x98D74D5A, 0x1CBD4241)
+#define OVP_TypeId_WaveletType_coif5                                OpenViBE::CIdentifier(0x8E04A881, 0xCA14F2A3)
+#define OVP_TypeId_WaveletType_sym1                                 OpenViBE::CIdentifier(0x538B9504, 0x377E928F)
+#define OVP_TypeId_WaveletType_sym2                                 OpenViBE::CIdentifier(0x946FBE9E, 0xB26F8423)
+#define OVP_TypeId_WaveletType_sym3                                 OpenViBE::CIdentifier(0xF38621BA, 0x5CCF36E4)
+#define OVP_TypeId_WaveletType_sym4                                 OpenViBE::CIdentifier(0x10367654, 0x8B3FE842)
+#define OVP_TypeId_WaveletType_sym5                                 OpenViBE::CIdentifier(0xFC55B3E3, 0xBC8C2902)
+#define OVP_TypeId_WaveletType_sym6                                 OpenViBE::CIdentifier(0x9865AE89, 0xDF57313C)
+#define OVP_TypeId_WaveletType_sym7                                 OpenViBE::CIdentifier(0xFBE4FC14, 0x737D89E8)
+#define OVP_TypeId_WaveletType_sym8                                 OpenViBE::CIdentifier(0x2CEC3288, 0x6DFA03C4)
+#define OVP_TypeId_WaveletType_sym9                                 OpenViBE::CIdentifier(0x90B6508F, 0xEA8D26EF)
+#define OVP_TypeId_WaveletType_sym10                                OpenViBE::CIdentifier(0x40FA4136, 0x9928BED0)
+
+#define OVP_TypeId_WaveletLevel                                     OpenViBE::CIdentifier(0xF80A2144, 0x6E692C51)
+#define OVP_TypeId_WaveletLevel_1                                   OpenViBE::CIdentifier(0x250F2D72, 0x2D46B76E)
+#define OVP_TypeId_WaveletLevel_2                                   OpenViBE::CIdentifier(0x070FCB6A, 0x8ECBA520)
+#define OVP_TypeId_WaveletLevel_3                                   OpenViBE::CIdentifier(0xDAADEACA, 0x5D55FF60)
+#define OVP_TypeId_WaveletLevel_4                                   OpenViBE::CIdentifier(0x3447C01C, 0x0B0467FD)
+#define OVP_TypeId_WaveletLevel_5                                   OpenViBE::CIdentifier(0x36278DFC, 0xDDBC678C)
+
+
+
+// @END JP
+
+
+
+
 //___________________________________________________________________//
 //                                                                   //
 // Global defines                                                   //
