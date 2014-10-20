@@ -1,5 +1,7 @@
 #include "ovpCBoxAlgorithmClock.h"
 
+#include <openvibe/ovITimeArithmetics.h>
+
 #include <cstdio>
 #include <cstdlib>
 
@@ -8,7 +10,7 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Samples;
+using namespace OpenViBEPlugins::Examples;
 
 uint64 CBoxAlgorithmClock::getClockFrequency(void)
 {

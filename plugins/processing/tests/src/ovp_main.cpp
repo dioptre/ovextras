@@ -14,6 +14,6 @@ OVP_Declare_Begin();
 
 	// OVP_Declare_New(OpenViBEPlugins::Samples::CCrashingBoxDesc);	
 
-	OVP_Declare_New(OpenViBEPlugins::Samples::CTestCodecToolkitDesc);
+	OVP_Declare_New(OpenViBEPlugins::Tests::CTestCodecToolkitDesc);
 
 OVP_Declare_End();

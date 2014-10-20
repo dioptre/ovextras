@@ -18,8 +18,8 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::Examples::CBoxAlgorithmMessageSenderDesc);
     OVP_Declare_New(OpenViBEPlugins::Examples::CBoxAlgorithmMessageReceiverDesc);
 
-	// OVP_Declare_New(OpenViBEPlugins::Samples::CLogDesc);
-	// OVP_Declare_New(OpenViBEPlugins::Samples::CBoxAlgorithmNothingDesc);
-	// OVP_Declare_New(OpenViBEPlugins::Samples::CBoxAlgorithmClockDesc);
+	OVP_Declare_New(OpenViBEPlugins::Examples::CLogDesc);
+	OVP_Declare_New(OpenViBEPlugins::Examples::CBoxAlgorithmNothingDesc);
+	OVP_Declare_New(OpenViBEPlugins::Examples::CBoxAlgorithmClockDesc);
 
 OVP_Declare_End();

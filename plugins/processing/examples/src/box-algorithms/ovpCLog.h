@@ -28,7 +28,7 @@ namespace OpenViBEPlugins
 		{
 		public:
 
-			CLogListener(void) : m_eLogLevel(OpenViBE::Kernel::LogLevel_Trace) {}
+			CLogListener(void) : m_eLogLevel(OpenViBE::Kernel::LogLevel_Info) {}
 			virtual OpenViBE::boolean initialize(void)                                                                                  { this->getLogManager() << m_eLogLevel << "initialize\n";                        return true; };
 			virtual OpenViBE::boolean uninitialize(void)                                                                                { this->getLogManager() << m_eLogLevel << "uninitialize\n";                      return true; };
 			virtual OpenViBE::boolean onInitialized(OpenViBE::Kernel::IBox& rBox)                                                       { this->getLogManager() << m_eLogLevel << "onInitialized\n";                     return true; };
@@ -71,8 +71,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Logs stuffs (init, uninit, input, clock, process)"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This sample box shows how stuffs could be logged in the log manager"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tests and examples"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This sample box shows how stuffs could be logged in the log manager. Note that the different inputs, outputs and parameters have no effect, they only exist to test the logging when there are modifications."); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Examples/Basic"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Log; }
@@ -82,13 +82,14 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				// Adds box inputs
-				rPrototype.addInput("Input stream", OV_UndefinedIdentifier);
+				rPrototype.addInput("Input stream", OV_TypeId_Signal);
 
 				// Adds box outputs
+				rPrototype.addOutput("Output stream", OV_TypeId_Signal);
 
 				// Adds box settings
-				rPrototype.addSetting("Enumeration", OpenViBE::CIdentifier(0x1234, 0x0000), "");
-				rPrototype.addSetting("Bit mask", OpenViBE::CIdentifier(0x0000, 0x5678), "");
+				rPrototype.addSetting("Integer setting", OV_TypeId_Integer, "0");
+				rPrototype.addSetting("String setting", OV_TypeId_String, "");
 
 				rPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddInput);
 				rPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);

@@ -9,7 +9,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Samples
+	namespace DataGeneration
 	{
 		class CSinusSignalGenerator : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
@@ -34,7 +34,7 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			EBML::TWriterCallbackProxy1<OpenViBEPlugins::Samples::CSinusSignalGenerator> m_oSignalOutputWriterCallbackProxy;
+			EBML::TWriterCallbackProxy1<OpenViBEPlugins::DataGeneration::CSinusSignalGenerator> m_oSignalOutputWriterCallbackProxy;
 			OpenViBEToolkit::IBoxAlgorithmSignalOutputWriter* m_pSignalOutputWriterHelper;
 			EBML::IWriter* m_pSignalOutputWriter;
 
@@ -60,7 +60,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_SinusSignalGenerator; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CSinusSignalGenerator(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::DataGeneration::CSinusSignalGenerator(); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-execute"); }
 
 			virtual OpenViBE::boolean getBoxPrototype(

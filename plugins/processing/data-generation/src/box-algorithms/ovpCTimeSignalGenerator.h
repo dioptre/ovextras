@@ -9,7 +9,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Samples
+	namespace DataGeneration
 	{
 		class CTimeSignalGenerator : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
@@ -35,7 +35,7 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			EBML::TWriterCallbackProxy1<OpenViBEPlugins::Samples::CTimeSignalGenerator> m_oSignalOutputWriterCallbackProxy;
+			EBML::TWriterCallbackProxy1<OpenViBEPlugins::DataGeneration::CTimeSignalGenerator> m_oSignalOutputWriterCallbackProxy;
 			OpenViBEToolkit::IBoxAlgorithmSignalOutputWriter* m_pSignalOutputWriterHelper;
 			EBML::IWriter* m_pSignalOutputWriter;
 
@@ -60,7 +60,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_TimeSignalGenerator; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CTimeSignalGenerator(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::DataGeneration::CTimeSignalGenerator(); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-execute"); }
 
 			virtual OpenViBE::boolean getBoxPrototype(
