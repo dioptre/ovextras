@@ -1664,6 +1664,8 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 		m_bScenarioModified = true;
 
 		this->snapshotCB();
+		//We need to grab the focus to enable shortcuts like F1
+		gtk_widget_grab_focus(GTK_WIDGET(m_pScenarioDrawingArea));
 	}
 	else
 	{
@@ -2274,7 +2276,6 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidget, ::GdkEventButton* pEvent)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaButtonReleasedCB\n";
-
 	if(this->isLocked()) return;
 
 	if(pEvent->button == 3)
