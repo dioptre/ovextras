@@ -7,6 +7,9 @@
 //___________________________________________________________________//
 //                                                                   //
 
+#define OVP_ClassId_Identity                                                           OpenViBE::CIdentifier(0x5DFFE431, 0x35215C50)
+#define OVP_ClassId_IdentityDesc                                                       OpenViBE::CIdentifier(0x54743810, 0x6A1A88CC)
+
 #define OVP_ClassId_TimeBasedEpoching                                                  OpenViBE::CIdentifier(0x00777FA0, 0x5DC3F560)
 #define OVP_ClassId_TimeBasedEpochingDesc                                              OpenViBE::CIdentifier(0x00ABDABE, 0x41381683)
 
@@ -110,9 +113,6 @@
 #define OVP_ClassId_SimpleDSPDesc                                                      OpenViBE::CIdentifier(0x00C44BFE, 0x76C9269E)
 #define OVP_ClassId_SignalAverageDesc                                                  OpenViBE::CIdentifier(0x007CDCE9, 0x16034F77)
 #define OVP_ClassId_SignalConcatenationDesc                                            OpenViBE::CIdentifier(0x3921BACD, 0x1E9546FE)
-#define OVP_ClassId_FirstDifferenceDetrendingDesc                                      OpenViBE::CIdentifier(0x0039EF62, 0x11DA5967)
-#define OVP_ClassId_SecondDifferenceDetrendingDesc                                     OpenViBE::CIdentifier(0x000B30B6, 0x29E85D42)
-#define OVP_ClassId_OverlappingEpochAverageDesc                                        OpenViBE::CIdentifier(0x000C8040, 0x7A4F177E)
 #define OVP_ClassId_BoxAlgorithm_QuadraticFormDesc                                     OpenViBE::CIdentifier(0x31C11856, 0x3E4F7B67)
 //___________________________________________________________________//
 //                                                                   //
@@ -125,9 +125,6 @@
 #define OVP_ClassId_SimpleDSP                                                          OpenViBE::CIdentifier(0x00E26FA1, 0x1DBAB1B2)
 #define OVP_ClassId_SignalAverage                                                      OpenViBE::CIdentifier(0x00642C4D, 0x5DF7E50A)
 #define OVP_ClassId_SignalConcatenation                                                OpenViBE::CIdentifier(0x6568D29B, 0x0D753CCA)
-#define OVP_ClassId_FirstDifferenceDetrending                                          OpenViBE::CIdentifier(0x001B4E3D, 0x7FEE9CB1)
-#define OVP_ClassId_SecondDifferenceDetrending                                         OpenViBE::CIdentifier(0x00D283A5, 0x40D76DD3)
-#define OVP_ClassId_OverlappingEpochAverage                                            OpenViBE::CIdentifier(0x0042232E, 0x6F5B5E21)
 #define OVP_ClassId_BoxAlgorithm_QuadraticForm                                         OpenViBE::CIdentifier(0x54E73B81, 0x1AD356C6)
 
 /*/Dieter p300 stuff
@@ -150,6 +147,7 @@
 #define OVP_ClassId_BoxAlgorithm_MultipleSpatialFilters	 	OpenViBE::CIdentifier(0x04C1466C, 0xFC89B739)
 #define OVP_ClassId_BoxAlgorithm_MultipleSpatialFiltersDesc	OpenViBE::CIdentifier(0xB1A96C51, 0xD75136A6)
 //*///End of Dieter's stuff
+
 #define OVP_ClassId_BoxAlgorithm_EpochVariance                  OpenViBE::CIdentifier(0x335384EA, 0x88C917D9)
 #define OVP_ClassId_BoxAlgorithm_EpochVarianceDesc              OpenViBE::CIdentifier(0xA15EAEC5, 0xAB0CE73D)
 #define OVP_ClassId_Algorithm_MatrixVarianceDesc 		OpenViBE::CIdentifier(0xE405260B, 0x59EEFAE4)

@@ -1,4 +1,4 @@
-PROJECT(openvibe-plugins-contrib-classification)
+PROJECT(openvibe-plugins-data-generation)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})
 SET(PROJECT_VERSION_MINOR ${OV_GLOBAL_VERSION_MINOR})
@@ -14,11 +14,10 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
-# INCLUDE("FindOpenViBEToolkit")
-# INCLUDE("FindOpenViBEModuleEBML")
-# INCLUDE("FindOpenViBEModuleSystem")
-# INCLUDE("FindThirdPartyITPP")
-# INCLUDE("FindOpenViBEModuleXML")#for gragient descent lda
+INCLUDE("FindOpenViBEToolkit")
+INCLUDE("FindOpenViBEModuleEBML")
+INCLUDE("FindOpenViBEModuleSystem")
+INCLUDE("FindOpenViBEModuleXML")
 
 # ---------------------------------
 # Target macros

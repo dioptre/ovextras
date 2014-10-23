@@ -7,11 +7,6 @@
 #define OVP_ClassId_MouseControlDesc                                                   OpenViBE::CIdentifier(0xB6B65C98, 0xA756ED0E)
 // @END inserm
 
-// @BEGIN multiple authors
-#define OVP_ClassId_BoxAlgorithm_SoundPlayer                  OpenViBE::CIdentifier(0x18D06E9F, 0x68D43C23)
-#define OVP_ClassId_BoxAlgorithm_SoundPlayerDesc              OpenViBE::CIdentifier(0x246E5EC4, 0x127D21AA)
-// @END multiple authors
-
 //___________________________________________________________________//
 //                                                                   //
 // Global defines                                                   //
