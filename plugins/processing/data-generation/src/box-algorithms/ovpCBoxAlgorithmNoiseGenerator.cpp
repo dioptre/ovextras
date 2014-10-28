@@ -75,6 +75,12 @@ boolean CNoiseGenerator::initialize(void)
 	l_rSampleMatrix.setDimensionCount(2);
 	l_rSampleMatrix.setDimensionSize(0,(uint32)m_ui64ChannelCount);
 	l_rSampleMatrix.setDimensionSize(1,(uint32)m_ui64GeneratedEpochSampleCount);
+	for(uint64 i=0;i<m_ui64ChannelCount;i++)
+	{
+		char l_sBuffer[64];
+		sprintf(l_sBuffer, "Noise %d", i);
+		l_rSampleMatrix.setDimensionLabel(0, static_cast<uint32>(i), l_sBuffer);
+	}
 
 	return true;
 }

@@ -110,7 +110,7 @@ boolean CSinusSignalGenerator::process(void)
 		for(i=0; i<m_ui32ChannelCount; i++)
 		{
 			char l_sChannelName[1024];
-			sprintf(l_sChannelName, "Channel %i", (int)i);
+			sprintf(l_sChannelName, "sinusOsc %i", (int)i);
 			m_pSignalOutputWriterHelper->setChannelName(i, l_sChannelName);
 		}
 		m_pSignalOutputWriterHelper->writeHeader(*m_pSignalOutputWriter);

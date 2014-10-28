@@ -96,25 +96,19 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 	m_pStreamDecoder=NULL;
 	m_pStreamEncoder=NULL;
 
-	boolean l_bValid=false;
 	CIdentifier l_oIdentifier;
 	l_rStaticBoxContext.getInputType(0, l_oIdentifier);
 
 	if(l_oIdentifier==OV_TypeId_StreamedMatrix)
 	{
-		l_bValid=true;
-
 		m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamDecoder));
 		m_pStreamEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamEncoder));
 
 		m_pStreamDecoder->initialize();
 		m_pStreamEncoder->initialize();
 	}
-
-	if(l_oIdentifier==OV_TypeId_Signal)
+	else if(l_oIdentifier==OV_TypeId_Signal)
 	{
-		l_bValid=true;
-
 		m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
 		m_pStreamEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoder));
 
@@ -124,12 +118,9 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 		TParameterHandler < uint64 > op_pSamplingFrequency(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
 		TParameterHandler < uint64 > ip_pSamplingFrequency(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_SamplingRate));
 		ip_pSamplingFrequency.setReferenceTarget(op_pSamplingFrequency);
-	}
-
-	if(l_oIdentifier==OV_TypeId_Spectrum)
+	} 
+	else if(l_oIdentifier==OV_TypeId_Spectrum)
 	{
-		l_bValid=true;
-
 		m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SpectrumStreamDecoder));
 		m_pStreamEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SpectrumStreamEncoder));
 
@@ -139,9 +130,8 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 		TParameterHandler < IMatrix* > op_pBandMatrix(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_MinMaxFrequencyBands));
 		TParameterHandler < IMatrix* > ip_pBandMatrix(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_MinMaxFrequencyBands));
 		ip_pBandMatrix.setReferenceTarget(op_pBandMatrix);
-	}
-
-	if(!l_bValid)
+	} 
+	else
 	{
 		this->getLogManager() << LogLevel_Error << "Unhandled input stream type " << l_oIdentifier << "\n";
 		return false;
@@ -221,6 +211,14 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 			ip_pMatrix->setDimensionCount(2);
 			ip_pMatrix->setDimensionSize(0, l_ui32OutputChannelCount);
 			ip_pMatrix->setDimensionSize(1, op_pMatrix->getDimensionSize(1));
+
+			// Name channels
+			for(uint64 i=0;i<ip_pMatrix->getDimensionSize(0);i++)
+			{
+				char l_sBuffer[64];
+				sprintf(l_sBuffer, "sFiltered %d", i);
+				ip_pMatrix->setDimensionLabel(0, static_cast<uint32>(i), l_sBuffer);
+			}
 
 			m_pStreamEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
 		}
