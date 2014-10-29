@@ -256,8 +256,11 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section "presage"
+Section /o "presage"
 
+; todo skip presage properly on vs2008
+StrCmp $suffix "vs100" 0 nopresage
+	
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
 
@@ -274,8 +277,15 @@ no_need_to_download_presage:
 	FileSeek $0 0 END
 	FileWrite $0 "SET PATH=$INSTDIR\presage\lib;%PATH%$\r$\n"
 	FileClose $0	
+	goto presagepassed
+	
+nopresage:
+	MessageBox MB_OK "Note: Presage not available for VS2008" /SD IDOK
 
+presagepassed:	
+	
 SectionEnd
+
 
 ;
 ##########################################################################################################################################################
@@ -461,14 +471,14 @@ Section "Lua"
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
 
-	IfFileExists "arch\lua-5.1.4-30.zip" no_need_to_download_lua
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/lua-5.1.4-30.zip "arch\lua-5.1.4-30.zip"
+	IfFileExists "arch\lua-5.1.4-$suffix.zip" no_need_to_download_lua
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/lua-5.1.4-$suffix.zip "arch\lua-5.1.4-$suffix.zip"
 	Pop $R0 ; Get the return value
 		StrCmp $R0 "success" +3
 			MessageBox MB_OK "Download failed: $R0" /SD IDOK
 			Quit
 no_need_to_download_lua:
-	ZipDLL::extractall "arch\lua-5.1.4-30.zip" "lua"
+	ZipDLL::extractall "arch\lua-5.1.4-$suffix.zip" ""
 
 	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
 	FileSeek $0 0 END
@@ -802,7 +812,7 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section "Device SDK: Mitsar"
+Section /o "Device SDK: Mitsar"
 
 	; For mitsar driver
 	
@@ -824,7 +834,7 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section "Device SDK: Micromed"
+Section /o "Device SDK: Micromed"
 
 	; For Micromed driver
 	SetOutPath "$INSTDIR"
@@ -844,7 +854,7 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section "Device SDK: MindMedia NeXus"
+Section /o "Device SDK: MindMedia NeXus"
 
 	; For NeXus driver
 	SetOutPath "$INSTDIR"
@@ -867,7 +877,7 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section "Enobio3G"
+Section /o "Enobio3G"
 
 	; Neuroelectrics Enobio 3G driver
 	
