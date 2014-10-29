@@ -95,8 +95,6 @@ Section "-OpenViBE"
 no_need_to_install_directx:
 
 	SetOutPath "$INSTDIR\dependencies\arch"
-	File ..\dependencies\arch\openvibe-vcredist-2005-sp1.exe
-	File ..\dependencies\arch\openvibe-vcredist-2008-sp1.exe
 	File ..\dependencies\arch\openvibe-vcredist-2010.exe
 	File ..\dependencies\arch\lua-5.1.4-vs100.zip
 	File ..\dependencies\arch\expat-2.0.1.zip
@@ -118,8 +116,6 @@ no_need_to_install_directx:
 	File ..\dependencies\arch\enobio3g-1.2.1-vs100-runtime.zip	
 	
 	SetOutPath "$INSTDIR\dependencies"
-	ExecWait '"arch\openvibe-vcredist-2005-sp1.exe" /q'
-	ExecWait '"arch\openvibe-vcredist-2008-sp1.exe" /q'
 	ExecWait '"arch\openvibe-vcredist-2010.exe" /q'
 
 	SetOutPath "$INSTDIR\dependencies"

@@ -123,26 +123,6 @@ Section "Visual Redistributable Packages"
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
 
-	IfFileExists "arch\openvibe-vcredist-2005-sp1.exe" no_need_to_download_vcredist_2005_sp1
-	NSISdl::download "http://download.microsoft.com/download/a/3/7/a379292d-24f2-4bbb-841b-c2aeb1100471/vcredist_x86.exe" "arch\openvibe-vcredist-2005-sp1.exe"
-	Pop $R0 ; Get the return value
-		StrCmp $R0 "success" +3
-			MessageBox MB_OK "Download failed: $R0" /SD IDOK
-			Quit
-no_need_to_download_vcredist_2005_sp1:
-	ExecWait '"arch\openvibe-vcredist-2005-sp1.exe" /q'
-;no_need_to_install_vcredist_2005_sp1:
-
-	IfFileExists "arch\openvibe-vcredist-2008-sp1.exe" no_need_to_download_vcredist_2008_sp1
-	NSISdl::download "http://download.microsoft.com/download/9/e/d/9edd8390-011b-4c6d-9806-d8dc2b10c0fb/vcredist_x86.exe" "arch\openvibe-vcredist-2008-sp1.exe"
-	Pop $R0 ; Get the return value
-		StrCmp $R0 "success" +3
-			MessageBox MB_OK "Download failed: $R0" /SD IDOK
-			Quit
-no_need_to_download_vcredist_2008_sp1:
-	ExecWait '"arch\openvibe-vcredist-2008-sp1.exe" /q'
-;no_need_to_install_vcredist_2008_sp1:
-
 	IfFileExists "arch\openvibe-vcredist-2010.exe" no_need_to_download_vcredist_2010
 	NSISdl::download "http://download.microsoft.com/download/5/B/C/5BC5DBB3-652D-4DCE-B14A-475AB85EEF6E/vcredist_x86.exe" "arch\openvibe-vcredist-2010.exe"
 	Pop $R0 ; Get the return value
