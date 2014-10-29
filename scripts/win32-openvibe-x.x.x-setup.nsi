@@ -107,7 +107,7 @@ no_need_to_install_directx:
 	File ..\dependencies\arch\itpp-4.0.7-runtime.zip
 	File ..\dependencies\arch\ogre-1.7.1-vs100-runtime.zip
 	File ..\dependencies\arch\cegui-0.7.2-vs100-runtime.zip
-	File ..\dependencies\arch\vrpn-7.26-runtime.zip
+	File ..\dependencies\arch\vrpn-7.31-vs100-runtime.zip
 	File ..\dependencies\arch\pthreads-2.8.0-runtime.zip
 	File ..\dependencies\arch\presage-0.8.9-vs100.zip		
 	File ..\dependencies\arch\openal-1.1-runtime.zip
@@ -132,7 +132,7 @@ no_need_to_install_directx:
 	ZipDLL::extractall "arch\itpp-4.0.7-runtime.zip" "itpp"
 	ZipDLL::extractall "arch\ogre-1.7.1-vs100-runtime.zip" "ogre"
 	ZipDLL::extractall "arch\cegui-0.7.2-vs100-runtime.zip" "cegui"
-	ZipDLL::extractall "arch\vrpn-7.26-runtime.zip" "vrpn"
+	ZipDLL::extractall "arch\vrpn-7.31-vs100-runtime.zip" ""
 	ZipDLL::extractall "arch\pthreads-2.8.0-runtime.zip" "pthreads"
 	ZipDLL::extractall "arch\presage-0.8.9-vs100.zip" ""
 	ZipDLL::extractall "arch\openal-1.1-runtime.zip" "openal"
