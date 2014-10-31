@@ -575,6 +575,12 @@ boolean CGDFFileReader::readFileHeader()
 
 void CGDFFileReader::writeExperimentInformation()
 {
+	// Here we have to declare some variables in the same scope as the encoding call, because otherwise they might be freed before the 
+	// encoder gets to process the data. The point of these is just to convert from std::string to CString as needed by the encoder.
+	CString l_sdate(m_pExperimentInfoHeader->m_sExperimentDate.c_str());
+	CString l_sName(m_pExperimentInfoHeader->m_sSubjectName.c_str());
+	CString l_sLabName(m_pExperimentInfoHeader->m_sLaboratoryName.c_str());
+	CString l_sTechName(m_pExperimentInfoHeader->m_sTechnicianName.c_str());
 
 	if(m_pExperimentInfoHeader->m_ui64ExperimentId != _NoValueI_)
 	{
@@ -584,8 +590,7 @@ void CGDFFileReader::writeExperimentInformation()
 
 	if(m_pExperimentInfoHeader->m_sExperimentDate != _NoValueS_)
 	{
-		CString  sdate(m_pExperimentInfoHeader->m_sExperimentDate.c_str());
-		m_pExperimentInformationEncoder->getInputExperimentDate() = &sdate;
+		m_pExperimentInformationEncoder->getInputExperimentDate() = &l_sdate;
 		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_ExperimentDate, m_pExperimentInfoHeader->m_sExperimentDate.c_str());
 	}
 
@@ -597,8 +602,7 @@ void CGDFFileReader::writeExperimentInformation()
 
 	if(m_pExperimentInfoHeader->m_sSubjectName != _NoValueS_)
 	{
-		CString sName(m_pExperimentInfoHeader->m_sSubjectName.c_str());
-		m_pExperimentInformationEncoder->getInputSubjectName() = &sName;
+		m_pExperimentInformationEncoder->getInputSubjectName() = &l_sName;
 		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_SubjectName, m_pExperimentInfoHeader->m_sSubjectName.c_str());
 	}
 
@@ -622,8 +626,7 @@ void CGDFFileReader::writeExperimentInformation()
 
 	if(m_pExperimentInfoHeader->m_sLaboratoryName != _NoValueS_)
 	{
-		CString sLabName(m_pExperimentInfoHeader->m_sLaboratoryName.c_str());
-		m_pExperimentInformationEncoder->getInputLaboratoryName() = &sLabName;
+		m_pExperimentInformationEncoder->getInputLaboratoryName() = &l_sLabName;
 		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_LaboratoryName, m_pExperimentInfoHeader->m_sLaboratoryName.c_str());
 	}
 
@@ -635,8 +638,7 @@ void CGDFFileReader::writeExperimentInformation()
 
 	if(m_pExperimentInfoHeader->m_sTechnicianName != _NoValueS_)
 	{
-		CString sTechName(m_pExperimentInfoHeader->m_sTechnicianName.c_str());
-		m_pExperimentInformationEncoder->getInputTechnicianName() = &sTechName;
+		m_pExperimentInformationEncoder->getInputTechnicianName() = &l_sTechName;
 		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_TechnicianName, m_pExperimentInfoHeader->m_sTechnicianName.c_str());
 	}
 
