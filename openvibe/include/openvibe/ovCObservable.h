@@ -4,8 +4,6 @@
 #include "ovIObserver.h"
 #include "ov_base.h"
 
-#include <vector>
-
 namespace OpenViBE
 {
 	class IObserver;
@@ -14,6 +12,7 @@ namespace OpenViBE
 	{
 	public:
 		CObservable(void);
+		virtual ~CObservable(void);
 
 		virtual void addObserver(IObserver *o);
 		virtual void deleteObserver(IObserver *o);
@@ -26,7 +25,8 @@ namespace OpenViBE
 		virtual void notifyObservers(void* data = NULL);
 
 	private:
-		std::vector<IObserver *> m_vObservers;
+		struct ObserverList;
+		ObserverList* m_pObserverList;
 		OpenViBE::boolean m_bHasChanged;
 	};
 }
