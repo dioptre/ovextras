@@ -8,7 +8,7 @@ namespace OpenViBE
 {
 	class IObserver;
 
-	class CObservable
+	class OV_API CObservable
 	{
 	public:
 		CObservable(void);

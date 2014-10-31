@@ -127,7 +127,7 @@ public:
 		const char *buf = signalBuffer.data();
 		const double* signalData = reinterpret_cast<const double*>(buf);
 
-		// Use this to fill your data matrix with the signal...Bordel
+		// Use this to fill your data matrix with the signal...
 		(void)signalData; 
 
 		signalBytesRead += bufferSize;
