@@ -66,6 +66,9 @@ namespace OpenViBEPlugins
 			//struct svm_parameter *m_oParam; // set by parse_command_line
 			struct svm_problem m_oProb;     // set by read_problem
 			struct svm_model *m_pModel;
+
+			OpenViBE::boolean m_bModelWasTrained; // true if from svm_train(), false if loaded
+
 			OpenViBE::int32 m_i32IndexSV;
 			OpenViBE::uint32 m_ui32NumberOfFeatures;
 			OpenViBE::CMemoryBuffer m_oConfiguration;
@@ -82,6 +85,9 @@ namespace OpenViBEPlugins
 			void setParameter(void);
 
 			void generateConfigurationNode(void);
+
+			void deleteModel(svm_model *pModel, bool bFreeSupportVectors);
+
 		};
 
 		class CAlgorithmClassifierSVMDesc : public OpenViBEToolkit::CAlgorithmClassifierDesc

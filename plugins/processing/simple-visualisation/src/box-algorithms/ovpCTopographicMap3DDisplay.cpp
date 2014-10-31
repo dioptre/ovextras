@@ -64,6 +64,7 @@ CTopographicMap3DDisplay::CTopographicMap3DDisplay(void) :
 	m_pSphericalSplineInterpolation(NULL),
 	m_pTopographicMapDatabase(NULL),
 	m_pTopographicMap3DView(NULL),
+	m_oResourceGroupIdentifier(OV_UndefinedIdentifier),
 	m_bSkullCreated(false),
 	m_bCameraPositioned(false),
 	m_bScalpDataInitialized(false),
@@ -152,10 +153,13 @@ boolean CTopographicMap3DDisplay::initialize(void)
 	//send widget pointers to visualisation context for parenting
 	::GtkWidget* l_pWidget=NULL;
 	m_o3DWidgetIdentifier = getBoxAlgorithmContext()->getVisualisationContext()->create3DWidget(l_pWidget);
-	if(l_pWidget != NULL)
+	if(!l_pWidget)
 	{
-		getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
+		this->getLogManager() << LogLevel_Error << "Unable to create 3D rendering widget.\n";
+		return false;
 	}
+
+	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
 
 	::GtkWidget* l_pToolbarWidget=NULL;
 	m_pTopographicMap3DView->getToolbar(l_pToolbarWidget);
@@ -205,7 +209,11 @@ boolean CTopographicMap3DDisplay::uninitialize(void)
 	}
 
 	//destroy resource group
-	getVisualisationContext().destroyResourceGroup(m_oResourceGroupIdentifier);
+	if(m_oResourceGroupIdentifier!=OV_UndefinedIdentifier)
+	{
+		getVisualisationContext().destroyResourceGroup(m_oResourceGroupIdentifier);
+		m_oResourceGroupIdentifier = OV_UndefinedIdentifier;
+	}
 
 	return true;
 }

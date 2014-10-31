@@ -1,6 +1,7 @@
 #ifndef __OpenViBE_AcquisitionServer_CDriverMitsarEEG202A_H__
 #define __OpenViBE_AcquisitionServer_CDriverMitsarEEG202A_H__
 
+#if defined(TARGET_HAS_ThirdPartyMitsar)
 #if defined TARGET_OS_Windows
 
 #include "ovasIDriver.h"
@@ -74,6 +75,7 @@ namespace OpenViBEAcquisitionServer
 	};
 };
 
+#endif
 #endif
 
 #endif // __OpenViBE_AcquisitionServer_CDriverMitsarEEG202A_H__

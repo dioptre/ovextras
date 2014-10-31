@@ -60,7 +60,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("G. Gibert - E. Maby - P.E. Aguera"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INSERM/U821"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Filters and downsamples input buffer."); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("First, applies a low-pass (Butterworth, Chebychev or Yule-Walker) filter (frequency cut is 1/4, 1/3 or 1/2 of the new sampling rate) to input buffers of signal for anti-aliasing. Then, the input buffers of signal is downsampled."); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("First, applies a low-pass (Butterworth or Chebychev) filter (frequency cut is 1/4, 1/3 or 1/2 of the new sampling rate) to input buffers of signal for anti-aliasing. Then, the input buffers of signal is downsampled."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Basic"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.01"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }

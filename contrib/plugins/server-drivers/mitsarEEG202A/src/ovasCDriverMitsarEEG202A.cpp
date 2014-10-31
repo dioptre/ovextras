@@ -1,3 +1,5 @@
+
+#if defined(TARGET_HAS_ThirdPartyMitsar)
 #if defined TARGET_OS_Windows
 
 #include "ovasCDriverMitsarEEG202A.h"
@@ -410,4 +412,5 @@ boolean CDriverMitsarEEG202A::configure(void)
 	return true;
 }
 
+#endif
 #endif

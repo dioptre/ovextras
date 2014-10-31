@@ -153,31 +153,31 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 		TDecoder<CBoxAlgorithmMatlabScripting> * l_pDecoder = NULL;
 		if(l_oInputType==OV_TypeId_StreamedMatrix)
 		{
-			l_pDecoder= new TStreamedMatrixDecoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pDecoder= new TStreamedMatrixDecoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oInputType==OV_TypeId_ChannelLocalisation)
 		{
-			l_pDecoder= new TChannelLocalisationDecoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pDecoder= new TChannelLocalisationDecoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oInputType==OV_TypeId_FeatureVector)
 		{
-			l_pDecoder= new TFeatureVectorDecoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pDecoder= new TFeatureVectorDecoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oInputType==OV_TypeId_Spectrum)
 		{
-			l_pDecoder= new TSpectrumDecoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pDecoder= new TSpectrumDecoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oInputType==OV_TypeId_Signal)
 		{
-			l_pDecoder= new TSignalDecoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pDecoder= new TSignalDecoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oInputType==OV_TypeId_Stimulations)
 		{
-			l_pDecoder= new TStimulationDecoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pDecoder= new TStimulationDecoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oInputType==OV_TypeId_ExperimentInformation)
 		{
-			l_pDecoder= new TExperimentInformationDecoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pDecoder= new TExperimentInformationDecoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else
 		{
@@ -197,31 +197,31 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 		TEncoder<CBoxAlgorithmMatlabScripting> * l_pEncoder = NULL;
 		if(l_oOutputType==OV_TypeId_StreamedMatrix)
 		{
-			l_pEncoder= new TStreamedMatrixEncoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pEncoder= new TStreamedMatrixEncoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oOutputType==OV_TypeId_ChannelLocalisation)
 		{
-			l_pEncoder= new TChannelLocalisationEncoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pEncoder= new TChannelLocalisationEncoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oOutputType==OV_TypeId_FeatureVector)
 		{
-			l_pEncoder= new TFeatureVectorEncoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pEncoder= new TFeatureVectorEncoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oOutputType==OV_TypeId_Spectrum)
 		{
-			l_pEncoder= new TSpectrumEncoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pEncoder= new TSpectrumEncoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oOutputType==OV_TypeId_Signal)
 		{
-			l_pEncoder= new TSignalEncoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pEncoder= new TSignalEncoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oOutputType==OV_TypeId_Stimulations)
 		{
-			l_pEncoder= new TStimulationEncoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pEncoder= new TStimulationEncoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else if(l_oOutputType==OV_TypeId_ExperimentInformation)
 		{
-			l_pEncoder= new TExperimentInformationEncoder<CBoxAlgorithmMatlabScripting>(*this);
+			l_pEncoder= new TExperimentInformationEncoder<CBoxAlgorithmMatlabScripting>(*this,i);
 		}
 		else
 		{
@@ -508,7 +508,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 	{
 		for(uint32 j = 0; j < l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
-			m_mDecoders[i]->decode(i,j);
+			m_mDecoders[i]->decode(j);
 			
 			CIdentifier l_oType;
 			getStaticBoxContext().getInputType(i,l_oType);
@@ -737,7 +737,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 					return false;
 				}
 
-				m_mEncoders[i]->encodeHeader(i);
+				m_mEncoders[i]->encodeHeader();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(i,0,0);
 
 
@@ -771,7 +771,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 				return false;
 			}
 
-			m_mEncoders[i]->encodeBuffer(i);
+			m_mEncoders[i]->encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(i,l_ui64StartTime,l_ui64EndTime);
 
 		}

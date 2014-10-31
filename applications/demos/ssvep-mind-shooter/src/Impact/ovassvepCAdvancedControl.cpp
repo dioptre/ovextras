@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCAdvancedControl.h"
 #include "ovassvepCImpactApplication.h"
 
@@ -96,3 +99,4 @@ void CAdvancedControl::commandeerShip(CAdvancedControl::ShipCommand sCommand)
 }
 
 
+#endif

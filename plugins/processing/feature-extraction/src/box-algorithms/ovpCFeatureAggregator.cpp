@@ -19,11 +19,11 @@ namespace OpenViBEPlugins
 {
 	namespace FeatureExtraction
 	{
+
 		CFeatureAggregator::CFeatureAggregator(void) :
 			m_ui64LastChunkStartTime(0),
 			m_ui64LastChunkEndTime(0),
 			m_ui32CurrentInput(0),
-			m_pVectorBuffer(NULL),
 			m_ui32VectorSize(0),
 			m_bError(false)
 		{
@@ -69,10 +69,6 @@ namespace OpenViBEPlugins
 				m_pFeatureVectorEncoder->uninitialize();
 				delete m_pFeatureVectorEncoder;
 			}
-
-			//deletes the vector
-			delete[] m_pVectorBuffer;
-			m_pVectorBuffer = NULL;
 
 			return true;
 		}

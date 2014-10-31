@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovkCMaterial.h"
 #include "ovkCOgreWindow.h"
 #include "ovkCOgreScene.h"
@@ -459,3 +462,5 @@ CIdentifier COgreVisualisation::getUnusedResourceGroupIdentifier(void) const
 	while(it!=m_mOgreResourceGroups.end() || l_oResult==OV_UndefinedIdentifier);
 	return l_oResult;
 }
+
+#endif

@@ -37,10 +37,14 @@ boolean CSimple3DDisplay::initialize(void)
 	//send widget pointers to visualisation context for parenting
 	::GtkWidget* l_pWidget=NULL;
 	m_o3DWidgetIdentifier = getBoxAlgorithmContext()->getVisualisationContext()->create3DWidget(l_pWidget);
-	if(l_pWidget != NULL)
+	if(!l_pWidget)
 	{
-		getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
+		this->getLogManager() << LogLevel_Error << "Unable to create 3D rendering widget.\n";
+		return false;
 	}
+
+	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
+	
 
 	::GtkWidget* l_pToolbarWidget=NULL;
 	dynamic_cast<CSimple3DView*>(m_pSimple3DView)->getToolbar(l_pToolbarWidget);

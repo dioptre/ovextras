@@ -7,6 +7,8 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <iostream>
+#include <fstream>
 
 // TODO:
 // - please move the identifier definitions in ovp_defines.h
@@ -39,16 +41,24 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			::FILE* m_pFile;
+			std::ofstream m_oFileStream;
+
 			OpenViBE::CString m_sSeparator;
 			OpenViBE::CIdentifier m_oTypeIdentifier;
-			OpenViBE::boolean m_bUseCompression;
 			OpenViBE::boolean m_bFirstBuffer;
 			OpenViBE::boolean (OpenViBEPlugins::FileIO::CBoxAlgorithmCSVFileWriter::*m_fpRealProcess)(void);
 
 			OpenViBEToolkit::TDecoder < CBoxAlgorithmCSVFileWriter >* m_pStreamDecoder;
 			OpenViBE::IMatrix* m_pMatrix;
 			OpenViBE::boolean m_bDeleteMatrix;
+
+			OpenViBE::uint64 m_ui64SampleCount;
+
+			// OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* > ip_pMemoryBuffer;
+			// OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pMatrix;
+			// OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pMinMaxFrequencyBand;
+			// OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > op_ui64SamplingFrequency;
+			// OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > op_pStimulationSet;
 
 		};
 
@@ -58,22 +68,11 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
+				// @note this doesn't currently work as ConnectionEditor replaces the value set here by the gtk widget text field contents				
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getInputType(ui32Index, l_oTypeIdentifier);
-				if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
-				{
-					rBox.setInputName(ui32Index, "Streamed matrix");
-				}
-				else if(l_oTypeIdentifier==OV_TypeId_Stimulations)
-				{
-					rBox.setInputName(ui32Index, "Stimulations");
-				}
-				else
-				{
-					rBox.setInputName(ui32Index, "Streamed matrix");
-					rBox.setInputType(ui32Index, OV_TypeId_Signal);
-					return false;
-				}
+				rBox.setInputName(ui32Index, this->getTypeManager().getTypeName(l_oTypeIdentifier));
+
 				return true;
 			}
 
@@ -106,12 +105,15 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput  ("Input signal",  OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addSetting("Filename",         OV_TypeId_Filename, "record-[$core{date}-$core{time}].csv");
 				rBoxAlgorithmPrototype.addSetting("Column separator", OV_TypeId_String, ";");
-				rBoxAlgorithmPrototype.addSetting("Use compression",  OV_TypeId_Boolean, "false");
+				rBoxAlgorithmPrototype.addSetting("Precision",        OV_TypeId_Integer, "10");
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
 
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Spectrum);
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_FeatureVector);
+
 				return true;
 			}
 

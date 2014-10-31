@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepICommandVRPNAnalog.h"
 #include "ovassvepCApplication.h"
 
@@ -43,3 +46,5 @@ void ICommandVRPNAnalog::processFrame()
 {
 	m_poVRPNAnalog->mainloop();
 }
+
+#endif

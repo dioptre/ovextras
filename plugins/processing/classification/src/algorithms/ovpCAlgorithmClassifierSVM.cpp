@@ -52,7 +52,7 @@ using namespace OpenViBEPlugins::Classification;
 using namespace OpenViBEToolkit;
 
 CAlgorithmClassifierSVM::CAlgorithmClassifierSVM(void)
-	:m_pModel(NULL)
+	:m_pModel(NULL), m_bModelWasTrained(false)
 {
 }
 
@@ -93,6 +93,12 @@ boolean CAlgorithmClassifierSVM::initialize(void)
 	m_oProb.y=NULL;
 	m_oProb.x=NULL;
 
+	m_oParam.weight = NULL;
+	m_oParam.weight_label = NULL;
+
+	m_pModel = NULL;
+	m_bModelWasTrained = false;
+
 	return CAlgorithmClassifier::initialize();
 }
 
@@ -110,7 +116,56 @@ boolean CAlgorithmClassifierSVM::uninitialize(void)
 		m_oProb.x=NULL;
 	}
 
+	if(m_oParam.weight) 
+	{
+		delete[] m_oParam.weight;
+		m_oParam.weight = NULL;
+	}
+
+	if(m_oParam.weight_label) 
+	{
+		delete[] m_oParam.weight_label;
+		m_oParam.weight_label = NULL;
+	}
+
+	deleteModel(m_pModel, !m_bModelWasTrained);
+	m_pModel = NULL;
+	m_bModelWasTrained = false;
+
 	return CAlgorithmClassifier::uninitialize();
+}
+
+void CAlgorithmClassifierSVM::deleteModel(svm_model *pModel, bool bFreeSupportVectors)
+{
+	if(pModel) 
+	{
+		delete[] pModel->rho;
+		delete[] pModel->probA;
+		delete[] pModel->probB;
+		delete[] pModel->label;
+		delete[] pModel->nSV;
+
+		for(int i=0;i<pModel->nr_class-1;i++)
+		{
+			delete[] pModel->sv_coef[i];
+		}
+		delete[] pModel->sv_coef;
+		
+		// We need the following depending on how the model was allocated. If we got it from svm_train,
+		// the support vectors are pointers to the problem structure which is freed elsewhere. 
+		// If we loaded the model from disk, we allocated the vectors separately.
+		if(bFreeSupportVectors)
+		{
+			for(int i=0;i<pModel->l;i++)
+			{
+				delete[] pModel->SV[i];
+			}
+		}
+		delete[] pModel->SV;
+
+		delete pModel;
+		pModel = NULL;
+	}
 }
 
 void CAlgorithmClassifierSVM::setParameter(void)
@@ -287,8 +342,9 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 	if(m_pModel)
 	{
 		//std::cout<<"delete model"<<std::endl;
-		delete m_pModel;
+		deleteModel(m_pModel, !m_bModelWasTrained);
 		m_pModel=NULL;
+		m_bModelWasTrained = false;
 	}
 	m_pModel=svm_train(&m_oProb,&m_oParam);
 
@@ -297,6 +353,8 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 		this->getLogManager() << LogLevel_Error << "the training with SVM had failed\n";
 		return false;
 	}
+
+	m_bModelWasTrained = true;
 
 	//std::cout<<"log model"<<std::endl;
 	this->getLogManager() << LogLevel_Trace << modelToString();
@@ -499,11 +557,11 @@ void CAlgorithmClassifierSVM::generateConfigurationNode(void)
 		if(m_pModel->probA)
 		{
 			std::stringstream l_sProbA;
+			l_sProbA << std::scientific << m_pModel->probA[0];
 			for(int i=1;i<m_pModel->nr_class*(m_pModel->nr_class-1)/2;i++)
 			{
 				l_sProbA << " " << m_pModel->probA[i];
 			}
-			l_sProbA << std::scientific << m_pModel->probA[0];
 
 			l_pTempNode = XML::createNode(c_sProbANodeName);
 			l_pTempNode->setPCData(l_sProbA.str().c_str());
@@ -512,11 +570,11 @@ void CAlgorithmClassifierSVM::generateConfigurationNode(void)
 		if(m_pModel->probB)
 		{
 			std::stringstream l_sProbB;
+			l_sProbB << std::scientific << m_pModel->probB[0];
 			for(int i=1;i<m_pModel->nr_class*(m_pModel->nr_class-1)/2;i++)
 			{
 				 l_sProbB << " " << m_pModel->probB[i];
 			}
-			l_sProbB << std::scientific << m_pModel->probB[0];
 
 			l_pTempNode = XML::createNode(c_sProbBNodeName);
 			l_pTempNode->setPCData(l_sProbB.str().c_str());
@@ -570,8 +628,9 @@ boolean CAlgorithmClassifierSVM::loadConfiguration(XML::IXMLNode *pConfiguration
 	if(m_pModel)
 	{
 		//std::cout<<"delete m_pModel load config"<<std::endl;
-		delete m_pModel;
+		deleteModel(m_pModel, !m_bModelWasTrained);
 		m_pModel=NULL;
+		m_bModelWasTrained = false;
 	}
 	//std::cout<<"load config"<<std::endl;
 	m_pModel=new svm_model();

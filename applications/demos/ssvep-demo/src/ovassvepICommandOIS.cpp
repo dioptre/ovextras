@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepICommandOIS.h"
 #include "ovassvepCApplication.h"
 
@@ -89,3 +92,5 @@ bool ICommandOIS::keyReleased( const OIS::KeyEvent &oEvent )
 }		
 
 
+
+#endif

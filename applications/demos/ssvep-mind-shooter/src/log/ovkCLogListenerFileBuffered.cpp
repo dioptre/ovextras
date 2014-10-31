@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovkCLogListenerFileBuffered.h"
 
 #include <cstdio>
@@ -197,3 +200,5 @@ void CLogListenerFileBuffered::log(const ELogLevel eLogLevel)
 void CLogListenerFileBuffered::log(const ELogColor eLogColor)
 {
 }
+
+#endif
