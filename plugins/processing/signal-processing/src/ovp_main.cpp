@@ -162,7 +162,10 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EpochAverageMethod, "Moving epoch average (Immediate)", OVP_TypeId_EpochAverageMethod_MovingAverageImmediate.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EpochAverageMethod, "Epoch block average", OVP_TypeId_EpochAverageMethod_BlockAverage.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EpochAverageMethod, "Cumulative average", OVP_TypeId_EpochAverageMethod_CumulativeAverage.toUInteger());
+	
+#if defined(TARGET_HAS_ThirdPartyITPP)	
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CMatrixVarianceDesc);
+#endif
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CEpochVarianceDesc);
 
     // @BEGIN JP
