@@ -1,5 +1,5 @@
-#ifndef OVDCSCRIPTSETTINGVIEW_H
-#define OVDCSCRIPTSETTINGVIEW_H
+#ifndef __OpenViBE_Designer_Setting_CScriptSettingView_H__
+#define __OpenViBE_Designer_Setting_CScriptSettingView_H__
 
 #include "../ovd_base.h"
 #include "ovdCAbstractSettingView.h"
@@ -35,4 +35,4 @@ namespace OpenViBEDesigner
 
 }
 
-#endif // OVDCSCRIPTSETTINGVIEW_H
+#endif // __OpenViBE_Designer_Setting_CScriptSettingView_H__

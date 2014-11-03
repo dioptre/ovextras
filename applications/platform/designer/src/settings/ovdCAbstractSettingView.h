@@ -1,5 +1,5 @@
-#ifndef OVDCABSTRACTSETTINGVIEW_H
-#define OVDCABSTRACTSETTINGVIEW_H
+#ifndef __OpenViBE_Designer_Setting_CAbstractSettingView_H__
+#define __OpenViBE_Designer_Setting_CAbstractSettingView_H__
 
 #include "../ovd_base.h"
 
@@ -57,4 +57,4 @@ namespace OpenViBEDesigner
 
 }
 
-#endif // OVDCABSTRACTSETTINGVIEW_H
+#endif // __OpenViBE_Designer_Setting_CAbstractSettingView_H__

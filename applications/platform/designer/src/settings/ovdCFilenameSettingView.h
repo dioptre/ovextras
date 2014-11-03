@@ -1,5 +1,5 @@
-#ifndef OVDCFILENAMESETTINGVIEW_H
-#define OVDCFILENAMESETTINGVIEW_H
+#ifndef __OpenViBE_Designer_Setting_CFilenameSettingView_H__
+#define __OpenViBE_Designer_Setting_CFilenameSettingView_H__
 
 #include "../ovd_base.h"
 #include "ovdCAbstractSettingView.h"
@@ -33,4 +33,4 @@ namespace OpenViBEDesigner
 }
 
 
-#endif // OVDCFILENAMESETTINGVIEW_H
+#endif // __OpenViBE_Designer_Setting_CFilenameSettingView_H__

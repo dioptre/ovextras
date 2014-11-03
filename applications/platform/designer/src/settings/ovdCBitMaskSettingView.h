@@ -1,5 +1,5 @@
-#ifndef OVDCBITMASKSETTINGVIEW_H
-#define OVDCBITMASKSETTINGVIEW_H
+#ifndef __OpenViBE_Designer_Setting_CBitMaskSettingView_H__
+#define __OpenViBE_Designer_Setting_CBitMaskSettingView_H__
 
 #include "../ovd_base.h"
 #include "ovdCAbstractSettingView.h"
@@ -35,4 +35,4 @@ namespace OpenViBEDesigner
 
 }
 
-#endif // OVDCBITMASKSETTINGVIEW_H
+#endif // __OpenViBE_Designer_Setting_CBitMaskSettingView_H__

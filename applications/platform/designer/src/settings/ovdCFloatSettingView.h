@@ -1,5 +1,5 @@
-#ifndef OVDCFLOATSETTINGVIEW_H
-#define OVDCFLOATSETTINGVIEW_H
+#ifndef __OpenViBE_Designer_Setting_CFloatSettingView_H__
+#define __OpenViBE_Designer_Setting_CFloatSettingView_H__
 
 #include "../ovd_base.h"
 #include "ovdCAbstractSettingView.h"
@@ -35,4 +35,4 @@ namespace OpenViBEDesigner
 
 }
 
-#endif // OVDCFLOATSETTINGVIEW_H
+#endif // __OpenViBE_Designer_Setting_CFloatSettingView_H__

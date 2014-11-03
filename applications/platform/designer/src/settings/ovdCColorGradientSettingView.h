@@ -1,5 +1,5 @@
-#ifndef OVDCCOLORGRADIENTSETTINGVIEW_CPP
-#define OVDCCOLORGRADIENTSETTINGVIEW_CPP
+#ifndef __OpenViBE_Designer_Setting_CColorGradientSettingView_H__
+#define __OpenViBE_Designer_Setting_CColorGradientSettingView_H__
 
 #include "../ovd_base.h"
 #include "ovdCAbstractSettingView.h"
@@ -63,4 +63,4 @@ namespace OpenViBEDesigner
 
 }
 
-#endif // OVDCCOLORGRADIENTSETTINGVIEW_CPP
+#endif // __OpenViBE_Designer_Setting_CColorGradientSettingView_H__

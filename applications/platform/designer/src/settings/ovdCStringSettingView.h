@@ -1,5 +1,5 @@
-#ifndef OVDCSTRINGSETTINGVIEW_H
-#define OVDCSTRINGSETTINGVIEW_H
+#ifndef __OpenViBE_Designer_Setting_CStringSettingView_H__
+#define __OpenViBE_Designer_Setting_CStringSettingView_H__
 
 #include "../ovd_base.h"
 #include "ovdCAbstractSettingView.h"
@@ -26,4 +26,4 @@ namespace OpenViBEDesigner
 
 }
 
-#endif // OVDCSTRINGSETTINGVIEW_H
+#endif // __OpenViBE_Designer_Setting_CStringSettingView_H__

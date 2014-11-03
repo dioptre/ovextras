@@ -1,5 +1,5 @@
-#ifndef OVDCINTEGERSETTINGVIEW_H
-#define OVDCINTEGERSETTINGVIEW_H
+#ifndef __OpenViBE_Designer_Setting_CIntegerSettingView_H__
+#define __OpenViBE_Designer_Setting_CIntegerSettingView_H__
 
 #include "../ovd_base.h"
 #include "ovdCAbstractSettingView.h"
@@ -33,4 +33,4 @@ namespace OpenViBEDesigner
 
 }
 
-#endif // OVDCINTEGERSETTINGVIEW_H
+#endif // __OpenViBE_Designer_Setting_CIntegerSettingView_H__
