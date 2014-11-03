@@ -16,16 +16,10 @@ using namespace OpenViBEToolkit;
 using namespace std;
 
 CSinusSignalGenerator::CSinusSignalGenerator(void)
-	:m_oSignalOutputWriterCallbackProxy(
-		*this,
-		&CSinusSignalGenerator::writeSignalOutput)
-	,m_pSignalOutputWriterHelper(NULL)
-	,m_pSignalOutputWriter(NULL)
-	,m_bHeaderSent(false)
+	:m_bHeaderSent(false)
 	,m_ui32ChannelCount(0)
 	,m_ui32SamplingFrequency(0)
 	,m_ui32GeneratedEpochSampleCount(0)
-	,m_pSampleBuffer(NULL)
 	,m_ui32SentSampleCount(0)
 {
 }
@@ -37,8 +31,7 @@ void CSinusSignalGenerator::release(void)
 
 boolean CSinusSignalGenerator::initialize(void)
 {
-	m_pSignalOutputWriterHelper=createBoxAlgorithmSignalOutputWriter();
-	m_pSignalOutputWriter=EBML::createWriter(m_oSignalOutputWriterCallbackProxy);
+	m_oSignalEncoder.initialize(*this,0);
 
 	// Parses box settings to try connecting to server
 	CString l_sChannelCount;
@@ -70,22 +63,12 @@ boolean CSinusSignalGenerator::initialize(void)
 		return false;
 	}
 
-	// Allocates sample block
-	m_pSampleBuffer=new float64[m_ui32ChannelCount*m_ui32GeneratedEpochSampleCount];
-
 	return true;
 }
 
 boolean CSinusSignalGenerator::uninitialize(void)
-{
-	delete [] m_pSampleBuffer;
-	m_pSampleBuffer=NULL;
-
-	m_pSignalOutputWriter->release();
-	m_pSignalOutputWriter=NULL;
-
-	releaseBoxAlgorithmSignalOutputWriter(m_pSignalOutputWriterHelper);
-	m_pSignalOutputWriterHelper=NULL;
+{	
+	m_oSignalEncoder.uninitialize();
 
 	return true;
 }
@@ -103,17 +86,23 @@ boolean CSinusSignalGenerator::process(void)
 	uint32 i,j;
 	if(!m_bHeaderSent)
 	{
-		m_pSignalOutputWriterHelper->setSamplingRate(m_ui32SamplingFrequency);
-		m_pSignalOutputWriterHelper->setChannelCount(m_ui32ChannelCount);
-		m_pSignalOutputWriterHelper->setSampleCountPerBuffer(m_ui32GeneratedEpochSampleCount);
-		m_pSignalOutputWriterHelper->setSampleBuffer(m_pSampleBuffer);
+		m_oSignalEncoder.getInputSamplingRate() = m_ui32SamplingFrequency;
+
+		IMatrix* l_pMatrix = m_oSignalEncoder.getInputMatrix();
+
+		l_pMatrix->setDimensionCount(2);
+		l_pMatrix->setDimensionSize(0,m_ui32ChannelCount);
+		l_pMatrix->setDimensionSize(1,m_ui32GeneratedEpochSampleCount);
+
 		for(i=0; i<m_ui32ChannelCount; i++)
 		{
 			char l_sChannelName[1024];
 			sprintf(l_sChannelName, "sinusOsc %i", (int)i);
-			m_pSignalOutputWriterHelper->setChannelName(i, l_sChannelName);
+			l_pMatrix->setDimensionLabel(0, i, l_sChannelName);
 		}
-		m_pSignalOutputWriterHelper->writeHeader(*m_pSignalOutputWriter);
+
+		m_oSignalEncoder.encodeHeader();
+
 		m_bHeaderSent=true;
 
 		uint64 l_ui64Time=ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui32SentSampleCount);
@@ -121,18 +110,22 @@ boolean CSinusSignalGenerator::process(void)
 	}
 	else
 	{
+		float64* l_pSampleBuffer = m_oSignalEncoder.getInputMatrix()->getBuffer();
+
 		uint32 l_ui32SentSampleCount=m_ui32SentSampleCount;
 		for(i=0; i<m_ui32ChannelCount; i++)
 		{
 			for(j=0; j<m_ui32GeneratedEpochSampleCount; j++)
 			{
-				m_pSampleBuffer[i*m_ui32GeneratedEpochSampleCount+j]=
+				l_pSampleBuffer[i*m_ui32GeneratedEpochSampleCount+j]=
 					sin(((j+m_ui32SentSampleCount)*(i+1)*12.3)/m_ui32SamplingFrequency)+
 					sin(((j+m_ui32SentSampleCount)*(i+1)* 4.5)/m_ui32SamplingFrequency)+
 					sin(((j+m_ui32SentSampleCount)*(i+1)*67.8)/m_ui32SamplingFrequency);
 			}
 		}
-		m_pSignalOutputWriterHelper->writeBuffer(*m_pSignalOutputWriter);
+
+		m_oSignalEncoder.encodeBuffer();
+
 		m_ui32SentSampleCount+=m_ui32GeneratedEpochSampleCount;
 
 		uint64 l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui32SentSampleCount);
@@ -148,9 +141,4 @@ OpenViBE::uint64 CSinusSignalGenerator::getClockFrequency(void)
 {
 	// Intentional parameter swap to get the frequency
 	return ITimeArithmetics::sampleCountToTime(m_ui32GeneratedEpochSampleCount, m_ui32SamplingFrequency);
-}
-
-void CSinusSignalGenerator::writeSignalOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize)
-{
-	appendOutputChunkData<0>(pBuffer, ui64BufferSize);
 }

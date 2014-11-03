@@ -28,21 +28,14 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, OVP_ClassId_SinusSignalGenerator)
 
-		public:
-
-			virtual void writeSignalOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize);
-
 		protected:
 
-			EBML::TWriterCallbackProxy1<OpenViBEPlugins::DataGeneration::CSinusSignalGenerator> m_oSignalOutputWriterCallbackProxy;
-			OpenViBEToolkit::IBoxAlgorithmSignalOutputWriter* m_pSignalOutputWriterHelper;
-			EBML::IWriter* m_pSignalOutputWriter;
+			OpenViBEToolkit::TSignalEncoder < CSinusSignalGenerator > m_oSignalEncoder;
 
 			OpenViBE::boolean m_bHeaderSent;
 			OpenViBE::uint32 m_ui32ChannelCount;
 			OpenViBE::uint32 m_ui32SamplingFrequency;
 			OpenViBE::uint32 m_ui32GeneratedEpochSampleCount;
-			OpenViBE::float64* m_pSampleBuffer;
 			OpenViBE::uint32 m_ui32SentSampleCount;
 		};
 
