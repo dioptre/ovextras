@@ -213,11 +213,11 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 			ip_pMatrix->setDimensionSize(1, op_pMatrix->getDimensionSize(1));
 
 			// Name channels
-			for(uint64 i=0;i<ip_pMatrix->getDimensionSize(0);i++)
+			for(uint32 i=0;i<ip_pMatrix->getDimensionSize(0);i++)
 			{
 				char l_sBuffer[64];
 				sprintf(l_sBuffer, "sFiltered %d", i);
-				ip_pMatrix->setDimensionLabel(0, static_cast<uint32>(i), l_sBuffer);
+				ip_pMatrix->setDimensionLabel(0, i, l_sBuffer);
 			}
 
 			m_pStreamEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);

@@ -27,7 +27,11 @@ IF(FFTW3_FOUND)
 	MESSAGE(STATUS "  Found fftw3 includes...")	
 	FOREACH(FFTW3_LIB ${FFTW3_LIBRARIES})
 		SET(FFTW3_LIB1 "FFTW3_LIB1-NOTFOUND")
-		FIND_LIBRARY(FFTW3_LIB1 NAMES ${FFTW3_LIB} PATHS ${FFTW3_LIBRARY_DIRS} ${FFTW3_LIBDIR})
+		# The list is 'fftw3 m' on Fedora 19. CMake gets confused unless the two following lines are used ... 
+		# 1) catch fftw3 if its under dependencies/lib/ (fedora19)
+		FIND_LIBRARY(FFTW3_LIB1 NAMES ${FFTW3_LIB} PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib NO_DEFAULT_PATH)
+		# 2) catch fftw3 from found paths, and libm from usual system paths, i.e. default path is allowed. (covers other systems + libm on fedora).
+		FIND_LIBRARY(FFTW3_LIB1 NAMES ${FFTW3_LIB} PATHS ${FFTW3_LIBRARY_DIRS})
 		IF(FFTW3_LIB1)
 			MESSAGE(STATUS "    [  OK  ] Third party lib ${FFTW3_LIB1}")
 			LIST(APPEND FFTW3_LOCATED_LIBS ${FFTW3_LIB1})
