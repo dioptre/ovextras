@@ -9,6 +9,11 @@ using namespace OpenViBE;
 using namespace OpenViBEDesigner;
 using namespace OpenViBEDesigner::Setting;
 
+// round is defined in <cmath> on c++11
+inline int ov_round(double dbl)
+{ return dbl >= 0.0 ? (int)(dbl + 0.5) : ((dbl - (double)(int)dbl) <= -0.5 ? (int)dbl : (int)(dbl - 0.5));
+}
+
 static void on_color_gradient_color_button_pressed(::GtkColorButton* pButton, gpointer pUserData)
 {
 	static_cast< CColorGradientSettingView *>(pUserData)->colorChange(pButton);
@@ -128,9 +133,9 @@ void CColorGradientSettingView::configurePressed()
 		for(uint32 i=0; i<vColorGradient.size(); i++)
 		{
 			l_oFinalGradient[i*4]   = vColorGradient[i].fPercent;
-			l_oFinalGradient[i*4+1] = vColorGradient[i].oColor.red   * 100. / 65535.;
-			l_oFinalGradient[i*4+2] = vColorGradient[i].oColor.green * 100. / 65535.;
-			l_oFinalGradient[i*4+3] = vColorGradient[i].oColor.blue  * 100. / 65535.;
+			l_oFinalGradient[i*4+1] = ov_round(vColorGradient[i].oColor.red   * 100. / 65535.);
+			l_oFinalGradient[i*4+2] = ov_round(vColorGradient[i].oColor.green * 100. / 65535.);
+			l_oFinalGradient[i*4+3] = ov_round(vColorGradient[i].oColor.blue  * 100. / 65535.);
 		}
 		OpenViBEToolkit::Tools::ColorGradient::format(l_sFinalGradient, l_oFinalGradient);
 		if(!m_bOnValueSetting)

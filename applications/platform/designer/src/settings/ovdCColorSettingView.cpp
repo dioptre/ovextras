@@ -7,6 +7,11 @@ using namespace OpenViBE;
 using namespace OpenViBEDesigner;
 using namespace OpenViBEDesigner::Setting;
 
+// round is defined in <cmath> on c++11
+inline int ov_round(double dbl)
+{ return dbl >= 0.0 ? (int)(dbl + 0.5) : ((dbl - (double)(int)dbl) <= -0.5 ? (int)dbl : (int)(dbl - 0.5));
+}
+
 static void on_button_setting_color_choose_pressed(::GtkColorButton* pButton, gpointer pUserData)
 {
 	static_cast< CColorSettingView *>(pUserData)->selectColor();
@@ -67,7 +72,7 @@ void CColorSettingView::selectColor()
 	gtk_color_button_get_color(m_pButton, &l_oColor);
 
 	char l_sBuffer[1024];
-	sprintf(l_sBuffer, "%i,%i,%i", (l_oColor.red*100)/65535, (l_oColor.green*100)/65535, (l_oColor.blue*100)/65535);
+	sprintf(l_sBuffer, "%i,%i,%i", ov_round((l_oColor.red*100)/65535.), ov_round((l_oColor.green*100)/65535.), ov_round((l_oColor.blue*100)/65535.));
 
 	getBox().setSettingValue(getSettingIndex(), l_sBuffer);
 }
