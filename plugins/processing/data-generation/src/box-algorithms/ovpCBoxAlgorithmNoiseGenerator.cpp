@@ -33,13 +33,7 @@ void CNoiseGenerator::release(void)
 
 boolean CNoiseGenerator::initialize(void)
 {
-	m_pStreamEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoder));
-	if(!m_pStreamEncoder) {
-		this->getLogManager() << LogLevel_Error << "Unable to get stream encoder.\n";
-		return false;
-	}
-
-	m_pStreamEncoder->initialize();
+	m_oSignalEncoder.initialize(*this,0);
 
 	m_ui64ChannelCount=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0); 
 	m_ui64SamplingFrequency=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
@@ -64,22 +58,18 @@ boolean CNoiseGenerator::initialize(void)
 		return false;
 	}
 
-	ip_ui64SignalSamplingRate.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_SamplingRate));
-	ip_pSignalMatrix.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_Matrix));
+	m_oSignalEncoder.getInputSamplingRate() = m_ui64SamplingFrequency;
 
-	ip_ui64SignalSamplingRate = m_ui64SamplingFrequency;
+	IMatrix* l_pSampleMatrix = m_oSignalEncoder.getInputMatrix();
 
-
-	IMatrix &l_rSampleMatrix = *ip_pSignalMatrix;
-
-	l_rSampleMatrix.setDimensionCount(2);
-	l_rSampleMatrix.setDimensionSize(0,(uint32)m_ui64ChannelCount);
-	l_rSampleMatrix.setDimensionSize(1,(uint32)m_ui64GeneratedEpochSampleCount);
+	l_pSampleMatrix->setDimensionCount(2);
+	l_pSampleMatrix->setDimensionSize(0,(uint32)m_ui64ChannelCount);
+	l_pSampleMatrix->setDimensionSize(1,(uint32)m_ui64GeneratedEpochSampleCount);
 	for(uint64 i=0;i<m_ui64ChannelCount;i++)
 	{
 		char l_sBuffer[64];
 		sprintf(l_sBuffer, "Noise %d", i);
-		l_rSampleMatrix.setDimensionLabel(0, static_cast<uint32>(i), l_sBuffer);
+		l_pSampleMatrix->setDimensionLabel(0, static_cast<uint32>(i), l_sBuffer);
 	}
 
 	return true;
@@ -87,9 +77,7 @@ boolean CNoiseGenerator::initialize(void)
 
 boolean CNoiseGenerator::uninitialize(void)
 {
-	m_pStreamEncoder->uninitialize();
-
-	getAlgorithmManager().releaseAlgorithm(*m_pStreamEncoder);
+	m_oSignalEncoder.uninitialize();
 
 	return true;
 }
@@ -104,12 +92,9 @@ boolean CNoiseGenerator::process(void)
 {
 	IBoxIO* l_pDynamicBoxContext=getBoxAlgorithmContext()->getDynamicBoxContext();
 
-	TParameterHandler < IMemoryBuffer* > l_oOutputMemoryBufferHandle(m_pStreamEncoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-	l_oOutputMemoryBufferHandle=l_pDynamicBoxContext->getOutputChunk(0);
-
 	if(!m_bHeaderSent)
 	{
-		m_pStreamEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
+		m_oSignalEncoder.encodeHeader();
 
 		uint64 l_ui64Time=ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, m_ui64SentSampleCount);
 		l_pDynamicBoxContext->markOutputAsReadyToSend(0, l_ui64Time, l_ui64Time);
@@ -118,8 +103,7 @@ boolean CNoiseGenerator::process(void)
 	}
 	else
 	{
-		IMatrix &l_rSampleMatrix = *ip_pSignalMatrix;
-		float64* l_pSampleBuffer = l_rSampleMatrix.getBuffer();
+		float64* l_pSampleBuffer = m_oSignalEncoder.getInputMatrix()->getBuffer();
 
 		uint32 l_ui32SentSampleCount=(uint32)m_ui64SentSampleCount;
 		for(uint32 i=0; i<(uint32)m_ui64ChannelCount; i++)
@@ -134,8 +118,7 @@ boolean CNoiseGenerator::process(void)
 		uint64 l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, l_ui32SentSampleCount);
 		uint64 l_ui64EndTime = ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, m_ui64SentSampleCount);
 		
-
-		m_pStreamEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeBuffer);
+		m_oSignalEncoder.encodeBuffer();
 
 		l_pDynamicBoxContext->markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 	}
