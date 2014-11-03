@@ -406,6 +406,7 @@
 #define OVTK_NodeId_Header_StreamedMatrix_Dimension                            EBML::CIdentifier(0x0000E3C0, 0x3A7D5141)
 #define OVTK_NodeId_Header_StreamedMatrix_Dimension_Size                       EBML::CIdentifier(0x001302F7, 0x36D8438A)
 #define OVTK_NodeId_Header_StreamedMatrix_Dimension_Label                      EBML::CIdentifier(0x00153E40, 0x190227E0)
+#define OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit                       EBML::CIdentifier(0x00B42112, 0x0ECD5B6D)
 #define OVTK_NodeId_Buffer_StreamedMatrix                                      EBML::CIdentifier(0x00120663, 0x08FBC165)
 #define OVTK_NodeId_Buffer_StreamedMatrix_RawBuffer                            EBML::CIdentifier(0x00B18C10, 0x427D098C)
 
@@ -416,9 +417,12 @@
 //                                                                   //
 
 /*
- * Signal stream description (based on v1 november 6th 2006, modified may 24th 2007)
+ * Signal stream description 
+ * v1 november 6th 2006
+ * v2 may 24th 2007
+ * v3 nov 2014
  *
- * version 2 :
+ * version 3 :
  * ----------------------------------------------------------------- *
  * OVTK_NodeId_Header
  *   OVTK_NodeId_Header_StreamType (integer:)
@@ -432,10 +436,16 @@
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:channel 1 name)
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:channel 2 name)
  *       ...
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:channel 1 unit)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:channel 2 unit)
+ *       ...
  *     OVTK_NodeId_Header_StreamedMatrix_Dimension
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Size (integer:number of samples per buffer)
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string)
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string)
+ *       ...
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:channel 1 unit)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:channel 2 unit)
  *       ...
  * OVTK_NodeId_Buffer
  *   OVTK_NodeId_Buffer_StreamedMatrix
@@ -458,9 +468,11 @@
 //                                                                   //
 
 /*
- * Channel localisation description (nov 04th 2008)
+ * Channel localisation description 
+ * v1 nov 04th 2008
+ * v2 nov 2014
  *
- * version 1 :
+ * version 2 :
  * ----------------------------------------------------------------- *
  * OVTK_NodeId_Header
  *   OVTK_NodeId_Header_StreamType (integer:)
@@ -474,11 +486,17 @@
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:channel 1 name)
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:channel 2 name)
  *       ...
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:channel 1 unit)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:channel 2 unit)
+ *       ...
  *     OVTK_NodeId_Header_StreamedMatrix_Dimension
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Size (integer:3)
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:x)
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:y)
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:z)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:x unit)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:y unit)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:z unit)
  * OVTK_NodeId_Buffer
  *   OVTK_NodeId_Buffer_StreamedMatrix
  *     OVTK_NodeId_Buffer_StreamedMatrix_RawBuffer (array of float64)
@@ -500,7 +518,10 @@
 //                                                                   //
 
 /*
- * Stimulation stream description (based on v1 november 6th 2006, modified may 24th 2007)
+ * Stimulation stream description 
+ * v1 november 6th 2006
+ * v2 may 24th 2007
+ * v3 ??
  *
  * version 3 :
  * ----------------------------------------------------------------- *
@@ -585,9 +606,11 @@
 //                                                                   //
 
 /*
- * Feature vector stream description (fixed on may 24th 2007)
+ * Feature vector stream description 
+ * v1 may 24th 2007
+ * v2 nov 2014
  *
- * version 1 :
+ * version 2 :
  * ----------------------------------------------------------------- *
  * OVTK_NodeId_Header
  *   OVTK_NodeId_Header_StreamType (integer:)
@@ -599,6 +622,9 @@
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:feature 1 name)
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:feature 2 name)
  *       ...
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:feature 1 unit)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:feature 2 unit)
+ *       ....
  * OVTK_NodeId_Buffer
  *   OVTK_NodeId_Buffer_StreamedMatrix
  *     OVTK_NodeId_Buffer_StreamedMatrix_RawBuffer (array of float64)
@@ -617,9 +643,11 @@
 //                                                                   //
 
 /*
- * Spectrum stream description (fixed on june 4th 2007)
+ * Spectrum stream description
+ * v1 june 4th 2007
+ * v2 nov 2014
  *
- * version 1 :
+ * version 2 :
  * ----------------------------------------------------------------- *
  * OVTK_NodeId_Header
  *   OVTK_NodeId_Header_StreamType (integer:)
@@ -631,10 +659,16 @@
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:channel 1 name)
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:channel 2 name)
  *       ...
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:channel 1 unit)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:channel 2 unit)
+ *       ...
  *     OVTK_NodeId_Header_StreamedMatrix_Dimension
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Size (integer:number of frequency band)
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:frequency band 1 name)
  *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:frequency band 2 name)
+ *       ...
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:channel 1 unit)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit (string:channel 2 unit)
  *       ...
  *   OVTK_NodeId_Header_Spectrum
  *     OVTK_NodeId_Header_Spectrum_FrequencyBand

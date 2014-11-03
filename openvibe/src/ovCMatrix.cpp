@@ -20,12 +20,14 @@ namespace OpenViBE
 			virtual const uint32 getDimensionCount(void) const;
 			virtual const uint32 getDimensionSize(const uint32 ui32DimensionIndex) const;
 			virtual const char* getDimensionLabel(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex) const;
+			virtual const char* getDimensionUnit(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex) const;
 			virtual const float64* getBuffer(void) const;
 			virtual const uint32 getBufferElementCount(void) const;
 
 			virtual boolean setDimensionCount(const uint32 ui32DimensionCount);
 			virtual boolean setDimensionSize(const uint32 ui32DimensionIndex, const uint32 ui32DimensionSize);
 			virtual boolean setDimensionLabel(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex, const char* sDimensionLabel);
+			virtual boolean setDimensionUnit(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex, const char* sDimensionUnit);
 			virtual float64* getBuffer(void);
 
 			_IsDerivedFromClass_Final_(IMatrix, OV_ClassId_MatrixImpl);
@@ -41,6 +43,7 @@ namespace OpenViBE
 
 			std::vector < uint32 > m_vDimensionSize;
 			std::vector < std::vector < std::string > > m_vDimensionLabel;
+			std::vector < std::vector < std::string > > m_vDimensionUnit;
 		};
 	};
 };
@@ -90,6 +93,19 @@ const char* CMatrixImpl::getDimensionLabel(const uint32 ui32DimensionIndex, cons
 	return m_vDimensionLabel[ui32DimensionIndex][ui32DimensionEntryIndex].c_str();
 }
 
+const char* CMatrixImpl::getDimensionUnit(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex) const
+{
+	if(ui32DimensionIndex>=m_vDimensionSize.size())
+	{
+		return "";
+	}
+	if(ui32DimensionEntryIndex>=m_vDimensionSize[ui32DimensionIndex])
+	{
+		return "";
+	}
+	return m_vDimensionUnit[ui32DimensionIndex][ui32DimensionEntryIndex].c_str();
+}
+
 const float64* CMatrixImpl::getBuffer(void) const
 {
 	if(!m_pBuffer)
@@ -129,6 +145,9 @@ boolean CMatrixImpl::setDimensionCount(const uint32 ui32DimensionCount)
 	m_vDimensionLabel.clear();
 	m_vDimensionLabel.resize(ui32DimensionCount);
 
+	m_vDimensionUnit.clear();
+	m_vDimensionUnit.resize(ui32DimensionCount);
+
 	return true;
 }
 
@@ -148,6 +167,8 @@ boolean CMatrixImpl::setDimensionSize(const uint32 ui32DimensionIndex, const uin
 	m_vDimensionSize[ui32DimensionIndex]=ui32DimensionSize;
 	m_vDimensionLabel[ui32DimensionIndex].clear();
 	m_vDimensionLabel[ui32DimensionIndex].resize(ui32DimensionSize);
+	m_vDimensionUnit[ui32DimensionIndex].clear();
+	m_vDimensionUnit[ui32DimensionIndex].resize(ui32DimensionSize);
 	return true;
 }
 
@@ -162,6 +183,21 @@ boolean CMatrixImpl::setDimensionLabel(const uint32 ui32DimensionIndex, const ui
 		return false;
 	}
 	m_vDimensionLabel[ui32DimensionIndex][ui32DimensionEntryIndex]=sDimensionLabel;
+	return true;
+}
+
+
+boolean CMatrixImpl::setDimensionUnit(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex, const char* sDimensionUnit)
+{
+	if(ui32DimensionIndex>=m_vDimensionSize.size())
+	{
+		return false;
+	}
+	if(ui32DimensionEntryIndex>=m_vDimensionSize[ui32DimensionIndex])
+	{
+		return false;
+	}
+	m_vDimensionUnit[ui32DimensionIndex][ui32DimensionEntryIndex]=sDimensionUnit;
 	return true;
 }
 
@@ -236,6 +272,11 @@ const char* CMatrix::getDimensionLabel(const uint32 ui32DimensionIndex, const ui
 	return m_pMatrixImpl->getDimensionLabel(ui32DimensionIndex, ui32DimensionEntryIndex);
 }
 
+const char* CMatrix::getDimensionUnit(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex) const
+{
+	return m_pMatrixImpl->getDimensionUnit(ui32DimensionIndex, ui32DimensionEntryIndex);
+}
+
 const float64* CMatrix::getBuffer(void) const
 {
 	return m_pMatrixImpl->getBuffer();
@@ -260,6 +301,12 @@ boolean CMatrix::setDimensionLabel(const uint32 ui32DimensionIndex, const uint32
 {
 	return m_pMatrixImpl->setDimensionLabel(ui32DimensionIndex, ui32DimensionEntryIndex, sDimensionLabel);
 }
+
+boolean CMatrix::setDimensionUnit(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex, const char* sDimensionUnit)
+{
+	return m_pMatrixImpl->setDimensionUnit(ui32DimensionIndex, ui32DimensionEntryIndex, sDimensionUnit);
+}
+
 
 float64* CMatrix::getBuffer(void)
 {
