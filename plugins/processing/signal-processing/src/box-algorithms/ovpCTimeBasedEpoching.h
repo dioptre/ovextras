@@ -3,7 +3,6 @@
 
 #include "../ovp_defines.h"
 #include <toolkit/ovtk_all.h>
-#include <ebml/TWriterCallbackProxy.h>
 #include <vector>
 #include <cstdio>
 
@@ -29,24 +28,16 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, OVP_ClassId_TimeBasedEpoching)
 
-		public:
-
-			virtual void setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
-			virtual void setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
-			virtual void setSampleCountPerBuffer(const OpenViBE::uint32 ui32SampleCountPerBuffer);
-			virtual void setSamplingRate(const OpenViBE::uint32 ui32SamplingFrequency);
-			virtual void setSampleBuffer(const OpenViBE::float64* pBuffer);
-
 		protected:
 
+			OpenViBEToolkit::TSignalDecoder<CTimeBasedEpoching> m_oSignalDecoder;
+			
 			std::vector<OpenViBEPlugins::SignalProcessing::CTimeBasedEpoching::COutputHandler*> m_vOutputHandler;
+
 			OpenViBE::uint32 m_ui32InputSampleCountPerBuffer;
 			OpenViBE::uint64 m_ui64LastStartTime;
 			OpenViBE::uint64 m_ui64LastEndTime;
 
-			EBML::IReader* m_pSignalInputReader;
-			OpenViBEToolkit::IBoxAlgorithmSignalInputReaderCallback* m_pSignalInputReaderCallback;
-			OpenViBEToolkit::IBoxAlgorithmSignalInputReaderCallback::TCallbackProxy1<CTimeBasedEpoching> m_oSignalInputReaderCallbackProxy;
 		};
 
 		class CTimeBasedEpochingListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
@@ -125,6 +116,11 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Epoch 1 duration (in sec)",  OV_TypeId_Float,  "1");
 				rPrototype.addSetting("Epoch 1 intervals (in sec)", OV_TypeId_Float,  "0.5");
 				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddOutput);
+
+			// don't need to specify these as the user is not allowed to modify them... avoiding for now to avoid updating boxes
+			//	rPrototype.addInputSupport(OV_TypeId_Signal);
+			//	rPrototype.addOutputSupport(OV_TypeId_Signal);
+
 				return true;
 			}
 
