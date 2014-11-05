@@ -135,37 +135,43 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 				return false;
 			}
 
-			// The matrix is a vector, make a [n x 1] matrix to represent it
-			if( l_pMatrix->getDimensionCount() == 1 )
+			if( l_pMatrix->getDimensionCount() == 1)
 			{
+				// The matrix is a vector, make a matrix to represent it
 				m_pMatrix = new CMatrix();
 				m_bDeleteMatrix = true;
 				m_pMatrix->setDimensionCount(2);
 
-				if(m_oTypeIdentifier==OV_TypeId_FeatureVector)
+				// This [n X 1] will get written as a single row due to transpose later
+				m_pMatrix->setDimensionSize(0,l_pMatrix->getDimensionSize(0));
+				m_pMatrix->setDimensionSize(1,1);
+				for(uint32 i=0;i<l_pMatrix->getDimensionSize(0);i++)
 				{
-					// Flip, [n channels X 1 sample]
-					m_pMatrix->setDimensionSize(0,l_pMatrix->getDimensionSize(0));
-					m_pMatrix->setDimensionSize(1,1);
-					for(uint32 i=0;i<l_pMatrix->getDimensionSize(0);i++)
-					{
-						m_pMatrix->setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(0,i));
-					}
-				} 
-				else
-				{
-					// As-is, [1 channel X n samples]
-					m_pMatrix->setDimensionSize(0,1);
-					m_pMatrix->setDimensionSize(1,l_pMatrix->getDimensionSize(0));
-					for(uint32 i=0;i<l_pMatrix->getDimensionSize(0);i++)
-					{
-						m_pMatrix->setDimensionLabel(1,i,l_pMatrix->getDimensionLabel(0,i));
-					}
+					m_pMatrix->setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(0,i));
 				}
 
 			}
+			else if(m_oTypeIdentifier==OV_TypeId_FeatureVector)
+			{
+				// OpenViBE matrixes are usually [channels x time], but they get written to the CSV as transposed, i.e. [time X channels].
+				// The feature stream matrix is [1 X features], but here we transpose it to [features X 1] to compensate and to get 
+				// one-vector-per-row in the output file
+				m_pMatrix = new CMatrix();
+				m_bDeleteMatrix = true;
+				m_pMatrix->setDimensionCount(2);
+
+				// This [n X 1] will get written as a single row due to transpose later
+				m_pMatrix->setDimensionSize(0,l_pMatrix->getDimensionSize(1));
+				m_pMatrix->setDimensionSize(1,1);
+				for(uint32 i=0;i<l_pMatrix->getDimensionSize(1);i++)
+				{
+   					// this->getLogManager() << LogLevel_Info << "  N: " << i << " is " << l_pMatrix->getDimensionLabel(1,i) << "\n";
+					m_pMatrix->setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(1,i));
+				}
+			}
 			else
 			{
+				// As-is
 				m_pMatrix=l_pMatrix;
 			}
 //			std::cout<<&m_pMatrix<<" "<<&op_pMatrix<<"\n";

@@ -168,6 +168,13 @@ namespace OpenViBEPlugins
 						l_pOutputMatrix->setDimensionCount(2);
 						l_pOutputMatrix->setDimensionSize(0, 1);
 						l_pOutputMatrix->setDimensionSize(1, (uint32)l_ui64TotalBufferSize);
+
+						for(uint32 i=0;i<(uint32)l_ui64TotalBufferSize;i++) {
+							char l_sBuffer[64];
+							sprintf(l_sBuffer, "Feature %d", i);
+							l_pOutputMatrix->setDimensionLabel(1, i, l_sBuffer);
+						}
+
 						m_pFeatureVectorEncoder->encodeHeader();
 						l_pBoxIO->markOutputAsReadyToSend(0,m_ui64LastChunkStartTime,m_ui64LastChunkEndTime);
 						m_bHeaderSent=true;

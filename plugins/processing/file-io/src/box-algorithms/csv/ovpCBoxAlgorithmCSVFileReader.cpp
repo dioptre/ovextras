@@ -2,6 +2,9 @@
 #include <iostream>
 #include <sstream>
 #include <map>
+
+#include <openvibe/ovITimeArithmetics.h>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -75,7 +78,7 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 		m_ui32SamplesPerBuffer=static_cast<uint32>(atoi((const char*)l_sParam));
 	}
 	//open file
-	m_pFile=::fopen(m_sFilename.toASCIIString(), "rb");
+	m_pFile=::fopen(m_sFilename.toASCIIString(), "r"); // we don't open as binary as that gives us \r\n on Windows as line-endings and leaves a dangling char after split. CSV files should be text.
 	if(!m_pFile)
 	{
 		this->getLogManager() << LogLevel_Error << "Could not open file [" << m_sFilename << "]\n";
@@ -268,7 +271,8 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 			return false;
 		}
 		if(!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Spectrum)
-				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation))
+				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation)
+				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_FeatureVector))
 		{
 			//get the date of the first bloc samples to send
 			uint64 l_ui64StartTime=(uint64)(atof(m_vDataMatrix[0][0].c_str())*65536.0);
@@ -446,26 +450,40 @@ OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_channelLocalisation(void)
 
 OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_featureVector(void)
 {
-	//CMatrix l_oMatrix;
-	//ip_pMatrix=&l_oMatrix;
-
-	IMatrix* ip_pMatrix = ((OpenViBEToolkit::TFeatureVectorEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
-
-
-	convertVectorDataToMatrix(ip_pMatrix);
+	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
+	IMatrix* l_pMatrix = ((OpenViBEToolkit::TFeatureVectorEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
 
 	if(!m_bHeaderSent)
 	{
+		l_pMatrix->setDimensionCount(2);
+		l_pMatrix->setDimensionSize(0,1);
+		l_pMatrix->setDimensionSize(1,m_ui32NbColumn-1);
+
 		for(uint32 i=1;i<m_ui32NbColumn;i++)
 		{
-			ip_pMatrix->setDimensionLabel(0,i-1,m_vHeaderFile[i].c_str());
+			l_pMatrix->setDimensionLabel(1,i-1,m_vHeaderFile[i].c_str());
 		}
 		m_pAlgorithmEncoder->encodeHeader();
 
 		m_bHeaderSent=true;
 
 	}
-	m_pAlgorithmEncoder->encodeBuffer();
+
+	// Each vector has to be sent separately
+	for(uint32 i=0;i<m_vDataMatrix.size();i++)
+	{
+		for(uint32 j=0;j<m_ui32NbColumn-1;j++)
+		{
+			l_pMatrix->getBuffer()[j]=atof(m_vDataMatrix[i][j+1].c_str());
+		}
+
+		m_pAlgorithmEncoder->encodeBuffer();
+
+		const uint64 l_ui64StartTime = ITimeArithmetics::secondsToTime(atof(m_vDataMatrix[i][0].c_str()));
+		l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_ui64StartTime,l_ui64StartTime);
+	}
+		
+	clearMatrix(m_vDataMatrix);
 
 	return true;
 }
@@ -545,20 +563,21 @@ OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_spectrum(void)
 
 void CBoxAlgorithmCSVFileReader::convertVectorDataToMatrix(IMatrix* matrix)
 {
-		matrix->setDimensionCount(2);
-		matrix->setDimensionSize(0,m_ui32NbColumn-1);
-		matrix->setDimensionSize(1,m_vDataMatrix.size());
+	matrix->setDimensionCount(2);
+	matrix->setDimensionSize(0,m_ui32NbColumn-1);
+	matrix->setDimensionSize(1,m_vDataMatrix.size());
 
-		std::stringstream  l_sMatrix;
-		for(uint32 i=0;i<m_vDataMatrix.size();i++)
+	std::stringstream  l_sMatrix;
+	for(uint32 i=0;i<m_vDataMatrix.size();i++)
+	{
+		l_sMatrix<<"at time ("<<m_vDataMatrix[i][0].c_str()<<"):";
+		for(uint32 j=0;j<m_ui32NbColumn-1;j++)
 		{
-			l_sMatrix<<"at time ("<<m_vDataMatrix[i][0].c_str()<<"):";
-			for(uint32 j=0;j<m_ui32NbColumn-1;j++)
-			{
-				matrix->getBuffer()[j*m_vDataMatrix.size()+i]=atof(m_vDataMatrix[i][j+1].c_str());
-				l_sMatrix<<matrix->getBuffer()[j*m_vDataMatrix.size()+i]<<";";
-			}
-			l_sMatrix<<"\n";
+			matrix->getBuffer()[j*m_vDataMatrix.size()+i]=atof(m_vDataMatrix[i][j+1].c_str());
+			l_sMatrix<<matrix->getBuffer()[j*m_vDataMatrix.size()+i]<<";";
 		}
-		getLogManager()<<LogLevel_Debug<<"Matrix:\n"<<l_sMatrix.str().c_str();
+		l_sMatrix<<"\n";
+	}
+	getLogManager()<<LogLevel_Debug<<"Matrix:\n"<<l_sMatrix.str().c_str();
+	getLogManager()<<LogLevel_Debug<<"Matrix:\n"<<l_sMatrix.str().c_str();
 }
