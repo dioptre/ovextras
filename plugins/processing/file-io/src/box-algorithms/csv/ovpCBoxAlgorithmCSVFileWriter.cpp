@@ -208,9 +208,11 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 				}
 				else if(m_oTypeIdentifier==OV_TypeId_Signal)
 				{
-					uint64 op_ui64SamplingFrequency =  ((OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputSamplingRate();
+					const uint64 l_ui64SamplingFrequency =  ((OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputSamplingRate();
+					const uint64 l_ui64TimeOfNthSample = ITimeArithmetics::sampleCountToTime(l_ui64SamplingFrequency, s); // assuming chunk start is 0
+					const uint64 l_ui64SampleTime = l_ui64StartTime+l_ui64TimeOfNthSample;
 
-					m_oFileStream << ITimeArithmetics::timeToSeconds(ITimeArithmetics::sampleCountToTime(static_cast<uint64>(op_ui64SamplingFrequency), m_ui64SampleCount+s));
+					m_oFileStream << ITimeArithmetics::timeToSeconds(l_ui64SampleTime);
 				}
 				else if(m_oTypeIdentifier==OV_TypeId_Spectrum) 
 				{
@@ -225,18 +227,18 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 				{
 					if(m_oTypeIdentifier==OV_TypeId_Signal)
 					{
-						uint64 op_ui64SamplingFrequency =  ((OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputSamplingRate();
+						const uint64 l_ui64SamplingFrequency =  ((OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputSamplingRate();
 
-						m_oFileStream << m_sSeparator.toASCIIString() << (uint64)op_ui64SamplingFrequency;
+						m_oFileStream << m_sSeparator.toASCIIString() << (uint64)l_ui64SamplingFrequency;
 
 						m_bFirstBuffer=false;
 					}
 					else if(m_oTypeIdentifier==OV_TypeId_Spectrum)
 					{
-						IMatrix* op_pMinMaxFrequencyBand =  ((OpenViBEToolkit::TSpectrumDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMinMaxFrequencyBands();
+						const IMatrix* l_pMinMaxFrequencyBand =  ((OpenViBEToolkit::TSpectrumDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMinMaxFrequencyBands();
 
-						m_oFileStream << m_sSeparator.toASCIIString() << op_pMinMaxFrequencyBand->getBuffer()[s*2+0];
-						m_oFileStream << m_sSeparator.toASCIIString() << op_pMinMaxFrequencyBand->getBuffer()[s*2+1];
+						m_oFileStream << m_sSeparator.toASCIIString() << l_pMinMaxFrequencyBand->getBuffer()[s*2+0];
+						m_oFileStream << m_sSeparator.toASCIIString() << l_pMinMaxFrequencyBand->getBuffer()[s*2+1];
 					}
 					else
 					{
@@ -285,7 +287,7 @@ boolean CBoxAlgorithmCSVFileWriter::process_stimulation(void)
 		}
 		if(m_pStreamDecoder->isBufferReceived())
 		{
-			IStimulationSet* l_pStimulationSet = ((OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputStimulationSet();
+			const IStimulationSet* l_pStimulationSet = ((OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputStimulationSet();
 			for(uint32 j=0; j<l_pStimulationSet->getStimulationCount(); j++)
 			{
 				m_oFileStream << ITimeArithmetics::timeToSeconds(l_pStimulationSet->getStimulationDate(j))
