@@ -1,6 +1,8 @@
 #ifndef __OpenViBEKernel_Kernel_Player_GtkOVCustom_H__
 #define __OpenViBEKernel_Kernel_Player_GtkOVCustom_H__
 
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include <gtk/gtkwidget.h>
 
 #include <openvibe/ov_all.h>
@@ -208,3 +210,5 @@ private:
 };
 
 #endif // __OpenViBEKernel_Kernel_Player_GtkOVCustom_H__
+
+#endif

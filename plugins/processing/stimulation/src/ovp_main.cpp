@@ -35,7 +35,10 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Pause", OV_TypeId_PlayerAction_Pause.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Forward", OV_TypeId_PlayerAction_Forward.toUInteger());
 
+#if defined(TARGET_HAS_ThirdPartyGTK)
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CKeyboardStimulatorDesc);
+#endif
+
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CSignChangeDetectorDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmPlayerControllerDesc);

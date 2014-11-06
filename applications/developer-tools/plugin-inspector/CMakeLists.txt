@@ -1,3 +1,9 @@
+
+IF(OV_DISABLE_GTK)
+  MESSAGE(STATUS  "Skipping Plugin Inspector, no GTK")
+  RETURN()
+ENDIF(OV_DISABLE_GTK)
+
 PROJECT(openvibe-plugin-inspector)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})

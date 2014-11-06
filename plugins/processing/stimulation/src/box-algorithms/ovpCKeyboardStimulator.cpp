@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "ovpCKeyboardStimulator.h"
 
 #include <fstream>
@@ -257,3 +260,5 @@ namespace OpenViBEPlugins
 		}
 	};
 };
+
+#endif

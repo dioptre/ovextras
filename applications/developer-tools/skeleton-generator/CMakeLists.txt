@@ -1,3 +1,9 @@
+
+IF(OV_DISABLE_GTK)
+  MESSAGE(STATUS  "Skipping Skeleton Generator, no GTK")
+  RETURN()
+ENDIF(OV_DISABLE_GTK)
+
 PROJECT(openvibe-skeleton-generator)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})

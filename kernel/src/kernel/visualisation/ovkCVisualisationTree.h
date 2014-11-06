@@ -1,6 +1,8 @@
 #ifndef __OpenViBEKernel_Kernel_Visualisation_CVisualisationTree_H__
 #define __OpenViBEKernel_Kernel_Visualisation_CVisualisationTree_H__
 
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "../ovkTKernelObject.h"
 
 #include "../scenario/ovkTAttributable.h"
@@ -275,3 +277,5 @@ namespace OpenViBE
 };
 
 #endif // __OpenViBEKernel_Kernel_Visualisation_CVisualisationTree_H__
+
+#endif
