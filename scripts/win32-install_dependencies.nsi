@@ -845,14 +845,14 @@ Section "Device SDK: MCS NVX"
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
 
-	IfFileExists "arch\mcs-$suffix-dev.zip" no_need_to_download_mcs_dev
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/mcs-$suffix-dev.zip "arch\mcs-$suffix-dev.zip"
+	IfFileExists "arch\sdk-mcs-B-$suffix-dev.zip" no_need_to_download_mcs_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/mcs-$suffix-dev.zip "arch\sdk-mcs-B-$suffix-dev.zip"
 	Pop $R0 ; Get the return value
 		StrCmp $R0 "success" +3
 			MessageBox MB_OK "Download failed: $R0" /SD IDOK
 			Quit
 no_need_to_download_mcs_dev:
-	ZipDLL::extractall "arch\mcs-$suffix-dev.zip" ""
+	ZipDLL::extractall "arch\sdk-mcs-B-$suffix-dev.zip" ""
 	
 SectionEnd
 

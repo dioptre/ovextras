@@ -218,6 +218,10 @@ boolean CDriverMKSNVXDriver::start(void)
 	return true;
 }
 
+const float floatNaN = std::numeric_limits<float>::quiet_NaN();
+//#define NVXValueToFloat(v, resolution) ((v) == INT_MAX ? floatNaN : ((v)*(resolution)))
+#define NVXValueToFloat(v, resolution) ((v) == INT_MAX ? 0.f : ((v)*(resolution)))
+
 boolean CDriverMKSNVXDriver::loop(void)
 {
 	if(!m_rDriverContext.isConnected()) return false;
@@ -255,32 +259,32 @@ boolean CDriverMKSNVXDriver::loop(void)
 						switch (nvxInfo_.Model) {
 						case NVX_MODEL_16:
 							if (i < NVX_MODEL_16_CHANNELS_MAIN) {
-								sampleDataPtr[i*sampblesPerChannel + j] = reinterpret_cast<t_NVXDataModel16*>(deviceBuffer_)[j].Main[i] * eegResolution;
+								sampleDataPtr[i*sampblesPerChannel + j] = NVXValueToFloat(reinterpret_cast<t_NVXDataModel16*>(deviceBuffer_)[j].Main[i], eegResolution);
 							}
 							else {
 								const size_t auxChannelNumber = i - NVX_MODEL_16_CHANNELS_MAIN;
-								sampleDataPtr[i*sampblesPerChannel + j] = reinterpret_cast<t_NVXDataModel16*>(deviceBuffer_)[j].Aux[auxChannelNumber] * auxResolution;
+								sampleDataPtr[i*sampblesPerChannel + j] = NVXValueToFloat(reinterpret_cast<t_NVXDataModel16*>(deviceBuffer_)[j].Aux[auxChannelNumber], auxResolution);
 							}
 							break;
 						case NVX_MODEL_24:
-							sampleDataPtr[i*sampblesPerChannel + j] = reinterpret_cast<t_NVXDataModel24*>(deviceBuffer_)[j].Main[i] * eegResolution;
+							sampleDataPtr[i*sampblesPerChannel + j] = NVXValueToFloat(reinterpret_cast<t_NVXDataModel24*>(deviceBuffer_)[j].Main[i], eegResolution);
 							break;
 						case NVX_MODEL_36:
 							if (i < NVX_MODEL_36_CHANNELS_MAIN) {
-								sampleDataPtr[i*sampblesPerChannel + j] = reinterpret_cast<t_NVXDataModel36*>(deviceBuffer_)[j].Main[i] * eegResolution;
+								sampleDataPtr[i*sampblesPerChannel + j] = NVXValueToFloat(reinterpret_cast<t_NVXDataModel36*>(deviceBuffer_)[j].Main[i], eegResolution);
 							}
 							else {
 								const size_t auxChannelNumber = i - NVX_MODEL_36_CHANNELS_MAIN;
-								sampleDataPtr[i*sampblesPerChannel + j] = reinterpret_cast<t_NVXDataModel36*>(deviceBuffer_)[j].Aux[auxChannelNumber] * auxResolution;
+								sampleDataPtr[i*sampblesPerChannel + j] = NVXValueToFloat(reinterpret_cast<t_NVXDataModel36*>(deviceBuffer_)[j].Aux[auxChannelNumber], auxResolution);
 							}
 							break;
 						case NVX_MODEL_52:
 							if (i < NVX_MODEL_52_CHANNELS_MAIN) {
-								sampleDataPtr[i*sampblesPerChannel + j] = reinterpret_cast<t_NVXDataModel52*>(deviceBuffer_)[j].Main[i] * eegResolution;
+								sampleDataPtr[i*sampblesPerChannel + j] = NVXValueToFloat(reinterpret_cast<t_NVXDataModel52*>(deviceBuffer_)[j].Main[i], eegResolution);
 							}
 							else {
 								const size_t auxChannelNumber = i - NVX_MODEL_52_CHANNELS_MAIN;
-								sampleDataPtr[i*sampblesPerChannel + j] = reinterpret_cast<t_NVXDataModel52*>(deviceBuffer_)[j].Aux[auxChannelNumber] * auxResolution;
+								sampleDataPtr[i*sampblesPerChannel + j] = NVXValueToFloat(reinterpret_cast<t_NVXDataModel52*>(deviceBuffer_)[j].Aux[auxChannelNumber], auxResolution);
 							}
 							break;
 						default:
@@ -289,7 +293,7 @@ boolean CDriverMKSNVXDriver::loop(void)
 						}
 					}
 					else {
-						sampleDataPtr[i*sampblesPerChannel + j] = reinterpret_cast<t_NVXDataMode50kHz*>(deviceBuffer_)[j].Main[i] * eegResolution;
+						sampleDataPtr[i*sampblesPerChannel + j] = NVXValueToFloat(reinterpret_cast<t_NVXDataMode50kHz*>(deviceBuffer_)[j].Main[i], eegResolution);
 					}
 				}
 				// check data integrity
