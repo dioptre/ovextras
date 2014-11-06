@@ -201,11 +201,6 @@ bool SmartingAmp::connect(std::string& port_name)
 		disconnect();
 		return false;
 	}
-	catch(...)
-	{
-		disconnect();
-		return false;
-	}
 	
 	// NOTE: After connection is established wait 3s and then you can start using the amp 
 	boost::this_thread::sleep(boost::posix_time::millisec(3000));
