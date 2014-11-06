@@ -4,7 +4,7 @@
   <!-- interface-naming-policy project-wide -->
   <object class="GtkAdjustment" id="adjustment1">
     <property name="lower">24</property>
-    <property name="upper">30</property>
+    <property name="upper">27</property>
     <property name="value">24</property>
     <property name="step_increment">3</property>
     <property name="page_increment">10</property>
