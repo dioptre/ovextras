@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyMicromed)
+
 #include "ovasCDriverMicromedSystemPlusEvolution.h"
 #include "../ovasCConfigurationNetworkBuilder.h"
 
@@ -888,4 +891,6 @@ boolean CDriverMicromedSystemPlusEvolution::configure(void)
 
 	return false;
 }
+#endif
+
 #endif

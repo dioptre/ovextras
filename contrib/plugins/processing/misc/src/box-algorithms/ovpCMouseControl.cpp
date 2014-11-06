@@ -44,12 +44,12 @@ boolean CMouseControl::initialize(void)
 
 	m_pInputBuffer = NULL;
 
-#if defined TARGET_OS_Linux
+#if !defined(TARGET_OS_Linux)
+	getLogManager() << LogLevel_Error << "This box algorithm is not implemented for your operating system\n";
+	return false;
 #else
-	getLogManager() << LogLevel_ImportantWarning << "This box algorithm is not yet implemented for your platform\n";
-#endif
-
 	return true;
+#endif
 }
 
 boolean CMouseControl::uninitialize(void)
