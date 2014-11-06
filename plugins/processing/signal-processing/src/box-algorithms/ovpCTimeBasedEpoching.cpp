@@ -50,9 +50,10 @@ protected:
 	uint32 m_ui32SampleIndex;
 	uint32 m_ui32SampleCountPerEpoch;
 	uint32 m_ui32SampleCountBetweenEpoch;
-	bool m_bHeaderSent;
 
 	uint64 m_ui64DeltaTime;
+
+	bool m_bHeaderSent;
 
 	CTimeBasedEpoching& m_rParent;
 
@@ -68,12 +69,12 @@ CTimeBasedEpoching::COutputHandler::COutputHandler(CTimeBasedEpoching& rParent, 
 	,m_ui32SampleIndex(0)
 	,m_ui32SampleCountPerEpoch(0)
 	,m_ui32SampleCountBetweenEpoch(0)
-	,m_rParent(rParent)
+	,m_ui64DeltaTime(0)
 	,m_bHeaderSent(false)
+	,m_rParent(rParent)
 
 {
 	m_oSignalEncoder.initialize(rParent, ui32OutputIndex);
-	m_ui64DeltaTime=0;
 }
 
 CTimeBasedEpoching::COutputHandler::~COutputHandler(void)
