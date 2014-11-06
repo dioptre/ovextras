@@ -68,7 +68,7 @@ boolean CConnectorEditor::run(void)
 	gtk_window_set_title(GTK_WINDOW(l_pConnectorDialog), m_sTitle.c_str());
 
 	//get a list of stream types and display connector type
-	map<string, CIdentifier> m_vStreamTypes;
+	map<string, CIdentifier> l_vStreamTypes;
 	CIdentifier l_oCurrentTypeIdentifier;
 	gint l_iActive=-1;
 
@@ -83,10 +83,10 @@ boolean CConnectorEditor::run(void)
 				gtk_combo_box_append_text(l_pConnectorTypeComboBox, m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString());
 				if(l_oCurrentTypeIdentifier==l_oConnectorType)
 				{
-					l_iActive=m_vStreamTypes.size();
+					l_iActive=l_vStreamTypes.size();
 					gtk_combo_box_set_active(l_pConnectorTypeComboBox, l_iActive);
 				}
-				m_vStreamTypes[m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString()]=l_oCurrentTypeIdentifier;
+				l_vStreamTypes[m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString()]=l_oCurrentTypeIdentifier;
 			}
 		}
 	}
@@ -104,7 +104,7 @@ boolean CConnectorEditor::run(void)
 			char* l_sActiveText=gtk_combo_box_get_active_text(l_pConnectorTypeComboBox);
 			if(l_sActiveText)
 			{
-				(m_rBox.*setConnectorType)(m_ui32ConnectorIndex, m_vStreamTypes[l_sActiveText]);
+				(m_rBox.*setConnectorType)(m_ui32ConnectorIndex, l_vStreamTypes[l_sActiveText]);
 				(m_rBox.*setConnectorName)(m_ui32ConnectorIndex, gtk_entry_get_text(l_pConnectorNameEntry));
 				l_bFinished=true;
 				l_bResult=true;

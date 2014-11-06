@@ -50,7 +50,9 @@ void CFastICA::setSampleCountPerBuffer(const uint32 ui32SampleCountPerBuffer)
 
 	for(uint32 i=0 ; i<m_pSignalDescription->m_ui32ChannelCount ; i++)
 	{
-		m_pSignalOutputWriterHelper->setChannelName(i, m_pSignalDescription->m_pChannelName[i].c_str());
+		char l_sBuffer[64];
+		sprintf(l_sBuffer, "IC %d", i);
+		m_pSignalOutputWriterHelper->setChannelName(i, l_sBuffer);
 	}
 
 	m_pSignalOutputWriterHelper->setSampleCountPerBuffer(m_pSignalDescription->m_ui32SampleCount);
