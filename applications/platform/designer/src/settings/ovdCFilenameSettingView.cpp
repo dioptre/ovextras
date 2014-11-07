@@ -21,12 +21,9 @@ static void on_change(::GtkEntry *entry, gpointer pUserData)
 
 
 CFilenameSettingView::CFilenameSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName, const Kernel::IKernelContext &rKernelContext):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_rKernelContext(rKernelContext), m_bOnValueSetting(false)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName, "settings_collection-hbox_setting_filename"), m_rKernelContext(rKernelContext), m_bOnValueSetting(false)
 {
-	setSettingWidgetName("settings_collection-hbox_setting_filename");
-
-	generateNameWidget();
-	::GtkWidget* l_pSettingWidget=generateEntryWidget();
+	::GtkWidget* l_pSettingWidget = this->getEntryFieldWidget();
 
 	std::vector< ::GtkWidget* > l_vWidget;
 	extractWidget(l_pSettingWidget, l_vWidget);

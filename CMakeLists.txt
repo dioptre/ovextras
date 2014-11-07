@@ -62,7 +62,7 @@ MESSAGE(STATUS "  CMAKE_CXX_FLAGS_DEBUG = '${CMAKE_CXX_FLAGS_DEBUG}'")
 SET(OV_COMPILE_TESTS "true")
 
 # By setting SKIP[_FOLDER]* you can skip a subtree (example: SKIP_A_B_C skips folder a/b/c and all its subfolders if any)
-SET(SKIP_DOCUMENTATION "1")
+SET(SKIP_DOCUMENTATION "0")
 #SET(SKIP_CONTRIB_PLUGINS_PROCESSING_PYTHON "1")
 
 IF(UNIX)

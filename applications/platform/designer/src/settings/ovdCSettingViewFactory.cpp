@@ -18,9 +18,11 @@ using namespace OpenViBEDesigner::Setting;
 CSettingViewFactory::CSettingViewFactory(const CString &rBuilderName, const OpenViBE::Kernel::IKernelContext& rKernelContext):
 	m_sBuilderName(rBuilderName), m_rKernelContext(rKernelContext)
 {
-	m_pBuilder = gtk_builder_new();
-	gtk_builder_add_from_file(m_pBuilder, rBuilderName.toASCIIString(), NULL);
-	gtk_builder_connect_signals(m_pBuilder, NULL);
+
+}
+
+CSettingViewFactory::~CSettingViewFactory()
+{
 
 }
 

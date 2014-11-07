@@ -16,14 +16,13 @@ static void on_change(::GtkEntry *entry, gpointer pUserData)
 CEnumerationSettingView::CEnumerationSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index,
 												 CString &rBuilderName, const Kernel::IKernelContext &rKernelContext,
 												 const OpenViBE::CIdentifier &rTypeIdentifier):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_oTypeIdentifier(rTypeIdentifier), m_rKernelContext(rKernelContext), m_bOnValueSetting(false)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName, "settings_collection-comboboxentry_setting_enumeration"),
+	m_oTypeIdentifier(rTypeIdentifier),
+	m_rKernelContext(rKernelContext),
+	m_bOnValueSetting(false)
 {
 	p=false;
-	setSettingWidgetName("settings_collection-comboboxentry_setting_enumeration");
-
-	generateNameWidget();
-
-	::GtkWidget* l_pSettingWidget=generateEntryWidget();
+	::GtkWidget* l_pSettingWidget = this->getEntryFieldWidget();
 
 	m_pComboBox = GTK_COMBO_BOX(l_pSettingWidget);
 

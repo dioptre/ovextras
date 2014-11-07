@@ -164,7 +164,6 @@ void CSettingEditorDialog::update(CObservable &o, void *data)
 			m_rBox.getSettingValue(l_pEvent->m_i32FirstIndex, l_sSettingValue);
 
 			m_pSettingView->setValue(l_sSettingValue);
-			std::cout << " Fin de value" <<  std::endl<< std::endl;
 			break;
 		}
 

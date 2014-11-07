@@ -13,12 +13,9 @@ static void on_checkbutton_setting_boolean_pressed(::GtkToggleButton* pButton, g
 }
 
 CBooleanSettingView::CBooleanSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_bOnValueSetting(false)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName, "settings_collection-hbox_setting_boolean"), m_bOnValueSetting(false)
 {
-	setSettingWidgetName("settings_collection-hbox_setting_boolean");
-
-	generateNameWidget();
-	::GtkWidget* l_pSettingWidget=generateEntryWidget();
+	::GtkWidget* l_pSettingWidget = this->getEntryFieldWidget();
 
 	std::vector< ::GtkWidget* > l_vWidget;
 	extractWidget(l_pSettingWidget, l_vWidget);

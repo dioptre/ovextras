@@ -13,12 +13,9 @@ static void on_change(::GtkEntry *entry, gpointer pUserData)
 }
 
 CStringSettingView::CStringSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index, CString &rBuilderName):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_bOnValueSetting(false)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName, "settings_collection-entry_setting_string"), m_bOnValueSetting(false)
 {
-	setSettingWidgetName("settings_collection-entry_setting_string");
-
-	generateNameWidget();
-	::GtkWidget* l_pSettingWidget=generateEntryWidget();
+	::GtkWidget* l_pSettingWidget = this->getEntryFieldWidget();
 
 	m_pEntry = GTK_ENTRY(l_pSettingWidget);
 	g_signal_connect(G_OBJECT(m_pEntry), "changed", G_CALLBACK(on_change), this);

@@ -15,12 +15,9 @@ static void on_checkbutton__pressed(::GtkToggleButton* pButton, gpointer pUserDa
 CBitMaskSettingView::CBitMaskSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE::uint32 ui32Index,
 										 CString &rBuilderName, const Kernel::IKernelContext &rKernelContext,
 										 const OpenViBE::CIdentifier &rTypeIdentifier):
-	CAbstractSettingView(rBox, ui32Index, rBuilderName), m_oTypeIdentifier(rTypeIdentifier), m_rKernelContext(rKernelContext), m_bOnValueSetting(false)
+	CAbstractSettingView(rBox, ui32Index, rBuilderName, "settings_collection-table_setting_bitmask"), m_oTypeIdentifier(rTypeIdentifier), m_rKernelContext(rKernelContext), m_bOnValueSetting(false)
 {
-	setSettingWidgetName("settings_collection-table_setting_bitmask");
-
-	generateNameWidget();
-	::GtkWidget* l_pSettingWidget=generateEntryWidget();
+	::GtkWidget* l_pSettingWidget = this->getEntryFieldWidget();
 
 	gint l_iTableSize=(guint)((m_rKernelContext.getTypeManager().getBitMaskEntryCount(m_oTypeIdentifier)+1)>>1);
 	::GtkTable* l_pBitMaskTable=GTK_TABLE(l_pSettingWidget);
@@ -68,7 +65,6 @@ void CBitMaskSettingView::setValue(const OpenViBE::CString &rValue)
 {
 	m_bOnValueSetting = true;
 	std::string l_sValue(rValue);
-	std::cout << rValue << std::endl;
 
 	for(size_t i = 0 ; i < m_vToggleButton.size() ; ++i)
 	{
