@@ -77,7 +77,7 @@ OVP_Declare_Begin();
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysisDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysisCospectraDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CFastICADesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CFastICADesc);
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CWindowingFunctionsDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CComputeTemporalFilterCoefficientsDesc);
