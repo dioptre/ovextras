@@ -29,7 +29,7 @@ public:
 public:
 
 	virtual void reset(const uint64 ui64DeltaTime);
-	virtual void process();
+	virtual bool process();
 
 private:
 
@@ -89,7 +89,7 @@ void CTimeBasedEpoching::COutputHandler::reset(const uint64 ui64DeltaTime)
 	m_ui32EpochIndex=0;
 }
 
-void CTimeBasedEpoching::COutputHandler::process()
+bool CTimeBasedEpoching::COutputHandler::process()
 {
 	if(!m_bHeaderSent)
 	{
@@ -99,6 +99,18 @@ void CTimeBasedEpoching::COutputHandler::process()
 		m_ui32ChannelCount = m_rParent.m_oSignalDecoder.getOutputMatrix()->getDimensionSize(0);
 		m_ui32SampleCountPerEpoch = ((uint32)(m_f64EpochDuration*m_ui64SamplingRate));
 		m_ui32SampleCountBetweenEpoch = ((uint32)(m_f64EpochInterval*m_ui64SamplingRate));
+
+		if(m_ui64SamplingRate == 0)
+		{
+			m_rParent.getLogManager() << LogLevel_Error << "Input sampling rate is 0, not supported\n";
+			return false;
+		}
+
+		if(m_ui32SampleCountPerEpoch == 0)
+		{
+			m_rParent.getLogManager() << LogLevel_Error << "Computed sample count per epoch is 0\n";
+			return false;
+		}
 
 		m_oSignalEncoder.getInputSamplingRate() = m_ui64SamplingRate;
 
@@ -140,7 +152,7 @@ void CTimeBasedEpoching::COutputHandler::process()
 				const uint64 l_ui64EndTime=  m_ui64DeltaTime+ITimeArithmetics::sampleCountToTime(m_ui64SamplingRate, (uint64)m_ui32EpochIndex*(uint64)m_ui32SampleCountBetweenEpoch+m_ui32SampleCountPerEpoch);
 				m_ui32EpochIndex++;
 
-				m_rParent.getLogManager() << LogLevel_Info << "Out: " << l_ui64StartTime << " to " << l_ui64EndTime << "\n";
+				// m_rParent.getLogManager() << LogLevel_Info << "Out: " << l_ui64StartTime << " to " << l_ui64EndTime << "\n";
 
 				// Writes epoch
 				m_oSignalEncoder.encodeBuffer();
@@ -179,6 +191,8 @@ void CTimeBasedEpoching::COutputHandler::process()
 			}
 		}
 	}
+
+	return true;
 }
 
 
@@ -296,7 +310,9 @@ boolean CTimeBasedEpoching::process(void)
 			vector<CTimeBasedEpoching::COutputHandler*>::iterator itOutputHandler;
 			for(itOutputHandler=m_vOutputHandler.begin(); itOutputHandler!=m_vOutputHandler.end(); itOutputHandler++)
 			{
-				(*itOutputHandler)->process();
+				if(!((*itOutputHandler)->process())) {
+					return false;
+				}
 			}						
 
 			m_ui64LastStartTime=l_ui64ChunkStartTime;
