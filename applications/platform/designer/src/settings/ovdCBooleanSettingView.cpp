@@ -19,8 +19,8 @@ CBooleanSettingView::CBooleanSettingView(OpenViBE::Kernel::IBox &rBox, OpenViBE:
 
 	std::vector< ::GtkWidget* > l_vWidget;
 	extractWidget(l_pSettingWidget, l_vWidget);
-	m_pToggle = GTK_TOGGLE_BUTTON(l_vWidget[0]);
-	m_pEntry = GTK_ENTRY(l_vWidget[1]);
+	m_pToggle = GTK_TOGGLE_BUTTON(l_vWidget[1]);
+	m_pEntry = GTK_ENTRY(l_vWidget[0]);
 	gtk_widget_set_sensitive(GTK_WIDGET(m_pEntry), false);
 
 	g_signal_connect(G_OBJECT(m_pToggle), "toggled", G_CALLBACK(on_checkbutton_setting_boolean_pressed), this);

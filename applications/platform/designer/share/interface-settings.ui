@@ -209,6 +209,16 @@
             <property name="visible">True</property>
             <property name="spacing">8</property>
             <child>
+              <object class="GtkEntry" id="settings_collection-entry_setting_boolean">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">&#x25CF;</property>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+	    <child>
               <object class="GtkCheckButton" id="settings_collection-checkbutton_setting_boolean">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -217,16 +227,6 @@
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="settings_collection-entry_setting_boolean">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">&#x25CF;</property>
-              </object>
-              <packing>
                 <property name="position">1</property>
               </packing>
             </child>
