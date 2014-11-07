@@ -923,23 +923,21 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 			}
 			for(uint32 k=0; k<m_ui64OverSamplingFactor; k++)
 			{
-				float32 alpha=float32(k+1)/m_ui64OverSamplingFactor;
+				const float32 alpha=float32(k+1)/m_ui64OverSamplingFactor;
+
+				bool l_bHadNaN = false;
+
 				for(uint32 j=0; j<m_ui32ChannelCount; j++)
 				{
-					const uint32 channel = m_vSelectedChannels[j];
+					const uint32 l_ui32Channel = m_vSelectedChannels[j];
+
 #ifdef TARGET_OS_Windows
-					if(_isnan(pSample[channel*ui32SampleCount+i]) || !_finite(pSample[channel*ui32SampleCount+i])) // NaN or infinite values
+					if(_isnan(pSample[l_ui32Channel*ui32SampleCount+i]) || !_finite(pSample[l_ui32Channel*ui32SampleCount+i])) // NaN or infinite values
 #else
-					if(std::isnan(pSample[channel*ui32SampleCount+i]) || !finite(pSample[channel*ui32SampleCount+i])) // NaN or infinite values
+					if(std::isnan(pSample[l_ui32Channel*ui32SampleCount+i]) || !finite(pSample[l_ui32Channel*ui32SampleCount+i])) // NaN or infinite values
 #endif
 					{
-						if(!m_bReplacementInProgress)
-						{
-							uint64 l_ui64StimulationTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount + channel*ui32SampleCount + i);
-
-							m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Incorrect, l_ui64StimulationTime, 0);
-							m_bReplacementInProgress = true;
-						}
+						l_bHadNaN = true;
 
 						switch(m_eNaNReplacementPolicy)
 						{
@@ -958,17 +956,38 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 					}
 					else
 					{
-						if(m_bReplacementInProgress)
-						{
-							// @note -1 input discrepancy to similar line above, is this intentional? if yes, please explain here.
-							uint64 l_ui64StimulationTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount + channel*ui32SampleCount + i -1);
-
-							m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Correct, l_ui64StimulationTime, 0);
-							m_bReplacementInProgress = false;
-						}
-						m_vSwapBuffer[j]=alpha*pSample[channel*ui32SampleCount+i]+(1-alpha)*m_vOverSamplingSwapBuffer[j];
+						m_vSwapBuffer[j]=alpha*pSample[l_ui32Channel*ui32SampleCount+i]+(1-alpha)*m_vOverSamplingSwapBuffer[j];
 					}
 				}
+		
+				const uint64 l_ui64CurrentSampleIndex = m_ui64SampleCount + i*m_ui64OverSamplingFactor + k;		// j is not included here as all channels have the equal sample time
+
+				if(l_bHadNaN)
+				{
+					// When a NaN is encountered at time t1 on any channel, OVTK_GDF_Incorrect stimulus is sent. When a first good sample is encountered 
+					// after the last bad sample t2, OVTK_GDF_Correct stimulus is sent, i.e. specifying a range of bad data : [t1,t2]. The stimuli are global 
+					// and not specific to channels.
+
+					if(!m_bReplacementInProgress)
+					{
+						const uint64 l_ui64IncorrectBlockStarts = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64CurrentSampleIndex);
+
+						m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Incorrect, l_ui64IncorrectBlockStarts, 0);
+						m_bReplacementInProgress = true;
+					}
+				} 
+				else 
+				{
+					if(m_bReplacementInProgress)
+					{
+						// @note -1 is used here because the incorrect-correct range is inclusive, [a,b]. So when sample is good at b+1, we set the end point at b.
+						const uint64 l_ui64IncorrectBlockStops = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64CurrentSampleIndex - 1);
+
+						m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Correct, l_ui64IncorrectBlockStops, 0);
+						m_bReplacementInProgress = false;
+					}
+				}
+
 				m_vPendingBuffer.push_back(m_vSwapBuffer);
 			}
 		}
@@ -976,8 +995,8 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 		m_ui64SampleCount+=ui32SampleCount*m_ui64OverSamplingFactor;
 
 		{
-			uint64 l_ui64TheoricalSampleCount=(m_ui32SamplingFrequency * (System::Time::zgetTime()-m_ui64StartTime))>>32;
-			int64 l_i64JitterSampleCount=int64(m_ui64SampleCount-l_ui64TheoricalSampleCount)+m_i64InnerLatencySampleCount;
+			const uint64 l_ui64TheoricalSampleCount=(m_ui32SamplingFrequency * (System::Time::zgetTime()-m_ui64StartTime))>>32;
+			const int64 l_i64JitterSampleCount=int64(m_ui64SampleCount-l_ui64TheoricalSampleCount)+m_i64InnerLatencySampleCount;
 
 			m_vJitterSampleCount.push_back(l_i64JitterSampleCount);
 			if(m_vJitterSampleCount.size() > m_ui64JitterEstimationCountForDrift)
