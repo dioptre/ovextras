@@ -125,6 +125,27 @@ boolean CBox::setAlgorithmClassIdentifier(
 		}
 	}
 
+	CBox oTemp(this->getKernelContext(), m_rOwnerScenario);
+	CBoxProto oTempProto(this->getKernelContext(), oTemp);
+	m_pBoxAlgorithmDescriptor->getBoxPrototype(oTempProto);
+
+	CIdentifier l_oStreamTypeIdentifier = OV_UndefinedIdentifier;
+	while((l_oStreamTypeIdentifier=this->getKernelContext().getTypeManager().getNextTypeIdentifier(l_oStreamTypeIdentifier))!=OV_UndefinedIdentifier)
+	{
+		if(this->getKernelContext().getTypeManager().isStream(l_oStreamTypeIdentifier))
+		{
+			//First check if it is a stream
+			if(oTemp.hasInputSupport(l_oStreamTypeIdentifier))
+			{
+				this->addInputSupport(l_oStreamTypeIdentifier);
+			}
+			if(oTemp.hasOutputSupport(l_oStreamTypeIdentifier))
+			{
+				this->addOutputSupport(l_oStreamTypeIdentifier);
+			}
+		}
+	}
+
 	this->notify(BoxModification_AlgorithmClassIdentifierChanged);
 
 	return true;
@@ -255,6 +276,23 @@ boolean CBox::initializeFromExistingBox(
 	{
 		addAttribute(l_oIdentifier, rExistingBox.getAttributeValue(l_oIdentifier));
 		l_oIdentifier=rExistingBox.getNextAttributeIdentifier(l_oIdentifier);
+	}
+
+	CIdentifier l_oStreamTypeIdentifier = OV_UndefinedIdentifier;
+	while((l_oStreamTypeIdentifier=this->getKernelContext().getTypeManager().getNextTypeIdentifier(l_oStreamTypeIdentifier))!=OV_UndefinedIdentifier)
+	{
+		if(this->getKernelContext().getTypeManager().isStream(l_oStreamTypeIdentifier))
+		{
+			//First check if it is a stream
+			if(rExistingBox.hasInputSupport(l_oStreamTypeIdentifier))
+			{
+				this->addInputSupport(l_oStreamTypeIdentifier);
+			}
+			if(rExistingBox.hasOutputSupport(l_oStreamTypeIdentifier))
+			{
+				this->addOutputSupport(l_oStreamTypeIdentifier);
+			}
+		}
 	}
 
 	this->enableNotification();
@@ -602,7 +640,7 @@ boolean CBox::addInputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdenti
 	return true;
 }
 
-boolean CBox::hasInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+boolean CBox::hasInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier) const
 {
 	//If there is no type specify, we allow all
 	if(m_vSupportInputType.empty())
@@ -644,7 +682,7 @@ boolean CBox::addOutputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdent
 	return true;
 }
 
-boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier) const
 {
 	//If there is no type specify, we allow all
 	if(m_vSupportOutputType.empty())

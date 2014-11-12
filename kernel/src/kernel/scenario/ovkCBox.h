@@ -66,13 +66,13 @@ namespace OpenViBE
 			virtual OpenViBE::boolean addInputAndDerivedSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier);
 			virtual OpenViBE::boolean hasInputSupport(
-					const OpenViBE::CIdentifier& rTypeIdentifier);
+					const OpenViBE::CIdentifier& rTypeIdentifier) const;
 			virtual OpenViBE::boolean addOutputSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier);
 			virtual OpenViBE::boolean addOutputAndDerivedSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier);
 			virtual OpenViBE::boolean hasOutputSupport(
-					const OpenViBE::CIdentifier& rTypeIdentifier);
+					const OpenViBE::CIdentifier& rTypeIdentifier) const;
 
 
 			//messages input

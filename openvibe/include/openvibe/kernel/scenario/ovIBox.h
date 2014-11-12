@@ -460,7 +460,7 @@ namespace OpenViBE
 			  * \return \e false if type isn't support.
 			  */
 			virtual OpenViBE::boolean hasInputSupport(
-					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+					const OpenViBE::CIdentifier& rTypeIdentifier) const =0;
 
 			/**
 			  * \brief Marks this type as supported by outputs
@@ -488,7 +488,7 @@ namespace OpenViBE
 			  * \return \e false if type isn't support.
 			  */
 			virtual OpenViBE::boolean hasOutputSupport(
-					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+					const OpenViBE::CIdentifier& rTypeIdentifier) const =0;
 			//@}
 
 			/** \name Message input management */
