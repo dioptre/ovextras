@@ -7,10 +7,46 @@
 
 #include <openvibe/ov_defines.h>
 
+
+
+namespace{
+	class CBoxProtoRestriction : public OpenViBE::Kernel::CBoxProto
+	{
+	public:
+
+		CBoxProtoRestriction(const OpenViBE::Kernel::IKernelContext& rKernelContext, OpenViBE::Kernel::IBox& rBox):
+			CBoxProto(rKernelContext, rBox){}
+
+		virtual OpenViBE::boolean addInput(
+			const OpenViBE::CString& sName,
+			const OpenViBE::CIdentifier& rTypeIdentifier){return true;}
+
+		virtual OpenViBE::boolean addMessageInput(
+			const OpenViBE::CString& sName){return true;}
+		virtual OpenViBE::boolean addMessageOutput(
+			const OpenViBE::CString& sName){return true;}
+
+		virtual OpenViBE::boolean addOutput(
+			const OpenViBE::CString& sName,
+			const OpenViBE::CIdentifier& rTypeIdentifier){return true;}
+
+		virtual OpenViBE::boolean addSetting(
+			const OpenViBE::CString& sName,
+			const OpenViBE::CIdentifier& rTypeIdentifier,
+			const OpenViBE::CString& sDefaultValue,
+			const OpenViBE::boolean bModifiable = false){return true;}
+
+		virtual OpenViBE::boolean addFlag(
+			const OpenViBE::Kernel::EBoxFlag eBoxFlag){return true;}
+	};
+}
+
+
 using namespace std;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
+
 
 //___________________________________________________________________//
 //                                                                   //
@@ -125,26 +161,8 @@ boolean CBox::setAlgorithmClassIdentifier(
 		}
 	}
 
-	CBox oTemp(this->getKernelContext(), m_rOwnerScenario);
-	CBoxProto oTempProto(this->getKernelContext(), oTemp);
+	CBoxProtoRestriction oTempProto(this->getKernelContext(), *this);
 	m_pBoxAlgorithmDescriptor->getBoxPrototype(oTempProto);
-
-	CIdentifier l_oStreamTypeIdentifier = OV_UndefinedIdentifier;
-	while((l_oStreamTypeIdentifier=this->getKernelContext().getTypeManager().getNextTypeIdentifier(l_oStreamTypeIdentifier))!=OV_UndefinedIdentifier)
-	{
-		if(this->getKernelContext().getTypeManager().isStream(l_oStreamTypeIdentifier))
-		{
-			//First check if it is a stream
-			if(oTemp.hasInputSupport(l_oStreamTypeIdentifier))
-			{
-				this->addInputSupport(l_oStreamTypeIdentifier);
-			}
-			if(oTemp.hasOutputSupport(l_oStreamTypeIdentifier))
-			{
-				this->addOutputSupport(l_oStreamTypeIdentifier);
-			}
-		}
-	}
 
 	this->notify(BoxModification_AlgorithmClassIdentifierChanged);
 
