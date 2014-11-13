@@ -820,14 +820,14 @@ Section /o "Device SDK: Micromed"
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
 
-	IfFileExists "arch\sdk-micromed.zip" no_need_to_download_micromed_dev
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-micromed.zip "arch\sdk-micromed.zip"
+	IfFileExists "arch\sdk-micromed-$suffix.zip" no_need_to_download_micromed_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-micromed-$suffix.zip "arch\sdk-micromed-$suffix.zip"
 	Pop $R0 ; Get the return value
 		StrCmp $R0 "success" +3
 			MessageBox MB_OK "Download failed: $R0" /SD IDOK
 			Quit
 no_need_to_download_micromed_dev:
-	ZipDLL::extractall "arch\sdk-micromed.zip" ""
+	ZipDLL::extractall "arch\sdk-micromed-$suffix.zip" ""
 
 SectionEnd
 ;##########################################################################################################################################################
