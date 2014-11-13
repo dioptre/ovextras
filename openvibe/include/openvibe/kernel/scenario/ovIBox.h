@@ -491,6 +491,17 @@ namespace OpenViBE
 					const OpenViBE::CIdentifier& rTypeIdentifier) const =0;
 			//@}
 
+			/**
+			 * \brief Set the supported stream type for input and output according
+			 * to the restriction of the algorithm whose identifier is given in parameter.
+			 * \param rTypeIdentifier [in] : identifier of the algorithm
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 * \note The supported stream list is not reset.
+			 */
+			virtual OpenViBE::boolean setSupportTypeFromAlgorithmIdentifier(
+					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+
 			/** \name Message input management */
 			//@{
 			/**

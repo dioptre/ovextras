@@ -10,6 +10,7 @@
 
 
 namespace{
+	//This class is used to set up the restriction of a stream type for input and output.
 	class CBoxProtoRestriction : public OpenViBE::Kernel::CBoxProto
 	{
 	public:
@@ -712,6 +713,17 @@ boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier) con
 			return true;
 	}
 	return false;
+}
+
+boolean CBox::setSupportTypeFromAlgorithmIdentifier(const CIdentifier &rTypeIdentifier)
+{
+
+	const IPluginObjectDesc* l_pPluginObjectDescriptor=getKernelContext().getPluginManager().getPluginObjectDescCreating(rTypeIdentifier);
+	const IBoxAlgorithmDesc *l_pBoxAlgorithmDescriptor=dynamic_cast<const IBoxAlgorithmDesc*>(l_pPluginObjectDescriptor);
+
+	CBoxProtoRestriction oTempProto(this->getKernelContext(), *this);
+	l_pBoxAlgorithmDescriptor->getBoxPrototype(oTempProto);
+	return true;
 }
 
 //___________________________________________________________________//

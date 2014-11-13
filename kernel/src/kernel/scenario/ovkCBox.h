@@ -73,6 +73,8 @@ namespace OpenViBE
 					const OpenViBE::CIdentifier& rTypeIdentifier);
 			virtual OpenViBE::boolean hasOutputSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier) const;
+			virtual OpenViBE::boolean setSupportTypeFromAlgorithmIdentifier(
+					const OpenViBE::CIdentifier& rTypeIdentifier);
 
 
 			//messages input
