@@ -34,6 +34,21 @@ boolean CBoxAlgorithmGenericStreamWriter::initialize(void)
 	m_oSwap.setSize(0, true);
 
 	m_oWriterHelper.connect(&m_oWriter);
+
+	m_oWriterHelper.openChild(EBML_Identifier_Header);
+	 m_oWriterHelper.openChild(EBML_Identifier_DocType);
+	  m_oWriterHelper.setASCIIStringAsChildData("OpenViBE_Stream_File");
+	 m_oWriterHelper.closeChild();
+
+	 m_oWriterHelper.openChild(EBML_Identifier_EBMLVersion);
+	  m_oWriterHelper.setUIntegerAsChildData(1);
+	 m_oWriterHelper.closeChild();
+
+	 m_oWriterHelper.openChild(EBML_Identifier_EBMLIdLength);
+	  m_oWriterHelper.setUIntegerAsChildData(10);
+	 m_oWriterHelper.closeChild();
+	m_oWriterHelper.closeChild();
+
 	m_oWriterHelper.openChild(OVP_NodeId_OpenViBEStream_Header);
 	 m_oWriterHelper.openChild(OVP_NodeId_OpenViBEStream_Header_Compression);
 	  m_oWriterHelper.setUIntegerAsChildData(0 /* m_bUseCompression?1:0 */);
