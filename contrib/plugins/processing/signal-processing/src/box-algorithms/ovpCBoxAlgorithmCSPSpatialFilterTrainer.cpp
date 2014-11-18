@@ -101,7 +101,7 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::uninitialize(void)
 	m_pSignalDecoderCondition1->uninitialize();
 	delete m_pSignalDecoderCondition1;
 	m_pSignalDecoderCondition2->uninitialize();
-	delete m_pStimulationDecoder;
+	delete m_pSignalDecoderCondition2;
 	m_pStimulationDecoder->uninitialize();
 	delete m_pStimulationDecoder;
 
