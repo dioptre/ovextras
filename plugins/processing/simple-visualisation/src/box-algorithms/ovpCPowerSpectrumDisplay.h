@@ -13,8 +13,7 @@ namespace OpenViBEPlugins
 	namespace SimpleVisualisation
 	{
 
-		class CPowerSpectrumDisplay : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>,
-		virtual public OpenViBEToolkit::IBoxAlgorithmSpectrumInputReaderCallback::ICallback
+		class CPowerSpectrumDisplay : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
 			public:
 				CPowerSpectrumDisplay();
@@ -27,20 +26,9 @@ namespace OpenViBEPlugins
 
 				_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_PowerSpectrumDisplay)
 
-				//IBoxAlgorithmSpectrumInputReaderCallback::ICallback implementation
-				virtual void setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
-				virtual void setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
-				virtual void setFrequencyBandCount(const OpenViBE::uint32 ui32FrequencyBandCount);
-				virtual void setFrequencyBandName(const OpenViBE::uint32 ui32FrequencyBandIndex, const char* sFrequencyBandName);
-				virtual void setFrequencyBandStart(const OpenViBE::uint32 ui32FrequencyBandIndex, const OpenViBE::float64 f64FrequencyBandStart);
-				virtual void setFrequencyBandStop(const OpenViBE::uint32 ui32FrequencyBandIndex, const OpenViBE::float64 f64FrequencyBandStop);
-				virtual void setBuffer(const OpenViBE::float64* pBuffer);
-
 			public:
 
-				//ebml
-				EBML::IReader* m_pReader;
-				OpenViBEToolkit::IBoxAlgorithmSpectrumInputReaderCallback* m_pSpectrumReaderCallBack;
+				OpenViBEToolkit::TSpectrumDecoder<CPowerSpectrumDisplay> m_oSpectrumDecoder;
 
 				//main object used for the display (contains all the GUI code)
 				CSignalDisplayDrawable* m_pPowerSpectrumDisplayView;
