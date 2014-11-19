@@ -13,7 +13,6 @@
 #include "box-algorithms/ovpCDetectingMinMaxBoxAlgorithm.h"
 
 #include "box-algorithms/ovpCWindowingFunctions.h"
-#include "box-algorithms/ovpCSpectralAnalysisCospectra.h"
 #include "box-algorithms/ovpCFastICA.h"
 #include "box-algorithms/ovpCSpectralAnalysis.h"
 
@@ -76,7 +75,6 @@ OVP_Declare_Begin();
 #if defined TARGET_HAS_ThirdPartyITPP
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysisDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysisCospectraDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CFastICADesc);
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CWindowingFunctionsDesc);

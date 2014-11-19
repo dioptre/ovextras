@@ -98,9 +98,6 @@
 #define OVP_ClassId_WindowingFunctions                                                  OpenViBE::CIdentifier(0x002034AE, 0x6509FD8F)
 #define OVP_ClassId_WindowingFunctionsDesc                                              OpenViBE::CIdentifier(0x602CF89F, 0x65BA6DA0)
 
-#define OVP_ClassId_SpectralAnalysisCospectra                                           OpenViBE::CIdentifier(0x0002F6AA, 0x418B260F)
-#define OVP_ClassId_SpectralAnalysisCospectraDesc                                       OpenViBE::CIdentifier(0xBE7311CE, 0x99BB5123)
-
 #define OVP_ClassId_FastICA                                                             OpenViBE::CIdentifier(0x00649B6E, 0x6C88CD17)
 #define OVP_ClassId_FastICADesc                                                         OpenViBE::CIdentifier(0x00E9436C, 0x41C904CA)
 
