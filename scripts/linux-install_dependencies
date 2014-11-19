@@ -948,7 +948,7 @@ fi;
 ov_package_url_cegui=$ov_sourceforge_mirror/crayzedsgui/files/CEGUI%20Mk-2/0.7.1/CEGUI-0.7.1.tar.gz
 ov_package_url_ogre=$ov_sourceforge_mirror/ogre/files/ogre/1.7/ogre_src_v1-7-3.tar.bz2
 # ov_package_url_vrpn=ftp://ftp.cs.unc.edu/pub/packages/GRIP/vrpn/old_versions/vrpn_07_26.zip
-ov_package_url_vrpn=http://openvibe.inria.fr/dependencies/linux-x86/vrpn_07_26.zip
+ov_package_url_vrpn=http://openvibe.inria.fr/dependencies/linux-x86/vrpn_07_31-ov.zip
 ov_package_url_openmask4=http://www.irisa.fr/bunraku/OpenViBE/dependencies/src/openmask4~dotsceneloader-src-164.tar.bz2
 ov_package_url_openmask4tutorial=http://www.irisa.fr/bunraku/OpenViBE/dependencies/src/openmask4-tutorial-src-164.tar.bz2
 
@@ -1336,32 +1336,32 @@ ov_package_post_install_hook_cegui='
 
 if [ "$ov_machine" == "x86_64" ]; then
 ov_package_configure_hook_vrpn='
-	$ov_sed -i "s/#HW_OS := pc_linux$/HW_OS := pc_linux64/g" quat/Makefile &&
+	$ov_sed -i "s/#HW_OS := pc_linux$/HW_OS := pc_linux64/g" vrpn/quat/Makefile &&
 	$ov_sed -i "s/#HW_OS := pc_linux$/HW_OS := pc_linux64/g" vrpn/Makefile'
 else
 ov_package_configure_hook_vrpn='
-	$ov_sed -i "s/#HW_OS := pc_linux$/HW_OS := pc_linux/g" quat/Makefile &&
-	$ov_sed -i "s/CC := gcc/CC := gcc -fPIC/g" quat/Makefile &&
+	$ov_sed -i "s/#HW_OS := pc_linux$/HW_OS := pc_linux/g" vrpn/quat/Makefile &&
+	$ov_sed -i "s/CC := gcc/CC := gcc -fPIC/g" vrpn/quat/Makefile &&
 	$ov_sed -i "s/#HW_OS := pc_linux$/HW_OS := pc_linux/g" vrpn/Makefile &&
 	$ov_sed -i "s/CC := gcc/CC := gcc -fPIC/g" vrpn/Makefile &&
 	$ov_sed -i "s/CC := g++/CC := g++ -fPIC/g" vrpn/Makefile'
 fi;
 ov_package_make_hook_vrpn='
-	pushd quat &&
+	pushd vrpn/quat &&
 	make &&
-	cd ../vrpn &&
+	cd .. &&
 	make &&
 	popd'
 if [ "$ov_machine" == "x86_64" ]; then
 ov_package_install_hook_vrpn='
-	chmod a-x quat/*.h vrpn/*.h &&
-	cp quat/*.h vrpn/*.h ../include &&
-	cp quat/pc_linux64/*.a vrpn/pc_linux64/*.a ../lib'
+	chmod a-x vrpn/quat/*.h vrpn/*.h &&
+	cp vrpn/quat/*.h vrpn/*.h ../include &&
+	cp vrpn/quat/pc_linux64/*.a vrpn/pc_linux64/*.a ../lib'
 else
 ov_package_install_hook_vrpn='
-	chmod a-x quat/*.h vrpn/*.h &&
-	cp quat/*.h vrpn/*.h ../include &&
-	cp quat/pc_linux/*.a vrpn/pc_linux/*.a ../lib'
+	chmod a-x vrpn/quat/*.h vrpn/*.h &&
+	cp vrpn/quat/*.h vrpn/*.h ../include &&
+	cp vrpn/quat/pc_linux/*.a vrpn/pc_linux/*.a ../lib'
 fi;
 
 ov_package_configure_hook_openmask4='

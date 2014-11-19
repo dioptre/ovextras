@@ -95,10 +95,8 @@ Section "-OpenViBE"
 no_need_to_install_directx:
 
 	SetOutPath "$INSTDIR\dependencies\arch"
-	File ..\dependencies\arch\openvibe-vcredist-2005-sp1.exe
-	File ..\dependencies\arch\openvibe-vcredist-2008-sp1.exe
 	File ..\dependencies\arch\openvibe-vcredist-2010.exe
-	File ..\dependencies\arch\lua-5.1.4-30.zip
+	File ..\dependencies\arch\lua-5.1.4-vs100.zip
 	File ..\dependencies\arch\expat-2.0.1.zip
 	File ..\dependencies\arch\glfw-3.0.4-vs100.zip	
 	File ..\dependencies\arch\gtk-2.22.1-runtime.zip
@@ -107,7 +105,7 @@ no_need_to_install_directx:
 	File ..\dependencies\arch\itpp-4.0.7-runtime.zip
 	File ..\dependencies\arch\ogre-1.7.1-vs100-runtime.zip
 	File ..\dependencies\arch\cegui-0.7.2-vs100-runtime.zip
-	File ..\dependencies\arch\vrpn-7.26-runtime.zip
+	File ..\dependencies\arch\vrpn-7.31-vs100-runtime.zip
 	File ..\dependencies\arch\pthreads-2.8.0-runtime.zip
 	File ..\dependencies\arch\presage-0.8.9-vs100.zip		
 	File ..\dependencies\arch\openal-1.1-runtime.zip
@@ -118,12 +116,10 @@ no_need_to_install_directx:
 	File ..\dependencies\arch\enobio3g-1.2.1-vs100-runtime.zip	
 	
 	SetOutPath "$INSTDIR\dependencies"
-	ExecWait '"arch\openvibe-vcredist-2005-sp1.exe" /q'
-	ExecWait '"arch\openvibe-vcredist-2008-sp1.exe" /q'
 	ExecWait '"arch\openvibe-vcredist-2010.exe" /q'
 
 	SetOutPath "$INSTDIR\dependencies"
-	ZipDLL::extractall "arch\lua-5.1.4-30.zip" "lua"
+	ZipDLL::extractall "arch\lua-5.1.4-vs100.zip" ""
 	ZipDLL::extractall "arch\expat-2.0.1.zip" "expat"
 	ZipDLL::extractall "arch\glfw-3.0.4-vs100.zip" ""	
 	ZipDLL::extractall "arch\gtk-2.22.1-runtime.zip" "gtk"
@@ -132,7 +128,7 @@ no_need_to_install_directx:
 	ZipDLL::extractall "arch\itpp-4.0.7-runtime.zip" "itpp"
 	ZipDLL::extractall "arch\ogre-1.7.1-vs100-runtime.zip" "ogre"
 	ZipDLL::extractall "arch\cegui-0.7.2-vs100-runtime.zip" "cegui"
-	ZipDLL::extractall "arch\vrpn-7.26-runtime.zip" "vrpn"
+	ZipDLL::extractall "arch\vrpn-7.31-vs100-runtime.zip" ""
 	ZipDLL::extractall "arch\pthreads-2.8.0-runtime.zip" "pthreads"
 	ZipDLL::extractall "arch\presage-0.8.9-vs100.zip" ""
 	ZipDLL::extractall "arch\openal-1.1-runtime.zip" "openal"
