@@ -62,7 +62,7 @@ namespace OpenViBEContributions {
 
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverOpenEEGModularEEG(pAcquisitionServer->getDriverContext()));
 
-#if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyTMSi
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverTMSi(pAcquisitionServer->getDriverContext()));
 #endif
 

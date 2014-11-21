@@ -27,7 +27,7 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEAcquisitionServer;
 
-#if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyTMSi
 
 namespace
 {

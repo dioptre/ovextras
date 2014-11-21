@@ -23,7 +23,8 @@
 #include "ovasCConfigurationTMSi.h"
 #include "ovasCTMSiAccess.h"
 
-#if defined TARGET_OS_Windows
+
+#if defined TARGET_HAS_ThirdPartyTMSi
 
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ovITimeArithmetics.h>

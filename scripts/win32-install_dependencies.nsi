@@ -849,7 +849,26 @@ Section /o "Device SDK: MindMedia NeXus"
 no_need_to_download_nexus_dev:
 	ZipDLL::extractall "arch\sdk-nexus.zip" ""	
 
-	
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device SDK: TMSi"
+
+	; For TMSi universal driver
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-tmsi.zip" no_need_to_download_tmsi_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-tmsi.zip "arch\sdk-tmsi.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_tmsi_dev:
+	ZipDLL::extractall "arch\sdk-tmsi.zip" ""	
 
 SectionEnd
 

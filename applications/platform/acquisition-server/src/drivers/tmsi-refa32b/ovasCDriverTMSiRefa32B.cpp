@@ -1,7 +1,8 @@
+
+#if defined TARGET_HAS_ThirdPartyNeXus
+
 #include "ovasCDriverTMSiRefa32B.h"
 #include "ovasCConfigurationTMSIRefa32B.h"
-
-#if defined TARGET_OS_Windows
 
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ovITimeArithmetics.h>

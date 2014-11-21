@@ -19,6 +19,8 @@
  * MA 02110-1301  USA
  */
 
+#if defined TARGET_HAS_ThirdPartyTMSi
+
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 #include "ovasCTMSiAccess.h"
@@ -26,8 +28,6 @@
 #include <iostream>
 #include <string>
 #include <gtk/gtk.h>
-
-#if defined TARGET_OS_Windows
 
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
