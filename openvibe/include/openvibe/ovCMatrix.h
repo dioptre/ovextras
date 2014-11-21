@@ -46,7 +46,10 @@ namespace OpenViBE
 		virtual const char* getDimensionLabel(
 			const OpenViBE::uint32 ui32DimensionIndex,
 			const OpenViBE::uint32 ui32DimensionEntryIndex) const;
-		virtual const char* getDimensionUnit(
+		virtual const OpenViBE::uint32 getDimensionUnit(
+			const OpenViBE::uint32 ui32DimensionIndex,
+			const OpenViBE::uint32 ui32DimensionEntryIndex) const;
+		virtual const OpenViBE::uint32 getDimensionFactor(
 			const OpenViBE::uint32 ui32DimensionIndex,
 			const OpenViBE::uint32 ui32DimensionEntryIndex) const;
 		virtual const OpenViBE::float64* getBuffer(void) const;
@@ -64,7 +67,11 @@ namespace OpenViBE
 		virtual OpenViBE::boolean setDimensionUnit(
 			const OpenViBE::uint32 ui32DimensionIndex,
 			const OpenViBE::uint32 ui32DimensionEntryIndex,
-			const char* sDimensionUnit);
+			const OpenViBE::uint32 ui32DimensionUnit);
+		virtual OpenViBE::boolean setDimensionFactor(
+			const OpenViBE::uint32 ui32DimensionIndex,
+			const OpenViBE::uint32 ui32DimensionEntryIndex,
+			const OpenViBE::uint32 ui32DimensionFactor);
 		virtual OpenViBE::float64* getBuffer(void);
 
 		_IsDerivedFromClass_Final_(OpenViBE::IMatrix, OV_ClassId_MatrixBridge);

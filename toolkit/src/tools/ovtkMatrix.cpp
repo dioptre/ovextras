@@ -67,6 +67,10 @@ boolean OpenViBEToolkit::Tools::Matrix::copyDescription(IMatrix& rDestinationMat
 			{
 				return false;
 			}
+			if(!rDestinationMatrix.setDimensionFactor(i, j, rSourceMatrix.getDimensionFactor(i, j)))
+			{
+				return false;
+			}
 		}
 	}
 	return true;
@@ -127,7 +131,11 @@ boolean OpenViBEToolkit::Tools::Matrix::isDescriptionSimilar(const IMatrix& rSou
 				{
 					return false;
 				}
-				if(strcmp(rSourceMatrix1.getDimensionUnit(i, j), rSourceMatrix2.getDimensionUnit(i, j))!=0)
+				if(rSourceMatrix1.getDimensionUnit(i, j) != rSourceMatrix2.getDimensionUnit(i, j))
+				{
+					return false;
+				}
+				if(rSourceMatrix1.getDimensionFactor(i, j) != rSourceMatrix2.getDimensionFactor(i, j))
 				{
 					return false;
 				}

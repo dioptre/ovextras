@@ -26,10 +26,10 @@ using namespace OpenViBE;
 using namespace OpenViBEAcquisitionServer;
 
 CHeaderAdapterBrainProductsBrainampSeries::CHeaderAdapterBrainProductsBrainampSeries(
-	IHeader& rAdpatedHeader,
+	IHeader& rAdaptedHeader,
 	EParameter* peChannelSelected)
 
-	:CHeaderAdapter(rAdpatedHeader)
+	:CHeaderAdapter(rAdaptedHeader)
 	,m_peChannelSelected(peChannelSelected)
 {
 }
@@ -47,7 +47,7 @@ boolean CHeaderAdapterBrainProductsBrainampSeries::setChannelName(const uint32 u
 uint32 CHeaderAdapterBrainProductsBrainampSeries::getChannelCount(void) const
 {
 	uint32 i, j=0;
-	for(i=0; i<m_rAdpatedHeader.getChannelCount(); i++)
+	for(i=0; i<m_rAdaptedHeader.getChannelCount(); i++)
 	{
 		if(m_peChannelSelected[i]==Channel_Selected)
 		{
@@ -60,13 +60,13 @@ uint32 CHeaderAdapterBrainProductsBrainampSeries::getChannelCount(void) const
 const char* CHeaderAdapterBrainProductsBrainampSeries::getChannelName(const uint32 ui32ChannelIndex) const
 {
 	uint32 i, j=0;
-	for(i=0; i<m_rAdpatedHeader.getChannelCount(); i++)
+	for(i=0; i<m_rAdaptedHeader.getChannelCount(); i++)
 	{
 		if(m_peChannelSelected[i]==Channel_Selected)
 		{
 			if(j==ui32ChannelIndex)
 			{
-				return m_rAdpatedHeader.getChannelName(i);
+				return m_rAdaptedHeader.getChannelName(i);
 			}
 			j++;
 		}

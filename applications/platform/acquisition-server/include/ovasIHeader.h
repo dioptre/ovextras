@@ -157,6 +157,21 @@ namespace OpenViBEAcquisitionServer
 		 * to transform measured values into physical dimension.
 		 */
 		virtual OpenViBE::boolean setChannelGain(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::float32 f32ChannelGain)=0;
+		/**
+		 * \brief Sets a channel' measurement unit and its scaling factor
+		 * \param ui32ChannelIndex [in] : the index of the channel which gain should be set
+		 * \param ui32ChannelUnit [in] : the unit
+		 * \param ui32ChannelFactor [in] : the scaling factor
+		 * \return \e true in case of success.
+		 * \return \e false in case of error.
+		 *
+		 * Measurement units (e.g. Volts, Litres, ...) are specified by uint32 enums defined in the openvibe toolkit.
+		 * Scaling factors (megas, millis, ...) are specified similarly. To specify that the channel is in millivolts, 
+		 * you set unit to volts and factor to millis. You get the list of supported enums from toolkit/ovtk_defines.h. 
+		 *
+		 * Default unit is 'Unspecified' and default factor is code translating 1e00. 
+		 */
+		virtual OpenViBE::boolean setChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::uint32 ui32ChannelUnit, const OpenViBE::uint32 ui32ChannelFactor)=0;
 		/// \todo setChannelLocation
 		// virtual OpenViBE::boolean setChannelLocation(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::float32 ui32ChannelLocationX, const OpenViBEAcquisitionServer::float32 ui32ChannelLocationY, const OpenViBEAcquisitionServer::float32 ui32ChannelLocationZ)=0;
 		/**
@@ -185,6 +200,17 @@ namespace OpenViBEAcquisitionServer
 		 * \sa setChannelGain
 		 */
 		virtual OpenViBE::float32 getChannelGain(const OpenViBE::uint32 ui32ChannelIndex) const=0;
+		/**
+		 * \brief Gets a channel' measurement unit and its scaling factor
+		 * \param ui32ChannelIndex [in] : the index of the channel which gain should be set
+		 * \param ui32ChannelUnit [in] : the unit
+		 * \param ui32ChannelFactor [in] : the scaling factor
+		 * \return \e true in case of success.
+		 * \return \e false in case of error.
+		 *
+		 * See setChannelUnits().
+		 */
+		virtual OpenViBE::boolean getChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, OpenViBE::uint32& ui32ChannelUnit, OpenViBE::uint32& ui32ChannelFactor) const=0;
 		/// \todo getChannelLocation
 		// virtual getChannelLocation(const OpenViBE::uint32 ui32ChannelIndex) const=0;
 		/**

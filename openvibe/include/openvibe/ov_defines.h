@@ -200,6 +200,9 @@
 
 #define OV_TypeId_Message                                    OpenViBE::CIdentifier(0x0A261C0A, 0xBD3BF6BD)
 
+#define OV_TypeId_MeasurementUnit                            OpenViBE::CIdentifier(0x2F3563A4, 0x571E194D)
+#define OV_TypeId_Factor                                     OpenViBE::CIdentifier(0x501F79FA, 0x7E1F6680)
+
 //___________________________________________________________________//
 //                                                                   //
 // Several other defined values                                      //

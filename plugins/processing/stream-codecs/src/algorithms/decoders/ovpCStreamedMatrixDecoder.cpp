@@ -119,7 +119,11 @@ void CStreamedMatrixDecoder::processChildData(const void* pBuffer, const EBML::u
 				}
 				else if(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit) 
 				{
-					op_pMatrix->setDimensionUnit(m_ui32DimensionIndex, m_ui32DimensionEntryIndexUnit++, m_pEBMLReaderHelper->getASCIIStringFromChildData(pBuffer, ui64BufferSize)); 
+					op_pMatrix->setDimensionUnit(m_ui32DimensionIndex, m_ui32DimensionEntryIndexUnit++, static_cast<uint32>(m_pEBMLReaderHelper->getUIntegerFromChildData(pBuffer, ui64BufferSize))); 
+				} 
+				else if(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Factor) 
+				{
+					op_pMatrix->setDimensionFactor(m_ui32DimensionIndex, m_ui32DimensionEntryIndexUnit++, static_cast<uint32>(m_pEBMLReaderHelper->getUIntegerFromChildData(pBuffer, ui64BufferSize))); 
 				} 
 				else 
 				{ 

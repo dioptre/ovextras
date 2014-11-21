@@ -47,10 +47,12 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
 		virtual OpenViBE::boolean setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
 		virtual OpenViBE::boolean setChannelGain(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::float32 f32ChannelGain);
+		virtual OpenViBE::boolean setChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::uint32 ui32ChannelUnit, const OpenViBE::uint32 ui32ChannelFactor);
 
 		virtual OpenViBE::uint32 getChannelCount(void) const;
 		virtual const char* getChannelName(const OpenViBE::uint32 ui32ChannelIndex) const;
 		virtual OpenViBE::float32 getChannelGain(const OpenViBE::uint32 ui32ChannelIndex) const;
+		virtual OpenViBE::boolean getChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, OpenViBE::uint32& ui32ChannelUnit, OpenViBE::uint32& ui32ChannelFactor) const;
 
 		virtual OpenViBE::boolean isChannelCountSet(void) const;
 		virtual OpenViBE::boolean isChannelNameSet(void) const;
@@ -76,12 +78,14 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean setPairCount(const OpenViBE::uint32 ui32PairCount);
 		virtual OpenViBE::boolean setPairName(const OpenViBE::uint32 ui32PairIndex, const char* sPairName);
 		virtual OpenViBE::boolean setPairGain(const OpenViBE::uint32 ui32PairIndex, const OpenViBE::float32 f32PairGain);
+		virtual OpenViBE::boolean setPairUnits(const OpenViBE::uint32 ui32PairIndex, const OpenViBE::uint32 ui32PairUnit, const OpenViBE::uint32 ui32PairFactor);
 		virtual OpenViBE::boolean setDeviceId(OpenViBE::int32 i32DeviceId);
 		virtual OpenViBE::boolean setFastModeSettings(t_faDataModeSettings tFastModeSettings);
 
 		virtual OpenViBE::uint32 getPairCount(void) const;
 		virtual const char* getPairName(const OpenViBE::uint32 ui32PairIndex) const;
 		virtual OpenViBE::float32 getPairGain(const OpenViBE::uint32 ui32PairIndex) const;
+		virtual OpenViBE::boolean getPairUnits(const OpenViBE::uint32 ui32PairIndex, OpenViBE::uint32& ui32PairUnit, OpenViBE::uint32& ui32PairFactor) const;
 		virtual OpenViBE::int32 getDeviceId(void) const;
 		virtual t_faDataModeSettings getFastModeSettings(void) const;
 
@@ -106,6 +110,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32PairCount;
 		std::map<OpenViBE::uint32, std::string> m_vPairName;
 		std::map<OpenViBE::uint32, OpenViBE::float32> m_vPairGain;
+		std::map<OpenViBE::uint32, std::pair<OpenViBE::uint32, OpenViBE::uint32> > m_vPairUnit;
 	};
 };
 
