@@ -8,8 +8,6 @@
 
 #include <iostream>
 
-#include <ebml/TWriterCallbackProxy.h>
-
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 

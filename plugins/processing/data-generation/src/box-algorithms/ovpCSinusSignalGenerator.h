@@ -5,8 +5,6 @@
 
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/TWriterCallbackProxy.h>
-
 namespace OpenViBEPlugins
 {
 	namespace DataGeneration
