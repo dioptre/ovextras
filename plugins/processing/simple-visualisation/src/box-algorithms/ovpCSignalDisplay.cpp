@@ -23,22 +23,15 @@ namespace OpenViBEPlugins
 		* Constructor
 		*/
 		CSignalDisplay::CSignalDisplay(void)
-			:m_pStreamedMatrixReader(NULL)
-			,m_pStimulationReader(NULL)
-			,m_pStreamedMatrixReaderCallBack(NULL)
-			,m_pStimulationReaderCallBack(NULL)
-			,m_pSignalDisplayView(NULL)
+			: m_pSignalDisplayView(NULL)
 			,m_pBufferDatabase(NULL)
 		{
 		}
 
 		boolean CSignalDisplay::initialize()
 		{
-			//initializes the ebml input
-			m_pStreamedMatrixReaderCallBack = createBoxAlgorithmStreamedMatrixInputReaderCallback(*this);
-			m_pStreamedMatrixReader=EBML::createReader(*m_pStreamedMatrixReaderCallBack);
-			m_pStimulationReaderCallBack = createBoxAlgorithmStimulationInputReaderCallback(*this);
-			m_pStimulationReader=EBML::createReader(*m_pStimulationReaderCallBack);
+			m_oStreamedMatrixDecoder.initialize(*this,0);
+			m_oStimulationDecoder.initialize(*this,1);
 
 			m_pBufferDatabase = new CBufferDatabase(*this);
 
@@ -80,16 +73,8 @@ namespace OpenViBEPlugins
 
 		boolean CSignalDisplay::uninitialize()
 		{
-			//release the ebml reader
-			releaseBoxAlgorithmStreamedMatrixInputReaderCallback(m_pStreamedMatrixReaderCallBack);
-			releaseBoxAlgorithmStimulationInputReaderCallback(m_pStimulationReaderCallBack);
-			m_pStreamedMatrixReaderCallBack=NULL;
-			m_pStimulationReaderCallBack=NULL;
-
-			m_pStreamedMatrixReader->release();
-			m_pStimulationReader->release();
-			m_pStreamedMatrixReader=NULL;
-			m_pStimulationReader=NULL;
+			m_oStimulationDecoder.uninitialize();
+			m_oStreamedMatrixDecoder.uninitialize();
 
 			delete m_pSignalDisplayView;
 			delete m_pBufferDatabase;
@@ -108,72 +93,66 @@ namespace OpenViBEPlugins
 		boolean CSignalDisplay::process()
 		{
 			IDynamicBoxContext* l_pDynamicBoxContext=getBoxAlgorithmContext()->getDynamicBoxContext();
-			uint32 i;
 
 			if(m_pBufferDatabase->getErrorStatus()) {
 				this->getLogManager() << LogLevel_Error << "Buffer database reports an error. Its possible that the inputs given to the Signal Display are not supported by it.\n";
 				return false;
 			}
 
-			for(i=0; i<l_pDynamicBoxContext->getInputChunkCount(1); i++)
+			// Stimulations in input 1
+			for(uint32 c=0; c<l_pDynamicBoxContext->getInputChunkCount(1); c++)
 			{
-				uint64 l_ui64ChunkSize=0;
-				const uint8* l_pChunkBuffer=NULL;
-				uint64 l_ui64StartTime=0;
-				uint64 l_ui64EndTime=0;
-
-				if(l_pDynamicBoxContext->getInputChunk(1, i, l_ui64StartTime, l_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer))
+				m_oStimulationDecoder.decode(c);
+				if(m_oStimulationDecoder.isBufferReceived())
 				{
-					m_pStimulationReader->processData(l_pChunkBuffer, l_ui64ChunkSize);
-					l_pDynamicBoxContext->markInputAsDeprecated(1, i);
+					const IStimulationSet* l_pStimulationSet = m_oStimulationDecoder.getOutputStimulationSet();
+					const uint64 l_ui64StimulationCount = l_pStimulationSet->getStimulationCount();
+
+					m_pBufferDatabase->setStimulationCount(static_cast<uint32>(l_ui64StimulationCount));
+
+					for(uint32 s=0;s<l_ui64StimulationCount;s++)
+					{
+						const uint64 l_ui64StimulationIdentifier = l_pStimulationSet->getStimulationIdentifier(s);
+						const uint64 l_ui64StimulationDate = l_pStimulationSet->getStimulationDate(s);
+						const CString l_oStimulationName = getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation, l_ui64StimulationIdentifier);
+
+						((CSignalDisplayView*)m_pSignalDisplayView)->onStimulationReceivedCB(l_ui64StimulationIdentifier, l_oStimulationName);
+						m_pBufferDatabase->setStimulation(s, l_ui64StimulationIdentifier, l_ui64StimulationDate);
+					}
 				}
 			}
 
-			for(i=0; i<l_pDynamicBoxContext->getInputChunkCount(0); i++)
+			// Streamed matrix in input 0
+			for(uint32 c=0; c<l_pDynamicBoxContext->getInputChunkCount(0); c++)
 			{
-				uint64 l_ui64ChunkSize=0;
-				const uint8* l_pChunkBuffer=NULL;
-
-				if(l_pDynamicBoxContext->getInputChunk(0, i, m_ui64StartTime, m_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer))
+				m_oStreamedMatrixDecoder.decode(c);
+				if(m_oStreamedMatrixDecoder.isHeaderReceived())
 				{
-					m_pStreamedMatrixReader->processData(l_pChunkBuffer, l_ui64ChunkSize);
-					l_pDynamicBoxContext->markInputAsDeprecated(0, i);
+					const IMatrix* l_pMatrix = m_oStreamedMatrixDecoder.getOutputMatrix();
+
+					m_pBufferDatabase->setMatrixDimensionCount(l_pMatrix->getDimensionCount());
+					for(uint32 i=0;i<l_pMatrix->getDimensionCount();i++)
+					{
+						m_pBufferDatabase->setMatrixDimensionSize(i, l_pMatrix->getDimensionSize(i));
+						for(uint32 j=0;j<l_pMatrix->getDimensionSize(i);j++) 
+						{
+							m_pBufferDatabase->setMatrixDimensionLabel(i, j, l_pMatrix->getDimensionLabel(i,j));
+						}
+					}
+				}
+
+				if(m_oStreamedMatrixDecoder.isBufferReceived())
+				{
+					const IMatrix* l_pMatrix = m_oStreamedMatrixDecoder.getOutputMatrix();
+
+					m_pBufferDatabase->setMatrixBuffer(l_pMatrix->getBuffer(),
+						l_pDynamicBoxContext->getInputChunkStartTime(0,c),
+						l_pDynamicBoxContext->getInputChunkEndTime(0,c));
+
 				}
 			}
 
 			return true;
-		}
-
-		void CSignalDisplay::setMatrixDimensionCount(const uint32 ui32DimensionCount)
-		{
-			m_pBufferDatabase->setMatrixDimensionCount(ui32DimensionCount);
-		}
-
-		void CSignalDisplay::setMatrixDimensionSize(const uint32 ui32DimensionIndex, const uint32 ui32DimensionSize)
-		{
-			m_pBufferDatabase->setMatrixDimensionSize(ui32DimensionIndex, ui32DimensionSize);
-		}
-
-		void CSignalDisplay::setMatrixDimensionLabel(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex, const char* sDimensionLabel)
-		{
-			m_pBufferDatabase->setMatrixDimensionLabel(ui32DimensionIndex, ui32DimensionEntryIndex, sDimensionLabel);
-		}
-
-		void CSignalDisplay::setMatrixBuffer(const float64* pBuffer)
-		{
-			m_pBufferDatabase->setMatrixBuffer(pBuffer, m_ui64StartTime, m_ui64EndTime);
-		}
-
-		void CSignalDisplay::setStimulationCount(const uint32 ui32StimulationCount)
-		{
-			m_pBufferDatabase->setStimulationCount(ui32StimulationCount);
-		}
-
-		void CSignalDisplay::setStimulation(const uint32 ui32StimulationIndex, const uint64 ui64StimulationIdentifier, const uint64 ui64StimulationDate)
-		{
-			CString l_oStimulationName = getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation, ui64StimulationIdentifier);
-			((CSignalDisplayView*)m_pSignalDisplayView)->onStimulationReceivedCB(ui64StimulationIdentifier, l_oStimulationName);
-			m_pBufferDatabase->setStimulation(ui32StimulationIndex, ui64StimulationIdentifier, ui64StimulationDate);
 		}
 	};
 };
