@@ -6,8 +6,6 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-// #include <ebml/IReader.h>
-
 #include "ovpCSimple3DDisplay/ovpCSimple3DDatabase.h"
 #include "ovpCSimple3DDisplay/ovpCSimple3DView.h"
 
