@@ -484,10 +484,10 @@ boolean CGDFFileReader::readFileHeader()
 		}
 
 		//This parameter is defined by the user of the plugin
-		m_pSignalDescription.m_ui32SampleCount = static_cast<EBML::uint32>(m_ui32SamplesPerBuffer);
+		m_pSignalDescription.m_ui32SampleCount = static_cast<uint32>(m_ui32SamplesPerBuffer);
 
 		//needs to be computed based on the duration of a data record and the number of samples in one of those data records
-		m_pSignalDescription.m_ui32SamplingRate = static_cast<EBML::uint32>(0.5 + (m_ui32NumberOfSamplesPerRecord/m_f64DurationOfDataRecord));
+		m_pSignalDescription.m_ui32SamplingRate = static_cast<uint32>(0.5 + (m_ui32NumberOfSamplesPerRecord/m_f64DurationOfDataRecord));
 
 		if(m_pSignalDescription.m_ui32SamplingRate==0) 
 		{
@@ -715,7 +715,7 @@ boolean CGDFFileReader::process()
 		{
 			//output matrix buffer
 			m_ui64MatrixBufferSize = m_pSignalDescription.m_ui32SampleCount*m_pSignalDescription.m_ui32ChannelCount;
-			m_pMatrixBuffer = new EBML::float64[(size_t)m_ui64MatrixBufferSize];
+			m_pMatrixBuffer = new float64[(size_t)m_ui64MatrixBufferSize];
 
 			//Associate this buffer to the signal output writer helper
 			//m_pSignalOutputWriterHelper->setSampleBuffer(m_pMatrixBuffer);

@@ -36,17 +36,17 @@ namespace OpenViBEPlugins
 			class CExperimentInfoHeader
 			{
 				public:
-					EBML::uint64 m_ui64ExperimentId;
+					OpenViBE::uint64 m_ui64ExperimentId;
 					std::string m_sExperimentDate;
 
-					EBML::uint64 m_ui64SubjectId;
+					OpenViBE::uint64 m_ui64SubjectId;
 					std::string m_sSubjectName;
-					EBML::uint64 m_ui64SubjectAge;
-					EBML::uint64 m_ui64SubjectSex;
+					OpenViBE::uint64 m_ui64SubjectAge;
+					OpenViBE::uint64 m_ui64SubjectSex;
 
-					EBML::uint64 m_ui64LaboratoryId;
+					OpenViBE::uint64 m_ui64LaboratoryId;
 					std::string m_sLaboratoryName;
-					EBML::uint64 m_ui64TechnicianId;
+					OpenViBE::uint64 m_ui64TechnicianId;
 					std::string m_sTechnicianName;
 
 					bool m_bReadyToSend;
@@ -61,12 +61,12 @@ namespace OpenViBEPlugins
 					}
 
 				public:
-					EBML::uint32 m_ui32StreamVersion;
-					EBML::uint32 m_ui32SamplingRate;
-					EBML::uint32 m_ui32ChannelCount;
-					EBML::uint32 m_ui32SampleCount;
+					OpenViBE::uint32 m_ui32StreamVersion;
+					OpenViBE::uint32 m_ui32SamplingRate;
+					OpenViBE::uint32 m_ui32ChannelCount;
+					OpenViBE::uint32 m_ui32SampleCount;
 					std::vector<std::string> m_pChannelName;
-					EBML::uint32 m_ui32CurrentChannel;
+					OpenViBE::uint32 m_ui32CurrentChannel;
 
 					bool m_bReadyToSend;
 			};
@@ -134,8 +134,8 @@ namespace OpenViBEPlugins
 			OpenViBE::uint8 ** m_pChannelDataInDataRecord;
 
 			//Output Stream matrix
-			EBML::float64 * m_pMatrixBuffer;
-			EBML::uint64 m_ui64MatrixBufferSize;
+			OpenViBE::float64 * m_pMatrixBuffer;
+			OpenViBE::uint64 m_ui64MatrixBufferSize;
 			OpenViBE::boolean m_bMatricesSent;
 
 			//Total number of samples sent up to now (used to compute start/end time)

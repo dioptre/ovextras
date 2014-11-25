@@ -37,12 +37,12 @@ namespace OpenViBEPlugins
 
 				public:
 
-					EBML::uint32 m_ui32StreamVersion;
-					EBML::uint32 m_ui32SamplingRate;
-					EBML::uint32 m_ui32ChannelCount;
-					EBML::uint32 m_ui32SampleCount;
+					OpenViBE::uint32 m_ui32StreamVersion;
+					OpenViBE::uint32 m_ui32SamplingRate;
+					OpenViBE::uint32 m_ui32ChannelCount;
+					OpenViBE::uint32 m_ui32SampleCount;
 					std::vector<std::string> m_pChannelName;
-					EBML::uint32 m_ui32CurrentChannel;
+					OpenViBE::uint32 m_ui32CurrentChannel;
 
 					OpenViBE::boolean m_bReadyToSend;
 			};
@@ -90,7 +90,7 @@ namespace OpenViBEPlugins
 			//! Size of the matrix buffer (output signal)
 			OpenViBE::uint64 m_ui64MatrixBufferSize;
 			//! Output signal's matrix buffer
-			EBML::float64* m_pMatrixBuffer;
+			OpenViBE::float64* m_pMatrixBuffer;
 
 			OpenViBE::uint64 m_ui64WindowMethod;
 		};
