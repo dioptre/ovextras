@@ -28,7 +28,6 @@ FUNCTION(OV_ADD_CONTRIB_DRIVER DRIVER_PATH)
 ENDFUNCTION(OV_ADD_CONTRIB_DRIVER)
 
 OV_ADD_CONTRIB_DRIVER("${CMAKE_SOURCE_DIR}/contrib/plugins/server-drivers/brainmaster-discovery")
-OV_ADD_CONTRIB_DRIVER("${CMAKE_SOURCE_DIR}/contrib/plugins/server-drivers/brainproducts-actichamp")
 OV_ADD_CONTRIB_DRIVER("${CMAKE_SOURCE_DIR}/contrib/plugins/server-drivers/brainproducts-brainvisionrecorder")
 OV_ADD_CONTRIB_DRIVER("${CMAKE_SOURCE_DIR}/contrib/plugins/server-drivers/cognionics")
 OV_ADD_CONTRIB_DRIVER("${CMAKE_SOURCE_DIR}/contrib/plugins/server-drivers/ctfvsm-meg")

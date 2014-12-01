@@ -13,6 +13,7 @@
 #include "generic-raw-reader/ovasCDriverGenericRawFileReader.h"
 #include "generic-raw-reader/ovasCDriverGenericRawTelnetReader.h"
 #include "biosemi-activetwo/ovasCDriverBioSemiActiveTwo.h"
+#include "brainproducts-actichamp/ovasCDriverBrainProductsActiCHamp.h"
 #include "brainproducts-brainampseries/ovasCDriverBrainProductsBrainampSeries.h"
 #include "brainproducts-vamp/ovasCDriverBrainProductsVAmp.h"
 #include "egi-ampserver/ovasCDriverEGIAmpServer.h"
@@ -144,6 +145,9 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 
 #if defined TARGET_HAS_ThirdPartyBioSemiAPI
 	m_vDriver.push_back(new CDriverBioSemiActiveTwo(m_pAcquisitionServer->getDriverContext()));
+#endif
+#if defined TARGET_HAS_ThirdPartyActiCHampAPI
+	m_vDriver.push_back(new CDriverBrainProductsActiCHamp(m_pAcquisitionServer->getDriverContext()));
 #endif
 
 #if defined(TARGET_HAS_ThirdPartyMicromed)
