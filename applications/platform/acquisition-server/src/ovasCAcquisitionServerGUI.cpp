@@ -8,11 +8,11 @@
 #include "contribAcquisitionServer.inl"
 #endif
 
-
 #include "generic-oscilator/ovasCDriverGenericOscilator.h"
 #include "generic-sawtooth/ovasCDriverGenericSawTooth.h"
 #include "generic-raw-reader/ovasCDriverGenericRawFileReader.h"
 #include "generic-raw-reader/ovasCDriverGenericRawTelnetReader.h"
+#include "biosemi-activetwo/ovasCDriverBioSemiActiveTwo.h"
 #include "brainproducts-brainampseries/ovasCDriverBrainProductsBrainampSeries.h"
 #include "brainproducts-vamp/ovasCDriverBrainProductsVAmp.h"
 #include "egi-ampserver/ovasCDriverEGIAmpServer.h"
@@ -141,6 +141,10 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	m_vDriver.push_back(new CDriverGenericRawTelnetReader(m_pAcquisitionServer->getDriverContext()));
 
 #if defined TARGET_OS_Windows
+
+#if defined TARGET_HAS_ThirdPartyBioSemiAPI
+	m_vDriver.push_back(new CDriverBioSemiActiveTwo(m_pAcquisitionServer->getDriverContext()));
+#endif
 
 #if defined(TARGET_HAS_ThirdPartyMicromed)
 	m_vDriver.push_back(new CDriverMicromedSystemPlusEvolution(m_pAcquisitionServer->getDriverContext()));

@@ -26,6 +26,7 @@ INCLUDE("FindOpenViBEModuleFS")
 INCLUDE("FindThirdPartyGTK")
 
 # These scripts will also add directives to copy the necessary bin dlls if any
+INCLUDE("FindThirdPartyBioSemiLabViewAPI")
 INCLUDE("FindThirdPartyNeXus")
 INCLUDE("FindThirdPartyMicromed")
 INCLUDE("FindThirdPartyMitsar")

@@ -6,7 +6,6 @@
 
 #include "ovasCPluginExternalStimulations.h"
 
-#include "ovasCDriverBioSemiActiveTwo.h"
 #include "ovasCDriverBrainmasterDiscovery.h"
 #include "ovasCDriverBrainProductsActiCHamp.h"
 #include "ovasCDriverBrainProductsBrainVisionRecorder.h"
@@ -27,9 +26,6 @@ namespace OpenViBEContributions {
 
 	void initiateContributions(OpenViBEAcquisitionServer::CAcquisitionServerGUI* pGUI, OpenViBEAcquisitionServer::CAcquisitionServer* pAcquisitionServer, const OpenViBE::Kernel::IKernelContext& rKernelContext, std::vector<OpenViBEAcquisitionServer::IDriver*>* vDriver)
 	{
-#if defined TARGET_HAS_ThirdPartyBioSemiAPI
-		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBioSemiActiveTwo(pAcquisitionServer->getDriverContext()));
-#endif
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder(pAcquisitionServer->getDriverContext()));
 #if defined WIN32
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverCognionics(pAcquisitionServer->getDriverContext()));
