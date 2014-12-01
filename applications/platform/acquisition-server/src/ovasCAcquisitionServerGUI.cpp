@@ -427,9 +427,20 @@ boolean CAcquisitionServerGUI::initialize(void)
 	uint64 l_ui64DefaultConnectionPort=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_DefaultConnectionPort}", 1024);
 	gtk_spin_button_set_value(l_pSpinButtonConnectionPort, (gdouble)l_ui64DefaultConnectionPort);
 
-	// Shows main window
+	// Optionnally autostarts
 
-	gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-acquisition-server")));
+	if(m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_AutoStart}", false))
+	{
+		::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "togglebutton_connect")), TRUE);
+		::gtk_button_pressed(GTK_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "button_play")));
+	}
+
+
+	// Shows main window
+	if(!m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NoGUI}", false))
+	{
+		gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-acquisition-server")));
+	}
 
 	return true;
 }
