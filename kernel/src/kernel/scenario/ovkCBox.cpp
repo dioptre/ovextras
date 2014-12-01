@@ -340,11 +340,12 @@ boolean CBox::removeInput(
 	for(i=0; i<l_vLink.size(); i++)
 	{
 		m_rOwnerScenario.connect(
+			l_oIdentifier,
 			l_vLink[i].first.first,
 			l_vLink[i].first.second,
 			l_vLink[i].second.first,
 			l_vLink[i].second.second-1,
-			l_oIdentifier);
+			OV_UndefinedIdentifier);
 	}
 
 	this->notify(BoxModification_InputRemoved, ui32InputIndex);
@@ -495,11 +496,12 @@ boolean CBox::removeOutput(
 	for(i=0; i<l_vLink.size(); i++)
 	{
 		m_rOwnerScenario.connect(
+			l_oIdentifier,
 			l_vLink[i].first.first,
 			l_vLink[i].first.second-1,
 			l_vLink[i].second.first,
 			l_vLink[i].second.second,
-			l_oIdentifier);
+			OV_UndefinedIdentifier);
 	}
 
 	this->notify(BoxModification_OutputRemoved, ui32OutputIndex);
@@ -864,11 +866,12 @@ boolean CBox::removeMessageInput(
 	for(i=0; i<l_vMessageLink.size(); i++)
 	{
 		m_rOwnerScenario.connectMessage(
+			l_oIdentifier,
 			l_vMessageLink[i].first.first,
 			l_vMessageLink[i].first.second,
 			l_vMessageLink[i].second.first,
 			l_vMessageLink[i].second.second-1,
-			l_oIdentifier);
+			OV_UndefinedIdentifier);
 	}
 
 	this->notify(BoxModification_MessageInputRemoved, ui32InputIndex);
@@ -976,11 +979,12 @@ boolean CBox::removeMessageOutput(
 	for(i=0; i<l_vMessageLink.size(); i++)
 	{
 		m_rOwnerScenario.connectMessage(
+			l_oIdentifier,
 			l_vMessageLink[i].first.first,
 			l_vMessageLink[i].first.second-1,
 			l_vMessageLink[i].second.first,
 			l_vMessageLink[i].second.second,
-			l_oIdentifier);
+			OV_UndefinedIdentifier);
 	}
 
 	this->notify(BoxModification_MessageOutputRemoved, ui32OutputIndex);

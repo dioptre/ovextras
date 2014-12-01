@@ -238,7 +238,7 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 	string l_sFullName=string(rPluginObjectDesc.getCategory().toASCIIString()) + "/" + string(rPluginObjectDesc.getName().toASCIIString());
 	string l_sFilename="BoxAlgorithm_"+transform(rPluginObjectDesc.getName().toASCIIString());
 	CIdentifier l_oBoxIdentifier;
-	if(!m_pScenario->addBox(rPluginObjectDesc.getCreatedClassIdentifier(), l_oBoxIdentifier))
+	if(!m_pScenario->addBox(l_oBoxIdentifier, rPluginObjectDesc.getCreatedClassIdentifier(), OV_UndefinedIdentifier))
 	{
 		m_rKernelContext.getLogManager() << LogLevel_Warning << "Skipped [" << CString(l_sFilename.c_str()) << "] (could not create corresponding box)\n";
 		return true;

@@ -870,7 +870,8 @@ boolean CApplication::openScenario(const char* sFileName)
 								OV_UndefinedIdentifier,
 								0,
 								l_pBox->getIdentifier(),
-								0);
+								0,
+								OV_UndefinedIdentifier);
 					}
 				}
 			}

@@ -146,13 +146,13 @@ IVisualisationWidget* CVisualisationTree::getVisualisationWidgetFromBoxIdentifie
 }
 
 boolean CVisualisationTree::addVisualisationWidget(CIdentifier& rIdentifier, const CString& rName, EVisualisationWidgetType oType,
-	const CIdentifier& rParentIdentifier, uint32 ui32Index, const CIdentifier& rBoxIdentifier, uint32 ui32NbChildren)
+	const CIdentifier& rParentIdentifier, uint32 ui32Index, const CIdentifier& rBoxIdentifier, uint32 ui32NbChildren, const OpenViBE::CIdentifier& rSuggestedIdentifier)
 {
 	this->getLogManager() << LogLevel_Trace << "Adding new visualisation widget\n";
 
 	//create new widget
 	IVisualisationWidget* l_pVisualisationWidget = OpenViBE::Tools::CKernelObjectFactoryHelper(getKernelContext().getKernelObjectFactory()).createObject<IVisualisationWidget*>(OV_ClassId_Kernel_Visualisation_VisualisationWidget);
-	rIdentifier=getUnusedIdentifier();
+	rIdentifier=getUnusedIdentifier(rSuggestedIdentifier);
 
 	if(l_pVisualisationWidget->initialize(rIdentifier, rName, oType, rParentIdentifier, rBoxIdentifier, ui32NbChildren) == false)
 	{
@@ -361,14 +361,20 @@ boolean CVisualisationTree::parentVisualisationWidget(const CIdentifier& rIdenti
 	return true;
 }
 
-CIdentifier CVisualisationTree::getUnusedIdentifier(void) const
+CIdentifier CVisualisationTree::getUnusedIdentifier(const CIdentifier& rSuggestedIdentifier) const
 {
 	uint64 l_ui64Identifier=(((uint64)rand())<<32)+((uint64)rand());
+	if(rSuggestedIdentifier != OV_UndefinedIdentifier)
+	{
+		l_ui64Identifier = rSuggestedIdentifier.toUInteger()-1;
+	}
+
 	CIdentifier l_oResult;
 	map<CIdentifier, IVisualisationWidget*>::const_iterator i;
 	do
 	{
-		l_oResult=CIdentifier(l_ui64Identifier++);
+		l_ui64Identifier++;
+		l_oResult=CIdentifier(l_ui64Identifier);
 		i=m_vVisualisationWidget.find(l_oResult);
 	}
 	while(i!= m_vVisualisationWidget.end() || l_oResult==OV_UndefinedIdentifier);
@@ -724,7 +730,8 @@ boolean CVisualisationTree::dragDataReceivedOutsideWidgetCB(const CIdentifier& r
 		l_oDstParentIdentifier, //parent paned to dest widget parent
 		l_ui32DstIndex, //put it at the index occupied by dest widget
 		OV_UndefinedIdentifier, //no box algorithm for a paned
-		2); //2 children
+		2, //2 children
+		OV_UndefinedIdentifier); //no prefered visualization identifier
 	IVisualisationWidget* l_pPanedVisualisationWidget = getVisualisationWidget(l_oPanedIdentifier);
 
 	//add attributes
@@ -876,7 +883,8 @@ boolean CVisualisationTree::loadVisualisationWidget(IVisualisationWidget* pVisua
 				pVisualisationWidget->getIdentifier(),
 				0,
 				OV_UndefinedIdentifier,
-				0);
+				0,
+				OV_UndefinedIdentifier);
 		}
 	}
 

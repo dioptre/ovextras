@@ -212,7 +212,7 @@ boolean CAlgorithmScenarioImporter::process(void)
 		IBox* l_pBox=NULL;
 		CIdentifier l_oNewBoxIdentifier;
 
-		l_pScenario->addBox(l_oNewBoxIdentifier);
+		l_pScenario->addBox(l_oNewBoxIdentifier, b->m_oIdentifier);
 		l_pBox=l_pScenario->getBoxDetails(l_oNewBoxIdentifier);
 		if(l_pBox)
 		{
@@ -270,7 +270,7 @@ boolean CAlgorithmScenarioImporter::process(void)
 		IComment* l_pComment=NULL;
 		CIdentifier l_oNewCommentIdentifier;
 
-		l_pScenario->addComment(l_oNewCommentIdentifier);
+		l_pScenario->addComment(l_oNewCommentIdentifier, c->m_oIdentifier);
 		l_pComment=l_pScenario->getCommentDetails(l_oNewCommentIdentifier);
 		if(l_pComment)
 		{
@@ -291,11 +291,12 @@ boolean CAlgorithmScenarioImporter::process(void)
 		CIdentifier l_oNewLinkIdentifier;
 
 		l_pScenario->connect(
+			l_oNewLinkIdentifier,
 			l_vBoxIdMapping[l->m_oLinkSource.m_oBoxIdentifier],
 			l->m_oLinkSource.m_ui32BoxOutputIndex,
 			l_vBoxIdMapping[l->m_oLinkTarget.m_oBoxIdentifier],
 			l->m_oLinkTarget.m_ui32BoxInputIndex,
-			l_oNewLinkIdentifier);
+			l->m_oIdentifier);
 		l_pLink=l_pScenario->getLinkDetails(l_oNewLinkIdentifier);
 		if(l_pLink)
 		{
@@ -315,11 +316,12 @@ boolean CAlgorithmScenarioImporter::process(void)
 		CIdentifier l_oNewLinkIdentifier;
 
 		l_pScenario->connectMessage(
+			l_oNewLinkIdentifier,
 			l_vBoxIdMapping[ml->m_oLinkSource.m_oBoxIdentifier],
 			ml->m_oLinkSource.m_ui32BoxOutputIndex,
 			l_vBoxIdMapping[ml->m_oLinkTarget.m_oBoxIdentifier],
 			ml->m_oLinkTarget.m_ui32BoxInputIndex,
-			l_oNewLinkIdentifier);
+			ml->m_oIdentifier);
 		l_pLink=l_pScenario->getMessageLinkDetails(l_oNewLinkIdentifier);
 		if(l_pLink)
 		{
@@ -350,7 +352,8 @@ boolean CAlgorithmScenarioImporter::process(void)
 			l_vVisualisationWidgetIdMapping[v->m_oParentIdentifier],
 			v->m_ui32Index,
 			l_vBoxIdMapping[v->m_oBoxIdentifier],
-			v->m_ui32NbChildren);
+			v->m_ui32NbChildren,
+			v->m_oIdentifier);
 		l_pVisualisationWidget=l_pScenario->getVisualisationTreeDetails().getVisualisationWidget(l_oNewVisualisationWidgetIdentifier);
 		if(l_pVisualisationWidget)
 		{

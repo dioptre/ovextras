@@ -238,7 +238,7 @@ boolean CScenarioImporterXML::doImport(IScenarioImporterContext& rScenarioImport
 		CIdentifier l_oBoxIdentifier;
 		l_oBoxIdentifier.fromString(_AutoCaster_(b->m_sIdentifier));
 
-		l_rScenario.addBox(l_oNewBoxIdentifier);
+		l_rScenario.addBox(l_oNewBoxIdentifier, l_oBoxIdentifier);
 		l_pBox=l_rScenario.getBoxDetails(l_oNewBoxIdentifier);
 		l_pBox->setName(_AutoCaster_(b->m_sName));
 
@@ -284,11 +284,12 @@ boolean CScenarioImporterXML::doImport(IScenarioImporterContext& rScenarioImport
 		l_oLinkIdentifier.fromString(_AutoCaster_(l->m_sIdentifier));
 
 		l_rScenario.connect(
+			l_oNewLinkIdentifier,
 			m_vBoxIdMapping[_AutoCaster_(l->m_oLinkSource.m_sBoxIdentifier)],
 			_AutoCaster_(l->m_oLinkSource.m_sBoxOutputIndex),
 			m_vBoxIdMapping[_AutoCaster_(l->m_oLinkTarget.m_sBoxIdentifier)],
 			_AutoCaster_(l->m_oLinkTarget.m_sBoxInputIndex),
-			l_oNewLinkIdentifier);
+			l_oLinkIdentifier);
 		l_pLink=l_rScenario.getLinkDetails(l_oNewLinkIdentifier);
 		for(a=l->m_vAttribute.begin(); a!=l->m_vAttribute.end(); a++)
 		{
@@ -317,7 +318,8 @@ boolean CScenarioImporterXML::doImport(IScenarioImporterContext& rScenarioImport
 			m_vVisualisationWidgetIdMapping[_AutoCaster_(v->m_sParentIdentifier)],
 			_AutoCaster_(v->m_sIndex),
 			m_vBoxIdMapping[_AutoCaster_(v->m_sBoxIdentifier)],
-			_AutoCaster_(v->m_sNbChildren));
+			_AutoCaster_(v->m_sNbChildren),
+			l_oVisualisationWidgetIdentifier);
 		l_pVisualisationWidget=l_rScenario.getVisualisationTreeDetails().getVisualisationWidget(l_oNewVisualisationWidgetIdentifier);
 		for(a=v->m_vAttribute.begin(); a!=v->m_vAttribute.end(); a++)
 		{
