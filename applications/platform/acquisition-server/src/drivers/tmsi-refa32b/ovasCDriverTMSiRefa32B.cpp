@@ -248,7 +248,7 @@ void CDriverTMSiRefa32B::release(void)
 
 const char* CDriverTMSiRefa32B::getName(void)
 {
-	return "TMSi Refa32B";
+	return "TMSi Refa32B (Legacy)";
 }
 
 boolean CDriverTMSiRefa32B::initialize(
