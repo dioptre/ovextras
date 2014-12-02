@@ -1,7 +1,5 @@
-#if defined(TARGET_OS_Windows)
 #include "ovasCConfigurationMBTSmarting.h"
 
-#include <windows.h>
 #include <string.h>
 #include <iostream>
 using namespace OpenViBE;
@@ -34,12 +32,12 @@ CConfigurationMBTSmarting::CConfigurationMBTSmarting(IDriverContext& rDriverCont
 	,m_rDriverContext(rDriverContext)
 	,m_ui32ConnectionID(rConnectionId)
 {
-	m_pListStore = gtk_list_store_new(1, G_TYPE_STRING);
+	//m_pListStore = gtk_list_store_new(1, G_TYPE_STRING);
 }
 
 CConfigurationMBTSmarting::~CConfigurationMBTSmarting(void)
 {
-	g_object_unref(m_pListStore);
+	//g_object_unref(m_pListStore);
 }
 
 boolean CConfigurationMBTSmarting::preConfigure(void)
@@ -48,41 +46,10 @@ boolean CConfigurationMBTSmarting::preConfigure(void)
 	{
 		return false;
 	}
-	::GtkComboBox* l_pComboBox = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_device"));
 
-	g_object_unref(m_pListStore);
-	m_pListStore = gtk_list_store_new(1, G_TYPE_STRING);
-	
-	gtk_combo_box_set_model(l_pComboBox, GTK_TREE_MODEL(m_pListStore));
-
-
-	boolean l_bSelected = false;
-
-	char lpTargetPath[50]; // buffer to store the path of the COMPORTS
-    DWORD test;
-    bool gotPort=0; // in case the port is not found
-
-    for(int i = 0; i < 255; i++) // checking ports from COM0 to COM255
-    {
-       
-       ::sprintf(lpTargetPath, "COM%i", i);
-        test = QueryDosDevice(lpTargetPath, (LPSTR)lpTargetPath, 5000);
-
-            // Test the return value and error if any
-        if(test != 0) //QueryDosDevice returns zero if it didn't find an object
-        {
-			 char comPort[50];
-			 ::sprintf(comPort, "COM%i", i);
-			 ::gtk_combo_box_append_text(l_pComboBox, comPort);
-             gotPort = 1; // found port
-        }
-
-        if(::GetLastError( )== ERROR_INSUFFICIENT_BUFFER)
-        {
-            lpTargetPath[10000]; // in case the buffer got filled, increase size of the buffer.
-            continue;
-        }
-    }
+	// Apply previous port number
+	::GtkSpinButton* l_pSpinButtonPortNumber = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_port_number"));
+	gtk_spin_button_set_value(l_pSpinButtonPortNumber, m_ui32ConnectionID);	
 	
 	// Connect here all callbacks
 	// Example:
@@ -98,34 +65,14 @@ boolean CConfigurationMBTSmarting::preConfigure(void)
 
 boolean CConfigurationMBTSmarting::postConfigure(void)
 {
-	::GtkComboBox* l_pComboBox = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_device"));
 
 	if(m_bApplyConfiguration)
 	{
 		// If the user pressed the "apply" button, you need to save the changes made in the configuration.
 		// For example, you can save the connection ID of the selected device:
 		// m_ui32ConnectionID = <value-from-gtk-widget>
-		const gchar* port = gtk_combo_box_get_active_text(l_pComboBox);
-
-		// TODO: FIX THIS SHIT
-		if(!port)
-		{
-			std::cout << "Error: Port not specified or invalid\n";
-		}
-		else
-		{
-			int l_iUSBIndex = 0;
-			char* port1 = (char*) port;
-			if(strlen(port1) > 4)
-				l_iUSBIndex = 10*((int)port[3] - '0') + (int)port[4] - '0' ;
-			else
-				l_iUSBIndex = (int)port[3] - '0';
-			if(l_iUSBIndex>=0)
-			{
-				m_ui32ConnectionID = (uint32)l_iUSBIndex;
-			}
-		}
-
+		::GtkSpinButton* l_pSpinButtonPortNumber = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_port_number"));
+		m_ui32ConnectionID = ::gtk_spin_button_get_value_as_int(l_pSpinButtonPortNumber);
 	}
 
 	
@@ -137,5 +84,3 @@ boolean CConfigurationMBTSmarting::postConfigure(void)
 
 	return true;
 }
-
-#endif

@@ -1,8 +1,6 @@
 #ifndef __OpenViBE_AcquisitionServer_CConfigurationMBTSmarting_H__
 #define __OpenViBE_AcquisitionServer_CConfigurationMBTSmarting_H__
 
-#if defined(TARGET_OS_Windows)
-
 #include "../ovasCConfigurationBuilder.h"
 #include "ovasIDriver.h"
 
@@ -46,10 +44,9 @@ namespace OpenViBEAcquisitionServer
 		 * Example:
 		 */
 		OpenViBE::uint32& m_ui32ConnectionID;
-		::GtkListStore* m_pListStore;
+		//::GtkListStore* m_pListStore;
 	};
 };
 
-#endif
 
 #endif // __OpenViBE_AcquisitionServer_CConfigurationMBTSmarting_H__

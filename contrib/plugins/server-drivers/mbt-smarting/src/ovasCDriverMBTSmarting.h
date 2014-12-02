@@ -1,8 +1,6 @@
 #ifndef __OpenViBE_AcquisitionServer_CDriverMBTSmarting_H__
 #define __OpenViBE_AcquisitionServer_CDriverMBTSmarting_H__
 
-#if defined(TARGET_OS_Windows)
-
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 #include <openvibe/ov_all.h>
@@ -49,7 +47,11 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isFlagSet(
 			const OpenViBEAcquisitionServer::EDriverFlag eFlag) const
 		{
-			return false;
+	#ifdef TARGET_OS_Windows
+		return false;
+	#elif defined TARGET_OS_Linux
+		return true;
+	#endif
 		}
 
 	protected:
@@ -79,5 +81,3 @@ namespace OpenViBEAcquisitionServer
 };
 
 #endif // __OpenViBE_AcquisitionServer_CDriverMBTSmarting_H__
-
-#endif

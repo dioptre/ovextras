@@ -1,10 +1,10 @@
-
-#if defined(TARGET_OS_Windows)
-
 #include "ovasCSmartingAmp.h"
 
 using namespace std;
 using namespace boost;
+
+#define CHANNEL_SCALAR_FACTOR 2.235174445530706e-2
+#define GYRO_SCALAR_FACTOR 0.00875
 
 SmartingAmp::SmartingAmp()
 {
@@ -17,7 +17,6 @@ SmartingAmp::~SmartingAmp()
 
 void SmartingAmp::disconnect()
 {
-
 	if(!m_port->is_open()) return;
     m_port->close();
 }
@@ -74,7 +73,6 @@ void SmartingAmp::on_receive(const boost::system::error_code& ec, size_t bytes_t
 					m_samples_lock.lock();
 					m_samplesBuffer.push(sample);
 					m_samples_lock.unlock();
-					//std::cout << sample[24] << endl;
 				}
 				else
 				{
@@ -153,14 +151,11 @@ std::pair<unsigned char*, int> SmartingAmp::make_command(Command command)
 			cmd[0] = '>';  cmd[1] = '5'; cmd[2] = '0'; cmd[3] = '0'; cmd[4] = '<'; 
 			out = std::make_pair(cmd, 5);
 			break;
-			case NOISE :
+		case NOISE :
 			cmd = new unsigned char[7];
 			cmd[0] = '>'; cmd[1] = 'N'; cmd[2] = 'O'; cmd[3] = 'I'; cmd[4] = 'S'; cmd[5] = 'E'; cmd[6] = '<';
 			out = std::make_pair(cmd, 7);
 			break;
-	
-
-
 	}
 
 	return out;
@@ -196,8 +191,6 @@ bool SmartingAmp::connect(std::string& port_name)
 	}
 	catch(const std::exception &)
 	{
-		// This is probably wrong port connection
-		//e.what();
 		disconnect();
 		return false;
 	}
@@ -259,9 +252,7 @@ bool SmartingAmp::start()
 	acquire();
 
 	acquire_t.reset(new boost::thread(boost::bind(&boost::asio::io_service::run, &m_io)));
-	apply_priority(acquire_t.get(), THREAD_PRIORITY_HIGHEST);
 
-	//boost::this_thread::sleep(boost::posix_time::millisec(15));
 	return true;
 }
 
@@ -306,95 +297,63 @@ bool SmartingAmp::stop()
 	return false;
 }
 
-// TODO: MULTIPLATFORM FIX
-void SmartingAmp::apply_priority(boost::thread* thread, int priority)
-{
-    if (!thread)
-        return;
-
-    BOOL res;
-    HANDLE th = thread->native_handle();
-
-    switch (priority)
-    {
-		case THREAD_PRIORITY_TIME_CRITICAL :
-			res = SetThreadPriority(th, THREAD_PRIORITY_TIME_CRITICAL);
-			break;
-		case THREAD_PRIORITY_HIGHEST :
-			res = SetThreadPriority(th, THREAD_PRIORITY_HIGHEST);
-			break;
-		case THREAD_PRIORITY_ABOVE_NORMAL :
-			res = SetThreadPriority(th, THREAD_PRIORITY_ABOVE_NORMAL);
-			break;
-		case THREAD_PRIORITY_NORMAL :
-			res = SetThreadPriority(th, THREAD_PRIORITY_NORMAL);
-			break;
-		case THREAD_PRIORITY_BELOW_NORMAL :
-			res = SetThreadPriority(th, THREAD_PRIORITY_BELOW_NORMAL);
-			break;
-		case THREAD_PRIORITY_LOWEST :
-			res = SetThreadPriority(th, THREAD_PRIORITY_LOWEST);
-			break;
-    }
-}
-
-// returned sample is in following format: [24channels, gyrox, gyroy, gyroz, counter, battery, checksum]
 float* SmartingAmp::convert_data(std::vector<unsigned char> byte_array)
 {
 	float* converted_data = new float[30];
-
-	int sign;
-	float data;
-	for (int length = 1; length < 83; length += 3)
+	
+	// channel data
+	for (int i = 0; i < 24; i++)
 	{
-		if (length <= 73 && length > 3) //if reading channel data
-		{
-			sign = (byte_array[length - 3] & 0x80) != 0; //checks if it should be negative in two's complement
-			data = (float)(((byte_array[length - 1] + byte_array[length - 2] * 256 + byte_array[length - 3] * 65536) ^ (0x00FFFFFF * sign)) + sign); //finds complement if needed
-			data = sign ? (-data) : data;
-			converted_data[(length - 1) / 3 - 1] = data;
-		}
-
-		if (length == 76)  //we have counter and GyroX here
-		{
-			converted_data[27] = (float)byte_array[length - 3]; //add counter data
-			sign = (byte_array[length - 2] & 0x80); //checks if it should be negative in two's complement
-			data = (float)(((byte_array[length - 1] + byte_array[length - 2] * 256) ^ (0xFFFF*sign)) + sign); //calculates GyroX
-			data = sign ? (-data) : data;
-			converted_data[24] = data;
-		}
-
-		if (length == 79) //we have GyroY and half of GyroZ
-		{
-			sign = (byte_array[length - 3] & 0x80); //checks if it should be negative in two's complement
-			data = (float)(((byte_array[length - 2] + byte_array[length - 3] * 256) ^ (0xFFFF * sign)) + sign); //calculates GyroY
-			data = sign ? (-data) : data;
-			converted_data[25] = data;
-		}
-
-		if (length == 82) //we have whole GyroZ, Battery, and checksum
-		{
-			sign = (byte_array[length - 4] & 0x80); //checks if it should be negative in two's complement
-			data = (float)(((byte_array[length - 3] + byte_array[length - 4] * 256) ^ (0xFFFF*sign)) + sign);//Calculates GyroZ
-			data = sign ? (-data) : data;
-			converted_data[26] = data;
-			converted_data[28] = (float)(byte_array[length - 2] & 0x7F);//add baterry data, removing highest bit, because it's used for impedance measurement
-			converted_data[29] = byte_array[length - 1]; //add checksum data
-		}
+		converted_data[i] = get_channel_value(byte_array[3*i + 1], byte_array[3*i + 2], byte_array[3*i + 3]);
 	}
+
+	// gyroX
+	converted_data[24] = get_gyro_value(byte_array[74], byte_array[75]);
+	// gyroY
+	converted_data[25] = get_gyro_value(byte_array[76], byte_array[77]);
+	// gyroZ
+	converted_data[26] = get_gyro_value(byte_array[78], byte_array[79]);
+
+	// counter
+	converted_data[27] = (float)byte_array[73];
+
+	// battery
+	converted_data[28] = (float)(byte_array[80] & 0x7F);//add baterry data, removing highest bit, because it's used for impedance measurement
+	converted_data[29] = byte_array[81]; //add checksum data
 	
 	return converted_data;
 }
 
-void SmartingAmp::flush()
+float SmartingAmp::get_channel_value(unsigned char first, unsigned char second, unsigned char third)
 {
-	cout << "Flushing buffer ..." << endl;
-	read_with_timeout(MAX_PORT_SIZE, 5000);
+	int firstByte = (int) first & 0xff;
+	int secondByte = (int) second & 0xff;
+	int thirdByte = (int) third & 0xff;
 
-	while (m_bytes_readed)
-	{
-		read_with_timeout(MAX_PORT_SIZE, 5000);
+	int channelValue = (firstByte << 16) + (secondByte << 8) + thirdByte;
+
+	// Checking if value is positive or negative
+	if (channelValue > 0x007FFFFF) {
+		channelValue = channelValue - 0x01000000;
 	}
+
+	return channelValue*(float)CHANNEL_SCALAR_FACTOR;
+}
+
+float SmartingAmp::get_gyro_value(unsigned char first, unsigned char second)
+{
+	int firstByte = (int) first & 0xff;
+	int secondByte = (int) second & 0xff;
+
+	int out = (firstByte << 8) + secondByte;
+
+	if (out > 0x00007FFF) {
+		out = out - 0x00008000;
+	} else {
+		out = out + 0x00008000;
+	}
+
+	return out * (float)GYRO_SCALAR_FACTOR;
 }
 
 void SmartingAmp::read_with_timeout(int size, size_t timeout)
@@ -430,46 +389,22 @@ void SmartingAmp::read_with_timeout(int size, size_t timeout)
 // Called when the timer's deadline expires.
 void SmartingAmp::timeout_expired(const boost::system::error_code& error)
 {
-	//boost::mutex::scoped_lock m(m_timer_expired_lock);
 	m_io.stop();
- //   if (error)
-	//{
-	//	cout << "timer was canceled" << endl;
- //       return;
- //   }
- //
-	//// no, we have timed out, so kill
- //   // the read operation
- //   // The read callback will be called
- //   // with an error
- //   cout << "timeout expired" << endl;
-	////boost::system::error_code ec(boost::asio::error::operation_aborted);
-	//m_io.stop();
-	
 }
 
 // Called when an async read completes or has been cancelled
 void SmartingAmp::read_complete(const boost::system::error_code& error, size_t bytes_transferred)
 {
-	// boost::mutex::scoped_lock m(m_read_complete_lock);
-	// cout << error.message() << endl;
 	// IMPORTANT NOTE: when timer expires, and port is canceled, read complete is 
 	// called for the last time. Its extremly important to cancel the timer even though
 	// it has already expired. So, here it goes
 	if (error)
 	{
-		//cout << "reading was canceled" << endl;
 		return;
 	}
-	//cout << "read complete " << bytes_transferred << endl;
+
 	m_bytes_readed = bytes_transferred;
     m_timer->cancel();
-}
-
-void SmartingAmp::on()
-{
-	std::pair< unsigned char*, size_t > transformed_cmd = make_command(ON);
-	write(transformed_cmd.first, transformed_cmd.second);
 }
 
 void SmartingAmp::off()
@@ -478,4 +413,3 @@ void SmartingAmp::off()
 	write(transformed_cmd.first, transformed_cmd.second);
 }
 
-#endif

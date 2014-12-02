@@ -67,9 +67,7 @@ namespace OpenViBEContributions {
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverTMSi(pAcquisitionServer->getDriverContext()));
 #endif
 
-#if defined TARGET_OS_Windows
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverMBTSmarting(pAcquisitionServer->getDriverContext()));
-#endif
 
 		pGUI->registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginExternalStimulations(rKernelContext));
 	}

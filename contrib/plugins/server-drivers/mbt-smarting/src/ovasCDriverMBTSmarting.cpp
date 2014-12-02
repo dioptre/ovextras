@@ -1,6 +1,3 @@
-
-#if defined(TARGET_OS_Windows)
-
 #include "ovasCDriverMBTSmarting.h"
 #include "ovasCConfigurationMBTSmarting.h"
 
@@ -75,19 +72,39 @@ boolean CDriverMBTSmarting::initialize(
 	m_pSmartingAmp.reset(new SmartingAmp);
 	
 	stringstream port_ss;
-	port_ss << "COM" << m_ui32ConnectionID;
+	#ifdef TARGET_OS_Windows
+		port_ss << "COM" << m_ui32ConnectionID;
+	#elif defined TARGET_OS_Linux
+		port_ss << "/dev/rfcomm" << m_ui32ConnectionID;
+	#endif
 
-	bool connected = m_pSmartingAmp->connect(port_ss.str());
-	if(!connected)
+	m_rDriverContext.getLogManager() << LogLevel_Info << "Attempting to Connect to Device at : " << port_ss.str().c_str() <<"\n";
+
+	string port(port_ss.str().c_str());
+	bool connected = m_pSmartingAmp->connect(port);
+	if(connected)
 	{
-		return false;
+		// set sampling frequency
+		switch(m_oHeader.getSamplingFrequency())
+		{
+		case 250:
+			m_pSmartingAmp->send_command(FREQUENCY_250);
+			m_rDriverContext.getLogManager() << LogLevel_Info << "Setting the sampling frequency at " << 250 <<"\n";
+			break;
+		case 500:
+			m_rDriverContext.getLogManager() << LogLevel_Info << "Setting the sampling frequency at " << 500 <<"\n";
+			m_pSmartingAmp->send_command(FREQUENCY_500);
+			break;
+		}
+
+		// Saves parameters
+		m_pCallback=&rCallback;
+		m_ui32SampleCountPerSentBlock=ui32SampleCountPerSentBlock;
+
+		return true;
 	}
 
-	// Saves parameters
-	m_pCallback=&rCallback;
-	m_ui32SampleCountPerSentBlock=ui32SampleCountPerSentBlock;
-
-	return true;
+	return false;
 }
 
 boolean CDriverMBTSmarting::start(void)
@@ -99,8 +116,10 @@ boolean CDriverMBTSmarting::start(void)
 	// request hardware to start
 	// sending data
 	// ...
+
 	m_pSmartingAmp->send_command(ON);
 	m_byteArray.clear();
+	
 	sample_number = 1;
 	latency = 1;
 
@@ -119,10 +138,11 @@ boolean CDriverMBTSmarting::loop(void)
 	// put them the correct way in the sample array
 	// whether the buffer is full, send it to the acquisition server
 	//...
-	// #ifdef WIN
-	HANDLE current_thread =  GetCurrentThread();
-	SetThreadPriority(current_thread, THREAD_PRIORITY_HIGHEST);
-	// #endif
+
+	#ifdef TARGET_OS_Windows
+		HANDLE current_thread =  GetCurrentThread();
+		SetThreadPriority(current_thread, THREAD_PRIORITY_HIGHEST);
+	#endif
 
 	unsigned char* receiveBuffer = new unsigned char[MAX_PACKAGE_SIZE];
 
@@ -246,5 +266,3 @@ boolean CDriverMBTSmarting::configure(void)
 	
 	return true;
 }
-
-#endif
