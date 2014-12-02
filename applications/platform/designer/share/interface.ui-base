@@ -41,6 +41,18 @@ Core Developers :
  - Loic Mahe, Inria
  - Guillaume Serrière, Inria
 
+SED Support Engineer
+ - Guillermo Andrade-Barroso, Inria
+
+Contributors :
+ - Mensia Technologies (France)
+ - Joao-Pedro Berti-Ligabo, Inria
+ - mBrainTrain dev team (Serbia)
+ - Ozan Caglayan, Galatasaray Univ. (Turkey)
+ 
+Previous Contributors : 
+ - http://openvibe.inria.fr/contributors/
+ 
 Former Core Developers
  - Yann Renard, Inria
  - Laurent Bonnet, Inria
@@ -50,24 +62,16 @@ Former Core Developers
  - Bruno Renier, Inria
  - Baptiste Payan, Inria
 
-Contributors :
- - Guillermo Andrade Barroso, Inria
- - Mensia Technologies
- - Mike Chi, Cognionics
- - Anton Albajes-Eizagirre, Neuroelectrics 
- - Anton Andreev, CNRS/Gipsa-lab
- - Jonathan Mercier-Ganady, Inria
+Scientific Steering Committee :
+ - Laurent Bougrain, Inria
+ - Maureen Clerc, Inria
+ - Anatole Lecuyer, Inria
+ - Fabien Lotte, Inria
+ - Theodore Papadopoulo, Inria
  
-Previous Contributors :
- - Dieter Devlaminck, Ghent Univ./Inria
- - Mattieu Goyat, INPG
- - Joan Fruitet, Inria
- - Guillaume Gibert, INSERM
- - Emmanuel Maby, INSERM
- - Pierre-Emmanuel Aguera, INSERM
- - Chris Veigl, UAS Technikum Wien
- - Lucie Daubigney, Supelec</property>
+    </property>
     <property name="documenters">Documenters :
+	
  - Yann Renard, Inria
  - Laurent Bonnet, Inria
  - Jozef Legény, Inria
@@ -79,7 +83,9 @@ Contributions also from :
  - Baptiste Payan, Inria
  - Vincent Delannoy, Inria
  - Guillaume Gibert, INSERM
- - Emmanuel Maby, INSERM</property>
+ - Emmanuel Maby, INSERM
+ 
+    </property>
     <child internal-child="vbox">
       <object class="GtkBox" id="about-dialog-vbox">
         <property name="visible">True</property>

@@ -17,8 +17,11 @@ Core Developers :
  - Alison Cellard, Inria
  - Loic Mahe, Inria
  - Guillaume Serrière, Inria
- 
-Former Core Developers
+
+SED Support Engineer
+ - Guillermo Andrade-Barroso, Inria
+
+Former Core Developers :
  - Yann Renard, Inria
  - Laurent Bonnet, Inria
  - Jozef Legény, Inria
@@ -27,22 +30,19 @@ Former Core Developers
  - Bruno Renier, Inria
  - Baptiste Payan, Inria
 
-Contributors :
- - Anton Andreev, CNRS/Gipsa-lab
- - Guillermo Andrade Barroso, Inria
+Scientific Steering Committee :
+ - Laurent Bougrain, Inria
+ - Maureen Clerc, Inria
+ - Anatole Lecuyer, Inria
+ - Fabien Lotte, Inria
+ - Theodore Papadopoulo, Inria
 
-Previous Contributors :
- - Dieter Devlaminck, Ghent Univ.
- - Yann Renard, Inria
- - Laurent Bonnet, Inria
- - Mattieu Goyat, INPG (Univariate Statistics box)
- - Joan Fruitet, Inria
- - Guillaume Gibert, INSERM
- - Guillaume Lio, INP Grenoble (Signal Merger box)
- - Emmanuel Maby, INSERM
- - Pierre-Emmanuel Aguera, INSERM
- - Chris Veigl, UAS Technikum Wien (Modular EEG P2 driver)
- - Lucie Daubigney, Supelec Metz (g.Mobilab+ driver)
+Contributors :
+
+ - Please see 
+   
+   http://openvibe.inria.fr/contributors/
+
  
 |End.of.file|
 
