@@ -16,22 +16,22 @@ namespace OpenViBEDesigner
 		operator OpenViBE::Kernel::ILink* (void);
 		operator const OpenViBE::Kernel::ILink* (void);
 
-		OpenViBE::int32 getXSource(void);
-		OpenViBE::int32 getYSource(void);
-		OpenViBE::int32 getXTarget(void);
-		OpenViBE::int32 getYTarget(void);
+		OpenViBE::float64 getXSource(void);
+		OpenViBE::float64 getYSource(void);
+		OpenViBE::float64 getXTarget(void);
+		OpenViBE::float64 getYTarget(void);
 
-		void setSource(OpenViBE::int32 i32XSource, OpenViBE::int32 i32YSource);
-		void setTarget(OpenViBE::int32 i32XTarget, OpenViBE::int32 i32YTarget);
+		void setSource(OpenViBE::float64 f64XSource, OpenViBE::float64 f64YSource);
+		void setTarget(OpenViBE::float64 f64XTarget, OpenViBE::float64 f64YTarget);
 
 	protected:
 
 		const OpenViBE::Kernel::ILink* m_pConstLink;
 		OpenViBE::Kernel::ILink* m_pLink;
-		int m_iXSource;
-		int m_iYSource;
-		int m_iXTarget;
-		int m_iYTarget;
+		OpenViBE::float64 m_f64XSource;
+		OpenViBE::float64 m_f64YSource;
+		OpenViBE::float64 m_f64XTarget;
+		OpenViBE::float64 m_f64YTarget;
 	};
 };
 

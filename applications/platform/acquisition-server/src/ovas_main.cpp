@@ -11,11 +11,73 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace std;
 
+typedef struct _SConfiguration
+{
+	_SConfiguration(void)
+	{
+	}
+
+	// <name, value>
+	std::map < std::string, std::string > m_oFlag;
+} SConfiguration;
+
+boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
+{
+	SConfiguration l_oConfiguration;
+
+	int i;
+	std::vector < std::string > l_vArgValue;
+	std::vector < std::string >::const_iterator it;
+	for(i=1; i<argc; i++)
+	{
+		l_vArgValue.push_back(argv[i]);
+	}
+	l_vArgValue.push_back("");
+
+	for(it=l_vArgValue.begin(); it!=l_vArgValue.end(); it++)
+	{
+		if(*it=="")
+		{
+		}
+		else if(*it=="-c" || *it=="--config")
+		{
+			l_oConfiguration.m_oFlag["config"] = *++it;
+		}
+		else if(*it=="-k" || *it=="--kernel")
+		{
+			l_oConfiguration.m_oFlag["kernel"] = *++it;
+		}
+		else if(*it=="-h" || *it=="--help")
+		{
+			return false;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	rConfiguration=l_oConfiguration;
+
+	return true;
+}
+
+
 int main(int argc, char ** argv)
 {
 //___________________________________________________________________//
 //                                                                   //
 
+	SConfiguration l_oConfiguration;
+	if(!parse_arguments(argc, argv, l_oConfiguration))
+	{
+		cout << "Syntax : " << argv[0] << " [ switches ]\n";
+		cout << "Possible switches :\n";
+		cout << "  --config filename       : path to config file\n";
+		cout << "  --help                  : displays this help message and exits\n";
+		cout << "  --kernel filename       : path to openvibe kernel library\n";
+		return -1;
+	}
 
 	CKernelLoader l_oKernelLoader;
 
@@ -26,9 +88,13 @@ int main(int argc, char ** argv)
 #else
 	CString l_sKernelFile = OpenViBE::Directories::getLibDir() + "/libopenvibe-kernel.so";
 #endif
+	if(l_oConfiguration.m_oFlag.count("kernel")) 
+	{
+		l_sKernelFile = CString(l_oConfiguration.m_oFlag["kernel"].c_str());
+	}
 	if(!l_oKernelLoader.load(l_sKernelFile, &l_sError))
 	{
-		cout<<"[ FAILED ] Error loading kernel ("<<l_sError<<")" << " from [" << l_sKernelFile << "]\n";
+		cout<<"[ FAILED ] Error loading kernel from [" << l_sKernelFile << "]: " << l_sError << "\n";
 	}
 	else
 	{
@@ -44,7 +110,15 @@ int main(int argc, char ** argv)
 		else
 		{
 			cout<<"[  INF  ] Got kernel descriptor, trying to create kernel"<<endl;
-			l_pKernelContext=l_pKernelDesc->createKernel("acquisition-server", OpenViBE::Directories::getDataDir() + "/kernel/openvibe.conf");
+
+
+			CString l_sConfigFile = CString(OpenViBE::Directories::getDataDir() + "/kernel/openvibe.conf");
+			if(l_oConfiguration.m_oFlag.count("config")) 
+			{
+				l_sConfigFile = CString(l_oConfiguration.m_oFlag["config"].c_str());
+			}
+
+			l_pKernelContext=l_pKernelDesc->createKernel("acquisition-server", l_sConfigFile);
 			if(!l_pKernelContext)
 			{
 				cout<<"[ FAILED ] No kernel created by kernel descriptor"<<endl;
@@ -66,6 +140,15 @@ int main(int argc, char ** argv)
 				gtk_init(&argc, &argv);
 
 				// gtk_rc_parse(OpenViBE::Directories::getDataDir() + "/applications/designer/interface.gtkrc");
+
+#ifdef TARGET_OS_Linux
+				// Replace the gtk signal handlers with the default ones. As a result, 
+				// the following exits on terminating signals won't be graceful, 
+				// but its better than not exiting at all (gtk default on Linux apparently)
+				signal(SIGHUP, SIG_DFL);
+				signal(SIGINT, SIG_DFL);
+				signal(SIGQUIT, SIG_DFL);
+#endif
 
 #if 0 // This is not needed in the acquisition server
 				if(l_rConfigurationManager.expandAsBoolean("${Kernel_3DVisualisationEnabled}"))

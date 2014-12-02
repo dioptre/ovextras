@@ -8,10 +8,6 @@
 #include "box-algorithms/ovpCBoxAlgorithmUnivariateStatistics.h"		// gipsa
 #include "box-algorithms/ovpCBoxAlgorithmSynchro.h"						// gipsa
 
-#include "box-algorithms/ovpCSteadyStateFrequencyComparison.h"			// inserm
-#include "box-algorithms/ovpCEpoching.h"								// inserm
-#include "box-algorithms/ovpCBandFrequencyAverage.h"					// inserm
-
 // @BEGIN inserm-gpl
 #include "algorithms/ovpCDetectingMinMax.h"
 #include "box-algorithms/ovpCDetectingMinMaxBoxAlgorithm.h"
@@ -20,11 +16,11 @@
 #include "box-algorithms/ovpCSpectralAnalysisCospectra.h"
 #include "box-algorithms/ovpCFastICA.h"
 #include "box-algorithms/ovpCSpectralAnalysis.h"
-#include "box-algorithms/ovpCTemporalFilter.h"
 
 #include "algorithms/ovpCApplyTemporalFilter.h"
 #include "algorithms/ovpCComputeTemporalFilterCoefficients.h"
 #include "box-algorithms/ovpCTemporalFilterBoxAlgorithm.h"
+#include "box-algorithms/ovpCModTemporalFilterBoxAlgorithm.h"
 
 #include "algorithms/ovpCDownsampling.h"
 #include "box-algorithms/ovpCDownsamplingBoxAlgorithm.h"
@@ -43,16 +39,6 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgoUnivariateStatisticDesc);	// gipsa
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxUnivariateStatisticDesc);	// gipsa
 
-// @BEGIN inserm
-	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_ComparisonMethod, "Comparison method");
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ComparisonMethod, "Ratio", OVP_TypeId_ComparisonMethod_Ratio.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ComparisonMethod, "Substraction", OVP_TypeId_ComparisonMethod_Substraction.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ComparisonMethod, "Laterality index", OVP_TypeId_ComparisonMethod_LateralityIndex.toUInteger());
-
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBandFrequencyAverageDesc)
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CEpochingDesc)
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSteadyStateFrequencyComparisonDesc)
-// @END inserm
 		
 // @BEGIN inserm-gpl
 	rPluginModuleContext.getTypeManager().registerBitMaskType (OVP_TypeId_SpectralComponent, "Spectral component");
@@ -64,7 +50,6 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_FilterMethod, "Filter method");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FilterMethod, "Butterworth", OVP_TypeId_FilterMethod_Butterworth.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FilterMethod, "Chebychev",   OVP_TypeId_FilterMethod_Chebychev.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FilterMethod, "Yule-Walker", OVP_TypeId_FilterMethod_YuleWalker.toUInteger());
 
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_FilterType, "Filter type");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FilterType, "Low pass",  OVP_TypeId_FilterType_LowPass.toUInteger());
@@ -93,11 +78,11 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysisDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysisCospectraDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CFastICADesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CTemporalFilterDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CWindowingFunctionsDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CComputeTemporalFilterCoefficientsDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CTemporalFilterBoxAlgorithmDesc);
+OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CModTemporalFilterBoxAlgorithmDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CApplyTemporalFilterDesc);
 #endif // TARGET_HAS_ThirdPartyITPP
 

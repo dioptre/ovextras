@@ -416,3 +416,8 @@ void CAlgorithm::handleCrash(const char* sWhere)
 		m_bActive=false;
 	}
 }
+
+boolean CAlgorithm::isAlgorithmDerivedFrom(const CIdentifier& rClassIdentifier)
+{
+	return m_rAlgorithm.isDerivedFromClass(rClassIdentifier);
+}

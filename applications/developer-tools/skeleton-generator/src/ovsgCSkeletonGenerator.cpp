@@ -4,11 +4,29 @@
 #include <cstdlib>
 #include <ctime>
 #include <sstream>
+#include <fstream>
+#include <iostream>
+#include <iterator>
+
+#include <boost/regex.hpp>
 
 using namespace std;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBESkeletonGenerator;
+
+// Wraps system() call to handle spaces on Windows
+int systemWrapper(const CString& command)
+{
+#if defined(TARGET_OS_Windows)
+	// If both command and its arguments have spaces on Windows, the whole thing needs to be padded with double quotes
+	CString l_sPadded = "\"" + command + "\"";
+	return system(l_sPadded.toASCIIString());
+#else
+	// On Linux we leave it as-is.
+	return system(command.toASCIIString());
+#endif
+}
 
 CSkeletonGenerator::CSkeletonGenerator(IKernelContext & rKernelContext, ::GtkBuilder * pBuilderInterface)
 	:m_rKernelContext(rKernelContext)
@@ -180,104 +198,44 @@ CString CSkeletonGenerator::ensureSedCompliancy(CString sExpression)
 	return CString(l_sExpression.c_str());
 }
 
-boolean CSkeletonGenerator::executeSedCommand(CString sTemplateFile, CString sCommand, CString sDestinationFile)
+boolean CSkeletonGenerator::regexReplace(const CString& sTemplateFile, const CString& sRegEx, const CString& sSubstitute, const CString& sDestinationFile)
 {
-	CString l_sSed;
-	CString l_sMove;
-	CString l_sNull;
-#ifdef TARGET_OS_Windows
-	l_sSed = m_rKernelContext.getConfigurationManager().expand("${Path_Data}/applications/skeleton-generator/sed");
-	l_sMove = "move";
-	l_sNull = "NULL";
-#else
-#ifdef TARGET_OS_Linux
-	l_sSed = "sed";
-	l_sMove = "mv";
-	l_sNull = "/dev/null";
-#endif
+	try {
+		// Read file to memory
+		std::ifstream l_oInStream(sTemplateFile.toASCIIString());
+		std::string l_sBuffer((std::istreambuf_iterator<char>(l_oInStream)), std::istreambuf_iterator<char>());
+		l_oInStream.close();
+
+		// Open output stream and set an iterator to it
+		CString l_sRealDestination(sDestinationFile);
+		if(l_sRealDestination==CString(""))
+		{
+			l_sRealDestination = sTemplateFile;
+		}
+#if 0
+		std::cout << "Replace from " << sTemplateFile << " to " << l_sRealDestination << "\n";
+		std::cout << "  regEx  : " << sRegEx << "\n";
+		std::cout << "  newText: " << sSubstitute << "\n";
 #endif
 
-	boolean l_bSuccess = false;
+		std::ofstream l_oOutStream(l_sRealDestination.toASCIIString());
 
-	CString l_sCommandSed = l_sSed + " \"" + sCommand+"\" \"" + sTemplateFile + "\"";
-	if(string(sDestinationFile) != string(""))
-	{
-		l_sCommandSed =  l_sCommandSed + " > \"" + sDestinationFile + "\"";
-		l_bSuccess = (system(((string)l_sCommandSed).c_str()) == 0);
-	}
-	else
-	{
-		l_sCommandSed =  l_sCommandSed + " > tmp-sed";
-		l_bSuccess = (system(l_sCommandSed) == 0);
-		CString l_sMoveCommand = l_sMove + " tmp-sed \"" + sTemplateFile + "\" >> "+l_sNull;
-		l_bSuccess &= (system(l_sMoveCommand) == 0);
-		m_rKernelContext.getLogManager() << LogLevel_Trace << " -- Move command : [" << l_sMoveCommand << "]\n";
-	}
+		std::ostream_iterator<char> l_oOutIterator(l_oOutStream);
 	
-	l_bSuccess = (system(((string)l_sCommandSed).c_str()) == 0);
+		// Do regex magic on the iterator
+		boost::regex l_oExpression;
+		l_oExpression.assign(sRegEx.toASCIIString());
 
-	if(l_bSuccess)
+		boost::regex_replace(l_oOutIterator, l_sBuffer.begin(), l_sBuffer.end(), l_oExpression, sSubstitute.toASCIIString(), boost::match_default | boost::format_sed);
+
+		l_oOutStream.close();
+	} 
+	catch(...)
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Trace << " -- Sed command successfully called : [" << l_sCommandSed << "]\n";
+		std::cout << "Error occurred processing " << sTemplateFile << " to " << sDestinationFile << "\n";
+		return false;
 	}
-	else
-	{
-		m_rKernelContext.getLogManager() << LogLevel_Error << " -- Faulty substitution command : [" << l_sCommandSed <<"]\n";
-	}
-
-	return l_bSuccess;
-
-}
-
-boolean CSkeletonGenerator::executeSedSubstitution(CString sTemplateFile, CString sTag, CString sSubstitute, CString sDestinationFile)
-{
-	CString l_sSed;
-	CString l_sMove;
-	CString l_sNull;
-#ifdef TARGET_OS_Windows
-	l_sSed = m_rKernelContext.getConfigurationManager().expand("${Path_Data}/applications/skeleton-generator/sed");
-	l_sMove = "move";
-	l_sNull = "NULL";
-#else
-#ifdef TARGET_OS_Linux
-	l_sSed = "sed";
-	l_sMove = "mv";
-	l_sNull = "/dev/null";
-#endif
-#endif
-
-	boolean l_bSuccess = false;
-
-	CString l_sSubstitute = ensureSedCompliancy(sSubstitute);
-
-	CString l_sCommandSed = l_sSed + " \"s/" + sTag + "/" + l_sSubstitute+ "/g\" \"" + sTemplateFile + "\"";
-	if(string(sDestinationFile) != string(""))
-	{
-		l_sCommandSed =  l_sCommandSed + " > \"" + sDestinationFile + "\"";
-		l_bSuccess = (system(((string)l_sCommandSed).c_str()) == 0);
-	}
-	else
-	{
-		l_sCommandSed =  l_sCommandSed + " > tmp-sed";
-		l_bSuccess = (system(l_sCommandSed) == 0);
-		CString l_sMoveCommand = l_sMove + " tmp-sed \"" + sTemplateFile + "\" >> "+l_sNull;
-		l_bSuccess &= (system(l_sMoveCommand) == 0);
-		m_rKernelContext.getLogManager() << LogLevel_Trace << " -- Move command : [" << l_sMoveCommand << "]\n";
-#ifdef TARGET_OS_Windows
-		l_bSuccess &= (system("del NULL") == 0);
-#endif
-	}
-
-	if(l_bSuccess)
-	{
-		m_rKernelContext.getLogManager() << LogLevel_Trace << " -- Sed command successfully called : [" << l_sCommandSed << "]\n";
-	}
-	else
-	{
-		m_rKernelContext.getLogManager() << LogLevel_Error << " -- Faulty substitution command : [" << l_sCommandSed <<"]\n";
-	}
-
-	return l_bSuccess;
+	return true;
 }
 
 CString CSkeletonGenerator::getDate()
@@ -319,14 +277,14 @@ boolean CSkeletonGenerator::generate(CString sTemplateFile, CString sDestination
 
 	//we need to create the destination file by copying the template file, then do the first substitution
 	map<CString,CString>::const_iterator it = mSubstitutions.begin();
-	l_bSuccess &= executeSedSubstitution(sTemplateFile, it->first, it->second, sDestinationFile);
+	l_bSuccess &= regexReplace(sTemplateFile, it->first, ensureSedCompliancy(it->second), sDestinationFile);
 	it++;
 	
 	//next substitutions are done on the - incomplete - destination file itself
 	while(it != mSubstitutions.end() && l_bSuccess)
 	{
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Executing substitution ["<<it->first<<"] ->["<<it->second<<"]\n";
-		l_bSuccess &= executeSedSubstitution(sDestinationFile, it->first, it->second);
+		l_bSuccess &= regexReplace(sDestinationFile, it->first, ensureSedCompliancy(it->second));
 		it++;
 	}
 

@@ -7,6 +7,7 @@
 #include "box-algorithms/ovpCBoxAlgorithmMatrixValidityChecker.h"
 
 #include "box-algorithms/ovpCBoxAlgorithmMessageSpy.h"
+#include "box-algorithms/ovpCBoxAlgorithmMouseTracking.h"
 
 OVP_Declare_Begin();
 
@@ -15,4 +16,5 @@ OVP_Declare_Begin();
 // 	OVP_Declare_New(OpenViBEPlugins::Tools::CBoxAlgorithmLatencyEvaluationDesc);
 	OVP_Declare_New(OpenViBEPlugins::Tools::CBoxAlgorithmMatrixValidityCheckerDesc);
     OVP_Declare_New(OpenViBEPlugins::Tools::CBoxAlgorithmMessageSpyDesc);
+    OVP_Declare_New(OpenViBEPlugins::Tools::CBoxAlgorithmMouseTrackingDesc);
 OVP_Declare_End();

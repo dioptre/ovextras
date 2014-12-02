@@ -119,7 +119,13 @@ boolean CBoxAlgorithmP300IdentifierCardVisualisation::initialize(void)
 		{
 			CString l_sForegroundImageFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
 			if(l_sForegroundImageFilename!=(CString)""){
-				::GtkWidget* l_pForegroundImageTarget=gtk_image_new_from_file(l_sForegroundImageFilename.toASCIIString());
+				GError *l_pError = NULL;
+
+				::GdkPixbuf* l_pTmp = gdk_pixbuf_new_from_file(l_sForegroundImageFilename.toASCIIString(), &l_pError);
+
+ 				::GtkWidget *l_pForegroundImageTarget = gtk_image_new_from_pixbuf(gdk_pixbuf_scale_simple(l_pTmp,192,192,GDK_INTERP_BILINEAR));
+				g_object_unref(l_pTmp);
+
 				gtk_widget_show(l_pForegroundImageTarget);
 				g_object_ref(l_pForegroundImageTarget);
 				m_vForegroundImageTarget.push_back(l_pForegroundImageTarget);

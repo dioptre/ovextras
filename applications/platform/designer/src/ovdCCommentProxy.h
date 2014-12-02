@@ -28,12 +28,12 @@ namespace OpenViBEDesigner
 		OpenViBE::int32 getHeight(
 			::GtkWidget* pWidget) const;
 
-		OpenViBE::int32 getXCenter(void) const;
-		OpenViBE::int32 getYCenter(void) const;
+		OpenViBE::float64 getXCenter(void) const;
+		OpenViBE::float64 getYCenter(void) const;
 
 		void setCenter(
-			OpenViBE::int32 i32XCenter,
-			OpenViBE::int32 i32YCenter);
+			OpenViBE::float64 f64XCenter,
+			OpenViBE::float64 f64YCenter);
 
 		void apply(void);
 
@@ -53,8 +53,8 @@ namespace OpenViBEDesigner
 		const OpenViBE::Kernel::IComment* m_pConstComment;
 		OpenViBE::Kernel::IComment* m_pComment;
 		OpenViBE::boolean m_bApplied;
-		int m_iXCenter;
-		int m_iYCenter;
+		OpenViBE::float64 m_f64XCenter;
+		OpenViBE::float64 m_f64YCenter;
 		mutable std::string m_sLabel;
 	};
 };

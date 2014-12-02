@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCShooterApplication.h"
 
 #include "../ovassvepCCommandStartStop.h"
@@ -98,3 +101,5 @@ void CShooterApplication::startExperiment()
 
 	m_poInstructionsReady->setVisible( false );
 }
+
+#endif

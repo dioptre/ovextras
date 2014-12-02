@@ -1,3 +1,6 @@
+
+#ifdef TARGET_HAS_Boost
+
 #include "ovpCBoxAlgorithmTCPWriter.h"
 
 #include <ctime>
@@ -194,7 +197,7 @@ boolean CBoxAlgorithmTCPWriter::processInput(uint32 ui32InputIndex)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmTCPWriter::sendToClients(void *pBuffer, uint32 ui32BufferLength)
+boolean CBoxAlgorithmTCPWriter::sendToClients(const void* pBuffer, uint32 ui32BufferLength)
 {
 	std::vector<boost::asio::ip::tcp::socket*>::iterator it = m_vSockets.begin();
 	while(it!=m_vSockets.end()) 
@@ -252,14 +255,22 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 		{
 			if(m_pActiveDecoder == &m_MatrixDecoder) 
 			{
-				m_ui32NumberOfChannels = (int) m_MatrixDecoder.getOutputMatrix()->getDimensionSize(0);
-				m_ui32NumberOfSamplesPerChunk = (int) m_MatrixDecoder.getOutputMatrix()->getDimensionSize(1);
+				m_ui32NumberOfChannels = static_cast<uint32> (m_MatrixDecoder.getOutputMatrix()->getDimensionSize(0) );
+				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> (m_MatrixDecoder.getOutputMatrix()->getDimensionSize(1) );
+
+				m_oChunkTranspose.setDimensionCount(2);
+				m_oChunkTranspose.setDimensionSize(0,m_ui32NumberOfSamplesPerChunk);
+				m_oChunkTranspose.setDimensionSize(1,m_ui32NumberOfChannels);
 			} 
 			else if(m_pActiveDecoder == &m_SignalDecoder)
 			{
-				m_ui32Frequency = (int) m_SignalDecoder.getOutputSamplingRate();
-				m_ui32NumberOfChannels = (int) m_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
-				m_ui32NumberOfSamplesPerChunk = (int) m_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
+				m_ui32Frequency = static_cast<uint32> ( m_SignalDecoder.getOutputSamplingRate() );
+				m_ui32NumberOfChannels = static_cast<uint32> ( m_SignalDecoder.getOutputMatrix()->getDimensionSize(0) );
+				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> ( m_SignalDecoder.getOutputMatrix()->getDimensionSize(1) );
+
+				m_oChunkTranspose.setDimensionCount(2);
+				m_oChunkTranspose.setDimensionSize(0,m_ui32NumberOfSamplesPerChunk);
+				m_oChunkTranspose.setDimensionSize(1,m_ui32NumberOfChannels);
 			}
 			else
 			{
@@ -270,13 +281,37 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 		{
 			if(m_pActiveDecoder == &m_MatrixDecoder) 
 			{
-				IMatrix* l_pMatrix = m_MatrixDecoder.getOutputMatrix();
-				sendToClients((void *)l_pMatrix->getBuffer(), l_pMatrix->getBufferElementCount()*sizeof(float64));
+				const IMatrix* l_pMatrix = m_MatrixDecoder.getOutputMatrix();
+
+				// Transpose
+				const float64 *l_pSource = l_pMatrix->getBuffer();
+				float64 *l_pDestination = m_oChunkTranspose.getBuffer();
+				for(uint32 c=0;c<m_ui32NumberOfChannels;c++) 
+				{
+					for(uint32 s=0;s<m_ui32NumberOfSamplesPerChunk;s++) 
+					{
+						l_pDestination[s*m_ui32NumberOfChannels+c] = l_pSource[c*m_ui32NumberOfSamplesPerChunk+s];
+					}
+				}
+
+				sendToClients((void *)l_pDestination, l_pMatrix->getBufferElementCount()*sizeof(float64));
 			} 
 			else if(m_pActiveDecoder == &m_SignalDecoder)
 			{
-				IMatrix* l_pMatrix = m_SignalDecoder.getOutputMatrix();
-				sendToClients((void *)l_pMatrix->getBuffer(), l_pMatrix->getBufferElementCount()*sizeof(float64));
+				const IMatrix* l_pMatrix = m_SignalDecoder.getOutputMatrix();
+
+				// Transpose
+				const float64 *l_pSource = l_pMatrix->getBuffer();
+				float64 *l_pDestination = m_oChunkTranspose.getBuffer();
+				for(uint32 c=0;c<m_ui32NumberOfChannels;c++) 
+				{
+					for(uint32 s=0;s<m_ui32NumberOfSamplesPerChunk;s++) 
+					{
+						l_pDestination[s*m_ui32NumberOfChannels+c] = l_pSource[c*m_ui32NumberOfSamplesPerChunk+s];
+					}
+				}
+
+				sendToClients((void *)l_pDestination, l_pMatrix->getBufferElementCount()*sizeof(float64));
 			} 
 			else // stimulus
 			{
@@ -320,3 +355,5 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 
 	return true;
 }
+
+#endif // TARGET_HAS_Boost

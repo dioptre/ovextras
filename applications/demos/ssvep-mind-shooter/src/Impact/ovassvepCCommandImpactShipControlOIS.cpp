@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCCommandImpactShipControlOIS.h"
 #include "ovassvepCImpactApplication.h"
 
@@ -74,3 +77,5 @@ void CCommandImpactShipControlOIS::receiveKeyReleasedEvent( const OIS::KeyCode o
 	{
 		m_vKeyPressed[OIS::KC_RIGHT] = false;
 	}}
+
+#endif

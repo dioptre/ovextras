@@ -28,6 +28,7 @@ boolean CConnectorEditor::run(void)
 	t_setConnectorName setConnectorName=NULL;
 	t_getConnectorType getConnectorType=NULL;
 	t_setConnectorType setConnectorType=NULL;
+	t_isTypeSupported isTypeSupported=NULL;
 
 	switch(m_ui32ConnectorType)
 	{
@@ -36,6 +37,7 @@ boolean CConnectorEditor::run(void)
 			setConnectorName=&IBox::setInputName;
 			getConnectorType=&IBox::getInputType;
 			setConnectorType=&IBox::setInputType;
+			isTypeSupported=&IBox::hasInputSupport;
 			break;
 
 		case Connector_Output:
@@ -43,6 +45,7 @@ boolean CConnectorEditor::run(void)
 			setConnectorName=&IBox::setOutputName;
 			getConnectorType=&IBox::getOutputType;
 			setConnectorType=&IBox::setOutputType;
+			isTypeSupported=&IBox::hasOutputSupport;
 			break;
 
 		default:
@@ -65,20 +68,26 @@ boolean CConnectorEditor::run(void)
 	gtk_window_set_title(GTK_WINDOW(l_pConnectorDialog), m_sTitle.c_str());
 
 	//get a list of stream types and display connector type
-	map<string, CIdentifier> m_vStreamTypes;
+	map<string, CIdentifier> l_vStreamTypes;
 	CIdentifier l_oCurrentTypeIdentifier;
 	gint l_iActive=-1;
+
 	while((l_oCurrentTypeIdentifier=m_rKernelContext.getTypeManager().getNextTypeIdentifier(l_oCurrentTypeIdentifier))!=OV_UndefinedIdentifier)
 	{
-		if(m_rKernelContext.getTypeManager().isStream(l_oCurrentTypeIdentifier))
+		//First check if the type is support by the connector
+		if((m_rBox.*isTypeSupported)(l_oCurrentTypeIdentifier))
 		{
-			gtk_combo_box_append_text(l_pConnectorTypeComboBox, m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString());
-			if(l_oCurrentTypeIdentifier==l_oConnectorType)
+			//If the input type is support by the connector, let's add it to the list
+			if(m_rKernelContext.getTypeManager().isStream(l_oCurrentTypeIdentifier))
 			{
-				l_iActive=m_vStreamTypes.size();
-				gtk_combo_box_set_active(l_pConnectorTypeComboBox, l_iActive);
+				gtk_combo_box_append_text(l_pConnectorTypeComboBox, m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString());
+				if(l_oCurrentTypeIdentifier==l_oConnectorType)
+				{
+					l_iActive=l_vStreamTypes.size();
+					gtk_combo_box_set_active(l_pConnectorTypeComboBox, l_iActive);
+				}
+				l_vStreamTypes[m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString()]=l_oCurrentTypeIdentifier;
 			}
-			m_vStreamTypes[m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString()]=l_oCurrentTypeIdentifier;
 		}
 	}
 
@@ -95,7 +104,7 @@ boolean CConnectorEditor::run(void)
 			char* l_sActiveText=gtk_combo_box_get_active_text(l_pConnectorTypeComboBox);
 			if(l_sActiveText)
 			{
-				(m_rBox.*setConnectorType)(m_ui32ConnectorIndex, m_vStreamTypes[l_sActiveText]);
+				(m_rBox.*setConnectorType)(m_ui32ConnectorIndex, l_vStreamTypes[l_sActiveText]);
 				(m_rBox.*setConnectorName)(m_ui32ConnectorIndex, gtk_entry_get_text(l_pConnectorNameEntry));
 				l_bFinished=true;
 				l_bResult=true;

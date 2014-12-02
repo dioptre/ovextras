@@ -53,7 +53,7 @@ namespace OpenViBEPlugins
 		 * \brief Get ruler widget
 		 * \return Pointer to ruler widget
 		 */
-		::GtkWidget* getRulerWidget() const;
+        ::GtkWidget* getRulerWidget(OpenViBE::uint32 ui32Index) const;
 
 		/**
 		 * \brief Get signal display widget
@@ -78,7 +78,7 @@ namespace OpenViBEPlugins
 		/**
 		 * \brief Reset list of channels displayed by this object
 		 */
-		void resetChannelList();
+        void resetChannelList();
 
 		/**
 		 * \brief Add a channel to the list of channels to be displayed
@@ -86,6 +86,9 @@ namespace OpenViBEPlugins
 		 */
 		void addChannel(
 			OpenViBE::uint32 ui32Channel);
+
+        void addChannelList(
+            OpenViBE::uint32 ui32Channel);
 
 		/**
 		 * \brief Get rectangle to clear and redraw based on latest signal data received
@@ -137,10 +140,10 @@ namespace OpenViBEPlugins
 		 * \brief Recomputes value range and changes signal translation if needed
 		 * In global best fit mode, recomputes translation so that signals fit in the drawing area.
 		 * If the value range has changed too much, the scale will be recomputed at next redraw.
-		 * \param[out] rDisplayedValueRange Returns updated value range displayed by this channel
+         * \param[out] rDisplayedValueRange Returns vector of updated value range displayed by the channels
 		 */
-		void checkTranslation(
-			OpenViBE::float64& rDisplayedValueRange);
+        void updateDisplayedValueRange(
+            std::vector<OpenViBE::float64> & rDisplayedValueRange);
 
 		/**
 		 * \brief Sets latest global best fit parameters
@@ -157,6 +160,9 @@ namespace OpenViBEPlugins
 			const OpenViBE::float64& rRange,
 			const OpenViBE::float64& rMargin);
 
+        void setMultiViewBestFitParameters(
+            const OpenViBE::float64& rRange,
+            const OpenViBE::float64& rMargin);
 		/**
 		 * \brief Updates signal scale and translation based on latest global range and margin
 		 * Called from setGlobalBestFitParameters when in global best fit mode, and when
@@ -198,11 +204,19 @@ namespace OpenViBEPlugins
 
 		/**
 		 * \brief Get Y coordinate of a sample
-		 * \param f64Value Sample value
+         * \param f64Value Sample value and index of channel
 		 * \return Y coordinate of sample
 		 */
 		OpenViBE::float64 getSampleYCoordinate(
-			OpenViBE::float64 f64Value);
+            OpenViBE::float64 f64Value, OpenViBE::uint32 ui32ChannelIndex);
+
+        /**
+         * \brief Get Y coordinate of a sample in Multiview mode
+         * \param f64Value Sample value and index of channel
+         * \return Y coordinate of sample
+         */
+        OpenViBE::float64 getSampleYMultiViewCoordinate(
+            OpenViBE::float64 f64Value);
 
 		/**
 		 * \brief Draw signals (and stimulations, if any) displayed by this channel
@@ -232,8 +246,8 @@ namespace OpenViBEPlugins
 		void drawZeroLine();
 
 	public:
-		//! Left ruler displaying signal scale
-		CSignalDisplayLeftRuler* m_pLeftRuler;
+        //! Vector of Left rulers displaying signal scale
+        std::vector<CSignalDisplayLeftRuler*> m_oLeftRuler;
 		//! The drawing area where the signal is to be drawn
 		GtkWidget * m_pDrawingArea;
 		//! Drawing area dimensions, in pixels
@@ -249,18 +263,19 @@ namespace OpenViBEPlugins
 		//! The database from which the information are to be read
 		CBufferDatabase * m_pDatabase;
 
-		/** \ name Extrema of displayed values for this channel */
+        /** \ name Extrema of displayed values for all channel in this display */
 		//@{
-		OpenViBE::float64 m_f64LocalMaximum;
-		OpenViBE::float64 m_f64LocalMinimum;
+        std::vector<OpenViBE::float64> m_vLocalMaximum;
+        std::vector<OpenViBE::float64> m_vLocalMinimum;
 		//@}
 
 		/** \name Auto scaling parameters */
 		//@{
 		OpenViBE::float64 m_f64ScaleX;
-		OpenViBE::float64 m_f64ScaleY;
 		OpenViBE::float64 m_f64TranslateX;
-		OpenViBE::float64 m_f64TranslateY;
+
+        std::vector<OpenViBE::float64> m_vScaleY;
+        std::vector<OpenViBE::float64> m_vTranslateY;
 		//@}
 
 		/** \name Zooming parameters (user controlled) */
@@ -275,11 +290,13 @@ namespace OpenViBEPlugins
 
 		/** \name Scale margin parameters */
 		//@{
-		OpenViBE::float64 m_f64MaximumTopMargin;
-		OpenViBE::float64 m_f64MaximumBottomMargin;
-		OpenViBE::float64 m_f64MinimumTopMargin;
-		OpenViBE::float64 m_f64MinimumBottomMargin;
+        std::vector<OpenViBE::float64> m_vMaximumTopMargin;
+        std::vector<OpenViBE::float64> m_vMaximumBottomMargin;
+        std::vector<OpenViBE::float64> m_vMinimumTopMargin;
+        std::vector<OpenViBE::float64> m_vMinimumBottomMargin;
 		//@}
+
+		OpenViBE::uint32 m_i32LeftRulerWidthRequest, m_i32LeftRulerHeightRequest;
 
 		//! Current signal display mode
 		OpenViBEPlugins::SimpleVisualisation::EDisplayMode m_eCurrentSignalMode;
@@ -287,6 +304,10 @@ namespace OpenViBEPlugins
 		OpenViBE::uint64 m_ui64LatestDisplayedTime;
 		//! Should the whole window be redrawn at next redraw?
 		OpenViBE::boolean m_bRedrawAll;
+
+        OpenViBE::float64 m_f64VerticalScale;
+        //! Is it a multiview display ?
+        OpenViBE::boolean m_bMultiView;
 	};
 
 	}

@@ -4,7 +4,10 @@
 # Adds include path
 # ---------------------------------
 IF(WIN32)
+	# note that ampersands in paths below passed through cmake mess up Visual Studio IDE. If you get this problem, rename the dll folder under Program Files/
 	FIND_PATH(PATH_BrainmasterCodeMakerAPI CMKRDLLU.H PATHS 
+		"C:/Program Files/Atlantis and Discovery SW DLL 1-11-12" 
+		"C:/Program Files (x86)/Atlantis and Discovery SW DLL 1-11-12" 	
 		"C:/Program Files/Atlantis & Discovery SW DLL 1-11-12" 
 		"C:/Program Files (x86)/Atlantis & Discovery SW DLL 1-11-12" 
 		${OV_CUSTOM_DEPENDENCIES_PATH})
@@ -29,6 +32,6 @@ IF(WIN32)
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI)
 	ELSE(PATH_BrainmasterCodeMakerAPI)
-		MESSAGE(STATUS "  FAILED to find Brainmaster Code Maker API")
+		MESSAGE(STATUS "  FAILED to find Brainmaster Code Maker API (optional)")
 	ENDIF(PATH_BrainmasterCodeMakerAPI)
 ENDIF(WIN32)

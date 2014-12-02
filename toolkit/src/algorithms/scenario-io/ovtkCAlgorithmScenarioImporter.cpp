@@ -13,15 +13,15 @@ namespace OpenViBEToolkit
 {
 	namespace
 	{
-		#define _default_and_copy_constructor_1_(c,m1)                      c(void) { } c(const c& r) : m1(r.m1) { }
-		#define _default_and_copy_constructor_2_(c,m1,m2)                   c(void) { } c(const c& r) : m1(r.m1), m2(r.m2) { }
-		#define _default_and_copy_constructor_3_(c,m1,m2,m3)                c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3) { }
-		#define _default_and_copy_constructor_4_(c,m1,m2,m3,m4)             c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4) { }
-		#define _default_and_copy_constructor_5_(c,m1,m2,m3,m4,m5)          c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5) { }
-		#define _default_and_copy_constructor_6_(c,m1,m2,m3,m4,m5,m6)       c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6) { }
-		#define _default_and_copy_constructor_7_(c,m1,m2,m3,m4,m5,m6,m7)    c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6), m7(r.m7) { }
-		#define _default_and_copy_constructor_8_(c,m1,m2,m3,m4,m5,m6,m7,m8) c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6), m7(r.m7), m8(r.m8) { }
-		#define _default_and_copy_constructor_9_(c,m1,m2,m3,m4,m5,m6,m7,m8, m9) c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6), m7(r.m7), m8(r.m8), m9(r.m9) { }
+#define _default_and_copy_constructor_1_(c,m1)                      c(void) { } c(const c& r) : m1(r.m1) { }
+#define _default_and_copy_constructor_2_(c,m1,m2)                   c(void) { } c(const c& r) : m1(r.m1), m2(r.m2) { }
+#define _default_and_copy_constructor_3_(c,m1,m2,m3)                c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3) { }
+#define _default_and_copy_constructor_4_(c,m1,m2,m3,m4)             c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4) { }
+#define _default_and_copy_constructor_5_(c,m1,m2,m3,m4,m5)          c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5) { }
+#define _default_and_copy_constructor_6_(c,m1,m2,m3,m4,m5,m6)       c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6) { }
+#define _default_and_copy_constructor_7_(c,m1,m2,m3,m4,m5,m6,m7)    c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6), m7(r.m7) { }
+#define _default_and_copy_constructor_8_(c,m1,m2,m3,m4,m5,m6,m7,m8) c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6), m7(r.m7), m8(r.m8) { }
+#define _default_and_copy_constructor_9_(c,m1,m2,m3,m4,m5,m6,m7,m8, m9) c(void) { } c(const c& r) : m1(r.m1), m2(r.m2), m3(r.m3), m4(r.m4), m5(r.m5), m6(r.m6), m7(r.m7), m8(r.m8), m9(r.m9) { }
 
 		typedef struct _SInput
 		{
@@ -52,11 +52,18 @@ namespace OpenViBEToolkit
 
 		typedef struct _SSetting
 		{
-			_default_and_copy_constructor_4_(_SSetting, m_oTypeIdentifier, m_sName, m_sDefaultValue, m_sValue);
+			//_default_and_copy_constructor_4_(_SSetting, m_oTypeIdentifier, m_sName, m_sDefaultValue, m_sValue);
+			_SSetting(void) :m_bModifiability(false) { }
+			_SSetting(const _SSetting& r) : m_oTypeIdentifier(r.m_oTypeIdentifier),
+				m_sName(r.m_sName),
+				m_sDefaultValue(r.m_sDefaultValue),
+				m_sValue(r.m_sValue),
+				m_bModifiability(r.m_bModifiability) { }
 			CIdentifier m_oTypeIdentifier;
 			CString m_sName;
 			CString m_sDefaultValue;
 			CString m_sValue;
+			boolean m_bModifiability;
 		} SSetting;
 		typedef struct _SAttribute
 		{
@@ -127,15 +134,15 @@ namespace OpenViBEToolkit
 			std::vector<SVisualisationWidget> m_vVisualisationWidget;
 		} SScenario;
 
-		#undef _default_and_copy_constructor_1_
-		#undef _default_and_copy_constructor_2_
-		#undef _default_and_copy_constructor_3_
-		#undef _default_and_copy_constructor_4_
-		#undef _default_and_copy_constructor_5_
-		#undef _default_and_copy_constructor_6_
-		#undef _default_and_copy_constructor_7_
-		#undef _default_and_copy_constructor_8_
-		#undef _default_and_copy_constructor_9_
+#undef _default_and_copy_constructor_1_
+#undef _default_and_copy_constructor_2_
+#undef _default_and_copy_constructor_3_
+#undef _default_and_copy_constructor_4_
+#undef _default_and_copy_constructor_5_
+#undef _default_and_copy_constructor_6_
+#undef _default_and_copy_constructor_7_
+#undef _default_and_copy_constructor_8_
+#undef _default_and_copy_constructor_9_
 	};
 
 	class CAlgorithmScenarioImporterContext : public IAlgorithmScenarioImporterContext
@@ -221,42 +228,44 @@ boolean CAlgorithmScenarioImporter::process(void)
 			for(i=b->m_vInput.begin(); i!=b->m_vInput.end(); i++)
 			{
 				l_pBox->addInput(
-					i->m_sName,
-					i->m_oTypeIdentifier);
+							i->m_sName,
+							i->m_oTypeIdentifier);
 			}
 			//
 			for(mi=b->m_vMessageInput.begin(); mi!=b->m_vMessageInput.end(); mi++)
 			{
 				l_pBox->addMessageInput(
-					mi->m_sName);
+							mi->m_sName);
 			}
 			for(mo=b->m_vMessageOutput.begin(); mo!=b->m_vMessageOutput.end(); mo++)
 			{
 				l_pBox->addMessageOutput(
-					mo->m_sName);
+							mo->m_sName);
 			}
 			//
 			for(o=b->m_vOutput.begin(); o!=b->m_vOutput.end(); o++)
 			{
 				l_pBox->addOutput(
-					o->m_sName,
-					o->m_oTypeIdentifier);
+							o->m_sName,
+							o->m_oTypeIdentifier);
 			}
 			for(s=b->m_vSetting.begin(); s!=b->m_vSetting.end(); s++)
 			{
 				l_pBox->addSetting(
-					s->m_sName,
-					s->m_oTypeIdentifier,
-					s->m_sDefaultValue);
+							s->m_sName,
+							s->m_oTypeIdentifier,
+							s->m_sDefaultValue,
+							-1,
+							s->m_bModifiability);
 				l_pBox->setSettingValue(
-					l_pBox->getSettingCount()-1,
-					s->m_sValue);
+							l_pBox->getSettingCount()-1,
+							s->m_sValue);
 			}
 			for(a=b->m_vAttribute.begin(); a!=b->m_vAttribute.end(); a++)
 			{
 				l_pBox->addAttribute(
-					a->m_oIdentifier,
-					a->m_sValue);
+							a->m_oIdentifier,
+							a->m_sValue);
 			}
 
 			// it is important to set box algorithm at
@@ -279,8 +288,8 @@ boolean CAlgorithmScenarioImporter::process(void)
 			for(a=c->m_vAttribute.begin(); a!=c->m_vAttribute.end(); a++)
 			{
 				l_pComment->addAttribute(
-					a->m_oIdentifier,
-					a->m_sValue);
+							a->m_oIdentifier,
+							a->m_sValue);
 			}
 		}
 		l_vCommentIdMapping[c->m_oIdentifier]=l_oNewCommentIdentifier;
@@ -303,8 +312,8 @@ boolean CAlgorithmScenarioImporter::process(void)
 			for(a=l->m_vAttribute.begin(); a!=l->m_vAttribute.end(); a++)
 			{
 				l_pLink->addAttribute(
-					a->m_oIdentifier,
-					a->m_sValue);
+							a->m_oIdentifier,
+							a->m_sValue);
 			}
 			l_vLinkIdMapping[l->m_oIdentifier]=l_oNewLinkIdentifier;
 		}
@@ -328,8 +337,8 @@ boolean CAlgorithmScenarioImporter::process(void)
 			for(a=ml->m_vAttribute.begin(); a!=ml->m_vAttribute.end(); a++)
 			{
 				l_pLink->addAttribute(
-					a->m_oIdentifier,
-					a->m_sValue);
+							a->m_oIdentifier,
+							a->m_sValue);
 			}
 			l_vMessageLinkIdMapping[ml->m_oIdentifier]=l_oNewLinkIdentifier;
 		}
@@ -360,8 +369,8 @@ boolean CAlgorithmScenarioImporter::process(void)
 			for(a=v->m_vAttribute.begin(); a!=v->m_vAttribute.end(); a++)
 			{
 				l_pVisualisationWidget->addAttribute(
-					a->m_oIdentifier,
-					a->m_sValue);
+							a->m_oIdentifier,
+							a->m_sValue);
 			}
 		}
 		l_vVisualisationWidgetIdMapping[v->m_oIdentifier]=l_oNewVisualisationWidgetIdentifier;
@@ -369,8 +378,8 @@ boolean CAlgorithmScenarioImporter::process(void)
 	for(a=l_rSymbolicScenario.m_vAttribute.begin(); a!=l_rSymbolicScenario.m_vAttribute.end(); a++)
 	{
 		l_pScenario->addAttribute(
-			a->m_oIdentifier,
-			a->m_sValue);
+					a->m_oIdentifier,
+					a->m_sValue);
 	}
 
 	return true;
@@ -468,6 +477,7 @@ boolean CAlgorithmScenarioImporterContext::processString(const CIdentifier& rIde
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Name)                         { m_oSymbolicScenario.m_vBox.back().m_vSetting.back().m_sName=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_DefaultValue)                 { m_oSymbolicScenario.m_vBox.back().m_vSetting.back().m_sDefaultValue=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Value)                        { m_oSymbolicScenario.m_vBox.back().m_vSetting.back().m_sValue=rValue; }
+	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box_Setting_Modifiability)				  { m_oSymbolicScenario.m_vBox.back().m_vSetting.back().m_bModifiability=(rValue==CString("true"))?true:false; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Comment_Text)                             { m_oSymbolicScenario.m_vComment.back().m_sText=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Comment_Attribute_Value)                  { m_oSymbolicScenario.m_vComment.back().m_vAttribute.back().m_sValue=rValue; }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Link_Attribute_Value)                     { m_oSymbolicScenario.m_vLink.back().m_vAttribute.back().m_sValue=rValue; }

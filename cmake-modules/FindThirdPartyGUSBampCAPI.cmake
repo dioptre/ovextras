@@ -3,6 +3,13 @@
 # Adds library to target
 # Adds include path
 # ---------------------------------
+
+IF(OV_ThirdPartyGMobilab)
+	MESSAGE(STATUS "  NOTE gtec Mobilab has already been found, cannot have gUSBAmp driver in the same executable")
+	MESSAGE(STATUS "    [ SKIP ] gUSBBampCAPI...")
+	RETURN()
+ENDIF(OV_ThirdPartyGMobilab)
+
 IF(WIN32)
 	FIND_PATH(PATH_GUSBampCAPI gUSBamp.h PATHS 
 		"C:/Program Files/gtec/gUSBampCAPI/API" 
@@ -25,6 +32,8 @@ IF(WIN32)
 		INSTALL(PROGRAMS "${PATH_GUSBampCAPI}/gUSBamp.dll" DESTINATION "bin")
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyGUSBampCAPI)
+		SET(OV_ThirdPartyGUSBAmp "YES")
+		 
 	ELSE(PATH_GUSBampCAPI)
 		MESSAGE(STATUS "  FAILED to find gUSBampCAPI")
 	ENDIF(PATH_GUSBampCAPI)

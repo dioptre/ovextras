@@ -266,14 +266,15 @@ void CDriverSkeletonGenerator::buttonOkCB()
 	}
 	// the following substitution is done in a .ui file, and not in a cpp file. 
 	// The SED primitive immplemented do not cover that case, and some typo problem happen with the character "
-	CString l_sCommandSed = "s/@@SamplingFrequencyList@@/";
+	CString l_sPattern("@@SamplingFrequencyList@@");
+	CString l_sSubstitute("");
+
 	for(vector<CString>::iterator it = m_vSamplingFrequencies.begin(); it != m_vSamplingFrequencies.end(); )
 	{
-		l_sCommandSed = l_sCommandSed + (*it++);
-		if(it!=m_vSamplingFrequencies.end()) l_sCommandSed = l_sCommandSed + "<\\/col><\\/row><row><col id=\\\"0\\\" translatable=\\\"yes\\\">";
+		l_sSubstitute = l_sSubstitute + (*it++);
+		if(it!=m_vSamplingFrequencies.end()) l_sSubstitute = l_sSubstitute + "<\\/col><\\/row><row><col id=\\\"0\\\" translatable=\\\"yes\\\">";
 	}
-	l_sCommandSed = l_sCommandSed +  "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest,l_sPattern, l_sSubstitute, CString(""));
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------//
 	// readme-driver.txt

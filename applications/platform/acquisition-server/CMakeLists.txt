@@ -24,10 +24,20 @@ INCLUDE("FindOpenViBEModuleSocket")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleFS")
 INCLUDE("FindThirdPartyGTK")
+
+# These scripts will also add directives to copy the necessary bin dlls if any
+INCLUDE("FindThirdPartyBioSemiLabViewAPI")
+INCLUDE("FindThirdPartyActiCHampAPI")
+INCLUDE("FindThirdPartyNeXus")
+INCLUDE("FindThirdPartyMicromed")
+INCLUDE("FindThirdPartyMitsar")
 INCLUDE("FindThirdPartyGMobiLabPlusAPI")
 INCLUDE("FindThirdPartyUSBFirstAmpAPI")
 INCLUDE("FindThirdPartyThinkGearAPI")
 INCLUDE("FindThirdPartyEmotivAPI")
+INCLUDE("FindThirdPartyNeuroelectricsEnobio3G")
+INCLUDE("FindThirdPartyTMSi")
+
 INCLUDE("FindThirdPartyOpenAL")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyBoost_Thread")
@@ -36,6 +46,7 @@ INCLUDE("FindThirdPartyPThreadsVCE2")	# for Windows Fieldtrip
 IF(PATH_OPENVIBE_CONTRIBUTIONS)
 	INCLUDE("${CMAKE_SOURCE_DIR}/contrib/common/contribAcquisitionServerLinkLibs.cmake")
 ENDIF(PATH_OPENVIBE_CONTRIBUTIONS)
+
 
 # ---------------------------------
 # Target macros
@@ -73,10 +84,6 @@ INSTALL(TARGETS ${PROJECT_NAME}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 
-IF(WIN32)
-	# Device driver .dlls
-	INSTALL(DIRECTORY bin/	 DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}	PATTERN ".dll" PATTERN ".svn" EXCLUDE)	
-ENDIF(WIN32)
 INSTALL(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/applications/acquisition-server PATTERN ".svn" EXCLUDE)
 
 #INSTALL(DIRECTORY src/   DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "doc" EXCLUDE)

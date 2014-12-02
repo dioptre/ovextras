@@ -67,7 +67,7 @@ CIdentifier CBox::getProcessingUnitIdentifier(void) const
 }
 
 boolean CBox::setIdentifier(
-	const CIdentifier& rIdentifier)
+		const CIdentifier& rIdentifier)
 {
 	if(m_oIdentifier!=OV_UndefinedIdentifier)
 	{
@@ -85,7 +85,7 @@ boolean CBox::setIdentifier(
 }
 
 boolean CBox::setName(
-	const CString& sName)
+		const CString& sName)
 {
 	m_sName=sName;
 
@@ -95,7 +95,7 @@ boolean CBox::setName(
 }
 
 boolean CBox::setAlgorithmClassIdentifier(
-	const CIdentifier& rAlgorithmClassIdentifier)
+		const CIdentifier& rAlgorithmClassIdentifier)
 {
 	m_oAlgorithmClassIdentifier=rAlgorithmClassIdentifier;
 
@@ -131,7 +131,7 @@ boolean CBox::setAlgorithmClassIdentifier(
 }
 
 boolean CBox::setProcessingUnitIdentifier(
-	const CIdentifier& rProcessingUnitIdentifier)
+		const CIdentifier& rProcessingUnitIdentifier)
 {
 	m_oProcessingUnitIdentifier=rProcessingUnitIdentifier;
 
@@ -144,7 +144,7 @@ boolean CBox::setProcessingUnitIdentifier(
 //                                                                   //
 
 boolean CBox::initializeFromAlgorithmClassIdentifier(
-	const CIdentifier& rAlgorithmClassIdentifier)
+		const CIdentifier& rAlgorithmClassIdentifier)
 {
 	this->disableNotification();
 
@@ -191,7 +191,7 @@ boolean CBox::initializeFromAlgorithmClassIdentifier(
 }
 
 boolean CBox::initializeFromExistingBox(
-	const IBox& rExistingBox)
+		const IBox& rExistingBox)
 {
 	uint32 i;
 
@@ -239,11 +239,14 @@ boolean CBox::initializeFromExistingBox(
 		CString l_sName;
 		CString l_sValue;
 		CString l_sDefaultValue;
+		boolean l_bModifiability;
+
 		rExistingBox.getSettingType(i, l_oType);
 		rExistingBox.getSettingName(i, l_sName);
 		rExistingBox.getSettingValue(i, l_sValue);
 		rExistingBox.getSettingDefaultValue(i, l_sDefaultValue);
-		addSetting(l_sName, l_oType, l_sDefaultValue);
+		rExistingBox.getSettingMod(i, l_bModifiability);
+		addSetting(l_sName, l_oType, l_sDefaultValue, -1 ,l_bModifiability);
 		setSettingValue(i, l_sValue);
 	}
 
@@ -265,16 +268,16 @@ boolean CBox::initializeFromExistingBox(
 //                                                                   //
 
 boolean CBox::addInput(
-	const CString& sName,
-	const CIdentifier& rTypeIdentifier)
+		const CString& sName,
+		const CIdentifier& rTypeIdentifier)
 {
 	if(!this->getTypeManager().isStream(rTypeIdentifier))
 	{
-		if(rTypeIdentifier==OV_UndefinedIdentifier) 
+		if(rTypeIdentifier==OV_UndefinedIdentifier)
 		{
 			this->getLogManager() << LogLevel_Warning << "Box '" << getName() << "' input '" << sName << "' maps to OV_UndefinedIdentifier. Please configure the box.\n";
-		} 
-		else 
+		}
+		else
 		{
 			this->getLogManager() << LogLevel_Warning << "While adding input '" << sName << "' to box '" << getName() << "', unknown stream type identifier " << rTypeIdentifier << "\n";
 		}
@@ -291,7 +294,7 @@ boolean CBox::addInput(
 }
 
 boolean CBox::removeInput(
-	const uint32 ui32InputIndex)
+		const uint32 ui32InputIndex)
 {
 	CIdentifier l_oIdentifier;
 	size_t i;
@@ -359,8 +362,8 @@ uint32 CBox::getInputCount(void) const
 }
 
 boolean CBox::getInputType(
-	const uint32 ui32InputIndex,
-	CIdentifier& rTypeIdentifier) const
+		const uint32 ui32InputIndex,
+		CIdentifier& rTypeIdentifier) const
 {
 	if(ui32InputIndex>=m_vInput.size())
 	{
@@ -371,8 +374,8 @@ boolean CBox::getInputType(
 }
 
 boolean CBox::getInputName(
-	const uint32 ui32InputIndex,
-	CString& rName) const
+		const uint32 ui32InputIndex,
+		CString& rName) const
 {
 	if(ui32InputIndex>=m_vInput.size())
 	{
@@ -383,8 +386,8 @@ boolean CBox::getInputName(
 }
 
 boolean CBox::setInputType(
-	const uint32 ui32InputIndex,
-	const CIdentifier& rTypeIdentifier)
+		const uint32 ui32InputIndex,
+		const CIdentifier& rTypeIdentifier)
 {
 	if(!this->getTypeManager().isStream(rTypeIdentifier))
 	{
@@ -403,8 +406,8 @@ boolean CBox::setInputType(
 }
 
 boolean CBox::setInputName(
-	const uint32 ui32InputIndex,
-	const CString& rName)
+		const uint32 ui32InputIndex,
+		const CString& rName)
 {
 	if(ui32InputIndex>=m_vInput.size())
 	{
@@ -421,16 +424,16 @@ boolean CBox::setInputName(
 //                                                                   //
 
 boolean CBox::addOutput(
-	const CString& sName,
-	const CIdentifier& rTypeIdentifier)
+		const CString& sName,
+		const CIdentifier& rTypeIdentifier)
 {
 	if(!this->getTypeManager().isStream(rTypeIdentifier))
 	{
-		if(rTypeIdentifier==OV_UndefinedIdentifier) 
+		if(rTypeIdentifier==OV_UndefinedIdentifier)
 		{
 			this->getLogManager() << LogLevel_Warning << "Box '" << getName() << "' output '" << sName << "' maps to OV_UndefinedIdentifier. Please configure the box.\n";
-		} 
-		else 
+		}
+		else
 		{
 			this->getLogManager() << LogLevel_Warning << "While adding output '" << sName << "' to box '" << getName() << "', unknown stream type identifier " << rTypeIdentifier << "\n";
 		}
@@ -447,7 +450,7 @@ boolean CBox::addOutput(
 }
 
 boolean CBox::removeOutput(
-	const uint32 ui32OutputIndex)
+		const uint32 ui32OutputIndex)
 {
 	CIdentifier l_oIdentifier;
 	size_t i;
@@ -515,8 +518,8 @@ uint32 CBox::getOutputCount(void) const
 }
 
 boolean CBox::getOutputType(
-	const uint32 ui32OutputIndex,
-	CIdentifier& rTypeIdentifier) const
+		const uint32 ui32OutputIndex,
+		CIdentifier& rTypeIdentifier) const
 {
 	if(ui32OutputIndex>=m_vOutput.size())
 	{
@@ -527,8 +530,8 @@ boolean CBox::getOutputType(
 }
 
 boolean CBox::getOutputName(
-	const uint32 ui32OutputIndex,
-	CString& rName) const
+		const uint32 ui32OutputIndex,
+		CString& rName) const
 {
 	if(ui32OutputIndex>=m_vOutput.size())
 	{
@@ -539,8 +542,8 @@ boolean CBox::getOutputName(
 }
 
 boolean CBox::setOutputType(
-	const uint32 ui32OutputIndex,
-	const CIdentifier& rTypeIdentifier)
+		const uint32 ui32OutputIndex,
+		const CIdentifier& rTypeIdentifier)
 {
 	if(!this->getTypeManager().isStream(rTypeIdentifier))
 	{
@@ -559,8 +562,8 @@ boolean CBox::setOutputType(
 }
 
 boolean CBox::setOutputName(
-	const uint32 ui32OutputIndex,
-	const CString& rName)
+		const uint32 ui32OutputIndex,
+		const CString& rName)
 {
 	if(ui32OutputIndex>=m_vOutput.size())
 	{
@@ -573,13 +576,97 @@ boolean CBox::setOutputName(
 	return true;
 }
 
+boolean CBox::addInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	m_vSupportInputType.push_back(rTypeIdentifier);
+	return true;
+}
+
+boolean CBox::addInputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	CIdentifier l_oCurrentTypeIdentifier;
+	this->addInputSupport(rTypeIdentifier);
+	while((l_oCurrentTypeIdentifier=this->getKernelContext().getTypeManager().getNextTypeIdentifier(l_oCurrentTypeIdentifier))!=OV_UndefinedIdentifier)
+	{
+		//First check if it is a stream
+		if(this->getKernelContext().getTypeManager().isStream(l_oCurrentTypeIdentifier))
+		{
+			if(!this->hasInputSupport(l_oCurrentTypeIdentifier))
+			{
+				//Now check if the type is derived from the accepted
+				if(this->getKernelContext().getTypeManager().isDerivedFromStream(l_oCurrentTypeIdentifier, rTypeIdentifier))
+				{
+					this->addInputSupport(l_oCurrentTypeIdentifier);
+				}
+			}
+		}
+	}
+	return true;
+}
+
+boolean CBox::hasInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	//If there is no type specify, we allow all
+	if(m_vSupportInputType.empty())
+		return true;
+
+	for(size_t i =0; i < m_vSupportInputType.size(); ++i)
+	{
+		if(m_vSupportInputType[i] == rTypeIdentifier)
+			return true;
+	}
+	return false;
+}
+
+boolean CBox::addOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	m_vSupportOutputType.push_back(rTypeIdentifier);
+	return true;
+}
+
+boolean CBox::addOutputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	CIdentifier l_oCurrentTypeIdentifier;
+	this->addOutputSupport(rTypeIdentifier);
+	while((l_oCurrentTypeIdentifier=this->getKernelContext().getTypeManager().getNextTypeIdentifier(l_oCurrentTypeIdentifier))!=OV_UndefinedIdentifier)
+	{
+		//First check if it is a stream
+		if(this->getKernelContext().getTypeManager().isStream(l_oCurrentTypeIdentifier))
+		{
+			if(!this->hasOutputSupport(l_oCurrentTypeIdentifier))
+			{
+				//Now check if the type is derived from the accepted
+				if(this->getKernelContext().getTypeManager().isDerivedFromStream(l_oCurrentTypeIdentifier, rTypeIdentifier))
+				{
+					this->addOutputSupport(l_oCurrentTypeIdentifier);
+				}
+			}
+		}
+	}
+	return true;
+}
+
+boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+{
+	//If there is no type specify, we allow all
+	if(m_vSupportOutputType.empty())
+		return true;
+
+	for(size_t i =0; i < m_vSupportOutputType.size(); ++i)
+	{
+		if(m_vSupportOutputType[i] == rTypeIdentifier)
+			return true;
+	}
+	return false;
+}
+
 //___________________________________________________________________//
 //                                                                   //
 
-boolean CBox::addSetting(
-	const CString& sName,
-	const CIdentifier& rTypeIdentifier,
-	const CString& sDefaultValue)
+boolean CBox::addSetting(const CString& sName,
+			 const CIdentifier& rTypeIdentifier,
+			 const CString& sDefaultValue, const int32 i32Index,
+			 const boolean bModifiability)
 {
 	CString l_sValue(sDefaultValue);
 	if(this->getTypeManager().isEnumeration(rTypeIdentifier))
@@ -593,12 +680,12 @@ boolean CBox::addSetting(
 				uint64 l_ui64Value=0;
 				this->getTypeManager().getEnumerationEntry(rTypeIdentifier, 0, l_sValue, l_ui64Value);
 
-				// Find if the default value string actually is an identifier
+				// Find if the default value string actually is an identifier, otherwise just keep the zero index name as default.
 				CIdentifier l_oIdentifier;
 				l_oIdentifier.fromString(sDefaultValue);
 
 				// Finally, if it is an identifier, then a name should be found
-				// from the type manager !
+				// from the type manager ! Otherwise l_sValue is left to the default.
 				CString l_sCandidateValue=this->getTypeManager().getEnumerationEntryNameFromValue(rTypeIdentifier, l_oIdentifier.toUInteger());
 				if(l_sCandidateValue!=CString(""))
 				{
@@ -613,16 +700,47 @@ boolean CBox::addSetting(
 	s.m_oTypeIdentifier=rTypeIdentifier;
 	s.m_sDefaultValue=l_sValue;
 	s.m_sValue=l_sValue;
+	s.m_bMod=bModifiability;
 
-	m_vSetting.push_back(s);
+	int32 l_i32Index = i32Index;
 
-	this->notify(BoxModification_SettingAdded, m_vSetting.size()-1);
+	if(i32Index>static_cast<int32>(m_vSetting.size())) {
+		// Don't accept pushes that are not either inside the existing array or an append right at the end
+		this->getLogManager() << LogLevel_Error << "Tried to push '" << sName << "' to slot " << i32Index << " with the array size being " << static_cast<int32>(m_vSetting.size()) << "\n";
+		return false;
+	}
+
+	int32 l_i32InsertLocation;
+
+	if(i32Index < 0 || i32Index == static_cast<int32>(m_vSetting.size()))
+	{
+		m_vSetting.push_back(s);
+		l_i32InsertLocation = (static_cast<int32>(m_vSetting.size()))-1;
+	}
+	else
+	{
+		vector<CSetting>::iterator l_it = m_vSetting.begin();
+		l_it += l_i32Index;
+		m_vSetting.insert(l_it, s);
+		l_i32InsertLocation = i32Index;
+		
+	}
+
+	//if this setting is modifiable, keep its index
+	if(bModifiability)
+	{
+		m_vModifiableSettingIndexes.push_back(l_i32Index);
+	}
+
+	this->getLogManager() << LogLevel_Debug << "Pushed '" << m_vSetting[l_i32InsertLocation].m_sName << "' : '" << m_vSetting[l_i32InsertLocation].m_sValue << "' to slot " << l_i32InsertLocation << " with the array size now " << static_cast<int32>(m_vSetting.size()) << "\n";
+
+	this->notify(BoxModification_SettingAdded, l_i32InsertLocation);
 
 	return true;
 }
 
 boolean CBox::removeSetting(
-	const uint32 ui32SettingIndex)
+		const uint32 ui32SettingIndex)
 {
 	uint32 i=0;
 	vector<CSetting>::iterator it=m_vSetting.begin();
@@ -634,7 +752,23 @@ boolean CBox::removeSetting(
 	{
 		return false;
 	}
+
 	it=m_vSetting.erase(it);
+
+	//update the modifiable setting indexes
+	vector<uint32>::iterator it2=m_vModifiableSettingIndexes.begin();
+	for (i=0; i<m_vModifiableSettingIndexes.size(); i++)
+	{
+		if(m_vModifiableSettingIndexes[i]==ui32SettingIndex)
+		{
+			m_vModifiableSettingIndexes.erase(it2);
+		}
+		else if(m_vModifiableSettingIndexes[i]>ui32SettingIndex)
+		{
+			m_vModifiableSettingIndexes[i]-=1;
+		}
+		it2++;
+	}
 
 	this->notify(BoxModification_SettingRemoved, ui32SettingIndex);
 
@@ -647,8 +781,8 @@ uint32 CBox::getSettingCount(void) const
 }
 
 boolean CBox::getSettingType(
-	const uint32 ui32SettingIndex,
-	CIdentifier& rTypeIdentifier) const
+		const uint32 ui32SettingIndex,
+		CIdentifier& rTypeIdentifier) const
 {
 	if(ui32SettingIndex>=m_vSetting.size())
 	{
@@ -659,8 +793,8 @@ boolean CBox::getSettingType(
 }
 
 boolean CBox::getSettingName(
-	const uint32 ui32SettingIndex,
-	CString& rName) const
+		const uint32 ui32SettingIndex,
+		CString& rName) const
 {
 	if(ui32SettingIndex>=m_vSetting.size())
 	{
@@ -671,8 +805,8 @@ boolean CBox::getSettingName(
 }
 
 boolean CBox::getSettingDefaultValue(
-	const uint32 ui32SettingIndex,
-	CString& rDefaultValue) const
+		const uint32 ui32SettingIndex,
+		CString& rDefaultValue) const
 {
 	if(ui32SettingIndex>=m_vSetting.size())
 	{
@@ -683,8 +817,8 @@ boolean CBox::getSettingDefaultValue(
 }
 
 boolean CBox::getSettingValue(
-	const uint32 ui32SettingIndex,
-	CString& rValue) const
+		const uint32 ui32SettingIndex,
+		CString& rValue) const
 {
 	if(ui32SettingIndex>=m_vSetting.size())
 	{
@@ -695,13 +829,19 @@ boolean CBox::getSettingValue(
 }
 
 boolean CBox::setSettingType(
-	const uint32 ui32SettingIndex,
-	const CIdentifier& rTypeIdentifier)
+		const uint32 ui32SettingIndex,
+		const CIdentifier& rTypeIdentifier)
 {
 	if(ui32SettingIndex>=m_vSetting.size())
 	{
 		return false;
 	}
+	if(m_vSetting[ui32SettingIndex].m_oTypeIdentifier == rTypeIdentifier)
+	{
+		// no change, don't bother notifying
+		return true;
+	}
+
 	m_vSetting[ui32SettingIndex].m_oTypeIdentifier=rTypeIdentifier;
 
 	this->notify(BoxModification_SettingTypeChanged, ui32SettingIndex);
@@ -710,8 +850,8 @@ boolean CBox::setSettingType(
 }
 
 boolean CBox::setSettingName(
-	const uint32 ui32SettingIndex,
-	const CString& rName)
+		const uint32 ui32SettingIndex,
+		const CString& rName)
 {
 	if(ui32SettingIndex>=m_vSetting.size())
 	{
@@ -725,8 +865,8 @@ boolean CBox::setSettingName(
 }
 
 boolean CBox::setSettingDefaultValue(
-	const uint32 ui32SettingIndex,
-	const CString& rDefaultValue)
+		const uint32 ui32SettingIndex,
+		const CString& rDefaultValue)
 {
 	if(ui32SettingIndex>=m_vSetting.size())
 	{
@@ -740,8 +880,8 @@ boolean CBox::setSettingDefaultValue(
 }
 
 boolean CBox::setSettingValue(
-	const uint32 ui32SettingIndex,
-	const CString& rValue)
+		const uint32 ui32SettingIndex,
+		const CString& rValue)
 {
 	if(ui32SettingIndex>=m_vSetting.size())
 	{
@@ -753,6 +893,58 @@ boolean CBox::setSettingValue(
 
 	return true;
 }
+
+//*
+boolean CBox::getSettingMod(
+		const OpenViBE::uint32 ui32SettingIndex,
+		OpenViBE::boolean& rValue) const
+{
+	if(ui32SettingIndex>=m_vSetting.size())
+	{
+		return false;
+	}
+	rValue=m_vSetting[ui32SettingIndex].m_bMod;
+	return true;
+}
+
+
+boolean CBox::setSettingMod(
+		const OpenViBE::uint32 ui32SettingIndex,
+		const OpenViBE::boolean rValue)
+{
+	if(ui32SettingIndex>=m_vSetting.size())
+	{
+		return false;
+	}
+	m_vSetting[ui32SettingIndex].m_bMod=rValue;
+
+	//this->notify(BoxModification_SettingNameChanged, ui32SettingIndex);
+	return true;
+}
+
+boolean CBox::hasModifiableSettings(void)const
+{
+	uint32 i=0;
+	boolean rValue = false;
+	while((i<m_vSetting.size())&&(!rValue))
+	{
+		rValue = m_vSetting[i].m_bMod;
+		i++;
+	}
+	return rValue;
+}
+
+uint32* CBox::getModifiableSettings(uint32& rCount)const
+{
+	uint32* l_pReturn = NULL;
+	rCount = m_vModifiableSettingIndexes.size();
+
+	return l_pReturn;
+
+}
+
+
+//*/
 
 //___________________________________________________________________//
 //                                                                   //
@@ -781,8 +973,8 @@ void CBox::disableNotification(void)
 }
 
 void CBox::notify(
-	const EBoxModification eBoxModificationType,
-	const uint32 ui32Index)
+		const EBoxModification eBoxModificationType,
+		const uint32 ui32Index)
 {
 	if(m_pBoxListener && !m_bIsNotifyingDescriptor && m_bIsNotificationActive)
 	{
@@ -797,14 +989,14 @@ void CBox::notify(
 //                                                                   //
 
 boolean CBox::acceptVisitor(
-	IObjectVisitor& rObjectVisitor)
+		IObjectVisitor& rObjectVisitor)
 {
 	CObjectVisitorContext l_oObjectVisitorContext(getKernelContext());
 	return rObjectVisitor.processBegin(l_oObjectVisitorContext, *this) && rObjectVisitor.processEnd(l_oObjectVisitorContext, *this);
 }
 
 boolean CBox::addMessageInput(
-	const CString& sName)
+		const CString& sName)
 {
 	//this->getLogManager() << LogLevel_Fatal << "adding message input named "<< sName << "for box "<< m_sName << "\n";
 	CMessageInput l_oMessageInput;
@@ -817,7 +1009,7 @@ boolean CBox::addMessageInput(
 }
 
 boolean CBox::removeMessageInput(
-	const uint32 ui32InputIndex)
+		const uint32 ui32InputIndex)
 {
 	CIdentifier l_oIdentifier;
 	size_t i;
@@ -888,8 +1080,8 @@ uint32 CBox::getMessageInputCount(void) const
 
 
 boolean CBox::getMessageInputName(
-	const uint32 ui32InputIndex,
-	CString& rName) const
+		const uint32 ui32InputIndex,
+		CString& rName) const
 {
 	if(ui32InputIndex>=m_vMessageInput.size())
 	{
@@ -901,8 +1093,8 @@ boolean CBox::getMessageInputName(
 
 
 boolean CBox::setMessageInputName(
-	const uint32 ui32InputIndex,
-	const CString& rName)
+		const uint32 ui32InputIndex,
+		const CString& rName)
 {
 	if(ui32InputIndex>=m_vMessageInput.size())
 	{
@@ -917,7 +1109,7 @@ boolean CBox::setMessageInputName(
 
 //
 boolean CBox::addMessageOutput(
-	const CString& sName)
+		const CString& sName)
 {
 	//this->getLogManager() << LogLevel_Fatal << "adding message Output named "<< sName << "for box "<< m_sName << "\n";
 	CMessageOutput l_oMessageOutput;
@@ -930,7 +1122,7 @@ boolean CBox::addMessageOutput(
 }
 
 boolean CBox::removeMessageOutput(
-	const uint32 ui32OutputIndex)
+		const uint32 ui32OutputIndex)
 {
 	CIdentifier l_oIdentifier;
 	size_t i;
@@ -1001,8 +1193,8 @@ uint32 CBox::getMessageOutputCount(void) const
 
 
 boolean CBox::getMessageOutputName(
-	const uint32 ui32InputIndex,
-	CString& rName) const
+		const uint32 ui32InputIndex,
+		CString& rName) const
 {
 	if(ui32InputIndex>=m_vMessageOutput.size())
 	{
@@ -1014,8 +1206,8 @@ boolean CBox::getMessageOutputName(
 
 
 boolean CBox::setMessageOutputName(
-	const uint32 ui32InputIndex,
-	const CString& rName)
+		const uint32 ui32InputIndex,
+		const CString& rName)
 {
 	if(ui32InputIndex>=m_vMessageOutput.size())
 	{

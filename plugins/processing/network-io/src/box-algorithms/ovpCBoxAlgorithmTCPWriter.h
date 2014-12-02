@@ -1,6 +1,8 @@
 #ifndef __OpenViBEPlugins_BoxAlgorithm_TCPWriter_H__
 #define __OpenViBEPlugins_BoxAlgorithm_TCPWriter_H__
 
+#ifdef TARGET_HAS_Boost
+
 #include "../ovp_defines.h"
 
 #include <openvibe/ov_all.h>
@@ -58,7 +60,7 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			OpenViBE::boolean sendToClients(void *pBuffer, OpenViBE::uint32 ui32BufferLength);
+			OpenViBE::boolean sendToClients(const void* pBuffer, OpenViBE::uint32 ui32BufferLength);
 
 			// Stream decoder
 			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmTCPWriter > m_StimulationDecoder;
@@ -69,6 +71,8 @@ namespace OpenViBEPlugins
 			boost::asio::io_service m_oIOService;
 			boost::asio::ip::tcp::acceptor* m_pAcceptor;
 			std::vector<boost::asio::ip::tcp::socket*> m_vSockets;
+
+			OpenViBE::CMatrix m_oChunkTranspose;
 
 			OpenViBE::uint64 m_ui64OutputStyle;
 
@@ -183,3 +187,5 @@ namespace OpenViBEPlugins
 };
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_TCPWriter_H__
+
+#endif // TARGET_HAS_Boost

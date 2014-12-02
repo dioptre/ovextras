@@ -7,6 +7,7 @@
 
 #include <gtk/gtk.h>
 #include <string.h>
+#include <vector>
 using namespace std;
 
 namespace OpenViBEAcquisitionServer
@@ -21,7 +22,8 @@ namespace OpenViBEAcquisitionServer
 								  OpenViBE::int32& rBandPassFilterIndex,
 								  OpenViBE::boolean& rTriggerInput,
 								  vector<string> rDevicesSerials,
-								  string& rMasterDeviceIndex 
+								  string& rMasterDeviceIndex,
+								  OpenViBE::boolean& rBipolar
 								  );
 
 		virtual OpenViBE::boolean preConfigure(void);
@@ -32,6 +34,8 @@ namespace OpenViBEAcquisitionServer
 
 		void buttonCommonGndRefPressedCB(void);
 		void buttonFiltersPressedCB(void);
+		void setHardwareFiltersDialog();
+		void buttonFiltersApplyPressedCB(void);
 
 	protected:
 		OpenViBE::uint32& m_rUSBIndex;
@@ -42,6 +46,9 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean& m_rTriggerInput;
 		vector<string> m_rDevicesSerials;
 		string& m_rMasterDeviceIndex;
+		vector<OpenViBE::uint32> m_vComboBoxBandPassFilterIndex;
+		vector<OpenViBE::uint32> m_vComboBoxNotchFilterIndex;
+		OpenViBE::boolean& m_rBipolarEnabled;
 		
 	private:
 		::GtkWidget* m_pCalibrateDialog;

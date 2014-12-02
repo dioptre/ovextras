@@ -74,7 +74,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Guillaume Gibert"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INSERM"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Mouse Control for Feedback"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Move the mouse with respect of input value"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Experimental box to move the mouse in x direction with respect to the input value. Only implemented on Linux."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tools"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 			virtual void release(void)                                   { }
@@ -85,6 +85,9 @@ namespace OpenViBEPlugins
 			{
 				rPrototype.addInput("Amplitude", OV_TypeId_StreamedMatrix);
 				rPrototype.addFlag (OpenViBE::Kernel::BoxFlag_IsUnstable);
+
+				rPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+
 				return true;
 			}
 

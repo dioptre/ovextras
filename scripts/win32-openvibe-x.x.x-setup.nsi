@@ -5,8 +5,8 @@
 	!include "zipdll.nsh"
 
 	;Name and file
-	Name "OpenViBE 0.17.1"
-	OutFile "openvibe-0.17.1-setup.exe"
+	Name "OpenViBE 0.18.0"
+	OutFile "openvibe-0.18.0-setup.exe"
 
 	;Default installation folder
 	InstallDir "$PROGRAMFILES\openvibe"
@@ -95,43 +95,49 @@ Section "-OpenViBE"
 no_need_to_install_directx:
 
 	SetOutPath "$INSTDIR\dependencies\arch"
-	File ..\dependencies\arch\openvibe-vcredist-2005-sp1.exe
-	File ..\dependencies\arch\openvibe-vcredist-2008-sp1.exe
 	File ..\dependencies\arch\openvibe-vcredist-2010.exe
-	File ..\dependencies\arch\lua-5.1.4-30.zip
+	File ..\dependencies\arch\lua-5.1.4-vs100.zip
 	File ..\dependencies\arch\expat-2.0.1.zip
+	File ..\dependencies\arch\glfw-3.0.4-vs100.zip	
 	File ..\dependencies\arch\gtk-2.22.1-runtime.zip
 	File ..\dependencies\arch\gtk-themes-2009.09.07.zip
+	File ..\dependencies\arch\inpout32-vs100.zip	
 	File ..\dependencies\arch\itpp-4.0.7-runtime.zip
 	File ..\dependencies\arch\ogre-1.7.1-vs100-runtime.zip
 	File ..\dependencies\arch\cegui-0.7.2-vs100-runtime.zip
-	File ..\dependencies\arch\vrpn-7.26-runtime.zip
+	File ..\dependencies\arch\vrpn-7.31-vs100-runtime.zip
 	File ..\dependencies\arch\pthreads-2.8.0-runtime.zip
+	File ..\dependencies\arch\presage-0.8.9-vs100.zip		
 	File ..\dependencies\arch\openal-1.1-runtime.zip
 	File ..\dependencies\arch\freealut-1.1.0-bin-runtime.zip
 	File ..\dependencies\arch\libvorbis-1.3.2-vs100-runtime.zip
 	File ..\dependencies\arch\libogg-1.2.1-vs100-runtime.zip
-
+	File ..\dependencies\arch\liblsl-1.04-vs100-runtime.zip
+	File ..\dependencies\arch\enobio3g-1.2.1-vs100-runtime.zip	
+	
 	SetOutPath "$INSTDIR\dependencies"
-	ExecWait '"arch\openvibe-vcredist-2005-sp1.exe" /q'
-	ExecWait '"arch\openvibe-vcredist-2008-sp1.exe" /q'
 	ExecWait '"arch\openvibe-vcredist-2010.exe" /q'
 
 	SetOutPath "$INSTDIR\dependencies"
-	ZipDLL::extractall "arch\lua-5.1.4-30.zip" "lua"
+	ZipDLL::extractall "arch\lua-5.1.4-vs100.zip" ""
 	ZipDLL::extractall "arch\expat-2.0.1.zip" "expat"
+	ZipDLL::extractall "arch\glfw-3.0.4-vs100.zip" ""	
 	ZipDLL::extractall "arch\gtk-2.22.1-runtime.zip" "gtk"
 	ZipDLL::extractall "arch\gtk-themes-2009.09.07.zip" "gtk"
+	ZipDLL::extractall "arch\inpout32-vs100.zip" ""	
 	ZipDLL::extractall "arch\itpp-4.0.7-runtime.zip" "itpp"
 	ZipDLL::extractall "arch\ogre-1.7.1-vs100-runtime.zip" "ogre"
 	ZipDLL::extractall "arch\cegui-0.7.2-vs100-runtime.zip" "cegui"
-	ZipDLL::extractall "arch\vrpn-7.26-runtime.zip" "vrpn"
+	ZipDLL::extractall "arch\vrpn-7.31-vs100-runtime.zip" ""
 	ZipDLL::extractall "arch\pthreads-2.8.0-runtime.zip" "pthreads"
+	ZipDLL::extractall "arch\presage-0.8.9-vs100.zip" ""
 	ZipDLL::extractall "arch\openal-1.1-runtime.zip" "openal"
 	ZipDLL::extractall "arch\freealut-1.1.0-bin-runtime.zip" "freealut"
 	ZipDLL::extractall "arch\libvorbis-1.3.2-vs100-runtime.zip" "libvorbis"
 	ZipDLL::extractall "arch\libogg-1.2.1-vs100-runtime.zip" "libogg"
-
+	ZipDLL::extractall "arch\liblsl-1.04-vs100-runtime.zip" "liblsl"
+	ZipDLL::extractall "arch\enobio3g-1.2.1-vs100-runtime.zip" ""
+	
 	SetOutPath "$INSTDIR"
 	; Export binaries
 	File /nonfatal /r ..\dist\bin
@@ -168,16 +174,21 @@ no_need_to_patch_3d_functionnality:
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\lua\lib;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\itpp\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\expat\bin;%PATH%$\r$\n"
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\glfw\lib\;%PATH%$\r$\n"		
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\gtk\bin;%PATH%$\r$\n"
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\inpout32\lib;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\itpp\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\cegui\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=%OGRE_HOME%\bin\release;%OGRE_HOME%\bin\debug;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=%VRPNROOT%\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\pthreads\lib;%PATH%$\r$\n"
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\presage\lib;%PATH%$\r$\n"	
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\openal\libs\Win32;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\freealut\lib;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libvorbis\win32\bin\release;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libogg\win32\bin\release\;%PATH%$\r$\n"
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\liblsl\lib\;%PATH%$\r$\n"
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\enobio3g\MSVC\;%PATH%$\r$\n"	
 	FileClose $0
 	
 	FileOpen $0 "$INSTDIR\dependencies\cegui\resources.cfg" w
@@ -207,7 +218,7 @@ no_need_to_patch_3d_functionnality:
 	CreateShortCut "$SMPROGRAMS\OpenViBE\Developer tools\openvibe skeleton generator.lnk" "$INSTDIR\openvibe-skeleton-generator.cmd"  "" "%SystemRoot%\system32\shell32.dll" 57
 	CreateShortCut "$SMPROGRAMS\OpenViBE\openvibe designer.lnk"                           "$INSTDIR\openvibe-designer.cmd"            "" "%SystemRoot%\system32\shell32.dll" 137
 	CreateShortCut "$SMPROGRAMS\OpenViBE\openvibe acquisition server.lnk"                 "$INSTDIR\openvibe-acquisition-server.cmd"  "" "%SystemRoot%\system32\shell32.dll" 18
-	CreateShortCut "$SMPROGRAMS\OpenViBE\openvibe vr-demo tie-fighter.lnk"                "$INSTDIR\openvibe-vr-demo-tie-fighter.cmd" "" "%SystemRoot%\system32\shell32.dll" 200
+	CreateShortCut "$SMPROGRAMS\OpenViBE\openvibe vr-demo spaceship.lnk"                  "$INSTDIR\openvibe-vr-demo-spaceship.cmd"   "" "%SystemRoot%\system32\shell32.dll" 200
 	CreateShortCut "$SMPROGRAMS\OpenViBE\openvibe vr-demo handball.lnk"                   "$INSTDIR\openvibe-vr-demo-handball.cmd"    "" "%SystemRoot%\system32\shell32.dll" 200
 	CreateShortCut "$SMPROGRAMS\OpenViBE\uninstall.lnk"                                   "$INSTDIR\Uninstall.exe"
 

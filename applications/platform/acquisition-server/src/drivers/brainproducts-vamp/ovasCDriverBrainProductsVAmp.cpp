@@ -28,9 +28,6 @@ CDriverBrainProductsVAmp::CDriverBrainProductsVAmp(IDriverContext& rDriverContex
 	,m_oSettings("AcquisitionServer_Driver_BrainProducts-VAmp", m_rDriverContext.getConfigurationManager())
 	,m_bAcquireAuxiliaryAsEEG(false)
 	,m_bAcquireTriggerAsEEG(false)
-	,m_oHeader(
-		m_bAcquireAuxiliaryAsEEG,
-		m_bAcquireTriggerAsEEG)
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_ui32TotalSampleCount(0)
@@ -62,7 +59,6 @@ CDriverBrainProductsVAmp::CDriverBrainProductsVAmp(IDriverContext& rDriverContex
 	m_oSettings.add("AcquireAuxiliaryAsEEG", &m_bAcquireAuxiliaryAsEEG);
 	m_oSettings.add("AcquireTriggerAsEEG", &m_bAcquireTriggerAsEEG);
 	m_oSettings.load();
-
 }
 
 CDriverBrainProductsVAmp::~CDriverBrainProductsVAmp(void)
@@ -94,6 +90,39 @@ boolean CDriverBrainProductsVAmp::initialize(
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] VAmp Driver: Channel count or frequency not set.\n";
 		return false;
 	}
+	
+	m_ui32AcquisitionMode=m_oHeader.getAcquisitionMode();
+	m_ui32EEGChannelCount=m_oHeader.getEEGChannelCount(m_ui32AcquisitionMode);
+	m_ui32AuxiliaryChannelCount=(m_bAcquireAuxiliaryAsEEG ? m_oHeader.getAuxiliaryChannelCount(m_ui32AcquisitionMode) : 0);
+	m_ui32TriggerChannelCount=(m_bAcquireTriggerAsEEG ? m_oHeader.getTriggerChannelCount(m_ui32AcquisitionMode) : 0);
+
+	m_oHeader.setChannelCount(m_ui32EEGChannelCount + m_ui32AuxiliaryChannelCount + m_ui32TriggerChannelCount);
+
+	// there can be 2 or 0 aux channels depending on the mode
+	if(m_bAcquireAuxiliaryAsEEG)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] VAmp Driver: will acquire aux as EEG\n";
+		char l_sBuffer[32];
+		for(uint32 i = 0; i < m_oHeader.getAuxiliaryChannelCount(m_ui32AcquisitionMode); i++)
+		{
+			sprintf(l_sBuffer,"Aux%i", i+1);
+			m_oHeader.setChannelName(m_ui32EEGChannelCount+i,CString(l_sBuffer));
+		}
+	}
+	else
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] VAmp Driver: will NOT acquire aux as EEG\n";
+	}
+	// always one trigger channel
+	if(m_bAcquireTriggerAsEEG)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] VAmp Driver: will acquire trigger as EEG\n";
+		m_oHeader.setChannelName(m_ui32EEGChannelCount + m_ui32AuxiliaryChannelCount,"Triggers");
+	}
+	else
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] VAmp Driver: will NOT acquire trigger as EEG\n";
+	}
 
 	// Builds up a buffer to store acquired samples. This buffer will be sent to the acquisition server later.
 	m_pSample=new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
@@ -109,16 +138,6 @@ boolean CDriverBrainProductsVAmp::initialize(
 
 	//__________________________________
 	// Hardware initialization
-
-	if(m_bAcquireAuxiliaryAsEEG) m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] VAmp Driver: will acquire aux as EEG\n";
-	else                         m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] VAmp Driver: will NOT acquire aux as EEG\n";
-	if(m_bAcquireTriggerAsEEG) m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] VAmp Driver: will acquire trigger as EEG\n";
-	else                       m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] VAmp Driver: will NOT acquire trigger as EEG\n";
-
-	m_ui32AcquisitionMode=m_oHeader.getAcquisitionMode();
-	m_ui32EEGChannelCount=m_oHeader.getEEGChannelCount(m_ui32AcquisitionMode);
-	m_ui32AuxiliaryChannelCount=m_oHeader.getAuxiliaryChannelCount(m_ui32AcquisitionMode);
-	m_ui32TriggerChannelCount=m_oHeader.getTriggerChannelCount(m_ui32AcquisitionMode);
 
 	// if no device selected with the properties dialog
 	// we take the last device connected
@@ -234,6 +253,24 @@ boolean CDriverBrainProductsVAmp::loop(void)
 		uint32 l_uint32ReadZeroCount = 0;
 #endif
 
+		if(m_bFirstStart)
+		{
+			//empty buffer
+			switch(m_ui32AcquisitionMode)
+			{
+				case AcquisitionMode_VAmp16:
+					while(faGetData(l_i32DeviceId, &l_DataBufferVAmp16, l_uint32ReadLengthVAmp16) > 0);
+					break;
+				case AcquisitionMode_VAmp8:
+					while(faGetData(l_i32DeviceId, &l_DataBufferVAmp8, l_uint32ReadLengthVAmp8) > 0);
+					break;
+				case AcquisitionMode_VAmp4Fast:
+					while(faGetData(l_i32DeviceId, &l_DataBufferVamp4Fast, l_uint32ReadLengthVamp4Fast) > 0);
+					break;
+			}
+			m_bFirstStart = false;
+		}
+
 		while(l_i32ReceivedSamples < m_ui32SampleCountPerSentBlock)
 		{
 			// we need to "getData" with the right output structure according to acquisition mode
@@ -274,7 +311,8 @@ boolean CDriverBrainProductsVAmp::loop(void)
 #endif
 				for(i=0; i < m_ui32EEGChannelCount; i++)
 				{
-					m_pSample[i*m_ui32SampleCountPerSentBlock+l_i32ReceivedSamples] = (float32)(l_pEEGArray[i]*m_oHeader.getChannelGain(i));
+					// The last slot of l_pEEGArray should carry the reference electrode measurement, we subtract it
+					m_pSample[i*m_ui32SampleCountPerSentBlock+l_i32ReceivedSamples] = (float32)((l_pEEGArray[i]-l_pEEGArray[m_ui32EEGChannelCount])*m_oHeader.getChannelGain(i));
 				}
 				for(i=0; i < m_ui32AuxiliaryChannelCount; i++)
 				{

@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCTrainerApplication.h"
 
 #include "../ovassvepCCommandStartStop.h"
@@ -128,3 +131,5 @@ void CTrainerApplication::stopFlickering()
 
 	this->setTarget( -1 );
 }
+
+#endif

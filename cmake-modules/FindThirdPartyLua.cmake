@@ -17,9 +17,10 @@ IF(PATH_LUA)
 
 	SET(name_liblua lua)
 	IF(WIN32)
-		SET(name_liblua lua51)
+		SET(name_liblua lua5.1)
 	ENDIF(WIN32)
 
+	SET(LIB_LUA "-NOTFOUND")
 	IF(WIN32)
 		FIND_LIBRARY(LIB_LUA ${name_liblua} PATHS ${PATH_LUA}/../lib NO_DEFAULT_PATH)
 		FIND_LIBRARY(LIB_LUA ${name_liblua} PATHS ${PATH_LUA}/../lib)

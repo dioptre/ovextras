@@ -373,10 +373,15 @@ void CConfigurationBuilder::buttonChangeChannelNamesCB(void)
 						if(l_oFile.is_open())
 						{
 							// Reads channel names from file
-							while(!l_oFile.eof())
+							string l_sElectrodeName;
+							while(getline(l_oFile, l_sElectrodeName))
 							{
-								string l_sElectrodeName;
-								l_oFile >> l_sElectrodeName;
+								//if line is empty, skip the channel by setting empty string as name
+								//if we do not, loading will squeeze the channels together.
+								if(l_sElectrodeName.empty())
+								{
+									l_sElectrodeName = "";
+								}
 								l_vElectrodeName.push_back(l_sElectrodeName);
 							}
 							l_oFile.close();

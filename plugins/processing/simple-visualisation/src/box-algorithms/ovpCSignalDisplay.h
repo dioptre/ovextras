@@ -73,12 +73,12 @@ namespace OpenViBEPlugins
 		{
 		public:
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Signal display"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Bruno Renier / Yann Renard"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Bruno Renier, Yann Renard, Alison Cellard"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Displays the incoming signal"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Displays the incoming signal"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualisation/Basic"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.3"); }
 			virtual void release(void)                                   { }
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_SignalDisplay; }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-zoom-fit"); }
@@ -93,6 +93,7 @@ namespace OpenViBEPlugins
 			{
 				rPrototype.addSetting("Time Scale", OV_TypeId_Float, "10");
 				rPrototype.addSetting("Display Mode", OVP_TypeId_SignalDisplayMode, "Scan");
+                rPrototype.addSetting("EEG display", OV_TypeId_Boolean, "false");
 				rPrototype.addSetting("Manual Vertical Scale",OV_TypeId_Boolean, "false");
 				rPrototype.addSetting("Vertical Scale",OV_TypeId_Float, "100");
 				rPrototype.addInput("Signal", OV_TypeId_StreamedMatrix);

@@ -27,6 +27,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer);
 			virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer);
 
+            virtual OpenViBE::uint32 getBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
+
 			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierBliffLDA);
 
 			OpenViBE::CMemoryBuffer m_oConfiguration;

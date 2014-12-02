@@ -378,28 +378,35 @@ boolean CScheduler::loop(void)
 		}
 
 		l_rSimulatedBoxChrono.stepIn();
-		if(l_pSimulatedBox && !l_bIsMuted)
+		if(l_pSimulatedBox)
 		{
-			l_pSimulatedBox->processClock();
-
-			if(l_pSimulatedBox->isReadyToProcess())
+			if(!l_bIsMuted)
 			{
-				l_pSimulatedBox->process();
+				l_pSimulatedBox->processClock();
+
+				if(l_pSimulatedBox->isReadyToProcess())
+				{
+					l_pSimulatedBox->process();
+				}
 			}
 
+			//if the box is muted we still have to erase chunks that arrives at the input
 			map < uint32, list < CChunk > >& l_rSimulatedBoxInput=m_vSimulatedBoxInput[itSimulatedBox->first.second];
 			map < uint32, list < CChunk > >::iterator itSimulatedBoxInput;
 			for(itSimulatedBoxInput=l_rSimulatedBoxInput.begin(); itSimulatedBoxInput!=l_rSimulatedBoxInput.end(); itSimulatedBoxInput++)
 			{
 				list < CChunk >& l_rSimulatedBoxInputChunkList=itSimulatedBoxInput->second;
-				list < CChunk >::iterator itSimulatedBoxInputChunkList;
-				for(itSimulatedBoxInputChunkList=l_rSimulatedBoxInputChunkList.begin(); itSimulatedBoxInputChunkList!=l_rSimulatedBoxInputChunkList.end(); itSimulatedBoxInputChunkList++)
+				if(!l_bIsMuted)
 				{
-					l_pSimulatedBox->processInput(itSimulatedBoxInput->first, *itSimulatedBoxInputChunkList);
-
-					if(l_pSimulatedBox->isReadyToProcess())
+					list < CChunk >::iterator itSimulatedBoxInputChunkList;
+					for(itSimulatedBoxInputChunkList=l_rSimulatedBoxInputChunkList.begin(); itSimulatedBoxInputChunkList!=l_rSimulatedBoxInputChunkList.end(); itSimulatedBoxInputChunkList++)
 					{
-						l_pSimulatedBox->process();
+						l_pSimulatedBox->processInput(itSimulatedBoxInput->first, *itSimulatedBoxInputChunkList);
+
+						if(l_pSimulatedBox->isReadyToProcess())
+						{
+							l_pSimulatedBox->process();
+						}
 					}
 				}
 				l_rSimulatedBoxInputChunkList.clear();

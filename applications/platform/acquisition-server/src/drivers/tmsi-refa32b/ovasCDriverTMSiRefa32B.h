@@ -1,6 +1,8 @@
 #ifndef __OpenViBE_AcquisitionServer_CDriverTMSiRefa32B_H__
 #define __OpenViBE_AcquisitionServer_CDriverTMSiRefa32B_H__
 
+#if defined TARGET_HAS_ThirdPartyNeXus
+
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 #include "ovas_base.h"
@@ -8,10 +10,9 @@
 #include "../ovasCSettingsHelper.h"
 #include "../ovasCSettingsHelperOperators.h"
 
-#if defined TARGET_OS_Windows
-
 #include "ovasCConfigurationTMSIRefa32B.h"
 
+// This dll comes from the sdk-nexus.zip dependency archive
 #define RTLOADER "RTINST.Dll"
 #include <gtk/gtk.h>
 // Get Signal info

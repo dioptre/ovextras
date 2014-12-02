@@ -35,6 +35,11 @@ uint64 Math::randomUInteger64(void)
 	return (r1<<24)^(r2<<16)^(r3<<8)^(r4);
 }
 
+uint32 Math::randomUInteger32WithCeiling(uint32 ui32upperLimit)
+{
+	return static_cast<int32>(randomUInteger64()) % ui32upperLimit;
+}
+
 int8 Math::randomSInterger8(void)
 {
 	return static_cast<int8>(randomUInteger64());
@@ -63,6 +68,11 @@ float32 Math::randomFloat32(void)
 	return fr;
 }
 
+float32 Math::randomFloat32BetweenZeroAndOne(void) {
+	float32 fr = static_cast<float32>(rand()) / static_cast<float32>(RAND_MAX);
+	return fr;
+}
+
 float64 Math::randomFloat64(void)
 {
 	uint64 r=randomUInteger64();
@@ -70,3 +80,5 @@ float64 Math::randomFloat64(void)
 	::memcpy(&fr, &r, sizeof(fr));
 	return fr;
 }
+
+

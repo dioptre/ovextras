@@ -37,6 +37,7 @@ boolean CSettingEditorDialog::run(void)
 	m_pTable=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceSetting, "setting_editor-table"));
 	m_pType=GTK_WIDGET(gtk_builder_get_object(l_pBuilderInterfaceSetting, "setting_editor-setting_type_combobox"));
 	gtk_list_store_clear(GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(m_pType))));
+	//::GtkCheckButton* m_Modif=GTK_CHECK_BUTTON(gtk_builder_get_object(l_pBuilderInterfaceSetting, "settings_editor-checkbutton_setting_modifiability"));//
 	g_object_unref(l_pBuilderInterfaceSetting);
 
 	gtk_window_set_title(GTK_WINDOW(l_pDialog), m_sTitle.c_str());
@@ -45,8 +46,11 @@ boolean CSettingEditorDialog::run(void)
 
 	CString l_sSettingName;
 	CIdentifier l_oSettingType;
+	//boolean l_bIsModifiable;//lm
 	m_rBox.getSettingName(m_ui32SettingIndex, l_sSettingName);
 	m_rBox.getSettingType(m_ui32SettingIndex, l_oSettingType);
+	//m_rBox.getSettingMod(m_ui32SettingIndex, l_bIsModifiable);//if we want setting mod to be accessible from the designer
+	//gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_Modif),l_bIsModifiable);
 
 	gtk_entry_set_text(GTK_ENTRY(l_pName), l_sSettingName.toASCIIString());
 
@@ -77,6 +81,8 @@ boolean CSettingEditorDialog::run(void)
 		gint l_iResult=gtk_dialog_run(GTK_DIALOG(l_pDialog));
 		if(l_iResult==GTK_RESPONSE_APPLY)
 		{
+			//l_bIsModifiable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_Modif));//mod
+
 			char* l_sActiveText=gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pType));
 			if(l_sActiveText)
 			{
@@ -85,6 +91,7 @@ boolean CSettingEditorDialog::run(void)
 				m_rBox.setSettingType(m_ui32SettingIndex, l_oSettingType);
 				m_rBox.setSettingValue(m_ui32SettingIndex, m_oHelper.getValue(l_oSettingType, m_pDefaultValue));
 				m_rBox.setSettingDefaultValue(m_ui32SettingIndex, m_oHelper.getValue(l_oSettingType, m_pDefaultValue));
+				//m_rBox.setSettingMod(m_ui32SettingIndex, l_bIsModifiable);//mod
 				l_bFinished=true;
 				l_bResult=true;
 			}

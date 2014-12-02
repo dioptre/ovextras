@@ -30,7 +30,18 @@ IF(NOT (LOCAL MATCHES "FALSE"))
 	set(CTEST_SOURCE_DIRECTORY		"${OV_ROOT_DIR}")
 	set(ENV{OV_BINARY_PATH} "${OV_ROOT_DIR}/dist")
 	message("running local test here= $ENV{OV_BINARY_PATH}")
+
+	IF(WIN32)
+	  SET(ENV{OV_USERDATA} "$ENV{APPDATA}/openvibe/")
+	ELSE(WIN32)
+	  SET(ENV{OV_USERDATA} "$ENV{HOME}/.config/openvibe/")
+	ENDIF(WIN32)
+	  
 ENDIF(NOT (LOCAL MATCHES "FALSE"))
+
+# this is the folder where test scenarios can be run under
+SET(ENV{OV_TEST_DEPLOY_PATH} "${CTEST_SOURCE_DIRECTORY}/local-tmp/test-deploy/")
+MESSAGE("Set the test deploy path to $ENV{OV_TEST_DEPLOY_PATH}")
 
 get_cmake_property(_variableNames VARIABLES)
 foreach (_variableName ${_variableNames})
@@ -48,7 +59,7 @@ SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/classification-gpl/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/signal-processing/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/simple-visualisation/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/file-io/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/samples/test")
+SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/data-generation/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/examples/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/classification/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/stream-codecs/test")

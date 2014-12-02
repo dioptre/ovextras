@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepICommandVRPNButton.h"
 #include "ovassvepCApplication.h"
 
@@ -43,3 +46,5 @@ void ICommandVRPNButton::processFrame()
 {
 	m_poVRPNButton->mainloop();
 }
+
+#endif

@@ -14,9 +14,10 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace std;
 
-CConfigurationGTecGMobiLabPlus::CConfigurationGTecGMobiLabPlus(const char* sGtkBuilderFileName, const char* sPortName)
+CConfigurationGTecGMobiLabPlus::CConfigurationGTecGMobiLabPlus(const char* sGtkBuilderFileName, std::string& rPortName, boolean& rTestMode)
 	:CConfigurationBuilder(sGtkBuilderFileName)
-	,m_oPortName(sPortName)
+	,m_rPortName(rPortName)
+	,m_rTestMode(rTestMode)
 {
 }
 
@@ -28,8 +29,10 @@ boolean CConfigurationGTecGMobiLabPlus::preConfigure(void)
 	}
 
 	::GtkEntry* l_pEntryPort=GTK_ENTRY(gtk_builder_get_object(m_pBuilderConfigureInterface, "entry_port"));
+	::gtk_entry_set_text(l_pEntryPort, m_rPortName.c_str());
 
-	::gtk_entry_set_text(l_pEntryPort, m_oPortName.c_str());
+	::GtkToggleButton* l_pToggleTestMode = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_testmode"));
+	gtk_toggle_button_set_active(l_pToggleTestMode, m_rTestMode);
 
 	return true;
 }
@@ -37,10 +40,13 @@ boolean CConfigurationGTecGMobiLabPlus::preConfigure(void)
 
 boolean CConfigurationGTecGMobiLabPlus::postConfigure(void)
 {
-	::GtkEntry* l_pEntryPort=GTK_ENTRY(gtk_builder_get_object(m_pBuilderConfigureInterface, "entry_port"));
 	if(m_bApplyConfiguration)
 	{
-		m_oPortName=::gtk_entry_get_text(l_pEntryPort);
+		::GtkEntry* l_pEntryPort=GTK_ENTRY(gtk_builder_get_object(m_pBuilderConfigureInterface, "entry_port"));
+		m_rPortName = ::gtk_entry_get_text(l_pEntryPort);
+
+		::GtkToggleButton* l_pToggleTestMode = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_testmode"));
+		m_rTestMode = (::gtk_toggle_button_get_active(l_pToggleTestMode)>0);
 	}
 
 	if(!CConfigurationBuilder::postConfigure())
@@ -49,11 +55,6 @@ boolean CConfigurationGTecGMobiLabPlus::postConfigure(void)
 	}
 
 	return true;
-}
-
-std::string CConfigurationGTecGMobiLabPlus::getPortName(void)
-{
-  return m_oPortName;
 }
 
 #endif // TARGET_HAS_ThirdPartyGMobiLabPlusAPI

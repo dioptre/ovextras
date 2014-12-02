@@ -37,7 +37,8 @@ namespace OpenViBEPlugins
 			CSignalDisplayView(
 				CBufferDatabase& rBufferDatabase,
 				OpenViBE::float64 f64TimeScale,
-				OpenViBE::CIdentifier oDisplayMode);
+				OpenViBE::CIdentifier oDisplayMode,
+				OpenViBE::boolean bIsEEG);
 			/**
 			 * \brief Constructor
 			 * \param [in] rBufferDatabase Signal database
@@ -50,6 +51,7 @@ namespace OpenViBEPlugins
 				CBufferDatabase& rBufferDatabase,
 				OpenViBE::float64 f64TimeScale,
 				OpenViBE::CIdentifier oDisplayMode,
+				OpenViBE::boolean bIsEEG,
 				OpenViBE::boolean bAutoVerticalScale,
 				OpenViBE::float64 f64VerticalScale);
 
@@ -105,6 +107,9 @@ namespace OpenViBEPlugins
 				OpenViBE::uint32 ui32ChannelIndex,
 				OpenViBE::boolean bActive);
 
+			void toggleChannelMultiView(
+				OpenViBE::boolean bActive);
+
 			void changeMultiView(void);
 
 			void updateMainTableStatus(void);
@@ -135,6 +140,9 @@ namespace OpenViBEPlugins
 			 */
 			OpenViBE::boolean onCustomVerticalScaleChangedCB(
 				::GtkSpinButton* pSpinButton);
+
+			OpenViBE::boolean onAutoTranslationToggledCB(
+					GtkToggleButton* pToggleButton);
 
 			/**
 			 * \brief Get a channel display object
@@ -232,6 +240,12 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 m_f64CustomVerticalScaleValue;
 			//@}
 
+			//! Flag set to true when auto translation is on (center signal in his spot)
+            OpenViBE::boolean m_bAutoTranslation;
+
+			//! Flage set to true when eeg settings mode is on 
+			OpenViBE::boolean m_bIsEEGSignal;
+
 			//! The database that contains the information to use to draw the signals
 			CBufferDatabase * m_pBufferDatabase;
 
@@ -260,6 +274,9 @@ namespace OpenViBEPlugins
 
 			//! Bottom time ruler
 			CBottomTimeRuler * m_pBottomRuler;
+
+			//! Widgets for left rulers
+			std::vector <GtkWidget *> m_oLeftRulers;
 		};
 	}
 }

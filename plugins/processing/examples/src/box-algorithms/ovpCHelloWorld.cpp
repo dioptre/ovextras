@@ -3,16 +3,10 @@
  */ 
 #include "ovpCHelloWorld.h"
 
-#include <iostream>
 #include <cstdlib>		// atof
 
 using namespace OpenViBE;
-using namespace OpenViBE::Kernel;
-using namespace OpenViBE::Plugins;
-using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Samples;
-using namespace OpenViBEToolkit;
-using namespace std;
+using namespace OpenViBEPlugins::Examples;
 
 
 OpenViBE::uint64 CHelloWorld::getClockFrequency(void)
