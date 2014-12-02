@@ -14,6 +14,7 @@
 #include "ovasCDriverGTecGUSBampLegacy.h"
 #include "ovasCDriverGTecGMobiLabPlus.h"
 #include "ovasCDriverFieldtrip.h"
+#include "ovasCDriverMBTSmarting.h"
 #include "ovasCDriverMitsarEEG202A.h"
 #include "ovasCDriverOpenALAudioCapture.h"
 #include "ovasCDriverOpenEEGModularEEG.h"
@@ -38,13 +39,15 @@ namespace OpenViBEContributions {
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverGTecGMobiLabPlus(pAcquisitionServer->getDriverContext()));
 #endif
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverFieldtrip(pAcquisitionServer->getDriverContext()));
-#if defined TARGET_OS_Windows
- #if defined TARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI
+
+#if defined TARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBrainmasterDiscovery(pAcquisitionServer->getDriverContext()));
- #endif
- #if defined(TARGET_HAS_ThirdPartyMitsar)
+#endif
+ 
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverMBTSmarting(pAcquisitionServer->getDriverContext()));
+		
+#if defined(TARGET_HAS_ThirdPartyMitsar)
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverMitsarEEG202A(pAcquisitionServer->getDriverContext()));
- #endif
 #endif
 
 #if defined TARGET_HAS_ThirdPartyOpenAL
