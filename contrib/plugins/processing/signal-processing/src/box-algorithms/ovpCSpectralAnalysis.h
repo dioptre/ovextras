@@ -56,10 +56,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32FrequencyBandCount;
 			OpenViBE::uint32 m_ui32SampleCount;
 
-
-			OpenViBE::boolean m_bCoefComputed;
-			OpenViBE::uint32 m_ui32FFTSize;				// Pad sample up to this, a power of two
-			OpenViBE::uint32 m_ui32HalfFFTSize;			// Half of the m_ui32FFTSize
+			OpenViBE::uint32 m_ui32HalfFFTSize;			// m_ui32SampleCount / 2 + 1;
 
 			OpenViBE::boolean m_bAmplitudeSpectrum;
 			OpenViBE::boolean m_bPhaseSpectrum;

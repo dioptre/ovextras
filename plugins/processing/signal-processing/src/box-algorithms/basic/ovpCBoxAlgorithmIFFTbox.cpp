@@ -5,6 +5,7 @@
 #include <itpp/itsignal.h>
 #include "ovpCBoxAlgorithmIFFTbox.h"
 
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -93,25 +94,41 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 				// Header received. This happens only once when pressing "play". For example with a StreamedMatrix input, you now know the dimension count, sizes, and labels of the matrix
 				// ... maybe do some process ...
 				m_channelsNumber=m_oAlgo0_SpectrumDecoder[i].getOutputMatrix()->getDimensionSize(0);
-				m_ui32SampleCount=m_oAlgo0_SpectrumDecoder[i].getOutputMatrix()->getDimensionSize(1)*2;	// real+imag make up the whole -> each array is half the size separately
+				m_ui32SampleCount = m_oAlgo0_SpectrumDecoder[i].getOutputMatrix()->getDimensionSize(1);
+				if(m_channelsNumber == 0 || m_ui32SampleCount == 0)
+				{
+					this->getLogManager() << LogLevel_Error << "Both dims of the input matrix must have positive size\n";					
+					return false;
+				}
+				m_ui32SampleCount = (m_ui32SampleCount-1)*2;
+				if(m_ui32SampleCount == 0) 
+				{
+					m_ui32SampleCount = 1;
+				}
 			}
 			else
 			{
-				// test headers coherence
-				const IMatrix* l_pMatrixMinMaxFrequencyBands = m_oAlgo0_SpectrumDecoder[i].getOutputMinMaxFrequencyBands();
-				if(m_ui32SampleCount!=l_pMatrixMinMaxFrequencyBands->getDimensionSize(1)*2)
+				if(!OpenViBEToolkit::Tools::Matrix::isDescriptionSimilar(*m_oAlgo0_SpectrumDecoder[0].getOutputMatrix(), *m_oAlgo0_SpectrumDecoder[i].getOutputMatrix(), false))
 				{
 					// problem!
-					this->getLogManager() << LogLevel_Warning << "Samples numbers mismatch, check stream structure or parameters\n";
+					this->getLogManager() << LogLevel_Error << "The matrix components of the two streams have different properties, check stream structures or parameters\n";
 					return false;
 				}
-				if(m_channelsNumber!=m_oAlgo0_SpectrumDecoder[i].getOutputMatrix()->getDimensionSize(0))
+				if(!OpenViBEToolkit::Tools::Matrix::isDescriptionSimilar(*m_oAlgo0_SpectrumDecoder[0].getOutputMinMaxFrequencyBands(), *m_oAlgo0_SpectrumDecoder[i].getOutputMinMaxFrequencyBands(), false))
 				{
 					// problem!
-					this->getLogManager() << LogLevel_Warning << "channels numbers mismatch, check stream structure or parameters\n";
+					this->getLogManager() << LogLevel_Error << "The band descriptors of the two streams have different properties, check stream structures or parameters\n";
+					return false;
+				}
+				if(m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionSize(1) != m_oAlgo0_SpectrumDecoder[i].getOutputMinMaxFrequencyBands()->getDimensionSize(1))
+				{
+					this->getLogManager() << LogLevel_Error << "Frequency band count " << m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionSize(1) 
+						<< " does not match the corresponding matrix chunk size " << m_oAlgo0_SpectrumDecoder[i].getOutputMinMaxFrequencyBands()->getDimensionSize(0) 
+						<< ", check stream structures or parameters\n";
 					return false;
 				}
 			}
+
 			l_ui32HeaderCount++;
 		}
 		if(m_oAlgo0_SpectrumDecoder[i].isBufferReceived()) l_ui32BufferCount++;
@@ -148,7 +165,7 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 		// Pass the header to the next boxes, by encoding a header on the output 0:
 		m_oAlgo1_SignalEncoder.encodeHeader();
 		// send the output chunk containing the header. The dates are the same as the input chunk:
-		l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(i, 0), l_rDynamicBoxContext.getInputChunkEndTime(i, 0));
+		l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, 0), l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
 																					
 	}
 	if(l_ui32BufferCount)
@@ -156,18 +173,27 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 			const float64* bufferInput0= m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getBuffer();
 			const float64* bufferInput1= m_oAlgo0_SpectrumDecoder[1].getOutputMatrix()->getBuffer();
 
-			const uint32 l_ui32HalfSize = m_ui32SampleCount/2;
+			const uint32 l_ui32HalfSize = m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionSize(1);
 			for(uint32 channel=0; channel< m_channelsNumber; channel++)
 			{
-				for(uint32 j=0; j< l_ui32HalfSize; j++)
+				m_frequencyBuffer[channel][0].real(bufferInput0[channel*l_ui32HalfSize+0]);
+				m_frequencyBuffer[channel][0].imag(bufferInput1[channel*l_ui32HalfSize+0]);
+
+				for(uint32 j=1; j< l_ui32HalfSize; j++)
 				{
 					m_frequencyBuffer[channel][j].real(bufferInput0[channel*l_ui32HalfSize+j]);
 					m_frequencyBuffer[channel][j].imag(bufferInput1[channel*l_ui32HalfSize+j]);
-					// implicit with itpp::ifft_real:
-					// m_frequencyBuffer[channel][(m_ui32SampleCount)-j-1].real(-m_frequencyBuffer[channel][j].real());
-					// m_frequencyBuffer[channel][(m_ui32SampleCount)-j-1].imag(m_frequencyBuffer[channel][j].imag());
+
+					m_frequencyBuffer[channel][m_ui32SampleCount-j].real(bufferInput0[channel*l_ui32HalfSize+j]);
+					m_frequencyBuffer[channel][m_ui32SampleCount-j].imag(bufferInput1[channel*l_ui32HalfSize+j]);
 				}
+
 				m_signalBuffer[channel]= itpp::ifft_real(m_frequencyBuffer[channel]);
+
+				// Test block
+				// std::cout << "Iy: " << m_frequencyBuffer[channel].size() << ", y=" << m_frequencyBuffer[channel] << "\n";
+				// std::cout << "Ix: " << m_signalBuffer[channel].size() << ", x'=" << m_signalBuffer[channel] << "\n";
+
 				float64* bufferOutput=m_oAlgo1_SignalEncoder.getInputMatrix()->getBuffer();
 				for(uint32 j=0; j< m_ui32SampleCount; j++)
 				{

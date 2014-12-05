@@ -22,8 +22,6 @@ CSpectralAnalysis::CSpectralAnalysis(void)
 	m_ui64LastChunkEndTime(0),
 	m_ui32ChannelCount(0),
 	m_ui32SampleCount(0),
-	m_bCoefComputed(false),
-	m_ui32FFTSize(1),
 	m_ui32HalfFFTSize(1)
 
 {
@@ -111,24 +109,7 @@ boolean CSpectralAnalysis::process()
 			CMatrix* l_pStreamedMatrix = new CMatrix();
 			l_pFrequencyBands->setDimensionCount(2);
 
-			if (!m_bCoefComputed)
-			{
-				m_ui32FFTSize=1;
-				m_ui32HalfFFTSize=1;
-				// Find out a power of two thats >= m_ui32SampleCount
-				while (m_ui32FFTSize < m_ui32SampleCount)
-				{
-					m_ui32FFTSize<<=1;
-				}
-				if(m_ui32FFTSize==1)
-				{
-					this->getLogManager() << LogLevel_Warning << "Computing FFT with size = 1\n";
-				}
-				// Due to the inputs being real numbers, we only need to look at half of the complex output later
-				m_ui32HalfFFTSize = m_ui32FFTSize>>1;
-				m_bCoefComputed = true;
-			}
-
+			m_ui32HalfFFTSize = m_ui32SampleCount / 2 + 1;
 			m_ui32FrequencyBandCount = m_ui32HalfFFTSize;
 
 			OpenViBEToolkit::Tools::MatrixManipulation::copyDescription(*l_pStreamedMatrix, *m_oSignalDecoder.getOutputMatrix());
@@ -201,7 +182,13 @@ boolean CSpectralAnalysis::process()
 					x[(int)j] =  (double)*(l_pBuffer+i*m_ui32SampleCount+j);
 				}
 
-				y = fft_real(x, m_ui32FFTSize);
+				y = fft_real(x);
+
+				//test block
+				// vec h = ifft_real(y);
+				// std::cout << "Fx: " << x.size() << ", x=" << x << "\n";
+				// std::cout << "FF: " << y.size() << ", y=" << y << "\n";
+				// std::cout << "Fr: " << h.size() << ", x'=" << h << "\n";
 
 				for(uint64 k=0 ; k<m_ui32HalfFFTSize ; k++)
 				{
