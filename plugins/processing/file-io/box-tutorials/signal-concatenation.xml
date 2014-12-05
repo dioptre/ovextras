@@ -23,7 +23,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue>record-[$core{date}-$core{time}].gdf</DefaultValue>
-					<Value>${Path_UserData}/tie-fighter-freetime-doubled.gdf</Value>
+					<Value>${Path_UserData}/spaceship-freetime-doubled.gdf</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
@@ -252,7 +252,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Path_Data}/scenarios/signals/tie-fighter-freetime.gdf</Value>
+					<Value>${Path_Data}/scenarios/signals/spaceship-freetime.gdf</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>

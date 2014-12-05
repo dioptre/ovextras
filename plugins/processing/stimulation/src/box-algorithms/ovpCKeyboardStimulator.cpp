@@ -208,7 +208,8 @@ namespace OpenViBEPlugins
 				IBoxIO * l_pBoxIO = getBoxAlgorithmContext()->getDynamicBoxContext();
 
 				IStimulationSet* l_pStimulationSet = m_oEncoder.getInputStimulationSet();
-					
+				l_pStimulationSet->clear();		// The encoder may retain the buffer from the previous round, clear it
+
 				for(size_t i=0 ; i<m_oStimulationToSend.size() ; i++)
 				{
 					l_pStimulationSet->appendStimulation(m_oStimulationToSend[i], l_ui64CurrentTime,0);

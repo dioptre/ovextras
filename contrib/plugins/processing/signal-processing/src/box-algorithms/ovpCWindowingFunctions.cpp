@@ -127,12 +127,14 @@ boolean CWindowingFunctions::process()
 			IMatrix* l_pInputMatrix = m_pSignalDecoder->getOutputMatrix();
 			IMatrix* l_pOutputMatrix = m_pSignalEncoder->getInputMatrix();
 
-
 			OpenViBEToolkit::Tools::MatrixManipulation::copy(*l_pOutputMatrix, *l_pInputMatrix);
 
 			m_pMatrixBuffer = l_pOutputMatrix->getBuffer();
 			m_ui64SamplesPerBuffer = l_pOutputMatrix->getDimensionSize(1);
 			m_ui64ChannelCount = l_pOutputMatrix->getDimensionSize(0);
+
+			const uint64 l_ui64SamplingRate = m_pSignalDecoder->getOutputSamplingRate();
+			m_pSignalEncoder->getInputSamplingRate() = l_ui64SamplingRate;
 
 			m_pSignalEncoder->encodeHeader();
 			l_pDynamicBoxContext->markOutputAsReadyToSend(i, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);

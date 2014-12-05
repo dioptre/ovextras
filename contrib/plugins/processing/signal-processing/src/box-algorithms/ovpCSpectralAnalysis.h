@@ -47,9 +47,8 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64LastChunkEndTime;
 
 			//codecs
-			OpenViBEToolkit::TSignalDecoder < CSpectralAnalysis >* m_pSignalDecoder;
-			std::vector<OpenViBEToolkit::TSpectrumEncoder < CSpectralAnalysis >* > m_vpSpectrumEncoder;
-
+			OpenViBEToolkit::TSignalDecoder< CSpectralAnalysis > m_oSignalDecoder;
+			OpenViBEToolkit::TSpectrumEncoder< CSpectralAnalysis > m_vSpectrumEncoder[4];
 
 			///number of channels
 			OpenViBE::uint32 m_ui32ChannelCount;
@@ -73,7 +72,7 @@ namespace OpenViBEPlugins
 		public:
 
 			virtual void release(void) { }
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Spectral analysis"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Spectral analysis (FFT)"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Guillaume Gibert"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INSERM"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Compute spectral analysis using Fast Fourier Transform"); }

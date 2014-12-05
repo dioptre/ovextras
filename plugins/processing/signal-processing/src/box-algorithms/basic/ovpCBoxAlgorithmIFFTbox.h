@@ -73,7 +73,7 @@ namespace OpenViBEPlugins
 		std::vector<itpp::Vec<double> > m_signalBuffer;
 		OpenViBE::uint32 m_bufferStartTime;
 		OpenViBE::uint32 m_bufferEndTime;
-		OpenViBE::uint32 m_samplesNumber;
+		OpenViBE::uint32 m_ui32SampleCount;
 		OpenViBE::uint32 m_channelsNumber;
 		};
 

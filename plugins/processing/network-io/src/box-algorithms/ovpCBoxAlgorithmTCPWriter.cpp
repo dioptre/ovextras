@@ -315,11 +315,12 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 			} 
 			else // stimulus
 			{
-				IStimulationSet* l_pStimulations = m_StimulationDecoder.getOutputStimulationSet();
+				const IStimulationSet* l_pStimulations = m_StimulationDecoder.getOutputStimulationSet();
 				for(uint32 j=0; j<l_pStimulations->getStimulationCount(); j++)
 				{
-					uint64 l_ui64StimulationCode = l_pStimulations->getStimulationIdentifier(j);
+					const uint64 l_ui64StimulationCode = l_pStimulations->getStimulationIdentifier(j);
 					// uint64 l_ui64StimulationDate = l_pStimulations->getStimulationDate(j);
+					this->getLogManager() << LogLevel_Trace << "Sending out " << l_ui64StimulationCode << "\n";
 
 					switch(m_ui64OutputStyle) {
 						case TCPWRITER_RAW:

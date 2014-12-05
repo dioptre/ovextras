@@ -46,12 +46,10 @@ boolean CSpectralAnalysis::initialize()
 	m_bRealPartSpectrum  = ((l_ui64SpectralComponents & OVP_TypeId_SpectralComponent_RealPart.toUInteger())>0);
 	m_bImagPartSpectrum  = ((l_ui64SpectralComponents & OVP_TypeId_SpectralComponent_ImaginaryPart.toUInteger())>0);
 
-
-
-	m_pSignalDecoder = new OpenViBEToolkit::TSignalDecoder < CSpectralAnalysis >(*this,0);
+	m_oSignalDecoder.initialize(*this,0);
 	for(uint32 i=0; i<4; i++)
 	{
-		m_vpSpectrumEncoder.push_back(new OpenViBEToolkit::TSpectrumEncoder < CSpectralAnalysis >(*this,i));
+		m_vSpectrumEncoder[i].initialize(*this,i);
 	}
 
 	return true;
@@ -59,14 +57,11 @@ boolean CSpectralAnalysis::initialize()
 
 boolean CSpectralAnalysis::uninitialize()
 {
-	m_pSignalDecoder->uninitialize();
-	delete m_pSignalDecoder;
-
 	for(uint32 i=0; i<4; i++)
 	{
-		m_vpSpectrumEncoder[i]->uninitialize();
+		m_vSpectrumEncoder[i].uninitialize();
 	}
-	m_vpSpectrumEncoder.clear();
+	m_oSignalDecoder.uninitialize();
 
 	return true;
 }
@@ -89,18 +84,32 @@ boolean CSpectralAnalysis::process()
 		m_ui64LastChunkStartTime=l_pDynamicContext->getInputChunkStartTime(0, chunkIdx);
 		m_ui64LastChunkEndTime=l_pDynamicContext->getInputChunkEndTime(0, chunkIdx);
 
-		m_pSignalDecoder->decode(chunkIdx);
+		m_oSignalDecoder.decode(chunkIdx);
 
-		if(m_pSignalDecoder->isHeaderReceived())//dealing with the signal header
+		if(m_oSignalDecoder.isHeaderReceived())//dealing with the signal header
 		{
+			//get signal info
+			m_ui32SampleCount = m_oSignalDecoder.getOutputMatrix()->getDimensionSize(1);
+			m_ui32ChannelCount = m_oSignalDecoder.getOutputMatrix()->getDimensionSize(0);
+			m_ui32SamplingRate = (uint32)m_oSignalDecoder.getOutputSamplingRate();
+
+			if(m_ui32SampleCount == 0) {
+				this->getLogManager() << LogLevel_Error << "Chunk size appears to be 0, not supported.\n";
+				return false;
+			}
+			if(m_ui32ChannelCount == 0) {
+				this->getLogManager() << LogLevel_Error << "Channel count appears to be 0, not supported.\n";
+				return false;
+			}
+			if(m_ui32SamplingRate == 0) {
+				this->getLogManager() << LogLevel_Error << "Sampling rate appears to be 0, not supported.\n";
+				return false;
+			}
+
 			//we need two matrices for the spectrum encoders, the Frequency bands and the one inherited form streamed matrix (see doc for details)
 			CMatrix* l_pFrequencyBands = new CMatrix();
 			CMatrix* l_pStreamedMatrix = new CMatrix();
 			l_pFrequencyBands->setDimensionCount(2);
-			//get signal info
-			m_ui32SampleCount = m_pSignalDecoder->getOutputMatrix()->getDimensionSize(1);
-			m_ui32ChannelCount = m_pSignalDecoder->getOutputMatrix()->getDimensionSize(0);
-			m_ui32SamplingRate = (uint32)m_pSignalDecoder->getOutputSamplingRate();
 
 			if (!m_bCoefComputed)
 			{
@@ -122,7 +131,7 @@ boolean CSpectralAnalysis::process()
 
 			m_ui32FrequencyBandCount = m_ui32HalfFFTSize;
 
-			OpenViBEToolkit::Tools::MatrixManipulation::copyDescription(*l_pStreamedMatrix, *m_pSignalDecoder->getOutputMatrix());
+			OpenViBEToolkit::Tools::MatrixManipulation::copyDescription(*l_pStreamedMatrix, *m_oSignalDecoder.getOutputMatrix());
 			l_pStreamedMatrix->setDimensionSize(1,m_ui32FrequencyBandCount);
 			l_pFrequencyBands->setDimensionSize(0,2);
 			l_pFrequencyBands->setDimensionSize(1,m_ui32FrequencyBandCount);
@@ -148,38 +157,38 @@ boolean CSpectralAnalysis::process()
 			for(uint32 i=0;i<4;i++)
 			{
 				//copy the information for each encoder
-				OpenViBEToolkit::Tools::MatrixManipulation::copy(*m_vpSpectrumEncoder[i]->getInputMinMaxFrequencyBands(),*l_pFrequencyBands);
-				OpenViBEToolkit::Tools::MatrixManipulation::copy(*m_vpSpectrumEncoder[i]->getInputMatrix(),*l_pStreamedMatrix);
+				OpenViBEToolkit::Tools::MatrixManipulation::copy(*m_vSpectrumEncoder[i].getInputMinMaxFrequencyBands(),*l_pFrequencyBands);
+				OpenViBEToolkit::Tools::MatrixManipulation::copy(*m_vSpectrumEncoder[i].getInputMatrix(),*l_pStreamedMatrix);
 			}
 
 			if (m_bAmplitudeSpectrum)
 			{
-				m_vpSpectrumEncoder[0]->encodeHeader();
+				m_vSpectrumEncoder[0].encodeHeader();
 				l_pDynamicContext->markOutputAsReadyToSend(0,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			}
 			if (m_bPhaseSpectrum)
 			{
-				m_vpSpectrumEncoder[1]->encodeHeader();
+				m_vSpectrumEncoder[1].encodeHeader();
 				l_pDynamicContext->markOutputAsReadyToSend(1,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			}
 			if (m_bRealPartSpectrum)
 			{
-				m_vpSpectrumEncoder[2]->encodeHeader();
+				m_vSpectrumEncoder[2].encodeHeader();
 				l_pDynamicContext->markOutputAsReadyToSend(2,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			}
 			if (m_bImagPartSpectrum)
 			{
-				m_vpSpectrumEncoder[3]->encodeHeader();
+				m_vSpectrumEncoder[3].encodeHeader();
 				l_pDynamicContext->markOutputAsReadyToSend(3,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			}
 
 			delete l_pFrequencyBands;
 			delete l_pStreamedMatrix;
 		}
-		if(m_pSignalDecoder->isBufferReceived())
+		if(m_oSignalDecoder.isBufferReceived())
 		{
 			//get input buffer
-			float64* l_pBuffer = m_pSignalDecoder->getOutputMatrix()->getBuffer();
+			const float64* l_pBuffer = m_oSignalDecoder.getOutputMatrix()->getBuffer();
 			//do the processing
 			vec x(m_ui32SampleCount);
 			cvec y(m_ui32SampleCount);
@@ -202,46 +211,46 @@ boolean CSpectralAnalysis::process()
 
 			if (m_bAmplitudeSpectrum)
 			{
-				IMatrix* l_pMatrix = m_vpSpectrumEncoder[0]->getInputMatrix();
+				IMatrix* l_pMatrix = m_vSpectrumEncoder[0].getInputMatrix();
 				float64* l_pBuffer = l_pMatrix->getBuffer();
 				for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
 				{
 					*(l_pBuffer+i) = sqrt(real(z[(int)i])*real(z[(int)i])+ imag(z[(int)i])*imag(z[(int)i]));
 				}
-				m_vpSpectrumEncoder[0]->encodeBuffer();
+				m_vSpectrumEncoder[0].encodeBuffer();
 				l_pDynamicContext->markOutputAsReadyToSend(0,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			}
 			if (m_bPhaseSpectrum)
 			{
-				IMatrix* l_pMatrix = m_vpSpectrumEncoder[1]->getInputMatrix();
+				IMatrix* l_pMatrix = m_vSpectrumEncoder[1].getInputMatrix();
 				float64* l_pBuffer = l_pMatrix->getBuffer();
 				for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
 				{
 					*(l_pBuffer+i) =  imag(z[(int)i])/real(z[(int)i]);
 				}
-				m_vpSpectrumEncoder[1]->encodeBuffer();
+				m_vSpectrumEncoder[1].encodeBuffer();
 				l_pDynamicContext->markOutputAsReadyToSend(1,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			}
 			if (m_bRealPartSpectrum)
 			{
-				IMatrix* l_pMatrix = m_vpSpectrumEncoder[2]->getInputMatrix();
+				IMatrix* l_pMatrix = m_vSpectrumEncoder[2].getInputMatrix();
 				float64* l_pBuffer = l_pMatrix->getBuffer();
 				for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
 				{
 					*(l_pBuffer+i) = real(z[(int)i]);
 				}
-				m_vpSpectrumEncoder[2]->encodeBuffer();
+				m_vSpectrumEncoder[2].encodeBuffer();
 				l_pDynamicContext->markOutputAsReadyToSend(2,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			}
 			if (m_bImagPartSpectrum)
 			{
-				IMatrix* l_pMatrix = m_vpSpectrumEncoder[3]->getInputMatrix();
+				IMatrix* l_pMatrix = m_vSpectrumEncoder[3].getInputMatrix();
 				float64* l_pBuffer = l_pMatrix->getBuffer();
 				for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
 				{
 					*(l_pBuffer+i) = imag(z[(int)i]);
 				}
-				m_vpSpectrumEncoder[3]->encodeBuffer();
+				m_vSpectrumEncoder[3].encodeBuffer();
 				l_pDynamicContext->markOutputAsReadyToSend(3,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			}
 		}
