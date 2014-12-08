@@ -10,7 +10,10 @@
 
 
 namespace{
-	//This class is used to set up the restriction of a stream type for input and output.
+	//This class is used to set up the restriction of a stream type for input and output. Each box comes with a
+	// decriptor that call functions describe in IBoxProto for intialize the CBox object.
+	// This implementation is derived from CBoxProto, to benefit from
+	// the implementation of the stream restriction mecanism but neutralizes all other initialization function.
 	class CBoxProtoRestriction : public OpenViBE::Kernel::CBoxProto
 	{
 	public:
@@ -162,6 +165,7 @@ boolean CBox::setAlgorithmClassIdentifier(
 		}
 	}
 
+	//We use the neutralized version of CBoxProto to just initialize the stream restriction mecanism
 	CBoxProtoRestriction oTempProto(this->getKernelContext(), *this);
 	m_pBoxAlgorithmDescriptor->getBoxPrototype(oTempProto);
 
@@ -720,7 +724,13 @@ boolean CBox::setSupportTypeFromAlgorithmIdentifier(const CIdentifier &rTypeIden
 
 	const IPluginObjectDesc* l_pPluginObjectDescriptor=getKernelContext().getPluginManager().getPluginObjectDescCreating(rTypeIdentifier);
 	const IBoxAlgorithmDesc *l_pBoxAlgorithmDescriptor=dynamic_cast<const IBoxAlgorithmDesc*>(l_pPluginObjectDescriptor);
+	if(l_pBoxAlgorithmDescriptor == NULL)
+	{
+		this->getLogManager() << LogLevel_Error << "Tried to initialize with an unregistered algorithm\n";
+		return false;
+	}
 
+	//We use the neutralized version of CBoxProto to just initialize the stream restriction mecanism
 	CBoxProtoRestriction oTempProto(this->getKernelContext(), *this);
 	l_pBoxAlgorithmDescriptor->getBoxPrototype(oTempProto);
 	return true;

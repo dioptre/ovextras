@@ -271,7 +271,6 @@ boolean CAlgorithmScenarioImporter::process(void)
 			// it is important to set box algorithm at
 			// last so the box listener is never called
 			l_pBox->setAlgorithmClassIdentifier(b->m_oAlgorithmClassIdentifier);
-			l_pBox->setSupportTypeFromAlgorithmIdentifier(b->m_oAlgorithmClassIdentifier);
 		}
 		l_vBoxIdMapping[b->m_oIdentifier]=l_oNewBoxIdentifier;
 	}
