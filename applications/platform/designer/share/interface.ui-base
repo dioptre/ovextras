@@ -282,14 +282,13 @@ Contributions also from :
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="box_configuration-button_apply">
-                <property name="label">gtk-apply</property>
+              <object class="GtkButton" id="box_configuration-button_cancel">
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <accelerator key="KP_Enter" signal="clicked"/>
-                <accelerator key="Return" signal="clicked"/>
+                <accelerator key="Escape" signal="clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -298,13 +297,14 @@ Contributions also from :
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="box_configuration-button_cancel">
-                <property name="label">gtk-cancel</property>
+              <object class="GtkButton" id="box_configuration-button_apply">
+                <property name="label">gtk-apply</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <accelerator key="Escape" signal="clicked"/>
+                <accelerator key="KP_Enter" signal="clicked"/>
+                <accelerator key="Return" signal="clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -953,6 +953,173 @@ Contributions also from :
       <action-widget response="0">dialog_error_popup-button_ok</action-widget>
     </action-widgets>
   </object>
+
+
+
+  <object class="GtkDialog" id="dialog_init_error_popup">
+    <property name="can_focus">False</property>
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes"> </property>
+    <property name="window_position">center-on-parent</property>
+    <property name="type_hint">dialog</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="dialog_init-vbox21">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog_init-action_area21">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="dialog_init_error_popup-button_continue">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <child>
+                  <object class="GtkHBox" id="init_error_hbox5">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImage" id="init_error_image3">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="stock">gtk-media-play</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="init_error_label3">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Continue</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="dialog_init_error_popup-button_stop">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <accelerator key="Return" signal="clicked"/>
+                <accelerator key="KP_Enter" signal="clicked"/>
+                <child>
+                  <object class="GtkHBox" id="init_error_hbox6">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImage" id="init_error_image4">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="stock">gtk-stop</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="init_error_label4">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Stop</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTable" id="init_error_table5">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="n_rows">1</property>
+            <property name="n_columns">2</property>
+            <property name="column_spacing">8</property>
+            <property name="row_spacing">8</property>
+            <child>
+              <object class="GtkLabel" id="init_error_unsaved_scenario_global-label_first_text1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">&lt;b&gt;One or more errors have occured during the initialization of the scenario.
+Do you want to continue the execution?&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+                <property name="justify">center</property>
+                <property name="wrap">True</property>
+              </object>
+              <packing>
+              <property name="left_attach">1</property>
+              <property name="right_attach">2</property>
+              <property name="top_attach">0</property>
+              <property name="bottom_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkImage" id="init_error_unsaved_scenario_global-image1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="stock">gtk-dialog-warning</property>
+                <property name="icon-size">6</property>
+              </object>
+              <packing>
+                <property name="bottom_attach">1</property>
+                <property name="x_options"></property>
+                <property name="y_options"></property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="1">dialog_init_error_popup-button_continue</action-widget>
+      <action-widget response="0">dialog_init_error_popup-button_stop</action-widget>
+    </action-widgets>
+  </object>
+
+
+
   <object class="GtkDialog" id="dialog_running_scenario">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -2027,7 +2194,6 @@ Contributions also from :
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">dummy</col>
       </row>
     </data>
   </object>
@@ -2038,7 +2204,7 @@ Contributions also from :
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">dummy</col>
+
       </row>
     </data>
   </object>
@@ -2049,7 +2215,7 @@ Contributions also from :
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">dummy</col>
+
       </row>
     </data>
   </object>
@@ -3255,6 +3421,28 @@ on Warnings and Errors</property>
                         <property name="homogeneous">True</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkToolItem" id="Init_alert">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkCheckButton" id="openvibe-messages_init_alert">
+                            <property name="label" translatable="yes">Show pop-up
+on initilization failure?</property>
+                            <property name="visible">True</property>
+                            <property name="active">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="xalign">0.5</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="homogeneous">True</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -3399,6 +3587,7 @@ on Warnings and Errors</property>
                     <property name="position">5</property>
                   </packing>
                 </child>
+
               </object>
             </child>
           </object>

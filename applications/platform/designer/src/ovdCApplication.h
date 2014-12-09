@@ -199,6 +199,8 @@ namespace OpenViBEDesigner
 		OpenViBE::boolean m_bIsQuitting;
 		OpenViBE::int32 m_i32CurrentScenarioPage;
 
+		::GtkToggleButton* m_pInitAlert;
+
 		std::vector < OpenViBEDesigner::CInterfacedScenario* > m_vInterfacedScenario;
 
 		// Keeps track of the used playing mode so the playback can be restarted in the same mode.

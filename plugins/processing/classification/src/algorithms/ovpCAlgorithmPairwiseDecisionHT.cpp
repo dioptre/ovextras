@@ -35,6 +35,11 @@ boolean CAlgorithmPairwiseDecisionHT::uninitialize()
 	return true;
 }
 
+boolean CAlgorithmPairwiseDecisionHT::parametrize()
+{
+	return true;
+}
+
 
 
 boolean CAlgorithmPairwiseDecisionHT::compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector)

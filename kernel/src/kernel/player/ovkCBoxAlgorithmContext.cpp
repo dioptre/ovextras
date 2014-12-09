@@ -99,6 +99,10 @@ namespace OpenViBE
 //lmlm//
 				virtual __BridgeBindFunc2__((*m_pBox), boolean, getSettingMod, const, const uint32, ui32SettingIndex, boolean&, rValue);
 				virtual __BridgeImplFunc1__((*m_pBox), uint32*, getModifiableSettings, const , return NULL, uint32&, rCount);
+
+
+				virtual __BridgeImplFunc0__((*m_pBox), void, storeState, , return);
+				virtual __BridgeImplFunc0__((*m_pBox), void, restoreState, , return);
 #if 0
 				virtual __BridgeBindFunc2__((*m_pBox), boolean, getSettingValue, const, const uint32, ui32SettingIndex, CString&, rValue);
 #else

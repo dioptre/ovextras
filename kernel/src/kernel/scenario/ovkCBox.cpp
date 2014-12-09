@@ -62,10 +62,12 @@ CBox::CBox(const IKernelContext& rKernelContext, CScenario& rOwnerScenario)
 	,m_pBoxListener(NULL)
 	,m_bIsNotifyingDescriptor(false)
 	,m_bIsNotificationActive(true)
+	,m_bIsObserverNotificationActive(true)
 	,m_oIdentifier(OV_UndefinedIdentifier)
 	,m_oAlgorithmClassIdentifier(OV_UndefinedIdentifier)
 	,m_oProcessingUnitIdentifier(OV_UndefinedIdentifier)
 	,m_sName("unnamed")
+	,m_pSavedState(NULL)
 {
 	if(this->hasAttribute(OV_AttributeId_Box_Muted))
 	{
@@ -80,6 +82,11 @@ CBox::~CBox(void)
 		CBoxListenerContext l_oContext(this->getKernelContext(), *this, 0xffffffff);
 		m_pBoxListener->uninitialize(l_oContext);
 		m_pBoxAlgorithmDescriptor->releaseBoxListener(m_pBoxListener);
+	}
+
+	if(m_pSavedState)
+	{
+		delete m_pSavedState;
 	}
 }
 
@@ -240,6 +247,7 @@ boolean CBox::initializeFromExistingBox(
 	uint32 i;
 
 	this->disableNotification();
+	m_bIsObserverNotificationActive = false;
 
 	clear();
 	setName(rExistingBox.getName());
@@ -321,6 +329,9 @@ boolean CBox::initializeFromExistingBox(
 	this->enableNotification();
 
 	this->notify(BoxModification_Initialized);
+
+	m_bIsObserverNotificationActive = true;
+	this->notifySettingChange(SettingsAllChange);
 
 	return true;
 }
@@ -813,6 +824,7 @@ boolean CBox::addSetting(const CString& sName,
 	this->getLogManager() << LogLevel_Debug << "Pushed '" << m_vSetting[l_i32InsertLocation].m_sName << "' : '" << m_vSetting[l_i32InsertLocation].m_sValue << "' to slot " << l_i32InsertLocation << " with the array size now " << static_cast<int32>(m_vSetting.size()) << "\n";
 
 	this->notify(BoxModification_SettingAdded, l_i32InsertLocation);
+	this->notifySettingChange(SettingAdd, l_i32InsertLocation);
 
 	return true;
 }
@@ -849,6 +861,7 @@ boolean CBox::removeSetting(
 	}
 
 	this->notify(BoxModification_SettingRemoved, ui32SettingIndex);
+	this->notifySettingChange(SettingDelete, ui32SettingIndex);
 
 	return true;
 }
@@ -923,6 +936,7 @@ boolean CBox::setSettingType(
 	m_vSetting[ui32SettingIndex].m_oTypeIdentifier=rTypeIdentifier;
 
 	this->notify(BoxModification_SettingTypeChanged, ui32SettingIndex);
+	this->notifySettingChange(SettingChange, ui32SettingIndex);
 
 	return true;
 }
@@ -938,6 +952,7 @@ boolean CBox::setSettingName(
 	m_vSetting[ui32SettingIndex].m_sName=rName;
 
 	this->notify(BoxModification_SettingNameChanged, ui32SettingIndex);
+	this->notifySettingChange(SettingChange, ui32SettingIndex);
 
 	return true;
 }
@@ -968,8 +983,23 @@ boolean CBox::setSettingValue(
 	m_vSetting[ui32SettingIndex].m_sValue=rValue;
 
 	this->notify(BoxModification_SettingValueChanged, ui32SettingIndex);
+	this->notifySettingChange(SettingValueUpdate, ui32SettingIndex);
 
 	return true;
+}
+
+void CBox::notifySettingChange(BoxEventMessageType eType, int32 i32FirstIndex, int32 i32SecondIndex)
+{
+	if( m_bIsObserverNotificationActive)
+	{
+		BoxEventMessage l_oEvent;
+		l_oEvent.m_eType = eType;
+		l_oEvent.m_i32FirstIndex = i32FirstIndex;
+		l_oEvent.m_i32SecondIndex = i32SecondIndex;
+
+		this->setChanged();
+		this->notifyObservers(&l_oEvent);
+	}
 }
 
 //*
@@ -1029,6 +1059,13 @@ uint32* CBox::getModifiableSettings(uint32& rCount)const
 
 void CBox::clear(void)
 {
+	if(m_pBoxAlgorithmDescriptor && m_pBoxListener)
+	{
+		CBoxListenerContext l_oContext(this->getKernelContext(), *this, 0xffffffff);
+		m_pBoxListener->uninitialize(l_oContext);
+		m_pBoxAlgorithmDescriptor->releaseBoxListener(m_pBoxListener);
+	}
+
 	m_pBoxAlgorithmDescriptor=NULL;
 	m_oAlgorithmClassIdentifier=OV_UndefinedIdentifier;
 	m_sName="";
@@ -1297,5 +1334,21 @@ boolean CBox::setMessageOutputName(
 
 	return true;
 }
+
+void CBox::storeState(void)
+{
+	if(m_pSavedState != NULL)
+	{
+		delete m_pSavedState;
+	}
+	m_pSavedState = new CBox(getKernelContext(), m_rOwnerScenario);
+	m_pSavedState->initializeFromExistingBox(*this);
+}
+
+void CBox::restoreState(void)
+{
+	this->initializeFromExistingBox(*m_pSavedState);
+}
+
 //
 

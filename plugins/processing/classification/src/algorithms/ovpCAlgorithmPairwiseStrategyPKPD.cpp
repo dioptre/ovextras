@@ -31,6 +31,11 @@ boolean CAlgorithmPairwiseStrategyPKPD::uninitialize()
 	return true;
 }
 
+boolean CAlgorithmPairwiseStrategyPKPD::parametrize()
+{
+	return true;
+}
+
 
 
 boolean CAlgorithmPairwiseStrategyPKPD::compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector)
