@@ -1,6 +1,6 @@
 #include "ovtkCSignalTrial.hpp"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <openvibe/ovITimeArithmetics.h>
 

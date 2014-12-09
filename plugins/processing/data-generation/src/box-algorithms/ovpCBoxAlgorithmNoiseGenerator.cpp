@@ -6,7 +6,7 @@
 #include <cstdio>
 
 #include <openvibe/ovITimeArithmetics.h>
-#include <system/CMath.h>
+#include <system/ovCMath.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;

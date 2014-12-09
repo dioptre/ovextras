@@ -1,6 +1,6 @@
 #include "ovpCAlgorithmBrainampFileReader.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 #include <sstream>
 #include <cstdlib>
 

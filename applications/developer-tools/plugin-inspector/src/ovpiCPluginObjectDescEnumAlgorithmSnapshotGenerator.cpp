@@ -1,6 +1,6 @@
 #include "ovpiCPluginObjectDescEnumAlgorithmSnapshotGenerator.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <iostream>
 #include <fstream>

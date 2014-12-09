@@ -11,7 +11,7 @@
 #include <ebml/TWriterCallbackProxy.h>
 #include <ebml/IWriter.h>
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <fstream>
 #include <string>

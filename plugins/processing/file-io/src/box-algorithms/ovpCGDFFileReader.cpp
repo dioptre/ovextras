@@ -4,7 +4,7 @@
 
 #include <openvibe/ovITimeArithmetics.h>
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 #include <cmath>
 
 #include <iostream>

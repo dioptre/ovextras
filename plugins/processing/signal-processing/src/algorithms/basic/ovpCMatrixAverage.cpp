@@ -1,6 +1,6 @@
 #include "ovpCMatrixAverage.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 #include <cmath>
 
 using namespace OpenViBE;

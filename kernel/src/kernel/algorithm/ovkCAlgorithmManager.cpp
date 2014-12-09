@@ -2,7 +2,7 @@
 #include "ovkCAlgorithmProxy.h"
 #include "ovkCAlgorithm.h"
 
-#include <system/CMath.h>
+#include <system/ovCMath.h>
 
 using namespace OpenViBE;
 using namespace Kernel;

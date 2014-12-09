@@ -3,7 +3,7 @@
 
 #include "../ovkTKernelObject.h"
 
-#include <system/CChrono.h>
+#include <system/ovCChrono.h>
 
 #include <map>
 #include <list>

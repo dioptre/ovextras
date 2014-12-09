@@ -2,7 +2,7 @@
 
 #include "ovpCBoxAlgorithmMatlabScripting.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 #include <iostream>
 #include <stdio.h>
 #include <sstream>

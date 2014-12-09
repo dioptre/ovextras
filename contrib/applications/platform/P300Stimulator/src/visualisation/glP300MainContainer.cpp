@@ -3,7 +3,7 @@
 #include "glGButton.h"
 #include "glGSymbol.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include "../handlers/ovexP300KeyboardHandler.h"
 

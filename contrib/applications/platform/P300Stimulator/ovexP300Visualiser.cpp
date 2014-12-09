@@ -1,7 +1,7 @@
 #include "ovexP300Visualiser.h"
 
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
-#include <system/Time.h>
+#include <system/ovCTime.h>
 #include <GLFW/glfw3.h>
 
 #include <openvibe/ovITimeArithmetics.h>//if debug?

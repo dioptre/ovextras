@@ -2,7 +2,7 @@
 
 #include "ovpCBoxAlgorithmCSPSpatialFilterTrainer.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <complex>
 #include <sstream>

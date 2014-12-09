@@ -25,8 +25,8 @@
 #include "neuroelectrics-enobio3g/ovasCDriverEnobio3G.h"
 #include "tmsi/ovasCDriverTMSi.h"
 
-#include <system/Memory.h>
-#include <system/Time.h>
+#include <system/ovCMemory.h>
+#include <system/ovCTime.h>
 #include <limits>
 
 #include <toolkit/ovtk_all.h>

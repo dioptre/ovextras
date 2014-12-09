@@ -5,7 +5,7 @@
 #include "ovkCSimulatedBox.h"
 #include "ovkCPlayer.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <xml/IReader.h>
 

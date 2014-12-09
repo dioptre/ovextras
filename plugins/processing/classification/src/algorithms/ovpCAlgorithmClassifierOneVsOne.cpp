@@ -10,7 +10,7 @@
 #include <string>
 #include <utility>
 #include <iostream>
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 namespace{
 	const char* const c_sTypeNodeName = "OneVsOne";

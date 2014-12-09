@@ -9,7 +9,7 @@
 
 #include <stdexcept>
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;

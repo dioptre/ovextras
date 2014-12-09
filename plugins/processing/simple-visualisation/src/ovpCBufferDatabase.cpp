@@ -1,6 +1,6 @@
 #include "ovpCBufferDatabase.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <algorithm>
 

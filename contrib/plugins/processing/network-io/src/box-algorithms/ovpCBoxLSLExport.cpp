@@ -3,7 +3,7 @@
 
 #include "ovpCBoxLSLExport.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <openvibe/ovITimeArithmetics.h>
 

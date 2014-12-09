@@ -5,9 +5,9 @@
 
 #include "edk.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <cstdlib>
 #include <cstring>

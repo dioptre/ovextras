@@ -7,7 +7,7 @@
 #include <iostream>
 #include <cmath>
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 #include <xml/IXMLHandler.h>
 
 #include <Eigen/Eigenvalues>

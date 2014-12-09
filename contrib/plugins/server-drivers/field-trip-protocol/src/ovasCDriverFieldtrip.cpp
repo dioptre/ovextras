@@ -17,7 +17,7 @@
 #include "fieldtrip/dmarequest.c"
 #include "fieldtrip/clientrequest.c"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 //#include "GetCpuTime.h"
 
 using namespace OpenViBEAcquisitionServer;

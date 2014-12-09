@@ -1,5 +1,5 @@
-#ifndef __System_Math_H__
-#define __System_Math_H__
+#ifndef __System_ovCMath_H__
+#define __System_ovCMath_H__
 
 #include "defines.h"
 
@@ -34,4 +34,4 @@ namespace System
 	};
 };
 
-#endif // __System_Math_H__
+#endif // __System_ovCMath_H__

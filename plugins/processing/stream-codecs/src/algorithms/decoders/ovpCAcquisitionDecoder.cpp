@@ -1,6 +1,6 @@
 #include "ovpCAcquisitionDecoder.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;

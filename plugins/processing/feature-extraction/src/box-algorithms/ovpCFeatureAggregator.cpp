@@ -1,6 +1,6 @@
 #include "ovpCFeatureAggregator.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <iostream>
 #include <cstdio>

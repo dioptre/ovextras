@@ -12,7 +12,7 @@
 #include "ovasIHeader.h"
 #include "mCBridgeBioSemiActiveTwo.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 
 #include <cstring>

@@ -6,8 +6,8 @@
 
 #include <ovp_global_defines.h>
 
-#include <system/Memory.h>
-#include <system/Time.h>
+#include <system/ovCMemory.h>
+#include <system/ovCTime.h>
 
 #include <fstream>
 #include <sstream>

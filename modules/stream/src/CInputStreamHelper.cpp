@@ -1,5 +1,5 @@
 #include "CInputStreamHelper.hpp"
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 using namespace Stream;
 

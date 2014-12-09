@@ -1,5 +1,5 @@
-#include "CChrono.h"
-#include "Time.h"
+#include "ovCChrono.h"
+#include "ovCTime.h"
 
 using namespace System;
 

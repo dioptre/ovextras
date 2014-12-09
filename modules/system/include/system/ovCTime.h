@@ -1,5 +1,5 @@
-#ifndef __Time_H__
-#define __Time_H__
+#ifndef __System_ovCTime_H__
+#define __System_ovCTime_H__
 
 #include "defines.h"
 
@@ -22,4 +22,4 @@ namespace System
 	};
 };
 
-#endif // __Time_H__
+#endif // __System_ovCTime_H__

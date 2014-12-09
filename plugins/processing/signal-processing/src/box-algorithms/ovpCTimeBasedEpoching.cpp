@@ -1,6 +1,6 @@
 #include "ovpCTimeBasedEpoching.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <iostream>
 

@@ -1,5 +1,5 @@
-#ifndef __System_Memory_H__
-#define __System_Memory_H__
+#ifndef __System_ovCMemory_H__
+#define __System_ovCMemory_H__
 
 #include "defines.h"
 
@@ -58,4 +58,4 @@ namespace System
 	};
 };
 
-#endif // __System_Memory_H__
+#endif // __System_ovCMemory_H__

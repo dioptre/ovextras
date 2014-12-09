@@ -1,5 +1,5 @@
-#ifndef __CChrono_H__
-#define __CChrono_H__
+#ifndef __System_ovCChrono_H__
+#define __System_ovCChrono_H__
 
 #include "defines.h"
 
@@ -40,4 +40,4 @@ namespace System
 	};
 };
 
-#endif // __CChrono_H__
+#endif // __System_ovCChrono_H__

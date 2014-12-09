@@ -1,4 +1,4 @@
-#include "Memory.h"
+#include "ovCMemory.h"
 
 #include <cstring>
 

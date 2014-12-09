@@ -1,7 +1,7 @@
 #include "ovexP300CStimulator.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "../ova_defines.h"
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <openvibe/ovITimeArithmetics.h>
 

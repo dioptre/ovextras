@@ -1,6 +1,6 @@
 #include "ovexP300RipRandSequenceGenerator.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;

@@ -7,7 +7,7 @@
 
 #include "../configuration/ovkCConfigurationManager.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <xml/IReader.h>
 

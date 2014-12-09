@@ -19,7 +19,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstring>
-#include <system/Time.h>
+#include <system/ovCTime.h>
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;

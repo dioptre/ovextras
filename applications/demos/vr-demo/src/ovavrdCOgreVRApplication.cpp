@@ -3,7 +3,7 @@
 
 #include "ovavrdCOgreVRApplication.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 #include <fs/Files.h>
 
 #include <iostream>

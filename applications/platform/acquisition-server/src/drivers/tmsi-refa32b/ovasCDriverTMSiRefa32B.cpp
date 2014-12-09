@@ -10,7 +10,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstring>
-#include <system/Time.h>
+#include <system/ovCTime.h>
 #include "ovasCConfigurationTMSIRefa32B.h"
 #include <windows.h>
 

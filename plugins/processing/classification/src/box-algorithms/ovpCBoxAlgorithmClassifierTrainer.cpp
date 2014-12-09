@@ -1,6 +1,6 @@
 #include "ovpCBoxAlgorithmClassifierTrainer.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <fstream>
 #include <sstream>

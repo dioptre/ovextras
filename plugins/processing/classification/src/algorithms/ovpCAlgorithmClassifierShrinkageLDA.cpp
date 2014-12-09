@@ -6,7 +6,7 @@
 #include <sstream>
 #include <iostream>
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 #include <xml/IXMLHandler.h>
 
 #include <Eigen/Eigenvalues>
