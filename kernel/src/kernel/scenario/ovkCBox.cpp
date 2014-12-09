@@ -7,10 +7,50 @@
 
 #include <openvibe/ov_defines.h>
 
+
+
+namespace{
+	//This class is used to set up the restriction of a stream type for input and output. Each box comes with a
+	// decriptor that call functions describe in IBoxProto for intialize the CBox object.
+	// This implementation is derived from CBoxProto, to benefit from
+	// the implementation of the stream restriction mecanism but neutralizes all other initialization function.
+	class CBoxProtoRestriction : public OpenViBE::Kernel::CBoxProto
+	{
+	public:
+
+		CBoxProtoRestriction(const OpenViBE::Kernel::IKernelContext& rKernelContext, OpenViBE::Kernel::IBox& rBox):
+			CBoxProto(rKernelContext, rBox){}
+
+		virtual OpenViBE::boolean addInput(
+			const OpenViBE::CString& sName,
+			const OpenViBE::CIdentifier& rTypeIdentifier){return true;}
+
+		virtual OpenViBE::boolean addMessageInput(
+			const OpenViBE::CString& sName){return true;}
+		virtual OpenViBE::boolean addMessageOutput(
+			const OpenViBE::CString& sName){return true;}
+
+		virtual OpenViBE::boolean addOutput(
+			const OpenViBE::CString& sName,
+			const OpenViBE::CIdentifier& rTypeIdentifier){return true;}
+
+		virtual OpenViBE::boolean addSetting(
+			const OpenViBE::CString& sName,
+			const OpenViBE::CIdentifier& rTypeIdentifier,
+			const OpenViBE::CString& sDefaultValue,
+			const OpenViBE::boolean bModifiable = false){return true;}
+
+		virtual OpenViBE::boolean addFlag(
+			const OpenViBE::Kernel::EBoxFlag eBoxFlag){return true;}
+	};
+}
+
+
 using namespace std;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
+
 
 //___________________________________________________________________//
 //                                                                   //
@@ -124,6 +164,10 @@ boolean CBox::setAlgorithmClassIdentifier(
 			m_pBoxListener->initialize(l_oContext);
 		}
 	}
+
+	//We use the neutralized version of CBoxProto to just initialize the stream restriction mecanism
+	CBoxProtoRestriction oTempProto(this->getKernelContext(), *this);
+	m_pBoxAlgorithmDescriptor->getBoxPrototype(oTempProto);
 
 	this->notify(BoxModification_AlgorithmClassIdentifierChanged);
 
@@ -255,6 +299,23 @@ boolean CBox::initializeFromExistingBox(
 	{
 		addAttribute(l_oIdentifier, rExistingBox.getAttributeValue(l_oIdentifier));
 		l_oIdentifier=rExistingBox.getNextAttributeIdentifier(l_oIdentifier);
+	}
+
+	CIdentifier l_oStreamTypeIdentifier = OV_UndefinedIdentifier;
+	while((l_oStreamTypeIdentifier=this->getKernelContext().getTypeManager().getNextTypeIdentifier(l_oStreamTypeIdentifier))!=OV_UndefinedIdentifier)
+	{
+		if(this->getKernelContext().getTypeManager().isStream(l_oStreamTypeIdentifier))
+		{
+			//First check if it is a stream
+			if(rExistingBox.hasInputSupport(l_oStreamTypeIdentifier))
+			{
+				this->addInputSupport(l_oStreamTypeIdentifier);
+			}
+			if(rExistingBox.hasOutputSupport(l_oStreamTypeIdentifier))
+			{
+				this->addOutputSupport(l_oStreamTypeIdentifier);
+			}
+		}
 	}
 
 	this->enableNotification();
@@ -604,7 +665,7 @@ boolean CBox::addInputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdenti
 	return true;
 }
 
-boolean CBox::hasInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+boolean CBox::hasInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier) const
 {
 	//If there is no type specify, we allow all
 	if(m_vSupportInputType.empty())
@@ -646,7 +707,7 @@ boolean CBox::addOutputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdent
 	return true;
 }
 
-boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier) const
 {
 	//If there is no type specify, we allow all
 	if(m_vSupportOutputType.empty())
@@ -658,6 +719,23 @@ boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
 			return true;
 	}
 	return false;
+}
+
+boolean CBox::setSupportTypeFromAlgorithmIdentifier(const CIdentifier &rTypeIdentifier)
+{
+
+	const IPluginObjectDesc* l_pPluginObjectDescriptor=getKernelContext().getPluginManager().getPluginObjectDescCreating(rTypeIdentifier);
+	const IBoxAlgorithmDesc *l_pBoxAlgorithmDescriptor=dynamic_cast<const IBoxAlgorithmDesc*>(l_pPluginObjectDescriptor);
+	if(l_pBoxAlgorithmDescriptor == NULL)
+	{
+		this->getLogManager() << LogLevel_Error << "Tried to initialize with an unregistered algorithm\n";
+		return false;
+	}
+
+	//We use the neutralized version of CBoxProto to just initialize the stream restriction mecanism
+	CBoxProtoRestriction oTempProto(this->getKernelContext(), *this);
+	l_pBoxAlgorithmDescriptor->getBoxPrototype(oTempProto);
+	return true;
 }
 
 //___________________________________________________________________//

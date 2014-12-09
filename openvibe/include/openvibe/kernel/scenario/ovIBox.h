@@ -460,7 +460,7 @@ namespace OpenViBE
 			  * \return \e false if type isn't support.
 			  */
 			virtual OpenViBE::boolean hasInputSupport(
-					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+					const OpenViBE::CIdentifier& rTypeIdentifier) const =0;
 
 			/**
 			  * \brief Marks this type as supported by outputs
@@ -488,8 +488,19 @@ namespace OpenViBE
 			  * \return \e false if type isn't support.
 			  */
 			virtual OpenViBE::boolean hasOutputSupport(
-					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+					const OpenViBE::CIdentifier& rTypeIdentifier) const =0;
 			//@}
+
+			/**
+			 * \brief Set the supported stream type for input and output according
+			 * to the restriction of the algorithm whose identifier is given in parameter.
+			 * \param rTypeIdentifier [in] : identifier of the algorithm
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 * \note The supported stream list is not reset.
+			 */
+			virtual OpenViBE::boolean setSupportTypeFromAlgorithmIdentifier(
+					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
 
 			/** \name Message input management */
 			//@{

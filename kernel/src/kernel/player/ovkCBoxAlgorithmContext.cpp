@@ -82,13 +82,14 @@ namespace OpenViBE
 				virtual __BridgeImplFunc2__((*m_pBox), boolean, setOutputName, , return false, const uint32, ui32OutputIndex, const CString&, rName);
 
 				virtual __BridgeImplFunc5__((*m_pBox), boolean, addSetting, , return false, const CString&, sName, const CIdentifier&, rTypeIdentifier, const CString&, sDefaultValue, const int32, i32Index, const boolean, bModifiability);
-				
+
 				virtual __BridgeImplFunc1__((*m_pBox), boolean, addInputSupport, , return false, const CIdentifier&, rTypeIdentifier);
 				virtual __BridgeImplFunc1__((*m_pBox), boolean, addInputAndDerivedSupport, , return false, const CIdentifier&, rTypeIdentifier);
-				virtual __BridgeImplFunc1__((*m_pBox), boolean, hasInputSupport, , return false, const CIdentifier&, rTypeIdentifier);
+				virtual __BridgeImplFunc1__((*m_pBox), boolean, hasInputSupport, const, return false, const CIdentifier&, rTypeIdentifier);
 				virtual __BridgeImplFunc1__((*m_pBox), boolean, addOutputSupport, , return false, const CIdentifier&, rTypeIdentifier);
 				virtual __BridgeImplFunc1__((*m_pBox), boolean, addOutputAndDerivedSupport, , return false, const CIdentifier&, rTypeIdentifier);
-				virtual __BridgeImplFunc1__((*m_pBox), boolean, hasOutputSupport, , return false, const CIdentifier&, rTypeIdentifier);
+				virtual __BridgeImplFunc1__((*m_pBox), boolean, hasOutputSupport, const, return false, const CIdentifier&, rTypeIdentifier);
+				virtual __BridgeImplFunc1__((*m_pBox), boolean, setSupportTypeFromAlgorithmIdentifier, , return false, const CIdentifier&, rTypeIdentifier);
 
 				virtual __BridgeImplFunc1__((*m_pBox), boolean, removeSetting, , return false, const uint32, ui32Index);
 				virtual __BridgeBindFunc0__((*m_pBox), uint32, getSettingCount, const);
