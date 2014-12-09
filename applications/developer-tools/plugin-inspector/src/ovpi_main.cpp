@@ -1,4 +1,5 @@
 #include "ovpiCPluginObjectDescEnumAlgorithmGlobalDefinesGenerator.h"
+#include "ovpiCPluginObjectDescEnumBoxAlgorithmDumper.h"
 #include "ovpiCPluginObjectDescEnumBoxAlgorithmSnapshotGenerator.h"
 #include "ovpiCPluginObjectDescEnumAlgorithmSnapshotGenerator.h"
 
@@ -17,16 +18,19 @@ typedef struct _SConfiguration
 		m_bKernelPathOverload(false),
 		m_bLoadPluginsFromPaths(false),
 		m_bDumpPathOverload(false),
-		m_bConfigPathOverload(false)
+		m_bConfigPathOverload(false),
+		m_bListBoxes(false)
 	{}
 
 	bool m_bKernelPathOverload;
 	bool m_bLoadPluginsFromPaths;
 	bool m_bDumpPathOverload;
 	bool m_bConfigPathOverload;
+	bool m_bListBoxes;
 	std::string m_sKernelPath;
 	std::string m_sDumpPath;
 	std::string m_sConfigPath;
+	std::string m_sListBoxesFile;
 	std::vector<std::string> m_vPluginPaths;
 } SConfiguration;
 
@@ -47,7 +51,7 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 	{
 		if (*it=="-h" || *it=="--help")
 		{
-			std::cout << "Usage: " << argv[0] << " [-p <dir1:dir2...>] [-d <dump_path>]" << std::endl;
+			std::cout << "Usage: " << argv[0] << " [-p <dir1:dir2...>] [-d <dump_path>] [-l boxListFile]" << std::endl;
 			return true;
 		}
 		// get a list of folders to load plugins from
@@ -82,6 +86,19 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 			else
 			{
 				return false;
+			}
+		}
+		// List path
+		else if (*it=="-l")
+		{
+			rConfiguration.m_bListBoxes = true;
+			if (it + 1 != l_vArgValue.end())
+			{
+				rConfiguration.m_sListBoxesFile = *++it;
+			}
+			else
+			{
+				rConfiguration.m_sListBoxesFile = ""; // to cout
 			}
 		}
 		// Kernel path
@@ -241,6 +258,14 @@ int main(int argc, char ** argv)
 					l_sBoxAlgorithmSnapshotDirectory   =l_rConfigurationManager.expand("${PluginInspector_DumpBoxAlgorithmSnapshotDirectory}");
 					l_sBoxAlgorithmDocTemplateDirectory=l_rConfigurationManager.expand("${PluginInspector_DumpBoxAlgorithmDocTemplateDirectory}");
 					l_sGlobalDefinesDirectory          =l_rConfigurationManager.expand("${PluginInspector_DumpGlobalDefinesDirectory}");
+				}
+
+				if(l_oConfiguration.m_bListBoxes) 
+				{
+					l_pKernelContext->getLogManager() << LogLevel_Info << "Dumping box identifiers ...\n";
+					const CString l_sOutputFile(l_oConfiguration.m_sListBoxesFile.c_str());
+					CPluginObjectDescEnumBoxAlgorithmDumper l_oBoxIdentifiersGenerator(*l_pKernelContext, l_sOutputFile);
+					l_oBoxIdentifiersGenerator.enumeratePluginObjectDesc(OV_ClassId_Plugins_BoxAlgorithmDesc);
 				}
 
 				l_pKernelContext->getLogManager() << LogLevel_Info << "Dumping global defines...\n";

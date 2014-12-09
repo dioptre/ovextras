@@ -33,7 +33,7 @@
 //                                                                   //
 
 #define OVP_ClassId_KeyboardStimulatorDesc                    OpenViBE::CIdentifier(0x00E51ACD, 0x284CA2CF)
-#define OVP_ClassId_BoxAlgorithm_P300IdentifierStimulatorDesc OpenViBE::CIdentifier(0x00F20CA,0x2A4EA9C3)
+#define OVP_ClassId_BoxAlgorithm_P300IdentifierStimulatorDesc OpenViBE::CIdentifier(0x000F20CA, 0x2A4EA9C3)
 #define OVP_ClassId_SignChangeDetectorDesc                    OpenViBE::CIdentifier(0x798ACD86, 0xEF1287A4)
 
 //___________________________________________________________________//
@@ -43,8 +43,8 @@
 //
 
 #define OVP_ClassId_KeyboardStimulator                        OpenViBE::CIdentifier(0x00D317B9, 0x6324C3FF)
-#define OVP_ClassId_BoxAlgorithm_P300IdentifierStimulator     OpenViBE::CIdentifier(0x00F27FDB,0x8203D1A5)
-#define OVP_ClassId_SignChangeDetector                        OpenViBE::CIdentifier(0x4FA78CD, 0xAFE45DE7)
+#define OVP_ClassId_BoxAlgorithm_P300IdentifierStimulator     OpenViBE::CIdentifier(0x00F27FDB, 0x8203D1A5)
+#define OVP_ClassId_SignChangeDetector                        OpenViBE::CIdentifier(0x04FA78CD, 0xAFE45DE7)
 
 
 
