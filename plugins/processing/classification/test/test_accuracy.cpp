@@ -35,11 +35,11 @@ int main (int argc, char** argv)
 
 				if(l_fPercentage < threshold)
 				{
-					cout << "Accuracy too low" << l_fPercentage << "%)" << endl;
+					cout << "Accuracy too low ( " << l_fPercentage << " % )" << endl;
 					return 1;
 				}
 				else{
-					cout << "Test ok (" << l_fPercentage << "%)" << endl;
+					cout << "Test ok ( " << l_fPercentage << " % )" << endl;
 					return 0;
 				}
 			}
