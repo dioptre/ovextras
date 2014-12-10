@@ -81,7 +81,7 @@ boolean CMouseControl::process()
 			::XSelectInput(m_pMainDisplay, m_oRootWindow, ButtonPressMask|ButtonReleaseMask|ButtonMotionMask|OwnerGrabButtonMask);
 
 			int32 l_i32yoffset = 0;
-			int32 l_i32xoffset = (int32)(m_pInputBuffer[0]*100.0);
+			int32 l_i32xoffset = (int32)(l_pInputBuffer[0]*100.0);
 
 			getLogManager() << LogLevel_Debug << "l_ui32xoffset = " << l_i32xoffset << "\n";
 

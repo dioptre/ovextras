@@ -464,7 +464,7 @@ boolean CAlgorithmBrainampFileReader::process(void)
 			m_oDataFile.read((char*)l_pFileBuffer, op_pSignalMatrix->getBufferElementCount()*sizeof(T)); \
 			if(m_oDataFile.eof()) \
 			{ \
-				memset(l_pFileBuffer, 0, op_pSignalMatrix->getBufferElementCount()*sizeof(T)); \
+				System::Memory::set(l_pFileBuffer, op_pSignalMatrix->getBufferElementCount()*sizeof(T), 0); \
 			} \
 			boolean (*l_fpFileToHost)(const uint8*, T*); \
 			if(m_ui32Endianness==Endianness_LittleEndian) \
