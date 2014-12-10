@@ -143,10 +143,13 @@ namespace OpenViBEPlugins
 			{
 				rBoxAlgorithmPrototype.addInput  ("Input stream 1", OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addInput  ("Input stream 2", OV_TypeId_StreamedMatrix);
-				rBoxAlgorithmPrototype.addOutput ("Multiplexerd streamed matrix", OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addOutput ("Multiplexed streamed matrix", OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
+
+				rBoxAlgorithmPrototype.addInputAndDerivedSupport(OV_TypeId_StreamedMatrix);
+
 				return true;
 			}
 

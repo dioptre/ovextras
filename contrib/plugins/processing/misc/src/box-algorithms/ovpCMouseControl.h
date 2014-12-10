@@ -38,16 +38,6 @@ namespace OpenViBEPlugins
 			//codec
 			OpenViBEToolkit::TStreamedMatrixDecoder < CMouseControl >* m_pStreamedMatrixDecoder;
 
-
-			//Start and end time of the last buffer
-			OpenViBE::uint64 m_ui64StartTime;
-			OpenViBE::uint64 m_ui64EndTime;
-
-			//the current input buffer being processed
-			const OpenViBE::float64* m_pInputBuffer;
-
-			OpenViBE::boolean m_bError;
-
 #if defined TARGET_OS_Linux
 			::Display* m_pMainDisplay;
 			::Window m_oRootWindow;

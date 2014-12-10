@@ -38,6 +38,11 @@ boolean CAlgorithmBrainampFileReader::initialize(void)
 
 boolean CAlgorithmBrainampFileReader::uninitialize(void)
 {
+	if(m_oDataFile.is_open()) 
+	{
+		m_oDataFile.close();
+	}
+
 	op_pStimulations.uninitialize();
 	op_pSignalMatrix.uninitialize();
 	op_ui64SamplingRate.uninitialize();
@@ -457,6 +462,10 @@ boolean CAlgorithmBrainampFileReader::process(void)
 			uint8* l_pFileBuffer=m_pBuffer; \
 			T l_tValue; \
 			m_oDataFile.read((char*)l_pFileBuffer, op_pSignalMatrix->getBufferElementCount()*sizeof(T)); \
+			if(m_oDataFile.eof()) \
+			{ \
+				memset(l_pFileBuffer, 0, op_pSignalMatrix->getBufferElementCount()*sizeof(T)); \
+			} \
 			boolean (*l_fpFileToHost)(const uint8*, T*); \
 			if(m_ui32Endianness==Endianness_LittleEndian) \
 			{ \
