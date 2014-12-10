@@ -3,9 +3,11 @@
 IF(WIN32)
 	SET(EXT cmd)
 	SET(OS_FLAGS "--no-pause")
+	SET(HOME_PREFIX "$ENV{APPDATA}")
 ELSE(WIN32)
 	SET(EXT sh)
 	SET(OS_FLAGS "")
+	SET(HOME_PREFIX "$ENV{HOME}/.config")	
 ENDIF(WIN32)
 
 
@@ -16,32 +18,32 @@ SET(TEST_NAME PLDA-OneVsOne-HT-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 SET(TEST_NAME PLDA-OneVsOne-PKPD-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 SET(TEST_NAME PLDA-OneVsOne-Voting-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 SET(TEST_NAME PLDA-OneVsAll-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 
@@ -52,16 +54,16 @@ SET(TEST_NAME LDA-OneVsOne-Voting-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 SET(TEST_NAME LDA-OneVsAll-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 
@@ -72,16 +74,16 @@ SET(TEST_NAME sLDA-OneVsOne-Voting-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 SET(TEST_NAME sLDA-OneVsAll-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 
@@ -92,32 +94,32 @@ SET(TEST_NAME PsLDA-OneVsOne-HT-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 SET(TEST_NAME PsLDA-OneVsOne-PKPD-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 SET(TEST_NAME PsLDA-OneVsOne-Voting-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 SET(TEST_NAME PsLDA-OneVsAll-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 #######################################
@@ -127,23 +129,23 @@ SET(TEST_NAME SVM-Native-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 SET(TEST_NAME SVM-OneVsOne-Voting-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 
 SET(TEST_NAME SVM-OneVsAll-Test)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log"})
+ADD_TEST(comparator_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${HOME_PREFIX}/openvibe/log/openvibe-designer.log")
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${HOME_PREFIX}/openvibe/log/openvibe-designer.log"})
 SET_TESTS_PROPERTIES(comparator_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
 

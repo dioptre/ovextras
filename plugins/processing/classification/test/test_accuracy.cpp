@@ -13,7 +13,7 @@ int main (int argc, char** argv)
 {
 	ifstream file(argv[1], ios::in);
 
-	if(file)
+	if(file.good() && !file.bad() && file.is_open()) // ...
 	{
 		string line;
 		while(getline(file, line))
