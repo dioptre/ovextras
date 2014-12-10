@@ -5,8 +5,6 @@
 
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/TWriterCallbackProxy.h>
-
 namespace OpenViBEPlugins
 {
 	namespace DataGeneration
@@ -29,20 +27,13 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, OVP_ClassId_TimeSignalGenerator)
 
-		public:
-
-			virtual void writeSignalOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize);
-
 		protected:
 
-			EBML::TWriterCallbackProxy1<OpenViBEPlugins::DataGeneration::CTimeSignalGenerator> m_oSignalOutputWriterCallbackProxy;
-			OpenViBEToolkit::IBoxAlgorithmSignalOutputWriter* m_pSignalOutputWriterHelper;
-			EBML::IWriter* m_pSignalOutputWriter;
+			OpenViBEToolkit::TSignalEncoder < CTimeSignalGenerator > m_oSignalEncoder;
 
 			OpenViBE::boolean m_bHeaderSent;
 			OpenViBE::uint32 m_ui32SamplingFrequency;
 			OpenViBE::uint32 m_ui32GeneratedEpochSampleCount;
-			OpenViBE::float64* m_pSampleBuffer;
 			OpenViBE::uint32 m_ui32SentSampleCount;
 		};
 

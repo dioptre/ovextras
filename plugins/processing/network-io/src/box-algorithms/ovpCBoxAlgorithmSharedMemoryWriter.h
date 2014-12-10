@@ -81,8 +81,11 @@ namespace OpenViBEPlugins
 		protected:
 			// Codec algorithms specified in the skeleton-generator:
 			// Stimulation stream decoder
-			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSharedMemoryWriter > m_oAlgo0_StimulationDecoder;
-			OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmSharedMemoryWriter > m_oAlgo0_StreamedMatrixDecoder;
+			//OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSharedMemoryWriter > m_oAlgo0_StimulationDecoder;
+			//OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmSharedMemoryWriter > m_oAlgo0_StreamedMatrixDecoder;
+			std::vector<OpenViBEToolkit::TDecoder < CBoxAlgorithmSharedMemoryWriter >* > m_vDecoder;
+
+
 			OpenViBE::CString m_sSharedMemoryName;
 			managed_shared_memory m_oSharedMemoryArray;
 			//OpenViBE::uint32 * m_pInputStimuliSet;

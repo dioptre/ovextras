@@ -16,6 +16,7 @@ void VRPN_CALLBACK vrpn_button_callback(void* user_data, vrpn_BUTTONCB button)
  
     if (button.button == 1)
     {
+		std::cout << "Quit requested by button press" << std::endl;
         *(bool*)user_data = false;
     }
 }
@@ -53,5 +54,11 @@ int main(int argc, char** argv)
         VRPNButton->mainloop();
     }
  
+	VRPNAnalog->unregister_change_handler(NULL, vrpn_analog_callback );
+	VRPNButton->unregister_change_handler(&running, vrpn_button_callback );
+
+	delete VRPNButton;
+	delete VRPNAnalog;
+
     return 0;
 }

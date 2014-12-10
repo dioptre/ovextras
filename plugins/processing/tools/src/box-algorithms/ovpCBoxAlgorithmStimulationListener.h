@@ -30,7 +30,8 @@ namespace OpenViBEPlugins
 		protected:
 
 			OpenViBE::Kernel::ELogLevel m_eLogLevel;
-			std::vector < OpenViBE::Kernel::IAlgorithmProxy* > m_vStreamDecoder;
+			std::vector < OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmStimulationListener >* > m_vStimulationDecoder;
+
 		};
 
 		class CBoxAlgorithmStimulationListenerListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >

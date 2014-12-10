@@ -28,10 +28,8 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamEncoder;
 
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > ip_pSignalMatrix;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64SignalSamplingRate;
+			OpenViBEToolkit::TSignalEncoder < CNoiseGenerator > m_oSignalEncoder;
 
 			OpenViBE::boolean m_bHeaderSent;
 			OpenViBE::uint64 m_ui64ChannelCount;

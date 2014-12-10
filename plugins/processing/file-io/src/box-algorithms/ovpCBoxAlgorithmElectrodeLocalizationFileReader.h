@@ -26,7 +26,8 @@ namespace OpenViBEPlugins
 		protected:
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pOVMatrixFileReader;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pChannelLocalisationStreamEncoder;
+
+			OpenViBEToolkit::TChannelLocalisationEncoder<CBoxAlgorithmElectrodeLocalisationFileReader>* m_pChannelLocalisationStreamEncoder;
 
 			OpenViBE::CString m_sFilename;
 			OpenViBE::boolean m_bHeaderSent;

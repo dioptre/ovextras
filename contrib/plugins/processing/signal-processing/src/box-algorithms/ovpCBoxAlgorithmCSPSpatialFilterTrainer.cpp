@@ -78,16 +78,16 @@ namespace itppextcsp
 
 boolean CBoxAlgorithmCSPSpatialFilterTrainer::initialize(void)
 {
-	m_pStimulationDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-	m_pStimulationDecoder->initialize();
+	m_pStimulationDecoder=new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >();
+	m_pStimulationDecoder->initialize(*this,0);
 
-	m_pSignalDecoderCondition1=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-	m_pSignalDecoderCondition1->initialize();
+	m_pSignalDecoderCondition1=new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >();
+	m_pSignalDecoderCondition1->initialize(*this,1);
 
-	m_pSignalDecoderCondition2=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-	m_pSignalDecoderCondition2->initialize();
+	m_pSignalDecoderCondition2=new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >();
+	m_pSignalDecoderCondition2->initialize(*this,2);
 
-	m_oStimulationEncoder.initialize(*this);
+	m_oStimulationEncoder.initialize(*this,0);
 
 	m_ui64StimulationIdentifier=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sSpatialFilterConfigurationFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
@@ -99,18 +99,14 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::initialize(void)
 boolean CBoxAlgorithmCSPSpatialFilterTrainer::uninitialize(void)
 {
 	m_pSignalDecoderCondition1->uninitialize();
+	delete m_pSignalDecoderCondition1;
 	m_pSignalDecoderCondition2->uninitialize();
+	delete m_pSignalDecoderCondition2;
 	m_pStimulationDecoder->uninitialize();
+	delete m_pStimulationDecoder;
 
 	m_oStimulationEncoder.uninitialize();
 
-	this->getAlgorithmManager().releaseAlgorithm(*m_pSignalDecoderCondition1);
-	this->getAlgorithmManager().releaseAlgorithm(*m_pSignalDecoderCondition2);
-	this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationDecoder);
-
-	m_pSignalDecoderCondition1=NULL;
-	m_pSignalDecoderCondition2=NULL;
-	m_pStimulationDecoder=NULL;
 
 	return true;
 }
@@ -130,17 +126,15 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		TParameterHandler < const IMemoryBuffer* > ip_pMemoryBuffer(m_pStimulationDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
-		m_pStimulationDecoder->process();
-		if(m_pStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+		m_pStimulationDecoder->decode(i);
+		if(m_pStimulationDecoder->isHeaderReceived())
 		{
-			m_oStimulationEncoder.encodeHeader(0);
+			m_oStimulationEncoder.encodeHeader();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, i),l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
-		if(m_pStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_pStimulationDecoder->isBufferReceived())
 		{
-			TParameterHandler < IStimulationSet* > op_pStimulationSet(m_pStimulationDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+			TParameterHandler < IStimulationSet* > op_pStimulationSet(m_pStimulationDecoder->getOutputStimulationSet());
 			for(uint32 j=0; j<op_pStimulationSet->getStimulationCount(); j++)
 			{
 				l_bShouldTrain |= (op_pStimulationSet->getStimulationIdentifier(j)==m_ui64StimulationIdentifier);
@@ -152,9 +146,9 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 				l_ui64TrainChunkEndTime = l_rDynamicBoxContext.getInputChunkEndTime(0, i);
 			}
 		}
-		if(m_pStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if(m_pStimulationDecoder->isEndReceived())
 		{
-			m_oStimulationEncoder.encodeEnd(0);
+			m_oStimulationEncoder.encodeEnd();
 		}
 		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
 	}
@@ -169,23 +163,21 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 		int l_iNumberOfCondition1Trials = 0;
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
 		{
-			TParameterHandler<const IMemoryBuffer*> ip_pMemoryBuffer(m_pSignalDecoderCondition1->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(1, i);
-			m_pSignalDecoderCondition1->process();
-			if(m_pSignalDecoderCondition1->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedHeader))
+			m_pSignalDecoderCondition1->decode(i);
+			if(m_pSignalDecoderCondition1->isHeaderReceived())
 			{
-				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition1->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition1->getOutputMatrix());
 				l_oCovarianceMatrixCondition1.set_size(ip_pMatrix->getDimensionSize(0),ip_pMatrix->getDimensionSize(0));
 				l_oCovarianceMatrixCondition1.zeros();
 			}
-			if(m_pSignalDecoderCondition1->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_pSignalDecoderCondition1->isBufferReceived())
 			{
-				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition1->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition1->getOutputMatrix());
 				itpp::mat l_oMatrix=itppextcsp::convert(*ip_pMatrix);
 				l_oCovarianceMatrixCondition1 += itppextcsp::cov(l_oMatrix);
 				l_iNumberOfCondition1Trials++;
 			}
-			if(m_pSignalDecoderCondition1->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_pSignalDecoderCondition1->isEndReceived())
 			{
 			}
 			l_rDynamicBoxContext.markInputAsDeprecated(1, i);
@@ -199,23 +191,21 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 		int l_iNumberOfCondition2Trials = 0;
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(2); i++)
 		{
-			TParameterHandler<const IMemoryBuffer*> ip_pMemoryBuffer(m_pSignalDecoderCondition2->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(2, i);
-			m_pSignalDecoderCondition2->process();
-			if(m_pSignalDecoderCondition2->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedHeader))
+			m_pSignalDecoderCondition2->decode(i);
+			if(m_pSignalDecoderCondition2->isHeaderReceived())
 			{
-				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition2->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition2->getOutputMatrix());
 				l_oCovarianceMatrixCondition2.set_size(ip_pMatrix->getDimensionSize(0),ip_pMatrix->getDimensionSize(0));
 				l_oCovarianceMatrixCondition2.zeros();
 			}
-			if(m_pSignalDecoderCondition2->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_pSignalDecoderCondition2->isBufferReceived())
 			{
-				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition2->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition2->getOutputMatrix());
 				itpp::mat l_oMatrix=itppextcsp::convert(*ip_pMatrix);
 				l_oCovarianceMatrixCondition2 += itppextcsp::cov(l_oMatrix);
 				l_iNumberOfCondition2Trials++;
 			}
-			if(m_pSignalDecoderCondition2->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_pSignalDecoderCondition2->isEndReceived())
 			{
 			}
 			l_rDynamicBoxContext.markInputAsDeprecated(2, i);
@@ -297,7 +287,7 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 
 		this->getLogManager() << LogLevel_Info << "CSP Spatial filter trained successfully.\n";
 		m_oStimulationEncoder.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, l_ui64TrainDate, 0);
-		m_oStimulationEncoder.encodeBuffer(0);
+		m_oStimulationEncoder.encodeBuffer();
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_ui64TrainChunkStartTime,l_ui64TrainChunkEndTime);
 	}
 

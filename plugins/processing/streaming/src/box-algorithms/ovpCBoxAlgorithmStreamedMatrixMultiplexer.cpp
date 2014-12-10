@@ -140,8 +140,9 @@ boolean CBoxAlgorithmStreamedMatrixMultiplexer::process(void)
 
 					if(l_ui64StartTime<m_ui64LastStartTime || l_ui64EndTime<m_ui64LastEndTime)
 					{
-						this->getLogManager() << LogLevel_ImportantWarning << "Stream chunk dating is incoherent, check inputs !\n";
+						this->getLogManager() << LogLevel_Error << "Stream chunk dating is incoherent, check inputs !\n";
 						m_bIncoherentChunkDating=true;
+						return false;
 					}
 					else
 					{

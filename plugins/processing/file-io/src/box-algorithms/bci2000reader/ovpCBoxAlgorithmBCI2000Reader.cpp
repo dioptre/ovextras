@@ -57,7 +57,7 @@ boolean CBoxAlgorithmBCI2000Reader::initialize(void)
 		return false;
 	}
 
-	m_oSignalEncoder.initialize(*this);
+	m_oSignalEncoder.initialize(*this,0);
 	m_pSignalOutputMatrix=m_oSignalEncoder.getInputMatrix();
 	m_pSignalOutputMatrix->setDimensionCount(2);
 	m_pSignalOutputMatrix->setDimensionSize(0,m_ui32ChannelCount);
@@ -67,7 +67,7 @@ boolean CBoxAlgorithmBCI2000Reader::initialize(void)
 		m_pSignalOutputMatrix->setDimensionLabel(0,i,m_pB2KReaderHelper->getChannelName(i));
 	}
 
-	m_oStateEncoder.initialize(*this);
+	m_oStateEncoder.initialize(*this,1);
 	m_pStateOutputMatrix=m_oStateEncoder.getInputMatrix();
 	m_pStateOutputMatrix->setDimensionCount(2);
 	m_pStateOutputMatrix->setDimensionSize(0,m_pB2KReaderHelper->getStateVectorSize());
@@ -119,8 +119,8 @@ uint64 CBoxAlgorithmBCI2000Reader::getClockFrequency(void)
 
 void CBoxAlgorithmBCI2000Reader::sendHeader(void)
 {
-	m_oSignalEncoder.encodeHeader(0);
-	m_oStateEncoder.encodeHeader(1);
+	m_oSignalEncoder.encodeHeader();
+	m_oStateEncoder.encodeHeader();
 	m_bHeaderSent=true;
 	getDynamicBoxContext().markOutputAsReadyToSend(0,0,0);
 	getDynamicBoxContext().markOutputAsReadyToSend(1,0,0);
@@ -153,13 +153,13 @@ boolean CBoxAlgorithmBCI2000Reader::process(void)
 				m_pSignalOutputMatrix->getBuffer()[j*m_ui32SampleCountPerBuffer+i]=m_pBuffer[i*m_ui32ChannelCount+j];
 			}
 		}
-		m_oSignalEncoder.encodeBuffer(0);
+		m_oSignalEncoder.encodeBuffer();
 		uint64 StartTime = ITimeArithmetics::sampleCountToTime(m_ui32Rate, m_ui32SamplesSent);
 		uint64 EndTime = ITimeArithmetics::sampleCountToTime(m_ui32Rate, m_ui32SamplesSent+m_ui32SampleCountPerBuffer);
 		m_ui32SamplesSent+=l_ui32SamplesRead;
 		if (m_pB2KReaderHelper->getSamplesLeft()==0)
 		{
-			m_oSignalEncoder.encodeEnd(0);
+			m_oSignalEncoder.encodeEnd();
 		}
 
 		getDynamicBoxContext().markOutputAsReadyToSend(0,StartTime,EndTime);
@@ -181,11 +181,11 @@ boolean CBoxAlgorithmBCI2000Reader::process(void)
 					m_pStates[i*m_pB2KReaderHelper->getStateVectorSize()+j];
 			}
 		}
-		m_oStateEncoder.encodeBuffer(1);
+		m_oStateEncoder.encodeBuffer();
 
 		if (m_pB2KReaderHelper->getSamplesLeft()==0)
 		{
-			m_oSignalEncoder.encodeEnd(1);
+			m_oSignalEncoder.encodeEnd();
 		}
 
 		getDynamicBoxContext().markOutputAsReadyToSend(1,StartTime,EndTime);

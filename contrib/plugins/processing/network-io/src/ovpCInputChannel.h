@@ -12,6 +12,7 @@
 
 namespace OpenViBEPlugins
 {
+
 	namespace SignalProcessing
 	{
 		class CInputChannel
@@ -39,13 +40,13 @@ namespace OpenViBEPlugins
 			OpenViBE::IStimulationSet*  discardStimulation(const OpenViBE::uint32 stimulationIndex);
 			OpenViBE::float64*          getSignal(OpenViBE::uint64& startTimestamp, OpenViBE::uint64& endTimestamp, const OpenViBE::uint32 signalIndex);
 			OpenViBE::float64*          discardSignal(const OpenViBE::uint32 signalIndex);
-			OpenViBE::uint64            getSamplingRate() const {return op_ui64SamplingRateSignal;}
-			OpenViBE::uint64            getNbOfChannels() const {return op_pMatrixSignal->getDimensionSize(0);}
-			OpenViBE::uint64            getNbOfSamples() const {return op_pMatrixSignal->getDimensionSize(1);}
+			OpenViBE::uint64            getSamplingRate() const {return m_pStreamDecoderSignal->getOutputSamplingRate();}
+			OpenViBE::uint64            getNbOfChannels() const {return m_pStreamDecoderSignal->getOutputMatrix()->getDimensionSize(0);}
+			OpenViBE::uint64            getNbOfSamples() const {return m_pStreamDecoderSignal->getOutputMatrix()->getDimensionSize(1);}
 			OpenViBE::uint64            getStartTimestamp() const {return m_ui64StartTimestamp;}
 			OpenViBE::uint64            getEndTimestamp() const {return m_ui64EndTimestamp;}
-			const char*                 getChannelName(OpenViBE::uint32 index) { return op_pMatrixSignal->getDimensionLabel(0,index); }
-			const OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* >& getOpMatrix() const {return op_pMatrixSignal;}
+			const char*                 getChannelName(OpenViBE::uint32 index) { return m_pStreamDecoderSignal->getOutputMatrix()->getDimensionLabel(0,index); }
+			const OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* >& getOpMatrix() const {return m_pStreamDecoderSignal->getOutputMatrix();}
 		
 		protected:
 			OpenViBE::uint32														m_ui32SignalChannel;
@@ -61,18 +62,12 @@ namespace OpenViBEPlugins
 			OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm>*     m_pTBoxAlgorithm;
 			
 			// signal section
-			OpenViBE::Kernel::IAlgorithmProxy*                                      m_pStreamDecoderSignal;
-			
-			OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* >	ip_pMemoryBufferSignal;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* >				op_pMatrixSignal;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 >				op_ui64SamplingRateSignal;
-			
-			
-			// stimulation section
-			OpenViBE::Kernel::IAlgorithmProxy*                                      m_pStreamDecoderStimulation;
+			//OpenViBE::Kernel::IAlgorithmProxy*                                      m_pStreamDecoderSignal;
+			OpenViBEToolkit::TSignalDecoder < OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm> >*	m_pStreamDecoderSignal;
 
-			OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* >	ip_pMemoryBufferStimulation;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* >		op_pStimulationSetStimulation;
+			// stimulation section
+			OpenViBEToolkit::TStimulationDecoder < OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm> >*		m_pStreamDecoderStimulation;
+
 		};
 	};
 };

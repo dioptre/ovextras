@@ -34,11 +34,6 @@ namespace OpenViBEPlugins
 			return TRUE;
 		}
 
-		void CGrazVisualization::setStimulationCount(const uint32 ui32StimulationCount)
-		{
-			/* TODO nothing? */
-		}
-
 		void CGrazVisualization::setStimulation(const uint32 ui32StimulationIndex, const uint64 ui64StimulationIdentifier, const uint64 ui64StimulationDate)
 		{
 			/*
@@ -156,8 +151,6 @@ namespace OpenViBEPlugins
 			m_pBuilderInterface(NULL),
 			m_pMainWindow(NULL),
 			m_pDrawingArea(NULL),
-			m_pStimulationReaderCallBack(NULL),
-			m_pStreamedMatrixReaderCallBack(NULL),
 			m_eCurrentState(EGrazVisualizationState_Idle),
 			m_eCurrentDirection(EArrowDirection_None),
 			m_f64MaxAmplitude(-DBL_MAX),
@@ -177,9 +170,6 @@ namespace OpenViBEPlugins
 			m_bShowInstruction(true),
 			m_bShowFeedback(false)
 		{
-			m_pReader[0] = NULL;
-			m_pReader[1] = NULL;
-
 			m_oBackgroundColor.pixel = 0;
 			m_oBackgroundColor.red = 0;//0xFFFF;
 			m_oBackgroundColor.green = 0;//0xFFFF;
@@ -204,11 +194,8 @@ namespace OpenViBEPlugins
 				m_bShowFeedback=(l_sShowFeedback==CString("true")?true:false);
 			}
 
-			m_pStimulationReaderCallBack=createBoxAlgorithmStimulationInputReaderCallback(*this);
-			m_pReader[0] = EBML::createReader(*m_pStimulationReaderCallBack);
-
-			m_pStreamedMatrixReaderCallBack = createBoxAlgorithmStreamedMatrixInputReaderCallback(*this);
-			m_pReader[1] =EBML::createReader(*m_pStreamedMatrixReaderCallBack);
+			m_oStimulationDecoder.initialize(*this,0);
+			m_oMatrixDecoder.initialize(*this,1);
 
 			//load the gtk builder interface
 			m_pBuilderInterface=gtk_builder_new(); // glade_xml_new(OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/openvibe-simple-visualisation-GrazVisualization.ui", NULL, NULL);
@@ -216,7 +203,7 @@ namespace OpenViBEPlugins
 
 			if(!m_pBuilderInterface)
 			{
-				g_warning("Couldn't load the interface!");
+				this->getLogManager() << LogLevel_Error << "Error: couldn't load the interface!";
 				return false;
 			}
 
@@ -253,7 +240,7 @@ namespace OpenViBEPlugins
 
 			if(!m_pOriginalLeftArrow || !m_pOriginalRightArrow || !m_pOriginalUpArrow || !m_pOriginalDownArrow)
 			{
-				getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning <<"Error couldn't load arrow ressource files!\n";
+				this->getLogManager() << LogLevel_Error << "Error couldn't load arrow ressource files!\n";
 				m_bError = true;
 
 				return false;
@@ -263,7 +250,7 @@ namespace OpenViBEPlugins
 			m_pOriginalBar = gdk_pixbuf_new_from_file_at_size(OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/openvibe-simple-visualisation-GrazVisualization-bar.png", -1, -1, NULL);
 			if(!m_pOriginalBar)
 			{
-				getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning <<"Error couldn't load bar ressource file!\n";
+				this->getLogManager() << LogLevel_Error <<"Error couldn't load bar ressource file!\n";
 				m_bError = true;
 
 				return false;
@@ -279,14 +266,10 @@ namespace OpenViBEPlugins
 
 		boolean CGrazVisualization::uninitialize()
 		{
-			releaseBoxAlgorithmStimulationInputReaderCallback(m_pStimulationReaderCallBack);
-
-			//release the ebml reader
-			m_pReader[0]->release();
-			m_pReader[0]=NULL;
-			m_pReader[1]->release();
-			m_pReader[1]=NULL;
-
+			
+			m_oStimulationDecoder.uninitialize();
+			m_oMatrixDecoder.uninitialize();
+			
 #if 0
 			//destroy the window and its children
 			if(m_pMainWindow)
@@ -334,21 +317,50 @@ namespace OpenViBEPlugins
 
 		boolean CGrazVisualization::process()
 		{
-			IBoxIO* l_pBoxIO=getBoxAlgorithmContext()->getDynamicBoxContext();
+			const IBoxIO* l_pBoxIO=getBoxAlgorithmContext()->getDynamicBoxContext();
 
-			for(uint32 input=0 ; input<getBoxAlgorithmContext()->getStaticBoxContext()->getInputCount() ; input++)
+			for(uint32 chunk=0; chunk<l_pBoxIO->getInputChunkCount(0); chunk++)
 			{
-				for(uint32 chunk=0; chunk<l_pBoxIO->getInputChunkCount(input); chunk++)
+				m_oStimulationDecoder.decode(chunk);
+				if(m_oStimulationDecoder.isBufferReceived())
 				{
-					uint64 l_ui64ChunkSize;
-					const uint8* l_pChunkBuffer=NULL;
-
-					if(l_pBoxIO->getInputChunk(input, chunk, m_ui64StartTime, m_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer))
+					const IStimulationSet* l_pStimulationSet = m_oStimulationDecoder.getOutputStimulationSet();
+					for(uint32 s=0;s<l_pStimulationSet->getStimulationCount();s++)
 					{
-						m_pReader[input]->processData(l_pChunkBuffer, l_ui64ChunkSize);
-						l_pBoxIO->markInputAsDeprecated(input, chunk);
+						setStimulation(s, 
+							l_pStimulationSet->getStimulationIdentifier(s),
+							l_pStimulationSet->getStimulationDate(s));
 					}
 				}
+			}
+			
+			for(uint32 chunk=0; chunk<l_pBoxIO->getInputChunkCount(1); chunk++)
+			{
+				m_oMatrixDecoder.decode(chunk);
+				if(m_oMatrixDecoder.isHeaderReceived())
+				{
+					const IMatrix* l_pMatrix = m_oMatrixDecoder.getOutputMatrix();
+	
+					if(l_pMatrix->getDimensionCount() != 1)
+					{
+						this->getLogManager() << LogLevel_Error << "Error, dimension count isn't 1 for Amplitude input !\n";
+						m_bError = true;
+						return false;
+					}
+
+					if(l_pMatrix->getDimensionSize(0) != 1)
+					{
+						this->getLogManager() << LogLevel_Error << "Error, dimension size isn't 1 for Amplitude input !\n";
+						m_bError = true;
+						return false;
+					}
+				}
+
+				if(m_oMatrixDecoder.isBufferReceived())
+				{
+					setMatrixBuffer(m_oMatrixDecoder.getOutputMatrix()->getBuffer());
+				}
+
 			}
 
 			return true;
@@ -480,29 +492,6 @@ namespace OpenViBEPlugins
 			}
 		}
 
-		void CGrazVisualization::setMatrixDimensionCount(const uint32 ui32DimensionCount)
-		{
-			if(ui32DimensionCount != 1)
-			{
-				getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning <<"Error, dimension count isn't 1 for Amplitude input !\n";
-				m_bError = true;
-			}
-
-		}
-
-		void CGrazVisualization::setMatrixDimensionSize(const uint32 ui32DimensionIndex, const uint32 ui32DimensionSize)
-		{
-			if(ui32DimensionSize != 1)
-			{
-				getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning <<"Error, dimension size isn't 1 for Amplitude input !\n";
-				m_bError = true;
-			}
-		}
-
-		void CGrazVisualization::setMatrixDimensionLabel(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex, const char* sDimensionLabel)
-		{
-			/* nothing to do */
-		}
 
 		void CGrazVisualization::setMatrixBuffer(const float64* pBuffer)
 		{

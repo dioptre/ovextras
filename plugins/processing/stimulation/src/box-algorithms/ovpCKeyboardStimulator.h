@@ -9,9 +9,6 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
-#include <ebml/IWriter.h>
-#include <ebml/TWriterCallbackProxy.h>
-
 #include <vector>
 #include <map>
 
@@ -36,8 +33,6 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean process();
 
-			virtual void writeStimulationOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize);
-
 			OpenViBE::boolean parseConfigurationFile(const char * pFilename);
 
 			virtual void processKey(guint uiKey, bool bState);
@@ -45,10 +40,8 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, OVP_ClassId_KeyboardStimulator)
 
 		public:
-			//EBML writing stuff
-			EBML::IWriter* m_pWriter;
-			EBML::TWriterCallbackProxy1<OpenViBEPlugins::Stimulation::CKeyboardStimulator> * m_pOutputWriterCallbackProxy;
-			OpenViBEToolkit::IBoxAlgorithmStimulationOutputWriter * m_pStimulationOutputWriterHelper;
+
+			OpenViBEToolkit::TStimulationEncoder<CKeyboardStimulator> m_oEncoder;
 
 			::GtkWidget * m_pWidget;
 

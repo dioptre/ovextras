@@ -33,9 +33,10 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationDecoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pSignalDecoderCondition1;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pSignalDecoderCondition2;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >* m_pStimulationDecoder;
+			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >* m_pSignalDecoderCondition1;
+			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >* m_pSignalDecoderCondition2;
+
 
 			OpenViBEToolkit::TStimulationEncoder<CBoxAlgorithmCSPSpatialFilterTrainer> m_oStimulationEncoder;
 

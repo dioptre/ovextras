@@ -337,31 +337,31 @@ OpenViBE::boolean CBoxAlgorithmPython::initialize(void)
 		l_rStaticBoxContext.getInputType(input, l_oTypeIdentifier);
 		if (l_oTypeIdentifier == OV_TypeId_StreamedMatrix)
 		{
-			m_vDecoders.push_back( new TStreamedMatrixDecoder <CBoxAlgorithmPython> (*this) );
+			m_vDecoders.push_back( new TStreamedMatrixDecoder <CBoxAlgorithmPython> (*this, input) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_Signal)
 		{
-			m_vDecoders.push_back( new TSignalDecoder <CBoxAlgorithmPython> (*this) );
+			m_vDecoders.push_back( new TSignalDecoder <CBoxAlgorithmPython> (*this, input) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_FeatureVector)
 		{
-			m_vDecoders.push_back( new TFeatureVectorDecoder <CBoxAlgorithmPython> (*this) );
+			m_vDecoders.push_back( new TFeatureVectorDecoder <CBoxAlgorithmPython> (*this, input) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_Spectrum)
 		{
-			m_vDecoders.push_back( new TSpectrumDecoder <CBoxAlgorithmPython> (*this) );
+			m_vDecoders.push_back( new TSpectrumDecoder <CBoxAlgorithmPython> (*this, input) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_ChannelLocalisation)
 		{
-			m_vDecoders.push_back( new TChannelLocalisationDecoder <CBoxAlgorithmPython> (*this) );
+			m_vDecoders.push_back( new TChannelLocalisationDecoder <CBoxAlgorithmPython> (*this, input) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_Stimulations)
 		{
-			m_vDecoders.push_back( new TStimulationDecoder <CBoxAlgorithmPython> (*this) );
+			m_vDecoders.push_back( new TStimulationDecoder <CBoxAlgorithmPython> (*this, input) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
 		{
-			m_vDecoders.push_back( new TExperimentInformationDecoder <CBoxAlgorithmPython> (*this) );
+			m_vDecoders.push_back( new TExperimentInformationDecoder <CBoxAlgorithmPython> (*this, input) );
 		}
 		else
 		{
@@ -376,31 +376,31 @@ OpenViBE::boolean CBoxAlgorithmPython::initialize(void)
 		l_rStaticBoxContext.getOutputType(output, l_oTypeIdentifier);
 		if (l_oTypeIdentifier == OV_TypeId_StreamedMatrix)
 		{
-			m_vEncoders.push_back( new TStreamedMatrixEncoder <CBoxAlgorithmPython> (*this) );
+			m_vEncoders.push_back( new TStreamedMatrixEncoder <CBoxAlgorithmPython> (*this, output) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_Signal)
 		{
-			m_vEncoders.push_back( new TSignalEncoder <CBoxAlgorithmPython> (*this) );
+			m_vEncoders.push_back( new TSignalEncoder <CBoxAlgorithmPython> (*this, output) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_FeatureVector)
 		{
-			m_vEncoders.push_back( new TFeatureVectorEncoder <CBoxAlgorithmPython> (*this) );
+			m_vEncoders.push_back( new TFeatureVectorEncoder <CBoxAlgorithmPython> (*this, output) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_Spectrum)
 		{
-			m_vEncoders.push_back( new TSpectrumEncoder <CBoxAlgorithmPython> (*this) );
+			m_vEncoders.push_back( new TSpectrumEncoder <CBoxAlgorithmPython> (*this, output) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_ChannelLocalisation)
 		{
-			m_vEncoders.push_back( new TChannelLocalisationEncoder <CBoxAlgorithmPython> (*this) );
+			m_vEncoders.push_back( new TChannelLocalisationEncoder <CBoxAlgorithmPython> (*this, output) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_Stimulations)
 		{
-			m_vEncoders.push_back( new TStimulationEncoder <CBoxAlgorithmPython> (*this) );
+			m_vEncoders.push_back( new TStimulationEncoder <CBoxAlgorithmPython> (*this, output) );
 		}
 		else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
 		{
-			m_vEncoders.push_back( new TExperimentInformationEncoder <CBoxAlgorithmPython> (*this) );
+			m_vEncoders.push_back( new TExperimentInformationEncoder <CBoxAlgorithmPython> (*this, output) );
 		}
 		else
 		{
@@ -1082,7 +1082,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStreamedMatrixOutputChunksFromPyt
 			Py_CLEAR(l_pDimensionSize);
 			Py_CLEAR(l_pDimensionLabel);
 
-			m_vEncoders[output_index]->encodeHeader(output_index);
+			m_vEncoders[output_index]->encodeHeader();
 
 			//New reference
 			PyObject *l_pStartTime = PyObject_GetAttrString(l_pOVChunk, "startTime");
@@ -1115,7 +1115,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStreamedMatrixOutputChunksFromPyt
 			uint64 l_ui64EndTime = ITimeArithmetics::secondsToTime(PyFloat_AsDouble(l_pEndTime));
 			Py_CLEAR(l_pEndTime);
 
-			m_vEncoders[output_index]->encodeBuffer(output_index);
+			m_vEncoders[output_index]->encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(output_index, l_ui64StartTime, l_ui64EndTime);
 		}
 
@@ -1131,7 +1131,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStreamedMatrixOutputChunksFromPyt
 			uint64 l_ui64EndTime = ITimeArithmetics::secondsToTime(PyFloat_AsDouble(l_pEndTime));
 			Py_CLEAR(l_pEndTime);
 
-			m_vEncoders[output_index]->encodeEnd(output_index);
+			m_vEncoders[output_index]->encodeEnd();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(output_index, l_ui64StartTime, l_ui64EndTime);
 		}
 
@@ -1493,7 +1493,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferSignalOutputChunksFromPython(uint
 			}
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 >& l_pSamplingRate = ( (TSignalEncoder <CBoxAlgorithmPython> *) m_vEncoders[output_index] )->getInputSamplingRate();
 			l_pSamplingRate = (OpenViBE::uint64) PyInt_AsLong(l_pChunkSamplingRate);
-			m_vEncoders[output_index]->encodeHeader(output_index);
+			m_vEncoders[output_index]->encodeHeader();
 			Py_CLEAR(l_pChunkSamplingRate);
 
 			//New reference
@@ -1527,7 +1527,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferSignalOutputChunksFromPython(uint
 			uint64 l_ui64EndTime = ITimeArithmetics::secondsToTime(PyFloat_AsDouble(l_pEndTime));
 			Py_CLEAR(l_pEndTime);
 
-			m_vEncoders[output_index]->encodeBuffer(output_index);
+			m_vEncoders[output_index]->encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(output_index, l_ui64StartTime, l_ui64EndTime);
 		}
 
@@ -1543,7 +1543,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferSignalOutputChunksFromPython(uint
 			uint64 l_ui64EndTime = ITimeArithmetics::secondsToTime(PyFloat_AsDouble(l_pEndTime));
 			Py_CLEAR(l_pEndTime);
 
-			m_vEncoders[output_index]->encodeEnd(output_index);
+			m_vEncoders[output_index]->encodeEnd();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(output_index, l_ui64StartTime, l_ui64EndTime);
 		}
 
@@ -1824,7 +1824,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStimulationOutputChunksFromPython
 			Py_CLEAR(l_pEndTime);
 
 			l_pStimulationSet->setStimulationCount(0);
-			m_vEncoders[output_index]->encodeHeader(output_index);
+			m_vEncoders[output_index]->encodeHeader();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(output_index, l_ui64StartTime, l_ui64EndTime);
 		}
 
@@ -1883,7 +1883,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStimulationOutputChunksFromPython
 			uint64 l_ui64EndTime = ITimeArithmetics::secondsToTime(PyFloat_AsDouble(l_pEndTime));
 			Py_CLEAR(l_pEndTime);
 
-			m_vEncoders[output_index]->encodeBuffer(output_index);
+			m_vEncoders[output_index]->encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(output_index, l_ui64StartTime, l_ui64EndTime);
 		}
 
@@ -1899,7 +1899,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStimulationOutputChunksFromPython
 			uint64 l_ui64EndTime = ITimeArithmetics::secondsToTime(PyFloat_AsDouble(l_pEndTime));
 			Py_CLEAR(l_pEndTime);
 
-			m_vEncoders[output_index]->encodeEnd(output_index);
+			m_vEncoders[output_index]->encodeEnd();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(output_index, l_ui64StartTime, l_ui64EndTime);
 		}
 

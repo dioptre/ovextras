@@ -92,7 +92,7 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	{
 		m_pActiveDecoder = &m_StimulationDecoder;
 	}
-	m_pActiveDecoder->initialize(*this);
+	m_pActiveDecoder->initialize(*this,0);
 
 	uint64 l_ui64Port = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_ui64OutputStyle = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
@@ -250,7 +250,7 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 
 	for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(0); j++)
 	{
-		m_pActiveDecoder->decode(0,j);
+		m_pActiveDecoder->decode(j);
 		if(m_pActiveDecoder->isHeaderReceived())
 		{
 			if(m_pActiveDecoder == &m_MatrixDecoder) 
@@ -315,11 +315,12 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 			} 
 			else // stimulus
 			{
-				IStimulationSet* l_pStimulations = m_StimulationDecoder.getOutputStimulationSet();
+				const IStimulationSet* l_pStimulations = m_StimulationDecoder.getOutputStimulationSet();
 				for(uint32 j=0; j<l_pStimulations->getStimulationCount(); j++)
 				{
-					uint64 l_ui64StimulationCode = l_pStimulations->getStimulationIdentifier(j);
+					const uint64 l_ui64StimulationCode = l_pStimulations->getStimulationIdentifier(j);
 					// uint64 l_ui64StimulationDate = l_pStimulations->getStimulationDate(j);
+					this->getLogManager() << LogLevel_Trace << "Sending out " << l_ui64StimulationCode << "\n";
 
 					switch(m_ui64OutputStyle) {
 						case TCPWRITER_RAW:

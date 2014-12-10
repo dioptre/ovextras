@@ -15,18 +15,13 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 	getStaticBoxContext().getInputType(0, l_oInputTypeIdentifier);
 	if(l_oInputTypeIdentifier==OV_TypeId_Signal)
 	{
-		m_pStreamDecoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-		m_pStreamEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoder));
+		m_pStreamDecoder=new OpenViBEToolkit::TSignalDecoder < CTemporalFilterBoxAlgorithm >(*this,0);
+		m_pStreamEncoder=new OpenViBEToolkit::TSignalEncoder < CTemporalFilterBoxAlgorithm >(*this,0);
 	}
 	else
 	{
 		return false;
 	}
-	m_pStreamDecoder->initialize();
-	m_pStreamEncoder->initialize();
-
-	ip_pMemoryBufferToDecode.initialize(m_pStreamDecoder->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
-	op_pEncodedMemoryBuffer.initialize(m_pStreamEncoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
 
 	// Compute filter coeff algorithm
 	m_pComputeTemporalFilterCoefficients=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ComputeTemporalFilterCoefficients));
@@ -37,11 +32,6 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 	m_pApplyTemporalFilter->initialize();
 
 	m_ui64LastEndTime = 0;
-
-	if(l_oInputTypeIdentifier==OV_TypeId_Signal)
-	{
-		m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_SamplingRate)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
-	}
 
 	// compute filter coefs settings
 	CString l_oNameFilter;
@@ -76,13 +66,15 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 	TParameterHandler<float64> ip_f64PassBandRipple(m_pComputeTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_BandPassRipple));
 	ip_f64PassBandRipple=atof(l_oPassBandRipple);
 
-	m_pComputeTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_SamplingFrequency)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
+	TParameterHandler<uint64> ip_ui64SamplingFrequency(m_pComputeTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_SamplingFrequency));
+	ip_ui64SamplingFrequency.setReferenceTarget(m_pStreamDecoder->getOutputSamplingRate());
 
 	// apply filter settings
-	m_pApplyTemporalFilter->getInputParameter(OVP_Algorithm_ApplyTemporalFilter_InputParameterId_SignalMatrix)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
 	m_pApplyTemporalFilter->getInputParameter(OVP_Algorithm_ApplyTemporalFilter_InputParameterId_FilterCoefficientsMatrix)->setReferenceTarget(m_pComputeTemporalFilterCoefficients->getOutputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_OutputParameterId_Matrix));
 
-	m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pApplyTemporalFilter->getOutputParameter(OVP_Algorithm_ApplyTemporalFilter_OutputParameterId_FilteredSignalMatrix));
+	m_pStreamEncoder->getInputMatrix().setReferenceTarget(m_pApplyTemporalFilter->getOutputParameter(OVP_Algorithm_ApplyTemporalFilter_OutputParameterId_FilteredSignalMatrix));
+	m_pStreamEncoder->getInputSamplingRate().setReferenceTarget(m_pStreamDecoder->getOutputSamplingRate());
+
 	return true;
 }
 
@@ -90,13 +82,14 @@ boolean CTemporalFilterBoxAlgorithm::uninitialize(void)
 {
 	m_pApplyTemporalFilter->uninitialize();
 	m_pComputeTemporalFilterCoefficients->uninitialize();
-	m_pStreamEncoder->uninitialize();
-	m_pStreamDecoder->uninitialize();
-
 	getAlgorithmManager().releaseAlgorithm(*m_pApplyTemporalFilter);
 	getAlgorithmManager().releaseAlgorithm(*m_pComputeTemporalFilterCoefficients);
-	getAlgorithmManager().releaseAlgorithm(*m_pStreamEncoder);
-	getAlgorithmManager().releaseAlgorithm(*m_pStreamDecoder);
+
+	//codecs
+	m_pStreamEncoder->uninitialize();
+	delete m_pStreamEncoder;
+	m_pStreamDecoder->uninitialize();
+	delete m_pStreamDecoder;
 
 	return true;
 }
@@ -116,26 +109,26 @@ boolean CTemporalFilterBoxAlgorithm::process(void)
 	{
 		for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
-//			TParameterHandler < const IMemoryBuffer* > l_oInputMemoryBufferHandle(m_pStreamDecoder->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
-//			TParameterHandler < IMemoryBuffer* > l_oOutputMemoryBufferHandle(m_pStreamEncoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-//			l_oInputMemoryBufferHandle=l_rDynamicBoxContext.getInputChunk(i, j);
-//			l_oOutputMemoryBufferHandle=l_rDynamicBoxContext.getOutputChunk(i);
-			ip_pMemoryBufferToDecode=l_rDynamicBoxContext.getInputChunk(i, j);
-			op_pEncodedMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(i);
 			uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(i, j);
 			uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(i, j);
 
-			if(!m_pStreamDecoder->process()) return false;
-			if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedHeader))
+			if(!m_pStreamDecoder->decode(j)) return false;
+
+			//this has to be done here as it does not work if done once in initialize()
+			IMatrix* l_pInputMatrix = m_pStreamDecoder->getOutputMatrix();
+			TParameterHandler<IMatrix*> l_oMatrixToFilter = m_pApplyTemporalFilter->getInputParameter(OVP_Algorithm_ApplyTemporalFilter_InputParameterId_SignalMatrix);
+			l_oMatrixToFilter.setReferenceTarget(l_pInputMatrix);
+
+			if(m_pStreamDecoder->isHeaderReceived())
 			{
 				if(!m_pComputeTemporalFilterCoefficients->process(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputTriggerId_Initialize)) return false;
 				if(!m_pComputeTemporalFilterCoefficients->process(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputTriggerId_ComputeCoefficients)) return false;
 				if(!m_pApplyTemporalFilter->process(OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_Initialize)) return false;
-				if(!m_pStreamEncoder->process(OVP_GD_Algorithm_SignalStreamEncoder_InputTriggerId_EncodeHeader)) return false;
+				if(!m_pStreamEncoder->encodeHeader()) return false;
 
 				l_rDynamicBoxContext.markOutputAsReadyToSend(i, l_ui64StartTime, l_ui64EndTime);
 			}
-			if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_pStreamDecoder->isBufferReceived())
 			{
 				if (m_ui64LastEndTime==l_ui64StartTime)
 				{
@@ -145,12 +138,12 @@ boolean CTemporalFilterBoxAlgorithm::process(void)
 				{
 					if(!m_pApplyTemporalFilter->process(OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_ApplyFilter)) return false;
 				}
-				if(!m_pStreamEncoder->process(OVP_GD_Algorithm_SignalStreamEncoder_InputTriggerId_EncodeBuffer)) return false;
+				if(!m_pStreamEncoder->encodeBuffer()) return false;
 				l_rDynamicBoxContext.markOutputAsReadyToSend(i, l_ui64StartTime, l_ui64EndTime);
 			}
-			if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_pStreamDecoder->isEndReceived())
 			{
-				if(!m_pStreamEncoder->process(OVP_GD_Algorithm_SignalStreamEncoder_InputTriggerId_EncodeEnd)) return false;
+				if(!m_pStreamEncoder->encodeEnd()) return false;
 				l_rDynamicBoxContext.markOutputAsReadyToSend(i, l_ui64StartTime, l_ui64EndTime);
 			}
 

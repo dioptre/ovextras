@@ -110,15 +110,7 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-		void CKeyboardStimulator::writeStimulationOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize)
-		{
-			appendOutputChunkData<0>(pBuffer, ui64BufferSize);
-		}
-
 		CKeyboardStimulator::CKeyboardStimulator(void) :
-			m_pWriter(NULL),
-			m_pOutputWriterCallbackProxy(NULL),
-			m_pStimulationOutputWriterHelper(NULL),
 			m_pWidget(NULL),
 			m_ui64PreviousActivationTime(0),
 			m_bError(false),
@@ -143,16 +135,11 @@ namespace OpenViBEPlugins
 				return false;
 			}
 
-			//EBML writer, ...
-			m_pOutputWriterCallbackProxy = new EBML::TWriterCallbackProxy1<OpenViBEPlugins::Stimulation::CKeyboardStimulator>(*this, &CKeyboardStimulator::writeStimulationOutput);
+			m_oEncoder.initialize(*this,0);
 
-			m_pWriter=EBML::createWriter(*m_pOutputWriterCallbackProxy);
-
-			m_pStimulationOutputWriterHelper=createBoxAlgorithmStimulationOutputWriter();
-
-			string l_sRed("#602020");
-			string l_sGreen("#206020");
-			string l_sBlue("#202060");
+			const string l_sRed("#602020");
+			const string l_sGreen("#206020");
+			const string l_sBlue("#202060");
 
 			stringstream ss;
 			ss << "\nUse your keyboard to send stimulations\nAvailable keys are :\n\n";
@@ -181,8 +168,8 @@ namespace OpenViBEPlugins
 
 			this->getVisualisationContext().setWidget(m_pWidget);
 
-			//write stimulation stream header
-			m_pStimulationOutputWriterHelper->writeHeader(*m_pWriter);
+			m_oEncoder.encodeHeader();
+
 			getBoxAlgorithmContext()->getDynamicBoxContext()->markOutputAsReadyToSend(0, 0, 0);
 
 			return true;
@@ -190,24 +177,8 @@ namespace OpenViBEPlugins
 
 		boolean CKeyboardStimulator::uninitialize()
 		{
-			if(m_pOutputWriterCallbackProxy) 
-			{
-				delete m_pOutputWriterCallbackProxy;
-				m_pOutputWriterCallbackProxy= NULL;
-			}
-
-			if(m_pWriter)
-			{
-				m_pWriter->release();
-				m_pWriter = NULL;
-			}
-
-			if(m_pStimulationOutputWriterHelper)
-			{
-				releaseBoxAlgorithmStimulationOutputWriter(m_pStimulationOutputWriterHelper);
-				m_pStimulationOutputWriterHelper=NULL;
-			}
-
+			m_oEncoder.uninitialize();
+			
 			if(m_pWidget)
 			{
 				g_object_unref(m_pWidget);
@@ -230,19 +201,23 @@ namespace OpenViBEPlugins
 				m_bUnknownKeyPressed = false;
 			}
 
-			uint64 l_ui64CurrentTime=rMessageClock.getTime();
+			const uint64 l_ui64CurrentTime=rMessageClock.getTime();
 
 			if(l_ui64CurrentTime!=m_ui64PreviousActivationTime)
 			{
 				IBoxIO * l_pBoxIO = getBoxAlgorithmContext()->getDynamicBoxContext();
-				m_pStimulationOutputWriterHelper->setStimulationCount(m_oStimulationToSend.size());
+
+				IStimulationSet* l_pStimulationSet = m_oEncoder.getInputStimulationSet();
+				l_pStimulationSet->clear();		// The encoder may retain the buffer from the previous round, clear it
+
 				for(size_t i=0 ; i<m_oStimulationToSend.size() ; i++)
 				{
-					m_pStimulationOutputWriterHelper->setStimulation(i, m_oStimulationToSend[i], l_ui64CurrentTime);
+					l_pStimulationSet->appendStimulation(m_oStimulationToSend[i], l_ui64CurrentTime,0);
 				}
 				m_oStimulationToSend.clear();
 
-				m_pStimulationOutputWriterHelper->writeBuffer(*m_pWriter);
+				m_oEncoder.encodeBuffer();
+
 				l_pBoxIO->markOutputAsReadyToSend(0, m_ui64PreviousActivationTime, l_ui64CurrentTime);
 				getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 			}

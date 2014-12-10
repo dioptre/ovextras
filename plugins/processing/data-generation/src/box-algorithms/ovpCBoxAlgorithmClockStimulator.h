@@ -33,7 +33,7 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationEncoder;
+			OpenViBEToolkit::TStimulationEncoder< CBoxAlgorithmClockStimulator > m_oStimulationEncoder;
 			OpenViBE::uint64 m_ui64StimulationId;
 			OpenViBE::uint64 m_ui64InterstimulationInterval;
 			OpenViBE::uint64 m_ui64LastStimulationDate;

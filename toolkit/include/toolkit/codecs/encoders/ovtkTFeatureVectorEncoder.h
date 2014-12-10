@@ -64,10 +64,10 @@ namespace OpenViBEToolkit
 		TFeatureVectorEncoder()
 		{
 		}
-		TFeatureVectorEncoder(T& rBoxAlgorithm)
+		TFeatureVectorEncoder(T& rBoxAlgorithm, OpenViBE::uint32 ui32ConnectorIndex)
 		{
 			m_pBoxAlgorithm = NULL;
-			this->initialize(rBoxAlgorithm);
+			this->initialize(rBoxAlgorithm, ui32ConnectorIndex);
 		}
 		virtual ~TFeatureVectorEncoder()
 		{

@@ -10,14 +10,6 @@
 
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/IReader.h>
-#include <ebml/IReaderHelper.h>
-#include <ebml/IWriter.h>
-#include <ebml/IWriterHelper.h>
-
-#include <ebml/TReaderCallbackProxy.h>
-#include <ebml/TWriterCallbackProxy.h>
-
 #include <vector>
 #include <map>
 #include <string>
@@ -47,40 +39,16 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, OVP_ClassId_SpectralAnalysis)
 
-		public:
-
-			virtual void writeAmplitudeSpectrumOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize);
-			virtual void writePhaseSpectrumOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize);
-			virtual void writeRealPartSpectrumOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize);
-			virtual void writeImagPartSpectrumOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize);
-
-			virtual void setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
-			virtual void setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
-			virtual void setSampleCountPerBuffer(const OpenViBE::uint32 ui32SampleCountPerBuffer);
-			virtual void setSamplingRate(const OpenViBE::uint32 ui32SamplingFrequency);
-			virtual void setSampleBuffer(const OpenViBE::float64* pBuffer);
-
-			virtual void setBuffer(const OpenViBE::float64* pBuffer);
 
 		public:
-
-			// Needed to read the input
-			EBML::IReader* m_pSignalReader;
-			OpenViBEToolkit::IBoxAlgorithmSignalInputReaderCallback* m_pSignalReaderCallBack;
-			OpenViBEToolkit::IBoxAlgorithmSignalInputReaderCallback::TCallbackProxy1<OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysis> m_oSignalReaderCallBackProxy;
 
 			//start time and end time of the last arrived chunk
 			OpenViBE::uint64 m_ui64LastChunkStartTime;
 			OpenViBE::uint64 m_ui64LastChunkEndTime;
 
-			// Needed to write on the plugin output
-			EBML::IWriter* m_pWriter[4];
-			EBML::TWriterCallbackProxy1<OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysis> m_oAmplitudeSpectrumOutputWriterCallbackProxy;
-			EBML::TWriterCallbackProxy1<OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysis> m_oPhaseSpectrumOutputWriterCallbackProxy;
-			EBML::TWriterCallbackProxy1<OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysis> m_oRealPartSpectrumOutputWriterCallbackProxy;
-			EBML::TWriterCallbackProxy1<OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysis> m_oImagPartSpectrumOutputWriterCallbackProxy;
-
-			OpenViBEToolkit::IBoxAlgorithmSpectrumOutputWriter* m_pSpectrumOutputWriterHelper;
+			//codecs
+			OpenViBEToolkit::TSignalDecoder< CSpectralAnalysis > m_oSignalDecoder;
+			OpenViBEToolkit::TSpectrumEncoder< CSpectralAnalysis > m_vSpectrumEncoder[4];
 
 			///number of channels
 			OpenViBE::uint32 m_ui32ChannelCount;
@@ -88,15 +56,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32FrequencyBandCount;
 			OpenViBE::uint32 m_ui32SampleCount;
 
-			//the current input buffer being processed
-			const OpenViBE::float64* m_pInputBuffer;
-
-			//the current output buffer being generated
-			OpenViBE::float64* m_pOutputBuffer;
-
-			OpenViBE::boolean m_bCoefComputed;
-			OpenViBE::uint32 m_ui32FFTSize;				// Pad sample up to this, a power of two
-			OpenViBE::uint32 m_ui32HalfFFTSize;			// Half of the m_ui32FFTSize
+			OpenViBE::uint32 m_ui32HalfFFTSize;			// m_ui32SampleCount / 2 + 1;
 
 			OpenViBE::boolean m_bAmplitudeSpectrum;
 			OpenViBE::boolean m_bPhaseSpectrum;
@@ -109,7 +69,7 @@ namespace OpenViBEPlugins
 		public:
 
 			virtual void release(void) { }
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Spectral analysis"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Spectral analysis (FFT)"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Guillaume Gibert"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INSERM"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Compute spectral analysis using Fast Fourier Transform"); }

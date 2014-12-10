@@ -7,9 +7,6 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/IReader.h>
-#include <ebml/IReaderHelper.h>
-
 #include <system/ovCMemory.h>
 
 #include <iostream>
@@ -30,9 +27,6 @@ namespace OpenViBEPlugins
 		*
 		*/
 		class CGDFFileWriter : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
-		, virtual public OpenViBEToolkit::IBoxAlgorithmSignalInputReaderCallback::ICallback
-		, virtual public OpenViBEToolkit::IBoxAlgorithmExperimentInformationInputReaderCallback::ICallback
-		, virtual public OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback::ICallback
 		{
 		public:
 
@@ -48,17 +42,15 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_GDFFileWriter)
 
 		public:
-			virtual void setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
-			virtual void setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
-			virtual void setSampleCountPerBuffer(const OpenViBE::uint32 ui32SampleCountPerBuffer);
-			virtual void setSamplingRate(const OpenViBE::uint32 ui32SamplingFrequency);
-			virtual void setSampleBuffer(const OpenViBE::float64* pBuffer);
+			void setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
+			void setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
+			void setSampleCountPerBuffer(const OpenViBE::uint32 ui32SampleCountPerBuffer);
+			void setSamplingRate(const OpenViBE::uint32 ui32SamplingFrequency);
+			void setSampleBuffer(const OpenViBE::float64* pBuffer);
 
-			virtual void setValue(const OpenViBE::uint32 ui32ValueIdentifier, const OpenViBE::uint64 ui64Value);
-			virtual void setValue(const OpenViBE::uint32 ui32ValueIdentifier, const char* sValue);
+			void setExperimentInformation();
 
-			virtual void setStimulationCount(const OpenViBE::uint32 ui32StimulationCount);
-			virtual void setStimulation(const OpenViBE::uint32 ui32StimulationIndex, const OpenViBE::uint64 ui64StimulationIdentifier, const OpenViBE::uint64 ui64StimulationDate);
+			void setStimulation(const OpenViBE::uint64 ui64StimulationIdentifier, const OpenViBE::uint64 ui64StimulationDate);
 
 			void saveMatrixData();
 			void saveEvents();
@@ -67,12 +59,9 @@ namespace OpenViBEPlugins
 			std::ofstream m_oFile;
 			OpenViBE::CString m_sFileName;
 
-			EBML::IReaderCallBack* m_pReaderCallBack[3];
-			EBML::IReader* m_pReader[3];
-
-			OpenViBEToolkit::IBoxAlgorithmSignalInputReaderCallback* m_pSignalReaderCallBack;
-			OpenViBEToolkit::IBoxAlgorithmExperimentInformationInputReaderCallback* m_pExperimentInformationReaderCallBack;
-			OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback* m_pStimulationReaderCallBack;
+			OpenViBEToolkit::TSignalDecoder<CGDFFileWriter>* m_pSignalDecoder;
+			OpenViBEToolkit::TExperimentInformationDecoder<CGDFFileWriter>* m_pExperimentInformationDecoder;
+			OpenViBEToolkit::TStimulationDecoder<CGDFFileWriter>* m_pStimulationDecoder;
 
 			//GDF structures
 			GDF::CFixedGDF1Header m_oFixedHeader;
@@ -117,10 +106,7 @@ namespace OpenViBEPlugins
 				// Adds box inputs //swap order of the first two
 				rPrototype.addInput("Experiment information", OV_TypeId_ExperimentInformation);
 				rPrototype.addInput("Signal", OV_TypeId_Signal);
-
 				rPrototype.addInput("Stimulation", OV_TypeId_Stimulations);
-
-				// Adds box outputs
 
 				// Adds box settings
 				rPrototype.addSetting("Filename", OV_TypeId_Filename, "record-[$core{date}-$core{time}].gdf");

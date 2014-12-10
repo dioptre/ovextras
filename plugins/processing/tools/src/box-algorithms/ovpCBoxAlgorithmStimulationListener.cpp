@@ -11,10 +11,8 @@ boolean CBoxAlgorithmStimulationListener::initialize(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
-	{
-		IAlgorithmProxy* m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-		m_pStreamDecoder->initialize();
-		m_vStreamDecoder.push_back(m_pStreamDecoder);
+	{		
+		m_vStimulationDecoder.push_back(new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmStimulationListener >(*this,i));
 	}
 
 	CString l_sSettingValue;
@@ -29,10 +27,9 @@ boolean CBoxAlgorithmStimulationListener::uninitialize(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		m_vStreamDecoder[i]->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_vStreamDecoder[i]);
+		m_vStimulationDecoder[i]->uninitialize();
 	}
-	m_vStreamDecoder.clear();
+	m_vStimulationDecoder.clear();
 
 	return true;
 }
@@ -52,15 +49,13 @@ boolean CBoxAlgorithmStimulationListener::process(void)
 	{
 		for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
-			TParameterHandler < const IMemoryBuffer* > ip_pMemoryBufferToDecode(m_vStreamDecoder[i]->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			TParameterHandler < const IStimulationSet* > op_pStimulationSet(m_vStreamDecoder[i]->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
-			ip_pMemoryBufferToDecode=l_rDynamicBoxContext.getInputChunk(i, j);
+			IStimulationSet* op_pStimulationSet = m_vStimulationDecoder[i]->getOutputStimulationSet();
 
-			m_vStreamDecoder[i]->process();
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+			m_vStimulationDecoder[i]->decode(j);
+			if(m_vStimulationDecoder[i]->isHeaderReceived())
 			{
 			}
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_vStimulationDecoder[i]->isBufferReceived())
 			{
 				CString l_sInputName;
 				l_rStaticBoxContext.getInputName(i, l_sInputName);
@@ -82,7 +77,7 @@ boolean CBoxAlgorithmStimulationListener::process(void)
 					}
 				}
 			}
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_vStimulationDecoder[i]->isEndReceived())
 			{
 			}
 			l_rDynamicBoxContext.markInputAsDeprecated(i, j);

@@ -38,6 +38,9 @@ int main(int argc, char** argv)
 		Sleep(10);
 	}
 
+	GenericVRPNServer::deleteInstance();
+	vrpnServer = NULL;
+
 	return 0;
 }
 
