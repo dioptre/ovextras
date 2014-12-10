@@ -32,7 +32,7 @@ namespace OpenViBEPlugins
 
 			//codecs
 			// for the TARGET
-			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmClassifierAccuracyMeasure >* m_pTargetStimulationDecoder;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmClassifierAccuracyMeasure > m_oTargetStimulationDecoder;
 			// For the CLASSIFIERS
 			std::vector<OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmClassifierAccuracyMeasure >* > m_vpClassifierStimulationDecoder;
 
