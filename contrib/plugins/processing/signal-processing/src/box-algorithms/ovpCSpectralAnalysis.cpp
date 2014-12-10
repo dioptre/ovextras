@@ -109,6 +109,7 @@ boolean CSpectralAnalysis::process()
 			CMatrix* l_pStreamedMatrix = new CMatrix();
 			l_pFrequencyBands->setDimensionCount(2);
 
+			// For real signals, if N is sample count, bins [0,N/2] (inclusive) contain non-redundant information, i.e. N/2+1 entries.
 			m_ui32HalfFFTSize = m_ui32SampleCount / 2 + 1;
 			m_ui32FrequencyBandCount = m_ui32HalfFFTSize;
 
@@ -118,10 +119,11 @@ boolean CSpectralAnalysis::process()
 			l_pFrequencyBands->setDimensionSize(1,m_ui32FrequencyBandCount);
 			float64* l_pBuffer = l_pFrequencyBands->getBuffer();
 
+			// @fixme would be more proper to use 'bins', one bin with a hz tag per array entry
 			for (uint32 j=0; j < m_ui32FrequencyBandCount; j++)
 			{
-				l_float64BandStart = static_cast<float64>(j*((double)(m_ui32SamplingRate/2)/m_ui32FrequencyBandCount));
-				l_float64BandStop = static_cast<float64>((j+1)*((double)(m_ui32SamplingRate/2)/m_ui32FrequencyBandCount));
+				l_float64BandStart = static_cast<float64>(j*(m_ui32SamplingRate/(float64)m_ui32SampleCount));
+				l_float64BandStop = static_cast<float64>((j+1)*(m_ui32SamplingRate/(float64)m_ui32SampleCount));
 				if (l_float64BandStop <l_float64BandStart )
 				{
 					l_float64BandStop = l_float64BandStart;
