@@ -45,5 +45,7 @@ int main (int argc, char** argv)
 			}
 		}
 	}
+	cout << "Error: Problem opening [" << argv[1] << "]\n";
+
 	return 2;
 }
