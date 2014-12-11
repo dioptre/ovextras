@@ -10,11 +10,11 @@ SET "OV_PATH_DATA=%OV_PATH_ROOT%\share\openvibe"
 SET OV_PAUSE=PAUSE
 SET OV_RUN_IN_BG=
 
-IF /i "%1"=="--no-pause" (
+IF /i "%~1"=="--no-pause" (
 	SET OV_PAUSE=
 	SHIFT
 )
-IF /i "%1"=="--run-bg" (
+IF /i "%~1"=="--run-bg" (
 	REM Run in background, disable pause. The first start arg is the app title.
 	SET OV_RUN_IN_BG=START "@OV_CMD_EXECUTABLE@"
 	SET OV_PAUSE=

@@ -11,6 +11,12 @@ const double threshold = 72;
 
 int main (int argc, char** argv)
 {
+	if(argc!=2) 
+	{
+		cout << "Usage: test_accuracy <filename>\n";
+		return 3;
+	}
+
 	ifstream file(argv[1], ios::in);
 
 	if(file.good() && !file.bad() && file.is_open()) // ...
