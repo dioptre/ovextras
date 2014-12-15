@@ -219,8 +219,8 @@ boolean CDriverMKSNVXDriver::start(void)
 }
 
 const float floatNaN = std::numeric_limits<float>::quiet_NaN();
-//#define NVXValueToFloat(v, resolution) ((v) == INT_MAX ? floatNaN : ((v)*(resolution)))
-#define NVXValueToFloat(v, resolution) ((v) == INT_MAX ? 0.f : ((v)*(resolution)))
+#define NVXValueToFloat(v, resolution) ((v) == INT_MAX ? floatNaN : ((v)*(resolution)))
+// #define NVXValueToFloat(v, resolution) ((v) == INT_MAX ? 0.f : ((v)*(resolution)))
 
 boolean CDriverMKSNVXDriver::loop(void)
 {
