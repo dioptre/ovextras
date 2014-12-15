@@ -3420,6 +3420,7 @@ boolean CInterfacedScenario::deleteModifiableSettingsBoxes(void)
 {
 	for (uint32 i=0; i<m_vBoxConfigurationDialog.size(); i++)
 	{
+		m_vBoxConfigurationDialog[i]->revertChange();
 		delete m_vBoxConfigurationDialog[i];
 	}
 	m_vBoxConfigurationDialog.clear();

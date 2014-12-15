@@ -12,7 +12,7 @@ ELSE(WIN32)
 	SET(OV_LOGFILE "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")	
 ENDIF(WIN32)
 
-SET(TEST_SCENARIOS PLDA-OneVsOne-HT-Test PLDA-OneVsOne-PKPD-Test PLDA-OneVsOne-Voting-Test PLDA-OneVsAll-Test LDA-OneVsOne-Voting-Test LDA-OneVsAll-Test sLDA-OneVsOne-Voting-Test sLDA-OneVsAll-Test PsLDA-OneVsOne-HT-Test PsLDA-OneVsOne-PKPD-Test PsLDA-OneVsOne-Voting-Test PsLDA-OneVsAll-Test SVM-Native-Test SVM-OneVsOne-Voting-Test SVM-OneVsAll-Test)
+SET(TEST_SCENARIOS PLDA-OneVsOne-HT-Test PLDA-OneVsOne-PKPD-Test PLDA-OneVsOne-Voting-Test PLDA-OneVsAll-Test LDA-OneVsOne-Voting-Test LDA-OneVsAll-Test sLDA-OneVsOne-Voting-Test sLDA-OneVsAll-Test PsLDA-OneVsOne-HT-Test PsLDA-OneVsOne-PKPD-Test PsLDA-OneVsOne-Voting-Test PsLDA-OneVsAll-Test SVM-Native-Test SVM-OneVsOne-Voting-Test SVM-OneVsOne-HT-Test SVM-OneVsOne-PKPD-Test SVM-OneVsAll-Test)
 
 FOREACH(TEST_NAME ${TEST_SCENARIOS})
 

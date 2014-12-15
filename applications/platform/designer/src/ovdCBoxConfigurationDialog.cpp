@@ -590,6 +590,11 @@ void CBoxConfigurationDialog::onOverrideBrowse()
 	gtk_widget_destroy(l_pWidgetDialogOpen);
 }
 
+void CBoxConfigurationDialog::revertChange()
+{
+	m_rBox.restoreState();
+}
+
 
 
 void CBoxConfigurationDialog::updateSize()

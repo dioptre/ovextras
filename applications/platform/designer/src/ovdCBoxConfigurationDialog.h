@@ -28,6 +28,9 @@ namespace OpenViBEDesigner
 		void loadConfiguration();
 		void onOverrideBrowse(void);
 
+		//This function is introduce to revert the change made during the execution of a scenario (modifiable settings)
+		void revertChange(void);
+
 	protected:
 		void generateSettingsTable(void);
 		OpenViBE::boolean addSettingsToView(OpenViBE::uint32 ui32SettingIndex, OpenViBE::uint32 ui32TableIndex);
