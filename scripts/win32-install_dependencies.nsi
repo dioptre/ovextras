@@ -792,21 +792,21 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section /o "Device SDK: Mitsar"
+Section /o "Device SDK: MCS NVX"
 
-	; For mitsar driver
+	; For MCS NVX driver
 	
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
 
-	IfFileExists "arch\sdk-mitsar.zip" no_need_to_download_mitsar_dev
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-mitsar.zip "arch\sdk-mitsar.zip"
+	IfFileExists "arch\sdk-mcs-b-$suffix-dev.zip" no_need_to_download_mcs_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-mcs-b-$suffix-dev.zip "arch\sdk-mcs-b-$suffix-dev.zip"
 	Pop $R0 ; Get the return value
 		StrCmp $R0 "success" +3
 			MessageBox MB_OK "Download failed: $R0" /SD IDOK
 			Quit
-no_need_to_download_mitsar_dev:
-	ZipDLL::extractall "arch\sdk-mitsar.zip" ""
+no_need_to_download_mcs_dev:
+	ZipDLL::extractall "arch\sdk-mcs-b-$suffix-dev.zip" ""
 	
 SectionEnd
 
@@ -830,6 +830,7 @@ no_need_to_download_micromed_dev:
 	ZipDLL::extractall "arch\sdk-micromed-$suffix.zip" ""
 
 SectionEnd
+
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
@@ -849,6 +850,28 @@ Section /o "Device SDK: MindMedia NeXus"
 no_need_to_download_nexus_dev:
 	ZipDLL::extractall "arch\sdk-nexus.zip" ""	
 
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device SDK: Mitsar"
+
+	; For mitsar driver
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-mitsar.zip" no_need_to_download_mitsar_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-mitsar.zip "arch\sdk-mitsar.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_mitsar_dev:
+	ZipDLL::extractall "arch\sdk-mitsar.zip" ""
+	
 SectionEnd
 
 ;##########################################################################################################################################################
@@ -876,9 +899,9 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section /o "Enobio3G"
+Section /o "Device SDK: NeuroElectrics Enobio3G"
 
-	; Neuroelectrics Enobio 3G driver
+	; For Neuroelectrics Enobio 3G driver
 	
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
@@ -908,6 +931,7 @@ no_need_to_download_enobio_runtime:
 
 SectionEnd
 
+
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
@@ -930,6 +954,7 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\tmp"
 	RMDir /r "$INSTDIR\pthreads"
 	RMDir /r "$INSTDIR\enobio3g"
+	RMDir /r "$INSTDIR\mcs"
 	
 	Delete "$INSTDIR\..\scripts\win32-dependencies.cmd"
 
