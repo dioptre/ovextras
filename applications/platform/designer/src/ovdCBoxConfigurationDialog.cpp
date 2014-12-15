@@ -156,6 +156,8 @@ CBoxConfigurationDialog::CBoxConfigurationDialog(const IKernelContext& rKernelCo
 		//if we are in a running scenario, we just need the WidgetToReturn and can destroy the rest
 		if (m_bIsScenarioRunning)
 		{
+			m_rBox.storeState();
+
 			//unparent widget
 			::GtkWidget* l_pWidgetParent = gtk_widget_get_parent(m_pWidgetToReturn);
 			if(GTK_IS_CONTAINER(l_pWidgetParent))

@@ -1347,6 +1347,11 @@ void CBox::storeState(void)
 
 void CBox::restoreState(void)
 {
+	if(!m_pSavedState) 
+	{
+		this->getLogManager() << LogLevel_Warning << "Tried to restore state with no state saved\n";
+		return;
+	}
 	this->initializeFromExistingBox(*m_pSavedState);
 }
 
