@@ -191,7 +191,7 @@ boolean CDriverMBTSmarting::loop(void)
 		}
 	}
 
-	if (latency == 200)
+	if (latency == 300)
 	{
 		latency = 0;
 		m_rDriverContext.setInnerLatencySampleCount(-m_rDriverContext.getDriftSampleCount());
