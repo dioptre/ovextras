@@ -137,9 +137,9 @@ EBML::boolean CBoxAlgorithmGenericStreamReader::isMasterChild(const EBML::CIdent
 {
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header              ) return true;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header_Compression  ) return false;
-	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header_ChannelType  ) return false;
+	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header_StreamType  ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer              ) return true;
-	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_ChannelIndex ) return false;
+	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_StreamIndex ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_StartTime    ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_EndTime      ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_Content      ) return false;
@@ -175,12 +175,12 @@ void CBoxAlgorithmGenericStreamReader::processChildData(const void* pBuffer, con
 			m_bUseCompression=false;
 		}
 	}
-	if(l_rTop==OVP_NodeId_OpenViBEStream_Header_ChannelType)
+	if(l_rTop==OVP_NodeId_OpenViBEStream_Header_StreamType)
 	{
 		m_vStreamIndexToTypeIdentifier[m_vStreamIndexToTypeIdentifier.size()]=m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize);
 	}
 
-	if(l_rTop==OVP_NodeId_OpenViBEStream_Buffer_ChannelIndex)
+	if(l_rTop==OVP_NodeId_OpenViBEStream_Buffer_StreamIndex)
 	{
 		uint32 l_ui32StreamIndex=(uint32)m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize);
 		if(m_vStreamIndexToTypeIdentifier.find(l_ui32StreamIndex)!=m_vStreamIndexToTypeIdentifier.end())

@@ -58,7 +58,7 @@ boolean CBoxAlgorithmGenericStreamWriter::initialize(void)
 		CIdentifier l_oIdentifier;
 		l_rStaticBoxContext.getInputType(i, l_oIdentifier);
 
-		m_oWriterHelper.openChild(OVP_NodeId_OpenViBEStream_Header_ChannelType);
+		m_oWriterHelper.openChild(OVP_NodeId_OpenViBEStream_Header_StreamType);
 		 m_oWriterHelper.setUIntegerAsChildData(l_oIdentifier.toUInteger());
 		m_oWriterHelper.closeChild();
 	}
@@ -101,7 +101,7 @@ boolean CBoxAlgorithmGenericStreamWriter::process(void)
 		{
 			m_oWriterHelper.connect(&m_oWriter);
 			m_oWriterHelper.openChild(OVP_NodeId_OpenViBEStream_Buffer);
-			 m_oWriterHelper.openChild(OVP_NodeId_OpenViBEStream_Buffer_ChannelIndex);
+			 m_oWriterHelper.openChild(OVP_NodeId_OpenViBEStream_Buffer_StreamIndex);
 			  m_oWriterHelper.setUIntegerAsChildData(i);
 			 m_oWriterHelper.closeChild();
 			 m_oWriterHelper.openChild(OVP_NodeId_OpenViBEStream_Buffer_StartTime);
