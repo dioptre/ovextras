@@ -2,8 +2,21 @@
  * mCBioSemiActiveTwoBridge.cpp
  *
  * Copyright (c) 2012, Mensia Technologies SA. All rights reserved.
- * -- Rights transferred to Inria, contract signed 21.11.2014
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301  USA
  */
 
 
@@ -114,7 +127,7 @@ namespace BioSemi
 	Speedmode 8: 290 (2+256+32)
 	*/
 	static unsigned int g_ActiveTwoMarkI_LongPerSample[BIOSEMI_ACTIVETWO_SPEEDMODECOUNT] = {258,130,66,34,258,130,66,34,290,0};
-
+	
 	/*
 	Mk2: 
 	Speedmode 0, 1, 2 and 3: 610 (2+4*152) 
@@ -125,8 +138,58 @@ namespace BioSemi
 	Speedmode 8: 314 (2+280+32)
 	*/
 	static unsigned int g_ActiveTwoMarkII_LongPerSample[BIOSEMI_ACTIVETWO_SPEEDMODECOUNT] = {610,610,610,610,282,154,90,58,314,0};
-
+	
 	static unsigned int * g_ActiveTwoMark_LongPerSample[2] = {g_ActiveTwoMarkI_LongPerSample, g_ActiveTwoMarkII_LongPerSample};
+	/*
+	The ActiveTwo sends the following number of 32-bit words per sample:
+	
+	Mk1: 
+	Speedmode 0 and 4: 258 
+	Speedmode 1 and 5: 130 
+	Speedmode 2 and 6: 66 
+	Speedmode 3 and 7: 34 
+	Speedmode 8: 290 (2+256+32)
+	*/
+	static unsigned int g_ActiveTwoMarkI_ElectrodeChannelPerSample[BIOSEMI_ACTIVETWO_SPEEDMODECOUNT] = {256,128,256,34,232,104,40,8,290,0};
+
+	/*
+	The ActiveTwo sends the following number of 32-bit words per sample:
+	
+	Mk2: 
+	Speedmode 0 and 4: 258 
+	Speedmode 1 and 5: 130 
+	Speedmode 2 and 6: 66 
+	Speedmode 3 and 7: 34 
+	Speedmode 8: 290 (2+256+32)
+	*/
+	static unsigned int g_ActiveTwoMarkII_ElectrodeChannelPerSample[BIOSEMI_ACTIVETWO_SPEEDMODECOUNT] = {256,128,256,128,256,128,64,32,314,0};
+	
+	static unsigned int * g_ActiveTwoMark_ElectrodeChannelPerSample[2] = {g_ActiveTwoMarkI_ElectrodeChannelPerSample, g_ActiveTwoMarkII_ElectrodeChannelPerSample};
+
+	/*
+	Mk2: 
+	Speedmode 0, 1, 2 and 3: 610 (2+4*152) 
+	Speedmode 4: 282 
+	Speedmode 5: 154 
+	Speedmode 6: 90 
+	Speedmode 7: 58 
+	Speedmode 8: 314 (2+280+32)
+	*/
+	static unsigned int g_ActiveTwoMarkI_EXChannelPerSample[BIOSEMI_ACTIVETWO_SPEEDMODECOUNT] = {0,0,0,0,8,8,8,8,8,8};
+	
+	/*
+	Mk2: 
+	Speedmode 0, 1, 2 and 3: 610 (2+4*152) 
+	Speedmode 4: 282 
+	Speedmode 5: 154 
+	Speedmode 6: 90 
+	Speedmode 7: 58 
+	Speedmode 8: 314 (2+280+32)
+	*/
+	static unsigned int g_ActiveTwoMarkII_EXChannelPerSample[BIOSEMI_ACTIVETWO_SPEEDMODECOUNT] = {8,8,8,8,8,8,8,8,8,8};
+		
+	static unsigned int * g_ActiveTwoMark_EXChannelPerSample[2] = {g_ActiveTwoMarkI_EXChannelPerSample, g_ActiveTwoMarkII_EXChannelPerSample};
+
 };
 
 //___________________________________________________________________//
@@ -137,6 +200,7 @@ CBridgeBioSemiActiveTwo::CBridgeBioSemiActiveTwo()
 	m_vBuffer.resize(BIOSEMI_ACTIVETWO_RINGBUFFERBYTES,0);
 	m_vControlBuffer.resize(BIOSEMI_ACTIVETWO_CONTROLBUFFERBYTES);
 	m_uiLastError = BioSemiError_NoError;
+	m_bUseEXChannels = false;
 }
 
 CBridgeBioSemiActiveTwo::~CBridgeBioSemiActiveTwo()
@@ -247,7 +311,7 @@ int CBridgeBioSemiActiveTwo::read()
 	int l_iBytesRead;
 	int l_iCurrentRingBufferByteIndex;
 	bool l_bStatus = (READ_POINTER(m_hDevice, &l_iCurrentRingBufferByteIndex) != FALSE);
-
+	
 	if(!l_bStatus)
 	{
 		__BioSemiBridgeLogConsole__("READ_POINTER failed !!\n");
@@ -272,8 +336,8 @@ int CBridgeBioSemiActiveTwo::read()
 		m_uiLastRingBufferByteIndex = l_iCurrentRingBufferByteIndex;
 		
 		// determine number of channels according to sync bytes
-		// Two extra channels are leading the ADC data: before: channel 1 = sync (check for FFFFFF00) and channel 2 = Status (see
-		//http://www.biosemi.com/faq/trigger_signals.htm), channels 3-258 are ADCs 1-256.
+		// Two extra channels are leading the ADC data: before: channel 1 = sync (check for FFFFFF00) and channel 2 = Status
+		// (see http://www.biosemi.com/faq/trigger_signals.htm), channels 3-258 are ADCs 1-256.
 
 		unsigned int l_iFirstSyncByte = -1;
 		unsigned int l_iNextSyncByte = -1;
@@ -295,7 +359,8 @@ int CBridgeBioSemiActiveTwo::read()
 					m_uiChannelCount = l_iNextSyncByte - l_iFirstSyncByte;
 					m_uiChannelCount /= sizeof(int);
 					m_uiChannelCount -= 2; 
-						
+					
+
 					// we also initialize the status values for getSamplingFrequency
 					int l_iStatusChannelValue = *(reinterpret_cast<int*>(&m_vBuffer[l_iFirstSyncByte + sizeof(int)])); // status integer just after sync integer
 					if(!this->updateStatusFromValue(l_iStatusChannelValue))
@@ -306,9 +371,16 @@ int CBridgeBioSemiActiveTwo::read()
 
 					// Bridge is synced, user can call status getters
 					m_bBridgeSyncedWithDevice = true;
+					
+					//consuming all sync samples
+					//this->consumeBytes(sizeof(int) * (getSampleCount() - m_uiChannelCount - 1));
+					
 					// The Handsake is complete; we can safely consume the corresponding data
-					// channel# + SYNC + STATUS
-					this->consumeBytes((m_uiChannelCount + 2) * sizeof(int));
+					// channel# + SYNC (Status is consumed in updateStatusFromValue function)
+					this->consumeBytes((m_uiChannelCount + 1) * sizeof(int));
+
+					// fix number of channel
+					
 				}
 			}
 		}
@@ -329,12 +401,18 @@ int CBridgeBioSemiActiveTwo::read()
 		
 		if(m_bFirstRead)
 		{
-			m_uiInitialChannelCount = m_uiChannelCount;
+			m_uiInitialChannelCount =  m_bUseEXChannels ? m_uiChannelCount + getEXChannelCount(): m_uiChannelCount;
 			m_uiInitialSpeedmode = m_uiSpeedMode;
 			m_bInitialActiveTwoMarkII = m_bActiveTwoMarkII;
 			m_bFirstRead = false;
 
-			__BioSemiBridgeLogConsole__("Bridge sync! Initial configuration is: %u channels | speedmode %u | Mark2 %u\n", m_uiInitialChannelCount, m_uiInitialSpeedmode, m_bInitialActiveTwoMarkII);
+			// Consume what remains of data
+			// samples# - channel# - SYNC
+			this->consumeBytes(sizeof(int) * (getSampleCount() - m_uiChannelCount - 1));
+
+			m_uiChannelCount = m_uiChannelCount < getElectrodeChannelCount() ? m_uiChannelCount : getElectrodeChannelCount();
+			__BioSemiBridgeLogConsole__("Bridge sync! Initial configuration is: %u channels | speedmode %u | Mark2 %u | Sample count %u | electrode channel count %u | EX channel count: %u \n", 
+				m_uiInitialChannelCount, m_uiInitialSpeedmode, m_bInitialActiveTwoMarkII, getSampleCount(), getElectrodeChannelCount(), getEXChannelCount() );
 		}
 		return l_iBytesRead;
 	}
@@ -389,19 +467,21 @@ bool CBridgeBioSemiActiveTwo::updateStatusFromValue(int iStatusChannelValue)
 	m_bActiveTwoMarkII = (iStatusChannelValue & (0x100 << 23)) != 0;
 	m_uiSpeedMode = ((iStatusChannelValue & (0x100 << 17))!= 0)
 		+ (((iStatusChannelValue & (0x100 << 18))!= 0) << 1)
-		+ (((iStatusChannelValue & (0x100 << 19))!= 0) << 2)
-		+ (((iStatusChannelValue & (0x100 << 22))!= 0) << 3);
+		+ (((iStatusChannelValue & (0x100 << 19))!= 0) << 2);
+//		+ (((iStatusChannelValue & (0x100 << 21))!= 0) << 3);
+	
+	this->consumeBytes(sizeof(int));
 	
 	// fail cases:
 	if(!m_bFirstRead && m_bActiveTwoMarkII != m_bInitialActiveTwoMarkII)
 	{
-		__BioSemiBridgeLogConsole__("Device type changed during acquisition! Stream may has lost synchronization.\n");
+		__BioSemiBridgeLogConsole__("Device type changed during acquisition! Stream may have lost synchronization.\n");
 		m_uiLastError = BioSemiError_DeviceTypeChanged;
 		return false;
 	}
 	if(!m_bFirstRead && m_uiSpeedMode != m_uiInitialSpeedmode)
 	{
-		__BioSemiBridgeLogConsole__("Speedmode changed during acquisition (%u > %u). Stream may has lost synchronization.\n", m_uiInitialSpeedmode, m_uiSpeedMode);
+		__BioSemiBridgeLogConsole__("Speedmode changed during acquisition (%u > %u). Stream may have lost synchronization.\n", m_uiInitialSpeedmode, m_uiSpeedMode);
 		m_uiLastError = BioSemiError_SpeedmodeChanged;
 		return false;
 	}
@@ -453,7 +533,7 @@ unsigned int CBridgeBioSemiActiveTwo::getAvailableSampleCount(void)
 {
 	if(!m_bBridgeSyncedWithDevice) return 0;
 	// this will be rounded
-	return (this->getAvailableByteCount() / (sizeof(int) * (BioSemi::g_ActiveTwoMark_LongPerSample[(m_bActiveTwoMarkII ? 1 : 0)][m_uiSpeedMode])));
+	return (this->getAvailableByteCount() / (sizeof(int) * getSampleCount()));
 }
 
 void CBridgeBioSemiActiveTwo::consumeBytes(unsigned int uiByteToConsume) 
@@ -470,7 +550,7 @@ bool CBridgeBioSemiActiveTwo::consumeOneSamplePerChannel(float* pSampleBuffer, u
 	// fail case: we can't consume if not yet sync'ed
 	if(!m_bBridgeSyncedWithDevice)
 	{
-		__BioSemiBridgeLogConsole__("Bridge is not sync'ed with the device, cannot consume.\n");
+		__BioSemiBridgeLogConsole__("Bridge is not synced with the device, cannot consume.\n");
 		m_uiLastError = BioSemiError_NoSync;
 		return false;
 	}
@@ -483,13 +563,13 @@ bool CBridgeBioSemiActiveTwo::consumeOneSamplePerChannel(float* pSampleBuffer, u
 		return false;
 	}
 
-	if(*(reinterpret_cast<int*>(&m_vBuffer[m_uiConsumptionByteIndex])) != BIOSEMI_ACTIVETWO_SYNCBYTES)
+/*	if(*(reinterpret_cast<int*>(&m_vBuffer[m_uiConsumptionByteIndex])) != BIOSEMI_ACTIVETWO_SYNCBYTES)
 	{
 		__BioSemiBridgeLogConsole__("Lost sync at consume time ! byte index is [%i]\n",m_uiConsumptionByteIndex);
 		m_uiLastError = BioSemiError_SyncLost;
 		return false;
 	}
-	
+*/	
 	/*
 	the LongPerSample value gives the number of integers that the device sends per sample round.
 	For example with the Mark II and a speedmode = 4, we have 282 Integers per sample.
@@ -497,11 +577,8 @@ bool CBridgeBioSemiActiveTwo::consumeOneSamplePerChannel(float* pSampleBuffer, u
 	- 273 SYNC
 	- 1 Integer for the Status
 	- 8 Integers for the 8 channels
-	*/
-
-	//consuming all sync samples
-	this->consumeBytes(sizeof(int) * (BioSemi::g_ActiveTwoMark_LongPerSample[(m_bActiveTwoMarkII ? 1 : 0)][m_uiSpeedMode] - m_uiChannelCount - 1));
-
+	*/	
+	//this->consumeBytes(sizeof(int) * (getSampleCount() - m_uiChannelCount - 1));
 
 	// We  consume the integer from STATUS channel.
 	int l_iStatusChannelValue = *(reinterpret_cast<int*>(&m_vBuffer[m_uiConsumptionByteIndex]));
@@ -510,33 +587,108 @@ bool CBridgeBioSemiActiveTwo::consumeOneSamplePerChannel(float* pSampleBuffer, u
 		__BioSemiBridgeLogConsole__("something bad in latest status value !\n");
 		return false;
 	}
-	this->consumeBytes(sizeof(int));
 
 	// EEG channels fill the user buffer.
-
-	/*
-	The receiver converts every 24-bit word from the AD-box into a 32-bit Signed Integer,
-	by adding an extra zero Least Significant Byte to the ADC data.
-	The 24-bit ADC output has an LSB value of 1/32th uV.
-	The 32-bit Integer received for the USB interface has an LSB value of 1/32*1/256 = 1/8192th uV
-	*/
-	float l_fFactor = 1.f/8192;
-
-	unsigned int l_uiSampleLongConsumed = 0;
-	while(l_uiSampleLongConsumed < m_uiChannelCount)
+	if(pSampleBuffer != NULL)
 	{
-		int l_iValue = *(reinterpret_cast<int*>(&m_vBuffer[m_uiConsumptionByteIndex]));
-		
-		if(pSampleBuffer != NULL)
+		/*
+		The receiver converts every 24-bit word from the AD-box into a 32-bit Signed Integer,
+		by adding an extra zero Least Significant Byte to the ADC data.
+		The 24-bit ADC output has an LSB value of 1/32th uV.
+		The 32-bit Integer received for the USB interface has an LSB value of 1/32*1/256 = 1/8192th uV
+		*/
+		float l_fFactor = 1.f/8192;
+
+		unsigned int l_uiSampleLongConsumed = 0;
+		unsigned int l_uiSampleInBuffer = 0;
+		unsigned int l_uiMaxEEGChannel = isUseEXChannels() ? uiBufferValueCount - getEXChannelCount() : uiBufferValueCount;
+		while(l_uiSampleInBuffer < l_uiMaxEEGChannel)
 		{
-			pSampleBuffer[l_uiSampleLongConsumed] = l_iValue * l_fFactor;
+			int l_iValue = *(reinterpret_cast<int*>(&m_vBuffer[m_uiConsumptionByteIndex]));
+		
+			// We don't add more samples that the number that should be displayed, 
+			// to avoid displaying an electrode channel instaed of an EX channel
+			if(l_uiSampleInBuffer < m_uiChannelCount)
+			{
+				pSampleBuffer[l_uiSampleInBuffer] = l_iValue * l_fFactor;
+			}
+			else
+			{
+				// If the number of requested channel is superior to the number of available channels, pad with 0
+				pSampleBuffer[l_uiSampleInBuffer] = 0;
+			}
+
+			l_uiSampleInBuffer++;
+			l_uiSampleLongConsumed++;
+			this->consumeBytes(sizeof(int));
 		}
-		l_uiSampleLongConsumed++;
+		if(m_bUseEXChannels)
+		{
+			// Consuming all sync samples until EX channels
+			// ELECTRODE CHANNEL # - CHANNEL#
+			this->consumeBytes(sizeof(int) * (getElectrodeChannelCount() - l_uiMaxEEGChannel) );
+			while(l_uiSampleLongConsumed < l_uiMaxEEGChannel + getEXChannelCount())
+			{
+				int l_iValue = *(reinterpret_cast<int*>(&m_vBuffer[m_uiConsumptionByteIndex]));
+				if(l_uiSampleInBuffer < uiBufferValueCount)
+				{
+					pSampleBuffer[l_uiSampleInBuffer] = l_iValue * l_fFactor;
+					l_uiSampleInBuffer++;
+				}
+				l_uiSampleLongConsumed++;
+				this->consumeBytes(sizeof(int));
+			}
+			// Consuming all remaining samples (sensor channels)
+			// SAMPLE# - ELECTRODE CHANNEL# - EX CHANNEL# - SYNC
+			this->consumeBytes(sizeof(int) * (getSampleCount() - (getElectrodeChannelCount() + getEXChannelCount() + 1)));
+		} 
+		else 
+		{
+			// Consuming all sync samples plus EX and sensor channels
+			// SAMPLE# - CHANNEL# - SYNC
+			this->consumeBytes(sizeof(int) * (getSampleCount() - l_uiMaxEEGChannel - 1));
+		}
 	}
-	this->consumeBytes(sizeof(int) * m_uiChannelCount);
+	//if pSample == NULL
+	else
+	{
+		// Consuming all sync samples plus EX and sensor channels
+		// SAMPLE# - CHANNEL# - SYNC
+		this->consumeBytes(sizeof(int) * (getSampleCount() - 1));
+	}
+	/*if(*(reinterpret_cast<int*>(&m_vBuffer[m_uiConsumptionByteIndex])) != BIOSEMI_ACTIVETWO_SYNCBYTES)
+	{
+		__BioSemiBridgeLogConsole__("Lost sync at consume time ! byte index is [%i]\n",m_uiConsumptionByteIndex);
+		m_uiLastError = BioSemiError_SyncLost;
+		return false;
+	}*/
+	//this->consumeBytes(sizeof(int) * m_uiChannelCount);
 
 	//__BioSemiBridgeLogConsole__("consumed "<<l_uiByteConsumed<<" bytes this round.\n";
 	return true;
+}
+
+
+unsigned int CBridgeBioSemiActiveTwo::getElectrodeChannelCount(void)
+{
+	if(!m_bBridgeSyncedWithDevice) return 0;
+	// this will be rounded
+	return (BioSemi::g_ActiveTwoMark_ElectrodeChannelPerSample[(m_bActiveTwoMarkII ? 1 : 0)][m_uiSpeedMode]);
+}
+
+unsigned int CBridgeBioSemiActiveTwo::getEXChannelCount(void)
+{
+	if(!m_bUseEXChannels) return 0;
+	else if(!m_bBridgeSyncedWithDevice) return 0;
+	// this will be rounded
+	return (BioSemi::g_ActiveTwoMark_EXChannelPerSample[(m_bActiveTwoMarkII ? 1 : 0)][m_uiSpeedMode]);
+}
+
+unsigned int CBridgeBioSemiActiveTwo::getSampleCount(void)
+{
+	if(!m_bBridgeSyncedWithDevice) return 0;
+	// this will be rounded
+	return (BioSemi::g_ActiveTwoMark_LongPerSample[(m_bActiveTwoMarkII ? 1 : 0)][m_uiSpeedMode]);
 }
 
 //___________________________________________________________________//

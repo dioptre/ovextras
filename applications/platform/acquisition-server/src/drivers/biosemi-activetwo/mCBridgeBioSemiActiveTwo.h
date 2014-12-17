@@ -2,8 +2,21 @@
  * ovasCDriverBioSemiActiveTwo.h
  *
  * Copyright (c) 2012, Mensia Technologies SA. All rights reserved.
- * -- Rights transferred to Inria, contract signed 21.11.2014
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301  USA
  */
 
 #ifdef TARGET_HAS_ThirdPartyBioSemiAPI
@@ -14,7 +27,8 @@
 #include <vector>
 
 
-#define BIOSEMI_ACTIVETWO_MAXCHANNELCOUNT 264
+#define BIOSEMI_ACTIVETWO_MAXCHANNELCOUNT 256
+#define BIOSEMI_ACTIVETWO_EXCHANNELCOUNT  8
 
 namespace Mensia
 {
@@ -55,13 +69,16 @@ namespace Mensia
 		virtual int read(void);
 		virtual bool discard(void);
 		virtual unsigned int getAvailableSampleCount(void);
+		virtual unsigned int getElectrodeChannelCount(void);
+		virtual unsigned int getEXChannelCount(void);
+		virtual unsigned int getSampleCount(void);
+		virtual unsigned int getSpeedMode(void) {return m_uiSpeedMode;}
+		unsigned int getChannelCount(void) { return m_uiChannelCount; }
 		virtual bool consumeOneSamplePerChannel(float* pSampleBuffer, unsigned int uiBufferValueCount);
 		virtual bool stop(void);
 		virtual bool close(void);
 
 		bool isSynced() const {return m_bBridgeSyncedWithDevice;}
-		
-		unsigned int getChannelCount() const {return m_uiChannelCount;}
 		
 		bool getTrigger(unsigned int uiIndex) const {return (uiIndex > m_vTriggers.size() ? false : m_vTriggers[uiIndex]);}
 		bool isCMSInRange(void) const {return m_bCMSInRange;}
@@ -70,6 +87,9 @@ namespace Mensia
 		virtual unsigned int getSamplingFrequency(void);
 
 		unsigned int getLastError(void) {return m_uiLastError;}
+
+		bool isUseEXChannels(void) {return m_bUseEXChannels;}
+		void setUseEXChannels(bool bUseEXChannels) {m_bUseEXChannels = bUseEXChannels;}
 
 	protected:
 		// Handle to the device
@@ -106,6 +126,8 @@ namespace Mensia
 		unsigned int m_uiTotalByteReadCount;
 
 		unsigned int m_uiLastError;
+
+		bool m_bUseEXChannels;
 	};
 };
 
