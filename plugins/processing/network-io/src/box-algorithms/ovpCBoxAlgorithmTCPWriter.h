@@ -177,8 +177,12 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
 
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Stimulations);
+
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
-				
+
 				return true;
 			}
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_TCPWriterDesc);

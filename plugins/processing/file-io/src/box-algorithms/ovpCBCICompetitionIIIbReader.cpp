@@ -25,22 +25,9 @@ namespace OpenViBEPlugins
 	namespace FileIO
 	{
 
-		//Writer Methods
-		void CBCICompetitionIIIbReader::writeSignalOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize)
-		{
-			appendOutputChunkData<0>(pBuffer, ui64BufferSize);
-		}
-
-		void CBCICompetitionIIIbReader::writeStimulationOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize)
-		{
-			appendOutputChunkData<1>(pBuffer, ui64BufferSize);
-		}
-
 		CBCICompetitionIIIbReader::CBCICompetitionIIIbReader()
 			: m_bErrorOccurred(false),
 			m_ui64FileSize(0),
-			m_pSignalOutputWriterHelper(NULL),
-			m_pStimulationOutputWriterHelper(NULL),
 			m_ui64ClockFrequency(100LL<<32),
 			m_ui32SamplesPerBuffer(0),
 			m_ui32SamplingRate(125),
@@ -53,21 +40,20 @@ namespace OpenViBEPlugins
 
 		void CBCICompetitionIIIbReader::writeSignalInformation()
 		{
-			m_pSignalOutputWriterHelper->setSamplingRate(125);
-			m_pSignalOutputWriterHelper->setChannelCount(2);
+			m_oSignalEncoder.getInputSamplingRate() = 125;
+			m_oSignalEncoder.getInputMatrix()->setDimensionCount(2);
+			m_oSignalEncoder.getInputMatrix()->setDimensionSize(0,2);						// channels
+			m_oSignalEncoder.getInputMatrix()->setDimensionSize(1,m_ui32SamplesPerBuffer);	// samples per buffer
 
-			m_pSignalOutputWriterHelper->setChannelName(0, "+C3a-C3p");
-			m_pSignalOutputWriterHelper->setChannelName(1, "+C4a-C4p");
-
-			m_pSignalOutputWriterHelper->setSampleCountPerBuffer(m_ui32SamplesPerBuffer);
-
-			m_pSignalOutputWriterHelper->writeHeader(*m_pWriter[0]);
-
-			getBoxAlgorithmContext()->getDynamicBoxContext()->markOutputAsReadyToSend(0, 0, 0);
+			m_oSignalEncoder.getInputMatrix()->setDimensionLabel(0, 0, "+C3a-C3p");
+			m_oSignalEncoder.getInputMatrix()->setDimensionLabel(0, 1, "+C4a-C4p");
 		}
 
 		OpenViBE::boolean CBCICompetitionIIIbReader::initialize()
 		{
+			m_oSignalEncoder.initialize(*this,0);
+			m_oStimulationEncoder.initialize(*this,1);
+
 			const IBox* l_pBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
 
 			CString l_oParameter;
@@ -228,49 +214,23 @@ namespace OpenViBEPlugins
 			l_pBoxContext->getSettingValue(9, l_oParameter);
 			m_bKeepArtifactSamples = (l_oParameter == CString("true"));
 
-			//Prepares the writers proxies
-			m_pOutputWriterCallbackProxy[0] = new EBML::TWriterCallbackProxy1<OpenViBEPlugins::FileIO::CBCICompetitionIIIbReader>(*this, &CBCICompetitionIIIbReader::writeSignalOutput);
-
-			m_pOutputWriterCallbackProxy[1] = new EBML::TWriterCallbackProxy1<OpenViBEPlugins::FileIO::CBCICompetitionIIIbReader>(*this, &CBCICompetitionIIIbReader::writeStimulationOutput);
-
-			for(int i=0 ; i<2 ; i++)
-			{
-				m_pWriter[i]=EBML::createWriter(*m_pOutputWriterCallbackProxy[i]);
-			}
-
-			// Prepares writer helpers
-			m_pSignalOutputWriterHelper=createBoxAlgorithmSignalOutputWriter();
-			m_pStimulationOutputWriterHelper=createBoxAlgorithmStimulationOutputWriter();
-
 			writeSignalInformation();
 
-			m_pStimulationOutputWriterHelper->writeHeader(*m_pWriter[1]);
+			m_oSignalEncoder.encodeHeader();
+			m_oStimulationEncoder.encodeHeader();
+
+			getBoxAlgorithmContext()->getDynamicBoxContext()->markOutputAsReadyToSend(0, 0, 0);
 			getBoxAlgorithmContext()->getDynamicBoxContext()->markOutputAsReadyToSend(1, 0, 0);
 
-			m_oMatrixBuffer.resize(2*m_ui32SamplesPerBuffer);
-			m_pSignalOutputWriterHelper->setSampleBuffer(&m_oMatrixBuffer[0]);
+			m_pMatrixBuffer = m_oSignalEncoder.getInputMatrix();
 
 			return true;
 		}
 
 		OpenViBE::boolean CBCICompetitionIIIbReader::uninitialize()
 		{
-			// Cleans up EBML writers
-			for(int i=0 ; i<2 ; i++)
-			{
-				delete m_pOutputWriterCallbackProxy[i];
-				m_pOutputWriterCallbackProxy[i] = NULL;
-				m_pWriter[i]->release();
-				m_pWriter[i] = NULL;
-			}
-
-			//desallocate the signal output writer helper
-			releaseBoxAlgorithmSignalOutputWriter(m_pSignalOutputWriterHelper);
-			m_pSignalOutputWriterHelper=NULL;
-
-			//desallocate the stimulation output writer helper
-			releaseBoxAlgorithmStimulationOutputWriter(m_pStimulationOutputWriterHelper);
-			m_pStimulationOutputWriterHelper=NULL;
+			m_oStimulationEncoder.uninitialize();
+			m_oSignalEncoder.uninitialize();
 
 			if(m_oSignalFile)
 			{
@@ -297,20 +257,22 @@ namespace OpenViBEPlugins
 				return false;
 			}
 
-			uint64 l_ui64StartTime=0;
-			uint64 l_ui64EndTime=0;
-
 			IBoxIO * l_pBoxIO = getBoxAlgorithmContext()->getDynamicBoxContext();
 
 			//reading signal
 			//reset vector
-			m_oMatrixBuffer.assign(2*m_ui32SamplesPerBuffer, 0);
-			uint32 i;
+			float64* l_pBuffer = m_pMatrixBuffer->getBuffer();
+			for(uint32 i=0;i<m_pMatrixBuffer->getBufferElementCount();i++)
+			{
+				l_pBuffer[i] = 0;
+			}
+
 			std::istringstream l_oStringStream;
 			std::string l_oLine;
 			float64 l_f64Sample;
 
-			for(i=0 ; i<m_ui32SamplesPerBuffer && !m_bEndOfFile; i++)
+			uint32 count = 0;
+			for( ; count<m_ui32SamplesPerBuffer && !m_bEndOfFile; count++)
 			{
 				m_bEndOfFile = (getline(m_oSignalFile, l_oLine) == NULL);
 
@@ -324,11 +286,11 @@ namespace OpenViBEPlugins
                 if(std::isnan(l_f64Sample))
 #endif
 				{
-					m_oMatrixBuffer[i] = (i != 0) ? m_oMatrixBuffer[i-1] : 0.0;
+					l_pBuffer[count] = (count != 0) ? l_pBuffer[count-1] : 0.0;
 				}
 				else
 				{
-					m_oMatrixBuffer[i] = l_f64Sample;
+					l_pBuffer[count] = l_f64Sample;
 				}
 
 				l_oStringStream>>l_f64Sample;
@@ -338,21 +300,21 @@ namespace OpenViBEPlugins
                 if(std::isnan(l_f64Sample))
 #endif
 				{
-					m_oMatrixBuffer[i+m_ui32SamplesPerBuffer] = (i != 0) ? m_oMatrixBuffer[i+m_ui32SamplesPerBuffer-1] : 0.0;
+					l_pBuffer[count+m_ui32SamplesPerBuffer] = (count != 0) ? l_pBuffer[count+m_ui32SamplesPerBuffer-1] : 0.0;
 				}
 				else
 				{
-					m_oMatrixBuffer[i+m_ui32SamplesPerBuffer] = l_f64Sample;
+					l_pBuffer[count+m_ui32SamplesPerBuffer] = l_f64Sample;
 				}
 			}
 
-			m_ui32SentSampleCount += i;
+			m_ui32SentSampleCount += count;
 
 			//A signal matrix is ready to be output
-			m_pSignalOutputWriterHelper->writeBuffer(*m_pWriter[0]);
+			m_oSignalEncoder.encodeBuffer();
 
-			l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingRate, (uint64)(m_ui32SentSampleCount - i));
-			l_ui64EndTime  =  ITimeArithmetics::sampleCountToTime(m_ui32SamplingRate, (uint64)(m_ui32SentSampleCount));
+			const uint64 l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingRate, (uint64)(m_ui32SentSampleCount - count));
+			const uint64 l_ui64EndTime  =  ITimeArithmetics::sampleCountToTime(m_ui32SamplingRate, (uint64)(m_ui32SentSampleCount));
 
 			l_pBoxIO->markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 			//////
@@ -365,12 +327,12 @@ namespace OpenViBEPlugins
 			{
 				l_bChanged = false;
 
-				boolean l_bKeepCurrentTrial =
+				const boolean l_bKeepCurrentTrial =
 					((m_oArtifacts[m_ui32CurrentTrial] && m_bKeepArtifactSamples) || !m_oArtifacts[m_ui32CurrentTrial]) &&
 					((m_oClassLabels[m_ui32CurrentTrial] == BCICompetitionIIIbReader_UndefinedClass && m_bKeepTestSamples) ||
 					 (m_oClassLabels[m_ui32CurrentTrial] != BCICompetitionIIIbReader_UndefinedClass && m_bKeepTrainingSamples));
 
-				if(m_oTriggerTime[m_ui32CurrentTrial]>(m_ui32SentSampleCount-i) &&
+				if(m_oTriggerTime[m_ui32CurrentTrial]>(m_ui32SentSampleCount-count) &&
 						m_oTriggerTime[m_ui32CurrentTrial]<=m_ui32SentSampleCount
 				     )
 				{
@@ -385,7 +347,7 @@ namespace OpenViBEPlugins
 				}
 
 				//send CUE stimulation
-				if(m_oCueDisplayStart[m_ui32CurrentTrial]>(m_ui32SentSampleCount-i) &&
+				if(m_oCueDisplayStart[m_ui32CurrentTrial]>(m_ui32SentSampleCount-count) &&
 						m_oCueDisplayStart[m_ui32CurrentTrial]<=m_ui32SentSampleCount
 				     )
 				{
@@ -405,7 +367,7 @@ namespace OpenViBEPlugins
 				}
 
 				//send feedback start stimulation
-				if(m_oFeedbackStart[m_ui32CurrentTrial]>(m_ui32SentSampleCount-i) &&
+				if(m_oFeedbackStart[m_ui32CurrentTrial]>(m_ui32SentSampleCount-count) &&
 						m_oFeedbackStart[m_ui32CurrentTrial]<=m_ui32SentSampleCount
 				     )
 				{
@@ -416,7 +378,7 @@ namespace OpenViBEPlugins
 				}
 
 				//send end of trial stimulation
-				if(m_oEndOfTrial[m_ui32CurrentTrial]>(m_ui32SentSampleCount-i) &&
+				if(m_oEndOfTrial[m_ui32CurrentTrial]>(m_ui32SentSampleCount-count) &&
 						m_oEndOfTrial[m_ui32CurrentTrial]<=m_ui32SentSampleCount
 				     )
 				{
@@ -431,7 +393,9 @@ namespace OpenViBEPlugins
 
 			if(!l_oEvents.empty() || m_bEndOfFile)
 			{
-				m_pStimulationOutputWriterHelper->setStimulationCount(l_oEvents.size() + ((m_bEndOfFile)? 1 : 0) );
+				IStimulationSet* l_pStimulationSet = m_oStimulationEncoder.getInputStimulationSet();
+
+				l_pStimulationSet->setStimulationCount(l_oEvents.size() + ((m_bEndOfFile)? 1 : 0) );
 
 				uint64 l_ui64EventDate = 0;
 
@@ -439,7 +403,7 @@ namespace OpenViBEPlugins
 				{
 					//compute date
 					l_ui64EventDate = ITimeArithmetics::sampleCountToTime(m_ui32SamplingRate, l_oEvents[j].second);
-					m_pStimulationOutputWriterHelper->setStimulation(j, l_oEvents[j].first, l_ui64EventDate);
+					l_pStimulationSet->insertStimulation(j, l_oEvents[j].first, l_ui64EventDate, 0);
 				}
 
 				//add the ending stim
@@ -447,10 +411,10 @@ namespace OpenViBEPlugins
 				{
 					//compute date
 					l_ui64EventDate = ITimeArithmetics::sampleCountToTime(m_ui32SamplingRate, m_ui32SentSampleCount);
-					m_pStimulationOutputWriterHelper->setStimulation(l_oEvents.size(), 0x3FF, l_ui64EventDate);
+					l_pStimulationSet->insertStimulation(l_oEvents.size(), 0x3FF, l_ui64EventDate, 0);
 				}
 
-				m_pStimulationOutputWriterHelper->writeBuffer(*m_pWriter[1]);
+				m_oStimulationEncoder.encodeBuffer();
 
 				l_pBoxIO->markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
 			}

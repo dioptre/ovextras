@@ -7,7 +7,7 @@
 
 #include "../configuration/ovkCConfigurationManager.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <xml/IReader.h>
 
@@ -76,12 +76,12 @@ boolean CPlayer::setScenario(
 	return m_oScheduler.setScenario(rScenarioIdentifier);;
 }
 
-boolean CPlayer::initialize(void)
+EPlayerReturnCode CPlayer::initialize(void)
 {
 	if(m_eStatus!=PlayerStatus_Uninitialized)
 	{
 		this->getLogManager() << LogLevel_Warning << "Trying to initialize an initialized player !\n";
-		return false;
+		return PlayerReturnCode_Failed;
 	}
 
 	this->getLogManager() << LogLevel_Trace << "Player initialize\n";
@@ -120,15 +120,15 @@ boolean CPlayer::initialize(void)
 		this->getLogManager() << LogLevel_Trace << "Requesting add of local scenario config from " << l_sConfigPath << "\n";
 		m_pLocalConfigurationManager->addConfigurationFromFile( l_sConfigPath ); 
 	}
-
-	if(!m_oScheduler.initialize()) 
+	SchedulerInitializationCode l_eCode = m_oScheduler.initialize();
+	if(l_eCode == SchedulerInitialization_Failed)
 	{
 		this->getLogManager() << LogLevel_Error << "Scheduler initialization failed\n";
 
 		delete m_pLocalConfigurationManager;
 		m_pLocalConfigurationManager = NULL;
 
-		return false;
+		return PlayerReturnCode_Failed;
 	}
 	m_oBenchmarkChrono.reset(static_cast<uint32>(m_oScheduler.getFrequency()));
 
@@ -136,7 +136,11 @@ boolean CPlayer::initialize(void)
 	m_ui64Lateness=0;
 	m_eStatus=PlayerStatus_Stop;
 
-	return true;
+	if(l_eCode == SchedulerInitialization_BoxInitializationFailed)
+	{
+		return PlayerReturnCode_BoxInitializationFailed;
+	}
+	return PlayerReturnCode_Sucess;
 
 }
 

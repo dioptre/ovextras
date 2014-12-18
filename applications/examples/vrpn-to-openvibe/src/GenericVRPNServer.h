@@ -41,6 +41,8 @@ class GenericVRPNServer
 		/// Public singleton factory
 		static GenericVRPNServer* getInstance(int port);
 
+		static void deleteInstance(void);
+
 		/// Public destructor
 		~GenericVRPNServer();
 

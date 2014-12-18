@@ -66,12 +66,14 @@ namespace OpenViBE
 			virtual OpenViBE::boolean addInputAndDerivedSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier);
 			virtual OpenViBE::boolean hasInputSupport(
-					const OpenViBE::CIdentifier& rTypeIdentifier);
+					const OpenViBE::CIdentifier& rTypeIdentifier) const;
 			virtual OpenViBE::boolean addOutputSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier);
 			virtual OpenViBE::boolean addOutputAndDerivedSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier);
 			virtual OpenViBE::boolean hasOutputSupport(
+					const OpenViBE::CIdentifier& rTypeIdentifier) const;
+			virtual OpenViBE::boolean setSupportTypeFromAlgorithmIdentifier(
 					const OpenViBE::CIdentifier& rTypeIdentifier);
 
 
@@ -159,6 +161,9 @@ namespace OpenViBE
 			virtual OpenViBE::boolean setSettingValue(
 				const OpenViBE::uint32 ui32SettingIndex,
 				const OpenViBE::CString& rValue);
+			virtual void notifySettingChange(BoxEventMessageType eType,
+					OpenViBE::int32 i32FirstIndex = -1,
+					OpenViBE::int32 i32SecondIndex = -1);
 
 			//*
 			virtual OpenViBE::boolean getSettingMod(
@@ -174,6 +179,10 @@ namespace OpenViBE
 
 			virtual OpenViBE::boolean acceptVisitor(
 				OpenViBE::IObjectVisitor& rObjectVisitor);
+
+			virtual void storeState(void);
+
+			virtual void restoreState(void);
 
 			_IsDerivedFromClass_Final_(OpenViBE::Kernel::TAttributable < OpenViBE::Kernel::TKernelObject < OpenViBE::Kernel::IBox > >, OVK_ClassId_Kernel_Scenario_Box)
 
@@ -260,6 +269,7 @@ namespace OpenViBE
 			OpenViBE::Plugins::IBoxListener* m_pBoxListener;
 			OpenViBE::boolean m_bIsNotifyingDescriptor;
 			OpenViBE::boolean m_bIsNotificationActive;
+			OpenViBE::boolean m_bIsObserverNotificationActive;
 
 			OpenViBE::CIdentifier m_oIdentifier;
 			OpenViBE::CIdentifier m_oAlgorithmClassIdentifier;
@@ -279,6 +289,8 @@ namespace OpenViBE
 			//only the name of the in/output are stored for message socket
 			std::vector<CMessageInput> m_vMessageInput;
 			std::vector<CMessageOutput> m_vMessageOutput;
+
+			OpenViBE::Kernel::CBox *m_pSavedState;
 		};
 	};
 };

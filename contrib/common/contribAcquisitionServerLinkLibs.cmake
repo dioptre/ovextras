@@ -1,4 +1,5 @@
-INCLUDE("../contrib/common/FindThirdPartyBioSemiLabViewAPI")
+
 INCLUDE("FindThirdPartyBrainmasterCodeMakerAPI")
-INCLUDE("FindThirdPartyActiCHampAPI")
+INCLUDE("FindThirdPartyGMobiLabPlusAPI")
 INCLUDE("FindThirdPartyGUSBampCAPI")
+INCLUDE("FindThirdPartyMitsar")

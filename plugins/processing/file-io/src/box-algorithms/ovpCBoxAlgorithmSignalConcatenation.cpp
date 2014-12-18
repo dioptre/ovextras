@@ -1,6 +1,6 @@
 #include "ovpCBoxAlgorithmSignalConcatenation.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -28,8 +28,8 @@ boolean CBoxAlgorithmSignalConcatenation::initialize(void)
 
 	for(uint32 i = 0; i < this->getStaticBoxContext().getInputCount(); i+=2)
 	{
-		OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSignalConcatenation > * l_pStimDecoder = new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSignalConcatenation >(*this);
-		OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmSignalConcatenation > * l_pSignalDecoder = new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmSignalConcatenation >(*this);
+		OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSignalConcatenation > * l_pStimDecoder = new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSignalConcatenation >(*this,i);
+		OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmSignalConcatenation > * l_pSignalDecoder = new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmSignalConcatenation >(*this,i+1);
 		
 		m_vSignalDecoders.push_back(l_pSignalDecoder);
 		m_vStimulationDecoders.push_back(l_pStimDecoder);
@@ -37,14 +37,14 @@ boolean CBoxAlgorithmSignalConcatenation::initialize(void)
 		m_vStimulationSets.push_back(l_pStimSet);
 	}
 
-	m_oStimulationEncoder.initialize(*this);
+	m_oStimulationEncoder.initialize(*this,1);
 	m_oStimulationEncoder.getInputStimulationSet().setReferenceTarget(m_vStimulationDecoders[0]->getOutputStimulationSet());
 
-	m_oSignalEncoder.initialize(*this);
+	m_oSignalEncoder.initialize(*this,0);
 	m_oSignalEncoder.getInputSamplingRate().setReferenceTarget(m_vSignalDecoders[0]->getOutputSamplingRate());
 	m_oSignalEncoder.getInputMatrix().setReferenceTarget(m_vSignalDecoders[0]->getOutputMatrix());
 
-	m_oTriggerEncoder.initialize(*this);
+	m_oTriggerEncoder.initialize(*this,2);
 	m_oTriggerEncoder.getInputStimulationSet().setReferenceTarget(m_vStimulationDecoders[0]->getOutputStimulationSet());
 
 	m_ui32HeaderReceivedCount = 0;
@@ -144,7 +144,7 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 			{
 				if(m_ui32HeaderReceivedCount < l_rStaticBoxContext.getInputCount()>>1)
 				{
-					m_vSignalDecoders[input>>1]->decode(input,chunk);
+					m_vSignalDecoders[input>>1]->decode(chunk);
 					
 					if(m_vSignalDecoders[input>>1]->isHeaderReceived())
 					{
@@ -156,7 +156,7 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 						if(input == 0)
 						{
 							this->getLogManager() << LogLevel_Info << "Common sampling rate is " << l_ui64SamplingFrequency << ", channel count is " << l_ui32ChannelCount << " and sample count per buffer is " << m_ui32SampleCountPerBuffer <<".\n";
-							m_oSignalEncoder.encodeHeader(0);
+							m_oSignalEncoder.encodeHeader();
 							l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(input,chunk), l_rDynamicBoxContext.getInputChunkEndTime(input,chunk));
 							m_bHeaderSent = true;
 						}
@@ -234,22 +234,22 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 	{
 		for(uint32 chunk = 0; chunk < l_rDynamicBoxContext.getInputChunkCount(input); chunk++)
 		{
-			m_vStimulationDecoders[input>>1]->decode(input,chunk);
+			m_vStimulationDecoders[input>>1]->decode(chunk);
 			if(m_vStimulationDecoders[input>>1]->isHeaderReceived() && !m_bStimHeaderSent)
 			{
-				m_oStimulationEncoder.encodeHeader(1);
+				m_oStimulationEncoder.encodeHeader();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(1,l_rDynamicBoxContext.getInputChunkStartTime(input,chunk),l_rDynamicBoxContext.getInputChunkEndTime(input,chunk));
-				m_oTriggerEncoder.encodeHeader(2);
+				m_oTriggerEncoder.encodeHeader();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(2,l_rDynamicBoxContext.getInputChunkStartTime(input,chunk),l_rDynamicBoxContext.getInputChunkEndTime(input,chunk));
 				m_bStimHeaderSent = true;
 			}
 			if(m_vStimulationDecoders[input>>1]->isEndReceived() && !m_bEndSent)
 			{
-				m_oStimulationEncoder.encodeEnd(1);
+				m_oStimulationEncoder.encodeEnd();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(1,l_rDynamicBoxContext.getInputChunkStartTime(input,chunk),l_rDynamicBoxContext.getInputChunkEndTime(input,chunk));
-				m_oTriggerEncoder.encodeEnd(2);
+				m_oTriggerEncoder.encodeEnd();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(2,l_rDynamicBoxContext.getInputChunkStartTime(input,chunk),l_rDynamicBoxContext.getInputChunkEndTime(input,chunk));
-				m_oSignalEncoder.encodeEnd(0);
+				m_oSignalEncoder.encodeEnd();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(input,chunk),l_rDynamicBoxContext.getInputChunkEndTime(input,chunk));
 				m_bEndSent = true;
 			}
@@ -290,7 +290,7 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 		else
 		{
 			m_oTriggerEncoder.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_EndOfFile, this->getPlayerContext().getCurrentTime(), 0);
-			m_oTriggerEncoder.encodeBuffer(2);
+			m_oTriggerEncoder.encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(2,this->getPlayerContext().getCurrentTime(),this->getPlayerContext().getCurrentTime());
 			m_bConcatenationFinished = true;
 		}
@@ -392,7 +392,7 @@ boolean CBoxAlgorithmSignalConcatenation::concate(void)
 			}
 
 			// then the stim memory buffer even if it is empty
-			m_oStimulationEncoder.encodeBuffer(1);
+			m_oStimulationEncoder.encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(1,m_vSignalChunkBuffers[i][j].m_ui64StartTime,m_vSignalChunkBuffers[i][j].m_ui64EndTime);
 			//this->getLogManager() << LogLevel_Info << "sending signal chunk from ["<<time64(l_ui64CurrentStartTime)<<"] to ["<<time64(l_ui64CurrentEndTime)<<"]\n";
 			

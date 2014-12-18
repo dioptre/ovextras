@@ -1,4 +1,4 @@
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 #include <algorithm>
 #include <cmath>
 

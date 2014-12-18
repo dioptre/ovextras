@@ -68,6 +68,7 @@ namespace OpenViBEToolkit
 
 		// Every codec has an algorithm
 		OpenViBE::Kernel::IAlgorithmProxy* m_pCodec;
+		OpenViBE::uint32 m_ui32ConnectorIndex;//one codec per connector
 
 	public:
 		TCodec()
@@ -77,11 +78,12 @@ namespace OpenViBEToolkit
 
 		//The initialization need a reference to the underlying box
 		//it will certainly be called in the box in such manner : m_oCodec.initialize(*this);
-		OpenViBE::boolean initialize(T& rBoxAlgorithm)
+		OpenViBE::boolean initialize(T& rBoxAlgorithm, OpenViBE::uint32 ui32ConnectorIndex)
 		{
 			if(m_pBoxAlgorithm == NULL)
 			{
 				m_pBoxAlgorithm = &rBoxAlgorithm;
+				m_ui32ConnectorIndex = ui32ConnectorIndex;//TODO : can we check the box static context and verify the requested connector exist?
 			}
 			else
 			{
@@ -100,7 +102,7 @@ namespace OpenViBEToolkit
 		virtual OpenViBE::boolean initializeImpl() = 0;
 
 
-		// for easier access to algorithm functyionnality, we redefine some functions:
+		// for easier access to algorithm functionnality, we redefine some functions:
 
 		virtual OpenViBE::boolean isOutputTriggerActive(OpenViBE::CIdentifier oTrigger)
 		{

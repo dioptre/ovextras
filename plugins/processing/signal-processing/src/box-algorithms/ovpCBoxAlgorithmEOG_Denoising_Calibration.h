@@ -68,9 +68,9 @@ namespace OpenViBEPlugins
        //     OpenViBE::Kernel::IAlgorithmProxy* m_pMatrixRegressionAlgorithmCalibration;
        //     OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > ip_pMatrixRegressionAlgorithmCalibration_Matrix0;
        //     OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > ip_pMatrixRegressionAlgorithmCalibration_Matrix1;
-            OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmEOG_Denoising_Calibration > m_oStimulationDecoder0;
+            OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmEOG_Denoising_Calibration > m_oAlgo2_StimulationDecoder;
 
-            OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmEOG_Denoising_Calibration > m_oStimulationEncoder1;
+            OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmEOG_Denoising_Calibration > m_oStimulationEncoder;
 
             OpenViBE::CString m_sRegressionDenoisingCalibrationFilename;
 

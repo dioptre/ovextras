@@ -21,7 +21,6 @@ namespace OpenViBEPlugins
 
 		class CDisplayCueImage :
 				public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
-				//public OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback::ICallback
 		{
 		public:
 

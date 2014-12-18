@@ -29,6 +29,15 @@ boolean CAlgorithmPairwiseDecisionVoting::uninitialize()
 	return true;
 }
 
+boolean CAlgorithmPairwiseDecisionVoting::parametrize()
+{
+	TParameterHandler < CIdentifier *> ip_pAlgorithmIdentifier(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_AlgorithmIdentifier));
+	CIdentifier l_oId = *ip_pAlgorithmIdentifier;
+	m_fAlgorithmComparison = getClassificationComparisonFunction(l_oId);
+
+	return true;
+}
+
 
 
 boolean CAlgorithmPairwiseDecisionVoting::compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector)
@@ -50,6 +59,14 @@ boolean CAlgorithmPairwiseDecisionVoting::compute(OpenViBE::IMatrix* pSubClassif
 	float64* l_pMatrixBuffer = pSubClassifierMatrix->getBuffer();
 	float64* l_pProbVector = new float64[l_ui32AmountClass];
 	uint32 l_pProbVectorSum = 0;
+	CMatrix l_oM1, l_oM2;
+	l_oM1.setDimensionCount(1);
+	l_oM1.setDimensionSize(0,1);
+
+	l_oM2.setDimensionCount(1);
+	l_oM2.setDimensionSize(0,1);
+
+
 	for(OpenViBE::uint32 l_ui32FirstClass = 0 ; l_ui32FirstClass < l_ui32AmountClass ; ++l_ui32FirstClass)
 	{
 		uint32 l_pTempSum = 0;
@@ -57,8 +74,9 @@ boolean CAlgorithmPairwiseDecisionVoting::compute(OpenViBE::IMatrix* pSubClassif
 		{
 			if(l_ui32SecondClass != l_ui32FirstClass)
 			{
-				if(l_pMatrixBuffer[l_ui32AmountClass*l_ui32FirstClass + l_ui32SecondClass] >
-						l_pMatrixBuffer[l_ui32AmountClass*l_ui32SecondClass + l_ui32FirstClass])
+				l_oM1.getBuffer()[0]= l_pMatrixBuffer[l_ui32AmountClass*l_ui32FirstClass + l_ui32SecondClass];
+				l_oM2.getBuffer()[0]= l_pMatrixBuffer[l_ui32AmountClass*l_ui32SecondClass + l_ui32FirstClass];
+				if((*m_fAlgorithmComparison)(l_oM1, l_oM2 ) < 0)
 				{
 					++l_pTempSum;
 				}

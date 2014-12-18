@@ -8,8 +8,6 @@
 // Plugin Object Descriptor Class Identifiers                        //
 //___________________________________________________________________//
 //                                                                   //
-#define OVP_ClassId_LDAClassifierDesc										OpenViBE::CIdentifier(0x1AE009FE, 0xF4FB82FB)
-
 
 #define OVP_Algorithm_ClassifierPLDA_InputParameterId_Shrinkage		OpenViBE::CIdentifier(0x7FEFDCA9, 0x816ED903) 
 #define OVP_Algorithm_ClassifierPLDA_InputParameterId_Lambda		OpenViBE::CIdentifier(0xEBAEB213, 0xDD4735A0)
@@ -21,8 +19,6 @@ enum { FULL=0, DIAG=1, SHRINK_TO_DIAG=2, SHRINK_TO_UNITY=3 };
 // Plugin Object Class Identifiers                                   //
 //___________________________________________________________________//
 //                                                                   //
-
-#define OVP_ClassId_LDAClassifier											OpenViBE::CIdentifier(0x49F18236, 0x75AE12FD)
 
 //___________________________________________________________________//
 //                                                                   //

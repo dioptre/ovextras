@@ -14,7 +14,7 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 #include <utility>
 #include <stdio.h>
 #include <string.h>

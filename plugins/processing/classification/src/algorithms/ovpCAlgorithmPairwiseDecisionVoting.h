@@ -31,11 +31,16 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 
+			virtual OpenViBE::boolean parametrize(void);
+
 			virtual OpenViBE::boolean compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector);
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode& rNode);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVP_ClassId_Algorithm_PairwiseDecision_Voting)
+
+		private:
+			fClassifierComparison m_fAlgorithmComparison;
 		};
 
 		class CAlgorithmPairwiseDecisionVotingDesc : virtual public OpenViBEPlugins::Classification::CAlgorithmPairwiseDecisionDesc

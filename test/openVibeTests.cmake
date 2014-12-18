@@ -152,8 +152,13 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestConfig.cmake  ${CTEST_BINARY_DIR
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestTestfile.cmake ${CTEST_BINARY_DIRECTORY}/CTestTestfile.cmake)
 
 
-# passthrow a environnement variable to binary path to tests
+# passthrough an environment variable to binary path to tests
 SET(ENV{OV_BINARY_PATH} "${CTEST_SOURCE_DIRECTORY}/dist")
+
+# Some tests may use bundled data files such as signals
+SET(ENV{OV_DATA_PATH} "${CTEST_SOURCE_DIRECTORY}/dist/share/openvibe/")
+
+
 ## -- read CTestCustom.cmake file
 ctest_read_custom_files("${CTEST_BINARY_DIRECTORY}")
 

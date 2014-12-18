@@ -6,32 +6,12 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "ovdCSettingCollectionHelper.h"
+#include "settings/ovdCAbstractSettingView.h"
+#include "settings/ovdCSettingViewFactory.h"
 
 namespace OpenViBEDesigner
 {
-	struct SButtonCB
-	{
-		SButtonCB(const OpenViBE::Kernel::IKernelContext& rKernelContext,
-			std::map< OpenViBE::CString, ::GtkWidget* >& rSettingWidget,
-			CSettingCollectionHelper& rHelper,
-			::GtkWidget* pSettingOverrideValue,
-			OpenViBE::Kernel::IBox& rBox) : 
-				m_rKernelContext(rKernelContext),
-				m_rSettingWidget(rSettingWidget), 
-				m_rHelper(rHelper), 
-				m_pSettingOverrideValue(pSettingOverrideValue),
-				m_rBox(rBox)
-		{ } ;
-
-		const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
-		std::map< OpenViBE::CString, ::GtkWidget* >& m_rSettingWidget;
-		CSettingCollectionHelper& m_rHelper;
-		::GtkWidget* m_pSettingOverrideValue;
-		OpenViBE::Kernel::IBox& m_rBox;
-	};
-
-	class CBoxConfigurationDialog
+	class CBoxConfigurationDialog : public OpenViBE::IObserver
 	{
 	public:
 
@@ -39,10 +19,29 @@ namespace OpenViBEDesigner
 		virtual ~CBoxConfigurationDialog(void);
 		virtual OpenViBE::boolean run(bool bMode);
 		virtual ::GtkWidget* getWidget();
-		virtual OpenViBE::boolean update(void);
 		virtual const OpenViBE::CIdentifier getBoxID() const;
 
+		virtual void update(OpenViBE::CObservable &o, void* data);
+
+		void updateSize();
+		void saveConfiguration();
+		void loadConfiguration();
+		void onOverrideBrowse(void);
+
+		//This function is introduce to revert the change made during the execution of a scenario (modifiable settings)
+		void revertChange(void);
+
 	protected:
+		void generateSettingsTable(void);
+		OpenViBE::boolean addSettingsToView(OpenViBE::uint32 ui32SettingIndex, OpenViBE::uint32 ui32TableIndex);
+
+		void settingChange(OpenViBE::uint32 ui32SettingIndex);
+		void addSetting(OpenViBE::uint32 ui32SettingIndex);
+
+		void clearSettingWrappersVector(void);
+		void removeSetting(OpenViBE::uint32 ui32SettingIndex, OpenViBE::boolean bShift = true);
+		OpenViBE::int32 getTableIndex(OpenViBE::uint32 ui32SettingIndex);
+		OpenViBE::uint32 getTableSize(void);
 
 		const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
 		OpenViBE::Kernel::IBox& m_rBox;
@@ -51,13 +50,21 @@ namespace OpenViBEDesigner
 		//
 		::GtkWidget* m_pWidget;//widget with the dialog for configuration (used whole for box config when no scenario is running)
 		::GtkWidget* m_pWidgetToReturn; //child of m_oWidget, if we are running a scenario, this is the widget we need, the rest can be discarded
-		::GtkWidget* m_pSettingOverrideValue;
+
+		::GtkEntry* m_pOverrideEntry;
+
+		::GtkTable *m_pSettingsTable;
+		::GtkViewport *m_pViewPort;
+		::GtkScrolledWindow * m_pScrolledWindow;
+
 		bool m_bIsScenarioRunning; // true if the scenario is running, false otherwise
-		std::map< OpenViBE::CString, ::GtkWidget* > m_mSettingWidget;
-		CSettingCollectionHelper* m_pHelper;
-		SButtonCB* m_pButtonCB;
+
+		Setting::CSettingViewFactory m_oSettingFactory;
+
+		std::vector<Setting::CAbstractSettingView* > m_vSettingViewVector;
+
 		::GtkCheckButton* m_pFileOverrideCheck;
 	};
-};
+}
 
 #endif // __OpenViBEDesigner_CBoxConfigurationDialog_H__

@@ -38,16 +38,14 @@ boolean CBoxAlgorithmClockStimulator::initialize(void)
 	m_ui64LastStimulationDate=0;
 	m_ui64LastEndTime=0;
 
-	m_pStimulationEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
-	m_pStimulationEncoder->initialize();
+	m_oStimulationEncoder.initialize(*this, 0);
 
 	return true;
 }
 
 boolean CBoxAlgorithmClockStimulator::uninitialize(void)
 {
-	m_pStimulationEncoder->uninitialize();
-	this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationEncoder);
+	m_oStimulationEncoder.uninitialize();
 
 	return true;
 }
@@ -63,27 +61,26 @@ boolean CBoxAlgorithmClockStimulator::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-	TParameterHandler < IStimulationSet* > ip_pStimulationSet(m_pStimulationEncoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_InputParameterId_StimulationSet));
-	TParameterHandler < IMemoryBuffer* > op_pMemoryBuffer(m_pStimulationEncoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-
 	uint64 l_ui64CurrentTime=getPlayerContext().getCurrentTime();
 
-	op_pMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
+	CStimulationSet l_oStimulationSet;
+	l_oStimulationSet.setStimulationCount(0);
 
-	ip_pStimulationSet->setStimulationCount(0);
 	while(m_ui64LastStimulationDate+m_ui64InterstimulationInterval<l_ui64CurrentTime)
 	{
 		m_ui64LastStimulationDate+=m_ui64InterstimulationInterval;
-		ip_pStimulationSet->appendStimulation(m_ui64StimulationId, m_ui64LastStimulationDate, 0);
+		l_oStimulationSet.appendStimulation(m_ui64StimulationId, m_ui64LastStimulationDate, 0);
 	}
 
 	if(m_ui64LastEndTime==0)
 	{
-		m_pStimulationEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
+		m_oStimulationEncoder.encodeHeader();
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastEndTime, m_ui64LastEndTime);
 	}
 
-	m_pStimulationEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
+	m_oStimulationEncoder.getInputStimulationSet() = &l_oStimulationSet;
+
+	m_oStimulationEncoder.encodeBuffer();
 	l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastEndTime, l_ui64CurrentTime);
 
 	m_ui64LastEndTime=l_ui64CurrentTime;

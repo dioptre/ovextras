@@ -2,7 +2,7 @@
 #include <iostream>
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <openvibe/ovITimeArithmetics.h>
 

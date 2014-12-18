@@ -6,7 +6,7 @@
 
 #include <cstdlib>
 #include <cmath>
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 using namespace std;
 

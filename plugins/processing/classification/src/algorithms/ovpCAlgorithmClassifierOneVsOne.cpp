@@ -10,7 +10,7 @@
 #include <string>
 #include <utility>
 #include <iostream>
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 namespace{
 	const char* const c_sTypeNodeName = "OneVsOne";
@@ -57,6 +57,9 @@ boolean CAlgorithmClassifierOneVsOne::initialize()
 {
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
 	op_pConfiguration=NULL;
+
+	TParameterHandler < uint64 > ip_pPairwise(this->getInputParameter(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType));
+	ip_pPairwise = OV_UndefinedIdentifier.toUInteger();
 
 	m_pDecisionStrategyAlgorithm = NULL;
 	m_oPairwiseDecisionIdentifier = OV_UndefinedIdentifier;
@@ -112,6 +115,10 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 	}
 	m_pDecisionStrategyAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(m_oPairwiseDecisionIdentifier));
 	m_pDecisionStrategyAlgorithm->initialize();
+
+	TParameterHandler < CIdentifier *> ip_pClassificationAlgorithm(m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_AlgorithmIdentifier));
+	ip_pClassificationAlgorithm = &m_oSubClassifierAlgorithmIdentifier;
+	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize);
 
 	l_pAlgoProxy->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
@@ -230,6 +237,15 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 			l_pProbabilityMatrix->getBuffer()[j*l_ui32AmountClass + i] = 1-l_f64Prob;
 		}
 	}
+
+//	for(size_t i =0 ; i < l_ui32AmountClass ; ++i )
+//	{
+//		for(size_t j = 0; j < l_ui32AmountClass ; ++j)
+//		{
+//			std::cout << l_pProbabilityMatrix->getBuffer()[i*l_ui32AmountClass + j] << " " ;
+//		}
+//		std::cout << std::endl;
+//	}
 
 	//Then ask to the startegy to make the decision
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute);
@@ -391,7 +407,12 @@ boolean CAlgorithmClassifierOneVsOne::loadConfiguration(XML::IXMLNode *pConfigur
 	}
 	TParameterHandler < XML::IXMLNode* > ip_pConfiguration(m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_Configuration));
 	ip_pConfiguration = l_pTempNode->getChild(0);
+
+	TParameterHandler < CIdentifier *> ip_pClassificationAlgorithm(m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_AlgorithmIdentifier));
+	ip_pClassificationAlgorithm = &l_pAlgorithmIdentifier;
+
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_LoadConfiguration);
+	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize);
 
 	l_pTempNode = l_pOneVsOneNode->getChildByName(c_sSubClassifierCountNodeName);
 	std::stringstream l_sCountData(l_pTempNode->getPCData());

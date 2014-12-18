@@ -15,17 +15,12 @@ using namespace OpenViBEToolkit;
 using namespace std;
 
 CTimeSignalGenerator::CTimeSignalGenerator(void)
-	:m_oSignalOutputWriterCallbackProxy(
-		*this,
-		&CTimeSignalGenerator::writeSignalOutput)
-	,m_pSignalOutputWriterHelper(NULL)
-	,m_pSignalOutputWriter(NULL)
-	,m_bHeaderSent(false)
+	: m_bHeaderSent(false)
 	,m_ui32SamplingFrequency(0)
 	,m_ui32GeneratedEpochSampleCount(0)
-	,m_pSampleBuffer(NULL)
 	,m_ui32SentSampleCount(0)
 {
+
 }
 
 void CTimeSignalGenerator::release(void)
@@ -35,8 +30,7 @@ void CTimeSignalGenerator::release(void)
 
 boolean CTimeSignalGenerator::initialize(void)
 {
-	m_pSignalOutputWriterHelper=createBoxAlgorithmSignalOutputWriter();
-	m_pSignalOutputWriter=EBML::createWriter(m_oSignalOutputWriterCallbackProxy);
+	m_oSignalEncoder.initialize(*this,0);
 
 	// Parses box settings to try connecting to server
 	CString l_sSamplingFrequency;
@@ -47,8 +41,6 @@ boolean CTimeSignalGenerator::initialize(void)
 	m_ui32GeneratedEpochSampleCount=atoi(l_sGeneratedEpochSampleCount);
 	m_bHeaderSent=false;
 
-	// Allocates sample block
-	m_pSampleBuffer=new float64[m_ui32GeneratedEpochSampleCount];
 	m_ui32SentSampleCount=0;
 
 	return true;
@@ -56,14 +48,7 @@ boolean CTimeSignalGenerator::initialize(void)
 
 boolean CTimeSignalGenerator::uninitialize(void)
 {
-	delete [] m_pSampleBuffer;
-	m_pSampleBuffer=NULL;
-
-	m_pSignalOutputWriter->release();
-	m_pSignalOutputWriter=NULL;
-
-	releaseBoxAlgorithmSignalOutputWriter(m_pSignalOutputWriterHelper);
-	m_pSignalOutputWriterHelper=NULL;
+	m_oSignalEncoder.uninitialize();
 
 	return true;
 }
@@ -80,25 +65,34 @@ boolean CTimeSignalGenerator::process(void)
 
 	if(!m_bHeaderSent)
 	{
-		m_pSignalOutputWriterHelper->setSamplingRate(m_ui32SamplingFrequency);
-		m_pSignalOutputWriterHelper->setChannelCount(1);
-		m_pSignalOutputWriterHelper->setSampleCountPerBuffer(m_ui32GeneratedEpochSampleCount);
-		m_pSignalOutputWriterHelper->setSampleBuffer(m_pSampleBuffer);
-		m_pSignalOutputWriterHelper->setChannelName(0, "Time signal");
-		m_pSignalOutputWriterHelper->writeHeader(*m_pSignalOutputWriter);
+		m_oSignalEncoder.getInputSamplingRate() = m_ui32SamplingFrequency;
+
+		IMatrix* l_pMatrix=m_oSignalEncoder.getInputMatrix();
+
+		l_pMatrix->setDimensionCount(2);
+		l_pMatrix->setDimensionSize(0, 1);
+		l_pMatrix->setDimensionSize(1, m_ui32GeneratedEpochSampleCount);
+		l_pMatrix->setDimensionLabel(0, 0, "Time signal");
+
+		m_oSignalEncoder.encodeHeader();
+
 		m_bHeaderSent=true;
 
 		l_pDynamicBoxContext->markOutputAsReadyToSend(0, 0, 0);
 	}
 	else
 	{
+		float64* l_pSampleBuffer = m_oSignalEncoder.getInputMatrix()->getBuffer();
+
 		uint32 l_ui32SentSampleCount=m_ui32SentSampleCount;
 		float64 l_f64SamplingFrequency=static_cast<float64>(m_ui32SamplingFrequency);
 		for(uint32 i=0; i<m_ui32GeneratedEpochSampleCount; i++)
 		{
-			m_pSampleBuffer[i]=(i+m_ui32SentSampleCount)/l_f64SamplingFrequency;
+			l_pSampleBuffer[i]=(i+m_ui32SentSampleCount)/l_f64SamplingFrequency;
 		}
-		m_pSignalOutputWriterHelper->writeBuffer(*m_pSignalOutputWriter);
+
+		m_oSignalEncoder.encodeBuffer();
+
 		m_ui32SentSampleCount+=m_ui32GeneratedEpochSampleCount;
 
 		uint64 l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui32SentSampleCount);
@@ -108,11 +102,6 @@ boolean CTimeSignalGenerator::process(void)
 	}
 
 	return true;
-}
-
-void CTimeSignalGenerator::writeSignalOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize)
-{
-	appendOutputChunkData<0>(pBuffer, ui64BufferSize);
 }
 
 OpenViBE::uint64 CTimeSignalGenerator::getClockFrequency(void) 

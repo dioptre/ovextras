@@ -15,13 +15,13 @@ using namespace OpenViBEPlugins::SignalProcessing;
 boolean CBoxAlgorithmEOG_Denoising_Calibration::initialize(void)
 {
     // Signal stream decoder
-    m_oAlgo0_SignalDecoder.initialize(*this);
+    m_oAlgo0_SignalDecoder.initialize(*this,0);
     // Signal stream decoder
-    m_oAlgo1_SignalDecoder.initialize(*this);
+    m_oAlgo1_SignalDecoder.initialize(*this,1);
 
-    m_oStimulationDecoder0.initialize(*this);
+    m_oAlgo2_StimulationDecoder.initialize(*this,2);
 
-    m_oStimulationEncoder1.initialize(*this);
+    m_oStimulationEncoder.initialize(*this,0);
 
     m_sRegressionDenoisingCalibrationFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
     m_f64StartTime=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
@@ -69,8 +69,8 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::uninitialize(void)
 {
     m_oAlgo0_SignalDecoder.uninitialize();
     m_oAlgo1_SignalDecoder.uninitialize();
-    m_oStimulationDecoder0.uninitialize();
-    m_oStimulationEncoder1.uninitialize();
+    m_oAlgo2_StimulationDecoder.uninitialize();
+    m_oStimulationEncoder.uninitialize();
 
 	// Clean up temporary files
 	if(m_oEEGFile.is_open())
@@ -125,8 +125,8 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::processClock(IMessageClock& rMes
 			this->getLogManager() << LogLevel_Warning << "Total time of your sample: " << m_f64Time << "\n";
 			this->getLogManager() << LogLevel_Warning << "b Matrix was NOT successfully calculated" << "\n";
 
-			m_oStimulationEncoder1.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
-			m_oStimulationEncoder1.encodeBuffer(0);
+			m_oStimulationEncoder.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
+			m_oStimulationEncoder.encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, 0),l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
 
 			//this->getLogManager() << LogLevel_Warning << "You can stop this scenario " <<"\n";
@@ -357,8 +357,8 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::processClock(IMessageClock& rMes
 
 			//this->getLogManager() << LogLevel_Warning << "You can stop this scenario " <<"\n";
 
-			m_oStimulationEncoder1.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
-			m_oStimulationEncoder1.encodeBuffer(0);
+			m_oStimulationEncoder.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
+			m_oStimulationEncoder.encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, 0),l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
 
 		}
@@ -415,7 +415,7 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
     for(uint32 ii=0; ii<l_rDynamicBoxContext.getInputChunkCount(0); ii++)
     {
 
-        m_oAlgo0_SignalDecoder.decode(0,ii);
+        m_oAlgo0_SignalDecoder.decode(ii);
 
         m_ui32NbChannels0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
         m_ui32NbSamples0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
@@ -439,7 +439,7 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
     for(uint32 ii=0; ii<l_rDynamicBoxContext.getInputChunkCount(1); ii++)
     {
 
-        m_oAlgo1_SignalDecoder.decode(1,ii);
+        m_oAlgo1_SignalDecoder.decode(ii);
 
         m_ui32NbChannels1 = m_oAlgo1_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
         m_ui32NbSamples1 = m_oAlgo1_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
@@ -461,27 +461,27 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
 
     for (uint32 chunk = 0; chunk<l_rDynamicBoxContext.getInputChunkCount(2); chunk++)
     {
-        m_oStimulationDecoder0.decode(2,chunk);
-        for(uint32 j=0; j<m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationCount(); j++)
+        m_oAlgo2_StimulationDecoder.decode(chunk);
+        for(uint32 j=0; j<m_oAlgo2_StimulationDecoder.getOutputStimulationSet()->getStimulationCount(); j++)
         {
-            if (m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationIdentifier(j) == 33025)
+            if (m_oAlgo2_StimulationDecoder.getOutputStimulationSet()->getStimulationIdentifier(j) == 33025)
             {
                 m_f64StartTime=m_f64Time;
                 this->getLogManager() << LogLevel_Info << "Start time: " << m_f64StartTime <<"\n";
             }
 
-            if (m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationIdentifier(j) == 33031)
+            if (m_oAlgo2_StimulationDecoder.getOutputStimulationSet()->getStimulationIdentifier(j) == 33031)
             {
                 m_f64EndTime=m_f64Time;
                 this->getLogManager() << LogLevel_Info << "End time: " << m_f64EndTime <<"\n";
 
             }
 
-            // m_ui64TrainDate = m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationDate(m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationCount());
-            m_ui64TrainDate = m_oStimulationDecoder0.getOutputStimulationSet()->getStimulationDate(j);
+            // m_ui64TrainDate = m_oAlgo2_StimulationDecoder.getOutputStimulationSet()->getStimulationDate(m_oAlgo2_StimulationDecoder.getOutputStimulationSet()->getStimulationCount());
+            m_ui64TrainDate = m_oAlgo2_StimulationDecoder.getOutputStimulationSet()->getStimulationDate(j);
 
 
-//            if(m_oStimulationDecoder0.isHeaderReceived()) // ->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+//            if(m_oAlgo2_StimulationDecoder.isHeaderReceived()) // ->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
 //            {
 //                m_oStimulationEncoder1.encodeHeader(0);
 //                l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, chunk),l_rDynamicBoxContext.getInputChunkEndTime(0, chunk));
@@ -493,7 +493,7 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
 
 
 
-//            if (m_oStimulationDecoder0.isBufferReceived())
+//            if (m_oAlgo2_StimulationDecoder.isBufferReceived())
 //            {
 //                //m_oStimulationEncoder1.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
 //                m_oStimulationEncoder1.encodeBuffer(0);
@@ -502,7 +502,7 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::process(void)
 //            }
 
 
-//            if (m_oStimulationDecoder0.isEndReceived())
+//            if (m_oAlgo2_StimulationDecoder.isEndReceived())
 //            {
 //                m_oStimulationEncoder1.encodeEnd(0);
 //                l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, chunk),l_rDynamicBoxContext.getInputChunkEndTime(0, chunk));

@@ -36,18 +36,10 @@ boolean CBoxAlgorithmBrainampFileWriter::initialize(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	//init input signal 1
-	m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-	m_pStreamDecoder->initialize();
-	op_ui64SamplingFrequency.initialize(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
-
-	ip_pMemoryBuffer.initialize(m_pStreamDecoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_InputParameterId_MemoryBufferToDecode));
-	op_pMatrix.initialize(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputParameterId_Matrix));
+	m_pStreamDecoder=new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmBrainampFileWriter >(*this,0);
 
 	//init input stimulation 1 
-	m_pStimulationDecoderTrigger=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-    m_pStimulationDecoderTrigger->initialize();
-    ip_pMemoryBufferToDecodeTrigger.initialize(m_pStimulationDecoderTrigger->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-    op_pStimulationSetTrigger.initialize(m_pStimulationDecoderTrigger->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+	m_pStimulationDecoderTrigger=new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmBrainampFileWriter >(*this,1);
 
 	//Get parameters:
 	CString l_sFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
@@ -109,22 +101,16 @@ boolean CBoxAlgorithmBrainampFileWriter::initialize(void)
 
 boolean CBoxAlgorithmBrainampFileWriter::uninitialize(void)
 {
-	//op_pStimulationSet.uninitialize();
-	op_pMatrix.uninitialize();
-	ip_pMemoryBuffer.uninitialize();
 
 	if(m_pStreamDecoder)
 	{
 		m_pStreamDecoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pStreamDecoder);
-		m_pStreamDecoder=NULL;
+		delete m_pStreamDecoder;
 	}
 
 	// uninit input stimulation
 	m_pStimulationDecoderTrigger->uninitialize();
-    ip_pMemoryBufferToDecodeTrigger.uninitialize();
-	op_pStimulationSetTrigger.uninitialize();
-    this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationDecoderTrigger);
+	delete m_pStimulationDecoderTrigger;
 
 	//close files
 	m_oHeaderFile.flush();
@@ -155,20 +141,22 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 	{
 		// uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
 		// uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
-		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
+		
 
-		m_pStreamDecoder->process();
+		m_pStreamDecoder->decode(i);
 
 		//HEADER
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedHeader))
+		if(m_pStreamDecoder->isHeaderReceived())
 		{
-			m_pMatrix=op_pMatrix;
+		  
+		  m_pMatrix=m_pStreamDecoder->getOutputMatrix();
+		  m_ui64SamplingFrequency = m_pStreamDecoder->getOutputSamplingRate();
 
 			writeHeaderFile();
 		}
 
 		//BUFFER
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_pStreamDecoder->isBufferReceived())
 		{
 			// OpenViBE::uint32 l_uint32ChannelCount = m_pMatrix->getDimensionSize(0);
 	
@@ -189,7 +177,7 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 		}
 
 		//END
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if(m_pStreamDecoder->isEndReceived())
 		{
 
 		}
@@ -202,12 +190,11 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 	{
 		// uint64 l_ui64ChunkStartTime =l_rDynamicBoxContext.getInputChunkStartTime(0, i);
 
-		TParameterHandler < const IMemoryBuffer* > ip_pMemoryBuffer(m_pStimulationDecoderTrigger->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(1, i);
-		m_pStimulationDecoderTrigger->process();
+		
+		m_pStimulationDecoderTrigger->decode(i);
 		
 		//header
-		if(m_pStimulationDecoderTrigger->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+		if(m_pStimulationDecoderTrigger->isHeaderReceived())
 		{
 			boost::posix_time::ptime l_dtNow = boost::posix_time::second_clock::local_time();
 		    std::string l_ftFormated(FormatTime(l_dtNow));
@@ -229,16 +216,16 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 		}
     
 		//buffer 
-		if(m_pStimulationDecoderTrigger->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_pStimulationDecoderTrigger->isBufferReceived())
 		{
-			  TParameterHandler < IStimulationSet* > op_pStimulationSetTrigger(m_pStimulationDecoderTrigger->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+		  IStimulationSet* op_pStimulationSetTrigger = m_pStimulationDecoderTrigger->getOutputStimulationSet();
 		  
 			  // Loop on stimulations
 			  for(uint32 j=0; j<op_pStimulationSetTrigger->getStimulationCount(); j++)
 			  {
 				uint64 code = op_pStimulationSetTrigger->getStimulationIdentifier(j);
 
-				uint64 position = ITimeArithmetics::timeToSampleCount(op_ui64SamplingFrequency, op_pStimulationSetTrigger->getStimulationDate(j)) + 1;
+				uint64 position = ITimeArithmetics::timeToSampleCount(m_ui64SamplingFrequency, op_pStimulationSetTrigger->getStimulationDate(j)) + 1;
 
 				m_oMarkerFile << "Mk" << m_uint32StimulationCounter << "=Stimulus," << "S" << std::right << std::setw(3) << code << "," << position << ",1,0" << std::endl;
 			
@@ -261,7 +248,7 @@ OpenViBE::boolean CBoxAlgorithmBrainampFileWriter::writeHeaderFile()
 	OpenViBE::uint32 l_uint32ChannelCount = m_pMatrix->getDimensionSize(0);
 	// OpenViBE::uint32 l_uint32SamplesPerChunk = m_pMatrix->getDimensionSize(1);
 
-	OpenViBE::float64 l_f64Sampling_Interval = 1000000.0 / static_cast<float64>(op_ui64SamplingFrequency);
+	OpenViBE::float64 l_f64Sampling_Interval = 1000000.0 / static_cast<float64>(m_ui64SamplingFrequency);
 
 	CString format("UNKNOWN");
 	switch (m_ui32BinaryFormat)
@@ -320,7 +307,7 @@ OpenViBE::boolean CBoxAlgorithmBrainampFileWriter::writeHeaderFile()
 		<< "A m p l i f i e r  S e t u p" << std::endl
 		<< "============================" << std::endl
 		<< "Number of channels: " << l_uint32ChannelCount << std::endl 
-		<< "Sampling Rate [Hz]: " << (uint64)op_ui64SamplingFrequency << std::endl 
+		<< "Sampling Rate [Hz]: " << (uint64)m_ui64SamplingFrequency << std::endl 
 		<< "Interval [µS]: " << std::fixed << std::setprecision(5) << l_f64Sampling_Interval << std::endl
 		<< std::endl;
 	

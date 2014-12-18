@@ -49,8 +49,8 @@ namespace
 
 boolean CBoxAlgorithmReferenceChannel::initialize(void)
 {
-	m_oDecoder.initialize(*this);
-	m_oEncoder.initialize(*this);
+	m_oDecoder.initialize(*this,0);
+	m_oEncoder.initialize(*this,0);
 	m_oEncoder.getInputSamplingRate().setReferenceTarget(m_oDecoder.getOutputSamplingRate());
 	return true;
 }
@@ -78,7 +78,7 @@ boolean CBoxAlgorithmReferenceChannel::process(void)
 
 	for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		m_oDecoder.decode(0, i);
+		m_oDecoder.decode(i);
 		if(m_oDecoder.isHeaderReceived())
 		{
 			IMatrix& l_rInputMatrix=*m_oDecoder.getOutputMatrix();
@@ -115,7 +115,7 @@ boolean CBoxAlgorithmReferenceChannel::process(void)
 				}
 			}
 
-			m_oEncoder.encodeHeader(0);
+			m_oEncoder.encodeHeader();
 		}
 		if(m_oDecoder.isBufferReceived())
 		{
@@ -139,11 +139,11 @@ boolean CBoxAlgorithmReferenceChannel::process(void)
 				l_pInputBuffer+=l_ui32SampleCount;
 			}
 
-			m_oEncoder.encodeBuffer(0);
+			m_oEncoder.encodeBuffer();
 		}
 		if(m_oDecoder.isEndReceived())
 		{
-			m_oEncoder.encodeEnd(0);
+			m_oEncoder.encodeEnd();
 		}
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 	}

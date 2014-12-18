@@ -25,8 +25,8 @@
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ovITimeArithmetics.h>
 
-#include <system/Memory.h>
-#include <system/Time.h>
+#include <system/ovCMemory.h>
+#include <system/ovCTime.h>
 
 #include <list>
 

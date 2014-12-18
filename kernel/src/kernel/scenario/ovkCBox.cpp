@@ -7,10 +7,50 @@
 
 #include <openvibe/ov_defines.h>
 
+
+
+namespace{
+	//This class is used to set up the restriction of a stream type for input and output. Each box comes with a
+	// decriptor that call functions describe in IBoxProto for intialize the CBox object.
+	// This implementation is derived from CBoxProto, to benefit from
+	// the implementation of the stream restriction mecanism but neutralizes all other initialization function.
+	class CBoxProtoRestriction : public OpenViBE::Kernel::CBoxProto
+	{
+	public:
+
+		CBoxProtoRestriction(const OpenViBE::Kernel::IKernelContext& rKernelContext, OpenViBE::Kernel::IBox& rBox):
+			CBoxProto(rKernelContext, rBox){}
+
+		virtual OpenViBE::boolean addInput(
+			const OpenViBE::CString& sName,
+			const OpenViBE::CIdentifier& rTypeIdentifier){return true;}
+
+		virtual OpenViBE::boolean addMessageInput(
+			const OpenViBE::CString& sName){return true;}
+		virtual OpenViBE::boolean addMessageOutput(
+			const OpenViBE::CString& sName){return true;}
+
+		virtual OpenViBE::boolean addOutput(
+			const OpenViBE::CString& sName,
+			const OpenViBE::CIdentifier& rTypeIdentifier){return true;}
+
+		virtual OpenViBE::boolean addSetting(
+			const OpenViBE::CString& sName,
+			const OpenViBE::CIdentifier& rTypeIdentifier,
+			const OpenViBE::CString& sDefaultValue,
+			const OpenViBE::boolean bModifiable = false){return true;}
+
+		virtual OpenViBE::boolean addFlag(
+			const OpenViBE::Kernel::EBoxFlag eBoxFlag){return true;}
+	};
+}
+
+
 using namespace std;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
+
 
 //___________________________________________________________________//
 //                                                                   //
@@ -22,10 +62,12 @@ CBox::CBox(const IKernelContext& rKernelContext, CScenario& rOwnerScenario)
 	,m_pBoxListener(NULL)
 	,m_bIsNotifyingDescriptor(false)
 	,m_bIsNotificationActive(true)
+	,m_bIsObserverNotificationActive(true)
 	,m_oIdentifier(OV_UndefinedIdentifier)
 	,m_oAlgorithmClassIdentifier(OV_UndefinedIdentifier)
 	,m_oProcessingUnitIdentifier(OV_UndefinedIdentifier)
 	,m_sName("unnamed")
+	,m_pSavedState(NULL)
 {
 	if(this->hasAttribute(OV_AttributeId_Box_Muted))
 	{
@@ -40,6 +82,11 @@ CBox::~CBox(void)
 		CBoxListenerContext l_oContext(this->getKernelContext(), *this, 0xffffffff);
 		m_pBoxListener->uninitialize(l_oContext);
 		m_pBoxAlgorithmDescriptor->releaseBoxListener(m_pBoxListener);
+	}
+
+	if(m_pSavedState)
+	{
+		delete m_pSavedState;
 	}
 }
 
@@ -125,6 +172,10 @@ boolean CBox::setAlgorithmClassIdentifier(
 		}
 	}
 
+	//We use the neutralized version of CBoxProto to just initialize the stream restriction mecanism
+	CBoxProtoRestriction oTempProto(this->getKernelContext(), *this);
+	m_pBoxAlgorithmDescriptor->getBoxPrototype(oTempProto);
+
 	this->notify(BoxModification_AlgorithmClassIdentifierChanged);
 
 	return true;
@@ -196,6 +247,7 @@ boolean CBox::initializeFromExistingBox(
 	uint32 i;
 
 	this->disableNotification();
+	m_bIsObserverNotificationActive = false;
 
 	clear();
 	setName(rExistingBox.getName());
@@ -257,9 +309,29 @@ boolean CBox::initializeFromExistingBox(
 		l_oIdentifier=rExistingBox.getNextAttributeIdentifier(l_oIdentifier);
 	}
 
+	CIdentifier l_oStreamTypeIdentifier = OV_UndefinedIdentifier;
+	while((l_oStreamTypeIdentifier=this->getKernelContext().getTypeManager().getNextTypeIdentifier(l_oStreamTypeIdentifier))!=OV_UndefinedIdentifier)
+	{
+		if(this->getKernelContext().getTypeManager().isStream(l_oStreamTypeIdentifier))
+		{
+			//First check if it is a stream
+			if(rExistingBox.hasInputSupport(l_oStreamTypeIdentifier))
+			{
+				this->addInputSupport(l_oStreamTypeIdentifier);
+			}
+			if(rExistingBox.hasOutputSupport(l_oStreamTypeIdentifier))
+			{
+				this->addOutputSupport(l_oStreamTypeIdentifier);
+			}
+		}
+	}
+
 	this->enableNotification();
 
 	this->notify(BoxModification_Initialized);
+
+	m_bIsObserverNotificationActive = true;
+	this->notifySettingChange(SettingsAllChange);
 
 	return true;
 }
@@ -343,11 +415,12 @@ boolean CBox::removeInput(
 	for(i=0; i<l_vLink.size(); i++)
 	{
 		m_rOwnerScenario.connect(
-					l_vLink[i].first.first,
-					l_vLink[i].first.second,
-					l_vLink[i].second.first,
-					l_vLink[i].second.second-1,
-					l_oIdentifier);
+			l_oIdentifier,
+			l_vLink[i].first.first,
+			l_vLink[i].first.second,
+			l_vLink[i].second.first,
+			l_vLink[i].second.second-1,
+			OV_UndefinedIdentifier);
 	}
 
 	this->notify(BoxModification_InputRemoved, ui32InputIndex);
@@ -498,11 +571,12 @@ boolean CBox::removeOutput(
 	for(i=0; i<l_vLink.size(); i++)
 	{
 		m_rOwnerScenario.connect(
-					l_vLink[i].first.first,
-					l_vLink[i].first.second-1,
-					l_vLink[i].second.first,
-					l_vLink[i].second.second,
-					l_oIdentifier);
+			l_oIdentifier,
+			l_vLink[i].first.first,
+			l_vLink[i].first.second-1,
+			l_vLink[i].second.first,
+			l_vLink[i].second.second,
+			OV_UndefinedIdentifier);
 	}
 
 	this->notify(BoxModification_OutputRemoved, ui32OutputIndex);
@@ -602,7 +676,7 @@ boolean CBox::addInputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdenti
 	return true;
 }
 
-boolean CBox::hasInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+boolean CBox::hasInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier) const
 {
 	//If there is no type specify, we allow all
 	if(m_vSupportInputType.empty())
@@ -644,7 +718,7 @@ boolean CBox::addOutputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdent
 	return true;
 }
 
-boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
+boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier) const
 {
 	//If there is no type specify, we allow all
 	if(m_vSupportOutputType.empty())
@@ -656,6 +730,23 @@ boolean CBox::hasOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
 			return true;
 	}
 	return false;
+}
+
+boolean CBox::setSupportTypeFromAlgorithmIdentifier(const CIdentifier &rTypeIdentifier)
+{
+
+	const IPluginObjectDesc* l_pPluginObjectDescriptor=getKernelContext().getPluginManager().getPluginObjectDescCreating(rTypeIdentifier);
+	const IBoxAlgorithmDesc *l_pBoxAlgorithmDescriptor=dynamic_cast<const IBoxAlgorithmDesc*>(l_pPluginObjectDescriptor);
+	if(l_pBoxAlgorithmDescriptor == NULL)
+	{
+		this->getLogManager() << LogLevel_Error << "Tried to initialize with an unregistered algorithm\n";
+		return false;
+	}
+
+	//We use the neutralized version of CBoxProto to just initialize the stream restriction mecanism
+	CBoxProtoRestriction oTempProto(this->getKernelContext(), *this);
+	l_pBoxAlgorithmDescriptor->getBoxPrototype(oTempProto);
+	return true;
 }
 
 //___________________________________________________________________//
@@ -733,6 +824,7 @@ boolean CBox::addSetting(const CString& sName,
 	this->getLogManager() << LogLevel_Debug << "Pushed '" << m_vSetting[l_i32InsertLocation].m_sName << "' : '" << m_vSetting[l_i32InsertLocation].m_sValue << "' to slot " << l_i32InsertLocation << " with the array size now " << static_cast<int32>(m_vSetting.size()) << "\n";
 
 	this->notify(BoxModification_SettingAdded, l_i32InsertLocation);
+	this->notifySettingChange(SettingAdd, l_i32InsertLocation);
 
 	return true;
 }
@@ -769,6 +861,7 @@ boolean CBox::removeSetting(
 	}
 
 	this->notify(BoxModification_SettingRemoved, ui32SettingIndex);
+	this->notifySettingChange(SettingDelete, ui32SettingIndex);
 
 	return true;
 }
@@ -843,6 +936,7 @@ boolean CBox::setSettingType(
 	m_vSetting[ui32SettingIndex].m_oTypeIdentifier=rTypeIdentifier;
 
 	this->notify(BoxModification_SettingTypeChanged, ui32SettingIndex);
+	this->notifySettingChange(SettingChange, ui32SettingIndex);
 
 	return true;
 }
@@ -858,6 +952,7 @@ boolean CBox::setSettingName(
 	m_vSetting[ui32SettingIndex].m_sName=rName;
 
 	this->notify(BoxModification_SettingNameChanged, ui32SettingIndex);
+	this->notifySettingChange(SettingChange, ui32SettingIndex);
 
 	return true;
 }
@@ -888,8 +983,23 @@ boolean CBox::setSettingValue(
 	m_vSetting[ui32SettingIndex].m_sValue=rValue;
 
 	this->notify(BoxModification_SettingValueChanged, ui32SettingIndex);
+	this->notifySettingChange(SettingValueUpdate, ui32SettingIndex);
 
 	return true;
+}
+
+void CBox::notifySettingChange(BoxEventMessageType eType, int32 i32FirstIndex, int32 i32SecondIndex)
+{
+	if( m_bIsObserverNotificationActive)
+	{
+		BoxEventMessage l_oEvent;
+		l_oEvent.m_eType = eType;
+		l_oEvent.m_i32FirstIndex = i32FirstIndex;
+		l_oEvent.m_i32SecondIndex = i32SecondIndex;
+
+		this->setChanged();
+		this->notifyObservers(&l_oEvent);
+	}
 }
 
 //*
@@ -949,6 +1059,13 @@ uint32* CBox::getModifiableSettings(uint32& rCount)const
 
 void CBox::clear(void)
 {
+	if(m_pBoxAlgorithmDescriptor && m_pBoxListener)
+	{
+		CBoxListenerContext l_oContext(this->getKernelContext(), *this, 0xffffffff);
+		m_pBoxListener->uninitialize(l_oContext);
+		m_pBoxAlgorithmDescriptor->releaseBoxListener(m_pBoxListener);
+	}
+
 	m_pBoxAlgorithmDescriptor=NULL;
 	m_oAlgorithmClassIdentifier=OV_UndefinedIdentifier;
 	m_sName="";
@@ -1056,11 +1173,12 @@ boolean CBox::removeMessageInput(
 	for(i=0; i<l_vMessageLink.size(); i++)
 	{
 		m_rOwnerScenario.connectMessage(
-					l_vMessageLink[i].first.first,
-					l_vMessageLink[i].first.second,
-					l_vMessageLink[i].second.first,
-					l_vMessageLink[i].second.second-1,
-					l_oIdentifier);
+			l_oIdentifier,
+			l_vMessageLink[i].first.first,
+			l_vMessageLink[i].first.second,
+			l_vMessageLink[i].second.first,
+			l_vMessageLink[i].second.second-1,
+			OV_UndefinedIdentifier);
 	}
 
 	this->notify(BoxModification_MessageInputRemoved, ui32InputIndex);
@@ -1168,11 +1286,12 @@ boolean CBox::removeMessageOutput(
 	for(i=0; i<l_vMessageLink.size(); i++)
 	{
 		m_rOwnerScenario.connectMessage(
-					l_vMessageLink[i].first.first,
-					l_vMessageLink[i].first.second-1,
-					l_vMessageLink[i].second.first,
-					l_vMessageLink[i].second.second,
-					l_oIdentifier);
+			l_oIdentifier,
+			l_vMessageLink[i].first.first,
+			l_vMessageLink[i].first.second-1,
+			l_vMessageLink[i].second.first,
+			l_vMessageLink[i].second.second,
+			OV_UndefinedIdentifier);
 	}
 
 	this->notify(BoxModification_MessageOutputRemoved, ui32OutputIndex);
@@ -1215,5 +1334,26 @@ boolean CBox::setMessageOutputName(
 
 	return true;
 }
+
+void CBox::storeState(void)
+{
+	if(m_pSavedState != NULL)
+	{
+		delete m_pSavedState;
+	}
+	m_pSavedState = new CBox(getKernelContext(), m_rOwnerScenario);
+	m_pSavedState->initializeFromExistingBox(*this);
+}
+
+void CBox::restoreState(void)
+{
+	if(!m_pSavedState) 
+	{
+		this->getLogManager() << LogLevel_Warning << "Tried to restore state with no state saved\n";
+		return;
+	}
+	this->initializeFromExistingBox(*m_pSavedState);
+}
+
 //
 

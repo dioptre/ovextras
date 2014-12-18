@@ -325,6 +325,7 @@ namespace OpenViBE
 			 * \param ui32ParentIndex [in] index where this widget is to be parented (irrelevant for top-level widgets)
 			 * \param rBoxIdentifier [in] identifier of associated IBox (for widgets of type EVisualisationWidget_VisualisationBox only)
 			 * \param ui32NbChildren [in] number of children of this widget (none for a visualisation box, 1 for a visualisation panel, 2 for split widgets, variable number for windows)
+			 * \param rSuggestedIdentifier [in] a suggestion as to the rIdentifier to use
 			 * \return true if widget successfully added to the internal tree store, false otherwise
 			 */
 			virtual OpenViBE::boolean addVisualisationWidget(
@@ -334,7 +335,8 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier& rParentIdentifier,
 				OpenViBE::uint32 ui32ParentIndex,
 				const OpenViBE::CIdentifier& rBoxIdentifier,
-				OpenViBE::uint32 ui32NbChildren)=0;
+				OpenViBE::uint32 ui32NbChildren,
+				const OpenViBE::CIdentifier& rSuggestedIdentifier)=0;
 
 			/**
 			 * \brief Returns the index where a widget is parented
@@ -461,7 +463,7 @@ namespace OpenViBE
 			 * \param eVisualisationTreeColumn [in] index of column where pointer is stored
 			 * \return true if pointer was successfully retrieved at the specified column of the specified node, 0 otherwise.
 			 */
-			virtual OpenViBE::boolean	getPointerValueFromTreeIter(
+			virtual OpenViBE::boolean getPointerValueFromTreeIter(
 				::GtkTreeIter* pTreeIter,
 				void*& rPointer,
 				OpenViBE::Kernel::EVisualisationTreeColumn eVisualisationTreeColumn) const=0;

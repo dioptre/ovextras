@@ -8,7 +8,7 @@
 
 #define MicromedDLL "dllMicromed.dll"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <cmath>
 

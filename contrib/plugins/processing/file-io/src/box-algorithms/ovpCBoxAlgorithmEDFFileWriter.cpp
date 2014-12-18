@@ -13,9 +13,9 @@ using namespace OpenViBEPlugins::FileIO;
 
 boolean CBoxAlgorithmEDFFileWriter::initialize(void)
 {
-	m_ExperimentInformationDecoder.initialize(*this);
-	m_SignalDecoder.initialize(*this);
-	m_StimulationDecoder.initialize(*this);
+	m_ExperimentInformationDecoder.initialize(*this,0);
+	m_SignalDecoder.initialize(*this,1);
+	m_StimulationDecoder.initialize(*this,2);
 	
 	m_sFilename = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	
@@ -128,7 +128,7 @@ boolean CBoxAlgorithmEDFFileWriter::process(void)
 	//iterate over all chunk on signal input
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
 	{
-		m_SignalDecoder.decode(1,i);
+		m_SignalDecoder.decode(i);
 		
 		if(m_SignalDecoder.isHeaderReceived())
 		{
@@ -231,7 +231,7 @@ boolean CBoxAlgorithmEDFFileWriter::process(void)
 		//iterate over all chunk on experiment information input
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 		{
-			m_ExperimentInformationDecoder.decode(0,i);
+			m_ExperimentInformationDecoder.decode(i);
 			
 			if(m_ExperimentInformationDecoder.isHeaderReceived())
 			{
@@ -294,7 +294,7 @@ boolean CBoxAlgorithmEDFFileWriter::process(void)
 	//iterate over all chunk on stimulation input
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(2); i++)
 	{
-		m_StimulationDecoder.decode(2,i);
+		m_StimulationDecoder.decode(i);
 		
 		if(m_StimulationDecoder.isHeaderReceived())
 		{

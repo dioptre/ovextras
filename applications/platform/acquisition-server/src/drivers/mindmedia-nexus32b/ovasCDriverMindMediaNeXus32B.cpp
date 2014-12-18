@@ -6,8 +6,8 @@
 
 #include <toolkit/ovtk_all.h>
 
-#include <system/Time.h>
-#include <system/Memory.h>
+#include <system/ovCTime.h>
+#include <system/ovCMemory.h>
 
 
 #if defined TARGET_OS_Windows

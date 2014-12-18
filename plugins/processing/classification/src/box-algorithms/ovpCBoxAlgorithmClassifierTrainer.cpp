@@ -1,6 +1,6 @@
 #include "ovpCBoxAlgorithmClassifierTrainer.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <fstream>
 #include <sstream>
@@ -494,23 +494,23 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 	l_rStaticBoxContext.getSettingValue(0, l_sStrategyClassIdentifier);
 	l_rStaticBoxContext.getSettingValue(1, l_sClassifierAlgorithmClassIdentifier);
 
-	XML::IXMLNode *root = XML::createNode(c_sClassificationBoxRoot);
+	XML::IXMLNode *l_sRoot = XML::createNode(c_sClassificationBoxRoot);
 	std::stringstream l_sVersion;
 	l_sVersion << OVP_Classification_BoxTrainerXMLVersion;
-	root->addAttribute(c_sXmlVersionAttributeName, l_sVersion.str().c_str());
+	l_sRoot->addAttribute(c_sXmlVersionAttributeName, l_sVersion.str().c_str());
 
 
 	XML::IXMLNode *l_pTempNode = XML::createNode(c_sStrategyNodeName);
 	l_oStrategyClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationStrategy, l_sStrategyClassIdentifier);
 	l_pTempNode->addAttribute(c_sIdentifierAttributeName, l_oStrategyClassIdentifier.toString());
 	l_pTempNode->setPCData(l_sStrategyClassIdentifier);
-	root->addChild(l_pTempNode);
+	l_sRoot->addChild(l_pTempNode);
 
 	l_pTempNode = XML::createNode(c_sAlgorithmNodeName);
 	l_oClassifierAlgorithmClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationAlgorithm, l_sClassifierAlgorithmClassIdentifier);
 	l_pTempNode->addAttribute(c_sIdentifierAttributeName, l_oClassifierAlgorithmClassIdentifier.toString());
 	l_pTempNode->setPCData(l_sClassifierAlgorithmClassIdentifier.toASCIIString());
-	root->addChild(l_pTempNode);
+	l_sRoot->addChild(l_pTempNode);
 
 
 	XML::IXMLNode *l_pStimulationsNode = XML::createNode(c_sStimulationsNodeName);
@@ -533,18 +533,18 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 		l_pTempNode->setPCData(l_sStimulationName.toASCIIString());
 		l_pStimulationsNode->addChild(l_pTempNode);
 	}
-	root->addChild(l_pStimulationsNode);
+	l_sRoot->addChild(l_pStimulationsNode);
 
-	root->addChild((XML::IXMLNode*)op_pConfiguration);
+	l_sRoot->addChild((XML::IXMLNode*)op_pConfiguration);
 
-	if(!l_pHandler->writeXMLInFile(*root, l_sConfigurationFilename.toASCIIString()))
+	if(!l_pHandler->writeXMLInFile(*l_sRoot, l_sConfigurationFilename.toASCIIString()))
 	{
 		this->getLogManager() << LogLevel_Error << "Could not save configuration to file [" << l_sConfigurationFilename << "]\n";
 		return false;
 	}
 
 	l_pHandler->release();
-	root->release();
+	l_sRoot->release();
 	op_pConfiguration=NULL;
 	return true;
 }

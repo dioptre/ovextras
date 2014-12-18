@@ -89,13 +89,13 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 	op_pMatrix.initialize(m_pConnectivityMethod->getOutputParameter(OVP_Algorithm_Connectivity_OutputParameterId_OutputMatrix));
 
 	// Signal stream decoder and encoder initialization
-	m_oAlgo0_SignalDecoder.initialize(*this);
-	m_oAlgo1_SignalEncoder.initialize(*this);
+	m_oAlgo0_SignalDecoder.initialize(*this,0);
+	m_oAlgo1_SignalEncoder.initialize(*this,0);
 	
 	// if an input was added, creation of the corresponding decoder
 	if(m_ui32InputCount==2)
 	{
-		m_oAlgo2_SignalDecoder.initialize(*this);
+		m_oAlgo2_SignalDecoder.initialize(*this,1);
 	}
 	// The box can't process more than two input
 	else if(m_ui32InputCount > 2)
@@ -204,11 +204,11 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 	{
 
 
-		m_oAlgo0_SignalDecoder.decode(0,i);
+		m_oAlgo0_SignalDecoder.decode(i);
 
 		if(m_ui32InputCount==2)
 		{
-			m_oAlgo2_SignalDecoder.decode(1,i);
+			m_oAlgo2_SignalDecoder.decode(i);
 
 			if(m_oAlgo0_SignalDecoder.isHeaderReceived() && m_oAlgo2_SignalDecoder.isHeaderReceived())
 			{
@@ -349,7 +349,7 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 			}
 
 			// Pass the header to the next boxes, by encoding a header on the output 0:
-			m_oAlgo1_SignalEncoder.encodeHeader(0);
+			m_oAlgo1_SignalEncoder.encodeHeader();
 
 			// send the output chunk containing the header. The dates are the same as the input chunk:
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
@@ -362,7 +362,7 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 			if(m_pConnectivityMethod->isOutputTriggerActive(OVP_Algorithm_Connectivity_OutputTriggerId_ProcessDone))
 			{
 				// Encode the output buffer :
-				m_oAlgo1_SignalEncoder.encodeBuffer(0);
+				m_oAlgo1_SignalEncoder.encodeBuffer();
 				// and send it to the next boxes :
 				l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 			}
@@ -371,7 +371,7 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 		if(l_bEndReceived)
 		{
 			// End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
-			m_oAlgo1_SignalEncoder.encodeEnd(0);
+			m_oAlgo1_SignalEncoder.encodeEnd();
 
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}

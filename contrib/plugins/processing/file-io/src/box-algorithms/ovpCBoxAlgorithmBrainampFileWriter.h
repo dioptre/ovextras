@@ -82,19 +82,22 @@ namespace OpenViBEPlugins
 			};
 
 			//input signal 1
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamDecoder;
+			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmBrainampFileWriter > * m_pStreamDecoder;
 			OpenViBE::IMatrix* m_pMatrix;
+			OpenViBE::uint64 m_ui64SamplingFrequency;
 
+			/*
 			OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* > ip_pMemoryBuffer;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pMatrix;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pMinMaxFrequencyBand;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > op_ui64SamplingFrequency;
+			//*/
 
 			
 			//input stimulation 1 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationDecoderTrigger;
-			OpenViBE::Kernel::TParameterHandler <const OpenViBE::IMemoryBuffer* > ip_pMemoryBufferToDecodeTrigger;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > op_pStimulationSetTrigger;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmBrainampFileWriter > * m_pStimulationDecoderTrigger;
+			//OpenViBE::Kernel::TParameterHandler <const OpenViBE::IMemoryBuffer* > ip_pMemoryBufferToDecodeTrigger;
+			//OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > op_pStimulationSetTrigger;
 
 			std::string m_sHeaderFilename;
 			std::string m_sDataFilename;

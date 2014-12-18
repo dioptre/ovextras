@@ -19,6 +19,7 @@ namespace OpenViBEToolkit
 		using T::initialize;
 		using T::m_pCodec;
 		using T::m_pBoxAlgorithm;
+		using T::m_ui32ConnectorIndex;
 
 		virtual void setOutputChunk(OpenViBE::IMemoryBuffer * pOutputChunkMemoryBuffer)
 		{
@@ -58,23 +59,23 @@ namespace OpenViBEToolkit
 		- mark output as ready to be sent has to be done manually, for accurate timing.
 		*/
 
-		OpenViBE::boolean encodeHeader(OpenViBE::uint32 ui32OutputIndex)
+		OpenViBE::boolean encodeHeader()
 		{
-			this->setOutputChunk(m_pBoxAlgorithm->getDynamicBoxContext().getOutputChunk(ui32OutputIndex));
+			this->setOutputChunk(m_pBoxAlgorithm->getDynamicBoxContext().getOutputChunk(m_ui32ConnectorIndex));
 			if(!this->encodeHeaderImpl()) return false;
 			return true;
 		}
 
-		OpenViBE::boolean encodeBuffer(OpenViBE::uint32 ui32OutputIndex)
+		OpenViBE::boolean encodeBuffer()
 		{
-			this->setOutputChunk(m_pBoxAlgorithm->getDynamicBoxContext().getOutputChunk(ui32OutputIndex));
+			this->setOutputChunk(m_pBoxAlgorithm->getDynamicBoxContext().getOutputChunk(m_ui32ConnectorIndex));
 			if(!this->encodeBufferImpl()) return false;
 			return true;
 		}
 
-		OpenViBE::boolean encodeEnd(OpenViBE::uint32 ui32OutputIndex)
+		OpenViBE::boolean encodeEnd()
 		{
-			this->setOutputChunk(m_pBoxAlgorithm->getDynamicBoxContext().getOutputChunk(ui32OutputIndex));
+			this->setOutputChunk(m_pBoxAlgorithm->getDynamicBoxContext().getOutputChunk(m_ui32ConnectorIndex));
 			if(!this->encodeEndImpl()) return false;
 			return true;
 		}

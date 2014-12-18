@@ -3,7 +3,7 @@
 
 #include <openvibe/ov_all.h>
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <fstream>
 #include <vector>
