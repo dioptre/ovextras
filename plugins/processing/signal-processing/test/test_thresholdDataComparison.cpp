@@ -16,22 +16,24 @@ using namespace std;
 
 
 /* Method to read a file a store it in a buffer */
-std::vector<float64> fileToBuffer(const CString sFileName)
+boolean fileToBuffer(const CString sFileName, std::vector<float64>& output )
 {
 	std::vector<string> l_vsData; // To store string data
-	std::vector<float64> l_vBuffer; // To store float64 data
+
+	output.clear();
 
 	float64 l_f64data = 0;
-
 
 	std::ifstream l_file; // To read file
 	stringstream ss; // to convert string to float64
 
 	l_file.open(sFileName);
 
-	if ( ! l_file.is_open() ) {
-	       cout << "Error : could not open file "<<sFileName<<"\n";
-	    }
+	if ( ! l_file.is_open() ) 
+	{
+		cout << "Error : could not open file " << sFileName << "\n";
+		return false;
+	}
 	
 	bool firstLineRead = false;
 
@@ -66,10 +68,10 @@ std::vector<float64> fileToBuffer(const CString sFileName)
 		ss.str(l_vsData[i]);
 		ss >> l_f64data;
 		ss.clear();
-		l_vBuffer.push_back(l_f64data);
+		output.push_back(l_f64data);
 	}
 
-	return l_vBuffer;
+	return true;
 }
 
 
@@ -143,24 +145,30 @@ boolean compareBuffers (const std::vector<float64>& rInVector, const std::vector
 // validation Test take in the algorithm output file, the expected output file (reference) and a tolerance threshold
 boolean validationTest(const CString sOutputFile, const CString sRefOutputFile, const float64 f64threshold)
 {
-	boolean l_bIsTestPassed = false;
+	boolean l_bIsTestPassed = true;
 
 	std::vector<float64> l_vOutputVector;
 	std::vector<float64> l_vRefOutputVector;
 
-	l_vOutputVector = fileToBuffer(sOutputFile);
-	l_vRefOutputVector = fileToBuffer(sRefOutputFile);
-
-	l_bIsTestPassed = compareBuffers(l_vOutputVector, l_vRefOutputVector,f64threshold);
+	l_bIsTestPassed &= fileToBuffer(sOutputFile, l_vOutputVector);
+	if(!l_bIsTestPassed) return false;
+	l_bIsTestPassed &= fileToBuffer(sRefOutputFile, l_vRefOutputVector);
+	if(!l_bIsTestPassed) return false;
+	l_bIsTestPassed &= compareBuffers(l_vOutputVector, l_vRefOutputVector,f64threshold);
 
 	return l_bIsTestPassed;
-
 }
 
 
 
 int main(int argc, char *argv[])
 {
+	if(argc!=4) 
+	{
+		cout<<"Usage: " << argv[0] << " <data> <reference> <threshold>\n";
+		return -1;
+	}
+
 	const float64 l_f64precisionTolerance = strtod(argv[3], NULL);
 
 	boolean l_bValidationTestPassed = false;
