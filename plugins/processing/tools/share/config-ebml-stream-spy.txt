@@ -28,10 +28,10 @@ OVTK_NodeId_Buffer                                                     EBML::CId
 OVTK_NodeId_End                                                        EBML::CIdentifier(0x00D9DDC3, 0x0B12873A) master
 
 OVTK_NodeId_Header_StreamedMatrix                                      EBML::CIdentifier(0x0072F560, 0x7ED2CBED) master
-OVTK_NodeId_Header_StreamedMatrix_DimmensionCount                      EBML::CIdentifier(0x003FEBD4, 0x2725D428) uinteger
-OVTK_NodeId_Header_StreamedMatrix_Dimmension                           EBML::CIdentifier(0x0000E3C0, 0x3A7D5141) master
-OVTK_NodeId_Header_StreamedMatrix_Dimmension_Size                      EBML::CIdentifier(0x001302F7, 0x36D8438A) uinteger
-OVTK_NodeId_Header_StreamedMatrix_Dimmension_Label                     EBML::CIdentifier(0x00153E40, 0x190227E0) string
+OVTK_NodeId_Header_StreamedMatrix_DimensionCount                       EBML::CIdentifier(0x003FEBD4, 0x2725D428) uinteger
+OVTK_NodeId_Header_StreamedMatrix_Dimension                            EBML::CIdentifier(0x0000E3C0, 0x3A7D5141) master
+OVTK_NodeId_Header_StreamedMatrix_Dimension_Size                       EBML::CIdentifier(0x001302F7, 0x36D8438A) uinteger
+OVTK_NodeId_Header_StreamedMatrix_Dimension_Label                      EBML::CIdentifier(0x00153E40, 0x190227E0) string
 OVTK_NodeId_Buffer_StreamedMatrix                                      EBML::CIdentifier(0x00120663, 0x08FBC165) master
 OVTK_NodeId_Buffer_StreamedMatrix_RawBuffer                            EBML::CIdentifier(0x00B18C10, 0x427D098C) binary(float64)
 
@@ -50,6 +50,12 @@ OVTK_NodeId_Buffer_Stimulation_Stimulation_Identifier                  EBML::CId
 OVTK_NodeId_Buffer_Stimulation_Stimulation_Date                        EBML::CIdentifier(0x00B866D8, 0x14DA5374) uinteger
 OVTK_NodeId_Buffer_Stimulation_Stimulation_Duration                    EBML::CIdentifier(0x14EE055F, 0x87FBCC9C) uinteger
 
+OVTK_NodeId_Header_ChannelLocalisation                                 EBML::CIdentifier(0x17400C76, 0x16CF14C8) master
+OVTK_NodeId_Header_ChannelLocalisation_Dynamic                         EBML::CIdentifier(0x7307023C, 0x7F754D2E) uinteger
+
+OVTK_NodeId_Header_ChannelUnits                                        EBML::CIdentifier(0xF2CFE60B, 0xEFD63E3B) master
+OVTK_NodeId_Header_ChannelUnits_Dynamic                                EBML::CIdentifier(0x5338AF5C, 0x07C469C3) uinteger
+
 OVTK_NodeId_Header_ExperimentInformation                               EBML::CIdentifier(0x00746BA0, 0x115AE04D) master
 OVTK_NodeId_Header_ExperimentInformation_Experiment                    EBML::CIdentifier(0x0011D6B7, 0x48F1AA39) master
 OVTK_NodeId_Header_ExperimentInformation_Experiment_Identifier         EBML::CIdentifier(0x006ACD74, 0x1C960C26) uinteger
@@ -64,5 +70,7 @@ OVTK_NodeId_Header_ExperimentInformation_Context_LaboratoryIdentifier  EBML::CId
 OVTK_NodeId_Header_ExperimentInformation_Context_LaboratoryName        EBML::CIdentifier(0x00EB1F23, 0x51C23B83) string
 OVTK_NodeId_Header_ExperimentInformation_Context_TechnicianIdentifier  EBML::CIdentifier(0x00874A7F, 0x60DC34C2) uinteger
 OVTK_NodeId_Header_ExperimentInformation_Context_TechnicianName        EBML::CIdentifier(0x00C8C393, 0x31CE5B3E) string
+
+
 
 DummyEnd                                                               EBML::CIdentifier(0x00000000, 0x00000000) binary

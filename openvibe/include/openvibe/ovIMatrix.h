@@ -50,13 +50,6 @@ namespace OpenViBE
 			const OpenViBE::uint32 ui32DimensionIndex,
 			const OpenViBE::uint32 ui32DimensionEntryIndex) const=0;
 
-		virtual const OpenViBE::uint32 getDimensionUnit(
-			const OpenViBE::uint32 ui32DimensionIndex,
-			const OpenViBE::uint32 ui32DimensionEntryIndex) const=0;
-		virtual const OpenViBE::uint32 getDimensionFactor(
-			const OpenViBE::uint32 ui32DimensionIndex,
-			const OpenViBE::uint32 ui32DimensionEntryIndex) const=0;
-
 		/**
 		 * \brief Gets the raw buffer for this matrix
 		 * \return the raw buffer for this matrix
@@ -130,16 +123,6 @@ namespace OpenViBE
 			const OpenViBE::uint32 ui32DimensionIndex,
 			const OpenViBE::uint32 ui32DimensionEntryIndex,
 			const char* sDimensionLabel)=0;
-
-		virtual OpenViBE::boolean setDimensionUnit(
-			const OpenViBE::uint32 ui32DimensionIndex,
-			const OpenViBE::uint32 ui32DimensionEntryIndex,
-			const OpenViBE::uint32 ui32DimensionUnit)=0;
-
-		virtual OpenViBE::boolean setDimensionFactor(
-			const OpenViBE::uint32 ui32DimensionIndex,
-			const OpenViBE::uint32 ui32DimensionEntryIndex,
-			const OpenViBE::uint32 ui32DimensionFactor)=0;
 
 		/**
 		 * \brief Gets a writable raw buffer for this matrix

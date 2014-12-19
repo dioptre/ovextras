@@ -276,6 +276,7 @@ boolean CKernelContext::initialize(void)
 	m_pTypeManager->registerStreamType(  OV_TypeId_Stimulations, "Stimulations", OV_TypeId_EBMLStream);
 	m_pTypeManager->registerStreamType(  OV_TypeId_StreamedMatrix, "Streamed matrix", OV_TypeId_EBMLStream);
 	m_pTypeManager->registerStreamType(    OV_TypeId_ChannelLocalisation, "Channel localisation", OV_TypeId_StreamedMatrix);
+	m_pTypeManager->registerStreamType(    OV_TypeId_ChannelUnits, "Channel units", OV_TypeId_StreamedMatrix);
 	m_pTypeManager->registerStreamType(    OV_TypeId_FeatureVector, "Feature vector", OV_TypeId_StreamedMatrix);
 	m_pTypeManager->registerStreamType(    OV_TypeId_Signal, "Signal", OV_TypeId_StreamedMatrix);
 	m_pTypeManager->registerStreamType(    OV_TypeId_Spectrum, "Spectrum", OV_TypeId_StreamedMatrix);

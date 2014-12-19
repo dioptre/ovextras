@@ -53,18 +53,6 @@ boolean CStreamedMatrixEncoder::processHeader(void)
 	     m_pEBMLWriterHelper->setASCIIStringAsChildData(l_pMatrix->getDimensionLabel(i, j));
 	    m_pEBMLWriterHelper->closeChild();
 	   }
-	   for(uint32 j=0; j<l_pMatrix->getDimensionSize(i); j++)
-	   {
-	    m_pEBMLWriterHelper->openChild(OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit);
-	     m_pEBMLWriterHelper->setUIntegerAsChildData(l_pMatrix->getDimensionUnit(i, j));
-	    m_pEBMLWriterHelper->closeChild();
-	   }
-	   for(uint32 j=0; j<l_pMatrix->getDimensionSize(i); j++)
-	   {
-	    m_pEBMLWriterHelper->openChild(OVTK_NodeId_Header_StreamedMatrix_Dimension_Factor);
-	     m_pEBMLWriterHelper->setUIntegerAsChildData(l_pMatrix->getDimensionFactor(i, j));
-	    m_pEBMLWriterHelper->closeChild();
-	   }
 	  m_pEBMLWriterHelper->closeChild();
 	 }
 	m_pEBMLWriterHelper->closeChild();

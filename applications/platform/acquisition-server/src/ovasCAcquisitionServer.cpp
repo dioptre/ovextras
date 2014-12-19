@@ -740,8 +740,8 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 				ip_pSignalMatrix->setDimensionLabel(0, i, ss.str().c_str());
 			}
 			// std::stringstream ss; ss << "Megabolts " << i+1 ;
-			ip_pSignalMatrix->setDimensionUnit(0, i, OVTK_UNIT_Volts);
-			ip_pSignalMatrix->setDimensionFactor(0, i, OVTK_FACTOR_Milli);
+			//ip_pSignalMatrix->setDimensionUnit(0, i, OVTK_UNIT_Volts);
+			// ip_pSignalMatrix->setDimensionFactor(0, i, OVTK_FACTOR_Milli);
 			m_rKernelContext.getLogManager() << LogLevel_Trace << "Channel name      : " << CString(ip_pSignalMatrix->getDimensionLabel(0, i)) << "\n";
 		}
 

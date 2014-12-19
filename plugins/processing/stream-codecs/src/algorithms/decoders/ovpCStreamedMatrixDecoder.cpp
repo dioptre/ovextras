@@ -46,7 +46,6 @@ EBML::boolean CStreamedMatrixDecoder::isMasterChild(const EBML::CIdentifier& rId
 	else if(rIdentifier==OVTK_NodeId_Header_StreamedMatrix_DimensionCount)  return false;
 	else if(rIdentifier==OVTK_NodeId_Header_StreamedMatrix_Dimension_Size)  return false;
 	else if(rIdentifier==OVTK_NodeId_Header_StreamedMatrix_Dimension_Label) return false;
-	else if(rIdentifier==OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit)  return false;
 	else if(rIdentifier==OVTK_NodeId_Buffer_StreamedMatrix)                  return true;
 	else if(rIdentifier==OVTK_NodeId_Buffer_StreamedMatrix_RawBuffer)        return false;
 	return CEBMLBaseDecoder::isMasterChild(rIdentifier);
@@ -63,7 +62,6 @@ void CStreamedMatrixDecoder::openChild(const EBML::CIdentifier& rIdentifier)
 	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_DimensionCount)
 	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Size)
 	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Label)
-	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit)
 	 ||(l_rTop==OVTK_NodeId_Buffer_StreamedMatrix)
 	 ||(l_rTop==OVTK_NodeId_Buffer_StreamedMatrix_RawBuffer))
 	{
@@ -98,7 +96,6 @@ void CStreamedMatrixDecoder::processChildData(const void* pBuffer, const EBML::u
 	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_DimensionCount)
 	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Size)
 	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Label)
-	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit)
 	 ||(l_rTop==OVTK_NodeId_Buffer_StreamedMatrix)
 	 ||(l_rTop==OVTK_NodeId_Buffer_StreamedMatrix_RawBuffer))
 	{
@@ -117,14 +114,6 @@ void CStreamedMatrixDecoder::processChildData(const void* pBuffer, const EBML::u
 				{
 					op_pMatrix->setDimensionLabel(m_ui32DimensionIndex, m_ui32DimensionEntryIndex++, m_pEBMLReaderHelper->getASCIIStringFromChildData(pBuffer, ui64BufferSize)); 
 				}
-				else if(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit) 
-				{
-					op_pMatrix->setDimensionUnit(m_ui32DimensionIndex, m_ui32DimensionEntryIndexUnit++, static_cast<uint32>(m_pEBMLReaderHelper->getUIntegerFromChildData(pBuffer, ui64BufferSize))); 
-				} 
-				else if(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Factor) 
-				{
-					op_pMatrix->setDimensionFactor(m_ui32DimensionIndex, m_ui32DimensionEntryIndexUnit++, static_cast<uint32>(m_pEBMLReaderHelper->getUIntegerFromChildData(pBuffer, ui64BufferSize))); 
-				} 
 				else 
 				{ 
 					// unknown identifier
@@ -151,7 +140,6 @@ void CStreamedMatrixDecoder::closeChild(void)
 	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_DimensionCount)
 	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Size)
 	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Label)
-	 ||(l_rTop==OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit)
 	 ||(l_rTop==OVTK_NodeId_Buffer_StreamedMatrix)
 	 ||(l_rTop==OVTK_NodeId_Buffer_StreamedMatrix_RawBuffer))
 	{

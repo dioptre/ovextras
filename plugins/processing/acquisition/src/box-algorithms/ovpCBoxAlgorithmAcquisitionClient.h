@@ -35,6 +35,7 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pSignalMemoryBuffer;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pStimulationMemoryBuffer;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pChannelLocalisationMemoryBuffer;
+			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pChannelUnitsMemoryBuffer;
 
 			Socket::IConnectionClient* m_pConnectionClient;
 
@@ -67,6 +68,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addOutput ("Signal strea",                OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addOutput ("Stimulations",                OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addOutput ("Channel localisation",        OV_TypeId_ChannelLocalisation);
+				rBoxAlgorithmPrototype.addOutput ("Channel units",               OV_TypeId_ChannelUnits);
 				rBoxAlgorithmPrototype.addSetting("Acquisition server hostname", OV_TypeId_String,  "${AcquisitionServer_HostName}");
 				rBoxAlgorithmPrototype.addSetting("Acquisition server port",     OV_TypeId_Integer, "1024");
 				return true;

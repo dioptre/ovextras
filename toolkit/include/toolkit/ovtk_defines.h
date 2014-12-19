@@ -26,7 +26,6 @@
 //                                                                   //
 
 #define OVTK_TypeId_EBMLStream                                         OpenViBE::CIdentifier(0x434F6587, 0x2EFD2B7E)
-#define   OVTK_TypeId_ChannelLocalisation                              OpenViBE::CIdentifier(0x1E4C0D6E, 0x5204EEB2)
 #define   OVTK_TypeId_ExperimentInformation                            OpenViBE::CIdentifier(0x403488E7, 0x565D70B6)
 #define   OVTK_TypeId_ExperimentationInformation                       OpenViBE::CIdentifier(0x403488E7, 0x565D70B6) // deprecated, kept for compatibility
 #define   OVTK_TypeId_Stimulations                                     OpenViBE::CIdentifier(0x6F752DD0, 0x082A321E)
@@ -34,6 +33,9 @@
 #define     OVTK_TypeId_FeatureVector                                  OpenViBE::CIdentifier(0x17341935, 0x152FF448)
 #define     OVTK_TypeId_Signal                                         OpenViBE::CIdentifier(0x5BA36127, 0x195FEAE1)
 #define     OVTK_TypeId_Spectrum                                       OpenViBE::CIdentifier(0x1F261C0A, 0x593BF6BD)
+#define     OVTK_TypeId_ChannelLocalisation                            OpenViBE::CIdentifier(0x1E4C0D6E, 0x5204EEB2)
+#define     OVTK_TypeId_ChannelUnits                                   OpenViBE::CIdentifier(0x5E330216, 0x2C09724C)
+
 
 //___________________________________________________________________//
 //                                                                   //
@@ -270,6 +272,8 @@
 // @TODO it would be better to read these from a database file (along with the symbols now specified in ovtk_main.cpp), 
 // however we still need the defines if we wish to provide compile-time token support.
 // 
+// Note: Since these will be stored as float64 when transmitted by OpenViBE, they should not exceed the floats integer precision
+//
 
 #define OVTK_UNIT_Unspecified 0
 #define OVTK_UNIT_Dimensionless 512
@@ -491,7 +495,9 @@
 //
 // The number of each prefix encodes the exponent in the 1e00 notation.
 //
-// OpenViBE enums are unsigned integers. Here we use the convention of ORring with 0xFF000000 to denote the negative exponents.
+// OpenViBE enums are unsigned integers. Here we use the convention of ORring with 0x0000FF00 to denote the negative exponents.
+//
+// Note: Since these will be stored as float64 when transmitted by OpenViBE, they should not exceed the floats integer precision
 //
 
 #define OVTK_FACTOR_Yotta                                            24
@@ -505,19 +511,19 @@
 #define OVTK_FACTOR_Hecto                                            2
 #define OVTK_FACTOR_Deca                                             1
 #define OVTK_FACTOR_Base                                             0
-#define OVTK_FACTOR_Deci                                             (1 | 0xFF000000)
-#define OVTK_FACTOR_Centi                                            (2 | 0xFF000000)
-#define OVTK_FACTOR_Milli                                            (3 | 0xFF000000)
-#define OVTK_FACTOR_Micro                                            (6 | 0xFF000000)
-#define OVTK_FACTOR_Nano                                             (9 | 0xFF000000)
-#define OVTK_FACTOR_Pico                                             (12 | 0xFF000000)
-#define OVTK_FACTOR_Femto                                            (15 | 0xFF000000)
-#define OVTK_FACTOR_Atto                                             (18 | 0xFF000000)
-#define OVTK_FACTOR_Zepto                                            (21 | 0xFF000000)
-#define OVTK_FACTOR_Yocto                                            (24 | 0xFF000000)
+#define OVTK_FACTOR_Deci                                             (1 | 0x0000FF00)
+#define OVTK_FACTOR_Centi                                            (2 | 0x0000FF00)
+#define OVTK_FACTOR_Milli                                            (3 | 0x0000FF00)
+#define OVTK_FACTOR_Micro                                            (6 | 0x0000FF00)
+#define OVTK_FACTOR_Nano                                             (9 | 0x0000FF00)
+#define OVTK_FACTOR_Pico                                             (12 | 0x0000FF00)
+#define OVTK_FACTOR_Femto                                            (15 | 0x0000FF00)
+#define OVTK_FACTOR_Atto                                             (18 | 0x0000FF00)
+#define OVTK_FACTOR_Zepto                                            (21 | 0x0000FF00)
+#define OVTK_FACTOR_Yocto                                            (24 | 0x0000FF00)
 
-// Convert the factor code to a floating point usable for calculations
-#define OVTK_FACTOR_TO_FLOAT(factor) ( factor & 0xFF000000 ? 1.0 / static_cast<float64>(factor & 0x00FFFFFF)) : static_cast<float64>(factor & 0x00FFFFFF) )
+// Convert the factor code to a signer integer
+#define OVTK_DECODE_FACTOR(factor) ( (factor & 0x0000FF00) ? -(factor & 0x000000FF) : factor )
 
 //___________________________________________________________________//
 //                                                                   //
@@ -570,7 +576,7 @@
  * Acquisition stream description (fixed on march 2008)
  * This is a multiplexed stream
  *
- * version 2 :
+ * version 3 :
  * ----------------------------------------------------------------- *
  * OVTK_NodeId_Header
  *   OVTK_NodeId_Acquisition_Header_ExperimentInformation
@@ -581,6 +587,8 @@
  *     ... some stimulation stream header
  *   OVTK_NodeId_Acquisition_Header_ChannelLocalisation
  *     ... some channel localisation stream header
+ *   OVTK_NodeId_Acquisition_Header_ChannelUnits
+ *     ... some channel units stream header
  * OVTK_NodeId_Buffer
  *   OVTK_NodeId_Acquisition_Buffer_ExperimentInformation
  *     ... some experiment information stream buffer
@@ -590,6 +598,8 @@
  *     ... some stimulation stream buffer
  *   OVTK_NodeId_Acquisition_Buffer_ChannelLocalisation
  *     ... some channel localisation stream buffer
+ *   OVTK_NodeId_Acquisition_Buffer_ChannelUnits
+ *     ... some channel units stream buffer
  * OVTK_NodeId_Buffer
  * OVTK_NodeId_Buffer
  * ...
@@ -600,10 +610,12 @@
 #define OVTK_NodeId_Acquisition_Header_Signal                                  EBML::CIdentifier(0x00000000, 0x00000082)
 #define OVTK_NodeId_Acquisition_Header_Stimulation                             EBML::CIdentifier(0x00000000, 0x00000083)
 #define OVTK_NodeId_Acquisition_Header_ChannelLocalisation                     EBML::CIdentifier(0x00000000, 0x00000084)
+#define OVTK_NodeId_Acquisition_Header_ChannelUnits                            EBML::CIdentifier(0x00000000, 0x00000085)
 #define OVTK_NodeId_Acquisition_Buffer_ExperimentInformation                   EBML::CIdentifier(0x00000000, 0x00000041)
 #define OVTK_NodeId_Acquisition_Buffer_Signal                                  EBML::CIdentifier(0x00000000, 0x00000042)
 #define OVTK_NodeId_Acquisition_Buffer_Stimulation                             EBML::CIdentifier(0x00000000, 0x00000043)
 #define OVTK_NodeId_Acquisition_Buffer_ChannelLocalisation                     EBML::CIdentifier(0x00000000, 0x00000044)
+#define OVTK_NodeId_Acquisition_Buffer_ChannelUnits                            EBML::CIdentifier(0x00000000, 0x00000045)
 
 #define OVTK_NodeId_Acquisition_Header                                         EBML::CIdentifier(0x00000000, 0x00004239) // deprecated
 #define OVTK_NodeId_Acquisition_AcquisitionInformation                         EBML::CIdentifier(0x00000000, 0x00004240) // deprecated
@@ -668,8 +680,6 @@
 #define OVTK_NodeId_Header_StreamedMatrix_Dimension                            EBML::CIdentifier(0x0000E3C0, 0x3A7D5141)
 #define OVTK_NodeId_Header_StreamedMatrix_Dimension_Size                       EBML::CIdentifier(0x001302F7, 0x36D8438A)
 #define OVTK_NodeId_Header_StreamedMatrix_Dimension_Label                      EBML::CIdentifier(0x00153E40, 0x190227E0)
-#define OVTK_NodeId_Header_StreamedMatrix_Dimension_Unit                       EBML::CIdentifier(0x00B42112, 0x0ECD5B6D)
-#define OVTK_NodeId_Header_StreamedMatrix_Dimension_Factor                     EBML::CIdentifier(0x037D19CE, 0x4D4E17A2)
 #define OVTK_NodeId_Buffer_StreamedMatrix                                      EBML::CIdentifier(0x00120663, 0x08FBC165)
 #define OVTK_NodeId_Buffer_StreamedMatrix_RawBuffer                            EBML::CIdentifier(0x00B18C10, 0x427D098C)
 
@@ -785,6 +795,9 @@
 
 #define OVTK_NodeId_Header_ChannelLocalisation                                 EBML::CIdentifier(0xF2CFE60B, 0xEFD63E3B)
 #define OVTK_NodeId_Header_ChannelLocalisation_Dynamic                         EBML::CIdentifier(0x5338AF5C, 0x07C469C3)
+
+#define OVTK_NodeId_Header_ChannelUnits                                        EBML::CIdentifier(0x17400C76, 0x16CF14C8)
+#define OVTK_NodeId_Header_ChannelUnits_Dynamic                                EBML::CIdentifier(0x7307023C, 0x7F754D2E)
 
 //___________________________________________________________________//
 //                                                                   //
