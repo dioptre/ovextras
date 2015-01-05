@@ -1,5 +1,7 @@
 #include "ovpCBoxAlgorithmGenericStreamReader.h"
 
+#include <iostream>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -9,6 +11,7 @@ using namespace OpenViBEPlugins::FileIO;
 
 CBoxAlgorithmGenericStreamReader::CBoxAlgorithmGenericStreamReader(void)
 	:m_oReader(*this)
+	,m_bHasEBMLHeader(false)
 	,m_pFile(NULL)
 {
 }
@@ -152,6 +155,17 @@ void CBoxAlgorithmGenericStreamReader::openChild(const EBML::CIdentifier& rIdent
 
 	EBML::CIdentifier& l_rTop=m_vNodes.top();
 
+	if(l_rTop == EBML_Identifier_Header)
+	{
+		m_bHasEBMLHeader = true;
+	}
+	if(l_rTop==OVP_NodeId_OpenViBEStream_Header)
+	{
+		if(!m_bHasEBMLHeader)
+		{
+			this->getLogManager() << LogLevel_Info << "The file " << m_sFilename << " use an outdated (but still compatible) version of ov file format\n";
+		}
+	}
 	if(l_rTop==OVP_NodeId_OpenViBEStream_Header)
 	{
 		m_vStreamIndexToOutputIndex.clear();
@@ -163,6 +177,11 @@ void CBoxAlgorithmGenericStreamReader::processChildData(const void* pBuffer, con
 {
 	EBML::CIdentifier& l_rTop=m_vNodes.top();
 
+	if(l_rTop == EBML_Identifier_EBMLVersion)
+	{
+		uint64 l_ui64VersionNumber=(uint64)m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize);
+		this->getLogManager() << LogLevel_Info << "The file " << m_sFilename << " use version " << l_ui64VersionNumber << " of ov file format\n";
+	}
 	if(l_rTop==OVP_NodeId_OpenViBEStream_Header_Compression)
 	{
 		if(m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize)!=0)

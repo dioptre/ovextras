@@ -55,6 +55,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32OutputIndex;
 			OpenViBE::boolean m_bPending;
 			OpenViBE::boolean m_bUseCompression;
+			OpenViBE::boolean m_bHasEBMLHeader;
 
 			::FILE* m_pFile;
 			std::stack < EBML::CIdentifier > m_vNodes;
