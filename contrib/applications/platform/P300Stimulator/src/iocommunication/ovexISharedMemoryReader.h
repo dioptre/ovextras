@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __ovexISharedMemoryReader__
 #define __ovexISharedMemoryReader__
 
@@ -165,4 +167,5 @@ namespace OpenViBEApplications
 		OpenViBE::CString m_sMutexName;
 	};
 };
+#endif
 #endif

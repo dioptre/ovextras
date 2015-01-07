@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef OVEXP300CSVREADER_H
 #define OVEXP300CSVREADER_H
 
@@ -37,3 +39,5 @@ private :
 };
 }
 #endif // OVEXP300CSVREADER_H
+
+#endif

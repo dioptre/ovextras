@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 // author: Dieter Devlaminck
 // affiliation: INRIA 
 // date: 26/01/2013
@@ -55,3 +57,5 @@ namespace OpenViBEApplications
 
 #endif
 #endif //__ParallelPort_H__
+
+#endif

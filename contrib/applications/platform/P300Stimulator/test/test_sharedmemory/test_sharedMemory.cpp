@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "../../src/ovexP300SharedMemoryReader.h"
 #include <iostream>
 #include <openvibe/ov_all.h>
@@ -60,3 +62,11 @@ int main(int argc, char *argv[])
 	
 
 }
+
+#else
+int main(int argc, char *argv[])
+{
+
+}
+
+#endif

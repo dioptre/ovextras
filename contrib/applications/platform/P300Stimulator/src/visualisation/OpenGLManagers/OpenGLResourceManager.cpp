@@ -1,4 +1,6 @@
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "OpenGLResourceManager.h"
 
 using namespace OpenViBE;
@@ -70,3 +72,5 @@ void OpenGLResourceManager::deleteResources(OpenGLResourceManager* context)
 	}	
 }
 #endif//TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
+#endif

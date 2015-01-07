@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __ovexSharedStimulusReader__
 #define __ovexSharedStimulusReader__
 
@@ -88,4 +90,5 @@ namespace OpenViBEApplications
 	};
 };
 
+#endif
 #endif

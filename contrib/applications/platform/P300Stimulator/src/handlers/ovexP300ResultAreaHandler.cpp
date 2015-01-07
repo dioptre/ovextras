@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300ResultAreaHandler.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "ovexP300TargetAreaHandler.h"
@@ -289,4 +291,6 @@ std::string P300ResultAreaHandler::eraseLastCharacter()
 	m_pSymbolContainer->removeChild(m_ui32ResultCounter-1);
 	return l_sCharacterRemoved;
 }
+#endif
+
 #endif

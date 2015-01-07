@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "glGContainer.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 using namespace OpenViBE;
@@ -185,4 +187,6 @@ std::string GContainer::toString() const
 {
 	return std::string("GContainer");
 }
+#endif
+
 #endif

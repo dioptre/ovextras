@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 // author: Dieter Devlaminck
 // affiliation: INRIA
 // date: 26/01/2013
@@ -163,5 +165,7 @@ int ParallelPort::write(uint32 value)
 		return 1;
 }
 
+
+#endif
 
 #endif

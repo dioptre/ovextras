@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __GLabel_H__
 #define __GLabel_H__
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
@@ -84,4 +86,6 @@ namespace OpenViBEApplications
 };
 
 #endif
+#endif
+
 #endif

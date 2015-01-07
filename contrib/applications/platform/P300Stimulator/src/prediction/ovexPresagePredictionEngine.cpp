@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifdef TARGET_HAS_ThirdPartyPresage
 
 #include "ovexPresagePredictionEngine.h"
@@ -88,5 +90,7 @@ std::vector<std::string>* PresagePredictionEngine::getMostProbableWords(const st
 
 	return m_lPredictedWords;
 }
+
+#endif
 
 #endif

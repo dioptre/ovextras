@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexISharedMemoryReader.h"
 #include "ovexSharedMatrixReader.h"
 #include "ovexSharedStimulusReader.h"
@@ -134,3 +136,4 @@ void ISharedMemoryReader::close()
 {
 	shared_memory_object::remove(m_sSharedMemoryName.toASCIIString());
 }
+#endif
