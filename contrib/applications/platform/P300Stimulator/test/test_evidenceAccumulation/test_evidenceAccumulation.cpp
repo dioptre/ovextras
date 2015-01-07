@@ -186,9 +186,10 @@ int main(int argc, char *argv[])
 }
 
 #else
+#include <iostream>
 int main(int argc, char *argv[])
 {
-
+        std::cout << "You do not have the required libraries for the CoAdapt stimulator " << std::endl;
 }
 
 #endif
