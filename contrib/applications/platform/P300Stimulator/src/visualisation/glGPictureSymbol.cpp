@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "glGPictureSymbol.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 using namespace OpenViBE;
@@ -172,4 +174,6 @@ std::string GPictureSymbol::toString() const
 	text = GLabel::toString() + std::string("picture ");
 	return text;
 }
+#endif
+
 #endif

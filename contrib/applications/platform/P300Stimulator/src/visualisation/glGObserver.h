@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __GObserverAAAAB_OV_H__
 #define __GObserverAAAAB_OV_H__
 
@@ -26,5 +28,7 @@ namespace OpenViBEApplications
 		virtual void update(GObservable* observable, const void * pUserData) = 0;
 	};
 };
+
+#endif
 
 #endif

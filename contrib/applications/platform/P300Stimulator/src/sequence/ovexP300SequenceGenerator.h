@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __ovCoAdaptP300SequenceGenerator__
 #define __ovCoAdaptP300SequenceGenerator__
 
@@ -95,5 +97,7 @@ namespace OpenViBEApplications
 		OpenViBE::uint64 m_ui64TrialIndex;
 	};
 };
+
+#endif
 
 #endif

@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300CNULLStimulator.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "../ova_defines.h"
@@ -103,4 +105,6 @@ void CoAdaptP300CNULLStimulator::run()
 	}
 	m_oFuncVisualiserCallback(OVA_StimulationId_ExperimentStop);
 }
+#endif
+
 #endif

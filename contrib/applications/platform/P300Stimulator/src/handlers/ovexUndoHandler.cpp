@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include <vector>
 
 #include "ovexUndoHandler.h"
@@ -89,4 +91,6 @@ void P300UndoHandler::update(GObservable* observable, const void * pUserData)
 			m_lRedoStack->pop_front();
 	}
 }
+#endif
+
 #endif

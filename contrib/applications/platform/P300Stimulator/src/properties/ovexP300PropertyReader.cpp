@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300PropertyReader.h"
 //#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include <string>
@@ -61,3 +63,5 @@ void CoAdaptP300PropertyReader::writeElement(const char* sName, const char* sDat
 		m_pKernelContext->getLogManager() << LogLevel_Trace << "End property " << sName << "\n";
 }
 //#endif
+
+#endif

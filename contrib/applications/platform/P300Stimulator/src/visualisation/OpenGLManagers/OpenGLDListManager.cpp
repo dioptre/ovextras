@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "OpenGLDListManager.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 using namespace OpenViBE;
@@ -46,4 +48,6 @@ void OpenGLDListManager::_deleteResource(GLuint* resource_id)
 	//std::cout << "OpenGLDListManager:: Deleting opengl resource with id " << *resource_id << "\n";
 	glDeleteLists(*resource_id,1);
 }
+#endif
+
 #endif

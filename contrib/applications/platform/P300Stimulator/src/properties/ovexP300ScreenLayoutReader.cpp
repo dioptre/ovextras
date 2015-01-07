@@ -268,7 +268,6 @@ void P300ScreenLayoutReader::closeChild(void)
 	m_vNode.pop();
 }
 
-#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 void P300ScreenLayoutReader::parseDimensions(BoxDimensions& dim, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
 {
 	for (uint32 it=0; it<ui64AttributeCount; it++)
@@ -284,7 +283,6 @@ void P300ScreenLayoutReader::parseDimensions(BoxDimensions& dim, const char** sA
 			dim.y = (l_f32AttributeValue);
 	}		
 }
-#endif
 
 void P300ScreenLayoutReader::readPropertiesFromFile(CString propertyFile)
 {

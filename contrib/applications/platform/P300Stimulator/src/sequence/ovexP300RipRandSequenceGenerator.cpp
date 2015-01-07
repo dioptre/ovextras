@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300RipRandSequenceGenerator.h"
 
 #include <system/ovCTime.h>
@@ -111,3 +113,5 @@ void  P300RipRandSequenceGenerator::writeSequenceToConsole(vector< vector<uint32
 		std::cout << "\n";
 	}
 }
+
+#endif

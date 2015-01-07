@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "OpenGLTextureManager.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 using namespace OpenViBE;
@@ -61,4 +63,6 @@ void OpenGLTextureManager::_deleteResource(GLuint* resource_id)
 {
 	glDeleteTextures(1,resource_id);	
 }
+#endif
+
 #endif

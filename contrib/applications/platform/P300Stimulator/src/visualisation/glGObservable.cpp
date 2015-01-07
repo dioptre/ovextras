@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "glGObservable.h"
 
 using namespace OpenViBE;
@@ -47,3 +49,4 @@ void GObservable::notifyObservers(const void * pUserData)
 	for (OpenViBE::uint32 i=0; i<m_vObservers->size(); i++)
 		m_vObservers->at(i)->update(this, pUserData);
 }
+#endif

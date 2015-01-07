@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __ovCoAdaptP300RowColumnSequenceGenerator__
 #define __ovCoAdaptP300RowColumnSequenceGenerator__
 
@@ -61,4 +63,6 @@ namespace OpenViBEApplications
 		OpenViBE::uint32 m_ui32Passes;*/
 	};
 };
+#endif
+
 #endif

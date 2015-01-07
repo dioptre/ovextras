@@ -189,11 +189,9 @@ int main(int argc, char *argv[])
 #else
 
 #include <iostream>
-
 int main(int argc, char *argv[])
 {
-	std::cout << "Not compiled, dependencies not met\n";
-	return -1;
+	std::cout << "Compiler did not have the required libraries for the CoAdapt stimulator." << std::endl;
+	return 1;
 }
-
 #endif

@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifdef TARGET_HAS_ThirdPartyPresage
 
 #ifndef __PresagePredictionEngine_H__
@@ -85,5 +87,6 @@ namespace OpenViBEApplications
 		#endif
 	};
 };
+#endif
 #endif
 #endif

@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300InterfacePropertyReader.h"
 
 using namespace OpenViBE;
@@ -190,3 +192,5 @@ void P300InterfacePropertyReader::closeChild(void)
 {
 	m_vNode.pop();
 }
+
+#endif

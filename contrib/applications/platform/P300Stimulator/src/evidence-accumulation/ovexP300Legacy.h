@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
@@ -79,3 +81,5 @@ namespace OpenViBEApplications
 		};
 
 };
+
+#endif
