@@ -1,3 +1,6 @@
+
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "../../src/evidence-accumulation/ovexP300CEvidenceAccumulator.h"
 
 #include "../../src/sequence/ovexP300RipRandSequenceGenerator.h"
@@ -182,3 +185,15 @@ int main(int argc, char *argv[])
 	
 
 }
+
+#else
+
+#include <iostream>
+
+int main(int argc, char *argv[])
+{
+	std::cout << "Not compiled, dependencies not met\n";
+	return -1;
+}
+
+#endif

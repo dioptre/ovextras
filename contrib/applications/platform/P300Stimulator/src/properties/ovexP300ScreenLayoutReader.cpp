@@ -1,4 +1,6 @@
 
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300ScreenLayoutReader.h"
 #include <stdexcept>
 
@@ -299,3 +301,6 @@ void P300ScreenLayoutReader::readPropertiesFromFile(CString propertyFile)
 		}
 	}
 }
+
+
+#endif
