@@ -16,9 +16,9 @@ using namespace OpenViBE;
  */
 int main(int argc, char** argv)
 {
-	if (argc < 2)
+	if (argc != 3)
 	{
-		printf("Usage : %s <application-type> [application-subtype]\n", argv[0]);
+		printf("Usage : %s <application-type> <scenario path>\n", argv[0]);
 		exit(1);
 	}
 	
@@ -100,8 +100,14 @@ int main(int argc, char** argv)
 				*/
 				l_poLogManager = &(l_poKernelContext->getLogManager());
 
-				(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Info << l_poConfigurationManager->expand("${UserHome}") << "\n";
-				l_poConfigurationManager->addConfigurationFromFile(l_sScenarioFolder + "/appconf/application-configuration.conf");
+				// (*l_poLogManager) << OpenViBE::Kernel::LogLevel_Info << l_poConfigurationManager->expand("${UserHome}") << "\n";
+				const CString l_sConfigFile = l_sScenarioFolder + "/appconf/application-configuration.conf";
+				if(!l_poConfigurationManager->addConfigurationFromFile(l_sConfigFile)) 
+				{
+					(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Error << "Unable to read [" << l_sConfigFile << "]\n";
+					return 3;
+				}
+				
 
 				l_poConfigurationManager->createConfigurationToken("SSVEP_MindShooterFolderName", "ssvep-mind-shooter");
 			}
@@ -138,7 +144,7 @@ int main(int argc, char** argv)
 
 		exit(2);
 	}
-
+	  
 	l_pApp->go();
 
 

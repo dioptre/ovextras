@@ -19,7 +19,7 @@ CLogListenerFileBuffered::CLogListenerFileBuffered(const IKernelContext& rKernel
 	m_f = fopen(m_sLogFilename.toASCIIString(), "wt");
 	if (m_f == NULL)
 	{
-		std::cout << "[  ERROR  ] This log listener can not be initialized, it will do nothing!" << std::endl;
+		std::cout << "[  ERROR  ] Unable to open [" << m_sLogFilename << "] for writing. This log listener can not be initialized, it will do nothing!" << std::endl;
 	}
 }
 

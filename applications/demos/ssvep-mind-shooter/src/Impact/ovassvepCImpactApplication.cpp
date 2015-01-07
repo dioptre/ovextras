@@ -60,7 +60,12 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	}
 
 	IConfigurationManager* l_poConfigurationManager = &(m_poKernelContext->getConfigurationManager());
-	l_poConfigurationManager->addConfigurationFromFile(m_sScenarioDir + "/appconf/impact-configuration.conf");
+	const CString l_sConfigFile = m_sScenarioDir + "/appconf/impact-configuration.conf";
+	if(!l_poConfigurationManager->addConfigurationFromFile(l_sConfigFile))
+	{
+		this->getLogManager() << LogLevel_Error << "Unable to open [" << l_sConfigFile << "]. Has the shooter-controller.lua been run?\n";
+		return false;
+	}
 
 	poKernelContext->getLogManager().activate(LogLevel_First, LogLevel_Last, true);
 

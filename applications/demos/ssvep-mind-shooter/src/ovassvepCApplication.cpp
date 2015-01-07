@@ -85,7 +85,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	CString l_sOgreLog = l_poConfigurationManager->expand("${Path_Log}") + "/openvibe-ssvep-mind-shooter-ogre.log";
 	(*m_poLogManager) << LogLevel_Info << "Ogre log file : " << l_sOgreLog << "\n";
 	FS::Files::createParentPath(l_sOgreLog);
-	l_poLogManager->createLog(l_sOgreLog.toASCIIString(), true, l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_LogToConsole}", false), true );
+	l_poLogManager->createLog(l_sOgreLog.toASCIIString(), true, l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_LogToConsole}", false), false );
 
 	// Root creation
 	CString l_sOgreCfg = l_poConfigurationManager->expand("${Path_UserData}") + "/openvibe-ssvep-mind-shooter-ogre.cfg";
@@ -114,10 +114,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 
 	int l_iWidth = (int) l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenWidth}", 800);
 	int l_iHeight = (int) l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenHeight}", 600);
-	OpenViBE::boolean l_bFullScreen = l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_FullScreen}", false);
-
-	(*m_poLogManager) << LogLevel_Info << "Fullscreen : " << l_poConfigurationManager->expand("${SSVEP_Ogre_FullScreen}") << "\n";
-
+	const OpenViBE::boolean l_bFullScreen = l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_FullScreen}", false);
 
 	(*m_poLogManager) << LogLevel_Info << "Width : " << l_iWidth << " Height : " << l_iHeight << " Fullscreen : " << l_bFullScreen << "\n";
 
@@ -149,7 +146,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	m_poPainter = new CBasicPainter( this );
 
 	(*m_poLogManager) << LogLevel_Debug << "  * initializing CEGUI\n";
-	this->initCEGUI();
+	this->initCEGUI(l_poConfigurationManager->expand("${Path_Log}") + "/openvibe-ssvep-mind-shooter-cegui.log");
 	(*m_poLogManager) << LogLevel_Debug << "  * CEGUI initialized\n";
 
 	// create the vector of stimulation frequencies
@@ -279,8 +276,17 @@ bool CApplication::configure()
 }
 
 
-void CApplication::initCEGUI()
+void CApplication::initCEGUI(const char *logFilename)
 {
+	// Instantiate logger before bootstrapping the system, this way we will be able to get the log redirected
+	if (!CEGUI::Logger::getSingletonPtr()) 
+	{
+		new CEGUI::DefaultLogger();		// singleton; instantiate only, no delete
+	}
+	(*m_poLogManager) << LogLevel_Info << "+ CEGUI log will be in '" << logFilename << "'\n";
+	FS::Files::createParentPath(logFilename);
+	CEGUI::Logger::getSingleton().setLogFilename(logFilename, false);
+
 	(*m_poLogManager) << LogLevel_Debug << "+ Creating CEGUI Ogre bootstrap\n";
 	m_roGUIRenderer = &(CEGUI::OgreRenderer::bootstrapSystem(*m_poWindow));
 	(*m_poLogManager) << LogLevel_Debug << "+ Creating CEGUI Scheme Manager\n";
@@ -292,6 +298,7 @@ void CApplication::initCEGUI()
 
 	(*m_poLogManager) << LogLevel_Debug << "+ Setting CEGUI StyleSheet\n";
 	CEGUI::System::getSingleton().setGUISheet(m_poSheet);
+
 }
 
 void CApplication::resizeViewport()
