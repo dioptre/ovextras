@@ -48,7 +48,7 @@ boolean CAlgorithmClassifierNULL::train(const IFeatureVectorSet& rFeatureVectorS
 	return true;
 }
 
-boolean CAlgorithmClassifierNULL::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
+boolean CAlgorithmClassifierNULL::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
 	rf64Class=1+(::rand()%3);
 	return true;

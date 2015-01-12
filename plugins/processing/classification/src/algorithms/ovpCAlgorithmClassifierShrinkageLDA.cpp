@@ -17,16 +17,19 @@ namespace{
 	const char* const c_sTypeNodeName = "LDA";
 	const char* const c_sCreatorNodeName = "Creator";
 	const char* const c_sClassesNodeName = "Classes";
-	const char* const c_sCoefficientsNodeName = "Coefficients";
+	const char* const c_sCoefficientsNodeName = "Weights";
+	const char* const c_sBiasDistanceNodeName = "Bias-distance";
+	const char* const c_sCoefficientProbabilityNodeName = "Coefficient-probability";
 }
 
 extern const char* const c_sClassifierRoot;
 
 OpenViBE::int32 OpenViBEPlugins::Classification::getShrinkageLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
 {
+	//We know that we will have to compare probability
 	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
 		return 0;
-	else if(::fabs(rFirstClassificationValue[0]) < ::fabs(rSecondClassificationValue[0]))
+	else if(::fabs(rFirstClassificationValue[0]) > ::fabs(rSecondClassificationValue[0]))
 		return -1;
 	else
 		return 1;
@@ -157,7 +160,7 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 		ip_pFeatureVectorSet->setDimensionSize(0, l_ui32nExamplesInClass);
 		ip_pFeatureVectorSet->setDimensionSize(1, l_ui32nCols);
 		float64 *l_pBuffer = ip_pFeatureVectorSet->getBuffer();
-		for(uint32 i=0;i<l_ui32nRows;i++) 
+		for(uint32 i=0;i<l_ui32nRows;i++)
 		{
 			if(rFeatureVectorSet[i].getLabel() == l_f64Label) 
 			{
@@ -216,12 +219,15 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	const MatrixXd l_oMeanDiff = l_aMean[0] - l_aMean[1];
 
 	const MatrixXd l_oBias = -0.5 * l_oMeanSum * l_oGlobalCovInv * l_oMeanDiff.transpose();
-	const MatrixXd l_oWeights = l_oGlobalCovInv * l_oMeanDiff.transpose();
+	m_oWeights =(l_oGlobalCovInv * l_oMeanDiff.transpose()).transpose();
+
+	const MatrixXd l_oClass1 = -0.5 * l_aMean[0] * l_oGlobalCovInv * l_aMean[0].transpose();
+	const MatrixXd l_oClass2 = 0.5 * l_aMean[1] * l_oGlobalCovInv * l_aMean[1].transpose();
+	m_f64w0 = l_oClass1(0,0) + l_oClass2(0,0) +
+			std::log(static_cast<double>(l_vClassLabels[m_f64Class1])/static_cast<double>(l_vClassLabels[m_f64Class2]));
 
 	// Catenate the bias term and the weights
-	m_oCoefficients.resize(1, l_ui32nCols+1 );
-	m_oCoefficients(0,0) = l_oBias(0,0);
-	m_oCoefficients.block(0,1,1,l_ui32nCols) = l_oWeights.transpose();
+	m_f64BiasDistance = l_oBias(0,0);
 
 	m_ui32NumCols = l_ui32nCols;
 	
@@ -235,7 +241,7 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	return true;
 }
 
-boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
+boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
 	const uint32 l_ui32nColsWithBiasTerm = m_oCoefficients.size();
 
@@ -247,6 +253,7 @@ boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatur
 
 	const Map<MatrixXdRowMajor> l_oFeatureVec(const_cast<float64*>(rFeatureVector.getBuffer()), 1, rFeatureVector.getSize());
 
+
 	// Catenate 1.0 to match the bias term
 	MatrixXd l_oWeights(1, l_ui32nColsWithBiasTerm);
 	l_oWeights(0,0) = 1.0;
@@ -257,7 +264,13 @@ boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatur
 	rClassificationValues.setSize(1);
 	rClassificationValues[0]= -l_f64Result;
 
-	if(l_f64Result >= 0)
+	const float64 l_f64a =(m_oWeights * l_oFeatureVec.transpose()).col(0)(0) + m_f64w0;
+	const float64 l_f64P1 = 1 / (1 + exp(-l_f64a));
+
+	rProbabilityValue.setSize(1);
+	rProbabilityValue[0] = l_f64P1;
+
+	if(l_f64P1 >= 0.5)
 	{
 		rf64Class=m_f64Class1;
 	}
@@ -271,47 +284,83 @@ boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatur
 
 void CAlgorithmClassifierShrinkageLDA::generateConfigurationNode(void)
 {
+	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode(c_sTypeNodeName);
+
 	// Write the classifier to an .xml
 	std::stringstream l_sClasses;
-	std::stringstream l_sCoefficients;
+	std::stringstream l_sWeigths;
+	std::stringstream l_sBiasDistance;
+	std::stringstream l_sCoefficentProbability;
 
 	l_sClasses << m_f64Class1 << " " << m_f64Class2;
-	l_sCoefficients << std::scientific;
+	l_sWeigths << std::scientific;
 
-	for(uint32 i=0; i<m_ui32NumCols+1; i++)
+	for(uint32 i=0; i<m_ui32NumCols; i++)
 	{
-		l_sCoefficients << " " << m_oCoefficients(0,i);
+		l_sWeigths << " " << m_oWeights(0,i);
 	}
 
-	XML::IXMLNode *l_pCreatorNode = XML::createNode(c_sCreatorNodeName);
-	l_pCreatorNode->setPCData("ShrinkageLDA");
-	XML::IXMLNode *l_pClassesNode = XML::createNode(c_sClassesNodeName);
-	l_pClassesNode->setPCData(l_sClasses.str().c_str());
-	XML::IXMLNode *l_pCoefficientsNode = XML::createNode(c_sCoefficientsNodeName);
-	l_pCoefficientsNode->setPCData(l_sCoefficients.str().c_str());
+	l_sBiasDistance << m_f64BiasDistance;
+	l_sCoefficentProbability << m_f64w0;
 
-	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode(c_sTypeNodeName);
-	l_pAlgorithmNode->addChild(l_pCreatorNode);
-	l_pAlgorithmNode->addChild(l_pClassesNode);
-	l_pAlgorithmNode->addChild(l_pCoefficientsNode);
+	XML::IXMLNode *l_pTempNode = XML::createNode(c_sCreatorNodeName);
+	l_pTempNode->setPCData("ShrinkageLDA");
+	l_pAlgorithmNode->addChild(l_pTempNode);
+
+	l_pTempNode = XML::createNode(c_sClassesNodeName);
+	l_pTempNode->setPCData(l_sClasses.str().c_str());
+	l_pAlgorithmNode->addChild(l_pTempNode);
+
+	l_pTempNode = XML::createNode(c_sCoefficientsNodeName);
+	l_pTempNode->setPCData(l_sWeigths.str().c_str());
+	l_pAlgorithmNode->addChild(l_pTempNode);
+
+	l_pTempNode = XML::createNode(c_sBiasDistanceNodeName);
+	l_pTempNode->setPCData(l_sBiasDistance.str().c_str());
+	l_pAlgorithmNode->addChild(l_pTempNode);
+
+	l_pTempNode = XML::createNode(c_sCoefficientProbabilityNodeName);
+	l_pTempNode->setPCData(l_sCoefficentProbability.str().c_str());
+	l_pAlgorithmNode->addChild(l_pTempNode);
+
 
 	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 	m_pConfigurationNode->addChild(l_pAlgorithmNode);
+
 }
 
 XML::IXMLNode* CAlgorithmClassifierShrinkageLDA::saveConfiguration(void)
 {
 	generateConfigurationNode();
+	std::cout << m_pConfigurationNode->getXML() << std::endl;
 	return m_pConfigurationNode;
+}
+
+//Extract a float64 from the PCDATA of a node
+float64 getFloatFromNode(XML::IXMLNode *pNode)
+{
+	std::stringstream l_sData(pNode->getPCData());
+	float64 res;
+	l_sData >> res;
+
+	return res;
 }
 
 boolean CAlgorithmClassifierShrinkageLDA::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
+	XML::IXMLNode * l_pLDANode = pConfigurationNode->getChild(0);
 	m_f64Class1=0;
 	m_f64Class2=0;
 
-	loadClassesFromNode(pConfigurationNode->getChild(0)->getChildByName("Classes"));
-	loadCoefficientsFromNode(pConfigurationNode->getChild(0)->getChildByName("Coefficients"));
+	loadClassesFromNode(l_pLDANode->getChildByName(c_sClassesNodeName));
+	loadCoefficientsFromNode(l_pLDANode->getChildByName(c_sCoefficientsNodeName));
+	m_f64BiasDistance = getFloatFromNode(l_pLDANode->getChildByName(c_sBiasDistanceNodeName));
+	m_f64w0 = getFloatFromNode(l_pLDANode->getChildByName(c_sCoefficientProbabilityNodeName));
+
+	//Now we initialize the coefficients vector according to Weights and bias (distance)
+	m_oCoefficients.resize(1, m_oWeights.cols()+1 );
+	m_oCoefficients(0,0) = m_f64BiasDistance;
+	m_oCoefficients.block(0,1,1,m_oWeights.cols()) = m_oWeights.transpose();
 
 	return true;
 }
@@ -324,6 +373,7 @@ void CAlgorithmClassifierShrinkageLDA::loadClassesFromNode(XML::IXMLNode *pNode)
 	l_sData >> m_f64Class2;
 }
 
+//Load the weight vector
 void CAlgorithmClassifierShrinkageLDA::loadCoefficientsFromNode(XML::IXMLNode *pNode)
 {
 	std::stringstream l_sData(pNode->getPCData());
@@ -336,10 +386,11 @@ void CAlgorithmClassifierShrinkageLDA::loadCoefficientsFromNode(XML::IXMLNode *p
 		l_vCoefficients.push_back(l_f64Value);
 	}
 
-	m_oCoefficients.resize(1,l_vCoefficients.size());
+	m_oWeights.resize(1,l_vCoefficients.size());
+	m_ui32NumCols  = l_vCoefficients.size();
 	for(size_t i=0; i<l_vCoefficients.size(); i++)
 	{
-		m_oCoefficients(0,i)=l_vCoefficients[i];
+		m_oWeights(0,i)=l_vCoefficients[i];
 	}
 }
 

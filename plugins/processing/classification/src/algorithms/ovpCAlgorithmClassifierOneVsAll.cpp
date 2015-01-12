@@ -112,9 +112,9 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
 	return true;
 }
 
-boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
+boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
-	std::vector< std::pair < float64, IMatrix*> > l_oClassificationVector;
+	std::vector< std::pair < float64, std::pair < IMatrix*, IMatrix* > > > l_oClassificationVector;
 
 	const uint32 l_ui32FeatureVectorSize=rFeatureVector.getSize();
 
@@ -124,6 +124,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 		TParameterHandler < IMatrix* > ip_pFeatureVector(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
 		TParameterHandler < float64 > op_f64ClassificationStateClass(l_pSubClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
 		TParameterHandler < IMatrix* > op_pClassificationValues(l_pSubClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
+		TParameterHandler < IMatrix* > op_pProbabilityValues(l_pSubClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
 		ip_pFeatureVector->setDimensionCount(1);
 		ip_pFeatureVector->setDimensionSize(0, l_ui32FeatureVectorSize);
 
@@ -134,31 +135,44 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 					l_ui32FeatureVectorSize*sizeof(float64));
 		l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 		//this->getLogManager() << LogLevel_Info << l_iClassifierCounter << " " << (float64)op_f64ClassificationStateClass << " " << (*op_pClassificationValues)[0] << "\n";
-		l_oClassificationVector.push_back(std::pair< float64, IMatrix*>(static_cast<float64>(op_f64ClassificationStateClass),
-																		static_cast<IMatrix*>(op_pClassificationValues)));
+		l_oClassificationVector.push_back(std::pair< float64, std::pair < IMatrix*, IMatrix* > >(static_cast<float64>(op_f64ClassificationStateClass),
+																		std::pair< IMatrix*, IMatrix*> (static_cast<IMatrix*>(op_pClassificationValues),
+																										static_cast<IMatrix*>(op_pProbabilityValues))));
 	}
 
 	//Now, we determine the best classification
-	std::pair<float64, IMatrix*> l_oBest = std::pair<float64, IMatrix*>(-1.0, static_cast<IMatrix*>(NULL));
+	std::pair<float64, std::pair < IMatrix*, IMatrix*> > l_oBest = std::pair<float64, std::pair < IMatrix*, IMatrix* > >
+			(-1.0, std::pair < IMatrix*, IMatrix* > (static_cast<IMatrix*>(NULL),static_cast<IMatrix*>(NULL)) );
 	rf64Class = -1;
-
+	CMatrix lala;
 	for(size_t l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
 	{
-		std::pair<float64, IMatrix*>&   l_pTemp = l_oClassificationVector[l_iClassificationCount];
+		std::pair<float64, std::pair < IMatrix*, IMatrix*> >&   l_pTemp = l_oClassificationVector[l_iClassificationCount];
 		if(l_pTemp.first==1)
 		{
-			if(l_oBest.second == NULL)
+			if(l_oBest.second.first == NULL)
 			{
 				l_oBest = l_pTemp;
 				rf64Class = l_iClassificationCount+1;
 			}
 			else
 			{
-				if((*m_fAlgorithmComparison)((*l_oBest.second), *(l_pTemp.second)) < 0)
+				if(l_oBest.second.second->getDimensionCount() != 0)
 				{
-					l_oBest = l_pTemp;
-					rf64Class = l_iClassificationCount+1;
+					if((*m_fAlgorithmComparison)((*l_oBest.second.second), *(l_pTemp.second.second)) < 0)
+					{
+						l_oBest = l_pTemp;
+						rf64Class = l_iClassificationCount+1;
+					}
 				}
+				else{
+					if((*m_fAlgorithmComparison)((*l_oBest.second.first), *(l_pTemp.second.first)) < 0)
+					{
+						l_oBest = l_pTemp;
+						rf64Class = l_iClassificationCount+1;
+					}
+				}
+
 			}
 		}
 	}
@@ -168,30 +182,43 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	{
 		for(uint32 l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
 		{
-			std::pair<float64, IMatrix*>& l_pTemp = l_oClassificationVector[l_iClassificationCount];
-			if(l_oBest.second == NULL)
+			std::pair<float64, std::pair < IMatrix*, IMatrix*> >& l_pTemp = l_oClassificationVector[l_iClassificationCount];
+			if(l_oBest.second.first == NULL)
 			{
 				l_oBest = l_pTemp;
 				rf64Class = (static_cast<float64>(l_iClassificationCount))+1;
 			}
 			else
 			{
-				if((*m_fAlgorithmComparison)((*l_oBest.second), *(l_pTemp.second)) > 0)
+				if(l_oBest.second.second->getDimensionCount() != 0)
 				{
-					l_oBest = l_pTemp;
-					rf64Class = (static_cast<float64>(l_iClassificationCount))+1;
+					if((*m_fAlgorithmComparison)((*l_oBest.second.second), *(l_pTemp.second.second)) < 0)
+					{
+						l_oBest = l_pTemp;
+						rf64Class = l_iClassificationCount+1;
+					}
+				}
+				else{
+					if((*m_fAlgorithmComparison)((*l_oBest.second.first), *(l_pTemp.second.first)) < 0)
+					{
+						l_oBest = l_pTemp;
+						rf64Class = l_iClassificationCount+1;
+					}
 				}
 			}
 		}
 	}
 
 	//If we still don't have a better classification, we face an error
-	if(l_oBest.second == NULL)
+	if(l_oBest.second.first == NULL)
 	{
 		return false;
 	}
-	rClassificationValues.setSize(l_oBest.second->getBufferElementCount());
-	System::Memory::copy(rClassificationValues.getBuffer(), l_oBest.second->getBuffer(), l_oBest.second->getBufferElementCount()*sizeof(float64));
+	rClassificationValues.setSize(l_oBest.second.first->getBufferElementCount());
+	System::Memory::copy(rClassificationValues.getBuffer(), l_oBest.second.first->getBuffer(), l_oBest.second.first->getBufferElementCount()*sizeof(float64));
+
+	rProbabilityValue.setSize(l_oBest.second.second->getBufferElementCount());
+	System::Memory::copy(rProbabilityValue.getBuffer(), l_oBest.second.second->getBuffer(), l_oBest.second.second->getBufferElementCount()*sizeof(float64));
 	return true;
 }
 

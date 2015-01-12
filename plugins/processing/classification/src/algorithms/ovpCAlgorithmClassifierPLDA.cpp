@@ -131,7 +131,7 @@ boolean CAlgorithmClassifierPLDA::train(const IFeatureVectorSet& rFeatureVectorS
 	return true;
 }
 
-boolean CAlgorithmClassifierPLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
+boolean CAlgorithmClassifierPLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
 	if(rFeatureVector.getSize()!=static_cast<uint32>(m_oW.size()))
 	{

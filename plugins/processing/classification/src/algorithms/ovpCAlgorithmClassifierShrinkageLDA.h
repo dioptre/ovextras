@@ -1,11 +1,12 @@
-#if defined TARGET_HAS_ThirdPartyEIGEN
-
 #ifndef __OpenViBEPlugins_Algorithm_ClassifierShrinkageLDA_H__
 #define __OpenViBEPlugins_Algorithm_ClassifierShrinkageLDA_H__
 
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+
+#define TARGET_HAS_ThirdPartyEIGEN
+#if defined TARGET_HAS_ThirdPartyEIGEN
 
 #include <xml/IXMLNode.h>
 
@@ -36,7 +37,10 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean uninitialize(void);
 
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
-			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
+			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector
+											   , OpenViBE::float64& rf64Class
+											   , OpenViBEToolkit::IVector& rDistanceValue
+											   , OpenViBEToolkit::IVector& rProbabilityValue);
 
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
@@ -51,6 +55,10 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 m_f64Class2;
 
 			Eigen::MatrixXd m_oCoefficients;
+			Eigen::MatrixXd m_oWeights;
+			OpenViBE::float64 m_f64BiasDistance;
+			OpenViBE::float64 m_f64w0;
+
 			OpenViBE::uint32 m_ui32NumCols;
 
 			XML::IXMLNode *m_pConfigurationNode;

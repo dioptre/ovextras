@@ -13,7 +13,7 @@
 
 #include <Eigen/Dense>
 
-#define OVP_ClassId_Algorithm_ClassifierPShrinkageLDA                                        OpenViBE::CIdentifier(0xFCC44AE1, 0x6225529A)
+#define OVP_ClassId_Algorithm_ClassifierPShrinkageLDA                                        OpenViBE::CIdentifier(0x2BA17A3C, 0x1BD46D87)
 #define OVP_ClassId_Algorithm_ClassifierPShrinkageLDA_DecisionAvailable                      OpenViBE::CIdentifier(0x6C3D2EF7, 0xA5AE21FA)
 #define OVP_ClassId_Algorithm_ClassifierPShrinkageLDADesc                                    OpenViBE::CIdentifier(0x928D97ED, 0xB4EA25EE)
 
@@ -36,7 +36,10 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean uninitialize(void);
 
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
-			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
+			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector
+											   , OpenViBE::float64& rf64Class
+											   , OpenViBEToolkit::IVector& rDistanceValue
+											   , OpenViBEToolkit::IVector& rProbabilityValue);
 
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);

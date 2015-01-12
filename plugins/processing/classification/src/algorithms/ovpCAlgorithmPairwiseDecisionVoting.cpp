@@ -59,7 +59,7 @@ boolean CAlgorithmPairwiseDecisionVoting::compute(OpenViBE::IMatrix* pSubClassif
 	float64* l_pMatrixBuffer = pSubClassifierMatrix->getBuffer();
 	float64* l_pProbVector = new float64[l_ui32AmountClass];
 	uint32 l_pProbVectorSum = 0;
-	CMatrix l_oM1, l_oM2;
+	CMatrix l_oM1, l_oM2;//Temporary matrix used to compare with m_fAlgorithmComparison
 	l_oM1.setDimensionCount(1);
 	l_oM1.setDimensionSize(0,1);
 

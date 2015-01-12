@@ -190,7 +190,7 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 	return true;
 }
 
-boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
+boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
 	if(!m_pDecisionStrategyAlgorithm) {
 		this->getLogManager() << LogLevel_Error << "Called without decision strategy algorithm\n";
@@ -220,7 +220,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 		{
 			IAlgorithmProxy * l_pTempProxy = this->getSubClassifierDescriptor(i+1, j+1).m_pSubClassifierProxy;
 			TParameterHandler < IMatrix* > ip_pFeatureVector(l_pTempProxy->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
-			TParameterHandler < IMatrix* > op_pClassificationValues(l_pTempProxy->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
+			TParameterHandler < IMatrix* > op_pClassificationValues(l_pTempProxy->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
 			ip_pFeatureVector->setDimensionCount(1);
 			ip_pFeatureVector->setDimensionSize(0, l_ui32FeatureVectorSize);
 
@@ -238,14 +238,15 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 		}
 	}
 
-//	for(size_t i =0 ; i < l_ui32AmountClass ; ++i )
-//	{
-//		for(size_t j = 0; j < l_ui32AmountClass ; ++j)
-//		{
-//			std::cout << l_pProbabilityMatrix->getBuffer()[i*l_ui32AmountClass + j] << " " ;
-//		}
-//		std::cout << std::endl;
-//	}
+	for(size_t i =0 ; i < l_ui32AmountClass ; ++i )
+	{
+		for(size_t j = 0; j < l_ui32AmountClass ; ++j)
+		{
+			std::cout << l_pProbabilityMatrix->getBuffer()[i*l_ui32AmountClass + j] << " " ;
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
 
 	//Then ask to the startegy to make the decision
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute);
@@ -266,8 +267,9 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 	}
 
 	rf64Class = static_cast<float64>(l_i32IndexSelectedClass);
-	rClassificationValues.setSize(1);
-	rClassificationValues[0]=l_f64MaxProb;
+	rClassificationValues.setSize(0);
+	rProbabilityValue.setSize(1);
+	rProbabilityValue[0]=l_f64MaxProb;
 	return true;
 }
 

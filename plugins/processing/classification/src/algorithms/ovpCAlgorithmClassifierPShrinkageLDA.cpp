@@ -43,7 +43,7 @@ using namespace OpenViBEToolkit;
 
 using namespace Eigen;
 
-#define PLDA_DEBUG 0
+#define PLDA_DEBUG 1
 #if PLDA_DEBUG
 void CAlgorithmClassifierPShrinkageLDA::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const MatrixXdRowMajor &mat, const CString &desc)
 {
@@ -223,18 +223,16 @@ boolean CAlgorithmClassifierPShrinkageLDA::train(const IFeatureVectorSet& rFeatu
 	m_ui32NumCols = l_ui32nCols;
 
 	// Debug output
-//	dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
-//	dumpMatrix(this->getLogManager(), l_oEigenValues, "Eigenvalues");
-//	dumpMatrix(this->getLogManager(), l_oEigenSolver.eigenvectors(), "Eigenvectors");
-//	dumpMatrix(this->getLogManager(), l_oGlobalCovInv, "Global cov inverse");
-//	dumpMatrix(this->getLogManager(), m_oW, "Coeff");
-	//dumpMatrix(this->getLogManager(), m_oCoefficients, "Hyperplane weights");
-	//this->getLogManager() << LogLevel_Info << "Finish training\n";
+	dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
+	dumpMatrix(this->getLogManager(), l_oEigenValues, "Eigenvalues");
+	dumpMatrix(this->getLogManager(), l_oEigenSolver.eigenvectors(), "Eigenvectors");
+	dumpMatrix(this->getLogManager(), l_oGlobalCovInv, "Global cov inverse");
+	dumpMatrix(this->getLogManager(), m_oW, "Coeff");
 
 	return true;
 }
 
-boolean CAlgorithmClassifierPShrinkageLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
+boolean CAlgorithmClassifierPShrinkageLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
 	const uint32 l_ui32nCols = m_ui32NumCols;
 
@@ -249,6 +247,8 @@ boolean CAlgorithmClassifierPShrinkageLDA::classify(const IFeatureVector& rFeatu
 	// Catenate 1.0 to match the bias term
 	MatrixXd l_oWeights(1, l_ui32nCols);
 	l_oWeights.block(0,0,1, l_ui32nCols) = l_oFeatureVec;
+
+	std::cout << l_oWeights.cols() << " " << m_oW.cols() << std::endl;
 
 	const float64 l_f64a =(m_oW * l_oWeights.transpose()).col(0)(0) + m_f64w0;
 	const float64 l_f64P1 = 1 / (1 + exp(-l_f64a));

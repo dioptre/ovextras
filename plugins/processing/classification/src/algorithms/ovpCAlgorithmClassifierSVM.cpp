@@ -362,7 +362,7 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 	return true;
 }
 
-boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
+boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
 	//std::cout<<"classify"<<std::endl;
 	if(m_pModel==NULL)
@@ -408,14 +408,17 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 			this->getLogManager() << LogLevel_Trace << "index:"<<i<<" label:"<< m_pModel->label[i]<<" probability:"<<l_pProbEstimates[i]<<"\n";
 			if( m_pModel->label[i] == 1 )
 			{
-				rClassificationValues.setSize(1);
-				rClassificationValues[0]=l_pProbEstimates[i];
+				rProbabilityValue.setSize(1);
+				rProbabilityValue[0]=l_pProbEstimates[i];
 
 			}
 		}
 	}
 	else
-		rClassificationValues.setSize(0);
+		rProbabilityValue.setSize(0);
+
+	//The hyperplan distance is disabled for SVM
+	rClassificationValues.setSize(0);
 
 	//std::cout<<";"<<rf64Class<<";"<<rClassificationValues[0] <<";"<<l_pProbEstimates[0]<<";"<<l_pProbEstimates[1]<<std::endl;
 	//std::cout<<"Label predict "<<rf64Class<< " proba:"<<rClassificationValues[0]<<std::endl;

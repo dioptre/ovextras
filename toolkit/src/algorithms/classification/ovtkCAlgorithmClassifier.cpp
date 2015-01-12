@@ -18,6 +18,7 @@ boolean CAlgorithmClassifier::process(void)
 	TParameterHandler < XML::IXMLNode* > ip_pConfiguration(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 	TParameterHandler < float64 > op_pClass(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
 	TParameterHandler < IMatrix* > op_pClassificationValues(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
+	TParameterHandler < IMatrix* > op_pProbabilityValues(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
 
 	TParameterHandler < IMatrix* > ip_pFeatureVectorSet(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
@@ -50,6 +51,8 @@ boolean CAlgorithmClassifier::process(void)
 		IMatrix* l_pFeatureVector=ip_pFeatureVector;
 		float64 l_f64Class=0;
 		IMatrix* l_pClassificationValues=op_pClassificationValues;
+		IMatrix* l_pProbabilityValues=op_pProbabilityValues;
+
 		if(!l_pFeatureVector || !l_pClassificationValues)
 		{
 			this->getLogManager() << LogLevel_ImportantWarning << "Either feature vector matrix is NULL or classification values matrix is NULL\n";
@@ -59,8 +62,9 @@ boolean CAlgorithmClassifier::process(void)
 		{
 			CFeatureVector l_oFeatureVectorAdapter(*l_pFeatureVector);
 			CVector l_oClassificationValuesAdapter(*l_pClassificationValues);
+			CVector l_oProbabilityValuesAdapter(*l_pProbabilityValues);
 
-			if(this->classify(l_oFeatureVectorAdapter, l_f64Class, l_oClassificationValuesAdapter))
+			if(this->classify(l_oFeatureVectorAdapter, l_f64Class, l_oClassificationValuesAdapter, l_oProbabilityValuesAdapter))
 			{
 				op_pClass=l_f64Class;
 
