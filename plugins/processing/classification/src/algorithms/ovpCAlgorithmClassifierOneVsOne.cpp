@@ -89,6 +89,7 @@ boolean CAlgorithmClassifierOneVsOne::uninitialize(void)
 
 boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
+
 	const uint32 l_ui32AmountClass = getClassAmount();
 	//Create the decision strategy
 	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierOneVsOne));

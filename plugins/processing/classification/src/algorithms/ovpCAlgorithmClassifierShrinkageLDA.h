@@ -18,6 +18,7 @@
 #define OVP_ClassId_Algorithm_ClassifierShrinkageLDA_DecisionAvailable                      OpenViBE::CIdentifier(0x79146976, 0xD7F01A25)
 #define OVP_ClassId_Algorithm_ClassifierShrinkageLDADesc                                    OpenViBE::CIdentifier(0x78FE2929, 0x644945B4)
 
+#define OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_UseShrinkage                OpenViBE::CIdentifier(0x01357534, 0x028312A0)
 #define OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage                   OpenViBE::CIdentifier(0x01357534, 0x028312A1)
 #define OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov                 OpenViBE::CIdentifier(0x067E45C5, 0x15285CC7)
 
@@ -92,8 +93,10 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage, "sLDA: Shrinkage (-1 == auto)",OpenViBE::Kernel::ParameterType_Float);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_UseShrinkage, "Use shrinkage", OpenViBE::Kernel::ParameterType_Boolean);
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov,"sLDA: Force diagonal cov (DDA)",OpenViBE::Kernel::ParameterType_Boolean);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage, "sLDA: Shrinkage (-1 == auto)",OpenViBE::Kernel::ParameterType_Float);
+
 
 				CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
 				return true;

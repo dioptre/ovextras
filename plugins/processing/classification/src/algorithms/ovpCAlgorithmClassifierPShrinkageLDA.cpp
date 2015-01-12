@@ -43,7 +43,7 @@ using namespace OpenViBEToolkit;
 
 using namespace Eigen;
 
-#define PLDA_DEBUG 1
+#define PLDA_DEBUG 0
 #if PLDA_DEBUG
 void CAlgorithmClassifierPShrinkageLDA::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const MatrixXdRowMajor &mat, const CString &desc)
 {

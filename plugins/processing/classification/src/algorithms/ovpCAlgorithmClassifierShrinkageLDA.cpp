@@ -45,7 +45,7 @@ using namespace OpenViBEToolkit;
 
 using namespace Eigen;
 
-#define LDA_DEBUG 0
+#define LDA_DEBUG 1
 #if LDA_DEBUG
 void CAlgorithmClassifierShrinkageLDA::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const MatrixXdRowMajor &mat, const CString &desc)
 {
@@ -98,14 +98,26 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierShrinkageLDA));
 	l_pAlgoProxy->initialize();
 
-	//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage
-	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage);
-	this->getFloat64Parameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage, (*l_pExtraParameter)[l_pParameterName]);
+	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_UseShrinkage);
+	boolean l_bUseShrinkage = this->getBooleanParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_UseShrinkage, (*l_pExtraParameter)[l_pParameterName]);
 
-	//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov
-	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov);
-	boolean l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov, (*l_pExtraParameter)[l_pParameterName]);
+	boolean l_pDiagonalCov;
+	//If we don't use shrinkage we need to set lambda to 0.
+	if(l_bUseShrinkage)
+	{
+		//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage
+		l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage);
+		this->getFloat64Parameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage, (*l_pExtraParameter)[l_pParameterName]);
 
+		//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov
+		l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov);
+		l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov, (*l_pExtraParameter)[l_pParameterName]);
+
+	}
+	else{
+		this->getFloat64Parameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage, "0.0");
+		l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov, "false");
+	}
 	l_pAlgoProxy->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
 
