@@ -216,7 +216,7 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 			for(uint32 i=0;i<ip_pMatrix->getDimensionSize(0);i++)
 			{
 				char l_sBuffer[64];
-				sprintf(l_sBuffer, "sFiltered %d", i);
+				sprintf(l_sBuffer, "sFiltered %d", i+1);
 				ip_pMatrix->setDimensionLabel(0, i, l_sBuffer);
 			}
 

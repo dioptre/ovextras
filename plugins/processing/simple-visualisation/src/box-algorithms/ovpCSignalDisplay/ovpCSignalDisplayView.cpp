@@ -364,14 +364,15 @@ namespace OpenViBEPlugins
 			{
 				//add channel label
 				//-----------------
+				// Convention: Channels are numbered as 1,2,... when shown to user
 				if(l_oChannelName[i] == "")
 				{
 					//if no name has been set, use channel index
-					l_oLabelString << "Channel " << i;
+					l_oLabelString << "Channel " << (i+1);
 				}
 				else //prepend name with channel index
 				{
-                    l_oLabelString << i << " : " << l_oChannelName[i];
+                    l_oLabelString << (i+1) << " : " << l_oChannelName[i];
 				}
 
                 // In either mode (eeg or non-eeg) create and attach label widget for each channel

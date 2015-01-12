@@ -581,7 +581,7 @@ boolean CTopographicMap3DDisplay::computeModelFrameChannelCoordinates()
 			{
 				CString l_oChannelLabel;
 				m_pTopographicMapDatabase->getChannelLabel(i, l_oChannelLabel);
-				getLogManager() << LogLevel_Warning << "Channel " << i << "(" << l_oChannelLabel << ") couldn't be projected on scalp! "
+				getLogManager() << LogLevel_Warning << "Channel " << (i+1) << "(" << l_oChannelLabel << ") couldn't be projected on scalp! "
 					<< "No graphical object will be created for this channel!\n";
 			}
 			else

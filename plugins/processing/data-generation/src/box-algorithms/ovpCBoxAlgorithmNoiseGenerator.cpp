@@ -68,7 +68,8 @@ boolean CNoiseGenerator::initialize(void)
 	for(uint32 i=0;i<static_cast<uint32>(m_ui64ChannelCount);i++)
 	{
 		char l_sBuffer[64];
-		sprintf(l_sBuffer, "Noise %d", i);
+		// Convention: channel shown as users go as 1,2,...
+		sprintf(l_sBuffer, "Noise %d", i+1);
 		l_pSampleMatrix->setDimensionLabel(0, i, l_sBuffer);
 	}
 
