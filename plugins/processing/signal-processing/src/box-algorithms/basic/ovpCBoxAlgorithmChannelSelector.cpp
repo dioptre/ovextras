@@ -85,9 +85,21 @@ boolean CBoxAlgorithmChannelSelector::initialize(void)
 		m_pInputMatrix=l_pDecoder->getOutputMatrix();
 		m_pOutputMatrix=l_pEncoder->getInputMatrix();
 	}
+	else if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
+	{
+		this->getLogManager() << LogLevel_Trace << "Treating input as a streamed matrix\n";
+		TStreamedMatrixEncoder < CBoxAlgorithmChannelSelector >* l_pEncoder=new TStreamedMatrixEncoder < CBoxAlgorithmChannelSelector >;
+		TStreamedMatrixDecoder < CBoxAlgorithmChannelSelector >* l_pDecoder=new TStreamedMatrixDecoder < CBoxAlgorithmChannelSelector >;
+		l_pEncoder->initialize(*this,0);
+		l_pDecoder->initialize(*this,0);
+		m_pDecoder=l_pDecoder;
+		m_pEncoder=l_pEncoder;
+		m_pInputMatrix=l_pDecoder->getOutputMatrix();
+		m_pOutputMatrix=l_pEncoder->getInputMatrix();
+	}
 	else
 	{
-		this->getLogManager() << LogLevel_Error << "Unhandled type of streamed matrix [" << l_oTypeIdentifier << "]\n";
+		this->getLogManager() << LogLevel_Error << "Unhandled type of input [" << l_oTypeIdentifier << "]\n";
 		return false;
 	}
 
@@ -120,9 +132,8 @@ boolean CBoxAlgorithmChannelSelector::processInput(uint32 ui32InputIndex)
 boolean CBoxAlgorithmChannelSelector::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
-	uint32 i, j, k;
 
-	for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
+	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
 		m_pDecoder->decode(i);
 		if(m_pDecoder->isHeaderReceived())
@@ -140,7 +151,7 @@ boolean CBoxAlgorithmChannelSelector::process(void)
 
 			std::vector < CString > l_sToken;
 			uint32 l_ui32TokenCount=OpenViBEToolkit::Tools::String::split(l_sSettingValue, OpenViBEToolkit::Tools::String::TSplitCallback < std::vector < CString > >(l_sToken), OV_Value_EnumeratedStringSeparator);
-			for(j=0; j<l_ui32TokenCount; j++)
+			for(uint32 j=0; j<l_ui32TokenCount; j++)
 			{
 				std::vector < CString > l_sSubToken;
 
@@ -164,7 +175,7 @@ boolean CBoxAlgorithmChannelSelector::process(void)
 					{
 						// The range is valid so selects all the channels in this range
 						this->getLogManager() << LogLevel_Trace << "For range [" << l_sToken[j] << "] :\n";
-						for(k=l_ui32RangeStartIndex; k<=l_ui32RangeEndIndex; k++)
+						for(uint32 k=l_ui32RangeStartIndex; k<=l_ui32RangeEndIndex; k++)
 						{
 							m_vLookup.push_back(k);
 							this->getLogManager() << LogLevel_Trace << "  Selected channel [" << k+1 << "]\n";
@@ -204,10 +215,10 @@ boolean CBoxAlgorithmChannelSelector::process(void)
 			if(l_ui64SelectionMethodIdentifier==OVP_TypeId_SelectionMethod_Reject)
 			{
 				std::vector < uint32 > l_vInversedLookup;
-				for(j=0; j<m_pInputMatrix->getDimensionSize(0); j++)
+				for(uint32 j=0; j<m_pInputMatrix->getDimensionSize(0); j++)
 				{
 					boolean l_bSelected=false;
-					for(k=0; k<m_vLookup.size(); k++)
+					for(uint32 k=0; k<m_vLookup.size(); k++)
 					{
 						l_bSelected|=(m_vLookup[k]==j);
 					}
@@ -229,7 +240,7 @@ boolean CBoxAlgorithmChannelSelector::process(void)
 			m_pOutputMatrix->setDimensionSize(0, m_vLookup.size());
 			m_pOutputMatrix->setDimensionSize(1, m_pInputMatrix->getDimensionSize(1));
 			Tools::Matrix::clearContent(*m_pOutputMatrix);
-			for(j=0; j<m_vLookup.size(); j++)
+			for(uint32 j=0; j<m_vLookup.size(); j++)
 			{
 				if(m_vLookup[j] < m_pInputMatrix->getDimensionSize(0))
 				{
@@ -240,8 +251,15 @@ boolean CBoxAlgorithmChannelSelector::process(void)
 					m_pOutputMatrix->setDimensionLabel(0, j, "Missing channel");
 				}
 			}
+
+			for(uint32 j=0; j<m_pInputMatrix->getDimensionSize(1); j++)
+			{
+				m_pOutputMatrix->setDimensionLabel(1, j, m_pInputMatrix->getDimensionLabel(1, j));
+			}
+
 			m_pEncoder->encodeHeader();
 		}
+
 		if(m_pDecoder->isBufferReceived())
 		{
 			// ______________________________________________________________________________________________________________________________________________________
@@ -251,7 +269,7 @@ boolean CBoxAlgorithmChannelSelector::process(void)
 			//
 
 			uint32 l_ui32SampleCount=m_pOutputMatrix->getDimensionSize(1);
-			for(j=0; j<m_vLookup.size(); j++)
+			for(uint32 j=0; j<m_vLookup.size(); j++)
 			{
 				if(m_vLookup[j] < m_pInputMatrix->getDimensionSize(0))
 				{
