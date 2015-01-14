@@ -46,6 +46,8 @@ extern const char* const c_sClassStimulationNodeName;
 extern const char* const c_sClassificationBoxRoot;
 extern const char* const c_sClassifierRoot;
 
+extern const char* const c_sPairwiseStrategyEnumerationName;
+
 bool ov_float_equal(double f64First, double f64Second);
 
 #endif // __OpenViBEPlugins_Defines_H__
