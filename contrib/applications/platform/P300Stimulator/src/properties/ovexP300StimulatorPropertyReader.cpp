@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300StimulatorPropertyReader.h"
 //#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include <openvibe/ovITimeArithmetics.h>
@@ -113,3 +115,5 @@ uint64 P300StimulatorPropertyReader::findSymbolIndex(std::string symbol)
 	return 0;
 }
 //#endif
+
+#endif

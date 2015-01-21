@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __ITagger_H__
 #define __ITagger_H__
 
@@ -26,4 +28,6 @@ namespace OpenViBEApplications
 		virtual int close()=0;
 	};
 }
+#endif
+
 #endif

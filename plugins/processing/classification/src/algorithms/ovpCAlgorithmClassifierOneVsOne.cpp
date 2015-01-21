@@ -102,10 +102,10 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 
 	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType);
 	m_oPairwiseDecisionIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationPairwiseStrategy,
-																											  l_pExtraParameters->at(l_pParameterName));
+		(*l_pExtraParameters)[l_pParameterName]);
 	if(m_oPairwiseDecisionIdentifier==OV_UndefinedIdentifier) {
 		this->getLogManager() << LogLevel_Error << "Tried to get algorithm id for pairwise decision strategy " << OVP_TypeId_ClassificationPairwiseStrategy << " and " << l_pParameterName << " -> " 
-			<<  ip_pExtraParameters->at(l_pParameterName) << " but failed\n";
+			<<  (*l_pExtraParameters)[l_pParameterName] << " but failed\n";
 		return false;
 	}
 	

@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "glGSymbol.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 using namespace OpenViBE;
@@ -350,4 +352,6 @@ std::string GSymbol::toString() const
 	text += std::string(" ");
 	return text;
 }
+#endif
+
 #endif

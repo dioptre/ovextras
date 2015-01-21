@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300KeyDescriptor.h"
 
 using namespace OpenViBE;
@@ -105,3 +107,5 @@ const boolean P300KeyDescriptor::isTextSymbol(const VisualState event) const
 	else
 		throw noSuchEventException;
 }
+
+#endif

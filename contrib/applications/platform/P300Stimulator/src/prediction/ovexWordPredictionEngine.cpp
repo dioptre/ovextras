@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexWordPredictionEngine.h"
 
 using namespace OpenViBE;
@@ -21,3 +23,4 @@ std::vector<std::string>* WordPredictionEngine::getMostProbableWords(const std::
 	
 	return m_lPredictedWords;
 }
+#endif

@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "glGLabel.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 using namespace OpenViBE;
@@ -106,4 +108,6 @@ std::string GLabel::toString() const
 {
 	return std::string("label ");
 }
+#endif
+
 #endif

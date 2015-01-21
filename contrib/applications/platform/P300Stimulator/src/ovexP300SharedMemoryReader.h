@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __ovCoAdaptP300SharedMemoryReader__
 #define __ovCoAdaptP300SharedMemoryReader__
 
@@ -72,4 +74,6 @@ namespace OpenViBEApplications
 			ISharedMemoryReader::SharedVariableHandler* m_pSharedVariableHandler;
 	};
 };
+#endif
+
 #endif

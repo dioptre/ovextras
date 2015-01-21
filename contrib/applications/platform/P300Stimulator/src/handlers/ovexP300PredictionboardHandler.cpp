@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include <vector>
 
 #include "ovexP300PredictionboardHandler.h"
@@ -39,4 +41,6 @@ void P300PredictionboardHandler::update(GObservable* observable, const void * pU
 	std::vector<std::string>* l_lWords = m_pWordPredictionEngine->getMostProbableWords(m_sSpelledLetters, m_ui32NPredictions);
 	this->notifyObservers(l_lWords);	
 }
+#endif
+
 #endif

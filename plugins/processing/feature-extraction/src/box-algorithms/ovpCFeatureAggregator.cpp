@@ -171,7 +171,7 @@ namespace OpenViBEPlugins
 
 						for(uint32 i=0;i<(uint32)l_ui64TotalBufferSize;i++) {
 							char l_sBuffer[64];
-							sprintf(l_sBuffer, "Feature %d", i);
+							sprintf(l_sBuffer, "Feature %d", (i+1));
 							l_pOutputMatrix->setDimensionLabel(1, i, l_sBuffer);
 						}
 

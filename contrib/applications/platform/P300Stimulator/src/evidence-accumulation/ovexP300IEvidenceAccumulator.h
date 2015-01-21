@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __IEvidenceAccumulator_H__
 #define __IEvidenceAccumulator_H__
 
@@ -204,4 +206,6 @@ namespace OpenViBEApplications
 		};
 
 };
+#endif
+
 #endif

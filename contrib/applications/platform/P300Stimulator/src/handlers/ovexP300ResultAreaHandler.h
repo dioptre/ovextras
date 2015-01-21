@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __P300ResultAreaHandler_H__
 #define __P300ResultAreaHandler_H__
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
@@ -93,4 +95,6 @@ namespace OpenViBEApplications
 	};
 };
 #endif
+#endif
+
 #endif

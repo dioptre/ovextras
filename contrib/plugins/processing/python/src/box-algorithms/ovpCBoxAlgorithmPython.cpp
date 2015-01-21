@@ -753,7 +753,7 @@ OpenViBE::boolean CBoxAlgorithmPython::processInput(uint32 ui32InputIndex)
 	return true;
 }
 
-OpenViBE::boolean CBoxAlgorithmPython::transferStreamedMatrixInputChunksToPython(uint32 input_index)
+OpenViBE::boolean CBoxAlgorithmPython::transferStreamedMatrixInputChunksToPython(const uint32 input_index)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
@@ -773,7 +773,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStreamedMatrixInputChunksToPython
 	//Expose input streamed matrix chunks to python
 	for(uint32 chunk_index=0; chunk_index < l_rDynamicBoxContext.getInputChunkCount(input_index); chunk_index++)
 	{
-		m_vDecoders[input_index]->decode(input_index, chunk_index);
+		m_vDecoders[input_index]->decode(chunk_index);
 
 		if (m_vDecoders[input_index]->isHeaderReceived())
 		{
@@ -1006,7 +1006,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStreamedMatrixInputChunksToPython
 	return true;
 }
 
-OpenViBE::boolean CBoxAlgorithmPython::transferStreamedMatrixOutputChunksFromPython(uint32 output_index)
+OpenViBE::boolean CBoxAlgorithmPython::transferStreamedMatrixOutputChunksFromPython(const uint32 output_index)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
@@ -1147,7 +1147,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStreamedMatrixOutputChunksFromPyt
 	return true;
 }
 
-OpenViBE::boolean CBoxAlgorithmPython::transferSignalInputChunksToPython(uint32 input_index)
+OpenViBE::boolean CBoxAlgorithmPython::transferSignalInputChunksToPython(const uint32 input_index)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
@@ -1167,7 +1167,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferSignalInputChunksToPython(uint32 
 	//Expose input signal chunks to python
 	for(uint32 chunk_index=0; chunk_index < l_rDynamicBoxContext.getInputChunkCount(input_index); chunk_index++)
 	{
-		m_vDecoders[input_index]->decode(input_index, chunk_index);
+		m_vDecoders[input_index]->decode(chunk_index);
 
 		if (m_vDecoders[input_index]->isHeaderReceived())
 		{
@@ -1408,7 +1408,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferSignalInputChunksToPython(uint32 
 	return true;
 }
 
-OpenViBE::boolean CBoxAlgorithmPython::transferSignalOutputChunksFromPython(uint32 output_index)
+OpenViBE::boolean CBoxAlgorithmPython::transferSignalOutputChunksFromPython(const uint32 output_index)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
@@ -1559,7 +1559,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferSignalOutputChunksFromPython(uint
 	return true;
 }
 
-OpenViBE::boolean CBoxAlgorithmPython::transferStimulationInputChunksToPython(uint32 input_index)
+OpenViBE::boolean CBoxAlgorithmPython::transferStimulationInputChunksToPython(const uint32 input_index)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 	//Borrowed reference
@@ -1571,7 +1571,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStimulationInputChunksToPython(ui
 	}
 	for(uint32 chunk_index = 0; chunk_index < l_rDynamicBoxContext.getInputChunkCount(input_index); chunk_index++)
 	{
-		m_vDecoders[input_index]->decode(input_index, chunk_index);
+		m_vDecoders[input_index]->decode(chunk_index);
 
 		if (m_vDecoders[input_index]->isHeaderReceived())
 		{
@@ -1773,7 +1773,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStimulationInputChunksToPython(ui
 	return true;
 }
 
-OpenViBE::boolean CBoxAlgorithmPython::transferStimulationOutputChunksFromPython(uint32 output_index)
+OpenViBE::boolean CBoxAlgorithmPython::transferStimulationOutputChunksFromPython(const uint32 output_index)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 

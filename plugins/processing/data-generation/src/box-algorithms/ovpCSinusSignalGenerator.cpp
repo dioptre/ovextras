@@ -83,7 +83,6 @@ boolean CSinusSignalGenerator::process(void)
 {
 	IBoxIO* l_pDynamicBoxContext=getBoxAlgorithmContext()->getDynamicBoxContext();
 
-	uint32 i,j;
 	if(!m_bHeaderSent)
 	{
 		m_oSignalEncoder.getInputSamplingRate() = m_ui32SamplingFrequency;
@@ -94,10 +93,11 @@ boolean CSinusSignalGenerator::process(void)
 		l_pMatrix->setDimensionSize(0,m_ui32ChannelCount);
 		l_pMatrix->setDimensionSize(1,m_ui32GeneratedEpochSampleCount);
 
-		for(i=0; i<m_ui32ChannelCount; i++)
+		for(uint32 i=0; i<m_ui32ChannelCount; i++)
 		{
+			// Convention: channel shown as users go as 1,2,...
 			char l_sChannelName[1024];
-			sprintf(l_sChannelName, "sinusOsc %i", (int)i);
+			sprintf(l_sChannelName, "sinusOsc %i", (int)(i+1));
 			l_pMatrix->setDimensionLabel(0, i, l_sChannelName);
 		}
 
@@ -113,9 +113,9 @@ boolean CSinusSignalGenerator::process(void)
 		float64* l_pSampleBuffer = m_oSignalEncoder.getInputMatrix()->getBuffer();
 
 		uint32 l_ui32SentSampleCount=m_ui32SentSampleCount;
-		for(i=0; i<m_ui32ChannelCount; i++)
+		for(uint32 i=0; i<m_ui32ChannelCount; i++)
 		{
-			for(j=0; j<m_ui32GeneratedEpochSampleCount; j++)
+			for(uint32 j=0; j<m_ui32GeneratedEpochSampleCount; j++)
 			{
 				l_pSampleBuffer[i*m_ui32GeneratedEpochSampleCount+j]=
 					sin(((j+m_ui32SentSampleCount)*(i+1)*12.3)/m_ui32SamplingFrequency)+

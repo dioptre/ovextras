@@ -100,13 +100,13 @@ XML::boolean IXMLNodeImpl::hasAttribute(const char *sAttributeName) const
 const char* IXMLNodeImpl::getAttribute(const char *sAttributeName) const
 {
 	const char* res = NULL;
-	try
-	{
-		res = m_mAttibuteMap.at(sAttributeName).c_str();
+	const std::string l_sAttributeName(sAttributeName);
+
+	std::map<std::string, std::string>::const_iterator it = m_mAttibuteMap.find(l_sAttributeName);
+	if(it!=m_mAttibuteMap.end()) {
+		res = (*it).second.c_str();
 	}
-	catch (const std::out_of_range&)
-	{
-	}
+
 	return res;
 }
 

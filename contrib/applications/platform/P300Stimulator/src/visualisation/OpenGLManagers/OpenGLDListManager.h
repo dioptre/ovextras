@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __OpenGLDListManager_OV_H__
 #define __OpenGLDListManager_OV_H__
 
@@ -54,4 +56,6 @@ namespace OpenViBEApplications
 };
 
 #endif
+#endif
+
 #endif

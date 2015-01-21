@@ -103,7 +103,7 @@ boolean CFastICA::process()
 			for(uint32 i=0 ; i<l_pEncoderMatrix->getDimensionSize(0) ; i++)
 			{
 				char l_sBuffer[64];
-				sprintf(l_sBuffer, "IC %d", i);
+				sprintf(l_sBuffer, "IC %d", i+1);
 				l_pEncoderMatrix->setDimensionLabel(0,i, l_sBuffer);
 			}
 

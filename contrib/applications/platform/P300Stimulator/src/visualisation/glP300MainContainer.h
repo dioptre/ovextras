@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __GP300MainContainer_OV_H__
 #define __GP300MainContainer_OV_H__
 
@@ -182,3 +184,5 @@ namespace OpenViBEApplications
 #endif//TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #endif
 
+
+#endif

@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexSharedStimulusReader.h"
 
 #include <boost/interprocess/sync/scoped_lock.hpp>
@@ -88,3 +90,5 @@ void SharedStimulusReader::close()
 	m_oSharedMemory.destroy<MyVectorStimulation>(m_sSharedVariableName.toASCIIString());	
 	//ISharedMemoryReader::close();
 }
+
+#endif

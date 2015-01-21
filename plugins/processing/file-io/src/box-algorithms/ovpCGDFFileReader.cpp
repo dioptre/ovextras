@@ -480,7 +480,7 @@ boolean CGDFFileReader::readFileHeader()
 			//reads the channels names
 			m_pSignalDescription.m_pChannelName[i].assign(l_pVariableHeaderBuffer + (16*i), 16);
 
-			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Debug <<" * Channel " << (uint32)i << " : " << CString(m_pSignalDescription.m_pChannelName[i].c_str()) << "\n";
+			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Debug <<" * Channel " << (uint32)(i+1) << " : " << CString(m_pSignalDescription.m_pChannelName[i].c_str()) << "\n";
 		}
 
 		//This parameter is defined by the user of the plugin

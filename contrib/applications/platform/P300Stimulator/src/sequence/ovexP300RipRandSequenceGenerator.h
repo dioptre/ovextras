@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __ovCoAdaptP300RipRandSequenceGenerator__
 #define __ovCoAdaptP300RipRandSequenceGenerator__
 
@@ -54,4 +56,6 @@ namespace OpenViBEApplications
 		
 	};
 };
+#endif
+
 #endif

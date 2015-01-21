@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __ovCoAdaptP300InterfacePropertyReader__
 #define __ovCoAdaptP300InterfacePropertyReader__
 
@@ -119,4 +121,6 @@ namespace OpenViBEApplications
 		
 	};
 };
+#endif
+
 #endif

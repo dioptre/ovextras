@@ -28,9 +28,9 @@ boolean CBoxAlgorithmSignalConcatenation::initialize(void)
 
 	for(uint32 i = 0; i < this->getStaticBoxContext().getInputCount(); i+=2)
 	{
-		OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSignalConcatenation > * l_pStimDecoder = new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSignalConcatenation >(*this,i);
-		OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmSignalConcatenation > * l_pSignalDecoder = new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmSignalConcatenation >(*this,i+1);
-		
+		OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmSignalConcatenation > * l_pSignalDecoder = new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmSignalConcatenation >(*this,i);
+		OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSignalConcatenation > * l_pStimDecoder = new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSignalConcatenation >(*this,i+1);
+
 		m_vSignalDecoders.push_back(l_pSignalDecoder);
 		m_vStimulationDecoders.push_back(l_pStimDecoder);
 		CStimulationSet * l_pStimSet = new CStimulationSet();
@@ -138,21 +138,23 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 	uint32 l_ui32ChannelCount;
 	for(uint32 input = 0 ; input < l_rStaticBoxContext.getInputCount() ; input+=2)
 	{
-		if(! m_vEndOfFileReached[input>>1])
+		const uint32 l_ui32SignalDecoderIndex = input >> 1;
+
+		if(! m_vEndOfFileReached[l_ui32SignalDecoderIndex])
 		{
 			for(uint32 chunk = 0; chunk < l_rDynamicBoxContext.getInputChunkCount(input); chunk++)
 			{
 				if(m_ui32HeaderReceivedCount < l_rStaticBoxContext.getInputCount()>>1)
 				{
-					m_vSignalDecoders[input>>1]->decode(chunk);
+					m_vSignalDecoders[l_ui32SignalDecoderIndex]->decode(chunk);
 					
-					if(m_vSignalDecoders[input>>1]->isHeaderReceived())
+					if(m_vSignalDecoders[l_ui32SignalDecoderIndex]->isHeaderReceived())
 					{
 						m_ui32HeaderReceivedCount++;
 
-						l_ui64SamplingFrequency = m_vSignalDecoders[input>>1]->getOutputSamplingRate();
-						l_ui32ChannelCount = m_vSignalDecoders[input>>1]->getOutputMatrix()->getDimensionSize(0);
-						m_ui32SampleCountPerBuffer = m_vSignalDecoders[input>>1]->getOutputMatrix()->getDimensionSize(1);
+						l_ui64SamplingFrequency = m_vSignalDecoders[l_ui32SignalDecoderIndex]->getOutputSamplingRate();
+						l_ui32ChannelCount = m_vSignalDecoders[l_ui32SignalDecoderIndex]->getOutputMatrix()->getDimensionSize(0);
+						m_ui32SampleCountPerBuffer = m_vSignalDecoders[l_ui32SignalDecoderIndex]->getOutputMatrix()->getDimensionSize(1);
 						if(input == 0)
 						{
 							this->getLogManager() << LogLevel_Info << "Common sampling rate is " << l_ui64SamplingFrequency << ", channel count is " << l_ui32ChannelCount << " and sample count per buffer is " << m_ui32SampleCountPerBuffer <<".\n";
@@ -162,24 +164,24 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 						}
 						else
 						{
-							if(m_vSignalDecoders[input>>1]->getOutputSamplingRate() != l_ui64SamplingFrequency)
+							if(m_vSignalDecoders[l_ui32SignalDecoderIndex]->getOutputSamplingRate() != l_ui64SamplingFrequency)
 							{
-								this->getLogManager() << LogLevel_Error << "File #" << (input>>1)+1 << "/" << (l_rStaticBoxContext.getInputCount()/2) << " has a different sampling rate ("<< m_vSignalDecoders[input>>1]->getOutputSamplingRate() <<"Hz) than previous file(s) ("<< l_ui64SamplingFrequency <<"Hz).\n";
+								this->getLogManager() << LogLevel_Error << "File #" << (l_ui32SignalDecoderIndex)+1 << "/" << (l_rStaticBoxContext.getInputCount()/2) << " has a different sampling rate ("<< m_vSignalDecoders[l_ui32SignalDecoderIndex]->getOutputSamplingRate() <<"Hz) than previous file(s) ("<< l_ui64SamplingFrequency <<"Hz).\n";
 								return false;
 							}
-							if(m_vSignalDecoders[input>>1]->getOutputMatrix()->getDimensionSize(0) != l_ui32ChannelCount)
+							if(m_vSignalDecoders[l_ui32SignalDecoderIndex]->getOutputMatrix()->getDimensionSize(0) != l_ui32ChannelCount)
 							{
-								this->getLogManager() << LogLevel_Error << "File #" << (input>>1)+1 << "/" << (l_rStaticBoxContext.getInputCount()/2) << " has a different channel count ("<< m_vSignalDecoders[input>>1]->getOutputMatrix()->getDimensionSize(0) <<") than previous file(s) ("<< l_ui32ChannelCount <<").\n";
+								this->getLogManager() << LogLevel_Error << "File #" << (l_ui32SignalDecoderIndex)+1 << "/" << (l_rStaticBoxContext.getInputCount()/2) << " has a different channel count ("<< m_vSignalDecoders[l_ui32SignalDecoderIndex]->getOutputMatrix()->getDimensionSize(0) <<") than previous file(s) ("<< l_ui32ChannelCount <<").\n";
 								return false;
 							}
-							if(m_vSignalDecoders[input>>1]->getOutputMatrix()->getDimensionSize(1) != m_ui32SampleCountPerBuffer)
+							if(m_vSignalDecoders[l_ui32SignalDecoderIndex]->getOutputMatrix()->getDimensionSize(1) != m_ui32SampleCountPerBuffer)
 							{
-								this->getLogManager() << LogLevel_Error << "File #" << (input>>1)+1 << "/" << (l_rStaticBoxContext.getInputCount()/2) << " has a different sample count per buffer ("<< m_vSignalDecoders[input>>1]->getOutputMatrix()->getDimensionSize(1) <<") than previous file(s) ("<< m_ui32SampleCountPerBuffer <<").\n";
+								this->getLogManager() << LogLevel_Error << "File #" << (l_ui32SignalDecoderIndex)+1 << "/" << (l_rStaticBoxContext.getInputCount()/2) << " has a different sample count per buffer ("<< m_vSignalDecoders[l_ui32SignalDecoderIndex]->getOutputMatrix()->getDimensionSize(1) <<") than previous file(s) ("<< m_ui32SampleCountPerBuffer <<").\n";
 								return false;
 							}
 						}
 					}
-					else if(m_vSignalDecoders[input>>1]->isBufferReceived())
+					else if(m_vSignalDecoders[l_ui32SignalDecoderIndex]->isBufferReceived())
 					{
 						IMemoryBuffer * l_pBuffer = new CMemoryBuffer();
 						l_pBuffer->setSize(l_rDynamicBoxContext.getInputChunk(input,chunk)->getSize(),true);
@@ -191,16 +193,16 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 						l_oChunk.m_pMemoryBuffer = l_pBuffer;
 						l_oChunk.m_ui64StartTime = l_rDynamicBoxContext.getInputChunkStartTime(input,chunk);
 						l_oChunk.m_ui64EndTime = l_rDynamicBoxContext.getInputChunkEndTime(input,chunk);
-						m_vSignalChunkBuffers[input>>1].push_back(l_oChunk);
+						m_vSignalChunkBuffers[l_ui32SignalDecoderIndex].push_back(l_oChunk);
 
-						m_vFileEndTimes[input>>1] = l_rDynamicBoxContext.getInputChunkEndTime(input,chunk);
+						m_vFileEndTimes[l_ui32SignalDecoderIndex] = l_rDynamicBoxContext.getInputChunkEndTime(input,chunk);
 						
 						l_rDynamicBoxContext.markInputAsDeprecated(input, chunk);
 					}
 				}
 				else
 				{
-					if(m_vEndOfFileReached[input>>1])
+					if(m_vEndOfFileReached[l_ui32SignalDecoderIndex])
 					{
 						//just discard it
 						l_rDynamicBoxContext.markInputAsDeprecated(input, chunk);
@@ -217,10 +219,10 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 						l_oChunk.m_pMemoryBuffer = l_pBuffer;
 						l_oChunk.m_ui64StartTime = l_rDynamicBoxContext.getInputChunkStartTime(input,chunk);
 						l_oChunk.m_ui64EndTime = l_rDynamicBoxContext.getInputChunkEndTime(input,chunk);
-						m_vSignalChunkBuffers[input>>1].push_back(l_oChunk);
+						m_vSignalChunkBuffers[l_ui32SignalDecoderIndex].push_back(l_oChunk);
 
 
-						m_vFileEndTimes[input>>1] = l_rDynamicBoxContext.getInputChunkEndTime(input,chunk);
+						m_vFileEndTimes[l_ui32SignalDecoderIndex] = l_rDynamicBoxContext.getInputChunkEndTime(input,chunk);
 						
 						l_rDynamicBoxContext.markInputAsDeprecated(input, chunk);
 					}
@@ -232,10 +234,12 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 	//STIMULATION INPUTS
 	for(uint32 input = 1 ; input < l_rStaticBoxContext.getInputCount() ; input+=2)
 	{
+		const uint32 l_ui32StimulationDecoderIndex = input >> 1;
+
 		for(uint32 chunk = 0; chunk < l_rDynamicBoxContext.getInputChunkCount(input); chunk++)
 		{
-			m_vStimulationDecoders[input>>1]->decode(chunk);
-			if(m_vStimulationDecoders[input>>1]->isHeaderReceived() && !m_bStimHeaderSent)
+			m_vStimulationDecoders[l_ui32StimulationDecoderIndex]->decode(chunk);
+			if(m_vStimulationDecoders[l_ui32StimulationDecoderIndex]->isHeaderReceived() && !m_bStimHeaderSent)
 			{
 				m_oStimulationEncoder.encodeHeader();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(1,l_rDynamicBoxContext.getInputChunkStartTime(input,chunk),l_rDynamicBoxContext.getInputChunkEndTime(input,chunk));
@@ -243,7 +247,7 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 				l_rDynamicBoxContext.markOutputAsReadyToSend(2,l_rDynamicBoxContext.getInputChunkStartTime(input,chunk),l_rDynamicBoxContext.getInputChunkEndTime(input,chunk));
 				m_bStimHeaderSent = true;
 			}
-			if(m_vStimulationDecoders[input>>1]->isEndReceived() && !m_bEndSent)
+			if(m_vStimulationDecoders[l_ui32StimulationDecoderIndex]->isEndReceived() && !m_bEndSent)
 			{
 				m_oStimulationEncoder.encodeEnd();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(1,l_rDynamicBoxContext.getInputChunkStartTime(input,chunk),l_rDynamicBoxContext.getInputChunkEndTime(input,chunk));
@@ -253,18 +257,18 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 				l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(input,chunk),l_rDynamicBoxContext.getInputChunkEndTime(input,chunk));
 				m_bEndSent = true;
 			}
-			if(m_vStimulationDecoders[input>>1]->isBufferReceived())
+			if(m_vStimulationDecoders[l_ui32StimulationDecoderIndex]->isBufferReceived())
 			{
-				IStimulationSet * l_pStimSet = m_vStimulationDecoders[input>>1]->getOutputStimulationSet();
+				IStimulationSet * l_pStimSet = m_vStimulationDecoders[l_ui32StimulationDecoderIndex]->getOutputStimulationSet();
 				for(uint32 stim = 0; stim < l_pStimSet->getStimulationCount(); stim++)
 				{
-					if(l_pStimSet->getStimulationIdentifier(stim) == m_vEndOfFileStimulations[input>>1])
+					if(l_pStimSet->getStimulationIdentifier(stim) == m_vEndOfFileStimulations[l_ui32StimulationDecoderIndex])
 					{
-						this->getLogManager() << LogLevel_Info << "File #" << (input>>1)+1 << "/" << (l_rStaticBoxContext.getInputCount()/2) << " is finished (end time: "<< time64(m_vFileEndTimes[input>>1]) <<"). Any more signal chunk will be discarded.\n";
-						m_vEndOfFileReached[input>>1] = true;
+						this->getLogManager() << LogLevel_Info << "File #" << (l_ui32StimulationDecoderIndex)+1 << "/" << (l_rStaticBoxContext.getInputCount()/2) << " is finished (end time: "<< time64(m_vFileEndTimes[l_ui32StimulationDecoderIndex]) <<"). Any more signal chunk will be discarded.\n";
+						m_vEndOfFileReached[l_ui32StimulationDecoderIndex] = true;
 					}
 					
-					m_vStimulationSets[input>>1]->appendStimulation(
+					m_vStimulationSets[l_ui32StimulationDecoderIndex]->appendStimulation(
 						l_pStimSet->getStimulationIdentifier(stim),
 						l_pStimSet->getStimulationDate(stim),
 						l_pStimSet->getStimulationDuration(stim));

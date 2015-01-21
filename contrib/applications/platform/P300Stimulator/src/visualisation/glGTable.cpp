@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "glGTable.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 using namespace OpenViBE;
@@ -63,4 +65,6 @@ std::string GTable::toString() const
 {
 	return std::string("GTable");
 }
+#endif
+
 #endif

@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300KeyboardHandler.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "ovexP300PredictionboardHandler.h"
@@ -334,4 +336,6 @@ GColor P300KeyboardHandler::getAssignedProbabilityColor(uint32 symbolIndex)
 	
 	return l_cProbabilityColor;
 }
+#endif
+
 #endif
