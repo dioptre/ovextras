@@ -279,8 +279,8 @@ boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatur
 	const float64 l_f64a =(m_oWeights * l_oFeatureVec.transpose()).col(0)(0) + m_f64w0;
 	const float64 l_f64P1 = 1 / (1 + exp(-l_f64a));
 
-//	rProbabilityValue.setSize(1);
-//	rProbabilityValue[0] = l_f64P1;
+	rProbabilityValue.setSize(1);
+	rProbabilityValue[0] = l_f64P1;
 
 	if(l_f64P1 >= 0.5)
 	{

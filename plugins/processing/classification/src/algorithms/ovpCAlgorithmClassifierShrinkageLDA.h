@@ -94,8 +94,8 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_UseShrinkage, "Use shrinkage", OpenViBE::Kernel::ParameterType_Boolean);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov,"sLDA: Force diagonal cov (DDA)",OpenViBE::Kernel::ParameterType_Boolean);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage, "sLDA: Shrinkage (-1 == auto)",OpenViBE::Kernel::ParameterType_Float);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov,"Shrinkage: Force diagonal cov (DDA)",OpenViBE::Kernel::ParameterType_Boolean);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage, "Shrinkage coefficient (-1 == auto)",OpenViBE::Kernel::ParameterType_Float);
 
 
 				CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);

@@ -239,15 +239,15 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 		}
 	}
 
-	for(size_t i =0 ; i < l_ui32AmountClass ; ++i )
-	{
-		for(size_t j = 0; j < l_ui32AmountClass ; ++j)
-		{
-			std::cout << l_pProbabilityMatrix->getBuffer()[i*l_ui32AmountClass + j] << " " ;
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
+//	for(size_t i =0 ; i < l_ui32AmountClass ; ++i )
+//	{
+//		for(size_t j = 0; j < l_ui32AmountClass ; ++j)
+//		{
+//			std::cout << l_pProbabilityMatrix->getBuffer()[i*l_ui32AmountClass + j] << " " ;
+//		}
+//		std::cout << std::endl;
+//	}
+//	std::cout << std::endl;
 
 	//Then ask to the startegy to make the decision
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute);

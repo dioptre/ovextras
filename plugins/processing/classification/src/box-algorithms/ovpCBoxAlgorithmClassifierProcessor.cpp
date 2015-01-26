@@ -103,27 +103,28 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		
 			m_vStimulation[0]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sRejectedLabel);
 
-			//Now load every stimulation and store them in the map with the right class id
-			for(uint32 i=1; i<l_pStimulationsNode->getChildCount(); i++)
-			{
-				l_pTempNode = l_pStimulationsNode->getChild(i);
-				if(!l_pTempNode)
-				{
-					this->getLogManager() << LogLevel_Error << "Expected child node " << i << " for node " << c_sStimulationsNodeName << ". Output labels not known. Aborting.\n";
-					return false;
-				}
-				CString l_sStimulationName(l_pTempNode->getPCData());
-	
-				OpenViBE::float64 l_f64ClassId;
-				std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
-				l_sIdentifierData >> l_f64ClassId ;
 
-				m_vStimulation[l_f64ClassId]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sStimulationName);
-			}
 		} 
 		else
 		{
 			this->getLogManager() << LogLevel_Warning << "The configuration file had no subnode " << c_sRejectedClassNodeName << ". Trouble may appear later.\n";
+		}
+
+		//Now load every stimulation and store them in the map with the right class id
+		for(uint32 i=0; i < l_pStimulationsNode->getChildCount(); i++)
+		{
+			l_pTempNode = l_pStimulationsNode->getChild(i);
+			if(!l_pTempNode)
+			{
+				this->getLogManager() << LogLevel_Error << "Expected child node " << i << " for node " << c_sStimulationsNodeName << ". Output labels not known. Aborting.\n";
+				return false;
+			}
+			CString l_sStimulationName(l_pTempNode->getPCData());
+
+			OpenViBE::float64 l_f64ClassId;
+			std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
+			l_sIdentifierData >> l_f64ClassId ;
+			m_vStimulation[l_f64ClassId]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sStimulationName);
 		}
 	}
 	else
@@ -254,6 +255,7 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 
 					ip_pLabelsStimulationSet->setStimulationCount(1);
 					ip_pLabelsStimulationSet->setStimulationIdentifier(0, m_vStimulation[op_f64ClassificationStateClass]);
+					std::cout << m_vStimulation[op_f64ClassificationStateClass] << std::endl;
 					ip_pLabelsStimulationSet->setStimulationDate(0, l_ui64EndTime);
 					ip_pLabelsStimulationSet->setStimulationDuration(0, 0);
 
