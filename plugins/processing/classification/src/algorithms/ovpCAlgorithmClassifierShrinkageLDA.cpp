@@ -344,7 +344,6 @@ void CAlgorithmClassifierShrinkageLDA::generateConfigurationNode(void)
 XML::IXMLNode* CAlgorithmClassifierShrinkageLDA::saveConfiguration(void)
 {
 	generateConfigurationNode();
-	std::cout << m_pConfigurationNode->getXML() << std::endl;
 	return m_pConfigurationNode;
 }
 

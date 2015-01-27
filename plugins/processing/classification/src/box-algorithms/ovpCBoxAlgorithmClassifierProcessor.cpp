@@ -255,7 +255,6 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 
 					ip_pLabelsStimulationSet->setStimulationCount(1);
 					ip_pLabelsStimulationSet->setStimulationIdentifier(0, m_vStimulation[op_f64ClassificationStateClass]);
-					std::cout << m_vStimulation[op_f64ClassificationStateClass] << std::endl;
 					ip_pLabelsStimulationSet->setStimulationDate(0, l_ui64EndTime);
 					ip_pLabelsStimulationSet->setStimulationDuration(0, 0);
 
