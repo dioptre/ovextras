@@ -33,7 +33,7 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean process_channelLocalisation(void);
 			OpenViBE::boolean process_featureVector(void);
 			OpenViBE::boolean process_spectrum(void);
-			void convertVectorDataToMatrix(OpenViBE::IMatrix* matrix);
+			OpenViBE::boolean convertVectorDataToMatrix(OpenViBE::IMatrix* matrix);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_CSVFileReader);
 
@@ -76,7 +76,7 @@ namespace OpenViBEPlugins
 				if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_Spectrum))
 				{
 					rBox.setOutputName(ui32Index, "Streamed matrix");
-					rBox.setSettingName(3,"");
+					rBox.setSettingName(3,"Unused parameter");
 					rBox.setSettingValue(3,"0");
 				}
 				else if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier,OV_TypeId_ChannelLocalisation))
@@ -88,7 +88,7 @@ namespace OpenViBEPlugins
 				else if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_FeatureVector))
 				{
 					rBox.setOutputName(ui32Index, "Feature vector");
-					rBox.setSettingName(3,"");
+					rBox.setSettingName(3,"Unused parameter");
 					rBox.setSettingValue(3,"0");
 				}
 				else if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
@@ -100,7 +100,7 @@ namespace OpenViBEPlugins
 				else if(l_oTypeIdentifier==OV_TypeId_Stimulations)
 				{
 					rBox.setOutputName(ui32Index, "Stimulations");
-					rBox.setSettingName(3,"");
+					rBox.setSettingName(3,"Unused parameter");
 					rBox.setSettingValue(3,"0");
 				}
 				else
@@ -152,6 +152,7 @@ namespace OpenViBEPlugins
 
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_FeatureVector);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_ChannelLocalisation);
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Spectrum);
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Stimulations);

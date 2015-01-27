@@ -16,8 +16,6 @@ CBoxAlgorithmCSVFileWriter::CBoxAlgorithmCSVFileWriter(void)
 	:
 	m_fpRealProcess(NULL)
 	,m_pStreamDecoder(NULL)
-	,m_pMatrix(NULL)
-	,m_bDeleteMatrix(false)
 {
 }
 
@@ -92,12 +90,6 @@ boolean CBoxAlgorithmCSVFileWriter::uninitialize(void)
 		m_oFileStream.close();
 	}
 
-	if(m_bDeleteMatrix)
-	{
-		delete m_pMatrix;
-		m_pMatrix = NULL;
-	}
-
 	if(m_pStreamDecoder)
 	{
 		m_pStreamDecoder->uninitialize();
@@ -125,10 +117,13 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 	{
 		const uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
 		const uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
+		
 		m_pStreamDecoder->decode(i);
-		IMatrix* l_pMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMatrix();
+
 		if(m_pStreamDecoder->isHeaderReceived())
 		{
+			const IMatrix* l_pMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMatrix();
+
 			if(l_pMatrix->getDimensionCount() > 2 || l_pMatrix->getDimensionCount() < 1)
 			{
 				this->getLogManager() << LogLevel_ImportantWarning << "Input matrix does not have 1 or 2 dimensions - Cannot write content in CSV file...\n";
@@ -138,47 +133,42 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 			if( l_pMatrix->getDimensionCount() == 1)
 			{
 				// The matrix is a vector, make a matrix to represent it
-				m_pMatrix = new CMatrix();
-				m_bDeleteMatrix = true;
-				m_pMatrix->setDimensionCount(2);
+				m_oMatrix.setDimensionCount(2);
 
 				// This [n X 1] will get written as a single row due to transpose later
-				m_pMatrix->setDimensionSize(0,l_pMatrix->getDimensionSize(0));
-				m_pMatrix->setDimensionSize(1,1);
+				m_oMatrix.setDimensionSize(0,l_pMatrix->getDimensionSize(0));
+				m_oMatrix.setDimensionSize(1,1);
 				for(uint32 i=0;i<l_pMatrix->getDimensionSize(0);i++)
 				{
-					m_pMatrix->setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(0,i));
+					m_oMatrix.setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(0,i));
 				}
-
 			}
 			else if(m_oTypeIdentifier==OV_TypeId_FeatureVector)
 			{
 				// OpenViBE matrixes are usually [channels x time], but they get written to the CSV as transposed, i.e. [time X channels].
 				// The feature stream matrix is [1 X features], but here we transpose it to [features X 1] to compensate and to get 
 				// one-vector-per-row in the output file
-				m_pMatrix = new CMatrix();
-				m_bDeleteMatrix = true;
-				m_pMatrix->setDimensionCount(2);
+				m_oMatrix.setDimensionCount(2);
 
 				// This [n X 1] will get written as a single row due to transpose later
-				m_pMatrix->setDimensionSize(0,l_pMatrix->getDimensionSize(1));
-				m_pMatrix->setDimensionSize(1,1);
+				m_oMatrix.setDimensionSize(0,l_pMatrix->getDimensionSize(1));
+				m_oMatrix.setDimensionSize(1,1);
 				for(uint32 i=0;i<l_pMatrix->getDimensionSize(1);i++)
 				{
    					// this->getLogManager() << LogLevel_Info << "  N: " << i << " is " << l_pMatrix->getDimensionLabel(1,i) << "\n";
-					m_pMatrix->setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(1,i));
+					m_oMatrix.setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(1,i));
 				}
 			}
 			else
 			{
 				// As-is
-				m_pMatrix=l_pMatrix;
+				OpenViBEToolkit::Tools::Matrix::copyDescription(m_oMatrix, *l_pMatrix);
 			}
 //			std::cout<<&m_pMatrix<<" "<<&op_pMatrix<<"\n";
 			m_oFileStream << "Time (s)";
-			for(uint32 c=0; c<m_pMatrix->getDimensionSize(0); c++)
+			for(uint32 c=0; c<m_oMatrix.getDimensionSize(0); c++)
 			{
-				std::string l_sLabel(m_pMatrix->getDimensionLabel(0, c));
+				std::string l_sLabel(m_oMatrix.getDimensionLabel(0, c));
 				while(l_sLabel.length()>0 && l_sLabel[l_sLabel.length()-1]==' ')
 				{
 					l_sLabel.erase(l_sLabel.length()-1);
@@ -203,8 +193,13 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 		}
 		if(m_pStreamDecoder->isBufferReceived())
 		{
-			const uint32 l_ui32NumChannels = m_pMatrix->getDimensionSize(0);
-			const uint32 l_ui32NumSamples = m_pMatrix->getDimensionSize(1);
+			const IMatrix* l_pMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMatrix();
+
+			const uint32 l_ui32NumChannels = m_oMatrix.getDimensionSize(0);
+			const uint32 l_ui32NumSamples = m_oMatrix.getDimensionSize(1);
+
+			//this->getLogManager() << LogLevel_Info << " dimsIn " << l_pMatrix->getDimensionSize(0) << "," << l_pMatrix->getDimensionSize(1) << "\n";
+			//this->getLogManager() << LogLevel_Info << " dimsBuf " << m_oMatrix.getDimensionSize(0) << "," << m_oMatrix.getDimensionSize(1) << "\n";
 
 			for(uint32 s=0; s<l_ui32NumSamples; s++)
 			{

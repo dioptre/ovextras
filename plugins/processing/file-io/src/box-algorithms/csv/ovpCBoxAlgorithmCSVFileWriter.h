@@ -49,8 +49,7 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean (OpenViBEPlugins::FileIO::CBoxAlgorithmCSVFileWriter::*m_fpRealProcess)(void);
 
 			OpenViBEToolkit::TDecoder < CBoxAlgorithmCSVFileWriter >* m_pStreamDecoder;
-			OpenViBE::IMatrix* m_pMatrix;
-			OpenViBE::boolean m_bDeleteMatrix;
+			OpenViBE::CMatrix m_oMatrix;		// This represents the properties of the input, no data
 
 			OpenViBE::uint64 m_ui64SampleCount;
 

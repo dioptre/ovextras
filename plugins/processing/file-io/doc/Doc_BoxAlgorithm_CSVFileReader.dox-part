@@ -6,16 +6,16 @@ Detailed description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_CSVFileReader_Description|
-This box allows to input some of the OpenViBE streams from a text file that is
-easy to read by the machine and easy to read by the human. CSV files are text files
+This box allows to read some of the OpenViBE streams from a text file that is
+easy to read both by machines and humans. CSV files are text files
 with different values separated by a special character such as a colon, a semicolon
-or a tabulation. This basic syntax makes them very easy to read for both machine and
-human. The purpose of this box is to quickly import some data from other softwares.
+or a tabulation. This basic syntax makes them very easy to parse. The purpose of this 
+box is to quickly import some data from other softwares.
 
-!NOTE! The file format the box accepts is NOT the usual N times M matrix. There
-must be a few extra items: the first column must be the time, and the first line must 
-have one more value than the other lines. This last value should be the sampling rate. 
-See below for details. 
+@b NOTE For files carrying signal, the file format the box accepts is NOT the usual 
+N times M matrix. There must be a few extra items: the first column must be the time
+of each sample, and the first line of data must have one more column than the other lines. 
+This last column should be the sampling rate. See below for details. 
 
  * |OVP_DocEnd_BoxAlgorithm_CSVFileReader_Description|
 __________________________________________________________________
@@ -29,8 +29,10 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_CSVFileReader_Output1|
 This output is used to import data from a CSV File to an OpenViBE stream. The type of
 this output can be modified by the user and the format of the file will be adapted
-depending on this type. Supported outputs are : Signal, Spectrum and Stimulations.
-Format specific to each of these stream types is detailed in section
+depending on this type. Supported outputs are : Signal, Spectrum, Stimulations,
+Feature Vector and Streamed Matrix.
+
+Format specific to some of these stream types is detailed in section
 \ref Doc_BoxAlgorithm_CSVFileReader_Miscellaneous.
  * |OVP_DocEnd_BoxAlgorithm_CSVFileReader_Output1|
 __________________________________________________________________
