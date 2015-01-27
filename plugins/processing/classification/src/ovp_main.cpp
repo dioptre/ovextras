@@ -25,7 +25,6 @@
 #if defined TARGET_HAS_ThirdPartyEIGEN
 #include "algorithms/ovpCAlgorithmConditionedCovariance.h"
 #include "algorithms/ovpCAlgorithmClassifierShrinkageLDA.h"
-#include "algorithms/ovpCAlgorithmClassifierPShrinkageLDA.h"
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
 const char* const c_sPairwiseStrategyEnumerationName = "Pairwise Decision Strategy";
