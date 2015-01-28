@@ -608,7 +608,7 @@ bool CBoxAlgorithmCSVFileReader::convertVectorDataToMatrix(IMatrix* matrix)
 		|| matrix->getDimensionSize(0) < m_ui32NbColumn-1 ) {
 		this->getLogManager() << LogLevel_Error 
 			<< "Matrix size incompatibility, data suggests " 
-			<< m_ui32NbColumn-1 << "x" << m_vDataMatrix.size() << ", expected at most " 
+			<< m_ui32NbColumn-1 << "x" << static_cast<uint64>(m_vDataMatrix.size()) << ", expected at most " 
 			<< matrix->getDimensionSize(0) << "x" << matrix->getDimensionSize(0) 
 			<< "\n";
 		return false;
