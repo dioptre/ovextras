@@ -29,6 +29,9 @@
 #include "ovIKernelLoader.h"
 #include "ovCKernelLoader.h"
 
+#include "ovIObserver.h"
+#include "ovCObservable.h"
+
 //___________________________________________________________________//
 //                                                                   //
 // Kernel includes                                                   //
@@ -118,6 +121,7 @@ namespace OpenViBE
 		typedef OpenViBE::Kernel::IBoxIO IDynamicBoxContext;
 	};
 };
+
 
 //___________________________________________________________________//
 //                                                                   //

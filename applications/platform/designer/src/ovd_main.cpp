@@ -1,7 +1,7 @@
 #include "ovd_base.h"
 
-#include <system/Time.h>
-#include <system/CMath.h>
+#include <system/ovCTime.h>
+#include <system/ovCMath.h>
 
 #include <stack>
 #include <vector>

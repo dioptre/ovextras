@@ -92,7 +92,13 @@ void CPluginExternalStimulations::stopHook()
 	if (m_bIsExternalStimulationsEnabled)
 	{
 		m_bIsESThreadRunning = false;
-		m_ESthreadPtr->join();
+		if(m_ESthreadPtr) {
+			m_ESthreadPtr->join();
+		}
+		else
+		{
+			m_rKernelContext.getLogManager() << LogLevel_Warning << "Warning: External Stims plugin stopHook() tried to join a NULL thread\n";
+		}
 	}
 
 

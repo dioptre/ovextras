@@ -1,6 +1,6 @@
 #include "ovpCBoxAlgorithmSpatialFilter.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <sstream>
 #include <string>
@@ -96,25 +96,19 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 	m_pStreamDecoder=NULL;
 	m_pStreamEncoder=NULL;
 
-	boolean l_bValid=false;
 	CIdentifier l_oIdentifier;
 	l_rStaticBoxContext.getInputType(0, l_oIdentifier);
 
 	if(l_oIdentifier==OV_TypeId_StreamedMatrix)
 	{
-		l_bValid=true;
-
 		m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamDecoder));
 		m_pStreamEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamEncoder));
 
 		m_pStreamDecoder->initialize();
 		m_pStreamEncoder->initialize();
 	}
-
-	if(l_oIdentifier==OV_TypeId_Signal)
+	else if(l_oIdentifier==OV_TypeId_Signal)
 	{
-		l_bValid=true;
-
 		m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
 		m_pStreamEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoder));
 
@@ -124,12 +118,9 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 		TParameterHandler < uint64 > op_pSamplingFrequency(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
 		TParameterHandler < uint64 > ip_pSamplingFrequency(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_SamplingRate));
 		ip_pSamplingFrequency.setReferenceTarget(op_pSamplingFrequency);
-	}
-
-	if(l_oIdentifier==OV_TypeId_Spectrum)
+	} 
+	else if(l_oIdentifier==OV_TypeId_Spectrum)
 	{
-		l_bValid=true;
-
 		m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SpectrumStreamDecoder));
 		m_pStreamEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SpectrumStreamEncoder));
 
@@ -139,9 +130,8 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 		TParameterHandler < IMatrix* > op_pBandMatrix(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_MinMaxFrequencyBands));
 		TParameterHandler < IMatrix* > ip_pBandMatrix(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_MinMaxFrequencyBands));
 		ip_pBandMatrix.setReferenceTarget(op_pBandMatrix);
-	}
-
-	if(!l_bValid)
+	} 
+	else
 	{
 		this->getLogManager() << LogLevel_Error << "Unhandled input stream type " << l_oIdentifier << "\n";
 		return false;
@@ -186,9 +176,7 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-	uint32 i, j, k, l;
-
-	for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
+	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
 		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
 		op_pMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
@@ -196,15 +184,21 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 		m_pStreamDecoder->process();
 		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedHeader))
 		{
-			CString l_sCoefficient=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+			const CString l_sCoefficient=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 			
 			loadCoefficients(l_sCoefficient, ' ', OV_Value_EnumeratedStringSeparator);
 
-			uint32 l_ui32OutputChannelCountSetting=(uint32)(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-			uint32 l_ui32InputChannelCountSetting=(uint32)(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+			const uint32 l_ui32OutputChannelCountSetting=(uint32)(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+			const uint32 l_ui32InputChannelCountSetting=(uint32)(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
-			uint32 l_ui32OutputChannelCount=m_vCoefficient.size() / op_pMatrix->getDimensionSize(0);
-			uint32 l_ui32InputChannelCount=op_pMatrix->getDimensionSize(0);
+			const uint32 l_ui32InputChannelCount=op_pMatrix->getDimensionSize(0);
+			const uint32 l_ui32InputSamplesCount=op_pMatrix->getDimensionSize(1);
+
+			if(l_ui32InputChannelCount == 0 || l_ui32InputSamplesCount == 0) 
+			{
+				this->getLogManager() << LogLevel_Error  << "Bad matrix size on input, [" << l_ui32InputChannelCount << " x " << l_ui32InputSamplesCount << "]\n";
+				return false;
+			}
 
 			if(l_ui32InputChannelCount!=l_ui32InputChannelCountSetting)
 			{
@@ -218,9 +212,19 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 				return false;
 			}
 
+			const uint32 l_ui32OutputChannelCount=m_vCoefficient.size() / l_ui32InputChannelCount;
+
 			ip_pMatrix->setDimensionCount(2);
 			ip_pMatrix->setDimensionSize(0, l_ui32OutputChannelCount);
-			ip_pMatrix->setDimensionSize(1, op_pMatrix->getDimensionSize(1));
+			ip_pMatrix->setDimensionSize(1, l_ui32InputSamplesCount);
+
+			// Name channels
+			for(uint32 i=0;i<ip_pMatrix->getDimensionSize(0);i++)
+			{
+				char l_sBuffer[64];
+				sprintf(l_sBuffer, "sFiltered %d", i);
+				ip_pMatrix->setDimensionLabel(0, i, l_sBuffer);
+			}
 
 			m_pStreamEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
 		}
@@ -234,11 +238,11 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 
 			System::Memory::set(l_pFilteredMatrix, l_ui32SampleCount*l_ui32OutputChannelCount*sizeof(float64), 0);
 
-			for(j=0; j<l_ui32OutputChannelCount; j++)
+			for(uint32 j=0; j<l_ui32OutputChannelCount; j++)
 			{
-				for(k=0; k<l_ui32InputChannelCount; k++)
+				for(uint32 k=0; k<l_ui32InputChannelCount; k++)
 				{
-					for(l=0; l<l_ui32SampleCount; l++)
+					for(uint32 l=0; l<l_ui32SampleCount; l++)
 					{
 						l_pFilteredMatrix[j*l_ui32SampleCount+l]+=m_vCoefficient[j*l_ui32InputChannelCount+k]*l_pMatrix[k*l_ui32SampleCount+l];
 					}

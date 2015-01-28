@@ -1,9 +1,11 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "glP300MainContainer.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "glGButton.h"
 #include "glGSymbol.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include "../handlers/ovexP300KeyboardHandler.h"
 
@@ -396,3 +398,5 @@ std::string P300MainContainer::toString() const
 	return std::string("P300MainContainer");
 }
 #endif//TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
+#endif

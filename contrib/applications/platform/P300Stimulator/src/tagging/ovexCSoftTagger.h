@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __CSoftTagger_H__
 #define __CSoftTagger_H__
 
@@ -35,4 +37,6 @@ namespace OpenViBEApplications
 		boost::interprocess::message_queue* m_messageQueue;
 };
 }
+#endif
+
 #endif

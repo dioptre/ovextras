@@ -1,6 +1,8 @@
+#if defined(TARGET_HAS_ThirdPartyITPP)
+
 #include "ovpCMatrixVariance.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 #include <cmath>
 #include <iostream>
 
@@ -255,3 +257,5 @@ boolean CMatrixVariance::process(void)
 
 	return true;
 }
+
+#endif

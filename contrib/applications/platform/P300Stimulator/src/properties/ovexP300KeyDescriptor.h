@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __ovP300KeyDescriptor__
 #define __ovP300KeyDescriptor__
 
@@ -144,4 +146,6 @@ namespace OpenViBEApplications
 		std::map<VisualState, OpenViBE::boolean>* m_vEventMapIsTextSymbol;
 	};
 };
+#endif
+
 #endif

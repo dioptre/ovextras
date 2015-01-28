@@ -149,7 +149,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Code example on how to construct messages"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This box can be configured to send out fixed messages periodically."); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tests and examples/Messaging"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Examples/Messaging"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
 

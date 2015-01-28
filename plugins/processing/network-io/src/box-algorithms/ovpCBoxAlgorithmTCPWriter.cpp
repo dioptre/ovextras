@@ -92,7 +92,7 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	{
 		m_pActiveDecoder = &m_StimulationDecoder;
 	}
-	m_pActiveDecoder->initialize(*this);
+	m_pActiveDecoder->initialize(*this,0);
 
 	uint64 l_ui64Port = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_ui64OutputStyle = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
@@ -197,7 +197,7 @@ boolean CBoxAlgorithmTCPWriter::processInput(uint32 ui32InputIndex)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmTCPWriter::sendToClients(void *pBuffer, uint32 ui32BufferLength)
+boolean CBoxAlgorithmTCPWriter::sendToClients(const void* pBuffer, uint32 ui32BufferLength)
 {
 	std::vector<boost::asio::ip::tcp::socket*>::iterator it = m_vSockets.begin();
 	while(it!=m_vSockets.end()) 
@@ -250,19 +250,27 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 
 	for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(0); j++)
 	{
-		m_pActiveDecoder->decode(0,j);
+		m_pActiveDecoder->decode(j);
 		if(m_pActiveDecoder->isHeaderReceived())
 		{
 			if(m_pActiveDecoder == &m_MatrixDecoder) 
 			{
 				m_ui32NumberOfChannels = static_cast<uint32> (m_MatrixDecoder.getOutputMatrix()->getDimensionSize(0) );
 				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> (m_MatrixDecoder.getOutputMatrix()->getDimensionSize(1) );
+
+				m_oChunkTranspose.setDimensionCount(2);
+				m_oChunkTranspose.setDimensionSize(0,m_ui32NumberOfSamplesPerChunk);
+				m_oChunkTranspose.setDimensionSize(1,m_ui32NumberOfChannels);
 			} 
 			else if(m_pActiveDecoder == &m_SignalDecoder)
 			{
 				m_ui32Frequency = static_cast<uint32> ( m_SignalDecoder.getOutputSamplingRate() );
 				m_ui32NumberOfChannels = static_cast<uint32> ( m_SignalDecoder.getOutputMatrix()->getDimensionSize(0) );
 				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> ( m_SignalDecoder.getOutputMatrix()->getDimensionSize(1) );
+
+				m_oChunkTranspose.setDimensionCount(2);
+				m_oChunkTranspose.setDimensionSize(0,m_ui32NumberOfSamplesPerChunk);
+				m_oChunkTranspose.setDimensionSize(1,m_ui32NumberOfChannels);
 			}
 			else
 			{
@@ -273,21 +281,46 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 		{
 			if(m_pActiveDecoder == &m_MatrixDecoder) 
 			{
-				IMatrix* l_pMatrix = m_MatrixDecoder.getOutputMatrix();
-				sendToClients((void *)l_pMatrix->getBuffer(), l_pMatrix->getBufferElementCount()*sizeof(float64));
+				const IMatrix* l_pMatrix = m_MatrixDecoder.getOutputMatrix();
+
+				// Transpose
+				const float64 *l_pSource = l_pMatrix->getBuffer();
+				float64 *l_pDestination = m_oChunkTranspose.getBuffer();
+				for(uint32 c=0;c<m_ui32NumberOfChannels;c++) 
+				{
+					for(uint32 s=0;s<m_ui32NumberOfSamplesPerChunk;s++) 
+					{
+						l_pDestination[s*m_ui32NumberOfChannels+c] = l_pSource[c*m_ui32NumberOfSamplesPerChunk+s];
+					}
+				}
+
+				sendToClients((void *)l_pDestination, l_pMatrix->getBufferElementCount()*sizeof(float64));
 			} 
 			else if(m_pActiveDecoder == &m_SignalDecoder)
 			{
-				IMatrix* l_pMatrix = m_SignalDecoder.getOutputMatrix();
-				sendToClients((void *)l_pMatrix->getBuffer(), l_pMatrix->getBufferElementCount()*sizeof(float64));
+				const IMatrix* l_pMatrix = m_SignalDecoder.getOutputMatrix();
+
+				// Transpose
+				const float64 *l_pSource = l_pMatrix->getBuffer();
+				float64 *l_pDestination = m_oChunkTranspose.getBuffer();
+				for(uint32 c=0;c<m_ui32NumberOfChannels;c++) 
+				{
+					for(uint32 s=0;s<m_ui32NumberOfSamplesPerChunk;s++) 
+					{
+						l_pDestination[s*m_ui32NumberOfChannels+c] = l_pSource[c*m_ui32NumberOfSamplesPerChunk+s];
+					}
+				}
+
+				sendToClients((void *)l_pDestination, l_pMatrix->getBufferElementCount()*sizeof(float64));
 			} 
 			else // stimulus
 			{
-				IStimulationSet* l_pStimulations = m_StimulationDecoder.getOutputStimulationSet();
+				const IStimulationSet* l_pStimulations = m_StimulationDecoder.getOutputStimulationSet();
 				for(uint32 j=0; j<l_pStimulations->getStimulationCount(); j++)
 				{
-					uint64 l_ui64StimulationCode = l_pStimulations->getStimulationIdentifier(j);
+					const uint64 l_ui64StimulationCode = l_pStimulations->getStimulationIdentifier(j);
 					// uint64 l_ui64StimulationDate = l_pStimulations->getStimulationDate(j);
+					this->getLogManager() << LogLevel_Trace << "Sending out " << l_ui64StimulationCode << "\n";
 
 					switch(m_ui64OutputStyle) {
 						case TCPWRITER_RAW:

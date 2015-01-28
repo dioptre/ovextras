@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __WordPredictionEngine_H__
 #define __WordPredictionEngine_H__
 
@@ -27,4 +29,6 @@ namespace OpenViBEApplications
 		std::vector<std::string>* m_lPredictedWords;
 	};
 };
+#endif
+
 #endif

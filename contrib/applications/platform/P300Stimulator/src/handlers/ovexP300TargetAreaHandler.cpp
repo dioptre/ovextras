@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300TargetAreaHandler.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 #include "ovexUndoHandler.h"
@@ -8,7 +10,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -57,4 +59,6 @@ void P300TargetAreaHandler::moveSymbolsLeft(OpenViBE::uint32 nshift)
 	for(uint32 i=0;i<nshift;i++)
 		m_pSymbolContainer->removeChild(0);	
 }
+#endif
+
 #endif

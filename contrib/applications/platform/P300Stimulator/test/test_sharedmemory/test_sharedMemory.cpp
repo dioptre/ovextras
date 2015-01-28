@@ -1,8 +1,10 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "../../src/ovexP300SharedMemoryReader.h"
 #include <iostream>
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <openvibe/ovITimeArithmetics.h>
 
@@ -60,3 +62,13 @@ int main(int argc, char *argv[])
 	
 
 }
+
+#else
+#include <iostream>
+int main(int argc, char *argv[])
+{
+	std::cout << "The compiler did not have the required libraries for the CoAdapt stimulator " << std::endl;
+	return 1;
+}
+
+#endif

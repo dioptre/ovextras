@@ -2,11 +2,29 @@
 #define __OpenViBE_Kernel_Scenario_IBox_H__
 
 #include "ovIAttributable.h"
+#include "../../ovCObservable.h"
 
 namespace OpenViBE
 {
 	namespace Kernel
 	{
+
+		enum BoxEventMessageType{
+			SettingValueUpdate,
+			SettingChange,
+			SettingDelete,
+			SettingAdd,
+			SettingsReorder,
+			SettingsAllChange
+		};
+
+		class OV_API BoxEventMessage{
+		public:
+			BoxEventMessageType m_eType;
+			OpenViBE::int32 m_i32FirstIndex;
+			OpenViBE::int32 m_i32SecondIndex;
+		};
+
 		/**
 		 * \class IBox
 		 * \author Yann Renard (IRISA/INRIA)
@@ -19,7 +37,7 @@ namespace OpenViBE
 		 * OpenViBE black box. It describes its identification values,
 		 * its inputs, its outputs and its settings.
 		 */
-		class OV_API IBox : public OpenViBE::Kernel::IAttributable
+		class OV_API IBox : public OpenViBE::Kernel::IAttributable, public OpenViBE::CObservable
 		{
 		public:
 
@@ -460,7 +478,7 @@ namespace OpenViBE
 			  * \return \e false if type isn't support.
 			  */
 			virtual OpenViBE::boolean hasInputSupport(
-					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+					const OpenViBE::CIdentifier& rTypeIdentifier) const =0;
 
 			/**
 			  * \brief Marks this type as supported by outputs
@@ -488,8 +506,19 @@ namespace OpenViBE
 			  * \return \e false if type isn't support.
 			  */
 			virtual OpenViBE::boolean hasOutputSupport(
-					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
+					const OpenViBE::CIdentifier& rTypeIdentifier) const =0;
 			//@}
+
+			/**
+			 * \brief Set the supported stream type for input and output according
+			 * to the restriction of the algorithm whose identifier is given in parameter.
+			 * \param rTypeIdentifier [in] : identifier of the algorithm
+			 * \return \e true in case of success.
+			 * \return \e false in case of error.
+			 * \note The supported stream list is not reset.
+			 */
+			virtual OpenViBE::boolean setSupportTypeFromAlgorithmIdentifier(
+					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
 
 			/** \name Message input management */
 			//@{
@@ -602,6 +631,10 @@ namespace OpenViBE
 					const OpenViBE::uint32 ui32OutputIndex,
 					const OpenViBE::CString& rName)=0;
 			//@}
+
+			virtual void storeState(void)=0;
+
+			virtual void restoreState(void)=0;
 
 			_IsDerivedFromClass_(OpenViBE::Kernel::IAttributable, OV_ClassId_Kernel_Scenario_Box)
 		};

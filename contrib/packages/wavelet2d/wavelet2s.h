@@ -1,5 +1,5 @@
 
-#if defined(TARGET_HAS_ThirdPartyITPP)	// fftw3 source in openvibe
+#if defined(TARGET_HAS_ThirdPartyFFTW3)
 
 #ifndef WAVELET2S_H
 #define WAVELET2S_H

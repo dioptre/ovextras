@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __OpenGLTextureManager_OV_H__
 #define __OpenGLTextureManager_OV_H__
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
@@ -53,4 +55,6 @@ namespace OpenViBEApplications
 };
 
 #endif
+#endif
+
 #endif

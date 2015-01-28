@@ -12,7 +12,7 @@ namespace OpenViBEAcquisitionServer
 {
 	/**
 	 * \class CConfigurationLabStreamingLayer
-	 * \author Jussi T. Lindgen / Inria
+	 * \author Jussi T. Lindgren / Inria
 	 * \date Wed Oct 15 09:41:18 2014
 	 * \brief The CConfigurationLabStreamingLayer handles the configuration dialog specific to the LabStreamingLayer (LSL) device.
 	 *

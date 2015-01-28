@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef CoAdaptP300StimulatorDefinitions2
 #define CoAdaptP300StimulatorDefinitions2
 
@@ -124,5 +126,7 @@ enum VisualState {
 	#  endif
 	# endif
 # endif
+
+#endif
 
 #endif

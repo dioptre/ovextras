@@ -10,11 +10,11 @@ using namespace OpenViBEPlugins::SignalProcessingBasic;
 boolean CBoxAlgorithmHilbert::initialize(void)
 {
 	// Signal stream decoder
-	m_oAlgo0_SignalDecoder.initialize(*this);
+	m_oAlgo0_SignalDecoder.initialize(*this,0);
 	// Signal stream encoder
-	m_oAlgo1_SignalEncoder.initialize(*this);
-	m_oAlgo2_SignalEncoder.initialize(*this);
-	m_oAlgo3_SignalEncoder.initialize(*this);
+	m_oAlgo1_SignalEncoder.initialize(*this,0);
+	m_oAlgo2_SignalEncoder.initialize(*this,1);
+	m_oAlgo3_SignalEncoder.initialize(*this,2);
 	
 	m_pHilbertAlgo = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_HilbertTransform));
 	m_pHilbertAlgo->initialize();
@@ -81,7 +81,7 @@ boolean CBoxAlgorithmHilbert::process(void)
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
 		// decode the chunk i on input 0
-		m_oAlgo0_SignalDecoder.decode(0,i);
+		m_oAlgo0_SignalDecoder.decode(i);
 		// the decoder may have decoded 3 different parts : the header, a buffer or the end of stream.
 		if(m_oAlgo0_SignalDecoder.isHeaderReceived())
 		{
@@ -89,9 +89,9 @@ boolean CBoxAlgorithmHilbert::process(void)
 			m_pHilbertAlgo->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Initialize);
 			
 			// Pass the header to the next boxes, by encoding a header on the output 0:
-			m_oAlgo1_SignalEncoder.encodeHeader(0);
-			m_oAlgo2_SignalEncoder.encodeHeader(1);
-			m_oAlgo3_SignalEncoder.encodeHeader(2);
+			m_oAlgo1_SignalEncoder.encodeHeader();
+			m_oAlgo2_SignalEncoder.encodeHeader();
+			m_oAlgo3_SignalEncoder.encodeHeader();
 
 			// send the output chunk containing the header. The dates are the same as the input chunk:
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
@@ -104,9 +104,9 @@ boolean CBoxAlgorithmHilbert::process(void)
 			m_pHilbertAlgo->process(OVP_Algorithm_HilbertTransform_InputTriggerId_Process);
 
 			// Encode the output buffer :
-			m_oAlgo1_SignalEncoder.encodeBuffer(0);
-			m_oAlgo2_SignalEncoder.encodeBuffer(1);
-			m_oAlgo3_SignalEncoder.encodeBuffer(2);
+			m_oAlgo1_SignalEncoder.encodeBuffer();
+			m_oAlgo2_SignalEncoder.encodeBuffer();
+			m_oAlgo3_SignalEncoder.encodeBuffer();
 
 			// and send it to the next boxes :
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
@@ -116,9 +116,9 @@ boolean CBoxAlgorithmHilbert::process(void)
 		if(m_oAlgo0_SignalDecoder.isEndReceived())
 		{
 			// End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
-			m_oAlgo1_SignalEncoder.encodeEnd(0);
-			m_oAlgo2_SignalEncoder.encodeEnd(1);
-			m_oAlgo3_SignalEncoder.encodeEnd(2);
+			m_oAlgo1_SignalEncoder.encodeEnd();
+			m_oAlgo2_SignalEncoder.encodeEnd();
+			m_oAlgo3_SignalEncoder.encodeEnd();
 
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 			l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));

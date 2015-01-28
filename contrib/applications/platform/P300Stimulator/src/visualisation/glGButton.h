@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __GButton_H__
 #define __GButton_H__
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
@@ -146,4 +148,6 @@ namespace OpenViBEApplications
 };
 
 #endif
+#endif
+
 #endif

@@ -27,7 +27,7 @@ boolean CTopographicMap2DDisplay::initialize(void)
 {
 	m_bFirstBufferReceived=false;
 	m_pDecoder = new OpenViBEToolkit::TStreamedMatrixDecoder < CTopographicMap2DDisplay >;
-	m_pDecoder->initialize(*this);
+	m_pDecoder->initialize(*this,0);
 
 	m_pSphericalSplineInterpolation = &getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_SphericalSplineInterpolation));
 	m_pSphericalSplineInterpolation->initialize();
@@ -105,7 +105,7 @@ boolean CTopographicMap2DDisplay::process(void)
 	//decode signal data
 	for(i=0; i<l_pDynamicBoxContext->getInputChunkCount(0); i++)
 	{
-		m_pDecoder->decode(0, i);
+		m_pDecoder->decode(i);
 		if(m_pDecoder->isBufferReceived())
 		{
 			IMatrix* l_pInputMatrix=m_pDecoder->getOutputMatrix();

@@ -27,7 +27,7 @@ boolean CBoxAlgorithmInverse_DWT::initialize(void)
 
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
-	m_AlgoInfo_SignalDecoder.initialize(*this);
+	m_AlgoInfo_SignalDecoder.initialize(*this,0);
 
 	m_sWaveletType=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sDecompositionLevel=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
@@ -36,10 +36,10 @@ boolean CBoxAlgorithmInverse_DWT::initialize(void)
 
 	for (uint32 o = 0; o < l_rStaticBoxContext.getInputCount()-1; o++)
 	{
-		m_oAlgoX_SignalDecoder[o].initialize(*this);
+		m_oAlgoX_SignalDecoder[o].initialize(*this,o+1);
 	}
 
-	m_oAlgo0_SignalEncoder.initialize(*this);
+	m_oAlgo0_SignalEncoder.initialize(*this,0);
 	return true;
 }
 
@@ -105,7 +105,7 @@ boolean CBoxAlgorithmInverse_DWT::process(void)
 		for(uint32 ii=0; ii<l_rDynamicBoxContext.getInputChunkCount(0); ii++)
 		{
 
-			m_AlgoInfo_SignalDecoder.decode(0,ii);
+			m_AlgoInfo_SignalDecoder.decode(ii);
 
 			l_vNbChannels0[0] = m_AlgoInfo_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
 			l_vNbSamples0[0] = m_AlgoInfo_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
@@ -150,7 +150,7 @@ boolean CBoxAlgorithmInverse_DWT::process(void)
 					//   this->getLogManager() << LogLevel_Warning << "getinputchunkcount "<< o <<": "<< l_rDynamicBoxContext.getInputChunkCount(o+1)  << "\n";
 
 
-					m_oAlgoX_SignalDecoder[o].decode(o+1,ii);
+					m_oAlgoX_SignalDecoder[o].decode(ii);
 
 
 					l_vNbChannels0[o+1] = m_oAlgoX_SignalDecoder[o].getOutputMatrix()->getDimensionSize(0);
@@ -219,14 +219,14 @@ boolean CBoxAlgorithmInverse_DWT::process(void)
 
 							//                         if(m_oAlgoX_SignalDecoder[o].isHeaderReceived())
 							//                         {
-							m_oAlgo0_SignalEncoder.encodeHeader(0);
+							m_oAlgo0_SignalEncoder.encodeHeader();
 							//                             // send the output chunk containing the header. The dates are the same as the input chunk:
 							l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 							//                         }
 							//                         if(m_oAlgoX_SignalDecoder[o].isBufferReceived())
 							//                         {
 							//                           this->getLogManager() << LogLevel_Warning << "Dentro buffer received "   << "\n";
-							m_oAlgo0_SignalEncoder.encodeBuffer(0);
+							m_oAlgo0_SignalEncoder.encodeBuffer();
 							// and send it to the next boxes :
 							l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 
@@ -235,7 +235,7 @@ boolean CBoxAlgorithmInverse_DWT::process(void)
 							//                         {
 							//                            this->getLogManager() << LogLevel_Warning << "Dentro end received "   << "\n";
 							// End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
-							m_oAlgo0_SignalEncoder.encodeEnd(0);
+							m_oAlgo0_SignalEncoder.encodeEnd();
 							l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 							//                         }
 						}

@@ -40,7 +40,7 @@ namespace OpenViBEDesigner
 			const OpenViBE::uint32 ui32InputIndex,
 			const OpenViBE::CString& rName);
 		typedef OpenViBE::boolean (OpenViBE::Kernel::IBox::*t_isTypeSupported)(
-			const OpenViBE::CIdentifier& rTypeIdentifier);
+			const OpenViBE::CIdentifier& rTypeIdentifier) const;
 	};
 };
 

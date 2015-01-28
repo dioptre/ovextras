@@ -6,7 +6,7 @@
 #include <fs/IEntryEnumerator.h>
 #include <fs/Files.h>
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <cstdio>
 #include <iostream>

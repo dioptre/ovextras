@@ -12,9 +12,9 @@ using namespace OpenViBEPlugins::SignalProcessing;
 boolean CBoxAlgorithmDifferentialIntegral::initialize(void)
 {
 	// Signal stream decoder
-	m_oSignalDecoder.initialize(*this);
+	m_oSignalDecoder.initialize(*this,0);
 	// Signal stream encoder
-	m_oSignalEncoder.initialize(*this);
+	m_oSignalEncoder.initialize(*this,0);
 	
 	// If you need to, you can manually set the reference targets to link the codecs input and output. To do so, you can use :
 	m_oSignalEncoder.getInputMatrix().setReferenceTarget(m_oSignalDecoder.getOutputMatrix());
@@ -78,7 +78,7 @@ boolean CBoxAlgorithmDifferentialIntegral::process(void)
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
 		// decode the chunk i on input 0
-		m_oSignalDecoder.decode(0,i);
+		m_oSignalDecoder.decode(i);
 
 		if(m_oSignalDecoder.isHeaderReceived())
 		{
@@ -102,7 +102,7 @@ boolean CBoxAlgorithmDifferentialIntegral::process(void)
 			}
 
 			// Encode the output header
-			m_oSignalEncoder.encodeHeader(0);
+			m_oSignalEncoder.encodeHeader();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
 
@@ -160,7 +160,7 @@ boolean CBoxAlgorithmDifferentialIntegral::process(void)
 			}
 
 			// Encode the output buffer
-			m_oSignalEncoder.encodeBuffer(0);
+			m_oSignalEncoder.encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 
 		}
@@ -168,7 +168,7 @@ boolean CBoxAlgorithmDifferentialIntegral::process(void)
 		if(m_oSignalDecoder.isEndReceived())
 		{
 			// End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
-			m_oSignalEncoder.encodeEnd(0);
+			m_oSignalEncoder.encodeEnd();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
 

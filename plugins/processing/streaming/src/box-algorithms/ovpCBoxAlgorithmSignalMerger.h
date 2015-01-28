@@ -29,8 +29,8 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			std::vector < OpenViBE::Kernel::IAlgorithmProxy* > m_vStreamDecoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamEncoder;
+			std::vector < OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmSignalMerger >* > m_vStreamDecoder;
+			OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmSignalMerger >* m_pStreamEncoder;
 		};
 
 		class CBoxAlgorithmSignalMergerListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >

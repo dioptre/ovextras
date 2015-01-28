@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexCSoftTagger.h"
 
 
@@ -66,3 +68,5 @@ int CSoftTagger::write(OpenViBE::uint32 value)
 
 	return 1;
 }
+
+#endif

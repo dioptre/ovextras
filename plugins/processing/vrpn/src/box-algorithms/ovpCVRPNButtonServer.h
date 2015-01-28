@@ -13,15 +13,13 @@ namespace OpenViBEPlugins
 {
 	namespace VRPN
 	{
-		class CVRPNButtonServer
-			:public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
-			,public OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback::ICallback
+		class CVRPNButtonServer : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
 		public:
 
 			CVRPNButtonServer(void);
 			virtual void release(void) { delete this; }
-			virtual OpenViBE::uint64 getClockFrequency(void) { return 64LL<<32; }
+			virtual OpenViBE::uint64 getClockFrequency(void) { return 64LL<<32; } // 64 times per second
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 			virtual OpenViBE::boolean processClock(OpenViBE::Kernel::IMessageClock& rMessageClock);
@@ -30,14 +28,11 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_VRPNButtonServer)
 
-			virtual void setStimulationCount(const OpenViBE::uint32 ui32StimulationCount);
 			virtual void setStimulation(const OpenViBE::uint32 ui32StimulationIndex, const OpenViBE::uint64 ui64StimulationIdentifier, const OpenViBE::uint64 ui64StimulationDate);
 
 		protected:
 
-			//ebml
-			EBML::IReader* m_pReader;
-			OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback* m_pStimulationReaderCallBack;
+			std::vector< OpenViBEToolkit::TStimulationDecoder < CVRPNButtonServer >* > m_vStimulationDecoders;
 
 			//Start and end time of the last buffer
 			OpenViBE::uint64 m_ui64StartTime;

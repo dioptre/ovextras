@@ -14,7 +14,7 @@ namespace OpenViBEAcquisitionServer
 {
 	/**
 	 * \class CDriverLabStreamingLayer
-	 * \author Jussi T. Lindgen / Inria
+	 * \author Jussi T. Lindgren / Inria
 	 * \date Wed Oct 15 09:41:18 2014
 	 * \brief The CDriverLabStreamingLayer allows the acquisition server to acquire data from a LabStreamingLayer (LSL) device.
 	 *

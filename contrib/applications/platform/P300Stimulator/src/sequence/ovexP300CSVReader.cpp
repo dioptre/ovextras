@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300CSVReader.h"
 
 #include <locale>
@@ -107,3 +109,5 @@ std::vector<unsigned int> ovexP300CSVReader::getNextFlashGroup()
 {
 }
 //*/
+
+#endif

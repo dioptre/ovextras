@@ -5,7 +5,7 @@
 #include "ovkCSimulatedBox.h"
 #include "ovkCPlayer.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <xml/IReader.h>
 
@@ -238,28 +238,28 @@ boolean CScheduler::setFrequency(
 //___________________________________________________________________//
 //                                                                   //
 
-boolean CScheduler::initialize(void)
+SchedulerInitializationCode CScheduler::initialize(void)
 {
 	this->getLogManager() << LogLevel_Trace << "Scheduler initialize\n";
 
 	if(m_bIsInitialized)
 	{
 		this->getLogManager() << LogLevel_Warning << "Trying to initialize an intialized scheduler !\n";
-		return false;
+		return SchedulerInitialization_Failed;
 	}
 
 	m_pScenario=&getScenarioManager().getScenario(m_oScenarioIdentifier);
 	if(!m_pScenario)
 	{
 		this->getLogManager() << LogLevel_ImportantWarning << "Scenario " << m_oScenarioIdentifier << " does not exist !\n";
-		return false;
+		return SchedulerInitialization_Failed;
 	}
 
 	CBoxSettingModifierVisitor l_oBoxSettingModifierVisitor(&getKernelContext().getConfigurationManager());
 	if(!m_pScenario->acceptVisitor(l_oBoxSettingModifierVisitor)) 
 	{
 		this->getLogManager() << LogLevel_Error << "Scenario " << m_oScenarioIdentifier << " setting modification with acceptVisitor() failed\n";
-		return false;
+		return SchedulerInitialization_Failed;
 	}
 
 	CIdentifier l_oBoxIdentifier;
@@ -300,13 +300,18 @@ boolean CScheduler::initialize(void)
 		m_vSimulatedBoxChrono[l_oBoxIdentifier].reset(static_cast<uint32>(m_ui64Frequency));
 	}
 
+	boolean l_bBoxInitialization = true;
+
 	for(map < pair < int32, CIdentifier >, CSimulatedBox* >::iterator itSimulatedBox=m_vSimulatedBox.begin(); itSimulatedBox!=m_vSimulatedBox.end(); itSimulatedBox++)
 	{
 		const IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
 		this->getLogManager() << LogLevel_Trace << "Scheduled box : id = " << itSimulatedBox->first.second << " priority = " << -itSimulatedBox->first.first << " name = " << l_pBox->getName() << "\n";
 		if(itSimulatedBox->second ) // we initialize regardless of mute so that we can bring the box back during the run (in theory...)
 		{
-			itSimulatedBox->second->initialize();
+			if(!itSimulatedBox->second->initialize())
+			{
+				l_bBoxInitialization = false;
+			}
 		}
 	}
 
@@ -315,7 +320,11 @@ boolean CScheduler::initialize(void)
 	m_bIsInitialized=true;
 
 	m_oBenchmarkChrono.reset((System::uint32)m_ui64Frequency);
-	return true;
+	if(l_bBoxInitialization)
+	{
+		return SchedulerInitialization_Success;
+	}
+	return SchedulerInitialization_BoxInitializationFailed;
 
 }
 

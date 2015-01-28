@@ -12,11 +12,11 @@ The main motivation for this box is to allow external applications to receive in
 
 Output:
 
-1) If the outputs of the box are raw numeric values, the box first sends every connecting client eight variables of uint32: version number (in network byte order), endianness of the stream (in network byte order, 0==unknown, 1==little, 2==big, 3==pdp), sampling frequency of the signal, the number of channels (matrix rows) and the number of samples per chunk (matrix columns) and three variables of padding, 8*4=32 bytes in total. The last 6 variables are in the byte order of the stream. Note that only those variables will be non-zero that are meaningful for the input in question. 
+1) If the outputs of the box are raw numeric values, the box first sends every connecting client eight variables of uint32: version number (in network byte order), endianness of the stream (in network byte order, 0==unknown, 1==little, 2==big, 3==pdp), sampling frequency of the signal, the number of channels, the number of samples per chunk and three variables of padding, 8*4=32 bytes in total. The last 6 variables are in the byte order of the stream. Note that only those variables will be non-zero that are meaningful for the input in question. 
 
 1b) If the output is chosen as hex string or descriptive string (these are valid for Stimulation input only), no header is sent.
 
-2) After the possible global header, the data itself is sent. The data is a stream of float64 for Signal and StreamedMatrix. For Stimulations, the data is uint64 if user chooses raw, or char strings otherwise.
+2) After the possible global header, the data itself is sent. The data is a stream of float64 for Signal and StreamedMatrix. The data orientation is [nSamples x nChannels], i.e. all channels for one sample are sent in a sequence, then all channels of the next sample, and so on. For Stimulations, the data is uint64 if user chooses raw, or char strings otherwise.
 
 Multiple clients can connect to the socket of the box. The box keeps sending data to each client until either the scenario is stopped or the client disconnects. The box does not guarantee that the client starts to receive the input stream from any particular location. When kernel calls box::process() at time t, all clients connected at time t get forwarded the chunks given to box::process() at t. However, if a client establish a connection during box::process(), it may get a partial chunk of t and the whole chunk of t+1 and so on.
 
@@ -56,7 +56,7 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Examples|
  Easiest way to test the box is to connect to the socket of the box with 'telnet' and redirect the telnet output to a file. 
  
- It is also possible to use Acquisition Server's Generic Raw Telnet Reader to read data from the box. In that case, set Start Skip to 32 and header and footer skips to 0.
+ It is also possible to use Acquisition Server's Generic Raw Telnet Reader to read data from the box. In that case, set Start Skip to 32 and header and footer skips to 0, and data format to float64. Remember to also set the number of channels and the sampling frequency correctly. This information is not read from the stream by the Generic Raw Telnet Reader.
  * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Examples|
 __________________________________________________________________
 
@@ -64,7 +64,9 @@ Miscellaneous description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Miscellaneous|
- The box performs no little-endian/big-endian conversions. The data is sent raw in the native format of the host system.
+ The box performs no little-endian/big-endian conversions. The data is sent raw in the native format of the host system. The host endianness is encoded into the sent header.
+ 
+ The box sends signal data as chunks with the same chunk size as the stream has.
  
  The box writes to all the sockets synchronously in the process() call and drops no data. If the connection is too slow to accommodate the data flow, the box will lag.
  

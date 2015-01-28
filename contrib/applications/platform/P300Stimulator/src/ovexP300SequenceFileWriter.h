@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __ovCoAdaptP300SequenceFileWriter__
 #define __ovCoAdaptP300SequenceFileWriter__
 
@@ -22,5 +24,7 @@ namespace OpenViBEApplications
 		
 	};
 };
+
+#endif
 
 #endif

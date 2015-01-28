@@ -16,8 +16,8 @@ using namespace OpenViBEPlugins::SignalProcessing;
 boolean CBoxAlgorithmEOG_Denoising::initialize(void)
 {
     // Signal stream decoder
-    m_oAlgo0_SignalDecoder.initialize(*this);
-    m_oAlgo1_SignalDecoder.initialize(*this);
+    m_oAlgo0_SignalDecoder.initialize(*this,0);
+    m_oAlgo1_SignalDecoder.initialize(*this,1);
 
     m_oAlgo2_SignalEncoder.getInputSamplingRate().setReferenceTarget(m_oAlgo0_SignalDecoder.getOutputSamplingRate());
 
@@ -65,7 +65,7 @@ boolean CBoxAlgorithmEOG_Denoising::initialize(void)
     m_fBMatrixFile.close();
 
     // Signal stream encoder
-    m_oAlgo2_SignalEncoder.initialize(*this);
+    m_oAlgo2_SignalEncoder.initialize(*this,0);
 
     return true;
 }
@@ -115,7 +115,7 @@ boolean CBoxAlgorithmEOG_Denoising::process(void)
             // Signal EEG
 
             // decode the chunk ii on input 0
-            m_oAlgo0_SignalDecoder.decode(0,ii);
+            m_oAlgo0_SignalDecoder.decode(ii);
 
             IMatrix* l_pMatrix_0 = m_oAlgo0_SignalDecoder.getOutputMatrix();
             float64* l_pBuffer0 = l_pMatrix_0->getBuffer();
@@ -129,7 +129,7 @@ boolean CBoxAlgorithmEOG_Denoising::process(void)
             }
 
             //Signal EOG
-            m_oAlgo1_SignalDecoder.decode(1,ii);
+            m_oAlgo1_SignalDecoder.decode(ii);
 
             IMatrix* l_pMatrix_1 = m_oAlgo1_SignalDecoder.getOutputMatrix();
             float64* l_pBuffer1 = l_pMatrix_1->getBuffer();
@@ -174,7 +174,7 @@ boolean CBoxAlgorithmEOG_Denoising::process(void)
             if(m_oAlgo1_SignalDecoder.isHeaderReceived())
             {
 
-                m_oAlgo2_SignalEncoder.encodeHeader(0);
+                m_oAlgo2_SignalEncoder.encodeHeader();
                 // send the output chunk containing the header. The dates are the same as the input chunk:
                 l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
             }
@@ -182,14 +182,14 @@ boolean CBoxAlgorithmEOG_Denoising::process(void)
             if(m_oAlgo1_SignalDecoder.isBufferReceived())
             {
                 // Encode the output buffer :
-                m_oAlgo2_SignalEncoder.encodeBuffer(0);
+                m_oAlgo2_SignalEncoder.encodeBuffer();
                 // and send it to the next boxes :
                 l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
             }
             if(m_oAlgo1_SignalDecoder.isEndReceived())
             {
                 // End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
-                m_oAlgo2_SignalEncoder.encodeEnd(0);
+                m_oAlgo2_SignalEncoder.encodeEnd();
                 l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
             }
 

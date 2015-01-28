@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __GContainer_OV_H__
 #define __GContainer_OV_H__
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
@@ -98,4 +100,6 @@ namespace OpenViBEApplications
 };
 
 #endif
+#endif
+
 #endif

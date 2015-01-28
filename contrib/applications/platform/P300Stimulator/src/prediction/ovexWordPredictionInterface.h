@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __WordPredictionInterface_H__
 #define __WordPredictionInterface_H__
 
@@ -27,4 +29,6 @@ namespace OpenViBEApplications
 		virtual std::vector<std::string>* getMostProbableWords(const std::string&  prefix, OpenViBE::uint32 nWords)=0;
 	};
 };
+#endif
+
 #endif

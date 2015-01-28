@@ -26,7 +26,7 @@ OpenViBE::int32 OpenViBEPlugins::Classification::getPLDABestClassification(OpenV
 {
 	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
 		return 0;
-	else if(::fabs(rFirstClassificationValue[0]) < ::fabs(rSecondClassificationValue[0]))
+	else if(::fabs(rFirstClassificationValue[0]) > ::fabs(rSecondClassificationValue[0]))
 		return -1;
 	else
 		return 1;

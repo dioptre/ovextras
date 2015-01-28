@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "glGButton.h"
 #if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
 using namespace OpenViBE;
@@ -204,4 +206,6 @@ std::string GButton::toString() const
 	text += std::string(m_pLabel->toString());
 	return text;	
 }
+#endif
+
 #endif

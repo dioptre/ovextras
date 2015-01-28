@@ -28,6 +28,7 @@ namespace OpenViBEPlugins
 						
 		public:
 
+			CInputChannel();
 			~CInputChannel();
 			OpenViBE::boolean initialize(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm>* pTBoxAlgorithm);
 			OpenViBE::boolean uninitialize();

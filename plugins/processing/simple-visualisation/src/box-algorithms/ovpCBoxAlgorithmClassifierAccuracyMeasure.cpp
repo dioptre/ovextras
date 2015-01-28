@@ -44,31 +44,18 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::initialize(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_vProgressBar.resize(getStaticBoxContext().getInputCount()-1); //-1 because the first input is the target
-	m_vpClassifierStimulationDecoder.resize(getStaticBoxContext().getInputCount()-1);
-	m_vInputClassifierMemoryBuffer.resize(getStaticBoxContext().getInputCount()-1);
-	m_vOutputClassifierStimulationSet.resize(getStaticBoxContext().getInputCount()-1);
+	//m_vpClassifierStimulationDecoder.resize(getStaticBoxContext().getInputCount()-1);
+	//m_vInputClassifierMemoryBuffer.resize(getStaticBoxContext().getInputCount()-1);
+	//m_vOutputClassifierStimulationSet.resize(getStaticBoxContext().getInputCount()-1);
 
 	//classifier decoders
-	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount()-1; i++)
+	for(uint32 i=1; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		m_vpClassifierStimulationDecoder[i]=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-		m_vpClassifierStimulationDecoder[i]->initialize();
+		m_vpClassifierStimulationDecoder.push_back(new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmClassifierAccuracyMeasure >());
+		m_vpClassifierStimulationDecoder.back()->initialize(*this,i);
 	}
 
-	//targets decoder
-	m_pTargetStimulationDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-	m_pTargetStimulationDecoder->initialize();
-
-	//IO for the classifier MemoryBuffer -> StimulationSet
-	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount()-1; i++)
-	{
-		m_vInputClassifierMemoryBuffer[i].initialize(m_vpClassifierStimulationDecoder[i]->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		m_vOutputClassifierStimulationSet[i].initialize(m_vpClassifierStimulationDecoder[i]->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
-	}
-
-	//IO for the targets MemoryBuffer -> StimulationSet
-	ip_pTargetMemoryBuffer.initialize(m_pTargetStimulationDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-	op_pTargetStimulationSet.initialize(m_pTargetStimulationDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+	m_oTargetStimulationDecoder.initialize(*this,0);
 
 	//widgets
 	m_pMainWidgetInterface=gtk_builder_new(); // glade_xml_new(OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/openvibe-simple-visualisation-ClassifierAccuracyMeasure.ui", "classifier-accuracy-measure-table", NULL);
@@ -101,23 +88,15 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::uninitialize(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
-	// IO
-	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount()-1; i++)
-	{
-		m_vOutputClassifierStimulationSet[i].uninitialize();
-		m_vInputClassifierMemoryBuffer[i].uninitialize();
-	}
-	op_pTargetStimulationSet.uninitialize();
-	ip_pTargetMemoryBuffer.uninitialize();
-
 	//decoders
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount()-1; i++)
 	{
 		m_vpClassifierStimulationDecoder[i]->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*(m_vpClassifierStimulationDecoder[i]));
+		delete m_vpClassifierStimulationDecoder[i];
 	}
-	m_pTargetStimulationDecoder->uninitialize();
-	this->getAlgorithmManager().releaseAlgorithm(*m_pTargetStimulationDecoder);
+	m_vpClassifierStimulationDecoder.clear();
+
+	m_oTargetStimulationDecoder.uninitialize();
 
 	//widgets
 	g_object_unref(m_pToolbarWidgetInterface);
@@ -145,10 +124,9 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::process(void)
 	// we iterate over the "target" chunks and update the timeline
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		ip_pTargetMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
-		m_pTargetStimulationDecoder->process();
+		m_oTargetStimulationDecoder.decode(i);
 
-		if(m_pTargetStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+		if(m_oTargetStimulationDecoder.isHeaderReceived())
 		{
 			//header received
 			//adding the progress bars to the window
@@ -201,24 +179,25 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::process(void)
 			m_ui64CurrentProcessingTimeLimit = 0;
 		}
 
-		if(m_pTargetStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_oTargetStimulationDecoder.isBufferReceived())
 		{
 			//buffer received
 			//A new target comes, let's update the timeline with it
-			for(uint32 s=0; s<op_pTargetStimulationSet->getStimulationCount(); s++)
+			const IStimulationSet* l_pTargetStimulationSet = m_oTargetStimulationDecoder.getOutputStimulationSet();
+			for(uint32 s=0; s<l_pTargetStimulationSet->getStimulationCount(); s++)
 			{
-				uint64 l_ui64StimulationIdentifier = op_pTargetStimulationSet->getStimulationIdentifier(s);
-				uint64 l_ui64StimulationDate = op_pTargetStimulationSet->getStimulationDate(s);
+				const uint64 l_ui64StimulationIdentifier = l_pTargetStimulationSet->getStimulationIdentifier(s);
+				const uint64 l_ui64StimulationDate = l_pTargetStimulationSet->getStimulationDate(s);
 				m_mTargetsTimeLine.insert(std::pair<uint64,uint64>(l_ui64StimulationDate,l_ui64StimulationIdentifier));
 				getLogManager() << LogLevel_Trace << "New target inserted ("<< l_ui64StimulationIdentifier <<","<< time64(l_ui64StimulationDate) <<")\n";
 			}
 
 			//we updtae the time limit for processing classifier stim
-			uint64 l_ui64ChunkEndTime = l_rDynamicBoxContext.getInputChunkEndTime(0, i);
+			const uint64 l_ui64ChunkEndTime = l_rDynamicBoxContext.getInputChunkEndTime(0, i);
 			m_ui64CurrentProcessingTimeLimit = MAX(l_ui64ChunkEndTime, m_ui64CurrentProcessingTimeLimit);
 		}
 
-		if(m_pTargetStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if(m_oTargetStimulationDecoder.isEndReceived())
 		{
 		}
 
@@ -230,31 +209,31 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::process(void)
 	{
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(ip); i++)
 		{
-			m_vInputClassifierMemoryBuffer[ip-1] = l_rDynamicBoxContext.getInputChunk(ip, i);
 
 			// lets get the chunck end time
-			uint64 l_ui64ChunkEndTime = l_rDynamicBoxContext.getInputChunkEndTime(ip,i);
+			const uint64 l_ui64ChunkEndTime = l_rDynamicBoxContext.getInputChunkEndTime(ip,i);
 			// if the incoming chunk is in the timeline
 			if(l_ui64ChunkEndTime <= m_ui64CurrentProcessingTimeLimit)
 			{
 				if(m_mTargetsTimeLine.size() != 0)
 				{
 					// we can process it
-					m_vpClassifierStimulationDecoder[ip-1]->process();
+					m_vpClassifierStimulationDecoder[ip-1]->decode(i);
 
-					if(m_vpClassifierStimulationDecoder[ip-1]->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+					if(m_vpClassifierStimulationDecoder[ip-1]->isHeaderReceived())
 					{
 						//header received
 					}
 
-					if(m_vpClassifierStimulationDecoder[ip-1]->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+					if(m_vpClassifierStimulationDecoder[ip-1]->isBufferReceived())
 					{
 						//buffer received
-						for(uint32 s=0; s<m_vOutputClassifierStimulationSet[ip-1]->getStimulationCount(); s++)
+						const IStimulationSet* l_pStimulationSet = m_vpClassifierStimulationDecoder[ip-1]->getOutputStimulationSet();
+						for(uint32 s=0; s<l_pStimulationSet->getStimulationCount(); s++)
 						{
 							//We need to locate the stimulation on the timeline
-							uint64 l_ui64StimulationFromClassifierIdentifier = m_vOutputClassifierStimulationSet[ip-1]->getStimulationIdentifier(s);
-							uint64 l_ui64StimulationFromClassifierDate = m_vOutputClassifierStimulationSet[ip-1]->getStimulationDate(s);
+							uint64 l_ui64StimulationFromClassifierIdentifier = l_pStimulationSet->getStimulationIdentifier(s);
+							uint64 l_ui64StimulationFromClassifierDate = l_pStimulationSet->getStimulationDate(s);
 
 							getLogManager() << LogLevel_Trace << "New Classifier state received ("<< l_ui64StimulationFromClassifierIdentifier <<","<< time64(l_ui64StimulationFromClassifierDate) <<") from Classifier "<< ip <<"\n";
 
@@ -303,7 +282,7 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::process(void)
 						gtk_progress_bar_set_text(m_vProgressBar[ip-1].m_pProgressBar, ss.str().c_str());
 					}
 
-					if(m_pTargetStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+					if(m_oTargetStimulationDecoder.isEndReceived())
 					{
 					}
 				}

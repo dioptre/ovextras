@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __ovCoAdaptP300LetterGroupReader__
 #define __ovCoAdaptP300LetterGroupReader__
 
@@ -164,5 +166,7 @@ namespace OpenViBEApplications
 		std::map<OpenViBE::CString,VisualState> EventStringMap;				
 	};
 };
+
+#endif
 
 #endif

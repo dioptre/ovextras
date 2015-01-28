@@ -28,8 +28,20 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	CString l_sConfigurationFilename;
 	l_rStaticBoxContext.getSettingValue(0, l_sConfigurationFilename);
 
+	if(l_sConfigurationFilename == CString("")) 
+	{
+		this->getLogManager() << LogLevel_Error << "You need to specify a classifier .xml for the box (use Classifier Trainer to create one)\n";
+		return false;
+	}
+
 	XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
 	XML::IXMLNode *l_pRootNode = l_pHandler->parseFile(l_sConfigurationFilename.toASCIIString());
+
+	if(!l_pRootNode) 
+	{
+		this->getLogManager() << LogLevel_Error << "Unable to get root node from [" << l_sConfigurationFilename << "]\n";
+		return false;
+	}
 
 	//Now check the version, and let's display a message if the version is not good
 	string l_sVersion;

@@ -6,9 +6,6 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/IWriter.h>
-#include <ebml/TWriterCallbackProxy.h>
-
 #include <string>
 #include <vector>
 #include <queue>
@@ -22,7 +19,7 @@ namespace OpenViBEPlugins
 		 * Main plugin class of the feature aggregator plugins.
 		 * Aggregates the features received in a feature vector then outputs it.
 		 * */
-		class CFeatureAggregator : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, virtual public OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback::ICallback
+		class CFeatureAggregator : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
 		public:
 
@@ -37,24 +34,12 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean process();
 
-			virtual void writeFeatureVectorOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize);
-
-			virtual void setMatrixDimensionCount(const OpenViBE::uint32 ui32DimensionCount);
-			virtual void setMatrixDimensionSize(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionSize);
-			virtual void setMatrixDimensionLabel(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionEntryIndex, const char* sDimensionLabel);
-			virtual void setMatrixBuffer(const OpenViBE::float64* pBuffer);
-
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, OVP_ClassId_FeatureAggregator)
 
 		public:
-				//EBML writing stuff
-				EBML::IWriter* m_pWriter;
-				EBML::TWriterCallbackProxy1<OpenViBEPlugins::FeatureExtraction::CFeatureAggregator> * m_pOutputWriterCallbackProxy;
-				OpenViBEToolkit::IBoxAlgorithmFeatureVectorOutputWriter * m_pFeatureVectorOutputWriterHelper;
-
-				// Needed to read the input
-				EBML::IReader* m_pReader;
-				OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback* m_pMatrixReaderCallBack;
+				//codecs
+				OpenViBEToolkit::TFeatureVectorEncoder<CFeatureAggregator>* m_pFeatureVectorEncoder;
+				std::vector< OpenViBEToolkit::TStreamedMatrixDecoder<CFeatureAggregator>* > m_pStreamedMatrixDecoder;
 
 				// contains the labels for each dimension for each input
 				std::vector<std::vector<std::vector<std::string> > > m_oFeatureNames;
@@ -82,6 +67,7 @@ namespace OpenViBEPlugins
 
 				// error flag
 				OpenViBE::boolean m_bError;
+				OpenViBE::boolean m_bHeaderSent;
 		};
 
 		class CFeatureAggregatorListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >

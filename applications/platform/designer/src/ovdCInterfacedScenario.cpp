@@ -1267,7 +1267,7 @@ void CInterfacedScenario::snapshotCB(boolean bManageModifiedStatusFlag)
 void CInterfacedScenario::addCommentCB(int x, int y)
 {
 	CIdentifier l_oIdentifier;
-	m_rScenario.addComment(l_oIdentifier);
+	m_rScenario.addComment(l_oIdentifier, OV_UndefinedIdentifier);
 	if(x==-1 || y==-1)
 	{
 		::GtkWidget* l_pScrolledWindow=gtk_widget_get_parent(gtk_widget_get_parent(GTK_WIDGET(m_pScenarioDrawingArea)));
@@ -1539,7 +1539,7 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 	l_oBoxAlgorithmClassIdentifier.fromString((const char*)gtk_selection_data_get_text(pSelectionData));
 	if(l_oBoxAlgorithmClassIdentifier!=OV_UndefinedIdentifier)
 	{
-		m_rScenario.addBox(l_oBoxAlgorithmClassIdentifier, l_oBoxIdentifier);
+		m_rScenario.addBox(l_oBoxIdentifier, l_oBoxAlgorithmClassIdentifier, OV_UndefinedIdentifier);
 
 		IBox* l_pBox = m_rScenario.getBoxDetails(l_oBoxIdentifier);
 		CIdentifier l_oId = l_pBox->getAlgorithmClassIdentifier();
@@ -2253,11 +2253,12 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 					{
 						CIdentifier l_oLinkIdentifier;
 						m_rScenario.connect(
+							l_oLinkIdentifier,
 							l_oSourceObject.m_oIdentifier,
 							l_oSourceObject.m_ui32ConnectorIndex,
 							l_oTargetObject.m_oIdentifier,
 							l_oTargetObject.m_ui32ConnectorIndex,
-							l_oLinkIdentifier);
+							OV_UndefinedIdentifier);
 						m_bScenarioModified = true;
 						this->snapshotCB();
 					}
@@ -2268,11 +2269,12 @@ void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidg
 						m_rKernelContext.getLogManager() << LogLevel_Debug << "connect message\n";
 						CIdentifier l_oLinkIdentifier;
 						m_rScenario.connectMessage(
+							l_oLinkIdentifier,
 							l_oSourceObject.m_oIdentifier,
 							l_oSourceObject.m_ui32ConnectorIndex,
 							l_oTargetObject.m_oIdentifier,
 							l_oTargetObject.m_ui32ConnectorIndex,
-							l_oLinkIdentifier);
+							OV_UndefinedIdentifier);
 						m_bScenarioModified = true;
 						this->snapshotCB();
 					}
@@ -2612,8 +2614,9 @@ void CInterfacedScenario::copySelection(void)
 				CIdentifier l_oNewIdentifier;
 				const IBox* l_pBox=m_rScenario.getBoxDetails(it->first);
 				m_rApplication.m_pClipboardScenario->addBox(
+					l_oNewIdentifier,
 					*l_pBox,
-					l_oNewIdentifier);
+					it->first);
 				l_vIdMapping[it->first]=l_oNewIdentifier;
 			}
 		}
@@ -2629,8 +2632,9 @@ void CInterfacedScenario::copySelection(void)
 				CIdentifier l_oNewIdentifier;
 				const IComment* l_pComment=m_rScenario.getCommentDetails(it->first);
 				m_rApplication.m_pClipboardScenario->addComment(
+					l_oNewIdentifier,
 					*l_pComment,
-					l_oNewIdentifier);
+					it->first);
 				l_vIdMapping[it->first]=l_oNewIdentifier;
 			}
 		}
@@ -2646,11 +2650,12 @@ void CInterfacedScenario::copySelection(void)
 				CIdentifier l_oNewIdentifier;
 				const ILink* l_pLink=m_rScenario.getLinkDetails(it->first);
 				m_rApplication.m_pClipboardScenario->connect(
+					l_oNewIdentifier,
 					l_vIdMapping[l_pLink->getSourceBoxIdentifier()],
 					l_pLink->getSourceBoxOutputIndex(),
 					l_vIdMapping[l_pLink->getTargetBoxIdentifier()],
 					l_pLink->getTargetBoxInputIndex(),
-					l_oNewIdentifier);
+					l_pLink->getIdentifier());
 			}
 		}
 	}
@@ -2665,11 +2670,12 @@ void CInterfacedScenario::copySelection(void)
 				CIdentifier l_oNewIdentifier;
 				const ILink* l_pLink=m_rScenario.getMessageLinkDetails(it->first);
 				m_rApplication.m_pClipboardScenario->connectMessage(
+					l_oNewIdentifier,
 					l_vIdMapping[l_pLink->getSourceBoxIdentifier()],
 					l_pLink->getSourceBoxOutputIndex(),
 					l_vIdMapping[l_pLink->getTargetBoxIdentifier()],
 					l_pLink->getTargetBoxInputIndex(),
-					l_oNewIdentifier);
+					l_pLink->getIdentifier());
 			}
 		}
 	}
@@ -2700,8 +2706,9 @@ void CInterfacedScenario::pasteSelection(void)
 		CIdentifier l_oNewIdentifier;
 		IBox* l_pBox=m_rApplication.m_pClipboardScenario->getBoxDetails(l_oIdentifier);
 		m_rScenario.addBox(
+			l_oNewIdentifier,
 			*l_pBox,
-			l_oNewIdentifier);
+			l_oIdentifier);
 		l_vIdMapping[l_oIdentifier]=l_oNewIdentifier;
 
 		// Updates visualisation manager
@@ -2729,8 +2736,9 @@ void CInterfacedScenario::pasteSelection(void)
 		CIdentifier l_oNewIdentifier;
 		IComment* l_pComment=m_rApplication.m_pClipboardScenario->getCommentDetails(l_oIdentifier);
 		m_rScenario.addComment(
+			l_oNewIdentifier,
 			*l_pComment,
-			l_oNewIdentifier);
+			l_oIdentifier);
 		l_vIdMapping[l_oIdentifier]=l_oNewIdentifier;
 	}
 
@@ -2740,11 +2748,12 @@ void CInterfacedScenario::pasteSelection(void)
 		CIdentifier l_oNewIdentifier;
 		ILink* l_pLink=m_rApplication.m_pClipboardScenario->getLinkDetails(l_oIdentifier);
 		m_rScenario.connect(
+			l_oNewIdentifier,
 			l_vIdMapping[l_pLink->getSourceBoxIdentifier()],
 			l_pLink->getSourceBoxOutputIndex(),
 			l_vIdMapping[l_pLink->getTargetBoxIdentifier()],
 			l_pLink->getTargetBoxInputIndex(),
-			l_oNewIdentifier);
+			l_pLink->getIdentifier());
 	}
 
 	// Pastes message links from clipboard
@@ -2753,11 +2762,12 @@ void CInterfacedScenario::pasteSelection(void)
 		CIdentifier l_oNewIdentifier;
 		ILink* l_pLink=m_rApplication.m_pClipboardScenario->getMessageLinkDetails(l_oIdentifier);
 		m_rScenario.connectMessage(
+			l_oNewIdentifier,
 			l_vIdMapping[l_pLink->getSourceBoxIdentifier()],
 			l_pLink->getSourceBoxOutputIndex(),
 			l_vIdMapping[l_pLink->getTargetBoxIdentifier()],
 			l_pLink->getTargetBoxInputIndex(),
-			l_oNewIdentifier);
+			l_pLink->getIdentifier());
 	}
 
 	// Makes pasted stuff the default selection
@@ -3405,22 +3415,12 @@ boolean CInterfacedScenario::hasSelection(void)
 	return false;
 }
 
-//this function is called by the g_idle_loop (see CApplication class) and update the boxes' settings with the value in the UI
-boolean CInterfacedScenario::updateModifiableSettingsBoxes(void)
-{
-	for (uint32 i=0; i<m_vBoxConfigurationDialog.size(); i++)
-	{
-		m_vBoxConfigurationDialog[i]->update();
-	}
-
-	return true;
-}
-
 
 boolean CInterfacedScenario::deleteModifiableSettingsBoxes(void)
 {
 	for (uint32 i=0; i<m_vBoxConfigurationDialog.size(); i++)
 	{
+		m_vBoxConfigurationDialog[i]->revertChange();
 		delete m_vBoxConfigurationDialog[i];
 	}
 	m_vBoxConfigurationDialog.clear();

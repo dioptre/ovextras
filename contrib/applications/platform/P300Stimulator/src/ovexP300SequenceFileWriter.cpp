@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300SequenceFileWriter.h"
 
 using namespace OpenViBE;
@@ -32,3 +34,4 @@ void P300SequenceFileWriter::writeSequence(uint64 trialIndex, vector< vector<uin
 	
 	l_ofFile.close();
 }
+#endif

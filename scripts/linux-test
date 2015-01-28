@@ -5,5 +5,5 @@
 ./openvibe-id-generator.sh $*
 ./openvibe-plugin-inspector.sh $*
 ./openvibe-skeleton-generator.sh $*
-./openvibe-vr-demo-tie-fighter.sh $*
+./openvibe-vr-demo-spaceship.sh $*
 ./openvibe-vrpn-simulator.sh $*

@@ -226,7 +226,8 @@ namespace OpenViBEToolkit
 			OpenViBE::Kernel::IBoxListenerContext& rBoxListenerContext,
 			const OpenViBE::Kernel::EBoxModification eBoxModificationType)
 		{
-			CScopedBoxListener l_oScopedBoxListener(m_pBoxListenerContext, &rBoxListenerContext);
+			//CScopedBoxListener l_oScopedBoxListener(m_pBoxListenerContext, &rBoxListenerContext);
+			m_pBoxListenerContext = &rBoxListenerContext;
 			switch(eBoxModificationType)
 			{
 				case OpenViBE::Kernel::BoxModification_Initialized: return this->onInitialized(m_pBoxListenerContext->getBox());

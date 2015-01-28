@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300RowColumnSequenceGenerator.h"
 
 using namespace OpenViBE;
@@ -58,3 +60,4 @@ vector< vector<uint32>* >* P300RowColumnSequenceGenerator::generateSequence()
 	
 	return m_lSequence;
 }
+#endif

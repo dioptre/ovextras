@@ -1,7 +1,8 @@
+
+#if defined TARGET_HAS_ThirdPartyNeXus
+
 #include "ovasCDriverTMSiRefa32B.h"
 #include "ovasCConfigurationTMSIRefa32B.h"
-
-#if defined TARGET_OS_Windows
 
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ovITimeArithmetics.h>
@@ -9,7 +10,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstring>
-#include <system/Time.h>
+#include <system/ovCTime.h>
 #include "ovasCConfigurationTMSIRefa32B.h"
 #include <windows.h>
 
@@ -247,7 +248,7 @@ void CDriverTMSiRefa32B::release(void)
 
 const char* CDriverTMSiRefa32B::getName(void)
 {
-	return "TMSi Refa32B";
+	return "TMSi Refa32B (Legacy)";
 }
 
 boolean CDriverTMSiRefa32B::initialize(

@@ -168,16 +168,17 @@ namespace OpenViBEPlugins
 			{
 				//add channel label
 				//-----------------
+				// Convention: Channels are numbered as 1,2,... when shown to user
 				CString l_sChannelLabel;
 				m_rSpectrumDatabase.getChannelLabel(i, l_sChannelLabel);
 				if(l_sChannelLabel == CString(""))
 				{
 					//if no name has been set, use channel index
-					l_oLabelString << "Channel " << i;
+					l_oLabelString << "Channel " << (i+1);
 				}
 				else //prepend name with channel index
 				{
-					l_oLabelString << i << " : " << l_sChannelLabel;
+					l_oLabelString << (i+1) << " : " << l_sChannelLabel;
 				}
 				GtkWidget* l_pLabel =  ::gtk_label_new(l_oLabelString.str().c_str());
 				m_vChannelLabels[i] = l_pLabel;

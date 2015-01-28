@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include <vector>
 
 #include "ovexBackspaceHandler.h"
@@ -37,4 +39,6 @@ void P300BackspaceHandler::update(GObservable* observable, const void * pUserDat
 		}
 	}
 }
+#endif
+
 #endif

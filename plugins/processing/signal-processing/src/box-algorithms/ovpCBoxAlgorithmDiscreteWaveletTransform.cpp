@@ -28,10 +28,10 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::initialize(void)
 
     IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	// Signal stream decoder
-	m_oAlgo0_SignalDecoder.initialize(*this);
+	m_oAlgo0_SignalDecoder.initialize(*this,0);
 
     //Signal stream encoder
-    m_oAlgoInfo_SignalEncoder.initialize(*this);
+    m_oAlgoInfo_SignalEncoder.initialize(*this,0);
 
     m_sWaveletType=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
     m_sDecompositionLevel=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
@@ -42,7 +42,7 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::initialize(void)
 
     for (uint32 o = 0; o < l_rStaticBoxContext.getOutputCount()-1; o++)
     {
-        m_oAlgoX_SignalEncoder[o].initialize(*this);
+        m_oAlgoX_SignalEncoder[o].initialize(*this,o+1);
     }
 
 
@@ -104,7 +104,7 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 	for(uint32 ii=0; ii<l_rDynamicBoxContext.getInputChunkCount(0); ii++)
 	{
 		//Decode input signal
-		m_oAlgo0_SignalDecoder.decode(0,ii);
+		m_oAlgo0_SignalDecoder.decode(ii);
 
 		l_ui32NbChannels0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
 		l_ui32NbSamples0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
@@ -225,35 +225,35 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 		//Encode buffer
 		if(m_oAlgo0_SignalDecoder.isHeaderReceived())
 		{
-			m_oAlgoInfo_SignalEncoder.encodeHeader(0);
+			m_oAlgoInfo_SignalEncoder.encodeHeader();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 		
 			for (uint32 o = 0; o < l_rStaticBoxContext.getOutputCount()-1; o++)
 			{
-				m_oAlgoX_SignalEncoder[o].encodeHeader(o+1);
+				m_oAlgoX_SignalEncoder[o].encodeHeader();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(o+1, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 			}
 		}
 
 		if(m_oAlgo0_SignalDecoder.isBufferReceived())
 		{
-			m_oAlgoInfo_SignalEncoder.encodeBuffer(0);
+			m_oAlgoInfo_SignalEncoder.encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 
 			for (uint32 o = 0; o < l_rStaticBoxContext.getOutputCount()-1; o++)
 			{
-				m_oAlgoX_SignalEncoder[o].encodeBuffer(o+1);
+				m_oAlgoX_SignalEncoder[o].encodeBuffer();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(o+1, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 			}
 		}
 		if(m_oAlgo0_SignalDecoder.isEndReceived())
 		{
-			m_oAlgoInfo_SignalEncoder.encodeEnd(0);
+			m_oAlgoInfo_SignalEncoder.encodeEnd();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 
 			for (uint32 o = 0; o < l_rStaticBoxContext.getOutputCount()-1; o++)
 			{
-				m_oAlgoX_SignalEncoder[o].encodeEnd(o+1);
+				m_oAlgoX_SignalEncoder[o].encodeEnd();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(o+1, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 			}
 		}

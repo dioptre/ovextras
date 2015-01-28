@@ -6,8 +6,6 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/IReader.h>
-
 #include <gtk/gtk.h>
 
 #include <vector>
@@ -41,9 +39,7 @@ namespace OpenViBEPlugins
 		/**
 		*/
 		class CGrazVisualization :
-			virtual public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>,
-			virtual public OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback::ICallback,
-			virtual public OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback::ICallback
+			virtual public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
 		public:
 
@@ -56,12 +52,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process();
 
-			virtual void setStimulationCount(const OpenViBE::uint32 ui32StimulationCount);
 			virtual void setStimulation(const OpenViBE::uint32 ui32StimulationIndex, const OpenViBE::uint64 ui64StimulationIdentifier, const OpenViBE::uint64 ui64StimulationDate);
 
-			virtual void setMatrixDimensionCount(const OpenViBE::uint32 ui32DimensionCount);
-			virtual void setMatrixDimensionSize(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionSize);
-			virtual void setMatrixDimensionLabel(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionEntryIndex, const char* sDimensionLabel);
 			virtual void setMatrixBuffer(const OpenViBE::float64* pBuffer);
 
 			virtual void processState();
@@ -83,9 +75,8 @@ namespace OpenViBEPlugins
 			GtkWidget * m_pDrawingArea;
 
 			//ebml
-			EBML::IReader* m_pReader[2];
-			OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback* m_pStimulationReaderCallBack;
-			OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback* m_pStreamedMatrixReaderCallBack;
+			OpenViBEToolkit::TStimulationDecoder<CGrazVisualization> m_oStimulationDecoder;
+			OpenViBEToolkit::TStreamedMatrixDecoder<CGrazVisualization> m_oMatrixDecoder;
 
 			EGrazVisualizationState m_eCurrentState;
 			EArrowDirection m_eCurrentDirection;

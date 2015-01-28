@@ -59,7 +59,14 @@ boolean CPluginObjectDescEnumAlgorithmGlobalDefinesGenerator::callback(const IPl
 	m_rKernelContext.getLogManager() << LogLevel_Info << "  Dumping [" << rPluginObjectDesc.getName() << "]\n";
 
 	IAlgorithmManager& l_rAlgorithmManager=m_rKernelContext.getAlgorithmManager();
-	IAlgorithmProxy& l_rAlgorithmProxy=l_rAlgorithmManager.getAlgorithm(l_rAlgorithmManager.createAlgorithm(rPluginObjectDesc.getCreatedClass()));
+	const CIdentifier l_oAlgorithmId = l_rAlgorithmManager.createAlgorithm(rPluginObjectDesc.getCreatedClass());
+	if(l_oAlgorithmId == OV_UndefinedIdentifier)
+	{
+		m_rKernelContext.getLogManager() << LogLevel_Error << "  Unable to create algorithm\n";
+		return false;
+	}
+
+	IAlgorithmProxy& l_rAlgorithmProxy=l_rAlgorithmManager.getAlgorithm(l_oAlgorithmId);
 	CIdentifier l_oIdentifier;
 
 	m_oFile << "// -----------------------------------------------------\n";

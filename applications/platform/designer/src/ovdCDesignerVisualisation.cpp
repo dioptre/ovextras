@@ -354,7 +354,8 @@ void CDesignerVisualisation::onVisualisationBoxAdded(const IBox* pBox)
 		OV_UndefinedIdentifier,
 		0,
 		pBox->getIdentifier(),
-		0);
+		0,
+		OV_UndefinedIdentifier);
 
 	m_rVisualisationTree.reloadTree();
 
@@ -1222,7 +1223,8 @@ boolean CDesignerVisualisation::newVisualisationWindow(const char* label)
 		OV_UndefinedIdentifier,
 		0,
 		OV_UndefinedIdentifier,
-		0);
+		0,
+		OV_UndefinedIdentifier);
 
 	l_pVisualisationWindow = m_rVisualisationTree.getVisualisationWidget(l_oVisualisationWindowIdentifier);
 
@@ -1242,7 +1244,8 @@ boolean CDesignerVisualisation::newVisualisationWindow(const char* label)
 		l_oVisualisationWindowIdentifier,
 		0,
 		OV_UndefinedIdentifier,
-		1);
+		1,
+		OV_UndefinedIdentifier);
 
 	m_rVisualisationTree.reloadTree();
 
@@ -1394,7 +1397,8 @@ boolean CDesignerVisualisation::newVisualisationPanel(const char* label)
 		l_oVisualisationWindowIdentifier,
 		l_pVisualisationWindow->getNbChildren(),
 		OV_UndefinedIdentifier,
-		1);
+		1,
+		OV_UndefinedIdentifier);
 
 	m_rVisualisationTree.reloadTree();
 

@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexSharedMatrixReader.h"
 
 #include <boost/interprocess/sync/scoped_lock.hpp>
@@ -94,3 +96,5 @@ void SharedMatrixReader::close()
 	m_oSharedMemory.destroy<MyVectorStreamedMatrix>(m_sSharedVariableName.toASCIIString());	
 	//ISharedMemoryReader::close();
 }
+
+#endif

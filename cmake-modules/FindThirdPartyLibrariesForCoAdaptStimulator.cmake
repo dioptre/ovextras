@@ -7,6 +7,11 @@
 SET(foundIncludeDir 1)	   # true, if all required headers have been found
 SET(required_libs_found 1) # true, if all libs which have headers have been found
 	
+IF(MSVC90)
+	MESSAGE(STATUS "CoAdapt P300 requires at least VS 2010\n")
+	RETURN()
+ENDIF(MSVC90)
+
 #GL is natively installed on our Linux pc's and comes with the installation of visual studio. In that case however, one has to make sure the SDK is in the INCLUDE environment variable
 IF(WIN32)
 	FIND_PATH(PATH_GL GL\\gl.h)

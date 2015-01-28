@@ -1,6 +1,8 @@
 #ifndef __OpenViBEPlugins_SignalProcessing_Algorithms_Basic_CMatrixVariance_H__
 #define __OpenViBEPlugins_SignalProcessing_Algorithms_Basic_CMatrixVariance_H__
 
+#if defined(TARGET_HAS_ThirdPartyITPP)
+
 #include "../../ovp_defines.h"
 
 #include <openvibe/ov_all.h>
@@ -88,5 +90,7 @@ namespace OpenViBEPlugins
 		};
 	};
 };
+
+#endif
 
 #endif // __OpenViBEPlugins_SignalProcessing_Algorithms_Basic_CMatrixVariance_H__

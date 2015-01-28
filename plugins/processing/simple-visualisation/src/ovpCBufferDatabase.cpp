@@ -1,6 +1,6 @@
 #include "ovpCBufferDatabase.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <algorithm>
 
@@ -342,6 +342,9 @@ boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64Star
 		}
 
 		//computes the sampling frequency
+		// @ FIXME this is not the frequency that is a property of the signal stream. Fix. Computing it like this
+		// makes sense for matrix stream, but makes the number given by signal display useless for debugging the 
+		// case where the rate specced in signal stream is e.g. 0 for some reason.
 		m_ui32SamplingFrequency = (uint32) ( ((uint64)1<<32) * m_pDimensionSizes[1] / (m_ui64BufferDuration) );
 
 		//computes the number of buffer necessary to display the interval

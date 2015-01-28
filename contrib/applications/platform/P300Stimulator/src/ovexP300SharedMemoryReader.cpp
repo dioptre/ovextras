@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300SharedMemoryReader.h"
 
 #include <utility>
@@ -78,3 +80,5 @@ IStimulationSet * CoAdaptP300SharedMemoryReader::readStimulation()
 	m_pSharedVariableHandler->clear(1);
 	return l_pStimulusSet;
 }
+
+#endif

@@ -1,6 +1,8 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #include "ovexP300RipRandSequenceGenerator.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -111,3 +113,5 @@ void  P300RipRandSequenceGenerator::writeSequenceToConsole(vector< vector<uint32
 		std::cout << "\n";
 	}
 }
+
+#endif

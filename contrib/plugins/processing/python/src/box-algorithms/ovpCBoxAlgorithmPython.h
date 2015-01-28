@@ -54,12 +54,12 @@ namespace OpenViBEPlugins
 
 			OpenViBE::boolean initializePythonSafely();
 			OpenViBE::boolean clearPyObjectMap();
-			OpenViBE::boolean transferStreamedMatrixInputChunksToPython(OpenViBE::uint32 input_index);
-			OpenViBE::boolean transferStreamedMatrixOutputChunksFromPython(OpenViBE::uint32 output_index);
-			OpenViBE::boolean transferSignalInputChunksToPython(OpenViBE::uint32 input_index);
-			OpenViBE::boolean transferSignalOutputChunksFromPython(OpenViBE::uint32 output_index);
-			OpenViBE::boolean transferStimulationInputChunksToPython(OpenViBE::uint32 input_index);
-			OpenViBE::boolean transferStimulationOutputChunksFromPython(OpenViBE::uint32 output_index);
+			OpenViBE::boolean transferStreamedMatrixInputChunksToPython(const OpenViBE::uint32 input_index);
+			OpenViBE::boolean transferStreamedMatrixOutputChunksFromPython(const OpenViBE::uint32 output_index);
+			OpenViBE::boolean transferSignalInputChunksToPython(const OpenViBE::uint32 input_index);
+			OpenViBE::boolean transferSignalOutputChunksFromPython(const OpenViBE::uint32 output_index);
+			OpenViBE::boolean transferStimulationInputChunksToPython(const OpenViBE::uint32 input_index);
+			OpenViBE::boolean transferStimulationOutputChunksFromPython(const OpenViBE::uint32 output_index);
 
 			static OpenViBE::boolean m_bPythonInitialized;
 

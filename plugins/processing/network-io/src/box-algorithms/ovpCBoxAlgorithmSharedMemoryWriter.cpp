@@ -22,8 +22,8 @@ using namespace OpenViBEPlugins::FileReadingAndWriting;
 
 boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 {
-	m_oAlgo0_StimulationDecoder.initialize(*this);
-	m_oAlgo0_StreamedMatrixDecoder.initialize(*this);
+	//m_oAlgo0_StimulationDecoder.initialize(*this);
+	//m_oAlgo0_StreamedMatrixDecoder.initialize(*this);
 
 	//remove and create shared memory
 	m_sSharedMemoryName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0); // can be local variable
@@ -51,6 +51,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 		l_rStaticBoxContext.getInputType(i,l_oTypeIdentifier);
 		if (l_oTypeIdentifier==OVTK_TypeId_StreamedMatrix)
 		{
+			m_vDecoder.push_back(new OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmSharedMemoryWriter >());
 			ShmString l_sShmVariableName("Matrix", alloc_inst_string);
 			l_sShmVariableName += ShmString(convert.str().c_str(), alloc_inst_string);
 			l_vMetaInfoVector->insert(std::make_pair<const ShmString,CIdentifier>(l_sShmVariableName,l_oTypeIdentifier));
@@ -62,6 +63,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 		}
 		else if (l_oTypeIdentifier==OVTK_TypeId_Stimulations)
 		{
+			m_vDecoder.push_back(new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSharedMemoryWriter >());
 			ShmString l_sShmVariableName("Stimuli", alloc_inst_string);
 			l_sShmVariableName += ShmString(convert.str().c_str(), alloc_inst_string);
 			l_vMetaInfoVector->insert(std::make_pair<const ShmString,CIdentifier>(l_sShmVariableName,l_oTypeIdentifier));
@@ -73,6 +75,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 		} else {
 			this->getLogManager() << LogLevel_Warning  << "Input type " << l_oTypeIdentifier << " is not supported\n";
 		}
+		m_vDecoder.back()->initialize(*this,i);
 	}
 
 	//m_ui32InputCounter = 0;
@@ -118,8 +121,14 @@ boolean CBoxAlgorithmSharedMemoryWriter::uninitialize(void)
 	shared_memory_object::remove(m_sSharedMemoryName.toASCIIString());	
 	named_mutex::remove(m_sMutexName.toASCIIString());
 	delete m_oMutex;
-	m_oAlgo0_StimulationDecoder.uninitialize();
-	m_oAlgo0_StreamedMatrixDecoder.uninitialize();
+	//m_oAlgo0_StimulationDecoder.uninitialize();
+	//m_oAlgo0_StreamedMatrixDecoder.uninitialize();
+	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
+	{
+		m_vDecoder[i]->uninitialize();
+		delete m_vDecoder[i];
+	}
+
 	
 	return true;
 }
@@ -147,15 +156,16 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 		{		
 			for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(j); i++)
 			{			
-				m_oAlgo0_StimulationDecoder.decode(j,i, false);
+				//m_oAlgo0_StimulationDecoder.decode(j,i, false);
+				m_vDecoder[j]->decode(i,false);
 				//CStimulationSet l_oStimSet;
-				IStimulationSet* l_pStimSet = m_oAlgo0_StimulationDecoder.getOutputStimulationSet();
+				IStimulationSet* l_pStimSet = ((OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSharedMemoryWriter >*)m_vDecoder[j])->getOutputStimulationSet();
 				//OpenViBEToolkit::Tools::StimulationSet::copy(l_oStimSet, *m_oAlgo0_StimulationDecoder.getOutputStimulationSet());
-				if(m_oAlgo0_StimulationDecoder.isHeaderReceived())
+				if(m_vDecoder[j]->isHeaderReceived())
 				{
 					l_rDynamicBoxContext.markInputAsDeprecated(j,i);
 				}
-				if(m_oAlgo0_StimulationDecoder.isBufferReceived())
+				if(m_vDecoder[j]->isBufferReceived())
 				{
 					if (l_pStimSet->getStimulationCount()>0)
 					{
@@ -181,7 +191,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 						//std::cout << "no stimuli in chunk for shared memory writer\n";
 					}
 				}
-				if(m_oAlgo0_StimulationDecoder.isEndReceived())
+				if(m_vDecoder[j]->isEndReceived())
 				{
 					l_rDynamicBoxContext.markInputAsDeprecated(j,i);
 				}
@@ -192,13 +202,13 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 		{
 			for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(j); i++)
 			{				
-				m_oAlgo0_StreamedMatrixDecoder.decode(j,i, false);
-				IMatrix* l_pMatrix = m_oAlgo0_StreamedMatrixDecoder.getOutputMatrix();
-				if(m_oAlgo0_StreamedMatrixDecoder.isHeaderReceived())
+				m_vDecoder[j]->decode(i, false);
+				IMatrix* l_pMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmSharedMemoryWriter >*)m_vDecoder[j])->getOutputMatrix();
+				if(m_vDecoder[j]->isHeaderReceived())
 				{
 					l_rDynamicBoxContext.markInputAsDeprecated(j,i);
 				}
-				if(m_oAlgo0_StreamedMatrixDecoder.isBufferReceived())
+				if(m_vDecoder[j]->isBufferReceived())
 				{
 					scoped_lock<named_mutex> lock(*m_oMutex, try_to_lock);
 					if (lock)
@@ -236,7 +246,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 						l_rDynamicBoxContext.markInputAsDeprecated(j,i);
 					}
 				}
-				if(m_oAlgo0_StreamedMatrixDecoder.isEndReceived())
+				if(m_vDecoder[j]->isEndReceived())
 				{
 					l_rDynamicBoxContext.markInputAsDeprecated(j,i);
 				}

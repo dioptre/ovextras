@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyModulesForCoAdaptStimulator
+
 #ifndef __GObservableAAAA_OV_H__
 #define __GObservableAAAA_OV_H__
 
@@ -57,5 +59,7 @@ namespace OpenViBEApplications
 		std::vector< GObserver* > * m_vObservers;
 	};
 };
+
+#endif
 
 #endif
