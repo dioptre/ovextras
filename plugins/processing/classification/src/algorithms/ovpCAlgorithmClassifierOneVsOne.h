@@ -60,7 +60,7 @@ namespace OpenViBEPlugins
 			XML::IXMLNode* getPairwiseDecisionConfiguration(void);
 			OpenViBE::uint32 getClassAmount(void) const;
 
-			void loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
+			OpenViBE::boolean loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 			void generateConfigurationNode(void);
 
 			SSubClassifierDescriptor& getSubClassifierDescriptor(const OpenViBE::uint32 f64FirstClass, const OpenViBE::uint32 f64SecondClass);

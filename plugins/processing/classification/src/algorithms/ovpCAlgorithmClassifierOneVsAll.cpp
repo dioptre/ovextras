@@ -337,20 +337,23 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 		}
 	}
 
-	loadSubClassifierConfiguration(l_pOneVsAllNode->getChildByName(c_sSubClassifiersNodeName));
-
-	return true;
+	return loadSubClassifierConfiguration(l_pOneVsAllNode->getChildByName(c_sSubClassifiersNodeName));
 }
 
-void CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode)
+boolean CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode)
 {
 	for( size_t i = 0; i < pSubClassifiersNode->getChildCount() ; ++i)
 	{
 		XML::IXMLNode *l_pSubClassifierNode = pSubClassifiersNode->getChild(i);
 		TParameterHandler < XML::IXMLNode* > ip_pConfiguration(m_oSubClassifierList[i]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 		ip_pConfiguration = l_pSubClassifierNode->getChild(0);
-		m_oSubClassifierList[i]->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
+		if(!m_oSubClassifierList[i]->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration))
+		{
+			this->getLogManager() << LogLevel_Error << "Unable to load the configuration of the classifier " << i+1 << " \n";
+			return false;
+		}
 	}
+	return true;
 }
 
 uint32 CAlgorithmClassifierOneVsAll::getClassAmount(void) const

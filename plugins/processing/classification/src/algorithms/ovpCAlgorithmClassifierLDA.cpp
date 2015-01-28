@@ -363,9 +363,30 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 	m_f64Class1=0;
 	m_f64Class2=0;
 
+	XML::IXMLNode* l_pTempNode;
+
+	if((l_pTempNode = l_pLDANode->getChildByName(c_sClassesNodeName)) == NULL)
+	{
+		return false;
+	}
 	loadClassesFromNode(l_pLDANode->getChildByName(c_sClassesNodeName));
+
+	if((l_pTempNode = l_pLDANode->getChildByName(c_sCoefficientsNodeName)) == NULL)
+	{
+		return false;
+	}
 	loadCoefficientsFromNode(l_pLDANode->getChildByName(c_sCoefficientsNodeName));
+
+	if((l_pTempNode = l_pLDANode->getChildByName(c_sBiasDistanceNodeName)) == NULL)
+	{
+		return false;
+	}
 	m_f64BiasDistance = getFloatFromNode(l_pLDANode->getChildByName(c_sBiasDistanceNodeName));
+
+	if((l_pTempNode = l_pLDANode->getChildByName(c_sCoefficientProbabilityNodeName)) == NULL)
+	{
+		return false;
+	}
 	m_f64w0 = getFloatFromNode(l_pLDANode->getChildByName(c_sCoefficientProbabilityNodeName));
 
 	//Now we initialize the coefficients vector according to Weights and bias (distance)

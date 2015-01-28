@@ -1896,9 +1896,10 @@ OpenViBE::boolean CApplication::createPlayer(void)
 			}
 			if(res == 0)
 			{
-				l_pCurrentInterfacedScenario->m_oPlayerIdentifier = OV_UndefinedIdentifier;
-				l_pCurrentInterfacedScenario->m_pPlayer=NULL;
-				m_rKernelContext.getPlayerManager().releasePlayer(l_oPlayerIdentifier);
+				releasePlayer();
+				//l_pCurrentInterfacedScenario->m_oPlayerIdentifier = OV_UndefinedIdentifier;
+				//l_pCurrentInterfacedScenario->m_pPlayer=NULL;
+				//m_rKernelContext.getPlayerManager().releasePlayer(l_oPlayerIdentifier);
 				return false;
 			}
 		}

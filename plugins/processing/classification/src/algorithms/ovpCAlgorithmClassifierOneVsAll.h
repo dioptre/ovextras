@@ -41,7 +41,7 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId);
 			OpenViBE::uint32 getClassAmount(void) const;
 
-			void loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
+			OpenViBE::boolean loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 
 			void generateConfigurationNode(void);
 
