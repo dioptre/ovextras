@@ -1,4 +1,4 @@
-#include "ovpCAlgorithmClassifierShrinkageLDA.h"
+#include "ovpCAlgorithmClassifierLDA.h"
 
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
@@ -24,7 +24,7 @@ namespace{
 
 extern const char* const c_sClassifierRoot;
 
-OpenViBE::int32 OpenViBEPlugins::Classification::getShrinkageLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
+OpenViBE::int32 OpenViBEPlugins::Classification::getLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
 {
 	//We know that we will have to compare probability
 	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
@@ -47,7 +47,7 @@ using namespace Eigen;
 
 #define LDA_DEBUG 0
 #if LDA_DEBUG
-void CAlgorithmClassifierShrinkageLDA::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const MatrixXdRowMajor &mat, const CString &desc)
+void CAlgorithmClassifierLDA::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const MatrixXdRowMajor &mat, const CString &desc)
 {
 	rMgr << LogLevel_Info << desc << "\n";
 	for(int i=0;i<mat.rows();i++) {
@@ -59,20 +59,20 @@ void CAlgorithmClassifierShrinkageLDA::dumpMatrix(OpenViBE::Kernel::ILogManager 
 	}
 }
 #else 
-void CAlgorithmClassifierShrinkageLDA::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { };
+void CAlgorithmClassifierLDA::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { };
 #endif
 
-boolean CAlgorithmClassifierShrinkageLDA::initialize(void)
+boolean CAlgorithmClassifierLDA::initialize(void)
 {
 	// Initialize the Conditioned Covariance Matrix algorithm
 	m_pCovarianceAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ConditionedCovariance));
 	m_pCovarianceAlgorithm->initialize();
 
 	// This is the weight parameter local to this module and automatically exposed to the GUI. Its redirected to the corresponding parameter of the cov alg.
-	TParameterHandler< float64 > ip_f64Shrinkage(this->getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage));
+	TParameterHandler< float64 > ip_f64Shrinkage(this->getInputParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage));
 	ip_f64Shrinkage.setReferenceTarget(m_pCovarianceAlgorithm->getInputParameter(OVP_Algorithm_ConditionedCovariance_InputParameterId_Shrinkage));
 
-	TParameterHandler < boolean > ip_bDiagonalCov(this->getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov));
+	TParameterHandler < boolean > ip_bDiagonalCov(this->getInputParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov));
 	ip_bDiagonalCov = false;
 
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
@@ -81,7 +81,7 @@ boolean CAlgorithmClassifierShrinkageLDA::initialize(void)
 	return CAlgorithmClassifier::initialize();
 }
 
-boolean CAlgorithmClassifierShrinkageLDA::uninitialize(void)
+boolean CAlgorithmClassifierLDA::uninitialize(void)
 {
 	m_pCovarianceAlgorithm->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*m_pCovarianceAlgorithm);
@@ -89,34 +89,34 @@ boolean CAlgorithmClassifierShrinkageLDA::uninitialize(void)
 	return CAlgorithmClassifier::uninitialize();
 }
 
-boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
+boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
 	//Let's set the extra settings
 	TParameterHandler < std::map<CString, CString>* > ip_pExtraParameter(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
 	std::map<CString, CString>* l_pExtraParameter = ip_pExtraParameter;
 
-	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierShrinkageLDA));
+	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierLDA));
 	l_pAlgoProxy->initialize();
 
-	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_UseShrinkage);
-	boolean l_bUseShrinkage = this->getBooleanParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_UseShrinkage, (*l_pExtraParameter)[l_pParameterName]);
+	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierLDA_InputParameterId_UseShrinkage);
+	boolean l_bUseShrinkage = this->getBooleanParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_UseShrinkage, (*l_pExtraParameter)[l_pParameterName]);
 
 	boolean l_pDiagonalCov;
 	//If we don't use shrinkage we need to set lambda to 0.
 	if(l_bUseShrinkage)
 	{
-		//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage
-		l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage);
-		this->getFloat64Parameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage, (*l_pExtraParameter)[l_pParameterName]);
+		//Extract OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage
+		l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage);
+		this->getFloat64Parameter(OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage, (*l_pExtraParameter)[l_pParameterName]);
 
-		//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov
-		l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov);
-		l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov, (*l_pExtraParameter)[l_pParameterName]);
+		//Extract OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov
+		l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov);
+		l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov, (*l_pExtraParameter)[l_pParameterName]);
 
 	}
 	else{
-		this->getFloat64Parameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage, "0.0");
-		l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov, "false");
+		this->getFloat64Parameter(OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage, "0.0");
+		l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov, "false");
 	}
 	l_pAlgoProxy->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
@@ -253,7 +253,7 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	return true;
 }
 
-boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
+boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
 	const uint32 l_ui32nColsWithBiasTerm = m_oCoefficients.size();
 
@@ -294,7 +294,7 @@ boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatur
 	return true;
 }
 
-void CAlgorithmClassifierShrinkageLDA::generateConfigurationNode(void)
+void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 {
 	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode(c_sTypeNodeName);
 
@@ -316,7 +316,7 @@ void CAlgorithmClassifierShrinkageLDA::generateConfigurationNode(void)
 	l_sCoefficentProbability << m_f64w0;
 
 	XML::IXMLNode *l_pTempNode = XML::createNode(c_sCreatorNodeName);
-	l_pTempNode->setPCData("ShrinkageLDA");
+	l_pTempNode->setPCData("LDA");
 	l_pAlgorithmNode->addChild(l_pTempNode);
 
 	l_pTempNode = XML::createNode(c_sClassesNodeName);
@@ -341,7 +341,7 @@ void CAlgorithmClassifierShrinkageLDA::generateConfigurationNode(void)
 
 }
 
-XML::IXMLNode* CAlgorithmClassifierShrinkageLDA::saveConfiguration(void)
+XML::IXMLNode* CAlgorithmClassifierLDA::saveConfiguration(void)
 {
 	generateConfigurationNode();
 	return m_pConfigurationNode;
@@ -357,7 +357,7 @@ float64 getFloatFromNode(XML::IXMLNode *pNode)
 	return res;
 }
 
-boolean CAlgorithmClassifierShrinkageLDA::loadConfiguration(XML::IXMLNode *pConfigurationNode)
+boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
 	XML::IXMLNode * l_pLDANode = pConfigurationNode->getChild(0);
 	m_f64Class1=0;
@@ -376,7 +376,7 @@ boolean CAlgorithmClassifierShrinkageLDA::loadConfiguration(XML::IXMLNode *pConf
 	return true;
 }
 
-void CAlgorithmClassifierShrinkageLDA::loadClassesFromNode(XML::IXMLNode *pNode)
+void CAlgorithmClassifierLDA::loadClassesFromNode(XML::IXMLNode *pNode)
 {
 	std::stringstream l_sData(pNode->getPCData());
 
@@ -385,7 +385,7 @@ void CAlgorithmClassifierShrinkageLDA::loadClassesFromNode(XML::IXMLNode *pNode)
 }
 
 //Load the weight vector
-void CAlgorithmClassifierShrinkageLDA::loadCoefficientsFromNode(XML::IXMLNode *pNode)
+void CAlgorithmClassifierLDA::loadCoefficientsFromNode(XML::IXMLNode *pNode)
 {
 	std::stringstream l_sData(pNode->getPCData());
 
