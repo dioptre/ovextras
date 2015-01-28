@@ -508,9 +508,9 @@ OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_featureVector(void)
 	// Each vector has to be sent separately
 	for(uint32 i=0;i<m_vDataMatrix.size();i++)
 	{
-		if(m_vDataMatrix[i].size()-1!=m_ui32NbColumn-1) {
+		if(m_vDataMatrix[i].size()!=m_ui32NbColumn) {
 			this->getLogManager() << LogLevel_Warning << "Unexpected number of elements"
-				<< "(got " << m_vDataMatrix[i].size()-1 << ", expected " << m_ui32NbColumn-1 << "), skipping line\n";
+				<< "(got " << static_cast<uint64>(m_vDataMatrix[i].size()) << ", expected " << m_ui32NbColumn << "), skipping line\n";
 			continue;
 		}
 		for(uint32 j=0;j<m_ui32NbColumn-1;j++)
