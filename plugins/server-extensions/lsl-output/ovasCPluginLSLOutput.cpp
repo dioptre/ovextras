@@ -24,15 +24,19 @@ using namespace std;
 CPluginLSLOutput::CPluginLSLOutput(const IKernelContext& rKernelContext) :
 	IAcquisitionServerPlugin(rKernelContext, CString("AcquisitionServer_Plugin_LSLOutput")),
 	m_bIsLSLOutputEnabled(false),
-	m_sLSLOutputStreamName("openvibeLSLOutput"),
+	m_sSignalStreamName("openvibeSignal"),
+	m_sMarkerStreamName("openvibeMarkers"),
+	m_sIdentifier("123456"),
 	m_oSignalOutlet(NULL),
 	m_oStimulusOutlet(NULL),
 	m_ui32SampleCountPerSentBlock(0)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Loading plugin: LSL Output\n";
 
-	m_oSettingsHelper.add("EnableLSLOutput", &m_bIsLSLOutputEnabled);
-	m_oSettingsHelper.add("LSLStreamName", &m_sLSLOutputStreamName);
+	m_oSettingsHelper.add("LSL_EnableLSLOutput",  &m_bIsLSLOutputEnabled);
+	m_oSettingsHelper.add("LSL_SignalStreamName", &m_sSignalStreamName);
+	m_oSettingsHelper.add("LSL_MarkerStreamName", &m_sMarkerStreamName);
+	m_oSettingsHelper.add("LSL_Identifier",       &m_sIdentifier);
 	m_oSettingsHelper.load();
 
 }
@@ -62,8 +66,7 @@ void CPluginLSLOutput::startHook(const std::vector<OpenViBE::CString>& vSelected
 	if (m_bIsLSLOutputEnabled)
 	{
 		// Open a signal stream 
-		const CString l_sIdentifier = m_sLSLOutputStreamName + "Signal"; 
-		lsl::stream_info l_oSignalInfo(m_sLSLOutputStreamName.toASCIIString(),"signal",ui32ChannelCount,ui32SamplingFrequency,lsl::cf_float32,l_sIdentifier.toASCIIString());
+		lsl::stream_info l_oSignalInfo(m_sSignalStreamName.toASCIIString(),"signal",ui32ChannelCount,ui32SamplingFrequency,lsl::cf_float32,m_sIdentifier.toASCIIString());
 
 		lsl::xml_element l_oChannels = l_oSignalInfo.desc().append_child("channels");
 
@@ -79,8 +82,7 @@ void CPluginLSLOutput::startHook(const std::vector<OpenViBE::CString>& vSelected
 		m_oSignalOutlet = new lsl::stream_outlet(l_oSignalInfo, m_ui32SampleCountPerSentBlock);
 
 		// Open a stimulus stream
-		const CString l_sStimulusIdentifier = m_sLSLOutputStreamName + "Markers"; 
-		lsl::stream_info l_oStimulusInfo(l_sStimulusIdentifier.toASCIIString(),"Markers",1,lsl::IRREGULAR_RATE,lsl::cf_string,l_sStimulusIdentifier.toASCIIString());
+		lsl::stream_info l_oStimulusInfo(m_sMarkerStreamName.toASCIIString(),"Markers",1,lsl::IRREGULAR_RATE,lsl::cf_int32,m_sIdentifier.toASCIIString());
 
 		l_oStimulusInfo.desc().append_child("channels")
 						.append_child("channel")
@@ -91,6 +93,10 @@ void CPluginLSLOutput::startHook(const std::vector<OpenViBE::CString>& vSelected
 
 		m_rKernelContext.getLogManager() << LogLevel_Info << "LSL Output activated...\n";
 	}
+
+	// m_rKernelContext.getLogManager() << LogLevel_Info << "Step from sampling rate is " << 1.0 / static_cast<float64>(ui32SamplingFrequency) << "\n";
+
+
 }
 
 void CPluginLSLOutput::loopHook(std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer, CStimulationSet &stimulationSet, uint64 start, uint64 end)
@@ -100,10 +106,17 @@ void CPluginLSLOutput::loopHook(std::vector < std::vector < OpenViBE::float32 > 
 		// Output signal
 		if(m_oSignalOutlet->have_consumers())
 		{
+			// note: the step computed below should be exactly the same as could be obtained from the sampling rate
+			const float64 l_f64Start = ITimeArithmetics::timeToSeconds(start);
+			const float64 l_f64Step = ITimeArithmetics::timeToSeconds(end-start)/static_cast<float64>(m_ui32SampleCountPerSentBlock);
+
 			for(uint32 i=0;i<m_ui32SampleCountPerSentBlock;i++)
 			{
-				m_oSignalOutlet->push_sample(vPendingBuffer[i]);
+				m_oSignalOutlet->push_sample(vPendingBuffer[i], l_f64Start + i*l_f64Step);
 			}
+
+			// m_rKernelContext.getLogManager() << LogLevel_Info << "Pushed first signal at " << l_f64Start << "\n"; 
+			// m_rKernelContext.getLogManager() << LogLevel_Info << "Step is " << l_f64Step << "\n";
 		}
 
 		// Output stimuli
@@ -114,16 +127,11 @@ void CPluginLSLOutput::loopHook(std::vector < std::vector < OpenViBE::float32 > 
 				if(stimulationSet.getStimulationDate(i) >= start &&
 				  stimulationSet.getStimulationDate(i) < end)
 				{
-					char l_sStimulationCode[128];
-					sprintf(l_sStimulationCode, "%ld", stimulationSet.getStimulationIdentifier(i));
-
-					const string l_sStimulationString(l_sStimulationCode);
-
+					const int32 l_i32StimulationCode = static_cast<int32>(stimulationSet.getStimulationIdentifier(i));
 					const float64 l_f64StimulationDate = ITimeArithmetics::timeToSeconds(stimulationSet.getStimulationDate(i));
 
-					// std::cout << l_f64StimulationDate << "\n";
-
-					m_oStimulusOutlet->push_sample(&l_sStimulationString,l_f64StimulationDate);
+					// m_rKernelContext.getLogManager() << LogLevel_Info << "Push stim " << l_i32StimulationCode << " at " << l_f64StimulationDate << "s\n";
+					m_oStimulusOutlet->push_sample(&l_i32StimulationCode,l_f64StimulationDate);
 				}
 			}
 		}

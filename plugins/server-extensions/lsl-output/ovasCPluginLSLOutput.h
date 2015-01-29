@@ -35,7 +35,9 @@ namespace OpenViBEAcquisitionServer
 				// Plugin implementation
 
 				OpenViBE::boolean m_bIsLSLOutputEnabled;
-				OpenViBE::CString m_sLSLOutputStreamName;
+				OpenViBE::CString m_sSignalStreamName;
+				OpenViBE::CString m_sMarkerStreamName;
+				OpenViBE::CString m_sIdentifier;
 
 			private:
 				lsl::stream_outlet* m_oSignalOutlet;

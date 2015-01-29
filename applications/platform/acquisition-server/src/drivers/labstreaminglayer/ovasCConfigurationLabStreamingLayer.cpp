@@ -16,12 +16,12 @@ using namespace std;
 
 CConfigurationLabStreamingLayer::CConfigurationLabStreamingLayer(IDriverContext& rDriverContext, const char* sGtkBuilderFileName, 
 	IHeader& rHeader,
-	CString& rStream,
+	CString& rSignalStream,
 	CString& rMarkerStream)
 	:CConfigurationBuilder(sGtkBuilderFileName)
 	,m_rDriverContext(rDriverContext)
 	,m_rHeader(rHeader)
-	,m_rStream(rStream)
+	,m_rSignalStream(rSignalStream)
 	,m_rMarkerStream(rMarkerStream)
 {
 }
@@ -56,7 +56,7 @@ boolean CConfigurationLabStreamingLayer::preConfigure(void)
 		{	
 			// std::cout << "Signal " << m_vStreams[i].name().c_str() << "\n";
 			::gtk_combo_box_append_text(l_pComboBox, l_vStreams[i].name().c_str());
-			if(m_rStream==CString(l_vStreams[i].name().c_str()) || !l_ui32nStreams)
+			if(m_rSignalStream==CString(l_vStreams[i].name().c_str()) || !l_ui32nStreams)
 			{
 				::gtk_combo_box_set_active(l_pComboBox,l_ui32nStreams);
 			}		
@@ -93,7 +93,7 @@ boolean CConfigurationLabStreamingLayer::postConfigure(void)
 		{
 			return false;
 		}
-		m_rStream = gtk_combo_box_get_active_text(l_pComboBox);
+		m_rSignalStream = gtk_combo_box_get_active_text(l_pComboBox);
 
 		::GtkComboBox* l_pMarkerComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_marker_stream"));
 		if(!l_pMarkerComboBox)

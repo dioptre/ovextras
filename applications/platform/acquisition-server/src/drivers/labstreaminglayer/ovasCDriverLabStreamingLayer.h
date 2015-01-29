@@ -61,13 +61,16 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::float32* m_pSample;
 		OpenViBE::float32* m_pBuffer;
 
-		lsl::stream_info m_oStream;
-		lsl::stream_inlet* m_pInlet;
+		OpenViBE::uint64 m_ui64StartTime;
+		OpenViBE::uint64 m_ui64SampleCount;
+
+		lsl::stream_info m_oSignalStream;
+		lsl::stream_inlet* m_pSignalInlet;
 
 		lsl::stream_info m_oMarkerStream;
 		lsl::stream_inlet* m_pMarkerInlet;
 
-		OpenViBE::CString m_sStream;
+		OpenViBE::CString m_sSignalStream;
 		OpenViBE::CString m_sMarkerStream;
 
 	};

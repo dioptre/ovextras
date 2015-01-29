@@ -896,8 +896,11 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 			// Create label
 			::GtkWidget* l_pSettingLabel = gtk_label_new( l_pCurrentProperty->getName().toASCIIString() );
 
+			// align to left
+			gtk_misc_set_alignment( GTK_MISC(l_pSettingLabel), 0.0, 0.0 );
+
 			// insert the settings into the table
-			gtk_table_attach_defaults(l_pSettingsTable, l_pSettingLabel,   0, 1, setting_index, setting_index+1);
+			gtk_table_attach(l_pSettingsTable, l_pSettingLabel,   0, 1, setting_index, setting_index+1, GTK_FILL, GTK_SHRINK,   2, 0);
 			gtk_table_attach_defaults(l_pSettingsTable, l_pSettingControl, 1, 2, setting_index, setting_index+1);
 
 			m_vPluginProperties[setting_index].m_pWidget = l_pSettingControl;

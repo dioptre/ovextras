@@ -817,6 +817,7 @@ boolean CAcquisitionServer::stop(void)
 	float64 l_f64DriftRatio=(l_ui64ReceivedSampleCount?((l_i64DriftSampleCount*10000)/int64(l_ui64ReceivedSampleCount))/100.:0);
 	float64 l_f64AddedRatio=(l_ui64ReceivedSampleCount?((m_i64DriftCorrectionSampleCountAdded*10000)/int64(l_ui64ReceivedSampleCount))/100.:0);
 	float64 l_f64RemovedRatio=(l_ui64ReceivedSampleCount?((m_i64DriftCorrectionSampleCountRemoved*10000)/int64(l_ui64ReceivedSampleCount))/100.:0);
+	
 	if(-m_i64DriftToleranceSampleCount * 5 <= m_i64DriftSampleCount && m_i64DriftSampleCount <= m_i64DriftToleranceSampleCount * 5 && l_f64DriftRatio <= 5)
 	{
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "For information, after " << (((System::Time::zgetTime()-m_ui64StartTime) * 1000) >> 32) * .001f << " seconds we got the following statistics :\n";
@@ -1004,7 +1005,8 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 		m_ui64SampleCount+=ui32SampleCount*m_ui64OverSamplingFactor;
 
 		{
-			const uint64 l_ui64TheoricalSampleCount=(m_ui32SamplingFrequency * (System::Time::zgetTime()-m_ui64StartTime))>>32;
+			const uint64 l_ui64ElapsedTime = System::Time::zgetTime()-m_ui64StartTime;
+			const uint64 l_ui64TheoricalSampleCount= (m_ui32SamplingFrequency * l_ui64ElapsedTime) >> 32;
 			const int64 l_i64JitterSampleCount=int64(m_ui64SampleCount-l_ui64TheoricalSampleCount)+m_i64InnerLatencySampleCount;
 			
 			m_vJitterSampleCount.push_back(l_i64JitterSampleCount);
