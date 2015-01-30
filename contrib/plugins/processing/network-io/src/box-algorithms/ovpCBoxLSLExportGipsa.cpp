@@ -1,7 +1,7 @@
 
 #if defined TARGET_HAS_ThirdPartyLSL
 
-#include "ovpCBoxLSLExport.h"
+#include "ovpCBoxLSLExportGipsa.h"
 
 #include <system/ovCMemory.h>
 
@@ -15,12 +15,12 @@ using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::NetworkIO;
 
 
-CBoxAlgorithmLSLExport::CBoxAlgorithmLSLExport()
+CBoxAlgorithmLSLExportGipsa::CBoxAlgorithmLSLExportGipsa()
 : m_oCInputChannel1(0)
 {
 }
 
-boolean CBoxAlgorithmLSLExport::initialize(void)
+boolean CBoxAlgorithmLSLExportGipsa::initialize(void)
 {
 	const IBox* l_pStaticBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
 
@@ -35,7 +35,7 @@ boolean CBoxAlgorithmLSLExport::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmLSLExport::uninitialize(void)
+boolean CBoxAlgorithmLSLExportGipsa::uninitialize(void)
 {
 	m_oCInputChannel1.uninitialize();
 
@@ -47,13 +47,13 @@ boolean CBoxAlgorithmLSLExport::uninitialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmLSLExport::processInput(uint32 ui32InputIndex)
+boolean CBoxAlgorithmLSLExportGipsa::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 
-boolean CBoxAlgorithmLSLExport::process(void)
+boolean CBoxAlgorithmLSLExportGipsa::process(void)
 {
 	if(!m_oCInputChannel1.isWorking()) 
 	{

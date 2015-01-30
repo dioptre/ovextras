@@ -1,5 +1,5 @@
-#ifndef __OpenViBEPlugins_BoxAlgorithm_LSLExport_H__
-#define __OpenViBEPlugins_BoxAlgorithm_LSLExport_H__
+#ifndef __OpenViBEPlugins_BoxAlgorithm_LSLExportGipsa_H__
+#define __OpenViBEPlugins_BoxAlgorithm_LSLExportGipsa_H__
 
 #if defined TARGET_HAS_ThirdPartyLSL
 
@@ -10,18 +10,18 @@
 #include "../ovpCInputChannel.h"
 #include <lsl_cpp.h>
 
-#define OVP_ClassId_BoxAlgorithm_CBoxAlgorithmLSLExport 	 	OpenViBE::CIdentifier(0x591D2E94, 0x221C23AD)
-#define OVP_ClassId_BoxAlgorithm_CBoxAlgorithmLSLExportDesc 	OpenViBE::CIdentifier(0x22AF11F5, 0x58F2787D)
+#define OVP_ClassId_BoxAlgorithm_CBoxAlgorithmLSLExportGipsa 	 	OpenViBE::CIdentifier(0x591D2E94, 0x221C23AD)
+#define OVP_ClassId_BoxAlgorithm_CBoxAlgorithmLSLExportGipsaDesc 	OpenViBE::CIdentifier(0x22AF11F5, 0x58F2787D)
 
 namespace OpenViBEPlugins
 {
 	namespace NetworkIO
 	{
-		class CBoxAlgorithmLSLExport : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
+		class CBoxAlgorithmLSLExportGipsa : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
 		public:
 
-			CBoxAlgorithmLSLExport();
+			CBoxAlgorithmLSLExportGipsa();
 
 			virtual void release(void) { delete this; }
 
@@ -30,7 +30,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process(void);
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_CBoxAlgorithmLSLExport);
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_CBoxAlgorithmLSLExportGipsa);
 
 		protected:
 
@@ -45,13 +45,13 @@ namespace OpenViBEPlugins
 			std::vector< std::pair<OpenViBE::float32,OpenViBE::uint64> > m_stims;//identifier,time
 		};
 
-		class CBoxAlgorithmLSLExportDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
+		class CBoxAlgorithmLSLExportGipsaDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
 		{
 		public:
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("LSL Export"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("LSL Export (Gipsa)"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Anton Andreev"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Gipsa-lab"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Streams signal outside OpenVibe using Lab Streaming Layer library"); }
@@ -60,8 +60,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-connect"); }
 
-			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_CBoxAlgorithmLSLExport; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::NetworkIO::CBoxAlgorithmLSLExport; }
+			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_CBoxAlgorithmLSLExportGipsa; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::NetworkIO::CBoxAlgorithmLSLExportGipsa; }
 
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
@@ -73,11 +73,11 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_CBoxAlgorithmLSLExportDesc);
+			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_CBoxAlgorithmLSLExportGipsaDesc);
 		};
 	};
 };
 
 #endif
 
-#endif // __OpenViBEPlugins_BoxAlgorithm_LSLExport_H__
+#endif // __OpenViBEPlugins_BoxAlgorithm_LSLExportGipsa_H__
