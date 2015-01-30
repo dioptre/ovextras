@@ -2,6 +2,10 @@
 #if defined(TARGET_HAS_ThirdPartyLSL)
 
 /*
+ *
+ * Notes: This code should be kept compatible with changes to LSL Output plugin in OpenViBE Acquisition Server, 
+ * and LSL Export box in Designer.
+ *
  * This driver makes a few assumptions:
  * 
  * Signal streams 
@@ -14,7 +18,7 @@
  *    - not dense
  *    - markers are retimed wrt the current signal chunk
  *
- * Notes: Due to network delays, it may be better to disable drift correction or
+ * Other notes: Due to network delays, it may be better to disable drift correction or
  * set the drift tolerance to high. This is because
  *	1) Signals are assumed dense, i.e. LSL pull results in stimuli stamped t,t+1,t+2,...
  *  2) However, Acquisition Server works in real time, so if there is a network delay between 
@@ -24,6 +28,9 @@
  * Todo. It might make sense to improve this driver in the future to take into account the LSL 
  * stamps when constructing each signal block. This is currently not done.
  * 
+
+ *
+ *
  *
  */
 
@@ -114,8 +121,37 @@ boolean CDriverLabStreamingLayer::initialize(
 		<< "Opened an LSL stream with " << m_oSignalStream.channel_count() 
 		<< " channels and a nominal rate of " << m_oSignalStream.nominal_srate() << " hz.\n";
 
-	// std::cout << "nCh " << m_oHeader.getChannelCount() << "\n";
-	// std::cout << "freq " << m_oHeader.getSamplingFrequency() << "\n";
+	// Get the channel names. We open a temporary inlet for this, it will be closed after going out of scope. The actual inlet will be opened in start().
+	m_rDriverContext.getLogManager() << LogLevel_Trace << "Polling channel names\n";
+	lsl::stream_inlet l_oTmpInlet(m_oSignalStream, 360, 0, false);
+	try {
+		l_oTmpInlet.open_stream(g_LSL_openTimeOut);
+	} catch(...) {
+		m_rDriverContext.getLogManager() << LogLevel_Error <<  "Failed to open signal stream with name [" << m_oSignalStream.name().c_str() << "] for polling channel names\n";
+		return false;
+	}
+
+	lsl::stream_info l_oFullInfo;
+	try {
+		l_oFullInfo = l_oTmpInlet.info(g_LSL_readTimeOut);
+	} catch(...) {
+		m_rDriverContext.getLogManager() << LogLevel_Error <<  "Timeout reading full stream info for [" << m_oSignalStream.name().c_str() << "] for polling channel names\n";
+		return false;
+	}
+
+	const lsl::xml_element l_oChannels = l_oFullInfo.desc().child("channels");
+	lsl::xml_element l_oChannel = l_oChannels.child("channel");		
+	for(uint32 i=0;i<m_oHeader.getChannelCount(); i++)
+	{
+		const char *l_sLabel = l_oChannel.child_value("label");
+
+		if(l_sLabel)
+		{
+			m_oHeader.setChannelName(i, l_sLabel);
+		}
+
+		l_oChannel = l_oChannel.next_sibling("channel");
+	}
 
 	// Buffer to store a single sample
 	m_pBuffer = new float32[m_oHeader.getChannelCount()];
@@ -125,7 +161,7 @@ boolean CDriverLabStreamingLayer::initialize(
 		return false;
 	}
 
-	// Buffer to store the signal
+	// Buffer to store the signal chunk
 	m_pSample=new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
 	if(!m_pSample)
 	{

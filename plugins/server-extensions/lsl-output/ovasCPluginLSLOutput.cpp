@@ -1,6 +1,12 @@
 
 #if defined TARGET_HAS_ThirdPartyLSL
 
+/*
+ * Notes: This code should be kept compatible with changes to LSL Input Driver in OpenViBE Acquisition Server, 
+ * and LSL Export box in Designer.
+ *
+ */
+
 #include "ovasCPluginLSLOutput.h"
 
 #include <vector>
