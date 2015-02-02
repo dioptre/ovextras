@@ -207,8 +207,8 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 
 		l_oGlobalCov += l_aCov[l_ui32classIdx];
 
-		dumpMatrix(this->getLogManager(), l_aMean[l_ui32classIdx], "Mean");
-		dumpMatrix(this->getLogManager(), l_aCov[l_ui32classIdx], "Shrinked cov");
+		//dumpMatrix(this->getLogManager(), l_aMean[l_ui32classIdx], "Mean");
+		//dumpMatrix(this->getLogManager(), l_aCov[l_ui32classIdx], "Shrinked cov");
 	}
 
 	l_oGlobalCov /= (double)l_ui32nClasses;
@@ -244,11 +244,11 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 	m_ui32NumCols = l_ui32nCols;
 	
 	// Debug output
-	dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
+	/*dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
 	dumpMatrix(this->getLogManager(), l_oEigenValues, "Eigenvalues");
 	dumpMatrix(this->getLogManager(), l_oEigenSolver.eigenvectors(), "Eigenvectors");
 	dumpMatrix(this->getLogManager(), l_oGlobalCovInv, "Global cov inverse");
-	dumpMatrix(this->getLogManager(), m_oCoefficients, "Hyperplane weights");
+	dumpMatrix(this->getLogManager(), m_oCoefficients, "Hyperplane weights");*/
 
 	return true;
 }
@@ -369,30 +369,30 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 	{
 		return false;
 	}
-	loadClassesFromNode(l_pLDANode->getChildByName(c_sClassesNodeName));
+	loadClassesFromNode(l_pTempNode);
 
 	if((l_pTempNode = l_pLDANode->getChildByName(c_sCoefficientsNodeName)) == NULL)
 	{
 		return false;
 	}
-	loadCoefficientsFromNode(l_pLDANode->getChildByName(c_sCoefficientsNodeName));
+	loadCoefficientsFromNode(l_pTempNode);
 
 	if((l_pTempNode = l_pLDANode->getChildByName(c_sBiasDistanceNodeName)) == NULL)
 	{
 		return false;
 	}
-	m_f64BiasDistance = getFloatFromNode(l_pLDANode->getChildByName(c_sBiasDistanceNodeName));
+	m_f64BiasDistance = getFloatFromNode(l_pTempNode);
 
 	if((l_pTempNode = l_pLDANode->getChildByName(c_sCoefficientProbabilityNodeName)) == NULL)
 	{
 		return false;
 	}
-	m_f64w0 = getFloatFromNode(l_pLDANode->getChildByName(c_sCoefficientProbabilityNodeName));
+	m_f64w0 = getFloatFromNode(l_pTempNode);
 
 	//Now we initialize the coefficients vector according to Weights and bias (distance)
 	m_oCoefficients.resize(1, m_oWeights.cols()+1 );
 	m_oCoefficients(0,0) = m_f64BiasDistance;
-	m_oCoefficients.block(0,1,1,m_oWeights.cols()) = m_oWeights.transpose();
+	m_oCoefficients.block(0,1,1,m_oWeights.cols()) = m_oWeights;
 
 	return true;
 }
