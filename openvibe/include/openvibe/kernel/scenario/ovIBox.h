@@ -463,15 +463,6 @@ namespace OpenViBE
 					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
 
 			/**
-			  * \brief Marks this type support and all types derived
-			  * from it as supported by inputs
-			  * \param rTypeIdentifier [in] : The type identifier
-			  * \return \e true in case of success.
-			  * \return \e false in case of error.
-			  */
-			virtual OpenViBE::boolean addInputAndDerivedSupport(
-					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
-			/**
 			  * \brief Indicates if a type is support by inputs
 			  * \param rTypeIdentifier [in] : The type identifier
 			  * \return \e true if type is support.
@@ -487,16 +478,6 @@ namespace OpenViBE
 			  * \return \e false in case of error.
 			  */
 			virtual OpenViBE::boolean addOutputSupport(
-					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
-
-			/**
-			  * \brief Marks this type support and all types derived
-			  * from it as supported by outputs
-			  * \param rTypeIdentifier [in] : The type identifier
-			  * \return \e true in case of success.
-			  * \return \e false in case of error.
-			  */
-			virtual OpenViBE::boolean addOutputAndDerivedSupport(
 					const OpenViBE::CIdentifier& rTypeIdentifier)=0;
 
 			/**
