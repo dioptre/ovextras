@@ -1,7 +1,7 @@
 #ifndef __OpenViBEPlugins_Defines_H__
 #define __OpenViBEPlugins_Defines_H__
 
-#define OVP_Classification_BoxTrainerXMLVersion								2
+#define OVP_Classification_BoxTrainerXMLVersion								3
 
 //___________________________________________________________________//
 //                                                                   //
