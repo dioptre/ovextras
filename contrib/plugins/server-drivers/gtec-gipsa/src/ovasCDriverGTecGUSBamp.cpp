@@ -1,5 +1,15 @@
 #if defined TARGET_HAS_ThirdPartyGUSBampCAPI
 
+/*
+ *
+ * Notes: According to gtec C API V3.12.00, the output from this driver
+ * should be microvolts, except when giving out a calibration signal.
+ *
+ * The auto calibration should be run before actual acquisition to ensure 
+ * that all the channels are scaled appropriately.
+ *
+ */
+
 #include "ovasCDriverGTecGUSBamp.h"
 #include "ovasCConfigurationGTecGUSBamp.h"
 
@@ -51,6 +61,7 @@ CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 	,m_masterSerial("")
 	,m_bBipolarEnabled(false)
 	,m_bReconfigurationRequired(false)
+	,m_bCalibrationSignalEnabled(false)
 {
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(GTEC_NUM_CHANNELS);	
@@ -64,6 +75,7 @@ CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 	m_oSettings.add("DeviceSerials", &m_vDevicesSerials);
 	m_oSettings.add("MasterSerial", &m_masterSerial);
 	m_oSettings.add("Bipolar", &m_bBipolarEnabled);
+	m_oSettings.add("CalibrationSignal", &m_bCalibrationSignalEnabled);
 	m_oSettings.load();
 
 	m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();	
@@ -227,7 +239,13 @@ OpenViBE::boolean CDriverGTecGUSBamp::ConfigureDevice(OpenViBE::uint32 deviceNum
     l_oReference.ref3=(m_ui8CommonGndAndRefBitmap&(1<<6));
     l_oReference.ref4=(m_ui8CommonGndAndRefBitmap&(1<<7));
 
-    if(!::GT_SetMode(o_pDevice, M_NORMAL)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetMode\n";
+	uint32 l_ui32Mode = M_NORMAL;
+	if(m_bCalibrationSignalEnabled) 
+	{
+		l_ui32Mode = M_CALIBRATE;
+	}
+
+    if(!::GT_SetMode(o_pDevice, l_ui32Mode)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetMode for mode " << l_ui32Mode << "\n";
        
     if(!::GT_SetBufferSize(o_pDevice, NUMBER_OF_SCANS)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetBufferSize\n";
        
@@ -288,9 +306,11 @@ OpenViBE::boolean CDriverGTecGUSBamp::ConfigureDevice(OpenViBE::uint32 deviceNum
 
     if(!::GT_SetSampleRate(o_pDevice, m_oHeader.getSamplingFrequency())) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetSampleRate\n";
 
-    if(!::GT_SetReference(o_pDevice, l_oReference)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetReference\n";
-    if(!::GT_SetGround(o_pDevice, l_oGround)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetGround\n";
-
+	if(l_ui32Mode = M_NORMAL)
+	{
+		if(!::GT_SetReference(o_pDevice, l_oReference)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetReference\n";
+		if(!::GT_SetGround(o_pDevice, l_oGround)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetGround\n";
+	}
 	
 
 	return true;
@@ -820,7 +840,8 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 		m_bTriggerInputEnabled,
 		m_vDevicesSerials,
 		targetMasterSerial,
-		m_bBipolarEnabled);
+		m_bBipolarEnabled,
+		m_bCalibrationSignalEnabled);
 
 	//reduce from number of channels for all devices to the number of channels for one device
 	m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
