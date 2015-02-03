@@ -206,7 +206,7 @@ namespace OpenViBEAcquisitionServer
 		 * \param ui32ChannelUnit [in] : the unit
 		 * \param ui32ChannelFactor [in] : the scaling factor
 		 * \return \e true in case of success.
-		 * \return \e false in case of error.
+		 * \return \e false in case of error. On false, the outputs will be set to default values.
 		 *
 		 * See setChannelUnits().
 		 */
@@ -236,6 +236,13 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isChannelGainSet(void) const=0;
 		/// \todo isChannelLocationSet
 		// virtual OpenViBE::boolean isChannelLocationSet(void) const=0;
+		/**
+		 * \brief Tests if channel unit has been set at least once
+		 * \return \e true if channel unit has been set at least once since last \c reset.
+		 * \return \e false if channel unit has not been set.
+		 * \sa setChannelGain
+		 */
+		virtual OpenViBE::boolean isChannelUnitSet(void) const=0;
 
 		//@}
 		/** \name Samples information */
@@ -274,6 +281,8 @@ namespace OpenViBEAcquisitionServer
 
 		static void copy(OpenViBEAcquisitionServer::IHeader& rDestination, const OpenViBEAcquisitionServer::IHeader& rSource)
 		{
+			rDestination.reset(); // Make sure that nothing lingers, this is mainly for channel units: we have no way to restore rDestination to an 'unset' state unless we reset
+
 			OpenViBE::uint32 i, l_ui32ChannelCount=rSource.getChannelCount();
 			rDestination.setExperimentIdentifier(rSource.getExperimentIdentifier());
 			rDestination.setSubjectAge(rSource.getSubjectAge());
@@ -285,6 +294,16 @@ namespace OpenViBEAcquisitionServer
 			{
 				rDestination.setChannelName(i, rSource.getChannelName(i));
 				rDestination.setChannelGain(i, rSource.getChannelGain(i));
+			}
+			if(rSource.isChannelUnitSet())
+			{
+				for(i=0; i<l_ui32ChannelCount; i++)
+				{
+					OpenViBE::uint32 l_ui32Unit = 0, l_ui32Factor = 0;
+
+					rSource.getChannelUnits(i, l_ui32Unit, l_ui32Factor);			// No need to test for error, will set defaults on fail
+					rDestination.setChannelUnits(i, l_ui32Unit, l_ui32Factor);
+				}
 			}
 		}
 	};

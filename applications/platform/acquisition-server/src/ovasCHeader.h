@@ -43,6 +43,7 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isChannelNameSet(void) const;
 		virtual OpenViBE::boolean isChannelGainSet(void) const;
 		// virtual OpenViBE::boolean isChannelLocationSet(void) const;
+		virtual OpenViBE::boolean isChannelUnitSet(void) const;
 
 		// Samples information
 		virtual OpenViBE::boolean setSamplingFrequency(const OpenViBE::uint32 ui32SamplingFrequency);
@@ -91,6 +92,7 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isChannelCountSet(void) const { return m_rAdaptedHeader.isChannelCountSet(); }
 		virtual OpenViBE::boolean isChannelNameSet(void) const { return m_rAdaptedHeader.isChannelNameSet(); }
 		virtual OpenViBE::boolean isChannelGainSet(void) const { return m_rAdaptedHeader.isChannelGainSet(); }
+		virtual OpenViBE::boolean isChannelUnitSet(void) const { return m_rAdaptedHeader.isChannelUnitSet(); }
 
 		// Samples information
 		virtual OpenViBE::boolean setSamplingFrequency(const OpenViBE::uint32 ui32SamplingFrequency) { return m_rAdaptedHeader.setSamplingFrequency(ui32SamplingFrequency); }
