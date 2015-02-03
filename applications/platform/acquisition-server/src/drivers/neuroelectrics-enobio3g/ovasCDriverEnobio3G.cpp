@@ -79,6 +79,11 @@ boolean CDriverEnobio3G::initialize(
 	m_oHeader.setChannelCount(m_ui32nChannels);
 	if(!m_oHeader.isChannelCountSet()||!m_oHeader.isSamplingFrequencySet()) return false;
 	
+	for(uint32 c=0;c<m_ui32nChannels;c++)
+	{
+		m_oHeader.setChannelUnits(c, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
+	}
+
 	// Builds up a buffer to store
 	// acquired samples. This buffer
 	// will be sent to the acquisition

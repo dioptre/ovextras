@@ -57,6 +57,7 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isChannelCountSet(void) const;
 		virtual OpenViBE::boolean isChannelNameSet(void) const;
 		virtual OpenViBE::boolean isChannelGainSet(void) const;
+		virtual OpenViBE::boolean isChannelUnitSet(void) const;
 
 		// Samples information
 		virtual OpenViBE::boolean setSamplingFrequency(const OpenViBE::uint32 ui32SamplingFrequency);
@@ -92,6 +93,7 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isPairCountSet(void) const;
 		virtual OpenViBE::boolean isPairNameSet(void) const;
 		virtual OpenViBE::boolean isPairGainSet(void) const;
+		virtual OpenViBE::boolean isPairUnitSet(void) const;
 		virtual OpenViBE::boolean isDeviceIdSet(void) const;
 		virtual OpenViBE::boolean isFastModeSettingsSet(void) const;
 

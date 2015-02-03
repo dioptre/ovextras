@@ -141,6 +141,22 @@ boolean CDriverEmotivEPOC::initialize(
 
 	m_oHeader.setSamplingFrequency(128); // let's hope so...
 
+	// Set channel units
+	// Various sources (e.g. http://emotiv.com/forum/forum15/topic879/messages/?PAGEN_1=3
+	// and http://www.bci2000.org/wiki/index.php/Contributions:Emotiv ) suggested
+	// that the units from the device are in microvolts, but with a typical DC offset around 4000. 
+	// Hard to find official source.
+	for(uint32 c=0;c<14;c++) 
+	{
+		m_oHeader.setChannelUnits(c, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
+	}
+	if(m_bUseGyroscope)
+	{
+		// Even less sure about the units of these, leaving as unspecified.
+		m_oHeader.setChannelUnits(14, OVTK_UNIT_Unspecified, OVTK_FACTOR_Base);
+		m_oHeader.setChannelUnits(15, OVTK_UNIT_Unspecified, OVTK_FACTOR_Base);
+	}
+
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "INIT called.\n";
 	if(m_rDriverContext.isConnected())
 	{

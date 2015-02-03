@@ -169,6 +169,12 @@ boolean CHeaderBrainProductsVAmp::isPairGainSet(void) const
 	return isPairCountSet();
 }
 
+boolean CHeaderBrainProductsVAmp::isPairUnitSet(void) const
+{
+	return isPairCountSet();
+}
+
+
 //___________________________________________________________________//
 //                                                                   //
 
@@ -394,6 +400,19 @@ boolean CHeaderBrainProductsVAmp::isChannelGainSet(void) const
 	else
 	{
 		return m_pBasicHeader->isChannelGainSet();
+	}
+}
+
+boolean CHeaderBrainProductsVAmp::isChannelUnitSet(void) const
+{
+	if(m_ui32AcquisitionMode == AcquisitionMode_VAmp4Fast)
+	{
+		// in fast mode the channel count is the pair count (to display in the designer as a "channel")
+		return this->isPairUnitSet();
+	}
+	else
+	{
+		return m_pBasicHeader->isChannelUnitSet();
 	}
 }
 

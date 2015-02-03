@@ -187,6 +187,22 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 		else m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetSlave\n";
 	}
 	
+	// Set channel units
+	for(uint32 c=0;c<m_oHeader.getChannelCount(); c++) 
+	{
+		if(!m_bCalibrationSignalEnabled)
+		{
+			m_oHeader.setChannelUnits(c, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
+		} 
+		else
+		{
+			// For calibration, the outputs are before-scaling raw values from the unit
+			// following formula 'normal output = (raw-offset)*factor'. In normal use, 
+			// offset and factor are obtained and set by the calibration procedure.
+			m_oHeader.setChannelUnits(c, OVTK_UNIT_Unspecified, OVTK_FACTOR_Base);
+		}
+	}
+
 	return true;
 }
 
