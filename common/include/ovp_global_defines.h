@@ -775,6 +775,10 @@
 #define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SubjectIdentifier                                      OpenViBE::CIdentifier(0xd5bb5231, 0x59389b72)
 #define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_BufferDuration                                         OpenViBE::CIdentifier(0xe1fc7385, 0x586a4f3f)
 #define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SignalMatrix                                           OpenViBE::CIdentifier(0xe9ac8077, 0xe369a51d)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_ChannelLocalisation                                    OpenViBE::CIdentifier(0x227E13F0, 0x206B44F9)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_ChannelUnits                                           OpenViBE::CIdentifier(0x740060C2, 0x7D2B4F57)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelLocalisationData                            OpenViBE::CIdentifier(0x26EE1F81, 0x3DB00D5D)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelUnitData                                    OpenViBE::CIdentifier(0x19DC533C, 0x56301D0B)
 #define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_OutputParameterId_EncodedMemoryBuffer                                   OpenViBE::CIdentifier(0xa3d8b171, 0xf8734734) // Duplicate of OVP_GD_Algorithm_ExperimentInformationStreamEncoder_OutputParameterId_EncodedMemoryBuffer
 #define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputTriggerId_EncodeBuffer                                             OpenViBE::CIdentifier(0x1b7076fd, 0x449bc70a) // Duplicate of OVP_GD_Algorithm_ExperimentInformationStreamEncoder_InputTriggerId_EncodeBuffer
 #define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputTriggerId_EncodeEnd                                                OpenViBE::CIdentifier(0x3fc23508, 0x806753d8) // Duplicate of OVP_GD_Algorithm_ExperimentInformationStreamEncoder_InputTriggerId_EncodeEnd

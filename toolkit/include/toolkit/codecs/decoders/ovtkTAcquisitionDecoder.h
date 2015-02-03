@@ -19,6 +19,7 @@ namespace OpenViBEToolkit
 		OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pSignalStream;
 		OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pStimulationStream;
 		OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pChannelLocalisationStream;
+		OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pChannelUnitsStream;
 
 		using T::m_pCodec;
 		using T::m_pBoxAlgorithm;
@@ -36,6 +37,7 @@ namespace OpenViBEToolkit
 			op_pSignalStream.initialize(m_pCodec->getOutputParameter(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputParameterId_SignalStream));
 			op_pStimulationStream.initialize(m_pCodec->getOutputParameter(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputParameterId_StimulationStream));
 			op_pChannelLocalisationStream.initialize(m_pCodec->getOutputParameter(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputParameterId_ChannelLocalisationStream));
+			op_pChannelUnitsStream.initialize(m_pCodec->getOutputParameter(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputParameterId_ChannelUnitsStream));
 
 			return true;
 		}
@@ -51,6 +53,7 @@ namespace OpenViBEToolkit
 				return false;
 			}
 
+			op_pChannelUnitsStream.uninitialize();
 			op_pChannelLocalisationStream.uninitialize();
 			op_pStimulationStream.uninitialize();
 			op_pSignalStream.uninitialize();
@@ -70,6 +73,7 @@ namespace OpenViBEToolkit
 		OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* >& getSignalStream() { return op_pSignalStream; }
 		OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* >& getStimulationStream() { return op_pStimulationStream; }
 		OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* >& getChannelLocalisationStream() { return op_pChannelLocalisationStream; }
+		OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* >& getChannelUnitsStream() { return op_pChannelUnitsStream; }
 
 		virtual OpenViBE::boolean isHeaderReceived()
 		{

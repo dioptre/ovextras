@@ -57,11 +57,6 @@ namespace OpenViBEToolkit
 			return m_bOutputDynamic;
 		}
 
-		OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* >& getOutputUnits()
-		{
-			return m_bOutputUnits;
-		}
-
 		virtual OpenViBE::boolean isHeaderReceived()
 		{
 			return m_pCodec->isOutputTriggerActive(OVP_GD_Algorithm_ChannelUnitsStreamDecoder_OutputTriggerId_ReceivedHeader);

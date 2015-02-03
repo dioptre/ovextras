@@ -54,6 +54,7 @@ EBML::boolean CAcquisitionDecoder::isMasterChild(const EBML::CIdentifier& rIdent
 	else if(rIdentifier==OVTK_NodeId_Acquisition_Header_Signal)                return false;
 	else if(rIdentifier==OVTK_NodeId_Acquisition_Header_Stimulation)           return false;
 	else if(rIdentifier==OVTK_NodeId_Acquisition_Header_ChannelLocalisation)   return false;
+	else if(rIdentifier==OVTK_NodeId_Acquisition_Header_ChannelUnits)          return false;
 	else if(rIdentifier==OVTK_NodeId_Acquisition_Buffer_ExperimentInformation) return false;
 	else if(rIdentifier==OVTK_NodeId_Acquisition_Buffer_Signal)                return false;
 	else if(rIdentifier==OVTK_NodeId_Acquisition_Buffer_Stimulation)           return false;
@@ -73,6 +74,7 @@ void CAcquisitionDecoder::openChild(const EBML::CIdentifier& rIdentifier)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_Signal)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_Stimulation)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_ChannelLocalisation)
+	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_ChannelUnits)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Buffer_ExperimentInformation)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Buffer_Signal)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Buffer_Stimulation)
@@ -96,6 +98,7 @@ void CAcquisitionDecoder::processChildData(const void* pBuffer, const EBML::uint
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_Signal)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_Stimulation)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_ChannelLocalisation)
+	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_ChannelUnits)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Buffer_ExperimentInformation)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Buffer_Signal)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Buffer_Stimulation)
@@ -108,6 +111,7 @@ void CAcquisitionDecoder::processChildData(const void* pBuffer, const EBML::uint
 		if(l_rTop==OVTK_NodeId_Acquisition_Header_Signal)                this->appendMemoryBuffer(op_pSignalStream, pBuffer, ui64BufferSize);
 		if(l_rTop==OVTK_NodeId_Acquisition_Header_Stimulation)           this->appendMemoryBuffer(op_pStimulationStream, pBuffer, ui64BufferSize);
 		if(l_rTop==OVTK_NodeId_Acquisition_Header_ChannelLocalisation)   this->appendMemoryBuffer(op_pChannelLocalisationStream, pBuffer, ui64BufferSize);
+		if(l_rTop==OVTK_NodeId_Acquisition_Header_ChannelUnits)          this->appendMemoryBuffer(op_pChannelUnitsStream, pBuffer, ui64BufferSize);
 		if(l_rTop==OVTK_NodeId_Acquisition_Buffer_ExperimentInformation) this->appendMemoryBuffer(op_pExperimentInformationStream, pBuffer, ui64BufferSize);
 		if(l_rTop==OVTK_NodeId_Acquisition_Buffer_Signal)                this->appendMemoryBuffer(op_pSignalStream, pBuffer, ui64BufferSize);
 		if(l_rTop==OVTK_NodeId_Acquisition_Buffer_Stimulation)           this->appendMemoryBuffer(op_pStimulationStream, pBuffer, ui64BufferSize);
@@ -129,6 +133,7 @@ void CAcquisitionDecoder::closeChild(void)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_Signal)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_Stimulation)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_ChannelLocalisation)
+	 ||(l_rTop==OVTK_NodeId_Acquisition_Header_ChannelUnits)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Buffer_ExperimentInformation)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Buffer_Signal)
 	 ||(l_rTop==OVTK_NodeId_Acquisition_Buffer_Stimulation)

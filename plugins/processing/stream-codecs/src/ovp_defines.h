@@ -168,6 +168,11 @@
 #define OVP_ClassId_Algorithm_ChannelLocalisationStreamEncoderDesc                                         OpenViBE::CIdentifier(0x3F7B49A3, 0x2B8F861A)
 #define OVP_Algorithm_ChannelLocalisationStreamEncoder_InputParameterId_Dynamic                            OpenViBE::CIdentifier(0xCF5DD4F8, 0xC2FF2878)
 
+//___________________________________________________________________//
+//
+// Channel units encoder
+//___________________________________________________________________//
+//
 #define OVP_ClassId_Algorithm_ChannelUnitsStreamEncoder                                                    OpenViBE::CIdentifier(0x2CA034FD, 0x5C051E86)
 #define OVP_ClassId_Algorithm_ChannelUnitsStreamEncoderDesc                                                OpenViBE::CIdentifier(0x08696DFC, 0x6D415262)
 #define OVP_Algorithm_ChannelUnitsStreamEncoder_InputParameterId_Dynamic                                   OpenViBE::CIdentifier(0x615F03B9, 0x4F6A320A)
@@ -231,6 +236,11 @@
 #define OVP_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SignalSamplingRate                   OpenViBE::CIdentifier(0xB84AD0CA, 0x4F316DD3)
 #define OVP_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_StimulationSet                       OpenViBE::CIdentifier(0x5B728D37, 0xFD088887)
 #define OVP_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_BufferDuration                       OpenViBE::CIdentifier(0xE1FC7385, 0x586A4F3F)
+#define OVP_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_ChannelLocalisation                  OpenViBE::CIdentifier(0x227E13F0, 0x206B44F9)
+#define OVP_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_ChannelUnits                         OpenViBE::CIdentifier(0x740060C2, 0x7D2B4F57)
+
+#define OVP_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelLocalisationData          OpenViBE::CIdentifier(0x26EE1F81, 0x3DB00D5D)
+#define OVP_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelUnitData                  OpenViBE::CIdentifier(0x19DC533C, 0x56301D0B)
 
 
 #endif // __OpenViBEPlugins_Defines_H__

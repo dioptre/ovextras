@@ -26,7 +26,6 @@ namespace OpenViBEToolkit
 			m_pCodec->initialize();
 			m_pInputMatrix.initialize(m_pCodec->getInputParameter(OVP_GD_Algorithm_ChannelUnitsStreamEncoder_InputParameterId_Matrix));
 			m_bInputDynamic.initialize(m_pCodec->getInputParameter(OVP_GD_Algorithm_ChannelUnitsStreamEncoder_InputParameterId_Dynamic));
-
 			m_pOutputMemoryBuffer.initialize(m_pCodec->getOutputParameter(OVP_GD_Algorithm_ChannelUnitsStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
 
 			return true;

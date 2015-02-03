@@ -101,6 +101,7 @@ boolean CBoxAlgorithmAcquisitionClient::process(void)
 	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
+
 	op_pExperimentInformationMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
 	op_pSignalMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(1);
 	op_pStimulationMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(2);
@@ -128,6 +129,7 @@ boolean CBoxAlgorithmAcquisitionClient::process(void)
 
 		m_pAcquisitionStreamDecoder->process();
 
+
 		if(m_pAcquisitionStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputTriggerId_ReceivedHeader)
 		 ||m_pAcquisitionStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputTriggerId_ReceivedBuffer)
 		 ||m_pAcquisitionStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputTriggerId_ReceivedEnd))
@@ -135,8 +137,23 @@ boolean CBoxAlgorithmAcquisitionClient::process(void)
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(1, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(2, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-			l_rDynamicBoxContext.markOutputAsReadyToSend(3, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-			l_rDynamicBoxContext.markOutputAsReadyToSend(4, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			if(op_pChannelLocalisationMemoryBuffer->getSize()>0)
+			{
+				l_rDynamicBoxContext.markOutputAsReadyToSend(3, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+			else
+			{
+				l_rDynamicBoxContext.setOutputChunkSize(3, 0, true);
+			}
+
+			if(op_pChannelUnitsMemoryBuffer->getSize()>0)
+			{
+				l_rDynamicBoxContext.markOutputAsReadyToSend(4, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+			else
+			{
+				l_rDynamicBoxContext.setOutputChunkSize(4, 0, true);
+			}
 			m_ui64LastChunkStartTime=m_ui64LastChunkEndTime;
 			m_ui64LastChunkEndTime+=op_ui64BufferDuration;
 			// @todo ?
