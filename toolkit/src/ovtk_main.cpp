@@ -409,6 +409,7 @@ boolean OpenViBEToolkit::initialize(const IKernelContext& rKernelContext)
 	l_rTypeManager.registerEnumerationEntry(OV_TypeId_MeasurementUnit, "dyne*s*m*m cm-5", OVTK_UNIT_Dyne_Seconds_Square_Meter_Per_Centimetre_To_The_Power_Of_5);
 	l_rTypeManager.registerEnumerationEntry(OV_TypeId_MeasurementUnit, "l m-2", OVTK_UNIT_Litres_Per_Square_Meter);
 	l_rTypeManager.registerEnumerationEntry(OV_TypeId_MeasurementUnit, "T", OVTK_UNIT_Tesla);
+	l_rTypeManager.registerEnumerationEntry(OV_TypeId_MeasurementUnit, "deg/s", OVTK_UNIT_Degree_Per_Second);
 
 	//  Register measurement factors
 	l_rTypeManager.registerEnumerationEntry(OV_TypeId_Factor, "1e+24", OVTK_FACTOR_Yotta);

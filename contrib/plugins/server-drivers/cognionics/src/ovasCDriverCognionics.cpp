@@ -123,6 +123,11 @@ boolean CDriverCognionics::initialize(
 	m_rDriverContext.getLogManager() << LogLevel_Info << "Number Channels (EEG + Packet Counter + Trigger): " << m_oHeader.getChannelCount() <<"\n";
 	m_rDriverContext.getLogManager() << LogLevel_Info << "Sampling Rate: " << m_oHeader.getSamplingFrequency() <<"\n";
 
+	for(uint32 c=0;c<m_oHeader.getChannelCount();c++)
+	{
+		m_oHeader.setChannelUnits(c, OVTK_UNIT_Volts, OVTK_FACTOR_Base);
+	}
+
 	//set impedance check mode ON
 	getData();
 	unsigned char imp_on = 0x11;

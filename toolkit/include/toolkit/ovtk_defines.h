@@ -415,70 +415,73 @@
 #define OVTK_UNIT_Moles                                   4544
 #define OVTK_UNIT_Equivalent                              4576
 #define OVTK_UNIT_Osmoles_Per_Litre                       4608
-#define OVTK_UNIT_Moles_Per_Cubic_Centimetre 4640
-#define OVTK_UNIT_Moles_Per_Cubic_Metre 4672
-#define OVTK_UNIT_Moles_Per_Litre 4704
-#define OVTK_UNIT_Moles_Per_Millilitre 4736
-#define OVTK_UNIT_Equivalents_Per_Cubic_Centimetre 4768
-#define OVTK_UNIT_Equivalents_Per_Cubic_Metre 4800
-#define OVTK_UNIT_Equivalents_Per_Litre 4832
-#define OVTK_UNIT_Equivalents_Per_Millilitre 4864
-#define OVTK_UNIT_Osmoles_Per_Kilogram 4896
-#define OVTK_UNIT_Moles_Per_Kilogram 4928
-#define OVTK_UNIT_Moles_Per_Second 4960
-#define OVTK_UNIT_Moles_Per_Minute 4992
-#define OVTK_UNIT_Moles_Per_Hour 5024
-#define OVTK_UNIT_Moles_Per_Day 5056
-#define OVTK_UNIT_Equivalents_Per_Second 5088
-#define OVTK_UNIT_Equivalents_Per_Minute 5120
-#define OVTK_UNIT_Equivalents_Per_Hour 5152
-#define OVTK_UNIT_Equivalents_Per_Day 5184
-#define OVTK_UNIT_Moles_Per_Kilogram_Per_Second 5216
-#define OVTK_UNIT_Moles_Per_Kilogram_Per_Minute 5248
-#define OVTK_UNIT_Moles_Per_Kilogram_Per_Hour 5280
-#define OVTK_UNIT_Moles_Per_Kilogram_Per_Day 5312
-#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Second 5344
-#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Minute 5376
-#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Hour 5408
-#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Day 5440
-#define OVTK_UNIT_International_Unit 5472
+#define OVTK_UNIT_Moles_Per_Cubic_Centimetre              4640
+#define OVTK_UNIT_Moles_Per_Cubic_Metre                   4672
+#define OVTK_UNIT_Moles_Per_Litre                         4704
+#define OVTK_UNIT_Moles_Per_Millilitre                    4736
+#define OVTK_UNIT_Equivalents_Per_Cubic_Centimetre        4768
+#define OVTK_UNIT_Equivalents_Per_Cubic_Metre             4800
+#define OVTK_UNIT_Equivalents_Per_Litre                   4832
+#define OVTK_UNIT_Equivalents_Per_Millilitre              4864
+#define OVTK_UNIT_Osmoles_Per_Kilogram                    4896
+#define OVTK_UNIT_Moles_Per_Kilogram                      4928
+#define OVTK_UNIT_Moles_Per_Second                        4960
+#define OVTK_UNIT_Moles_Per_Minute                        4992
+#define OVTK_UNIT_Moles_Per_Hour                          5024
+#define OVTK_UNIT_Moles_Per_Day                           5056
+#define OVTK_UNIT_Equivalents_Per_Second                  5088
+#define OVTK_UNIT_Equivalents_Per_Minute                  5120
+#define OVTK_UNIT_Equivalents_Per_Hour                    5152
+#define OVTK_UNIT_Equivalents_Per_Day                     5184
+#define OVTK_UNIT_Moles_Per_Kilogram_Per_Second           5216
+#define OVTK_UNIT_Moles_Per_Kilogram_Per_Minute           5248
+#define OVTK_UNIT_Moles_Per_Kilogram_Per_Hour             5280
+#define OVTK_UNIT_Moles_Per_Kilogram_Per_Day              5312
+#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Second     5344
+#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Minute     5376
+#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Hour       5408
+#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Day        5440
+#define OVTK_UNIT_International_Unit                      5472
 #define OVTK_UNIT_International_Units_Per_Cubic_Centimetre 5504
-#define OVTK_UNIT_International_Units_Per_Cubic_Meter 5536
-#define OVTK_UNIT_International_Units_Per_Litre 5568
-#define OVTK_UNIT_International_Units_Per_Millilitre 5600
-#define OVTK_UNIT_International_Units_Per_Second 5632
-#define OVTK_UNIT_International_Units_Per_Minute 5664
-#define OVTK_UNIT_International_Units_Per_Hour 5696
-#define OVTK_UNIT_International_Units_Per_Day 5728
+#define OVTK_UNIT_International_Units_Per_Cubic_Meter      5536
+#define OVTK_UNIT_International_Units_Per_Litre            5568
+#define OVTK_UNIT_International_Units_Per_Millilitre       5600
+#define OVTK_UNIT_International_Units_Per_Second           5632
+#define OVTK_UNIT_International_Units_Per_Minute           5664
+#define OVTK_UNIT_International_Units_Per_Hour             5696
+#define OVTK_UNIT_International_Units_Per_Day              5728
 #define OVTK_UNIT_International_Units_Per_Kilogram_Per_Second 5760
 #define OVTK_UNIT_International_Units_Per_Kilogram_Per_Minute 5792
-#define OVTK_UNIT_International_Units_Per_Kilogram_Per_Hour 5824
-#define OVTK_UNIT_International_Units_Per_Kilogram_Per_Day 5856
-#define OVTK_UNIT_Centimetre_Of_Water_Per_Litre_Per_Second 5920
-#define OVTK_UNIT_Litre_Squared_Per_Second 5952
-#define OVTK_UNIT_Centimetre_Of_Water_Per_Percent 5984
+#define OVTK_UNIT_International_Units_Per_Kilogram_Per_Hour   5824
+#define OVTK_UNIT_International_Units_Per_Kilogram_Per_Day    5856
+#define OVTK_UNIT_Centimetre_Of_Water_Per_Litre_Per_Second    5920
+#define OVTK_UNIT_Litre_Squared_Per_Second                    5952
+#define OVTK_UNIT_Centimetre_Of_Water_Per_Percent             5984
 #define OVTK_UNIT_Dyne_Seconds_Per_Square_Meter_Per_Centimetre_To_The_Power_Of_5 6016
-#define OVTK_UNIT_Millimetres_Of_Mercury_Per_Percent 6176
-#define OVTK_UNIT_Pascal_Per_Percent 6208
-#define OVTK_UNIT_Relative_Power_Decibel	 6432
-#define OVTK_UNIT_Meter_Per_Second_Squared 6624
-#define OVTK_UNIT_Radians_Per_Second_Squared 6656
-#define OVTK_UNIT_Foot_Per_Minute 6688
-#define OVTK_UNIT_Inch_Per_Minute 6720
-#define OVTK_UNIT_Step_Per_Minute 6752
-#define OVTK_UNIT_Kilocalories 6784
-#define OVTK_UNIT_Revolution_Per_Minute 6816
-#define OVTK_UNIT_V_Per_S  65152
-#define OVTK_UNIT_M_Per_M  65184
-#define OVTK_UNIT_Velocity_Kilometer_Per_Hour 65216
-#define OVTK_UNIT_Left_Stroke_Work_Index_Lswi 65248
-#define OVTK_UNIT_Indexed_Left_Cardiac_Work_Lcwi 65280
-#define OVTK_UNIT_Mhg_Per_S 65312
-#define OVTK_UNIT_Millimol_Per_Liter_X_Millimeter 65344
-#define OVTK_UNIT_Rotations_Per_Minute 65376
+#define OVTK_UNIT_Millimetres_Of_Mercury_Per_Percent          6176
+#define OVTK_UNIT_Pascal_Per_Percent                          6208
+#define OVTK_UNIT_Relative_Power_Decibel	                  6432
+#define OVTK_UNIT_Meter_Per_Second_Squared                    6624
+#define OVTK_UNIT_Radians_Per_Second_Squared                  6656
+#define OVTK_UNIT_Foot_Per_Minute                             6688
+#define OVTK_UNIT_Inch_Per_Minute                             6720
+#define OVTK_UNIT_Step_Per_Minute                             6752
+#define OVTK_UNIT_Kilocalories                                6784
+#define OVTK_UNIT_Revolution_Per_Minute                       6816
+#define OVTK_UNIT_V_Per_S                                    65152
+#define OVTK_UNIT_M_Per_M                                    65184
+#define OVTK_UNIT_Velocity_Kilometer_Per_Hour                65216
+#define OVTK_UNIT_Left_Stroke_Work_Index_Lswi                65248
+#define OVTK_UNIT_Indexed_Left_Cardiac_Work_Lcwi             65280
+#define OVTK_UNIT_Mhg_Per_S                                  65312
+#define OVTK_UNIT_Millimol_Per_Liter_X_Millimeter            65344
+#define OVTK_UNIT_Rotations_Per_Minute                       65376
 #define OVTK_UNIT_Dyne_Seconds_Square_Meter_Per_Centimetre_To_The_Power_Of_5 65440
-#define OVTK_UNIT_Litres_Per_Square_Meter 65472
-#define OVTK_UNIT_Tesla 65504
+#define OVTK_UNIT_Litres_Per_Square_Meter                    65472
+#define OVTK_UNIT_Tesla                                      65504
+
+// OpenViBE extensions, starting from 100001
+#define OVTK_UNIT_Degree_Per_Second                         100001
 
 
 
@@ -491,7 +494,7 @@
 //
 // The number of each prefix encodes the exponent in the 1e00 notation.
 //
-// OpenViBE enums are unsigned integers. Here we use the convention of ORring with 0x0000FF00 to denote the negative exponents.
+// OpenViBE enums are unsigned integers. Here we use the convention of ORring with 0x00010000 to denote the negative exponents.
 //
 // Note: Since these will be stored as float64 when transmitted by OpenViBE, they should not exceed the floats integer precision
 //
@@ -507,19 +510,19 @@
 #define OVTK_FACTOR_Hecto                                            2
 #define OVTK_FACTOR_Deca                                             1
 #define OVTK_FACTOR_Base                                             0
-#define OVTK_FACTOR_Deci                                             (1 | 0x0000FF00)
-#define OVTK_FACTOR_Centi                                            (2 | 0x0000FF00)
-#define OVTK_FACTOR_Milli                                            (3 | 0x0000FF00)
-#define OVTK_FACTOR_Micro                                            (6 | 0x0000FF00)
-#define OVTK_FACTOR_Nano                                             (9 | 0x0000FF00)
-#define OVTK_FACTOR_Pico                                             (12 | 0x0000FF00)
-#define OVTK_FACTOR_Femto                                            (15 | 0x0000FF00)
-#define OVTK_FACTOR_Atto                                             (18 | 0x0000FF00)
-#define OVTK_FACTOR_Zepto                                            (21 | 0x0000FF00)
-#define OVTK_FACTOR_Yocto                                            (24 | 0x0000FF00)
+#define OVTK_FACTOR_Deci                                             (1  | 0x00010000) // 65537
+#define OVTK_FACTOR_Centi                                            (2  | 0x00010000) // 65538
+#define OVTK_FACTOR_Milli                                            (3  | 0x00010000) // 65539
+#define OVTK_FACTOR_Micro                                            (6  | 0x00010000) // 65540
+#define OVTK_FACTOR_Nano                                             (9  | 0x00010000) // 65541
+#define OVTK_FACTOR_Pico                                             (12 | 0x00010000) // 65542
+#define OVTK_FACTOR_Femto                                            (15 | 0x00010000) // 65543
+#define OVTK_FACTOR_Atto                                             (18 | 0x00010000) // 65544
+#define OVTK_FACTOR_Zepto                                            (21 | 0x00010000) // 65545
+#define OVTK_FACTOR_Yocto                                            (24 | 0x00010000) // 65546
 
 // Convert the factor code to a signer integer
-#define OVTK_DECODE_FACTOR(factor) ( (factor & 0x0000FF00) ? -static_cast<int32>(factor & 0x000000FF) : static_cast<int32>(factor) )
+#define OVTK_DECODE_FACTOR(factor) ( (factor & 0x00010000) ? -static_cast<int32>(factor & 0x0000FFFF) : static_cast<int32>(factor) )
 
 //___________________________________________________________________//
 //                                                                   //
