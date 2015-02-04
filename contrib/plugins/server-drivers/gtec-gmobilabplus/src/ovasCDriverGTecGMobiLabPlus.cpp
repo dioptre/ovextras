@@ -13,7 +13,7 @@
 
 #include <toolkit/ovtk_all.h>
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <cmath>
 #include <cstring>

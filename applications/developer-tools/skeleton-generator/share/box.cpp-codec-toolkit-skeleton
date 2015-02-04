@@ -136,8 +136,8 @@ boolean CBoxAlgorithm@@ClassName@@::process(void)
 	//iterate over all chunk on input 0
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		// decode the chunk i on input 0
-		m_oSignalDecoder.decode(0,i);
+		// decode the chunk i
+		m_oSignalDecoder.decode(i);
 		// the decoder may have decoded 3 different parts : the header, a buffer or the end of stream.
 		if(m_oSignalDecoder.isHeaderReceived())
 		{

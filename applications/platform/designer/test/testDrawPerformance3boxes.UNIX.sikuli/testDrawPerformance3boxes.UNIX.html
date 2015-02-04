@@ -97,8 +97,10 @@
     <span class="kw">print</span> <span class="str">"time to scroll= "</span>+ str(stop-start)
 
 <span class="kw">def</span> tearDown(self):
-    App.close(self.terminal)
-    self.terminal= None
+    mouseMove(Location(<span class="dig">0</span>,<span class="dig">0</span>))
+    <span class="kw">if</span> self.terminal.window():
+        App.close(self.terminal)
+        self.terminal= None
 </pre>
 </body>
 </html>

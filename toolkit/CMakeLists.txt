@@ -25,6 +25,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
 INCLUDE("FindOpenViBEModuleEBML")
+INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindOpenViBEModuleSystem")
 
 # ---------------------------------

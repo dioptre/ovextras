@@ -2,20 +2,6 @@
 #ifndef __OpenViBEPlugins_Defines_H__
 #define __OpenViBEPlugins_Defines_H__
 
-// @BEGIN inserm
-#define OVP_ClassId_BoxAlgorithm_BandFrequencyAverage                                  OpenViBE::CIdentifier(0x95E4781E, 0x45576562)
-#define OVP_ClassId_BoxAlgorithm_BandFrequencyAverageDesc                              OpenViBE::CIdentifier(0xB87877FC, 0xFB3591F2)
-
-#define OVP_ClassId_BoxAlgorithm_Epoching                                              OpenViBE::CIdentifier(0x974D2B9C, 0x369D1065)
-#define OVP_ClassId_BoxAlgorithm_EpochingDesc                                          OpenViBE::CIdentifier(0x617BF26E, 0xADDFBC4D)
-
-#define OVP_ClassId_BoxAlgorithm_SteadyStateFrequencyComparison                        OpenViBE::CIdentifier(0xC13EFA6C, 0x7757834D)
-#define OVP_ClassId_BoxAlgorithm_SteadyStateFrequencyComparisonDesc                    OpenViBE::CIdentifier(0x50DC8D3E, 0x22B235DB)
-#define OVP_TypeId_ComparisonMethod                                                    OpenViBE::CIdentifier(0xCF7AE755, 0x134E71CB)
-#define OVP_TypeId_ComparisonMethod_Ratio                                              OpenViBE::CIdentifier(0xE81FAD81, 0xB320B8EA)
-#define OVP_TypeId_ComparisonMethod_Substraction                                       OpenViBE::CIdentifier(0x2444FC59, 0x40DAB3AD)
-#define OVP_TypeId_ComparisonMethod_LateralityIndex                                    OpenViBE::CIdentifier(0x127A1836, 0xF608C3B5)
-// @END inserm
 
 // @BEGIN inserm-gpl
 #define OVP_ClassId_SpectralAnalysis                                                    OpenViBE::CIdentifier(0x84218FF8, 0xA87E7995)
@@ -29,7 +15,6 @@
 #define OVP_TypeId_FilterMethod                                                         OpenViBE::CIdentifier(0x2F2C606C, 0x8512ED68)
 #define OVP_TypeId_FilterMethod_Butterworth                                             OpenViBE::CIdentifier(0x00E4EADE, 0x9586A50E)
 #define OVP_TypeId_FilterMethod_Chebychev                                               OpenViBE::CIdentifier(0x0C3F5301, 0x7397A7FB)
-#define OVP_TypeId_FilterMethod_YuleWalker                                              OpenViBE::CIdentifier(0x7BF59C86, 0xB6D459BA)
 
 #define OVP_TypeId_FilterType                                                           OpenViBE::CIdentifier(0xFA20178E, 0x4CBA62E9)
 #define OVP_TypeId_FilterType_LowPass                                                   OpenViBE::CIdentifier(0x0C33A568, 0xE2BD46D2)
@@ -103,27 +88,15 @@
 #define OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_ApplyFilter                    OpenViBE::CIdentifier(0xBC1F5655, 0x9807B400)
 #define OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_ApplyFilterWithHistoric        OpenViBE::CIdentifier(0xB7B7D546, 0x6000FF51)
 
-#define OVP_ClassId_TemporalFilter                                                      OpenViBE::CIdentifier(0x4DEB9943, 0x7E638DC1)
-#define OVP_ClassId_TemporalFilterDesc                                                  OpenViBE::CIdentifier(0x9EB3386D, 0x492C30A2)
-
 #define OVP_ClassId_Box_TemporalFilterBoxAlgorithm                                      OpenViBE::CIdentifier(0xB4F9D042, 0x9D79F2E5)
 #define OVP_ClassId_Box_TemporalFilterBoxAlgorithmDesc                                  OpenViBE::CIdentifier(0x7BF6BA62, 0xAF829A37)
 
-#define OVP_ClassId_Algorithm_FeatureExtractionLda                                      OpenViBE::CIdentifier(0xD1AA6C72, 0x0432E1C5)
-#define OVP_ClassId_Algorithm_FeatureExtractionLdaDesc                                  OpenViBE::CIdentifier(0x2109D46A, 0x9A45E1DC)
-#define OVP_Algorithm_FeatureExtractionLda_InputParameterId_EpochTable                  OpenViBE::CIdentifier(0xA7BE9AE6, 0xD09FAD58)
-#define OVP_Algorithm_FeatureExtractionLda_InputParameterId_Class1SamplesNumber         OpenViBE::CIdentifier(0x7F99FBC6, 0x748B183B)
-#define OVP_Algorithm_FeatureExtractionLda_OutputParameterId_MatrixFirstClass           OpenViBE::CIdentifier(0x76F84603, 0x1F5D7A10)
-#define OVP_Algorithm_FeatureExtractionLda_OutputParameterId_MatrixSecondClass          OpenViBE::CIdentifier(0x0AF9008A, 0xE7A7B2B7)
-#define OVP_Algorithm_FeatureExtractionLda_OutputParameterId_MatrixEpoch                OpenViBE::CIdentifier(0xD4B473F6, 0xD5626A12)
-#define OVP_Algorithm_FeatureExtractionLda_InputTriggerId_Initialize                    OpenViBE::CIdentifier(0x06176684, 0x5FA2C7C7)
-#define OVP_Algorithm_FeatureExtractionLda_InputTriggerId_ExtractFeature                OpenViBE::CIdentifier(0x3B505F2F, 0x024B2C52)
+#define OVP_ClassId_Box_ModTemporalFilterBoxAlgorithm                                      OpenViBE::CIdentifier(0xBF49D042, 0x9D79FE52)
+#define OVP_ClassId_Box_ModTemporalFilterBoxAlgorithmDesc                                  OpenViBE::CIdentifier(0x7BF4BA62, 0xAF829A73)
+
 
 #define OVP_ClassId_WindowingFunctions                                                  OpenViBE::CIdentifier(0x002034AE, 0x6509FD8F)
 #define OVP_ClassId_WindowingFunctionsDesc                                              OpenViBE::CIdentifier(0x602CF89F, 0x65BA6DA0)
-
-#define OVP_ClassId_SpectralAnalysisCospectra                                           OpenViBE::CIdentifier(0x0002F6AA, 0x418B260F)
-#define OVP_ClassId_SpectralAnalysisCospectraDesc                                       OpenViBE::CIdentifier(0xBE7311CE, 0x99BB5123)
 
 #define OVP_ClassId_FastICA                                                             OpenViBE::CIdentifier(0x00649B6E, 0x6C88CD17)
 #define OVP_ClassId_FastICADesc                                                         OpenViBE::CIdentifier(0x00E9436C, 0x41C904CA)

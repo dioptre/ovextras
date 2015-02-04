@@ -1,4 +1,3 @@
-
 #if defined TARGET_HAS_ThirdPartyITPP
 
 #include "ovpCSpectralAnalysis.h"
@@ -19,40 +18,13 @@ using namespace std;
 using namespace OpenViBE::Kernel;
 
 CSpectralAnalysis::CSpectralAnalysis(void)
-	:m_pSignalReader(NULL),
-	m_pSignalReaderCallBack(NULL),
-	m_oSignalReaderCallBackProxy(*this,
-		&CSpectralAnalysis::setChannelCount,
-		&CSpectralAnalysis::setChannelName,
-		&CSpectralAnalysis::setSampleCountPerBuffer,
-		&CSpectralAnalysis::setSamplingRate,
-		&CSpectralAnalysis::setSampleBuffer),
-	m_ui64LastChunkStartTime(0),
+	:m_ui64LastChunkStartTime(0),
 	m_ui64LastChunkEndTime(0),
-	m_oAmplitudeSpectrumOutputWriterCallbackProxy(
-		*this,
-		&CSpectralAnalysis::writeAmplitudeSpectrumOutput),
-	m_oPhaseSpectrumOutputWriterCallbackProxy(
-		*this,
-		&CSpectralAnalysis::writePhaseSpectrumOutput),
-	m_oRealPartSpectrumOutputWriterCallbackProxy(
-		*this,
-		&CSpectralAnalysis::writeRealPartSpectrumOutput),
-	m_oImagPartSpectrumOutputWriterCallbackProxy(
-		*this,
-		&CSpectralAnalysis::writeImagPartSpectrumOutput),
-	m_pSpectrumOutputWriterHelper(NULL),
 	m_ui32ChannelCount(0),
 	m_ui32SampleCount(0),
-	m_bCoefComputed(false),
-	m_ui32FFTSize(1),
 	m_ui32HalfFFTSize(1)
 
 {
-	m_pWriter[0] = NULL;
-	m_pWriter[1] = NULL;
-	m_pWriter[2] = NULL;
-	m_pWriter[3] = NULL;
 }
 
 void CSpectralAnalysis::release(void)
@@ -72,45 +44,22 @@ boolean CSpectralAnalysis::initialize()
 	m_bRealPartSpectrum  = ((l_ui64SpectralComponents & OVP_TypeId_SpectralComponent_RealPart.toUInteger())>0);
 	m_bImagPartSpectrum  = ((l_ui64SpectralComponents & OVP_TypeId_SpectralComponent_ImaginaryPart.toUInteger())>0);
 
-	// Prepares EBML reader
-	m_pSignalReaderCallBack = createBoxAlgorithmSignalInputReaderCallback(m_oSignalReaderCallBackProxy);
-	m_pSignalReader=EBML::createReader(*m_pSignalReaderCallBack);
-
-	// Prepares EBML writer
-	m_pSpectrumOutputWriterHelper=createBoxAlgorithmSpectrumOutputWriter();
-	m_pWriter[0]=EBML::createWriter(m_oAmplitudeSpectrumOutputWriterCallbackProxy);
-	m_pWriter[1]=EBML::createWriter(m_oPhaseSpectrumOutputWriterCallbackProxy);
-	m_pWriter[2]=EBML::createWriter(m_oRealPartSpectrumOutputWriterCallbackProxy);
-	m_pWriter[3]=EBML::createWriter(m_oImagPartSpectrumOutputWriterCallbackProxy);
-
-	m_pInputBuffer = NULL;
-	m_pOutputBuffer = NULL;
+	m_oSignalDecoder.initialize(*this,0);
+	for(uint32 i=0; i<4; i++)
+	{
+		m_vSpectrumEncoder[i].initialize(*this,i);
+	}
 
 	return true;
 }
 
 boolean CSpectralAnalysis::uninitialize()
 {
-	// Cleans up EBML writer
-	m_pWriter[0]->release();
-	m_pWriter[0]=NULL;
-	m_pWriter[1]->release();
-	m_pWriter[1]=NULL;
-	m_pWriter[2]->release();
-	m_pWriter[2]=NULL;
-	m_pWriter[3]->release();
-	m_pWriter[3]=NULL;
-
-	releaseBoxAlgorithmSpectrumOutputWriter(m_pSpectrumOutputWriterHelper);
-	m_pSpectrumOutputWriterHelper=NULL;
-
-	// Cleans up EBML reader
-	releaseBoxAlgorithmSignalInputReaderCallback(m_pSignalReaderCallBack);
-	m_pSignalReader->release();
-	m_pSignalReaderCallBack = NULL;
-	m_pSignalReader=NULL;
-
-	delete[] m_pOutputBuffer;
+	for(uint32 i=0; i<4; i++)
+	{
+		m_vSpectrumEncoder[i].uninitialize();
+	}
+	m_oSignalDecoder.uninitialize();
 
 	return true;
 }
@@ -119,58 +68,6 @@ boolean CSpectralAnalysis::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
-}
-
-void CSpectralAnalysis::setChannelCount(const uint32 ui32ChannelCount)
-{
-	//gets the channel count
-	m_ui32ChannelCount = ui32ChannelCount;
-	m_pSpectrumOutputWriterHelper->setChannelCount(ui32ChannelCount);
-}
-
-void CSpectralAnalysis::setChannelName(const uint32 ui32ChannelIndex, const char* sChannelName)
-{
-	m_pSpectrumOutputWriterHelper->setChannelName(ui32ChannelIndex, sChannelName);
-}
-
-void CSpectralAnalysis::setSampleCountPerBuffer(const uint32 ui32SampleCountPerBuffer)
-{
-	m_ui32SampleCount = ui32SampleCountPerBuffer;
-}
-
-void CSpectralAnalysis::setSamplingRate(const uint32 ui32SamplingFrequency)
-{
-	m_ui32SamplingRate = ui32SamplingFrequency;
-}
-
-void CSpectralAnalysis::setSampleBuffer(const float64* pBuffer)
-{
-	m_pInputBuffer = pBuffer;
-}
-
-void CSpectralAnalysis::setBuffer(const float64* pBuffer)
-{
-	m_pInputBuffer = pBuffer;
-}
-
-void CSpectralAnalysis::writeAmplitudeSpectrumOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize)
-{
-	appendOutputChunkData<0>(pBuffer, ui64BufferSize);
-}
-
-void CSpectralAnalysis::writePhaseSpectrumOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize)
-{
-	appendOutputChunkData<1>(pBuffer, ui64BufferSize);
-}
-
-void CSpectralAnalysis::writeRealPartSpectrumOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize)
-{
-	appendOutputChunkData<2>(pBuffer, ui64BufferSize);
-}
-
-void CSpectralAnalysis::writeImagPartSpectrumOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize)
-{
-	appendOutputChunkData<3>(pBuffer, ui64BufferSize);
 }
 
 boolean CSpectralAnalysis::process()
@@ -182,135 +79,171 @@ boolean CSpectralAnalysis::process()
 
 	for(uint32 chunkIdx = 0; chunkIdx < l_ui32InputChunkCount; chunkIdx++)
     {
-		uint64 l_ui64ChunkSize = 0;
-		const uint8 * l_pChunkBuffer = NULL;
+		m_ui64LastChunkStartTime=l_pDynamicContext->getInputChunkStartTime(0, chunkIdx);
+		m_ui64LastChunkEndTime=l_pDynamicContext->getInputChunkEndTime(0, chunkIdx);
 
-		if(l_pDynamicContext->getInputChunk(0, chunkIdx, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime, l_ui64ChunkSize, l_pChunkBuffer))
+		m_oSignalDecoder.decode(chunkIdx);
+
+		if(m_oSignalDecoder.isHeaderReceived())//dealing with the signal header
 		{
-			m_pSignalReader->processData(l_pChunkBuffer, l_ui64ChunkSize);
+			//get signal info
+			m_ui32SampleCount = m_oSignalDecoder.getOutputMatrix()->getDimensionSize(1);
+			m_ui32ChannelCount = m_oSignalDecoder.getOutputMatrix()->getDimensionSize(0);
+			m_ui32SamplingRate = (uint32)m_oSignalDecoder.getOutputSamplingRate();
 
-			if(m_pInputBuffer == NULL) //dealing with the signal header
-			{
-				if (!m_bCoefComputed)
-				{
-					m_ui32FFTSize=1;
-					m_ui32HalfFFTSize=1;
-					// Find out a power of two thats >= m_ui32SampleCount
-					while (m_ui32FFTSize < m_ui32SampleCount)
-					{
-						m_ui32FFTSize<<=1;
-					}
-					if(m_ui32FFTSize==1)
-					{
-						this->getLogManager() << LogLevel_Warning << "Computing FFT with size = 1\n";
-					}
-					// Due to the inputs being real numbers, we only need to look at half of the complex output later
-					m_ui32HalfFFTSize = m_ui32FFTSize>>1;	
-					m_bCoefComputed = true;
-				}
-
-				m_ui32FrequencyBandCount = m_ui32HalfFFTSize;
-				m_pSpectrumOutputWriterHelper->setFrequencyBandCount(m_ui32FrequencyBandCount);
-				for (uint32 j=0; j < m_ui32FrequencyBandCount; j++)
-				{
-					l_float64BandStart = static_cast<float64>(j*((double)(m_ui32SamplingRate/2)/m_ui32FrequencyBandCount));
-					l_float64BandStop = static_cast<float64>((j+1)*((double)(m_ui32SamplingRate/2)/m_ui32FrequencyBandCount));
-					if (l_float64BandStop <l_float64BandStart )
-					{
-						l_float64BandStop = l_float64BandStart;
-					}
-
-					m_pSpectrumOutputWriterHelper->setFrequencyBandStart(j, l_float64BandStart);
-					m_pSpectrumOutputWriterHelper->setFrequencyBandStop(j,  l_float64BandStop);
-					sprintf(l_sFrequencyBandName, "%lg-%lg", l_float64BandStart, l_float64BandStop);
-					m_pSpectrumOutputWriterHelper->setFrequencyBandName(j, l_sFrequencyBandName);
-				}
-
-				if (m_bAmplitudeSpectrum)
-				{
-					m_pSpectrumOutputWriterHelper->writeHeader(*m_pWriter[0]);
-					l_pDynamicContext->markOutputAsReadyToSend(0,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-				}
-				if (m_bPhaseSpectrum)
-				{
-					m_pSpectrumOutputWriterHelper->writeHeader(*m_pWriter[1]);
-					l_pDynamicContext->markOutputAsReadyToSend(1,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-				}
-				if (m_bRealPartSpectrum)
-				{
-					m_pSpectrumOutputWriterHelper->writeHeader(*m_pWriter[2]);
-					l_pDynamicContext->markOutputAsReadyToSend(2,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-				}
-				if (m_bImagPartSpectrum)
-				{
-					m_pSpectrumOutputWriterHelper->writeHeader(*m_pWriter[3]);
-					l_pDynamicContext->markOutputAsReadyToSend(3,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-				}
-
-				m_pOutputBuffer = new float64[m_ui32HalfFFTSize*m_ui32ChannelCount];
-				m_pSpectrumOutputWriterHelper->setBuffer(m_pOutputBuffer);
+			if(m_ui32SampleCount == 0) {
+				this->getLogManager() << LogLevel_Error << "Chunk size appears to be 0, not supported.\n";
+				return false;
 			}
-			else
-			{
-				//do the processing
-				vec x(m_ui32SampleCount);
-				cvec y(m_ui32SampleCount);
-				cvec z(m_ui32ChannelCount*m_ui32HalfFFTSize);
-
-				for (uint64 i=0;  i < m_ui32ChannelCount; i++)
-				{
-					for(uint64 j=0 ; j<m_ui32SampleCount ; j++)
-					{
-						x[(int)j] =  (double)m_pInputBuffer[i*m_ui32SampleCount+j];
-					}
-
-					y = fft_real(x, m_ui32FFTSize);
-
-					for(uint64 k=0 ; k<m_ui32HalfFFTSize ; k++)
-					{
-						z[(int)(k+i*m_ui32HalfFFTSize)] = y[(int)k];
-					}
-				}
-
-				if (m_bAmplitudeSpectrum)
-				{
-					for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
-					{
-						m_pOutputBuffer[i] =  sqrt(real(z[(int)i])*real(z[(int)i])+ imag(z[(int)i])*imag(z[(int)i]));
-					}
-					m_pSpectrumOutputWriterHelper->writeBuffer(*m_pWriter[0]);
-					l_pDynamicContext->markOutputAsReadyToSend(0,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-				}
-				if (m_bPhaseSpectrum)
-				{
-					for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
-					{
-						m_pOutputBuffer[i] =  imag(z[(int)i])/real(z[(int)i]);
-					}
-					m_pSpectrumOutputWriterHelper->writeBuffer(*m_pWriter[1]);
-					l_pDynamicContext->markOutputAsReadyToSend(1,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-				}
-				if (m_bRealPartSpectrum)
-				{
-					for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
-					{
-						m_pOutputBuffer[i] = real(z[(int)i]);
-					}
-					m_pSpectrumOutputWriterHelper->writeBuffer(*m_pWriter[2]);
-					l_pDynamicContext->markOutputAsReadyToSend(2,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-				}
-				if (m_bImagPartSpectrum)
-				{
-					for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
-					{
-						m_pOutputBuffer[i] = imag(z[(int)i]);
-					}
-					m_pSpectrumOutputWriterHelper->writeBuffer(*m_pWriter[3]);
-					l_pDynamicContext->markOutputAsReadyToSend(3,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-				}
+			if(m_ui32ChannelCount == 0) {
+				this->getLogManager() << LogLevel_Error << "Channel count appears to be 0, not supported.\n";
+				return false;
 			}
-			l_pDynamicContext->markInputAsDeprecated(0,chunkIdx);
+			if(m_ui32SamplingRate == 0) {
+				this->getLogManager() << LogLevel_Error << "Sampling rate appears to be 0, not supported.\n";
+				return false;
+			}
+
+			//we need two matrices for the spectrum encoders, the Frequency bands and the one inherited form streamed matrix (see doc for details)
+			CMatrix* l_pFrequencyBands = new CMatrix();
+			CMatrix* l_pStreamedMatrix = new CMatrix();
+			l_pFrequencyBands->setDimensionCount(2);
+
+			// For real signals, if N is sample count, bins [0,N/2] (inclusive) contain non-redundant information, i.e. N/2+1 entries.
+			m_ui32HalfFFTSize = m_ui32SampleCount / 2 + 1;
+			m_ui32FrequencyBandCount = m_ui32HalfFFTSize;
+
+			OpenViBEToolkit::Tools::MatrixManipulation::copyDescription(*l_pStreamedMatrix, *m_oSignalDecoder.getOutputMatrix());
+			l_pStreamedMatrix->setDimensionSize(1,m_ui32FrequencyBandCount);
+			l_pFrequencyBands->setDimensionSize(0,2);
+			l_pFrequencyBands->setDimensionSize(1,m_ui32FrequencyBandCount);
+			float64* l_pBuffer = l_pFrequencyBands->getBuffer();
+
+			// @fixme would be more proper to use 'bins', one bin with a hz tag per array entry
+			for (uint32 j=0; j < m_ui32FrequencyBandCount; j++)
+			{
+				l_float64BandStart = static_cast<float64>(j*(m_ui32SamplingRate/(float64)m_ui32SampleCount));
+				l_float64BandStop = static_cast<float64>((j+1)*(m_ui32SamplingRate/(float64)m_ui32SampleCount));
+				if (l_float64BandStop <l_float64BandStart )
+				{
+					l_float64BandStop = l_float64BandStart;
+				}
+
+				*(l_pBuffer+2*j) = l_float64BandStart;
+				*(l_pBuffer+2*j+1) = l_float64BandStop;
+
+
+				sprintf(l_sFrequencyBandName, "%lg-%lg", l_float64BandStart, l_float64BandStop);
+				l_pStreamedMatrix->setDimensionLabel(1,j,l_sFrequencyBandName);//set the names of the frequency bands
+			}
+
+			for(uint32 i=0;i<4;i++)
+			{
+				//copy the information for each encoder
+				OpenViBEToolkit::Tools::MatrixManipulation::copy(*m_vSpectrumEncoder[i].getInputMinMaxFrequencyBands(),*l_pFrequencyBands);
+				OpenViBEToolkit::Tools::MatrixManipulation::copy(*m_vSpectrumEncoder[i].getInputMatrix(),*l_pStreamedMatrix);
+			}
+
+			if (m_bAmplitudeSpectrum)
+			{
+				m_vSpectrumEncoder[0].encodeHeader();
+				l_pDynamicContext->markOutputAsReadyToSend(0,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+			if (m_bPhaseSpectrum)
+			{
+				m_vSpectrumEncoder[1].encodeHeader();
+				l_pDynamicContext->markOutputAsReadyToSend(1,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+			if (m_bRealPartSpectrum)
+			{
+				m_vSpectrumEncoder[2].encodeHeader();
+				l_pDynamicContext->markOutputAsReadyToSend(2,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+			if (m_bImagPartSpectrum)
+			{
+				m_vSpectrumEncoder[3].encodeHeader();
+				l_pDynamicContext->markOutputAsReadyToSend(3,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+
+			delete l_pFrequencyBands;
+			delete l_pStreamedMatrix;
 		}
+		if(m_oSignalDecoder.isBufferReceived())
+		{
+			//get input buffer
+			const float64* l_pBuffer = m_oSignalDecoder.getOutputMatrix()->getBuffer();
+			//do the processing
+			vec x(m_ui32SampleCount);
+			cvec y(m_ui32SampleCount);
+			cvec z(m_ui32ChannelCount*m_ui32HalfFFTSize);
+
+			for (uint64 i=0;  i < m_ui32ChannelCount; i++)
+			{
+				for(uint64 j=0 ; j<m_ui32SampleCount ; j++)
+				{
+					x[(int)j] =  (double)*(l_pBuffer+i*m_ui32SampleCount+j);
+				}
+
+				y = fft_real(x);
+
+				//test block
+				// vec h = ifft_real(y);
+				// std::cout << "Fx: " << x.size() << ", x=" << x << "\n";
+				// std::cout << "FF: " << y.size() << ", y=" << y << "\n";
+				// std::cout << "Fr: " << h.size() << ", x'=" << h << "\n";
+
+				for(uint64 k=0 ; k<m_ui32HalfFFTSize ; k++)
+				{
+					z[(int)(k+i*m_ui32HalfFFTSize)] = y[(int)k];
+				}
+			}
+
+			if (m_bAmplitudeSpectrum)
+			{
+				IMatrix* l_pMatrix = m_vSpectrumEncoder[0].getInputMatrix();
+				float64* l_pBuffer = l_pMatrix->getBuffer();
+				for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
+				{
+					*(l_pBuffer+i) = sqrt(real(z[(int)i])*real(z[(int)i])+ imag(z[(int)i])*imag(z[(int)i]));
+				}
+				m_vSpectrumEncoder[0].encodeBuffer();
+				l_pDynamicContext->markOutputAsReadyToSend(0,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+			if (m_bPhaseSpectrum)
+			{
+				IMatrix* l_pMatrix = m_vSpectrumEncoder[1].getInputMatrix();
+				float64* l_pBuffer = l_pMatrix->getBuffer();
+				for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
+				{
+					*(l_pBuffer+i) =  imag(z[(int)i])/real(z[(int)i]);
+				}
+				m_vSpectrumEncoder[1].encodeBuffer();
+				l_pDynamicContext->markOutputAsReadyToSend(1,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+			if (m_bRealPartSpectrum)
+			{
+				IMatrix* l_pMatrix = m_vSpectrumEncoder[2].getInputMatrix();
+				float64* l_pBuffer = l_pMatrix->getBuffer();
+				for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
+				{
+					*(l_pBuffer+i) = real(z[(int)i]);
+				}
+				m_vSpectrumEncoder[2].encodeBuffer();
+				l_pDynamicContext->markOutputAsReadyToSend(2,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+			if (m_bImagPartSpectrum)
+			{
+				IMatrix* l_pMatrix = m_vSpectrumEncoder[3].getInputMatrix();
+				float64* l_pBuffer = l_pMatrix->getBuffer();
+				for (uint64 i=0;  i < m_ui32ChannelCount*m_ui32HalfFFTSize; i++)
+				{
+					*(l_pBuffer+i) = imag(z[(int)i]);
+				}
+				m_vSpectrumEncoder[3].encodeBuffer();
+				l_pDynamicContext->markOutputAsReadyToSend(3,m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+		}
+		l_pDynamicContext->markInputAsDeprecated(0,chunkIdx);
 	}
 	return true;
 }

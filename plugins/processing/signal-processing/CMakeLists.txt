@@ -6,7 +6,9 @@ SET(PROJECT_VERSION_PATCH ${OV_GLOBAL_VERSION_PATCH})
 SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files}
+	"../../../contrib/packages/wavelet2d/wavelet2s.cpp"
+	"../../../contrib/packages/wavelet2d/wavelet2s.h")
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 	VERSION ${PROJECT_VERSION}
 	SOVERSION ${PROJECT_VERSION_MAJOR}
@@ -19,7 +21,11 @@ INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyEigen")
-INCLUDE("FindThirdPartyITPP")
+INCLUDE("FindThirdPartyFFTW3")		# used by the wavelet library
+INCLUDE("FindThirdPartyITPP")		# note that itpp gives the fftw3 on Win
+#for additionnal coadapt plugins, the following
+INCLUDE("FindThirdPartyBoost_Math")
+INCLUDE("FindOpenViBEModuleXML")
 
 # ---------------------------------
 # Target macros
@@ -54,6 +60,7 @@ INSTALL(TARGETS ${PROJECT_NAME}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 
+INSTALL(DIRECTORY signals/       DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/signals         PATTERN ".svn" EXCLUDE)
 INSTALL(DIRECTORY box-tutorials/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/box-tutorials   PATTERN ".svn" EXCLUDE)
 	
 #INSTALL(DIRECTORY src/   DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "doc" EXCLUDE)

@@ -80,15 +80,15 @@ void CGDFFileWriter::setSampleBuffer(const float64* pBuffer)
 {
 	float64 l_f64Sample=0;
 
+
 	//for each channel
 	for(uint32 j=0; j<m_oFixedHeader.m_ui32NumberOfSignals ; j++)
 	{
-
 		for(uint32 i=0; i<m_ui32SamplesPerChannel; i++)
 		{
+
 			//gets a sample value
 			l_f64Sample = pBuffer[j*m_ui32SamplesPerChannel+i];
-
 			//actualize channel's digital min/max
 			if(fabs(l_f64Sample) > m_oVariableHeader[j].m_f64PhysicalMaximum)
 			{
@@ -135,104 +135,65 @@ void CGDFFileWriter::setSampleBuffer(const float64* pBuffer)
 * Experiment callback
 *
 */
-void CGDFFileWriter::setValue(const uint32 ui32ValueIdentifier, const uint64 ui64Value)
+void CGDFFileWriter::setExperimentInformation()
 {
-	switch(ui32ValueIdentifier)
+	uint64 ui64Value;
+
+	ui64Value = m_pExperimentInformationDecoder->getOutputExperimentIdentifier();
+	sprintf(m_oFixedHeader.m_sRecordingId, "0x%08X", (unsigned int)ui64Value);
+	m_oFixedHeader.m_sRecordingId[10] = ' ';
+
+	ui64Value = m_pExperimentInformationDecoder->getOutputSubjectIdentifier();
+	sprintf(m_oFixedHeader.m_sPatientId, "0x%08X ", (unsigned int)ui64Value);
+	m_oFixedHeader.m_sPatientId[11] = ' ';
+
+
+	m_pExperimentInformationDecoder->getOutputSubjectAge();
+	// TODO using the experiment date, compute the birthdate?
+
+	ui64Value = m_pExperimentInformationDecoder->getOutputSubjectGender();
+	switch(ui64Value)
 	{
-		case IBoxAlgorithmExperimentInformationInputReaderCallback::Value_ExperimentIdentifier:
-
-			sprintf(m_oFixedHeader.m_sRecordingId, "0x%08X", (unsigned int)ui64Value);
-			m_oFixedHeader.m_sRecordingId[10] = ' ';
+		case OVTK_Value_Sex_Female:
+			m_oFixedHeader.m_sPatientId[17] = 'F';
 			break;
 
-		case IBoxAlgorithmExperimentInformationInputReaderCallback::Value_SubjectIdentifier:
-
-			sprintf(m_oFixedHeader.m_sPatientId, "0x%08X ", (unsigned int)ui64Value);
-			m_oFixedHeader.m_sPatientId[11] = ' ';
+		case OVTK_Value_Sex_Male:
+			m_oFixedHeader.m_sPatientId[17] = 'M';
 			break;
 
-		case IBoxAlgorithmExperimentInformationInputReaderCallback::Value_SubjectAge:
-			// TODO using the experiment date, compute the birthdate?
+		case OVTK_Value_Sex_Unknown:
+		case OVTK_Value_Sex_NotSpecified:
+		default:
+			m_oFixedHeader.m_sPatientId[17] = 'X';
 			break;
-
-		case IBoxAlgorithmExperimentInformationInputReaderCallback::Value_SubjectSex:
-
-			switch(ui64Value)
-			{
-				case OVTK_Value_Sex_Female:
-					m_oFixedHeader.m_sPatientId[17] = 'F';
-					break;
-
-				case OVTK_Value_Sex_Male:
-					m_oFixedHeader.m_sPatientId[17] = 'M';
-					break;
-
-				case OVTK_Value_Sex_Unknown:
-				case OVTK_Value_Sex_NotSpecified:
-				default:
-					m_oFixedHeader.m_sPatientId[17] = 'X';
-					break;
-			}
-
-			m_oFixedHeader.m_sPatientId[18] = ' ';
-			break;
-
-		case IBoxAlgorithmExperimentInformationInputReaderCallback::Value_LaboratoryIdentifier:
-			m_oFixedHeader.m_ui64LaboratoryId = ui64Value;
-			break;
-
-		case IBoxAlgorithmExperimentInformationInputReaderCallback::Value_TechnicianIdentifier:
-			m_oFixedHeader.m_ui64TechnicianId = ui64Value;
-			if(!m_oFixedHeader.save(m_oFile))
-			{
-				m_bError = true;
-
-				getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Error while writing to the output file!\n";
-			}
-			break;
-
 	}
-}
+	m_oFixedHeader.m_sPatientId[18] = ' ';
 
-void CGDFFileWriter::setValue(const uint32 ui32ValueIdentifier, const char* sValue)
-{
-	switch(ui32ValueIdentifier)
+
+	ui64Value = m_pExperimentInformationDecoder->getOutputLaboratoryIdentifier();
+	m_oFixedHeader.m_ui64LaboratoryId = ui64Value;
+
+
+	ui64Value = m_pExperimentInformationDecoder->getOutputTechnicianIdentifier();
+	m_oFixedHeader.m_ui64TechnicianId = ui64Value;
+
+	CString* l_sSubjectNameValue = m_pExperimentInformationDecoder->getOutputSubjectName();
+	std::string l_sFormattedSubjectName((*l_sSubjectNameValue).toASCIIString());
+	l_sFormattedSubjectName.replace(l_sFormattedSubjectName.begin(), l_sFormattedSubjectName.end(), ' ', '_');
+	sprintf(m_oFixedHeader.m_sPatientId + 31, "%s", l_sFormattedSubjectName.c_str());
+
+	if(!m_oFixedHeader.save(m_oFile))
 	{
-		/*
-		case IBoxAlgorithmExperimentInformationInputReaderCallback::Value_ExperimentDate:
-			break;
-		*/
+		m_bError = true;
 
-		case IBoxAlgorithmExperimentInformationInputReaderCallback::Value_SubjectName:
-		{
-			int l_nameLen = strlen(sValue);
-			if (l_nameLen>0)
-			{
-				char * l_pFormattedSubjectName = new char[l_nameLen+1];
-
-				strcpy(l_pFormattedSubjectName, sValue);
-
-				char * l_pSpaceInSubjectName;
-				//replaces all spaces by underscores
-				while( (l_pSpaceInSubjectName = strchr(l_pFormattedSubjectName , ' ')) != NULL)
-				{
-					*l_pSpaceInSubjectName = '_';
-				}
-
-				sprintf(m_oFixedHeader.m_sPatientId + 31, "%s", l_pFormattedSubjectName);
-
-				delete[] l_pFormattedSubjectName;
-			}
-		}
-		break;
+		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Error while writing to the output file!\n";
 	}
+
+
 }
 
-void CGDFFileWriter::setStimulationCount(const uint32 ui32StimulationCount)
-{
-}
-
-void CGDFFileWriter::setStimulation(const uint32 ui32StimulationIndex, const uint64 ui64StimulationIdentifier, const uint64 ui64StimulationDate)
+void CGDFFileWriter::setStimulation(const uint64 ui64StimulationIdentifier, const uint64 ui64StimulationDate)
 {
 	m_oEvents.push_back(pair<uint64,uint64>(ui64StimulationIdentifier, ui64StimulationDate));
 }
@@ -240,26 +201,19 @@ void CGDFFileWriter::setStimulation(const uint32 ui32StimulationIndex, const uin
 CGDFFileWriter::CGDFFileWriter(void) :
 	m_bError(false)
 {
-	for(int i=0 ; i<3 ; i++)
-	{
-		m_pReaderCallBack[i]=NULL;
-		m_pReader[i] = NULL;
-	}
 }
 
 boolean CGDFFileWriter::initialize()
 {
 	const IBox* l_pBox=getBoxAlgorithmContext()->getStaticBoxContext();
 
-	// Prepares EBML readers
-	m_pExperimentInformationReaderCallBack=createBoxAlgorithmExperimentInformationInputReaderCallback(*this);
-	m_pReader[0]=EBML::createReader(*m_pExperimentInformationReaderCallBack);
+	m_pSignalDecoder = new OpenViBEToolkit::TSignalDecoder<CGDFFileWriter>;
+	m_pExperimentInformationDecoder = new OpenViBEToolkit::TExperimentInformationDecoder<CGDFFileWriter>;
+	m_pStimulationDecoder = new OpenViBEToolkit::TStimulationDecoder<CGDFFileWriter>;
 
-	m_pSignalReaderCallBack = createBoxAlgorithmSignalInputReaderCallback(*this);
-	m_pReader[1]=EBML::createReader(*m_pSignalReaderCallBack);
-
-	m_pStimulationReaderCallBack=createBoxAlgorithmStimulationInputReaderCallback(*this);
-	m_pReader[2]=EBML::createReader(*m_pStimulationReaderCallBack);
+	m_pSignalDecoder->initialize(*this,1);
+	m_pExperimentInformationDecoder->initialize(*this,0);
+	m_pStimulationDecoder->initialize(*this,2);
 
 	// Parses box settings to find filename
 	l_pBox->getSettingValue(0, m_sFileName);
@@ -288,6 +242,7 @@ boolean CGDFFileWriter::uninitialize()
 	if(m_vSampleCount.size() != 0)
 	{
 		m_oFixedHeader.m_i64NumberOfDataRecords=m_vSampleCount[0];
+		this->getLogManager() << LogLevel_Fatal << "Saving " << m_vSampleCount[0] << " data records\n";
 	}
 
 	if(m_oFixedHeader.update(m_oFile))
@@ -320,15 +275,20 @@ boolean CGDFFileWriter::uninitialize()
 		m_oFile.close();
 	}
 
-	releaseBoxAlgorithmExperimentInformationInputReaderCallback(m_pExperimentInformationReaderCallBack);
-	releaseBoxAlgorithmSignalInputReaderCallback(m_pSignalReaderCallBack);
-	releaseBoxAlgorithmStimulationInputReaderCallback(m_pStimulationReaderCallBack);
-
-	// Cleans up EBML reader
-	for(int i=0 ; i<3 ; i++)
+	if(m_pSignalDecoder)
 	{
-		m_pReader[i]->release();
-		m_pReader[i]=NULL;
+		m_pSignalDecoder->uninitialize();
+		delete m_pSignalDecoder;
+	}
+	if(m_pExperimentInformationDecoder)
+	{
+		m_pExperimentInformationDecoder->uninitialize();
+		delete m_pExperimentInformationDecoder;
+	}
+	if(m_pStimulationDecoder)
+	{
+		m_pStimulationDecoder->uninitialize();
+		delete m_pStimulationDecoder;
 	}
 
 	return true;
@@ -441,21 +401,59 @@ boolean CGDFFileWriter::process()
 {
 	IBoxIO* l_pBoxIO=getBoxAlgorithmContext()->getDynamicBoxContext();
 
-	for(uint32 j=0 ; j<getBoxAlgorithmContext()->getStaticBoxContext()->getInputCount() ; j++)
+	//Experiment information
+	for(uint32 i=0; i<l_pBoxIO->getInputChunkCount(0); i++)
 	{
-		for(uint32 i=0; i<l_pBoxIO->getInputChunkCount(j); i++)
+		m_pExperimentInformationDecoder->decode(i);
+		if(m_pExperimentInformationDecoder->isHeaderReceived())
 		{
-			uint64 l_ui64StartTime;
-			uint64 l_ui64EndTime;
-			uint64 l_ui64ChunkSize;
-			const uint8* l_pChunkBuffer=NULL;
-
-			if(l_pBoxIO->getInputChunk(j, i, l_ui64StartTime, l_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer))
-			{
-				m_pReader[j]->processData(l_pChunkBuffer, l_ui64ChunkSize);
-			}
-			l_pBoxIO->markInputAsDeprecated(j, i);
+			setExperimentInformation();
 		}
+		l_pBoxIO->markInputAsDeprecated(0, i);
+	}
+
+
+	//Signal
+	for(uint32 i=0; i<l_pBoxIO->getInputChunkCount(1); i++)
+	{
+		m_pSignalDecoder->decode(i);
+		if(m_pSignalDecoder->isHeaderReceived())
+		{
+			IMatrix* l_pOutputMatrix = m_pSignalDecoder->getOutputMatrix();
+			uint32 l_ui32ChannelCount = l_pOutputMatrix->getDimensionSize(0);
+			setChannelCount(l_ui32ChannelCount);
+			for(uint32 i=0; i<l_ui32ChannelCount; i++)
+			{
+				setChannelName(i, l_pOutputMatrix->getDimensionLabel(0,i));
+			}
+			setSamplingRate((uint32)m_pSignalDecoder->getOutputSamplingRate());
+			setSampleCountPerBuffer(l_pOutputMatrix->getDimensionSize(1));
+
+		}
+		if(m_pSignalDecoder->isBufferReceived())
+		{
+			IMatrix* l_pOutputMatrix = m_pSignalDecoder->getOutputMatrix();
+			float64* l_pBuffer = l_pOutputMatrix->getBuffer();
+			setSampleBuffer(l_pBuffer);
+		}
+		l_pBoxIO->markInputAsDeprecated(1, i);
+	}
+
+	//Stimulations
+	for(uint32 i=0; i<l_pBoxIO->getInputChunkCount(2); i++)
+	{
+		m_pStimulationDecoder->decode(i);
+
+		if(m_pStimulationDecoder->isBufferReceived())
+		{
+			IStimulationSet* l_pStimulationSet = m_pStimulationDecoder->getOutputStimulationSet();
+			for(uint32 i=0; i<l_pStimulationSet->getStimulationCount(); i++)
+			{
+				setStimulation(l_pStimulationSet->getStimulationIdentifier(i), l_pStimulationSet->getStimulationDate(i));
+			}
+		}
+
+		l_pBoxIO->markInputAsDeprecated(2, i);
 	}
 
 	return true;

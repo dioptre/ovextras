@@ -2,6 +2,10 @@
 #include <iostream>
 #include <sstream>
 #include <map>
+#include <cmath>  // std::ceil() on Linux
+
+#include <openvibe/ovITimeArithmetics.h>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -53,6 +57,9 @@ uint64 CBoxAlgorithmCSVFileReader::getClockFrequency(void)
 
 boolean CBoxAlgorithmCSVFileReader::initialize(void)
 {
+	m_ui64SamplingRate = 0;
+	m_pAlgorithmEncoder = NULL;
+
 	this->getStaticBoxContext().getOutputType(0,m_oTypeIdentifier);
 
 	m_sFilename= FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
@@ -75,7 +82,7 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 		m_ui32SamplesPerBuffer=static_cast<uint32>(atoi((const char*)l_sParam));
 	}
 	//open file
-	m_pFile=::fopen(m_sFilename.toASCIIString(), "rb");
+	m_pFile=::fopen(m_sFilename.toASCIIString(), "r"); // we don't open as binary as that gives us \r\n on Windows as line-endings and leaves a dangling char after split. CSV files should be text.
 	if(!m_pFile)
 	{
 		this->getLogManager() << LogLevel_Error << "Could not open file [" << m_sFilename << "]\n";
@@ -98,31 +105,20 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 
 	if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation))
 	{
-		m_pAlgorithmEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_ChannelLocalisationStreamEncoder));
-		m_pAlgorithmEncoder->initialize();
-		op_pMemoryBuffer.initialize(m_pAlgorithmEncoder->getOutputParameter(OVP_GD_Algorithm_ChannelLocalisationStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-		ip_pMatrix.initialize(m_pAlgorithmEncoder->getInputParameter(OVP_GD_Algorithm_ChannelLocalisationStreamEncoder_InputParameterId_Matrix));
-		ip_pDynamic.initialize(m_pAlgorithmEncoder->getInputParameter(OVP_GD_Algorithm_ChannelLocalisationStreamEncoder_InputParameterId_Dynamic));
-
+		m_pAlgorithmEncoder= new OpenViBEToolkit::TChannelLocalisationEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		//number of column without the column contains the dynamic parameter
 		//m_ui32NbColumn-=1;
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_channelLocalisation;
 	}
 	else if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_FeatureVector))
 	{
-		m_pAlgorithmEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_FeatureVectorStreamEncoder));
-		m_pAlgorithmEncoder->initialize();
-		op_pMemoryBuffer.initialize(m_pAlgorithmEncoder->getOutputParameter(OVP_GD_Algorithm_FeatureVectorStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-		ip_pMatrix.initialize(m_pAlgorithmEncoder->getInputParameter(OVP_GD_Algorithm_FeatureVectorStreamEncoder_InputParameterId_Matrix));
+		m_pAlgorithmEncoder=new OpenViBEToolkit::TFeatureVectorEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_featureVector;
+		m_ui32SamplesPerBuffer = 1;
 	}
 	else if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Spectrum))
 	{
-		m_pAlgorithmEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SpectrumStreamEncoder));
-		m_pAlgorithmEncoder->initialize();
-		op_pMemoryBuffer.initialize(m_pAlgorithmEncoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-		ip_pMinMaxFrequencyBands.initialize(m_pAlgorithmEncoder->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_MinMaxFrequencyBands));
-		ip_pMatrix.initialize(m_pAlgorithmEncoder->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_Matrix));
+		m_pAlgorithmEncoder=new OpenViBEToolkit::TSpectrumEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_spectrum;
 
 		//number of column without columns contains min max frequency bands parameters
@@ -130,11 +126,7 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 	}
 	else if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Signal))
 	{
-		m_pAlgorithmEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoder));
-		m_pAlgorithmEncoder->initialize();
-		op_pMemoryBuffer.initialize(m_pAlgorithmEncoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-		ip_pMatrix.initialize(m_pAlgorithmEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_Matrix));
-		ip_pSamplingRate.initialize(m_pAlgorithmEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_SamplingRate));
+		m_pAlgorithmEncoder=new OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_signal;
 
 		//find the sampling rate
@@ -153,13 +145,28 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 			this->getLogManager() << LogLevel_Error << "Line didn't have enough components. Remember it needs to have +1 for freq. \n";
 			return false;
 		}
-		m_ui64SamplingRate=atoi(l_vParsed[m_ui32NbColumn-1].c_str());
+		const float64 l_f64SamplingRate = static_cast<float64>(atof(l_vParsed[m_ui32NbColumn-1].c_str()));
+		if(std::ceil(l_f64SamplingRate) != l_f64SamplingRate) 
+		{
+			this->getLogManager() << LogLevel_Error << "Extracted sampling rate (column " 
+				<< m_ui32NbColumn << ") appears fractional (" << l_f64SamplingRate << " hz), but fractional sampling rates are not supported. "
+				<< "As this is likely a parsing error, please modify the file to correspond to OV conventions (see CSV Reader documentation).\n";
+			return false;
+		}
 
+		m_ui64SamplingRate=static_cast<uint64>(l_f64SamplingRate);
+
+		if(m_ui64SamplingRate == 0) 
+		{
+			this->getLogManager() << LogLevel_Error << "Parsed the sampling rate as 0, this is not acceptable for a signal stream.\n";
+			return false;
+		}
+
+		// Skip the header
 		::rewind(m_pFile);
 		l_pResult=::fgets(l_pLine,m_ui32bufferLen,m_pFile);
 		if(NULL==l_pResult)
 		{
-			// bad : FIXME handle reading error here
 			fclose(m_pFile);
 			m_pFile=NULL;
 			this->getLogManager() << LogLevel_Error << "fgets() error\n";
@@ -171,18 +178,12 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 	}
 	else if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_StreamedMatrix))
 	{
-		m_pAlgorithmEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamEncoder));
-		m_pAlgorithmEncoder->initialize();
-		op_pMemoryBuffer.initialize(m_pAlgorithmEncoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-		ip_pMatrix.initialize(m_pAlgorithmEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix));
+		m_pAlgorithmEncoder=new OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_streamedMatrix;
 	}
 	else if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Stimulations))
 	{
-		m_pAlgorithmEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
-		m_pAlgorithmEncoder->initialize();
-		op_pMemoryBuffer.initialize(m_pAlgorithmEncoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-		ip_pStimulationSet.initialize(m_pAlgorithmEncoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_InputParameterId_StimulationSet));
+		m_pAlgorithmEncoder=new OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_stimulation;
 	}
 	else
@@ -204,17 +205,12 @@ boolean CBoxAlgorithmCSVFileReader::uninitialize(void)
 	{
 		::fclose(m_pFile);
 		m_pFile=NULL;
-
+	}
+	if(m_pAlgorithmEncoder) 
+	{
 		m_pAlgorithmEncoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pAlgorithmEncoder);
-		m_pAlgorithmEncoder=NULL;
-
-		op_pMemoryBuffer.uninitialize();
-		ip_pMatrix.uninitialize();
-		ip_pDynamic.uninitialize();
-		ip_pMinMaxFrequencyBands.uninitialize();
-		ip_pSamplingRate.uninitialize();
-		ip_pStimulationSet.uninitialize();
+		delete m_pAlgorithmEncoder;
+		m_pAlgorithmEncoder = NULL;
 	}
 	return true;
 }
@@ -227,12 +223,9 @@ boolean CBoxAlgorithmCSVFileReader::processClock(IMessageClock& rMessageClock)
 
 boolean CBoxAlgorithmCSVFileReader::process(void)
 {
-
 	//line buffer
 	char l_pLine[m_ui32bufferLen];
-	bool l_bStimulationSend=false;
-	// float64 l_f64currentTime=ITimeArithmetics::timeToSeconds(getPlayerContext().getCurrentTime());  ?
-	float64 l_f64currentTime=(getPlayerContext().getCurrentTime()>>16)/65536.0;
+	const float64 l_f64currentTime=ITimeArithmetics::timeToSeconds(getPlayerContext().getCurrentTime());
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	//if no line was read, read the first data line.
@@ -258,24 +251,28 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 			{
 				m_vDataMatrix.push_back(m_vLastLineSplit);
 			}
-
 		}
-
+		if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier, OV_TypeId_StreamedMatrix) 
+			&& feof(m_pFile) && l_ui32NbSamples<m_ui32SamplesPerBuffer)
+		{
+			// Last chunk will be partial, zero the output matrix... 
+			IMatrix* ip_pMatrix=((OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
+			OpenViBEToolkit::Tools::Matrix::clearContent(*ip_pMatrix);
+		}
 	}
 
-	l_bStimulationSend=m_vLastLineSplit.size()!=0
+	bool l_bSomethingToSend= (m_vLastLineSplit.size()!=0)
 			&& atof(m_vLastLineSplit[0].c_str())<l_f64currentTime;
 
-
 	if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Stimulations)
-			||this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation)
+			|| this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation)
 			|| this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Spectrum))
 	{
 		while(m_vLastLineSplit.size()!=0 && atof(m_vLastLineSplit[0].c_str())<l_f64currentTime)
 		{
 			m_vDataMatrix.push_back(m_vLastLineSplit);
 
-			l_bStimulationSend=true;
+			l_bSomethingToSend=true;
 
 			if(!feof(m_pFile) && fgets(l_pLine, m_ui32bufferLen, m_pFile) != NULL)
 			{
@@ -291,24 +288,23 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 
 	//convert data to the good output type
 
-	if(l_bStimulationSend )
+	if(l_bSomethingToSend)
 	{
-		op_pMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
 		if(!(this->*m_fpRealProcess)())
 		{
 			return false;
 		}
 		if(!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Spectrum)
-				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation))
+				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation)
+				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_FeatureVector))
 		{
-			//get the date of the first bloc samples to send
-			uint64 l_ui64StartTime=(uint64)(atof(m_vDataMatrix[0][0].c_str())*65536.0);
-			l_ui64StartTime=l_ui64StartTime<<16;
+			//get the date of the first block samples to send
+			const uint64 l_ui64StartTime=ITimeArithmetics::secondsToTime(atof(m_vDataMatrix[0][0].c_str()));
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_ui64StartTime,this->getPlayerContext().getCurrentTime());
 
 		}
 
-		//for the stimulation the line contains in m_vLastLineSplit isn't process.
+		//for the stimulation, the line contents in m_vLastLineSplit isn't processed.
 		if(!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Stimulations)
 				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Spectrum)
 				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation))
@@ -325,99 +321,127 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 
 boolean CBoxAlgorithmCSVFileReader::process_streamedMatrix(void)
 {
-	CMatrix l_oMatrix;
-	ip_pMatrix=&l_oMatrix;
+	IMatrix* ip_pMatrix=((OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
 
-	convertVectorDataToMatrix(ip_pMatrix);
-
+	//Header
 	if(!m_bHeaderSent)
 	{
+		IMatrix* ip_pMatrix=((OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
+		ip_pMatrix->setDimensionCount(2);
+		ip_pMatrix->setDimensionSize(0,m_ui32NbColumn-1);
+		ip_pMatrix->setDimensionSize(1,m_ui32SamplesPerBuffer);
+
+		for(uint32 i=1;i<m_ui32NbColumn;i++)
+		{
+			ip_pMatrix->setDimensionLabel(0,i-1,m_vHeaderFile[i].c_str());
+		}
+		m_pAlgorithmEncoder->encodeHeader();
+		m_bHeaderSent = true;
+	}
+
+	if(!convertVectorDataToMatrix(ip_pMatrix))
+	{
+		return false;
+	}
+
+	m_pAlgorithmEncoder->encodeBuffer();
+
+	return true;
+}
+
+OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_stimulation(void)
+{
+	//Header
+	if(!m_bHeaderSent)
+	{
+		m_pAlgorithmEncoder->encodeHeader();
+		m_bHeaderSent = true;
+	}
+
+	IStimulationSet* ip_pStimulationSet=((OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputStimulationSet();
+	ip_pStimulationSet->clear();
+
+	for(uint32 i=0;i<m_vDataMatrix.size();i++)
+	{
+		if(m_vDataMatrix[i].size()!=3)
+		{
+			this->getLogManager() << LogLevel_Warning << "Unexpected data row length, skipping\n";
+			continue;
+		}
+		//stimulation date
+		const uint64 l_ui64StimulationDate = ITimeArithmetics::secondsToTime(atof(m_vDataMatrix[i][0].c_str()));
+
+		//stimulation indices
+		const uint64 l_ui64Stimulation=(uint64)atof(m_vDataMatrix[i][1].c_str());
+
+		//stimulation duration
+		const uint64 l_ui64StimulationDuration = ITimeArithmetics::secondsToTime(atof(m_vDataMatrix[i][2].c_str()));
+
+		getLogManager()<<LogLevel_Trace<<"  Stimulation "<<l_ui64Stimulation<<" start at time: "<<l_ui64StimulationDate<<"("<<ITimeArithmetics::timeToSeconds(l_ui64StimulationDate)<<" s)"<<" end during:"<<l_ui64StimulationDuration<<"("<<ITimeArithmetics::timeToSeconds(l_ui64StimulationDuration)<<" s)\n";
+
+		ip_pStimulationSet->appendStimulation(l_ui64Stimulation,l_ui64StimulationDate,l_ui64StimulationDuration);
+
+	}
+
+	m_pAlgorithmEncoder->encodeBuffer();
+
+	return true;
+}
+
+OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_signal(void)
+{
+	IMatrix* ip_pMatrix=((OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
+
+	//Header
+	if(!m_bHeaderSent)
+	{
+		IMatrix* ip_pMatrix=((OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
+		ip_pMatrix->setDimensionCount(2);
+		ip_pMatrix->setDimensionSize(0,m_ui32NbColumn-1);
+		ip_pMatrix->setDimensionSize(1,m_ui32SamplesPerBuffer);
+
 		for(uint32 i=1;i<m_ui32NbColumn;i++)
 		{
 			ip_pMatrix->setDimensionLabel(0,i-1,m_vHeaderFile[i].c_str());
 		}
 
-		// Produces header
-		m_pAlgorithmEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
+		this->getLogManager() << LogLevel_Trace << "Sampling rate is " << m_ui64SamplingRate << "hz.\n";
+		((OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputSamplingRate()=m_ui64SamplingRate;
 
-		// Turn flag off
-		m_bHeaderSent=true;
-
+		m_pAlgorithmEncoder->encodeHeader();
+		m_bHeaderSent = true;
 	}
-	m_pAlgorithmEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeBuffer);
 
-	return true;
-}
-
-OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_stimulation(void){
-
-	CStimulationSet l_oStimulationSet;
-	ip_pStimulationSet=&l_oStimulationSet;
-
-	for(uint32 i=0;i<m_vDataMatrix.size();i++)
+	if(!convertVectorDataToMatrix(ip_pMatrix))
 	{
-		//stimulation date
-		uint64 l_ui64StimulationDate=(uint64)(atof(m_vDataMatrix[i][0].c_str())*65536.0);
-		l_ui64StimulationDate=l_ui64StimulationDate<<16;
-
-		//stimulation indices
-		uint64 l_ui64Stimulation=(uint64)atof(m_vDataMatrix[i][1].c_str());
-
-		//stimulation duration
-		uint64 l_ui64StimulationDuration=(uint64)(atof(m_vDataMatrix[i][2].c_str())*65536.0);
-		l_ui64StimulationDuration=l_ui64StimulationDuration<<16;
-
-		getLogManager()<<LogLevel_Trace<<"  Stimulation "<<l_ui64Stimulation<<" start at time: "<<l_ui64StimulationDate<<"("<<((l_ui64StimulationDate>>16)/65536.0)<<" s)"<<" end during:"<<l_ui64StimulationDuration<<"("<<((l_ui64StimulationDuration>>16)/65536.0)<<" s)\n";
-
-		l_oStimulationSet.appendStimulation(l_ui64Stimulation,l_ui64StimulationDate,l_ui64StimulationDuration);
-
-	}
-	if(!m_bHeaderSent)
-	{
-		// Produces header
-		m_pAlgorithmEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
-
-		// Turn flag off
-		m_bHeaderSent=true;
+		return false;
 	}
 
-	m_pAlgorithmEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
+	// this->getLogManager() << LogLevel_Info << "Cols from header " << m_ui32NbColumn << "\n";
+	// this->getLogManager() << LogLevel_Info << "InMatrix " << (m_vDataMatrix.size() > 0 ? m_vDataMatrix[0].size() : 0) << " outMatrix " << ip_pMatrix->getDimensionSize(0) << "\n";
 
-	return true;
-}
-OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_signal(void)
-{
-	CMatrix l_oMatrix;
-	ip_pMatrix=&l_oMatrix;
-
-
-	convertVectorDataToMatrix(&l_oMatrix);
-
-
-	if(!m_bHeaderSent)
-	{
-		ip_pSamplingRate=m_ui64SamplingRate;
-		for(uint32 i=1;i<m_ui32NbColumn;i++)
-		{
-			l_oMatrix.setDimensionLabel(0,i-1,m_vHeaderFile[i].c_str());
-		}
-		m_pAlgorithmEncoder->process(OVP_GD_Algorithm_SignalStreamEncoder_InputTriggerId_EncodeHeader);
-
-		m_bHeaderSent=true;
-
-		getLogManager()<<LogLevel_Trace<<"Sampling Rate:"<<ip_pSamplingRate<<"\n";
-
-	}
-
-	m_pAlgorithmEncoder->process(OVP_GD_Algorithm_SignalStreamEncoder_InputTriggerId_EncodeBuffer);
+	m_pAlgorithmEncoder->encodeBuffer();
 
 	return true;
 }
 OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_channelLocalisation(void)
 {
-	CMatrix l_oMatrix;
-	ip_pMatrix=&l_oMatrix;
-	op_pMemoryBuffer=this->getDynamicBoxContext().getOutputChunk(0);
+	IMatrix* ip_pMatrix = ((OpenViBEToolkit::TChannelLocalisationEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
+
+	if(!m_bHeaderSent)
+	{
+		IMatrix* ip_pMatrix=((OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
+		ip_pMatrix->setDimensionCount(2);
+		ip_pMatrix->setDimensionSize(0,m_ui32NbColumn-1);
+		ip_pMatrix->setDimensionSize(1,m_ui32SamplesPerBuffer);
+
+		for(uint32 i=1;i<m_ui32NbColumn;i++)
+		{
+			ip_pMatrix->setDimensionLabel(0,i-1,m_vHeaderFile[i].c_str());
+		}
+
+		((OpenViBEToolkit::TChannelLocalisationEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputDynamic()=false;//atoi(m_vDataMatrix[0][m_ui32NbColumn].c_str());
+	}
 
 	std::vector<std::vector<std::string> > l_vChannelBloc;
 	for(uint32 i=0;i<m_vDataMatrix.size();i++)
@@ -435,25 +459,14 @@ OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_channelLocalisation(void)
 		//send the current bloc if the next data hasn't the same date
 		if(i>=l_vChannelBloc.size()-1 || l_vChannelBloc[(unsigned int)(i+1)][0]!=m_vDataMatrix[0][0])
 		{
-			convertVectorDataToMatrix(&l_oMatrix);
 
-			//Header
-			if(!m_bHeaderSent)
+			if(!convertVectorDataToMatrix(ip_pMatrix))
 			{
-				ip_pDynamic=false;//atoi(m_vDataMatrix[0][m_ui32NbColumn].c_str());
-				for(uint32 i=1;i<m_ui32NbColumn;i++)
-				{
-					l_oMatrix.setDimensionLabel(0,i-1,m_vHeaderFile[i].c_str());
-				}
-				m_pAlgorithmEncoder->process(OVP_GD_Algorithm_ChannelLocalisationStreamEncoder_InputTriggerId_EncodeHeader);
-
-				m_bHeaderSent=true;
-
+				return false;
 			}
 
-			m_pAlgorithmEncoder->process(OVP_GD_Algorithm_ChannelLocalisationStreamEncoder_InputTriggerId_EncodeBuffer);
-			uint64 l_ui64Date=(uint64)(atof(m_vDataMatrix[0][0].c_str())*65536.0);
-			l_ui64Date=l_ui64Date<<16;
+			m_pAlgorithmEncoder->encodeBuffer();
+			const uint64 l_ui64Date=ITimeArithmetics::secondsToTime(atof(m_vDataMatrix[0][0].c_str()));
 			this->getDynamicBoxContext().markOutputAsReadyToSend(0,l_ui64Date,l_ui64Date);
 
 			//clear matrix
@@ -470,33 +483,86 @@ OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_channelLocalisation(void)
 
 OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_featureVector(void)
 {
-	CMatrix l_oMatrix;
-	ip_pMatrix=&l_oMatrix;
+	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
+	IMatrix* l_pMatrix = ((OpenViBEToolkit::TFeatureVectorEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
 
-	convertVectorDataToMatrix(&l_oMatrix);
-
+	//Header
 	if(!m_bHeaderSent)
 	{
+		// in this case we need to transpose it
+		IMatrix* ip_pMatrix=((OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
+
+		ip_pMatrix->setDimensionCount(2);
+		ip_pMatrix->setDimensionSize(0,1);
+		ip_pMatrix->setDimensionSize(1,m_ui32NbColumn-1);
+
 		for(uint32 i=1;i<m_ui32NbColumn;i++)
 		{
-			l_oMatrix.setDimensionLabel(0,i-1,m_vHeaderFile[i].c_str());
+			ip_pMatrix->setDimensionLabel(1,i-1,m_vHeaderFile[i].c_str());
 		}
-		m_pAlgorithmEncoder->process(OVP_GD_Algorithm_FeatureVectorStreamEncoder_InputTriggerId_EncodeHeader);
 
-		m_bHeaderSent=true;
-
+		m_pAlgorithmEncoder->encodeHeader();
+		m_bHeaderSent = true;
 	}
-	m_pAlgorithmEncoder->process(OVP_GD_Algorithm_FeatureVectorStreamEncoder_InputTriggerId_EncodeBuffer);
+
+	// Each vector has to be sent separately
+	for(uint32 i=0;i<m_vDataMatrix.size();i++)
+	{
+		if(m_vDataMatrix[i].size()!=m_ui32NbColumn) {
+			this->getLogManager() << LogLevel_Warning << "Unexpected number of elements"
+				<< "(got " << static_cast<uint64>(m_vDataMatrix[i].size()) << ", expected " << m_ui32NbColumn << "), skipping line\n";
+			continue;
+		}
+		for(uint32 j=0;j<m_ui32NbColumn-1;j++)
+		{
+
+			l_pMatrix->getBuffer()[j]=atof(m_vDataMatrix[i][j+1].c_str());
+		}
+
+		m_pAlgorithmEncoder->encodeBuffer();
+
+		const uint64 l_ui64StartTime = ITimeArithmetics::secondsToTime(atof(m_vDataMatrix[i][0].c_str()));
+		l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_ui64StartTime,l_ui64StartTime);
+	}
+		
+	clearMatrix(m_vDataMatrix);
 
 	return true;
 }
 OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_spectrum(void)
 {
-	CMatrix l_oMinMaxFrequencyBands;
-	CMatrix l_oMatrix;
-	ip_pMinMaxFrequencyBands=&l_oMinMaxFrequencyBands;
-	ip_pMatrix=&l_oMatrix;
-	op_pMemoryBuffer=this->getDynamicBoxContext().getOutputChunk(0);
+	IMatrix* ip_pMatrix = ((OpenViBEToolkit::TSpectrumEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
+	IMatrix* ip_pMinMaxFrequencyBands = ((OpenViBEToolkit::TSpectrumEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMinMaxFrequencyBands();
+
+	//Header
+	if(!m_bHeaderSent)
+	{
+		ip_pMatrix->setDimensionCount(2);
+		ip_pMatrix->setDimensionSize(0,m_ui32NbColumn-1);
+		ip_pMatrix->setDimensionSize(1,m_vDataMatrix.size());
+
+		for(uint32 i=1;i<m_ui32NbColumn;i++)
+		{
+			ip_pMatrix->setDimensionLabel(0,i-1,m_vHeaderFile[i].c_str());
+		}
+		ip_pMinMaxFrequencyBands->setDimensionCount(3);
+		ip_pMinMaxFrequencyBands->setDimensionSize(0,m_ui32NbColumn-1);
+		ip_pMinMaxFrequencyBands->setDimensionSize(1,m_vDataMatrix.size());
+		ip_pMinMaxFrequencyBands->setDimensionSize(2,2);
+		for(uint32 j=0;j<m_ui32NbColumn-1;j++)
+		{
+			for(uint32 i=0;i<m_vDataMatrix.size();i++)
+			{
+				ip_pMinMaxFrequencyBands->getBuffer()[j*m_vDataMatrix.size()*2+i*2]=atof(m_vDataMatrix[i][m_ui32NbColumn].c_str());
+				ip_pMinMaxFrequencyBands->getBuffer()[j*m_vDataMatrix.size()*2+i*2+1]=atof(m_vDataMatrix[i][m_ui32NbColumn+1].c_str());
+				std::stringstream l_sLabel;
+				l_sLabel<<(16*i)<<"-"<<(16*(i+1));
+				ip_pMinMaxFrequencyBands->setDimensionLabel(1,i,l_sLabel.str().c_str());
+			}
+		}
+		m_bHeaderSent = true;
+		m_pAlgorithmEncoder->encodeHeader();
+	}
 
 	std::vector<std::vector<std::string> > l_vSpectrumBloc;
 	for(uint32 i=0;i<m_vDataMatrix.size();i++)
@@ -513,40 +579,13 @@ OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_spectrum(void)
 		//send the current bloc if the next data hasn't the same date
 		if(i>=l_vSpectrumBloc.size()-1 || l_vSpectrumBloc[(unsigned int)(i+1)][0]!=m_vDataMatrix[0][0])
 		{
-			convertVectorDataToMatrix(&l_oMatrix);
-
-			//Header
-			if(!m_bHeaderSent)
+			if(!convertVectorDataToMatrix(ip_pMatrix))
 			{
-				for(uint32 i=1;i<m_ui32NbColumn;i++)
-				{
-					l_oMatrix.setDimensionLabel(0,i-1,m_vHeaderFile[i].c_str());
-				}
-				l_oMinMaxFrequencyBands.setDimensionCount(3);
-				l_oMinMaxFrequencyBands.setDimensionSize(0,m_ui32NbColumn-1);
-				l_oMinMaxFrequencyBands.setDimensionSize(1,m_vDataMatrix.size());
-				l_oMinMaxFrequencyBands.setDimensionSize(2,2);
-				for(uint32 j=0;j<m_ui32NbColumn-1;j++)
-				{
-					for(uint32 i=0;i<m_vDataMatrix.size();i++)
-					{
-						l_oMinMaxFrequencyBands.getBuffer()[j*m_vDataMatrix.size()*2+i*2]=atof(m_vDataMatrix[i][m_ui32NbColumn].c_str());
-						l_oMinMaxFrequencyBands.getBuffer()[j*m_vDataMatrix.size()*2+i*2+1]=atof(m_vDataMatrix[i][m_ui32NbColumn+1].c_str());
-						std::stringstream l_sLabel;
-						l_sLabel<<(16*i)<<"-"<<(16*(i+1));
-						l_oMinMaxFrequencyBands.setDimensionLabel(1,i,l_sLabel.str().c_str());
-					}
-				}
-
-				m_pAlgorithmEncoder->process(OVP_GD_Algorithm_SpectrumStreamEncoder_InputTriggerId_EncodeHeader);
-
-				m_bHeaderSent=true;
-
+				return false;
 			}
 
-			m_pAlgorithmEncoder->process(OVP_GD_Algorithm_SpectrumStreamEncoder_InputTriggerId_EncodeBuffer);
-			uint64 l_ui64Date=(uint64)(atof(m_vDataMatrix[0][0].c_str())*65536.0);
-			l_ui64Date=l_ui64Date<<16;
+			m_pAlgorithmEncoder->encodeBuffer();
+			const uint64 l_ui64Date = ITimeArithmetics::secondsToTime(atof(m_vDataMatrix[0][0].c_str()));
 			this->getDynamicBoxContext().markOutputAsReadyToSend(0,l_ui64Date-1,l_ui64Date);
 
 			//clear matrix
@@ -560,22 +599,34 @@ OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_spectrum(void)
 	return true;
 }
 
-void CBoxAlgorithmCSVFileReader::convertVectorDataToMatrix(IMatrix* matrix)
+bool CBoxAlgorithmCSVFileReader::convertVectorDataToMatrix(IMatrix* matrix)
 {
-		matrix->setDimensionCount(2);
-		matrix->setDimensionSize(0,m_ui32NbColumn-1);
-		matrix->setDimensionSize(1,m_vDataMatrix.size());
+	// note: Chunk size shouldn't change after encoding header, do not mess with it here, even if the input has different size
 
-		std::stringstream  l_sMatrix;
-		for(uint32 i=0;i<m_vDataMatrix.size();i++)
+	// We accept partial data, but not buffer overruns ...
+	if(matrix->getDimensionSize(1) < m_vDataMatrix.size()
+		|| matrix->getDimensionSize(0) < m_ui32NbColumn-1 ) {
+		this->getLogManager() << LogLevel_Error 
+			<< "Matrix size incompatibility, data suggests " 
+			<< m_ui32NbColumn-1 << "x" << static_cast<uint64>(m_vDataMatrix.size()) << ", expected at most " 
+			<< matrix->getDimensionSize(0) << "x" << matrix->getDimensionSize(0) 
+			<< "\n";
+		return false;
+	}
+	
+	std::stringstream  l_sMatrix;
+	for(uint32 i=0;i<m_vDataMatrix.size();i++)
+	{
+		l_sMatrix<<"at time ("<<m_vDataMatrix[i][0].c_str()<<"):";
+		for(uint32 j=0;j<m_ui32NbColumn-1;j++)
 		{
-			l_sMatrix<<"at time ("<<m_vDataMatrix[i][0].c_str()<<"):";
-			for(uint32 j=0;j<m_ui32NbColumn-1;j++)
-			{
-				matrix->getBuffer()[j*m_vDataMatrix.size()+i]=atof(m_vDataMatrix[i][j+1].c_str());
-				l_sMatrix<<matrix->getBuffer()[j*m_vDataMatrix.size()+i]<<";";
-			}
-			l_sMatrix<<"\n";
+			matrix->getBuffer()[j*matrix->getDimensionSize(1)+i]=atof(m_vDataMatrix[i][j+1].c_str());
+			l_sMatrix<<matrix->getBuffer()[j*matrix->getDimensionSize(1)+i]<<";";
 		}
-		getLogManager()<<LogLevel_Debug<<"Matrix:\n"<<l_sMatrix.str().c_str();
+		l_sMatrix<<"\n";
+	}
+	getLogManager()<<LogLevel_Debug<<"Matrix:\n"<<l_sMatrix.str().c_str();
+	getLogManager()<<LogLevel_Debug<<"Matrix:\n"<<l_sMatrix.str().c_str();
+
+	return true;
 }

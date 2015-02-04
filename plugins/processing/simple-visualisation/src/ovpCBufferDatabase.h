@@ -6,8 +6,6 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/IReader.h>
-
 #include <vector>
 #include <deque>
 #include <queue>
@@ -348,7 +346,7 @@ namespace OpenViBEPlugins
 				const OpenViBE::uint32 ui32DimensionIndex,
 				const OpenViBE::uint32 ui32DimensionEntryIndex,
 				const char* sDimensionLabel);
-			virtual void setMatrixBuffer(
+			virtual OpenViBE::boolean setMatrixBuffer(
 				const OpenViBE::float64* pBuffer,
 				OpenViBE::uint64 ui64StartTime,
 				OpenViBE::uint64 ui64EndTime);

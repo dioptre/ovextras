@@ -89,10 +89,19 @@ namespace OpenViBE
 			 *        setting (used to initialize the box itself)
 			 * \return The created setting index.
 			 */
+
+			/*
 			virtual OpenViBE::boolean addSetting(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier,
 				const OpenViBE::CString& sDefaultValue)=0;
+				//*/
+
+			virtual OpenViBE::boolean addSetting(
+				const OpenViBE::CString& sName,
+				const OpenViBE::CIdentifier& rTypeIdentifier,
+				const OpenViBE::CString& sDefaultValue,
+				const OpenViBE::boolean bModifiable = false)=0;
 			/**
 			 * \brief Adds a flag to the box
 			 * \param eBoxFlag [in] : the flag to add to the box
@@ -101,6 +110,38 @@ namespace OpenViBE
 			 */
 			virtual OpenViBE::boolean addFlag(
 				const OpenViBE::Kernel::EBoxFlag eBoxFlag)=0;
+			/**
+			 * \brief Adds a new type supported by inputs of the box
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true in case of success.
+			  * \return \e false in case of error.
+			  */
+			virtual OpenViBE::boolean addInputSupport(
+				const OpenViBE::CIdentifier &rTypeIdentifier)=0;
+			/**
+			 * \brief Adds a new type and its derived type supported by inputs of the box
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true in case of success.
+			  * \return \e false in case of error.
+			  */
+			virtual OpenViBE::boolean addInputAndDerivedSupport(
+				const OpenViBE::CIdentifier &rTypeIdentifier)=0;
+			/**
+			 * \brief Adds a new type supported by outputs of the box
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true in case of success.
+			  * \return \e false in case of error.
+			  */
+			virtual OpenViBE::boolean addOutputSupport(
+				const OpenViBE::CIdentifier &rTypeIdentifier)=0;
+			/**
+			 * \brief Adds a new type and its derived type supported by outputs of the box
+			  * \param rTypeIdentifier [in] : The type identifier
+			  * \return \e true in case of success.
+			  * \return \e false in case of error.
+			  */
+			virtual OpenViBE::boolean addOutputAndDerivedSupport(
+				const OpenViBE::CIdentifier &rTypeIdentifier)=0;
 
 			_IsDerivedFromClass_(OpenViBE::Kernel::IKernelObject, OV_ClassId_Kernel_Scenario_BoxProto)
 		};

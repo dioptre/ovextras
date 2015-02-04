@@ -3,18 +3,10 @@
 
 #include "../ovp_defines.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 #include <toolkit/ovtk_all.h>
 
 #include "../ovpCSimpleDSP/ovpCEquationParser.h"
-
-#include <ebml/IReader.h>
-#include <ebml/IReaderHelper.h>
-#include <ebml/IWriter.h>
-#include <ebml/IWriterHelper.h>
-
-#include <ebml/TReaderCallbackProxy.h>
-#include <ebml/TWriterCallbackProxy.h>
 
 #include <string>
 #include <vector>

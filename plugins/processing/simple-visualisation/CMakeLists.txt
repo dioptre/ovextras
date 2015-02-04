@@ -18,7 +18,7 @@ INCLUDE("FindOpenViBEToolkit")
 INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindThirdPartyGTK")
-
+INCLUDE("FindThirdPartyBoost")#need boost for erp plot
 # ---------------------------------
 # Target macros
 # Defines target operating system

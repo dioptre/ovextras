@@ -3,6 +3,8 @@
 #include <string>
 #include <iostream>
 
+#include "openvibe/ovITimeArithmetics.h"
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -11,11 +13,9 @@ using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::FileIO;
 
 CBoxAlgorithmCSVFileWriter::CBoxAlgorithmCSVFileWriter(void)
-	:m_pFile(NULL)
-	,m_fpRealProcess(NULL)
+	:
+	m_fpRealProcess(NULL)
 	,m_pStreamDecoder(NULL)
-	,m_pMatrix(NULL)
-	,m_bDeleteMatrix(false)
 {
 }
 
@@ -23,47 +23,52 @@ boolean CBoxAlgorithmCSVFileWriter::initialize(void)
 {
 	this->getStaticBoxContext().getInputType(0, m_oTypeIdentifier);
 
-	CString l_sFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	const CString l_sFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sSeparator=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-	m_bUseCompression=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+	const uint64 l_ui64Precision=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
-	m_pFile=::fopen(l_sFilename.toASCIIString(), "wb");
-	if(!m_pFile)
+	m_oFileStream.open(l_sFilename.toASCIIString(), std::ios::trunc);
+	if(!m_oFileStream)
 	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << l_sFilename << "]\n";
+		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << l_sFilename << "] for writing\n";
 		return false;
 	}
+
+	m_oFileStream << std::scientific;
+	m_oFileStream.precision(static_cast<std::streamsize>(l_ui64Precision));
 
 	if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier, OV_TypeId_StreamedMatrix))
 	{
 		if(m_oTypeIdentifier==OV_TypeId_Signal)
 		{
-			m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-			m_pStreamDecoder->initialize();
-			op_ui64SamplingFrequency.initialize(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
+			m_pStreamDecoder=new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSVFileWriter >();
+			m_pStreamDecoder->initialize(*this,0);
 		}
 		else if(m_oTypeIdentifier==OV_TypeId_Spectrum)
 		{
-			m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SpectrumStreamDecoder));
-			m_pStreamDecoder->initialize();
-			op_pMinMaxFrequencyBand.initialize(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_MinMaxFrequencyBands));
+			m_pStreamDecoder=new OpenViBEToolkit::TSpectrumDecoder < CBoxAlgorithmCSVFileWriter >();
+			m_pStreamDecoder->initialize(*this,0);
+		}
+		else if(m_oTypeIdentifier==OV_TypeId_FeatureVector)
+		{
+			m_pStreamDecoder=new OpenViBEToolkit::TFeatureVectorDecoder  < CBoxAlgorithmCSVFileWriter >();
+			m_pStreamDecoder->initialize(*this, 0);
 		}
 		else
 		{
-			m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamDecoder));
-			m_pStreamDecoder->initialize();
+			if(m_oTypeIdentifier!=OV_TypeId_StreamedMatrix)
+			{
+				this->getLogManager() << LogLevel_Info << "Input is a type derived from matrix that the box doesn't recognize, decoding as Streamed Matrix\n";
+			}
+			m_pStreamDecoder=new OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmCSVFileWriter >();
+			m_pStreamDecoder->initialize(*this,0);
 		}
-
-		ip_pMemoryBuffer.initialize(m_pStreamDecoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		op_pMatrix.initialize(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputParameterId_Matrix));
 		m_fpRealProcess=&CBoxAlgorithmCSVFileWriter::process_streamedMatrix;
 	}
 	else if(m_oTypeIdentifier==OV_TypeId_Stimulations)
 	{
-		m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-		m_pStreamDecoder->initialize();
-		ip_pMemoryBuffer.initialize(m_pStreamDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		op_pStimulationSet.initialize(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+		m_pStreamDecoder=new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmCSVFileWriter >();
+		m_pStreamDecoder->initialize(*this,0);
 		m_fpRealProcess=&CBoxAlgorithmCSVFileWriter::process_stimulation;
 	}
 	else
@@ -72,10 +77,7 @@ boolean CBoxAlgorithmCSVFileWriter::initialize(void)
 		return false;
 	}
 
-	if(m_bUseCompression)
-	{
-		this->getLogManager() << LogLevel_Warning << "Compression flag not used yet, the file will be flagged uncompressed and stored as is\n";
-	}
+	m_ui64SampleCount = 0;
 
 	m_bFirstBuffer=true;
 	return true;
@@ -83,24 +85,15 @@ boolean CBoxAlgorithmCSVFileWriter::initialize(void)
 
 boolean CBoxAlgorithmCSVFileWriter::uninitialize(void)
 {
-	if(m_pFile)
+	if(m_oFileStream.is_open())
 	{
-		::fclose(m_pFile);
-		m_pFile=NULL;
+		m_oFileStream.close();
 	}
-	if(m_bDeleteMatrix)
-	{
-		delete m_pMatrix;
-	}
-	op_pStimulationSet.uninitialize();
-	op_pMatrix.uninitialize();
-	ip_pMemoryBuffer.uninitialize();
 
 	if(m_pStreamDecoder)
 	{
 		m_pStreamDecoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pStreamDecoder);
-		m_pStreamDecoder=NULL;
+		delete m_pStreamDecoder;
 	}
 
 	return true;
@@ -122,105 +115,131 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
-		uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
-		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
-		m_pStreamDecoder->process();
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedHeader))
+		const uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
+		const uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
+		
+		m_pStreamDecoder->decode(i);
+
+		if(m_pStreamDecoder->isHeaderReceived())
 		{
-			if(op_pMatrix->getDimensionCount() > 2 || op_pMatrix->getDimensionCount() < 1)
+			const IMatrix* l_pMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMatrix();
+
+			if(l_pMatrix->getDimensionCount() > 2 || l_pMatrix->getDimensionCount() < 1)
 			{
-				this->getLogManager() << LogLevel_ImportantWarning << "Input matrix does not have 1 or 2 dimensions - Could not write content in CSV file...\n";
+				this->getLogManager() << LogLevel_ImportantWarning << "Input matrix does not have 1 or 2 dimensions - Cannot write content in CSV file...\n";
 				return false;
 			}
 
-			if( op_pMatrix->getDimensionCount() == 1 )
+			if( l_pMatrix->getDimensionCount() == 1)
 			{
-				m_pMatrix = new CMatrix();
-				m_bDeleteMatrix = true;
-				m_pMatrix->setDimensionCount(2);
-				m_pMatrix->setDimensionSize(0,1);
-				m_pMatrix->setDimensionSize(1,op_pMatrix->getDimensionSize(0));
-				for(uint32 i=0;i<op_pMatrix->getDimensionSize(0);i++)
+				// The matrix is a vector, make a matrix to represent it
+				m_oMatrix.setDimensionCount(2);
+
+				// This [n X 1] will get written as a single row due to transpose later
+				m_oMatrix.setDimensionSize(0,l_pMatrix->getDimensionSize(0));
+				m_oMatrix.setDimensionSize(1,1);
+				for(uint32 i=0;i<l_pMatrix->getDimensionSize(0);i++)
 				{
-					m_pMatrix->setDimensionLabel(1,i,op_pMatrix->getDimensionLabel(0,i));
+					m_oMatrix.setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(0,i));
+				}
+			}
+			else if(m_oTypeIdentifier==OV_TypeId_FeatureVector)
+			{
+				// OpenViBE matrixes are usually [channels x time], but they get written to the CSV as transposed, i.e. [time X channels].
+				// The feature stream matrix is [1 X features], but here we transpose it to [features X 1] to compensate and to get 
+				// one-vector-per-row in the output file
+				m_oMatrix.setDimensionCount(2);
+
+				// This [n X 1] will get written as a single row due to transpose later
+				m_oMatrix.setDimensionSize(0,l_pMatrix->getDimensionSize(1));
+				m_oMatrix.setDimensionSize(1,1);
+				for(uint32 i=0;i<l_pMatrix->getDimensionSize(1);i++)
+				{
+   					// this->getLogManager() << LogLevel_Info << "  N: " << i << " is " << l_pMatrix->getDimensionLabel(1,i) << "\n";
+					m_oMatrix.setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(1,i));
 				}
 			}
 			else
 			{
-				m_pMatrix=op_pMatrix;
+				// As-is
+				OpenViBEToolkit::Tools::Matrix::copyDescription(m_oMatrix, *l_pMatrix);
 			}
 //			std::cout<<&m_pMatrix<<" "<<&op_pMatrix<<"\n";
-			::fprintf(m_pFile, "Time (s)");
-			for(uint32 c=0; c<m_pMatrix->getDimensionSize(0); c++)
+			m_oFileStream << "Time (s)";
+			for(uint32 c=0; c<m_oMatrix.getDimensionSize(0); c++)
 			{
-				std::string l_sLabel(m_pMatrix->getDimensionLabel(0, c));
+				std::string l_sLabel(m_oMatrix.getDimensionLabel(0, c));
 				while(l_sLabel.length()>0 && l_sLabel[l_sLabel.length()-1]==' ')
 				{
 					l_sLabel.erase(l_sLabel.length()-1);
 				}
-				::fprintf(m_pFile,
-					"%s%s",
-					m_sSeparator.toASCIIString(),
-					l_sLabel.c_str());
+				m_oFileStream << m_sSeparator.toASCIIString() << l_sLabel.c_str();
 			}
 
 			if(m_oTypeIdentifier==OV_TypeId_Signal)
 			{
-				::fprintf(m_pFile,
-					"%sSampling Rate",
-					m_sSeparator.toASCIIString());
+				m_oFileStream << m_sSeparator.toASCIIString() << "Sampling Rate";
 			}
 			else if(m_oTypeIdentifier==OV_TypeId_Spectrum)
 			{
-				::fprintf(m_pFile,
-					"%sMin frequency band",
-					m_sSeparator.toASCIIString());
-				::fprintf(m_pFile,
-					"%sMax frequency band",
-					m_sSeparator.toASCIIString());
+				m_oFileStream << m_sSeparator << "Min frequency band";
+				m_oFileStream << m_sSeparator << "Max frequency band";
 			}
 			else
 			{
 			}
 
-			::fprintf(m_pFile, "\n");
+			m_oFileStream << "\n";
 		}
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_pStreamDecoder->isBufferReceived())
 		{
-			for(uint32 s=0; s<m_pMatrix->getDimensionSize(1); s++)
+			const IMatrix* l_pMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMatrix();
+
+			const uint32 l_ui32NumChannels = m_oMatrix.getDimensionSize(0);
+			const uint32 l_ui32NumSamples = m_oMatrix.getDimensionSize(1);
+
+			//this->getLogManager() << LogLevel_Info << " dimsIn " << l_pMatrix->getDimensionSize(0) << "," << l_pMatrix->getDimensionSize(1) << "\n";
+			//this->getLogManager() << LogLevel_Info << " dimsBuf " << m_oMatrix.getDimensionSize(0) << "," << m_oMatrix.getDimensionSize(1) << "\n";
+
+			for(uint32 s=0; s<l_ui32NumSamples; s++)
 			{
-				if(m_oTypeIdentifier==OV_TypeId_Signal)   ::fprintf(m_pFile, "%f", ((l_ui64StartTime+((s*(l_ui64EndTime-l_ui64StartTime))/op_pMatrix->getDimensionSize(1)))>>16)/65536.);
-				if(m_oTypeIdentifier==OV_TypeId_Spectrum) ::fprintf(m_pFile, "%f", (l_ui64EndTime>>16)/65536.);
-				for(uint32 c=0; c<m_pMatrix->getDimensionSize(0); c++)
+				if(m_oTypeIdentifier==OV_TypeId_StreamedMatrix || m_oTypeIdentifier==OV_TypeId_FeatureVector)
 				{
-					::fprintf(m_pFile,
-						"%s%f",
-						m_sSeparator.toASCIIString(),
-						op_pMatrix->getBuffer()[c*m_pMatrix->getDimensionSize(1)+s]);
+					m_oFileStream << ITimeArithmetics::timeToSeconds(l_ui64StartTime);
+				}
+				else if(m_oTypeIdentifier==OV_TypeId_Signal)
+				{
+					const uint64 l_ui64SamplingFrequency =  ((OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputSamplingRate();
+					const uint64 l_ui64TimeOfNthSample = ITimeArithmetics::sampleCountToTime(l_ui64SamplingFrequency, s); // assuming chunk start is 0
+					const uint64 l_ui64SampleTime = l_ui64StartTime+l_ui64TimeOfNthSample;
+
+					m_oFileStream << ITimeArithmetics::timeToSeconds(l_ui64SampleTime);
+				}
+				else if(m_oTypeIdentifier==OV_TypeId_Spectrum) 
+				{
+					m_oFileStream << ITimeArithmetics::timeToSeconds(l_ui64EndTime);
+				}
+				for(uint32 c=0; c<l_ui32NumChannels; c++)
+				{
+					m_oFileStream << m_sSeparator.toASCIIString() << l_pMatrix->getBuffer()[c*l_ui32NumSamples+s];
 				}
 
 				if(m_bFirstBuffer)
 				{
 					if(m_oTypeIdentifier==OV_TypeId_Signal)
 					{
-						::fprintf(m_pFile,
-							"%s%lli",
-							m_sSeparator.toASCIIString(),
-							(uint64)op_ui64SamplingFrequency);
+						const uint64 l_ui64SamplingFrequency =  ((OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputSamplingRate();
+
+						m_oFileStream << m_sSeparator.toASCIIString() << (uint64)l_ui64SamplingFrequency;
 
 						m_bFirstBuffer=false;
 					}
 					else if(m_oTypeIdentifier==OV_TypeId_Spectrum)
 					{
-						::fprintf(m_pFile,
-							"%s%f",
-							m_sSeparator.toASCIIString(),
-							op_pMinMaxFrequencyBand->getBuffer()[s*2+0]);
-						::fprintf(m_pFile,
-							"%s%f",
-							m_sSeparator.toASCIIString(),
-							op_pMinMaxFrequencyBand->getBuffer()[s*2+1]);
+						const IMatrix* l_pMinMaxFrequencyBand =  ((OpenViBEToolkit::TSpectrumDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMinMaxFrequencyBands();
+
+						m_oFileStream << m_sSeparator.toASCIIString() << l_pMinMaxFrequencyBand->getBuffer()[s*2+0];
+						m_oFileStream << m_sSeparator.toASCIIString() << l_pMinMaxFrequencyBand->getBuffer()[s*2+1];
 					}
 					else
 					{
@@ -230,30 +249,24 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 				{
 					if(m_oTypeIdentifier==OV_TypeId_Signal)
 					{
-						::fprintf(m_pFile,
-							"%s",
-							m_sSeparator.toASCIIString());
+						m_oFileStream << m_sSeparator.toASCIIString();
 					}
 					else if(m_oTypeIdentifier==OV_TypeId_Spectrum)
 					{
-						::fprintf(m_pFile,
-							"%s",
-							m_sSeparator.toASCIIString());
-						::fprintf(m_pFile,
-							"%s",
-							m_sSeparator.toASCIIString());
+						m_oFileStream << m_sSeparator.toASCIIString() << m_sSeparator.toASCIIString();
 					}
 					else
 					{
 					}
 				}
 
-				::fprintf(m_pFile, "\n");
+				m_oFileStream << "\n";
 			}
+			m_ui64SampleCount += l_ui32NumSamples;
 
 			m_bFirstBuffer=false;
 		}
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if(m_pStreamDecoder->isEndReceived())
 		{
 		}
 		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
@@ -268,29 +281,25 @@ boolean CBoxAlgorithmCSVFileWriter::process_stimulation(void)
 
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
-		m_pStreamDecoder->process();
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+		m_pStreamDecoder->decode(i);
+		if(m_pStreamDecoder->isHeaderReceived())
 		{
-			::fprintf(m_pFile,
-				"Time (s)%sIdentifier%sDuration\n",
-				m_sSeparator.toASCIIString(),
-				m_sSeparator.toASCIIString());
+			m_oFileStream << "Time (s)" << m_sSeparator.toASCIIString() << "Identifier" << m_sSeparator.toASCIIString() << "Duration\n";
 		}
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_pStreamDecoder->isBufferReceived())
 		{
-			for(uint32 j=0; j<op_pStimulationSet->getStimulationCount(); j++)
+			const IStimulationSet* l_pStimulationSet = ((OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputStimulationSet();
+			for(uint32 j=0; j<l_pStimulationSet->getStimulationCount(); j++)
 			{
-				::fprintf(m_pFile,
-					"%f%s%llu%s%f\n",
-					(op_pStimulationSet->getStimulationDate(j)>>16)/65536.0,
-					m_sSeparator.toASCIIString(),
-					op_pStimulationSet->getStimulationIdentifier(j),
-					m_sSeparator.toASCIIString(),
-					(op_pStimulationSet->getStimulationDuration(j)>>16)/65536.0);
+				m_oFileStream << ITimeArithmetics::timeToSeconds(l_pStimulationSet->getStimulationDate(j))
+					<< m_sSeparator.toASCIIString() 
+					<< l_pStimulationSet->getStimulationIdentifier(j)
+					<< m_sSeparator.toASCIIString() 
+					<< ITimeArithmetics::timeToSeconds(l_pStimulationSet->getStimulationDuration(j))
+					<< "\n";
 			}
 		}
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if(m_pStreamDecoder->isEndReceived())
 		{
 		}
 		l_rDynamicBoxContext.markInputAsDeprecated(0, i);

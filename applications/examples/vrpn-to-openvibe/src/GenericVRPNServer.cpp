@@ -13,6 +13,11 @@ GenericVRPNServer::GenericVRPNServer(int port)
 	_connection = vrpn_create_server_connection(port);
 }
 
+GenericVRPNServer::~GenericVRPNServer()
+{
+	deleteInstance();
+}
+
 GenericVRPNServer* GenericVRPNServer::getInstance(int port)
 {
 	if (serverInstance == NULL)
@@ -21,6 +26,24 @@ GenericVRPNServer* GenericVRPNServer::getInstance(int port)
 	}
 
 	return serverInstance;
+}
+
+void GenericVRPNServer::deleteInstance(void)
+{
+	for (std::map<std::string, ButtonServer>::iterator it = serverInstance->_buttonServer.begin(); it != serverInstance->_buttonServer.end(); ++it)
+	{
+		delete it->second.server;
+	}
+	serverInstance->_buttonServer.clear();
+
+	for (std::map<std::string, AnalogServer>::iterator it = serverInstance->_analogServer.begin(); it != serverInstance->_analogServer.end(); ++it)
+	{
+		delete it->second.server;
+	}
+	serverInstance->_analogServer.clear();
+
+	delete serverInstance;
+	serverInstance = NULL;
 }
 
 void GenericVRPNServer::loop()

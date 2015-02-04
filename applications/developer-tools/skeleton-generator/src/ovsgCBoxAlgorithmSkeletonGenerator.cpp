@@ -464,7 +464,7 @@ void CBoxAlgorithmSkeletonGenerator::buttonCheckCB(void)
 
 void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 {
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Generating files... \n";
+	m_rKernelContext.getLogManager() << LogLevel_Info << "Generating files, please wait ... \n";
 	CString l_sLogMessages = "Generating files...\n";
 	::GtkWidget * l_pTooltipTextview = GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "sg-box-tooltips-textview"));
 	::GtkTextBuffer * l_pTextBuffer  = gtk_text_view_get_buffer(GTK_TEXT_VIEW(l_pTooltipTextview));
@@ -648,17 +648,24 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 			-1);
 		l_bSuccess = false;
 	}
+
+	CString l_sPattern;
+	CString l_sSubstitute;
+
 	//--------------------------------------------------------------------------------------
 	//Inputs
 	//--------------------------------------------------------------------------------------
-	CString l_sCommandSed = "s/@@Inputs@@/";
-	if(m_vInputs.empty()) l_sCommandSed = l_sCommandSed + "\\/\\/No input specified.To add inputs use :\\n\\/\\/rBoxAlgorithmPrototype.addInput(\\\"Input Name\\\",OV_TypeId_XXXX);\\n";
+
+	l_sPattern = "@@Inputs@@";
+	l_sSubstitute = "";
+
+	if(m_vInputs.empty()) l_sSubstitute = l_sSubstitute + "\\/\\/No input specified.To add inputs use :\\n\\/\\/rBoxAlgorithmPrototype.addInput(\\\"Input Name\\\",OV_TypeId_XXXX);\\n";
 	for(vector<IOSStruct>::iterator it = m_vInputs.begin(); it != m_vInputs.end(); it++)
 	{
 		if(it != m_vInputs.begin()) 
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t\\t";
+			l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\t";
 		//add the CIdentifier corresponding to type
-		//l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addInput(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+");\\n";
+		//l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addInput(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+");\\n";
 		//reconstruct the type_id
 		string l_sTypeName((const char *)(*it)._type);
 		for(uint32 s=0; s<l_sTypeName.length(); s++)
@@ -669,22 +676,22 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 				if(l_sTypeName[s] >= 'a' && l_sTypeName[s]<= 'z') l_sTypeName.replace(s,1,1,(char)(l_sTypeName[s]+'A'-'a'));
 			}
 		}
-		l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addInput(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+");\\n";
+		l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addInput(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+");\\n";
 	}
-	l_sCommandSed = l_sCommandSed +  "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//--------------------------------------------------------------------------------------
 	//Outputs
 	//--------------------------------------------------------------------------------------
-	l_sCommandSed = " s/@@Outputs@@/";
-	if(m_vOutputs.empty()) l_sCommandSed = l_sCommandSed + "\\/\\/No output specified.To add outputs use :\\n\\/\\/rBoxAlgorithmPrototype.addOutput(\\\"Output Name\\\",OV_TypeId_XXXX);\\n";
+	l_sPattern = "@@Outputs@@";
+	l_sSubstitute = "";
+	if(m_vOutputs.empty()) l_sSubstitute = l_sSubstitute + "\\/\\/No output specified.To add outputs use :\\n\\/\\/rBoxAlgorithmPrototype.addOutput(\\\"Output Name\\\",OV_TypeId_XXXX);\\n";
 	for(vector<IOSStruct>::iterator it = m_vOutputs.begin(); it != m_vOutputs.end(); it++)
 	{
 		if(it != m_vOutputs.begin()) 
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t\\t";
+			l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\t";
 		//add the CIdentifier corresponding to type
-		//l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addOutput(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+");\\n";
+		//l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addOutput(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+");\\n";
 		//reconstruct the type_id
 		string l_sTypeName((const char *)(*it)._type);
 		for(uint32 s=0; s<l_sTypeName.length(); s++)
@@ -695,50 +702,52 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 				if(l_sTypeName[s] >= 'a' && l_sTypeName[s]<= 'z') l_sTypeName.replace(s,1,1,(char)(l_sTypeName[s]+'A'-'a'));
 			}
 		}
-		l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addOutput(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+");\\n";
+		l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addOutput(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+");\\n";
 	}
-	l_sCommandSed = l_sCommandSed +  "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//--------------------------------------------------------------------------------------
 	//Message Inputs
 	//--------------------------------------------------------------------------------------
-	l_sCommandSed = "s/@@MessageInputs@@/";
-	if(m_vMessageInputs.empty()) l_sCommandSed = l_sCommandSed + "\\/\\/No Message input specified.To add Message inputs use :\\n\\/\\/rBoxAlgorithmPrototype.addMessageInput(\\\"Input Name\\\");\\n";
+	l_sPattern = "@@MessageInputs@@";
+	l_sSubstitute = "";
+	if(m_vMessageInputs.empty()) l_sSubstitute = l_sSubstitute + "\\/\\/No Message input specified.To add Message inputs use :\\n\\/\\/rBoxAlgorithmPrototype.addMessageInput(\\\"Input Name\\\");\\n";
 	for(vector<IOSStruct>::iterator it = m_vMessageInputs.begin(); it != m_vMessageInputs.end(); it++)
 	{
 		if(it != m_vMessageInputs.begin())
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t\\t";
-		l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addMessageInput(\\\""+(*it)._name+"\\\");\\n";
+			l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\t";
+		l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addMessageInput(\\\""+(*it)._name+"\\\");\\n";
 	}
-	l_sCommandSed = l_sCommandSed +  "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//--------------------------------------------------------------------------------------
 	//Message Outputs
 	//--------------------------------------------------------------------------------------
-	l_sCommandSed = " s/@@MessageOutputs@@/";
-	if(m_vMessageOutputs.empty()) l_sCommandSed = l_sCommandSed + "\\/\\/No Message output specified.To add Message outputs use :\\n\\/\\/rBoxAlgorithmPrototype.addMessageOutput(\\\"Output Name\\\");\\n";
+	l_sPattern = "@@MessageOutputs@@";
+	l_sSubstitute = "";
+
+	if(m_vMessageOutputs.empty()) l_sSubstitute = l_sSubstitute + "\\/\\/No Message output specified.To add Message outputs use :\\n\\/\\/rBoxAlgorithmPrototype.addMessageOutput(\\\"Output Name\\\");\\n";
 	for(vector<IOSStruct>::iterator it = m_vMessageOutputs.begin(); it != m_vMessageOutputs.end(); it++)
 	{
 		if(it != m_vMessageOutputs.begin())
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t\\t";
-		l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addMessageOutput(\\\""+(*it)._name+"\\\");\\n";
+			l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\t";
+		l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addMessageOutput(\\\""+(*it)._name+"\\\");\\n";
 	}
-	l_sCommandSed = l_sCommandSed +  "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//--------------------------------------------------------------------------------------
 	//Settings
 	//--------------------------------------------------------------------------------------
-	l_sCommandSed = "s/@@Settings@@/";
-	if(m_vSettings.empty()) l_sCommandSed = l_sCommandSed + "\\/\\/No setting specified.To add settings use :\\n\\/\\/rBoxAlgorithmPrototype.addSetting(\\\"Setting Name\\\",OV_TypeId_XXXX,\\\"default value\\\");\\n";
+	l_sPattern = "@@Settings@@";
+	l_sSubstitute = "";
+
+	if(m_vSettings.empty()) l_sSubstitute = l_sSubstitute + "\\/\\/No setting specified.To add settings use :\\n\\/\\/rBoxAlgorithmPrototype.addSetting(\\\"Setting Name\\\",OV_TypeId_XXXX,\\\"default value\\\");\\n";
 	for(vector<IOSStruct>::iterator it = m_vSettings.begin(); it != m_vSettings.end(); it++)
 	{
 		if(it != m_vSettings.begin()) 
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t\\t";
+			l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\t";
 		//add the CIdentifier corresponding to type
-		//l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addSetting(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+",\\\""+(*it)._defaultValue+"\\\");\\n";
+		//l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addSetting(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+",\\\""+(*it)._defaultValue+"\\\");\\n";
 		//reconstruct the type_id by erasing the spaces and upcasing the following letter
 		string l_sTypeName((const char *)(*it)._type);
 		for(uint32 s=0; s<l_sTypeName.length(); s++)
@@ -749,27 +758,28 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 				if(l_sTypeName[s] >= 'a' && l_sTypeName[s]<= 'z') l_sTypeName.replace(s,1,1,(char)(l_sTypeName[s]+'A'-'a'));
 			}
 		}
-		l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addSetting(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+",\\\""+(*it)._defaultValue+"\\\");\\n";
+		l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addSetting(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+",\\\""+(*it)._defaultValue+"\\\");\\n";
 	}
-	l_sCommandSed = l_sCommandSed +  "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//--------------------------------------------------------------------------------------
 	//Codecs algorithms
 	//--------------------------------------------------------------------------------------
-	l_sCommandSed = "s/@@Algorithms@@/";
+	l_sPattern = "@@Algorithms@@";
+	l_sSubstitute = "";
+
 	if(m_vAlgorithms.size() == 0)
 	{
-		l_sCommandSed = l_sCommandSed + "\\/\\/ No codec algorithms were specified in the skeleton-generator.\\n";
+		l_sSubstitute = l_sSubstitute + "\\/\\/ No codec algorithms were specified in the skeleton-generator.\\n";
 	}
 	else
 	{
-		l_sCommandSed = l_sCommandSed + "\\/\\/ Codec algorithms specified in the skeleton-generator:\\n";
+		l_sSubstitute = l_sSubstitute + "\\/\\/ Codec algorithms specified in the skeleton-generator:\\n";
 	}
 	for(uint32 a=0; a<m_vAlgorithms.size(); a++)
 	{
 		/*if(a != 0) 
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t";
+			l_sSubstitute = l_sSubstitute + "\\t\\t\\t";
 */
 		string l_sBlock = string((const char *)m_mAlgorithmHeaderDeclaration[m_vAlgorithms[a]]);
 		stringstream ss; ss << "Algo" << a << "_";
@@ -782,11 +792,9 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 				l_sBlock.insert(s,l_sUniqueMarker);
 			}
 		}
-		l_sCommandSed = l_sCommandSed + CString(l_sBlock.c_str());
+		l_sSubstitute = l_sSubstitute + CString(l_sBlock.c_str());
 	}
-		
-	l_sCommandSed = l_sCommandSed + "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------//
 	// box.cpp
@@ -808,7 +816,9 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 	}
 
 	// Codec Algorithm stuff. too complicated for the simple SED primitives.
-	l_sCommandSed = "s/@@AlgorithmInitialisation@@/";
+	l_sPattern = "@@AlgorithmInitialisation@@";
+	l_sSubstitute = "";
+
 	for(uint32 a=0; a<m_vAlgorithms.size(); a++)
 	{
 		string l_sBlock = string((const char *)m_mAlgorithmInitialisation[m_vAlgorithms[a]]);
@@ -822,18 +832,19 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 				l_sBlock.insert(s,l_sUniqueMarker);
 			}
 		}
-		l_sCommandSed = l_sCommandSed + CString(l_sBlock.c_str());
+		l_sSubstitute = l_sSubstitute + CString(l_sBlock.c_str());
 	}
-	l_sCommandSed = l_sCommandSed + "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 		
-	l_sCommandSed = "s/@@AlgorithmInitialisationReferenceTargets@@/";
+	l_sPattern = "@@AlgorithmInitialisationReferenceTargets@@";
+	l_sSubstitute = "";
+
 	if(m_bUseCodecToolkit)
 	{
-		l_sCommandSed = l_sCommandSed + "\\t\\/\\/ If you need to, you can manually set the reference targets to link the codecs input and output. To do so, you can use :\\n";
-		l_sCommandSed = l_sCommandSed + "\\t\\/\\/m_oEncoder.getInputX().setReferenceTarget(m_oDecoder.getOutputX())\\n";
-		l_sCommandSed = l_sCommandSed + "\\t\\/\\/ Where 'X' depends on the codec type. Please refer to the Codec Toolkit Reference Page\\n";
-		l_sCommandSed = l_sCommandSed + "\\t\\/\\/ (http:\\/\\/openvibe.inria.fr\\/documentation\\/unstable\\/Doc_Tutorial_Developer_SignalProcessing_CodecToolkit_Ref.html) for a complete list.\\n";
+		l_sSubstitute = l_sSubstitute + "\\t\\/\\/ If you need to, you can manually set the reference targets to link the codecs input and output. To do so, you can use :\\n";
+		l_sSubstitute = l_sSubstitute + "\\t\\/\\/m_oEncoder.getInputX().setReferenceTarget(m_oDecoder.getOutputX())\\n";
+		l_sSubstitute = l_sSubstitute + "\\t\\/\\/ Where 'X' depends on the codec type. Please refer to the Codec Toolkit Reference Page\\n";
+		l_sSubstitute = l_sSubstitute + "\\t\\/\\/ (http:\\/\\/openvibe.inria.fr\\/documentation\\/unstable\\/Doc_Tutorial_Developer_SignalProcessing_CodecToolkit_Ref.html) for a complete list.\\n";
 	}
 	else
 	{
@@ -850,14 +861,15 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 					l_sBlock.insert(s,l_sUniqueMarker);
 				}
 			}
-			l_sCommandSed = l_sCommandSed + CString(l_sBlock.c_str());
+			l_sSubstitute = l_sSubstitute + CString(l_sBlock.c_str());
 		}
 	}
-	l_sCommandSed = l_sCommandSed + "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 		
 		
-	l_sCommandSed = "s/@@AlgorithmUninitialisation@@/";
+	l_sPattern = "@@AlgorithmUninitialisation@@";
+	l_sSubstitute = "";
+
 	for(uint32 a=0; a<m_vAlgorithms.size(); a++)
 	{
 		string l_sBlock = string((const char *)m_mAlgorithmUninitialisation[m_vAlgorithms[a]]);
@@ -871,10 +883,9 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 				l_sBlock.insert(s,l_sUniqueMarker);
 			}
 		}
-		l_sCommandSed = l_sCommandSed + CString(l_sBlock.c_str());
+		l_sSubstitute = l_sSubstitute + CString(l_sBlock.c_str());
 	}
-	l_sCommandSed = l_sCommandSed + "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------//
 	// readme-box.cpp

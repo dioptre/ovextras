@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCTrainerFlickeringObject.h"
 #include "ovassvepCTrainerApplication.h"
 
@@ -107,3 +110,4 @@ void CTrainerFlickeringObject::setTarget( bool bIsTarget )
 }
 
 
+#endif

@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvep_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
@@ -147,3 +150,13 @@ int main(int argc, char** argv)
 
 
 
+#else
+#include <stdio.h>
+
+int main(int argc, char** argv)
+{
+	printf("SSVEP Mind Shooter has not been compiled as it depends on Ogre (missing/disabled)\n");
+
+	return -1;
+}
+#endif

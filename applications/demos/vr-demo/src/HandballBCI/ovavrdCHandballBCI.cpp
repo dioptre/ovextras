@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovavrdCHandballBCI.h"
 
 #include <iostream>
@@ -712,3 +715,5 @@ void CHandballBCI::initSceneCrossArrowAndFeedback()
 	
 	l_poFeedbackNode->setVisible(false);
 }
+
+#endif

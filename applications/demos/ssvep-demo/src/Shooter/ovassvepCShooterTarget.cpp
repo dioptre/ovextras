@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCShooterTarget.h"
 
 using namespace OpenViBESSVEP;
@@ -51,3 +54,5 @@ bool CShooterTarget::collidesWith(std::pair<Ogre::Real, Ogre::Real> pPoint)
 
 	return l_rDistance <= SSVEP_SHOOTER_TARGET_SIZE;
 }
+
+#endif

@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCApplication.h"
 #include <cmath>
 
@@ -301,3 +304,5 @@ void CApplication::stopExperiment()
 	this->exit();
 }
 
+
+#endif

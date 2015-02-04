@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCCommandImpactShipControl.h"
 #include "ovassvepCImpactApplication.h"
 
@@ -25,3 +28,5 @@ void CCommandImpactShipControl::execute(int iButton, int iState)
 			break;
 	}
 }
+
+#endif

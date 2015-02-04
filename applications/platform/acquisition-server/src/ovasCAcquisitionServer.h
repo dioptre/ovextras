@@ -95,10 +95,12 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean setNaNReplacementPolicy(OpenViBEAcquisitionServer::ENaNReplacementPolicy eNaNReplacementPolicy);
 		OpenViBE::boolean setDriftCorrectionPolicy(OpenViBEAcquisitionServer::EDriftCorrectionPolicy eDriftCorrectionPolicy);
 		OpenViBE::boolean isImpedanceCheckRequested(void);
+		OpenViBE::boolean isChannelSelectionRequested(void);
 		OpenViBE::boolean setDriftToleranceDuration(OpenViBE::uint64 ui64DriftToleranceDuration);
 		OpenViBE::boolean setJitterEstimationCountForDrift(OpenViBE::uint64 ui64JitterEstimationCountForDrift);
 		OpenViBE::boolean setOversamplingFactor(OpenViBE::uint64 ui64OversamplingFactor);
 		OpenViBE::boolean setImpedanceCheckRequest(OpenViBE::boolean bActive);
+		OpenViBE::boolean setChannelSelectionRequest(OpenViBE::boolean bActive);
 
 		std::vector<IAcquisitionServerPlugin*> getPlugins() { return m_vPlugins; }
 
@@ -137,6 +139,7 @@ namespace OpenViBEAcquisitionServer
 		std::vector < OpenViBE::float32 > m_vSwapBuffer;
 		std::vector < OpenViBE::float32 > m_vOverSamplingSwapBuffer;
 		std::vector < OpenViBE::float64 > m_vImpedance;
+		std::vector < OpenViBE::uint32 >  m_vSelectedChannels;
 		Socket::IConnectionServer* m_pConnectionServer;
 
 		OpenViBEAcquisitionServer::EDriftCorrectionPolicy m_eDriftCorrectionPolicy;
@@ -147,6 +150,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bInitialized;
 		OpenViBE::boolean m_bStarted;
 		OpenViBE::boolean m_bIsImpedanceCheckRequested;
+		OpenViBE::boolean m_bIsChannelSelectionRequested;
 		OpenViBE::boolean m_bGotData;
 		OpenViBE::boolean m_bDriftCorrectionCalled;
 		OpenViBE::uint64 m_ui64OverSamplingFactor;

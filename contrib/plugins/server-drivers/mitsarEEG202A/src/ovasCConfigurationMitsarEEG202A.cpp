@@ -1,3 +1,5 @@
+
+#if defined(TARGET_HAS_ThirdPartyMitsar)
 #if defined TARGET_OS_Windows
 
 #include "ovasCConfigurationMitsarEEG202A.h"
@@ -57,5 +59,7 @@ boolean CConfigurationMitsarEEG202A::postConfigure(void)
 	}
 	return true;
 }
+
+#endif
 
 #endif

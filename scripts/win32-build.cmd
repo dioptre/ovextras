@@ -8,13 +8,13 @@ set InitEnvScript=win32-init_env_command.cmd
 set PAUSE=pause
 if /i "%1"=="-h" (
 	echo Usage: win32-build.cmd [Build Type] [Init-env Script]
-	echo -- Build Type option can be : --release (-r^) or --debug (-d^). Default is release.
+	echo -- Build Type option can be : --release (-r^), --debug (-d^) or --debug-symbols. Default is Release.
 	echo -- Default Init-env script is: win32-init_env_command.cmd
 	pause
 	exit 0
 ) else if /i "%1"=="--help" (
 	echo Usage: win32-build.cmd [Build Type] [Init-env Script]
-	echo -- Build Type option can be : --release (-r^) or --debug (-d^). Default is Release.
+	echo -- Build Type option can be : --release (-r^), --debug (-d^) or --debug-symbols. Default is Release.
 	echo -- Default Init-env script is: win32-init_env_command.cmd
 	pause
 	exit 0
@@ -30,6 +30,11 @@ if /i "%1"=="-h" (
 	if not "%2"=="" (
 		set !InitEnvScript!=%2
 	)	
+) else if /i "%1"=="--debug-symbols" (
+	set BuildType=RelWithDebInfo
+	if not "%2"=="" (
+		set !InitEnvScript!=%2
+	)		
 ) else if /i "%1"=="-r" (
 	set BuildType=Release
 	if not "%2"=="" (

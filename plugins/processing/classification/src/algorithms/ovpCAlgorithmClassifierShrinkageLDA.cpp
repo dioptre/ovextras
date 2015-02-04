@@ -4,12 +4,33 @@
 
 #include <map>
 #include <sstream>
+#include <iostream>
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
+#include <xml/IXMLHandler.h>
 
 #include <Eigen/Eigenvalues>
 
 #include "../algorithms/ovpCAlgorithmConditionedCovariance.h"
+
+namespace{
+	const char* const c_sTypeNodeName = "LDA";
+	const char* const c_sCreatorNodeName = "Creator";
+	const char* const c_sClassesNodeName = "Classes";
+	const char* const c_sCoefficientsNodeName = "Coefficients";
+}
+
+extern const char* const c_sClassifierRoot;
+
+OpenViBE::int32 OpenViBEPlugins::Classification::getShrinkageLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
+{
+	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
+		return 0;
+	else if(::fabs(rFirstClassificationValue[0]) < ::fabs(rSecondClassificationValue[0]))
+		return -1;
+	else
+		return 1;
+}
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -51,6 +72,9 @@ boolean CAlgorithmClassifierShrinkageLDA::initialize(void)
 	TParameterHandler < boolean > ip_bDiagonalCov(this->getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov));
 	ip_bDiagonalCov = false;
 
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	op_pConfiguration=NULL;
+
 	return CAlgorithmClassifier::initialize();
 }
 
@@ -64,7 +88,24 @@ boolean CAlgorithmClassifierShrinkageLDA::uninitialize(void)
 
 boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
-	TParameterHandler< boolean > ip_bDiagonalCov(getInputParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov));
+	//Let's set the extra settings
+	TParameterHandler < std::map<CString, CString>* > ip_pExtraParameter(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+	std::map<CString, CString>* l_pExtraParameter = ip_pExtraParameter;
+
+	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierShrinkageLDA));
+	l_pAlgoProxy->initialize();
+
+	//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage
+	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage);
+	this->getFloat64Parameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_Shrinkage, (*l_pExtraParameter)[l_pParameterName]);
+
+	//Extract OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov
+	l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov);
+	boolean l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierShrinkageLDA_InputParameterId_DiagonalCov, (*l_pExtraParameter)[l_pParameterName]);
+
+	l_pAlgoProxy->uninitialize();
+	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
+
 
 	// IO to the covariance alg
 	TParameterHandler < OpenViBE::IMatrix* > op_pMean(m_pCovarianceAlgorithm->getOutputParameter(OVP_Algorithm_ConditionedCovariance_OutputParameterId_Mean));
@@ -137,7 +178,7 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 		Map<MatrixXdRowMajor> l_oCovMapper(op_pCovarianceMatrix->getBuffer(), l_ui32nCols, l_ui32nCols);
 		l_aCov[l_ui32classIdx] = l_oCovMapper;
 
-		if(ip_bDiagonalCov) 
+		if(l_pDiagonalCov)
 		{
 			for(uint32 i=0;i<l_ui32nCols;i++) 
 			{
@@ -182,34 +223,7 @@ boolean CAlgorithmClassifierShrinkageLDA::train(const IFeatureVectorSet& rFeatur
 	m_oCoefficients(0,0) = l_oBias(0,0);
 	m_oCoefficients.block(0,1,1,l_ui32nCols) = l_oWeights.transpose();
 
-	// Write the classifier to an .xml
-	std::stringstream l_sClasses;
-	std::stringstream l_sCoefficients;
-
-	l_sClasses << m_f64Class1 << " " << m_f64Class2;
-	l_sCoefficients << std::scientific;
-	for(uint32 i=0; i<l_ui32nCols+1; i++)
-	{
-		l_sCoefficients << " " << m_oCoefficients(0,i);
-	}
-
-	m_oConfiguration.setSize(0, true);
-	XML::IWriter* l_pWriter=XML::createWriter(*this);
-	l_pWriter->openChild("OpenViBE-Classifier");
-	 l_pWriter->openChild("LDA");
-	  l_pWriter->openChild("Creator");
-	   l_pWriter->setChildData("ShrinkageLDA");
-	  l_pWriter->closeChild();
-	  l_pWriter->openChild("Classes");
-	   l_pWriter->setChildData(l_sClasses.str().c_str());
-	  l_pWriter->closeChild();
-	  l_pWriter->openChild("Coefficients");
-	   l_pWriter->setChildData(l_sCoefficients.str().c_str());
-	  l_pWriter->closeChild();
-	 l_pWriter->closeChild();
-	l_pWriter->closeChild();
-	l_pWriter->release();
-	l_pWriter=NULL;
+	m_ui32NumCols = l_ui32nCols;
 	
 	// Debug output
 	dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
@@ -255,67 +269,78 @@ boolean CAlgorithmClassifierShrinkageLDA::classify(const IFeatureVector& rFeatur
 	return true;
 }
 
-boolean CAlgorithmClassifierShrinkageLDA::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
+void CAlgorithmClassifierShrinkageLDA::generateConfigurationNode(void)
 {
-	rMemoryBuffer.setSize(0, true);
-	rMemoryBuffer.append(m_oConfiguration);
-	return true;
+	// Write the classifier to an .xml
+	std::stringstream l_sClasses;
+	std::stringstream l_sCoefficients;
+
+	l_sClasses << m_f64Class1 << " " << m_f64Class2;
+	l_sCoefficients << std::scientific;
+
+	for(uint32 i=0; i<m_ui32NumCols+1; i++)
+	{
+		l_sCoefficients << " " << m_oCoefficients(0,i);
+	}
+
+	XML::IXMLNode *l_pCreatorNode = XML::createNode(c_sCreatorNodeName);
+	l_pCreatorNode->setPCData("ShrinkageLDA");
+	XML::IXMLNode *l_pClassesNode = XML::createNode(c_sClassesNodeName);
+	l_pClassesNode->setPCData(l_sClasses.str().c_str());
+	XML::IXMLNode *l_pCoefficientsNode = XML::createNode(c_sCoefficientsNodeName);
+	l_pCoefficientsNode->setPCData(l_sCoefficients.str().c_str());
+
+	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode(c_sTypeNodeName);
+	l_pAlgorithmNode->addChild(l_pCreatorNode);
+	l_pAlgorithmNode->addChild(l_pClassesNode);
+	l_pAlgorithmNode->addChild(l_pCoefficientsNode);
+
+	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
+	m_pConfigurationNode->addChild(l_pAlgorithmNode);
 }
 
-boolean CAlgorithmClassifierShrinkageLDA::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
+XML::IXMLNode* CAlgorithmClassifierShrinkageLDA::saveConfiguration(void)
+{
+	generateConfigurationNode();
+	return m_pConfigurationNode;
+}
+
+boolean CAlgorithmClassifierShrinkageLDA::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
 	m_f64Class1=0;
 	m_f64Class2=0;
 
-	XML::IReader* l_pReader=XML::createReader(*this);
-	l_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
-	l_pReader->release();
-	l_pReader=NULL;
+	loadClassesFromNode(pConfigurationNode->getChild(0)->getChildByName("Classes"));
+	loadCoefficientsFromNode(pConfigurationNode->getChild(0)->getChildByName("Coefficients"));
 
 	return true;
 }
 
-void CAlgorithmClassifierShrinkageLDA::write(const char* sString)
+void CAlgorithmClassifierShrinkageLDA::loadClassesFromNode(XML::IXMLNode *pNode)
 {
-	m_oConfiguration.append((const uint8*)sString, ::strlen(sString));
+	std::stringstream l_sData(pNode->getPCData());
+
+	l_sData >> m_f64Class1;
+	l_sData >> m_f64Class2;
 }
 
-void CAlgorithmClassifierShrinkageLDA::openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
+void CAlgorithmClassifierShrinkageLDA::loadCoefficientsFromNode(XML::IXMLNode *pNode)
 {
-	m_vNode.push(sName);
-}
+	std::stringstream l_sData(pNode->getPCData());
 
-void CAlgorithmClassifierShrinkageLDA::processChildData(const char* sData)
-{
-	std::stringstream l_sData(sData);
-
-	if(m_vNode.top()==CString("Classes"))
+	std::vector < float64 > l_vCoefficients;
+	while(!l_sData.eof())
 	{
-		l_sData >> m_f64Class1;
-		l_sData >> m_f64Class2;
+		float64 l_f64Value;
+		l_sData >> l_f64Value;
+		l_vCoefficients.push_back(l_f64Value);
 	}
 
-	if(m_vNode.top()==CString("Coefficients"))
+	m_oCoefficients.resize(1,l_vCoefficients.size());
+	for(size_t i=0; i<l_vCoefficients.size(); i++)
 	{
-		std::vector < float64 > l_vCoefficients;
-		while(!l_sData.eof())
-		{
-			float64 l_f64Value;
-			l_sData >> l_f64Value;
-			l_vCoefficients.push_back(l_f64Value);
-		}
-
-		m_oCoefficients.resize(1,l_vCoefficients.size());
-		for(size_t i=0; i<l_vCoefficients.size(); i++)
-		{
-			m_oCoefficients(0,i)=l_vCoefficients[i];
-		}
+		m_oCoefficients(0,i)=l_vCoefficients[i];
 	}
-}
-
-void CAlgorithmClassifierShrinkageLDA::closeChild(void)
-{
-	m_vNode.pop();
 }
 
 #endif // TARGET_HAS_ThirdPartyEIGEN

@@ -6,8 +6,6 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/IReader.h>
-
 #include <vector>
 #include <string>
 
@@ -22,9 +20,7 @@ namespace OpenViBEPlugins
 		* This plugin opens a new GTK window and displays the incoming signals. The user may change the zoom level,
 		* the width of the time window displayed, ...
 		*/
-		class CSignalDisplay : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>,
-			public OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback::ICallback,
-			public OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback::ICallback
+		class CSignalDisplay : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
 		public:
 
@@ -39,21 +35,10 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_SignalDisplay)
 
-			virtual void setMatrixDimensionCount(const OpenViBE::uint32 ui32DimensionCount);
-			virtual void setMatrixDimensionSize(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionSize);
-			virtual void setMatrixDimensionLabel(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionEntryIndex, const char* sDimensionLabel);
-			virtual void setMatrixBuffer(const OpenViBE::float64* pBuffer);
-
-			virtual void setStimulationCount(const OpenViBE::uint32 ui32StimulationCount);
-			virtual void setStimulation(const OpenViBE::uint32 ui32StimulationIndex, const OpenViBE::uint64 ui64StimulationIdentifier, const OpenViBE::uint64 ui64StimulationDate);
-
 		public:
 
-			//ebml
-			EBML::IReader* m_pStreamedMatrixReader;
-			EBML::IReader* m_pStimulationReader;
-			OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback* m_pStreamedMatrixReaderCallBack;
-			OpenViBEToolkit::IBoxAlgorithmStimulationInputReaderCallback* m_pStimulationReaderCallBack;
+			OpenViBEToolkit::TStreamedMatrixDecoder<CSignalDisplay> m_oStreamedMatrixDecoder;
+			OpenViBEToolkit::TStimulationDecoder<CSignalDisplay> m_oStimulationDecoder;
 
 			//The main object used for the display (contains all the GUI code)
 			CSignalDisplayDrawable * m_pSignalDisplayView;
@@ -61,9 +46,6 @@ namespace OpenViBEPlugins
 			//Contains all the data about the incoming signal
 			CBufferDatabase * m_pBufferDatabase;
 
-			//Start and end time of the last buffer
-			OpenViBE::uint64 m_ui64StartTime;
-			OpenViBE::uint64 m_ui64EndTime;
 		};
 
 		/**
@@ -73,12 +55,12 @@ namespace OpenViBEPlugins
 		{
 		public:
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Signal display"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Bruno Renier / Yann Renard"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Bruno Renier, Yann Renard, Alison Cellard"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Displays the incoming signal"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Displays the incoming signal"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualisation/Basic"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.3"); }
 			virtual void release(void)                                   { }
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_SignalDisplay; }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-zoom-fit"); }

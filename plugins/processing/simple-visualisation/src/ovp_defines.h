@@ -55,6 +55,8 @@
 #define OVP_ClassId_TimeFrequencyMapDisplay                              OpenViBE::CIdentifier(0x3AE63330, 0x76532117)
 #define OVP_ClassId_BoxAlgorithm_P300IdentifierCardVisualisation         OpenViBE::CIdentifier(0x3AF7FF20, 0xA68745DB)
 
+#define OVP_ClassId_BoxAlgorithm_ErpPlot 				OpenViBE::CIdentifier(0x10DC6917, 0x2B29B2A0)
+
 //___________________________________________________________________//
 //                                                                   //
 // Plugin Object Descriptor Class Identifiers                                   //
@@ -70,6 +72,8 @@
 #define OVP_ClassId_VoxelDisplayDesc                                     OpenViBE::CIdentifier(0x79321659, 0x642D3D0C)
 #define OVP_ClassId_TimeFrequencyMapDisplayDesc                          OpenViBE::CIdentifier(0x1BAE74F3, 0x20FB7C89)
 #define OVP_ClassId_BoxAlgorithm_P300IdentifierCardVisualisationDesc     OpenViBE::CIdentifier(0x84F146EF, 0x4AA712A4)
+
+#define OVP_ClassId_BoxAlgorithm_ErpPlotDesc 			     	OpenViBE::CIdentifier(0x10DC6917, 0x2B29B2A0)
 //___________________________________________________________________//
 //                                                                   //
 // Global defines                                                   //

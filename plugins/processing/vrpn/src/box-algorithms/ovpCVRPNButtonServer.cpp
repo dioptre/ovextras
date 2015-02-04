@@ -12,9 +12,7 @@ using namespace OpenViBEToolkit;
 using namespace std;
 
 CVRPNButtonServer::CVRPNButtonServer()
-	:m_pReader(NULL)
-	,m_pStimulationReaderCallBack(NULL)
-	,m_ui32CurrentInput(0)
+	:m_ui32CurrentInput(0)
 {
 }
 
@@ -22,9 +20,6 @@ boolean CVRPNButtonServer::initialize()
 {
 	const IBox * l_pBox=getBoxAlgorithmContext()->getStaticBoxContext();
 
-	//initializes the ebml input
-	m_pStimulationReaderCallBack = createBoxAlgorithmStimulationInputReaderCallback(*this);
-	m_pReader=EBML::createReader(*m_pStimulationReaderCallBack);
 
 	//get server name, and creates a button server for this server
 	CString l_oServerName;
@@ -33,6 +28,8 @@ boolean CVRPNButtonServer::initialize()
 	IVRPNServerManager::getInstance().initialize();
 	IVRPNServerManager::getInstance().addServer(l_oServerName, m_oServerIdentifier);
 	IVRPNServerManager::getInstance().setButtonCount(m_oServerIdentifier, l_pBox->getInputCount());
+
+	m_vStimulationDecoders.resize(l_pBox->getInputCount());
 
 	//get stim id
 	for(uint32 i=0; i<l_pBox->getInputCount(); i++)
@@ -45,6 +42,9 @@ boolean CVRPNButtonServer::initialize()
 			pair<uint64, uint64>(
 				getBoxAlgorithmContext()->getPlayerContext()->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_Stimulation, l_sOnStimulationIdentifier),
 				getBoxAlgorithmContext()->getPlayerContext()->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_Stimulation, l_sOffStimulationIdentifier));
+
+		m_vStimulationDecoders[i] = new OpenViBEToolkit::TStimulationDecoder < CVRPNButtonServer >;
+		m_vStimulationDecoders[i]->initialize(*this,i);
 	}
 
 	return true;
@@ -52,11 +52,10 @@ boolean CVRPNButtonServer::initialize()
 
 boolean CVRPNButtonServer::uninitialize()
 {
-	//release the ebml reader
-	releaseBoxAlgorithmStimulationInputReaderCallback(m_pStimulationReaderCallBack);
-
-	m_pReader->release();
-	m_pReader=NULL;
+	for(size_t i=0;i<m_vStimulationDecoders.size();i++) {
+		delete m_vStimulationDecoders[i];
+	}
+	m_vStimulationDecoders.clear();
 
 	IVRPNServerManager::getInstance().uninitialize();
 
@@ -85,22 +84,20 @@ boolean CVRPNButtonServer::process()
 
 		for(uint32 chunk=0; chunk<l_pBoxIO->getInputChunkCount(input); chunk++)
 		{
-			uint64 l_ui64ChunkSize;
-			const uint8* l_pChunkBuffer=NULL;
+			m_vStimulationDecoders[input]->decode(chunk);
 
-			if(l_pBoxIO->getInputChunk(input, chunk, m_ui64StartTime, m_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer))
+			if(m_vStimulationDecoders[input]->isBufferReceived())
 			{
-				m_pReader->processData(l_pChunkBuffer, l_ui64ChunkSize);
-				l_pBoxIO->markInputAsDeprecated(input, chunk);
+				const IStimulationSet* l_oStimSet = m_vStimulationDecoders[input]->getOutputStimulationSet();
+				for(uint32 s=0;s<l_oStimSet->getStimulationCount();s++)
+				{
+					setStimulation(s,l_oStimSet->getStimulationIdentifier(s), l_oStimSet->getStimulationDate(s));
+				}
 			}
 		}
 	}
 
 	return true;
-}
-
-void CVRPNButtonServer::setStimulationCount(const uint32 ui32StimulationCount)
-{
 }
 
 void CVRPNButtonServer::setStimulation(const uint32 ui32StimulationIndex, const uint64 ui64StimulationIdentifier, const uint64 ui64StimulationDate)

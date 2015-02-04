@@ -85,7 +85,6 @@ ELSE(${MODEL} MATCHES Continuous)
 	exec_program("mktemp" ARGS "--tmpdir -d ov.XXX" OUTPUT_VARIABLE OV_ROOT_DIR)
 ENDIF(${MODEL} MATCHES Continuous)
 
-
 ####
 
 ## -- SRC Dir
@@ -96,8 +95,6 @@ set(CTEST_BINARY_DIRECTORY	              "${OV_ROOT_DIR}/dist")
 
 ## -- DashBoard Root
 set(CTEST_DASHBOARD_ROOT                "${CMAKE_CURRENT_SOURCE_DIR}")
-
-
 
 # -----------------------------------------------------------  
 # -- commands
@@ -153,10 +150,26 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestConfig.cmake  ${CTEST_BINARY_DIR
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestTestfile.cmake ${CTEST_BINARY_DIRECTORY}/CTestTestfile.cmake)
 
 
-# passthrow a environnement variable to binary path to tests
+# passthrough an environment variable to binary path to tests
 SET(ENV{OV_BINARY_PATH} "${CTEST_SOURCE_DIRECTORY}/dist")
+
+# Some tests may use bundled data files such as signals
+SET(ENV{OV_DATA_PATH} "${CTEST_SOURCE_DIRECTORY}/dist/share/openvibe/")
+
 ## -- read CTestCustom.cmake file
 ctest_read_custom_files("${CTEST_BINARY_DIRECTORY}")
+
+# this is the folder where test scenarios can be run under
+SET(ENV{OV_TEST_DEPLOY_PATH} "${CTEST_SOURCE_DIRECTORY}/local-tmp/test-deploy/")
+
+MESSAGE("Directories used:")
+MESSAGE("-- Set the OV_ROOT_DIR to            ${OV_ROOT_DIR}")
+MESSAGE("-- Set the CTEST_SOURCE_DIRECTORY to ${CTEST_SOURCE_DIRECTORY}")
+MESSAGE("-- Set the CTEST_BINARY_DIRECTORY to ${CTEST_BINARY_DIRECTORY}")
+MESSAGE("-- Set the CTEST_DASHBOARD_ROOT to   ${CTEST_DASHBOARD_ROOT}")
+MESSAGE("-- Set the OV_TEST_DEPLOY_PATH to    $ENV{OV_TEST_DEPLOY_PATH}")
+MESSAGE("-- Set the OV_BINARY_PATH to         $ENV{OV_BINARY_PATH}")
+MESSAGE("-- Set the OV_DATA_PATH to           $ENV{OV_DATA_PATH}")
 
 #~ SET(CTEST_PROJECT_NAME "OpenViBe")
 #~ # set time for update 

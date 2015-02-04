@@ -7,7 +7,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Samples
+	namespace Examples
 	{
 		class CHelloWorldWithInput : public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
@@ -69,12 +69,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Duplicates input to output and prints a message to the log for each input block"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tests and examples/Basic"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Examples/Basic"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-copy"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_HelloWorldWithInput; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CHelloWorldWithInput(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Examples::CHelloWorldWithInput(); }
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CHelloWorldWithInputListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 

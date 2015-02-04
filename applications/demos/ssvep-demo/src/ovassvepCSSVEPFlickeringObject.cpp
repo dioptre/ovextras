@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCSSVEPFlickeringObject.h"
 #include <iostream>
 
@@ -39,3 +42,5 @@ void CSSVEPFlickeringObject::processFrame()
 		m_ui32CurrentFrame = 0;
 	}
 }
+
+#endif

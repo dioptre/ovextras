@@ -65,11 +65,11 @@ ENDIF(UNIX)
 # ----------------------
 IF(WIN32)
 	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-handball" "handball")
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-tie-fighter" "tie-fighter")
+	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-spaceship" "spaceship")
 ENDIF(WIN32)
 IF(UNIX)
 	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-handball" "handball")
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-tie-fighter" "tie-fighter")
+	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-spaceship" "spaceship")
 ENDIF(UNIX)
 
 # -----------------------------

@@ -1,7 +1,6 @@
 
 #include "ovp_defines.h"
 
-#include "box-algorithms/ovpCXMLStimulationScenarioPlayer.h"
 #include "box-algorithms/ovpCKeyboardStimulator.h"
 #include "box-algorithms/ovpCSignChangeDetector.h"
 
@@ -36,7 +35,6 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Pause", OV_TypeId_PlayerAction_Pause.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Forward", OV_TypeId_PlayerAction_Forward.toUInteger());
 
-	OVP_Declare_New(OpenViBEPlugins::Stimulation::CXMLStimulationScenarioPlayerDesc);
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CKeyboardStimulatorDesc);
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CSignChangeDetectorDesc);
 

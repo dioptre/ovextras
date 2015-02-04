@@ -5,6 +5,8 @@
 #include "ovdCInterfacedScenario.h"
 #include "ovdCInputDialog.h"
 
+#include "ovdCBoxConfigurationDialog.h"//modUI
+
 #include <gdk/gdkkeysyms.h>
 #include <cstring>
 
@@ -157,6 +159,20 @@ CDesignerVisualisation::CDesignerVisualisation(const IKernelContext& rKernelCont
 	m_pUndefinedItemFactory(NULL),
 	m_pSplitItemFactory(NULL)
 {
+		m_ui32ModifiableSettingsBoxes = 0;
+
+		//we have to check the number of mod UI boxes
+		IScenario& m_rScenario =  m_rInterfacedScenario.m_rScenario;
+		CIdentifier l_oId = m_rScenario.getNextBoxIdentifier(OV_UndefinedIdentifier);
+		while (l_oId!=OV_UndefinedIdentifier)
+		{
+			IBox* l_oBox = m_rScenario.getBoxDetails (l_oId);
+			if(l_oBox->hasModifiableSettings())
+			{
+				m_ui32ModifiableSettingsBoxes++;
+			}
+			l_oId = m_rScenario.getNextBoxIdentifier(l_oId);
+		}
 }
 
 CDesignerVisualisation::~CDesignerVisualisation()
@@ -272,9 +288,8 @@ void CDesignerVisualisation::init(std::string guiFile)
 }
 
 void CDesignerVisualisation::load(void)
-{
+{;
 	m_rVisualisationTree.setTreeViewCB(this);
-
 	m_rVisualisationTree.reloadTree();
 
 	gtk_tree_view_expand_all(m_pTreeView);
@@ -317,6 +332,20 @@ void CDesignerVisualisation::onVisualisationBoxAdded(const IBox* pBox)
 		}
 	}
 
+	//if this is a mod UI box
+	if (pBox->hasModifiableSettings())
+	{
+		m_rKernelContext.getLogManager() <<  LogLevel_Debug << "box has MODUI\n";
+		//if there was no mod UI box previously, this is the first one so we need to add the config tab
+		if (m_ui32ModifiableSettingsBoxes==0)
+		{
+			m_rKernelContext.getLogManager() <<  LogLevel_Debug << "adding config tab\n";
+			this->newVisualisationPanel("config");
+		}
+		//new mod UI box
+		m_ui32ModifiableSettingsBoxes++;
+	}
+
 	CIdentifier l_oVisualisationWidgetIdentifier;
 	m_rVisualisationTree.addVisualisationWidget(
 		l_oVisualisationWidgetIdentifier,
@@ -325,14 +354,119 @@ void CDesignerVisualisation::onVisualisationBoxAdded(const IBox* pBox)
 		OV_UndefinedIdentifier,
 		0,
 		pBox->getIdentifier(),
-		0);
+		0,
+		OV_UndefinedIdentifier);
 
 	m_rVisualisationTree.reloadTree();
+
+	//to add the mod UI widget to the config tab we have to wait after the addVisualisationWidget + reloadTree
+	if (pBox->hasModifiableSettings())
+	{
+		CString l_PanelName("config");
+		CIdentifier l_oIdentifier = OV_UndefinedIdentifier;
+		IVisualisationWidget* l_oPanel = NULL;
+		CString l_sWidgetName("");
+		boolean l_bFound = false;
+		//get the config panel
+		do
+		{
+			l_bFound = m_rVisualisationTree.getNextVisualisationWidgetIdentifier(l_oIdentifier,EVisualisationWidget_VisualisationPanel);
+			if (l_oIdentifier!=OV_UndefinedIdentifier)
+			{
+				l_oPanel = m_rVisualisationTree.getVisualisationWidget(l_oIdentifier);
+				l_sWidgetName = l_oPanel->getName();
+			}
+		} while((l_sWidgetName!=l_PanelName)&&(l_bFound));
+
+		//the only way we could have no config tab is that the user deleted it
+		//should we re check and add it back?
+
+		//if we found the config tab
+		if(l_bFound)
+		{
+			//put the widget we just created in the panel
+			if (m_ui32ModifiableSettingsBoxes==1)//first modUI widget to put in the tab
+			{
+				m_rKernelContext.getLogManager() <<  LogLevel_Debug << "			adding first modUI widget\n";
+				//put the widget in the empty config tab in position 0
+				m_rVisualisationTree.parentVisualisationWidget(l_oVisualisationWidgetIdentifier,l_oIdentifier,0);
+				m_rVisualisationTree.reloadTree();
+			}
+			else//otherwise (see dragDataReceivedInEventBoxCB)
+			{
+				m_rKernelContext.getLogManager() <<  LogLevel_Debug << "			adding another modUI widget\n";
+
+				//find the last child of the config tab and add this widget to its right
+				CIdentifier l_oLastChildID;
+
+				//to try to even out the tab, we add the new widget on the first or second child of the tab accroding to the oddness of m_ui32ModifiableSettingsBoxes
+
+				//first always the child 0 which is the split child of the tab
+				l_oPanel->getChildIdentifier(0, l_oLastChildID);
+				//l_oLastChildID now contains the ID of the first root split
+
+				//this split has 1 to 2 children and so on ...
+				if (m_ui32ModifiableSettingsBoxes>=2)
+				{
+					IVisualisationWidget* l_oSplit = NULL;
+					l_oSplit = m_rVisualisationTree.getVisualisationWidget(l_oLastChildID);
+					uint32 count = m_ui32ModifiableSettingsBoxes-1;
+					while (count>1)
+					{
+						//0 is left 1 is right (could be top/bottom)
+						l_oSplit->getChildIdentifier(count%2, l_oLastChildID);
+						l_oSplit = m_rVisualisationTree.getVisualisationWidget(l_oLastChildID);
+						if (count%2==0)
+						{
+							count/=2;
+						}
+						else
+						{
+							count = (count-1)/2;
+						}
+					}
+				}
+
+				//widget corresponding to this last child
+				void* l_pDstWidget = NULL;
+				//since the widget was just added, it should be unaffected thus the check is redundant
+				::GtkTreeIter l_oDstIter;
+
+				//get iterator to src widget	
+				if(m_rVisualisationTree.findChildNodeFromRoot(&l_oDstIter, l_oLastChildID) == false)
+				{
+					m_rKernelContext.getLogManager() <<  LogLevel_Fatal << "			did not found destination node\n";
+					return;
+				}
+				//get actual dst widget (item being dropped) and ensure it isn't being dropped in its own table
+				m_rVisualisationTree.getPointerValueFromTreeIter(&l_oDstIter, l_pDstWidget, EVisualisationTreeColumn_PointerWidget);
+				if (l_pDstWidget==NULL)
+				{
+					m_rKernelContext.getLogManager() <<  LogLevel_Fatal << "			did not found destination widget\n";
+				}
+				GtkWidget* l_oDstVisuWidget = this->getVisualisationWidget((::GtkWidget*)l_pDstWidget);
+				m_rVisualisationTree.dragDataReceivedOutsideWidgetCB(l_oVisualisationWidgetIdentifier, l_oDstVisuWidget, EDragData_Right);//could be replaced with EDragData_Bottom
+			}
+			//refresh view
+			::GtkTreeIter l_oDraggedIter;
+			m_rVisualisationTree.findChildNodeFromRoot(&l_oDraggedIter, l_oVisualisationWidgetIdentifier);
+			refreshActiveVisualisation(m_rVisualisationTree.getTreePath(&l_oDraggedIter));
+
+		}
+		else
+		{
+			//the widget will stay unaffected
+			m_rKernelContext.getLogManager() <<  LogLevel_Fatal << "			panel not found\n";
+		}
+
+	}
 
 	//refresh view
 	::GtkTreeIter l_oIter;
 	m_rVisualisationTree.findChildNodeFromRoot(&l_oIter, l_oVisualisationWidgetIdentifier);
 	refreshActiveVisualisation(m_rVisualisationTree.getTreePath(&l_oIter));
+
+	m_rVisualisationTree.reloadTree();
 }
 
 void CDesignerVisualisation::onVisualisationBoxRemoved(const CIdentifier& rBoxIdentifier)
@@ -340,6 +474,22 @@ void CDesignerVisualisation::onVisualisationBoxRemoved(const CIdentifier& rBoxId
 	IVisualisationWidget* l_pVisualisationWidget = m_rVisualisationTree.getVisualisationWidgetFromBoxIdentifier(rBoxIdentifier);
 	if(l_pVisualisationWidget != NULL)
 	{
+		//retrieve box details
+		const IBox* l_pBox = m_rInterfacedScenario.m_rScenario.getBoxDetails(rBoxIdentifier);
+		if (l_pBox->hasModifiableSettings())
+		{
+			m_ui32ModifiableSettingsBoxes--;
+			//if this was the last modUI box, remove the config tab(?)
+			if (m_ui32ModifiableSettingsBoxes==0)
+			{
+				//that works if the user did not mess with the tab
+				CString l_oActivePanel(m_oActiveVisualisationPanelName);
+				m_oActiveVisualisationPanelName = CString("config");
+				this->removeVisualisationPanel();
+				m_oActiveVisualisationPanelName = l_oActivePanel;
+			}
+		}
+
 		//unaffected widget : delete it
 		if(l_pVisualisationWidget->getParentIdentifier() == OV_UndefinedIdentifier)
 		{
@@ -525,6 +675,8 @@ static gboolean s_iconFill = TRUE;
 				char* l_pVisualisationPanelName = NULL;
 				m_rVisualisationTree.getStringValueFromTreeIter(&l_oParentIter, l_pVisualisationPanelName, EVisualisationTreeColumn_StringName);
 				gtk_notebook_append_page(GTK_NOTEBOOK(l_pNotebook), l_pTreeWidget, gtk_label_new(l_pVisualisationPanelName));
+				//set the child reorderable
+				gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(l_pNotebook), l_pTreeWidget, true);
 			}
 			else if(l_pParentVisualisationWidget->getType() == EVisualisationWidget_VerticalSplit || l_pParentVisualisationWidget->getType() == EVisualisationWidget_HorizontalSplit)
 			{
@@ -1071,7 +1223,8 @@ boolean CDesignerVisualisation::newVisualisationWindow(const char* label)
 		OV_UndefinedIdentifier,
 		0,
 		OV_UndefinedIdentifier,
-		0);
+		0,
+		OV_UndefinedIdentifier);
 
 	l_pVisualisationWindow = m_rVisualisationTree.getVisualisationWidget(l_oVisualisationWindowIdentifier);
 
@@ -1091,7 +1244,8 @@ boolean CDesignerVisualisation::newVisualisationWindow(const char* label)
 		l_oVisualisationWindowIdentifier,
 		0,
 		OV_UndefinedIdentifier,
-		1);
+		1,
+		OV_UndefinedIdentifier);
 
 	m_rVisualisationTree.reloadTree();
 
@@ -1243,7 +1397,8 @@ boolean CDesignerVisualisation::newVisualisationPanel(const char* label)
 		l_oVisualisationWindowIdentifier,
 		l_pVisualisationWindow->getNbChildren(),
 		OV_UndefinedIdentifier,
-		1);
+		1,
+		OV_UndefinedIdentifier);
 
 	m_rVisualisationTree.reloadTree();
 
@@ -1785,7 +1940,6 @@ void CDesignerVisualisation::cursorChangedCB(::GtkTreeView* pTreeView)
 
 void CDesignerVisualisation::drag_data_get_from_tree_cb(::GtkWidget* pSrcWidget, ::GdkDragContext* pDragContex, ::GtkSelectionData* pSelectionData, guint uiInfo, guint uiT, gpointer pData)
 {
-	//m_rKernelContext.getLogManager() << LogLevel_Debug << "drag_data_get_from_tree_cb\n";
 	static_cast<CDesignerVisualisation*>(pData)->dragDataGetFromTreeCB(pSrcWidget, pSelectionData);
 }
 
@@ -1856,6 +2010,7 @@ void CDesignerVisualisation::dragDataReceivedInWidgetCB(::GtkWidget* pDstWidget,
 		return;
 	}
 
+
 	//retrieve dest widget type
 	::GtkTreeIter l_oDstIter;
 	if(m_rVisualisationTree.findChildNodeFromRoot(&l_oDstIter, getTreeWidget(pDstWidget)) == false)
@@ -1894,6 +2049,8 @@ void CDesignerVisualisation::dragDataReceivedInWidgetCB(::GtkWidget* pDstWidget,
 		m_rVisualisationTree.dragDataReceivedInWidgetCB(l_oSrcIdentifier, getVisualisationWidget(GTK_WIDGET(l_pNewDstTreeWidget)));
 	}
 
+
+
 	//refresh view
 	::GtkTreeIter l_oDraggedIter;
 	m_rVisualisationTree.findChildNodeFromRoot(&l_oDraggedIter, l_oSrcIdentifier);
@@ -1902,6 +2059,7 @@ void CDesignerVisualisation::dragDataReceivedInWidgetCB(::GtkWidget* pDstWidget,
 
 void CDesignerVisualisation::drag_data_received_in_event_box_cb(::GtkWidget* pDstWidget,GdkDragContext*,gint,gint,::GtkSelectionData* pSelectionData,guint,guint,gpointer pData)
 {
+	// std::cout << "drag_data_received_in_event_box_cb\n";
 	char buf[1024];
 	void* pDesignerVisualisation = NULL;
 	sscanf((const char*)pData, "%p %s", &pDesignerVisualisation, buf);
@@ -1975,6 +2133,16 @@ void CDesignerVisualisation::dragDataReceivedInEventBoxCB(::GtkWidget* pDstWidge
 	::GtkTreeIter l_oUnaffectedIter = l_oSrcIter;
 	if(m_rVisualisationTree.findParentNode(&l_oUnaffectedIter, EVisualisationTreeNode_Unaffected) == true)
 	{
+
+		//*
+		//retrieve dest widget type
+		::GtkTreeIter l_oDstIter;
+		if(m_rVisualisationTree.findChildNodeFromRoot(&l_oDstIter, getTreeWidget(pDstWidget)) == false)
+		{
+			m_rKernelContext.getLogManager() << LogLevel_Debug << "dragDataReceivedInWidgetCB couldn't retrieve iterator of destination widget!\n";
+			return;
+		}
+
 		m_rVisualisationTree.dragDataReceivedOutsideWidgetCB(l_oSrcIdentifier, pDstWidget, l_oLocation);
 	}
 	else

@@ -6,7 +6,7 @@
 
 #include "../ovkCKernelContext.h"
 
-#include <system/CChrono.h>
+#include <system/ovCChrono.h>
 
 #include <map>
 
@@ -24,7 +24,7 @@ namespace OpenViBE
 			virtual OpenViBE::boolean setScenario(
 				const OpenViBE::CIdentifier& rScenarioIdentifier);
 
-			virtual OpenViBE::boolean initialize(void);
+			virtual OpenViBE::Kernel::EPlayerReturnCode initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 
 			virtual OpenViBE::boolean stop(void);

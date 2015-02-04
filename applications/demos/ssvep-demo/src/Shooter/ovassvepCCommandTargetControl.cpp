@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCCommandTargetControl.h"
 #include "ovassvepCShooterApplication.h"
 
@@ -39,3 +42,5 @@ void CCommandTargetControl::execute(int iButton, int iState)
 		dynamic_cast<CShooterApplication*>(m_poApplication)->addTarget(iButton);
 	}
 }
+
+#endif

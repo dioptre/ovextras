@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCCommandFeedbackHandler.h"
 #include "ovassvepCImpactApplication.h"
 
@@ -14,3 +17,5 @@ void CCommandFeedbackHandler::execute(int iChannelCount, double* pChannel)
 
 	l_poImpactApplication->calculateFeedback(iChannelCount, pChannel);
 }
+
+#endif

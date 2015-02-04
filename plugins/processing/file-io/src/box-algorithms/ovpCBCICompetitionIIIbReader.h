@@ -4,8 +4,6 @@
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
-#include <ebml/TWriterCallbackProxy.h>
-#include <ebml/IWriter.h>
 
 #include <vector>
 #include <string>
@@ -39,9 +37,6 @@ namespace OpenViBEPlugins
 			public:
 				void writeSignalInformation();
 
-				virtual void writeSignalOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize);
-				virtual void writeStimulationOutput(const void* pBuffer, const EBML::uint64 ui64BufferSize);
-
 				_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_BCICompetitionIIIbReader)
 
 
@@ -52,12 +47,8 @@ namespace OpenViBEPlugins
 				std::ifstream m_oSignalFile;
 				OpenViBE::uint64 m_ui64FileSize;
 
-				//EBML handling
-				EBML::TWriterCallbackProxy1<OpenViBEPlugins::FileIO::CBCICompetitionIIIbReader> * m_pOutputWriterCallbackProxy[2];
-				EBML::IWriter* m_pWriter[2];
-
-				OpenViBEToolkit::IBoxAlgorithmSignalOutputWriter * m_pSignalOutputWriterHelper;
-				OpenViBEToolkit::IBoxAlgorithmStimulationOutputWriter * m_pStimulationOutputWriterHelper;
+				OpenViBEToolkit::TSignalEncoder<CBCICompetitionIIIbReader> m_oSignalEncoder;
+				OpenViBEToolkit::TStimulationEncoder<CBCICompetitionIIIbReader> m_oStimulationEncoder;
 
 				OpenViBE::uint64 m_ui64ClockFrequency;
 
@@ -74,7 +65,7 @@ namespace OpenViBEPlugins
 				OpenViBE::uint32 m_ui32SamplingRate;
 				OpenViBE::uint32 m_ui32SentSampleCount;
 
-				std::vector<OpenViBE::float64> m_oMatrixBuffer;
+				OpenViBE::IMatrix* m_pMatrixBuffer;
 				OpenViBE::boolean m_bEndOfFile;
 
 				OpenViBE::uint32 m_ui32CurrentTrial;

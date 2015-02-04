@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovkCOgreResourceGroup.h"
 
 using namespace std;
@@ -180,3 +183,5 @@ bool COgreResourceGroup::destroy()
 
 	return false;
 }
+
+#endif

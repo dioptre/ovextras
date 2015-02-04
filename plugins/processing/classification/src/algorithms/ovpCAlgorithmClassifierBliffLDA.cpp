@@ -141,6 +141,11 @@ boolean CAlgorithmClassifierBliffLDA::classify(const IFeatureVector& rFeatureVec
 	return true;
 }
 
+uint32 CAlgorithmClassifierBliffLDA::getBestClassification(IMatrix& rFirstClassificationValue, IMatrix& rSecondClassificationValue)
+{
+        return 0;
+}
+
 boolean CAlgorithmClassifierBliffLDA::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
 {
 	rMemoryBuffer.setSize(0, true);

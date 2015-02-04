@@ -68,16 +68,16 @@ How to add new test:
 You can add new test using DartTestFile.txt placed in test directory from a specific module.
 
 For example, designer specific tests will be placed in DartTestFile.txt in applications/platform/designer/test/
-And specific test for samples plugin will be placed in DartTestFile.txt in plugins/processing/samples/test/
+And specific test for data generation plugin will be placed in DartTestFile.txt in plugins/processing/data-generation/test/
 To be sure that test are executed, you need to add this subdirectories in file trunk/test/CTestfile.cmake.
 For last examples:
 ...
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/applications/platform/designer/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/samples/test")
+SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/data-generation/test")
 ...
 
 
-There is an exemple of test using Sinus Oscillator in plugins/processing/samples/test/DartTestFile.txt :
+There is an exemple of test using Sinus Oscillator in plugins/processing/data-generation/test/DartTestFile.txt :
 
 SET(TEST_NAME SinusOscillator)
 SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
@@ -131,7 +131,7 @@ Some Remarks :
 
     This test run designer with no GUI, but in Linux it still need a X11 context. So you need to be sure that test can access to a X server. That will be do by a automatic start-up of "Xorg -ac&" command to ensure that X server is launched at test moment. 
     That's why we need to define DISPLAY environment variable before launch test.
-    This test run in path : plugins/processing/samples/test/.
+    This test run in path : plugins/processing/data-generation/test/.
     This test works with a specific scenario that content automatic stop set to a 1 second (using Clock stimulator+Player Controller),
     This test produce a CSV file output that contents output of Sinus oscillator for 1 second (using CSV File Writer)
     Second test is a "white box" test that compare current output signal file with a reference file using "diff" program as comparator. Signal reference file was obtained with the same scenario "a day when all work fine" (actually, non-regression test) 

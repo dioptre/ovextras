@@ -1,6 +1,6 @@
 #include "ovpCBoxAlgorithmP300MagicCardVisualisation.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <list>
 #include <vector>
@@ -53,8 +53,14 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::initialize(void)
 
 	for(uint32 i=6; i<l_rStaticBoxContext.getSettingCount(); i++)
 	{
+		GError *l_pError = NULL;
+
 		CString l_sForegroundImageFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
-		::GtkWidget* l_pForegroundImage=gtk_image_new_from_file(l_sForegroundImageFilename.toASCIIString());
+		::GdkPixbuf* l_pTmp = gdk_pixbuf_new_from_file(l_sForegroundImageFilename.toASCIIString(), &l_pError);
+
+ 		::GtkWidget *l_pForegroundImage = gtk_image_new_from_pixbuf(gdk_pixbuf_scale_simple(l_pTmp,192,192,GDK_INTERP_BILINEAR));
+		g_object_unref(l_pTmp);
+
 		gtk_widget_show(l_pForegroundImage);
 		g_object_ref(l_pForegroundImage);
 		m_vForegroundImage.push_back(l_pForegroundImage);

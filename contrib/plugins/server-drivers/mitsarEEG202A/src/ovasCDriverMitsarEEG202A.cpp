@@ -1,3 +1,5 @@
+
+#if defined(TARGET_HAS_ThirdPartyMitsar)
 #if defined TARGET_OS_Windows
 
 #include "ovasCDriverMitsarEEG202A.h"
@@ -7,8 +9,8 @@
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ovITimeArithmetics.h>
 
-#include <system/Time.h>
-#include <system/Memory.h>
+#include <system/ovCTime.h>
+#include <system/ovCMemory.h>
 
 #include <iostream>
 #include <fstream>
@@ -410,4 +412,5 @@ boolean CDriverMitsarEEG202A::configure(void)
 	return true;
 }
 
+#endif
 #endif

@@ -5,12 +5,10 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include "ovpCBoxAlgorithmCommonClassifierListener.inl"
-
 #include <map>
 
-#define OVP_ClassId_BoxAlgorithm_ClassifierProcessor     OpenViBE::CIdentifier(0x40AB4835, 0x1AE96E9E)
-#define OVP_ClassId_BoxAlgorithm_ClassifierProcessorDesc OpenViBE::CIdentifier(0x786B436B, 0x5B327327)
+#define OVP_ClassId_BoxAlgorithm_ClassifierProcessor       OpenViBE::CIdentifier(0x5FE23D17, 0x95B0452C)
+#define OVP_ClassId_BoxAlgorithm_ClassifierProcessorDesc   OpenViBE::CIdentifier(0x29B66B00, 0xB4683D49)
 
 namespace OpenViBEPlugins
 {
@@ -27,7 +25,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process(void);
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierProcessor);
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierProcessor)
 
 		protected:
 
@@ -47,12 +45,12 @@ namespace OpenViBEPlugins
 			virtual void release(void) { }
 
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Classifier processor"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard, Guillaume Serriere"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Generic classification, relying on several box algorithms"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Classifies incoming feature vectors using a previously learned classifier."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Classification"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("2.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-apply"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ClassifierProcessor; }
@@ -64,20 +62,18 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput  ("Features",                            OV_TypeId_FeatureVector);
 				rBoxAlgorithmPrototype.addOutput ("Labels",                              OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addOutput ("Classification state",                OV_TypeId_StreamedMatrix);
-				rBoxAlgorithmPrototype.addSetting("Classifier to use",                   OVTK_TypeId_ClassificationAlgorithm, "");
+
+				//We load everything in the save filed
 				rBoxAlgorithmPrototype.addSetting("Filename to load configuration from", OV_TypeId_Filename,    "");
-				rBoxAlgorithmPrototype.addSetting("Reject class label",                  OV_TypeId_Stimulation, "OVTK_StimulationId_Label_00");
-				rBoxAlgorithmPrototype.addSetting("Class 1 label",                       OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");
-				rBoxAlgorithmPrototype.addSetting("Class 2 label",                       OV_TypeId_Stimulation, "OVTK_StimulationId_Label_02");
 				return true;
 			}
 
 			// virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const { return new CBoxAlgorithmCommonClassifierListener(5); }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) { delete pBoxListener; }
 
-			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_ClassifierProcessorDesc);
+			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_ClassifierProcessorDesc)
 		};
-	};
-};
+	}
+}
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_ClassifierProcessor_H__

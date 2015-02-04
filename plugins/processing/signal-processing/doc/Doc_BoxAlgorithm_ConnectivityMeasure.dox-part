@@ -6,7 +6,7 @@ Detailed description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Description|
- This box measure connectivity between pairs of channels using several method. For now, Single-Trial Phase Locking Value [1] and Magnitude squared coherence are available. 
+ This box measure connectivity between pairs of channels using several method. For now, Single-Trial Phase Locking Value [1] is available. 
  
  [1] JP Lachaux, E Rodriguez, M Le Van Quyen, A Lutz, J Martinerie, FJ Varela, Studying single-trials of phase synchronous activity in the brain, International Journal of Bifurcation and Chaos in Applied Sciences and Engineering vol.10 p.2429-2440, 2000.
  

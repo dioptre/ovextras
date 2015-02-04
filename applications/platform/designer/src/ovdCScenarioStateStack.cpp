@@ -158,6 +158,7 @@ boolean CScenarioStateStack::restoreState(const IMemoryBuffer& rState)
 	CIdentifier l_oWidgetIdentifier;
 	while(m_rScenario.getVisualisationTreeDetails().getNextVisualisationWidgetIdentifier(l_oWidgetIdentifier))
 	{
+		CString name = m_rScenario.getVisualisationTreeDetails().getVisualisationWidget(l_oWidgetIdentifier)->getName();
 		m_rScenario.getVisualisationTreeDetails().destroyHierarchy(l_oWidgetIdentifier);
 		l_oWidgetIdentifier=OV_UndefinedIdentifier;
 	}

@@ -1,6 +1,8 @@
 #include "ovkCAlgorithmProxy.h"
 #include "ovkCAlgorithm.h"
 
+#include <iostream>
+
 using namespace OpenViBE;
 using namespace Kernel;
 
@@ -119,4 +121,11 @@ boolean CAlgorithmProxy::process(
 {
 	if(!m_bIsInitialized) getLogManager() << LogLevel_ImportantWarning << "Calling accessor on uninitialized algorithm\n";
 	return m_rAlgorithm.process(rTriggerIdentifier);
+}
+
+boolean CAlgorithmProxy::isAlgorithmDerivedFrom(const CIdentifier& rClassIdentifier)
+{
+
+	if(!m_bIsInitialized) getLogManager() << LogLevel_ImportantWarning << "Calling accessor on uninitialized algorithm\n";
+	return m_rAlgorithm.isAlgorithmDerivedFrom(rClassIdentifier);
 }

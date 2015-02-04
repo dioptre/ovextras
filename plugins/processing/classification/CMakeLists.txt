@@ -25,6 +25,13 @@ INCLUDE("FindThirdPartyITPP")
 INCLUDE("FindThirdPartyEigen")
 
 # ---------------------------------
+# Test applications
+# ---------------------------------
+IF(OV_COMPILE_TESTS)
+	ADD_SUBDIRECTORY(test)
+ENDIF(OV_COMPILE_TESTS)
+
+# ---------------------------------
 # Target macros
 # Defines target operating system
 # Defines target architecture
@@ -52,5 +59,7 @@ INSTALL(TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+
+INSTALL(DIRECTORY box-tutorials/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/box-tutorials   PATTERN ".svn" EXCLUDE)
 
 #INSTALL(DIRECTORY src/   DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "doc" EXCLUDE)

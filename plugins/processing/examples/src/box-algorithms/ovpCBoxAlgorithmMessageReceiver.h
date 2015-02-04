@@ -14,7 +14,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Samples
+	namespace Examples
 	{
 		/**
 		 * \class CBoxAlgorithmMessageReceiver
@@ -119,12 +119,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Code example on how to parse messages"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This box expects the input messages to contain specific keys of specific types. The corresponding data is printed to LogManager. For an example how to retrieve all keys from a message, please see the Message Spy box."); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tests and examples/Messaging"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Examples/Messaging"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_MessageReceiver; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Samples::CBoxAlgorithmMessageReceiver; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Examples::CBoxAlgorithmMessageReceiver; }
 			
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const

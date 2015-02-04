@@ -128,6 +128,13 @@ namespace OpenViBEDesigner
 		Mode_Connect,
 		Mode_EditSettings,
 	};
+
+	enum
+	{
+		Log_NotAvailable = 0,
+		Log_AvailableNotActivate = 1,
+		Log_AvailableActivate = 2
+	};
 };
 
 //___________________________________________________________________//
@@ -139,5 +146,7 @@ namespace OpenViBEDesigner
 #ifdef TARGET_HAS_ThirdPartyOpenViBEPluginsGlobalDefines
  #include "ovp_global_defines.h"
 #endif // TARGET_HAS_ThirdPartyOpenViBEPluginsGlobalDefines
+
+
 
 #endif // __OpenViBEDesigner_defines_H__

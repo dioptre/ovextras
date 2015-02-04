@@ -75,6 +75,16 @@ CVoxelDisplay::CVoxelDisplay(void) :
 	m_f64SkullOpacity(0),
 	m_bRepositionCamera(false)
 {
+
+}
+
+uint64 CVoxelDisplay::getClockFrequency(void)
+{
+	return ((uint64)1LL)<<37;
+}
+
+boolean CVoxelDisplay::initialize(void)
+{
 	//TODO : read color scale from some database of flow header
 	m_ui32NbColors = 13;
 	m_pColorScale = new float32[m_ui32NbColors*3];
@@ -91,15 +101,7 @@ CVoxelDisplay::CVoxelDisplay(void) :
 	m_pColorScale[30] = 205/255.f; m_pColorScale[31] = 0/255.f; m_pColorScale[32] = 101/255.f;
 	m_pColorScale[33] = 234/255.f; m_pColorScale[34] = 1/255.f; m_pColorScale[35] = 0/255.f;
 	m_pColorScale[36] = 255/255.f; m_pColorScale[37] = 0/255.f; m_pColorScale[38] = 0/255.f;
-}
 
-uint64 CVoxelDisplay::getClockFrequency(void)
-{
-	return ((uint64)1LL)<<37;
-}
-
-boolean CVoxelDisplay::initialize(void)
-{
 	// Create OVMatrix file reader
 	//FIXME
 	m_pOVMatrixFileReader =
@@ -142,10 +144,13 @@ boolean CVoxelDisplay::initialize(void)
 	//send widget pointers to visualisation context for parenting
 	::GtkWidget* l_pWidget=NULL;
 	m_o3DWidgetIdentifier = getBoxAlgorithmContext()->getVisualisationContext()->create3DWidget(l_pWidget);
-	if(l_pWidget != NULL)
+	if(!l_pWidget)
 	{
-		getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
+		this->getLogManager() << LogLevel_Error << "Unable to create 3D rendering widget.\n";
+		return false;
 	}
+
+	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
 
 	::GtkWidget* l_pToolbarWidget=NULL;
 	m_pVoxelView->getToolbar(l_pToolbarWidget);
@@ -172,10 +177,18 @@ boolean CVoxelDisplay::uninitialize(void)
 	m_pOVMatrixFileReader->uninitialize();
 	getAlgorithmManager().releaseAlgorithm(*m_pOVMatrixFileReader);
 
-	delete[] m_pColorScale;
+	if(m_pColorScale)
+	{
+		delete[] m_pColorScale;
+		m_pColorScale = NULL;
+	}
 
 	//destroy resource group
-	getVisualisationContext().destroyResourceGroup(m_oResourceGroupIdentifier);
+	if(m_oResourceGroupIdentifier!=OV_UndefinedIdentifier)
+	{
+		getVisualisationContext().destroyResourceGroup(m_oResourceGroupIdentifier);
+		m_oResourceGroupIdentifier = OV_UndefinedIdentifier;
+	}
 
 	return true;
 }

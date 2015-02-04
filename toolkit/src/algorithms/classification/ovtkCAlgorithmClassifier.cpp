@@ -3,6 +3,9 @@
 #include "ovtkCFeatureVectorSet.hpp"
 #include "ovtkCVector.hpp"
 
+#include <xml/IXMLHandler.h>
+#include <iostream>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -12,12 +15,12 @@ using namespace OpenViBEToolkit;
 boolean CAlgorithmClassifier::process(void)
 {
 	TParameterHandler < IMatrix* > ip_pFeatureVector(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
-	TParameterHandler < IMemoryBuffer* > ip_pConfiguration(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
+	TParameterHandler < XML::IXMLNode* > ip_pConfiguration(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 	TParameterHandler < float64 > op_pClass(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
 	TParameterHandler < IMatrix* > op_pClassificationValues(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
 
 	TParameterHandler < IMatrix* > ip_pFeatureVectorSet(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
-	TParameterHandler < IMemoryBuffer* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
 
 	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_Train))
 	{
@@ -37,6 +40,7 @@ boolean CAlgorithmClassifier::process(void)
 			else
 			{
 				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+				return false;
 			}
 		}
 	}
@@ -73,52 +77,87 @@ boolean CAlgorithmClassifier::process(void)
 			else
 			{
 				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+				return false;
 			}
 		}
 	}
 
 	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_SaveConfiguration))
 	{
-		IMemoryBuffer* l_pConfiguration=op_pConfiguration;
-		if(!l_pConfiguration)
+		XML::IXMLNode *l_pNode = this->saveConfiguration();
+		op_pConfiguration = l_pNode;
+		if(l_pNode)
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Configuration memory buffer is NULL\n";
-			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
 		}
 		else
 		{
-			l_pConfiguration->setSize(0, true);
-			if(this->saveConfiguration(*l_pConfiguration))
-			{
-				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
-			}
-			else
-			{
-				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
-			}
+			this->getLogManager() << LogLevel_Error << "Unable to save configuration\n";
+			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+			return false;
 		}
 	}
 
 	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration))
 	{
-		IMemoryBuffer* l_pConfiguration=ip_pConfiguration;
-		if(!l_pConfiguration)
+		XML::IXMLNode *l_pNode = ip_pConfiguration;
+		if(!l_pNode)
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Configuration memory buffer is NULL\n";
+			this->getLogManager() << LogLevel_ImportantWarning << "Configuration XML node is NULL\n";
 			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+			return false;
 		}
 		else
 		{
-			if(this->loadConfiguration(*l_pConfiguration))
+
+			if(this->loadConfiguration(l_pNode))
 			{
 				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
 			}
 			else
 			{
 				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
+				return false;
 			}
 		}
 	}
 
 	return true;
 }
+
+int64 CAlgorithmClassifier::getInt64Parameter(const CIdentifier &rParameterIdentifier, const CString &rParameterValue)
+{
+	TParameterHandler < int64 > ip_i64Temp(getInputParameter(rParameterIdentifier));
+	ip_i64Temp = this->getAlgorithmContext().getConfigurationManager().expandAsInteger(rParameterValue);
+	return (int64)ip_i64Temp;
+}
+
+float64 CAlgorithmClassifier::getFloat64Parameter(const CIdentifier &rParameterIdentifier, const CString &rParameterValue)
+{
+	TParameterHandler < float64 > ip_f64Temp(getInputParameter(rParameterIdentifier));
+	ip_f64Temp = this->getAlgorithmContext().getConfigurationManager().expandAsFloat(rParameterValue);
+	return (float64)ip_f64Temp;
+}
+
+boolean CAlgorithmClassifier::getBooleanParameter(const CIdentifier &rParameterIdentifier, const CString &rParameterValue)
+{
+	TParameterHandler < boolean > ip_bTemp(getInputParameter(rParameterIdentifier));
+	ip_bTemp = this->getAlgorithmContext().getConfigurationManager().expandAsBoolean(rParameterValue);
+	return (boolean)ip_bTemp;
+}
+
+CString *CAlgorithmClassifier::getCStringParameter(const CIdentifier &rParameterIdentifier, CString &rParameterValue)
+{
+	TParameterHandler < CString* > ip_pTemp(getInputParameter(rParameterIdentifier));
+	ip_pTemp = &rParameterValue;
+	return (CString*)ip_pTemp;
+}
+
+int64 CAlgorithmClassifier::getEnumerationParameter(const CIdentifier &rParameterIdentifier, const CIdentifier &rEnumerationIdentifier, const CString &rParameterValue)
+{
+	TParameterHandler < int64 > ip_i64Temp(getInputParameter(rParameterIdentifier));
+	ip_i64Temp = this->getTypeManager().getEnumerationEntryValueFromName(rEnumerationIdentifier, rParameterValue);
+	return (int64) ip_i64Temp;
+}
+
+

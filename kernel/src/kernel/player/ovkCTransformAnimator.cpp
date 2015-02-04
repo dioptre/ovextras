@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "Ogre.h"
 #include "ovkCTransformAnimator.h"
 
@@ -54,3 +57,5 @@ void CTransformAnimator::setScale(Ogre::Real scaleX, Ogre::Real scaleY, Ogre::Re
 		m_pSceneNode->setScale(scaleX, scaleY, scaleZ);
 	}
 }
+
+#endif

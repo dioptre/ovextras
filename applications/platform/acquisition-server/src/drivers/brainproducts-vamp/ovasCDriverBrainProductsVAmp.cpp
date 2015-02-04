@@ -4,7 +4,7 @@
 #include "ovasCConfigurationBrainProductsVAmp.h"
 #include "ovasCHeaderBrainProductsVAmp.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 #include <windows.h>
 
 #include <cstdlib>
@@ -311,7 +311,8 @@ boolean CDriverBrainProductsVAmp::loop(void)
 #endif
 				for(i=0; i < m_ui32EEGChannelCount; i++)
 				{
-					m_pSample[i*m_ui32SampleCountPerSentBlock+l_i32ReceivedSamples] = (float32)(l_pEEGArray[i]*m_oHeader.getChannelGain(i));
+					// The last slot of l_pEEGArray should carry the reference electrode measurement, we subtract it
+					m_pSample[i*m_ui32SampleCountPerSentBlock+l_i32ReceivedSamples] = (float32)((l_pEEGArray[i]-l_pEEGArray[m_ui32EEGChannelCount])*m_oHeader.getChannelGain(i));
 				}
 				for(i=0; i < m_ui32AuxiliaryChannelCount; i++)
 				{

@@ -3,15 +3,9 @@
  */ 
 #include "ovpCHelloWorldWithInput.h"
 
-#include <iostream>
-
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
-using namespace OpenViBE::Plugins;
-using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Samples;
-using namespace OpenViBEToolkit;
-using namespace std;
+using namespace OpenViBEPlugins::Examples;
 
 void CHelloWorldWithInput::release(void)
 {

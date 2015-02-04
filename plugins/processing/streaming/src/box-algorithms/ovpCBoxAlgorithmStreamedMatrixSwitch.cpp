@@ -41,37 +41,54 @@ boolean CBoxAlgorithmStreamedMatrixSwitch::initialize(void)
 	}
 
 	// Stimulation stream decoder
-	m_oStimulationDecoder.initialize(*this);
+	m_oStimulationDecoder.initialize(*this,0);
 	m_ui64LastStimulationInputChunkEndTime = 0;
 
 	//initializing the decoder depending on the input type.
 	CIdentifier l_oTypeIdentifier;
 	this->getStaticBoxContext().getInputType(1,l_oTypeIdentifier);
 
+	m_pStreamDecoder = NULL;
+
 	if(l_oTypeIdentifier == OV_TypeId_StreamedMatrix)
 	{
-		m_pStreamDecoder = new TStreamedMatrixDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
+		m_pStreamDecoder = new TStreamedMatrixDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
 		//m_pStreamEncoder = new TStreamedMatrixEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
 	}
-	if(l_oTypeIdentifier == OV_TypeId_Signal)
+	else if(l_oTypeIdentifier == OV_TypeId_Signal)
 	{
-		m_pStreamDecoder = new TSignalDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
+		m_pStreamDecoder = new TSignalDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
 		//m_pStreamEncoder = new TSignalEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
 	}
-	if(l_oTypeIdentifier == OV_TypeId_Spectrum)
+	else if(l_oTypeIdentifier == OV_TypeId_Spectrum)
 	{
-		m_pStreamDecoder = new TSpectrumDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
+		m_pStreamDecoder = new TSpectrumDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
 		//m_pStreamEncoder = new TSpectrumEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
 	}
-	if(l_oTypeIdentifier == OV_TypeId_FeatureVector)
+	else if(l_oTypeIdentifier == OV_TypeId_FeatureVector)
 	{
-		m_pStreamDecoder = new TFeatureVectorDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
+		m_pStreamDecoder = new TFeatureVectorDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
 		//m_pStreamEncoder = new TFeatureVectorEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
 	}
-	if(l_oTypeIdentifier == OV_TypeId_ChannelLocalisation)
+	else if(l_oTypeIdentifier == OV_TypeId_ChannelLocalisation)
 	{
-		m_pStreamDecoder = new TChannelLocalisationDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
+		m_pStreamDecoder = new TChannelLocalisationDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
 		//m_pStreamEncoder = new TChannelLocalisationEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
+	}
+	else if(l_oTypeIdentifier == OV_TypeId_Stimulations)
+	{
+		m_pStreamDecoder = new TStimulationDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
+		//m_pStreamEncoder = new TStimulationEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
+	}
+	else if(l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
+	{
+		m_pStreamDecoder = new TExperimentInformationDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
+		//m_pStreamEncoder = new TExperimentInformationEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
+	}
+	else
+	{
+		this->getLogManager() << LogLevel_Error << "Unsupported stream type " << this->getTypeManager().getTypeName(l_oTypeIdentifier).toASCIIString() << " (" << l_oTypeIdentifier.toString() << ")\n";
+		return false;
 	}
 
 	return true;
@@ -81,8 +98,11 @@ boolean CBoxAlgorithmStreamedMatrixSwitch::initialize(void)
 boolean CBoxAlgorithmStreamedMatrixSwitch::uninitialize(void)
 {
 	m_oStimulationDecoder.uninitialize();
-	m_pStreamDecoder->uninitialize();
-	delete m_pStreamDecoder;
+	if(m_pStreamDecoder)
+	{
+		m_pStreamDecoder->uninitialize();
+		delete m_pStreamDecoder;
+	}
 	//m_pStreamEncoder->uninitialize();
 	//delete m_pStreamEncoder;
 
@@ -114,7 +134,7 @@ boolean CBoxAlgorithmStreamedMatrixSwitch::process(void)
 	//iterate over all chunk on input 0 (Stimulation)
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		m_oStimulationDecoder.decode(0,i);
+		m_oStimulationDecoder.decode(i);
 
 		if(m_oStimulationDecoder.isHeaderReceived() || m_oStimulationDecoder.isEndReceived())
 		{
@@ -139,7 +159,7 @@ boolean CBoxAlgorithmStreamedMatrixSwitch::process(void)
 	for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(1); j++)
 	{
 		//We decode the chunk but we don't automatically mark it as deprecated, as we may need to keep it.
-		m_pStreamDecoder->decode(1,j,false);
+		m_pStreamDecoder->decode(j,false);
 		{
 			l_rDynamicBoxContext.getInputChunk(1, j, l_ui64StartTime, l_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer);
 			if(m_pStreamDecoder->isHeaderReceived() || m_pStreamDecoder->isEndReceived())

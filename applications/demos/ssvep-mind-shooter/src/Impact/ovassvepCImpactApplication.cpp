@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCImpactApplication.h"
 
 #include "openvibe/ov_all.h"
@@ -628,3 +631,5 @@ void CImpactApplication::debugAction4()
 	}
 
 }
+
+#endif

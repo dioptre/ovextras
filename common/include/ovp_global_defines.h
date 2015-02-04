@@ -7,6 +7,8 @@
 // LDA classifier
 // -----------------------------------------------------
 
+#if 0
+
 #define OVP_GD_ClassId_Algorithm_LDAClassifier                                                                               OpenViBE::CIdentifier(0xd7183fc7, 0xbd74f298)
 #define OVP_GD_ClassId_Algorithm_LDAClassifierDesc                                                                           OpenViBE::CIdentifier(0xd42d544a, 0x7a28ddb1)
 #define OVP_GD_Algorithm_LDAClassifier_InputParameterId_FeatureVectorSet                                                     OpenViBE::CIdentifier(0x27c05927, 0x5de9103a)
@@ -21,6 +23,8 @@
 #define OVP_GD_Algorithm_LDAClassifier_InputTriggerId_LoadConfiguration                                                      OpenViBE::CIdentifier(0xf346bbe0, 0xadafc735)
 #define OVP_GD_Algorithm_LDAClassifier_OutputTriggerId_Success                                                               OpenViBE::CIdentifier(0x24fab755, 0x78868782)
 #define OVP_GD_Algorithm_LDAClassifier_OutputTriggerId_Failed                                                                OpenViBE::CIdentifier(0x6e72b255, 0x317faa04)
+
+#endif
 
 // -----------------------------------------------------
 // SVM classifier

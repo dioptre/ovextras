@@ -183,6 +183,10 @@ namespace OpenViBE
 			virtual OpenViBE::boolean process(
 				const OpenViBE::CIdentifier& rTriggerIdentifier)=0;
 
+
+			virtual OpenViBE::boolean isAlgorithmDerivedFrom(
+				const OpenViBE::CIdentifier& rClassIdentifier)=0;
+
 			//@}
 
 			_IsDerivedFromClass_(OpenViBE::Kernel::IKernelObject, OV_ClassId_Kernel_Algorithm_AlgorithmProxy)

@@ -59,15 +59,23 @@ namespace OpenViBEPlugins
 		{
 		public:
 
+			//it seems the only purpose of the check was to give a name when adding an input
+			//without it, the input configuration dialog display random characters in the name field
+			//the check is unnecessary when removing/changing inputs and on already named inputs
 			OpenViBE::boolean check(OpenViBE::Kernel::IBox& rBox)
 			{
 				char l_sName[1024];
-				OpenViBE::uint32 i;
+				OpenViBE::uint32 i = rBox.getInputCount()-1;
+				//only check last input (we assume previous inputs have benn named, how could they not?)
+				sprintf(l_sName, "Input stream %u", i+1);
+				rBox.setInputName(i, l_sName);
+				/*
 				for(i=0; i<rBox.getInputCount(); i++)
 				{
 					sprintf(l_sName, "Input stream %u", i+1);
 					rBox.setInputName(i, l_sName);
 				}
+				//*/
 				return true;
 			}
 
@@ -80,13 +88,13 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				this->check(rBox);
+				//this->check(rBox);
 				return true;
 			}
 
 			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				this->check(rBox);
+				//this->check(rBox);
 				return true;
 			}
 

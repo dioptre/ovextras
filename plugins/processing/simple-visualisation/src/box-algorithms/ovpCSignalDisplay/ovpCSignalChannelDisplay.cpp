@@ -148,7 +148,11 @@ void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
 
 void CSignalChannelDisplay::addChannelList(uint32 ui32Channel)
 {
-    m_oChannelList.push_back(ui32Channel);
+	m_oChannelList.push_back(ui32Channel);
+	// @fixme added enlargement of m_vLocalMaximum/minimum here as otherwise enabling multiview crashed. 
+	// This solution should be reviewed/replaced by the original author ...
+	m_vLocalMaximum.push_back(-DBL_MAX);
+	m_vLocalMinimum.push_back(DBL_MAX);
 }
 
 uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)

@@ -8,20 +8,20 @@
 
 # Tries to locate matlab executable from $PATH, and set the library path to the corresponding matlab libs.
 if [ "`which matlab`" != "" ] ; then
-	MATLAB_ROOT=`matlab -e | grep "^MATLAB=" | sed -e "s/^MATLAB=//"`
-	MATLAB_ARCH=`matlab -e | grep "^ARCH=" | sed -e "s/^ARCH=//"`
-	MATLAB_LIBPATH="$MATLAB_ROOT/bin/$MATLAB_ARCH"
-	# echo Matlab libs expected at $MATLAB_LIBPATH
-	export LD_LIBRARY_PATH="$MATLAB_LIBPATH:$LD_LIBRARY_PATH"
+        MATLAB_ROOT=`matlab -e | grep "^MATLAB=" | sed -e "s/^MATLAB=//"`
+        MATLAB_ARCH=`matlab -e | grep "^ARCH=" | sed -e "s/^ARCH=//"`
+        MATLAB_LIBPATH="$MATLAB_ROOT/bin/$MATLAB_ARCH"
+        # echo Matlab libs expected at $MATLAB_LIBPATH
+        export LD_LIBRARY_PATH="$MATLAB_LIBPATH:$LD_LIBRARY_PATH"
 fi
 
 LOCAL_BIN_PATH="@CMAKE_INSTALL_FULL_BINDIR@"
 if [ "$OV_PATH_BIN" != "" ]; then
-	LOCAL_BIN_PATH="$OV_PATH_BIN"
+        LOCAL_BIN_PATH="$OV_PATH_BIN"
 fi
 LOCAL_LIB_PATH="@CMAKE_INSTALL_FULL_LIBDIR@"
 if [ "$OV_PATH_LIB" != "" ]; then
-	LOCAL_LIB_PATH="$OV_PATH_LIB"
+        LOCAL_LIB_PATH="$OV_PATH_LIB"
 fi
 
 export LD_LIBRARY_PATH="$LOCAL_LIB_PATH:@CMAKE_SOURCE_DIR@/dependencies/lib:$LD_LIBRARY_PATH"
@@ -33,24 +33,28 @@ renice 19 $$
 
 ov_debugger=
 if [ "$1" == "--debug" ]; then
-	ov_debugger="gdb --args"
-	shift
+        ov_debugger="gdb --args"
+        shift
+fi
+
+if [ "$1" == "--memcheck" ]; then
+        ov_debugger="valkyrie "
+        #ov_debugger="valgrind --tool=memcheck --log-file='valgrind_@OV_CMD_EXECUTABLE@_%p.log'"
+        shift
 fi
 ov_run_bg=0
 if [ "$1" == "--run-bg" ]; then
-	ov_run_bg=1
-	shift
+        ov_run_bg=1
+        shift
 fi
 
-
-	
 ret_code=0
 
 if [ $ov_run_bg == 0 ]; then
-	eval $ov_debugger "$LOCAL_BIN_PATH/@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ $*
-	ret_code=$?
+        eval $ov_debugger "$LOCAL_BIN_PATH/@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ $*
+        ret_code=$?
 else
-	$ov_debugger "$LOCAL_BIN_PATH/@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ $* &
+        $ov_debugger "$LOCAL_BIN_PATH/@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ $* &
 fi
 
 exit $ret_code

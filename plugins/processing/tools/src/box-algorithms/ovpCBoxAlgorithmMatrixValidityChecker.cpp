@@ -15,9 +15,7 @@ boolean CBoxAlgorithmMatrixValidityChecker::initialize(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		IAlgorithmProxy* m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamDecoder));
-		m_pStreamDecoder->initialize();
-		m_vStreamDecoder.push_back(m_pStreamDecoder);
+		m_vStreamDecoder.push_back(new OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmMatrixValidityChecker >(*this,i));
 	}
 
 	CString l_sSettingValue;
@@ -33,7 +31,6 @@ boolean CBoxAlgorithmMatrixValidityChecker::uninitialize(void)
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
 		m_vStreamDecoder[i]->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_vStreamDecoder[i]);
 	}
 	m_vStreamDecoder.clear();
 
@@ -55,22 +52,20 @@ boolean CBoxAlgorithmMatrixValidityChecker::process(void)
 	{
 		for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
-			TParameterHandler < const IMemoryBuffer* > ip_pMemoryBufferToDecode(m_vStreamDecoder[i]->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			TParameterHandler < const IMatrix* > op_pMatrix(m_vStreamDecoder[i]->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputParameterId_Matrix));
-			ip_pMemoryBufferToDecode=l_rDynamicBoxContext.getInputChunk(i, j);
+			IMatrix* op_pMatrix = m_vStreamDecoder[i]->getOutputMatrix();
 
-			m_vStreamDecoder[i]->process();
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedHeader))
+			m_vStreamDecoder[i]->decode(j);
+			if(m_vStreamDecoder[i]->isHeaderReceived())
 			{
 			}
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_vStreamDecoder[i]->isBufferReceived())
 			{
 				if(!OpenViBEToolkit::Tools::Matrix::isContentValid(*op_pMatrix))
 				{
 					getLogManager() << m_eLogLevel << "Matrix on input " << i << " either contains NAN or Infinity in its buffer (" << l_rDynamicBoxContext.getInputChunkStartTime(i, j) << "," << l_rDynamicBoxContext.getInputChunkEndTime(i, j) << ")\n";
 				}
 			}
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_vStreamDecoder[i]->isEndReceived())
 			{
 			}
 			l_rDynamicBoxContext.markInputAsDeprecated(i, j);

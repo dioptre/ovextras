@@ -1,6 +1,6 @@
 #include "ovasCConfigurationTMSIRefa32B.h"
 
-#if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyNeXus
 
 #include <windows.h>
 #include <iostream>

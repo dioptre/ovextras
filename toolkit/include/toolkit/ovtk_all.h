@@ -70,47 +70,13 @@
 
 #include "box-algorithms/ovtkTBoxAlgorithm.h"
 
-#if defined TARGET_HAS_EBML
-#include "box-algorithms/ovtkTTrainingBoxAlgorithm.h"
-#endif
-
 #include "algorithms/ovtkTAlgorithm.h"
 #include "algorithms/classification/ovtkCAlgorithmClassifier.h"
+#include "algorithms/classification/ovtkCAlgorithmPairingStrategy.h"
 
 #include "algorithms/scenario-io/ovtkCAlgorithmScenarioImporter.h"
 #include "algorithms/scenario-io/ovtkCAlgorithmScenarioExporter.h"
 
-//___________________________________________________________________//
-//                                                                   //
-//                                                                   //
-//___________________________________________________________________//
-//                                                                   //
-
-#if defined TARGET_HAS_EBML
-#include "deprecated/reader/ovtkIBoxAlgorithmEBMLInputReaderCallback.h"
-#include "deprecated/reader/ovtkIBoxAlgorithmStreamedMatrixInputReaderCallback.h"
-#include "deprecated/reader/ovtkIBoxAlgorithmSignalInputReaderCallback.h"
-#include "deprecated/reader/ovtkIBoxAlgorithmSpectrumInputReaderCallback.h"
-#include "deprecated/reader/ovtkIBoxAlgorithmFeatureVectorInputReaderCallback.h"
-#include "deprecated/reader/ovtkIBoxAlgorithmStimulationInputReaderCallback.h"
-#include "deprecated/reader/ovtkIBoxAlgorithmExperimentInformationInputReaderCallback.h"
-#endif
-
-//___________________________________________________________________//
-//                                                                   //
-//                                                                   //
-//___________________________________________________________________//
-//                                                                   //
-
-#if defined TARGET_HAS_EBML
-#include "deprecated/writer/ovtkIBoxAlgorithmEBMLOutputWriter.h"
-#include "deprecated/writer/ovtkIBoxAlgorithmStreamedMatrixOutputWriter.h"
-#include "deprecated/writer/ovtkIBoxAlgorithmSignalOutputWriter.h"
-#include "deprecated/writer/ovtkIBoxAlgorithmSpectrumOutputWriter.h"
-#include "deprecated/writer/ovtkIBoxAlgorithmFeatureVectorOutputWriter.h"
-#include "deprecated/writer/ovtkIBoxAlgorithmStimulationOutputWriter.h"
-#include "deprecated/writer/ovtkIBoxAlgorithmExperimentInformationOutputWriter.h"
-#endif
 
 //___________________________________________________________________//
 //                                                                   //
