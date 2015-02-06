@@ -143,7 +143,9 @@ namespace OpenViBEPlugins
          * \param[out] rDisplayedValueRange Returns vector of updated value range displayed by the channels
 		 */
         void updateDisplayedValueRange(
-            std::vector<OpenViBE::float64> & rDisplayedValueRange);
+            std::vector<OpenViBE::float64>& rDisplayedValueRange,
+			std::vector<OpenViBE::float64>& rDisplayedValueMin,
+			std::vector<OpenViBE::float64>& rDisplayedValueMax);
 
 		/**
 		 * \brief Sets latest global best fit parameters
@@ -159,6 +161,19 @@ namespace OpenViBEPlugins
 		void setGlobalBestFitParameters(
 			const OpenViBE::float64& rRange,
 			const OpenViBE::float64& rMargin);
+
+		void setGlobalBestFitParameters2(
+			const OpenViBE::float64& rMin,
+			const OpenViBE::float64& rMax);
+
+		void setGlobalManualParameters(
+			OpenViBE::float64 f64Scale,
+			OpenViBE::float64 f64Center);
+
+		void setLocalManualParameters(
+			const OpenViBE::uint32 subChannelIndex,
+			const OpenViBE::float64 rMin,
+			const OpenViBE::float64 rMax);
 
         void setMultiViewBestFitParameters(
             const OpenViBE::float64& rRange,
@@ -271,8 +286,8 @@ namespace OpenViBEPlugins
 
 		/** \name Auto scaling parameters */
 		//@{
-		OpenViBE::float64 m_f64ScaleX;
-		OpenViBE::float64 m_f64TranslateX;
+//		OpenViBE::float64 m_f64ScaleX;
+//		OpenViBE::float64 m_f64TranslateX;
 
         std::vector<OpenViBE::float64> m_vScaleY;
         std::vector<OpenViBE::float64> m_vTranslateY;
@@ -305,7 +320,6 @@ namespace OpenViBEPlugins
 		//! Should the whole window be redrawn at next redraw?
 		OpenViBE::boolean m_bRedrawAll;
 
-        OpenViBE::float64 m_f64VerticalScale;
         //! Is it a multiview display ?
         OpenViBE::boolean m_bMultiView;
 	};

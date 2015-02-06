@@ -46,6 +46,10 @@ namespace OpenViBEPlugins
 			//Contains all the data about the incoming signal
 			CBufferDatabase * m_pBufferDatabase;
 
+		protected:
+
+			OpenViBE::uint64 m_ui64LastScaleRefreshTime;
+
 		};
 
 		/**
@@ -73,13 +77,19 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
+				// @todo reorder, clean
 				rPrototype.addSetting("Time Scale", OV_TypeId_Float, "10");
 				rPrototype.addSetting("Display Mode", OVP_TypeId_SignalDisplayMode, "Scan");
-                rPrototype.addSetting("EEG display", OV_TypeId_Boolean, "false");
-				rPrototype.addSetting("Manual Vertical Scale",OV_TypeId_Boolean, "false");
+                rPrototype.addSetting("UNUSED1", OV_TypeId_Boolean, "false");
+				rPrototype.addSetting("UNUSED2", OV_TypeId_Boolean, "false");
 				rPrototype.addSetting("Vertical Scale",OV_TypeId_Float, "100");
+				rPrototype.addSetting("Vertical Offset",OV_TypeId_Float, "0");
+				rPrototype.addSetting("Auto vertical scale", OVP_TypeId_SignalDisplayScaling, CSignalDisplayView::m_vScalingModes[0]);
+
 				rPrototype.addInput("Signal", OV_TypeId_StreamedMatrix);
 				rPrototype.addInput("Stimulations", OV_TypeId_Stimulations);
+
+				// @todo : add multiview as a param. problem: need channel list
 
 				return true;
 			}

@@ -324,7 +324,7 @@ boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64Star
 	//if an error has occurred, do nothing
 	if(m_bError)
 	{
-		return !m_bError;
+		return false;
 	}
 
 	//if this the first buffer, perform some precomputations
@@ -338,7 +338,8 @@ boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64Star
 			m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Error : buffer start time and end time are equal : " << ui64StartTime << "\n";
 
 			m_bError = true;
-			return !m_bError;
+
+			return false;
 		}
 
 		//computes the sampling frequency
@@ -357,7 +358,10 @@ boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64Star
 
 	if(m_bChannelLookupTableInitialized == false)
 	{
-		l_bChannelLookupTable = fillChannelLookupTable(); //to retrieve the unrecognized electrode warning
+		fillChannelLookupTable();  //to retrieve the unrecognized electrode warning
+		// The above call will fail if no electrode localisation data...
+		// m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Unable to fill lookup table\n";
+		//	return false;
 	}
 	else
 	{
@@ -371,10 +375,6 @@ boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64Star
 			}
 		}
 	}
-
-#ifdef ELAN_VALIDATION
-	return !m_bError;
-#endif
 
 	float64* l_pBufferToWrite = NULL;
 	uint64 l_ui64NumberOfSamplesPerBuffer = m_pDimensionSizes[0] * m_pDimensionSizes[1];
@@ -470,7 +470,12 @@ boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64Star
 		m_pDrawable->redraw();
 	}
 
-	return !m_bError&&l_bChannelLookupTable;
+	return true;
+}
+
+void CBufferDatabase::getDisplayedChannelLocalMeanValue(uint32 ui32Channel, float64& f64Mean)
+{
+
 }
 
 void CBufferDatabase::getDisplayedChannelLocalMinMaxValue(uint32 ui32Channel, float64& f64Min, float64& f64Max)
@@ -693,14 +698,6 @@ boolean CBufferDatabase::fillChannelLookupTable()
 	{
 		return false;
 	}
-
-#ifdef ELAN_VALIDATION
-		setMatrixDimensionSize(0, NB_ELAN_CHANNELS);
-		for(uint32 i=0; i<m_pDimensionSizes[0]; i++)
-		{
-			m_pDimensionLabels[0][i] = m_oChannelLocalisationLabels[i].toASCIIString();	//use elan database
-		}
-#endif
 
 	boolean res = true;
 

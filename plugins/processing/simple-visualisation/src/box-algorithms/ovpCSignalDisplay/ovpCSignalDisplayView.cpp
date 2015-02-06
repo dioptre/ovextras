@@ -14,18 +14,20 @@ using namespace OpenViBEToolkit;
 
 using namespace std;
 
+
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
 	{
 		void scrollModeButtonCallback(::GtkWidget *widget, gpointer data);
-		void scanModeButtonCallback(::GtkWidget *widget, gpointer data);
+		void scalingModeButtonCallback(::GtkWidget *widget, gpointer data);
 		void toggleLeftRulerButtonCallback(::GtkWidget *widget, gpointer data);
 		void toggleBottomRulerButtonCallback(::GtkWidget *widget, gpointer data);
-		void toggleAutoVerticalScaleButtonCallback(::GtkToggleButton *togglebutton, gpointer data);
+		// void toggleAutoVerticalScaleButtonCallback(::GtkToggleButton *togglebutton, gpointer data);
 		void customVerticalScaleChangedCallback(::GtkSpinButton* pSpinButton, gpointer data);
-		gboolean spinButtonValueChangedCallback(::GtkSpinButton *widget,  gpointer data);
-		void toggleAutoTranslationButtonCallback(::GtkToggleButton *togglebutton, gpointer data);
+		void customVerticalOffsetChangedCallback(::GtkSpinButton* pSpinButton, gpointer data);
+		gboolean spinButtonValueChangedCallback(::GtkSpinButton *widget,  gpointer data); // time scale
+		// void toggleAutoTranslationButtonCallback(::GtkToggleButton *togglebutton, gpointer data);
 		void channelSelectButtonCallback(::GtkButton *button, gpointer data);
 		void channelSelectDialogApplyButtonCallback(::GtkButton *button, gpointer data);
 		void stimulationColorsButtonCallback(::GtkButton *button, gpointer data);
@@ -33,8 +35,11 @@ namespace OpenViBEPlugins
 		void multiViewButtonCallback(::GtkButton *button, gpointer data);
 		void multiViewDialogApplyButtonCallback(::GtkButton *button, gpointer data);
 
-		CSignalDisplayView::CSignalDisplayView(CBufferDatabase& oBufferDatabase, float64 f64TimeScale, CIdentifier oDisplayMode, boolean bIsEEG, boolean bAutoVerticalScale, float64 f64VerticalScale)
-			:m_pBuilderInterface(NULL)
+		const char* CSignalDisplayView::m_vScalingModes[] = { "Per channel", "Global", "None" };
+
+		CSignalDisplayView::CSignalDisplayView(CBufferDatabase& oBufferDatabase, float64 f64TimeScale, CIdentifier oDisplayMode, CIdentifier ui64ScalingMode, boolean bAutoVerticalScale, float64 f64VerticalScale, float64 f64VerticalOffset)
+			:
+			m_pBuilderInterface(NULL)
 			,m_pMainWindow(NULL)
 			,m_pSignalDisplayTable(NULL)
 			,m_bShowLeftRulers(false)
@@ -45,23 +50,28 @@ namespace OpenViBEPlugins
             ,m_f64MarginFactor(0.4f) //add 40% space above and below extremums
 			,m_bVerticalScaleChanged(false)
 			,m_bAutoVerticalScale(false)
-			,m_f64CustomVerticalScaleValue(1.)
+			,m_bVerticalScaleRefresh(true)
+			,m_f64CustomVerticalScaleValue(f64VerticalScale)
+			,m_f64CustomVerticalOffset(f64VerticalOffset)
 			,m_pBufferDatabase(&oBufferDatabase)
-			,m_bMultiViewInitialized(false)
+			,m_bMultiViewEnabled(false)
 			,m_pBottomBox(NULL)
 			,m_pBottomRuler(NULL)
+			,m_oScalingMode(ui64ScalingMode)
 		{
-			m_bIsEEGSignal = bIsEEG;
-			m_bAutoVerticalScale=bAutoVerticalScale;
-			m_bVerticalScaleChanged=!bAutoVerticalScale;
-			m_bAutoTranslation = !bIsEEG;
-			if(!bAutoVerticalScale)
-			{
-				m_f64CustomVerticalScaleValue=f64VerticalScale;
-			}
+			m_bIsEEGSignal = true;
+		//	m_bIsEEGSignal = bIsEEG;
+
+			m_bAutoVerticalScale=false;
+			m_bVerticalScaleChanged=true;
+			// m_bAutoTranslation = !bIsEEG;
+			m_bAutoTranslation = true;
+
 			construct(oBufferDatabase,f64TimeScale,oDisplayMode);
 		}
 
+
+		/*
 		CSignalDisplayView::CSignalDisplayView(CBufferDatabase& oBufferDatabase, float64 f64TimeScale, CIdentifier oDisplayMode, boolean bIsEEG)
 			:m_pBuilderInterface(NULL)
 			,m_pMainWindow(NULL)
@@ -81,9 +91,10 @@ namespace OpenViBEPlugins
 			m_bIsEEGSignal = bIsEEG;
 			m_bAutoTranslation = !bIsEEG;
 			m_bAutoVerticalScale = !bIsEEG;
-			m_bVerticalScaleChanged = bIsEEG;
+			m_bVerticalScaleChanged = true;
 			construct(oBufferDatabase,f64TimeScale,oDisplayMode);
 		}
+		*/
 
 		void CSignalDisplayView::construct(CBufferDatabase& oBufferDatabase, float64 f64TimeScale, CIdentifier oDisplayMode)
 		{
@@ -104,13 +115,10 @@ namespace OpenViBEPlugins
 			::gtk_toggle_tool_button_set_active(
 				GTK_TOGGLE_TOOL_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrollModeButton")),
 				oDisplayMode == OVP_TypeId_SignalDisplayMode_Scroll);
-            ::gtk_toggle_tool_button_set_active(
-                GTK_TOGGLE_TOOL_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScanModeButton")),
-                oDisplayMode == OVP_TypeId_SignalDisplayMode_Scan);
+			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrollModeButton")),  true);
 
 			//connect display mode callbacks
 			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrollModeButton")), "toggled", G_CALLBACK (scrollModeButtonCallback), this);
-			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScanModeButton")),   "toggled", G_CALLBACK (scanModeButtonCallback),   this);
 
 			//creates the cursors
 			m_pCursor[0] = gdk_cursor_new(GDK_LEFT_PTR);
@@ -122,17 +130,18 @@ namespace OpenViBEPlugins
 			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayMultiViewButton")),         "clicked", G_CALLBACK(multiViewButtonCallback),         this);
 			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayInformationButton")),       "clicked", G_CALLBACK(informationButtonCallback),       this);
 
-			::gtk_toggle_tool_button_set_active(GTK_TOGGLE_TOOL_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayAutoTranslationButton")), m_bAutoTranslation);
-			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayAutoTranslationButton")),   "toggled", G_CALLBACK(toggleAutoTranslationButtonCallback), this);
-
 			//initialize vertical scale
-			::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayVerticalScaleToggleButton")), m_bAutoVerticalScale);
+			// ::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayVerticalScaleToggleButton")), m_bAutoVerticalScale);
 			::gtk_spin_button_set_value(GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), m_f64CustomVerticalScaleValue);
-			::gtk_spin_button_set_increments(GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")),0.001,1.0);
-			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), !m_bAutoVerticalScale);
+			// ::gtk_spin_button_set_increments(GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")),0.001,1.0);
+			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")),  m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None);
+			//::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayVerticalScaleToggleButton")), m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None);
+			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayDC")), m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None);
+			::gtk_spin_button_set_value(GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayDC")), m_f64CustomVerticalOffset);
+			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayDC")), "value-changed", G_CALLBACK(customVerticalOffsetChangedCallback), this);
 
 			//connect vertical scale callbacks
-			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayVerticalScaleToggleButton")),     "toggled",       G_CALLBACK(toggleAutoVerticalScaleButtonCallback), this);
+			// g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayVerticalScaleToggleButton")),     "toggled",       G_CALLBACK(toggleAutoVerticalScaleButtonCallback), this);
 			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), "value-changed", G_CALLBACK(customVerticalScaleChangedCallback), this);
 
 			//time scale
@@ -189,6 +198,49 @@ namespace OpenViBEPlugins
 			//bottom box
 			//----------
 			m_pBottomBox = GTK_BOX(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayBottomBox"));
+
+			// ::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayBestFitButton")), false);
+			// ::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayGlobalBestFitButton")), false);
+
+			::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderInterface, "ScalingMode"));
+
+			for(uint32 i=0;i<sizeof(m_vScalingModes)/sizeof(const char *);i++)
+			{
+				::gtk_combo_box_append_text(l_pComboBox, m_vScalingModes[i]);
+			}
+
+			g_signal_connect(G_OBJECT(l_pComboBox), "changed", G_CALLBACK(scalingModeButtonCallback), this);
+			::gtk_combo_box_set_active(l_pComboBox, (gint)m_oScalingMode.toUInteger());
+
+			/*
+			OpenViBE::Kernel::ITypeManager& l_oMgr = m_rBoxContext.getPlayerContext()->getTypeManager();
+			const uint64 l_ui64nEntries = l_oMgr.getEnumerationEntryCount(OVP_TypeId_SignalDisplayScaling);
+			GList *glist = NULL;int32 l_i64SelectedIdx = -1;
+			for(uint64 i=0;i<l_ui64nEntries;i++)
+			{
+				CString l_sEntryName;
+				uint64 l_ui64EntryValue;
+				if(l_oMgr.getEnumerationEntry(OVP_TypeId_SignalDisplayScaling, i, l_sEntryName, l_ui64EntryValue))
+				{
+					glist = g_list_append(glist, (gpointer)l_sEntryName.toASCIIString());
+					// ::gtk_combo_box_append_text(l_pComboBox, l_sEntryName.toASCIIString());
+					if(l_ui64EntryValue == OVP_TypeId_SignalDisplayScaling_AutoLocal)
+					{
+						l_i64SelectedIdx = i;
+					}
+				}
+			}
+
+			gtk_combo_set_popdown_strings(l_pComboBox, glist);
+
+			if(l_i64SelectedIdx>=0) 
+			{
+				::gtk_combo_box_set_active(l_pComboBox, static_cast<gint>(l_i64SelectedIdx));
+			}
+
+			*/
+
+			::gtk_widget_set_sensitive(GTK_WIDGET(l_pComboBox), true);
 		}
 
 		CSignalDisplayView::~CSignalDisplayView()
@@ -223,15 +275,11 @@ namespace OpenViBEPlugins
 
 		void CSignalDisplayView::changeMultiView()
 		{
-			if(!m_bMultiViewInitialized)
-			{
-				return;
-			}
 
             CSignalChannelDisplay* l_pChannelDisplay = m_oChannelDisplay[m_oChannelDisplay.size()-1];
 
 			//check if there are channels to display in multiview
-			boolean l_bMultiView=false;
+			m_bMultiViewEnabled=false;
             boolean l_bNoneSelected=false;
 			for(uint32 i=0; i<m_oChannelLabel.size(); i++)
 			{
@@ -244,17 +292,17 @@ namespace OpenViBEPlugins
                 if(!l_bNoneSelected)
 				{
                     //Enable Multiview only if None item isn't selected and at list one channel is selected
-					l_bMultiView|=m_vMultiViewSelectedChannels[i];
+					m_bMultiViewEnabled|=m_vMultiViewSelectedChannels[i];
 				}
                 else
                 {
                     //Disable Multiview if None is selected
-                    l_bMultiView = false;
+                    m_bMultiViewEnabled = false;
                 }
 			}
 
 			//if there are no channels to display in the multiview (None selected only)
-			if(!l_bMultiView)
+			if(!m_bMultiViewEnabled)
 			{
 				//hides the multiview display (last one in the list)
 				l_pChannelDisplay->resetChannelList();
@@ -291,6 +339,8 @@ namespace OpenViBEPlugins
                 }
 
                 l_pChannelDisplay->m_bMultiView = true;
+
+				m_bVerticalScaleChanged = true; // need to pass the scale params to multiview, use this to make them refresh...
 
 				//request a redraw
 				if(l_pChannelDisplay->getSignalDisplayWidget()->window) gdk_window_invalidate_rect(l_pChannelDisplay->getSignalDisplayWidget()->window, NULL, false);
@@ -396,7 +446,7 @@ namespace OpenViBEPlugins
 				//create channel display widget
 				//-----------------------------
 
-                // eeg mode non active, create one display for each channel
+                // eeg mode inactive, create one display for each channel
                 if(!m_bIsEEGSignal)
                 {
                     m_oChannelDisplay[i] = new CSignalChannelDisplay(
@@ -447,8 +497,8 @@ namespace OpenViBEPlugins
 				l_oLabelString.str("");
 			}
 
-
-            if(m_bIsEEGSignal) // eeg mode active, create only one display for all channels
+			 // eeg mode active, create only one display for all channels
+            if(m_bIsEEGSignal)
             {
                 //create and attach display widget
                 CSignalChannelDisplay* l_pChannelDisplay = new CSignalChannelDisplay(
@@ -521,8 +571,6 @@ namespace OpenViBEPlugins
 				static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
 				0, 0);
 
-			m_bMultiViewInitialized = true;
-
 			//create bottom ruler
 			//-------------------
 			m_pBottomRuler = new CBottomTimeRuler(*m_pBufferDatabase, l_i32BottomRulerWidthRequest, l_i32BottomRulerHeightRequest);
@@ -575,93 +623,79 @@ namespace OpenViBEPlugins
 				return;
 			}
 
-			float64 l_f64LargestDisplayedValueRange = 0;
-
-			//update channels display parameters based on current signal data
-			for(uint32 i=0 ; i<m_oChannelDisplay.size(); i++)
+			if(m_bVerticalScaleRefresh)
 			{
-				if(m_oChannelDisplay[i] == NULL)
+				if(m_oScalingMode == OVP_TypeId_SignalDisplayScaling_Global) 
 				{
+					// Auto global
+				
+					// Find the global min and max
+					vector<float64> l_vValueRange;
+					vector<float64> l_vValueMin;
+					vector<float64> l_vValueMax;
+					m_oChannelDisplay[0]->updateDisplayedValueRange(l_vValueRange,l_vValueMin,l_vValueMax);
+
+					std::vector<float64>::iterator minValue = std::min_element(std::begin(l_vValueMin), std::end(l_vValueMin));
+					std::vector<float64>::iterator maxValue = std::max_element(std::begin(l_vValueMax), std::end(l_vValueMax));
+
+					m_oChannelDisplay[0]->setGlobalBestFitParameters2(*minValue, *maxValue); // normal chns
+					m_oChannelDisplay[1]->setGlobalBestFitParameters2(*minValue, *maxValue); // multiview
+				} 
+				else if(m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None) 
+				{
+					// Manual global
+					if(m_bVerticalScaleChanged)
+					{
+						m_oChannelDisplay[0]->setGlobalManualParameters(m_f64CustomVerticalScaleValue, m_f64CustomVerticalOffset); // normal chns
+						m_oChannelDisplay[1]->setGlobalManualParameters(m_f64CustomVerticalScaleValue, m_f64CustomVerticalOffset); // multiview
+						m_bVerticalScaleChanged = false;
+					}
+				}
+				else if(m_oScalingMode == OVP_TypeId_SignalDisplayScaling_PerChannel) 
+				{
+					// Auto local
+					vector<float64> l_vValueRange;
+					vector<float64> l_vValueMin;
+					vector<float64> l_vValueMax;
+					m_oChannelDisplay[0]->updateDisplayedValueRange(l_vValueRange,l_vValueMin,l_vValueMax);
+
+					for(uint32 i=0;i<l_vValueMin.size();i++) 
+					{
+						m_oChannelDisplay[0]->setLocalManualParameters(i, l_vValueMin[i], l_vValueMax[i]);
+					}
+					m_oChannelDisplay[0]->updateDisplayParameters();
+
+					// For multiview, we take the maxes of the involved signals
+					if(m_bMultiViewEnabled)
+					{
+						m_oChannelDisplay[1]->updateDisplayedValueRange(l_vValueRange,l_vValueMin,l_vValueMax);
+						std::vector<float64>::iterator minValue = std::min_element(std::begin(l_vValueMin), std::end(l_vValueMin));
+						std::vector<float64>::iterator maxValue = std::max_element(std::begin(l_vValueMax), std::end(l_vValueMax));
+						m_oChannelDisplay[1]->setLocalManualParameters(0, *minValue, *maxValue);
+						m_oChannelDisplay[1]->updateDisplayParameters();
+					}
+				}
+				else
+				{
+					std::cout << "Error: unknown scaling mode " << m_oScalingMode.toString() << "\n";
 					return;
 				}
-
-				//FIXME : should hidden channels be taken into account when computing largest value range?
-				if(GTK_WIDGET_VISIBLE(m_oChannelDisplay[i]->getSignalDisplayWidget()))
-				{
-                    vector<float64> l_vValueRange;
-                    m_oChannelDisplay[i]->updateDisplayedValueRange(l_vValueRange);
-                    if(m_bIsEEGSignal)
-                    {
-                        for(uint32 j=0 ; j<m_oChannelDisplay[i]->m_oChannelList.size(); j++)
-                        {
-                            if(l_vValueRange[j] > l_f64LargestDisplayedValueRange)
-                            {
-                                l_f64LargestDisplayedValueRange = l_vValueRange[j];
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if(l_vValueRange[0] > l_f64LargestDisplayedValueRange)
-                        {
-                            l_f64LargestDisplayedValueRange = l_vValueRange[0];
-                        }
-                    }
-
-				}
+				m_bVerticalScaleRefresh = false;
 			}
 
-			if(m_bAutoVerticalScale == true) //global best fit
-			{
-				//if we just switched back to auto scale, or if range increased or decreased beyond margin boundaries
-				if(m_bVerticalScaleChanged == true ||
-					l_f64LargestDisplayedValueRange > (m_f64LargestDisplayedValueRange + m_f64ValueRangeMargin) ||
-					l_f64LargestDisplayedValueRange < (m_f64LargestDisplayedValueRange - m_f64ValueRangeMargin))
-				{
-					m_f64LargestDisplayedValueRange = l_f64LargestDisplayedValueRange;
-					m_f64ValueRangeMargin = m_f64MarginFactor * l_f64LargestDisplayedValueRange;
+			// todo don't reset every frame
 
-                    for(uint32 i=0; i<m_oChannelDisplay.size()-1; i++)
-					{
-						//set new parameters
-						m_oChannelDisplay[i]->setGlobalBestFitParameters(m_f64LargestDisplayedValueRange, m_f64ValueRangeMargin);
-					}
-                    //set new parameters for multiview
-                    if(m_bIsEEGSignal)
-                    {
-                        m_oChannelDisplay[m_oChannelDisplay.size()-1]->setGlobalBestFitParameters(m_f64LargestDisplayedValueRange, m_f64ValueRangeMargin);
-                    }
-                    else
-                    {
-                        m_oChannelDisplay[m_oChannelDisplay.size()-1]->setMultiViewBestFitParameters(m_f64LargestDisplayedValueRange, m_f64ValueRangeMargin);
-                    }
+			/*
 
-				}
-			}
-			else //fixed scale
-			{
-				//tell all channels about new fixed range if it just changed
-				if(m_bVerticalScaleChanged == true)
-				{
-                    for(uint32 i=0; i<m_oChannelDisplay.size()-1; i++)
-					{
-						//set new parameters
-						float64 l_f64Margin = 0;
-						m_oChannelDisplay[i]->setGlobalBestFitParameters(m_f64CustomVerticalScaleValue, l_f64Margin);
-					}
-                    //set new parameters for multiview
-                    float64 l_f64Margin = 0;
 
-                    if(m_bIsEEGSignal)
-                    {
-                        m_oChannelDisplay[m_oChannelDisplay.size()-1]->setGlobalBestFitParameters(m_f64CustomVerticalScaleValue, l_f64Margin);
-                    }
-                    else
-                    {
-                        m_oChannelDisplay[m_oChannelDisplay.size()-1]->setMultiViewBestFitParameters(m_f64CustomVerticalScaleValue, l_f64Margin);
-                    }
-				}
-			}
+			std::cout << "Range is " << l_f64LargestDisplayedValueRange << " at " << l_ui32MaxIdxI << "," << l_ui32MaxIdxJ 
+				<< " with lim [" << m_f64LargestDisplayedValueRange - m_f64ValueRangeMargin << "," 
+								 << m_f64LargestDisplayedValueRange + m_f64ValueRangeMargin << ","
+				<< " largest " << l_f64LargestDisplayedValue
+				<< " vs " << m_f64LargestDisplayedValue 
+				<< " smallest " << l_f64SmallestDisplayedValue << " vs " << m_f64SmallestDisplayedValue
+				<< "\n";
+			*/
 
 			//if in scan mode, check whether time scale needs to be updated
 			if(m_pBufferDatabase->getDisplayMode() == OVP_TypeId_SignalDisplayMode_Scan && m_ui64LeftmostDisplayedTime < m_pBufferDatabase->m_oStartTime[0])
@@ -864,10 +898,9 @@ namespace OpenViBEPlugins
 		void CSignalDisplayView::activateToolbarButtons(boolean bActive)
 		{
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrollModeButton")), bActive);
-			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScanModeButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleLeftRulerButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleBottomRulerButton")), bActive);
-            ::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayAutoTranslationButton")), bActive);
+            //::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayAutoTranslationButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayChannelSelectButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayStimulationColorsButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayMultiViewButton")), bActive);
@@ -894,20 +927,10 @@ namespace OpenViBEPlugins
 		{
 			m_bVerticalScaleChanged = true;
 			m_bAutoVerticalScale = ::gtk_toggle_button_get_active(pToggleButton) != 0;
-#if 0
-			if(m_bAutoVerticalScale)
-			{
-				::gtk_widget_hide(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")));
-			}
-			else
-			{
-				::gtk_spin_button_set_value(GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), m_f64LargestDisplayedValueRange);
-				::gtk_widget_show(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")));
-			}
-#else
-			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), !m_bAutoVerticalScale);
-			::gtk_spin_button_set_value(GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), m_f64LargestDisplayedValueRange);
-#endif
+
+//			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), !m_bAutoVerticalScale);
+//			::gtk_spin_button_set_value(GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), m_f64LargestDisplayedValueRange);
+
 			return true;
 		}
 
@@ -918,18 +941,13 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-        boolean CSignalDisplayView::onAutoTranslationToggledCB(::GtkToggleButton* pToggleButton)
-        {
-            if(::gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayAutoTranslationButton"))))
-            {
-                m_bAutoTranslation = true;
-            }
-            else
-            {
-                m_bAutoTranslation = false;
-            }
-            return true;
-        }
+		boolean CSignalDisplayView::onCustomVerticalOffsetChangedCB(::GtkSpinButton *pSpinButton)
+		{
+			m_bVerticalScaleChanged = true;
+			m_f64CustomVerticalOffset = ::gtk_spin_button_get_value(pSpinButton);
+			return true;
+		}
+
 
 
 		CSignalChannelDisplay* CSignalDisplayView::getChannelDisplay(uint32 ui32ChannelIndex)
@@ -1090,6 +1108,11 @@ namespace OpenViBEPlugins
 #endif
 		}
 
+		void CSignalDisplayView::refreshScale(void) 
+		{
+			m_bVerticalScaleRefresh = true;
+		}
+
 		//
 		//CALLBACKS
 		//
@@ -1101,11 +1124,22 @@ namespace OpenViBEPlugins
 					OVP_TypeId_SignalDisplayMode_Scroll : OVP_TypeId_SignalDisplayMode_Scan);
 		}
 
-		void scanModeButtonCallback(::GtkWidget *widget, gpointer data)
+		void scalingModeButtonCallback(::GtkWidget *widget, gpointer data)
 		{
-			reinterpret_cast < CSignalDisplayView* >(data)->onDisplayModeToggledCB(
-				::gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(widget)) != 0 ?
-					OVP_TypeId_SignalDisplayMode_Scan : OVP_TypeId_SignalDisplayMode_Scroll);
+			CSignalDisplayView* l_pView = reinterpret_cast < CSignalDisplayView* >(data);
+
+			int32 l_i32Selection = (gint)::gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
+			
+			l_pView->m_oScalingMode = l_i32Selection;
+
+			bool l_pcontrolsActive = (l_pView->m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None);
+
+		//	::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(l_pView->m_pBuilderInterface, "SignalDisplayAutoTranslationButton")), l_pcontrolsActive);
+		//	::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(l_pView->m_pBuilderInterface, "SignalDisplayCustomVerticalScaleToggleButton")),  l_pcontrolsActive);
+			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(l_pView->m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")),  l_pcontrolsActive);
+		//	::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(l_pView->m_pBuilderInterface, "SignalDisplayVerticalScaleToggleButton")), l_pcontrolsActive);
+			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(l_pView->m_pBuilderInterface, "SignalDisplayDC")), l_pcontrolsActive);
+
 		}
 
 		void toggleLeftRulerButtonCallback(::GtkWidget *widget, gpointer data)
@@ -1122,14 +1156,22 @@ namespace OpenViBEPlugins
 
 		void toggleAutoVerticalScaleButtonCallback(::GtkToggleButton *togglebutton, gpointer data)
 		{
+			/*
 			CSignalDisplayView* l_pView = reinterpret_cast < CSignalDisplayView* >(data);
 			l_pView->onVerticalScaleModeToggledCB(togglebutton);
+			*/
 		}
 
 		void customVerticalScaleChangedCallback(::GtkSpinButton* pSpinButton, gpointer data)
 		{
 			CSignalDisplayView* l_pView = reinterpret_cast < CSignalDisplayView* >(data);
 			l_pView->onCustomVerticalScaleChangedCB(pSpinButton);
+		}
+
+		void customVerticalOffsetChangedCallback(::GtkSpinButton *pSpinButton, gpointer data)
+		{
+			CSignalDisplayView* l_pView = reinterpret_cast < CSignalDisplayView* >(data);
+			l_pView->onCustomVerticalOffsetChangedCB(pSpinButton);
 		}
 
 		gboolean spinButtonValueChangedCallback(::GtkSpinButton *widget,  gpointer data)
@@ -1164,8 +1206,10 @@ namespace OpenViBEPlugins
 
         void toggleAutoTranslationButtonCallback(::GtkToggleButton *togglebutton, gpointer data)
         {
+			/*
             CSignalDisplayView* l_pView = reinterpret_cast < CSignalDisplayView* >(data);
             l_pView->onAutoTranslationToggledCB(togglebutton);
+			*/
         }
 
 
@@ -1253,6 +1297,9 @@ namespace OpenViBEPlugins
 
 
 			l_pView->updateMainTableStatus();
+
+			l_pView->m_bVerticalScaleChanged = true;
+
             //redraw channels
             l_pView->redraw();
 

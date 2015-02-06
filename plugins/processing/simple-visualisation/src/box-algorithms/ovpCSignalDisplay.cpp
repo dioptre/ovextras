@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#include <openvibe/ovITimeArithmetics.h>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -38,23 +40,33 @@ namespace OpenViBEPlugins
 			//retrieve settings
 			CString l_sTimeScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 			CString l_sDisplayModeSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-			CString l_sIsEEGMode=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+			OpenViBE::boolean l_bIsMultiview=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 			CString l_sManualVerticalScaleSettingValue="false";
 			CString l_sVerticalScaleSettingValue="100.";
+			CString l_sVerticalOffset ="0.0";
+			CString l_sScalingMode = getTypeManager().getEnumerationEntryNameFromValue(OVP_TypeId_SignalDisplayMode, OVP_TypeId_SignalDisplayScaling_PerChannel);
+
 			if(this->getStaticBoxContext().getSettingCount() > 3) l_sManualVerticalScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
 			if(this->getStaticBoxContext().getSettingCount() > 4) l_sVerticalScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+			if(this->getStaticBoxContext().getSettingCount() > 5) l_sVerticalOffset=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
+			if(this->getStaticBoxContext().getSettingCount() > 6) l_sScalingMode=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
+
 
 			this->getLogManager() << LogLevel_Debug << "l_sManualVerticalScaleSettingValue=" << l_sManualVerticalScaleSettingValue << "\n";
-			this->getLogManager() << LogLevel_Debug << "l_sVerticalScaleSettingValue=" << l_sVerticalScaleSettingValue << "\n";
+			this->getLogManager() << LogLevel_Debug << "l_sVerticalScaleSettingValue=" << l_sVerticalScaleSettingValue << ", offset " << l_sVerticalOffset << "\n";
+			this->getLogManager() << LogLevel_Info << "l_sScalingMode=" << l_sScalingMode << "\n";
 
 			//create GUI
 			m_pSignalDisplayView = new CSignalDisplayView(
 				*m_pBufferDatabase,
 				::atof(l_sTimeScaleSettingValue),
+	//			l_bIsMultiview,
 				CIdentifier(getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_SignalDisplayMode, l_sDisplayModeSettingValue)),
-				this->getConfigurationManager().expandAsBoolean(l_sIsEEGMode),
+				CIdentifier(getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_SignalDisplayScaling, l_sScalingMode)),
 				!this->getConfigurationManager().expandAsBoolean(l_sManualVerticalScaleSettingValue),
-				::atof(l_sVerticalScaleSettingValue));
+				::atof(l_sVerticalScaleSettingValue),
+				::atof(l_sVerticalOffset)
+				);
 
 			m_pBufferDatabase->setDrawable(m_pSignalDisplayView);
 
@@ -67,6 +79,8 @@ namespace OpenViBEPlugins
 			{
 				getBoxAlgorithmContext()->getVisualisationContext()->setToolbar(l_pToolbarWidget);
 			}
+
+			m_ui64LastScaleRefreshTime = 0;
 
 			return true;
 		}
@@ -122,6 +136,14 @@ namespace OpenViBEPlugins
 				}
 			}
 
+			const uint64 l_ui64TimeNow = getPlayerContext().getCurrentTime();
+			if(m_ui64LastScaleRefreshTime == 0 || l_ui64TimeNow - m_ui64LastScaleRefreshTime > ITimeArithmetics::secondsToTime(5.0)) 
+			{
+				((CSignalDisplayView*)m_pSignalDisplayView)->refreshScale();
+				m_ui64LastScaleRefreshTime = l_ui64TimeNow;
+			}
+
+
 			// Streamed matrix in input 0
 			for(uint32 c=0; c<l_pDynamicBoxContext->getInputChunkCount(0); c++)
 			{
@@ -145,9 +167,13 @@ namespace OpenViBEPlugins
 				{
 					const IMatrix* l_pMatrix = m_oStreamedMatrixDecoder.getOutputMatrix();
 
-					m_pBufferDatabase->setMatrixBuffer(l_pMatrix->getBuffer(),
+					bool l_bReturnValue = m_pBufferDatabase->setMatrixBuffer(l_pMatrix->getBuffer(),
 						l_pDynamicBoxContext->getInputChunkStartTime(0,c),
 						l_pDynamicBoxContext->getInputChunkEndTime(0,c));
+					if(!l_bReturnValue) 
+					{
+						return false;
+					}
 
 				}
 			}

@@ -27,18 +27,24 @@ namespace OpenViBEPlugins
 		*/
 		class CSignalDisplayView : public CSignalDisplayDrawable
 		{
+
 		public:
+
+
+
 			/**
 			 * \brief Constructor
 			 * \param [in] rBufferDatabase Signal database
 			 * \param [in] f64TimeScale Initial time scale value
 			 * \param [in] oDisplayMode Initial signal display mode
 			 */
+			/*
 			CSignalDisplayView(
 				CBufferDatabase& rBufferDatabase,
 				OpenViBE::float64 f64TimeScale,
 				OpenViBE::CIdentifier oDisplayMode,
 				OpenViBE::boolean bIsEEG);
+				*/
 			/**
 			 * \brief Constructor
 			 * \param [in] rBufferDatabase Signal database
@@ -50,10 +56,12 @@ namespace OpenViBEPlugins
 			CSignalDisplayView(
 				CBufferDatabase& rBufferDatabase,
 				OpenViBE::float64 f64TimeScale,
+			//	OpenViBE::boolean l_bIsMultiview,
 				OpenViBE::CIdentifier oDisplayMode,
-				OpenViBE::boolean bIsEEG,
+				OpenViBE::CIdentifier ui64ScalingMode,
 				OpenViBE::boolean bAutoVerticalScale,
-				OpenViBE::float64 f64VerticalScale);
+				OpenViBE::float64 f64VerticalScale,
+				OpenViBE::float64 f64VerticalOffset);
 
 			/**
 			 * \brief Base constructor
@@ -140,6 +148,8 @@ namespace OpenViBEPlugins
 			 */
 			OpenViBE::boolean onCustomVerticalScaleChangedCB(
 				::GtkSpinButton* pSpinButton);
+			OpenViBE::boolean onCustomVerticalOffsetChangedCB(
+				::GtkSpinButton* pSpinButton);
 
 			OpenViBE::boolean onAutoTranslationToggledCB(
 					GtkToggleButton* pToggleButton);
@@ -177,6 +187,8 @@ namespace OpenViBEPlugins
 			void getMultiViewColor(
 				OpenViBE::uint32 ui32ChannelIndex,
 				::GdkColor& rColor);
+
+			void refreshScale(void);
 
 		private:
 			/**
@@ -217,8 +229,13 @@ namespace OpenViBEPlugins
 
 			//! Largest displayed value range, to be matched by all channels in global best fit mode
 			OpenViBE::float64 m_f64LargestDisplayedValueRange;
+
+			OpenViBE::float64 m_f64LargestDisplayedValue;
+			OpenViBE::float64 m_f64SmallestDisplayedValue;
+
 			//! Current value range margin, used to avoid redrawing signals every time the largest value range changes
 			OpenViBE::float64 m_f64ValueRangeMargin;
+			// OpenViBE::float64 m_f64ValueMaxMargin;
 			/*! Margins added to largest and subtracted from smallest displayed values are computed as :
 			m_f64MarginFactor * m_f64LargestDisplayedValueRange. If m_ui64MarginFactor = 0, there's no margin at all.
 			If factor is 0.1, largest displayed value range is extended by 10% above and below its extremums at the time
@@ -236,9 +253,14 @@ namespace OpenViBEPlugins
 			GtkRadioButton* m_pAutoVerticalScaleRadioButton;
 			//! Flag set to true when auto vertical scale is toggled on
 			OpenViBE::boolean m_bAutoVerticalScale;
+			//
+			OpenViBE::boolean m_bVerticalScaleRefresh;
 			//! Value of custom vertical scale
 			OpenViBE::float64 m_f64CustomVerticalScaleValue;
+			//! Value of custom vertical offset
+			OpenViBE::float64 m_f64CustomVerticalOffset;
 			//@}
+
 
 			//! Flag set to true when auto translation is on (center signal in his spot)
             OpenViBE::boolean m_bAutoTranslation;
@@ -259,7 +281,8 @@ namespace OpenViBEPlugins
 			std::map<OpenViBE::uint32, OpenViBE::boolean> m_vSelectedChannels;
 
 			//! Flag set to true once multi view configuration dialog is initialized
-			OpenViBE::boolean m_bMultiViewInitialized;
+			OpenViBE::boolean m_bMultiViewEnabled;
+
 			//! Vector of indices of selected channels
 			std::map<OpenViBE::uint32, OpenViBE::boolean> m_vMultiViewSelectedChannels;
 
@@ -277,6 +300,10 @@ namespace OpenViBEPlugins
 
 			//! Widgets for left rulers
 			std::vector <GtkWidget *> m_oLeftRulers;
+
+			OpenViBE::CIdentifier m_oScalingMode;
+
+			static const char* m_vScalingModes[];
 		};
 	}
 }

@@ -12,13 +12,6 @@
 #include <string>
 #include <cfloat>
 
-#ifdef TARGET_OS_Windows
-#ifndef NDEBUG
-		//#define ELAN_VALIDATION
-		#define NB_ELAN_CHANNELS 143
-#endif
-#endif
-
 #include <iostream>
 
 namespace OpenViBEPlugins
@@ -240,6 +233,8 @@ namespace OpenViBEPlugins
 			//! Returns the min/max values currently displayed (all channels taken into account)
 			virtual void getDisplayedGlobalMinMaxValue(OpenViBE::float64& f64Min, OpenViBE::float64& f64Max);
 
+			virtual void getDisplayedChannelLocalMeanValue(OpenViBE::uint32 ui32Channel, OpenViBE::float64& f64Mean);
+
 			//! Returns the min/max values of the last buffer arrived for the given channel
 			virtual void getLastBufferChannelLocalMinMaxValue(OpenViBE::uint32 ui32Channel, OpenViBE::float64& f64Min, OpenViBE::float64& f64Max)
 			{
@@ -346,6 +341,8 @@ namespace OpenViBEPlugins
 				const OpenViBE::uint32 ui32DimensionIndex,
 				const OpenViBE::uint32 ui32DimensionEntryIndex,
 				const char* sDimensionLabel);
+
+			// Returns false on failure
 			virtual OpenViBE::boolean setMatrixBuffer(
 				const OpenViBE::float64* pBuffer,
 				OpenViBE::uint64 ui64StartTime,

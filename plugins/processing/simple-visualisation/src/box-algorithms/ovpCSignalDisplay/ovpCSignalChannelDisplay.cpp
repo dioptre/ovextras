@@ -12,7 +12,6 @@ using namespace OpenViBE;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::SimpleVisualisation;
 
-#define convert_time(i) (float64)(i>>32) + (float64)((float64)(i&0xFFFFFFFF) / (float64)((uint64)1<<32))
 
 gboolean drawingAreaExposeEventCallback(GtkWidget* pWidget, GdkEventExpose* pEvent, gpointer data);
 gboolean drawingAreaResizeEventCallback(GtkWidget* pWidget, GtkAllocation* pAllocation, gpointer data);
@@ -33,8 +32,8 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 	,m_f64PointStep(0)
 	,m_pParentDisplayView(pDisplayView)
 	,m_pDatabase(pDisplayView->m_pBufferDatabase)
-	,m_f64ScaleX(1)
-	,m_f64TranslateX(0)
+//	,m_f64ScaleX(1)
+//	,m_f64TranslateX(0)
 	,m_f64ZoomTranslateX(0)
 	,m_f64ZoomTranslateY(0)
 	,m_f64ZoomScaleX(1)
@@ -130,6 +129,15 @@ void CSignalChannelDisplay::updateScale()
 void CSignalChannelDisplay::resetChannelList()
 {
     m_oChannelList.clear();
+
+	m_vLocalMaximum.clear();
+    m_vLocalMinimum.clear();
+    m_vTranslateY.clear();
+    m_vMaximumBottomMargin.clear();
+    m_vMaximumTopMargin.clear();
+    m_vMinimumBottomMargin.clear();
+    m_vMinimumTopMargin.clear();
+    m_vScaleY.clear();
 }
 
 void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
@@ -149,10 +157,14 @@ void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
 void CSignalChannelDisplay::addChannelList(uint32 ui32Channel)
 {
 	m_oChannelList.push_back(ui32Channel);
-	// @fixme added enlargement of m_vLocalMaximum/minimum here as otherwise enabling multiview crashed. 
-	// This solution should be reviewed/replaced by the original author ...
 	m_vLocalMaximum.push_back(-DBL_MAX);
 	m_vLocalMinimum.push_back(DBL_MAX);
+    m_vTranslateY.push_back(0);
+    m_vMaximumBottomMargin.push_back(0);
+    m_vMaximumTopMargin.push_back(0);
+    m_vMinimumBottomMargin.push_back(0);
+    m_vMinimumTopMargin.push_back(0);
+    m_vScaleY.push_back(1);
 }
 
 uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
@@ -304,7 +316,7 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 
 	//updates the left ruler
     //for each channel
-    for(uint32 i =0 ; i<m_oLeftRuler.size(); i++)
+    for(uint32 i = 0 ; i<m_oChannelList.size(); i++)
     {
         if(m_pParentDisplayView->m_bAutoTranslation && !m_bMultiView)
         {
@@ -327,8 +339,16 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
             l_f64MinimumDisplayedValue = -((m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * m_ui32Height) );
         }
 
-        m_oLeftRuler[i]->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
+		if(!m_bMultiView)
+		{
+			m_oLeftRuler[i]->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
+		}
     }
+
+	if(m_bMultiView)
+	{
+		m_oLeftRuler[0]->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
+	}
 
 	//determine index and position of first (in the sense of leftmost) buffer to display, and index of first sample to display
 	uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
@@ -485,7 +505,9 @@ void CSignalChannelDisplay::computeZoom(OpenViBE::boolean bZoomIn, OpenViBE::flo
 	}
 }
 
-void CSignalChannelDisplay::updateDisplayedValueRange(std::vector<float64> & rDisplayedValueRange)
+void CSignalChannelDisplay::updateDisplayedValueRange(std::vector<float64> & rDisplayedValueRange, 
+	std::vector<float64>& rDisplayedValueMin,
+	std::vector<float64>& rDisplayedValueMax)
 {
 	//update maximum and minimum values displayed by this channel
 	float64 l_f64CurrentMaximum;
@@ -493,23 +515,28 @@ void CSignalChannelDisplay::updateDisplayedValueRange(std::vector<float64> & rDi
 
 //    float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
     rDisplayedValueRange.resize(m_oChannelList.size());
+    rDisplayedValueMin.resize(m_oChannelList.size());
+    rDisplayedValueMax.resize(m_oChannelList.size());
 
 	for(size_t k=0 ; k<m_oChannelList.size() ; k++)
 	{
 		//get local min/max
 		m_pDatabase->getDisplayedChannelLocalMinMaxValue(m_oChannelList[k], l_f64CurrentMinimum, l_f64CurrentMaximum);
+		// m_pDatabase->getDisplayedChannelLocalMeanValue(m_oChannelList[k], rDisplayedValueRange[k]);
 
-        if(l_f64CurrentMinimum < m_vLocalMinimum[k])
-		{
+//      if(l_f64CurrentMinimum < m_vLocalMinimum[k])
+//		{
             m_vLocalMinimum[k] = l_f64CurrentMinimum;
-		}
-        if(l_f64CurrentMaximum > m_vLocalMaximum[k])
-		{
+//		}
+//       if(l_f64CurrentMaximum > m_vLocalMaximum[k])
+//		{
             m_vLocalMaximum[k] = l_f64CurrentMaximum;
-		}
+//		}
 
         //set parameter to recomputed range
         rDisplayedValueRange[k] = m_vLocalMaximum[k] - m_vLocalMinimum[k];
+		rDisplayedValueMin[k] = m_vLocalMinimum[k];
+		rDisplayedValueMax[k] = m_vLocalMaximum[k];
 
         //in global best fit mode, translate signals if necessary // Commenting out this since it's already done in CSignalChannelDisplay::updateDisplayParameters()
 /*        if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
@@ -532,30 +559,107 @@ void CSignalChannelDisplay::updateDisplayedValueRange(std::vector<float64> & rDi
 
 void CSignalChannelDisplay::setGlobalBestFitParameters(const float64& rRange, const float64& rMargin)
 {
-	m_f64ScaleX = 1;
-    m_f64VerticalScale = rRange/2;
+//	m_f64ScaleX = 1;
+	bool redraw = true;
 
     for(size_t k = 0; k<m_oChannelList.size(); k++)
     {
         float64 l_f64LocalMediumValue = (m_vLocalMaximum[k] + m_vLocalMinimum[k]) / 2;
 
-        m_vMaximumTopMargin[k] = l_f64LocalMediumValue + rRange/2 + rMargin;
-        m_vMaximumBottomMargin[k] = l_f64LocalMediumValue + rRange/2 - rMargin;
+        float64 newMaximumTopMargin = l_f64LocalMediumValue + rRange/2 + rMargin;
+        float64 newMaximumBottomMargin = l_f64LocalMediumValue + rRange/2 - rMargin;
+        float64 newMinimumTopMargin = l_f64LocalMediumValue - rRange/2 + rMargin;
+        float64 newMinimumBottomMargin = l_f64LocalMediumValue - rRange/2 - rMargin;
+		
+		/*
+		const float th = 2;
+		if(std::fabs(newMaximumTopMargin     - m_vMaximumTopMargin[k]) > th ||
+			std::fabs(newMaximumBottomMargin - m_vMaximumBottomMargin[k]) > th ||	
+			std::fabs(newMinimumTopMargin    - m_vMinimumTopMargin[k]) > th ||
+			std::fabs(newMinimumBottomMargin - m_vMinimumBottomMargin[k]) > th) 
+		{
+			redraw = true;
+		}
+		*/
 
-        m_vMinimumTopMargin[k] = l_f64LocalMediumValue - rRange/2 + rMargin;
-        m_vMinimumBottomMargin[k] = l_f64LocalMediumValue - rRange/2 - rMargin;
+        m_vMaximumTopMargin[k] = newMaximumTopMargin;
+        m_vMaximumBottomMargin[k] = newMaximumBottomMargin;
+
+        m_vMinimumTopMargin[k] = newMinimumTopMargin;
+        m_vMinimumBottomMargin[k] = newMinimumTopMargin;
     }
 
-	if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
+	if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit && redraw)
 	{
 		updateDisplayParameters();
 	}
 }
 
+void CSignalChannelDisplay::setGlobalBestFitParameters2(const float64& rMin, const float64& rMax)
+{
+//	m_f64ScaleX = 1;
+	const float64 f64Margin = 0.2;
+
+	const float64 f64MaxTop    = rMax + f64Margin*std::fabs(rMax);
+	const float64 f64MinBottom = rMin - f64Margin*std::fabs(rMin);
+
+    for(size_t k = 0; k<m_oChannelList.size(); k++)
+    {
+        m_vMaximumTopMargin[k]    = f64MaxTop;
+        m_vMaximumBottomMargin[k] = rMax;
+
+        m_vMinimumTopMargin[k]    = rMin;
+        m_vMinimumBottomMargin[k] = f64MinBottom;
+    }
+
+	updateDisplayParameters();
+}
+
+void CSignalChannelDisplay::setGlobalManualParameters(float64 f64Scale, float64 f64Center)
+{
+//	m_f64ScaleX = 1;
+
+	const float64 f64Max = f64Center + f64Scale/2;
+	const float64 f64Min = f64Center - f64Scale/2;
+
+	const float64 f64Margin = 0.2 * (f64Max - f64Min);
+
+	const float64 f64MaxTop    = f64Max + f64Margin;
+	const float64 f64MinBottom = f64Min - f64Margin;
+
+    for(size_t k = 0; k<m_oChannelList.size(); k++)
+    {
+        m_vMaximumTopMargin[k]    = f64MaxTop;
+        m_vMaximumBottomMargin[k] = f64Max;
+
+        m_vMinimumTopMargin[k]    = f64Min;
+        m_vMinimumBottomMargin[k] = f64MinBottom;
+    }
+
+//	if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
+//	{
+		updateDisplayParameters();
+//	}
+}
+
+void CSignalChannelDisplay::setLocalManualParameters(const uint32 subChannelIndex, const float64 f64Min, const float64 f64Max)
+{
+//	m_f64ScaleX = 1;
+
+	const float64 f64Margin = 0.2 * (f64Max - f64Min);
+	// const float f64Margin = 0;
+
+	m_vMaximumTopMargin[subChannelIndex]    = f64Max + f64Margin;
+	m_vMinimumTopMargin[subChannelIndex]    = f64Max;
+
+	m_vMaximumBottomMargin[subChannelIndex] = f64Min;
+	m_vMinimumBottomMargin[subChannelIndex] = f64Min - f64Margin;
+}
+
+
 void CSignalChannelDisplay::setMultiViewBestFitParameters(const float64& rRange, const float64& rMargin)
 {
-    m_f64ScaleX = 1;
-    m_f64VerticalScale = rRange/2;
+//    m_f64ScaleX = 1;
 
         float64 l_f64LocalMediumValue = (m_vLocalMaximum[0] + m_vLocalMinimum[0]) / 2;
 
@@ -572,10 +676,12 @@ void CSignalChannelDisplay::setMultiViewBestFitParameters(const float64& rRange,
     }
 }
 
+// Assume [a,b] is the range between MinimumBottom and MaxiMumTop of k. If c \in [a,b],
+// then m_vScale[k]*(m_vTranslate[k]-c) should be in what???
 void CSignalChannelDisplay::updateDisplayParameters()
 {
     //compute the translation needed to center the signal correctly in the window
-    m_f64TranslateX = 0;
+//    m_f64TranslateX = 0;
 
     for(size_t k = 0; k<m_oChannelList.size(); k++)
         {
@@ -588,7 +694,7 @@ void CSignalChannelDisplay::updateDisplayParameters()
             {
                 m_vScaleY[k] =  1 / (m_vMaximumTopMargin[k] - m_vMinimumBottomMargin[k]);
             }
-            m_vTranslateY[k] =  (m_vMaximumTopMargin[k] + m_vMinimumBottomMargin[k]) / (2*(m_oChannelList.size())) ;
+            m_vTranslateY[k] =  (m_vMaximumTopMargin[k] + m_vMinimumBottomMargin[k]) / 2;
         }
 
 	//reflect changes
@@ -636,12 +742,12 @@ void CSignalChannelDisplay::getFirstBufferToDisplayInformation(uint32& rFirstBuf
 
 int32 CSignalChannelDisplay::getBufferStartX(uint32 ui32Position)
 {
-	return static_cast<int32>((ui32Position*m_f64WidthPerBuffer - m_f64TranslateX) * m_f64ScaleX);
+	return static_cast<int32>((ui32Position*m_f64WidthPerBuffer - 0) * 1);
 }
 
 float64 CSignalChannelDisplay::getSampleXCoordinate(uint32 ui32BufferPosition, uint32 ui32SampleIndex, float64 f64XOffset)
 {
-	return (f64XOffset + ui32BufferPosition*m_f64WidthPerBuffer + ui32SampleIndex*m_f64PointStep - m_f64TranslateX) * m_f64ScaleX;
+	return (f64XOffset + ui32BufferPosition*m_f64WidthPerBuffer + ui32SampleIndex*m_f64PointStep - 0) * 1;
 }
 
 float64 CSignalChannelDisplay::getSampleYCoordinate(float64 f64Value, uint32 ui32ChannelIndex)
@@ -652,7 +758,8 @@ float64 CSignalChannelDisplay::getSampleYCoordinate(float64 f64Value, uint32 ui3
     //Autotranslation on
     if(m_pParentDisplayView->m_bAutoTranslation)
     {
-        return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*l_f64sizePerChannel*(m_vTranslateY[ui32ChannelIndex]-f64Value)+(ui32ChannelIndex+1)*l_f64sizePerChannel*m_f64ZoomScaleY - m_f64ZoomTranslateY*m_f64ZoomScaleY - l_f64sizePerChannel/2;
+		const float64 l_f64TranslatedData = m_vTranslateY[ui32ChannelIndex]-f64Value;
+        return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*l_f64sizePerChannel*l_f64TranslatedData+(ui32ChannelIndex+1)*l_f64sizePerChannel*m_f64ZoomScaleY - m_f64ZoomTranslateY*m_f64ZoomScaleY - l_f64sizePerChannel/2;
     }
     //Autotranslation off
     else
@@ -666,7 +773,8 @@ float64 CSignalChannelDisplay::getSampleYMultiViewCoordinate(float64 f64Value)
     //Autotranslation on
     if(m_pParentDisplayView->m_bAutoTranslation)
     {
-        return m_vScaleY[0]*m_f64ZoomScaleY*m_ui32Height* (m_vTranslateY[0]-f64Value) + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
+		const float64 l_f64TranslatedData = m_vTranslateY[0]-f64Value;
+        return m_vScaleY[0]*m_f64ZoomScaleY*m_ui32Height*l_f64TranslatedData + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
     }
     //Autotranslation off
     else
