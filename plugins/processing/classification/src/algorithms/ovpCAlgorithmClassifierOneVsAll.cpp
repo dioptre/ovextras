@@ -42,7 +42,7 @@ boolean CAlgorithmClassifierOneVsAll::uninitialize(void)
 	{
 		this->removeClassifierAtBack();
 	}
-	return true;
+	return CAlgorithmPairingStrategy::uninitialize();
 }
 
 

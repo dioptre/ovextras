@@ -12,6 +12,22 @@ using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEToolkit;
 
+boolean CAlgorithmClassifier::initialize()
+{
+	m_pAlgorithmProxy = NULL;
+	m_pExtraParameter = NULL;
+}
+
+boolean CAlgorithmClassifier::uninitialize()
+{
+	if(m_pAlgorithmProxy != NULL)
+	{
+		m_pAlgorithmProxy->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pAlgorithmProxy);
+		m_pAlgorithmProxy = NULL;
+	}
+}
+
 boolean CAlgorithmClassifier::process(void)
 {
 	TParameterHandler < IMatrix* > ip_pFeatureVector(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
@@ -129,39 +145,63 @@ boolean CAlgorithmClassifier::process(void)
 	return true;
 }
 
-int64 CAlgorithmClassifier::getInt64Parameter(const CIdentifier &rParameterIdentifier, const CString &rParameterValue)
+boolean CAlgorithmClassifier::initializeExtraParameterMecanism(const OpenViBE::CIdentifier& rAlgoritmIdentifier)
+{
+	TParameterHandler < std::map<CString, CString>* > ip_pExtraParameter(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
+	m_pExtraParameter = (std::map<CString, CString>*) ip_pExtraParameter;
+
+	m_pAlgorithmProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(rAlgoritmIdentifier));
+	m_pAlgorithmProxy->initialize();
+	return true;
+}
+
+boolean CAlgorithmClassifier::uninitializeExtraParameterMecanism()
+{
+	m_pAlgorithmProxy->uninitialize();
+	this->getAlgorithmManager().releaseAlgorithm(*m_pAlgorithmProxy);
+
+	m_pAlgorithmProxy = NULL;
+	m_pExtraParameter = NULL;
+	return true;
+}
+
+CString& CAlgorithmClassifier::getParameterValue(const CIdentifier &rParameterIdentifier)
+{
+	CString l_pParameterName = m_pAlgorithmProxy->getInputParameterName(rParameterIdentifier);
+	return (*static_cast<std::map<CString, CString>* >(m_pExtraParameter))[l_pParameterName];
+}
+
+int64 CAlgorithmClassifier::getInt64Parameter(const CIdentifier &rParameterIdentifier)
 {
 	TParameterHandler < int64 > ip_i64Temp(getInputParameter(rParameterIdentifier));
-	ip_i64Temp = this->getAlgorithmContext().getConfigurationManager().expandAsInteger(rParameterValue);
+	ip_i64Temp = this->getAlgorithmContext().getConfigurationManager().expandAsInteger(getParameterValue(rParameterIdentifier));
 	return (int64)ip_i64Temp;
 }
 
-float64 CAlgorithmClassifier::getFloat64Parameter(const CIdentifier &rParameterIdentifier, const CString &rParameterValue)
+float64 CAlgorithmClassifier::getFloat64Parameter(const CIdentifier &rParameterIdentifier)
 {
 	TParameterHandler < float64 > ip_f64Temp(getInputParameter(rParameterIdentifier));
-	ip_f64Temp = this->getAlgorithmContext().getConfigurationManager().expandAsFloat(rParameterValue);
+	ip_f64Temp = this->getAlgorithmContext().getConfigurationManager().expandAsFloat(getParameterValue(rParameterIdentifier));
 	return (float64)ip_f64Temp;
 }
 
-boolean CAlgorithmClassifier::getBooleanParameter(const CIdentifier &rParameterIdentifier, const CString &rParameterValue)
+boolean CAlgorithmClassifier::getBooleanParameter(const CIdentifier &rParameterIdentifier)
 {
 	TParameterHandler < boolean > ip_bTemp(getInputParameter(rParameterIdentifier));
-	ip_bTemp = this->getAlgorithmContext().getConfigurationManager().expandAsBoolean(rParameterValue);
+	ip_bTemp = this->getAlgorithmContext().getConfigurationManager().expandAsBoolean(getParameterValue(rParameterIdentifier));
 	return (boolean)ip_bTemp;
 }
 
-CString *CAlgorithmClassifier::getCStringParameter(const CIdentifier &rParameterIdentifier, CString &rParameterValue)
+CString *CAlgorithmClassifier::getCStringParameter(const CIdentifier &rParameterIdentifier)
 {
 	TParameterHandler < CString* > ip_pTemp(getInputParameter(rParameterIdentifier));
-	ip_pTemp = &rParameterValue;
+	ip_pTemp = &getParameterValue(rParameterIdentifier);
 	return (CString*)ip_pTemp;
 }
 
-int64 CAlgorithmClassifier::getEnumerationParameter(const CIdentifier &rParameterIdentifier, const CIdentifier &rEnumerationIdentifier, const CString &rParameterValue)
+int64 CAlgorithmClassifier::getEnumerationParameter(const CIdentifier &rParameterIdentifier, const CIdentifier &rEnumerationIdentifier)
 {
 	TParameterHandler < int64 > ip_i64Temp(getInputParameter(rParameterIdentifier));
-	ip_i64Temp = this->getTypeManager().getEnumerationEntryValueFromName(rEnumerationIdentifier, rParameterValue);
+	ip_i64Temp = this->getTypeManager().getEnumerationEntryValueFromName(rEnumerationIdentifier, getParameterValue(rParameterIdentifier));
 	return (int64) ip_i64Temp;
 }
-
-

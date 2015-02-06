@@ -37,6 +37,9 @@ namespace OpenViBEToolkit
 	{
 	public:
 
+		virtual OpenViBE::boolean initialize();
+		virtual OpenViBE::boolean uninitialize();
+
 		virtual void release(void) { delete this; }
 
 		virtual OpenViBE::boolean process(void);
@@ -50,13 +53,25 @@ namespace OpenViBEToolkit
 		virtual XML::IXMLNode* saveConfiguration(void)=0;
 		virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode * pConfigurationRoot)=0;
 
-		OpenViBE::int64 getInt64Parameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CString& rParameterValue);
-		OpenViBE::float64 getFloat64Parameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CString& rParameterValue);
-		OpenViBE::boolean getBooleanParameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CString& rParameterValue);
-		OpenViBE::CString* getCStringParameter(const OpenViBE::CIdentifier& rParameterIdentifier, OpenViBE::CString& rParameterValue);
-		OpenViBE::int64 getEnumerationParameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CIdentifier& rEnumerationIdentifier,  const OpenViBE::CString& rParameterValue);
-
 		_IsDerivedFromClass_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVTK_ClassId_Algorithm_Classifier);
+
+	protected:
+		OpenViBE::boolean initializeExtraParameterMecanism(const OpenViBE::CIdentifier& rAlgoritmIdentifier);
+		OpenViBE::boolean uninitializeExtraParameterMecanism();
+
+		OpenViBE::int64 getInt64Parameter(const OpenViBE::CIdentifier& rParameterIdentifier);
+		OpenViBE::float64 getFloat64Parameter(const OpenViBE::CIdentifier& rParameterIdentifier);
+		OpenViBE::boolean getBooleanParameter(const OpenViBE::CIdentifier& rParameterIdentifier);
+		OpenViBE::CString* getCStringParameter(const OpenViBE::CIdentifier& rParameterIdentifier);
+		OpenViBE::int64 getEnumerationParameter(const OpenViBE::CIdentifier& rParameterIdentifier, const OpenViBE::CIdentifier& rEnumerationIdentifier);
+
+	private:
+		OpenViBE::CString& getParameterValue(const OpenViBE::CIdentifier& rParameterIdentifier);
+
+		OpenViBE::Kernel::IAlgorithmProxy *m_pAlgorithmProxy;
+		void* m_pExtraParameter;
+
+
 	};
 
 	class OV_API CAlgorithmClassifierDesc : public OpenViBE::Plugins::IAlgorithmDesc

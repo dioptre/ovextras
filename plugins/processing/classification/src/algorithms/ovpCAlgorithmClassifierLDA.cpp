@@ -1,5 +1,6 @@
 #include "ovpCAlgorithmClassifierLDA.h"
 
+#define TARGET_HAS_ThirdPartyEIGEN
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
 #include <map>
@@ -91,35 +92,28 @@ boolean CAlgorithmClassifierLDA::uninitialize(void)
 
 boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
-	//Let's set the extra settings
-	TParameterHandler < std::map<CString, CString>* > ip_pExtraParameter(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
-	std::map<CString, CString>* l_pExtraParameter = ip_pExtraParameter;
+	this->initializeExtraParameterMecanism(OVP_ClassId_Algorithm_ClassifierLDA);
 
-	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierLDA));
-	l_pAlgoProxy->initialize();
-
-	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierLDA_InputParameterId_UseShrinkage);
-	boolean l_bUseShrinkage = this->getBooleanParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_UseShrinkage, (*l_pExtraParameter)[l_pParameterName]);
+	boolean l_bUseShrinkage = this->getBooleanParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_UseShrinkage);
 
 	boolean l_pDiagonalCov;
-	//If we don't use shrinkage we need to set lambda to 0.
 	if(l_bUseShrinkage)
 	{
-		//Extract OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage
-		l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage);
-		this->getFloat64Parameter(OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage, (*l_pExtraParameter)[l_pParameterName]);
-
-		//Extract OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov
-		l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov);
-		l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov, (*l_pExtraParameter)[l_pParameterName]);
+		this->getFloat64Parameter(OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage);
+		l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov);
 
 	}
 	else{
-		this->getFloat64Parameter(OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage, "0.0");
-		l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov, "false");
+		//If we don't use shrinkage we need to set lambda to 0.
+		TParameterHandler< float64 > ip_f64Shrinkage(this->getInputParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage));
+		ip_f64Shrinkage = 0.0;
+
+		TParameterHandler < boolean > ip_bDiagonalCov(this->getInputParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov));
+		ip_bDiagonalCov = false;
+		l_pDiagonalCov = false;
 	}
-	l_pAlgoProxy->uninitialize();
-	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
+	this->uninitializeExtraParameterMecanism();
+
 
 
 	// IO to the covariance alg

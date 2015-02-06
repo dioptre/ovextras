@@ -92,20 +92,12 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 
 	const uint32 l_ui32AmountClass = getClassAmount();
 	//Create the decision strategy
-	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierOneVsOne));
-	l_pAlgoProxy->initialize();
+	this->initializeExtraParameterMecanism(OVP_ClassId_Algorithm_ClassifierOneVsOne);
 
+	m_oPairwiseDecisionIdentifier=this->getEnumerationParameter(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType, OVP_TypeId_ClassificationPairwiseStrategy);
 
-	TParameterHandler< std::map<CString, CString>* > ip_pExtraParameters(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
-
-	std::map<CString,CString>* l_pExtraParameters = ip_pExtraParameters;
-
-	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType);
-	m_oPairwiseDecisionIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationPairwiseStrategy,
-		(*l_pExtraParameters)[l_pParameterName]);
 	if(m_oPairwiseDecisionIdentifier==OV_UndefinedIdentifier) {
-		this->getLogManager() << LogLevel_Error << "Tried to get algorithm id for pairwise decision strategy " << OVP_TypeId_ClassificationPairwiseStrategy << " and " << l_pParameterName << " -> " 
-			<<  (*l_pExtraParameters)[l_pParameterName] << " but failed\n";
+		this->getLogManager() << LogLevel_Error << "Tried to get algorithm id for pairwise decision strategy " << OVP_TypeId_ClassificationPairwiseStrategy << " but failed\n";
 		return false;
 	}
 	
@@ -121,8 +113,8 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 	ip_pClassificationAlgorithm = &m_oSubClassifierAlgorithmIdentifier;
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize);
 
-	l_pAlgoProxy->uninitialize();
-	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
+	this->uninitializeExtraParameterMecanism();
+
 
 	//Calculate the amount of sample for each class
 	std::map < float64, size_t > l_vClassLabels;
