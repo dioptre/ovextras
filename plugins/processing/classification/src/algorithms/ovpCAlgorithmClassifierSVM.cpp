@@ -10,25 +10,27 @@
 
 #include <xml/IXMLHandler.h>
 
-static const char* const c_sTypeNodeName = "SVM";
-static const char* const c_sParamNodeName = "Param";
-static const char* const c_sSvmTypeNodeName = "svm_type";
-static const char* const c_sKernelTypeNodeName = "kernel_type";
-static const char* const c_sDegreeNodeName = "degree";
-static const char* const c_sGammaNodeName = "gamma";
-static const char* const c_sCoef0NodeName = "coef0";
-static const char* const c_sModelNodeName = "Model";
-static const char* const c_sNrClassNodeName = "nr_class";
-static const char* const c_sTotalSvNodeName = "total_sv";
-static const char* const c_sRhoNodeName = "rho";
-static const char* const c_sLabelNodeName = "label";
-static const char* const c_sProbANodeName = "probA";
-static const char* const c_sProbBNodeName = "probB";
-static const char* const c_sNrSvNodeName = "nr_sv";
-static const char* const c_sSvsNodeName = "SVs";
-static const char* const c_sSVNodeName = "SV";
-static const char* const c_sCoefNodeName = "coef";
-static const char* const c_sValueNodeName = "value";
+namespace{
+	const char* const c_sTypeNodeName = "SVM";
+	const char* const c_sParamNodeName = "Param";
+	const char* const c_sSvmTypeNodeName = "svm_type";
+	const char* const c_sKernelTypeNodeName = "kernel_type";
+	const char* const c_sDegreeNodeName = "degree";
+	const char* const c_sGammaNodeName = "gamma";
+	const char* const c_sCoef0NodeName = "coef0";
+	const char* const c_sModelNodeName = "Model";
+	const char* const c_sNrClassNodeName = "nr_class";
+	const char* const c_sTotalSvNodeName = "total_sv";
+	const char* const c_sRhoNodeName = "rho";
+	const char* const c_sLabelNodeName = "label";
+	const char* const c_sProbANodeName = "probA";
+	const char* const c_sProbBNodeName = "probB";
+	const char* const c_sNrSvNodeName = "nr_sv";
+	const char* const c_sSvsNodeName = "SVs";
+	const char* const c_sSVNodeName = "SV";
+	const char* const c_sCoefNodeName = "coef";
+	const char* const c_sValueNodeName = "value";
+}
 
 extern const char* const c_sClassifierRoot;
 
@@ -876,25 +878,7 @@ CString CAlgorithmClassifierSVM::modelToString()
 		}
 	}
 	l_sModel << "\n";
-	/*l_sModel << "\tSV: "<<"\n";
-	if(m_pModel->sv_coef !=NULL && m_pModel->SV != NULL)
-	{
-		for(int i=0;i<m_pModel->l;i++)
-		{
-			l_sModel << "\t("<<i<<")\tcoef: "<<m_pModel->sv_coef[0][i];
-			for(int j=1;j<m_pModel->nr_class-1;j++)
-			{
-				l_sModel << " "<<m_pModel->sv_coef[j][i];
-			}
-			l_sModel << "\n";
-			l_sModel << "\t("<<i<<")\tvalue: "<<m_pModel->SV[i][0].index<<":"<<m_pModel->SV[i][0].value;
-			for(int j=1;j<m_ui32NumberOfFeatures+1;j++)
-			{
-				l_sModel << " "<<m_pModel->SV[i][j].index<<":"<<m_pModel->SV[i][0].value;
-			}
-			l_sModel << "\n";
-		}
-	}*/
+
 	return CString(l_sModel.str().c_str());
 }
 CString CAlgorithmClassifierSVM::problemToString(svm_problem *pProb)
@@ -908,14 +892,6 @@ CString CAlgorithmClassifierSVM::problemToString(svm_problem *pProb)
 	l_sProb << "Problem";
 	l_sProb << "\ttotal sv: "<<pProb->l<<"\n";
 	l_sProb << "\tnb features: " << m_ui32NumberOfFeatures << "\n";
-	/*for(int i=0;i<pProb->l;i++)
-	{
-		l_sProb << "\t("<<i<<")\ty = " << pProb->y[i]<<": ";
-		for(uint32 j=0;j<m_ui32NumberOfFeatures+1;j++)
-		{
-			l_sProb << " " <<pProb->x[i][j].index <<";"<<pProb->x[i][j].value;
-		}
-		l_sProb<<"\n";
-	}*/
+
 	return CString(l_sProb.str().c_str());
 }

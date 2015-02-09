@@ -1,6 +1,5 @@
 #include "ovpCAlgorithmClassifierLDA.h"
 
-#define TARGET_HAS_ThirdPartyEIGEN
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
 #include <map>
@@ -16,7 +15,6 @@
 
 namespace{
 	const char* const c_sTypeNodeName = "LDA";
-	const char* const c_sCreatorNodeName = "Creator";
 	const char* const c_sClassesNodeName = "Classes";
 	const char* const c_sCoefficientsNodeName = "Weights";
 	const char* const c_sBiasDistanceNodeName = "Bias-distance";
@@ -309,11 +307,7 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 	l_sBiasDistance << m_f64BiasDistance;
 	l_sCoefficentProbability << m_f64w0;
 
-	XML::IXMLNode *l_pTempNode = XML::createNode(c_sCreatorNodeName);
-	l_pTempNode->setPCData("LDA");
-	l_pAlgorithmNode->addChild(l_pTempNode);
-
-	l_pTempNode = XML::createNode(c_sClassesNodeName);
+	XML::IXMLNode *l_pTempNode = XML::createNode(c_sClassesNodeName);
 	l_pTempNode->setPCData(l_sClasses.str().c_str());
 	l_pAlgorithmNode->addChild(l_pTempNode);
 

@@ -211,7 +211,7 @@ namespace OpenViBEPlugins
 						rBox.getSettingValue(i, l_sEnumValue);
 
 						OpenViBE::uint64 l_ui64OldId = this->getTypeManager().getEnumerationEntryValueFromName(l_oEnum, l_sEnumValue);
-						if(l_ui64OldId == 0xffffffffffffffffLL)//The previous strategy does not exists in the new enum, let's switch to the default value (the first)
+						if(l_ui64OldId == OV_UndefinedIdentifier)//The previous strategy does not exists in the new enum, let's switch to the default value (the first)
 						{
 							l_ui64EnumIndex = 0;
 						}

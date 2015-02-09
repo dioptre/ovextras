@@ -7,8 +7,9 @@
 #include <xml/IXMLNode.h>
 #include <xml/IXMLHandler.h>
 
-static const char* const c_sTypeNodeName = "PairwiseDecision_Voting";
-
+namespace{
+	const char* const c_sTypeNodeName = "PairwiseDecision_Voting";
+}
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;

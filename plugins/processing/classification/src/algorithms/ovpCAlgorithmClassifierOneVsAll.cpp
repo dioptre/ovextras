@@ -144,7 +144,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	std::pair<float64, std::pair < IMatrix*, IMatrix*> > l_oBest = std::pair<float64, std::pair < IMatrix*, IMatrix* > >
 			(-1.0, std::pair < IMatrix*, IMatrix* > (static_cast<IMatrix*>(NULL),static_cast<IMatrix*>(NULL)) );
 	rf64Class = -1;
-	CMatrix lala;
+
 	for(size_t l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
 	{
 		std::pair<float64, std::pair < IMatrix*, IMatrix*> >&   l_pTemp = l_oClassificationVector[l_iClassificationCount];

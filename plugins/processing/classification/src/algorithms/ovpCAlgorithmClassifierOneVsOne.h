@@ -47,7 +47,7 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsOne)
 
-		protected:
+		private:
 			std::vector<SSubClassifierDescriptor> m_oSubClassifierDescriptorList;
 			XML::IXMLNode *m_pConfigurationNode;
 			fClassifierComparison m_fAlgorithmComparison;
@@ -55,7 +55,6 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::IAlgorithmProxy* m_pDecisionStrategyAlgorithm;
 			OpenViBE::CIdentifier m_oPairwiseDecisionIdentifier;
 
-		private:
 			XML::IXMLNode* getClassifierConfiguration(SSubClassifierDescriptor &rDescriptor);
 			XML::IXMLNode* getPairwiseDecisionConfiguration(void);
 			OpenViBE::uint32 getClassAmount(void) const;

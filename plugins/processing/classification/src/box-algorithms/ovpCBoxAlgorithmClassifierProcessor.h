@@ -27,7 +27,7 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierProcessor)
 
-		protected:
+		private:
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pFeaturesDecoder;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pLabelsEncoder;
