@@ -47,10 +47,15 @@ a new classification process is triggered, resulting in the generation of the co
  * |OVP_DocEnd_BoxAlgorithm_ClassifierProcessor_Output1|
 
  * |OVP_DocBegin_BoxAlgorithm_ClassifierProcessor_Output2|
-This output reflects the classification algorithm status in the form of a matrix of value. The content of this
-matrix is dependent of the chosen classification algorithm. For example, the LDA classifier sends the hyperplane
-distance as its status. Given that this value is dependent of the chosen algorithm, you should be very carefull
-with the use of this output stream. Unexepected behavior may (will) occur when changing the classifier.
+This output reflects the classification algorithm status in the form of a matrix of value.  This output will contain one or several distances
+to an hyperplan if the classifier provide it. If not, the matrix will have 0 dimension. The format of this output directly depend on 
+the classification algorithm and of the strategy used by the processor box.
+ * |OVP_DocEnd_BoxAlgorithm_ClassifierProcessor_Output2|
+ * 
+ * |OVP_DocBegin_BoxAlgorithm_ClassifierProcessor_Output3|
+This output reflects the classification algorithm status in the form of a matrix of value.  This output will contains one or several probabilities
+for a data to be on a class if the classifier provide it. If not, the matrix will have 0 dimension. The format of this output directly depend on 
+the classification algorithm and of the strategy used by the processor box.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierProcessor_Output2|
 __________________________________________________________________
 
