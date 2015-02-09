@@ -2528,8 +2528,8 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 void CApplication::reorderCurrentScenario(OpenViBE::uint32 i32NewPageIndex)
 {
 	CInterfacedScenario* temp = m_vInterfacedScenario[m_i32CurrentScenarioPage];
-	m_vInterfacedScenario[m_i32CurrentScenarioPage] = m_vInterfacedScenario[i32NewPageIndex];
-	m_vInterfacedScenario[i32NewPageIndex] = temp;
+	m_vInterfacedScenario.erase(m_vInterfacedScenario.begin() + m_i32CurrentScenarioPage);
+	m_vInterfacedScenario.insert(m_vInterfacedScenario.begin() + i32NewPageIndex, temp);
 	this->changeCurrentScenario(i32NewPageIndex);
 }
 
