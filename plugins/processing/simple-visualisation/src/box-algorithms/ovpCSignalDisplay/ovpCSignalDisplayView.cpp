@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+#include <algorithm>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Plugins;
 
@@ -365,6 +367,8 @@ namespace OpenViBEPlugins
 			//allocate channel labels and channel displays arrays accordingly
             m_oChannelDisplay.resize(l_ui32TableSize);
 			m_oChannelLabel.resize(l_ui32ChannelCount+1);
+			m_vPreviousValueMin.resize(l_ui32ChannelCount+1);
+			m_vPreviousValueMax.resize(l_ui32ChannelCount+1);
 
 			//retrieve and allocate main table accordingly
 			m_pSignalDisplayTable = GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayMainTable"));
@@ -635,11 +639,21 @@ namespace OpenViBEPlugins
 					vector<float64> l_vValueMax;
 					m_oChannelDisplay[0]->updateDisplayedValueRange(l_vValueRange,l_vValueMin,l_vValueMax);
 
-					std::vector<float64>::iterator minValue = std::min_element(std::begin(l_vValueMin), std::end(l_vValueMin));
-					std::vector<float64>::iterator maxValue = std::max_element(std::begin(l_vValueMax), std::end(l_vValueMax));
+					std::vector<float64>::iterator minValue = std::min_element(l_vValueMin.begin(), l_vValueMin.end());
+					std::vector<float64>::iterator maxValue = std::max_element(l_vValueMax.begin(), l_vValueMax.end());
 
-					m_oChannelDisplay[0]->setGlobalBestFitParameters2(*minValue, *maxValue); // normal chns
-					m_oChannelDisplay[1]->setGlobalBestFitParameters2(*minValue, *maxValue); // multiview
+					// @todo some robust & fast estimate of a high quantile instead of max/min...
+					const float64 f64Margin = 0.2 * (*maxValue - *minValue);
+
+					if( *minValue < m_vPreviousValueMin[0]-f64Margin || *maxValue > m_vPreviousValueMax[0] + f64Margin ||
+						*minValue > m_vPreviousValueMin[0]+f64Margin || *maxValue < m_vPreviousValueMax[0] - f64Margin)
+					{
+						m_oChannelDisplay[0]->setGlobalBestFitParameters2(*minValue, *maxValue); // normal chns
+						m_oChannelDisplay[1]->setGlobalBestFitParameters2(*minValue, *maxValue); // multiview
+
+						m_vPreviousValueMin[0] = *minValue;
+						m_vPreviousValueMax[0] = *maxValue;
+					}
 				} 
 				else if(m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None) 
 				{
@@ -659,18 +673,31 @@ namespace OpenViBEPlugins
 					vector<float64> l_vValueMax;
 					m_oChannelDisplay[0]->updateDisplayedValueRange(l_vValueRange,l_vValueMin,l_vValueMax);
 
+					bool updated = false;
 					for(uint32 i=0;i<l_vValueMin.size();i++) 
 					{
-						m_oChannelDisplay[0]->setLocalManualParameters(i, l_vValueMin[i], l_vValueMax[i]);
+						const float64 f64Margin = 0.2 * (l_vValueMax[i] - l_vValueMin[i]);
+
+						if(l_vValueMin[i] < m_vPreviousValueMin[i]-f64Margin || l_vValueMax[i] > m_vPreviousValueMax[i]+f64Margin || 
+							l_vValueMin[i] > m_vPreviousValueMin[i]+f64Margin || l_vValueMax[i] < m_vPreviousValueMax[i]-f64Margin)
+						{
+							m_oChannelDisplay[0]->setLocalManualParameters(i, l_vValueMin[i], l_vValueMax[i]);
+							updated = true;
+						}
 					}
-					m_oChannelDisplay[0]->updateDisplayParameters();
+					if(updated)
+					{
+						m_oChannelDisplay[0]->updateDisplayParameters();
+						m_vPreviousValueMax = l_vValueMax;
+						m_vPreviousValueMin = l_vValueMin;
+					}
 
 					// For multiview, we take the maxes of the involved signals
-					if(m_bMultiViewEnabled)
+					if(m_bMultiViewEnabled && updated)
 					{
 						m_oChannelDisplay[1]->updateDisplayedValueRange(l_vValueRange,l_vValueMin,l_vValueMax);
-						std::vector<float64>::iterator minValue = std::min_element(std::begin(l_vValueMin), std::end(l_vValueMin));
-						std::vector<float64>::iterator maxValue = std::max_element(std::begin(l_vValueMax), std::end(l_vValueMax));
+						std::vector<float64>::iterator minValue = std::min_element(l_vValueMin.begin(), l_vValueMin.end());
+						std::vector<float64>::iterator maxValue = std::max_element(l_vValueMax.begin(), l_vValueMax.end());
 						m_oChannelDisplay[1]->setLocalManualParameters(0, *minValue, *maxValue);
 						m_oChannelDisplay[1]->updateDisplayParameters();
 					}
@@ -927,6 +954,7 @@ namespace OpenViBEPlugins
 		{
 			m_bVerticalScaleChanged = true;
 			m_bAutoVerticalScale = ::gtk_toggle_button_get_active(pToggleButton) != 0;
+			m_bVerticalScaleRefresh = true;
 
 //			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), !m_bAutoVerticalScale);
 //			::gtk_spin_button_set_value(GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), m_f64LargestDisplayedValueRange);
@@ -938,12 +966,14 @@ namespace OpenViBEPlugins
 		{
 			m_bVerticalScaleChanged = true;
 			m_f64CustomVerticalScaleValue = ::gtk_spin_button_get_value(pSpinButton);
+			m_bVerticalScaleRefresh = true;
 			return true;
 		}
 
 		boolean CSignalDisplayView::onCustomVerticalOffsetChangedCB(::GtkSpinButton *pSpinButton)
 		{
 			m_bVerticalScaleChanged = true;
+			m_bVerticalScaleRefresh = true;
 			m_f64CustomVerticalOffset = ::gtk_spin_button_get_value(pSpinButton);
 			return true;
 		}

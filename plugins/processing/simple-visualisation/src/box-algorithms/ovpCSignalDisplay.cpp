@@ -40,7 +40,11 @@ namespace OpenViBEPlugins
 			//retrieve settings
 			CString l_sTimeScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 			CString l_sDisplayModeSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-			OpenViBE::boolean l_bIsMultiview=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+			m_f64RefreshInterval=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+			if(m_f64RefreshInterval<0) {
+				m_f64RefreshInterval = 0;
+			}
+
 			CString l_sManualVerticalScaleSettingValue="false";
 			CString l_sVerticalScaleSettingValue="100.";
 			CString l_sVerticalOffset ="0.0";
@@ -137,7 +141,7 @@ namespace OpenViBEPlugins
 			}
 
 			const uint64 l_ui64TimeNow = getPlayerContext().getCurrentTime();
-			if(m_ui64LastScaleRefreshTime == 0 || l_ui64TimeNow - m_ui64LastScaleRefreshTime > ITimeArithmetics::secondsToTime(5.0)) 
+			if(m_ui64LastScaleRefreshTime == 0 || l_ui64TimeNow - m_ui64LastScaleRefreshTime > ITimeArithmetics::secondsToTime(m_f64RefreshInterval)) 
 			{
 				((CSignalDisplayView*)m_pSignalDisplayView)->refreshScale();
 				m_ui64LastScaleRefreshTime = l_ui64TimeNow;

@@ -261,7 +261,6 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 m_f64CustomVerticalOffset;
 			//@}
 
-
 			//! Flag set to true when auto translation is on (center signal in his spot)
             OpenViBE::boolean m_bAutoTranslation;
 
@@ -304,6 +303,9 @@ namespace OpenViBEPlugins
 			OpenViBE::CIdentifier m_oScalingMode;
 
 			static const char* m_vScalingModes[];
+
+			std::vector<OpenViBE::float64> m_vPreviousValueMin;
+			std::vector<OpenViBE::float64> m_vPreviousValueMax;
 		};
 	}
 }

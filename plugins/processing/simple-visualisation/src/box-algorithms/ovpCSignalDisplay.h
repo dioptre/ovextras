@@ -50,6 +50,8 @@ namespace OpenViBEPlugins
 
 			OpenViBE::uint64 m_ui64LastScaleRefreshTime;
 
+			OpenViBE::float64 m_f64RefreshInterval;
+
 		};
 
 		/**
@@ -80,7 +82,7 @@ namespace OpenViBEPlugins
 				// @todo reorder, clean
 				rPrototype.addSetting("Time Scale", OV_TypeId_Float, "10");
 				rPrototype.addSetting("Display Mode", OVP_TypeId_SignalDisplayMode, "Scan");
-                rPrototype.addSetting("UNUSED1", OV_TypeId_Boolean, "false");
+                rPrototype.addSetting("Scale refresh interval (secs)", OV_TypeId_Float, "5");
 				rPrototype.addSetting("UNUSED2", OV_TypeId_Boolean, "false");
 				rPrototype.addSetting("Vertical Scale",OV_TypeId_Float, "100");
 				rPrototype.addSetting("Vertical Offset",OV_TypeId_Float, "0");
