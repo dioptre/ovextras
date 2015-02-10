@@ -737,13 +737,24 @@ namespace OpenViBEPlugins
 					if(m_pBufferDatabase->m_ui64TotalStep == 0)
 					{
 						//error
+						std::cout << "Error: Buffer database m_ui64TotalStep is 0\n";
 					}
 					else
 					{
 						m_ui64LeftmostDisplayedTime += m_pBufferDatabase->m_ui64TotalStep;
 
+						uint64 l_ui64UpperLimit = 0;
+						if(m_pBufferDatabase->m_ui64BufferStep <= m_pBufferDatabase->m_oStartTime[0]) // This bubblegum-patch test is here for uint, should be an assert
+						{
+							l_ui64UpperLimit = m_pBufferDatabase->m_oStartTime[0] - m_pBufferDatabase->m_ui64BufferStep;
+						}
+						else
+						{
+							std::cout << "Error: Buffer step is larger than the start time\n";
+						}
+
 						//while there is time to catch up
-						while(m_ui64LeftmostDisplayedTime < (m_pBufferDatabase->m_oStartTime[0] - m_pBufferDatabase->m_ui64BufferStep))
+						while(m_ui64LeftmostDisplayedTime < l_ui64UpperLimit)
 						{
 							m_ui64LeftmostDisplayedTime += m_pBufferDatabase->m_ui64TotalStep;
 						}

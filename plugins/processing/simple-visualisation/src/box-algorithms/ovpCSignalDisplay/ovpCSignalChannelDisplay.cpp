@@ -654,6 +654,8 @@ void CSignalChannelDisplay::setLocalManualParameters(const uint32 subChannelInde
 
 	m_vMaximumBottomMargin[subChannelIndex] = f64Min;
 	m_vMinimumBottomMargin[subChannelIndex] = f64Min - f64Margin;
+
+//	std::cout << "Scaling to [" <<  f64Min << "," << f64Max << "]S\n";
 }
 
 

@@ -143,6 +143,7 @@ namespace OpenViBEPlugins
 			const uint64 l_ui64TimeNow = getPlayerContext().getCurrentTime();
 			if(m_ui64LastScaleRefreshTime == 0 || l_ui64TimeNow - m_ui64LastScaleRefreshTime > ITimeArithmetics::secondsToTime(m_f64RefreshInterval)) 
 			{
+//				this->getLogManager() << LogLevel_Info << "Refresh at " << ITimeArithmetics::timeToSeconds(l_ui64TimeNow) << "s \n";
 				((CSignalDisplayView*)m_pSignalDisplayView)->refreshScale();
 				m_ui64LastScaleRefreshTime = l_ui64TimeNow;
 			}

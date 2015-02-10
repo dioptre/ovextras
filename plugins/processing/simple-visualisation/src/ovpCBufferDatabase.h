@@ -108,6 +108,11 @@ namespace OpenViBEPlugins
 			Computed once, but not constant when sampling frequency is not a multiple of buffer size!*/
 			OpenViBE::uint64 m_ui64BufferStep;
 
+			// When did the last inserted buffer end
+			OpenViBE::uint64 m_ui64LastBufferEndTime;
+			// Did we print a warning about noncontinuity?
+			OpenViBE::boolean m_bWarningPrinted;
+
 			//! Pointer to the drawable object to update (if needed)
 			CSignalDisplayDrawable * m_pDrawable;
 

@@ -1,9 +1,9 @@
 #include "ovpCBufferDatabase.h"
 
 #include <system/ovCMemory.h>
+#include <openvibe/ovITimeArithmetics.h>
 
 #include <algorithm>
-
 #include <cmath>
 #include <cstring>
 
@@ -31,6 +31,8 @@ CBufferDatabase::CBufferDatabase(OpenViBEToolkit::TBoxAlgorithm<Plugins::IBoxAlg
 	,m_ui64BufferDuration(0)
 	,m_ui64TotalStep(0)
 	,m_ui64BufferStep(0)
+	,m_ui64LastBufferEndTime(0)
+	,m_bWarningPrinted(false)
 	,m_pDrawable(NULL)
 	,m_oParentPlugin(oPlugin)
 	,m_bError(false)
@@ -327,6 +329,18 @@ boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64Star
 		return false;
 	}
 
+	// Check for time-continuity
+	if(ui64StartTime < m_ui64LastBufferEndTime && !m_bWarningPrinted) 
+	{
+		m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Your signal does not appear to be continuous in time. "
+			<< "Previously inserted buffer ended at " << ITimeArithmetics::timeToSeconds(m_ui64LastBufferEndTime) 
+			<< "s, the current starts at " << ITimeArithmetics::timeToSeconds(ui64StartTime)
+			<< "s. The display may be incorrect.\n";
+		m_bWarningPrinted = true;
+	}
+	m_ui64LastBufferEndTime = ui64EndTime;
+
+
 	//if this the first buffer, perform some precomputations
 	if(m_bFirstBufferReceived == false)
 	{
@@ -346,7 +360,15 @@ boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64Star
 		// @ FIXME this is not the frequency that is a property of the signal stream. Fix. Computing it like this
 		// makes sense for matrix stream, but makes the number given by signal display useless for debugging the 
 		// case where the rate specced in signal stream is e.g. 0 for some reason.
-		m_ui32SamplingFrequency = (uint32) ( ((uint64)1<<32) * m_pDimensionSizes[1] / (m_ui64BufferDuration) );
+		const uint64 l_ui64SampleDuration = ((uint64)1<<32) * m_pDimensionSizes[1];
+		m_ui32SamplingFrequency = (uint32) ( l_ui64SampleDuration / m_ui64BufferDuration );
+
+		if(m_ui32SamplingFrequency == 0)
+		{
+			m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "The integer sampling frequency was estimated from the chunk size to be 0"
+				<< " (nSamples " << m_pDimensionSizes[1] << " / bufferLength " << ITimeArithmetics::timeToSeconds(m_ui64BufferDuration) << "s = 0). This is not supported. Forcing the rate to 1. This may lead to problems.\n";
+			m_ui32SamplingFrequency = 1;
+		}
 
 		//computes the number of buffer necessary to display the interval
 		adjustNumberOfDisplayedBuffers(-1);
@@ -377,7 +399,7 @@ boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64Star
 	}
 
 	float64* l_pBufferToWrite = NULL;
-	uint64 l_ui64NumberOfSamplesPerBuffer = m_pDimensionSizes[0] * m_pDimensionSizes[1];
+	const uint64 l_ui64NumberOfSamplesPerBuffer = m_pDimensionSizes[0] * m_pDimensionSizes[1];
 
 	//if old buffers need to be removed
 	if(m_oSampleBuffers.size() == m_ui64NumberOfBufferToDisplay)
