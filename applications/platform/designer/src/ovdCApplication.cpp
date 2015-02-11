@@ -1884,7 +1884,7 @@ OpenViBE::boolean CApplication::createPlayer(void)
 			gint res = 1;
 			if(gtk_toggle_button_get_active(m_pInitAlert) )
 			{
-				if( !(m_eCommandLineFlags&CommandLineFlag_NoGui))
+				if(!this->isNoGuiActive())
 				{
 					::GtkBuilder* l_pBuilder=gtk_builder_new(); // glade_xml_new(OVD_GUI_File, "about", NULL);
 					gtk_builder_add_from_file(l_pBuilder, OVD_GUI_File, NULL);
@@ -1902,7 +1902,7 @@ OpenViBE::boolean CApplication::createPlayer(void)
 					res=0;//No matter what happen, if the user ask for a warning on initilization we consider that we don't run the scenario
 				}
 			}
-			if(res == 0 || m_eCommandLineFlags&CommandLineFlag_NoGui)
+			if(res == 0)
 			{
 				l_pCurrentInterfacedScenario->m_oPlayerIdentifier = OV_UndefinedIdentifier;
 				l_pCurrentInterfacedScenario->m_pPlayer=NULL;
@@ -2578,4 +2578,9 @@ boolean CApplication::isLogAreaClicked()
 	}
 	else
 		return false;
+}
+
+boolean CApplication::isNoGuiActive()
+{
+	return m_eCommandLineFlags&CommandLineFlag_NoGui;
 }

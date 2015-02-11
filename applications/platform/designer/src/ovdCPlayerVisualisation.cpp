@@ -41,9 +41,10 @@ static gboolean KeyboardStimulator_KeyPressCallback(GtkWidget *widget, GdkEventK
 }
 
 
-CPlayerVisualisation::CPlayerVisualisation(const IKernelContext& rKernelContext, IVisualisationTree& rVisualisationTree, CInterfacedScenario& rInterfacedScenario) :
+CPlayerVisualisation::CPlayerVisualisation(const IKernelContext& rKernelContext, IVisualisationTree& rVisualisationTree, CApplication &rApplication, CInterfacedScenario& rInterfacedScenario) :
 	m_rKernelContext(rKernelContext),
 	m_rVisualisationTree(rVisualisationTree),
+	m_rApplication(rApplication),
 	m_rInterfacedScenario(rInterfacedScenario),
 	m_pActiveToolbarButton(NULL)
 {
@@ -259,7 +260,7 @@ void CPlayerVisualisation::init(void)
 	//show newly created widget
 	if(l_pTreeWidget != NULL && pVisualisationWidget->getType() != EVisualisationWidget_VisualisationWindow)
 	{
-		gtk_widget_show(l_pTreeWidget);
+		showWidget(l_pTreeWidget);
 	}
 
 #if 0
@@ -465,7 +466,7 @@ boolean CPlayerVisualisation::setWidget(const CIdentifier& rBoxIdentifier, ::Gtk
 	gtk_box_pack_start(l_pVBox, pWidget, TRUE, TRUE, 0);
 
 	//show vbox hierarchy
-	gtk_widget_show_all(GTK_WIDGET(l_pVBox));
+	showAllWidget(GTK_WIDGET(l_pVBox));
 
 	//parent box at the appropriate location
 	parentWidgetBox(l_pVisualisationWidget, l_pVBox);
@@ -525,7 +526,7 @@ boolean CPlayerVisualisation::parentWidgetBox(IVisualisationWidget* pWidget, ::G
 		if(l_bMute==false)
 		{
 			//show window (and realize widget in doing so)
-			gtk_widget_show(l_pWindow);
+			showWidget(l_pWindow);
 		}
 	}
 	else //retrieve parent widget in which to insert current widget
@@ -610,7 +611,7 @@ boolean CPlayerVisualisation::parentWidgetBox(IVisualisationWidget* pWidget, ::G
 					m_rVisualisationTree.getPointerValueFromTreeIter(&l_oWindowIter, l_pWindowWidget, EVisualisationTreeColumn_PointerWidget);
 
 					//show parent window
-					gtk_widget_show(GTK_WIDGET(l_pWindowWidget));
+					showWidget(GTK_WIDGET(l_pWindowWidget));
 					// gtk_widget_realize(GTK_WIDGET(l_pWindowWidget));
 					// gdk_flush();
 
@@ -633,19 +634,19 @@ void CPlayerVisualisation::showTopLevelWindows(void)
 
 	for(unsigned int i=0; i<m_vWindows.size(); i++)
 	{
-		gtk_widget_show(GTK_WIDGET(m_vWindows[i]));
+		showWidget(GTK_WIDGET(m_vWindows[i]));
 	}
 	if(m_pActiveToolbarButton != NULL)
 	{
 		//show active toolbar
-		gtk_widget_show(m_mToolbars[m_pActiveToolbarButton]);
+		showWidget(m_mToolbars[m_pActiveToolbarButton]);
 	}
 	std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
 	while(it!=m_mPlugins.end())
 	{
 		if((GTK_IS_WIDGET(it->second.m_pWidget))&&(!it->second.m_Muted))
 		{
-			gtk_widget_show(it->second.m_pWidget);
+			showWidget(it->second.m_pWidget);
 		}
 		it++;
 	}
@@ -655,7 +656,7 @@ void CPlayerVisualisation::showTopLevelWindows(void)
 void CPlayerVisualisation::showSelectedWindow(OpenViBE::uint32 ui32Index)
 {
 	// printf("Show %p\n", GTK_WIDGET(m_vWindows[ui32Index]));
-	gtk_widget_show(GTK_WIDGET(m_vWindows[ui32Index]));
+	showWidget(GTK_WIDGET(m_vWindows[ui32Index]));
 	boolean l_bShowWindow = false;
 
 	// Show widgets which are in the window (unless muted)
@@ -668,7 +669,7 @@ void CPlayerVisualisation::showSelectedWindow(OpenViBE::uint32 ui32Index)
 			if(l_pTopLevelWidget == GTK_WIDGET(m_vWindows[ui32Index]))
 			{
 				// printf("ShowPlugin %p\n", it->second.m_pWidget);
-				gtk_widget_show(it->second.m_pWidget);
+				showWidget(it->second.m_pWidget);
 				l_bShowWindow = true;
 			}
 		}
@@ -1019,7 +1020,7 @@ boolean CPlayerVisualisation::toggleToolbarCB(::GtkToggleButton* pToolbarButton)
 		}
 		else //showing active toolbar
 		{
-			gtk_widget_show(l_pToolbar);
+			showWidget(l_pToolbar);
 		}
 	}
 	else //a new toolbar is to be shown
@@ -1046,7 +1047,7 @@ boolean CPlayerVisualisation::toggleToolbarCB(::GtkToggleButton* pToolbarButton)
 		}
 */
 		//show new toolbar
-		gtk_widget_show(l_pToolbar);
+		showWidget(l_pToolbar);
 
 		//update active toolbar button
 		m_pActiveToolbarButton = pToolbarButton;
@@ -1084,4 +1085,22 @@ boolean CPlayerVisualisation::deleteToolbarCB(GtkWidget* pToolbarWidget)
 	m_pActiveToolbarButton = NULL;
 
 	return TRUE;
+}
+
+void CPlayerVisualisation::showWidget(GtkWidget *pWidget)
+{
+	//We show widget only if no gui is off
+	if(!m_rApplication.isNoGuiActive())
+	{
+		gtk_widget_show(pWidget);
+	}
+}
+
+void CPlayerVisualisation::showAllWidget(GtkWidget *pWidget)
+{
+	//We show widget only if no gui is off
+	if(!m_rApplication.isNoGuiActive())
+	{
+		gtk_widget_show_all(pWidget);
+	}
 }

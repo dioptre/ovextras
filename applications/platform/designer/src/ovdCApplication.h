@@ -162,6 +162,8 @@ namespace OpenViBEDesigner
 		// to know which GtkEntry should be fu=ocused on when doing CTRL+F
 		OpenViBE::boolean isLogAreaClicked();
 
+		OpenViBE::boolean isNoGuiActive();
+
 	public:
 
 		const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
