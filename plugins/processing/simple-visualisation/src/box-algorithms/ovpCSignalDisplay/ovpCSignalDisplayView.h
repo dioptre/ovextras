@@ -55,13 +55,15 @@ namespace OpenViBEPlugins
 			 */
 			CSignalDisplayView(
 				CBufferDatabase& rBufferDatabase,
-				OpenViBE::float64 f64TimeScale,
-			//	OpenViBE::boolean l_bIsMultiview,
 				OpenViBE::CIdentifier oDisplayMode,
-				OpenViBE::CIdentifier ui64ScalingMode,
-				OpenViBE::boolean bAutoVerticalScale,
+				OpenViBE::CIdentifier oScalingMode,
 				OpenViBE::float64 f64VerticalScale,
-				OpenViBE::float64 f64VerticalOffset);
+				OpenViBE::float64 f64VerticalOffset,
+				OpenViBE::float64 f64TimeScale,
+				OpenViBE::boolean l_bHorizontalRuler,
+				OpenViBE::boolean l_bVerticalRuler,
+				OpenViBE::boolean l_bIsMultiview
+			);
 
 			/**
 			 * \brief Base constructor
@@ -249,10 +251,6 @@ namespace OpenViBEPlugins
 			//@{
 			//! Flag set to true when vertical scale mode or value changes
 			OpenViBE::boolean m_bVerticalScaleChanged;
-			//! Auto vertical scale radio button
-			GtkRadioButton* m_pAutoVerticalScaleRadioButton;
-			//! Flag set to true when auto vertical scale is toggled on
-			OpenViBE::boolean m_bAutoVerticalScale;
 			//
 			OpenViBE::boolean m_bVerticalScaleRefresh;
 			//! Value of custom vertical scale
@@ -263,9 +261,6 @@ namespace OpenViBEPlugins
 
 			//! Flag set to true when auto translation is on (center signal in his spot)
             OpenViBE::boolean m_bAutoTranslation;
-
-			//! Flage set to true when eeg settings mode is on 
-			OpenViBE::boolean m_bIsEEGSignal;
 
 			//! The database that contains the information to use to draw the signals
 			CBufferDatabase * m_pBufferDatabase;

@@ -17,6 +17,7 @@
 #include <cmath>
 
 #include <vector>
+#include <map>
 
 namespace OpenViBEPlugins
 {
@@ -261,8 +262,9 @@ namespace OpenViBEPlugins
 		void drawZeroLine();
 
 	public:
-        //! Vector of Left rulers displaying signal scale
-        std::vector<CSignalDisplayLeftRuler*> m_oLeftRuler;
+        //! Vector of Left rulers displaying signal scale. Indexed by channel id. @note This is a map as the active number of channels 
+		// may change by the toolbar whereas this total set of rulers doesn't...
+        std::map<OpenViBE::uint32, CSignalDisplayLeftRuler* > m_oLeftRuler;
 		//! The drawing area where the signal is to be drawn
 		GtkWidget * m_pDrawingArea;
 		//! Drawing area dimensions, in pixels

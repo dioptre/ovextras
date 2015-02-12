@@ -32,44 +32,44 @@ namespace OpenViBEPlugins
 
 		boolean CSignalDisplay::initialize()
 		{
+			//@fixme should use signal decoder for a signal and really use the sampling rate from that
 			m_oStreamedMatrixDecoder.initialize(*this,0);
 			m_oStimulationDecoder.initialize(*this,1);
 
 			m_pBufferDatabase = new CBufferDatabase(*this);
 
 			//retrieve settings
-			CString l_sTimeScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-			CString l_sDisplayModeSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-			m_f64RefreshInterval=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+			CIdentifier l_oDisplayMode                   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+			CIdentifier l_oScalingMode                   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+			m_f64RefreshInterval                         = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+			float64 l_f64VerticalScale                   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+			float64 l_f64VerticalOffset                  = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+			float64 l_f64TimeScale                       = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
+			boolean l_bHorizontalRuler                   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
+			boolean l_bVerticalRuler                     = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 7);
+			boolean l_bMultiview                         = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 8);
+
 			if(m_f64RefreshInterval<0) {
 				m_f64RefreshInterval = 0;
 			}
+			if(l_f64TimeScale<0.01) {
+				l_f64TimeScale = 0.01;
+			}
 
-			CString l_sManualVerticalScaleSettingValue="false";
-			CString l_sVerticalScaleSettingValue="100.";
-			CString l_sVerticalOffset ="0.0";
-			CString l_sScalingMode = getTypeManager().getEnumerationEntryNameFromValue(OVP_TypeId_SignalDisplayMode, OVP_TypeId_SignalDisplayScaling_PerChannel);
-
-			if(this->getStaticBoxContext().getSettingCount() > 3) l_sManualVerticalScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
-			if(this->getStaticBoxContext().getSettingCount() > 4) l_sVerticalScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
-			if(this->getStaticBoxContext().getSettingCount() > 5) l_sVerticalOffset=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
-			if(this->getStaticBoxContext().getSettingCount() > 6) l_sScalingMode=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
-
-
-			this->getLogManager() << LogLevel_Debug << "l_sManualVerticalScaleSettingValue=" << l_sManualVerticalScaleSettingValue << "\n";
-			this->getLogManager() << LogLevel_Debug << "l_sVerticalScaleSettingValue=" << l_sVerticalScaleSettingValue << ", offset " << l_sVerticalOffset << "\n";
-			this->getLogManager() << LogLevel_Info << "l_sScalingMode=" << l_sScalingMode << "\n";
+			this->getLogManager() << LogLevel_Debug << "l_sVerticalScale=" << l_f64VerticalScale << ", offset " << l_f64VerticalOffset << "\n";
+			this->getLogManager() << LogLevel_Info << "l_sScalingMode=" << l_oScalingMode << "\n";
 
 			//create GUI
 			m_pSignalDisplayView = new CSignalDisplayView(
 				*m_pBufferDatabase,
-				::atof(l_sTimeScaleSettingValue),
-	//			l_bIsMultiview,
-				CIdentifier(getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_SignalDisplayMode, l_sDisplayModeSettingValue)),
-				CIdentifier(getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_SignalDisplayScaling, l_sScalingMode)),
-				!this->getConfigurationManager().expandAsBoolean(l_sManualVerticalScaleSettingValue),
-				::atof(l_sVerticalScaleSettingValue),
-				::atof(l_sVerticalOffset)
+				l_oDisplayMode,
+				l_oScalingMode,
+				l_f64VerticalScale,
+				l_f64VerticalOffset,
+				l_f64TimeScale,
+				l_bHorizontalRuler,
+				l_bVerticalRuler,
+				l_bMultiview
 				);
 
 			m_pBufferDatabase->setDrawable(m_pSignalDisplayView);

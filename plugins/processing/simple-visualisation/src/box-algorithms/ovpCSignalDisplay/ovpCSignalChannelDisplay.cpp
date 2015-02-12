@@ -71,11 +71,12 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 
 CSignalChannelDisplay::~CSignalChannelDisplay()
 {
-    for(uint32 i = 0; i<m_oLeftRuler.size(); i++)
+	std::map<uint32, CSignalDisplayLeftRuler* >::const_iterator it = m_oLeftRuler.begin();
+    for( ; it != m_oLeftRuler.end(); it++)
     {
-            delete m_oLeftRuler[i];
-            m_oLeftRuler[i]=NULL;
+            delete it->second;
     }
+	m_oLeftRuler.clear();
 
 /*  m_vLocalMaximum.clear();
     m_vLocalMinimum.clear();
@@ -89,8 +90,13 @@ CSignalChannelDisplay::~CSignalChannelDisplay()
 }
 
 GtkWidget* CSignalChannelDisplay::getRulerWidget(uint32 ui32Index) const
-{
-    return m_oLeftRuler[ui32Index]->getWidget();
+{		
+	std::map<uint32, CSignalDisplayLeftRuler* >::const_iterator it = m_oLeftRuler.find(ui32Index);
+	if(it != m_oLeftRuler.end() && it->second)
+	{
+		return it->second->getWidget();
+	}
+	return NULL;
 }
 
 GtkWidget* CSignalChannelDisplay::getSignalDisplayWidget() const
@@ -143,7 +149,7 @@ void CSignalChannelDisplay::resetChannelList()
 void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
 {
 	m_oChannelList.push_back(ui32Channel);
-    m_oLeftRuler.push_back(new CSignalDisplayLeftRuler(m_i32LeftRulerWidthRequest, m_i32LeftRulerHeightRequest));
+    m_oLeftRuler[ui32Channel] = new CSignalDisplayLeftRuler(m_i32LeftRulerWidthRequest, m_i32LeftRulerHeightRequest);
     m_vLocalMaximum.push_back(-DBL_MAX);
     m_vLocalMinimum.push_back(DBL_MAX);
     m_vTranslateY.push_back(0);
@@ -154,6 +160,7 @@ void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
     m_vScaleY.push_back(1);
 }
 
+// Adds a channel, but no ruler
 void CSignalChannelDisplay::addChannelList(uint32 ui32Channel)
 {
 	m_oChannelList.push_back(ui32Channel);
@@ -341,7 +348,7 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 
 		if(!m_bMultiView)
 		{
-			m_oLeftRuler[i]->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
+			m_oLeftRuler[m_oChannelList[i]]->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
 		}
     }
 
@@ -1029,9 +1036,13 @@ void drawingAreaClickedEventCallback(GtkWidget *widget, GdkEventButton *pEvent, 
 		m_pChannelDisplay->redrawAllAtNextRefresh();
 		if(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window) gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window, NULL, true);
 
-        for(uint32 i = 0; i<m_pChannelDisplay->m_oLeftRuler.size();i++)
+		std::map<uint32, CSignalDisplayLeftRuler* >::const_iterator it = m_pChannelDisplay->m_oLeftRuler.begin();
+        for( ; it != m_pChannelDisplay->m_oLeftRuler.end();it++)
         {
-            if(GTK_WIDGET(m_pChannelDisplay->m_oLeftRuler[i]->getWidget())->window) gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_oLeftRuler[i]->getWidget())->window, NULL, true);
+            if(GTK_WIDGET(it->second->getWidget())->window) 
+			{
+				gdk_window_invalidate_rect(GTK_WIDGET(it->second->getWidget())->window, NULL, true);
+			}
         }
 	}
 }
