@@ -10,14 +10,6 @@
 #include <iostream>
 #include <fstream>
 
-// TODO:
-// - please move the identifier definitions in ovp_defines.h
-// - please include your desciptor in ovp_main.cpp
-
-//#define OVP_ClassId_BoxAlgorithm_CSVFileWriter     OpenViBE::CIdentifier(0x2C9312F1, 0x2D6613E5)
-//#define OVP_ClassId_BoxAlgorithm_CSVFileWriterDesc OpenViBE::CIdentifier(0x65075FF7, 0x2B555E97)
-
-
 namespace OpenViBEPlugins
 {
 	namespace FileIO
@@ -53,27 +45,11 @@ namespace OpenViBEPlugins
 
 			OpenViBE::uint64 m_ui64SampleCount;
 
-			// OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* > ip_pMemoryBuffer;
-			// OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pMatrix;
-			// OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pMinMaxFrequencyBand;
-			// OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > op_ui64SamplingFrequency;
-			// OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > op_pStimulationSet;
-
 		};
 
 		class CBoxAlgorithmCSVFileWriterListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
 		{
 		public:
-
-			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
-			{
-				// @note this doesn't currently work as ConnectionEditor replaces the value set here by the gtk widget text field contents				
-				OpenViBE::CIdentifier l_oTypeIdentifier;
-				rBox.getInputType(ui32Index, l_oTypeIdentifier);
-				rBox.setInputName(ui32Index, this->getTypeManager().getTypeName(l_oTypeIdentifier));
-
-				return true;
-			}
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 		};
@@ -101,7 +77,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addInput  ("Input signal",  OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addInput  ("Input stream",     OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addSetting("Filename",         OV_TypeId_Filename, "record-[$core{date}-$core{time}].csv");
 				rBoxAlgorithmPrototype.addSetting("Column separator", OV_TypeId_String, ";");
 				rBoxAlgorithmPrototype.addSetting("Precision",        OV_TypeId_Integer, "10");

@@ -67,15 +67,15 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 	m_sSeparator=l_sSeparator.toASCIIString();
 	m_bNotUseTimer= FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 	m_ui32SamplesPerBuffer=1;
-	if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation))
+	if(m_oTypeIdentifier == OV_TypeId_ChannelLocalisation)
 	{
 		CString l_sParam;
 		this->getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(3,l_sParam);
 		m_ui32ChannelNumberPerBuffer=static_cast<uint32>(atoi((const char*)l_sParam));
 
 	}
-	else if(!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Stimulations)
-			&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Spectrum))
+	else if(m_oTypeIdentifier != OV_TypeId_Stimulations
+			&& m_oTypeIdentifier != OV_TypeId_Spectrum)
 	{
 		CString l_sParam;
 		this->getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(3,l_sParam);
@@ -103,20 +103,20 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 	m_vHeaderFile=split(std::string(l_pLine),m_sSeparator);
 	m_ui32NbColumn=m_vHeaderFile.size();
 
-	if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation))
+	if(m_oTypeIdentifier == OV_TypeId_ChannelLocalisation)
 	{
 		m_pAlgorithmEncoder= new OpenViBEToolkit::TChannelLocalisationEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		//number of column without the column contains the dynamic parameter
 		//m_ui32NbColumn-=1;
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_channelLocalisation;
 	}
-	else if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_FeatureVector))
+	else if(m_oTypeIdentifier == OV_TypeId_FeatureVector)
 	{
 		m_pAlgorithmEncoder=new OpenViBEToolkit::TFeatureVectorEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_featureVector;
 		m_ui32SamplesPerBuffer = 1;
 	}
-	else if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Spectrum))
+	else if(m_oTypeIdentifier == OV_TypeId_Spectrum)
 	{
 		m_pAlgorithmEncoder=new OpenViBEToolkit::TSpectrumEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_spectrum;
@@ -124,7 +124,7 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 		//number of column without columns contains min max frequency bands parameters
 		m_ui32NbColumn-=2;
 	}
-	else if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Signal))
+	else if(m_oTypeIdentifier == OV_TypeId_Signal)
 	{
 		m_pAlgorithmEncoder=new OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_signal;
@@ -176,12 +176,12 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 		//number of column without the column contains the sampling rate parameters
 		m_ui32NbColumn-=1;
 	}
-	else if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_StreamedMatrix))
+	else if(m_oTypeIdentifier == OV_TypeId_StreamedMatrix)
 	{
 		m_pAlgorithmEncoder=new OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_streamedMatrix;
 	}
-	else if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Stimulations))
+	else if(m_oTypeIdentifier == OV_TypeId_Stimulations)
 	{
 		m_pAlgorithmEncoder=new OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmCSVFileReader >(*this,0);
 		m_fpRealProcess=&CBoxAlgorithmCSVFileReader::process_stimulation;
@@ -237,7 +237,7 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 		{
 			m_vLastLineSplit=split(std::string(l_pLine),m_sSeparator);
 			l_ui32NbSamples++;
-			if(m_bNotUseTimer && getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Signal))
+			if(m_bNotUseTimer && m_oTypeIdentifier == OV_TypeId_Signal)
 			{
 				std::stringstream l_sNextTime;
 				l_sNextTime<<m_f64NextTime;
@@ -245,14 +245,14 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 				m_f64NextTime+=1./m_ui64SamplingRate;
 			}
 
-			if(!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Stimulations)
-					&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Spectrum)
-					&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation))
+			if(m_oTypeIdentifier != OV_TypeId_Stimulations
+					&& m_oTypeIdentifier != OV_TypeId_Spectrum
+					&& m_oTypeIdentifier != OV_TypeId_ChannelLocalisation)
 			{
 				m_vDataMatrix.push_back(m_vLastLineSplit);
 			}
 		}
-		if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier, OV_TypeId_StreamedMatrix) 
+		if(m_oTypeIdentifier == OV_TypeId_StreamedMatrix
 			&& feof(m_pFile) && l_ui32NbSamples<m_ui32SamplesPerBuffer)
 		{
 			// Last chunk will be partial, zero the output matrix... 
@@ -264,9 +264,9 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 	bool l_bSomethingToSend= (m_vLastLineSplit.size()!=0)
 			&& atof(m_vLastLineSplit[0].c_str())<l_f64currentTime;
 
-	if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Stimulations)
-			|| this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation)
-			|| this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Spectrum))
+	if(m_oTypeIdentifier == OV_TypeId_Stimulations
+			|| m_oTypeIdentifier == OV_TypeId_ChannelLocalisation
+			|| m_oTypeIdentifier == OV_TypeId_Spectrum)
 	{
 		while(m_vLastLineSplit.size()!=0 && atof(m_vLastLineSplit[0].c_str())<l_f64currentTime)
 		{
@@ -294,9 +294,9 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 		{
 			return false;
 		}
-		if(!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Spectrum)
-				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation)
-				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_FeatureVector))
+		if(m_oTypeIdentifier != OV_TypeId_Spectrum
+				&& m_oTypeIdentifier != OV_TypeId_ChannelLocalisation
+				&& m_oTypeIdentifier != OV_TypeId_FeatureVector)
 		{
 			//get the date of the first block samples to send
 			const uint64 l_ui64StartTime=ITimeArithmetics::secondsToTime(atof(m_vDataMatrix[0][0].c_str()));
@@ -305,9 +305,9 @@ boolean CBoxAlgorithmCSVFileReader::process(void)
 		}
 
 		//for the stimulation, the line contents in m_vLastLineSplit isn't processed.
-		if(!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Stimulations)
-				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_Spectrum)
-				&&!this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier,OV_TypeId_ChannelLocalisation))
+		if(m_oTypeIdentifier != OV_TypeId_Stimulations
+				&& m_oTypeIdentifier != OV_TypeId_Spectrum
+				&& m_oTypeIdentifier != OV_TypeId_ChannelLocalisation)
 		{
 			m_vLastLineSplit.clear();
 		}
