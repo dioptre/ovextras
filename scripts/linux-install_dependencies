@@ -369,9 +369,9 @@ if [[ ! -e "$ov_target_folder_hit/no-native-packages.hit" ]]; then
 	if [[ "`grep -E 'Ubuntu|LinuxMint' /etc/lsb-release 2> /dev/null`" != "" || "`grep -E 'Raspbian' /etc/os-release 2> /dev/null`" != "" || "`grep Debian /etc/issue 2> /dev/null`" != "" ]]; then
 		ov_native_package_installed=true
 		ov_native_package_log_file="$ov_target_folder_log/native-packages.log"
-		if [[ "`grep -E '14.04|13.10' /etc/lsb-release 2> /dev/null`" != "" ]]; then
+		if [[ "`grep -E '14.04|13.10|14.10' /etc/lsb-release 2> /dev/null`" != "" ]]; then
 			# at the time of writing this, there was a conflict between libogre-dev and libboost-thread-dev dependencies in 13.10 and 14.04
-			echo "  Ubuntu 13.10 or 14.04 detected, suggesting specific set of packages..."
+			echo "  Ubuntu 13.10, 14.04 or 14.10 detected, suggesting specific set of packages..."
 			ov_lib_ogre_dev=libogre-1.8-dev
 		else
 			ov_lib_ogre_dev=libogre-dev
