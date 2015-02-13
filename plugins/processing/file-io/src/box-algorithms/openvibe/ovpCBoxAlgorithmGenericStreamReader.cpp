@@ -138,6 +138,7 @@ boolean CBoxAlgorithmGenericStreamReader::process(void)
 
 EBML::boolean CBoxAlgorithmGenericStreamReader::isMasterChild(const EBML::CIdentifier& rIdentifier)
 {
+	if(rIdentifier==EBML_Identifier_Header                        ) return true;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header              ) return true;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header_Compression  ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header_StreamType  ) return false;
