@@ -1,3 +1,5 @@
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "ovpCBoxAlgorithmMouseTracking.h"
 
 #include <openvibe/ovITimeArithmetics.h>
@@ -162,3 +164,5 @@ void motion_event_handler(GtkWidget* widget, GdkEventMotion* event, gpointer dat
 }
 
 
+
+#endif

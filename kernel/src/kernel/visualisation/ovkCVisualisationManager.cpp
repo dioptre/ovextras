@@ -2,10 +2,12 @@
 #include "ovkCVisualisationManager.h"
 #include "../ovkGtkOVCustom.h"
 
-
 #if defined(TARGET_HAS_ThirdPartyOgre3D)
 #include "../player/ovkCOgreVisualisation.h"
 #endif
+
+
+#if defined(TARGET_HAS_ThirdPartyGTK)
 
 #if defined TARGET_OS_Windows
 #  include <gdk/gdkwin32.h>
@@ -16,6 +18,8 @@
 #  include <gdk/gdkx.h>
 #  undef Cursor
 #else
+#endif
+
 #endif
 
 using namespace std;
@@ -48,11 +52,15 @@ CVisualisationManager::CVisualisationManager(const IKernelContext& rKernelContex
 
 CVisualisationManager::~CVisualisationManager()
 {
+	
+#if defined(TARGET_HAS_ThirdPartyGTK)
 	if(m_pPrimaryRenderWindowWidget != NULL)
 	{
 		//destroy Gtk widget only - the primary RenderWindow it contains will be deleted by Ogre
 		gtk_widget_destroy(GTK_WIDGET(m_pPrimaryRenderWindowWidget));
 	}
+#endif
+
 #if defined(TARGET_HAS_ThirdPartyOgre3D)
 	delete m_pOgreVisualisation;
 #endif
@@ -88,6 +96,8 @@ boolean CVisualisationManager::initialize3DContext(void)
 
 	try
 	{
+
+#if defined(TARGET_HAS_ThirdPartyGTK)
 		this->getLogManager() << LogLevel_Trace << "Creating primary render window\n";
 		//create primary render window
 		//----------------------------
@@ -100,6 +110,10 @@ boolean CVisualisationManager::initialize3DContext(void)
 		gtk_widget_show_all(m_pPrimaryRenderWindowWidget);
 		//hide window from now on
 		gtk_widget_hide_all(m_pPrimaryRenderWindowWidget);
+#else
+		this->getLogManager() << LogLevel_Info << "No GTK, visualisation context has been disabled.\n";
+		return false;
+#endif
 	}
 	catch(std::exception& e)
 	{
@@ -182,7 +196,7 @@ COgreVisualisation* CVisualisationManager::getOgreVisualisation()
 
 boolean CVisualisationManager::handleRealizeEvent(::GtkWidget* pOVCustomWidget)
 {
-#if defined(TARGET_HAS_ThirdPartyOgre3D)
+#if defined(TARGET_HAS_ThirdPartyOgre3D) && defined(TARGET_HAS_ThirdPartyGTK) 
 	//ensure Ogre could be initialized
 	if(m_pOgreVisualisation == NULL || m_pOgreVisualisation->ogreInitialized() == false)
 	{
@@ -346,3 +360,4 @@ CIdentifier CVisualisationManager::getUnusedIdentifier(void) const
 	while(it!=m_vVisualisationTree.end() || l_oResult==OV_UndefinedIdentifier);
 	return l_oResult;
 }
+

@@ -1,3 +1,9 @@
+
+IF(OV_DISABLE_GTK)
+  MESSAGE(STATUS  "Skipping Acquisition Server, no GTK")
+  RETURN()
+ENDIF(OV_DISABLE_GTK)
+
 PROJECT(openvibe-acquisition-server)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})

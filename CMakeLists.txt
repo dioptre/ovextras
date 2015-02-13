@@ -59,8 +59,12 @@ MESSAGE(STATUS "  CMAKE_CXX_FLAGS_DEBUG = '${CMAKE_CXX_FLAGS_DEBUG}'")
 # if want to compile tests, use the following.
 SET(OV_COMPILE_TESTS "true")
 
-# if you don't want an Ogre dependency, use the following. All 3D visualizations and 3D apps will be unavailable. The result will also compile faster.
+# if you don't want an Ogre dependency, use the following. All 3D visualizations and 3D apps will be unavailable. The result will compile faster.
 # SET(OV_DISABLE_OGRE "true")
+
+# if you don't want a GTK dependency, set the following. Note that most applications including Acquisition Server and Designer will NOT be built.
+# This option is mostly of interest to hackers who are interested in using a minimal OpenViBE kernel in their own projects.
+# SET(OV_DISABLE_GTK "true")
 
 # By setting SKIP[_FOLDER]* you can skip a subtree (example: SKIP_A_B_C skips folder a/b/c and all its subfolders if any)
 

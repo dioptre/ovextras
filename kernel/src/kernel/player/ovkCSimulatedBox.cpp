@@ -19,6 +19,8 @@
 
 #include <openvibe/ovITimeArithmetics.h>
 
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #if defined TARGET_OS_Windows
 #  include <gdk/gdkwin32.h>
 #elif defined TARGET_OS_Linux
@@ -28,6 +30,8 @@
 #  include <gdk/gdkx.h>
 #  undef Cursor
 #else
+#endif
+
 #endif
 
 using namespace std;
@@ -106,6 +110,7 @@ CSimulatedBox::CSimulatedBox(const IKernelContext& rKernelContext, CScheduler& r
 #endif
 
 	m_pOgreVis = ((CVisualisationManager*)(&rKernelContext.getVisualisationManager()))->getOgreVisualisation();
+
 }
 
 CSimulatedBox::~CSimulatedBox(void)
@@ -113,6 +118,8 @@ CSimulatedBox::~CSimulatedBox(void)
 #if defined _SimulatedBox_ScopeTester_
 	this->getLogManager() << LogLevel_Debug << __OV_FUNC__ << " - " << __OV_FILE__ << ":" << __OV_LINE__ << "\n";
 #endif
+
+#if defined(TARGET_HAS_ThirdPartyGTK)
 
 	//delete OgreWidgets
 	std::map<GtkWidget*, CIdentifier>::iterator it;
@@ -123,20 +130,20 @@ CSimulatedBox::~CSimulatedBox(void)
 		gtk_widget_destroy(it->first);
 	}
 
+#endif
+
 	//clear simulated objects map
 	m_mSimulatedObjects.clear();
 
 	//delete OgreScene
-#if defined(TARGET_HAS_ThirdPartyOgre3D)
 	if(m_pOgreVis)
 	{
 		m_pOgreVis->deleteScene(m_oSceneIdentifier);
 	}
-#endif
 }
 
 
-#if defined(TARGET_HAS_ThirdPartyOgre3D)
+#if defined(TARGET_HAS_ThirdPartyOgre3D) && defined(TARGET_HAS_ThirdPartyGTK)
 
 boolean CSimulatedBox::handleDestroyEvent(GtkWidget* pOVCustomWidget)
 {
@@ -684,7 +691,7 @@ CIdentifier CSimulatedBox::createOgreWindow()
 }
 
 #else
-	// NO ogre
+	// NO (ogre AND gtk), dummy versions of the functions
 
 boolean CSimulatedBox::handleDestroyEvent(GtkWidget* /* pOVCustomWidget*/ )
 {

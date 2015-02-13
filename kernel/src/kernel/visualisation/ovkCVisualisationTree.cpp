@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "ovkCVisualisationTree.h"
 
 #include "../ovkCObjectVisitorContext.h"
@@ -1006,3 +1009,5 @@ boolean CVisualisationTree::acceptVisitor(IObjectVisitor& rObjectVisitor)
 
 	return true;
 }
+
+#endif

@@ -7,7 +7,6 @@
 
 #include "ovkCMessageWithData.h"
 
-#include <gtk/gtk.h>
 #include <system/ovCChrono.h>
 #include <vector>
 #include <string>

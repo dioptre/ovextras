@@ -1,3 +1,9 @@
+
+IF(OV_DISABLE_GTK)
+  MESSAGE(STATUS  "Skipping CoAdapt P300 Stimulator, no GTK")
+  RETURN()
+ENDIF(OV_DISABLE_GTK)
+
 PROJECT(openvibe-coadapt-p300-stimulator)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})

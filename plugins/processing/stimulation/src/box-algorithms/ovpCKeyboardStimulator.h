@@ -1,6 +1,8 @@
 #ifndef __OpenViBEPlugins_Stimulation_CKeyboardStimulator_H__
 #define __OpenViBEPlugins_Stimulation_CKeyboardStimulator_H__
 
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "../ovp_defines.h"
 
 #include <openvibe/ov_all.h>
@@ -103,6 +105,8 @@ namespace OpenViBEPlugins
 		};
 	};
 };
+
+#endif
 
 #endif
 
