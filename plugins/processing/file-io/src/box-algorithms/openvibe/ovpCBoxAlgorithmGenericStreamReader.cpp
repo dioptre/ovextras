@@ -1,5 +1,7 @@
 #include "ovpCBoxAlgorithmGenericStreamReader.h"
 
+#include <iostream>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -9,6 +11,7 @@ using namespace OpenViBEPlugins::FileIO;
 
 CBoxAlgorithmGenericStreamReader::CBoxAlgorithmGenericStreamReader(void)
 	:m_oReader(*this)
+	,m_bHasEBMLHeader(false)
 	,m_pFile(NULL)
 {
 }
@@ -135,11 +138,12 @@ boolean CBoxAlgorithmGenericStreamReader::process(void)
 
 EBML::boolean CBoxAlgorithmGenericStreamReader::isMasterChild(const EBML::CIdentifier& rIdentifier)
 {
+	if(rIdentifier==EBML_Identifier_Header                        ) return true;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header              ) return true;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header_Compression  ) return false;
-	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header_ChannelType  ) return false;
+	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header_StreamType  ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer              ) return true;
-	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_ChannelIndex ) return false;
+	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_StreamIndex ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_StartTime    ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_EndTime      ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_Content      ) return false;
@@ -152,6 +156,17 @@ void CBoxAlgorithmGenericStreamReader::openChild(const EBML::CIdentifier& rIdent
 
 	EBML::CIdentifier& l_rTop=m_vNodes.top();
 
+	if(l_rTop == EBML_Identifier_Header)
+	{
+		m_bHasEBMLHeader = true;
+	}
+	if(l_rTop==OVP_NodeId_OpenViBEStream_Header)
+	{
+		if(!m_bHasEBMLHeader)
+		{
+			this->getLogManager() << LogLevel_Info << "The file " << m_sFilename << " uses an outdated (but still compatible) version of the .ov file format\n";
+		}
+	}
 	if(l_rTop==OVP_NodeId_OpenViBEStream_Header)
 	{
 		m_vStreamIndexToOutputIndex.clear();
@@ -163,6 +178,11 @@ void CBoxAlgorithmGenericStreamReader::processChildData(const void* pBuffer, con
 {
 	EBML::CIdentifier& l_rTop=m_vNodes.top();
 
+	if(l_rTop == EBML_Identifier_EBMLVersion)
+	{
+		const uint64 l_ui64VersionNumber=(uint64)m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize);
+		this->getLogManager() << LogLevel_Trace << "The file " << m_sFilename << " uses version " << l_ui64VersionNumber << " of the .ov file format\n";
+	}
 	if(l_rTop==OVP_NodeId_OpenViBEStream_Header_Compression)
 	{
 		if(m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize)!=0)
@@ -175,12 +195,12 @@ void CBoxAlgorithmGenericStreamReader::processChildData(const void* pBuffer, con
 			m_bUseCompression=false;
 		}
 	}
-	if(l_rTop==OVP_NodeId_OpenViBEStream_Header_ChannelType)
+	if(l_rTop==OVP_NodeId_OpenViBEStream_Header_StreamType)
 	{
 		m_vStreamIndexToTypeIdentifier[m_vStreamIndexToTypeIdentifier.size()]=m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize);
 	}
 
-	if(l_rTop==OVP_NodeId_OpenViBEStream_Buffer_ChannelIndex)
+	if(l_rTop==OVP_NodeId_OpenViBEStream_Buffer_StreamIndex)
 	{
 		uint32 l_ui32StreamIndex=(uint32)m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize);
 		if(m_vStreamIndexToTypeIdentifier.find(l_ui32StreamIndex)!=m_vStreamIndexToTypeIdentifier.end())
