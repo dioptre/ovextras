@@ -42,12 +42,18 @@
  */
 #define EBML_Identifier_EBMLVersion			EBML::CIdentifier(0x0286)
 /**
+ * EBML Read Version.
+ * This is a child node of type \c integer.
+ * Indicates the EBML version a parser has to support to read this file
+ */
+#define EBML_Identifier_EBMLReadVersion		EBML::CIdentifier(0x02F7)
+/**
  * EBML Identifier Length.
  * This is a child node of type \c integer.
  * Indicates the parser the maximum number of bytes an identifier
  * can have.
  */
-#define EBML_Identifier_EBMLIdLength		EBML::CIdentifier(0x02F7)
+#define EBML_Identifier_EBMLIdLength		EBML::CIdentifier(0x02F2)
 /**
  * EBML Size Length.
  * This is a child node of type \c integer.
