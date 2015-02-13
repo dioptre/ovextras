@@ -3,6 +3,8 @@
 
 #include "ovd_base.h"
 
+#include "ovdCApplication.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -15,6 +17,7 @@ namespace OpenViBEDesigner
 		CPlayerVisualisation(
 			const OpenViBE::Kernel::IKernelContext& rKernelContext,
 			OpenViBE::Kernel::IVisualisationTree& rVisualisationTree,
+			OpenViBEDesigner::CApplication& rApplication,
 			CInterfacedScenario& rInterfacedScenario);
 
 		virtual ~CPlayerVisualisation();
@@ -99,10 +102,15 @@ namespace OpenViBEDesigner
 
 
 	private:
+		//Show on widget if no-gui is off
+		void showWidget(GtkWidget *pWidget);
+		void showAllWidget(GtkWidget* pWidget);
 
 		const OpenViBE::Kernel::IKernelContext&	m_rKernelContext;
 		OpenViBE::Kernel::IVisualisationTree& m_rVisualisationTree;
+		OpenViBEDesigner::CApplication& m_rApplication;
 		OpenViBEDesigner::CInterfacedScenario& m_rInterfacedScenario;
+
 
 		/**
 		 * \brief Vector of top level windows

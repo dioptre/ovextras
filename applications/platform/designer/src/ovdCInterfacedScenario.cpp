@@ -3307,7 +3307,7 @@ void CInterfacedScenario::createPlayerVisualisation()
 
 	if(m_pPlayerVisualisation == NULL)
 	{
-		m_pPlayerVisualisation = new CPlayerVisualisation(m_rKernelContext, *m_pVisualisationTree, *this);
+		m_pPlayerVisualisation = new CPlayerVisualisation(m_rKernelContext, *m_pVisualisationTree, m_rApplication, *this);
 
 		//we go here when we press start
 		//we have to set the modUI here

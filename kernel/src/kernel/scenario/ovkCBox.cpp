@@ -654,28 +654,6 @@ boolean CBox::addInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
 	return true;
 }
 
-boolean CBox::addInputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
-{
-	CIdentifier l_oCurrentTypeIdentifier;
-	this->addInputSupport(rTypeIdentifier);
-	while((l_oCurrentTypeIdentifier=this->getKernelContext().getTypeManager().getNextTypeIdentifier(l_oCurrentTypeIdentifier))!=OV_UndefinedIdentifier)
-	{
-		//First check if it is a stream
-		if(this->getKernelContext().getTypeManager().isStream(l_oCurrentTypeIdentifier))
-		{
-			if(!this->hasInputSupport(l_oCurrentTypeIdentifier))
-			{
-				//Now check if the type is derived from the accepted
-				if(this->getKernelContext().getTypeManager().isDerivedFromStream(l_oCurrentTypeIdentifier, rTypeIdentifier))
-				{
-					this->addInputSupport(l_oCurrentTypeIdentifier);
-				}
-			}
-		}
-	}
-	return true;
-}
-
 boolean CBox::hasInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier) const
 {
 	//If there is no type specify, we allow all
@@ -693,28 +671,6 @@ boolean CBox::hasInputSupport(const OpenViBE::CIdentifier& rTypeIdentifier) cons
 boolean CBox::addOutputSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
 {
 	m_vSupportOutputType.push_back(rTypeIdentifier);
-	return true;
-}
-
-boolean CBox::addOutputAndDerivedSupport(const OpenViBE::CIdentifier& rTypeIdentifier)
-{
-	CIdentifier l_oCurrentTypeIdentifier;
-	this->addOutputSupport(rTypeIdentifier);
-	while((l_oCurrentTypeIdentifier=this->getKernelContext().getTypeManager().getNextTypeIdentifier(l_oCurrentTypeIdentifier))!=OV_UndefinedIdentifier)
-	{
-		//First check if it is a stream
-		if(this->getKernelContext().getTypeManager().isStream(l_oCurrentTypeIdentifier))
-		{
-			if(!this->hasOutputSupport(l_oCurrentTypeIdentifier))
-			{
-				//Now check if the type is derived from the accepted
-				if(this->getKernelContext().getTypeManager().isDerivedFromStream(l_oCurrentTypeIdentifier, rTypeIdentifier))
-				{
-					this->addOutputSupport(l_oCurrentTypeIdentifier);
-				}
-			}
-		}
-	}
 	return true;
 }
 

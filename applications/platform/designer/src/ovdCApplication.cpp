@@ -1882,17 +1882,25 @@ OpenViBE::boolean CApplication::createPlayer(void)
 		}
 		else if(l_eCode == PlayerReturnCode_BoxInitializationFailed){
 			gint res = 1;
-			if(gtk_toggle_button_get_active(m_pInitAlert))
+			if(gtk_toggle_button_get_active(m_pInitAlert) )
 			{
-				::GtkBuilder* l_pBuilder=gtk_builder_new(); // glade_xml_new(OVD_GUI_File, "about", NULL);
-				gtk_builder_add_from_file(l_pBuilder, OVD_GUI_File, NULL);
-				gtk_builder_connect_signals(l_pBuilder, NULL);
-				::GtkWidget* l_pDialog=GTK_WIDGET(gtk_builder_get_object(l_pBuilder, "dialog_init_error_popup"));
+				if(!this->isNoGuiActive())
+				{
+					::GtkBuilder* l_pBuilder=gtk_builder_new(); // glade_xml_new(OVD_GUI_File, "about", NULL);
+					gtk_builder_add_from_file(l_pBuilder, OVD_GUI_File, NULL);
+					gtk_builder_connect_signals(l_pBuilder, NULL);
+					::GtkWidget* l_pDialog=GTK_WIDGET(gtk_builder_get_object(l_pBuilder, "dialog_init_error_popup"));
 
-				res = gtk_dialog_run(GTK_DIALOG(l_pDialog));
+					res = gtk_dialog_run(GTK_DIALOG(l_pDialog));
 
-				gtk_widget_destroy(l_pDialog);
-				g_object_unref(l_pBuilder);
+					gtk_widget_destroy(l_pDialog);
+					g_object_unref(l_pBuilder);
+				}
+				else{
+					m_rKernelContext.getLogManager() << LogLevel_Error << "Initilization of scenario didn't work properly."
+														" Aborting the execution. (To prevent this, deactivate the warning on initialization option\n" ;
+					res=0;//No matter what happen, if the user ask for a warning on initilization we consider that we don't run the scenario
+				}
 			}
 			if(res == 0)
 			{
@@ -2528,8 +2536,8 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 void CApplication::reorderCurrentScenario(OpenViBE::uint32 i32NewPageIndex)
 {
 	CInterfacedScenario* temp = m_vInterfacedScenario[m_i32CurrentScenarioPage];
-	m_vInterfacedScenario[m_i32CurrentScenarioPage] = m_vInterfacedScenario[i32NewPageIndex];
-	m_vInterfacedScenario[i32NewPageIndex] = temp;
+	m_vInterfacedScenario.erase(m_vInterfacedScenario.begin() + m_i32CurrentScenarioPage);
+	m_vInterfacedScenario.insert(m_vInterfacedScenario.begin() + i32NewPageIndex, temp);
 	this->changeCurrentScenario(i32NewPageIndex);
 }
 
@@ -2570,4 +2578,9 @@ boolean CApplication::isLogAreaClicked()
 	}
 	else
 		return false;
+}
+
+boolean CApplication::isNoGuiActive()
+{
+	return m_eCommandLineFlags&CommandLineFlag_NoGui;
 }

@@ -155,7 +155,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	l_pHandler->release();
 
 	m_bOutputHeaderSent=false;
-	return true;
+	return false;
 }
 
 boolean CBoxAlgorithmClassifierProcessor::uninitialize(void)
