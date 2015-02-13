@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstdio>
+#include <sstream>
 
 #include <openvibe/ovITimeArithmetics.h>
 #include <system/ovCMath.h>
@@ -42,7 +43,7 @@ boolean CNoiseGenerator::initialize(void)
 
 	if(m_ui64ChannelCount == 0)
 	{
-		this->getLogManager() << LogLevel_Error << "Channel count is 0. At least 1 channel required. Check box settings.\n";
+		this->getLogManager() << LogLevel_Error << "Channel count is 0. At least 1 channel is required. Check box settings.\n";
 		return false;
 	}
 
@@ -58,6 +59,8 @@ boolean CNoiseGenerator::initialize(void)
 		return false;
 	}
 
+	// Set parameters of the encoder
+
 	m_oSignalEncoder.getInputSamplingRate() = m_ui64SamplingFrequency;
 
 	IMatrix* l_pSampleMatrix = m_oSignalEncoder.getInputMatrix();
@@ -67,10 +70,9 @@ boolean CNoiseGenerator::initialize(void)
 	l_pSampleMatrix->setDimensionSize(1,static_cast<uint32>(m_ui64GeneratedEpochSampleCount));
 	for(uint32 i=0;i<static_cast<uint32>(m_ui64ChannelCount);i++)
 	{
-		char l_sBuffer[64];
-		// Convention: channel shown as users go as 1,2,...
-		sprintf(l_sBuffer, "Noise %d", i+1);
-		l_pSampleMatrix->setDimensionLabel(0, i, l_sBuffer);
+		// Convention: channel shown to users go as 1,2,...
+		std::stringstream ss; ss << "Noise " << (i+1); 
+		l_pSampleMatrix->setDimensionLabel(0, i, ss.str().c_str());
 	}
 
 	return true;
@@ -93,36 +95,36 @@ boolean CNoiseGenerator::process(void)
 {
 	IBoxIO* l_pDynamicBoxContext=getBoxAlgorithmContext()->getDynamicBoxContext();
 
+	// Send header?
 	if(!m_bHeaderSent)
 	{
 		m_oSignalEncoder.encodeHeader();
 
-		uint64 l_ui64Time=ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, m_ui64SentSampleCount);
-		l_pDynamicBoxContext->markOutputAsReadyToSend(0, l_ui64Time, l_ui64Time);
+		l_pDynamicBoxContext->markOutputAsReadyToSend(0, 0, 0);
 
 		m_bHeaderSent=true;
 	}
-	else
+
+	// Send buffer
+	float64* l_pSampleBuffer = m_oSignalEncoder.getInputMatrix()->getBuffer();
+	const uint64 l_ui64SamplesAtBeginning=m_ui64SentSampleCount;
+	for(uint32 i=0; i<(uint32)m_ui64ChannelCount; i++)
 	{
-		float64* l_pSampleBuffer = m_oSignalEncoder.getInputMatrix()->getBuffer();
-
-		uint32 l_ui32SentSampleCount=(uint32)m_ui64SentSampleCount;
-		for(uint32 i=0; i<(uint32)m_ui64ChannelCount; i++)
+		for(uint32 j=0; j<(uint32)m_ui64GeneratedEpochSampleCount; j++)
 		{
-			for(uint32 j=0; j<(uint32)m_ui64GeneratedEpochSampleCount; j++)
-			{
-				l_pSampleBuffer[i*m_ui64GeneratedEpochSampleCount+j]=(float64)System::Math::randomFloat32BetweenZeroAndOne();
-			}
+			l_pSampleBuffer[i*m_ui64GeneratedEpochSampleCount+j]=static_cast<float64>(System::Math::randomFloat32BetweenZeroAndOne());
 		}
-		m_ui64SentSampleCount+=m_ui64GeneratedEpochSampleCount;
-
-		uint64 l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, l_ui32SentSampleCount);
-		uint64 l_ui64EndTime = ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, m_ui64SentSampleCount);
-		
-		m_oSignalEncoder.encodeBuffer();
-
-		l_pDynamicBoxContext->markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 	}
+
+	m_ui64SentSampleCount = l_ui64SamplesAtBeginning + m_ui64GeneratedEpochSampleCount;
+
+	const uint64 l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, l_ui64SamplesAtBeginning);
+	const uint64 l_ui64EndTime = ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, m_ui64SentSampleCount);
+		
+	m_oSignalEncoder.encodeBuffer();
+
+	l_pDynamicBoxContext->markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
+
 
 	return true;
 }
