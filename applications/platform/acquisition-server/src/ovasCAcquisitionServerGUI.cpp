@@ -8,6 +8,8 @@
 #include "contribAcquisitionServer.inl"
 #endif
 
+#include "ovasCPluginLSLOutput.h"
+
 #include "generic-oscilator/ovasCDriverGenericOscilator.h"
 #include "generic-sawtooth/ovasCDriverGenericSawTooth.h"
 #include "generic-raw-reader/ovasCDriverGenericRawFileReader.h"
@@ -19,6 +21,7 @@
 #include "brainproducts-vamp/ovasCDriverBrainProductsVAmp.h"
 #include "egi-ampserver/ovasCDriverEGIAmpServer.h"
 #include "emotiv-epoc/ovasCDriverEmotivEPOC.h"
+#include "labstreaminglayer/ovasCDriverLabStreamingLayer.h"
 #include "micromed-systemplusevolution/ovasCDriverMicromedSystemPlusEvolution.h"
 #include "mindmedia-nexus32b/ovasCDriverMindMediaNeXus32B.h"
 #include "mcs-nvx/ovasCDriverMCSNVXDriver.h"
@@ -26,6 +29,7 @@
 #include "neurosky-mindset/ovasCDriverNeuroskyMindset.h"
 #include "tmsi/ovasCDriverTMSi.h"
 #include "tmsi-refa32b/ovasCDriverTMSiRefa32B.h"
+
 
 #include <system/ovCMemory.h>
 #include <system/ovCTime.h>
@@ -182,9 +186,19 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 #if defined TARGET_HAS_ThirdPartyUSBFirstAmpAPI
 	m_vDriver.push_back(new CDriverBrainProductsVAmp(m_pAcquisitionServer->getDriverContext()));
 #endif
+#if defined TARGET_HAS_ThirdPartyLSL
+	m_vDriver.push_back(new CDriverLabStreamingLayer(m_pAcquisitionServer->getDriverContext()));
+#endif
+
 
 #if defined TARGET_HAS_OpenViBEContributions
 	OpenViBEContributions::initiateContributions(this, m_pAcquisitionServer, rKernelContext, &m_vDriver);
+#endif
+
+	// Plugins that just send out data must be the last in list (since other plugins may modify the data)
+
+#if defined TARGET_HAS_ThirdPartyLSL
+	registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginLSLOutput(rKernelContext));
 #endif
 
 	std::sort(m_vDriver.begin(), m_vDriver.end(), compare_driver_names);
@@ -882,8 +896,11 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 			// Create label
 			::GtkWidget* l_pSettingLabel = gtk_label_new( l_pCurrentProperty->getName().toASCIIString() );
 
+			// align to left
+			gtk_misc_set_alignment( GTK_MISC(l_pSettingLabel), 0.0, 0.0 );
+
 			// insert the settings into the table
-			gtk_table_attach_defaults(l_pSettingsTable, l_pSettingLabel,   0, 1, setting_index, setting_index+1);
+			gtk_table_attach(l_pSettingsTable, l_pSettingLabel,   0, 1, setting_index, setting_index+1, GTK_FILL, GTK_SHRINK,   2, 0);
 			gtk_table_attach_defaults(l_pSettingsTable, l_pSettingControl, 1, 2, setting_index, setting_index+1);
 
 			m_vPluginProperties[setting_index].m_pWidget = l_pSettingControl;

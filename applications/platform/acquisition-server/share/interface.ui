@@ -526,6 +526,8 @@ Configuration </property>
               <object class="GtkLabel" id="label_oversampling_factor">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+				<property name="xalign">0</property>
+				<property name="xpad">2</property>
                 <property name="label" translatable="yes">Oversampling Factor</property>
               </object>
               <packing>
@@ -548,6 +550,8 @@ Configuration </property>
               <object class="GtkLabel" id="label_select_only_named_channels">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+				<property name="xalign">0</property>
+				<property name="xpad">2</property>
                 <property name="label" translatable="yes">Select only named channels</property>
               </object>
               <packing>
@@ -607,6 +611,8 @@ Configuration </property>
               <object class="GtkLabel" id="label_jitter_measure_count">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+				<property name="xalign">0</property>
+				<property name="xpad">2</property>
                 <property name="label" translatable="yes">Jitter Estimation Count For Drift</property>
               </object>
               <packing>
@@ -618,6 +624,8 @@ Configuration </property>
               <object class="GtkLabel" id="label_drift_tolerance">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+				<property name="xalign">0</property>
+				<property name="xpad">2</property>
                 <property name="label" translatable="yes">Drift Tolerance (ms)</property>
               </object>
               <packing>
@@ -687,6 +695,8 @@ Configuration </property>
               <object class="GtkLabel" id="label_drift_correction">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+				<property name="xalign">0</property>
+				<property name="xpad">2</property>
                 <property name="label" translatable="yes">Drift Correction</property>
               </object>
             </child>
@@ -722,6 +732,8 @@ Configuration </property>
               <object class="GtkLabel" id="label_nan_replacement">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+				<property name="xalign">0</property>
+				<property name="xpad">2</property>
                 <property name="label" translatable="yes">NaN value replacement</property>
               </object>
               <packing>

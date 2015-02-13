@@ -12,9 +12,23 @@ IF(PATH_OPENVIBE_CONTRIBUTIONS)
 	INCLUDE("${CMAKE_SOURCE_DIR}/contrib/common/contribAcquisitionServer.cmake")
 ENDIF(PATH_OPENVIBE_CONTRIBUTIONS)
 
+SET(ADDITIONAL_PATH "${CMAKE_SOURCE_DIR}/plugins/server-extensions/")
+FILE(GLOB_RECURSE additional_source_files ${ADDITIONAL_PATH}/*.cpp ${ADDITIONAL_PATH}/*.h)
+SET(source_files "${source_files};${additional_source_files}")
+
 ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
 INCLUDE_DIRECTORIES("src/drivers")
 INCLUDE_DIRECTORIES("include")
+
+# add include paths for non-contrib server plugins
+FILE(GLOB children ${ADDITIONAL_PATH}/*)
+FOREACH(FILENAME ${children})
+	# MESSAGE("Testing ${FILENAME}")
+	IF(IS_DIRECTORY ${FILENAME})
+		# MESSAGE("Adding ${FILENAME}")
+		INCLUDE_DIRECTORIES(${FILENAME})
+	ENDIF(IS_DIRECTORY ${FILENAME})
+ENDFOREACH(FILENAME)
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
@@ -41,6 +55,8 @@ INCLUDE("FindThirdPartyOpenAL")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyBoost_Thread")
 INCLUDE("FindThirdPartyPThreadsVCE2")	# for Windows Fieldtrip
+
+INCLUDE("FindThirdPartyLSL")
 
 IF(PATH_OPENVIBE_CONTRIBUTIONS)
 	INCLUDE("${CMAKE_SOURCE_DIR}/contrib/common/contribAcquisitionServerLinkLibs.cmake")

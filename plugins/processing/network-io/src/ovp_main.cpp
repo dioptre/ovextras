@@ -1,11 +1,16 @@
 
 #include "ovp_defines.h"
 
+#include "box-algorithms/ovpCBoxAlgorithmLSLExport.h"
 #include "box-algorithms/ovpCBoxAlgorithmTCPWriter.h"
 #include "box-algorithms/ovpCBoxAlgorithmSharedMemoryWriter.h"
 
 OVP_Declare_Begin();
 	
+#ifdef TARGET_HAS_ThirdPartyLSL
+	OVP_Declare_New(OpenViBEPlugins::NetworkIO::CBoxAlgorithmLSLExportDesc);
+#endif
+
 #ifdef TARGET_HAS_Boost
 	OVP_Declare_New(OpenViBEPlugins::FileReadingAndWriting::CBoxAlgorithmSharedMemoryWriterDesc);
 	OVP_Declare_New(OpenViBEPlugins::NetworkIO::CBoxAlgorithmTCPWriterDesc);

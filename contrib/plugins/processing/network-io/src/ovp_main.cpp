@@ -7,7 +7,7 @@
 
 // @BEGIN gipsa
 	
-#include "box-algorithms/ovpCBoxLSLExport.h"
+#include "box-algorithms/ovpCBoxLSLExportGipsa.h"
 
 // @END gipsa
 
@@ -18,7 +18,7 @@ OVP_Declare_Begin();
 
 // @BEGIN gipsa
 #if defined TARGET_HAS_ThirdPartyLSL
-	OVP_Declare_New(OpenViBEPlugins::NetworkIO::CBoxAlgorithmLSLExportDesc);
+	OVP_Declare_New(OpenViBEPlugins::NetworkIO::CBoxAlgorithmLSLExportGipsaDesc);
 
 #endif // TARGET_HAS_ThirdPartyLSL
 

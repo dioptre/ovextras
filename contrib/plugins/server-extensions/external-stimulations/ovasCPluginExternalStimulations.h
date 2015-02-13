@@ -29,9 +29,10 @@ namespace OpenViBEAcquisitionServer
 				CPluginExternalStimulations(const OpenViBE::Kernel::IKernelContext& rKernelContext);
 				virtual ~CPluginExternalStimulations();
 
-				virtual void startHook();
+				virtual void startHook(const std::vector<OpenViBE::CString>&, OpenViBE::uint32 ui32SamplingFrequency, OpenViBE::uint32 ui32ChannelCount, OpenViBE::uint32 ui32SampleCountPerSentBlock);
 				virtual void stopHook();
-				virtual void loopHook(OpenViBE::CStimulationSet& stimulationSet, OpenViBE::uint64 start, OpenViBE::uint64 end);
+				virtual void loopHook(std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer, 
+					OpenViBE::CStimulationSet& stimulationSet, OpenViBE::uint64 start, OpenViBE::uint64 end);
 				virtual void acceptNewConnectionHook();
 
 
