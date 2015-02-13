@@ -42,6 +42,7 @@ boolean CBoxAlgorithm@@ClassName@@::processClock(IMessageClock& rMessageClock)
 
 	return true;
 }
+@@ProcessClockCommentOut@@
 /*******************************************************************************/
 
 @@ProcessClockCommentIn@@
@@ -50,6 +51,7 @@ uint64 CBoxAlgorithm@@ClassName@@::getClockFrequency(void)
 	// Note that the time is coded on a 64 bits unsigned integer, fixed decimal point (32:32)
 	return @@ClockFrequency@@; // the box clock frequency
 }
+@@ProcessClockCommentOut@@
 /*******************************************************************************/
 
 @@ProcessInputCommentIn@@
@@ -62,6 +64,7 @@ boolean CBoxAlgorithm@@ClassName@@::processInput(uint32 ui32InputIndex)
 
 	return true;
 }
+@@ProcessInputCommentOut@@
 /*******************************************************************************/
 
 @@ProcessMessageCommentIn@@
@@ -105,6 +108,7 @@ boolean CBoxAlgorithm@@ClassName@@::processMessage(const IMessageWithData& msg, 
 	// Remember to return false in case the message was unexpected (user has made a wrong connection)	
 	return true;
 }
+@@ProcessMessageCommentOut@@
 /*******************************************************************************/
 
 boolean CBoxAlgorithm@@ClassName@@::process(void)
