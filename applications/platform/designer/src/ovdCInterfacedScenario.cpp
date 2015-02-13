@@ -392,6 +392,9 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 	m_pScrolledWindow = GTK_SCROLLED_WINDOW(gtk_builder_get_object(m_pBuilderDummyScenarioNotebookClient, "openvibe_scenario_notebook_scrolledwindow"));
 
 	gtk_drag_dest_set(GTK_WIDGET(m_pScenarioDrawingArea), GTK_DEST_DEFAULT_ALL, g_vTargetEntry, sizeof(g_vTargetEntry)/sizeof(::GtkTargetEntry), GDK_ACTION_COPY);
+	//gtk_drag_dest_add_text_targets(GTK_WIDGET(m_pScenarioDrawingArea));
+	gtk_drag_dest_add_uri_targets(GTK_WIDGET(m_pScenarioDrawingArea));//for drag&drop scenario file, on windows we get file uri so we need to enable this
+
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "expose_event", G_CALLBACK(scenario_drawing_area_expose_cb), this);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "drag_data_received", G_CALLBACK(scenario_drawing_area_drag_data_received_cb), this);
 	g_signal_connect(G_OBJECT(m_pScenarioDrawingArea), "motion_notify_event", G_CALLBACK(scenario_drawing_area_motion_notify_cb), this);
@@ -572,7 +575,7 @@ void CInterfacedScenario::redraw(IBox& rBox)
 	{
 		CIdentifier l_oComputationTime;
 		l_oComputationTime.fromString(rBox.getAttributeValue(OV_AttributeId_Box_ComputationTimeLastSecond));
-		
+
 		// FIXME use timearithmetics.h?
 		const uint64 l_ui64ComputationTime=(l_oComputationTime==OV_UndefinedIdentifier?0:l_oComputationTime.toUInteger());
 		const uint64 l_ui64ComputationTimeReference=(1LL<<32)/(m_ui32BoxCount==0?1:m_ui32BoxCount);
@@ -1061,9 +1064,51 @@ uint32 CInterfacedScenario::pickInterfacedObject(int x, int y)
 	int l_iMaxY;
 	uint32 l_ui32InterfacedObjectId=0xffffffff;
 	gdk_drawable_get_size(GDK_DRAWABLE(m_pStencilBuffer), &l_iMaxX, &l_iMaxY);
+
+	//to congigure : conf manager token?
+	int xSizeOfSelection = 50;
+	int ySizeOfSelection = 50;
+
+	//we want a zone around the click
+	//gdk_pixbuf_get_from_drawable(NULL, GDK_DRAWABLE(m_pStencilBuffer), NULL, x, y, 0, 0, xSizeOfSelection, ySizeOfSelection);
+	//return a pixbuf origin (x,y) of the required size
+	//	(x,y) - - -|
+	//	  |	       |
+	//    |		   |
+	//    | _ _ _ _|
+	//we want a zone centered around the click
+	//thus origin of the zone is x-xSizeOfSelection/2, y-ySizeOfSelection/2
+	x-=xSizeOfSelection/2;
+	y-=ySizeOfSelection/2;
+
+	//we have to consider limit case near the y=0 and x=0 borders
+	if(x<0)
+	{
+		xSizeOfSelection+=x; // we decrease xSizeOfSelection (x is negative)
+		x=0;//origin of the zone is x=0
+
+	}
+	if(y<0)
+	{
+		ySizeOfSelection+=y; // we decrease ySizeOfSelection (y is negative)
+		y=0;//origin of the zone is y=0
+	}
+
+
 	if(x>=0 && y>=0 && x<l_iMaxX && y<l_iMaxY)
 	{
-		::GdkPixbuf* l_pPixbuf=gdk_pixbuf_get_from_drawable(NULL, GDK_DRAWABLE(m_pStencilBuffer), NULL, x, y, 0, 0, 1, 1);
+		//to avoid going out of pixbuff bounds
+		//we want
+		xSizeOfSelection = (xSizeOfSelection+x>l_iMaxX)?l_iMaxX-x:xSizeOfSelection;
+		ySizeOfSelection = (ySizeOfSelection+y>l_iMaxY)?l_iMaxY-y:ySizeOfSelection;
+
+		m_rKernelContext.getLogManager() << LogLevel_Debug << x << " " << y
+										 << " for " << xSizeOfSelection << " by " << ySizeOfSelection <<  "\n";
+
+
+
+		//::GdkPixbuf* l_pPixbuf=gdk_pixbuf_get_from_drawable(NULL, GDK_DRAWABLE(m_pStencilBuffer), NULL, x, y, 0, 0, 1, 1);
+		::GdkPixbuf* l_pPixbuf=gdk_pixbuf_get_from_drawable(NULL, GDK_DRAWABLE(m_pStencilBuffer), NULL, x, y, 0, 0, xSizeOfSelection, ySizeOfSelection);
 		if(!l_pPixbuf)
 		{
 			m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "Could not get pixbuf from stencil buffer - couldn't pick object... this should never happen !\n";
@@ -1077,10 +1122,52 @@ uint32 CInterfacedScenario::pickInterfacedObject(int x, int y)
 			return 0xffffffff;
 		}
 
+
+		//here comes the tricky part
+		//we have to check xSizeOfSelection*ySizeOfSelection pixels. If we start from 0 a go incrementaly, we will begin to check the upper left pixel
+		//in case there are several objects in the pixbuf, we want the one closer to the center (the click) so we have to go through the pixels in a spiral fashion
+		//see http://stackoverflow.com/questions/398299/looping-in-a-spiral slightly modified here
+		//first we made the change of variable x=x+X/2 and y=y+Y/2 because our table start from (0.0) and we changed some variables name
+
+		//get some infos from the pixbuf
+		int rowstride = gdk_pixbuf_get_rowstride (l_pPixbuf);
+		int n_channels = gdk_pixbuf_get_n_channels (l_pPixbuf);
 		l_ui32InterfacedObjectId=0;
-		l_ui32InterfacedObjectId+=(l_pPixels[0]<<16);
-		l_ui32InterfacedObjectId+=(l_pPixels[1]<<8);
-		l_ui32InterfacedObjectId+=(l_pPixels[2]);
+
+		int px,py;//coordinates of the pixels we are currently looking at in the pixbuf
+		px=xSizeOfSelection/2;
+		py=ySizeOfSelection/2;
+		int dx,dy;
+		dx=0;
+		dy=-1;
+		int t = std::max(xSizeOfSelection,ySizeOfSelection);
+		unsigned int maxI = t*t;
+		uint32 l_ui32Counter=0;
+
+		while((l_ui32InterfacedObjectId==0)&&(l_ui32Counter<maxI))
+		{
+			if((0<=px)&&(px<=xSizeOfSelection)&&(0<=py)&&(py<=ySizeOfSelection))
+			{
+				//see gdk pixbuf strucutre documentation for clarification as to why we go through the pixbuf that way
+				guchar* p = l_pPixels + px*n_channels + py*rowstride;
+				l_ui32InterfacedObjectId+=(p[0]<<16);
+				l_ui32InterfacedObjectId+=(p[1]<<8);
+				l_ui32InterfacedObjectId+=(p[2]);
+			}
+			if((px-xSizeOfSelection/2==py-ySizeOfSelection/2)||((px<xSizeOfSelection/2)&&(px-xSizeOfSelection/2==-py+ySizeOfSelection/2))||((px>xSizeOfSelection/2)&&(px-xSizeOfSelection/2==1-py+ySizeOfSelection/2)))
+			{
+				t = dx;
+				dx = -dy;
+				dy=t;
+			}
+			px+=dx;
+			py+=dy;
+			l_ui32Counter++;
+		}
+
+		m_rKernelContext.getLogManager() << LogLevel_Debug << "Found " << l_ui32InterfacedObjectId << " on pixel  " << l_ui32Counter << "/"  << xSizeOfSelection*ySizeOfSelection << " \n";
+
+
 		g_object_unref(l_pPixbuf);
 	}
 	return l_ui32InterfacedObjectId;
@@ -1313,9 +1400,10 @@ void CInterfacedScenario::addCommentCB(int x, int y)
 }
 
 // @Important No log should be displayed in this method because it could lead to a crash of gtk during the expand of the log section
+//not true anymore on fedora 17 TODO check all platform
 void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 {
-	// @fixme uncomment this log will create a crash of gtk
+	// @fixme uncomment this log will create a crash of gtk (not on fedora 17)
 	//m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaExposeCB\n";
 	gint x = -1;
 	gint y = -1;
@@ -1530,13 +1618,24 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 }
 void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext* pDragContext, gint iX, gint iY, ::GtkSelectionData* pSelectionData, guint uiInfo, guint uiT)
 {
-	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaDragDataReceivedCB [" << (const char*)gtk_selection_data_get_text(pSelectionData) << "]\n";
+	//check if I need to free later
+	const char* l_sSelectionText = (const char*)gtk_selection_data_get_text(pSelectionData);
+	gchar** l_sSelectionUri = gtk_selection_data_get_uris(pSelectionData);
+
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaDragDataReceivedCB [";
+	if(l_sSelectionText!=NULL)
+		m_rKernelContext.getLogManager() << LogLevel_Debug << l_sSelectionText;
+	else if (*l_sSelectionUri!=NULL)
+		m_rKernelContext.getLogManager() << LogLevel_Debug << *l_sSelectionUri;
+	m_rKernelContext.getLogManager() << LogLevel_Debug << "]\n";
 
 	if(this->isLocked()) return;
 
 	CIdentifier l_oBoxIdentifier;
-	CIdentifier l_oBoxAlgorithmClassIdentifier;
-	l_oBoxAlgorithmClassIdentifier.fromString((const char*)gtk_selection_data_get_text(pSelectionData));
+	CIdentifier l_oBoxAlgorithmClassIdentifier = OV_UndefinedIdentifier;
+	if(l_sSelectionText!=NULL)
+		l_oBoxAlgorithmClassIdentifier.fromString(l_sSelectionText);
+
 	if(l_oBoxAlgorithmClassIdentifier!=OV_UndefinedIdentifier)
 	{
 		m_rScenario.addBox(l_oBoxIdentifier, l_oBoxAlgorithmClassIdentifier, OV_UndefinedIdentifier);
@@ -1565,6 +1664,29 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 		m_bScenarioModified = true;
 
 		this->snapshotCB();
+		//We need to grab the focus to enable shortcuts like F1
+		gtk_widget_grab_focus(GTK_WIDGET(m_pScenarioDrawingArea));
+	}
+	else
+	{
+		m_rKernelContext.getLogManager() << LogLevel_Debug << "not a box, might be a scenario\n";
+		std::string l_sFilename;
+		if(l_sSelectionText!=NULL)
+		{
+			l_sFilename = l_sSelectionText;
+		}
+		else if (*l_sSelectionUri!=NULL)
+		{
+			l_sFilename = *l_sSelectionUri;
+		}
+		m_rKernelContext.getLogManager() << LogLevel_Fatal <<  "filename " << l_sFilename.c_str() << "\n";
+		l_sFilename.erase(l_sFilename.begin(), l_sFilename.begin()+7);//erase the file:// at the begining
+#if defined TARGET_OS_Windows
+		l_sFilename.erase(l_sFilename.begin(), l_sFilename.begin()+1);//we have an additionnal / to erase before the uri starts
+#endif
+		l_sFilename.erase(l_sFilename.begin()+l_sFilename.find(".xml")+4, l_sFilename.end());//erase \n at the end
+		m_rKernelContext.getLogManager() << LogLevel_Fatal <<  "filename " << l_sFilename.c_str() << "\n";
+		m_rApplication.openScenario(l_sFilename.c_str());
 	}
 
 	m_f64CurrentMouseX=iX;
@@ -2154,7 +2276,6 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 void CInterfacedScenario::scenarioDrawingAreaButtonReleasedCB(::GtkWidget* pWidget, ::GdkEventButton* pEvent)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaButtonReleasedCB\n";
-
 	if(this->isLocked()) return;
 
 	if(pEvent->button == 3)
@@ -2568,7 +2689,7 @@ void CInterfacedScenario::scenarioDrawingAreaKeyReleaseEventCB(::GtkWidget* pWid
 	m_bAltPressed    &=!(pEvent->keyval==GDK_Alt_L     || pEvent->keyval==GDK_Alt_R);
 	m_bAPressed      &=!(pEvent->keyval==GDK_A         || pEvent->keyval==GDK_a);
 	m_bWPressed      &=!(pEvent->keyval==GDK_W         || pEvent->keyval==GDK_w);
-	
+
 	m_rKernelContext.getLogManager() << LogLevel_Debug
 		<< "scenarioDrawingAreaKeyReleaseEventCB ("
 		<< (m_bShiftPressed?"true":"false") << "|"
@@ -3176,7 +3297,7 @@ bool CInterfacedScenario::browseURL(CString sURL)  {
 	return true;
 }
 
-bool CInterfacedScenario::browseBoxDocumentation(CIdentifier oBoxId) 
+bool CInterfacedScenario::browseBoxDocumentation(CIdentifier oBoxId)
 {
 	if(oBoxId!=OV_UndefinedIdentifier && m_rKernelContext.getPluginManager().canCreatePluginObject(oBoxId))
 	{
