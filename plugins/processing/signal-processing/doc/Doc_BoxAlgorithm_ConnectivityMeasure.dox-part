@@ -8,7 +8,16 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Description|
  This box measure connectivity between pairs of channels using several method. For now, Single-Trial Phase Locking Value [1] is available. 
  
+ The coherence definition used is :
+\image html Coherence_Formula.png
+<!-- "Formula of coherence is C_{xy}(t)=\frac{\left | G_{xy}\right |^{2}}{G_{xx} G_{xy}}"-->
+ 
+ With \e G<sub>xy</sub> the cross-spectral density between the two input signal channel, and \e G<sub>xx</sub> and \e G<sub>yy</sub> the auto-spectral densities, respectively for the first and second channels of the pair. 
+ The spectral densities are estimated via Welch's method [2]
+
+
  [1] JP Lachaux, E Rodriguez, M Le Van Quyen, A Lutz, J Martinerie, FJ Varela, Studying single-trials of phase synchronous activity in the brain, International Journal of Bifurcation and Chaos in Applied Sciences and Engineering vol.10 p.2429-2440, 2000.
+ [2] Welch, P.D. (1967) "The Use of Fast Fourier Transform for the Estimation of Power Spectra: A Method Based on Time Averaging Over Short, Modified Periodograms", IEEE Transactions on Audio Electroacoustics, AU-15, 70–73
  
  
  * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Description|
@@ -29,17 +38,39 @@ Outputs description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Outputs|
+ The number of outputs of this box can vary depending on the algorithm chosen. If you change the algorithm, the number of outputs can change, for this to be apply, you need to press apply, and close the box settings window.
+
+If you choose the Magnitude Square Coherence, the box will have two outputs :
+<ol>
+<li><b>Mean Coherence signal</b></li>
+
+The mean value of coherence over all the frequencies found in the input signal at each time.  
+- \c Type identifier : Signal <i>(0x5ba36127, 0x195feae1)</i>
+
+<li><b>Coherence spectrum</b></li>
+
+The coherence value at each frequencies.
+- \c Type identifier : Spectrum <i>(0x1f261c0a, 0x593bf6bd)</i>
+</ol>
+
+As the default algorithm is Single-trial Phase-Locking value, the box has initially one input. 
+
  * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Outputs|
 
+
  * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Output1|
- Connectivity measure between chosen channels
+ Default connectivity measure (S-PLV) between chosen channels
  * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Output1|
+
+ 
+ 
 __________________________________________________________________
 
 Settings description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Settings|
+ As for the outputs, the settings change according to the algorithm chosen. This documentation display only the three settings common to all algorithms. For more settings see Example description section.
  * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Settings|
 
  * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Setting1|
@@ -64,6 +95,30 @@ Examples description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ConnectivityMeasure_Examples|
+ To use the Magnitude Squared Coherence you need to specify a few more settings due to the Welch's method which is to divide input dataset in several segments with a certain overlap and apply a window.
+ <!--\image html MSC_box_settings_example.png-->
+ <img src="MSC_box_settings_example.png" height="384" width="683">
+<ol>
+<li><b>Window method</b></li>
+
+The window applied to segments when estimating spectral density
+
+- \c Default value [<i>Welch</i>]
+
+<li><b>Overlap</b></li>
+
+Define the overlap. The value is in percentage so it must be between 0 (no overlap) and 100.
+
+- \c Type identifier : Integer <i>(0x007deef9, 0x2f3e95c6)</i>
+- \c Default value : [ <i>50</i> ]
+
+<li><b>Length of segments</b></li> 
+
+Define the length of segment (in sample) in which the input signal will be divided. Be careful, by default, the data chunk in OpenViBE contain 32 samples, if you want to divide the chunks in segments longer than 32, you need to use the Time Based Epoching box to have longer chunks.
+
+- \c Type identifier : Integer <i>(0x007deef9, 0x2f3e95c6)</i>
+- \c Default value : [ <i>32</i> ]
+ 
  * |OVP_DocEnd_BoxAlgorithm_ConnectivityMeasure_Examples|
 __________________________________________________________________
 
