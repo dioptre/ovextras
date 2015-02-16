@@ -167,11 +167,13 @@ namespace OpenViBEPlugins
 				//return this->onAlgorithmClassifierChanged(rBox);
 			}
 
+			//Return the index of the combo box used to select the strategy (native/ OnevsOne...)
 			virtual OpenViBE::uint32 getStrategyIndex()
 			{
 				return 2;
 			}
 
+			//Return the index of the combo box used to select the classification algorithm
 			virtual OpenViBE::uint32 getClassifierIndex(OpenViBE::Kernel::IBox& rBox)
 			{
 				return getStrategySettingsCount(rBox) + 3 + rBox.getInputCount() - 1;

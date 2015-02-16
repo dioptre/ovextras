@@ -90,7 +90,7 @@ boolean CAlgorithmClassifierLDA::uninitialize(void)
 
 boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
-	this->initializeExtraParameterMecanism(OVP_ClassId_Algorithm_ClassifierLDA);
+	this->initializeExtraParameterMechanism();
 
 	boolean l_bUseShrinkage = this->getBooleanParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_UseShrinkage);
 
@@ -110,7 +110,7 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		ip_bDiagonalCov = false;
 		l_pDiagonalCov = false;
 	}
-	this->uninitializeExtraParameterMecanism();
+	this->uninitializeExtraParameterMechanism();
 
 
 
@@ -294,7 +294,7 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 	std::stringstream l_sClasses;
 	std::stringstream l_sWeigths;
 	std::stringstream l_sBiasDistance;
-	std::stringstream l_sCoefficentProbability;
+	std::stringstream l_sCoefficientProbability;
 
 	l_sClasses << m_f64Class1 << " " << m_f64Class2;
 	l_sWeigths << std::scientific;
@@ -305,7 +305,7 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 	}
 
 	l_sBiasDistance << m_f64BiasDistance;
-	l_sCoefficentProbability << m_f64w0;
+	l_sCoefficientProbability << m_f64w0;
 
 	XML::IXMLNode *l_pTempNode = XML::createNode(c_sClassesNodeName);
 	l_pTempNode->setPCData(l_sClasses.str().c_str());
@@ -320,7 +320,7 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 	l_pAlgorithmNode->addChild(l_pTempNode);
 
 	l_pTempNode = XML::createNode(c_sCoefficientProbabilityNodeName);
-	l_pTempNode->setPCData(l_sCoefficentProbability.str().c_str());
+	l_pTempNode->setPCData(l_sCoefficientProbability.str().c_str());
 	l_pAlgorithmNode->addChild(l_pTempNode);
 
 

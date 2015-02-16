@@ -48,7 +48,7 @@ a new classification process is triggered, resulting in the generation of the co
 
  * |OVP_DocBegin_BoxAlgorithm_ClassifierProcessor_Output2|
 This output reflects the classification algorithm status in the form of a matrix of value.  This output will contain one or several distances
-to an hyperplan if the classifier provide it. If not, the matrix will have 0 dimension. The format of this output directly depend on 
+to an hyperplane if the classifier provide it. If not, the matrix will have 0 dimension. The format of this output directly depend on 
 the classification algorithm and of the strategy used by the processor box.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierProcessor_Output2|
  * 

@@ -28,6 +28,9 @@ using namespace OpenViBEPlugins::Classification;
 
 using namespace OpenViBEToolkit;
 
+typedef std::pair < IMatrix*, IMatrix* > CIMatrixPointerPair;
+typedef std::pair< float64, CIMatrixPointerPair > CClassifierOutput;
+
 boolean CAlgorithmClassifierOneVsAll::initialize()
 {
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
@@ -114,7 +117,7 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
 
 boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
-	std::vector< std::pair < float64, std::pair < IMatrix*, IMatrix* > > > l_oClassificationVector;
+	std::vector< CClassifierOutput > l_oClassificationVector;
 
 	const uint32 l_ui32FeatureVectorSize=rFeatureVector.getSize();
 
@@ -135,19 +138,19 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 					l_ui32FeatureVectorSize*sizeof(float64));
 		l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 		//this->getLogManager() << LogLevel_Info << l_iClassifierCounter << " " << (float64)op_f64ClassificationStateClass << " " << (*op_pClassificationValues)[0] << "\n";
-		l_oClassificationVector.push_back(std::pair< float64, std::pair < IMatrix*, IMatrix* > >(static_cast<float64>(op_f64ClassificationStateClass),
-																		std::pair< IMatrix*, IMatrix*> (static_cast<IMatrix*>(op_pClassificationValues),
+		l_oClassificationVector.push_back(CClassifierOutput(static_cast<float64>(op_f64ClassificationStateClass),
+																		CIMatrixPointerPair (static_cast<IMatrix*>(op_pClassificationValues),
 																										static_cast<IMatrix*>(op_pProbabilityValues))));
 	}
 
 	//Now, we determine the best classification
-	std::pair<float64, std::pair < IMatrix*, IMatrix*> > l_oBest = std::pair<float64, std::pair < IMatrix*, IMatrix* > >
-			(-1.0, std::pair < IMatrix*, IMatrix* > (static_cast<IMatrix*>(NULL),static_cast<IMatrix*>(NULL)) );
+	CClassifierOutput l_oBest = CClassifierOutput
+			(-1.0, CIMatrixPointerPair (static_cast<IMatrix*>(NULL),static_cast<IMatrix*>(NULL)) );
 	rf64Class = -1;
 
 	for(size_t l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
 	{
-		std::pair<float64, std::pair < IMatrix*, IMatrix*> >&   l_pTemp = l_oClassificationVector[l_iClassificationCount];
+		CClassifierOutput&   l_pTemp = l_oClassificationVector[l_iClassificationCount];
 		if(l_pTemp.first==1)
 		{
 			if(l_oBest.second.first == NULL)
@@ -182,7 +185,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	{
 		for(uint32 l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
 		{
-			std::pair<float64, std::pair < IMatrix*, IMatrix*> >& l_pTemp = l_oClassificationVector[l_iClassificationCount];
+			CClassifierOutput& l_pTemp = l_oClassificationVector[l_iClassificationCount];
 			if(l_oBest.second.first == NULL)
 			{
 				l_oBest = l_pTemp;

@@ -56,8 +56,8 @@ namespace OpenViBEToolkit
 		_IsDerivedFromClass_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVTK_ClassId_Algorithm_Classifier);
 
 	protected:
-		OpenViBE::boolean initializeExtraParameterMecanism(const OpenViBE::CIdentifier& rAlgoritmIdentifier);
-		OpenViBE::boolean uninitializeExtraParameterMecanism();
+		OpenViBE::boolean initializeExtraParameterMechanism();
+		OpenViBE::boolean uninitializeExtraParameterMechanism();
 
 		OpenViBE::int64 getInt64Parameter(const OpenViBE::CIdentifier& rParameterIdentifier);
 		OpenViBE::float64 getFloat64Parameter(const OpenViBE::CIdentifier& rParameterIdentifier);
@@ -87,7 +87,7 @@ namespace OpenViBEToolkit
 			rAlgorithmPrototype.addInputParameter (OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter,        "Extra parameter",       OpenViBE::Kernel::ParameterType_Pointer);
 
 			rAlgorithmPrototype.addOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class,                "Class",                 OpenViBE::Kernel::ParameterType_Float);
-			rAlgorithmPrototype.addOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues, "Hyperplan distance",    OpenViBE::Kernel::ParameterType_Matrix);
+			rAlgorithmPrototype.addOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues, "Hyperplane distance",   OpenViBE::Kernel::ParameterType_Matrix);
 			rAlgorithmPrototype.addOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues,    "Probability values",    OpenViBE::Kernel::ParameterType_Matrix);
 			rAlgorithmPrototype.addOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration,        "Configuration",         OpenViBE::Kernel::ParameterType_Pointer);
 

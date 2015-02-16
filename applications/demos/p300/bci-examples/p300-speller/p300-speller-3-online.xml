@@ -1031,7 +1031,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
@@ -1107,7 +1107,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
@@ -1183,7 +1183,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
@@ -1259,7 +1259,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
@@ -1335,7 +1335,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
@@ -1411,7 +1411,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
@@ -1487,7 +1487,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
@@ -1563,7 +1563,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
@@ -1639,7 +1639,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
@@ -1715,7 +1715,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
@@ -1791,7 +1791,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
@@ -1867,7 +1867,7 @@
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>
-					<Name>Hyperplan distance</Name>
+					<Name>Hyperplane distance</Name>
 				</Output>
 				<Output>
 					<TypeIdentifier>(0x544a003e, 0x6dcba5f6)</TypeIdentifier>

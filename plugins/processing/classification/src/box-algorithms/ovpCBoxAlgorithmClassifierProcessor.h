@@ -62,7 +62,7 @@ namespace OpenViBEPlugins
 			{
 				rBoxAlgorithmPrototype.addInput  ("Features",                            OV_TypeId_FeatureVector);
 				rBoxAlgorithmPrototype.addOutput ("Labels",                              OV_TypeId_Stimulations);
-				rBoxAlgorithmPrototype.addOutput ("Hyperplan distance",                  OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addOutput ("Hyperplane distance",                 OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addOutput ("Probability values",                  OV_TypeId_StreamedMatrix);
 
 				//We load everything in the save filed

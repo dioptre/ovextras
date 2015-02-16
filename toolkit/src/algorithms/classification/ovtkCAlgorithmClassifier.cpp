@@ -16,6 +16,7 @@ boolean CAlgorithmClassifier::initialize()
 {
 	m_pAlgorithmProxy = NULL;
 	m_pExtraParameter = NULL;
+	return true;
 }
 
 boolean CAlgorithmClassifier::uninitialize()
@@ -26,6 +27,7 @@ boolean CAlgorithmClassifier::uninitialize()
 		this->getAlgorithmManager().releaseAlgorithm(*m_pAlgorithmProxy);
 		m_pAlgorithmProxy = NULL;
 	}
+	return true;
 }
 
 boolean CAlgorithmClassifier::process(void)
@@ -145,17 +147,17 @@ boolean CAlgorithmClassifier::process(void)
 	return true;
 }
 
-boolean CAlgorithmClassifier::initializeExtraParameterMecanism(const OpenViBE::CIdentifier& rAlgoritmIdentifier)
+boolean CAlgorithmClassifier::initializeExtraParameterMechanism()
 {
 	TParameterHandler < std::map<CString, CString>* > ip_pExtraParameter(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
 	m_pExtraParameter = (std::map<CString, CString>*) ip_pExtraParameter;
 
-	m_pAlgorithmProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(rAlgoritmIdentifier));
+	m_pAlgorithmProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(this->getClassIdentifier()));
 	m_pAlgorithmProxy->initialize();
 	return true;
 }
 
-boolean CAlgorithmClassifier::uninitializeExtraParameterMecanism()
+boolean CAlgorithmClassifier::uninitializeExtraParameterMechanism()
 {
 	m_pAlgorithmProxy->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*m_pAlgorithmProxy);

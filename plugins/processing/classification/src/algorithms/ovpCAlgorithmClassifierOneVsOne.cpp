@@ -92,7 +92,7 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 
 	const uint32 l_ui32AmountClass = getClassAmount();
 	//Create the decision strategy
-	this->initializeExtraParameterMecanism(OVP_ClassId_Algorithm_ClassifierOneVsOne);
+	this->initializeExtraParameterMechanism();
 
 	m_oPairwiseDecisionIdentifier=this->getEnumerationParameter(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType, OVP_TypeId_ClassificationPairwiseStrategy);
 
@@ -113,7 +113,7 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 	ip_pClassificationAlgorithm = &m_oSubClassifierAlgorithmIdentifier;
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize);
 
-	this->uninitializeExtraParameterMecanism();
+	this->uninitializeExtraParameterMechanism();
 
 
 	//Calculate the amount of sample for each class

@@ -156,7 +156,8 @@ A well-known classifier supporting non-linear classification via kernels. The im
 This algorithm provides only probabilities.
 
 \par Linear Discriminant Analysis (LDA)
- A simple and fast linear classifier. For description, see any major textbook on Machine Learning or Statistics (e.g. Duda, Hart & Stork, or Hastie, Tibshirani & Friedman). This algorithm can be used with a regularized covariance matrix.
+ A simple and fast linear classifier. For description, see any major textbook on Machine Learning or Statistics (e.g. Duda, Hart & Stork, or Hastie, Tibshirani & Friedman). This algorithm can be used with a regularized covariance matrix
+ according to a method proposed by Ledoit & Wolf: "A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices", 2004..
  The Linear Discriminant Analysis has the following option.
  \par
  \li Use shrinkage: Use a classic or a regularized covariance matrix.
@@ -168,7 +169,7 @@ This algorithm provides only probabilities.
 \par
 Note that setting shrinkage to 0 should get you the regular LDA behavior. If you additionally force the covariance to be diagonal, you should get a model resembling the Naive Bayes classifier.
 \par 
-This algorithm provides both hyperplan distance and probabilities.
+This algorithm provides both hyperplane distance and probabilities.
  
 Cross Validation 
  

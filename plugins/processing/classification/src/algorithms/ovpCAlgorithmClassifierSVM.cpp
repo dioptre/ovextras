@@ -172,7 +172,7 @@ void CAlgorithmClassifierSVM::deleteModel(svm_model *pModel, bool bFreeSupportVe
 
 void CAlgorithmClassifierSVM::setParameter(void)
 {
-	this->initializeExtraParameterMecanism(OVP_ClassId_Algorithm_ClassifierSVM);
+	this->initializeExtraParameterMechanism();
 
 	m_oParam.svm_type           = (int)this->getEnumerationParameter(  OVP_Algorithm_ClassifierSVM_InputParameterId_SVMType,       OVP_TypeId_SVMType);
 	m_oParam.kernel_type        = (int)this->getEnumerationParameter(  OVP_Algorithm_ClassifierSVM_InputParameterId_SVMKernelType, OVP_TypeId_SVMKernelType);
@@ -190,7 +190,7 @@ void CAlgorithmClassifierSVM::setParameter(void)
 	CString l_sParamWeight      = *this->getCStringParameter(          OVP_ALgorithm_ClassifierSVM_InputParameterId_SVMweight);
 	CString l_sParamWeightLabel = *this->getCStringParameter(          OVP_Algorithm_ClassifierSVM_InputParameterId_SVMWeightLabel);
 
-	this->uninitializeExtraParameterMecanism();
+	this->uninitializeExtraParameterMechanism();
 
 	std::vector<float64> l_vWeight;
 	std::stringstream l_oStreamString((const char*)l_sParamWeight);
@@ -373,7 +373,7 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 	else
 		rProbabilityValue.setSize(0);
 
-	//The hyperplan distance is disabled for SVM
+	//The hyperplane distance is disabled for SVM
 	rClassificationValues.setSize(0);
 
 	//std::cout<<";"<<rf64Class<<";"<<rClassificationValues[0] <<";"<<l_pProbEstimates[0]<<";"<<l_pProbEstimates[1]<<std::endl;
