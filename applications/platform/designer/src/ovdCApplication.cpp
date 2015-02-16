@@ -934,6 +934,18 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"), LogLevel_Error, "${Designer_ErrorCanal}");
 		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"), LogLevel_Fatal, "${Designer_FatalCanal}");
 
+
+		CIdentifier l_oTokenIdentifier;
+		l_oTokenIdentifier = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier("Designer_LogExpanderStatus");
+		if(l_oTokenIdentifier != OV_UndefinedIdentifier)
+		{
+			CString l_sExpanderStatus;
+			l_sExpanderStatus = m_rKernelContext.getConfigurationManager().getConfigurationTokenValue(l_oTokenIdentifier);
+			gtk_expander_set_expanded(GTK_EXPANDER(gtk_builder_get_object(m_pBuilderInterface, "openvibe-expander_messages")),
+									  m_rKernelContext.getConfigurationManager().expandAsBoolean(l_sExpanderStatus));
+		}
+
+
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_clear")),       "clicked",  G_CALLBACK(clear_messages_cb), m_pLogListenerDesigner);
 
 		g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_search")),       "clicked",  G_CALLBACK(search_messages_cb), this);
@@ -2322,6 +2334,9 @@ boolean CApplication::quitApplicationCB(void)
 			::fprintf(l_pFile, "Designer_ImportantWarningCanal = %d\n",getLogState("openvibe-messages_tb_impwarning"));
 			::fprintf(l_pFile, "Designer_ErrorCanal = %d\n",getLogState("openvibe-messages_tb_error"));
 			::fprintf(l_pFile, "Designer_FatalCanal = %d\n",getLogState("openvibe-messages_tb_fatal"));
+
+			::fprintf(l_pFile, "Designer_LogExpanderStatus = %s\n",
+					  gtk_expander_get_expanded(GTK_EXPANDER(gtk_builder_get_object(m_pBuilderInterface, "openvibe-expander_messages")))?"True":"False");
 
 			::fprintf(l_pFile, "Designer_HorizontalContainerPosition = %d\n",gtk_paned_get_position(GTK_PANED(gtk_builder_get_object(m_pBuilderInterface, "openvibe-horizontal_container"))));
 			gint l_iWidth=0, l_iHeight = 0;
