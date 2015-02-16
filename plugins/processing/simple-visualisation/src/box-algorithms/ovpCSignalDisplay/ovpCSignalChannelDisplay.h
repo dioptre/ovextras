@@ -246,7 +246,9 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 ui32FirstBufferToDisplay,
 			OpenViBE::uint32 ui32LastBufferToDisplay,
 			OpenViBE::uint32 ui32FirstSampleToDisplay,
-			OpenViBE::float64 f64FirstBufferStartX);
+			OpenViBE::float64 f64FirstBufferStartX,
+			OpenViBE::uint32 ui32FirstChannelToDisplay, 
+			OpenViBE::uint32 ui32LastChannelToDisplay);
 
 		/**
 		 * \brief Draw vertical line highlighting where data was last drawn

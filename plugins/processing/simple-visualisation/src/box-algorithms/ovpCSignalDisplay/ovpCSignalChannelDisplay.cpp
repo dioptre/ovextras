@@ -114,7 +114,7 @@ void CSignalChannelDisplay::onResizeEventCB(gint i32Width, gint i32Height)
 
 void CSignalChannelDisplay::updateScale()
 {
-	uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
+	const uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
 	uint64 l_ui64NumberOfBufferToDisplay = m_pDatabase->m_ui64NumberOfBufferToDisplay;
 	if(l_ui32SamplesPerBuffer == 1 && l_ui64NumberOfBufferToDisplay != 1)
 	{
@@ -315,50 +315,32 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 		return;
 	}
 
-
-    float64 l_f64MaximumDisplayedValue = 0;
-    float64 l_f64MinimumDisplayedValue = 0;
-
-    float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
+	const float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
+	const uint32 l_ui32FirstChannelToDisplay = static_cast<uint32>(std::floor( rExposedArea.y / l_f64sizePerChannel));
+	const uint32 l_ui32LastChannelToDisplay = std::min(m_oChannelList.size(), static_cast<uint32>(l_ui32FirstChannelToDisplay + std::floor(rExposedArea.height / l_f64sizePerChannel) + 1));
 
 	//updates the left ruler
-    //for each channel
-    for(uint32 i = 0 ; i<m_oChannelList.size(); i++)
-    {
-        if(m_pParentDisplayView->m_bAutoTranslation && !m_bMultiView)
-        {
-            l_f64MaximumDisplayedValue = m_vTranslateY[i] - ( (0 - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
-            l_f64MinimumDisplayedValue = m_vTranslateY[i] - ( (l_f64sizePerChannel - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
-        }
-        else if(!m_pParentDisplayView->m_bAutoTranslation && !m_bMultiView)
-        {
-            l_f64MaximumDisplayedValue = ((((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
-            l_f64MinimumDisplayedValue = -((l_f64sizePerChannel - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
-        }
-        else if(m_pParentDisplayView->m_bAutoTranslation && m_bMultiView)
-        {
-            l_f64MaximumDisplayedValue = m_vTranslateY[i] - ( (0 - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * m_ui32Height) );
-            l_f64MinimumDisplayedValue = m_vTranslateY[i] - ( (m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * m_ui32Height) );
-        }
-        else
-        {
-            l_f64MaximumDisplayedValue = ((((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * m_ui32Height) );
-            l_f64MinimumDisplayedValue = -((m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY*m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * m_ui32Height) );
-        }
-
-		if(!m_bMultiView)
-		{
-			m_oLeftRuler[m_oChannelList[i]]->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
-		}
-    }
-
 	if(m_bMultiView)
 	{
+		const float64 l_f64MaximumDisplayedValue = m_vTranslateY[0] - ( (0 - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[0] * m_f64ZoomScaleY * m_ui32Height) );
+		const float64 l_f64MinimumDisplayedValue = m_vTranslateY[0] - ( (m_ui32Height - ((m_ui32Height*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[0] * m_f64ZoomScaleY * m_ui32Height) );
+
 		m_oLeftRuler[0]->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
+	}
+	else
+	{
+		// own ruler for each channel
+		for(uint32 i = l_ui32FirstChannelToDisplay ; i<l_ui32LastChannelToDisplay; i++)
+		{
+			const float64 l_f64MaximumDisplayedValue = m_vTranslateY[i] - ( (0 - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
+			const float64 l_f64MinimumDisplayedValue = m_vTranslateY[i] - ( (l_f64sizePerChannel - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
+
+			m_oLeftRuler[m_oChannelList[i]]->update(l_f64MinimumDisplayedValue,l_f64MaximumDisplayedValue);
+		}
 	}
 
 	//determine index and position of first (in the sense of leftmost) buffer to display, and index of first sample to display
-	uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
+	const uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
 	uint32 l_ui32FirstBufferToDisplay = 0;
 	uint32 l_ui32FirstSampleToDisplay = 0;
 	uint32 l_ui32FirstBufferToDisplayPosition = 0;
@@ -367,13 +349,13 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 	if(m_pDatabase->getDisplayMode() == OVP_TypeId_SignalDisplayMode_Scan && mustRedrawAll() == false)
 	{
 		//X position of last drawn sample (0 if restarting from left edge)
-		float64 l_f64StartX = getSampleXCoordinate(l_ui32FirstBufferToDisplayPosition, l_ui32FirstSampleToDisplay, 0);
+		const float64 l_f64StartX = getSampleXCoordinate(l_ui32FirstBufferToDisplayPosition, l_ui32FirstSampleToDisplay, 0);
 
 		//position on screen of latest buffer
-		uint32 l_ui32LatestBufferPosition = l_ui32FirstBufferToDisplayPosition + m_pDatabase->m_oSampleBuffers.size()-1-l_ui32FirstBufferToDisplay;
+		const uint32 l_ui32LatestBufferPosition = l_ui32FirstBufferToDisplayPosition + m_pDatabase->m_oSampleBuffers.size()-1-l_ui32FirstBufferToDisplay;
 
 		//X position of last sample that will be drawn when channel is refreshed
-		float64 l_f64EndX = getSampleXCoordinate(l_ui32LatestBufferPosition, l_ui32SamplesPerBuffer-1, 0);
+		const float64 l_f64EndX = getSampleXCoordinate(l_ui32LatestBufferPosition, l_ui32SamplesPerBuffer-1, 0);
 
 		//make sure exposed area lies within area about to be redrawn
 		if(rExposedArea.x < (gint)l_f64StartX ||
@@ -429,10 +411,14 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 		l_f64FirstBufferToDisplayStartX = getSampleXCoordinate(l_ui32FirstBufferToDisplayPosition, 0, 0);
 	}
 
-	uint32 l_ui32LastBufferToDisplay = m_pDatabase->m_oSampleBuffers.size()-1;
+	const uint32 l_ui32LastBufferToDisplay = m_pDatabase->m_oSampleBuffers.size()-1;
+
+
+	// std::cout << "plot " << l_ui32FirstChannelToDisplay << "," << l_ui32LastChannelToDisplay << "\n";
 
 	//draw latest signals
-	drawSignals(l_ui32FirstBufferToDisplay, l_ui32LastBufferToDisplay, l_ui32FirstSampleToDisplay, l_f64FirstBufferToDisplayStartX);
+	drawSignals(l_ui32FirstBufferToDisplay, l_ui32LastBufferToDisplay, l_ui32FirstSampleToDisplay, l_f64FirstBufferToDisplayStartX,
+		l_ui32FirstChannelToDisplay, l_ui32LastChannelToDisplay);
 
 	//in scan mode, there is more to be drawn
 	if(m_pDatabase->getDisplayMode() == OVP_TypeId_SignalDisplayMode_Scan)
@@ -450,7 +436,7 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 				l_f64FirstBufferToDisplayStartX);
 
 			//draw older signals (to the right of progress line)
-			drawSignals(0, l_ui32FirstBufferToDisplay-1, 0, l_f64FirstBufferToDisplayStartX);
+			drawSignals(0, l_ui32FirstBufferToDisplay-1, 0, l_f64FirstBufferToDisplayStartX, l_ui32FirstChannelToDisplay, l_ui32LastChannelToDisplay);
 		}
 	}
 
@@ -792,7 +778,9 @@ float64 CSignalChannelDisplay::getSampleYMultiViewCoordinate(float64 f64Value)
     }
 }
 
-boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint32 ui32LastBufferToDisplay, uint32 ui32FirstSampleToDisplay, float64 f64FirstBufferStartX)
+boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint32 ui32LastBufferToDisplay, uint32 ui32FirstSampleToDisplay,
+	float64 f64FirstBufferStartX,
+	uint32 ui32FirstChannelToDisplay, uint32 ui32LastChannelToDisplay)
 {
 	//compute and draw sample points
 	uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
@@ -804,8 +792,12 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 
 	GdkColor l_oLineColor;
 
-	for(size_t k=0; k<m_oChannelList.size(); k++)
+	ui32LastChannelToDisplay = std::min(ui32LastChannelToDisplay, m_oChannelList.size());
+
+	for(size_t k=ui32FirstChannelToDisplay; k<ui32LastChannelToDisplay; k++)
 	{
+
+
         if(m_bMultiView)
 		{
 			m_pParentDisplayView->getMultiViewColor(m_oChannelList[k], l_oLineColor);
