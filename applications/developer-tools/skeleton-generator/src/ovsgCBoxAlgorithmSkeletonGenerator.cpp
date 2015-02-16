@@ -631,8 +631,11 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 	l_mSubstitutions[CString("@@ProcessInputComment@@")] = (m_bProcessInput ? "" : "//");
 	l_mSubstitutions[CString("@@ProcessMessageComment@@")] = (m_bProcessMessage ? "" : "//");
 	l_mSubstitutions[CString("@@ProcessClockCommentIn@@")] = (m_bProcessClock ? "" : "/*");
+	l_mSubstitutions[CString("@@ProcessClockCommentOut@@")] = (m_bProcessClock ? "" : "*/");
 	l_mSubstitutions[CString("@@ProcessInputCommentIn@@")] = (m_bProcessInput ? "" : "/*");
+	l_mSubstitutions[CString("@@ProcessInputCommentOut@@")] = (m_bProcessInput ? "" : "*/");
 	l_mSubstitutions[CString("@@ProcessMessageCommentIn@@")] = (m_bProcessMessage ? "" : "/*");
+	l_mSubstitutions[CString("@@ProcessMessageCommentOut@@")] = (m_bProcessMessage ? "" : "*/");
 	stringstream ss; ss << m_ui32ClockFrequency << "LL<<32";
 	l_mSubstitutions[CString("@@ClockFrequency@@")] = ss.str().c_str();
 	
@@ -768,31 +771,57 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 	l_sPattern = "@@Algorithms@@";
 	l_sSubstitute = "";
 
-	if(m_vAlgorithms.size() == 0)
+	if(m_vInputs.size() == 0)
 	{
-		l_sSubstitute = l_sSubstitute + "\\/\\/ No codec algorithms were specified in the skeleton-generator.\\n";
+		l_sSubstitute = l_sSubstitute + "\\/\\/ No Input decoder.\\n";
 	}
 	else
 	{
-		l_sSubstitute = l_sSubstitute + "\\/\\/ Codec algorithms specified in the skeleton-generator:\\n";
+		l_sSubstitute = l_sSubstitute + "\\/\\/ Input decoder:\\n";
 	}
-	for(uint32 a=0; a<m_vAlgorithms.size(); a++)
+	int index = 0;
+	for(vector<IOSStruct>::iterator it = m_vInputs.begin() ; it != m_vInputs.end(); it++)
 	{
-		/*if(a != 0) 
-			l_sSubstitute = l_sSubstitute + "\\t\\t\\t";
-*/
-		string l_sBlock = string((const char *)m_mAlgorithmHeaderDeclaration[m_vAlgorithms[a]]);
-		stringstream ss; ss << "Algo" << a << "_";
-		string l_sUniqueMarker = ss.str();
-		for(uint32 s=0; s<l_sBlock.length(); s++)
+		l_sSubstitute = l_sSubstitute + "\\t\\t\\t";
+		string l_sTypeName((const char *)(*it)._type);
+		for(uint32 s=0; s<l_sTypeName.length(); s++)
 		{
-			if(l_sBlock[s]=='@')
+			if(l_sTypeName[s]==' ')
 			{
-				l_sBlock.erase(s,1);
-				l_sBlock.insert(s,l_sUniqueMarker);
+				l_sTypeName.erase(s,1);
+				if(l_sTypeName[s] >= 'a' && l_sTypeName[s]<= 'z') l_sTypeName.replace(s,1,1,(char)(l_sTypeName[s]+'A'-'a'));
 			}
 		}
-		l_sSubstitute = l_sSubstitute + CString(l_sBlock.c_str());
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+		l_sSubstitute = l_sSubstitute + "OpenViBEToolkit::T" + CString(l_sTypeName.c_str()) +"Decoder < CBoxAlgorithm"+m_sClassName+" > m_oInput"+ CString(l_sIndex.str().c_str()) + "Decoder;\\n";
+		++index;
+	}
+	index = 0;
+	if(m_vInputs.size() == 0)
+	{
+		l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\/\\/ No Output decoder.\\n";
+	}
+	else
+	{
+		l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\/\\/ Output decoder:\\n";
+	}
+	for(vector<IOSStruct>::iterator it = m_vOutputs.begin(); it != m_vOutputs.end(); it++)
+	{
+		l_sSubstitute = l_sSubstitute + "\\t\\t\\t";
+		string l_sTypeName((const char *)(*it)._type);
+		for(uint32 s=0; s<l_sTypeName.length(); s++)
+		{
+			if(l_sTypeName[s]==' ')
+			{
+				l_sTypeName.erase(s,1);
+				if(l_sTypeName[s] >= 'a' && l_sTypeName[s]<= 'z') l_sTypeName.replace(s,1,1,(char)(l_sTypeName[s]+'A'-'a'));
+			}
+		}
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+		l_sSubstitute = l_sSubstitute + "OpenViBEToolkit::T" + CString(l_sTypeName.c_str()) +"Encoder < CBoxAlgorithm"+m_sClassName+"> m_oOutput"+ CString(l_sIndex.str().c_str()) + "Encoder;\\n";
+		++index;
 	}
 	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
@@ -818,35 +847,35 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 	// Codec Algorithm stuff. too complicated for the simple SED primitives.
 	l_sPattern = "@@AlgorithmInitialisation@@";
 	l_sSubstitute = "";
-
-	for(uint32 a=0; a<m_vAlgorithms.size(); a++)
+	//We initialize the codec algorithm by give them this, and the index of the input/output
+	index = 0;
+	for(vector<IOSStruct>::iterator it = m_vInputs.begin(); it != m_vInputs.end(); it++)
 	{
-		string l_sBlock = string((const char *)m_mAlgorithmInitialisation[m_vAlgorithms[a]]);
-		stringstream ss; ss << "Algo" << a << "_";
-		string l_sUniqueMarker = ss.str();
-		for(uint32 s=0; s<l_sBlock.length(); s++)
-		{
-			if(l_sBlock[s]=='@')
-			{
-				l_sBlock.erase(s,1);
-				l_sBlock.insert(s,l_sUniqueMarker);
-			}
-		}
-		l_sSubstitute = l_sSubstitute + CString(l_sBlock.c_str());
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+
+		l_sSubstitute = l_sSubstitute + "\\t";
+		l_sSubstitute = l_sSubstitute + "m_oInput" + CString(l_sIndex.str().c_str())+ "Decoder.initialize(*this, " + CString(l_sIndex.str().c_str()) + ");\n";
+
+		++index;
+	}
+	index = 0;
+	for(vector<IOSStruct>::iterator it = m_vOutputs.begin(); it != m_vOutputs.end(); it++)
+	{
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+
+		l_sSubstitute = l_sSubstitute + "\\t";
+		l_sSubstitute = l_sSubstitute + "m_oOutput" + CString(l_sIndex.str().c_str())+ "Encoder.initialize(*this, " + CString(l_sIndex.str().c_str()) + ");\n";
+
+		++index;
 	}
 	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 		
 	l_sPattern = "@@AlgorithmInitialisationReferenceTargets@@";
 	l_sSubstitute = "";
 
-	if(m_bUseCodecToolkit)
-	{
-		l_sSubstitute = l_sSubstitute + "\\t\\/\\/ If you need to, you can manually set the reference targets to link the codecs input and output. To do so, you can use :\\n";
-		l_sSubstitute = l_sSubstitute + "\\t\\/\\/m_oEncoder.getInputX().setReferenceTarget(m_oDecoder.getOutputX())\\n";
-		l_sSubstitute = l_sSubstitute + "\\t\\/\\/ Where 'X' depends on the codec type. Please refer to the Codec Toolkit Reference Page\\n";
-		l_sSubstitute = l_sSubstitute + "\\t\\/\\/ (http:\\/\\/openvibe.inria.fr\\/documentation\\/unstable\\/Doc_Tutorial_Developer_SignalProcessing_CodecToolkit_Ref.html) for a complete list.\\n";
-	}
-	else
+	if(!m_bUseCodecToolkit)
 	{
 		for(uint32 a=0; a<m_vAlgorithms.size(); a++)
 		{
@@ -869,21 +898,28 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 		
 	l_sPattern = "@@AlgorithmUninitialisation@@";
 	l_sSubstitute = "";
-
-	for(uint32 a=0; a<m_vAlgorithms.size(); a++)
+	//We initialize the codec algorithm by give them this, and the index of the input/output
+	index = 0;
+	for(vector<IOSStruct>::iterator it = m_vInputs.begin(); it != m_vInputs.end(); it++)
 	{
-		string l_sBlock = string((const char *)m_mAlgorithmUninitialisation[m_vAlgorithms[a]]);
-		stringstream ss; ss << "Algo" << a << "_";
-		string l_sUniqueMarker = ss.str();
-		for(uint32 s=0; s<l_sBlock.length(); s++)
-		{
-			if(l_sBlock[s]=='@')
-			{
-				l_sBlock.erase(s,1);
-				l_sBlock.insert(s,l_sUniqueMarker);
-			}
-		}
-		l_sSubstitute = l_sSubstitute + CString(l_sBlock.c_str());
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+
+		l_sSubstitute = l_sSubstitute + "\\t";
+		l_sSubstitute = l_sSubstitute + "m_oInput" + CString(l_sIndex.str().c_str())+ "Decoder.uninitialize();\n";
+
+		++index;
+	}
+	index = 0;
+	for(vector<IOSStruct>::iterator it = m_vOutputs.begin(); it != m_vOutputs.end(); it++)
+	{
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+
+		l_sSubstitute = l_sSubstitute + "\\t";
+		l_sSubstitute = l_sSubstitute + "m_oOutput" + CString(l_sIndex.str().c_str())+ "Encoder.uninitialize();\n";
+
+		++index;
 	}
 	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
