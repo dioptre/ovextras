@@ -750,32 +750,16 @@ float64 CSignalChannelDisplay::getSampleYCoordinate(float64 f64Value, uint32 ui3
 	//TODO : precompute some factors!
     float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
 
-    //Autotranslation on
-    if(m_pParentDisplayView->m_bAutoTranslation)
-    {
-		const float64 l_f64TranslatedData = m_vTranslateY[ui32ChannelIndex]-f64Value;
-        return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*l_f64sizePerChannel*l_f64TranslatedData+(ui32ChannelIndex+1)*l_f64sizePerChannel*m_f64ZoomScaleY - m_f64ZoomTranslateY*m_f64ZoomScaleY - l_f64sizePerChannel/2;
-    }
-    //Autotranslation off
-    else
-    {
-        return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*l_f64sizePerChannel*(-f64Value)+(ui32ChannelIndex+1)*l_f64sizePerChannel*m_f64ZoomScaleY - m_f64ZoomTranslateY*m_f64ZoomScaleY - l_f64sizePerChannel/2;
-    }
+	const float64 l_f64TranslatedData = m_vTranslateY[ui32ChannelIndex]-f64Value;
+    return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*l_f64sizePerChannel*l_f64TranslatedData+(ui32ChannelIndex+1)*l_f64sizePerChannel*m_f64ZoomScaleY - m_f64ZoomTranslateY*m_f64ZoomScaleY - l_f64sizePerChannel/2;
 }
 
 float64 CSignalChannelDisplay::getSampleYMultiViewCoordinate(float64 f64Value)
 {
-    //Autotranslation on
-    if(m_pParentDisplayView->m_bAutoTranslation)
-    {
-		const float64 l_f64TranslatedData = m_vTranslateY[0]-f64Value;
-        return m_vScaleY[0]*m_f64ZoomScaleY*m_ui32Height*l_f64TranslatedData + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
-    }
-    //Autotranslation off
-    else
-    {
-        return m_vScaleY[0]*m_f64ZoomScaleY*m_ui32Height* (-f64Value) + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
-    }
+
+	const float64 l_f64TranslatedData = m_vTranslateY[0]-f64Value;
+    return m_vScaleY[0]*m_f64ZoomScaleY*m_ui32Height*l_f64TranslatedData + (m_ui32Height*m_f64ZoomScaleY)/2 - m_f64ZoomTranslateY*m_f64ZoomScaleY;
+
 }
 
 boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint32 ui32LastBufferToDisplay, uint32 ui32FirstSampleToDisplay,

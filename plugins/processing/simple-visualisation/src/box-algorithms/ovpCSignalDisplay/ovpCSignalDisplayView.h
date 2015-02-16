@@ -122,6 +122,7 @@ namespace OpenViBEPlugins
 
 			void changeMultiView(void);
 
+			void recreateWidgets(void);
 			void updateMainTableStatus(void);
 
 			void activateToolbarButtons(
@@ -152,9 +153,6 @@ namespace OpenViBEPlugins
 				::GtkSpinButton* pSpinButton);
 			OpenViBE::boolean onCustomVerticalOffsetChangedCB(
 				::GtkSpinButton* pSpinButton);
-
-			OpenViBE::boolean onAutoTranslationToggledCB(
-					GtkToggleButton* pToggleButton);
 
 			/**
 			 * \brief Get a channel display object
@@ -213,6 +211,8 @@ namespace OpenViBEPlugins
 			//! The table containing the CSignalChannelDisplays
 			GtkWidget* m_pSignalDisplayTable;
 
+			GtkWidget* m_pSeparator;
+
 			//! Array of the channel's labels
 			std::vector<GtkWidget*> m_oChannelLabel;
 
@@ -258,9 +258,6 @@ namespace OpenViBEPlugins
 			//! Value of custom vertical offset
 			OpenViBE::float64 m_f64CustomVerticalOffset;
 			//@}
-
-			//! Flag set to true when auto translation is on (center signal in his spot)
-            OpenViBE::boolean m_bAutoTranslation;
 
 			//! The database that contains the information to use to draw the signals
 			CBufferDatabase * m_pBufferDatabase;

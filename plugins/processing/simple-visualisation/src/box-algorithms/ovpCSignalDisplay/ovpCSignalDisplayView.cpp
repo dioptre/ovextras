@@ -25,11 +25,9 @@ namespace OpenViBEPlugins
 		void scalingModeButtonCallback(::GtkWidget *widget, gpointer data);
 		void toggleLeftRulerButtonCallback(::GtkWidget *widget, gpointer data);
 		void toggleBottomRulerButtonCallback(::GtkWidget *widget, gpointer data);
-		// void toggleAutoVerticalScaleButtonCallback(::GtkToggleButton *togglebutton, gpointer data);
 		void customVerticalScaleChangedCallback(::GtkSpinButton* pSpinButton, gpointer data);
 		void customVerticalOffsetChangedCallback(::GtkSpinButton* pSpinButton, gpointer data);
 		gboolean spinButtonValueChangedCallback(::GtkSpinButton *widget,  gpointer data); // time scale
-		// void toggleAutoTranslationButtonCallback(::GtkToggleButton *togglebutton, gpointer data);
 		void channelSelectButtonCallback(::GtkButton *button, gpointer data);
 		void channelSelectDialogApplyButtonCallback(::GtkButton *button, gpointer data);
 		void stimulationColorsButtonCallback(::GtkButton *button, gpointer data);
@@ -71,8 +69,6 @@ namespace OpenViBEPlugins
 		{
 
 			m_bVerticalScaleChanged=true;
-			// m_bAutoTranslation = !bIsEEG;
-			m_bAutoTranslation = true;
 
 			construct(oBufferDatabase,f64TimeScale,oDisplayMode);
 		}
@@ -96,7 +92,6 @@ namespace OpenViBEPlugins
 			,m_pBottomRuler(NULL)
 		{
 			m_bIsEEGSignal = bIsEEG;
-			m_bAutoTranslation = !bIsEEG;
 			m_bAutoVerticalScale = !bIsEEG;
 			m_bVerticalScaleChanged = true;
 			construct(oBufferDatabase,f64TimeScale,oDisplayMode);
@@ -397,12 +392,12 @@ namespace OpenViBEPlugins
 				(l_ui32ChannelCount+1)*l_i32ChannelDisplayHeightRequest + l_ui32ChannelCount*l_i32HorizontalSeparatorHeightRequest);
 
 			//add a vertical separator
-			::GtkWidget* l_pSeparator = ::gtk_vseparator_new();
-			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable), l_pSeparator,
+			m_pSeparator = ::gtk_vseparator_new();
+			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable), m_pSeparator,
 				1, 2, //second column
 				0, l_ui32ChannelCount*2+1, //run over the whole table height
 				GTK_SHRINK, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), 0, 0);
-			::gtk_widget_show(l_pSeparator);
+			::gtk_widget_show(m_pSeparator);
 
 			//create a size group for channel labels and the empty bottom left widget
 			//(useful to position the bottom ruler correctly)
@@ -887,20 +882,104 @@ namespace OpenViBEPlugins
 			}
 		}
 
+		// When channels are added or removed, this function removes and recreates the table holding the
+		// rulers. The reason to do this is that the size of the drawing canvas is dependent on the size
+		// of the table, and we want to use the window space to draw the selected signals, likely much
+		// smaller than the size of canvas for all the channes.
+		// @fixme the hacks with g_object_ref() probably leak memory. They're needed as otherwise
+		// gtk unallocates the widgets.
+		// @fixme this code could really use some refactoring, for example
+		// make a struct to hold label and ruler and keep them in a vector. Also, similar attach code is
+		// already in init(). Turn to functions.
+		void CSignalDisplayView::recreateWidgets(void)
+		{
+			// Use m_vSelectedchannels
+
+			// Remove labels and rulers
+			OpenViBE::uint32 l_ui32ChannelCount=0;
+			for(uint32 i=0;i<m_vSelectedChannels.size();i++)
+			{
+				if(m_vSelectedChannels[i])
+				{
+					l_ui32ChannelCount++;
+				}
+				g_object_ref(m_oChannelLabel[i]);
+				g_object_ref(m_oChannelDisplay[0]->getRulerWidget(i));
+				gtk_container_remove(GTK_CONTAINER(m_pSignalDisplayTable), m_oChannelLabel[i]);
+				gtk_container_remove(GTK_CONTAINER(m_pSignalDisplayTable), m_oChannelDisplay[0]->getRulerWidget(i));
+			}
+
+			// Remove the separator
+			g_object_ref(m_pSeparator);
+			gtk_container_remove(GTK_CONTAINER(m_pSignalDisplayTable), m_pSeparator);
+
+			// Remove the drawing area
+			g_object_ref(m_oChannelDisplay[0]->getSignalDisplayWidget());
+			gtk_container_remove(GTK_CONTAINER(m_pSignalDisplayTable), m_oChannelDisplay[0]->getSignalDisplayWidget());
+
+			// Resize the table to fit only the selected amount of channels (+multiview)
+			::gtk_table_resize(GTK_TABLE(m_pSignalDisplayTable), l_ui32ChannelCount*2+1, 4);
+
+			// Add selected channel widgets back
+			for(uint32 i=0,cnt=0;i<m_vSelectedChannels.size();i++)
+			{
+				if(m_vSelectedChannels[i])
+				{
+					::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
+	                    m_oChannelDisplay[0]->getRulerWidget(i),
+						2, 3, //third column
+						cnt*2, (cnt*2)+1,
+						GTK_FILL, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),	0, 0);
+					::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),m_oChannelLabel[i],
+						0, 1, //first column
+						cnt*2, (cnt*2)+1,
+						GTK_FILL, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
+						0, 0);
+					cnt++;
+				}
+//				g_object_unref(m_oChannelLabel[i]);
+//				g_object_unref(m_oChannelDisplay[0]->getRulerWidget(i));
+			}
+
+			// Add separator back
+			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable), m_pSeparator,
+				1, 2, //second column
+				0, l_ui32ChannelCount*2+1, //run over the whole table height
+				GTK_SHRINK, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), 0, 0);
+//			g_object_unref(m_pSeparator);
+
+			// Add drawing canvas back
+            ::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
+                        m_oChannelDisplay[0]->getSignalDisplayWidget(),
+                        3, 4, //fourth column
+                        0, l_ui32ChannelCount*2,// run over the whole table (last row for multiview)
+                        static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
+                        0, 0);
+//			g_object_unref(m_oChannelDisplay[0]->getSignalDisplayWidget());
+
+			// Just some bogus values, it'll get a better size by itself when its set to too small.
+			::gtk_widget_set_size_request(
+				m_pSignalDisplayTable,
+				40,
+				(l_ui32ChannelCount+1)*20 + l_ui32ChannelCount*5);
+
+//            ::gtk_widget_show(m_oChannelDisplay[0]->getSignalDisplayWidget());
+
+		}
+
+
 		void CSignalDisplayView::updateMainTableStatus()
 		{
-			uint32 l_ui32Index=0;
-
 			// Do we have multiview channels selected?
 			boolean l_bMultiView=false;
-			for(uint32 i=0; i<m_oChannelLabel.size(); i++)
+			for(uint32 i=0; i<m_vMultiViewSelectedChannels.size(); i++)
 			{
 				l_bMultiView|=m_vMultiViewSelectedChannels[i];
 			}
 
 			// See if any normal channels have been selected
 			boolean l_bChannels=false;
-			for(uint32 i=0; i<m_oChannelLabel.size(); i++)
+			for(uint32 i=0; i<m_vSelectedChannels.size(); i++)
 			{
 				l_bChannels|=m_vSelectedChannels[i];
 			}
@@ -935,7 +1014,6 @@ namespace OpenViBEPlugins
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrollModeButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleLeftRulerButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleBottomRulerButton")), bActive);
-            //::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayAutoTranslationButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayChannelSelectButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayStimulationColorsButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayMultiViewButton")), bActive);
@@ -1243,15 +1321,6 @@ namespace OpenViBEPlugins
 		}
 
 
-        void toggleAutoTranslationButtonCallback(::GtkToggleButton *togglebutton, gpointer data)
-        {
-			/*
-            CSignalDisplayView* l_pView = reinterpret_cast < CSignalDisplayView* >(data);
-            l_pView->onAutoTranslationToggledCB(togglebutton);
-			*/
-        }
-
-
 		//called when the channel select button is pressed (opens the channel selection dialog)
 		void channelSelectButtonCallback(::GtkButton *button, gpointer data)
 		{
@@ -1262,13 +1331,12 @@ namespace OpenViBEPlugins
 			::GtkTreeSelection* l_pChannelSelectTreeSelection = ::gtk_tree_view_get_selection(l_pChannelSelectTreeView);
 			::GtkTreeModel* l_pChannelSelectTreeModel = ::gtk_tree_view_get_model(l_pChannelSelectTreeView);
 			::GtkTreeIter l_oIter;
-			uint32 l_ui32Index=0;
 
 			if(::gtk_tree_model_get_iter_first(l_pChannelSelectTreeModel, &l_oIter))
 			{
-				do
+				for(uint32 i=0;i<l_pView->m_vSelectedChannels.size();i++)
 				{
-					if(l_pView->m_vSelectedChannels[l_ui32Index])
+					if(l_pView->m_vSelectedChannels[i])
 					{
 						::gtk_tree_selection_select_iter(l_pChannelSelectTreeSelection, &l_oIter);
 					}
@@ -1276,9 +1344,11 @@ namespace OpenViBEPlugins
 					{
 						::gtk_tree_selection_unselect_iter(l_pChannelSelectTreeSelection, &l_oIter);
 					}
-					l_ui32Index++;
+					if(!::gtk_tree_model_iter_next(l_pChannelSelectTreeModel, &l_oIter)) 
+					{
+						break;
+					}
 				}
-				while(::gtk_tree_model_iter_next(l_pChannelSelectTreeModel, &l_oIter));
 			}
 
 			//finally, show the information dialog
@@ -1294,37 +1364,38 @@ namespace OpenViBEPlugins
 			::GtkTreeSelection* l_pChannelSelectTreeSelection = ::gtk_tree_view_get_selection(l_pChannelSelectTreeView);
 			::GtkTreeModel* l_pChannelSelectTreeModel = ::gtk_tree_view_get_model(l_pChannelSelectTreeView);
 			::GtkTreeIter l_oIter;
-			uint32 l_ui32Index=0;
 			uint32 l_ui32SelectedCount = 0;
 
 			l_pView->m_oChannelDisplay[0]->resetChannelList();
 
 			if(::gtk_tree_model_get_iter_first(l_pChannelSelectTreeModel, &l_oIter))
 			{
-				do
+				for(uint32 i=0;i<l_pView->m_vSelectedChannels.size();i++)
 				{
-					l_pView->m_vSelectedChannels[l_ui32Index]=(::gtk_tree_selection_iter_is_selected(l_pChannelSelectTreeSelection, &l_oIter)?true:false);
+					l_pView->m_vSelectedChannels[i]=(::gtk_tree_selection_iter_is_selected(l_pChannelSelectTreeSelection, &l_oIter)?true:false);
 
                     if(gtk_tree_selection_iter_is_selected(l_pChannelSelectTreeSelection, &l_oIter)?true:false)
                     {
-                        l_pView->m_oChannelDisplay[0]->addChannelList(l_ui32Index);
-                        gtk_widget_show(l_pView->m_oChannelLabel[l_ui32Index]);
+                        l_pView->m_oChannelDisplay[0]->addChannelList(i);
+                        gtk_widget_show(l_pView->m_oChannelLabel[i]);
                         if(l_pView->m_bShowLeftRulers == true)
                         {
-                            gtk_widget_show(l_pView->m_oLeftRulers[l_ui32Index]);
+                            gtk_widget_show(l_pView->m_oLeftRulers[i]);
                         }
 						l_ui32SelectedCount++;
 					}
 					else
 					{
-						gtk_widget_hide(l_pView->m_oChannelLabel[l_ui32Index]);
-						gtk_widget_hide(l_pView->m_oLeftRulers[l_ui32Index]);
+						gtk_widget_hide(l_pView->m_oChannelLabel[i]);
+						gtk_widget_hide(l_pView->m_oLeftRulers[i]);
 
 					}
 
-					l_ui32Index++;
+					if(!::gtk_tree_model_iter_next(l_pChannelSelectTreeModel, &l_oIter))
+					{
+						break;
+					}
 				}
-				while(::gtk_tree_model_iter_next(l_pChannelSelectTreeModel, &l_oIter));
 			}
 
 			l_pView->m_vPreviousValueMax.resize(l_ui32SelectedCount);
@@ -1335,6 +1406,7 @@ namespace OpenViBEPlugins
 				l_pView->m_vPreviousValueMin[i] = +DBL_MAX;
 			}
 
+			l_pView->recreateWidgets();
 			l_pView->updateMainTableStatus();
 
 			l_pView->m_bVerticalScaleChanged = true;
@@ -1412,13 +1484,12 @@ namespace OpenViBEPlugins
 			::GtkTreeSelection* l_pMultiViewTreeSelection = ::gtk_tree_view_get_selection(l_pMultiViewTreeView);
 			::GtkTreeModel* l_pMultiViewTreeModel = ::gtk_tree_view_get_model(l_pMultiViewTreeView);
 			::GtkTreeIter l_oIter;
-			uint32 l_ui32Index=0;
 
 			if(::gtk_tree_model_get_iter_first(l_pMultiViewTreeModel, &l_oIter))
 			{
-				do
+				for(uint32 i=0;l_pView->m_vMultiViewSelectedChannels.size();i++)
 				{
-					if(l_pView->m_vMultiViewSelectedChannels[l_ui32Index])
+					if(l_pView->m_vMultiViewSelectedChannels[i])
 					{
 						::gtk_tree_selection_select_iter(l_pMultiViewTreeSelection, &l_oIter);
 					}
@@ -1426,9 +1497,11 @@ namespace OpenViBEPlugins
 					{
 						::gtk_tree_selection_unselect_iter(l_pMultiViewTreeSelection, &l_oIter);
 					}
-					l_ui32Index++;
+					if(!::gtk_tree_model_iter_next(l_pMultiViewTreeModel, &l_oIter))
+					{
+						break;
+					}
 				}
-				while(::gtk_tree_model_iter_next(l_pMultiViewTreeModel, &l_oIter));
 			}
 
 			//finally, show the information dialog
@@ -1444,16 +1517,18 @@ namespace OpenViBEPlugins
 			::GtkTreeSelection* l_pMultiViewTreeSelection = ::gtk_tree_view_get_selection(l_pMultiViewTreeView);
 			::GtkTreeModel* l_pMultiViewTreeModel = ::gtk_tree_view_get_model(l_pMultiViewTreeView);
 			::GtkTreeIter l_oIter;
-			uint32 l_ui32Index=0;
 
 			if(::gtk_tree_model_get_iter_first(l_pMultiViewTreeModel, &l_oIter))
 			{
-				do
+				for(uint32 i=0;i<l_pView->m_vMultiViewSelectedChannels.size();i++)
 				{
-					l_pView->m_vMultiViewSelectedChannels[l_ui32Index]=(::gtk_tree_selection_iter_is_selected(l_pMultiViewTreeSelection, &l_oIter)?true:false);
-					l_ui32Index++;
+					l_pView->m_vMultiViewSelectedChannels[i]=(::gtk_tree_selection_iter_is_selected(l_pMultiViewTreeSelection, &l_oIter)?true:false);
+					
+					if(!::gtk_tree_model_iter_next(l_pMultiViewTreeModel, &l_oIter))
+					{
+						break;
+					}
 				}
-				while(::gtk_tree_model_iter_next(l_pMultiViewTreeModel, &l_oIter));
 			}
 
 			l_pView->changeMultiView();

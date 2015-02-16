@@ -39,8 +39,8 @@ namespace OpenViBEPlugins
 			m_pBufferDatabase = new CBufferDatabase(*this);
 
 			//retrieve settings
-			CIdentifier l_oDisplayMode                   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-			CIdentifier l_oScalingMode                   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+			CIdentifier l_oDisplayMode                   = (uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+			CIdentifier l_oScalingMode                   = (uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 			m_f64RefreshInterval                         = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 			float64 l_f64VerticalScale                   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
 			float64 l_f64VerticalOffset                  = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
