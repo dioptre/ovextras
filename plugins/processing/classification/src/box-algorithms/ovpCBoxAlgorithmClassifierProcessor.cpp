@@ -20,6 +20,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	m_pFeaturesDecoder = NULL;
 	m_pLabelsEncoder = NULL;
 	m_pClassificationStateEncoder = NULL;
+	m_pProbabilityValues=NULL;
 	m_pClassifier = NULL;
 
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
