@@ -95,21 +95,6 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	XML::IXMLNode *l_pStimulationsNode = l_pRootNode->getChildByName(c_sStimulationsNodeName);
 	if(l_pStimulationsNode)
 	{
-		//Load Rejected class label and put it as the entry for class 0
-		l_pTempNode = l_pStimulationsNode->getChildByName(c_sRejectedClassNodeName);
-		if(l_pTempNode)
-		{
-			CString l_sRejectedLabel(l_pTempNode->getPCData());
-		
-			m_vStimulation[0]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sRejectedLabel);
-
-
-		} 
-		else
-		{
-			this->getLogManager() << LogLevel_Warning << "The configuration file had no subnode " << c_sRejectedClassNodeName << ". Trouble may appear later.\n";
-		}
-
 		//Now load every stimulation and store them in the map with the right class id
 		for(uint32 i=0; i < l_pStimulationsNode->getChildCount(); i++)
 		{
