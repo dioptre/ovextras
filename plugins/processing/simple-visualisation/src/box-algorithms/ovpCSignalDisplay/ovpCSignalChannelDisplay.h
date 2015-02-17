@@ -326,6 +326,10 @@ namespace OpenViBEPlugins
 
         //! Is it a multiview display ?
         OpenViBE::boolean m_bMultiView;
+
+		// Currently visible y segment in the drawing area
+		OpenViBE::uint32 m_ui32StartY;
+		OpenViBE::uint32 m_ui32StopY;
 	};
 
 	}

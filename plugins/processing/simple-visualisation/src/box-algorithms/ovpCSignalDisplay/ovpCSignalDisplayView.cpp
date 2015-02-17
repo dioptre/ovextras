@@ -756,6 +756,9 @@ namespace OpenViBEPlugins
 						{
 							for(size_t i=0; i<m_oChannelDisplay.size(); i++)
 							{
+#ifdef DEBUG
+								std::cout << "Requesting full redraw for " << i << ", case D\n";
+#endif
 								m_oChannelDisplay[i]->redrawAllAtNextRefresh();
 							}
 						}
@@ -775,7 +778,15 @@ namespace OpenViBEPlugins
 						printf("full redraw\n");*/
 						GdkRectangle l_oUpdateRect;
 						m_oChannelDisplay[i]->getUpdateRectangle(l_oUpdateRect);
-						if(m_oChannelDisplay[i]->getSignalDisplayWidget()->window) gdk_window_invalidate_rect(m_oChannelDisplay[i]->getSignalDisplayWidget()->window, &l_oUpdateRect, false);
+						if(m_oChannelDisplay[i]->getSignalDisplayWidget()->window) 
+						{
+#ifdef DEBUG
+							std::cout 
+								<< "Invalidate rect B " << l_oUpdateRect.x << "+" << l_oUpdateRect.width 
+								<< "," << l_oUpdateRect.y << "+" << l_oUpdateRect.height << "\n";
+#endif
+							gdk_window_invalidate_rect(m_oChannelDisplay[i]->getSignalDisplayWidget()->window, &l_oUpdateRect, false);
+						}
 					/*}
 					else
 					{
@@ -882,31 +893,21 @@ namespace OpenViBEPlugins
 			}
 		}
 
-		// When channels are added or removed, this function removes and recreates the table holding the
-		// rulers. The reason to do this is that the size of the drawing canvas is dependent on the size
-		// of the table, and we want to use the window space to draw the selected signals, likely much
-		// smaller than the size of canvas for all the channes.
-		// @fixme the hacks with g_object_ref() probably leak memory. They're needed as otherwise
-		// gtk unallocates the widgets.
-		// @fixme this code could really use some refactoring, for example
-		// make a struct to hold label and ruler and keep them in a vector. Also, similar attach code is
-		// already in init(). Turn to functions.
-		void CSignalDisplayView::recreateWidgets(void)
+		// This removes all the per-channel rulers and widgets. It adds ref count to the removed
+		// widgets so we can later add them back.
+		void CSignalDisplayView::removeOldWidgets(void)
 		{
-			// Use m_vSelectedchannels
-
 			// Remove labels and rulers
-			OpenViBE::uint32 l_ui32ChannelCount=0;
 			for(uint32 i=0;i<m_vSelectedChannels.size();i++)
 			{
+				// Only remove those which we know are displayed
 				if(m_vSelectedChannels[i])
 				{
-					l_ui32ChannelCount++;
+					g_object_ref(m_oChannelLabel[i]);
+					g_object_ref(m_oChannelDisplay[0]->getRulerWidget(i));
+					gtk_container_remove(GTK_CONTAINER(m_pSignalDisplayTable), m_oChannelLabel[i]);
+					gtk_container_remove(GTK_CONTAINER(m_pSignalDisplayTable), m_oChannelDisplay[0]->getRulerWidget(i));
 				}
-				g_object_ref(m_oChannelLabel[i]);
-				g_object_ref(m_oChannelDisplay[0]->getRulerWidget(i));
-				gtk_container_remove(GTK_CONTAINER(m_pSignalDisplayTable), m_oChannelLabel[i]);
-				gtk_container_remove(GTK_CONTAINER(m_pSignalDisplayTable), m_oChannelDisplay[0]->getRulerWidget(i));
 			}
 
 			// Remove the separator
@@ -917,8 +918,21 @@ namespace OpenViBEPlugins
 			g_object_ref(m_oChannelDisplay[0]->getSignalDisplayWidget());
 			gtk_container_remove(GTK_CONTAINER(m_pSignalDisplayTable), m_oChannelDisplay[0]->getSignalDisplayWidget());
 
+
+		}
+
+		// When channels are added or removed, this function removes and recreates the table holding the
+		// rulers. The reason to do this is that the size of the drawing canvas is dependent on the size
+		// of the table, and we want to use the window space to draw the selected signals, likely much
+		// smaller than the size of canvas for all the channes.
+		// @note refcounts of the added widgets are decreased. Its expected removeOldWidgets() has been called before.
+		// @fixme this code could really use some refactoring, for example
+		// make a struct to hold label and ruler and keep them in a vector. Also, similar attach code is
+		// already in init(). Turn to functions.
+		void CSignalDisplayView::recreateWidgets(uint32 ui32ChannelCount)
+		{
 			// Resize the table to fit only the selected amount of channels (+multiview)
-			::gtk_table_resize(GTK_TABLE(m_pSignalDisplayTable), l_ui32ChannelCount*2+1, 4);
+			::gtk_table_resize(GTK_TABLE(m_pSignalDisplayTable), ui32ChannelCount*2+1, 4);
 
 			// Add selected channel widgets back
 			for(uint32 i=0,cnt=0;i<m_vSelectedChannels.size();i++)
@@ -936,34 +950,32 @@ namespace OpenViBEPlugins
 						GTK_FILL, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
 						0, 0);
 					cnt++;
+					g_object_unref(m_oChannelLabel[i]);
+					g_object_unref(m_oChannelDisplay[0]->getRulerWidget(i));
 				}
-//				g_object_unref(m_oChannelLabel[i]);
-//				g_object_unref(m_oChannelDisplay[0]->getRulerWidget(i));
 			}
 
 			// Add separator back
 			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable), m_pSeparator,
 				1, 2, //second column
-				0, l_ui32ChannelCount*2+1, //run over the whole table height
+				0, ui32ChannelCount*2+1, //run over the whole table height
 				GTK_SHRINK, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), 0, 0);
-//			g_object_unref(m_pSeparator);
+			g_object_unref(m_pSeparator);
 
 			// Add drawing canvas back
             ::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
                         m_oChannelDisplay[0]->getSignalDisplayWidget(),
                         3, 4, //fourth column
-                        0, l_ui32ChannelCount*2,// run over the whole table (last row for multiview)
+                        0, ui32ChannelCount*2,// run over the whole table (last row for multiview)
                         static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
                         0, 0);
-//			g_object_unref(m_oChannelDisplay[0]->getSignalDisplayWidget());
+			g_object_unref(m_oChannelDisplay[0]->getSignalDisplayWidget());
 
 			// Just some bogus values, it'll get a better size by itself when its set to too small.
 			::gtk_widget_set_size_request(
 				m_pSignalDisplayTable,
 				40,
-				(l_ui32ChannelCount+1)*20 + l_ui32ChannelCount*5);
-
-//            ::gtk_widget_show(m_oChannelDisplay[0]->getSignalDisplayWidget());
+				(ui32ChannelCount+1)*10 + ui32ChannelCount*5);
 
 		}
 
@@ -1027,6 +1039,9 @@ namespace OpenViBEPlugins
 			//force full redraw of all channels when display mode changes
 			for(size_t i=0 ; i<m_oChannelDisplay.size(); i++)
 			{
+#ifdef DEBUG
+				std::cout << "Requesting full redraw for " << i << ", case E\n";
+#endif
 				m_oChannelDisplay[i]->redrawAllAtNextRefresh();
 			}
 
@@ -1118,8 +1133,10 @@ namespace OpenViBEPlugins
 				updateStimulationColorsDialog(rStimulationName, l_oColor);
 			}
 
-			//redraw channels
-			redraw();
+			// @note We should not redraw after the stimuli, as the stim timestamp may be in the future compared
+			// to the signal database. If that is the case, we get an expensive redraw from the code. 
+			// The redraw will be carried out in the normal course of events when plotting the signal.
+
 		}
 
 		void CSignalDisplayView::getStimulationColor(uint64 ui64StimulationCode, GdkColor& rColor)
@@ -1368,6 +1385,9 @@ namespace OpenViBEPlugins
 
 			l_pView->m_oChannelDisplay[0]->resetChannelList();
 
+			// We first remove the widgets while we still know from m_vSelectedChannels which are displayed
+			l_pView->removeOldWidgets();
+
 			if(::gtk_tree_model_get_iter_first(l_pChannelSelectTreeModel, &l_oIter))
 			{
 				for(uint32 i=0;i<l_pView->m_vSelectedChannels.size();i++)
@@ -1406,7 +1426,9 @@ namespace OpenViBEPlugins
 				l_pView->m_vPreviousValueMin[i] = +DBL_MAX;
 			}
 
-			l_pView->recreateWidgets();
+			// Add the widgets back with the new list of channels
+			l_pView->recreateWidgets(l_ui32SelectedCount);
+
 			l_pView->updateMainTableStatus();
 
 			l_pView->m_bVerticalScaleChanged = true;

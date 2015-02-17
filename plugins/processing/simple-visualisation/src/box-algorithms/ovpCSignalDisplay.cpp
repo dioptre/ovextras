@@ -1,3 +1,4 @@
+
 #include "ovpCSignalDisplay.h"
 
 #include <cmath>
@@ -5,6 +6,7 @@
 #include <cstdlib>
 
 #include <openvibe/ovITimeArithmetics.h>
+#include <system/ovCTime.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -57,7 +59,7 @@ namespace OpenViBEPlugins
 			}
 
 			this->getLogManager() << LogLevel_Debug << "l_sVerticalScale=" << l_f64VerticalScale << ", offset " << l_f64VerticalOffset << "\n";
-			this->getLogManager() << LogLevel_Info << "l_sScalingMode=" << l_oScalingMode << "\n";
+			this->getLogManager() << LogLevel_Trace << "l_sScalingMode=" << l_oScalingMode << "\n";
 
 			//create GUI
 			m_pSignalDisplayView = new CSignalDisplayView(
@@ -117,6 +119,10 @@ namespace OpenViBEPlugins
 				return false;
 			}
 
+#ifdef DEBUG
+			uint64 in = System::Time::zgetTime();
+#endif
+
 			// Stimulations in input 1
 			for(uint32 c=0; c<l_pDynamicBoxContext->getInputChunkCount(1); c++)
 			{
@@ -139,15 +145,6 @@ namespace OpenViBEPlugins
 					}
 				}
 			}
-
-			const uint64 l_ui64TimeNow = getPlayerContext().getCurrentTime();
-			if(m_ui64LastScaleRefreshTime == 0 || l_ui64TimeNow - m_ui64LastScaleRefreshTime > ITimeArithmetics::secondsToTime(m_f64RefreshInterval)) 
-			{
-//				this->getLogManager() << LogLevel_Info << "Refresh at " << ITimeArithmetics::timeToSeconds(l_ui64TimeNow) << "s \n";
-				((CSignalDisplayView*)m_pSignalDisplayView)->refreshScale();
-				m_ui64LastScaleRefreshTime = l_ui64TimeNow;
-			}
-
 
 			// Streamed matrix in input 0
 			for(uint32 c=0; c<l_pDynamicBoxContext->getInputChunkCount(0); c++)
@@ -172,6 +169,11 @@ namespace OpenViBEPlugins
 				{
 					const IMatrix* l_pMatrix = m_oStreamedMatrixDecoder.getOutputMatrix();
 
+#ifdef DEBUG
+					static int count = 0; 
+					std::cout << "Push chunk " << (count++) << " at " << 	l_pDynamicBoxContext->getInputChunkStartTime(0,c) << "\n";
+#endif
+
 					bool l_bReturnValue = m_pBufferDatabase->setMatrixBuffer(l_pMatrix->getBuffer(),
 						l_pDynamicBoxContext->getInputChunkStartTime(0,c),
 						l_pDynamicBoxContext->getInputChunkEndTime(0,c));
@@ -182,6 +184,19 @@ namespace OpenViBEPlugins
 
 				}
 			}
+
+			const uint64 l_ui64TimeNow = getPlayerContext().getCurrentTime();
+			if(m_ui64LastScaleRefreshTime == 0 || l_ui64TimeNow - m_ui64LastScaleRefreshTime > ITimeArithmetics::secondsToTime(m_f64RefreshInterval)) 
+			{
+//				this->getLogManager() << LogLevel_Info << "Refresh at " << ITimeArithmetics::timeToSeconds(l_ui64TimeNow) << "s \n";
+				((CSignalDisplayView*)m_pSignalDisplayView)->refreshScale();
+				m_ui64LastScaleRefreshTime = l_ui64TimeNow;
+			}
+
+#ifdef DEBUG
+			out = System::Time::zgetTime();
+			std::cout << "Elapsed1 " << out-in << "\n";
+#endif
 
 			return true;
 		}

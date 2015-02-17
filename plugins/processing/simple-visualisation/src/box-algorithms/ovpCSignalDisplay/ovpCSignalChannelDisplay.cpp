@@ -2,6 +2,8 @@
 
 #include "ovpCSignalDisplayView.h"
 #include <cfloat>
+#include <system/ovCTime.h>
+#include <openvibe/ovITimeArithmetics.h>
 
 #include <sstream>
 #include <iostream>
@@ -45,6 +47,8 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 	,m_ui64LatestDisplayedTime(0)
 	,m_bRedrawAll(false)
     ,m_bMultiView(false)
+	,m_ui32StartY(0)
+	,m_ui32StopY(i32LeftRulerHeightRequest)
 {
 
     //creates the drawing area
@@ -109,6 +113,9 @@ void CSignalChannelDisplay::onResizeEventCB(gint i32Width, gint i32Height)
 	m_ui32Width = i32Width;
 	m_ui32Height = i32Height;
 
+	m_ui32StartY = 0;
+	m_ui32StopY = m_ui32Height;
+
 	updateScale();
 }
 
@@ -129,6 +136,9 @@ void CSignalChannelDisplay::updateScale()
 		m_f64PointStep = static_cast<float64>(m_ui32Width) / ( (l_ui32SamplesPerBuffer*l_ui64NumberOfBufferToDisplay) - 1);
 	}
 
+#ifdef DEBUG
+	std::cout << "Requesting full redraw, C\n";
+#endif
 	redrawAllAtNextRefresh();
 }
 
@@ -265,8 +275,8 @@ uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
 
 void CSignalChannelDisplay::getUpdateRectangle(GdkRectangle& rRect)
 {
-	rRect.y = 0;
-	rRect.height = m_ui32Height;
+	rRect.y = m_ui32StartY;
+	rRect.height = m_ui32StopY-m_ui32StartY;
 
 	//if in scroll mode, or if redrawing everything, update the whole drawing area
 	if(m_pDatabase->getDisplayMode() == OVP_TypeId_SignalDisplayMode_Scroll || mustRedrawAll() == true)
@@ -315,9 +325,17 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 		return;
 	}
 
+#ifdef DEBUG
+	uint64 in = System::Time::zgetTime();
+#endif
+
+	// These parameters control that we don't unnecessarily draw parts of the signal which are not in view
 	const float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
 	const uint32 l_ui32FirstChannelToDisplay = static_cast<uint32>(std::floor( rExposedArea.y / l_f64sizePerChannel));
 	const uint32 l_ui32LastChannelToDisplay = std::min(m_oChannelList.size(), static_cast<uint32>(l_ui32FirstChannelToDisplay + std::floor(rExposedArea.height / l_f64sizePerChannel) + 1));
+
+	m_ui32StartY = static_cast<uint32>(l_f64sizePerChannel*l_ui32FirstChannelToDisplay);
+	m_ui32StopY = std::min(m_ui32Height,static_cast<uint32>(l_f64sizePerChannel*l_ui32LastChannelToDisplay+1));
 
 	//updates the left ruler
 	if(m_bMultiView)
@@ -363,6 +381,9 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 		{
 			//this means the window was invalidated by an external widget : redraw it all
 			m_bRedrawAll = true;
+#ifdef DEBUG
+			std::cout << "Requesting full redraw, A\n";
+#endif
 			m_pDatabase->getIndexOfBufferStartingAtTime(m_pParentDisplayView->m_ui64LeftmostDisplayedTime, l_ui32FirstBufferToDisplay);
 			l_ui32FirstBufferToDisplayPosition = 0;
 		}
@@ -445,6 +466,11 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 
 	//update time of latest displayed data
 	m_ui64LatestDisplayedTime = m_pDatabase->m_oEndTime.back();
+
+#ifdef DEBUG
+	uint64 out = System::Time::zgetTime();
+	std::cout << "Elapsed2 " << ITimeArithmetics::timeToSeconds(out-in) << ", ld=" << m_ui64LatestDisplayedTime << "\n";
+#endif
 
 	//reset redraw all flag
 	m_bRedrawAll = false;
@@ -531,22 +557,6 @@ void CSignalChannelDisplay::updateDisplayedValueRange(std::vector<float64> & rDi
 		rDisplayedValueMin[k] = m_vLocalMinimum[k];
 		rDisplayedValueMax[k] = m_vLocalMaximum[k];
 
-        //in global best fit mode, translate signals if necessary // Commenting out this since it's already done in CSignalChannelDisplay::updateDisplayParameters()
-/*        if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
-        {
-            //compute Y coord of local max and min
-            gint l_iMaxY = (gint)getSampleYCoordinate(m_vLocalMaximum[k],k);
-            gint l_iMinY = (gint)getSampleYCoordinate(m_vLocalMinimum[k],k);
-
-            //translate signal if some data is plotted out of the window and to center it in his spot
-            if(l_iMaxY < (int32)((k-1)*l_f64sizePerChannel) || l_iMinY > (int32)(k*l_f64sizePerChannel))
-            {
-                m_vTranslateY[k] = (m_vLocalMaximum[k] + m_vLocalMinimum[k]) / 2;
-
-                //reflect changes
-                redrawAllAtNextRefresh();
-            }
-        }*/
     }
 }
 
@@ -656,13 +666,13 @@ void CSignalChannelDisplay::setMultiViewBestFitParameters(const float64& rRange,
 {
 //    m_f64ScaleX = 1;
 
-        float64 l_f64LocalMediumValue = (m_vLocalMaximum[0] + m_vLocalMinimum[0]) / 2;
+    const float64 l_f64LocalMediumValue = (m_vLocalMaximum[0] + m_vLocalMinimum[0]) / 2;
 
-        m_vMaximumTopMargin[0] = l_f64LocalMediumValue + rRange/2 + rMargin;
-        m_vMaximumBottomMargin[0] = l_f64LocalMediumValue + rRange/2 - rMargin;
+    m_vMaximumTopMargin[0] = l_f64LocalMediumValue + rRange/2 + rMargin;
+    m_vMaximumBottomMargin[0] = l_f64LocalMediumValue + rRange/2 - rMargin;
 
-        m_vMinimumTopMargin[0] = l_f64LocalMediumValue - rRange/2 + rMargin;
-        m_vMinimumBottomMargin[0] = l_f64LocalMediumValue - rRange/2 - rMargin;
+    m_vMinimumTopMargin[0] = l_f64LocalMediumValue - rRange/2 + rMargin;
+    m_vMinimumBottomMargin[0] = l_f64LocalMediumValue - rRange/2 - rMargin;
 
 
     if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
@@ -693,6 +703,9 @@ void CSignalChannelDisplay::updateDisplayParameters()
         }
 
 	//reflect changes
+#ifdef DEBUG
+	std::cout << "Requesting full redraw, F\n";
+#endif
 	redrawAllAtNextRefresh();
 }
 
@@ -707,30 +720,37 @@ void CSignalChannelDisplay::getFirstBufferToDisplayInformation(uint32& rFirstBuf
 		if(m_bRedrawAll == true)
 		{
 			m_pDatabase->getIndexOfBufferStartingAtTime(m_pParentDisplayView->m_ui64LeftmostDisplayedTime, rFirstBufferToDisplay);
+			return;
 		}
-		else if(m_pDatabase->getIndexOfBufferStartingAtTime(m_ui64LatestDisplayedTime, rFirstBufferToDisplay) == false)
+
+		const boolean l_bHaveLatestBufferDisplayed = m_pDatabase->getIndexOfBufferStartingAtTime(m_ui64LatestDisplayedTime, rFirstBufferToDisplay);
+		if(!l_bHaveLatestBufferDisplayed)
 		{
 			//chances are drawing is up to date and this call was triggered following an "external" expose event
 			//(e.g. the window was covered by a widget which was just moved, resulting in an expose event)
 			//=>let's redraw the whole window
+#ifdef DEBUG
+			std::cout << "Requesting full redraw, B1\n";
+#endif
 			m_pDatabase->getIndexOfBufferStartingAtTime(m_pParentDisplayView->m_ui64LeftmostDisplayedTime, rFirstBufferToDisplay);
 			m_bRedrawAll = true;
+
+			return;
 		}
-		else //partial redraw
+		
+		//partial redraw
+		uint32 l_ui32LeftmostBufferIndex = 0;
+		m_pDatabase->getIndexOfBufferStartingAtTime(m_pParentDisplayView->m_ui64LeftmostDisplayedTime, l_ui32LeftmostBufferIndex);
+
+		//get position of first new buffer
+		rFirstBufferToDisplayPosition = rFirstBufferToDisplay - l_ui32LeftmostBufferIndex;
+
+		//redraw from last sample of last drawn buffer, if we're not restarting from left edge
+		if(rFirstBufferToDisplayPosition > 0)
 		{
-			uint32 l_ui32LeftmostBufferIndex = 0;
-			m_pDatabase->getIndexOfBufferStartingAtTime(m_pParentDisplayView->m_ui64LeftmostDisplayedTime, l_ui32LeftmostBufferIndex);
-
-			//get position of first new buffer
-			rFirstBufferToDisplayPosition = rFirstBufferToDisplay - l_ui32LeftmostBufferIndex;
-
-			//redraw from last sample of last drawn buffer, if we're not restarting from left edge
-			if(rFirstBufferToDisplayPosition > 0)
-			{
-				rFirstBufferToDisplay--;
-				rFirstBufferToDisplayPosition--;
-				rFirstSampleToDisplay = (uint32)m_pDatabase->m_pDimensionSizes[1] - 1;
-			}
+			rFirstBufferToDisplay--;
+			rFirstBufferToDisplayPosition--;
+			rFirstSampleToDisplay = (uint32)m_pDatabase->m_pDimensionSizes[1] - 1;
 		}
 	}
 }
@@ -748,7 +768,7 @@ float64 CSignalChannelDisplay::getSampleXCoordinate(uint32 ui32BufferPosition, u
 float64 CSignalChannelDisplay::getSampleYCoordinate(float64 f64Value, uint32 ui32ChannelIndex)
 {
 	//TODO : precompute some factors!
-    float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
+    const float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
 
 	const float64 l_f64TranslatedData = m_vTranslateY[ui32ChannelIndex]-f64Value;
     return m_vScaleY[ui32ChannelIndex]*m_f64ZoomScaleY*l_f64sizePerChannel*l_f64TranslatedData+(ui32ChannelIndex+1)*l_f64sizePerChannel*m_f64ZoomScaleY - m_f64ZoomTranslateY*m_f64ZoomScaleY - l_f64sizePerChannel/2;
@@ -767,7 +787,7 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 	uint32 ui32FirstChannelToDisplay, uint32 ui32LastChannelToDisplay)
 {
 	//compute and draw sample points
-	uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
+	const uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
 	if(l_ui32SamplesPerBuffer==0) 
 	{
 		// @FIXME silent fail, but no logManager here, so can't print
@@ -826,7 +846,14 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 		}
 
 		//crop points
-		uint64 l_ui64NumberOfPointsToDisplay = cropCurve(l_ui64PointIndex);
+		const uint64 l_ui64NumberOfPointsToDisplay = cropCurve(l_ui64PointIndex);
+
+		/*
+		if(l_ui64NumberOfPointsToDisplay>1000) 
+		{
+			std::cout << "points " << l_ui64NumberOfPointsToDisplay << " in " << k << "\n";
+		}
+		*/
 
 		if(l_ui64NumberOfPointsToDisplay != 0)
 		{
@@ -845,10 +872,10 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 		uint64 l_ui64StartTime = m_pDatabase->m_oStartTime[ui32FirstBufferToDisplay] +	m_pDatabase->m_ui64BufferDuration * ui32FirstSampleToDisplay / l_ui32SamplesPerBuffer;
 		uint64 l_ui64EndTime = m_pDatabase->m_oStartTime[ui32LastBufferToDisplay] + m_pDatabase->m_ui64BufferDuration;
 #else
-		uint64 l_ui64FirstBufferDuration = m_pDatabase->m_oEndTime[ui32FirstBufferToDisplay] - m_pDatabase->m_oStartTime[ui32FirstBufferToDisplay];
-		uint64 l_ui64LastBufferDuration = m_pDatabase->m_oEndTime[ui32LastBufferToDisplay] - m_pDatabase->m_oStartTime[ui32LastBufferToDisplay];
-		uint64 l_ui64StartTime = m_pDatabase->m_oStartTime[ui32FirstBufferToDisplay] + l_ui64FirstBufferDuration * ui32FirstSampleToDisplay / l_ui32SamplesPerBuffer;
-		uint64 l_ui64EndTime = m_pDatabase->m_oStartTime[ui32LastBufferToDisplay] + l_ui64LastBufferDuration;
+		const uint64 l_ui64FirstBufferDuration = m_pDatabase->m_oEndTime[ui32FirstBufferToDisplay] - m_pDatabase->m_oStartTime[ui32FirstBufferToDisplay];
+		const uint64 l_ui64LastBufferDuration = m_pDatabase->m_oEndTime[ui32LastBufferToDisplay] - m_pDatabase->m_oStartTime[ui32LastBufferToDisplay];
+		const uint64 l_ui64StartTime = m_pDatabase->m_oStartTime[ui32FirstBufferToDisplay] + l_ui64FirstBufferDuration * ui32FirstSampleToDisplay / l_ui32SamplesPerBuffer;
+		const uint64 l_ui64EndTime = m_pDatabase->m_oStartTime[ui32LastBufferToDisplay] + l_ui64LastBufferDuration;
 #endif
 
 		//draw stimulations
@@ -870,11 +897,11 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 #if 0
 				uint32 i = (uint32)((it->first - m_pDatabase->m_oStartTime[j]) * l_ui32SamplesPerBuffer / m_pDatabase->m_ui64BufferDuration);
 #else
-				uint64 l_ui64StimBufferDuration = m_pDatabase->m_oEndTime[j] - m_pDatabase->m_oStartTime[j];
+				const uint64 l_ui64StimBufferDuration = m_pDatabase->m_oEndTime[j] - m_pDatabase->m_oStartTime[j];
 				uint32 i = (uint32)((it->first - m_pDatabase->m_oStartTime[j]) * l_ui32SamplesPerBuffer / l_ui64StimBufferDuration);
 #endif
-				uint32 l_ui32StimulationX = (uint32)getSampleXCoordinate(j - ui32FirstBufferToDisplay, i, f64FirstBufferStartX);
-				gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], l_ui32StimulationX, 0, l_ui32StimulationX, m_ui32Height);
+				const uint32 l_ui32StimulationX = (uint32)getSampleXCoordinate(j - ui32FirstBufferToDisplay, i, f64FirstBufferStartX);
+				gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], l_ui32StimulationX, m_ui32StartY, l_ui32StimulationX, m_ui32StopY);
 			}
 		}
 	}
@@ -894,13 +921,13 @@ void CSignalChannelDisplay::drawProgressLine(uint32 ui32FirstBufferToDisplay, ui
 	if(m_pDatabase->m_oSampleBuffers.size() < m_pDatabase->m_ui64NumberOfBufferToDisplay ||
 		m_pParentDisplayView->m_ui64LeftmostDisplayedTime > m_pDatabase->m_oStartTime[0])
 	{
-		uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
+		const uint32 l_ui32SamplesPerBuffer = (uint32)m_pDatabase->m_pDimensionSizes[1];
 
 		//position on screen of latest buffer
-		uint32 l_ui32LatestBufferPosition = ui32FirstBufferToDisplayPosition + m_pDatabase->m_oSampleBuffers.size()-1-ui32FirstBufferToDisplay;
+		const uint32 l_ui32LatestBufferPosition = ui32FirstBufferToDisplayPosition + m_pDatabase->m_oSampleBuffers.size()-1-ui32FirstBufferToDisplay;
 
 		//X position of last sample that will be drawn when channel is refreshed
-		float64 l_f64EndX = getSampleXCoordinate(l_ui32LatestBufferPosition, l_ui32SamplesPerBuffer-1, 0);
+		const float64 l_f64EndX = getSampleXCoordinate(l_ui32LatestBufferPosition, l_ui32SamplesPerBuffer-1, 0);
 
 		GdkColor l_oLineColor;
 		l_oLineColor.red = 0*65535/255; l_oLineColor.green = 255*65535/255; l_oLineColor.blue = 0*65535/255;
@@ -925,14 +952,14 @@ void CSignalChannelDisplay::drawZeroLine()
 	//draw Y=0 line
     if(m_bMultiView)
     {
-        gint l_iZeroY = (gint)getSampleYMultiViewCoordinate(0);
+        const gint l_iZeroY = (gint)getSampleYMultiViewCoordinate(0);
         gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY, m_ui32Width ,l_iZeroY);
     }
     else
     {
         for(uint32 k = 0; k< m_oChannelList.size();k++)
         {
-            gint l_iZeroY = (gint)getSampleYCoordinate(0,k);
+            const gint l_iZeroY = (gint)getSampleYCoordinate(0,k);
             gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY, m_ui32Width ,l_iZeroY);
         }
     }
@@ -947,11 +974,16 @@ void CSignalChannelDisplay::drawZeroLine()
 
 gboolean drawingAreaExposeEventCallback(GtkWidget *widget, GdkEventExpose *pEvent, gpointer data)
 {
+//	std::cout << "EE for " << pEvent->area.x << " " << pEvent->area.y <<  "  " << pEvent->area.width << " " << pEvent->area.height << "\n";
+
 	CSignalChannelDisplay * m_pChannelDisplay = reinterpret_cast<CSignalChannelDisplay*>(data);
 
 	//check if a full redrawn was asked for
 	if(pEvent->area.width == (gint)m_pChannelDisplay->m_ui32Width && pEvent->area.height == (gint)m_pChannelDisplay->m_ui32Height)
 	{
+#ifdef DEBUG
+		std::cout << "Requesting full redraw, G\n";
+#endif
 		m_pChannelDisplay->redrawAllAtNextRefresh();
 	}
 
@@ -1009,8 +1041,14 @@ void drawingAreaClickedEventCallback(GtkWidget *widget, GdkEventButton *pEvent, 
 	//if the zoom level has changed, redraw the signal and left ruler
 	if(l_bZoomChanged)
 	{
+#ifdef DEBUG
+		std::cout << "Requesting full redraw, H\n";
+#endif
 		m_pChannelDisplay->redrawAllAtNextRefresh();
-		if(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window) gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window, NULL, true);
+		if(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window) 
+		{
+			gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window, NULL, true);
+		}
 
 		std::map<uint32, CSignalDisplayLeftRuler* >::const_iterator it = m_pChannelDisplay->m_oLeftRuler.begin();
         for( ; it != m_pChannelDisplay->m_oLeftRuler.end();it++)

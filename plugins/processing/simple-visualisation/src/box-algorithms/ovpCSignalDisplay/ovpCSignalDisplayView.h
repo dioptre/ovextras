@@ -122,7 +122,8 @@ namespace OpenViBEPlugins
 
 			void changeMultiView(void);
 
-			void recreateWidgets(void);
+			void removeOldWidgets(void);
+			void recreateWidgets(OpenViBE::uint32 ui32ChannelCount);
 			void updateMainTableStatus(void);
 
 			void activateToolbarButtons(
