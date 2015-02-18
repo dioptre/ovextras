@@ -332,7 +332,7 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 	// These parameters control that we don't unnecessarily draw parts of the signal which are not in view
 	const float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
 	const uint32 l_ui32FirstChannelToDisplay = static_cast<uint32>(std::floor( rExposedArea.y / l_f64sizePerChannel));
-	const uint32 l_ui32LastChannelToDisplay = std::min(m_oChannelList.size(), static_cast<uint32>(l_ui32FirstChannelToDisplay + std::floor(rExposedArea.height / l_f64sizePerChannel) + 1));
+	const uint32 l_ui32LastChannelToDisplay = std::min(static_cast<uint32>(m_oChannelList.size()), static_cast<uint32>(l_ui32FirstChannelToDisplay + std::floor(rExposedArea.height / l_f64sizePerChannel) + 1));
 
 	m_ui32StartY = static_cast<uint32>(l_f64sizePerChannel*l_ui32FirstChannelToDisplay);
 	m_ui32StopY = std::min(m_ui32Height,static_cast<uint32>(l_f64sizePerChannel*l_ui32LastChannelToDisplay+1));
@@ -796,7 +796,7 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 
 	GdkColor l_oLineColor;
 
-	ui32LastChannelToDisplay = std::min(ui32LastChannelToDisplay, m_oChannelList.size());
+	ui32LastChannelToDisplay = std::min(ui32LastChannelToDisplay, static_cast<uint32>(m_oChannelList.size()));
 
 	for(size_t k=ui32FirstChannelToDisplay; k<ui32LastChannelToDisplay; k++)
 	{
