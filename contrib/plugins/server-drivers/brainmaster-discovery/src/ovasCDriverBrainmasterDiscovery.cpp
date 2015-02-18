@@ -170,6 +170,11 @@ CDriverBrainmasterDiscovery::CDriverBrainmasterDiscovery(IDriverContext& rDriver
 	m_oHeader.setChannelName(21, "Oz");
 	m_oHeader.setChannelName(22, "AUX1");
 	m_oHeader.setChannelName(23, "AUX2");
+
+	for(uint32 i=0;i<m_oHeader.getChannelCount();i++)
+	{
+		m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
+	}
 }
 
 void CDriverBrainmasterDiscovery::release(void)

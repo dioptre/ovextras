@@ -206,6 +206,11 @@ boolean CDriverTMSi::initialize(
 		}
 	}
 
+	// @todo modify the API to provide this info (depends on the device)
+	for(uint32 i=0;i<m_oHeader.getChannelCount();i++)
+	{
+		m_oHeader.setChannelUnits(i, OVTK_UNIT_Unspecified, OVTK_FACTOR_Base);
+	}
 
 	return true;
 }

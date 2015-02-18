@@ -116,6 +116,7 @@ CDriverBrainProductsBrainampSeries::CDriverBrainProductsBrainampSeries(IDriverCo
 	for(uint32 i=0; i<256; i++)
 	{
 		m_oHeader.setChannelName(i, (i<sizeof(l_sChannelNameActiCap128)/sizeof(void*)?l_sChannelName[i]:""));
+		m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
 		m_peChannelSelected[i]=Channel_Selected;
 		m_peLowPassFilterFull[i]=Parameter_Default;
 		m_peResolutionFull[i]=Parameter_Default;

@@ -249,7 +249,11 @@ CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
 	ip_ui64SignalSamplingRate.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SignalSamplingRate));
 	ip_pStimulationSet.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_StimulationSet));
 	ip_ui64BufferDuration.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_BufferDuration));
+	ip_pChannelUnits.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_ChannelUnits));
 	op_pEncodedMemoryBuffer.initialize(m_pStreamEncoder->getOutputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
+
+	ip_bEncodeChannelLocalisationData.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelLocalisationData));
+	ip_bEncodeChannelUnitData.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelUnitData));
 
 	CString l_sNaNReplacementPolicy=m_rKernelContext.getConfigurationManager().expand("${AcquisitionServer_NaNReplacementPolicy}");
 	if(l_sNaNReplacementPolicy==CString("Disabled"))
@@ -341,6 +345,10 @@ CAcquisitionServer::~CAcquisitionServer(void)
 	ip_pStimulationSet.uninitialize();
 	ip_ui64BufferDuration.uninitialize();
 	op_pEncodedMemoryBuffer.uninitialize();
+	ip_pChannelUnits.uninitialize();
+
+	ip_bEncodeChannelLocalisationData.uninitialize();
+	ip_bEncodeChannelUnitData.uninitialize();
 
 	m_pStreamEncoder->uninitialize();
 	m_rKernelContext.getAlgorithmManager().releaseAlgorithm(*m_pStreamEncoder);
@@ -421,6 +429,8 @@ boolean CAcquisitionServer::loop(void)
 				l_oInfo.m_ui64SignalSampleCountToSkip=l_ui64TheoreticalSampleCountToSkip;
 				l_oInfo.m_pConnectionClientHandlerThread=new CConnectionClientHandlerThread(*this, *l_pConnection);
 				l_oInfo.m_pConnectionClientHandlerBoostThread=new boost::thread(boost::bind(&start_connection_client_handler_thread, l_oInfo.m_pConnectionClientHandlerThread));
+				l_oInfo.m_bChannelLocalisationSent = false;
+				l_oInfo.m_bChannelUnitsSent = false;
 				//applyPriority(l_oInfo.m_pConnectionClientHandlerBoostThread,15);
 
 				m_vConnection.push_back(pair < Socket::IConnection*, SConnectionInfo >(l_pConnection, l_oInfo));
@@ -583,10 +593,31 @@ boolean CAcquisitionServer::loop(void)
 
 				OpenViBEToolkit::Tools::StimulationSet::copy(*ip_pStimulationSet, l_oStimulationSet, -int64(l_rInfo.m_ui64StimulationTimeOffset));
 
+				// Send a chunk of channel units? Note that we'll always send the units header.
+				if(!l_rInfo.m_bChannelUnitsSent)
+				{
+					// If default values in channel units, don't bother sending unit data chunk
+					ip_bEncodeChannelUnitData = m_pHeaderCopy->isChannelUnitSet();
+					// std::cout << "Set " <<  ip_pChannelUnits->getBufferElementCount()  << "\n";
+				}
+
 				op_pEncodedMemoryBuffer->setSize(0, true);
 				m_pStreamEncoder->process(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputTriggerId_EncodeBuffer);
 
+				if(!l_rInfo.m_bChannelUnitsSent)
+				{
+					// Do not send again
+					l_rInfo.m_bChannelUnitsSent = true;
+					ip_bEncodeChannelUnitData = false;
+				}
+
+#if 0
+				uint64 l_ui64MemoryBufferSize=op_pEncodedMemoryBuffer->getSize();
+				l_pConnection->sendBufferBlocking(&l_ui64MemoryBufferSize, sizeof(l_ui64MemoryBufferSize));
+				l_pConnection->sendBufferBlocking(op_pEncodedMemoryBuffer->getDirectPointer(), (uint32)op_pEncodedMemoryBuffer->getSize());
+#else
 				l_rInfo.m_pConnectionClientHandlerThread->scheduleBuffer(*op_pEncodedMemoryBuffer);
+#endif
 			}
 			else
 			{
@@ -617,6 +648,7 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 
 	m_i64InnerLatencySampleCount=0;
 	m_pDriver=&rDriver;
+	m_pHeaderCopy=&rHeaderCopy;
 	m_ui32SampleCountPerSentBlock=ui32SamplingCountPerSentBlock;
 
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Connecting to device [" << CString(m_pDriver->getName()) << "]...\n";
@@ -646,7 +678,15 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 			const std::string name = rHeaderCopy.getChannelName(i);
 			if (name!="") {
 				m_vSelectedChannels.push_back(i);
-				rHeaderCopy.setChannelName(l++,name.c_str());
+				rHeaderCopy.setChannelName(l,name.c_str());
+
+				uint32 l_ui32Unit = 0, l_ui32Factor = 0;
+				if(rHeaderCopy.isChannelUnitSet())
+				{
+					rHeaderCopy.getChannelUnits(i, l_ui32Unit, l_ui32Factor); // no need to check, will be defaults on failure
+					rHeaderCopy.setChannelUnits(l, l_ui32Unit, l_ui32Factor);
+				}
+				l++;
 			}
 		}
 		rHeaderCopy.setChannelCount(m_vSelectedChannels.size());
@@ -751,7 +791,47 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 			m_rKernelContext.getLogManager() << LogLevel_Trace << "Channel name      : " << CString(ip_pSignalMatrix->getDimensionLabel(0, i)) << "\n";
 		}
 
-		// TODO Gain is ignored
+		// Construct channel units stream header & matrix
+		// Note: Channel units, although part of IHeader, will be sent as a matrix chunk during loop() once - if at all - to each client
+		if(m_pHeaderCopy->isChannelUnitSet())
+		{
+			ip_pChannelUnits->setDimensionCount(2);
+			ip_pChannelUnits->setDimensionSize(0, m_ui32ChannelCount);
+			ip_pChannelUnits->setDimensionSize(1,2);                    // Units, Factor
+			for(uint32 c=0;c<m_ui32ChannelCount;c++)
+			{
+				ip_pChannelUnits->setDimensionLabel(0, c, m_pHeaderCopy->getChannelName(c));
+				if(m_pHeaderCopy->isChannelUnitSet())
+				{
+					uint32 l_ui32Unit = 0, l_ui32Factor = 0;
+				
+					m_pHeaderCopy->getChannelUnits(c, l_ui32Unit, l_ui32Factor); // no need to check, will be defaults on failure
+
+					ip_pChannelUnits->getBuffer()[c*2+0] = static_cast<float64>(l_ui32Unit);
+					ip_pChannelUnits->getBuffer()[c*2+1] = static_cast<float64>(l_ui32Factor);
+
+					m_rKernelContext.getLogManager() << LogLevel_Trace << "Channel Unit      : " << l_ui32Unit << ", factor=" << OVTK_DECODE_FACTOR(l_ui32Factor) << "\n";
+				}
+			}
+			ip_pChannelUnits->setDimensionLabel(1, 0, "Unit");
+			ip_pChannelUnits->setDimensionLabel(1, 1, "Factor");
+		}
+		else
+		{
+			// Driver did not set units. Convention: send empty header matrix in this case.
+			ip_pChannelUnits->setDimensionCount(2);
+			ip_pChannelUnits->setDimensionSize(0,0);
+			ip_pChannelUnits->setDimensionSize(0,0);
+			m_rKernelContext.getLogManager() << LogLevel_Trace << "Driver did not set units, sending empty channel units matrix\n";
+		}
+
+		// @TODO Channel localisation
+		{
+			ip_bEncodeChannelLocalisationData = false; // never at the moment
+
+		}
+
+		// @TODO Gain is ignored
 	}
 	else
 	{
@@ -1309,6 +1389,9 @@ boolean CAcquisitionServer::acceptNewConnection(Socket::IConnection* pConnection
 	l_oInfo.m_ui64SignalSampleCountToSkip=0; // not used
 	l_oInfo.m_pConnectionClientHandlerThread=NULL; // not used
 	l_oInfo.m_pConnectionClientHandlerBoostThread=NULL; // not used
+	l_oInfo.m_bChannelLocalisationSent = false;
+	l_oInfo.m_bChannelUnitsSent = false;
+
 	m_vPendingConnection.push_back(pair < Socket::IConnection*, SConnectionInfo > (pConnection, l_oInfo));
 
 	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)

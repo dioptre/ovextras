@@ -55,7 +55,7 @@ namespace
 	{
 		bGuardFlag=true;
 
-		int i;
+		// int i;
 		int l_iActive=::gtk_combo_box_get_active(pComboBox);
 		switch(l_iActive)
 		{

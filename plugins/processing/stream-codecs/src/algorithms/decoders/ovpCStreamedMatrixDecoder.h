@@ -45,6 +45,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32Status;
 			OpenViBE::uint32 m_ui32DimensionIndex;
 			OpenViBE::uint32 m_ui32DimensionEntryIndex;
+			OpenViBE::uint32 m_ui32DimensionEntryIndexUnit;
 			OpenViBE::uint64 m_ui64MatrixBufferSize;
 		};
 

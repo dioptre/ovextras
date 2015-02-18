@@ -44,7 +44,7 @@ static void button_filters_pressed_cb(::GtkButton* pButton, void* pUserData)
 }
 
 CConfigurationGTecGUSBamp::CConfigurationGTecGUSBamp(
-	            const char* sGtkBuilderFileName,uint32& rUSBIndex,uint8& rCommonGndAndRefBitmap, int32& rNotchFilterIndex, int32& rBandPassFilterIndex,OpenViBE::boolean& rTriggerInput,vector<string> rDevicesSerials,string& rMasterDeviceIndex, OpenViBE::boolean& rBipolar)
+	            const char* sGtkBuilderFileName,uint32& rUSBIndex,uint8& rCommonGndAndRefBitmap, int32& rNotchFilterIndex, int32& rBandPassFilterIndex,OpenViBE::boolean& rTriggerInput,vector<string> rDevicesSerials,string& rMasterDeviceIndex, OpenViBE::boolean& rBipolar, OpenViBE::boolean& rCalibrationSignalEnabled)
 	: CConfigurationBuilder(sGtkBuilderFileName)
 	,m_rUSBIndex(rUSBIndex)
 	,m_rCommonGndAndRefBitmap(rCommonGndAndRefBitmap)
@@ -54,6 +54,7 @@ CConfigurationGTecGUSBamp::CConfigurationGTecGUSBamp(
 	,m_rDevicesSerials(rDevicesSerials)
 	,m_rMasterDeviceIndex(rMasterDeviceIndex)
 	,m_rBipolarEnabled(rBipolar)
+	,m_rCalibrationSignalEnabled(rCalibrationSignalEnabled)
 {
 }
 
@@ -69,6 +70,9 @@ OpenViBE::boolean CConfigurationGTecGUSBamp::preConfigure(void)
 
 	::GtkCheckButton* l_pCheckButton_Bipolar=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_Bipolar"));
 	::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pCheckButton_Bipolar), m_rBipolarEnabled);
+
+	::GtkCheckButton* l_pCheckButton_CalibrationMode=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_CalibrationSignal"));
+	::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pCheckButton_CalibrationMode), m_rCalibrationSignalEnabled);
 
 	::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_master_device"));
 
@@ -222,6 +226,9 @@ OpenViBE::boolean CConfigurationGTecGUSBamp::postConfigure(void)
 
 		::GtkCheckButton* l_pCheckButton_Bipolar=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_Bipolar"));
 		m_rBipolarEnabled=(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButton_Bipolar)) ? true : false);
+
+		::GtkCheckButton* l_pCheckButton_CalibrationSignal=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_CalibrationSignal"));
+		m_rCalibrationSignalEnabled=(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButton_CalibrationSignal)) ? true : false);
 	}
 
 	if(!CConfigurationBuilder::postConfigure())

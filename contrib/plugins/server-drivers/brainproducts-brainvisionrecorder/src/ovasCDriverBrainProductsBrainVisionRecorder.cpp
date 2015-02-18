@@ -178,7 +178,8 @@ boolean CDriverBrainProductsBrainVisionRecorder::initialize(
 	for(uint32 i=0; i<m_oHeader.getChannelCount(); i++)
 	{
 		m_oHeader.setChannelName(i, l_pszChannelNames);
-		m_oHeader.setChannelGain(i, (float32)((m_pStructRDA_MessageStart->dResolutions[i])));
+		m_oHeader.setChannelGain(i, (float32)((m_pStructRDA_MessageStart->dResolutions[i]))); // @note passing this outside makes little sense as this driver already appears to apply the gain before giving the data out
+		m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
 		l_pszChannelNames += strlen(l_pszChannelNames) + 1;
 	}
 

@@ -157,6 +157,21 @@ namespace OpenViBEAcquisitionServer
 		 * to transform measured values into physical dimension.
 		 */
 		virtual OpenViBE::boolean setChannelGain(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::float32 f32ChannelGain)=0;
+		/**
+		 * \brief Sets a channel' measurement unit and its scaling factor
+		 * \param ui32ChannelIndex [in] : the index of the channel which gain should be set
+		 * \param ui32ChannelUnit [in] : the unit
+		 * \param ui32ChannelFactor [in] : the scaling factor
+		 * \return \e true in case of success.
+		 * \return \e false in case of error.
+		 *
+		 * Measurement units (e.g. Volts, Litres, ...) are specified by uint32 enums defined in the openvibe toolkit.
+		 * Scaling factors (megas, millis, ...) are specified similarly. To specify that the channel is in millivolts, 
+		 * you set unit to volts and factor to millis. You get the list of supported enums from toolkit/ovtk_defines.h. 
+		 *
+		 * Default unit is 'Unspecified' and default factor is code translating 1e00. 
+		 */
+		virtual OpenViBE::boolean setChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::uint32 ui32ChannelUnit, const OpenViBE::uint32 ui32ChannelFactor)=0;
 		/// \todo setChannelLocation
 		// virtual OpenViBE::boolean setChannelLocation(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::float32 ui32ChannelLocationX, const OpenViBEAcquisitionServer::float32 ui32ChannelLocationY, const OpenViBEAcquisitionServer::float32 ui32ChannelLocationZ)=0;
 		/**
@@ -185,6 +200,17 @@ namespace OpenViBEAcquisitionServer
 		 * \sa setChannelGain
 		 */
 		virtual OpenViBE::float32 getChannelGain(const OpenViBE::uint32 ui32ChannelIndex) const=0;
+		/**
+		 * \brief Gets a channel' measurement unit and its scaling factor
+		 * \param ui32ChannelIndex [in] : the index of the channel which gain should be set
+		 * \param ui32ChannelUnit [in] : the unit
+		 * \param ui32ChannelFactor [in] : the scaling factor
+		 * \return \e true in case of success.
+		 * \return \e false in case of error. On false, the outputs will be set to default values.
+		 *
+		 * See setChannelUnits().
+		 */
+		virtual OpenViBE::boolean getChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, OpenViBE::uint32& ui32ChannelUnit, OpenViBE::uint32& ui32ChannelFactor) const=0;
 		/// \todo getChannelLocation
 		// virtual getChannelLocation(const OpenViBE::uint32 ui32ChannelIndex) const=0;
 		/**
@@ -210,6 +236,13 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isChannelGainSet(void) const=0;
 		/// \todo isChannelLocationSet
 		// virtual OpenViBE::boolean isChannelLocationSet(void) const=0;
+		/**
+		 * \brief Tests if channel unit has been set at least once
+		 * \return \e true if channel unit has been set at least once since last \c reset.
+		 * \return \e false if channel unit has not been set.
+		 * \sa setChannelGain
+		 */
+		virtual OpenViBE::boolean isChannelUnitSet(void) const=0;
 
 		//@}
 		/** \name Samples information */
@@ -248,6 +281,8 @@ namespace OpenViBEAcquisitionServer
 
 		static void copy(OpenViBEAcquisitionServer::IHeader& rDestination, const OpenViBEAcquisitionServer::IHeader& rSource)
 		{
+			rDestination.reset(); // Make sure that nothing lingers, this is mainly for channel units: we have no way to restore rDestination to an 'unset' state unless we reset
+
 			OpenViBE::uint32 i, l_ui32ChannelCount=rSource.getChannelCount();
 			rDestination.setExperimentIdentifier(rSource.getExperimentIdentifier());
 			rDestination.setSubjectAge(rSource.getSubjectAge());
@@ -259,6 +294,16 @@ namespace OpenViBEAcquisitionServer
 			{
 				rDestination.setChannelName(i, rSource.getChannelName(i));
 				rDestination.setChannelGain(i, rSource.getChannelGain(i));
+			}
+			if(rSource.isChannelUnitSet())
+			{
+				for(i=0; i<l_ui32ChannelCount; i++)
+				{
+					OpenViBE::uint32 l_ui32Unit = 0, l_ui32Factor = 0;
+
+					rSource.getChannelUnits(i, l_ui32Unit, l_ui32Factor);			// No need to test for error, will set defaults on fail
+					rDestination.setChannelUnits(i, l_ui32Unit, l_ui32Factor);
+				}
 			}
 		}
 	};

@@ -26,14 +26,16 @@
 //                                                                   //
 
 #define OVTK_TypeId_EBMLStream                                         OpenViBE::CIdentifier(0x434F6587, 0x2EFD2B7E)
-#define   OVTK_TypeId_ChannelLocalisation                              OpenViBE::CIdentifier(0x1E4C0D6E, 0x5204EEB2)
 #define   OVTK_TypeId_ExperimentInformation                            OpenViBE::CIdentifier(0x403488E7, 0x565D70B6)
-#define   OVTK_TypeId_ExperimentationInformation                       OpenViBE::CIdentifier(0x403488E7, 0x565D70B6) // deprecated, kept for compatibility
+#define   OVTK_TypeId_ExperimentationInformation                       OpenViBE::CIdentifier(0x403488E7, 0x565D70B6) // deprecated token, kept for compatibility, equal to the one above
 #define   OVTK_TypeId_Stimulations                                     OpenViBE::CIdentifier(0x6F752DD0, 0x082A321E)
 #define   OVTK_TypeId_StreamedMatrix                                   OpenViBE::CIdentifier(0x544A003E, 0x6DCBA5F6)
 #define     OVTK_TypeId_FeatureVector                                  OpenViBE::CIdentifier(0x17341935, 0x152FF448)
 #define     OVTK_TypeId_Signal                                         OpenViBE::CIdentifier(0x5BA36127, 0x195FEAE1)
 #define     OVTK_TypeId_Spectrum                                       OpenViBE::CIdentifier(0x1F261C0A, 0x593BF6BD)
+#define     OVTK_TypeId_ChannelLocalisation                            OpenViBE::CIdentifier(0x1E4C0D6E, 0x5204EEB2)
+#define     OVTK_TypeId_ChannelUnits                                   OpenViBE::CIdentifier(0x5E330216, 0x2C09724C)
+
 
 //___________________________________________________________________//
 //                                                                   //
@@ -259,56 +261,285 @@
 
 //___________________________________________________________________//
 //                                                                   //
+// Measurement units                                                 //
+//___________________________________________________________________//
+//                                                                   //
+// These units attempt to be compatible with those specified by Alois Schloegl in the BioSig project, see http://biosig.sf.net/
+//
+// See also e.g.
+//    ISO/IEEE 11073-10101:2004, Health informatics - Point-of-care medical device communication - Part 10101: Nomenclature
+//
+// @TODO it would be better to read these from a database file (along with the symbols now specified in ovtk_main.cpp), 
+// however we still need the defines if we wish to provide compile-time token support.
+// 
+// Note: Since these will be stored as float64 when transmitted by OpenViBE, they should not exceed the floats integer precision
+//
+
+#define OVTK_UNIT_Unspecified                            0
+#define OVTK_UNIT_Dimensionless                          512
+#define OVTK_UNIT_10_2_Percent                           544
+#define OVTK_UNIT_10_3_Parts_Per_Thousand                576
+#define OVTK_UNIT_10_6_Parts_Per_Million                 608
+#define OVTK_UNIT_10_9_Parts_Per_Milliard                640
+#define OVTK_UNIT_10_12_Parts_Per_Billion                672
+#define OVTK_UNIT_10_18_Parts_Per_Trillion               704
+#define OVTK_UNIT_Angle_Degree                           736
+#define OVTK_UNIT_Angle_Radian                           768
+#define OVTK_UNIT_Grams_Per_Gram                         800
+#define OVTK_UNIT_Grams_Per_Kilogram                     832
+#define OVTK_UNIT_Moles_Per_Mole                         864
+#define OVTK_UNIT_Litres_Per_Litre                       896
+#define OVTK_UNIT_Cubic_Metres_Per_Cubic_Metre           928
+#define OVTK_UNIT_Cubic_Metres_Per_Cubic_Centimetre      960
+#define OVTK_UNIT_Volume_Percent                        6240
+#define OVTK_UNIT_Ph                                     992
+#define OVTK_UNIT_Drop                                  1024
+#define OVTK_UNIT_Red_Blood_Cells                       1056
+#define OVTK_UNIT_Beat                                  1088
+#define OVTK_UNIT_Breath                                1120
+#define OVTK_UNIT_Cell                                  1152
+#define OVTK_UNIT_Cough                                 1184
+#define OVTK_UNIT_Sigh                                  1216
+#define OVTK_UNIT_Percent_Of_Packed_Cell_Volume         1248
+#define OVTK_UNIT_Metres                                1280
+#define OVTK_UNIT_Yard                                  1312
+#define OVTK_UNIT_Foot                                  1344
+#define OVTK_UNIT_Inch                                  1376
+#define OVTK_UNIT_Litres_Per_Square_Metre               1408
+#define OVTK_UNIT_Per_Metre                             1440
+#define OVTK_UNIT_Square_Metres                         1472
+#define OVTK_UNIT_Square_Inch                           1504
+#define OVTK_UNIT_Per_Square_Metre                      1536
+#define OVTK_UNIT_Cubic_Metres                          1568
+#define OVTK_UNIT_Litres                                1600
+#define OVTK_UNIT_Litres_Per_Breath                     1632
+#define OVTK_UNIT_Litres_Per_Beat                       6112
+#define OVTK_UNIT_Per_Cubic_Metre                       1664
+#define OVTK_UNIT_Per_Litre                             1696
+#define OVTK_UNIT_Gram                                  1728
+#define OVTK_UNIT_Pound                                 1760
+#define OVTK_UNIT_Ounce                                 1792
+#define OVTK_UNIT_Per_Gram                              1824
+#define OVTK_UNIT_Gram_Metre                            1856
+#define OVTK_UNIT_Grams_Meter_Per_Square_Metre          1888
+#define OVTK_UNIT_Gram_Metre_Squared                    1920
+#define OVTK_UNIT_Kilograms_Per_Square_Metre            1952
+#define OVTK_UNIT_Grams_Per_Cubic_Metre                 1984
+#define OVTK_UNIT_Grams_Per_Cubic_Centimetre            2016
+#define OVTK_UNIT_Grams_Per_Litre                       2048
+#define OVTK_UNIT_Grams_Per_Centilitre                  2080
+#define OVTK_UNIT_Grams_Per_Decilitre                   2112
+#define OVTK_UNIT_Grams_Per_Millilitre                  2144
+#define OVTK_UNIT_Second                                2176
+#define OVTK_UNIT_Minute                                2208
+#define OVTK_UNIT_Hour                                  2240
+#define OVTK_UNIT_Day                                   2272
+#define OVTK_UNIT_Weeks                                 2304
+#define OVTK_UNIT_Months                                2336
+#define OVTK_UNIT_Year                                  2368
+#define OVTK_UNIT_Time_Of_Day_Hh_Mm_Ss                  2400
+#define OVTK_UNIT_Date_Yyyy_Mm_Dd                       2432
+#define OVTK_UNIT_Per_Second                            2464
+#define OVTK_UNIT_Hertz                                 2496
+#define OVTK_UNIT_Per_Minute                            2528
+#define OVTK_UNIT_Per_Hour                              2560
+#define OVTK_UNIT_Per_Day                               2592
+#define OVTK_UNIT_Per_Week                              2624
+#define OVTK_UNIT_Per_Month                             2656
+#define OVTK_UNIT_Per_Year                              2688
+#define OVTK_UNIT_Beat_Per_Minute                       2720
+#define OVTK_UNIT_Puls_Per_Minute                       2752
+#define OVTK_UNIT_Respirations_Per_Minute               2784
+#define OVTK_UNIT_Metres_Per_Second                     2816
+#define OVTK_UNIT_Litres_Per_Minute_Per_Square_Meter    2848
+#define OVTK_UNIT_Square_Metres_Per_Second              2880
+#define OVTK_UNIT_Cubic_Metres_Per_Second               2912
+#define OVTK_UNIT_Cubic_Metres_Per_Minute               2944
+#define OVTK_UNIT_Cubic_Metres_Per_Hour                 2976
+#define OVTK_UNIT_Cubic_Metres_Per_Day                  3008
+#define OVTK_UNIT_Litres_Per_Second                     3040
+#define OVTK_UNIT_Litres_Per_Minute                     3072
+#define OVTK_UNIT_Litres_Per_Hour                         3104
+#define OVTK_UNIT_Litres_Per_Day                          3136
+#define OVTK_UNIT_Litres_Per_Kilogram                     3168
+#define OVTK_UNIT_Cubic_Metres_Per_Kilogram               3200
+#define OVTK_UNIT_Meter_Per_Pascal_Second                 3232
+#define OVTK_UNIT_Litre_Per_Min_Per_Millimetre_Of_Mercury 3264
+#define OVTK_UNIT_Grams_Per_Second                        3296
+#define OVTK_UNIT_Grams_Per_Minute                        3328
+#define OVTK_UNIT_Grams_Per_Hour                          3360
+#define OVTK_UNIT_Grams_Per_Day                           3392
+#define OVTK_UNIT_Grams_Per_Kilogram_Per_Second           3424
+#define OVTK_UNIT_Grams_Per_Kilogram_Per_Minute           3456
+#define OVTK_UNIT_Grams_Per_Kilogram_Per_Hour             3488
+#define OVTK_UNIT_Grams_Per_Kilogram_Per_Day              3520
+#define OVTK_UNIT_Grams_Per_Litre_Per_Second              3552
+#define OVTK_UNIT_Grams_Per_Litre_Per_Minute              3584
+#define OVTK_UNIT_Grams_Per_Litre_Per_Hour                3616
+#define OVTK_UNIT_Grams_Per_Litre_Per_Day                 3648
+#define OVTK_UNIT_Grams_Per_Meter_Per_Second              3680
+#define OVTK_UNIT_Gram_Metres_Per_Second                  3712
+#define OVTK_UNIT_Newton_Seconds                          3744
+#define OVTK_UNIT_Newton                                  3776
+#define OVTK_UNIT_Dyne                                    3808
+#define OVTK_UNIT_Pascal                                  3840
+#define OVTK_UNIT_Millimetres_Of_Mercury                  3872
+#define OVTK_UNIT_Centimetre_Of_Water                     3904
+#define OVTK_UNIT_Bar                                     3936
+#define OVTK_UNIT_Joules                                  3968
+#define OVTK_UNIT_Electronvolts                           4000
+#define OVTK_UNIT_Watts                                   4032
+#define OVTK_UNIT_Pascal_Second_Per_Cubic_Meter           4064
+#define OVTK_UNIT_Pascal_Second_Per_Litre                 4096
+#define OVTK_UNIT_Dyne_Second_Per_Cm5                     4128
+#define OVTK_UNIT_Litre_Per_Centimetre_Of_Water           5888
+#define OVTK_UNIT_Litre_Per_Millimetre_Of_Mercury         6272
+#define OVTK_UNIT_Litre_Per_Pascal                        6304
+#define OVTK_UNIT_Centimetre_Of_Water_Per_Litre           6144
+#define OVTK_UNIT_Millimetre_Of_Mercury_Per_Litre         6336
+#define OVTK_UNIT_Pascal_Per_Litre                        6368
+#define OVTK_UNIT_Amperes                                 4160
+#define OVTK_UNIT_Coulombs                                4192
+#define OVTK_UNIT_Amperes_Hour                            6080
+#define OVTK_UNIT_Amperes_Per_Metre                       4224
+#define OVTK_UNIT_Volts                                   4256
+#define OVTK_UNIT_Ohms                                    4288
+#define OVTK_UNIT_Ohm_Metres                              4320
+#define OVTK_UNIT_Farads                                  4352
+#define OVTK_UNIT_Kelvin                                  4384
+#define OVTK_UNIT_Degree_Celcius                          6048
+#define OVTK_UNIT_Degree_Fahrenheit                       4416
+#define OVTK_UNIT_Kelvins_Per_Watt                        4448
+#define OVTK_UNIT_Candelas                                4480
+#define OVTK_UNIT_Osmoles                                 4512
+#define OVTK_UNIT_Moles                                   4544
+#define OVTK_UNIT_Equivalent                              4576
+#define OVTK_UNIT_Osmoles_Per_Litre                       4608
+#define OVTK_UNIT_Moles_Per_Cubic_Centimetre              4640
+#define OVTK_UNIT_Moles_Per_Cubic_Metre                   4672
+#define OVTK_UNIT_Moles_Per_Litre                         4704
+#define OVTK_UNIT_Moles_Per_Millilitre                    4736
+#define OVTK_UNIT_Equivalents_Per_Cubic_Centimetre        4768
+#define OVTK_UNIT_Equivalents_Per_Cubic_Metre             4800
+#define OVTK_UNIT_Equivalents_Per_Litre                   4832
+#define OVTK_UNIT_Equivalents_Per_Millilitre              4864
+#define OVTK_UNIT_Osmoles_Per_Kilogram                    4896
+#define OVTK_UNIT_Moles_Per_Kilogram                      4928
+#define OVTK_UNIT_Moles_Per_Second                        4960
+#define OVTK_UNIT_Moles_Per_Minute                        4992
+#define OVTK_UNIT_Moles_Per_Hour                          5024
+#define OVTK_UNIT_Moles_Per_Day                           5056
+#define OVTK_UNIT_Equivalents_Per_Second                  5088
+#define OVTK_UNIT_Equivalents_Per_Minute                  5120
+#define OVTK_UNIT_Equivalents_Per_Hour                    5152
+#define OVTK_UNIT_Equivalents_Per_Day                     5184
+#define OVTK_UNIT_Moles_Per_Kilogram_Per_Second           5216
+#define OVTK_UNIT_Moles_Per_Kilogram_Per_Minute           5248
+#define OVTK_UNIT_Moles_Per_Kilogram_Per_Hour             5280
+#define OVTK_UNIT_Moles_Per_Kilogram_Per_Day              5312
+#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Second     5344
+#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Minute     5376
+#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Hour       5408
+#define OVTK_UNIT_Equivalents_Per_Kilogram_Per_Day        5440
+#define OVTK_UNIT_International_Unit                      5472
+#define OVTK_UNIT_International_Units_Per_Cubic_Centimetre 5504
+#define OVTK_UNIT_International_Units_Per_Cubic_Meter      5536
+#define OVTK_UNIT_International_Units_Per_Litre            5568
+#define OVTK_UNIT_International_Units_Per_Millilitre       5600
+#define OVTK_UNIT_International_Units_Per_Second           5632
+#define OVTK_UNIT_International_Units_Per_Minute           5664
+#define OVTK_UNIT_International_Units_Per_Hour             5696
+#define OVTK_UNIT_International_Units_Per_Day              5728
+#define OVTK_UNIT_International_Units_Per_Kilogram_Per_Second 5760
+#define OVTK_UNIT_International_Units_Per_Kilogram_Per_Minute 5792
+#define OVTK_UNIT_International_Units_Per_Kilogram_Per_Hour   5824
+#define OVTK_UNIT_International_Units_Per_Kilogram_Per_Day    5856
+#define OVTK_UNIT_Centimetre_Of_Water_Per_Litre_Per_Second    5920
+#define OVTK_UNIT_Litre_Squared_Per_Second                    5952
+#define OVTK_UNIT_Centimetre_Of_Water_Per_Percent             5984
+#define OVTK_UNIT_Dyne_Seconds_Per_Square_Meter_Per_Centimetre_To_The_Power_Of_5 6016
+#define OVTK_UNIT_Millimetres_Of_Mercury_Per_Percent          6176
+#define OVTK_UNIT_Pascal_Per_Percent                          6208
+#define OVTK_UNIT_Relative_Power_Decibel	                  6432
+#define OVTK_UNIT_Meter_Per_Second_Squared                    6624
+#define OVTK_UNIT_Radians_Per_Second_Squared                  6656
+#define OVTK_UNIT_Foot_Per_Minute                             6688
+#define OVTK_UNIT_Inch_Per_Minute                             6720
+#define OVTK_UNIT_Step_Per_Minute                             6752
+#define OVTK_UNIT_Kilocalories                                6784
+#define OVTK_UNIT_Revolution_Per_Minute                       6816
+#define OVTK_UNIT_V_Per_S                                    65152
+#define OVTK_UNIT_M_Per_M                                    65184
+#define OVTK_UNIT_Velocity_Kilometer_Per_Hour                65216
+#define OVTK_UNIT_Left_Stroke_Work_Index_Lswi                65248
+#define OVTK_UNIT_Indexed_Left_Cardiac_Work_Lcwi             65280
+#define OVTK_UNIT_Mhg_Per_S                                  65312
+#define OVTK_UNIT_Millimol_Per_Liter_X_Millimeter            65344
+#define OVTK_UNIT_Rotations_Per_Minute                       65376
+#define OVTK_UNIT_Dyne_Seconds_Square_Meter_Per_Centimetre_To_The_Power_Of_5 65440
+#define OVTK_UNIT_Litres_Per_Square_Meter                    65472
+#define OVTK_UNIT_Tesla                                      65504
+
+// OpenViBE extensions, starting from 100001
+#define OVTK_UNIT_Degree_Per_Second                         100001
+
+
+
+//___________________________________________________________________//
+//                                                                   //
+// Measurement Factors                                               //
+//___________________________________________________________________//
+//                                                                   //
+// These are the usual metric prefixes (also known as SI prefixes)
+//
+// The number of each prefix encodes the exponent in the 1e00 notation.
+//
+// OpenViBE enums are unsigned integers. Here we use the convention of ORring with 0x00010000 to denote the negative exponents.
+//
+// Note: Since these will be stored as float64 when transmitted by OpenViBE, they should not exceed the floats integer precision
+//
+
+#define OVTK_FACTOR_Yotta                                            24
+#define OVTK_FACTOR_Zetta                                            21
+#define OVTK_FACTOR_Exa                                              18
+#define OVTK_FACTOR_Peta                                             15
+#define OVTK_FACTOR_Tera                                             12
+#define OVTK_FACTOR_Giga                                             9
+#define OVTK_FACTOR_Mega                                             6
+#define OVTK_FACTOR_Kilo                                             3
+#define OVTK_FACTOR_Hecto                                            2
+#define OVTK_FACTOR_Deca                                             1
+#define OVTK_FACTOR_Base                                             0
+#define OVTK_FACTOR_Deci                                             (1  | 0x00010000) // 65537
+#define OVTK_FACTOR_Centi                                            (2  | 0x00010000) // 65538
+#define OVTK_FACTOR_Milli                                            (3  | 0x00010000) // 65539
+#define OVTK_FACTOR_Micro                                            (6  | 0x00010000) // 65540
+#define OVTK_FACTOR_Nano                                             (9  | 0x00010000) // 65541
+#define OVTK_FACTOR_Pico                                             (12 | 0x00010000) // 65542
+#define OVTK_FACTOR_Femto                                            (15 | 0x00010000) // 65543
+#define OVTK_FACTOR_Atto                                             (18 | 0x00010000) // 65544
+#define OVTK_FACTOR_Zepto                                            (21 | 0x00010000) // 65545
+#define OVTK_FACTOR_Yocto                                            (24 | 0x00010000) // 65546
+
+// Convert the factor code to a signer integer
+#define OVTK_DECODE_FACTOR(factor) ( (factor & 0x00010000) ? -static_cast<int32>(factor & 0x0000FFFF) : static_cast<int32>(factor) )
+
+//___________________________________________________________________//
+//                                                                   //
 // Acquisition stream node identifiers                               //
 //___________________________________________________________________//
 //                                                                   //
 
 /*
- * Acquisition stream description (fixed on july 2006)
+ * Acquisition stream description 
  *
- * version 1 :
- * ----------------------------------------------------------------- *
- * OVTK_NodeId_Acquisition_Header
- *   OVTK_NodeId_Acquisition_AcquisitionInformation
- *     OVTK_NodeId_Acquisition_ExperimentId (integer)
- *     OVTK_NodeId_Acquisition_SubjectAge (integer)
- *     OVTK_NodeId_Acquisition_SubjectGender (integer)
- *   OVTK_NodeId_Acquisition_ChannelCount (integer)
- *   OVTK_NodeId_Acquisition_SamplingFrequency (integer)
- *   OVTK_NodeId_Acquisition_GainFactors
- *     OVTK_NodeId_Acquisition_GainFactor (float)
- *     OVTK_NodeId_Acquisition_GainFactor (float)
- *     ...
- *   OVTK_NodeId_Acquisition_ChannelNames
- *     OVTK_NodeId_Acquisition_ChannelName (string)
- *     OVTK_NodeId_Acquisition_ChannelName (string)
- *     ...
- *   OVTK_NodeId_Acquisition_ChannelLocations
- *     OVTK_NodeId_Acquisition_ChannelLocation (array of 3 float64)
- *     OVTK_NodeId_Acquisition_ChannelLocation (array of 3 float64)
- *     ...
- * OVTK_NodeId_Acquisition_Buffer
- *   OVTK_NodeId_Acquisition_Samples
- *     OVTK_NodeId_Acquisition_SamplesPerChannelCount (integer)
- *     OVTK_NodeId_Acquisition_SampleBlock (array of float32)
- *     OVTK_NodeId_Acquisition_SampleBlock (array of float32)
- *     ...
- *   OVTK_NodeId_Acquisition_Stimulations
- *     OVTK_NodeId_Acquisition_StimulationsCount (integer)
- *     OVTK_NodeId_Acquisition_Stimulation
- *       OVTK_NodeId_Acquisition_StimulationSampleIndex (integer)
- *       OVTK_NodeId_Acquisition_StimulationIdentifier (integer)
- *     OVTK_NodeId_Acquisition_Stimulation
- *     ...
- * OVTK_NodeId_Acquisition_Buffer
- * ...
- */
-
-/*
- * Acquisition stream description (fixed on march 2008)
+ * v1 july 2006
+ * v2 march 2008
+ * v3 november 2014
+ *
  * This is a multiplexed stream
  *
- * version 2 :
+ * version 3 :
  * ----------------------------------------------------------------- *
  * OVTK_NodeId_Header
  *   OVTK_NodeId_Acquisition_Header_ExperimentInformation
@@ -319,6 +550,8 @@
  *     ... some stimulation stream header
  *   OVTK_NodeId_Acquisition_Header_ChannelLocalisation
  *     ... some channel localisation stream header
+ *   OVTK_NodeId_Acquisition_Header_ChannelUnits
+ *     ... some channel units stream header
  * OVTK_NodeId_Buffer
  *   OVTK_NodeId_Acquisition_Buffer_ExperimentInformation
  *     ... some experiment information stream buffer
@@ -328,6 +561,8 @@
  *     ... some stimulation stream buffer
  *   OVTK_NodeId_Acquisition_Buffer_ChannelLocalisation
  *     ... some channel localisation stream buffer
+ *   OVTK_NodeId_Acquisition_Buffer_ChannelUnits
+ *     ... some channel units stream buffer
  * OVTK_NodeId_Buffer
  * OVTK_NodeId_Buffer
  * ...
@@ -338,10 +573,12 @@
 #define OVTK_NodeId_Acquisition_Header_Signal                                  EBML::CIdentifier(0x00000000, 0x00000082)
 #define OVTK_NodeId_Acquisition_Header_Stimulation                             EBML::CIdentifier(0x00000000, 0x00000083)
 #define OVTK_NodeId_Acquisition_Header_ChannelLocalisation                     EBML::CIdentifier(0x00000000, 0x00000084)
+#define OVTK_NodeId_Acquisition_Header_ChannelUnits                            EBML::CIdentifier(0x00000000, 0x00000085)
 #define OVTK_NodeId_Acquisition_Buffer_ExperimentInformation                   EBML::CIdentifier(0x00000000, 0x00000041)
 #define OVTK_NodeId_Acquisition_Buffer_Signal                                  EBML::CIdentifier(0x00000000, 0x00000042)
 #define OVTK_NodeId_Acquisition_Buffer_Stimulation                             EBML::CIdentifier(0x00000000, 0x00000043)
 #define OVTK_NodeId_Acquisition_Buffer_ChannelLocalisation                     EBML::CIdentifier(0x00000000, 0x00000044)
+#define OVTK_NodeId_Acquisition_Buffer_ChannelUnits                            EBML::CIdentifier(0x00000000, 0x00000045)
 
 #define OVTK_NodeId_Acquisition_Header                                         EBML::CIdentifier(0x00000000, 0x00004239) // deprecated
 #define OVTK_NodeId_Acquisition_AcquisitionInformation                         EBML::CIdentifier(0x00000000, 0x00004240) // deprecated
@@ -381,6 +618,8 @@
  *     - Signal
  *     - Spectrum
  *     - Feature vector
+ *     - Channel localisation
+ *     - Channel units
  */
 
 //___________________________________________________________________//
@@ -416,7 +655,9 @@
 //                                                                   //
 
 /*
- * Signal stream description (based on v1 november 6th 2006, modified may 24th 2007)
+ * Signal stream description 
+ * v1 november 6th 2006
+ * v2 may 24th 2007
  *
  * version 2 :
  * ----------------------------------------------------------------- *
@@ -458,7 +699,8 @@
 //                                                                   //
 
 /*
- * Channel localisation description (nov 04th 2008)
+ * Channel localisation description 
+ * v1 nov 04th 2008
  *
  * version 1 :
  * ----------------------------------------------------------------- *
@@ -493,6 +735,41 @@
 #define OVTK_NodeId_Header_ChannelLocalisation                                 EBML::CIdentifier(0xF2CFE60B, 0xEFD63E3B)
 #define OVTK_NodeId_Header_ChannelLocalisation_Dynamic                         EBML::CIdentifier(0x5338AF5C, 0x07C469C3)
 
+/*
+ * Channel units description 
+ * v1 nov 2014
+ *
+ * version 1 :
+ * ----------------------------------------------------------------- *
+ * OVTK_NodeId_Header
+ *   OVTK_NodeId_Header_StreamType (integer:)
+ *   OVTK_NodeId_Header_StreamVersion (integer:1)
+ *   OVTK_NodeId_Header_ChannelUnits
+ *     OVTK_NodeId_Header_ChannelUnits_Dynamic (boolean)
+ *   OVTK_NodeId_Header_StreamedMatrix
+ *     OVTK_NodeId_Header_StreamedMatrix_DimensionCount (integer:2)
+ *     OVTK_NodeId_Header_StreamedMatrix_Dimension
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Size (integer:channel count)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:channel 1 name)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:channel 2 name)
+ *       ...
+ *     OVTK_NodeId_Header_StreamedMatrix_Dimension
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Size (integer:2)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:unit)
+ *       OVTK_NodeId_Header_StreamedMatrix_Dimension_Label (string:factor)
+ * OVTK_NodeId_Buffer
+ *   OVTK_NodeId_Buffer_StreamedMatrix
+ *     OVTK_NodeId_Buffer_StreamedMatrix_RawBuffer (array of float64)
+ * OVTK_NodeId_Buffer
+ *   OVTK_NodeId_Buffer_StreamedMatrix
+ *     OVTK_NodeId_Buffer_StreamedMatrix_RawBuffer (array of float64)
+ * ...
+ * OVTK_NodeId_End
+ * ----------------------------------------------------------------- *
+ */
+#define OVTK_NodeId_Header_ChannelUnits                                        EBML::CIdentifier(0x17400C76, 0x16CF14C8)
+#define OVTK_NodeId_Header_ChannelUnits_Dynamic                                EBML::CIdentifier(0x7307023C, 0x7F754D2E)
+
 //___________________________________________________________________//
 //                                                                   //
 // Stimulation stream node identifiers                               //
@@ -500,7 +777,10 @@
 //                                                                   //
 
 /*
- * Stimulation stream description (based on v1 november 6th 2006, modified may 24th 2007)
+ * Stimulation stream description 
+ * v1 november 6th 2006
+ * v2 may 24th 2007
+ * v3 ??
  *
  * version 3 :
  * ----------------------------------------------------------------- *
@@ -585,7 +865,8 @@
 //                                                                   //
 
 /*
- * Feature vector stream description (fixed on may 24th 2007)
+ * Feature vector stream description 
+ * v1 may 24th 2007
  *
  * version 1 :
  * ----------------------------------------------------------------- *
@@ -617,7 +898,8 @@
 //                                                                   //
 
 /*
- * Spectrum stream description (fixed on june 4th 2007)
+ * Spectrum stream description
+ * v1 june 4th 2007
  *
  * version 1 :
  * ----------------------------------------------------------------- *

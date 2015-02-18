@@ -152,7 +152,9 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("script",OV_TypeId_Script, "somescript.lua", true);
 				rBoxAlgorithmPrototype.addSetting("color",OV_TypeId_Color, "20,65,90", true);
 				rBoxAlgorithmPrototype.addSetting("colorgradient",OV_TypeId_ColorGradient, "0:0,0,0; 100:60,40,40", true);
-				
+				rBoxAlgorithmPrototype.addSetting("unit",OV_TypeId_MeasurementUnit, "V", true);
+				rBoxAlgorithmPrototype.addSetting("factor",OV_TypeId_Factor, "1e-01", true);
+
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 				
 				return true;

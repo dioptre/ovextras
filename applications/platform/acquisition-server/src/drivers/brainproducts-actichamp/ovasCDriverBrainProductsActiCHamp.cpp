@@ -292,6 +292,12 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 	for(i=0; i<m_ui32CountEEG; i++, j++) m_vResolution[j]=l_oProperties.ResolutionEeg*1E6f; // converts to microvolts
 	for(i=0; i<m_ui32CountAux; i++, j++) m_vResolution[j]=l_oProperties.ResolutionAux*1E6f; // converts to microvolts
 
+	// Set channel units
+	for(uint32 c=0;c<m_ui32ChannelCount;c++)
+	{
+		m_oHeader.setChannelUnits(c, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
+	}
+
 	// Sets data pointers
 	// the amplifier model is depending on the number of channels, always including AUX
 	switch((m_bUseAuxChannels ? m_ui32ChannelCount : m_ui32ChannelCount+8))

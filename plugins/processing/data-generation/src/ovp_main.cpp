@@ -6,15 +6,16 @@
 
 #include "box-algorithms/ovpCBoxAlgorithmClockStimulator.h"
 
-
-
 #include "box-algorithms/ovpCBoxAlgorithmMeanVariance.h"
+
+#include "box-algorithms/ovpCBoxAlgorithmChannelUnitsGenerator.h"
 
 OVP_Declare_Begin();
 
 	OVP_Declare_New(OpenViBEPlugins::DataGeneration::CNoiseGeneratorDesc);
 	OVP_Declare_New(OpenViBEPlugins::DataGeneration::CSinusSignalGeneratorDesc);
 	OVP_Declare_New(OpenViBEPlugins::DataGeneration::CTimeSignalGeneratorDesc);
+	OVP_Declare_New(OpenViBEPlugins::DataGeneration::CChannelUnitsGeneratorDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::DataGeneration::CBoxAlgorithmClockStimulatorDesc);
 

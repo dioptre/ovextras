@@ -49,6 +49,9 @@
 #include "codecs/encoders/ovtkTChannelLocalisationEncoder.h"
 #include "codecs/decoders/ovtkTChannelLocalisationDecoder.h"
 
+#include "codecs/encoders/ovtkTChannelUnitsEncoder.h"
+#include "codecs/decoders/ovtkTChannelUnitsDecoder.h"
+
 #include "codecs/encoders/ovtkTExperimentInformationEncoder.h"
 #include "codecs/decoders/ovtkTExperimentInformationDecoder.h"
 
