@@ -37,6 +37,7 @@ namespace OpenViBEPlugins
 			//@fixme should use signal decoder for a signal and really use the sampling rate from that
 			m_oStreamedMatrixDecoder.initialize(*this,0);
 			m_oStimulationDecoder.initialize(*this,1);
+			m_oUnitDecoder.initialize(*this,2);
 
 			m_pBufferDatabase = new CBufferDatabase(*this);
 
@@ -93,6 +94,7 @@ namespace OpenViBEPlugins
 
 		boolean CSignalDisplay::uninitialize()
 		{
+			m_oUnitDecoder.uninitialize();
 			m_oStimulationDecoder.uninitialize();
 			m_oStreamedMatrixDecoder.uninitialize();
 
@@ -122,6 +124,32 @@ namespace OpenViBEPlugins
 #ifdef DEBUG
 			uint64 in = System::Time::zgetTime();
 #endif
+
+			// Channel units on input 2 
+			for(uint32 c=0; c<l_pDynamicBoxContext->getInputChunkCount(2); c++)
+			{
+				m_oUnitDecoder.decode(c);
+				if(m_oUnitDecoder.isBufferReceived()) 
+				{
+					std::vector< std::pair<CString, CString> > l_vChannelUnits;
+					l_vChannelUnits.resize(m_oUnitDecoder.getOutputMatrix()->getDimensionSize(0));
+					const float64 *l_pBuffer = m_oUnitDecoder.getOutputMatrix()->getBuffer();
+					for(uint32 i=0;i<l_vChannelUnits.size();i++)
+					{
+						CString l_sUnit = this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_MeasurementUnit, 
+							static_cast<uint64>(l_pBuffer[i*2+0]));
+						CString l_sFactor = this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Factor, 
+							static_cast<uint64>(l_pBuffer[i*2+1]));
+
+						l_vChannelUnits[i] = std::pair<CString, CString>(l_sUnit, l_sFactor);
+					}
+					
+					if(!((CSignalDisplayView*)m_pSignalDisplayView)->setChannelUnits(l_vChannelUnits))
+					{
+						this->getLogManager() << LogLevel_Warning << "Unable to set channel units properly\n";
+					}
+				}
+			}
 
 			// Stimulations in input 1
 			for(uint32 c=0; c<l_pDynamicBoxContext->getInputChunkCount(1); c++)

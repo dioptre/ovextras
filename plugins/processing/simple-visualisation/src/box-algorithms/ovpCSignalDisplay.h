@@ -39,6 +39,7 @@ namespace OpenViBEPlugins
 
 			OpenViBEToolkit::TStreamedMatrixDecoder<CSignalDisplay> m_oStreamedMatrixDecoder;
 			OpenViBEToolkit::TStimulationDecoder<CSignalDisplay> m_oStimulationDecoder;
+			OpenViBEToolkit::TChannelUnitsDecoder<CSignalDisplay> m_oUnitDecoder;
 
 			//The main object used for the display (contains all the GUI code)
 			CSignalDisplayDrawable * m_pSignalDisplayView;
@@ -72,6 +73,17 @@ namespace OpenViBEPlugins
 						rBox.setInputType(ui32Index, OV_TypeId_Stimulations);
 					}
 				}
+				else if(ui32Index==2)
+				{
+					OpenViBE::CIdentifier l_oSettingType;
+					rBox.getSettingType(ui32Index, l_oSettingType);
+					if(l_oSettingType != OV_TypeId_ChannelUnits)
+					{
+						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Error: Only measurement unit type supported for input 3\n";
+						rBox.setInputType(ui32Index, OV_TypeId_ChannelUnits);
+					}
+				}
+
 				return true;
 			}
 
@@ -115,11 +127,13 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Vertical ruler", OV_TypeId_Boolean, "false");
 				rPrototype.addSetting("Multiview", OV_TypeId_Boolean, "false");
 
-				rPrototype.addInput("Data",         OV_TypeId_Signal); 
-				rPrototype.addInput("Stimulations", OV_TypeId_Stimulations);
+				rPrototype.addInput("Data",          OV_TypeId_Signal); 
+				rPrototype.addInput("Stimulations",  OV_TypeId_Stimulations);
+				rPrototype.addInput("Channel Units", OV_TypeId_ChannelUnits);
 
 				rPrototype.addInputSupport(OV_TypeId_Signal);
 				rPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+				rPrototype.addInputSupport(OV_TypeId_ChannelUnits);
 
 				rPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
 

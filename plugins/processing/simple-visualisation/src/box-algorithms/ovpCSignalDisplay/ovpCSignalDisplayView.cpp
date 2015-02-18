@@ -16,12 +16,12 @@ using namespace OpenViBEToolkit;
 
 using namespace std;
 
-
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
 	{
 		void scrollModeButtonCallback(::GtkWidget *widget, gpointer data);
+		void unitsButtonCallback(::GtkWidget *widget, gpointer data);
 		void scalingModeButtonCallback(::GtkWidget *widget, gpointer data);
 		void toggleLeftRulerButtonCallback(::GtkWidget *widget, gpointer data);
 		void toggleBottomRulerButtonCallback(::GtkWidget *widget, gpointer data);
@@ -69,6 +69,9 @@ namespace OpenViBEPlugins
 		{
 
 			m_bVerticalScaleChanged=true;
+
+			m_vSelectedChannels.clear();
+			m_vChannelUnits.clear();
 
 			construct(oBufferDatabase,f64TimeScale,oDisplayMode);
 		}
@@ -120,7 +123,8 @@ namespace OpenViBEPlugins
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrollModeButton")),  true);
 
 			//connect display mode callbacks
-			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrollModeButton")), "toggled", G_CALLBACK (scrollModeButtonCallback), this);
+			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrollModeButton")),  "toggled", G_CALLBACK(scrollModeButtonCallback),        this);
+			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleUnitsButton")), "toggled", G_CALLBACK(unitsButtonCallback),             this);
 
 			//creates the cursors
 			m_pCursor[0] = gdk_cursor_new(GDK_LEFT_PTR);
@@ -137,14 +141,17 @@ namespace OpenViBEPlugins
 			::gtk_spin_button_set_value(GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), m_f64CustomVerticalScaleValue);
 			// ::gtk_spin_button_set_increments(GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")),0.001,1.0);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")),  m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None);
-			//::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayVerticalScaleToggleButton")), m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayDC")), m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None);
 			::gtk_spin_button_set_value(GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayDC")), m_f64CustomVerticalOffset);
 			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayDC")), "value-changed", G_CALLBACK(customVerticalOffsetChangedCallback), this);
 
+	//		::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleUnitsButton")), false);
+			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleUnitsButton")), false);
+
 			//connect vertical scale callbacks
 			// g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayVerticalScaleToggleButton")),     "toggled",       G_CALLBACK(toggleAutoVerticalScaleButtonCallback), this);
 			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), "value-changed", G_CALLBACK(customVerticalScaleChangedCallback), this);
+
 
 			//time scale
 			//----------
@@ -367,6 +374,7 @@ namespace OpenViBEPlugins
 			//allocate channel labels and channel displays arrays accordingly
             m_oChannelDisplay.resize(l_ui32TableSize);
 			m_oChannelLabel.resize(l_ui32ChannelCount+1);
+			m_vChannelName.resize(l_ui32ChannelCount+1);
 			m_vPreviousValueMin.resize(l_ui32ChannelCount+1);
 			m_vPreviousValueMax.resize(l_ui32ChannelCount+1);
 
@@ -438,6 +446,7 @@ namespace OpenViBEPlugins
 
                 // In either mode (eeg or non-eeg) create and attach label widget for each channel
 				::GtkWidget* l_pLabel = ::gtk_label_new(l_oLabelString.str().c_str());
+				m_vChannelName[i] = CString(l_oLabelString.str().c_str());
 				m_oChannelLabel[i] = l_pLabel;
 				::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),l_pLabel,
 					0, 1, //first column
@@ -445,7 +454,13 @@ namespace OpenViBEPlugins
                     GTK_FILL, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
 					0, 0);
 				::gtk_widget_show(l_pLabel);
-				::gtk_size_group_add_widget(l_pSizeGroup, l_pLabel);
+
+				// Using the labels in a size group causes it to freeze after changing the labels in a callback. Disabled for now.
+		//		::gtk_size_group_add_widget(l_pSizeGroup, l_pLabel);
+				if(m_vChannelUnits.size()<=i)
+				{
+					m_vChannelUnits[i]=std::pair<CString, CString>(CString("Unknown"), CString("Unspecified"));
+				}
 
 				//create channel display widget
 				//-----------------------------
@@ -1026,10 +1041,35 @@ namespace OpenViBEPlugins
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrollModeButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleLeftRulerButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleBottomRulerButton")), bActive);
+			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleUnitsButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayChannelSelectButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayStimulationColorsButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayMultiViewButton")), bActive);
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayInformationButton")), bActive);
+		}
+
+		boolean CSignalDisplayView::onUnitsToggledCB(boolean active)
+		{
+			// dont update for multiview
+			for(size_t i=0 ; i<m_oChannelLabel.size()-1; i++)
+			{
+				if(active)
+				{
+					std::stringstream label(""); 
+					label << m_vChannelName[i].toASCIIString(); 
+					label << "\n(" << m_vChannelUnits[i].first.toASCIIString();
+					label << ", " << m_vChannelUnits[i].second.toASCIIString() << ")"; 
+
+					gtk_label_set_text(GTK_LABEL(m_oChannelLabel[i]), label.str().c_str());
+				}
+				else
+				{					
+					std::stringstream label(""); label << m_vChannelName[i]; 
+					gtk_label_set_text(GTK_LABEL(m_oChannelLabel[i]), label.str().c_str());
+				}
+			}
+
+			return true;
 		}
 
 		boolean CSignalDisplayView::onDisplayModeToggledCB(CIdentifier oDisplayMode)
@@ -1137,6 +1177,16 @@ namespace OpenViBEPlugins
 			// to the signal database. If that is the case, we get an expensive redraw from the code. 
 			// The redraw will be carried out in the normal course of events when plotting the signal.
 
+		}
+
+		boolean CSignalDisplayView::setChannelUnits(const std::vector< std::pair<OpenViBE::CString, OpenViBE::CString> >& oChannelUnits)
+		{
+			for(uint32 i=0;i<oChannelUnits.size();i++)
+			{
+				m_vChannelUnits[i] = oChannelUnits[i];
+			}
+
+			return true;
 		}
 
 		void CSignalDisplayView::getStimulationColor(uint64 ui64StimulationCode, GdkColor& rColor)
@@ -1254,6 +1304,13 @@ namespace OpenViBEPlugins
 			reinterpret_cast < CSignalDisplayView* >(data)->onDisplayModeToggledCB(
 				::gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(widget)) != 0 ?
 					OVP_TypeId_SignalDisplayMode_Scroll : OVP_TypeId_SignalDisplayMode_Scan);
+		}
+
+		void unitsButtonCallback(::GtkWidget *widget, gpointer data)
+		{
+			reinterpret_cast < CSignalDisplayView* >(data)->onUnitsToggledCB(
+				::gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(widget)) != 0 ?
+					 true : false);
 		}
 
 		void scalingModeButtonCallback(::GtkWidget *widget, gpointer data)

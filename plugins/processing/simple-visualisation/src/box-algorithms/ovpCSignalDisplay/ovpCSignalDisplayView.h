@@ -137,6 +137,9 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean onDisplayModeToggledCB(
 				OpenViBE::CIdentifier oDisplayMode);
 
+			OpenViBE::boolean onUnitsToggledCB(OpenViBE::boolean active);
+
+
 			/**
 			 * Callback called when vertical scale mode changes
 			 * \param pToggleButton Radio button toggled
@@ -169,6 +172,8 @@ namespace OpenViBEPlugins
 			void onStimulationReceivedCB(
 				OpenViBE::uint64 ui64StimulationCode,
 				const OpenViBE::CString& rStimulationName);
+
+			OpenViBE::boolean setChannelUnits(const std::vector< std::pair<OpenViBE::CString, OpenViBE::CString> >& oChannelUnits);
 
 			/**
 			 * \brief Get a color from a stimulation code
@@ -269,8 +274,12 @@ namespace OpenViBEPlugins
 			//! Vector of raw points. Stores the points' coordinates before cropping.
 			std::vector<std::pair<OpenViBE::float64,OpenViBE::float64> > m_pRawPoints;
 
+			std::vector< OpenViBE::CString > m_vChannelName;
+
 			//! Vector of indexes of the channels to display
 			std::map<OpenViBE::uint32, OpenViBE::boolean> m_vSelectedChannels;
+
+			std::map<OpenViBE::uint32, std::pair<OpenViBE::CString, OpenViBE::CString> > m_vChannelUnits;
 
 			//! Flag set to true once multi view configuration dialog is initialized
 			OpenViBE::boolean m_bMultiViewEnabled;
