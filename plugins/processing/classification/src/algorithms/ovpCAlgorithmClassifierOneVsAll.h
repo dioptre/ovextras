@@ -23,7 +23,10 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
-			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
+			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector
+											   , OpenViBE::float64& rf64Class
+											   , OpenViBEToolkit::IVector& rDistanceValue
+											   , OpenViBEToolkit::IVector& rProbabilityValue);
 			virtual OpenViBE::boolean designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassAmount);
 
 			virtual XML::IXMLNode* saveConfiguration(void);
@@ -38,7 +41,7 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId);
 			OpenViBE::uint32 getClassAmount(void) const;
 
-			void loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
+			OpenViBE::boolean loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 
 			void generateConfigurationNode(void);
 

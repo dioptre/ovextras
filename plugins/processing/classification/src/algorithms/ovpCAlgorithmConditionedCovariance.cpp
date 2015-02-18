@@ -63,7 +63,7 @@ OpenViBE::boolean CAlgorithmConditionedCovariance::process(void)
 		this->getLogManager() << LogLevel_Error << "Max shrinkage parameter value is 1.0\n";
 		return false;
 	}
-	
+
 	if(ip_pFeatureVectorSet->getDimensionCount() !=2 ) 
 	{
 		this->getLogManager() << LogLevel_Error << "Feature vector set should have dim=2\n";

@@ -27,11 +27,12 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierProcessor)
 
-		protected:
+		private:
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pFeaturesDecoder;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pLabelsEncoder;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pClassificationStateEncoder;
+			OpenViBE::Kernel::IAlgorithmProxy* m_pProbabilityValues;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pClassifier;
 
 			std::map < OpenViBE::float64, OpenViBE::uint64 > m_vStimulation;
@@ -61,7 +62,8 @@ namespace OpenViBEPlugins
 			{
 				rBoxAlgorithmPrototype.addInput  ("Features",                            OV_TypeId_FeatureVector);
 				rBoxAlgorithmPrototype.addOutput ("Labels",                              OV_TypeId_Stimulations);
-				rBoxAlgorithmPrototype.addOutput ("Classification state",                OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addOutput ("Hyperplane distance",                 OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addOutput ("Probability values",                  OV_TypeId_StreamedMatrix);
 
 				//We load everything in the save filed
 				rBoxAlgorithmPrototype.addSetting("Filename to load configuration from", OV_TypeId_Filename,    "");

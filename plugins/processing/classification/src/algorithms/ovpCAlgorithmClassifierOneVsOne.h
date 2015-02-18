@@ -36,7 +36,10 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
-			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
+			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector
+											   , OpenViBE::float64& rf64Class
+											   , OpenViBEToolkit::IVector& rDistanceValue
+											   , OpenViBEToolkit::IVector& rProbabilityValue);
 			virtual OpenViBE::boolean designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassAmount);
 
 			virtual XML::IXMLNode* saveConfiguration(void);
@@ -44,7 +47,7 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsOne)
 
-		protected:
+		private:
 			std::vector<SSubClassifierDescriptor> m_oSubClassifierDescriptorList;
 			XML::IXMLNode *m_pConfigurationNode;
 			fClassifierComparison m_fAlgorithmComparison;
@@ -52,12 +55,11 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::IAlgorithmProxy* m_pDecisionStrategyAlgorithm;
 			OpenViBE::CIdentifier m_oPairwiseDecisionIdentifier;
 
-		private:
 			XML::IXMLNode* getClassifierConfiguration(SSubClassifierDescriptor &rDescriptor);
 			XML::IXMLNode* getPairwiseDecisionConfiguration(void);
 			OpenViBE::uint32 getClassAmount(void) const;
 
-			void loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
+			OpenViBE::boolean loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 			void generateConfigurationNode(void);
 
 			SSubClassifierDescriptor& getSubClassifierDescriptor(const OpenViBE::uint32 f64FirstClass, const OpenViBE::uint32 f64SecondClass);

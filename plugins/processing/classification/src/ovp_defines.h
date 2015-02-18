@@ -1,7 +1,7 @@
 #ifndef __OpenViBEPlugins_Defines_H__
 #define __OpenViBEPlugins_Defines_H__
 
-#define OVP_Classification_BoxTrainerXMLVersion								2
+#define OVP_Classification_BoxTrainerXMLVersion								3
 
 //___________________________________________________________________//
 //                                                                   //
@@ -45,6 +45,8 @@ extern const char* const c_sClassStimulationNodeName;
 
 extern const char* const c_sClassificationBoxRoot;
 extern const char* const c_sClassifierRoot;
+
+extern const char* const c_sPairwiseStrategyEnumerationName;
 
 bool ov_float_equal(double f64First, double f64Second);
 

@@ -17,6 +17,15 @@
 
 #define OVP_BoxAlgorithm_ClassifierTrainer_CommonSettingsCount 5
 
+namespace{
+const char* const c_sTrainTriggerSettingName = "Train trigger";
+const char* const c_sFilenameSettingName = "Filename to save configuration to";
+const char* const c_sMulticlassStrategySettingName = "Multiclass strategy to apply";
+const char* const c_sAlgorithmSettingName = "Algorithm to use";
+const char* const c_sKFoldSettingName = "Number of partitions for k-fold cross-validation test";
+}
+
+
 namespace OpenViBEPlugins
 {
 	namespace Classification
@@ -53,7 +62,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64PartitionCount;
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationsEncoder;
-			std::map < OpenViBE::CString, OpenViBE::CString> *m_pExtraParameter;
+			std::map < OpenViBE::CString, OpenViBE::CString> *m_pParameter;
 
 			typedef struct
 			{
@@ -93,11 +102,20 @@ namespace OpenViBEPlugins
 
 				rBoxAlgorithmPrototype.addOutput ("Train-completed Flag",                 OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addSetting("Multiclass strategy to apply",                          OVTK_TypeId_ClassificationStrategy,  "Native");
-				rBoxAlgorithmPrototype.addSetting("Algorithm to use",                                      OVTK_TypeId_ClassificationAlgorithm, "Linear Discrimimant Analysis (LDA)");
-				rBoxAlgorithmPrototype.addSetting("Filename to save configuration to",                     OV_TypeId_Filename,                  "${Path_UserData}/my-classifier.xml");
-				rBoxAlgorithmPrototype.addSetting("Train trigger",                                         OV_TypeId_Stimulation,               "OVTK_StimulationId_Train");
-				rBoxAlgorithmPrototype.addSetting("Number of partitions for k-fold cross-validation test", OV_TypeId_Integer,                   "10");
+				rBoxAlgorithmPrototype.addSetting(c_sTrainTriggerSettingName,         OV_TypeId_Stimulation,               "OVTK_StimulationId_Train");
+				rBoxAlgorithmPrototype.addSetting(c_sFilenameSettingName,             OV_TypeId_Filename,                  "${Path_UserData}/my-classifier.xml");
+
+				rBoxAlgorithmPrototype.addSetting(c_sMulticlassStrategySettingName,   OVTK_TypeId_ClassificationStrategy,  "Native");
+				//Pairing startegy argument
+				//Class label
+
+				rBoxAlgorithmPrototype.addSetting(c_sAlgorithmSettingName,            OVTK_TypeId_ClassificationAlgorithm, "Linear Discrimimant Analysis (LDA)");
+				//Argument of algorithm
+
+				rBoxAlgorithmPrototype.addSetting(c_sKFoldSettingName,                OV_TypeId_Integer,                   "10");
+
+
+
 
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddInput);
 				return true;

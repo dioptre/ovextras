@@ -20,6 +20,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	m_pFeaturesDecoder = NULL;
 	m_pLabelsEncoder = NULL;
 	m_pClassificationStateEncoder = NULL;
+	m_pProbabilityValues=NULL;
 	m_pClassifier = NULL;
 
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
@@ -95,35 +96,21 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	XML::IXMLNode *l_pStimulationsNode = l_pRootNode->getChildByName(c_sStimulationsNodeName);
 	if(l_pStimulationsNode)
 	{
-		//Load Rejected class label and put it as the entry for class 0
-		l_pTempNode = l_pStimulationsNode->getChildByName(c_sRejectedClassNodeName);
-		if(l_pTempNode)
+		//Now load every stimulation and store them in the map with the right class id
+		for(uint32 i=0; i < l_pStimulationsNode->getChildCount(); i++)
 		{
-			CString l_sRejectedLabel(l_pTempNode->getPCData());
-		
-			m_vStimulation[0]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sRejectedLabel);
-
-			//Now load every stimulation and store them in the map with the right class id
-			for(uint32 i=1; i<l_pStimulationsNode->getChildCount(); i++)
+			l_pTempNode = l_pStimulationsNode->getChild(i);
+			if(!l_pTempNode)
 			{
-				l_pTempNode = l_pStimulationsNode->getChild(i);
-				if(!l_pTempNode)
-				{
-					this->getLogManager() << LogLevel_Error << "Expected child node " << i << " for node " << c_sStimulationsNodeName << ". Output labels not known. Aborting.\n";
-					return false;
-				}
-				CString l_sStimulationName(l_pTempNode->getPCData());
-	
-				OpenViBE::float64 l_f64ClassId;
-				std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
-				l_sIdentifierData >> l_f64ClassId ;
-
-				m_vStimulation[l_f64ClassId]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sStimulationName);
+				this->getLogManager() << LogLevel_Error << "Expected child node " << i << " for node " << c_sStimulationsNodeName << ". Output labels not known. Aborting.\n";
+				return false;
 			}
-		} 
-		else
-		{
-			this->getLogManager() << LogLevel_Warning << "The configuration file had no subnode " << c_sRejectedClassNodeName << ". Trouble may appear later.\n";
+			CString l_sStimulationName(l_pTempNode->getPCData());
+
+			OpenViBE::float64 l_f64ClassId;
+			std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
+			l_sIdentifierData >> l_f64ClassId ;
+			m_vStimulation[l_f64ClassId]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sStimulationName);
 		}
 	}
 	else
@@ -135,15 +122,17 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	m_pLabelsEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
 	m_pClassificationStateEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamEncoder));
 	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oAlgorithmClassIdentifier));
-
+	m_pProbabilityValues=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamEncoder));
 
 	m_pFeaturesDecoder->initialize();
 	m_pLabelsEncoder->initialize();
 	m_pClassificationStateEncoder->initialize();
+	m_pProbabilityValues->initialize();
 	m_pClassifier->initialize();
 
 	m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)->setReferenceTarget(m_pFeaturesDecoder->getOutputParameter(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputParameterId_Matrix));
 	m_pClassificationStateEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
+	m_pProbabilityValues->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
 
 	TParameterHandler < XML::IXMLNode* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 	ip_pClassificationConfiguration = l_pRootNode->getChildByName(c_sClassifierRoot);
@@ -172,6 +161,13 @@ boolean CBoxAlgorithmClassifierProcessor::uninitialize(void)
 		m_pClassificationStateEncoder->uninitialize();
 		this->getAlgorithmManager().releaseAlgorithm(*m_pClassificationStateEncoder);
 		m_pClassificationStateEncoder = NULL;
+	}
+
+	if(m_pProbabilityValues)
+	{
+		m_pProbabilityValues->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pProbabilityValues);
+		m_pProbabilityValues = NULL;
 	}
 
 	if(m_pLabelsEncoder)
@@ -210,6 +206,7 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 		TParameterHandler < const IMemoryBuffer* > ip_pFeatureVectorMemoryBuffer(m_pFeaturesDecoder->getInputParameter(OVP_GD_Algorithm_FeatureVectorStreamDecoder_InputParameterId_MemoryBufferToDecode));
 		TParameterHandler < IMemoryBuffer* > op_pLabelsMemoryBuffer(m_pLabelsEncoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
 		TParameterHandler < IMemoryBuffer* > op_pClassificationStateMemoryBuffer(m_pClassificationStateEncoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
+		TParameterHandler < IMemoryBuffer* > op_pProbabilityValues(m_pProbabilityValues->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
 
 		TParameterHandler < IStimulationSet* > ip_pLabelsStimulationSet(m_pLabelsEncoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_InputParameterId_StimulationSet));
 		TParameterHandler < float64 > op_f64ClassificationStateClass(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
@@ -217,6 +214,7 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 		ip_pFeatureVectorMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
 		op_pLabelsMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
 		op_pClassificationStateMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(1);
+		op_pProbabilityValues = l_rDynamicBoxContext.getOutputChunk(2);
 
 		m_pFeaturesDecoder->process();
 		if(m_pFeaturesDecoder->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedHeader))
@@ -234,8 +232,10 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 					{
 						m_pLabelsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
 						m_pClassificationStateEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
+						m_pProbabilityValues->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
 						l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64StartTime);
 						l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64StartTime);
+						l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64StartTime);
 						m_bOutputHeaderSent=true;
 					}
 
@@ -246,8 +246,10 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 
 					m_pLabelsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
 					m_pClassificationStateEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeBuffer);
+					m_pProbabilityValues->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeBuffer);
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 					l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
+					l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64EndTime);
 				}
 				//else
 				//	this->getLogManager() << LogLevel_Warning << "---Classification failed---\n";
@@ -257,8 +259,10 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 		{
 			m_pLabelsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeEnd);
 			m_pClassificationStateEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeEnd);
+			m_pProbabilityValues->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeEnd);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
+			l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64EndTime);
 		}
 
 		l_rDynamicBoxContext.markInputAsDeprecated(0, i);

@@ -37,7 +37,10 @@ namespace OpenViBEToolkit
 		virtual OpenViBE::boolean designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassAmount) = 0;
 
 		virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet)=0;
-		virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValue)=0;
+		virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector
+										   , OpenViBE::float64& rf64Class
+										   , OpenViBEToolkit::IVector& rDistanceValue
+										   , OpenViBEToolkit::IVector& rProbabilityValue)=0;
 
 		virtual XML::IXMLNode* saveConfiguration(void)=0;
 		virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode* pConfiguratioNode)=0;

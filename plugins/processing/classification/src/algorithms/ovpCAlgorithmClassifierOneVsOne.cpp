@@ -89,22 +89,15 @@ boolean CAlgorithmClassifierOneVsOne::uninitialize(void)
 
 boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
+
 	const uint32 l_ui32AmountClass = getClassAmount();
 	//Create the decision strategy
-	IAlgorithmProxy *l_pAlgoProxy = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ClassifierOneVsOne));
-	l_pAlgoProxy->initialize();
+	this->initializeExtraParameterMechanism();
 
+	m_oPairwiseDecisionIdentifier=this->getEnumerationParameter(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType, OVP_TypeId_ClassificationPairwiseStrategy);
 
-	TParameterHandler< std::map<CString, CString>* > ip_pExtraParameters(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
-
-	std::map<CString,CString>* l_pExtraParameters = ip_pExtraParameters;
-
-	CString l_pParameterName = l_pAlgoProxy->getInputParameterName(OVP_Algorithm_OneVsOneStrategy_InputParameterId_DecisionType);
-	m_oPairwiseDecisionIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_ClassificationPairwiseStrategy,
-		(*l_pExtraParameters)[l_pParameterName]);
 	if(m_oPairwiseDecisionIdentifier==OV_UndefinedIdentifier) {
-		this->getLogManager() << LogLevel_Error << "Tried to get algorithm id for pairwise decision strategy " << OVP_TypeId_ClassificationPairwiseStrategy << " and " << l_pParameterName << " -> " 
-			<<  (*l_pExtraParameters)[l_pParameterName] << " but failed\n";
+		this->getLogManager() << LogLevel_Error << "Tried to get algorithm id for pairwise decision strategy " << OVP_TypeId_ClassificationPairwiseStrategy << " but failed\n";
 		return false;
 	}
 	
@@ -120,8 +113,8 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 	ip_pClassificationAlgorithm = &m_oSubClassifierAlgorithmIdentifier;
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize);
 
-	l_pAlgoProxy->uninitialize();
-	this->getAlgorithmManager().releaseAlgorithm(*l_pAlgoProxy);
+	this->uninitializeExtraParameterMechanism();
+
 
 	//Calculate the amount of sample for each class
 	std::map < float64, size_t > l_vClassLabels;
@@ -190,7 +183,7 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 	return true;
 }
 
-boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
+boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
 	if(!m_pDecisionStrategyAlgorithm) {
 		this->getLogManager() << LogLevel_Error << "Called without decision strategy algorithm\n";
@@ -220,7 +213,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 		{
 			IAlgorithmProxy * l_pTempProxy = this->getSubClassifierDescriptor(i+1, j+1).m_pSubClassifierProxy;
 			TParameterHandler < IMatrix* > ip_pFeatureVector(l_pTempProxy->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
-			TParameterHandler < IMatrix* > op_pClassificationValues(l_pTempProxy->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
+			TParameterHandler < IMatrix* > op_pClassificationValues(l_pTempProxy->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
 			ip_pFeatureVector->setDimensionCount(1);
 			ip_pFeatureVector->setDimensionSize(0, l_ui32FeatureVectorSize);
 
@@ -246,6 +239,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 //		}
 //		std::cout << std::endl;
 //	}
+//	std::cout << std::endl;
 
 	//Then ask to the startegy to make the decision
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute);
@@ -266,8 +260,9 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 	}
 
 	rf64Class = static_cast<float64>(l_i32IndexSelectedClass);
-	rClassificationValues.setSize(1);
-	rClassificationValues[0]=l_f64MaxProb;
+	rClassificationValues.setSize(0);
+	rProbabilityValue.setSize(1);
+	rProbabilityValue[0]=l_f64MaxProb;
 	return true;
 }
 
@@ -442,11 +437,10 @@ boolean CAlgorithmClassifierOneVsOne::loadConfiguration(XML::IXMLNode *pConfigur
 		}
 	}
 
-	loadSubClassifierConfiguration(l_pOneVsOneNode->getChildByName(c_sSubClassifiersNodeName));
-	return true;
+	return loadSubClassifierConfiguration(l_pOneVsOneNode->getChildByName(c_sSubClassifiersNodeName));
 }
 
-void CAlgorithmClassifierOneVsOne::loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode)
+boolean CAlgorithmClassifierOneVsOne::loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode)
 {
 	for(size_t i = 0; i < pSubClassifiersNode->getChildCount() ; ++i)
 	{
@@ -454,7 +448,11 @@ void CAlgorithmClassifierOneVsOne::loadSubClassifierConfiguration(XML::IXMLNode 
 		IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierDescriptorList[i].m_pSubClassifierProxy;
 		TParameterHandler < XML::IXMLNode* > ip_pConfiguration(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 		ip_pConfiguration = l_pSubClassifierNode->getChild(0);
-		l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration);
+		if(!l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration))
+		{
+			this->getLogManager() << LogLevel_Error << "Unable to load the configuration for the sub-classifier " << i+1 << "\n";
+			return false;
+		}
 
 		//Now we have to restore classes name
 		std::stringstream l_sFirstClass(l_pSubClassifierNode->getAttribute(c_sFirstClassAtrributeName));
@@ -462,6 +460,7 @@ void CAlgorithmClassifierOneVsOne::loadSubClassifierConfiguration(XML::IXMLNode 
 		std::stringstream l_sSecondClass(l_pSubClassifierNode->getAttribute(c_sSecondClassAttributeName));
 		l_sSecondClass >> m_oSubClassifierDescriptorList[i].m_f64SecondClass;
 	}
+	return true;
 }
 
 uint32 CAlgorithmClassifierOneVsOne::getClassAmount(void) const
