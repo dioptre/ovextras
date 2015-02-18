@@ -137,6 +137,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	TParameterHandler < XML::IXMLNode* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 	ip_pClassificationConfiguration = l_pRootNode->getChildByName(c_sClassifierRoot);
 	if(!m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration)){
+		this->getLogManager() << LogLevel_Error << "Subclassifier failed to load config\n";
 		return false;
 	}
 
@@ -144,7 +145,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	l_pHandler->release();
 
 	m_bOutputHeaderSent=false;
-	return false;
+	return true;
 }
 
 boolean CBoxAlgorithmClassifierProcessor::uninitialize(void)
