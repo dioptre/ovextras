@@ -257,6 +257,9 @@ boolean CKernelContext::initialize(void)
 
 	m_pTypeManager->registerEnumerationType(OV_TypeId_Stimulation, "Stimulation");
 
+	m_pTypeManager->registerEnumerationType(OV_TypeId_MeasurementUnit, "Measurement unit");
+	m_pTypeManager->registerEnumerationType(OV_TypeId_Factor,          "Factor");
+
 	m_pTypeManager->registerEnumerationType(OV_TypeId_LogLevel, "Log level");
 	m_pTypeManager->registerEnumerationEntry(OV_TypeId_LogLevel, "None",                     LogLevel_None);
 	m_pTypeManager->registerEnumerationEntry(OV_TypeId_LogLevel, "Debug",                    LogLevel_Debug);
@@ -273,6 +276,7 @@ boolean CKernelContext::initialize(void)
 	m_pTypeManager->registerStreamType(  OV_TypeId_Stimulations, "Stimulations", OV_TypeId_EBMLStream);
 	m_pTypeManager->registerStreamType(  OV_TypeId_StreamedMatrix, "Streamed matrix", OV_TypeId_EBMLStream);
 	m_pTypeManager->registerStreamType(    OV_TypeId_ChannelLocalisation, "Channel localisation", OV_TypeId_StreamedMatrix);
+	m_pTypeManager->registerStreamType(    OV_TypeId_ChannelUnits, "Channel units", OV_TypeId_StreamedMatrix);
 	m_pTypeManager->registerStreamType(    OV_TypeId_FeatureVector, "Feature vector", OV_TypeId_StreamedMatrix);
 	m_pTypeManager->registerStreamType(    OV_TypeId_Signal, "Signal", OV_TypeId_StreamedMatrix);
 	m_pTypeManager->registerStreamType(    OV_TypeId_Spectrum, "Spectrum", OV_TypeId_StreamedMatrix);

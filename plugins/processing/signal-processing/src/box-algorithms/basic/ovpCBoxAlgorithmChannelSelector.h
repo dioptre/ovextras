@@ -65,14 +65,15 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getInputType(0, l_oTypeIdentifier);
-				if(l_oTypeIdentifier==OV_TypeId_Signal || l_oTypeIdentifier==OV_TypeId_Spectrum)
+				if(l_oTypeIdentifier==OV_TypeId_Signal || l_oTypeIdentifier==OV_TypeId_Spectrum
+					|| this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix) )
 				{
 					rBox.setOutputType(0, l_oTypeIdentifier);
 					return true;
 				}
 				else
 				{
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are Signal and Spectrum, change refused.\n";
+					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are signal, spectrum, and other types derived from streamed matrix. Change refused.\n";
 
 					rBox.getOutputType(0, l_oTypeIdentifier);
 					rBox.setInputType(0, l_oTypeIdentifier);
@@ -152,9 +153,11 @@ namespace OpenViBEPlugins
 
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addInputAndDerivedSupport(OV_TypeId_StreamedMatrix);
 
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addOutputAndDerivedSupport(OV_TypeId_StreamedMatrix);
 				return true;
 			}
 

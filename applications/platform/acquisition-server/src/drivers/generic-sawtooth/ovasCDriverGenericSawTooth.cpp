@@ -27,6 +27,8 @@ CDriverGenericSawTooth::CDriverGenericSawTooth(IDriverContext& rDriverContext)
 
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(1);
+	m_oHeader.setChannelName(0, "Sawtooth");
+	m_oHeader.setChannelUnits(0, OVTK_UNIT_Volts, OVTK_FACTOR_Base);
 }
 
 void CDriverGenericSawTooth::release(void)

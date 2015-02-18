@@ -102,7 +102,7 @@ const float64* CMatrixImpl::getBuffer(void) const
 
 const uint32 CMatrixImpl::getBufferElementCount(void) const
 {
-	if(!m_ui32BufferElementCount)
+	if(!m_pBuffer || !m_ui32BufferElementCount)
 	{
 		this->refreshInternalBuffer();
 	}

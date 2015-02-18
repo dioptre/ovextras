@@ -1,6 +1,8 @@
 #include "ovpCBoxAlgorithmAcquisitionClient.h"
 #include <cstdlib>
 
+#include <openvibe/ovITimeArithmetics.h>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -25,6 +27,7 @@ boolean CBoxAlgorithmAcquisitionClient::initialize(void)
 	op_pSignalMemoryBuffer.initialize(m_pAcquisitionStreamDecoder->getOutputParameter(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputParameterId_SignalStream));
 	op_pStimulationMemoryBuffer.initialize(m_pAcquisitionStreamDecoder->getOutputParameter(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputParameterId_StimulationStream));
 	op_pChannelLocalisationMemoryBuffer.initialize(m_pAcquisitionStreamDecoder->getOutputParameter(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputParameterId_ChannelLocalisationStream));
+	op_pChannelUnitsMemoryBuffer.initialize(m_pAcquisitionStreamDecoder->getOutputParameter(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputParameterId_ChannelUnitsStream));
 
 	m_ui64LastChunkStartTime=0;
 	m_ui64LastChunkEndTime=0;
@@ -42,6 +45,7 @@ boolean CBoxAlgorithmAcquisitionClient::uninitialize(void)
 		m_pConnectionClient=NULL;
 	}
 
+	op_pChannelUnitsMemoryBuffer.uninitialize();
 	op_pChannelLocalisationMemoryBuffer.uninitialize();
 	op_pStimulationMemoryBuffer.uninitialize();
 	op_pSignalMemoryBuffer.uninitialize();
@@ -74,8 +78,8 @@ boolean CBoxAlgorithmAcquisitionClient::processClock(IMessageClock& rMessageCloc
 		m_pConnectionClient->connect(l_sServerName, l_ui32ServerPort);
 		if(!m_pConnectionClient->isConnected())
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Could not connect to server " << l_sServerName << ":" << l_ui32ServerPort << "\n";
-			return true;
+			this->getLogManager() << LogLevel_Error << "Could not connect to server " << l_sServerName << ":" << l_ui32ServerPort << "\n";
+			return false;
 		}
 	}
 
@@ -97,31 +101,34 @@ boolean CBoxAlgorithmAcquisitionClient::process(void)
 	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
+
 	op_pExperimentInformationMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
 	op_pSignalMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(1);
 	op_pStimulationMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(2);
 	op_pChannelLocalisationMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(3);
+	op_pChannelUnitsMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(4);
 
 	while(m_pConnectionClient->isReadyToReceive())
 	{
 		uint64 l_ui64MemoryBufferSize=0;
 		if(!m_pConnectionClient->receiveBufferBlocking(&l_ui64MemoryBufferSize, sizeof(l_ui64MemoryBufferSize)))
 		{
-			getLogManager() << LogLevel_ImportantWarning << "Could not receive memory buffer size\n";
+			getLogManager() << LogLevel_Error << "Could not receive memory buffer size\n";
 			return false;
 		}
 		if(!ip_pAcquisitionMemoryBuffer->setSize(l_ui64MemoryBufferSize, true))
 		{
-			getLogManager() << LogLevel_ImportantWarning << "Could not re allocate memory buffer with size " << l_ui64MemoryBufferSize << "\n";
+			getLogManager() << LogLevel_Error << "Could not re allocate memory buffer with size " << l_ui64MemoryBufferSize << "\n";
 			return false;
 		}
 		if(!m_pConnectionClient->receiveBufferBlocking(ip_pAcquisitionMemoryBuffer->getDirectPointer(), static_cast<uint32>(l_ui64MemoryBufferSize)))
 		{
-			getLogManager() << LogLevel_ImportantWarning << "Could not receive memory buffer content of size " << l_ui64MemoryBufferSize << "\n";
+			getLogManager() << LogLevel_Error << "Could not receive memory buffer content of size " << l_ui64MemoryBufferSize << "\n";
 			return false;
 		}
 
 		m_pAcquisitionStreamDecoder->process();
+
 
 		if(m_pAcquisitionStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputTriggerId_ReceivedHeader)
 		 ||m_pAcquisitionStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputTriggerId_ReceivedBuffer)
@@ -130,10 +137,28 @@ boolean CBoxAlgorithmAcquisitionClient::process(void)
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(1, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(2, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
-			l_rDynamicBoxContext.markOutputAsReadyToSend(3, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			if(op_pChannelLocalisationMemoryBuffer->getSize()>0)
+			{
+				l_rDynamicBoxContext.markOutputAsReadyToSend(3, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+			else
+			{
+				l_rDynamicBoxContext.setOutputChunkSize(3, 0, true);
+			}
+
+			if(op_pChannelUnitsMemoryBuffer->getSize()>0)
+			{
+				l_rDynamicBoxContext.markOutputAsReadyToSend(4, m_ui64LastChunkStartTime, m_ui64LastChunkEndTime);
+			}
+			else
+			{
+				l_rDynamicBoxContext.setOutputChunkSize(4, 0, true);
+			}
 			m_ui64LastChunkStartTime=m_ui64LastChunkEndTime;
 			m_ui64LastChunkEndTime+=op_ui64BufferDuration;
-			float64 l_f64Latency=(int64(m_ui64LastChunkEndTime-this->getPlayerContext().getCurrentTime())/(1LL<<22))/1024.;
+			// @todo ?
+			// const float64 l_f64Latency=ITimeArithmetics::timeToSeconds(m_ui64LastChunkEndTime)-ITimeArithmetics::timeToSeconds(this->getPlayerContext().getCurrentTime());
+			const float64 l_f64Latency=(int64(m_ui64LastChunkEndTime-this->getPlayerContext().getCurrentTime())/(1LL<<22))/1024.;
 			this->getLogManager() << LogLevel_Debug << "Acquisition inner latency : " << l_f64Latency << "\n";
 		}
 	}

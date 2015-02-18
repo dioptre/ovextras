@@ -97,6 +97,15 @@ boolean CDriverMBTSmarting::initialize(
 			break;
 		}
 
+		// Declare channel units
+		for(uint32 c=0;c<24;c++) 
+		{
+			m_oHeader.setChannelUnits(c, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);         // signal channels
+		}
+		m_oHeader.setChannelUnits(24, OVTK_UNIT_Degree_Per_Second, OVTK_FACTOR_Base); // gyroscope outputs
+		m_oHeader.setChannelUnits(25, OVTK_UNIT_Degree_Per_Second, OVTK_FACTOR_Base);
+		m_oHeader.setChannelUnits(26, OVTK_UNIT_Degree_Per_Second, OVTK_FACTOR_Base);
+
 		// Saves parameters
 		m_pCallback=&rCallback;
 		m_ui32SampleCountPerSentBlock=ui32SampleCountPerSentBlock;

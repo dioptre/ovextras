@@ -224,6 +224,7 @@ boolean CDriverBioSemiActiveTwo::initialize(
 			char l_sEXName[5];
 			sprintf(l_sEXName, "EX %i", j) ;
 			m_oHeader.setChannelName(i, l_sEXName);
+			m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
 			m_rDriverContext.getLogManager() << LogLevel_Trace << "Channel name: " << m_oHeader.getChannelName(i) << "\n";
 			j++;
 		}
@@ -508,6 +509,7 @@ boolean CDriverBioSemiActiveTwo::uninitialize(void)
 		for (uint32 i = m_oHeader.getChannelCount() - m_oBridge.getEXChannelCount(); i < m_oHeader.getChannelCount(); i++)
 		{
 			m_oHeader.setChannelName(i, "");
+			m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
 		}
 	}
 
