@@ -589,7 +589,7 @@ void CSignalChannelDisplay::setGlobalBestFitParameters(const float64& rRange, co
         m_vMaximumBottomMargin[k] = newMaximumBottomMargin;
 
         m_vMinimumTopMargin[k] = newMinimumTopMargin;
-        m_vMinimumBottomMargin[k] = newMinimumTopMargin;
+        m_vMinimumBottomMargin[k] = newMinimumBottomMargin;
     }
 
 	if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit && redraw)

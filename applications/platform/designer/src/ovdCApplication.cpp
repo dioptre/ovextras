@@ -112,10 +112,12 @@ namespace
 		static_cast<CApplication*>(pUserData)->preferencesCB();
 	}
 
+	/*
 	void menu_test_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 	{
 		static_cast<CApplication*>(pUserData)->testCB();
 	}
+	*/
 	void menu_new_scenario_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 	{
 		static_cast<CApplication*>(pUserData)->newScenarioCB();
@@ -152,11 +154,12 @@ namespace
 	{
 		static_cast<CApplication*>(pUserData)->aboutOpenViBECB();
 	}
+#if defined(TARGET_OS_Windows)
 	void menu_about_link_clicked_cb(::GtkAboutDialog* pAboutDialog, const gchar *linkPtr, gpointer pUserData)
 	{
 		static_cast<CApplication*>(pUserData)->aboutLinkClickedCB(linkPtr);
 	}
-
+#endif
 	void menu_browse_documentation_cb(::GtkMenuItem* pMenuItem, gpointer pUserData)
 	{
 		static_cast<CApplication*>(pUserData)->browseDocumentationCB();
@@ -2595,5 +2598,5 @@ boolean CApplication::isLogAreaClicked()
 
 boolean CApplication::isNoGuiActive()
 {
-	return m_eCommandLineFlags&CommandLineFlag_NoGui;
+	return ( (m_eCommandLineFlags & CommandLineFlag_NoGui) ? true : false);
 }

@@ -450,7 +450,7 @@ boolean CAlgorithmClassifierOneVsOne::loadSubClassifierConfiguration(XML::IXMLNo
 		ip_pConfiguration = l_pSubClassifierNode->getChild(0);
 		if(!l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration))
 		{
-			this->getLogManager() << LogLevel_Error << "Unable to load the configuration for the sub-classifier " << i+1 << "\n";
+			this->getLogManager() << LogLevel_Error << "Unable to load the configuration for the sub-classifier " << static_cast<uint64>(i+1) << "\n";
 			return false;
 		}
 
