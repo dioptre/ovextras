@@ -51,10 +51,10 @@ namespace OpenViBEPlugins
 
 			OpenViBE::boolean m_bHeaderSent;
 			OpenViBE::uint32 m_ui32HeaderReceivedCount;
+			OpenViBE::uint32 m_ui32EndReceivedCount;
 			OpenViBE::boolean m_bStimHeaderSent;
 			OpenViBE::boolean m_bEndSent;
-
-			OpenViBE::uint32 m_ui32SampleCountPerBuffer;
+			OpenViBE::boolean m_bStatsPrinted;
 
 			std::vector < OpenViBE::uint64 > m_vEndOfFileStimulations;
 			std::vector < OpenViBE::boolean > m_vEndOfFileReached;
@@ -66,13 +66,23 @@ namespace OpenViBEPlugins
 				OpenViBE::uint64          m_ui64EndTime;
 			};
 
+			struct StimulationChunk
+			{
+				OpenViBE::IStimulationSet * m_pStimulationSet;
+				OpenViBE::uint64          m_ui64StartTime;
+				OpenViBE::uint64          m_ui64EndTime;
+			};
+
+			OpenViBE::uint64 l_ui64stimChunkLength;
+
 			// File end times
 			std::vector < OpenViBE::uint64 > m_vFileEndTimes;
 
 			// The signal buffers, one per file
 			std::vector < std::vector < Chunk > > m_vSignalChunkBuffers;
-			
-			
+
+			std::vector < std::vector < StimulationChunk > > m_vStimulationChunkBuffers;
+
 			// The stimulations are stored in one stimulation set per file. The chunk are reconstructed.
 			std::vector < OpenViBE::IStimulationSet *> m_vStimulationSets;
 			
