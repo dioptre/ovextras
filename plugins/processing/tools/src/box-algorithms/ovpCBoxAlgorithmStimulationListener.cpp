@@ -1,4 +1,5 @@
 #include "ovpCBoxAlgorithmStimulationListener.h"
+#include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -49,14 +50,14 @@ boolean CBoxAlgorithmStimulationListener::process(void)
 	{
 		for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
-			IStimulationSet* op_pStimulationSet = m_vStimulationDecoder[i]->getOutputStimulationSet();
-
 			m_vStimulationDecoder[i]->decode(j);
 			if(m_vStimulationDecoder[i]->isHeaderReceived())
 			{
 			}
 			if(m_vStimulationDecoder[i]->isBufferReceived())
 			{
+				const IStimulationSet* op_pStimulationSet = m_vStimulationDecoder[i]->getOutputStimulationSet();
+
 				CString l_sInputName;
 				l_rStaticBoxContext.getInputName(i, l_sInputName);
 				for(uint64 k=0; k<op_pStimulationSet->getStimulationCount(); k++)
@@ -76,6 +77,14 @@ boolean CBoxAlgorithmStimulationListener::process(void)
 							<< " and chunk range is [" << time64(l_rDynamicBoxContext.getInputChunkStartTime(i, j)) << ", " << time64(l_rDynamicBoxContext.getInputChunkEndTime(i, j)) << "]\n";
 					}
 				}
+				/*
+				if(ITimeArithmetics::timeToSeconds(l_rDynamicBoxContext.getInputChunkStartTime(i, j)) > 234 && op_pStimulationSet->getStimulationCount()==0) 
+				{
+								this->getLogManager() << LogLevel_Info
+							<< "Chunk is empty at ["
+							<< time64(l_rDynamicBoxContext.getInputChunkStartTime(i, j)) << ", " << time64(l_rDynamicBoxContext.getInputChunkEndTime(i, j)) << "]\n";
+				}
+				*/
 			}
 			if(m_vStimulationDecoder[i]->isEndReceived())
 			{

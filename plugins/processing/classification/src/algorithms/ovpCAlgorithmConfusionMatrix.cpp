@@ -23,8 +23,26 @@ boolean CAlgorithmConfusionMatrix::initialize(void)
 	return true;
 }
 
+#ifdef DEBUG
+void dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const CMatrix& mat, const CString &desc)
+{
+	rMgr << LogLevel_Info << desc << "\n";
+	for(uint32 i=0;i<mat.getDimensionSize(0);i++) {
+		rMgr << LogLevel_Info << "Row " << i << ": ";
+		for(uint32 j=0;j<mat.getDimensionSize(1);j++) {
+			rMgr << mat.getBuffer()[i*mat.getDimensionSize(0)+j] << " ";
+		}
+		rMgr << "\n";
+	}
+}
+#endif
+
 boolean CAlgorithmConfusionMatrix::uninitialize(void)
 {
+#ifdef DEBUG
+	dumpMatrix(this->getLogManager(), m_oConfusionMatrix, "Confusion matrix");
+#endif
+
 	ip_pTargetStimulationSet.uninitialize();
 	ip_pClassifierStimulationSet.uninitialize();
 	ip_pClassesCodes.uninitialize();
