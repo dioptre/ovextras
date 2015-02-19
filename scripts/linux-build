@@ -48,7 +48,8 @@ echo ""
 echo "Building ..."
 echo ""
 
-make $1 -j 3 # VERBOSE=1
+NJOBS=`grep processor /proc/cpuinfo | wc -l`
+make $1 -j $NJOBS # VERBOSE=1
 if [ $? -eq 0 ]; then
 	echo Make has been called successfully !
 else
