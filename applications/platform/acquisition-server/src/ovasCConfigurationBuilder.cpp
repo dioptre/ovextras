@@ -7,6 +7,7 @@
 #include <fstream>
 #include <list>
 #include <cstdlib>
+#include <cstring>
 
 #define OVAS_ElectrodeNames_File           OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/electrode-names.txt"
 #define OVAS_ConfigureGUIElectrodes_File   OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-channel-names.ui"
@@ -126,6 +127,7 @@ boolean CConfigurationBuilder::preConfigure(void)
 	m_pIdentifier=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_identifier"));
 	m_pAge=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_age"));
 	m_pNumberOfChannels=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_number_of_channels"));
+	// NB: sampling_frequency is not really a "combobox" everywhere (eg telnet reader), should update in every UI the ID name
 	m_pSamplingFrequency=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_sampling_frequency"));
 	m_pGender=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_gender"));
 
@@ -184,15 +186,34 @@ boolean CConfigurationBuilder::preConfigure(void)
 	{
 		char l_sSamplingFrequency[1024];
 		sprintf(l_sSamplingFrequency, "%i", (int)m_pHeader->getSamplingFrequency());
-		gtk_combo_box_set_active_text(
-			GTK_COMBO_BOX(m_pSamplingFrequency),
-			l_sSamplingFrequency);
+		
+		// sampling frequency could be set to an Int through a spin button instead of regular combo box (eg: telnet reader)
+		if (std::strcmp(G_OBJECT_TYPE_NAME(m_pSamplingFrequency),"GtkSpinButton")==0) {
+			gtk_spin_button_set_value(
+				GTK_SPIN_BUTTON(m_pSamplingFrequency),
+				m_pHeader->getSamplingFrequency());
+		}
+		// would be a "GtkComboBox"
+		else {
+			gtk_combo_box_set_active_text(
+				GTK_COMBO_BOX(m_pSamplingFrequency),
+				l_sSamplingFrequency);
+		}
 	}
 	else
 	{
-		gtk_combo_box_set_active(
-			GTK_COMBO_BOX(m_pSamplingFrequency),
-			0);
+	        // sampling frequency could be set to an Int through a spin button instead of regular combo box (eg: telnet reader)
+		if (std::strcmp(G_OBJECT_TYPE_NAME(m_pSamplingFrequency),"GtkSpinButton")==0) {
+			gtk_spin_button_set_value(
+				GTK_SPIN_BUTTON(m_pSamplingFrequency),
+				0);
+		}
+		// would be a "GtkComboBox"
+		else {
+			gtk_combo_box_set_active(
+				GTK_COMBO_BOX(m_pSamplingFrequency),
+				0);
+		}
 	}
 	if(m_pHeader->isSubjectGenderSet())
 	{
@@ -235,12 +256,21 @@ boolean CConfigurationBuilder::postConfigure(void)
 		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pAge));
 		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pNumberOfChannels));
 
-		gchar* l_sSamplingFrequency=gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pSamplingFrequency));
 		string l_sGender=gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pGender));
 		m_pHeader->setExperimentIdentifier(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pIdentifier)));
 		m_pHeader->setSubjectAge(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pAge)));
 		m_pHeader->setChannelCount(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pNumberOfChannels)));
-		m_pHeader->setSamplingFrequency(l_sSamplingFrequency?atoi(l_sSamplingFrequency):0);
+		// sampling frequency could be set to an Int through a spin button instead of regular combo box (eg: telnet reader)
+		if (std::strcmp(G_OBJECT_TYPE_NAME(m_pSamplingFrequency),"GtkSpinButton")==0) {
+			gtk_spin_button_update(GTK_SPIN_BUTTON(m_pSamplingFrequency));
+			m_pHeader->setSamplingFrequency(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pSamplingFrequency)));
+		}
+		// would be a "GtkComboBox"
+		else {
+			gchar* l_sSamplingFrequency=gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pSamplingFrequency));
+			m_pHeader->setSamplingFrequency(l_sSamplingFrequency?atoi(l_sSamplingFrequency):0);
+			
+		}
 		m_pHeader->setSubjectGender(
 			l_sGender=="male"?OVTK_Value_Gender_Male:
 			l_sGender=="female"?OVTK_Value_Gender_Female:
