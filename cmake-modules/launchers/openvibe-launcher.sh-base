@@ -51,10 +51,10 @@ fi
 ret_code=0
 
 if [ $ov_run_bg == 0 ]; then
-        eval $ov_debugger "$LOCAL_BIN_PATH/@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ $*
+        eval $ov_debugger "$LOCAL_BIN_PATH/@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ "$@"
         ret_code=$?
 else
-        $ov_debugger "$LOCAL_BIN_PATH/@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ $* &
+        $ov_debugger "$LOCAL_BIN_PATH/@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ "$@" &
 fi
 
 exit $ret_code

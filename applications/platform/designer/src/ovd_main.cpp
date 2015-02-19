@@ -294,7 +294,10 @@ typedef struct _SConfiguration
 	OpenViBEDesigner::ECommandLineFlag m_eNoGui;
 	OpenViBEDesigner::ECommandLineFlag m_eNoCheckColorDepth;
 	OpenViBEDesigner::ECommandLineFlag m_eNoManageSession;
+	std::map < std::string, std::string > m_oTokenMap;
+
 } SConfiguration;
+
 
 boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 {
@@ -317,6 +320,27 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		else if(*it=="-c" || *it=="--config")
 		{
 			l_oConfiguration.m_oFlag[CommandLineFlag_Config] = *++it;
+		}
+		else if(*it=="-d" || *it=="--define")
+		{
+			it++;
+			if(it==l_vArgValue.end()) {
+				std::cout << "Error: Need two arguments after -d / --define.\n";
+				return false;
+			}
+
+			// Were not using = as a separator for token/value, as on Windows its a problem passing = to the cmd interpreter 
+			// which is used to launch the actual designer exe.
+			const std::string& l_rToken = *it++;
+			if(it==l_vArgValue.end()) {
+				std::cout << "Error: Need two arguments after -d / --define.\n";
+				return false;
+			}
+
+			const std::string& l_rValue = *it;	// iterator will increment later
+			
+			l_oConfiguration.m_oTokenMap[l_rToken] = l_rValue;
+
 		}
 		else if(*it=="-h" || *it=="--help")
 		{
@@ -356,16 +380,9 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		{
 			l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed] = *++it;
 		}
-//		else if(*it=="--define")
-//		{
-//			l_oConfiguration.m_oFlag.push_back(std::make_pair(Flag_NoGui, *++it));
-//		}
 		else
 		{
-#if 0
-			// Assumes we just open a scenario - this is for retro compatibility and should not be supported in the future
-			l_oConfiguration.m_oFlag.push_back(std::make_pair(CommandLineFlag_Open, *++it));
-#endif
+			std::cout << "Error: Unknown argument [" << *it << "]\n";
 			return false;
 		}
 	}
@@ -400,6 +417,7 @@ int go(int argc, char ** argv)
 		cout << "Syntax : " << argv[0] << " [ switches ]\n";
 		cout << "Possible switches :\n";
 		cout << "  --config filename       : path to config file\n";
+		cout << "  --define token value    : specify configuration token with a given value\n";
 		cout << "  --help                  : displays this help message and exits\n";
 		cout << "  --kernel filename       : path to openvibe kernel library\n";
 		cout << "  --no-gui                : hides the designer graphical user interface (assumes --no-check-color-depth)\n";
@@ -499,6 +517,15 @@ int go(int argc, char ** argv)
 				ILogManager& l_rLogManager=l_pKernelContext->getLogManager();
 
 				l_pKernelContext->getPluginManager().addPluginsFromFiles(l_rConfigurationManager.expand("${Kernel_Plugins}"));
+
+				std::map<std::string, std::string>::const_iterator itr;
+				for(itr=l_oConfiguration.m_oTokenMap.begin();
+					itr!=l_oConfiguration.m_oTokenMap.end();
+					itr++)
+				{
+					l_rLogManager << LogLevel_Trace << "Adding command line configuration token [" << (*itr).first.c_str() << " = " << (*itr).second.c_str() << "]\n";
+					l_rConfigurationManager.addOrReplaceConfigurationToken((*itr).first.c_str(), (*itr).second.c_str());
+				}
 
 				//FIXME : set locale only when needed
 				CString l_sLocale = l_rConfigurationManager.expand("${Designer_Locale}");

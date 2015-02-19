@@ -7,20 +7,34 @@ SET "OV_PATH_BIN=%OV_PATH_ROOT%\bin"
 SET "OV_PATH_LIB=%OV_PATH_ROOT%\bin"
 SET "OV_PATH_DATA=%OV_PATH_ROOT%\share\openvibe"
 
+REM Default behavior
 SET OV_PAUSE=PAUSE
 SET OV_RUN_IN_BG=
 
-IF /i "%~1"=="--no-pause" (
-	SET OV_PAUSE=
+REM Parse out Windows specific args ...
+SET "ARGS="
+:loop
+if "%~1" NEQ "" (
+	IF /i "%~1"=="--no-pause" (
+		SET OV_PAUSE=
+		goto found:
+	)
+	IF /i "%~1"=="--run-bg" (
+		REM Run in background, disable pause. The second parameter below is because CMD requires a 'title'
+		SET OV_RUN_IN_BG=START "@OV_CMD_EXECUTABLE@"
+		SET OV_PAUSE=
+		goto found:
+	)
+	
+	REM Pass this arg to the launched application...
+	SET "ARGS=%ARGS% %1"
+	
+:found	
 	SHIFT
-)
-IF /i "%~1"=="--run-bg" (
-	REM Run in background, disable pause. The first start arg is the app title.
-	SET OV_RUN_IN_BG=START "@OV_CMD_EXECUTABLE@"
-	SET OV_PAUSE=
-	SHIFT
+	goto loop:
 )
 
+REM Set dependency paths etc...
 SET "OV_ENVIRONMENT_FILE=%OV_PATH_ROOT%\bin\OpenViBE-set-env.cmd"
 IF NOT EXIST "%OV_ENVIRONMENT_FILE%" (
 	ECHO Error: "%OV_ENVIRONMENT_FILE%" was not found
@@ -28,7 +42,9 @@ IF NOT EXIST "%OV_ENVIRONMENT_FILE%" (
 )
 CALL "%OV_ENVIRONMENT_FILE%"
 
-%OV_RUN_IN_BG% "%OV_PATH_ROOT%\bin\@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ %1 %2 %3 %4 %5 %6
+REM OV_CMD_ARGS below may specify additional arguments outside this script
+
+%OV_RUN_IN_BG% "%OV_PATH_ROOT%\bin\@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ %ARGS%
 	
 :EndOfScript
 

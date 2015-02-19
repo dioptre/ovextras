@@ -19,6 +19,7 @@ typedef struct _SConfiguration
 
 	// <name, value>
 	std::map < std::string, std::string > m_oFlag;
+	std::map < std::string, std::string > m_oTokenMap;
 } SConfiguration;
 
 boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
@@ -43,6 +44,27 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		{
 			l_oConfiguration.m_oFlag["config"] = *++it;
 		}
+		else if(*it=="-d" || *it=="--define")
+		{
+			it++;
+			if(it==l_vArgValue.end()) {
+				std::cout << "Error: Need two arguments after -d / --define.\n";
+				return false;
+			}
+
+			// Were not using = as a separator for token/value, as on Windows its a problem passing = to the cmd interpreter 
+			// which is used to launch the actual designer exe.
+			const std::string& l_rToken = *it++;
+			if(it==l_vArgValue.end()) {
+				std::cout << "Error: Need two arguments after -d / --define.\n";
+				return false;
+			}
+
+			const std::string& l_rValue = *it;	// iterator will increment later
+			
+			l_oConfiguration.m_oTokenMap[l_rToken] = l_rValue;
+
+		}
 		else if(*it=="-k" || *it=="--kernel")
 		{
 			l_oConfiguration.m_oFlag["kernel"] = *++it;
@@ -53,6 +75,7 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else
 		{
+			std::cout << "Error: Unknown argument [" << *it << "]\n";
 			return false;
 		}
 	}
@@ -74,6 +97,7 @@ int main(int argc, char ** argv)
 		cout << "Syntax : " << argv[0] << " [ switches ]\n";
 		cout << "Possible switches :\n";
 		cout << "  --config filename       : path to config file\n";
+		cout << "  --define token value    : specify configuration token with a given value\n";
 		cout << "  --help                  : displays this help message and exits\n";
 		cout << "  --kernel filename       : path to openvibe kernel library\n";
 		return -1;
@@ -130,6 +154,15 @@ int main(int argc, char ** argv)
 				IConfigurationManager& l_rConfigurationManager=l_pKernelContext->getConfigurationManager();
 
 				l_pKernelContext->getPluginManager().addPluginsFromFiles(l_rConfigurationManager.expand("${Kernel_Plugins}"));
+
+				std::map<std::string, std::string>::const_iterator itr;
+				for(itr=l_oConfiguration.m_oTokenMap.begin();
+					itr!=l_oConfiguration.m_oTokenMap.end();
+					itr++)
+				{
+					l_pKernelContext->getLogManager() << LogLevel_Trace << "Adding command line configuration token [" << (*itr).first.c_str() << " = " << (*itr).second.c_str() << "]\n";
+					l_rConfigurationManager.addOrReplaceConfigurationToken((*itr).first.c_str(), (*itr).second.c_str());
+				}
 
 				//initialise Gtk before 3D context
 #if !GLIB_CHECK_VERSION(2,32,0)
