@@ -15,20 +15,6 @@ using namespace OpenViBEToolkit;
 
 using namespace std;
 
-#ifdef ELAN_VALIDATION
-static float64 s_elanChannelValues[NB_ELAN_CHANNELS] =
-{
-0.836,1.255,1.686,1.985,1.960,1.857,0.319,0.613,1.073,1.537,1.671,1.639,1.468,1.232,0.306,0.687,1.071,
-1.360,1.295,1.024,0.612,0.493,0.870,0.463,0.158,0.230,0.268,0.304,0.291,0.382,0.111,0.225,0.325,0.495,
-0.671,0.580,0.189,0.312,0.612,0.992,1.029,0.146,0.319,0.494,1.110,1.628,0.500,0.563,0.549,0.400,0.260,
-0.828,1.007,1.314,1.152,0.827,0.429,1.405,1.686,2.042,1.666,0.995,2.255,2.317,2.136,1.631,0.698,0.008,
--0.104,-0.228,-0.278,-0.160,0.072,0.034,0.082,0.068,-0.929,-1.447,-1.992,-2.336,-2.295,-2.237,-0.307,
--0.658,-1.246,-1.864,-2.012,-2.001,-1.882,-1.570,-0.359,-0.852,-1.398,-1.714,-1.658,-1.435,-1.103,-0.842,
--1.274,-0.981,-0.035,-0.123,-0.154,-0.155,-0.136,-0.218,-0.024,-0.159,-0.280,-0.429,-0.543,-0.428,-0.146,
--0.291,-0.638,-1.024,-0.958,-0.112,-0.292,-0.498,-1.228,-1.765,-0.307,-0.342,-0.316,-0.212,-0.097,-0.648,
--0.842,-1.103,-0.945,-0.633,-0.214,-1.397,-1.801,-2.080,-1.665,-0.927,-2.535,-2.638,-2.417,-1.871,-0.791
-};
-#endif
 
 CTopographicMapDatabase::CTopographicMapDatabase(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>& oPlugin, IAlgorithmProxy& rSphericalSplineInterpolation)
 	:CBufferDatabase(oPlugin)
@@ -148,16 +134,6 @@ boolean CTopographicMapDatabase::processValues()
 	}
 
 	//retrieve electrode values
-#ifdef ELAN_VALIDATION
-	if(m_i64NbElectrodes != NB_ELAN_CHANNELS)
-	{
-		_asm int 3;
-	}
-	for(int i=0; i<m_i64NbElectrodes; i++)
-	{
-		*(m_oElectrodePotentials.getBuffer()+i) = s_elanChannelValues[i];
-	}
-#else
 	//determine what buffer to use from delay
 	uint32 l_ui32BufferIndex;
 	uint64 l_ui64CurrentTime = m_oParentPlugin.getPlayerContext().getCurrentTime();
@@ -183,7 +159,6 @@ boolean CTopographicMapDatabase::processValues()
 	{
 		*(m_oElectrodePotentials.getBuffer()+i) = m_oSampleBuffers[l_ui32BufferIndex][i*m_pDimensionSizes[1] + l_ui64SampleIndex];
 	}
-#endif
 
 	//interpolate spline values (potentials)
 	if(m_ui64InterpolationType == OVP_TypeId_SphericalLinearInterpolationType_Spline)

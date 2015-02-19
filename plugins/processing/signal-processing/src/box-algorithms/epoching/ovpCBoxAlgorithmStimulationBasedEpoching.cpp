@@ -74,13 +74,13 @@ boolean CBoxAlgorithmStimulationBasedEpoching::initialize(void)
 
 	getLogManager() << LogLevel_Debug << "Parameters existence : " << op_ui64SamplingRate.exists() << ip_pStimulationSet.exists() << op_pStimulationSet.exists() << ip_pSignal.exists() << op_pSignal.exists() << "\n";
 
+	m_pOutputSignalDescription=new CMatrix();
+
 	m_pSignalStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_SamplingRate)->setReferenceTarget(m_pSignalStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
 
 	op_pStimulationMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(1);
 	m_pStimulationStreamEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
 	l_rDynamicBoxContext.markOutputAsReadyToSend(1, 0, 0);
-
-	m_pOutputSignalDescription=new CMatrix();
 
 	return true;
 }
@@ -193,6 +193,13 @@ boolean CBoxAlgorithmStimulationBasedEpoching::process(void)
 
 		if(m_pSignalStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedHeader))
 		{
+			// can only test after we have the header...
+			if(op_ui64SamplingRate == 0)
+			{
+				this->getLogManager() << LogLevel_Error << "Sampling rate 0 is not supported\n";
+				return false;
+			}
+
 			m_pOutputSignalDescription->setDimensionCount(2);
 			m_pOutputSignalDescription->setDimensionSize(0, ip_pSignal->getDimensionSize(0));
 			m_pOutputSignalDescription->setDimensionSize(1, (uint32)ITimeArithmetics::timeToSampleCount(op_ui64SamplingRate, m_ui64EpochDuration));

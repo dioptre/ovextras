@@ -1,8 +1,12 @@
+
 #include "ovpCSignalDisplay.h"
 
 #include <cmath>
 #include <iostream>
 #include <cstdlib>
+
+#include <openvibe/ovITimeArithmetics.h>
+#include <system/ovCTime.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -30,31 +34,46 @@ namespace OpenViBEPlugins
 
 		boolean CSignalDisplay::initialize()
 		{
+			//@fixme should use signal decoder for a signal and really use the sampling rate from that
 			m_oStreamedMatrixDecoder.initialize(*this,0);
 			m_oStimulationDecoder.initialize(*this,1);
+			m_oUnitDecoder.initialize(*this,2);
 
 			m_pBufferDatabase = new CBufferDatabase(*this);
 
 			//retrieve settings
-			CString l_sTimeScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-			CString l_sDisplayModeSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-			CString l_sIsEEGMode=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
-			CString l_sManualVerticalScaleSettingValue="false";
-			CString l_sVerticalScaleSettingValue="100.";
-			if(this->getStaticBoxContext().getSettingCount() > 3) l_sManualVerticalScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
-			if(this->getStaticBoxContext().getSettingCount() > 4) l_sVerticalScaleSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+			CIdentifier l_oDisplayMode                   = (uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+			CIdentifier l_oScalingMode                   = (uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+			m_f64RefreshInterval                         = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+			float64 l_f64VerticalScale                   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+			float64 l_f64VerticalOffset                  = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+			float64 l_f64TimeScale                       = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
+			boolean l_bHorizontalRuler                   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
+			boolean l_bVerticalRuler                     = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 7);
+			boolean l_bMultiview                         = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 8);
 
-			this->getLogManager() << LogLevel_Debug << "l_sManualVerticalScaleSettingValue=" << l_sManualVerticalScaleSettingValue << "\n";
-			this->getLogManager() << LogLevel_Debug << "l_sVerticalScaleSettingValue=" << l_sVerticalScaleSettingValue << "\n";
+			if(m_f64RefreshInterval<0) {
+				m_f64RefreshInterval = 0;
+			}
+			if(l_f64TimeScale<0.01) {
+				l_f64TimeScale = 0.01;
+			}
+
+			this->getLogManager() << LogLevel_Debug << "l_sVerticalScale=" << l_f64VerticalScale << ", offset " << l_f64VerticalOffset << "\n";
+			this->getLogManager() << LogLevel_Trace << "l_sScalingMode=" << l_oScalingMode << "\n";
 
 			//create GUI
 			m_pSignalDisplayView = new CSignalDisplayView(
 				*m_pBufferDatabase,
-				::atof(l_sTimeScaleSettingValue),
-				CIdentifier(getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_SignalDisplayMode, l_sDisplayModeSettingValue)),
-				this->getConfigurationManager().expandAsBoolean(l_sIsEEGMode),
-				!this->getConfigurationManager().expandAsBoolean(l_sManualVerticalScaleSettingValue),
-				::atof(l_sVerticalScaleSettingValue));
+				l_oDisplayMode,
+				l_oScalingMode,
+				l_f64VerticalScale,
+				l_f64VerticalOffset,
+				l_f64TimeScale,
+				l_bHorizontalRuler,
+				l_bVerticalRuler,
+				l_bMultiview
+				);
 
 			m_pBufferDatabase->setDrawable(m_pSignalDisplayView);
 
@@ -68,11 +87,14 @@ namespace OpenViBEPlugins
 				getBoxAlgorithmContext()->getVisualisationContext()->setToolbar(l_pToolbarWidget);
 			}
 
+			m_ui64LastScaleRefreshTime = 0;
+
 			return true;
 		}
 
 		boolean CSignalDisplay::uninitialize()
 		{
+			m_oUnitDecoder.uninitialize();
 			m_oStimulationDecoder.uninitialize();
 			m_oStreamedMatrixDecoder.uninitialize();
 
@@ -97,6 +119,36 @@ namespace OpenViBEPlugins
 			if(m_pBufferDatabase->getErrorStatus()) {
 				this->getLogManager() << LogLevel_Error << "Buffer database reports an error. Its possible that the inputs given to the Signal Display are not supported by it.\n";
 				return false;
+			}
+
+#ifdef DEBUG
+			uint64 in = System::Time::zgetTime();
+#endif
+
+			// Channel units on input 2 
+			for(uint32 c=0; c<l_pDynamicBoxContext->getInputChunkCount(2); c++)
+			{
+				m_oUnitDecoder.decode(c);
+				if(m_oUnitDecoder.isBufferReceived()) 
+				{
+					std::vector< std::pair<CString, CString> > l_vChannelUnits;
+					l_vChannelUnits.resize(m_oUnitDecoder.getOutputMatrix()->getDimensionSize(0));
+					const float64 *l_pBuffer = m_oUnitDecoder.getOutputMatrix()->getBuffer();
+					for(uint32 i=0;i<l_vChannelUnits.size();i++)
+					{
+						CString l_sUnit = this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_MeasurementUnit, 
+							static_cast<uint64>(l_pBuffer[i*2+0]));
+						CString l_sFactor = this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Factor, 
+							static_cast<uint64>(l_pBuffer[i*2+1]));
+
+						l_vChannelUnits[i] = std::pair<CString, CString>(l_sUnit, l_sFactor);
+					}
+					
+					if(!((CSignalDisplayView*)m_pSignalDisplayView)->setChannelUnits(l_vChannelUnits))
+					{
+						this->getLogManager() << LogLevel_Warning << "Unable to set channel units properly\n";
+					}
+				}
 			}
 
 			// Stimulations in input 1
@@ -145,12 +197,34 @@ namespace OpenViBEPlugins
 				{
 					const IMatrix* l_pMatrix = m_oStreamedMatrixDecoder.getOutputMatrix();
 
-					m_pBufferDatabase->setMatrixBuffer(l_pMatrix->getBuffer(),
+#ifdef DEBUG
+					static int count = 0; 
+					std::cout << "Push chunk " << (count++) << " at " << 	l_pDynamicBoxContext->getInputChunkStartTime(0,c) << "\n";
+#endif
+
+					bool l_bReturnValue = m_pBufferDatabase->setMatrixBuffer(l_pMatrix->getBuffer(),
 						l_pDynamicBoxContext->getInputChunkStartTime(0,c),
 						l_pDynamicBoxContext->getInputChunkEndTime(0,c));
+					if(!l_bReturnValue) 
+					{
+						return false;
+					}
 
 				}
 			}
+
+			const uint64 l_ui64TimeNow = getPlayerContext().getCurrentTime();
+			if(m_ui64LastScaleRefreshTime == 0 || l_ui64TimeNow - m_ui64LastScaleRefreshTime > ITimeArithmetics::secondsToTime(m_f64RefreshInterval)) 
+			{
+//				this->getLogManager() << LogLevel_Info << "Refresh at " << ITimeArithmetics::timeToSeconds(l_ui64TimeNow) << "s \n";
+				((CSignalDisplayView*)m_pSignalDisplayView)->refreshScale();
+				m_ui64LastScaleRefreshTime = l_ui64TimeNow;
+			}
+
+#ifdef DEBUG
+			out = System::Time::zgetTime();
+			std::cout << "Elapsed1 " << out-in << "\n";
+#endif
 
 			return true;
 		}

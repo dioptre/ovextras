@@ -27,18 +27,24 @@ namespace OpenViBEPlugins
 		*/
 		class CSignalDisplayView : public CSignalDisplayDrawable
 		{
+
 		public:
+
+
+
 			/**
 			 * \brief Constructor
 			 * \param [in] rBufferDatabase Signal database
 			 * \param [in] f64TimeScale Initial time scale value
 			 * \param [in] oDisplayMode Initial signal display mode
 			 */
+			/*
 			CSignalDisplayView(
 				CBufferDatabase& rBufferDatabase,
 				OpenViBE::float64 f64TimeScale,
 				OpenViBE::CIdentifier oDisplayMode,
 				OpenViBE::boolean bIsEEG);
+				*/
 			/**
 			 * \brief Constructor
 			 * \param [in] rBufferDatabase Signal database
@@ -49,11 +55,15 @@ namespace OpenViBEPlugins
 			 */
 			CSignalDisplayView(
 				CBufferDatabase& rBufferDatabase,
-				OpenViBE::float64 f64TimeScale,
 				OpenViBE::CIdentifier oDisplayMode,
-				OpenViBE::boolean bIsEEG,
-				OpenViBE::boolean bAutoVerticalScale,
-				OpenViBE::float64 f64VerticalScale);
+				OpenViBE::CIdentifier oScalingMode,
+				OpenViBE::float64 f64VerticalScale,
+				OpenViBE::float64 f64VerticalOffset,
+				OpenViBE::float64 f64TimeScale,
+				OpenViBE::boolean l_bHorizontalRuler,
+				OpenViBE::boolean l_bVerticalRuler,
+				OpenViBE::boolean l_bIsMultiview
+			);
 
 			/**
 			 * \brief Base constructor
@@ -112,6 +122,8 @@ namespace OpenViBEPlugins
 
 			void changeMultiView(void);
 
+			void removeOldWidgets(void);
+			void recreateWidgets(OpenViBE::uint32 ui32ChannelCount);
 			void updateMainTableStatus(void);
 
 			void activateToolbarButtons(
@@ -124,6 +136,9 @@ namespace OpenViBEPlugins
 			 */
 			OpenViBE::boolean onDisplayModeToggledCB(
 				OpenViBE::CIdentifier oDisplayMode);
+
+			OpenViBE::boolean onUnitsToggledCB(OpenViBE::boolean active);
+
 
 			/**
 			 * Callback called when vertical scale mode changes
@@ -140,9 +155,8 @@ namespace OpenViBEPlugins
 			 */
 			OpenViBE::boolean onCustomVerticalScaleChangedCB(
 				::GtkSpinButton* pSpinButton);
-
-			OpenViBE::boolean onAutoTranslationToggledCB(
-					GtkToggleButton* pToggleButton);
+			OpenViBE::boolean onCustomVerticalOffsetChangedCB(
+				::GtkSpinButton* pSpinButton);
 
 			/**
 			 * \brief Get a channel display object
@@ -158,6 +172,8 @@ namespace OpenViBEPlugins
 			void onStimulationReceivedCB(
 				OpenViBE::uint64 ui64StimulationCode,
 				const OpenViBE::CString& rStimulationName);
+
+			OpenViBE::boolean setChannelUnits(const std::vector< std::pair<OpenViBE::CString, OpenViBE::CString> >& oChannelUnits);
 
 			/**
 			 * \brief Get a color from a stimulation code
@@ -177,6 +193,8 @@ namespace OpenViBEPlugins
 			void getMultiViewColor(
 				OpenViBE::uint32 ui32ChannelIndex,
 				::GdkColor& rColor);
+
+			void refreshScale(void);
 
 		private:
 			/**
@@ -199,6 +217,8 @@ namespace OpenViBEPlugins
 			//! The table containing the CSignalChannelDisplays
 			GtkWidget* m_pSignalDisplayTable;
 
+			GtkWidget* m_pSeparator;
+
 			//! Array of the channel's labels
 			std::vector<GtkWidget*> m_oChannelLabel;
 
@@ -217,8 +237,13 @@ namespace OpenViBEPlugins
 
 			//! Largest displayed value range, to be matched by all channels in global best fit mode
 			OpenViBE::float64 m_f64LargestDisplayedValueRange;
+
+			OpenViBE::float64 m_f64LargestDisplayedValue;
+			OpenViBE::float64 m_f64SmallestDisplayedValue;
+
 			//! Current value range margin, used to avoid redrawing signals every time the largest value range changes
 			OpenViBE::float64 m_f64ValueRangeMargin;
+			// OpenViBE::float64 m_f64ValueMaxMargin;
 			/*! Margins added to largest and subtracted from smallest displayed values are computed as :
 			m_f64MarginFactor * m_f64LargestDisplayedValueRange. If m_ui64MarginFactor = 0, there's no margin at all.
 			If factor is 0.1, largest displayed value range is extended by 10% above and below its extremums at the time
@@ -232,19 +257,13 @@ namespace OpenViBEPlugins
 			//@{
 			//! Flag set to true when vertical scale mode or value changes
 			OpenViBE::boolean m_bVerticalScaleChanged;
-			//! Auto vertical scale radio button
-			GtkRadioButton* m_pAutoVerticalScaleRadioButton;
-			//! Flag set to true when auto vertical scale is toggled on
-			OpenViBE::boolean m_bAutoVerticalScale;
+			//
+			OpenViBE::boolean m_bVerticalScaleRefresh;
 			//! Value of custom vertical scale
 			OpenViBE::float64 m_f64CustomVerticalScaleValue;
+			//! Value of custom vertical offset
+			OpenViBE::float64 m_f64CustomVerticalOffset;
 			//@}
-
-			//! Flag set to true when auto translation is on (center signal in his spot)
-            OpenViBE::boolean m_bAutoTranslation;
-
-			//! Flage set to true when eeg settings mode is on 
-			OpenViBE::boolean m_bIsEEGSignal;
 
 			//! The database that contains the information to use to draw the signals
 			CBufferDatabase * m_pBufferDatabase;
@@ -255,11 +274,16 @@ namespace OpenViBEPlugins
 			//! Vector of raw points. Stores the points' coordinates before cropping.
 			std::vector<std::pair<OpenViBE::float64,OpenViBE::float64> > m_pRawPoints;
 
+			std::vector< OpenViBE::CString > m_vChannelName;
+
 			//! Vector of indexes of the channels to display
 			std::map<OpenViBE::uint32, OpenViBE::boolean> m_vSelectedChannels;
 
+			std::map<OpenViBE::uint32, std::pair<OpenViBE::CString, OpenViBE::CString> > m_vChannelUnits;
+
 			//! Flag set to true once multi view configuration dialog is initialized
-			OpenViBE::boolean m_bMultiViewInitialized;
+			OpenViBE::boolean m_bMultiViewEnabled;
+
 			//! Vector of indices of selected channels
 			std::map<OpenViBE::uint32, OpenViBE::boolean> m_vMultiViewSelectedChannels;
 
@@ -277,6 +301,13 @@ namespace OpenViBEPlugins
 
 			//! Widgets for left rulers
 			std::vector <GtkWidget *> m_oLeftRulers;
+
+			OpenViBE::CIdentifier m_oScalingMode;
+
+			static const char* m_vScalingModes[];
+
+			std::vector<OpenViBE::float64> m_vPreviousValueMin;
+			std::vector<OpenViBE::float64> m_vPreviousValueMax;
 		};
 	}
 }

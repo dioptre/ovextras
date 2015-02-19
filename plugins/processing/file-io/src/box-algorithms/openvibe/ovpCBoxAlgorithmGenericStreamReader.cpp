@@ -256,36 +256,55 @@ void CBoxAlgorithmGenericStreamReader::closeChild(void)
 					{
 						if(l_oOutputTypeIdentifier==it->second)
 						{
-							this->getLogManager() << LogLevel_Trace << "Found output " << i << " for stream " << it->first << " with corresponding type identifier " << l_oOutputTypeIdentifier << "\n";
+							this->getLogManager() << LogLevel_Trace << "Found output " << i+1 << " for stream " << it->first << " with corresponding type identifier " << l_oOutputTypeIdentifier << "\n";
 							l_ui32Index=i;
 						}
 					}
 				}
 			}
 
-			// In case no suiting output was found, look for a derived one
+			// In case no suitable output was found, see if we can downcast some type
 			for(uint32 i=0; i<l_rStaticBoxContext.getOutputCount() && l_ui32Index==(uint32)-1; i++)
 			{
 				if(l_rStaticBoxContext.getOutputType(i, l_oOutputTypeIdentifier))
 				{
 					if(l_vOutputIndexToStreamIndex.find(i)==l_vOutputIndexToStreamIndex.end())
 					{
-						if(this->getTypeManager().isDerivedFromStream(l_oOutputTypeIdentifier, it->second))
+						if(this->getTypeManager().isDerivedFromStream(it->second, l_oOutputTypeIdentifier))
 						{
-							this->getLogManager() << LogLevel_Trace << "Found output " << i << " for stream " << it->first << " with corresponding derived type identifier " << l_oOutputTypeIdentifier << " " << it->second << "\n";
-							l_ui32Index=i;
+							const CString l_sSourceTypeName=this->getTypeManager().getTypeName(it->second);
+							const CString l_sOutputTypeName=this->getTypeManager().getTypeName(l_oOutputTypeIdentifier);
+							this->getLogManager() << LogLevel_Info << "Note: downcasting stream " << i+1 << " from " 
+								<< l_sSourceTypeName << " to " << l_sOutputTypeName << ", as there is no exactly type-matching output connector.\n";
+							l_ui32Index=i;								
 						}
 					}
 				}
 			}
 
-			// In case it was not find
+			// In case it was not found
 			if(l_ui32Index==(uint32)-1)
 			{
 				CString l_sTypeName=this->getTypeManager().getTypeName(it->second);
 				this->getLogManager() << LogLevel_Warning << "Did not find output for stream " << it->first << " of type identifier " << it->second << " (type name is [" << l_sTypeName << "])\n";
 				m_vStreamIndexToOutputIndex[it->first]=(uint32)-1;
 				l_bLostStreams=true;
+
+				// In case no suitable output was found, just check if the user made a mistake and inform of that
+				for(uint32 i=0; i<l_rStaticBoxContext.getOutputCount() && l_ui32Index==(uint32)-1; i++)
+				{
+					if(l_rStaticBoxContext.getOutputType(i, l_oOutputTypeIdentifier))
+					{
+						if(l_vOutputIndexToStreamIndex.find(i)==l_vOutputIndexToStreamIndex.end())
+						{
+							if(this->getTypeManager().isDerivedFromStream(l_oOutputTypeIdentifier, it->second))
+							{
+								this->getLogManager() << LogLevel_Warning << "Note that output " << i+1 << " has a derived type identifier for the stream. This is not supported. Please change the connector type.\n";
+								
+							}
+						}
+					}
+				}
 			}
 			else
 			{

@@ -288,7 +288,9 @@ boolean CBoxAlgorithmEBMLStreamSpy::process(void)
 				l_rDynamicBoxContext.markInputAsDeprecated(i, j);
 
 				getLogManager() << m_eLogLevel
-					<< "For chunk [id:" << j << "] at [time:" << CIdentifier(l_ui64StartTime) << "," << CIdentifier(l_ui64EndTime) << "]\n";
+					<< "For chunk [id:" << j << "] at [time:" << CIdentifier(l_ui64StartTime) << "," << CIdentifier(l_ui64EndTime) 
+					<< " / " << time64(l_ui64StartTime) << "," << time64(l_ui64EndTime)
+					<< "]\n";
 
 				m_pReader->processData(l_pChunkBuffer, l_ui64ChunkSize);
 			}

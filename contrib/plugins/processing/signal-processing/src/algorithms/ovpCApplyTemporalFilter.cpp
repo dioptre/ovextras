@@ -323,6 +323,7 @@ boolean CApplyTemporalFilter::process(void)
 		
 	}
 
+	// This mode is used when the consecutive input chunks are discontinuous in time
 	if(isInputTriggerActive(OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_ApplyFilter))
 	{
 		// signal input vars
@@ -345,6 +346,14 @@ boolean CApplyTemporalFilter::process(void)
 		vec x(l_ui32SignalInputMatrixDimensionSizeEpoch);
 		x = zeros(l_ui32SignalInputMatrixDimensionSizeEpoch);
 			
+		// test that Filtfilt() won't exceed the data array boundaries
+		const uint32 l_ui32MinSize = 3*(m_vecDenomCoefFilter.size() - 1 ) + 1;
+		if(l_ui32SignalInputMatrixDimensionSizeEpoch <  l_ui32MinSize) 
+		{
+			this->getLogManager() << LogLevel_Error << "Data chunk size (" << l_ui32SignalInputMatrixDimensionSizeEpoch << ") "
+				<< "is too short for the requirements of the filter (" << l_ui32MinSize << "). Please use a larger chunk size.\n";
+			return false;
+		}
 
 		for (uint64 i=0;  i < l_ui32SignalInputMatrixDimensionNbChannels; i++)
 		{
@@ -364,6 +373,7 @@ boolean CApplyTemporalFilter::process(void)
 		}
 	}
 
+	// This mode is used when the consecutive input chunks are continuous in time
 	if(isInputTriggerActive(OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_ApplyFilterWithHistoric))
 	{
 		// signal input vars

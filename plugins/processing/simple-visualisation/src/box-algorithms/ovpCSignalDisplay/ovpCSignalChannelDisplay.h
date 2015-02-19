@@ -17,6 +17,7 @@
 #include <cmath>
 
 #include <vector>
+#include <map>
 
 namespace OpenViBEPlugins
 {
@@ -143,7 +144,9 @@ namespace OpenViBEPlugins
          * \param[out] rDisplayedValueRange Returns vector of updated value range displayed by the channels
 		 */
         void updateDisplayedValueRange(
-            std::vector<OpenViBE::float64> & rDisplayedValueRange);
+            std::vector<OpenViBE::float64>& rDisplayedValueRange,
+			std::vector<OpenViBE::float64>& rDisplayedValueMin,
+			std::vector<OpenViBE::float64>& rDisplayedValueMax);
 
 		/**
 		 * \brief Sets latest global best fit parameters
@@ -159,6 +162,19 @@ namespace OpenViBEPlugins
 		void setGlobalBestFitParameters(
 			const OpenViBE::float64& rRange,
 			const OpenViBE::float64& rMargin);
+
+		void setGlobalBestFitParameters2(
+			const OpenViBE::float64& rMin,
+			const OpenViBE::float64& rMax);
+
+		void setGlobalManualParameters(
+			OpenViBE::float64 f64Scale,
+			OpenViBE::float64 f64Center);
+
+		void setLocalManualParameters(
+			const OpenViBE::uint32 subChannelIndex,
+			const OpenViBE::float64 rMin,
+			const OpenViBE::float64 rMax);
 
         void setMultiViewBestFitParameters(
             const OpenViBE::float64& rRange,
@@ -230,7 +246,9 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 ui32FirstBufferToDisplay,
 			OpenViBE::uint32 ui32LastBufferToDisplay,
 			OpenViBE::uint32 ui32FirstSampleToDisplay,
-			OpenViBE::float64 f64FirstBufferStartX);
+			OpenViBE::float64 f64FirstBufferStartX,
+			OpenViBE::uint32 ui32FirstChannelToDisplay, 
+			OpenViBE::uint32 ui32LastChannelToDisplay);
 
 		/**
 		 * \brief Draw vertical line highlighting where data was last drawn
@@ -246,8 +264,9 @@ namespace OpenViBEPlugins
 		void drawZeroLine();
 
 	public:
-        //! Vector of Left rulers displaying signal scale
-        std::vector<CSignalDisplayLeftRuler*> m_oLeftRuler;
+        //! Vector of Left rulers displaying signal scale. Indexed by channel id. @note This is a map as the active number of channels 
+		// may change by the toolbar whereas this total set of rulers doesn't...
+        std::map<OpenViBE::uint32, CSignalDisplayLeftRuler* > m_oLeftRuler;
 		//! The drawing area where the signal is to be drawn
 		GtkWidget * m_pDrawingArea;
 		//! Drawing area dimensions, in pixels
@@ -271,8 +290,8 @@ namespace OpenViBEPlugins
 
 		/** \name Auto scaling parameters */
 		//@{
-		OpenViBE::float64 m_f64ScaleX;
-		OpenViBE::float64 m_f64TranslateX;
+//		OpenViBE::float64 m_f64ScaleX;
+//		OpenViBE::float64 m_f64TranslateX;
 
         std::vector<OpenViBE::float64> m_vScaleY;
         std::vector<OpenViBE::float64> m_vTranslateY;
@@ -305,9 +324,12 @@ namespace OpenViBEPlugins
 		//! Should the whole window be redrawn at next redraw?
 		OpenViBE::boolean m_bRedrawAll;
 
-        OpenViBE::float64 m_f64VerticalScale;
         //! Is it a multiview display ?
         OpenViBE::boolean m_bMultiView;
+
+		// Currently visible y segment in the drawing area
+		OpenViBE::uint32 m_ui32StartY;
+		OpenViBE::uint32 m_ui32StopY;
 	};
 
 	}

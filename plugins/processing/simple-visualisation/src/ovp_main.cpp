@@ -35,6 +35,11 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SignalDisplayMode, "Scroll", OVP_TypeId_SignalDisplayMode_Scroll.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SignalDisplayMode, "Scan",  OVP_TypeId_SignalDisplayMode_Scan.toUInteger());
 
+	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_SignalDisplayScaling, "Signal display y scaling");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SignalDisplayScaling, OpenViBEPlugins::SimpleVisualisation::CSignalDisplayView::m_vScalingModes[OVP_TypeId_SignalDisplayScaling_PerChannel], OVP_TypeId_SignalDisplayScaling_PerChannel);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SignalDisplayScaling, OpenViBEPlugins::SimpleVisualisation::CSignalDisplayView::m_vScalingModes[OVP_TypeId_SignalDisplayScaling_Global]    , OVP_TypeId_SignalDisplayScaling_Global);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SignalDisplayScaling, OpenViBEPlugins::SimpleVisualisation::CSignalDisplayView::m_vScalingModes[OVP_TypeId_SignalDisplayScaling_None]      , OVP_TypeId_SignalDisplayScaling_None);
+
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CAlgorithmLevelMeasureDesc)
 	OVP_Declare_New(OpenViBEPlugins::Test::CAlgorithmSphericalSplineInterpolationDesc)
 

@@ -73,39 +73,34 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getOutputType(ui32Index, l_oTypeIdentifier);
-				if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_Spectrum))
+				if(l_oTypeIdentifier == OV_TypeId_Spectrum)
 				{
-					rBox.setOutputName(ui32Index, "Streamed matrix");
 					rBox.setSettingName(3,"Unused parameter");
 					rBox.setSettingValue(3,"0");
 				}
-				else if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier,OV_TypeId_ChannelLocalisation))
+				else if(l_oTypeIdentifier == OV_TypeId_ChannelLocalisation)
 				{
-					rBox.setOutputName(ui32Index, "Streamed matrix");
 					rBox.setSettingName(3,"Channels number");
 					rBox.setSettingValue(3,"32");
 				}
-				else if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_FeatureVector))
+				else if(l_oTypeIdentifier == OV_TypeId_FeatureVector)
 				{
-					rBox.setOutputName(ui32Index, "Feature vector");
 					rBox.setSettingName(3,"Unused parameter");
 					rBox.setSettingValue(3,"0");
 				}
-				else if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
+				else if(l_oTypeIdentifier == OV_TypeId_StreamedMatrix)
 				{
-					rBox.setOutputName(ui32Index, "Streamed matrix");
 					rBox.setSettingName(3,"Samples per buffer");
 					rBox.setSettingValue(3,"32");
 				}
 				else if(l_oTypeIdentifier==OV_TypeId_Stimulations)
 				{
-					rBox.setOutputName(ui32Index, "Stimulations");
 					rBox.setSettingName(3,"Unused parameter");
 					rBox.setSettingValue(3,"0");
 				}
 				else
 				{
-					rBox.setOutputName(ui32Index, "Streamed matrix");
+					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Unsupported stream type " << l_oTypeIdentifier << "\n";
 					rBox.setOutputType(ui32Index, OV_TypeId_Signal);
 					rBox.setSettingName(3,"Samples per buffer");
 					rBox.setSettingValue(3,"32");
@@ -140,7 +135,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addOutput ("Output signal", OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutput ("Output stream", OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addSetting("Filename", OV_TypeId_Filename, "");
 				rBoxAlgorithmPrototype.addSetting("Column separator", OV_TypeId_String, ";");
 				rBoxAlgorithmPrototype.addSetting("Don't use the file time",OV_TypeId_Boolean, "false");

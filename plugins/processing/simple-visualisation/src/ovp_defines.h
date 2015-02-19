@@ -9,6 +9,18 @@
 #define OVP_TypeId_SignalDisplayMode_Scroll                           OpenViBE::CIdentifier(0x0A4B5537, 0x3F791851)
 #define OVP_TypeId_SignalDisplayMode_Scan                             OpenViBE::CIdentifier(0x1CE12013, 0x69464506)
 
+// Note: the code relies on the following indexing starting from 0
+#define OVP_TypeId_SignalDisplayScaling                               OpenViBE::CIdentifier(0x33A30739, 0x00D5299B)
+#define OVP_TypeId_SignalDisplayScaling_PerChannel                    0
+#define OVP_TypeId_SignalDisplayScaling_Global   					  1
+#define OVP_TypeId_SignalDisplayScaling_None                          2
+
+//#define OV_ClassId_                                        OpenViBE::CIdentifier(0x33A30739, 0x00D5299B)
+//#define OV_ClassId_                                        OpenViBE::CIdentifier(0x566D62B9, 0x2CFB4A72)
+//#define OV_ClassId_                                        OpenViBE::CIdentifier(0x60486B42, 0x5F5014E2)
+// #define OV_ClassId_                                        OpenViBE::CIdentifier(0x0CEA30C4, 0x5ED50F77)
+
+
 #define OVP_ClassId_BoxAlgorithm_LevelMeasure                         OpenViBE::CIdentifier(0x657138E4, 0x46D6586F)
 #define OVP_ClassId_BoxAlgorithm_LevelMeasureDesc                     OpenViBE::CIdentifier(0x4D061428, 0x11B02233)
 #define OVP_ClassId_Algorithm_LevelMeasure                            OpenViBE::CIdentifier(0x63C71764, 0x34A9717F)
