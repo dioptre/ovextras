@@ -65,7 +65,7 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addOutput ("Experiment information",      OV_TypeId_ExperimentInformation);
-				rBoxAlgorithmPrototype.addOutput ("Signal strea",                OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutput ("Signal stream",               OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addOutput ("Stimulations",                OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addOutput ("Channel localisation",        OV_TypeId_ChannelLocalisation);
 				rBoxAlgorithmPrototype.addOutput ("Channel units",               OV_TypeId_ChannelUnits);
