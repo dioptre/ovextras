@@ -1,7 +1,7 @@
 <OpenViBE-Scenario>
 	<Boxes>
 		<Box>
-			<Identifier>(0x00001ae1, 0x0000543a)</Identifier>
+			<Identifier>(0x00002e59, 0x00005225)</Identifier>
 			<Name>Modifiable Settings example</Name>
 			<AlgorithmClassIdentifier>(0x4ab0dd05, 0x32155d41)</AlgorithmClassIdentifier>
 			<Settings>
@@ -61,27 +61,45 @@
 					<Value>0:0,0,0; 100:60,40,40</Value>
 					<Modifiability>true</Modifiability>
 				</Setting>
+				<Setting>
+					<TypeIdentifier>(0x2f3563a4, 0x571e194d)</TypeIdentifier>
+					<Name>unit</Name>
+					<DefaultValue>V</DefaultValue>
+					<Value>V</Value>
+					<Modifiability>true</Modifiability>
+				</Setting>
+				<Setting>
+					<TypeIdentifier>(0x501f79fa, 0x7e1f6680)</TypeIdentifier>
+					<Name>factor</Name>
+					<DefaultValue>1e-01</DefaultValue>
+					<Value>1e-01</Value>
+					<Modifiability>true</Modifiability>
+				</Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
-					<Value>128.000000</Value>
+					<Value>144.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>33</Value>
+					<Value>38</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>416.000000</Value>
+					<Value>432.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0xef70c6f7, 0x758d3fa7)</Value>
+					<Value>(0x905adcea, 0xd88c907d)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>193</Value>
+					<Value>222</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xc67a01dc, 0x28ce06c1)</Identifier>
+					<Value></Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
@@ -89,7 +107,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xce18836a, 0x9c0eb403)</Identifier>
-					<Value>8</Value>
+					<Value>10</Value>
 				</Attribute>
 			</Attributes>
 		</Box>
@@ -147,11 +165,11 @@ chanfes accordingly.</Text>
 			<NumChildren>1</NumChildren>
 		</VisualisationWidget>
 		<VisualisationWidget>
-			<Identifier>(0x00000bb8, 0x00001270)</Identifier>
+			<Identifier>(0x0000463a, 0x00002105)</Identifier>
 			<Type>3</Type>
 			<ParentIdentifier>(0x00002075, 0x000044ac)</ParentIdentifier>
 			<Index>0</Index>
-			<BoxIdentifier>(0x00001ae1, 0x0000543a)</BoxIdentifier>
+			<BoxIdentifier>(0x00002e59, 0x00005225)</BoxIdentifier>
 			<NumChildren>0</NumChildren>
 		</VisualisationWidget>
 	</VisualisationTree>
