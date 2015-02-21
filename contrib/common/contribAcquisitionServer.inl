@@ -18,6 +18,7 @@
 #include "ovasCDriverMitsarEEG202A.h"
 #include "ovasCDriverOpenALAudioCapture.h"
 #include "ovasCDriverOpenEEGModularEEG.h"
+#include "ovasCDriverOpenBCI.h"
 
 namespace OpenViBEContributions {
 
@@ -55,6 +56,8 @@ namespace OpenViBEContributions {
 #endif
 
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverOpenEEGModularEEG(pAcquisitionServer->getDriverContext()));
+		
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverOpenBCI(pAcquisitionServer->getDriverContext()));
 
 		pGUI->registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginExternalStimulations(rKernelContext));
 	}
