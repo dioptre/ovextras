@@ -14,6 +14,7 @@
  #include <cstdio>
  #include <cstdlib>
  #include <commctrl.h>
+ #include <winsock2.h> // htons and co.
  //#define TERM_SPEED 57600
  #define TERM_SPEED CBR_115200
 #elif defined TARGET_OS_Linux
@@ -22,6 +23,7 @@
  #include <fcntl.h>
  #include <termios.h>
  #include <sys/select.h>
+ #include <netinet/in.h> // htons and co.
  #define TERM_SPEED B115200
 #else
 #endif
@@ -193,20 +195,20 @@ boolean CDriverOpenBCI::configure(void)
 	return true;
 }
 
-// from OpenBCI docs, convert EEG value format
-// FIXME: check if it depends on endianness
+// from OpenBCI docs, convert EEG value format from int24 MSB (network order) to int32 host
 int32 CDriverOpenBCI::interpret24bitAsInt32(std::vector < uint8 > byteBuffer) {
 	int32 newInt = (
 		((0xFF & byteBuffer[0]) << 16) |
 		((0xFF & byteBuffer[1]) << 8) |
 		(0xFF & byteBuffer[2])
 	);
-	if ((newInt & 0x00800000) > 0) {
+	if (ntohl(newInt & 0x00800000) > 0) {
 		newInt |= 0xFF000000;
 	} else {
 		newInt &= 0x00FFFFFF;
 	}
-	return newInt;
+	// converts to host endianness on the fly
+	return ntohl(newInt);
 }
 
 //___________________________________________________________________//
@@ -294,10 +296,11 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 				}
 				// we got Acc value
 				if (m_ui8SampleBufferPosition == AccValueBufferSize) { 
-					// convert 2 bytes buffer to int32
-					// TODO: check if depends on endianness
-					int32 accValue = ((int32)m_vAccValueBuffer[0])<<8;
+					// convert 2 bytes buffer to int16 (network order)
+					int16 accValue = ((int32)m_vAccValueBuffer[0])<<8;
 					accValue+=m_vAccValueBuffer[1];
+					// convert to host order
+					accValue=ntohs(accValue);
 					// fill channel buffer, positioning after EEG values
 					m_vChannelBuffer2[EEGNbValuesPerSample+m_ui16ExtractPosition] = accValue;
 					// reset for next value
