@@ -190,9 +190,25 @@ boolean CDriverOpenBCI::configure(void)
 	return true;
 }
 
+// from OpenBCI docs, convert EEG value format
+// FIXME: check if it depends on endianness
+int32 CDriverOpenBCI::interpret24bitAsInt32(std::vector < uint8 > byteBuffer) {
+	int32 newInt = (
+		((0xFF & byteBuffer[0]) << 16) |
+		((0xFF & byteBuffer[1]) << 8) |
+		(0xFF & byteBuffer[2])
+	);
+	if ((newInt & 0x00800000) > 0) {
+		newInt |= 0xFF000000;
+	} else {
+		newInt &= 0x00FFFFFF;
+	}
+	return newInt;
+}
+
 //___________________________________________________________________//
 //                                                                   //
-// return sample number once one is receivced (between 0 and 255, -1 if none)
+// return sample number once one is received (between 0 and 255, -1 if none)
 OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 {
 	// finished to read sample or not
@@ -253,17 +269,21 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 				}
 				// we got EEG value
 				else {
+					// fill channel buffer, converting at the same time from 24 to 32 bits
+					m_vChannelBuffer2[m_ui16ExtractPosition] = interpret24bitAsInt32(m_vEEGValueBuffer);
+					// FIXME: DEBUG
+					std::cout << "EEG value: " << m_vChannelBuffer2[m_ui16ExtractPosition] << std::endl;
+					// reset for next value
 					m_ui8SampleBufferPosition = 0;
 					m_ui16ExtractPosition++;
 				}
 			}
 			// finished with EEG
 			else {
-				// TODO: fill channel buffer
-				// text step: accelerometer
+				// next step: accelerometer
 				m_ui16Readstate++;
-				// re-use the same variable to know position inside accelerometer block (I know, I'm bad!)
-				m_ui16ExtractPosition = 0;
+				// re-use the same variable to know position inside accelerometer block (I know, I'm bad!). Err... FIXME
+				m_ui16ExtractPosition=0;
 			}
 			break;
 		// reading accelerometer data
@@ -282,14 +302,23 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 					m_ui8SampleBufferPosition++;
 				}
 				// we got Acc value
-				else {
+				else { 
+					// convert 2 bytes buffer to int32
+					// TODO: check if depends on endianness
+					int32 accValue = ((int32)m_vAccValueBuffer[0])<<8;
+					accValue+=m_vAccValueBuffer[1];
+					// fill channel buffer, positioning after EEG values
+					m_vChannelBuffer2[EEGNbValuesPerSample+m_ui16ExtractPosition] = accValue;
+					// FIXME: DEBUG
+					std::cout << "Acc value: " << m_vChannelBuffer2[EEGNbValuesPerSample+m_ui16ExtractPosition] << std::endl;
+					// reset for next value
 					m_ui8SampleBufferPosition = 0;
 					m_ui16ExtractPosition++;
-				}
+				 }
 			}
 			// finished with acc
 			else {
-				// TODO: fill acc buffer
+				// next step: footer
 				m_ui16Readstate++;
 			}
 			break;
@@ -469,7 +498,8 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 		::ReadFile(i32FileDescriptor, l_ui8ReadBuffer, 1, (LPDWORD)&l_ui32ReadOk, 0);
 		if(l_ui32ReadOk==1)
 		{
-			if(this->parseByteP2(l_ui8ReadBuffer[0]))
+			// sample number returned: complete sample/packet
+			if(this->parseByteP2(l_ui8ReadBuffer[0]) != -1)
 			{
 				l_i32PacketsProcessed++;
 			}
@@ -505,7 +535,8 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 					{
 						for(l_ui32BytesProcessed=0; l_ui32BytesProcessed<l_ui32ReadLength; l_ui32BytesProcessed++)
 						{
-							if(this->parseByteP2(l_ui8ReadBuffer[l_ui32BytesProcessed]))
+							// sample number returned: complete sample/packet
+							if(this->parseByteP2(l_ui8ReadBuffer[l_ui32BytesProcessed]) != -1)
 							{
 								l_i32PacketsProcessed++;
 							}
