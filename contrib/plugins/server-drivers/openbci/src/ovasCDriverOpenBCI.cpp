@@ -21,7 +21,7 @@
  #include <fcntl.h>
  #include <termios.h>
  #include <sys/select.h>
- #define TERM_SPEED B57600
+ #define TERM_SPEED B115200
 #else
 #endif
 
@@ -47,7 +47,6 @@ CDriverOpenBCI::CDriverOpenBCI(IDriverContext& rDriverContext)
 	m_oSettings.add("Header", &m_oHeader);
 	m_oSettings.add("DeviceIdentifier", &m_ui32DeviceIdentifier);
 	m_oSettings.load();
-
 }
 
 void CDriverOpenBCI::release(void)
@@ -75,8 +74,11 @@ boolean CDriverOpenBCI::initialize(
 		return false;
 	}
 
+	// init state
 	m_ui16Readstate=0;
 	m_ui16ExtractPosition=0;
+	m_i16SampleNumber  = -1;
+	m_ui16ExtractPosition = 0;
 
 	if(!this->initTTY(&m_i32FileDescriptor, m_ui32DeviceIdentifier!=uint32(-1)?m_ui32DeviceIdentifier:1))
 	{
@@ -210,16 +212,15 @@ int32 CDriverOpenBCI::interpret24bitAsInt32(std::vector < uint8 > byteBuffer) {
 //                                                                   //
 // return sample number once one is received (between 0 and 255, -1 if none)
 OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
-{
+{		
 	// finished to read sample or not
 	bool l_bSampleStatus = false;
 	
 	switch(m_ui16Readstate)
 	{
-		//  Byte 1: 0xA0
 		case 0:
 			// if first byte is not the one expected, won't go further
-			if(ui8Actbyte==160)
+			if(ui8Actbyte==0xA0)
 			{
 				m_ui16Readstate++;
 			        // FIXME: DEBUG, may be info about the board
@@ -228,24 +229,18 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 			else
 			{
 				m_ui16Readstate=0;
-				// FIXME: DEBUG, may be info about the board
-				std::cout << "OpenBCI reads: " << (char) ui8Actbyte << std::endl;
 			}
 			// reset sample info
 			m_i16SampleNumber  = -1;
 			m_ui16ExtractPosition = 0;
 			m_ui8SampleBufferPosition = 0;
-			// zero EEG and accel buffers
-			// zero accel buffer
-			m_vEEGValueBuffer.clear();
-			m_vAccValueBuffer.clear();
 			break;
 		// Byte 2: Sample Number
 		case 1:
 			m_i16SampleNumber = ui8Actbyte;
 			m_ui16Readstate++;
 			// FIXME: DEBUG
-			std::cout << "Sample number: " << (char) ui8Actbyte << std::endl;
+			std::cout << "Sample number: " << (int) ui8Actbyte << std::endl;
 			break;
 		// reading EEG data 
 		/* 
@@ -261,14 +256,19 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 		* Bytes 24-26: Data value for EEG channel 8
 		*/
 		case 2:
+			//std::cout << "in case 2" << std::endl;
 			if (m_ui16ExtractPosition < EEGNbValuesPerSample) {	
 				// fill EEG buffer
 				if (m_ui8SampleBufferPosition < EEGValueBufferSize) {
+				  //std::cout << "fill eeg buffer at pos: " << (int)m_ui8SampleBufferPosition << std::endl;
 					m_vEEGValueBuffer[m_ui8SampleBufferPosition] = ui8Actbyte;
+					//std::cout << "buffer: " << (int)ui8Actbyte << std::endl;	
 					m_ui8SampleBufferPosition++;
 				}
 				// we got EEG value
-				else {
+				if (m_ui8SampleBufferPosition == EEGValueBufferSize)
+				{
+					//std::cout << "fill eeg value at pos: " << (int)m_ui16ExtractPosition << std::endl;
 					// fill channel buffer, converting at the same time from 24 to 32 bits
 					m_vChannelBuffer2[m_ui16ExtractPosition] = interpret24bitAsInt32(m_vEEGValueBuffer);
 					// FIXME: DEBUG
@@ -279,7 +279,7 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 				}
 			}
 			// finished with EEG
-			else {
+			if (m_ui16ExtractPosition == EEGNbValuesPerSample) {
 				// next step: accelerometer
 				m_ui16Readstate++;
 				// re-use the same variable to know position inside accelerometer block (I know, I'm bad!). Err... FIXME
@@ -295,6 +295,7 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 		* Bytes 31-32: Data value for accelerometer channel Z
 		*/
 		case 3:
+		  //std::cout << "in case3" << std::endl;
 			if (m_ui16ExtractPosition < AccNbValuesPerSample) {	
 				// fill Acc buffer
 				if (m_ui8SampleBufferPosition < AccValueBufferSize) {
@@ -302,7 +303,7 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 					m_ui8SampleBufferPosition++;
 				}
 				// we got Acc value
-				else { 
+				if (m_ui8SampleBufferPosition == AccValueBufferSize) { 
 					// convert 2 bytes buffer to int32
 					// TODO: check if depends on endianness
 					int32 accValue = ((int32)m_vAccValueBuffer[0])<<8;
@@ -317,15 +318,16 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 				 }
 			}
 			// finished with acc
-			else {
+			if (m_ui16ExtractPosition == AccNbValuesPerSample) {
 				// next step: footer
 				m_ui16Readstate++;
 			}
 			break;
 		// footer: Byte 33: 0xC0
 		case 4:
+		  std::cout << "in case 4" << std::endl;
 			// expected footer: perfect, returns sample number
-			if(ui8Actbyte==192)
+			if(ui8Actbyte==0xC0)
 			{
 			        // FIXME: DEBUG, may be info about the board
 				std::cout << "OpenBCI got footer" << std::endl;
@@ -336,12 +338,12 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 			else
 			{
 				// FIXME: DEBUG, may be info about the board
-				std::cout << "OpenBCI reads instead of footer: " << (char) ui8Actbyte << std::endl;
+				std::cout << "OpenBCI reads instead of footer: " << (int) ui8Actbyte << std::endl;
 			}
 			// whatever happened, it'll be the end of this journey
-			m_ui16Readstate++;
+			m_ui16Readstate=0;
 			break;
-		// next time will be a new time
+		// uh-oh, should not be there
 		default:
 			m_ui16Readstate = 0;
 			break;
@@ -385,7 +387,7 @@ boolean CDriverOpenBCI::initTTY(::FD_TYPE* pFileDescriptor, uint32 ui32TTYNumber
 
 	// update DCB rate, byte size, parity, and stop bits size
 	dcb.DCBlength = sizeof(dcb);
-	dcb.BaudRate  = CBR_56000;
+	dcb.BaudRate  = CBR_56000; //FIXME: wrong rate??
 	dcb.ByteSize  = 8;
 	dcb.Parity    = NOPARITY;
 	dcb.StopBits  = ONESTOPBIT;
@@ -477,7 +479,7 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Debug << "Enters readPacketFromTTY\n";
 
-	uint8  l_ui8ReadBuffer[100];
+	uint8  l_ui8ReadBuffer[1]; // FIXME: size...
 	uint32 l_ui32BytesProcessed=0;
 	int32  l_i32PacketsProcessed=0;
 
@@ -531,8 +533,9 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 			default:
 				if(FD_ISSET(i32FileDescriptor, &l_inputFileDescriptorSet))
 				{
-					if((l_ui32ReadLength=::read(i32FileDescriptor, l_ui8ReadBuffer, 1)) > 0)
-					{
+				  l_ui32ReadLength=::read(i32FileDescriptor, l_ui8ReadBuffer, sizeof(l_ui8ReadBuffer));		  
+					if((l_ui32ReadLength) > 0)
+					{					   
 						for(l_ui32BytesProcessed=0; l_ui32BytesProcessed<l_ui32ReadLength; l_ui32BytesProcessed++)
 						{
 							// sample number returned: complete sample/packet
