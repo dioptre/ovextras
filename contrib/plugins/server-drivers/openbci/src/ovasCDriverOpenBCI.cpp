@@ -195,17 +195,12 @@ boolean CDriverOpenBCI::configure(void)
 	return true;
 }
 
-// from OpenBCI docs, convert EEG value format from int24 MSB (network order) to int32 host
+// Convert EEG value format from int24 MSB (network order) to int32 host
 int32 CDriverOpenBCI::interpret24bitAsInt32(std::vector < uint8 > byteBuffer) {
-	int32 newInt = (
-		((0xFF & byteBuffer[0]) << 16) |
-		((0xFF & byteBuffer[1]) << 8) |
-		(0xFF & byteBuffer[2])
-	);
-	if (ntohl(newInt & 0x00800000) > 0) {
-		newInt |= 0xFF000000;
-	} else {
-		newInt &= 0x00FFFFFF;
+	int32 newInt = (byteBuffer[2] << 16) | (byteBuffer[1] << 8) | byteBuffer[0];
+	// negative number if most significant > 128
+	if (byteBuffer[0] > 127) {
+		newInt |= 0xFF << 24; 
 	}
 	// converts to host endianness on the fly
 	return ntohl(newInt);
@@ -297,9 +292,8 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 				// we got Acc value
 				if (m_ui8SampleBufferPosition == AccValueBufferSize) { 
 					// convert 2 bytes buffer to int16 (network order)
-					int16 accValue = ((int32)m_vAccValueBuffer[0])<<8;
-					accValue+=m_vAccValueBuffer[1];
-					// convert to host order
+					int16 accValue = m_vAccValueBuffer[1]<< 8;
+					accValue |= m_vAccValueBuffer[0];
 					accValue=ntohs(accValue);
 					// fill channel buffer, positioning after EEG values
 					m_vChannelBuffer2[EEGNbValuesPerSample+m_ui16ExtractPosition] = accValue;
