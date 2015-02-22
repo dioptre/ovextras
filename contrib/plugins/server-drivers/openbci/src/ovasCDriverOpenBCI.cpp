@@ -224,8 +224,6 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 			if(ui8Actbyte==0xA0)
 			{
 				m_ui16Readstate++;
-			        // FIXME: DEBUG, may be info about the board
-				std::cout << "OpenBCI got header" << std::endl;
 			}
 			else
 			{
@@ -240,8 +238,6 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 		case 1:
 			m_i16SampleNumber = ui8Actbyte;
 			m_ui16Readstate++;
-			// FIXME: DEBUG
-			std::cout << "Sample number: " << m_i16SampleNumber << std::endl;
 			break;
 		// reading EEG data 
 		/* 
@@ -257,23 +253,17 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 		* Bytes 24-26: Data value for EEG channel 8
 		*/
 		case 2:
-			//std::cout << "in case 2" << std::endl;
 			if (m_ui16ExtractPosition < EEGNbValuesPerSample) {	
 				// fill EEG buffer
 				if (m_ui8SampleBufferPosition < EEGValueBufferSize) {
-				  //std::cout << "fill eeg buffer at pos: " << (int)m_ui8SampleBufferPosition << std::endl;
-					m_vEEGValueBuffer[m_ui8SampleBufferPosition] = ui8Actbyte;
-					//std::cout << "buffer: " << (int)ui8Actbyte << std::endl;	
+					m_vEEGValueBuffer[m_ui8SampleBufferPosition] = ui8Actbyte;	
 					m_ui8SampleBufferPosition++;
 				}
 				// we got EEG value
 				if (m_ui8SampleBufferPosition == EEGValueBufferSize)
 				{
-					//std::cout << "fill eeg value at pos: " << (int)m_ui16ExtractPosition << std::endl;
 					// fill channel buffer, converting at the same time from 24 to 32 bits
 					m_vChannelBuffer2[m_ui16ExtractPosition] = interpret24bitAsInt32(m_vEEGValueBuffer);
-					// FIXME: DEBUG
-					std::cout << "EEG value: " << m_vChannelBuffer2[m_ui16ExtractPosition] << std::endl;
 					// reset for next value
 					m_ui8SampleBufferPosition = 0;
 					m_ui16ExtractPosition++;
@@ -296,7 +286,6 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 		* Bytes 31-32: Data value for accelerometer channel Z
 		*/
 		case 3:
-		  //std::cout << "in case3" << std::endl;
 			if (m_ui16ExtractPosition < AccNbValuesPerSample) {	
 				// fill Acc buffer
 				if (m_ui8SampleBufferPosition < AccValueBufferSize) {
@@ -311,8 +300,6 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 					accValue+=m_vAccValueBuffer[1];
 					// fill channel buffer, positioning after EEG values
 					m_vChannelBuffer2[EEGNbValuesPerSample+m_ui16ExtractPosition] = accValue;
-					// FIXME: DEBUG
-					std::cout << "Acc value: " << m_vChannelBuffer2[EEGNbValuesPerSample+m_ui16ExtractPosition] << std::endl;
 					// reset for next value
 					m_ui8SampleBufferPosition = 0;
 					m_ui16ExtractPosition++;
@@ -329,16 +316,12 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 			// expected footer: perfect, returns sample number
 			if(ui8Actbyte==0xC0)
 			{
-			        // FIXME: DEBUG, may be info about the board
-				std::cout << "OpenBCI got footer" << std::endl;
 				// we shall pass
 				l_bSampleStatus = true;
 			}
 			// if last byte is not the one expected, discard whole sample
 			else
 			{
-				// FIXME: DEBUG, may be info about the board
-				std::cout << "OpenBCI reads instead of footer: " << (int) ui8Actbyte << std::endl;
 			}
 			// whatever happened, it'll be the end of this journey
 			m_ui16Readstate=0;
@@ -348,8 +331,9 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 			m_ui16Readstate = 0;
 			break;
 	}
-	// if it's a GO, returns sample number 
+	// if it's a GO, add channel values, returns sample number
 	if (l_bSampleStatus) {
+		m_vChannelBuffer.push_back(m_vChannelBuffer2);
 		return m_i16SampleNumber;
 	}
 	// by default we're not ready
@@ -542,8 +526,8 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 							// number returned: only eif complete sample/packet
 							if(l_curPacket != -1)
 							{
-								// check packet drop -- little trick for movulo 255
-								if(m_ui8LastPacketNumber + 1 !=  l_curPacket) {
+								// check packet drop
+								if ((m_ui8LastPacketNumber + 1) % 256 !=  l_curPacket) {
 									// FIXME: use logging
 									std::cout << "Last packet drop! Last: " << (int) m_ui8LastPacketNumber << ", current packet number: " << l_curPacket << std::endl;
 								}
