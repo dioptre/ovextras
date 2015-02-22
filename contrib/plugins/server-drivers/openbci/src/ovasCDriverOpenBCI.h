@@ -65,8 +65,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::int16 m_i16SampleNumber; // returned by the board
 		OpenViBE::uint16 m_ui16Readstate; // position in the sample (see doc)
 		OpenViBE::uint8 m_ui8SampleBufferPosition;// position in the buffer
-		std::vector < OpenViBE::uint8 > m_vEEGValueBuffer; // buffer for one EEG value (float24)
-		const static OpenViBE::uint8 EEGValueBufferSize = 3; // float24 == 3 bytes
+		std::vector < OpenViBE::uint8 > m_vEEGValueBuffer; // buffer for one EEG value (int24)
+		const static OpenViBE::uint8 EEGValueBufferSize = 3; // int24 == 3 bytes
 		std::vector < OpenViBE::uint8 > m_vAccValueBuffer; // buffer for one accelerometer value (int16)
 		const static OpenViBE::uint8 AccValueBufferSize = 2; // int16 == 2 bytes
 		const static OpenViBE::uint8 EEGNbValuesPerSample = 8; // the board send EEG values 8 by 8
