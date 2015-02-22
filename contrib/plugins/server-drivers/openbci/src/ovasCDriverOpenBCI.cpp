@@ -14,7 +14,8 @@
  #include <cstdio>
  #include <cstdlib>
  #include <commctrl.h>
- #define TERM_SPEED 57600
+ //#define TERM_SPEED 57600
+ #define TERM_SPEED CBR_115200
 #elif defined TARGET_OS_Linux
  #include <cstdio>
  #include <unistd.h>
@@ -212,7 +213,7 @@ int32 CDriverOpenBCI::interpret24bitAsInt32(std::vector < uint8 > byteBuffer) {
 //                                                                   //
 // return sample number once one is received (between 0 and 255, -1 if none)
 OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
-{		
+{
 	// finished to read sample or not
 	bool l_bSampleStatus = false;
 	
@@ -240,7 +241,7 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 			m_i16SampleNumber = ui8Actbyte;
 			m_ui16Readstate++;
 			// FIXME: DEBUG
-			std::cout << "Sample number: " << (int) ui8Actbyte << std::endl;
+			std::cout << "Sample number: " << m_i16SampleNumber << std::endl;
 			break;
 		// reading EEG data 
 		/* 
@@ -325,7 +326,6 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 			break;
 		// footer: Byte 33: 0xC0
 		case 4:
-		  std::cout << "in case 4" << std::endl;
 			// expected footer: perfect, returns sample number
 			if(ui8Actbyte==0xC0)
 			{
@@ -387,7 +387,7 @@ boolean CDriverOpenBCI::initTTY(::FD_TYPE* pFileDescriptor, uint32 ui32TTYNumber
 
 	// update DCB rate, byte size, parity, and stop bits size
 	dcb.DCBlength = sizeof(dcb);
-	dcb.BaudRate  = CBR_56000; //FIXME: wrong rate??
+	dcb.BaudRate  = TERM_SPEED;
 	dcb.ByteSize  = 8;
 	dcb.Parity    = NOPARITY;
 	dcb.StopBits  = ONESTOPBIT;
@@ -538,9 +538,16 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 					{					   
 						for(l_ui32BytesProcessed=0; l_ui32BytesProcessed<l_ui32ReadLength; l_ui32BytesProcessed++)
 						{
-							// sample number returned: complete sample/packet
-							if(this->parseByteP2(l_ui8ReadBuffer[l_ui32BytesProcessed]) != -1)
+							int l_curPacket = this->parseByteP2(l_ui8ReadBuffer[l_ui32BytesProcessed]);
+							// number returned: only eif complete sample/packet
+							if(l_curPacket != -1)
 							{
+								// check packet drop -- little trick for movulo 255
+								if(m_ui8LastPacketNumber + 1 !=  l_curPacket) {
+									// FIXME: use logging
+									std::cout << "Last packet drop! Last: " << (int) m_ui8LastPacketNumber << ", current packet number: " << l_curPacket << std::endl;
+								}
+							        m_ui8LastPacketNumber = l_curPacket;
 								l_i32PacketsProcessed++;
 							}
 						}
