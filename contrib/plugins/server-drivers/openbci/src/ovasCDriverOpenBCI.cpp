@@ -90,13 +90,18 @@ boolean CDriverOpenBCI::initialize(
 		m_pSample=NULL;
 		return false;
 	}
-	m_vChannelBuffer2.resize(6);
+	// in OpenBCI protocol, a sample consists in EEG + Accelerometer data
+	m_vChannelBuffer2.resize(EEGNbValuesPerSample+AccNbValuesPerSample);
 
 	m_pCallback=&rCallback;
 	m_ui32ChannelCount=m_oHeader.getChannelCount();
 	m_ui8LastPacketNumber=0;
 
 	m_rDriverContext.getLogManager() << LogLevel_Debug << CString(this->getName()) << " driver initialized.\n";
+	
+	// init buffer for EEG value and accel values
+	m_vEEGValueBuffer.resize(EEGValueBufferSize);
+	m_vAccValueBuffer.resize(AccValueBufferSize);
 	return true;
 }
 
@@ -187,72 +192,137 @@ boolean CDriverOpenBCI::configure(void)
 
 //___________________________________________________________________//
 //                                                                   //
-
-boolean CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
+// return sample number once one is receivced (between 0 and 255, -1 if none)
+OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 {
+	// finished to read sample or not
+	bool l_bSampleStatus = false;
+	
 	switch(m_ui16Readstate)
 	{
+		//  Byte 1: 0xA0
 		case 0:
-			if(ui8Actbyte==165)
+			// if first byte is not the one expected, won't go further
+			if(ui8Actbyte==160)
 			{
 				m_ui16Readstate++;
+			        // FIXME: DEBUG, may be info about the board
+				std::cout << "OpenBCI got header" << std::endl;
 			}
+			else
+			{
+				m_ui16Readstate=0;
+				// FIXME: DEBUG, may be info about the board
+				std::cout << "OpenBCI reads: " << (char) ui8Actbyte << std::endl;
+			}
+			// reset sample info
+			m_i16SampleNumber  = -1;
+			m_ui16ExtractPosition = 0;
+			m_ui8SampleBufferPosition = 0;
+			// zero EEG and accel buffers
+			// zero accel buffer
+			m_vEEGValueBuffer.clear();
+			m_vAccValueBuffer.clear();
 			break;
-
+		// Byte 2: Sample Number
 		case 1:
-			if(ui8Actbyte==90)
-			{
+			m_i16SampleNumber = ui8Actbyte;
+			m_ui16Readstate++;
+			// FIXME: DEBUG
+			std::cout << "Sample number: " << (char) ui8Actbyte << std::endl;
+			break;
+		// reading EEG data 
+		/* 
+		Note: values are 24-bit signed, MSB first
+
+		* Bytes 3-5: Data value for EEG channel 1
+		* Bytes 6-8: Data value for EEG channel 2
+		* Bytes 9-11: Data value for EEG channel 3
+		* Bytes 12-14: Data value for EEG channel 4
+		* Bytes 15-17: Data value for EEG channel 5
+		* Bytes 18-20: Data value for EEG channel 6
+		* Bytes 21-23: Data value for EEG channel 6
+		* Bytes 24-26: Data value for EEG channel 8
+		*/
+		case 2:
+			if (m_ui16ExtractPosition < EEGNbValuesPerSample) {	
+				// fill EEG buffer
+				if (m_ui8SampleBufferPosition < EEGValueBufferSize) {
+					m_vEEGValueBuffer[m_ui8SampleBufferPosition] = ui8Actbyte;
+					m_ui8SampleBufferPosition++;
+				}
+				// we got EEG value
+				else {
+					m_ui8SampleBufferPosition = 0;
+					m_ui16ExtractPosition++;
+				}
+			}
+			// finished with EEG
+			else {
+				// TODO: fill channel buffer
+				// text step: accelerometer
+				m_ui16Readstate++;
+				// re-use the same variable to know position inside accelerometer block (I know, I'm bad!)
+				m_ui16ExtractPosition = 0;
+			}
+			break;
+		// reading accelerometer data
+		/*
+		 Note: values are 16-bit signed, MSB first
+		 
+		* Bytes 27-28: Data value for accelerometer channel X
+		* Bytes 29-30: Data value for accelerometer channel Y
+		* Bytes 31-32: Data value for accelerometer channel Z
+		*/
+		case 3:
+			if (m_ui16ExtractPosition < AccNbValuesPerSample) {	
+				// fill Acc buffer
+				if (m_ui8SampleBufferPosition < AccValueBufferSize) {
+					m_vAccValueBuffer[m_ui8SampleBufferPosition] = ui8Actbyte;
+					m_ui8SampleBufferPosition++;
+				}
+				// we got Acc value
+				else {
+					m_ui8SampleBufferPosition = 0;
+					m_ui16ExtractPosition++;
+				}
+			}
+			// finished with acc
+			else {
+				// TODO: fill acc buffer
 				m_ui16Readstate++;
 			}
-			else
-			{
-				m_ui16Readstate=0;
-			}
 			break;
-
-		case 2:
-			m_ui16Readstate++;
-			break;
-
-		case 3:
-			m_ui8PacketNumber=ui8Actbyte;
-			m_ui16ExtractPosition=0;
-			m_ui16Readstate++;
-			break;
-
+		// footer: Byte 33: 0xC0
 		case 4:
-			if(m_ui16ExtractPosition < 12)
+			// expected footer: perfect, returns sample number
+			if(ui8Actbyte==192)
 			{
-				if((m_ui16ExtractPosition & 1) == 0)
-				{
-					if((uint32)(m_ui16ExtractPosition>>1)<m_ui32ChannelCount)
-					{
-						m_vChannelBuffer2[m_ui16ExtractPosition>>1]=((int32)ui8Actbyte)<<8;
-					}
-				}
-				else
-				{
-					if((uint32)(m_ui16ExtractPosition>>1)<m_ui32ChannelCount)
-					{
-						m_vChannelBuffer2[m_ui16ExtractPosition>>1]+=ui8Actbyte;
-					}
-				}
-				m_ui16ExtractPosition++;
+			        // FIXME: DEBUG, may be info about the board
+				std::cout << "OpenBCI got footer" << std::endl;
+				// we shall pass
+				l_bSampleStatus = true;
 			}
+			// if last byte is not the one expected, discard whole sample
 			else
 			{
-				m_vChannelBuffer.push_back(m_vChannelBuffer2);
-				m_ui16Switches=ui8Actbyte;
-				m_ui16Readstate=0;
-				return true;
+				// FIXME: DEBUG, may be info about the board
+				std::cout << "OpenBCI reads instead of footer: " << (char) ui8Actbyte << std::endl;
 			}
+			// whatever happened, it'll be the end of this journey
+			m_ui16Readstate++;
 			break;
-
+		// next time will be a new time
 		default:
-			m_ui16Readstate=0;
+			m_ui16Readstate = 0;
 			break;
 	}
-	return false;
+	// if it's a GO, returns sample number 
+	if (l_bSampleStatus) {
+		return m_i16SampleNumber;
+	}
+	// by default we're not ready
+	return -1;
 }
 
 boolean CDriverOpenBCI::initTTY(::FD_TYPE* pFileDescriptor, uint32 ui32TTYNumber)
