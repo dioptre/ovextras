@@ -117,6 +117,9 @@ boolean CDriverOpenBCI::initialize(
 	// init buffer for EEG value and accel values
 	m_vEEGValueBuffer.resize(EEGValueBufferSize);
 	m_vAccValueBuffer.resize(AccValueBufferSize);
+	
+	// init scale factor
+	ScaleFacuVoltsPerCount = ADS1299_VREF/(pow(2,23)-1)/ADS1299_GAIN*1000000.;
 	return true;
 }
 
@@ -146,14 +149,16 @@ boolean CDriverOpenBCI::loop(void)
 			{
 				for(uint32 j=0; j<m_ui32ChannelCount; j++)
 				{
-					m_pSample[j]=(float32)m_vChannelBuffer[i][j]-512.f;
+					// convert value to microvolt
+					// TODO: check scale + depend of gain
+					m_pSample[j]= (float32)m_vChannelBuffer[i][j] * ScaleFacuVoltsPerCount;
 				}
 				m_pCallback->setSamples(m_pSample, 1);
 			}
 			m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
 		}
 		m_vChannelBuffer.clear();
-	}
+	}microvolt
 
 	return true;
 }

@@ -15,6 +15,10 @@
 #endif
 
 #include <vector>
+ 
+// some constants related to the boardWriteAndPrint
+#define ADS1299_VREF 4.5  // reference voltage for ADC in ADS1299.  set by its hardware
+#define ADS1299_GAIN 24.0  //assumed gain setting for ADS1299.  set by its Arduino code
 
 namespace OpenViBEAcquisitionServer
 {
@@ -76,6 +80,8 @@ namespace OpenViBEAcquisitionServer
 		const static OpenViBE::uint8 AccNbValuesPerSample = 3; // 3 accelerometer data per sample
 		
 		OpenViBE::uint16 m_ui16ExtractPosition; // used to situate sample reading both with EEG and accelerometer data
+		
+		OpenViBE::float32 ScaleFacuVoltsPerCount; // convert from int32 to microvort
 		
 		OpenViBE::uint8  m_ui8PacketNumber;
 		OpenViBE::uint8  m_ui8LastPacketNumber;
