@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include <time.h>
+#include <cstring>
 
 #if defined TARGET_OS_Windows
  #include <windows.h>
@@ -465,13 +466,20 @@ void CDriverOpenBCI::BadSleep(int32 mseconds)
 	while (goal > clock());
 }
 
-boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
-{
- 
-  
+// if waitForResponse, will print (and wait for) this particular sequence of character
+boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const char * cmd, const char * waitForResponse) {
+	// no command: don't go further
+	if (strlen(cmd) == 0) {
+		return true;
+	}
+	uint32 cmdSize = strlen(cmd);
+	std::cout << "Command size: " << cmdSize << std::endl;
 	uint8  l_ui8ReadBuffer[1]; // FIXME: size...
 	uint32 l_ui32BytesProcessed=0;
-	
+
+#if defined TARGET_OS_Windows
+
+#elif defined TARGET_OS_Linux
 	fd_set  l_inputFileDescriptorSet;
 	struct timeval l_timeout;
 	size_t l_ui32ReadLength=0;
@@ -482,9 +490,7 @@ boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
 	
  	FD_ZERO(&l_inputFileDescriptorSet);
 	FD_SET(i32FileDescriptor, &l_inputFileDescriptorSet);
-		
-	// reset 32-bit board (no effect with 8bit board)	
-	char cmd[] = "v";
+	
 	int n_written = 0;
 	unsigned int spot = 0;
 	do {
@@ -493,45 +499,65 @@ boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
 		// give some time to the board to register
 		sleep(2);
 		spot += n_written;
-	} while (cmd[spot] != '\0' && n_written > 0); //traling 
+	} while (spot < cmdSize && n_written > 0); //traling 
 	// ended before end, problem
-	if (cmd[spot] != '\0') {
+	if (spot != cmdSize) {;
 		std::cout << "stop before end" << std::endl;
 		return false;
 	}
 	
-	std::cout << "response: " << std::endl;
-	do
-	{
-		switch(::select(i32FileDescriptor+1, &l_inputFileDescriptorSet, NULL, NULL, &l_timeout))
+	if (strlen(waitForResponse) > 0) {
+		std::cout << "Wait for: " << waitForResponse << std::endl;
+		do
 		{
-			case -1: // error or timeout
-			case  0:
-				finished=true;
-				break;
+			switch(::select(i32FileDescriptor+1, &l_inputFileDescriptorSet, NULL, NULL, &l_timeout))
+			{
+				case -1: // error or timeout
+				case  0:
+					finished=true;
+					break;
 
-			default:
-				if(FD_ISSET(i32FileDescriptor, &l_inputFileDescriptorSet))
-				{
-					l_ui32ReadLength=::read(i32FileDescriptor, l_ui8ReadBuffer, sizeof(l_ui8ReadBuffer));		  
-					if((l_ui32ReadLength) > 0)
-					{					   
-						for(l_ui32BytesProcessed=0; l_ui32BytesProcessed<l_ui32ReadLength; l_ui32BytesProcessed++)
-						{
-							std::cout << l_ui8ReadBuffer[l_ui32BytesProcessed];
+				default:
+					if(FD_ISSET(i32FileDescriptor, &l_inputFileDescriptorSet))
+					{
+						l_ui32ReadLength=::read(i32FileDescriptor, l_ui8ReadBuffer, sizeof(l_ui8ReadBuffer));		  
+						if((l_ui32ReadLength) > 0)
+						{					   
+							for(l_ui32BytesProcessed=0; l_ui32BytesProcessed<l_ui32ReadLength; l_ui32BytesProcessed++)
+							{
+								std::cout << l_ui8ReadBuffer[l_ui32BytesProcessed];
+							}
 						}
 					}
-				}
-				else
-				{
-					finished=true;
-					std::cout << std::end;
-				}
-				break;
+					else
+					{
+						finished=true;
+					}
+					break;
+			}
 		}
+		while(!finished);
+		std::cout << std::endl;
+		std::cout << "finish to read" << std::endl;
 	}
-	while(!finished);
-	std::cout << "finish to read" << std::endl;
+	else {
+		std::cout << "Do not expect reponse." << std::endl;
+	}
+#else
+#endif
+	// FIXME: only if waitForResponse
+	return true;
+
+}
+
+boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
+{	
+	// reset 32-bit board (no effect with 8bit board)
+	const char * cmd = "v";
+	boardWriteAndPrint(i32FileDescriptor, cmd, "$$$");
+	
+	// start stream
+	boardWriteAndPrint(i32FileDescriptor, "b", "");
 	
 	// send commands...
 	return true;

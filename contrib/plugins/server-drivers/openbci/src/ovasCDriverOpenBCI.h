@@ -46,6 +46,7 @@ namespace OpenViBEAcquisitionServer
 		void BadSleep(OpenViBE::int32 mseconds);
 		OpenViBE::boolean initTTY(::FD_TYPE * pFileDescriptor, OpenViBE::uint32 ui32TtyNumber);
 		
+		OpenViBE::boolean boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const char *cmd, const char * waitForResponse);
 		OpenViBE::boolean initBoard(::FD_TYPE i32FileDescriptor);
 		OpenViBE::int32 readPacketFromTTY(::FD_TYPE i32FileDescriptor);
 		void closeTTY(::FD_TYPE i32FileDescriptor);
