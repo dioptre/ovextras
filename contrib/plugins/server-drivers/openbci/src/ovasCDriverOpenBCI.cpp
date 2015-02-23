@@ -158,7 +158,7 @@ boolean CDriverOpenBCI::loop(void)
 			m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
 		}
 		m_vChannelBuffer.clear();
-	}microvolt
+	}
 
 	return true;
 }
@@ -484,6 +484,49 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 
 #if defined TARGET_OS_Windows
 
+	uint32 l_ui32ReadLength=0;
+	uint32 l_ui32ReadOk=0;
+	uint32 l_ui32WriteOk=0;
+	struct _COMSTAT l_oStatus;
+	::DWORD l_dwState;
+	
+	// write
+	unsigned int spot = 0;
+	do {
+		std::cout << "write: " << cmd[spot] << std::endl;
+		::WriteFile(i32FileDescriptor, cmd[spot], 1, (LPDWORD)&l_ui32WriteOk, 0);
+
+		// give some time to the board to register
+		sleep(2);
+		spot += n_written;
+	} while (spot < cmdSize && l_ui32WriteOk == 1); //traling 
+	// ended before end, problem
+	if (spot != cmdSize) {;
+		std::cout << "stop before end" << std::endl;
+		return false;
+	}
+	// read
+	if (strlen(waitForResponse) > 0) {
+	  
+		if(::ClearCommError(i32FileDescriptor, &l_dwState, &l_oStatus))
+		{
+			l_ui32ReadLength=l_oStatus.cbInQue;
+		}
+
+		for(l_ui32BytesProcessed=0; l_ui32BytesProcessed<l_ui32ReadLength; l_ui32BytesProcessed++)
+		{
+			::ReadFile(i32FileDescriptor, l_ui8ReadBuffer, 1, (LPDWORD)&l_ui32ReadOk, 0);
+			if(l_ui32ReadOk==1)
+			{
+				std::cout << l_ui8ReadBuffer[0]);
+			}
+		}
+	}
+	else {
+		std::cout << "Do not expect reponse." << std::endl;
+	}
+
+	
 #elif defined TARGET_OS_Linux
 	fd_set  l_inputFileDescriptorSet;
 	struct timeval l_timeout;
