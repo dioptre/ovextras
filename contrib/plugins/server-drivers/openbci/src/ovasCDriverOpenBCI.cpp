@@ -366,9 +366,8 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 			m_ui16Readstate = 0;
 			break;
 	}
-	// if it's a GO, add channel values, returns sample number
+	// if it's a GO, returns sample number, may trigger channel push
 	if (l_bSampleStatus) {
-		m_vChannelBuffer.push_back(m_vChannelBuffer2);
 		return m_i16SampleNumber;
 	}
 	// by default we're not ready
@@ -649,6 +648,7 @@ void CDriverOpenBCI::closeTTY(::FD_TYPE i32FileDescriptor)
 #endif
 }
 
+// fear the code duplication!
 int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Debug << "Enters readPacketFromTTY\n";
@@ -677,7 +677,36 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 			// sample number returned: complete sample/packet
 			if(this->parseByteP2(l_ui8ReadBuffer[0]) != -1)
 			{
-				l_i32PacketsProcessed++;
+				// check packet drop
+				if ((m_ui8LastPacketNumber + 1) % 256 !=  l_curPacket) {
+					// FIXME: use logging
+					std::cout << "Last packet drop! Last: " << (int) m_ui8LastPacketNumber << ", current packet number: " << l_curPacket << std::endl;
+				}
+				
+				// no daisy module: push directly
+				if (!m_bDaisyModule) {
+					m_vChannelBuffer.push_back(m_vChannelBuffer2);
+					l_i32PacketsProcessed++;
+				}
+				// even: daisy, odd: first 8 channels
+				else {
+					// on odd packet, got complete sample
+					if (l_curPacket % 2) {
+						std::cout << "Will merge packets" << std::endl;
+						// won't concatenate if there was packet drop
+						if ((m_ui8LastPacketNumber + 1) % 256 !=  l_curPacket) {
+							  std::cout << "or not, packet drop." << std::endl;
+						}
+						else {
+							//FIXE: concatenate
+							m_vChannelBuffer.push_back(m_vChannelBuffer2);
+							l_i32PacketsProcessed++;
+						}
+					}
+					// else, will be for next time
+				}
+				
+				m_ui8LastPacketNumber = l_curPacket;
 			}
 		}
 	}
@@ -721,8 +750,31 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 									// FIXME: use logging
 									std::cout << "Last packet drop! Last: " << (int) m_ui8LastPacketNumber << ", current packet number: " << l_curPacket << std::endl;
 								}
-							        m_ui8LastPacketNumber = l_curPacket;
-								l_i32PacketsProcessed++;
+								
+								// no daisy module: push directly
+								if (!m_bDaisyModule) {
+									m_vChannelBuffer.push_back(m_vChannelBuffer2);
+									l_i32PacketsProcessed++;
+								}
+								// even: daisy, odd: first 8 channels
+								else {
+									// on odd packet, got complete sample
+									if (l_curPacket % 2) {
+										std::cout << "Will merge packets" << std::endl;
+										// won't concatenate if there was packet drop
+										if ((m_ui8LastPacketNumber + 1) % 256 !=  l_curPacket) {
+											  std::cout << "or not, packet drop." << std::endl;
+										}
+										else {
+											//FIXE: concatenate
+											m_vChannelBuffer.push_back(m_vChannelBuffer2);
+											l_i32PacketsProcessed++;
+										}
+									}
+									// else, will be for next time
+								}
+								
+								m_ui8LastPacketNumber = l_curPacket;
 							}
 						}
 					}
