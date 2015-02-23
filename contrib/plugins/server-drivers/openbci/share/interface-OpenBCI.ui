@@ -69,7 +69,19 @@
         <child>
           <object class="GtkLabel" id="label_title">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">OpenBCI reader</property>
+            <property name="label" translatable="yes">OpenBCI reader
+	      
+&lt;small&gt;Upon initialization, board response will appear in the console
+and should end by "&lt;b&gt;$$$&lt;/b&gt;" before stream starts.
+
+The last 3 channels represent accelerometer values.
+The sampling rate and the total number of channels are automatically
+selected depending on the &lt;b&gt;Daisy module&lt;/b&gt; option
+(8 EEG + 3 acc. at 250Hz without, 16 EEG + 3 acc. at 125Hz with).
+
+Use "&lt;b&gt;Send command on init&lt;/b&gt;" to configure the board between
+reset and streaming. Refer to OpenBCI doc for more details.&lt;/small&gt;</property>
+            <property name="use_markup">True</property>
             <property name="justify">center</property>
           </object>
           <packing>
