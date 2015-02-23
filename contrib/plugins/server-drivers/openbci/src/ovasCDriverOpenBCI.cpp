@@ -488,15 +488,19 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	
 	// write
 	unsigned int spot = 0;
+	bool returnWrite = false;
 	do {
-		std::cout << "write: " << cmd[spot] << std::endl;
-		::WriteFile(i32FileDescriptor, cmd[spot], 1, (LPDWORD)&l_ui32WriteOk, 0);
+		std::cout << "Write: " << cmd[spot] << std::endl;
+		returnWrite = ::WriteFile(i32FileDescriptor, (LPCVOID) &cmd[spot], 1, (LPDWORD)&l_ui32WriteOk, NULL);
+		spot+=l_ui32WriteOk;
+		if (!returnWrite) {
+			std::cout << "Error: " << ::GetLastError() << std::endl;
+		}
 		if (sleepBetween > 0) {
 			// give some time to the board to register
 			Sleep(sleepBetween);
 		}
-		spot += n_written;
-	} while (spot < cmdSize && l_ui32WriteOk == 1); //traling 
+	} while (spot < cmdSize && returnWrite); //traling 
 	// ended before end, problem
 	if (spot != cmdSize) {;
 		std::cout << "stop before end" << std::endl;
@@ -515,7 +519,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 			::ReadFile(i32FileDescriptor, l_ui8ReadBuffer, 1, (LPDWORD)&l_ui32ReadOk, 0);
 			if(l_ui32ReadOk==1)
 			{
-				std::cout << l_ui8ReadBuffer[0]);
+				std::cout << l_ui8ReadBuffer[0];
 			}
 		}
 	}
