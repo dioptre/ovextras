@@ -134,6 +134,7 @@ boolean CDriverOpenBCI::initialize(
 	
 	// init scale factor
 	ScaleFacuVoltsPerCount = ADS1299_VREF/(pow(2.,23)-1)/ADS1299_GAIN*1000000.;
+	std::cout << "Scale factor: " << ScaleFacuVoltsPerCount << std::endl;
 	
 	return true;
 }
@@ -236,7 +237,7 @@ boolean CDriverOpenBCI::configure(void)
 int32 CDriverOpenBCI::interpret24bitAsInt32(std::vector < uint8 > byteBuffer) {
 	int32 newInt = (byteBuffer[2] << 16) | (byteBuffer[1] << 8) | byteBuffer[0];
 	// negative number if most significant > 128
-	if (byteBuffer[0] > 127) {
+	if (byteBuffer[2] > 127) {
 		newInt |= 0xFF << 24; 
 	}
 	// converts to host endianness on the fly
