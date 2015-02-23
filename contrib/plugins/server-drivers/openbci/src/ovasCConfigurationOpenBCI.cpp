@@ -27,8 +27,11 @@ boolean CConfigurationOpenBCI::preConfigure(void)
 	::gtk_entry_set_text(l_pEntryComInit, m_sComInit.toASCIIString());
 
 	::GtkSpinButton* l_pSpinButtonComDelay=GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_com_delay"));
-	::gtk_spin_button_set_value(l_pSpinButtonComDelay, m_sComDelay);
+	::gtk_spin_button_set_value(l_pSpinButtonComDelay, m_iComDelay);
 	
+	::GtkToggleButton* l_pToggleButtonDaisyModule=GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_daisy_module"));
+	::gtk_toggle_button_set_active(l_pToggleButtonDaisyModule, m_bDaisyModule?true:false);
+		
 	::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_device"));
 
 	g_object_unref(m_pListStore);
@@ -88,8 +91,10 @@ boolean CConfigurationOpenBCI::postConfigure(void)
 		
 		::GtkSpinButton* l_pSpinButtonComDelay=GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_com_delay"));
 		gtk_spin_button_update(GTK_SPIN_BUTTON(l_pSpinButtonComDelay));
-		m_sComDelay=::gtk_spin_button_get_value_as_int(l_pSpinButtonComDelay);
-	
+		m_iComDelay=::gtk_spin_button_get_value_as_int(l_pSpinButtonComDelay);
+		
+		::GtkToggleButton* l_pToggleButtonDaisyModule=GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_daisy_module"));
+		m_bDaisyModule=::gtk_toggle_button_get_active(l_pToggleButtonDaisyModule)?true:false;	
 	}
 
 	if(!CConfigurationBuilder::postConfigure())
@@ -111,14 +116,26 @@ CString CConfigurationOpenBCI::getComInit(void) const
         return m_sComInit;
 }
 
-boolean CConfigurationOpenBCI::setComDelay(uint32 sComDelay)
+boolean CConfigurationOpenBCI::setComDelay(uint32 iComDelay)
 {
-        m_sComDelay=sComDelay;
+        m_iComDelay=iComDelay;
         return true;
 }
 
 
 uint32 CConfigurationOpenBCI::getComDelay(void) const
 {
-        return m_sComDelay;
+        return m_iComDelay;
+}
+
+bool CConfigurationOpenBCI::setDaisyModule(bool bDaisyModule)
+{
+        m_bDaisyModule=bDaisyModule;
+        return true;
+}
+
+
+bool CConfigurationOpenBCI::getDaisyModule(void) const
+{
+        return m_bDaisyModule;
 }

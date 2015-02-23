@@ -72,6 +72,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32DeviceIdentifier;
 		OpenViBE::CString m_sComInit; // string to send possibly upon initialisation
 		OpenViBE::uint32 m_ui32ComDelay; // parameter com init string
+		OpenViBE::boolean m_bDaisyModule; // daisy module attached or not
 		OpenViBE::float32* m_pSample;
 
 		::FD_TYPE  m_i32FileDescriptor;
@@ -84,8 +85,9 @@ namespace OpenViBEAcquisitionServer
 		const static OpenViBE::uint8 EEGValueBufferSize = 3; // int24 == 3 bytes
 		std::vector < OpenViBE::uint8 > m_vAccValueBuffer; // buffer for one accelerometer value (int16)
 		const static OpenViBE::uint8 AccValueBufferSize = 2; // int16 == 2 bytes
-		const static OpenViBE::uint8 EEGNbValuesPerSample = 8; // the board send EEG values 8 by 8
+		const static OpenViBE::uint8 EEGNbValuesPerSample = 8; // the board send EEG values 8 by 8 (will concatenate 2 samples with daisy module)
 		const static OpenViBE::uint8 AccNbValuesPerSample = 3; // 3 accelerometer data per sample
+		const static OpenViBE::uint16 DefaultSamplingRate = 250; // sampling rate with no daisy module (divided by 2 with daisy module)
 		
 		OpenViBE::uint16 m_ui16ExtractPosition; // used to situate sample reading both with EEG and accelerometer data
 		

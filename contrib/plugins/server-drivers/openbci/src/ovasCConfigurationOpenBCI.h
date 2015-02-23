@@ -19,8 +19,11 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean setComInit(const OpenViBE::CString& sComInit);
 		OpenViBE::CString getComInit(void) const;
 		
-		OpenViBE::boolean setComDelay(const OpenViBE::uint32 sComDelay);
+		OpenViBE::boolean setComDelay(const OpenViBE::uint32 iComDelay);
 		OpenViBE::uint32 getComDelay(void) const;
+		
+		OpenViBE::boolean setDaisyModule(const OpenViBE::boolean sDaisyModule);
+		OpenViBE::boolean getDaisyModule(void) const;
 		
 
 	protected:
@@ -28,7 +31,8 @@ namespace OpenViBEAcquisitionServer
 		::GtkListStore* m_pListStore;
 		::GtkEntry* l_pEntryComInit;
 		OpenViBE::CString m_sComInit;
-		OpenViBE::uint32 m_sComDelay;
+		OpenViBE::uint32 m_iComDelay;
+		OpenViBE::boolean m_bDaisyModule;
 	};
 };
 

@@ -101,59 +101,42 @@
                     <property name="n_columns">2</property>
                     <property name="homogeneous">True</property>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton_number_of_channels">
+                      <object class="GtkLabel" id="label_identifier">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Identifier :</property>
+                        <property name="justify">right</property>
+                        <property name="single_line_mode">True</property>
+                      </object>
+		      <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="spinbutton_identifier">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="adjustment">adjustment1</property>
+                        <property name="adjustment">adjustment3</property>
                         <property name="snap_to_ticks">True</property>
                         <property name="numeric">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label_number_of_channels">
+                      <object class="GtkLabel" id="label_gender">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Number of channels :</property>
+                        <property name="label" translatable="yes">Gender :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
                       </object>
                       <packing>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBox" id="combobox_device">
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="renderer2"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_device">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Device :</property>
-                        <property name="justify">right</property>
-                        <property name="single_line_mode">True</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
                       </packing>
                     </child>
                     <child>
@@ -175,6 +158,18 @@
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkLabel" id="label_age">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Age :</property>
+                        <property name="justify">right</property>
+                        <property name="single_line_mode">True</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkSpinButton" id="spinbutton_age">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -185,59 +180,41 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton_identifier">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="adjustment">adjustment3</property>
+                      <object class="GtkSpinButton" id="spinbutton_number_of_channels">
+                        <property name="visible">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="adjustment">adjustment1</property>
                         <property name="snap_to_ticks">True</property>
                         <property name="numeric">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label_gender">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Gender :</property>
+                      <object class="GtkLabel" id="label_number_of_channels">
+                        <property name="visible">False</property>
+                        <property name="label" translatable="yes">Number of channels :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
                       </object>
                       <packing>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
                       </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_age">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Age :</property>
-                        <property name="justify">right</property>
-                        <property name="single_line_mode">True</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_identifier">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Identifier :</property>
-                        <property name="justify">right</property>
-                        <property name="single_line_mode">True</property>
-                      </object>
                     </child>
                     <child>
                       <object class="GtkSpinButton" id="combobox_sampling_frequency">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="visible">False</property>
+                        <property name="can_focus">False</property>
                         <property name="adjustment">adjustment_sampling_frequency</property>
                         <property name="snap_to_ticks">True</property>
                         <property name="numeric">True</property>
@@ -251,24 +228,79 @@
                     </child>
                     <child>
                       <object class="GtkLabel" id="label_sampling_frequency">
-                        <property name="visible">True</property>
+                        <property name="visible">False</property>
                         <property name="label" translatable="yes">Sampling frequency :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
                       </object>
                       <packing>
-                        <property name="top_attach">5</property>
+			<property name="top_attach">5</property>
                         <property name="bottom_attach">6</property>
                       </packing>
                     </child>
-		    <child>
+                    <child>
+                      <object class="GtkLabel" id="label_daisy_module">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Daisy module :</property>
+                        <property name="justify">right</property>
+                        <property name="single_line_mode">True</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">6</property>
+                        <property name="bottom_attach">7</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="checkbutton_daisy_module">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">6</property>
+                        <property name="bottom_attach">7</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="combobox_device">
+                        <property name="visible">True</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="renderer2"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">7</property>
+                        <property name="bottom_attach">8</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_device">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Device :</property>
+                        <property name="justify">right</property>
+                        <property name="single_line_mode">True</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">7</property>
+                        <property name="bottom_attach">8</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkLabel" id="label_com_init">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Send command on init :</property>
                       </object>
                       <packing>
-                        <property name="top_attach">6</property>
-                        <property name="bottom_attach">7</property>
+                        <property name="top_attach">8</property>
+                        <property name="bottom_attach">9</property>
                       </packing>
                     </child>
 		    <child>
@@ -280,8 +312,8 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">6</property>
-                        <property name="bottom_attach">7</property>
+                        <property name="top_attach">8</property>
+                        <property name="bottom_attach">9</property>
                       </packing>
                     </child>
 		    <child>
@@ -290,8 +322,8 @@
                         <property name="label" translatable="yes">Delay between init commands (ms) :</property>
                       </object>
                       <packing>
-                        <property name="top_attach">7</property>
-                        <property name="bottom_attach">8</property>
+                        <property name="top_attach">9</property>
+                        <property name="bottom_attach">10</property>
                       </packing>
                     </child>
                     <child>
@@ -305,8 +337,8 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">7</property>
-                        <property name="bottom_attach">8</property>
+                        <property name="top_attach">9</property>
+                        <property name="bottom_attach">10</property>
                       </packing>
                     </child>
                   </object>

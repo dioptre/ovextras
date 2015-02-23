@@ -38,18 +38,20 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 
 //___________________________________________________________________//
+// Heavily inspired by OpenEEG code. Will override channel count and sampling late upon "daisy" selection
 //                                                                   //
 
 CDriverOpenBCI::CDriverOpenBCI(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
 	,m_oSettings("AcquisitionServer_Driver_OpenBCI", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
-	,m_ui32ChannelCount(6)
+	,m_ui32ChannelCount(11)
 	,m_ui32DeviceIdentifier(uint32(-1))
 	,m_pSample(NULL)
 {
-	m_oHeader.setSamplingFrequency(256);
-	m_oHeader.setChannelCount(m_ui32ChannelCount);
+	// by default, no daisy module, 11 channels at 250Hz, override during init
+	m_oHeader.setSamplingFrequency(DefaultSamplingRate);
+	m_oHeader.setChannelCount(EEGNbValuesPerSample+AccNbValuesPerSample);
 	m_sComInit="";
 	m_ui32ComDelay=100;
 
@@ -57,6 +59,8 @@ CDriverOpenBCI::CDriverOpenBCI(IDriverContext& rDriverContext)
 	m_oSettings.add("DeviceIdentifier", &m_ui32DeviceIdentifier);
 	m_oSettings.add("ComInit", &m_sComInit);
 	m_oSettings.add("ComDelay", &m_ui32ComDelay);
+	m_oSettings.add("DaisyModule", &m_bDaisyModule);
+	
 	m_oSettings.load();
 }
 
@@ -79,12 +83,18 @@ boolean CDriverOpenBCI::initialize(
 {
 	if(m_rDriverContext.isConnected()) { return false; }
 
-	if(!m_oHeader.isChannelCountSet()
-	 ||!m_oHeader.isSamplingFrequencySet())
-	{
-		return false;
+	// change channel and sampling rate according to daisy module
+	if (m_bDaisyModule) {
+		m_oHeader.setSamplingFrequency(DefaultSamplingRate/2);
+		m_oHeader.setChannelCount(2*EEGNbValuesPerSample+AccNbValuesPerSample);
+		std::cout << "Daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)(2*EEGNbValuesPerSample) << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << std::endl;
 	}
-
+	else {
+	  	m_oHeader.setSamplingFrequency(DefaultSamplingRate);
+		m_oHeader.setChannelCount(EEGNbValuesPerSample+AccNbValuesPerSample);
+		std::cout << "NO daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)EEGNbValuesPerSample << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << std::endl;
+	}
+	
 	// init state
 	m_ui16Readstate=0;
 	m_ui16ExtractPosition=0;
@@ -124,6 +134,7 @@ boolean CDriverOpenBCI::initialize(
 	
 	// init scale factor
 	ScaleFacuVoltsPerCount = ADS1299_VREF/(pow(2.,23)-1)/ADS1299_GAIN*1000000.;
+	
 	return true;
 }
 
@@ -207,6 +218,7 @@ boolean CDriverOpenBCI::configure(void)
 
 	m_oConfiguration.setComInit(m_sComInit);
 	m_oConfiguration.setComDelay(m_ui32ComDelay);
+	m_oConfiguration.setDaisyModule(m_bDaisyModule);
 	
 	if(!m_oConfiguration.configure(m_oHeader)) {
 		return false;
@@ -214,6 +226,7 @@ boolean CDriverOpenBCI::configure(void)
 
 	m_sComInit=m_oConfiguration.getComInit();
 	m_ui32ComDelay=m_oConfiguration.getComDelay();
+	m_bDaisyModule=m_oConfiguration.getDaisyModule();
 	m_oSettings.save();
 
 	return true;
