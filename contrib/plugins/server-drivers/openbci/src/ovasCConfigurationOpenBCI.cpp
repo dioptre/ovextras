@@ -23,6 +23,9 @@ boolean CConfigurationOpenBCI::preConfigure(void)
 		return false;
 	}
 
+	::GtkEntry* l_pEntryComInit=GTK_ENTRY(gtk_builder_get_object(m_pBuilderConfigureInterface, "entry_com_init"));
+	::gtk_entry_set_text(l_pEntryComInit, m_sComInit.toASCIIString());
+	
 	::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_device"));
 
 	g_object_unref(m_pListStore);
@@ -76,6 +79,9 @@ boolean CConfigurationOpenBCI::postConfigure(void)
 		{
 			m_rUSBIndex=(uint32)l_iUSBIndex+1;
 		}
+		
+		::GtkEntry* l_pEntryComInit=GTK_ENTRY(gtk_builder_get_object(m_pBuilderConfigureInterface, "entry_com_init"));
+		m_sComInit=::gtk_entry_get_text(l_pEntryComInit);
 	}
 
 	if(!CConfigurationBuilder::postConfigure())
@@ -84,3 +90,16 @@ boolean CConfigurationOpenBCI::postConfigure(void)
 	}
 	return true;
 }
+
+boolean CConfigurationOpenBCI::setComInit(const CString& sComInit)
+{
+        m_sComInit=sComInit;
+        return true;
+}
+
+
+CString CConfigurationOpenBCI::getComInit(void) const
+{
+        return m_sComInit;
+}
+

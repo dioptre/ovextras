@@ -50,9 +50,11 @@ CDriverOpenBCI::CDriverOpenBCI(IDriverContext& rDriverContext)
 {
 	m_oHeader.setSamplingFrequency(256);
 	m_oHeader.setChannelCount(m_ui32ChannelCount);
+	m_sComInit="";
 
 	m_oSettings.add("Header", &m_oHeader);
 	m_oSettings.add("DeviceIdentifier", &m_ui32DeviceIdentifier);
+	m_oSettings.add("ComInit", &m_sComInit);
 	m_oSettings.load();
 }
 
@@ -201,10 +203,13 @@ boolean CDriverOpenBCI::configure(void)
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-OpenBCI.ui", 
 		m_ui32DeviceIdentifier);
 
+	m_oConfiguration.setComInit(m_sComInit);
+	
 	if(!m_oConfiguration.configure(m_oHeader)) {
 		return false;
 	}
 
+	m_sComInit=m_oConfiguration.getComInit();
 	m_oSettings.save();
 
 	return true;
@@ -597,6 +602,11 @@ boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
 	// reset 32-bit board (no effect with 8bit board)
 	const char * cmd = "v";
 	boardWriteAndPrint(i32FileDescriptor, cmd, "$$$", 2000);
+	
+	std::cout << "ComInit: [" << m_sComInit << "]" << std::endl;
+	if (strlen(m_sComInit) > 0) {
+		boardWriteAndPrint(i32FileDescriptor, m_sComInit, "", 2000);
+	}
 	
 	// start stream
 	boardWriteAndPrint(i32FileDescriptor, "b", "", 2000);

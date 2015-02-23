@@ -70,6 +70,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::uint32 m_ui32ChannelCount;
 		OpenViBE::uint32 m_ui32DeviceIdentifier;
+		OpenViBE::CString m_sComInit; // string to send possibly upon initialisation
 		OpenViBE::float32* m_pSample;
 
 		::FD_TYPE  m_i32FileDescriptor;

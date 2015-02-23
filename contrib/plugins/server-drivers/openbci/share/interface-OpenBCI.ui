@@ -254,6 +254,29 @@
                         <property name="bottom_attach">6</property>
                       </packing>
                     </child>
+		    <child>
+                      <object class="GtkLabel" id="label_com_init">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Send command on init :</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">6</property>
+                        <property name="bottom_attach">7</property>
+                      </packing>
+                    </child>
+		    <child>
+                      <object class="GtkEntry" id="entry_com_init">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="text" translatable="yes"></property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">6</property>
+                        <property name="bottom_attach">7</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="position">0</property>
