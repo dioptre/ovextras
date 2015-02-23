@@ -470,9 +470,9 @@ boolean CDriverOpenBCI::initTTY(::FD_TYPE* pFileDescriptor, uint32 ui32TTYNumber
 	return true;
 }
 
-// if waitForResponse, will print (and wait for) this particular sequence of character. TODO: not implemented (will only print everything if set)
+// if waitForResponse, will print output after the sequence of character is sent
 // sleepBetween: time to sleep between each character written (in ms)
-boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const char * cmd, const char * waitForResponse, uint32 sleepBetween) {
+boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const char * cmd, bool waitForResponse, uint32 sleepBetween) {
 	// no command: don't go further
 	if (strlen(cmd) == 0) {
 		return true;
@@ -512,8 +512,8 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 		return false;
 	}
 	// read
-	if (strlen(waitForResponse) > 0) {
-	  
+	if (waitForResponse) {
+		std::cout << "Response: " << std::endl;
 		if(::ClearCommError(i32FileDescriptor, &l_dwState, &l_oStatus))
 		{
 			l_ui32ReadLength=l_oStatus.cbInQue;
@@ -563,8 +563,8 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 		return false;
 	}
 	
-	if (strlen(waitForResponse) > 0) {
-		std::cout << "Wait for: " << waitForResponse << std::endl;
+	if (waitForResponse) {
+		std::cout << "Response: " << std::endl;
 		do
 		{
 			switch(::select(i32FileDescriptor+1, &l_inputFileDescriptorSet, NULL, NULL, &l_timeout))
