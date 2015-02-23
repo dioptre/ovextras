@@ -119,7 +119,7 @@ boolean CDriverOpenBCI::initialize(
 	m_vAccValueBuffer.resize(AccValueBufferSize);
 	
 	// init scale factor
-	ScaleFacuVoltsPerCount = ADS1299_VREF/(pow(2,23)-1)/ADS1299_GAIN*1000000.;
+	ScaleFacuVoltsPerCount = ADS1299_VREF/(pow(2.,23)-1)/ADS1299_GAIN*1000000.;
 	return true;
 }
 
@@ -494,11 +494,10 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	unsigned int spot = 0;
 	do {
 		std::cout << "write: " << cmd[spot] << std::endl;
-		::WriteFile(i32FileDescriptor, cmd[spot], 1, (LPDWORD)&l_ui32WriteOk, 0);
+		::WriteFile(i32FileDescriptor, (LPCVOID) cmd[spot], 1, (LPDWORD)&l_ui32WriteOk, 0);
 
 		// give some time to the board to register
-		sleep(2);
-		spot += n_written;
+		Sleep(2000);
 	} while (spot < cmdSize && l_ui32WriteOk == 1); //traling 
 	// ended before end, problem
 	if (spot != cmdSize) {;
@@ -518,7 +517,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 			::ReadFile(i32FileDescriptor, l_ui8ReadBuffer, 1, (LPDWORD)&l_ui32ReadOk, 0);
 			if(l_ui32ReadOk==1)
 			{
-				std::cout << l_ui8ReadBuffer[0]);
+				std::cout << l_ui8ReadBuffer[0];
 			}
 		}
 	}
