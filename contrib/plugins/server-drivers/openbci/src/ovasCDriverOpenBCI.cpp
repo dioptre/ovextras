@@ -119,7 +119,7 @@ boolean CDriverOpenBCI::initialize(
 	m_vAccValueBuffer.resize(AccValueBufferSize);
 	
 	// init scale factor
-	ScaleFacuVoltsPerCount = ADS1299_VREF/(pow(2,23)-1)/ADS1299_GAIN*1000000.;
+	ScaleFacuVoltsPerCount = ADS1299_VREF/(pow(2.,23)-1)/ADS1299_GAIN*1000000.;
 	return true;
 }
 
@@ -461,18 +461,9 @@ boolean CDriverOpenBCI::initTTY(::FD_TYPE* pFileDescriptor, uint32 ui32TTYNumber
 	return true;
 }
 
-
-// bad but portable method to sleep
-// mseconds: miliseconds to sleep
-void CDriverOpenBCI::BadSleep(int32 mseconds)
-{
-	
-	clock_t goal = mseconds + clock();
-	while (goal > clock());
-}
-
 // if waitForResponse, will print (and wait for) this particular sequence of character
-boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const char * cmd, const char * waitForResponse) {
+// sleepBetween: time to sleep between each character written (in ms)
+boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const char * cmd, const char * waitForResponse, uint32 sleepBetween) {
 	// no command: don't go further
 	if (strlen(cmd) == 0) {
 		return true;
@@ -495,9 +486,10 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	do {
 		std::cout << "write: " << cmd[spot] << std::endl;
 		::WriteFile(i32FileDescriptor, cmd[spot], 1, (LPDWORD)&l_ui32WriteOk, 0);
-
-		// give some time to the board to register
-		sleep(2);
+		if (sleepBetween > 0) {
+			// give some time to the board to register
+			Sleep(sleepBetween);
+		}
 		spot += n_written;
 	} while (spot < cmdSize && l_ui32WriteOk == 1); //traling 
 	// ended before end, problem
@@ -544,8 +536,10 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	do {
 		std::cout << "write: " << cmd[spot] << std::endl;
 		n_written = write(i32FileDescriptor, &cmd[spot], 1 );
-		// give some time to the board to register
-		sleep(2);
+		if (sleepBetween > 0) {
+			// give some time to the board to register (usleep takes microseconds)
+			usleep(sleepBetween*1000);
+		}
 		spot += n_written;
 	} while (spot < cmdSize && n_written > 0); //traling 
 	// ended before end, problem
@@ -602,10 +596,10 @@ boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
 {	
 	// reset 32-bit board (no effect with 8bit board)
 	const char * cmd = "v";
-	boardWriteAndPrint(i32FileDescriptor, cmd, "$$$");
+	boardWriteAndPrint(i32FileDescriptor, cmd, "$$$", 2000);
 	
 	// start stream
-	boardWriteAndPrint(i32FileDescriptor, "b", "");
+	boardWriteAndPrint(i32FileDescriptor, "b", "", 2000);
 	
 	// send commands...
 	return true;
