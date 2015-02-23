@@ -51,10 +51,12 @@ CDriverOpenBCI::CDriverOpenBCI(IDriverContext& rDriverContext)
 	m_oHeader.setSamplingFrequency(256);
 	m_oHeader.setChannelCount(m_ui32ChannelCount);
 	m_sComInit="";
+	m_ui32ComDelay=100;
 
 	m_oSettings.add("Header", &m_oHeader);
 	m_oSettings.add("DeviceIdentifier", &m_ui32DeviceIdentifier);
 	m_oSettings.add("ComInit", &m_sComInit);
+	m_oSettings.add("ComDelay", &m_ui32ComDelay);
 	m_oSettings.load();
 }
 
@@ -204,12 +206,14 @@ boolean CDriverOpenBCI::configure(void)
 		m_ui32DeviceIdentifier);
 
 	m_oConfiguration.setComInit(m_sComInit);
+	m_oConfiguration.setComDelay(m_ui32ComDelay);
 	
 	if(!m_oConfiguration.configure(m_oHeader)) {
 		return false;
 	}
 
 	m_sComInit=m_oConfiguration.getComInit();
+	m_ui32ComDelay=m_oConfiguration.getComDelay();
 	m_oSettings.save();
 
 	return true;
@@ -466,7 +470,7 @@ boolean CDriverOpenBCI::initTTY(::FD_TYPE* pFileDescriptor, uint32 ui32TTYNumber
 	return true;
 }
 
-// if waitForResponse, will print (and wait for) this particular sequence of character
+// if waitForResponse, will print (and wait for) this particular sequence of character. TODO: not implemented (will only print everything if set)
 // sleepBetween: time to sleep between each character written (in ms)
 boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const char * cmd, const char * waitForResponse, uint32 sleepBetween) {
 	// no command: don't go further
@@ -498,6 +502,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 		}
 		if (sleepBetween > 0) {
 			// give some time to the board to register
+			std::cout << "Sleep for: " << sleepBetween << "ms" << std::endl;
 			Sleep(sleepBetween);
 		}
 	} while (spot < cmdSize && returnWrite); //traling 
@@ -547,6 +552,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 		n_written = write(i32FileDescriptor, &cmd[spot], 1 );
 		if (sleepBetween > 0) {
 			// give some time to the board to register (usleep takes microseconds)
+			std::cout << "Sleep for: " << sleepBetween << "ms" << std::endl;
 			usleep(sleepBetween*1000);
 		}
 		spot += n_written;
@@ -609,7 +615,7 @@ boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
 	
 	std::cout << "ComInit: [" << m_sComInit << "]" << std::endl;
 	if (strlen(m_sComInit) > 0) {
-		boardWriteAndPrint(i32FileDescriptor, m_sComInit, "", 2000);
+		boardWriteAndPrint(i32FileDescriptor, m_sComInit, " ", m_ui32ComDelay); // yeah, a space to listen to data
 	}
 	
 	// start stream

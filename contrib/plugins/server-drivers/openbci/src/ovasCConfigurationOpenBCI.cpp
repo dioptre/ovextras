@@ -25,6 +25,9 @@ boolean CConfigurationOpenBCI::preConfigure(void)
 
 	::GtkEntry* l_pEntryComInit=GTK_ENTRY(gtk_builder_get_object(m_pBuilderConfigureInterface, "entry_com_init"));
 	::gtk_entry_set_text(l_pEntryComInit, m_sComInit.toASCIIString());
+
+	::GtkSpinButton* l_pSpinButtonComDelay=GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_com_delay"));
+	::gtk_spin_button_set_value(l_pSpinButtonComDelay, m_sComDelay);
 	
 	::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_device"));
 
@@ -82,6 +85,11 @@ boolean CConfigurationOpenBCI::postConfigure(void)
 		
 		::GtkEntry* l_pEntryComInit=GTK_ENTRY(gtk_builder_get_object(m_pBuilderConfigureInterface, "entry_com_init"));
 		m_sComInit=::gtk_entry_get_text(l_pEntryComInit);
+		
+		::GtkSpinButton* l_pSpinButtonComDelay=GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_com_delay"));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(l_pSpinButtonComDelay));
+		m_sComDelay=::gtk_spin_button_get_value_as_int(l_pSpinButtonComDelay);
+	
 	}
 
 	if(!CConfigurationBuilder::postConfigure())
@@ -103,3 +111,14 @@ CString CConfigurationOpenBCI::getComInit(void) const
         return m_sComInit;
 }
 
+boolean CConfigurationOpenBCI::setComDelay(uint32 sComDelay)
+{
+        m_sComDelay=sComDelay;
+        return true;
+}
+
+
+uint32 CConfigurationOpenBCI::getComDelay(void) const
+{
+        return m_sComDelay;
+}
