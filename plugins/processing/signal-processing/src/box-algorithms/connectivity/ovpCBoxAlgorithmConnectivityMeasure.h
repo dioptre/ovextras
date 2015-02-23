@@ -1,4 +1,4 @@
-//#if defined(TARGET_HAS_ThirdPartyEIGEN)
+#if defined(TARGET_HAS_ThirdPartyEIGEN)
 
 #ifndef __OpenViBEPlugins_BoxAlgorithm_ConnectivityMeasure_H__
 #define __OpenViBEPlugins_BoxAlgorithm_ConnectivityMeasure_H__
@@ -339,4 +339,4 @@ namespace OpenViBEPlugins
 };
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_ConnectivityMeasure_H__
-//#endif //TARGET_HAS_ThirdPartyEIGEN
+#endif //TARGET_HAS_ThirdPartyEIGEN

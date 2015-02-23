@@ -89,9 +89,11 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_DifferentialIntegralOperation, "Differential", OVP_TypeId_DifferentialIntegralOperation_Differential.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_DifferentialIntegralOperation, "Integral",     OVP_TypeId_DifferentialIntegralOperation_Integral.toUInteger());
 
+#if defined(TARGET_HAS_ThirdPartyEIGEN)
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_ClassId_ConnectivityAlgorithm, "Connectivity measure method");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_ClassId_ConnectivityAlgorithm, "Single-Trial Phase Locking Value", OVP_TypeId_Algorithm_SingleTrialPhaseLockingValue.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_ClassId_ConnectivityAlgorithm, "Magnitude Squared Coherence", OVP_TypeId_Algorithm_MagnitudeSquaredCoherence.toUInteger());
+#endif
 
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_WindowType, "Window method");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry (OVP_TypeId_WindowType, "Bartlett (triangular)", OVP_TypeId_WindowType_Bartlett.toUInteger());
