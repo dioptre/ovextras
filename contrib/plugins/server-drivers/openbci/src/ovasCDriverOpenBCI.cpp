@@ -8,6 +8,8 @@
 #include <cmath>
 #include <iostream>
 
+#include <time.h>
+
 #if defined TARGET_OS_Windows
  #include <windows.h>
  #include <winbase.h>
@@ -24,6 +26,7 @@
  #include <termios.h>
  #include <sys/select.h>
  #include <netinet/in.h> // htons and co.
+ #include <unistd.h>
  #define TERM_SPEED B115200
 #else
 #endif
@@ -87,7 +90,13 @@ boolean CDriverOpenBCI::initialize(
 	{
 		return false;
 	}
-
+	
+	// check board status and print response
+	if(!this->initBoard(m_i32FileDescriptor))
+	{
+		return false;
+	}
+	
 	m_pSample=new float32[m_oHeader.getChannelCount()];
 	if(!m_pSample)
 	{
@@ -444,7 +453,89 @@ boolean CDriverOpenBCI::initTTY(::FD_TYPE* pFileDescriptor, uint32 ui32TTYNumber
 	m_sTTYName = l_sTTYName;
 
 	return true;
- }
+}
+
+
+// bad but portable method to sleep
+// mseconds: miliseconds to sleep
+void CDriverOpenBCI::BadSleep(int32 mseconds)
+{
+	
+	clock_t goal = mseconds + clock();
+	while (goal > clock());
+}
+
+boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
+{
+ 
+  
+	uint8  l_ui8ReadBuffer[1]; // FIXME: size...
+	uint32 l_ui32BytesProcessed=0;
+	
+	fd_set  l_inputFileDescriptorSet;
+	struct timeval l_timeout;
+	size_t l_ui32ReadLength=0;
+	bool finished=false;
+
+	l_timeout.tv_sec=0;
+	l_timeout.tv_usec=0;
+	
+ 	FD_ZERO(&l_inputFileDescriptorSet);
+	FD_SET(i32FileDescriptor, &l_inputFileDescriptorSet);
+		
+	// reset 32-bit board (no effect with 8bit board)	
+	char cmd[] = "v";
+	int n_written = 0;
+	unsigned int spot = 0;
+	do {
+		std::cout << "write: " << cmd[spot] << std::endl;
+		n_written = write(i32FileDescriptor, &cmd[spot], 1 );
+		// give some time to the board to register
+		sleep(2);
+		spot += n_written;
+	} while (cmd[spot] != '\0' && n_written > 0); //traling 
+	// ended before end, problem
+	if (cmd[spot] != '\0') {
+		std::cout << "stop before end" << std::endl;
+		return false;
+	}
+	
+	std::cout << "response: " << std::endl;
+	do
+	{
+		switch(::select(i32FileDescriptor+1, &l_inputFileDescriptorSet, NULL, NULL, &l_timeout))
+		{
+			case -1: // error or timeout
+			case  0:
+				finished=true;
+				break;
+
+			default:
+				if(FD_ISSET(i32FileDescriptor, &l_inputFileDescriptorSet))
+				{
+					l_ui32ReadLength=::read(i32FileDescriptor, l_ui8ReadBuffer, sizeof(l_ui8ReadBuffer));		  
+					if((l_ui32ReadLength) > 0)
+					{					   
+						for(l_ui32BytesProcessed=0; l_ui32BytesProcessed<l_ui32ReadLength; l_ui32BytesProcessed++)
+						{
+							std::cout << l_ui8ReadBuffer[l_ui32BytesProcessed];
+						}
+					}
+				}
+				else
+				{
+					finished=true;
+					std::cout << std::end;
+				}
+				break;
+		}
+	}
+	while(!finished);
+	std::cout << "finish to read" << std::endl;
+	
+	// send commands...
+	return true;
+}
 
 void CDriverOpenBCI::closeTTY(::FD_TYPE i32FileDescriptor)
 {
@@ -514,7 +605,7 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 			default:
 				if(FD_ISSET(i32FileDescriptor, &l_inputFileDescriptorSet))
 				{
-				  l_ui32ReadLength=::read(i32FileDescriptor, l_ui8ReadBuffer, sizeof(l_ui8ReadBuffer));		  
+					l_ui32ReadLength=::read(i32FileDescriptor, l_ui8ReadBuffer, sizeof(l_ui8ReadBuffer));		  
 					if((l_ui32ReadLength) > 0)
 					{					   
 						for(l_ui32BytesProcessed=0; l_ui32BytesProcessed<l_ui32ReadLength; l_ui32BytesProcessed++)

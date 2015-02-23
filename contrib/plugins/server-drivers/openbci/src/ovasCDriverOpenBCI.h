@@ -43,8 +43,10 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::int32 interpret24bitAsInt32(std::vector < OpenViBE::uint8 > byteBuffer);
 		OpenViBE::int16 parseByteP2(OpenViBE::uint8 ui8Actbyte);
-
+		void BadSleep(OpenViBE::int32 mseconds);
 		OpenViBE::boolean initTTY(::FD_TYPE * pFileDescriptor, OpenViBE::uint32 ui32TtyNumber);
+		
+		OpenViBE::boolean initBoard(::FD_TYPE i32FileDescriptor);
 		OpenViBE::int32 readPacketFromTTY(::FD_TYPE i32FileDescriptor);
 		void closeTTY(::FD_TYPE i32FileDescriptor);
 
