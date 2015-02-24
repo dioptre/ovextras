@@ -626,15 +626,15 @@ boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
 {	
 	// reset 32-bit board (no effect with 8bit board)
 	const char * cmd = "v";
-	boardWriteAndPrint(i32FileDescriptor, cmd, "$$$", 2000);
+	boardWriteAndPrint(i32FileDescriptor, cmd, true, 2000);
 	
 	std::cout << "ComInit: [" << m_sComInit << "]" << std::endl;
 	if (strlen(m_sComInit) > 0) {
-		boardWriteAndPrint(i32FileDescriptor, m_sComInit, " ", m_ui32ComDelay); // yeah, a space to listen to data
+		boardWriteAndPrint(i32FileDescriptor, m_sComInit, true, m_ui32ComDelay); // yeah, a space to listen to data
 	}
 	
 	// start stream
-	boardWriteAndPrint(i32FileDescriptor, "b", "", 2000);
+	boardWriteAndPrint(i32FileDescriptor, "b", false, 2000);
 	
 	// send commands...
 	return true;
@@ -667,7 +667,7 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 			// concatenate EEG and Acc
 			std::vector < int32 > l_vSampleBuffer;
 			l_vSampleBuffer.reserve(m_vSampleEEGBuffer.size() + m_vSampleAccBuffer.size());
-			l_vSampleBuffer.insert( l_vSampleBuffer.end(), m_vSampleEEGBuffer.begin(), m_vSampleEEGBuffer.end());
+			l_vSampleBuffer.insert(l_vSampleBuffer.end(), m_vSampleEEGBuffer.begin(), m_vSampleEEGBuffer.end());
 			l_vSampleBuffer.insert(l_vSampleBuffer.end(), m_vSampleAccBuffer.begin(), m_vSampleAccBuffer.end());
 			// copy them to current chunk
 			m_vChannelBuffer.push_back(l_vSampleBuffer);
@@ -677,18 +677,31 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 		else {
 			// on odd packet, got complete sample
 			if (packetNumber % 2) {
-				std::cout << "Will merge packets" << std::endl;
 				// won't concatenate if there was packet drop
-				if ((m_ui8LastPacketNumber + 1) % 256 !=  packetNumber) {
-					  std::cout << "or not, packet drop." << std::endl;
-				}
-				else {
-					//FIXME: concatenate
-					//m_vChannelBuffer.push_back(m_vChannelBuffer2);
+				if ((m_ui8LastPacketNumber + 1) % 256 ==  packetNumber) {
+					// Average Acc values between daisy and current sample, as on the board EEG were averaged
+					std::vector < int32 > l_AccAvgBuffer;
+					l_AccAvgBuffer.resize(m_vSampleAccBuffer.size());
+					for (size_t i = 0; i < l_AccAvgBuffer.size(); i++) {
+						l_AccAvgBuffer[i] = (m_vSampleAccBuffer[i] + m_vSampleAccBufferDaisy[i]) / 2;
+					}
+					// Concatenate EEG values and averaged Acc
+					std::vector < int32 > l_vSampleBuffer;
+					l_vSampleBuffer.reserve(2*m_vSampleEEGBuffer.size() + m_vSampleAccBuffer.size());
+					l_vSampleBuffer.insert(l_vSampleBuffer.end(), m_vSampleEEGBuffer.begin(), m_vSampleEEGBuffer.end());
+					l_vSampleBuffer.insert(l_vSampleBuffer.end(), m_vSampleEEGBufferDaisy.begin(), m_vSampleEEGBufferDaisy.end());
+					l_vSampleBuffer.insert(l_vSampleBuffer.end(), l_AccAvgBuffer.begin(), l_AccAvgBuffer.end());
+					// at last, add to chunk
+					m_vChannelBuffer.push_back(l_vSampleBuffer);
 					l_bSampleOK = true;
 				}
 			}
-			// else, will be for next time
+			// an even packet: it's Daisy, store values for later
+			else {
+				// swap may modify origin, but it's faster
+				m_vSampleEEGBufferDaisy.swap(m_vSampleEEGBuffer);
+				m_vSampleAccBufferDaisy.swap(m_vSampleAccBuffer);
+			}
 		}
 		
 		m_ui8LastPacketNumber = packetNumber;
