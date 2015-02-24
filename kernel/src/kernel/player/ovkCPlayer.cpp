@@ -135,7 +135,6 @@ EPlayerReturnCode CPlayer::initialize(void)
 	m_ui64CurrentTimeToReach=0;
 	m_ui64Lateness=0;
 	m_eStatus=PlayerStatus_Stop;
-
 	if(l_eCode == SchedulerInitialization_BoxInitializationFailed)
 	{
 		return PlayerReturnCode_BoxInitializationFailed;

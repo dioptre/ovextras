@@ -239,7 +239,6 @@ boolean CPluginModuleBase::getPluginObjectDescription(
 		rpPluginObjectDescription=NULL;
 		return false;
 	}
-
 	rpPluginObjectDescription=m_vPluginObjectDescriptor[ui32Index];
 	return true;
 }

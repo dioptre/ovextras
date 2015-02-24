@@ -778,6 +778,7 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	m_pResourceNotebook=GTK_NOTEBOOK(gtk_builder_get_object(m_pBuilderInterface, "openvibe-resource_notebook"));
 
 	m_pInitAlert = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_init_alert"));
+	gtk_toggle_button_set_active(m_pInitAlert, (OpenViBE::boolean)(m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_PopUpOnInitError}")));
 
 	// Creates an empty scnenario
 	gtk_notebook_remove_page(m_pScenarioNotebook, 0);
@@ -1913,7 +1914,7 @@ OpenViBE::boolean CApplication::createPlayer(void)
 				}
 				else{
 					m_rKernelContext.getLogManager() << LogLevel_Error << "Initilization of scenario didn't work properly."
-														" Aborting the execution. (To prevent this, deactivate the warning on initialization option\n" ;
+														" Aborting the execution. (To prevent this, deactivate the warning on initialization option)\n" ;
 					res=0;//No matter what happen, if the user ask for a warning on initilization we consider that we don't run the scenario
 				}
 			}
@@ -2102,7 +2103,7 @@ void CApplication::nextScenarioCB(void)
 	}
 }
 
-void CApplication::playScenarioCB(void)
+boolean CApplication::playScenarioCB(void)
 {
 	boolean l_bIsAlreadyStarted = false;
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "playScenarioCB\n";
@@ -2112,7 +2113,7 @@ void CApplication::playScenarioCB(void)
 		if(!this->createPlayer())
 		{
 			m_rKernelContext.getLogManager() << LogLevel_Error << "CreatePlayer failed\n";
-			return;
+			return false;
 		}
 	}
 	else
@@ -2151,10 +2152,10 @@ void CApplication::playScenarioCB(void)
 
 		}
 	}
-
+	return true;
 }
 
-void CApplication::forwardScenarioCB(void)
+boolean CApplication::forwardScenarioCB(void)
 {
 	boolean l_bIsAlreadyStarted = false;
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "forwardScenarioCB\n";
@@ -2164,7 +2165,7 @@ void CApplication::forwardScenarioCB(void)
 		if(!this->createPlayer())
 		{
 			m_rKernelContext.getLogManager() << LogLevel_Error << "CreatePlayer failed\n";
-			return;
+			return false;
 		}
 	}
 	else
@@ -2203,6 +2204,7 @@ void CApplication::forwardScenarioCB(void)
 
 		}
 	}
+	return true;
 }
 
 void CApplication::keyPressEventCB(::GtkWidget* pWidget, ::GdkEventKey* pEvent)

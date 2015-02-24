@@ -111,7 +111,6 @@ namespace OpenViBE
 				{
 					this->getLogManager() << LogLevel_Warning << "No 'plugin object descriptor' found from [" << CString(rEntry.getName()) << "] even if it looked like a plugin module\n";
 				}
-
 				return true;
 			}
 

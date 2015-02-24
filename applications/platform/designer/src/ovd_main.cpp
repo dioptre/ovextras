@@ -403,6 +403,7 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 
 int go(int argc, char ** argv)
 {
+	boolean errorWhileLoadingScenario = false;
 	/*
 		{ 0,     0,     0,     0 },
 		{ 0, 16383, 16383, 16383 },
@@ -467,6 +468,7 @@ int go(int argc, char ** argv)
 //                                                                   //
 
 	CKernelLoader l_oKernelLoader;
+
 
 	cout<<"[  INF  ] Created kernel loader, trying to load kernel module"<<"\n";
 	CString l_sError;
@@ -564,7 +566,6 @@ int go(int argc, char ** argv)
 				{
 					::CApplication app(*l_pKernelContext);
 					app.initialize(l_oConfiguration.getFlags());
-
 					// FIXME is it necessary to keep next line uncomment ?
 					//boolean l_bIsScreenValid=true;
 					if(!l_oConfiguration.m_eNoCheckColorDepth)
@@ -587,10 +588,10 @@ int go(int argc, char ** argv)
 							}
 						}
 					}
-
 					std::map < ECommandLineFlag, std::string >::iterator it;
 					for(it=l_oConfiguration.m_oFlag.begin(); it!=l_oConfiguration.m_oFlag.end(); it++)
 					{
+
 						switch(it->first)
 						{
 							case CommandLineFlag_Open:
@@ -601,14 +602,20 @@ int go(int argc, char ** argv)
 								l_rLogManager << LogLevel_Info << "Opening and playing scenario [" << CString(it->second.c_str()) << "]\n";
 								if(app.openScenario(it->second.c_str()))
 								{
-									app.playScenarioCB();
+									if(!app.playScenarioCB())
+									{
+										errorWhileLoadingScenario = true;
+									}
 								}
 								break;
 							case CommandLineFlag_PlayFast:
 								l_rLogManager << LogLevel_Info << "Opening and fast playing scenario [" << CString(it->second.c_str()) << "]\n";
 								if(app.openScenario(it->second.c_str()))
 								{
-									app.forwardScenarioCB();
+									if(!app.forwardScenarioCB())
+									{
+										errorWhileLoadingScenario = true;
+									}
 								}
 								break;
 //								case CommandLineFlag_Define:
@@ -617,7 +624,6 @@ int go(int argc, char ** argv)
 								break;
 						}
 					}
-
 					if(app.m_vInterfacedScenario.empty())
 					{
 						app.newScenarioCB();
@@ -655,6 +661,10 @@ int go(int argc, char ** argv)
 		}
 		l_oKernelLoader.uninitialize();
 		l_oKernelLoader.unload();
+	}
+	if(errorWhileLoadingScenario && l_oConfiguration.m_eNoGui == CommandLineFlag_NoGui)
+	{
+		return -1;
 	}
 
 	return 0;
