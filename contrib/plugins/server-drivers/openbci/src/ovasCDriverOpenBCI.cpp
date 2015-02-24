@@ -493,7 +493,6 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 		return true;
 	}
 	uint32 cmdSize = strlen(cmd);
-	std::cout << "Command size: " << cmdSize << std::endl;
 	uint8  l_ui8ReadBuffer[1]; // TODO: better size for buffer
 	uint32 l_ui32BytesProcessed=0;
 
@@ -512,21 +511,23 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	unsigned int spot = 0;
 	bool returnWrite = false;
 	do {
-		std::cout << "Write: " << cmd[spot] << std::endl;
+		std::cout << "Write: " << cmd[spot];
 		returnWrite = ::WriteFile(i32FileDescriptor, (LPCVOID) &cmd[spot], 1, (LPDWORD)&l_ui32WriteOk, NULL) != 0;
 		spot+=l_ui32WriteOk;
 		if (!returnWrite) {
-			std::cout << "Error: " << ::GetLastError() << std::endl;
+			std::cout << " -- Error: " << ::GetLastError();
 		}
 		if (sleepBetween > 0) {
 			// give some time to the board to register
-			std::cout << "Sleep for: " << sleepBetween << "ms" << std::endl;
+			std::cout << " -- then sleep for: " << sleepBetween << "ms" << std::endl;
 			Sleep(sleepBetween);
+		} else {
+			std::cout << std::endl;
 		}
 	} while (spot < cmdSize && returnWrite); //traling 
 	// ended before end, problem
 	if (spot != cmdSize) {;
-		std::cout << "stop before end" << std::endl;
+		std::cout << "Error: write stopped too early." << std::endl;
 		return false;
 	}
 	// read
@@ -547,10 +548,6 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 		}
 		std::cout << std::endl << "---- End response ----" << std::endl;
 	}
-	else {
-		std::cout << "Do not expect reponse." << std::endl;
-	}
-
 	
 #elif defined TARGET_OS_Linux
 	fd_set  l_inputFileDescriptorSet;
@@ -571,18 +568,20 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	int n_written = 0;
 	unsigned int spot = 0;
 	do {
-		std::cout << "write: " << cmd[spot] << std::endl;
+		std::cout << "Write: " << cmd[spot];
 		n_written = write(i32FileDescriptor, &cmd[spot], 1 );
 		if (sleepBetween > 0) {
-			// give some time to the board to register (usleep takes microseconds)
-			std::cout << "Sleep for: " << sleepBetween << "ms" << std::endl;
+			// give some time to the board to register
+			std::cout << " -- then sleep for: " << sleepBetween << "ms" << std::endl;
 			usleep(sleepBetween*1000);
+		} else {
+			std::cout << std::endl;
 		}
 		spot += n_written;
 	} while (spot < cmdSize && n_written > 0); //traling 
 	// ended before end, problem
 	if (spot != cmdSize) {;
-		std::cout << "stop before end" << std::endl;
+		std::cout << "Error: write stopped too early." << std::endl;
 		return false;
 	}
 	
@@ -619,9 +618,6 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 		while(!finished);
 		std::cout << std::endl << "---- End response ----" << std::endl;
 	}
-	else {
-		std::cout << "Do not expect reponse." << std::endl;
-	}
 #else
 #endif
 	// TODO: detect errors
@@ -629,28 +625,44 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 }
 
 boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
-{	
+{
+	// stop/reset/default board
+	std::cout << "Stop board streaming..." << std::endl;
+	boardWriteAndPrint(i32FileDescriptor, "s", false, 1000);
+	
 	// reset 32-bit board (no effect with 8bit board)
-	std::cout << "Reset board..." << std::endl;
-	boardWriteAndPrint(i32FileDescriptor, "v", true, 1000);
+	std::cout << "Soft reset of the board..." << std::endl;
+	boardWriteAndPrint(i32FileDescriptor, "v", false, 1000);
+	
+	// TODO: flush remaining data?
 	
 	// send correct config for daisy module
 	if (m_bDaisyModule) {
 		std::cout << "Tell the board to enable daisy module..." << std::endl;
-		boardWriteAndPrint(i32FileDescriptor, "C", true, 1000);
+	      boardWriteAndPrint(i32FileDescriptor, "C", true, 1000);
 	}
 	else {
 		std::cout << "Tell the board to disable daisy module..." << std::endl;
 		boardWriteAndPrint(i32FileDescriptor, "c", true, 1000);
 	}
 	
+	// reset 32-bit board (no effect with 8bit board)
+	std::cout << "Channels settings back to default..." << std::endl;
+	boardWriteAndPrint(i32FileDescriptor, "d", true, 1000);
+	
 	std::cout << "ComInit: [" << m_sComInit << "]" << std::endl;
 	if (strlen(m_sComInit) > 0) {
 		boardWriteAndPrint(i32FileDescriptor, m_sComInit, true, m_ui32ComDelay); // yeah, a space to listen to data
 	}
 	
+	
+	// reset 32-bit board (no effect with 8bit board)
+	std::cout << "Print register settings..." << std::endl;
+	boardWriteAndPrint(i32FileDescriptor, "?", true, 2500);
+	
 	// start stream
-	boardWriteAndPrint(i32FileDescriptor, "b", false, 2000);
+	std::cout << "Starting stream..." << std::endl;
+	boardWriteAndPrint(i32FileDescriptor, "b", false, 1000);
 	
 	// send commands...
 	return true;

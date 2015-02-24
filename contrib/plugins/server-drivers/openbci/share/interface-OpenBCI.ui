@@ -71,8 +71,8 @@
             <property name="visible">True</property>
             <property name="label" translatable="yes">OpenBCI reader
 	      
-&lt;small&gt;Upon initialization, board response will appear in the console
-and should end by "&lt;b&gt;$$$&lt;/b&gt;" before stream starts.
+&lt;small&gt;Upon initialization, board responses will appear in the console
+and should end by "&lt;b&gt;$$$&lt;/b&gt;" after a few seconds, before stream starts.
 
 The last 3 channels represent accelerometer values.
 The sampling rate and the total number of channels are automatically
