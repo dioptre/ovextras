@@ -60,6 +60,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean initBoard(::FD_TYPE i32FileDescriptor);
 		OpenViBE::int32 readPacketFromTTY(::FD_TYPE i32FileDescriptor);
 		void closeTTY(::FD_TYPE i32FileDescriptor);
+		OpenViBE::boolean handleCurrentSample(OpenViBE::int32 packetNumber); // will take car of samples fetch from OpenBCI board, dropping/merging packets if necessary
 
 	protected:
 
@@ -93,12 +94,11 @@ namespace OpenViBEAcquisitionServer
 		
 		OpenViBE::float32 ScaleFacuVoltsPerCount; // convert from int32 to microvort
 		
-		OpenViBE::uint8  m_ui8PacketNumber;
 		OpenViBE::uint8  m_ui8LastPacketNumber;
 		OpenViBE::uint16 m_ui16Switches;
 
-		std::vector < std::vector < OpenViBE::int32 > > m_vChannelBuffer;
-		std::vector < OpenViBE::int32 > m_vChannelBuffer2;
+		std::vector < std::vector < OpenViBE::int32 > > m_vChannelBuffer; // buffer to store channels & chunks
+		std::vector < OpenViBE::int32 > m_vChannelBuffer2; // buffer to store sample coming from OpenBCI -- filled by parseByteP2(), passed to handleCurrentSample()
 
 		OpenViBE::CString m_sTTYName;
 	};

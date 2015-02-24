@@ -19,7 +19,7 @@
  #include <commctrl.h>
  #include <winsock2.h> // htons and co.
  //#define TERM_SPEED 57600
- #define TERM_SPEED CBR_115200
+ #define TERM_SPEED CBR_115200 // OpenBCI is a bit faster than others
 #elif defined TARGET_OS_Linux
  #include <cstdio>
  #include <unistd.h>
@@ -308,7 +308,7 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 			if (m_ui16ExtractPosition == EEGNbValuesPerSample) {
 				// next step: accelerometer
 				m_ui16Readstate++;
-				// re-use the same variable to know position inside accelerometer block (I know, I'm bad!). Err... FIXME
+				// re-use the same variable to know position inside accelerometer block (I know, I'm bad!). Err... TODO
 				m_ui16ExtractPosition=0;
 			}
 			break;
@@ -492,7 +492,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	}
 	uint32 cmdSize = strlen(cmd);
 	std::cout << "Command size: " << cmdSize << std::endl;
-	uint8  l_ui8ReadBuffer[1]; // FIXME: size...
+	uint8  l_ui8ReadBuffer[1]; // TODO: better size for buffer
 	uint32 l_ui32BytesProcessed=0;
 
 #if defined TARGET_OS_Windows
@@ -526,7 +526,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	}
 	// read
 	if (waitForResponse) {
-		std::cout << "Response: " << std::endl;
+		std::cout << "---- Response ----" << std::endl;
 		if(::ClearCommError(i32FileDescriptor, &l_dwState, &l_oStatus))
 		{
 			l_ui32ReadLength=l_oStatus.cbInQue;
@@ -540,6 +540,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 				std::cout << l_ui8ReadBuffer[0];
 			}
 		}
+		std::cout << std::endl << "---- End response ----" << std::endl;
 	}
 	else {
 		std::cout << "Do not expect reponse." << std::endl;
@@ -577,7 +578,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	}
 	
 	if (waitForResponse) {
-		std::cout << "Response: " << std::endl;
+		std::cout << "---- Response ----" << std::endl;
 		do
 		{
 			switch(::select(i32FileDescriptor+1, &l_inputFileDescriptorSet, NULL, NULL, &l_timeout))
@@ -607,17 +608,15 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 			}
 		}
 		while(!finished);
-		std::cout << std::endl;
-		std::cout << "finish to read" << std::endl;
+		std::cout << std::endl << "---- End response ----" << std::endl;
 	}
 	else {
 		std::cout << "Do not expect reponse." << std::endl;
 	}
 #else
 #endif
-	// FIXME: only if waitForResponse
+	// TODO: detect errors
 	return true;
-
 }
 
 boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
@@ -648,12 +647,52 @@ void CDriverOpenBCI::closeTTY(::FD_TYPE i32FileDescriptor)
 #endif
 }
 
+// update internal state (lastPacket, number of packet processed, etc.)
+// returns true if a new sample is created
+bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
+	bool l_bSampleOK = false; // true if a sample is added to m_vChannelBuffer
+	// if == -1, current sample is incomplete or corrupted
+	if (packetNumber >= 0) {
+		// check packet drop
+		if ((m_ui8LastPacketNumber + 1) % 256 !=  packetNumber) {
+			// FIXME: use logging
+			std::cout << "Last packet drop! Last: " << (int) m_ui8LastPacketNumber << ", current packet number: " << packetNumber << std::endl;
+		}
+		
+		// no daisy module: push directly
+		if (!m_bDaisyModule) {
+			m_vChannelBuffer.push_back(m_vChannelBuffer2);
+			l_bSampleOK = false;
+		}
+		// even: daisy, odd: first 8 channels
+		else {
+			// on odd packet, got complete sample
+			if (packetNumber % 2) {
+				std::cout << "Will merge packets" << std::endl;
+				// won't concatenate if there was packet drop
+				if ((m_ui8LastPacketNumber + 1) % 256 !=  packetNumber) {
+					  std::cout << "or not, packet drop." << std::endl;
+				}
+				else {
+					//FIXME: concatenate
+					m_vChannelBuffer.push_back(m_vChannelBuffer2);
+					l_bSampleOK = true;
+				}
+			}
+			// else, will be for next time
+		}
+		
+		m_ui8LastPacketNumber = packetNumber;
+	}
+	return l_bSampleOK;
+}
+
 // fear the code duplication!
 int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Debug << "Enters readPacketFromTTY\n";
 
-	uint8  l_ui8ReadBuffer[1]; // FIXME: size...
+	uint8  l_ui8ReadBuffer[1]; // TODO: better size for buffer
 	uint32 l_ui32BytesProcessed=0;
 	int32  l_i32PacketsProcessed=0;
 
@@ -674,39 +713,9 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 		::ReadFile(i32FileDescriptor, l_ui8ReadBuffer, 1, (LPDWORD)&l_ui32ReadOk, 0);
 		if(l_ui32ReadOk==1)
 		{
-			// sample number returned: complete sample/packet
-			if(this->parseByteP2(l_ui8ReadBuffer[0]) != -1)
-			{
-				// check packet drop
-				if ((m_ui8LastPacketNumber + 1) % 256 !=  l_curPacket) {
-					// FIXME: use logging
-					std::cout << "Last packet drop! Last: " << (int) m_ui8LastPacketNumber << ", current packet number: " << l_curPacket << std::endl;
-				}
-				
-				// no daisy module: push directly
-				if (!m_bDaisyModule) {
-					m_vChannelBuffer.push_back(m_vChannelBuffer2);
-					l_i32PacketsProcessed++;
-				}
-				// even: daisy, odd: first 8 channels
-				else {
-					// on odd packet, got complete sample
-					if (l_curPacket % 2) {
-						std::cout << "Will merge packets" << std::endl;
-						// won't concatenate if there was packet drop
-						if ((m_ui8LastPacketNumber + 1) % 256 !=  l_curPacket) {
-							  std::cout << "or not, packet drop." << std::endl;
-						}
-						else {
-							//FIXE: concatenate
-							m_vChannelBuffer.push_back(m_vChannelBuffer2);
-							l_i32PacketsProcessed++;
-						}
-					}
-					// else, will be for next time
-				}
-				
-				m_ui8LastPacketNumber = l_curPacket;
+			// will have effect only if complete sample/packet
+			if (handleCurrentSample(this->parseByteP2(l_ui8ReadBuffer[0]))) {
+				l_i32PacketsProcessed++;
 			}
 		}
 	}
@@ -741,40 +750,9 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 					{					   
 						for(l_ui32BytesProcessed=0; l_ui32BytesProcessed<l_ui32ReadLength; l_ui32BytesProcessed++)
 						{
-							int l_curPacket = this->parseByteP2(l_ui8ReadBuffer[l_ui32BytesProcessed]);
-							// number returned: only eif complete sample/packet
-							if(l_curPacket != -1)
-							{
-								// check packet drop
-								if ((m_ui8LastPacketNumber + 1) % 256 !=  l_curPacket) {
-									// FIXME: use logging
-									std::cout << "Last packet drop! Last: " << (int) m_ui8LastPacketNumber << ", current packet number: " << l_curPacket << std::endl;
-								}
-								
-								// no daisy module: push directly
-								if (!m_bDaisyModule) {
-									m_vChannelBuffer.push_back(m_vChannelBuffer2);
-									l_i32PacketsProcessed++;
-								}
-								// even: daisy, odd: first 8 channels
-								else {
-									// on odd packet, got complete sample
-									if (l_curPacket % 2) {
-										std::cout << "Will merge packets" << std::endl;
-										// won't concatenate if there was packet drop
-										if ((m_ui8LastPacketNumber + 1) % 256 !=  l_curPacket) {
-											  std::cout << "or not, packet drop." << std::endl;
-										}
-										else {
-											//FIXE: concatenate
-											m_vChannelBuffer.push_back(m_vChannelBuffer2);
-											l_i32PacketsProcessed++;
-										}
-									}
-									// else, will be for next time
-								}
-								
-								m_ui8LastPacketNumber = l_curPacket;
+							// will have effect only if complete sample/packet
+							if (handleCurrentSample(this->parseByteP2(l_ui8ReadBuffer[l_ui32BytesProcessed]))) {
+								l_i32PacketsProcessed++;
 							}
 						}
 					}
