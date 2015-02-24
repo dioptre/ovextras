@@ -136,7 +136,7 @@ boolean CDriverOpenBCI::initialize(
 	m_rDriverContext.getLogManager() << LogLevel_Debug << CString(this->getName()) << " driver initialized.\n";
 	
 	// init scale factor
-	ScaleFacuVoltsPerCount = ADS1299_VREF/(pow(2.,23)-1)/ADS1299_GAIN*1000000.;
+	ScaleFacuVoltsPerCount = (float32) (ADS1299_VREF/(pow(2.,23)-1)/ADS1299_GAIN*1000000.);
 	std::cout << "Scale factor: " << ScaleFacuVoltsPerCount << std::endl;
 	
 	return true;
@@ -511,7 +511,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	bool returnWrite = false;
 	do {
 		std::cout << "Write: " << cmd[spot] << std::endl;
-		returnWrite = ::WriteFile(i32FileDescriptor, (LPCVOID) &cmd[spot], 1, (LPDWORD)&l_ui32WriteOk, NULL);
+		returnWrite = ::WriteFile(i32FileDescriptor, (LPCVOID) &cmd[spot], 1, (LPDWORD)&l_ui32WriteOk, NULL) != 0;
 		spot+=l_ui32WriteOk;
 		if (!returnWrite) {
 			std::cout << "Error: " << ::GetLastError() << std::endl;
