@@ -131,13 +131,12 @@ boolean CDriverOpenBCI::initialize(
 	
 	m_pCallback=&rCallback;
 	m_ui32ChannelCount=m_oHeader.getChannelCount();
-	m_ui8LastPacketNumber=0;
+	m_i16LastPacketNumber=-1;
 
 	m_rDriverContext.getLogManager() << LogLevel_Debug << CString(this->getName()) << " driver initialized.\n";
 	
 	// init scale factor
 	ScaleFacuVoltsPerCount = (float32) (ADS1299_VREF/(pow(2.,23)-1)/ADS1299_GAIN*1000000.);
-	std::cout << "Scale factor: " << ScaleFacuVoltsPerCount << std::endl;
 	
 	return true;
 }
@@ -506,6 +505,9 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	struct _COMSTAT l_oStatus;
 	::DWORD l_dwState;
 	
+	// wait a little before we send value
+	Sleep(SLEEP_BEFORE_WRITE);
+	
 	// write
 	unsigned int spot = 0;
 	bool returnWrite = false;
@@ -562,6 +564,10 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
  	FD_ZERO(&l_inputFileDescriptorSet);
 	FD_SET(i32FileDescriptor, &l_inputFileDescriptorSet);
 	
+	// wait a little before we send value
+	usleep(SLEEP_BEFORE_WRITE*1000);
+	
+	// write
 	int n_written = 0;
 	unsigned int spot = 0;
 	do {
@@ -625,8 +631,18 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
 {	
 	// reset 32-bit board (no effect with 8bit board)
-	const char * cmd = "v";
-	boardWriteAndPrint(i32FileDescriptor, cmd, true, 2000);
+	std::cout << "Reset board..." << std::endl;
+	boardWriteAndPrint(i32FileDescriptor, "v", true, 1000);
+	
+	// send correct config for daisy module
+	if (m_bDaisyModule) {
+		std::cout << "Tell the board to enable daisy module..." << std::endl;
+		boardWriteAndPrint(i32FileDescriptor, "C", true, 1000);
+	}
+	else {
+		std::cout << "Tell the board to disable daisy module..." << std::endl;
+		boardWriteAndPrint(i32FileDescriptor, "c", true, 1000);
+	}
 	
 	std::cout << "ComInit: [" << m_sComInit << "]" << std::endl;
 	if (strlen(m_sComInit) > 0) {
@@ -657,9 +673,9 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 	// if == -1, current sample is incomplete or corrupted
 	if (packetNumber >= 0) {
 		// check packet drop
-		if ((m_ui8LastPacketNumber + 1) % 256 !=  packetNumber) {
+		if ((m_i16LastPacketNumber + 1) % 256 !=  packetNumber) {
 			// FIXME: use logging
-			std::cout << "Last packet drop! Last: " << (int) m_ui8LastPacketNumber << ", current packet number: " << packetNumber << std::endl;
+			std::cout << "Last packet drop! Last: " << (int) m_i16LastPacketNumber << ", current packet number: " << packetNumber << std::endl;
 		}
 		
 		// no daisy module: push directly values
@@ -678,7 +694,7 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 			// on odd packet, got complete sample
 			if (packetNumber % 2) {
 				// won't concatenate if there was packet drop
-				if ((m_ui8LastPacketNumber + 1) % 256 ==  packetNumber) {
+				if ((m_i16LastPacketNumber + 1) % 256 ==  packetNumber) {
 					// Average Acc values between daisy and current sample, as on the board EEG were averaged
 					std::vector < int32 > l_AccAvgBuffer;
 					l_AccAvgBuffer.resize(m_vSampleAccBuffer.size());
@@ -704,7 +720,7 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 			}
 		}
 		
-		m_ui8LastPacketNumber = packetNumber;
+		m_i16LastPacketNumber = packetNumber;
 	}
 	return l_bSampleOK;
 }

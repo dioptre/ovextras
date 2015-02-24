@@ -20,6 +20,9 @@
 #define ADS1299_VREF 4.5  // reference voltage for ADC in ADS1299.  set by its hardware
 #define ADS1299_GAIN 24.0  //assumed gain setting for ADS1299.  set by its Arduino code
 
+// wait a little before before new writings are initiated (ms)
+#define SLEEP_BEFORE_WRITE 500
+
 namespace OpenViBEAcquisitionServer
 {
 	class CDriverOpenBCI : public OpenViBEAcquisitionServer::IDriver
@@ -94,7 +97,7 @@ namespace OpenViBEAcquisitionServer
 		
 		OpenViBE::float32 ScaleFacuVoltsPerCount; // convert from int32 to microvort
 		
-		OpenViBE::uint8  m_ui8LastPacketNumber;
+		OpenViBE::int16  m_i16LastPacketNumber;
 		OpenViBE::uint16 m_ui16Switches;
 
 		std::vector < std::vector < OpenViBE::int32 > > m_vChannelBuffer; // buffer to store channels & chunks
