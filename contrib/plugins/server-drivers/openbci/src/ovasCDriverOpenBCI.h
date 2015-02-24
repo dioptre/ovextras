@@ -98,7 +98,12 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint16 m_ui16Switches;
 
 		std::vector < std::vector < OpenViBE::int32 > > m_vChannelBuffer; // buffer to store channels & chunks
-		std::vector < OpenViBE::int32 > m_vChannelBuffer2; // buffer to store sample coming from OpenBCI -- filled by parseByteP2(), passed to handleCurrentSample()
+		// buffer to store sample coming from OpenBCI -- filled by parseByteP2(), passed to handleCurrentSample()
+		std::vector < OpenViBE::int32 > m_vSampleEEGBuffer;
+		std::vector < OpenViBE::int32 > m_vSampleAccBuffer;
+		// buffers to store & merge daisy samples
+		std::vector < OpenViBE::int32 > m_vSampleEEGBufferDaisy; 
+		std::vector < OpenViBE::int32 > m_vSampleAccBufferDaisy;
 
 		OpenViBE::CString m_sTTYName;
 	};

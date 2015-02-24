@@ -38,7 +38,7 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 
 //___________________________________________________________________//
-// Heavily inspired by OpenEEG code. Will override channel count and sampling late upon "daisy" selection
+// Heavily inspired by OpenEEG code. Will override channel count and sampling late upon "daisy" selection. If daisy module is attached, will concatenate EEG values and average accelerometer values every two samples.
 //                                                                   //
 
 CDriverOpenBCI::CDriverOpenBCI(IDriverContext& rDriverContext)
@@ -119,18 +119,21 @@ boolean CDriverOpenBCI::initialize(
 		m_pSample=NULL;
 		return false;
 	}
-	// in OpenBCI protocol, a sample consists in EEG + Accelerometer data
-	m_vChannelBuffer2.resize(EEGNbValuesPerSample+AccNbValuesPerSample);
-
+	// prepare buffer for samples
+	m_vSampleEEGBuffer.resize(EEGNbValuesPerSample);
+	m_vSampleEEGBufferDaisy.resize(EEGNbValuesPerSample);
+	m_vSampleAccBuffer.resize(AccNbValuesPerSample);
+	m_vSampleAccBufferDaisy.resize(AccNbValuesPerSample);
+	
+	// init buffer for 1 EEG value and 1 accel value
+	m_vEEGValueBuffer.resize(EEGValueBufferSize);
+	m_vAccValueBuffer.resize(AccValueBufferSize);
+	
 	m_pCallback=&rCallback;
 	m_ui32ChannelCount=m_oHeader.getChannelCount();
 	m_ui8LastPacketNumber=0;
 
 	m_rDriverContext.getLogManager() << LogLevel_Debug << CString(this->getName()) << " driver initialized.\n";
-	
-	// init buffer for EEG value and accel values
-	m_vEEGValueBuffer.resize(EEGValueBufferSize);
-	m_vAccValueBuffer.resize(AccValueBufferSize);
 	
 	// init scale factor
 	ScaleFacuVoltsPerCount = ADS1299_VREF/(pow(2.,23)-1)/ADS1299_GAIN*1000000.;
@@ -297,8 +300,8 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 				// we got EEG value
 				if (m_ui8SampleBufferPosition == EEGValueBufferSize)
 				{
-					// fill channel buffer, converting at the same time from 24 to 32 bits
-					m_vChannelBuffer2[m_ui16ExtractPosition] = interpret24bitAsInt32(m_vEEGValueBuffer);
+					// fill EEG channel buffer, converting at the same time from 24 to 32 bits
+					m_vSampleEEGBuffer[m_ui16ExtractPosition] = interpret24bitAsInt32(m_vEEGValueBuffer);
 					// reset for next value
 					m_ui8SampleBufferPosition = 0;
 					m_ui16ExtractPosition++;
@@ -308,7 +311,7 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 			if (m_ui16ExtractPosition == EEGNbValuesPerSample) {
 				// next step: accelerometer
 				m_ui16Readstate++;
-				// re-use the same variable to know position inside accelerometer block (I know, I'm bad!). Err... TODO
+				// re-use the same variable to know position inside accelerometer block (I know, I'm bad!).
 				m_ui16ExtractPosition=0;
 			}
 			break;
@@ -333,8 +336,8 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 					int16 accValue = m_vAccValueBuffer[1]<< 8;
 					accValue |= m_vAccValueBuffer[0];
 					accValue=ntohs(accValue);
-					// fill channel buffer, positioning after EEG values
-					m_vChannelBuffer2[EEGNbValuesPerSample+m_ui16ExtractPosition] = accValue;
+					// fill acc channel buffer
+					m_vSampleAccBuffer[m_ui16ExtractPosition] = accValue;
 					// reset for next value
 					m_ui8SampleBufferPosition = 0;
 					m_ui16ExtractPosition++;
@@ -659,10 +662,16 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 			std::cout << "Last packet drop! Last: " << (int) m_ui8LastPacketNumber << ", current packet number: " << packetNumber << std::endl;
 		}
 		
-		// no daisy module: push directly
+		// no daisy module: push directly values
 		if (!m_bDaisyModule) {
-			m_vChannelBuffer.push_back(m_vChannelBuffer2);
-			l_bSampleOK = false;
+			// concatenate EEG and Acc
+			std::vector < int32 > l_vSampleBuffer;
+			l_vSampleBuffer.reserve(m_vSampleEEGBuffer.size() + m_vSampleAccBuffer.size());
+			l_vSampleBuffer.insert( l_vSampleBuffer.end(), m_vSampleEEGBuffer.begin(), m_vSampleEEGBuffer.end());
+			l_vSampleBuffer.insert(l_vSampleBuffer.end(), m_vSampleAccBuffer.begin(), m_vSampleAccBuffer.end());
+			// copy them to current chunk
+			m_vChannelBuffer.push_back(l_vSampleBuffer);
+			l_bSampleOK = true;
 		}
 		// even: daisy, odd: first 8 channels
 		else {
@@ -675,7 +684,7 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 				}
 				else {
 					//FIXME: concatenate
-					m_vChannelBuffer.push_back(m_vChannelBuffer2);
+					//m_vChannelBuffer.push_back(m_vChannelBuffer2);
 					l_bSampleOK = true;
 				}
 			}
