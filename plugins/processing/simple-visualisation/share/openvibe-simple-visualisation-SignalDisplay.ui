@@ -931,8 +931,8 @@
                     <property name="secondary_icon_sensitive">True</property>
                     <property name="adjustment">adjustment3</property>
                     <property name="climb_rate">0.001</property>
-                    <property name="digits">3</property>
-                    <property name="snap_to_ticks">True</property>
+                    <property name="digits">5</property>
+                    <property name="snap_to_ticks">False</property>
                     <property name="numeric">True</property>
                   </object>
                   <packing>
@@ -1052,7 +1052,7 @@
   <object class="GtkAdjustment" id="adjustment3">
     <property name="lower">-1000000</property>
     <property name="upper">1000000</property>
-    <property name="step_increment">1</property>
+    <property name="step_increment">0.01</property>
     <property name="page_increment">10</property>
   </object>
   <object class="GtkListStore" id="liststore1">

@@ -601,10 +601,10 @@ void CSignalChannelDisplay::setGlobalBestFitParameters(const float64& rRange, co
 void CSignalChannelDisplay::setGlobalBestFitParameters2(const float64& rMin, const float64& rMax)
 {
 //	m_f64ScaleX = 1;
-	const float64 f64Margin = 0.2;
+	const float64 f64Margin = 0.2 * (rMax - rMin);
 
-	const float64 f64MaxTop    = rMax + f64Margin*std::fabs(rMax);
-	const float64 f64MinBottom = rMin - f64Margin*std::fabs(rMin);
+	const float64 f64MaxTop    = rMax + f64Margin;
+	const float64 f64MinBottom = rMin - f64Margin;
 
     for(size_t k = 0; k<m_oChannelList.size(); k++)
     {
