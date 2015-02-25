@@ -36,6 +36,37 @@ inline int ov_round(double dbl)
 { return dbl >= 0.0 ? (int)(dbl + 0.5) : ((dbl - (double)(int)dbl) <= -0.5 ? (int)dbl : (int)(dbl - 0.5));
 }
 
+// Decodes a number in %XX to one letter
+char decodeNumber(const char* sString) 
+{
+	const char l_char0 = sString[0];
+	const char l_char1 = sString[1];
+	char l_cOut;
+
+	l_cOut  = (l_char0 >= 'A' ? ( (l_char0 & 0xDF) - 'A' ) + 10 : (l_char0 - '0') ) * 16;
+	l_cOut += (l_char1 >= 'A' ? ( (l_char1 & 0xDF) - 'A' ) + 10 : (l_char1 - '0') );
+
+	return l_cOut;
+}
+
+// Decodes url from all its %XX strings
+std::string decodeUrl(const std::string& sUrl)
+{
+	std::string l_sOut = sUrl;
+
+	for(uint32 i=0;i<l_sOut.length();i++)
+	{
+		if(l_sOut[i]=='%' && i<l_sOut.length()-2)
+		{
+			l_sOut[i] = decodeNumber(&l_sOut[i+1]);
+			l_sOut.erase(i+1, 2);
+		}
+	}
+
+	return l_sOut;
+}
+
+
 
 extern map<uint32, ::GdkColor> g_vColors;
 
@@ -1679,19 +1710,30 @@ void CInterfacedScenario::scenarioDrawingAreaDragDataReceivedCB(::GdkDragContext
 		{
 			l_sFilename = *l_sSelectionUri;
 		}
-		m_rKernelContext.getLogManager() << LogLevel_Fatal <<  "filename " << l_sFilename.c_str() << "\n";
+		m_rKernelContext.getLogManager() << LogLevel_Trace <<  "Drag and drop gave URL [" << l_sFilename.c_str() << "]\n";
 		l_sFilename.erase(l_sFilename.begin(), l_sFilename.begin()+7);//erase the file:// at the begining
 #if defined TARGET_OS_Windows
 		l_sFilename.erase(l_sFilename.begin(), l_sFilename.begin()+1);//we have an additionnal / to erase before the uri starts
 #endif
-		l_sFilename.erase(l_sFilename.begin()+l_sFilename.find(".xml")+4, l_sFilename.end());//erase \n at the end
-		m_rKernelContext.getLogManager() << LogLevel_Fatal <<  "filename " << l_sFilename.c_str() << "\n";
+		// Get rid of the %20 sequences etc
+		l_sFilename = ::decodeUrl(l_sFilename);
+		// Remove possible linefeed in the end
+		while(l_sFilename.length()>0 && (l_sFilename[l_sFilename.length()-1] == '\n' || l_sFilename[l_sFilename.length()-1] == '\r'))
+		{
+			l_sFilename = l_sFilename.substr(0,l_sFilename.length()-1);
+		}
+		// l_sFilename.erase(l_sFilename.begin()+l_sFilename.find(".xml")+4, l_sFilename.end());//erase \n at the end
+
+		m_rKernelContext.getLogManager() << LogLevel_Trace <<  "Parsed out [" << l_sFilename.c_str() << "]\n";
 		m_rApplication.openScenario(l_sFilename.c_str());
 	}
 
 	m_f64CurrentMouseX=iX;
 	m_f64CurrentMouseY=iY;
 }
+
+
+
 void CInterfacedScenario::scenarioDrawingAreaMotionNotifyCB(::GtkWidget* pWidget, ::GdkEventMotion* pEvent)
 {
 	//m_rKernelContext.getLogManager() << LogLevel_Debug << "scenarioDrawingAreaMotionNotifyCB\n";
