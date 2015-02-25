@@ -308,6 +308,10 @@ namespace OpenViBEPlugins
 
 			std::vector<OpenViBE::float64> m_vPreviousValueMin;
 			std::vector<OpenViBE::float64> m_vPreviousValueMax;
+
+			std::vector<OpenViBE::CString> m_vErrorState;
+
+			OpenViBE::boolean m_bStimulationColorsShown;
 		};
 	}
 }

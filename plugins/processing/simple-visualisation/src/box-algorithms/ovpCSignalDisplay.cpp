@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#include <sstream>
+
 #include <openvibe/ovITimeArithmetics.h>
 #include <system/ovCTime.h>
 
@@ -121,6 +123,15 @@ namespace OpenViBEPlugins
 				return false;
 			}
 
+			// Subcomponents may generate errors while running e.g. in gtk callbacks, where its not safe/possible to call logmanager
+			if(((CSignalDisplayView*)m_pSignalDisplayView)->m_vErrorState.size()>0) {
+				for(uint32 i=0;i<((CSignalDisplayView*)m_pSignalDisplayView)->m_vErrorState.size();i++)
+				{
+					this->getLogManager() << LogLevel_Error << ((CSignalDisplayView*)m_pSignalDisplayView)->m_vErrorState[i];
+				}
+				return false;
+			}
+
 #ifdef DEBUG
 			uint64 in = System::Time::zgetTime();
 #endif
@@ -166,8 +177,13 @@ namespace OpenViBEPlugins
 					{
 						const uint64 l_ui64StimulationIdentifier = l_pStimulationSet->getStimulationIdentifier(s);
 						const uint64 l_ui64StimulationDate = l_pStimulationSet->getStimulationDate(s);
-						const CString l_oStimulationName = getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation, l_ui64StimulationIdentifier);
+						CString l_oStimulationName = getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation, l_ui64StimulationIdentifier);
 
+						if(l_oStimulationName==CString("")) 
+						{
+							std::stringstream ss; ss << "Id " << l_ui64StimulationIdentifier;
+							l_oStimulationName = CString(ss.str().c_str());
+						}
 						((CSignalDisplayView*)m_pSignalDisplayView)->onStimulationReceivedCB(l_ui64StimulationIdentifier, l_oStimulationName);
 						m_pBufferDatabase->setStimulation(s, l_ui64StimulationIdentifier, l_ui64StimulationDate);
 					}

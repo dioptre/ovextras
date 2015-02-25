@@ -123,8 +123,8 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Vertical Scale",OV_TypeId_Float, "100");
 				rPrototype.addSetting("Vertical Offset",OV_TypeId_Float, "0");
 				rPrototype.addSetting("Time Scale", OV_TypeId_Float, "10");
-				rPrototype.addSetting("Horizontal ruler", OV_TypeId_Boolean, "true");
-				rPrototype.addSetting("Vertical ruler", OV_TypeId_Boolean, "false");
+				rPrototype.addSetting("Bottom ruler", OV_TypeId_Boolean, "true");
+				rPrototype.addSetting("Left ruler", OV_TypeId_Boolean, "false");
 				rPrototype.addSetting("Multiview", OV_TypeId_Boolean, "false");
 
 				rPrototype.addInput("Data",          OV_TypeId_Signal); 

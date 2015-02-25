@@ -31,6 +31,7 @@ namespace OpenViBEPlugins
 		void channelSelectButtonCallback(::GtkButton *button, gpointer data);
 		void channelSelectDialogApplyButtonCallback(::GtkButton *button, gpointer data);
 		void stimulationColorsButtonCallback(::GtkButton *button, gpointer data);
+		gint closeStimulationColorsWindow(GtkWidget *widget, GdkEvent  *event, gpointer data);
 		void informationButtonCallback(::GtkButton *button, gpointer data);
 		void multiViewButtonCallback(::GtkButton *button, gpointer data);
 		void multiViewDialogApplyButtonCallback(::GtkButton *button, gpointer data);
@@ -66,12 +67,14 @@ namespace OpenViBEPlugins
 			,m_pBottomBox(NULL)
 			,m_pBottomRuler(NULL)
 			,m_oScalingMode(oScalingMode)
+			,m_bStimulationColorsShown(false)
 		{
 
 			m_bVerticalScaleChanged=true;
 
 			m_vSelectedChannels.clear();
 			m_vChannelUnits.clear();
+			m_vErrorState.clear();
 
 			construct(oBufferDatabase,f64TimeScale,oDisplayMode);
 		}
@@ -179,15 +182,16 @@ namespace OpenViBEPlugins
 			//stimulation colors dialog's signals
 			//-----------------------------------
 			//connect the close button to the dialog's hide command
-			g_signal_connect_swapped(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayStimulationColorsCloseButton")),
+			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayStimulationColorsCloseButton")),
 					"clicked",
-					G_CALLBACK(::gtk_widget_hide),
-					G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayStimulationColorsDialog")));
+					G_CALLBACK(stimulationColorsButtonCallback),
+					this);
 
 			//hides the dialog if the user tries to close it
-			g_signal_connect (G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayStimulationColorsDialog")),
+			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayStimulationColorsDialog")),
 					"delete_event",
-					G_CALLBACK(::gtk_widget_hide), NULL);
+					 G_CALLBACK(closeStimulationColorsWindow),
+					 this);
 
 			//multiview signals
 			//-----------------
@@ -351,6 +355,7 @@ namespace OpenViBEPlugins
 
 				m_bVerticalScaleChanged = true; // need to pass the scale params to multiview, use this to make them refresh...
 				m_bVerticalScaleRefresh = true;
+
 
 				//request a redraw
 				/*
@@ -625,21 +630,31 @@ namespace OpenViBEPlugins
 					vector<float64> l_vValueMin;
 					vector<float64> l_vValueMax;
 					m_oChannelDisplay[0]->updateDisplayedValueRange(l_vValueRange,l_vValueMin,l_vValueMax);
+			
+					float64 l_f64MinValue = *(std::min_element(l_vValueMin.begin(), l_vValueMin.end()));
+					float64 l_f64MaxValue = *(std::max_element(l_vValueMax.begin(), l_vValueMax.end()));
 
-					std::vector<float64>::iterator minValue = std::min_element(l_vValueMin.begin(), l_vValueMin.end());
-					std::vector<float64>::iterator maxValue = std::max_element(l_vValueMax.begin(), l_vValueMax.end());
+					if(m_bMultiViewEnabled)
+					{
+						vector<float64> l_vMultiValueMin;
+						vector<float64> l_vMultiValueMax;
+						m_oChannelDisplay[1]->updateDisplayedValueRange(l_vValueRange,l_vMultiValueMin,l_vMultiValueMax);
+
+						l_f64MinValue = std::min(l_f64MinValue, *(std::min_element(l_vMultiValueMin.begin(), l_vMultiValueMin.end())));
+						l_f64MaxValue = std::max(l_f64MaxValue, *(std::max_element(l_vMultiValueMax.begin(), l_vMultiValueMax.end())));
+					}
 
 					// @todo some robust & fast estimate of a high quantile instead of max/min...
-					const float64 f64Margin = 0.2 * (*maxValue - *minValue);
+					const float64 f64Margin = 0.2 * (l_f64MaxValue - l_f64MinValue);
 
-					if( *minValue < m_vPreviousValueMin[0]-f64Margin || *maxValue > m_vPreviousValueMax[0] + f64Margin ||
-						*minValue > m_vPreviousValueMin[0]+f64Margin || *maxValue < m_vPreviousValueMax[0] - f64Margin)
+					if( l_f64MinValue < m_vPreviousValueMin[0]-f64Margin || l_f64MaxValue > m_vPreviousValueMax[0] + f64Margin ||
+						l_f64MinValue > m_vPreviousValueMin[0]+f64Margin || l_f64MaxValue < m_vPreviousValueMax[0] - f64Margin)
 					{
-						m_oChannelDisplay[0]->setGlobalBestFitParameters2(*minValue, *maxValue); // normal chns
-						m_oChannelDisplay[1]->setGlobalBestFitParameters2(*minValue, *maxValue); // multiview
+						m_oChannelDisplay[0]->setGlobalBestFitParameters2(l_f64MinValue, l_f64MaxValue); // normal chns
+						m_oChannelDisplay[1]->setGlobalBestFitParameters2(l_f64MinValue, l_f64MaxValue); // multiview
 
-						m_vPreviousValueMin[0] = *minValue;
-						m_vPreviousValueMax[0] = *maxValue;
+						m_vPreviousValueMin[0] = l_f64MinValue;
+						m_vPreviousValueMax[0] = l_f64MaxValue;
 					}
 				} 
 				else if(m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None) 
@@ -684,25 +699,30 @@ namespace OpenViBEPlugins
 					{
 						m_oChannelDisplay[1]->updateDisplayedValueRange(l_vValueRange,l_vValueMin,l_vValueMax);
 
-						std::vector<float64>::iterator minValue = std::min_element(l_vValueMin.begin(), l_vValueMin.end());
-						std::vector<float64>::iterator maxValue = std::max_element(l_vValueMax.begin(), l_vValueMax.end());
+						float64 l_f64MinValue = *(std::min_element(l_vValueMin.begin(), l_vValueMin.end()));
+						float64 l_f64MaxValue = *(std::max_element(l_vValueMax.begin(), l_vValueMax.end()));
 
 						// @todo some robust & fast estimate of a high quantile instead of max/min...
-						const float64 f64Margin = 0.2 * (*maxValue - *minValue);
+						const float64 f64Margin = 0.2 * (l_f64MaxValue - l_f64MinValue);
 
-						if(    *maxValue > m_oChannelDisplay[1]->m_vMaximumTopMargin[0]    + f64Margin 
-							|| *maxValue < m_oChannelDisplay[1]->m_vMaximumTopMargin[0]    - f64Margin 
-							|| *minValue > m_oChannelDisplay[1]->m_vMinimumBottomMargin[0] + f64Margin 
-							|| *minValue < m_oChannelDisplay[1]->m_vMinimumBottomMargin[0] - f64Margin)
+						if(    l_f64MaxValue > m_oChannelDisplay[1]->m_vMaximumTopMargin[0]    + f64Margin 
+							|| l_f64MaxValue < m_oChannelDisplay[1]->m_vMaximumTopMargin[0]    - f64Margin 
+							|| l_f64MinValue > m_oChannelDisplay[1]->m_vMinimumBottomMargin[0] + f64Margin 
+							|| l_f64MinValue < m_oChannelDisplay[1]->m_vMinimumBottomMargin[0] - f64Margin)
 						{
-							m_oChannelDisplay[1]->setGlobalBestFitParameters2(*minValue, *maxValue); // multiview
+							m_oChannelDisplay[1]->setGlobalBestFitParameters2(l_f64MinValue, l_f64MaxValue); // multiview
 							m_oChannelDisplay[1]->updateDisplayParameters();
 						}
 					}
 				}
 				else
 				{
-					std::cout << "Error: unknown scaling mode " << m_oScalingMode.toString() << "\n";
+					std::stringstream ss; 
+
+					ss << "Error: unknown scaling mode " << m_oScalingMode.toString() << ". Did you update the box?\n";
+
+					m_vErrorState.push_back(CString(ss.str().c_str()));
+
 					return;
 				}
 				m_bVerticalScaleRefresh = false;
@@ -735,7 +755,9 @@ namespace OpenViBEPlugins
 					if(m_pBufferDatabase->m_ui64TotalStep == 0)
 					{
 						//error
-						std::cout << "Error: Buffer database m_ui64TotalStep is 0\n";
+
+						m_vErrorState.push_back(CString("Error: Buffer database m_ui64TotalStep is 0\n"));
+
 					}
 					else
 					{
@@ -747,8 +769,8 @@ namespace OpenViBEPlugins
 							l_ui64UpperLimit = m_pBufferDatabase->m_oStartTime[0] - m_pBufferDatabase->m_ui64BufferStep;
 						}
 						else
-						{
-							std::cout << "Error: Buffer step is larger than the start time\n";
+						{		
+							m_vErrorState.push_back(CString("Error: Buffer step is larger than the start time\n"));
 						}
 
 						//while there is time to catch up
@@ -1288,6 +1310,13 @@ namespace OpenViBEPlugins
 				l_pStimulationColorsTable->nrows-1, l_pStimulationColorsTable->nrows-1+1, //last row
 				static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),	0, 0);
 #endif
+			::GtkWidget* l_pStimulationColorsDialog = GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayStimulationColorsDialog"));
+			if(m_bStimulationColorsShown)
+			{
+				// Forces a redraw of it all
+				::gtk_widget_show_all(l_pStimulationColorsDialog);
+				gtk_widget_queue_draw(l_pStimulationColorsDialog);
+			}
 		}
 
 		void CSignalDisplayView::refreshScale(void) 
@@ -1324,6 +1353,15 @@ namespace OpenViBEPlugins
 				l_pView->m_oScalingMode = l_i32Selection;
 				l_pView->m_bVerticalScaleChanged = true;
 				l_pView->m_bVerticalScaleRefresh = true;
+
+				// Make sure the scale readjusts
+				for(uint32 i=0;i<l_pView->m_vPreviousValueMax.size();i++)
+				{
+					l_pView->m_vPreviousValueMax[i] = -DBL_MIN;
+					l_pView->m_vPreviousValueMin[i] = +DBL_MAX;
+				}
+
+				l_pView->redraw(); // immediate redraw
 
 				bool l_pcontrolsActive = (l_pView->m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None);
 
@@ -1498,11 +1536,28 @@ namespace OpenViBEPlugins
 			::gtk_widget_hide(GTK_WIDGET(::gtk_builder_get_object(l_pView->m_pBuilderInterface, "SignalDisplayChannelSelectDialog")));
 		}
 
+		gint closeStimulationColorsWindow(GtkWidget *widget, GdkEvent  *event, gpointer data)
+		{
+			stimulationColorsButtonCallback(NULL, data);
+
+			return TRUE;
+		}
+
 		void stimulationColorsButtonCallback(::GtkButton *button, gpointer data)
 		{
 			CSignalDisplayView* l_pView = reinterpret_cast < CSignalDisplayView* >(data);
 			::GtkWidget* l_pStimulationColorsDialog = GTK_WIDGET(::gtk_builder_get_object(l_pView->m_pBuilderInterface, "SignalDisplayStimulationColorsDialog"));
-			::gtk_widget_show_all(l_pStimulationColorsDialog);
+
+			if(l_pView->m_bStimulationColorsShown)
+			{
+				::gtk_widget_hide(l_pStimulationColorsDialog);
+				l_pView->m_bStimulationColorsShown = false;
+			}
+			else
+			{
+				::gtk_widget_show_all(l_pStimulationColorsDialog);
+				l_pView->m_bStimulationColorsShown = true;
+			}
 		}
 
 		//Called when the user presses the Information button (opens the information dialog)
@@ -1612,6 +1667,8 @@ namespace OpenViBEPlugins
 
 			l_pView->changeMultiView();
 			l_pView->updateMainTableStatus();
+
+			l_pView->redraw(); // immediate redraw
 
 			//hides the channel selection dialog
 			::gtk_widget_hide(GTK_WIDGET(::gtk_builder_get_object(l_pView->m_pBuilderInterface, "SignalDisplayMultiViewDialog")));
