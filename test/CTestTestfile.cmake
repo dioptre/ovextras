@@ -31,8 +31,6 @@ IF(NOT (LOCAL MATCHES "FALSE"))
 	set(ENV{OV_BINARY_PATH} "${OV_ROOT_DIR}/dist")
 	message("running local test here= $ENV{OV_BINARY_PATH}")
 
-	SET(ENV{OV_DATA_PATH} "${OV_ROOT_DIR}/dist/share/openvibe/")
-	
 	IF(WIN32)
 	  SET(ENV{OV_USERDATA} "$ENV{APPDATA}/openvibe/")
 	ELSE(WIN32)

@@ -153,9 +153,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestTestfile.cmake ${CTEST_BINARY_DI
 # passthrough an environment variable to binary path to tests
 SET(ENV{OV_BINARY_PATH} "${CTEST_SOURCE_DIRECTORY}/dist")
 
-# Some tests may use bundled data files such as signals
-SET(ENV{OV_DATA_PATH} "${CTEST_SOURCE_DIRECTORY}/dist/share/openvibe/")
-
 ## -- read CTestCustom.cmake file
 ctest_read_custom_files("${CTEST_BINARY_DIRECTORY}")
 
@@ -169,7 +166,6 @@ MESSAGE("-- Set the CTEST_BINARY_DIRECTORY to ${CTEST_BINARY_DIRECTORY}")
 MESSAGE("-- Set the CTEST_DASHBOARD_ROOT to   ${CTEST_DASHBOARD_ROOT}")
 MESSAGE("-- Set the OV_TEST_DEPLOY_PATH to    $ENV{OV_TEST_DEPLOY_PATH}")
 MESSAGE("-- Set the OV_BINARY_PATH to         $ENV{OV_BINARY_PATH}")
-MESSAGE("-- Set the OV_DATA_PATH to           $ENV{OV_DATA_PATH}")
 
 #~ SET(CTEST_PROJECT_NAME "OpenViBe")
 #~ # set time for update 
