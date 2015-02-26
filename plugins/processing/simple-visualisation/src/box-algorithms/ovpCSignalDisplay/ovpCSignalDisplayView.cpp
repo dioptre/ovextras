@@ -155,7 +155,6 @@ namespace OpenViBEPlugins
 			// g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayVerticalScaleToggleButton")),     "toggled",       G_CALLBACK(toggleAutoVerticalScaleButtonCallback), this);
 			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), "value-changed", G_CALLBACK(customVerticalScaleChangedCallback), this);
 
-
 			//time scale
 			//----------
 			::GtkSpinButton* l_pSpinButton = GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayTimeScale"));
@@ -754,9 +753,13 @@ namespace OpenViBEPlugins
 				{
 					if(m_pBufferDatabase->m_ui64TotalStep == 0)
 					{
-						//error
-
-						m_vErrorState.push_back(CString("Error: Buffer database m_ui64TotalStep is 0\n"));
+						// Error
+						//
+						// @note This can happen at least during changing of time scale, however on the next attempt it seems
+						// to be already fixed in the bufferdatabase and things seem to work, so don't bother returning error.
+						// @fixme should get proper understanding of this part to properly handle it, i.e. should we 
+						// really raise an error state in some situations or not.
+//						m_vErrorState.push_back(CString("Error: Buffer database m_ui64TotalStep is 0\n"));
 
 					}
 					else
@@ -1426,6 +1429,10 @@ namespace OpenViBEPlugins
 				}
 
 				//redraw channels
+
+				l_pView->m_bVerticalScaleChanged = true;
+				l_pView->m_bVerticalScaleRefresh = true;
+
 				l_pView->redraw();
 			}
 
