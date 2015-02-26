@@ -76,6 +76,9 @@ namespace OpenViBEPlugins
 		 */
 		void updateScale();
 
+		// Updates some drawing limits, i.e. to limit drawing to [chn_i,...,chn_j]
+		void updateLimits(void);
+
 		/**
 		 * \brief Reset list of channels displayed by this object
 		 */
@@ -327,9 +330,16 @@ namespace OpenViBEPlugins
         //! Is it a multiview display ?
         OpenViBE::boolean m_bMultiView;
 
+		// These parameters control that we don't unnecessarily draw parts of the signal which are not in view
+		
 		// Currently visible y segment in the drawing area
 		OpenViBE::uint32 m_ui32StartY;
 		OpenViBE::uint32 m_ui32StopY;
+
+		// First and last channel to draw
+		OpenViBE::uint32 m_ui32FirstChannelToDisplay;
+		OpenViBE::uint32 m_ui32LastChannelToDisplay;
+
 	};
 
 	}

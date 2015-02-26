@@ -16,10 +16,12 @@ using namespace OpenViBEPlugins::SimpleVisualisation;
 
 
 gboolean drawingAreaExposeEventCallback(GtkWidget* pWidget, GdkEventExpose* pEvent, gpointer data);
+gboolean drawingAreaConfigureCallback(GtkWidget* pWidget, GdkEventExpose* pEvent, gpointer data);
 gboolean drawingAreaResizeEventCallback(GtkWidget* pWidget, GtkAllocation* pAllocation, gpointer data);
 void drawingAreaClickedEventCallback(GtkWidget* pWidget, GdkEventButton* pEvent, gpointer data);
 void drawingAreaEnterEventCallback(GtkWidget* pWidget, GdkEventCrossing* pEvent, gpointer data);
 void drawingAreaLeaveEventCallback(GtkWidget* pWidget, GdkEventCrossing* pEvent, gpointer data);
+gboolean visibleRegionChangedCallback(GtkWidget* pWidget,  gpointer data); 
 
 CSignalChannelDisplay::CSignalChannelDisplay(
 	CSignalDisplayView* pDisplayView,
@@ -49,6 +51,9 @@ CSignalChannelDisplay::CSignalChannelDisplay(
     ,m_bMultiView(false)
 	,m_ui32StartY(0)
 	,m_ui32StopY(i32LeftRulerHeightRequest)
+	,m_ui32FirstChannelToDisplay(0)
+	,m_ui32LastChannelToDisplay(0)
+
 {
 
     //creates the drawing area
@@ -65,12 +70,20 @@ CSignalChannelDisplay::CSignalChannelDisplay(
 	gtk_widget_add_events(GTK_WIDGET(m_pDrawingArea), GDK_BUTTON_PRESS_MASK);
 	gtk_widget_add_events(GTK_WIDGET(m_pDrawingArea), GDK_ENTER_NOTIFY_MASK);
 	gtk_widget_add_events(GTK_WIDGET(m_pDrawingArea), GDK_LEAVE_NOTIFY_MASK);
+	gtk_widget_add_events(GTK_WIDGET(m_pDrawingArea), GDK_CONFIGURE);          // Size change
 
 	g_signal_connect_after(G_OBJECT(m_pDrawingArea), "expose_event",       G_CALLBACK(drawingAreaExposeEventCallback), this);
 	g_signal_connect_after(G_OBJECT(m_pDrawingArea), "size-allocate",      G_CALLBACK(drawingAreaResizeEventCallback), this);
 	g_signal_connect_after(G_OBJECT(m_pDrawingArea), "button-press-event", G_CALLBACK(drawingAreaClickedEventCallback), this);
 	g_signal_connect_after(G_OBJECT(m_pDrawingArea), "enter-notify-event", G_CALLBACK(drawingAreaEnterEventCallback), this);
 	g_signal_connect_after(G_OBJECT(m_pDrawingArea), "leave-notify-event", G_CALLBACK(drawingAreaLeaveEventCallback), this);
+	g_signal_connect_after(G_OBJECT(m_pDrawingArea), "configure-event",    G_CALLBACK(drawingAreaConfigureCallback), this); // Size change, set draw limits
+
+	// These take care of setting the redraw limits in the case of vertical scroll by user
+	GtkWidget* l_pWidget = GTK_WIDGET(gtk_builder_get_object(m_pParentDisplayView->m_pBuilderInterface, "SignalDisplayChannelsScrolledWindow"));
+	GtkAdjustment* vadj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(l_pWidget));
+	g_signal_connect_after(G_OBJECT(vadj), "value-changed", G_CALLBACK(visibleRegionChangedCallback), this);
+
 }
 
 CSignalChannelDisplay::~CSignalChannelDisplay()
@@ -329,13 +342,7 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 	uint64 in = System::Time::zgetTime();
 #endif
 
-	// These parameters control that we don't unnecessarily draw parts of the signal which are not in view
 	const float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
-	const uint32 l_ui32FirstChannelToDisplay = static_cast<uint32>(std::floor( rExposedArea.y / l_f64sizePerChannel));
-	const uint32 l_ui32LastChannelToDisplay = std::min(static_cast<uint32>(m_oChannelList.size()), static_cast<uint32>(l_ui32FirstChannelToDisplay + std::floor(rExposedArea.height / l_f64sizePerChannel) + 1));
-
-	m_ui32StartY = static_cast<uint32>(l_f64sizePerChannel*l_ui32FirstChannelToDisplay);
-	m_ui32StopY = std::min(m_ui32Height,static_cast<uint32>(l_f64sizePerChannel*l_ui32LastChannelToDisplay+1));
 
 	//updates the left ruler
 	if(m_bMultiView)
@@ -348,7 +355,7 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 	else
 	{
 		// own ruler for each channel
-		for(uint32 i = l_ui32FirstChannelToDisplay ; i<l_ui32LastChannelToDisplay; i++)
+		for(uint32 i = m_ui32FirstChannelToDisplay ; i<=m_ui32LastChannelToDisplay; i++)
 		{
 			const float64 l_f64MaximumDisplayedValue = m_vTranslateY[i] - ( (0 - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
 			const float64 l_f64MinimumDisplayedValue = m_vTranslateY[i] - ( (l_f64sizePerChannel - ((l_f64sizePerChannel*m_f64ZoomScaleY)/2) + (m_f64ZoomTranslateY* m_f64ZoomScaleY)) / (m_vScaleY[i] * m_f64ZoomScaleY * l_f64sizePerChannel) );
@@ -439,7 +446,7 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 
 	//draw latest signals
 	drawSignals(l_ui32FirstBufferToDisplay, l_ui32LastBufferToDisplay, l_ui32FirstSampleToDisplay, l_f64FirstBufferToDisplayStartX,
-		l_ui32FirstChannelToDisplay, l_ui32LastChannelToDisplay);
+		m_ui32FirstChannelToDisplay, m_ui32LastChannelToDisplay);
 
 	//in scan mode, there is more to be drawn
 	if(m_pDatabase->getDisplayMode() == OVP_TypeId_SignalDisplayMode_Scan)
@@ -457,7 +464,7 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 				l_f64FirstBufferToDisplayStartX);
 
 			//draw older signals (to the right of progress line)
-			drawSignals(0, l_ui32FirstBufferToDisplay-1, 0, l_f64FirstBufferToDisplayStartX, l_ui32FirstChannelToDisplay, l_ui32LastChannelToDisplay);
+			drawSignals(0, l_ui32FirstBufferToDisplay-1, 0, l_f64FirstBufferToDisplayStartX, m_ui32FirstChannelToDisplay, m_ui32LastChannelToDisplay);
 		}
 	}
 
@@ -796,9 +803,9 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 
 	GdkColor l_oLineColor;
 
-	ui32LastChannelToDisplay = std::min(ui32LastChannelToDisplay, static_cast<uint32>(m_oChannelList.size()));
+	ui32LastChannelToDisplay = std::min(ui32LastChannelToDisplay, static_cast<uint32>(m_oChannelList.size()-1));
 
-	for(size_t k=ui32FirstChannelToDisplay; k<ui32LastChannelToDisplay; k++)
+	for(size_t k=ui32FirstChannelToDisplay; k<=ui32LastChannelToDisplay; k++)
 	{
 
 
@@ -968,15 +975,75 @@ void CSignalChannelDisplay::drawZeroLine()
 	gdk_gc_set_line_attributes(m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 1, GDK_LINE_SOLID, GDK_CAP_BUTT, GDK_JOIN_BEVEL);
 }
 
+void CSignalChannelDisplay::updateLimits(void)
+{
+	if(m_ui32Height == 0) 
+	{
+		// Bail out, no use setting the limits based on 0 ... this happens sometimes (todo: why?)
+		// l_pChannelDisplay->m_ui32FirstChannelToDisplay = 0;
+		// l_pChannelDisplay->m_ui32LastChannelToDisplay = l_pChannelDisplay->m_oChannelList.size() - 1;
+		return;
+	}
+
+	if(m_bMultiView)
+	{
+		m_ui32FirstChannelToDisplay = 0;
+		m_ui32LastChannelToDisplay = m_oChannelList.size() - 1;
+
+		// keep as is:  l_pChannelDisplay->m_ui32StartY,  l_pChannelDisplay->m_ui32StopY 
+		return;
+	}
+
+	GtkWidget* l_pWidget = GTK_WIDGET(gtk_builder_get_object(m_pParentDisplayView->m_pBuilderInterface, "SignalDisplayChannelsScrolledWindow"));
+
+	GtkAdjustment* l_pVadj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(l_pWidget));
+
+	const float64 areaStartY = l_pVadj->value;
+	const float64 areaSizeY = l_pVadj->page_size;
+
+	const float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
+	m_ui32FirstChannelToDisplay = static_cast<uint32>(std::floor( areaStartY / l_f64sizePerChannel));
+	m_ui32LastChannelToDisplay = std::min(static_cast<uint32>(m_oChannelList.size()-1), static_cast<uint32>(m_ui32FirstChannelToDisplay + std::floor(areaSizeY / l_f64sizePerChannel) + 1));
+
+	m_ui32StartY = static_cast<uint32>(l_f64sizePerChannel*m_ui32FirstChannelToDisplay);
+	m_ui32StopY = std::min(m_ui32Height,static_cast<uint32>(l_f64sizePerChannel*(m_ui32LastChannelToDisplay+1)));
+
+	redrawAllAtNextRefresh();
+
+	// cout << "SetChns " << l_pChannelDisplay->m_ui32FirstChannelToDisplay << " to " << l_pChannelDisplay->m_ui32LastChannelToDisplay << "\n";
+	// cout << "SetLim  " << l_pChannelDisplay->m_ui32StartY << " to " << l_pChannelDisplay->m_ui32StopY << "\n";
+}
+
 //
 //CALLBACKS
 //
+
+// DrawingArea visible region may have changed, estimate the limits again
+gboolean visibleRegionChangedCallback(GtkWidget* pWidget, gpointer data)
+{
+	CSignalChannelDisplay * l_pChannelDisplay = reinterpret_cast<CSignalChannelDisplay*>(data);
+
+	l_pChannelDisplay->updateLimits();
+
+	return false; // propagate
+}
+
+
+gboolean drawingAreaConfigureCallback(GtkWidget* pWidget, GdkEventExpose* pEvent, gpointer data)
+{
+	CSignalChannelDisplay * l_pChannelDisplay = reinterpret_cast<CSignalChannelDisplay*>(data);
+
+	l_pChannelDisplay->updateLimits();
+
+	return false; // propagate
+}
 
 gboolean drawingAreaExposeEventCallback(GtkWidget *widget, GdkEventExpose *pEvent, gpointer data)
 {
 //	std::cout << "EE for " << pEvent->area.x << " " << pEvent->area.y <<  "  " << pEvent->area.width << " " << pEvent->area.height << "\n";
 
 	CSignalChannelDisplay * m_pChannelDisplay = reinterpret_cast<CSignalChannelDisplay*>(data);
+
 
 	//check if a full redrawn was asked for
 	if(pEvent->area.width == (gint)m_pChannelDisplay->m_ui32Width && pEvent->area.height == (gint)m_pChannelDisplay->m_ui32Height)
@@ -996,8 +1063,11 @@ gboolean drawingAreaExposeEventCallback(GtkWidget *widget, GdkEventExpose *pEven
 
 gboolean drawingAreaResizeEventCallback(GtkWidget* pWidget, GtkAllocation* pAllocation, gpointer data)
 {
-	CSignalChannelDisplay * m_pChannelDisplay = reinterpret_cast<CSignalChannelDisplay*>(data);
-	m_pChannelDisplay->onResizeEventCB(pAllocation->width, pAllocation->height);
+	CSignalChannelDisplay * l_pChannelDisplay = reinterpret_cast<CSignalChannelDisplay*>(data);
+	l_pChannelDisplay->onResizeEventCB(pAllocation->width, pAllocation->height);
+	
+	l_pChannelDisplay->updateLimits();
+
 	return FALSE;
 }
 
