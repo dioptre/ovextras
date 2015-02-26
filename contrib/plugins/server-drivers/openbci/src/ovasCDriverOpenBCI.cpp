@@ -45,13 +45,10 @@ CDriverOpenBCI::CDriverOpenBCI(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
 	,m_oSettings("AcquisitionServer_Driver_OpenBCI", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
-	,m_ui32ChannelCount(11)
+	,m_ui32ChannelCount(19)
 	,m_ui32DeviceIdentifier(uint32(-1))
 	,m_pSample(NULL)
 {
-	// by default, no daisy module, 11 channels at 250Hz, override during init
-	m_oHeader.setSamplingFrequency(DefaultSamplingRate);
-	m_oHeader.setChannelCount(EEGNbValuesPerSample+AccNbValuesPerSample);
 	m_sComInit="";
 	m_ui32ComDelay=100;
 
@@ -62,6 +59,9 @@ CDriverOpenBCI::CDriverOpenBCI(IDriverContext& rDriverContext)
 	m_oSettings.add("DaisyModule", &m_bDaisyModule);
 	
 	m_oSettings.load();
+	
+	// default parameter loaded, update channel count and frequency
+	updateDaisy();
 }
 
 void CDriverOpenBCI::release(void)
@@ -77,12 +77,7 @@ const char* CDriverOpenBCI::getName(void)
 //___________________________________________________________________//
 //                                                                   //
 
-boolean CDriverOpenBCI::initialize(
-	const uint32 ui32SampleCountPerSentBlock,
-	IDriverCallback& rCallback)
-{
-	if(m_rDriverContext.isConnected()) { return false; }
-
+void  CDriverOpenBCI::updateDaisy() {
 	// change channel and sampling rate according to daisy module
 	if (m_bDaisyModule) {
 		m_oHeader.setSamplingFrequency(DefaultSamplingRate/2);
@@ -94,6 +89,16 @@ boolean CDriverOpenBCI::initialize(
 		m_oHeader.setChannelCount(EEGNbValuesPerSample+AccNbValuesPerSample);
 		std::cout << "NO daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)EEGNbValuesPerSample << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << std::endl;
 	}
+}
+
+boolean CDriverOpenBCI::initialize(
+	const uint32 ui32SampleCountPerSentBlock,
+	IDriverCallback& rCallback)
+{
+	if(m_rDriverContext.isConnected()) { return false; }
+
+	// change channel and sampling rate according to daisy module
+	updateDaisy();
 	
 	// init state
 	m_ui16Readstate=0;
@@ -232,6 +237,8 @@ boolean CDriverOpenBCI::configure(void)
 	m_bDaisyModule=m_oConfiguration.getDaisyModule();
 	m_oSettings.save();
 
+	updateDaisy();
+	
 	return true;
 }
 

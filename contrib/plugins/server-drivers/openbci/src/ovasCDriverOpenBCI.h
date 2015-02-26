@@ -64,7 +64,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::int32 readPacketFromTTY(::FD_TYPE i32FileDescriptor);
 		void closeTTY(::FD_TYPE i32FileDescriptor);
 		OpenViBE::boolean handleCurrentSample(OpenViBE::int32 packetNumber); // will take car of samples fetch from OpenBCI board, dropping/merging packets if necessary
-
+		void updateDaisy(); // update internal state regarding daisy module
+		
 	protected:
 
 		SettingsHelper m_oSettings;
