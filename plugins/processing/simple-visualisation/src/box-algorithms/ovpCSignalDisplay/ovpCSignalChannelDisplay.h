@@ -76,6 +76,9 @@ namespace OpenViBEPlugins
 		 */
 		void updateScale();
 
+		// Updates some drawing limits, i.e. to limit drawing to [chn_i,...,chn_j]
+		void updateLimits(void);
+
 		/**
 		 * \brief Reset list of channels displayed by this object
 		 */

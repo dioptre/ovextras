@@ -345,6 +345,8 @@ namespace OpenViBEPlugins
 					}
 				}
 
+				l_pMultiViewDisplay->updateLimits();
+
                 if(m_bShowLeftRulers == true)
                 {
                     ::gtk_widget_show(GTK_WIDGET(m_oLeftRulers[m_oChannelDisplay.size()-1]));
@@ -514,6 +516,8 @@ namespace OpenViBEPlugins
                     GTK_FILL, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),	0, 0);
                 ::gtk_widget_show(l_pChannelDisplay->getRulerWidget(i));
             }
+			l_pChannelDisplay->updateLimits();
+
             // attach display
             ::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
                         l_pChannelDisplay->getSignalDisplayWidget(),
@@ -1410,8 +1414,10 @@ namespace OpenViBEPlugins
 		{
 			CSignalDisplayView* l_pView = reinterpret_cast < CSignalDisplayView* >(data);
 
+			const float64 l_f64NewValue = ::gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+
 			//Compute and save the new number of buffers to display
-			boolean l_bNumberOfDisplayedBufferChanged = l_pView->m_pBufferDatabase->adjustNumberOfDisplayedBuffers(::gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget)));
+			boolean l_bNumberOfDisplayedBufferChanged = l_pView->m_pBufferDatabase->adjustNumberOfDisplayedBuffers(l_f64NewValue);
 
 			if(l_bNumberOfDisplayedBufferChanged)
 			{
