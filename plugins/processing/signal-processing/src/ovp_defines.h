@@ -59,6 +59,9 @@
 #define OVP_ClassId_BoxAlgorithm_Crop                                                  OpenViBE::CIdentifier(0x7F1A3002, 0x358117BA)
 #define OVP_ClassId_BoxAlgorithm_CropDesc                                              OpenViBE::CIdentifier(0x64D619D7, 0x26CC42C9)
 
+#define OVP_ClassId_BoxAlgorithm_MatrixTranspose                                       OpenViBE::CIdentifier(0x5E0F04B5, 0x5B5005CF)
+#define OVP_ClassId_BoxAlgorithm_MatrixTransposeDesc                                   OpenViBE::CIdentifier(0x119249F7, 0x556C7E0D)
+
 #define OVP_TypeId_SelectionMethod                         OpenViBE::CIdentifier(0x3BCF9E67, 0x0C23994D)
 #define OVP_TypeId_SelectionMethod_Select                  OpenViBE::CIdentifier(0x1970FAAF, 0x4FD1CC4D)
 #define OVP_TypeId_SelectionMethod_Reject                  OpenViBE::CIdentifier(0x4C05408D, 0x6EAC6F85)
