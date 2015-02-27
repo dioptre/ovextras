@@ -20,7 +20,6 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::NetworkIO;
 
-
 boolean CBoxAlgorithmLSLExport::initialize(void)
 {
 	m_pSignalOutlet = NULL;
@@ -32,7 +31,18 @@ boolean CBoxAlgorithmLSLExport::initialize(void)
 
 	m_sSignalStreamName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sMarkerStreamName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-	m_sIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+
+	// These are supposed to be unique, so we don't have them in the box config
+	m_sSignalStreamID = CIdentifier::random().toString();
+	m_sMarkerStreamID = CIdentifier::random().toString();
+
+	while(m_sMarkerStreamID == m_sSignalStreamID) // very unlikely
+	{
+		m_sMarkerStreamID = CIdentifier::random().toString();
+	}
+
+	this->getLogManager() << LogLevel_Trace << "Will create streams [" << m_sSignalStreamName << ", id " << m_sSignalStreamID << "] and ["
+		<< m_sMarkerStreamName << ", id " << m_sMarkerStreamID << "]\n";
 
 	return true;
 }
@@ -82,7 +92,7 @@ boolean CBoxAlgorithmLSLExport::process(void)
 	for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(0); j++)
 	{
 		m_oSignalDecoder.decode(j);
-		if(m_oSignalDecoder.isHeaderReceived())
+		if(m_oSignalDecoder.isHeaderReceived() && !m_pSignalOutlet)
 		{
 			const uint32 l_ui32ChannelCount = m_oSignalDecoder.getOutputMatrix()->getDimensionSize(0);
 			const uint32 l_ui32SamplesPerBlock = m_oSignalDecoder.getOutputMatrix()->getDimensionSize(1);
@@ -91,7 +101,7 @@ boolean CBoxAlgorithmLSLExport::process(void)
 			m_pSingleSampleBuffer = new float[l_ui32ChannelCount];
 
 			// Open a signal stream 
-			lsl::stream_info l_oSignalInfo(m_sSignalStreamName.toASCIIString(),"signal",l_ui32ChannelCount,l_ui32Frequency,lsl::cf_float32,m_sIdentifier.toASCIIString());
+			lsl::stream_info l_oSignalInfo(m_sSignalStreamName.toASCIIString(),"signal",l_ui32ChannelCount,l_ui32Frequency,lsl::cf_float32,m_sSignalStreamID.toASCIIString());
 
 			lsl::xml_element l_oChannels = l_oSignalInfo.desc().append_child("channels");
 			m_oSignalDecoder.getOutputMatrix()->getDimensionLabel(0,1);
@@ -106,12 +116,12 @@ boolean CBoxAlgorithmLSLExport::process(void)
 					.append_child_value("type","signal");
 			}
 
-
+#ifdef DEBUG
 			lsl::xml_element l_oDebug = l_oSignalInfo.desc().child("channels");
 			if(l_oDebug.child("channel").child_value("label")) {
-				std::cout << "poo " << l_oDebug.child("channel").child_value("label") << "\n";
+				std::cout << "channel label " << l_oDebug.child("channel").child_value("label") << "\n";
 			}
-
+#endif
 
 			// make a new outlet
 			try {
@@ -167,10 +177,10 @@ boolean CBoxAlgorithmLSLExport::process(void)
 	for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(1); j++)
 	{
 		m_oStimulationDecoder.decode(j);
-		if(m_oStimulationDecoder.isHeaderReceived())
+		if(m_oStimulationDecoder.isHeaderReceived() && !m_pStimulusOutlet)
 		{
 			// Open a stimulus stream
-			lsl::stream_info l_oStimulusInfo(m_sMarkerStreamName.toASCIIString(),"Markers",1,lsl::IRREGULAR_RATE,lsl::cf_int32,m_sIdentifier.toASCIIString());
+			lsl::stream_info l_oStimulusInfo(m_sMarkerStreamName.toASCIIString(),"Markers",1,lsl::IRREGULAR_RATE,lsl::cf_int32,m_sMarkerStreamID.toASCIIString());
 
 			l_oStimulusInfo.desc().append_child("channels")
 							.append_child("channel")

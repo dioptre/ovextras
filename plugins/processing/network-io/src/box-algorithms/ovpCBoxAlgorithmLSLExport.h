@@ -67,8 +67,9 @@ namespace OpenViBEPlugins
 			OpenViBE::float32* m_pSingleSampleBuffer;
 
 			OpenViBE::CString m_sSignalStreamName;
+			OpenViBE::CString m_sSignalStreamID;
 			OpenViBE::CString m_sMarkerStreamName;
-			OpenViBE::CString m_sIdentifier;
+			OpenViBE::CString m_sMarkerStreamID;
 		};
 
 		class CBoxAlgorithmLSLExportListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
@@ -115,7 +116,6 @@ namespace OpenViBEPlugins
 
 				rBoxAlgorithmPrototype.addSetting("Signal stream",     OV_TypeId_String, "openvibeSignal");
 				rBoxAlgorithmPrototype.addSetting("Marker stream",     OV_TypeId_String, "openvibeMarkers");
-				rBoxAlgorithmPrototype.addSetting("Stream identifier", OV_TypeId_String, "654321");
 
 				return true;
 			}

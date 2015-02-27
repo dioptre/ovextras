@@ -71,7 +71,9 @@ namespace OpenViBEAcquisitionServer
 		lsl::stream_inlet* m_pMarkerInlet;
 
 		OpenViBE::CString m_sSignalStream;
+		OpenViBE::CString m_sSignalStreamID;
 		OpenViBE::CString m_sMarkerStream;
+		OpenViBE::CString m_sMarkerStreamID;
 
 	};
 };
