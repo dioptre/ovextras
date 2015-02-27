@@ -241,16 +241,34 @@ boolean CDriverOpenBCI::configure(void)
 	
 	return true;
 }
-
+  
 // Convert EEG value format from int24 MSB (network order) to int32 host
+// TODO: check on big endian architecture
 int32 CDriverOpenBCI::interpret24bitAsInt32(std::vector < uint8 > byteBuffer) {
-	int32 newInt = (byteBuffer[2] << 16) | (byteBuffer[1] << 8) | byteBuffer[0];
-	// negative number if most significant > 128
-	if (byteBuffer[2] > 127) {
-		newInt |= 0xFF << 24; 
+	// create a big endian so that we could adapt to host architecture later on
+	int32 newInt = (byteBuffer[2] << 24) | (byteBuffer[1] << 16) | byteBuffer[0] << 8;
+	// depending on most significant byte, set positive or negative value
+	if ((newInt & 0x00008000) > 0) {
+		newInt |= 0x000000FF;
+	} else {
+		newInt &= 0xFFFFFF00;
 	}
-	// converts to host endianness on the fly
-	return ntohl(newInt);
+	// convert back from big endian (network order) to host
+	return htonl(newInt);
+}
+
+// Convert EEG value format from int16 MSB (network order) to int32 host
+int32 CDriverOpenBCI::interpret16bitAsInt32(std::vector < uint8 > byteBuffer) {
+	// create a big endian so that we could adapt to host architecture later on
+	int32 newInt = (byteBuffer[1] << 24) | byteBuffer[0] << 16;
+	// depending on most significant byte, set positive or negative value
+	if ((newInt & 0x00800000) > 0) {
+		newInt |= 0x0000FFFF;
+	} else {
+		newInt &= 0xFFFF0000;
+	}
+	// convert back from big endian (network order) to host
+	return htonl(newInt);
 }
 
 //___________________________________________________________________//
@@ -311,6 +329,7 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 					// reset for next value
 					m_ui8SampleBufferPosition = 0;
 					m_ui16ExtractPosition++;
+				
 				}
 			}
 			// finished with EEG
@@ -337,13 +356,9 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 					m_ui8SampleBufferPosition++;
 				}
 				// we got Acc value
-				if (m_ui8SampleBufferPosition == AccValueBufferSize) { 
-					// convert 2 bytes buffer to int16 (network order)
-					int16 accValue = m_vAccValueBuffer[1]<< 8;
-					accValue |= m_vAccValueBuffer[0];
-					accValue=ntohs(accValue);
-					// fill acc channel buffer
-					m_vSampleAccBuffer[m_ui16ExtractPosition] = accValue;
+				if (m_ui8SampleBufferPosition == AccValueBufferSize) {
+					// fill Acc channel buffer, converting at the same time from 16 to 32 bits
+					m_vSampleAccBuffer[m_ui16ExtractPosition] = interpret16bitAsInt32(m_vAccValueBuffer);
 					// reset for next value
 					m_ui8SampleBufferPosition = 0;
 					m_ui16ExtractPosition++;

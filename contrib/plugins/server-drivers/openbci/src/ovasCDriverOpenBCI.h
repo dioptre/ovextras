@@ -56,6 +56,7 @@ namespace OpenViBEAcquisitionServer
 	protected:
 
 		OpenViBE::int32 interpret24bitAsInt32(std::vector < OpenViBE::uint8 > byteBuffer);
+		OpenViBE::int32 interpret16bitAsInt32(std::vector < OpenViBE::uint8 > byteBuffer);
 		OpenViBE::int16 parseByteP2(OpenViBE::uint8 ui8Actbyte);
 		OpenViBE::boolean initTTY(::FD_TYPE * pFileDescriptor, OpenViBE::uint32 ui32TtyNumber);
 		
