@@ -274,7 +274,7 @@ int32 CDriverOpenBCI::interpret16bitAsInt32(std::vector < uint8 > byteBuffer) {
 //                                                                   //
 // return sample number once one is received (between 0 and 255, -1 if none)
 // NB: will wait to get footer and then header in a row, may miss a packet but will prevent a bad sync with stream (thx BrainBay for the tip!)
-OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
+OpenViBE::int16 CDriverOpenBCI::parseByte(uint8 ui8Actbyte)
 {
 	// finished to read sample or not
 	bool l_bSampleStatus = false;
@@ -796,7 +796,7 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 		if(l_ui32ReadOk==1)
 		{
 			// will have effect only if complete sample/packet
-			if (handleCurrentSample(this->parseByteP2(l_ui8ReadBuffer[0]))) {
+			if (handleCurrentSample(this->parseByte(l_ui8ReadBuffer[0]))) {
 				l_i32PacketsProcessed++;
 			}
 		}
@@ -833,7 +833,7 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 						for(l_ui32BytesProcessed=0; l_ui32BytesProcessed<l_ui32ReadLength; l_ui32BytesProcessed++)
 						{
 							// will have effect only if complete sample/packet
-							if (handleCurrentSample(this->parseByteP2(l_ui8ReadBuffer[l_ui32BytesProcessed]))) {
+							if (handleCurrentSample(this->parseByte(l_ui8ReadBuffer[l_ui32BytesProcessed]))) {
 								l_i32PacketsProcessed++;
 							}
 						}
