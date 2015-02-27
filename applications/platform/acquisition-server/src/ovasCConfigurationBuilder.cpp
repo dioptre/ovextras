@@ -98,12 +98,12 @@ CConfigurationBuilder::~CConfigurationBuilder(void)
 
 boolean CConfigurationBuilder::configure(IHeader& rHeader)
 {
-	m_bApplyConfiguration=false;
+	m_bApplyConfiguration=true;
 
 	m_pHeader=&rHeader;
-	this->preConfigure();
-	m_bApplyConfiguration=this->doConfigure();
-	this->postConfigure();
+	m_bApplyConfiguration &= this->preConfigure();
+	m_bApplyConfiguration &= this->doConfigure();
+	m_bApplyConfiguration &= this->postConfigure();
 	m_pHeader=NULL;
 
 	return m_bApplyConfiguration;
