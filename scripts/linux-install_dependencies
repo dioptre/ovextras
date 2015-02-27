@@ -931,12 +931,9 @@ ov_package_url_glade=$ov_gnome_mirror/sources/glade3/3.5/glade3-3.5.2.tar.bz2
 ov_package_url_itpp_external=http://openvibe.inria.fr/dependencies/linux-x86/itpp-external-3.0.0.tar.bz2
 ov_package_url_itpp=http://openvibe.inria.fr/dependencies/linux-x86/itpp-4.0.7.tar.bz2
 ov_package_url_gsl=$ov_gnu_mirror/gsl/gsl-1.9.tar.gz
-ov_package_url_torch=http://www.torch.ch/archives/Torch3src.tgz
-ov_package_url_bliff=http://www.irisa.fr/bunraku/OpenViBE/dependencies/src/bliff-src-16.tar.bz2
 
-# OpenMASK 4 related packages
+# Some GFX related packages
 ov_package_url_cmake=http://www.cmake.org/files/v2.8/cmake-2.8.7.tar.gz
-ov_package_url_obt=http://www.irisa.fr/bunraku/OpenViBE/dependencies/src/obt-src-22.tar.bz2
 ov_package_url_freeimage=$ov_sourceforge_mirror/freeimage/files/Source%20Distribution/3.11.0/FreeImage3110.zip
 ov_package_url_ois=$ov_sourceforge_mirror/wgois/files/Source%20Release/1.2/ois_1.2.0.tar.gz
 ov_package_url_zziplib=$ov_sourceforge_mirror/zziplib/files/zziplib10/0.10.82/zziplib-0.10.82.tar.bz2
@@ -949,9 +946,8 @@ ov_package_url_cegui=$ov_sourceforge_mirror/crayzedsgui/files/CEGUI%20Mk-2/0.7.1
 ov_package_url_ogre=$ov_sourceforge_mirror/ogre/files/ogre/1.7/ogre_src_v1-7-3.tar.bz2
 # ov_package_url_vrpn=ftp://ftp.cs.unc.edu/pub/packages/GRIP/vrpn/old_versions/vrpn_07_26.zip
 ov_package_url_vrpn=http://openvibe.inria.fr/dependencies/linux-x86/vrpn_07_31-ov.zip
-ov_package_url_openmask4=http://www.irisa.fr/bunraku/OpenViBE/dependencies/src/openmask4~dotsceneloader-src-164.tar.bz2
-ov_package_url_openmask4tutorial=http://www.irisa.fr/bunraku/OpenViBE/dependencies/src/openmask4-tutorial-src-164.tar.bz2
 
+# LabStreamingLayer
 ov_package_url_liblsl=http://openvibe.inria.fr/dependencies/linux-x86/liblsl-1.04-src.tar.bz2
 
 # Scripting packages
@@ -962,10 +958,6 @@ ov_package_url_swig=http://prdownloads.sourceforge.net/swig/swig-1.3.36.tar.gz
 
 ov_package_url_presage=$ov_sourceforge_mirror/presage/files/presage/0.8.9/presage-0.8.9.tar.gz
 ov_package_url_glfw=http://openvibe.inria.fr/dependencies/linux-x86/glfw-3.0.4.zip
-
-#svn://scm.gforge.inria.fr/svn/obt
-#svn://scm.gforge.inria.fr/svn/openmask4/OpenMASK
-#svn://scm.gforge.inria.fr/svn/openmask4/Tutorial
 
 ##############################################
 ##                                          ##
@@ -1032,12 +1024,9 @@ ov_package_archive_glade=`echo "$ov_package_url_glade" | $ov_sed 's#.*/##g'`
 ov_package_archive_itpp_external=`echo "$ov_package_url_itpp_external" | $ov_sed 's#.*/##g'`
 ov_package_archive_itpp=`echo "$ov_package_url_itpp" | $ov_sed 's#.*/##g'`
 ov_package_archive_gsl=`echo "$ov_package_url_gsl" | $ov_sed 's#.*/##g'`
-ov_package_archive_torch=`echo "$ov_package_url_torch" | $ov_sed 's#.*/##g'`
-ov_package_archive_bliff=`echo "$ov_package_url_bliff" | $ov_sed 's#.*/##g'`
 
-# OpenMASK 4 related packages
+# GFX related packages
 ov_package_archive_cmake=`echo "$ov_package_url_cmake" | $ov_sed 's#.*/##g'`
-ov_package_archive_obt=`echo "$ov_package_url_obt" | $ov_sed 's#.*/##g'`
 ov_package_archive_freeimage=`echo "$ov_package_url_freeimage" | $ov_sed 's#.*/##g'`
 ov_package_archive_ois=`echo "$ov_package_url_ois" | $ov_sed 's#.*/##g'`
 ov_package_archive_zziplib=`echo "$ov_package_url_zziplib" git repo-config core.sharedRepository true| $ov_sed 's#.*/##g'`
@@ -1045,9 +1034,8 @@ ov_package_archive_cg=`echo "$ov_package_url_cg" | $ov_sed 's#.*/##g'`
 ov_package_archive_cegui=`echo "$ov_package_url_cegui" | $ov_sed 's#.*/##g'`
 ov_package_archive_ogre=`echo "$ov_package_url_ogre" | $ov_sed 's#.*/##g'`
 ov_package_archive_vrpn=`echo "$ov_package_url_vrpn" | $ov_sed 's#.*/##g'`
-ov_package_archive_openmask4=`echo "$ov_package_url_openmask4" | $ov_sed 's#.*/##g'`
-ov_package_archive_openmask4tutorial=`echo "$ov_package_url_openmask4tutorial" | $ov_sed 's#.*/##g'`
 
+# LabStreamingLayer
 ov_package_archive_liblsl=`echo "$ov_package_url_liblsl" | $ov_sed 's#.*/##g'`
 
 # Scripting packages
@@ -1162,58 +1150,6 @@ ov_package_install_hook_glfw='
 	make install &&
 	popd'
 
-
-if [ "$ov_machine" == "x86_64" ]; then
-ov_package_configure_hook_torch='
-	pushd * &&
-	$ov_sed -i "263s#else#//else#g" kernels/QCTrainer.cc&&
-	$ov_sed -i "s#print#//print#g" kernels/QCTrainer.cc &&
-	$ov_sed -i "s#message(#//message(#g" kernels/QCTrainer.cc &&
-	$ov_sed -i "s#message(#//message(#g" kernels/SVMCache.cc &&
-	$ov_sed -i "s#message(#//message(#g" core/TwoClassFormat.cc &&
-	$ov_sed -i "s#message(#//message(#g" core/MultiClassFormat.cc &&
-	$ov_sed -i "s#message(#//message(#g" core/OneHotClassFormat.cc &&
-	$ov_sed -i "s/PACKAGES = /PACKAGES = gradients kernels distributions/g" config/Makefile_options_Linux &&
-	$ov_sed -i "s/-march=i686//g" config/Makefile_options_Linux &&
-	$ov_sed -i "s/-mcpu=i686/-mtune=generic/g" config/Makefile_options_Linux &&
-	$ov_sed -i "s/-malign-double//g" config/Makefile_options_Linux &&
-	ln -s config/Makefile_options_Linux &&
-	make depend &&
-	popd'
-else
-ov_package_configure_hook_torch='
-	pushd * &&
-	ln -s config/Makefile_options_Linux &&
-	make depend &&
-	popd'
-fi;
-ov_package_install_hook_torch='
-	pushd * &&
-	find -name *.h -type f -exec cp -f "{}" ../../include \; &&
-	find -name *.a -type f -exec cp -f "{}" ../../lib \; &&
-	cp Makefile_options_Linux ../.. &&
-	popd'
-
-ov_package_configure_hook_bliff='
-	pushd * &&
-	$ov_sed -i "1iITPP_HOME=$ov_target_folder" Makefile &&
-	$ov_sed -i "1iTORCH_HOME=$ov_target_folder" Makefile &&
-	$ov_sed -i "1iGSL_HOME=$ov_target_folder" Makefile &&
-	$ov_sed -i "1iBOOST_INCLUDE=$ov_target_folder/include/boost-1_36" Makefile &&
-	$ov_sed -i "s/CFLAGS =/CFLAGS = -fPIC/g" Makefile &&
-	$ov_sed -i "s/iostream\.h/iostream/g" include/*.h src/*.inl src/*.cpp &&
-	$ov_sed -i "s/vector\.h/vector/g" include/*.h src/*.inl src/*.cpp &&
-	$ov_sed -i "3i#include <iostream>" include/*.h &&
-	$ov_sed -i "4i#include <algorithm>" include/*.h &&
-	$ov_sed -i "5iusing namespace std;" include/*.h &&
-	popd'
-ov_package_install_hook_bliff='
-	pushd * &&
-	chmod a-x include/*.h &&
-	cp include/*.h ../../include &&
-	cp lib/*.a ../../lib &&
-	popd'
-
 ov_package_configure_hook_cg='
 	$ov_true'
 ov_package_make_hook_cg='
@@ -1228,13 +1164,6 @@ ov_package_pre_configure_hook_zziplib='
 ov_package_post_configure_hook_zziplib='
 	pushd * &&
 	$ov_sed -i "76s/(char \*)hdr/hdr/" bins/zziptest.c &&
-	popd'
-
-# $ov_sed -i "s/_disable( false )/_disable( true )/g" Source/OBTTrace.cpp &&
-#  -DCMAKE_BUILD_TYPE=Release
-ov_package_configure_hook_obt='
-	pushd * &&
-	cmake . -DINSTALLPREFIX:PATH=$ov_target_folder &&
 	popd'
 
 # http://sourceforge.net/forum/forum.php?thread_id=1751867&forum_id=36109
@@ -1363,26 +1292,6 @@ ov_package_install_hook_vrpn='
 	cp vrpn/quat/*.h vrpn/*.h ../include &&
 	cp vrpn/quat/pc_linux/*.a vrpn/pc_linux/*.a ../lib'
 fi;
-
-ov_package_configure_hook_openmask4='
-	pushd * &&
-	$ov_sed -i "4s/^/ADD_DEFINITIONS(-pthread)\nSET(CMAKE_VERBOSE_MAKEFILE 1)\nFIND_LIBRARY(LIB_STANDARD_MODULE_PTHREAD pthread)\nLINK_LIBRARIES(\$\{LIB_STANDARD_MODULE_PTHREAD\})/g" CMakeLists.txt &&
-	$ov_sed -i "s/, _tNode/, this->Animator::_tNode/g" Source/Vis/Source/OMKOgreAnimatorT.h &&
-	cmake . -DINSTALLPREFIX:PATH=$ov_target_folder -DCMAKE_BUILD_TYPE=Release &&
-	popd'
-#	$ov_sed -i "s/numKeyboard/numKeyBoard/g" Source/Inputs/Source/OMKInputExtension.cpp &&
-#	$ov_sed -i "s/numJoySticks/numJoysticks/g" Source/Inputs/Source/OMKInputExtension.cpp &&
-
-ov_package_configure_hook_openmask4tutorial='
-	pushd * &&
-	$ov_sed -i "7s/^/ADD_DEFINITIONS(-pthread)\nSET(CMAKE_VERBOSE_MAKEFILE 1)\nFIND_LIBRARY(LIB_STANDARD_MODULE_PTHREAD pthread)\nLINK_LIBRARIES(${LIB_STANDARD_MODULE_PTHREAD})/g" CMakeLists.txt &&
-	cmake . -DCMAKE_BUILD_TYPE=Release &&
-	$ov_sed -i "s/ -fPIC//g" Source/CMakeFiles/OMKPlugin_Tuto.dir/*.* &&
-	$ov_sed -i "s#lib\" \"\([a-zA-Z_]*\)#lib/lib\1.so#g" *.OpenMASK3 &&
-	popd'
-ov_package_install_hook_openmask4tutorial='
-	pushd * &&
-	popd'
 
 ov_package_configure_hook_liblsl='
 	pushd * &&
@@ -1516,7 +1425,7 @@ fi;
 	ov_install_package "itpp_external"
 	ov_install_package "itpp"
 
-	# OpenMASK 4 related packages
+	# Graphics packages
 	ov_install_package "freeimage"
 	ov_install_package "ois"
 	ov_install_package "zziplib"
@@ -1527,15 +1436,7 @@ fi;
 	# Lab Streaming Layer, this is an optional dependence that enables LSL output plugin
 	ov_install_package "liblsl"
 	
-# If you want BLiFF++
-# ov_install_package "gsl"
-# ov_install_package "torch"
-# ov_install_package "bliff"
-
 ov_install_package "vrpn"
-# ov_install_package "obt"
-
-
 
 # Scripting packages
 #ov_install_package "readline"

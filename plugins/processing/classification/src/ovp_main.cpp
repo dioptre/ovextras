@@ -19,9 +19,6 @@
 #include "box-algorithms/ovpCBoxAlgorithmClassifierProcessor.h"
 #include "box-algorithms/ovpCBoxAlgorithmConfusionMatrix.h"
 
-#include "box-algorithms/deprecated/ovpCBoxAlgorithmClassifierProcessorDeprecated.h"
-#include "box-algorithms/deprecated/ovpCBoxAlgorithmClassifierTrainerDeprecated.h"
-
 #if defined TARGET_HAS_ThirdPartyEIGEN
 #include "algorithms/ovpCAlgorithmConditionedCovariance.h"
 #include "algorithms/ovpCAlgorithmClassifierLDA.h"
@@ -78,11 +75,6 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmPairwiseDecisionHTDesc);
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ClassificationPairwiseStrategy, "HT", OVP_ClassId_Algorithm_PairwiseDecision_HT.toUInteger());
 
-
-	//Deprecated trainer/processos boxes
-	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorDeprecatedDesc);
-	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierTrainerDeprecatedDesc);
-	
 #if defined TARGET_HAS_ThirdPartyEIGEN
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmConditionedCovarianceDesc);
 

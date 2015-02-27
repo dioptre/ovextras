@@ -67,7 +67,7 @@ boolean CConfigurationLabStreamingLayer::preConfigure(void)
 	boolean l_bExactSignalMatch = false; 	// If we can match both name and ID, stop at that. Otherwise we auto-accept the 'name only' match.
 	boolean l_bExactMarkerMatch = false;
 
-	m_rDriverContext.getLogManager() << LogLevel_Trace << "Discovered " << m_vStreams.size() << " streams in total\n";
+	m_rDriverContext.getLogManager() << LogLevel_Trace << "Discovered " << static_cast<uint64>(m_vStreams.size()) << " streams in total\n";
 
 	for(uint32 i=0; i<m_vStreams.size(); i++)
 	{
