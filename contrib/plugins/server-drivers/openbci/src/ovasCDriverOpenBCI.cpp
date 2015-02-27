@@ -172,9 +172,7 @@ boolean CDriverOpenBCI::loop(void)
 			{
 				for(uint32 j=0; j<m_ui32ChannelCount; j++)
 				{
-					// convert value to microvolt
-					// TODO: check scale + depend of gain
-					m_pSample[j]= (float32)m_vChannelBuffer[i][j] * ScaleFacuVoltsPerCount;
+					m_pSample[j]= m_vChannelBuffer[i][j];
 				}
 				m_pCallback->setSamples(m_pSample, 1);
 			}
@@ -324,8 +322,9 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 				// we got EEG value
 				if (m_ui8SampleBufferPosition == EEGValueBufferSize)
 				{
-					// fill EEG channel buffer, converting at the same time from 24 to 32 bits
-					m_vSampleEEGBuffer[m_ui16ExtractPosition] = interpret24bitAsInt32(m_vEEGValueBuffer);
+					// fill EEG channel buffer, converting at the same time from 24 to 32 bits + scaling
+					// TODO: scale depends on gain
+					m_vSampleEEGBuffer[m_ui16ExtractPosition] = interpret24bitAsInt32(m_vEEGValueBuffer)*ScaleFacuVoltsPerCount;
 					// reset for next value
 					m_ui8SampleBufferPosition = 0;
 					m_ui16ExtractPosition++;
@@ -700,7 +699,7 @@ void CDriverOpenBCI::closeTTY(::FD_TYPE i32FileDescriptor)
 #endif
 }
 
-// update internal state (lastPacket, number of packet processed, etc.)
+// update internal state (lastPacket, number of packet processed, etc.).
 // returns true if a new sample is created
 bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 	bool l_bSampleOK = false; // true if a sample is added to m_vChannelBuffer
@@ -715,7 +714,7 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 		// no daisy module: push directly values
 		if (!m_bDaisyModule) {
 			// concatenate EEG and Acc
-			std::vector < int32 > l_vSampleBuffer;
+			std::vector < float32 > l_vSampleBuffer;
 			l_vSampleBuffer.reserve(m_vSampleEEGBuffer.size() + m_vSampleAccBuffer.size());
 			l_vSampleBuffer.insert(l_vSampleBuffer.end(), m_vSampleEEGBuffer.begin(), m_vSampleEEGBuffer.end());
 			l_vSampleBuffer.insert(l_vSampleBuffer.end(), m_vSampleAccBuffer.begin(), m_vSampleAccBuffer.end());
@@ -730,13 +729,13 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 				// won't concatenate if there was packet drop
 				if ((m_i16LastPacketNumber + 1) % 256 ==  packetNumber) {
 					// Average Acc values between daisy and current sample, as on the board EEG were averaged
-					std::vector < int32 > l_AccAvgBuffer;
+					std::vector < float32 > l_AccAvgBuffer;
 					l_AccAvgBuffer.resize(m_vSampleAccBuffer.size());
 					for (size_t i = 0; i < l_AccAvgBuffer.size(); i++) {
 						l_AccAvgBuffer[i] = (m_vSampleAccBuffer[i] + m_vSampleAccBufferDaisy[i]) / 2;
 					}
 					// Concatenate EEG values and averaged Acc
-					std::vector < int32 > l_vSampleBuffer;
+					std::vector < float32 > l_vSampleBuffer;
 					l_vSampleBuffer.reserve(2*m_vSampleEEGBuffer.size() + m_vSampleAccBuffer.size());
 					l_vSampleBuffer.insert(l_vSampleBuffer.end(), m_vSampleEEGBuffer.begin(), m_vSampleEEGBuffer.end());
 					l_vSampleBuffer.insert(l_vSampleBuffer.end(), m_vSampleEEGBufferDaisy.begin(), m_vSampleEEGBufferDaisy.end());
