@@ -105,6 +105,7 @@ boolean CDriverOpenBCI::initialize(
 	m_ui16ExtractPosition=0;
 	m_i16SampleNumber  = -1;
 	m_ui16ExtractPosition = 0;
+	m_bSeenPacketFooter = true; // let's say we will start with header
 
 	if(!this->initTTY(&m_i32FileDescriptor, m_ui32DeviceIdentifier!=uint32(-1)?m_ui32DeviceIdentifier:1))
 	{
@@ -272,6 +273,7 @@ int32 CDriverOpenBCI::interpret16bitAsInt32(std::vector < uint8 > byteBuffer) {
 //___________________________________________________________________//
 //                                                                   //
 // return sample number once one is received (between 0 and 255, -1 if none)
+// NB: will wait to get footer and then header in a row, may miss a packet but will prevent a bad sync with stream (thx BrainBay for the tip!)
 OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 {
 	// finished to read sample or not
@@ -281,13 +283,15 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 	{
 		case 0:
 			// if first byte is not the one expected, won't go further
-			if(ui8Actbyte==0xA0)
-			{
-				m_ui16Readstate++;
+			if(ui8Actbyte==SAMPLE_STOP_BYTE) {
+				m_bSeenPacketFooter = true;
 			}
-			else
-			{
-				m_ui16Readstate=0;
+			else {
+				if(ui8Actbyte==SAMPLE_START_BYTE && m_bSeenPacketFooter)
+				{
+					m_ui16Readstate++;
+				}
+				m_bSeenPacketFooter = false;
 			}
 			// reset sample info
 			m_i16SampleNumber  = -1;
@@ -372,10 +376,12 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 		// footer: Byte 33: 0xC0
 		case 4:
 			// expected footer: perfect, returns sample number
-			if(ui8Actbyte==0xC0)
+			if(ui8Actbyte==SAMPLE_STOP_BYTE)
 			{
 				// we shall pass
 				l_bSampleStatus = true;
+				// we're ockay for next time
+				m_bSeenPacketFooter = true;
 			}
 			// if last byte is not the one expected, discard whole sample
 			else
@@ -386,6 +392,11 @@ OpenViBE::int16 CDriverOpenBCI::parseByteP2(uint8 ui8Actbyte)
 			break;
 		// uh-oh, should not be there
 		default:
+			if(ui8Actbyte==SAMPLE_STOP_BYTE)
+			{
+				// we're ockay for next time
+				m_bSeenPacketFooter = true;
+			}
 			m_ui16Readstate = 0;
 			break;
 	}

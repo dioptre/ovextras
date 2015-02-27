@@ -23,6 +23,10 @@
 // wait a little before before new writings are initiated (ms)
 #define SLEEP_BEFORE_WRITE 500
 
+// start and stop bytes from OpenBCI protocl
+#define SAMPLE_START_BYTE 0xA0
+#define SAMPLE_STOP_BYTE 0xC0
+ 
 namespace OpenViBEAcquisitionServer
 {
 	class CDriverOpenBCI : public OpenViBEAcquisitionServer::IDriver
@@ -109,6 +113,8 @@ namespace OpenViBEAcquisitionServer
 		// buffers to store & merge daisy samples
 		std::vector < OpenViBE::float32 > m_vSampleEEGBufferDaisy; 
 		std::vector < OpenViBE::float32 > m_vSampleAccBufferDaisy;
+		
+		bool m_bSeenPacketFooter; // extra precaution to sync packets
 
 		OpenViBE::CString m_sTTYName;
 	};
