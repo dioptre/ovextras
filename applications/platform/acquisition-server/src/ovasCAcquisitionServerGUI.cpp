@@ -326,8 +326,10 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 	vector<IDriver*>::iterator itDriver;
 	for(itDriver=m_vDriver.begin(); itDriver!=m_vDriver.end(); itDriver++)
 	{
+		m_rKernelContext.getLogManager() << LogLevel_Debug << "Deleting " << (*itDriver)->getName() << "\n";
 		delete (*itDriver);
 	}
+
 	m_vDriver.clear();
 	m_pDriver=NULL;
 

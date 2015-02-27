@@ -43,13 +43,13 @@ CDriverEnobio3G::CDriverEnobio3G(IDriverContext& rDriverContext)
 
 CDriverEnobio3G::~CDriverEnobio3G(void)
 {
+	// Note: Device itself is closed in uninitialize()
 
 	if(m_pSample!=NULL)
 	{
 		delete m_pSample;
 	}
 	delete m_macAddress;
-	m_enobioDevice.closeDevice();
 }
 
 const char* CDriverEnobio3G::getName(void)
