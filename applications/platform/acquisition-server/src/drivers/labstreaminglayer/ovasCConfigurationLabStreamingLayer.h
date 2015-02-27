@@ -25,7 +25,9 @@ namespace OpenViBEAcquisitionServer
 		CConfigurationLabStreamingLayer(OpenViBEAcquisitionServer::IDriverContext& rDriverContext, const char* sGtkBuilderFileName, 
 			OpenViBEAcquisitionServer::IHeader& rHeader,
 			OpenViBE::CString& rSignalStream,
-			OpenViBE::CString& rMarkerStream);
+			OpenViBE::CString& rSignalStreamID,
+			OpenViBE::CString& rMarkerStream,
+			OpenViBE::CString& rMarkerStreamID);
 
 		virtual OpenViBE::boolean preConfigure(void);
 		virtual OpenViBE::boolean postConfigure(void);
@@ -39,8 +41,13 @@ namespace OpenViBEAcquisitionServer
 		OpenViBEAcquisitionServer::IHeader& m_rHeader;
 
 		OpenViBE::CString& m_rSignalStream;
+		OpenViBE::CString& m_rSignalStreamID;
 		OpenViBE::CString& m_rMarkerStream;
+		OpenViBE::CString& m_rMarkerStreamID;
 
+		std::vector<lsl::stream_info> m_vStreams;
+		std::vector<OpenViBE::int32> m_vSignalIndex;
+		std::vector<OpenViBE::int32> m_vMarkerIndex;
 	};
 };
 

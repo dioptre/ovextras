@@ -20,7 +20,7 @@
  *
  * Other notes: Due to network delays, it may be better to disable drift correction or
  * set the drift tolerance to high. This is because
- *	1) Signals are assumed dense, i.e. LSL pull results in stimuli stamped t,t+1,t+2,...
+ *	1) Signals are assumed dense, i.e. LSL pull results in samples stamped t,t+1,t+2,...
  *  2) However, Acquisition Server works in real time, so if there is a network delay between 
  *     the samples stamped t and t+1, this delay does not indicate a delay in the original signal
  *     and it might not be correct to pad the corresponding signal block during the delay.
@@ -73,7 +73,9 @@ CDriverLabStreamingLayer::CDriverLabStreamingLayer(IDriverContext& rDriverContex
 	m_oSettings.add("Header", &m_oHeader);
 	// To save your custom driver settings, register each variable to the SettingsHelper
 	m_oSettings.add("SignalStreamName", &m_sSignalStream);
+	m_oSettings.add("SignalStreamID",   &m_sSignalStreamID);
 	m_oSettings.add("MarkerStreamName", &m_sMarkerStream);
+	m_oSettings.add("MarkerStreamID",   &m_sMarkerStreamID);
 	m_oSettings.load();	
 }
 
@@ -95,21 +97,41 @@ boolean CDriverLabStreamingLayer::initialize(
 {
 	if(m_rDriverContext.isConnected()) return false;
 
-	std::vector<lsl::stream_info> l_vStreams = lsl::resolve_stream("name", m_sSignalStream.toASCIIString(), 1, g_LSL_resolveTimeOut);
+	// Find the signal stream
+	const std::vector<lsl::stream_info> l_vStreams = lsl::resolve_stream("name", m_sSignalStream.toASCIIString(), 1, g_LSL_resolveTimeOut);
 	if(!l_vStreams.size()) {
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Error opening signal stream with name [" << m_sSignalStream.toASCIIString() << "]\n";
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Error resolving signal stream with name [" << m_sSignalStream.toASCIIString() << "]\n";
 		return false;
 	}
-	m_oSignalStream = l_vStreams[0];
-
-	if(m_sMarkerStream!=CString(""))
+	for(uint32 i=0;i<l_vStreams.size();i++)
 	{
-		std::vector<lsl::stream_info> l_vMarkerStreams = lsl::resolve_stream("name", m_sMarkerStream.toASCIIString(), 1, g_LSL_resolveTimeOut);
+		m_oSignalStream = l_vStreams[i];
+		if(l_vStreams[i].source_id() == std::string(m_sSignalStreamID.toASCIIString()))
+		{
+			// This is the best one
+			break;
+		}
+		m_rDriverContext.getLogManager() << LogLevel_Trace << "Finally resolved signal stream to " << m_oSignalStream.name().c_str() << ", id " << m_oSignalStream.source_id().c_str() << "\n";
+	}
+
+	// Find the marker stream
+	if(m_sMarkerStream!=CString("None"))
+	{
+		const std::vector<lsl::stream_info> l_vMarkerStreams = lsl::resolve_stream("name", m_sMarkerStream.toASCIIString(), 1, g_LSL_resolveTimeOut);
 		if(!l_vMarkerStreams.size()) {
-			m_rDriverContext.getLogManager() << LogLevel_Error <<  "Error opening marker stream with name [" << m_sMarkerStream.toASCIIString() << "]\n";
+			m_rDriverContext.getLogManager() << LogLevel_Error <<  "Error resolving marker stream with name [" << m_sMarkerStream.toASCIIString() << "]\n";
 			return false;
 		}
-		m_oMarkerStream = l_vMarkerStreams[0];
+		for(uint32 i=0;i<l_vMarkerStreams.size();i++)
+		{
+			m_oMarkerStream = l_vMarkerStreams[i];
+			if(l_vMarkerStreams[i].source_id() == std::string(m_sMarkerStreamID.toASCIIString()))
+			{
+				// This is the best one
+				break;
+			}
+		}
+		m_rDriverContext.getLogManager() << LogLevel_Trace << "Finally resolved marker stream to " << m_oMarkerStream.name().c_str() << ", id " << m_oMarkerStream.source_id().c_str() << "\n";
 	} else {
 		// We do not have a marker stream. This is ok.
 	}
@@ -194,7 +216,7 @@ boolean CDriverLabStreamingLayer::start(void)
 		return false;
 	}
 
-	if(m_sMarkerStream!=CString("")) 
+	if(m_sMarkerStream!=CString("None")) 
 	{
 		m_pMarkerInlet = new lsl::stream_inlet(m_oMarkerStream, 360, 0, false);
 		if(!m_pMarkerInlet)
@@ -396,7 +418,9 @@ boolean CDriverLabStreamingLayer::configure(void)
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-LabStreamingLayer.ui",
 		m_oHeader,
 		m_sSignalStream,
-		m_sMarkerStream);
+		m_sSignalStreamID,
+		m_sMarkerStream,
+		m_sMarkerStreamID);
 	
 	if(!m_oConfiguration.configure(m_oHeader))
 	{

@@ -28,11 +28,10 @@ using namespace OpenViBEAcquisitionServerPlugins;
 using namespace std;
 
 CPluginLSLOutput::CPluginLSLOutput(const IKernelContext& rKernelContext) :
-	IAcquisitionServerPlugin(rKernelContext, CString("AcquisitionServer_Plugin_LSLOutput")),
+	IAcquisitionServerPlugin(rKernelContext, CString("AcquisitionServer_Plugin_LabStreamingLayerOutput")),
 	m_bIsLSLOutputEnabled(false),
 	m_sSignalStreamName("openvibeSignal"),
 	m_sMarkerStreamName("openvibeMarkers"),
-	m_sIdentifier("123456"),
 	m_oSignalOutlet(NULL),
 	m_oStimulusOutlet(NULL),
 	m_ui32SampleCountPerSentBlock(0)
@@ -42,8 +41,16 @@ CPluginLSLOutput::CPluginLSLOutput(const IKernelContext& rKernelContext) :
 	m_oSettingsHelper.add("LSL_EnableLSLOutput",  &m_bIsLSLOutputEnabled);
 	m_oSettingsHelper.add("LSL_SignalStreamName", &m_sSignalStreamName);
 	m_oSettingsHelper.add("LSL_MarkerStreamName", &m_sMarkerStreamName);
-	m_oSettingsHelper.add("LSL_Identifier",       &m_sIdentifier);
 	m_oSettingsHelper.load();
+
+	// These are not saved or loaded from .conf as they are supposed to be unique
+	m_sSignalStreamID = CIdentifier::random().toString();
+	m_sMarkerStreamID = CIdentifier::random().toString();
+
+	while(m_sMarkerStreamID == m_sSignalStreamID) // very unlikely
+	{
+		m_sMarkerStreamID = CIdentifier::random().toString();
+	}
 
 }
 
@@ -71,8 +78,11 @@ void CPluginLSLOutput::startHook(const std::vector<OpenViBE::CString>& vSelected
 
 	if (m_bIsLSLOutputEnabled)
 	{
+		m_rKernelContext.getLogManager() << LogLevel_Trace << "Will create streams [" << m_sSignalStreamName << ", id " << m_sSignalStreamID << "] and ["
+			<< m_sMarkerStreamName << ", id " << m_sMarkerStreamID << "]\n";
+
 		// Open a signal stream 
-		lsl::stream_info l_oSignalInfo(m_sSignalStreamName.toASCIIString(),"signal",ui32ChannelCount,ui32SamplingFrequency,lsl::cf_float32,m_sIdentifier.toASCIIString());
+		lsl::stream_info l_oSignalInfo(m_sSignalStreamName.toASCIIString(),"signal",ui32ChannelCount,ui32SamplingFrequency,lsl::cf_float32,m_sSignalStreamID.toASCIIString());
 
 		lsl::xml_element l_oChannels = l_oSignalInfo.desc().append_child("channels");
 
@@ -88,7 +98,7 @@ void CPluginLSLOutput::startHook(const std::vector<OpenViBE::CString>& vSelected
 		m_oSignalOutlet = new lsl::stream_outlet(l_oSignalInfo, m_ui32SampleCountPerSentBlock);
 
 		// Open a stimulus stream
-		lsl::stream_info l_oStimulusInfo(m_sMarkerStreamName.toASCIIString(),"Markers",1,lsl::IRREGULAR_RATE,lsl::cf_int32,m_sIdentifier.toASCIIString());
+		lsl::stream_info l_oStimulusInfo(m_sMarkerStreamName.toASCIIString(),"Markers",1,lsl::IRREGULAR_RATE,lsl::cf_int32,m_sMarkerStreamID.toASCIIString());
 
 		l_oStimulusInfo.desc().append_child("channels")
 						.append_child("channel")
@@ -100,8 +110,7 @@ void CPluginLSLOutput::startHook(const std::vector<OpenViBE::CString>& vSelected
 		m_rKernelContext.getLogManager() << LogLevel_Info << "LSL Output activated...\n";
 	}
 
-	// m_rKernelContext.getLogManager() << LogLevel_Info << "Step from sampling rate is " << 1.0 / static_cast<float64>(ui32SamplingFrequency) << "\n";
-
+	// m_rKernelContext.getLogManager() << LogLevel_Trace << "Step from sampling rate is " << 1.0 / static_cast<float64>(ui32SamplingFrequency) << "\n";
 
 }
 

@@ -36,8 +36,10 @@ namespace OpenViBEAcquisitionServer
 
 				OpenViBE::boolean m_bIsLSLOutputEnabled;
 				OpenViBE::CString m_sSignalStreamName;
+				OpenViBE::CString m_sSignalStreamID;
 				OpenViBE::CString m_sMarkerStreamName;
-				OpenViBE::CString m_sIdentifier;
+				OpenViBE::CString m_sMarkerStreamID;
+
 
 			private:
 				lsl::stream_outlet* m_oSignalOutlet;

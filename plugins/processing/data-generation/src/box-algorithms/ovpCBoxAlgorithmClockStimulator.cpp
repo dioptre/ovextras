@@ -72,7 +72,7 @@ boolean CBoxAlgorithmClockStimulator::process(void)
 		l_oStimulationSet.appendStimulation(m_ui64StimulationId, m_ui64LastStimulationDate, 0);
 	}
 
-	if(m_ui64LastEndTime==0)
+	if(l_ui64CurrentTime==0)
 	{
 		m_oStimulationEncoder.encodeHeader();
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastEndTime, m_ui64LastEndTime);
