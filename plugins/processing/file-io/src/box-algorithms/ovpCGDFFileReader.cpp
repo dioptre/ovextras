@@ -686,6 +686,7 @@ void CGDFFileReader::writeEvents()
 	}
 
 	m_pStimulationEncoder->encodeBuffer();
+	l_pStimulationSet->clear();
 	//m_pStimulationOutputWriterHelper->writeBuffer(*m_pWriter[GDFReader_StimulationOutput]);
 }
 

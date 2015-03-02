@@ -242,7 +242,7 @@ boolean CGDFFileWriter::uninitialize()
 	if(m_vSampleCount.size() != 0)
 	{
 		m_oFixedHeader.m_i64NumberOfDataRecords=m_vSampleCount[0];
-		this->getLogManager() << LogLevel_Fatal << "Saving " << m_vSampleCount[0] << " data records\n";
+		this->getLogManager() << LogLevel_Trace << "Saving " << m_vSampleCount[0] << " data records\n";
 	}
 
 	if(m_oFixedHeader.update(m_oFile))
