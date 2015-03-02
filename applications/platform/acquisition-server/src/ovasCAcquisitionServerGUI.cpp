@@ -205,36 +205,6 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 
 	scanPluginSettings();
 
-#ifdef OV_BOOST_SETTINGS
-	// Load plugin settings
-
-	for (size_t setting_index = 0; setting_index < m_vPluginSettings.size(); ++setting_index)
-	{
-		PluginSetting* l_pCurrentSetting = m_vPluginSettings[setting_index].setting_ptr;
-
-		if (m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(m_vPluginSettings[setting_index].unique_name) != OV_UndefinedIdentifier)
-		{
-			CString l_sConfigurationNameExpression = CString("${" + m_vPluginSettings[setting_index].unique_name + "}");
-
-			if (l_pCurrentSetting->type == OVTK_TypeId_Boolean)
-			{
-				l_pCurrentSetting->value = m_rKernelContext.getConfigurationManager().expandAsBoolean(l_sConfigurationNameExpression);
-			}
-			else if (l_pCurrentSetting->type == OVTK_TypeId_Integer)
-			{
-				l_pCurrentSetting->value = m_rKernelContext.getConfigurationManager().expandAsInteger(l_sConfigurationNameExpression);
-			}
-			else if (l_pCurrentSetting->type == OVTK_TypeId_String)
-			{
-				l_pCurrentSetting->value = m_rKernelContext.getConfigurationManager().expand(l_sConfigurationNameExpression);
-			}
-			else
-			{
-				// in the case where no valid type is defined we do nothing
-			}
-		}
-	}
-#endif
 	m_pAcquisitionServerThread=new CAcquisitionServerThread(m_rKernelContext, *this, *m_pAcquisitionServer);
 
 	// Initialize GTK objects as the thread started below may refer to them quickly
@@ -294,31 +264,6 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 
 			::fprintf(l_pFile, "%s = %s\n", l_vTokens[i].c_str(), tokenValue.toASCIIString());
 		}
-
-#ifdef OV_BOOST_SETTINGS
-		::fprintf(l_pFile, "# Settings for server plugins\n");
-		for (size_t setting_index = 0; setting_index < m_vPluginSettings.size(); ++setting_index)
-		{
-			PluginSetting* l_pCurrentSetting = m_vPluginSettings[setting_index].setting_ptr;
-
-			if (l_pCurrentSetting->type == OVTK_TypeId_Boolean)
-			{
-				::fprintf(l_pFile, m_vPluginSettings[setting_index].unique_name + " = %s\n", l_pCurrentSetting->getValue<bool>() ? "True" : "False");
-			}
-			else if (l_pCurrentSetting->type == OVTK_TypeId_Integer)
-			{
-				::fprintf(l_pFile, m_vPluginSettings[setting_index].unique_name + " = %llu\n", l_pCurrentSetting->getValue<int64>());
-			}
-			else if (l_pCurrentSetting->type == OVTK_TypeId_String)
-			{
-				::fprintf(l_pFile, m_vPluginSettings[setting_index].unique_name + " = %s\n", (l_pCurrentSetting->getValue<CString>()).toASCIIString());
-			}
-			else
-			{
-				// in the case where no valid type is defined we do nothing
-			}
-		}
-#endif
 
 		::fclose(l_pFile);
 	}
@@ -767,100 +712,6 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 
 	::GtkTable* l_pSettingsTable = GTK_TABLE(::gtk_builder_get_object(l_pInterface, "table-pluginsettings"));
 
-#ifdef OV_BOOST_SETTINGS
-
-	gtk_table_resize(l_pSettingsTable, m_vPluginSettings.size(), 2);
-
-	for (size_t setting_index = 0; setting_index < m_vPluginSettings.size(); ++setting_index)
-	{
-		const PluginSetting* l_pCurrentSetting = m_vPluginSettings[setting_index].setting_ptr;
-
-		// Create label
-		::GtkWidget* l_pSettingLabel = gtk_label_new(m_vPluginSettings[setting_index].setting_name);
-
-		// Create the setting controller widget
-		::GtkWidget* l_pSettingControl;
-
-		if (l_pCurrentSetting->type == OVTK_TypeId_Boolean)
-		{
-			// create the check button and assign it the current value of the setting
-			l_pSettingControl = gtk_check_button_new();
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pSettingControl), l_pCurrentSetting->getValue<bool>());
-		}
-		else if (l_pCurrentSetting->type == OVTK_TypeId_Integer)
-		{
-			// create the check button and assign it the current value of the setting
-
-			l_pSettingControl = gtk_spin_button_new_with_range((gdouble)std::numeric_limits<int64>::min(), (gdouble)std::numeric_limits<int64>::max(), 1.0);
-			gtk_spin_button_set_value(GTK_SPIN_BUTTON(l_pSettingControl), (gdouble)l_pCurrentSetting->getValue<int64>());
-
-		}
-		else if (l_pCurrentSetting->type == OVTK_TypeId_String)
-		{
-			// create the check button and assign it the current value of the setting
-			l_pSettingControl = gtk_entry_new();
-			gtk_entry_append_text(GTK_ENTRY(l_pSettingControl), l_pCurrentSetting->getValue<OpenViBE::CString>());
-		}
-		else
-		{
-			// in the case where no valid type is defined we create a placeholder label
-			l_pSettingControl = gtk_label_new("Undefined Type");
-		}
-
-		// insert the settings into the table
-		gtk_table_attach_defaults(l_pSettingsTable, l_pSettingLabel, 0, 1, setting_index, setting_index+1);
-		gtk_table_attach_defaults(l_pSettingsTable, l_pSettingControl, 1, 2, setting_index, setting_index+1);
-
-		m_vPluginSettings[setting_index].gui_widget = l_pSettingControl;
-		gtk_widget_show(l_pSettingLabel);
-		gtk_widget_show(l_pSettingControl);
-	}
-
-	gint l_iResponseId=::gtk_dialog_run(l_pDialog);
-	switch(l_iResponseId)
-	{
-		case GTK_RESPONSE_APPLY:
-		case GTK_RESPONSE_OK:
-		case GTK_RESPONSE_YES:
-			m_pAcquisitionServer->setNaNReplacementPolicy((ENaNReplacementPolicy)::gtk_combo_box_get_active(l_pNaNReplacementPolicy));
-			m_pAcquisitionServer->setDriftCorrectionPolicy((EDriftCorrectionPolicy)::gtk_combo_box_get_active(l_pDriftCorrectionPolicy));
-			m_pAcquisitionServer->setDriftToleranceDuration(::gtk_spin_button_get_value_as_int(l_pDriftTolerance));
-			m_pAcquisitionServer->setJitterEstimationCountForDrift(::gtk_spin_button_get_value_as_int(l_pJitterMeasureCount));
-			m_pAcquisitionServer->setOversamplingFactor(::gtk_spin_button_get_value_as_int(l_pOverSamplingFactor));
-			m_pAcquisitionServer->setImpedanceCheckRequest(::gtk_toggle_button_get_active(l_pImpedanceCheck)?true:false);
-			m_pAcquisitionServer->setChannelSelectionRequest(::gtk_toggle_button_get_active(l_ChannelSelection)?true:false);
-
-			for (size_t setting_index = 0; setting_index < m_vPluginSettings.size(); ++setting_index)
-			{
-				PluginSetting* l_pCurrentSetting = m_vPluginSettings[setting_index].setting_ptr;
-
-				if (l_pCurrentSetting->type == OVTK_TypeId_Boolean)
-				{
-					l_pCurrentSetting->value = ::gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_vPluginSettings[setting_index].gui_widget)) ? true : false;
-				}
-				else if (l_pCurrentSetting->type == OVTK_TypeId_Integer)
-				{
-					l_pCurrentSetting->value = static_cast<int64>(::gtk_spin_button_get_value(GTK_SPIN_BUTTON(m_vPluginSettings[setting_index].gui_widget)));
-				}
-				else if (l_pCurrentSetting->type == OVTK_TypeId_String)
-				{
-					l_pCurrentSetting->value = CString(::gtk_entry_get_text(GTK_ENTRY(m_vPluginSettings[setting_index].gui_widget)));
-				}
-				else
-				{
-					// in the case where no valid type is defined we do nothing
-				}
-			}
-
-
-			break;
-		case GTK_RESPONSE_CANCEL:
-		case GTK_RESPONSE_NO:
-			break;
-	}
-
-#else
-
 	gtk_table_resize(l_pSettingsTable, m_vPluginProperties.size(), 2);
 
 	for (size_t setting_index = 0; setting_index < m_vPluginProperties.size(); ++setting_index)
@@ -959,7 +810,6 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 		case GTK_RESPONSE_NO:
 			break;
 	}
-#endif
 
 	::gtk_widget_destroy(GTK_WIDGET(l_pDialog));
 	g_object_unref(l_pInterface);
@@ -1013,40 +863,6 @@ void CAcquisitionServerGUI::registerPlugin(IAcquisitionServerPlugin* plugin)
 void CAcquisitionServerGUI::scanPluginSettings()
 {
 	vector<IAcquisitionServerPlugin*> l_vPlugins = m_pAcquisitionServer->getPlugins();
-
-#ifdef OV_BOOST_SETTINGS
-
-	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
-	{
-		IAcquisitionServerPlugin* l_pPlugin = dynamic_cast<IAcquisitionServerPlugin*>(*itp);
-
-		typedef std::map<OpenViBE::CString, PluginSetting> PluginSettingMap;
-		PluginSettingMap& l_rSettings = l_pPlugin->getProperties().settings;
-
-		// Iterate over the settings of the plugin
-		for (PluginSettingMap::iterator settings_it = l_rSettings.begin(); settings_it != l_rSettings.end(); ++settings_it)
-		{
-			// Creates a setting reference, containing the name of the plugin (not used yet, except for the creation of the unique name)
-			// the name of the setting and a pointer to the setting in the plugin itself
-			PluginSettingReference l_sSettingReference = PluginSettingReference(
-				std::string(l_pPlugin->getProperties().name.toASCIIString()),
-				std::string((*settings_it).first.toASCIIString()),
-				&((*settings_it).second));
-
-			m_vPluginSettings.push_back(l_sSettingReference);
-
-		}
-
-		SettingsHelper& tmp = l_pPlugin->getSettingsHelper();
-		const std::map<OpenViBE::CString, Property*>& props = tmp.getAllProperties();
-
-		std::map<OpenViBE::CString, Property*>::const_iterator prop_it = props.begin();
-		for(;prop_it!=props.end();++prop_it) {
-			m_vPluginProperties.push_back( PropertyAndWidget(prop_it->second, NULL) );
-		}
-
-	}
-#endif
 
 	m_vPluginProperties.clear();
 

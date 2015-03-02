@@ -19,25 +19,6 @@ namespace OpenViBEAcquisitionServer
 {
 	class CAcquisitionServer;
 
-#ifdef OV_BOOST_SETTINGS
-
-	/// Structure holding a single user-available setting for the plugin
-	struct PluginSetting
-	{
-			OpenViBE::CIdentifier type;
-
-			// The setting value can be either a boolean, int64 or a CString
-			// The boost::variant will hold one of these types
-			boost::variant<OpenViBE::boolean, OpenViBE::int64, OpenViBE::CString> value;
-
-			/// This getter hides the boost::variant from external applications
-			template<typename T> const T getValue() const
-			{
-				return boost::get<T>(value);
-			}
-	};
-#endif
-
 	class IAcquisitionServerPlugin
 	{
 		public:
@@ -75,40 +56,6 @@ namespace OpenViBEAcquisitionServer
 
 			virtual ~IAcquisitionServerPlugin() {}
 
-#ifdef OV_BOOST_SETTINGS
-			struct PluginProperties
-			{
-					OpenViBE::CString name;
-					std::map<OpenViBE::CString, PluginSetting> settings;
-			};
-
-			/// Adds a setting to the plugin. This method should be called from the constructor
-			template<typename T> void addSetting(OpenViBE::CString name, T value)
-			{
-				const OpenViBE::CIdentifier l_TypeIDs[3] = {OVTK_TypeId_Boolean, OVTK_TypeId_Integer, OVTK_TypeId_String};
-				PluginSetting ps;
-
-				ps.value = value;
-				// sets the type member to the identifier as described in the OpenViBE Toolkit
-				ps.type =  l_TypeIDs[ps.value.which()]; // .which() method returns the index of the type in the table of types as defined in the boost::variant
-
-				m_oProperties.settings.insert(std::pair<OpenViBE::CString, PluginSetting>(name, ps));
-			}
-
-			/// Gets the value of the settings, return type is defined by the template
-			template<typename T> T getSetting(OpenViBE::CString name)
-			{
-				return boost::get<T>(m_oProperties.settings[name].value);
-			}
-
-
-			const PluginProperties& getProperties() const { return m_oProperties; }
-			PluginProperties& getProperties() { return m_oProperties; }
-
-		protected:
-			struct PluginProperties m_oProperties;
-			const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
-#endif
 		public:
 			const SettingsHelper& getSettingsHelper() const { return m_oSettingsHelper; }
 			SettingsHelper& getSettingsHelper() { return m_oSettingsHelper; }

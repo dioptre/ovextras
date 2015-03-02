@@ -50,52 +50,11 @@ namespace OpenViBEAcquisitionServer
 		virtual void comboBoxDriverChanged(::GtkComboBox* pComboBox);
 		virtual void comboBoxSampleCountPerSentBlockChanged(::GtkComboBox* pComboBox);
 
-#ifdef OV_BOOST_SETTINGS
-		class PluginSettingReference
-		{
-			public:
-				// name of the plugin containing the setting
-				OpenViBE::CString plugin_name;
-
-				// the name of the setting in the table
-				OpenViBE::CString setting_name;
-
-				// pointer to the setting structure inside the plugin
-				PluginSetting* setting_ptr;
-
-				// an unique name used for saving/loading settings, generated automatically
-				OpenViBE::CString unique_name;
-
-				// pointer to the widget containing the settings current value in the preferences dialog
-				GtkWidget* gui_widget;
-
-				// constructor of the structure, creates the unique name automatically
-				PluginSettingReference(std::string pluginName, std::string settingName, PluginSetting* settingPtr)
-					:
-					  plugin_name(pluginName.c_str()),
-					  setting_name(settingName.c_str()),
-					  setting_ptr(settingPtr),
-					  gui_widget(NULL)
-				{
-					// the unique name consists of a prefix, plugin name without spaces and setting name without spaces
-					boost::erase_all(pluginName, " ");
-					boost::erase_all(settingName, " ");
-
-					unique_name = OpenViBE::CString(("AcquisitionServerPlugin_" + pluginName + "_"  + settingName).c_str());
-				}
-		};
-#endif
-
 		/// registers a new acquisition server plugin, the plugin is activated immediately
 		void registerPlugin(IAcquisitionServerPlugin* plugin);
 
 		/// scans all plugins for settings and puts them into a flat structure easier to handle
 		void scanPluginSettings();
-
-#ifdef OV_BOOST_SETTINGS
-		/// holds references to the plugins' settings for faster access
-		std::vector<PluginSettingReference> m_vPluginSettings;
-#endif
 
 		void savePluginSettings();
 
