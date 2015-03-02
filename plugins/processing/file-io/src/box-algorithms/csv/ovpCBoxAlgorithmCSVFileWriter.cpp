@@ -80,6 +80,8 @@ boolean CBoxAlgorithmCSVFileWriter::initialize(void)
 	m_ui64SampleCount = 0;
 
 	m_bFirstBuffer=true;
+	m_bHeaderReceived = false;
+
 	return true;
 }
 
@@ -122,74 +124,84 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 
 		if(m_pStreamDecoder->isHeaderReceived())
 		{
-			const IMatrix* l_pMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMatrix();
-
-			if(l_pMatrix->getDimensionCount() > 2 || l_pMatrix->getDimensionCount() < 1)
+			if(!m_bHeaderReceived)
 			{
-				this->getLogManager() << LogLevel_ImportantWarning << "Input matrix does not have 1 or 2 dimensions - Cannot write content in CSV file...\n";
-				return false;
-			}
+				m_bHeaderReceived = true;
 
-			if( l_pMatrix->getDimensionCount() == 1)
-			{
-				// The matrix is a vector, make a matrix to represent it
-				m_oMatrix.setDimensionCount(2);
+				const IMatrix* l_pMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMatrix();
 
-				// This [n X 1] will get written as a single row due to transpose later
-				m_oMatrix.setDimensionSize(0,l_pMatrix->getDimensionSize(0));
-				m_oMatrix.setDimensionSize(1,1);
-				for(uint32 i=0;i<l_pMatrix->getDimensionSize(0);i++)
+				if(l_pMatrix->getDimensionCount() > 2 || l_pMatrix->getDimensionCount() < 1)
 				{
-					m_oMatrix.setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(0,i));
+					this->getLogManager() << LogLevel_ImportantWarning << "Input matrix does not have 1 or 2 dimensions - Cannot write content in CSV file...\n";
+					return false;
 				}
-			}
-			else if(m_oTypeIdentifier==OV_TypeId_FeatureVector)
-			{
-				// OpenViBE matrixes are usually [channels x time], but they get written to the CSV as transposed, i.e. [time X channels].
-				// The feature stream matrix is [1 X features], but here we transpose it to [features X 1] to compensate and to get 
-				// one-vector-per-row in the output file
-				m_oMatrix.setDimensionCount(2);
 
-				// This [n X 1] will get written as a single row due to transpose later
-				m_oMatrix.setDimensionSize(0,l_pMatrix->getDimensionSize(1));
-				m_oMatrix.setDimensionSize(1,1);
-				for(uint32 i=0;i<l_pMatrix->getDimensionSize(1);i++)
+				if( l_pMatrix->getDimensionCount() == 1)
 				{
-   					// this->getLogManager() << LogLevel_Info << "  N: " << i << " is " << l_pMatrix->getDimensionLabel(1,i) << "\n";
-					m_oMatrix.setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(1,i));
+					// The matrix is a vector, make a matrix to represent it
+					m_oMatrix.setDimensionCount(2);
+
+					// This [n X 1] will get written as a single row due to transpose later
+					m_oMatrix.setDimensionSize(0,l_pMatrix->getDimensionSize(0));
+					m_oMatrix.setDimensionSize(1,1);
+					for(uint32 i=0;i<l_pMatrix->getDimensionSize(0);i++)
+					{
+						m_oMatrix.setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(0,i));
+					}
 				}
+				else if(m_oTypeIdentifier==OV_TypeId_FeatureVector)
+				{
+					// OpenViBE matrixes are usually [channels x time], but they get written to the CSV as transposed, i.e. [time X channels].
+					// The feature stream matrix is [1 X features], but here we transpose it to [features X 1] to compensate and to get 
+					// one-vector-per-row in the output file
+					m_oMatrix.setDimensionCount(2);
+
+					// This [n X 1] will get written as a single row due to transpose later
+					m_oMatrix.setDimensionSize(0,l_pMatrix->getDimensionSize(1));
+					m_oMatrix.setDimensionSize(1,1);
+					for(uint32 i=0;i<l_pMatrix->getDimensionSize(1);i++)
+					{
+   						// this->getLogManager() << LogLevel_Info << "  N: " << i << " is " << l_pMatrix->getDimensionLabel(1,i) << "\n";
+						m_oMatrix.setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(1,i));
+					}
+				}
+				else
+				{
+					// As-is
+					OpenViBEToolkit::Tools::Matrix::copyDescription(m_oMatrix, *l_pMatrix);
+				}
+	//			std::cout<<&m_pMatrix<<" "<<&op_pMatrix<<"\n";
+				m_oFileStream << "Time (s)";
+				for(uint32 c=0; c<m_oMatrix.getDimensionSize(0); c++)
+				{
+					std::string l_sLabel(m_oMatrix.getDimensionLabel(0, c));
+					while(l_sLabel.length()>0 && l_sLabel[l_sLabel.length()-1]==' ')
+					{
+						l_sLabel.erase(l_sLabel.length()-1);
+					}
+					m_oFileStream << m_sSeparator.toASCIIString() << l_sLabel.c_str();
+				}
+
+				if(m_oTypeIdentifier==OV_TypeId_Signal)
+				{
+					m_oFileStream << m_sSeparator.toASCIIString() << "Sampling Rate";
+				}
+				else if(m_oTypeIdentifier==OV_TypeId_Spectrum)
+				{
+					m_oFileStream << m_sSeparator << "Min frequency band";
+					m_oFileStream << m_sSeparator << "Max frequency band";
+				}
+				else
+				{
+				}
+
+				m_oFileStream << "\n";
 			}
 			else
 			{
-				// As-is
-				OpenViBEToolkit::Tools::Matrix::copyDescription(m_oMatrix, *l_pMatrix);
+				// Already received a header
+				this->getLogManager() << LogLevel_Warning << "Received matrix header more than once, not supported\n";
 			}
-//			std::cout<<&m_pMatrix<<" "<<&op_pMatrix<<"\n";
-			m_oFileStream << "Time (s)";
-			for(uint32 c=0; c<m_oMatrix.getDimensionSize(0); c++)
-			{
-				std::string l_sLabel(m_oMatrix.getDimensionLabel(0, c));
-				while(l_sLabel.length()>0 && l_sLabel[l_sLabel.length()-1]==' ')
-				{
-					l_sLabel.erase(l_sLabel.length()-1);
-				}
-				m_oFileStream << m_sSeparator.toASCIIString() << l_sLabel.c_str();
-			}
-
-			if(m_oTypeIdentifier==OV_TypeId_Signal)
-			{
-				m_oFileStream << m_sSeparator.toASCIIString() << "Sampling Rate";
-			}
-			else if(m_oTypeIdentifier==OV_TypeId_Spectrum)
-			{
-				m_oFileStream << m_sSeparator << "Min frequency band";
-				m_oFileStream << m_sSeparator << "Max frequency band";
-			}
-			else
-			{
-			}
-
-			m_oFileStream << "\n";
 		}
 		if(m_pStreamDecoder->isBufferReceived())
 		{
@@ -284,7 +296,15 @@ boolean CBoxAlgorithmCSVFileWriter::process_stimulation(void)
 		m_pStreamDecoder->decode(i);
 		if(m_pStreamDecoder->isHeaderReceived())
 		{
-			m_oFileStream << "Time (s)" << m_sSeparator.toASCIIString() << "Identifier" << m_sSeparator.toASCIIString() << "Duration\n";
+			if(!m_bHeaderReceived)
+			{
+				m_bHeaderReceived = true;
+				m_oFileStream << "Time (s)" << m_sSeparator.toASCIIString() << "Identifier" << m_sSeparator.toASCIIString() << "Duration\n";
+			}
+			else
+			{
+				this->getLogManager() << LogLevel_Warning << "Received stimulation header more than once, not supported\n";
+			}
 		}
 		if(m_pStreamDecoder->isBufferReceived())
 		{

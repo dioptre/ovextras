@@ -45,6 +45,8 @@ namespace OpenViBEPlugins
 
 			OpenViBE::uint64 m_ui64SampleCount;
 
+			OpenViBE::boolean m_bHeaderReceived;
+
 		};
 
 		class CBoxAlgorithmCSVFileWriterListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
