@@ -2,6 +2,7 @@
 	SetCompressorDictSize 16
 
 	!include "MUI.nsh"
+	!include "Sections.nsh"
 	!include "zipdll.nsh"
 
 	;Name and file
@@ -94,6 +95,8 @@ SectionGroupEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
+
+SectionGroup Required
 
 Section "DirectX Runtime"
 
@@ -206,95 +209,9 @@ no_need_to_download_boost:
 
 SectionEnd
 
+
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
-;##########################################################################################################################################################
-
-Section "GLFW"
-
-	SetOutPath "$INSTDIR"
-	CreateDirectory "$INSTDIR\arch"
-
-	IfFileExists "arch\glfw-3.0.4-$suffix.zip" no_need_to_download_glfw
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/glfw-3.0.4-$suffix.zip "arch\glfw-3.0.4-$suffix.zip"
-	Pop $R0 ; Get the return value
-		StrCmp $R0 "success" +3
-			MessageBox MB_OK "Download failed: $R0" /SD IDOK
-			Quit
-no_need_to_download_glfw:
-	ZipDLL::extractall "arch\glfw-3.0.4-$suffix.zip" ""
-
-	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
-	FileSeek $0 0 END
-	FileWrite $0 "SET PATH=$INSTDIR\glfw\lib;%PATH%$\r$\n"
-	FileClose $0	
-
-SectionEnd
-
-;
-##########################################################################################################################################################
-;##########################################################################################################################################################
-;##########################################################################################################################################################
-
-Section /o "presage"
-
-; todo skip presage properly on vs2008
-StrCmp $suffix "vs100" 0 nopresage
-	
-	SetOutPath "$INSTDIR"
-	CreateDirectory "$INSTDIR\arch"
-
-	IfFileExists "arch\presage-0.8.9-$suffix.zip" no_need_to_download_presage
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/presage-0.8.9-$suffix.zip "arch\presage-0.8.9-$suffix.zip"
-	Pop $R0 ; Get the return value
-		StrCmp $R0 "success" +3
-			MessageBox MB_OK "Download failed: $R0" /SD IDOK
-			Quit
-no_need_to_download_presage:
-	ZipDLL::extractall "arch\presage-0.8.9-$suffix.zip" ""
-
-	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
-	FileSeek $0 0 END
-	FileWrite $0 "SET PATH=$INSTDIR\presage\lib;%PATH%$\r$\n"
-	FileClose $0	
-	goto presagepassed
-	
-nopresage:
-	MessageBox MB_OK "Note: Presage not available for VS2008" /SD IDOK
-
-presagepassed:	
-	
-SectionEnd
-
-
-;
-##########################################################################################################################################################
-;##########################################################################################################################################################
-;##########################################################################################################################################################
-
-Section "inpout32"
-
-	SetOutPath "$INSTDIR"
-	CreateDirectory "$INSTDIR\arch"
-
-	IfFileExists "arch\inpout32-$suffix.zip" no_need_to_download_inpout32
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/inpout32-$suffix.zip "arch\inpout32-$suffix.zip"
-	Pop $R0 ; Get the return value
-		StrCmp $R0 "success" +3
-			MessageBox MB_OK "Download failed: $R0" /SD IDOK
-			Quit
-no_need_to_download_inpout32:
-	ZipDLL::extractall "arch\inpout32-$suffix.zip" ""
-
-	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
-	FileSeek $0 0 END
-	FileWrite $0 "SET PATH=$INSTDIR\inpout32\lib;%PATH%$\r$\n"
-	FileClose $0	
-
-SectionEnd
-
-;
-####################################################################################################################################################################################################################################################################################################################
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
@@ -353,35 +270,6 @@ no_need_to_download_gtk_runtime:
 	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
 	FileSeek $0 0 END
 	FileWrite $0 "SET PATH=$INSTDIR\gtk\bin;%PATH%$\r$\n"	
-	FileClose $0
-
-SectionEnd
-
-;##########################################################################################################################################################
-;##########################################################################################################################################################
-;##########################################################################################################################################################
-
-Section /o "GTK+ themes"
-
-	SetOutPath "$INSTDIR"
-	CreateDirectory "$INSTDIR\arch"
-
-	IfFileExists "arch\gtk-themes-2009.09.07.zip" no_need_to_download_gtk_themes
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/gtk-themes-2009.09.07.zip "arch\gtk-themes-2009.09.07.zip"
-	Pop $R0 ; Get the return value
-		StrCmp $R0 "success" +3
-			MessageBox MB_OK "Download failed: $R0" /SD IDOK
-			Quit
-no_need_to_download_gtk_themes:
-	ZipDLL::extractall "arch\gtk-themes-2009.09.07.zip" "gtk"
-
-	FileOpen $0 "$INSTDIR\gtk\etc\gtk-2.0\gtkrc" w
-	FileWrite $0 "gtk-theme-name = $\"Redmond$\"$\r$\n"
-	FileWrite $0 "style $\"user-font$\"$\r$\n"
-	FileWrite $0 "{$\r$\n"
-	FileWrite $0 "	font_name=$\"Sans 8$\"$\r$\n"
-	FileWrite $0 "}$\r$\n"
-	FileWrite $0 "widget_class $\"*$\" style $\"user-font$\"$\r$\n"
 	FileClose $0
 
 SectionEnd
@@ -788,9 +676,137 @@ no_need_to_download_lsl_runtime:
 
 SectionEnd
 
+SectionGroupEnd
+
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
+
+SectionGroup Optional optionalGroup
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "GLFW"
+
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\glfw-3.0.4-$suffix.zip" no_need_to_download_glfw
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/glfw-3.0.4-$suffix.zip "arch\glfw-3.0.4-$suffix.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_glfw:
+	ZipDLL::extractall "arch\glfw-3.0.4-$suffix.zip" ""
+
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\glfw\lib;%PATH%$\r$\n"
+	FileClose $0	
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "GTK+ themes"
+
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\gtk-themes-2009.09.07.zip" no_need_to_download_gtk_themes
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/gtk-themes-2009.09.07.zip "arch\gtk-themes-2009.09.07.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_gtk_themes:
+	ZipDLL::extractall "arch\gtk-themes-2009.09.07.zip" "gtk"
+
+	FileOpen $0 "$INSTDIR\gtk\etc\gtk-2.0\gtkrc" w
+	FileWrite $0 "gtk-theme-name = $\"Redmond$\"$\r$\n"
+	FileWrite $0 "style $\"user-font$\"$\r$\n"
+	FileWrite $0 "{$\r$\n"
+	FileWrite $0 "	font_name=$\"Sans 8$\"$\r$\n"
+	FileWrite $0 "}$\r$\n"
+	FileWrite $0 "widget_class $\"*$\" style $\"user-font$\"$\r$\n"
+	FileClose $0
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "inpout32"
+
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\inpout32-$suffix.zip" no_need_to_download_inpout32
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/inpout32-$suffix.zip "arch\inpout32-$suffix.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_inpout32:
+	ZipDLL::extractall "arch\inpout32-$suffix.zip" ""
+
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\inpout32\lib;%PATH%$\r$\n"
+	FileClose $0	
+
+SectionEnd
+
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "presage"
+
+; todo skip presage properly on vs2008
+StrCmp $suffix "vs100" 0 nopresage
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\presage-0.8.9-$suffix.zip" no_need_to_download_presage
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/presage-0.8.9-$suffix.zip "arch\presage-0.8.9-$suffix.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_presage:
+	ZipDLL::extractall "arch\presage-0.8.9-$suffix.zip" ""
+
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\presage\lib;%PATH%$\r$\n"
+	FileClose $0	
+	goto presagepassed
+	
+nopresage:
+	MessageBox MB_OK "Note: Presage not available for VS2008" /SD IDOK
+
+presagepassed:	
+	
+SectionEnd
+
+
+SectionGroupEnd
+
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+SectionGroup Drivers DriverGroup
 
 Section /o "Device SDK: MCS NVX"
 
@@ -878,27 +894,6 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section /o "Device SDK: TMSi"
-
-	; For TMSi universal driver
-	SetOutPath "$INSTDIR"
-	CreateDirectory "$INSTDIR\arch"
-
-	IfFileExists "arch\sdk-tmsi.zip" no_need_to_download_tmsi_dev
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-tmsi.zip "arch\sdk-tmsi.zip"
-	Pop $R0 ; Get the return value
-		StrCmp $R0 "success" +3
-			MessageBox MB_OK "Download failed: $R0" /SD IDOK
-			Quit
-no_need_to_download_tmsi_dev:
-	ZipDLL::extractall "arch\sdk-tmsi.zip" ""	
-
-SectionEnd
-
-;##########################################################################################################################################################
-;##########################################################################################################################################################
-;##########################################################################################################################################################
-
 Section /o "Device SDK: NeuroElectrics Enobio3G"
 
 	; For Neuroelectrics Enobio 3G driver
@@ -931,6 +926,34 @@ no_need_to_download_enobio_runtime:
 
 SectionEnd
 
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device SDK: TMSi"
+
+	; For TMSi universal driver
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-tmsi.zip" no_need_to_download_tmsi_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-tmsi.zip "arch\sdk-tmsi.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_tmsi_dev:
+	ZipDLL::extractall "arch\sdk-tmsi.zip" ""	
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+
+
+SectionGroupEnd
 
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
@@ -955,7 +978,7 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\pthreads"
 	RMDir /r "$INSTDIR\enobio3g"
 	RMDir /r "$INSTDIR\mcs"
-	
+		
 	Delete "$INSTDIR\..\scripts\win32-dependencies.cmd"
 
 	Delete "$INSTDIR\Uninstall.exe"
@@ -968,8 +991,23 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
+Function EnableOptionals
+
+  SectionGetFlags ${optionalGroup} $0 
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${optionalGroup} $0
+
+  SectionGetFlags ${driverGroup} $0 
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${driverGroup} $0
+
+FunctionEnd
+
 Function .onInit
   StrCpy $9 ${vs90}
+  ; On silent install, we install all components
+  IfSilent 0 +2
+	Call EnableOptionals
 FunctionEnd
 
 Function .onSelChange
