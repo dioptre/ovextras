@@ -125,8 +125,10 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::processClock(IMessageClock& rMes
 			this->getLogManager() << LogLevel_Warning << "Total time of your sample: " << m_f64Time << "\n";
 			this->getLogManager() << LogLevel_Warning << "b Matrix was NOT successfully calculated" << "\n";
 
+			m_oStimulationEncoder.getInputStimulationSet()->clear();
 			m_oStimulationEncoder.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
 			m_oStimulationEncoder.encodeBuffer();
+
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, 0),l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
 
 			//this->getLogManager() << LogLevel_Warning << "You can stop this scenario " <<"\n";
@@ -357,8 +359,10 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::processClock(IMessageClock& rMes
 
 			//this->getLogManager() << LogLevel_Warning << "You can stop this scenario " <<"\n";
 
+			m_oStimulationEncoder.getInputStimulationSet()->clear();
 			m_oStimulationEncoder.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, 0, 0);
 			m_oStimulationEncoder.encodeBuffer();
+
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, 0),l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
 
 		}

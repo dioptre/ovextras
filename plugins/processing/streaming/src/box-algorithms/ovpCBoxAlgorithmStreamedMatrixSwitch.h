@@ -43,7 +43,6 @@ namespace OpenViBEPlugins
 		protected:
 			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmStreamedMatrixSwitch > m_oStimulationDecoder;
 			OpenViBEToolkit::TDecoder < CBoxAlgorithmStreamedMatrixSwitch > * m_pStreamDecoder;
-			//OpenViBEToolkit::TEncoder < CBoxAlgorithmStreamedMatrixSwitch > * m_pStreamEncoder;
 
 			std::map <OpenViBE::uint64, OpenViBE::uint32> m_mStimulationOutputIndexMap;
 			OpenViBE::int32 m_i32ActiveOutputIndex;

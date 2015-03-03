@@ -585,95 +585,77 @@ void CGDFFileReader::writeExperimentInformation()
 	if(m_pExperimentInfoHeader->m_ui64ExperimentId != _NoValueI_)
 	{
 		m_pExperimentInformationEncoder->getInputExperimentIdentifier() = m_pExperimentInfoHeader->m_ui64ExperimentId;
-		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_ExperimentIdentifier, (uint32)m_pExperimentInfoHeader->m_ui64ExperimentId);
 	}
 
 	if(m_pExperimentInfoHeader->m_sExperimentDate != _NoValueS_)
 	{
 		m_pExperimentInformationEncoder->getInputExperimentDate() = &l_sDate;
-		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_ExperimentDate, m_pExperimentInfoHeader->m_sExperimentDate.c_str());
 	}
 
 	if(m_pExperimentInfoHeader->m_ui64SubjectId != _NoValueI_)
 	{
 		m_pExperimentInformationEncoder->getInputSubjectIdentifier()= m_pExperimentInfoHeader->m_ui64SubjectId;
-		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_SubjectIdentifier, (uint32) m_pExperimentInfoHeader->m_ui64SubjectId);
 	}
 
 	if(m_pExperimentInfoHeader->m_sSubjectName != _NoValueS_)
 	{
 		m_pExperimentInformationEncoder->getInputSubjectName() = &l_sName;
-		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_SubjectName, m_pExperimentInfoHeader->m_sSubjectName.c_str());
 	}
 
 	if(m_pExperimentInfoHeader->m_ui64SubjectAge != _NoValueI_)
 	{
 		m_pExperimentInformationEncoder->getInputSubjectAge() = m_pExperimentInfoHeader->m_ui64SubjectAge;
-		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_SubjectAge, (uint32)m_pExperimentInfoHeader->m_ui64SubjectAge);
 	}
 
 	if(m_pExperimentInfoHeader->m_ui64SubjectSex != _NoValueI_)
 	{
 		m_pExperimentInformationEncoder->getInputSubjectGender() = m_pExperimentInfoHeader->m_ui64SubjectSex;
-		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_SubjectSex, (uint32)m_pExperimentInfoHeader->m_ui64SubjectSex);
 	}
 
 	if(m_pExperimentInfoHeader->m_ui64LaboratoryId != _NoValueI_)
 	{
 		m_pExperimentInformationEncoder->getInputLaboratoryIdentifier() = m_pExperimentInfoHeader->m_ui64LaboratoryId;
-		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_LaboratoryIdentifier, (uint32)m_pExperimentInfoHeader->m_ui64LaboratoryId);
 	}
 
 	if(m_pExperimentInfoHeader->m_sLaboratoryName != _NoValueS_)
 	{
 		m_pExperimentInformationEncoder->getInputLaboratoryName() = &l_sLabName;
-		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_LaboratoryName, m_pExperimentInfoHeader->m_sLaboratoryName.c_str());
 	}
 
 	if(m_pExperimentInfoHeader->m_ui64TechnicianId != _NoValueI_)
 	{
 		m_pExperimentInformationEncoder->getInputTechnicianIdentifier() = m_pExperimentInfoHeader->m_ui64TechnicianId;
-		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_TechnicianIdentifier, (uint32)m_pExperimentInfoHeader->m_ui64TechnicianId);
 	}
 
 	if(m_pExperimentInfoHeader->m_sTechnicianName != _NoValueS_)
 	{
 		m_pExperimentInformationEncoder->getInputTechnicianName() = &l_sTechName;
-		//m_pExperimentInformationOutputWriterHelper->setValue(IBoxAlgorithmExperimentInformationOutputWriter::Value_TechnicianName, m_pExperimentInfoHeader->m_sTechnicianName.c_str());
 	}
 
 	m_pExperimentInformationEncoder->encodeHeader();
-	//m_pExperimentInformationOutputWriterHelper->writeHeader(*m_pWriter[GDFReader_ExperimentInfoOutput]);
 }
 
 void CGDFFileReader::writeSignalInformation()
 {
 	m_pSignalEncoder->getInputSamplingRate() = m_pSignalDescription.m_ui32SamplingRate;
-	//m_pSignalOutputWriterHelper->setSamplingRate(m_pSignalDescription.m_ui32SamplingRate);
-
 
 	IMatrix* l_pInputMatrix = m_pSignalEncoder->getInputMatrix();
 	l_pInputMatrix->setDimensionCount(2);
 	l_pInputMatrix->setDimensionSize(0, m_pSignalDescription.m_ui32ChannelCount);
-	//m_pSignalOutputWriterHelper->setChannelCount(m_pSignalDescription.m_ui32ChannelCount);
+	l_pInputMatrix->setDimensionSize(1, m_pSignalDescription.m_ui32SampleCount);
 
 	for(uint32 i=0 ; i<m_pSignalDescription.m_ui32ChannelCount ; i++)
 	{
 		l_pInputMatrix->setDimensionLabel(0, i, m_pSignalDescription.m_pChannelName[i].c_str());
-		//m_pSignalOutputWriterHelper->setChannelName(i, m_pSignalDescription.m_pChannelName[i].c_str());
 	}
 
-	l_pInputMatrix->setDimensionSize(1,m_pSignalDescription.m_ui32SampleCount);
-	//m_pSignalOutputWriterHelper->setSampleCountPerBuffer(m_pSignalDescription.m_ui32SampleCount);
-
 	m_pSignalEncoder->encodeHeader();
-	//m_pSignalOutputWriterHelper->writeHeader(*m_pWriter[GDFReader_SignalOutput]);
 }
 
 void CGDFFileReader::writeEvents()
 {
 	IStimulationSet* l_pStimulationSet = m_pStimulationEncoder->getInputStimulationSet();
-	//m_pStimulationOutputWriterHelper->setStimulationCount(m_oEvents.size());
+	l_pStimulationSet->clear();
 
 	uint64 l_ui64EventDate = 0;
 
@@ -682,12 +664,9 @@ void CGDFFileReader::writeEvents()
 		//compute date
 		l_ui64EventDate = ITimeArithmetics::sampleCountToTime(m_pSignalDescription.m_ui32SamplingRate, m_oEvents[i].m_ui32Position);
 		l_pStimulationSet->appendStimulation(m_oEvents[i].m_ui16Type, l_ui64EventDate, 0);
-		//m_pStimulationOutputWriterHelper->setStimulation(i, m_oEvents[i].m_ui16Type, l_ui64EventDate);
 	}
 
 	m_pStimulationEncoder->encodeBuffer();
-	l_pStimulationSet->clear();
-	//m_pStimulationOutputWriterHelper->writeBuffer(*m_pWriter[GDFReader_StimulationOutput]);
 }
 
 boolean CGDFFileReader::process()
@@ -717,10 +696,6 @@ boolean CGDFFileReader::process()
 			//output matrix buffer
 			m_ui64MatrixBufferSize = m_pSignalDescription.m_ui32SampleCount*m_pSignalDescription.m_ui32ChannelCount;
 			m_pMatrixBuffer = new float64[(size_t)m_ui64MatrixBufferSize];
-
-			//Associate this buffer to the signal output writer helper
-			//m_pSignalOutputWriterHelper->setSampleBuffer(m_pMatrixBuffer);
-
 
 			//We also have to read the first data record
 			m_pDataRecordBuffer = new uint8[(size_t)m_ui64DataRecordSize];

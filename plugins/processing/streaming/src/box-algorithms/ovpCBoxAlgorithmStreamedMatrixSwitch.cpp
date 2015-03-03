@@ -53,37 +53,30 @@ boolean CBoxAlgorithmStreamedMatrixSwitch::initialize(void)
 	if(l_oTypeIdentifier == OV_TypeId_StreamedMatrix)
 	{
 		m_pStreamDecoder = new TStreamedMatrixDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
-		//m_pStreamEncoder = new TStreamedMatrixEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
 	}
 	else if(l_oTypeIdentifier == OV_TypeId_Signal)
 	{
 		m_pStreamDecoder = new TSignalDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
-		//m_pStreamEncoder = new TSignalEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
 	}
 	else if(l_oTypeIdentifier == OV_TypeId_Spectrum)
 	{
 		m_pStreamDecoder = new TSpectrumDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
-		//m_pStreamEncoder = new TSpectrumEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
 	}
 	else if(l_oTypeIdentifier == OV_TypeId_FeatureVector)
 	{
 		m_pStreamDecoder = new TFeatureVectorDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
-		//m_pStreamEncoder = new TFeatureVectorEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
 	}
 	else if(l_oTypeIdentifier == OV_TypeId_ChannelLocalisation)
 	{
 		m_pStreamDecoder = new TChannelLocalisationDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
-		//m_pStreamEncoder = new TChannelLocalisationEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
 	}
 	else if(l_oTypeIdentifier == OV_TypeId_Stimulations)
 	{
 		m_pStreamDecoder = new TStimulationDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
-		//m_pStreamEncoder = new TStimulationEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
 	}
 	else if(l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
 	{
 		m_pStreamDecoder = new TExperimentInformationDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
-		//m_pStreamEncoder = new TExperimentInformationEncoder < CBoxAlgorithmStreamedMatrixSwitch >(*this);
 	}
 	else
 	{
@@ -103,8 +96,6 @@ boolean CBoxAlgorithmStreamedMatrixSwitch::uninitialize(void)
 		m_pStreamDecoder->uninitialize();
 		delete m_pStreamDecoder;
 	}
-	//m_pStreamEncoder->uninitialize();
-	//delete m_pStreamEncoder;
 
 	return true;
 }

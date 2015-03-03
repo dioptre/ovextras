@@ -424,8 +424,11 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		}
 
 		this->getLogManager() << LogLevel_Info << "xDAWN Spatial filter trained successfully.\n";
+
+		m_oStimulationEncoder.getInputStimulationSet()->clear();
 		m_oStimulationEncoder.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, l_ui64TrainDate, 0);
 		m_oStimulationEncoder.encodeBuffer();
+
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_ui64TrainChunkStartTime, l_ui64TrainChunkEndTime);
 	}
 
