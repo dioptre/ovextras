@@ -1037,7 +1037,7 @@ boolean CApplication::openScenario(const char* sFileName)
 				{
 					m_rKernelContext.getLogManager() << LogLevel_Info << "Importing scenario...\n";
 
-					l_pImporter->initialize();
+					l_bSuccess = l_pImporter->initialize();
 
 					TParameterHandler < const IMemoryBuffer* > ip_pMemoryBuffer(l_pImporter->getInputParameter(OVTK_Algorithm_ScenarioImporter_InputParameterId_MemoryBuffer));
 					TParameterHandler < IScenario* > op_pScenario(l_pImporter->getOutputParameter(OVTK_Algorithm_ScenarioImporter_OutputParameterId_Scenario));
@@ -1045,10 +1045,11 @@ boolean CApplication::openScenario(const char* sFileName)
 					ip_pMemoryBuffer=&l_oMemoryBuffer;
 					op_pScenario=&l_rScenario;
 
-					l_pImporter->process();
-					l_pImporter->uninitialize();
+					l_bSuccess &= l_pImporter->process();
+					l_bSuccess &= l_pImporter->uninitialize();
+
 					m_rKernelContext.getAlgorithmManager().releaseAlgorithm(*l_pImporter);
-					l_bSuccess=true;
+
 				}
 			}
 		}
@@ -1120,27 +1121,35 @@ boolean CApplication::openScenario(const char* sFileName)
 		}
 		else
 		{
-			m_rKernelContext.getLogManager() << LogLevel_Warning << "Importing scenario failed...\n";
+			m_rKernelContext.getLogManager() << LogLevel_Error << "Importing scenario from [" << sFileName << "] failed...\n";
 
 			m_pScenarioManager->releaseScenario(l_oScenarioIdentifier);
 
 			std::stringstream l_oStringStream;
 			l_oStringStream << "The requested file: " << sFileName << "\n";
 			l_oStringStream << "may either not be an OpenViBE scenario file, \n";
-			l_oStringStream << "be corrupted or not be compatible with \n";
+			l_oStringStream << "it may be corrupted or not compatible with \n";
 			l_oStringStream << "the selected scenario importer...";
 
-			::GtkWidget* l_pErrorDialog=gtk_message_dialog_new(
-					NULL,
-					GTK_DIALOG_MODAL,
-					GTK_MESSAGE_WARNING,
-					GTK_BUTTONS_OK,
-					"Scenario importation process failed !");
-			gtk_message_dialog_format_secondary_text(
-					GTK_MESSAGE_DIALOG(l_pErrorDialog), "%s", l_oStringStream.str().c_str());
-			gtk_dialog_run(GTK_DIALOG(l_pErrorDialog));
-			gtk_widget_destroy(l_pErrorDialog);
-
+			if(!this->isNoGuiActive())
+			{
+				::GtkWidget* l_pErrorDialog=gtk_message_dialog_new(
+						NULL,
+						GTK_DIALOG_MODAL,
+						GTK_MESSAGE_WARNING,
+						GTK_BUTTONS_OK,
+						"Scenario importation process failed !");
+				gtk_message_dialog_format_secondary_text(
+						GTK_MESSAGE_DIALOG(l_pErrorDialog), "%s", l_oStringStream.str().c_str());
+				gtk_dialog_run(GTK_DIALOG(l_pErrorDialog));
+				gtk_widget_destroy(l_pErrorDialog);
+			}
+			else
+			{
+				m_rKernelContext.getLogManager() << LogLevel_Error << l_oStringStream.str().c_str() << "\n";
+				releasePlayer();
+				return false;
+			}
 		}
 	}
 	return false;

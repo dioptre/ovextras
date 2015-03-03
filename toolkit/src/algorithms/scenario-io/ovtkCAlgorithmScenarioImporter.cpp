@@ -175,7 +175,7 @@ boolean CAlgorithmScenarioImporter::process(void)
 	IScenario* l_pScenario=op_pScenario;
 	if(!l_pScenario)
 	{
-		this->getLogManager() << LogLevel_Warning << "No scenario to import to\n";
+		this->getLogManager() << LogLevel_Error << "No scenario to import to\n";
 		return false;
 	}
 
@@ -183,7 +183,7 @@ boolean CAlgorithmScenarioImporter::process(void)
 	IMemoryBuffer* l_pMemoryBuffer=ip_pMemoryBuffer;
 	if(!l_pMemoryBuffer)
 	{
-		this->getLogManager() << LogLevel_Warning << "No memory buffer to import scenario from\n";
+		this->getLogManager() << LogLevel_Error << "No memory buffer to import scenario from\n";
 		return false;
 	}
 
@@ -196,7 +196,7 @@ boolean CAlgorithmScenarioImporter::process(void)
 	CAlgorithmScenarioImporterContext l_oContext(this->getAlgorithmContext());
 	if(!this->import(l_oContext, *l_pMemoryBuffer))
 	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Import failed\n";
+		this->getLogManager() << LogLevel_Error << "Import failed\n";
 		return false;
 	}
 

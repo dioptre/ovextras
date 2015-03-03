@@ -63,6 +63,7 @@ CAlgorithmXMLScenarioImporter::CAlgorithmXMLScenarioImporter(void)
 	:m_pContext(NULL)
 	,m_ui32Status(Status_ParsingNothing)
 	,m_pReader(NULL)
+	,m_bScenarioRecognized(false)
 {
 	m_pReader=XML::createReader(*this);
 }
@@ -80,7 +81,7 @@ void CAlgorithmXMLScenarioImporter::openChild(const char* sName, const char** sA
 
 	if(false) { }
 
-	else if(l_sTop=="OpenViBE-Scenario"   && m_ui32Status==Status_ParsingNothing)  { m_ui32Status=Status_ParsingScenario;          m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_OpenViBEScenario); }
+	else if(l_sTop=="OpenViBE-Scenario"   && m_ui32Status==Status_ParsingNothing)  { m_ui32Status=Status_ParsingScenario;          m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_OpenViBEScenario); m_bScenarioRecognized = true; }
 	else if(l_sTop=="Attribute"           && m_ui32Status==Status_ParsingScenario) { m_ui32Status=Status_ParsingScenarioAttribute; m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Scenario_Attribute); }
 
 	else if(l_sTop=="Box"                 && m_ui32Status==Status_ParsingScenario) { m_ui32Status=Status_ParsingBox;               m_pContext->processStart(OVTK_Algorithm_ScenarioExporter_NodeId_Box); }
@@ -256,5 +257,16 @@ void CAlgorithmXMLScenarioImporter::closeChild(void)
 boolean CAlgorithmXMLScenarioImporter::import(IAlgorithmScenarioImporterContext& rContext, const IMemoryBuffer& rMemoryBuffer)
 {
 	m_pContext=&rContext;
-	return m_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
+
+	m_bScenarioRecognized = false;
+
+	boolean m_bOk = m_pReader->processData(rMemoryBuffer.getDirectPointer(), rMemoryBuffer.getSize());
+
+	if(!m_bScenarioRecognized)
+	{
+		// This is not a conforming openvibe XML scenario, lacking the <OpenViBE-Scenario> tag
+		return false;
+	}
+
+	return m_bOk;
 }

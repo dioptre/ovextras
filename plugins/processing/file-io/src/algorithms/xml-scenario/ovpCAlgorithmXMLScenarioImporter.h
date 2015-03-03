@@ -40,6 +40,8 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32Status;
 			XML::IReader* m_pReader;
 			std::stack < std::string > m_vNodes;
+
+			OpenViBE::boolean m_bScenarioRecognized;
 		};
 
 		class CAlgorithmXMLScenarioImporterDesc : public OpenViBEToolkit::CAlgorithmScenarioImporterDesc

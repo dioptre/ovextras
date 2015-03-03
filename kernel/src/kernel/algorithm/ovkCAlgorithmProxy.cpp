@@ -101,13 +101,17 @@ boolean CAlgorithmProxy::activateInputTrigger(
 boolean CAlgorithmProxy::initialize(void)
 {
 	if(m_bIsInitialized) getLogManager() << LogLevel_ImportantWarning << "Can not initialize already initialized algorithm\n";
-	return (m_bIsInitialized=m_rAlgorithm.initialize());
+
+	m_bIsInitialized=m_rAlgorithm.initialize();
+
+	return m_bIsInitialized;
 }
 
 boolean CAlgorithmProxy::uninitialize(void)
 {
 	if(!m_bIsInitialized) getLogManager() << LogLevel_ImportantWarning << "Can not uninitialize uninitialized algorithm\n";
-	return (m_bIsInitialized=!m_rAlgorithm.uninitialize());
+
+	return (m_bIsInitialized && m_rAlgorithm.uninitialize());
 }
 
 boolean CAlgorithmProxy::process(void)
