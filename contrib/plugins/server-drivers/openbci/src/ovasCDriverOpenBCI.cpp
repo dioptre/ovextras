@@ -10,6 +10,7 @@
 
 #include <time.h>
 #include <cstring>
+#include <sstream>
 
 #if defined TARGET_OS_Windows
  #include <windows.h>
@@ -82,12 +83,12 @@ void  CDriverOpenBCI::updateDaisy() {
 	if (m_bDaisyModule) {
 		m_oHeader.setSamplingFrequency(DefaultSamplingRate/2);
 		m_oHeader.setChannelCount(2*EEGNbValuesPerSample+AccNbValuesPerSample);
-		std::cout << "Daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)(2*EEGNbValuesPerSample) << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << std::endl;
+		m_rDriverContext.getLogManager() << LogLevel_Info << "Daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)(2*EEGNbValuesPerSample) << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << "\n";
 	}
 	else {
 	  	m_oHeader.setSamplingFrequency(DefaultSamplingRate);
 		m_oHeader.setChannelCount(EEGNbValuesPerSample+AccNbValuesPerSample);
-		std::cout << "NO daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)EEGNbValuesPerSample << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << std::endl;
+		m_rDriverContext.getLogManager() << LogLevel_Info << "NO daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)EEGNbValuesPerSample << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << "\n";
 	}
 }
 
@@ -527,7 +528,9 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	uint32 cmdSize = strlen(cmd);
 	uint8  l_ui8ReadBuffer[1]; // TODO: better size for buffer
 	uint32 l_ui32BytesProcessed=0;
-
+	// buffer for serial reading
+	std::ostringstream serial_read_buff;
+	
 #if defined TARGET_OS_Windows
 
 	uint32 l_ui32ReadLength=0;
@@ -543,28 +546,27 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	unsigned int spot = 0;
 	bool returnWrite = false;
 	do {
-		std::cout << "Write: " << cmd[spot];
+	      
+		m_pDriverContext->getLogManager() << LogLevel_Info << "Write: " << &cmd[spot] << "\n";
 		returnWrite = ::WriteFile(i32FileDescriptor, (LPCVOID) &cmd[spot], 1, (LPDWORD)&l_ui32WriteOk, NULL) != 0;
 		spot+=l_ui32WriteOk;
 		if (!returnWrite) {
-			std::cout << " -- Error: " << ::GetLastError();
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Error: " << ::GetLastError() << "\n";
 		}
 		if (sleepBetween > 0) {
 			// give some time to the board to register
-			std::cout << " -- then sleep for: " << sleepBetween << "ms" << std::endl;
+			m_rDriverContext.getLogManager() << LogLevel_Info << "Sleep for: " << sleepBetween << "ms" << "\n";
 			Sleep(sleepBetween);
-		} else {
-			std::cout << std::endl;
 		}
 	} while (spot < cmdSize && returnWrite); //traling 
 	// ended before end, problem
 	if (spot != cmdSize) {;
-		std::cout << "Error: write stopped too early." << std::endl;
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Error: write stopped too early." << "\n";
 		return false;
 	}
 	// read
 	if (waitForResponse) {
-		std::cout << "---- Response ----" << std::endl;
+		m_rDriverContext.getLogManager() << LogLevel_Info << "---- Response ----" << "\n";
 		if(::ClearCommError(i32FileDescriptor, &l_dwState, &l_oStatus))
 		{
 			l_ui32ReadLength=l_oStatus.cbInQue;
@@ -575,10 +577,12 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 			::ReadFile(i32FileDescriptor, l_ui8ReadBuffer, 1, (LPDWORD)&l_ui32ReadOk, 0);
 			if(l_ui32ReadOk==1)
 			{
-				std::cout << l_ui8ReadBuffer[0];
+				serial_read_buff << l_ui8ReadBuffer[0];
 			}
 		}
-		std::cout << std::endl << "---- End response ----" << std::endl;
+		// serial_read_buff stream to std::string and then to const to please log manager
+		m_rDriverContext.getLogManager() << LogLevel_Info  << serial_read_buff.str().c_str() << "\n";
+		m_rDriverContext.getLogManager() << LogLevel_Info << "---- End response ----" << "\n";
 	}
 	
 #elif defined TARGET_OS_Linux
@@ -600,25 +604,25 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	int n_written = 0;
 	unsigned int spot = 0;
 	do {
-		std::cout << "Write: " << cmd[spot];
+		m_rDriverContext.getLogManager() << LogLevel_Info << "Write: " << &cmd[spot] << "\n";
 		n_written = write(i32FileDescriptor, &cmd[spot], 1 );
 		if (sleepBetween > 0) {
 			// give some time to the board to register
-			std::cout << " -- then sleep for: " << sleepBetween << "ms" << std::endl;
+			m_rDriverContext.getLogManager() << LogLevel_Info << "Sleep for: " << sleepBetween << "ms" << "\n";
 			usleep(sleepBetween*1000);
 		} else {
-			std::cout << std::endl;
+			m_rDriverContext.getLogManager() << LogLevel_Info << "\n";
 		}
 		spot += n_written;
 	} while (spot < cmdSize && n_written > 0); //traling 
 	// ended before end, problem
 	if (spot != cmdSize) {;
-		std::cout << "Error: write stopped too early." << std::endl;
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Error: write stopped too early." << "\n";
 		return false;
 	}
 	
 	if (waitForResponse) {
-		std::cout << "---- Response ----" << std::endl;
+		m_rDriverContext.getLogManager() << LogLevel_Info << "---- Response ----" << "\n";
 		do
 		{
 			switch(::select(i32FileDescriptor+1, &l_inputFileDescriptorSet, NULL, NULL, &l_timeout))
@@ -636,7 +640,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 						{					   
 							for(l_ui32BytesProcessed=0; l_ui32BytesProcessed<l_ui32ReadLength; l_ui32BytesProcessed++)
 							{
-								std::cout << l_ui8ReadBuffer[l_ui32BytesProcessed];
+								serial_read_buff << l_ui8ReadBuffer[l_ui32BytesProcessed];
 							}
 						}
 					}
@@ -648,7 +652,9 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 			}
 		}
 		while(!finished);
-		std::cout << std::endl << "---- End response ----" << std::endl;
+		// serial_read_buff stream to std::string and then to const to please log manager
+	        m_rDriverContext.getLogManager() << LogLevel_Info  << serial_read_buff.str().c_str() << "\n";
+		m_rDriverContext.getLogManager() << LogLevel_Info << "---- End response ----" << "\n";
 	}
 #else
 #endif
@@ -659,41 +665,41 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
 {
 	// stop/reset/default board
-	std::cout << "Stop board streaming..." << std::endl;
+	m_rDriverContext.getLogManager() << LogLevel_Info << "Stop board streaming..." << "\n";
 	boardWriteAndPrint(i32FileDescriptor, "s", false, 1000);
 	
 	// reset 32-bit board (no effect with 8bit board)
-	std::cout << "Soft reset of the board..." << std::endl;
+	m_rDriverContext.getLogManager() << LogLevel_Info << "Soft reset of the board..." << "\n";
 	boardWriteAndPrint(i32FileDescriptor, "v", false, 1000);
 	
 	// TODO: flush remaining data?
 	
 	// send correct config for daisy module
 	if (m_bDaisyModule) {
-		std::cout << "Tell the board to enable daisy module..." << std::endl;
+		m_rDriverContext.getLogManager() << LogLevel_Info << "Tell the board to enable daisy module..." << "\n";
 	      boardWriteAndPrint(i32FileDescriptor, "C", true, 1000);
 	}
 	else {
-		std::cout << "Tell the board to disable daisy module..." << std::endl;
+		m_rDriverContext.getLogManager() << LogLevel_Info << "Tell the board to disable daisy module..." << "\n";
 		boardWriteAndPrint(i32FileDescriptor, "c", true, 1000);
 	}
 	
 	// reset 32-bit board (no effect with 8bit board)
-	std::cout << "Channels settings back to default..." << std::endl;
+	m_rDriverContext.getLogManager() << LogLevel_Info << "Channels settings back to default..." << "\n";
 	boardWriteAndPrint(i32FileDescriptor, "d", true, 1000);
 	
-	std::cout << "ComInit: [" << m_sComInit << "]" << std::endl;
+	m_rDriverContext.getLogManager() << LogLevel_Info << "ComInit: [" << m_sComInit << "]" << "\n";
 	if (strlen(m_sComInit) > 0) {
 		boardWriteAndPrint(i32FileDescriptor, m_sComInit, true, m_ui32ComDelay); // yeah, a space to listen to data
 	}
 	
 	
 	// reset 32-bit board (no effect with 8bit board)
-	std::cout << "Print register settings..." << std::endl;
+	m_rDriverContext.getLogManager() << LogLevel_Info << "Print register settings..." << "\n";
 	boardWriteAndPrint(i32FileDescriptor, "?", true, 2500);
 	
 	// start stream
-	std::cout << "Starting stream..." << std::endl;
+	m_rDriverContext.getLogManager() << LogLevel_Info << "Starting stream..." << "\n";
 	boardWriteAndPrint(i32FileDescriptor, "b", false, 1000);
 	
 	// send commands...
@@ -718,8 +724,7 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 	if (packetNumber >= 0) {
 		// check packet drop
 		if ((m_i16LastPacketNumber + 1) % 256 !=  packetNumber) {
-			// FIXME: use logging
-			std::cout << "Last packet drop! Last: " << (int) m_i16LastPacketNumber << ", current packet number: " << packetNumber << std::endl;
+			m_rDriverContext.getLogManager() << LogLevel_Warning << "Last packet drop! Last: " << (int) m_i16LastPacketNumber << ", current packet number: " << packetNumber << "\n";
 		}
 		
 		// no daisy module: push directly values
