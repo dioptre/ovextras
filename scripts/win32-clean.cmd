@@ -1,47 +1,56 @@
 @echo off
 
-if "%1" == "" goto recall_me
+REM this script just deletes all the resulting build folders, do make clean in VS or make if that is what you want.
 
-goto base
+SET ARGFOUND=0
+SET CLEAR_DIST=0
+SET CLEAR_DEPENDENCIES=0
+SET CLEAR_ARTIFACTS=0
 
-REM #######################################################################################
+:loop
+if "%~1" NEQ "" (
+	IF /i "%~1"=="--all" (
+		SET ARGFOUND=1	
+		SET CLEAR_DIST=1
+		SET CLEAR_DEPENDENCIES=1
+		SET CLEAR_ARTIFACTS=1
+		goto found:
+	)
+	IF /i "%~1"=="--local-tmp" (
+		SET ARGFOUND=1	
+		SET CLEAR_ARTIFACTS=1
+		goto found:
+	)	
+	IF /i "%~1"=="--dist" (
+		SET ARGFOUND=1	
+		SET CLEAR_DIST=1
+		goto found:
+	)
+	IF /i "%~1"=="--dependencies" (
+		SET ARGFOUND=1	
+		SET CLEAR_DEPENDENCIES=1
+		goto found:
+	)
 
-:recall_me
+:found
+	SHIFT
+	goto loop:
+)
 
-cmd /e /v /c %0 dummy
+if "%ARGFOUND%" NEQ "1" (
+	echo Usage: win32-clean.bat [--all --local-tmp --dist --dependencies]
+	exit
+)
+	
+if "%CLEAR_DIST%" == "1" (
+	rmdir /S ../dist
+)
 
-goto terminate
+if "%CLEAR_ARTIFACTS%" == "1" (
+	rmdir /S ../local-tmp
+)
 
-REM #######################################################################################
-
-:base
-
-REM #######################################################################################
-
-call "win32-init_env_command.cmd"
-
-REM #######################################################################################
-
-set saved_directory=%CD%
-
-cd ..\..\local-tmp\nmake
-
-echo Cleaning up ..\..\local-tmp\nmake
-
-nmake clean
-IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
-
-echo.
-echo Clean process terminated successfully !
-echo.
-
-pause
-
-goto terminate
-
-:terminate_error
-
-echo There was a problem during clean...
-
-:terminate
+if "%CLEAR_DEPENDENCIES%" == "1" (
+	rmdir /S ../dependencies
+)
 
