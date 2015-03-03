@@ -329,7 +329,7 @@ OpenViBE::int16 CDriverOpenBCI::parseByte(uint8 ui8Actbyte)
 				{
 					// fill EEG channel buffer, converting at the same time from 24 to 32 bits + scaling
 					// TODO: scale depends on gain
-					m_vSampleEEGBuffer[m_ui16ExtractPosition] = interpret24bitAsInt32(m_vEEGValueBuffer)*ScaleFacuVoltsPerCount;
+					m_vSampleEEGBuffer[m_ui16ExtractPosition] = (float) interpret24bitAsInt32(m_vEEGValueBuffer)*ScaleFacuVoltsPerCount;
 					// reset for next value
 					m_ui8SampleBufferPosition = 0;
 					m_ui16ExtractPosition++;
@@ -362,7 +362,7 @@ OpenViBE::int16 CDriverOpenBCI::parseByte(uint8 ui8Actbyte)
 				// we got Acc value
 				if (m_ui8SampleBufferPosition == AccValueBufferSize) {
 					// fill Acc channel buffer, converting at the same time from 16 to 32 bits
-					m_vSampleAccBuffer[m_ui16ExtractPosition] = interpret16bitAsInt32(m_vAccValueBuffer);
+					m_vSampleAccBuffer[m_ui16ExtractPosition] = (float) interpret16bitAsInt32(m_vAccValueBuffer);
 					// reset for next value
 					m_ui8SampleBufferPosition = 0;
 					m_ui16ExtractPosition++;
@@ -546,12 +546,12 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	unsigned int spot = 0;
 	bool returnWrite = false;
 	do {
-	      
-		m_pDriverContext->getLogManager() << LogLevel_Info << "Write: " << &cmd[spot] << "\n";
+		// conversion from char a bit messy...
+		m_rDriverContext.getLogManager() << LogLevel_Info << "Write: " << std::string(1, cmd[spot]).c_str() << "\n";
 		returnWrite = ::WriteFile(i32FileDescriptor, (LPCVOID) &cmd[spot], 1, (LPDWORD)&l_ui32WriteOk, NULL) != 0;
 		spot+=l_ui32WriteOk;
 		if (!returnWrite) {
-			m_rDriverContext.getLogManager() << LogLevel_Error << "Error: " << ::GetLastError() << "\n";
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Error: " << (int32)::GetLastError() << "\n";
 		}
 		if (sleepBetween > 0) {
 			// give some time to the board to register
@@ -604,7 +604,8 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	int n_written = 0;
 	unsigned int spot = 0;
 	do {
-		m_rDriverContext.getLogManager() << LogLevel_Info << "Write: " << &cmd[spot] << "\n";
+		// conversion from char a bit messy...
+		m_rDriverContext.getLogManager() << LogLevel_Info << "Write: " << std::string(1, cmd[spot]).c_str() << "\n";
 		n_written = write(i32FileDescriptor, &cmd[spot], 1 );
 		if (sleepBetween > 0) {
 			// give some time to the board to register
