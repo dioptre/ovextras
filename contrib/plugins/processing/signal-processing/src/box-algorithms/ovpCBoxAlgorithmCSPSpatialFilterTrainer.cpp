@@ -157,10 +157,12 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 	{
 		this->getLogManager() << LogLevel_Info << "Received train stimulation - be patient\n";
 
-		this->getLogManager() << LogLevel_Trace << "Decoding motor signal 1...\n";
+		this->getLogManager() << LogLevel_Trace << "Estimating cov for condition 1...\n";
 
 		itpp::mat l_oCovarianceMatrixCondition1;
 		int l_iNumberOfCondition1Trials = 0;
+		int l_iCondition1ChunkSize = 0;
+		int l_iCondition2ChunkSize = 0;
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
 		{
 			m_pSignalDecoderCondition1->decode(i);
@@ -169,6 +171,11 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition1->getOutputMatrix());
 				l_oCovarianceMatrixCondition1.set_size(ip_pMatrix->getDimensionSize(0),ip_pMatrix->getDimensionSize(0));
 				l_oCovarianceMatrixCondition1.zeros();
+
+				l_iCondition1ChunkSize = ip_pMatrix->getDimensionSize(1);
+				this->getLogManager() << LogLevel_Debug << "Cov matrix size for condition 1 is [" 
+					<< ip_pMatrix->getDimensionSize(0) << "x" << ip_pMatrix->getDimensionSize(0) 
+					<< "], chunk size is " << l_iCondition1ChunkSize << " samples\n";
 			}
 			if(m_pSignalDecoderCondition1->isBufferReceived())
 			{
@@ -183,9 +190,9 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 			l_rDynamicBoxContext.markInputAsDeprecated(1, i);
 		}
 		l_oCovarianceMatrixCondition1 = l_oCovarianceMatrixCondition1/ ((double)l_iNumberOfCondition1Trials);
-		this->getLogManager() << LogLevel_Debug << "Number of trials for condition 1: " << l_iNumberOfCondition1Trials << "\n";
+		this->getLogManager() << LogLevel_Trace << "Number of chunks for condition 1: " << l_iNumberOfCondition1Trials << "\n";
 
-		this->getLogManager() << LogLevel_Trace << "Decoding motor signal 2...\n";
+		this->getLogManager() << LogLevel_Trace << "Estimating cov for condition 2...\n";
 
 		itpp::mat l_oCovarianceMatrixCondition2;
 		int l_iNumberOfCondition2Trials = 0;
@@ -197,6 +204,11 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition2->getOutputMatrix());
 				l_oCovarianceMatrixCondition2.set_size(ip_pMatrix->getDimensionSize(0),ip_pMatrix->getDimensionSize(0));
 				l_oCovarianceMatrixCondition2.zeros();
+
+				l_iCondition2ChunkSize = ip_pMatrix->getDimensionSize(1);
+				this->getLogManager() << LogLevel_Debug << "Cov matrix size for condition 2 is [" 
+					<< ip_pMatrix->getDimensionSize(0) << "x" << ip_pMatrix->getDimensionSize(0) 
+					<< "], chunk size is " << l_iCondition2ChunkSize << " samples\n";
 			}
 			if(m_pSignalDecoderCondition2->isBufferReceived())
 			{
@@ -211,7 +223,21 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 			l_rDynamicBoxContext.markInputAsDeprecated(2, i);
 		}
 		l_oCovarianceMatrixCondition2 = l_oCovarianceMatrixCondition2/ ((double)l_iNumberOfCondition2Trials);
-		this->getLogManager() << LogLevel_Debug << "Number of trials for condition 2: " << l_iNumberOfCondition2Trials << "\n";
+
+		if(l_oCovarianceMatrixCondition1.cols() != l_oCovarianceMatrixCondition2.cols())
+		{
+			this->getLogManager() << LogLevel_Error << "The two inputs do not seem to have the same number of channels, "
+				<< l_oCovarianceMatrixCondition1.cols() << " vs " << l_oCovarianceMatrixCondition2.cols() << "\n";
+			return false;
+		}
+
+		this->getLogManager() << LogLevel_Info << "Data covariance dims are [" << l_oCovarianceMatrixCondition1.rows() << "x"
+			<< l_oCovarianceMatrixCondition1.cols() 
+			<< "]. Number of samples per condition : \n";
+		this->getLogManager() << LogLevel_Info << "  cond1 = " 
+			<< l_iNumberOfCondition1Trials << " chunks, sized " << l_iCondition1ChunkSize << " -> " << l_iNumberOfCondition1Trials*l_iCondition1ChunkSize << " samples\n";
+		this->getLogManager() << LogLevel_Info << "  cond2 = " 
+			<< l_iNumberOfCondition2Trials << " chunks, sized " << l_iCondition2ChunkSize << " -> " << l_iNumberOfCondition2Trials*l_iCondition2ChunkSize << " samples\n";
 
 		if(l_iNumberOfCondition1Trials==0 || l_iNumberOfCondition2Trials==0)
 		{
