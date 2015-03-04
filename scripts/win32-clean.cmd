@@ -1,6 +1,7 @@
 @echo off
 
-REM this script just deletes all the resulting build folders, do make clean in VS or make if that is what you want.
+REM this script just deletes all the resulting build folders. 
+REM You should do make clean manually in VS or make if that is what you want.
 
 SET ARGFOUND=0
 SET CLEAR_DIST=0
@@ -37,20 +38,23 @@ if "%~1" NEQ "" (
 	goto loop:
 )
 
-if "%ARGFOUND%" NEQ "1" (
+if "%ARGFOUND%" == "0" (
 	echo Usage: win32-clean.bat [--all --local-tmp --dist --dependencies]
-	exit
+	exit /B
 )
 	
 if "%CLEAR_DIST%" == "1" (
-	rmdir /S ../dist
+    echo Deleting
+	rmdir /S ..\dist
 )
 
 if "%CLEAR_ARTIFACTS%" == "1" (
-	rmdir /S ../local-tmp
+    echo Deleting
+	rmdir /S ..\local-tmp
 )
 
 if "%CLEAR_DEPENDENCIES%" == "1" (
-	rmdir /S ../dependencies
+    echo Deleting
+	rmdir /S ..\dependencies
 )
 
