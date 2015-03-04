@@ -604,7 +604,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 					uint64 l_ui64StartTime = l_rDynamicBoxContext.getInputChunkStartTime(i,j);
 					uint64 l_ui64EndTime = l_rDynamicBoxContext.getInputChunkEndTime(i,j);
 					if(l_pStimSet->getStimulationCount() > 0) {
-						this->getLogManager() << LogLevel_Info << "Stuffing in stimuli\n";
+						this->getLogManager() << LogLevel_Trace << "Inserting stimulation set with size " << l_pStimSet->getStimulationCount() << "\n";
 					}
 					if(!checkFailureRoutine(m_oMatlabHelper.addStimulationsInputBuffer(i,l_pStimSet,l_ui64StartTime,l_ui64EndTime),"Error calling [OV_addInputBuffer (Stimulations)]\n")) return false;
 					l_bUnknownStream = false;
@@ -663,7 +663,6 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 				boolean l_bUnknownType = true;
 				if(l_oType == OV_TypeId_StreamedMatrix)
 				{
-					((TStreamedMatrixEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix() = new CMatrix();
 					IMatrix * l_pMatrixToSend = ((TStreamedMatrixEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix();
 					if(!checkFailureRoutine(m_oMatlabHelper.getStreamedMatrixOutputHeader(i,l_pMatrixToSend),"Error calling [OV_getStreamedMatrixOutputHeader]. Did you correctly set the output header in the matlab structure ?\n")) return false;
 
@@ -671,7 +670,6 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 				}
 				if(l_oType == OV_TypeId_Signal)
 				{
-					((TSignalEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix() = new CMatrix();
 					IMatrix * l_pMatrixToSend = ((TSignalEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix();
 					uint64 l_ui64SamplingRate = ((TSignalEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputSamplingRate();
 					if(!checkFailureRoutine(m_oMatlabHelper.getSignalOutputHeader(i,l_pMatrixToSend,l_ui64SamplingRate),"Error calling [OV_getSignalOutputHeader]. Did you correctly set the output header in the matlab structure ?\n")) return false;
@@ -684,7 +682,6 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 
 				if(l_oType == OV_TypeId_FeatureVector)
 				{
-					((TFeatureVectorEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix() = new CMatrix();
 					IMatrix * l_pMatrixToSend = ((TFeatureVectorEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix();
 					if(!checkFailureRoutine(m_oMatlabHelper.getFeatureVectorOutputHeader(i,l_pMatrixToSend),"Error calling [OV_getFeatureVectorOutputHeader]. Did you correctly set the output header in the matlab structure ?\n")) return false;
 
@@ -693,8 +690,6 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 
 				if(l_oType == OV_TypeId_Spectrum)
 				{
-					((TSpectrumEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix() = new CMatrix();
-					((TSpectrumEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMinMaxFrequencyBands() = new CMatrix();
 					IMatrix * l_pMatrixToSend = ((TSpectrumEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix();
 					IMatrix * l_pBands        = ((TSpectrumEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMinMaxFrequencyBands();
 					if(!checkFailureRoutine(m_oMatlabHelper.getSpectrumOutputHeader(i,l_pMatrixToSend,l_pBands),"Error calling [OV_getSpectrumOutputHeader]. Did you correctly set the output header in the matlab structure ?\n")) return false;
@@ -704,7 +699,6 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 
 				if(l_oType == OV_TypeId_ChannelLocalisation)
 				{
-					((TChannelLocalisationEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix() = new CMatrix();
 					IMatrix * l_pMatrixToSend = ((TChannelLocalisationEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix();
 					boolean   l_bDynamic      = ((TChannelLocalisationEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputDynamic();
 					if(!checkFailureRoutine(m_oMatlabHelper.getChannelLocalisationOutputHeader(i,l_pMatrixToSend,l_bDynamic),"Error calling [OV_getChannelLocalizationOutputHeader]. Did you correctly set the output header in the matlab structure ?\n")) return false;
@@ -723,7 +717,6 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 
 				if(l_oType == OV_TypeId_Stimulations)
 				{
-					((TStimulationEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputStimulationSet() = new CStimulationSet();
 					IStimulationSet * l_pStimSet = ((TStimulationEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputStimulationSet();
 					if(!checkFailureRoutine(m_oMatlabHelper.getStimulationsOutputHeader(i, l_pStimSet),"Error calling [OV_getStimulationsOutputHeader]. Did you correctly set the output header in the matlab structure ?\n")) return false;
 
