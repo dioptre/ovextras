@@ -1,3 +1,12 @@
+/*
+ * OpenBCI driver for OpenViBE
+ *
+ * \author Jeremy Frey
+ *
+ * \note Based on OpenEEG code; inherits its AGPL3 license conditions
+ *
+ */
+
 #include "ovasCDriverOpenBCI.h"
 #include "ovasCConfigurationOpenBCI.h"
 

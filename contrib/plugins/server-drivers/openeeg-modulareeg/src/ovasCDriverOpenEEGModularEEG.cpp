@@ -1,3 +1,9 @@
+/*
+ * \author Christoph Veigl, Yann Renard
+ *
+ * \copyright AGPL3
+ *
+ */
 #include "ovasCDriverOpenEEGModularEEG.h"
 #include "ovasCConfigurationOpenEEGModularEEG.h"
 

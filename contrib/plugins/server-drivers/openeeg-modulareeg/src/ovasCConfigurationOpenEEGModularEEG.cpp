@@ -1,3 +1,9 @@
+/*
+ * \author Christoph Veigl, Yann Renard
+ *
+ * \copyright AGPL3
+ *
+ */
 #include "ovasCConfigurationOpenEEGModularEEG.h"
 
 using namespace OpenViBE;

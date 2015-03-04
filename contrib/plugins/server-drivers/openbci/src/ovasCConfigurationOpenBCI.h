@@ -1,3 +1,11 @@
+/*
+ * OpenBCI driver for OpenViBE
+ *
+ * \author Jeremy Frey
+ *
+ * \note Based on OpenEEG code; inherits its AGPL3 license conditions
+ *
+ */
 #ifndef __OpenViBE_AcquisitionServer_CConfigurationOpenBCI_H__
 #define __OpenViBE_AcquisitionServer_CConfigurationOpenBCI_H__
 
