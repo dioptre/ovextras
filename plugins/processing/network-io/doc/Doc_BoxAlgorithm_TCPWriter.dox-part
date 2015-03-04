@@ -8,7 +8,8 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Description|
 This box works as a TCP server that writes its input stream out to a TCP socket with minimal header information and encoding.
 
-The main motivation for this box is to allow external applications to receive information from OpenViBE without requiring unusual dependencies such as VRPN.
+The main motivation for this box is to allow external applications to receive information in a simple manner from OpenViBE without 
+requiring unusual dependencies such as VRPN.
 
 Output:
 
@@ -16,7 +17,10 @@ Output:
 
 1b) If the output is chosen as hex string or descriptive string (these are valid for Stimulation input only), no header is sent.
 
-2) After the possible global header, the data itself is sent. The data is a stream of float64 for Signal and StreamedMatrix. The data orientation is [nSamples x nChannels], i.e. all channels for one sample are sent in a sequence, then all channels of the next sample, and so on. For Stimulations, the data is uint64 if user chooses raw, or char strings otherwise.
+2) After the possible global header, the data itself is sent. The data is a stream of float64 for Signal and StreamedMatrix. 
+The data orientation is [nSamples x nChannels], i.e. all channels for one sample are sent in a sequence, then all channels of the next sample, 
+and so on (the matrix is a transpose of the usual OpenViBE signal orientation). For Stimulations, the data is uint64 if user chooses raw, 
+or char strings otherwise.
 
 Multiple clients can connect to the socket of the box. The box keeps sending data to each client until either the scenario is stopped or the client disconnects. The box does not guarantee that the client starts to receive the input stream from any particular location. When kernel calls box::process() at time t, all clients connected at time t get forwarded the chunks given to box::process() at t. However, if a client establish a connection during box::process(), it may get a partial chunk of t and the whole chunk of t+1 and so on.
 
@@ -54,7 +58,10 @@ Examples description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_TCPWriter_Examples|
- Easiest way to test the box is to connect to the socket of the box with 'telnet' and redirect the telnet output to a file. 
+ There is an example application 'openvibe-examples-openvibe-to-tcpip' that can be used to receive data from this box. 
+ The application is intended to be used together with the 'tcp-writer.xml' box tutorial.
+
+ Another way to test the box is to connect to the socket of the box with a 'telnet' application and redirect the telnet output to a file. 
  
  It is also possible to use Acquisition Server's Generic Raw Telnet Reader to read data from the box. In that case, set Start Skip to 32 and header and footer skips to 0, and data format to float64. Remember to also set the number of channels and the sampling frequency correctly. This information is not read from the stream by the Generic Raw Telnet Reader.
  * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Examples|
@@ -74,5 +81,8 @@ __________________________________________________________________
  
  Streamed Matrix can be recognized from the TCPWriter header by the sampling rate 0. If the stream is a signal, the sampling rate is a positive number.
  
+ Known issues: Note that it can be difficult to time-synchronize signals and stimulations exactly on the client side when the client receives data from
+ two TCP Writer boxes. Maintaining such synchronization was not a design goal of this box. If you need synchronized streams, it is advised to build
+ the connection with LabStreamingLayer: Use LSL Export box and include LSL support in the client.
  * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Miscellaneous|
  */

@@ -116,6 +116,8 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	m_ui32Reserved1 = 0;
 	m_ui32Reserved2 = 0;
 
+	this->getLogManager() << LogLevel_Trace << "Setting up an acceptor at port " << l_ui64Port << "\n";
+
 	try 
 	{
 #ifdef TARGET_OS_Windows

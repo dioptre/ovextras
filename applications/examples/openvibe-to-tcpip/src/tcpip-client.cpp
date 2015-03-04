@@ -41,10 +41,12 @@ public:
 		tcp::resolver resolver(ioService);
 
 		// Signal port
+		std::cout << "Connecting to signal port [" << sAddress << " : " << sSignalPort << "]\n";
 		tcp::resolver::query query = tcp::resolver::query(tcp::v4(), sAddress, sSignalPort);
 		signalSocket.connect(*resolver.resolve(query), error);
 
 		// Stimulus port
+		std::cout << "Connecting to stimulus port [" << sAddress << " : " << sStimulusPort << "]\n";
 		query = tcp::resolver::query(tcp::v4(), sAddress, sStimulusPort);
 		stimulusSocket.connect(*resolver.resolve(query), error);
 
@@ -146,22 +148,28 @@ int main(int argc, char** argv)
 {
 	try
 	{
-		if(strcmp(argv[1], "-h") == 0)
+		if(argc>1 && ( (strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "--help") == 0) || argc!=4 ) )
 		{
-			std::cout << "usage: " << argv[0] << " ip_address signal_port stimulus_port" << std::endl;
-			std::cout << "If no argument is given, the program try to communicate on localhost using default port value." << std::endl;
+			std::cout << "Usage: " << argv[0] << " ip_address signal_port stimulus_port" << std::endl;
+			std::cout << "If no argument is given, the program tries to communicate on localhost using default port value." << std::endl;
 			return EXIT_SUCCESS;
 		}
-		boost::asio::io_service ioService;
+
+		const char* l_sHostname = "localhost";
+		const char* l_sSignalPort = "5678";
+		const char* l_sStimulusPort = "5679";
+
 		if(argc == 4)
 		{
-			TCPWriterClient client(ioService, argv[1], argv[2], argv[3]);
+			l_sHostname = argv[1]; l_sSignalPort = argv[2]; l_sStimulusPort = argv[3];
 		}
-		else
 
-		{
-			TCPWriterClient client(ioService, "localhost", "5678", "5679");
-		}
+		std::cout << "This example is intended to be used together with the tcp-writer.xml tutorial.\n\n";
+
+		boost::asio::io_service ioService;
+
+		TCPWriterClient client(ioService, l_sHostname, l_sSignalPort, l_sStimulusPort);
+
 		ioService.run();
 	}
 	catch (std::exception& e)
