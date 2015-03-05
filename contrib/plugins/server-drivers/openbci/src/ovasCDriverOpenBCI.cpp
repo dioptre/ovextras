@@ -818,8 +818,8 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 	m_rDriverContext.getLogManager() << LogLevel_Debug << "Enters readPacketFromTTY\n";
 
 	// try to awake the board if there's something wrong
-	if (System::Time::getTime() - m_ui32tick > m_ui32PollingDelay) {
-		m_rDriverContext.getLogManager() << LogLevel_ImportantWarning << "No response for " << m_ui32PollingDelay << "ms, emergency reset.\n";
+	if (System::Time::getTime() - m_ui32tick > PollingDelay) {
+		m_rDriverContext.getLogManager() << LogLevel_ImportantWarning << "No response for " << (uint32)PollingDelay << "ms, emergency reset.\n";
 		fastReco(i32FileDescriptor);
 	}
 				

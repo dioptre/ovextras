@@ -120,7 +120,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::CString m_sTTYName;
 		
 		// mechanism to call fastReco() if no data are received
-		const static OpenViBE::uint32 m_ui32PollingDelay = 1000; // in ms
+		const static OpenViBE::uint32 PollingDelay = 1000; // in ms
 		OpenViBE::uint32 m_ui32tick; // last tick for polling
 	};
 };
