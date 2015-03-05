@@ -66,6 +66,7 @@ namespace OpenViBEAcquisitionServer
 		
 		OpenViBE::boolean boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const char *cmd, OpenViBE::boolean waitForResponse, OpenViBE::uint32 sleepBetween);
 		OpenViBE::boolean initBoard(::FD_TYPE i32FileDescriptor);
+		void fastReco(::FD_TYPE i32FileDescriptor);
 		OpenViBE::int32 readPacketFromTTY(::FD_TYPE i32FileDescriptor);
 		void closeTTY(::FD_TYPE i32FileDescriptor);
 		OpenViBE::boolean handleCurrentSample(OpenViBE::int32 packetNumber); // will take car of samples fetch from OpenBCI board, dropping/merging packets if necessary
@@ -101,7 +102,7 @@ namespace OpenViBEAcquisitionServer
 		
 		OpenViBE::uint16 m_ui16ExtractPosition; // used to situate sample reading both with EEG and accelerometer data
 		
-		OpenViBE::float32 ScaleFacuVoltsPerCount; // convert from int32 to microvort
+		OpenViBE::float32 ScaleFacuVoltsPerCount; // convert from int32 to microvolt
 		
 		OpenViBE::int16  m_i16LastPacketNumber;
 		OpenViBE::uint16 m_ui16Switches;
@@ -117,6 +118,10 @@ namespace OpenViBEAcquisitionServer
 		bool m_bSeenPacketFooter; // extra precaution to sync packets
 
 		OpenViBE::CString m_sTTYName;
+		
+		// mechanism to call fastReco() if no data are received
+		const static OpenViBE::uint32 m_ui32PollingDelay = 1000; // in ms
+		OpenViBE::uint32 m_ui32tick; // last tick for polling
 	};
 };
 
