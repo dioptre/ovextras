@@ -790,6 +790,7 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 					// at last, add to chunk
 					m_vChannelBuffer.push_back(l_vSampleBuffer);
 					l_bSampleOK = true;
+
 				}
 			}
 			// an even packet: it's Daisy, store values for later
@@ -802,6 +803,12 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 		
 		m_i16LastPacketNumber = packetNumber;
 	}
+	
+	// something to read: won't have to poll before "long"
+	if (l_bSampleOK) {
+		m_ui32tick = System::Time::getTime();
+	}
+	  
 	return l_bSampleOK;
 }
 
@@ -810,6 +817,12 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Debug << "Enters readPacketFromTTY\n";
 
+	// try to awake the board if there's something wrong
+	if (System::Time::getTime() - m_ui32tick > m_ui32PollingDelay) {
+		m_rDriverContext.getLogManager() << LogLevel_ImportantWarning << "No response for " << m_ui32PollingDelay << "ms, emergency reset.\n";
+		fastReco(i32FileDescriptor);
+	}
+				
 	uint8  l_ui8ReadBuffer[1]; // TODO: better size for buffer
 	uint32 l_ui32BytesProcessed=0;
 	int32  l_i32PacketsProcessed=0;
@@ -857,16 +870,10 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 		{
 			case -1: // error or timeout
 			case  0:
-				if (System::Time::getTime() - m_ui32tick > m_ui32PollingDelay) {
-				  m_rDriverContext.getLogManager() << LogLevel_ImportantWarning << "No response for " << m_ui32PollingDelay << "ms, emergency reset.\n";
-				  fastReco(i32FileDescriptor);
-				}
 				finished=true;
 				break;
 
 			default:
-				// something to read: won't have to poll before "long"
-				m_ui32tick = System::Time::getTime();
 				if(FD_ISSET(i32FileDescriptor, &l_inputFileDescriptorSet))
 				{
 					l_ui32ReadLength=::read(i32FileDescriptor, l_ui8ReadBuffer, sizeof(l_ui8ReadBuffer));		  
