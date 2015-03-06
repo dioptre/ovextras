@@ -540,6 +540,9 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	// buffer for serial reading
 	std::ostringstream serial_read_buff;
 	
+	// wait a little before we send value
+	System::Time::sleep(SLEEP_BEFORE_WRITE);
+	
 #if defined TARGET_OS_Windows
 
 	uint32 l_ui32ReadLength=0;
@@ -547,9 +550,6 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 	uint32 l_ui32WriteOk=0;
 	struct _COMSTAT l_oStatus;
 	::DWORD l_dwState;
-	
-	// wait a little before we send value
-	Sleep(SLEEP_BEFORE_WRITE);
 	
 	// write
 	unsigned int spot = 0;
@@ -565,7 +565,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 		if (sleepBetween > 0) {
 			// give some time to the board to register
 			m_rDriverContext.getLogManager() << LogLevel_Info << "Sleep for: " << sleepBetween << "ms" << "\n";
-			Sleep(sleepBetween);
+			System::Time::sleep(sleepBetween);
 		}
 	} while (spot < cmdSize && returnWrite); //traling 
 	// ended before end, problem
@@ -606,9 +606,6 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
  	FD_ZERO(&l_inputFileDescriptorSet);
 	FD_SET(i32FileDescriptor, &l_inputFileDescriptorSet);
 	
-	// wait a little before we send value
-	usleep(SLEEP_BEFORE_WRITE*1000);
-	
 	// write
 	int n_written = 0;
 	unsigned int spot = 0;
@@ -619,7 +616,7 @@ boolean CDriverOpenBCI::boardWriteAndPrint(::FD_TYPE i32FileDescriptor, const ch
 		if (sleepBetween > 0) {
 			// give some time to the board to register
 			m_rDriverContext.getLogManager() << LogLevel_Info << "Sleep for: " << sleepBetween << "ms" << "\n";
-			usleep(sleepBetween*1000);
+			System::Time::sleep(sleepBetween);
 		} else {
 			m_rDriverContext.getLogManager() << LogLevel_Info << "\n";
 		}
@@ -700,7 +697,7 @@ boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
 	
 	m_rDriverContext.getLogManager() << LogLevel_Info << "ComInit: [" << m_sComInit << "]" << "\n";
 	if (strlen(m_sComInit) > 0) {
-		boardWriteAndPrint(i32FileDescriptor, m_sComInit, true, m_ui32ComDelay); // yeah, a space to listen to data
+		boardWriteAndPrint(i32FileDescriptor, m_sComInit, true, m_ui32ComDelay);
 	}
 	
 	
@@ -712,8 +709,41 @@ boolean CDriverOpenBCI::initBoard(::FD_TYPE i32FileDescriptor)
 	m_rDriverContext.getLogManager() << LogLevel_Info << "Starting stream..." << "\n";
 	boardWriteAndPrint(i32FileDescriptor, "b", false, 1000);
 	
-	// send commands...
+	// should start streaming!
+	m_ui32tick = System::Time::getTime();
 	return true;
+}
+
+// a sub-list of command compared to init; the timeout is threatening us
+// FIXME: we will force the delay of users' commands here because of the 5s timeout + too many user's command will timeout...
+void CDriverOpenBCI::fastReco(::FD_TYPE i32FileDescriptor)
+{
+	// concatenate all commands to speedup further reco
+	std::ostringstream write_buff;
+	// send correct config for daisy module
+	if (m_bDaisyModule) {
+	      write_buff << "C";
+	}
+	else {
+	      write_buff << "c";
+	}
+	
+	// reset 32-bit board (no effect with 8bit board)
+	write_buff << "d";
+	
+	// command from user
+	if (strlen(m_sComInit) > 0) {
+		write_buff <<  m_sComInit;
+	}
+	
+	// start stream
+	write_buff << "b";
+
+	// send all
+	boardWriteAndPrint(i32FileDescriptor, write_buff.str().c_str(), false, 100);
+	
+	// should start streaming!
+	m_ui32tick = System::Time::getTime();
 }
 
 void CDriverOpenBCI::closeTTY(::FD_TYPE i32FileDescriptor)
@@ -769,6 +799,7 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 					// at last, add to chunk
 					m_vChannelBuffer.push_back(l_vSampleBuffer);
 					l_bSampleOK = true;
+
 				}
 			}
 			// an even packet: it's Daisy, store values for later
@@ -781,6 +812,12 @@ bool CDriverOpenBCI::handleCurrentSample(int32 packetNumber) {
 		
 		m_i16LastPacketNumber = packetNumber;
 	}
+	
+	// something to read: won't have to poll before "long"
+	if (l_bSampleOK) {
+		m_ui32tick = System::Time::getTime();
+	}
+	  
 	return l_bSampleOK;
 }
 
@@ -789,6 +826,12 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Debug << "Enters readPacketFromTTY\n";
 
+	// try to awake the board if there's something wrong
+	if (System::Time::getTime() - m_ui32tick > PollingDelay) {
+		m_rDriverContext.getLogManager() << LogLevel_ImportantWarning << "No response for " << (uint32)PollingDelay << "ms, emergency reset.\n";
+		fastReco(i32FileDescriptor);
+	}
+				
 	uint8  l_ui8ReadBuffer[1]; // TODO: better size for buffer
 	uint32 l_ui32BytesProcessed=0;
 	int32  l_i32PacketsProcessed=0;
@@ -831,7 +874,7 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 	{
 		FD_ZERO(&l_inputFileDescriptorSet);
 		FD_SET(i32FileDescriptor, &l_inputFileDescriptorSet);
-
+		
 		switch(::select(i32FileDescriptor+1, &l_inputFileDescriptorSet, NULL, NULL, &l_timeout))
 		{
 			case -1: // error or timeout
@@ -862,9 +905,6 @@ int32 CDriverOpenBCI::readPacketFromTTY(::FD_TYPE i32FileDescriptor)
 		}
 	}
 	while(!finished);
-
-#else
-
 #endif
 
 	m_rDriverContext.getLogManager() << LogLevel_Debug << "Leaves readPacketFromTTY\n";
