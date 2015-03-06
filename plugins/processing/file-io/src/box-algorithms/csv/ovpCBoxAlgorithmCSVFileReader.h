@@ -41,7 +41,7 @@ namespace OpenViBEPlugins
 
 			::FILE* m_pFile;
 			std::string m_sSeparator;
-			OpenViBE::boolean m_bNotUseTimer;
+			OpenViBE::boolean m_bDoNotUseFileTime;
 			OpenViBE::CString m_sFilename;
 			OpenViBE::boolean m_bUseCompression;
 
@@ -61,6 +61,9 @@ namespace OpenViBEPlugins
 			std::vector<std::vector<std::string> > m_vDataMatrix;
 
 			OpenViBE::float64 m_f64NextTime;
+
+			OpenViBE::uint64 m_ui64ChunkStartTime;
+			OpenViBE::uint64 m_ui64ChunkEndTime;
 
 			static const OpenViBE::uint32 m_ui32bufferLen = 16384; // Side-effect: a maximum allowed length for a line of a CSV file
 		};
