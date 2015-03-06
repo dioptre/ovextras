@@ -76,7 +76,7 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 	// Display an error message if the algorithm is not recognized
 	if(l_oConnectivityAlgorithmClassIdentifier==OV_UndefinedIdentifier)
 	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Unknown connectivity algorithm [" << l_sConnectivityAlgorithmClassIdentifier << "]\n";
+		this->getLogManager() << LogLevel_Error << "Unknown connectivity algorithm [" << l_sConnectivityAlgorithmClassIdentifier << "]\n";
 		return false;
 	}
 

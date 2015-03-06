@@ -29,6 +29,7 @@ boolean CBoxAlgorithmStimulationListener::uninitialize(void)
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
 		m_vStimulationDecoder[i]->uninitialize();
+		delete m_vStimulationDecoder[i];
 	}
 	m_vStimulationDecoder.clear();
 

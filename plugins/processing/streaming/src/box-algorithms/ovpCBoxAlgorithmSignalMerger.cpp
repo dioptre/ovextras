@@ -33,6 +33,7 @@ boolean CBoxAlgorithmSignalMerger::uninitialize(void)
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
 		m_vStreamDecoder[i]->uninitialize();
+		delete m_vStreamDecoder[i];
 	}
 	m_vStreamDecoder.clear();
 

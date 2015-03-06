@@ -60,6 +60,7 @@ namespace OpenViBEPlugins
 				if(m_pStreamedMatrixDecoder.back())
 				{
 					m_pStreamedMatrixDecoder.back()->uninitialize();
+					delete m_pStreamedMatrixDecoder.back();
 					m_pStreamedMatrixDecoder.pop_back();
 				}
 			}

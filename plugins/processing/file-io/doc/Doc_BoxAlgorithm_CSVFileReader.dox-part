@@ -53,10 +53,15 @@ fields. Typical examples are colon, semi colon and tabulations.
  * |OVP_DocEnd_BoxAlgorithm_CSVFileReader_Setting2|
 
  * |OVP_DocBegin_BoxAlgorithm_CSVFileReader_Setting3|
-This option can be only used for an output signal type.
-Sometimes, the time of the first sample isn't equal 0 or the file contains many parts
-of samples, space in the time. If you want used a continues signal, start at the begin of the scenario,
-tick this setting. All samples are send with the sampling rate specified at the end of the second line of the csv file.
+This option mainly makes sense for an output signal type, but can also be used
+for matrices. Sometimes, the time of the first sample in the data isn't equal 
+0 or the file appears to contain such timing that it is difficult to parse a 
+continuous chunk sequence from it. Many OpenViBE boxes expect continuous 
+chunking, starting at time 0, with no time between the signal chunks. This
+setting interpretes the file as essentially being dense, with consecutive
+chunks, the first chunk (sample) at time 0. The samples are sent according 
+to the timing dictated by the sampling rate specified at the end of the 
+second line of the csv file, with the first column ignored.
  * |OVP_DocEnd_BoxAlgorithm_CSVFileReader_Setting3|
  
  * |OVP_DocBegin_BoxAlgorithm_CSVFileReader_Setting4|
@@ -75,7 +80,14 @@ Miscellaneous description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_CSVFileReader_Miscellaneous|
-In this section, we detail the typical inputs that you will find in the input
+If the boxes obtaining signal from the CSV File Reader behave curiously, 
+you may want to try enabling the "don't use the file time" setting. Also, 
+if the time is not monotonically increasing from sample to another 
+in the file (this can result from e.g. epoching), the result may not 
+be read back as expected. For such signals, it is best to use the 
+.ov file format and not CSV.
+ 
+Here are some typical inputs that you will find in the input
 file depending on the type of the input connector.
 
 For the Signal stream, you will have something like this :

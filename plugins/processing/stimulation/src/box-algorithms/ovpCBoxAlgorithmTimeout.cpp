@@ -41,7 +41,7 @@ boolean CBoxAlgorithmTimeout::processClock(IMessageClock& rMessageClock)
 	// timeout flag and let the box send a stimulation
 	if (getPlayerContext().getCurrentTime() > m_ui64LastTimePolled + m_ui64Timeout)
 	{
-		getLogManager() << LogLevel_ImportantWarning << "Timeout reached" << "\n";
+		getLogManager() << LogLevel_Info << "Timeout reached" << "\n";
 		m_bTimeoutReached = true;
 	}
 

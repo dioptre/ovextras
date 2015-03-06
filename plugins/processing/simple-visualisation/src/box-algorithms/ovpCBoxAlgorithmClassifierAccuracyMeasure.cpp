@@ -44,9 +44,6 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::initialize(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_vProgressBar.resize(getStaticBoxContext().getInputCount()-1); //-1 because the first input is the target
-	//m_vpClassifierStimulationDecoder.resize(getStaticBoxContext().getInputCount()-1);
-	//m_vInputClassifierMemoryBuffer.resize(getStaticBoxContext().getInputCount()-1);
-	//m_vOutputClassifierStimulationSet.resize(getStaticBoxContext().getInputCount()-1);
 
 	//classifier decoders
 	for(uint32 i=1; i<l_rStaticBoxContext.getInputCount(); i++)
