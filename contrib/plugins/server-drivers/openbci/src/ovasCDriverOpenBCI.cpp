@@ -90,6 +90,18 @@ void  CDriverOpenBCI::updateDaisy() {
 		m_oHeader.setChannelCount(EEGNbValuesPerSample+AccNbValuesPerSample);
 		m_rDriverContext.getLogManager() << LogLevel_Info << "NO daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)EEGNbValuesPerSample << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << "\n";
 	}
+	
+	int32 l_ui32nChannels = m_oHeader.getChannelCount();
+	// microvolt for EEG channels
+	for(int32 c=0;c<l_ui32nChannels-AccNbValuesPerSample;c++)
+	{
+		m_oHeader.setChannelUnits(c, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
+	}
+	// undefined for accelerometer/extra channels
+	for(int32 c=l_ui32nChannels-AccNbValuesPerSample;c<l_ui32nChannels;c++)
+	{
+		m_oHeader.setChannelUnits(c, OVTK_UNIT_Unspecified, OVTK_FACTOR_Base);
+	}
 }
 
 boolean CDriverOpenBCI::initialize(
