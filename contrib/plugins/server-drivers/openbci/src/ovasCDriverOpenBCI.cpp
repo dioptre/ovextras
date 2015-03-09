@@ -71,7 +71,7 @@ CDriverOpenBCI::CDriverOpenBCI(IDriverContext& rDriverContext)
 	m_oSettings.load();
 	
 	// default parameter loaded, update channel count and frequency
-	updateDaisy();
+	updateDaisy(true);
 }
 
 void CDriverOpenBCI::release(void)
@@ -87,17 +87,17 @@ const char* CDriverOpenBCI::getName(void)
 //___________________________________________________________________//
 //                                                                   //
 
-void  CDriverOpenBCI::updateDaisy() {
+void  CDriverOpenBCI::updateDaisy(bool bBeQuiet) {
 	// change channel and sampling rate according to daisy module
 	if (m_bDaisyModule) {
 		m_oHeader.setSamplingFrequency(DefaultSamplingRate/2);
 		m_oHeader.setChannelCount(2*EEGNbValuesPerSample+AccNbValuesPerSample);
-		m_rDriverContext.getLogManager() << LogLevel_Info << "Daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)(2*EEGNbValuesPerSample) << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << "\n";
+		if(!bBeQuiet) m_rDriverContext.getLogManager() << LogLevel_Info << "Daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)(2*EEGNbValuesPerSample) << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << "\n";
 	}
 	else {
 	  	m_oHeader.setSamplingFrequency(DefaultSamplingRate);
 		m_oHeader.setChannelCount(EEGNbValuesPerSample+AccNbValuesPerSample);
-		m_rDriverContext.getLogManager() << LogLevel_Info << "NO daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)EEGNbValuesPerSample << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << "\n";
+		if(!bBeQuiet) m_rDriverContext.getLogManager() << LogLevel_Info << "NO daisy module attached, " << m_oHeader.getChannelCount() << " channels -- " << (int)EEGNbValuesPerSample << " EEG and " << (int)AccNbValuesPerSample << " accelerometer -- at " << m_oHeader.getSamplingFrequency() << "Hz." << "\n";
 	}
 }
 
@@ -108,7 +108,7 @@ boolean CDriverOpenBCI::initialize(
 	if(m_rDriverContext.isConnected()) { return false; }
 
 	// change channel and sampling rate according to daisy module
-	updateDaisy();
+	updateDaisy(false);
 	
 	// init state
 	m_ui16Readstate=0;
@@ -246,7 +246,7 @@ boolean CDriverOpenBCI::configure(void)
 	m_bDaisyModule=m_oConfiguration.getDaisyModule();
 	m_oSettings.save();
 
-	updateDaisy();
+	updateDaisy(false);
 	
 	return true;
 }
