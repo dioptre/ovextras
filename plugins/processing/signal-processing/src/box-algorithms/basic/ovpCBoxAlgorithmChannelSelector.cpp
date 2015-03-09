@@ -85,9 +85,8 @@ boolean CBoxAlgorithmChannelSelector::initialize(void)
 		m_pInputMatrix=l_pDecoder->getOutputMatrix();
 		m_pOutputMatrix=l_pEncoder->getInputMatrix();
 	}
-	else if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
+	else if(l_oTypeIdentifier==OV_TypeId_StreamedMatrix)
 	{
-		this->getLogManager() << LogLevel_Trace << "Treating input as a streamed matrix\n";
 		TStreamedMatrixEncoder < CBoxAlgorithmChannelSelector >* l_pEncoder=new TStreamedMatrixEncoder < CBoxAlgorithmChannelSelector >;
 		TStreamedMatrixDecoder < CBoxAlgorithmChannelSelector >* l_pDecoder=new TStreamedMatrixDecoder < CBoxAlgorithmChannelSelector >;
 		l_pEncoder->initialize(*this,0);

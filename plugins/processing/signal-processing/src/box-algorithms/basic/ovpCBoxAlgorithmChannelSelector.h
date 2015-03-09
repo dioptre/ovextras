@@ -46,14 +46,15 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getOutputType(0, l_oTypeIdentifier);
-				if(l_oTypeIdentifier==OV_TypeId_Signal || l_oTypeIdentifier==OV_TypeId_Spectrum)
+				if(l_oTypeIdentifier==OV_TypeId_Signal || l_oTypeIdentifier==OV_TypeId_Spectrum
+					|| l_oTypeIdentifier==OV_TypeId_StreamedMatrix)
 				{
 					rBox.setInputType(0, l_oTypeIdentifier);
 					return true;
 				}
 				else
 				{
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are Signal and Spectrum, change refused.\n";
+					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are Signal, Spectrum and Streamed Matrix, change refused.\n";
 
 					rBox.getInputType(0, l_oTypeIdentifier);
 					rBox.setOutputType(0, l_oTypeIdentifier);
@@ -66,14 +67,14 @@ namespace OpenViBEPlugins
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getInputType(0, l_oTypeIdentifier);
 				if(l_oTypeIdentifier==OV_TypeId_Signal || l_oTypeIdentifier==OV_TypeId_Spectrum
-					|| this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix) )
+					|| l_oTypeIdentifier == OV_TypeId_StreamedMatrix )
 				{
 					rBox.setOutputType(0, l_oTypeIdentifier);
 					return true;
 				}
 				else
 				{
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are signal, spectrum, and other types derived from streamed matrix. Change refused.\n";
+					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are Signal, Spectrum and Streamed Matrix, change refused.\n";
 
 					rBox.getOutputType(0, l_oTypeIdentifier);
 					rBox.setInputType(0, l_oTypeIdentifier);
