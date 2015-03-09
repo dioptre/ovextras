@@ -78,6 +78,10 @@ boolean CBoxAlgorithmStreamedMatrixSwitch::initialize(void)
 	{
 		m_pStreamDecoder = new TExperimentInformationDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this,1);
 	}
+	else if(l_oTypeIdentifier == OV_TypeId_ChannelUnits)
+	{
+		m_pStreamDecoder = new TChannelUnitsDecoder < CBoxAlgorithmStreamedMatrixSwitch >(*this, 1);
+	}
 	else
 	{
 		this->getLogManager() << LogLevel_Error << "Unsupported stream type " << this->getTypeManager().getTypeName(l_oTypeIdentifier).toASCIIString() << " (" << l_oTypeIdentifier.toString() << ")\n";
@@ -120,6 +124,7 @@ boolean CBoxAlgorithmStreamedMatrixSwitch::process(void)
 	uint64 l_ui64StartTime=0;
 	uint64 l_ui64EndTime=0;
 	uint64 l_ui64ChunkSize=0;
+	boolean l_bGotStimulation = false;
 	const uint8* l_pChunkBuffer=NULL;
 
 	//iterate over all chunk on input 0 (Stimulation)
@@ -143,6 +148,7 @@ boolean CBoxAlgorithmStreamedMatrixSwitch::process(void)
 					this->getLogManager() << LogLevel_Trace << "Switching with ["<<this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation,l_pStimSet->getStimulationIdentifier(stim_index)) << "] to output ["<< m_i32ActiveOutputIndex << "].\n";
 				}
 			}
+			l_bGotStimulation = true;
 			m_ui64LastStimulationInputChunkEndTime = l_rDynamicBoxContext.getInputChunkEndTime(0,i);
 		}
 	}
@@ -171,7 +177,7 @@ boolean CBoxAlgorithmStreamedMatrixSwitch::process(void)
 				}
 				else
 				{
-					if(l_ui64StartTime < m_ui64LastStimulationInputChunkEndTime)
+					if(!l_bGotStimulation || (l_ui64StartTime < m_ui64LastStimulationInputChunkEndTime))
 					{
 						// the input chunk is in the good time range (we are sure that no stim has been received to change the active output)
 						l_rDynamicBoxContext.appendOutputChunkData(m_i32ActiveOutputIndex, l_pChunkBuffer, l_ui64ChunkSize);

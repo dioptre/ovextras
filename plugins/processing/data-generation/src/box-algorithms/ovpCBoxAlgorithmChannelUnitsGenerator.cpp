@@ -62,7 +62,7 @@ boolean CChannelUnitsGenerator::process(void)
 		}
 
 		m_oEncoder.encodeHeader();
-
+		l_pDynamicBoxContext->markOutputAsReadyToSend(0, 0, 0);
 		m_oEncoder.encodeBuffer();
 
 		l_pDynamicBoxContext->markOutputAsReadyToSend(0, 0, 0);

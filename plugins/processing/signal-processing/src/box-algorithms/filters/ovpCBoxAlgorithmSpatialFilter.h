@@ -56,23 +56,11 @@ namespace OpenViBEPlugins
 		{
 		public:
 
-			virtual OpenViBE::boolean isValidTypeIdentifier(const OpenViBE::CIdentifier& rTypeIdenfitier)
-			{
-				OpenViBE::boolean l_bValid=false;
-				l_bValid|=(rTypeIdenfitier==OV_TypeId_StreamedMatrix);
-				l_bValid|=(rTypeIdenfitier==OV_TypeId_Spectrum);
-				l_bValid|=(rTypeIdenfitier==OV_TypeId_Signal);
-				return l_bValid;
-			}
-
 			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getInputType(0, l_oTypeIdentifier);
-				if(this->isValidTypeIdentifier(l_oTypeIdentifier))
-				{
-					rBox.setOutputType(0, l_oTypeIdentifier);
-				}
+				rBox.setOutputType(0, l_oTypeIdentifier);
 				return true;
 			}
 
@@ -80,10 +68,7 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getOutputType(0, l_oTypeIdentifier);
-				if(this->isValidTypeIdentifier(l_oTypeIdentifier))
-				{
-					rBox.setInputType(0, l_oTypeIdentifier);
-				}
+				rBox.setInputType(0, l_oTypeIdentifier);
 				return true;
 			}
 
@@ -120,6 +105,14 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Number of Input Channels",    OV_TypeId_Integer, "4");
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
+
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
+
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Signal);
 
 				return true;
 			}

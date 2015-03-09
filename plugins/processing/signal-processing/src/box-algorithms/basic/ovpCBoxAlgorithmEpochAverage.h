@@ -41,15 +41,7 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getInputType(ui32Index, l_oTypeIdentifier);
-				if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
-				{
-					rBox.setOutputType(ui32Index, l_oTypeIdentifier);
-				}
-				else
-				{
-					rBox.getOutputType(ui32Index, l_oTypeIdentifier);
-					rBox.setInputType(ui32Index, l_oTypeIdentifier);
-				}
+				rBox.setOutputType(ui32Index, l_oTypeIdentifier);
 				return true;
 			}
 
@@ -57,15 +49,7 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getOutputType(ui32Index, l_oTypeIdentifier);
-				if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
-				{
-					rBox.setInputType(ui32Index, l_oTypeIdentifier);
-				}
-				else
-				{
-					rBox.getInputType(ui32Index, l_oTypeIdentifier);
-					rBox.setOutputType(ui32Index, l_oTypeIdentifier);
-				}
+				rBox.setInputType(ui32Index, l_oTypeIdentifier);
 				return true;
 			};
 
@@ -100,6 +84,16 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Epoch count",     OV_TypeId_Integer, "4");
 				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyInput);
+
+				rPrototype.addInputSupport(OV_TypeId_Signal);
+				rPrototype.addInputSupport(OV_TypeId_Spectrum);
+				rPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+				rPrototype.addInputSupport(OV_TypeId_FeatureVector);
+
+				rPrototype.addOutputSupport(OV_TypeId_Signal);
+				rPrototype.addOutputSupport(OV_TypeId_Spectrum);
+				rPrototype.addOutputSupport(OV_TypeId_StreamedMatrix);
+				rPrototype.addOutputSupport(OV_TypeId_FeatureVector);
 				return true;
 			}
 

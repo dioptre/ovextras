@@ -67,13 +67,6 @@ namespace OpenViBEPlugins
 		{
 
 		public:
-
-			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
-			{
-				rBox.setInputType(ui32Index, OV_TypeId_Stimulations); // all inputs must be stimulations
-				return true;
-			}
-
 			virtual OpenViBE::boolean onInputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				if(ui32Index == 0)
@@ -125,6 +118,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput("Classifier 1", OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addFlag (OpenViBE::Kernel::BoxFlag_CanAddInput);
 				rBoxAlgorithmPrototype.addFlag (OpenViBE::Kernel::BoxFlag_CanModifyInput);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Stimulations);
 				// rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsUnstable);
 
 				return true;

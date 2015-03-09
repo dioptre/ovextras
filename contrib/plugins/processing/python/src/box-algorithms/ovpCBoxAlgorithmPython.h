@@ -77,119 +77,17 @@ namespace OpenViBEPlugins
 		class CBoxAlgorithmPythonListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
 		{
 		public:
-
-			//virtual OpenViBE::boolean onInitialized(OpenViBE::Kernel::IBox& rBox) { return true; };
-			//virtual OpenViBE::boolean onNameChanged(OpenViBE::Kernel::IBox& rBox) { return true; };
-			//virtual OpenViBE::boolean onInputConnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onInputDisconnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
 			virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) 
 			{
 				rBox.setInputType(ui32Index, OV_TypeId_StreamedMatrix);
 				return true;
 			};
-			//virtual OpenViBE::boolean onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) 
-			{
-				OpenViBE::CIdentifier l_oTypeIdentifier;
-				rBox.getInputType(ui32Index, l_oTypeIdentifier);
-				if (l_oTypeIdentifier == OV_TypeId_StreamedMatrix)
-				{
-					return true;
-				}
-				else if (l_oTypeIdentifier == OV_TypeId_Stimulations)
-				{
-					return true;
-				}
-				else if (l_oTypeIdentifier == OV_TypeId_Signal)
-				{
-					return true;
-				}
-				else
-				{
-					if (l_oTypeIdentifier == OV_TypeId_FeatureVector)
-					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Feature Vector input is not implemented.\n";
-					}
-					else if (l_oTypeIdentifier == OV_TypeId_Spectrum)
-					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Spectrum input is not implemented.\n";
-					}
-					else if (l_oTypeIdentifier == OV_TypeId_ChannelLocalisation)
-					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Channel Localisation input is not implemented.\n";
-					}
-					else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
-					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Experiment Information input is not implemented.\n";
-					}
-					else
-					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Input type chosen is not implemented.\n";
-					}
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Input " << ui32Index << " was set to the default type Streamed Matrix.\n";
-					rBox.setInputType(ui32Index, OV_TypeId_StreamedMatrix);
-					return false;
-				} 
-			};
-			//virtual OpenViBE::boolean onInputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputConnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputDisconnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
+
 			virtual OpenViBE::boolean onOutputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) 
 			{ 
 				rBox.setOutputType(ui32Index, OV_TypeId_StreamedMatrix);
 				return true; 
 			};
-			//virtual OpenViBE::boolean onOutputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			virtual OpenViBE::boolean onOutputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) 
-			{ 
-				OpenViBE::CIdentifier l_oTypeIdentifier;
-				rBox.getOutputType(ui32Index, l_oTypeIdentifier);
-				if (l_oTypeIdentifier == OV_TypeId_StreamedMatrix)
-				{
-					return true;
-				}
-				else if (l_oTypeIdentifier == OV_TypeId_Stimulations)
-				{
-					return true;
-				}
-				else if (l_oTypeIdentifier == OV_TypeId_Signal)
-				{
-					return true;
-				}
-				else
-				{
-					if (l_oTypeIdentifier == OV_TypeId_FeatureVector)
-					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Feature Vector output is not implemented.\n";
-					}
-					else if (l_oTypeIdentifier == OV_TypeId_Spectrum)
-					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Spectrum output is not implemented.\n";
-					}
-					else if (l_oTypeIdentifier == OV_TypeId_ChannelLocalisation)
-					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Channel Localisation output is not implemented.\n";
-					}
-					else if (l_oTypeIdentifier == OV_TypeId_ExperimentInformation)
-					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Experiment Information output is not implemented.\n";
-					}
-					else
-					{
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Output type chosen is not implemented.\n";
-					}
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Output " << ui32Index << " was set to the default type Streamed Matrix.\n";
-					rBox.setOutputType(ui32Index, OV_TypeId_StreamedMatrix);
-					return false;
-				}  
-			};
-			//virtual OpenViBE::boolean onOutputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingDefaultValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 		};
@@ -230,6 +128,14 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
+
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_StreamedMatrix);
 				
 				return true;
 			}

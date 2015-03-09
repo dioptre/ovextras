@@ -41,15 +41,7 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getInputType(ui32Index, l_oTypeIdentifier);
-				if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
-				{
-					rBox.setOutputType(ui32Index, l_oTypeIdentifier);
-				}
-				else
-				{
-					rBox.getOutputType(ui32Index, l_oTypeIdentifier);
-					rBox.setInputType(ui32Index, l_oTypeIdentifier);
-				}
+				rBox.setOutputType(ui32Index, l_oTypeIdentifier);
 				return true;
 			}
 
@@ -57,15 +49,7 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getOutputType(ui32Index, l_oTypeIdentifier);
-				if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
-				{
-					rBox.setInputType(ui32Index, l_oTypeIdentifier);
-				}
-				else
-				{
-					rBox.getInputType(ui32Index, l_oTypeIdentifier);
-					rBox.setOutputType(ui32Index, l_oTypeIdentifier);
-				}
+				rBox.setInputType(ui32Index, l_oTypeIdentifier);
 				return true;
 			};
 
@@ -102,12 +86,22 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Max crop value",    OV_TypeId_Float, "1");
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
+
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_FeatureVector);
+
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_FeatureVector);
 				return true;
 			}
 
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_CropDesc);
 		};
-	};
-};
+	}
+}
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_Crop_H__

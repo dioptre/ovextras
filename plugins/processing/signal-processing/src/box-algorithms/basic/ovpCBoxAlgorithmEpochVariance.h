@@ -45,17 +45,8 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getInputType(ui32Index, l_oTypeIdentifier);
-				if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
-				{
-					for (OpenViBE::uint32 i=0; i<rBox.getOutputCount(); i++)
-						rBox.setOutputType(i, l_oTypeIdentifier);
-				}
-				else
-				{
-					// shouldn't get here
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Unsupported input stream type " << l_oTypeIdentifier << "\n";
-					return false;
-				}
+				for (OpenViBE::uint32 i=0; i<rBox.getOutputCount(); i++)
+					rBox.setOutputType(i, l_oTypeIdentifier);
 				return true;
 			}
 
