@@ -1,18 +1,18 @@
-#include "ovasCConfigurationDriverGenericOscilator.h"
+#include "ovasCConfigurationDriverGenericOscillator.h"
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEAcquisitionServer;
 using namespace std;
 
-CConfigurationDriverGenericOscilator::CConfigurationDriverGenericOscilator(IDriverContext& rDriverContext, const char* sGtkBuilderFileName, boolean& rSendPeriodicStimulations)
+CConfigurationDriverGenericOscillator::CConfigurationDriverGenericOscillator(IDriverContext& rDriverContext, const char* sGtkBuilderFileName, boolean& rSendPeriodicStimulations)
 	:CConfigurationBuilder(sGtkBuilderFileName)
 	 ,m_rDriverContext(rDriverContext)
 	 ,m_rSendPeriodicStimulations(rSendPeriodicStimulations)
 {
 }
 
-boolean CConfigurationDriverGenericOscilator::preConfigure(void)
+boolean CConfigurationDriverGenericOscillator::preConfigure(void)
 {
 	if (!CConfigurationBuilder::preConfigure())
 	{
@@ -26,7 +26,7 @@ boolean CConfigurationDriverGenericOscilator::preConfigure(void)
 	return true;
 }
 
-boolean CConfigurationDriverGenericOscilator::postConfigure(void)
+boolean CConfigurationDriverGenericOscillator::postConfigure(void)
 {
 	if (m_bApplyConfiguration)
 	{

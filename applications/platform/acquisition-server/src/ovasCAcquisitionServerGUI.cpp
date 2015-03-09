@@ -10,7 +10,7 @@
 
 #include "ovasCPluginLSLOutput.h"
 
-#include "generic-oscilator/ovasCDriverGenericOscilator.h"
+#include "generic-oscillator/ovasCDriverGenericOscillator.h"
 #include "generic-sawtooth/ovasCDriverGenericSawTooth.h"
 #include "generic-raw-reader/ovasCDriverGenericRawFileReader.h"
 #include "generic-raw-reader/ovasCDriverGenericRawTelnetReader.h"

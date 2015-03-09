@@ -1,5 +1,5 @@
-#include "ovasCDriverGenericOscilator.h"
-#include "ovasCConfigurationDriverGenericOscilator.h"
+#include "ovasCDriverGenericOscillator.h"
+#include "ovasCConfigurationDriverGenericOscillator.h"
 
 #include <toolkit/ovtk_all.h>
 
@@ -193,7 +193,7 @@ boolean CDriverGenericOscillator::configure(void)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGenericOscillator::configure\n";
 
-	CConfigurationDriverGenericOscilator m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Generic-Oscillator.ui", 
+	CConfigurationDriverGenericOscillator m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Generic-Oscillator.ui", 
 		m_bSendPeriodicStimulations);
 
 	if(m_oConfiguration.configure(m_oHeader)) 
