@@ -157,15 +157,14 @@ This algorithm provides only probabilities.
 
 \par Linear Discriminant Analysis (LDA)
  A simple and fast linear classifier. For description, see any major textbook on Machine Learning or Statistics (e.g. Duda, Hart & Stork, or Hastie, Tibshirani & Friedman). This algorithm can be used with a regularized covariance matrix
- according to a method proposed by Ledoit & Wolf: "A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices", 2004..
- The Linear Discriminant Analysis has the following option.
+ according to a method proposed by Ledoit & Wolf: "A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices", 2004.
+ The Linear Discriminant Analysis has the following options.
  \par
  \li Use shrinkage: Use a classic or a regularized covariance matrix.
- \li Shrinkage: Force diagonal cov (DDA) : A value s between [0,1] sets a linear weight between dataCov and priorCov. I.e. cov=(1-s)*dataCov+s*priorCov.
+ \li Shrinkage: A value s between [0,1] sets a linear weight between dataCov and priorCov. I.e. cov=(1-s)*dataCov+s*priorCov.
  Value <0 is used to auto-estimate the shrinking coefficient (default). If var(x) is a vector of empirical variances of all data dimensions, priorCov is a 
  diagonal matrix with a single value mean(var(x)) pasted on its diagonal. Used only if use shrinkage is checked.
-\li Force diagonal cov: This sets the nondiagonal entries of the covariance matrices to zero. Used only if Use shrinkage is checked.
- \li Shrinkage coefficient (-1 == auto)
+\li Force diagonal cov (DDA): This sets the nondiagonal entries of the covariance matrices to zero. Used only if Use shrinkage is checked.
 \par
 Note that setting shrinkage to 0 should get you the regular LDA behavior. If you additionally force the covariance to be diagonal, you should get a model resembling the Naive Bayes classifier.
 \par 

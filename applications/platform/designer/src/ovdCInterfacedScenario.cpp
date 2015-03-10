@@ -1177,7 +1177,7 @@ uint32 CInterfacedScenario::pickInterfacedObject(int x, int y)
 
 		while((l_ui32InterfacedObjectId==0)&&(l_ui32Counter<maxI))
 		{
-			if((0<=px)&&(px<=xSizeOfSelection)&&(0<=py)&&(py<=ySizeOfSelection))
+			if((0<=px)&&(px<xSizeOfSelection)&&(0<=py)&&(py<ySizeOfSelection))
 			{
 				//see gdk pixbuf strucutre documentation for clarification as to why we go through the pixbuf that way
 				guchar* p = l_pPixels + px*n_channels + py*rowstride;
