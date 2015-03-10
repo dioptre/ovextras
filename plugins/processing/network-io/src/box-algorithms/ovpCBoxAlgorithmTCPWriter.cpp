@@ -337,7 +337,13 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 							break;
 						case TCPWRITER_STRING: 
 							{
-							CString l_sTmp = this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation, l_ui64StimulationCode) + CString("\n");
+							CString l_sTmp = this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation, l_ui64StimulationCode);
+							if(l_sTmp==CString("")) 
+							{
+								l_sTmp = CString("Unregistered_stimulus ") + CIdentifier(l_ui64StimulationCode).toString();
+							}
+							l_sTmp = l_sTmp + CString("\n");
+
 							const char *l_sPtr = l_sTmp.toASCIIString();
 							sendToClients((void*)l_sPtr,strlen(l_sPtr));
 							}

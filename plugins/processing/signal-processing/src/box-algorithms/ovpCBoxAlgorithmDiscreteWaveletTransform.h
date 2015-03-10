@@ -32,7 +32,6 @@ namespace OpenViBEPlugins
 		class CBoxAlgorithmDiscreteWaveletTransform : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
 		public:
-			CBoxAlgorithmDiscreteWaveletTransform(void) : m_oAlgoX_SignalEncoder(NULL) { };
 
 			virtual void release(void) { delete this; }
 
@@ -54,12 +53,13 @@ namespace OpenViBEPlugins
 			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmDiscreteWaveletTransform > m_oAlgo0_SignalDecoder;
 
 			OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmDiscreteWaveletTransform > m_oAlgoInfo_SignalEncoder;
-			OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmDiscreteWaveletTransform >  *m_oAlgoX_SignalEncoder;
+			std::vector< OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmDiscreteWaveletTransform >* > m_vAlgoX_SignalEncoder;
 
 			OpenViBE::CString m_sWaveletType;
 			OpenViBE::CString m_sDecompositionLevel;
 
-
+			OpenViBE::uint32 m_ui32Infolength;
+			std::vector< std::vector<double> > m_sig;
 
 		};
 

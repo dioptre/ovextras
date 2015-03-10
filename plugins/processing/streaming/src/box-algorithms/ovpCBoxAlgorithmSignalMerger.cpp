@@ -101,7 +101,9 @@ boolean CBoxAlgorithmSignalMerger::process(void)
 					if(l_ui32SampleCountPerSentBlock!=op_pMatrix->getDimensionSize(1)) { return false; }
 					if(m_vStreamDecoder[0]->getOutputSamplingRate() != m_vStreamDecoder[i]->getOutputSamplingRate())
 					{
-						this->getLogManager() << LogLevel_Error << "Sampling rates of inputs 1 and " << i+1 << " differ\n";
+						this->getLogManager() << LogLevel_Error << "Sampling rates of inputs 1 and " << i+1 << " differ, "
+							<< m_vStreamDecoder[0]->getOutputSamplingRate() << " vs " << m_vStreamDecoder[i]->getOutputSamplingRate() 
+							<< "\n";
 						return false;
 					}
 
