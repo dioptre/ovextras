@@ -11,7 +11,7 @@
 #include <vector>
 #include <iostream>
 
-// #define OV_DEBUG_CLASSIFIER_LISTENER
+//#define OV_DEBUG_CLASSIFIER_LISTENER
 
 #ifdef OV_DEBUG_CLASSIFIER_LISTENER
 #define DEBUG_PRINT(x) x
@@ -37,7 +37,8 @@ namespace OpenViBEPlugins
 				m_oClassifierClassIdentifier=OV_UndefinedIdentifier;
 				m_pClassifier=NULL;
 
-				m_oStrategyClassIdentifier=OV_UndefinedIdentifier;
+				//OV_UndefinedIdentifier is already use for the native, We initialize to an unused identifier in the strategy list
+				m_oStrategyClassIdentifier=0x0;
 				m_pStrategy = NULL;
 
 				//This value means that we need to calculate it
@@ -242,7 +243,6 @@ namespace OpenViBEPlugins
 				rBox.getSettingValue(getStrategyIndex(), l_sStrategyName);
 
 				l_oStrategyIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationStrategy, l_sStrategyName);
-
 				if(l_oStrategyIdentifier != m_oStrategyClassIdentifier)
 				{
 					if(m_pStrategy)
@@ -259,14 +259,11 @@ namespace OpenViBEPlugins
 						m_oStrategyClassIdentifier=l_oStrategyIdentifier;
 					}
 
-					if(getStrategySettingsCount(rBox) > 0)
+					// std::cout << m_ui32StrategyAmountSettings << std::endl;
+					for(OpenViBE::uint32 i = getStrategyIndex() + getStrategySettingsCount(rBox) ; i > getStrategyIndex() ; --i)
 					{
-						// std::cout << m_ui32StrategyAmountSettings << std::endl;
-						for(OpenViBE::uint32 i = getStrategyIndex() + getStrategySettingsCount(rBox) ; i > getStrategyIndex() ; --i)
-						{
-							DEBUG_PRINT(std::cout << "Remove pairing strategy setting at idx " << i-1 << "\n";)
-							rBox.removeSetting(i);
-						}
+						DEBUG_PRINT(std::cout << "Remove pairing strategy setting at idx " << i-1 << "\n";)
+						rBox.removeSetting(i);
 					}
 					m_i32StrategyAmountSettings = 0;
 				}
@@ -314,7 +311,6 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CString l_sClassifierName;
 				OpenViBE::CIdentifier l_oClassifierIdentifier;
-				OpenViBE::CIdentifier l_oOldClassifierIdentifier=m_oClassifierClassIdentifier;
 				OpenViBE::CIdentifier l_oIdentifier;
 
 				rBox.getSettingValue(getClassifierIndex(rBox), l_sClassifierName);
@@ -335,12 +331,10 @@ namespace OpenViBEPlugins
 						m_oClassifierClassIdentifier=l_oClassifierIdentifier;
 					}
 
-					if(l_oOldClassifierIdentifier != OV_UndefinedIdentifier)
+					//Disable the graphical refresh to avoid abusive redraw (not really a problem)
+					while(rBox.getSettingCount()>=m_ui32CustomSettingBase+rBox.getInputCount() + getStrategySettingsCount(rBox))
 					{
-						while(rBox.getSettingCount()>m_ui32CustomSettingBase+rBox.getInputCount() + getStrategySettingsCount(rBox))
-						{
-							rBox.removeSetting(getClassifierIndex(rBox)+1);
-						}
+						rBox.removeSetting(getClassifierIndex(rBox)+1);
 					}
 				}
 				else//If we don't change the algorithm we just have to return
@@ -402,33 +396,11 @@ namespace OpenViBEPlugins
 
 							if(l_bValid)
 							{
-								if(i>=rBox.getSettingCount()-1)
-								{
-									rBox.addSetting(l_sParameterName, l_oTypeIdentifier, l_sBuffer, rBox.getSettingCount()-1);
-									DEBUG_PRINT(std::cout << "Adding setting (case A) " << l_sParameterName << " : " << l_sBuffer << "\n";)
-								}
-								else
-								{
-									OpenViBE::CIdentifier l_oOldTypeIdentifier;
-									rBox.getSettingType(i, l_oOldTypeIdentifier);
-									if(l_oOldTypeIdentifier != l_oTypeIdentifier)
-									{
-										rBox.setSettingType(i, l_oTypeIdentifier);
-									}
-									rBox.setSettingValue(i, l_sBuffer);
-									rBox.setSettingName(i, l_sParameterName);
-									OpenViBE::CString tmpName;  rBox.getSettingName(i, tmpName);
-									DEBUG_PRINT(std::cout << "Replacing setting " << i << " : " << tmpName << " with " << l_sParameterName << " : " << l_sBuffer << "\n";)
-								}
+								rBox.addSetting(l_sParameterName, l_oTypeIdentifier, l_sBuffer, rBox.getSettingCount()-1);
+								DEBUG_PRINT(std::cout << "Adding setting (case A) " << l_sParameterName << " : " << l_sBuffer << "\n";)
 								i++;
 							}
 						}
-					}
-
-					while(i<rBox.getSettingCount()-1)
-					{
-						DEBUG_PRINT(OpenViBE::CString tmpName;  rBox.getSettingName(i, tmpName); std::cout << "Removing setting " << i << " : " << tmpName << "\n";)
-						rBox.removeSetting(i-1);
 					}
 				}
 
