@@ -1513,18 +1513,18 @@ void CApplication::openScenarioCB(void)
 	gtk_widget_destroy(l_pWidgetDialogOpen);
 }
 
-void CApplication::saveScenarioCB(CInterfacedScenario* pScenario)
+boolean CApplication::saveScenarioCB(CInterfacedScenario* pScenario)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "saveScenarioCB\n";
 
 	CInterfacedScenario* l_pCurrentInterfacedScenario=pScenario?pScenario:getCurrentInterfacedScenario();
 	if(!l_pCurrentInterfacedScenario)
 	{
-		return;
+		return false;
 	}
 	if(!l_pCurrentInterfacedScenario->m_bHasFileName)
 	{
-		saveScenarioAsCB(pScenario);
+		return saveScenarioAsCB(pScenario);
 	}
 	else
 	{
@@ -1538,9 +1538,11 @@ void CApplication::saveScenarioCB(CInterfacedScenario* pScenario)
 			IAlgorithmProxy* l_pExporter=&m_rKernelContext.getAlgorithmManager().getAlgorithm(l_oExporterIdentifier);
 			if(l_pExporter)
 			{
+				l_bSuccess = true;
+
 				m_rKernelContext.getLogManager() << LogLevel_Info << "Exporting scenario...\n";
 
-				l_pExporter->initialize();
+				l_bSuccess &= l_pExporter->initialize();
 
 				TParameterHandler < const IScenario* > ip_pScenario(l_pExporter->getInputParameter(OVTK_Algorithm_ScenarioExporter_InputParameterId_Scenario));
 				TParameterHandler < IMemoryBuffer* > op_pMemoryBuffer(l_pExporter->getOutputParameter(OVTK_Algorithm_ScenarioExporter_OutputParameterId_MemoryBuffer));
@@ -1548,40 +1550,56 @@ void CApplication::saveScenarioCB(CInterfacedScenario* pScenario)
 				ip_pScenario=&l_pCurrentInterfacedScenario->m_rScenario;
 				op_pMemoryBuffer=&l_oMemoryBuffer;
 
-				l_pExporter->process();
-				l_pExporter->uninitialize();
+				l_bSuccess &= l_pExporter->process();
+				l_bSuccess &= l_pExporter->uninitialize();
 				m_rKernelContext.getAlgorithmManager().releaseAlgorithm(*l_pExporter);
 
-				l_bSuccess=(l_oMemoryBuffer.getSize()!=0);
+				l_bSuccess &= (l_oMemoryBuffer.getSize()!=0);
 
-				l_pCurrentInterfacedScenario->m_bHasBeenModified=false;
-				l_pCurrentInterfacedScenario->updateScenarioLabel();
-
-				std::ofstream l_oFile(l_pCurrentInterfacedScenario->m_sFileName.c_str(), ios::binary);
-				if(l_oFile.good())
+				if(l_bSuccess)
 				{
-					l_oFile.write(reinterpret_cast<const char*>(l_oMemoryBuffer.getDirectPointer()), l_oMemoryBuffer.getSize());
-					l_oFile.close();
+					// Only write if successful so far
+					std::ofstream l_oFile(l_pCurrentInterfacedScenario->m_sFileName.c_str(), ios::binary);
+					if(l_oFile.good())
+					{
+						l_oFile.write(reinterpret_cast<const char*>(l_oMemoryBuffer.getDirectPointer()), l_oMemoryBuffer.getSize());
+						l_oFile.close();
+					} 
+					else
+					{
+						m_rKernelContext.getLogManager() << LogLevel_Error << "Unable to write to file [" << CString(l_pCurrentInterfacedScenario->m_sFileName.c_str()) << "]. Check permissions?\n";
+						l_bSuccess = false;
+					}
+				}
+
+				if(l_bSuccess)
+				{
+					l_pCurrentInterfacedScenario->m_bHasBeenModified=false;
+					l_pCurrentInterfacedScenario->updateScenarioLabel();
 				}
 			}
 		}
 
 		if(!l_bSuccess)
 		{
-			m_rKernelContext.getLogManager() << LogLevel_Warning << "Exporting scenario failed...\n";
+			m_rKernelContext.getLogManager() << LogLevel_Error << "Exporting scenario failed...\n";
 		}
+
+		return l_bSuccess;
 	}
 }
 
-void CApplication::saveScenarioAsCB(CInterfacedScenario* pScenario)
+OpenViBE::boolean CApplication::saveScenarioAsCB(CInterfacedScenario* pScenario)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "saveScenarioAsCB\n";
 
 	CInterfacedScenario* l_pCurrentInterfacedScenario=pScenario?pScenario:getCurrentInterfacedScenario();
 	if(!l_pCurrentInterfacedScenario)
 	{
-		return;
+		return false;
 	}
+
+	boolean l_bResult = false;
 
 	::GtkFileFilter* l_pFileFilterXML=gtk_file_filter_new();
 	// ::GtkFileFilter* l_pFileFilterSVG=gtk_file_filter_new();
@@ -1636,18 +1654,35 @@ void CApplication::saveScenarioAsCB(CInterfacedScenario* pScenario)
 				::strcat(l_sFileName, ".xml");
 			}
 		}
-		l_pCurrentInterfacedScenario->m_bHasBeenModified=false;
+
+		const std::string l_sOldFileName = l_pCurrentInterfacedScenario->m_sFileName;
+		const boolean l_bOldHasFileName = l_pCurrentInterfacedScenario->m_bHasFileName;
+
 		l_pCurrentInterfacedScenario->m_sFileName=l_sFileName;
 		l_pCurrentInterfacedScenario->m_bHasFileName=true;
-		l_pCurrentInterfacedScenario->updateScenarioLabel();
 
 		l_pCurrentInterfacedScenario->m_oExporterIdentifier=OVP_GD_ClassId_Algorithm_XMLScenarioExporter;
 
-		saveScenarioCB(l_pCurrentInterfacedScenario);
+		if(!saveScenarioCB(l_pCurrentInterfacedScenario))
+		{
+			// restore
+			l_pCurrentInterfacedScenario->m_sFileName = l_sOldFileName;
+			l_pCurrentInterfacedScenario->m_bHasFileName = l_bOldHasFileName;
+		} 
+		else
+		{
+			l_pCurrentInterfacedScenario->m_bHasBeenModified=false;
+			l_pCurrentInterfacedScenario->updateScenarioLabel();
 
-		updateWorkingDirectoryToken(l_pCurrentInterfacedScenario->m_oScenarioIdentifier);
+			updateWorkingDirectoryToken(l_pCurrentInterfacedScenario->m_oScenarioIdentifier);
+
+			l_bResult = true;
+		}
+
 	}
 	gtk_widget_destroy(l_pWidgetDialogSaveAs);
+
+	return l_bResult;
 }
 
 void CApplication::closeScenarioCB(CInterfacedScenario* pInterfacedScenario)

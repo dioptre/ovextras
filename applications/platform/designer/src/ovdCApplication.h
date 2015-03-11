@@ -76,8 +76,8 @@ namespace OpenViBEDesigner
 		void testCB(void);
 		void newScenarioCB(void);
 		void openScenarioCB(void);
-		void saveScenarioCB(OpenViBEDesigner::CInterfacedScenario* pInterfacedScenario=NULL); // defaults to current scenario if NULL
-		void saveScenarioAsCB(OpenViBEDesigner::CInterfacedScenario* pInterfacedScenario=NULL); // defaults to current scenario if NULL
+		OpenViBE::boolean saveScenarioCB(OpenViBEDesigner::CInterfacedScenario* pInterfacedScenario=NULL); // defaults to current scenario if NULL
+		OpenViBE::boolean saveScenarioAsCB(OpenViBEDesigner::CInterfacedScenario* pInterfacedScenario=NULL); // defaults to current scenario if NULL
 		void closeScenarioCB(
 			OpenViBEDesigner::CInterfacedScenario* pInterfacedScenario);
 
