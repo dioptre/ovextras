@@ -257,6 +257,14 @@ namespace OpenViBEPlugins
 
 		CSignalDisplayView::~CSignalDisplayView()
 		{
+			// @fixme who destroys this beast? It seems to be accessed by visualisationtree later?!  pointer ownership unclear.
+			::gtk_widget_hide(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "Toolbar")));
+
+			::gtk_widget_destroy(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayInformationDialog")));
+			::gtk_widget_destroy(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayChannelSelectDialog")));
+			::gtk_widget_destroy(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayMultiViewDialog")));
+			::gtk_widget_destroy(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayStimulationColorsDialog")));
+
 			//destroy the window and its children
 			::gtk_widget_destroy(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayMainWindow")));
 
@@ -1476,7 +1484,7 @@ namespace OpenViBEPlugins
 				}
 			}
 
-			//finally, show the information dialog
+			//finally, show the dialog
 			::gtk_widget_show_all(l_pChannelSelectDialog);
 		}
 
@@ -1611,7 +1619,7 @@ namespace OpenViBEPlugins
 					"clicked",
 					G_CALLBACK(::gtk_widget_hide),
 					G_OBJECT(l_pInformationDialog));
-			
+
 			g_signal_connect(G_OBJECT(l_pInformationDialog),
 				"delete_event",
 				G_CALLBACK(::gtk_widget_hide),

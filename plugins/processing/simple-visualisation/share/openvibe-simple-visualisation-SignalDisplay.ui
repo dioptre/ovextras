@@ -106,7 +106,6 @@
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Signal Information</property>
     <property name="resizable">False</property>
-    <property name="modal">True</property>
     <property name="window_position">mouse</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
