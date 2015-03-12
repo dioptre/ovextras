@@ -104,7 +104,8 @@ boolean CDownsampling::process(void)
 	{
 	}
 
-	if((isInputTriggerActive(OVP_Algorithm_Downsampling_InputTriggerId_ResampleWithHistoric))||(isInputTriggerActive(OVP_Algorithm_Downsampling_InputTriggerId_Resample)))
+	if((isInputTriggerActive(OVP_Algorithm_Downsampling_InputTriggerId_ResampleWithHistoric))
+		||(isInputTriggerActive(OVP_Algorithm_Downsampling_InputTriggerId_Resample)))
 	{
 		float64 l_f64CountOrig, l_f64CountNew=0, l_f64ValuePrev, l_f64TimePrev, l_f64ValueCur;
 		int32 l_i32IndexInput;

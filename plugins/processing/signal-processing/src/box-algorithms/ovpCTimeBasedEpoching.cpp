@@ -242,7 +242,8 @@ boolean CTimeBasedEpoching::initialize(void)
 			l_pOutputHandler->m_f64EpochDuration=1.0;
 			l_pOutputHandler->m_f64EpochInterval=0.5;
 
-			this->getLogManager() << LogLevel_Warning << "Epocher settings for output " << i << " are invalid (duration:" << l_f64EpochDuration << "|" << "interval:" << l_f64EpochInterval << ")... falling back to default 1 second duration and 0.5 second interval.\n";
+			this->getLogManager() << LogLevel_Error << "Epocher settings for output " << i << " are invalid (duration:" << l_f64EpochDuration << "|" << "interval:" << l_f64EpochInterval << ")\n";
+			return false;
 		}
 		m_vOutputHandler.push_back(l_pOutputHandler);
 	}

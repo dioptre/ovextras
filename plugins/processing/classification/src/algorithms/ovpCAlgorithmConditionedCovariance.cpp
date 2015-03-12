@@ -120,7 +120,7 @@ OpenViBE::boolean CAlgorithmConditionedCovariance::process(void)
 		l_f64Shrinkage = std::max<float64>(0,std::min<float64>(1,l_f64kappa/(double)l_ui32nRows));
 		
 		this->getLogManager() << LogLevel_Debug << "Phi " << l_f64phi << " Gamma " << l_f64gamma << " kappa " << l_f64kappa << "\n";
-		this->getLogManager() << LogLevel_Info << "Estimated shrinkage weight to be " << l_f64Shrinkage << "\n";
+		this->getLogManager() << LogLevel_Trace << "Estimated shrinkage weight to be " << l_f64Shrinkage << "\n";
 
 		dumpMatrix(this->getLogManager(), l_oPhiMat, "PhiMat");
 	}
