@@ -16,7 +16,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace SignalProcessingGpl
+	namespace SignalProcessing
 	{
 		namespace WindowingFunctions
 		{
@@ -109,7 +109,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_WindowingFunctions; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessingGpl::CWindowingFunctions(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CWindowingFunctions(); }
 
 			virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{

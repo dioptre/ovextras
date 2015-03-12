@@ -1,5 +1,5 @@
-#ifndef __OpenViBEPlugins_SignalProcessingGpl_Algorithms_Filter_CApplyTemporalFilter_H__
-#define __OpenViBEPlugins_SignalProcessingGpl_Algorithms_Filter_CApplyTemporalFilter_H__
+#ifndef __OpenViBEPlugins_SignalProcessing_Algorithms_Filter_CApplyTemporalFilter_H__
+#define __OpenViBEPlugins_SignalProcessing_Algorithms_Filter_CApplyTemporalFilter_H__
 
 #if defined TARGET_HAS_ThirdPartyITPP
 
@@ -14,7 +14,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace SignalProcessingGpl
+	namespace SignalProcessing
 	{
 		class CApplyTemporalFilter : virtual public OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >
 		{
@@ -59,7 +59,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ApplyTemporalFilter; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessingGpl::CApplyTemporalFilter(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CApplyTemporalFilter(); }
 
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmProto) const
@@ -81,4 +81,4 @@ namespace OpenViBEPlugins
 
 #endif // TARGET_HAS_ThirdPartyITPP
 
-#endif // __OpenViBEPlugins_SignalProcessingGpl_Algorithms_Filter_CApplyTemporalFilter_H__
+#endif // __OpenViBEPlugins_SignalProcessing_Algorithms_Filter_CApplyTemporalFilter_H__

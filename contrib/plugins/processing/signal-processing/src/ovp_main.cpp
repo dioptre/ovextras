@@ -31,7 +31,7 @@
 OVP_Declare_Begin();
 
 #if defined TARGET_HAS_ThirdPartyITPP
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CBoxAlgorithmCSPSpatialFilterTrainerDesc); // ghent univ
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmCSPSpatialFilterTrainerDesc); // ghent univ
 #endif		
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmSynchroDesc)		// gipsa
@@ -74,20 +74,20 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_MinMax, "Max", OVP_TypeId_MinMax_Max.toUInteger());
 #if defined TARGET_HAS_ThirdPartyITPP
 
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CSpectralAnalysisDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSpectralAnalysisDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CFastICADesc);
 
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CWindowingFunctionsDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CComputeTemporalFilterCoefficientsDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CTemporalFilterBoxAlgorithmDesc);
-OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CModTemporalFilterBoxAlgorithmDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CApplyTemporalFilterDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CWindowingFunctionsDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CComputeTemporalFilterCoefficientsDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CTemporalFilterBoxAlgorithmDesc);
+OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CModTemporalFilterBoxAlgorithmDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CApplyTemporalFilterDesc);
 #endif // TARGET_HAS_ThirdPartyITPP
 
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CDownsamplingDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CDownsamplingBoxAlgorithmDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CDetectingMinMaxDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CDetectingMinMaxBoxAlgorithmDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CDownsamplingDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CDownsamplingBoxAlgorithmDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CDetectingMinMaxDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CDetectingMinMaxBoxAlgorithmDesc);
 // @END inserm-gpl
 		 
 OVP_Declare_End();

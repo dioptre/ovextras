@@ -1,5 +1,5 @@
-#ifndef __OpenViBEPlugins_SignalProcessingGpl_Algorithms_Basic_CDetectingMinMax_H__
-#define __OpenViBEPlugins_SignalProcessingGpl_Algorithms_Basic_CDetectingMinMax_H__
+#ifndef __OpenViBEPlugins_SignalProcessing_Algorithms_Basic_CDetectingMinMax_H__
+#define __OpenViBEPlugins_SignalProcessing_Algorithms_Basic_CDetectingMinMax_H__
 
 #include "../ovp_defines.h"
 
@@ -9,7 +9,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace SignalProcessingGpl
+	namespace SignalProcessing
 	{
 		class CDetectingMinMax : virtual public OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >
 		{
@@ -50,7 +50,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_DetectingMinMax; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessingGpl::CDetectingMinMax(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CDetectingMinMax(); }
 
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmProto) const
@@ -72,4 +72,4 @@ namespace OpenViBEPlugins
 	};
 };
 
-#endif // __OpenViBEPlugins_SignalProcessingGpl_Algorithms_Basic_CDetectingMinMax_H__
+#endif // __OpenViBEPlugins_SignalProcessing_Algorithms_Basic_CDetectingMinMax_H__

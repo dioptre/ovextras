@@ -1,8 +1,8 @@
 
 // @copyright notice: Possibly due to dependencies, this box used to be GPL before upgrade to AGPL3
 
-#ifndef __OpenViBEPlugins_SignalProcessingGpl_BoxAlgorithms_Filter_CTemporalFilterBoxAlgorithm_H__
-#define __OpenViBEPlugins_SignalProcessingGpl_BoxAlgorithms_Filter_CTemporalFilterBoxAlgorithm_H__
+#ifndef __OpenViBEPlugins_SignalProcessing_BoxAlgorithms_Filter_CTemporalFilterBoxAlgorithm_H__
+#define __OpenViBEPlugins_SignalProcessing_BoxAlgorithms_Filter_CTemporalFilterBoxAlgorithm_H__
 
 #include "../ovp_defines.h"
 
@@ -10,7 +10,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace SignalProcessingGpl
+	namespace SignalProcessing
 	{
 		class CTemporalFilterBoxAlgorithm : virtual public OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>
 		{
@@ -54,7 +54,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Box_TemporalFilterBoxAlgorithm; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessingGpl::CTemporalFilterBoxAlgorithm(); }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CTemporalFilterBoxAlgorithm(); }
 
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rPrototype) const
@@ -75,4 +75,4 @@ namespace OpenViBEPlugins
 	};
 };
 
-#endif // __OpenViBEPlugins_SignalProcessingGpl_BoxAlgorithms_Filter_CTemporalFilterBoxAlgorithm_H__
+#endif // __OpenViBEPlugins_SignalProcessing_BoxAlgorithms_Filter_CTemporalFilterBoxAlgorithm_H__

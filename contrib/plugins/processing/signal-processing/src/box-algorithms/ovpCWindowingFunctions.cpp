@@ -13,8 +13,8 @@ using namespace OpenViBE;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::SignalProcessingGpl;
-using namespace OpenViBEPlugins::SignalProcessingGpl::WindowingFunctions;
+using namespace OpenViBEPlugins::SignalProcessing;
+using namespace OpenViBEPlugins::SignalProcessing::WindowingFunctions;
 using namespace OpenViBEToolkit;
 using namespace std;
 

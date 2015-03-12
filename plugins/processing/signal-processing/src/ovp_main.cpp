@@ -132,7 +132,7 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmSpectrumAverageDesc)
 
 #if defined TARGET_HAS_ThirdPartyITPP
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CBoxAlgorithmXDAWNSpatialFilterTrainerDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmXDAWNSpatialFilterTrainerDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessingBasic::CBoxAlgorithmIFFTboxDesc);
 
@@ -140,10 +140,10 @@ OVP_Declare_Begin()
 
 
 #ifdef __OpenViBEPlugins_BoxAlgorithm_ARCoefficients_H__
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CBoxAlgorithmARCoefficientsDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmARCoefficientsDesc);
 #endif
 #ifdef __OpenViBEPlugins_Algorithm_ARBurgMethod_H__
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingGpl::CAlgorithmARBurgMethodDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmARBurgMethodDesc);
 #endif
 	
 #ifdef __OpenViBEPlugins_BoxAlgorithm_ConnectivityMeasure_H__

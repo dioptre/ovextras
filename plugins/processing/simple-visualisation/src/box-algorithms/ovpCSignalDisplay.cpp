@@ -127,8 +127,11 @@ namespace OpenViBEPlugins
 		{
 			m_oUnitDecoder.uninitialize();
 			m_oStimulationDecoder.uninitialize();
-			m_pStreamDecoder->uninitialize();
-			delete m_pStreamDecoder;
+			if(m_pStreamDecoder)
+			{
+				m_pStreamDecoder->uninitialize();
+				delete m_pStreamDecoder;
+			}
 
 			delete m_pSignalDisplayView;
 			delete m_pBufferDatabase;

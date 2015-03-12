@@ -9,7 +9,7 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::SignalProcessingGpl;
+using namespace OpenViBEPlugins::SignalProcessing;
 using namespace std;
 // ________________________________________________________________________________________________________________
 //

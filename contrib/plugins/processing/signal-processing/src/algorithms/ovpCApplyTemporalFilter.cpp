@@ -9,7 +9,7 @@ using namespace Kernel;
 using namespace Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::SignalProcessingGpl;
+using namespace OpenViBEPlugins::SignalProcessing;
 using namespace itpp;
 using namespace std;
 // ________________________________________________________________________________________________________________
