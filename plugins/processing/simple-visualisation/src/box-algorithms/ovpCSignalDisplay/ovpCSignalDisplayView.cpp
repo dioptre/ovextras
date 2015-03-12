@@ -57,8 +57,8 @@ namespace OpenViBEPlugins
 			,m_f64LargestDisplayedValueRange(0)
 			,m_f64ValueRangeMargin(0)
             ,m_f64MarginFactor(0.4f) //add 40% space above and below extremums
-			,m_bVerticalScaleForceUpdate(false)
 			,m_bVerticalScaleRefresh(true)
+			,m_bVerticalScaleForceUpdate(false)
 			,m_f64CustomVerticalScaleValue(f64VerticalScale)
 			,m_f64CustomVerticalOffset(f64VerticalOffset)
 			,m_pBufferDatabase(&oBufferDatabase)

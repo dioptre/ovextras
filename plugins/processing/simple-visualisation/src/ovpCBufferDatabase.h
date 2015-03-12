@@ -353,6 +353,11 @@ namespace OpenViBEPlugins
 				OpenViBE::uint64 ui64StartTime,
 				OpenViBE::uint64 ui64EndTime);
 
+			// Sets the sampling frequency. If this is not called, the frequency is estimated from the stream chunk properties.
+			// Mainly used to force a warning if stream-specified rate differs from the chunk-estimated rate.
+			virtual OpenViBE::boolean setSamplingFrequency(
+				OpenViBE::uint32 ui32SamplingFrequency);
+
 			virtual void setStimulationCount(
 				const OpenViBE::uint32 ui32StimulationCount);
 			virtual void setStimulation(

@@ -355,18 +355,26 @@ boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64Star
 			return false;
 		}
 
-		//computes the sampling frequency
-		// @ FIXME this is not the frequency that is a property of the signal stream. Fix. Computing it like this
-		// makes sense for matrix stream, but makes the number given by signal display useless for debugging the 
-		// case where the rate specced in signal stream is e.g. 0 for some reason.
+		//computes the sampling frequency for sanity checking or if the setter has not been called
 		const uint64 l_ui64SampleDuration = ((uint64)1<<32) * m_pDimensionSizes[1];
-		m_ui32SamplingFrequency = (uint32) ( l_ui64SampleDuration / m_ui64BufferDuration );
-
-		if(m_ui32SamplingFrequency == 0)
+		uint32 l_ui32EstimatedFrequency = (uint32) ( l_ui64SampleDuration / m_ui64BufferDuration );
+		if(l_ui32EstimatedFrequency==0)
 		{
+			// Complain if estimate is bad
 			m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "The integer sampling frequency was estimated from the chunk size to be 0"
 				<< " (nSamples " << m_pDimensionSizes[1] << " / bufferLength " << ITimeArithmetics::timeToSeconds(m_ui64BufferDuration) << "s = 0). This is not supported. Forcing the rate to 1. This may lead to problems.\n";
-			m_ui32SamplingFrequency = 1;
+			l_ui32EstimatedFrequency = 1;
+		}
+		if(m_ui32SamplingFrequency==0) 
+		{
+			// use chunking duration estimate if setter hasn't been used
+			m_ui32SamplingFrequency = l_ui32EstimatedFrequency;
+		}
+		if(m_ui32SamplingFrequency != l_ui32EstimatedFrequency)
+		{
+			m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning
+				<< "Sampling rate [" << l_ui32EstimatedFrequency << "] suggested by chunk properties differs from stream-specified rate [" << m_ui32SamplingFrequency << "]. There may be a problem with an upstream box. Trying to use the estimated rate.\n";
+			m_ui32SamplingFrequency = l_ui32EstimatedFrequency;
 		}
 
 		//computes the number of buffer necessary to display the interval
@@ -490,6 +498,13 @@ boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64Star
 	{
 		m_pDrawable->redraw();
 	}
+
+	return true;
+}
+
+boolean CBufferDatabase::setSamplingFrequency(uint32 ui32Frequency)
+{
+	m_ui32SamplingFrequency = ui32Frequency;
 
 	return true;
 }

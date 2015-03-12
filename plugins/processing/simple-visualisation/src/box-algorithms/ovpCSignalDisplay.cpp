@@ -35,15 +35,31 @@ namespace OpenViBEPlugins
 		* Constructor
 		*/
 		CSignalDisplay::CSignalDisplay(void)
-			: m_pSignalDisplayView(NULL)
+			:
+			 m_pStreamDecoder(NULL)
+		    ,m_pSignalDisplayView(NULL)
 			,m_pBufferDatabase(NULL)
 		{
 		}
 
 		boolean CSignalDisplay::initialize()
 		{
-			//@fixme should use signal decoder for a signal and really use the sampling rate from that
-			m_oStreamedMatrixDecoder.initialize(*this,0);
+			this->getStaticBoxContext().getInputType(0, m_oInputTypeIdentifier);
+
+			if(m_oInputTypeIdentifier==OV_TypeId_StreamedMatrix)
+			{
+				m_pStreamDecoder = new OpenViBEToolkit::TStreamedMatrixDecoder < CSignalDisplay >(*this, 0);
+			}
+			else if(m_oInputTypeIdentifier==OV_TypeId_Signal)
+			{
+				m_pStreamDecoder = new OpenViBEToolkit::TSignalDecoder < CSignalDisplay >(*this, 0);
+			}
+			else 
+			{
+				this->getLogManager() << LogLevel_Error << "Unknown input stream type at stream 0\n";
+				return false;
+			}
+
 			m_oStimulationDecoder.initialize(*this,1);
 			m_oUnitDecoder.initialize(*this,2);
 
@@ -61,10 +77,17 @@ namespace OpenViBEPlugins
 			boolean l_bMultiview                         = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 8);
 
 			if(m_f64RefreshInterval<0) {
-				m_f64RefreshInterval = 0;
+				this->getLogManager() << LogLevel_Error << "Refresh interval must be >= 0\n";
+				return false;
 			}
-			if(l_f64TimeScale<0.01) {
-				l_f64TimeScale = 0.01;
+			if(l_f64VerticalScale<=0)
+			{
+				this->getLogManager() << LogLevel_Error << "Vertical scale must be > 0\n";
+				return false;
+			}
+			if(l_f64TimeScale<=0) {
+				this->getLogManager() << LogLevel_Error << "Time scale must be > 0\n";
+				return false;
 			}
 
 			this->getLogManager() << LogLevel_Debug << "l_sVerticalScale=" << l_f64VerticalScale << ", offset " << l_f64VerticalOffset << "\n";
@@ -104,7 +127,8 @@ namespace OpenViBEPlugins
 		{
 			m_oUnitDecoder.uninitialize();
 			m_oStimulationDecoder.uninitialize();
-			m_oStreamedMatrixDecoder.uninitialize();
+			m_pStreamDecoder->uninitialize();
+			delete m_pStreamDecoder;
 
 			delete m_pSignalDisplayView;
 			delete m_pBufferDatabase;
@@ -199,10 +223,17 @@ namespace OpenViBEPlugins
 			// Streamed matrix in input 0
 			for(uint32 c=0; c<l_pDynamicBoxContext->getInputChunkCount(0); c++)
 			{
-				m_oStreamedMatrixDecoder.decode(c);
-				if(m_oStreamedMatrixDecoder.isHeaderReceived())
+				m_pStreamDecoder->decode(c);
+				if(m_pStreamDecoder->isHeaderReceived())
 				{
-					const IMatrix* l_pMatrix = m_oStreamedMatrixDecoder.getOutputMatrix();
+					const IMatrix* l_pMatrix = static_cast< OpenViBEToolkit::TStreamedMatrixDecoder<CSignalDisplay>* >(m_pStreamDecoder)->getOutputMatrix();
+
+					if(m_oInputTypeIdentifier == OV_TypeId_Signal)
+					{
+						const uint64 l_ui64Rate = static_cast< OpenViBEToolkit::TSignalDecoder<CSignalDisplay>* >(m_pStreamDecoder)->getOutputSamplingRate();
+
+						m_pBufferDatabase->setSamplingFrequency(static_cast<uint32>(l_ui64Rate));
+					}
 
 					m_pBufferDatabase->setMatrixDimensionCount(l_pMatrix->getDimensionCount());
 					for(uint32 i=0;i<l_pMatrix->getDimensionCount();i++)
@@ -215,9 +246,9 @@ namespace OpenViBEPlugins
 					}
 				}
 
-				if(m_oStreamedMatrixDecoder.isBufferReceived())
+				if(m_pStreamDecoder->isBufferReceived())
 				{
-					const IMatrix* l_pMatrix = m_oStreamedMatrixDecoder.getOutputMatrix();
+					const IMatrix* l_pMatrix = static_cast< OpenViBEToolkit::TStreamedMatrixDecoder<CSignalDisplay>* >(m_pStreamDecoder)->getOutputMatrix();
 
 #ifdef DEBUG
 					static int count = 0; 

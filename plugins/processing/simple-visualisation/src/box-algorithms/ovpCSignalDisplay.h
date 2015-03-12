@@ -37,7 +37,7 @@ namespace OpenViBEPlugins
 
 		public:
 
-			OpenViBEToolkit::TStreamedMatrixDecoder<CSignalDisplay> m_oStreamedMatrixDecoder;
+			OpenViBEToolkit::TDecoder<CSignalDisplay>* m_pStreamDecoder;
 			OpenViBEToolkit::TStimulationDecoder<CSignalDisplay> m_oStimulationDecoder;
 			OpenViBEToolkit::TChannelUnitsDecoder<CSignalDisplay> m_oUnitDecoder;
 
@@ -46,6 +46,8 @@ namespace OpenViBEPlugins
 
 			//Contains all the data about the incoming signal
 			CBufferDatabase * m_pBufferDatabase;
+
+			OpenViBE::CIdentifier m_oInputTypeIdentifier;
 
 		protected:
 
@@ -97,10 +99,10 @@ namespace OpenViBEPlugins
 		{
 		public:
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Signal display"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Bruno Renier, Yann Renard, Alison Cellard"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Bruno Renier, Yann Renard, Alison Cellard, Jussi T. Lindgren"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Displays the incoming signal"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Displays the incoming signal"); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Displays the incoming stream"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This box can be used to visualize signal and matrix streams"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualisation/Basic"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.3"); }
 			virtual void release(void)                                   { }
