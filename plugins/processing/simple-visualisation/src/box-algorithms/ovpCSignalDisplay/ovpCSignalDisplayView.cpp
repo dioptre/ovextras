@@ -50,7 +50,6 @@ namespace OpenViBEPlugins
 			)
 			:
 			m_pBuilderInterface(NULL)
-			,m_pMainWindow(NULL)
 			,m_pSignalDisplayTable(NULL)
 			,m_bShowLeftRulers(bVerticalRuler)
 			,m_bShowBottomRuler(bHorizontalRuler)
@@ -58,7 +57,7 @@ namespace OpenViBEPlugins
 			,m_f64LargestDisplayedValueRange(0)
 			,m_f64ValueRangeMargin(0)
             ,m_f64MarginFactor(0.4f) //add 40% space above and below extremums
-			,m_bVerticalScaleChanged(false)
+			,m_bVerticalScaleForceUpdate(false)
 			,m_bVerticalScaleRefresh(true)
 			,m_f64CustomVerticalScaleValue(f64VerticalScale)
 			,m_f64CustomVerticalOffset(f64VerticalOffset)
@@ -70,7 +69,7 @@ namespace OpenViBEPlugins
 			,m_bStimulationColorsShown(false)
 		{
 
-			m_bVerticalScaleChanged=true;
+			m_bVerticalScaleForceUpdate=true;
 
 			m_vSelectedChannels.clear();
 			m_vChannelUnits.clear();
@@ -78,31 +77,6 @@ namespace OpenViBEPlugins
 
 			construct(oBufferDatabase,f64TimeScale,oDisplayMode);
 		}
-
-
-		/*
-		CSignalDisplayView::CSignalDisplayView(CBufferDatabase& oBufferDatabase, float64 f64TimeScale, CIdentifier oDisplayMode, boolean bIsEEG)
-			:m_pBuilderInterface(NULL)
-			,m_pMainWindow(NULL)
-			,m_pSignalDisplayTable(NULL)
-			,m_bShowLeftRulers(false)
-			,m_bShowBottomRuler(true)
-			,m_ui64LeftmostDisplayedTime(0)
-			,m_f64LargestDisplayedValueRange(0)
-			,m_f64ValueRangeMargin(0)
-            ,m_f64MarginFactor(0.4f) //add 40% space above and below extremums
-			,m_f64CustomVerticalScaleValue(1.)
-			,m_pBufferDatabase(&oBufferDatabase)
-			,m_bMultiViewInitialized(false)
-			,m_pBottomBox(NULL)
-			,m_pBottomRuler(NULL)
-		{
-			m_bIsEEGSignal = bIsEEG;
-			m_bAutoVerticalScale = !bIsEEG;
-			m_bVerticalScaleChanged = true;
-			construct(oBufferDatabase,f64TimeScale,oDisplayMode);
-		}
-		*/
 
 		void CSignalDisplayView::construct(CBufferDatabase& oBufferDatabase, float64 f64TimeScale, CIdentifier oDisplayMode)
 		{
@@ -152,7 +126,6 @@ namespace OpenViBEPlugins
 			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayToggleUnitsButton")), false);
 
 			//connect vertical scale callbacks
-			// g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayVerticalScaleToggleButton")),     "toggled",       G_CALLBACK(toggleAutoVerticalScaleButtonCallback), this);
 			g_signal_connect(G_OBJECT(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), "value-changed", G_CALLBACK(customVerticalScaleChangedCallback), this);
 
 			//time scale
@@ -224,35 +197,10 @@ namespace OpenViBEPlugins
 			g_signal_connect(G_OBJECT(l_pComboBox), "changed", G_CALLBACK(scalingModeButtonCallback), this);
 			::gtk_combo_box_set_active(l_pComboBox, (gint)m_oScalingMode.toUInteger());
 
-			/*
-			OpenViBE::Kernel::ITypeManager& l_oMgr = m_rBoxContext.getPlayerContext()->getTypeManager();
-			const uint64 l_ui64nEntries = l_oMgr.getEnumerationEntryCount(OVP_TypeId_SignalDisplayScaling);
-			GList *glist = NULL;int32 l_i64SelectedIdx = -1;
-			for(uint64 i=0;i<l_ui64nEntries;i++)
-			{
-				CString l_sEntryName;
-				uint64 l_ui64EntryValue;
-				if(l_oMgr.getEnumerationEntry(OVP_TypeId_SignalDisplayScaling, i, l_sEntryName, l_ui64EntryValue))
-				{
-					glist = g_list_append(glist, (gpointer)l_sEntryName.toASCIIString());
-					// ::gtk_combo_box_append_text(l_pComboBox, l_sEntryName.toASCIIString());
-					if(l_ui64EntryValue == OVP_TypeId_SignalDisplayScaling_AutoLocal)
-					{
-						l_i64SelectedIdx = i;
-					}
-				}
-			}
-
-			gtk_combo_set_popdown_strings(l_pComboBox, glist);
-
-			if(l_i64SelectedIdx>=0) 
-			{
-				::gtk_combo_box_set_active(l_pComboBox, static_cast<gint>(l_i64SelectedIdx));
-			}
-
-			*/
-
 			::gtk_widget_set_sensitive(GTK_WIDGET(l_pComboBox), true);
+
+		//	GtkWidget* l_pMainWindow = GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayMainWindow"));
+		//	::gtk_window_set_default_size(GTK_WINDOW(l_pMainWindow), 640, 200);
 		}
 
 		CSignalDisplayView::~CSignalDisplayView()
@@ -362,7 +310,7 @@ namespace OpenViBEPlugins
 
                 l_pMultiViewDisplay->m_bMultiView = true;
 
-				m_bVerticalScaleChanged = true; // need to pass the scale params to multiview, use this to make them refresh...
+				m_bVerticalScaleForceUpdate = true; // need to pass the scale params to multiview, use this to make them refresh...
 				m_bVerticalScaleRefresh = true;
 
 
@@ -382,15 +330,16 @@ namespace OpenViBEPlugins
 		void CSignalDisplayView::init()
 		{
 			//retrieve channel count
-			OpenViBE::uint32 l_ui32ChannelCount = (uint32)m_pBufferDatabase->getChannelCount();
+			const OpenViBE::uint32 l_ui32ChannelCount = (uint32)m_pBufferDatabase->getChannelCount();
             const OpenViBE::uint32 l_ui32TableSize = 2;
 
 			//allocate channel labels and channel displays arrays accordingly
             m_oChannelDisplay.resize(l_ui32TableSize);
 			m_oChannelLabel.resize(l_ui32ChannelCount+1);
 			m_vChannelName.resize(l_ui32ChannelCount+1);
-			m_vPreviousValueMin.resize(l_ui32ChannelCount+1);
-			m_vPreviousValueMax.resize(l_ui32ChannelCount+1);
+
+			GtkWidget* l_pScrolledWindow = GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayScrolledWindow"));
+			::gtk_widget_set_size_request(l_pScrolledWindow, 400, 200);
 
 			//retrieve and allocate main table accordingly
 			m_pSignalDisplayTable = GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayMainTable"));
@@ -398,19 +347,19 @@ namespace OpenViBEPlugins
 			//columns : [0] label, [1] vertical separator, [2] left ruler, [3] signal display
 			::gtk_table_resize(GTK_TABLE(m_pSignalDisplayTable), l_ui32ChannelCount*2+1, 4);
 
-			int32 l_i32LeftRulerWidthRequest = 50;
-			int32 l_i32ChannelDisplayWidthRequest = 20;
-			int32 l_i32BottomRulerWidthRequest = 0;
+			const int32 l_i32LeftRulerWidthRequest = 50;
+			const int32 l_i32ChannelDisplayWidthRequest = 20;
+			const int32 l_i32BottomRulerWidthRequest = 0;
 
-			int32 l_i32LeftRulerHeightRequest = 20;
-			int32 l_i32ChannelDisplayHeightRequest = 20;
-			int32 l_i32HorizontalSeparatorHeightRequest = 5;
-			int32 l_i32BottomRulerHeightRequest = 20;
+			const int32 l_i32LeftRulerHeightRequest = 20;
+			const int32 l_i32ChannelDisplayHeightRequest = 20;
+			const int32 l_i32HorizontalSeparatorHeightRequest = 5;
+			const int32 l_i32BottomRulerHeightRequest = 20;
 
 			//sets a minimum size for the table (needed to scroll)
 			::gtk_widget_set_size_request(
 				m_pSignalDisplayTable,
-				l_i32LeftRulerWidthRequest + l_i32ChannelDisplayHeightRequest,
+				l_i32LeftRulerWidthRequest + l_i32ChannelDisplayWidthRequest,
 				(l_ui32ChannelCount+1)*l_i32ChannelDisplayHeightRequest + l_ui32ChannelCount*l_i32HorizontalSeparatorHeightRequest);
 
 			//add a vertical separator
@@ -620,6 +569,7 @@ namespace OpenViBEPlugins
 			}
 
 			activateToolbarButtons(true);
+
 		}
 
 		void CSignalDisplayView::redraw()
@@ -630,17 +580,21 @@ namespace OpenViBEPlugins
 				return;
 			}
 
-			if(m_bVerticalScaleRefresh)
+			if(m_bVerticalScaleRefresh || m_bVerticalScaleForceUpdate)
 			{
+				const float64 l_f64MarginMultiplier = 0.2;
+
+				// @note the reason the applying of scale parameters is here and not inside SignalChannelDisplay is that in
+				// some situations we wish to estimate and set params across two SignalChannelDisplay objects: 
+				// the main view and multiview.
 				if(m_oScalingMode == OVP_TypeId_SignalDisplayScaling_Global) 
 				{
 					// Auto global
 				
 					// Find the global min and max
-					vector<float64> l_vValueRange;
 					vector<float64> l_vValueMin;
 					vector<float64> l_vValueMax;
-					m_oChannelDisplay[0]->updateDisplayedValueRange(l_vValueRange,l_vValueMin,l_vValueMax);
+					m_oChannelDisplay[0]->getDisplayedValueRange(l_vValueMin,l_vValueMax);
 			
 					float64 l_f64MinValue = *(std::min_element(l_vValueMin.begin(), l_vValueMin.end()));
 					float64 l_f64MaxValue = *(std::max_element(l_vValueMax.begin(), l_vValueMax.end()));
@@ -649,79 +603,101 @@ namespace OpenViBEPlugins
 					{
 						vector<float64> l_vMultiValueMin;
 						vector<float64> l_vMultiValueMax;
-						m_oChannelDisplay[1]->updateDisplayedValueRange(l_vValueRange,l_vMultiValueMin,l_vMultiValueMax);
+						m_oChannelDisplay[1]->getDisplayedValueRange(l_vMultiValueMin,l_vMultiValueMax);
 
 						l_f64MinValue = std::min(l_f64MinValue, *(std::min_element(l_vMultiValueMin.begin(), l_vMultiValueMin.end())));
 						l_f64MaxValue = std::max(l_f64MaxValue, *(std::max_element(l_vMultiValueMax.begin(), l_vMultiValueMax.end())));
 					}
 
 					// @todo some robust & fast estimate of a high quantile instead of max/min...
-					const float64 f64Margin = 0.2 * (l_f64MaxValue - l_f64MinValue);
+					const float64 l_f64Margin = l_f64MarginMultiplier * (l_f64MaxValue - l_f64MinValue);
 
-					if( l_f64MinValue < m_vPreviousValueMin[0]-f64Margin || l_f64MaxValue > m_vPreviousValueMax[0] + f64Margin ||
-						l_f64MinValue > m_vPreviousValueMin[0]+f64Margin || l_f64MaxValue < m_vPreviousValueMax[0] - f64Margin)
+					const float64 l_f64MinimumTopMargin    = m_oChannelDisplay[0]->m_vMinimumTopMargin[0];
+					const float64 l_f64MaximumBottomMargin = m_oChannelDisplay[0]->m_vMaximumBottomMargin[0];
+
+					if( m_bVerticalScaleForceUpdate || 
+						l_f64MinValue < l_f64MaximumBottomMargin-l_f64Margin || l_f64MaxValue > l_f64MinimumTopMargin + l_f64Margin ||
+						l_f64MinValue > l_f64MaximumBottomMargin+l_f64Margin || l_f64MaxValue < l_f64MinimumTopMargin - l_f64Margin)
 					{
-						m_oChannelDisplay[0]->setGlobalBestFitParameters2(l_f64MinValue, l_f64MaxValue); // normal chns
-						m_oChannelDisplay[1]->setGlobalBestFitParameters2(l_f64MinValue, l_f64MaxValue); // multiview
-
-						m_vPreviousValueMin[0] = l_f64MinValue;
-						m_vPreviousValueMax[0] = l_f64MaxValue;
+						m_oChannelDisplay[0]->setGlobalScaleParameters(l_f64MinValue, l_f64MaxValue, l_f64Margin); // normal chns
+						m_oChannelDisplay[1]->setGlobalScaleParameters(l_f64MinValue, l_f64MaxValue, l_f64Margin); // multiview
 					}
 				} 
 				else if(m_oScalingMode == OVP_TypeId_SignalDisplayScaling_None) 
 				{
-					// Manual global
-					if(m_bVerticalScaleChanged)
+					// Manual global, only updated when triggered as necessary
+					if(m_bVerticalScaleForceUpdate)
 					{
-						m_oChannelDisplay[0]->setGlobalManualParameters(m_f64CustomVerticalScaleValue, m_f64CustomVerticalOffset); // normal chns
-						m_oChannelDisplay[1]->setGlobalManualParameters(m_f64CustomVerticalScaleValue, m_f64CustomVerticalOffset); // multiview
-						m_bVerticalScaleChanged = false;
+						const float64 l_f64Min = m_f64CustomVerticalOffset - m_f64CustomVerticalScaleValue/2;
+						const float64 l_f64Max = m_f64CustomVerticalOffset + m_f64CustomVerticalScaleValue/2;
+						const float64 l_f64Margin = l_f64MarginMultiplier * (l_f64Max - l_f64Min);
+
+						m_oChannelDisplay[0]->setGlobalScaleParameters(l_f64Min, l_f64Max, l_f64Margin); // normal chns
+						m_oChannelDisplay[1]->setGlobalScaleParameters(l_f64Min, l_f64Max, l_f64Margin); // multiview
 					}
 				}
 				else if(m_oScalingMode == OVP_TypeId_SignalDisplayScaling_PerChannel) 
 				{
 					// Auto local
-					vector<float64> l_vValueRange;
 					vector<float64> l_vValueMin;
 					vector<float64> l_vValueMax;
-					m_oChannelDisplay[0]->updateDisplayedValueRange(l_vValueRange,l_vValueMin,l_vValueMax);
+					m_oChannelDisplay[0]->getDisplayedValueRange(l_vValueMin,l_vValueMax);
 
 					bool updated = false;
 					for(uint32 i=0;i<l_vValueMin.size();i++) 
 					{
-						const float64 f64Margin = 0.2 * (l_vValueMax[i] - l_vValueMin[i]);
+						const float64 l_f64Margin = l_f64MarginMultiplier * (l_vValueMax[i] - l_vValueMin[i]);
+						const float64 l_f64MinimumTopMargin    = m_oChannelDisplay[0]->m_vMinimumTopMargin[i];
+						const float64 l_f64MaximumBottomMargin = m_oChannelDisplay[0]->m_vMaximumBottomMargin[i];
 
-						if(l_vValueMin[i] < m_vPreviousValueMin[i]-f64Margin || l_vValueMax[i] > m_vPreviousValueMax[i]+f64Margin || 
-							l_vValueMin[i] > m_vPreviousValueMin[i]+f64Margin || l_vValueMax[i] < m_vPreviousValueMax[i]-f64Margin)
+						if(m_bVerticalScaleForceUpdate ||
+						   l_vValueMin[i] < l_f64MaximumBottomMargin-l_f64Margin || l_vValueMax[i] > l_f64MinimumTopMargin+l_f64Margin || 
+						   l_vValueMin[i] > l_f64MaximumBottomMargin+l_f64Margin || l_vValueMax[i] < l_f64MinimumTopMargin-l_f64Margin)
 						{
-							m_oChannelDisplay[0]->setLocalManualParameters(i, l_vValueMin[i], l_vValueMax[i]);
+#ifdef DEBUG
+							std::cout << "Channel " << i+1 << " params updated: " 
+								<< l_vValueMin[i] << " not in [" << l_f64MaximumBottomMargin-f64Margin << "," << l_f64MaximumBottomMargin+f64Margin << "], or "
+								<< l_vValueMax[i] << " not in [" << l_f64MinimumTopMargin-f64Margin << "," << l_f64MinimumTopMargin+f64Margin << "], "
+								<< " margin was " << l_f64Margin << "\n";
+#endif
+							m_oChannelDisplay[0]->setLocalScaleParameters(i, l_vValueMin[i], l_vValueMax[i], l_f64Margin);
 							updated = true;
+						}
+						else
+						{
+#ifdef DEBUG
+							std::cout << "No need to update channel " << i+1 << ", "
+								<< l_vValueMin[i] << " in [" << l_f64MaximumBottomMargin-f64Margin << "," << l_f64MaximumBottomMargin+f64Margin << "], or "
+								<< l_vValueMax[i] << " in [" << l_f64MinimumTopMargin-f64Margin << "," << l_f64MinimumTopMargin+f64Margin << "], "
+								<< " margin was " << l_f64Margin << "\n";
+#endif
 						}
 					}
 					if(updated)
 					{
 						m_oChannelDisplay[0]->updateDisplayParameters();
-						m_vPreviousValueMax = l_vValueMax;
-						m_vPreviousValueMin = l_vValueMin;
 					}
 
 					// For multiview, we take the maxes of the involved signals
 					if(m_bMultiViewEnabled)
 					{
-						m_oChannelDisplay[1]->updateDisplayedValueRange(l_vValueRange,l_vValueMin,l_vValueMax);
+						m_oChannelDisplay[1]->getDisplayedValueRange(l_vValueMin,l_vValueMax);
 
-						float64 l_f64MinValue = *(std::min_element(l_vValueMin.begin(), l_vValueMin.end()));
-						float64 l_f64MaxValue = *(std::max_element(l_vValueMax.begin(), l_vValueMax.end()));
+						const float64 l_f64MinValue = *(std::min_element(l_vValueMin.begin(), l_vValueMin.end()));
+						const float64 l_f64MaxValue = *(std::max_element(l_vValueMax.begin(), l_vValueMax.end()));
 
 						// @todo some robust & fast estimate of a high quantile instead of max/min...
-						const float64 f64Margin = 0.2 * (l_f64MaxValue - l_f64MinValue);
+						const float64 l_f64Margin = l_f64MarginMultiplier * (l_f64MaxValue - l_f64MinValue);
+						const float64 l_f64MinimumTopMargin    = m_oChannelDisplay[1]->m_vMinimumTopMargin[0];
+						const float64 l_f64MaximumBottomMargin = m_oChannelDisplay[1]->m_vMaximumBottomMargin[0];
 
-						if(    l_f64MaxValue > m_oChannelDisplay[1]->m_vMaximumTopMargin[0]    + f64Margin 
-							|| l_f64MaxValue < m_oChannelDisplay[1]->m_vMaximumTopMargin[0]    - f64Margin 
-							|| l_f64MinValue > m_oChannelDisplay[1]->m_vMinimumBottomMargin[0] + f64Margin 
-							|| l_f64MinValue < m_oChannelDisplay[1]->m_vMinimumBottomMargin[0] - f64Margin)
+						if( m_bVerticalScaleForceUpdate
+							|| l_f64MaxValue > l_f64MinimumTopMargin    + l_f64Margin 
+							|| l_f64MaxValue < l_f64MinimumTopMargin    - l_f64Margin 
+							|| l_f64MinValue > l_f64MaximumBottomMargin + l_f64Margin 
+							|| l_f64MinValue < l_f64MaximumBottomMargin - l_f64Margin)
 						{
-							m_oChannelDisplay[1]->setGlobalBestFitParameters2(l_f64MinValue, l_f64MaxValue); // multiview
+							m_oChannelDisplay[1]->setGlobalScaleParameters(l_f64MinValue, l_f64MaxValue, l_f64Margin); // multiview
 							m_oChannelDisplay[1]->updateDisplayParameters();
 						}
 					}
@@ -737,6 +713,7 @@ namespace OpenViBEPlugins
 					return;
 				}
 				m_bVerticalScaleRefresh = false;
+				m_bVerticalScaleForceUpdate = false;
 			}
 
 			// todo don't reset every frame
@@ -853,8 +830,6 @@ namespace OpenViBEPlugins
 			//redraw ruler
 			m_pBottomRuler->setLeftmostDisplayedTime(m_ui64LeftmostDisplayedTime);
 			if(GTK_WIDGET(m_pBottomRuler->getWidget())->window) gdk_window_invalidate_rect(GTK_WIDGET(m_pBottomRuler->getWidget())->window, NULL, true);
-
-			m_bVerticalScaleChanged = false;
 		}
 
 		void CSignalDisplayView::toggleLeftRulers(boolean bActive)
@@ -1130,7 +1105,7 @@ namespace OpenViBEPlugins
 
 		boolean CSignalDisplayView::onVerticalScaleModeToggledCB(::GtkToggleButton* pToggleButton)
 		{
-			m_bVerticalScaleChanged = true;
+			m_bVerticalScaleForceUpdate = true;
 			m_bVerticalScaleRefresh = true;
 
 //			::gtk_widget_set_sensitive(GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayCustomVerticalScaleSpinButton")), !m_bAutoVerticalScale);
@@ -1141,15 +1116,15 @@ namespace OpenViBEPlugins
 
 		boolean CSignalDisplayView::onCustomVerticalScaleChangedCB(::GtkSpinButton *pSpinButton)
 		{
-			m_bVerticalScaleChanged = true;
-			m_f64CustomVerticalScaleValue = ::gtk_spin_button_get_value(pSpinButton);
+			m_bVerticalScaleForceUpdate = true;
 			m_bVerticalScaleRefresh = true;
+			m_f64CustomVerticalScaleValue = ::gtk_spin_button_get_value(pSpinButton);
 			return true;
 		}
 
 		boolean CSignalDisplayView::onCustomVerticalOffsetChangedCB(::GtkSpinButton *pSpinButton)
 		{
-			m_bVerticalScaleChanged = true;
+			m_bVerticalScaleForceUpdate = true;
 			m_bVerticalScaleRefresh = true;
 			m_f64CustomVerticalOffset = ::gtk_spin_button_get_value(pSpinButton);
 			return true;
@@ -1337,6 +1312,7 @@ namespace OpenViBEPlugins
 		void CSignalDisplayView::refreshScale(void) 
 		{
 			m_bVerticalScaleRefresh = true;
+			// But do not force an update, its just a recommendation to check...
 		}
 
 		//
@@ -1366,15 +1342,8 @@ namespace OpenViBEPlugins
 			if(l_pView->m_oScalingMode != l_i32Selection)
 			{
 				l_pView->m_oScalingMode = l_i32Selection;
-				l_pView->m_bVerticalScaleChanged = true;
+				l_pView->m_bVerticalScaleForceUpdate = true;
 				l_pView->m_bVerticalScaleRefresh = true;
-
-				// Make sure the scale readjusts
-				for(uint32 i=0;i<l_pView->m_vPreviousValueMax.size();i++)
-				{
-					l_pView->m_vPreviousValueMax[i] = -DBL_MIN;
-					l_pView->m_vPreviousValueMin[i] = +DBL_MAX;
-				}
 
 				l_pView->redraw(); // immediate redraw
 
@@ -1396,14 +1365,6 @@ namespace OpenViBEPlugins
 		{
 			CSignalDisplayView* l_pView = reinterpret_cast < CSignalDisplayView* >(data);
 			l_pView->toggleBottomRuler(::gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(widget))?true:false);
-		}
-
-		void toggleAutoVerticalScaleButtonCallback(::GtkToggleButton *togglebutton, gpointer data)
-		{
-			/*
-			CSignalDisplayView* l_pView = reinterpret_cast < CSignalDisplayView* >(data);
-			l_pView->onVerticalScaleModeToggledCB(togglebutton);
-			*/
 		}
 
 		void customVerticalScaleChangedCallback(::GtkSpinButton* pSpinButton, gpointer data)
@@ -1444,7 +1405,7 @@ namespace OpenViBEPlugins
 
 				//redraw channels
 
-				l_pView->m_bVerticalScaleChanged = true;
+				l_pView->m_bVerticalScaleForceUpdate = true;
 				l_pView->m_bVerticalScaleRefresh = true;
 
 				l_pView->redraw();
@@ -1534,20 +1495,12 @@ namespace OpenViBEPlugins
 				}
 			}
 
-			l_pView->m_vPreviousValueMax.resize(l_ui32SelectedCount);
-			l_pView->m_vPreviousValueMin.resize(l_ui32SelectedCount);
-			for(uint32 i=0;i<l_ui32SelectedCount;i++)
-			{
-				l_pView->m_vPreviousValueMax[i] = -DBL_MIN;
-				l_pView->m_vPreviousValueMin[i] = +DBL_MAX;
-			}
-
 			// Add the widgets back with the new list of channels
 			l_pView->recreateWidgets(l_ui32SelectedCount);
 
 			l_pView->updateMainTableStatus();
 
-			l_pView->m_bVerticalScaleChanged = true;
+			l_pView->m_bVerticalScaleForceUpdate = true;
 			l_pView->m_bVerticalScaleRefresh = true;
 
             //redraw channels

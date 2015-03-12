@@ -30,7 +30,7 @@
 					<TypeIdentifier>(0x33a30739, 0x00d5299b)</TypeIdentifier>
 					<Name>Auto vertical scale</Name>
 					<DefaultValue>Per channel</DefaultValue>
-					<Value>Global</Value>
+					<Value>None</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -44,7 +44,7 @@
 					<TypeIdentifier>(0x512a166f, 0x5c3ef83f)</TypeIdentifier>
 					<Name>Vertical Scale</Name>
 					<DefaultValue>100</DefaultValue>
-					<Value>100</Value>
+					<Value>30</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -90,7 +90,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>51</Value>
+					<Value>43</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
@@ -106,15 +106,11 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>116</Value>
+					<Value>103</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
-					<Value>(0x00000000, 0x003ed85a)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xc67a01dc, 0x28ce06c1)</Identifier>
-					<Value></Value>
+					<Value>(0x00000000, 0x0058c3ed)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
@@ -220,7 +216,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>51</Value>
+					<Value>43</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
@@ -236,11 +232,11 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>90</Value>
+					<Value>80</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
-					<Value>(0x00000000, 0x004f9d54)</Value>
+					<Value>(0x00000000, 0x006a7edc)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
@@ -294,7 +290,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>38</Value>
+					<Value>33</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
@@ -310,11 +306,11 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>177</Value>
+					<Value>153</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
-					<Value>(0x00000000, 0x0076471f)</Value>
+					<Value>(0x00000000, 0x00a1ff2e)</Value>
 				</Attribute>
 			</Attributes>
 		</Box>
@@ -356,7 +352,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>38</Value>
+					<Value>33</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
@@ -372,11 +368,11 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>177</Value>
+					<Value>153</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
-					<Value>(0x00000000, 0x00b609c4)</Value>
+					<Value>(0x00000000, 0x00b2c9f7)</Value>
 				</Attribute>
 			</Attributes>
 		</Box>
@@ -447,7 +443,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>25</Value>
+					<Value>23</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
@@ -459,11 +455,11 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>119</Value>
+					<Value>105</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
-					<Value>(0x00000000, 0x00692b41)</Value>
+					<Value>(0x00000000, 0x00a7d4a2)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
@@ -498,7 +494,7 @@
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
-					<Value>201</Value>
+					<Value>199</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
@@ -506,7 +502,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
-					<Value>242</Value>
+					<Value>246</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
@@ -527,7 +523,7 @@
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
-					<Value>201</Value>
+					<Value>199</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
@@ -535,7 +531,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
-					<Value>242</Value>
+					<Value>246</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
@@ -556,7 +552,7 @@
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
-					<Value>291</Value>
+					<Value>290</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
@@ -564,7 +560,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
-					<Value>322</Value>
+					<Value>326</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
@@ -585,7 +581,7 @@
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
-					<Value>201</Value>
+					<Value>199</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
@@ -593,7 +589,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
-					<Value>322</Value>
+					<Value>326</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
@@ -614,7 +610,7 @@
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
-					<Value>201</Value>
+					<Value>199</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
@@ -622,7 +618,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
-					<Value>255</Value>
+					<Value>256</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
@@ -740,11 +736,11 @@ You can enable eeg mode by checking EEG display in box settings.</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x4c90d4ad, 0x7a2554ec)</Identifier>
-					<Value>355</Value>
+					<Value>583</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7b814cca, 0x271df6dd)</Identifier>
-					<Value>255</Value>
+					<Value>578</Value>
 				</Attribute>
 			</Attributes>
 		</VisualisationWidget>
@@ -768,11 +764,11 @@ You can enable eeg mode by checking EEG display in box settings.</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x237e56d2, 0x10cd68ae)</Identifier>
-					<Value>310</Value>
+					<Value>533</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x54e45f5b, 0x76c036e2)</Identifier>
-					<Value>153</Value>
+					<Value>263</Value>
 				</Attribute>
 			</Attributes>
 		</VisualisationWidget>

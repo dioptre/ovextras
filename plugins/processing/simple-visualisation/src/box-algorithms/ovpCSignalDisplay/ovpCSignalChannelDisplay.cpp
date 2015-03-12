@@ -95,8 +95,7 @@ CSignalChannelDisplay::~CSignalChannelDisplay()
     }
 	m_oLeftRuler.clear();
 
-/*  m_vLocalMaximum.clear();
-    m_vLocalMinimum.clear();
+/*
     m_vTranslateY.clear();
     m_vMaximumBottomMargin.clear();
     m_vMaximumTopMargin.clear();
@@ -159,8 +158,6 @@ void CSignalChannelDisplay::resetChannelList()
 {
     m_oChannelList.clear();
 
-	m_vLocalMaximum.clear();
-    m_vLocalMinimum.clear();
     m_vTranslateY.clear();
     m_vMaximumBottomMargin.clear();
     m_vMaximumTopMargin.clear();
@@ -173,8 +170,6 @@ void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
 {
 	m_oChannelList.push_back(ui32Channel);
     m_oLeftRuler[ui32Channel] = new CSignalDisplayLeftRuler(m_i32LeftRulerWidthRequest, m_i32LeftRulerHeightRequest);
-    m_vLocalMaximum.push_back(-DBL_MAX);
-    m_vLocalMinimum.push_back(DBL_MAX);
     m_vTranslateY.push_back(0);
     m_vMaximumBottomMargin.push_back(0);
     m_vMaximumTopMargin.push_back(0);
@@ -187,8 +182,6 @@ void CSignalChannelDisplay::addChannel(uint32 ui32Channel)
 void CSignalChannelDisplay::addChannelList(uint32 ui32Channel)
 {
 	m_oChannelList.push_back(ui32Channel);
-	m_vLocalMaximum.push_back(-DBL_MAX);
-	m_vLocalMinimum.push_back(DBL_MAX);
     m_vTranslateY.push_back(0);
     m_vMaximumBottomMargin.push_back(0);
     m_vMaximumTopMargin.push_back(0);
@@ -531,109 +524,31 @@ void CSignalChannelDisplay::computeZoom(OpenViBE::boolean bZoomIn, OpenViBE::flo
 	}
 }
 
-void CSignalChannelDisplay::updateDisplayedValueRange(std::vector<float64> & rDisplayedValueRange, 
-	std::vector<float64>& rDisplayedValueMin,
-	std::vector<float64>& rDisplayedValueMax)
+void CSignalChannelDisplay::getDisplayedValueRange(std::vector<float64>& rDisplayedValueMin,
+	std::vector<float64>& rDisplayedValueMax) const
 {
-	//update maximum and minimum values displayed by this channel
-	float64 l_f64CurrentMaximum;
-	float64 l_f64CurrentMinimum;
 
-//    float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
-    rDisplayedValueRange.resize(m_oChannelList.size());
     rDisplayedValueMin.resize(m_oChannelList.size());
     rDisplayedValueMax.resize(m_oChannelList.size());
 
 	for(size_t k=0 ; k<m_oChannelList.size() ; k++)
 	{
+		//update maximum and minimum values displayed by this channel
+		float64 l_f64CurrentMaximum;
+		float64 l_f64CurrentMinimum;
+
 		//get local min/max
 		m_pDatabase->getDisplayedChannelLocalMinMaxValue(m_oChannelList[k], l_f64CurrentMinimum, l_f64CurrentMaximum);
-		// m_pDatabase->getDisplayedChannelLocalMeanValue(m_oChannelList[k], rDisplayedValueRange[k]);
-
-//      if(l_f64CurrentMinimum < m_vLocalMinimum[k])
-//		{
-            m_vLocalMinimum[k] = l_f64CurrentMinimum;
-//		}
-//       if(l_f64CurrentMaximum > m_vLocalMaximum[k])
-//		{
-            m_vLocalMaximum[k] = l_f64CurrentMaximum;
-//		}
 
         //set parameter to recomputed range
-        rDisplayedValueRange[k] = m_vLocalMaximum[k] - m_vLocalMinimum[k];
-		rDisplayedValueMin[k] = m_vLocalMinimum[k];
-		rDisplayedValueMax[k] = m_vLocalMaximum[k];
+		rDisplayedValueMin[k] = l_f64CurrentMinimum;
+		rDisplayedValueMax[k] = l_f64CurrentMaximum;
 
     }
 }
 
-void CSignalChannelDisplay::setGlobalBestFitParameters(const float64& rRange, const float64& rMargin)
+void CSignalChannelDisplay::setGlobalScaleParameters(const float64 f64Min, const float64 f64Max, const float64 f64Margin)
 {
-//	m_f64ScaleX = 1;
-	bool redraw = true;
-
-    for(size_t k = 0; k<m_oChannelList.size(); k++)
-    {
-        float64 l_f64LocalMediumValue = (m_vLocalMaximum[k] + m_vLocalMinimum[k]) / 2;
-
-        float64 newMaximumTopMargin = l_f64LocalMediumValue + rRange/2 + rMargin;
-        float64 newMaximumBottomMargin = l_f64LocalMediumValue + rRange/2 - rMargin;
-        float64 newMinimumTopMargin = l_f64LocalMediumValue - rRange/2 + rMargin;
-        float64 newMinimumBottomMargin = l_f64LocalMediumValue - rRange/2 - rMargin;
-		
-		/*
-		const float th = 2;
-		if(std::fabs(newMaximumTopMargin     - m_vMaximumTopMargin[k]) > th ||
-			std::fabs(newMaximumBottomMargin - m_vMaximumBottomMargin[k]) > th ||	
-			std::fabs(newMinimumTopMargin    - m_vMinimumTopMargin[k]) > th ||
-			std::fabs(newMinimumBottomMargin - m_vMinimumBottomMargin[k]) > th) 
-		{
-			redraw = true;
-		}
-		*/
-
-        m_vMaximumTopMargin[k] = newMaximumTopMargin;
-        m_vMaximumBottomMargin[k] = newMaximumBottomMargin;
-
-        m_vMinimumTopMargin[k] = newMinimumTopMargin;
-        m_vMinimumBottomMargin[k] = newMinimumBottomMargin;
-    }
-
-	if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit && redraw)
-	{
-		updateDisplayParameters();
-	}
-}
-
-void CSignalChannelDisplay::setGlobalBestFitParameters2(const float64& rMin, const float64& rMax)
-{
-//	m_f64ScaleX = 1;
-	const float64 f64Margin = 0.2 * (rMax - rMin);
-
-	const float64 f64MaxTop    = rMax + f64Margin;
-	const float64 f64MinBottom = rMin - f64Margin;
-
-    for(size_t k = 0; k<m_oChannelList.size(); k++)
-    {
-        m_vMaximumTopMargin[k]    = f64MaxTop;
-        m_vMaximumBottomMargin[k] = rMax;
-
-        m_vMinimumTopMargin[k]    = rMin;
-        m_vMinimumBottomMargin[k] = f64MinBottom;
-    }
-
-	updateDisplayParameters();
-}
-
-void CSignalChannelDisplay::setGlobalManualParameters(float64 f64Scale, float64 f64Center)
-{
-//	m_f64ScaleX = 1;
-
-	const float64 f64Max = f64Center + f64Scale/2;
-	const float64 f64Min = f64Center - f64Scale/2;
-
-	const float64 f64Margin = 0.2 * (f64Max - f64Min);
-
 	const float64 f64MaxTop    = f64Max + f64Margin;
 	const float64 f64MinBottom = f64Min - f64Margin;
 
@@ -646,19 +561,11 @@ void CSignalChannelDisplay::setGlobalManualParameters(float64 f64Scale, float64 
         m_vMinimumBottomMargin[k] = f64MinBottom;
     }
 
-//	if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
-//	{
-		updateDisplayParameters();
-//	}
+	updateDisplayParameters();
 }
 
-void CSignalChannelDisplay::setLocalManualParameters(const uint32 subChannelIndex, const float64 f64Min, const float64 f64Max)
+void CSignalChannelDisplay::setLocalScaleParameters(const uint32 subChannelIndex, const float64 f64Min, const float64 f64Max, const float64 f64Margin)
 {
-//	m_f64ScaleX = 1;
-
-	const float64 f64Margin = 0.2 * (f64Max - f64Min);
-	// const float f64Margin = 0;
-
 	m_vMaximumTopMargin[subChannelIndex]    = f64Max + f64Margin;
 	m_vMinimumTopMargin[subChannelIndex]    = f64Max;
 
@@ -666,26 +573,6 @@ void CSignalChannelDisplay::setLocalManualParameters(const uint32 subChannelInde
 	m_vMinimumBottomMargin[subChannelIndex] = f64Min - f64Margin;
 
 //	std::cout << "Scaling to [" <<  f64Min << "," << f64Max << "]S\n";
-}
-
-
-void CSignalChannelDisplay::setMultiViewBestFitParameters(const float64& rRange, const float64& rMargin)
-{
-//    m_f64ScaleX = 1;
-
-    const float64 l_f64LocalMediumValue = (m_vLocalMaximum[0] + m_vLocalMinimum[0]) / 2;
-
-    m_vMaximumTopMargin[0] = l_f64LocalMediumValue + rRange/2 + rMargin;
-    m_vMaximumBottomMargin[0] = l_f64LocalMediumValue + rRange/2 - rMargin;
-
-    m_vMinimumTopMargin[0] = l_f64LocalMediumValue - rRange/2 + rMargin;
-    m_vMinimumBottomMargin[0] = l_f64LocalMediumValue - rRange/2 - rMargin;
-
-
-    if(m_eCurrentSignalMode == DisplayMode_GlobalBestFit)
-    {
-        updateDisplayParameters();
-    }
 }
 
 // Assume [a,b] is the range between MinimumBottom and MaxiMumTop of k. If c \in [a,b],

@@ -31,20 +31,6 @@ namespace OpenViBEPlugins
 		public:
 
 
-
-			/**
-			 * \brief Constructor
-			 * \param [in] rBufferDatabase Signal database
-			 * \param [in] f64TimeScale Initial time scale value
-			 * \param [in] oDisplayMode Initial signal display mode
-			 */
-			/*
-			CSignalDisplayView(
-				CBufferDatabase& rBufferDatabase,
-				OpenViBE::float64 f64TimeScale,
-				OpenViBE::CIdentifier oDisplayMode,
-				OpenViBE::boolean bIsEEG);
-				*/
 			/**
 			 * \brief Constructor
 			 * \param [in] rBufferDatabase Signal database
@@ -211,9 +197,6 @@ namespace OpenViBEPlugins
 			//! The Builder handler used to create the interface
 			::GtkBuilder* m_pBuilderInterface;
 
-			//! The main window
-			GtkWidget * m_pMainWindow;
-
 			//! The table containing the CSignalChannelDisplays
 			GtkWidget* m_pSignalDisplayTable;
 
@@ -255,10 +238,10 @@ namespace OpenViBEPlugins
 
 			/** \name Vertical scale */
 			//@{
-			//! Flag set to true when vertical scale mode or value changes
-			OpenViBE::boolean m_bVerticalScaleChanged;
-			//
+			//! Flag set to true when you'd like the display to *check* if the scale needs to change and possibly update
 			OpenViBE::boolean m_bVerticalScaleRefresh;
+			//! Flag set to true when you'd like the display to update in any case
+			OpenViBE::boolean m_bVerticalScaleForceUpdate;
 			//! Value of custom vertical scale
 			OpenViBE::float64 m_f64CustomVerticalScaleValue;
 			//! Value of custom vertical offset
@@ -305,9 +288,6 @@ namespace OpenViBEPlugins
 			OpenViBE::CIdentifier m_oScalingMode;
 
 			static const char* m_vScalingModes[];
-
-			std::vector<OpenViBE::float64> m_vPreviousValueMin;
-			std::vector<OpenViBE::float64> m_vPreviousValueMax;
 
 			std::vector<OpenViBE::CString> m_vErrorState;
 

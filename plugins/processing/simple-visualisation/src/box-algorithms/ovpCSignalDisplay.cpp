@@ -1,3 +1,9 @@
+/*
+ * Note: The signal display and its subclasses (SignalChannelDisplay, SignalDisplayView) 
+ * were rehauled to give a better user experience for different types of signal. However, 
+ * the code could likely use significant refactoring for clarity and maintainability. 
+ * If this is done, care should be taken that the code does not break.
+ */
 
 #include "ovpCSignalDisplay.h"
 

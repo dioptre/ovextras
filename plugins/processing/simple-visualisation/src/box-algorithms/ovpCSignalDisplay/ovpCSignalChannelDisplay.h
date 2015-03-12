@@ -141,51 +141,33 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 f64YClick);
 
 		/**
-		 * \brief Recomputes value range and changes signal translation if needed
-		 * In global best fit mode, recomputes translation so that signals fit in the drawing area.
-		 * If the value range has changed too much, the scale will be recomputed at next redraw.
-         * \param[out] rDisplayedValueRange Returns vector of updated value range displayed by the channels
+		 * \brief Returns empiric y min and maxes of the currently shown signal chunks for all subchannels.
+		 * Note that the actually used display limits may be different. This function can be used
+		 * to get the data extremal values and then use these to configure the display appropriately.
 		 */
-        void updateDisplayedValueRange(
-            std::vector<OpenViBE::float64>& rDisplayedValueRange,
+        void getDisplayedValueRange(
 			std::vector<OpenViBE::float64>& rDisplayedValueMin,
-			std::vector<OpenViBE::float64>& rDisplayedValueMax);
+			std::vector<OpenViBE::float64>& rDisplayedValueMax) const;
 
-		/**
-		 * \brief Sets latest global best fit parameters
-		 * Channel display parameters need to be updated based on this information.
-		 * The visible range is recomputed so that :
-		 * maxVisibleValue = channelMiddleValue + rRange/2 + rMargin
-		 * minVisibleValue = channelMiddleValue - rRange/2 - rMargin
-		 * The margin ensures signals are not redrawn every time, allowing
-		 * for some extra top and bottom space in case signals increase/decrease.
-		 * \param rRange New global value range
-		 * \param rMargin New global value margin
+		/*
+		 * \brief Sets scale for all subchannels. 
 		 */
-		void setGlobalBestFitParameters(
-			const OpenViBE::float64& rRange,
-			const OpenViBE::float64& rMargin);
+		void setGlobalScaleParameters(
+			const OpenViBE::float64 f64Min,
+			const OpenViBE::float64 f64Max,
+			const OpenViBE::float64 f64Margin);
 
-		void setGlobalBestFitParameters2(
-			const OpenViBE::float64& rMin,
-			const OpenViBE::float64& rMax);
-
-		void setGlobalManualParameters(
-			OpenViBE::float64 f64Scale,
-			OpenViBE::float64 f64Center);
-
-		void setLocalManualParameters(
+		/*
+		 * \brief Sets scale for a single subchannel.
+		 */
+		void setLocalScaleParameters(
 			const OpenViBE::uint32 subChannelIndex,
 			const OpenViBE::float64 rMin,
-			const OpenViBE::float64 rMax);
+			const OpenViBE::float64 rMax,
+			const OpenViBE::float64 f64Margin);
 
-        void setMultiViewBestFitParameters(
-            const OpenViBE::float64& rRange,
-            const OpenViBE::float64& rMargin);
 		/**
 		 * \brief Updates signal scale and translation based on latest global range and margin
-		 * Called from setGlobalBestFitParameters when in global best fit mode, and when
-		 * leaving zooming mode.
 		 */
 		void updateDisplayParameters();
 
