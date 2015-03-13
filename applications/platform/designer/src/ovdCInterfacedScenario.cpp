@@ -1932,6 +1932,7 @@ void CInterfacedScenario::scenarioDrawingAreaButtonPressedCB(::GtkWidget* pWidge
 									if(l_oConnectorEditor.run())
 									{
 										this->snapshotCB();
+										m_bScenarioModified = true;
 									}
 								}
 							}
