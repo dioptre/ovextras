@@ -58,7 +58,9 @@ Miscellaneous description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_WindowingFunctions_Miscellaneous|
- * This plugin applies a window to  the input signal. Several
- * windows are available.
+ * This plugin applies a window (weighting function) to each of the channels of the
+ * input signal. Several windows are available. Note that the window is applied 
+ * separately per each chunk and each channel. It does not 'slide' over the streaming data.
  * |OVP_DocEnd_BoxAlgorithm_WindowingFunctions_Miscellaneous|
  */
+

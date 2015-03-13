@@ -168,7 +168,8 @@ boolean CBoxAlgorithmChannelSelector::process(void)
 					 // After these corections, if either first or second token were not found, or if start index is greater than start index, consider this an error and invalid range
 					if(l_ui32RangeStartIndex==uint32(-1) || l_ui32RangeEndIndex  ==uint32(-1) || l_ui32RangeStartIndex>l_ui32RangeEndIndex)
 					{
-						this->getLogManager() << LogLevel_Warning << "Invalid channel range [" << l_sToken[j] << "] - splitted as [" << l_sSubToken[0] << "][" << l_sSubToken[1] << "]\n";
+						this->getLogManager() << LogLevel_Error << "Invalid channel range [" << l_sToken[j] << "] - splitted as [" << l_sSubToken[0] << "][" << l_sSubToken[1] << "]\n";
+						return false;
 					}
 					else
 					{

@@ -30,7 +30,7 @@ boolean CBoxAlgorithmCSVFileWriter::initialize(void)
 	m_oFileStream.open(l_sFilename.toASCIIString(), std::ios::trunc);
 	if(!m_oFileStream)
 	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << l_sFilename << "] for writing\n";
+		this->getLogManager() << LogLevel_Error << "Could not open file [" << l_sFilename << "] for writing\n";
 		return false;
 	}
 

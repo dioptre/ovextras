@@ -2,9 +2,10 @@
 // Windows debug build doesn't typically link as most people don't have the python debug library.
 #else
 
+#if defined TARGET_HAS_ThirdPartyPython
+
 #include "ovpCBoxAlgorithmPython.h"
 
-#if defined TARGET_HAS_ThirdPartyPython
 
 #include <iostream>
 
@@ -685,12 +686,14 @@ OpenViBE::boolean CBoxAlgorithmPython::uninitialize(void)
 	for(uint32 i = 0; i < m_vDecoders.size(); i++)
 	{
 		m_vDecoders[i]->uninitialize();
+		delete m_vDecoders[i];
 	}
 	m_vDecoders.clear();
 
 	for(uint32 i = 0; i < m_vEncoders.size(); i++)
 	{
 		m_vEncoders[i]->uninitialize();
+		delete m_vEncoders[i];
 	}
 	m_vEncoders.clear();
 

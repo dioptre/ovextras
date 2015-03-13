@@ -38,10 +38,7 @@ boolean CModTemporalFilterBoxAlgorithm::initialize(void)
 
 	m_ui64LastEndTime = 0;
 
-	if(l_oInputTypeIdentifier==OV_TypeId_Signal)
-	{
-		m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_SamplingRate)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
-	}
+	m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_SamplingRate)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
 
 	m_sFilterMethod=CString("");
 	m_sFilterType=CString("");
