@@ -27,7 +27,7 @@ boolean CAlgorithmARBurgMethod::uninitialize(void)
 {
 	op_pMatrix.uninitialize();
 	ip_pMatrix.uninitialize();
- 	ip_ui64Order.uninitialize();
+	ip_ui64Order.uninitialize();
 
 	return true;
 }
@@ -60,8 +60,20 @@ boolean CAlgorithmARBurgMethod::process(void)
 		// Setting size of output
 
 		l_pOutputMatrix->setDimensionCount(2); // the output matrix will have 2 dimensions 
-	    l_pOutputMatrix->setDimensionSize(0,l_ui32ChannelCount);
-    	l_pOutputMatrix->setDimensionSize(1,(m_ui32Order+1));// The number of coefficients per channel is equal to the order+1
+		l_pOutputMatrix->setDimensionSize(0,l_ui32ChannelCount);
+		l_pOutputMatrix->setDimensionSize(1,(m_ui32Order+1));// The number of coefficients per channel is equal to the order+1
+
+		for(uint32 i=0;i<l_ui32ChannelCount;i++) {
+				char l_sBuffer[64];
+				sprintf(l_sBuffer, "Channel %d", (i+1));
+				l_pOutputMatrix->setDimensionLabel(0, i, l_sBuffer);
+		}
+		for(uint32 i=0;i<(m_ui32Order+1);i++) {
+				char l_sBuffer[64];
+				sprintf(l_sBuffer, "ARFeature %d", (i+1));
+				l_pOutputMatrix->setDimensionLabel(1, i, l_sBuffer);
+		}
+
 
 	}
 

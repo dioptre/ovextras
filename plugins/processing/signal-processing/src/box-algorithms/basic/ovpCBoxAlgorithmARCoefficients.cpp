@@ -28,13 +28,13 @@ boolean CBoxAlgorithmARCoefficients::initialize(void)
 	ip_ui64ARBurgMethodAlgorithm_Order = (uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(),0);
 
 	// Feature vector stream encoder
-	m_oAlgo1_FeatureVectorEncoder.initialize(*this,0);
+	m_oAlgo1_Encoder.initialize(*this,0);
 
 	// The AR Burg's Method algorithm will take the matrix coming from the signal decoder:
 	ip_pARBurgMethodAlgorithm_Matrix.setReferenceTarget(m_oAlgo0_SignalDecoder.getOutputMatrix());
 
 	// The feature vector encoder will take the matrix from the AR Burg's Method algorithm:
-	m_oAlgo1_FeatureVectorEncoder.getInputMatrix().setReferenceTarget(op_pARBurgMethodAlgorithm_Matrix);
+	m_oAlgo1_Encoder.getInputMatrix().setReferenceTarget(op_pARBurgMethodAlgorithm_Matrix);
 
 	
 	return true;
@@ -53,7 +53,7 @@ boolean CBoxAlgorithmARCoefficients::uninitialize(void)
 	m_pARBurgMethodAlgorithm->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*m_pARBurgMethodAlgorithm);
 
-	m_oAlgo1_FeatureVectorEncoder.uninitialize();
+	m_oAlgo1_Encoder.uninitialize();
 
 	return true;
 }
@@ -101,7 +101,7 @@ boolean CBoxAlgorithmARCoefficients::process(void)
 			}
 
 			// Pass the header to the next boxes, by encoding a header on the output 0:	
-			m_oAlgo1_FeatureVectorEncoder.encodeHeader();
+			m_oAlgo1_Encoder.encodeHeader();
 
 			// send the output chunk containing the header. The dates are the same as the input chunk:
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
@@ -117,7 +117,7 @@ boolean CBoxAlgorithmARCoefficients::process(void)
 			if(m_pARBurgMethodAlgorithm->isOutputTriggerActive(OVP_Algorithm_ARBurgMethod_OutputTriggerId_ProcessDone))
 			{
 				// Encode the output buffer :        		    	
-				m_oAlgo1_FeatureVectorEncoder.encodeBuffer();
+				m_oAlgo1_Encoder.encodeBuffer();
 
 				// and send it to the next boxes :
 				l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i),
@@ -128,7 +128,7 @@ boolean CBoxAlgorithmARCoefficients::process(void)
 		if(m_oAlgo0_SignalDecoder.isEndReceived())
 		{
 			// End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
-			m_oAlgo1_FeatureVectorEncoder.encodeEnd();
+			m_oAlgo1_Encoder.encodeEnd();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));	
 
 		}
