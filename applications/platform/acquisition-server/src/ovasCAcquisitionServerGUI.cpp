@@ -339,7 +339,7 @@ boolean CAcquisitionServerGUI::initialize(void)
 		if(m_vDriver[i]->isFlagSet(DriverFlag_IsUnstable))
 		{
 			gtk_tree_store_set(l_pDriverTreeStore, &l_oIter,
-				Resource_StringMarkup, (string("<span foreground=\"#6f6f6f\">")+l_sDriverName+string("</span> <span size=\"smaller\" style=\"italic\">(<span foreground=\"#202060\">new</span>)</span>")).c_str(),
+				Resource_StringMarkup, (string("<span foreground=\"#6f6f6f\">")+l_sDriverName+string("</span> <span size=\"smaller\" style=\"italic\">(<span foreground=\"#202060\">unstable</span>)</span>")).c_str(),
 				-1);
 		}
 		else
