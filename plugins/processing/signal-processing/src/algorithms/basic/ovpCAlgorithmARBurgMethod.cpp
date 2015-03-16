@@ -2,6 +2,7 @@
 
 #include "ovpCAlgorithmARBurgMethod.h"
 #include <iostream>
+#include <sstream>
 
 #include <Eigen/Dense> 
 
@@ -64,14 +65,12 @@ boolean CAlgorithmARBurgMethod::process(void)
 		l_pOutputMatrix->setDimensionSize(1,(m_ui32Order+1));// The number of coefficients per channel is equal to the order+1
 
 		for(uint32 i=0;i<l_ui32ChannelCount;i++) {
-				char l_sBuffer[64];
-				sprintf(l_sBuffer, "Channel %d", (i+1));
-				l_pOutputMatrix->setDimensionLabel(0, i, l_sBuffer);
+				std:: stringstream ss; ss << "Channel " << (i+1);
+				l_pOutputMatrix->setDimensionLabel(0, i, ss.str().c_str());
 		}
 		for(uint32 i=0;i<(m_ui32Order+1);i++) {
-				char l_sBuffer[64];
-				sprintf(l_sBuffer, "ARFeature %d", (i+1));
-				l_pOutputMatrix->setDimensionLabel(1, i, l_sBuffer);
+				std:: stringstream ss; ss << "ARCoeff " << (i+1);
+				l_pOutputMatrix->setDimensionLabel(1, i, ss.str().c_str());
 		}
 
 
