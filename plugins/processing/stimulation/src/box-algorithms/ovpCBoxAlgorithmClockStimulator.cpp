@@ -6,7 +6,7 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::DataGeneration;
+using namespace OpenViBEPlugins::Stimulation;
 
 uint64 CBoxAlgorithmClockStimulator::getClockFrequency(void)
 {
