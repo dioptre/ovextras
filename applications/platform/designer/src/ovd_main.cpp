@@ -319,20 +319,20 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else if(*it=="-c" || *it=="--config")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_Config] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --config needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_Config] = *it;
 		}
 		else if(*it=="-d" || *it=="--define")
 		{
-			it++;
-			if(it==l_vArgValue.end()) {
+			if(*++it=="") {
 				std::cout << "Error: Need two arguments after -d / --define.\n";
 				return false;
 			}
 
 			// Were not using = as a separator for token/value, as on Windows its a problem passing = to the cmd interpreter 
 			// which is used to launch the actual designer exe.
-			const std::string& l_rToken = *it++;
-			if(it==l_vArgValue.end()) {
+			const std::string& l_rToken = *it;
+			if(*++it=="") {
 				std::cout << "Error: Need two arguments after -d / --define.\n";
 				return false;
 			}
@@ -348,19 +348,23 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else if(*it=="-k" || *it=="--kernel")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_Kernel] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --kernel needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_Kernel] = *it;
 		}
 		else if(*it=="-o" || *it=="--open")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_Open] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --open needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_Open] = *it;
 		}
 		else if(*it=="-p" || *it=="--play")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_Play] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --play needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_Play] = *it;
 		}
 		else if(*it=="-pf" || *it=="--play-fast")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_PlayFast] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --play-fast needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_PlayFast] = *it;
 		}
 		else if(*it=="--no-gui")
 		{
@@ -378,7 +382,8 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else if(*it=="--random-seed")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --random-seed needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed] = *it;
 		}
 		else
 		{

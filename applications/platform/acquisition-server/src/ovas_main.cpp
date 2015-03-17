@@ -42,20 +42,20 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else if(*it=="-c" || *it=="--config")
 		{
-			l_oConfiguration.m_oFlag["config"] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --config needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag["config"] = *it;
 		}
 		else if(*it=="-d" || *it=="--define")
 		{
-			it++;
-			if(it==l_vArgValue.end()) {
+			if(*++it=="") {
 				std::cout << "Error: Need two arguments after -d / --define.\n";
 				return false;
 			}
 
 			// Were not using = as a separator for token/value, as on Windows its a problem passing = to the cmd interpreter 
 			// which is used to launch the actual designer exe.
-			const std::string& l_rToken = *it++;
-			if(it==l_vArgValue.end()) {
+			const std::string& l_rToken = *it;
+			if(*++it=="") {
 				std::cout << "Error: Need two arguments after -d / --define.\n";
 				return false;
 			}
@@ -67,7 +67,8 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else if(*it=="-k" || *it=="--kernel")
 		{
-			l_oConfiguration.m_oFlag["kernel"] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --kernel needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag["kernel"] = *it;
 		}
 		else if(*it=="-h" || *it=="--help")
 		{
