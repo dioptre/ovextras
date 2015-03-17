@@ -82,7 +82,7 @@ boolean CBoxAlgorithmGenericStreamWriter::generateFileHeader()
 	m_oFile.open(m_sFilename.toASCIIString(), std::ios::binary | std::ios::trunc);
 	if(!m_oFile.good())
 	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFilename << "]\n";
+		this->getLogManager() << LogLevel_Error << "Could not open file [" << m_sFilename << "] for writing\n";
 		return false;
 	}
 	m_oFile.write(reinterpret_cast<const char*>(m_oSwap.getDirectPointer()), (std::streamsize)m_oSwap.getSize());

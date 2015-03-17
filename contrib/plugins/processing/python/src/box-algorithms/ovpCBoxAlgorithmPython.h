@@ -1,13 +1,13 @@
 #ifndef __OpenViBEPlugins_BoxAlgorithm_Python_H__
 #define __OpenViBEPlugins_BoxAlgorithm_Python_H__
+
 #if defined TARGET_HAS_ThirdPartyPython
-# include <Python.h>
-#endif
+
+#include <Python.h>
+
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
-
-#if defined TARGET_HAS_ThirdPartyPython
 
 #include <string.h>
 #include <string>

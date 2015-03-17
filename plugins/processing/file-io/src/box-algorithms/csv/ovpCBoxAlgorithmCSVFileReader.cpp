@@ -115,7 +115,7 @@ boolean CBoxAlgorithmCSVFileReader::initializeFile()
 	m_pFile=::fopen(m_sFilename.toASCIIString(), "r"); // we don't open as binary as that gives us \r\n on Windows as line-endings and leaves a dangling char after split. CSV files should be text.
 	if(!m_pFile)
 	{
-		this->getLogManager() << LogLevel_Error << "Could not open file [" << m_sFilename << "]\n";
+		this->getLogManager() << LogLevel_Error << "Could not open file [" << m_sFilename << "] for reading\n";
 		return false;
 	}
 

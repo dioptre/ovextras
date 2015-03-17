@@ -49,7 +49,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addInput("input", OV_UndefinedIdentifier);
+				rBoxAlgorithmPrototype.addInput("input", OV_TypeId_EBMLStream);
 				rBoxAlgorithmPrototype.addSetting("Log level to use", OV_TypeId_LogLevel, "Trace");
 				rBoxAlgorithmPrototype.addFlag (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				return true;

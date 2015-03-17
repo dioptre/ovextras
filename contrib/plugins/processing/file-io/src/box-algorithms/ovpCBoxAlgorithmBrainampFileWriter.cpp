@@ -27,6 +27,7 @@ CBoxAlgorithmBrainampFileWriter::CBoxAlgorithmBrainampFileWriter(void)
 	:
 	m_pStreamDecoder(NULL)
 	,m_pMatrix(NULL)
+	,m_pStimulationDecoderTrigger(NULL)
 	,m_uint32StimulationCounter(2) //because the first is outputed manually
 {
 }
@@ -109,8 +110,11 @@ boolean CBoxAlgorithmBrainampFileWriter::uninitialize(void)
 	}
 
 	// uninit input stimulation
-	m_pStimulationDecoderTrigger->uninitialize();
-	delete m_pStimulationDecoderTrigger;
+	if(m_pStimulationDecoderTrigger)
+	{
+		m_pStimulationDecoderTrigger->uninitialize();
+		delete m_pStimulationDecoderTrigger;
+	}
 
 	//close files
 	m_oHeaderFile.flush();

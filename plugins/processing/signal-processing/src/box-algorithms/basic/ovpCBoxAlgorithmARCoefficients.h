@@ -58,7 +58,7 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64ARBurgMethodAlgorithm_Order;
 			
 			// Feature vector stream encoder
-			OpenViBEToolkit::TFeatureVectorEncoder < CBoxAlgorithmARCoefficients > m_oAlgo1_FeatureVectorEncoder;
+			OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmARCoefficients > m_oAlgo1_Encoder;
 
 		};
 
@@ -83,7 +83,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Estimates autoregressive (AR) linear model coefficients using Burg's method"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Basic"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
-			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-add"); }
+			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-convert"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ARCoefficients; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CBoxAlgorithmARCoefficients; }
@@ -92,7 +92,7 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput("EEG Signal",OV_TypeId_Signal);
-				rBoxAlgorithmPrototype.addOutput("AR Features",OV_TypeId_FeatureVector);
+				rBoxAlgorithmPrototype.addOutput("AR Features",OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addSetting("Order",OV_TypeId_Integer,"1");
 		
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);

@@ -52,7 +52,7 @@ boolean CBoxAlgorithmMatrixTranspose::process(void)
 			l_pOutput->setDimensionSize(0, l_pInput->getDimensionSize(1));
 			l_pOutput->setDimensionSize(1, l_pInput->getDimensionSize(0));
 
-			this->getLogManager() << LogLevel_Info << "Output matrix will be [" 
+			this->getLogManager() << LogLevel_Trace << "Output matrix will be [" 
 				<< l_pOutput->getDimensionSize(0) << "x"
 				<< l_pOutput->getDimensionSize(1) << "]\n";
 
