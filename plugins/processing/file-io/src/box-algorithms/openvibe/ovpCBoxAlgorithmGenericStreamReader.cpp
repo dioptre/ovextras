@@ -54,6 +54,7 @@ boolean CBoxAlgorithmGenericStreamReader::initializeFile()
 		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFilename << "]\n";
 		return false;
 	}
+	return true;
 }
 
 boolean CBoxAlgorithmGenericStreamReader::processClock(IMessageClock& rMessageClock)
