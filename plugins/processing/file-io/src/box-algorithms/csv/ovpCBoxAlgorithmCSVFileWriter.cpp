@@ -23,19 +23,7 @@ boolean CBoxAlgorithmCSVFileWriter::initialize(void)
 {
 	this->getStaticBoxContext().getInputType(0, m_oTypeIdentifier);
 
-	const CString l_sFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sSeparator=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-	const uint64 l_ui64Precision=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
-
-	m_oFileStream.open(l_sFilename.toASCIIString(), std::ios::trunc);
-	if(!m_oFileStream)
-	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << l_sFilename << "] for writing\n";
-		return false;
-	}
-
-	m_oFileStream << std::scientific;
-	m_oFileStream.precision(static_cast<std::streamsize>(l_ui64Precision));
 
 	if(this->getTypeManager().isDerivedFromStream(m_oTypeIdentifier, OV_TypeId_StreamedMatrix))
 	{
@@ -101,6 +89,24 @@ boolean CBoxAlgorithmCSVFileWriter::uninitialize(void)
 	return true;
 }
 
+boolean CBoxAlgorithmCSVFileWriter::initializeFile()
+{
+	const CString l_sFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	const uint64 l_ui64Precision=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+
+	m_oFileStream.open(l_sFilename.toASCIIString(), std::ios::trunc);
+	if(!m_oFileStream.is_open())
+	{
+		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << l_sFilename << "] for writing\n";
+		return false;
+	}
+
+	m_oFileStream << std::scientific;
+	m_oFileStream.precision(static_cast<std::streamsize>(l_ui64Precision));
+
+	return true;
+}
+
 boolean CBoxAlgorithmCSVFileWriter::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
@@ -109,6 +115,10 @@ boolean CBoxAlgorithmCSVFileWriter::processInput(uint32 ui32InputIndex)
 
 boolean CBoxAlgorithmCSVFileWriter::process(void)
 {
+	if(!m_oFileStream.is_open())
+	{
+		initializeFile();
+	}
 	return (this->*m_fpRealProcess)();
 }
 

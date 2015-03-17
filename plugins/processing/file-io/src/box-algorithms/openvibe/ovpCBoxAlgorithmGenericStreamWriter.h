@@ -36,11 +36,14 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process(void);
 
+			OpenViBE::boolean generateFileHeader(void);
+
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_GenericStreamWriter);
 
 		protected:
 
 			OpenViBE::boolean m_bUseCompression;
+			OpenViBE::boolean m_bIsHeaderGenerate;
 			OpenViBE::CString m_sFilename;
 			EBML::CWriter m_oWriter;
 			EBML::CWriterHelper m_oWriterHelper;

@@ -169,11 +169,14 @@ namespace OpenViBEPlugins
 
 			OpenViBE::boolean m_bTranslateByMinimum;
 
+
 		private:
 
 			void writeExperimentInformation();
 			void writeSignalInformation();
 			void writeEvents();
+
+			OpenViBE::boolean initializeFile();
 
 			template<class T> OpenViBE::float64 GDFTypeToFloat64(T val, OpenViBE::uint32 ui32Channel)
 			{

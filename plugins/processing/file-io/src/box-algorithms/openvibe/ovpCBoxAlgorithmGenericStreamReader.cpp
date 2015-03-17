@@ -25,13 +25,6 @@ boolean CBoxAlgorithmGenericStreamReader::initialize(void)
 {
 	getStaticBoxContext().getSettingValue(0, m_sFilename);
 
-	m_pFile=::fopen(m_sFilename.toASCIIString(), "rb");
-	if(!m_pFile)
-	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFilename << "]\n";
-		return false;
-	}
-
 	m_bPending=false;
 	m_bUseCompression=false;
 
@@ -52,6 +45,17 @@ boolean CBoxAlgorithmGenericStreamReader::uninitialize(void)
 	return true;
 }
 
+boolean CBoxAlgorithmGenericStreamReader::initializeFile()
+{
+
+	m_pFile=::fopen(m_sFilename.toASCIIString(), "rb");
+	if(!m_pFile)
+	{
+		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFilename << "]\n";
+		return false;
+	}
+}
+
 boolean CBoxAlgorithmGenericStreamReader::processClock(IMessageClock& rMessageClock)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
@@ -61,6 +65,13 @@ boolean CBoxAlgorithmGenericStreamReader::processClock(IMessageClock& rMessageCl
 
 boolean CBoxAlgorithmGenericStreamReader::process(void)
 {
+	if(m_pFile == NULL)
+	{
+		if(!initializeFile())
+		{
+			return false;
+		}
+	}
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 

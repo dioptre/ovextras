@@ -81,6 +81,36 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 		this->getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(3,l_sParam);
 		m_ui32SamplesPerBuffer=static_cast<uint32>(atoi((const char*)l_sParam));
 	}
+
+
+	m_bUseCompression=false;
+	getLogManager() << LogLevel_Trace << "use the file time: "<<(!m_bDoNotUseFileTime)<<"\n";
+	m_f64NextTime=0.;
+
+	m_ui64ChunkStartTime=0;
+	m_ui64ChunkEndTime=0;
+
+	return true;
+}
+
+boolean CBoxAlgorithmCSVFileReader::uninitialize(void)
+{
+	if(m_pFile)
+	{
+		::fclose(m_pFile);
+		m_pFile=NULL;
+	}
+	if(m_pAlgorithmEncoder) 
+	{
+		m_pAlgorithmEncoder->uninitialize();
+		delete m_pAlgorithmEncoder;
+		m_pAlgorithmEncoder = NULL;
+	}
+	return true;
+}
+
+boolean CBoxAlgorithmCSVFileReader::initializeFile()
+{
 	//open file
 	m_pFile=::fopen(m_sFilename.toASCIIString(), "r"); // we don't open as binary as that gives us \r\n on Windows as line-endings and leaves a dangling char after split. CSV files should be text.
 	if(!m_pFile)
@@ -146,9 +176,9 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 			return false;
 		}
 		const float64 l_f64SamplingRate = static_cast<float64>(atof(l_vParsed[m_ui32NbColumn-1].c_str()));
-		if(std::ceil(l_f64SamplingRate) != l_f64SamplingRate) 
+		if(std::ceil(l_f64SamplingRate) != l_f64SamplingRate)
 		{
-			this->getLogManager() << LogLevel_Error << "Extracted sampling rate (column " 
+			this->getLogManager() << LogLevel_Error << "Extracted sampling rate (column "
 				<< m_ui32NbColumn << ") appears fractional (" << l_f64SamplingRate << " hz), but fractional sampling rates are not supported. "
 				<< "As this is likely a parsing error, please modify the file to correspond to OV conventions (see CSV Reader documentation).\n";
 			return false;
@@ -156,7 +186,7 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 
 		m_ui64SamplingRate=static_cast<uint64>(l_f64SamplingRate);
 
-		if(m_ui64SamplingRate == 0) 
+		if(m_ui64SamplingRate == 0)
 		{
 			this->getLogManager() << LogLevel_Error << "Parsed the sampling rate as 0, this is not acceptable for a signal stream.\n";
 			return false;
@@ -193,29 +223,6 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 	}
 	getLogManager()<< LogLevel_Trace <<"number of column without parameters: "<<m_ui32NbColumn<<"\n";
 
-	m_bUseCompression=false;
-	getLogManager() << LogLevel_Trace << "use the file time: "<<(!m_bDoNotUseFileTime)<<"\n";
-	m_f64NextTime=0.;
-
-	m_ui64ChunkStartTime=0;
-	m_ui64ChunkEndTime=0;
-
-	return true;
-}
-
-boolean CBoxAlgorithmCSVFileReader::uninitialize(void)
-{
-	if(m_pFile)
-	{
-		::fclose(m_pFile);
-		m_pFile=NULL;
-	}
-	if(m_pAlgorithmEncoder) 
-	{
-		m_pAlgorithmEncoder->uninitialize();
-		delete m_pAlgorithmEncoder;
-		m_pAlgorithmEncoder = NULL;
-	}
 	return true;
 }
 
@@ -227,6 +234,13 @@ boolean CBoxAlgorithmCSVFileReader::processClock(IMessageClock& rMessageClock)
 
 boolean CBoxAlgorithmCSVFileReader::process(void)
 {
+	if(m_pFile == NULL)
+	{
+		if(!initializeFile())
+		{
+			return false;
+		}
+	}
 	//line buffer
 	char l_pLine[m_ui32bufferLen];
 	const float64 l_f64currentTime=ITimeArithmetics::timeToSeconds(getPlayerContext().getCurrentTime());

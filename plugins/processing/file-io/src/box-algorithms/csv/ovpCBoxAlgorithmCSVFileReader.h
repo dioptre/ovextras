@@ -37,7 +37,9 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_CSVFileReader);
 
+
 		protected:
+			OpenViBE::boolean initializeFile();
 
 			::FILE* m_pFile;
 			std::string m_sSeparator;

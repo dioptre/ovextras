@@ -31,7 +31,9 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_CSVFileWriter);
 
+
 		protected:
+			OpenViBE::boolean initializeFile();
 
 			std::ofstream m_oFileStream;
 

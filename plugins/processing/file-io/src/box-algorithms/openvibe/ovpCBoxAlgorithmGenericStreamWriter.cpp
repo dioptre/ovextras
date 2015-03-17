@@ -9,6 +9,7 @@ using namespace OpenViBEPlugins::FileIO;
 
 CBoxAlgorithmGenericStreamWriter::CBoxAlgorithmGenericStreamWriter(void)
 	:m_bUseCompression(true)
+	,m_bIsHeaderGenerate(false)
 	,m_oWriter(*this)
 {
 }
@@ -30,6 +31,19 @@ boolean CBoxAlgorithmGenericStreamWriter::initialize(void)
 	{
 		this->getLogManager() << LogLevel_Info << "Compression flag not used yet, the file will be flagged uncompressed and stored as is\n";
 	}
+
+	return true;
+}
+
+boolean CBoxAlgorithmGenericStreamWriter::uninitialize(void)
+{
+	m_oFile.close();
+	return true;
+}
+
+boolean CBoxAlgorithmGenericStreamWriter::generateFileHeader()
+{
+	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_oSwap.setSize(0, true);
 
@@ -73,12 +87,7 @@ boolean CBoxAlgorithmGenericStreamWriter::initialize(void)
 	}
 	m_oFile.write(reinterpret_cast<const char*>(m_oSwap.getDirectPointer()), (std::streamsize)m_oSwap.getSize());
 
-	return true;
-}
-
-boolean CBoxAlgorithmGenericStreamWriter::uninitialize(void)
-{
-	m_oFile.close();
+	m_bIsHeaderGenerate = true;
 	return true;
 }
 
@@ -92,6 +101,14 @@ boolean CBoxAlgorithmGenericStreamWriter::process(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
+
+	if(!m_bIsHeaderGenerate)
+	{
+		if(!generateFileHeader())
+		{
+			return false;
+		}
+	}
 
 	m_oSwap.setSize(0, true);
 

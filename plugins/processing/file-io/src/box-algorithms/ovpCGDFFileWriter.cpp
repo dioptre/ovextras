@@ -218,19 +218,6 @@ boolean CGDFFileWriter::initialize()
 	// Parses box settings to find filename
 	l_pBox->getSettingValue(0, m_sFileName);
 
-	if(!m_oFile.is_open())
-	{
-		m_oFile.open(m_sFileName, ios::binary | ios::trunc);
-
-		if(!m_oFile.good())
-		{
-			m_bError = true;
-
-			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFileName << "]\n";
-			return false;
-		}
-	}
-
 	m_f64Precision = 1000.0;
 
 	return true;
@@ -238,40 +225,41 @@ boolean CGDFFileWriter::initialize()
 
 boolean CGDFFileWriter::uninitialize()
 {
-	//update the fixed header
-	if(m_vSampleCount.size() != 0)
+	//If the file is not open, that mean that the box is muted. If the file is not open because of a bug, it should have already been notify
+	if(m_oFile.is_open())
 	{
-		m_oFixedHeader.m_i64NumberOfDataRecords=m_vSampleCount[0];
-		this->getLogManager() << LogLevel_Trace << "Saving " << m_vSampleCount[0] << " data records\n";
-	}
+		//update the fixed header
+		if(m_vSampleCount.size() != 0)
+		{
+			m_oFixedHeader.m_i64NumberOfDataRecords=m_vSampleCount[0];
+			this->getLogManager() << LogLevel_Trace << "Saving " << m_vSampleCount[0] << " data records\n";
+		}
 
-	if(m_oFixedHeader.update(m_oFile))
-	{
-		//To save the Physical/Digital max/min values
-		if(!m_oVariableHeader.update(m_oFile))
+		if(m_oFixedHeader.update(m_oFile))
+		{
+			//To save the Physical/Digital max/min values
+			if(!m_oVariableHeader.update(m_oFile))
+			{
+				m_bError = true;
+			}
+		}
+		else
 		{
 			m_bError = true;
 		}
-	}
-	else
-	{
-		m_bError = true;
-	}
 
-	//write events
-	if(!m_oEvents.empty())
-	{
-		this->getLogManager() << LogLevel_Trace << "Saving " << (uint32)m_oEvents.size() << " events\n";
-		saveEvents();
-	}
+		//write events
+		if(!m_oEvents.empty())
+		{
+			this->getLogManager() << LogLevel_Trace << "Saving " << (uint32)m_oEvents.size() << " events\n";
+			saveEvents();
+		}
 
-	if(m_bError)
-	{
-		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Error while writing to the output file!\n";
-	}
+		if(m_bError)
+		{
+			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Error while writing to the output file!\n";
+		}
 
-	if(m_oFile.is_open())
-	{
 		m_oFile.close();
 	}
 
@@ -399,6 +387,19 @@ void CGDFFileWriter::saveEvents()
 
 boolean CGDFFileWriter::process()
 {
+	if(!m_oFile.is_open())
+	{
+		m_oFile.open(m_sFileName, ios::binary | ios::trunc);
+
+		if(!m_oFile.good())
+		{
+			m_bError = true;
+
+			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFileName << "]\n";
+			return false;
+		}
+	}
+
 	IBoxIO* l_pBoxIO=getBoxAlgorithmContext()->getDynamicBoxContext();
 
 	//Experiment information
