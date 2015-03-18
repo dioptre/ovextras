@@ -326,11 +326,14 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 	if(l_bShouldConcatenate && !m_bStatsPrinted)
 	{
 		for(uint32 i=0;i<m_vStimulationChunkBuffers.size();i++) {
-			this->getLogManager() << LogLevel_Trace << "File " << i 
-				<< " has 1st signal chunk at " << time64(m_vSignalChunkBuffers[i][0].m_ui64StartTime)
-				<< " last at [" << time64(m_vSignalChunkBuffers[i].back().m_ui64EndTime)
-				<< ", " << time64(m_vSignalChunkBuffers[i].back().m_ui64EndTime)
-				<< "].\n";
+			if(m_vSignalChunkBuffers[i].size() != 0)
+			{
+				this->getLogManager() << LogLevel_Trace << "File " << i
+					<< " has 1st signal chunk at " << time64(m_vSignalChunkBuffers[i][0].m_ui64StartTime)
+					<< " last at [" << time64(m_vSignalChunkBuffers[i].back().m_ui64EndTime)
+					<< ", " << time64(m_vSignalChunkBuffers[i].back().m_ui64EndTime)
+					<< "].\n";
+			}
 			this->getLogManager() << LogLevel_Trace << "File " << i 
 				<< " has 1st stim chunk at " << time64(m_vStimulationChunkBuffers[i][0].m_ui64StartTime)
 				<< " last at [" << time64(m_vStimulationChunkBuffers[i].back().m_ui64EndTime)
@@ -542,12 +545,15 @@ boolean CBoxAlgorithmSignalConcatenation::concate(void)
 
 					for(uint32 s=0;s<l_pBufferedStimSet->getStimulationCount();s++)
 					{
-						this->getLogManager() << LogLevel_Warning 
-							<< "Stimulation " << l_pBufferedStimSet->getStimulationIdentifier(s) 
-							<< "'s chunk at [" << time64(l_rStimChunk.m_ui64StartTime)
-							<< ", " << time64(l_rStimChunk.m_ui64EndTime)
-							<< "] is after the last signal chunk end time " << time64(l_rChunkVector.back().m_ui64EndTime) 
-							<< ", discarded.\n";
+						if(l_rChunkVector.size() != 0)
+						{
+							this->getLogManager() << LogLevel_Warning
+								<< "Stimulation " << l_pBufferedStimSet->getStimulationIdentifier(s)
+								<< "'s chunk at [" << time64(l_rStimChunk.m_ui64StartTime)
+								<< ", " << time64(l_rStimChunk.m_ui64EndTime)
+								<< "] is after the last signal chunk end time " << time64(l_rChunkVector.back().m_ui64EndTime)
+								<< ", discarded.\n";
+						}
 					}
 				}
 			}
@@ -569,11 +575,17 @@ boolean CBoxAlgorithmSignalConcatenation::concate(void)
 
 		this->getLogManager() << LogLevel_Info << "File #" << i+1 <<" Finished.\n";
 	}
-		
-	const uint32 l_ui32LastFile = m_vSignalChunkBuffers.size();
-	const uint32 l_ui32LastChunkOfLastFile = m_vSignalChunkBuffers[l_ui32LastFile-1].size();
 
-	m_ui64LastChunkEndTime = m_vSignalChunkBuffers[l_ui32LastFile-1][l_ui32LastChunkOfLastFile-1].m_ui64EndTime;
+	//We search for the last file with data.
+	for(uint32 l_ui32LastFile = m_vSignalChunkBuffers.size() ; l_ui32LastFile <= 0 ; --l_ui32LastFile)
+	{
+		uint32 l_ui32LastChunkOfLastFile = m_vSignalChunkBuffers[l_ui32LastFile-1].size();
+		if(l_ui32LastChunkOfLastFile != 0)
+		{
+			m_ui64LastChunkEndTime = m_vSignalChunkBuffers[l_ui32LastFile-1][l_ui32LastChunkOfLastFile-1].m_ui64EndTime;
+			break;
+		}
+	}
 
 	this->getLogManager() << LogLevel_Info << "Concatenation finished !\n";
 	
