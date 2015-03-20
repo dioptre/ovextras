@@ -41,7 +41,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Jussi T. Lindgren"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Transposes each matrix of the input stream"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Only works for 2-dimensional matrices"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Only works for 1 and 2 dimensional matrices. One-dimensional matrixes will be upgraded to two dimensions: [N x 1]"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Basic"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-sort-ascending"); }
