@@ -112,6 +112,8 @@ namespace OpenViBEPlugins
 			void recreateWidgets(OpenViBE::uint32 ui32ChannelCount);
 			void updateMainTableStatus(void);
 
+			void updateDisplayTableSize(void);
+
 			void activateToolbarButtons(
 				OpenViBE::boolean bActive);
 
@@ -261,6 +263,8 @@ namespace OpenViBEPlugins
 
 			//! Vector of indexes of the channels to display
 			std::map<OpenViBE::uint32, OpenViBE::boolean> m_vSelectedChannels;
+
+			OpenViBE::uint32 m_ui32SelectedChannelCount; 
 
 			std::map<OpenViBE::uint32, std::pair<OpenViBE::CString, OpenViBE::CString> > m_vChannelUnits;
 

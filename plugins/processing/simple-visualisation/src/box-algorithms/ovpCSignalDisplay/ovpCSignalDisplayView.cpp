@@ -70,6 +70,7 @@ namespace OpenViBEPlugins
 		{
 
 			m_bVerticalScaleForceUpdate=true;
+			m_ui32SelectedChannelCount = 0;
 
 			m_vSelectedChannels.clear();
 			m_vChannelUnits.clear();
@@ -345,7 +346,7 @@ namespace OpenViBEPlugins
 			m_pSignalDisplayTable = GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayMainTable"));
 			//rows : for each channel, [0] channel data, [1] horizontal separator
 			//columns : [0] label, [1] vertical separator, [2] left ruler, [3] signal display
-			::gtk_table_resize(GTK_TABLE(m_pSignalDisplayTable), l_ui32ChannelCount*2+1, 4);
+			::gtk_table_resize(GTK_TABLE(m_pSignalDisplayTable), l_ui32ChannelCount+1, 4);
 
 			const int32 l_i32LeftRulerWidthRequest = 50;
 			const int32 l_i32ChannelDisplayWidthRequest = 20;
@@ -353,26 +354,23 @@ namespace OpenViBEPlugins
 
 			const int32 l_i32LeftRulerHeightRequest = 20;
 			const int32 l_i32ChannelDisplayHeightRequest = 20;
-			const int32 l_i32HorizontalSeparatorHeightRequest = 5;
 			const int32 l_i32BottomRulerHeightRequest = 20;
 
-			//sets a minimum size for the table (needed to scroll)
-			::gtk_widget_set_size_request(
-				m_pSignalDisplayTable,
-				l_i32LeftRulerWidthRequest + l_i32ChannelDisplayWidthRequest,
-				(l_ui32ChannelCount+1)*l_i32ChannelDisplayHeightRequest + l_ui32ChannelCount*l_i32HorizontalSeparatorHeightRequest);
+			m_ui32SelectedChannelCount = l_ui32ChannelCount;	// All channels selected by default
+
+			updateDisplayTableSize();
 
 			//add a vertical separator
 			m_pSeparator = ::gtk_vseparator_new();
 			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable), m_pSeparator,
 				1, 2, //second column
-				0, l_ui32ChannelCount*2+1, //run over the whole table height
+				0, l_ui32ChannelCount+1, //run over the whole table height
 				GTK_SHRINK, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), 0, 0);
 			::gtk_widget_show(m_pSeparator);
 
 			//create a size group for channel labels and the empty bottom left widget
 			//(useful to position the bottom ruler correctly)
-			::GtkSizeGroup* l_pSizeGroup = ::gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
+			//::GtkSizeGroup* l_pSizeGroup = ::gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
 
 			//channels selection widget
 			::GtkWidget * l_pChannelSelectList = GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayChannelSelectList"));
@@ -413,7 +411,7 @@ namespace OpenViBEPlugins
 				m_oChannelLabel[i] = l_pLabel;
 				::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),l_pLabel,
 					0, 1, //first column
-					i*2, (i*2)+1,
+					i, i+1,
                     GTK_FILL, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
 					0, 0);
 				::gtk_widget_show(l_pLabel);
@@ -469,7 +467,7 @@ namespace OpenViBEPlugins
                 ::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
                     l_pChannelDisplay->getRulerWidget(i),
                     2, 3, //third column
-                    i*2, (i*2)+1,
+                    i, i+1,
                     GTK_FILL, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),	0, 0);
                 ::gtk_widget_show(l_pChannelDisplay->getRulerWidget(i));
             }
@@ -479,8 +477,9 @@ namespace OpenViBEPlugins
             ::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
                         l_pChannelDisplay->getSignalDisplayWidget(),
                         3, 4, //fourth column
-                        0, l_ui32ChannelCount*2,// run over the whole table (last row for multiview)
-                        static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
+                        0, l_ui32ChannelCount,// run over the whole table (last row for multiview)
+                        static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), 
+						static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
                         0, 0);
             ::gtk_widget_show(m_oChannelDisplay[0]->getSignalDisplayWidget());
 
@@ -502,10 +501,9 @@ namespace OpenViBEPlugins
 			m_oChannelLabel[l_ui32ChannelCount] = l_pLabel;
 			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),l_pLabel,
 				0, 1,
-				l_ui32ChannelCount*2, (l_ui32ChannelCount*2)+1,
+				l_ui32ChannelCount, (l_ui32ChannelCount)+1,
 				GTK_FILL, GTK_SHRINK,
 				0, 0);
-
 			//create and attach display widget
 			CSignalChannelDisplay* l_pMultiViewDisplay = new CSignalChannelDisplay(
 				this,
@@ -516,20 +514,19 @@ namespace OpenViBEPlugins
 			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
                 l_pMultiViewDisplay->getRulerWidget(0),
 				2, 3, //third column
-				(l_ui32ChannelCount*2), (l_ui32ChannelCount*2)+1,
+				(l_ui32ChannelCount), (l_ui32ChannelCount)+1,
 				GTK_FILL, GTK_FILL,
 				0, 0);
 			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
 				l_pMultiViewDisplay->getSignalDisplayWidget(),
 				3, 4, //fourth column
-				(l_ui32ChannelCount*2), (l_ui32ChannelCount*2)+1,
+				(l_ui32ChannelCount), (l_ui32ChannelCount)+1,
 				static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
 				0, 0);
-
 			//create bottom ruler
 			//-------------------
 			m_pBottomRuler = new CBottomTimeRuler(*m_pBufferDatabase, l_i32BottomRulerWidthRequest, l_i32BottomRulerHeightRequest);
-			::gtk_size_group_add_widget(l_pSizeGroup, GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayEmptyLabel1")));
+			//::gtk_size_group_add_widget(l_pSizeGroup, GTK_WIDGET(::gtk_builder_get_object(m_pBuilderInterface, "SignalDisplayEmptyLabel1")));
 			::gtk_box_pack_start(m_pBottomBox, m_pBottomRuler->getWidget(), false, false, 0);
 			// tell ruler has to resize when channel displays are resized
 			if(m_oChannelDisplay.size() != 0)
@@ -899,11 +896,31 @@ namespace OpenViBEPlugins
 			}
 		}
 
+		// If we swap multiview on/off, it seems we need to do another size request to 
+		// get the labels and signals properly aligned. The problem appears if there are many channels and this is not done.
+		void CSignalDisplayView::updateDisplayTableSize(void)
+		{
+				const int32 l_i32LeftRulerWidthRequest = 50;
+				const int32 l_i32ChannelDisplayWidthRequest = 20;
+	
+				const int32 l_i32ChannelDisplayHeightRequest = 20;
+			
+				//sets a minimum size for the table (needed to scroll)
+				::gtk_widget_set_size_request(
+					m_pSignalDisplayTable,
+					l_i32LeftRulerWidthRequest + l_i32ChannelDisplayWidthRequest,
+					(m_ui32SelectedChannelCount + (m_bMultiViewEnabled ? 1 : 0))*l_i32ChannelDisplayHeightRequest);
+
+		}
+
 		void CSignalDisplayView::toggleChannelMultiView(boolean bActive)
 		{
+			updateDisplayTableSize();
+
 			CSignalChannelDisplay* l_pChannelDisplay = getChannelDisplay(m_oChannelDisplay.size()-1);
 			if(bActive)
 			{
+
 				::gtk_widget_show(m_oChannelLabel[m_oChannelLabel.size()-1]);
 				if(m_bShowLeftRulers == true)
 				{
@@ -959,7 +976,7 @@ namespace OpenViBEPlugins
 		void CSignalDisplayView::recreateWidgets(uint32 ui32ChannelCount)
 		{
 			// Resize the table to fit only the selected amount of channels (+multiview)
-			::gtk_table_resize(GTK_TABLE(m_pSignalDisplayTable), ui32ChannelCount*2+1, 4);
+			::gtk_table_resize(GTK_TABLE(m_pSignalDisplayTable), ui32ChannelCount+1, 4);
 
 			// Add selected channel widgets back
 			for(uint32 i=0,cnt=0;i<m_vSelectedChannels.size();i++)
@@ -969,11 +986,11 @@ namespace OpenViBEPlugins
 					::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
 	                    m_oChannelDisplay[0]->getRulerWidget(i),
 						2, 3, //third column
-						cnt*2, (cnt*2)+1,
+						cnt, cnt+1,
 						GTK_FILL, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),	0, 0);
 					::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),m_oChannelLabel[i],
 						0, 1, //first column
-						cnt*2, (cnt*2)+1,
+						cnt, cnt+1,
 						GTK_FILL, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
 						0, 0);
 					cnt++;
@@ -985,7 +1002,7 @@ namespace OpenViBEPlugins
 			// Add separator back
 			::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable), m_pSeparator,
 				1, 2, //second column
-				0, ui32ChannelCount*2+1, //run over the whole table height
+				0, ui32ChannelCount+1, //run over the whole table height
 				GTK_SHRINK, static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), 0, 0);
 			g_object_unref(m_pSeparator);
 
@@ -993,17 +1010,12 @@ namespace OpenViBEPlugins
             ::gtk_table_attach(GTK_TABLE(m_pSignalDisplayTable),
                         m_oChannelDisplay[0]->getSignalDisplayWidget(),
                         3, 4, //fourth column
-                        0, ui32ChannelCount*2,// run over the whole table (last row for multiview)
+                        0, ui32ChannelCount,// run over the whole table (last row for multiview)
                         static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL), static_cast < ::GtkAttachOptions >(GTK_EXPAND | GTK_FILL),
                         0, 0);
 			g_object_unref(m_oChannelDisplay[0]->getSignalDisplayWidget());
 
-			// Just some bogus values, it'll get a better size by itself when its set to too small.
-			::gtk_widget_set_size_request(
-				m_pSignalDisplayTable,
-				40,
-				(ui32ChannelCount+1)*10 + ui32ChannelCount*5);
-
+			updateDisplayTableSize();
 		}
 
 
@@ -1282,7 +1294,7 @@ namespace OpenViBEPlugins
 #if 1
 			GdkPixbuf* l_pPixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, l_i32ColorWidthRequest, l_i32RowHeightRequest);
 			//fill with RGBA value
-			guint32 l_ui32Color = (((guint32)(rStimulationColor.red * 255 / 65535)) << 24) +
+			const guint32 l_ui32Color = (((guint32)(rStimulationColor.red * 255 / 65535)) << 24) +
 				(((guint32)(rStimulationColor.green * 255 / 65535)) << 16) +
 				(((guint32)(rStimulationColor.blue * 255 / 65535)) << 8);
 			gdk_pixbuf_fill(l_pPixbuf, l_ui32Color);
@@ -1494,6 +1506,8 @@ namespace OpenViBEPlugins
 					}
 				}
 			}
+
+			l_pView->m_ui32SelectedChannelCount = l_ui32SelectedCount;
 
 			// Add the widgets back with the new list of channels
 			l_pView->recreateWidgets(l_ui32SelectedCount);
