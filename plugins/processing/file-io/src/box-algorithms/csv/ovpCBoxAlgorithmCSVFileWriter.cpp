@@ -149,7 +149,7 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 					return false;
 				}
 
-				if( l_pMatrix->getDimensionCount() == 1)
+				if( l_pMatrix->getDimensionCount() == 1 || m_oTypeIdentifier==OV_TypeId_FeatureVector)
 				{
 					// The matrix is a vector, make a matrix to represent it
 					m_oMatrix.setDimensionCount(2);
@@ -160,22 +160,6 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 					for(uint32 i=0;i<l_pMatrix->getDimensionSize(0);i++)
 					{
 						m_oMatrix.setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(0,i));
-					}
-				}
-				else if(m_oTypeIdentifier==OV_TypeId_FeatureVector)
-				{
-					// OpenViBE matrixes are usually [channels x time], but they get written to the CSV as transposed, i.e. [time X channels].
-					// The feature stream matrix is [1 X features], but here we transpose it to [features X 1] to compensate and to get 
-					// one-vector-per-row in the output file
-					m_oMatrix.setDimensionCount(2);
-
-					// This [n X 1] will get written as a single row due to transpose later
-					m_oMatrix.setDimensionSize(0,l_pMatrix->getDimensionSize(1));
-					m_oMatrix.setDimensionSize(1,1);
-					for(uint32 i=0;i<l_pMatrix->getDimensionSize(1);i++)
-					{
-   						// this->getLogManager() << LogLevel_Info << "  N: " << i << " is " << l_pMatrix->getDimensionLabel(1,i) << "\n";
-						m_oMatrix.setDimensionLabel(0,i,l_pMatrix->getDimensionLabel(1,i));
 					}
 				}
 				else

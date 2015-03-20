@@ -166,14 +166,13 @@ namespace OpenViBEPlugins
 					l_ui64TotalBufferSize+=l_pInputMatrix->getBufferElementCount();
 					if(input==l_pStaticBoxContext->getInputCount()-1)
 					{
-						l_pOutputMatrix->setDimensionCount(2);
-						l_pOutputMatrix->setDimensionSize(0, 1);
-						l_pOutputMatrix->setDimensionSize(1, (uint32)l_ui64TotalBufferSize);
+						l_pOutputMatrix->setDimensionCount(1);
+						l_pOutputMatrix->setDimensionSize(0, (uint32)l_ui64TotalBufferSize);
 
 						for(uint32 i=0;i<(uint32)l_ui64TotalBufferSize;i++) {
 							char l_sBuffer[64];
 							sprintf(l_sBuffer, "Feature %d", (i+1));
-							l_pOutputMatrix->setDimensionLabel(1, i, l_sBuffer);
+							l_pOutputMatrix->setDimensionLabel(0, i, l_sBuffer);
 						}
 
 						m_pFeatureVectorEncoder->encodeHeader();

@@ -550,13 +550,12 @@ OpenViBE::boolean CBoxAlgorithmCSVFileReader::process_featureVector(void)
 		// in this case we need to transpose it
 		IMatrix* ip_pMatrix=((OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmCSVFileReader >*)m_pAlgorithmEncoder)->getInputMatrix();
 
-		ip_pMatrix->setDimensionCount(2);
-		ip_pMatrix->setDimensionSize(0,1);
-		ip_pMatrix->setDimensionSize(1,m_ui32NbColumn-1);
+		ip_pMatrix->setDimensionCount(1);
+		ip_pMatrix->setDimensionSize(0,m_ui32NbColumn-1);
 
 		for(uint32 i=1;i<m_ui32NbColumn;i++)
 		{
-			ip_pMatrix->setDimensionLabel(1,i-1,m_vHeaderFile[i].c_str());
+			ip_pMatrix->setDimensionLabel(0,i-1,m_vHeaderFile[i].c_str());
 		}
 
 		m_pAlgorithmEncoder->encodeHeader();

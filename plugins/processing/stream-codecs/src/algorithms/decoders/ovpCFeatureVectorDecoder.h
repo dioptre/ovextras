@@ -13,7 +13,14 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
+			virtual void openChild(const EBML::CIdentifier& rIdentifier);
+			virtual void processChildData(const void* pBuffer, const EBML::uint64 ui64BufferSize);
+
 			_IsDerivedFromClass_Final_(OpenViBEPlugins::StreamCodecs::CStreamedMatrixDecoder, OVP_ClassId_Algorithm_FeatureVectorStreamDecoder);
+		
+		private:
+
+			EBML::CIdentifier m_oTop;
 
 		};
 
