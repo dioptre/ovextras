@@ -128,6 +128,43 @@
 #define OVTK_StimulationId_TrainCompleted                    0x00008207
 #define OVTK_StimulationId_Reset                             0x00008208
 
+// These are low-order stimulations that may be required for some legacy communication 
+// channels like parallel port handling only 1 byte codes. The name and number of these stimuli exactly matches.
+#define OVTK_StimulationId_NumberStart                        0x00000000
+#define OVTK_StimulationId_Number_00                          0x00000000
+#define OVTK_StimulationId_Number_01                          0x00000001
+#define OVTK_StimulationId_Number_02                          0x00000002
+#define OVTK_StimulationId_Number_03                          0x00000003
+#define OVTK_StimulationId_Number_04                          0x00000004
+#define OVTK_StimulationId_Number_05                          0x00000005
+#define OVTK_StimulationId_Number_06                          0x00000006
+#define OVTK_StimulationId_Number_07                          0x00000007
+#define OVTK_StimulationId_Number_08                          0x00000008
+#define OVTK_StimulationId_Number_09                          0x00000009
+#define OVTK_StimulationId_Number_0A                          0x0000000a
+#define OVTK_StimulationId_Number_0B                          0x0000000b
+#define OVTK_StimulationId_Number_0C                          0x0000000c
+#define OVTK_StimulationId_Number_0D                          0x0000000d
+#define OVTK_StimulationId_Number_0E                          0x0000000e
+#define OVTK_StimulationId_Number_0F                          0x0000000f
+#define OVTK_StimulationId_Number_10                          0x00000010
+#define OVTK_StimulationId_Number_11                          0x00000011
+#define OVTK_StimulationId_Number_12                          0x00000012
+#define OVTK_StimulationId_Number_13                          0x00000013
+#define OVTK_StimulationId_Number_14                          0x00000014
+#define OVTK_StimulationId_Number_15                          0x00000015
+#define OVTK_StimulationId_Number_16                          0x00000016
+#define OVTK_StimulationId_Number_17                          0x00000017
+#define OVTK_StimulationId_Number_18                          0x00000018
+#define OVTK_StimulationId_Number_19                          0x00000019
+#define OVTK_StimulationId_Number_1A                          0x0000001a
+#define OVTK_StimulationId_Number_1B                          0x0000001b
+#define OVTK_StimulationId_Number_1C                          0x0000001c
+#define OVTK_StimulationId_Number_1D                          0x0000001d
+#define OVTK_StimulationId_Number_1E                          0x0000001e
+#define OVTK_StimulationId_Number_1F                          0x0000001f
+#define OVTK_StimulationId_NumberEnd                          0x000000ff
+
 //___________________________________________________________________//
 //                                                                   //
 // GDF file format stimulation identifiers                           //
