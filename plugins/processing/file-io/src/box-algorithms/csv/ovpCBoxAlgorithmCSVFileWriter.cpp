@@ -117,7 +117,10 @@ boolean CBoxAlgorithmCSVFileWriter::process(void)
 {
 	if(!m_oFileStream.is_open())
 	{
-		initializeFile();
+		if(!initializeFile());
+		{
+			return false;
+		}
 	}
 	return (this->*m_fpRealProcess)();
 }

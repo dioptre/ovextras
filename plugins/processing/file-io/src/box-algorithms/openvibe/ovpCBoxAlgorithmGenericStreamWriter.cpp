@@ -37,7 +37,10 @@ boolean CBoxAlgorithmGenericStreamWriter::initialize(void)
 
 boolean CBoxAlgorithmGenericStreamWriter::uninitialize(void)
 {
-	m_oFile.close();
+	if(m_oFile.is_open())
+	{
+		m_oFile.close();
+	}
 	return true;
 }
 

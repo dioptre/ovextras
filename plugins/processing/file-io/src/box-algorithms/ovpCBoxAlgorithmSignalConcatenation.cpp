@@ -577,9 +577,9 @@ boolean CBoxAlgorithmSignalConcatenation::concate(void)
 	}
 
 	//We search for the last file with data.
-	for(uint32 l_ui32LastFile = m_vSignalChunkBuffers.size() ; l_ui32LastFile <= 0 ; --l_ui32LastFile)
+	for(uint32 l_ui32LastFile = m_vSignalChunkBuffers.size() ; l_ui32LastFile > 0 ; l_ui32LastFile--)
 	{
-		uint32 l_ui32LastChunkOfLastFile = m_vSignalChunkBuffers[l_ui32LastFile-1].size();
+		const uint32 l_ui32LastChunkOfLastFile = m_vSignalChunkBuffers[l_ui32LastFile-1].size();
 		if(l_ui32LastChunkOfLastFile != 0)
 		{
 			m_ui64LastChunkEndTime = m_vSignalChunkBuffers[l_ui32LastFile-1][l_ui32LastChunkOfLastFile-1].m_ui64EndTime;
