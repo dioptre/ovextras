@@ -1,6 +1,7 @@
 #include "ovdCEnumerationSettingView.h"
 #include "../ovd_base.h"
 
+#include <algorithm> // std::sort
 #include <iostream>
 #include <map>
 
@@ -26,10 +27,7 @@ CEnumerationSettingView::CEnumerationSettingView(OpenViBE::Kernel::IBox &rBox, O
 
 	m_pComboBox = GTK_COMBO_BOX(l_pSettingWidget);
 
-	::GtkTreeIter l_oListIter;
-	::GtkListStore* l_pList=GTK_LIST_STORE(gtk_combo_box_get_model(m_pComboBox));
-	gtk_combo_box_set_wrap_width(m_pComboBox, 0);
-	gtk_list_store_clear(l_pList);
+	std::vector<std::string> l_vEntries;
 
 	for(uint64 i=0; i<m_rKernelContext.getTypeManager().getEnumerationEntryCount(m_oTypeIdentifier); i++)
 	{
@@ -37,11 +35,23 @@ CEnumerationSettingView::CEnumerationSettingView(OpenViBE::Kernel::IBox &rBox, O
 		uint64 l_ui64EntryValue;
 		if(m_rKernelContext.getTypeManager().getEnumerationEntry(m_oTypeIdentifier, i, l_sEntryName, l_ui64EntryValue))
 		{
-			gtk_list_store_append(l_pList, &l_oListIter);
-			gtk_list_store_set(l_pList, &l_oListIter, 0, l_sEntryName.toASCIIString(), -1);
-
-			m_mEntriesIndex[l_sEntryName] = i;
+			l_vEntries.push_back(l_sEntryName.toASCIIString());
 		}
+	}
+
+	std::sort(l_vEntries.begin(), l_vEntries.end());
+
+	::GtkTreeIter l_oListIter;
+	::GtkListStore* l_pList=GTK_LIST_STORE(gtk_combo_box_get_model(m_pComboBox));
+	gtk_combo_box_set_wrap_width(m_pComboBox, 0);
+	gtk_list_store_clear(l_pList);
+
+	for(size_t i=0;i<l_vEntries.size();i++)
+	{
+		gtk_list_store_append(l_pList, &l_oListIter);
+		gtk_list_store_set(l_pList, &l_oListIter, 0, l_vEntries[i].c_str(), -1);
+
+		m_mEntriesIndex[CString(l_vEntries[i].c_str())] = static_cast<uint64>(i);
 	}
 
 	initializeValue();
