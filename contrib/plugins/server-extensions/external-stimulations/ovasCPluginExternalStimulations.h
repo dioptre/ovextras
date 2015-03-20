@@ -43,8 +43,6 @@ namespace OpenViBEAcquisitionServer
 				{
 						OpenViBE::uint64 timestamp;
 						OpenViBE::uint64 identifier;
-						OpenViBE::boolean isProcessed;
-						OpenViBE::boolean alreadyCountedAsEarlier;
 				};
 
 				void addExternalStimulations(OpenViBE::CStimulationSet*, OpenViBE::Kernel::ILogManager& logm,OpenViBE::uint64 start,OpenViBE::uint64 end);

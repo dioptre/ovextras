@@ -94,15 +94,6 @@ void CPluginExternalStimulations::stopHook()
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "  Stimulations that came later: " << 	m_iDebugStimulationsReceivedLate << "\n";
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "  Stimulations that had wrong size: " << 	m_iDebugStimulationsReceivedWrongSize << "\n";
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "  Buffered: " << 	m_iDebugStimulationsBuffered << "\n";
-
-	int processed=0;
-	vector<SExternalStimulation>::iterator cii;
-	for(cii=m_vExternalStimulations.begin(); cii!=m_vExternalStimulations.end(); cii++)
-	{
-		if (cii->isProcessed)
-			processed++;
-	}
-	m_rKernelContext.getLogManager() << LogLevel_Debug << "  processed: " << processed << "\n";
 	//end software tagging diagnosting
 }
 
@@ -193,8 +184,6 @@ void CPluginExternalStimulations::readExternalStimulations()
 			uint64 ov_time = ITimeArithmetics::secondsToTime(time);
 			stim.timestamp = ov_time;
 
-			stim.alreadyCountedAsEarlier = false;
-
 			//3. Store, the main thread will process it
 			{
 				//lock
@@ -223,40 +212,26 @@ void CPluginExternalStimulations::addExternalStimulations(OpenViBE::CStimulation
 
 		for(cii=m_vExternalStimulations.begin(); cii!=m_vExternalStimulations.end(); cii++)
 		{
-			if (cii->isProcessed==true) continue;
-
-			// if time matches current chunk being processed - send it
-			if (cii->timestamp >= start && cii->timestamp < end)
+			// if time is current or any time in the future - send it (AS will buffer it)
+			if (cii->timestamp >= start)
 			{
 				//flashes_in_this_time_chunk++;
 				//logm << LogLevel_Error << "Stimulation added." << "\n";
 				ss->appendStimulation(cii->identifier, cii->timestamp, duration_ms);
-				m_iDebugExternalStimulationsSent++;
-				//m_vExternalStimulations.erase(cii);
-				cii->isProcessed = true;
 			}
 			else
+			{
 				//the stimulation is coming too late - after the current block being processed
 				//we correct the timestamp to the current block and we send it
-				if (cii->timestamp < start)
-				{
-					m_iDebugStimulationsReceivedLate++;
-					ss->appendStimulation(cii->identifier, start, duration_ms);
-					m_iDebugExternalStimulationsSent++;
-					//m_vExternalStimulations.erase(cii);
-					cii->isProcessed = true;
-				}
-				else //stim.timestamp > end - coming before the currently processed block, so we still can put in the right place
-				{
-					//save the stimulation for later
-					if (!cii->alreadyCountedAsEarlier)
-					{
-						m_iDebugStimulationsReceivedEarlier++;
-						cii->alreadyCountedAsEarlier = true;
-					}
-					continue;
-				}
+				m_iDebugStimulationsReceivedLate++;
+				ss->appendStimulation(cii->identifier, start, duration_ms);
+			}
+
+			m_iDebugExternalStimulationsSent++;
 		}
+
+		// Since we processed all stimulations, we can clear the queue
+		m_vExternalStimulations.clear();
 
 		m_esAvailable.notify_one();
 		//unlock
