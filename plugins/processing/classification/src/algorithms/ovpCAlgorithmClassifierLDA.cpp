@@ -143,21 +143,22 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		return false;
 	}
 
-	static const uint32 l_ui32nClasses = 2;
+	const uint32 l_ui32nClasses = l_vClassLabels.size();
 
 	// Get class labels
-	m_f64Class1=l_vClassLabels.begin()->first;
-	m_f64Class2=l_vClassLabels.rbegin()->first;
+	for(std::map < float64, uint32 >::iterator iter = l_vClassLabels.begin() ; iter != l_vClassLabels.end() ; ++iter)
+	{
+		m_oLabelList.push_back(iter->first);
+	}
 
 	// Get regularized covariances of all the classes
-	const float64 l_f64Labels[] = {m_f64Class1,m_f64Class2};
 	MatrixXd l_aCov[l_ui32nClasses];
 	MatrixXd l_aMean[l_ui32nClasses];
 	MatrixXd l_oGlobalCov = MatrixXd::Zero(l_ui32nCols,l_ui32nCols);
 
 	for(uint32 l_ui32classIdx=0;l_ui32classIdx<l_ui32nClasses;l_ui32classIdx++) 
 	{
-		const float64 l_f64Label = l_f64Labels[l_ui32classIdx];
+		const float64 l_f64Label = m_oLabelList[l_ui32classIdx];
 		const uint32 l_ui32nExamplesInClass = l_vClassLabels[l_f64Label];
 
 		// Copy all the data of the class to a feature matrix
@@ -220,23 +221,21 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 	// Build LDA model for 2 classes. This is a special case of the multiclass version.
 	const MatrixXd l_oGlobalCovInv = l_oEigenSolver.eigenvectors() * l_oEigenValues.asDiagonal() * l_oEigenSolver.eigenvectors().inverse();	
 
-	if(m_bOldClassification){
-		const MatrixXd l_oMeanSum  = l_aMean[0] + l_aMean[1];
-		const MatrixXd l_oMeanDiff = l_aMean[0] - l_aMean[1];
+	const MatrixXd l_oMeanSum  = l_aMean[0] + l_aMean[1];
+	const MatrixXd l_oMeanDiff = l_aMean[0] - l_aMean[1];
 
-		const MatrixXd l_oBias = -0.5 * l_oMeanSum * l_oGlobalCovInv * l_oMeanDiff.transpose();
-		m_oWeights =(l_oGlobalCovInv * l_oMeanDiff.transpose()).transpose();
+	const MatrixXd l_oBias = -0.5 * l_oMeanSum * l_oGlobalCovInv * l_oMeanDiff.transpose();
+	m_oWeights =(l_oGlobalCovInv * l_oMeanDiff.transpose()).transpose();
 
-		const MatrixXd l_oClass1 = -0.5 * l_aMean[0] * l_oGlobalCovInv * l_aMean[0].transpose();
-		const MatrixXd l_oClass2 = 0.5 * l_aMean[1] * l_oGlobalCovInv * l_aMean[1].transpose();
-		m_f64w0 = l_oClass1(0,0) + l_oClass2(0,0) +
-				std::log(static_cast<double>(l_vClassLabels[m_f64Class1])/static_cast<double>(l_vClassLabels[m_f64Class2]));
+	const MatrixXd l_oClass1 = -0.5 * l_aMean[0] * l_oGlobalCovInv * l_aMean[0].transpose();
+	const MatrixXd l_oClass2 = 0.5 * l_aMean[1] * l_oGlobalCovInv * l_aMean[1].transpose();
+	m_f64w0 = l_oClass1(0,0) + l_oClass2(0,0) +
+			std::log(static_cast<double>(m_oLabelList[0])/static_cast<double>(m_oLabelList[1]));
 
-		// Catenate the bias term and the weights
-		m_f64BiasDistance = l_oBias(0,0);
+	// Catenate the bias term and the weights
+	m_f64BiasDistance = l_oBias(0,0);
 
-		m_ui32NumCols = l_ui32nCols;
-	}
+	m_ui32NumCols = l_ui32nCols;
 	
 	// Debug output
 	/*dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
@@ -281,11 +280,11 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 
 		if(l_f64P1 >= 0.5)
 		{
-			rf64Class=m_f64Class1;
+			rf64Class=m_oLabelList[0];
 		}
 		else
 		{
-			rf64Class=m_f64Class2;
+			rf64Class=m_oLabelList[1];
 		}
 	}
 	return true;
@@ -301,7 +300,10 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 	std::stringstream l_sBiasDistance;
 	std::stringstream l_sCoefficientProbability;
 
-	l_sClasses << m_f64Class1 << " " << m_f64Class2;
+	for(size_t i = 0; i< m_oLabelList.size() ; ++i)
+	{
+		l_sClasses << m_oLabelList[i] << " ";
+	}
 	l_sWeigths << std::scientific;
 
 	for(uint32 i=0; i<m_ui32NumCols; i++)
@@ -353,8 +355,7 @@ float64 getFloatFromNode(XML::IXMLNode *pNode)
 boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
 	XML::IXMLNode * l_pLDANode = pConfigurationNode->getChild(0);
-	m_f64Class1=0;
-	m_f64Class2=0;
+	m_oLabelList.clear();
 
 	XML::IXMLNode* l_pTempNode;
 
@@ -393,9 +394,12 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 void CAlgorithmClassifierLDA::loadClassesFromNode(XML::IXMLNode *pNode)
 {
 	std::stringstream l_sData(pNode->getPCData());
-
-	l_sData >> m_f64Class1;
-	l_sData >> m_f64Class2;
+	while(!l_sData.eof())
+	{
+		float64 l_f64Temp;
+		l_sData >> l_f64Temp;
+		m_oLabelList.push_back(l_f64Temp);
+	}
 }
 
 //Load the weight vector

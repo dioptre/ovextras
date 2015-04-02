@@ -54,8 +54,7 @@ namespace OpenViBEPlugins
 			// Debug method. Prints the matrix to the logManager. May be disabled in implementation.
 			void dumpMatrix(OpenViBE::Kernel::ILogManager& pMgr, const MatrixXdRowMajor& mat, const OpenViBE::CString& desc);
 
-			OpenViBE::float64 m_f64Class1;
-			OpenViBE::float64 m_f64Class2;
+			std::vector < OpenViBE::float64 > m_oLabelList;
 
 			Eigen::MatrixXd m_oCoefficients;
 			Eigen::MatrixXd m_oWeights;
