@@ -63,6 +63,7 @@ void CAlgorithmClassifierLDA::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr 
 
 boolean CAlgorithmClassifierLDA::initialize(void)
 {
+	m_bOldClassification = true;
 	// Initialize the Conditioned Covariance Matrix algorithm
 	m_pCovarianceAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ConditionedCovariance));
 	m_pCovarianceAlgorithm->initialize();
@@ -219,21 +220,23 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 	// Build LDA model for 2 classes. This is a special case of the multiclass version.
 	const MatrixXd l_oGlobalCovInv = l_oEigenSolver.eigenvectors() * l_oEigenValues.asDiagonal() * l_oEigenSolver.eigenvectors().inverse();	
 
-	const MatrixXd l_oMeanSum  = l_aMean[0] + l_aMean[1];
-	const MatrixXd l_oMeanDiff = l_aMean[0] - l_aMean[1];
+	if(m_bOldClassification){
+		const MatrixXd l_oMeanSum  = l_aMean[0] + l_aMean[1];
+		const MatrixXd l_oMeanDiff = l_aMean[0] - l_aMean[1];
 
-	const MatrixXd l_oBias = -0.5 * l_oMeanSum * l_oGlobalCovInv * l_oMeanDiff.transpose();
-	m_oWeights =(l_oGlobalCovInv * l_oMeanDiff.transpose()).transpose();
+		const MatrixXd l_oBias = -0.5 * l_oMeanSum * l_oGlobalCovInv * l_oMeanDiff.transpose();
+		m_oWeights =(l_oGlobalCovInv * l_oMeanDiff.transpose()).transpose();
 
-	const MatrixXd l_oClass1 = -0.5 * l_aMean[0] * l_oGlobalCovInv * l_aMean[0].transpose();
-	const MatrixXd l_oClass2 = 0.5 * l_aMean[1] * l_oGlobalCovInv * l_aMean[1].transpose();
-	m_f64w0 = l_oClass1(0,0) + l_oClass2(0,0) +
-			std::log(static_cast<double>(l_vClassLabels[m_f64Class1])/static_cast<double>(l_vClassLabels[m_f64Class2]));
+		const MatrixXd l_oClass1 = -0.5 * l_aMean[0] * l_oGlobalCovInv * l_aMean[0].transpose();
+		const MatrixXd l_oClass2 = 0.5 * l_aMean[1] * l_oGlobalCovInv * l_aMean[1].transpose();
+		m_f64w0 = l_oClass1(0,0) + l_oClass2(0,0) +
+				std::log(static_cast<double>(l_vClassLabels[m_f64Class1])/static_cast<double>(l_vClassLabels[m_f64Class2]));
 
-	// Catenate the bias term and the weights
-	m_f64BiasDistance = l_oBias(0,0);
+		// Catenate the bias term and the weights
+		m_f64BiasDistance = l_oBias(0,0);
 
-	m_ui32NumCols = l_ui32nCols;
+		m_ui32NumCols = l_ui32nCols;
+	}
 	
 	// Debug output
 	/*dumpMatrix(this->getLogManager(), l_oGlobalCov, "Global cov");
@@ -258,31 +261,33 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 	const Map<MatrixXdRowMajor> l_oFeatureVec(const_cast<float64*>(rFeatureVector.getBuffer()), 1, rFeatureVector.getSize());
 
 
+	if(m_bOldClassification)
+	{
 	// Catenate 1.0 to match the bias term
-	MatrixXd l_oWeights(1, l_ui32nColsWithBiasTerm);
-	l_oWeights(0,0) = 1.0;
-	l_oWeights.block(0,1,1,l_ui32nColsWithBiasTerm-1) = l_oFeatureVec;
+		MatrixXd l_oWeights(1, l_ui32nColsWithBiasTerm);
+		l_oWeights(0,0) = 1.0;
+		l_oWeights.block(0,1,1,l_ui32nColsWithBiasTerm-1) = l_oFeatureVec;
 
-	const float64 l_f64Result = (l_oWeights*m_oCoefficients.transpose()).col(0)(0);
+		const float64 l_f64Result = (l_oWeights*m_oCoefficients.transpose()).col(0)(0);
 
-	rClassificationValues.setSize(1);
-	rClassificationValues[0]= -l_f64Result;
+		rClassificationValues.setSize(1);
+		rClassificationValues[0]= -l_f64Result;
 
-	const float64 l_f64a =(m_oWeights * l_oFeatureVec.transpose()).col(0)(0) + m_f64w0;
-	const float64 l_f64P1 = 1 / (1 + exp(-l_f64a));
+		const float64 l_f64a =(m_oWeights * l_oFeatureVec.transpose()).col(0)(0) + m_f64w0;
+		const float64 l_f64P1 = 1 / (1 + exp(-l_f64a));
 
-	rProbabilityValue.setSize(1);
-	rProbabilityValue[0] = l_f64P1;
+		rProbabilityValue.setSize(1);
+		rProbabilityValue[0] = l_f64P1;
 
-	if(l_f64P1 >= 0.5)
-	{
-		rf64Class=m_f64Class1;
+		if(l_f64P1 >= 0.5)
+		{
+			rf64Class=m_f64Class1;
+		}
+		else
+		{
+			rf64Class=m_f64Class2;
+		}
 	}
-	else
-	{
-		rf64Class=m_f64Class2;
-	}
-
 	return true;
 }
 

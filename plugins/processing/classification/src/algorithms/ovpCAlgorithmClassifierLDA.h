@@ -5,6 +5,7 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
+#define TARGET_HAS_ThirdPartyEIGEN
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
 #include <xml/IXMLNode.h>
@@ -27,9 +28,11 @@ namespace OpenViBEPlugins
 	{
 		OpenViBE::int32 getLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
+		typedef Eigen::Matrix< double , Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor > MatrixXdRowMajor;
+
 		class CAlgorithmClassifierLDA : public OpenViBEToolkit::CAlgorithmClassifier
 		{
-		typedef Eigen::Matrix< double , Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor > MatrixXdRowMajor;
+
 
 		public:
 
@@ -62,6 +65,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32NumCols;
 
 			XML::IXMLNode *m_pConfigurationNode;
+			OpenViBE::boolean m_bOldClassification;
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pCovarianceAlgorithm;
 
