@@ -145,7 +145,7 @@ namespace OpenViBEToolkit
 					OpenViBE::uint64 l_ui64StimId=m_rTypeManager.getEnumerationEntryValueFromName(m_oSettingType, m_sSettingValue);
 					if(l_ui64StimId==0xffffffffffffffffll)
 					{
-						m_rLogManager << OpenViBE::Kernel::LogLevel_ImportantWarning << "Did not find an enumeration value for [" << m_rTypeManager.getTypeName(m_oSettingType) << ":" << m_sSettingValue << "]\n";
+						m_rLogManager << OpenViBE::Kernel::LogLevel_ImportantWarning << "Did not find an enumeration value for [" << m_rTypeManager.getTypeName(m_oSettingType) << "] =  [" << m_sSettingValue << "]\n";
 					}
 					return l_ui64StimId;
 				}

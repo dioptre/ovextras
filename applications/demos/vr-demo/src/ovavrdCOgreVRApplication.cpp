@@ -172,8 +172,11 @@ bool COgreVRApplication::setup()
 	this->initCEGUI(OpenViBE::Directories::getLogDir() + "/openvibe-vr-demo-cegui.log");
 
 	//VRPN
-	m_poVrpnPeripheral = new CAbstractVrpnPeripheral("openvibe-vrpn@localhost");
+	const std::string l_sVRPNAddress("openvibe-vrpn@localhost");
+	m_poVrpnPeripheral = new CAbstractVrpnPeripheral(l_sVRPNAddress);
 	m_poVrpnPeripheral->init();
+
+	std::cout << "Listening to VRPN address [" << l_sVRPNAddress << "]\n";
 
 	return true;
 }
