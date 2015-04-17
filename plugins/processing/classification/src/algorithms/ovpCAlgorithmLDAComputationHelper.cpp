@@ -39,6 +39,11 @@ float64 CAlgorithmLDAComputationHelper::getValue(MatrixXd &rFeatureVector)
 	return (m_oWeight * rFeatureVector.transpose()).col(0)(0) + m_f64Bias;
 }
 
+uint32 CAlgorithmLDAComputationHelper::getWeightVectorSize()
+{
+	return m_oWeight.size();
+}
+
 boolean CAlgorithmLDAComputationHelper::loadConfiguration(XML::IXMLNode *pConfiguration)
 {
 	std::stringstream l_sBias(pConfiguration->getChildByName(c_sBiasNodeName)->getPCData());
@@ -61,7 +66,7 @@ boolean CAlgorithmLDAComputationHelper::loadConfiguration(XML::IXMLNode *pConfig
 	return true;
 }
 
-XML::IXMLNode *CAlgorithmLDAComputationHelper::getConfiguration()
+XML::IXMLNode *CAlgorithmLDAComputationHelper::getConfiguration(void)
 {
 	XML::IXMLNode* l_pRootNode = XML::createNode(c_sBaseNodeName);
 

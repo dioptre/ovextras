@@ -2,6 +2,7 @@
 #define __OpenViBEPlugins_Algorithm_ClassifierLDA_H__
 
 #include "../ovp_defines.h"
+#include "ovpCAlgorithmLDAComputationHelper.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
@@ -26,13 +27,14 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
+		class CAlgorithmLDAComputationHelper;
+
 		OpenViBE::int32 getLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
 		typedef Eigen::Matrix< double , Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor > MatrixXdRowMajor;
 
 		class CAlgorithmClassifierLDA : public OpenViBEToolkit::CAlgorithmClassifier
 		{
-
 
 		public:
 
@@ -55,6 +57,7 @@ namespace OpenViBEPlugins
 			void dumpMatrix(OpenViBE::Kernel::ILogManager& pMgr, const MatrixXdRowMajor& mat, const OpenViBE::CString& desc);
 
 			std::vector < OpenViBE::float64 > m_oLabelList;
+			std::vector < CAlgorithmLDAComputationHelper > m_oComputationHelperList;
 
 			Eigen::MatrixXd m_oCoefficients;
 			Eigen::MatrixXd m_oWeights;

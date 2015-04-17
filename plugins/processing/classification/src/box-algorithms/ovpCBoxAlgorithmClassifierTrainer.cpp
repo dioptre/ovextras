@@ -524,7 +524,7 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 	l_sRoot->addChild(l_pStimulationsNode);
 
 	l_sRoot->addChild((XML::IXMLNode*)op_pConfiguration);
-
+	std::cout << l_sRoot->getXML() << std::endl;
 	if(!l_pHandler->writeXMLInFile(*l_sRoot, l_sConfigurationFilename.toASCIIString()))
 	{
 		this->getLogManager() << LogLevel_Error << "Could not save configuration to file [" << l_sConfigurationFilename << "]\n";

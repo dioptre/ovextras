@@ -4,6 +4,9 @@
 #define TARGET_HAS_ThirdPartyEIGEN
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
+#include "../ovp_defines.h"
+#include <openvibe/ov_all.h>
+
 #include <Eigen/Eigenvalues>
 
 #include "ovpCAlgorithmClassifierLDA.h"
@@ -23,9 +26,10 @@ namespace OpenViBEPlugins
 			void setBias(OpenViBE::float64 f64Bias);
 
 			OpenViBE::float64 getValue(Eigen::MatrixXd &rFeatureVector);
+			OpenViBE::uint32 getWeightVectorSize(void);
 
 			OpenViBE::boolean loadConfiguration(XML::IXMLNode* pConfiguration);
-			XML::IXMLNode* getConfiguration();
+			XML::IXMLNode* getConfiguration(void);
 
 		private:
 			OpenViBE::uint32 m_ui32NumCol;
