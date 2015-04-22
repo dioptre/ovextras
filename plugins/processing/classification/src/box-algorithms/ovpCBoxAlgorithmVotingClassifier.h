@@ -50,6 +50,7 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::TParameterHandler<const OpenViBE::IMemoryBuffer*> ip_pMemoryBuffer;
 				OpenViBE::Kernel::TParameterHandler<OpenViBE::IStimulationSet*> op_pStimulationSet;
 				OpenViBE::Kernel::TParameterHandler<OpenViBE::IMatrix*> op_pMatrix;
+				OpenViBE::boolean m_bTwoValue;
 				std::vector < std::pair < OpenViBE::float64, OpenViBE::uint64 > > m_vScore;
 			} SInput;
 
