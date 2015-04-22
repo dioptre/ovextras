@@ -36,79 +36,64 @@ boolean CAlgorithmPairwiseDecisionVoting::parametrize()
 	CIdentifier l_oId = *ip_pAlgorithmIdentifier;
 	m_fAlgorithmComparison = getClassificationComparisonFunction(l_oId);
 
+	TParameterHandler < uint32 > ip_pClassAmount(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_AmountClass));
+	m_ui32ClassAmount = ip_pClassAmount;
+
 	return true;
 }
 
 
 
-boolean CAlgorithmPairwiseDecisionVoting::compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector)
+boolean CAlgorithmPairwiseDecisionVoting::compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabiltyVector)
 {
-	OpenViBE::uint32 l_ui32AmountClass = pSubClassifierMatrix->getDimensionSize(0);
-
 #if VOTING_DEBUG
-	std::cout << pSubClassifierMatrix->getDimensionSize(0) << std::endl;
+	std::cout << pClassificationValueList->size() << std::endl;
 
-	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
-
-		for(OpenViBE::uint32 j = 0 ; j<l_ui32AmountClass ; ++j){
-			std::cout << pSubClassifierMatrix->getBuffer()[i*l_ui32AmountClass + j] << " ";
-		}
+	for(OpenViBE::uint32 i = 0 ; i< pClassificationValueList->size() ; ++i){
+		std::cout << (*pClassificationValueList)[i].m_f64FirstClass << " " << (*pClassificationValueList)[i].m_f64SecondClass << std::endl;
+		std::cout << (*pClassificationValueList)[i].m_f64ClassLabel;
 		std::cout << std::endl;
 	}
 #endif
 
-	float64* l_pMatrixBuffer = pSubClassifierMatrix->getBuffer();
-	float64* l_pProbVector = new float64[l_ui32AmountClass];
-	uint32 l_pProbVectorSum = 0;
-	CMatrix l_oM1, l_oM2;//Temporary matrix used to compare with m_fAlgorithmComparison
-	l_oM1.setDimensionCount(1);
-	l_oM1.setDimensionSize(0,1);
-
-	l_oM2.setDimensionCount(1);
-	l_oM2.setDimensionSize(0,1);
-
-
-	for(OpenViBE::uint32 l_ui32FirstClass = 0 ; l_ui32FirstClass < l_ui32AmountClass ; ++l_ui32FirstClass)
+	uint32* l_pWinCount = new uint32[m_ui32ClassAmount];
+	for(size_t i = 0 ; i < m_ui32ClassAmount ; ++i)
 	{
-		uint32 l_pTempSum = 0;
-		for(OpenViBE::uint32 l_ui32SecondClass = 0 ; l_ui32SecondClass<l_ui32AmountClass ; ++l_ui32SecondClass)
+		l_pWinCount[i] = 0;
+	}
+
+	for(uint32 i =0 ; i < pClassificationValueList.size() ; ++i)
+	{
+		SClassificationInfo & l_rTemp = pClassificationValueList[i];
+		if(l_rTemp.m_f64ClassLabel == 1)
 		{
-			if(l_ui32SecondClass != l_ui32FirstClass)
-			{
-				l_oM1.getBuffer()[0]= l_pMatrixBuffer[l_ui32AmountClass*l_ui32FirstClass + l_ui32SecondClass];
-				l_oM2.getBuffer()[0]= l_pMatrixBuffer[l_ui32AmountClass*l_ui32SecondClass + l_ui32FirstClass];
-				if((*m_fAlgorithmComparison)(l_oM1, l_oM2 ) < 0)
-				{
-					++l_pTempSum;
-				}
-			}
+			++(l_pWinCount[(uint32)(l_rTemp.m_f64FirstClass-1)]);
 		}
-		l_pProbVector[l_ui32FirstClass] = l_pTempSum;
-		l_pProbVectorSum += l_pTempSum;
+		else
+		{
+			++(l_pWinCount[(uint32)(l_rTemp.m_f64SecondClass-1)]);
+		}
+
 	}
 
-	for(OpenViBE::uint32 i = 0; i<l_ui32AmountClass ; ++i)
-	{
-		l_pProbVector[i] /= l_pProbVectorSum;
-	}
 
 #if VOTING_DEBUG
-	for(OpenViBE::uint32 i = 0; i<l_ui32AmountClass ; ++i)
+	for(size_t i = 0; i < m_ui32ClassAmount ;  ++i)
 	{
-		std::cout << l_pProbVector[i] << " ";
+		std::cout << ((float64)l_pWinCount[i])/pClassificationValueList->size() <<  " ";
 	}
 	std::cout << std::endl;
 #endif
 
 	pProbabiltyVector->setDimensionCount(1);
-	pProbabiltyVector->setDimensionSize(0,l_ui32AmountClass);
+	pProbabiltyVector->setDimensionSize(0,m_ui32ClassAmount);
 
-	for(OpenViBE::uint32 i = 0 ; i<l_ui32AmountClass ; ++i)
+	for(OpenViBE::uint32 i = 0 ; i<m_ui32ClassAmount ; ++i)
 	{
-		pProbabiltyVector->getBuffer()[i] = l_pProbVector[i];
+		pProbabiltyVector->getBuffer()[i] = ((float64)l_pWinCount[i])/pClassificationValueList.size();
 	}
 
-	delete[] l_pProbVector;
+	delete[] l_pWinCount;
 	return true;
 }
 

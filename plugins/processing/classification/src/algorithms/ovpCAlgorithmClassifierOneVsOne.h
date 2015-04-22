@@ -28,6 +28,14 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::IAlgorithmProxy* m_pSubClassifierProxy;
 		} SSubClassifierDescriptor;
 
+		typedef struct{
+			OpenViBE::float64 m_f64FirstClass;
+			OpenViBE::float64 m_f64SecondClass;
+			OpenViBE::float64 m_f64ClassLabel;
+			//This output is probabilist
+			OpenViBE::IMatrix *m_pClassificationValue;
+		}SClassificationInfo;
+
 
 		class CAlgorithmClassifierOneVsOne : public OpenViBEToolkit::CAlgorithmPairingStrategy
 		{

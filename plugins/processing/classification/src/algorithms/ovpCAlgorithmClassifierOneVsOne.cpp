@@ -1,4 +1,3 @@
-
 #include "ovpCAlgorithmClassifierOneVsOne.h"
 #include "ovpCAlgorithmPairwiseDecision.h"
 
@@ -111,6 +110,9 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 
 	TParameterHandler < CIdentifier *> ip_pClassificationAlgorithm(m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_AlgorithmIdentifier));
 	ip_pClassificationAlgorithm = &m_oSubClassifierAlgorithmIdentifier;
+	TParameterHandler <uint32> ip_pClassAmount(m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_AmountClass));
+	ip_pClassAmount = l_ui32AmountClass;
+
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize);
 
 	this->uninitializeExtraParameterMechanism();
@@ -193,6 +195,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 //	std::cout << "Starting Classification" << std::endl;
 	const OpenViBE::uint32 l_ui32AmountClass = this->getClassAmount();
 	const uint32 l_ui32FeatureVectorSize=rFeatureVector.getSize();
+	std::vector< SClassificationInfo > l_oClassificationList;
 
 	TParameterHandler<IMatrix*> ip_pProbabilityMatrix = m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix);
 	IMatrix * l_pProbabilityMatrix = (IMatrix*)ip_pProbabilityMatrix;
@@ -214,6 +217,7 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 			IAlgorithmProxy * l_pTempProxy = this->getSubClassifierDescriptor(i+1, j+1).m_pSubClassifierProxy;
 			TParameterHandler < IMatrix* > ip_pFeatureVector(l_pTempProxy->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
 			TParameterHandler < IMatrix* > op_pClassificationValues(l_pTempProxy->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
+			TParameterHandler < float64 > op_pClassificationLabel (l_pTempProxy->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
 			ip_pFeatureVector->setDimensionCount(1);
 			ip_pFeatureVector->setDimensionSize(0, l_ui32FeatureVectorSize);
 
@@ -224,10 +228,13 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 						l_ui32FeatureVectorSize*sizeof(float64));
 			l_pTempProxy->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 
-			//We have only probability here
-			float64 l_f64Prob = op_pClassificationValues->getBuffer()[0];
-			l_pProbabilityMatrix->getBuffer()[i*l_ui32AmountClass + j] = l_f64Prob;
-			l_pProbabilityMatrix->getBuffer()[j*l_ui32AmountClass + i] = 1-l_f64Prob;
+			SClassificationInfo l_oClassificationInfo = {(float64)(i+1), (float64)(j+1), op_pClassificationLabel, op_pClassificationValues};
+			l_oClassificationList.push_back(l_oClassificationInfo);
+
+//			//We have only probability here
+//			float64 l_f64Prob = op_pClassificationValues->getBuffer()[0];
+//			l_pProbabilityMatrix->getBuffer()[i*l_ui32AmountClass + j] = l_f64Prob;
+//			l_pProbabilityMatrix->getBuffer()[j*l_ui32AmountClass + i] = 1-l_f64Prob;
 		}
 	}
 
@@ -240,6 +247,10 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 //		std::cout << std::endl;
 //	}
 //	std::cout << std::endl;
+
+	TParameterHandler< std::vector < SClassificationInfo > * > ip_pClassificationInfos(
+				m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassificationOutputs));
+	ip_pClassificationInfos = &l_oClassificationList;
 
 	//Then ask to the startegy to make the decision
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute);

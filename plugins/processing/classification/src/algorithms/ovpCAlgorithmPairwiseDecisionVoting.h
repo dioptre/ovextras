@@ -33,7 +33,7 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean parametrize(void);
 
-			virtual OpenViBE::boolean compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector);
+			virtual OpenViBE::boolean compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabiltyVector);
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode& rNode);
 
@@ -41,6 +41,7 @@ namespace OpenViBEPlugins
 
 		private:
 			fClassifierComparison m_fAlgorithmComparison;
+			OpenViBE::uint32 m_ui32ClassAmount;
 		};
 
 		class CAlgorithmPairwiseDecisionVotingDesc : virtual public OpenViBEPlugins::Classification::CAlgorithmPairwiseDecisionDesc
