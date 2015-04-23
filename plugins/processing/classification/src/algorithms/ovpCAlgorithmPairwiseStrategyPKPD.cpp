@@ -61,20 +61,15 @@ boolean CAlgorithmPairwiseStrategyPKPD::compute(std::vector< SClassificationInfo
 		l_pProbabiltyMatrix[l_f64SecondIndex * m_ui32AmountClass + l_f64FirstIndex] = 1 - l_pValues[0];
 	}
 
-	//Now we init the rest with pClassificationValueList
-	//for(size_t i = 0 ; i < pClassificationValueList->size() ; )
+#if PKPD_DEBUG
+	for(OpenViBE::uint32 i = 0 ; i< m_ui32AmountClass ; ++i){
 
-//#if PKPD_DEBUG
-//	std::cout << pSubClassifierMatrix->getDimensionSize(0) << std::endl;
-
-//	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
-
-//		for(OpenViBE::uint32 j = 0 ; j<l_ui32AmountClass ; ++j){
-//			std::cout << pSubClassifierMatrix->getBuffer()[i*l_ui32AmountClass + j] << " ";
-//		}
-//		std::cout << std::endl;
-//	}
-//#endif
+		for(OpenViBE::uint32 j = 0 ; j<m_ui32AmountClass ; ++j){
+			std::cout << l_pProbabiltyMatrix[i*m_ui32AmountClass + j] << " ";
+		}
+		std::cout << std::endl;
+	}
+#endif
 
 	float64* l_pProbVector = new float64[m_ui32AmountClass];
 	float64 l_pProbVectorSum = 0;
@@ -102,7 +97,7 @@ boolean CAlgorithmPairwiseStrategyPKPD::compute(std::vector< SClassificationInfo
 	{
 		std::cout << l_pProbVector[i] << " ";
 	}
-	std::cout << std::endl << l_pProbVectorSum << std::endl;
+	std::cout << std::endl;
 #endif
 
 	pProbabiltyVector->setDimensionCount(1);

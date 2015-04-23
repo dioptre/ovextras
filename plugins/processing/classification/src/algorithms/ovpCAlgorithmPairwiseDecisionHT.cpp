@@ -56,6 +56,16 @@ boolean CAlgorithmPairwiseDecisionHT::compute(std::vector< SClassificationInfo >
 		l_pProbabiltyMatrix[i*m_ui32AmountClass + i] = 0.;
 	}
 
+#if HT_DEBUG
+	for(OpenViBE::uint32 i = 0 ; i< m_ui32AmountClass ; ++i){
+
+		for(OpenViBE::uint32 j = 0 ; j<m_ui32AmountClass ; ++j){
+			std::cout << l_pProbabiltyMatrix[i*m_ui32AmountClass + j] << " ";
+		}
+		std::cout << std::endl;
+	}
+#endif
+
 	for(size_t i = 0 ; i < pClassificationValueList.size() ; ++i)
 	{
 		SClassificationInfo& l_rTemp = pClassificationValueList[i];
@@ -114,16 +124,7 @@ boolean CAlgorithmPairwiseDecisionHT::compute(std::vector< SClassificationInfo >
 	std::cout << std::endl;
 #endif
 
-//#if HT_DEBUG
-//	std::cout << "Probability matrix" << std::endl;
-//	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
 
-//		for(OpenViBE::uint32 j = 0 ; j<l_ui32AmountClass ; ++j){
-//			std::cout << pSubClassifierMatrix->getBuffer()[i*l_ui32AmountClass + j] << " ";
-//		}
-//		std::cout << std::endl << std::endl;
-//	}
-//#endif
 
 	uint32 l_ui32ConsecutiveAlpha = 0;
 	uint32 l_ui32Index = 0;

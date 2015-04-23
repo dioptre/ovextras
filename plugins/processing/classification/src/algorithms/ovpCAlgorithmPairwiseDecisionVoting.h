@@ -40,7 +40,6 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVP_ClassId_Algorithm_PairwiseDecision_Voting)
 
 		private:
-			fClassifierComparison m_fAlgorithmComparison;
 			OpenViBE::uint32 m_ui32ClassAmount;
 		};
 

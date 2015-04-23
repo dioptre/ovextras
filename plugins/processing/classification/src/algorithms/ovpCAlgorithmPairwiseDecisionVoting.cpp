@@ -32,10 +32,6 @@ boolean CAlgorithmPairwiseDecisionVoting::uninitialize()
 
 boolean CAlgorithmPairwiseDecisionVoting::parametrize()
 {
-	TParameterHandler < CIdentifier *> ip_pAlgorithmIdentifier(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_AlgorithmIdentifier));
-	CIdentifier l_oId = *ip_pAlgorithmIdentifier;
-	m_fAlgorithmComparison = getClassificationComparisonFunction(l_oId);
-
 	TParameterHandler < uint32 > ip_pClassAmount(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_AmountClass));
 	m_ui32ClassAmount = ip_pClassAmount;
 
@@ -47,11 +43,11 @@ boolean CAlgorithmPairwiseDecisionVoting::parametrize()
 boolean CAlgorithmPairwiseDecisionVoting::compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabiltyVector)
 {
 #if VOTING_DEBUG
-	std::cout << pClassificationValueList->size() << std::endl;
+	std::cout << pClassificationValueList.size() << std::endl;
 
-	for(OpenViBE::uint32 i = 0 ; i< pClassificationValueList->size() ; ++i){
-		std::cout << (*pClassificationValueList)[i].m_f64FirstClass << " " << (*pClassificationValueList)[i].m_f64SecondClass << std::endl;
-		std::cout << (*pClassificationValueList)[i].m_f64ClassLabel;
+	for(OpenViBE::uint32 i = 0 ; i< pClassificationValueList.size() ; ++i){
+		std::cout << pClassificationValueList[i].m_f64FirstClass << " " << pClassificationValueList[i].m_f64SecondClass << std::endl;
+		std::cout << pClassificationValueList[i].m_f64ClassLabel;
 		std::cout << std::endl;
 	}
 #endif
@@ -76,11 +72,10 @@ boolean CAlgorithmPairwiseDecisionVoting::compute(std::vector< SClassificationIn
 
 	}
 
-
 #if VOTING_DEBUG
 	for(size_t i = 0; i < m_ui32ClassAmount ;  ++i)
 	{
-		std::cout << ((float64)l_pWinCount[i])/pClassificationValueList->size() <<  " ";
+		std::cout << ((float64)l_pWinCount[i])/pClassificationValueList.size() <<  " ";
 	}
 	std::cout << std::endl;
 #endif

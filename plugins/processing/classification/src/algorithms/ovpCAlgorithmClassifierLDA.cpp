@@ -34,6 +34,16 @@ OpenViBE::int32 OpenViBEPlugins::Classification::getLDABestClassification(OpenVi
 
 	l_pClassificationValueBuffer = rSecondClassificationValue.getBuffer();
 	OpenViBE::float64 l_f64MaxSecond = *(std::max_element(l_pClassificationValueBuffer, l_pClassificationValueBuffer+rSecondClassificationValue.getBufferElementCount()));
+
+	if(!ov_float_equal(l_f64MaxFirst, l_f64MaxSecond))
+	{
+		return 0;
+	}
+	else if(l_f64MaxFirst > l_f64MaxSecond)
+	{
+		return -1;
+	}
+	return 1;
 }
 
 using namespace OpenViBE;
@@ -367,7 +377,6 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 
 	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 	m_pConfigurationNode->addChild(l_pAlgorithmNode);
-	std::cout << m_pConfigurationNode->getXML() << std::endl;
 }
 
 XML::IXMLNode* CAlgorithmClassifierLDA::saveConfiguration(void)
