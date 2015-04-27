@@ -105,12 +105,14 @@ boolean CDriverEmotivEPOC::initialize(
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: Failed to get the ENV variable PATH.\n";
 		return false;
 	}
-		
+
+#if defined TARGET_OS_Windows
 	if(_putenv_s("PATH",m_sCommandForPathModification) != 0)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: Failed to modify the environment PATH with the Emotiv SDK path.\n";
 		return false;
 	}
+#endif
 	
 	m_oHeader.setChannelCount(14);
 	if(m_bUseGyroscope)
@@ -190,14 +192,22 @@ boolean CDriverEmotivEPOC::initialize(
 	// Hardware initialization
 
 	m_bReadyToCollect = false;
-
+#if defined TARGET_OS_Windows
 	// First call to a function from EDK.DLL: guard the call with __try/__except clauses.
 	__try
+#elif defined TARGET_OS_Linux
+	try
+#endif
 	{
 		m_tEEEventHandle = EE_EmoEngineEventCreate();
 		m_ui32EDK_LastErrorCode = EE_EngineConnect();
+
 	}
+#if defined TARGET_OS_Windows
 	__except(EXCEPTION_EXECUTE_HANDLER)
+#elif
+	catch(...)
+#endif
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: First call to 'edk.dll' failed.\n"
 			<< "\tTo use this driver you must have the Emotiv SDK Research Edition (or above) installed on your computer.\n"
