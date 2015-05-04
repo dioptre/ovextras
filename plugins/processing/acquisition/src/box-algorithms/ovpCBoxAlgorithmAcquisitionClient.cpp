@@ -78,7 +78,7 @@ boolean CBoxAlgorithmAcquisitionClient::processClock(IMessageClock& rMessageCloc
 		m_pConnectionClient->connect(l_sServerName, l_ui32ServerPort);
 		if(!m_pConnectionClient->isConnected())
 		{
-			this->getLogManager() << LogLevel_Error << "Could not connect to server " << l_sServerName << ":" << l_ui32ServerPort << "\n";
+			this->getLogManager() << LogLevel_Error << "Could not connect to server " << l_sServerName << ":" << l_ui32ServerPort << ". Make sure the server is running and in Play state.\n";
 			return false;
 		}
 	}
@@ -113,7 +113,7 @@ boolean CBoxAlgorithmAcquisitionClient::process(void)
 		uint64 l_ui64MemoryBufferSize=0;
 		if(!m_pConnectionClient->receiveBufferBlocking(&l_ui64MemoryBufferSize, sizeof(l_ui64MemoryBufferSize)))
 		{
-			getLogManager() << LogLevel_Error << "Could not receive memory buffer size\n";
+			getLogManager() << LogLevel_Error << "Could not receive memory buffer size from the server. Is the server on 'Play'?\n";
 			return false;
 		}
 		if(!ip_pAcquisitionMemoryBuffer->setSize(l_ui64MemoryBufferSize, true))

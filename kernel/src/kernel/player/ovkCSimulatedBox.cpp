@@ -109,7 +109,9 @@ CSimulatedBox::CSimulatedBox(const IKernelContext& rKernelContext, CScheduler& r
 	this->getLogManager() << LogLevel_Debug << __OV_FUNC__ << " - " << __OV_FILE__ << ":" << __OV_LINE__ << "\n";
 #endif
 
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 	m_pOgreVis = ((CVisualisationManager*)(&rKernelContext.getVisualisationManager()))->getOgreVisualisation();
+#endif
 
 }
 
@@ -135,11 +137,13 @@ CSimulatedBox::~CSimulatedBox(void)
 	//clear simulated objects map
 	m_mSimulatedObjects.clear();
 
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
 	//delete OgreScene
 	if(m_pOgreVis)
 	{
 		m_pOgreVis->deleteScene(m_oSceneIdentifier);
 	}
+#endif
 }
 
 
