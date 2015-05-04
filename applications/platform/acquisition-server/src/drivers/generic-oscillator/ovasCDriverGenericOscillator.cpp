@@ -28,13 +28,6 @@ CDriverGenericOscillator::CDriverGenericOscillator(IDriverContext& rDriverContex
 
 	m_oHeader.setSamplingFrequency(512);
 	m_oHeader.setChannelCount(4);
-	for(uint32 i=0;i<4;i++)
-	{
-		std::stringstream ss; ss << "Oscillator " << (i+1);
-
-		m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Base);
-		m_oHeader.setChannelName(i, ss.str().c_str());
-	}
 
 	m_oSettings.add("Header", &m_oHeader);
 	m_oSettings.add("SendPeriodicStimulations", &m_bSendPeriodicStimulations);
@@ -70,6 +63,14 @@ boolean CDriverGenericOscillator::initialize(
 	 ||!m_oHeader.isSamplingFrequencySet())
 	{
 		return false;
+	}
+
+	for(uint32 i=0;i<m_oHeader.getChannelCount();i++)
+	{
+		std::stringstream ss; ss << "Oscillator " << (i+1);
+
+		m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Base);
+		m_oHeader.setChannelName(i, ss.str().c_str());
 	}
 
 	m_pSample=new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
