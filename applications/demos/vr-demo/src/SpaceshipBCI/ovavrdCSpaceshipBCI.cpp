@@ -335,6 +335,8 @@ bool CSpaceshipBCI::process(double timeSinceLastProcess)
 
 		if(l_rVrpnButtonState.second) // if the button is ON
 		{
+			// std::cout << "Received button " << l_rVrpnButtonState.first << "\n";
+
 			switch(l_rVrpnButtonState.first)
 			{
 				case 0: m_iPhase=Phase_Rest;              break;
@@ -344,6 +346,8 @@ bool CSpaceshipBCI::process(double timeSinceLastProcess)
 				case 4: m_iStage=Stage_FreetimeReal;      break;
 				case 5: m_iStage=Stage_FreetimeImaginary; break;
 				case 6: m_iStage=Stage_Statistics;        break;
+				default:
+					std::cout << "Received unsupported button " << l_rVrpnButtonState.first << "\n";
 			}
 		}
 
@@ -357,7 +361,7 @@ bool CSpaceshipBCI::process(double timeSinceLastProcess)
 		m_dFeedback = *(l_rVrpnAnalogState.begin());
 		m_dMinimumFeedback = (m_dMinimumFeedback > m_dFeedback ?  m_dFeedback : m_dMinimumFeedback);
 
-		//cout<< "New analog state received. Feedback is : "<<m_dFeedback<<endl;
+		// std::cout << "Received analog " << m_dFeedback << "\n";
 
 		m_poVrpnPeripheral->m_vAnalog.pop_front();
 	}
