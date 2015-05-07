@@ -8,14 +8,18 @@
 ! The code adds the channel number to the channel data (so each channel will have noticable and different effect)
 !
 
-subroutine fortran_init() bind(C)
-	implicit none
+subroutine fortran_init(errorCode) bind(C)
+	use iso_c_binding
+	INTEGER(C_INT32_T), intent(out) :: errorCode
 	write(*,*) "Init in Fortran"
+	
+	errorCode = 0	
 end subroutine fortran_init
 
-subroutine fortran_process(mat,rows,cols) bind(C)
+subroutine fortran_process(mat,rows,cols,errorCode) bind(C)
 	use iso_c_binding
 	INTEGER(C_INT32_T), intent(in) :: rows,cols
+	INTEGER(C_INT32_T), intent(out) :: errorCode
 	REAL(C_DOUBLE), intent(inout) :: mat(rows*cols)
 	REAL, DIMENSION(1:rows,1:cols) :: A; 
 	! write(*,*) "Process in Fortran" , rows, " ", cols
@@ -38,10 +42,14 @@ subroutine fortran_process(mat,rows,cols) bind(C)
    
 	mat = reshape( TRANSPOSE(A), (/ rows * cols /) )
    
+	errorCode = 0
 end subroutine fortran_process
 
-subroutine fortran_uninit() bind(C)
-	implicit none
+subroutine fortran_uninit(errorCode) bind(C)
+	use iso_c_binding
+	INTEGER(C_INT32_T), intent(out) :: errorCode
 	write(*,*) "Uninit in Fortran"
+	
+	errorCode = 0	
 end subroutine fortran_uninit
 

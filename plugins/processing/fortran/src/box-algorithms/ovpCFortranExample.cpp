@@ -15,9 +15,9 @@ using namespace OpenViBEToolkit;
 
 using namespace std;
 
-extern "C" void fortran_init(void);
-extern "C" void fortran_process(OpenViBE::float64* mat, int32* m, int32* n);
-extern "C" void fortran_uninit(void);
+extern "C" void fortran_init(int32 *errorCode);
+extern "C" void fortran_process(OpenViBE::float64* mat, int32* m, int32* n, int32 *errorCode);
+extern "C" void fortran_uninit(int32 *errorCode);
 
 void dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const CMatrix& mat, const CString &desc)
 {
@@ -46,8 +46,13 @@ namespace OpenViBEPlugins
 
 			m_oEncoder.getInputMatrix().setReferenceTarget(m_oDecoder.getOutputMatrix());
 		
-			fortran_init();
-
+			int32 l_i32ErrorCode = 0;
+			fortran_init(&l_i32ErrorCode);
+			if(l_i32ErrorCode) 
+			{
+				this->getLogManager() << LogLevel_Error << "Fortran init() returned error code " << l_i32ErrorCode << "\n";
+				return false;
+			}
 			return true;
 		}
 
@@ -55,11 +60,18 @@ namespace OpenViBEPlugins
 		{
 			this->getLogManager() << LogLevel_Info << "Uninitializing\n";
 
-			fortran_uninit();
+			int32 l_i32ErrorCode = 0;			
+			fortran_uninit(&l_i32ErrorCode);
 
 			m_oEncoder.uninitialize();
 			m_oDecoder.uninitialize();
 			
+			if(l_i32ErrorCode) 
+			{
+				this->getLogManager() << LogLevel_Error << "Fortran uninit() returned error code " << l_i32ErrorCode << "\n";
+				return false;
+			}
+						
 			return true;
 		}
 
@@ -81,7 +93,8 @@ namespace OpenViBEPlugins
 			
 				if(m_oDecoder.isHeaderReceived())
 				{ 
-					if(m_oDecoder.getOutputMatrix()->getDimensionCount()!=2) {
+					if(m_oDecoder.getOutputMatrix()->getDimensionCount()!=2) 
+					{
 						this->getLogManager() << LogLevel_Error << "Only 2 dimensional matrices supported\n";
 						return false;
 					}
@@ -95,8 +108,14 @@ namespace OpenViBEPlugins
 					int32 nRows = l_pMatrix->getDimensionSize(0);
 					int32 nCols = l_pMatrix->getDimensionSize(1);
 					
-					fortran_process(l_pMatrix->getBuffer(), &nRows, &nCols);
-
+					int32 l_i32ErrorCode = 0;
+					fortran_process(l_pMatrix->getBuffer(), &nRows, &nCols, &l_i32ErrorCode);
+					if(l_i32ErrorCode) 
+					{
+						this->getLogManager() << LogLevel_Error << "Fortran process() returned error code " << l_i32ErrorCode << "\n";
+						return false;
+					}
+					
 					m_oEncoder.encodeBuffer();
 
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
