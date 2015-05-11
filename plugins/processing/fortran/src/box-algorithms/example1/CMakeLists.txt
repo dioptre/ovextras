@@ -1,0 +1,9 @@
+
+PROJECT(openvibe-plugins-fortran-example1 C Fortran)
+
+FILE(GLOB_RECURSE source_files *.f90)
+
+# ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files})
+ADD_LIBRARY(${PROJECT_NAME} STATIC ${source_files})
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C++)
+
