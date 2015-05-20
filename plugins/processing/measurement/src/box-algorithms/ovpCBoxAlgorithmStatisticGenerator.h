@@ -43,6 +43,8 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32AmountChannel;
 			OpenViBE::CString m_oFilename;
 			std::map < OpenViBE::CIdentifier, OpenViBE::uint32> m_oStimulationMap;
+
+			OpenViBE::boolean m_bHasBeenStreamed;
 		};
 
 
@@ -85,7 +87,7 @@ namespace OpenViBEPlugins
 				
 				return true;
 			}
-			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_StatisticGeneratorDesc);
+			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_StatisticGeneratorDesc)
 		};
 	};
 };

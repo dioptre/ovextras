@@ -1,5 +1,11 @@
 #include "ovpCBoxAlgorithmKappaCoefficient.h"
+#include "../algorithms/ovpCAlgorithmConfusionMatrix.h"
 
+#include <xml/IXMLHandler.h>
+#include <sstream>
+#include <vector>
+
+using namespace std;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -9,14 +15,116 @@ using namespace OpenViBEPlugins::Measurement;
 
 boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 {
-	m_oInput0Decoder.initialize(*this, 0);
+	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+
+	//CLASSIFIER RESULTS DECODER
+	m_pClassifierStimulationDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
+	m_pClassifierStimulationDecoder->initialize();
+	//IO for the classifier stim decoder
+	ip_pClassifierMemoryBufferToDecode.initialize(m_pClassifierStimulationDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
+	op_pClassifierStimulationSetDecoded.initialize(m_pClassifierStimulationDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+
+	//TARGETS DECODER
+	m_pTargetStimulationDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
+	m_pTargetStimulationDecoder->initialize();
+	//IO for the targets stim decoder
+	ip_pTargetMemoryBufferToDecode.initialize(m_pTargetStimulationDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
+	op_pTargetStimulationSetDecoded.initialize(m_pTargetStimulationDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+
+	//CONFUSION MATRIX ALGORITHM
+	m_pConfusionMatrixAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ConfusionMatrix));
+	m_pConfusionMatrixAlgorithm->initialize();
+	//IO for the confusion matrix algorithm
+	ip_pTargetStimulationSet.initialize(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_TargetStimulationSet));
+	ip_pClassifierStimulationSet.initialize(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_ClassifierStimulationSet));
+	ip_bPercentages.initialize(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_Percentage));
+	ip_bSums.initialize(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_Sums));
+	op_pConfusionMatrix.initialize(m_pConfusionMatrixAlgorithm->getOutputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_OutputParameterId_ConfusionMatrix));
+
+	//MATRIX ENCODER
+	m_pConfusionMatrixEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamEncoder));
+	m_pConfusionMatrixEncoder->initialize();
+
+	CString l_sPercentageSetting;
+	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0,l_sPercentageSetting);
+	ip_bPercentages = this->getConfigurationManager().expandAsBoolean(l_sPercentageSetting);
+
+	CString l_sSumsSetting;
+	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1,l_sSumsSetting);
+	ip_bSums = this->getConfigurationManager().expandAsBoolean(l_sSumsSetting);
+
+	m_ui32ClassCount=getBoxAlgorithmContext()->getStaticBoxContext()->getSettingCount() - FIRST_CLASS_SETTING_INDEX;
+	vector < uint64 > l_vClassCodes;
+	l_vClassCodes.resize(m_ui32ClassCount);
+	for(uint32 i = 0; i< m_ui32ClassCount; i++)
+	{
+		CString l_sClassValue;
+		getStaticBoxContext().getSettingValue(i+FIRST_CLASS_SETTING_INDEX, l_sClassValue); // classes are settings from 2 to n
+		l_vClassCodes[i] =(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i+FIRST_CLASS_SETTING_INDEX);
+	}
+	// verification...
+	for(uint32 i = 0; i< m_ui32ClassCount; i++)
+	{
+		for(uint32 j = i+1; j< m_ui32ClassCount; j++)
+		{
+			if(l_vClassCodes[i] == l_vClassCodes[j])
+			{
+				CString l_sClassValue;
+				getStaticBoxContext().getSettingValue(i+FIRST_CLASS_SETTING_INDEX, l_sClassValue);
+				getLogManager() << LogLevel_Error << "You must use unique classes to compute a confusion matrix. Class "<<i+1<<" and "<<j+1<< " are the same ("<<l_sClassValue.toASCIIString()<<").\n";
+				return false;
+			}
+		}
+	}
+
+	ip_pClassesCodes.initialize(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_ClassCodes));
+
+	for(uint32 i = 0 ; i<l_vClassCodes.size(); i++)
+	{
+		ip_pClassesCodes->appendStimulation(l_vClassCodes[i],0,0);
+	}
+
+	// setting reference targets
+	m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_ClassifierStimulationSet)->setReferenceTarget(m_pClassifierStimulationDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+	m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_TargetStimulationSet)->setReferenceTarget(m_pTargetStimulationDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+
+	m_pConfusionMatrixEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pConfusionMatrixAlgorithm->getOutputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_OutputParameterId_ConfusionMatrix));
 
 	return true;
 }
 
 boolean CBoxAlgorithmKappaCoefficient::uninitialize(void)
 {
-	m_oInput0Decoder.uninitialize();
+	//IO for the classifier results
+	op_pClassifierStimulationSetDecoded.uninitialize();
+	ip_pClassifierMemoryBufferToDecode.uninitialize();
+
+	//IO for the targets
+	op_pTargetStimulationSetDecoded.uninitialize();
+	ip_pTargetMemoryBufferToDecode.uninitialize();
+
+	//IO for the confusion matrix algorithm
+	op_pConfusionMatrix.uninitialize();
+	ip_pClassifierStimulationSet.uninitialize();
+	ip_pTargetStimulationSet.uninitialize();
+	ip_pClassesCodes.uninitialize();
+	ip_bPercentages.uninitialize();
+
+	//CLASSIFIER RESULTS DECODER
+	m_pClassifierStimulationDecoder->uninitialize();
+	this->getAlgorithmManager().releaseAlgorithm(*(m_pClassifierStimulationDecoder));
+
+	//TARGETS DECODER
+	m_pTargetStimulationDecoder->uninitialize();
+	this->getAlgorithmManager().releaseAlgorithm(*m_pTargetStimulationDecoder);
+
+	//CONFUSION MATRIX
+	m_pConfusionMatrixAlgorithm->uninitialize();
+	this->getAlgorithmManager().releaseAlgorithm(*m_pConfusionMatrixAlgorithm);
+
+	//MATRIX ENCODER
+	m_pConfusionMatrixEncoder->uninitialize();
+	this->getAlgorithmManager().releaseAlgorithm(*m_pConfusionMatrixEncoder);
 
 	return true;
 }
@@ -25,87 +133,78 @@ boolean CBoxAlgorithmKappaCoefficient::uninitialize(void)
 boolean CBoxAlgorithmKappaCoefficient::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
-
 	return true;
 }
 
 boolean CBoxAlgorithmKappaCoefficient::process(void)
 {
-	
-	// the static box context describes the box inputs, outputs, settings structures
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-	// here is some useful functions:
-	// - To get input/output/setting count:
-	// l_rStaticBoxContext.getInputCount();
-	// l_rStaticBoxContext.getOutputCount();
-	
-	// - To get the number of chunks currently available on a particular input :
-	// l_rDynamicBoxContext.getInputChunkCount(input_index)
-	
-	// - To send an output chunk :
-	// l_rDynamicBoxContext.markOutputAsReadyToSend(output_index, chunk_start_time, chunk_end_time);
-	
-	
-	// A typical process iteration may look like this.
-	// This example only iterate over the first input of type Signal, and output a modified Signal.
-	// thus, the box uses 1 decoder (m_oSignalDecoder) and 1 encoder (m_oSignalEncoder)
-	/*
-	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
-
-	//iterate over all chunk on input 0
+	//Input 0: Targets
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		// decode the chunk i
-		m_oSignalDecoder.decode(i);
-		// the decoder may have decoded 3 different parts : the header, a buffer or the end of stream.
-		if(m_oSignalDecoder.isHeaderReceived())
-		{
-			// Header received. This happens only once when pressing "play". For example with a StreamedMatrix input, you now know the dimension count, sizes, and labels of the matrix
-			// ... maybe do some process ...
-			
-			// Pass the header to the next boxes, by encoding a header on the output 0:
-			m_oSignalEncoder.encodeHeader(0);
-			// send the output chunk containing the header. The dates are the same as the input chunk:
-			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
-		}
-		if(m_oSignalDecoder.isBufferReceived())
-		{
-			// Buffer received. For example the signal values
-			// Access to the buffer can be done thanks to :
-			IMatrix* l_pMatrix = m_oSignalDecoder.getOutputMatrix(); // the StreamedMatrix of samples.
-			uint64 l_uiSamplingFrequency = m_oSignalDecoder.getOutputSamplingRate(); // the sampling rate of the signal
-			
-			// ... do some process on the matrix ...
+		ip_pTargetMemoryBufferToDecode=l_rDynamicBoxContext.getInputChunk(0, i);
+		m_pTargetStimulationDecoder->process();
 
-			// Encode the output buffer :
-			m_oSignalEncoder.encodeBuffer(0);
-			// and send it to the next boxes :
-			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
-			
-		}
-		if(m_oSignalDecoder.isEndReceived())
+		if(m_pTargetStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
 		{
-			// End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
-			m_oSignalEncoder.encodeEnd(0);
+			m_pConfusionMatrixAlgorithm->process(OVP_Algorithm_ConfusionMatrixAlgorithm_InputTriggerId_ResetTarget);
+			m_pConfusionMatrixEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
+			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+			m_ui64CurrentProcessingTimeLimit = 0;
+		}
+
+		if(m_pTargetStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		{
+			uint64 l_ui64ChunkEndTime = l_rDynamicBoxContext.getInputChunkEndTime(0, i);
+			m_ui64CurrentProcessingTimeLimit = (l_ui64ChunkEndTime>m_ui64CurrentProcessingTimeLimit?l_ui64ChunkEndTime:m_ui64CurrentProcessingTimeLimit);
+
+			m_pConfusionMatrixAlgorithm->process(OVP_Algorithm_ConfusionMatrixAlgorithm_InputTriggerId_FeedTarget);
+
+		}
+
+		if(m_pTargetStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+		{
+			m_pConfusionMatrixEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeEnd);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
 
-		// The current input chunk has been processed, and automaticcaly discarded.
-		// you don't need to call "l_rDynamicBoxContext.markInputAsDeprecated(0, i);"
+		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
 	}
-	*/
 
-	// check the official developer documentation webpage for more example and information :
-	
-	// Tutorials:
-	// http://openvibe.inria.fr/documentation/#Developer+Documentation
-	// Codec Toolkit page :
-	// http://openvibe.inria.fr/codec-toolkit-references/
-	
-	// Feel free to ask experienced developers on the forum (http://openvibe.inria.fr/forum) and IRC (#openvibe on irc.freenode.net).
+	//Input 1: Classifier results
+	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
+	{
+		uint64 l_ui64ChunkEndTime = l_rDynamicBoxContext.getInputChunkEndTime(1,i);
+		if(l_ui64ChunkEndTime <= m_ui64CurrentProcessingTimeLimit)
+		{
+			ip_pClassifierMemoryBufferToDecode=l_rDynamicBoxContext.getInputChunk(1, i);
+			m_pClassifierStimulationDecoder->process();
+
+			if(m_pClassifierStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+			{
+				m_pConfusionMatrixAlgorithm->process(OVP_Algorithm_ConfusionMatrixAlgorithm_InputTriggerId_ResetClassifier);
+			}
+
+			if(m_pClassifierStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			{
+				m_pConfusionMatrixAlgorithm->process(OVP_Algorithm_ConfusionMatrixAlgorithm_InputTriggerId_FeedClassifier);
+				if(m_pConfusionMatrixAlgorithm->isOutputTriggerActive(OVP_Algorithm_ConfusionMatrixAlgorithm_OutputTriggerId_ConfusionPerformed))
+				{
+					m_pConfusionMatrixEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeBuffer);
+					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+				}
+			}
+
+			if(m_pClassifierStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+			{
+				m_pConfusionMatrixEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeEnd);
+				l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+			}
+
+			l_rDynamicBoxContext.markInputAsDeprecated(1, i);
+		}
+	}
 
 	return true;
 }

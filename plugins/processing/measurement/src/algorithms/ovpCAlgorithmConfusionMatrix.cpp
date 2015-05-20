@@ -1,11 +1,13 @@
 #include "ovpCAlgorithmConfusionMatrix.h"
 
+#include <iostream>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Classification;
+using namespace OpenViBEPlugins::Measurement;
 using namespace std;
 
 #define boolean OpenViBE::boolean
@@ -124,6 +126,7 @@ boolean CAlgorithmConfusionMatrix::process(void)
 
 	if(this->isInputTriggerActive(OVP_Algorithm_ConfusionMatrixAlgorithm_InputTriggerId_FeedTarget))
 	{
+		std::cout << "Matrix : " << ip_pTargetStimulationSet->getStimulationCount() << std::endl;
 		for(uint32 s=0; s<ip_pTargetStimulationSet->getStimulationCount(); s++)
 		{
 			uint64 l_ui64StimulationIdentifier = ip_pTargetStimulationSet->getStimulationIdentifier(s);
@@ -169,6 +172,7 @@ boolean CAlgorithmConfusionMatrix::process(void)
 				// we need to update the whole line vector for the targeted class
 				if(isClass(l_ui64StimulationFromClassifierIdentifier))
 				{
+					std::cout << "lala2" << std::endl;
 					uint32 l_ui32OldAttemptCount = m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted];
 					m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted]++; // the confusion matrix can treat this result
 

@@ -21,6 +21,8 @@ boolean CBoxAlgorithmStatisticGenerator::initialize(void)
 	m_ui32AmountChannel = 0;
 	m_oStimulationMap.clear();
 
+	m_bHasBeenStreamed = false;
+
 	m_oFilename = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
 	return true;
@@ -28,42 +30,48 @@ boolean CBoxAlgorithmStatisticGenerator::initialize(void)
 
 boolean CBoxAlgorithmStatisticGenerator::uninitialize(void)
 {
-	XML::IXMLNode* l_pRootNode = XML::createNode("Statistic");
-
-
-	XML::IXMLNode* l_pStimulationsNode = XML::createNode("Stimulations-list");
-	for(std::map< CIdentifier,uint32 >::iterator iter = m_oStimulationMap.begin(); iter != m_oStimulationMap.end(); ++iter)
-	{
-		XML::IXMLNode* l_pTempNode = XML::createNode("Stimulation");
-
-		XML::IXMLNode* l_pIdNode = XML::createNode("Identifier");
-		CIdentifier l_oIdentifier =  iter->first;
-		l_pIdNode->setPCData(l_oIdentifier.toString());
-
-		XML::IXMLNode* l_pAmountNode = XML::createNode("Amount");
-		std::stringstream l_sAmount;
-		l_sAmount << m_oStimulationMap[l_oIdentifier];
-
-		l_pAmountNode->setPCData(l_sAmount.str().c_str());
-
-		l_pTempNode->addChild(l_pIdNode);
-		l_pTempNode->addChild(l_pAmountNode);
-
-		l_pStimulationsNode->addChild(l_pTempNode);
-
-	}
-	l_pRootNode->addChild(l_pStimulationsNode);
-
-	XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
-	l_pHandler->writeXMLInFile(*l_pRootNode, m_oFilename.toASCIIString());
-
-	//We need to compute and store data
 	m_oSignalDecoder.uninitialize();
 	m_oStimulationDecoder.uninitialize();
 
-	l_pHandler->release();
-	l_pRootNode->release();
+	if(m_bHasBeenStreamed)
+	{
 
+		XML::IXMLNode* l_pRootNode = XML::createNode(c_sStatisticRootNodeName);
+
+
+		XML::IXMLNode* l_pStimulationsNode = XML::createNode(c_sStimulationListNodeName);
+		for(std::map< CIdentifier,uint32 >::iterator iter = m_oStimulationMap.begin(); iter != m_oStimulationMap.end(); ++iter)
+		{
+			XML::IXMLNode* l_pTempNode = XML::createNode(c_sStimulationNodeName);
+
+			XML::IXMLNode* l_pIdNode = XML::createNode(c_sIdentifierNodeName);
+			CIdentifier l_oIdentifier =  iter->first;
+			l_pIdNode->setPCData(l_oIdentifier.toString());
+
+			XML::IXMLNode* l_pAmountNode = XML::createNode(c_sAmountNodeName);
+			std::stringstream l_sAmount;
+			l_sAmount << m_oStimulationMap[l_oIdentifier];
+
+			l_pAmountNode->setPCData(l_sAmount.str().c_str());
+
+			l_pTempNode->addChild(l_pIdNode);
+			l_pTempNode->addChild(l_pAmountNode);
+
+			l_pStimulationsNode->addChild(l_pTempNode);
+
+		}
+		l_pRootNode->addChild(l_pStimulationsNode);
+
+		XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
+		l_pHandler->writeXMLInFile(*l_pRootNode, m_oFilename.toASCIIString());
+
+		//We need to compute and store data
+		m_oSignalDecoder.uninitialize();
+		m_oStimulationDecoder.uninitialize();
+
+		l_pHandler->release();
+		l_pRootNode->release();
+	}
 	return true;
 }
 
@@ -85,6 +93,7 @@ boolean CBoxAlgorithmStatisticGenerator::process(void)
 		if(m_oSignalDecoder.isHeaderReceived())
 		{
 			m_ui32AmountChannel = m_oSignalDecoder.getOutputMatrix()->getDimensionSize(0);
+			m_bHasBeenStreamed = true;
 
 		}
 		if(m_oSignalDecoder.isBufferReceived())
@@ -102,7 +111,7 @@ boolean CBoxAlgorithmStatisticGenerator::process(void)
 		m_oStimulationDecoder.decode(i);
 		if(m_oStimulationDecoder.isHeaderReceived())
 		{
-
+			m_bHasBeenStreamed=true;
 		}
 		if(m_oStimulationDecoder.isBufferReceived())
 		{
