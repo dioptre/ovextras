@@ -1,5 +1,5 @@
 #include "ovpCAlgorithmClassifierLDA.h"
-
+#define TARGET_HAS_ThirdPartyEIGEN
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
 #include <map>
@@ -35,6 +35,7 @@ OpenViBE::int32 OpenViBEPlugins::Classification::getLDABestClassification(OpenVi
 	l_pClassificationValueBuffer = rSecondClassificationValue.getBuffer();
 	OpenViBE::float64 l_f64MaxSecond = *(std::max_element(l_pClassificationValueBuffer, l_pClassificationValueBuffer+rSecondClassificationValue.getBufferElementCount()));
 
+	//Then we just compared them
 	if(!ov_float_equal(l_f64MaxFirst, l_f64MaxSecond))
 	{
 		return 0;
@@ -231,7 +232,7 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 
 	// Build LDA model for 2 classes. This is a special case of the multiclass version.
 	const MatrixXd l_oGlobalCovInv = l_oEigenSolver.eigenvectors() * l_oEigenValues.asDiagonal() * l_oEigenSolver.eigenvectors().inverse();	
-
+	//We send the bias and the weight of each class to ComputationHelper
 	for(size_t i = 0 ; i < m_oLabelList.size() ; ++i)
 	{
 		MatrixXd l_oWeight = (l_oGlobalCovInv * l_aMean[i].transpose()).transpose();
@@ -241,20 +242,6 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		m_oComputationHelperList[i].setWeight(l_oWeight);
 		m_oComputationHelperList[i].setBias(l_f64Bias);
 	}
-
-	const MatrixXd l_oMeanSum  = l_aMean[0] + l_aMean[1];
-	const MatrixXd l_oMeanDiff = l_aMean[0] - l_aMean[1];
-
-	const MatrixXd l_oBias = -0.5 * l_oMeanSum * l_oGlobalCovInv * l_oMeanDiff.transpose();
-	m_oWeights =(l_oGlobalCovInv * l_oMeanDiff.transpose()).transpose();
-
-	const MatrixXd l_oClass1 = -0.5 * l_aMean[0] * l_oGlobalCovInv * l_aMean[0].transpose();
-	const MatrixXd l_oClass2 = 0.5 * l_aMean[1] * l_oGlobalCovInv * l_aMean[1].transpose();
-	m_f64w0 = l_oClass1(0,0) + l_oClass2(0,0) +
-			std::log(static_cast<double>(m_oLabelList[0])/static_cast<double>(m_oLabelList[1]));
-
-	// Catenate the bias term and the weights
-	m_f64BiasDistance = l_oBias(0,0);
 
 	m_ui32NumCols = l_ui32nCols;
 	
@@ -317,13 +304,20 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 
 		float64 *l_pValueArray = new float64[l_ui32AmountClass];
 		float64 *l_pProbabilityValue = new float64[l_ui32AmountClass];
-
+		//We ask for all computation helper to give the corresponding class value
 		for(size_t i = 0; i < l_ui32AmountClass ; ++i)
 		{
 			l_pValueArray[i] = m_oComputationHelperList[i].getValue(l_oWeights);
 			//std::cout << l_pValueArray[i] << std::endl;
 		}
 
+		//p(Ck | x) = exp(ak) / sum[j](exp (aj))
+		// with aj = (Weight for class j).transpose() * x + (Bias for class j)
+
+		//Exponential can lead to nan results, so we reduce the computation and instead compute
+		// p(Ck | x) = 1 / sum[j](exp(aj) - exp(ak))
+
+		//All ak are given by computation helper
 		for(size_t i = 0 ; i < l_ui32AmountClass ; ++i)
 		{
 			float64 l_f64ExpSum = 0.;
@@ -335,7 +329,7 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 			//std::cout << l_pProbabilityValue[i] << std::endl;
 		}
 
-
+		//Then we just found the highest score and took it as results
 		uint32 l_ui32ClassIndex = std::distance(l_pValueArray, std::max_element(l_pValueArray, l_pValueArray+l_ui32AmountClass));
 
 		rClassificationValues.setSize(l_ui32AmountClass);
@@ -364,6 +358,7 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 		l_sClasses << m_oLabelList[i] << " ";
 	}
 
+	//Only new version should be recorded so we don't need to test
 	XML::IXMLNode *l_pHelpersConfiguration = XML::createNode(c_sComputationHelpersConfigurationNode);
 	for(size_t i = 0; i < m_oComputationHelperList.size() ; ++i)
 	{
@@ -399,6 +394,7 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 {
 	XML::IXMLNode * l_pLDANode = pConfigurationNode->getChild(0);
 
+	//If the attribute exist, we deal with the new version
 	if(l_pLDANode->hasAttribute(c_sLDAConfigFileVersionAttributeName))
 	{
 		m_bOldClassification = false;
@@ -448,7 +444,7 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 	{
 		//We send corresponding data to the computation helper
 		XML::IXMLNode* l_pConfigsNode = l_pLDANode->getChildByName(c_sComputationHelpersConfigurationNode);
-		// Get class labels
+
 		for(size_t i = 0 ; i < l_pConfigsNode->getChildCount() ; ++i)
 		{
 			m_oComputationHelperList.push_back(CAlgorithmLDAComputationHelper());
