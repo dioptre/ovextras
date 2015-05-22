@@ -18,6 +18,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverBrainProductsActiCHamp
+	 * \author Mensia Technologies
+	 */
 	class CDriverBrainProductsActiCHamp : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

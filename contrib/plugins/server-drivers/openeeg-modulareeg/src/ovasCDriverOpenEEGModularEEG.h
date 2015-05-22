@@ -23,6 +23,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverOpenEEGModularEEG
+	 * \author Christoph Veigl, Yann Renard
+	 */
 	class CDriverOpenEEGModularEEG : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

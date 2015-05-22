@@ -39,6 +39,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverBrainProductsBrainampSeries
+	 * \author Mensia Technologies
+	 */
 	class CDriverBrainProductsBrainampSeries : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

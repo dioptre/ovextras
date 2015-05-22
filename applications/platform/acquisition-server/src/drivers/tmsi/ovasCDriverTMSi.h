@@ -29,6 +29,10 @@ namespace OpenViBEAcquisitionServer
 {
 	class CTMSiAccess;
 
+	/**
+	 * \class CDriverTMSi
+	 * \author Mensia Technologies
+	 */
 	class CDriverTMSi : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

@@ -68,6 +68,10 @@ namespace OpenViBEAcquisitionServer
 		boost::mutex m_oMutex;
 	} SInformationWindow;
 
+	/**
+	 * \class CDriverBioSemiActiveTwo
+	 * \author Mensia Technologies
+	 */
 	class CDriverBioSemiActiveTwo : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

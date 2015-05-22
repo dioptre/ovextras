@@ -23,6 +23,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverGTecGMobiLabPlus
+	 * \author Lucie Daubigney (Supelec Metz)
+	 */
 	class CDriverGTecGMobiLabPlus : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:
