@@ -14,7 +14,6 @@
 
 #define OVP_ClassId_BoxAlgorithm_KappaCoefficient OpenViBE::CIdentifier(0x160D8F1B, 0xD864C5BB)
 #define OVP_ClassId_BoxAlgorithm_KappaCoefficientDesc OpenViBE::CIdentifier(0xD8BA2199, 0xD252BECB)
-#define FIRST_CLASS_SETTING_INDEX 2
 
 namespace OpenViBEPlugins
 {
@@ -42,32 +41,17 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_KappaCoefficient)
 
 		protected:
-				// input TARGET
-				OpenViBE::Kernel::IAlgorithmProxy* m_pTargetStimulationDecoder;
-				OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* > ip_pTargetMemoryBufferToDecode;
-				OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > op_pTargetStimulationSetDecoded;
+				OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmKappaCoefficient > m_oTargetStimulationDecoder;
+				OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmKappaCoefficient > m_oClassifierStimulationDecoder;
 
-				// input CLASSIFIER
-				OpenViBE::Kernel::IAlgorithmProxy* m_pClassifierStimulationDecoder;
-				OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* > ip_pClassifierMemoryBufferToDecode;
-				OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > op_pClassifierStimulationSetDecoded;
+				OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmKappaCoefficient > m_oOutputMatrixEncoder;
 
-				//CONFUSION MATRIX computing
-				OpenViBE::Kernel::IAlgorithmProxy* m_pConfusionMatrixAlgorithm;
-				OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > ip_pTargetStimulationSet;
-				OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > ip_pClassifierStimulationSet;
-				OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > ip_pClassesCodes;
-				OpenViBE::Kernel::TParameterHandler < OpenViBE::boolean > ip_bPercentages;
-				OpenViBE::Kernel::TParameterHandler < OpenViBE::boolean > ip_bSums;
 				OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pConfusionMatrix;
 
-				OpenViBE::uint32 m_ui32ClassCount;
-				OpenViBE::uint64 m_ui64CurrentProcessingTimeLimit;
+				OpenViBE::Kernel::IAlgorithmProxy* m_pConfusionMatrixAlgorithm;
 
-				//OUTPUT MATRIX
-				OpenViBE::Kernel::IAlgorithmProxy* m_pConfusionMatrixEncoder;
-				OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > ip_pConfusionMatrixToEncode;
-				OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* > op_pConfusionMatrixEncoded;
+				OpenViBE::uint32 m_ui32AmountClass;
+				OpenViBE::uint64 m_ui64CurrentProcessingTimeLimit;
 		};
 		
 		
