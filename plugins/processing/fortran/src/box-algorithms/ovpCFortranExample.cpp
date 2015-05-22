@@ -15,6 +15,7 @@ using namespace OpenViBEToolkit;
 
 using namespace std;
 
+// These functions must be provided by the Fortran code
 extern "C" void fortran_init(int32 *errorCode);
 extern "C" void fortran_process(OpenViBE::float64* mat, int32* m, int32* n, int32 *errorCode);
 extern "C" void fortran_uninit(int32 *errorCode);
@@ -36,7 +37,7 @@ namespace OpenViBEPlugins
 	namespace Fortran
 	{
 
-
+		// This function is called once when user presses play in Designer
 		OpenViBE::boolean CFortranExample::initialize()
 		{			
 			this->getLogManager() << LogLevel_Info << "Initializing\n";
@@ -46,6 +47,7 @@ namespace OpenViBEPlugins
 
 			m_oEncoder.getInputMatrix().setReferenceTarget(m_oDecoder.getOutputMatrix());
 		
+			// Do some initialization in Fortran
 			int32 l_i32ErrorCode = 0;
 			fortran_init(&l_i32ErrorCode);
 			if(l_i32ErrorCode) 
@@ -56,10 +58,12 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
+		// This function is called once when user presses Stop in Designer
 		OpenViBE::boolean CFortranExample::uninitialize()
 		{
 			this->getLogManager() << LogLevel_Info << "Uninitializing\n";
 
+			// Do some uninitialization in Fortran
 			int32 l_i32ErrorCode = 0;			
 			fortran_uninit(&l_i32ErrorCode);
 
@@ -82,6 +86,7 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
+		// This function is called for every signal chunk (matrix of N samples [channels x samples]).
 		OpenViBE::boolean CFortranExample::process()
 		{
 
@@ -108,6 +113,7 @@ namespace OpenViBEPlugins
 					int32 nRows = l_pMatrix->getDimensionSize(0);
 					int32 nCols = l_pMatrix->getDimensionSize(1);
 					
+					// Process the sample chunk in Fortran
 					int32 l_i32ErrorCode = 0;
 					fortran_process(l_pMatrix->getBuffer(), &nRows, &nCols, &l_i32ErrorCode);
 					if(l_i32ErrorCode) 
@@ -128,7 +134,6 @@ namespace OpenViBEPlugins
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 				}
 			}
-			// dumpMatrix(this->getLogManager(), poo, CString(""));
 			
 			return true;
 		}

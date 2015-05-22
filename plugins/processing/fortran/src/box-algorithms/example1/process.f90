@@ -1,21 +1,28 @@
 
 !
-! This code illustrates passing a matrix in from OpenViBE, making modifications,
-! and sending it out. Actually the changes could be directly made in the input
-! matrix but care must be taken that the differences in C/Fortran row/column major
-! is taken into account.
+! This code illustrates passing a matrix in from OpenViBE, making modifications in-place,
+! and sending it back. Actually the changes could be directly made into the input
+! matrix but care must be taken that the difference in C/Fortran row/column major order
+! of the matrix storage is taken into account.
 !
-! The code adds the channel number to the channel data (so each channel will have noticable and different effect)
+! This example adds the channel number to the channel data (so each channel will have noticable and different effect)
 !
 
+! this routine is run once at the beginning of playback. it can be used to precompute/load things needed later.
+! set errorCode to 0 on success, a non-zero code otherwise.
 subroutine fortran_init(errorCode) bind(C)
 	use iso_c_binding
 	INTEGER(C_INT32_T), intent(out) :: errorCode
+
+	! in this example, the routine does nothing much
+	
 	write(*,*) "Init in Fortran"
 	
 	errorCode = 0	
 end subroutine fortran_init
 
+! this routine is runs once for each matrix chunk of data. It can modify the matrix in place.
+! set errorCode to 0 on success, a non-zero code otherwise.
 subroutine fortran_process(mat,rows,cols,errorCode) bind(C)
 	use iso_c_binding
 	INTEGER(C_INT32_T), intent(in) :: rows,cols
@@ -45,9 +52,14 @@ subroutine fortran_process(mat,rows,cols,errorCode) bind(C)
 	errorCode = 0
 end subroutine fortran_process
 
+! this routine is run once at the end of playback. it can be used to deallocate resources (memory, files, ...).
+! set errorCode to 0 on success, a non-zero code otherwise.
 subroutine fortran_uninit(errorCode) bind(C)
 	use iso_c_binding
 	INTEGER(C_INT32_T), intent(out) :: errorCode
+	
+	! in this example, the routine does nothing much
+	
 	write(*,*) "Uninit in Fortran"
 	
 	errorCode = 0	
