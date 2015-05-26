@@ -784,6 +784,11 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 	{
 		l_sSubstitute = l_sSubstitute + "\\t\\t\\t";
 		string l_sTypeName((const char *)(*it)._type);
+		//The stream type is Stimulations but the decoder is tStimulationDecoder
+		if( l_sTypeName == "Stimulations")
+		{
+			l_sTypeName = "Stimulation";
+		}
 		for(uint32 s=0; s<l_sTypeName.length(); s++)
 		{
 			if(l_sTypeName[s]==' ')
@@ -810,6 +815,11 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 	{
 		l_sSubstitute = l_sSubstitute + "\\t\\t\\t";
 		string l_sTypeName((const char *)(*it)._type);
+		//The stream type is Stimulations but the encoder is tStimulationEncoder
+		if( l_sTypeName == "Stimulations")
+		{
+			l_sTypeName = "Stimulation";
+		}
 		for(uint32 s=0; s<l_sTypeName.length(); s++)
 		{
 			if(l_sTypeName[s]==' ')
