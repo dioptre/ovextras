@@ -16,7 +16,7 @@
 #define OVP_Algorithm_Classifier_Pairwise_InputParameterId_AlgorithmIdentifier				OpenViBE::CIdentifier(0xBE71BE18, 0x82A0E017)
 #define OVP_Algorithm_Classifier_Pairwise_InputParameterId_SetRepartition					OpenViBE::CIdentifier(0xBE71BE18, 0x82A0E018)
 #define OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassificationOutputs				OpenViBE::CIdentifier(0xBE71BE18, 0x82A0E019)
-#define OVP_Algorithm_Classifier_Pairwise_InputParameter_AmountClass						OpenViBE::CIdentifier(0xBE71BE18, 0x82A0E01A)
+#define OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount						OpenViBE::CIdentifier(0xBE71BE18, 0x82A0E01A)
 
 
 #define OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector							OpenViBE::CIdentifier(0x883599FE, 0x2FDB32FF)
@@ -48,7 +48,7 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean parametrize(void)=0;
 
-			virtual OpenViBE::boolean compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabiltyVector) =0;
+			virtual OpenViBE::boolean compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabilityVector) =0;
 			virtual XML::IXMLNode* saveConfiguration(void) = 0;
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode& rNode) = 0;
 
@@ -69,7 +69,7 @@ namespace OpenViBEPlugins
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_AlgorithmIdentifier, "Classification Algorithm", OpenViBE::Kernel::ParameterType_Identifier);
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassificationOutputs,
 													  "Classification Outputs", OpenViBE::Kernel::ParameterType_Pointer);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_AmountClass, "Classification Algorithm", OpenViBE::Kernel::ParameterType_UInteger);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount, "Classification Algorithm", OpenViBE::Kernel::ParameterType_UInteger);
 
 
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector, "Probability Vector", OpenViBE::Kernel::ParameterType_Matrix);

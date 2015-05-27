@@ -111,14 +111,14 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	//If we have to deal with a pairing strategy we have to pass argument
 	if(l_bIsPairing)
 	{
-		TParameterHandler < uint64 > ip_pClassAmount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount));
+		TParameterHandler < uint64 > ip_pClassCount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassCount));
 		if(l_rStaticBoxContext.getInputCount()==0)
 		{
 			// This shouldn't happen.
 			this->getLogManager() << LogLevel_Error << "Must have more than 0 inputs\n";
 			return false;
 		}
-		ip_pClassAmount = l_rStaticBoxContext.getInputCount() -1;	 // >=0 by above test. -1 because one input connector is for stimulations.
+		ip_pClassCount = l_rStaticBoxContext.getInputCount() -1;	 // >=0 by above test. -1 because one input connector is for stimulations.
 		TParameterHandler < CIdentifier* > ip_oClassId(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
 		ip_oClassId = &l_oClassifierAlgorithmClassIdentifier;
 		if(!m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture))

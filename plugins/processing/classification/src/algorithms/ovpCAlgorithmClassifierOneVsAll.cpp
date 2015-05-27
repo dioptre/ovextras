@@ -52,7 +52,7 @@ boolean CAlgorithmClassifierOneVsAll::uninitialize(void)
 
 boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVectorSet)
 {
-	const uint32 l_ui32AmountClass = m_oSubClassifierList.size();
+	const uint32 l_ui32ClassCount = m_oSubClassifierList.size();
 	std::map < float64, size_t > l_vClassLabels;
 
 	for(size_t i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
@@ -64,9 +64,9 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
 		l_vClassLabels[rFeatureVectorSet[i].getLabel()]++;
 	}
 
-	if(l_vClassLabels.size() != l_ui32AmountClass)
+	if(l_vClassLabels.size() != l_ui32ClassCount)
 	{
-		this->getLogManager() << LogLevel_Error << "There are samples for " << (uint32)l_vClassLabels.size() << " classes but expected samples for " << l_ui32AmountClass << " classes.\n";
+		this->getLogManager() << LogLevel_Error << "There are samples for " << (uint32)l_vClassLabels.size() << " classes but expected samples for " << l_ui32ClassCount << " classes.\n";
 		return false;
 	}
 
@@ -138,11 +138,11 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 					l_ui32FeatureVectorSize*sizeof(float64));
 		l_pSubClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 
-		IMatrix* l_pClassificationValue = static_cast<IMatrix*>(op_pProbabilityValues);
+		IMatrix* l_pProbabilityValue = static_cast<IMatrix*>(op_pProbabilityValues);
 		//If the algorithm give a probability we take it, instead we take the first value
-		if(l_pClassificationValue->getDimensionCount() != 0)
+		if(l_pProbabilityValue->getDimensionCount() != 0)
 		{
-			l_oClassificationVector.push_back(CClassifierOutput(static_cast<float64>(op_f64ClassificationStateClass), l_pClassificationValue));
+			l_oClassificationVector.push_back(CClassifierOutput(static_cast<float64>(op_f64ClassificationStateClass), l_pProbabilityValue));
 		}
 		else
 		{
@@ -241,13 +241,13 @@ void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
 	this->m_oSubClassifierList.pop_back();
 }
 
-boolean CAlgorithmClassifierOneVsAll::designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassAmount)
+boolean CAlgorithmClassifierOneVsAll::designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassCount)
 {
 	if(!this->setSubClassifierIdentifier(rId))
 	{
 		return false;
 	}
-	for(size_t i = 0 ; i < rClassAmount ; ++i)
+	for(size_t i = 0 ; i < rClassCount ; ++i)
 	{
 		this->addNewClassifierAtBack();
 	}
@@ -264,8 +264,8 @@ XML::IXMLNode* CAlgorithmClassifierOneVsAll::getClassifierConfiguration(IAlgorit
 
 void CAlgorithmClassifierOneVsAll::generateConfigurationNode(void)
 {
-	std::stringstream l_sAmountClasses;
-	l_sAmountClasses << getClassAmount();
+	std::stringstream l_sClassCountes;
+	l_sClassCountes << getClassCount();
 
 	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 
@@ -277,7 +277,7 @@ void CAlgorithmClassifierOneVsAll::generateConfigurationNode(void)
 	l_pOneVsAllNode->addChild(l_pTempNode);
 
 	l_pTempNode = XML::createNode(c_sSubClassifierCountNodeName);
-	l_pTempNode->setPCData(l_sAmountClasses.str().c_str());
+	l_pTempNode->setPCData(l_sClassCountes.str().c_str());
 	l_pOneVsAllNode->addChild(l_pTempNode);
 
 	XML::IXMLNode *l_pSubClassifersNode = XML::createNode(c_sSubClassifiersNodeName);
@@ -321,12 +321,12 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 
 	l_pTempNode = l_pOneVsAllNode->getChildByName(c_sSubClassifierCountNodeName);
 	std::stringstream l_sCountData(l_pTempNode->getPCData());
-	uint64 l_iAmountClass;
-	l_sCountData >> l_iAmountClass;
+	uint64 l_iClassCount;
+	l_sCountData >> l_iClassCount;
 
-	while(l_iAmountClass != getClassAmount())
+	while(l_iClassCount != getClassCount())
 	{
-		if(l_iAmountClass < getClassAmount())
+		if(l_iClassCount < getClassCount())
 		{
 			this->removeClassifierAtBack();
 		}
@@ -355,7 +355,7 @@ boolean CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNo
 	return true;
 }
 
-uint32 CAlgorithmClassifierOneVsAll::getClassAmount(void) const
+uint32 CAlgorithmClassifierOneVsAll::getClassCount(void) const
 {
 	return m_oSubClassifierList.size();
 }

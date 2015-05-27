@@ -1,5 +1,4 @@
 #include "ovpCAlgorithmClassifierLDA.h"
-#define TARGET_HAS_ThirdPartyEIGEN
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
 #include <map>
@@ -26,7 +25,7 @@ namespace{
 
 extern const char* const c_sClassifierRoot;
 
-OpenViBE::int32 OpenViBEPlugins::Classification::getLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
+OpenViBE::int32 OpenViBEPlugins::Classification::LDAClassificationCompare(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
 {
 	//We first need to find the best classification of each.
 	OpenViBE::float64* l_pClassificationValueBuffer = rFirstClassificationValue.getBuffer();
@@ -76,7 +75,7 @@ void CAlgorithmClassifierLDA::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr 
 
 boolean CAlgorithmClassifierLDA::initialize(void)
 {
-	m_bOldClassification = true;
+	m_bv1Classification = false;
 	// Initialize the Conditioned Covariance Matrix algorithm
 	m_pCovarianceAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ConditionedCovariance));
 	m_pCovarianceAlgorithm->initialize();
@@ -160,16 +159,17 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 	for(std::map < float64, uint32 >::iterator iter = l_vClassLabels.begin() ; iter != l_vClassLabels.end() ; ++iter)
 	{
 		m_oLabelList.push_back(iter->first);
-		m_oComputationHelperList.push_back(CAlgorithmLDAComputationHelper());
+		m_oComputationHelperList.push_back(CAlgorithmLDADiscriminantFunction());
 	}
 
 	// Get regularized covariances of all the classes
-	MatrixXd l_aCov[l_ui32nClasses];
 	MatrixXd l_aMean[l_ui32nClasses];
 	MatrixXd l_oGlobalCov = MatrixXd::Zero(l_ui32nCols,l_ui32nCols);
 
 	for(uint32 l_ui32classIdx=0;l_ui32classIdx<l_ui32nClasses;l_ui32classIdx++) 
 	{
+		MatrixXd l_aCov;
+
 		const float64 l_f64Label = m_oLabelList[l_ui32classIdx];
 		const uint32 l_ui32nExamplesInClass = l_vClassLabels[l_f64Label];
 
@@ -197,27 +197,27 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		Map<MatrixXdRowMajor> l_oMeanMapper(op_pMean->getBuffer(), 1, l_ui32nCols);
 		l_aMean[l_ui32classIdx] = l_oMeanMapper;
 		Map<MatrixXdRowMajor> l_oCovMapper(op_pCovarianceMatrix->getBuffer(), l_ui32nCols, l_ui32nCols);
-		l_aCov[l_ui32classIdx] = l_oCovMapper;
+		l_aCov = l_oCovMapper;
 
-		if(l_pDiagonalCov)
-		{
-			for(uint32 i=0;i<l_ui32nCols;i++) 
-			{
-				for(uint32 j=i+1;j<l_ui32nCols;j++) 
-				{
-					l_aCov[l_ui32classIdx](i,j) = 0.0;
-					l_aCov[l_ui32classIdx](j,i) = 0.0;
-				}
-			}
-		}
-
-		l_oGlobalCov += l_aCov[l_ui32classIdx];
+		l_oGlobalCov += l_aCov;
 
 		//dumpMatrix(this->getLogManager(), l_aMean[l_ui32classIdx], "Mean");
 		//dumpMatrix(this->getLogManager(), l_aCov[l_ui32classIdx], "Shrinked cov");
 	}
 
 	l_oGlobalCov /= (double)l_ui32nClasses;
+
+	if(l_pDiagonalCov)
+	{
+		for(uint32 i=0;i<l_ui32nCols;i++)
+		{
+			for(uint32 j=i+1;j<l_ui32nCols;j++)
+			{
+				l_oGlobalCov(i,j) = 0.0;
+				l_oGlobalCov(j,i) = 0.0;
+			}
+		}
+	}
 
 	// Get the pseudoinverse of the global cov using eigen decomposition for self-adjoint matrices
 	const float64 l_f64Tolerance = 1e-10;
@@ -230,10 +230,9 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		}
 	}
 
-	// Build LDA model for 2 classes. This is a special case of the multiclass version.
 	const MatrixXd l_oGlobalCovInv = l_oEigenSolver.eigenvectors() * l_oEigenValues.asDiagonal() * l_oEigenSolver.eigenvectors().inverse();	
 	//We send the bias and the weight of each class to ComputationHelper
-	for(size_t i = 0 ; i < m_oLabelList.size() ; ++i)
+	for(size_t i = 0 ; i < getClassCount() ; ++i)
 	{
 		MatrixXd l_oWeight = (l_oGlobalCovInv * l_aMean[i].transpose()).transpose();
 		const MatrixXd l_oInter = -0.5 * l_aMean[i] * l_oGlobalCovInv * l_aMean[i].transpose();
@@ -262,7 +261,7 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 	const Map<MatrixXdRowMajor> l_oFeatureVec(const_cast<float64*>(rFeatureVector.getBuffer()), 1, rFeatureVector.getSize());
 
 
-	if(m_bOldClassification)
+	if(m_bv1Classification)
 	{
 		const uint32 l_ui32nColsWithBiasTerm = m_oCoefficients.size();
 
@@ -300,15 +299,14 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 	else
 	{
 		MatrixXd l_oWeights = l_oFeatureVec;
-		const uint32 l_ui32AmountClass = m_oLabelList.size();
+		const uint32 l_ui32ClassCount = getClassCount();
 
-		float64 *l_pValueArray = new float64[l_ui32AmountClass];
-		float64 *l_pProbabilityValue = new float64[l_ui32AmountClass];
+		float64 *l_pValueArray = new float64[l_ui32ClassCount];
+		float64 *l_pProbabilityValue = new float64[l_ui32ClassCount];
 		//We ask for all computation helper to give the corresponding class value
-		for(size_t i = 0; i < l_ui32AmountClass ; ++i)
+		for(size_t i = 0; i < l_ui32ClassCount ; ++i)
 		{
 			l_pValueArray[i] = m_oComputationHelperList[i].getValue(l_oWeights);
-			//std::cout << l_pValueArray[i] << std::endl;
 		}
 
 		//p(Ck | x) = exp(ak) / sum[j](exp (aj))
@@ -318,24 +316,23 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 		// p(Ck | x) = 1 / sum[j](exp(aj) - exp(ak))
 
 		//All ak are given by computation helper
-		for(size_t i = 0 ; i < l_ui32AmountClass ; ++i)
+		for(size_t i = 0 ; i < l_ui32ClassCount ; ++i)
 		{
 			float64 l_f64ExpSum = 0.;
-			for(size_t j = 0 ; j < l_ui32AmountClass ; ++j)
+			for(size_t j = 0 ; j < l_ui32ClassCount ; ++j)
 			{
 				l_f64ExpSum += exp(l_pValueArray[j] - l_pValueArray[i]);
 			}
 			l_pProbabilityValue[i] = 1/l_f64ExpSum;
-			//std::cout << l_pProbabilityValue[i] << std::endl;
 		}
 
 		//Then we just found the highest score and took it as results
-		uint32 l_ui32ClassIndex = std::distance(l_pValueArray, std::max_element(l_pValueArray, l_pValueArray+l_ui32AmountClass));
+		uint32 l_ui32ClassIndex = std::distance(l_pValueArray, std::max_element(l_pValueArray, l_pValueArray+l_ui32ClassCount));
 
-		rClassificationValues.setSize(l_ui32AmountClass);
-		rProbabilityValue.setSize(l_ui32AmountClass);
+		rClassificationValues.setSize(l_ui32ClassCount);
+		rProbabilityValue.setSize(l_ui32ClassCount);
 
-		for(size_t i = 0 ; i < l_ui32AmountClass ; ++i)
+		for(size_t i = 0 ; i < l_ui32ClassCount ; ++i)
 		{
 			rClassificationValues[i] = l_pValueArray[i];
 			rProbabilityValue[i] = l_pProbabilityValue[i];
@@ -353,7 +350,7 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 	// Write the classifier to an .xml
 	std::stringstream l_sClasses;
 
-	for(size_t i = 0; i< m_oLabelList.size() ; ++i)
+	for(size_t i = 0; i< getClassCount() ; ++i)
 	{
 		l_sClasses << m_oLabelList[i] << " ";
 	}
@@ -372,6 +369,11 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 
 	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 	m_pConfigurationNode->addChild(l_pAlgorithmNode);
+}
+
+uint32 CAlgorithmClassifierLDA::getClassCount()
+{
+	return m_oLabelList.size();
 }
 
 XML::IXMLNode* CAlgorithmClassifierLDA::saveConfiguration(void)
@@ -397,11 +399,11 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 	//If the attribute exist, we deal with the new version
 	if(l_pLDANode->hasAttribute(c_sLDAConfigFileVersionAttributeName))
 	{
-		m_bOldClassification = false;
+		m_bv1Classification = false;
 	}
 	else
 	{
-		m_bOldClassification = true;
+		m_bv1Classification = true;
 	}
 
 	m_oLabelList.clear();
@@ -414,7 +416,7 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 	}
 	loadClassesFromNode(l_pTempNode);
 
-	if(m_bOldClassification)
+	if(m_bv1Classification)
 	{
 		if((l_pTempNode = l_pLDANode->getChildByName(c_sCoefficientsNodeName)) == NULL)
 		{
@@ -447,7 +449,7 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 
 		for(size_t i = 0 ; i < l_pConfigsNode->getChildCount() ; ++i)
 		{
-			m_oComputationHelperList.push_back(CAlgorithmLDAComputationHelper());
+			m_oComputationHelperList.push_back(CAlgorithmLDADiscriminantFunction());
 			m_oComputationHelperList[i].loadConfiguration(l_pConfigsNode->getChild(i));
 		}
 	}

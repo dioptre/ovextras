@@ -1,4 +1,4 @@
-#include "ovpCAlgorithmLDAComputationHelper.h"
+#include "ovpCAlgorithmLDADiscriminantFunction.h"
 
 #include <sstream>
 #include <vector>
@@ -20,31 +20,31 @@ namespace{
 	const char* const c_sBiasNodeName     = "Bias";
 }
 
-CAlgorithmLDAComputationHelper::CAlgorithmLDAComputationHelper():m_f64Bias(0)
+CAlgorithmLDADiscriminantFunction::CAlgorithmLDADiscriminantFunction():m_f64Bias(0)
 {
 }
 
-void CAlgorithmLDAComputationHelper::setWeight(MatrixXd &rWeigth)
+void CAlgorithmLDADiscriminantFunction::setWeight(MatrixXd &rWeigth)
 {
 	m_oWeight = rWeigth;
 }
 
-void CAlgorithmLDAComputationHelper::setBias(float64 f64Bias)
+void CAlgorithmLDADiscriminantFunction::setBias(float64 f64Bias)
 {
 	m_f64Bias = f64Bias;
 }
 
-float64 CAlgorithmLDAComputationHelper::getValue(MatrixXd &rFeatureVector)
+float64 CAlgorithmLDADiscriminantFunction::getValue(MatrixXd &rFeatureVector)
 {
 	return (m_oWeight * rFeatureVector.transpose()).col(0)(0) + m_f64Bias;
 }
 
-uint32 CAlgorithmLDAComputationHelper::getWeightVectorSize()
+uint32 CAlgorithmLDADiscriminantFunction::getWeightVectorSize()
 {
 	return m_oWeight.size();
 }
 
-boolean CAlgorithmLDAComputationHelper::loadConfiguration(XML::IXMLNode *pConfiguration)
+boolean CAlgorithmLDADiscriminantFunction::loadConfiguration(XML::IXMLNode *pConfiguration)
 {
 	std::stringstream l_sBias(pConfiguration->getChildByName(c_sBiasNodeName)->getPCData());
 	l_sBias >> m_f64Bias;
@@ -66,7 +66,7 @@ boolean CAlgorithmLDAComputationHelper::loadConfiguration(XML::IXMLNode *pConfig
 	return true;
 }
 
-XML::IXMLNode *CAlgorithmLDAComputationHelper::getConfiguration(void)
+XML::IXMLNode *CAlgorithmLDADiscriminantFunction::getConfiguration(void)
 {
 	XML::IXMLNode* l_pRootNode = XML::createNode(c_sBaseNodeName);
 

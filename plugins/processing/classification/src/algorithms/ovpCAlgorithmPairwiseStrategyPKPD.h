@@ -32,14 +32,14 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean parametrize(void);
 
-			virtual OpenViBE::boolean compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabiltyVector);
+			virtual OpenViBE::boolean compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabilityVector);
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode& rNode);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVP_ClassId_Algorithm_PairwiseStrategy_PKPD)
 
 		private:
-			OpenViBE::uint32 m_ui32AmountClass;
+			OpenViBE::uint32 m_ui32ClassCount;
 		};
 
 		class CAlgorithmPairwiseStrategyPKPDDesc : virtual public OpenViBEPlugins::Classification::CAlgorithmPairwiseDecisionDesc

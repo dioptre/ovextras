@@ -32,15 +32,15 @@ boolean CAlgorithmPairwiseDecisionVoting::uninitialize()
 
 boolean CAlgorithmPairwiseDecisionVoting::parametrize()
 {
-	TParameterHandler < uint32 > ip_pClassAmount(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_AmountClass));
-	m_ui32ClassAmount = ip_pClassAmount;
+	TParameterHandler < uint32 > ip_pClassCount(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount));
+	m_ui32ClassCount = ip_pClassCount;
 
 	return true;
 }
 
 
 
-boolean CAlgorithmPairwiseDecisionVoting::compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabiltyVector)
+boolean CAlgorithmPairwiseDecisionVoting::compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabilityVector)
 {
 #if VOTING_DEBUG
 	std::cout << pClassificationValueList.size() << std::endl;
@@ -52,8 +52,8 @@ boolean CAlgorithmPairwiseDecisionVoting::compute(std::vector< SClassificationIn
 	}
 #endif
 
-	uint32* l_pWinCount = new uint32[m_ui32ClassAmount];
-	for(size_t i = 0 ; i < m_ui32ClassAmount ; ++i)
+	uint32* l_pWinCount = new uint32[m_ui32ClassCount];
+	for(size_t i = 0 ; i < m_ui32ClassCount ; ++i)
 	{
 		l_pWinCount[i] = 0;
 	}
@@ -73,19 +73,19 @@ boolean CAlgorithmPairwiseDecisionVoting::compute(std::vector< SClassificationIn
 	}
 
 #if VOTING_DEBUG
-	for(size_t i = 0; i < m_ui32ClassAmount ;  ++i)
+	for(size_t i = 0; i < m_ui32ClassCount ;  ++i)
 	{
 		std::cout << ((float64)l_pWinCount[i])/pClassificationValueList.size() <<  " ";
 	}
 	std::cout << std::endl;
 #endif
 
-	pProbabiltyVector->setDimensionCount(1);
-	pProbabiltyVector->setDimensionSize(0,m_ui32ClassAmount);
+	pProbabilityVector->setDimensionCount(1);
+	pProbabilityVector->setDimensionSize(0,m_ui32ClassCount);
 
-	for(OpenViBE::uint32 i = 0 ; i<m_ui32ClassAmount ; ++i)
+	for(OpenViBE::uint32 i = 0 ; i<m_ui32ClassCount ; ++i)
 	{
-		pProbabiltyVector->getBuffer()[i] = ((float64)l_pWinCount[i])/pClassificationValueList.size();
+		pProbabilityVector->getBuffer()[i] = ((float64)l_pWinCount[i])/pClassificationValueList.size();
 	}
 
 	delete[] l_pWinCount;

@@ -2,11 +2,10 @@
 #define __OpenViBEPlugins_Algorithm_ClassifierLDA_H__
 
 #include "../ovp_defines.h"
-#include "ovpCAlgorithmLDAComputationHelper.h"
+#include "ovpCAlgorithmLDADiscriminantFunction.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#define TARGET_HAS_ThirdPartyEIGEN
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
 #include <xml/IXMLNode.h>
@@ -27,9 +26,9 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		class CAlgorithmLDAComputationHelper;
+		class CAlgorithmLDADiscriminantFunction;
 
-		OpenViBE::int32 getLDABestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
+		OpenViBE::int32 LDAClassificationCompare(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
 		typedef Eigen::Matrix< double , Eigen::Dynamic , Eigen::Dynamic, Eigen::RowMajor > MatrixXdRowMajor;
 
@@ -57,7 +56,7 @@ namespace OpenViBEPlugins
 			void dumpMatrix(OpenViBE::Kernel::ILogManager& pMgr, const MatrixXdRowMajor& mat, const OpenViBE::CString& desc);
 
 			std::vector < OpenViBE::float64 > m_oLabelList;
-			std::vector < CAlgorithmLDAComputationHelper > m_oComputationHelperList;
+			std::vector < CAlgorithmLDADiscriminantFunction > m_oComputationHelperList;
 
 			Eigen::MatrixXd m_oCoefficients;
 			Eigen::MatrixXd m_oWeights;
@@ -67,7 +66,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32NumCols;
 
 			XML::IXMLNode *m_pConfigurationNode;
-			OpenViBE::boolean m_bOldClassification;
+			OpenViBE::boolean m_bv1Classification;
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pCovarianceAlgorithm;
 
@@ -76,6 +75,8 @@ namespace OpenViBEPlugins
 			void loadCoefficientsFromNode(XML::IXMLNode *pNode);
 
 			void generateConfigurationNode(void);
+
+			OpenViBE::uint32 getClassCount(void);
 		};
 
 		class CAlgorithmClassifierLDADesc : public OpenViBEToolkit::CAlgorithmClassifierDesc
@@ -90,7 +91,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Estimates LDA using regularized or classic covariances"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("2.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ClassifierLDA; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Classification::CAlgorithmClassifierLDA; }

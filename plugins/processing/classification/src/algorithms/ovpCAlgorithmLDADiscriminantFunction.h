@@ -1,7 +1,6 @@
 #ifndef OVPCALGORITHMLDACOMPUTATIONHELPER_H
 #define OVPCALGORITHMLDACOMPUTATIONHELPER_H
 
-#define TARGET_HAS_ThirdPartyEIGEN
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
 #include "../ovp_defines.h"
@@ -16,15 +15,16 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		//The purpose of this class is to
-		class CAlgorithmLDAComputationHelper
+		//The purpose of this class is to compute the "membership" of a vector
+		class CAlgorithmLDADiscriminantFunction
 		{
 		public:
-			CAlgorithmLDAComputationHelper();
+			CAlgorithmLDADiscriminantFunction();
 
 			void setWeight(Eigen::MatrixXd &rWeigth);
 			void setBias(OpenViBE::float64 f64Bias);
 
+			//Return the class membership of the feature vector
 			OpenViBE::float64 getValue(Eigen::MatrixXd &rFeatureVector);
 			OpenViBE::uint32 getWeightVectorSize(void);
 
