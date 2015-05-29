@@ -225,9 +225,15 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	return true;
 }
 
-void CAlgorithmClassifierOneVsAll::addNewClassifierAtBack(void)
+boolean CAlgorithmClassifierOneVsAll::addNewClassifierAtBack(void)
 {
-	IAlgorithmProxy* l_pSubClassifier = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(this->m_oSubClassifierAlgorithmIdentifier));
+	const CIdentifier l_oSubClassifierAlgorithm = this->getAlgorithmManager().createAlgorithm(this->m_oSubClassifierAlgorithmIdentifier);
+	if(l_oSubClassifierAlgorithm == OV_UndefinedIdentifier)
+	{
+		this->getLogManager() << LogLevel_Error << "Unable to instantiate classifier for class " << this->m_oSubClassifierAlgorithmIdentifier << "\n. Is the classifier still available in OpenViBE?";
+		return false;
+	}
+	IAlgorithmProxy* l_pSubClassifier = &this->getAlgorithmManager().getAlgorithm(l_oSubClassifierAlgorithm);
 	l_pSubClassifier->initialize();
 
 	//Set a references to the extra parameters input of the pairing strategy
@@ -235,6 +241,8 @@ void CAlgorithmClassifierOneVsAll::addNewClassifierAtBack(void)
 	ip_pExtraParameters.setReferenceTarget(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
 
 	this->m_oSubClassifierList.push_back(l_pSubClassifier);
+
+	return true;
 }
 
 void CAlgorithmClassifierOneVsAll::removeClassifierAtBack(void)
@@ -253,7 +261,10 @@ boolean CAlgorithmClassifierOneVsAll::designArchitecture(const OpenViBE::CIdenti
 	}
 	for(size_t i = 0 ; i < rClassAmount ; ++i)
 	{
-		this->addNewClassifierAtBack();
+		if(!this->addNewClassifierAtBack())
+		{
+			return false;
+		}
 	}
 	return true;
 }
@@ -336,7 +347,10 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 		}
 		else
 		{
-			this->addNewClassifierAtBack();
+			if(!this->addNewClassifierAtBack())
+			{
+				return false;
+			}
 		}
 	}
 
