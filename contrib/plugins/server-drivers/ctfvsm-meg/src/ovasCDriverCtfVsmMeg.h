@@ -16,6 +16,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverCtfVsmMeg
+	 * \author Pierre-Emmanuel Aguera (INSERM)
+	 */
 	class CDriverCtfVsmMeg : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

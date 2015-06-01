@@ -33,6 +33,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverBrainmasterDiscovery
+	 * \author Yann Renard
+	 */
 	class CDriverBrainmasterDiscovery : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

@@ -18,6 +18,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverMicromedSystemPlusEvolution
+	 * \author Yann Renard (INRIA)
+	 */
 	class CDriverMicromedSystemPlusEvolution : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

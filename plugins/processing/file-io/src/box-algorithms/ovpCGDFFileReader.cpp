@@ -57,6 +57,7 @@ CGDFFileReader::CGDFFileReader(void):
 	m_pEventsTypeBuffer(NULL),
 	m_ui32CurrentEvent(0),
 	m_bEventsSent(false),
+	m_bAppendEOF(true),
 	m_ui64StimulationPerBuffer(32),
 	m_pExperimentInfoHeader(NULL),
 	m_bExperimentInformationSent(false),
@@ -114,6 +115,9 @@ boolean CGDFFileReader::initialize()
 	m_oFile.seekg(0, ios::beg);
 
 	m_ui64Header3Length = 0;
+
+	// const char *l_sFilename = m_sFileName.toASCIIString();
+	// this->getLogManager() << LogLevel_Trace << "Opening [" << l_sFilename << "]\n";
 
 	//reads the gdf headers and sends the corresponding buffers
 	boolean l_bReturnValue = readFileHeader();
@@ -358,6 +362,7 @@ boolean CGDFFileReader::readFileHeader()
 			l_pBoxIO->markOutputAsReadyToSend(GDFReader_ExperimentInfoOutput, 0, 0);
 			m_bExperimentInformationSent=true;
 
+
 			//not needed anymore
 			delete l_oFixedHeader;
 			delete m_pExperimentInfoHeader;
@@ -442,6 +447,7 @@ boolean CGDFFileReader::readFileHeader()
 
 		m_ui32NumberOfSamplesPerRecord = l_pNumberOfSamplesPerRecordArray[0];
 
+
 		for(int i=1 ; i<m_ui16NumberOfChannels ; i++)
 		{
 			//If all the channels don't have the same sampling rate
@@ -496,8 +502,9 @@ boolean CGDFFileReader::readFileHeader()
 			return false;
 		}
 
-		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Debug <<"Sample count per buffer : " << m_ui32SamplesPerBuffer << "\n";
-		getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Debug <<"Sampling rate : " << m_pSignalDescription.m_ui32SamplingRate << "\n";
+		this->getLogManager() << LogLevel_Debug <<"Samples in file : " << m_ui64NumberOfDataRecords*m_ui32NumberOfSamplesPerRecord << " samples\n";
+		this->getLogManager() << LogLevel_Debug <<"Sample count per buffer : " << m_ui32SamplesPerBuffer << "\n";
+		this->getLogManager() << LogLevel_Debug <<"Sampling rate : " << m_pSignalDescription.m_ui32SamplingRate << "\n";
 
 		//computes clock frequency
 		if(m_ui32SamplesPerBuffer <= m_pSignalDescription.m_ui32SamplingRate)
@@ -657,12 +664,10 @@ void CGDFFileReader::writeEvents()
 	IStimulationSet* l_pStimulationSet = m_pStimulationEncoder->getInputStimulationSet();
 	l_pStimulationSet->clear();
 
-	uint64 l_ui64EventDate = 0;
-
 	for(size_t i=0 ; i<m_oEvents.size() ; i++)
 	{
 		//compute date
-		l_ui64EventDate = ITimeArithmetics::sampleCountToTime(m_pSignalDescription.m_ui32SamplingRate, m_oEvents[i].m_ui32Position);
+		const uint64 l_ui64EventDate = ITimeArithmetics::sampleCountToTime(m_pSignalDescription.m_ui32SamplingRate, m_oEvents[i].m_ui32Position);
 		l_pStimulationSet->appendStimulation(m_oEvents[i].m_ui16Type, l_ui64EventDate, 0);
 	}
 
@@ -781,7 +786,7 @@ boolean CGDFFileReader::process()
 					m_ui32CurrentSampleInDataRecord = 0;
 					m_ui64CurrentDataRecord++;
 				}
-				//if there is now more data record
+				//if there are no more data records
 				else
 				{
 					//we can (for instance) pad the rest of the matrix with 0s
@@ -797,7 +802,6 @@ boolean CGDFFileReader::process()
 					//No more data after that
 					m_bMatricesSent = true;
 				}
-
 			}
 
 			//Check if we have finished the current data record
@@ -807,7 +811,7 @@ boolean CGDFFileReader::process()
 				m_ui64CurrentDataRecord++;
 
 				//if there are no more data records
-				if(m_ui64CurrentDataRecord == m_ui64NumberOfDataRecords-1)
+				if(m_ui64CurrentDataRecord >= m_ui64NumberOfDataRecords-1)
 				{
 					//We don't have to read data records anymore
 					m_bMatricesSent = true;
@@ -830,6 +834,8 @@ boolean CGDFFileReader::process()
 		}
 
 		m_ui32SentSampleCount += m_pSignalDescription.m_ui32SampleCount;
+
+		// this->getLogManager() << LogLevel_Trace << "Sent " << m_ui32SentSampleCount << " samples\n";
 
 		//A signal matrix is ready to be output
 
@@ -890,6 +896,8 @@ boolean CGDFFileReader::process()
 				m_ui32NumberOfEvents = *(reinterpret_cast<uint32*>(l_pEventTableHeader +3));
 			}
 
+			this->getLogManager() << LogLevel_Trace << "The file has " << m_ui32NumberOfEvents << " events\n";
+
 			m_pEventsPositionBuffer = new uint32[m_ui32NumberOfEvents * 4];
 			m_pEventsTypeBuffer = new uint16[m_ui32NumberOfEvents * 2];
 
@@ -919,6 +927,12 @@ boolean CGDFFileReader::process()
 			//adds it to the list of events
 			m_oEvents.push_back(l_oEvent);
 
+			// If input already has an EOF marker, we don't add our own
+			if(l_oEvent.m_ui16Type == OVTK_StimulationId_EndOfFile)
+			{
+				m_bAppendEOF = false;
+			}
+
 			m_ui32CurrentEvent++;
 		}
 
@@ -930,21 +944,30 @@ boolean CGDFFileReader::process()
 			m_pEventsPositionBuffer = NULL;
 			delete [] m_pEventsTypeBuffer;
 			m_pEventsTypeBuffer = NULL;
+		}
+	}
 
+	// Send out stims. Logic:
+	// If we haven't yet sent out all matrices, or we have a pending EOF stim, send a stim chunk
+	// If we have sent out all matrices and we have a pending EOF, append it
+	if(!m_bMatricesSent || m_bAppendEOF)
+	{
+		if(m_bMatricesSent && m_bAppendEOF)
+		{
 			//creates an end of file event
-			l_oEvent.m_ui32Position = m_ui32SentSampleCount;
+			GDF::CGDFEvent l_oEvent;
+			l_oEvent.m_ui32Position = static_cast<uint32>(m_ui64NumberOfDataRecords * m_ui32NumberOfSamplesPerRecord);
 			l_oEvent.m_ui16Type = OVTK_StimulationId_EndOfFile;
 
 			//adds it to the list of events
 			m_oEvents.push_back(l_oEvent);
+
+			m_bAppendEOF = false;
 		}
 
-		//if there is at least one event, sends it
-		if(m_oEvents.size() != 0)
-		{
-			writeEvents();
-			m_oEvents.clear();
-		}
+		// In OpenViBE, we should always send a stimulus chunk even if it was empty
+		writeEvents();
+		m_oEvents.clear();
 
 		l_pBoxIO->markOutputAsReadyToSend(GDFReader_StimulationOutput, l_ui64StartTime, l_ui64EndTime);
 	}

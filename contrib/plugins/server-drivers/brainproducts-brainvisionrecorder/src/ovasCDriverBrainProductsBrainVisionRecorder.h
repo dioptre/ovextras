@@ -31,6 +31,12 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverBrainProductsBrainVisionRecorder
+	 * \author Guillaume Gibert (INSERM)
+	 * 
+	 * Author assignation is a guess based on SVN history
+	 */
 	class CDriverBrainProductsBrainVisionRecorder : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

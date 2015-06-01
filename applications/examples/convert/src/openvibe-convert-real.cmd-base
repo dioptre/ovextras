@@ -80,8 +80,8 @@ set OV_CONVERT_SRC=%1
 set OV_CONVERT_DEST=%2
 
 REM launch designer
-REM echo %OV_PATH_BIN%\openvibe-designer --no-gui --no-session-management --play-fast !ScenarioFolder!!ScenarioToOpen!
-%OV_PATH_BIN%\openvibe-designer --no-gui --no-session-management --play-fast !ScenarioFolder!!ScenarioToOpen!
+REM echo "%OV_PATH_BIN%\openvibe-designer" --no-gui --no-session-management --play-fast "!ScenarioFolder!!ScenarioToOpen!"
+"%OV_PATH_BIN%\openvibe-designer" --no-gui --no-session-management --play-fast "!ScenarioFolder!!ScenarioToOpen!"
 
 endlocal
 

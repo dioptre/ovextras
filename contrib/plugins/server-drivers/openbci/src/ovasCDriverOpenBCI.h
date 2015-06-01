@@ -37,6 +37,10 @@
  
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverOpenBCI
+	 * \author Jeremy Frey
+	 */
 	class CDriverOpenBCI : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

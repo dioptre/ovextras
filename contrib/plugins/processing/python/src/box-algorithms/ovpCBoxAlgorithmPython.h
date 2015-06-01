@@ -130,11 +130,11 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
-				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
 
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Signal);
-				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_StreamedMatrix);
 				
 				return true;

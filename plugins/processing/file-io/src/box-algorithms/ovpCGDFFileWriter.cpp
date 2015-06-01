@@ -78,9 +78,6 @@ void CGDFFileWriter::setSamplingRate(const uint32 ui32SamplingFrequency)
 
 void CGDFFileWriter::setSampleBuffer(const float64* pBuffer)
 {
-	float64 l_f64Sample=0;
-
-
 	//for each channel
 	for(uint32 j=0; j<m_oFixedHeader.m_ui32NumberOfSignals ; j++)
 	{
@@ -88,7 +85,7 @@ void CGDFFileWriter::setSampleBuffer(const float64* pBuffer)
 		{
 
 			//gets a sample value
-			l_f64Sample = pBuffer[j*m_ui32SamplesPerChannel+i];
+			const float64 l_f64Sample = pBuffer[j*m_ui32SamplesPerChannel+i];
 			//actualize channel's digital min/max
 			if(fabs(l_f64Sample) > m_oVariableHeader[j].m_f64PhysicalMaximum)
 			{
@@ -105,6 +102,8 @@ void CGDFFileWriter::setSampleBuffer(const float64* pBuffer)
 		//updates the sample count
 		m_vSampleCount[j]+=m_ui32SamplesPerChannel;
 	}
+
+	// this->getLogManager() << LogLevel_Trace << "Received up to " << m_vSampleCount[0] << "\n";
 
 	//save in the file
 	saveMatrixData();

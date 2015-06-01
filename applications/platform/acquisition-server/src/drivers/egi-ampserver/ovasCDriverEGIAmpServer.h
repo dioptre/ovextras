@@ -13,6 +13,10 @@ namespace OpenViBEAcquisitionServer
 {
 	class CCommandConnectionHandler;
 
+	/**
+	 * \class CDriverEGIAmpServer
+	 * \author Unknown
+	 */
 	class CDriverEGIAmpServer : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

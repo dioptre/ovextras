@@ -25,19 +25,15 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamedMatrixDecoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationEncoder;
-
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pMatrix;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > ip_pStimulationSet;
+			OpenViBEToolkit::TStreamedMatrixDecoder < CSignChangeDetector > m_oStreamedMatrixDecoder;
+			OpenViBEToolkit::TStimulationEncoder < CSignChangeDetector > m_oStimulationEncoder;
 
 			OpenViBE::uint64 m_ui64OnStimulationId;
 			OpenViBE::uint64 m_ui64OffStimulationId;
 			OpenViBE::uint64 m_ui64ChannelIndex;
 			OpenViBE::uint64 m_ui64SamplesPerChannel;
-			OpenViBE::float64 m_f64Lastsample;
-			OpenViBE::boolean m_bNextStimIsOn; // if true next stimulation will be m_ui64OnStimulationId and the next one m_ui64OffStimulationId and so on
-			OpenViBE::boolean m_bError;
+			OpenViBE::float64 m_f64LastSample;
+			OpenViBE::boolean m_bFirstSample; 
 		};
 
 		class CSignChangeDetectorDesc : virtual public OpenViBE::Plugins::IBoxAlgorithmDesc
