@@ -19,33 +19,27 @@ boolean CSignChangeDetector::initialize(void)
 	getStaticBoxContext().getSettingValue(1, l_sSettingValue);
 	m_ui64OffStimulationId=getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sSettingValue);
 
+	m_f64LastSample=0;
+	m_bFirstSample=true;
+	
+	m_oStreamedMatrixDecoder.initialize(*this, 0);
+	m_oStimulationEncoder.initialize(*this, 0);
+
 	m_ui64ChannelIndex=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
-	// The refractory periode
+	if (m_ui64ChannelIndex == 0)
+	{
+		this->getLogManager() << LogLevel_Info << "Channel Index is 0. The channel indexing convention starts from 1.\n";
+		return false;
+	}
+	m_ui64ChannelIndex--; // Convert from [1,n] indexing to [0,n-1] indexing used later
 
-	m_f64Lastsample=0;
-	m_bNextStimIsOn=true;
-
-	m_pStreamedMatrixDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamDecoder));
-	m_pStreamedMatrixDecoder->initialize();
-	op_pMatrix.initialize(m_pStreamedMatrixDecoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputParameterId_Matrix));
-
-	m_pStimulationEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
-	m_pStimulationEncoder->initialize();
-	ip_pStimulationSet.initialize(m_pStimulationEncoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_InputParameterId_StimulationSet));
-
-	m_bError=false;
 	return true;
 }
 
 boolean CSignChangeDetector::uninitialize(void)
 {
-	op_pMatrix.uninitialize();
-	m_pStreamedMatrixDecoder->uninitialize();
-	this->getAlgorithmManager().releaseAlgorithm(*m_pStreamedMatrixDecoder);
-
-	ip_pStimulationSet.uninitialize();
-	m_pStimulationEncoder->uninitialize();
-	this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationEncoder);
+	m_oStimulationEncoder.uninitialize();
+	m_oStreamedMatrixDecoder.uninitialize();
 
 	return true;
 }
@@ -60,85 +54,94 @@ boolean CSignChangeDetector::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-	TParameterHandler < IMemoryBuffer* > op_pMemoryBuffer(m_pStimulationEncoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-	op_pMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
+	// Get a few convenience handles
+	const OpenViBE::IMatrix* l_pMatrix = m_oStreamedMatrixDecoder.getOutputMatrix();
+	OpenViBE::IStimulationSet* l_pStimulationSet = m_oStimulationEncoder.getInputStimulationSet();
 
 	// We decode the stream matrix
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
-		uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
+		const uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
+		const uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
 
-		TParameterHandler < const IMemoryBuffer* > ip_pMemoryBuffer(m_pStreamedMatrixDecoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
-		m_pStreamedMatrixDecoder->process();
+		m_oStreamedMatrixDecoder.decode(i);
 
 		// if  we received the header
-		if(m_pStreamedMatrixDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedHeader))
+		if(m_oStreamedMatrixDecoder.isHeaderReceived())
 		{
 			//we analyse the header (meaning the input matrix size)
-			if (op_pMatrix->getDimensionCount() != 2)
+			if (l_pMatrix->getDimensionCount() != 2)
 			{
 				this->getLogManager() << LogLevel_ImportantWarning << "Streamed matrix must have exactly 2 dimensions\n";
 				return false;
 			}
 			else
 			{
-				if (m_ui64ChannelIndex > op_pMatrix->getDimensionSize(0) - 1)
+
+				if (m_ui64ChannelIndex >= l_pMatrix->getDimensionSize(0))
 				{
-					this->getLogManager() << LogLevel_Info << "Channel Index out of bounds. Incoming matrix has fewer channels than specified index.";
+					this->getLogManager() << LogLevel_Info << "Channel Index out of bounds. Incoming matrix has fewer channels than specified index.\n";
 					return false;
 				}
 
-				m_ui64SamplesPerChannel = op_pMatrix->getDimensionSize(1);
+				m_ui64SamplesPerChannel = l_pMatrix->getDimensionSize(1);
 			}
 
 			// we send a header on the stimulation output:
-			m_pStimulationEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
+			m_oStimulationEncoder.encodeHeader();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime,l_ui64EndTime );
 		}
 
 
 		// if we received a buffer
-		if(m_pStreamedMatrixDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_oStreamedMatrixDecoder.isBufferReceived())
 		{
-			ip_pStimulationSet->setStimulationCount(0);
-			float64* l_pData = op_pMatrix->getBuffer();
+			l_pStimulationSet->clear();
+			const float64* l_pData = l_pMatrix->getBuffer();
 			// for each data sample of the buffer we look for sign change
 
-			for (uint32 j=0;j< op_pMatrix->getDimensionSize(1);j++)
+			for (uint32 j=0;j< l_pMatrix->getDimensionSize(1);j++)
 			{
-				// if m_bNextStimIsOn==true we look for the signal getting positive.
-				if ( m_bNextStimIsOn && ( ( (j==0) ? (m_f64Lastsample) : (l_pData[(m_ui64ChannelIndex * m_ui64SamplesPerChannel) + j-1]) ) <0) && (l_pData[(m_ui64ChannelIndex * m_ui64SamplesPerChannel) + j]>=0) )
+				const float64 l_f64CurrentSample = l_pData[(m_ui64ChannelIndex * m_ui64SamplesPerChannel) + j];
+				if(m_bFirstSample) 
 				{
-					uint64 l_ui64Time = l_ui64StartTime + (l_ui64EndTime-l_ui64StartTime)*j/m_ui64SamplesPerChannel;
-
-					ip_pStimulationSet->appendStimulation(m_ui64OnStimulationId, l_ui64Time, 0);
-					m_bNextStimIsOn=false;
+					m_f64LastSample = l_f64CurrentSample;
+					m_bFirstSample = false;
 				}
 
-				// if m_bNextStimIsOn==false we look for the signal getting negative.
-				if ( !m_bNextStimIsOn && ( ( (j==0) ? (m_f64Lastsample) : (l_pData[(m_ui64ChannelIndex * m_ui64SamplesPerChannel) + j-1]) ) >=0) && (l_pData[(m_ui64ChannelIndex * m_ui64SamplesPerChannel) + j]<0) )
+				// Change from positive to negative
+				if(m_f64LastSample > 0 && l_f64CurrentSample < 0)
 				{
-					uint64 l_ui64Time = l_ui64StartTime + (l_ui64EndTime-l_ui64StartTime)*j/m_ui64SamplesPerChannel;
-					ip_pStimulationSet->appendStimulation(m_ui64OffStimulationId, l_ui64Time, 0);
-					m_bNextStimIsOn=true;
+					const uint64 l_ui64Time = l_ui64StartTime + (l_ui64EndTime-l_ui64StartTime)*j/m_ui64SamplesPerChannel;
+
+					l_pStimulationSet->appendStimulation(m_ui64OffStimulationId, l_ui64Time, 0);
 				}
+
+				// Change from negative to positive
+				if(m_f64LastSample < 0 && l_f64CurrentSample > 0)
+				{
+					const uint64 l_ui64Time = l_ui64StartTime + (l_ui64EndTime-l_ui64StartTime)*j/m_ui64SamplesPerChannel;
+
+					l_pStimulationSet->appendStimulation(m_ui64OnStimulationId, l_ui64Time, 0);
+				}
+
+				m_f64LastSample = l_f64CurrentSample;
+
 			}
 
-			m_f64Lastsample=l_pData[(m_ui64ChannelIndex * m_ui64SamplesPerChannel) +m_ui64SamplesPerChannel-1]; // we save the last sample of the buffer to compare it to the first one of the next buffer
-			m_pStimulationEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
+			m_oStimulationEncoder.encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 		}
 
 		// if we received the End
-		if(m_pStreamedMatrixDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if(m_oStreamedMatrixDecoder.isEndReceived())
 		{
 			// we send the End signal to the stimulation output:
-			m_pStimulationEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeEnd);
+			m_oStimulationEncoder.encodeEnd();
+			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 		}
 
-		// The stream matrix chunk i has been process
+		// The stream matrix chunk i has been processed
 		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
 	}
 
