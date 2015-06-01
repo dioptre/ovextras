@@ -154,7 +154,8 @@ namespace OpenViBEPlugins
 			std::vector<GDF::CGDFEvent> m_oEvents;		//current stimulation block
 
 			OpenViBE::uint32 m_ui32CurrentEvent;		//current event in event table
-			OpenViBE::boolean m_bEventsSent;		//true if all the events have been sent
+			OpenViBE::boolean m_bEventsSent;			//true if all the events have been sent
+			OpenViBE::boolean m_bAppendEOF;				//true if the file does contains a recognized EOF marker, then we add our own
 
 			OpenViBE::uint64 m_ui64StimulationPerBuffer;	//user defined
 

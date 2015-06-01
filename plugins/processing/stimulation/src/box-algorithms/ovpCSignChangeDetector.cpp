@@ -110,7 +110,7 @@ boolean CSignChangeDetector::process(void)
 				}
 
 				// Change from positive to negative
-				if(m_f64LastSample > 0 && l_f64CurrentSample < 0)
+				if(m_f64LastSample >= 0 && l_f64CurrentSample < 0)
 				{
 					const uint64 l_ui64Time = l_ui64StartTime + (l_ui64EndTime-l_ui64StartTime)*j/m_ui64SamplesPerChannel;
 
@@ -118,7 +118,7 @@ boolean CSignChangeDetector::process(void)
 				}
 
 				// Change from negative to positive
-				if(m_f64LastSample < 0 && l_f64CurrentSample > 0)
+				if(m_f64LastSample < 0 && l_f64CurrentSample >= 0)
 				{
 					const uint64 l_ui64Time = l_ui64StartTime + (l_ui64EndTime-l_ui64StartTime)*j/m_ui64SamplesPerChannel;
 
