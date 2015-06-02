@@ -15,7 +15,7 @@ namespace OpenViBEAcquisitionServer
 
 	/**
 	 * \class CDriverEGIAmpServer
-	 * \author Unknown
+	 * \author Yann Renard (Inria)
 	 */
 	class CDriverEGIAmpServer : public OpenViBEAcquisitionServer::IDriver
 	{

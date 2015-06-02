@@ -1,6 +1,8 @@
 #ifndef __OpenViBE_AcquisitionServer_CConfigurationLabStreamingLayer_H__
 #define __OpenViBE_AcquisitionServer_CConfigurationLabStreamingLayer_H__
 
+#if defined(TARGET_HAS_ThirdPartyLSL)
+
 #include "../ovasCConfigurationBuilder.h"
 #include "ovasIDriver.h"
 #include "ovasIHeader.h"
@@ -51,4 +53,8 @@ namespace OpenViBEAcquisitionServer
 	};
 };
 
+#endif // TARGET_HAS_ThirdPartyLSL
+
 #endif // __OpenViBE_AcquisitionServer_CConfigurationLabStreamingLayer_H__
+
+
