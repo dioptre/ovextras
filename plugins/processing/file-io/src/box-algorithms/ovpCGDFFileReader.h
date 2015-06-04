@@ -228,7 +228,7 @@ namespace OpenViBEPlugins
 				// Adds settings
 				rPrototype.addSetting("Filename", OV_TypeId_Filename, "");
 				rPrototype.addSetting("Samples per buffer", OV_TypeId_Integer, "32");
-				rPrototype.addSetting("Subtract physical minimum", OV_TypeId_Boolean, "False");
+				rPrototype.addSetting("Subtract physical minimum", OV_TypeId_Boolean, "false");
 
 				return true;
 			}
