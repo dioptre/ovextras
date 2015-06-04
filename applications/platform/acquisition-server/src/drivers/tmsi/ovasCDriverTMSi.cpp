@@ -244,7 +244,7 @@ boolean CDriverTMSi::loop(void)
 	if(!m_rDriverContext.isConnected()) return false;
 	if(m_rDriverContext.isStarted())
 	{
-		int32 l_i32BytesReceived =  m_pTMSiAccess->getSamples(m_pSample, m_pCallback, m_ui32SampleCountPerSentBlock);
+		int32 l_i32BytesReceived =  m_pTMSiAccess->getSamples(m_pSample, m_pCallback, m_ui32SampleCountPerSentBlock, m_oHeader.getSamplingFrequency());
 
 		if (l_i32BytesReceived >= 0)
 		{
