@@ -5,8 +5,8 @@
 	!include "zipdll.nsh"
 
 	;Name and file
-	Name "OpenViBE 1.0.0"
-	OutFile "openvibe-1.0.0-setup.exe"
+	Name "OpenViBE 1.0.1"
+	OutFile "openvibe-1.0.1-setup.exe"
 
 	;Default installation folder
 	InstallDir "$PROGRAMFILES\openvibe"
@@ -74,6 +74,8 @@ FunctionEnd
 
 Section "-OpenViBE"
 
+	LogSet on
+	
 	${If} $OLDINSTDIR != ""
 		RMDir /r $OLDINSTDIR
 		RMDir /r "$SMPROGRAMS\OpenViBE"
