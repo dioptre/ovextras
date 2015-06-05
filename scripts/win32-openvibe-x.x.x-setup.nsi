@@ -45,6 +45,10 @@
 
 Function .onInit
 
+	; Note that for logging to work, you will need a logging-enabled build of nsis. 
+	; At the time of writing this, you could get one from http://nsis.sourceforge.net/Special_Builds 
+	LogSet on
+  
 	UserInfo::GetAccountType
 	Pop $R1
 	StrCmp $R1 "Admin" has_admin_rights 0

@@ -1005,6 +1005,11 @@ FunctionEnd
 
 Function .onInit
   StrCpy $9 ${vs90}
+ 
+  ; Note that for logging to work, you will need a logging-enabled build of nsis. 
+  ; At the time of writing this, you could get one from http://nsis.sourceforge.net/Special_Builds 
+  LogSet on
+  
   ; On silent install, we install all components
   IfSilent 0 +2
 	Call EnableOptionals
