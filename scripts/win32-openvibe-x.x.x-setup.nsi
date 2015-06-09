@@ -5,8 +5,8 @@
 	!include "zipdll.nsh"
 
 	;Name and file
-	Name "OpenViBE 1.0.1"
-	OutFile "openvibe-1.0.1-setup.exe"
+	Name "OpenViBE 1.0.1+git"
+	OutFile "openvibe-1.0.1+git-setup.exe"
 
 	;Default installation folder
 	InstallDir "$PROGRAMFILES\openvibe"
