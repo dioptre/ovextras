@@ -172,7 +172,6 @@ boolean CAlgorithmConfusionMatrix::process(void)
 				// we need to update the whole line vector for the targeted class
 				if(isClass(l_ui64StimulationFromClassifierIdentifier))
 				{
-					std::cout << "lala2" << std::endl;
 					uint32 l_ui32OldAttemptCount = m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted];
 					m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted]++; // the confusion matrix can treat this result
 

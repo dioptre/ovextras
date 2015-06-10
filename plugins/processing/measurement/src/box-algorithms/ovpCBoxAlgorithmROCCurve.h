@@ -6,6 +6,10 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
+#include <set>
+#include <map>
+#include <iostream>
+
 #define OVP_ClassId_BoxAlgorithm_ROCCurve OpenViBE::CIdentifier(0x06FE5B1B, 0xDE066FEC)
 #define OVP_ClassId_BoxAlgorithm_ROCCurveDesc OpenViBE::CIdentifier(0xCB5DFCEA, 0xAF41EAB2)
 
@@ -13,6 +17,51 @@ namespace OpenViBEPlugins
 {
 	namespace Measurement
 	{
+		typedef struct{
+			OpenViBE::uint64 m_ui64ExpectedClass;
+			OpenViBE::uint64 m_ui64PredictedClass;
+			OpenViBE::float64* m_f64ClassificationValues;
+		}SROCClassificationInfo;
+
+
+		typedef std::pair < OpenViBE::CIdentifier, OpenViBE::uint64 > CTimelineStimulationPair;
+		typedef std::pair < OpenViBE::uint64, OpenViBE::float64* > CTimelineValuePair;
+		typedef std::pair < OpenViBE::CIdentifier, OpenViBE::float64* > CLabelValuesPair;
+		typedef std::pair < OpenViBE::float64, OpenViBE::float64 > CCoordinate;
+
+		typedef std::pair < OpenViBE::uint32, OpenViBE::float64 > CRocPairValue;
+
+		class CRocVectorBuilder{
+		public:
+			CRocVectorBuilder(std::vector < CRocPairValue >& rTargetVector, const OpenViBE::CIdentifier& rIdentifier, const OpenViBE::uint32& ui32Index):
+				m_rTargetVector(rTargetVector),
+				m_oClassLabel(rIdentifier),
+				m_ui32Index(ui32Index),
+				m_ui32AmountPositive(0)
+			{
+			}
+
+			void operator() (CLabelValuesPair oLabelValuePair)
+			{
+				CRocPairValue l_oRocPairValue;
+				l_oRocPairValue.first = (oLabelValuePair.first == m_oClassLabel)? 1:0;
+				m_ui32AmountPositive += l_oRocPairValue.first;
+				l_oRocPairValue.second = oLabelValuePair.second[m_ui32Index];
+				m_rTargetVector.push_back(l_oRocPairValue);
+			}
+
+			OpenViBE::uint32 getPositiveCount(void) const
+			{
+				return m_ui32AmountPositive;
+			}
+
+		private:
+			std::vector < CRocPairValue >& m_rTargetVector;
+			OpenViBE::CIdentifier m_oClassLabel;
+			OpenViBE::uint32 m_ui32Index;
+			OpenViBE::uint32 m_ui32AmountPositive;
+		};
+
 		/**
 		 * \class CBoxAlgorithmROCCurve
 		 * \author Serrière Guillaume (Inria)
@@ -34,15 +83,24 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ROCCurve)
 
-		protected:
+		private:
+			OpenViBE::boolean computeROCCurves();
+			OpenViBE::boolean computeOneROCCurve(OpenViBE::CIdentifier rClassIdentifier, OpenViBE::uint32 ui32ClassIndex);
+
 			// Input decoder:
-			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmROCCurve > m_oTriggerDecoder;
-			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmROCCurve > m_oClassLabelDecoder;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmROCCurve > m_oExpectedDecoder;
 			OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmROCCurve > m_oClassificationValueDecoder;
+
+			std::set < OpenViBE::CIdentifier > m_oClassStimulationSet;
+			OpenViBE::CIdentifier m_oComputationTrigger;
+
+			std::vector < CTimelineStimulationPair > m_oStimulationTimeline;
+			std::vector < CTimelineValuePair > m_oValueTimeline;
+
+			std::vector< CLabelValuesPair > m_oLabelValueList;
 
 		};
 		
-
 		/**
 		 * \class CBoxAlgorithmROCCurveDesc
 		 * \author Serrière Guillaume (Inria)
@@ -68,16 +126,15 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ROCCurve; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Measurement::CBoxAlgorithmROCCurve; }
 			
-			
-			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmROCCurveListener; }
-			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
-			
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addInput("Stimulation trigger",OV_TypeId_Stimulations);
-				rBoxAlgorithmPrototype.addInput("Class label",OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addInput("Expected label",OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addInput("Classification values",OV_TypeId_StreamedMatrix);
+
+				rBoxAlgorithmPrototype.addSetting("Computation trigger", OV_TypeId_Stimulation, "");
+				rBoxAlgorithmPrototype.addSetting("Class 1 identifier" , OV_TypeId_Stimulation, "");
+				rBoxAlgorithmPrototype.addSetting("Class 2 identifier" , OV_TypeId_Stimulation, "");
 
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				
