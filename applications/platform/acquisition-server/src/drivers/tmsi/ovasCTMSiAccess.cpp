@@ -906,7 +906,7 @@ int32 CTMSiAccess::getSamples(float32* pSamples, IDriverCallback* pDriverCallbac
 					if(m_ui32LastTriggerValue!=l_ui32Trigger)
 					{
 						uint32 l_ui32IndexStimulation=(uint32)m_oStimulationSet.getStimulationCount();
-						uint64 l_ui64StimulationTime = ITimeArithmetics::sampleCountToTime(ui32SamplingFrequency, uint64(l_ui32SampleIndex));
+						uint64 l_ui64StimulationTime = ITimeArithmetics::sampleCountToTime(ui32SamplingFrequency, uint64(m_ui32LastSampleIndexInBuffer));
 						m_oStimulationSet.appendStimulation(l_ui32Trigger, l_ui64StimulationTime, 0);
 						m_ui32LastTriggerValue=l_ui32Trigger;
 					}
