@@ -1414,7 +1414,6 @@ namespace OpenViBEPlugins
 				{
 					l_pView->getChannelDisplay(i)->updateScale();
 				}
-
 				//redraw channels
 
 				l_pView->m_bVerticalScaleForceUpdate = true;

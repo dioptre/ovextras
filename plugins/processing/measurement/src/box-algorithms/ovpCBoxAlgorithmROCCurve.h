@@ -3,8 +3,12 @@
 
 #include "../ovp_defines.h"
 
+#include "ovpCROCCurveDraw.h"
+
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+
+#include <gtk/gtk.h>
 
 #include <set>
 #include <map>
@@ -27,7 +31,6 @@ namespace OpenViBEPlugins
 		typedef std::pair < OpenViBE::CIdentifier, OpenViBE::uint64 > CTimelineStimulationPair;
 		typedef std::pair < OpenViBE::uint64, OpenViBE::float64* > CTimelineValuePair;
 		typedef std::pair < OpenViBE::CIdentifier, OpenViBE::float64* > CLabelValuesPair;
-		typedef std::pair < OpenViBE::float64, OpenViBE::float64 > CCoordinate;
 
 		typedef std::pair < OpenViBE::uint32, OpenViBE::float64 > CRocPairValue;
 
@@ -36,30 +39,29 @@ namespace OpenViBEPlugins
 			CRocVectorBuilder(std::vector < CRocPairValue >& rTargetVector, const OpenViBE::CIdentifier& rIdentifier, const OpenViBE::uint32& ui32Index):
 				m_rTargetVector(rTargetVector),
 				m_oClassLabel(rIdentifier),
-				m_ui32Index(ui32Index),
-				m_ui32AmountPositive(0)
+				m_ui32Index(ui32Index)
 			{
 			}
 
 			void operator() (CLabelValuesPair oLabelValuePair)
 			{
 				CRocPairValue l_oRocPairValue;
-				l_oRocPairValue.first = (oLabelValuePair.first == m_oClassLabel)? 1:0;
-				m_ui32AmountPositive += l_oRocPairValue.first;
+				if(oLabelValuePair.first == m_oClassLabel.toUInteger())
+				{
+					l_oRocPairValue.first = 1;
+				}
+				else
+				{
+					l_oRocPairValue.first = 0;
+				}
 				l_oRocPairValue.second = oLabelValuePair.second[m_ui32Index];
 				m_rTargetVector.push_back(l_oRocPairValue);
-			}
-
-			OpenViBE::uint32 getPositiveCount(void) const
-			{
-				return m_ui32AmountPositive;
 			}
 
 		private:
 			std::vector < CRocPairValue >& m_rTargetVector;
 			OpenViBE::CIdentifier m_oClassLabel;
 			OpenViBE::uint32 m_ui32Index;
-			OpenViBE::uint32 m_ui32AmountPositive;
 		};
 
 		/**
@@ -99,6 +101,14 @@ namespace OpenViBEPlugins
 
 			std::vector< CLabelValuesPair > m_oLabelValueList;
 
+
+			//Display section
+			::GtkWidget* m_pWidget;
+			std::vector < ::GtkWidget *> m_oDrawableList;
+			std::vector < CROCCurveDraw* > m_oDrawerList;
+
+
+
 		};
 		
 		/**
@@ -125,6 +135,11 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ROCCurve; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Measurement::CBoxAlgorithmROCCurve; }
+
+			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+			{
+				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+			}
 			
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const

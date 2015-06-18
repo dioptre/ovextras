@@ -25,6 +25,11 @@ boolean compareRocValuePair(const CRocPairValue& elt1, const CRocPairValue& elt2
 	return elt1.second > elt2.second;
 }
 
+boolean isPositive(const CRocPairValue &elt1)
+{
+	return elt1.first;
+}
+
 boolean CBoxAlgorithmROCCurve::initialize(void)
 {
 	m_oExpectedDecoder.initialize(*this, 0);
@@ -32,12 +37,20 @@ boolean CBoxAlgorithmROCCurve::initialize(void)
 
 	m_oComputationTrigger = CIdentifier(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0));
 
+	m_pWidget = GTK_WIDGET(gtk_notebook_new());
+
 	for(size_t i = 1; i < this->getStaticBoxContext().getSettingCount() ; ++i)
 	{
 		CIdentifier l_oClassLabel(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i));
+		CString l_sClassName;
+		this->getStaticBoxContext().getSettingName(i, l_sClassName);
+
 		m_oClassStimulationSet.insert(l_oClassLabel);
+
+		m_oDrawerList.push_back(new CROCCurveDraw(GTK_NOTEBOOK(m_pWidget), i-1, l_sClassName));
 	}
-	
+	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pWidget);
+
 	return true;
 }
 
@@ -46,6 +59,11 @@ boolean CBoxAlgorithmROCCurve::uninitialize(void)
 
 	m_oExpectedDecoder.uninitialize();
 	m_oClassificationValueDecoder.uninitialize();
+
+	for(size_t i = 0; i < m_oDrawerList.size(); ++i)
+	{
+		delete m_oDrawerList[i];
+	}
 
 	return true;
 }
@@ -153,6 +171,8 @@ boolean CBoxAlgorithmROCCurve::computeROCCurves()
 		CIdentifier l_oClassLabel(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i));
 		computeOneROCCurve(l_oClassLabel, i-1);
 	}
+	//Now we ask to the current page to draw itself
+	m_oDrawerList[gtk_notebook_current_page(GTK_NOTEBOOK(m_pWidget))]->forceRedraw();
 	return true;
 }
 
@@ -173,20 +193,20 @@ boolean CBoxAlgorithmROCCurve::computeOneROCCurve(CIdentifier rClassIdentifier, 
 	float64 l_f64FalsePositiveRate = 0.;
 
 	const uint32 l_ui32ElementCount = l_oRocpairValue.size();
-	const uint32 l_ui32PositiveCount = l_oVectorBuilder.getPositiveCount();
+	const uint32 l_ui32PositiveCount = std::count_if(l_oRocpairValue.begin(), l_oRocpairValue.end(), isPositive);
 	const uint32 l_ui32NegativeCount = l_ui32ElementCount - l_ui32PositiveCount;
 
-	std::vector < CCoordinate > l_oCoordinateVector;
+	std::vector < CCoordinate >& l_oCoordinateVector = m_oDrawerList[ui32ClassIndex]->getCoordinateVector();
 
 	for(size_t i = 0; i < l_oRocpairValue.size(); ++i)
 	{
 		l_ui32TruePositive += l_oRocpairValue[i].first;
-		l_ui32FalsePositive = i - l_ui32TruePositive;
-
+		l_ui32FalsePositive = (i+1) - l_ui32TruePositive;
 		l_f64FalsePositiveRate = ((float64)l_ui32FalsePositive) / l_ui32NegativeCount;
 		l_f64TruePositiveRate = ((float64)l_ui32TruePositive) / l_ui32PositiveCount;
 		l_oCoordinateVector.push_back(CCoordinate(l_f64FalsePositiveRate, l_f64TruePositiveRate));
 	}
+	m_oDrawerList[ui32ClassIndex]->generateCurve();
 
 	return true;
 }
