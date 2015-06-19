@@ -2,19 +2,19 @@
 
 #include <iostream>
 
+
 using namespace OpenViBE;
 using namespace OpenViBEPlugins::Measurement;
 
-static void area_expose_cb(::GtkWidget* pWidget, ::GdkEventExpose* pEvent, gpointer pUserData)
-{
-	static_cast<CROCCurveDraw*>(pUserData)->exposeEnvent();
-}
-
-static void size_allocate_cb(::GtkWidget *pWidget, ::GdkRectangle *pRectangle, gpointer pUserData)
+void size_allocate_cb(::GtkWidget *pWidget, ::GdkRectangle *pRectangle, gpointer pUserData)
 {
 	static_cast<CROCCurveDraw*>(pUserData)->resizeEvent(pRectangle);
 }
 
+void area_expose_cb(::GtkWidget* pWidget, ::GdkEventExpose* pEvent, gpointer pUserData)
+{
+	static_cast<CROCCurveDraw*>(pUserData)->exposeEnvent();
+}
 
 CROCCurveDraw::CROCCurveDraw(::GtkNotebook* pNotebook, OpenViBE::uint32 ui32ClassIndex, CString &rClassName)
 {
@@ -22,19 +22,14 @@ CROCCurveDraw::CROCCurveDraw(::GtkNotebook* pNotebook, OpenViBE::uint32 ui32Clas
 	m_ui32ClassIndex = ui32ClassIndex;
 	m_bHasBeenInit = false;
 	m_bHasBeenExposed = false;
-	m_pNotebook = pNotebook;
 	m_pDrawableArea = gtk_drawing_area_new();
 	::gtk_widget_set_size_request(m_pDrawableArea, 700, 600);
 
 	g_signal_connect(G_OBJECT(m_pDrawableArea), "expose_event", G_CALLBACK(area_expose_cb), this);
 	g_signal_connect(G_OBJECT(m_pDrawableArea), "size-allocate", G_CALLBACK(size_allocate_cb), this);
 
-	gtk_notebook_append_page(m_pNotebook, getWidget(), NULL);
-}
-
-GtkWidget *CROCCurveDraw::getWidget()
-{
-	return m_pDrawableArea;
+	::GtkWidget* l_pLabel = gtk_label_new(rClassName.toASCIIString());
+	gtk_notebook_append_page(pNotebook, m_pDrawableArea, l_pLabel);
 }
 
 std::vector < CCoordinate> &CROCCurveDraw::getCoordinateVector()
@@ -95,19 +90,13 @@ void CROCCurveDraw::redraw()
 
 	GtkAllocation l_pAllocation;
 	gtk_widget_get_allocation(m_pDrawableArea, &l_pAllocation);
-	//::gtk_widget_set_size_request(m_pDrawableArea, l_oRequisition.width, l_oRequisition.height);
-
-	GdkGC *l_pGc = gdk_gc_new((m_pDrawableArea)->window);
 
 	gdk_draw_rectangle (m_pDrawableArea->window, GTK_WIDGET(m_pDrawableArea)->style->white_gc, TRUE, 0, 0,l_pAllocation.width, l_pAllocation.height);
 
 
-	GdkColor l_oLineColor;
+	GdkColor l_oLineColor = {0, 35000, 35000, 35000};
 
-	l_oLineColor.red = 35000;
-	l_oLineColor.green = 35000;
-	l_oLineColor.blue = 35000;
-
+	GdkGC *l_pGc = gdk_gc_new((m_pDrawableArea)->window);
 	gdk_gc_set_rgb_fg_color(l_pGc, &l_oLineColor);
 
 	//We need to draw the rulers

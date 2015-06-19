@@ -3,10 +3,10 @@
 
 #include "../ovp_defines.h"
 
-#include "ovpCROCCurveDraw.h"
-
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+
+#include "ovpCROCCurveDraw.h"
 
 #include <gtk/gtk.h>
 
@@ -28,41 +28,11 @@ namespace OpenViBEPlugins
 		}SROCClassificationInfo;
 
 
-		typedef std::pair < OpenViBE::CIdentifier, OpenViBE::uint64 > CTimelineStimulationPair;
-		typedef std::pair < OpenViBE::uint64, OpenViBE::float64* > CTimelineValuePair;
-		typedef std::pair < OpenViBE::CIdentifier, OpenViBE::float64* > CLabelValuesPair;
+		typedef std::pair < OpenViBE::uint64, OpenViBE::uint64 > CTimestampLabelPair;
+		typedef std::pair < OpenViBE::uint64, OpenViBE::float64* > CTimestampValuesPair;
+		typedef std::pair < OpenViBE::uint64, OpenViBE::float64* > CLabelValuesPair;
 
-		typedef std::pair < OpenViBE::uint32, OpenViBE::float64 > CRocPairValue;
-
-		class CRocVectorBuilder{
-		public:
-			CRocVectorBuilder(std::vector < CRocPairValue >& rTargetVector, const OpenViBE::CIdentifier& rIdentifier, const OpenViBE::uint32& ui32Index):
-				m_rTargetVector(rTargetVector),
-				m_oClassLabel(rIdentifier),
-				m_ui32Index(ui32Index)
-			{
-			}
-
-			void operator() (CLabelValuesPair oLabelValuePair)
-			{
-				CRocPairValue l_oRocPairValue;
-				if(oLabelValuePair.first == m_oClassLabel.toUInteger())
-				{
-					l_oRocPairValue.first = 1;
-				}
-				else
-				{
-					l_oRocPairValue.first = 0;
-				}
-				l_oRocPairValue.second = oLabelValuePair.second[m_ui32Index];
-				m_rTargetVector.push_back(l_oRocPairValue);
-			}
-
-		private:
-			std::vector < CRocPairValue >& m_rTargetVector;
-			OpenViBE::CIdentifier m_oClassLabel;
-			OpenViBE::uint32 m_ui32Index;
-		};
+		typedef std::pair < OpenViBE::boolean, OpenViBE::float64 > CRocPairValue;
 
 		/**
 		 * \class CBoxAlgorithmROCCurve
@@ -96,19 +66,15 @@ namespace OpenViBEPlugins
 			std::set < OpenViBE::CIdentifier > m_oClassStimulationSet;
 			OpenViBE::CIdentifier m_oComputationTrigger;
 
-			std::vector < CTimelineStimulationPair > m_oStimulationTimeline;
-			std::vector < CTimelineValuePair > m_oValueTimeline;
+			std::vector < CTimestampLabelPair > m_oStimulationTimeline;
+			std::vector < CTimestampValuesPair > m_oValueTimeline;
 
 			std::vector< CLabelValuesPair > m_oLabelValueList;
-
 
 			//Display section
 			::GtkWidget* m_pWidget;
 			std::vector < ::GtkWidget *> m_oDrawableList;
 			std::vector < CROCCurveDraw* > m_oDrawerList;
-
-
-
 		};
 		
 		/**

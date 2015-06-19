@@ -10,14 +10,14 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Measurement;
 
-boolean compareCTimelineStimulationPair(const CTimelineStimulationPair& elt1, const CTimelineStimulationPair& elt2)
+boolean compareCTimelineStimulationPair(const CTimestampLabelPair& elt1, const CTimestampLabelPair& elt2)
 {
-	return elt1.second < elt2.second;
+	return elt1.first < elt2.first;
 }
 
-boolean compareValueAndStimulationTimelinePair(const CTimelineStimulationPair& elt1, const CTimelineValuePair& elt2)
+boolean compareValueAndStimulationTimelinePair(const CTimestampLabelPair& elt1, const CTimestampValuesPair& elt2)
 {
-	return elt1.second < elt2.first;
+	return elt1.first < elt2.first;
 }
 
 boolean compareRocValuePair(const CRocPairValue& elt1, const CRocPairValue& elt2)
@@ -43,7 +43,7 @@ boolean CBoxAlgorithmROCCurve::initialize(void)
 	{
 		CIdentifier l_oClassLabel(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i));
 		CString l_sClassName;
-		this->getStaticBoxContext().getSettingName(i, l_sClassName);
+		this->getStaticBoxContext().getSettingValue(i, l_sClassName);
 
 		m_oClassStimulationSet.insert(l_oClassLabel);
 
@@ -98,7 +98,7 @@ boolean CBoxAlgorithmROCCurve::process(void)
 				CIdentifier l_oStimulationIdentifier = l_pStimulationSet->getStimulationIdentifier(k);
 				if(m_oClassStimulationSet.find(l_oStimulationIdentifier) != m_oClassStimulationSet.end())
 				{
-					m_oStimulationTimeline.push_back(CTimelineStimulationPair(l_oStimulationIdentifier, l_pStimulationSet->getStimulationDate(k)));
+					m_oStimulationTimeline.push_back(CTimestampLabelPair(l_pStimulationSet->getStimulationDate(k), l_oStimulationIdentifier.toUInteger() ));
 				}
 				//We need to check if we receive the computation trigger
 				if(l_oStimulationIdentifier == m_oComputationTrigger)
@@ -137,8 +137,8 @@ boolean CBoxAlgorithmROCCurve::process(void)
 				l_pArrayValue[1] = 1 - l_pMatrixValue->getBuffer()[0];
 			}
 
-			uint64 timestamp = l_rDynamicBoxContext.getInputChunkEndTime(1, i); //the time in stimulation correspond to the end of the chunck (cf processorbox code)
-			m_oValueTimeline.push_back(CTimelineValuePair(timestamp, l_pArrayValue));
+			uint64 l_ui64timestamp = l_rDynamicBoxContext.getInputChunkEndTime(1, i); //the time in stimulation correspond to the end of the chunck (cf processorbox code)
+			m_oValueTimeline.push_back(CTimestampValuesPair(l_ui64timestamp, l_pArrayValue));
 		}
 	}
 	return true;
@@ -146,19 +146,18 @@ boolean CBoxAlgorithmROCCurve::process(void)
 
 boolean CBoxAlgorithmROCCurve::computeROCCurves()
 {
-	std::cout << "Start computation of ROC curves" << std::endl;
 	//Now we assiociate all values to the corresponding label
 	std::sort(m_oStimulationTimeline.begin(), m_oStimulationTimeline.end(), compareCTimelineStimulationPair);//ensure the timeline is ok
-	std::vector< CTimelineStimulationPair >::iterator m_oBound;
+	std::vector< CTimestampLabelPair >::iterator m_oBound;
 
 	for(size_t i = 0; i < m_oValueTimeline.size(); ++i)
 	{
-		CTimelineValuePair& l_rValuePair = m_oValueTimeline[i];
+		CTimestampValuesPair& l_rValuePair = m_oValueTimeline[i];
 		m_oBound = std::lower_bound(m_oStimulationTimeline.begin(), m_oStimulationTimeline.end(), l_rValuePair, compareValueAndStimulationTimelinePair);
 		if(m_oBound != m_oStimulationTimeline.begin())
 		{
 			--m_oBound;
-			m_oLabelValueList.push_back(CLabelValuesPair(m_oBound->first, l_rValuePair.second));
+			m_oLabelValueList.push_back(CLabelValuesPair(m_oBound->second, l_rValuePair.second));
 		}
 		else{
 			//Impossible to find the corresponding stimulation
@@ -176,35 +175,33 @@ boolean CBoxAlgorithmROCCurve::computeROCCurves()
 	return true;
 }
 
-boolean CBoxAlgorithmROCCurve::computeOneROCCurve(CIdentifier rClassIdentifier, uint32 ui32ClassIndex)
+boolean CBoxAlgorithmROCCurve::computeOneROCCurve(const CIdentifier rClassIdentifier, uint32 ui32ClassIndex)
 {
-	std::cout << "Compute ROC curve for class " << rClassIdentifier.toString() <<  " Index " << ui32ClassIndex << std::endl;
-	std::vector < CRocPairValue > l_oRocpairValue;
-	CRocVectorBuilder l_oVectorBuilder(l_oRocpairValue, rClassIdentifier, ui32ClassIndex);
-	std::for_each(m_oLabelValueList.begin(), m_oLabelValueList.end(), l_oVectorBuilder);
+	std::vector < CRocPairValue > l_oRocPairValueList;
+	for(std::vector< CLabelValuesPair >::iterator it = m_oLabelValueList.begin(); it != m_oLabelValueList.end(); ++it)
+	{
+		CRocPairValue l_oRocPairValue;
 
-	std::sort(l_oRocpairValue.begin(), l_oRocpairValue.end(), compareRocValuePair);
-
+		l_oRocPairValue.first = ((*it).first == rClassIdentifier.toUInteger());
+		l_oRocPairValue.second = (*it).second[ui32ClassIndex];
+		l_oRocPairValueList.push_back(l_oRocPairValue);
+	}
+	std::sort(l_oRocPairValueList.begin(), l_oRocPairValueList.end(), compareRocValuePair);
 
 	uint32 l_ui32TruePositive = 0;
 	uint32 l_ui32FalsePositive = 0;
 
-	float64 l_f64TruePositiveRate = 0.;
-	float64 l_f64FalsePositiveRate = 0.;
-
-	const uint32 l_ui32ElementCount = l_oRocpairValue.size();
-	const uint32 l_ui32PositiveCount = std::count_if(l_oRocpairValue.begin(), l_oRocpairValue.end(), isPositive);
-	const uint32 l_ui32NegativeCount = l_ui32ElementCount - l_ui32PositiveCount;
+	const uint32 l_ui32PositiveCount = std::count_if(l_oRocPairValueList.begin(), l_oRocPairValueList.end(), isPositive);
+	const uint32 l_ui32NegativeCount = l_oRocPairValueList.size() - l_ui32PositiveCount;
 
 	std::vector < CCoordinate >& l_oCoordinateVector = m_oDrawerList[ui32ClassIndex]->getCoordinateVector();
 
-	for(size_t i = 0; i < l_oRocpairValue.size(); ++i)
+	for(size_t i = 0; i < l_oRocPairValueList.size(); ++i)
 	{
-		l_ui32TruePositive += l_oRocpairValue[i].first;
-		l_ui32FalsePositive = (i+1) - l_ui32TruePositive;
-		l_f64FalsePositiveRate = ((float64)l_ui32FalsePositive) / l_ui32NegativeCount;
-		l_f64TruePositiveRate = ((float64)l_ui32TruePositive) / l_ui32PositiveCount;
-		l_oCoordinateVector.push_back(CCoordinate(l_f64FalsePositiveRate, l_f64TruePositiveRate));
+		l_oRocPairValueList[i].first ? ++l_ui32TruePositive : ++l_ui32FalsePositive;
+
+		l_oCoordinateVector.push_back(CCoordinate(((float64)l_ui32FalsePositive) / l_ui32NegativeCount,
+												  ((float64)l_ui32TruePositive) / l_ui32PositiveCount));
 	}
 	m_oDrawerList[ui32ClassIndex]->generateCurve();
 
