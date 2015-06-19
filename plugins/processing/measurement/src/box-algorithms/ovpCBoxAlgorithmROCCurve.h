@@ -13,6 +13,7 @@
 #include <set>
 #include <map>
 #include <iostream>
+#include <sstream>
 
 #define OVP_ClassId_BoxAlgorithm_ROCCurve OpenViBE::CIdentifier(0x06FE5B1B, 0xDE066FEC)
 #define OVP_ClassId_BoxAlgorithm_ROCCurveDesc OpenViBE::CIdentifier(0xCB5DFCEA, 0xAF41EAB2)
@@ -21,13 +22,6 @@ namespace OpenViBEPlugins
 {
 	namespace Measurement
 	{
-		typedef struct{
-			OpenViBE::uint64 m_ui64ExpectedClass;
-			OpenViBE::uint64 m_ui64PredictedClass;
-			OpenViBE::float64* m_f64ClassificationValues;
-		}SROCClassificationInfo;
-
-
 		typedef std::pair < OpenViBE::uint64, OpenViBE::uint64 > CTimestampLabelPair;
 		typedef std::pair < OpenViBE::uint64, OpenViBE::float64* > CTimestampValuesPair;
 		typedef std::pair < OpenViBE::uint64, OpenViBE::float64* > CLabelValuesPair;
@@ -39,6 +33,8 @@ namespace OpenViBEPlugins
 		 * \author Serrière Guillaume (Inria)
 		 * \date Thu May 28 11:49:24 2015
 		 * \brief The class CBoxAlgorithmROCCurve describes the box ROC curve.
+		 * The roc curve is a graphical plot that represents the performance of a classifier. This curve is created by plotting the true positive
+		 * rate against the false positive rate at various threshold settings.
 		 *
 		 */
 		class CBoxAlgorithmROCCurve : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
@@ -73,9 +69,66 @@ namespace OpenViBEPlugins
 
 			//Display section
 			::GtkWidget* m_pWidget;
-			std::vector < ::GtkWidget *> m_oDrawableList;
 			std::vector < CROCCurveDraw* > m_oDrawerList;
 		};
+
+		// The box listener can be used to call specific callbacks whenever the box structure changes : input added, name changed, etc.
+		// Please uncomment below the callbacks you want to use.
+		class CBoxAlgorithmROCCurveListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
+		{
+		public:
+
+			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) {
+				if(ui32Index == 1)
+				{
+					OpenViBE::CString l_sAmountClass;
+					rBox.getSettingValue(ui32Index, l_sAmountClass);
+					//Could happen if we rewritte a number
+					//TODO Add more protection here
+					if(l_sAmountClass.length() == 0 )
+					{
+						return true;
+					}
+
+					OpenViBE::int32 l_i32SettingCount;
+
+					std::stringstream l_sStream(l_sAmountClass.toASCIIString());
+					l_sStream >> l_i32SettingCount;
+
+					//First of all we prevent for the value to goes under 1.
+					if(l_i32SettingCount < 1)
+					{
+						rBox.setSettingValue(ui32Index, "1");
+						l_i32SettingCount = 1;
+					}
+
+					OpenViBE::int32 l_i32CurrentAmount = rBox.getSettingCount()-2;
+					//We have two choice 1/We need to add class, 2/We need to remove some
+					if(l_i32CurrentAmount < l_i32SettingCount)
+					{
+						while(l_i32CurrentAmount < l_i32SettingCount)
+						{
+							char l_sBuffer[64];
+							sprintf(l_sBuffer, "Class %i identifier", l_i32CurrentAmount+1);
+							rBox.addSetting(l_sBuffer, OVTK_TypeId_Stimulation, "");
+							++l_i32CurrentAmount;
+						}
+					}
+					else
+					{
+						while(l_i32CurrentAmount > l_i32SettingCount)
+						{
+							rBox.removeSetting(rBox.getSettingCount()-1);
+							--l_i32CurrentAmount;
+						}
+					}
+				}
+				return true;
+			}
+
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier)
+		};
+
 		
 		/**
 		 * \class CBoxAlgorithmROCCurveDesc
@@ -102,6 +155,9 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ROCCurve; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Measurement::CBoxAlgorithmROCCurve; }
 
+			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmROCCurveListener; }
+			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
+
 			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
 			{
 				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
@@ -114,6 +170,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput("Classification values",OV_TypeId_StreamedMatrix);
 
 				rBoxAlgorithmPrototype.addSetting("Computation trigger", OV_TypeId_Stimulation, "");
+				rBoxAlgorithmPrototype.addSetting("Amount of class",OV_TypeId_Integer,"2");
 				rBoxAlgorithmPrototype.addSetting("Class 1 identifier" , OV_TypeId_Stimulation, "");
 				rBoxAlgorithmPrototype.addSetting("Class 2 identifier" , OV_TypeId_Stimulation, "");
 

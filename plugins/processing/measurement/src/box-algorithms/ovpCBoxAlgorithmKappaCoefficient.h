@@ -64,46 +64,43 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) {
 				if(ui32Index == 0)
 				{
-					OpenViBE::CString l_sAmountClass;
-					rBox.getSettingValue(ui32Index, l_sAmountClass);
-					//Could happen if we rewritte a number
-					//TODO Add more protection here
-					if(l_sAmountClass.length() == 0 )
+					OpenViBE::CString l_sClassCount;
+					rBox.getSettingValue(ui32Index, l_sClassCount);
+
+					if(l_sClassCount.length() == 0 )
 					{
 						return true;
 					}
 
-					OpenViBE::uint32 l_ui32SettingAmount;
+					OpenViBE::int32 l_i32SettingCount;
 
-					std::stringstream l_sStream(l_sAmountClass.toASCIIString());
-					l_sStream >> l_ui32SettingAmount;
+					std::stringstream l_sStream(l_sClassCount.toASCIIString());
+					l_sStream >> l_i32SettingCount;
 
 					//First of all we prevent for the value to goes under 1.
-					if(l_ui32SettingAmount < 1)
+					if(l_i32SettingCount < 1)
 					{
 						rBox.setSettingValue(ui32Index, "1");
+						l_i32SettingCount = 1;
+					}
+					OpenViBE::int32 l_i32CurrentCount = rBox.getSettingCount()-1;
+					//We have two choice 1/We need to add class, 2/We need to remove some
+					if(l_i32CurrentCount < l_i32SettingCount)
+					{
+						while(l_i32CurrentCount < l_i32SettingCount)
+						{
+							char l_sBuffer[64];
+							sprintf(l_sBuffer, "Stimulation of class %i", l_i32CurrentCount+1);
+							rBox.addSetting(l_sBuffer, OVTK_TypeId_Stimulation, "");
+							++l_i32CurrentCount;
+						}
 					}
 					else
 					{
-						OpenViBE::uint32 l_ui32CurrentAmount = rBox.getSettingCount()-1;
-						//We have two choice 1/We need to add class, 2/We need to remove some
-						if(l_ui32CurrentAmount < l_ui32SettingAmount)
+						while(l_i32CurrentCount > l_i32SettingCount)
 						{
-							while(l_ui32CurrentAmount < l_ui32SettingAmount)
-							{
-								char l_sBuffer[64];
-								sprintf(l_sBuffer, "Stimulation of class %i", l_ui32CurrentAmount+1);
-								rBox.addSetting(l_sBuffer, OVTK_TypeId_Stimulation, "");
-								++l_ui32CurrentAmount;
-							}
-						}
-						else
-						{
-							while(l_ui32CurrentAmount > l_ui32SettingAmount)
-							{
-								rBox.removeSetting(rBox.getSettingCount()-1);
-								--l_ui32CurrentAmount;
-							}
+							rBox.removeSetting(rBox.getSettingCount()-1);
+							--l_i32CurrentCount;
 						}
 					}
 
@@ -114,7 +111,6 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier)
 		};
-		
 
 		/**
 		 * \class CBoxAlgorithmKappaCoefficientDesc

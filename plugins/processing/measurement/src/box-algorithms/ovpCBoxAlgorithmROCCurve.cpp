@@ -39,7 +39,7 @@ boolean CBoxAlgorithmROCCurve::initialize(void)
 
 	m_pWidget = GTK_WIDGET(gtk_notebook_new());
 
-	for(size_t i = 1; i < this->getStaticBoxContext().getSettingCount() ; ++i)
+	for(size_t i = 2; i < this->getStaticBoxContext().getSettingCount() ; ++i)
 	{
 		CIdentifier l_oClassLabel(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i));
 		CString l_sClassName;
@@ -56,7 +56,6 @@ boolean CBoxAlgorithmROCCurve::initialize(void)
 
 boolean CBoxAlgorithmROCCurve::uninitialize(void)
 {
-
 	m_oExpectedDecoder.uninitialize();
 	m_oClassificationValueDecoder.uninitialize();
 
@@ -65,6 +64,11 @@ boolean CBoxAlgorithmROCCurve::uninitialize(void)
 		delete m_oDrawerList[i];
 	}
 
+	//The m_oValueTimeline vector contains each dynamically instantiate values that need to be free'd
+	for(size_t i = 0; i < m_oValueTimeline.size(); ++i)
+	{
+		delete m_oValueTimeline[i].second;
+	}
 	return true;
 }
 
@@ -161,14 +165,15 @@ boolean CBoxAlgorithmROCCurve::computeROCCurves()
 		}
 		else{
 			//Impossible to find the corresponding stimulation
+			this->getLogManager() << LogLevel_Warning << "A result of classification cannot be connect to a class. The result will be discard\n";
 		}
 	}
 
-	//Wa cannot use the set because we need the correct order
-	for(size_t i = 1; i < this->getStaticBoxContext().getSettingCount() ; ++i)
+	//We cannot use the set because we need the correct order
+	for(size_t i = 2; i < this->getStaticBoxContext().getSettingCount() ; ++i)
 	{
 		CIdentifier l_oClassLabel(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i));
-		computeOneROCCurve(l_oClassLabel, i-1);
+		computeOneROCCurve(l_oClassLabel, i-2);
 	}
 	//Now we ask to the current page to draw itself
 	m_oDrawerList[gtk_notebook_current_page(GTK_NOTEBOOK(m_pWidget))]->forceRedraw();

@@ -19,6 +19,7 @@ namespace OpenViBEPlugins
 
 		public:
 			CROCCurveDraw(::GtkNotebook* pNotebook, OpenViBE::uint32 ui32ClassIndex, OpenViBE::CString& rClassName);
+			virtual ~CROCCurveDraw();
 			std::vector < CCoordinate >& getCoordinateVector();
 
 			void generateCurve();
@@ -35,6 +36,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32ClassIndex;
 			std::vector <GdkPoint> m_oPointList;
 			std::vector < CCoordinate > m_oCoordinateList;
+			OpenViBE::uint64 m_ui64PixelsPerLeftRulerLabel;
 
 			::GtkWidget *m_pDrawableArea;
 			OpenViBE::boolean m_bHasBeenInit;
@@ -43,6 +45,8 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bHasBeenExposed;
 
 			void redraw();
+			void drawLeftMark(OpenViBE::uint32 ui32W, OpenViBE::uint32 ui32H, const char* sLabel);
+			void drawBottomMark(OpenViBE::uint32 ui32W, OpenViBE::uint32 ui32H, const char *sLabel);
 
 		};
 	}
