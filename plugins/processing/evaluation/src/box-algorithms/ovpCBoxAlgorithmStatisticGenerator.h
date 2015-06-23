@@ -72,12 +72,12 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Statistic generator"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("General statistics generator"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Serrière Guillaume"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Generate statistic on signal."); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Generate some general purpose statistic on signal and store them in a file. This box is required for some measurement tools."); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Measurement"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Generate some general purpose statistics on signal and store them in a file."); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Evaluation"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-yes"); }
 
@@ -100,7 +100,7 @@ namespace OpenViBEPlugins
 			}
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_StatisticGeneratorDesc)
 		};
-	};
-};
+	}
+}
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_StatisticGenerator_H__

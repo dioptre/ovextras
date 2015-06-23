@@ -53,7 +53,7 @@ namespace OpenViBEPlugins
 
 		private:
 			OpenViBE::boolean computeROCCurves();
-			OpenViBE::boolean computeOneROCCurve(OpenViBE::CIdentifier rClassIdentifier, OpenViBE::uint32 ui32ClassIndex);
+			OpenViBE::boolean computeOneROCCurve(const OpenViBE::CIdentifier& rClassIdentifier, OpenViBE::uint32 ui32ClassIndex);
 
 			// Input decoder:
 			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmROCCurve > m_oExpectedDecoder;
@@ -84,7 +84,6 @@ namespace OpenViBEPlugins
 					OpenViBE::CString l_sAmountClass;
 					rBox.getSettingValue(ui32Index, l_sAmountClass);
 					//Could happen if we rewritte a number
-					//TODO Add more protection here
 					if(l_sAmountClass.length() == 0 )
 					{
 						return true;
@@ -148,7 +147,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Compute the ROC curve for each class."); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("The box computes the ROC curve for each class."); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Measurement"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Evaluation/Classification"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-yes"); }
 

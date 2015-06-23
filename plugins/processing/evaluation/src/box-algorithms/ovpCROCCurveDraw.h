@@ -15,6 +15,7 @@ namespace OpenViBEPlugins
 	{
 		typedef std::pair < OpenViBE::float64, OpenViBE::float64 > CCoordinate;
 
+		//The aim of the class is to handle the graphical part of a RocCurve
 		class CROCCurveDraw{
 
 		public:
@@ -24,7 +25,7 @@ namespace OpenViBEPlugins
 
 			void generateCurve();
 
-			//Callbak functions, should not been called
+			//Callbak functions, should not be called
 			void resizeEvent(::GdkRectangle *pRectangle);
 			void exposeEnvent();
 
@@ -42,6 +43,7 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bHasBeenInit;
 
 			//For a mytical reason, gtk says that the DrawableArea is not a DrawableArea unless it's been exposed at least once...
+			// So we need to if the DrawableArea as been exposed
 			OpenViBE::boolean m_bHasBeenExposed;
 
 			void redraw();

@@ -118,7 +118,7 @@ void CROCCurveDraw::redraw()
 	gdk_gc_set_rgb_fg_color(l_pGc, &l_oLineColor);
 
 
-	//We need to draw the rulers
+	//Left ruler
 	gdk_draw_line((m_pDrawableArea)->window, l_pGc,  m_ui32Margin, m_ui32Margin, m_ui32Margin, l_pAllocation.height- m_ui32Margin);
 	drawLeftMark(m_ui32Margin, m_ui32Margin, "1");
 	drawLeftMark(m_ui32Margin, l_pAllocation.height/2, "0.5");
@@ -163,6 +163,7 @@ void CROCCurveDraw::redraw()
 	g_object_unref (l_pRotationGc);
 	//** End of black magic section
 
+	//Bottom ruler
 	gdk_draw_line((m_pDrawableArea)->window, l_pGc,  m_ui32Margin, l_pAllocation.height- m_ui32Margin, l_pAllocation.width - m_ui32Margin, l_pAllocation.height- m_ui32Margin);
 	drawBottomMark(m_ui32Margin,  l_pAllocation.height- m_ui32Margin, "0");
 	drawBottomMark(l_pAllocation.width/2,  l_pAllocation.height- m_ui32Margin, "0.5");
@@ -206,7 +207,6 @@ void CROCCurveDraw::drawLeftMark(OpenViBE::uint32 ui32W, OpenViBE::uint32 ui32H,
 	gdk_draw_line(m_pDrawableArea->window, l_pGc, ui32W - 5, ui32H, ui32W  , ui32H);
 
 	g_object_unref(l_pGc);
-	//g_object_unref(l_pText);
 }
 
 void CROCCurveDraw::drawBottomMark(OpenViBE::uint32 ui32W, OpenViBE::uint32 ui32H, const char *sLabel)
@@ -227,5 +227,4 @@ void CROCCurveDraw::drawBottomMark(OpenViBE::uint32 ui32W, OpenViBE::uint32 ui32
 	gdk_draw_line(m_pDrawableArea->window, l_pGc, ui32W , ui32H+5, ui32W  , ui32H);
 
 	g_object_unref(l_pGc);
-	//g_object_unref(l_pText);
 }

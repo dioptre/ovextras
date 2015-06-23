@@ -130,7 +130,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Compute the kappa coefficient for the classifier."); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("The box computes kappa coefficient for a classifier."); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Measurement"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Evaluation/Classification"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-yes"); }
 

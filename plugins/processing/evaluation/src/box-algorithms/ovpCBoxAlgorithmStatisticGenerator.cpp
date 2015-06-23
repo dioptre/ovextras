@@ -1,6 +1,5 @@
 #include "ovpCBoxAlgorithmStatisticGenerator.h"
 
-#include <iostream>
 #include <sstream>
 
 #include <xml/IXMLHandler.h>
@@ -36,7 +35,6 @@ boolean CBoxAlgorithmStatisticGenerator::initialize(void)
 	m_oSignalDecoder.initialize(*this, 0);
 	m_oStimulationDecoder.initialize(*this, 1);
 
-	m_ui32AmountChannel = 0;
 	m_oStimulationMap.clear();
 
 	m_bHasBeenStreamed = false;
@@ -130,9 +128,9 @@ boolean CBoxAlgorithmStatisticGenerator::process(void)
 		m_oSignalDecoder.decode(i);
 		if(m_oSignalDecoder.isHeaderReceived())
 		{
-			m_ui32AmountChannel = m_oSignalDecoder.getOutputMatrix()->getDimensionSize(0);
+			uint32 l_ui32AmountChannel = m_oSignalDecoder.getOutputMatrix()->getDimensionSize(0);
 			m_bHasBeenStreamed = true;
-			for(size_t j = 0; j < m_ui32AmountChannel; ++j)
+			for(size_t j = 0; j < l_ui32AmountChannel; ++j)
 			{
 				SSignalInfo l_oInfo = {m_oSignalDecoder.getOutputMatrix()->getDimensionLabel(0, j),
 									   std::numeric_limits<float64>::max(), - std::numeric_limits<float64>::max(), 0, 0};
@@ -143,7 +141,7 @@ boolean CBoxAlgorithmStatisticGenerator::process(void)
 		{
 			uint32 l_ui32SampleCount = m_oSignalDecoder.getOutputMatrix()->getDimensionSize(1);
 			float64* l_pBuffer = m_oSignalDecoder.getOutputMatrix()->getBuffer();
-			for(size_t j = 0; j < m_ui32AmountChannel; ++j)
+			for(size_t j = 0; j < m_oSignalInfoList.size(); ++j)
 			{
 				SSignalInfo& l_oInfo = m_oSignalInfoList[j];
 				for(size_t k = 0; k < l_ui32SampleCount; ++k)

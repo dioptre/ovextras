@@ -180,7 +180,7 @@ boolean CBoxAlgorithmROCCurve::computeROCCurves()
 	return true;
 }
 
-boolean CBoxAlgorithmROCCurve::computeOneROCCurve(const CIdentifier rClassIdentifier, uint32 ui32ClassIndex)
+boolean CBoxAlgorithmROCCurve::computeOneROCCurve(const CIdentifier& rClassIdentifier, uint32 ui32ClassIndex)
 {
 	std::vector < CRocPairValue > l_oRocPairValueList;
 	for(std::vector< CLabelValuesPair >::iterator it = m_oLabelValueList.begin(); it != m_oLabelValueList.end(); ++it)
