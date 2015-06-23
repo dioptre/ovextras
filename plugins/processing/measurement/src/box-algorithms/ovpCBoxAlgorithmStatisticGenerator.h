@@ -15,6 +15,14 @@ namespace OpenViBEPlugins
 {
 	namespace Measurement
 	{
+		typedef struct {
+			OpenViBE::CString m_sChannelName;
+			OpenViBE::float64 m_f64Min;
+			OpenViBE::float64 m_f64Max;
+			OpenViBE::float64 m_f64SampleSum;
+			OpenViBE::uint32 m_ui32SampleCount;
+		}SSignalInfo;
+
 		/**
 		 * \class CBoxAlgorithmStatisticGenerator
 		 * \author Serrière Guillaume (Inria)
@@ -33,9 +41,11 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process(void);
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_StatisticGenerator);
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_StatisticGenerator)
 
 		private:
+			XML::IXMLNode* getFloat64Node(const char* const sNodeName, OpenViBE::float64 f64Value);
+
 			// Input decoder:
 			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmStatisticGenerator > m_oSignalDecoder;
 			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmStatisticGenerator > m_oStimulationDecoder;
@@ -43,6 +53,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32AmountChannel;
 			OpenViBE::CString m_oFilename;
 			std::map < OpenViBE::CIdentifier, OpenViBE::uint32> m_oStimulationMap;
+			std::vector < SSignalInfo > m_oSignalInfoList;
 
 			OpenViBE::boolean m_bHasBeenStreamed;
 		};
