@@ -14,9 +14,9 @@ boolean CAlgorithmPairwiseDecision::process()
 {
 	if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute))
 	{
-		TParameterHandler<IMatrix *> ip_pProbabilityMatrix = this->getInputParameter(OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix);
+		TParameterHandler<std::vector < SClassificationInfo > *> ip_pClassificationValues = this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassificationOutputs);
 		TParameterHandler<IMatrix*> op_pProbabilityVector = this->getOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector);
-		return this->compute((IMatrix*)ip_pProbabilityMatrix, (IMatrix*)op_pProbabilityVector);
+		return this->compute(*((std::vector < SClassificationInfo > *)ip_pClassificationValues), (IMatrix*)op_pProbabilityVector);
 	}
 	else if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_SaveConfiguration))
 	{

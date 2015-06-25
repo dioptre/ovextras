@@ -37,44 +37,64 @@ boolean CAlgorithmPairwiseDecisionHT::uninitialize()
 
 boolean CAlgorithmPairwiseDecisionHT::parametrize()
 {
+	TParameterHandler < uint32 > ip_pClassCount(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount));
+	m_ui32ClassCount = ip_pClassCount;
+
 	return true;
 }
 
 
 
-boolean CAlgorithmPairwiseDecisionHT::compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector)
+boolean CAlgorithmPairwiseDecisionHT::compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabilityVector)
 {
 	TParameterHandler<IMatrix*> ip_pRepartitionSetVector = this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_SetRepartition);
+	float64* l_pProbabilityMatrix = new float64[m_ui32ClassCount * m_ui32ClassCount];
 
-	const uint32 l_ui32AmountClass = pSubClassifierMatrix->getDimensionSize(0);
+	//First we set the diagonal to 0
+	for(size_t i = 0 ; i < m_ui32ClassCount ; ++i)
+	{
+		l_pProbabilityMatrix[i*m_ui32ClassCount + i] = 0.;
+	}
 
 #if HT_DEBUG
-	std::cout << "Repartition" << std::endl;
-	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
-			std::cout << ip_pRepartitionSetVector->getBuffer()[i] << " ";
+	for(OpenViBE::uint32 i = 0 ; i< m_ui32ClassCount ; ++i){
+
+		for(OpenViBE::uint32 j = 0 ; j<m_ui32ClassCount ; ++j){
+			std::cout << l_pProbabilityMatrix[i*m_ui32ClassCount + j] << " ";
+		}
+		std::cout << std::endl;
 	}
-	std::cout << std::endl << std::endl;
 #endif
 
-	float64 *l_pP = new float64[l_ui32AmountClass];
-	float64 **l_pMu = new float64*[l_ui32AmountClass];
-	uint32 l_ui32AmountSample = 0;
-
-	for(size_t i=0; i<l_ui32AmountClass ; ++i){
-		l_pMu[i] = new float64[l_ui32AmountClass];
+	for(size_t i = 0 ; i < pClassificationValueList.size() ; ++i)
+	{
+		SClassificationInfo& l_rTemp = pClassificationValueList[i];
+		const uint32 l_f64FirstIndex = l_rTemp.m_f64FirstClass -1;
+		const uint32 l_f64SecondIndex = l_rTemp.m_f64SecondClass -1;
+		const float64* l_pValues = l_rTemp.m_pClassificationValue->getBuffer();
+		l_pProbabilityMatrix[l_f64FirstIndex * m_ui32ClassCount + l_f64SecondIndex] = l_pValues[0];
+		l_pProbabilityMatrix[l_f64SecondIndex * m_ui32ClassCount + l_f64FirstIndex] = 1 - l_pValues[0];
 	}
 
-	for(size_t i=0; i<l_ui32AmountClass ; ++i){
+	float64 *l_pP = new float64[m_ui32ClassCount];
+	float64 **l_pMu = new float64*[m_ui32ClassCount];
+	uint32 l_ui32AmountSample = 0;
+
+	for(size_t i=0; i<m_ui32ClassCount ; ++i){
+		l_pMu[i] = new float64[m_ui32ClassCount];
+	}
+
+	for(size_t i=0; i<m_ui32ClassCount ; ++i){
 		l_ui32AmountSample += static_cast<uint32>(ip_pRepartitionSetVector->getBuffer()[i]);
 	}
 
-	for(size_t i=0; i<l_ui32AmountClass ; ++i){
+	for(size_t i=0; i<m_ui32ClassCount ; ++i){
 		l_pP[i] = ip_pRepartitionSetVector->getBuffer()[i]/l_ui32AmountSample;
 	}
 
-	for(size_t i=0; i < l_ui32AmountClass ; ++i)
+	for(size_t i=0; i < m_ui32ClassCount ; ++i)
 	{
-		for(size_t j = 0 ; j < l_ui32AmountClass ; ++j)
+		for(size_t j = 0 ; j < m_ui32ClassCount ; ++j)
 		{
 			if(i != j)
 			{
@@ -89,14 +109,14 @@ boolean CAlgorithmPairwiseDecisionHT::compute(OpenViBE::IMatrix* pSubClassifierM
 
 #if HT_DEBUG
 	std::cout << "Initial probability and Mu" << std::endl;
-	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
+	for(OpenViBE::uint32 i = 0 ; i< m_ui32ClassCount ; ++i){
 			std::cout << l_pP[i] << " ";
 	}
 	std::cout << std::endl << std::endl;
 
-	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
+	for(OpenViBE::uint32 i = 0 ; i< m_ui32ClassCount ; ++i){
 
-		for(OpenViBE::uint32 j = 0 ; j<l_ui32AmountClass ; ++j){
+		for(OpenViBE::uint32 j = 0 ; j<m_ui32ClassCount ; ++j){
 			std::cout << l_pMu[i][j] << " ";
 		}
 		std::cout << std::endl;
@@ -104,32 +124,23 @@ boolean CAlgorithmPairwiseDecisionHT::compute(OpenViBE::IMatrix* pSubClassifierM
 	std::cout << std::endl;
 #endif
 
-#if HT_DEBUG
-	std::cout << "Probability matrix" << std::endl;
-	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
 
-		for(OpenViBE::uint32 j = 0 ; j<l_ui32AmountClass ; ++j){
-			std::cout << pSubClassifierMatrix->getBuffer()[i*l_ui32AmountClass + j] << " ";
-		}
-		std::cout << std::endl << std::endl;
-	}
-#endif
 
 	uint32 l_ui32ConsecutiveAlpha = 0;
 	uint32 l_ui32Index = 0;
-	while(l_ui32ConsecutiveAlpha != l_ui32AmountClass)
+	while(l_ui32ConsecutiveAlpha != m_ui32ClassCount)
 	{
 		float64 l_f64FirstSum = 0.0;
 		float64 l_f64SecondSum = 0.0;
 		float64 l_f64Alpha = 0.0;
 
-		for(size_t j = 0; j < l_ui32AmountClass ; ++j)
+		for(size_t j = 0; j < m_ui32ClassCount ; ++j)
 		{
 			if(j != l_ui32Index)
 			{
-				const uint32 l_ui32Temp = static_cast<uint32>(ip_pRepartitionSetVector->getBuffer()[l_ui32Index]+ip_pRepartitionSetVector->getBuffer()[j]);
+				const uint32 l_ui32Temp = static_cast<uint32>(l_pProbabilityMatrix[l_ui32Index]+ip_pRepartitionSetVector->getBuffer()[j]);
 
-				l_f64FirstSum += l_ui32Temp * pSubClassifierMatrix->getBuffer()[l_ui32Index*l_ui32AmountClass + j];
+				l_f64FirstSum += l_ui32Temp * l_pProbabilityMatrix[l_ui32Index*m_ui32ClassCount + j];
 				l_f64SecondSum += l_ui32Temp * l_pMu[l_ui32Index][j];
 			}
 		}
@@ -142,7 +153,7 @@ boolean CAlgorithmPairwiseDecisionHT::compute(OpenViBE::IMatrix* pSubClassifierM
 			l_f64Alpha = 1;
 		}
 
-		for(size_t j = 0; j<l_ui32AmountClass ; ++j)
+		for(size_t j = 0; j<m_ui32ClassCount ; ++j)
 		{
 			if(j != l_ui32Index)
 			{
@@ -161,19 +172,19 @@ boolean CAlgorithmPairwiseDecisionHT::compute(OpenViBE::IMatrix* pSubClassifierM
 		{
 			l_ui32ConsecutiveAlpha=0;
 		}
-		l_ui32Index = (l_ui32Index+1) % l_ui32AmountClass;
+		l_ui32Index = (l_ui32Index+1) % m_ui32ClassCount;
 
 #if HT_DEBUG
 	std::cout << "Intermediate probability, MU and alpha" << std::endl;
 	std::cout << l_f64Alpha << std::endl;
-	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
+	for(OpenViBE::uint32 i = 0 ; i< m_ui32ClassCount ; ++i){
 			std::cout << l_pP[i] << " ";
 	}
 	std::cout << std::endl << std::endl;
 
-	for(OpenViBE::uint32 i = 0 ; i< l_ui32AmountClass ; ++i){
+	for(OpenViBE::uint32 i = 0 ; i< m_ui32ClassCount ; ++i){
 
-		for(OpenViBE::uint32 j = 0 ; j<l_ui32AmountClass ; ++j){
+		for(OpenViBE::uint32 j = 0 ; j<m_ui32ClassCount ; ++j){
 			std::cout << l_pMu[i][j] << " ";
 		}
 		std::cout << std::endl;
@@ -186,24 +197,25 @@ boolean CAlgorithmPairwiseDecisionHT::compute(OpenViBE::IMatrix* pSubClassifierM
 
 #if HT_DEBUG
 	std::cout << "Result " << std::endl;
-	for(OpenViBE::uint32 i = 0; i<l_ui32AmountClass ; ++i)
+	for(OpenViBE::uint32 i = 0; i<m_ui32ClassCount ; ++i)
 	{
 		std::cout << l_pP[i] << " ";
 	}
 	std::cout << std::endl << std::endl;
 #endif
 
-	pProbabiltyVector->setDimensionCount(1);
-	pProbabiltyVector->setDimensionSize(0,l_ui32AmountClass);
-	for(OpenViBE::uint32 i = 0 ; i<l_ui32AmountClass ; ++i)
+	pProbabilityVector->setDimensionCount(1);
+	pProbabilityVector->setDimensionSize(0,m_ui32ClassCount);
+	for(OpenViBE::uint32 i = 0 ; i<m_ui32ClassCount ; ++i)
 	{
-		pProbabiltyVector->getBuffer()[i] = l_pP[i];
+		pProbabilityVector->getBuffer()[i] = l_pP[i];
 	}
 
 	delete[] l_pP;
-	for(size_t i=0; i<l_ui32AmountClass ; ++i){
+	for(size_t i=0; i<m_ui32ClassCount ; ++i){
 		delete[] l_pMu[i];
 	}
+	delete[] l_pProbabilityMatrix;
 	delete[] l_pMu;
 	return true;
 }
@@ -213,10 +225,10 @@ XML::IXMLNode* CAlgorithmPairwiseDecisionHT::saveConfiguration()
 	XML::IXMLNode* l_pRootNode = XML::createNode(c_sTypeNodeName);
 
 	TParameterHandler<IMatrix*> ip_pRepartitionSetVector = this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_SetRepartition);
-	const uint32 l_ui32AmountClass = ip_pRepartitionSetVector->getDimensionSize(0);
+	const uint32 l_ui32ClassCount = ip_pRepartitionSetVector->getDimensionSize(0);
 
 	std::stringstream l_sRepartition;
-	for(size_t i=0; i<l_ui32AmountClass ; i++)
+	for(size_t i=0; i<l_ui32ClassCount ; i++)
 	{
 		l_sRepartition << ip_pRepartitionSetVector->getBuffer()[i] << " " ;
 	}

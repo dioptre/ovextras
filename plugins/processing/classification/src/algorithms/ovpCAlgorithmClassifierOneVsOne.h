@@ -28,6 +28,17 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::IAlgorithmProxy* m_pSubClassifierProxy;
 		} SSubClassifierDescriptor;
 
+		//The aim of this structure is to record informations returned by the sub-classifier. They will be used by
+		// pairwise decision algorithms to compute probability vector.
+		// Should be use only by OneVsOne and pairwise decision algorithm
+		typedef struct{
+			OpenViBE::float64 m_f64FirstClass;
+			OpenViBE::float64 m_f64SecondClass;
+			OpenViBE::float64 m_f64ClassLabel;
+			//This output is probabilist
+			OpenViBE::IMatrix *m_pClassificationValue;
+		}SClassificationInfo;
+
 
 		class CAlgorithmClassifierOneVsOne : public OpenViBEToolkit::CAlgorithmPairingStrategy
 		{
@@ -40,7 +51,7 @@ namespace OpenViBEPlugins
 											   , OpenViBE::float64& rf64Class
 											   , OpenViBEToolkit::IVector& rDistanceValue
 											   , OpenViBEToolkit::IVector& rProbabilityValue);
-			virtual OpenViBE::boolean designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassAmount);
+			virtual OpenViBE::boolean designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassCount);
 
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
@@ -57,7 +68,7 @@ namespace OpenViBEPlugins
 
 			XML::IXMLNode* getClassifierConfiguration(SSubClassifierDescriptor &rDescriptor);
 			XML::IXMLNode* getPairwiseDecisionConfiguration(void);
-			OpenViBE::uint32 getClassAmount(void) const;
+			OpenViBE::uint32 getClassCount(void) const;
 
 			OpenViBE::boolean loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 			void generateConfigurationNode(void);
