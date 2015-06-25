@@ -282,16 +282,18 @@ typedef struct _SConfiguration
 		:m_eNoGui(CommandLineFlag_None)
 		,m_eNoCheckColorDepth(CommandLineFlag_None)
 		,m_eNoManageSession(CommandLineFlag_None)
+		,m_eNoVisualisation(CommandLineFlag_None)
 	{
 	}
 
 	OpenViBEDesigner::ECommandLineFlag getFlags(void)
 	{
-		return OpenViBEDesigner::ECommandLineFlag(m_eNoGui|m_eNoCheckColorDepth|m_eNoManageSession);
+		return OpenViBEDesigner::ECommandLineFlag(m_eNoGui|m_eNoCheckColorDepth|m_eNoManageSession|m_eNoVisualisation);
 	}
 
 	std::map < ECommandLineFlag, std::string > m_oFlag;
 	OpenViBEDesigner::ECommandLineFlag m_eNoGui;
+	OpenViBEDesigner::ECommandLineFlag m_eNoVisualisation;
 	OpenViBEDesigner::ECommandLineFlag m_eNoCheckColorDepth;
 	OpenViBEDesigner::ECommandLineFlag m_eNoManageSession;
 	std::map < std::string, std::string > m_oTokenMap;
@@ -372,6 +374,10 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 			l_oConfiguration.m_eNoCheckColorDepth=CommandLineFlag_NoCheckColorDepth;
 			l_oConfiguration.m_eNoManageSession=CommandLineFlag_NoManageSession;
 		}
+		else if(*it=="--no-visualisation")
+		{
+			l_oConfiguration.m_eNoVisualisation=CommandLineFlag_NoVisualisation;
+		}
 		else if(*it=="--no-check-color-depth")
 		{
 			l_oConfiguration.m_eNoCheckColorDepth=CommandLineFlag_NoCheckColorDepth;
@@ -427,6 +433,7 @@ int go(int argc, char ** argv)
 		cout << "  --help                  : displays this help message and exits\n";
 		cout << "  --kernel filename       : path to openvibe kernel library\n";
 		cout << "  --no-gui                : hides the designer graphical user interface (assumes --no-check-color-depth)\n";
+		cout << "  --no-visualisation      : hides the visualisation widgets\n";
 		cout << "  --no-check-color-depth  : does not check 24/32 bits color depth\n";
 		cout << "  --no-session-management : neither restore last used scenarios nor saves them at exit\n";
 		cout << "  --open filename         : opens a scenario (see also --no-session-management)\n";

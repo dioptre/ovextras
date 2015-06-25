@@ -2646,3 +2646,8 @@ boolean CApplication::isNoGuiActive()
 {
 	return ( (m_eCommandLineFlags & CommandLineFlag_NoGui) ? true : false);
 }
+
+boolean CApplication::isNoVisualisation()
+{
+	return ( (m_eCommandLineFlags & CommandLineFlag_NoVisualisation) ? true : false);
+}

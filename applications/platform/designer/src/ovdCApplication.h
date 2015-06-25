@@ -163,6 +163,8 @@ namespace OpenViBEDesigner
 		OpenViBE::boolean isLogAreaClicked();
 
 		OpenViBE::boolean isNoGuiActive();
+		
+		OpenViBE::boolean CApplication::isNoVisualisation();
 
 	public:
 
