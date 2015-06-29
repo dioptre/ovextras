@@ -25,7 +25,7 @@ namespace OpenViBEDesigner
 		CommandLineFlag_Config           =0x00000080,
 		CommandLineFlag_Kernel           =0x00000100,
 		CommandLineFlag_RandomSeed       =0x00000200,
-		CommandLineFlag_NoVisualisation  =0x00000400,  /** flag to hide visualisation widget */
+		CommandLineFlag_NoVisualisation  =0x00000400  /** flag to hide visualisation widget */
 	} ECommandLineFlag;
 
 	enum

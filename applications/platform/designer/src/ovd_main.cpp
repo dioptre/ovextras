@@ -280,9 +280,9 @@ typedef struct _SConfiguration
 {
 	_SConfiguration(void)
 		:m_eNoGui(CommandLineFlag_None)
+		,m_eNoVisualisation(CommandLineFlag_None)
 		,m_eNoCheckColorDepth(CommandLineFlag_None)
 		,m_eNoManageSession(CommandLineFlag_None)
-		,m_eNoVisualisation(CommandLineFlag_None)
 	{
 	}
 

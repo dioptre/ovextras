@@ -164,7 +164,7 @@ namespace OpenViBEDesigner
 
 		OpenViBE::boolean isNoGuiActive();
 		
-		OpenViBE::boolean CApplication::isNoVisualisation();
+		OpenViBE::boolean isNoVisualisation();
 
 	public:
 
