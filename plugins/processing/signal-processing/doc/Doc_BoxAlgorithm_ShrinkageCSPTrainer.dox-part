@@ -17,16 +17,18 @@ __________________________________________________________________
  
  In principle CSP can be useful in two-class experiments where there is discriminative information in the variance (or power) of the signal conditions.
  
- The implemented approach follows Lotte & Guan: "Regularizing common spatial patterns...", 2011. The filters for condition 1 are found by eigenvector
- decomposition of inv(Sigma1+rho*I)*Sigma2, where Sigma1 and Sigma2 are empirical covariance matrices for the two conditions, rho the amount of
- regularization and I an identity matrix. For condition 2, the formula is the same with sigmas swapped. 
- 
+ The box implements some of the methods described e.g. in Lotte & Guan: "Regularizing common spatial patterns...", 2011. Especially, it 
+ allows using the methods called "CSP with Diagonal Loading" and "CSP with Tikhonov Regularization" in the paper. In this approach, 
+ the filters for condition 1 are found by eigenvector decomposition of inv(Sigma1+rho*I)*Sigma2, where Sigma1 and Sigma2 are empirical 
+ covariance matrices for the two conditions, rho the amount of Tikhonov regularization and I an identity matrix. For condition 2, 
+ the formula is the same with sigmas swapped. The Sigma1 and Sigma2 may be optionally shrunk towards diagonal matrices.
  
  To avoid caching the whole dataset in the box, the algorithm tries to estimate the required covariances incrementally. The box supports
  a few different incremental ways to compute the covariances. The 'block average' approach takes an average of all the covariances of the incoming 
  signal chunks, whereas the incremental (per sample) method aims to implement Youngs & Cramer algorithm as described in Chan, Golub, Leveq, 
  "Updating formulae and a pairwise algorithm...", 1979. Which one gives better results may depend on the situation -- however, 
- taking an average of covariance matrices is not usually suggested as a method for computing covariance over the whole data.
+ taking an average of covariance matrices is not usually suggested as a method for computing covariance over the whole data. It is 
+ also possible to compensate for the effect of changes in the average signal power over time by enabling 'Trace Normalization' setting.
  
  * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Description|
 __________________________________________________________________
@@ -83,10 +85,18 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Setting4|
  Method to update the covariances
  * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting4| 
- 
+
  * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Setting5|
- The amount of regularization, bigger signifies more. This equals parameter rho in the description above. If 0, the method behaves approximately as a regular CSP. 
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting5|
+ Is trace normalization done when appending the per-chunk covariances? 
+ * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting5| 
+
+ * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Setting6|
+ The amount of shrinkage, between 0 and 1. It interpolates between the covariance matrices and the diagonal matrix.
+ * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting6|
+ 
+ * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Setting7|
+ The amount of Tikhonov regularization, bigger signifies more. This equals parameter rho in the description above. If 0, the method behaves approximately as a regular CSP. 
+ * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting7|
 __________________________________________________________________
 
 Miscellaneous description
@@ -98,6 +108,13 @@ __________________________________________________________________
  
  Note that the usage of the CSP filters before classification training can make the cross-validation results optimistic, unless strictly non-overlapping 
  parts of the data were used to train the CSP and the classifier (disjoints sets for each). 
+ 
+ The origin of the trace normalization trick has been lost. Presumably the idea is to normalize the scale of 
+ each chunk in order to compensate for possible signal power drift over time during the EEG recording, 
+ making each chunks' covariance contribute similarly to the aggregate regardless of the current chunks average power. 
+				
+ To get the CSP with Diagonal Loading of Lotte & Guan paper, set shrinkage to a positive value and Tikhonov to 0. To get the CSP with Tikhonov regularization, 
+ do the opposite. You can also try a mixture of the two. The Guan & Lotte paper does not use trace normalization.
  
  Once the spatial filters are computed and saved in the configuration file, you can load it into the \ref Doc_BoxAlgorithm_SpatialFilter "Spatial Filter" box.
  

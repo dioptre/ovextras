@@ -20,6 +20,7 @@
 #define OVP_Algorithm_OnlineCovariance_InputParameterId_Shrinkage                         OpenViBE::CIdentifier(0x16577C7B, 0x4E056BF7) 
 #define OVP_Algorithm_OnlineCovariance_InputParameterId_InputVectors                      OpenViBE::CIdentifier(0x47E55F81, 0x27A519C4)
 #define OVP_Algorithm_OnlineCovariance_InputParameterId_UpdateMethod                      OpenViBE::CIdentifier(0x1C4F444F, 0x3CA213E2)
+#define OVP_Algorithm_OnlineCovariance_InputParameterId_TraceNormalization                OpenViBE::CIdentifier(0x269D5E63, 0x3B6D486E)
 
 #define OVP_Algorithm_OnlineCovariance_OutputParameterId_Mean                             OpenViBE::CIdentifier(0x3F1F50A3, 0x05504D0E)
 #define OVP_Algorithm_OnlineCovariance_OutputParameterId_CovarianceMatrix                 OpenViBE::CIdentifier(0x203A5472, 0x67C5324C)
@@ -61,7 +62,8 @@ namespace OpenViBEPlugins
 			Eigen::MatrixXd m_oIncrementalCov;
 			Eigen::MatrixXd m_oIncrementalMean;
 
-			OpenViBE::uint32 m_ui32Count;
+			// The divisor for the above estimates to do the normalization
+			OpenViBE::uint64 m_ui64Count;
 
 		};
 
@@ -85,9 +87,10 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_Shrinkage,         "Shrinkage",         OpenViBE::Kernel::ParameterType_Float);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_InputVectors,      "Input vectors",     OpenViBE::Kernel::ParameterType_Matrix);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_UpdateMethod,      "Cov update method", OpenViBE::Kernel::ParameterType_Enumeration, OVP_TypeId_OnlineCovariance_UpdateMethod);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_Shrinkage,          "Shrinkage",           OpenViBE::Kernel::ParameterType_Float);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_InputVectors,       "Input vectors",       OpenViBE::Kernel::ParameterType_Matrix);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_UpdateMethod,       "Cov update method",   OpenViBE::Kernel::ParameterType_Enumeration, OVP_TypeId_OnlineCovariance_UpdateMethod);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_TraceNormalization, "Trace normalization", OpenViBE::Kernel::ParameterType_Boolean);
 
 				// The algorithm returns these outputs
 				rAlgorithmPrototype.addOutputParameter (OVP_Algorithm_OnlineCovariance_OutputParameterId_Mean,             "Mean vector",        OpenViBE::Kernel::ParameterType_Matrix);

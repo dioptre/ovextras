@@ -78,10 +78,13 @@ boolean CBoxAlgorithmShrinkageCSPTrainer::initialize(void)
 		m_pIncrementalCov[i]->initialize();
 
 		// Set the params of the cov algorithm
-		OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64UpdateMethod(m_pIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_UpdateMethod));
+		OpenViBE::Kernel::TParameterHandler < uint64 > ip_ui64UpdateMethod(m_pIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_UpdateMethod));
 		ip_ui64UpdateMethod = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
-        OpenViBE::Kernel::TParameterHandler < OpenViBE::float64 > ip_f64Shrinkage(m_pIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_Shrinkage));
-		ip_f64Shrinkage = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+		OpenViBE::Kernel::TParameterHandler < boolean > ip_bTraceNormalization(m_pIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_TraceNormalization));
+		ip_bTraceNormalization = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+		OpenViBE::Kernel::TParameterHandler < float64 > ip_f64Shrinkage(m_pIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_Shrinkage));
+		ip_f64Shrinkage = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
+		m_f64Tikhonov = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
 
 		m_ui64nBuffers[i] = 0;
 		m_ui64nSamples[i] = 0;
@@ -267,7 +270,7 @@ boolean CBoxAlgorithmShrinkageCSPTrainer::process(void)
 
 		if(l_oCov[0].rows() != l_oCov[1].rows() || l_oCov[0].cols() != l_oCov[1].cols() )
 		{
-			this->getLogManager() << LogLevel_Info << "The input streams had different amount of channels\n";
+			this->getLogManager() << LogLevel_Info << "The input streams had different number of channels\n";
 			return false;
 		}
 
@@ -286,26 +289,30 @@ boolean CBoxAlgorithmShrinkageCSPTrainer::process(void)
 		MatrixXd l_oSortedEigenVectors[2];
 		MatrixXd l_oCovInv[2];
 		MatrixXd l_oCovProd[2];
+		MatrixXd l_oTikhonov;
+		l_oTikhonov.resizeLike(l_oCov[0]);
+		l_oTikhonov.setIdentity();
+		l_oTikhonov *= m_f64Tikhonov;
 
 		// To get the CSP filters, we compute two sets of eigenvectors,
-		// eig(inv(sigma2+shrink)*sigma1) and eig(inv(sigma1+shrink)*sigma2
+		// eig(inv(sigma2+tikhonov)*sigma1) and eig(inv(sigma1+tikhonov)*sigma2
 		// and pick the ones corresponding to the largest eigenvalues as
-		// spatial filters [following Lotte & Guan 2010]. Assumes the shrink
-		// (+shrink) has already been done inside the cov computation algorithm.
+		// spatial filters [following Lotte & Guan 2011]. Assumes the shrink
+		// of the sigmas (if its used) has been performed inside the cov 
+		// computation algorithm.
 	
 		EigenSolver<MatrixXd> l_oEigenSolverGeneral;
 
 		for(uint32 c=0;c<2;c++) 
 		{
 			try {
-				l_oCovInv[c] = l_oCov[c].inverse();
+				l_oCovInv[c] = (l_oCov[c]+l_oTikhonov).inverse();
 			} catch(...) {
 				this->getLogManager() << LogLevel_Error << "Inverse failed for condition " << c+1 << "\n";
 				return false;
 			}
-			
 
-			l_oCovProd[c] = l_oCovInv[c] * l_oCovRaw[1-c];
+			l_oCovProd[c] = l_oCovInv[c] * l_oCov[1-c];
 
 			// std::stringstream fn; fn << "C:/jl/dump_covprod" << c << ".csv";
 			// dumpMatrixFile(l_oCovProd[c], fn.str().c_str());

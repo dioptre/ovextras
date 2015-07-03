@@ -48,32 +48,15 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64StimulationIdentifier;
 			OpenViBE::CString m_sSpatialFilterConfigurationFilename;
 			OpenViBE::uint64 m_ui64FilterDimension;
-			// OpenViBE::float64 m_f64Shrinkage;
+			OpenViBE::float64 m_f64Tikhonov;
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pIncrementalCov[2];
 
 			OpenViBE::uint64 m_ui64nBuffers[2];
 			OpenViBE::uint64 m_ui64nSamples[2];
 
-			// OpenViBE::CMatrix m_oSignalTranspose[2];
-
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ShrinkageCSPTrainer)
 		};
-
-#if 0
-		class CBoxAlgorithmShrinkageCSPTrainerListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
-		{
-		public:
-			virtual OpenViBE::boolean onInitialized(OpenViBE::Kernel::IBox& rBox) { 
-
-				rBox.addSetting("test", OV_TypeId_Stimulation, "1", rBox.getSettingCount());
-				
-				return true;
-			};
-
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier)
-		};
-#endif
 
 		class CBoxAlgorithmShrinkageCSPTrainerDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
 		{
@@ -83,19 +66,14 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Shrinkage CSP Trainer"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Jussi T. Lindgren"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Computes Common Spatial Pattern filter with regularized cov."); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Computes Common Spatial Pattern filters with regularization"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Filtering"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.5"); }
-			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
+			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-apply"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ShrinkageCSPTrainer; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CBoxAlgorithmShrinkageCSPTrainer; }
-
-#if 0
-			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmShrinkageCSPTrainerListener; }
-			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
-#endif
 
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
@@ -112,8 +90,10 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Filter dimension",             OV_TypeId_Integer, "2");
 
 				// Params of the cov algorithm; would be better to poll the params from the algorithm, however this is not straightforward to do
-				rBoxAlgorithmPrototype.addSetting("Covariance method",            OVP_TypeId_OnlineCovariance_UpdateMethod, OVP_TypeId_OnlineCovariance_UpdateMethod_ChunkAverage.toString());   
-				rBoxAlgorithmPrototype.addSetting("Shrinkage coefficient",        OpenViBE::Kernel::ParameterType_Float, "0.0");
+				rBoxAlgorithmPrototype.addSetting("Covariance update",            OVP_TypeId_OnlineCovariance_UpdateMethod, OVP_TypeId_OnlineCovariance_UpdateMethod_ChunkAverage.toString());   
+				rBoxAlgorithmPrototype.addSetting("Trace normalization",          OV_TypeId_Boolean, "false");   
+				rBoxAlgorithmPrototype.addSetting("Shrinkage coefficient",        OV_TypeId_Float,   "0.0");
+				rBoxAlgorithmPrototype.addSetting("Tikhonov coefficient",         OV_TypeId_Float,   "0.0");
 
 				rBoxAlgorithmPrototype.addOutput ("Train-completed Flag",         OV_TypeId_Stimulations);
 
