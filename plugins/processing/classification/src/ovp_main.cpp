@@ -22,6 +22,7 @@
 #if defined TARGET_HAS_ThirdPartyEIGEN
 #include "algorithms/ovpCAlgorithmConditionedCovariance.h"
 #include "algorithms/ovpCAlgorithmClassifierLDA.h"
+#include "algorithms/ovpCAlgorithmClassifierMLP.h"
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
 const char* const c_sPairwiseStrategyEnumerationName = "Pairwise Decision Strategy";
@@ -87,6 +88,17 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_ClassId_Algorithm_ClassifierLDA_DecisionAvailable, "HT", OVP_ClassId_Algorithm_PairwiseDecision_HT.toUInteger());
 	OpenViBEPlugins::Classification::registerAvailableDecisionEnumeration(OVP_ClassId_Algorithm_ClassifierLDA, OVP_ClassId_Algorithm_ClassifierLDA_DecisionAvailable);
 
+	//MLP section
+	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierMLPDesc);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Multi-layer Perceptron", OVP_ClassId_Algorithm_ClassifierMLP.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_Enumeration_TransfertFunction, c_sMLPTransfertFunctionName);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Enumeration_TransfertFunction, "Identity", OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Identity.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Enumeration_TransfertFunction, "Softmax", OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Softmax.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Enumeration_TransfertFunction, "Sigmoid", OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Sigmoid.toUInteger());
+
+	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_Enumeration_EvaluationFunction, c_sMLPEvaluationFunctionName);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Enumeration_EvaluationFunction, "Quadratic", OVP_Algorithm_ClassifierMLP_Enumeration_EvaluationFunction_Quadratic.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Enumeration_EvaluationFunction, "Misclassification", OVP_Algorithm_ClassifierMLP_Enumeration_EvaluationFunction_MisClassification.toUInteger());
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
 OVP_Declare_End();

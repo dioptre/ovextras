@@ -7,9 +7,24 @@
 
 //#if defined TARGET_HAS_ThirdPartyEIGEN
 
-#define OVP_ClassId_Algorithm_ClassifierLDA                                        OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401260)
-#define OVP_ClassId_Algorithm_ClassifierLDA_DecisionAvailable                      OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401261)
-#define OVP_ClassId_Algorithm_ClassifierLDADesc                                    OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401262)
+#define OVP_ClassId_Algorithm_ClassifierMLP                                          OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401260)
+#define OVP_ClassId_Algorithm_ClassifierMLP_DecisionAvailable                        OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401261)
+#define OVP_ClassId_Algorithm_ClassifierMLPDesc                                      OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401262)
+
+#define OVP_Algorithm_ClassifierMLP_InputParameterId_TransfertFunction               OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401263)
+#define OVP_Algorithm_ClassifierMLP_InputParameterId_EvaluationFunction              OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401264)
+#define OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount               OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401265)
+
+#define OVP_TypeId_Enumeration_TransfertFunction                                     OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401267)
+#define OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Identity           OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401268)
+#define OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Softmax            OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401269)
+#define OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Sigmoid            OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC40126A)
+
+#define OVP_TypeId_Enumeration_EvaluationFunction                                    OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC40126B)
+#define OVP_Algorithm_ClassifierMLP_Enumeration_EvaluationFunction_Quadratic         OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC40126C)
+#define OVP_Algorithm_ClassifierMLP_Enumeration_EvaluationFunction_MisClassification OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC40126D)
+
+
 
 
 #include <xml/IXMLNode.h>
@@ -41,6 +56,9 @@ namespace OpenViBEPlugins
 
 		private:
 
+			OpenViBE::int64 m_i64HiddenNeuronCount;
+			OpenViBE::CIdentifier m_oEvaluationFunctionIdentifier;
+			OpenViBE::CIdentifier m_oTransfertFunctionIdentifier;
 		};
 
 		class CAlgorithmClassifierMLPDesc : public OpenViBEToolkit::CAlgorithmClassifierDesc
@@ -65,6 +83,13 @@ namespace OpenViBEPlugins
 			{
 
 				CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
+
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_TransfertFunction,c_sMLPTransfertFunctionName,
+													  OpenViBE::Kernel::ParameterType_Enumeration, OVP_TypeId_Enumeration_TransfertFunction);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_EvaluationFunction,c_sMLPEvaluationFunctionName,
+													  OpenViBE::Kernel::ParameterType_Enumeration, OVP_TypeId_Enumeration_EvaluationFunction);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount, "Amount of neuron in hidden layer",
+													  OpenViBE::Kernel::ParameterType_Integer);
 				return true;
 			}
 
