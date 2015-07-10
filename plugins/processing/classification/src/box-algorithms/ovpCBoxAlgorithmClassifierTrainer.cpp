@@ -473,6 +473,7 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 		m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 
 		const float64 l_f64PredictedValue = op_f64ClassificationStateClass;
+		//std::cout << "Try to recognize " << l_f64CorrectValue << " and get " << l_f64PredictedValue << std::endl;
 		if(l_f64PredictedValue==l_f64CorrectValue)
 		{
 			l_iSuccessfullTrainerCount++;

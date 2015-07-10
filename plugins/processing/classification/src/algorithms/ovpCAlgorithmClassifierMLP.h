@@ -24,15 +24,17 @@
 #define OVP_Algorithm_ClassifierMLP_Enumeration_EvaluationFunction_Quadratic         OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC40126C)
 #define OVP_Algorithm_ClassifierMLP_Enumeration_EvaluationFunction_MisClassification OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC40126D)
 
-
-
+#include <Eigen/Dense>
 
 #include <xml/IXMLNode.h>
+#include <vector>
 
 namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
+		OpenViBE::int32 MLPClassificationCompare(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
+
 		class CAlgorithmClassifierMLP : public OpenViBEToolkit::CAlgorithmClassifier
 		{
 
@@ -55,10 +57,32 @@ namespace OpenViBEPlugins
 		protected:
 
 		private:
+			void dumpData (XML::IXMLNode *pNode, Eigen::MatrixXd &rMatrix);
+			void dumpData (XML::IXMLNode *pNode, Eigen::VectorXd &rVector);
+			void dumpData (XML::IXMLNode *pNode, OpenViBE::int64 i64Value);
+			void dumpData (XML::IXMLNode *pNode, OpenViBE::float64 f64Value);
+			void dumpData (XML::IXMLNode *pNode, OpenViBE::CIdentifier &rIdentifier, const OpenViBE::CIdentifier &rEnumerationIdentifier);
+
+			void loadData (XML::IXMLNode *pNode, Eigen::MatrixXd &rMatrix, OpenViBE::int64 ui32RowCount, OpenViBE::int64 ui32ColCount);
+			void loadData (XML::IXMLNode *pNode, Eigen::VectorXd &rVector);
+			void loadData (XML::IXMLNode *pNode, OpenViBE::int64 &i64Value);
+			void loadData (XML::IXMLNode *pNode, OpenViBE::float64 &f64Value);
+			void loadData (XML::IXMLNode *pNode, OpenViBE::CIdentifier &rIdentifier);
+
+			std::vector < OpenViBE::float64 > m_oLabelList;
 
 			OpenViBE::int64 m_i64HiddenNeuronCount;
 			OpenViBE::CIdentifier m_oEvaluationFunctionIdentifier;
 			OpenViBE::CIdentifier m_oTransfertFunctionIdentifier;
+
+			Eigen::MatrixXd m_oInputWeight;
+			Eigen::VectorXd m_oInputBias;
+
+			Eigen::MatrixXd m_oHiddenWeight;
+			Eigen::VectorXd m_oHiddenBias;
+
+			OpenViBE::float64 m_f64Min;
+			OpenViBE::float64 m_f64Max;
 		};
 
 		class CAlgorithmClassifierMLPDesc : public OpenViBEToolkit::CAlgorithmClassifierDesc
