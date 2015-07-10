@@ -101,35 +101,24 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 
 	if(l_oIdentifier==OV_TypeId_StreamedMatrix)
 	{
-		m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamDecoder));
-		m_pStreamEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamEncoder));
-
-		m_pStreamDecoder->initialize();
-		m_pStreamEncoder->initialize();
+		m_pStreamDecoder=new OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmSpatialFilter >(*this, 0);
+		m_pStreamEncoder=new OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmSpatialFilter >(*this, 0);
 	}
 	else if(l_oIdentifier==OV_TypeId_Signal)
 	{
-		m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-		m_pStreamEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoder));
+		m_pStreamDecoder=new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmSpatialFilter >(*this, 0);
+		m_pStreamEncoder=new OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmSpatialFilter >(*this, 0);
 
-		m_pStreamDecoder->initialize();
-		m_pStreamEncoder->initialize();
-
-		TParameterHandler < uint64 > op_pSamplingFrequency(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
-		TParameterHandler < uint64 > ip_pSamplingFrequency(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SignalStreamEncoder_InputParameterId_SamplingRate));
-		ip_pSamplingFrequency.setReferenceTarget(op_pSamplingFrequency);
+		((OpenViBEToolkit::TSignalDecoder<CBoxAlgorithmSpatialFilter>*)m_pStreamEncoder)->getOutputSamplingRate() 
+			= ((OpenViBEToolkit::TSignalDecoder<CBoxAlgorithmSpatialFilter>*)m_pStreamDecoder)->getOutputSamplingRate();
 	} 
 	else if(l_oIdentifier==OV_TypeId_Spectrum)
 	{
-		m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SpectrumStreamDecoder));
-		m_pStreamEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SpectrumStreamEncoder));
+		m_pStreamDecoder=new OpenViBEToolkit::TSpectrumDecoder < CBoxAlgorithmSpatialFilter >(*this, 0);
+		m_pStreamEncoder=new OpenViBEToolkit::TSpectrumEncoder < CBoxAlgorithmSpatialFilter >(*this, 0);
 
-		m_pStreamDecoder->initialize();
-		m_pStreamEncoder->initialize();
-
-		TParameterHandler < IMatrix* > op_pBandMatrix(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_MinMaxFrequencyBands));
-		TParameterHandler < IMatrix* > ip_pBandMatrix(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_MinMaxFrequencyBands));
-		ip_pBandMatrix.setReferenceTarget(op_pBandMatrix);
+		((OpenViBEToolkit::TSpectrumDecoder<CBoxAlgorithmSpatialFilter>*)m_pStreamEncoder)->getOutputMinMaxFrequencyBands() 
+			= ((OpenViBEToolkit::TSpectrumDecoder<CBoxAlgorithmSpatialFilter>*)m_pStreamDecoder)->getOutputMinMaxFrequencyBands();
 	} 
 	else
 	{
@@ -137,11 +126,9 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 		return false;
 	}
 
-	ip_pMemoryBuffer.initialize(m_pStreamDecoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_InputParameterId_MemoryBufferToDecode));
-	op_pMatrix.initialize(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputParameterId_Matrix));
-
-	ip_pMatrix.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix));
-	op_pMemoryBuffer.initialize(m_pStreamEncoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
+	const CString l_sCoefficient=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+			
+	loadCoefficients(l_sCoefficient, ' ', OV_Value_EnumeratedStringSeparator);
 
 	return true;
 }
@@ -151,14 +138,14 @@ boolean CBoxAlgorithmSpatialFilter::uninitialize(void)
 	if(m_pStreamDecoder)
 	{
 		m_pStreamDecoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pStreamDecoder);
+		delete m_pStreamDecoder;
 		m_pStreamDecoder=NULL;
 	}
 
 	if(m_pStreamEncoder)
 	{
 		m_pStreamEncoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pStreamEncoder);
+		delete m_pStreamEncoder;
 		m_pStreamEncoder=NULL;
 	}
 
@@ -178,21 +165,18 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
-		op_pMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
 
-		m_pStreamDecoder->process();
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedHeader))
+		m_pStreamDecoder->decode(i);
+		if(m_pStreamDecoder->isHeaderReceived()) 
 		{
-			const CString l_sCoefficient=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-			
-			loadCoefficients(l_sCoefficient, ' ', OV_Value_EnumeratedStringSeparator);
-
 			const uint32 l_ui32OutputChannelCountSetting=(uint32)(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 			const uint32 l_ui32InputChannelCountSetting=(uint32)(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
-			const uint32 l_ui32InputChannelCount=op_pMatrix->getDimensionSize(0);
-			const uint32 l_ui32InputSamplesCount=op_pMatrix->getDimensionSize(1);
+			// we can treat them all as matrix decoders as they inherit from it
+			const IMatrix *l_pInputMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder<CBoxAlgorithmSpatialFilter>*)m_pStreamDecoder)->getOutputMatrix();
+
+			const uint32 l_ui32InputChannelCount=l_pInputMatrix->getDimensionSize(0);
+			const uint32 l_ui32InputSamplesCount=l_pInputMatrix->getDimensionSize(1);
 
 			if(l_ui32InputChannelCount == 0 || l_ui32InputSamplesCount == 0) 
 			{
@@ -214,29 +198,33 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 
 			const uint32 l_ui32OutputChannelCount=m_vCoefficient.size() / l_ui32InputChannelCount;
 
-			ip_pMatrix->setDimensionCount(2);
-			ip_pMatrix->setDimensionSize(0, l_ui32OutputChannelCount);
-			ip_pMatrix->setDimensionSize(1, l_ui32InputSamplesCount);
+			IMatrix *l_pOutputMatrix = ((OpenViBEToolkit::TStreamedMatrixEncoder<CBoxAlgorithmSpatialFilter>*)m_pStreamEncoder)->getInputMatrix();
+			l_pOutputMatrix->setDimensionCount(2);
+			l_pOutputMatrix->setDimensionSize(0, l_ui32OutputChannelCount);
+			l_pOutputMatrix->setDimensionSize(1, l_ui32InputSamplesCount);
 
 			// Name channels
-			for(uint32 i=0;i<ip_pMatrix->getDimensionSize(0);i++)
+			for(uint32 i=0;i<l_pOutputMatrix->getDimensionSize(0);i++)
 			{
 				char l_sBuffer[64];
 				sprintf(l_sBuffer, "sFiltered %d", i);
-				ip_pMatrix->setDimensionLabel(0, i, l_sBuffer);
+				l_pOutputMatrix->setDimensionLabel(0, i, l_sBuffer);
 			}
 
-			m_pStreamEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
+			m_pStreamEncoder->encodeHeader();
 		}
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_pStreamDecoder->isBufferReceived())
 		{
-			float64* l_pMatrix=op_pMatrix->getBuffer();
-			float64* l_pFilteredMatrix=ip_pMatrix->getBuffer();
-			uint32 l_ui32InputChannelCount=op_pMatrix->getDimensionSize(0);
-			uint32 l_ui32OutputChannelCount=ip_pMatrix->getDimensionSize(0);
-			uint32 l_ui32SampleCount=ip_pMatrix->getDimensionSize(1);
+			const IMatrix *l_pInputMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder<CBoxAlgorithmSpatialFilter>*)m_pStreamDecoder)->getOutputMatrix();
+			IMatrix *l_pOutputMatrix = ((OpenViBEToolkit::TStreamedMatrixEncoder<CBoxAlgorithmSpatialFilter>*)m_pStreamEncoder)->getInputMatrix();
 
-			System::Memory::set(l_pFilteredMatrix, l_ui32SampleCount*l_ui32OutputChannelCount*sizeof(float64), 0);
+			const float64* l_pInput=l_pInputMatrix->getBuffer();
+			float64* l_pOutput=l_pOutputMatrix->getBuffer();
+			const uint32 l_ui32InputChannelCount=l_pInputMatrix->getDimensionSize(0);
+			const uint32 l_ui32OutputChannelCount=l_pOutputMatrix->getDimensionSize(0);
+			const uint32 l_ui32SampleCount=l_pInputMatrix->getDimensionSize(1);
+
+			System::Memory::set(l_pOutput, l_ui32SampleCount*l_ui32OutputChannelCount*sizeof(float64), 0);
 
 			for(uint32 j=0; j<l_ui32OutputChannelCount; j++)
 			{
@@ -244,19 +232,18 @@ boolean CBoxAlgorithmSpatialFilter::process(void)
 				{
 					for(uint32 l=0; l<l_ui32SampleCount; l++)
 					{
-						l_pFilteredMatrix[j*l_ui32SampleCount+l]+=m_vCoefficient[j*l_ui32InputChannelCount+k]*l_pMatrix[k*l_ui32SampleCount+l];
+						l_pOutput[j*l_ui32SampleCount+l]+=m_vCoefficient[j*l_ui32InputChannelCount+k]*l_pInput[k*l_ui32SampleCount+l];
 					}
 				}
 			}
 
-			m_pStreamEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeBuffer);
+			m_pStreamEncoder->encodeBuffer();
 		}
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if(m_pStreamDecoder->isEndReceived())
 		{
-			m_pStreamEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeEnd);
+			m_pStreamEncoder->encodeEnd();
 		}
 
-		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 	}
 
