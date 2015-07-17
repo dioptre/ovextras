@@ -785,7 +785,7 @@ namespace OpenViBEPlugins
 #ifdef DEBUG
 								std::cout << "Requesting full redraw for " << i << ", case D\n";
 #endif
-								m_oChannelDisplay[i]->redrawAllAtNextRefresh();
+								m_oChannelDisplay[i]->redrawAllAtNextRefresh(true);
 							}
 						}
 					}
@@ -1106,7 +1106,7 @@ namespace OpenViBEPlugins
 #ifdef DEBUG
 				std::cout << "Requesting full redraw for " << i << ", case E\n";
 #endif
-				m_oChannelDisplay[i]->redrawAllAtNextRefresh();
+				m_oChannelDisplay[i]->redrawAllAtNextRefresh(true);
 			}
 
 			//redraw channels

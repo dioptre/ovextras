@@ -1,3 +1,12 @@
+/*
+ * Notes: 
+ *
+ * - the redraw never redraws the samples in the past on purpose. Calling the corresp. gtk functions for the whole
+ *   set of buffers in memory causes the display to lag/freeze on Windows with big signals. If you 'fix' the
+ *   redraw to draw everything, make sure that the display runs smoothly in real-time on Win when Signal Display is in 
+ *   full screen (maximized), 1000hz and 256 channels, including using scrollbar, alt-tab, resize, occluding windows, etc.
+ */
+
 #include "ovpCSignalChannelDisplay.h"
 
 #include "ovpCSignalDisplayView.h"
@@ -14,6 +23,7 @@ using namespace OpenViBE;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::SimpleVisualisation;
 
+// #define DEBUG 1
 
 gboolean drawingAreaExposeEventCallback(GtkWidget* pWidget, GdkEventExpose* pEvent, gpointer data);
 gboolean drawingAreaConfigureCallback(GtkWidget* pWidget, GdkEventExpose* pEvent, gpointer data);
@@ -151,7 +161,7 @@ void CSignalChannelDisplay::updateScale()
 #ifdef DEBUG
 	std::cout << "Requesting full redraw, C\n";
 #endif
-	redrawAllAtNextRefresh();
+	redrawAllAtNextRefresh(true);
 }
 
 void CSignalChannelDisplay::resetChannelList()
@@ -192,6 +202,7 @@ void CSignalChannelDisplay::addChannelList(uint32 ui32Channel)
 
 uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
 {
+
 	if(ui64PointCount == 0)
 	{
 		return 0;
@@ -203,6 +214,13 @@ uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
 	GdkPoint l_oPoint;
 	vector< pair< float64, float64> >& l_vCurvePoints = m_pParentDisplayView->m_pRawPoints;
 
+	GdkRegion *reg = gdk_drawable_get_visible_region(m_pDrawingArea->window);
+	GdkRectangle box;
+	gdk_region_get_clipbox(reg, &box);
+
+	const float64 l_f64yStart = box.y;
+	const float64 l_f64yStop = box.y + box.height;
+
 	//for each couple of successive points
 	for(size_t i=0 ; i<ui64PointCount-1; i++)
 	{
@@ -212,28 +230,34 @@ uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
 		float64 l_f64X1 = l_vCurvePoints[i+1].first;
 		float64 l_f64Y1 = l_vCurvePoints[i+1].second;
 
+		/*
+		if(!gdk_region_point_in(reg, l_f64X0, l_f64Y0) || !gdk_region_point_in(reg, l_f64X1, l_f64Y1)) {
+			continue;
+		}
+		*/
+
 		//if one of the point is out of the drawing area
-		if(l_f64Y0<0 || l_f64Y0>=m_ui32Height || l_f64Y1<0 || l_f64Y1>=m_ui32Height)
+		if(l_f64Y0<l_f64yStart || l_f64Y0>=l_f64yStop || l_f64Y1<l_f64yStart || l_f64Y1>=l_f64yStop)
 		{
 			//computes the line's coefficients
 			float64 l_f64A = (l_f64Y1-l_f64Y0)/(l_f64X1-l_f64X0);
 			float64 l_f64B = l_f64Y0 - (l_f64A*l_f64X0);
 
 			//if the first point is out of the window
-			if(l_f64Y0<0)
+			if(l_f64Y0<l_f64yStart)
 			{
 				//computes its X-coordinate with the minimum Y
 				l_oPoint.x = static_cast<gint>(-l_f64B/l_f64A);
 				//we take -1 and not 0, this way, the line between the two successive intersect points won't be drawn
-				l_oPoint.y = static_cast<gint>(-1);
+				l_oPoint.y = static_cast<gint>(l_f64yStart-1);
 				//adds it to the vector
 				m_pParentDisplayView->m_pPoints.push_back(l_oPoint);
 			}
-			else if(l_f64Y0>=m_ui32Height)
+			else if(l_f64Y0>=l_f64yStop)
 			{
 				//same with the maximum Y
-				l_oPoint.x = static_cast<gint>((m_ui32Height-l_f64B)/l_f64A);
-				l_oPoint.y = m_ui32Height;
+				l_oPoint.x = static_cast<gint>((l_f64yStop-l_f64B)/l_f64A);
+				l_oPoint.y = static_cast<gint>(l_f64yStop);
 				m_pParentDisplayView->m_pPoints.push_back(l_oPoint);
 			}
 			//if it is inside, keep its current coordinates
@@ -245,16 +269,16 @@ uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
 			}
 
 			//if the second point is out of the window, computes its intersect point and adds it
-			if(l_f64Y1<0)
+			if(l_f64Y1<l_f64yStart)
 			{
 				l_oPoint.x = static_cast<gint>(-l_f64B/l_f64A);
-				l_oPoint.y = static_cast<gint>(-1);
+				l_oPoint.y = static_cast<gint>(l_f64yStart-1);
 				m_pParentDisplayView->m_pPoints.push_back(l_oPoint);
 			}
-			else if(l_f64Y1>=m_ui32Height)
+			else if(l_f64Y1>=l_f64yStop)
 			{
-				l_oPoint.x = static_cast<gint>((m_ui32Height-l_f64B)/l_f64A);
-				l_oPoint.y = static_cast<gint>(m_ui32Height) ;
+				l_oPoint.x = static_cast<gint>((l_f64yStop-l_f64B)/l_f64A);
+				l_oPoint.y = static_cast<gint>(l_f64yStop) ;
 				m_pParentDisplayView->m_pPoints.push_back(l_oPoint);
 			}
 		}
@@ -313,12 +337,12 @@ void CSignalChannelDisplay::getUpdateRectangle(GdkRectangle& rRect)
 	}
 }
 
-void CSignalChannelDisplay::redrawAllAtNextRefresh()
+void CSignalChannelDisplay::redrawAllAtNextRefresh(boolean bRedraw)
 {
-	m_bRedrawAll = true;
+	m_bRedrawAll = bRedraw;
 }
 
-boolean CSignalChannelDisplay::mustRedrawAll()
+boolean CSignalChannelDisplay::mustRedrawAll(void) const
 {
 	return m_bRedrawAll;
 }
@@ -334,6 +358,11 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 #ifdef DEBUG
 	uint64 in = System::Time::zgetTime();
 #endif
+
+	if(mustRedrawAll())
+	{
+		gdk_window_clear_area(m_pDrawingArea->window, rExposedArea.x, rExposedArea.y, rExposedArea.width, rExposedArea.height);
+	}
 
 	const float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
 
@@ -379,13 +408,15 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 		if(rExposedArea.x < (gint)l_f64StartX ||
 			rExposedArea.width-1/*exposed width is 1 pixel larger than asked for*/ > (gint)l_f64EndX - (gint)l_f64StartX + 1 + 1)
 		{
-			//this means the window was invalidated by an external widget : redraw it all
-			m_bRedrawAll = true;
 #ifdef DEBUG
 			std::cout << "Requesting full redraw, A\n";
 #endif
-			m_pDatabase->getIndexOfBufferStartingAtTime(m_pParentDisplayView->m_ui64LeftmostDisplayedTime, l_ui32FirstBufferToDisplay);
-			l_ui32FirstBufferToDisplayPosition = 0;
+			//this means the window was invalidated by an external widget : redraw it all
+			redrawAllAtNextRefresh(true);
+		
+		
+		//	m_pDatabase->getIndexOfBufferStartingAtTime(m_pParentDisplayView->m_ui64LeftmostDisplayedTime, l_ui32FirstBufferToDisplay);
+		//	l_ui32FirstBufferToDisplayPosition = 0;
 		}
 		else
 		{
@@ -447,6 +478,11 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 		//draw progress line
 		drawProgressLine(l_ui32FirstBufferToDisplay, l_ui32FirstBufferToDisplayPosition);
 
+		// We never redraw the whole window since with big signals (e.g. 256chns, 1000hz), 
+		// this could cause rendering on Windows to freeze on resizes in a manner 
+		// that the display doesn't recover
+
+#if 0
 		//if redrawing the whole window
 		if(m_bRedrawAll == true && l_ui32FirstBufferToDisplay > 0)
 		{
@@ -459,6 +495,7 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 			//draw older signals (to the right of progress line)
 			drawSignals(0, l_ui32FirstBufferToDisplay-1, 0, l_f64FirstBufferToDisplayStartX, m_ui32FirstChannelToDisplay, m_ui32LastChannelToDisplay);
 		}
+#endif
 	}
 
 	//draw Y=0 line
@@ -473,7 +510,7 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 #endif
 
 	//reset redraw all flag
-	m_bRedrawAll = false;
+	redrawAllAtNextRefresh(false);
 }
 
 void CSignalChannelDisplay::computeZoom(OpenViBE::boolean bZoomIn, OpenViBE::float64 f64XClick, OpenViBE::float64 f64YClick)
@@ -592,15 +629,16 @@ void CSignalChannelDisplay::updateDisplayParameters()
             else
             {
                 m_vScaleY[k] =  1 / (m_vMaximumTopMargin[k] - m_vMinimumBottomMargin[k]);
+				
             }
-            m_vTranslateY[k] =  (m_vMaximumTopMargin[k] + m_vMinimumBottomMargin[k]) / 2;
+			m_vTranslateY[k] =  (m_vMaximumTopMargin[k] + m_vMinimumBottomMargin[k]) / 2;
         }
 
 	//reflect changes
 #ifdef DEBUG
 	std::cout << "Requesting full redraw, F\n";
 #endif
-	redrawAllAtNextRefresh();
+	redrawAllAtNextRefresh(true);
 }
 
 void CSignalChannelDisplay::getFirstBufferToDisplayInformation(uint32& rFirstBufferToDisplay, uint32& rFirstSampleToDisplay, uint32& rFirstBufferToDisplayPosition)
@@ -611,23 +649,25 @@ void CSignalChannelDisplay::getFirstBufferToDisplayInformation(uint32& rFirstBuf
 
 	if(m_pDatabase->getDisplayMode() == OVP_TypeId_SignalDisplayMode_Scan)
 	{
+/*
 		if(m_bRedrawAll == true)
 		{
 			m_pDatabase->getIndexOfBufferStartingAtTime(m_pParentDisplayView->m_ui64LeftmostDisplayedTime, rFirstBufferToDisplay);
 			return;
 		}
-
+*/
 		const boolean l_bHaveLatestBufferDisplayed = m_pDatabase->getIndexOfBufferStartingAtTime(m_ui64LatestDisplayedTime, rFirstBufferToDisplay);
 		if(!l_bHaveLatestBufferDisplayed)
 		{
 			//chances are drawing is up to date and this call was triggered following an "external" expose event
 			//(e.g. the window was covered by a widget which was just moved, resulting in an expose event)
-			//=>let's redraw the whole window
+			//=>let's just start from the last sample
 #ifdef DEBUG
 			std::cout << "Requesting full redraw, B1\n";
 #endif
-			m_pDatabase->getIndexOfBufferStartingAtTime(m_pParentDisplayView->m_ui64LeftmostDisplayedTime, rFirstBufferToDisplay);
-			m_bRedrawAll = true;
+			rFirstBufferToDisplay = m_pDatabase->m_oSampleBuffers.size()-1;
+			// m_pDatabase->getIndexOfBufferStartingAtTime(m_pParentDisplayView->m_ui64LeftmostDisplayedTime, rFirstBufferToDisplay);
+			// redrawAllAtNextRefresh(true);
 
 			return;
 		}
@@ -692,6 +732,10 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 
 	ui32LastChannelToDisplay = std::min(ui32LastChannelToDisplay, static_cast<uint32>(m_oChannelList.size()-1));
 
+#ifdef DEBUG
+		std::cout << "Channel range [" << ui32FirstChannelToDisplay << "," << ui32LastChannelToDisplay << "]\n";
+#endif
+
 	for(size_t k=ui32FirstChannelToDisplay; k<=ui32LastChannelToDisplay; k++)
 	{
 
@@ -719,6 +763,8 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 
 		size_t l_ui64PointIndex = 0;
 
+
+
 		for(size_t j=ui32FirstBufferToDisplay; j<=ui32LastBufferToDisplay; j++)
 		{
 			const float64 * l_pCurrentChannelSampleBuffer = (m_pDatabase->m_oSampleBuffers)[j] + (m_oChannelList[k] * l_ui32SamplesPerBuffer);
@@ -742,12 +788,13 @@ boolean CSignalChannelDisplay::drawSignals(uint32 ui32FirstBufferToDisplay, uint
 		//crop points
 		const uint64 l_ui64NumberOfPointsToDisplay = cropCurve(l_ui64PointIndex);
 
-		/*
-		if(l_ui64NumberOfPointsToDisplay>1000) 
+		
+#ifdef DEBUG
+		if(l_ui64NumberOfPointsToDisplay>2000) 
 		{
 			std::cout << "points " << l_ui64NumberOfPointsToDisplay << " in " << k << "\n";
 		}
-		*/
+#endif
 
 		if(l_ui64NumberOfPointsToDisplay != 0)
 		{
@@ -843,18 +890,29 @@ void CSignalChannelDisplay::drawZeroLine()
 	//switch to dashed line
 	gdk_gc_set_line_attributes(m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 1, GDK_LINE_ON_OFF_DASH, GDK_CAP_BUTT, GDK_JOIN_BEVEL);
 
+	const float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
+
 	//draw Y=0 line
     if(m_bMultiView)
     {
+		const gint l_iMidPoint = (gint)getSampleYMultiViewCoordinate(m_vTranslateY[0]); 
         const gint l_iZeroY = (gint)getSampleYMultiViewCoordinate(0);
-        gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY, m_ui32Width ,l_iZeroY);
+		if(l_iZeroY>=0 && l_iZeroY<static_cast<gint>(m_ui32Height) && std::abs(l_iMidPoint-l_iZeroY) < l_f64sizePerChannel/2.0)
+		{
+	        gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY, m_ui32Width ,l_iZeroY);
+		}
     }
     else
     {
-        for(uint32 k = 0; k< m_oChannelList.size();k++)
+		for(uint32 k = m_ui32FirstChannelToDisplay; k < m_ui32LastChannelToDisplay; k++)
         {
+			const gint l_iMidPoint = (gint)getSampleYCoordinate(m_vTranslateY[k],k);
             const gint l_iZeroY = (gint)getSampleYCoordinate(0,k);
-            gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY, m_ui32Width ,l_iZeroY);
+
+			if(l_iZeroY>=0 && l_iZeroY<static_cast<gint>(m_ui32Height) && std::abs(l_iMidPoint-l_iZeroY) < l_f64sizePerChannel/2.0)
+			{
+				gdk_draw_line(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 0, l_iZeroY, m_ui32Width ,l_iZeroY);
+			}
         }
     }
 
@@ -895,7 +953,7 @@ void CSignalChannelDisplay::updateLimits(void)
 	m_ui32StartY = static_cast<uint32>(l_f64sizePerChannel*m_ui32FirstChannelToDisplay);
 	m_ui32StopY = std::min(m_ui32Height,static_cast<uint32>(l_f64sizePerChannel*(m_ui32LastChannelToDisplay+1)));
 
-	redrawAllAtNextRefresh();
+	redrawAllAtNextRefresh(true);
 
 	// cout << "SetChns " << l_pChannelDisplay->m_ui32FirstChannelToDisplay << " to " << l_pChannelDisplay->m_ui32LastChannelToDisplay << "\n";
 	// cout << "SetLim  " << l_pChannelDisplay->m_ui32StartY << " to " << l_pChannelDisplay->m_ui32StopY << "\n";
@@ -931,14 +989,13 @@ gboolean drawingAreaExposeEventCallback(GtkWidget *widget, GdkEventExpose *pEven
 
 	CSignalChannelDisplay * m_pChannelDisplay = reinterpret_cast<CSignalChannelDisplay*>(data);
 
-
 	//check if a full redrawn was asked for
 	if(pEvent->area.width == (gint)m_pChannelDisplay->m_ui32Width && pEvent->area.height == (gint)m_pChannelDisplay->m_ui32Height)
 	{
 #ifdef DEBUG
 		std::cout << "Requesting full redraw, G\n";
 #endif
-		m_pChannelDisplay->redrawAllAtNextRefresh();
+		m_pChannelDisplay->redrawAllAtNextRefresh(true);
 	}
 
 	//redraw signals
@@ -1001,7 +1058,7 @@ void drawingAreaClickedEventCallback(GtkWidget *widget, GdkEventButton *pEvent, 
 #ifdef DEBUG
 		std::cout << "Requesting full redraw, H\n";
 #endif
-		m_pChannelDisplay->redrawAllAtNextRefresh();
+		m_pChannelDisplay->redrawAllAtNextRefresh(true);
 		if(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window) 
 		{
 			gdk_window_invalidate_rect(GTK_WIDGET(m_pChannelDisplay->m_pDrawingArea)->window, NULL, true);

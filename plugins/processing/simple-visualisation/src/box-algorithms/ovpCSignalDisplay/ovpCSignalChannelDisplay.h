@@ -104,13 +104,13 @@ namespace OpenViBEPlugins
 		/**
 		 * \brief Flag widget so that its whole window is redrawn at next refresh
 	   */
-		void redrawAllAtNextRefresh();
+		void redrawAllAtNextRefresh(OpenViBE::boolean bRedraw);
 
 		/**
 		 * \brief Check whether the whole window must be redrawn
 		 * \return True if the whole window must be redrawn, false otherwise
 		 */
-		OpenViBE::boolean mustRedrawAll();
+		OpenViBE::boolean mustRedrawAll() const;
 
 		/**
 		 * \brief Draws the signal on the signal's drawing area.
@@ -306,6 +306,7 @@ namespace OpenViBEPlugins
 		OpenViBEPlugins::SimpleVisualisation::EDisplayMode m_eCurrentSignalMode;
 		//! Time of latest displayed data
 		OpenViBE::uint64 m_ui64LatestDisplayedTime;
+
 		//! Should the whole window be redrawn at next redraw?
 		OpenViBE::boolean m_bRedrawAll;
 
