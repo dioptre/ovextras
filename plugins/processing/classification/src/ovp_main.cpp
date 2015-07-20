@@ -91,15 +91,13 @@ OVP_Declare_Begin();
 	//MLP section
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierMLPDesc);
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Multi-layer Perceptron", OVP_ClassId_Algorithm_ClassifierMLP.toUInteger());
-	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierLDA, OpenViBEPlugins::Classification::MLPClassificationCompare);
-	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_Enumeration_TransfertFunction, c_sMLPTransfertFunctionName);
-	//rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Enumeration_TransfertFunction, "Identity", OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Identity.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Enumeration_TransfertFunction, "Softmax", OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Softmax.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Enumeration_TransfertFunction, "Sigmoid", OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Sigmoid.toUInteger());
+	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierMLP, OpenViBEPlugins::Classification::MLPClassificationCompare);
 
-	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_Enumeration_EvaluationFunction, c_sMLPEvaluationFunctionName);
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Enumeration_EvaluationFunction, "Quadratic", OVP_Algorithm_ClassifierMLP_Enumeration_EvaluationFunction_Quadratic.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Enumeration_EvaluationFunction, "Misclassification", OVP_Algorithm_ClassifierMLP_Enumeration_EvaluationFunction_MisClassification.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_ClassId_Algorithm_ClassifierMLP_DecisionAvailable, c_sPairwiseStrategyEnumerationName);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_ClassId_Algorithm_ClassifierMLP_DecisionAvailable, "PKPD", OVP_ClassId_Algorithm_PairwiseStrategy_PKPD.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_ClassId_Algorithm_ClassifierMLP_DecisionAvailable, "Voting", OVP_ClassId_Algorithm_PairwiseDecision_Voting.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_ClassId_Algorithm_ClassifierMLP_DecisionAvailable, "HT", OVP_ClassId_Algorithm_PairwiseDecision_HT.toUInteger());
+	OpenViBEPlugins::Classification::registerAvailableDecisionEnumeration(OVP_ClassId_Algorithm_ClassifierMLP, OVP_ClassId_Algorithm_ClassifierMLP_DecisionAvailable);
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
 OVP_Declare_End();

@@ -15,15 +15,6 @@
 #define OVP_Algorithm_ClassifierMLP_InputParameterId_EvaluationFunction              OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401264)
 #define OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount               OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401265)
 
-#define OVP_TypeId_Enumeration_TransfertFunction                                     OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401267)
-#define OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Identity           OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401268)
-#define OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Softmax            OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401269)
-#define OVP_Algorithm_ClassifierMLP_Enumeration_TransfertFunction_Sigmoid            OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC40126A)
-
-#define OVP_TypeId_Enumeration_EvaluationFunction                                    OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC40126B)
-#define OVP_Algorithm_ClassifierMLP_Enumeration_EvaluationFunction_Quadratic         OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC40126C)
-#define OVP_Algorithm_ClassifierMLP_Enumeration_EvaluationFunction_MisClassification OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC40126D)
-
 #include <Eigen/Dense>
 
 #include <xml/IXMLNode.h>
@@ -37,6 +28,7 @@ namespace OpenViBEPlugins
 
 		class CAlgorithmClassifierMLP : public OpenViBEToolkit::CAlgorithmClassifier
 		{
+			typedef std::pair< OpenViBE::float64, Eigen::VectorXd> CEigenFeatureVector;
 
 		public:
 
@@ -72,8 +64,6 @@ namespace OpenViBEPlugins
 			std::vector < OpenViBE::float64 > m_oLabelList;
 
 			OpenViBE::int64 m_i64HiddenNeuronCount;
-			OpenViBE::CIdentifier m_oEvaluationFunctionIdentifier;
-			OpenViBE::CIdentifier m_oTransfertFunctionIdentifier;
 
 			Eigen::MatrixXd m_oInputWeight;
 			Eigen::VectorXd m_oInputBias;
@@ -108,10 +98,6 @@ namespace OpenViBEPlugins
 
 				CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
 
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_TransfertFunction,c_sMLPTransfertFunctionName,
-													  OpenViBE::Kernel::ParameterType_Enumeration, OVP_TypeId_Enumeration_TransfertFunction);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_EvaluationFunction,c_sMLPEvaluationFunctionName,
-													  OpenViBE::Kernel::ParameterType_Enumeration, OVP_TypeId_Enumeration_EvaluationFunction);
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount, "Amount of neuron in hidden layer",
 													  OpenViBE::Kernel::ParameterType_Integer);
 				return true;
