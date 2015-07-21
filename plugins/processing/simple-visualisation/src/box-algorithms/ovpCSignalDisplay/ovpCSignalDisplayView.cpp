@@ -16,6 +16,8 @@ using namespace OpenViBEToolkit;
 
 using namespace std;
 
+// #define DEBUG 1
+
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
@@ -609,12 +611,12 @@ namespace OpenViBEPlugins
 					// @todo some robust & fast estimate of a high quantile instead of max/min...
 					const float64 l_f64Margin = l_f64MarginMultiplier * (l_f64MaxValue - l_f64MinValue);
 
-					const float64 l_f64MinimumTopMargin    = m_oChannelDisplay[0]->m_vMinimumTopMargin[0];
-					const float64 l_f64MaximumBottomMargin = m_oChannelDisplay[0]->m_vMaximumBottomMargin[0];
+					const float64 l_f64InnerTopMargin       = m_oChannelDisplay[0]->m_vInnerTopMargin[0];
+					const float64 l_f64InnerBottomMargin    = m_oChannelDisplay[0]->m_vInnerBottomMargin[0];
 
 					if( m_bVerticalScaleForceUpdate || 
-						l_f64MinValue < l_f64MaximumBottomMargin-l_f64Margin || l_f64MaxValue > l_f64MinimumTopMargin + l_f64Margin ||
-						l_f64MinValue > l_f64MaximumBottomMargin+l_f64Margin || l_f64MaxValue < l_f64MinimumTopMargin - l_f64Margin)
+						l_f64MinValue < l_f64InnerBottomMargin-l_f64Margin || l_f64MaxValue > l_f64InnerTopMargin + l_f64Margin ||
+						l_f64MinValue > l_f64InnerBottomMargin+l_f64Margin || l_f64MaxValue < l_f64InnerTopMargin - l_f64Margin)
 					{
 						m_oChannelDisplay[0]->setGlobalScaleParameters(l_f64MinValue, l_f64MaxValue, l_f64Margin); // normal chns
 						m_oChannelDisplay[1]->setGlobalScaleParameters(l_f64MinValue, l_f64MaxValue, l_f64Margin); // multiview
@@ -640,33 +642,44 @@ namespace OpenViBEPlugins
 					vector<float64> l_vValueMax;
 					m_oChannelDisplay[0]->getDisplayedValueRange(l_vValueMin,l_vValueMax);
 
+#ifdef DEBUG
+					if(m_bVerticalScaleForceUpdate)
+					{
+						std::cout << "All channel params updated, forced\n";
+					}
+#endif
+
 					bool updated = false;
 					for(uint32 i=0;i<l_vValueMin.size();i++) 
 					{
 						const float64 l_f64Margin = l_f64MarginMultiplier * (l_vValueMax[i] - l_vValueMin[i]);
-						const float64 l_f64MinimumTopMargin    = m_oChannelDisplay[0]->m_vMinimumTopMargin[i];
-						const float64 l_f64MaximumBottomMargin = m_oChannelDisplay[0]->m_vMaximumBottomMargin[i];
+						const float64 l_f64InnerTopMargin    = m_oChannelDisplay[0]->m_vInnerTopMargin[i];
+						const float64 l_f64InnerBottomMargin = m_oChannelDisplay[0]->m_vInnerBottomMargin[i];
 
 						if(m_bVerticalScaleForceUpdate ||
-						   l_vValueMin[i] < l_f64MaximumBottomMargin-l_f64Margin || l_vValueMax[i] > l_f64MinimumTopMargin+l_f64Margin || 
-						   l_vValueMin[i] > l_f64MaximumBottomMargin+l_f64Margin || l_vValueMax[i] < l_f64MinimumTopMargin-l_f64Margin)
+						   l_vValueMin[i] < l_f64InnerBottomMargin-l_f64Margin || l_vValueMax[i] > l_f64InnerTopMargin+l_f64Margin || 
+						   l_vValueMin[i] > l_f64InnerBottomMargin+l_f64Margin || l_vValueMax[i] < l_f64InnerTopMargin-l_f64Margin)
 						{
 #ifdef DEBUG
-							std::cout << "Channel " << i+1 << " params updated: " 
-								<< l_vValueMin[i] << " not in [" << l_f64MaximumBottomMargin-f64Margin << "," << l_f64MaximumBottomMargin+f64Margin << "], or "
-								<< l_vValueMax[i] << " not in [" << l_f64MinimumTopMargin-f64Margin << "," << l_f64MinimumTopMargin+f64Margin << "], "
-								<< " margin was " << l_f64Margin << "\n";
+							if(!m_bVerticalScaleForceUpdate) {
+								std::cout << "Channel " << i+1 << " params updated: " 
+									<< l_vValueMin[i] << " not in [" << l_f64InnerBottomMargin-l_f64Margin << "," << l_f64InnerBottomMargin+l_f64Margin << "], or "
+									<< l_vValueMax[i] << " not in [" << l_f64InnerTopMargin-l_f64Margin << "," << l_f64InnerTopMargin+l_f64Margin << "], "
+									<< " margin was " << l_f64Margin << "\n";
+							}
 #endif
 							m_oChannelDisplay[0]->setLocalScaleParameters(i, l_vValueMin[i], l_vValueMax[i], l_f64Margin);
 							updated = true;
 						}
 						else
 						{
+#if 0
 #ifdef DEBUG
 							std::cout << "No need to update channel " << i+1 << ", "
-								<< l_vValueMin[i] << " in [" << l_f64MaximumBottomMargin-f64Margin << "," << l_f64MaximumBottomMargin+f64Margin << "], or "
-								<< l_vValueMax[i] << " in [" << l_f64MinimumTopMargin-f64Margin << "," << l_f64MinimumTopMargin+f64Margin << "], "
+								<< l_vValueMin[i] << " in [" << l_f64InnerBottomMargin-l_f64Margin << "," << l_f64InnerBottomMargin+l_f64Margin << "], or "
+								<< l_vValueMax[i] << " in [" << l_f64InnerTopMargin-l_f64Margin << "," << l_f64InnerTopMargin+l_f64Margin << "], "
 								<< " margin was " << l_f64Margin << "\n";
+#endif
 #endif
 						}
 					}
@@ -685,14 +698,14 @@ namespace OpenViBEPlugins
 
 						// @todo some robust & fast estimate of a high quantile instead of max/min...
 						const float64 l_f64Margin = l_f64MarginMultiplier * (l_f64MaxValue - l_f64MinValue);
-						const float64 l_f64MinimumTopMargin    = m_oChannelDisplay[1]->m_vMinimumTopMargin[0];
-						const float64 l_f64MaximumBottomMargin = m_oChannelDisplay[1]->m_vMaximumBottomMargin[0];
+						const float64 l_f64InnerTopMargin    = m_oChannelDisplay[1]->m_vInnerTopMargin[0];
+						const float64 l_f64InnerBottomMargin = m_oChannelDisplay[1]->m_vInnerBottomMargin[0];
 
 						if( m_bVerticalScaleForceUpdate
-							|| l_f64MaxValue > l_f64MinimumTopMargin    + l_f64Margin 
-							|| l_f64MaxValue < l_f64MinimumTopMargin    - l_f64Margin 
-							|| l_f64MinValue > l_f64MaximumBottomMargin + l_f64Margin 
-							|| l_f64MinValue < l_f64MaximumBottomMargin - l_f64Margin)
+							|| l_f64MaxValue > l_f64InnerTopMargin    + l_f64Margin 
+							|| l_f64MaxValue < l_f64InnerTopMargin    - l_f64Margin 
+							|| l_f64MinValue > l_f64InnerBottomMargin + l_f64Margin 
+							|| l_f64MinValue < l_f64InnerBottomMargin - l_f64Margin)
 						{
 							m_oChannelDisplay[1]->setGlobalScaleParameters(l_f64MinValue, l_f64MaxValue, l_f64Margin); // multiview
 							m_oChannelDisplay[1]->updateDisplayParameters();
@@ -777,17 +790,20 @@ namespace OpenViBEPlugins
 							}
 						}
 
+#if 0
 						//if drawing is not up to date, force a full redraw
+						// We're not currently doing this as it seems to cause even worse lag
 						if(m_oChannelDisplay[0]->m_ui64LatestDisplayedTime != m_ui64LeftmostDisplayedTime)
 						{
 							for(size_t i=0; i<m_oChannelDisplay.size(); i++)
 							{
 #ifdef DEBUG
-								std::cout << "Requesting full redraw for " << i << ", case D\n";
+								std::cout << "Requesting full redraw for " << i << ", case D (drawing late)\n";
 #endif
 								m_oChannelDisplay[i]->redrawAllAtNextRefresh(true);
 							}
 						}
+#endif
 					}
 				}
 			}
@@ -806,11 +822,13 @@ namespace OpenViBEPlugins
 						m_oChannelDisplay[i]->getUpdateRectangle(l_oUpdateRect);
 						if(m_oChannelDisplay[i]->getSignalDisplayWidget()->window) 
 						{
-#ifdef DEBUG
+#if 0
+#ifdef DEBUG 
 							std::cout 
-								<< "Invalidate rect B " << l_oUpdateRect.x << "+" << l_oUpdateRect.width 
-								<< "," << l_oUpdateRect.y << "+" << l_oUpdateRect.height << "\n";
+								<< "Invalidate rect B x=" << l_oUpdateRect.x << "+" << l_oUpdateRect.width 
+								<< ", y=" << l_oUpdateRect.y << "+" << l_oUpdateRect.height << "\n";
 #endif
+#endif							
 							gdk_window_invalidate_rect(m_oChannelDisplay[i]->getSignalDisplayWidget()->window, &l_oUpdateRect, false);
 						}
 					/*}
@@ -1104,7 +1122,7 @@ namespace OpenViBEPlugins
 			for(size_t i=0 ; i<m_oChannelDisplay.size(); i++)
 			{
 #ifdef DEBUG
-				std::cout << "Requesting full redraw for " << i << ", case E\n";
+				std::cout << "Requesting full redraw for " << i << ", case E (display mode toggle)\n";
 #endif
 				m_oChannelDisplay[i]->redrawAllAtNextRefresh(true);
 			}

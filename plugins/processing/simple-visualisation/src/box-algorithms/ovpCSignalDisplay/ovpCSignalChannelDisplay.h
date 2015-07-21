@@ -294,10 +294,10 @@ namespace OpenViBEPlugins
 
 		/** \name Scale margin parameters */
 		//@{
-        std::vector<OpenViBE::float64> m_vMaximumTopMargin;
-        std::vector<OpenViBE::float64> m_vMaximumBottomMargin;
-        std::vector<OpenViBE::float64> m_vMinimumTopMargin;
-        std::vector<OpenViBE::float64> m_vMinimumBottomMargin;
+        std::vector<OpenViBE::float64> m_vOuterTopMargin;
+        std::vector<OpenViBE::float64> m_vInnerTopMargin;
+        std::vector<OpenViBE::float64> m_vInnerBottomMargin;
+        std::vector<OpenViBE::float64> m_vOuterBottomMargin;
 		//@}
 
 		OpenViBE::uint32 m_i32LeftRulerWidthRequest, m_i32LeftRulerHeightRequest;
