@@ -240,26 +240,39 @@ uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
 	for(size_t i=0 ; i<ui64PointCount-1; i++)
 	{
 		//get the two points coordinates
-		float64 l_f64X0 = l_vCurvePoints[i].first;
-		float64 l_f64Y0 = l_vCurvePoints[i].second;
-		float64 l_f64X1 = l_vCurvePoints[i+1].first;
-		float64 l_f64Y1 = l_vCurvePoints[i+1].second;
+		const float64 l_f64X0 = l_vCurvePoints[i].first;
+		const float64 l_f64Y0 = l_vCurvePoints[i].second;
+		const float64 l_f64X1 = l_vCurvePoints[i+1].first;
+		const float64 l_f64Y1 = l_vCurvePoints[i+1].second;
 
 		/*
 		if(!gdk_region_point_in(reg, l_f64X0, l_f64Y0) || !gdk_region_point_in(reg, l_f64X1, l_f64Y1)) {
 			continue;
 		}
 		*/
+		
+		const boolean l_bFirstOutTop =     (l_f64Y0<l_f64yStart);
+		const boolean l_bFirstOutBottom =  (l_f64Y0>=l_f64yStop); 
+		const boolean l_bSecondOutTop =    (l_f64Y1<l_f64yStart);
+		const boolean l_bSecondOutBottom = (l_f64Y1>=l_f64yStop); 
+		const boolean l_bFirstPointOut =   l_bFirstOutTop || l_bFirstOutBottom;
+		const boolean l_bSecondPointOut =  l_bSecondOutTop || l_bSecondOutBottom;
 
-		//if one of the point is out of the drawing area
-		if(l_f64Y0<l_f64yStart || l_f64Y0>=l_f64yStop || l_f64Y1<l_f64yStart || l_f64Y1>=l_f64yStop)
+		//if one of the points is out of the drawing area
+		if(l_bFirstPointOut || l_bSecondPointOut) 
 		{
+			if( (l_bFirstOutTop && l_bSecondOutTop) || (l_bFirstOutBottom && l_bSecondOutBottom) )
+			{
+				// Both out and on the same side, forget about it
+				continue;
+			}
+	
 			//computes the line's coefficients
-			float64 l_f64A = (l_f64Y1-l_f64Y0)/(l_f64X1-l_f64X0);
-			float64 l_f64B = l_f64Y0 - (l_f64A*l_f64X0);
+			const float64 l_f64A = (l_f64Y1-l_f64Y0)/(l_f64X1-l_f64X0);     // slope
+			const float64 l_f64B = l_f64Y0 - (l_f64A*l_f64X0);              // intersect
 
 			//if the first point is out of the window
-			if(l_f64Y0<l_f64yStart)
+			if(l_bFirstOutTop)
 			{
 				//computes its X-coordinate with the minimum Y
 				l_oPoint.x = static_cast<gint>(-l_f64B/l_f64A);
@@ -268,7 +281,7 @@ uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
 				//adds it to the vector
 				m_pParentDisplayView->m_pPoints.push_back(l_oPoint);
 			}
-			else if(l_f64Y0>=l_f64yStop)
+			else if(l_bFirstOutBottom)
 			{
 				//same with the maximum Y
 				l_oPoint.x = static_cast<gint>((l_f64yStop-l_f64B)/l_f64A);
@@ -284,13 +297,13 @@ uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
 			}
 
 			//if the second point is out of the window, computes its intersect point and adds it
-			if(l_f64Y1<l_f64yStart)
+			if(l_bSecondOutTop)
 			{
 				l_oPoint.x = static_cast<gint>(-l_f64B/l_f64A);
 				l_oPoint.y = static_cast<gint>(l_f64yStart-1);
 				m_pParentDisplayView->m_pPoints.push_back(l_oPoint);
 			}
-			else if(l_f64Y1>=l_f64yStop)
+			else if(l_bSecondOutBottom)
 			{
 				l_oPoint.x = static_cast<gint>((l_f64yStop-l_f64B)/l_f64A);
 				l_oPoint.y = static_cast<gint>(l_f64yStop) ;
@@ -312,6 +325,13 @@ uint64 CSignalChannelDisplay::cropCurve(uint64 ui64PointCount)
 				m_pParentDisplayView->m_pPoints.push_back(l_oPoint);
 			}
 		}
+
+		/* // assert
+		if(l_oPoint.x<box.x || l_oPoint.x>=box.x+box.width)
+		{
+			std::cout << "blam\n";
+		}
+		*/
 	}
 
 	//return the number of points to draw
@@ -729,15 +749,23 @@ void CSignalChannelDisplay::getFirstBufferToDisplayInformation(uint32& rFirstBuf
 		uint32 l_ui32LeftmostBufferIndex = 0;
 		m_pDatabase->getIndexOfBufferStartingAtTime(m_pParentDisplayView->m_ui64LeftmostDisplayedTime, l_ui32LeftmostBufferIndex);
 
-		//get position of first new buffer
-		rFirstBufferToDisplayPosition = rFirstBufferToDisplay - l_ui32LeftmostBufferIndex;
-
-		//redraw from last sample of last drawn buffer, if we're not restarting from left edge
-		if(rFirstBufferToDisplayPosition > 0)
+		if(l_ui32LeftmostBufferIndex > rFirstBufferToDisplay)
 		{
-			rFirstBufferToDisplay--;
-			rFirstBufferToDisplayPosition--;
-			rFirstSampleToDisplay = (uint32)m_pDatabase->m_pDimensionSizes[1] - 1;
+			// @fixme not sure why this happens...
+			rFirstBufferToDisplayPosition = 0;
+		} 
+		else
+		{
+			//get position of first new buffer
+			rFirstBufferToDisplayPosition = rFirstBufferToDisplay - l_ui32LeftmostBufferIndex;
+
+			//redraw from last sample of last drawn buffer, if we're not restarting from left edge
+			if(rFirstBufferToDisplayPosition > 0)
+			{
+				rFirstBufferToDisplay--;
+				rFirstBufferToDisplayPosition--;
+				rFirstSampleToDisplay = (uint32)m_pDatabase->m_pDimensionSizes[1] - 1;
+			}
 		}
 	}
 }
@@ -749,7 +777,9 @@ int32 CSignalChannelDisplay::getBufferStartX(uint32 ui32Position)
 
 float64 CSignalChannelDisplay::getSampleXCoordinate(uint32 ui32BufferPosition, uint32 ui32SampleIndex, float64 f64XOffset)
 {
-	return (f64XOffset + ui32BufferPosition*m_f64WidthPerBuffer + ui32SampleIndex*m_f64PointStep - 0) * 1;
+	const float64 l_f64ReturnValue = (f64XOffset + ui32BufferPosition*m_f64WidthPerBuffer + ui32SampleIndex*m_f64PointStep - 0) * 1;
+	
+	return l_f64ReturnValue;
 }
 
 float64 CSignalChannelDisplay::getSampleYCoordinate(float64 f64Value, uint32 ui32ChannelIndex)
