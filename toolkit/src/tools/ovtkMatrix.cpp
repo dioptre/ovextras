@@ -547,9 +547,12 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 	return true;
 }
 
-boolean OpenViBEToolkit::Tools::Matrix::toString(const OpenViBE::IMatrix& rMatrix, OpenViBE::CString& sString)
+boolean OpenViBEToolkit::Tools::Matrix::toString(const OpenViBE::IMatrix& rMatrix, OpenViBE::CString& sString, uint32 ui32Precision /* = 6 */)
 {
 	std::stringstream l_oBuffer;
+
+	l_oBuffer << std::scientific;
+	l_oBuffer.precision(static_cast<std::streamsize>(ui32Precision));
 
 	// Dump header
 
@@ -622,7 +625,7 @@ boolean OpenViBEToolkit::Tools::Matrix::loadFromTextFile(OpenViBE::IMatrix& rMat
 	return l_bReturnValue;
 }
 
-boolean OpenViBEToolkit::Tools::Matrix::saveToTextFile(const OpenViBE::IMatrix& rMatrix, const OpenViBE::CString& sFilename)
+boolean OpenViBEToolkit::Tools::Matrix::saveToTextFile(const OpenViBE::IMatrix& rMatrix, const OpenViBE::CString& sFilename, uint32 ui32Precision /* = 6 */)
 {
 	std::ofstream m_oDataFile;
 	m_oDataFile.open(sFilename.toASCIIString(), std::ios_base::out | std::ios_base::trunc);
@@ -632,7 +635,7 @@ boolean OpenViBEToolkit::Tools::Matrix::saveToTextFile(const OpenViBE::IMatrix& 
 	
 	CString l_sMatrix;
 
-	if(!OpenViBEToolkit::Tools::Matrix::toString(rMatrix, l_sMatrix))
+	if(!OpenViBEToolkit::Tools::Matrix::toString(rMatrix, l_sMatrix, ui32Precision))
 	{
 		return false;
 	}
