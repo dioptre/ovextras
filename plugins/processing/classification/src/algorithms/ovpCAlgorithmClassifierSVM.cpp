@@ -385,7 +385,7 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 	return true;
 }
 
-void CAlgorithmClassifierSVM::generateConfigurationNode(void)
+XML::IXMLNode* CAlgorithmClassifierSVM::saveConfiguration(void)
 {
 	//xml file
 	//std::cout<<"model save"<<std::endl;
@@ -436,8 +436,6 @@ void CAlgorithmClassifierSVM::generateConfigurationNode(void)
 		l_vSVCoef.push_back(CString(l_sSVCoef.str().c_str()));
 		l_vSVValue.push_back(CString(l_sSVValue.str().c_str()));
 	}
-	//std::cout<<"xml save"<<std::endl;
-	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 
 	XML::IXMLNode *l_pSVMNode = XML::createNode(c_sTypeNodeName);
 
@@ -573,13 +571,7 @@ void CAlgorithmClassifierSVM::generateConfigurationNode(void)
 		l_pModelNode->addChild(l_pSVsNode);
 	}
 	l_pSVMNode->addChild(l_pModelNode);
-	m_pConfigurationNode->addChild(l_pSVMNode);
-}
-
-XML::IXMLNode* CAlgorithmClassifierSVM::saveConfiguration(void)
-{
-	generateConfigurationNode();
-	return m_pConfigurationNode;
+	return l_pSVMNode;
 }
 
 boolean CAlgorithmClassifierSVM::loadConfiguration(XML::IXMLNode *pConfigurationNode)
@@ -600,8 +592,8 @@ boolean CAlgorithmClassifierSVM::loadConfiguration(XML::IXMLNode *pConfiguration
 	m_pModel->nSV = NULL;
 	m_i32IndexSV=-1;
 
-	loadParamNodeConfiguration(pConfigurationNode->getChild(0)->getChildByName(c_sParamNodeName));
-	loadModelNodeConfiguration(pConfigurationNode->getChild(0)->getChildByName(c_sModelNodeName));
+	loadParamNodeConfiguration(pConfigurationNode->getChildByName(c_sParamNodeName));
+	loadModelNodeConfiguration(pConfigurationNode->getChildByName(c_sModelNodeName));
 
 	this->getLogManager() << LogLevel_Trace << modelToString();
 	return true;

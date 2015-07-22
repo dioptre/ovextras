@@ -273,12 +273,10 @@ XML::IXMLNode* CAlgorithmClassifierOneVsAll::getClassifierConfiguration(IAlgorit
 	return l_pRes;
 }
 
-void CAlgorithmClassifierOneVsAll::generateConfigurationNode(void)
+XML::IXMLNode* CAlgorithmClassifierOneVsAll::saveConfiguration(void)
 {
 	std::stringstream l_sClassCountes;
 	l_sClassCountes << getClassCount();
-
-	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 
 	XML::IXMLNode *l_pOneVsAllNode = XML::createNode(c_sTypeNodeName);
 
@@ -296,26 +294,16 @@ void CAlgorithmClassifierOneVsAll::generateConfigurationNode(void)
 	//We now add configuration of each subclassifiers
 	for(size_t i = 0; i<m_oSubClassifierList.size(); ++i)
 	{
-		l_pTempNode = XML::createNode(c_sSubClassifierNodeName);
-		l_pTempNode->addChild(getClassifierConfiguration(m_oSubClassifierList[i]));
-		l_pSubClassifersNode->addChild(l_pTempNode);
+		l_pSubClassifersNode->addChild(getClassifierConfiguration(m_oSubClassifierList[i]));
 	}
 	l_pOneVsAllNode->addChild(l_pSubClassifersNode);
 
-	m_pConfigurationNode->addChild(l_pOneVsAllNode);
-}
-
-XML::IXMLNode* CAlgorithmClassifierOneVsAll::saveConfiguration(void)
-{
-	generateConfigurationNode();
-	return m_pConfigurationNode;
+	return l_pOneVsAllNode;
 }
 
 boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
-	XML::IXMLNode *l_pOneVsAllNode = pConfigurationNode->getChild(0);
-
-	XML::IXMLNode *l_pTempNode = l_pOneVsAllNode->getChildByName(c_sSubClassifierIdentifierNodeName);
+	XML::IXMLNode *l_pTempNode = pConfigurationNode->getChildByName(c_sSubClassifierIdentifierNodeName);
 	CIdentifier l_oIdentifier;
 	l_oIdentifier.fromString(l_pTempNode->getAttribute(c_sAlgorithmIdAttribute));
 	if(m_oSubClassifierAlgorithmIdentifier.toUInteger() != l_oIdentifier)
@@ -330,7 +318,7 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 		}
 	}
 
-	l_pTempNode = l_pOneVsAllNode->getChildByName(c_sSubClassifierCountNodeName);
+	l_pTempNode = pConfigurationNode->getChildByName(c_sSubClassifierCountNodeName);
 	std::stringstream l_sCountData(l_pTempNode->getPCData());
 	uint64 l_iClassCount;
 	l_sCountData >> l_iClassCount;
@@ -350,7 +338,7 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 		}
 	}
 
-	return loadSubClassifierConfiguration(l_pOneVsAllNode->getChildByName(c_sSubClassifiersNodeName));
+	return loadSubClassifierConfiguration(pConfigurationNode->getChildByName(c_sSubClassifiersNodeName));
 }
 
 boolean CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode)
@@ -359,7 +347,7 @@ boolean CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNo
 	{
 		XML::IXMLNode *l_pSubClassifierNode = pSubClassifiersNode->getChild(i);
 		TParameterHandler < XML::IXMLNode* > ip_pConfiguration(m_oSubClassifierList[i]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
-		ip_pConfiguration = l_pSubClassifierNode->getChild(0);
+		ip_pConfiguration = l_pSubClassifierNode;
 		if(!m_oSubClassifierList[i]->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration))
 		{
 			this->getLogManager() << LogLevel_Error << "Unable to load the configuration of the classifier " << static_cast<uint64>(i+1) << " \n";

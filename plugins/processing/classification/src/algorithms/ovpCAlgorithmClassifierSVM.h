@@ -78,16 +78,12 @@ namespace OpenViBEPlugins
 			//todo a modifier en fonction de svn_save_model
 			//vector m_oCoefficients;
 
-			XML::IXMLNode *m_pConfigurationNode;
-
 		private:
 			void loadParamNodeConfiguration(XML::IXMLNode *pParamNode);
 			void loadModelNodeConfiguration(XML::IXMLNode *pModelNode);
 			void loadModelSVsNodeConfiguration(XML::IXMLNode* pSVsNodeParam);
 
 			void setParameter(void);
-
-			void generateConfigurationNode(void);
 
 			void deleteModel(svm_model *pModel, bool bFreeSupportVectors);
 

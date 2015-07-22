@@ -419,16 +419,13 @@ XML::IXMLNode *CAlgorithmClassifierMLP::saveConfiguration()
 	dumpData(l_pTempNode, m_oHiddenWeight);
 	l_pRootNode->addChild(l_pTempNode);
 
-	XML::IXMLNode* l_pResultNode = XML::createNode(c_sClassifierRoot);
-	l_pResultNode->addChild(l_pRootNode);
-	return l_pResultNode;
+	return l_pRootNode;
 }
 
 boolean CAlgorithmClassifierMLP::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
-	XML::IXMLNode* l_pMLPNode = pConfigurationNode->getChild(0);
 	m_oLabelList.clear();
-	std::stringstream l_sData(l_pMLPNode->getChildByName(c_sMLPClassLabelNodeName)->getPCData());
+	std::stringstream l_sData(pConfigurationNode->getChildByName(c_sMLPClassLabelNodeName)->getPCData());
 	float64 l_f64Temp;
 	while(l_sData >> l_f64Temp)
 	{
@@ -436,18 +433,18 @@ boolean CAlgorithmClassifierMLP::loadConfiguration(XML::IXMLNode *pConfiguration
 	}
 
 	int64 l_i64FeatureSize, l_i64HiddenNeuronCount;
-	XML::IXMLNode* l_pNeuronConfigurationNode = l_pMLPNode->getChildByName(c_sMLPNeuronConfigurationNodeName);
+	XML::IXMLNode* l_pNeuronConfigurationNode = pConfigurationNode->getChildByName(c_sMLPNeuronConfigurationNodeName);
 
 	loadData(l_pNeuronConfigurationNode->getChildByName(c_sMLPHiddenNeuronCountNodeName), l_i64HiddenNeuronCount);
 	loadData(l_pNeuronConfigurationNode->getChildByName(c_sMLPInputNeuronCountNodeName), l_i64FeatureSize);
 
-	loadData(l_pMLPNode->getChildByName(c_sMLPMaximumNodeName), m_f64Max);
-	loadData(l_pMLPNode->getChildByName(c_sMLPMinimumNodeName), m_f64Min);
+	loadData(pConfigurationNode->getChildByName(c_sMLPMaximumNodeName), m_f64Max);
+	loadData(pConfigurationNode->getChildByName(c_sMLPMinimumNodeName), m_f64Min);
 
-	loadData(l_pMLPNode->getChildByName(c_sMLPInputWeightNodeName),m_oInputWeight, l_i64HiddenNeuronCount, l_i64FeatureSize);
-	loadData(l_pMLPNode->getChildByName(c_sMLPInputBiasNodeName), m_oInputBias);
-	loadData(l_pMLPNode->getChildByName(c_sMLPHiddenWeightNodeName),m_oHiddenWeight, m_oLabelList.size(), l_i64HiddenNeuronCount);
-	loadData(l_pMLPNode->getChildByName(c_sMLPHiddenBiasNodeName), m_oHiddenBias);
+	loadData(pConfigurationNode->getChildByName(c_sMLPInputWeightNodeName),m_oInputWeight, l_i64HiddenNeuronCount, l_i64FeatureSize);
+	loadData(pConfigurationNode->getChildByName(c_sMLPInputBiasNodeName), m_oInputBias);
+	loadData(pConfigurationNode->getChildByName(c_sMLPHiddenWeightNodeName),m_oHiddenWeight, m_oLabelList.size(), l_i64HiddenNeuronCount);
+	loadData(pConfigurationNode->getChildByName(c_sMLPHiddenBiasNodeName), m_oHiddenBias);
 
 	return true;
 }

@@ -148,7 +148,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	m_pProbabilityValues->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
 
 	TParameterHandler < XML::IXMLNode* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
-	ip_pClassificationConfiguration = l_pRootNode->getChildByName(c_sClassifierRoot);
+	ip_pClassificationConfiguration = l_pRootNode->getChildByName(c_sClassifierRoot)->getChild(0);
 	if(!m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_LoadConfiguration)){
 		this->getLogManager() << LogLevel_Error << "Subclassifier failed to load config\n";
 		return false;

@@ -65,7 +65,6 @@ namespace OpenViBEPlugins
 
 			OpenViBE::uint32 m_ui32NumCols;
 
-			XML::IXMLNode *m_pConfigurationNode;
 			OpenViBE::boolean m_bv1Classification;
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pCovarianceAlgorithm;
@@ -73,8 +72,6 @@ namespace OpenViBEPlugins
 		private:
 			void loadClassesFromNode(XML::IXMLNode *pNode);
 			void loadCoefficientsFromNode(XML::IXMLNode *pNode);
-
-			void generateConfigurationNode(void);
 
 			OpenViBE::uint32 getClassCount(void);
 		};

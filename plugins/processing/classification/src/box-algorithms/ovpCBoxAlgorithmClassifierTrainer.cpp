@@ -491,6 +491,9 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	XML::IXMLNode* l_pAlgorithmConfigurationNode = XML::createNode(c_sClassifierRoot);
+	l_pAlgorithmConfigurationNode->addChild((XML::IXMLNode*)op_pConfiguration);
+
 	XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
 	CString l_sConfigurationFilename(this->getConfigurationManager().expand((*m_pParameter)[c_sFilenameSettingName]));
 
@@ -533,13 +536,14 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 	}
 	l_sRoot->addChild(l_pStimulationsNode);
 
-	l_sRoot->addChild((XML::IXMLNode*)op_pConfiguration);
+	l_sRoot->addChild(l_pAlgorithmConfigurationNode);
 	//std::cout << l_sRoot->getXML() << std::endl;
 	if(!l_pHandler->writeXMLInFile(*l_sRoot, l_sConfigurationFilename.toASCIIString()))
 	{
 		this->getLogManager() << LogLevel_Error << "Could not save configuration to file [" << l_sConfigurationFilename << "]\n";
 		return false;
 	}
+
 
 	l_pHandler->release();
 	l_sRoot->release();

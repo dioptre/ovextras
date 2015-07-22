@@ -338,12 +338,10 @@ XML::IXMLNode* CAlgorithmClassifierOneVsOne::getPairwiseDecisionConfiguration()
 	return l_pTempNode;
 }
 
-
-void CAlgorithmClassifierOneVsOne::generateConfigurationNode(void)
+XML::IXMLNode* CAlgorithmClassifierOneVsOne::saveConfiguration(void)
 {
 	std::stringstream l_sClassCountes;
 	l_sClassCountes << getClassCount();
-	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 
 	XML::IXMLNode *l_pOneVsOneNode = XML::createNode(c_sTypeNodeName);
 
@@ -365,20 +363,12 @@ void CAlgorithmClassifierOneVsOne::generateConfigurationNode(void)
 	}
 	l_pOneVsOneNode->addChild(l_pSubClassifersNode);
 
-	m_pConfigurationNode->addChild(l_pOneVsOneNode);
-}
-
-XML::IXMLNode* CAlgorithmClassifierOneVsOne::saveConfiguration(void)
-{
-	generateConfigurationNode();
-	return m_pConfigurationNode;
+	return l_pOneVsOneNode;
 }
 
 boolean CAlgorithmClassifierOneVsOne::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
-	XML::IXMLNode *l_pOneVsOneNode = pConfigurationNode->getChild(0);
-
-	XML::IXMLNode *l_pTempNode = l_pOneVsOneNode->getChildByName(c_sSubClassifierIdentifierNodeName);
+	XML::IXMLNode *l_pTempNode = pConfigurationNode->getChildByName(c_sSubClassifierIdentifierNodeName);
 
 	CIdentifier l_pAlgorithmIdentifier;
 	l_pAlgorithmIdentifier.fromString(l_pTempNode->getAttribute(c_sAlgorithmIdAttribute));
@@ -398,7 +388,7 @@ boolean CAlgorithmClassifierOneVsOne::loadConfiguration(XML::IXMLNode *pConfigur
 		}
 	}
 
-	l_pTempNode = l_pOneVsOneNode->getChildByName(c_sPairwiseDecisionName);
+	l_pTempNode = pConfigurationNode->getChildByName(c_sPairwiseDecisionName);
 	CIdentifier l_pPairwiseIdentifier;
 	l_pPairwiseIdentifier.fromString(l_pTempNode->getAttribute(c_sAlgorithmIdAttribute));
 	if(l_pPairwiseIdentifier != m_oPairwiseDecisionIdentifier)
@@ -421,7 +411,7 @@ boolean CAlgorithmClassifierOneVsOne::loadConfiguration(XML::IXMLNode *pConfigur
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_LoadConfiguration);
 	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize);
 
-	l_pTempNode = l_pOneVsOneNode->getChildByName(c_sSubClassifierCountNodeName);
+	l_pTempNode = pConfigurationNode->getChildByName(c_sSubClassifierCountNodeName);
 	std::stringstream l_sCountData(l_pTempNode->getPCData());
 	uint64 l_iClassCount;
 	l_sCountData >> l_iClassCount;
@@ -449,7 +439,7 @@ boolean CAlgorithmClassifierOneVsOne::loadConfiguration(XML::IXMLNode *pConfigur
 		}
 	}
 
-	return loadSubClassifierConfiguration(l_pOneVsOneNode->getChildByName(c_sSubClassifiersNodeName));
+	return loadSubClassifierConfiguration(pConfigurationNode->getChildByName(c_sSubClassifiersNodeName));
 }
 
 boolean CAlgorithmClassifierOneVsOne::loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode)

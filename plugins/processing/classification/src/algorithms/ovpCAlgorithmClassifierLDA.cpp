@@ -343,7 +343,12 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 	return true;
 }
 
-void CAlgorithmClassifierLDA::generateConfigurationNode(void)
+uint32 CAlgorithmClassifierLDA::getClassCount()
+{
+	return m_oLabelList.size();
+}
+
+XML::IXMLNode* CAlgorithmClassifierLDA::saveConfiguration(void)
 {
 	XML::IXMLNode *l_pAlgorithmNode  = XML::createNode(c_sTypeNodeName);
 	l_pAlgorithmNode->addAttribute(c_sLDAConfigFileVersionAttributeName, "1");
@@ -368,19 +373,7 @@ void CAlgorithmClassifierLDA::generateConfigurationNode(void)
 	l_pAlgorithmNode->addChild(l_pTempNode);
 	l_pAlgorithmNode->addChild(l_pHelpersConfiguration);
 
-	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
-	m_pConfigurationNode->addChild(l_pAlgorithmNode);
-}
-
-uint32 CAlgorithmClassifierLDA::getClassCount()
-{
-	return m_oLabelList.size();
-}
-
-XML::IXMLNode* CAlgorithmClassifierLDA::saveConfiguration(void)
-{
-	generateConfigurationNode();
-	return m_pConfigurationNode;
+	return l_pAlgorithmNode;
 }
 
 //Extract a float64 from the PCDATA of a node
@@ -395,10 +388,8 @@ float64 getFloatFromNode(XML::IXMLNode *pNode)
 
 boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
-	XML::IXMLNode * l_pLDANode = pConfigurationNode->getChild(0);
-
 	//If the attribute exist, we deal with the new version
-	if(l_pLDANode->hasAttribute(c_sLDAConfigFileVersionAttributeName))
+	if(pConfigurationNode->hasAttribute(c_sLDAConfigFileVersionAttributeName))
 	{
 		m_bv1Classification = false;
 	}
@@ -411,7 +402,7 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 
 	XML::IXMLNode* l_pTempNode;
 
-	if((l_pTempNode = l_pLDANode->getChildByName(c_sClassesNodeName)) == NULL)
+	if((l_pTempNode = pConfigurationNode->getChildByName(c_sClassesNodeName)) == NULL)
 	{
 		return false;
 	}
@@ -419,19 +410,19 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 
 	if(m_bv1Classification)
 	{
-		if((l_pTempNode = l_pLDANode->getChildByName(c_sCoefficientsNodeName)) == NULL)
+		if((l_pTempNode = pConfigurationNode->getChildByName(c_sCoefficientsNodeName)) == NULL)
 		{
 			return false;
 		}
 		loadCoefficientsFromNode(l_pTempNode);
 
-		if((l_pTempNode = l_pLDANode->getChildByName(c_sBiasDistanceNodeName)) == NULL)
+		if((l_pTempNode = pConfigurationNode->getChildByName(c_sBiasDistanceNodeName)) == NULL)
 		{
 			return false;
 		}
 		m_f64BiasDistance = getFloatFromNode(l_pTempNode);
 
-		if((l_pTempNode = l_pLDANode->getChildByName(c_sCoefficientProbabilityNodeName)) == NULL)
+		if((l_pTempNode = pConfigurationNode->getChildByName(c_sCoefficientProbabilityNodeName)) == NULL)
 		{
 			return false;
 		}
@@ -446,7 +437,7 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 	else
 	{
 		//We send corresponding data to the computation helper
-		XML::IXMLNode* l_pConfigsNode = l_pLDANode->getChildByName(c_sComputationHelpersConfigurationNode);
+		XML::IXMLNode* l_pConfigsNode = pConfigurationNode->getChildByName(c_sComputationHelpersConfigurationNode);
 
 		for(size_t i = 0 ; i < l_pConfigsNode->getChildCount() ; ++i)
 		{
