@@ -5,8 +5,6 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-//#if defined TARGET_HAS_ThirdPartyEIGEN
-
 #define OVP_ClassId_Algorithm_ClassifierMLP                                          OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401260)
 #define OVP_ClassId_Algorithm_ClassifierMLP_DecisionAvailable                        OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401261)
 #define OVP_ClassId_Algorithm_ClassifierMLPDesc                                      OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401262)
@@ -49,21 +47,18 @@ namespace OpenViBEPlugins
 		protected:
 
 		private:
+			//Helpers for load or sotre data in XMLNode
 			void dumpData (XML::IXMLNode *pNode, Eigen::MatrixXd &rMatrix);
 			void dumpData (XML::IXMLNode *pNode, Eigen::VectorXd &rVector);
 			void dumpData (XML::IXMLNode *pNode, OpenViBE::int64 i64Value);
 			void dumpData (XML::IXMLNode *pNode, OpenViBE::float64 f64Value);
-			void dumpData (XML::IXMLNode *pNode, OpenViBE::CIdentifier &rIdentifier, const OpenViBE::CIdentifier &rEnumerationIdentifier);
 
 			void loadData (XML::IXMLNode *pNode, Eigen::MatrixXd &rMatrix, OpenViBE::int64 ui32RowCount, OpenViBE::int64 ui32ColCount);
 			void loadData (XML::IXMLNode *pNode, Eigen::VectorXd &rVector);
 			void loadData (XML::IXMLNode *pNode, OpenViBE::int64 &i64Value);
 			void loadData (XML::IXMLNode *pNode, OpenViBE::float64 &f64Value);
-			void loadData (XML::IXMLNode *pNode, OpenViBE::CIdentifier &rIdentifier);
 
 			std::vector < OpenViBE::float64 > m_oLabelList;
-
-			OpenViBE::int64 m_i64HiddenNeuronCount;
 
 			Eigen::MatrixXd m_oInputWeight;
 			Eigen::VectorXd m_oInputBias;
@@ -95,7 +90,6 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
-
 				CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
 
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount, "Amount of neuron in hidden layer",
@@ -107,9 +101,6 @@ namespace OpenViBEPlugins
 		};
 	}
 }
-
-
-//#endif // TARGET_HAS_ThirdPartyEIGEN
 
 #endif // __OpenViBEPlugins_Algorithm_ClassifierMLP_H__
 
