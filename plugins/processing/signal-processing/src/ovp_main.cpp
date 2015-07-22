@@ -1,7 +1,6 @@
 
 #include "algorithms/basic/ovpCMatrixAverage.h"
 #include "algorithms/epoching/ovpCAlgorithmStimulationBasedEpoching.h"
-//#include "algorithms/filters/ovpCApplySpatialFilter.h"
 
 #include "box-algorithms/basic/ovpCIdentity.h"
 
@@ -14,7 +13,6 @@
 #include "box-algorithms/basic/ovpCBoxAlgorithmReferenceChannel.h"
 #include "box-algorithms/basic/ovpCBoxAlgorithmDifferentialIntegral.h"
 #include "box-algorithms/epoching/ovpCBoxAlgorithmStimulationBasedEpoching.h"
-//#include "box-algorithms/filters/ovpCSpatialFilterBoxAlgorithm.h"
 #include "box-algorithms/filters/ovpCBoxAlgorithmCommonAverageReference.h"
 #include "box-algorithms/filters/ovpCBoxAlgorithmSpatialFilter.h"
 
@@ -41,17 +39,6 @@
 #include "algorithms/basic/ovpCAlgorithmARBurgMethod.h"
 #include "box-algorithms/basic/ovpCBoxAlgorithmARCoefficients.h"
 
-
-/*/Dieter boxes for p300
-#include "box-algorithms/ovpCBoxAlgorithmTwoSampleTTest.h"
-#include "box-algorithms/ovpCBoxAlgorithmLikelinessDistributor.h"
-
-#include "box-algorithms/ovpCBoxAlgorithmXDAWNSpatialFilterTrainer.h"
-#include "box-algorithms/ovpCBoxAlgorithmSpatialFilter.h"
-#include "box-algorithms/ovpCBoxAlgorithmMultipleSpatialFilters.h"
-#include "box-algorithms/ovpCBoxAlgorithmConditionalIdentity.h"
-
-//*/
 #include "algorithms/basic/ovpCMatrixVariance.h"
 #include "box-algorithms/basic/ovpCBoxAlgorithmEpochVariance.h"
 
@@ -109,7 +96,6 @@ OVP_Declare_Begin()
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CMatrixAverageDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmStimulationBasedEpochingDesc)
-//	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CApplySpatialFilterDesc)
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmChannelRenameDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmChannelSelectorDesc)
@@ -120,8 +106,8 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmMatrixTransposeDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmSignalDecimationDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmStimulationBasedEpochingDesc)
-//	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSpatialFilterBoxAlgorithmDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmCommonAverageReferenceDesc)
+
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmSpatialFilterDesc)
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSimpleDSPDesc)
@@ -161,18 +147,6 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmMagnitudeSquaredCoherenceDesc)
 #endif
 
-	/*/Dieter stuff for p300
-
-
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingStatistics::CBoxAlgorithmTwoSampleTTestDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingStatistics::CBoxAlgorithmLikelinessDistributorDesc);
-	
-	
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CBoxAlgorithmXDAWNSpatialFilterTrainerDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CBoxAlgorithmSpatialFilterDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CConditionalIdentityDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CBoxAlgorithmMultipleSpatialFiltersDesc);
-	//*/
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_EpochAverageMethod, "Epoch Average method");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EpochAverageMethod, "Moving epoch average", OVP_TypeId_EpochAverageMethod_MovingAverage.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EpochAverageMethod, "Moving epoch average (Immediate)", OVP_TypeId_EpochAverageMethod_MovingAverageImmediate.toUInteger());

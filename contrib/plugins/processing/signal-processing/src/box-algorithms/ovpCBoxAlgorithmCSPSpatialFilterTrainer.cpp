@@ -92,6 +92,7 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::initialize(void)
 	m_ui64StimulationIdentifier=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sSpatialFilterConfigurationFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 	m_ui64FilterDimension=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+	m_bSaveAsBoxConfig=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
 
 	return true;
 }
@@ -260,19 +261,15 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 				l_vEigenVector[itpp::real(l_oEigenValue)[i]]=itpp::real(l_oVector);
 			}
 
-			FILE* l_pFile=::fopen(m_sSpatialFilterConfigurationFilename.toASCIIString(), "wb");
-			if(!l_pFile)
-			{
-				this->getLogManager() << LogLevel_Error << "The file [" << m_sSpatialFilterConfigurationFilename << "] could not be opened for writing...\n";
-				return false;
-			}
+			// Collect the output vectors here
+			CMatrix l_oOutputVectors;
+			l_oOutputVectors.setDimensionCount(2);
+			l_oOutputVectors.setDimensionSize(0, static_cast<uint32>(m_ui64FilterDimension));
+			l_oOutputVectors.setDimensionSize(1, l_ui32ChannelCount);
 
-
+			uint32 l_u32Steps=0,cnt=0;
 			std::map < double, itpp::vec >::const_iterator it_forward;
-			::fprintf(l_pFile, "<OpenViBE-SettingsOverride>\n");
-			::fprintf(l_pFile, "\t<SettingValue>");
 			this->getLogManager() << LogLevel_Debug << "lowest eigenvalues: " << "\n";
-			uint32 l_u32Steps;
 			for(it_forward=l_vEigenVector.begin(), l_u32Steps = 0; 
 				it_forward!=l_vEigenVector.end() && l_u32Steps < ::ceil(m_ui64FilterDimension/2.0);
 				it_forward++, l_u32Steps++)
@@ -280,7 +277,7 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 				this->getLogManager() << LogLevel_Debug << it_forward->first << ", ";
 				for(uint32 j=0; j<l_ui32ChannelCount; j++)
 				{
-					::fprintf(l_pFile, "%e ", it_forward->second[j]);
+					l_oOutputVectors.getBuffer()[cnt++] = it_forward->second[j];
 				}
 			}
 			this->getLogManager() << LogLevel_Debug << "\n";
@@ -294,16 +291,45 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 				this->getLogManager() << LogLevel_Debug << it_backward->first << ", ";
 				for(uint32 j=0; j<l_ui32ChannelCount; j++)
 				{
-					::fprintf(l_pFile, "%e ", it_backward->second[j]);
+					l_oOutputVectors.getBuffer()[cnt++] = it_backward->second[j];
 				}
 			}
 			this->getLogManager() << LogLevel_Debug << "\n";
-			::fprintf(l_pFile, "</SettingValue>\n");
-			::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", uint32(m_ui64FilterDimension));
-			::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", l_ui32ChannelCount);
-			::fprintf(l_pFile, "</OpenViBE-SettingsOverride>\n");
-			::fclose(l_pFile);
 
+			if(m_bSaveAsBoxConfig) {
+				FILE* l_pFile=::fopen(m_sSpatialFilterConfigurationFilename.toASCIIString(), "wb");
+				if(!l_pFile)
+				{
+					this->getLogManager() << LogLevel_Error << "The file [" << m_sSpatialFilterConfigurationFilename << "] could not be opened for writing...\n";
+					return false;
+				}
+
+				::fprintf(l_pFile, "<OpenViBE-SettingsOverride>\n");
+				::fprintf(l_pFile, "\t<SettingValue>");
+
+				cnt=0;
+				for(uint32 i=0;i<m_ui64FilterDimension;i++)
+				{
+					for(uint32 j=0; j<l_ui32ChannelCount; j++)
+					{
+						::fprintf(l_pFile, "%e ", l_oOutputVectors.getBuffer()[cnt++]);
+					}
+				}
+
+				::fprintf(l_pFile, "</SettingValue>\n");
+				::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", uint32(m_ui64FilterDimension));
+				::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", l_ui32ChannelCount);
+				::fprintf(l_pFile, "\t<SettingValue></SettingValue>\n");
+				::fprintf(l_pFile, "</OpenViBE-SettingsOverride>\n");
+				::fclose(l_pFile);
+			} 
+			else
+			{
+				if(!OpenViBEToolkit::Tools::Matrix::saveToTextFile(l_oOutputVectors, m_sSpatialFilterConfigurationFilename)) {
+					this->getLogManager() << LogLevel_Error << "Unable to save to [" << m_sSpatialFilterConfigurationFilename << "\n";
+					return false;
+				}
+			}
 		}
 		else
 		{

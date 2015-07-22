@@ -65,6 +65,10 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_CSPSpatialFilterTrainer_Setting3|
  Here you need to determine how many spatial filters will be computed (default value is two).
  * |OVP_DocEnd_BoxAlgorithm_CSPSpatialFilterTrainer_Setting3|
+ 
+ * |OVP_DocBegin_BoxAlgorithm_CSPSpatialFilterTrainer_Setting4|
+ If true, the output file will be a box configuration XML. Otherwise it will be a text format matrix.
+ * |OVP_DocEnd_BoxAlgorithm_CSPSpatialFilterTrainer_Setting4|
 __________________________________________________________________
 
 Examples description
