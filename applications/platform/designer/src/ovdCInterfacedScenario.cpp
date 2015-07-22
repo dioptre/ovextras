@@ -1512,8 +1512,20 @@ void CInterfacedScenario::scenarioDrawingAreaExposeCB(::GdkEventExpose* pEvent)
 		{
 			//If scenario has no size, let's say we gonna print nothing
 			gtk_widget_set_size_request(GTK_WIDGET(m_pScenarioDrawingArea), l_iViewportX, l_iViewportY);
+			if(m_pStencilBuffer) g_object_unref(m_pStencilBuffer);
+			m_pStencilBuffer=gdk_pixmap_new(GTK_WIDGET(m_pScenarioDrawingArea)->window, l_iViewportX, l_iViewportY, -1);
 			if(m_pBufferedDrawingArea) g_object_unref(m_pBufferedDrawingArea);
 			m_pBufferedDrawingArea = gdk_pixmap_new(GTK_WIDGET(m_pScenarioDrawingArea)->window, l_iViewportX, l_iViewportY, -1);
+
+			::GdkGC* l_pStencilGC=gdk_gc_new(m_pStencilBuffer);
+			::GdkColor l_oStencilColor={0, 0, 0, 0};
+			gdk_gc_set_rgb_fg_color(l_pStencilGC, &l_oStencilColor);
+			gdk_draw_rectangle(
+				GDK_DRAWABLE(m_pStencilBuffer),
+				l_pStencilGC,
+				TRUE,
+				0, 0, l_iViewportX, l_iViewportY);
+			g_object_unref(l_pStencilGC);
 
 			::GdkColor l_oColor;
 			l_oColor.pixel=0;
