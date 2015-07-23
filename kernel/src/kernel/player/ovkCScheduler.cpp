@@ -226,9 +226,9 @@ boolean CScheduler::loop(void)
 		System::CChrono& l_rSimulatedBoxChrono=m_vSimulatedBoxChrono[itSimulatedBox->first.second];
 
 		// we check once a cycle if the box is indeed muted.
-		IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
+		const IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
 		boolean l_bIsMuted = false;
-		if(l_pBox->hasAttribute(OV_AttributeId_Box_Muted))
+		if(l_pBox && l_pBox->hasAttribute(OV_AttributeId_Box_Muted))
 		{
 			CString l_sIsMuted = l_pBox->getAttributeValue(OV_AttributeId_Box_Muted);
 			if (l_sIsMuted==CString("true"))
