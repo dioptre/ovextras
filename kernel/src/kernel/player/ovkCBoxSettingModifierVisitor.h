@@ -38,9 +38,7 @@ public:
 	OpenViBE::boolean m_bIsParsingSettingOverride;
 	OpenViBE::Kernel::IConfigurationManager* m_pConfigurationManager;
 
-#undef boolean
 	_IsDerivedFromClass_Final_(OpenViBE::IObjectVisitor, OV_UndefinedIdentifier);
-#define boolean OpenViBE::boolean
 };
 
 #endif

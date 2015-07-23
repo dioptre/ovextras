@@ -16,6 +16,14 @@
 #include "ovdCInterfacedScenario.h"
 #include "ovdCApplication.h"
 
+#if defined(TARGET_OS_Windows) && defined(TEST_NO_CONSOLE)
+// #include <Windows.h>
+
+// msvcrt
+// extern int  __cdecl __getmainargs( int *argc, char ***argv, char ***envp,
+						// int expand_wildcards, int *new_mode );
+#endif
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -23,6 +31,10 @@ using namespace OpenViBEDesigner;
 using namespace std;
 
 map<uint32, ::GdkColor> g_vColors;
+
+#if TARGET_HAS_ThirdPartyEIGEN
+#include <Eigen/Core>
+#endif
 
 class CPluginObjectDescEnum
 {
@@ -37,7 +49,7 @@ public:
 	{
 	}
 
-	virtual boolean enumeratePluginObjectDesc(void)
+	virtual OpenViBE::boolean enumeratePluginObjectDesc(void)
 	{
 		CIdentifier l_oIdentifier;
 		while((l_oIdentifier=m_rKernelContext.getPluginManager().getNextPluginObjectDescIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
@@ -47,7 +59,7 @@ public:
 		return true;
 	}
 
-	virtual boolean enumeratePluginObjectDesc(
+	virtual OpenViBE::boolean enumeratePluginObjectDesc(
 		const CIdentifier& rParentClassIdentifier)
 	{
 		CIdentifier l_oIdentifier;
@@ -58,7 +70,7 @@ public:
 		return true;
 	}
 
-	virtual boolean callback(
+	virtual OpenViBE::boolean callback(
 		const IPluginObjectDesc& rPluginObjectDesc)=0;
 
 protected:
@@ -79,7 +91,7 @@ public:
 	{
 	}
 
-	virtual boolean callback(
+	virtual OpenViBE::boolean callback(
 		const IPluginObjectDesc& rPluginObjectDesc)
 	{
 		string l_sFullName=string(rPluginObjectDesc.getCategory())+"/"+string(rPluginObjectDesc.getName());
@@ -115,7 +127,7 @@ public:
 	{
 	}
 
-	virtual boolean callback(
+	virtual OpenViBE::boolean callback(
 		const IPluginObjectDesc& rPluginObjectDesc)
 	{
 		// Outputs plugin info to console
@@ -150,7 +162,7 @@ static void insertPluginObjectDesc_to_GtkTreeStore(const IKernelContext& rKernel
 			l_sStockItemName=l_pBoxAlgorithmDesc->getStockItemName();
 		}
 
-		boolean l_bShouldShow=true;
+		OpenViBE::boolean l_bShouldShow=true;
 
 		if  (rKernelContext.getPluginManager().isPluginObjectFlaggedAsDeprecated(l_pPluginObjectDesc->getCreatedClass())
 		 && !rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_ShowDeprecated}", false))
@@ -160,7 +172,7 @@ static void insertPluginObjectDesc_to_GtkTreeStore(const IKernelContext& rKernel
 
 		/*
 		if  (rKernelContext.getPluginManager().isPluginObjectFlaggedAsUnstable(l_pPluginObjectDesc->getCreatedClass())
-		 && !rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_ShowUnstable}", false))
+		 && !rKernelContext.getConfigurationManager().expandAsOpenViBE::boolean("${Designer_ShowUnstable}", false))
 		{
 			l_bShouldShow=false;
 		}
@@ -200,8 +212,8 @@ static void insertPluginObjectDesc_to_GtkTreeStore(const IKernelContext& rKernel
 			::GtkTreeIter* l_pGtkIterChild=&l_oGtkIter1;
 			for(it=l_vCategory.begin(); it!=l_vCategory.end(); it++)
 			{
-				boolean l_bFound=false;
-				boolean l_bValid=gtk_tree_model_iter_children(
+				OpenViBE::boolean l_bFound=false;
+				OpenViBE::boolean l_bValid=gtk_tree_model_iter_children(
 					GTK_TREE_MODEL(pTreeStore),
 					l_pGtkIterChild,
 					l_pGtkIterParent)?true:false;
@@ -299,7 +311,7 @@ typedef struct _SConfiguration
 } SConfiguration;
 
 
-boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
+OpenViBE::boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 {
 	SConfiguration l_oConfiguration;
 
@@ -408,7 +420,7 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 
 int go(int argc, char ** argv)
 {
-	boolean errorWhileLoadingScenario = false;
+	OpenViBE::boolean errorWhileLoadingScenario = false;
 	/*
 		{ 0,     0,     0,     0 },
 		{ 0, 16383, 16383, 16383 },
@@ -543,7 +555,16 @@ int go(int argc, char ** argv)
 				setlocale( LC_ALL, l_sLocale.toASCIIString() );
 
 				//initialise Gtk before 3D context
+#if !GLIB_CHECK_VERSION(2,32,0)
+				// although deprecated in newer GTKs (no more needed after (at least) 2.24.13, deprecated in 2.32), we need to use this on Windows with the older GTK (2.22.1), or acquisition server will crash on startup
+				g_thread_init(NULL);
+#endif
+				gdk_threads_init();
+
+				gdk_threads_enter();
+
 				gtk_init(&argc, &argv);
+
 				// gtk_rc_parse(OpenViBE::Directories::getDataDir() + "/applications/designer/interface.gtkrc");
 
 #ifdef TARGET_OS_Linux
@@ -572,7 +593,7 @@ int go(int argc, char ** argv)
 					::CApplication app(*l_pKernelContext);
 					app.initialize(l_oConfiguration.getFlags());
 					// FIXME is it necessary to keep next line uncomment ?
-					//boolean l_bIsScreenValid=true;
+					//OpenViBE::boolean l_bIsScreenValid=true;
 					if(!l_oConfiguration.m_eNoCheckColorDepth)
 					{
 						if(GDK_IS_DRAWABLE(GTK_WIDGET(app.m_pMainWindow)->window))
@@ -657,6 +678,8 @@ int go(int argc, char ** argv)
 					}
 				}
 
+				gdk_threads_leave();
+
 				l_rLogManager << LogLevel_Info << "Application terminated, releasing allocated objects\n";
 
 				OpenViBEToolkit::uninitialize(*l_pKernelContext);
@@ -675,8 +698,19 @@ int go(int argc, char ** argv)
 	return 0;
 }
 
-int main(int argc, char ** argv)
+#if defined(TARGET_OS_Windows) && defined(TEST_NO_CONSOLE)
+int __stdcall WinMain(HINSTANCE hInstance,
+            HINSTANCE hPrevInstance, 
+            LPTSTR    lpCmdLine, 
+            int       cmdShow)
 {
+	int argc = -1;
+    char **argv = NULL;
+	char **env = NULL;
+	int start_info = 0;
+
+    __getmainargs(&argc, &argv, &env, 0, &start_info);
+
 	int l_iRet=-1;
 	try
 	{
@@ -688,3 +722,47 @@ int main(int argc, char ** argv)
 	}
 	return l_iRet;
 }
+#else
+
+int main(int argc, char ** argv)
+{
+#if defined(TARGET_OS_Windows) && defined(TEST_NO_CONSOLE)
+	// FreeConsole();
+#endif
+
+#if defined(TARGET_HAS_ThirdPartyEIGEN)
+
+#if (EIGEN_WORLD_VERSION >= 3) && (EIGEN_MAJOR_VERSION >= 2)
+	Eigen::initParallel();
+	// Eigen::setNbThreads(4);
+	// std::cout << "Eigen: I'm using " << Eigen::nbThreads() << " threads\n";
+#endif
+
+#if DEBUG
+
+#ifdef EIGEN_VECTORIZE
+	std::cout << "Eigen: Vectorization is compiled\n";
+#else
+	std::cout << "Eigen: Vectorization is NOT compiled\n";
+#ifdef EIGEN_DONT_VECTORIZE
+	std::cout << "Eigen: (DONT_VECTORIZE is on)\n";
+#endif
+#endif
+
+#endif
+
+#endif
+
+	int l_iRet=-1;
+	try
+	{
+		l_iRet=go(argc, argv);
+	}
+	catch (...)
+	{
+		std::cout << "Caught an exception at the very top...\nLeaving application!\n";
+	}
+	return l_iRet;
+}
+
+#endif

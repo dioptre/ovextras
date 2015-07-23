@@ -3,6 +3,7 @@
 
 #include "../ovkTKernelObject.h"
 #include "ovkCScheduler.h"
+#include "ovkCSchedulerMulticore.h"
 
 #include "../ovkCKernelContext.h"
 
@@ -48,7 +49,9 @@ namespace OpenViBE
 			OpenViBE::Kernel::CKernelContextBridge m_oKernelContextBridge;
 			OpenViBE::Kernel::IConfigurationManager* m_pLocalConfigurationManager;
 
-			OpenViBE::Kernel::CScheduler m_oScheduler;
+			// For now, switch between these to change the schedulers
+			// OpenViBE::Kernel::CScheduler m_oScheduler;
+			OpenViBE::Kernel::CSchedulerMulticore m_oScheduler;
 
 			OpenViBE::uint64 m_ui64CurrentTimeToReach;
 			OpenViBE::uint64 m_ui64Lateness;

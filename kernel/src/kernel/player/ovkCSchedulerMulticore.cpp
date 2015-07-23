@@ -6,7 +6,7 @@
 #include "ovkCPlayer.h"
 #include "ovkCBoxSettingModifierVisitor.h"
 
-// #include <system/ovCTime.h>
+#include <system/ovCTime.h>
 
 #include <xml/IReader.h>
 
@@ -28,10 +28,114 @@ using namespace OpenViBE::Plugins;
 //___________________________________________________________________//
 //                                                                   //
 
+static uint32 g_ui32NumThreads = 4;
+
+
+boolean parallelExecutor::initialize(const uint32 nThreads)
+{
+	// Basically jobContext is the stuff that the scheduler and parallel executor use to communicate the status of the jobs
+	m_oJobContext.m_bQuit = false;
+	m_oJobContext.m_ui32JobsPending = 0;
+	m_oJobContext.m_vJobList.clear();
+
+	for(uint32 i=0;i<nThreads;i++)
+	{
+		m_vWorkerThread.push_back(new CWorkerThread(m_oJobContext));
+		m_vThread.push_back(new boost::thread(boost::bind(&CWorkerThread::startWorkerThread, m_vWorkerThread[i])));
+	}
+
+	return true;
+}
+
+boolean parallelExecutor::uninitialize() 
+{
+	// Make sure all jobs have been completed
+	waitForAll();
+
+	// Tell the threads waiting in the cond its time to quit
+	{ // scope for lock
+		boost::unique_lock<boost::mutex> lock(m_oJobContext.m_oJobMutex);	
+		m_oJobContext.m_bQuit = true;
+	}
+
+	m_oJobContext.m_oHaveWork.notify_all();
+
+	for(uint32 i=0;i<m_vThread.size();i++)
+	{
+		m_vThread[i]->join();
+
+		delete m_vThread[i];
+		delete m_vWorkerThread[i];
+	}
+
+	m_vThread.clear();
+	m_vWorkerThread.clear();
+
+	return true;
+}
+
+boolean parallelExecutor::push(const jobCall& someJob)
+{
+	// @fixme to add better concurrency, push a list instead; lock();add list;unlock();notify_all();
+	{ // lock scope
+		boost::lock_guard<boost::mutex> lock(m_oJobContext.m_oJobMutex);
+
+		m_oJobContext.m_vJobList.push_back(someJob);
+
+		m_oJobContext.m_ui32JobsPending++;
+	}
+
+	m_oJobContext.m_oHaveWork.notify_one();
+
+
+	return true;
+}
+
+
+boolean parallelExecutor::pushList(const std::deque<jobCall>& vJobList)
+{
+	{ // lock scope
+		boost::lock_guard<boost::mutex> lock(m_oJobContext.m_oJobMutex);
+
+		if(m_oJobContext.m_ui32JobsPending) {
+			std::cout << "Error, trying to push list with old jobs pending\n";
+			return false;
+		}
+
+		m_oJobContext.m_vJobList = vJobList;
+
+		m_oJobContext.m_ui32JobsPending = vJobList.size();
+	}
+
+	m_oJobContext.m_oHaveWork.notify_all();
+
+
+	return true;
+}
+
+boolean parallelExecutor::waitForAll()
+{
+	{ // lock scope
+		boost::unique_lock<boost::mutex> lock(m_oJobContext.m_oJobMutex);
+		while(m_oJobContext.m_ui32JobsPending>0) {
+			m_oJobContext.m_oJobDone.wait(lock); 
+		}
+	}
+
+	return true;
+}
 
 
 //___________________________________________________________________//
 //                                                                   //
+
+boolean testFunction(void* data) {
+	for(uint32 i=0;i<10;i++) {
+		std::cout << "Fun: " << *(uint32*)(data) << "\n";
+		System::Time::sleep(*(uint32*)data);
+	}
+	return true;
+}
 
 CSchedulerMulticore::CSchedulerMulticore(const IKernelContext& rKernelContext, CPlayer& rPlayer)
 	:	CScheduler(rKernelContext, rPlayer)
@@ -43,11 +147,40 @@ CSchedulerMulticore::CSchedulerMulticore(const IKernelContext& rKernelContext, C
 	,m_ui64CurrentTime(0)
 	,m_bIsInitialized(false)
 {
+ 	int stuff[6] = {500,666,50,1000,300,100};
+
+	m_oExecutor.initialize(g_ui32NumThreads);
+
+	// m_oExecutor.push(boost::bind(CSchedulerMulticore::job, this));
+	/*
+	m_oExecutor.push(boost::bind(testFunction, &stuff[0]));
+
+//	test.push(jobInfo(boost::bind(&CSchedulerMulticore::job, this)));
+
+//		boost::bind(&CWorkerThread::startWorkerThread, m_vWorkerThread[i])));
+*/
+
+	/*
+	parallelExecutor test;
+	test.initialize(3);
+	test.push(boost::bind(testFunction, &stuff[0]));
+	test.waitForAll();
+	test.push(boost::bind(testFunction, &stuff[1]));
+	test.push(boost::bind(testFunction, &stuff[2]));
+	test.push(boost::bind(testFunction, &stuff[3]));
+	test.push(boost::bind(testFunction, &stuff[4]));
+	test.push(boost::bind(testFunction, &stuff[2]));
+	test.waitForAll();
+	test.waitForAll();
+	test.uninitialize();
+	*/
 
 }
 
 CSchedulerMulticore::~CSchedulerMulticore(void)
 {
+	m_oExecutor.uninitialize();
+
 	if(m_bIsInitialized)
 	{
 		this->uninitialize();
@@ -151,6 +284,7 @@ SchedulerInitializationCode CSchedulerMulticore::initialize(void)
 
 		m_vSimulatedBox[std::make_pair(-l_iPriority, l_oBoxIdentifier)]=l_pSimulatedBox;
 		m_vSimulatedBoxChrono[l_oBoxIdentifier].reset(static_cast<uint32>(m_ui64Frequency));
+		m_vSimulatedBoxInputMutex[l_oBoxIdentifier] = new boost::mutex();
 	}
 
 	boolean l_bBoxInitialization = true;
@@ -205,6 +339,12 @@ boolean CSchedulerMulticore::uninitialize(void)
 	}
 	m_vSimulatedBox.clear();
 
+	for(map < CIdentifier, boost::mutex* >::iterator it = m_vSimulatedBoxInputMutex.begin(); it!=m_vSimulatedBoxInputMutex.end();it++)
+	{
+		delete it->second;
+	}
+	m_vSimulatedBoxInputMutex.clear();
+
 	m_pScenario=NULL;
 
 	m_bIsInitialized=false;
@@ -214,47 +354,50 @@ boolean CSchedulerMulticore::uninitialize(void)
 //___________________________________________________________________//
 //                                                                   //
 
-
-boolean CSchedulerMulticore::loop(void)
+boolean CSchedulerMulticore::job(CSchedulerMulticore *context, CIdentifier id, CSimulatedBox* box)
 {
-	if(!m_bIsInitialized)
+	return context->runBox(id, box);
+}
+
+boolean CSchedulerMulticore::runBox(CIdentifier id, CSimulatedBox* box)
+{
+//	std::cout << "id " << id.toString() << "\n";
+
+	// we check once a cycle if the box is indeed muted.
+	IBox* l_pBox=m_pScenario->getBoxDetails(id);
+	boolean l_bIsMuted = false;
+	if(l_pBox->hasAttribute(OV_AttributeId_Box_Muted))
 	{
-		return false;
+		CString l_sIsMuted = l_pBox->getAttributeValue(OV_AttributeId_Box_Muted);
+		if (l_sIsMuted==CString("true"))
+		{
+			l_bIsMuted = true;
+		}
 	}
 
-	m_oBenchmarkChrono.stepIn();
-	for(map < pair < int32, CIdentifier >, CSimulatedBox* >::iterator itSimulatedBox=m_vSimulatedBox.begin(); itSimulatedBox!=m_vSimulatedBox.end(); itSimulatedBox++)
-	{
-		CSimulatedBox* l_pSimulatedBox=itSimulatedBox->second;
-		System::CChrono& l_rSimulatedBoxChrono=m_vSimulatedBoxChrono[itSimulatedBox->first.second];
+	System::CChrono& l_rSimulatedBoxChrono=m_vSimulatedBoxChrono[id];
 
-		// we check once a cycle if the box is indeed muted.
-		IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
-		boolean l_bIsMuted = false;
-		if(l_pBox->hasAttribute(OV_AttributeId_Box_Muted))
+	l_rSimulatedBoxChrono.stepIn();
+	if(box)
+	{
+		if(!l_bIsMuted)
 		{
-			CString l_sIsMuted = l_pBox->getAttributeValue(OV_AttributeId_Box_Muted);
-			if (l_sIsMuted==CString("true"))
+			box->processClock();
+
+			if(box->isReadyToProcess())
 			{
-				l_bIsMuted = true;
+				box->process();
 			}
 		}
 
-		l_rSimulatedBoxChrono.stepIn();
-		if(l_pSimulatedBox)
+		//if the box is muted we still have to erase chunks that arrives at the input
 		{
-			if(!l_bIsMuted)
-			{
-				l_pSimulatedBox->processClock();
+			// CSimulatedBox in a thread may call m_rScheduler.sendInput() inside a process() call with modifies the
+			// map of inputs. Hence, at least as long as the boxes are not synchronized into dependency layers, 
+			// we need to guard accesses to the input map.
+			boost::lock_guard<boost::mutex> lock(*m_vSimulatedBoxInputMutex[id]);
 
-				if(l_pSimulatedBox->isReadyToProcess())
-				{
-					l_pSimulatedBox->process();
-				}
-			}
-
-			//if the box is muted we still have to erase chunks that arrives at the input
-			map < uint32, list < CChunk > >& l_rSimulatedBoxInput=m_vSimulatedBoxInput[itSimulatedBox->first.second];
+			map < uint32, list < CChunk > >& l_rSimulatedBoxInput=m_vSimulatedBoxInput[id];
 			map < uint32, list < CChunk > >::iterator itSimulatedBoxInput;
 			for(itSimulatedBoxInput=l_rSimulatedBoxInput.begin(); itSimulatedBoxInput!=l_rSimulatedBoxInput.end(); itSimulatedBoxInput++)
 			{
@@ -264,28 +407,83 @@ boolean CSchedulerMulticore::loop(void)
 					list < CChunk >::iterator itSimulatedBoxInputChunkList;
 					for(itSimulatedBoxInputChunkList=l_rSimulatedBoxInputChunkList.begin(); itSimulatedBoxInputChunkList!=l_rSimulatedBoxInputChunkList.end(); itSimulatedBoxInputChunkList++)
 					{
-						l_pSimulatedBox->processInput(itSimulatedBoxInput->first, *itSimulatedBoxInputChunkList);
+						box->processInput(itSimulatedBoxInput->first, *itSimulatedBoxInputChunkList);
 
-						if(l_pSimulatedBox->isReadyToProcess())
+						if(box->isReadyToProcess())	
 						{
-							l_pSimulatedBox->process();
+							box->process();
 						}
 					}
 				}
 				l_rSimulatedBoxInputChunkList.clear();
 			}
-			//process and processClock have been called for this cycle, we can clean the messages
-			l_pSimulatedBox->cleanupMessages();
 		}
-		l_rSimulatedBoxChrono.stepOut();
-
-		if(l_rSimulatedBoxChrono.hasNewEstimation())
-		{
-			IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
-			l_pBox->addAttribute(OV_AttributeId_Box_ComputationTimeLastSecond, "");
-			l_pBox->setAttributeValue(OV_AttributeId_Box_ComputationTimeLastSecond, CIdentifier(l_rSimulatedBoxChrono.getTotalStepInDuration()).toString());
-		}
+		//process and processClock have been called for this cycle, we can clean the messages
+		box->cleanupMessages();
 	}
+	l_rSimulatedBoxChrono.stepOut();
+
+	if(l_rSimulatedBoxChrono.hasNewEstimation())
+	{
+		IBox* l_pBox=m_pScenario->getBoxDetails(id);
+		l_pBox->addAttribute(OV_AttributeId_Box_ComputationTimeLastSecond, "");
+		l_pBox->setAttributeValue(OV_AttributeId_Box_ComputationTimeLastSecond, CIdentifier(l_rSimulatedBoxChrono.getTotalStepInDuration()).toString());
+	}
+
+	return true;
+}
+
+boolean CSchedulerMulticore::loop(void)
+{
+	if(!m_bIsInitialized)
+	{
+		return false;
+	}
+
+	m_oBenchmarkChrono.stepIn();
+
+	std::deque<jobCall> l_vJobList;
+
+	// Send all the 'thread safe' stuff to the parallel execution
+	for(map < pair < int32, CIdentifier >, CSimulatedBox* >::iterator itSimulatedBox=m_vSimulatedBox.begin(); itSimulatedBox!=m_vSimulatedBox.end(); itSimulatedBox++)
+	{
+		CSimulatedBox* l_pSimulatedBox=itSimulatedBox->second;
+		// runBox(itSimulatedBox->first.second, l_pSimulatedBox);
+
+		CIdentifier l_oBoxAlgId;
+		l_pSimulatedBox->getBoxAlgorithmClassIdentifier(l_oBoxAlgId);
+		const IPluginObjectDesc* l_pPOD = getPluginManager().getPluginObjectDescCreating(l_oBoxAlgId);
+
+		if(g_ui32NumThreads > 0 && (l_pPOD && !l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization)))
+		{
+			l_vJobList.push_back(boost::bind(CSchedulerMulticore::job, this, itSimulatedBox->first.second, l_pSimulatedBox));
+			// m_oExecutor.push(boost::bind(CSchedulerMulticore::job, this, itSimulatedBox->first.second, l_pSimulatedBox));
+		}
+
+	}
+
+	m_oExecutor.pushList(l_vJobList);
+
+	// Do the rest in the main thread
+	for(map < pair < int32, CIdentifier >, CSimulatedBox* >::iterator itSimulatedBox=m_vSimulatedBox.begin(); itSimulatedBox!=m_vSimulatedBox.end(); itSimulatedBox++)
+	{
+		CSimulatedBox* l_pSimulatedBox=itSimulatedBox->second;
+		// runBox(itSimulatedBox->first.second, l_pSimulatedBox);
+
+		CIdentifier l_oBoxAlgId;
+		l_pSimulatedBox->getBoxAlgorithmClassIdentifier(l_oBoxAlgId);
+		const IPluginObjectDesc* l_pPOD = getPluginManager().getPluginObjectDescCreating(l_oBoxAlgId);
+
+		if(g_ui32NumThreads==0 || (l_pPOD && l_pPOD->hasFunctionality(Kernel::PluginFunctionality_Visualization)))
+		{
+			job(this, itSimulatedBox->first.second, l_pSimulatedBox);
+		}
+
+	}
+
+	// Wait for threads to finish their jobs
+	m_oExecutor.waitForAll();
+
 	m_oBenchmarkChrono.stepOut();
 
 	if((m_ui64Steps%m_ui64Frequency)==0)
@@ -351,8 +549,10 @@ boolean CSchedulerMulticore::sendInput(
 	}
 
 	// TODO: check if ui32InputIndex does not overflow
-
-	m_vSimulatedBoxInput[rBoxIdentifier][ui32InputIndex].push_back(rChunk);
+	{
+		boost::lock_guard<boost::mutex> lock(*m_vSimulatedBoxInputMutex[rBoxIdentifier]);
+		m_vSimulatedBoxInput[rBoxIdentifier][ui32InputIndex].push_back(rChunk);
+	}
 
 	return true;
 }

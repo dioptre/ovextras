@@ -898,6 +898,16 @@ boolean CSimulatedBox::getBoxIdentifier(CIdentifier& rBoxIdentifier)
 	return true;
 }
 
+boolean CSimulatedBox::getBoxAlgorithmClassIdentifier(CIdentifier& rIdentifier)
+{
+	if(m_pBox == NULL)
+	{
+		return false;
+	}
+	rIdentifier = m_pBox->getAlgorithmClassIdentifier();
+	return true;
+}
+
 boolean CSimulatedBox::setBoxIdentifier(const CIdentifier& rBoxIdentifier)
 {
 	if(!m_pScenario)

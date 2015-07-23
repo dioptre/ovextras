@@ -12,7 +12,12 @@ SET(PROJECT_VERSION_PATCH ${OV_GLOBAL_VERSION_PATCH})
 SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
-ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
+IF(WIN32)
+#	ADD_EXECUTABLE(${PROJECT_NAME} WIN32 ${source_files})
+	ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
+ELSE(WIN32)
+	ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
+ENDIF(WIN32)
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
@@ -22,6 +27,9 @@ INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleFS")
 INCLUDE("FindThirdPartyGTK")
+INCLUDE("FindThirdPartyBoost")
+INCLUDE("FindThirdPartyBoost_Thread")
+INCLUDE("FindThirdPartyEigen")
 
 # ---------------------------------
 # Target macros

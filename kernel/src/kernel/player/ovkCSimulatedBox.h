@@ -121,6 +121,9 @@ namespace OpenViBE
 			virtual OpenViBE::boolean setBoxIdentifier(
 				const OpenViBE::CIdentifier& rBoxIdentifier);
 
+			virtual OpenViBE::boolean getBoxAlgorithmClassIdentifier(
+				OpenViBE::CIdentifier& rIdentifier);
+
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 
@@ -332,7 +335,7 @@ namespace OpenViBE
 			std::vector< OpenViBE::Kernel::CMessageWithData* > m_vPreparedMessages;
 			OpenViBE::boolean m_bIsReceivingMessage;
 
-		public:
+		private:
 
 			std::vector < std::deque < OpenViBE::Kernel::CChunk > > m_vInput;
 			std::vector < std::deque < OpenViBE::Kernel::CChunk > > m_vOutput;

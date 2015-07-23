@@ -5,6 +5,8 @@
 
 #include <openvibe/ovITimeArithmetics.h>
 
+#include <boost/thread.hpp>
+
 #define OVD_GUI_File OpenViBE::Directories::getDataDir() + "/applications/designer/interface.ui"
 
 using namespace OpenViBE;

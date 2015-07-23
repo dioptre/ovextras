@@ -6,6 +6,8 @@
 #include <vector>
 #include <map>
 
+#include <boost/thread.hpp>
+
 namespace OpenViBE
 {
 	namespace Kernel
@@ -50,10 +52,15 @@ namespace OpenViBE
 
 			_IsDerivedFromClass_Final_(OpenViBE::Kernel::TKernelObject<OpenViBE::Kernel::ILogManager>, OVK_ClassId_Kernel_Log_LogManager);
 
+			boost::mutex m_oMutex;
+
 		protected:
 
 			template <class T> void logForEach(T tValue)
 			{
+				// @fixme we need to create a buffer per thread (caller) and then on EOL, lock();flush buffer();unlock()
+				boost::mutex::scoped_lock lock(m_oMutex);
+
 				if(m_eCurrentLogLevel!=LogLevel_None && this->isActive(m_eCurrentLogLevel))
 				{
 					std::vector<OpenViBE::Kernel::ILogListener*>::iterator i;
