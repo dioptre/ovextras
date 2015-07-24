@@ -1,124 +1,127 @@
 /**
- * \page BoxAlgorithm_ShrinkageCSPTrainer Shrinkage CSP Trainer
+ * \page BoxAlgorithm_RegularizedCSPTrainer Shrinkage CSP Trainer
 __________________________________________________________________
 
 Detailed description
 __________________________________________________________________
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Description|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Description|
  
  The box estimates a filter bank of spatial filters using Common Spatial Patterns (CSP) algorithm. The algorithm tries to find a linear transform of the data that 
  makes the two signal conditions (or classes) more distinct, when the data is projected to the matrix of the filters found by the algorithm (i.e. s=Wx, where we
  assume x is the signal sample, W is the discovered filter bank, and s a lower-dimensional representation of the sample). The spatial filters are constructed 
- to maximize the variance of the signals of the first condition while at the same time minimizing it for the second condition. This approach can be 
- attempted to alleviate the discrimination of the signals of two-class designs such as motor-imagery tasks (e.g. left versus right hand movement). 
+ to maximize the variance of the signals of the first condition while at the same time minimizing it for the second condition. This approach may 
+ aid the discrimination of the signals for two-class designs such as motor-imagery tasks (e.g. left versus right hand movement). 
  It can be useful in situations where designing spatial filter masks such as Laplacians manually is cumbersome or when it is believed
- that a filter optimized to the current data/user would produce better results than an one-size-fits all filter.
- 
+ that a filter optimized to the current data/user would produce better results than using an one-size-fits all filter.
+
  In principle CSP can be useful in two-class experiments where there is discriminative information in the variance (or power) of the signal conditions.
  
  The box implements some of the methods described e.g. in Lotte & Guan: "Regularizing common spatial patterns...", 2011. Especially, it 
- allows using the methods called "CSP with Diagonal Loading" and "CSP with Tikhonov Regularization" in the paper. In this approach, 
- the filters for condition 1 are found by eigenvector decomposition of inv(Sigma1+rho*I)*Sigma2, where Sigma1 and Sigma2 are empirical 
- covariance matrices for the two conditions, rho the amount of Tikhonov regularization and I an identity matrix. For condition 2, 
- the formula is the same with sigmas swapped. The Sigma1 and Sigma2 may be optionally shrunk towards diagonal matrices.
+ allows using the methods called "CSP with Diagonal Loading" and "CSP with Tikhonov Regularization" in the paper. In the approach of
+ the paper, the filters for condition 1 are found by eigenvector decomposition of inv(Sigma1+rho*I)*Sigma2, where Sigma1 and Sigma2 are 
+ empirical covariance matrices for the two conditions, rho the amount of Tikhonov regularization and I an identity matrix. For condition 2, 
+ the formula is the same with the sigmas swapped. The matrices Sigma1 and Sigma2 may be optionally shrunk towards diagonal matrices.
  
  To avoid caching the whole dataset in the box, the algorithm tries to estimate the required covariances incrementally. The box supports
  a few different incremental ways to compute the covariances. The 'block average' approach takes an average of all the covariances of the incoming 
  signal chunks, whereas the incremental (per sample) method aims to implement Youngs & Cramer algorithm as described in Chan, Golub, Leveq, 
  "Updating formulae and a pairwise algorithm...", 1979. Which one gives better results may depend on the situation -- however, 
- taking an average of covariance matrices is not usually suggested as a method for computing covariance over the whole data. It is 
- also possible to compensate for the effect of changes in the average signal power over time by enabling 'Trace Normalization' setting.
+ taking an average of covariance matrices is not usually suggested as a method for computing covariance over the whole data. 
  
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Description|
+ Finally, the box also presents an option to try to compensate for the effect of changes in the average signal power over time. This is 
+ can be done by enabling 'Trace Normalization' setting. When trace normalization is enabled, each data chunks contribution to 
+ the covariance gets divided by its trace.
+ 
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Description|
 __________________________________________________________________
 
 Inputs description
 __________________________________________________________________
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Inputs|
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Inputs|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Inputs|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Inputs|
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Input1|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Input1|
  This stimulus input is needed to indicate the end of a recording session (or end of file). It triggers the training/computation of the CSP filters.
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Input1|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Input1|
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Input2|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Input2|
  This input expects epoched data for the first condition (e.g. epochs for left hand motor imagery).
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Input2|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Input2|
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Input3|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Input3|
  This input expects epoched data for the second condition (e.g. epochs for right hand motor imagery).
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Input3|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Input3|
 __________________________________________________________________
 
 Outputs description
 __________________________________________________________________
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Outputs|
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Outputs|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Outputs|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Outputs|
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Output1|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Output1|
  The CSP Trainer outputs the stimulation <b>OVTK_StimulationId_TrainCompleted</b> when the training process was successful. No output is produced if the process failed.
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Output1|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Output1|
 __________________________________________________________________
 
 Settings description
 __________________________________________________________________
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Settings|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Settings|
  
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Settings|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Settings|
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Setting1|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting1|
  The stimulus identifier denoting the end of a recording session or end of file, e.g. OVTK_GDF_End_Of_Session or OVTK_StimulationId_ExperimentStop.
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting1|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting1|
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Setting2|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting2|
  The path and filename of the configuration file in which the computed spatial filters are saved. 
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting2|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting2|
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Setting3|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting3|
  How many spatial filters should be output. Each condition will have half this amount of filters specific to it.
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting3|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting3|
  
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Setting4|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting4|
  Method to update the covariances
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting4| 
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting4| 
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Setting5|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting5|
  Is trace normalization done when appending the per-chunk covariances? 
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting5| 
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting5| 
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Setting6|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting6|
  The amount of shrinkage, between 0 and 1. It interpolates between the covariance matrices and the diagonal matrix.
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting6|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting6|
  
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Setting7|
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting7|
  The amount of Tikhonov regularization, bigger signifies more. This equals parameter rho in the description above. If 0, the method behaves approximately as a regular CSP. 
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Setting7|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting7|
 __________________________________________________________________
 
 Miscellaneous description
 __________________________________________________________________
 
- * |OVP_DocBegin_BoxAlgorithm_ShrinkageCSPTrainer_Miscellaneous|
- The amount of regularization may depend on the variance of the data. You may need to try different values to find the one that suits your situation best.
- Before the CSP, it may be useful to temporally filter the input data to remove bands which are believed to have no relevant discriminative information.
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Miscellaneous|
+ The suitable amount of regularization may depend on the variance of the data. You may need to try different values to find the one that suits your situation best.
+ Before the CSP training, it may be useful to temporally filter the input data to remove bands which are believed to have no relevant discriminative information.
  
  Note that the usage of the CSP filters before classification training can make the cross-validation results optimistic, unless strictly non-overlapping 
- parts of the data were used to train the CSP and the classifier (disjoints sets for each). 
+ parts of the data were used to train the CSP and the classifier (disjoint sets for each). 
  
  The origin of the trace normalization trick has been lost. Presumably the idea is to normalize the scale of 
  each chunk in order to compensate for possible signal power drift over time during the EEG recording, 
  making each chunks' covariance contribute similarly to the aggregate regardless of the current chunks average power. 
 				
- To get the CSP with Diagonal Loading of Lotte & Guan paper, set shrinkage to a positive value and Tikhonov to 0. To get the CSP with Tikhonov regularization, 
- do the opposite. You can also try a mixture of the two. The Guan & Lotte paper does not use trace normalization.
+ To get the "CSP with Diagonal Loading" of Lotte & Guan paper, set shrinkage to a positive value and Tikhonov to 0. To get the 
+ "CSP with Tikhonov regularization", do the opposite. You can also try a mixture of the two. Note that the Guan & Lotte paper does not use trace normalization.
  
- Once the spatial filters are computed and saved in the configuration file, you can load it into the \ref Doc_BoxAlgorithm_SpatialFilter "Spatial Filter" box.
+ Once the spatial filters are computed and saved in the configuration file, you can load the configuration into the \ref Doc_BoxAlgorithm_SpatialFilter "Spatial Filter" box.
  
  For the moment the Shrinkage CSP Trainer supports only two classes. 
   
- * |OVP_DocEnd_BoxAlgorithm_ShrinkageCSPTrainer_Miscellaneous|
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Miscellaneous|
  */
