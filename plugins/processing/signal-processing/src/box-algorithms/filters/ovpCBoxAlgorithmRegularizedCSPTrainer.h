@@ -47,9 +47,10 @@ namespace OpenViBEPlugins
 
 			OpenViBE::uint64 m_ui64StimulationIdentifier;
 			OpenViBE::CString m_sSpatialFilterConfigurationFilename;
-			OpenViBE::uint64 m_ui64FilterDimension;
-			OpenViBE::float64 m_f64Tikhonov;
+			OpenViBE::uint32 m_ui32FilterDimension;
+			OpenViBE::boolean m_bSaveAsBoxConf;
 
+			OpenViBE::float64 m_f64Tikhonov;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pIncrementalCov[2];
 
 			OpenViBE::uint64 m_ui64nBuffers[2];
@@ -88,6 +89,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Train Trigger",                OV_TypeId_Stimulation, "OVTK_GDF_End_Of_Session");
 				rBoxAlgorithmPrototype.addSetting("Spatial filter configuration", OV_TypeId_Filename, "");
 				rBoxAlgorithmPrototype.addSetting("Filter dimension",             OV_TypeId_Integer, "2");
+				rBoxAlgorithmPrototype.addSetting("Save filters as box config",   OV_TypeId_Boolean, "false");
 
 				// Params of the cov algorithm; would be better to poll the params from the algorithm, however this is not straightforward to do
 				rBoxAlgorithmPrototype.addSetting("Covariance update",            OVP_TypeId_OnlineCovariance_UpdateMethod, OVP_TypeId_OnlineCovariance_UpdateMethod_ChunkAverage.toString());   

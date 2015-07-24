@@ -84,22 +84,26 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting3|
  How many spatial filters should be output. Each condition will have half this amount of filters specific to it.
  * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting3|
- 
- * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting4|
- Method to update the covariances
- * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting4| 
 
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting4|
+If true, the file written will be a box configuration override especially for the spatial filter box. Otherwise, it will be an ASCII matrix.
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting4|
+ 
  * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting5|
- Is trace normalization done when appending the per-chunk covariances? 
+ Method to update the covariances
  * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting5| 
 
  * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting6|
- The amount of shrinkage, between 0 and 1. It interpolates between the covariance matrices and the diagonal matrix.
- * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting6|
- 
+ Is trace normalization done when appending the per-chunk covariances? 
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting6| 
+
  * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting7|
- The amount of Tikhonov regularization, bigger signifies more. This equals parameter rho in the description above. If 0, the method behaves approximately as a regular CSP. 
+ The amount of shrinkage, between 0 and 1. It interpolates between the covariance matrices and the diagonal matrix.
  * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting7|
+ 
+ * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting8|
+ The amount of Tikhonov regularization, bigger signifies more. This equals parameter rho in the description above. If 0, the method behaves approximately as a regular CSP. 
+ * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting8|
 __________________________________________________________________
 
 Miscellaneous description
@@ -121,7 +125,7 @@ __________________________________________________________________
  
  Once the spatial filters are computed and saved in the configuration file, you can load the configuration into the \ref Doc_BoxAlgorithm_SpatialFilter "Spatial Filter" box.
  
- For the moment the Shrinkage CSP Trainer supports only two classes. 
+ For the moment the Regularized CSP Trainer supports only two classes. 
   
  * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Miscellaneous|
  */
