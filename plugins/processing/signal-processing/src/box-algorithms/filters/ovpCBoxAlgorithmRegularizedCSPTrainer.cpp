@@ -1,6 +1,6 @@
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
-#include "ovpCBoxAlgorithmShrinkageCSPTrainer.h"
+#include "ovpCBoxAlgorithmRegularizedCSPTrainer.h"
 
 #include <sstream>
 #include <cstdio>
@@ -20,7 +20,7 @@ using namespace Eigen;
 
 #define CSP_DEBUG 0
 #if CSP_DEBUG
-void CBoxAlgorithmShrinkageCSPTrainer::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const MatrixXdRowMajor &mat, const CString &desc)
+void CBoxAlgorithmRegularizedCSPTrainer::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const MatrixXdRowMajor &mat, const CString &desc)
 {
 	rMgr << LogLevel_Info << desc << "\n";
 	for(int i=0;i<mat.rows();i++) {
@@ -31,7 +31,7 @@ void CBoxAlgorithmShrinkageCSPTrainer::dumpMatrix(OpenViBE::Kernel::ILogManager 
 		rMgr << "\n";
 	}
 }
-void CBoxAlgorithmShrinkageCSPTrainer::dumpMatrixFile(const MatrixXd& mat, const char *fn)
+void CBoxAlgorithmRegularizedCSPTrainer::dumpMatrixFile(const MatrixXd& mat, const char *fn)
 {
 	FILE *fp = fopen(fn, "w");
 	if(!fp) { this->getLogManager() << LogLevel_Error << "Cannot open " << fn << "\n"; return; }; 
@@ -44,7 +44,7 @@ void CBoxAlgorithmShrinkageCSPTrainer::dumpMatrixFile(const MatrixXd& mat, const
 	fclose(fp);
 }
 
-void CBoxAlgorithmShrinkageCSPTrainer::dumpVector(OpenViBE::Kernel::ILogManager &rMgr, const VectorXd &mat, const CString &desc)
+void CBoxAlgorithmRegularizedCSPTrainer::dumpVector(OpenViBE::Kernel::ILogManager &rMgr, const VectorXd &mat, const CString &desc)
 {
 	rMgr << LogLevel_Info << desc << " : ";
 	for(int i=0;i<mat.size();i++) {
@@ -53,12 +53,12 @@ void CBoxAlgorithmShrinkageCSPTrainer::dumpVector(OpenViBE::Kernel::ILogManager 
 	rMgr << "\n";
 }
 #else 
-void CBoxAlgorithmShrinkageCSPTrainer::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { }
-void CBoxAlgorithmShrinkageCSPTrainer::dumpVector(OpenViBE::Kernel::ILogManager &rMgr, const VectorXd &mat, const CString &desc) { }
-void CBoxAlgorithmShrinkageCSPTrainer::dumpMatrixFile(const MatrixXd& mat, const char *fn) { }
+void CBoxAlgorithmRegularizedCSPTrainer::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { }
+void CBoxAlgorithmRegularizedCSPTrainer::dumpVector(OpenViBE::Kernel::ILogManager &rMgr, const VectorXd &mat, const CString &desc) { }
+void CBoxAlgorithmRegularizedCSPTrainer::dumpMatrixFile(const MatrixXd& mat, const char *fn) { }
 #endif
 
-boolean CBoxAlgorithmShrinkageCSPTrainer::initialize(void)
+boolean CBoxAlgorithmRegularizedCSPTrainer::initialize(void)
 {
 	m_oStimulationDecoder.initialize(*this,0);
 	m_oStimulationEncoder.initialize(*this,0);
@@ -103,7 +103,7 @@ boolean CBoxAlgorithmShrinkageCSPTrainer::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmShrinkageCSPTrainer::uninitialize(void)
+boolean CBoxAlgorithmRegularizedCSPTrainer::uninitialize(void)
 {
 	m_oStimulationDecoder.uninitialize();
 	m_oStimulationEncoder.uninitialize();
@@ -120,19 +120,19 @@ boolean CBoxAlgorithmShrinkageCSPTrainer::uninitialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmShrinkageCSPTrainer::processInput(uint32 ui32InputIndex)
+boolean CBoxAlgorithmRegularizedCSPTrainer::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 
-boolean CBoxAlgorithmShrinkageCSPTrainer::updateCov(int index)
+boolean CBoxAlgorithmRegularizedCSPTrainer::updateCov(int index)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(index+1); i++)
 	{
-		OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmShrinkageCSPTrainer >* l_oDecoder = &m_oSignalDecoders[index];			
+		OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmRegularizedCSPTrainer >* l_oDecoder = &m_oSignalDecoders[index];			
 		const IMatrix* l_pInputSignal = l_oDecoder->getOutputMatrix();
 		
 		l_oDecoder->decode(i);
@@ -174,7 +174,7 @@ boolean CBoxAlgorithmShrinkageCSPTrainer::updateCov(int index)
 	return true;
 }		
 
-boolean CBoxAlgorithmShrinkageCSPTrainer::process(void)
+boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 

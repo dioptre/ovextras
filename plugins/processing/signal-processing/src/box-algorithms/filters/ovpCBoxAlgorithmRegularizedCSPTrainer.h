@@ -1,6 +1,6 @@
 
-#ifndef __OpenViBEPlugins_BoxAlgorithm_ShrinkageCSPTrainer_H__
-#define __OpenViBEPlugins_BoxAlgorithm_ShrinkageCSPTrainer_H__
+#ifndef __OpenViBEPlugins_BoxAlgorithm_RegularizedCSPTrainer_H__
+#define __OpenViBEPlugins_BoxAlgorithm_RegularizedCSPTrainer_H__
 
 #if defined TARGET_HAS_ThirdPartyEIGEN
 
@@ -10,8 +10,8 @@
 
 #include "../../algorithms/basic/ovpCAlgorithmOnlineCovariance.h"
 
-#define OVP_ClassId_BoxAlgorithm_ShrinkageCSPTrainer      OpenViBE::CIdentifier(0x2EC14CC0, 0x428C48BD)
-#define OVP_ClassId_BoxAlgorithm_ShrinkageCSPTrainerDesc  OpenViBE::CIdentifier(0x02205F54, 0x733C51EE)
+#define OVP_ClassId_BoxAlgorithm_RegularizedCSPTrainer      OpenViBE::CIdentifier(0x2EC14CC0, 0x428C48BD)
+#define OVP_ClassId_BoxAlgorithm_RegularizedCSPTrainerDesc  OpenViBE::CIdentifier(0x02205F54, 0x733C51EE)
 
 #include <Eigen/Eigenvalues>
 
@@ -21,7 +21,7 @@ namespace OpenViBEPlugins
 {
 	namespace SignalProcessing
 	{
-		class CBoxAlgorithmShrinkageCSPTrainer : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
+		class CBoxAlgorithmRegularizedCSPTrainer : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
 		public:
 
@@ -40,10 +40,10 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean updateCov(int index);
 
-			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmShrinkageCSPTrainer > m_oStimulationDecoder;
-			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmShrinkageCSPTrainer > m_oSignalDecoders[2];
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmRegularizedCSPTrainer > m_oStimulationDecoder;
+			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmRegularizedCSPTrainer > m_oSignalDecoders[2];
 
-			OpenViBEToolkit::TStimulationEncoder <CBoxAlgorithmShrinkageCSPTrainer > m_oStimulationEncoder;
+			OpenViBEToolkit::TStimulationEncoder <CBoxAlgorithmRegularizedCSPTrainer > m_oStimulationEncoder;
 
 			OpenViBE::uint64 m_ui64StimulationIdentifier;
 			OpenViBE::CString m_sSpatialFilterConfigurationFilename;
@@ -55,15 +55,15 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64nBuffers[2];
 			OpenViBE::uint64 m_ui64nSamples[2];
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ShrinkageCSPTrainer)
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_RegularizedCSPTrainer)
 		};
 
-		class CBoxAlgorithmShrinkageCSPTrainerDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
+		class CBoxAlgorithmRegularizedCSPTrainerDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
 		{
 		public:
 
 			virtual void release(void) { }
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Shrinkage CSP Trainer"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Regularized CSP Trainer"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Jussi T. Lindgren"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Computes Common Spatial Pattern filters with regularization"); }
@@ -72,8 +72,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.5"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-apply"); }
 
-			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ShrinkageCSPTrainer; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CBoxAlgorithmShrinkageCSPTrainer; }
+			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_RegularizedCSPTrainer; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CBoxAlgorithmRegularizedCSPTrainer; }
 
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
@@ -123,11 +123,11 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_ShrinkageCSPTrainerDesc);
+			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_RegularizedCSPTrainerDesc);
 		};
 	};
 };
 
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
-#endif // __OpenViBEPlugins_BoxAlgorithm_XDAWNSpatialFilterTrainer_H__
+#endif // __OpenViBEPlugins_BoxAlgorithm_RegularizedCSPTrainer_H__
