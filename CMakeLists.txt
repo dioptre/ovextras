@@ -86,6 +86,10 @@ IF(UNIX)
 	SET(SKIP_PLUGINS_PROCESSING_MATLAB "1")
 ENDIF(UNIX)
 
+# If you don't skip the following, it compiles an example of a Fortran-based box (see under plugins/processing/fortran/). 
+# The feature needs CMake 3.2 and a Fortran compiler (e.g. Intels on Win or gfortran on Linux). Default is to skip this.
+SET(SKIP_PLUGINS_PROCESSING_FORTRAN "1")
+
 # Currently empty module
 SET(SKIP_CONTRIB_PLUGINS_PROCESSING_CLASSIFICATION "1")
 
