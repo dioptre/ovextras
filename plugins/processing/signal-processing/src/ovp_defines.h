@@ -13,14 +13,6 @@
 #define OVP_ClassId_TimeBasedEpoching                                                  OpenViBE::CIdentifier(0x00777FA0, 0x5DC3F560)
 #define OVP_ClassId_TimeBasedEpochingDesc                                              OpenViBE::CIdentifier(0x00ABDABE, 0x41381683)
 
-#define OVP_ClassId_Algorithm_ApplySpatialFilter                                       OpenViBE::CIdentifier(0xC5DC28FF, 0x2394AFBC)
-#define OVP_ClassId_Algorithm_ApplySpatialFilterDesc                                   OpenViBE::CIdentifier(0x0601FABE, 0x85692BFD)
-#define OVP_Algorithm_ApplySpatialFilter_InputParameterId_SignalMatrix                 OpenViBE::CIdentifier(0x6FF50741, 0xB9757B1F)
-#define OVP_Algorithm_ApplySpatialFilter_InputParameterId_FilterCoefficientsMatrix     OpenViBE::CIdentifier(0x43DC06E5, 0x48E413BA)
-#define OVP_Algorithm_ApplySpatialFilter_OutputParameterId_FilteredSignalMatrix        OpenViBE::CIdentifier(0x695B69B2, 0x02DBE696)
-#define OVP_Algorithm_ApplySpatialFilter_InputTriggerId_Initialize                     OpenViBE::CIdentifier(0x06D0E2D6, 0xE1E9C082)
-#define OVP_Algorithm_ApplySpatialFilter_InputTriggerId_ApplyFilter                    OpenViBE::CIdentifier(0x316BBE5D, 0xBEE0F747)
-
 #define OVP_TypeId_EpochAverageMethod                                                  OpenViBE::CIdentifier(0x6530BDB1, 0xD057BBFE)
 #define OVP_TypeId_EpochAverageMethod_MovingAverage                                    OpenViBE::CIdentifier(0x426377E7, 0xCF8E32CD)
 #define OVP_TypeId_EpochAverageMethod_MovingAverageImmediate                           OpenViBE::CIdentifier(0x1F830F88, 0xAA01A592)

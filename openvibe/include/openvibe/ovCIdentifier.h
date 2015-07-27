@@ -12,7 +12,7 @@ namespace OpenViBE
 	 * \class CIdentifier
 	 * \author Yann Renard (INRIA/IRISA)
 	 * \date 2006-06-16
-	 * \brief Globally used identifiaction class
+	 * \brief Globally used identification class
 	 * \ingroup Group_Base
 	 *
 	 * This class is the basic class to use in order to identify
@@ -43,7 +43,7 @@ namespace OpenViBE
 		/**
 		 * \brief Default constructor
 		 *
-		 * Builds up the 64 bits identifier intialized to
+		 * Builds up the 64 bits identifier initialized to
 		 * \c OV_UndefinedIdentifier.
 		 */
 		CIdentifier(void);
