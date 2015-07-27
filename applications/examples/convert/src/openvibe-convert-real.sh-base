@@ -85,7 +85,7 @@ if [ $From ] && [ $To ]; then
   export OV_CONVERT_DEST=$2
 
   #launch designer
-  $LOCAL_BIN_PATH/openvibe-designer --no-gui --no-session-management --play-fast $ScenarioFolder$ScenarioToOpen
+  "$LOCAL_BIN_PATH/openvibe-designer" --no-gui --no-session-management --play-fast "$ScenarioFolder$ScenarioToOpen"
 
 fi
 

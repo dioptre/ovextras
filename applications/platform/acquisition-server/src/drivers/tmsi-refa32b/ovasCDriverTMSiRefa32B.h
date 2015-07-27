@@ -22,6 +22,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverTMSiRefa32B
+	 * \author Baptiste Payan (INRIA)
+	 */
 	class CDriverTMSiRefa32B : virtual public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

@@ -30,7 +30,7 @@ void dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const CMatrix& mat, const C
 	for(uint32 i=0;i<mat.getDimensionSize(0);i++) {
 		rMgr << LogLevel_Info << "Row " << i << ": ";
 		for(uint32 j=0;j<mat.getDimensionSize(1);j++) {
-			rMgr << mat.getBuffer()[i*mat.getDimensionSize(0)+j] << " ";
+			rMgr << mat.getBuffer()[i*mat.getDimensionSize(1)+j] << " ";
 		}
 		rMgr << "\n";
 	}

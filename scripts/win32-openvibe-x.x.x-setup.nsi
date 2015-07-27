@@ -5,8 +5,8 @@
 	!include "zipdll.nsh"
 
 	;Name and file
-	Name "OpenViBE 1.0.0"
-	OutFile "openvibe-1.0.0-setup.exe"
+	Name "OpenViBE 1.0.1+git"
+	OutFile "openvibe-1.0.1+git-setup.exe"
 
 	;Default installation folder
 	InstallDir "$PROGRAMFILES\openvibe"
@@ -45,6 +45,10 @@
 
 Function .onInit
 
+	; Note that for logging to work, you will need a logging-enabled build of nsis. 
+	; At the time of writing this, you could get one from http://nsis.sourceforge.net/Special_Builds 
+	LogSet on
+  
 	UserInfo::GetAccountType
 	Pop $R1
 	StrCmp $R1 "Admin" has_admin_rights 0
@@ -70,6 +74,8 @@ FunctionEnd
 
 Section "-OpenViBE"
 
+	LogSet on
+	
 	${If} $OLDINSTDIR != ""
 		RMDir /r $OLDINSTDIR
 		RMDir /r "$SMPROGRAMS\OpenViBE"

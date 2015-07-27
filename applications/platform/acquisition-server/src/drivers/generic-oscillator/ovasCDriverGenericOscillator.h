@@ -9,6 +9,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverGenericOscillator
+	 * \author Yann Renard (INRIA)
+	 */
 	class CDriverGenericOscillator : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

@@ -52,7 +52,7 @@ namespace OpenViBEAcquisitionServer
 	}
 }
 
-#endif
+#endif // TARGET_HAS_ThirdPartyLSL
 
 #endif // __OpenViBE_AcquisitionServer_LSLOutput_H__
 

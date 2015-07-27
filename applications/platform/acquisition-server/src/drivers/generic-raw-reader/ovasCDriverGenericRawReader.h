@@ -6,6 +6,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverGenericRawReader
+	 * \author Yann Renard (INRIA)
+	 */
 	class CDriverGenericRawReader : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

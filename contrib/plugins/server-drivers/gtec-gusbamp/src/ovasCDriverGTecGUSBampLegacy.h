@@ -16,7 +16,7 @@ namespace OpenViBEAcquisitionServer
 {
 	/**
 	 * \class CDriverGTecGUSBampLegacy
-	 * \author Unknown
+	 * \author Yann Renard (Inria)
 	 * \date unknown
 	 * \brief GTEC driver 
 	 *

@@ -221,7 +221,7 @@ void CBoxAlgorithmGenericStreamReader::processChildData(const void* pBuffer, con
 		}
 		else
 		{
-			this->getLogManager() << LogLevel_Trace << "Discarded buffer on stream " << l_ui32StreamIndex << " that has no corresponding output\n";
+			this->getLogManager() << LogLevel_Trace << "Discarded buffer in stream " << l_ui32StreamIndex << " that has no corresponding output\n";
 		}
 	}
 	if(l_rTop==OVP_NodeId_OpenViBEStream_Buffer_StartTime)
@@ -268,7 +268,8 @@ void CBoxAlgorithmGenericStreamReader::closeChild(void)
 					{
 						if(l_oOutputTypeIdentifier==it->second)
 						{
-							this->getLogManager() << LogLevel_Trace << "Found output " << i+1 << " for stream " << it->first << " with corresponding type identifier " << l_oOutputTypeIdentifier << "\n";
+							const CString l_sTypeName=this->getTypeManager().getTypeName(it->second);
+							this->getLogManager() << LogLevel_Trace << "Found output " << i+1 << " for stream " << it->first << " with corresponding type identifier " << l_oOutputTypeIdentifier << "  (" << l_sTypeName << ")\n";
 							l_ui32Index=i;
 						}
 					}
@@ -286,7 +287,7 @@ void CBoxAlgorithmGenericStreamReader::closeChild(void)
 						{
 							const CString l_sSourceTypeName=this->getTypeManager().getTypeName(it->second);
 							const CString l_sOutputTypeName=this->getTypeManager().getTypeName(l_oOutputTypeIdentifier);
-							this->getLogManager() << LogLevel_Info << "Note: downcasting stream " << i+1 << " from " 
+							this->getLogManager() << LogLevel_Info << "Note: downcasting output " << i+1 << " from " 
 								<< l_sSourceTypeName << " to " << l_sOutputTypeName << ", as there is no exactly type-matching output connector.\n";
 							l_ui32Index=i;								
 						}
@@ -298,7 +299,7 @@ void CBoxAlgorithmGenericStreamReader::closeChild(void)
 			if(l_ui32Index==(uint32)-1)
 			{
 				CString l_sTypeName=this->getTypeManager().getTypeName(it->second);
-				this->getLogManager() << LogLevel_Warning << "Did not find output for stream " << it->first << " of type identifier " << it->second << " (type name is [" << l_sTypeName << "])\n";
+				this->getLogManager() << LogLevel_Warning << "No free output connector for stream " << it->first << " of type " << it->second << " (" << l_sTypeName << ")\n";
 				m_vStreamIndexToOutputIndex[it->first]=(uint32)-1;
 				l_bLostStreams=true;
 
@@ -330,7 +331,7 @@ void CBoxAlgorithmGenericStreamReader::closeChild(void)
 		{
 			if(l_vOutputIndexToStreamIndex.find(i)==l_vOutputIndexToStreamIndex.end())
 			{
-				this->getLogManager() << LogLevel_Warning << "Output " << i << " did not find a stream candidate from the input file\n";
+				this->getLogManager() << LogLevel_Warning << "Output " << i+1 << " did not find a stream candidate from the input file\n";
 				l_bLastOutputs=true;
 			}
 		}

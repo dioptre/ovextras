@@ -13,6 +13,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverMindMediaNeXus32B
+	 * \author Yann Renard (INRIA)
+	 */
 	class CDriverMindMediaNeXus32B : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

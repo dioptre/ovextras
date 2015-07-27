@@ -81,3 +81,34 @@ SET_TESTS_PROPERTIES(compare_${TEST_NAME}_stimulation          PROPERTIES DEPEND
 SET_TESTS_PROPERTIES(compare_${TEST_NAME}_spectrum             PROPERTIES DEPENDS run_${TEST_NAME})
 SET_TESTS_PROPERTIES(compare_${TEST_NAME}_features             PROPERTIES DEPENDS run_${TEST_NAME})
 
+###################
+
+#
+# This test basically first writes test data to CSV "1", then CSV "1" to GDF (test 'GDF Writer'), then GDF to CSV "2" (test 'GDF Reader'). 
+# Finally, the CSV "1" and CSV "2" are compared for equality, both for signals and stimulations.
+#
+# We use CSV because of the float scaling in the GDF Writer and Reader, we don't seem to be able to maintain bitwise equality between read and write?
+#
+
+SET(TEST_NAME gdf-readwrite)
+
+ADD_TEST(clean_${TEST_NAME} "rm" "-f" "output*.csv" "output*.gdf")
+ADD_TEST(run_${TEST_NAME}-1 "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-session-management" "--no-gui" "--play-fast" "test-gdf-readwrite-1.xml")
+ADD_TEST(run_${TEST_NAME}-2 "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-session-management" "--no-gui" "--play-fast" "test-gdf-readwrite-2.xml")
+ADD_TEST(run_${TEST_NAME}-3 "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-session-management" "--no-gui" "--play-fast" "test-gdf-readwrite-3.xml")
+
+ADD_TEST(compare_${TEST_NAME}-signal "$ENV{OV_BINARY_PATH}/test_thresholdDataComparison.${EXT}" ${OS_FLAGS}  "output_gdf_signal_1.csv" "output_gdf_signal_2.csv" 0.001)
+ADD_TEST(compare_${TEST_NAME}-stim   "$ENV{OV_BINARY_PATH}/test_thresholdDataComparison.${EXT}" ${OS_FLAGS}  "output_gdf_stim_1.csv"   "output_gdf_stim_2.csv" 0.0001)
+
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "$ENV{OV_USERDATA}/log/openvibe-designer.log")
+
+SET_TESTS_PROPERTIES(compare_${TEST_NAME}-signal PROPERTIES ATTACHED_FILES_ON_FAIL "output_gdf_signal_1.csv" "output_gdf_signal_2.csv")
+SET_TESTS_PROPERTIES(compare_${TEST_NAME}-stim PROPERTIES ATTACHED_FILES_ON_FAIL "output_gdf_stim_1.csv" "output_gdf_stim_2.csv")
+
+SET_TESTS_PROPERTIES(run_${TEST_NAME}-1 PROPERTIES DEPENDS clean_${TEST_NAME})
+SET_TESTS_PROPERTIES(run_${TEST_NAME}-2 PROPERTIES DEPENDS run_${TEST_NAME}-1)
+SET_TESTS_PROPERTIES(run_${TEST_NAME}-3 PROPERTIES DEPENDS run_${TEST_NAME}-2)
+SET_TESTS_PROPERTIES(compare_${TEST_NAME}-signal PROPERTIES DEPENDS run_${TEST_NAME}-3)
+SET_TESTS_PROPERTIES(compare_${TEST_NAME}-stim PROPERTIES DEPENDS run_${TEST_NAME}-3)
+
+

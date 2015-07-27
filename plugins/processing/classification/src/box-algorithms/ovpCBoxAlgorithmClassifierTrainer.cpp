@@ -71,7 +71,16 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	if(l_oStrategyClassIdentifier==OV_UndefinedIdentifier)
 	{
 		//That means that we want to use a classical algorithm so just let's create it
-		m_pClassifier=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier));
+		const CIdentifier l_oClassifierAlgorithmIdentifier = this->getAlgorithmManager().createAlgorithm(l_oClassifierAlgorithmClassIdentifier);
+		if(l_oClassifierAlgorithmIdentifier == OV_UndefinedIdentifier)
+		{
+			this->getLogManager() << LogLevel_Error << "Error instantiating classifier class with id " 
+				<< l_oClassifierAlgorithmClassIdentifier
+				<< ". If you've loaded an old scenario or configuration file(s), make sure that the classifiers specified in it are still available.\n";
+			return false;
+		}
+
+		m_pClassifier=&this->getAlgorithmManager().getAlgorithm(l_oClassifierAlgorithmIdentifier);
 		m_pClassifier->initialize();
 	}
 	else
