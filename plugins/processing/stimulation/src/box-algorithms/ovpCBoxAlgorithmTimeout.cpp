@@ -9,13 +9,15 @@ using namespace OpenViBEPlugins::Stimulation;
 
 boolean CBoxAlgorithmTimeout::initialize(void)
 {
-	m_bTimeoutReached = false;
+	m_ui32TimeoutState = 0;
+
 	m_oStimulationEncoder.initialize(*this,0);
 	
 	m_ui64Timeout = static_cast<uint64>(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0)) << 32;
 	m_ui64StimulationToSend = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 	m_ui64LastTimePolled = 0;
+	m_ui64PreviousTime = 0;
 
 	return true;
 }
@@ -32,17 +34,12 @@ boolean CBoxAlgorithmTimeout::uninitialize(void)
 
 boolean CBoxAlgorithmTimeout::processClock(IMessageClock& rMessageClock)
 {
-	if (m_bTimeoutReached)
-	{
-		return true;
-	}
-
 	// if there was nothing received on the input for a period of time we raise the
 	// timeout flag and let the box send a stimulation
-	if (getPlayerContext().getCurrentTime() > m_ui64LastTimePolled + m_ui64Timeout)
+	if (m_ui32TimeoutState == 0 && getPlayerContext().getCurrentTime() > m_ui64LastTimePolled + m_ui64Timeout)
 	{
 		getLogManager() << LogLevel_Info << "Timeout reached" << "\n";
-		m_bTimeoutReached = true;
+		m_ui32TimeoutState = 1;
 	}
 
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
@@ -72,20 +69,24 @@ boolean CBoxAlgorithmTimeout::processInput(uint32 ui32InputIndex)
 
 boolean CBoxAlgorithmTimeout::process(void)
 {
+
+	IStimulationSet* l_pStimulationSet = m_oStimulationEncoder.getInputStimulationSet();
+	l_pStimulationSet->clear();
+
+	const uint64 l_ui64StimulationDate = this->getPlayerContext().getCurrentTime();
+
 	// If the timeout is reached we send the stimulation on the output 0
-	if (m_bTimeoutReached)
+	if (m_ui32TimeoutState == 1)
 	{
-		IStimulationSet* l_pStimulationSet = m_oStimulationEncoder.getInputStimulationSet();
-		l_pStimulationSet->clear();
-
-		uint64 l_ui64StimulationDate = this->getPlayerContext().getCurrentTime();
-
 		l_pStimulationSet->appendStimulation(m_ui64StimulationToSend, l_ui64StimulationDate, 0);
-
-		// encoding the stimulation
-		m_oStimulationEncoder.encodeBuffer();
-		this->getDynamicBoxContext().markOutputAsReadyToSend(0, m_ui64LastTimePolled, l_ui64StimulationDate);
+		m_ui32TimeoutState = 2;
 	}
+
+	// we need to send an empty chunk even if there's no stim
+	m_oStimulationEncoder.encodeBuffer();
+	this->getDynamicBoxContext().markOutputAsReadyToSend(0, m_ui64PreviousTime, l_ui64StimulationDate);
+
+	m_ui64PreviousTime = l_ui64StimulationDate;
 
 	return true;
 }

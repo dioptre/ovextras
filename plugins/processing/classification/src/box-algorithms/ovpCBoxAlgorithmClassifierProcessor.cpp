@@ -54,7 +54,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		l_sData >> l_ui32Version;
 		if(l_ui32Version != OVP_Classification_BoxTrainerXMLVersion)
 		{
-			this->getLogManager() << LogLevel_Warning << "The configuration file doesn't have the same version numero than the box. Trouble may appear in loading process.\n";
+			this->getLogManager() << LogLevel_Warning << "The configuration file doesn't have the same version number as the box. Trouble may appear in loading process.\n";
 		}
 	}
 	else
@@ -68,7 +68,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	if(l_pTempNode) {
 		l_oAlgorithmClassIdentifier.fromString(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
 	} else {
-		this->getLogManager() << LogLevel_Warning << "The configuration file had no node " << c_sStrategyNodeName << ". Trouble may appear later.\n";
+		this->getLogManager() << LogLevel_Warning << "The configuration file had no node [" << c_sStrategyNodeName << "]. Trouble may appear later.\n";
 	}
 
 	//If the Identifier is undefined, that means we need to load a native algorithm
@@ -81,7 +81,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		}
 		else
 		{
-			this->getLogManager() << LogLevel_Warning << "The configuration file had no node " << c_sAlgorithmNodeName << ". Trouble may appear later.\n";
+			this->getLogManager() << LogLevel_Warning << "The configuration file had no node [" << c_sAlgorithmNodeName << "]. Trouble may appear later.\n";
 		}
 
 		//If the algorithm is still unknown, that means that we face an error
@@ -102,13 +102,20 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 			l_pTempNode = l_pStimulationsNode->getChild(i);
 			if(!l_pTempNode)
 			{
-				this->getLogManager() << LogLevel_Error << "Expected child node " << i << " for node " << c_sStimulationsNodeName << ". Output labels not known. Aborting.\n";
+				this->getLogManager() << LogLevel_Error << "Expected child node " << i << " for node [" << c_sStimulationsNodeName << "]. Output labels not known. Aborting.\n";
 				return false;
 			}
 			CString l_sStimulationName(l_pTempNode->getPCData());
 
 			OpenViBE::float64 l_f64ClassId;
-			std::stringstream l_sIdentifierData(l_pTempNode->getAttribute(c_sIdentifierAttributeName));
+			const char *l_sAttributeData = l_pTempNode->getAttribute(c_sIdentifierAttributeName);
+			if(!l_sAttributeData) 
+			{
+				this->getLogManager() << LogLevel_Error << "Expected child node " << i << " for node [" << c_sStimulationsNodeName << "] to have attribute [" << c_sIdentifierAttributeName <<  "]. Aborting.\n";
+				return false;
+			}
+
+			std::stringstream l_sIdentifierData(l_sAttributeData);
 			l_sIdentifierData >> l_f64ClassId ;
 			m_vStimulation[l_f64ClassId]=this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sStimulationName);
 		}

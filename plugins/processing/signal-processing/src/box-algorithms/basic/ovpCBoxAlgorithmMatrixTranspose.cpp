@@ -107,8 +107,8 @@ boolean CBoxAlgorithmMatrixTranspose::process(void)
 			else
 			{
 				// 2 dim
-				const uint32 l_ui32nCols = l_pInput->getDimensionSize(0);
-				const uint32 l_ui32nRows = l_pInput->getDimensionSize(1);
+				const uint32 l_ui32nRows = l_pInput->getDimensionSize(0);
+				const uint32 l_ui32nCols = l_pInput->getDimensionSize(1);
 
 				const float64* l_pInputBuffer = l_pInput->getBuffer(); 
 				float64* l_pOutputBuffer = l_pOutput->getBuffer(); 
