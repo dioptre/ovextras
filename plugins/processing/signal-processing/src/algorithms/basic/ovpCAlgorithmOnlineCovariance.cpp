@@ -109,10 +109,6 @@ OpenViBE::boolean CAlgorithmOnlineCovariance::process(void)
 			return false;
 		}
 
-		// Increment sample counts
-		const uint64 l_ui64CountBefore = m_ui64Count;
-		const uint64 l_ui64CountChunk = l_ui32nRows;
-		const uint64 l_ui64CountAfter = l_ui64CountBefore + l_ui64CountChunk;
 
 		// Cast our data into an Eigen matrix. As Eigen doesn't have const float64* constructor, we cast away the const.
 		const Map<MatrixXdRowMajor> l_oSampleChunk(const_cast<float64*>(l_pBuffer),l_ui32nRows,l_ui32nCols); 
@@ -192,6 +188,10 @@ OpenViBE::boolean CAlgorithmOnlineCovariance::process(void)
 #if 0
 		else if(l_ui32Method == 2)
 		{
+			// Increment sample counts
+			const uint64 l_ui64CountBefore = m_ui64Count;
+			const uint64 l_ui64CountChunk = l_ui32nRows;
+			const uint64 l_ui64CountAfter = l_ui64CountBefore + l_ui64CountChunk;
 			const MatrixXd l_oSampleSum = l_oSampleChunk.colwise().sum();
 
 			// Center the chunk
@@ -215,6 +215,10 @@ OpenViBE::boolean CAlgorithmOnlineCovariance::process(void)
 		}
 		else
 		{
+			// Increment sample counts
+			const uint64 l_ui64CountBefore = m_ui64Count;
+			const uint64 l_ui64CountChunk = l_ui32nRows;
+			const uint64 l_ui64CountAfter = l_ui64CountBefore + l_ui64CountChunk;
 			
 			// Insert our data into an Eigen matrix. As Eigen doesn't have const float64* constructor, we cast away the const.
 			const Map<MatrixXdRowMajor> l_oDataMatrix(const_cast<float64*>(l_pBuffer),l_ui32nRows,l_ui32nCols); 
@@ -256,7 +260,6 @@ OpenViBE::boolean CAlgorithmOnlineCovariance::process(void)
 	// Give output with regularization (mix prior + cov)?
 	if(isInputTriggerActive(OVP_Algorithm_OnlineCovariance_Process_GetCov))
 	{
-		const uint32 l_ui32nRows = ip_pFeatureVectorSet->getDimensionSize(0);
 		const uint32 l_ui32nCols = ip_pFeatureVectorSet->getDimensionSize(1);
 
 		if(!m_ui64Count) {
@@ -288,7 +291,6 @@ OpenViBE::boolean CAlgorithmOnlineCovariance::process(void)
 	// Give just the output with no shrinkage?
 	if(isInputTriggerActive(OVP_Algorithm_OnlineCovariance_Process_GetCovRaw))
 	{
-		const uint32 l_ui32nRows = ip_pFeatureVectorSet->getDimensionSize(0);
 		const uint32 l_ui32nCols = ip_pFeatureVectorSet->getDimensionSize(1);
 
 		if(!m_ui64Count) {

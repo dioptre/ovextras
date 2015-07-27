@@ -342,12 +342,12 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 			l_oEigenVectors[c] = l_oEigenSolverGeneral.eigenvectors().real();
 
 			// Sort the vectors -_- 
-			std::vector<std::pair<float64, int>> l_oIndexes;
+			std::vector< std::pair<float64, int> > l_oIndexes;
 			for(int i=0; i<l_oEigenValues[c].size(); i++)
 			{
 				l_oIndexes.push_back( std::make_pair( (l_oEigenValues[c])[i], i));
 			}
-			std::sort( std::begin(l_oIndexes), std::end(l_oIndexes), std::greater< std::pair<float64,int> >() );
+			std::sort( l_oIndexes.begin(), l_oIndexes.end(), std::greater< std::pair<float64,int> >() );
 
 			l_oSortedEigenValues[c].resizeLike(l_oEigenValues[c]);
 			l_oSortedEigenVectors[c].resizeLike(l_oEigenVectors[c]);

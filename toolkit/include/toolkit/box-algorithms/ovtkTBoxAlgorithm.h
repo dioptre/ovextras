@@ -161,11 +161,11 @@ namespace OpenViBEToolkit
 			}
 			operator OpenViBE::uint32 (void)
 			{
-				return static_cast<uint32>(FSettingValueAutoCast::operator OpenViBE::uint64());
+				return static_cast<OpenViBE::uint32>(FSettingValueAutoCast::operator OpenViBE::uint64());
 			}
 			operator OpenViBE::int32 (void)
 			{
-				return static_cast<int32>(FSettingValueAutoCast::operator OpenViBE::int64());
+				return static_cast<OpenViBE::int32>(FSettingValueAutoCast::operator OpenViBE::int64());
 			}
 			operator OpenViBE::boolean (void)
 			{
