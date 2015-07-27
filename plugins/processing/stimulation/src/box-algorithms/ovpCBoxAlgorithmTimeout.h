@@ -41,9 +41,10 @@ namespace OpenViBEPlugins
 				OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmTimeout > m_oStimulationEncoder;
 
 			private:
-				OpenViBE::boolean m_bTimeoutReached;
+				OpenViBE::uint32 m_ui32TimeoutState;			// 0 == no timeout, 1 == timeout, 2 == timeout sent
 				OpenViBE::uint64 m_ui64Timeout;
 				OpenViBE::uint64 m_ui64LastTimePolled;
+				OpenViBE::uint64 m_ui64PreviousTime;
 				OpenViBE::uint64 m_ui64StimulationToSend;
 
 		};
@@ -67,7 +68,7 @@ namespace OpenViBEPlugins
 				virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Sends a stimulation after a period of time without receiving signal"); }
 				virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Sends a stimulation after a period of time without receiving signal. Useful for stopping scenarios after hardware disconnection."); }
 				virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Stimulation"); }
-				virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+				virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }
 				virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-disconnect"); }
 
 				virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_Timeout; }

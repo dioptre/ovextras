@@ -87,7 +87,7 @@ namespace OpenViBEAcquisitionServer
 		 *
 		 * Gets the tolerance configured for the acquisition server. This
 		 * tolerance is present to avoid numerous corrections on a drift
-		 * value that would oscilate in a small range around 0. In such case,
+		 * value that would oscillate in a small range around 0. In such case,
 		 * a correction in a way would probably turn in a correction in the
 		 * opposite way a few seconds later, resulting in crap measurements
 		 * because of irregular but valid source.
