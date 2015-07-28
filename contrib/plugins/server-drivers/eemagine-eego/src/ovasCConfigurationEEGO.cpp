@@ -1,3 +1,5 @@
+#if defined(TARGET_HAS_ThirdPartyEEGOAPI)
+
 #if defined TARGET_OS_Windows
 
 #include <bitset>
@@ -197,3 +199,5 @@ void CConfigurationEEGO::update_channel_num_cb(GtkWidget *widget, CConfiguration
 
 
 #endif // TARGET_OS_Windows
+
+#endif

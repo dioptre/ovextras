@@ -1,3 +1,5 @@
+#if defined(TARGET_HAS_ThirdPartyEEGOAPI)
+
 #if defined TARGET_OS_Windows
 
 // stl includes
@@ -427,5 +429,7 @@ boolean CDriverEEGO::configure(void)
 
 	return true;
 }
+
+#endif
 
 #endif

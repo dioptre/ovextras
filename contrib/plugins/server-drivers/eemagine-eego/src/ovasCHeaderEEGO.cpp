@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyEEGOAPI
+
 #if defined TARGET_OS_Windows
 
 #include "ovasCHeaderEEGO.h"
@@ -40,12 +42,12 @@ CHeaderEEGO::CHeaderEEGO()
 
 OpenViBE::uint32 CHeaderEEGO::getEEGMaskInt() const
 {
-	return strtoull(m_sEEGMask, NULL, 0);
+	return static_cast<OpenViBE::uint32>(strtoull(m_sEEGMask, NULL, 0));
 }
 
 OpenViBE::uint32 CHeaderEEGO::getBIPMaskInt() const
 {
-	return strtoull(m_sBIPMask, NULL, 0);
+	return static_cast<OpenViBE::uint32>(strtoull(m_sBIPMask, NULL, 0));
 }
 
 
@@ -56,3 +58,5 @@ OpenViBE::uint64 CHeaderEEGO::strtoull(char const* str, char** str_end, int base
 }
 
 #endif // TARGET_OS_Windows
+
+#endif
