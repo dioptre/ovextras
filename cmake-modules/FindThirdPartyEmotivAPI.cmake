@@ -11,6 +11,7 @@ FILE(GLOB PATH_Candidates
         "C:/Program Files (x86)/Emotiv Development Kit*"
         "C:/Program Files (x86)/Emotiv Research Edition*"
         "/home/{username}/EmotivResearch_2.0.0.20*"
+        #Put here the path to the directory where you install the emotiv sdk
 )
 FOREACH(Candidate_folder ${PATH_Candidates})
         # MESSAGE(STATUS "Found path ${PATH_Candidate}")
@@ -26,7 +27,7 @@ FIND_PATH(PATH_EmotivAPI edk.h  PATHS ${PATH_Candidates} ${OV_CUSTOM_DEPENDENCIE
 IF(PATH_EmotivAPI)
     MESSAGE(STATUS "  Found Emotiv API...")
     INCLUDE_DIRECTORIES(${PATH_EmotivAPI})
-    FIND_LIBRARY(LIB_EmotivAPI edk PATHS "${PATH_EmotivAPI}/../lib" "${PATH_EmotivAPI}/../../lib")
+    FIND_LIBRARY(LIB_EmotivAPI edk PATHS "${PATH_EmotivAPI}/../lib" "${PATH_EmotivAPI}/../../lib" "${PATH_EmotivAPI}/../../../lib")
     IF(LIB_EmotivAPI)
         MESSAGE(STATUS "    [  OK  ] lib ${LIB_EmotivAPI}")
         TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_EmotivAPI} )

@@ -205,7 +205,7 @@ boolean CDriverEmotivEPOC::initialize(
 	}
 #if defined TARGET_OS_Windows
 	__except(EXCEPTION_EXECUTE_HANDLER)
-#elif
+#elif defined TARGET_OS_Linux
 	catch(...)
 #endif
 	{
