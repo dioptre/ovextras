@@ -284,19 +284,9 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 			if(m_pActiveDecoder == &m_MatrixDecoder) 
 			{
 				const IMatrix* l_pMatrix = m_MatrixDecoder.getOutputMatrix();
-
-				// Transpose
 				const float64 *l_pSource = l_pMatrix->getBuffer();
-				float64 *l_pDestination = m_oChunkTranspose.getBuffer();
-				for(uint32 c=0;c<m_ui32NumberOfChannels;c++) 
-				{
-					for(uint32 s=0;s<m_ui32NumberOfSamplesPerChunk;s++) 
-					{
-						l_pDestination[s*m_ui32NumberOfChannels+c] = l_pSource[c*m_ui32NumberOfSamplesPerChunk+s];
-					}
-				}
 
-				sendToClients((void *)l_pDestination, l_pMatrix->getBufferElementCount()*sizeof(float64));
+				sendToClients((void *)l_pSource, l_pMatrix->getBufferElementCount()*sizeof(float64));
 			} 
 			else if(m_pActiveDecoder == &m_SignalDecoder)
 			{
@@ -342,7 +332,7 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 							{
 								l_sTmp = CString("Unregistered_stimulus ") + CIdentifier(l_ui64StimulationCode).toString();
 							}
-							l_sTmp = l_sTmp + CString("\n");
+							l_sTmp = l_sTmp + CString("\r\n");
 
 							const char *l_sPtr = l_sTmp.toASCIIString();
 							sendToClients((void*)l_sPtr,strlen(l_sPtr));
