@@ -28,10 +28,20 @@ boolean CBoxAlgorithmConfusionMatrix::initialize(void)
 	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0,l_sPercentageSetting);
 	ip_bPercentages = this->getConfigurationManager().expandAsBoolean(l_sPercentageSetting);
 
-	CString l_sSumsSetting;
 	TParameterHandler<boolean> ip_bSums(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_Sums));
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1,l_sSumsSetting);
-	ip_bSums = this->getConfigurationManager().expandAsBoolean(l_sSumsSetting);
+	if(!(boolean)ip_bPercentages)
+	{
+		CString l_sSumsSetting;
+		getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1,l_sSumsSetting);
+		ip_bSums = this->getConfigurationManager().expandAsBoolean(l_sSumsSetting);
+	}
+	else
+	{
+		this->getLogManager() << LogLevel_Info << "Asking for percentage. The value of the setting \"Sums\" will be ignore.\n";
+		ip_bSums = false;
+	}
+
+
 
 	uint32 l_ui32ClassCount=getBoxAlgorithmContext()->getStaticBoxContext()->getSettingCount() - FIRST_CLASS_SETTING_INDEX;
 	vector < uint64 > l_vClassCodes;

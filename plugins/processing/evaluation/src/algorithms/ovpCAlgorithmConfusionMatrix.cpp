@@ -126,7 +126,6 @@ boolean CAlgorithmConfusionMatrix::process(void)
 
 	if(this->isInputTriggerActive(OVP_Algorithm_ConfusionMatrixAlgorithm_InputTriggerId_FeedTarget))
 	{
-		std::cout << "Matrix : " << ip_pTargetStimulationSet->getStimulationCount() << std::endl;
 		for(uint32 s=0; s<ip_pTargetStimulationSet->getStimulationCount(); s++)
 		{
 			uint64 l_ui64StimulationIdentifier = ip_pTargetStimulationSet->getStimulationIdentifier(s);
