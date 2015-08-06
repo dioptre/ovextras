@@ -4,6 +4,7 @@
 #include <xml/IXMLHandler.h>
 #include <sstream>
 #include <vector>
+#include <iomanip>
 
 using namespace std;
 using namespace OpenViBE;
@@ -73,6 +74,23 @@ boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 	ip_pTargetStimulationSet.setReferenceTarget(m_oTargetStimulationDecoder.getOutputStimulationSet());
 
 	op_pConfusionMatrix.initialize(m_pConfusionMatrixAlgorithm->getOutputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_OutputParameterId_ConfusionMatrix));
+
+	::GtkTable* l_pTable = GTK_TABLE(gtk_table_new(2, 1, false));
+
+	m_pKappaLabel = gtk_label_new("x");
+	gtk_table_attach(
+		l_pTable, m_pKappaLabel,
+		0, 1, 0, 5,
+		(::GtkAttachOptions)(GTK_EXPAND|GTK_FILL),
+		(::GtkAttachOptions)(GTK_EXPAND|GTK_FILL),
+		0, 0);
+
+	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(GTK_WIDGET(l_pTable));
+
+	PangoContext * l_pPangoContext = gtk_widget_get_pango_context(GTK_WIDGET(m_pKappaLabel));
+	PangoFontDescription * l_pFontDescription = pango_context_get_font_description(l_pPangoContext);
+	pango_font_description_set_size(l_pFontDescription,40*PANGO_SCALE);
+	gtk_widget_modify_font(m_pKappaLabel, l_pFontDescription);
 
 	return true;
 }
@@ -177,8 +195,9 @@ boolean CBoxAlgorithmKappaCoefficient::process(void)
 					l_f64ObservedAccurancy /= l_ui32Total;
 					l_f64ExpectedAccurancy /= (l_ui32Total * l_ui32Total);
 
-					float64 l_f64KappaCoefficient = (l_f64ObservedAccurancy - l_f64ExpectedAccurancy)/(1 - l_f64ExpectedAccurancy);
+					float64 l_f64LastKappaCompute = (l_f64ObservedAccurancy - l_f64ExpectedAccurancy)/(1 - l_f64ExpectedAccurancy);
 
+					updateKappaValue(l_f64KappaCoefficient);
 					m_oOutputMatrixEncoder.getInputMatrix()->getBuffer()[0]=l_f64KappaCoefficient;
 					m_oOutputMatrixEncoder.encodeBuffer();
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
@@ -196,4 +215,13 @@ boolean CBoxAlgorithmKappaCoefficient::process(void)
 	}
 
 	return true;
+}
+
+void CBoxAlgorithmKappaCoefficient::updateKappaValue(float64 f64KappaValue)
+{
+	std::stringstream l_sStream;
+	l_sStream << std::fixed;
+	l_sStream << std::setprecision(2);
+	l_sStream << f64KappaValue;
+	gtk_label_set(GTK_LABEL(m_pKappaLabel), l_sStream.str().c_str());
 }

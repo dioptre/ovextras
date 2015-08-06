@@ -11,6 +11,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <map>
+#include <gtk/gtk.h>
 
 #define OVP_ClassId_BoxAlgorithm_KappaCoefficient OpenViBE::CIdentifier(0x160D8F1B, 0xD864C5BB)
 #define OVP_ClassId_BoxAlgorithm_KappaCoefficientDesc OpenViBE::CIdentifier(0xD8BA2199, 0xD252BECB)
@@ -41,6 +42,8 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_KappaCoefficient)
 
 		protected:
+				void updateKappaValue(OpenViBE::float64 f64KappaValue);
+
 				OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmKappaCoefficient > m_oTargetStimulationDecoder;
 				OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmKappaCoefficient > m_oClassifierStimulationDecoder;
 
@@ -52,6 +55,8 @@ namespace OpenViBEPlugins
 
 				OpenViBE::uint32 m_ui32AmountClass;
 				OpenViBE::uint64 m_ui64CurrentProcessingTimeLimit;
+
+				::GtkWidget* m_pKappaLabel;
 		};
 		
 		
@@ -140,6 +145,12 @@ namespace OpenViBEPlugins
 			
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmKappaCoefficientListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
+
+			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePluginFunctionality) const
+			{
+				return ePluginFunctionality == OpenViBE::Kernel::PluginFunctionality_Visualization;
+			}
+
 			
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const

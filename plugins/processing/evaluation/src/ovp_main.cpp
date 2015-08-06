@@ -4,6 +4,7 @@
 #include "box-algorithms/ovpCBoxAlgorithmKappaCoefficient.h"
 #include "box-algorithms/ovpCBoxAlgorithmConfusionMatrix.h"
 #include "box-algorithms/ovpCBoxAlgorithmROCCurve.h"
+#include "box-algorithms/ovpCBoxAlgorithmClassifierAccuracyMeasure.h"
 
 #include "algorithms/ovpCAlgorithmConfusionMatrix.h"
 
@@ -14,4 +15,5 @@ OVP_Declare_Begin()
 
 	OVP_Declare_New(OpenViBEPlugins::Measurement::CAlgorithmConfusionMatrixDesc);
 	OVP_Declare_New(OpenViBEPlugins::Measurement::CBoxAlgorithmConfusionMatrixDesc);
+	OVP_Declare_New(OpenViBEPlugins::Measurement::CBoxAlgorithmClassifierAccuracyMeasureDesc);
 OVP_Declare_End()

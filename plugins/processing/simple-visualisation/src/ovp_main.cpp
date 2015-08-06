@@ -16,7 +16,6 @@
 #include "box-algorithms/ovpCPowerSpectrumDisplay.h"
 #include "box-algorithms/ovpCTopographicMap2DDisplay.h"
 #include "box-algorithms/ovpCBoxAlgorithmLevelMeasure.h"
-#include "box-algorithms/ovpCBoxAlgorithmClassifierAccuracyMeasure.h"
 #include "box-algorithms/ovpCBoxAlgorithmMatrixDisplay.h"
 //3D plugins
 #include "box-algorithms/ovpCSimple3DDisplay.h"
@@ -53,7 +52,6 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CPowerSpectrumDisplayDesc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CTopographicMap2DDisplayDesc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmLevelMeasureDesc)
-	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmClassifierAccuracyMeasureDesc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmMatrixDisplayDesc)
 
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CSimple3DDisplayDesc)
