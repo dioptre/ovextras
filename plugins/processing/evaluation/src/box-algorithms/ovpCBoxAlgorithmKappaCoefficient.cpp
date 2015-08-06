@@ -12,7 +12,7 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Measurement;
+using namespace OpenViBEPlugins::Evaluation;
 
 namespace{
 	const uint32 c_ui32ClassLabelOffset = 1;
@@ -195,7 +195,7 @@ boolean CBoxAlgorithmKappaCoefficient::process(void)
 					l_f64ObservedAccurancy /= l_ui32Total;
 					l_f64ExpectedAccurancy /= (l_ui32Total * l_ui32Total);
 
-					float64 l_f64LastKappaCompute = (l_f64ObservedAccurancy - l_f64ExpectedAccurancy)/(1 - l_f64ExpectedAccurancy);
+					float64 l_f64KappaCoefficient = (l_f64ObservedAccurancy - l_f64ExpectedAccurancy)/(1 - l_f64ExpectedAccurancy);
 
 					updateKappaValue(l_f64KappaCoefficient);
 					m_oOutputMatrixEncoder.getInputMatrix()->getBuffer()[0]=l_f64KappaCoefficient;

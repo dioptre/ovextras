@@ -27,7 +27,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Measurement
+	namespace Evaluation
 	{
 		class CAlgorithmConfusionMatrix : virtual public OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >
 		{
@@ -83,7 +83,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ConfusionMatrix; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Measurement::CAlgorithmConfusionMatrix; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Evaluation::CAlgorithmConfusionMatrix; }
 
 			virtual OpenViBE::boolean getAlgorithmPrototype(
 				OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const

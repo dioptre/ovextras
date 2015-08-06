@@ -13,7 +13,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Measurement
+	namespace Evaluation
 	{
 		typedef struct {
 			OpenViBE::CString m_sChannelName;
@@ -82,7 +82,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-yes"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_StatisticGenerator; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Measurement::CBoxAlgorithmStatisticGenerator; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Evaluation::CBoxAlgorithmStatisticGenerator; }
 			
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const

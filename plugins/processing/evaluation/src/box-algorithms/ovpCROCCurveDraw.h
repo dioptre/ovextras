@@ -11,7 +11,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Measurement
+	namespace Evaluation
 	{
 		typedef std::pair < OpenViBE::float64, OpenViBE::float64 > CCoordinate;
 

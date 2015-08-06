@@ -20,7 +20,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Measurement
+	namespace Evaluation
 	{
 		typedef std::pair < OpenViBE::uint64, OpenViBE::uint64 > CTimestampLabelPair;
 		typedef std::pair < OpenViBE::uint64, OpenViBE::float64* > CTimestampValuesPair;
@@ -152,7 +152,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-yes"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ROCCurve; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Measurement::CBoxAlgorithmROCCurve; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Evaluation::CBoxAlgorithmROCCurve; }
 
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmROCCurveListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }

@@ -9,11 +9,11 @@
 #include "algorithms/ovpCAlgorithmConfusionMatrix.h"
 
 OVP_Declare_Begin()
-	OVP_Declare_New(OpenViBEPlugins::Measurement::CBoxAlgorithmStatisticGeneratorDesc);
-	OVP_Declare_New(OpenViBEPlugins::Measurement::CBoxAlgorithmKappaCoefficientDesc);
-	OVP_Declare_New(OpenViBEPlugins::Measurement::CBoxAlgorithmROCCurveDesc);
+	OVP_Declare_New(OpenViBEPlugins::Evaluation::CBoxAlgorithmStatisticGeneratorDesc);
+	OVP_Declare_New(OpenViBEPlugins::Evaluation::CBoxAlgorithmKappaCoefficientDesc);
+	OVP_Declare_New(OpenViBEPlugins::Evaluation::CBoxAlgorithmROCCurveDesc);
 
-	OVP_Declare_New(OpenViBEPlugins::Measurement::CAlgorithmConfusionMatrixDesc);
-	OVP_Declare_New(OpenViBEPlugins::Measurement::CBoxAlgorithmConfusionMatrixDesc);
-	OVP_Declare_New(OpenViBEPlugins::Measurement::CBoxAlgorithmClassifierAccuracyMeasureDesc);
+	OVP_Declare_New(OpenViBEPlugins::Evaluation::CAlgorithmConfusionMatrixDesc);
+	OVP_Declare_New(OpenViBEPlugins::Evaluation::CBoxAlgorithmConfusionMatrixDesc);
+	OVP_Declare_New(OpenViBEPlugins::Evaluation::CBoxAlgorithmClassifierAccuracyMeasureDesc);
 OVP_Declare_End()

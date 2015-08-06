@@ -4,7 +4,7 @@
 
 
 using namespace OpenViBE;
-using namespace OpenViBEPlugins::Measurement;
+using namespace OpenViBEPlugins::Evaluation;
 
 void size_allocate_cb(::GtkWidget *pWidget, ::GdkRectangle *pRectangle, gpointer pUserData)
 {

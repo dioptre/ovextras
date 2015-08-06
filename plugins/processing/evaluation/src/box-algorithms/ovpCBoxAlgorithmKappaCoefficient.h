@@ -18,7 +18,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Measurement
+	namespace Evaluation
 	{
 
 		/**
@@ -140,7 +140,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-yes"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_KappaCoefficient; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Measurement::CBoxAlgorithmKappaCoefficient; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Evaluation::CBoxAlgorithmKappaCoefficient; }
 			
 			
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmKappaCoefficientListener; }

@@ -15,7 +15,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace Measurement
+	namespace Evaluation
 	{
 		class CBoxAlgorithmConfusionMatrix : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
@@ -92,7 +92,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-execute"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ConfusionMatrix; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Measurement::CBoxAlgorithmConfusionMatrix; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Evaluation::CBoxAlgorithmConfusionMatrix; }
 
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
