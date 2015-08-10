@@ -378,6 +378,14 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		{
 			l_oConfiguration.m_eNoVisualisation=CommandLineFlag_NoVisualisation;
 		}
+                else if(*it=="--invisible")
+                {
+			// no-gui + no-visualisation
+			l_oConfiguration.m_eNoVisualisation=CommandLineFlag_NoVisualisation;
+			l_oConfiguration.m_eNoGui=CommandLineFlag_NoGui;
+			l_oConfiguration.m_eNoCheckColorDepth=CommandLineFlag_NoCheckColorDepth;
+			l_oConfiguration.m_eNoManageSession=CommandLineFlag_NoManageSession;
+                }
 		else if(*it=="--no-check-color-depth")
 		{
 			l_oConfiguration.m_eNoCheckColorDepth=CommandLineFlag_NoCheckColorDepth;
@@ -434,6 +442,7 @@ int go(int argc, char ** argv)
 		cout << "  --kernel filename       : path to openvibe kernel library\n";
 		cout << "  --no-gui                : hides the designer graphical user interface (assumes --no-check-color-depth)\n";
 		cout << "  --no-visualisation      : hides the visualisation widgets\n";
+		cout << "  --invisible             : hides the designer and the visualisation widgets\n";
 		cout << "  --no-check-color-depth  : does not check 24/32 bits color depth\n";
 		cout << "  --no-session-management : neither restore last used scenarios nor saves them at exit\n";
 		cout << "  --open filename         : opens a scenario (see also --no-session-management)\n";
