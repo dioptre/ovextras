@@ -36,7 +36,7 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		OpenViBE::int32 getSVMBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
+		OpenViBE::int32 SVMClassificationCompare(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
 
 		class CAlgorithmClassifierSVM : public OpenViBEToolkit::CAlgorithmClassifier

@@ -18,9 +18,9 @@ FOREACH(TEST_NAME ${TEST_SCENARIOS})
 
 	SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
-	ADD_TEST(clean_${TEST_NAME} rm -f ${OV_LOGFILE} classifiers/multiclass.xml)
-	ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui"  "--no-session-management" "--config" "$ENV{OV_BINARY_PATH}/share/openvibe/kernel/openvibe_test.conf" "--play-fast" ${SCENARIO_TO_TEST})
-	ADD_TEST(compare_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${OV_LOGFILE}")
+	ADD_TEST(clean_Classification_${TEST_NAME} rm -f ${OV_LOGFILE} classifiers/multiclass.xml)
+	ADD_TEST(run_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui"  "--no-session-management" "--config" "$ENV{OV_BINARY_PATH}/share/openvibe/kernel/openvibe_test.conf" "--play-fast" ${SCENARIO_TO_TEST})
+	ADD_TEST(compare_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${OV_LOGFILE}")
 	
 	# It would be better to clean last, but we can't do this as it will delete the 
 	# output we wish to include, and we can't prevent clean from running if a prev. test fails

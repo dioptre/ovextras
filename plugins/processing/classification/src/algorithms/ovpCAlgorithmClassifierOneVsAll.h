@@ -27,7 +27,7 @@ namespace OpenViBEPlugins
 											   , OpenViBE::float64& rf64Class
 											   , OpenViBEToolkit::IVector& rDistanceValue
 											   , OpenViBEToolkit::IVector& rProbabilityValue);
-			virtual OpenViBE::boolean designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassAmount);
+			virtual OpenViBE::boolean designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassCount);
 
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
@@ -39,7 +39,7 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean addNewClassifierAtBack(void);
 			void removeClassifierAtBack(void);
 			OpenViBE::boolean setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId);
-			OpenViBE::uint32 getClassAmount(void) const;
+			OpenViBE::uint32 getClassCount(void) const;
 
 			OpenViBE::boolean loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 

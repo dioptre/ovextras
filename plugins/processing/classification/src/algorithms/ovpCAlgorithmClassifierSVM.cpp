@@ -34,7 +34,7 @@ namespace{
 
 extern const char* const c_sClassifierRoot;
 
-OpenViBE::int32 OpenViBEPlugins::Classification::getSVMBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
+OpenViBE::int32 OpenViBEPlugins::Classification::SVMClassificationCompare(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
 {
 	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
 		return 0;
