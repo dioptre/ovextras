@@ -43,6 +43,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64StimulationIdentifier;
 			OpenViBE::CString m_sSpatialFilterConfigurationFilename;
 			OpenViBE::uint64 m_ui64FilterDimension;
+			OpenViBE::boolean m_bSaveAsBoxConfig;
 		};
 
 		class CBoxAlgorithmXDAWNSpatialFilterTrainerDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -66,14 +67,15 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addInput  ("Stimulations", OV_TypeId_Stimulations);
-				rBoxAlgorithmPrototype.addInput  ("Session signal", OV_TypeId_Signal);
-				rBoxAlgorithmPrototype.addInput  ("Evoked potential epochs", OV_TypeId_Signal);
-				rBoxAlgorithmPrototype.addOutput ("Train-completed Flag", OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addInput  ("Stimulations",                 OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addInput  ("Session signal",               OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addInput  ("Evoked potential epochs",      OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutput ("Train-completed Flag",         OV_TypeId_Stimulations);
 				
-				rBoxAlgorithmPrototype.addSetting("Train stimulation", OV_TypeId_Stimulation, "OVTK_StimulationId_Train");
-				rBoxAlgorithmPrototype.addSetting("Spatial filter configuration", OV_TypeId_Filename, "");
-				rBoxAlgorithmPrototype.addSetting("Filter dimension", OV_TypeId_Integer, "4");
+				rBoxAlgorithmPrototype.addSetting("Train stimulation",            OV_TypeId_Stimulation,  "OVTK_StimulationId_Train");
+				rBoxAlgorithmPrototype.addSetting("Spatial filter configuration", OV_TypeId_Filename,     "");
+				rBoxAlgorithmPrototype.addSetting("Filter dimension",             OV_TypeId_Integer,      "4");
+				rBoxAlgorithmPrototype.addSetting("Save as box config",           OV_TypeId_Boolean,      "true");
 				// rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 				return true;
 			}
