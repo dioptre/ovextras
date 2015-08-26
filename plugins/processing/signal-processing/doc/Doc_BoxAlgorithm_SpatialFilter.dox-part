@@ -86,5 +86,6 @@ Miscellaneous description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_SpatialFilter_Miscellaneous|
+ Another way to describe the spatial filter is that it runs a filter bank W of linear filters on the signal chunk X, essentially implementing a matrix product S=WX, where S is the output chunk.
  * |OVP_DocEnd_BoxAlgorithm_SpatialFilter_Miscellaneous|
  */

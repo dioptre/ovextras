@@ -18,6 +18,9 @@
 #include "box-algorithms/filters/ovpCBoxAlgorithmCommonAverageReference.h"
 #include "box-algorithms/filters/ovpCBoxAlgorithmSpatialFilter.h"
 
+#include "box-algorithms/filters/ovpCBoxAlgorithmRegularizedCSPTrainer.h"
+#include "algorithms/basic/ovpCAlgorithmOnlineCovariance.h"
+
 #include "box-algorithms/spectral-analysis/ovpCBoxAlgorithmFrequencyBandSelector.h"
 #include "box-algorithms/spectral-analysis/ovpCBoxAlgorithmSpectrumAverage.h"
 
@@ -34,24 +37,13 @@
 #include "box-algorithms/ovpCSignalAverage.h"
 #include "box-algorithms/ovpCBoxAlgorithmQuadraticForm.h"
 
-#include "box-algorithms/filter/ovpCBoxAlgorithmXDAWNSpatialFilterTrainer.h"
+#include "box-algorithms/filters/ovpCBoxAlgorithmXDAWNSpatialFilterTrainer.h"
 
 #include "box-algorithms/basic/ovpCBoxAlgorithmIFFTbox.h"
 
 #include "algorithms/basic/ovpCAlgorithmARBurgMethod.h"
 #include "box-algorithms/basic/ovpCBoxAlgorithmARCoefficients.h"
 
-
-/*/Dieter boxes for p300
-#include "box-algorithms/ovpCBoxAlgorithmTwoSampleTTest.h"
-#include "box-algorithms/ovpCBoxAlgorithmLikelinessDistributor.h"
-
-#include "box-algorithms/ovpCBoxAlgorithmXDAWNSpatialFilterTrainer.h"
-#include "box-algorithms/ovpCBoxAlgorithmSpatialFilter.h"
-#include "box-algorithms/ovpCBoxAlgorithmMultipleSpatialFilters.h"
-#include "box-algorithms/ovpCBoxAlgorithmConditionalIdentity.h"
-
-//*/
 #include "algorithms/basic/ovpCMatrixVariance.h"
 #include "box-algorithms/basic/ovpCBoxAlgorithmEpochVariance.h"
 
@@ -123,6 +115,16 @@ OVP_Declare_Begin()
 //	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSpatialFilterBoxAlgorithmDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmCommonAverageReferenceDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmSpatialFilterDesc)
+
+#if defined TARGET_HAS_ThirdPartyEIGEN
+	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_OnlineCovariance_UpdateMethod, "Update method");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_OnlineCovariance_UpdateMethod,"Chunk average",OVP_TypeId_OnlineCovariance_UpdateMethod_ChunkAverage.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_OnlineCovariance_UpdateMethod,"Per sample",OVP_TypeId_OnlineCovariance_UpdateMethod_Incremental.toUInteger());
+
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmRegularizedCSPTrainerDesc)
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmOnlineCovarianceDesc)
+
+#endif
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSimpleDSPDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSignalAverageDesc)

@@ -84,12 +84,24 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				//we are only interested in the setting 0
-				if((ui32Index==0)&&(!m_bHasUserSetName))
+				//we are only interested in the setting 0 and the type changes (select or reject)
+				if((ui32Index==0 || ui32Index==1) && (!m_bHasUserSetName))
 				{
-					OpenViBE::CString l_sSettings;
-					rBox.getSettingValue(0, l_sSettings);
-					rBox.setName(l_sSettings);
+					OpenViBE::CString l_sChannels;
+					rBox.getSettingValue(0, l_sChannels);
+
+					OpenViBE::CString l_sSelectionMethod;
+					OpenViBE::CIdentifier l_oSelectionEnumIdentifier;
+					rBox.getSettingValue(1, l_sSelectionMethod);
+					rBox.getSettingType(1, l_oSelectionEnumIdentifier);
+				
+					const OpenViBE::CIdentifier l_oSelectionMethodIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(l_oSelectionEnumIdentifier, l_sSelectionMethod);
+
+					if(l_oSelectionMethodIdentifier==OVP_TypeId_SelectionMethod_Reject)
+					{
+						l_sChannels = OpenViBE::CString("!") + l_sChannels;
+					}
+					rBox.setName(l_sChannels);
 				}
 				return true;
 			}

@@ -484,7 +484,7 @@ uint32 CAlgorithmClassifierOneVsOne::getClassCount(void) const
 	return static_cast<uint32>((1+::sqrt(static_cast<double>(l_ui32DeltaCarre)))/2);
 }
 
-//The function take int because we don't take the "label" of the class but only the numero of declaration
+//The function take int because we don't take the "label" of the class but only the number of declaration
 SSubClassifierDescriptor &CAlgorithmClassifierOneVsOne::getSubClassifierDescriptor(const uint32 ui32FirstClass, const uint32 ui32SecondClass)
 {
 	uint32 ui32Max, ui32Min;
