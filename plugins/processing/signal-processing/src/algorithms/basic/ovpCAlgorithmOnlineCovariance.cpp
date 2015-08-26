@@ -1,4 +1,4 @@
-#if defined TARGET_HAS_ThirdPartyEIGEN
+#if 1//defined TARGET_HAS_ThirdPartyEIGEN
 
 #include "ovpCAlgorithmOnlineCovariance.h"
 
@@ -122,8 +122,6 @@ OpenViBE::boolean CAlgorithmOnlineCovariance::process(void)
 
 			const MatrixXd l_oChunkMean = l_oSampleChunk.colwise().mean();
 			const MatrixXd l_oChunkCentered = l_oSampleChunk.rowwise() - l_oChunkMean.row(0);
-
-			const MatrixXd l_oChunkCenteredMean = l_oChunkCentered.colwise().mean();
 			
 			MatrixXd l_oChunkCov = (1.0/float64(l_ui32nRows)) * l_oChunkCentered.transpose() * l_oChunkCentered;
 
