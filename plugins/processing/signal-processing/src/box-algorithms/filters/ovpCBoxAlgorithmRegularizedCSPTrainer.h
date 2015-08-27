@@ -2,7 +2,7 @@
 #ifndef __OpenViBEPlugins_BoxAlgorithm_RegularizedCSPTrainer_H__
 #define __OpenViBEPlugins_BoxAlgorithm_RegularizedCSPTrainer_H__
 
-#if defined TARGET_HAS_ThirdPartyEIGEN
+#if 1//defined TARGET_HAS_ThirdPartyEIGEN
 
 #include "../../ovp_defines.h"
 #include <openvibe/ov_all.h>

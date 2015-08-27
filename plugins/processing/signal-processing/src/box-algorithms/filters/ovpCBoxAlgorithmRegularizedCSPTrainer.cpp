@@ -1,4 +1,4 @@
-#if defined TARGET_HAS_ThirdPartyEIGEN
+#if 1//defined TARGET_HAS_ThirdPartyEIGEN
 
 #include "ovpCBoxAlgorithmRegularizedCSPTrainer.h"
 
@@ -288,7 +288,7 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 			return false;
 		}
 
-		this->getLogManager() << LogLevel_Info << "Data covariance dims are [" << l_oCov[0].rows() << "x" << l_oCov[0].cols() 
+		this->getLogManager() << LogLevel_Info << "Data covariance dims are [" << static_cast<uint32>(l_oCov[0].rows()) << "x" << static_cast<uint32>(l_oCov[0].cols())
 			<< "]. Number of samples per condition : \n";
 		this->getLogManager() << LogLevel_Info << "  cond1 = " 
 			<< m_ui64nBuffers[0] << " chunks, sized " << l_pInput->getDimensionSize(1) << " -> " << m_ui64nSamples[0] << " samples\n";
