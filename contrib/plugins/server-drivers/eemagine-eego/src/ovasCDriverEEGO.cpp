@@ -175,13 +175,13 @@ boolean CDriverEEGO::check_configuration(void)
 
 OpenViBE::uint64 CDriverEEGO::getRefChannelMask() const
 {
-	const OpenViBE::uint64 l_i64MaskEEG = CHeaderEEGO::strtoull(m_sEEGMask, NULL, 0);
+	const OpenViBE::uint64 l_i64MaskEEG = CHeaderEEGO::strmasktoull(m_sEEGMask);
 	return l_i64MaskEEG;
 }
 
 OpenViBE::uint64 CDriverEEGO::getBipChannelMask() const
 {
-	const OpenViBE::uint64 l_i64MaskBIP = CHeaderEEGO::strtoull(m_sBIPMask, NULL, 0);
+	const OpenViBE::uint64 l_i64MaskBIP = CHeaderEEGO::strmasktoull(m_sBIPMask);
 	return l_i64MaskBIP;
 }
 

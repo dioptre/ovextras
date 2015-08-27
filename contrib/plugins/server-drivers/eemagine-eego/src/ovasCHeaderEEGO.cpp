@@ -2,6 +2,7 @@
 
 #if defined TARGET_OS_Windows
 
+#include <boost/algorithm/string.hpp>
 #include "ovasCHeaderEEGO.h"
 
 #ifdef _MSC_VER
@@ -50,6 +51,21 @@ OpenViBE::uint32 CHeaderEEGO::getBIPMaskInt() const
 	return static_cast<OpenViBE::uint32>(strtoull(m_sBIPMask, NULL, 0));
 }
 
+OpenViBE::uint64 CHeaderEEGO::strmasktoull(char const* str)
+{
+	std::string l_oString(str);  //easier substring handling etc. Minor performance penalty which should not matter.
+	boost::algorithm::trim(l_oString); // Make sure to handle whitespace correctly
+	
+	// check for binary prefix
+	if(boost::algorithm::starts_with(l_oString, "0b"))
+	{
+		// use the substring for string to number conversion as base 2
+		return strtoull(l_oString.substr(2).c_str(), NULL, 2);
+	}
+
+	// if no special handling for the base 2 case is neccessary we can just use the std::stroull implementation and do not mess with that any further.
+	return strtoull(str, NULL, 0);
+}
 
 /* static */
 OpenViBE::uint64 CHeaderEEGO::strtoull(char const* str, char** str_end, int base)

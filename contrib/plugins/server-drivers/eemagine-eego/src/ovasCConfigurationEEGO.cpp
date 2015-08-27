@@ -183,8 +183,8 @@ void CConfigurationEEGO::update_channel_num_cb(GtkWidget *widget, CConfiguration
 	const gchar* l_sMaskBIP=gtk_entry_get_text(pThis->m_pBIPEntryMask);
 	const gchar* l_sMaskEEG=gtk_entry_get_text(pThis->m_pEEGEntryMask);
 
-	const OpenViBE::uint64 l_i64MaskBIP=CHeaderEEGO::strtoull(l_sMaskBIP, NULL, 0);
-	const OpenViBE::uint64 l_i64MaskEEG=CHeaderEEGO::strtoull(l_sMaskEEG, NULL, 0);
+	const OpenViBE::uint64 l_i64MaskBIP=CHeaderEEGO::strmasktoull(l_sMaskBIP);
+	const OpenViBE::uint64 l_i64MaskEEG=CHeaderEEGO::strmasktoull(l_sMaskEEG);
 
 	const std::bitset<64> l_oBitsetEEG(l_i64MaskEEG);
 	const std::bitset<24> l_oBitsetBIP(l_i64MaskBIP);

@@ -39,11 +39,16 @@ namespace OpenViBEAcquisitionServer
 		void				setBIPMask(const OpenViBE::CString mask) { m_sBIPMask = mask; m_bBIPMaskSet = true; };
 		OpenViBE::boolean	isBIPMaskSet() const { return m_bBIPMaskSet; };
 
+	public:
+		// Basically just strtoull but supports 0bXXXX for binary notification
+		static OpenViBE::uint64 strmasktoull(char const* str);
+				
 	// static helper methods. Reason to put it in here is to provide the service to configuration, header and driver.
 	// Not nice, should go to generic utilities or just go when VS10 is gone.
-	public:
+	private:
 		static OpenViBE::uint64 strtoull(char const* str, char** str_end, int base);
 
+	// data
 	protected:
 		OpenViBE::uint32	m_iEEGRange;
 		OpenViBE::uint32	m_iBIPRange;
