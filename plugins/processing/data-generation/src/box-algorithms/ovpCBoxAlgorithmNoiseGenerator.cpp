@@ -103,28 +103,29 @@ boolean CNoiseGenerator::process(void)
 		l_pDynamicBoxContext->markOutputAsReadyToSend(0, 0, 0);
 
 		m_bHeaderSent=true;
-	}
-
-	// Send buffer
-	float64* l_pSampleBuffer = m_oSignalEncoder.getInputMatrix()->getBuffer();
-	const uint64 l_ui64SamplesAtBeginning=m_ui64SentSampleCount;
-	for(uint32 i=0; i<(uint32)m_ui64ChannelCount; i++)
+	} 
+	else
 	{
-		for(uint32 j=0; j<(uint32)m_ui64GeneratedEpochSampleCount; j++)
+		// Send buffer
+		float64* l_pSampleBuffer = m_oSignalEncoder.getInputMatrix()->getBuffer();
+		const uint64 l_ui64SamplesAtBeginning=m_ui64SentSampleCount;
+		for(uint32 i=0; i<(uint32)m_ui64ChannelCount; i++)
 		{
-			l_pSampleBuffer[i*m_ui64GeneratedEpochSampleCount+j]=static_cast<float64>(System::Math::randomFloat32BetweenZeroAndOne());
+			for(uint32 j=0; j<(uint32)m_ui64GeneratedEpochSampleCount; j++)
+			{
+				l_pSampleBuffer[i*m_ui64GeneratedEpochSampleCount+j]=static_cast<float64>(System::Math::randomFloat32BetweenZeroAndOne());
+			}
 		}
-	}
 
-	m_ui64SentSampleCount = l_ui64SamplesAtBeginning + m_ui64GeneratedEpochSampleCount;
+		m_ui64SentSampleCount = l_ui64SamplesAtBeginning + m_ui64GeneratedEpochSampleCount;
 
-	const uint64 l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, l_ui64SamplesAtBeginning);
-	const uint64 l_ui64EndTime = ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, m_ui64SentSampleCount);
+		const uint64 l_ui64StartTime = ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, l_ui64SamplesAtBeginning);
+		const uint64 l_ui64EndTime = ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, m_ui64SentSampleCount);
 		
-	m_oSignalEncoder.encodeBuffer();
+		m_oSignalEncoder.encodeBuffer();
 
-	l_pDynamicBoxContext->markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
-
+		l_pDynamicBoxContext->markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
+	}
 
 	return true;
 }
