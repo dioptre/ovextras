@@ -116,8 +116,10 @@ namespace OpenViBEPlugins
 			{
 				rBoxAlgorithmPrototype.addInput("Targets",      OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addInput("Classifier 1", OV_TypeId_Stimulations);
+
 				rBoxAlgorithmPrototype.addFlag (OpenViBE::Kernel::BoxFlag_CanAddInput);
 				rBoxAlgorithmPrototype.addFlag (OpenViBE::Kernel::BoxFlag_CanModifyInput);
+
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Stimulations);
 				// rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsUnstable);
 
