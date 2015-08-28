@@ -81,17 +81,16 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) {
 				if(ui32Index == 1)
 				{
-					OpenViBE::CString l_sAmountClass;
-					rBox.getSettingValue(ui32Index, l_sAmountClass);
+					OpenViBE::CString l_sClassCount;
+					rBox.getSettingValue(ui32Index, l_sClassCount);
 					//Could happen if we rewritte a number
-					if(l_sAmountClass.length() == 0 )
+					if(l_sClassCount.length() == 0 )
 					{
 						return true;
 					}
 
 					OpenViBE::int32 l_i32SettingCount;
-
-					std::stringstream l_sStream(l_sAmountClass.toASCIIString());
+					std::stringstream l_sStream(l_sClassCount.toASCIIString());
 					l_sStream >> l_i32SettingCount;
 
 					//First of all we prevent for the value to goes under 1.
@@ -101,24 +100,24 @@ namespace OpenViBEPlugins
 						l_i32SettingCount = 1;
 					}
 
-					OpenViBE::int32 l_i32CurrentAmount = rBox.getSettingCount()-2;
+					OpenViBE::int32 l_i32CurrentCount = rBox.getSettingCount()-2;
 					//We have two choice 1/We need to add class, 2/We need to remove some
-					if(l_i32CurrentAmount < l_i32SettingCount)
+					if(l_i32CurrentCount < l_i32SettingCount)
 					{
-						while(l_i32CurrentAmount < l_i32SettingCount)
+						while(l_i32CurrentCount < l_i32SettingCount)
 						{
-							char l_sBuffer[64];
-							sprintf(l_sBuffer, "Class %i identifier", l_i32CurrentAmount+1);
-							rBox.addSetting(l_sBuffer, OVTK_TypeId_Stimulation, "");
-							++l_i32CurrentAmount;
+							std::stringstream l_sSettingName;
+							l_sSettingName << "Class " << (l_i32CurrentCount+1) << " identifier";
+							rBox.addSetting(l_sSettingName.str().c_str(), OVTK_TypeId_Stimulation, "");
+							++l_i32CurrentCount;
 						}
 					}
 					else
 					{
-						while(l_i32CurrentAmount > l_i32SettingCount)
+						while(l_i32CurrentCount > l_i32SettingCount)
 						{
 							rBox.removeSetting(rBox.getSettingCount()-1);
-							--l_i32CurrentAmount;
+							--l_i32CurrentCount;
 						}
 					}
 				}
@@ -165,13 +164,13 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addInput("Expected label",OV_TypeId_Stimulations);
-				rBoxAlgorithmPrototype.addInput("Classification values",OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addInput("Expected label",        OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addInput("Classification values", OV_TypeId_StreamedMatrix);
 
-				rBoxAlgorithmPrototype.addSetting("Computation trigger", OV_TypeId_Stimulation, "");
-				rBoxAlgorithmPrototype.addSetting("Amount of class",OV_TypeId_Integer,"2");
-				rBoxAlgorithmPrototype.addSetting("Class 1 identifier" , OV_TypeId_Stimulation, "");
-				rBoxAlgorithmPrototype.addSetting("Class 2 identifier" , OV_TypeId_Stimulation, "");
+				rBoxAlgorithmPrototype.addSetting("Computation trigger", OV_TypeId_Stimulation,  "");
+				rBoxAlgorithmPrototype.addSetting("Amount of class",     OV_TypeId_Integer,      "2");
+				rBoxAlgorithmPrototype.addSetting("Class 1 identifier" , OV_TypeId_Stimulation,  "");
+				rBoxAlgorithmPrototype.addSetting("Class 2 identifier" , OV_TypeId_Stimulation,  "");
 
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				

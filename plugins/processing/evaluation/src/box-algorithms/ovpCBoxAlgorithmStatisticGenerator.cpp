@@ -161,10 +161,6 @@ boolean CBoxAlgorithmStatisticGenerator::process(void)
 				l_oInfo.m_ui32SampleCount += l_ui32SampleCount;
 			}
 		}
-		if(m_oSignalDecoder.isEndReceived())
-		{
-
-		}
 	}
 
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
@@ -181,10 +177,6 @@ boolean CBoxAlgorithmStatisticGenerator::process(void)
 			{
 				m_oStimulationMap[l_rStimulationSet.getStimulationIdentifier(j)]++;
 			}
-		}
-		if(m_oStimulationDecoder.isEndReceived())
-		{
-
 		}
 	}
 

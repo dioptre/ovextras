@@ -5,8 +5,6 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <vector>
-#include <sstream>
 #include <cstdio>
 
 #define OVP_ClassId_BoxAlgorithm_ConfusionMatrix     OpenViBE::CIdentifier(0x1AB625DA, 0x3B2502CE)
@@ -101,8 +99,8 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput  ("Classification results", OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addOutput ("Confusion Matrix",       OV_TypeId_StreamedMatrix);
 
-				rBoxAlgorithmPrototype.addSetting("Percentages",            OV_TypeId_Boolean, "true");
-				rBoxAlgorithmPrototype.addSetting("Sums",                   OV_TypeId_Boolean, "false");
+				rBoxAlgorithmPrototype.addSetting("Percentages",            OV_TypeId_Boolean,     "true");
+				rBoxAlgorithmPrototype.addSetting("Sums",                   OV_TypeId_Boolean,     "false");
 
 				rBoxAlgorithmPrototype.addSetting("Class 1",                OV_TypeId_Stimulation, "OVTK_StimulationId_Label_00");
 				rBoxAlgorithmPrototype.addSetting("Class 2",                OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");

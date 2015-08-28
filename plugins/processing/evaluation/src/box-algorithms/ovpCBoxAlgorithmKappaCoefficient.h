@@ -7,14 +7,11 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <iostream>
 #include <sstream>
-#include <stdio.h>
-#include <map>
 #include <gtk/gtk.h>
 
-#define OVP_ClassId_BoxAlgorithm_KappaCoefficient OpenViBE::CIdentifier(0x160D8F1B, 0xD864C5BB)
-#define OVP_ClassId_BoxAlgorithm_KappaCoefficientDesc OpenViBE::CIdentifier(0xD8BA2199, 0xD252BECB)
+#define OVP_ClassId_BoxAlgorithm_KappaCoefficient OpenViBE::CIdentifier         (0x160D8F1B, 0xD864C5BB)
+#define OVP_ClassId_BoxAlgorithm_KappaCoefficientDesc OpenViBE::CIdentifier     (0xD8BA2199, 0xD252BECB)
 
 namespace OpenViBEPlugins
 {
@@ -78,7 +75,6 @@ namespace OpenViBEPlugins
 					}
 
 					OpenViBE::int32 l_i32SettingCount;
-
 					std::stringstream l_sStream(l_sClassCount.toASCIIString());
 					l_sStream >> l_i32SettingCount;
 
@@ -94,9 +90,9 @@ namespace OpenViBEPlugins
 					{
 						while(l_i32CurrentCount < l_i32SettingCount)
 						{
-							char l_sBuffer[64];
-							sprintf(l_sBuffer, "Stimulation of class %i", l_i32CurrentCount+1);
-							rBox.addSetting(l_sBuffer, OVTK_TypeId_Stimulation, "");
+							std::stringstream l_sSettingName;
+							l_sSettingName << "Stimulation of class " << (l_i32CurrentCount+1);
+							rBox.addSetting(l_sSettingName.str().c_str(), OVTK_TypeId_Stimulation, "");
 							++l_i32CurrentCount;
 						}
 					}
@@ -108,9 +104,7 @@ namespace OpenViBEPlugins
 							--l_i32CurrentCount;
 						}
 					}
-
 				}
-
 				return true;
 			}
 
@@ -151,23 +145,19 @@ namespace OpenViBEPlugins
 				return ePluginFunctionality == OpenViBE::Kernel::PluginFunctionality_Visualization;
 			}
 
-			
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addInput("Expected stimulations",OV_TypeId_Stimulations);
-				rBoxAlgorithmPrototype.addInput("Found stimulations", OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addInput("Expected stimulations",       OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addInput("Found stimulations",          OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addOutput ("Confusion Matrix",       OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addOutput ("Confusion Matrix",          OV_TypeId_StreamedMatrix);
 
-				rBoxAlgorithmPrototype.addSetting("Amount of class",OV_TypeId_Integer,"2");
-
-				rBoxAlgorithmPrototype.addSetting("Stimulation of class 1",OV_TypeId_Stimulation,"");
-				rBoxAlgorithmPrototype.addSetting("Stimulation of class 2",OV_TypeId_Stimulation,"");
-
+				rBoxAlgorithmPrototype.addSetting("Amount of class",           OV_TypeId_Integer,     "2");
+				rBoxAlgorithmPrototype.addSetting("Stimulation of class 1",    OV_TypeId_Stimulation, "");
+				rBoxAlgorithmPrototype.addSetting("Stimulation of class 2",    OV_TypeId_Stimulation, "");
 
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
-				
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 				
 				return true;

@@ -10,24 +10,24 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Evaluation;
 
-boolean compareCTimelineStimulationPair(const CTimestampLabelPair& elt1, const CTimestampLabelPair& elt2)
+boolean compareCTimelineStimulationPair(const CTimestampLabelPair& rElt1, const CTimestampLabelPair& rElt2)
 {
-	return elt1.first < elt2.first;
+	return rElt1.first < rElt2.first;
 }
 
-boolean compareValueAndStimulationTimelinePair(const CTimestampLabelPair& elt1, const CTimestampValuesPair& elt2)
+boolean compareValueAndStimulationTimelinePair(const CTimestampLabelPair& rElt1, const CTimestampValuesPair& rElt2)
 {
-	return elt1.first < elt2.first;
+	return rElt1.first < rElt2.first;
 }
 
-boolean compareRocValuePair(const CRocPairValue& elt1, const CRocPairValue& elt2)
+boolean compareRocValuePair(const CRocPairValue& rElt1, const CRocPairValue& rElt2)
 {
-	return elt1.second > elt2.second;
+	return rElt1.second > rElt2.second;
 }
 
-boolean isPositive(const CRocPairValue &elt1)
+boolean isPositive(const CRocPairValue &rElt1)
 {
-	return elt1.first;
+	return rElt1.first;
 }
 
 boolean CBoxAlgorithmROCCurve::initialize(void)

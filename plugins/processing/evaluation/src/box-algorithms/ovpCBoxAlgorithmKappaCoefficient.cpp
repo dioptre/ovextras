@@ -2,6 +2,7 @@
 #include "../algorithms/ovpCAlgorithmConfusionMatrix.h"
 
 #include <xml/IXMLHandler.h>
+#include <map>
 #include <sstream>
 #include <vector>
 #include <iomanip>
@@ -26,7 +27,7 @@ boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 
 	m_oOutputMatrixEncoder.initialize(*this, 0);
 
-	//CONFUSION MATRIX ALGORITHM
+	//Confusion matrix algorithm
 	m_pConfusionMatrixAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ConfusionMatrix));
 	m_pConfusionMatrixAlgorithm->initialize();
 
@@ -45,7 +46,8 @@ boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 		getStaticBoxContext().getSettingValue(i+c_ui32ClassLabelOffset, l_sClassValue); // classes are settings from 2 to n
 		l_vClassCodes[i] =(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i+c_ui32ClassLabelOffset);
 	}
-	// verification...
+
+	// Let's check that each identifier is unique
 	for(uint32 i = 0; i< m_ui32AmountClass; i++)
 	{
 		for(uint32 j = i+1; j< m_ui32AmountClass; j++)
@@ -53,8 +55,8 @@ boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 			if(l_vClassCodes[i] == l_vClassCodes[j])
 			{
 				CString l_sClassValue;
-				getStaticBoxContext().getSettingValue(i+c_ui32ClassLabelOffset, l_sClassValue);
-				getLogManager() << LogLevel_Error << "You must use unique classes to compute a confusion matrix. Class "<<i+1<<" and "<<j+1<< " are the same ("<<l_sClassValue.toASCIIString()<<").\n";
+				getStaticBoxContext().getSettingValue(i + c_ui32ClassLabelOffset, l_sClassValue);
+				getLogManager() << LogLevel_Error << "You must use unique classes to compute a Kappa coefficient. Class "<<i+1<<" and "<<j+1<< " are the same ("<<l_sClassValue.toASCIIString()<<").\n";
 				return false;
 			}
 		}
@@ -87,9 +89,9 @@ boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 
 	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(GTK_WIDGET(l_pTable));
 
-	PangoContext * l_pPangoContext = gtk_widget_get_pango_context(GTK_WIDGET(m_pKappaLabel));
-	PangoFontDescription * l_pFontDescription = pango_context_get_font_description(l_pPangoContext);
-	pango_font_description_set_size(l_pFontDescription,40*PANGO_SCALE);
+	PangoContext *l_pPangoContext = gtk_widget_get_pango_context(GTK_WIDGET(m_pKappaLabel));
+	PangoFontDescription *l_pFontDescription = pango_context_get_font_description(l_pPangoContext);
+	pango_font_description_set_size(l_pFontDescription, 40 * PANGO_SCALE);
 	gtk_widget_modify_font(m_pKappaLabel, l_pFontDescription);
 
 	return true;
@@ -116,10 +118,10 @@ boolean CBoxAlgorithmKappaCoefficient::processInput(uint32 ui32InputIndex)
 
 boolean CBoxAlgorithmKappaCoefficient::process(void)
 {
-	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
+	IBoxIO& l_rDynamicBoxContext = this->getDynamicBoxContext();
 
 	//Input 0: Targets
-	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
+	for(uint32 i = 0; i < l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
 		m_oTargetStimulationDecoder.decode(i);
 
@@ -198,7 +200,7 @@ boolean CBoxAlgorithmKappaCoefficient::process(void)
 					float64 l_f64KappaCoefficient = (l_f64ObservedAccurancy - l_f64ExpectedAccurancy)/(1 - l_f64ExpectedAccurancy);
 
 					updateKappaValue(l_f64KappaCoefficient);
-					m_oOutputMatrixEncoder.getInputMatrix()->getBuffer()[0]=l_f64KappaCoefficient;
+					m_oOutputMatrixEncoder.getInputMatrix()->getBuffer()[0] = l_f64KappaCoefficient;
 					m_oOutputMatrixEncoder.encodeBuffer();
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 				}

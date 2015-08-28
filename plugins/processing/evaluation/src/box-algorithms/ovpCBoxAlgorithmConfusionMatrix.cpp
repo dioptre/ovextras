@@ -1,7 +1,9 @@
 #include "ovpCBoxAlgorithmConfusionMatrix.h"
 
 #include "../algorithms/ovpCAlgorithmConfusionMatrix.h"
-#include <iostream>
+
+#include <vector>
+#include <sstream>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;

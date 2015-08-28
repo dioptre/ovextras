@@ -22,8 +22,6 @@
 #define OVP_ClassId_Algorithm_ConfusionMatrixDesc                                        OpenViBE::CIdentifier(0x4CDD225D, 0x6C9A59DB)
 
 #include <map>
-#include <vector>
-#include <sstream>
 
 namespace OpenViBEPlugins
 {
