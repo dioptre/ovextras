@@ -7,7 +7,6 @@
 #include "algorithms/ovpCAlgorithmClassifierSVM.h"
 #include "algorithms/ovpCAlgorithmClassifierOneVsAll.h"
 #include "algorithms/ovpCAlgorithmClassifierOneVsOne.h"
-#include "algorithms/ovpCAlgorithmConfusionMatrix.h"
 
 #include "algorithms/ovpCAlgorithmPairwiseDecision.h"
 #include "algorithms/ovpCAlgorithmPairwiseStrategyPKPD.h"
@@ -17,7 +16,6 @@
 #include "box-algorithms/ovpCBoxAlgorithmVotingClassifier.h"
 #include "box-algorithms/ovpCBoxAlgorithmClassifierTrainer.h"
 #include "box-algorithms/ovpCBoxAlgorithmClassifierProcessor.h"
-#include "box-algorithms/ovpCBoxAlgorithmConfusionMatrix.h"
 
 #if defined TARGET_HAS_ThirdPartyEIGEN
 #include "algorithms/ovpCAlgorithmConditionedCovariance.h"
@@ -54,13 +52,11 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SVMKernelType,"Sigmoid",SIGMOID);
 
 
-	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmConfusionMatrixDesc);
+
 
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmVotingClassifierDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierTrainerDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmClassifierProcessorDesc);
-
-	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmConfusionMatrixDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierOneVsAllDesc);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierOneVsOneDesc);

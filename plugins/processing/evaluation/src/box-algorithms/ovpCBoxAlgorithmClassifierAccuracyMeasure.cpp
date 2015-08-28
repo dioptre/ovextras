@@ -11,7 +11,7 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::SimpleVisualisation;
+using namespace OpenViBEPlugins::Evaluation;
 
 namespace
 {
@@ -56,10 +56,10 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::initialize(void)
 
 	//widgets
 	m_pMainWidgetInterface=gtk_builder_new(); // glade_xml_new(OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/openvibe-simple-visualisation-ClassifierAccuracyMeasure.ui", "classifier-accuracy-measure-table", NULL);
-	gtk_builder_add_from_file(m_pMainWidgetInterface, OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/openvibe-simple-visualisation-ClassifierAccuracyMeasure.ui", NULL);
+	gtk_builder_add_from_file(m_pMainWidgetInterface, OpenViBE::Directories::getDataDir() + "/plugins/evaluation/openvibe-simple-visualisation-ClassifierAccuracyMeasure.ui", NULL);
 
 	m_pToolbarWidgetInterface=gtk_builder_new(); // glade_xml_new(OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/openvibe-simple-visualisation-ClassifierAccuracyMeasure.ui", "classifier-accuracy-measure-toolbar", NULL);
-	gtk_builder_add_from_file(m_pToolbarWidgetInterface, OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/openvibe-simple-visualisation-ClassifierAccuracyMeasure.ui", NULL);
+	gtk_builder_add_from_file(m_pToolbarWidgetInterface, OpenViBE::Directories::getDataDir() + "/plugins/evaluation/openvibe-simple-visualisation-ClassifierAccuracyMeasure.ui", NULL);
 
 	gtk_builder_connect_signals(m_pMainWidgetInterface, NULL);
 	gtk_builder_connect_signals(m_pToolbarWidgetInterface, NULL);

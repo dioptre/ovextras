@@ -1,11 +1,14 @@
 #include "ovpCAlgorithmConfusionMatrix.h"
 
+#include <vector>
+#include <sstream>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::Classification;
+using namespace OpenViBEPlugins::Evaluation;
 using namespace std;
 
 #define boolean OpenViBE::boolean
@@ -55,7 +58,7 @@ boolean CAlgorithmConfusionMatrix::uninitialize(void)
 
 boolean CAlgorithmConfusionMatrix::process(void)
 {
-	uint64 l_ui64ClassCount = ip_pClassesCodes->getStimulationCount();
+	const uint32 l_ui32ClassCount = static_cast<uint32>(ip_pClassesCodes->getStimulationCount());
 
 	if(this->isInputTriggerActive(OVP_Algorithm_ConfusionMatrixAlgorithm_InputTriggerId_ResetTarget))
 	{
@@ -73,16 +76,16 @@ boolean CAlgorithmConfusionMatrix::process(void)
 		op_pConfusionMatrix->setDimensionCount(2);
 		if(ip_bSums)
 		{
-			op_pConfusionMatrix->setDimensionSize(0,(uint32)(l_ui64ClassCount+1));
-			op_pConfusionMatrix->setDimensionSize(1,(uint32)(l_ui64ClassCount+1));
+			op_pConfusionMatrix->setDimensionSize(0, l_ui32ClassCount+1);
+			op_pConfusionMatrix->setDimensionSize(1, l_ui32ClassCount+1);
 		}
 		else
 		{
-			op_pConfusionMatrix->setDimensionSize(0,(uint32)l_ui64ClassCount);
-			op_pConfusionMatrix->setDimensionSize(1,(uint32)l_ui64ClassCount);
+			op_pConfusionMatrix->setDimensionSize(0, l_ui32ClassCount);
+			op_pConfusionMatrix->setDimensionSize(1, l_ui32ClassCount);
 		}
 
-		for(uint32 i = 0 ; i<l_ui64ClassCount; i++)
+		for(uint32 i = 0 ; i<l_ui32ClassCount; i++)
 		{
 			stringstream ss;
 			//ss << "Target\nClass " << i+1;
@@ -96,13 +99,13 @@ boolean CAlgorithmConfusionMatrix::process(void)
 
 		if(ip_bSums)
 		{
-			op_pConfusionMatrix->setDimensionLabel(0, (uint32)l_ui64ClassCount, "Sums");
-			op_pConfusionMatrix->setDimensionLabel(1, (uint32)l_ui64ClassCount, "Sums");
+			op_pConfusionMatrix->setDimensionLabel(0, l_ui32ClassCount, "Sums");
+			op_pConfusionMatrix->setDimensionLabel(1, l_ui32ClassCount, "Sums");
 		}
 
 		m_oConfusionMatrix.setDimensionCount(2);
-		m_oConfusionMatrix.setDimensionSize(0, (uint32)l_ui64ClassCount);
-		m_oConfusionMatrix.setDimensionSize(1, (uint32)l_ui64ClassCount);
+		m_oConfusionMatrix.setDimensionSize(0, l_ui32ClassCount);
+		m_oConfusionMatrix.setDimensionSize(1, l_ui32ClassCount);
 
 		// initialization
 		for(uint32 i = 0; i<op_pConfusionMatrix->getDimensionSize(0); i++)
@@ -135,7 +138,7 @@ boolean CAlgorithmConfusionMatrix::process(void)
 			}
 			else
 			{
-				getLogManager() << LogLevel_Warning << "The target received is not a valid class: " << l_ui64StimulationIdentifier << "\n";
+				getLogManager() << LogLevel_Trace << "The target received is not a valid class: " << l_ui64StimulationIdentifier << "\n";
 			}
 		}
 	}
@@ -144,8 +147,14 @@ boolean CAlgorithmConfusionMatrix::process(void)
 	{
 		for(uint32 s=0; s<ip_pClassifierStimulationSet->getStimulationCount(); s++)
 		{
+
 			//We need to locate the stimulation on the timeline
 			uint64 l_ui64StimulationFromClassifierIdentifier = ip_pClassifierStimulationSet->getStimulationIdentifier(s);
+			if(!isClass(l_ui64StimulationFromClassifierIdentifier))//If we don't have
+			{
+				getLogManager() << LogLevel_Trace << "The result received is not a valid class: " << l_ui64StimulationFromClassifierIdentifier << "\n";
+				continue;
+			}
 			uint64 l_ui64StimulationTargeted = 0;
 			uint64 l_ui64StimulationFromClassifierDate = ip_pClassifierStimulationSet->getStimulationDate(s);
 
@@ -167,60 +176,53 @@ boolean CAlgorithmConfusionMatrix::process(void)
 			{
 				// now we found the target, let's update the confusion matrix
 				// we need to update the whole line vector for the targeted class
-				if(isClass(l_ui64StimulationFromClassifierIdentifier))
+				uint32 l_ui32OldAttemptCount = m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted];
+				m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted]++; // the confusion matrix can treat this result
+
+				uint32 i = getClassIndex(l_ui64StimulationTargeted);// the good line index
+				uint32 l_ui32ResultIndex = getClassIndex(l_ui64StimulationFromClassifierIdentifier);
+				for(uint32 j=0;j<l_ui32ClassCount;j++)
 				{
-					uint32 l_ui32OldAttemptCount = m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted];
-					m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted]++; // the confusion matrix can treat this result
-
-					uint32 i = getClassIndex(l_ui64StimulationTargeted);// the good line index
-					uint32 l_ui32ResultIndex = getClassIndex(l_ui64StimulationFromClassifierIdentifier);
-					for(uint32 j=0;j<l_ui64ClassCount;j++)
+					float64 l_f64NewValue = 0.f;
+					float64 l_f64OldValue = op_pConfusionMatrix->getBuffer()[i*op_pConfusionMatrix->getDimensionSize(0)+j];
+					if(j == l_ui32ResultIndex)
 					{
-						float64 l_f64NewValue = 0.f;
-						float64 l_f64OldValue = op_pConfusionMatrix->getBuffer()[i*op_pConfusionMatrix->getDimensionSize(0)+j];
-						if(j == l_ui32ResultIndex)
-						{
-							l_f64NewValue = (l_f64OldValue*l_ui32OldAttemptCount +1) / (m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted]);
-							m_oConfusionMatrix.getBuffer()[i*l_ui64ClassCount+j]++;
-						}
-						else
-						{
-							l_f64NewValue = (l_f64OldValue*l_ui32OldAttemptCount) / (m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted]);
-						}
-						if(ip_bPercentages)
-						{
-							op_pConfusionMatrix->getBuffer()[i*op_pConfusionMatrix->getDimensionSize(0)+j] = l_f64NewValue;
-						}
-						else // the count value
-						{
-							op_pConfusionMatrix->getBuffer()[i*op_pConfusionMatrix->getDimensionSize(0)+j] = m_oConfusionMatrix.getBuffer()[i*l_ui64ClassCount+j];
-						}
+						l_f64NewValue = (l_f64OldValue*l_ui32OldAttemptCount +1) / (m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted]);
+						m_oConfusionMatrix.getBuffer()[i*l_ui32ClassCount+j]++;
 					}
-
-					//we compute the sums if needed
-					if(ip_bSums)
+					else
 					{
-						uint64 l_ui64Size = op_pConfusionMatrix->getDimensionSize(0);
-						float64 l_f64Total = 0.f;
-						for(uint32 i = 0; i<l_ui64ClassCount; i++)
-						{
-							float64 l_f64LineSum = 0.f;
-							float64 l_f64ColumnSum = 0.f;
-							for(uint32 j = 0; j<l_ui64ClassCount; j++)
-							{
-								l_f64LineSum += op_pConfusionMatrix->getBuffer()[i*l_ui64Size+j];
-								l_f64ColumnSum += op_pConfusionMatrix->getBuffer()[j*l_ui64Size+i];
-							}
-							op_pConfusionMatrix->getBuffer()[i*l_ui64Size+l_ui64Size-1] = l_f64LineSum;
-							op_pConfusionMatrix->getBuffer()[(l_ui64Size-1)*l_ui64Size+i] = l_f64ColumnSum;
-							l_f64Total+=l_f64LineSum;
-						}
-						op_pConfusionMatrix->getBuffer()[(l_ui64Size-1)*l_ui64Size + l_ui64Size -1] = l_f64Total; // the lower-right entry, i.e. the last in the buffer
+						l_f64NewValue = (l_f64OldValue*l_ui32OldAttemptCount) / (m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted]);
+					}
+					if(ip_bPercentages)
+					{
+						op_pConfusionMatrix->getBuffer()[i*op_pConfusionMatrix->getDimensionSize(0)+j] = l_f64NewValue;
+					}
+					else // the count value
+					{
+						op_pConfusionMatrix->getBuffer()[i*op_pConfusionMatrix->getDimensionSize(0)+j] = m_oConfusionMatrix.getBuffer()[i*l_ui32ClassCount+j];
 					}
 				}
-				else
+
+				//we compute the sums if needed
+				if(ip_bSums)
 				{
-					getLogManager() << LogLevel_Warning << "The classification result received is not a valid class: " << l_ui64StimulationFromClassifierIdentifier << "\n";
+					uint32 l_ui32Size = op_pConfusionMatrix->getDimensionSize(0);
+					float64 l_f64Total = 0.f;
+					for(uint32 i = 0; i<l_ui32ClassCount; i++)
+					{
+						float64 l_f64LineSum = 0.f;
+						float64 l_f64ColumnSum = 0.f;
+						for(uint32 j = 0; j<l_ui32ClassCount; j++)
+						{
+							l_f64LineSum += op_pConfusionMatrix->getBuffer()[i*l_ui32Size+j];
+							l_f64ColumnSum += op_pConfusionMatrix->getBuffer()[j*l_ui32Size+i];
+						}
+						op_pConfusionMatrix->getBuffer()[i*l_ui32Size+l_ui32Size-1] = l_f64LineSum;
+						op_pConfusionMatrix->getBuffer()[(l_ui32Size-1)*l_ui32Size+i] = l_f64ColumnSum;
+						l_f64Total+=l_f64LineSum;
+					}
+					op_pConfusionMatrix->getBuffer()[(l_ui32Size-1)*l_ui32Size + l_ui32Size -1] = l_f64Total; // the lower-right entry, i.e. the last in the buffer
 				}
 			}
 			else
