@@ -166,12 +166,6 @@ OpenViBE::boolean CConfigurationEEGO::postConfigure(void)
 	
 	m_pHeader->setChannelCount(l_oBitsetEEG.count()+l_oBitsetBIP.count()+2); // Plus status channels: trigger and sample counter
 	
-
-	for(OpenViBE::uint32 i=0;i!=m_pHeader->getChannelCount();i++)
-	{
-		m_pHeader->setChannelName(i, m_vChannelName[i].c_str());
-	}
-
 	return true;
 }
 
@@ -195,6 +189,16 @@ void CConfigurationEEGO::update_channel_num_cb(GtkWidget *widget, CConfiguration
 	l_ss << l_oBitsetEEG.count() << " + " << l_oBitsetBIP.count() << " + 2; (EEG + BIP + STATUS)";
 	// set text
 	gtk_entry_set_text(pThis->m_pNumChannelEntry, l_ss.str().c_str());
+
+	const OpenViBE::uint32 l_oNumChannels = l_oBitsetEEG.count()+l_oBitsetBIP.count()+2;
+	pThis->m_pHeader->setChannelCount(l_oNumChannels);
+	
+	// Workaround! The current channel number is not derived from the channel count. It is retrieved from the /here hidden/ 
+	// widget when the channel editing window is opening. Thus we have to set the value there too.
+	if(GTK_SPIN_BUTTON(pThis->m_pNumberOfChannels))
+	{
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(pThis->m_pNumberOfChannels), l_oNumChannels);
+	}
 }
 
 
