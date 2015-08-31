@@ -23,14 +23,14 @@ namespace OpenViBEAcquisitionServer
 
 		// mask
 		OpenViBE::CString	getEEGMask() const { return m_sEEGMask; };
-		OpenViBE::uint32	getEEGMaskInt() const; // Same as method above. Only string parsing has been done
+		OpenViBE::uint64	getEEGMaskInt() const; // Same as method above. Only string parsing has been done
 		void				setEEGMask(const OpenViBE::CString mask) { m_sEEGMask = mask; m_bEEGMaskSet = true; };
 		OpenViBE::boolean	isEEGMaskSet() const { return m_bEEGMaskSet; };
 
 		// Bipolar channels
 		// range
 		OpenViBE::uint32	getBIPRange() const { return m_iBIPRange; };
-		OpenViBE::uint32	getBIPMaskInt() const; // Same as method above. Only string parsing has been done
+		OpenViBE::uint64	getBIPMaskInt() const; // Same as method above. Only string parsing has been done
 		void				setBIPRange(OpenViBE::uint32 range) { m_iBIPRange = range; m_bBIPRangeSet = true; };
 		OpenViBE::boolean	isBIPRangeSet() const { return m_bBIPRangeSet; };
 

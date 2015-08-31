@@ -41,14 +41,14 @@ CHeaderEEGO::CHeaderEEGO()
 	,m_bBIPMaskSet(false)
 {}
 
-OpenViBE::uint32 CHeaderEEGO::getEEGMaskInt() const
+OpenViBE::uint64 CHeaderEEGO::getEEGMaskInt() const
 {
-	return static_cast<OpenViBE::uint32>(strtoull(m_sEEGMask, NULL, 0));
+	return strtoull(m_sEEGMask, NULL, 0);
 }
 
-OpenViBE::uint32 CHeaderEEGO::getBIPMaskInt() const
+OpenViBE::uint64 CHeaderEEGO::getBIPMaskInt() const
 {
-	return static_cast<OpenViBE::uint32>(strtoull(m_sBIPMask, NULL, 0));
+	return strtoull(m_sBIPMask, NULL, 0);
 }
 
 OpenViBE::uint64 CHeaderEEGO::strmasktoull(char const* str)
