@@ -279,7 +279,7 @@ namespace OpenViBEAcquisitionServer
 		// ACQUISITION HANDLING
 
 		OpenViBE::boolean startAcquisition();
-		OpenViBE::int32 getSamples(OpenViBE::float32 *pSamples, IDriverCallback* pDriverCallback, OpenViBE::uint64 ui64SampleCountPerSentBlock);
+		OpenViBE::int32 getSamples(OpenViBE::float32 *pSamples, IDriverCallback* pDriverCallback, OpenViBE::uint64 ui64SampleCountPerSentBlock, OpenViBE::uint32 ui32SamplingFrequency);
 		OpenViBE::boolean getImpedanceValues(std::vector<OpenViBE::float64>* pvImpedanceValues);
 		OpenViBE::boolean stopAcquisition();
 
@@ -320,6 +320,9 @@ namespace OpenViBEAcquisitionServer
 
 		IDriverContext& m_rDriverContext;
 		OpenViBE::boolean m_bValid;
+
+		OpenViBE::CStimulationSet m_oStimulationSet;
+		OpenViBE::uint32 m_ui32LastTriggerValue;
 
 	private: // private methods
 
