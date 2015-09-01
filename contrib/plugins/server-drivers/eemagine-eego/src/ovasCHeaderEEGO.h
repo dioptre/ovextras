@@ -40,14 +40,20 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean	isBIPMaskSet() const { return m_bBIPMaskSet; };
 
 	public:
-		// Basically just strtoull but supports 0bXXXX for binary notification
-		static OpenViBE::uint64 strmasktoull(char const* str);
+		// Converts a string representing a number to this number as unsigned 64 bit value.
+		// Accepts 0x, 0b and 0 notation for hexadecimal, binary and octal notation.
+		// Otherwise it is interpreted as decimal.
+		// Returns true if the conversion was successfull, false on error.
+		// Please note that the error checking goes beyond the parsing  strtoull etc.:
+		// The strto* methods stop parsing at the first character which could not be interpreted.
+		// Here the string is checked against all invalid chars and an error will be returned.
+		static OpenViBE::boolean convertMask(char const* str, OpenViBE::uint64& r_oOutValue);
 				
 	// static helper methods. Reason to put it in here is to provide the service to configuration, header and driver.
 	// Not nice, should go to generic utilities or just go when VS10 is gone.
 	private:
 		static OpenViBE::uint64 strtoull(char const* str, char** str_end, int base);
-
+		
 	// data
 	protected:
 		OpenViBE::uint32	m_iEEGRange;

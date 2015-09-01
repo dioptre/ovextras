@@ -175,13 +175,21 @@ boolean CDriverEEGO::check_configuration(void)
 
 OpenViBE::uint64 CDriverEEGO::getRefChannelMask() const
 {
-	const OpenViBE::uint64 l_i64MaskEEG = CHeaderEEGO::strmasktoull(m_sEEGMask);
+	OpenViBE::uint64 l_i64MaskEEG(0);
+	if(!CHeaderEEGO::convertMask(m_sEEGMask, l_i64MaskEEG))
+	{
+		m_rDriverContext.getLogManager()<<LogLevel_Warning<<"Error converting mask: m_sEEGMask: " << m_sEEGMask;
+	}
 	return l_i64MaskEEG;
 }
 
 OpenViBE::uint64 CDriverEEGO::getBipChannelMask() const
 {
-	const OpenViBE::uint64 l_i64MaskBIP = CHeaderEEGO::strmasktoull(m_sBIPMask);
+	OpenViBE::uint64 l_i64MaskBIP(0);
+	if(!CHeaderEEGO::convertMask(m_sBIPMask, l_i64MaskBIP))
+	{
+		m_rDriverContext.getLogManager()<<LogLevel_Warning<<"Error converting mask: l_i64MaskBIP: " << l_i64MaskBIP;
+	}
 	return l_i64MaskBIP;
 }
 

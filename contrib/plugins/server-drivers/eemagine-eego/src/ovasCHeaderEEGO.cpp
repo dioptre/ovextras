@@ -2,6 +2,8 @@
 
 #if defined TARGET_OS_Windows
 
+#include <algorithm>
+#include <locale>
 #include <boost/algorithm/string.hpp>
 #include "ovasCHeaderEEGO.h"
 
@@ -51,20 +53,82 @@ OpenViBE::uint64 CHeaderEEGO::getBIPMaskInt() const
 	return strtoull(m_sBIPMask, NULL, 0);
 }
 
-OpenViBE::uint64 CHeaderEEGO::strmasktoull(char const* str)
+/* static */
+OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_oOutValue)
 {
+	OpenViBE::boolean l_bParseError = false;
+
+	// init r_outValue anyway
+	r_oOutValue = 0;
+
 	std::string l_oString(str);  //easier substring handling etc. Minor performance penalty which should not matter.
 	boost::algorithm::trim(l_oString); // Make sure to handle whitespace correctly
 	
-	// check for binary prefix
-	if(boost::algorithm::starts_with(l_oString, "0b"))
+	// check prefixes
+	if(boost::algorithm::istarts_with(l_oString, "0b"))
 	{
-		// use the substring for string to number conversion as base 2
-		return strtoull(l_oString.substr(2).c_str(), NULL, 2);
+		// binary
+		const auto substring = l_oString.substr(2);
+
+		// check for valid string members
+		if(!std::all_of(substring.begin(), substring.end(), [&](const char& chr){ return chr == '0' || chr == '1'; }))
+		{
+			l_bParseError = true;
+		}
+		else
+		{
+			// use the substring for string to number conversion as base 2
+			r_oOutValue = strtoull(substring.c_str(), NULL, 2);
+		}
+	}
+	else if (boost::algorithm::istarts_with(l_oString, "0x"))	
+	{
+		// hex
+		const auto substring = l_oString.substr(2);
+		std::locale loc;
+
+		if(!std::all_of(substring.begin(), substring.end(), [&](const char& chr){ return std::isxdigit(chr, loc); }))
+		{
+			l_bParseError = true;
+		}
+		else
+		{
+			r_oOutValue = strtoull(substring.c_str(), NULL, 16);
+		}
+	}
+	else if (boost::algorithm::istarts_with(l_oString, "0"))	
+	{
+		// octal
+		const auto substring = l_oString.substr(1);
+		std::locale loc;
+
+		if(!std::all_of(substring.begin(), substring.end(), [&](const char& chr){ return chr >= '0' && chr < '8'; }))
+		{
+			l_bParseError = true;
+		}
+		else
+		{
+			r_oOutValue = strtoull(substring.c_str(), NULL, 8);
+		}
+	}
+	else
+	{
+		// decimal
+		const auto substring = l_oString;
+		std::locale loc;
+
+		if(!std::all_of(substring.begin(), substring.end(), [&](const char& chr){ return std::isdigit(chr, loc); }))
+		{
+			l_bParseError = true;
+		}
+		else
+		{
+			r_oOutValue = strtoull(substring.c_str(), NULL, 10);
+		}
 	}
 
 	// if no special handling for the base 2 case is neccessary we can just use the std::stroull implementation and do not mess with that any further.
-	return strtoull(str, NULL, 0);
+	return !l_bParseError;
 }
 
 /* static */
