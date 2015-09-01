@@ -180,23 +180,34 @@ void CConfigurationEEGO::update_channel_num_cb(GtkWidget *widget, CConfiguration
 	OpenViBE::uint64 l_i64MaskBIP;
 	OpenViBE::uint64 l_i64MaskEEG;
 
-	if(!CHeaderEEGO::convertMask(l_sMaskBIP, l_i64MaskBIP))
-	{
-		// TODO set error flag
-	}
-
-	if(!CHeaderEEGO::convertMask(l_sMaskEEG, l_i64MaskEEG))
-	{
-		// TODO set error flag
-	}
+	const OpenViBE::boolean l_bBIPSuccess = CHeaderEEGO::convertMask(l_sMaskBIP, l_i64MaskBIP);
+	const OpenViBE::boolean l_bEEGSuccess = CHeaderEEGO::convertMask(l_sMaskEEG, l_i64MaskEEG);
 
 	const std::bitset<64> l_oBitsetEEG(l_i64MaskEEG);
 	const std::bitset<24> l_oBitsetBIP(l_i64MaskBIP);
 	
 	// format them
 	std::stringstream l_ss;
+	if(l_bEEGSuccess)
+	{
+		l_ss << l_oBitsetEEG.count();
+	}
+	else {
+		l_ss << "Error";
+	}
 
-	l_ss << l_oBitsetEEG.count() << " + " << l_oBitsetBIP.count() << " + 2; (EEG + BIP + STATUS)";
+	l_ss << " + "; 
+
+	if(l_bBIPSuccess)
+	{
+		l_ss << l_oBitsetBIP.count();
+	}
+	else {
+		l_ss << "Error";
+	}
+	
+	l_ss << " + 2; (EEG + BIP + STATUS)";
+	
 	// set text
 	gtk_entry_set_text(pThis->m_pNumChannelEntry, l_ss.str().c_str());
 
