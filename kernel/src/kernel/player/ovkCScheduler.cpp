@@ -225,10 +225,15 @@ boolean CScheduler::loop(void)
 		CSimulatedBox* l_pSimulatedBox=itSimulatedBox->second;
 		System::CChrono& l_rSimulatedBoxChrono=m_vSimulatedBoxChrono[itSimulatedBox->first.second];
 
+		IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
+		if(!l_pBox) {
+			this->getLogManager() << LogLevel_Warning << "Unable to get box details for box with id " << itSimulatedBox->first.second << "\n";
+			continue;
+		}
+
 		// we check once a cycle if the box is indeed muted.
-		const IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
 		boolean l_bIsMuted = false;
-		if(l_pBox && l_pBox->hasAttribute(OV_AttributeId_Box_Muted))
+		if(l_pBox->hasAttribute(OV_AttributeId_Box_Muted))
 		{
 			CString l_sIsMuted = l_pBox->getAttributeValue(OV_AttributeId_Box_Muted);
 			if (l_sIsMuted==CString("true"))
@@ -278,7 +283,6 @@ boolean CScheduler::loop(void)
 
 		if(l_rSimulatedBoxChrono.hasNewEstimation())
 		{
-			IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
 			l_pBox->addAttribute(OV_AttributeId_Box_ComputationTimeLastSecond, "");
 			l_pBox->setAttributeValue(OV_AttributeId_Box_ComputationTimeLastSecond, CIdentifier(l_rSimulatedBoxChrono.getTotalStepInDuration()).toString());
 		}
