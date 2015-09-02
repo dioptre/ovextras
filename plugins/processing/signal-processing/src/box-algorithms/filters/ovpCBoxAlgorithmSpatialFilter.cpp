@@ -152,13 +152,14 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 			return false;
 		}
 
-#ifdef DEBUG
-		OpenViBEToolkit::Tools::Matrix::saveToTextFile(m_oFilterBank, "C:/temp/filters.txt");
+#if defined(DEBUG)
+		OpenViBEToolkit::Tools::Matrix::saveToTextFile(m_oFilterBank, this->getConfigurationManager().expand("${Path_UserData}/spatialfilter_debug.txt"));
 #endif
 	}
 	else
 	{
 		const CString l_sCoefficient=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);	
+		// The double cast is needed until FSettingValueAutoCast supports uint32. 
 		const uint32 l_ui32OutputChannelCountSetting=(uint32)(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 		const uint32 l_ui32InputChannelCountSetting=(uint32)(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
@@ -166,8 +167,8 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 		{
 			return false;
 		}
-#ifdef DEBUG
-		OpenViBEToolkit::Tools::Matrix::saveToTextFile(m_oFilterBank, "C:/temp/filters.txt");
+#if defined(DEBUG)
+		OpenViBEToolkit::Tools::Matrix::saveToTextFile(m_oFilterBank, this->getConfigurationManager().expand("${Path_UserData}/spatialfilter_debug.txt"));
 #endif
 	}
 
