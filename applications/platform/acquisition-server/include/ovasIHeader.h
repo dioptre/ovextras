@@ -119,6 +119,9 @@ namespace OpenViBEAcquisitionServer
 		 * \sa setSubjectGender
 		 */
 		virtual OpenViBE::boolean isSubjectGenderSet(void) const=0;
+		
+		virtual OpenViBE::boolean setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested) = 0;
+		virtual OpenViBE::boolean isImpedanceCheckRequested(void) const = 0;
 
 		//@}
 		/** \name Chanel information */

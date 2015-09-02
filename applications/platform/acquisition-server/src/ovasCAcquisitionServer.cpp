@@ -1327,7 +1327,17 @@ boolean CAcquisitionServer::setDriftCorrectionPolicy(EDriftCorrectionPolicy eDri
 
 boolean CAcquisitionServer::isImpedanceCheckRequested(void)
 {
-	return m_bIsImpedanceCheckRequested;
+	//return m_bIsImpedanceCheckRequested;
+	if (m_pDriver)
+	{
+		return m_pDriver->getHeader()->isImpedanceCheckRequested();
+	}
+	return false;	//return m_bIsImpedanceCheckRequested;
+	if (m_pDriver)
+	{
+		return m_pDriver->getHeader()->isImpedanceCheckRequested();
+	}
+	return false;
 }
 
 boolean CAcquisitionServer::isChannelSelectionRequested(void)

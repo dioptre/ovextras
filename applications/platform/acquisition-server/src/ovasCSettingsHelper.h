@@ -7,6 +7,8 @@
 #include <map>
 #include <iostream>
 
+#include "ovasCSettingsHelperOperators.h"
+
 namespace OpenViBEAcquisitionServer
 {
 	/**
