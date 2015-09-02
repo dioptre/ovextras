@@ -697,15 +697,15 @@ void CSignalChannelDisplay::updateDisplayParameters()
 	uint32 l_ui32FirstBufferToDisplayPosition = 0;
 	getFirstBufferToDisplayInformation(l_ui32FirstBufferToDisplay, l_ui32FirstSampleToDisplay, l_ui32FirstBufferToDisplayPosition);
 
-	GdkRegion *reg = gdk_drawable_get_visible_region(m_pDrawingArea->window);
-	GdkRectangle box;
-	gdk_region_get_clipbox(reg, &box);
+	GdkRegion* l_pRegion = gdk_drawable_get_visible_region(m_pDrawingArea->window);
+	GdkRectangle l_oBox;
+	gdk_region_get_clipbox(l_pRegion, &l_oBox);
 
 	const float64 l_f64StartX = getSampleXCoordinate(l_ui32FirstBufferToDisplayPosition, l_ui32FirstSampleToDisplay, 0);
 	gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE(m_pDrawingArea)], 
-		true, (gint)l_f64StartX-2, box.y, (gint)2, 4);
+		true, (gint)l_f64StartX-2, l_oBox.y, (gint)2, 4);
 	gdk_draw_rectangle(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE(m_pDrawingArea)], 
-		true, (gint)l_f64StartX-2, box.y+box.height-4, (gint)2, 4);
+		true, (gint)l_f64StartX-2, l_oBox.y+l_oBox.height-4, (gint)2, 4);
 
 	l_oLineColor.red = 0*65535/255; l_oLineColor.green = 0*65535/255; l_oLineColor.blue = 0*65535/255;
 	gdk_gc_set_rgb_fg_color(m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE(m_pDrawingArea)], &l_oLineColor);
