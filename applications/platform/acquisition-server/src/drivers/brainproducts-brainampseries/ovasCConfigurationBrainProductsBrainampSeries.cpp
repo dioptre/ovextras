@@ -234,7 +234,12 @@ void CConfigurationBrainProductsBrainampSeries::buttonChannelDetailsPressedCB(vo
 
 		::GtkLabel* l_pWidgetChannelName=GTK_LABEL(::gtk_label_new(m_pHeader->getChannelName(i-1)));
 		::gtk_label_set_justify(l_pWidgetChannelName, GTK_JUSTIFY_LEFT);
-		::gtk_widget_show(GTK_WIDGET(l_pWidgetChannelName));
+		// We hide this label as the channel name is not accurate
+		// The update of the channel rename configuration (moved to the main application)
+		// has broken this feature in the driver: real channel names are not passed to the driver
+		// but are only kept at the server level. This problem should be adressed in future version.
+		::gtk_widget_hide(GTK_WIDGET(l_pWidgetChannelName));
+		//::gtk_widget_show(GTK_WIDGET(l_pWidgetChannelName));
 
 		::GtkBox* l_pWidgetChannel=GTK_BOX(::gtk_hbox_new(false, 2));
 		::gtk_box_pack_start(l_pWidgetChannel, GTK_WIDGET(l_pWidgetIndex), true, true, 0);
