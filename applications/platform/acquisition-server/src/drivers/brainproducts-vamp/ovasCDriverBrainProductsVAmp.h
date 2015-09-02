@@ -10,10 +10,8 @@
 #include "../ovasCSettingsHelper.h"
 #include "../ovasCSettingsHelperOperators.h"
 
-#include <windows.h>
-#include <FirstAmp.h>
-
 #include <vector>
+#include <deque>
 
 namespace OpenViBEAcquisitionServer
 {
@@ -67,11 +65,22 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32EEGChannelCount;
 		OpenViBE::uint32 m_ui32AuxiliaryChannelCount;
 		OpenViBE::uint32 m_ui32TriggerChannelCount;
-		OpenViBE::float32* m_pSample;
 
 		std::vector<OpenViBE::uint32> m_vStimulationIdentifier;
 		std::vector<OpenViBE::uint64> m_vStimulationDate;
 		std::vector<OpenViBE::uint64> m_vStimulationSample;
+		OpenViBE::CStimulationSet m_oStimulationSet;
+		OpenViBE::uint32 m_ui32LastTrigger;
+
+		std::deque < std::vector < OpenViBE::float32 > > m_vSampleCache;
+		std::vector < OpenViBE::float32 > m_vSample;
+		std::vector < OpenViBE::float64 > m_vFilter;
+		std::vector < OpenViBE::float32 > m_vResolution;
+
+		OpenViBE::int64 m_i64DriftOffsetSampleCount;
+		OpenViBE::uint32 m_ui32PhysicalSampleRateHz;
+		OpenViBE::uint64 m_ui64CounterStep;
+		OpenViBE::uint64 m_ui64Counter;
 
 	private:
 

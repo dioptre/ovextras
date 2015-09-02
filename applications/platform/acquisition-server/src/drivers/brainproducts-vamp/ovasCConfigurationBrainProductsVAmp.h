@@ -35,7 +35,7 @@ namespace OpenViBEAcquisitionServer
 	{
 	public:
 
-		CConfigurationBrainProductsVAmp(OpenViBEAcquisitionServer::IDriverContext& rDriverContext, const char* sGtkBuilderFileName, OpenViBEAcquisitionServer::CHeaderBrainProductsVAmp * pHeaderBrainProductsVAmp);
+		CConfigurationBrainProductsVAmp(OpenViBEAcquisitionServer::IDriverContext& rDriverContext, const char* sGtkBuilderFileName, OpenViBEAcquisitionServer::CHeaderBrainProductsVAmp * pHeaderBrainProductsVAmp, OpenViBE::boolean& rAcquireAuxiliaryAsEEG, OpenViBE::boolean& rAcquireTriggerAsEEG);
 
 		virtual OpenViBE::boolean preConfigure(void);
 		virtual OpenViBE::boolean postConfigure(void);
@@ -43,7 +43,7 @@ namespace OpenViBEAcquisitionServer
 		virtual void buttonFastModeSettingsCB(void);
 		virtual void buttonStartServiceCB(void);
 		virtual void buttonStopServiceCB(void);
-		virtual void comboBoxAcquisitionModeCB(::GtkComboBox* pComboBox);
+		virtual void channelCountChangedCB(void);
 
 	protected:
 
@@ -52,12 +52,18 @@ namespace OpenViBEAcquisitionServer
 
 		CHeaderBrainProductsVAmp* m_pHeaderBrainProductsVAmp;
 
+		OpenViBE::boolean& m_rAcquireAuxiliaryAsEEG;
+		OpenViBE::boolean& m_rAcquireTriggerAsEEG;
+
 		//widgets
 		::GtkWidget* m_pDialogFastModeSettings;
 
 		::GtkWidget* m_pDevice;
 
 		::GtkWidget* m_pAcquisitionMode;
+
+		::GtkWidget* m_pAuxiliaryChannels;
+		::GtkWidget* m_pTriggerChannels;
 
 		::GtkWidget* m_pPair1PositiveInputs;
 		::GtkWidget* m_pPair1NegativeInputs;
@@ -79,6 +85,6 @@ namespace OpenViBEAcquisitionServer
 	};
 };
 
-#endif // TARGET_HAS_ThirdPartyGUSBampCAPI
+#endif // TARGET_HAS_ThirdPartyUSBFirstAmpAPI
 
 #endif // __OpenViBE_AcquisitionServer_CConfigurationBrainProductsVAmp_H__
