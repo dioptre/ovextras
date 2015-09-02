@@ -41,7 +41,15 @@ namespace OpenViBEPlugins
 				OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmTimeout > m_oStimulationEncoder;
 
 			private:
-				OpenViBE::uint32 m_ui32TimeoutState;			// 0 == no timeout, 1 == timeout, 2 == timeout sent
+				enum ETimeoutState
+				{
+					ETimeout_No,
+					ETimeout_Occurred,
+					ETimeout_Sent
+				};
+
+				ETimeoutState m_oTimeoutState;		
+
 				OpenViBE::uint64 m_ui64Timeout;
 				OpenViBE::uint64 m_ui64LastTimePolled;
 				OpenViBE::uint64 m_ui64PreviousTime;
