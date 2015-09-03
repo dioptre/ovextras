@@ -110,11 +110,13 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_SignalDisplay_Examples|
 
-To get some signals displayed right, changing the automatic y scaling may be useful. In more detail, the provided settings are 
+To get some signals displayed right, changing the automatic y scaling may be useful. The provided scaling settings are 
 
 	- Per channel (default) : Every channel will get centered and scaled separately. This should allow viewing arbitrary signals. This is suitable for unfiltered data which may have huge differences in scale and DC between channels.
 	- Global : All channels are put to the same scale which is the maximum of all the channels. This mode is suitable for filtered EEG and data which may have long-term trends but where all channels generally stay in the same range. 
 	- None: User must specify global center and scale. Display is never automatically rescaled. This is suitable for filtered EEG data where the meaningful range is within known parameters and DC doesn't vary. 
+
+Note that the automatic scalers may include discontinuities in the plot when the scale changes (see below for 'Best practices').
 
 Practical example :
 
@@ -134,19 +136,25 @@ __________________________________________________________________
 
 Best practices
 
-All vertical scaling modes except 'None' require redrawing the whole canvas
-when the scale of the data appears to have changed. For smoothest 
-drawing experience, for most situations, the following is recommended:
+All vertical scaling modes except 'None' will change the scaling dynamically
+when the scale of the data appears to have changed. To avoid slow redraws,
+the box simply changes the scale and leaves the old part of the signal
+as it was, meaning that you may see a discontinuity in the signal, as
+for the moment there are two or more different scales visible. The scale
+change is marked by small red ticks at the top and bottom of the display. 
 
-	- First filter the signals meaningfully to remove DC and slow trends by using the Temporal Filter box. For EEG, you can use bandpass configuration with a range a such as [1,40] hz.
-	- Next, set the vertical scaling to 'None' and provide the display box a meaningful fixed scale. Note that when the scale is given in the box parameters, this can be saved with the scenario.
+For most situations, and to avoid the discontinuities of the automatic
+scaling, the following is recommended:
+
+	- First filter the signals meaningfully to remove DC and slow trends by using the Temporal Filter box. For EEG, you can use a bandpass configuration with a range a such as [1,40] hz.
+	- Next, set the vertical scaling to 'None' and provide the display box a meaningful fixed scale corresponding to your signal. You can find out a suitable scale by activating 'Left Ruler' when the auto scale is active. Note that when the scale is given in the box parameters, the scale can be saved with the scenario.
 
 Known issues and workarounds
 
-The box supports only two data stream types. Many OpenViBE stream types 
-derive from the Streamed Matrix type. In this case, you can configure the 
-box to have a Streamed Matrix input socket, and then connect the derived 
-stream type to that. Note that the data of the stream not contained in the 
+The box supports only two data stream types: Matrix and Signal. Many OpenViBE 
+stream types derive from the Streamed Matrix type. In this case, you can 
+configure the box to have a Streamed Matrix input socket, and then connect the 
+derived stream type to that. Note that the data of the stream not contained in the 
 matrix will be ignored. In any case, you may be able to visualize something 
 meaningful. In the case of Feature Vector stream, you can try to use the 
 Matrix Transpose box on the feature stream first to turn the features into 
