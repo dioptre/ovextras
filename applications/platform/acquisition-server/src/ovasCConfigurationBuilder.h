@@ -51,6 +51,7 @@ namespace OpenViBEAcquisitionServer
 		::GtkWidget* m_pNumberOfChannels;
 		::GtkWidget* m_pSamplingFrequency;
 		::GtkWidget* m_pGender;
+		::GtkWidget* m_pImpedanceCheck;
 
 		::GtkListStore* m_pElectrodeNameListStore;
 		::GtkListStore* m_pChannelNameListStore;

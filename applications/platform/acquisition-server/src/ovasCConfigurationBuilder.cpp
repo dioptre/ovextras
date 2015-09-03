@@ -81,8 +81,18 @@ static void treeview_apply_channel_name_cb(::GtkTreeView* pTreeview, ::GtkTreePa
 
 CConfigurationBuilder::CConfigurationBuilder(const char* sGtkBuilderFileName)
 	:m_pBuilderConfigureInterface(NULL)
+	,m_pBuilderConfigureChannelInterface(NULL)
+	,m_pDialog(NULL)
+	,m_pIdentifier(NULL)
+	,m_pAge(NULL)
+	,m_pNumberOfChannels(NULL)
+	,m_pSamplingFrequency(NULL)
+	,m_pGender(NULL)
+	,m_pImpedanceCheck(NULL)
 	,m_pElectrodeNameListStore(NULL)
 	,m_pChannelNameListStore(NULL)
+	,m_pElectrodeNameTreeView(NULL)
+	,m_pChannelNameTreeView(NULL)
 	,m_sGtkBuilderFileName(sGtkBuilderFileName?sGtkBuilderFileName:"")
 	,m_sElectrodeFileName(OVAS_ElectrodeNames_File)
 	,m_sGtkBuilderChannelsFileName(OVAS_ConfigureGUIElectrodes_File)
@@ -130,6 +140,11 @@ boolean CConfigurationBuilder::preConfigure(void)
 	// NB: sampling_frequency is not really a "combobox" everywhere (eg telnet reader), should update in every UI the ID name
 	m_pSamplingFrequency=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_sampling_frequency"));
 	m_pGender=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_gender"));
+
+	if (gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_impedance"))
+	{
+		m_pImpedanceCheck = GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_impedance"));
+	}
 
 	m_pElectrodeNameTreeView=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureChannelInterface, "treeview_electrode_names"));
 	m_pChannelNameTreeView=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureChannelInterface, "treeview_channel_names"));
@@ -231,6 +246,11 @@ boolean CConfigurationBuilder::preConfigure(void)
 			0);
 	}
 
+	if (m_pImpedanceCheck)
+	{
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_pImpedanceCheck), m_pHeader->isImpedanceCheckRequested());
+	}
+
 	// Prepares channel name cache
 	if(m_pHeader->isChannelCountSet())
 	{
@@ -279,6 +299,15 @@ boolean CConfigurationBuilder::postConfigure(void)
 		for(uint32 i=0; i!=m_pHeader->getChannelCount(); i++)
 		{
 			m_pHeader->setChannelName(i, m_vChannelName[i].c_str());
+		}
+
+		if (m_pImpedanceCheck)
+		{
+			m_pHeader->setImpedanceCheckRequested(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_pImpedanceCheck)) != FALSE);
+		}
+		else
+		{
+			m_pHeader->setImpedanceCheckRequested(false);
 		}
 	}
 

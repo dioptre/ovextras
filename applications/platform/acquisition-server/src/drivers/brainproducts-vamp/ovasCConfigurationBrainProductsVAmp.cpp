@@ -31,7 +31,9 @@ gboolean idle_check_service(gpointer pData)
 				gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(l_pInterface, "button_start_service")),false);
 				gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(l_pInterface, "button_stop_service")),true);
 				gtk_label_set(GTK_LABEL(gtk_builder_get_object(l_pInterface, "label_service")),"VampService is Enabled");
-				gtk_image_set_from_stock(GTK_IMAGE(gtk_builder_get_object(l_pInterface, "image_service")),GTK_STOCK_YES,GTK_ICON_SIZE_BUTTON);
+				gtk_image_set_from_stock(GTK_IMAGE(gtk_builder_get_object(l_pInterface, "image_service")),GTK_STOCK_DIALOG_WARNING,GTK_ICON_SIZE_BUTTON);
+				CloseServiceHandle(l_hSCM);
+				CloseServiceHandle(l_hService);
 				return true;
 			}
 			else
@@ -39,7 +41,9 @@ gboolean idle_check_service(gpointer pData)
 				gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(l_pInterface, "button_start_service")),true);
 				gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(l_pInterface, "button_stop_service")),false);
 				gtk_label_set(GTK_LABEL(gtk_builder_get_object(l_pInterface, "label_service")),"VampService is Disabled");
-				gtk_image_set_from_stock(GTK_IMAGE(gtk_builder_get_object(l_pInterface, "image_service")),GTK_STOCK_NO,GTK_ICON_SIZE_BUTTON);
+				gtk_image_set_from_stock(GTK_IMAGE(gtk_builder_get_object(l_pInterface, "image_service")),GTK_STOCK_APPLY,GTK_ICON_SIZE_BUTTON);
+				CloseServiceHandle(l_hSCM);
+				CloseServiceHandle(l_hService);
 				return true;
 			}
 		}
@@ -66,9 +70,9 @@ static void button_fast_mode_settings_cb(::GtkButton* pButton, void* pUserData)
 	static_cast<CConfigurationBrainProductsVAmp*>(pUserData)->buttonFastModeSettingsCB();
 }
 
-static void combo_box_acquisition_mode_cb(::GtkComboBox* pComboBox, void* pUserData)
+static void channel_count_changed_cb(::GtkComboBox* pComboBox, void* pUserData)
 {
-	static_cast<CConfigurationBrainProductsVAmp*>(pUserData)->comboBoxAcquisitionModeCB(pComboBox);
+	static_cast<CConfigurationBrainProductsVAmp*>(pUserData)->channelCountChangedCB();
 }
 
 static void gtk_combo_box_set_active_text(::GtkComboBox* pComboBox, const gchar* sActiveText)
@@ -129,10 +133,12 @@ void initFastModeSettingsComboBox(GtkWidget * comboBox, uint32 activeValue, bool
 
 //____________________________________________________________________________________
 
-CConfigurationBrainProductsVAmp::CConfigurationBrainProductsVAmp(IDriverContext& rDriverContext, const char* sGtkBuilderFileName, CHeaderBrainProductsVAmp * pHeaderBrainProductsVAmp)
+CConfigurationBrainProductsVAmp::CConfigurationBrainProductsVAmp(IDriverContext& rDriverContext, const char* sGtkBuilderFileName, CHeaderBrainProductsVAmp * pHeaderBrainProductsVAmp, boolean& rAcquireAuxiliaryAsEEG, boolean& rAcquireTriggerAsEEG)
 	:CConfigurationBuilder(sGtkBuilderFileName)
 	,m_rDriverContext(rDriverContext)
 	,m_pHeaderBrainProductsVAmp(pHeaderBrainProductsVAmp)
+	,m_rAcquireAuxiliaryAsEEG(rAcquireAuxiliaryAsEEG)
+	,m_rAcquireTriggerAsEEG(rAcquireTriggerAsEEG)
 {
 	m_giIdleID = 0;
 }
@@ -153,6 +159,10 @@ boolean CConfigurationBrainProductsVAmp::preConfigure(void)
 	// the device combo box autofilled with all connected device
 	m_pDevice=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_device"));
 
+	// the toggle button for aux channels and triggers
+	m_pAuxiliaryChannels=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_aux"));
+	m_pTriggerChannels=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_trigger"));
+
 	// the 8 spin buttons for the settings in the "fast mode settings" interface
 	m_pPair1PositiveInputs=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_pair1_positive_input"));
 	m_pPair1NegativeInputs=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_pair1_negative_input"));
@@ -166,9 +176,17 @@ boolean CConfigurationBrainProductsVAmp::preConfigure(void)
 	m_pPair4PositiveInputs=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_pair4_positive_input"));
 	m_pPair4NegativeInputs=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_pair4_negative_input"));
 
+	// hide the Change Channel Names button (for compatibility with original contributor (Mensia Technologies) base code)
+#if defined TARGET_Is_Mensia_Acquisition_Server
+	gtk_widget_set_visible(GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "button_change_channel_names")), false);
+	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "button_change_channel_names")), false);
+#endif
+
 	// connects callbacks to buttons
 	g_signal_connect(gtk_builder_get_object(m_pBuilderConfigureInterface,"button_fast_mode_settings"), "pressed", G_CALLBACK(button_fast_mode_settings_cb), this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderConfigureInterface,"combobox_acquisition_mode"), "changed", G_CALLBACK(combo_box_acquisition_mode_cb), this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderConfigureInterface,"combobox_acquisition_mode"), "changed", G_CALLBACK(channel_count_changed_cb), this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderConfigureInterface,"checkbutton_aux"), "toggled", G_CALLBACK(channel_count_changed_cb), this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderConfigureInterface,"checkbutton_trigger"), "toggled", G_CALLBACK(channel_count_changed_cb), this);
 	g_signal_connect(gtk_builder_get_object(m_pBuilderConfigureInterface,"button_start_service"), "pressed", G_CALLBACK(button_start_service_cb), this);
 	g_signal_connect(gtk_builder_get_object(m_pBuilderConfigureInterface,"button_stop_service"), "pressed", G_CALLBACK(button_stop_service_cb), this);
 
@@ -218,8 +236,37 @@ boolean CConfigurationBrainProductsVAmp::preConfigure(void)
 		// active = the last opened device
 		gtk_combo_box_set_active(l_pComboBox, l_uint32DeviceCount-1);
 	}
+	else
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] VAmp Driver: faGetCount() returned [" << faGetCount() << "]. No device detected.\n";
+		gtk_widget_set_sensitive(m_pDialogFastModeSettings, false);
+		gtk_widget_set_sensitive(m_pAcquisitionMode, false);
+		gtk_widget_set_sensitive(m_pDevice, false);
+		gtk_widget_set_sensitive(m_pAuxiliaryChannels, false);
+		gtk_widget_set_sensitive(m_pTriggerChannels, false);
+		gtk_widget_set_sensitive(m_pPair1PositiveInputs, false);
+		gtk_widget_set_sensitive(m_pPair1NegativeInputs, false);
+		gtk_widget_set_sensitive(m_pPair2PositiveInputs, false);
+		gtk_widget_set_sensitive(m_pPair2NegativeInputs, false);
+		gtk_widget_set_sensitive(m_pPair3PositiveInputs, false);
+		gtk_widget_set_sensitive(m_pPair3NegativeInputs, false);
+		gtk_widget_set_sensitive(m_pPair4PositiveInputs, false);
+		gtk_widget_set_sensitive(m_pPair4NegativeInputs, false);
+		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "button_change_channel_names")), false);
+		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_impedance")), false);
+	}
 
 	m_iDeviceCount = l_uint32DeviceCount;
+
+	// acquisition mode
+	gtk_combo_box_set_active(GTK_COMBO_BOX(m_pAcquisitionMode), m_pHeaderBrainProductsVAmp->getAcquisitionMode());
+
+	// aux channels and triggers
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_pAuxiliaryChannels), m_rAcquireAuxiliaryAsEEG);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_pTriggerChannels), m_rAcquireTriggerAsEEG);
+
+	// channel count (widget is hidden but is read when clicnking on "channel names..."
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels), m_pHeader->getChannelCount());
 
 	//SETTINGS:
 	//Adding all possible settings : 7/8/9/10 and -1
@@ -255,6 +302,10 @@ boolean CConfigurationBrainProductsVAmp::postConfigure(void)
 				m_pHeaderBrainProductsVAmp->setDeviceId(faGetId((uint32)l_iDeviceNumber));
 			}
 		}
+
+		// aux and triggers: update the references
+		m_rAcquireAuxiliaryAsEEG = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_pAuxiliaryChannels)) != 0;
+		m_rAcquireTriggerAsEEG = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_pTriggerChannels)) != 0;
 	}
 
 #if 0
@@ -365,7 +416,12 @@ boolean CConfigurationBrainProductsVAmp::postConfigure(void)
 	}
 
 	// Force sampling frequency
+#if 0
 	m_pHeaderBrainProductsVAmp->setSamplingFrequency(m_pHeaderBrainProductsVAmp->getAcquisitionMode()==AcquisitionMode_VAmp4Fast?20000:2000);
+#else
+	// Signal is now decimated down to 512Hz whatever input sampling frequency was acquired
+	m_pHeaderBrainProductsVAmp->setSamplingFrequency(512);
+#endif
 
 	return true;
 }
@@ -426,15 +482,19 @@ void CConfigurationBrainProductsVAmp::buttonFastModeSettingsCB(void)
 	gtk_widget_hide(GTK_WIDGET(l_pDialog));
 }
 
-void CConfigurationBrainProductsVAmp::comboBoxAcquisitionModeCB(::GtkComboBox* pComboBox)
+void CConfigurationBrainProductsVAmp::channelCountChangedCB()
 {
-	gint l_iAcquisitionMode=gtk_combo_box_get_active(pComboBox);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels),
-		m_pHeaderBrainProductsVAmp->getEEGChannelCount(l_iAcquisitionMode)/*+
-		m_pHeaderBrainProductsVAmp->getAuxiliaryChannelCount(l_iAcquisitionMode)+
-		m_pHeaderBrainProductsVAmp->getTriggerChannelCount(l_iAcquisitionMode)*/); // we do not need to add trigger and Aux channels, this is done at initialization time as it is a token configuration.
+	boolean l_bAcquireAuxiliaryAsEEG = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_pAuxiliaryChannels)) != 0;
+	boolean l_bAcquireTriggerAsEEG = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_pTriggerChannels)) != 0;
+	gint l_iAcquisitionMode=gtk_combo_box_get_active(GTK_COMBO_BOX(m_pAcquisitionMode));
+
+	uint32 l_ui32ChannelCount = m_pHeaderBrainProductsVAmp->getEEGChannelCount(l_iAcquisitionMode);
+	l_ui32ChannelCount += (l_bAcquireTriggerAsEEG ? m_pHeaderBrainProductsVAmp->getTriggerChannelCount(l_iAcquisitionMode) : 0);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels),l_ui32ChannelCount);
+
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "button_change_channel_names")), l_iAcquisitionMode!=AcquisitionMode_VAmp4Fast);
 	gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "button_fast_mode_settings")), l_iAcquisitionMode==AcquisitionMode_VAmp4Fast);
+
 }
 
 void CConfigurationBrainProductsVAmp::buttonStartServiceCB(void)
