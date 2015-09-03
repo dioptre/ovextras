@@ -91,9 +91,9 @@ CConfigurationBuilder::CConfigurationBuilder(const char* sGtkBuilderFileName)
 	,m_pImpedanceCheck(NULL)
 	,m_pElectrodeNameListStore(NULL)
 	,m_pChannelNameListStore(NULL)
-	,m_sGtkBuilderFileName(sGtkBuilderFileName?sGtkBuilderFileName:"")
 	,m_pElectrodeNameTreeView(NULL)
 	,m_pChannelNameTreeView(NULL)
+	,m_sGtkBuilderFileName(sGtkBuilderFileName?sGtkBuilderFileName:"")
 	,m_sElectrodeFileName(OVAS_ElectrodeNames_File)
 	,m_sGtkBuilderChannelsFileName(OVAS_ConfigureGUIElectrodes_File)
 	,m_pHeader(NULL)
@@ -109,12 +109,12 @@ CConfigurationBuilder::~CConfigurationBuilder(void)
 
 boolean CConfigurationBuilder::configure(IHeader& rHeader)
 {
-	m_bApplyConfiguration=false;
+	m_bApplyConfiguration=true;
 
 	m_pHeader=&rHeader;
-	this->preConfigure();
-	m_bApplyConfiguration=this->doConfigure();
-	this->postConfigure();
+	m_bApplyConfiguration &= this->preConfigure();
+	m_bApplyConfiguration &= this->doConfigure();
+	m_bApplyConfiguration &= this->postConfigure();
 	m_pHeader=NULL;
 
 	return m_bApplyConfiguration;
