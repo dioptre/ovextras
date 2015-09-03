@@ -30,6 +30,7 @@
 #include "tmsi/ovasCDriverTMSi.h"
 #include "tmsi-refa32b/ovasCDriverTMSiRefa32B.h"
 
+#include "mensia-acquisition/ovasCDriverMensiaAcquisition.h"
 
 #include <system/ovCMemory.h>
 #include <system/ovCTime.h>
@@ -45,6 +46,7 @@
 #include <sstream>
 
 #include <string>
+#include <vector>
 #include <algorithm>
 #include <functional>
 #include <cctype>
@@ -190,7 +192,55 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	m_vDriver.push_back(new CDriverLabStreamingLayer(m_pAcquisitionServer->getDriverContext()));
 #endif
 
+	// BEGIN MENSIA ACQUISITION DRIVERS
+#if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver
 
+		m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Loading Mensia Driver Collection\n";
+		CString l_sMensiaDLLPath = m_pAcquisitionServer->getDriverContext().getConfigurationManager().expand("${Path_Bin}/openvibe-driver-mensia-acquisition.dll");
+		HINSTANCE l_oLibMensiaAcquisition; // Library Handle
+		l_oLibMensiaAcquisition = ::LoadLibrary(l_sMensiaDLLPath.toASCIIString());
+
+		//if it can't be open return FALSE;
+		if( l_oLibMensiaAcquisition == NULL)
+		{
+			m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Warning << "Couldn't load DLL: [" << l_sMensiaDLLPath << "]. Got error: [" << static_cast<uint64>(GetLastError()) << "]\n";
+		}
+		else
+		{	
+			typedef int32 (*MACQ_InitializeMensiaAcquisitionLibrary)();
+			MACQ_InitializeMensiaAcquisitionLibrary l_fpInitializeMensiaAcquisitionLibrary;
+			l_fpInitializeMensiaAcquisitionLibrary = (MACQ_InitializeMensiaAcquisitionLibrary)::GetProcAddress(l_oLibMensiaAcquisition, "initializeAcquisitionLibrary");
+			typedef const char* (*MACQ_GetDriverId)(unsigned int uiDriverId);
+			MACQ_GetDriverId l_fpGetDriverID;
+			l_fpGetDriverID = (MACQ_GetDriverId)::GetProcAddress(l_oLibMensiaAcquisition, "getDriverId");
+
+			int32 l_i32MensiaDeviceCount = l_fpInitializeMensiaAcquisitionLibrary();
+
+			if (l_i32MensiaDeviceCount >= 0)
+			{
+				for (size_t l_uiDeviceIndex = 0; l_uiDeviceIndex < static_cast<uint32>(l_i32MensiaDeviceCount); l_uiDeviceIndex++)
+				{
+					char l_sDriverIdentifier[1024];
+
+					strcpy(l_sDriverIdentifier, l_fpGetDriverID(l_uiDeviceIndex));
+					if (strcmp(l_sDriverIdentifier, "") != 0)
+					{
+						m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Found driver [" << l_sDriverIdentifier << "] in Mensia Driver Collection" << "\n";
+						m_vDriver.push_back(new CDriverMensiaAcquisition(m_pAcquisitionServer->getDriverContext(), l_sDriverIdentifier));
+					}
+
+				}
+			}
+			else
+			{
+				m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Error << "Error occurred while initializing Mensia Acquisition Library" << "\n";
+			}
+
+			::FreeLibrary(l_oLibMensiaAcquisition);
+		}
+#endif
+	// END MENSIA ACQUISITION DRIVERS
+	
 #if defined TARGET_HAS_OpenViBEContributions
 	OpenViBEContributions::initiateContributions(this, m_pAcquisitionServer, rKernelContext, &m_vDriver);
 #endif

@@ -68,6 +68,10 @@ IF(PATH_OPENVIBE_CONTRIBUTIONS)
 	INCLUDE("${CMAKE_SOURCE_DIR}/contrib/common/contribAcquisitionServerLinkLibs.cmake")
 ENDIF(PATH_OPENVIBE_CONTRIBUTIONS)
 
+IF(NOT(DISABLE_MENSIA_ACQUISITION_DRIVER))
+	ADD_DEFINITIONS(-DTARGET_HasMensiaAcquisitionDriver)
+ENDIF()
+
 
 # ---------------------------------
 # Target macros
