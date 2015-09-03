@@ -110,6 +110,7 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmSignalDecimationDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmStimulationBasedEpochingDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmCommonAverageReferenceDesc)
+
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmSpatialFilterDesc)
 
 #if defined TARGET_HAS_ThirdPartyEIGEN
@@ -159,18 +160,6 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmMagnitudeSquaredCoherenceDesc)
 #endif
 
-	/*/Dieter stuff for p300
-
-
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingStatistics::CBoxAlgorithmTwoSampleTTestDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingStatistics::CBoxAlgorithmLikelinessDistributorDesc);
-	
-	
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CBoxAlgorithmXDAWNSpatialFilterTrainerDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CBoxAlgorithmSpatialFilterDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CConditionalIdentityDesc);
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessingCoAdapt::CBoxAlgorithmMultipleSpatialFiltersDesc);
-	//*/
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_EpochAverageMethod, "Epoch Average method");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EpochAverageMethod, "Moving epoch average", OVP_TypeId_EpochAverageMethod_MovingAverage.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_EpochAverageMethod, "Moving epoch average (Immediate)", OVP_TypeId_EpochAverageMethod_MovingAverageImmediate.toUInteger());

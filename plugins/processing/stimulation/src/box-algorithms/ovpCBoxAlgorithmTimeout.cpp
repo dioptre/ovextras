@@ -9,7 +9,7 @@ using namespace OpenViBEPlugins::Stimulation;
 
 boolean CBoxAlgorithmTimeout::initialize(void)
 {
-	m_ui32TimeoutState = 0;
+	m_oTimeoutState = ETimeout_No;
 
 	m_oStimulationEncoder.initialize(*this,0);
 	
@@ -36,10 +36,10 @@ boolean CBoxAlgorithmTimeout::processClock(IMessageClock& rMessageClock)
 {
 	// if there was nothing received on the input for a period of time we raise the
 	// timeout flag and let the box send a stimulation
-	if (m_ui32TimeoutState == 0 && getPlayerContext().getCurrentTime() > m_ui64LastTimePolled + m_ui64Timeout)
+	if (m_oTimeoutState == ETimeout_No && getPlayerContext().getCurrentTime() > m_ui64LastTimePolled + m_ui64Timeout)
 	{
 		getLogManager() << LogLevel_Info << "Timeout reached" << "\n";
-		m_ui32TimeoutState = 1;
+		m_oTimeoutState = ETimeout_Occurred;
 	}
 
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
@@ -76,10 +76,10 @@ boolean CBoxAlgorithmTimeout::process(void)
 	const uint64 l_ui64StimulationDate = this->getPlayerContext().getCurrentTime();
 
 	// If the timeout is reached we send the stimulation on the output 0
-	if (m_ui32TimeoutState == 1)
+	if (m_oTimeoutState == ETimeout_Occurred)
 	{
 		l_pStimulationSet->appendStimulation(m_ui64StimulationToSend, l_ui64StimulationDate, 0);
-		m_ui32TimeoutState = 2;
+		m_oTimeoutState = ETimeout_Sent;
 	}
 
 	// we need to send an empty chunk even if there's no stim

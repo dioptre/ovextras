@@ -143,6 +143,13 @@
 					<Value>3</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
+                                <Setting>
+                                        <TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>
+                                        <Name>Save as box config</Name>
+                                        <DefaultValue>true</DefaultValue>
+                                        <Value>true</Value>
+                                        <Modifiability>false</Modifiability>
+                                </Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
@@ -159,7 +166,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x7a928e1f, 0x49016786)</Value>
+					<Value>(0x4b49a133, 0x42f38d94)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
@@ -399,6 +406,13 @@
 					<Value>3</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
+                                <Setting>
+                                        <TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>
+                                        <Name>Save as box config</Name>
+                                        <DefaultValue>true</DefaultValue>
+                                        <Value>true</Value>
+                                        <Modifiability>false</Modifiability>
+                                </Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
@@ -415,7 +429,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x7a928e1f, 0x49016786)</Value>
+					<Value>(0x4b49a133, 0x42f38d94)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
@@ -584,6 +598,13 @@
 					<Value>3</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
+                                <Setting>
+                                        <TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>
+                                        <Name>Save as box config</Name>
+                                        <DefaultValue>true</DefaultValue>
+                                        <Value>true</Value>
+                                        <Modifiability>false</Modifiability>
+                                </Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
@@ -600,7 +621,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x7a928e1f, 0x49016786)</Value>
+					<Value>(0x4b49a133, 0x42f38d94)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
@@ -1031,6 +1052,13 @@
 					<Value>3</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
+                                <Setting>
+                                        <TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>
+                                        <Name>Save as box config</Name>
+                                        <DefaultValue>true</DefaultValue>
+                                        <Value>true</Value>
+                                        <Modifiability>false</Modifiability>
+                                </Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
@@ -1047,7 +1075,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x7a928e1f, 0x49016786)</Value>
+					<Value>(0x4b49a133, 0x42f38d94)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
@@ -2622,6 +2650,13 @@
 					<Value>3</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
+                                <Setting>
+                                        <TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>
+                                        <Name>Save as box config</Name>
+                                        <DefaultValue>true</DefaultValue>
+                                        <Value>true</Value>
+                                        <Modifiability>false</Modifiability>
+                                </Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
@@ -2638,7 +2673,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x7a928e1f, 0x49016786)</Value>
+					<Value>(0x4b49a133, 0x42f38d94)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>
@@ -2708,6 +2743,13 @@
 					<Value>3</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
+                                <Setting>
+                                        <TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>
+                                        <Name>Save as box config</Name>
+                                        <DefaultValue>true</DefaultValue>
+                                        <Value>true</Value>
+                                        <Modifiability>false</Modifiability>
+                                </Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
@@ -2724,7 +2766,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x7a928e1f, 0x49016786)</Value>
+					<Value>(0x4b49a133, 0x42f38d94)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x8d21ff41, 0xdf6afe7e)</Identifier>

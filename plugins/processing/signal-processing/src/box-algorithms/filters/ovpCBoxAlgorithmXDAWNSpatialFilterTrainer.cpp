@@ -111,6 +111,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::initialize(void)
 	m_ui64StimulationIdentifier=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sSpatialFilterConfigurationFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 	m_ui64FilterDimension=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+	m_bSaveAsBoxConfig=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
 
 	return true;
 }
@@ -385,29 +386,51 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 			this->getLogManager() << LogLevel_Fatal << s7.str().c_str() << "\n";
 #endif
 
-			std::map < double, itpp::vec >::const_reverse_iterator it;
-			FILE* l_pFile=::fopen(m_sSpatialFilterConfigurationFilename.toASCIIString(), "wb");
-			if(!l_pFile)
-			{
-				this->getLogManager() << LogLevel_Error << "The file [" << m_sSpatialFilterConfigurationFilename << "] could not be opened for writing...";
-				return false;
-			}
+			std::map < double, itpp::vec >::const_reverse_iterator it = l_vEigenVector.rbegin();
+			uint32 l_ui32Cnt=0;
+			//We need to compute the size of the first dimension before setting the matrix
+			uint32 l_ui32Dimension1Size = l_vEigenVector.size() < static_cast<uint32>(m_ui64FilterDimension)?l_vEigenVector.size():static_cast<uint32>(m_ui64FilterDimension);
 
-			::fprintf(l_pFile, "<OpenViBE-SettingsOverride>\n");
-			::fprintf(l_pFile, "\t<SettingValue>");
-			it=l_vEigenVector.rbegin();
-			for(uint32 i=0; it!=l_vEigenVector.rend() && i<m_ui64FilterDimension; it++, i++)
+			CMatrix l_oOutputVectors;
+			l_oOutputVectors.setDimensionCount(2);
+			l_oOutputVectors.setDimensionSize(0, l_ui32Dimension1Size);
+			l_oOutputVectors.setDimensionSize(1, l_ui32ChannelCount);
+
+			for(uint32 i=0; i< l_ui32Dimension1Size; it++, i++)
 			{
 				for(uint32 j=0; j<l_ui32ChannelCount; j++)
 				{
-					::fprintf(l_pFile, "%e ", it->second[j]);
+					 l_oOutputVectors.getBuffer()[l_ui32Cnt++] =it->second[j];
 				}
 			}
-			::fprintf(l_pFile, "</SettingValue>\n");
-			::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", uint32(m_ui64FilterDimension));
-			::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", l_ui32ChannelCount);
-			::fprintf(l_pFile, "</OpenViBE-SettingsOverride>\n");
-			::fclose(l_pFile);
+			if(m_bSaveAsBoxConfig) {
+				FILE* l_pFile=::fopen(m_sSpatialFilterConfigurationFilename.toASCIIString(), "wb");
+				if(!l_pFile)
+				{
+					this->getLogManager() << LogLevel_Error << "The file [" << m_sSpatialFilterConfigurationFilename << "] could not be opened for writing...";
+					return false;
+				}
+
+				::fprintf(l_pFile, "<OpenViBE-SettingsOverride>\n");
+				::fprintf(l_pFile, "\t<SettingValue>");
+				for(uint32 i=0; i < l_oOutputVectors.getBufferElementCount(); ++i)
+				{
+					::fprintf(l_pFile, "%e ", l_oOutputVectors.getBuffer()[i]);
+				}
+				::fprintf(l_pFile, "</SettingValue>\n");
+				::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", uint32(m_ui64FilterDimension));
+				::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", l_ui32ChannelCount);
+				::fprintf(l_pFile, "\t<SettingValue><SettingValue>\n");
+				::fprintf(l_pFile, "</OpenViBE-SettingsOverride>\n");
+				::fclose(l_pFile);
+			}
+			else
+			{
+				if(!OpenViBEToolkit::Tools::Matrix::saveToTextFile(l_oOutputVectors, m_sSpatialFilterConfigurationFilename)) {
+					this->getLogManager() << LogLevel_Error << "Unable to save to [" << m_sSpatialFilterConfigurationFilename << "\n";
+					return false;
+				}
+			}
 
 			this->getLogManager() << LogLevel_Info << "Training finished... Eigen values are ";
 			it=l_vEigenVector.rbegin();

@@ -19,7 +19,9 @@ SET(OV_CUSTOM_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
 IF(WIN32)
 	ADD_DEFINITIONS("-DNOMINMAX -DBOOST_ALL_NO_LIB")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4355 /MP")
+	# the /openmp switch allows eigen to use multiple cores. Switch /arch:SSE2 enables vectorization. Remove if your CPU/compiler doesn't support them.
+	SET(OV_EIGEN_FLAGS "/openmp /arch:SSE2")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4355 /MP ${OV_EIGEN_FLAGS}")
 	SET(OV_WIN32_BOOST_VERSION "1_47")
 ELSEIF(UNIX)
 	# check for c++11 support
@@ -36,7 +38,9 @@ ELSEIF(UNIX)
 		MESSAGE(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. In the future this may be required.")
 	ENDIF(COMPILER_SUPPORTS_CXX11)
 
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+	# the -fopenmp switch allows eigen to use multiple cores; Switch -msse2 is for vectorization. Remove if your CPU/compiler doesn't support them.
+	SET(OV_EIGEN_FLAGS "-fopenmp -msse2")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall ${OV_EIGEN_FLAGS}")
 	# This ENV var is needed to locate our custom IT++ on Linux
 	SET(ENV{PKG_CONFIG_PATH} "${OV_CUSTOM_DEPENDENCIES_PATH}/lib/pkgconfig")
 ELSE(WIN32)
@@ -76,6 +80,7 @@ SET(SKIP_DOCUMENTATION "1")
 
 # Skipping demos can speed up compilation a lot, if you don't need them
 #SET(SKIP_APPLICATIONS_DEMOS "1")
+#SET(SKIP_CONTRIB_APPLICATIONS "1")
 
 IF(UNIX)
 	# On Linux, the presence of matlab plugin .so can cause crashes in Simple DSP box as the two may use different versions of boost which are
