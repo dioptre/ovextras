@@ -12,6 +12,7 @@
 #include "ovasCConfigurationBrainProductsActiCHamp.h"
 
 #include <toolkit/ovtk_all.h>
+#include <system/ovCTime.h>
 
 #include <actichamp.h>
 
@@ -184,7 +185,23 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Can not change current working directory!" << m_ui32DeviceId << "\n";
 		return false;
 	}
-	if((m_pHandle=::champOpen(m_ui32DeviceId))==NULL)
+
+	int l_iRetriesCount = 0;
+	while (l_iRetriesCount++ < 5)
+	{
+		m_pHandle = ::champOpen(m_ui32DeviceId);
+		if (m_pHandle == NULL)
+		{
+			m_rDriverContext.getLogManager() << LogLevel_Trace << "Failed to open the device, retrying (" << l_iRetriesCount << ")" << "\n";
+			System::Time::sleep(500);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	if (m_pHandle == NULL)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Can not open actiCHamp device id " << m_ui32DeviceId << "\n";
 		return false;
@@ -275,6 +292,13 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 	m_ui32CountEEG=l_oProperties.CountEeg;
 	m_ui32CountAux=(m_bUseAuxChannels ? l_oProperties.CountAux : 0);
 	m_ui32ChannelCount=m_ui32CountEEG+m_ui32CountAux;
+	if(m_ui32ChannelCount == 0)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "No channels were selected [EEG: "<<m_ui32CountEEG<<"] [AUX: "<<m_ui32CountAux<<"]. Close device.\n";
+		::champClose(m_pHandle);
+		m_pHandle=NULL;
+		return false;
+	}
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "Channel counts are  [EEG: "<<m_ui32CountEEG<<"] [AUX: "<<m_ui32CountAux<<"]\n";
 
 	m_oHeader.setChannelCount(m_ui32ChannelCount);
@@ -289,13 +313,17 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "Sampling rate in Hz  [Physical: "<<m_ui32PhysicalSampleRateHz<<"] [Driver: "<<m_oHeader.getSamplingFrequency()<<"]\n";
 
 	uint32 i,j=0;
-	for(i=0; i<m_ui32CountEEG; i++, j++) m_vResolution[j]=l_oProperties.ResolutionEeg*1E6f; // converts to microvolts
-	for(i=0; i<m_ui32CountAux; i++, j++) m_vResolution[j]=l_oProperties.ResolutionAux*1E6f; // converts to microvolts
-
-	// Set channel units
-	for(uint32 c=0;c<m_ui32ChannelCount;c++)
+	for(i=0; i<m_ui32CountEEG; i++, j++) m_vResolution[j]=l_oProperties.ResolutionEeg*1E6f; // converts to µV
+	for(i=0; i<m_ui32CountAux; i++, j++) m_vResolution[j]=l_oProperties.ResolutionAux*1E6f; // converts to µV
+	
+	j = 0;
+	for(uint32 i=0; i<m_ui32CountEEG; i++, j++)
 	{
-		m_oHeader.setChannelUnits(c, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
+		m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
+	}
+	for(i=0; i<m_ui32CountAux; i++, j++)
+	{
+		m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Micro); // converts to µV
 	}
 
 	// Sets data pointers
@@ -376,11 +404,11 @@ boolean CDriverBrainProductsActiCHamp::initialize(
 #define __set_filter__(f,f_decim) \
 	if(m_ui32ADCDataDecimation==CHAMP_DECIMATION_0) \
 	{ \
-		if(! loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/"f".bin", m_vFilter)) { m_rDriverContext.getLogManager() << LogLevel_Error << "Failed to load filter !\n"; } \
+		if(! loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/" f ".bin", m_vFilter)) { m_rDriverContext.getLogManager() << LogLevel_Error << "Failed to load filter !\n"; } \
 	} \
 	else \
 	{ \
-		if(!loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/"f_decim".bin", m_vFilter)) { m_rDriverContext.getLogManager() << LogLevel_Error << "Failed to load filter !\n"; } \
+		if(!loadFilter(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/filters/" f_decim ".bin", m_vFilter)) { m_rDriverContext.getLogManager() << LogLevel_Error << "Failed to load filter !\n"; } \
 	}\
 	l_bValid=true;
 

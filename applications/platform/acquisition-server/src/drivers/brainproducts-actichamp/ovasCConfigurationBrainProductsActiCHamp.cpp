@@ -13,6 +13,10 @@
 #include "ovasIHeader.h"
 
 #include <actichamp.h>
+#include <system/ovCTime.h>
+
+#include <iostream>
+#include <shellapi.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -63,6 +67,13 @@ CConfigurationBrainProductsActiCHamp::CConfigurationBrainProductsActiCHamp(
 {
 }
 
+namespace {
+	void open_url_brainproducts_download_actichamp_fw_cb(GtkWidget* pWidget, gpointer data)
+	{
+		ShellExecute(0, 0, "http://www.brainproducts.com/files/public/downloads/actiCHamp_rev03_FW-Update.zip", 0, 0, SW_SHOW);
+	}
+}
+
 boolean CConfigurationBrainProductsActiCHamp::preConfigure(void)
 {
 	if(!CConfigurationBuilder::preConfigure())
@@ -70,6 +81,9 @@ boolean CConfigurationBrainProductsActiCHamp::preConfigure(void)
 		return false;
 	}
 
+	m_pImageErrorIcon = GTK_WIDGET(::gtk_builder_get_object(m_pBuilderConfigureInterface, "image_error_icon"));
+	m_pLabelErrorMessage = GTK_LABEL(::gtk_builder_get_object(m_pBuilderConfigureInterface, "label_error_message"));
+	m_pButtonErrorDLLink = GTK_BUTTON(::gtk_builder_get_object(m_pBuilderConfigureInterface, "button_bp_actichamp_download_firmware"));
 	m_pComboBoxDeviceId=GTK_COMBO_BOX(::gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_device_id"));
 	m_pComboBoxMode=GTK_COMBO_BOX(::gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_mode"));
 	m_pComboBoxPhysicalSampleRate=GTK_COMBO_BOX(::gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_physical_sample_rate"));
@@ -93,6 +107,7 @@ boolean CConfigurationBrainProductsActiCHamp::preConfigure(void)
 	g_signal_connect(G_OBJECT(m_pToggleModule5), "toggled", G_CALLBACK(button_module_toggled_cb), this);
 
 	g_signal_connect(G_OBJECT(m_pCheckButtonUseAuxChannels), "toggled", G_CALLBACK(button_aux_channels_toggled_cb), this);
+	g_signal_connect(G_OBJECT(m_pButtonErrorDLLink), "clicked", G_CALLBACK(open_url_brainproducts_download_actichamp_fw_cb), NULL);
 
 	g_signal_connect(G_OBJECT(m_pComboBoxDeviceId), "changed", G_CALLBACK(combobox_device_changed_cb), this);
 
@@ -174,9 +189,29 @@ void CConfigurationBrainProductsActiCHamp::comboBoxDeviceChangedCB(void)
 	void* l_pHandle;
 	uint32 l_ui32DeviceId=::gtk_combo_box_get_active(m_pComboBoxDeviceId);
 
-	// Opens device
-	if((l_pHandle=::champOpen(l_ui32DeviceId))!=NULL)
+	// retry opening the device several times, as sometimes the champOpen fails for no reason
+
+	int l_iRetriesCount = 0;
+	while (l_iRetriesCount++ < 1)
 	{
+		l_pHandle = ::champOpen(l_ui32DeviceId);
+		if (l_pHandle == NULL)
+		{
+			System::Time::sleep(500);
+		}
+		else
+		{
+			break;
+		}
+	}
+	// Opens device
+	if(l_pHandle != NULL)
+	{
+		// Clear error messages
+		gtk_widget_hide(m_pImageErrorIcon);
+		gtk_widget_hide(GTK_WIDGET(m_pLabelErrorMessage));
+		gtk_widget_hide(GTK_WIDGET(m_pButtonErrorDLLink));
+
 		// Gets properties
 		t_champProperty l_oProperties;
 		::champGetProperty(l_pHandle, &l_oProperties);
@@ -188,7 +223,6 @@ void CConfigurationBrainProductsActiCHamp::comboBoxDeviceChangedCB(void)
 
 		// The channel count is updated with the toggled button callbacks.
 		m_pHeader->setChannelCount(0);
-		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels), 0);
 
 		// Gets modules
 		t_champModules l_oModules;
@@ -198,6 +232,18 @@ void CConfigurationBrainProductsActiCHamp::comboBoxDeviceChangedCB(void)
 		::gtk_widget_set_sensitive(GTK_WIDGET(m_pToggleModule3), (l_oModules.Present&0x08)?TRUE:FALSE);
 		::gtk_widget_set_sensitive(GTK_WIDGET(m_pToggleModule4), (l_oModules.Present&0x10)?TRUE:FALSE);
 		::gtk_widget_set_sensitive(GTK_WIDGET(m_pToggleModule5), (l_oModules.Present&0x20)?TRUE:FALSE);
+
+
+		// Since the toggle_button method fires the event we have to clean up all boutons
+		// and the channel count before actually activating the modules
+		::gtk_toggle_button_set_active(m_pToggleModule1, FALSE);
+		::gtk_toggle_button_set_active(m_pToggleModule2, FALSE);
+		::gtk_toggle_button_set_active(m_pToggleModule3, FALSE);
+		::gtk_toggle_button_set_active(m_pToggleModule4, FALSE);
+		::gtk_toggle_button_set_active(m_pToggleModule5, FALSE);
+
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels), 0);
+
 		::gtk_toggle_button_set_active(m_pToggleModule1, (m_rModuleEnabled&0x02 && l_oModules.Present&0x02)?TRUE:FALSE); // calls the buttonModuleToggledCB callback.
 		::gtk_toggle_button_set_active(m_pToggleModule2, (m_rModuleEnabled&0x04 && l_oModules.Present&0x04)?TRUE:FALSE); // calls the buttonModuleToggledCB callback.
 		::gtk_toggle_button_set_active(m_pToggleModule3, (m_rModuleEnabled&0x08 && l_oModules.Present&0x08)?TRUE:FALSE); // calls the buttonModuleToggledCB callback.
@@ -207,8 +253,30 @@ void CConfigurationBrainProductsActiCHamp::comboBoxDeviceChangedCB(void)
 		//Aux channels
 		::gtk_toggle_button_set_active(m_pCheckButtonUseAuxChannels, m_rUseAuxChannels);
 
-		// Closes the device
-		::champClose(l_pHandle);
+		// TODO: champClose function returns an error code which is never ever checked,
+		// closing a device can and does fail in some circumstances, but we can not really
+		// do much about it.
+		int l_iErrorCode = ::champClose(l_pHandle);
+		if (l_iErrorCode) {
+			std::cerr << "Closing ActiCHamp device failed" << std::endl;
+		}
+	}
+	else
+	{
+		// The device failed to open, we disable all of the controls and display an error message
+		gtk_widget_show(m_pImageErrorIcon);
+		gtk_widget_show(GTK_WIDGET(m_pLabelErrorMessage));
+		gtk_widget_show(GTK_WIDGET(m_pButtonErrorDLLink));
+
+		m_pHeader->setChannelCount(0);
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(m_pNumberOfChannels), 0);
+
+		::gtk_widget_set_sensitive(GTK_WIDGET(m_pToggleModule1), FALSE);
+		::gtk_widget_set_sensitive(GTK_WIDGET(m_pToggleModule2), FALSE);
+		::gtk_widget_set_sensitive(GTK_WIDGET(m_pToggleModule3), FALSE);
+		::gtk_widget_set_sensitive(GTK_WIDGET(m_pToggleModule4), FALSE);
+		::gtk_widget_set_sensitive(GTK_WIDGET(m_pToggleModule5), FALSE);
+
 	}
 }
 
