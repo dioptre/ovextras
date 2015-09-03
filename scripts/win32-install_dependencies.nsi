@@ -812,6 +812,27 @@ SectionGroup Drivers DriverGroup
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
+Section /o "Device SDK: BrainProducts ActiCHamp"
+
+	; For BrainProducts ActiCHamp driver
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-brainproducts-actichamp.zip" no_need_to_download_brainproducts_actichamp_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-brainproducts-actichamp.zip "arch\sdk-brainproducts-actichamp.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_brainproducts_actichamp_dev:
+	ZipDLL::extractall "arch\sdk-brainproducts-actichamp.zip" ""	
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
 Section /o "Device SDK: Eemagine EEGO"
 
 	SetOutPath "$INSTDIR"

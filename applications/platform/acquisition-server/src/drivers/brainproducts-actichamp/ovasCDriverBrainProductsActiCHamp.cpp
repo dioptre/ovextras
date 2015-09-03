@@ -14,7 +14,7 @@
 #include <toolkit/ovtk_all.h>
 #include <system/ovCTime.h>
 
-#include <actichamp.h>
+#include <ActiChamp.h>
 
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
