@@ -108,15 +108,15 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 	m_oLabelList.clear();
 
 	this->initializeExtraParameterMechanism();
-	uint32 l_ui64HiddenNeuronCount = this->getInt64Parameter(OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount);
+	uint32 l_ui32HiddenNeuronCount = static_cast<uint32>(this->getInt64Parameter(OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount));
 	float64 l_f64Alpha = this->getFloat64Parameter(OVP_Algorithm_ClassifierMLP_InputParameterId_Alpha);
 	float64 l_f64Epsilon = this->getFloat64Parameter(OVP_Algorithm_ClassifierMLP_InputParameterId_Epsilon);
 	this->uninitializeExtraParameterMechanism();
 
-	if(l_ui64HiddenNeuronCount < 1)
+	if(l_ui32HiddenNeuronCount < 1)
 	{
 		this->getLogManager() << LogLevel_Error << "Invalid amount of neuron in the hidden layer. Fallback to default value (3)\n";
-		l_ui64HiddenNeuronCount = 3;
+		l_ui32HiddenNeuronCount = 3;
 	}
 	if(l_f64Alpha <= 0)
 	{
@@ -142,46 +142,47 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 	for(std::map < float64, uint32 >::iterator iter = l_vClassCount.begin() ; iter != l_vClassCount.end() ; ++iter)
 	{
 		//We keep 20% percent of the training set for the validation for each class
-		l_ui32ValidationElementCount += iter->second * 0.2;
+		l_ui32ValidationElementCount += static_cast<uint32>(iter->second * 0.2);
 		m_oLabelList.push_back(iter->first);
-		iter->second = iter->second * 0.2;
+		iter->second = static_cast<uint32>(iter->second * 0.2);
 	}
 
 	const uint32 l_ui32ClassCount = m_oLabelList.size();
-	const uint64 l_ui64FeatureSize = rFeatureVectorSet.getFeatureVector(0).getSize();
+	const uint32 l_ui32FeatureSize = rFeatureVectorSet.getFeatureVector(0).getSize();
 
 	//Generate the target vector for each class. To save time and memory, we compute only one vector per class
+	//Vector tagret looks like following [0 0 1 0] for class 3 (if 4 classes)
 	for(size_t i=0; i < l_ui32ClassCount; ++i)
 	{
 		VectorXd l_oTarget = VectorXd::Zero(l_ui32ClassCount);
 		//class 1 is at index 0
-		l_oTarget[(uint64)m_oLabelList[i] -1 ] = 1.;
+		l_oTarget[static_cast<uint32>(m_oLabelList[i]) -1 ] = 1.;
 		l_oTargetList[m_oLabelList[i]] = l_oTarget;
 	}
 
 	//We store each normalize vector we get for training. This not optimal in memory but avoid a lot of computation later
 	//List of the class of the feature vectors store in the same order are they are in validation/training set(to be able to get the target)
-	std::vector <float64> m_oTrainingSet;
-	std::vector <float64> m_oValidationSet;
-	MatrixXd l_oTrainingDataMatrix(l_ui64FeatureSize, rFeatureVectorSet.getFeatureVectorCount() - l_ui32ValidationElementCount);
-	MatrixXd l_oValidationDataMatrix(l_ui64FeatureSize, l_ui32ValidationElementCount);
+	std::vector <float64> l_oTrainingSet;
+	std::vector <float64> l_oValidationSet;
+	MatrixXd l_oTrainingDataMatrix(l_ui32FeatureSize, rFeatureVectorSet.getFeatureVectorCount() - l_ui32ValidationElementCount);
+	MatrixXd l_oValidationDataMatrix(l_ui32FeatureSize, l_ui32ValidationElementCount);
 
 	//We don't need to make a shuffle it has already be made by the trainer box
 	//We store 20% of the feature vectors for validation
 	int32 l_i32ValidationIndex =0, l_i32TrainingIndex =0;
 	for(size_t i=0; i < rFeatureVectorSet.getFeatureVectorCount(); ++i)
 	{
-		const Map<VectorXd> l_oFeatureVec(const_cast<float64*>(rFeatureVectorSet.getFeatureVector(i).getBuffer()), l_ui64FeatureSize);
+		const Map<VectorXd> l_oFeatureVec(const_cast<float64*>(rFeatureVectorSet.getFeatureVector(i).getBuffer()), l_ui32FeatureSize);
 		VectorXd l_oData = l_oFeatureVec;
 		if(l_vClassCount[rFeatureVectorSet.getFeatureVector(i).getLabel()] > 0)
 		{
 			l_oValidationDataMatrix.col(l_i32ValidationIndex++) = l_oData;
-			m_oValidationSet.push_back(rFeatureVectorSet.getFeatureVector(i).getLabel());
+			l_oValidationSet.push_back(rFeatureVectorSet.getFeatureVector(i).getLabel());
 			--l_vClassCount[rFeatureVectorSet.getFeatureVector(i).getLabel()];
 		}
 		else{
 			l_oTrainingDataMatrix.col(l_i32TrainingIndex++) = l_oData;
-			m_oTrainingSet.push_back(rFeatureVectorSet.getFeatureVector(i).getLabel());
+			l_oTrainingSet.push_back(rFeatureVectorSet.getFeatureVector(i).getLabel());
 		}
 	}
 
@@ -204,22 +205,22 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 		}
 	}
 
-	const uint64 l_ui64FeatureCount = m_oTrainingSet.size();
-	const float64 l_f64BoundValue = 1./(l_ui64FeatureSize+1);
+	const uint32 l_ui32FeatureCount = l_oTrainingSet.size();
+	const float64 l_f64BoundValue = 1./(l_ui32FeatureSize+1);
 	float64 l_f64PreviousError = std::numeric_limits<float64>::max();
 	float64 l_f64CumulativeError = 0;
 
 	//Let's generate randomly weights and biases
 	//We restrain the weight between -1/(fan-in) and 1/(fan-in) to avoid saturation in the worst case
-	m_oInputWeight = MatrixXd::Random(l_ui64HiddenNeuronCount, l_ui64FeatureSize) * l_f64BoundValue;
-	m_oInputBias = VectorXd::Random(l_ui64HiddenNeuronCount) * l_f64BoundValue;
+	m_oInputWeight = MatrixXd::Random(l_ui32HiddenNeuronCount, l_ui32FeatureSize) * l_f64BoundValue;
+	m_oInputBias = VectorXd::Random(l_ui32HiddenNeuronCount) * l_f64BoundValue;
 
-	m_oHiddenWeight = MatrixXd::Random(l_ui32ClassCount, l_ui64HiddenNeuronCount) * l_f64BoundValue;
+	m_oHiddenWeight = MatrixXd::Random(l_ui32ClassCount, l_ui32HiddenNeuronCount) * l_f64BoundValue;
 	m_oHiddenBias = VectorXd::Random(l_ui32ClassCount) * l_f64BoundValue;
 
-	MatrixXd l_oDeltaInputWeight = MatrixXd::Zero(l_ui64HiddenNeuronCount, l_ui64FeatureSize);
-	VectorXd l_oDeltaInputBias = VectorXd::Zero(l_ui64HiddenNeuronCount);
-	MatrixXd l_oDeltaHiddenWeight = MatrixXd::Zero(l_ui32ClassCount, l_ui64HiddenNeuronCount);
+	MatrixXd l_oDeltaInputWeight = MatrixXd::Zero(l_ui32HiddenNeuronCount, l_ui32FeatureSize);
+	VectorXd l_oDeltaInputBias = VectorXd::Zero(l_ui32HiddenNeuronCount);
+	MatrixXd l_oDeltaHiddenWeight = MatrixXd::Zero(l_ui32ClassCount, l_ui32HiddenNeuronCount);
 	VectorXd l_oDeltaHiddenBias = VectorXd::Zero(l_ui32ClassCount);
 
 	MatrixXd m_oY1, m_oA2;
@@ -233,19 +234,19 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 		l_oDeltaInputBias.setZero();
 		l_oDeltaHiddenWeight.setZero();
 		l_oDeltaHiddenBias.setZero();
-
-		m_oY1.noalias() = ((m_oInputWeight * l_oTrainingDataMatrix).colwise() + m_oInputBias).unaryExpr(std::ptr_fun(tanh));
+		//The first cast of tanh has to been explicit for windows compilation
+		m_oY1.noalias() = ((m_oInputWeight * l_oTrainingDataMatrix).colwise() + m_oInputBias).unaryExpr(std::ptr_fun<float64, float64>((float64 (*)(float64))tanh));
 		m_oA2.noalias() = (m_oHiddenWeight * m_oY1).colwise() + m_oHiddenBias;
-		for(size_t i =0; i < l_ui64FeatureCount; ++i)
+		for(size_t i =0; i < l_ui32FeatureCount; ++i)
 		{
-			const VectorXd& l_oTarget = l_oTargetList[m_oTrainingSet[i]];
+			const VectorXd& l_oTarget = l_oTargetList[l_oTrainingSet[i]];
 			const VectorXd& l_oData = l_oTrainingDataMatrix.col(i);
 
 			//Now we compute all deltas of output layer
 			VectorXd l_oOutputDelta = m_oA2.col(i) - l_oTarget;
 			for(size_t j = 0; j < l_ui32ClassCount; ++j)
 			{
-				for(size_t k = 0; k < (uint32)l_ui64HiddenNeuronCount; ++k)
+				for(size_t k = 0; k < l_ui32HiddenNeuronCount; ++k)
 				{
 					l_oDeltaHiddenWeight(j,k) -= l_oOutputDelta[j] * m_oY1.col(i)[k];
 				}
@@ -253,8 +254,8 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 			l_oDeltaHiddenBias.noalias() -= l_oOutputDelta;
 
 			//Now we take care of the hidden layer
-			VectorXd l_oHiddenDelta = VectorXd::Zero(l_ui64HiddenNeuronCount);
-			for(size_t j=0; j < (size_t)l_ui64HiddenNeuronCount; ++j)
+			VectorXd l_oHiddenDelta = VectorXd::Zero(l_ui32HiddenNeuronCount);
+			for(size_t j=0; j < l_ui32HiddenNeuronCount; ++j)
 			{
 				for(size_t k = 0; k < l_ui32ClassCount; ++k)
 				{
@@ -263,9 +264,9 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 				l_oHiddenDelta[j] *= (1 - pow(m_oY1.col(i)[j], 2));
 			}
 
-			for(size_t j =0; j < (size_t)l_ui64HiddenNeuronCount; ++j)
+			for(size_t j =0; j < l_ui32HiddenNeuronCount; ++j)
 			{
-				for(size_t k =0; k < l_ui64FeatureSize; ++k)
+				for(size_t k =0; k < l_ui32FeatureSize; ++k)
 				{
 					l_oDeltaInputWeight(j, k) -= l_oHiddenDelta[j] * l_oData[k];
 				}
@@ -274,10 +275,10 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 
 		}
 		//We finish the loop, let's apply deltas
-		m_oHiddenWeight.noalias() += l_oDeltaHiddenWeight / l_ui64FeatureCount * l_f64Alpha;
-		m_oHiddenBias.noalias() += l_oDeltaHiddenBias / l_ui64FeatureCount * l_f64Alpha;
-		m_oInputWeight.noalias() += l_oDeltaInputWeight / l_ui64FeatureCount * l_f64Alpha;
-		m_oInputBias.noalias() += l_oDeltaInputBias / l_ui64FeatureCount * l_f64Alpha;
+		m_oHiddenWeight.noalias() += l_oDeltaHiddenWeight / l_ui32FeatureCount * l_f64Alpha;
+		m_oHiddenBias.noalias() += l_oDeltaHiddenBias / l_ui32FeatureCount * l_f64Alpha;
+		m_oInputWeight.noalias() += l_oDeltaInputWeight / l_ui32FeatureCount * l_f64Alpha;
+		m_oInputBias.noalias() += l_oDeltaInputBias / l_ui32FeatureCount * l_f64Alpha;
 
 		dumpMatrix(this->getLogManager(), m_oHiddenWeight, "m_oHiddenWeight");
 		dumpMatrix(this->getLogManager(), m_oHiddenBias, "m_oHiddenBias");
@@ -287,10 +288,11 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 		//Now we compute the cumulative error in the validation set
 		l_f64CumulativeError=0;
 		//We don't compute Y2 because we train on the identity
-		m_oA2.noalias() = (m_oHiddenWeight * ((m_oInputWeight * l_oValidationDataMatrix).colwise() + m_oInputBias).unaryExpr(std::ptr_fun(tanh))).colwise() + m_oHiddenBias;
-		for(size_t i=0; i < m_oValidationSet.size(); ++i)
+		m_oA2.noalias() = (m_oHiddenWeight * ((m_oInputWeight * l_oValidationDataMatrix).colwise() + m_oInputBias).unaryExpr(std::ptr_fun<float64, float64>(tanh))).colwise()
+							+ m_oHiddenBias;
+		for(size_t i=0; i < l_oValidationSet.size(); ++i)
 		{
-			const VectorXd& l_oTarget = l_oTargetList[m_oValidationSet[i]];
+			const VectorXd& l_oTarget = l_oTargetList[l_oValidationSet[i]];
 			const VectorXd& l_oIdentityResult = m_oA2.col(i);
 
 			//Now we need to compute the error
@@ -299,7 +301,7 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 				l_f64CumulativeError += 0.5 * pow(l_oIdentityResult[j] - l_oTarget[j], 2);
 			}
 		}
-		l_f64CumulativeError /= m_oValidationSet.size();
+		l_f64CumulativeError /= l_oValidationSet.size();
 		//If the delta of error is under Epsilon we consider that the training is over
 		if(l_f64PreviousError - l_f64CumulativeError < l_f64Epsilon)
 		{
@@ -327,10 +329,10 @@ boolean CAlgorithmClassifierMLP::classify(const IFeatureVector &rFeatureVector, 
 
 	const uint32 l_ui32ClassCount = m_oLabelList.size();
 
-	VectorXd m_oA2 = m_oHiddenBias + (m_oHiddenWeight * (m_oInputBias + (m_oInputWeight * l_oData)).unaryExpr(std::ptr_fun(tanh)));
+	VectorXd m_oA2 = m_oHiddenBias + (m_oHiddenWeight * (m_oInputBias + (m_oInputWeight * l_oData)).unaryExpr(std::ptr_fun<float64, float64>(tanh)));
 
 	//The final transfer function is the softmax
-	VectorXd m_oY2 = m_oA2.unaryExpr(std::ptr_fun(exp));
+	VectorXd m_oY2 = m_oA2.unaryExpr(std::ptr_fun<float64, float64>(exp));
 	m_oY2 /= m_oY2.sum();
 
 	rDistanceValue.setSize(l_ui32ClassCount);
@@ -366,7 +368,7 @@ XML::IXMLNode *CAlgorithmClassifierMLP::saveConfiguration()
 
 
 	std::stringstream l_sClasses;
-	for(size_t i = 0; i< (uint32)m_oHiddenBias.size() ; ++i)
+	for(int32 i = 0; i< m_oHiddenBias.size() ; ++i)
 	{
 		l_sClasses << m_oLabelList[i] << " ";
 	}
@@ -378,11 +380,11 @@ XML::IXMLNode *CAlgorithmClassifierMLP::saveConfiguration()
 
 	//The input and output neuron count are not mandatory but they facilitate a lot the loading process
 	l_pTempNode = XML::createNode(c_sMLPInputNeuronCountNodeName);
-	dumpData(l_pTempNode, (int64)m_oInputWeight.cols());
+	dumpData(l_pTempNode, static_cast<int64>(m_oInputWeight.cols()));
 	l_pConfiguration->addChild(l_pTempNode);
 
 	l_pTempNode = XML::createNode(c_sMLPHiddenNeuronCountNodeName);
-	dumpData(l_pTempNode, (int64)m_oInputWeight.rows());
+	dumpData(l_pTempNode, static_cast<int64>(m_oInputWeight.rows()));
 	l_pConfiguration->addChild(l_pTempNode);
 	l_pRootNode->addChild(l_pConfiguration);
 
