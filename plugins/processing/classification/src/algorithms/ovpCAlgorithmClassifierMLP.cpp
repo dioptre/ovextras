@@ -15,7 +15,7 @@
 
 //Need to be reachable from outside
 const char* const c_sMLPEvaluationFunctionName = "Evaluation function";
-const char* const c_sMLPTransfertFunctionName = "Transfert function";
+const char* const c_sMLPTransferFunctionName = "Transfer function";
 
 namespace{
 	const char* const c_sMLPTypeNodeName = "MLP";
@@ -91,7 +91,10 @@ boolean CAlgorithmClassifierMLP::initialize()
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
 	op_pConfiguration=NULL;
 
-
+	TParameterHandler < float64 > ip_f64Alpha(this->getInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_Alpha));
+	ip_f64Alpha = 0.01;
+	TParameterHandler < float64 > ip_f64Epsilon(this->getInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_Epsilon));
+	ip_f64Epsilon = 0.000001;
 	return true;
 }
 
@@ -106,6 +109,8 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 
 	this->initializeExtraParameterMechanism();
 	uint32 l_ui64HiddenNeuronCount = this->getInt64Parameter(OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount);
+	float64 l_f64Alpha = this->getFloat64Parameter(OVP_Algorithm_ClassifierMLP_InputParameterId_Alpha);
+	float64 l_f64Epsilon = this->getFloat64Parameter(OVP_Algorithm_ClassifierMLP_InputParameterId_Epsilon);
 	this->uninitializeExtraParameterMechanism();
 
 	if(l_ui64HiddenNeuronCount < 1)
@@ -113,78 +118,89 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 		this->getLogManager() << LogLevel_Error << "Invalid amount of neuron in the hidden layer. Fallback to default value (3)\n";
 		l_ui64HiddenNeuronCount = 3;
 	}
+	if(l_f64Alpha <= 0)
+	{
+		this->getLogManager() << LogLevel_Error << "Invalid value for learning coefficient (" << l_f64Alpha << "). Fallback to default value (0.01)\n";
+		l_f64Alpha = 0.01;
+	}
+	if(l_f64Epsilon <= 0)
+	{
+		this->getLogManager() << LogLevel_Error << "Invalid value for stop learning condition (" << l_f64Epsilon << "). Fallback to default value (0.000001)\n";
+		l_f64Epsilon = 0.000001;
+	}
 
-	m_f64Min = rFeatureVectorSet.getFeatureVector(0).getBuffer()[0];
-	m_f64Max = m_f64Min;
-	std::map < float64, uint32 > l_vClassLabels;
-	std::map < float64, VectorXd > l_oClassGoal;
+	std::map < float64, uint32 > l_vClassCount;
+	std::map < float64, VectorXd > l_oTargetList;
+	//We need to compute the min and the max of data in order to normalize and center them
 	for(uint32 i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
 	{
-		l_vClassLabels[rFeatureVectorSet[i].getLabel()]++;
-		for(size_t j = 0; j < rFeatureVectorSet[i].getSize(); ++j)
-		{
-			const float64 l_f64Value = rFeatureVectorSet.getFeatureVector(i).getBuffer()[j];
-			if(m_f64Max < l_f64Value)
-			{
-				m_f64Max = l_f64Value;
-			}
-			else if(m_f64Min > l_f64Value)
-			{
-				m_f64Min = l_f64Value;
-			}
-		}
+		l_vClassCount[rFeatureVectorSet[i].getLabel()]++;
 	}
+	uint32 l_ui32ValidationElementCount = 0;
 
 	//We generate the list of class
-	for(std::map < float64, uint32 >::iterator iter = l_vClassLabels.begin() ; iter != l_vClassLabels.end() ; ++iter)
+	for(std::map < float64, uint32 >::iterator iter = l_vClassCount.begin() ; iter != l_vClassCount.end() ; ++iter)
 	{
+		//We keep 20% percent of the training set for the validation for each class
+		l_ui32ValidationElementCount += iter->second * 0.2;
 		m_oLabelList.push_back(iter->first);
-		iter->second *= 0.2;
+		iter->second = iter->second * 0.2;
 	}
 
-	const float64 l_f64Alpha = 0.01;
-	const float64 l_f64Epsilon=0.000001;
 	const uint32 l_ui32ClassCount = m_oLabelList.size();
 	const uint64 l_ui64FeatureSize = rFeatureVectorSet.getFeatureVector(0).getSize();
 
-	//Generate the target vector for each class
+	//Generate the target vector for each class. To save time and memory, we compute only one vector per class
 	for(size_t i=0; i < l_ui32ClassCount; ++i)
 	{
-		VectorXd l_oGoal = VectorXd::Zero(l_ui32ClassCount);
+		VectorXd l_oTarget = VectorXd::Zero(l_ui32ClassCount);
 		//class 1 is at index 0
-		l_oGoal[(uint64)m_oLabelList[i] -1 ] = 1.;
-		l_oClassGoal[m_oLabelList[i]] = l_oGoal;
+		l_oTarget[(uint64)m_oLabelList[i] -1 ] = 1.;
+		l_oTargetList[m_oLabelList[i]] = l_oTarget;
 	}
 
 	//We store each normalize vector we get for training. This not optimal in memory but avoid a lot of computation later
-	std::vector <CEigenFeatureVector> m_oTrainingSet;
-	std::vector <CEigenFeatureVector> m_oValidationSet;
+	//List of the class of the feature vectors store in the same order are they are in validation/training set(to be able to get the target)
+	std::vector <float64> m_oTrainingSet;
+	std::vector <float64> m_oValidationSet;
+	MatrixXd l_oTrainingDataMatrix(l_ui64FeatureSize, rFeatureVectorSet.getFeatureVectorCount() - l_ui32ValidationElementCount);
+	MatrixXd l_oValidationDataMatrix(l_ui64FeatureSize, l_ui32ValidationElementCount);
 
 	//We don't need to make a shuffle it has already be made by the trainer box
-	//We store 20% of the full feature vector set for validation part of the training process
+	//We store 20% of the feature vectors for validation
+	int32 l_i32ValidationIndex =0, l_i32TrainingIndex =0;
 	for(size_t i=0; i < rFeatureVectorSet.getFeatureVectorCount(); ++i)
 	{
-		if(l_vClassLabels[rFeatureVectorSet.getFeatureVector(i).getLabel()] > 0)
+		const Map<VectorXd> l_oFeatureVec(const_cast<float64*>(rFeatureVectorSet.getFeatureVector(i).getBuffer()), l_ui64FeatureSize);
+		VectorXd l_oData = l_oFeatureVec;
+		if(l_vClassCount[rFeatureVectorSet.getFeatureVector(i).getLabel()] > 0)
 		{
-			const Map<VectorXd> l_oFeatureVec(const_cast<float64*>(rFeatureVectorSet.getFeatureVector(i).getBuffer()), l_ui64FeatureSize);
-			VectorXd l_oData = l_oFeatureVec;
-			for(size_t j =0; j < l_ui64FeatureSize; ++j)
-			{
-				//Normalization
-				l_oData[j] = 2 * (l_oData[j] - m_f64Min)/ (m_f64Max - m_f64Min) - 1;
-			}
-			m_oValidationSet.push_back(CEigenFeatureVector(rFeatureVectorSet.getFeatureVector(i).getLabel(), l_oData));
-			--l_vClassLabels[rFeatureVectorSet.getFeatureVector(i).getLabel()];
+			l_oValidationDataMatrix.col(l_i32ValidationIndex++) = l_oData;
+			m_oValidationSet.push_back(rFeatureVectorSet.getFeatureVector(i).getLabel());
+			--l_vClassCount[rFeatureVectorSet.getFeatureVector(i).getLabel()];
 		}
 		else{
-			const Map<VectorXd> l_oFeatureVec(const_cast<float64*>(rFeatureVectorSet.getFeatureVector(i).getBuffer()), l_ui64FeatureSize);
-			VectorXd l_oData = l_oFeatureVec;
-			for(size_t j =0; j < l_ui64FeatureSize; ++j)
-			{
-				//Normalization
-				l_oData[j] = 2 * (l_oData[j] - m_f64Min)/ (m_f64Max - m_f64Min) - 1;
-			}
-			m_oTrainingSet.push_back(CEigenFeatureVector(rFeatureVectorSet.getFeatureVector(i).getLabel(), l_oData));
+			l_oTrainingDataMatrix.col(l_i32TrainingIndex++) = l_oData;
+			m_oTrainingSet.push_back(rFeatureVectorSet.getFeatureVector(i).getLabel());
+		}
+	}
+
+	//We now get the min and the max of the training set for normalization
+	m_f64Max = l_oTrainingDataMatrix.maxCoeff();
+	m_f64Min = l_oTrainingDataMatrix.minCoeff();
+	//Normalization of the data. We need to do it to avoid saturation of tanh.
+	for(int32 i=0; i < l_oTrainingDataMatrix.cols(); ++i)
+	{
+		for(int32 j=0; j < l_oTrainingDataMatrix.rows(); ++j)
+		{
+			l_oTrainingDataMatrix(j, i) = 2 * (l_oTrainingDataMatrix(j,i) - m_f64Min)/ (m_f64Max - m_f64Min) - 1;
+		}
+	}
+	for(int32 i=0; i < l_oValidationDataMatrix.cols(); ++i)
+	{
+		for(int32 j=0; j < l_oValidationDataMatrix.rows(); ++j)
+		{
+			l_oValidationDataMatrix(j, i) = 2 * (l_oValidationDataMatrix(j,i) - m_f64Min)/ (m_f64Max - m_f64Min) - 1;
 		}
 	}
 
@@ -194,54 +210,44 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 	float64 l_f64CumulativeError = 0;
 
 	//Let's generate randomly weights and biases
-	m_oInputWeight = MatrixXd::Random(l_ui64HiddenNeuronCount, l_ui64FeatureSize);
-	m_oInputBias = VectorXd::Random(l_ui64HiddenNeuronCount);
+	//We restrain the weight between -1/(fan-in) and 1/(fan-in) to avoid saturation in the worst case
+	m_oInputWeight = MatrixXd::Random(l_ui64HiddenNeuronCount, l_ui64FeatureSize) * l_f64BoundValue;
+	m_oInputBias = VectorXd::Random(l_ui64HiddenNeuronCount) * l_f64BoundValue;
 
-	m_oHiddenWeight = MatrixXd::Random(l_ui32ClassCount, l_ui64HiddenNeuronCount);
-	m_oHiddenBias = VectorXd::Random(l_ui32ClassCount);
-
-	//Let's restrain the weight between -1/(fan-in) and 1/(fan-in) to avoid saturation in the worst case
-	m_oInputWeight*= l_f64BoundValue;
-	m_oInputBias*= l_f64BoundValue;
-	m_oHiddenWeight*= l_f64BoundValue;
-	m_oHiddenBias*= l_f64BoundValue;
+	m_oHiddenWeight = MatrixXd::Random(l_ui32ClassCount, l_ui64HiddenNeuronCount) * l_f64BoundValue;
+	m_oHiddenBias = VectorXd::Random(l_ui32ClassCount) * l_f64BoundValue;
 
 	MatrixXd l_oDeltaInputWeight = MatrixXd::Zero(l_ui64HiddenNeuronCount, l_ui64FeatureSize);
 	VectorXd l_oDeltaInputBias = VectorXd::Zero(l_ui64HiddenNeuronCount);
 	MatrixXd l_oDeltaHiddenWeight = MatrixXd::Zero(l_ui32ClassCount, l_ui64HiddenNeuronCount);
 	VectorXd l_oDeltaHiddenBias = VectorXd::Zero(l_ui32ClassCount);
 
-	VectorXd m_oA1, m_oY1, m_oA2;
+	MatrixXd m_oY1, m_oA2;
 	//A1 is the value compute in hidden neuron before applying tanh
 	//Y1 is the output vector of hidden layer
-	//A2 is the value compute by output neuron before applying transfert function
-	//Y2 is the value of output after the transfert function (softmax)
-	for(size_t l_uiTrainingIteration = 0 ; l_uiTrainingIteration < 100000 ; ++l_uiTrainingIteration)
+	//A2 is the value compute by output neuron before applying transfer function
+	//Y2 is the value of output after the transfer function (softmax)
+	while(1)
 	{
 		l_oDeltaInputWeight.setZero();
 		l_oDeltaInputBias.setZero();
 		l_oDeltaHiddenWeight.setZero();
 		l_oDeltaHiddenBias.setZero();
 
+		m_oY1.noalias() = ((m_oInputWeight * l_oTrainingDataMatrix).colwise() + m_oInputBias).unaryExpr(std::ptr_fun(tanh));
+		m_oA2.noalias() = (m_oHiddenWeight * m_oY1).colwise() + m_oHiddenBias;
 		for(size_t i =0; i < l_ui64FeatureCount; ++i)
 		{
-			VectorXd& l_oGoal = l_oClassGoal[m_oTrainingSet[i].first];
-
-			//We need to compute the output
-			VectorXd& l_oData = m_oTrainingSet[i].second;
-
-			m_oA1.noalias() = m_oInputBias + (m_oInputWeight * l_oData);
-			m_oY1.noalias() = m_oA1.unaryExpr(std::ptr_fun(tanh));
-			m_oA2.noalias() = m_oHiddenBias + (m_oHiddenWeight * m_oY1);
-			//We don't need to compute Y2 (we use the identity for training)
+			const VectorXd& l_oTarget = l_oTargetList[m_oTrainingSet[i]];
+			const VectorXd& l_oData = l_oTrainingDataMatrix.col(i);
 
 			//Now we compute all deltas of output layer
-			VectorXd l_oOutputDelta = m_oA2 - l_oGoal;
+			VectorXd l_oOutputDelta = m_oA2.col(i) - l_oTarget;
 			for(size_t j = 0; j < l_ui32ClassCount; ++j)
 			{
 				for(size_t k = 0; k < (uint32)l_ui64HiddenNeuronCount; ++k)
 				{
-					l_oDeltaHiddenWeight(j,k) -= l_oOutputDelta[j] * m_oY1[k];
+					l_oDeltaHiddenWeight(j,k) -= l_oOutputDelta[j] * m_oY1.col(i)[k];
 				}
 			}
 			l_oDeltaHiddenBias.noalias() -= l_oOutputDelta;
@@ -254,7 +260,7 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 				{
 					l_oHiddenDelta[j] += l_oOutputDelta[k] * m_oHiddenWeight(k,j);
 				}
-				l_oHiddenDelta[j] *= (1 - pow(m_oY1[j], 2));
+				l_oHiddenDelta[j] *= (1 - pow(m_oY1.col(i)[j], 2));
 			}
 
 			for(size_t j =0; j < (size_t)l_ui64HiddenNeuronCount; ++j)
@@ -280,20 +286,17 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 
 		//Now we compute the cumulative error in the validation set
 		l_f64CumulativeError=0;
+		//We don't compute Y2 because we train on the identity
+		m_oA2.noalias() = (m_oHiddenWeight * ((m_oInputWeight * l_oValidationDataMatrix).colwise() + m_oInputBias).unaryExpr(std::ptr_fun(tanh))).colwise() + m_oHiddenBias;
 		for(size_t i=0; i < m_oValidationSet.size(); ++i)
 		{
-			VectorXd& l_oGoal = l_oClassGoal[m_oValidationSet[i].first];
-			VectorXd& l_oData = m_oValidationSet[i].second;
-			//we normalize and center data on 0 to avoid saturation
-
-			m_oA1.noalias() = m_oInputBias + (m_oInputWeight * l_oData);
-			m_oA2.noalias() = m_oHiddenBias + (m_oHiddenWeight * m_oA1.unaryExpr(std::ptr_fun(tanh)));
-			//We don't need to compute Y2
+			const VectorXd& l_oTarget = l_oTargetList[m_oValidationSet[i]];
+			const VectorXd& l_oIdentityResult = m_oA2.col(i);
 
 			//Now we need to compute the error
 			for(size_t j =0; j < l_ui32ClassCount; ++j)
 			{
-				l_f64CumulativeError += 0.5 * pow(m_oA2[j] - l_oGoal[j], 2);
+				l_f64CumulativeError += 0.5 * pow(l_oIdentityResult[j] - l_oTarget[j], 2);
 			}
 		}
 		l_f64CumulativeError /= m_oValidationSet.size();
@@ -303,6 +306,7 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 			break;
 		}
 		l_f64PreviousError = l_f64CumulativeError;
+		//std::cout << l_f64PreviousError << std::endl;
 	}
 	dumpMatrix(this->getLogManager(), m_oHiddenWeight, "l_oHiddenWeight");
 	dumpMatrix(this->getLogManager(), m_oHiddenBias, "l_oHiddenBias");
@@ -322,24 +326,11 @@ boolean CAlgorithmClassifierMLP::classify(const IFeatureVector &rFeatureVector, 
 	}
 
 	const uint32 l_ui32ClassCount = m_oLabelList.size();
-	const uint32 l_ui32HiddenNeuronCount = (int64)m_oInputWeight.rows();
 
-	VectorXd m_oA1 = m_oInputBias + (m_oInputWeight * l_oData);
+	VectorXd m_oA2 = m_oHiddenBias + (m_oHiddenWeight * (m_oInputBias + (m_oInputWeight * l_oData)).unaryExpr(std::ptr_fun(tanh)));
 
-	VectorXd m_oY1(l_ui32HiddenNeuronCount);
-	for(size_t j = 0; j < l_ui32HiddenNeuronCount; ++j)
-	{
-		m_oY1[j] = tanh(m_oA1[j]);
-	}
-
-	VectorXd m_oA2 = m_oHiddenBias + (m_oHiddenWeight * m_oY1);
-	VectorXd m_oY2(l_ui32ClassCount);
-
-	//The final transfert function is the softmax
-	for(size_t j = 0; j< l_ui32ClassCount ; ++j)
-	{
-		m_oY2[j] = exp(m_oA2[j]);
-	}
+	//The final transfer function is the softmax
+	VectorXd m_oY2 = m_oA2.unaryExpr(std::ptr_fun(exp));
 	m_oY2 /= m_oY2.sum();
 
 	rDistanceValue.setSize(l_ui32ClassCount);

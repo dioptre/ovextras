@@ -1239,9 +1239,23 @@
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
-					<Name>Amount of neuron in hidden layer</Name>
+					<Name>Number of neurons in hidden layer</Name>
 					<DefaultValue>3</DefaultValue>
 					<Value>3</Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
+				<Setting>
+					<TypeIdentifier>(0x512a166f, 0x5c3ef83f)</TypeIdentifier>
+					<Name>Learning stop condition</Name>
+					<DefaultValue>0.000001</DefaultValue>
+					<Value>0.000001</Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
+				<Setting>
+					<TypeIdentifier>(0x512a166f, 0x5c3ef83f)</TypeIdentifier>
+					<Name>Learning coefficient</Name>
+					<DefaultValue>0.010000</DefaultValue>
+					<Value>0.010000</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>

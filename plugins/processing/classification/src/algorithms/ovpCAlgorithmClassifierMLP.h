@@ -9,9 +9,10 @@
 #define OVP_ClassId_Algorithm_ClassifierMLP_DecisionAvailable                        OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401261)
 #define OVP_ClassId_Algorithm_ClassifierMLPDesc                                      OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401262)
 
-#define OVP_Algorithm_ClassifierMLP_InputParameterId_TransfertFunction               OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401263)
-#define OVP_Algorithm_ClassifierMLP_InputParameterId_EvaluationFunction              OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401264)
-#define OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount               OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401265)
+#define OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount               OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401263)
+#define OVP_Algorithm_ClassifierMLP_InputParameterId_Epsilon                         OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401264)
+#define OVP_Algorithm_ClassifierMLP_InputParameterId_Alpha                           OpenViBE::CIdentifier(0xF3FAB4BE, 0xDC401265)
+
 
 #include <Eigen/Dense>
 
@@ -26,8 +27,6 @@ namespace OpenViBEPlugins
 
 		class CAlgorithmClassifierMLP : public OpenViBEToolkit::CAlgorithmClassifier
 		{
-			typedef std::pair< OpenViBE::float64, Eigen::VectorXd> CEigenFeatureVector;
-
 		public:
 
 			virtual OpenViBE::boolean initialize(void);
@@ -92,8 +91,12 @@ namespace OpenViBEPlugins
 			{
 				CAlgorithmClassifierDesc::getAlgorithmPrototype(rAlgorithmPrototype);
 
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount, "Amount of neuron in hidden layer",
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_HiddenNeuronCount, "Number of neurons in hidden layer",
 													  OpenViBE::Kernel::ParameterType_Integer);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_Epsilon, "Learning stop condition",
+													  OpenViBE::Kernel::ParameterType_Float);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_ClassifierMLP_InputParameterId_Alpha, "Learning coefficient",
+													  OpenViBE::Kernel::ParameterType_Float);
 				return true;
 			}
 
