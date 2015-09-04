@@ -60,7 +60,6 @@ namespace OpenViBEPlugins
 
 		private:
 			std::vector<SSubClassifierDescriptor> m_oSubClassifierDescriptorList;
-			XML::IXMLNode *m_pConfigurationNode;
 			fClassifierComparison m_fAlgorithmComparison;
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pDecisionStrategyAlgorithm;
@@ -71,7 +70,6 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 getClassCount(void) const;
 
 			OpenViBE::boolean loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
-			void generateConfigurationNode(void);
 
 			SSubClassifierDescriptor& getSubClassifierDescriptor(const OpenViBE::uint32 f64FirstClass, const OpenViBE::uint32 f64SecondClass);
 			OpenViBE::boolean setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId);

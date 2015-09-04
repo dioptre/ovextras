@@ -43,10 +43,7 @@ namespace OpenViBEPlugins
 
 			OpenViBE::boolean loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 
-			void generateConfigurationNode(void);
-
 			std::vector<OpenViBE::Kernel::IAlgorithmProxy*> m_oSubClassifierList;
-			XML::IXMLNode *m_pConfigurationNode;
 			fClassifierComparison m_fAlgorithmComparison;
 		};
 
