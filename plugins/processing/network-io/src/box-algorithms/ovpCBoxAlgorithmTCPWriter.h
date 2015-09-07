@@ -64,10 +64,10 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean sendToClients(const void* pBuffer, OpenViBE::uint32 ui32BufferLength);
 
 			// Stream decoder
-			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmTCPWriter > m_StimulationDecoder;
-			OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmTCPWriter > m_MatrixDecoder;
-			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmTCPWriter > m_SignalDecoder;
-			OpenViBEToolkit::TDecoder < CBoxAlgorithmTCPWriter > *m_pActiveDecoder;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmTCPWriter > m_oStimulationDecoder;
+			OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmTCPWriter > m_oMatrixDecoder;
+			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmTCPWriter > m_oSignalDecoder;
+			OpenViBEToolkit::TDecoder < CBoxAlgorithmTCPWriter >* m_pActiveDecoder;
 
 			boost::asio::io_service m_oIOService;
 			boost::asio::ip::tcp::acceptor* m_pAcceptor;
@@ -146,7 +146,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Send input stream out via a TCP socket"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("\n"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Acquisition and network IO"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-connect"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_TCPWriter; }
