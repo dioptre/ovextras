@@ -1,5 +1,6 @@
 #include "ovpCModTemporalFilterBoxAlgorithm.h"
 #include <cstdlib>
+#include <cerrno>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -11,17 +12,11 @@ using namespace std;
 
 boolean CModTemporalFilterBoxAlgorithm::initialize(void)
 {
-	CIdentifier l_oInputTypeIdentifier;
-	getStaticBoxContext().getInputType(0, l_oInputTypeIdentifier);
-	if(l_oInputTypeIdentifier==OV_TypeId_Signal)
-	{
-		m_pStreamDecoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-		m_pStreamEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoder));
-	}
-	else
-	{
-		return false;
-	}
+	m_bHasBeenInit = false;
+
+	m_pStreamDecoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
+	m_pStreamEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamEncoder));
+
 	m_pStreamDecoder->initialize();
 	m_pStreamEncoder->initialize();
 
@@ -46,7 +41,11 @@ boolean CModTemporalFilterBoxAlgorithm::initialize(void)
 	m_sLowBand=CString("");
 	m_sHighBand=CString("");
 	m_sPassBandRiple=CString("");
-	updateSettings();
+	if(!updateSettings())
+	{
+		this->getLogManager() << LogLevel_Error << "The box cannot be initialized.\n";
+		return false;
+	}
 
 	m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_SamplingFrequency)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_SamplingRate));
 
@@ -61,7 +60,9 @@ boolean CModTemporalFilterBoxAlgorithm::initialize(void)
 
 bool CModTemporalFilterBoxAlgorithm::updateSettings()
 {
-	bool retVal = false;
+	boolean retVal = false;
+	boolean l_bError = false;
+	char* l_pEndPtr = NULL;
 	//get the settings
 	CString l_oNameFilter;
 	CString l_oKindFilter;
@@ -79,52 +80,126 @@ bool CModTemporalFilterBoxAlgorithm::updateSettings()
 
 	if(m_sFilterMethod!=l_oNameFilter)
 	{
-		TParameterHandler<uint64> ip_ui64NameFilter(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_FilterMethod));
-		ip_ui64NameFilter=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_FilterMethod, l_oNameFilter);
-		m_sFilterMethod=l_oNameFilter;
-		retVal=true;
+		uint64 l_ui64UInteger64Parameter = this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_FilterMethod, l_oNameFilter);
+		if(l_ui64UInteger64Parameter == OV_UndefinedIdentifier)
+		{
+			this->getLogManager() << LogLevel_Error << "Unrecognized filter method " << l_oNameFilter << ".\n";
+			l_bError = true;
+		}
+		else
+		{
+			TParameterHandler<uint64> ip_ui64NameFilter(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_FilterMethod));
+			ip_ui64NameFilter=l_ui64UInteger64Parameter;
+			retVal=true;
+		}
+		m_sFilterMethod=l_oNameFilter; //We set up the new value to avoid to repeat the error log over and over again
 	}
 
 	if(m_sFilterType!=l_oKindFilter)
 	{
-		TParameterHandler<uint64> ip_ui64KindFilter(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_FilterType));
-		ip_ui64KindFilter=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_FilterType, l_oKindFilter);
-		m_sFilterType=l_oKindFilter;
-		retVal=true;
+		uint64 l_ui64UInteger64Parameter = this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_FilterType, l_oKindFilter);
+		if(l_ui64UInteger64Parameter == OV_UndefinedIdentifier)
+		{
+			this->getLogManager() << LogLevel_Error << "Unrecognized filter type " << l_oKindFilter << ".\n";
+			l_bError = true;
+		}
+		else
+		{
+			TParameterHandler<uint64> ip_ui64KindFilter(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_FilterType));
+			ip_ui64KindFilter=l_ui64UInteger64Parameter;
+			retVal=true;
+		}
+		m_sFilterType=l_oKindFilter; //We set up the new value to avoid to repeat the error log over and over again
 	}
 
 	if(m_sFilterOrder!=l_oFilterOrder)
 	{
-		TParameterHandler<uint64> ip_ui64FilterOrder(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_FilterOrder));
-		ip_ui64FilterOrder=atoi(l_oFilterOrder);
-		m_sFilterOrder=l_oFilterOrder;
-		retVal=true;
+		int64 l_i64Integer64Parameter = strtoll(l_oFilterOrder, &l_pEndPtr, 10);
+		if(l_i64Integer64Parameter <= 0 || (errno !=0 && l_i64Integer64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
+		{
+			this->getLogManager() << LogLevel_Error << "Wrong filter order (" << l_oFilterOrder << "). Should be one or more.\n";
+			l_bError = true;
+		}
+		else
+		{
+			TParameterHandler<uint64> ip_ui64FilterOrder(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_FilterOrder));
+			ip_ui64FilterOrder=l_i64Integer64Parameter;
+			retVal=true;
+		}
+		m_sFilterOrder=l_oFilterOrder; //We set up the new value to avoid to repeat the error log over and over again
 	}
 
 	if(m_sLowBand!=l_oLowPassBandEdge)
 	{
-		TParameterHandler<float64> ip_f64LowCutFrequency(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_LowCutFrequency));
-		ip_f64LowCutFrequency=atof(l_oLowPassBandEdge);
+		TParameterHandler<float64> ip_f64HighCutFrequency(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_HighCutFrequency));
+		float64 l_f64Float64Parameter = strtof(l_oLowPassBandEdge, &l_pEndPtr);
+		if(l_f64Float64Parameter < 0 || (errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
+		{
+			this->getLogManager() << LogLevel_Error << "Wrong low cut frequency (" << l_oLowPassBandEdge << " Hz). Should be positive.\n";
+			l_bError = true;
+		}
+		else if(m_bHasBeenInit && l_f64Float64Parameter > static_cast<float64>(ip_f64HighCutFrequency))//If it's not the first init we need to check that we do not set a wrong frequency according to the high one
+		{
+			this->getLogManager() << LogLevel_Error << "Wrong low cut frequency (" << l_oLowPassBandEdge << " Hz). Should be under the high cut frequency "
+								  << static_cast<float64>(ip_f64HighCutFrequency) << " Hz.\n";
+			l_bError = true;
+		}
+		else
+		{
+			TParameterHandler<float64> ip_f64LowCutFrequency(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_LowCutFrequency));
+			ip_f64LowCutFrequency=l_f64Float64Parameter;
+			retVal=true;
+		}
 		m_sLowBand=l_oLowPassBandEdge;
-		retVal=true;
 	}
 
 	if(m_sHighBand!=l_oHighPassBandEdge)
 	{
-		TParameterHandler<float64> ip_f64HighCutFrequency(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_HighCutFrequency));
-		ip_f64HighCutFrequency=atof(l_oHighPassBandEdge);
+		TParameterHandler<float64> ip_f64LowCutFrequency(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_LowCutFrequency));
+		float64 l_f64Float64Parameter = strtof(l_oHighPassBandEdge, &l_pEndPtr);
+		if(l_f64Float64Parameter < 0 || (errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
+		{
+			this->getLogManager() << LogLevel_Error << "Wrong high cut frequency (" << l_oHighPassBandEdge << " Hz). Should be positive.\n";
+			l_bError = true;
+		}
+		else if(l_f64Float64Parameter < static_cast<float64>(ip_f64LowCutFrequency))
+		{
+			this->getLogManager() << LogLevel_Error << "Wrong high cut frequency (" << l_oHighPassBandEdge << " Hz). Should be over the low cut frequency "
+								  << static_cast<float64>(ip_f64LowCutFrequency) << " Hz.\n";
+			l_bError = true;
+		}
+		else
+		{
+			TParameterHandler<float64> ip_f64HighCutFrequency(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_HighCutFrequency));
+			ip_f64HighCutFrequency=l_f64Float64Parameter;
+			retVal=true;
+		}
 		m_sHighBand=l_oHighPassBandEdge;
-		retVal=true;
 	}
 
 	if(m_sPassBandRiple!=l_oPassBandRipple)
 	{
-		TParameterHandler<float64> ip_f64PassBandRipple(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_BandPassRipple));
-		ip_f64PassBandRipple=atof(l_oPassBandRipple);
+		float64 l_f64Float64Parameter = strtof(l_oPassBandRipple, &l_pEndPtr);;
+		if((errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
+		{
+			this->getLogManager() << LogLevel_Error << "Wrong pass band ripple (" << l_oPassBandRipple << " dB).\n";
+			l_bError = true;
+		}
+		else
+		{
+			TParameterHandler<float64> ip_f64PassBandRipple(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_BandPassRipple));
+			ip_f64PassBandRipple = l_f64Float64Parameter;
+			retVal=true;
+		}
 		m_sPassBandRiple=l_oPassBandRipple;
-		retVal=true;
 	}
 
+	//If it was the original init we return false to stop the init process
+	if(!m_bHasBeenInit && l_bError)
+	{
+		return false;
+	}
+	m_bHasBeenInit = true;
 	return retVal;
 }
 
