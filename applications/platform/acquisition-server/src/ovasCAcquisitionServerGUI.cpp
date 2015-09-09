@@ -348,11 +348,13 @@ boolean CAcquisitionServerGUI::initialize(void)
 
 	// Connects custom GTK signals
 
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_preference"),                    "pressed", G_CALLBACK(button_preference_pressed_cb), this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_configure"),                     "pressed", G_CALLBACK(button_configure_pressed_cb),  this);
+	// Note: Seems the signals below have to be "clicked", not "pressed", or the underlined keyboard shortcuts
+	// of gtk stock items that can be activated with alt key ("mnemonics") do not work.
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_preference"),                    "clicked", G_CALLBACK(button_preference_pressed_cb), this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_configure"),                     "clicked", G_CALLBACK(button_configure_pressed_cb),  this);
 	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "togglebutton_connect"),                 "toggled", G_CALLBACK(button_connect_toggled_cb),    this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_play"),                          "pressed", G_CALLBACK(button_start_pressed_cb),      this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_stop"),                          "pressed", G_CALLBACK(button_stop_pressed_cb),       this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_play"),                          "clicked", G_CALLBACK(button_start_pressed_cb),      this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_stop"),                          "clicked", G_CALLBACK(button_stop_pressed_cb),       this);
 	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "combobox_driver"),                      "changed", G_CALLBACK(combobox_driver_changed_cb),   this);
 	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "combobox_sample_count_per_sent_block"), "changed", G_CALLBACK(combobox_sample_count_per_sent_block_changed_cb),  this);
 	gtk_builder_connect_signals(m_pBuilderInterface, NULL);

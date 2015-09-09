@@ -1,5 +1,6 @@
 @ECHO OFF
 SETLOCAL EnableExtensions
+SETLOCAL EnableDelayedExpansion
 
 REM Get the directory location of this script, assume it contains the OpenViBE dist tree. These variables will be used by OpenViBE executables.
 SET "OV_PATH_ROOT=%~dp0"
@@ -13,21 +14,23 @@ SET OV_RUN_IN_BG=
 
 REM Parse out Windows specific args ...
 SET "ARGS="
+SET EMPTY=
 :loop
-if "%~1" NEQ "" (
-	IF /i "%~1"=="--no-pause" (
+SET "STRIPPEDARG=%~1"
+if NOT !STRIPPEDARG! == !EMPTY! (
+	IF /i "!STRIPPEDARG!" == "--no-pause" (
 		SET OV_PAUSE=
 		goto found:
 	)
-	IF /i "%~1"=="--run-bg" (
+	IF /i "!STRIPPEDARG!" == "--run-bg" (
 		REM Run in background, disable pause. The second parameter below is because CMD requires a 'title'
 		SET OV_RUN_IN_BG=START "@OV_CMD_EXECUTABLE@"
 		SET OV_PAUSE=
 		goto found:
 	)
 	
-	REM Pass this arg to the launched application...
-	SET "ARGS=%ARGS% %1"
+	REM Pass the non-stripped arg to the launched application...
+	SET ARGS=%ARGS% %1
 	
 :found	
 	SHIFT
@@ -42,7 +45,7 @@ IF NOT EXIST "%OV_ENVIRONMENT_FILE%" (
 )
 CALL "%OV_ENVIRONMENT_FILE%"
 
-REM OV_CMD_ARGS below may specify additional arguments outside this script
+REM cmake variable OV_CMD_ARGS below may specify additional arguments outside this script
 
 %OV_RUN_IN_BG% "%OV_PATH_ROOT%\bin\@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ %ARGS%
 	
