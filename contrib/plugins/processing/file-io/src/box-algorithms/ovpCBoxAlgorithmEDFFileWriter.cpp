@@ -1,6 +1,7 @@
 #include "ovpCBoxAlgorithmEDFFileWriter.h"
 
 #include <openvibe/ovITimeArithmetics.h>
+#include <limits>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -28,20 +29,46 @@ boolean CBoxAlgorithmEDFFileWriter::initialize(void)
 
 boolean CBoxAlgorithmEDFFileWriter::uninitialize(void)
 {
-	/*
-	while(!buffer.empty())
+	for(int channel=0; channel<m_iNumberOfChannels; channel++)
 	{
-		buffer.pop();
+		if(edf_set_samplefrequency(m_iFileHandle, channel, m_iSampleFrequency) == -1)
+		{
+			this->getLogManager() << LogLevel_ImportantWarning << "edf_set_samplefrequency failed!\n";
+			return false;
+		}
+		if(edf_set_physical_maximum(m_iFileHandle, channel, m_oChannelInformation[channel].m_f64MaxValue) == -1)//1.7*10^308)
+		{
+			this->getLogManager() << LogLevel_ImportantWarning << "edf_set_physical_maximum failed!\n";
+			return false;
+		}
+		if(edf_set_physical_minimum(m_iFileHandle, channel, m_oChannelInformation[channel].m_f64MinValue) == -1)//-1.7*10^308)
+		{
+			this->getLogManager() << LogLevel_ImportantWarning << "edf_set_physical_minimum failed!\n";
+			return false;
+		}
+		if(edf_set_digital_maximum(m_iFileHandle, channel, 32767) == -1)
+		{
+			this->getLogManager() << LogLevel_ImportantWarning << "edf_set_digital_maximum failed!\n";
+			return false;
+		}
+		if(edf_set_digital_minimum(m_iFileHandle, channel, -32768) == -1)
+		{
+			this->getLogManager() << LogLevel_ImportantWarning << "edf_set_digital_minimum failed!\n";
+			return false;
+		}
+		if(edf_set_label(m_iFileHandle, channel, const_cast <char*>(m_SignalDecoder.getOutputMatrix()->getDimensionLabel(0, channel))) == -1)
+		{
+			this->getLogManager() << LogLevel_ImportantWarning << "edf_set_label failed!\n";
+			return false;
+		}
 	}
-	*/
-
 	
 	if(m_bIsFileOpened && ((int) buffer.size() >= m_iSampleFrequency*m_iNumberOfChannels))
 	{
 		this->getLogManager() << LogLevel_Trace << "m_bIsFileOpened && ((int) buffer.size() >= m_iSampleFrequency*m_iNumberOfChannels)\n";
 		while((int)buffer.size() >= m_iSampleFrequency*m_iNumberOfChannels)
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "while((int)buffer.size() >= m_iSampleFrequency*m_iNumberOfChannels)\n";
+			this->getLogManager() << LogLevel_Trace << "while((int)buffer.size() >= m_iSampleFrequency*m_iNumberOfChannels)\n";
 			for(int element=0; element<m_iSampleFrequency*m_iNumberOfChannels; element++)
 			{
 				m_pTemporyBuffer[element] = (double) buffer.front();
@@ -173,36 +200,9 @@ boolean CBoxAlgorithmEDFFileWriter::process(void)
 
 			for(int channel=0; channel<m_iNumberOfChannels; channel++)
 			{
-				if(edf_set_samplefrequency(m_iFileHandle, channel, m_iSampleFrequency) == -1)
-				{
-					this->getLogManager() << LogLevel_ImportantWarning << "edf_set_samplefrequency failed!\n";
-					return false;
-				}
-				if(edf_set_physical_maximum(m_iFileHandle, channel, 32767) == -1)//1.7*10^308)
-				{
-					this->getLogManager() << LogLevel_ImportantWarning << "edf_set_physical_maximum failed!\n";
-					return false;
-				}
-				if(edf_set_physical_minimum(m_iFileHandle, channel, -32768) == -1)//-1.7*10^308)
-				{
-					this->getLogManager() << LogLevel_ImportantWarning << "edf_set_physical_minimum failed!\n";
-					return false;
-				}
-				if(edf_set_digital_maximum(m_iFileHandle, channel, 32767) == -1)
-				{
-					this->getLogManager() << LogLevel_ImportantWarning << "edf_set_digital_maximum failed!\n";
-					return false;
-				}
-				if(edf_set_digital_minimum(m_iFileHandle, channel, -32768) == -1)
-				{
-					this->getLogManager() << LogLevel_ImportantWarning << "edf_set_digital_minimum failed!\n";
-					return false;
-				}
-				if(edf_set_label(m_iFileHandle, channel, const_cast <char*>(m_SignalDecoder.getOutputMatrix()->getDimensionLabel(0, channel))) == -1)
-				{
-					this->getLogManager() << LogLevel_ImportantWarning << "edf_set_label failed!\n";
-					return false;
-				}
+				//Creation of one information channel structure per channel
+				SChannelInfo l_oChannelInfo = {std::numeric_limits<float64>::max(), -std::numeric_limits<float64>::max()};
+				m_oChannelInformation.push_back(l_oChannelInfo);
 			}
 			
 			m_bIsFileOpened = true;
@@ -216,7 +216,16 @@ boolean CBoxAlgorithmEDFFileWriter::process(void)
 			{
 				for(int channel=0; channel<m_iNumberOfChannels; channel++)
 				{
-					buffer.push(l_pMatrix->getBuffer()[channel*m_iNumberOfSamplesPerChunk+sample]);
+					float64 l_f64TempValue = l_pMatrix->getBuffer()[channel*m_iNumberOfSamplesPerChunk+sample];
+					if(l_f64TempValue > m_oChannelInformation[channel].m_f64MaxValue)
+					{
+						m_oChannelInformation[channel].m_f64MaxValue = l_f64TempValue;
+					}
+					if(l_f64TempValue < m_oChannelInformation[channel].m_f64MinValue)
+					{
+						m_oChannelInformation[channel].m_f64MinValue = l_f64TempValue;
+					}
+					buffer.push(l_f64TempValue);
 				}
 			}
 		}
@@ -263,30 +272,6 @@ boolean CBoxAlgorithmEDFFileWriter::process(void)
 				sprintf(l_TemporyPatientAge, "%u", (unsigned int)m_ExperimentInformationDecoder.getOutputSubjectAge());
 				strcat(l_PatientAge, l_TemporyPatientAge);
 				edf_set_patient_additional(m_iFileHandle, const_cast <char *>(l_PatientAge));
-			}
-		}
-		
-		while((int)buffer.size() >= m_iSampleFrequency*m_iNumberOfChannels)
-		{
-			
-			for(int element=0; element<m_iSampleFrequency*m_iNumberOfChannels; element++)
-			{
-				m_pTemporyBuffer[element] = (double) buffer.front();
-				buffer.pop();
-			}
-			
-			for(int channel=0; channel<m_iNumberOfChannels; channel++)
-			{
-				for(int sample=0; sample<m_iSampleFrequency; sample++)
-				{
-					m_pTemporyBufferToWrite[channel*m_iSampleFrequency+sample] = m_pTemporyBuffer[sample*m_iNumberOfChannels+channel];
-				}
-			}
-			
-			if(edf_blockwrite_physical_samples(m_iFileHandle, m_pTemporyBufferToWrite) == -1)
-			{
-				this->getLogManager() << LogLevel_ImportantWarning << "edf_blockwrite_physical_samples: Could not write samples in file [" << m_sFilename << "]\n";
-				return false;
 			}
 		}
 	}
