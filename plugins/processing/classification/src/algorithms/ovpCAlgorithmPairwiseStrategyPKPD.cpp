@@ -54,8 +54,8 @@ boolean CAlgorithmPairwiseStrategyPKPD::compute(std::vector< SClassificationInfo
 	for(size_t i = 0 ; i < pClassificationValueList.size() ; ++i)
 	{
 		SClassificationInfo& l_rTemp = pClassificationValueList[i];
-		const uint32 l_f64FirstIndex = l_rTemp.m_f64FirstClass -1;
-		const uint32 l_f64SecondIndex = l_rTemp.m_f64SecondClass -1;
+		const uint32 l_f64FirstIndex = static_cast<uint32>(l_rTemp.m_f64FirstClass) -1;
+		const uint32 l_f64SecondIndex = static_cast<uint32>(l_rTemp.m_f64SecondClass) -1;
 		const float64* l_pValues = l_rTemp.m_pClassificationValue->getBuffer();
 		l_pProbabilityMatrix[l_f64FirstIndex * m_ui32ClassCount + l_f64SecondIndex] = l_pValues[0];
 		l_pProbabilityMatrix[l_f64SecondIndex * m_ui32ClassCount + l_f64FirstIndex] = 1 - l_pValues[0];

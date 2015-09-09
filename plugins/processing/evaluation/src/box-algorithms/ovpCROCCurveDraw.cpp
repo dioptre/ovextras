@@ -68,8 +68,8 @@ void CROCCurveDraw::generateCurve()
 	for(size_t i = 0; i < m_oCoordinateList.size(); ++i)
 	{
 		GdkPoint l_oPoint;
-		l_oPoint.x = m_oCoordinateList[i].first * l_ui32ChartWidth + m_ui32Margin;
-		l_oPoint.y = (l_pAllocation.height - m_ui32Margin) - m_oCoordinateList[i].second * l_ui32ChartHeight;
+		l_oPoint.x = static_cast<gint>(m_oCoordinateList[i].first * l_ui32ChartWidth + m_ui32Margin);
+		l_oPoint.y = static_cast<gint>((l_pAllocation.height - m_ui32Margin) - m_oCoordinateList[i].second * l_ui32ChartHeight);
 		m_oPointList.push_back(l_oPoint);
 	}
 	m_bHasBeenInit = true;

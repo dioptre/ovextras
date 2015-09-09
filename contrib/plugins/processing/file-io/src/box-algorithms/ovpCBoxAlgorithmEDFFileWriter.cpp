@@ -94,6 +94,7 @@ boolean CBoxAlgorithmEDFFileWriter::uninitialize(void)
 	}
 	
 	delete m_pTemporyBuffer;
+	delete m_pTemporyBufferToWrite;
 	
 	if(m_bIsFileOpened)
 	{

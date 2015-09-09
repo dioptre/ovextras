@@ -177,7 +177,7 @@ boolean CBoxAlgorithmKappaCoefficient::process(void)
 					uint32 l_ui32Total = 0;
 					for(size_t j =0; j < m_ui32AmountClass * m_ui32AmountClass ; ++j)
 					{
-						l_ui32Total += l_pConfusionMatrix[j];
+						l_ui32Total += static_cast<uint32>(l_pConfusionMatrix[j]);
 					}
 
 					//Now we gonna compute the two sum we need to compute the kappa coefficient

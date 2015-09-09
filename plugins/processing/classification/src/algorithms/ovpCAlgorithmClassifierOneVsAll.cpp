@@ -206,7 +206,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	}
 
 	//Now that we made the calculation, we send the corresponding data
-	IAlgorithmProxy* l_pWinner = this->m_oSubClassifierList[rf64Class-1];
+	IAlgorithmProxy* l_pWinner = this->m_oSubClassifierList[static_cast<uint32>(rf64Class)-1];
 	TParameterHandler < IMatrix* > op_pClassificationWinnerValues(l_pWinner->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
 	TParameterHandler < IMatrix* > op_pProbabilityWinnerValues(l_pWinner->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
 

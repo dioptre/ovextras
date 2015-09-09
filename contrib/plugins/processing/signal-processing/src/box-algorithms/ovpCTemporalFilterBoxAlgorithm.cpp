@@ -67,7 +67,7 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 	ip_ui64KindFilter=l_ui64UInteger64Parameter;
 
 
-	l_i64Integer64Parameter = strtoll(l_oFilterOrder, &l_pEndPtr, 10);
+	l_i64Integer64Parameter = strtol(l_oFilterOrder, &l_pEndPtr, 10);
 	if(l_i64Integer64Parameter <= 0 || (errno !=0 && l_i64Integer64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 	{
 		this->getLogManager() << LogLevel_Error << "Wrong filter order (" << l_oFilterOrder << "). Should be one or more.\n";
@@ -77,7 +77,7 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 	ip_ui64FilterOrder=l_i64Integer64Parameter;
 
 
-	l_f64Float64Parameter = strtof(l_oLowPassBandEdge, &l_pEndPtr);
+	l_f64Float64Parameter = strtod(l_oLowPassBandEdge, &l_pEndPtr);
 	if(l_f64Float64Parameter < 0  || (errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 	{
 		this->getLogManager() << LogLevel_Error << "Wrong low cut frequency (" << l_oLowPassBandEdge << " Hz). Should be positive.\n";
@@ -87,7 +87,7 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 	ip_f64LowCutFrequency=l_f64Float64Parameter;
 
 
-	l_f64Float64Parameter = strtof(l_oHighPassBandEdge, &l_pEndPtr);
+	l_f64Float64Parameter = strtod(l_oHighPassBandEdge, &l_pEndPtr);
 	if(l_f64Float64Parameter < 0 || (errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 	{
 		this->getLogManager() << LogLevel_Error << "Wrong high cut frequency (" << l_oHighPassBandEdge << " Hz). Should be positive.\n";
@@ -104,7 +104,7 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 
 
 
-	l_f64Float64Parameter = strtof(l_oPassBandRipple, &l_pEndPtr);;
+	l_f64Float64Parameter = strtod(l_oPassBandRipple, &l_pEndPtr);;
 	if((errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 	{
 		this->getLogManager() << LogLevel_Error << "Wrong pass band ripple (" << l_oPassBandRipple << " dB).\n";
