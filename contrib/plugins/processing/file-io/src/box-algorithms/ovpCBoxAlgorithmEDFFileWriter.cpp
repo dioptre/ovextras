@@ -29,6 +29,8 @@ boolean CBoxAlgorithmEDFFileWriter::initialize(void)
 
 boolean CBoxAlgorithmEDFFileWriter::uninitialize(void)
 {
+	this->getLogManager() << LogLevel_Info << "Writing the file, this may take a moment.\n";
+
 	for(int channel=0; channel<m_iNumberOfChannels; channel++)
 	{
 		if(edf_set_samplefrequency(m_iFileHandle, channel, m_iSampleFrequency) == -1)
@@ -120,8 +122,8 @@ boolean CBoxAlgorithmEDFFileWriter::uninitialize(void)
 		}
 	}
 	
-	delete m_pTemporyBuffer;
-	delete m_pTemporyBufferToWrite;
+	delete[] m_pTemporyBuffer;
+	delete[] m_pTemporyBufferToWrite;
 	
 	if(m_bIsFileOpened)
 	{
