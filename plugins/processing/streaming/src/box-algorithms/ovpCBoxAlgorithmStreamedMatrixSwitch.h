@@ -64,14 +64,6 @@ namespace OpenViBEPlugins
 				
 				OpenViBE::CIdentifier l_oIdentifier;
 				rBox.getInputType(1,l_oIdentifier);
-				
-				//The input can be only streamed matrix or children streams
-				if(!this->getTypeManager().isDerivedFromStream(l_oIdentifier, OV_TypeId_StreamedMatrix))
-				{
-					OpenViBE::CIdentifier l_oOutputIdentifier;
-					rBox.getOutputType(0,l_oOutputIdentifier);
-					rBox.setInputType(ui32Index, l_oOutputIdentifier);
-				}
 
 				// all output must have the input type
 				for(OpenViBE::uint32 i = 0; i < rBox.getOutputCount(); i++)
