@@ -12,21 +12,24 @@ ELSE(WIN32)
 	SET(OV_LOGFILE "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")	
 ENDIF(WIN32)
 
-SET(TEST_SCENARIOS LDA-OneVsOne-HT-Test LDA-OneVsOne-PKPD-Test LDA-OneVsOne-Voting-Test LDA-OneVsAll-Test sLDA-OneVsOne-HT-Test sLDA-OneVsOne-PKPD-Test sLDA-OneVsOne-Voting-Test sLDA-OneVsAll-Test SVM-Native-Test SVM-OneVsOne-Voting-Test SVM-OneVsOne-HT-Test SVM-OneVsOne-PKPD-Test SVM-OneVsAll-Test MLP-Native-Test MLP-OneVsOne-Voting-Test MLP-OneVsOne-HT-Test MLP-OneVsOne-PKPD-Test MLP-OneVsAll-Test)
-
-
-ADD_TEST(clean_Evaluation-kappa rm -f ${OV_LOGFILE})
-ADD_TEST(run_Evaluation-kappa "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" "--config" "$ENV{OV_BINARY_PATH}/share/openvibe/kernel/openvibe_test.conf" "--play-fast" Test-kappa.xml)
-ADD_TEST(compare_Evaluation_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_evaluation.${EXT}" "${OS_FLAGS}" "${OV_LOGFILE}")
+ADD_TEST(clean_Evaluation_kappa rm -f ${OV_LOGFILE})
+ADD_TEST(run_Evaluation_kappa "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" "--config" "$ENV{OV_BINARY_PATH}/share/openvibe/kernel/openvibe_test.conf" "--play-fast" Test-kappa.xml)
+ADD_TEST(compare_Evaluation_kappa "$ENV{OV_BINARY_PATH}/test_evaluation.${EXT}" "${OS_FLAGS}" "${OV_LOGFILE}")
 	
 # It would be better to clean last, but we can't do this as it will delete the 
 # output we wish to include, and we can't prevent clean from running if a prev. test fails
 # We need the clean to be sure that the comparator stage is not getting data from a previous run.
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES DEPENDS clean_${TEST_NAME})
-SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
+SET_TESTS_PROPERTIES(run_Evaluation_kappa PROPERTIES DEPENDS clean_Evaluation_kappa)
+SET_TESTS_PROPERTIES(run_Evaluation_kappa PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
 
-SET_TESTS_PROPERTIES(compare_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
-SET_TESTS_PROPERTIES(compare_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
+SET_TESTS_PROPERTIES(compare_Evaluation_kappa PROPERTIES DEPENDS run_Evaluation_kappa)
+SET_TESTS_PROPERTIES(compare_Evaluation_kappa PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
 
 
+ADD_TEST(run_Evaluation_statistic_generator "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" "--config" "$ENV{OV_BINARY_PATH}/share/openvibe/kernel/openvibe_test.conf" "--play-fast" Test-StatisticGenerator.xml)
+ADD_TEST(compare_Evaluation_statistic_generator "diff" "stat.xml" "data/Statistic_comparison.xml")
+ADD_TEST(clean_Evaluation_statistic_generator rm -f stat.xml)
 
+
+SET_TESTS_PROPERTIES(compare_Evaluation_statistic_generator PROPERTIES DEPENDS run_Evaluation_statistic_generator)
+SET_TESTS_PROPERTIES(compare_Evaluation_statistic_generator PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
