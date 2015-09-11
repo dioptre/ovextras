@@ -411,6 +411,15 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 
 		this->getLogManager() << LogLevel_Info << "Regularized CSP Spatial filter trained successfully.\n";
 
+		// Clean data, so if there's a new train stimulation, we'll start again.
+		// @note possibly this should be a parameter in the future to allow incremental training
+		for(uint32 i=0;i<2;i++)
+		{
+			m_pIncrementalCov[i]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_Reset, true);
+			m_ui64nSamples[i] = 0;
+			m_ui64nBuffers[i] = 0;
+		}
+
 		m_oStimulationEncoder.getInputStimulationSet()->clear();
 		m_oStimulationEncoder.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, l_ui64TrainDate, 0);
 		m_oStimulationEncoder.encodeBuffer();
