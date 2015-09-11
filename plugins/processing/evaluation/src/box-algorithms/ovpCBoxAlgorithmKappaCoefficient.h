@@ -39,7 +39,7 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_KappaCoefficient)
 
 		protected:
-				void updateKappaValue(OpenViBE::float64 f64KappaValue);
+				void updateKappaValue();
 
 				OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmKappaCoefficient > m_oTargetStimulationDecoder;
 				OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmKappaCoefficient > m_oClassifierStimulationDecoder;
@@ -52,6 +52,7 @@ namespace OpenViBEPlugins
 
 				OpenViBE::uint32 m_ui32AmountClass;
 				OpenViBE::uint64 m_ui64CurrentProcessingTimeLimit;
+				OpenViBE::float64 m_f64KappaCoefficient;
 
 				::GtkWidget* m_pKappaLabel;
 		};

@@ -35,7 +35,7 @@ boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 	ip_bPercentages = false;
 
 	TParameterHandler<boolean> ip_bSums(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_Sums));
-	ip_bSums = false;
+	ip_bSums = true;
 
 	m_ui32AmountClass=getBoxAlgorithmContext()->getStaticBoxContext()->getSettingCount() - c_ui32ClassLabelOffset;
 	vector < uint64 > l_vClassCodes;
@@ -99,6 +99,8 @@ boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 
 boolean CBoxAlgorithmKappaCoefficient::uninitialize(void)
 {
+	//Log for the automatic test
+	this->getLogManager() << LogLevel_Trace << "[Test] Final value of Kappa " << m_f64KappaCoefficient << "\n";
 	m_pConfusionMatrixAlgorithm->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*m_pConfusionMatrixAlgorithm);
 
@@ -174,11 +176,7 @@ boolean CBoxAlgorithmKappaCoefficient::process(void)
 					//The confusion matrix has changed so we need to update the kappa coefficient
 					float64* l_pConfusionMatrix = op_pConfusionMatrix->getBuffer();
 					//First we need the amount of sample that have been classified
-					uint32 l_ui32Total = 0;
-					for(size_t j =0; j < m_ui32AmountClass * m_ui32AmountClass ; ++j)
-					{
-						l_ui32Total += static_cast<uint32>(l_pConfusionMatrix[j]);
-					}
+					uint32 l_ui32Total = static_cast<uint32>(l_pConfusionMatrix[(m_ui32AmountClass+1) * (m_ui32AmountClass + 1) -1]);
 
 					//Now we gonna compute the two sum we need to compute the kappa coefficient
 					//It's more easy to use a double loop
@@ -187,20 +185,19 @@ boolean CBoxAlgorithmKappaCoefficient::process(void)
 
 					for(size_t j =0; j < m_ui32AmountClass ; ++j)
 					{
-						l_f64ObservedAccurancy += l_pConfusionMatrix[j*m_ui32AmountClass + j];
+						//We need to take the column sum in account
+						l_f64ObservedAccurancy += l_pConfusionMatrix[j*(m_ui32AmountClass+1) + j];
 
-						for(size_t k =0; k < m_ui32AmountClass ; ++k)
-						{
-							l_f64ExpectedAccurancy += (l_pConfusionMatrix[m_ui32AmountClass* j + k] * l_pConfusionMatrix[m_ui32AmountClass * k + j]);
-						}
+						l_f64ExpectedAccurancy += (l_pConfusionMatrix[(m_ui32AmountClass+1)* j + m_ui32AmountClass] *
+												   l_pConfusionMatrix[(m_ui32AmountClass+1) * m_ui32AmountClass + j]);
 					}
 					l_f64ObservedAccurancy /= l_ui32Total;
 					l_f64ExpectedAccurancy /= (l_ui32Total * l_ui32Total);
 
-					float64 l_f64KappaCoefficient = (l_f64ObservedAccurancy - l_f64ExpectedAccurancy)/(1 - l_f64ExpectedAccurancy);
+					m_f64KappaCoefficient = (l_f64ObservedAccurancy - l_f64ExpectedAccurancy)/(1 - l_f64ExpectedAccurancy);
 
-					updateKappaValue(l_f64KappaCoefficient);
-					m_oOutputMatrixEncoder.getInputMatrix()->getBuffer()[0] = l_f64KappaCoefficient;
+					updateKappaValue();
+					m_oOutputMatrixEncoder.getInputMatrix()->getBuffer()[0] = m_f64KappaCoefficient;
 					m_oOutputMatrixEncoder.encodeBuffer();
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 				}
@@ -219,11 +216,11 @@ boolean CBoxAlgorithmKappaCoefficient::process(void)
 	return true;
 }
 
-void CBoxAlgorithmKappaCoefficient::updateKappaValue(float64 f64KappaValue)
+void CBoxAlgorithmKappaCoefficient::updateKappaValue()
 {
 	std::stringstream l_sStream;
 	l_sStream << std::fixed;
 	l_sStream << std::setprecision(2);
-	l_sStream << f64KappaValue;
+	l_sStream << m_f64KappaCoefficient;
 	gtk_label_set(GTK_LABEL(m_pKappaLabel), l_sStream.str().c_str());
 }
