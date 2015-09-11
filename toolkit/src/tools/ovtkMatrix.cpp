@@ -557,6 +557,54 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 	return true;
 }
 
+// A recursive helper function to spool matrix contents to a txt stringstream. 
+boolean dumpMatrixBuffer(const OpenViBE::IMatrix& rMatrix, std::stringstream& buffer, uint32 ui32DimensionIndex, uint32& ui32ElementIndex)
+{
+	//are we in innermost dimension?
+	if(ui32DimensionIndex == rMatrix.getDimensionCount()-1)
+	{
+		//dimension start
+		for(uint32 j=0; j<ui32DimensionIndex; j++)
+		{
+			buffer << CONSTANT_TAB;
+		}
+		buffer << CONSTANT_LEFT_SQUARE_BRACKET;
+
+		//dump current cell contents
+		for(uint32 j=0; j<rMatrix.getDimensionSize(ui32DimensionIndex); j++, ui32ElementIndex++)
+		{
+			buffer << CONSTANT_SPACE << rMatrix.getBuffer()[ui32ElementIndex];
+		}
+
+		//dimension end
+		buffer << CONSTANT_SPACE << CONSTANT_RIGHT_SQUARE_BRACKET << CONSTANT_EOL;
+	}
+	else
+	{
+		//dump all entries in current dimension
+		for(uint32 i=0; i<rMatrix.getDimensionSize(ui32DimensionIndex); i++)
+		{
+			//dimension start
+			for(uint32 j=0; j<ui32DimensionIndex; j++)
+			{
+				buffer << CONSTANT_TAB;
+			}
+			buffer << CONSTANT_LEFT_SQUARE_BRACKET << CONSTANT_EOL;
+
+			dumpMatrixBuffer(rMatrix, buffer, ui32DimensionIndex+1, ui32ElementIndex);
+
+			//dimension end
+			for(uint32 j=0; j<ui32DimensionIndex; j++)
+			{
+				buffer << CONSTANT_TAB;
+			}
+			buffer << CONSTANT_RIGHT_SQUARE_BRACKET << CONSTANT_EOL;
+		}
+	}
+
+	return true;
+}
+
 boolean OpenViBEToolkit::Tools::Matrix::toString(const OpenViBE::IMatrix& rMatrix, OpenViBE::CString& sString, uint32 ui32Precision /* = 6 */)
 {
 	std::stringstream l_oBuffer;
@@ -585,30 +633,9 @@ boolean OpenViBEToolkit::Tools::Matrix::toString(const OpenViBE::IMatrix& rMatri
 	//header end
 	l_oBuffer << CONSTANT_RIGHT_SQUARE_BRACKET << CONSTANT_EOL;
 
-	// Dump buffer
-	const uint32 l_ui32ElementSize = rMatrix.getDimensionSize(rMatrix.getDimensionCount()-1);
-	for(uint32 l_ui32ElementIndex=0;l_ui32ElementIndex<rMatrix.getBufferElementCount(); )
-	{
-		// dimension start
-		for(uint32 j=0; j<rMatrix.getDimensionCount()-1; j++)
-		{
-			l_oBuffer << CONSTANT_LEFT_SQUARE_BRACKET << CONSTANT_EOL;
-		}
-	
-		//dump current cell contents
-		l_oBuffer << CONSTANT_LEFT_SQUARE_BRACKET;
-		for(uint32 i=0;i<l_ui32ElementSize;i++) 
-		{
-			l_oBuffer << CONSTANT_SPACE << (rMatrix.getBuffer())[l_ui32ElementIndex++];
-		}
-		l_oBuffer << CONSTANT_RIGHT_SQUARE_BRACKET << CONSTANT_EOL;
-
-		//dimension end
-		for(uint32 j=0; j<rMatrix.getDimensionCount()-1; j++)
-		{
-			l_oBuffer << CONSTANT_RIGHT_SQUARE_BRACKET << CONSTANT_EOL;
-		}
-	}
+	// Dump buffer using a recursive algorithm
+	uint32 l_ui32ElementIndex = 0;
+	dumpMatrixBuffer(rMatrix, l_oBuffer, 0, l_ui32ElementIndex);
 
 	sString = CString(l_oBuffer.str().c_str());
 
