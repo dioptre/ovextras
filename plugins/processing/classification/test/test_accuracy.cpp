@@ -7,14 +7,18 @@
 
 using namespace std;
 
-const double threshold = 72;
+double threshold = 72;
 
 int main (int argc, char** argv)
 {
-	if(argc!=2) 
+	if(argc!=2 && argc!=3) 
 	{
-		cout << "Usage: test_accuracy <filename>\n";
+		cout << "Usage: test_accuracy <filename> <threshold>\n";
 		return 3;
+	}
+	if(argc==3) 
+	{
+		threshold = atof(argv[2]);
 	}
 
 	ifstream file(argv[1], ios::in);
