@@ -176,7 +176,15 @@ boolean CBoxAlgorithmROCCurve::computeROCCurves()
 		computeOneROCCurve(l_oClassLabel, i-2);
 	}
 	//Now we ask to the current page to draw itself
-	m_oDrawerList[gtk_notebook_current_page(GTK_NOTEBOOK(m_pWidget))]->forceRedraw();
+	const gint l_iCurrentPage = gtk_notebook_current_page(GTK_NOTEBOOK(m_pWidget));
+	if(l_iCurrentPage < 0)
+	{
+		this->getLogManager() << LogLevel_Trace << "No page is select. The designer is probably in no visualisation mode. Discard the drawing phase\n";
+	}
+	else
+	{
+		m_oDrawerList[l_iCurrentPage]->forceRedraw();
+	}
 	return true;
 }
 
