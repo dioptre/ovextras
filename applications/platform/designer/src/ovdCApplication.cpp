@@ -924,20 +924,19 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	}
 	refresh_search_no_data_cb(NULL, this);
 
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"), LogLevel_Debug, "${Designer_DebugCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench"), LogLevel_Benchmark, "${Designer_BenchCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace"), LogLevel_Trace, "${Designer_TraceCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info"), LogLevel_Info, "${Designer_InfoCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_warning"), LogLevel_Warning, "${Designer_WarningCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning"), LogLevel_ImportantWarning, "${Designer_ImportantWarningCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"), LogLevel_Error, "${Designer_ErrorCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"), LogLevel_Fatal, "${Designer_FatalCanal}");
+
 	if(!(m_eCommandLineFlags&CommandLineFlag_NoGui))
 	{
 		m_pLogListenerDesigner = new CLogListenerDesigner(m_rKernelContext, m_pBuilderInterface);
 		m_rKernelContext.getLogManager().addListener(m_pLogListenerDesigner);
-
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"), LogLevel_Debug, "${Designer_DebugCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench"), LogLevel_Benchmark, "${Designer_BenchCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace"), LogLevel_Trace, "${Designer_TraceCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info"), LogLevel_Info, "${Designer_InfoCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_warning"), LogLevel_Warning, "${Designer_WarningCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning"), LogLevel_ImportantWarning, "${Designer_ImportantWarningCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"), LogLevel_Error, "${Designer_ErrorCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"), LogLevel_Fatal, "${Designer_FatalCanal}");
-
 
 		CIdentifier l_oTokenIdentifier;
 		l_oTokenIdentifier = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier("Designer_LogExpanderStatus");
