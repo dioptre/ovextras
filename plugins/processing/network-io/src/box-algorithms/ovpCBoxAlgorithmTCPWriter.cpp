@@ -47,7 +47,7 @@ void CBoxAlgorithmTCPWriter::handleAccept(const boost::system::error_code& ec, b
 		this->getLogManager() << LogLevel_Debug << "Handling a new incoming connection\n";
 
 		// Send the known configuration to the client
-		if( m_pActiveDecoder != &m_StimulationDecoder || m_ui64OutputStyle==TCPWRITER_RAW ) 
+		if( m_pActiveDecoder != &m_oStimulationDecoder || m_ui64OutputStyle==TCPWRITER_RAW ) 
 		{
 			try 
 			{
@@ -82,22 +82,23 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	l_rStaticBoxContext.getInputType(0, m_oInputType);
 	if(m_oInputType == OV_TypeId_StreamedMatrix) 
 	{
-		m_pActiveDecoder = &m_MatrixDecoder;
+		m_pActiveDecoder = &m_oMatrixDecoder;
 	} 
 	else if(m_oInputType == OV_TypeId_Signal)
 	{
-		m_pActiveDecoder = &m_SignalDecoder;
+		m_pActiveDecoder = &m_oSignalDecoder;
+		m_oChunkTranspose.setDimensionCount(0);
 	}
 	else
 	{
-		m_pActiveDecoder = &m_StimulationDecoder;
+		m_pActiveDecoder = &m_oStimulationDecoder;
 	}
 	m_pActiveDecoder->initialize(*this,0);
 
 	uint64 l_ui64Port = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_ui64OutputStyle = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
-	m_ui32RawVersion = htonl(1);
+	m_ui32RawVersion = htonl(1); // TCP Writer output format version
 #if defined(BOOST_LITTLE_ENDIAN)
 	m_ui32Endianness = htonl(1);
 #elif defined(BOOST_BIG_ENDIAN)
@@ -201,6 +202,13 @@ boolean CBoxAlgorithmTCPWriter::processInput(uint32 ui32InputIndex)
 
 boolean CBoxAlgorithmTCPWriter::sendToClients(const void* pBuffer, uint32 ui32BufferLength)
 {
+	if(ui32BufferLength==0 || pBuffer == NULL)
+	{
+		// Nothing to send, shouldn't happen
+		this->getLogManager() << LogLevel_Warning << "Asked to send an empty buffer to clients (shouldn't happen)\n";
+		return false;
+	}
+
 	std::vector<boost::asio::ip::tcp::socket*>::iterator it = m_vSockets.begin();
 	while(it!=m_vSockets.end()) 
 	{
@@ -255,21 +263,33 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 		m_pActiveDecoder->decode(j);
 		if(m_pActiveDecoder->isHeaderReceived())
 		{
-			if(m_pActiveDecoder == &m_MatrixDecoder) 
+			if(m_pActiveDecoder == &m_oMatrixDecoder) 
 			{
-				m_ui32NumberOfChannels = static_cast<uint32> (m_MatrixDecoder.getOutputMatrix()->getDimensionSize(0) );
-				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> (m_MatrixDecoder.getOutputMatrix()->getDimensionSize(1) );
+				const uint32 l_ui32NumberOfDimensions = static_cast<uint32> (m_oMatrixDecoder.getOutputMatrix()->getDimensionCount() ); 
+				if(l_ui32NumberOfDimensions != 2) 
+				{
+					this->getLogManager() << LogLevel_Error << "TCPWriter only supports 2 dimensional matrices\n";
+					return false;
+				}
 
-				m_oChunkTranspose.setDimensionCount(2);
-				m_oChunkTranspose.setDimensionSize(0,m_ui32NumberOfSamplesPerChunk);
-				m_oChunkTranspose.setDimensionSize(1,m_ui32NumberOfChannels);
+				m_ui32NumberOfChannels = static_cast<uint32> (m_oMatrixDecoder.getOutputMatrix()->getDimensionSize(0) );
+				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> (m_oMatrixDecoder.getOutputMatrix()->getDimensionSize(1) );
 			} 
-			else if(m_pActiveDecoder == &m_SignalDecoder)
+			else if(m_pActiveDecoder == &m_oSignalDecoder)
 			{
-				m_ui32Frequency = static_cast<uint32> ( m_SignalDecoder.getOutputSamplingRate() );
-				m_ui32NumberOfChannels = static_cast<uint32> ( m_SignalDecoder.getOutputMatrix()->getDimensionSize(0) );
-				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> ( m_SignalDecoder.getOutputMatrix()->getDimensionSize(1) );
+				const uint32 l_ui32NumberOfDimensions = static_cast<uint32> (m_oSignalDecoder.getOutputMatrix()->getDimensionCount() ); 
+				if(l_ui32NumberOfDimensions != 2) 
+				{
+					this->getLogManager() << LogLevel_Error << "TCPWriter only supports 2 dimensional matrices\n";
+					return false;
+				}
 
+				m_ui32NumberOfChannels = static_cast<uint32> ( m_oSignalDecoder.getOutputMatrix()->getDimensionSize(0) );
+				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> ( m_oSignalDecoder.getOutputMatrix()->getDimensionSize(1) );
+				m_ui32Frequency = static_cast<uint32> ( m_oSignalDecoder.getOutputSamplingRate() );\
+
+				// C++ is in row major order and openvibe signal matrices are [nChannels x nSamples]. The following buffer
+				// is used for transposing the chunks to get [nSamples x nChannels] output matrix (only used in case of signals).
 				m_oChunkTranspose.setDimensionCount(2);
 				m_oChunkTranspose.setDimensionSize(0,m_ui32NumberOfSamplesPerChunk);
 				m_oChunkTranspose.setDimensionSize(1,m_ui32NumberOfChannels);
@@ -278,36 +298,39 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 			{
 				// Stimulus, do nothing
 			}
+
+			// Conformance checking for all matrix based streams
+			if(m_pActiveDecoder == &m_oMatrixDecoder || m_pActiveDecoder == &m_oSignalDecoder)
+			{
+				if(m_ui32NumberOfChannels == 0 || m_ui32NumberOfSamplesPerChunk == 0)
+				{
+					this->getLogManager() << LogLevel_Error << "For matrix-like inputs, both input dimensions must be larger than 0\n";
+					return false;
+				}
+			}
 		}
 		if(m_pActiveDecoder->isBufferReceived()) 
 		{
-			if(m_pActiveDecoder == &m_MatrixDecoder) 
+			if(m_pActiveDecoder == &m_oMatrixDecoder) 
 			{
-				const IMatrix* l_pMatrix = m_MatrixDecoder.getOutputMatrix();
+				const IMatrix* l_pMatrix = m_oMatrixDecoder.getOutputMatrix();
+
+				sendToClients((void *)l_pMatrix->getBuffer(), l_pMatrix->getBufferElementCount()*sizeof(float64));
+			} 
+			else if(m_pActiveDecoder == &m_oSignalDecoder)
+			{
+				const IMatrix* l_pMatrix = m_oSignalDecoder.getOutputMatrix();
 
 				// Transpose
 				const float64 *l_pSource = l_pMatrix->getBuffer();
 				float64 *l_pDestination = m_oChunkTranspose.getBuffer();
-				for(uint32 c=0;c<m_ui32NumberOfChannels;c++) 
-				{
-					for(uint32 s=0;s<m_ui32NumberOfSamplesPerChunk;s++) 
-					{
-						l_pDestination[s*m_ui32NumberOfChannels+c] = l_pSource[c*m_ui32NumberOfSamplesPerChunk+s];
-					}
+				if(m_oChunkTranspose.getDimensionCount() == 0) {
+					this->getLogManager() << LogLevel_Debug << "Box received buffer before header. Bad.\n";
 				}
 
-				sendToClients((void *)l_pDestination, l_pMatrix->getBufferElementCount()*sizeof(float64));
-			} 
-			else if(m_pActiveDecoder == &m_SignalDecoder)
-			{
-				const IMatrix* l_pMatrix = m_SignalDecoder.getOutputMatrix();
-
-				// Transpose
-				const float64 *l_pSource = l_pMatrix->getBuffer();
-				float64 *l_pDestination = m_oChunkTranspose.getBuffer();
-				for(uint32 c=0;c<m_ui32NumberOfChannels;c++) 
+				for(uint32 c=0;c<m_ui32NumberOfChannels;c++)
 				{
-					for(uint32 s=0;s<m_ui32NumberOfSamplesPerChunk;s++) 
+					for(uint32 s=0;s<m_ui32NumberOfSamplesPerChunk;s++)
 					{
 						l_pDestination[s*m_ui32NumberOfChannels+c] = l_pSource[c*m_ui32NumberOfSamplesPerChunk+s];
 					}
@@ -317,7 +340,7 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 			} 
 			else // stimulus
 			{
-				const IStimulationSet* l_pStimulations = m_StimulationDecoder.getOutputStimulationSet();
+				const IStimulationSet* l_pStimulations = m_oStimulationDecoder.getOutputStimulationSet();
 				for(uint32 j=0; j<l_pStimulations->getStimulationCount(); j++)
 				{
 					const uint64 l_ui64StimulationCode = l_pStimulations->getStimulationIdentifier(j);
@@ -330,7 +353,7 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 							break;
 						case TCPWRITER_HEX:
 							{
-							CString  l_sTmp = CIdentifier(l_ui64StimulationCode).toString() + CString("\n");
+							CString  l_sTmp = CIdentifier(l_ui64StimulationCode).toString() + CString("\r\n");
 							const char *l_sPtr = l_sTmp.toASCIIString();
 							sendToClients((void*)l_sPtr,strlen(l_sPtr));
 							}
@@ -342,7 +365,7 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 							{
 								l_sTmp = CString("Unregistered_stimulus ") + CIdentifier(l_ui64StimulationCode).toString();
 							}
-							l_sTmp = l_sTmp + CString("\n");
+							l_sTmp = l_sTmp + CString("\r\n");
 
 							const char *l_sPtr = l_sTmp.toASCIIString();
 							sendToClients((void*)l_sPtr,strlen(l_sPtr));
