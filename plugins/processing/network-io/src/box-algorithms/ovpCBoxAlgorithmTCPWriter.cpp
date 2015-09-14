@@ -353,7 +353,7 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 							break;
 						case TCPWRITER_HEX:
 							{
-							CString  l_sTmp = CIdentifier(l_ui64StimulationCode).toString() + CString("\n");
+							CString  l_sTmp = CIdentifier(l_ui64StimulationCode).toString() + CString("\r\n");
 							const char *l_sPtr = l_sTmp.toASCIIString();
 							sendToClients((void*)l_sPtr,strlen(l_sPtr));
 							}
