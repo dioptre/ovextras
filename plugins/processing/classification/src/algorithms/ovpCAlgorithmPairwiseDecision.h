@@ -69,7 +69,7 @@ namespace OpenViBEPlugins
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_AlgorithmIdentifier, "Classification Algorithm", OpenViBE::Kernel::ParameterType_Identifier);
 				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassificationOutputs,
 													  "Classification Outputs", OpenViBE::Kernel::ParameterType_Pointer);
-				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount, "Classification Algorithm", OpenViBE::Kernel::ParameterType_UInteger);
+				rAlgorithmPrototype.addInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount, "Class Count", OpenViBE::Kernel::ParameterType_UInteger);
 
 
 				rAlgorithmPrototype.addOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector, "Probability Vector", OpenViBE::Kernel::ParameterType_Matrix);

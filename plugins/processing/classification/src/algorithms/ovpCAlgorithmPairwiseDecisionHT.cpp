@@ -37,8 +37,8 @@ boolean CAlgorithmPairwiseDecisionHT::uninitialize()
 
 boolean CAlgorithmPairwiseDecisionHT::parametrize()
 {
-	TParameterHandler < uint32 > ip_pClassCount(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount));
-	m_ui32ClassCount = ip_pClassCount;
+	TParameterHandler < uint64 > ip_pClassCount(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount));
+	m_ui32ClassCount = static_cast<uint32>(ip_pClassCount);
 
 	return true;
 }
