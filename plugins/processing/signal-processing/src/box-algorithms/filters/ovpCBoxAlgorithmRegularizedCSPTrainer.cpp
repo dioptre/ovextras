@@ -63,6 +63,12 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::initialize(void)
 	m_oStimulationDecoder.initialize(*this,0);
 	m_oStimulationEncoder.initialize(*this,0);
 
+
+	for(uint32 i=0;i<2;i++)
+	{
+		m_pIncrementalCov[i] = NULL;
+	}
+
 	m_ui64StimulationIdentifier=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sSpatialFilterConfigurationFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 	m_ui32FilterDimension=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
@@ -70,9 +76,16 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::initialize(void)
 
 	if(m_ui32FilterDimension%2 != 0)
 	{
+		m_bHasBeenInitialized = false;
 		this->getLogManager() << LogLevel_Error << "Filter dimension must be an even number\n";
 		return false;
 	}
+	else if(m_ui32FilterDimension == 0)
+	{
+		this->getLogManager() << LogLevel_Error << "CSP filter dimension cannot be 0.\n";
+		return false;
+	}
+	m_bHasBeenInitialized = true;
 
 	for(uint32 i=0;i<2;i++)
 	{
@@ -86,7 +99,11 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::initialize(void)
 		}
 
 		m_pIncrementalCov[i] = &this->getAlgorithmManager().getAlgorithm(l_oCovAlgId);
-		m_pIncrementalCov[i]->initialize();
+		if(!m_pIncrementalCov[i]->initialize())
+		{
+			this->getLogManager() << LogLevel_Error << "Unable to initiate the online cov algorithm\n";
+			return false;
+		}
 
 		// Set the params of the cov algorithm
 		OpenViBE::Kernel::TParameterHandler < uint64 > ip_ui64UpdateMethod(m_pIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_UpdateMethod));
@@ -117,13 +134,17 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::uninitialize(void)
 	m_oStimulationDecoder.uninitialize();
 	m_oStimulationEncoder.uninitialize();
 
-	for(uint32 i=0;i<2;i++)
+	if(m_bHasBeenInitialized)
 	{
-		m_oSignalDecoders[i].uninitialize();
-
-		m_pIncrementalCov[i]->uninitialize();
-		
-		getAlgorithmManager().releaseAlgorithm(*m_pIncrementalCov[i]);
+		for(uint32 i=0;i<2;i++)
+		{
+			m_oSignalDecoders[i].uninitialize();
+			if(m_pIncrementalCov[i])
+			{
+				m_pIncrementalCov[i]->uninitialize();
+				getAlgorithmManager().releaseAlgorithm(*m_pIncrementalCov[i]);
+			}
+		}
 	}
 
 	return true;
@@ -159,7 +180,11 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::updateCov(int index)
 			}
 
 			m_pIncrementalCov[index]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_Reset, true);
-			m_pIncrementalCov[index]->process();
+			if(!m_pIncrementalCov[index]->process())
+			{
+				this->getLogManager() << LogLevel_Error << "Something went wrong during the parametrization of the covariance algorithm.\n";
+				return false;
+			}
 		}
 		if(l_oDecoder->isBufferReceived())
 		{

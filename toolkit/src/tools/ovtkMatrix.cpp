@@ -546,6 +546,11 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 
 	} while(l_oBuffer.good()); //read each line in turn
 
+	//If the file is empty or other (like directory)
+	if(l_vValuesCount.size() == 0)
+	{
+		return false;
+	}
 	//ensure the right number of values were parsed in first dimension
 	if(l_vValuesCount[0] != rMatrix.getDimensionSize(0))
 	{

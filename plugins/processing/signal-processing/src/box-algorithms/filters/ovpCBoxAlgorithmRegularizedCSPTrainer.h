@@ -49,6 +49,7 @@ namespace OpenViBEPlugins
 			OpenViBE::CString m_sSpatialFilterConfigurationFilename;
 			OpenViBE::uint32 m_ui32FilterDimension;
 			OpenViBE::boolean m_bSaveAsBoxConf;
+			OpenViBE::boolean m_bHasBeenInitialized;
 
 			OpenViBE::float64 m_f64Tikhonov;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pIncrementalCov[2];
