@@ -1,6 +1,7 @@
 #include "ovpCBoxAlgorithmClassifierTrainer.h"
 
 #include <system/ovCMemory.h>
+#include <system/ovCMath.h>
 
 #include <fstream>
 #include <sstream>
@@ -326,8 +327,7 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 			if (l_bRandomizeVectorOrder)
 			{
 				this->getLogManager() << LogLevel_Info << "Randomizing the feature vector set\n";
-				random_shuffle(m_vFeatureVectorIndex.begin(), m_vFeatureVectorIndex.end());
-
+				random_shuffle(m_vFeatureVectorIndex.begin(), m_vFeatureVectorIndex.end(), System::Math::randomUInteger32WithCeiling);
 			}
 
 			if(m_ui64PartitionCount>=2)

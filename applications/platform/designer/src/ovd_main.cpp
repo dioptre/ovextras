@@ -577,7 +577,8 @@ int go(int argc, char ** argv)
 
 				if(l_oConfiguration.m_oFlag.count(CommandLineFlag_RandomSeed)) 
 				{
-					System::Math::initializeRandomMachine(atol(l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed].c_str()));
+					const int32 l_i32Seed = atol(l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed].c_str());
+					System::Math::initializeRandomMachine(static_cast<const uint32>(l_i32Seed));
 				} 
 				else
 				{
