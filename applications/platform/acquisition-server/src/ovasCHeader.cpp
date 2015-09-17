@@ -97,6 +97,7 @@ CHeaderImpl::CHeaderImpl(void)
 	,m_ui32SubjectGender(OVTK_Value_Gender_NotSpecified)
 	,m_ui32ChannelCount(_NoValueI_)
 	,m_ui32SamplingFrequency(_NoValueI_)
+	,m_bIsImpedanceCheckRequested(false)
 {
 }
 
@@ -114,6 +115,7 @@ void CHeaderImpl::reset(void)
 	m_vChannelGain.clear();
 	m_vChannelUnits.clear();
 	m_ui32SamplingFrequency=_NoValueI_;
+	m_bIsImpedanceCheckRequested=false;
 }
 
 //___________________________________________________________________//

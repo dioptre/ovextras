@@ -109,15 +109,30 @@ CConfigurationBuilder::~CConfigurationBuilder(void)
 
 boolean CConfigurationBuilder::configure(IHeader& rHeader)
 {
-	m_bApplyConfiguration=true;
+	m_bApplyConfiguration = true;
 
 	m_pHeader=&rHeader;
-	m_bApplyConfiguration &= this->preConfigure();
-	m_bApplyConfiguration &= this->doConfigure();
-	m_bApplyConfiguration &= this->postConfigure();
+	if(!this->preConfigure())
+	{
+		std::cout << "Error: Driver preconfigure failed\n";
+		m_bApplyConfiguration = false;
+	}
+
+	// Only run if preConfig succeeded
+	if(m_bApplyConfiguration && !this->doConfigure())
+	{
+		std::cout << "Note: Driver doConfigure failed (or user cancelled)\n";
+		m_bApplyConfiguration = false;
+	}
+
+	// Run the postconfigure in any case to close a possible dialog
+	if(!this->postConfigure()) {
+		std::cout << "Error: Driver postconfigure failed\n";
+		m_bApplyConfiguration = false;
+	}
 	m_pHeader=NULL;
 
-	return m_bApplyConfiguration;
+	return m_bApplyConfiguration; 
 }
 
 boolean CConfigurationBuilder::preConfigure(void)
@@ -125,14 +140,28 @@ boolean CConfigurationBuilder::preConfigure(void)
 	// Prepares interface
 
 	m_pBuilderConfigureInterface=gtk_builder_new(); // glade_xml_new(m_sGtkBuilderFileName.c_str(), NULL, NULL);
-	gtk_builder_add_from_file(m_pBuilderConfigureInterface, m_sGtkBuilderFileName.c_str(), NULL);
+	GError* l_pGtkError = NULL;
+	if(!gtk_builder_add_from_file(m_pBuilderConfigureInterface, m_sGtkBuilderFileName.c_str(), &l_pGtkError))
+	{
+		std::cout << "Error: Unable to load interface from " << m_sGtkBuilderFileName << ", code " << l_pGtkError->code << " (" << l_pGtkError->message << ")\n";
+		return false;
+	}
 
 	m_pBuilderConfigureChannelInterface=gtk_builder_new(); // glade_xml_new(m_sGtkBuilderChannelsFileName.c_str(), NULL, NULL);
-	gtk_builder_add_from_file(m_pBuilderConfigureChannelInterface, m_sGtkBuilderChannelsFileName.c_str(), NULL);
+	if(!gtk_builder_add_from_file(m_pBuilderConfigureChannelInterface, m_sGtkBuilderChannelsFileName.c_str(), &l_pGtkError))
+	{
+		std::cout << "Error: Unable to load channels from " << m_sGtkBuilderChannelsFileName << ", code " << l_pGtkError->code << " (" << l_pGtkError->message << ")\n";
+		return false;
+	}
 
 	// Finds all the widgets
 
 	m_pDialog=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "openvibe-acquisition-server-settings"));
+	if(!m_pDialog)
+	{
+		std::cout << "Error: Unable to find even the basic settings dialog from " << m_sGtkBuilderFileName << "\n";
+		return false;
+	}
 
 	m_pIdentifier=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_identifier"));
 	m_pAge=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_age"));
@@ -265,6 +294,11 @@ boolean CConfigurationBuilder::preConfigure(void)
 
 boolean CConfigurationBuilder::doConfigure(void)
 {
+	if(!m_pDialog)
+	{
+		return false;
+	}
+
 	return gtk_dialog_run(GTK_DIALOG(m_pDialog))==GTK_RESPONSE_APPLY;
 }
 
@@ -311,12 +345,22 @@ boolean CConfigurationBuilder::postConfigure(void)
 		}
 	}
 
-	gtk_widget_hide(m_pDialog);
+	if(m_pDialog)
+	{
+		gtk_widget_hide(m_pDialog);
+	}
 
-	g_object_unref(m_pBuilderConfigureInterface);
-	g_object_unref(m_pBuilderConfigureChannelInterface);
-	m_pBuilderConfigureInterface=NULL;
-	m_pBuilderConfigureChannelInterface=NULL;
+	if(m_pBuilderConfigureInterface)
+	{
+		g_object_unref(m_pBuilderConfigureInterface);
+		m_pBuilderConfigureInterface=NULL;
+	}
+
+	if(m_pBuilderConfigureChannelInterface) 
+	{
+		g_object_unref(m_pBuilderConfigureChannelInterface);
+		m_pBuilderConfigureChannelInterface=NULL;
+	}
 
 	m_vChannelName.clear();
 
