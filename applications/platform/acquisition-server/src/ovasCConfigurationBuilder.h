@@ -15,6 +15,11 @@ namespace OpenViBEAcquisitionServer
 	class CConfigurationBuilder
 	{
 	public:
+		typedef enum {
+			Error_NoError        = 0,
+			Error_UserCancelled  = 1,
+			Error_Unknown        = 2
+		} EErrorCode;
 
 		CConfigurationBuilder(const char* sGtkBuilderFileName);
 		virtual ~CConfigurationBuilder(void);
@@ -30,7 +35,7 @@ namespace OpenViBEAcquisitionServer
 	protected:
 
 		virtual OpenViBE::boolean preConfigure(void);
-		virtual OpenViBE::boolean doConfigure(void);
+		virtual OpenViBE::boolean doConfigure(EErrorCode& result);
 		virtual OpenViBE::boolean postConfigure(void);
 
 	private:

@@ -119,9 +119,13 @@ boolean CConfigurationBuilder::configure(IHeader& rHeader)
 	}
 
 	// Only run if preConfig succeeded
-	if(m_bApplyConfiguration && !this->doConfigure())
+	EErrorCode l_oErrorCode;
+	if(m_bApplyConfiguration && !this->doConfigure(l_oErrorCode))
 	{
-		std::cout << "Note: Driver doConfigure failed (or user cancelled)\n";
+		if(l_oErrorCode != Error_UserCancelled)
+		{
+			std::cout << "Note: Driver doConfigure failed with code " << l_oErrorCode << "\n";
+		}
 		m_bApplyConfiguration = false;
 	}
 
@@ -292,14 +296,28 @@ boolean CConfigurationBuilder::preConfigure(void)
 	return true;
 }
 
-boolean CConfigurationBuilder::doConfigure(void)
+boolean CConfigurationBuilder::doConfigure(EErrorCode& errorCode)
 {
 	if(!m_pDialog)
 	{
+		errorCode = Error_Unknown;
 		return false;
 	}
 
-	return gtk_dialog_run(GTK_DIALOG(m_pDialog))==GTK_RESPONSE_APPLY;
+	const gint l_oResponse = gtk_dialog_run(GTK_DIALOG(m_pDialog));
+	
+	switch(l_oResponse)
+	{
+		case GTK_RESPONSE_APPLY:
+			errorCode = Error_NoError;
+			return true;
+		case GTK_RESPONSE_CANCEL:
+			errorCode = Error_UserCancelled;
+			return false;
+		default:
+			errorCode = Error_Unknown;
+			return false;
+	}
 }
 
 boolean CConfigurationBuilder::postConfigure(void)

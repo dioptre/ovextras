@@ -286,7 +286,6 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 		::fprintf(l_pFile, "AcquisitionServer_JitterEstimationCountForDrift = %llu\n", m_pAcquisitionServer->getJitterEstimationCountForDrift());
 		::fprintf(l_pFile, "AcquisitionServer_DriftToleranceDuration = %llu\n", m_pAcquisitionServer->getDriftToleranceDuration());
 		::fprintf(l_pFile, "AcquisitionServer_OverSamplingFactor = %llu\n", m_pAcquisitionServer->getOversamplingFactor());
-		::fprintf(l_pFile, "AcquisitionServer_CheckImpedance = %s\n", (m_pAcquisitionServer->isImpedanceCheckRequested() ? "True" : "False"));
 		::fprintf(l_pFile, "AcquisitionServer_ChannelSelection = %s\n", (m_pAcquisitionServer->isChannelSelectionRequested() ? "True" : "False"));
 		::fprintf(l_pFile, "AcquisitionServer_NaNReplacementPolicy = %s\n", m_pAcquisitionServer->getNaNReplacementPolicyStr().toASCIIString());
 
