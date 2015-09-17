@@ -75,6 +75,11 @@ SET(OV_COMPILE_TESTS "true")
 # This option is mostly of interest to hackers who are interested in using a minimal OpenViBE kernel in their own projects.
 # SET(OV_DISABLE_GTK "true")
 
+# The CoAdapt P300 speller is currently only working in the v0.18 version
+# of OpenViBE. It is intended to be replaced by an even more robust and easy 
+# to use P300 speller from the same authors.
+SET(OV_DISABLE_COADAPT_P300 "1")
+
 # By setting SKIP[_FOLDER]* you can skip a subtree (example: SKIP_A_B_C skips folder a/b/c and all its subfolders if any)
 
 # Skip building documentation
@@ -86,6 +91,7 @@ SET(SKIP_DOCUMENTATION "1")
 # Skipping demos can speed up compilation a lot, if you don't need them
 #SET(SKIP_APPLICATIONS_DEMOS "1")
 #SET(SKIP_CONTRIB_APPLICATIONS "1")
+
 
 IF(UNIX)
 	# On Linux, the presence of matlab plugin .so can cause crashes in Simple DSP box as the two may use different versions of boost which are
