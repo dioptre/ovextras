@@ -25,12 +25,11 @@ FOREACH(TEST_NAME ${TEST_SCENARIOS})
 	# It would be better to clean last, but we can't do this as it will delete the 
 	# output we wish to include, and we can't prevent clean from running if a prev. test fails
 	# We need the clean to be sure that the comparator stage is not getting data from a previous run.
-	SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES DEPENDS clean_${TEST_NAME})
-	SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
+	SET_TESTS_PROPERTIES(run_Classification_${TEST_NAME} PROPERTIES DEPENDS clean_Classification_${TEST_NAME})
+	SET_TESTS_PROPERTIES(run_Classification_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
 
-	SET_TESTS_PROPERTIES(compare_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME}})
-	SET_TESTS_PROPERTIES(compare_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
+	SET_TESTS_PROPERTIES(compare_Classification_${TEST_NAME} PROPERTIES DEPENDS run_Classification_${TEST_NAME}})
+	SET_TESTS_PROPERTIES(compare_Classification_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
 
 ENDFOREACH(TEST_NAME)
-
 
