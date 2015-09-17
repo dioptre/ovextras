@@ -27,7 +27,7 @@ SET_TESTS_PROPERTIES(compare_Evaluation_kappa PROPERTIES ATTACHED_FILES_ON_FAIL 
 
 
 ADD_TEST(run_Evaluation_statistic_generator "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" "--config" "$ENV{OV_BINARY_PATH}/share/openvibe/kernel/openvibe_test.conf" "--play-fast" Test-StatisticGenerator.xml)
-ADD_TEST(compare_Evaluation_statistic_generator "diff" "stat.xml" "data/Statistic_comparison.xml")
+ADD_TEST(compare_Evaluation_statistic_generator "diff" "--ignore-all-space" "stat.xml" "data/Statistic_comparison.xml")
 ADD_TEST(clean_Evaluation_statistic_generator rm -f stat.xml)
 
 
