@@ -73,9 +73,6 @@ namespace OpenViBEAcquisitionServer
 			OpenViBE::uint32 m_ui32SubjectAge;
 			OpenViBE::uint32 m_ui32SubjectGender;
 
-			// Impedance check
-			OpenViBE::boolean m_bIsImpedanceCheckRequested;
-
 			// Chanel information
 			OpenViBE::uint32 m_ui32ChannelCount;
 			std::map<OpenViBE::uint32, std::string> m_vChannelName;
@@ -84,6 +81,9 @@ namespace OpenViBEAcquisitionServer
 
 			// Samples information
 			OpenViBE::uint32 m_ui32SamplingFrequency;
+
+			// Impedance check
+			OpenViBE::boolean m_bIsImpedanceCheckRequested;
 		};
 	};
 };
@@ -95,9 +95,9 @@ CHeaderImpl::CHeaderImpl(void)
 	:m_ui32ExperimentIdentifier(_NoValueI_)
 	,m_ui32SubjectAge(18)
 	,m_ui32SubjectGender(OVTK_Value_Gender_NotSpecified)
-	,m_bIsImpedanceCheckRequested(false)
 	,m_ui32ChannelCount(_NoValueI_)
 	,m_ui32SamplingFrequency(_NoValueI_)
+	,m_bIsImpedanceCheckRequested(false)
 {
 }
 
