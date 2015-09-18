@@ -24,12 +24,14 @@ namespace OpenViBEPlugins
 
 		public:
 
+			CAlgorithmPairwiseDecisionHT() : m_ui32ClassCount(0) { };
+
 			virtual void release(void) { delete this; }
 
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 
-			virtual OpenViBE::boolean parametrize(void);
+			virtual OpenViBE::boolean parameterize(void);
 
 			virtual OpenViBE::boolean compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabilityVector);
 			virtual XML::IXMLNode* saveConfiguration(void);

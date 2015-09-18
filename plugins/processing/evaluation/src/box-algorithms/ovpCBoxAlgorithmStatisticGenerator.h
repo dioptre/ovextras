@@ -90,7 +90,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput("Signal",OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addInput("Stimulations",OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addSetting("Filename for saving",OV_TypeId_Filename,"");
+				rBoxAlgorithmPrototype.addSetting("Filename for saving",OV_TypeId_Filename,"${Path_UserData}/statistics-dump.xml");
 
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				

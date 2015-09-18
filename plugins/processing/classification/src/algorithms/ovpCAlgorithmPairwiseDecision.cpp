@@ -12,6 +12,7 @@ using namespace OpenViBEToolkit;
 
 boolean CAlgorithmPairwiseDecision::process()
 {
+	// @note there is essentially no test that these are called in correct order. Caller be careful!
 	if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute))
 	{
 		TParameterHandler<std::vector < SClassificationInfo > *> ip_pClassificationValues = this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassificationOutputs);
@@ -39,9 +40,9 @@ boolean CAlgorithmPairwiseDecision::process()
 		}
 		return false;
 	}
-	else if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize))
+	else if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parameterize))
 	{
-		return this->parametrize();
+		return this->parameterize();
 	}
 	return true;
 }

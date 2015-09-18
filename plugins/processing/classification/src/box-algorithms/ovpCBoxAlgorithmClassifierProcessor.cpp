@@ -272,8 +272,16 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 					l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
 					l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64EndTime);
 				}
-				//else
-				//	this->getLogManager() << LogLevel_Warning << "---Classification failed---\n";
+				else
+				{
+				//	this->getLogManager() << LogLevel_Error << "Classification failed (success trigger not active).\n";
+				//	return false;
+				}
+			}
+			else
+			{
+				this->getLogManager() << LogLevel_Error << "Classification algorithm failed.\n";
+				return false;
 			}
 		}
 		if(m_pFeaturesDecoder->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedEnd))

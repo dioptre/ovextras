@@ -126,7 +126,12 @@ boolean CBoxAlgorithmROCCurve::process(void)
 			//The matrix is suppose to have only one dimension
 			float64* l_pArrayValue;
 
-			if(l_pMatrixValue->getBufferElementCount() > 1)
+			if(l_pMatrixValue->getBufferElementCount() == 0)
+			{
+				this->getLogManager() << LogLevel_Error << "Received zero-sized buffer\n";
+				return false;
+			}
+			else if(l_pMatrixValue->getBufferElementCount() > 1)
 			{
 				l_pArrayValue = new float64[l_pMatrixValue->getBufferElementCount()];
 				for(size_t k = 0; k < l_pMatrixValue->getBufferElementCount() ; ++k)
@@ -165,7 +170,7 @@ boolean CBoxAlgorithmROCCurve::computeROCCurves()
 		}
 		else{
 			//Impossible to find the corresponding stimulation
-			this->getLogManager() << LogLevel_Warning << "A result of classification cannot be connect to a class. The result will be discard\n";
+			this->getLogManager() << LogLevel_Warning << "A result of classification cannot be connected to a class. The result will be discarded.\n";
 		}
 	}
 
@@ -179,7 +184,7 @@ boolean CBoxAlgorithmROCCurve::computeROCCurves()
 	const gint l_iCurrentPage = gtk_notebook_current_page(GTK_NOTEBOOK(m_pWidget));
 	if(l_iCurrentPage < 0)
 	{
-		this->getLogManager() << LogLevel_Trace << "No page is select. The designer is probably in no visualisation mode. Discard the drawing phase\n";
+		this->getLogManager() << LogLevel_Trace << "No page is selected. The designer is probably in no visualisation mode. Skipping the drawing phase\n";
 	}
 	else
 	{

@@ -35,10 +35,16 @@ boolean CAlgorithmPairwiseDecisionHT::uninitialize()
 	return true;
 }
 
-boolean CAlgorithmPairwiseDecisionHT::parametrize()
+boolean CAlgorithmPairwiseDecisionHT::parameterize()
 {
 	TParameterHandler < uint64 > ip_pClassCount(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount));
 	m_ui32ClassCount = static_cast<uint32>(ip_pClassCount);
+
+	if(m_ui32ClassCount<2) 
+	{
+		this->getLogManager() << LogLevel_Error << "Algorithm needs at least 2 classes.\n";
+		return false;
+	}
 
 	return true;
 }
@@ -47,6 +53,11 @@ boolean CAlgorithmPairwiseDecisionHT::parametrize()
 
 boolean CAlgorithmPairwiseDecisionHT::compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabilityVector)
 {
+	if(m_ui32ClassCount<2) {
+		this->getLogManager() << LogLevel_Error << "Algorithm needs at least 2 classes. Has parameterize() been called?\n";
+		return false;
+	}
+
 	TParameterHandler<IMatrix*> ip_pRepartitionSetVector = this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_SetRepartition);
 	float64* l_pProbabilityMatrix = new float64[m_ui32ClassCount * m_ui32ClassCount];
 

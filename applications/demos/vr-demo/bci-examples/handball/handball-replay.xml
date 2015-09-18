@@ -1726,7 +1726,7 @@ in which step the experiment is. It also triggers
 the instructions given to the user.
 
 The &lt;b&gt;Analog Server&lt;/b&gt; provides the feedback value
-computed by the classifier (distance to LDA hyperplan).</Text>
+computed by the classifier (distance to LDA hyperplane).</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>

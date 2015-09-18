@@ -41,11 +41,18 @@ boolean CBoxAlgorithmStatisticGenerator::initialize(void)
 
 	m_oFilename = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
+	if(m_oFilename == CString("")) 
+	{
+		this->getLogManager() << LogLevel_Error << "The filename is empty\n";
+		return false;
+	}
 	return true;
 }
 
 boolean CBoxAlgorithmStatisticGenerator::uninitialize(void)
 {
+	boolean l_bReturnValue = true;
+
 	m_oSignalDecoder.uninitialize();
 	m_oStimulationDecoder.uninitialize();
 
@@ -103,12 +110,15 @@ boolean CBoxAlgorithmStatisticGenerator::uninitialize(void)
 		l_pRootNode->addChild(l_pChannelsNode);
 
 		XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
-		l_pHandler->writeXMLInFile(*l_pRootNode, m_oFilename.toASCIIString());
+		if(!l_pHandler->writeXMLInFile(*l_pRootNode, m_oFilename.toASCIIString())) 
+		{
+			l_bReturnValue = false;
+		}
 
 		l_pHandler->release();
 		l_pRootNode->release();
 	}
-	return true;
+	return l_bReturnValue;
 }
 
 

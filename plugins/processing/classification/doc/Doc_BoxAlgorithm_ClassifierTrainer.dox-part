@@ -183,7 +183,7 @@ the modification of weights and biases to avoid oscillations. The learning stop 
 \par
 Note that feature vectors are normalized between -1 and 1 (using the min/max of the training set) to avoid saturation of the hyperbolic tangent.
 \par
-This algorithm provides both hyperplan distance (identity of output layer) and probabilites (softmax function on output layer).
+This algorithm provides both hyperplane distance (identity of output layer) and probabilites (softmax function on output layer).
  
 Cross Validation 
  

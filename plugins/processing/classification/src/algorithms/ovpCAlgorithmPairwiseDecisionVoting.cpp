@@ -30,10 +30,16 @@ boolean CAlgorithmPairwiseDecisionVoting::uninitialize()
 	return true;
 }
 
-boolean CAlgorithmPairwiseDecisionVoting::parametrize()
+boolean CAlgorithmPairwiseDecisionVoting::parameterize()
 {
 	TParameterHandler < uint64 > ip_pClassCount(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount));
 	m_ui32ClassCount = static_cast<uint32>(ip_pClassCount);
+
+	if(m_ui32ClassCount<2) 
+	{
+		this->getLogManager() << LogLevel_Error << "Algorithm needs at least 2 classes.\n";
+		return false;
+	}
 
 	return true;
 }
@@ -42,6 +48,11 @@ boolean CAlgorithmPairwiseDecisionVoting::parametrize()
 
 boolean CAlgorithmPairwiseDecisionVoting::compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabilityVector)
 {
+	if(m_ui32ClassCount<2) {
+		this->getLogManager() << LogLevel_Error << "Algorithm needs at least 2 classes. Has parameterize() been called?\n";
+		return false;
+	}
+
 #if VOTING_DEBUG
 	std::cout << pClassificationValueList.size() << std::endl;
 

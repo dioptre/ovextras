@@ -167,10 +167,10 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput("Expected label",        OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addInput("Classification values", OV_TypeId_StreamedMatrix);
 
-				rBoxAlgorithmPrototype.addSetting("Computation trigger", OV_TypeId_Stimulation,  "");
+				rBoxAlgorithmPrototype.addSetting("Computation trigger", OV_TypeId_Stimulation,  "OVTK_StimulationId_ExperimentStop");
 				rBoxAlgorithmPrototype.addSetting("Amount of class",     OV_TypeId_Integer,      "2");
-				rBoxAlgorithmPrototype.addSetting("Class 1 identifier" , OV_TypeId_Stimulation,  "");
-				rBoxAlgorithmPrototype.addSetting("Class 2 identifier" , OV_TypeId_Stimulation,  "");
+				rBoxAlgorithmPrototype.addSetting("Class 1 identifier" , OV_TypeId_Stimulation,  "OVTK_StimulationId_Label_01");
+				rBoxAlgorithmPrototype.addSetting("Class 2 identifier" , OV_TypeId_Stimulation,  "OVTK_StimulationId_Label_02");
 
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				

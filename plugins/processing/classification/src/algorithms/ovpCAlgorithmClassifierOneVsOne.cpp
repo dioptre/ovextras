@@ -113,7 +113,7 @@ boolean CAlgorithmClassifierOneVsOne::train(const IFeatureVectorSet& rFeatureVec
 	TParameterHandler <uint64> ip_pClassCount(m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount));
 	ip_pClassCount = l_ui32ClassCount;
 
-	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize);
+	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parameterize);
 
 	this->uninitializeExtraParameterMechanism();
 
@@ -247,7 +247,11 @@ boolean CAlgorithmClassifierOneVsOne::classify(const IFeatureVector& rFeatureVec
 	ip_pClassificationInfos = &l_oClassificationList;
 
 	//Then ask to the startegy to make the decision
-	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute);
+	if(!m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute))
+	{
+		this->getLogManager() << LogLevel_Error << "Decision strategy compute() failed.\n";
+		return false;
+	}
 
 	TParameterHandler<IMatrix*> op_pProbabilityVector = m_pDecisionStrategyAlgorithm->getOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector);
 	float64 l_f64MaxProb = -1;
@@ -408,17 +412,30 @@ boolean CAlgorithmClassifierOneVsOne::loadConfiguration(XML::IXMLNode *pConfigur
 	TParameterHandler < CIdentifier *> ip_pClassificationAlgorithm(m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_AlgorithmIdentifier));
 	ip_pClassificationAlgorithm = &l_pAlgorithmIdentifier;
 
-	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_LoadConfiguration);
-	m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize);
-
 	l_pTempNode = pConfigurationNode->getChildByName(c_sSubClassifierCountNodeName);
 	std::stringstream l_sCountData(l_pTempNode->getPCData());
-	uint64 l_iClassCount;
-	l_sCountData >> l_iClassCount;
+	uint64 l_ui64ClassCount;
+	l_sCountData >> l_ui64ClassCount;
 
-	while(l_iClassCount != getClassCount())
+	TParameterHandler<uint64> ip_pClassCount(m_pDecisionStrategyAlgorithm->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassCount));
+	ip_pClassCount = l_ui64ClassCount;
+
+	if(!m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_LoadConfiguration))
 	{
-		if(l_iClassCount < getClassCount())
+		this->getLogManager() << LogLevel_Error << "Loading decision strategy configuration failed\n";
+		return false;
+	}
+	if(!m_pDecisionStrategyAlgorithm->process(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parameterize))
+	{
+		this->getLogManager() << LogLevel_Error << "Parameterizing decision strategy failed\n";
+		return false;
+	}
+
+
+
+	while(l_ui64ClassCount != getClassCount())
+	{
+		if(l_ui64ClassCount < getClassCount())
 		{
 			IAlgorithmProxy* l_pSubClassifier = m_oSubClassifierDescriptorList.back().m_pSubClassifierProxy;
 			l_pSubClassifier->uninitialize();

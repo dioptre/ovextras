@@ -39,7 +39,7 @@ boolean CBoxAlgorithmConfusionMatrix::initialize(void)
 	}
 	else
 	{
-		this->getLogManager() << LogLevel_Info << "Asking for percentage. The value of the setting \"Sums\" will be ignore.\n";
+		this->getLogManager() << LogLevel_Debug << "Asking for percentage. The value of the setting \"Sums\" will be ignored.\n";
 		ip_bSums = false;
 	}
 
