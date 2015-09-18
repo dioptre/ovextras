@@ -154,7 +154,7 @@ namespace OpenViBEPlugins
 
 				rBoxAlgorithmPrototype.addOutput ("Confusion Matrix",          OV_TypeId_StreamedMatrix);
 
-				rBoxAlgorithmPrototype.addSetting("Amount of class",           OV_TypeId_Integer,     "2");
+				rBoxAlgorithmPrototype.addSetting("Number of classes",         OV_TypeId_Integer,     "2");
 				rBoxAlgorithmPrototype.addSetting("Stimulation of class 1",    OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");
 				rBoxAlgorithmPrototype.addSetting("Stimulation of class 2",    OV_TypeId_Stimulation, "OVTK_StimulationId_Label_02");
 
