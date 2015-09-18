@@ -440,13 +440,13 @@ void CSignalChannelDisplay::draw(const GdkRectangle& rExposedArea)
 		//X position of last drawn sample (0 if restarting from left edge)
 		const float64 l_f64StartX = getSampleXCoordinate(l_ui32FirstBufferToDisplayPosition, l_ui32FirstSampleToDisplay, 0);
 
+
+#if SUPPORT_REDRAW
 		//position on screen of latest buffer
 		const uint32 l_ui32LatestBufferPosition = l_ui32FirstBufferToDisplayPosition + m_pDatabase->m_oSampleBuffers.size()-1-l_ui32FirstBufferToDisplay;
 
 		//X position of last sample that will be drawn when channel is refreshed
 		const float64 l_f64EndX = getSampleXCoordinate(l_ui32LatestBufferPosition, l_ui32SamplesPerBuffer-1, 0);
-
-#if SUPPORT_REDRAW
 		// is exposed area larger than the currently shown samples indicate?
 		if(rExposedArea.x < (gint)l_f64StartX ||
 			rExposedArea.width-1/*exposed width is 1 pixel larger than asked for*/ > (gint)l_f64EndX - (gint)l_f64StartX + 1 + 1)
@@ -603,6 +603,8 @@ void CSignalChannelDisplay::computeZoom(OpenViBE::boolean bZoomIn, OpenViBE::flo
 	{
 		m_f64ZoomTranslateY = m_ui32Height - (m_ui32Height/ m_f64ZoomScaleY);
 	}
+	//Put a Y translation breaks the zoom out so let's set it to 0
+	m_f64ZoomTranslateY=0;
 }
 
 void CSignalChannelDisplay::getDisplayedValueRange(std::vector<float64>& rDisplayedValueMin,
@@ -1029,7 +1031,7 @@ void CSignalChannelDisplay::updateLimits(void)
 	const float64 areaStartY = l_pVadj->value;
 	const float64 areaSizeY = l_pVadj->page_size;
 
-	const float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size();
+	const float64 l_f64sizePerChannel = m_ui32Height/(float64)m_oChannelList.size() * m_f64ZoomScaleY;
 	m_ui32FirstChannelToDisplay = static_cast<uint32>(std::floor( areaStartY / l_f64sizePerChannel));
 	m_ui32LastChannelToDisplay = std::min(static_cast<uint32>(m_oChannelList.size()-1), static_cast<uint32>(m_ui32FirstChannelToDisplay + std::floor(areaSizeY / l_f64sizePerChannel) + 1));
 
