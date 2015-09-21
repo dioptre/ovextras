@@ -300,7 +300,17 @@ typedef struct _SConfiguration
 
 } SConfiguration;
 
-
+/* About hide/show flags.
+ * no-gui => hides the designer main window, shows visualisation widgets.
+ * no-visualisation => shows the designer main window, hides display of visualisation widgets.
+ * invisible => hides both designer main window and visualisation widgets.
+ *
+ * About implied option flag.
+ * If the designer main window is not visible the flag no-session-management must be activated to avoid to increase the amount of open scenarios at
+ * each launch.
+ * If the designer main window is not visible, the flag no-check-color-depth can be activated (the color depth has been reported to cause trouble
+ * only in the designer main window).
+ */
 boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 {
 	SConfiguration l_oConfiguration;
