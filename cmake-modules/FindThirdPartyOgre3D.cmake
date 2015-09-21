@@ -36,7 +36,7 @@ ENDIF(WIN32)
 
 IF(UNIX)
 	INCLUDE("FindThirdPartyPkgConfig")
-	pkg_check_modules(Ogre3D OGRE)
+	pkg_check_modules(Ogre3D OGRE<=1.8)
 	pkg_check_modules(OIS OIS)
 ENDIF(UNIX)
 
