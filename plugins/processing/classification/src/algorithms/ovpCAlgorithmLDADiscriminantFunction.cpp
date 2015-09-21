@@ -25,7 +25,7 @@ CAlgorithmLDADiscriminantFunction::CAlgorithmLDADiscriminantFunction():m_f64Bias
 {
 }
 
-void CAlgorithmLDADiscriminantFunction::setWeight(VectorXd &rWeigth)
+void CAlgorithmLDADiscriminantFunction::setWeight(const VectorXd &rWeigth)
 {
 	m_oWeight = rWeigth;
 }
@@ -35,7 +35,7 @@ void CAlgorithmLDADiscriminantFunction::setBias(float64 f64Bias)
 	m_f64Bias = f64Bias;
 }
 
-float64 CAlgorithmLDADiscriminantFunction::getValue(VectorXd &rFeatureVector)
+float64 CAlgorithmLDADiscriminantFunction::getValue(const VectorXd &rFeatureVector)
 {
 	return (m_oWeight.transpose() * rFeatureVector)(0) + m_f64Bias;
 }
@@ -45,7 +45,7 @@ uint32 CAlgorithmLDADiscriminantFunction::getWeightVectorSize()
 	return m_oWeight.size();
 }
 
-boolean CAlgorithmLDADiscriminantFunction::loadConfiguration(XML::IXMLNode *pConfiguration)
+boolean CAlgorithmLDADiscriminantFunction::loadConfiguration(const XML::IXMLNode *pConfiguration)
 {
 	std::stringstream l_sBias(pConfiguration->getChildByName(c_sBiasNodeName)->getPCData());
 	l_sBias >> m_f64Bias;
