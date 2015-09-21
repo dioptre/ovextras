@@ -75,7 +75,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("General statistics generator"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Serrière Guillaume"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Generate statistic on signal."); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Generate statistics on signal."); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Generate some general purpose statistics on signal and store them in a file."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Evaluation"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }

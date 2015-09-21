@@ -1,0 +1,65 @@
+/**
+ * \page BoxAlgorithm_ROCCurve ROC Curve
+__________________________________________________________________
+
+Detailed description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_ROCCurve_Description|
+ * This box computes the ROC (Receiver Operating Characteristic) curve for a classifier (https://fr.wikipedia.org/wiki/Receiver_Operating_Characteristic). One curve will be computes
+ * by class. This box is designed to work with the probability output of the \ref Doc_BoxAlgorithm_ClassifierProcessor.
+ * 
+ * The box will compute the curve when it receives the computation trigger on the first input.
+ * 
+ * The result is displayed when computed in a standalone visualization.
+ * |OVP_DocEnd_BoxAlgorithm_ROCCurve_Description|
+ * 
+ * 
+_______________________________________________________________
+
+Inputs description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_ROCCurve_Inputs|
+ * |OVP_DocEnd_BoxAlgorithm_ROCCurve_Inputs|
+
+ * |OVP_DocBegin_BoxAlgorithm_ROCCurve_Input1|
+The first input receives the expected stimulations stream.
+ * |OVP_DocEnd_BoxAlgorithm_ROCCurve_Input1|
+
+ * |OVP_DocBegin_BoxAlgorithm_ROCCurve_Input2|
+This input receives the probability output stream of the processor box.
+ * |OVP_DocEnd_BoxAlgorithm_ROCCurve_Input2|
+__________________________________________________________________
+
+Settings description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_ROCCurve_Settings|
+ * Each setting after the second one corresponds to the stimulation code of a class. A stimulation must be unique. 
+ * |OVP_DocEnd_BoxAlgorithm_ROCCurve_Settings|
+
+ * |OVP_DocBegin_BoxAlgorithm_ROCCurve_Setting1|
+ * Stimulation trigger for the computation.
+ * |OVP_DocEnd_BoxAlgorithm_ROCCurve_Setting1|
+
+ * |OVP_DocBegin_BoxAlgorithm_ROCCurve_Setting2|
+ * This setting indicates the amount of classes handled by the box. This setting will change the amount of setting.
+ * |OVP_DocEnd_BoxAlgorithm_ROCCurve_Setting2|
+
+ * |OVP_DocBegin_BoxAlgorithm_ROCCurve_Setting3|
+ * This setting indicates the stimulation corresponding to the first class.
+ * |OVP_DocEnd_BoxAlgorithm_ROCCurve_Setting3|
+ * 
+ *  * |OVP_DocBegin_BoxAlgorithm_ROCCurve_Setting4|
+ * This setting indicates the stimulation corresponding to the second class.
+ * |OVP_DocEnd_BoxAlgorithm_ROCCurve_Setting4|
+__________________________________________________________________
+
+Miscellaneous description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_ROCCurve_Miscellaneous|
+ * All stimulations can be send to the box. They will be filtered.
+ * |OVP_DocEnd_BoxAlgorithm_ROCCurve_Miscellaneous|
+ */
