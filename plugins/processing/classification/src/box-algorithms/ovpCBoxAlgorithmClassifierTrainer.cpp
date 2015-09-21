@@ -10,6 +10,8 @@
 
 #include <map>
 
+#include <iomanip> // setw
+
 #include <xml/IXMLHandler.h>
 #include <xml/IXMLNode.h>
 
@@ -330,8 +332,16 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 				random_shuffle(m_vFeatureVectorIndex.begin(), m_vFeatureVectorIndex.end(), System::Math::randomUInteger32WithCeiling);
 			}
 
+			const uint32 l_ui32ClassCount = l_rStaticBoxContext.getInputCount() - 1;
+			CMatrix l_oConfusion;
+			l_oConfusion.setDimensionCount(2);
+			l_oConfusion.setDimensionSize(0, l_ui32ClassCount);
+			l_oConfusion.setDimensionSize(1, l_ui32ClassCount);
+
 			if(m_ui64PartitionCount>=2)
 			{
+
+				OpenViBEToolkit::Tools::Matrix::clearContent(l_oConfusion);
 
 				this->getLogManager() << LogLevel_Info << "k-fold test could take quite a long time, be patient\n";
 				for(uint64 i=0; i<m_ui64PartitionCount; i++)
@@ -342,7 +352,7 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 					this->getLogManager() << LogLevel_Trace << "Training on partition " << i << " (feature vectors " << (uint32)l_uiStartIndex << " to " << (uint32)l_uiStopIndex-1 << ")...\n";
 					if(this->train(l_uiStartIndex, l_uiStopIndex))
 					{
-						l_f64PartitionAccuracy=this->getAccuracy(l_uiStartIndex, l_uiStopIndex);
+						l_f64PartitionAccuracy=this->getAccuracy(l_uiStartIndex, l_uiStopIndex, l_oConfusion);
 						l_vPartitionAccuracies[(unsigned int)i]=l_f64PartitionAccuracy;
 						l_f64FinalAccuracy+=l_f64PartitionAccuracy;
 					} else {
@@ -363,6 +373,8 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 				l_fDeviation = sqrt( l_fDeviation / m_ui64PartitionCount );
 
 				this->getLogManager() << LogLevel_Info << "Cross-validation test accuracy is " << l_fMean << "% (sigma = " << l_fDeviation << "%)\n";
+
+				printConfusionMatrix(l_oConfusion);
 			} 
 			else
 			{
@@ -377,7 +389,12 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 				return false;
 			}
 
-			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << this->getAccuracy(0, m_vFeatureVector.size()) << "% (optimistic)\n";
+			OpenViBEToolkit::Tools::Matrix::clearContent(l_oConfusion);
+
+			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << this->getAccuracy(0, m_vFeatureVector.size(), l_oConfusion) << "% (optimistic)\n";
+
+			printConfusionMatrix(l_oConfusion);
+
 			if(!this->saveConfiguration())
 				return false;
 		}
@@ -435,7 +452,7 @@ boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const s
 	return l_bReturnValue;
 }
 
-float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex)
+float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex, CMatrix& oConfusionMatrix)
 {
 	size_t l_iSuccessfullTrainerCount=0;
 
@@ -478,12 +495,69 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 		{
 			l_iSuccessfullTrainerCount++;
 		}
+
+		oConfusionMatrix[static_cast<uint32>(l_f64CorrectValue-1)*oConfusionMatrix.getDimensionSize(1) + 
+			static_cast<uint32>(l_f64PredictedValue-1)] += 1.0;
 	}
 
 	return static_cast<float64>((l_iSuccessfullTrainerCount*100.0)/(uiStopIndex-uiStartIndex));
 }
 
+boolean CBoxAlgorithmClassifierTrainer::printConfusionMatrix(const CMatrix& oMatrix)
+{
+	if(oMatrix.getDimensionCount() != 2 ||
+		oMatrix.getDimensionSize(0) != oMatrix.getDimensionSize(1))
+	{
+		this->getLogManager() << LogLevel_Warning << "Confusion matrix has unusual size, not printing\n";
+		return false;
+	}
 
+	const uint32 l_ui32Rows = oMatrix.getDimensionSize(0);
+
+	if(l_ui32Rows>10 && !this->getConfigurationManager().expandAsBoolean("${Plugin_Classification_ForceConfusionMatrixPrint}"))
+	{
+		this->getLogManager() << LogLevel_Info << "Over 10 classes, not printing the confusion matrix. If needed, override with setting Plugin_Classification_ForceConfusionMatrixPrint token to true.\n";
+		return true;
+	}
+
+	// Normalize
+	CMatrix l_oTmp,l_oRowSum;
+	OpenViBEToolkit::Tools::Matrix::copy(l_oTmp, oMatrix);
+	l_oRowSum.setDimensionCount(1);
+	l_oRowSum.setDimensionSize(0,l_ui32Rows);
+	OpenViBEToolkit::Tools::Matrix::clearContent(l_oRowSum);
+
+	for(uint32 i=0;i<l_ui32Rows;i++) {
+		float64 l_f64RowSum = 0;
+		for(uint32 j=0;j<l_ui32Rows;j++) {
+			l_oRowSum[i] += l_oTmp[i*l_ui32Rows+j];
+		}
+		for(uint32 j=0;j<l_ui32Rows;j++) {
+			l_oTmp[i*l_ui32Rows+j] /= l_oRowSum[i];
+		}
+	}
+
+	std::stringstream ss;
+	ss << std::fixed;
+
+	ss << "  Cls vs cls ";
+	for(uint32 i=0;i<l_ui32Rows;i++) {
+		ss << setw(6) << (i+1);
+	}
+	this->getLogManager() << LogLevel_Info << ss.str().c_str()<< "\n";
+
+	ss.precision(1);
+	for(uint32 i=0;i<l_ui32Rows;i++) {
+		ss.str("") ; 
+		ss << "  Target " << setw(2) << (i+1) << ": ";
+		for(uint32 j=0;j<l_ui32Rows;j++) {
+			ss << setw(6) << l_oTmp[i*l_ui32Rows+j]*100;
+		}
+		this->getLogManager() << LogLevel_Info << ss.str().c_str() << " %, " << static_cast<uint32>(l_oRowSum[i]) << " examples\n";
+	}
+
+	return true;
+}
 
 boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 {
