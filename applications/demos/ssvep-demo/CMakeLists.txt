@@ -11,6 +11,12 @@ IF(NOT PATH_VRPN)
 	RETURN()
 ENDIF(NOT PATH_VRPN)
 
+INCLUDE("FindThirdPartyCEGUI")
+IF(NOT PATH_CEGUI)
+        MESSAGE(STATUS "    --> Not building ${PROJECT_NAME}")
+        RETURN()
+ENDIF(NOT PATH_CEGUI)
+
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
 ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
 
