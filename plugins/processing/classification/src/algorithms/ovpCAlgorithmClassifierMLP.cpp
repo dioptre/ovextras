@@ -321,7 +321,7 @@ boolean CAlgorithmClassifierMLP::classify(const IFeatureVector &rFeatureVector, 
 {
 	if(rFeatureVector.getSize() != m_oInputWeight.cols())
 	{
-		this->getLogManager() << LogLevel_Error << "Classifier expected " << m_oInputWeight.cols() << " features, got " << rFeatureVector.getSize() << "\n";
+		this->getLogManager() << LogLevel_Error << "Classifier expected " << static_cast<uint32>(m_oInputWeight.cols()) << " features, got " << rFeatureVector.getSize() << "\n";
 		return false;
 	}
 
