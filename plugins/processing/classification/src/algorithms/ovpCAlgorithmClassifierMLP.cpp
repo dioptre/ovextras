@@ -505,9 +505,9 @@ void CAlgorithmClassifierMLP::loadData(XML::IXMLNode *pNode, MatrixXd &rMatrix, 
 	}
 
 	size_t index=0;
-	for(size_t i =0; i < ui32RowCount; ++i)
+	for(int64 i =0; i < ui32RowCount; ++i)
 	{
-		for(size_t j=0; j < ui32ColCount; ++j)
+		for(int64 j=0; j < ui32ColCount; ++j)
 		{
 			rMatrix(i,j) = l_vCoefficients[index];
 			++index;
