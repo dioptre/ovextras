@@ -11,7 +11,7 @@ IF(NOT PATH_VRPN)
 	RETURN()
 ENDIF(NOT PATH_VRPN)
 
-INCLUDE("FindThirdPartyCEGUI")
+INCLUDE("FindThirdPartyCEGUI_Check")
 IF(NOT PATH_CEGUI)
         MESSAGE(STATUS "    --> Not building ${PROJECT_NAME}")
         RETURN()
