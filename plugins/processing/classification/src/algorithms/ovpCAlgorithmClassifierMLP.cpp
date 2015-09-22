@@ -319,6 +319,12 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 
 boolean CAlgorithmClassifierMLP::classify(const IFeatureVector &rFeatureVector, float64 &rf64Class, IVector &rDistanceValue, IVector &rProbabilityValue)
 {
+	if(rFeatureVector.getSize() != m_oInputWeight.cols())
+	{
+		this->getLogManager() << LogLevel_Error << "Classifier expected " << m_oInputWeight.cols() << " features, got " << rFeatureVector.getSize() << "\n";
+		return false;
+	}
+
 	const Map<VectorXd> l_oFeatureVec(const_cast<float64*>(rFeatureVector.getBuffer()), rFeatureVector.getSize());
 	VectorXd l_oData = l_oFeatureVec;
 	//we normalize and center data on 0 to avoid saturation

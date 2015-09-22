@@ -323,14 +323,20 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 	//std::cout<<"classify"<<std::endl;
 	if(m_pModel==NULL)
 	{
-		this->getLogManager() << LogLevel_Error << "classify impossible with a model equal NULL\n";
+		this->getLogManager() << LogLevel_Error << "Classification is impossible with a model equalling NULL\n";
 		return false;
 	}
 	if(m_pModel->nr_class==0||m_pModel->rho==NULL)
 	{
-		this->getLogManager() << LogLevel_Error << "the model wasn't load correctly\n";
+		this->getLogManager() << LogLevel_Error << "The model wasn't loaded correctly\n";
 		return false;
 	}
+	if(m_ui32NumberOfFeatures != rFeatureVector.getSize())
+	{
+		this->getLogManager() << LogLevel_Error << "Classifier expected " << m_ui32NumberOfFeatures << " features, got " << rFeatureVector.getSize() << "\n";		
+		return false;
+	}
+
 	//std::cout<<"create l_pX"<<std::endl;
 	svm_node* l_pX=new svm_node[rFeatureVector.getSize()+1];
 	//std::cout<<"rFeatureVector.getSize():"<<rFeatureVector.getSize()<<"m_ui32NumberOfFeatures"<<m_ui32NumberOfFeatures<<std::endl;

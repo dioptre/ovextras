@@ -103,11 +103,13 @@ algorithm you want.
 
  * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainer_Setting10|
 If you want to perform a k-fold test, you should enter something else than 0 or 1 here. A k-fold test generally gives
-a better estimate of the classifiers accuracy than naive testing with the training data. The idea is to divide the set of 
-feature vectors in a number of partitions. The classification algorithm is trained on some of the partitions and its 
-accuracy is tested on the others. However, the classifier produced by the box is the classifier trained with the whole
-data. The cross-validation is only an error estimation tool, it does not affect the resulting model.
-See the miscellaneous section for details on how the k-fold test is done in this box.
+a better estimate of the classifiers accuracy than naive testing with the training data. The classifier may overfit
+the training data, and get a good accuracy with the observed data, but not be able to generalize to unseen data. 
+In cross-validation, the idea is to divide the set of  feature vectors in a number of partitions. The classification algorithm 
+is trained on some of the partitions and its accuracy is tested on the others. However, the classifier produced by the box is 
+the classifier trained with the whole data. The cross-validation is only an error estimation tool, it does not affect 
+the resulting model. See the miscellaneous section for details on how the k-fold test is done in this box, and possible 
+caveats about the cross-validation procedure.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Setting10|
  
 
@@ -120,7 +122,9 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainer_Examples|
 This box is used in BCI pipelines in order to classify cerebral activity states. For a detailed scenario using this
 box and its associated \ref Doc_BoxAlgorithm_ClassifierProcessor, please see the <b>motor imagary</b>
-BCI scenario in the sample scenarios.
+BCI scenario in the sample scenarios. An even more simple tutorial with artificial data 
+is available in the <b>box-tutorials/</b> folder.
+
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Examples|
 __________________________________________________________________
 
@@ -226,10 +230,33 @@ The same process if performed on all the partitions :
 \endverbatim
 
 Important things to consider :
-- The more partitions you have, the more feature vectors you have in your training sets... and the less examples you'll have to
-test on. This means that the result of the test will probably be less reliable. 
+- The more partitions you have, the more feature vectors you have in your training sets... and the less examples 
+you'll have to test on. This means that the result of the test will probably be less reliable. 
 
 In conclusion, be careful when choosing this k-fold test setting. Typical value range from 4 partitions (train on 75% of the feature vectors and
 test on 25% - 4 times) to 10 partitions (train on 90% of the feature vectors and test on 10% - 10 times).
+
+Note that the cross-validation performed by the classifier trainer box in OpenViBE may be optimistic.
+The cross-validation is working as it should, but it cannot take into account what happens outside it. 
+In OpenViBE scenarios, there may be e.g. time overlap from epoching, examples drawn from the same epoch 
+ending up in the same cross-validation partition, and (supervised) preprocessing 
+such as CSP or XDawn potentially overfitting the data before its given to the classifier trainer. 
+Such situations are not compatible with the theoretical assumption that the classified examples are 
+independent and identically distributed (the typical iid assumption in machine learning) across
+train and test. To do cross-validation controlling for such issues, we have provided
+a more advanced cross-validation tutorial in the OpenViBE web documentation.
+
+Confusion Matrices
+
+At the end of the training, the box will print one or two confusion matrices, depending if cross-validation
+was used: one matrix for the cross-validation, the other for the training data. Each matrix will contain true 
+class as rows, and predicted class as columns. The diagonal describes the percentage of correct predictions per class. 
+Although the matrix can be optimistic (see above section about the cross-validation), it may give useful 
+diagnostic information. For example, if the accuracy is very skewed towards one class, this may indicate
+a problem if the design is supposed to be balanced. The problem may originate e.g. from the original data 
+source, the signal processing chains for the different classes, or the classifier learning algorithm. These need
+then to be investigated. Also, if very low accuracies are observed in these matrices, it may give reason 
+to suspect that prediction accuracies on fresh data might be likewise lacking -- or worse.
+
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Miscellaneous|
  */
