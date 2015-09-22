@@ -38,6 +38,10 @@ SET_TESTS_PROPERTIES(compare_Evaluation_statistic_generator PROPERTIES ATTACHED_
 FIND_PROGRAM(SIKULI NAMES sikuli-ide)
 IF(SIKULI)
 	IF(UNIX)
+		ADD_TEST(clean_Evaluation_ROC rm -f ${OV_LOGFILE} screenshot.png)
 		ADD_TEST(run_Evaluation_ROC "${SIKULI}" -t testROCCurve.UNIX.sikuli)
+		
+		SET_TESTS_PROPERTIES(run_Evaluation_ROC PROPERTIES DEPENDS clean_Evaluation_ROC)
+		SET_TESTS_PROPERTIES(run_Evaluation_ROC PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE} screenshot.png)
 	ENDIF(UNIX)
 ENDIF(SIKULI)
