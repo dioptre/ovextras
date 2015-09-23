@@ -319,7 +319,7 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 
 boolean CAlgorithmClassifierMLP::classify(const IFeatureVector &rFeatureVector, float64 &rf64Class, IVector &rDistanceValue, IVector &rProbabilityValue)
 {
-	if(rFeatureVector.getSize() != m_oInputWeight.cols())
+	if(rFeatureVector.getSize() != static_cast<uint32>(m_oInputWeight.cols()))
 	{
 		this->getLogManager() << LogLevel_Error << "Classifier expected " << static_cast<uint32>(m_oInputWeight.cols()) << " features, got " << rFeatureVector.getSize() << "\n";
 		return false;
@@ -492,9 +492,9 @@ void CAlgorithmClassifierMLP::dumpData(XML::IXMLNode *pNode, float64 f64Value)
 	pNode->setPCData(l_sData.str().c_str());
 }
 
-void CAlgorithmClassifierMLP::loadData(XML::IXMLNode *pNode, MatrixXd &rMatrix, OpenViBE::int64 ui32RowCount, OpenViBE::int64 ui32ColCount)
+void CAlgorithmClassifierMLP::loadData(XML::IXMLNode *pNode, MatrixXd &rMatrix, OpenViBE::int64 i64RowCount, OpenViBE::int64 i64ColCount)
 {
-	rMatrix = MatrixXd(ui32RowCount, ui32ColCount);
+	rMatrix = MatrixXd(i64RowCount, i64ColCount);
 	std::stringstream l_sData(pNode->getPCData());
 
 	std::vector < float64 > l_vCoefficients;
@@ -505,11 +505,11 @@ void CAlgorithmClassifierMLP::loadData(XML::IXMLNode *pNode, MatrixXd &rMatrix, 
 	}
 
 	size_t index=0;
-	for(int64 i =0; i < ui32RowCount; ++i)
+	for(int64 i =0; i < i64RowCount; ++i)
 	{
-		for(int64 j=0; j < ui32ColCount; ++j)
+		for(int64 j=0; j < i64ColCount; ++j)
 		{
-			rMatrix(i,j) = l_vCoefficients[index];
+			rMatrix(static_cast<int32>(i) ,static_cast<int32>(j)) = l_vCoefficients[index];
 			++index;
 		}
 

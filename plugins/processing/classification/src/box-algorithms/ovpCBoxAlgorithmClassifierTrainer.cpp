@@ -528,7 +528,6 @@ boolean CBoxAlgorithmClassifierTrainer::printConfusionMatrix(const CMatrix& oMat
 	OpenViBEToolkit::Tools::Matrix::clearContent(l_oRowSum);
 
 	for(uint32 i=0;i<l_ui32Rows;i++) {
-		float64 l_f64RowSum = 0;
 		for(uint32 j=0;j<l_ui32Rows;j++) {
 			l_oRowSum[i] += l_oTmp[i*l_ui32Rows+j];
 		}

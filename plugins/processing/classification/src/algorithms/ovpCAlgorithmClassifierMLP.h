@@ -52,7 +52,7 @@ namespace OpenViBEPlugins
 			void dumpData (XML::IXMLNode *pNode, OpenViBE::int64 i64Value);
 			void dumpData (XML::IXMLNode *pNode, OpenViBE::float64 f64Value);
 
-			void loadData (XML::IXMLNode *pNode, Eigen::MatrixXd &rMatrix, OpenViBE::int64 ui32RowCount, OpenViBE::int64 ui32ColCount);
+			void loadData (XML::IXMLNode *pNode, Eigen::MatrixXd &rMatrix, OpenViBE::int64 i64RowCount, OpenViBE::int64 i64ColCount);
 			void loadData (XML::IXMLNode *pNode, Eigen::VectorXd &rVector);
 			void loadData (XML::IXMLNode *pNode, OpenViBE::int64 &i64Value);
 			void loadData (XML::IXMLNode *pNode, OpenViBE::float64 &f64Value);
