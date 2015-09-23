@@ -35,20 +35,26 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, OVP_ClassId_DLLBridge)
 
 		private:
-			OpenViBE::CIdentifier m_oInputType;
+
 			OpenViBEToolkit::TDecoder < CDLLBridge >* m_pDecoder;		
 			OpenViBEToolkit::TEncoder < CDLLBridge >* m_pEncoder;			
 
+			OpenViBE::CIdentifier m_oInputType;
 			OpenViBE::CString m_sDLLFile;
 			OpenViBE::CString m_sParameters;
 
 			// These functions are expected from the DLL library
 			typedef void (* INITFUNC)(OpenViBE::int32* paramsLength, const char *params, OpenViBE::int32 *errorCode);
 			typedef void (* UNINITFUNC)(OpenViBE::int32 *errorCode);
-			typedef void (* PROCESSFUNC)(OpenViBE::float64* mat, OpenViBE::int32* rows, OpenViBE::int32* cols, OpenViBE::int32* errorCode);
+			typedef void (* PROCESSHEADERFUNC)(
+				OpenViBE::int32* rowsIn, OpenViBE::int32* colsIn, OpenViBE::int32* samplingRateIn,
+				OpenViBE::int32* rowsOut, OpenViBE::int32* colsOut, OpenViBE::int32* samplingRateOut,
+				OpenViBE::int32* errorCode);
+			typedef void (* PROCESSFUNC)(OpenViBE::float64* matIn, OpenViBE::float64* matOut, OpenViBE::int32* errorCode);
 
 			INITFUNC m_pInitialize;
 			UNINITFUNC m_pUninitialize;
+			PROCESSHEADERFUNC m_pProcessHeader;
 			PROCESSFUNC m_pProcess;
 
 #if defined(TARGET_OS_Windows)
@@ -92,7 +98,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Process a signal or matrix stream with a DLL"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Scripting"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-convert"); }
 			virtual void release(void)                                   { }
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_DLLBridge; }
@@ -121,7 +127,7 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_DLLBridgeDesc)
+			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_DLLBridgeDesc);
 
 		};
 

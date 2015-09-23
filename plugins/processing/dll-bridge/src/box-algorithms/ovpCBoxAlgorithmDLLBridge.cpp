@@ -51,6 +51,7 @@ namespace OpenViBEPlugins
 			m_pDecoder = NULL;
 			m_pLibrary = NULL;
 			m_pInitialize = NULL;
+			m_pProcessHeader = NULL;
 			m_pProcess = NULL;
 			m_pUninitialize = NULL;
 
@@ -106,6 +107,17 @@ namespace OpenViBEPlugins
 			}
 
 #if defined(TARGET_OS_Windows)
+			m_pProcessHeader = (PROCESSHEADERFUNC)GetProcAddress(m_pLibrary, "box_process_header");
+#elif defined(TARGET_OS_Linux)
+			m_pProcessHeader = (PROCESSHEADERFUNC)dlsym(m_pLibrary, "box_process_header");
+#endif
+			if(!m_pProcessHeader) 
+			{
+				this->getLogManager() << LogLevel_Error << "Unable to find box_process_header() in the DLL\n";
+				return false;
+			}
+
+#if defined(TARGET_OS_Windows)
 			m_pUninitialize = (UNINITFUNC)GetProcAddress(m_pLibrary, "box_uninit");
 #elif defined(TARGET_OS_Linux)
 			m_pUninitialize = (UNINITFUNC)dlsym(m_pLibrary, "box_uninit");
@@ -127,8 +139,6 @@ namespace OpenViBEPlugins
 				l_pDecoder->initialize(*this, 0);
 				l_pEncoder->initialize(*this, 0);
 
-				l_pEncoder->getInputMatrix().setReferenceTarget(l_pDecoder->getOutputMatrix());
-
 				m_pDecoder = l_pDecoder;
 				m_pEncoder = l_pEncoder;
 			} else {
@@ -139,9 +149,6 @@ namespace OpenViBEPlugins
 
 				l_pDecoder->initialize(*this, 0);
 				l_pEncoder->initialize(*this, 0);
-
-				l_pEncoder->getInputMatrix().setReferenceTarget(l_pDecoder->getOutputMatrix());
-				l_pEncoder->getInputSamplingRate().setReferenceTarget(l_pDecoder->getOutputSamplingRate());
 
 				m_pDecoder = l_pDecoder;
 				m_pEncoder = l_pEncoder;
@@ -235,25 +242,50 @@ namespace OpenViBEPlugins
 						this->getLogManager() << LogLevel_Error << "Only 2 dimensional matrices supported\n";
 						return false;
 					}
+
+					int32 l_i32SamplingRateIn = 0;
+
+					if(m_oInputType == OV_TypeId_Signal)
+					{
+						l_i32SamplingRateIn = (int32)((OpenViBEToolkit::TSignalDecoder < OpenViBEPlugins::DLLBridge::CDLLBridge >*)l_pDecoder)->getOutputSamplingRate();
+					}
+
+					int32 l_i32nRowsIn = l_pDecoder->getOutputMatrix()->getDimensionSize(0);
+					int32 l_i32nColsIn = l_pDecoder->getOutputMatrix()->getDimensionSize(1);
+
+					int32 l_i32ErrorCode = 0;
+					int32 l_i32nRowsOut=0,l_i32nColsOut=0;
+					int32 l_i32SamplingRateOut = 0;
+					m_pProcessHeader(&l_i32nRowsIn,&l_i32nColsIn, &l_i32SamplingRateIn, &l_i32nRowsOut, &l_i32nColsOut, &l_i32SamplingRateOut, &l_i32ErrorCode);
+
+					l_pEncoder->getInputMatrix()->setDimensionCount(2);
+					l_pEncoder->getInputMatrix()->setDimensionSize(0, l_i32nRowsOut);
+					l_pEncoder->getInputMatrix()->setDimensionSize(1, l_i32nColsOut);
+
+					if(m_oInputType == OV_TypeId_Signal)
+					{
+						((OpenViBEToolkit::TSignalEncoder < OpenViBEPlugins::DLLBridge::CDLLBridge >*)l_pEncoder)->getInputSamplingRate() = l_i32SamplingRateOut;
+					}
+
 					l_pEncoder->encodeHeader();
 
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 				}
+
 				if(l_pDecoder->isBufferReceived())
 				{
-					IMatrix* l_pMatrix = l_pDecoder->getOutputMatrix();
-					int32 nRows = l_pMatrix->getDimensionSize(0);
-					int32 nCols = l_pMatrix->getDimensionSize(1);
-					
+					float64* l_pInput = l_pDecoder->getOutputMatrix()->getBuffer();
+					float64* l_pOutput = l_pEncoder->getInputMatrix()->getBuffer();
+
 					// Process the sample chunk in DLL
 					int32 l_i32ErrorCode = 0;
-					m_pProcess(l_pMatrix->getBuffer(), &nRows, &nCols, &l_i32ErrorCode);
+					m_pProcess(l_pInput, l_pOutput, &l_i32ErrorCode);
 					if(l_i32ErrorCode) 
 					{
 						this->getLogManager() << LogLevel_Error << "DLL box_process() returned error code " << l_i32ErrorCode << "\n";
 						return false;
 					}
-					
+
 					l_pEncoder->encodeBuffer();
 
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
