@@ -7,7 +7,10 @@
 
 #if defined(TARGET_OS_Windows)
 #include <windows.h>
+#elif defined(TARGET_OS_Linux)
+#include <dlfcn.h>
 #endif
+
 
 using namespace OpenViBE;
 using namespace OpenViBE::Plugins;
@@ -19,6 +22,8 @@ using namespace OpenViBEToolkit;
 
 using namespace std;
 
+// #define DLLBRIDGE_DEBUG
+#if defined(DLLBRIDGE_DEBUG)
 static void dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const CMatrix& mat, const CString &desc)
 {
 	rMgr << LogLevel_Info << desc << "\n";
@@ -30,6 +35,7 @@ static void dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, const CMatrix& mat, 
 		rMgr << "\n";
 	}
 }
+#endif
 
 namespace OpenViBEPlugins
 {
@@ -57,32 +63,53 @@ namespace OpenViBEPlugins
 				return false;
 			}
 
+
+#if defined(TARGET_OS_Windows)
 			std::string tmp = m_sDLLFile.toASCIIString();
 			std::replace( tmp.begin(), tmp.end(), '/', '\\');
 			m_sDLLFile = tmp.c_str();
-
+			
 			m_pLibrary = LoadLibrary(m_sDLLFile.toASCIIString());
+#elif defined(TARGET_OS_Linux)
+			m_pLibrary = dlopen(m_sDLLFile.toASCIIString(), RTLD_LAZY);
+#endif
 			if(!m_pLibrary)
 			{
+#if defined(TARGET_OS_Windows)
 				this->getLogManager() << LogLevel_Error << "Failed to load " << m_sDLLFile << ", error code " << (int64) GetLastError() << "\n";
+#elif defined(TARGET_OS_Linux)
+				this->getLogManager() << LogLevel_Error << "Failed to load " << m_sDLLFile << ", error code " << (int64) dlerror() << "\n";
+#endif
 				return false;
 			}
 
+#if defined(TARGET_OS_Windows)
 			m_pInitialize = (INITFUNC)GetProcAddress(m_pLibrary, "box_init");
+#elif defined(TARGET_OS_Linux)
+			m_pInitialize = (INITFUNC)dlsym(m_pLibrary, "box_init");
+#endif
 			if(!m_pInitialize) 
 			{
 				this->getLogManager() << LogLevel_Error << "Unable to find box_init() in the DLL\n";
 				return false;
 			}
 
+#if defined(TARGET_OS_Windows)
 			m_pProcess = (PROCESSFUNC)GetProcAddress(m_pLibrary, "box_process");
+#elif defined(TARGET_OS_Linux)
+			m_pProcess = (PROCESSFUNC)dlsym(m_pLibrary, "box_process");
+#endif
 			if(!m_pProcess) 
 			{
 				this->getLogManager() << LogLevel_Error << "Unable to find box_process() in the DLL\n";
 				return false;
 			}
 
+#if defined(TARGET_OS_Windows)
 			m_pUninitialize = (UNINITFUNC)GetProcAddress(m_pLibrary, "box_uninit");
+#elif defined(TARGET_OS_Linux)
+			m_pUninitialize = (UNINITFUNC)dlsym(m_pLibrary, "box_uninit");
+#endif
 			if(!m_pUninitialize) 
 			{
 				this->getLogManager() << LogLevel_Error << "Unable to find box_uninit() in the DLL\n";
@@ -166,7 +193,11 @@ namespace OpenViBEPlugins
 
 			if(m_pLibrary) 
 			{
+#if defined(TARGET_OS_Windows)
 				FreeLibrary(m_pLibrary);
+#elif defined(TARGET_OS_Linux)
+				dlclose(m_pLibrary);
+#endif
 				m_pLibrary = NULL;
 			}
 						

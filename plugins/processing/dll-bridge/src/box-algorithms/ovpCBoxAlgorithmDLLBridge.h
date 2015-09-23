@@ -42,6 +42,7 @@ namespace OpenViBEPlugins
 			OpenViBE::CString m_sDLLFile;
 			OpenViBE::CString m_sParameters;
 
+			// These functions are expected from the DLL library
 			typedef void (* INITFUNC)(OpenViBE::int32* paramsLength, const char *params, OpenViBE::int32 *errorCode);
 			typedef void (* UNINITFUNC)(OpenViBE::int32 *errorCode);
 			typedef void (* PROCESSFUNC)(OpenViBE::float64* mat, OpenViBE::int32* rows, OpenViBE::int32* cols, OpenViBE::int32* errorCode);
@@ -51,9 +52,11 @@ namespace OpenViBEPlugins
 			PROCESSFUNC m_pProcess;
 
 #if defined(TARGET_OS_Windows)
-
 			HINSTANCE m_pLibrary;
+#elif defined(TARGET_OS_Linux)
+			void* m_pLibrary;
 #endif
+
 		};
 
 		class CDLLBridgeListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
@@ -112,6 +115,8 @@ namespace OpenViBEPlugins
 
 				rPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				rPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
+
+				rPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
 
 				return true;
 			}
