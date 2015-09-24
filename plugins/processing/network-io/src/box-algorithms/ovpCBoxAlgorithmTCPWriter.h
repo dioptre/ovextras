@@ -73,8 +73,6 @@ namespace OpenViBEPlugins
 			boost::asio::ip::tcp::acceptor* m_pAcceptor;
 			std::vector<boost::asio::ip::tcp::socket*> m_vSockets;
 
-			OpenViBE::CMatrix m_oChunkTranspose;
-
 			OpenViBE::uint64 m_ui64OutputStyle;
 
 			OpenViBE::CIdentifier m_oInputType;
@@ -163,7 +161,6 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Port",OV_TypeId_Integer,"5678");
 				rBoxAlgorithmPrototype.addSetting("Stimulus output", OVP_TypeID_TCPWriter_OutputStyle, "Raw");
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
 
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);

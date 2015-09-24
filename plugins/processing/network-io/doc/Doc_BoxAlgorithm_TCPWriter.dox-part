@@ -17,10 +17,10 @@ Output:
 
 1b) If the output is chosen as hex string or descriptive string (these are valid for Stimulation input only), no header is sent.
 
-2) After the possible global header, the data itself is sent. The data is a stream of float64 for Signal and StreamedMatrix. 
-For signals, the data orientation is [nSamples x nChannels], i.e. all channels for one sample are sent in a sequence, then all channels of the next sample, 
-and so on (the matrix is a transpose of the usual OpenViBE signal orientation). For matrices, the data is sent as is, in row-major order. 
-For Stimulations, the data is uint64 if the user chooses raw, or char strings otherwise.
+2) After the possible global header, the data itself is sent. The data is a stream of float64 chunks for Signal and StreamedMatrix. 
+Each chunk is a matrix [nChannels x nSamples], sent in row-major order, i.e. all samples for one channel are sent in a sequence (a row), 
+then all samples of the next sample (next row), and so on. For Stimulations, the data is uint64 if the user chooses raw, 
+or char strings otherwise.
 
 Multiple clients can connect to the socket of the box. The box keeps sending data to each client until either the scenario is stopped or the client disconnects. The box does not guarantee that the client starts to receive the input stream from any particular location. When kernel calls box::process() at time t, all clients connected at time t get forwarded the chunks given to box::process() at t. However, if a client establish a connection during box::process(), it may get a partial chunk of t and the whole chunk of t+1 and so on.
 

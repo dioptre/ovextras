@@ -87,7 +87,6 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	else if(m_oInputType == OV_TypeId_Signal)
 	{
 		m_pActiveDecoder = &m_oSignalDecoder;
-		m_oChunkTranspose.setDimensionCount(0);
 	}
 	else
 	{
@@ -95,7 +94,7 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	}
 	m_pActiveDecoder->initialize(*this,0);
 
-	uint64 l_ui64Port = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	const uint64 l_ui64Port = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_ui64OutputStyle = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 	m_ui32RawVersion = htonl(1); // TCP Writer output format version
@@ -263,38 +262,41 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 		m_pActiveDecoder->decode(j);
 		if(m_pActiveDecoder->isHeaderReceived())
 		{
-			if(m_pActiveDecoder == &m_oMatrixDecoder) 
+			// Matrix part
+			if(m_pActiveDecoder == &m_oMatrixDecoder || m_pActiveDecoder == &m_oSignalDecoder) 
 			{
-				const uint32 l_ui32NumberOfDimensions = static_cast<uint32> (m_oMatrixDecoder.getOutputMatrix()->getDimensionCount() ); 
-				if(l_ui32NumberOfDimensions != 2) 
+				// Casting to base class, ok
+				OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmTCPWriter >* l_pDecoder 
+					= (OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmTCPWriter >*)m_pActiveDecoder;
+
+				const uint32 l_ui32NumberOfDimensions = l_pDecoder->getOutputMatrix()->getDimensionCount(); 
+				switch(l_ui32NumberOfDimensions)
 				{
-					this->getLogManager() << LogLevel_Error << "TCPWriter only supports 2 dimensional matrices\n";
+				case 0:
+					this->getLogManager() << LogLevel_Error << "Nothing to send, zero size matrix stream received\n";
+					return false;
+				case 1:
+					// Ok, this is a vector, openvibe style. Interpret it as 1 channel row vector.
+					m_ui32NumberOfChannels = 1;
+					m_ui32NumberOfSamplesPerChunk = l_pDecoder->getOutputMatrix()->getDimensionSize(0);
+					break;
+				case 2:
+					m_ui32NumberOfChannels = l_pDecoder->getOutputMatrix()->getDimensionSize(0);
+					m_ui32NumberOfSamplesPerChunk = l_pDecoder->getOutputMatrix()->getDimensionSize(1);
+					break;
+				default:
+					this->getLogManager() << LogLevel_Error << "Only 1 and 2 dimensional matrices are supported\n";
 					return false;
 				}
-
-				m_ui32NumberOfChannels = static_cast<uint32> (m_oMatrixDecoder.getOutputMatrix()->getDimensionSize(0) );
-				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> (m_oMatrixDecoder.getOutputMatrix()->getDimensionSize(1) );
 			} 
-			else if(m_pActiveDecoder == &m_oSignalDecoder)
+			
+			// Signal specific part
+			if(m_pActiveDecoder == &m_oSignalDecoder)
 			{
-				const uint32 l_ui32NumberOfDimensions = static_cast<uint32> (m_oSignalDecoder.getOutputMatrix()->getDimensionCount() ); 
-				if(l_ui32NumberOfDimensions != 2) 
-				{
-					this->getLogManager() << LogLevel_Error << "TCPWriter only supports 2 dimensional matrices\n";
-					return false;
-				}
-
-				m_ui32NumberOfChannels = static_cast<uint32> ( m_oSignalDecoder.getOutputMatrix()->getDimensionSize(0) );
-				m_ui32NumberOfSamplesPerChunk = static_cast<uint32> ( m_oSignalDecoder.getOutputMatrix()->getDimensionSize(1) );
-				m_ui32Frequency = static_cast<uint32> ( m_oSignalDecoder.getOutputSamplingRate() );\
-
-				// C++ is in row major order and openvibe signal matrices are [nChannels x nSamples]. The following buffer
-				// is used for transposing the chunks to get [nSamples x nChannels] output matrix (only used in case of signals).
-				m_oChunkTranspose.setDimensionCount(2);
-				m_oChunkTranspose.setDimensionSize(0,m_ui32NumberOfSamplesPerChunk);
-				m_oChunkTranspose.setDimensionSize(1,m_ui32NumberOfChannels);
+				m_ui32Frequency = static_cast<uint32> ( m_oSignalDecoder.getOutputSamplingRate() );
 			}
-			else
+
+			if(m_pActiveDecoder == &m_oStimulationDecoder)
 			{
 				// Stimulus, do nothing
 			}
@@ -321,22 +323,7 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 			{
 				const IMatrix* l_pMatrix = m_oSignalDecoder.getOutputMatrix();
 
-				// Transpose
-				const float64 *l_pSource = l_pMatrix->getBuffer();
-				float64 *l_pDestination = m_oChunkTranspose.getBuffer();
-				if(m_oChunkTranspose.getDimensionCount() == 0) {
-					this->getLogManager() << LogLevel_Debug << "Box received buffer before header. Bad.\n";
-				}
-
-				for(uint32 c=0;c<m_ui32NumberOfChannels;c++)
-				{
-					for(uint32 s=0;s<m_ui32NumberOfSamplesPerChunk;s++)
-					{
-						l_pDestination[s*m_ui32NumberOfChannels+c] = l_pSource[c*m_ui32NumberOfSamplesPerChunk+s];
-					}
-				}
-
-				sendToClients((void *)l_pDestination, l_pMatrix->getBufferElementCount()*sizeof(float64));
+				sendToClients((void *)l_pMatrix->getBuffer(), l_pMatrix->getBufferElementCount()*sizeof(float64));
 			} 
 			else // stimulus
 			{
