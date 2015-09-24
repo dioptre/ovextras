@@ -1,4 +1,4 @@
-#if 1//defined TARGET_HAS_ThirdPartyEIGEN
+#if defined TARGET_HAS_ThirdPartyEIGEN
 
 #include "ovpCBoxAlgorithmRegularizedCSPTrainer.h"
 
