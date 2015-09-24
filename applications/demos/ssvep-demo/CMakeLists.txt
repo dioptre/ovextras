@@ -12,10 +12,10 @@ IF(NOT PATH_VRPN)
 ENDIF(NOT PATH_VRPN)
 
 INCLUDE("FindThirdPartyCEGUI_Check")
-IF(NOT PATH_CEGUI)
+IF(NOT CEGUI_FOUND OR NOT OgreCEGUIRenderer_FOUND)
         MESSAGE(STATUS "    --> Not building ${PROJECT_NAME}")
         RETURN()
-ENDIF(NOT PATH_CEGUI)
+ENDIF(NOT CEGUI_FOUND OR NOT OgreCEGUIRenderer_FOUND)
 
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
 ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
