@@ -16,12 +16,13 @@
 ;Interface Settings
 
 	!define MUI_ABORTWARNING
-
+	
 ;Pages
 
 	!insertmacro MUI_PAGE_WELCOME
 	!insertmacro MUI_PAGE_LICENSE "..\COPYING"
 	!insertmacro MUI_PAGE_DIRECTORY
+	!insertmacro MUI_PAGE_COMPONENTS	
 	!insertmacro MUI_PAGE_INSTFILES
 	!insertmacro MUI_PAGE_FINISH
 
@@ -30,6 +31,8 @@
 	!insertmacro MUI_UNPAGE_INSTFILES
 	!insertmacro MUI_UNPAGE_FINISH
 
+
+	
 ;Languages
 
 	!insertmacro MUI_LANGUAGE "English"
@@ -43,6 +46,7 @@
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
+  
 Function .onInit
 
 	; Note that for logging to work, you will need a logging-enabled build of nsis. 
@@ -66,13 +70,18 @@ has_admin_rights:
 		StrCpy $INSTDIR $0
 	${EndIf}
 
+	; Make OpenViBE section mandatory
+	IntOp $0 ${SF_SELECTED} | ${SF_RO}
+	IntOp $0 $0 | ${SF_BOLD}
+    SectionSetFlags "Section1" $0
+	
 FunctionEnd
 
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section "-OpenViBE"
+Section "!OpenViBE" Section1
 
 	LogSet on
 	
@@ -104,16 +113,16 @@ no_need_to_install_directx:
 	File ..\dependencies\arch\openvibe-vcredist-2010.exe
 	File ..\dependencies\arch\lua-5.1.4-vs100.zip
 	File ..\dependencies\arch\expat-2.0.1.zip
-	File ..\dependencies\arch\glfw-3.0.4-vs100.zip	
+	; File ..\dependencies\arch\glfw-3.0.4-vs100.zip	
 	File ..\dependencies\arch\gtk-2.22.1-runtime.zip
 	File ..\dependencies\arch\gtk-themes-2009.09.07.zip
-	File ..\dependencies\arch\inpout32-vs100.zip	
+	; File ..\dependencies\arch\inpout32-vs100.zip	
 	File ..\dependencies\arch\itpp-4.0.7-runtime.zip
 	File ..\dependencies\arch\ogre-1.7.1-vs100-runtime.zip
 	File ..\dependencies\arch\cegui-0.7.2-vs100-runtime.zip
 	File ..\dependencies\arch\vrpn-7.31-vs100-runtime.zip
 	File ..\dependencies\arch\pthreads-2.8.0-runtime.zip
-	File ..\dependencies\arch\presage-0.8.9-vs100.zip		
+	; File ..\dependencies\arch\presage-0.8.9-vs100.zip		
 	File ..\dependencies\arch\openal-1.1-runtime.zip
 	File ..\dependencies\arch\freealut-1.1.0-bin-runtime.zip
 	File ..\dependencies\arch\libvorbis-1.3.2-vs100-runtime.zip
@@ -127,16 +136,16 @@ no_need_to_install_directx:
 	SetOutPath "$INSTDIR\dependencies"
 	ZipDLL::extractall "arch\lua-5.1.4-vs100.zip" ""
 	ZipDLL::extractall "arch\expat-2.0.1.zip" "expat"
-	ZipDLL::extractall "arch\glfw-3.0.4-vs100.zip" ""	
+	; ZipDLL::extractall "arch\glfw-3.0.4-vs100.zip" ""	
 	ZipDLL::extractall "arch\gtk-2.22.1-runtime.zip" "gtk"
 	ZipDLL::extractall "arch\gtk-themes-2009.09.07.zip" "gtk"
-	ZipDLL::extractall "arch\inpout32-vs100.zip" ""	
+	; ZipDLL::extractall "arch\inpout32-vs100.zip" ""	
 	ZipDLL::extractall "arch\itpp-4.0.7-runtime.zip" "itpp"
 	ZipDLL::extractall "arch\ogre-1.7.1-vs100-runtime.zip" "ogre"
 	ZipDLL::extractall "arch\cegui-0.7.2-vs100-runtime.zip" "cegui"
 	ZipDLL::extractall "arch\vrpn-7.31-vs100-runtime.zip" ""
 	ZipDLL::extractall "arch\pthreads-2.8.0-runtime.zip" "pthreads"
-	ZipDLL::extractall "arch\presage-0.8.9-vs100.zip" ""
+	; ZipDLL::extractall "arch\presage-0.8.9-vs100.zip" ""
 	ZipDLL::extractall "arch\openal-1.1-runtime.zip" "openal"
 	ZipDLL::extractall "arch\freealut-1.1.0-bin-runtime.zip" "freealut"
 	ZipDLL::extractall "arch\libvorbis-1.3.2-vs100-runtime.zip" "libvorbis"
@@ -145,8 +154,8 @@ no_need_to_install_directx:
 	ZipDLL::extractall "arch\enobio3g-1.2.1-vs100-runtime.zip" ""
 	
 	SetOutPath "$INSTDIR"
-	; Export binaries
-	File /nonfatal /r ..\dist\bin
+	; Export binaries (except the mensia acquisition dll, it will be installed optionally as part of neurort drivers choice)
+	File /nonfatal /r /x openvibe-driver-mensia-acquisition.dll ..\dist\bin
 	; Export launch scripts
 	File /nonfatal ..\dist\*.cmd
 	; File /nonfatal /r ..\dist\doc
@@ -180,15 +189,15 @@ no_need_to_patch_3d_functionnality:
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\lua\lib;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\itpp\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\expat\bin;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\glfw\lib\;%PATH%$\r$\n"		
+	; FileWrite $0 "SET PATH=$INSTDIR\dependencies\glfw\lib\;%PATH%$\r$\n"		
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\gtk\bin;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\inpout32\lib;%PATH%$\r$\n"
+	; FileWrite $0 "SET PATH=$INSTDIR\dependencies\inpout32\lib;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\itpp\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\cegui\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=%OGRE_HOME%\bin\release;%OGRE_HOME%\bin\debug;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=%VRPNROOT%\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\pthreads\lib;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\presage\lib;%PATH%$\r$\n"	
+	;FileWrite $0 "SET PATH=$INSTDIR\dependencies\presage\lib;%PATH%$\r$\n"	
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\openal\libs\Win32;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\freealut\lib;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libvorbis\win32\bin\release;%PATH%$\r$\n"
@@ -234,9 +243,39 @@ no_need_to_patch_3d_functionnality:
 	; AccessControl::GrantOnFile "$INSTDIR" "(S-1-5-32-545)" "GenericRead + GenericWrite + GenericExecute + Delete" ; (BU) user group (builtin users) does not exist on win7. this SID replaces it.
 SectionEnd
 
+Section "Mensia NeuroRT drivers" Section2
+
+	CreateDirectory "$INSTDIR\dependencies\arch"	
+	SetOutPath "$INSTDIR\dependencies"
+	
+	NSISdl::download "http://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x86.exe" "arch\vcredist_2013_x86.exe"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0$\nCheck your Internet connection and your firewall settings.$\nNeuroRT driver collection wont be installed...$\n" /SD IDOK
+			Goto skip_mensia_acquisition
+	ExecWait '"arch\vcredist_2013_x86.exe" /install /quiet'
+	
+	SetOutPath "$INSTDIR\dependencies\arch"
+	File ..\dependencies\arch\sdk-mensia-acquisition-driver-vs120-20150925.zip
+
+	SetOutPath "$INSTDIR\dependencies"
+	ZipDLL::extractall "arch\sdk-mensia-acquisition-driver-vs120-20150925.zip" "$INSTDIR\bin"
+	
+skip_mensia_acquisition:	
+SectionEnd
+
 Section "Uninstall"
 
 	RMDir /r $INSTDIR
 	RMDir /r "$SMPROGRAMS\OpenViBE"
 
 SectionEnd
+
+LangString DESC_Section1 ${LANG_ENGLISH} "The OpenViBE package: Designer, Acquisition Server, drivers, examples, etc."
+LangString DESC_Section2 ${LANG_ENGLISH} "Mensia NeuroRT driver library. Adds support for Brain Rhythm 8, Simulator, SmartBCI and Wearable Sensing Dry Sensor Interface. Visual Studio 2013 redistributable will be installed."
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+  !insertmacro MUI_DESCRIPTION_TEXT ${Section1} $(DESC_Section1)
+  !insertmacro MUI_DESCRIPTION_TEXT ${Section2} $(DESC_Section2)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+

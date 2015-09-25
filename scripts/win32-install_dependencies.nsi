@@ -687,6 +687,9 @@ SectionGroup Optional optionalGroup
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
+/* 
+ * CoAdapt p300
+ 
 Section /o "GLFW"
 
 	SetOutPath "$INSTDIR"
@@ -707,7 +710,8 @@ no_need_to_download_glfw:
 	FileClose $0	
 
 SectionEnd
-
+ */
+ 
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
@@ -741,6 +745,9 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
+/* 
+ * coadapt p300
+ 
 Section /o "inpout32"
 
 	SetOutPath "$INSTDIR"
@@ -767,6 +774,9 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
+/*
+ * coadapt p300
+ 
 Section /o "presage"
 
 ; todo skip presage properly on vs2008
@@ -796,6 +806,7 @@ nopresage:
 presagepassed:	
 	
 SectionEnd
+*/
 
 
 SectionGroupEnd
@@ -806,6 +817,44 @@ SectionGroupEnd
 ;##########################################################################################################################################################
 
 SectionGroup Drivers DriverGroup
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device PKG: Mensia NeuroRT collection"
+
+	; Provides Mensia acquisition driver / NeuroRT driver collection, requires vc2013 redist
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\vcredist_2013_x86.exe" no_need_to_install_vc2013_redist
+	NSISdl::download "http://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x86.exe" "arch\vcredist_2013_x86.exe"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0$\nCheck your Internet connection and your firewall settings.$\nMensia acquisition driver wont be installed...$\n" /SD IDOK
+			Goto skip_mensia_acquisition
+	ExecWait '"arch\vcredist_2013_x86.exe" /Q'
+no_need_to_install_vc2013_redist:
+	
+	IfFileExists "arch\sdk-mensia-acquisition-driver-vs120-20150925.zip" no_need_to_download_mensia_acquisition
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-mensia-acquisition-driver-vs120-20150925.zip "arch\sdk-mensia-acquisition-driver-vs120-20150925.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Goto skip_mensia_acquisition
+no_need_to_download_mensia_acquisition:
+	ZipDLL::extractall "arch\sdk-mensia-acquisition-driver-vs120-20150925.zip" "sdk-mensia-acquisition-driver"
+	
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\sdk-mensia-acquisition-driver\;%PATH%$\r$\n"
+	FileClose $0
+	
+skip_mensia_acquisition:
+	
+SectionEnd
 
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
@@ -996,7 +1045,6 @@ SectionEnd
 ;##########################################################################################################################################################
 
 
-
 SectionGroupEnd
 
 ;##########################################################################################################################################################
@@ -1021,6 +1069,7 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\tmp"
 	RMDir /r "$INSTDIR\pthreads"
 	RMDir /r "$INSTDIR\enobio3g"
+	RMDir /r "$INSTDIR\sdk-*"
 	RMDir /r "$INSTDIR\mcs"
 		
 	Delete "$INSTDIR\..\scripts\win32-dependencies.cmd"
@@ -1053,7 +1102,7 @@ Function .onInit
   ; Note that for logging to work, you will need a logging-enabled build of nsis. 
   ; At the time of writing this, you could get one from http://nsis.sourceforge.net/Special_Builds 
   LogSet on
-  
+
   ; On silent install, we install all components
   IfSilent 0 +2
 	Call EnableOptionals

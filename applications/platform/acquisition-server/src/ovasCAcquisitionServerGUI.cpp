@@ -195,8 +195,15 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	// BEGIN MENSIA ACQUISITION DRIVERS
 #if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver
 
-		m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Loading Mensia Driver Collection\n";
-		CString l_sMensiaDLLPath = m_pAcquisitionServer->getDriverContext().getConfigurationManager().expand("${Path_Bin}/openvibe-driver-mensia-acquisition.dll");
+	m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Loading Mensia Driver Collection\n";
+	CString l_sMensiaDLLPath = m_pAcquisitionServer->getDriverContext().getConfigurationManager().expand("${Path_Bin}/openvibe-driver-mensia-acquisition.dll");
+	if(!std::ifstream(l_sMensiaDLLPath.toASCIIString()).is_open())
+	{
+		m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Couldn't open" <<
+			" dll file [" << l_sMensiaDLLPath.toASCIIString() <<"], perhaps it was not installed.\n";
+	}
+	else 
+	{
 		HINSTANCE l_oLibMensiaAcquisition; // Library Handle
 		l_oLibMensiaAcquisition = ::LoadLibrary(l_sMensiaDLLPath.toASCIIString());
 
@@ -238,6 +245,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 
 			::FreeLibrary(l_oLibMensiaAcquisition);
 		}
+	}
 #endif
 	// END MENSIA ACQUISITION DRIVERS
 	

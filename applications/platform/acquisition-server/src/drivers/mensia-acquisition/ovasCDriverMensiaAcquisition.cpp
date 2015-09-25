@@ -10,6 +10,8 @@
 #include <cmath>
 #include <string>
 
+#include <fstream>
+
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -89,6 +91,14 @@ CDriverMensiaAcquisition::CDriverMensiaAcquisition(IDriverContext& rDriverContex
 
 	// Load the Mensia Acquisition Library
 	OpenViBE::CString l_sPath = m_rDriverContext.getConfigurationManager().expand("${Path_Bin}") + "/" + s_sMensiaDLL;
+	if(!std::ifstream(l_sPath.toASCIIString()).is_open())
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverMensiaAcquisition::CDriverMensiaAcquisition: " <<
+			" dll file [" << l_sPath.toASCIIString() <<"] not openable, perhaps it was not installed.\n";
+		m_bValid = false;
+		return;
+	}
+
 	m_oLibMensiaAcquisition = LoadLibrary(l_sPath);
 	if(!m_oLibMensiaAcquisition)
 	{
