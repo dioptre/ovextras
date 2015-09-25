@@ -156,10 +156,9 @@ Section "CMake"
 no_need_to_download_cmake:
 	ZipDLL::extractall "arch\cmake-2.8.7-win32-x86-ov2.zip" ""
 
-	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
-	FileSeek $0 0 END
-	FileWrite $0 "SET PATH=$INSTDIR\cmake\bin;%PATH%$\r$\n"
-	FileClose $0
+	; Note: Do NOT put cmake bin on the PATH, as/if it contains MSVC* libraries. These have been
+	; observed to have been picked up by third-party software like the python interpreter 
+	; and caused hard-to-trace manifest errors.
 
 SectionEnd
 
