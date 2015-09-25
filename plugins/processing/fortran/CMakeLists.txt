@@ -1,8 +1,11 @@
 
-#IF(NOT check_language(Fortran))
-#	MESSAGE(STATUS "Fortran not available, skipping Fortran example")
-#	RETURN()
-#ENDIF(NOT check_language(Fortran))
+INCLUDE(CheckLanguage)
+
+check_language(Fortran)
+if(NOT CMAKE_Fortran_COMPILER)
+	MESSAGE(STATUS "Fortran not available, skipping Fortran example")
+	RETURN()
+ENDIF(NOT CMAKE_Fortran_COMPILER)
 
 enable_language(Fortran)
 #   INCLUDE(FortranCInterface) 
