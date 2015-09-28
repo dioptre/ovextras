@@ -100,7 +100,7 @@ boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 boolean CBoxAlgorithmKappaCoefficient::uninitialize(void)
 {
 	//Log for the automatic test
-	this->getLogManager() << LogLevel_Trace << "[Test] Final value of Kappa " << m_f64KappaCoefficient << "\n";
+	this->getLogManager() << LogLevel_Info << "Final value of Kappa " << m_f64KappaCoefficient << "\n";
 	m_pConfusionMatrixAlgorithm->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*m_pConfusionMatrixAlgorithm);
 
