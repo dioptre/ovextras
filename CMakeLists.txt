@@ -1,5 +1,17 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+# Here we set a few policies to get rid of warnings on newer cmakes.
+# we should update the scripts after upgrading each platform's cmake to 3.x.
+if(POLICY CMP0026)
+  cmake_policy(SET CMP0026 OLD)
+endif()
+if(POLICY CMP0043)
+  cmake_policy(SET CMP0043 OLD)
+endif()
+if(POLICY CMP0048)
+  cmake_policy(SET CMP0048 OLD)
+endif()
+
 PROJECT(OpenVIBE)
 
 # These versions are used by the subprojects by default.
