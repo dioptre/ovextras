@@ -49,12 +49,15 @@ void CBoxSettingModifierVisitor::processChildData(const char* sData)
 	{
 		m_pObjectVisitorContext->getLogManager() << LogLevel_Debug << "Using [" << CString(sData) << "] as setting " << m_ui32SettingIndex << "...\n";
 		m_pBox->setSettingValue(m_ui32SettingIndex, sData);
-		m_ui32SettingIndex++;
 	}
 }
 
 void CBoxSettingModifierVisitor::closeChild(void)
 {
+	//We need to count it here because we need to take in account the empty value
+	if(m_bIsParsingSettingValue){
+		m_ui32SettingIndex++;
+	}
 	m_bIsParsingSettingValue=false;
 }
 

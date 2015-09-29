@@ -420,6 +420,7 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 			::fprintf(l_pFile, "</SettingValue>\n");
 			::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", m_ui32FilterDimension);
 			::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", l_ui32nChannels);
+			::fprintf(l_pFile, "\t<SettingValue></SettingValue>\n");
 			::fprintf(l_pFile, "</OpenViBE-SettingsOverride>\n");
 
 			::fclose(l_pFile);
