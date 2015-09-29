@@ -16,7 +16,7 @@ def testROCCurve(self):
     import os
     import shutil
     try:
-      wait("ROCCurveResult.png",10)
+      wait("ROCCurveResult.png",60)
       assert(exists("ROCCurveResult.png"))
     except (FindFailed, AssertionError):
       print "Unable to find the required png"
