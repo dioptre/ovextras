@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+#include <cerrno>
 
 using namespace std;
 
@@ -56,6 +57,7 @@ int main (int argc, char** argv)
 		}
 	}
 	cout << "Error: Problem opening [" << argv[1] << "]\n";
+	cerr << "Error: " << strerror(errno);
 
 	return 2;
 }
