@@ -1254,7 +1254,7 @@ boolean CApplication::hasUnsavedScenario(void)
 
 CInterfacedScenario* CApplication::getCurrentInterfacedScenario(void)
 {
-	if(m_i32CurrentScenarioPage<static_cast<int32>(m_vInterfacedScenario.size()) && m_i32CurrentScenarioPage >= 0)
+	if(m_i32CurrentScenarioPage < static_cast<int32>(m_vInterfacedScenario.size()) && m_i32CurrentScenarioPage >= 0)
 	{
 		return m_vInterfacedScenario[m_i32CurrentScenarioPage];
 	}
@@ -1755,6 +1755,9 @@ void CApplication::closeScenarioCB(CInterfacedScenario* pInterfacedScenario)
 			//This is the last, we need to reset the volatile scenario dir
 			resetVolatileScenarioDirectoryToken();
 			changeCurrentScenario(-1);
+		}
+		else{
+			changeCurrentScenario(static_cast<uint32>(gtk_notebook_get_current_page(m_pScenarioNotebook)));
 		}
 	}
 }
