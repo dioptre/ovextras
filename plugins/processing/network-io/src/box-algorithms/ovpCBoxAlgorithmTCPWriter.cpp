@@ -288,6 +288,13 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 					this->getLogManager() << LogLevel_Error << "Only 1 and 2 dimensional matrices are supported\n";
 					return false;
 				}
+
+				// Conformance checking for all matrix based streams
+				if(m_ui32NumberOfChannels == 0 || m_ui32NumberOfSamplesPerChunk == 0)
+				{
+					this->getLogManager() << LogLevel_Error << "For matrix-like inputs, both input dimensions must be larger than 0\n";
+					return false;
+				}
 			} 
 			
 			// Signal specific part
@@ -295,21 +302,12 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 			{
 				m_ui32Frequency = static_cast<uint32> ( m_oSignalDecoder.getOutputSamplingRate() );
 			}
-
+			
 			if(m_pActiveDecoder == &m_oStimulationDecoder)
 			{
 				// Stimulus, do nothing
 			}
 
-			// Conformance checking for all matrix based streams
-			if(m_pActiveDecoder == &m_oMatrixDecoder || m_pActiveDecoder == &m_oSignalDecoder)
-			{
-				if(m_ui32NumberOfChannels == 0 || m_ui32NumberOfSamplesPerChunk == 0)
-				{
-					this->getLogManager() << LogLevel_Error << "For matrix-like inputs, both input dimensions must be larger than 0\n";
-					return false;
-				}
-			}
 		}
 		if(m_pActiveDecoder->isBufferReceived()) 
 		{
