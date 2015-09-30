@@ -60,12 +60,13 @@ namespace OpenViBEPlugins
 			// Signal stream encoder
 			OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmIFFTbox > m_oAlgo1_SignalEncoder;
 		private:
-		std::vector<itpp::Vec<std::complex<double> > > m_frequencyBuffer;
-		std::vector<itpp::Vec<double> > m_signalBuffer;
-		OpenViBE::uint32 m_bufferStartTime;
-		OpenViBE::uint32 m_bufferEndTime;
-		OpenViBE::uint32 m_ui32SampleCount;
-		OpenViBE::uint32 m_channelsNumber;
+			std::vector<itpp::Vec<std::complex<double> > > m_frequencyBuffer;
+			std::vector<itpp::Vec<double> > m_signalBuffer;
+			OpenViBE::uint32 m_bufferStartTime;
+			OpenViBE::uint32 m_bufferEndTime;
+			OpenViBE::uint32 m_ui32SampleCount;
+			OpenViBE::uint32 m_channelsNumber;
+			OpenViBE::boolean m_bHeaderSent;
 		};
 
 		/**
