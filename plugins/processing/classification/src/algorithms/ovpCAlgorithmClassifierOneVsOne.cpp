@@ -459,6 +459,16 @@ boolean CAlgorithmClassifierOneVsOne::loadConfiguration(XML::IXMLNode *pConfigur
 	return loadSubClassifierConfiguration(pConfigurationNode->getChildByName(c_sSubClassifiersNodeName));
 }
 
+uint32 CAlgorithmClassifierOneVsOne::getOutputProbabilityVectorLength()
+{
+	return this->getClassCount();
+}
+
+uint32 CAlgorithmClassifierOneVsOne::getOutputDistanceVectorLength()
+{
+	return 0;
+}
+
 boolean CAlgorithmClassifierOneVsOne::loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode)
 {
 	for(size_t i = 0; i < pSubClassifiersNode->getChildCount() ; ++i)

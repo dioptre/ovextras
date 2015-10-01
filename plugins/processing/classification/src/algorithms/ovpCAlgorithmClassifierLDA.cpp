@@ -70,8 +70,27 @@ void CAlgorithmClassifierLDA::dumpMatrix(OpenViBE::Kernel::ILogManager &rMgr, co
 	}
 }
 #else 
-void CAlgorithmClassifierLDA::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { };
+void CAlgorithmClassifierLDA::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { }
 #endif
+
+uint32 CAlgorithmClassifierLDA::getOutputProbabilityVectorLength()
+{
+	if(m_bv1Classification){
+		return 1;
+	} else{
+		return m_vDiscriminantFunctions.size();
+	}
+}
+
+uint32 CAlgorithmClassifierLDA::getOutputDistanceVectorLength()
+{
+	if(m_bv1Classification){
+		return 1;
+	} else{
+		return m_vDiscriminantFunctions.size();
+	}
+}
+
 
 boolean CAlgorithmClassifierLDA::initialize(void)
 {
@@ -348,7 +367,7 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 		// with aj = (Weight for class j).transpose() * x + (Bias for class j)
 
 		//Exponential can lead to nan results, so we reduce the computation and instead compute
-		// p(Ck | x) = 1 / sum[j](exp(aj) - exp(ak))
+		// p(Ck | x) = 1 / sum[j](exp(aj - ak))
 
 		//All ak are given by computation helper
 		for(size_t i = 0 ; i < l_ui32ClassCount ; ++i)
@@ -436,6 +455,7 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 	}
 
 	m_vLabelList.clear();
+	m_vDiscriminantFunctions.clear();
 
 	XML::IXMLNode* l_pTempNode;
 
@@ -481,6 +501,7 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 			m_vDiscriminantFunctions.push_back(CAlgorithmLDADiscriminantFunction());
 			m_vDiscriminantFunctions[i].loadConfiguration(l_pConfigsNode->getChild(i));
 		}
+
 	}
 	return true;
 }

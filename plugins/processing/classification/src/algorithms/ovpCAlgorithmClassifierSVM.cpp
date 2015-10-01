@@ -893,3 +893,13 @@ CString CAlgorithmClassifierSVM::problemToString(svm_problem *pProb)
 
 	return CString(l_sProb.str().c_str());
 }
+
+uint32 CAlgorithmClassifierSVM::getOutputProbabilityVectorLength()
+{
+	return 1;
+}
+
+uint32 CAlgorithmClassifierSVM::getOutputDistanceVectorLength()
+{
+	return 0;
+}

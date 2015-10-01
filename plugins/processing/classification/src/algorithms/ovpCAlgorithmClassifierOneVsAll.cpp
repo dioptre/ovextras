@@ -341,6 +341,18 @@ boolean CAlgorithmClassifierOneVsAll::loadConfiguration(XML::IXMLNode *pConfigur
 	return loadSubClassifierConfiguration(pConfigurationNode->getChildByName(c_sSubClassifiersNodeName));
 }
 
+uint32 CAlgorithmClassifierOneVsAll::getOutputProbabilityVectorLength()
+{
+	TParameterHandler < IMatrix* > op_pProbabilityValues(m_oSubClassifierList[0]->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
+	return op_pProbabilityValues->getDimensionSize(0);
+}
+
+uint32 CAlgorithmClassifierOneVsAll::getOutputDistanceVectorLength()
+{
+	TParameterHandler < IMatrix* > op_pDistanceValues(m_oSubClassifierList[0]->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
+	return op_pDistanceValues->getDimensionSize(0);
+}
+
 boolean CAlgorithmClassifierOneVsAll::loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode)
 {
 	for( size_t i = 0; i < pSubClassifiersNode->getChildCount() ; ++i)

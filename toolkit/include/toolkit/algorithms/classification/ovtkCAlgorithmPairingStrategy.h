@@ -46,6 +46,9 @@ namespace OpenViBEToolkit
 		virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode* pConfiguratioNode)=0;
 		_IsDerivedFromClass_(CAlgorithmClassifier, OVTK_ClassId_Algorithm_PairingStrategy)
 
+		virtual OpenViBE::uint32 getOutputProbabilityVectorLength(void) =0;
+		virtual OpenViBE::uint32 getOutputDistanceVectorLength(void) =0;
+
 
 	protected:
 		//  std::vector <OpenViBE::float64> m_fClasses;

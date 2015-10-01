@@ -35,9 +35,14 @@ namespace OpenViBEPlugins
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
 
+			virtual OpenViBE::uint32 getOutputProbabilityVectorLength();
+			virtual OpenViBE::uint32 getOutputDistanceVectorLength();
+
 			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierNULL);
 
 		protected:
+
+
 		};
 
 		class CAlgorithmClassifierNULLDesc : public OpenViBEToolkit::CAlgorithmClassifierDesc

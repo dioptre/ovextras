@@ -56,7 +56,13 @@ namespace OpenViBEPlugins
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
 
+			virtual OpenViBE::uint32 getOutputProbabilityVectorLength();
+			virtual OpenViBE::uint32 getOutputDistanceVectorLength();
+
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsOne)
+
+		protected:
+
 
 		private:
 			std::vector<SSubClassifierDescriptor> m_oSubClassifierDescriptorList;

@@ -1,3 +1,5 @@
+#if defined TARGET_HAS_ThirdPartyEIGEN
+
 #include "ovpCAlgorithmClassifierMLP.h"
 
 #include <map>
@@ -544,3 +546,14 @@ void CAlgorithmClassifierMLP::loadData(XML::IXMLNode *pNode, float64 &f64Value)
 	std::stringstream l_sData(pNode->getPCData());
 	l_sData >> f64Value;
 }
+
+uint32 CAlgorithmClassifierMLP::getOutputProbabilityVectorLength()
+{
+	return m_oLabelList.size();
+}
+
+uint32 CAlgorithmClassifierMLP::getOutputDistanceVectorLength()
+{
+	return m_oLabelList.size();
+}
+#endif

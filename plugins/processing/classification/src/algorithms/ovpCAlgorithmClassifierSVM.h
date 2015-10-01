@@ -60,9 +60,13 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString modelToString();
 			virtual OpenViBE::CString problemToString(svm_problem *pProb);
 
+			virtual OpenViBE::uint32 getOutputProbabilityVectorLength();
+			virtual OpenViBE::uint32 getOutputDistanceVectorLength();
+
 			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierSVM);
 
 		protected:
+
 			std::vector <OpenViBE::float64> m_vClass;
 			struct svm_parameter m_oParam;
 

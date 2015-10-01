@@ -1,6 +1,8 @@
 #ifndef __OpenViBEPlugins_Algorithm_ClassifierMLP_H__
 #define __OpenViBEPlugins_Algorithm_ClassifierMLP_H__
 
+#if defined TARGET_HAS_ThirdPartyEIGEN
+
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
@@ -40,6 +42,9 @@ namespace OpenViBEPlugins
 
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
+
+			virtual OpenViBE::uint32 getOutputProbabilityVectorLength();
+			virtual OpenViBE::uint32 getOutputDistanceVectorLength();
 
 			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierMLP)
 
@@ -104,6 +109,7 @@ namespace OpenViBEPlugins
 		};
 	}
 }
+#endif // TARGET_HAS_ThirdPartyEIGEN
 
 #endif // __OpenViBEPlugins_Algorithm_ClassifierMLP_H__
 

@@ -53,6 +53,9 @@ namespace OpenViBEToolkit
 		virtual XML::IXMLNode* saveConfiguration(void)=0;
 		virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode * pConfigurationRoot)=0;
 
+		virtual OpenViBE::uint32 getOutputProbabilityVectorLength(void) =0;
+		virtual OpenViBE::uint32 getOutputDistanceVectorLength(void) =0;
+
 		_IsDerivedFromClass_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVTK_ClassId_Algorithm_Classifier);
 
 	protected:
@@ -67,6 +70,7 @@ namespace OpenViBEToolkit
 
 	private:
 		OpenViBE::CString& getParameterValue(const OpenViBE::CIdentifier& rParameterIdentifier);
+		void setMatrixOutputDimension(OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > &rMatrix, OpenViBE::uint32 ui32Length);
 
 		OpenViBE::Kernel::IAlgorithmProxy *m_pAlgorithmProxy;
 		void* m_pExtraParameter;
