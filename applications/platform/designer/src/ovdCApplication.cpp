@@ -447,6 +447,7 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 
 	static gboolean searchbox_focus_in_cb(::GtkWidget* pWidget, ::GdkEvent* pEvent, CApplication* pApplication)
 	{
+		//TODO check if this line is necessary
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pApplication->m_pBuilderInterface, "openvibe-menu_edit")), false);
 
 		return false;
@@ -2539,7 +2540,7 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), true);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_next")),       true);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_forward")),    l_ePlayerStatus!=PlayerStatus_Forward);
-		gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), (l_ePlayerStatus==PlayerStatus_Stop || l_ePlayerStatus==PlayerStatus_Pause || l_ePlayerStatus==PlayerStatus_Uninitialized) ? GTK_STOCK_MEDIA_PLAY : GTK_STOCK_MEDIA_PAUSE);
+		gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), (l_ePlayerStatus==PlayerStatus_Play) ? GTK_STOCK_MEDIA_PAUSE : GTK_STOCK_MEDIA_PLAY);
 
 		g_signal_handlers_disconnect_by_func(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-togglebutton_cpu_usage")), G_CALLBACK2(cpu_usage_cb), this);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_windowmanager")), l_ePlayerStatus==PlayerStatus_Stop);

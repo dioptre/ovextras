@@ -373,24 +373,28 @@ void CLogListenerDesigner::log(const ELogLevel eLogLevel)
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, "[", -1, "w_bold", "f_mono", NULL);
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, "WARNING", -1, "w_bold", "f_mono", "c_darkViolet", NULL);
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, "] ", -1, "w_bold", "f_mono", NULL);
+			++m_ui32CountWarnings;
 			break;
 
 		case LogLevel_ImportantWarning:
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, "[", -1, "w_bold", "f_mono", NULL);
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, "WARNING", -1, "w_bold", "f_mono", "c_darkOrange", NULL);
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, "] ", -1, "w_bold", "f_mono", NULL);
+			++m_ui32CountWarnings;
 			break;
 
 		case LogLevel_Error:
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, "[ ", -1, "w_bold", "f_mono", NULL);
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, "ERROR", -1, "w_bold", "f_mono", "c_red", NULL);
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, " ] ", -1, "w_bold", "f_mono", NULL);
+			++m_ui32CountErrors;
 			break;
 
 		case LogLevel_Fatal:
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, "[ ", -1, "w_bold", "f_mono", NULL);
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, "FATAL", -1, "w_bold", "f_mono", "c_red", NULL);
 			gtk_text_buffer_insert_with_tags_by_name(m_pCurrentLog->getTextBuffer(), &l_oEndLogIter, " ] ", -1, "w_bold", "f_mono", NULL);
+			++m_ui32CountErrors;
 			break;
 
 		default:
