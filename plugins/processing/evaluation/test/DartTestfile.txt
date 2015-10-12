@@ -34,15 +34,17 @@ ADD_TEST(clean_Evaluation_statistic_generator rm -f stat.xml)
 SET_TESTS_PROPERTIES(compare_Evaluation_statistic_generator PROPERTIES DEPENDS run_Evaluation_statistic_generator)
 SET_TESTS_PROPERTIES(compare_Evaluation_statistic_generator PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
 
+### Do not enable the commented out sikuli tests unless you 
+### or your lab commits to keep them passing in the long term.
+#FIND_PROGRAM(SIKULI NAMES sikuli-ide)
+#IF(SIKULI)
+#	IF(UNIX)
+#		ADD_TEST(sikuli_clean_Evaluation_ROC rm -f ${OV_LOGFILE} screenshot.png)
+#		ADD_TEST(sikuli_run_Evaluation_ROC "${SIKULI}" -t testROCCurve.UNIX.sikuli)
+#		
+#		SET_TESTS_PROPERTIES(sikuli_run_Evaluation_ROC PROPERTIES DEPENDS sikuli_clean_Evaluation_ROC)
+#		SET_TESTS_PROPERTIES(sikuli_run_Evaluation_ROC PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
+#		SET_TESTS_PROPERTIES(sikuli_run_Evaluation_ROC PROPERTIES ATTACHED_FILES_ON_FAIL ${CTEST_SOURCE_DIRECTORY}/plugins/processing/evaluation/test/screenshot.png)
+#	ENDIF(UNIX)
+#ENDIF(SIKULI)
 
-FIND_PROGRAM(SIKULI NAMES sikuli-ide)
-IF(SIKULI)
-	IF(UNIX)
-		ADD_TEST(clean_Evaluation_ROC rm -f ${OV_LOGFILE} screenshot.png)
-		ADD_TEST(run_Evaluation_ROC "${SIKULI}" -t testROCCurve.UNIX.sikuli)
-		
-		SET_TESTS_PROPERTIES(run_Evaluation_ROC PROPERTIES DEPENDS clean_Evaluation_ROC)
-		SET_TESTS_PROPERTIES(run_Evaluation_ROC PROPERTIES ATTACHED_FILES_ON_FAIL ${OV_LOGFILE})
-		SET_TESTS_PROPERTIES(run_Evaluation_ROC PROPERTIES ATTACHED_FILES_ON_FAIL ${CTEST_SOURCE_DIRECTORY}/plugins/processing/evaluation/test/screenshot.png)
-	ENDIF(UNIX)
-ENDIF(SIKULI)

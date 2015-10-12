@@ -85,13 +85,14 @@ SET_TESTS_PROPERTIES(compare_${TEST_NAME} PROPERTIES DEPENDS run_${TEST_NAME})
 SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES DEPENDS clean_${TEST_NAME})
 
 
-
-FIND_PROGRAM(SIKULI NAMES sikuli-ide)
-IF(SIKULI)
-	IF(UNIX)
-		ADD_TEST(crop "${SIKULI}" -t testCrop.UNIX.sikuli)
-	ENDIF(UNIX)
-ENDIF(SIKULI)
+### Do not enable the commented out sikuli tests unless you 
+### or your lab commits to keep them passing in the long term.
+#FIND_PROGRAM(SIKULI NAMES sikuli-ide)
+#IF(SIKULI)
+#	IF(UNIX)
+#		ADD_TEST(sikuli_crop "${SIKULI}" -t testCrop.UNIX.sikuli)
+#	ENDIF(UNIX)
+#ENDIF(SIKULI)
 
 # Test Regularized CSP
 
