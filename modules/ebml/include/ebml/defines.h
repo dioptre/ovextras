@@ -1,3 +1,6 @@
+#ifndef __EBML_defines_H__
+#define __EBML_defines_H__
+
 /**
  * \file defines.h
  * \author Yann Renard (INRIA/IRISA)
@@ -5,8 +8,6 @@
  * \brief Contains basic type definitions and EBML standard identifiers
  */
 
-#ifndef __EBML_defines_H__
-#define __EBML_defines_H__
 
 #include <ov_common_defines.h>
 
