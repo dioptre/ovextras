@@ -569,7 +569,18 @@ int go(int argc, char ** argv)
 				setlocale( LC_ALL, l_sLocale.toASCIIString() );
 
 				//initialise Gtk before 3D context
-				gtk_init(&argc, &argv);
+				if(!gtk_init_check(&argc, &argv))
+				{
+					l_rLogManager << LogLevel_Error << "Unable to initialize GTK. Possibly the display could not be opened. Exiting.\n";
+				
+					OpenViBEToolkit::uninitialize(*l_pKernelContext);
+					l_pKernelDesc->releaseKernel(l_pKernelContext);
+
+					l_oKernelLoader.uninitialize();
+					l_oKernelLoader.unload();
+
+					return -2;
+				}
 				// gtk_rc_parse(OpenViBE::Directories::getDataDir() + "/applications/designer/interface.gtkrc");
 
 #ifdef TARGET_OS_Linux
