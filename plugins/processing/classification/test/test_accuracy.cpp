@@ -55,9 +55,16 @@ int main (int argc, char** argv)
 				}
 			}
 		}
+		cout << "Error: EOF of log file reached without finding the cross-validation accuracy string.\n";
+		return 4;
 	}
-	cout << "Error: Problem opening [" << argv[1] << "]\n";
-	cerr << "Error: " << strerror(errno);
+	else
+	{
+		cout << "Error: Problem opening [" << argv[1] << "]\n";
+		cerr << "Error: Code is " << strerror(errno) << "\n";
 
-	return 2;
+		return 5;
+	}
+
+	return 2; // shouldn't happen
 }
