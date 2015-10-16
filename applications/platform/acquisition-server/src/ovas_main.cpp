@@ -76,8 +76,8 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else
 		{
-			std::cout << "Error: Unknown argument [" << *it << "]\n";
-			return false;
+			// The argument may be relevant to GTK, do not stop here
+			std::cout << "Note: Unknown argument [" << *it << "], passing it on to gtk...\n";
 		}
 	}
 
