@@ -40,8 +40,9 @@ using namespace std;
 boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 {
 	m_pClassifier = NULL;
-	m_pStimulationsDecoder = NULL;
-	m_pStimulationsEncoder = NULL;
+
+	m_oLabelsDecoder.initialize(*this, 0);
+	m_oStimulationsEncoder.initialize(*this, 0);
 
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	//As we add some parameter in the middle of "static" parameters, we cannot rely on settings index.
@@ -104,19 +105,13 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 
 	for(uint32 i=1; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		m_vFeatureVectorsDecoder[i-1]=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_FeatureVectorStreamDecoder));
-		m_vFeatureVectorsDecoder[i-1]->initialize();
+		m_vFeatureVectorsDecoder.push_back(new OpenViBEToolkit::TFeatureVectorDecoder<CBoxAlgorithmClassifierTrainer>());
+		m_vFeatureVectorsDecoder[i-1]->initialize(*this, i);
 	}
-
-	m_pStimulationsDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-	m_pStimulationsDecoder->initialize();
 
 	//We link the parameters to the extra parameters input parameter to transmit them
 	TParameterHandler < map<CString , CString> * > ip_pExtraParameter(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
 	ip_pExtraParameter = m_pParameter;
-
-	m_pStimulationsEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
-	m_pStimulationsEncoder->initialize();
 
 	m_vFeatureCount.clear();
 
@@ -145,29 +140,19 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 
 boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
 {
+	m_oLabelsDecoder.uninitialize();
+	m_oStimulationsEncoder.uninitialize();
 
-	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-	// IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 	if(m_pClassifier) 
 	{
 		m_pClassifier->uninitialize();
 		this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
 	}
-	if(m_pStimulationsDecoder)
-	{
-		m_pStimulationsDecoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationsDecoder);
-	}
-	if(m_pStimulationsEncoder)
-	{
-		m_pStimulationsEncoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationsEncoder);
-	}
 
 	for(uint32 i=0; i<m_vFeatureVectorsDecoder.size(); i++)
 	{
 		m_vFeatureVectorsDecoder[i]->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_vFeatureVectorsDecoder[i]);
+		delete m_vFeatureVectorsDecoder[i];
 	}
 	m_vFeatureVectorsDecoder.clear();
 
@@ -193,7 +178,6 @@ boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
 boolean CBoxAlgorithmClassifierTrainer::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
-
 	return true;
 }
 
@@ -208,33 +192,18 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 	// Parses stimulations
 	for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		TParameterHandler < const IMemoryBuffer* > ip_pMemoryBuffer(m_pStimulationsDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		TParameterHandler < const IStimulationSet* > op_pStimulationSet(m_pStimulationsDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+		TParameterHandler < IStimulationSet* > op_pStimulationSet = m_oLabelsDecoder.getOutputStimulationSet();
+		TParameterHandler < IStimulationSet* > ip_pStimulationSet = m_oStimulationsEncoder.getInputStimulationSet();
 
-		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
+		m_oLabelsDecoder.decode(i);
 
-		TParameterHandler < IStimulationSet* > ip_pStimulationSet(m_pStimulationsEncoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_InputParameterId_StimulationSet));
-		TParameterHandler < IMemoryBuffer* > op_pEncodedMemoryBuffer(m_pStimulationsEncoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-
-		CStimulationSet l_oStimulationSet;
-		ip_pStimulationSet=&l_oStimulationSet;
-
-		if(l_rStaticBoxContext.getOutputCount()>=1)
+		if(m_oLabelsDecoder.isHeaderReceived())
 		{
-			op_pEncodedMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
-		}
-		else
-		{
-			op_pEncodedMemoryBuffer->setSize(0, true);
-		}
+			m_oStimulationsEncoder.encodeHeader();
 
-		m_pStimulationsDecoder->process();
-
-		if(m_pStimulationsDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
-		{
-			m_pStimulationsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
+			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
-		if(m_pStimulationsDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_oLabelsDecoder.isBufferReceived())
 		{
 			for(uint64 j=0; j<op_pStimulationSet->getStimulationCount(); j++)
 			{
@@ -244,22 +213,22 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 
 					this->getLogManager() << LogLevel_Trace << "Raising train-completed Flag.\n";
 					uint64 l_ui32TrainCompletedStimulation = this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation,"OVTK_StimulationId_TrainCompleted");
-					l_oStimulationSet.appendStimulation(l_ui32TrainCompletedStimulation, op_pStimulationSet->getStimulationDate(j), 0);
+					ip_pStimulationSet->appendStimulation(l_ui32TrainCompletedStimulation, op_pStimulationSet->getStimulationDate(j), 0);
 				}
 			}
-			m_pStimulationsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
-		}
-		if(m_pStimulationsDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
-		{
-			m_pStimulationsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeEnd);
-		}
+			m_oStimulationsEncoder.encodeBuffer();
 
-		if(l_rStaticBoxContext.getOutputCount()>=1)
+			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+		}
+		if(m_oLabelsDecoder.isEndReceived())
 		{
+			m_oStimulationsEncoder.encodeEnd();
+
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
 
-		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
+
+		//l_rDynamicBoxContext.markInputAsDeprecated(0, i);
 	}
 
 	// Parses feature vectors
@@ -267,28 +236,25 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 	{
 		for(j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
-			TParameterHandler < const IMemoryBuffer* > ip_pFeatureVectorMemoryBuffer(m_vFeatureVectorsDecoder[i-1]->getInputParameter(OVP_GD_Algorithm_FeatureVectorStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			TParameterHandler < const IMatrix* > op_pFeatureVectorMatrix(m_vFeatureVectorsDecoder[i-1]->getOutputParameter(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputParameterId_Matrix));
-			ip_pFeatureVectorMemoryBuffer=l_rDynamicBoxContext.getInputChunk(i, j);
-			m_vFeatureVectorsDecoder[i-1]->process();
-			if(m_vFeatureVectorsDecoder[i-1]->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedHeader))
+			TParameterHandler < IMatrix* > op_pFeatureVectorMatrix = m_vFeatureVectorsDecoder[i-1]->getOutputMatrix();
+			m_vFeatureVectorsDecoder[i-1]->decode(j);
+
+			if(m_vFeatureVectorsDecoder[i-1]->isHeaderReceived())
 			{
 			}
-			if(m_vFeatureVectorsDecoder[i-1]->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_vFeatureVectorsDecoder[i-1]->isBufferReceived())
 			{
 				CBoxAlgorithmClassifierTrainer::SFeatureVector l_oFeatureVector;
 				l_oFeatureVector.m_pFeatureVectorMatrix=new CMatrix();
-				l_oFeatureVector.m_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(i, j);
-				l_oFeatureVector.m_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(i, j);
 				l_oFeatureVector.m_ui32InputIndex=i;
 				OpenViBEToolkit::Tools::Matrix::copy(*l_oFeatureVector.m_pFeatureVectorMatrix, *op_pFeatureVectorMatrix);
 				m_vFeatureVector.push_back(l_oFeatureVector);
 				m_vFeatureCount[i]++;
 			}
-			if(m_vFeatureVectorsDecoder[i-1]->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_vFeatureVectorsDecoder[i-1]->isEndReceived())
 			{
 			}
-			l_rDynamicBoxContext.markInputAsDeprecated(i, j);
+			//l_rDynamicBoxContext.markInputAsDeprecated(i, j);
 		}
 	}
 

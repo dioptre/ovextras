@@ -56,20 +56,22 @@ namespace OpenViBEPlugins
 
 			std::map < OpenViBE::uint32, OpenViBE::uint32 > m_vFeatureCount;
 			std::vector < OpenViBE::uint32 > m_vFeatureVectorIndex;
-			std::map < OpenViBE::uint32, OpenViBE::Kernel::IAlgorithmProxy*> m_vFeatureVectorsDecoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationsDecoder;
+
 			OpenViBE::Kernel::IAlgorithmProxy* m_pClassifier;
 			OpenViBE::uint64 m_ui64TrainStimulation;
 			OpenViBE::uint64 m_ui64PartitionCount;
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationsEncoder;
 			std::map < OpenViBE::CString, OpenViBE::CString> *m_pParameter;
+
+			//Input / output
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmClassifierTrainer > m_oLabelsDecoder;
+			std::vector < OpenViBEToolkit::TFeatureVectorDecoder < CBoxAlgorithmClassifierTrainer > *> m_vFeatureVectorsDecoder;
+
+			OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmClassifierTrainer > m_oStimulationsEncoder;
 
 			typedef struct
 			{
 				OpenViBE::CMatrix* m_pFeatureVectorMatrix;
-				OpenViBE::uint64 m_ui64StartTime;
-				OpenViBE::uint64 m_ui64EndTime;
 				OpenViBE::uint32 m_ui32InputIndex;
 			} SFeatureVector;
 
