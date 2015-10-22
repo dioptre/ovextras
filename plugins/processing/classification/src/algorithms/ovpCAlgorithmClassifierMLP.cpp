@@ -43,7 +43,7 @@ OpenViBE::int32 OpenViBEPlugins::Classification::MLPClassificationCompare(OpenVi
 	OpenViBE::float64 l_f64MaxSecond = *(std::max_element(l_pClassificationValueBuffer, l_pClassificationValueBuffer+rSecondClassificationValue.getBufferElementCount()));
 
 	//Then we just compared them
-	if(!ov_float_equal(l_f64MaxFirst, l_f64MaxSecond))
+	if(ov_float_equal(l_f64MaxFirst, l_f64MaxSecond))
 	{
 		return 0;
 	}

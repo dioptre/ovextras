@@ -178,7 +178,7 @@ void CROCCurveDraw::redraw()
 	g_object_unref(l_pText);
 
 
-	if(m_oPointList.size() != 0)
+	if(m_oPointList.empty())
 	{
 		gdk_draw_lines((m_pDrawableArea)->window, GTK_WIDGET(m_pDrawableArea)->style->black_gc, &(m_oPointList[0]), m_oPointList.size());
 	}

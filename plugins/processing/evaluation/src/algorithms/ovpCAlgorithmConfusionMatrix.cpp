@@ -161,10 +161,10 @@ boolean CAlgorithmConfusionMatrix::process(void)
 			std::map<uint64,uint64>::iterator l_itTarget = m_mTargetsTimeLine.begin();
 			std::map<uint64,uint64>::iterator l_itNextTarget;
 			boolean l_bFound = false;
-			for(;l_itTarget != m_mTargetsTimeLine.end() && !l_bFound;l_itTarget++)
+			for(;l_itTarget != m_mTargetsTimeLine.end() && !l_bFound;++l_itTarget)
 			{
 				l_itNextTarget = l_itTarget;
-				l_itNextTarget++;
+				++l_itNextTarget;
 				if( (l_itNextTarget == m_mTargetsTimeLine.end() || l_ui64StimulationFromClassifierDate < l_itNextTarget->first)
 					&& l_ui64StimulationFromClassifierDate > l_itTarget->first)
 				{

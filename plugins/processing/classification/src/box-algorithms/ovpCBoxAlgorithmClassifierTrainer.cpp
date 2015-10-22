@@ -266,7 +266,7 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 			this->getLogManager() << LogLevel_Error << "Fewer examples (" << (uint32)m_vFeatureVector.size() << ") than the specified partition count (" << m_ui64PartitionCount << ").\n";
 			return false;
 		}
-		if(m_vFeatureVector.size()==0)
+		if(m_vFeatureVector.empty())
 		{
 			this->getLogManager() << LogLevel_Warning << "Received train stimulation but no training examples received\n";
 		}
@@ -279,8 +279,6 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 				this->getLogManager() << LogLevel_Trace << "For information, we have " << m_vFeatureCount[i] << " feature vector(s) for input " << i << "\n";
 			}
 
-			float64 l_f64PartitionAccuracy=0;
-			float64 l_f64FinalAccuracy=0;
 			vector<float64> l_vPartitionAccuracies((unsigned int)m_ui64PartitionCount);
 
 			boolean l_bRandomizeVectorOrder = (&(this->getConfigurationManager()))->expandAsBoolean("${Plugin_Classification_RandomizeKFoldTestData}");
@@ -306,6 +304,8 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 
 			if(m_ui64PartitionCount>=2)
 			{
+				float64 l_f64PartitionAccuracy=0;
+				float64 l_f64FinalAccuracy=0;
 
 				OpenViBEToolkit::Tools::Matrix::clearContent(l_oConfusion);
 
@@ -446,8 +446,11 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 	{
 		const size_t k = m_vFeatureVectorIndex[j];
 
+
 		float64* l_pFeatureVectorBuffer=ip_pFeatureVector->getBuffer();
 		const float64 l_f64CorrectValue=(float64)m_vFeatureVector[k].m_ui32InputIndex;
+
+		this->getLogManager() << LogLevel_Debug << "Try to recognize " << l_f64CorrectValue << "\n";
 		System::Memory::copy(
 			l_pFeatureVectorBuffer,
 			m_vFeatureVector[k].m_pFeatureVectorMatrix->getBuffer(),
@@ -456,7 +459,7 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 		m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 
 		const float64 l_f64PredictedValue = op_f64ClassificationStateClass;
-		//std::cout << "Try to recognize " << l_f64CorrectValue << " and get " << l_f64PredictedValue << std::endl;
+		this->getLogManager() << LogLevel_Debug << "Recognize " << l_f64PredictedValue << "\n";
 		if(l_f64PredictedValue==l_f64CorrectValue)
 		{
 			l_iSuccessfullTrainerCount++;
