@@ -1,7 +1,5 @@
 #include "ovpCBoxAlgorithmClassifierProcessor.h"
 
-#include <fstream>
-#include <iostream>
 #include <sstream>
 
 #include <xml/IXMLHandler.h>

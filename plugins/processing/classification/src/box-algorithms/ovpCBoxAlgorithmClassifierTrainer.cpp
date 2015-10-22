@@ -3,7 +3,6 @@
 #include <system/ovCMemory.h>
 #include <system/ovCMath.h>
 
-#include <fstream>
 #include <sstream>
 #include <cmath>
 #include <algorithm>
