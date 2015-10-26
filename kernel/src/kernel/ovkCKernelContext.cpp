@@ -7,7 +7,8 @@
 #include "player/ovkCPlayerManager.h"
 #include "plugins/ovkCPluginManager.h"
 #include "scenario/ovkCScenarioManager.h"
-#include "log/ovkCLogManager.h"
+// #include "log/ovkCLogManager.h"
+#include "log/ovkCLogManagerMulticore.h"
 #include "log/ovkCLogListenerConsole.h"
 #include "log/ovkCLogListenerFile.h"
 #include "visualisation/ovkCVisualisationManager.h"
@@ -147,7 +148,8 @@ boolean CKernelContext::initialize(void)
 
 	this->getLogManager() << LogLevel_Trace << "Creating log manager\n";
 
-	m_pLogManager=new CLogManager(m_rMasterKernelContext);
+	// m_pLogManager=new CLogManager(m_rMasterKernelContext);
+	m_pLogManager=new CLogManagerMulticore(m_rMasterKernelContext);
 	m_pLogManager->activate(true);
 
 	this->getLogManager() << LogLevel_Trace << "Creating and configuring console log listener\n";
