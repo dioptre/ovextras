@@ -26,6 +26,9 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isSubjectAgeSet(void) const;
 		virtual OpenViBE::boolean isSubjectGenderSet(void) const;
 
+		virtual OpenViBE::boolean setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested);
+		virtual OpenViBE::boolean isImpedanceCheckRequested(void) const;
+
 		// Chanel information
 		virtual OpenViBE::boolean setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
 		virtual OpenViBE::boolean setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
@@ -77,6 +80,9 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isExperimentIdentifierSet(void) const { return m_rAdaptedHeader.isExperimentIdentifierSet(); }
 		virtual OpenViBE::boolean isSubjectAgeSet(void) const { return m_rAdaptedHeader.isSubjectAgeSet(); }
 		virtual OpenViBE::boolean isSubjectGenderSet(void) const { return m_rAdaptedHeader.isSubjectGenderSet(); }
+		
+		virtual OpenViBE::boolean setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested){ return m_rAdaptedHeader.setImpedanceCheckRequested(bImpedanceCheckRequested); }
+		virtual OpenViBE::boolean isImpedanceCheckRequested(void) const { return m_rAdaptedHeader.isImpedanceCheckRequested(); }
 
 		// Channel information
 		virtual OpenViBE::boolean setChannelCount(const OpenViBE::uint32 ui32ChannelCount) { return m_rAdaptedHeader.setChannelCount(ui32ChannelCount); }

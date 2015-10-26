@@ -1,6 +1,7 @@
 #include "ovpCBoxAlgorithmStimulationVoter.h"
 
 #include <openvibe/ovITimeArithmetics.h>
+#include <system/ovCMath.h>
 
 #include <vector>
 #include <string>
@@ -40,12 +41,12 @@ boolean CBoxAlgorithmStimulationVoter::initialize(void)
 	ip_pMemoryBuffer.initialize(m_pDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
 	op_pStimulationSet.initialize(m_pDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
 
-	m_ui64MinimumVotes			= FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-	m_f64TimeWindow				= FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-	m_oClearVotes				= ((uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2));
-	m_oOutputDateMode			= ((uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3));
-	m_ui64RejectClassLabel		= FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
-	m_oRejectClass_CanWin				= ((uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5));
+	m_ui64MinimumVotes     = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	m_f64TimeWindow        = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+	m_oClearVotes          = ((uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2));
+	m_oOutputDateMode      = ((uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3));
+	m_ui64RejectClassLabel = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+	m_oRejectClass_CanWin  = ((uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5));
 
 	this->getLogManager() << LogLevel_Debug << "Vote clear mode " << m_oClearVotes << ", timestamp at " << m_oOutputDateMode << ", reject mode " << m_oRejectClass_CanWin << "\n";
 
@@ -177,7 +178,7 @@ boolean CBoxAlgorithmStimulationVoter::process(void)
 		}
 		else if( l_ui64StimulusVotes == l_ui64MaxVotes ) {
 			// Break ties arbitrarily
-			if(rand() > RAND_MAX/2 )
+			if(System::Math::randomFloat32BetweenZeroAndOne() > 0.5)
 			{
 				l_ui64ResultClassLabel = l_ui64StimulusType;
 				l_ui64MaxVotes = l_ui64StimulusVotes;

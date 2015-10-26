@@ -536,17 +536,6 @@ Configuration </property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label_impedance_check">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Impedance Check (when available)</property>
-              </object>
-              <packing>
-                <property name="top_attach">6</property>
-                <property name="bottom_attach">7</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkLabel" id="label_select_only_named_channels">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -555,8 +544,8 @@ Configuration </property>
                 <property name="label" translatable="yes">Select only named channels</property>
               </object>
               <packing>
-                <property name="top_attach">7</property>
-                <property name="bottom_attach">8</property>
+                <property name="top_attach">6</property>
+                <property name="bottom_attach">7</property>
               </packing>
             </child>
             <child>
@@ -578,7 +567,7 @@ Configuration </property>
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="checkbutton_impedance">
+              <object class="GtkCheckButton" id="checkbutton_channel_selection">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -590,21 +579,6 @@ Configuration </property>
                 <property name="right_attach">2</property>
                 <property name="top_attach">6</property>
                 <property name="bottom_attach">7</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton" id="checkbutton_channel_selection">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
-                <property name="draw_indicator">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">7</property>
-                <property name="bottom_attach">8</property>
               </packing>
             </child>
             <child>

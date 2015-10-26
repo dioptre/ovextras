@@ -89,6 +89,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64EndTime;
 
 			OpenViBE::boolean m_bError;
+			OpenViBE::boolean m_bTwoValueInput;
 
 			GdkPixbuf * m_pOriginalBar;
 			GdkPixbuf * m_pLeftBar;

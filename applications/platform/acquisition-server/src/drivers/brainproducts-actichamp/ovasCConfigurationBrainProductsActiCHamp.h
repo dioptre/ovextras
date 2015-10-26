@@ -56,6 +56,9 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32& m_rGoodImpedanceLimit;
 		OpenViBE::uint32& m_rBadImpedanceLimit;
 
+		::GtkWidget* m_pImageErrorIcon;
+		::GtkLabel* m_pLabelErrorMessage;
+		::GtkButton* m_pButtonErrorDLLink;
 		::GtkComboBox* m_pComboBoxDeviceId;
 		::GtkComboBox* m_pComboBoxMode;
 		::GtkComboBox* m_pComboBoxPhysicalSampleRate;

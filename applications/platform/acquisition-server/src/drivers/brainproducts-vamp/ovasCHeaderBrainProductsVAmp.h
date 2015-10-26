@@ -43,6 +43,8 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isSubjectAgeSet(void) const;
 		virtual OpenViBE::boolean isSubjectGenderSet(void) const;
 
+		virtual OpenViBE::boolean setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested);
+		virtual OpenViBE::boolean isImpedanceCheckRequested(void) const;
 		// Channel information
 		virtual OpenViBE::boolean setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
 		virtual OpenViBE::boolean setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
@@ -97,7 +99,7 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isDeviceIdSet(void) const;
 		virtual OpenViBE::boolean isFastModeSettingsSet(void) const;
 
-		OpenViBEAcquisitionServer::CHeader* getBasicHeader() const { return m_pBasicHeader; } ;
+		OpenViBEAcquisitionServer::CHeader* getBasicHeader() const { return m_pBasicHeader; }
 
 	protected:
 
@@ -114,7 +116,7 @@ namespace OpenViBEAcquisitionServer
 		std::map<OpenViBE::uint32, OpenViBE::float32> m_vPairGain;
 		std::map<OpenViBE::uint32, std::pair<OpenViBE::uint32, OpenViBE::uint32> > m_vPairUnit;
 	};
-};
+}
 
 #endif // TARGET_HAS_ThirdPartyGUSBampCAPI
 

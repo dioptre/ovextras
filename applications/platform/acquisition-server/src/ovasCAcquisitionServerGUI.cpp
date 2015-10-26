@@ -30,6 +30,7 @@
 #include "tmsi/ovasCDriverTMSi.h"
 #include "tmsi-refa32b/ovasCDriverTMSiRefa32B.h"
 
+#include "mensia-acquisition/ovasCDriverMensiaAcquisition.h"
 
 #include <system/ovCMemory.h>
 #include <system/ovCTime.h>
@@ -45,6 +46,7 @@
 #include <sstream>
 
 #include <string>
+#include <vector>
 #include <algorithm>
 #include <functional>
 #include <cctype>
@@ -190,7 +192,63 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	m_vDriver.push_back(new CDriverLabStreamingLayer(m_pAcquisitionServer->getDriverContext()));
 #endif
 
+	// BEGIN MENSIA ACQUISITION DRIVERS
+#if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver
 
+	m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Loading Mensia Driver Collection\n";
+	CString l_sMensiaDLLPath = m_pAcquisitionServer->getDriverContext().getConfigurationManager().expand("${Path_Bin}/openvibe-driver-mensia-acquisition.dll");
+	if(!std::ifstream(l_sMensiaDLLPath.toASCIIString()).is_open())
+	{
+		m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Couldn't open" <<
+			" dll file [" << l_sMensiaDLLPath.toASCIIString() <<"], perhaps it was not installed.\n";
+	}
+	else 
+	{
+		HINSTANCE l_oLibMensiaAcquisition; // Library Handle
+		l_oLibMensiaAcquisition = ::LoadLibrary(l_sMensiaDLLPath.toASCIIString());
+
+		//if it can't be open return FALSE;
+		if( l_oLibMensiaAcquisition == NULL)
+		{
+			m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Warning << "Couldn't load DLL: [" << l_sMensiaDLLPath << "]. Got error: [" << static_cast<uint64>(GetLastError()) << "]\n";
+		}
+		else
+		{	
+			typedef int32 (*MACQ_InitializeMensiaAcquisitionLibrary)();
+			MACQ_InitializeMensiaAcquisitionLibrary l_fpInitializeMensiaAcquisitionLibrary;
+			l_fpInitializeMensiaAcquisitionLibrary = (MACQ_InitializeMensiaAcquisitionLibrary)::GetProcAddress(l_oLibMensiaAcquisition, "initializeAcquisitionLibrary");
+			typedef const char* (*MACQ_GetDriverId)(unsigned int uiDriverId);
+			MACQ_GetDriverId l_fpGetDriverID;
+			l_fpGetDriverID = (MACQ_GetDriverId)::GetProcAddress(l_oLibMensiaAcquisition, "getDriverId");
+
+			int32 l_i32MensiaDeviceCount = l_fpInitializeMensiaAcquisitionLibrary();
+
+			if (l_i32MensiaDeviceCount >= 0)
+			{
+				for (size_t l_uiDeviceIndex = 0; l_uiDeviceIndex < static_cast<uint32>(l_i32MensiaDeviceCount); l_uiDeviceIndex++)
+				{
+					char l_sDriverIdentifier[1024];
+
+					strcpy(l_sDriverIdentifier, l_fpGetDriverID(l_uiDeviceIndex));
+					if (strcmp(l_sDriverIdentifier, "") != 0)
+					{
+						m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Found driver [" << l_sDriverIdentifier << "] in Mensia Driver Collection" << "\n";
+						m_vDriver.push_back(new CDriverMensiaAcquisition(m_pAcquisitionServer->getDriverContext(), l_sDriverIdentifier));
+					}
+
+				}
+			}
+			else
+			{
+				m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Error << "Error occurred while initializing Mensia Acquisition Library" << "\n";
+			}
+
+			::FreeLibrary(l_oLibMensiaAcquisition);
+		}
+	}
+#endif
+	// END MENSIA ACQUISITION DRIVERS
+	
 #if defined TARGET_HAS_OpenViBEContributions
 	OpenViBEContributions::initiateContributions(this, m_pAcquisitionServer, rKernelContext, &m_vDriver);
 #endif
@@ -236,7 +294,6 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 		::fprintf(l_pFile, "AcquisitionServer_JitterEstimationCountForDrift = %llu\n", m_pAcquisitionServer->getJitterEstimationCountForDrift());
 		::fprintf(l_pFile, "AcquisitionServer_DriftToleranceDuration = %llu\n", m_pAcquisitionServer->getDriftToleranceDuration());
 		::fprintf(l_pFile, "AcquisitionServer_OverSamplingFactor = %llu\n", m_pAcquisitionServer->getOversamplingFactor());
-		::fprintf(l_pFile, "AcquisitionServer_CheckImpedance = %s\n", (m_pAcquisitionServer->isImpedanceCheckRequested() ? "True" : "False"));
 		::fprintf(l_pFile, "AcquisitionServer_ChannelSelection = %s\n", (m_pAcquisitionServer->isChannelSelectionRequested() ? "True" : "False"));
 		::fprintf(l_pFile, "AcquisitionServer_NaNReplacementPolicy = %s\n", m_pAcquisitionServer->getNaNReplacementPolicyStr().toASCIIString());
 
@@ -298,11 +355,13 @@ boolean CAcquisitionServerGUI::initialize(void)
 
 	// Connects custom GTK signals
 
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_preference"),                    "pressed", G_CALLBACK(button_preference_pressed_cb), this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_configure"),                     "pressed", G_CALLBACK(button_configure_pressed_cb),  this);
+	// Note: Seems the signals below have to be "clicked", not "pressed", or the underlined keyboard shortcuts
+	// of gtk stock items that can be activated with alt key ("mnemonics") do not work.
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_preference"),                    "clicked", G_CALLBACK(button_preference_pressed_cb), this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_configure"),                     "clicked", G_CALLBACK(button_configure_pressed_cb),  this);
 	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "togglebutton_connect"),                 "toggled", G_CALLBACK(button_connect_toggled_cb),    this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_play"),                          "pressed", G_CALLBACK(button_start_pressed_cb),      this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_stop"),                          "pressed", G_CALLBACK(button_stop_pressed_cb),       this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_play"),                          "clicked", G_CALLBACK(button_start_pressed_cb),      this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_stop"),                          "clicked", G_CALLBACK(button_stop_pressed_cb),       this);
 	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "combobox_driver"),                      "changed", G_CALLBACK(combobox_driver_changed_cb),   this);
 	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "combobox_sample_count_per_sent_block"), "changed", G_CALLBACK(combobox_sample_count_per_sent_block_changed_cb),  this);
 	gtk_builder_connect_signals(m_pBuilderInterface, NULL);
@@ -697,14 +756,12 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 	::GtkSpinButton* l_pDriftTolerance=GTK_SPIN_BUTTON(::gtk_builder_get_object(l_pInterface, "spinbutton_drift_tolerance"));
 	::GtkSpinButton* l_pJitterMeasureCount=GTK_SPIN_BUTTON(::gtk_builder_get_object(l_pInterface, "spinbutton_jitter_measure_count"));
 	::GtkSpinButton* l_pOverSamplingFactor=GTK_SPIN_BUTTON(::gtk_builder_get_object(l_pInterface, "spinbutton_oversampling_factor"));
-	::GtkToggleButton* l_pImpedanceCheck=GTK_TOGGLE_BUTTON(::gtk_builder_get_object(l_pInterface, "checkbutton_impedance"));
 	::GtkToggleButton* l_ChannelSelection=GTK_TOGGLE_BUTTON(::gtk_builder_get_object(l_pInterface, "checkbutton_channel_selection"));
 
 	::gtk_combo_box_set_active(l_pDriftCorrectionPolicy, (int)m_pAcquisitionServer->getDriftCorrectionPolicy());
 	::gtk_spin_button_set_value(l_pDriftTolerance, (gdouble)m_pAcquisitionServer->getDriftToleranceDuration());
 	::gtk_spin_button_set_value(l_pJitterMeasureCount, (gdouble)m_pAcquisitionServer->getJitterEstimationCountForDrift());
 	::gtk_spin_button_set_value(l_pOverSamplingFactor, (gdouble)m_pAcquisitionServer->getOversamplingFactor());
-	::gtk_toggle_button_set_active(l_pImpedanceCheck, m_pAcquisitionServer->isImpedanceCheckRequested()?TRUE:FALSE);
 	::gtk_toggle_button_set_active(l_ChannelSelection, m_pAcquisitionServer->isChannelSelectionRequested()?TRUE:FALSE);
 	::gtk_combo_box_set_active(l_pNaNReplacementPolicy, (int)m_pAcquisitionServer->getNaNReplacementPolicy());
 
@@ -773,7 +830,6 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 			m_pAcquisitionServer->setDriftToleranceDuration(::gtk_spin_button_get_value_as_int(l_pDriftTolerance));
 			m_pAcquisitionServer->setJitterEstimationCountForDrift(::gtk_spin_button_get_value_as_int(l_pJitterMeasureCount));
 			m_pAcquisitionServer->setOversamplingFactor(::gtk_spin_button_get_value_as_int(l_pOverSamplingFactor));
-			m_pAcquisitionServer->setImpedanceCheckRequest(::gtk_toggle_button_get_active(l_pImpedanceCheck)?true:false);
 			m_pAcquisitionServer->setChannelSelectionRequest(::gtk_toggle_button_get_active(l_ChannelSelection)?true:false);
 
 			for (size_t setting_index = 0; setting_index < m_vPluginProperties.size(); ++setting_index)

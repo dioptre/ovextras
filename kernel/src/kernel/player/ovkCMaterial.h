@@ -1,3 +1,6 @@
+#ifndef __OpenViBEKernel_Kernel_Player_CMaterial_H__
+#define __OpenViBEKernel_Kernel_Player_CMaterial_H__
+
 /************************************************************************/
 /* This file is part of openMask(c) INRIA, CNRS, Universite de Rennes 1 */
 /* 1993-2002, thereinafter the Software                                 */
@@ -18,8 +21,6 @@
 /* Universite Rennes 1 for the software may use this file in            */
 /* accordance with that specific licence                                */
 /************************************************************************/
-#ifndef __OpenViBEKernel_Kernel_Player_CMaterial_H__
-#define __OpenViBEKernel_Kernel_Player_CMaterial_H__
 
 #include <Ogre.h>
 #include <stack>

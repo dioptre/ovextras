@@ -1,6 +1,7 @@
 #include "ovpCBoxAlgorithmClassifierTrainer.h"
 
 #include <system/ovCMemory.h>
+#include <system/ovCMath.h>
 
 #include <fstream>
 #include <sstream>
@@ -8,6 +9,8 @@
 #include <algorithm>
 
 #include <map>
+
+#include <iomanip> // setw
 
 #include <xml/IXMLHandler.h>
 #include <xml/IXMLNode.h>
@@ -120,14 +123,14 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	//If we have to deal with a pairing strategy we have to pass argument
 	if(l_bIsPairing)
 	{
-		TParameterHandler < uint64 > ip_pClassAmount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassAmount));
+		TParameterHandler < uint64 > ip_pClassCount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassCount));
 		if(l_rStaticBoxContext.getInputCount()==0)
 		{
 			// This shouldn't happen.
 			this->getLogManager() << LogLevel_Error << "Must have more than 0 inputs\n";
 			return false;
 		}
-		ip_pClassAmount = l_rStaticBoxContext.getInputCount() -1;	 // >=0 by above test. -1 because one input connector is for stimulations.
+		ip_pClassCount = l_rStaticBoxContext.getInputCount() -1;	 // >=0 by above test. -1 because one input connector is for stimulations.
 		TParameterHandler < CIdentifier* > ip_oClassId(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
 		ip_oClassId = &l_oClassifierAlgorithmClassIdentifier;
 		if(!m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture))
@@ -326,12 +329,19 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 			if (l_bRandomizeVectorOrder)
 			{
 				this->getLogManager() << LogLevel_Info << "Randomizing the feature vector set\n";
-				random_shuffle(m_vFeatureVectorIndex.begin(), m_vFeatureVectorIndex.end());
-
+				random_shuffle(m_vFeatureVectorIndex.begin(), m_vFeatureVectorIndex.end(), System::Math::randomUInteger32WithCeiling);
 			}
+
+			const uint32 l_ui32ClassCount = l_rStaticBoxContext.getInputCount() - 1;
+			CMatrix l_oConfusion;
+			l_oConfusion.setDimensionCount(2);
+			l_oConfusion.setDimensionSize(0, l_ui32ClassCount);
+			l_oConfusion.setDimensionSize(1, l_ui32ClassCount);
 
 			if(m_ui64PartitionCount>=2)
 			{
+
+				OpenViBEToolkit::Tools::Matrix::clearContent(l_oConfusion);
 
 				this->getLogManager() << LogLevel_Info << "k-fold test could take quite a long time, be patient\n";
 				for(uint64 i=0; i<m_ui64PartitionCount; i++)
@@ -342,7 +352,7 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 					this->getLogManager() << LogLevel_Trace << "Training on partition " << i << " (feature vectors " << (uint32)l_uiStartIndex << " to " << (uint32)l_uiStopIndex-1 << ")...\n";
 					if(this->train(l_uiStartIndex, l_uiStopIndex))
 					{
-						l_f64PartitionAccuracy=this->getAccuracy(l_uiStartIndex, l_uiStopIndex);
+						l_f64PartitionAccuracy=this->getAccuracy(l_uiStartIndex, l_uiStopIndex, l_oConfusion);
 						l_vPartitionAccuracies[(unsigned int)i]=l_f64PartitionAccuracy;
 						l_f64FinalAccuracy+=l_f64PartitionAccuracy;
 					} else {
@@ -363,6 +373,8 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 				l_fDeviation = sqrt( l_fDeviation / m_ui64PartitionCount );
 
 				this->getLogManager() << LogLevel_Info << "Cross-validation test accuracy is " << l_fMean << "% (sigma = " << l_fDeviation << "%)\n";
+
+				printConfusionMatrix(l_oConfusion);
 			} 
 			else
 			{
@@ -377,7 +389,12 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 				return false;
 			}
 
-			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << this->getAccuracy(0, m_vFeatureVector.size()) << "% (optimistic)\n";
+			OpenViBEToolkit::Tools::Matrix::clearContent(l_oConfusion);
+
+			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << this->getAccuracy(0, m_vFeatureVector.size(), l_oConfusion) << "% (optimistic)\n";
+
+			printConfusionMatrix(l_oConfusion);
+
 			if(!this->saveConfiguration())
 				return false;
 		}
@@ -435,7 +452,7 @@ boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const s
 	return l_bReturnValue;
 }
 
-float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex)
+float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex, CMatrix& oConfusionMatrix)
 {
 	size_t l_iSuccessfullTrainerCount=0;
 
@@ -473,16 +490,73 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 		m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 
 		const float64 l_f64PredictedValue = op_f64ClassificationStateClass;
+		//std::cout << "Try to recognize " << l_f64CorrectValue << " and get " << l_f64PredictedValue << std::endl;
 		if(l_f64PredictedValue==l_f64CorrectValue)
 		{
 			l_iSuccessfullTrainerCount++;
 		}
+
+		oConfusionMatrix[static_cast<uint32>(l_f64CorrectValue-1)*oConfusionMatrix.getDimensionSize(1) + 
+			static_cast<uint32>(l_f64PredictedValue-1)] += 1.0;
 	}
 
 	return static_cast<float64>((l_iSuccessfullTrainerCount*100.0)/(uiStopIndex-uiStartIndex));
 }
 
+boolean CBoxAlgorithmClassifierTrainer::printConfusionMatrix(const CMatrix& oMatrix)
+{
+	if(oMatrix.getDimensionCount() != 2 ||
+		oMatrix.getDimensionSize(0) != oMatrix.getDimensionSize(1))
+	{
+		this->getLogManager() << LogLevel_Warning << "Confusion matrix has unusual size, not printing\n";
+		return false;
+	}
 
+	const uint32 l_ui32Rows = oMatrix.getDimensionSize(0);
+
+	if(l_ui32Rows>10 && !this->getConfigurationManager().expandAsBoolean("${Plugin_Classification_ForceConfusionMatrixPrint}"))
+	{
+		this->getLogManager() << LogLevel_Info << "Over 10 classes, not printing the confusion matrix. If needed, override with setting Plugin_Classification_ForceConfusionMatrixPrint token to true.\n";
+		return true;
+	}
+
+	// Normalize
+	CMatrix l_oTmp,l_oRowSum;
+	OpenViBEToolkit::Tools::Matrix::copy(l_oTmp, oMatrix);
+	l_oRowSum.setDimensionCount(1);
+	l_oRowSum.setDimensionSize(0,l_ui32Rows);
+	OpenViBEToolkit::Tools::Matrix::clearContent(l_oRowSum);
+
+	for(uint32 i=0;i<l_ui32Rows;i++) {
+		for(uint32 j=0;j<l_ui32Rows;j++) {
+			l_oRowSum[i] += l_oTmp[i*l_ui32Rows+j];
+		}
+		for(uint32 j=0;j<l_ui32Rows;j++) {
+			l_oTmp[i*l_ui32Rows+j] /= l_oRowSum[i];
+		}
+	}
+
+	std::stringstream ss;
+	ss << std::fixed;
+
+	ss << "  Cls vs cls ";
+	for(uint32 i=0;i<l_ui32Rows;i++) {
+		ss << setw(6) << (i+1);
+	}
+	this->getLogManager() << LogLevel_Info << ss.str().c_str()<< "\n";
+
+	ss.precision(1);
+	for(uint32 i=0;i<l_ui32Rows;i++) {
+		ss.str("") ; 
+		ss << "  Target " << setw(2) << (i+1) << ": ";
+		for(uint32 j=0;j<l_ui32Rows;j++) {
+			ss << setw(6) << l_oTmp[i*l_ui32Rows+j]*100;
+		}
+		this->getLogManager() << LogLevel_Info << ss.str().c_str() << " %, " << static_cast<uint32>(l_oRowSum[i]) << " examples\n";
+	}
+
+	return true;
+}
 
 boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 {
@@ -490,6 +564,9 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	XML::IXMLNode* l_pAlgorithmConfigurationNode = XML::createNode(c_sClassifierRoot);
+	l_pAlgorithmConfigurationNode->addChild((XML::IXMLNode*)op_pConfiguration);
+
 	XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
 	CString l_sConfigurationFilename(this->getConfigurationManager().expand((*m_pParameter)[c_sFilenameSettingName]));
 
@@ -532,13 +609,14 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 	}
 	l_sRoot->addChild(l_pStimulationsNode);
 
-	l_sRoot->addChild((XML::IXMLNode*)op_pConfiguration);
-
+	l_sRoot->addChild(l_pAlgorithmConfigurationNode);
+	//std::cout << l_sRoot->getXML() << std::endl;
 	if(!l_pHandler->writeXMLInFile(*l_sRoot, l_sConfigurationFilename.toASCIIString()))
 	{
 		this->getLogManager() << LogLevel_Error << "Could not save configuration to file [" << l_sConfigurationFilename << "]\n";
 		return false;
 	}
+
 
 	l_pHandler->release();
 	l_sRoot->release();

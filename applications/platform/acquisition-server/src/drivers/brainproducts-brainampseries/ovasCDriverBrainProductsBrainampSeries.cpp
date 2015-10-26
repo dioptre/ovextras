@@ -116,11 +116,15 @@ CDriverBrainProductsBrainampSeries::CDriverBrainProductsBrainampSeries(IDriverCo
 	for(uint32 i=0; i<256; i++)
 	{
 		m_oHeader.setChannelName(i, (i<sizeof(l_sChannelNameActiCap128)/sizeof(void*)?l_sChannelName[i]:""));
-		m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
 		m_peChannelSelected[i]=Channel_Selected;
 		m_peLowPassFilterFull[i]=Parameter_Default;
 		m_peResolutionFull[i]=Parameter_Default;
 		m_peDCCouplingFull[i]=Parameter_Default;
+	}
+
+	for(uint32 i=0; i<256; i++)
+	{
+		m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
 	}
 
 	m_oSettings.add("Header", &m_oHeader);
@@ -501,14 +505,10 @@ boolean CDriverBrainProductsBrainampSeries::loop(void)
 			if(l_ui16Marker != m_ui16Marker)
 			{
 				m_ui16Marker=l_ui16Marker;
-				if(m_ui16Marker != 0)
-				{
-					;
-					l_oStimulationSet.appendStimulation(m_ui16Marker, 
-						ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency()*m_ui32DecimationFactor, uint64(j)), 
-						0);
-					m_rDriverContext.getLogManager() << LogLevel_Trace << "Got stim code " << m_ui16Marker << " at sample " << j << "\n";
-				}
+				l_oStimulationSet.appendStimulation(OVTK_StimulationId_Label(m_ui16Marker),
+					ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency()*m_ui32DecimationFactor, uint64(j)), 
+					0);
+				m_rDriverContext.getLogManager() << LogLevel_Trace << "Got stim code " << m_ui16Marker << " at sample " << j << "\n";
 			}
 			l_pBuffer+=m_oHeaderAdapter.getChannelCount()+1;
 		}

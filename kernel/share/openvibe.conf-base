@@ -171,7 +171,8 @@ CustomConfiguration = ${CustomConfigurationPrefix${OperatingSystem}}${CustomConf
 CustomConfigurationApplication = ${CustomConfigurationPrefix${OperatingSystem}}-${ApplicationName}${CustomConfigurationSuffix${OperatingSystem}}
 Include = ${CustomConfigurationApplication}
 Include = ${CustomConfiguration}
-Include = ${Path_Data}/applications/CoAdaptP300Stimulator/P300AcquisitionConfig.conf
+
+# Include = ${Path_Data}/applications/CoAdaptP300Stimulator/P300AcquisitionConfig.conf
 
 
 

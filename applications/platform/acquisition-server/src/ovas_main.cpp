@@ -76,8 +76,8 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else
 		{
-			std::cout << "Error: Unknown argument [" << *it << "]\n";
-			return false;
+			// The argument may be relevant to GTK, do not stop here
+			std::cout << "Note: Unknown argument [" << *it << "], passing it on to gtk...\n";
 		}
 	}
 
@@ -171,7 +171,19 @@ int main(int argc, char ** argv)
 				g_thread_init(NULL);
 #endif
 				gdk_threads_init();
-				gtk_init(&argc, &argv);
+
+				if(!gtk_init_check(&argc, &argv))
+				{
+					l_pKernelContext->getLogManager() << LogLevel_Error << "Unable to initialize GTK. Possibly the display could not be opened. Exiting.\n";
+					
+					OpenViBEToolkit::uninitialize(*l_pKernelContext);
+					l_pKernelDesc->releaseKernel(l_pKernelContext);
+
+					l_oKernelLoader.uninitialize();
+					l_oKernelLoader.unload();
+
+					return -2;
+				}
 
 				// gtk_rc_parse(OpenViBE::Directories::getDataDir() + "/applications/designer/interface.gtkrc");
 

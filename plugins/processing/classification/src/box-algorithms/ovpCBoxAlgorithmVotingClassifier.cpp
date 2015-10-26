@@ -41,6 +41,8 @@ boolean CBoxAlgorithmVotingClassifier::initialize(void)
 			l_rInput.ip_pMemoryBuffer.initialize(l_rInput.m_pDecoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_InputParameterId_MemoryBufferToDecode));
 			l_rInput.op_pMatrix.initialize(l_rInput.m_pDecoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputParameterId_Matrix));
 
+			l_rInput.m_bTwoValueInput = false;
+
 			m_oStreamDecoder_OutputTriggerId_ReceivedHeader=OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedHeader;
 			m_oStreamDecoder_OutputTriggerId_ReceivedBuffer=OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedBuffer;
 			m_oStreamDecoder_OutputTriggerId_ReceivedEnd=OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedEnd;
@@ -53,9 +55,12 @@ boolean CBoxAlgorithmVotingClassifier::initialize(void)
 			l_rInput.ip_pMemoryBuffer.initialize(l_rInput.m_pDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
 			l_rInput.op_pStimulationSet.initialize(l_rInput.m_pDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
 
+			l_rInput.m_bTwoValueInput = false;
+
 			m_oStreamDecoder_OutputTriggerId_ReceivedHeader=OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader;
 			m_oStreamDecoder_OutputTriggerId_ReceivedBuffer=OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer;
 			m_oStreamDecoder_OutputTriggerId_ReceivedEnd=OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd;
+
 		}
 	}
 
@@ -121,8 +126,16 @@ boolean CBoxAlgorithmVotingClassifier::process(void)
 				{
 					if(l_rInput.op_pMatrix->getBufferElementCount() != 1)
 					{
-						this->getLogManager() << LogLevel_ImportantWarning << "Input matrix should have a single value\n";
-						return false;
+						if(l_rInput.op_pMatrix->getBufferElementCount() == 2)
+						{
+							this->getLogManager() << LogLevel_Trace << "Input got two dimensions, the value use for the vote will be the difference between the two values\n";
+							l_rInput.m_bTwoValueInput = true;
+						}
+						else
+						{
+							this->getLogManager() << LogLevel_ImportantWarning << "Input matrix should have one or two values\n";
+							return false;
+						}
 					}
 				}
 			}
@@ -130,7 +143,16 @@ boolean CBoxAlgorithmVotingClassifier::process(void)
 			{
 				if(m_bMatrixBased)
 				{
-					l_rInput.m_vScore.push_back(std::pair<float64, uint64>(-l_rInput.op_pMatrix->getBuffer()[0], l_rDynamicBoxContext.getInputChunkEndTime(i, j)));
+					float64 l_f64Value;
+					if(l_rInput.m_bTwoValueInput)
+					{
+						l_f64Value = l_rInput.op_pMatrix->getBuffer()[1] - l_rInput.op_pMatrix->getBuffer()[0];
+					}
+					else
+					{
+						l_f64Value = l_rInput.op_pMatrix->getBuffer()[0];
+					}
+					l_rInput.m_vScore.push_back(std::pair<float64, uint64>(-l_f64Value, l_rDynamicBoxContext.getInputChunkEndTime(i, j)));
 				}
 				else
 				{

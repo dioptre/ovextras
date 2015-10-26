@@ -12,11 +12,12 @@ using namespace OpenViBEToolkit;
 
 boolean CAlgorithmPairwiseDecision::process()
 {
+	// @note there is essentially no test that these are called in correct order. Caller be careful!
 	if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Compute))
 	{
-		TParameterHandler<IMatrix *> ip_pProbabilityMatrix = this->getInputParameter(OVP_Algorithm_Classifier_InputParameter_ProbabilityMatrix);
+		TParameterHandler<std::vector < SClassificationInfo > *> ip_pClassificationValues = this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameter_ClassificationOutputs);
 		TParameterHandler<IMatrix*> op_pProbabilityVector = this->getOutputParameter(OVP_Algorithm_Classifier_OutputParameter_ProbabilityVector);
-		return this->compute((IMatrix*)ip_pProbabilityMatrix, (IMatrix*)op_pProbabilityVector);
+		return this->compute(*((std::vector < SClassificationInfo > *)ip_pClassificationValues), (IMatrix*)op_pProbabilityVector);
 	}
 	else if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_SaveConfiguration))
 	{
@@ -33,11 +34,15 @@ boolean CAlgorithmPairwiseDecision::process()
 	{
 		TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getInputParameter(OVP_Algorithm_Classifier_Pairwise_InputParameterId_Configuration));
 		XML::IXMLNode* l_pTempNode = (XML::IXMLNode*)op_pConfiguration;
-		return this->loadConfiguration(*l_pTempNode);
+		if(l_pTempNode != NULL)
+		{
+			return this->loadConfiguration(*l_pTempNode);
+		}
+		return false;
 	}
-	else if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parametrize))
+	else if(this->isInputTriggerActive(OVP_Algorithm_Classifier_Pairwise_InputTriggerId_Parameterize))
 	{
-		this->parametrize();
+		return this->parameterize();
 	}
 	return true;
 }

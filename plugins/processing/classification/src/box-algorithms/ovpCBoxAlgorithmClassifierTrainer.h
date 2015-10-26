@@ -46,7 +46,8 @@ namespace OpenViBEPlugins
 		protected:
 
 			virtual OpenViBE::boolean train(const size_t uiStartIndex, const size_t uiStopIndex);
-			virtual OpenViBE::float64 getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex);
+			virtual OpenViBE::float64 getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex, OpenViBE::CMatrix& oConfusionMatrix);
+			virtual OpenViBE::boolean printConfusionMatrix(const OpenViBE::CMatrix& oMatrix);
 
 		private:
 			OpenViBE::boolean saveConfiguration(void);

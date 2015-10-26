@@ -8,12 +8,19 @@
 #include "edf/edflib.h"
 #include <queue>
 #include <deque>
+#include <vector>
 
 
 namespace OpenViBEPlugins
 {
 	namespace FileIO
 	{
+		typedef struct{
+			OpenViBE::float64 m_f64MinValue;
+			OpenViBE::float64 m_f64MaxValue;
+		}SChannelInfo;
+
+
 		class CBoxAlgorithmEDFFileWriter : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
 		public:
@@ -45,6 +52,8 @@ namespace OpenViBEPlugins
 			double * m_pTemporyBufferToWrite;
 			//int * m_pTemporyBuffer;
 			//int * m_pTemporyBufferToWrite;
+
+			std::vector< SChannelInfo > m_oChannelInformation;
 		};
 
 		class CBoxAlgorithmEDFFileWriterDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc

@@ -176,6 +176,16 @@ enum EStatus
 	Status_ParsingBufferValue
 };
 
+// tokens in the ascii matrix format
+const char CONSTANT_LEFT_SQUARE_BRACKET  = '[';
+const char CONSTANT_RIGHT_SQUARE_BRACKET = ']';
+const char CONSTANT_HASHTAG              = '#';
+const char CONSTANT_DOUBLE_QUOTE         = '"';
+const char CONSTANT_TAB                  = '\t';
+const char CONSTANT_CARRIAGE_RETURN      = '\r';
+const char CONSTANT_EOL                  = '\n';
+const char CONSTANT_SPACE                = ' ';
+
 boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, const OpenViBE::CString& sString)
 {
 	std::stringstream l_oBuffer;
@@ -205,7 +215,7 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 	do
 	{
 		//read current line
-		std::getline(l_oBuffer, l_sWhat, '\n');
+		std::getline(l_oBuffer, l_sWhat, CONSTANT_EOL);
 
 		//is line empty?
 		if(l_sWhat.length()==0)
@@ -218,7 +228,7 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 		// getLogManager() << LogLevel_Debug << CString(l_sWhat.c_str()) << "\n";
 
 		//remove ending carriage return (if any) for windows / linux compatibility
-		if(l_sWhat[l_sWhat.length()-1]=='\r')
+		if(l_sWhat[l_sWhat.length()-1]==CONSTANT_CARRIAGE_RETURN)
 		{
 			l_sWhat.erase(l_sWhat.length()-1, 1);
 		}
@@ -235,13 +245,13 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 				case Status_Nothing:
 
 					//comments starting
-					if(*l_oIt == '#')
+					if(*l_oIt == CONSTANT_HASHTAG)
 					{
 						//ignore rest of line by skipping to last character
 						l_oIt = l_sWhat.end()-1;
 					}
 					//header starting
-					else if(*l_oIt == '[')
+					else if(*l_oIt == CONSTANT_LEFT_SQUARE_BRACKET)
 					{
 						//update status
 						l_ui32Status = Status_ParsingHeader;
@@ -257,13 +267,13 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 				case Status_ParsingHeader:
 
 					//comments starting
-					if(*l_oIt == '#')
+					if(*l_oIt == CONSTANT_HASHTAG)
 					{
 						//ignore rest of line by skipping to last character
 						l_oIt = l_sWhat.end()-1;
 					}
 					//new dimension opened
-					else if(*l_oIt == '[')
+					else if(*l_oIt == CONSTANT_LEFT_SQUARE_BRACKET)
 					{
 						//increment dimension count
 						l_vDimensionSize.resize(l_vDimensionSize.size()+1);
@@ -275,7 +285,7 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 						l_ui32Status = Status_ParsingHeaderDimension;
 					}
 					//finished parsing header
-					else if(*l_oIt == ']')
+					else if(*l_oIt == CONSTANT_RIGHT_SQUARE_BRACKET)
 					{
 						//ensure at least one dimension was found
 						if(l_vDimensionSize.size() == 0)
@@ -339,13 +349,13 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 				case Status_ParsingHeaderDimension:
 
 					//comments starting
-					if(*l_oIt == '#')
+					if(*l_oIt == CONSTANT_HASHTAG)
 					{
 						//ignore rest of line by skipping to last character
 						l_oIt = l_sWhat.end()-1;
 					}
 					//new label found
-					else if(*l_oIt == '"')
+					else if(*l_oIt == CONSTANT_DOUBLE_QUOTE)
 					{
 						//new element found in current dimension
 						l_vDimensionSize[l_ui32CurDimensionIndex]++;
@@ -354,7 +364,7 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 						l_ui32Status = Status_ParsingHeaderLabel;
 					}
 					//finished parsing current dimension header
-					else if(*l_oIt == ']')
+					else if(*l_oIt == CONSTANT_RIGHT_SQUARE_BRACKET)
 					{
 						//update status
 						l_ui32Status = Status_ParsingHeader;
@@ -370,7 +380,7 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 				case Status_ParsingHeaderLabel:
 
 					//found '"' char not preceded by escape char : end of label reached
-					if(*l_oIt == '"' && *(l_oIt-1) != '\\')
+					if(*l_oIt == CONSTANT_DOUBLE_QUOTE && *(l_oIt-1) != '\\')
 					{
 						// We can only attach the label later after we know the size
 						l_vLabels.push_back(l_sCurString);
@@ -393,13 +403,13 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 				case Status_ParsingBuffer:
 
 					//comments starting
-					if(*l_oIt == '#')
+					if(*l_oIt == CONSTANT_HASHTAG)
 					{
 						//ignore rest of line by skipping to last character
 						l_oIt = l_sWhat.end()-1;
 					}
 					//going down one dimension
-					else if(*l_oIt == '[')
+					else if(*l_oIt == CONSTANT_LEFT_SQUARE_BRACKET)
 					{
 						//update dimension index
 						l_ui32CurDimensionIndex++;
@@ -425,7 +435,7 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 						}
 					}
 					//going up one dimension
-					else if(*l_oIt == ']')
+					else if(*l_oIt == CONSTANT_RIGHT_SQUARE_BRACKET)
 					{
 						//if we are not in innermost dimension
 						if(l_ui32CurDimensionIndex < rMatrix.getDimensionCount()-1)
@@ -487,10 +497,10 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 				case Status_ParsingBufferValue:
 
 					//values end at first whitespace character or ']' character
-					if(std::isspace(*l_oIt, l_oLocale) == true || *l_oIt == ']')
+					if(std::isspace(*l_oIt, l_oLocale) == true || *l_oIt == CONSTANT_RIGHT_SQUARE_BRACKET)
 					{
 						//if dimension closing bracket is found
-						if(*l_oIt == ']')
+						if(*l_oIt == CONSTANT_RIGHT_SQUARE_BRACKET)
 						{
 							//move back iterator by one character so that closing bracket is taken into account in Status_ParsingBuffer case
 							l_oIt--;
@@ -536,12 +546,65 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 
 	} while(l_oBuffer.good()); //read each line in turn
 
+	//If the file is empty or other (like directory)
+	if(l_vValuesCount.size() == 0)
+	{
+		return false;
+	}
 	//ensure the right number of values were parsed in first dimension
 	if(l_vValuesCount[0] != rMatrix.getDimensionSize(0))
 	{
 	//	getLogManager() << LogLevel_Trace <<
 	//		"Found " << l_vValuesCount[0] << " values in dimension 0, expected " << op_pMatrix->getDimensionSize(0) << ", parsing aborted\n";
 		return false;
+	}
+
+	return true;
+}
+
+// A recursive helper function to spool matrix contents to a txt stringstream. 
+boolean dumpMatrixBuffer(const OpenViBE::IMatrix& rMatrix, std::stringstream& buffer, uint32 ui32DimensionIndex, uint32& ui32ElementIndex)
+{
+	//are we in innermost dimension?
+	if(ui32DimensionIndex == rMatrix.getDimensionCount()-1)
+	{
+		//dimension start
+		for(uint32 j=0; j<ui32DimensionIndex; j++)
+		{
+			buffer << CONSTANT_TAB;
+		}
+		buffer << CONSTANT_LEFT_SQUARE_BRACKET;
+
+		//dump current cell contents
+		for(uint32 j=0; j<rMatrix.getDimensionSize(ui32DimensionIndex); j++, ui32ElementIndex++)
+		{
+			buffer << CONSTANT_SPACE << rMatrix.getBuffer()[ui32ElementIndex];
+		}
+
+		//dimension end
+		buffer << CONSTANT_SPACE << CONSTANT_RIGHT_SQUARE_BRACKET << CONSTANT_EOL;
+	}
+	else
+	{
+		//dump all entries in current dimension
+		for(uint32 i=0; i<rMatrix.getDimensionSize(ui32DimensionIndex); i++)
+		{
+			//dimension start
+			for(uint32 j=0; j<ui32DimensionIndex; j++)
+			{
+				buffer << CONSTANT_TAB;
+			}
+			buffer << CONSTANT_LEFT_SQUARE_BRACKET << CONSTANT_EOL;
+
+			dumpMatrixBuffer(rMatrix, buffer, ui32DimensionIndex+1, ui32ElementIndex);
+
+			//dimension end
+			for(uint32 j=0; j<ui32DimensionIndex; j++)
+			{
+				buffer << CONSTANT_TAB;
+			}
+			buffer << CONSTANT_RIGHT_SQUARE_BRACKET << CONSTANT_EOL;
+		}
 	}
 
 	return true;
@@ -557,48 +620,27 @@ boolean OpenViBEToolkit::Tools::Matrix::toString(const OpenViBE::IMatrix& rMatri
 	// Dump header
 
 	//header start
-	l_oBuffer << "[\n";
+	l_oBuffer << CONSTANT_LEFT_SQUARE_BRACKET << CONSTANT_EOL;
 
 	//dump labels for each dimension
 	for(uint32 i=0; i<rMatrix.getDimensionCount(); i++)
 	{
-		l_oBuffer << "\t[";
+		l_oBuffer << CONSTANT_TAB << CONSTANT_LEFT_SQUARE_BRACKET;
 
 		for(uint32 j=0; j<rMatrix.getDimensionSize(i); j++)
 		{
-			l_oBuffer << " \"" << rMatrix.getDimensionLabel(i, j) << "\"";
+			l_oBuffer << CONSTANT_SPACE << CONSTANT_DOUBLE_QUOTE << rMatrix.getDimensionLabel(i, j) << CONSTANT_DOUBLE_QUOTE;
 		}
 
-		l_oBuffer << " ]\n";
+		l_oBuffer << CONSTANT_SPACE << CONSTANT_RIGHT_SQUARE_BRACKET << CONSTANT_EOL;
 	}
 
 	//header end
-	l_oBuffer << "]\n";
+	l_oBuffer << CONSTANT_RIGHT_SQUARE_BRACKET << CONSTANT_EOL;
 
-	// Dump buffer
-	const uint32 l_ui32ElementSize = rMatrix.getDimensionSize(rMatrix.getDimensionCount()-1);
-	for(uint32 l_ui32ElementIndex=0;l_ui32ElementIndex<rMatrix.getBufferElementCount(); )
-	{
-		// dimension start
-		for(uint32 j=0; j<rMatrix.getDimensionCount()-1; j++)
-		{
-			l_oBuffer << "[\n";
-		}
-	
-		//dump current cell contents
-		l_oBuffer << "[";
-		for(uint32 i=0;i<l_ui32ElementSize;i++) 
-		{
-			l_oBuffer << " " << (rMatrix.getBuffer())[l_ui32ElementIndex++];
-		}
-		l_oBuffer << "]\n";
-
-		//dimension end
-		for(uint32 j=0; j<rMatrix.getDimensionCount()-1; j++)
-		{
-			l_oBuffer << "]\n";
-		}
-	}
+	// Dump buffer using a recursive algorithm
+	uint32 l_ui32ElementIndex = 0;
+	dumpMatrixBuffer(rMatrix, l_oBuffer, 0, l_ui32ElementIndex);
 
 	sString = CString(l_oBuffer.str().c_str());
 

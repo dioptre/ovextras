@@ -31,6 +31,21 @@ void VRPN_CALLBACK vrpn_analog_callback(void* user_data, vrpn_ANALOGCB analog)
  
 int main(int argc, char** argv)
 {
+	if(argc!=1 && argc!=3) {
+		std::cout << "Usage:\n\n" << argv[0] << " [buttonDevice] [analogDevice]\n";
+		return 1;
+	}
+
+	const char *buttonDevice = "openvibe_vrpn_button@localhost";
+	const char *analogDevice = "openvibe_vrpn_analog@localhost";
+
+	if(argc==3) {
+		buttonDevice=argv[1];
+		analogDevice=argv[2];
+	}
+
+	std::cout << "Polling these VRPN devices\n  Button: " << buttonDevice << "\n  Analog: " << analogDevice << "\n";
+
     /* flag used to stop the program execution */
     bool running = true;
  
@@ -38,14 +53,14 @@ int main(int argc, char** argv)
     vrpn_Button_Remote* VRPNButton;
  
     /* Binding of the VRPN Button to a callback */
-    VRPNButton = new vrpn_Button_Remote( "openvibe_vrpn_button@localhost" );
+    VRPNButton = new vrpn_Button_Remote( buttonDevice );
     VRPNButton->register_change_handler( &running, vrpn_button_callback );
  
     /* VRPN Analog object */
     vrpn_Analog_Remote* VRPNAnalog;
  
     /* Binding of the VRPN Analog to a callback */
-    VRPNAnalog = new vrpn_Analog_Remote( "openvibe_vrpn_analog@localhost" );
+    VRPNAnalog = new vrpn_Analog_Remote( analogDevice );
     VRPNAnalog->register_change_handler( NULL, vrpn_analog_callback );
  
     /* The main loop of the program, each VRPN object must be called in order to process data */

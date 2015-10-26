@@ -32,7 +32,7 @@ IF(UNIX)
 		COMMAND @CMAKE_CURRENT_BINARY_DIR@/../../applications/developer-tools/plugin-inspector/openvibe-plugin-inspector
 			-d "@CMAKE_CURRENT_BINARY_DIR@" -p ${ov_plugin_inspector_load_path}
 			-k "@CMAKE_CURRENT_BINARY_DIR@/../../kernel/"
-			-c "@CMAKE_SOURCE_DIR@/kernel/share/openvibe.conf"
+			-c "@CMAKE_SOURCE_DIR@/kernel/share/openvibe.conf-base"
 		WORKING_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@/../../applications/developer-tools/plugin-inspector"
 	)
 ELSEIF(WIN32)
@@ -40,7 +40,7 @@ ELSEIF(WIN32)
 		COMMAND	@CMAKE_CURRENT_SOURCE_DIR@/openvibe-plugin-inspector.cmd @CMAKE_SOURCE_DIR@ @CMAKE_CURRENT_BINARY_DIR@/../..
 			-d "@CMAKE_CURRENT_BINARY_DIR@" -p ${ov_plugin_inspector_load_path}
 			-k "@CMAKE_CURRENT_BINARY_DIR@/../../kernel"
-			-c "@CMAKE_SOURCE_DIR@/kernel/share/openvibe.conf"
+			-c "@CMAKE_SOURCE_DIR@/kernel/share/openvibe.conf-base"
 		WORKING_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@/../../applications/developer-tools/plugin-inspector"
 	)
 ENDIF(UNIX)

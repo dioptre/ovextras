@@ -1,12 +1,24 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+# Here we set a few policies to get rid of warnings on newer cmakes.
+# we should update the scripts after upgrading each platform's cmake to 3.x.
+if(POLICY CMP0026)
+  cmake_policy(SET CMP0026 OLD)
+endif()
+if(POLICY CMP0043)
+  cmake_policy(SET CMP0043 OLD)
+endif()
+if(POLICY CMP0048)
+  cmake_policy(SET CMP0048 OLD)
+endif()
+
 PROJECT(OpenVIBE)
 
 # These versions are used by the subprojects by default.
 # If you wish to maintain specific version numbers for a subproject, please do so in the projects CMakeLists.txt
 SET(OV_GLOBAL_VERSION_MAJOR 1)
-SET(OV_GLOBAL_VERSION_MINOR 0)
-SET(OV_GLOBAL_VERSION_PATCH 1+git)
+SET(OV_GLOBAL_VERSION_MINOR 1)
+SET(OV_GLOBAL_VERSION_PATCH 0+git)
 
 # Default is to build to dist/. If you wish a custom install, set your own MAKE_INSTALL_PREFIX when you call CMake. Safest to do under a fakeroot.
 #IF(NOT CMAKE_INSTALL_PREFIX)
@@ -16,11 +28,16 @@ MESSAGE(STATUS "Appending compilation flags...")
 
 SET(OV_CUSTOM_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
+# If OpenMP is available, it will allow Eigen to use multiple cores in matrix math.
+INCLUDE("FindOpenMP")
+IF(OPENMP_FOUND)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+ENDIF(OPENMP_FOUND)
 
 IF(WIN32)
 	ADD_DEFINITIONS("-DNOMINMAX -DBOOST_ALL_NO_LIB")
-	# the /openmp switch allows eigen to use multiple cores. Switch /arch:SSE2 enables vectorization. Remove if your CPU/compiler doesn't support them.
-	SET(OV_EIGEN_FLAGS "/openmp /arch:SSE2")
+	# Switch /arch:SSE2 enables vectorization. Remove if your CPU/compiler doesn't support it.
+	SET(OV_EIGEN_FLAGS "/arch:SSE2")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4355 /MP ${OV_EIGEN_FLAGS}")
 	SET(OV_WIN32_BOOST_VERSION "1_47")
 ELSEIF(UNIX)
@@ -38,11 +55,26 @@ ELSEIF(UNIX)
 		MESSAGE(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. In the future this may be required.")
 	ENDIF(COMPILER_SUPPORTS_CXX11)
 
-	# the -fopenmp switch allows eigen to use multiple cores; Switch -msse2 is for vectorization. Remove if your CPU/compiler doesn't support them.
-	SET(OV_EIGEN_FLAGS "-fopenmp -msse2")
+	# Switch -msse2 enables vectorization. Remove if your CPU/compiler doesn't support it.
+	SET(OV_EIGEN_FLAGS "-msse2")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall ${OV_EIGEN_FLAGS}")
 	# This ENV var is needed to locate our custom IT++ on Linux
-	SET(ENV{PKG_CONFIG_PATH} "${OV_CUSTOM_DEPENDENCIES_PATH}/lib/pkgconfig")
+	SET(ENV{PKG_CONFIG_PATH} "${OV_CUSTOM_DEPENDENCIES_PATH}/lib/pkgconfig")	
+
+	if (${CMAKE_SYSTEM_PROCESSOR} MATCHES i386|i586|i686)
+		set ( BIT_MODE "32")
+	else ()
+		set ( BIT_MODE "64")
+	endif ()
+
+	if(EXISTS "/etc/debian_version")
+	   set (PLATFORM "Debian")
+	endif(EXISTS "/etc/debian_version")
+
+	if(EXISTS "/etc/fedora-release")
+	   set (PLATFORM "Fedora")
+	endif(EXISTS "/etc/fedora-release")
+
 ELSE(WIN32)
 	MESSAGE(WARNING "Warning: unknown platform")
 ENDIF(WIN32)
@@ -70,6 +102,11 @@ SET(OV_COMPILE_TESTS "true")
 # This option is mostly of interest to hackers who are interested in using a minimal OpenViBE kernel in their own projects.
 # SET(OV_DISABLE_GTK "true")
 
+# The CoAdapt P300 speller is currently only working in the v0.18 version
+# of OpenViBE. It is intended to be replaced by an even more robust and easy 
+# to use P300 speller from the same authors.
+SET(OV_DISABLE_COADAPT_P300 "1")
+
 # By setting SKIP[_FOLDER]* you can skip a subtree (example: SKIP_A_B_C skips folder a/b/c and all its subfolders if any)
 
 # Skip building documentation
@@ -81,6 +118,7 @@ SET(SKIP_DOCUMENTATION "1")
 # Skipping demos can speed up compilation a lot, if you don't need them
 #SET(SKIP_APPLICATIONS_DEMOS "1")
 #SET(SKIP_CONTRIB_APPLICATIONS "1")
+
 
 IF(UNIX)
 	# On Linux, the presence of matlab plugin .so can cause crashes in Simple DSP box as the two may use different versions of boost which are

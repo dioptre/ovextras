@@ -24,18 +24,23 @@ namespace OpenViBEPlugins
 
 		public:
 
+			CAlgorithmPairwiseDecisionHT() : m_ui32ClassCount(0) { };
+
 			virtual void release(void) { delete this; }
 
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 
-			virtual OpenViBE::boolean parametrize(void);
+			virtual OpenViBE::boolean parameterize(void);
 
-			virtual OpenViBE::boolean compute(OpenViBE::IMatrix* pSubClassifierMatrix, OpenViBE::IMatrix* pProbabiltyVector);
+			virtual OpenViBE::boolean compute(std::vector< SClassificationInfo >& pClassificationValueList, OpenViBE::IMatrix* pProbabilityVector);
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode& rNode);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVP_ClassId_Algorithm_PairwiseDecision_HT)
+
+		private:
+			OpenViBE::uint32 m_ui32ClassCount;
 		};
 
 		class CAlgorithmPairwiseDecisionHTDesc : virtual public OpenViBEPlugins::Classification::CAlgorithmPairwiseDecisionDesc

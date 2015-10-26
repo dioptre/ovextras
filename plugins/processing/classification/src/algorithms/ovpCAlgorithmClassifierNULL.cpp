@@ -76,3 +76,13 @@ boolean CAlgorithmClassifierNULL::loadConfiguration(XML::IXMLNode *pConfiguratio
 {
 	return true;
 }
+
+uint32 CAlgorithmClassifierNULL::getOutputProbabilityVectorLength()
+{
+	return 1;
+}
+
+uint32 CAlgorithmClassifierNULL::getOutputDistanceVectorLength()
+{
+	return 1;
+}

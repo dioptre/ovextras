@@ -37,6 +37,9 @@ namespace OpenViBEAcquisitionServer
 			virtual OpenViBE::boolean isSubjectAgeSet(void) const;
 			virtual OpenViBE::boolean isSubjectGenderSet(void) const;
 
+			virtual OpenViBE::boolean setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested);
+			virtual OpenViBE::boolean isImpedanceCheckRequested(void) const;
+
 			// Chanel information
 			virtual OpenViBE::boolean setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
 			virtual OpenViBE::boolean setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
@@ -78,6 +81,9 @@ namespace OpenViBEAcquisitionServer
 
 			// Samples information
 			OpenViBE::uint32 m_ui32SamplingFrequency;
+
+			// Impedance check
+			OpenViBE::boolean m_bIsImpedanceCheckRequested;
 		};
 	};
 };
@@ -91,6 +97,7 @@ CHeaderImpl::CHeaderImpl(void)
 	,m_ui32SubjectGender(OVTK_Value_Gender_NotSpecified)
 	,m_ui32ChannelCount(_NoValueI_)
 	,m_ui32SamplingFrequency(_NoValueI_)
+	,m_bIsImpedanceCheckRequested(false)
 {
 }
 
@@ -108,6 +115,7 @@ void CHeaderImpl::reset(void)
 	m_vChannelGain.clear();
 	m_vChannelUnits.clear();
 	m_ui32SamplingFrequency=_NoValueI_;
+	m_bIsImpedanceCheckRequested=false;
 }
 
 //___________________________________________________________________//
@@ -145,6 +153,17 @@ uint32 CHeaderImpl::getSubjectAge(void) const
 uint32 CHeaderImpl::getSubjectGender(void) const
 {
 	return m_ui32SubjectGender;
+}
+
+boolean CHeaderImpl::setImpedanceCheckRequested(const boolean bImpedanceCheckRequested)
+{
+	m_bIsImpedanceCheckRequested = bImpedanceCheckRequested;
+	return true;
+}
+
+boolean CHeaderImpl::isImpedanceCheckRequested(void) const
+{
+	return m_bIsImpedanceCheckRequested;
 }
 
 boolean CHeaderImpl::isExperimentIdentifierSet(void) const
@@ -349,6 +368,19 @@ boolean CHeader::isSubjectAgeSet(void) const
 boolean CHeader::isSubjectGenderSet(void) const
 {
 	return m_pHeaderImpl->isSubjectGenderSet();
+}
+
+//___________________________________________________________________//
+//                                                                   //
+
+boolean CHeader::setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested)
+{
+	return m_pHeaderImpl->setImpedanceCheckRequested(bImpedanceCheckRequested);
+}
+
+boolean CHeader::isImpedanceCheckRequested(void) const
+{
+	return m_pHeaderImpl->isImpedanceCheckRequested();
 }
 
 //___________________________________________________________________//

@@ -17,7 +17,9 @@
 
 #include <vector>
 
+#if defined TARGET_OS_Windows
 #include <windows.h>
+#endif
 
 namespace OpenViBEAcquisitionServer
 {

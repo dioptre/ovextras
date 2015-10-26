@@ -1,23 +1,35 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkAdjustment" id="adjustment_active_shield_gain">
-    <property name="value">5</property>
     <property name="upper">100</property>
+    <property name="value">5</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="adjustment_age">
-    <property name="value">18</property>
     <property name="upper">100</property>
+    <property name="value">18</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_bad_imp">
+    <property name="upper">100000</property>
+    <property name="value">10000</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="adjustment_channel_count">
-    <property name="value">4</property>
     <property name="lower">1</property>
     <property name="upper">1024</property>
+    <property name="value">4</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_good_imp">
+    <property name="upper">100000</property>
+    <property name="value">5000</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
@@ -25,6 +37,52 @@
     <property name="upper">100</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
+  </object>
+  <object class="GtkWindow" id="dummy-window">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkTable" id="table1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="n_columns">2</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
   </object>
   <object class="GtkListStore" id="model_adc_data_decimation">
     <columns>
@@ -144,6 +202,7 @@
     </data>
   </object>
   <object class="GtkDialog" id="openvibe-acquisition-server-settings">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Device configuration</property>
     <property name="window_position">center</property>
@@ -152,51 +211,106 @@
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
         <property name="spacing">8</property>
         <child>
           <object class="GtkLabel" id="label_title">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label" translatable="yes">Brain Products actiCHamp
 
 &lt;span color="darkred"&gt;
-To use this driver in good conditions,
-the drift correction parameters should be adjusted.
-(e.g. Jitter estimation count : 500)
+This driver uses software decimation
+to lower the sampling frequency to
+the value selected below.
+The signal is low-pass filtered with
+a FIR filter prior to downsampling.
 &lt;/span&gt;</property>
             <property name="use_markup">True</property>
             <property name="justify">center</property>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkImage" id="image_error_icon">
+            <property name="can_focus">False</property>
+            <property name="stock">gtk-dialog-error</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <object class="GtkHSeparator" id="hseparator">
+          <object class="GtkLabel" id="label_error_message">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">&lt;span color="#d07005"&gt;The selected ActiCHamp device can not be accessed.
+The device is probably used by another program
+or has an older version of firmware. 
+
+Try un-plugging and re-plugging the device and if the
+problem persists please update  the actiCHamp firmware. 
+All required files and instructions can be downloaded from here:&lt;/span&gt;</property>
+            <property name="use_markup">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_bp_actichamp_download_firmware">
+            <property name="label" translatable="yes">Download ActiCHamp firmware from Brain Products</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHSeparator" id="hseparator1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="position">2</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
           <object class="GtkVBox" id="vbox">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="border_width">8</property>
             <property name="spacing">8</property>
             <child>
               <object class="GtkHBox" id="hbox">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="spacing">8</property>
                 <child>
                   <object class="GtkTable" id="table2">
                     <property name="visible">True</property>
-                    <property name="n_rows">17</property>
+                    <property name="can_focus">False</property>
+                    <property name="n_rows">18</property>
                     <property name="n_columns">2</property>
                     <child>
                       <object class="GtkComboBox" id="combobox_gender">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="model">model_gender</property>
                         <child>
                           <object class="GtkCellRendererText" id="renderer1"/>
@@ -216,6 +330,8 @@ the drift correction parameters should be adjusted.
                       <object class="GtkSpinButton" id="spinbutton_age">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
                         <property name="adjustment">adjustment_age</property>
@@ -233,6 +349,8 @@ the drift correction parameters should be adjusted.
                       <object class="GtkSpinButton" id="spinbutton_identifier">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
                         <property name="adjustment">adjustment_identifier</property>
@@ -248,8 +366,10 @@ the drift correction parameters should be adjusted.
                       <object class="GtkSpinButton" id="spinbutton_active_shield_gain">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="invisible_char">●</property>
                         <property name="invisible_char_set">True</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
                         <property name="adjustment">adjustment_active_shield_gain</property>
@@ -266,6 +386,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkComboBox" id="combobox_adc_data_decimation">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="model">model_adc_data_decimation</property>
                         <child>
                           <object class="GtkCellRendererText" id="renderer7"/>
@@ -284,6 +405,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkComboBox" id="combobox_adc_data_filter">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="model">model_adc_data_filter</property>
                         <child>
                           <object class="GtkCellRendererText" id="renderer6"/>
@@ -302,6 +424,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkComboBox" id="combobox_mode">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="model">model_mode</property>
                         <property name="active">1</property>
                         <child>
@@ -321,6 +444,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkComboBox" id="combobox_sampling_frequency">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="model">model_sampling_frequency</property>
                         <property name="active">0</property>
                         <child>
@@ -340,6 +464,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkComboBox" id="combobox_device_id">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="model">model_device_id</property>
                         <child>
                           <object class="GtkCellRendererText" id="renderer3"/>
@@ -360,7 +485,9 @@ the drift correction parameters should be adjusted.
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
                         <property name="adjustment">adjustment_channel_count</property>
@@ -377,6 +504,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkHSeparator" id="hseparator3">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="right_attach">2</property>
@@ -387,16 +515,18 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkHSeparator" id="hseparator2">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">14</property>
-                        <property name="bottom_attach">15</property>
+                        <property name="top_attach">15</property>
+                        <property name="bottom_attach">16</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkVBox" id="vbox1">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkToggleButton" id="togglebutton_module_1">
                             <property name="label" translatable="yes">1 (1-32)</property>
@@ -405,6 +535,8 @@ the drift correction parameters should be adjusted.
                             <property name="receives_default">True</property>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
@@ -416,6 +548,8 @@ the drift correction parameters should be adjusted.
                             <property name="receives_default">True</property>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -427,6 +561,8 @@ the drift correction parameters should be adjusted.
                             <property name="receives_default">True</property>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">2</property>
                           </packing>
                         </child>
@@ -438,6 +574,8 @@ the drift correction parameters should be adjusted.
                             <property name="receives_default">True</property>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">3</property>
                           </packing>
                         </child>
@@ -449,6 +587,8 @@ the drift correction parameters should be adjusted.
                             <property name="receives_default">True</property>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">4</property>
                           </packing>
                         </child>
@@ -456,8 +596,8 @@ the drift correction parameters should be adjusted.
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">15</property>
-                        <property name="bottom_attach">16</property>
+                        <property name="top_attach">16</property>
+                        <property name="bottom_attach">17</property>
                       </packing>
                     </child>
                     <child>
@@ -470,13 +610,14 @@ the drift correction parameters should be adjusted.
                       </object>
                       <packing>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">16</property>
-                        <property name="bottom_attach">17</property>
+                        <property name="top_attach">17</property>
+                        <property name="bottom_attach">18</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label_gender">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Gender :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
@@ -489,6 +630,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_age">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Age :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
@@ -501,6 +643,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_identifier">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Identifier :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
@@ -509,6 +652,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_active_shield_gain">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Active Shield Gain :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
@@ -521,6 +665,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_adc_data_decimation">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ADC Data Decimation :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
@@ -533,6 +678,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_adc_data_filter">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ADC Data Filter :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
@@ -545,6 +691,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_mode">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Mode :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
@@ -557,6 +704,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_sampling_frequency">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Sampling frequency :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
@@ -569,6 +717,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_device_id">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Device :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
@@ -581,6 +730,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_number_of_channels">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Number of channels :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
@@ -593,19 +743,21 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_modules">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Modules :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
                       </object>
                       <packing>
-                        <property name="top_attach">15</property>
-                        <property name="bottom_attach">16</property>
+                        <property name="top_attach">16</property>
+                        <property name="bottom_attach">17</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkComboBox" id="combobox_physical_sample_rate">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
+                        <property name="can_focus">False</property>
                         <property name="model">model_physical_sampling_rate</property>
                         <child>
                           <object class="GtkCellRendererText" id="renderer5"/>
@@ -624,6 +776,7 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_physical_sampling_rate">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Physical Sampling Rate :</property>
                         <property name="justify">right</property>
                         <property name="single_line_mode">True</property>
@@ -636,43 +789,35 @@ the drift correction parameters should be adjusted.
                     <child>
                       <object class="GtkLabel" id="label_good_imp">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Good impedance limit (Ohm) :</property>
                       </object>
                       <packing>
-                        <property name="top_attach">12</property>
-                        <property name="bottom_attach">13</property>
+                        <property name="top_attach">13</property>
+                        <property name="bottom_attach">14</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label_bad_imp">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Bad impedance limit (Ohm) :</property>
                       </object>
                       <packing>
-                        <property name="top_attach">13</property>
-                        <property name="bottom_attach">14</property>
+                        <property name="top_attach">14</property>
+                        <property name="bottom_attach">15</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkSpinButton" id="spinbutton_good_imp">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                         <property name="adjustment">adjustment_good_imp</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">12</property>
-                        <property name="bottom_attach">13</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSpinButton" id="spinbutton_bad_imp">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="invisible_char">&#x25CF;</property>
-                        <property name="adjustment">adjustment_bad_imp</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -681,45 +826,98 @@ the drift correction parameters should be adjusted.
                         <property name="bottom_attach">14</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkSpinButton" id="spinbutton_bad_imp">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
+                        <property name="adjustment">adjustment_bad_imp</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">14</property>
+                        <property name="bottom_attach">15</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Enable impedance checking:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">12</property>
+                        <property name="bottom_attach">13</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="checkbutton_impedance">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">12</property>
+                        <property name="bottom_attach">13</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
               </object>
               <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkButton" id="button_change_channel_names">
                 <property name="label" translatable="yes">Change channel names</property>
-                <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
+                <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
             </child>
           </object>
           <packing>
-            <property name="position">3</property>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
-          <object class="GtkHSeparator" id="hseparator1">
+          <object class="GtkHSeparator" id="hseparator">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="position">4</property>
+            <property name="fill">True</property>
+            <property name="position">6</property>
           </packing>
         </child>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK</property>
             <property name="layout_style">end</property>
             <child>
@@ -753,8 +951,9 @@ the drift correction parameters should be adjusted.
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
-            <property name="position">0</property>
+            <property name="position">6</property>
           </packing>
         </child>
       </object>
@@ -763,31 +962,5 @@ the drift correction parameters should be adjusted.
       <action-widget response="-10">button_apply</action-widget>
       <action-widget response="-6">button_cancel</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkWindow" id="dummy-window">
-    <child>
-      <object class="GtkTable" id="table1">
-        <property name="visible">True</property>
-        <property name="n_columns">2</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkAdjustment" id="adjustment_good_imp">
-    <property name="value">5000</property>
-    <property name="upper">100000</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="adjustment_bad_imp">
-    <property name="value">10000</property>
-    <property name="upper">100000</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
   </object>
 </interface>

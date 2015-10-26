@@ -256,7 +256,16 @@ namespace OpenViBEPlugins
 #ifdef DEBUG
 					static int count = 0; 
 					std::cout << "Push chunk " << (count++) << " at " << 	l_pDynamicBoxContext->getInputChunkStartTime(0,c) << "\n";
+
+					if(!OpenViBEToolkit::Tools::Matrix::isContentValid(*l_pMatrix, true, true))
+					{
+						this->getLogManager() << LogLevel_Warning << "Chunk at [" 
+							<< l_pDynamicBoxContext->getInputChunkStartTime(0,c) << ", "
+							<< l_pDynamicBoxContext->getInputChunkEndTime(0,c) << "] "
+							<< "contains invalid entries\n";
+					}
 #endif
+
 
 					bool l_bReturnValue = m_pBufferDatabase->setMatrixBuffer(l_pMatrix->getBuffer(),
 						l_pDynamicBoxContext->getInputChunkStartTime(0,c),

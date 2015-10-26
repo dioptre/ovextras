@@ -34,7 +34,7 @@ namespace{
 
 extern const char* const c_sClassifierRoot;
 
-OpenViBE::int32 OpenViBEPlugins::Classification::getSVMBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
+OpenViBE::int32 OpenViBEPlugins::Classification::SVMClassificationCompare(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
 {
 	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
 		return 0;
@@ -323,14 +323,20 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 	//std::cout<<"classify"<<std::endl;
 	if(m_pModel==NULL)
 	{
-		this->getLogManager() << LogLevel_Error << "classify impossible with a model equal NULL\n";
+		this->getLogManager() << LogLevel_Error << "Classification is impossible with a model equalling NULL\n";
 		return false;
 	}
 	if(m_pModel->nr_class==0||m_pModel->rho==NULL)
 	{
-		this->getLogManager() << LogLevel_Error << "the model wasn't load correctly\n";
+		this->getLogManager() << LogLevel_Error << "The model wasn't loaded correctly\n";
 		return false;
 	}
+	if(m_ui32NumberOfFeatures != rFeatureVector.getSize())
+	{
+		this->getLogManager() << LogLevel_Error << "Classifier expected " << m_ui32NumberOfFeatures << " features, got " << rFeatureVector.getSize() << "\n";		
+		return false;
+	}
+
 	//std::cout<<"create l_pX"<<std::endl;
 	svm_node* l_pX=new svm_node[rFeatureVector.getSize()+1];
 	//std::cout<<"rFeatureVector.getSize():"<<rFeatureVector.getSize()<<"m_ui32NumberOfFeatures"<<m_ui32NumberOfFeatures<<std::endl;
@@ -385,7 +391,7 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 	return true;
 }
 
-void CAlgorithmClassifierSVM::generateConfigurationNode(void)
+XML::IXMLNode* CAlgorithmClassifierSVM::saveConfiguration(void)
 {
 	//xml file
 	//std::cout<<"model save"<<std::endl;
@@ -436,8 +442,6 @@ void CAlgorithmClassifierSVM::generateConfigurationNode(void)
 		l_vSVCoef.push_back(CString(l_sSVCoef.str().c_str()));
 		l_vSVValue.push_back(CString(l_sSVValue.str().c_str()));
 	}
-	//std::cout<<"xml save"<<std::endl;
-	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 
 	XML::IXMLNode *l_pSVMNode = XML::createNode(c_sTypeNodeName);
 
@@ -573,13 +577,7 @@ void CAlgorithmClassifierSVM::generateConfigurationNode(void)
 		l_pModelNode->addChild(l_pSVsNode);
 	}
 	l_pSVMNode->addChild(l_pModelNode);
-	m_pConfigurationNode->addChild(l_pSVMNode);
-}
-
-XML::IXMLNode* CAlgorithmClassifierSVM::saveConfiguration(void)
-{
-	generateConfigurationNode();
-	return m_pConfigurationNode;
+	return l_pSVMNode;
 }
 
 boolean CAlgorithmClassifierSVM::loadConfiguration(XML::IXMLNode *pConfigurationNode)
@@ -600,8 +598,8 @@ boolean CAlgorithmClassifierSVM::loadConfiguration(XML::IXMLNode *pConfiguration
 	m_pModel->nSV = NULL;
 	m_i32IndexSV=-1;
 
-	loadParamNodeConfiguration(pConfigurationNode->getChild(0)->getChildByName(c_sParamNodeName));
-	loadModelNodeConfiguration(pConfigurationNode->getChild(0)->getChildByName(c_sModelNodeName));
+	loadParamNodeConfiguration(pConfigurationNode->getChildByName(c_sParamNodeName));
+	loadModelNodeConfiguration(pConfigurationNode->getChildByName(c_sModelNodeName));
 
 	this->getLogManager() << LogLevel_Trace << modelToString();
 	return true;
@@ -894,4 +892,14 @@ CString CAlgorithmClassifierSVM::problemToString(svm_problem *pProb)
 	l_sProb << "\tnb features: " << m_ui32NumberOfFeatures << "\n";
 
 	return CString(l_sProb.str().c_str());
+}
+
+uint32 CAlgorithmClassifierSVM::getOutputProbabilityVectorLength()
+{
+	return 1;
+}
+
+uint32 CAlgorithmClassifierSVM::getOutputDistanceVectorLength()
+{
+	return 0;
 }

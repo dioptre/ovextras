@@ -29,6 +29,13 @@ INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindOpenViBEModuleSystem")
 
 # ---------------------------------
+# Test applications
+# ---------------------------------
+IF(OV_COMPILE_TESTS)
+	ADD_SUBDIRECTORY(test)
+ENDIF(OV_COMPILE_TESTS)
+
+# ---------------------------------
 # Target macros
 # Defines target operating system
 # Defines target architecture

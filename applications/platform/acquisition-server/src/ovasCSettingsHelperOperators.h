@@ -54,6 +54,8 @@ namespace OpenViBEAcquisitionServer
 			out << "SubjectGender " << var.getSubjectGender() << " ";
 		}
 
+		out << "ImpedanceCheck " << var.isImpedanceCheckRequested() << " ";
+
 		if(var.isSamplingFrequencySet()) 
 		{
 			out << "SamplingFrequency " << var.getSamplingFrequency() << " ";
@@ -117,6 +119,12 @@ namespace OpenViBEAcquisitionServer
 				OpenViBE::uint32 l_ui32tmp;
 				in >> l_ui32tmp; var.setSubjectGender(l_ui32tmp);
 			} 
+			else if(token=="ImpedanceCheck")
+			{
+				// std::cout << "Parsing impedance check\n";
+				OpenViBE::boolean l_btmp;
+				in >> l_btmp; var.setImpedanceCheckRequested(l_btmp);
+			}
 			else if(token=="SamplingFrequency") 
 			{
 				// std::cout << "Parsing freq\n";

@@ -61,17 +61,17 @@ void CHeaderBrainProductsVAmp::reset(void)
 
 uint32 CHeaderBrainProductsVAmp::getEEGChannelCount(uint32 ui32AcquisitionMode)
 {
-	return ::g_vEEGChannelCount[ui32AcquisitionMode];
+	return g_vEEGChannelCount[ui32AcquisitionMode];
 }
 
 uint32 CHeaderBrainProductsVAmp::getAuxiliaryChannelCount(uint32 ui32AcquisitionMode)
 {
-	return ::g_vAuxiliaryChannelCount[ui32AcquisitionMode];
+	return g_vAuxiliaryChannelCount[ui32AcquisitionMode];
 }
 
 uint32 CHeaderBrainProductsVAmp::getTriggerChannelCount(uint32 ui32AcquisitionMode)
 {
-	return ::g_vTriggerChannelCount[ui32AcquisitionMode];
+	return g_vTriggerChannelCount[ui32AcquisitionMode];
 }
 
 // Pair information
@@ -192,6 +192,15 @@ boolean CHeaderBrainProductsVAmp::setSubjectAge(const uint32 ui32SubjectAge)
 boolean CHeaderBrainProductsVAmp::setSubjectGender(const uint32 ui32SubjectGender)
 {
 	return m_pBasicHeader->setSubjectGender(ui32SubjectGender);
+}
+boolean CHeaderBrainProductsVAmp::setImpedanceCheckRequested(const boolean bImpedanceCheckRequested)
+{
+	return m_pBasicHeader->setImpedanceCheckRequested(bImpedanceCheckRequested);
+}
+
+boolean CHeaderBrainProductsVAmp::isImpedanceCheckRequested(void) const
+{
+	return m_pBasicHeader->isImpedanceCheckRequested();
 }
 
 uint32 CHeaderBrainProductsVAmp::getExperimentIdentifier(void) const

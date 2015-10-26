@@ -12,6 +12,8 @@
 #include "../ovasCHeader.h"
 #include "ovasCTMSiAccess.h"
 
+#include <openvibe/ovITimeArithmetics.h>
+
 #include <iostream>
 #include <string>
 #include <gtk/gtk.h>
@@ -43,7 +45,8 @@ CTMSiAccess::CTMSiAccess(IDriverContext& rDriverContext)
       m_bInitialized(false),
       m_bOpened(false),
       m_bHasChannelStructure(false),
-      m_bStarted(false)
+      m_bStarted(false),
+      m_ui32LastTriggerValue(0)
 {
 	// Create a map of available protocols, each protocol has an Enum value coming from TMSi and an index (used for the dropbown box)
 	m_mConnectionProtocols["USB"] = std::make_pair(TMSiConnectionUSB, 0);
@@ -834,7 +837,7 @@ boolean CTMSiAccess::stopAcquisition()
 	return true;
 }
 
-int32 CTMSiAccess::getSamples(float32* pSamples, IDriverCallback* pDriverCallback, uint64 ui64SampleCountPerSentBlock)
+int32 CTMSiAccess::getSamples(float32* pSamples, IDriverCallback* pDriverCallback, uint64 ui64SampleCountPerSentBlock, OpenViBE::uint32 ui32SamplingFrequency)
 {
 	// since this function is called all the time, we do not do safety checks
 	long l_lNumberOfBytesReceived = m_fpGetSamples(m_hLibraryHandle, m_pSampleBuffer, m_ulSignalBufferSizeInBytes);
@@ -865,6 +868,7 @@ int32 CTMSiAccess::getSamples(float32* pSamples, IDriverCallback* pDriverCallbac
 					{
 						*l_f32SampleValueInFloat = 0 ; // Set it to a value you find a good sign of a overflow
 					}
+
 					else
 					{
 						switch( l_pCurrentSampleSignalFormat->Format )
@@ -883,12 +887,38 @@ int32 CTMSiAccess::getSamples(float32* pSamples, IDriverCallback* pDriverCallbac
 
 					l_ui32VirtualChannel++;
 				}
+
+				// process DIGI channel, to receive hardware stimulations
+				if (m_pSignalFormat[l_ui32ChannelIndex].Type == CHANNELTYPE_DIG)
+				{
+					uint32 l_ui32Trigger = m_pSampleBuffer[l_ui32SampleIndex*m_ulActualChannelCount +l_ui32ChannelIndex];
+
+					// invert bits
+					l_ui32Trigger=~l_ui32Trigger;
+
+					// mask for bits 0-7 (see Refa manual)
+					l_ui32Trigger&=255;
+
+					// add 0x8100 to match OVTK_StimulationId_Label_00 stimulation code
+					l_ui32Trigger+=0x8100U;
+
+					// add stimulation to SimulationSet
+					if(m_ui32LastTriggerValue!=l_ui32Trigger)
+					{
+						uint32 l_ui32IndexStimulation=(uint32)m_oStimulationSet.getStimulationCount();
+						uint64 l_ui64StimulationTime = ITimeArithmetics::sampleCountToTime(ui32SamplingFrequency, uint64(m_ui32LastSampleIndexInBuffer));
+						m_oStimulationSet.appendStimulation(l_ui32Trigger, l_ui64StimulationTime, 0);
+						m_ui32LastTriggerValue=l_ui32Trigger;
+					}
+				}
 			}
 			m_ui32LastSampleIndexInBuffer++;
 
 			if (m_ui32LastSampleIndexInBuffer == ui64SampleCountPerSentBlock)
 			{
 				pDriverCallback->setSamples(pSamples);
+				pDriverCallback->setStimulationSet(m_oStimulationSet);
+				m_oStimulationSet.clear();
 				m_ui32LastSampleIndexInBuffer = 0;
 				m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
 			}

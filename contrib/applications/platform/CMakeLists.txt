@@ -1,3 +1,3 @@
 
 # Add all the subdirs as projects of the named branch
-OV_ADD_PROJECTS("APPLICATIONS_PLATFORM")
+OV_ADD_PROJECTS("CONTRIB_APPLICATIONS_PLATFORM")

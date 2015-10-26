@@ -62,7 +62,7 @@ boolean CScheduler::setScenario(
 
 	if(m_bIsInitialized)
 	{
-		this->getLogManager() << LogLevel_Warning << "Trying to configure an intialized scheduler !\n";
+		this->getLogManager() << LogLevel_Warning << "Trying to configure an initialized scheduler !\n";
 		return false;
 	}
 
@@ -78,7 +78,7 @@ boolean CScheduler::setFrequency(
 
 	if(m_bIsInitialized)
 	{
-		this->getLogManager() << LogLevel_Warning << "Trying to configure an intialized scheduler !\n";
+		this->getLogManager() << LogLevel_Warning << "Trying to configure an initialized scheduler !\n";
 		return false;
 	}
 
@@ -95,7 +95,7 @@ SchedulerInitializationCode CScheduler::initialize(void)
 
 	if(m_bIsInitialized)
 	{
-		this->getLogManager() << LogLevel_Warning << "Trying to initialize an intialized scheduler !\n";
+		this->getLogManager() << LogLevel_Warning << "Trying to initialize an initialized scheduler !\n";
 		return SchedulerInitialization_Failed;
 	}
 
@@ -225,8 +225,13 @@ boolean CScheduler::loop(void)
 		CSimulatedBox* l_pSimulatedBox=itSimulatedBox->second;
 		System::CChrono& l_rSimulatedBoxChrono=m_vSimulatedBoxChrono[itSimulatedBox->first.second];
 
-		// we check once a cycle if the box is indeed muted.
 		IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
+		if(!l_pBox) {
+			this->getLogManager() << LogLevel_Warning << "Unable to get box details for box with id " << itSimulatedBox->first.second << "\n";
+			continue;
+		}
+
+		// we check once a cycle if the box is indeed muted.
 		boolean l_bIsMuted = false;
 		if(l_pBox->hasAttribute(OV_AttributeId_Box_Muted))
 		{
@@ -278,7 +283,6 @@ boolean CScheduler::loop(void)
 
 		if(l_rSimulatedBoxChrono.hasNewEstimation())
 		{
-			IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
 			l_pBox->addAttribute(OV_AttributeId_Box_ComputationTimeLastSecond, "");
 			l_pBox->setAttributeValue(OV_AttributeId_Box_ComputationTimeLastSecond, CIdentifier(l_rSimulatedBoxChrono.getTotalStepInDuration()).toString());
 		}
