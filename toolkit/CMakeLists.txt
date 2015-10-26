@@ -6,8 +6,21 @@ SET(PROJECT_VERSION_MINOR ${OV_GLOBAL_VERSION_MINOR})
 SET(PROJECT_VERSION_PATCH ${OV_GLOBAL_VERSION_PATCH})
 SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
+
+#We need to generate the stimulation files
+add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/include/toolkit/ovtk_stimulations.h ${CMAKE_CURRENT_SOURCE_DIR}/src/ovtk_stimulations.cpp
+    DEPENDS openvibe-stimulation-generator
+    COMMAND echo `pwd` & ${stim_generator_path}/openvibe-stimulation-generator
+    ${CMAKE_CURRENT_SOURCE_DIR}/share/stim 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/toolkit/ovtk_stimulations.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ovtk_stimulations.cpp
+    COMMENT "Generating stimulation sources..." )
+    
+add_custom_target(generate_stimulations_file DEPENDS include/toolkit/ovtk_stimulations.h src/ovtk_stimulations.cpp)
+
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl src/*.hpp include/*.h)
 
+INCLUDE_DIRECTORIES(${openvibe-toolkit_SOURCE_DIR}/share/)
 INCLUDE_DIRECTORIES(${openvibe-toolkit_SOURCE_DIR}/include/)
 INCLUDE_DIRECTORIES(${openvibe-toolkit_SOURCE_DIR}/include/toolkit/algorithms/scenario-io)
 INCLUDE_DIRECTORIES(${openvibe-toolkit_SOURCE_DIR}/include/toolkit/algorithms/classification)
@@ -16,7 +29,9 @@ INCLUDE_DIRECTORIES(${openvibe-toolkit_SOURCE_DIR}/include/toolkit/deprecated/re
 INCLUDE_DIRECTORIES(${openvibe-toolkit_SOURCE_DIR}/include/toolkit/training)
 INCLUDE_DIRECTORIES(${openvibe-toolkit_SOURCE_DIR}/include/toolkit/tools)
 
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files})
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files} ${CMAKE_CURRENT_SOURCE_DIR}/src/ovtk_stimulations.cpp)
+add_dependencies(openvibe-toolkit generate_stimulations_file)
+
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 	VERSION ${PROJECT_VERSION}
 	SOVERSION ${PROJECT_VERSION_MAJOR}
