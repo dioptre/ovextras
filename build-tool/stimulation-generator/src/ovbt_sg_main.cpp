@@ -8,6 +8,29 @@
 
 using namespace std;
 
+typedef enum{
+	CPP, MATLAB, PYTHON, LUA, UNKNOWN
+}generation_type;
+
+
+generation_type parse_argument(string option)
+{
+	if(option == "--cpp"){
+		return CPP;
+	}
+	else if(option == "--matlab"){
+		return MATLAB;
+	}
+	else if(option == "--python"){
+		return PYTHON;
+	}
+	else if(option == "--lua"){
+		return LUA;
+	}
+	else{
+		return UNKNOWN;
+	}
+}
 
 string getBrutHexaCode(string l_oFormatedHexaCode)
 {
@@ -16,15 +39,53 @@ string getBrutHexaCode(string l_oFormatedHexaCode)
 	return res;
 }
 
+int generate_generator_list(vector<CFileGeneratorBase*> & rList, generation_type rType, int argc, char** argv)
+{
+	switch(rType)
+	{
+		case CPP:
+		{
+			if(argc < 4){
+				return -1;
+			}
+			CFileGeneratorBase* gen = new CCppDefineGenerator();
+			if(!gen->openFile(argv[3])){
+				cerr << "Unable to open " << argv[3] << endl;
+				return -1;
+			}
+			rList.push_back(gen);
+
+			gen = new CCppCodeGenerator();
+			if(!gen->openFile(argv[4])){
+				cerr << "Unable to open " << argv[4] << endl;
+				return -1;
+			}
+			rList.push_back(gen);
+			return 0;
+		}
+
+		case MATLAB:
+		case PYTHON:
+		case LUA:
+		case UNKNOWN:
+		default:
+		{
+			cerr << "Unhandle type. Fatal error" << endl;
+			return -1;
+		}
+	}
+}
+
 int main (int argc, char** argv)
 {
 	if(argc < 3)
 		return -1;
+	generation_type l_eType = parse_argument(argv[1]);
 
 	vector<SStimulation> l_oStimulationList;
 	vector<CFileGeneratorBase*> l_oGeneratorList;
 
-	ifstream l_oStimulationFile(argv[1]);
+	ifstream l_oStimulationFile(argv[2]);
 	string l_sName, l_sId, l_sHexaCode;
 	while(l_oStimulationFile >> l_sName >> l_sId >> l_sHexaCode)
 	{
@@ -32,21 +93,9 @@ int main (int argc, char** argv)
 		l_oStimulationList.push_back(l_oTemp);
 	}
 
-	CFileGeneratorBase* gen = new CCppDefineGenerator();
-	if(!gen->openFile(argv[2]))
-	{
-		cerr << "Unable to open " << argv[2] << endl;
+	if(generate_generator_list(l_oGeneratorList, l_eType, argc, argv)){
 		return -1;
 	}
-	l_oGeneratorList.push_back(gen);
-
-	gen = new CCppCodeGenerator();
-	if(!gen->openFile(argv[3]))
-	{
-		cerr << "Unable to open " << argv[3] << endl;
-		return -1;
-	}
-	l_oGeneratorList.push_back(gen);
 
 	//Now we generate all files that needs to be done
 	for(vector<SStimulation>::iterator it = l_oStimulationList.begin(); it != l_oStimulationList.end(); ++it)

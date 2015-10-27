@@ -11,6 +11,7 @@ SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/include/toolkit/ovtk_stimulations.h ${CMAKE_CURRENT_SOURCE_DIR}/src/ovtk_stimulations.cpp
     DEPENDS openvibe-stimulation-generator ${CMAKE_CURRENT_SOURCE_DIR}/share/stimulation_list.txt
     COMMAND echo `pwd` & ${stim_generator_path}/openvibe-stimulation-generator
+    --cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/share/stimulation_list.txt
     ${CMAKE_CURRENT_SOURCE_DIR}/include/toolkit/ovtk_stimulations.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ovtk_stimulations.cpp
