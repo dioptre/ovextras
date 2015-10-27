@@ -6,6 +6,9 @@
 #include <map>
 #include <string>
 
+#include <boost/thread.hpp> // for mutex
+#include <boost/thread/condition.hpp>
+
 namespace OpenViBE
 {
 	namespace Kernel
@@ -105,6 +108,9 @@ namespace OpenViBE
 		protected:
 
 			std::map < OpenViBE::CIdentifier, OpenViBE::Kernel::SConfigurationToken > m_vConfigurationToken;
+
+			mutable boost::recursive_mutex m_oLock; // Protects the array for threads. 
+
 		};
 	};
 };

@@ -178,12 +178,16 @@ CConfigurationManager::CConfigurationManager(const IKernelContext& rKernelContex
 
 void CConfigurationManager::clear(void)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	m_vConfigurationToken.clear();
 }
 
 boolean CConfigurationManager::addConfigurationFromFile(
 	const CString& rFileNameWildCard)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	this->getLogManager() << LogLevel_Info << "Adding configuration file(s) [" << rFileNameWildCard << "]\n";
 
 	boolean l_bResult;
@@ -201,6 +205,8 @@ CIdentifier CConfigurationManager::createConfigurationToken(
 	const CString& rConfigurationTokenName,
 	const CString& rConfigurationTokenValue)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	if(this->lookUpConfigurationTokenIdentifier(rConfigurationTokenName, false)!=OV_UndefinedIdentifier)
 	{
 		this->getLogManager() << LogLevel_Warning << "Configuration token name " << rConfigurationTokenName << " already exists\n";
@@ -216,6 +222,8 @@ CIdentifier CConfigurationManager::createConfigurationToken(
 boolean CConfigurationManager::releaseConfigurationToken(
 	const CIdentifier& rConfigurationTokenIdentifier)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map < CIdentifier, SConfigurationToken >::iterator itConfigurationToken=m_vConfigurationToken.find(rConfigurationTokenIdentifier);
 	if(itConfigurationToken==m_vConfigurationToken.end())
 	{
@@ -229,6 +237,8 @@ boolean CConfigurationManager::releaseConfigurationToken(
 CIdentifier CConfigurationManager::getNextConfigurationTokenIdentifier(
 	const CIdentifier& rPreviousConfigurationTokenIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map < CIdentifier, SConfigurationToken >::const_iterator itConfigurationToken;
 
 	if(rPreviousConfigurationTokenIdentifier==OV_UndefinedIdentifier)
@@ -253,6 +263,8 @@ CIdentifier CConfigurationManager::getNextConfigurationTokenIdentifier(
 CString CConfigurationManager::getConfigurationTokenName(
 	const CIdentifier& rConfigurationTokenIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map < CIdentifier, SConfigurationToken >::const_iterator itConfigurationToken=m_vConfigurationToken.find(rConfigurationTokenIdentifier);
 	if(itConfigurationToken!=m_vConfigurationToken.end())
 	{
@@ -264,6 +276,8 @@ CString CConfigurationManager::getConfigurationTokenName(
 CString CConfigurationManager::getConfigurationTokenValue(
 	const CIdentifier& rConfigurationTokenIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map < CIdentifier, SConfigurationToken >::const_iterator itConfigurationToken=m_vConfigurationToken.find(rConfigurationTokenIdentifier);
 	if(itConfigurationToken!=m_vConfigurationToken.end())
 	{
@@ -278,6 +292,8 @@ boolean CConfigurationManager::setConfigurationTokenName(
 	const CIdentifier& rConfigurationTokenIdentifier,
 	const CString& rConfigurationTokenName)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	if(this->lookUpConfigurationTokenIdentifier(rConfigurationTokenName, false)!=OV_UndefinedIdentifier)
 	{
 		getLogManager() << LogLevel_Warning << "Configuration token " << rConfigurationTokenName << " already exists\n";
@@ -299,6 +315,8 @@ boolean CConfigurationManager::setConfigurationTokenValue(
 	const CIdentifier& rConfigurationTokenIdentifier,
 	const CString& rConfigurationTokenValue)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map < CIdentifier, SConfigurationToken >::iterator itConfigurationToken=m_vConfigurationToken.find(rConfigurationTokenIdentifier);
 	if(itConfigurationToken==m_vConfigurationToken.end())
 	{
@@ -314,6 +332,8 @@ boolean CConfigurationManager::addOrReplaceConfigurationToken(
 	const CString& rConfigurationTokenName,
 	const CString& rConfigurationTokenValue)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	const CIdentifier l_oOldIdentifier = this->lookUpConfigurationTokenIdentifier(rConfigurationTokenName, false);
 	if(l_oOldIdentifier == OV_UndefinedIdentifier)
 	{
@@ -331,6 +351,8 @@ CIdentifier CConfigurationManager::lookUpConfigurationTokenIdentifier(
 	const CString& rConfigurationTokenName,
 	const boolean bRecursive) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map < CIdentifier, SConfigurationToken >::const_iterator itConfigurationToken=m_vConfigurationToken.begin();
 	while(itConfigurationToken!=m_vConfigurationToken.end())
 	{
@@ -350,6 +372,8 @@ CIdentifier CConfigurationManager::lookUpConfigurationTokenIdentifier(
 CString CConfigurationManager::lookUpConfigurationTokenValue(
 	const CString& rConfigurationTokenName) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map < CIdentifier, SConfigurationToken >::const_iterator itConfigurationToken=m_vConfigurationToken.begin();
 	while(itConfigurationToken!=m_vConfigurationToken.end())
 	{
@@ -384,6 +408,8 @@ CString CConfigurationManager::expand(
 
 CIdentifier CConfigurationManager::getUnusedIdentifier(void) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	uint64 l_ui64Identifier=(((uint64)rand())<<32)+((uint64)rand());
 	CIdentifier l_oResult;
 	std::map < CIdentifier, SConfigurationToken >::const_iterator i;

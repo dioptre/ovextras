@@ -5,6 +5,10 @@
 
 #include <map>
 
+#include <boost/thread.hpp> // for mutex
+#include <boost/thread/condition.hpp>
+#include <boost/thread/recursive_mutex.hpp> 
+
 namespace OpenViBE
 {
 	namespace Kernel
@@ -103,6 +107,8 @@ namespace OpenViBE
 			std::map<OpenViBE::CIdentifier, std::map<OpenViBE::uint64, OpenViBE::CString> > m_vEnumeration;
 			std::map<OpenViBE::CIdentifier, std::map<OpenViBE::uint64, OpenViBE::CString> > m_vBitMask;
 			std::map<OpenViBE::CIdentifier, OpenViBE::CIdentifier> m_vStream;
+
+			mutable boost::recursive_mutex m_oLock; // Protects the arrays for threads. Recursive as the functions touching the arrays call each other.
 		};
 	};
 };

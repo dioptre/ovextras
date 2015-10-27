@@ -5,6 +5,9 @@
 
 #include <map>
 
+#include <boost/thread.hpp> // for mutex
+#include <boost/thread/condition.hpp>
+
 namespace OpenViBE
 {
 	namespace Kernel
@@ -39,6 +42,8 @@ namespace OpenViBE
 		protected:
 
 			std::map < OpenViBE::CIdentifier, std::pair < OpenViBE::Kernel::CAlgorithm*, OpenViBE::Kernel::CAlgorithmProxy* > > m_vAlgorithm;
+
+			mutable boost::mutex m_oLock; // Protects the array for threads
 		};
 	};
 };

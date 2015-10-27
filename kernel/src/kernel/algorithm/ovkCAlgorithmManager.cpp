@@ -29,6 +29,8 @@ CAlgorithmManager::~CAlgorithmManager(void)
 CIdentifier CAlgorithmManager::createAlgorithm(
 	const CIdentifier& rAlgorithmClassIdentifier)
 {
+	boost::mutex::scoped_lock lock(m_oLock);
+
 	const IAlgorithmDesc* l_pAlgorithmDesc=NULL;
 	IAlgorithm* l_pAlgorithm=getKernelContext().getPluginManager().createAlgorithm(rAlgorithmClassIdentifier, &l_pAlgorithmDesc);
 	if(!l_pAlgorithm || !l_pAlgorithmDesc)
@@ -49,6 +51,8 @@ CIdentifier CAlgorithmManager::createAlgorithm(
 boolean CAlgorithmManager::releaseAlgorithm(
 	const CIdentifier& rAlgorithmIdentifier)
 {
+	boost::mutex::scoped_lock lock(m_oLock);
+
 	map < CIdentifier, pair < CAlgorithm*, CAlgorithmProxy* > >::iterator itAlgorithm;
 	itAlgorithm=m_vAlgorithm.find(rAlgorithmIdentifier);
 	if(itAlgorithm==m_vAlgorithm.end())
@@ -76,6 +80,8 @@ boolean CAlgorithmManager::releaseAlgorithm(
 boolean CAlgorithmManager::releaseAlgorithm(
 	IAlgorithmProxy& rAlgorithm)
 {
+	boost::mutex::scoped_lock lock(m_oLock);
+
 	map < CIdentifier, pair < CAlgorithm*, CAlgorithmProxy* > >::iterator itAlgorithm;
 	for(itAlgorithm=m_vAlgorithm.begin(); itAlgorithm!=m_vAlgorithm.end(); itAlgorithm++)
 	{
@@ -105,6 +111,8 @@ boolean CAlgorithmManager::releaseAlgorithm(
 IAlgorithmProxy& CAlgorithmManager::getAlgorithm(
 	const CIdentifier& rAlgorithmIdentifier)
 {
+	boost::mutex::scoped_lock lock(m_oLock);
+
 	map < CIdentifier, pair < CAlgorithm*, CAlgorithmProxy* > >::const_iterator itAlgorithm;
 	itAlgorithm=m_vAlgorithm.find(rAlgorithmIdentifier);
 	if(itAlgorithm==m_vAlgorithm.end())
@@ -117,6 +125,8 @@ IAlgorithmProxy& CAlgorithmManager::getAlgorithm(
 CIdentifier CAlgorithmManager::getNextAlgorithmIdentifier(
 	const CIdentifier& rPreviousIdentifier) const
 {
+	boost::mutex::scoped_lock lock(m_oLock);
+
 	map < CIdentifier, pair < CAlgorithm*, CAlgorithmProxy* > >::const_iterator itAlgorithm=m_vAlgorithm.begin();
 
 	if(rPreviousIdentifier==OV_UndefinedIdentifier)

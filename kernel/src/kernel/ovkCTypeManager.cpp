@@ -1,5 +1,7 @@
 #include "ovkCTypeManager.h"
 
+
+
 #include "../ovk_tools.h"
 
 #include <string>
@@ -33,6 +35,8 @@ CTypeManager::CTypeManager(const IKernelContext& rKernelContext)
 CIdentifier CTypeManager::getNextTypeIdentifier(
 	const CIdentifier& rPreviousIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	return getNextIdentifier< CString >(m_vName, rPreviousIdentifier);
 }
 
@@ -40,10 +44,13 @@ boolean CTypeManager::registerType(
 	const CIdentifier& rTypeIdentifier,
 	const CString& sTypeName)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	if(isRegistered(rTypeIdentifier))
 	{
 		return false;
 	}
+
 	m_vName[rTypeIdentifier]=sTypeName;
 	this->getLogManager() << LogLevel_Trace << "Registered type id " << rTypeIdentifier << " - " << sTypeName << "\n";
 	return true;
@@ -54,6 +61,8 @@ boolean CTypeManager::registerStreamType(
 	const CString& sTypeName,
 	const CIdentifier& rParentTypeIdentifier)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	if(isRegistered(rTypeIdentifier))
 	{
 		return false;
@@ -72,14 +81,19 @@ boolean CTypeManager::registerEnumerationType(
 	const CIdentifier& rTypeIdentifier,
 	const CString& sTypeName)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	if(isRegistered(rTypeIdentifier))
 	{
 		return false;
 	}
+
 	m_vName[rTypeIdentifier]=sTypeName;
 	m_vEnumeration[rTypeIdentifier];
+
 	this->getLogManager() << LogLevel_Trace << "Registered enumeration type id " << rTypeIdentifier << " - " << sTypeName << "\n";
 	return true;
+	
 }
 
 boolean CTypeManager::registerEnumerationEntry(
@@ -87,6 +101,8 @@ boolean CTypeManager::registerEnumerationEntry(
 	const CString& sEntryName,
 	const uint64 ui64EntryValue)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::iterator itEnumeration=m_vEnumeration.find(rTypeIdentifier);
 	if(itEnumeration==m_vEnumeration.end())
 	{
@@ -105,6 +121,8 @@ boolean CTypeManager::registerBitMaskType(
 	const CIdentifier& rTypeIdentifier,
 	const CString& sTypeName)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	if(isRegistered(rTypeIdentifier))
 	{
 		return false;
@@ -120,6 +138,8 @@ boolean CTypeManager::registerBitMaskEntry(
 	const CString& sEntryName,
 	const uint64 ui64EntryValue)
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::iterator itBitMask=m_vBitMask.find(rTypeIdentifier);
 	if(itBitMask==m_vBitMask.end())
 	{
@@ -149,12 +169,16 @@ boolean CTypeManager::registerBitMaskEntry(
 boolean CTypeManager::isRegistered(
 	const CIdentifier& rTypeIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	return m_vName.find(rTypeIdentifier)!=m_vName.end()?true:false;
 }
 
 boolean CTypeManager::isStream(
 	const CIdentifier& rTypeIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	return m_vStream.find(rTypeIdentifier)!=m_vStream.end()?true:false;
 }
 
@@ -162,6 +186,8 @@ boolean CTypeManager::isDerivedFromStream(
 	const CIdentifier& rTypeIdentifier,
 	const CIdentifier& rParentTypeIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map < CIdentifier, CIdentifier >::const_iterator it=m_vStream.find(rTypeIdentifier);
 	std::map < CIdentifier, CIdentifier >::const_iterator itParent=m_vStream.find(rParentTypeIdentifier);
 	if(it==m_vStream.end()) return false;
@@ -180,38 +206,50 @@ boolean CTypeManager::isDerivedFromStream(
 boolean CTypeManager::isEnumeration(
 	const CIdentifier& rTypeIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	return m_vEnumeration.find(rTypeIdentifier)!=m_vEnumeration.end()?true:false;
 }
 
 boolean CTypeManager::isBitMask(
 	const CIdentifier& rTypeIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	return m_vBitMask.find(rTypeIdentifier)!=m_vBitMask.end()?true:false;
 }
 
 CString CTypeManager::getTypeName(
 	const CIdentifier& rTypeIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	if(!isRegistered(rTypeIdentifier))
 	{
 		return CString("");
 	}
+
 	return m_vName.find(rTypeIdentifier)->second;
 }
 
 CIdentifier CTypeManager::getStreamParentType(
 	const CIdentifier& rTypeIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	if(!isStream(rTypeIdentifier))
 	{
 		return OV_UndefinedIdentifier;
 	}
+	
 	return m_vStream.find(rTypeIdentifier)->second;
 }
 
 uint64 CTypeManager::getEnumerationEntryCount(
 	const CIdentifier& rTypeIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::const_iterator itEnumeration=m_vEnumeration.find(rTypeIdentifier);
 	if(itEnumeration==m_vEnumeration.end())
 	{
@@ -226,6 +264,8 @@ boolean CTypeManager::getEnumerationEntry(
 	CString& sEntryName,
 	uint64& rEntryValue) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::const_iterator itEnumeration=m_vEnumeration.find(rTypeIdentifier);
 	if(itEnumeration==m_vEnumeration.end())
 	{
@@ -252,6 +292,8 @@ CString CTypeManager::getEnumerationEntryNameFromValue(
 	const CIdentifier& rTypeIdentifier,
 	const uint64 ui64EntryValue) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::const_iterator itEnumeration=m_vEnumeration.find(rTypeIdentifier);
 	if(itEnumeration==m_vEnumeration.end())
 	{
@@ -269,6 +311,8 @@ uint64 CTypeManager::getEnumerationEntryValueFromName(
 	const CIdentifier& rTypeIdentifier,
 	const CString& rEntryName) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::const_iterator itEnumeration=m_vEnumeration.find(rTypeIdentifier);
 	std::map<uint64, CString>::const_iterator itEnumerationEntry;
 	if(itEnumeration==m_vEnumeration.end())
@@ -314,6 +358,8 @@ uint64 CTypeManager::getEnumerationEntryValueFromName(
 uint64 CTypeManager::getBitMaskEntryCount(
 	const CIdentifier& rTypeIdentifier) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::const_iterator itBitMask=m_vBitMask.find(rTypeIdentifier);
 	if(itBitMask==m_vBitMask.end())
 	{
@@ -328,6 +374,8 @@ boolean CTypeManager::getBitMaskEntry(
 	CString& sEntryName,
 	uint64& rEntryValue) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::const_iterator itBitMask=m_vBitMask.find(rTypeIdentifier);
 	if(itBitMask==m_vBitMask.end())
 	{
@@ -354,6 +402,8 @@ CString CTypeManager::getBitMaskEntryNameFromValue(
 	const CIdentifier& rTypeIdentifier,
 	const uint64 ui64EntryValue) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::const_iterator itBitMask=m_vBitMask.find(rTypeIdentifier);
 	if(itBitMask==m_vBitMask.end())
 	{
@@ -371,6 +421,8 @@ uint64 CTypeManager::getBitMaskEntryValueFromName(
 	const CIdentifier& rTypeIdentifier,
 	const CString& rEntryName) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::const_iterator itBitMask=m_vBitMask.find(rTypeIdentifier);
 	std::map<uint64, CString>::const_iterator itBitMaskEntry;
 	if(itBitMask==m_vBitMask.end())
@@ -417,6 +469,8 @@ CString CTypeManager::getBitMaskEntryCompositionNameFromValue(
 	const CIdentifier& rTypeIdentifier,
 	const uint64 ui64EntryCompositionValue) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::const_iterator itBitMask=m_vBitMask.find(rTypeIdentifier);
 	if(itBitMask==m_vBitMask.end())
 	{
@@ -452,6 +506,8 @@ uint64 CTypeManager::getBitMaskEntryCompositionValueFromName(
 	const CIdentifier& rTypeIdentifier,
 	const CString& rEntryCompositionName) const
 {
+	boost::recursive_mutex::scoped_lock lock(m_oLock);
+
 	std::map<CIdentifier, std::map<uint64, CString> >::const_iterator itBitMask=m_vBitMask.find(rTypeIdentifier);
 	if(itBitMask==m_vBitMask.end())
 	{
