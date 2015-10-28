@@ -26,3 +26,10 @@ public:
 	virtual bool appendStimulation(SStimulation &rStim);
 	virtual bool closeFile(void);
 };
+
+class CMatlabGenerator: public CFileGeneratorBase{
+public:
+	virtual bool openFile(const char* sFilename);
+	virtual bool appendStimulation(SStimulation &rStim);
+	virtual bool closeFile(void);
+};

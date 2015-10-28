@@ -32,13 +32,6 @@ generation_type parse_argument(string option)
 	}
 }
 
-string getBrutHexaCode(string l_oFormatedHexaCode)
-{
-	string res = l_oFormatedHexaCode;
-	res.erase(res.begin(), res.begin()+2);
-	return res;
-}
-
 int generate_generator_list(vector<CFileGeneratorBase*> & rList, generation_type rType, int argc, char** argv)
 {
 	switch(rType)
@@ -65,6 +58,15 @@ int generate_generator_list(vector<CFileGeneratorBase*> & rList, generation_type
 		}
 
 		case MATLAB:
+		{
+			CFileGeneratorBase* gen = new CMatlabGenerator();
+			if(!gen->openFile(argv[3])){
+				cerr << "Unable to open " << argv[3] << endl;
+				return -1;
+			}
+			rList.push_back(gen);
+			return 0;
+		}
 		case PYTHON:
 		case LUA:
 		case UNKNOWN:
