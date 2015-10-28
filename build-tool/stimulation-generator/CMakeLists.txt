@@ -8,8 +8,12 @@ SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
 ADD_EXECUTABLE(openvibe-stimulation-generator ${source_files})
 
+if(UNIX)
 SET(stim_generator_path  "${CMAKE_CURRENT_BINARY_DIR}" CACHE INTERNAL "stim_generator_path")
-
+else()
+get_property(path_to_target TARGET openvibe-stimulation-generator PROPERTY LOCATION)
+SET(stim_generator_path  "${path_to_target}" CACHE INTERNAL "stim_generator_path")
+endif()
 # ---------------------------------
 # Target macros
 # Defines target operating system
