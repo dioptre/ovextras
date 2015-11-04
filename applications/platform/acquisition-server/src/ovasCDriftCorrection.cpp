@@ -153,7 +153,7 @@ void CDriftCorrection::printStats(void) const
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Estimated drift (tolerance = " << l_ui64DriftToleranceDuration << "ms),\n";
 
 	m_rKernelContext.getLogManager() << (l_f64DriftRatioTooSlowMax > 1.0 ? LogLevel_Warning : LogLevel_Info)
-		<< "  Peak slow : " << m_f64DriftEstimateTooSlowMax << " samples (" << getDriftTooSlowMax() << "ms late, " << 100*l_f64DriftRatioTooSlowMax << "% of tol.)\n";
+		<< "  Peak slow : " << -m_f64DriftEstimateTooSlowMax << " samples (" << getDriftTooSlowMax() << "ms late, " << 100*l_f64DriftRatioTooSlowMax << "% of tol.)\n";
 	m_rKernelContext.getLogManager() << (l_f64DriftRatioTooFastMax > 1.0 ? LogLevel_Warning : LogLevel_Info)
 		<< "  Peak fast : " << m_f64DriftEstimateTooFastMax << " samples (" << getDriftTooFastMax() << "ms early, " << 100*l_f64DriftRatioTooFastMax << "% of tol.)\n";
 
@@ -161,7 +161,7 @@ void CDriftCorrection::printStats(void) const
 	{
 		const float64 l_f64RemainingDrift = (static_cast<int64>(m_ui64CorrectedSampleCount) - static_cast<int64>(l_ui64TheoreticalSampleCount)) / static_cast<float64>(m_ui32SamplingFrequency);
 		m_rKernelContext.getLogManager() << (std::abs(l_f64RemainingDrift) > l_ui64DriftToleranceDuration ? LogLevel_ImportantWarning : LogLevel_Info)
-			<< "  Residual : " << l_f64RemainingDrift << "ms, " << 100*l_f64RemainingDrift/l_ui64DriftToleranceDuration << "% of tol. (after corr.)\n";
+			<< "  Residual : " << l_f64RemainingDrift << "ms, " << 100*l_f64RemainingDrift/l_ui64DriftToleranceDuration << "% of tol., after corr.\n";
 	}
 
 	m_rKernelContext.getLogManager() << (std::abs(l_f64DriftRatio) > 1.0 ? LogLevel_Warning : LogLevel_Info)

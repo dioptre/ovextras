@@ -2,6 +2,7 @@
 #include "ovasCConfigurationDriverGenericOscillator.h"
 
 #include <toolkit/ovtk_all.h>
+#include <openvibe/ovITimeArithmetics.h>
 
 #include <system/ovCTime.h>
 
@@ -21,7 +22,7 @@ CDriverGenericOscillator::CDriverGenericOscillator(IDriverContext& rDriverContex
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
 	,m_ui32TotalSampleCount(0)
-	,m_ui32StartTime(0)
+	,m_ui64StartTime(0)
 	,m_bSendPeriodicStimulations(false)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGenericOscillator::CDriverGenericOscillator\n";
@@ -76,8 +77,7 @@ boolean CDriverGenericOscillator::initialize(
 	m_pSample=new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
 	if(!m_pSample)
 	{
-		delete [] m_pSample;
-		m_pSample=NULL;
+		m_rDriverContext.getLogManager() << LogLevel_Error << "GenericOscillator: Memory allocation error\n";
 		return false;
 	}
 
@@ -95,7 +95,7 @@ boolean CDriverGenericOscillator::start(void)
 	if(m_rDriverContext.isStarted()) { return false; }
 
 	m_ui32TotalSampleCount=0;
-	m_ui32StartTime=System::Time::getTime();
+	m_ui64StartTime=System::Time::zgetTime();
 
 	return true;
 }
@@ -108,10 +108,16 @@ boolean CDriverGenericOscillator::loop(void)
 
 	if(m_rDriverContext.isStarted())
 	{
-		uint32 l_ui32CurrentTime=System::Time::getTime();
+		const uint64 l_ui64CurrentTime = System::Time::zgetTime();
+		const uint64 l_ui64NextTime = ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui32TotalSampleCount+m_ui32SampleCountPerSentBlock);
 
-		if(l_ui32CurrentTime-m_ui32StartTime > (1000*(m_ui32TotalSampleCount+m_ui32SampleCountPerSentBlock))/m_oHeader.getSamplingFrequency())
+		if(l_ui64CurrentTime - m_ui64StartTime >= l_ui64NextTime)
 		{
+#ifdef TIMINGDEBUG
+			m_rDriverContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64CurrentTime - m_ui64StartTime)*1000 << "ms filling for " 
+				<< ITimeArithmetics::timeToSeconds(l_ui64NextTime)*1000 << "ms  -> nSamples = " << m_ui32TotalSampleCount + m_ui32SampleCountPerSentBlock << "\n";
+#endif
+
 			CStimulationSet l_oStimulationSet;
 			if (m_bSendPeriodicStimulations)
 			{
@@ -126,7 +132,7 @@ boolean CDriverGenericOscillator::loop(void)
 				for(uint32 i=0; i<m_ui32SampleCountPerSentBlock; i++)
 				{
 #if 1
-					float64 l_f64Value=
+					const float64 l_f64Value=
 						::sin(((i+m_ui32TotalSampleCount)*(j+1)*12.3)/m_oHeader.getSamplingFrequency())+
 						::sin(((i+m_ui32TotalSampleCount)*(j+1)* 4.5)/m_oHeader.getSamplingFrequency())+
 						::sin(((i+m_ui32TotalSampleCount)*(j+1)*67.8)/m_oHeader.getSamplingFrequency());
