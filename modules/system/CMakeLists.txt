@@ -16,6 +16,8 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 	COMPILE_FLAGS "-DOV_Shared -DOV_Exports")
 
 INCLUDE("FindOpenViBECommon")
+INCLUDE("FindThirdPartyBoost")
+INCLUDE("FindThirdPartyBoost_Thread")
 
 # ---------------------------------
 # Finds standard library winmm
@@ -37,9 +39,9 @@ ENDIF(WIN32)
 # Test applications
 # ---------------------------------
 OPTION(BUILD_OPENVIBE_MODULE_System_EXAMPLES "Build OpenViBE module System examples" OFF)
-IF(BUILD_OPENVIBE_MODULE_System_EXAMPLES)
+IF(OV_COMPILE_TESTS)
 	SUBDIRS(test)
-ENDIF(BUILD_OPENVIBE_MODULE_System_EXAMPLES)
+ENDIF(OV_COMPILE_TESTS)
 
 # ---------------------------------
 # Target macros
