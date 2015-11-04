@@ -7,6 +7,11 @@
 
 #include <iostream>
 
+#if defined(TARGET_OS_Windows)
+  #include <Windows.h>
+  #include <MMSystem.h>
+#endif
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace std;
@@ -104,6 +109,11 @@ int main(int argc, char ** argv)
 		return -1;
 	}
 
+#if defined(TARGET_OS_Windows)
+	// Set the clock precision to 1ms (default on Win7: 15ms)
+	timeBeginPeriod(1);
+#endif
+
 	CKernelLoader l_oKernelLoader;
 
 	cout<<"[  INF  ] Created kernel loader, trying to load kernel module"<<endl;
@@ -182,6 +192,10 @@ int main(int argc, char ** argv)
 					l_oKernelLoader.uninitialize();
 					l_oKernelLoader.unload();
 
+#if defined(TARGET_OS_Windows)
+					timeEndPeriod(1);
+#endif
+
 					return -2;
 				}
 
@@ -207,6 +221,8 @@ int main(int argc, char ** argv)
 					// If this is encapsulated by gdk_threads_enter() and gdk_threads_exit(), m_pThread->join() can hang when gtk_main() returns before destructor of app has been called.
 					OpenViBEAcquisitionServer::CAcquisitionServerGUI app(*l_pKernelContext);
 
+
+
 					try
 					{
 						gdk_threads_enter();	
@@ -217,6 +233,8 @@ int main(int argc, char ** argv)
 					{
 						l_pKernelContext->getLogManager() << LogLevel_Fatal << "Catched top level exception\n";
 					}
+
+
 				}
 
 				cout<<"[  INF  ] Application terminated, releasing allocated objects"<<endl;
@@ -229,6 +247,10 @@ int main(int argc, char ** argv)
 		l_oKernelLoader.uninitialize();
 		l_oKernelLoader.unload();
 	}
+			
+#if defined(TARGET_OS_Windows)
+	timeEndPeriod(1);
+#endif
 
 	return 0;
 }
