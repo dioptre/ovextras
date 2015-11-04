@@ -356,5 +356,100 @@ int main(int argc, char *argv[])
 	cout << "Got " << l_ui64Errors << " errors\n";
 #endif
 
+	std::cout << "Test mapping 1ms from fixed point time.\n";
+
+	// Old openvibe computation in getTime: (uint32)(((time>>22)*1000)>>10);
+	//
+    //        8       16       24       32       40       48       56       64
+	// ZZZZZZZZ ZZXXXXXX XXXXXXXX XXXXXXXX YYYYYYYY YYYYYYYY YYYYYYYY YYYYYYYY >> 22
+	// 00000000 00000000 000000ZZ ZZZZZZZZ XXXXXXXX XXXXXXXX XXXXXXYY YYYYYYYY << 10 (= approx * 1000 (2^10=1024))
+	// 00000000 0000ZZZZ ZZZZZZXX XXXXXXXX XXXXXXXX XXXXYYYY YYYYYY00 00000000 >> 10
+	// 00000000 00000000 000000ZZ ZZZZZZZZ XXXXXXXX XXXXXXXX XXXXXXYY YYYYYYYY 
+	//
+	// The interpretation of this operation. Mathematically we want to get a 
+	// 64 bits fixed time in milliseconds -> multiply by 1000. Since this 
+	// would cause the most significant bits of the 64bit fixed point to overflow,
+	// we first arrange some headroom with >> 22. Then multiply with 10. 
+	// Last shift with 10 brings the millisecond part to the LSB of 32 bits.
+	// Note that Z will be discarded by the cast to 32bit. So effectively
+	// this approximates a 32bit shift of a 64bit fixed point value multiplied 
+	// by 1000.
+	//
+	// The simple way (time*1000)>>32,
+	//
+    // -16      -8                8       16       24       32       40       48       56       64	    
+	// 00000000 00000000 | ZZZZZZZZ ZZXXXXXX XXXXXXXX XXXXXXXX YYYYYYYY YYYYYYYY YYYYYYYY YYYYYYYY << 10 (= approx * 1000 (2^10=1024))
+	// 000000ZZ ZZZZZZZZ | XXXXXXXX XXXXXXXX XXXXXXYY YYYYYYYY YYYYYYYY YYYYYYYY YYYYYY00 00000000 >> 32
+	// 00000000 00000000 | 00000000 00000000 00000000 00000000 XXXXXXXX XXXXXXXX XXXXXXYY YYYYYYYY		// due to truncation
+	//
+	// The difference is that the first can be more accurate with high-order bits, and the latter
+	// with small order bits?
+	// 
+	// Another variant, ((ui64Seconds>>10)*1000)>>22)),
+	//
+    //        8       16       24       32       40       48       56       64
+	// ZZZZZZZZ ZZXXXXXX XXXXXXXX XXXXXXXX YYYYYYYY YYYYYYYY YYYYYYYY YYYYYYYY >> 10
+	// 00000000 00ZZZZZZ ZZZZXXXX XXXXXXXX XXXXXXXX XXYYYYYY YYYYYYYY YYYYYYYY << 10 (= approx * 1000 (2^10=1024))
+	// ZZZZZZZZ ZZXXXXXX XXXXXXXX XXXXXXXX YYYYYYYY YYYYYYYY YYYYYY00 00000000 >> 22
+	// 00000000 00000000 000000ZZ ZZZZZZZZ XXXXXXXX XXXXXXXX XXXXXXYY YYYYYYYY (uint32)
+	// 00000000 00000000 00000000 00000000 XXXXXXXX XXXXXXXX XXXXXXYY YYYYYYYY
+	// 
+	// The difference: when multiplying by 1000, 
+	//
+	// 1) the first uses 10 most significant fraction bits. 
+	// 2) The second uses all of them. 
+	// 3) the third uses 22.
+	// 
+	// Tests with 1ms precision:
+	//
+	// 0x800000 is the first 64bit number method1 understands as "1 ms".
+	// 0x418938 -"-                       method2 -""-
+	// 0x418c00 -"-                       method3 -""-
+	// 
+	// 1ms obtained by (1LL<<32)/1000LL is                0x418937 -> about 2x difference to method 1
+	// 1ms obtained by ov secondstoTime is                0x400000
+	// 1ms obtained by (2^32/1000 is        4294967.296 = 0x418937 + 0.296
+	// 1ms obtained by (2^32-1)/1000 is     4294967.295 = 0x418937 + 0.295
+	//
+
+	uint64 l_ui64CurrentTime;
+
+	static const uint64 l_ui64Expected = 4294967; // + 0.296
+
+	std::cout << "As fixed point, its " << l_ui64Expected   << " (expected), "
+		                                << (1LL<<32)/1000LL << " (naive) or " 
+										<< ITimeArithmetics::secondsToTime(0.001) << " (timeArithm)\n";
+
+	for(uint64 i=0;i<10000000;i++) {
+		l_ui64CurrentTime = i;
+
+		const uint32 l_ui32InMillis= (uint32)(((i>>22)*1000)>>10);
+
+		if(l_ui32InMillis == 1) {
+			std::cout << "Method 1 : 1ms first at " << i << "\n";
+			break;
+		}
+	}
+
+	for(uint64 i=0;i<10000000;i++) {
+		l_ui64CurrentTime = i;
+
+		const uint32 l_ui32InMillis = (uint32)((i * 1000) >> 32);
+
+		if(l_ui32InMillis == 1) {
+			std::cout << "Method 2 : 1ms first at " << i << "\n";
+			break;
+		}
+	}
+
+	for(uint64 i=0;i<10000000;i++) {
+		const uint32 l_ui32InMillis = (uint32)(((i>>10)*1000) >> 22);
+
+		if(l_ui32InMillis == 1) {
+			std::cout << "Method 3 : 1ms first at " << i << "\n";
+			break;
+		}
+	}
+
 	return retVal;
 } 
