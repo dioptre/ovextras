@@ -63,6 +63,7 @@ class NTPClient
 	NTPClient(string hostName)
 		: m_socket(m_service)
 	{
+		std::cout << "NTP set to poll [" << hostName << "]\n";
 
 		boost::asio::ip::udp::resolver resolver(m_service);
 		boost::asio::ip::udp::resolver::query query(boost::asio::ip::udp::v4(), hostName, "ntp");
@@ -92,7 +93,10 @@ class NTPClient
 		try
 		{
 			size_t len = m_socket.receive_from( boost::asio::buffer(recvBuf), sender);
-
+			if(len==0) {
+				std::cerr << "Received 0 bytes from the NTP server\n";
+				return 0;
+			}
 #if 0
 			// NTP debug
 			char fn[512];
@@ -110,8 +114,7 @@ class NTPClient
 			const uint64_t fraction = ntohl(recvBuf[5]); 
 			const uint64_t microSecs = (fraction * 1000000) >> 32;
 
-			const uint64_t ctimeSeconds = seconds - 2208988800U;  // subtract unix time
-
+//			const uint64_t ctimeSeconds = seconds - 2208988800U;  // subtract unix time
 //			std::cout << "NTP received " << seconds << ", " << fraction << ", " << ctime((time_t*)&ctimeSeconds);
 
 			static const uint64_t l_ui64MicrosPerSecond = 1000*1000;
@@ -369,13 +372,12 @@ int main(int argc, char** argv)
 //	unsigned long min, max, actual;
 //	NtQueryTimerResolution(&min, &max, &actual);
 
-	const uint32_t preferredInterval = 1;			// set the preferred clock interval
 	const uint64_t ntpInterval = (2LL*60LL) << 32;	// 2 minutes in seconds, ov time
 	const bool ntpEnabled = false;
 	const double errorThMs = 5.0;					// If clock delta is more than this, count an error
 
 #if defined(TARGET_OS_Windows)
-
+	const uint32_t preferredInterval = 1;			// set the preferred clock interval, in ms
 
 	TIMECAPS caps;
 	timeGetDevCaps(&caps, sizeof(TIMECAPS));
@@ -417,6 +419,7 @@ int main(int argc, char** argv)
 	sprintf(filename, "timetest-%lld-%lld-errors.csv", runTime, sleepTime);
 	FILE* fe = fopen(filename, "w");
 
+	// @warning Use a server at home that you can access.
 	NTPClient NTP("ntp.inria.fr");
 
 	Measurement timeSystem;
