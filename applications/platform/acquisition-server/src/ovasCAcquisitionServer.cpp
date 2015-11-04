@@ -87,32 +87,36 @@ namespace OpenViBEAcquisitionServer
 
 		virtual int64 getDriftSampleCount(void) const
 		{
-			return m_rAcquisitionServer.getDriftSampleCount();
+			return m_rAcquisitionServer.m_oDriftCorrection.getDriftSampleCount();
 		}
 
 		virtual boolean correctDriftSampleCount(int64 i64SampleCount)
 		{
-			return m_rAcquisitionServer.correctDriftSampleCount(i64SampleCount);
+			return m_rAcquisitionServer.m_oDriftCorrection.correctDrift(i64SampleCount, 
+				m_rAcquisitionServer.m_ui64SampleCount,
+				m_rAcquisitionServer.m_vPendingBuffer,
+				m_rAcquisitionServer.m_oPendingStimulationSet,
+				m_rAcquisitionServer.m_vSwapBuffer);
 		}
 
 		virtual int64 getDriftToleranceSampleCount(void) const
 		{
-			return m_rAcquisitionServer.getDriftToleranceSampleCount();
+			return m_rAcquisitionServer.m_oDriftCorrection.getDriftToleranceSampleCount();
 		}
 
 		virtual int64 getSuggestedDriftCorrectionSampleCount(void) const
 		{
-			return m_rAcquisitionServer.getSuggestedDriftCorrectionSampleCount();
+			return m_rAcquisitionServer.m_oDriftCorrection.getSuggestedDriftCorrectionSampleCount();
 		}
 
 		virtual boolean setInnerLatencySampleCount(int64 i64SampleCount)
 		{
-			return m_rAcquisitionServer.setInnerLatencySampleCount(i64SampleCount);
+			return m_rAcquisitionServer.m_oDriftCorrection.setInnerLatencySampleCount(i64SampleCount);
 		}
 
 		virtual int64 getInnerLatencySampleCount(void) const
 		{
-			return m_rAcquisitionServer.getInnerLatencySampleCount();
+			return m_rAcquisitionServer.m_oDriftCorrection.getInnerLatencySampleCount();
 		}
 
 		virtual boolean updateImpedance(const uint32 ui32ChannelIndex, const float64 f64Impedance)
@@ -230,11 +234,11 @@ CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
 	,m_pDriver(NULL)
 	,m_pStreamEncoder(NULL)
 	,m_pConnectionServer(NULL)
-	,m_eDriftCorrectionPolicy(DriftCorrectionPolicy_DriverChoice)
 	,m_eNaNReplacementPolicy(NaNReplacementPolicy_LastCorrectValue)
 	,m_bReplacementInProgress(false)
 	,m_bInitialized(false)
 	,m_bStarted(false)
+	,m_oDriftCorrection(rKernelContext)
 {
 	m_pDriverContext=new CDriverContext(rKernelContext, *this);
 
@@ -269,23 +273,6 @@ CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
 		this->setNaNReplacementPolicy(NaNReplacementPolicy_LastCorrectValue);
 	}
 
-
-	CString l_sDriftCorrectionPolicy=m_rKernelContext.getConfigurationManager().expand("${AcquisitionServer_DriftCorrectionPolicy}");
-	if(l_sDriftCorrectionPolicy==CString("Forced"))
-	{
-		this->setDriftCorrectionPolicy(DriftCorrectionPolicy_Forced);
-	}
-	else if(l_sDriftCorrectionPolicy==CString("Disabled"))
-	{
-		this->setDriftCorrectionPolicy(DriftCorrectionPolicy_Disabled);
-	}
-	else
-	{
-		this->setDriftCorrectionPolicy(DriftCorrectionPolicy_DriverChoice);
-	}
-
-	this->setDriftToleranceDuration(m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_DriftToleranceDuration}", 5));
-	this->setJitterEstimationCountForDrift(m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_JitterEstimationCountForDrift}", 128));
 	this->setOversamplingFactor(m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_OverSamplingFactor}", 1));
 	this->setImpedanceCheckRequest(m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_CheckImpedance}", false));
 	this->setChannelSelectionRequest(m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_ChannelSelection}", false));
@@ -293,11 +280,6 @@ CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
 	m_ui64StartedDriverSleepDuration=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_StartedDriverSleepDuration}", 2);
 	m_ui64StoppedDriverSleepDuration=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_StoppedDriverSleepDuration}", 100);
 	m_ui64DriverTimeoutDuration=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_DriverTimeoutDuration}", 5000);
-
-
-
-
-	m_i64DriftSampleCount=0;
 
 	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
 	{
@@ -368,10 +350,6 @@ uint32 CAcquisitionServer::getClientCount(void)
 	return uint32(m_vConnection.size());
 }
 
-float64 CAcquisitionServer::getDrift(void)
-{
-	return m_f64DriftSampleCount*1000./m_ui32SamplingFrequency;
-}
 
 float64 CAcquisitionServer::getImpedance(const uint32 ui32ChannelIndex)
 {
@@ -410,7 +388,7 @@ boolean CAcquisitionServer::loop(void)
 
 				// Computes inner data to skip
 				int64 l_i64SignedTheoreticalSampleCountToSkip=0;
-				if(m_bDriftCorrectionCalled)
+				if(m_oDriftCorrection.isActive())
 				{
 					l_i64SignedTheoreticalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64StartTime)*m_ui32SamplingFrequency)>>32)-m_ui64SampleCount+m_vPendingBuffer.size();
 				}
@@ -511,9 +489,10 @@ boolean CAcquisitionServer::loop(void)
 				m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "After " << m_ui64DriverTimeoutDuration << " milliseconds, did not receive anything from the driver - Timed out\n";
 				return false;
 			}
-			if(m_bGotData && m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Forced)
+			if(m_bGotData && m_oDriftCorrection.getDriftCorrectionPolicy() == DriftCorrectionPolicy_Forced)
 			{
-				this->correctDriftSampleCount(this->getSuggestedDriftCorrectionSampleCount());
+				m_oDriftCorrection.correctDrift(m_oDriftCorrection.getSuggestedDriftCorrectionSampleCount(),
+					m_ui64SampleCount, m_vPendingBuffer, m_oPendingStimulationSet, m_vSwapBuffer);
 			}
 		}
 		else
@@ -646,7 +625,7 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 {
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "connect\n";
 
-	m_i64InnerLatencySampleCount=0;
+
 	m_pDriver=&rDriver;
 	m_pHeaderCopy=&rHeaderCopy;
 	m_ui32SampleCountPerSentBlock=ui32SamplingCountPerSentBlock;
@@ -729,20 +708,6 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 	{
 		m_bInitialized=true;
 
-		m_i64DriftSampleCount=0;
-		m_i64DriftToleranceSampleCount=(m_ui64DriftToleranceDuration * m_ui32SamplingFrequency) / 1000;
-		m_i64DriftCorrectionSampleCountAdded=0;
-		m_i64DriftCorrectionSampleCountRemoved=0;
-
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "Drift correction is set to ";
-		switch(m_eDriftCorrectionPolicy)
-		{
-			default:
-			case DriftCorrectionPolicy_DriverChoice: m_rKernelContext.getLogManager() << CString("DriverChoice") << "\n"; break;
-			case DriftCorrectionPolicy_Forced:       m_rKernelContext.getLogManager() << CString("Forced") << "\n"; break;
-			case DriftCorrectionPolicy_Disabled:     m_rKernelContext.getLogManager() << CString("Disabled") << "\n"; break;
-		};
-
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "NaN value correction is set to ";
 		switch(m_eNaNReplacementPolicy)
 		{
@@ -754,8 +719,6 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Oversampling factor set to " << m_ui64OverSamplingFactor << "\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Sampling frequency set to " << m_ui32SamplingFrequency << "Hz\n";
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "Driver monitoring drift tolerance set to " << m_ui64DriftToleranceDuration << " milliseconds - eq " << m_i64DriftToleranceSampleCount << " samples\n";
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "Driver monitoring drift estimation on " << m_ui64JitterEstimationCountForDrift << " jitter measures\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Started driver sleeping duration is " << m_ui64StartedDriverSleepDuration << " milliseconds\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Stopped driver sleeping duration is " << m_ui64StoppedDriverSleepDuration << " milliseconds\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Driver timeout duration set to " << m_ui64DriverTimeoutDuration << " milliseconds\n";
@@ -865,14 +828,9 @@ boolean CAcquisitionServer::start(void)
 
 	m_vPendingBuffer.clear();
 	m_oPendingStimulationSet.clear();
-	m_vJitterSampleCount.clear();
 
 	m_ui64SampleCount=0;
 	m_ui64LastSampleCount=0;
-	m_i64DriftSampleCount=0;
-	m_i64DriftCorrectionSampleCountAdded=0;
-	m_i64DriftCorrectionSampleCountRemoved=0;
-	m_bDriftCorrectionCalled=false;
 	m_ui64StartTime=System::Time::zgetTime();
 	m_ui64LastDeliveryTime=m_ui64StartTime;
 
@@ -880,6 +838,8 @@ boolean CAcquisitionServer::start(void)
 	{
 		(*itp)->startHook(m_vSelectedChannelNames, m_ui32SamplingFrequency, m_ui32ChannelCount, m_ui32SampleCountPerSentBlock);
 	}
+
+	m_oDriftCorrection.start(m_ui32SamplingFrequency);
 
 	m_bStarted=true;
 	return true;
@@ -891,45 +851,12 @@ boolean CAcquisitionServer::stop(void)
 
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Stopping the acquisition.\n";
 
-	int64 l_i64DriftSampleCount=m_i64DriftSampleCount-(m_i64DriftCorrectionSampleCountAdded-m_i64DriftCorrectionSampleCountRemoved);
-	uint64 l_ui64TheoreticalSampleCount=m_ui64SampleCount-m_i64DriftSampleCount;
-	uint64 l_ui64ReceivedSampleCount=m_ui64SampleCount-(m_i64DriftCorrectionSampleCountAdded-m_i64DriftCorrectionSampleCountRemoved);
-	float64 l_f64DriftRatio=(l_ui64ReceivedSampleCount?((l_i64DriftSampleCount*10000)/int64(l_ui64ReceivedSampleCount))/100.:0);
-	float64 l_f64AddedRatio=(l_ui64ReceivedSampleCount?((m_i64DriftCorrectionSampleCountAdded*10000)/int64(l_ui64ReceivedSampleCount))/100.:0);
-	float64 l_f64RemovedRatio=(l_ui64ReceivedSampleCount?((m_i64DriftCorrectionSampleCountRemoved*10000)/int64(l_ui64ReceivedSampleCount))/100.:0);
-	
-	if(-m_i64DriftToleranceSampleCount * 5 <= m_i64DriftSampleCount && m_i64DriftSampleCount <= m_i64DriftToleranceSampleCount * 5 && l_f64DriftRatio <= 5)
-	{
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "For information, after " << (((System::Time::zgetTime()-m_ui64StartTime) * 1000) >> 32) * .001f << " seconds we got the following statistics :\n";
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Received : " << l_ui64ReceivedSampleCount << " samples\n";
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Should have received : " << l_ui64TheoreticalSampleCount << " samples\n";
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Drift was : " << l_i64DriftSampleCount << " samples (" << l_f64DriftRatio << "%)\n";
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Added : " << m_i64DriftCorrectionSampleCountAdded << " samples (" << l_f64AddedRatio << "%)\n";
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Removed : " << m_i64DriftCorrectionSampleCountRemoved << " samples (" << l_f64RemovedRatio << "%)\n";
-	}
-	else
-	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "After " << (((System::Time::zgetTime()-m_ui64StartTime) * 1000) >> 32) * .001f << " seconds, theoretical samples per second does not match real samples per second\n";
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "  Received : " << l_ui64ReceivedSampleCount << " samples\n";
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "  Should have received : " << l_ui64TheoreticalSampleCount << " samples\n";
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "  Drift was : " << l_i64DriftSampleCount << " samples (" << l_f64DriftRatio << "%)\n";
-		if(m_i64DriftCorrectionSampleCountAdded==0 && m_i64DriftCorrectionSampleCountRemoved==0)
-		{
-			m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "  The driver did not try to correct this difference. This may be a feature of the driver.\n";
-		}
-		else
-		{
-			m_rKernelContext.getLogManager() << LogLevel_Warning << "  Added : " << m_i64DriftCorrectionSampleCountAdded << " samples (" << l_f64AddedRatio << "%)\n";
-			m_rKernelContext.getLogManager() << LogLevel_Warning << "  Removed : " << m_i64DriftCorrectionSampleCountRemoved << " samples (" << l_f64RemovedRatio << "%)\n";
-			m_rKernelContext.getLogManager() << LogLevel_Warning << "  The driver obviously tried to correct this difference\n";
-		}
-		// m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "  Please submit a bug report (including the acquisition server log file or at least this complete message) for the driver you are using\n";
-	}
+	m_oDriftCorrection.printStats();
+	m_oDriftCorrection.stop();
 
 	// Stops driver
 	m_pDriver->stop();
 	// m_pDriverContext->onStop(*m_pDriver->getHeader());
-
 
 	list < pair < Socket::IConnection*, SConnectionInfo > >::iterator itConnection=m_vConnection.begin();
 	while(itConnection!=m_vConnection.end())
@@ -1084,26 +1011,7 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 		m_ui64LastSampleCount=m_ui64SampleCount;
 		m_ui64SampleCount+=ui32SampleCount*m_ui64OverSamplingFactor;
 
-		{
-			const uint64 l_ui64ElapsedTime = System::Time::zgetTime()-m_ui64StartTime;
-			const uint64 l_ui64TheoricalSampleCount= (m_ui32SamplingFrequency * l_ui64ElapsedTime) >> 32;
-			const int64 l_i64JitterSampleCount=int64(m_ui64SampleCount-l_ui64TheoricalSampleCount)+m_i64InnerLatencySampleCount;
-			
-			m_vJitterSampleCount.push_back(l_i64JitterSampleCount);
-			if(m_vJitterSampleCount.size() > m_ui64JitterEstimationCountForDrift)
-			{
-				m_vJitterSampleCount.pop_front();
-			}
-			m_i64DriftSampleCount=0;
-			for(list<int64>::iterator j=m_vJitterSampleCount.begin(); j!=m_vJitterSampleCount.end(); j++)
-			{
-				m_i64DriftSampleCount+=*j;
-			}
-			m_f64DriftSampleCount=m_i64DriftSampleCount/float64(m_vJitterSampleCount.size());
-			m_i64DriftSampleCount/=int64(m_vJitterSampleCount.size());
-
-			m_rKernelContext.getLogManager() << LogLevel_Debug << "Acquisition monitoring [drift:" << m_i64DriftSampleCount << "][jitter:" << l_i64JitterSampleCount << "] samples.\n";
-		}
+		m_oDriftCorrection.estimateDrift(ui32SampleCount*m_ui64OverSamplingFactor);
 
 		m_ui64LastDeliveryTime=System::Time::zgetTime();
 		m_bGotData=true;
@@ -1127,121 +1035,6 @@ void CAcquisitionServer::setStimulationSet(const IStimulationSet& rStimulationSe
 	}
 }
 
-boolean CAcquisitionServer::correctDriftSampleCount(int64 i64SampleCount)
-{
-	if(!m_bStarted)
-	{
-		return false;
-	}
-
-	m_bDriftCorrectionCalled=true;
-
-	if(i64SampleCount == 0)
-	{
-		return true;
-	}
-	else
-	{
-		if(m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled)
-		{
-			return false;
-		}
-
-		char l_sTime[1024];
-		uint64 l_ui64Time=System::Time::zgetTime()-m_ui64StartTime;
-		float64 l_f64Time=ITimeArithmetics::timeToSeconds(l_ui64Time);
-		::sprintf(l_sTime, "%.03lf", l_f64Time);
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "At time " << CString(l_sTime) << " : Correcting drift by " << i64SampleCount << " samples\n";
-		if(i64SampleCount > 0)
-		{
-			for(int64 i=0; i<i64SampleCount; i++)
-			{
-				m_vPendingBuffer.push_back(m_vSwapBuffer);
-			}
-
-			uint64 l_ui64TimeOfIncorrect     = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-1);
-			uint64 l_ui64DurationOfIncorrect = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, i64SampleCount);
-			uint64 l_ui64TimeOfCorrect       = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-1+i64SampleCount);
-			m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Incorrect, l_ui64TimeOfIncorrect, l_ui64DurationOfIncorrect);
-			m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Correct,   l_ui64TimeOfCorrect, 0);
-
-			m_f64DriftSampleCount+=i64SampleCount;
-			m_i64DriftSampleCount+=i64SampleCount;
-			m_ui64LastSampleCount=m_ui64SampleCount;
-			m_ui64SampleCount+=i64SampleCount;
-			m_i64DriftCorrectionSampleCountAdded+=i64SampleCount;
-		}
-		else if(i64SampleCount < 0)
-		{
-			uint64 l_ui64SamplesToRemove=uint64(-i64SampleCount);
-			if(l_ui64SamplesToRemove>m_vPendingBuffer.size())
-			{
-				l_ui64SamplesToRemove=m_vPendingBuffer.size();
-			}
-
-			m_vPendingBuffer.erase(m_vPendingBuffer.begin()+m_vPendingBuffer.size()-(int)l_ui64SamplesToRemove, m_vPendingBuffer.begin()+m_vPendingBuffer.size());
-
-#if 0
-			uint64 l_ui64Start = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-l_ui64SamplesToRemove);
-			uint64 l_ui64End   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount);
-			OpenViBEToolkit::Tools::StimulationSet::removeRange(m_oPendingStimulationSet, l_ui64Start, l_ui64End);
-#else
-			uint64 l_ui64LastSampleDate = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-l_ui64SamplesToRemove);
-			for(uint32 i=0; i<m_oPendingStimulationSet.getStimulationCount(); i++)
-			{
-				if(m_oPendingStimulationSet.getStimulationDate(i) > l_ui64LastSampleDate)
-				{
-					m_oPendingStimulationSet.setStimulationDate(i, l_ui64LastSampleDate);
-				}
-			}
-#endif
-
-			m_f64DriftSampleCount-=l_ui64SamplesToRemove;
-			m_i64DriftSampleCount-=l_ui64SamplesToRemove;
-			m_ui64LastSampleCount=m_ui64SampleCount;
-			m_ui64SampleCount-=l_ui64SamplesToRemove;
-			m_i64DriftCorrectionSampleCountRemoved+=l_ui64SamplesToRemove;
-		}
-
-		for(list<int64>::iterator j=m_vJitterSampleCount.begin(); j!=m_vJitterSampleCount.end(); j++)
-		{
-			(*j)+=i64SampleCount;
-		}
-	}
-
-	return true;
-}
-
-int64 CAcquisitionServer::getSuggestedDriftCorrectionSampleCount(void) const
-{
-	if(m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled)
-	{
-		return 0;
-	}
-
-	if(this->getDriftSampleCount() >= this->getDriftToleranceSampleCount())
-	{
-		return -this->getDriftSampleCount();
-	}
-
-	if(this->getDriftSampleCount() <= -this->getDriftToleranceSampleCount())
-	{
-		return -this->getDriftSampleCount();
-	}
-
-	return 0;
-}
-
-boolean CAcquisitionServer::setInnerLatencySampleCount(OpenViBE::int64 i64SampleCount)
-{
-	m_i64InnerLatencySampleCount=i64SampleCount;
-	return true;
-}
-
-int64 CAcquisitionServer::getInnerLatencySampleCount(void) const
-{
-	return m_i64InnerLatencySampleCount;
-}
 
 boolean CAcquisitionServer::updateImpedance(const uint32 ui32ChannelIndex, const float64 f64Impedance)
 {
@@ -1261,12 +1054,6 @@ ENaNReplacementPolicy CAcquisitionServer::getNaNReplacementPolicy(void)
 	return m_eNaNReplacementPolicy;
 }
 
-
-EDriftCorrectionPolicy CAcquisitionServer::getDriftCorrectionPolicy(void)
-{
-	return m_eDriftCorrectionPolicy;
-}
-
 CString CAcquisitionServer::getNaNReplacementPolicyStr(void)
 {
 	switch (m_eNaNReplacementPolicy)
@@ -1282,32 +1069,6 @@ CString CAcquisitionServer::getNaNReplacementPolicyStr(void)
 	}
 }
 
-
-CString CAcquisitionServer::getDriftCorrectionPolicyStr(void)
-{
-	switch (m_eDriftCorrectionPolicy)
-	{
-		case DriftCorrectionPolicy_Disabled:
-			return CString("Disabled");
-		case DriftCorrectionPolicy_DriverChoice:
-			return CString("DriverChoice");
-		case DriftCorrectionPolicy_Forced:
-			return CString("Forced");
-		default :
-			return CString("N/A");
-	}
-}
-
-uint64 CAcquisitionServer::getDriftToleranceDuration(void)
-{
-	return m_ui64DriftToleranceDuration;
-}
-
-uint64 CAcquisitionServer::getJitterEstimationCountForDrift(void)
-{
-	return m_ui64JitterEstimationCountForDrift;
-}
-
 uint64 CAcquisitionServer::getOversamplingFactor(void)
 {
 	return m_ui64OverSamplingFactor;
@@ -1319,11 +1080,6 @@ boolean CAcquisitionServer::setNaNReplacementPolicy(ENaNReplacementPolicy eNaNRe
 	return true;
 }
 
-boolean CAcquisitionServer::setDriftCorrectionPolicy(EDriftCorrectionPolicy eDriftCorrectionPolicy)
-{
-	m_eDriftCorrectionPolicy=eDriftCorrectionPolicy;
-	return true;
-}
 
 boolean CAcquisitionServer::isImpedanceCheckRequested(void)
 {
@@ -1337,18 +1093,6 @@ boolean CAcquisitionServer::isImpedanceCheckRequested(void)
 boolean CAcquisitionServer::isChannelSelectionRequested(void)
 {
 	return m_bIsChannelSelectionRequested;
-}
-
-boolean CAcquisitionServer::setDriftToleranceDuration(uint64 ui64DriftToleranceDuration)
-{
-	m_ui64DriftToleranceDuration=ui64DriftToleranceDuration;
-	return true;
-}
-
-boolean CAcquisitionServer::setJitterEstimationCountForDrift(uint64 ui64JitterEstimationCountForDrift)
-{
-	m_ui64JitterEstimationCountForDrift=ui64JitterEstimationCountForDrift;
-	return true;
 }
 
 boolean CAcquisitionServer::setOversamplingFactor(uint64 ui64OversamplingFactor)
