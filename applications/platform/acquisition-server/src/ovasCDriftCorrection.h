@@ -46,8 +46,8 @@ namespace OpenViBEAcquisitionServer
 
 		// Result getters
 		virtual OpenViBE::float64 getDrift(void) const;		                		// current drift, in ms.
-		virtual OpenViBE::float64 getDriftTooFastMax(void) const;                   // maximum drift observed, in ms. (driver gave too many samples)
-		virtual OpenViBE::float64 getDriftTooSlowMax(void) const;		            // maximum drift observed, in ms. (driver gave too few samples)
+		virtual OpenViBE::float64 getDriftTooFastMax(void) const;                   // maximum positive drift observed, in ms. (driver gave too many samples)
+		virtual OpenViBE::float64 getDriftTooSlowMax(void) const;		            // maximum negative drift observed, in ms. (driver gave too few samples)
 		virtual OpenViBE::int64 getDriftSampleCount(void) const;	                // current drift, in samples
 		virtual OpenViBE::int64 getSuggestedDriftCorrectionSampleCount(void) const; // number of samples to correct drift with
 		virtual OpenViBE::int64 getDriftToleranceSampleCount(void) const { return m_i64DriftToleranceSampleCount; }
@@ -100,10 +100,10 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint64 m_ui64StartTime;
 		OpenViBE::uint64 m_ui64LastEstimationTime;
 
-		// Jitter estimation buffer. Each entry is the number of samples deviated from the expectation
-		// between the current time and the last measurement.
-		// The average of the buffer items is the current aggregated drift estimate (in samples), convertable to ms by getDrift().
-		std::list < OpenViBE::int64 > m_vJitterSampleCount;
+		// Jitter estimation buffer. Each entry is the difference between the expected number of 
+		// samples and the received number of samples per each call to estimateDrift(). The buffer has subsample accuracy to avoid rounding errors.
+		// -> The average of the buffer items is the current aggregated drift estimate (in samples), convertable to ms by getDrift().
+		std::list < OpenViBE::float64 > m_vJitterEstimate;
 	};
 };
 

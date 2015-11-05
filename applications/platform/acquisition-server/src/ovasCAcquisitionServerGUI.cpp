@@ -537,11 +537,11 @@ void CAcquisitionServerGUI::setDrift(float64 f64Drift)
 
 	if(l_bDriftWarning)
 	{
-		::sprintf(l_sLabel, "<b>Device drift is too high</b> : %3.2lf ms\n<small>(tolerance is set to %llu ms)</small>", f64Drift, l_ui64DriftToleranceDuration);
+		::sprintf(l_sLabel, "<b>Device drift is too high</b> : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %llu ms) --&gt; early</small>", f64Drift, l_ui64DriftToleranceDuration);
 	}
 	else
 	{
-		::sprintf(l_sLabel, "Device drift : %3.2lf ms\n<small>(tolerance is set to %llu ms)</small>", f64Drift, l_ui64DriftToleranceDuration);
+		::sprintf(l_sLabel, "Device drift : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %llu ms) --&gt; early</small>", f64Drift, l_ui64DriftToleranceDuration);
 	}
 	::gtk_label_set_markup(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_drift")), l_sLabel);
 }

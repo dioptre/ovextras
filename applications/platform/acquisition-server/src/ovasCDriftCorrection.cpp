@@ -65,6 +65,7 @@ boolean CDriftCorrection::start(uint32 ui32SamplingFrequency, uint64 ui64StartTi
 	m_ui32SamplingFrequency = ui32SamplingFrequency;
 	m_i64DriftToleranceSampleCount=(m_ui64DriftToleranceDuration * m_ui32SamplingFrequency) / 1000;
 	m_ui64StartTime = ui64StartTime;
+	m_ui64LastEstimationTime = ui64StartTime;
 
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "Drift correction is set to ";
 	switch(m_eDriftCorrectionPolicy)
@@ -91,11 +92,10 @@ void CDriftCorrection::stop(void)
 
 void CDriftCorrection::reset(void)
 {
-	m_vJitterSampleCount.clear();
+	m_vJitterEstimate.clear();
 
 	m_ui64ReceivedSampleCount = 0;
 	m_ui64CorrectedSampleCount = 0;
-	m_ui64LastEstimationTime = 0;
 	m_i64InnerLatencySampleCount = 0;
 
 	m_f64DriftEstimate = 0;
@@ -171,13 +171,15 @@ void CDriftCorrection::printStats(void) const
 
 	m_rKernelContext.getLogManager() << (std::abs(l_f64DriftRatio) > 1.0 ? LogLevel_Warning : LogLevel_Info)
 		<< "  Last estim : " << truncateDecimals(m_f64DriftEstimate,1) << " samples (" << truncateDecimals(getDrift(),1) << "ms, " << truncateDecimals(100*l_f64DriftRatio,1) << "% of tol.)"
-		<< (m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled ? ", NO corr." : ", after corr.")
+		<< (m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled ? "" : ", after corr.")
 		<< "\n";
 
 	const int64 l_i64RemainingDriftCount = (static_cast<int64>(m_ui64CorrectedSampleCount) - static_cast<int64>(l_ui64TheoreticalSampleCount));
 	const float64 l_f64RemainingDriftMs = l_i64RemainingDriftCount / static_cast<float64>(m_ui32SamplingFrequency);
 	m_rKernelContext.getLogManager() << (std::abs(l_f64RemainingDriftMs) > l_ui64DriftToleranceDuration ? LogLevel_ImportantWarning : LogLevel_Info)
-		<< "  Remaining  : " << l_i64RemainingDriftCount << " samples (" << truncateDecimals(l_f64RemainingDriftMs,1) << "ms, " << truncateDecimals(100*l_f64RemainingDriftMs/l_ui64DriftToleranceDuration,1) << "% of tol.), after corr.\n";
+		<< "  Remaining  : " << l_i64RemainingDriftCount << " samples (" << truncateDecimals(l_f64RemainingDriftMs,1) << "ms, " << truncateDecimals(100*l_f64RemainingDriftMs/l_ui64DriftToleranceDuration,1) << "% of tol.)"
+		<< (m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled ? "" : ", after corr.")
+		<< "\n";
 
 	if(l_f64DriftRatioTooFastMax > 1.0 || l_f64DriftRatioTooSlowMax > 1.0 || std::abs(l_f64DriftRatio) > 1.0)
 	{
@@ -205,33 +207,34 @@ boolean CDriftCorrection::estimateDrift(const uint64 ui64NewSamples)
 	m_ui64CorrectedSampleCount += ui64NewSamples;
 
 	const uint64 l_ui64CurrentTime = System::Time::zgetTime();
-	const uint64 l_ui64ElapsedTime = l_ui64CurrentTime - m_ui64StartTime;
-	const uint64 l_ui64TheoreticalSampleCount= (m_ui32SamplingFrequency * l_ui64ElapsedTime) >> 32;
-	const int64 l_i64JitterSampleCount
-		= static_cast<int64>(m_ui64CorrectedSampleCount)  - static_cast<int64>(l_ui64TheoreticalSampleCount)
-			+m_i64InnerLatencySampleCount;
-		
+	const uint64 l_ui64ElapsedTime = l_ui64CurrentTime - m_ui64LastEstimationTime;
+	const float64 l_f64ExpectedSampleCount = ITimeArithmetics::timeToSeconds(m_ui32SamplingFrequency * l_ui64ElapsedTime);
+	const float64 l_f64NewSampleCount = static_cast<float64>(ui64NewSamples);
+
+	const float64 l_f64Jitter 
+		= l_f64NewSampleCount - l_f64ExpectedSampleCount + m_i64InnerLatencySampleCount;
+	
 #if defined TIMINGDEBUG
-	m_rKernelContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64ElapsedTime)*1000 << "ms, +" << ui64NewSamples << " smp, jit " << l_i64JitterSampleCount << "\n";
+	m_rKernelContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64ElapsedTime)*1000 << "ms, +" << ui64NewSamples << " smp, " << l_f64ExpectedSampleCount << " exp, " << l_f64Jitter << " jit\n";
 #endif
 
-	m_vJitterSampleCount.push_back(l_i64JitterSampleCount);
-	if(m_vJitterSampleCount.size() > m_ui64JitterEstimationCountForDrift)
+	m_vJitterEstimate.push_back(l_f64Jitter);
+	if(m_vJitterEstimate.size() > m_ui64JitterEstimationCountForDrift)
 	{
-		m_vJitterSampleCount.pop_front();
+		m_vJitterEstimate.pop_front();
 	}
 
 	// Estimate the drift after we have a full buffer of jitter estimates
-	if(m_vJitterSampleCount.size() == m_ui64JitterEstimationCountForDrift)
+	if(m_vJitterEstimate.size() == m_ui64JitterEstimationCountForDrift)
 	{
-		float64  l_f64NewDriftSampleEstimate = 0;
+		float64  l_f64NewDriftEstimate = 0;
 
-		for(list<int64>::iterator j=m_vJitterSampleCount.begin(); j!=m_vJitterSampleCount.end(); j++)
+		for(list<float64>::iterator j=m_vJitterEstimate.begin(); j!=m_vJitterEstimate.end(); j++)
 		{
-			l_f64NewDriftSampleEstimate+=*j;
+			l_f64NewDriftEstimate+=*j;
 		}
 
-		m_f64DriftEstimate = l_f64NewDriftSampleEstimate / m_ui64JitterEstimationCountForDrift;
+		m_f64DriftEstimate = l_f64NewDriftEstimate / m_ui64JitterEstimationCountForDrift;
 
 		if(m_f64DriftEstimate>0) {
 			m_f64DriftEstimateTooFastMax = std::max<float64>(m_f64DriftEstimateTooFastMax, m_f64DriftEstimate);
@@ -248,12 +251,12 @@ boolean CDriftCorrection::estimateDrift(const uint64 ui64NewSamples)
 				<< "Acq mon [drift:" << getDrift() << "][jitter:" << l_i64JitterSampleCount << "] samples "
 				<< "dsc " << getDriftSampleCount() << " "
 				<< "(rsc " << m_ui64ReceivedSampleCount << " tsc " << l_ui64TheoreticalSampleCount << " ilsc " << m_i64InnerLatencySampleCount 
-				<< "jsc " << m_vJitterSampleCount.size() 
+				<< "jsc " << m_vJitterEstimate.size() 
 				<< ").\n";
 			*/
 
 			/*
-			for(list<int64>::iterator j=m_vJitterSampleCount.begin(); j!=m_vJitterSampleCount.end(); j++)
+			for(list<float64>::iterator j=m_vJitterEstimate.begin(); j!=m_vJitterEstimate.end(); j++)
 			{
 				std::cout << *j << " ";
 			}
@@ -299,6 +302,7 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 	const float64 l_f64ElapsedTime=ITimeArithmetics::timeToSeconds(l_ui64ElapsedTime);
 
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "At time " << l_f64ElapsedTime << "s : Correcting drift by " << i64Correction << " samples\n";
+
 	if(i64Correction > 0)
 	{
 		for(int64 i=0; i<i64Correction; i++)
@@ -343,7 +347,7 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 	// estimate should become [0,0,0,0,...] wrt the adjustment. This changes jitter estimates
 	// in the past. The other alternative would be to reset the estimate. Adjusting 
 	// might keep some detail the reset would lose.
-	for(list<int64>::iterator j=m_vJitterSampleCount.begin(); j!=m_vJitterSampleCount.end(); j++)
+	for(list<float64>::iterator j=m_vJitterEstimate.begin(); j!=m_vJitterEstimate.end(); j++)
 	{
 		(*j)+=i64Correction;
 	}
@@ -391,16 +395,20 @@ int64 CDriftCorrection::getDriftSampleCount(void) const
 	return static_cast<int64>(m_f64DriftEstimate);
 }
 
+// Note that we cannot do actual correction with subsample accuracy, so here we truncate the drift estimate to integer in getDriftSampleCount().
 int64 CDriftCorrection::getSuggestedDriftCorrectionSampleCount(void) const
 {
-	// If the drift is positive, we need to correct by removing samples
-	if(this->getDriftSampleCount() >= this->getDriftToleranceSampleCount())
+	const float64 l_f64DriftTolerance = static_cast<float64>(this->getDriftToleranceDuration());
+	const float64 l_f64CurrentDrift = this->getDrift();
+	
+	// If the drift is positive, we need to correct by removing samples. 
+	if(l_f64CurrentDrift >= l_f64DriftTolerance)
 	{
 		return -this->getDriftSampleCount();
 	}
 
 	// If the drift is negative, we need to add samples
-	if(this->getDriftSampleCount() <= -this->getDriftToleranceSampleCount())
+	if(l_f64CurrentDrift <= -l_f64DriftTolerance)
 	{
 		return -this->getDriftSampleCount();
 	}
