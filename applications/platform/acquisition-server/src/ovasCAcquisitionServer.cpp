@@ -814,32 +814,34 @@ boolean CAcquisitionServer::start(void)
 
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Starting the acquisition...\n";
 
-	// Starts driver
-	if(!m_pDriver->start())
-	{
-		m_ui64StartTime=System::Time::zgetTime();
-		m_rKernelContext.getLogManager() << LogLevel_Error << "Starting failed !\n";
-		return false;
-	}
-	// m_pDriverContext->onStart(*m_pDriver->getHeader());
-
-
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Now acquiring...\n";
-
 	m_vPendingBuffer.clear();
 	m_oPendingStimulationSet.clear();
 
 	m_ui64SampleCount=0;
 	m_ui64LastSampleCount=0;
+
+	// Starts driver
+	if(!m_pDriver->start())
+	{
+		m_ui64StartTime=System::Time::zgetTime();
+		m_ui64LastDeliveryTime=m_ui64StartTime;
+
+		m_rKernelContext.getLogManager() << LogLevel_Error << "Starting failed !\n";
+		return false;
+	}
+	// m_pDriverContext->onStart(*m_pDriver->getHeader());
+
 	m_ui64StartTime=System::Time::zgetTime();
 	m_ui64LastDeliveryTime=m_ui64StartTime;
+
+	m_oDriftCorrection.start(m_ui32SamplingFrequency, m_ui64StartTime);
 
 	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
 	{
 		(*itp)->startHook(m_vSelectedChannelNames, m_ui32SamplingFrequency, m_ui32ChannelCount, m_ui32SampleCountPerSentBlock);
 	}
 
-	m_oDriftCorrection.start(m_ui32SamplingFrequency);
+	m_rKernelContext.getLogManager() << LogLevel_Info << "Now acquiring...\n";
 
 	m_bStarted=true;
 	return true;

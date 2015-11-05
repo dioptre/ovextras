@@ -52,7 +52,7 @@ CDriftCorrection::~CDriftCorrection(void)
 
 }
 
-boolean CDriftCorrection::start(uint32 ui32SamplingFrequency)
+boolean CDriftCorrection::start(uint32 ui32SamplingFrequency, uint64 ui64StartTime)
 {
 	if(ui32SamplingFrequency==0)
 	{
@@ -64,7 +64,7 @@ boolean CDriftCorrection::start(uint32 ui32SamplingFrequency)
 
 	m_ui32SamplingFrequency = ui32SamplingFrequency;
 	m_i64DriftToleranceSampleCount=(m_ui64DriftToleranceDuration * m_ui32SamplingFrequency) / 1000;
-	m_ui64StartTime = System::Time::zgetTime();
+	m_ui64StartTime = ui64StartTime;
 
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "Drift correction is set to ";
 	switch(m_eDriftCorrectionPolicy)
@@ -121,6 +121,18 @@ void CDriftCorrection::reset(void)
 //___________________________________________________________________//
 //                                                                   //
 
+float64 truncateDecimals(float64 value, uint32 nDecimals)
+{
+	uint32 tmp=1;
+	for(uint32 i=0;i<nDecimals;i++) {
+		tmp*=10;
+	}
+	const int64 trunc = static_cast<int64>(value*tmp);
+	const float64 retVal = trunc / static_cast<float64>(tmp);
+
+	return retVal;
+}
+
 void CDriftCorrection::printStats(void) const
 {
 	if(!m_bStarted)
@@ -147,27 +159,25 @@ void CDriftCorrection::printStats(void) const
 	m_rKernelContext.getLogManager() << LogLevel_Info << "  Expected : " << l_ui64TheoreticalSampleCount << " samples\n";
 	m_rKernelContext.getLogManager() << LogLevel_Info << "  Returned : " << m_ui64CorrectedSampleCount << " samples " 
 		<< (m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled ? "(drift correction disabled)" : "(after drift correction)") << "\n";
-	m_rKernelContext.getLogManager() << LogLevel_Info << "  Added    : " << m_i64DriftCorrectionSampleCountAdded << " samples (" << l_f64AddedRatio << "%)\n";
-	m_rKernelContext.getLogManager() << LogLevel_Info << "  Removed  : " << m_i64DriftCorrectionSampleCountRemoved << " samples (" << l_f64RemovedRatio << "%)\n";
+	m_rKernelContext.getLogManager() << LogLevel_Info << "  Added    : " << m_i64DriftCorrectionSampleCountAdded << " samples (" << truncateDecimals(l_f64AddedRatio,1) << "%)\n";
+	m_rKernelContext.getLogManager() << LogLevel_Info << "  Removed  : " << m_i64DriftCorrectionSampleCountRemoved << " samples (" << truncateDecimals(l_f64RemovedRatio,1) << "%)\n";
 
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Estimated drift (tolerance = " << l_ui64DriftToleranceDuration << "ms),\n";
 
 	m_rKernelContext.getLogManager() << (l_f64DriftRatioTooSlowMax > 1.0 ? LogLevel_Warning : LogLevel_Info)
-		<< "  Peak slow : " << -m_f64DriftEstimateTooSlowMax << " samples (" << getDriftTooSlowMax() << "ms late, " << 100*l_f64DriftRatioTooSlowMax << "% of tol.)\n";
+		<< "  Slow peak  : " << -truncateDecimals(m_f64DriftEstimateTooSlowMax,1) << " samples (" << truncateDecimals(getDriftTooSlowMax(),1) << "ms late, " << truncateDecimals(100*l_f64DriftRatioTooSlowMax,1) << "% of tol.)\n";
 	m_rKernelContext.getLogManager() << (l_f64DriftRatioTooFastMax > 1.0 ? LogLevel_Warning : LogLevel_Info)
-		<< "  Peak fast : " << m_f64DriftEstimateTooFastMax << " samples (" << getDriftTooFastMax() << "ms early, " << 100*l_f64DriftRatioTooFastMax << "% of tol.)\n";
-
-	if(m_eDriftCorrectionPolicy != DriftCorrectionPolicy_Disabled)
-	{
-		const float64 l_f64RemainingDrift = (static_cast<int64>(m_ui64CorrectedSampleCount) - static_cast<int64>(l_ui64TheoreticalSampleCount)) / static_cast<float64>(m_ui32SamplingFrequency);
-		m_rKernelContext.getLogManager() << (std::abs(l_f64RemainingDrift) > l_ui64DriftToleranceDuration ? LogLevel_ImportantWarning : LogLevel_Info)
-			<< "  Residual : " << l_f64RemainingDrift << "ms, " << 100*l_f64RemainingDrift/l_ui64DriftToleranceDuration << "% of tol., after corr.\n";
-	}
+		<< "  Fast peak  : " << truncateDecimals(m_f64DriftEstimateTooFastMax,1) << " samples (" << truncateDecimals(getDriftTooFastMax(),1) << "ms early, " << truncateDecimals(100*l_f64DriftRatioTooFastMax,1) << "% of tol.)\n";
 
 	m_rKernelContext.getLogManager() << (std::abs(l_f64DriftRatio) > 1.0 ? LogLevel_Warning : LogLevel_Info)
-		<< "  Last estimate : " << m_f64DriftEstimate << " samples (" << getDrift() << "ms, " << 100*l_f64DriftRatio << "% of tol.)"
+		<< "  Last estim : " << truncateDecimals(m_f64DriftEstimate,1) << " samples (" << truncateDecimals(getDrift(),1) << "ms, " << truncateDecimals(100*l_f64DriftRatio,1) << "% of tol.)"
 		<< (m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled ? ", NO corr." : ", after corr.")
 		<< "\n";
+
+	const int64 l_i64RemainingDriftCount = (static_cast<int64>(m_ui64CorrectedSampleCount) - static_cast<int64>(l_ui64TheoreticalSampleCount));
+	const float64 l_f64RemainingDriftMs = l_i64RemainingDriftCount / static_cast<float64>(m_ui32SamplingFrequency);
+	m_rKernelContext.getLogManager() << (std::abs(l_f64RemainingDriftMs) > l_ui64DriftToleranceDuration ? LogLevel_ImportantWarning : LogLevel_Info)
+		<< "  Remaining  : " << l_i64RemainingDriftCount << " samples (" << truncateDecimals(l_f64RemainingDriftMs,1) << "ms, " << truncateDecimals(100*l_f64RemainingDriftMs/l_ui64DriftToleranceDuration,1) << "% of tol.), after corr.\n";
 
 	if(l_f64DriftRatioTooFastMax > 1.0 || l_f64DriftRatioTooSlowMax > 1.0 || std::abs(l_f64DriftRatio) > 1.0)
 	{
@@ -200,7 +210,11 @@ boolean CDriftCorrection::estimateDrift(const uint64 ui64NewSamples)
 	const int64 l_i64JitterSampleCount
 		= static_cast<int64>(m_ui64CorrectedSampleCount)  - static_cast<int64>(l_ui64TheoreticalSampleCount)
 			+m_i64InnerLatencySampleCount;
-			
+		
+#if defined TIMINGDEBUG
+	m_rKernelContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64ElapsedTime)*1000 << "ms, +" << ui64NewSamples << " smp, jit " << l_i64JitterSampleCount << "\n";
+#endif
+
 	m_vJitterSampleCount.push_back(l_i64JitterSampleCount);
 	if(m_vJitterSampleCount.size() > m_ui64JitterEstimationCountForDrift)
 	{
@@ -453,6 +467,13 @@ boolean CDriftCorrection::setDriftCorrectionPolicy(EDriftCorrectionPolicy eDrift
 
 boolean CDriftCorrection::setDriftToleranceDuration(uint64 ui64DriftToleranceDuration)
 {
+	if(ui64DriftToleranceDuration==0)
+	{
+		m_rKernelContext.getLogManager() << LogLevel_Error << "Minimum accepted drift tolerance limit is 1ms\n";
+		m_ui64DriftToleranceDuration = 1;
+		return true;
+	}
+
 	m_ui64DriftToleranceDuration=ui64DriftToleranceDuration;
 	return true;
 }

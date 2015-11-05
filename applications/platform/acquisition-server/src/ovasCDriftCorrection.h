@@ -30,7 +30,7 @@ namespace OpenViBEAcquisitionServer
 		virtual ~CDriftCorrection(void);
 
 		// To start a new drift estimation and stop it.
-		virtual OpenViBE::boolean start(OpenViBE::uint32 ui32SamplingFrequency);
+		virtual OpenViBE::boolean start(OpenViBE::uint32 ui32SamplingFrequency, OpenViBE::uint64 ui64StartTime);
 		virtual void stop(void);
 
 		// The main functions to estimate and correct drift
