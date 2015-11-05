@@ -327,7 +327,6 @@ OpenViBE::boolean CDriverGTecGUSBamp::ConfigureDevice(OpenViBE::uint32 deviceNum
 		if(!::GT_SetReference(o_pDevice, l_oReference)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetReference\n";
 		if(!::GT_SetGround(o_pDevice, l_oGround)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetGround\n";
 	}
-	
 
 	return true;
 }
@@ -356,6 +355,11 @@ OpenViBE::boolean CDriverGTecGUSBamp::start(void)
 	m_ui32TotalDriverChunksLost = 0;
 	m_ui32TotalRingBufferOverruns = 0;
 	m_ui32TotalDataUnavailable = 0;
+
+	{
+		boost::mutex::scoped_lock lock(m_io_mutex);
+		m_RingBuffer.Reset();
+	}
 
 	for (uint32 i=0;i<numDevices;i++)
 	{
