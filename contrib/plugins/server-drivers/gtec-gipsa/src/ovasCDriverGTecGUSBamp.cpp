@@ -346,11 +346,6 @@ OpenViBE::boolean CDriverGTecGUSBamp::start(void)
 		m_bReconfigurationRequired = false;
 	}
 
-	//new set process priority
-	HANDLE hProcess = GetCurrentProcess();
-    SetPriorityClass(hProcess, HIGH_PRIORITY_CLASS);
-	//end set process priority
-
 	m_ui32TotalHardwareStimulations = 0;
 	m_ui32TotalDriverChunksLost = 0;
 	m_ui32TotalRingBufferOverruns = 0;
@@ -373,7 +368,6 @@ OpenViBE::boolean CDriverGTecGUSBamp::start(void)
 	m_ui32CurrentQueueIndex = 0;
 
 	m_ThreadPtr.reset(new boost::thread( boost::bind(&CDriverGTecGUSBamp::acquire , this )));
-	//applyPriority(m_ThreadPtr.get(),15);
 
 	return true;
 }
@@ -685,10 +679,6 @@ OpenViBE::boolean CDriverGTecGUSBamp::stop(void)
 	if(!m_rDriverContext.isConnected()) return false;
 	if(!m_rDriverContext.isStarted()) return false;
 
-	//reset the main process (data processing thread) to normal priority
-	HANDLE hProcess = GetCurrentProcess();
-	SetPriorityClass(hProcess, NORMAL_PRIORITY_CLASS);
-
 	//stop thread
 	m_bIsThreadRunning = false;
 	m_ThreadPtr->join(); //wait until the thread has stopped data acquisition
@@ -894,31 +884,6 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 
 	return true;
 }
-
-/*
- This method should not be necessarily used.
- Use it if you have problems with frequencies above 10 000.
- "real time" is 15.
-*/
-void CDriverGTecGUSBamp::applyPriority(boost::thread* thread, int priority)
-{
-    if (!thread)
-        return;
-
-    BOOL res;
-    HANDLE th = thread->native_handle();
-
-    switch (priority)
-    {
-		case THREAD_PRIORITY_TIME_CRITICAL               : res = SetThreadPriority(th, THREAD_PRIORITY_TIME_CRITICAL);   break;
-		case THREAD_PRIORITY_HIGHEST                   : res = SetThreadPriority(th, THREAD_PRIORITY_HIGHEST);                 break;
-		case THREAD_PRIORITY_ABOVE_NORMAL   : res = SetThreadPriority(th, THREAD_PRIORITY_ABOVE_NORMAL);    break;
-		case THREAD_PRIORITY_NORMAL                 : res = SetThreadPriority(th, THREAD_PRIORITY_NORMAL);                  break;
-		case THREAD_PRIORITY_BELOW_NORMAL   : res = SetThreadPriority(th, THREAD_PRIORITY_BELOW_NORMAL);    break;
-		case THREAD_PRIORITY_LOWEST                   : res = SetThreadPriority(th, THREAD_PRIORITY_LOWEST);                  break;
-    }
-}
-
 
 void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 {
