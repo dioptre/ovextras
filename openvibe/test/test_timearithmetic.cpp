@@ -412,8 +412,6 @@ int main(int argc, char *argv[])
 	// 1ms obtained by (2^32-1)/1000 is     4294967.295 = 0x418937 + 0.295
 	//
 
-	uint64 l_ui64CurrentTime;
-
 	static const uint64 l_ui64Expected = 4294967; // + 0.296
 
 	std::cout << "As fixed point, its " << l_ui64Expected   << " (expected), "
@@ -421,8 +419,6 @@ int main(int argc, char *argv[])
 										<< ITimeArithmetics::secondsToTime(0.001) << " (timeArithm)\n";
 
 	for(uint64 i=0;i<10000000;i++) {
-		l_ui64CurrentTime = i;
-
 		const uint32 l_ui32InMillis= (uint32)(((i>>22)*1000)>>10);
 
 		if(l_ui32InMillis == 1) {
@@ -432,8 +428,6 @@ int main(int argc, char *argv[])
 	}
 
 	for(uint64 i=0;i<10000000;i++) {
-		l_ui64CurrentTime = i;
-
 		const uint32 l_ui32InMillis = (uint32)((i * 1000) >> 32);
 
 		if(l_ui32InMillis == 1) {
@@ -450,6 +444,17 @@ int main(int argc, char *argv[])
 			break;
 		}
 	}
+
+	/*
+	uint64 test = (1LL << 32);
+	uint64 test2 = (128LL << 32);
+	uint64 test3 = (128LL << 32) + (1LL << 31);
+
+	std::cout << ITimeArithmetics::timeToSeconds(test/2) << "\n";
+	std::cout << ITimeArithmetics::timeToSeconds(test/512) << "\n";
+	std::cout << ITimeArithmetics::timeToSeconds(test2/512) << "\n";
+	std::cout << ITimeArithmetics::timeToSeconds(test3) << "->" << ITimeArithmetics::timeToSeconds(test3/10) << "\n";
+	*/
 
 	return retVal;
 } 
