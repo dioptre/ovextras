@@ -98,29 +98,34 @@ boolean CDriverGenericSawTooth::loop(void)
 	if(!m_rDriverContext.isStarted()) { return true; }
 
 	const uint64 l_ui64CurrentTime = System::Time::zgetTime();
-	const uint64 l_ui64NextTime = ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui32TotalSampleCount+m_ui32SampleCountPerSentBlock);
+	const uint64 l_ui64NextTime = m_ui64StartTime + ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui32TotalSampleCount+m_ui32SampleCountPerSentBlock);
 
-	if(l_ui64CurrentTime - m_ui64StartTime >= l_ui64NextTime)
+	// If we're early, we sleep. If we're late, we crank out the chunk immediately
+	if(l_ui64NextTime>l_ui64CurrentTime)
 	{
+		const uint64 l_ui64SleepTime = l_ui64NextTime - l_ui64CurrentTime;
+//			m_rDriverContext.getLogManager() << LogLevel_Info << ITimeArithmetics::timeToSeconds(l_ui64SleepTime)*1000 << "ms\n";
+		System::Time::zsleep(l_ui64SleepTime);
+	}
+
 #ifdef TIMINGDEBUG
-		m_rDriverContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64CurrentTime - m_ui64StartTime)*1000 << "ms filling for " 
-			<< ITimeArithmetics::timeToSeconds(l_ui64NextTime)*1000 << "ms  -> nSamples = " << m_ui32TotalSampleCount + m_ui32SampleCountPerSentBlock << "\n";
+	m_rDriverContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64CurrentTime - m_ui64StartTime)*1000 << "ms filling for " 
+		<< ITimeArithmetics::timeToSeconds(l_ui64NextTime)*1000 << "ms  -> nSamples = " << m_ui32TotalSampleCount + m_ui32SampleCountPerSentBlock << "\n";
 #endif
 
-		for(uint32 j=0; j<m_oHeader.getChannelCount(); j++)
+	for(uint32 j=0; j<m_oHeader.getChannelCount(); j++)
+	{
+		for(uint32 i=0; i<m_ui32SampleCountPerSentBlock; i++)
 		{
-			for(uint32 i=0; i<m_ui32SampleCountPerSentBlock; i++)
-			{
-				m_pSample[j*m_ui32SampleCountPerSentBlock+i]=float32(i)/(m_ui32SampleCountPerSentBlock-1);
-			}
+			m_pSample[j*m_ui32SampleCountPerSentBlock+i]=float32(i)/(m_ui32SampleCountPerSentBlock-1);
 		}
-
-		m_pCallback->setSamples(m_pSample);
-
-		m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
-
-		m_ui32TotalSampleCount+=m_ui32SampleCountPerSentBlock;
 	}
+
+	m_pCallback->setSamples(m_pSample);
+
+	m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
+
+	m_ui32TotalSampleCount+=m_ui32SampleCountPerSentBlock;
 
 	return true;
 }
