@@ -15,7 +15,16 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBEAcquisitionServer;
 using namespace std;
 
-// #define TIMINGDEBUG
+// #define OV_DEBUG_DRIFT
+
+// #define OV_ESTIMATE_BASIC
+// #define OV_ESTIMATE_LOCAL
+#define OV_ESTIMATE_TIMEDIFF_BASED
+// #define OV_ESTIMATE_BOOST
+
+#if defined(OV_ESTIMATE_BOOST)
+#include "boost/date_time/posix_time/posix_time.hpp"
+#endif
 
 //___________________________________________________________________//
 //                                                                   //
@@ -64,7 +73,13 @@ boolean CDriftCorrection::start(uint32 ui32SamplingFrequency, uint64 ui64StartTi
 
 	m_ui32SamplingFrequency = ui32SamplingFrequency;
 	m_i64DriftToleranceSampleCount=(m_ui64DriftToleranceDuration * m_ui32SamplingFrequency) / 1000;
+
 	m_ui64StartTime = ui64StartTime;
+
+#if defined(OV_ESTIMATE_BOOST)
+	m_oStartTime = boost::posix_time::microsec_clock::local_time();
+#endif
+
 	m_ui64LastEstimationTime = ui64StartTime;
 
 	m_rKernelContext.getLogManager() << LogLevel_Trace << "Drift correction is set to ";
@@ -203,19 +218,112 @@ boolean CDriftCorrection::estimateDrift(const uint64 ui64NewSamples)
 		return false;
 	}
 
-	m_ui64ReceivedSampleCount += ui64NewSamples;
-	m_ui64CorrectedSampleCount += ui64NewSamples;
+	m_ui64ReceivedSampleCount += ui64NewSamples;		// Just kept for statistics
+	m_ui64CorrectedSampleCount += ui64NewSamples;		// The "corrected" amount of samples
 
 	const uint64 l_ui64CurrentTime = System::Time::zgetTime();
+
+#if defined(OV_ESTIMATE_BASIC)
+	// Global estimate (the correction has memory over the whole play time)
+	const uint64 l_ui64ElapsedTime = l_ui64CurrentTime - m_ui64StartTime;
+	const uint64 l_ui64ExpectedSampleCountFixedPoint = (m_ui32SamplingFrequency * l_ui64ElapsedTime); // fractional
+	const uint64 l_ui64CorrectedSampleCountFixedPoint = (m_ui64CorrectedSampleCount << 32);
+
+	// Do some kludge arithmetic to get the signed jitter to a float (32:32 fixedpoint is unsigned). We try to
+	// operate on the fixed point arithmetic as long as possible and only cast the diff to float in the end.
+	float64 l_f64Jitter = static_cast<float64>(m_i64InnerLatencySampleCount);
+	if(l_ui64ExpectedSampleCountFixedPoint >= l_ui64CorrectedSampleCountFixedPoint)
+	{
+		const uint64 l_ui64SampleCountDiff = l_ui64ExpectedSampleCountFixedPoint - l_ui64CorrectedSampleCountFixedPoint;
+		l_f64Jitter += -ITimeArithmetics::timeToSeconds(l_ui64SampleCountDiff);
+	}
+	else
+	{
+		const uint64 l_ui64SampleCountDiff = l_ui64CorrectedSampleCountFixedPoint - l_ui64ExpectedSampleCountFixedPoint;
+		l_f64Jitter += ITimeArithmetics::timeToSeconds(l_ui64SampleCountDiff);
+	}
+
+#if defined(OV_DEBUG_DRIFT)
+	static int calls=0;
+	if(calls++ % 100 == 0) {
+		m_rKernelContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64ElapsedTime)*1000 
+			<< "ms r=" << m_ui64ReceivedSampleCount 
+			<< " e=" << ITimeArithmetics::timeToSeconds(l_ui64ExpectedSampleCountFixedPoint) 
+			// << ", i=" << m_i64InnerLatencySampleCount 
+			<< " j=" << l_f64Jitter << " d=" << m_f64DriftEstimate 
+			<< " sk=" << m_ui64ReceivedSampleCount / ITimeArithmetics::timeToSeconds(l_ui64ExpectedSampleCountFixedPoint) // skew between the clocks
+			// << " m=" << (m_f64DriftEstimateTooFastMax > m_f64DriftEstimateTooSlowMax ? m_f64DriftEstimateTooFastMax : -m_f64DriftEstimateTooSlowMax)
+			<< "\n";
+	}
+#endif
+
+#elif defined(OV_ESTIMATE_LOCAL)
+	// Just estimate from this chunk, the correction has no memory of events earlier than whats in the jitter buffer.
 	const uint64 l_ui64ElapsedTime = l_ui64CurrentTime - m_ui64LastEstimationTime;
 	const float64 l_f64ExpectedSampleCount = ITimeArithmetics::timeToSeconds(m_ui32SamplingFrequency * l_ui64ElapsedTime);
 	const float64 l_f64NewSampleCount = static_cast<float64>(ui64NewSamples);
 
-	const float64 l_f64Jitter 
-		= l_f64NewSampleCount - l_f64ExpectedSampleCount + m_i64InnerLatencySampleCount;
-	
-#if defined TIMINGDEBUG
-	m_rKernelContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64ElapsedTime)*1000 << "ms, +" << ui64NewSamples << " smp, " << l_f64ExpectedSampleCount << " exp, " << l_f64Jitter << " jit\n";
+	const float64 l_f64Jitter = l_f64NewSampleCount - l_f64ExpectedSampleCount + m_i64InnerLatencySampleCount;
+
+#if defined(OV_DEBUG_DRIFT)
+	static int calls=0;
+	if(calls++ % 4 == 0) {
+		m_rKernelContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64ElapsedTime)*1000 
+			<< "ms r=" << m_ui64ReceivedSampleCount 
+			<< " e=" << l_f64ExpectedSampleCount
+			// << ", i=" << m_i64InnerLatencySampleCount 
+			<< " j=" << l_f64Jitter << " d=" << m_f64DriftEstimate 
+			<< " m=" << (m_f64DriftEstimateTooFastMax > m_f64DriftEstimateTooSlowMax ? m_f64DriftEstimateTooFastMax : -m_f64DriftEstimateTooSlowMax)
+			<< "\n";
+	}
+#endif
+
+#elif defined(OV_ESTIMATE_BOOST)
+	// this global estimate uses posix::time for the arithmetic and the clock. Mainly to study if it makes a difference.
+	boost::posix_time::ptime l_oTimeNow = boost::posix_time::microsec_clock::local_time();
+	boost::posix_time::time_duration l_oTd = (l_oTimeNow - m_oStartTime);
+
+	const float64 l_f64Expected = (l_oTd.total_microseconds() / 1000000.0) * m_ui32SamplingFrequency;
+	const float64 l_f64Received = static_cast<float64>(m_ui64CorrectedSampleCount);
+
+	const float64 l_f64Jitter = l_f64Received - l_f64Expected + m_i64InnerLatencySampleCount;
+
+#if defined(OV_DEBUG_DRIFT)
+	static int calls=0;
+	if(calls++ % 100 == 0) {
+		m_rKernelContext.getLogManager() << LogLevel_Info << "At " << l_oTd.total_seconds()
+			<< "ms, +" << ui64NewSamples << " smp, rec=" << l_f64Received
+			<< ", exp=" << l_f64Expected+l_f64ExpectedFraction << ", " << l_f64Jitter << " jit " << m_f64DriftEstimate << " dft\n";
+	}
+#endif
+
+#elif defined(OV_ESTIMATE_TIMEDIFF_BASED)
+	// An alternative way to compute the jitter, by computing the diff in the times instead of diff in the sample counts.
+	const uint64 l_ui64ExpectedTime = m_ui64StartTime + (m_ui64CorrectedSampleCount<<32) / static_cast<uint64>(m_ui32SamplingFrequency);
+
+	float64 l_f64TimeDiff; // time in seconds that our expectation differs from the measured clock
+	if(l_ui64ExpectedTime>=l_ui64CurrentTime)
+	{
+		l_f64TimeDiff = ITimeArithmetics::timeToSeconds(l_ui64ExpectedTime-l_ui64CurrentTime);
+	}
+	else
+	{
+		l_f64TimeDiff = -ITimeArithmetics::timeToSeconds(l_ui64CurrentTime-l_ui64ExpectedTime);
+	}
+
+	// Jitter in fractional samples
+	const float64 l_f64Jitter = l_f64TimeDiff*m_ui32SamplingFrequency + static_cast<float64>(m_i64InnerLatencySampleCount);
+
+#if defined(OV_DEBUG_DRIFT)
+	static int calls=0;
+	if(calls++ % 100 == 0) {
+		m_rKernelContext.getLogManager() << LogLevel_Info << "At " 
+			<< ITimeArithmetics::timeToSeconds(l_ui64CurrentTime)*1000 << "ms."
+			<< " r=" <<m_ui64ReceivedSampleCount
+			<< " td=" << l_f64Diff*1000 << "ms, j=" << l_f64Jitter << "\n";
+	}
+#endif
+
 #endif
 
 	m_vJitterEstimate.push_back(l_f64Jitter);
@@ -242,7 +350,7 @@ boolean CDriftCorrection::estimateDrift(const uint64 ui64NewSamples)
 			m_f64DriftEstimateTooSlowMax = std::max<float64>(m_f64DriftEstimateTooSlowMax, -m_f64DriftEstimate);
 		}
 
-#ifdef TIMINGDEBUG
+#ifdef OV_DEBUG_DRIFT
 		if(m_f64DriftEstimate!=0)
 		{	
 			/*
@@ -364,7 +472,7 @@ float64 CDriftCorrection::getDrift(void) const
 		return 0;
 	}
 
-#ifdef TIMINGDEBUG
+#ifdef OV_DEBUG_DRIFT
 	// m_rKernelContext.getLogManager() << LogLevel_Info << "Req drift " << m_f64DriftEstimate << " freq " << m_ui32SamplingFrequency << "\n";
 #endif
 	return m_f64DriftEstimate*1000./m_ui32SamplingFrequency;

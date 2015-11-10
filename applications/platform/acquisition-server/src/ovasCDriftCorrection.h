@@ -6,6 +6,9 @@
 #include <vector>
 #include <list>
 
+// ifdef OV_ESTIMATE_BOOST
+// #include <boost/thread.hpp>
+
 namespace OpenViBEAcquisitionServer
 {
 	typedef enum
@@ -100,10 +103,14 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint64 m_ui64StartTime;
 		OpenViBE::uint64 m_ui64LastEstimationTime;
 
+		// ifdef OV_ESTIMATE_BOOST
+		// boost::posix_time::ptime m_oStartTime;
+
 		// Jitter estimation buffer. Each entry is the difference between the expected number of 
 		// samples and the received number of samples per each call to estimateDrift(). The buffer has subsample accuracy to avoid rounding errors.
 		// -> The average of the buffer items is the current aggregated drift estimate (in samples), convertable to ms by getDrift().
 		std::list < OpenViBE::float64 > m_vJitterEstimate;
+
 	};
 };
 
