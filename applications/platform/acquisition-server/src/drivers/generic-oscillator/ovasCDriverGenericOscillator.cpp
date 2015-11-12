@@ -108,22 +108,7 @@ boolean CDriverGenericOscillator::loop(void)
 
 	if(m_rDriverContext.isStarted())
 	{
-		const uint64 l_ui64CurrentTime = System::Time::zgetTime();
-		const uint64 l_ui64NextTime = m_ui64StartTime + ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui32TotalSampleCount+m_ui32SampleCountPerSentBlock);
-
-		// If we're early, we sleep. If we're late, we crank out the chunk immediately
-		if(l_ui64NextTime>l_ui64CurrentTime)
-		{
-			const uint64 l_ui64SleepTime = l_ui64NextTime - l_ui64CurrentTime;
-//			m_rDriverContext.getLogManager() << LogLevel_Info << ITimeArithmetics::timeToSeconds(l_ui64SleepTime)*1000 << "ms\n";
-			System::Time::zsleep(l_ui64SleepTime);
-		}
-
-#ifdef TIMINGDEBUG
-		m_rDriverContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64CurrentTime - m_ui64StartTime)*1000 << "ms filling for " 
-			<< ITimeArithmetics::timeToSeconds(l_ui64NextTime)*1000 << "ms  -> nSamples = " << m_ui32TotalSampleCount + m_ui32SampleCountPerSentBlock << "\n";
-#endif
-
+		// Generate the contents we want to send next
 		CStimulationSet l_oStimulationSet;
 		if (m_bSendPeriodicStimulations)
 		{
@@ -148,6 +133,20 @@ boolean CDriverGenericOscillator::loop(void)
 #endif
 			}
 		}
+
+		// If we're early, sleep before sending. Otherwise, push the chunk out immediately
+		const uint64 l_ui64CurrentTime = System::Time::zgetTime() - m_ui64StartTime;
+		const uint64 l_ui64NextTime = ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui32TotalSampleCount+m_ui32SampleCountPerSentBlock);
+		if(l_ui64NextTime>l_ui64CurrentTime)
+		{
+			const uint64 l_ui64SleepTime = l_ui64NextTime - l_ui64CurrentTime;
+			System::Time::zsleep(l_ui64SleepTime);
+		}
+
+#ifdef TIMINGDEBUG
+		m_rDriverContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64CurrentTime)*1000 << "ms filled for " 
+			<< ITimeArithmetics::timeToSeconds(l_ui64NextTime)*1000 << "ms  -> nSamples = " << m_ui32TotalSampleCount + m_ui32SampleCountPerSentBlock << "\n";
+#endif
 
 		m_ui32TotalSampleCount+=m_ui32SampleCountPerSentBlock;
 		m_pCallback->setSamples(m_pSample);
