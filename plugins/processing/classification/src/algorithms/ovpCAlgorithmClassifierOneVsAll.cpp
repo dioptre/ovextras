@@ -121,7 +121,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 
 	const uint32 l_ui32FeatureVectorSize=rFeatureVector.getSize();
 
-	for(size_t l_iClassifierCounter = 0 ; l_iClassifierCounter < m_oSubClassifierList.size() ; ++l_iClassifierCounter )
+	for(uint64 l_iClassifierCounter = 0 ; l_iClassifierCounter < m_oSubClassifierList.size() ; ++l_iClassifierCounter )
 	{
 		IAlgorithmProxy* l_pSubClassifier = this->m_oSubClassifierList[l_iClassifierCounter];
 		TParameterHandler < IMatrix* > ip_pFeatureVector(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
@@ -148,7 +148,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 		{
 			l_oClassificationVector.push_back(CClassifierOutput(static_cast<float64>(op_f64ClassificationStateClass), static_cast<IMatrix*>(op_pClassificationValues)));
 		}
-		this->getLogManager() << LogLevel_Debug << l_iClassifierCounter << " " << (float64)op_f64ClassificationStateClass << " " << (*op_pProbabilityValues)[0] << " " << (*op_pProbabilityValues)[1] << "\n";
+		this->getLogManager() << LogLevel_Debug << l_iClassifierCounter << " " << (float64)op_f64ClassificationStateClass << " " << (float64)(*op_pProbabilityValues)[0] << " " << (float64)(*op_pProbabilityValues)[1] << "\n";
 	}
 
 	//Now, we determine the best classification
