@@ -17,7 +17,7 @@ IF(UNIX)
 ENDIF(UNIX)
 	
 INCLUDE_DIRECTORIES(../src)
-ADD_EXECUTABLE(${PROJECT_NAME} test_time.cpp)
+ADD_EXECUTABLE(${PROJECT_NAME} test_time.cpp ntpclient.cpp ntpclient.h)
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBEModuleSystem")

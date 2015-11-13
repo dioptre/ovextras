@@ -31,10 +31,9 @@
  #include <MMSystem.h> 
 #endif
 
-using namespace std;
+#include "ntpclient.h"
 
-#define NTP_MODE_CLIENT 3
-#define NTP_VERSION 3
+using namespace std;
 
 namespace OpenViBE {
 	class ITimeArithmetics {
@@ -50,86 +49,6 @@ namespace OpenViBE {
 		static const uint32_t m_ui32Multiplier = 1L << m_ui32DecimalPrecision;	// 1024
 	};
 }
-
-class NTPClient 
-{
-	private:
-		boost::asio::io_service m_service;
-		boost::asio::ip::udp::endpoint m_receiver;
-		boost::asio::ip::udp::socket m_socket;
-
-	public:
-
-	NTPClient(string hostName)
-		: m_socket(m_service)
-	{
-		std::cout << "NTP set to poll [" << hostName << "]\n";
-
-		boost::asio::ip::udp::resolver resolver(m_service);
-		boost::asio::ip::udp::resolver::query query(boost::asio::ip::udp::v4(), hostName, "ntp");
-
-		try { 
-			m_receiver = *resolver.resolve(query);
-			m_socket.open(boost::asio::ip::udp::v4());
-		} catch (std::exception& e){
-			std::cerr << "NTP Client Error: " << e.what() << std::endl;
-		}
-	}
-
-	uint64_t getTime(void) {
-				
-		uint64_t returnValue = 0;
-
-		boost::array<unsigned char, 48> sendBuf;
-		memset(&sendBuf[0], 0, 48);
-
-		sendBuf[0]= NTP_MODE_CLIENT | (NTP_VERSION << 3);
-
-		m_socket.send_to(boost::asio::buffer(sendBuf), m_receiver);
-
-		boost::array<unsigned long, 1024> recvBuf;
-		boost::asio::ip::udp::endpoint sender;
-		
-		try
-		{
-			size_t len = m_socket.receive_from( boost::asio::buffer(recvBuf), sender);
-			if(len==0) {
-				std::cerr << "Received 0 bytes from the NTP server\n";
-				return 0;
-			}
-#if 0
-			// NTP debug
-			char fn[512];
-			static int i = 0;
-
-			sprintf(fn, "dump%d.dat", i++);
-			FILE* fp=fopen(fn, "w");
-			if(fp) {
-				fwrite(&recvBuf[0], len, 1,fp);
-				fclose(fp);
-			}
-#endif
-
-			const uint64_t seconds = ntohl(recvBuf[4]);  
-			const uint64_t fraction = ntohl(recvBuf[5]); 
-			const uint64_t microSecs = (fraction * 1000000) >> 32;
-
-//			const uint64_t ctimeSeconds = seconds - 2208988800U;  // subtract unix time
-//			std::cout << "NTP received " << seconds << ", " << fraction << ", " << ctime((time_t*)&ctimeSeconds);
-
-			static const uint64_t l_ui64MicrosPerSecond = 1000*1000;
-
-			returnValue = (seconds << 32) + microSecs*(0xFFFFFFFF/(l_ui64MicrosPerSecond));
-
-		} catch (std::exception& e){
-
-			std::cerr << "NTP Client error: " << e.what() << std::endl;
-
-		}
-
-		return returnValue;
-	}
-};
 
 #if defined(TARGET_OS_Windows)
 
@@ -372,8 +291,8 @@ int main(int argc, char** argv)
 //	unsigned long min, max, actual;
 //	NtQueryTimerResolution(&min, &max, &actual);
 
-	const uint64_t ntpInterval = (2LL*60LL) << 32;	// 2 minutes in seconds, ov time
-	const bool ntpEnabled = false;
+	const uint32_t ntpInterval = 2*60*1000;			// How often to poll? Some servers may return identical values if polled too often. 2 minutes in milliseconds.
+	const bool ntpEnabled = true;
 	const double errorThMs = 5.0;					// If clock delta is more than this, count an error
 
 #if defined(TARGET_OS_Windows)
@@ -384,7 +303,7 @@ int main(int argc, char** argv)
 
 	printf("System supported timer period interval is [%d,%d] ms.\n", caps.wPeriodMin, caps.wPeriodMax);
 	
-	printf("Setting interval to %d ms\n", preferredInterval);
+	printf("Setting timer interval to %d ms\n", preferredInterval);
 	MMRESULT result = timeBeginPeriod(preferredInterval);
 	if(result!=0) {
 		printf("WARNING: setting time interval returned error code %d\n", result);
@@ -392,6 +311,13 @@ int main(int argc, char** argv)
 	if(sleepTime<preferredInterval) {
 		printf("WARNING: sleep time %d ms is smaller than the preferred clock interval %d ms\n", sleepTime, preferredInterval);
 	}
+
+	HANDLE l_oProcess = GetCurrentProcess();
+	SetPriorityClass(l_oProcess, REALTIME_PRIORITY_CLASS);		// The highest priority class
+	SetThreadPriority(l_oProcess, THREAD_PRIORITY_NORMAL);		// Even higher options: THREAD_PRIORITY_HIGHEST, THREAD_PRIORITY_TIME_CRITICAL
+
+	// Ad-hoc sleep a bit to let clock stabilize after timeBeginPeriod()
+	boost::this_thread::sleep(boost::posix_time::millisec(1000));
 #endif
 
 #if 0
@@ -420,7 +346,9 @@ int main(int argc, char** argv)
 	FILE* fe = fopen(filename, "w");
 
 	// @warning Use a server at home that you can access.
-	NTPClient NTP("ntp.inria.fr");
+	NTPClient NTP("ntp.inria.fr", (ntpEnabled ? ntpInterval : 0) , getBoostTime);
+	// Ad-hoc sleep a bit to let the NTP get its date.
+	boost::this_thread::sleep(boost::posix_time::millisec(2000));
 
 	Measurement timeSystem;
 	Measurement timeBoost;
@@ -446,9 +374,8 @@ int main(int argc, char** argv)
 	timeZ2.last = timeZ2.start;
 #endif
 
-	timeNTP.start = (ntpEnabled ? NTP.getTime() : 0);
+	timeNTP.start = NTP.getTime();
 	timeNTP.last = timeNTP.start;
-	uint64_t ntpPolled = timeSystem.start;
 
 	fprintf(f, "Record,Expect,SystemTime,BoostTime,zGetTime,Z1,Z2,NTPTime\n");
 	fprintf(fd, "Record,SystemTime,BoostTime,zGetTime,Z1,Z2,NTPTime\n");
@@ -471,15 +398,7 @@ int main(int argc, char** argv)
 		timeZ1.now = zgetTime1();
 		timeZ2.now = zgetTime2();
 #endif
-		if(ntpEnabled && ntpPolled + ntpInterval <= timeSystem.now)
-		{
-			timeNTP.now = NTP.getTime();
-			ntpPolled = timeSystem.now;
-		}
-		else
-		{
-			timeNTP.now = timeNTP.last;
-		}
+		timeNTP.now = NTP.getTime();
 
 		// const uint64_t dSystem = timeSystem.now - timeSystem.last;
 		// std::cout << i << " : " << (dSystem>>32) << ", " << (dSystem & 0x0000000FFFFFFFFLL) << "\n";
