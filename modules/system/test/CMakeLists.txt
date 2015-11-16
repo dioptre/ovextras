@@ -22,6 +22,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} test_time.cpp ntpclient.cpp ntpclient.h)
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindThirdPartyBoost")
+INCLUDE("FindThirdPartyBoost_Chrono")
 INCLUDE("FindThirdPartyBoost_Thread")
 INCLUDE("FindThirdPartyBoost_System")
 

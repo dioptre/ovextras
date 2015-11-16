@@ -19,6 +19,12 @@
 #include <boost/thread.hpp>
 #include <boost/config.hpp>
 
+// On Linuxes, needs libboost-chrono1.48dev; may require updating ALL boost pkgs to 1.48
+#if defined(TARGET_HAS_Boost_Chrono)
+#define BOOST_CHRONO_HEADER_ONLY
+#include <boost/chrono.hpp>
+#endif
+
 #if defined TARGET_OS_Linux
  #include <unistd.h>
  #include <ctime>
@@ -241,6 +247,40 @@ uint64_t getBoostTime(void)
 	return retVal;
 }
 
+#if defined(TARGET_HAS_Boost_Chrono)
+uint64_t getBoostChronoTime(void)
+{
+	static bool l_bInitialized=false;
+	static boost::chrono::steady_clock::time_point l_oTimeStart;
+
+	if(!l_bInitialized)
+	{
+		l_oTimeStart = boost::chrono::steady_clock::now();
+		l_bInitialized = true;
+	}
+
+	const boost::chrono::steady_clock::time_point l_oTimeNow = boost::chrono::steady_clock::now();
+
+	const boost::chrono::steady_clock::duration l_oElapsed = l_oTimeNow - l_oTimeStart;
+
+    const boost::chrono::microseconds l_oElapsedMs = boost::chrono::duration_cast<boost::chrono::microseconds>(l_oElapsed);
+
+	const uint64_t l_ui64MicrosPerSecond = 1000*1000;
+
+	const uint64_t seconds = l_oElapsedMs.count() / l_ui64MicrosPerSecond;
+	const uint64_t fraction = l_oElapsedMs.count() % l_ui64MicrosPerSecond;
+
+	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
+	const uint64_t retVal =  (seconds<<32) + fraction*(0xFFFFFFFF/l_ui64MicrosPerSecond);
+
+//	std::cout << "poo: " << OpenViBE::ITimeArithmetics::timeToSeconds(retVal) << "\n";
+
+	return retVal;
+}
+#else
+uint64_t getBoostChronoTime(void) { return 0; }
+#endif
+
 class Measurement
 {
 public:
@@ -352,6 +392,7 @@ int main(int argc, char** argv)
 
 	Measurement timeSystem;
 	Measurement timeBoost;
+	Measurement timeBoostChrono;
 	Measurement timeZ;
 	Measurement timeZ1;
 	Measurement timeZ2;
@@ -359,6 +400,9 @@ int main(int argc, char** argv)
 
 	timeBoost.start = getBoostTime();
 	timeBoost.last = timeBoost.start;
+
+	timeBoostChrono.start = getBoostChronoTime();
+	timeBoostChrono.last = timeBoostChrono.start;
 
 	timeZ.start= zgetTime();
 	timeZ.last = timeZ.start;
@@ -377,9 +421,9 @@ int main(int argc, char** argv)
 	timeNTP.start = NTP.getTime();
 	timeNTP.last = timeNTP.start;
 
-	fprintf(f, "Record,Expect,SystemTime,BoostTime,zGetTime,Z1,Z2,NTPTime\n");
-	fprintf(fd, "Record,SystemTime,BoostTime,zGetTime,Z1,Z2,NTPTime\n");
-	fprintf(fe, "SystemTime,BoostTime,zGetTime,Z1,Z2,NTPTime\n");
+	fprintf(f, "Record,Expect,SystemTime,BoostTime,BoostChrono,zGetTime,Z1,Z2,NTPTime\n");
+	fprintf(fd, "Record,SystemTime,BoostTime,BoostChrono,zGetTime,Z1,Z2,NTPTime\n");
+	fprintf(fe, "SystemTime,BoostTime,BoostChrono,zGetTime,Z1,Z2,NTPTime\n");
 
 	int i = 0;
 	while (timeZ.last < timeZ.start + (runTime << 32))
@@ -391,6 +435,7 @@ int main(int argc, char** argv)
 		}
 
 		timeBoost.now = getBoostTime();
+		timeBoostChrono.now = getBoostChronoTime();
 		timeZ.now = zgetTime();
 
 #if defined(TARGET_OS_Windows)
@@ -408,6 +453,7 @@ int main(int argc, char** argv)
 
 		const double diffSystem = OpenViBE::ITimeArithmetics::timeToSeconds(timeSystem.now - timeSystem.last) * 1000.0;
 		const double diffBoost = OpenViBE::ITimeArithmetics::timeToSeconds(timeBoost.now - timeBoost.last) * 1000.0;
+		const double diffBoostChrono = OpenViBE::ITimeArithmetics::timeToSeconds(timeBoostChrono.now - timeBoostChrono.last) * 1000.0;
 		const double diffZ = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ.now - timeZ.last) * 1000.0;
 		const double diffZ1 = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ1.now - timeZ1.last) * 1000.0;
 		const double diffZ2 = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ2.now - timeZ2.last) * 1000.0;
@@ -415,6 +461,7 @@ int main(int argc, char** argv)
 
 		if( fabs(diffSystem - sleepTime) > errorThMs ) timeSystem.errors++;
 		if( fabs(diffBoost - sleepTime) > errorThMs ) timeBoost.errors++;
+		if( fabs(diffBoostChrono - sleepTime) > errorThMs ) timeBoostChrono.errors++;
 		if( fabs(diffZ - sleepTime) > errorThMs ) timeZ.errors++;
 		if( fabs(diffZ1 - sleepTime) > errorThMs ) timeZ1.errors++;
 		if( fabs(diffZ2 - sleepTime) > errorThMs ) timeZ2.errors++;
@@ -422,6 +469,7 @@ int main(int argc, char** argv)
 
 		const double elapsedSystem = OpenViBE::ITimeArithmetics::timeToSeconds(timeSystem.now - timeSystem.start) * 1000.0;
 		const double elapsedBoost = OpenViBE::ITimeArithmetics::timeToSeconds(timeBoost.now - timeBoost.start) * 1000.0;
+		const double elapsedBoostChrono = OpenViBE::ITimeArithmetics::timeToSeconds(timeBoostChrono.now - timeBoostChrono.start) * 1000.0;
 		const double elapsedZ = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ.now - timeZ.start) * 1000.0;
 		const double elapsedZ1 = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ1.now - timeZ1.start) * 1000.0;
 		const double elapsedZ2 = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ2.now - timeZ2.start) * 1000.0;
@@ -432,13 +480,14 @@ int main(int argc, char** argv)
 		// fprintf(f, "zGetTime: %lf\n", (zt >> 22) / 1024.0 * 1000);
 		//fprintf(f, "%d,%lf,%lf,%lf\n", i, st_d, zt_d, zt_d - st_d);
 		// Times elapsed since start
-		fprintf(f, "%d,%lld,%lf,%lf,%lf,%lf,%lf,%lf\n", i, (i+1)*sleepTime, elapsedSystem, elapsedBoost, elapsedZ, elapsedZ1, elapsedZ2, elapsedNTP);
+		fprintf(f, "%d,%lld,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n", i, (i+1)*sleepTime, elapsedSystem, elapsedBoost, elapsedBoostChrono, elapsedZ, elapsedZ1, elapsedZ2, elapsedNTP);
 		// Timediff since last measurement
-		fprintf(fd, "%d,%lf,%lf,%lf,%lf,%lf,%lf\n", i, diffSystem, diffBoost, diffZ, diffZ1, diffZ2, diffNTP);
+		fprintf(fd, "%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n", i, diffSystem, diffBoost, diffBoostChrono, diffZ, diffZ1, diffZ2, diffNTP);
 		i++;
 
 		timeSystem.last = timeSystem.now;
 		timeBoost.last = timeBoost.now;
+		timeBoostChrono.last = timeBoostChrono.now;
 		timeZ.last = timeZ.now;
 		timeZ1.last = timeZ1.now;
 		timeZ2.last = timeZ2.now;
@@ -448,9 +497,10 @@ int main(int argc, char** argv)
 	fclose(f);
 	fclose(fd);
 
-	fprintf(fe, "%f %f %f %f %f\n", 
+	fprintf(fe, "%f %f %f %f %f %f\n", 
 		timeSystem.errors/(float)i,
 		timeBoost.errors/(float)i,
+		timeBoostChrono.errors/(float)i,
 		timeZ.errors/(float)i,
 		timeZ1.errors/(float)i,
 		timeZ2.errors/(float)i
