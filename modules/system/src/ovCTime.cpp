@@ -5,8 +5,13 @@
 // \note On Windows, unless timeBeginPeriod(1) is set, all the non-QPC functions here may have only 15ms accuracy.
 // \warning On Windows, avoid "using namespace System;" here as it may cause confusion with stuff coming from windows/boost
 
-// #define OV_CLASSIC_TIME                  // Use the 'classic' openvibe timing routines.
-#define OV_BOOST_TIME                       // Use timing routines based on boost. 
+#if defined(TARGET_HAS_Boost_Chrono)
+#define OV_BOOST_CHRONO_TIME               // Use timing routines based on boost::chrono.
+#else
+#define OV_CLASSIC_TIME                    // Use the 'classic' openvibe timing routines.
+#endif
+           
+//#define OV_BOOST_POSIX_TIME              // Use timing routines based on boost::posix_time, may not have a monotonic guarantee?
 
 #if defined(OV_CLASSIC_TIME)
 
@@ -208,7 +213,7 @@ uint64 System::Time::zgetTime(void)
 
 #endif
 
-#elif defined(OV_BOOST_TIME)
+#elif defined(OV_BOOST_POSIX_TIME) || defined(OV_BOOST_CHRONO_TIME)
 
 #include <boost/thread.hpp>
 
@@ -244,6 +249,8 @@ uint32 System::Time::getTime(void)
 	return static_cast<uint32>((zgetTime()*1000)>>32);
 }
 
+#if defined(OV_BOOST_POSIX_TIME) 
+
 uint64 System::Time::zgetTime(void)
 {
 	static boolean l_bInitialized = false;
@@ -268,6 +275,39 @@ uint64 System::Time::zgetTime(void)
 	return l_ui64ReturnValue;
 }
 
+#elif defined(OV_BOOST_CHRONO_TIME)
 
-#endif // OV_BOOST_TIME
+#define BOOST_CHRONO_HEADER_ONLY
+#include <boost/chrono.hpp>
+
+uint64 System::Time::zgetTime(void)
+{
+	static bool l_bInitialized=false;
+	static boost::chrono::steady_clock::time_point l_oTimeStart;
+	if(!l_bInitialized)
+	{
+		l_oTimeStart = boost::chrono::steady_clock::now();
+		l_bInitialized = true;
+	}
+
+	const boost::chrono::steady_clock::time_point l_oTimeNow = boost::chrono::steady_clock::now();
+
+	const boost::chrono::steady_clock::duration l_oElapsed = l_oTimeNow - l_oTimeStart;
+
+    const boost::chrono::microseconds l_oElapsedMs = boost::chrono::duration_cast<boost::chrono::microseconds>(l_oElapsed);
+
+	const uint64_t l_ui64MicrosPerSecond = 1000*1000;
+
+	const uint64_t l_ui64Seconds = l_oElapsedMs.count() / l_ui64MicrosPerSecond;
+	const uint64_t l_ui64Fraction = l_oElapsedMs.count() % l_ui64MicrosPerSecond;
+
+	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
+	const uint64_t l_ui64ReturnValue =  (l_ui64Seconds<<32) + l_ui64Fraction*(0xFFFFFFFF/l_ui64MicrosPerSecond);
+
+	return l_ui64ReturnValue;
+}
+
+#endif // OV_BOOST_CHRONO_TIME
+
+#endif // OV_BOOST_POSIX_TIME || OV_BOOST_CHRONO_TIME
 

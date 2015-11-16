@@ -17,6 +17,8 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 
 INCLUDE("FindOpenViBECommon")
 INCLUDE("FindThirdPartyBoost")
+INCLUDE("FindThirdPartyBoost_Chrono")
+INCLUDE("FindThirdPartyBoost_System")
 INCLUDE("FindThirdPartyBoost_Thread")
 
 # ---------------------------------
