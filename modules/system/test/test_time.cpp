@@ -310,6 +310,36 @@ ULONG NtQueryTimerResolution(
 }; /* extern "C" */
 #endif
 
+// Spin the clock, make an estimate of the clock granularity
+void spinTest(const char *clockName, uint64_t (*getTimeFunct)(void) )
+{
+	const uint64_t l_ui64TestFor = 5LL << 32;
+
+	printf("%s spin test... ", clockName);
+	const uint64_t l_ui64StartTime = getTimeFunct();
+	uint64_t l_ui64Now = l_ui64StartTime;
+	uint64_t l_ui64Previous = l_ui64Now;
+	uint64_t l_ui64CumulativeStep = 0;
+	uint64_t l_ui64Estimates = 0;
+	while( l_ui64Now - l_ui64StartTime < l_ui64TestFor)
+	{
+		l_ui64Now = getTimeFunct();
+		if(l_ui64Now > l_ui64Previous) 
+		{
+			l_ui64CumulativeStep += (l_ui64Now - l_ui64Previous);
+			l_ui64Estimates++;
+		}
+		if(l_ui64Now < l_ui64Previous)
+		{
+			printf("Error, clock is not monotonic\n");
+			return;
+		}
+		l_ui64Previous = l_ui64Now;
+	}
+	const double l_f64Step = OpenViBE::ITimeArithmetics::timeToSeconds(l_ui64CumulativeStep) / l_ui64Estimates;
+	printf("clock step seems to be %f ms\n", l_f64Step*1000.0);
+//	printf("  accu %lld after %lld iters.\n", l_ui64CumulativeStep, l_ui64Estimates);
+}
 
 int main(int argc, char** argv)
 {
@@ -349,7 +379,7 @@ int main(int argc, char** argv)
 		printf("WARNING: setting time interval returned error code %d\n", result);
 	}
 	if(sleepTime<preferredInterval) {
-		printf("WARNING: sleep time %d ms is smaller than the preferred clock interval %d ms\n", sleepTime, preferredInterval);
+		printf("WARNING: sleep time %lld ms is smaller than the preferred clock interval %d ms\n", sleepTime, preferredInterval);
 	}
 
 	HANDLE l_oProcess = GetCurrentProcess();
@@ -361,7 +391,7 @@ int main(int argc, char** argv)
 #endif
 
 #if 0
-	// boost time test
+	// boost sleep accuracy test
 	boost::posix_time::ptime t1 = boost::posix_time::second_clock::local_time();
 	boost::this_thread::sleep(boost::posix_time::millisec(500));
 	boost::posix_time::ptime t2 = boost::posix_time::second_clock::local_time();
@@ -373,6 +403,12 @@ int main(int argc, char** argv)
 	boost::posix_time::ptime mst2 = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::time_duration msdiff = mst2 - mst1;
 	std::cout << "boost2 : " << msdiff.total_milliseconds() << std::endl;
+#endif
+
+#if 1
+	// todo: if needed, test the other clocks
+	spinTest("boost::chrono", getBoostChronoTime);
+	spinTest("boost::posix_time", getBoostTime);
 #endif
 
 	printf("Run time: %lld (s), Sleep time: %lld (ms)\n", runTime, sleepTime);

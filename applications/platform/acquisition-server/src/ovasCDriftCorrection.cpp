@@ -190,7 +190,7 @@ void CDriftCorrection::printStats(void) const
 		<< "\n";
 
 	const int64 l_i64RemainingDriftCount = (static_cast<int64>(m_ui64CorrectedSampleCount) - static_cast<int64>(l_ui64TheoreticalSampleCount));
-	const float64 l_f64RemainingDriftMs = l_i64RemainingDriftCount / static_cast<float64>(m_ui32SamplingFrequency);
+	const float64 l_f64RemainingDriftMs = 1000.0 * l_i64RemainingDriftCount / static_cast<float64>(m_ui32SamplingFrequency);
 	m_rKernelContext.getLogManager() << (std::abs(l_f64RemainingDriftMs) > l_ui64DriftToleranceDuration ? LogLevel_ImportantWarning : LogLevel_Info)
 		<< "  Remaining  : " << l_i64RemainingDriftCount << " samples (" << truncateDecimals(l_f64RemainingDriftMs,1) << "ms, " << truncateDecimals(100*l_f64RemainingDriftMs/l_ui64DriftToleranceDuration,1) << "% of tol.)"
 		<< (m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled ? "" : ", after corr.")
