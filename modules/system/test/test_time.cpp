@@ -193,6 +193,7 @@ uint64_t getSystemTime(void)
 
 #endif
 
+	
 uint64_t zgetTime(void)
 {
 #if defined(TARGET_OS_Windows)
@@ -277,18 +278,34 @@ uint64_t getBoostChronoTime(void)
 
 	return retVal;
 }
-#else
-uint64_t getBoostChronoTime(void) { return 0; }
 #endif
 
-class Measurement
+uint64_t getNTPTime(void)
+{
+	// Change to server you can access
+	const char* NTPServer = "ntp.inria.fr";
+	// How often to poll? Some servers may return identical values if polled too often. 2 minutes in milliseconds.
+	const uint64_t ntpInterval = 2*60*1000;
+
+#if defined(TARGET_HAS_Boost_Chrono)
+	static NTPClient NTP(NTPServer, ntpInterval , getBoostChronoTime);
+#else
+	static NTPClient NTP(NTPServer, ntpInterval , getZTime);
+#endif
+
+	return NTP.getTime();
+}
+
+class Clock
 {
 public:
-	Measurement(void) : start(0),now(0),last(0),errors(0) { };
+	Clock( std::string name, uint64_t (*getTimeFunct)(void) ) : start(0),now(0),last(0),errors(0), m_sName(name), m_pGetTimeFunct(getTimeFunct) { };
 	uint64_t start;
 	uint64_t now;
 	uint64_t last;
 	uint64_t errors;
+	std::string m_sName;
+	uint64_t (*m_pGetTimeFunct)(void);
 };
 
 // #include <ntstatus.h>
@@ -361,8 +378,6 @@ int main(int argc, char** argv)
 //	unsigned long min, max, actual;
 //	NtQueryTimerResolution(&min, &max, &actual);
 
-	const uint32_t ntpInterval = 2*60*1000;			// How often to poll? Some servers may return identical values if polled too often. 2 minutes in milliseconds.
-	const bool ntpEnabled = true;
 	const double errorThMs = 5.0;					// If clock delta is more than this, count an error
 
 #if defined(TARGET_OS_Windows)
@@ -421,48 +436,47 @@ int main(int argc, char** argv)
 	sprintf(filename, "timetest-%lld-%lld-errors.csv", runTime, sleepTime);
 	FILE* fe = fopen(filename, "w");
 
-	// @warning Use a server at home that you can access.
-	NTPClient NTP("ntp.inria.fr", (ntpEnabled ? ntpInterval : 0) , getBoostTime);
-	// Ad-hoc sleep a bit to let the NTP get its date.
-	boost::this_thread::sleep(boost::posix_time::millisec(2000));
+	std::vector<Clock> l_vClocks;
 
-	Measurement timeSystem;
-	Measurement timeBoost;
-	Measurement timeBoostChrono;
-	Measurement timeZ;
-	Measurement timeZ1;
-	Measurement timeZ2;
-	Measurement timeNTP;
-
-	timeBoost.start = getBoostTime();
-	timeBoost.last = timeBoost.start;
-
-	timeBoostChrono.start = getBoostChronoTime();
-	timeBoostChrono.last = timeBoostChrono.start;
-
-	timeZ.start= zgetTime();
-	timeZ.last = timeZ.start;
-
+	l_vClocks.push_back(Clock("zgetTime", zgetTime));						// the first clock controls the duration of the test
+	l_vClocks.push_back(Clock("BoostTime", getBoostTime));
+#if defined(TARGET_HAS_Boost_Chrono)
+	l_vClocks.push_back(Clock("BoostChronoTime", getBoostChronoTime));
+#endif
 #if defined(TARGET_OS_Windows)
-	timeSystem.start = getSystemTime();
-	timeSystem.last = timeSystem.start;
-
-	timeZ1.start= zgetTime1();
-	timeZ1.last = timeZ1.start;
-
-	timeZ2.start= zgetTime2();
-	timeZ2.last = timeZ2.start;
+	l_vClocks.push_back(Clock("systemTime", getSystemTime));
+	l_vClocks.push_back(Clock("zgetTime1", zgetTime1));
+	l_vClocks.push_back(Clock("zgetTime2", zgetTime2));
+#endif
+#define USE_NTP
+#if defined(USE_NTP)
+	l_vClocks.push_back(Clock("NTP", getNTPTime));
+	// NTP clock needs a moment to complete the poll, call once to start
+	getNTPTime(); 
+	boost::this_thread::sleep(boost::posix_time::millisec(2000));
 #endif
 
-	timeNTP.start = NTP.getTime();
-	timeNTP.last = timeNTP.start;
+	// Times elapsed since start per clock
+	fprintf(f, "Record,Expect");
+	// Timediff since last measurement
+	fprintf(fd, "Record");
+	for(size_t i=0;i<l_vClocks.size();i++)
+	{
+		fprintf(f, ",%s", l_vClocks[i].m_sName.c_str());
+		fprintf(fd, ",%s", l_vClocks[i].m_sName.c_str());
+	}
+	fprintf(f, "\n");
+	fprintf(fd, "\n");
 
-	fprintf(f, "Record,Expect,SystemTime,BoostTime,BoostChrono,zGetTime,Z1,Z2,NTPTime\n");
-	fprintf(fd, "Record,SystemTime,BoostTime,BoostChrono,zGetTime,Z1,Z2,NTPTime\n");
-	fprintf(fe, "SystemTime,BoostTime,BoostChrono,zGetTime,Z1,Z2,NTPTime\n");
+	// Start all the clocks
+	for(size_t i=0;i<l_vClocks.size();i++)
+	{
+		l_vClocks[i].start = l_vClocks[i].m_pGetTimeFunct();
+		l_vClocks[i].last = l_vClocks[i].start;
+	}
 
-	int i = 0;
-	while (timeZ.last < timeZ.start + (runTime << 32))
+	int pollCount = 0;
+	while (l_vClocks[0].last < l_vClocks[0].start + (runTime << 32))
 	{
 		if (sleepTime > 0)
 		{
@@ -470,77 +484,49 @@ int main(int argc, char** argv)
 			// Sleep(sleepTime);
 		}
 
-		timeBoost.now = getBoostTime();
-		timeBoostChrono.now = getBoostChronoTime();
-		timeZ.now = zgetTime();
+		// First poll all the clocks
+		for(size_t i=0;i<l_vClocks.size();i++)
+		{	
+			l_vClocks[i].now = l_vClocks[i].m_pGetTimeFunct();
+		}
 
-#if defined(TARGET_OS_Windows)
-		timeSystem.now = getSystemTime();
-		timeZ1.now = zgetTime1();
-		timeZ2.now = zgetTime2();
-#endif
-		timeNTP.now = NTP.getTime();
+		// Then do the rest, so each clock gets approx the same (tiny) delay from this
 
-		// const uint64_t dSystem = timeSystem.now - timeSystem.last;
-		// std::cout << i << " : " << (dSystem>>32) << ", " << (dSystem & 0x0000000FFFFFFFFLL) << "\n";
-		// const uint64_t dBoost = timeBoost.now - timeBoost.last;
-		// std::cout << i << " : " << (dBoost>>32) << ", " << (dBoost & 0x0000000FFFFFFFFLL) << " -> " << OpenViBE::ITimeArithmetics::timeToSeconds(dBoost) << "\n";
-		// std::cout << i << " : " << timeSystem.start << " " << timeSystem.now << "\n";
+		fprintf(f, "%d,%lld", pollCount, (pollCount+1)*sleepTime);
+		fprintf(fd, "%d", pollCount);
 
-		const double diffSystem = OpenViBE::ITimeArithmetics::timeToSeconds(timeSystem.now - timeSystem.last) * 1000.0;
-		const double diffBoost = OpenViBE::ITimeArithmetics::timeToSeconds(timeBoost.now - timeBoost.last) * 1000.0;
-		const double diffBoostChrono = OpenViBE::ITimeArithmetics::timeToSeconds(timeBoostChrono.now - timeBoostChrono.last) * 1000.0;
-		const double diffZ = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ.now - timeZ.last) * 1000.0;
-		const double diffZ1 = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ1.now - timeZ1.last) * 1000.0;
-		const double diffZ2 = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ2.now - timeZ2.last) * 1000.0;
-		const double diffNTP = OpenViBE::ITimeArithmetics::timeToSeconds(timeNTP.now - timeNTP.last) * 1000.0;
+		for(size_t i=0;i<l_vClocks.size();i++)
+		{
+			const double elapsed = OpenViBE::ITimeArithmetics::timeToSeconds(l_vClocks[i].now - l_vClocks[i].start) * 1000.0;
+			const double diff = OpenViBE::ITimeArithmetics::timeToSeconds(l_vClocks[i].now - l_vClocks[i].last) * 1000.0;
 
-		if( fabs(diffSystem - sleepTime) > errorThMs ) timeSystem.errors++;
-		if( fabs(diffBoost - sleepTime) > errorThMs ) timeBoost.errors++;
-		if( fabs(diffBoostChrono - sleepTime) > errorThMs ) timeBoostChrono.errors++;
-		if( fabs(diffZ - sleepTime) > errorThMs ) timeZ.errors++;
-		if( fabs(diffZ1 - sleepTime) > errorThMs ) timeZ1.errors++;
-		if( fabs(diffZ2 - sleepTime) > errorThMs ) timeZ2.errors++;
-		// if( fabs(diffNTP - sleepTime) > 0.1*sleepTime ) timeNTP.errors++;
+			if( fabs(diff - sleepTime) > errorThMs ) l_vClocks[i].errors++;
 
-		const double elapsedSystem = OpenViBE::ITimeArithmetics::timeToSeconds(timeSystem.now - timeSystem.start) * 1000.0;
-		const double elapsedBoost = OpenViBE::ITimeArithmetics::timeToSeconds(timeBoost.now - timeBoost.start) * 1000.0;
-		const double elapsedBoostChrono = OpenViBE::ITimeArithmetics::timeToSeconds(timeBoostChrono.now - timeBoostChrono.start) * 1000.0;
-		const double elapsedZ = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ.now - timeZ.start) * 1000.0;
-		const double elapsedZ1 = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ1.now - timeZ1.start) * 1000.0;
-		const double elapsedZ2 = OpenViBE::ITimeArithmetics::timeToSeconds(timeZ2.now - timeZ2.start) * 1000.0;
-		const double elapsedNTP = OpenViBE::ITimeArithmetics::timeToSeconds(timeNTP.now - timeNTP.start) * 1000.0;
+			// Times elapsed since start
+			fprintf(f, ",%lf", elapsed);
 
-		// fprintf(f, "Cycle %d\n", i);
-		// fprintf(f, "SystemTime: [%lld]\n", Delta(start_st, st) / 10000);
-		// fprintf(f, "zGetTime: %lf\n", (zt >> 22) / 1024.0 * 1000);
-		//fprintf(f, "%d,%lf,%lf,%lf\n", i, st_d, zt_d, zt_d - st_d);
-		// Times elapsed since start
-		fprintf(f, "%d,%lld,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n", i, (i+1)*sleepTime, elapsedSystem, elapsedBoost, elapsedBoostChrono, elapsedZ, elapsedZ1, elapsedZ2, elapsedNTP);
-		// Timediff since last measurement
-		fprintf(fd, "%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n", i, diffSystem, diffBoost, diffBoostChrono, diffZ, diffZ1, diffZ2, diffNTP);
-		i++;
+			// Timediff since last measurement
+			fprintf(fd, ",%lf", diff);
 
-		timeSystem.last = timeSystem.now;
-		timeBoost.last = timeBoost.now;
-		timeBoostChrono.last = timeBoostChrono.now;
-		timeZ.last = timeZ.now;
-		timeZ1.last = timeZ1.now;
-		timeZ2.last = timeZ2.now;
-		timeNTP.last = timeNTP.now;
+			l_vClocks[i].last = l_vClocks[i].now;
+		}
+
+		fprintf(f, "\n");
+		fprintf(fd, "\n");
+
+		pollCount++;
+
 	}
 
 	fclose(f);
 	fclose(fd);
 
-	fprintf(fe, "%f %f %f %f %f %f\n", 
-		timeSystem.errors/(float)i,
-		timeBoost.errors/(float)i,
-		timeBoostChrono.errors/(float)i,
-		timeZ.errors/(float)i,
-		timeZ1.errors/(float)i,
-		timeZ2.errors/(float)i
-		);
+	for(uint32_t i=0;i<l_vClocks.size();i++)
+	{
+		fprintf(fe, "%f ", l_vClocks[i].errors/(float)pollCount);
+	}
+	fprintf(fe, "\n");
+
 	fclose(fe);
 
 #if defined(TARGET_OS_Windows)
