@@ -290,7 +290,7 @@ uint64_t getNTPTime(void)
 #if defined(TARGET_HAS_Boost_Chrono)
 	static NTPClient NTP(NTPServer, ntpInterval , getBoostChronoTime);
 #else
-	static NTPClient NTP(NTPServer, ntpInterval , getZTime);
+	static NTPClient NTP(NTPServer, ntpInterval , zgetTime);
 #endif
 
 	return NTP.getTime();
@@ -332,7 +332,7 @@ void spinTest(const char *clockName, uint64_t (*getTimeFunct)(void) )
 {
 	const uint64_t l_ui64TestFor = 5LL << 32;
 
-	printf("%s spin test... ", clockName);
+	printf("Spin test %s ... ", clockName);
 	const uint64_t l_ui64StartTime = getTimeFunct();
 	uint64_t l_ui64Now = l_ui64StartTime;
 	uint64_t l_ui64Previous = l_ui64Now;
@@ -422,7 +422,11 @@ int main(int argc, char** argv)
 
 #if 1
 	// todo: if needed, test the other clocks
+#if defined(TARGET_HAS_Boost_Chrono)
 	spinTest("boost::chrono", getBoostChronoTime);
+#else
+	spinTest("zgetTime", zgetTime);
+#endif
 	spinTest("boost::posix_time", getBoostTime);
 #endif
 
