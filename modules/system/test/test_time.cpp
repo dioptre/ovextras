@@ -243,8 +243,6 @@ uint64_t getBoostTime(void)
 	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
 	const uint64_t retVal =  (seconds<<32) + fraction*(0xFFFFFFFF/l_ui64MicrosPerSecond);
 
-//	std::cout << "poo: " << OpenViBE::ITimeArithmetics::timeToSeconds(retVal) << "\n";
-
 	return retVal;
 }
 
@@ -274,8 +272,6 @@ uint64_t getBoostChronoTime(void)
 	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
 	const uint64_t retVal =  (seconds<<32) + fraction*(0xFFFFFFFF/l_ui64MicrosPerSecond);
 
-//	std::cout << "poo: " << OpenViBE::ITimeArithmetics::timeToSeconds(retVal) << "\n";
-
 	return retVal;
 }
 #endif
@@ -296,6 +292,44 @@ uint64_t getNTPTime(void)
 	return NTP.getTime();
 }
 
+#if defined(TARGET_OS_Windows)
+
+#include <sys/timeb.h>
+
+uint64_t getFTime(void)
+{
+	static bool l_bInitialized=false;
+	static uint64_t l_ui64TimeStartMs;
+
+	if(!l_bInitialized)
+	{
+		timeb l_oTimeStart;
+		ftime(&l_oTimeStart);
+		l_ui64TimeStartMs = l_oTimeStart.time * 1000 + l_oTimeStart.millitm; 
+		l_bInitialized = true;
+	}
+
+	timeb l_oTimeNow;
+	ftime(&l_oTimeNow);
+
+	const uint64_t l_ui64TimeNowMs = (l_oTimeNow.time * 1000 + l_oTimeNow.millitm);
+
+	const uint64_t l_ui64ElapsedMs = l_ui64TimeNowMs - l_ui64TimeStartMs;
+
+	static const uint64_t l_ui64MillisPerSecond = 1000;
+
+	const uint64_t seconds = l_ui64ElapsedMs / l_ui64MillisPerSecond;
+	const uint64_t fraction = l_ui64ElapsedMs % l_ui64MillisPerSecond;
+
+	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
+	const uint64_t retVal =  (seconds<<32) + fraction*(0xFFFFFFFF/l_ui64MillisPerSecond);
+
+	return retVal;
+
+}
+
+#endif
+
 class Clock
 {
 public:
@@ -307,25 +341,6 @@ public:
 	std::string m_sName;
 	uint64_t (*m_pGetTimeFunct)(void);
 };
-
-// #include <ntstatus.h>
-
-#if 0
-// hidden functions
-#pragma comment(lib, "ntdll")
-
-extern "C" {
-ULONG NtSetTimerResolution(
-		IN  ULONG   desiredResolution,
-		IN  BOOLEAN setResolution,
-		OUT PULONG  currentResolution);
-
-ULONG NtQueryTimerResolution(
-		OUT PULONG minimumResolution,
-		OUT PULONG maximumResolution,
-		OUT PULONG currentResolution);
-}; /* extern "C" */
-#endif
 
 // Spin the clock, make an estimate of the clock granularity
 void spinTest(const char *clockName, uint64_t (*getTimeFunct)(void) )
@@ -354,9 +369,40 @@ void spinTest(const char *clockName, uint64_t (*getTimeFunct)(void) )
 		l_ui64Previous = l_ui64Now;
 	}
 	const double l_f64Step = OpenViBE::ITimeArithmetics::timeToSeconds(l_ui64CumulativeStep) / l_ui64Estimates;
-	printf("clock step seems to be %f ms\n", l_f64Step*1000.0);
+	printf("measured step is %f ms\n", l_f64Step*1000.0);
 //	printf("  accu %lld after %lld iters.\n", l_ui64CumulativeStep, l_ui64Estimates);
 }
+
+#if defined(TARGET_OS_Windows)
+
+#include <Winternl.h>
+
+typedef ULONG (__stdcall* NtQueryTimerResolution)(
+		OUT PULONG minimumResolution,
+		OUT PULONG maximumResolution,
+		OUT PULONG currentResolution);
+
+// Returns 100ns units, needs a 'hidden' function from ntdll.dll
+void getClockResolution(uint32_t& minimum, uint32_t& maximum, uint32_t& current)
+{
+    HMODULE hModule = LoadLibrary(TEXT("ntdll.dll"));
+	if(!hModule) {
+		std::cout << "Error loading ntdll.dll\n";
+		return;
+	}
+    NtQueryTimerResolution func = (NtQueryTimerResolution)GetProcAddress(hModule, "NtQueryTimerResolution");
+	if(!func)
+	{
+		std::cout << "Error getting NtQueryTimerResolution function handle\n";
+		return;
+	}
+
+	ULONG min = 0, max = 0, cur = 0;
+	func(&min, &max, &cur);
+
+	minimum = min; maximum = max; current = cur;
+}
+#endif
 
 int main(int argc, char** argv)
 {
@@ -375,26 +421,29 @@ int main(int argc, char** argv)
 		sleepTime = atoi(argv[2]);
 	}
 	
-//	unsigned long min, max, actual;
-//	NtQueryTimerResolution(&min, &max, &actual);
-
 	const double errorThMs = 5.0;					// If clock delta is more than this, count an error
 
 #if defined(TARGET_OS_Windows)
-	const uint32_t preferredInterval = 1;			// set the preferred clock interval, in ms
+	const uint32_t preferredResolution = 5;			// set the preferred clock resolution, in ms
 
-	TIMECAPS caps;
-	timeGetDevCaps(&caps, sizeof(TIMECAPS));
+	uint32_t minimumResolution, maximumResolution, currentResolution;
+	getClockResolution(minimumResolution, maximumResolution, currentResolution);
 
-	printf("System supported timer period interval is [%d,%d] ms.\n", caps.wPeriodMin, caps.wPeriodMax);
-	
-	printf("Setting timer interval to %d ms\n", preferredInterval);
-	MMRESULT result = timeBeginPeriod(preferredInterval);
-	if(result!=0) {
-		printf("WARNING: setting time interval returned error code %d\n", result);
+	printf("System's timer resolution range is [%.2f, %.2f] ms\n", maximumResolution/10000.0, minimumResolution/10000.0);
+	printf("Current timer resolution is %.2f ms\n", currentResolution/10000.0);
+
+	if(currentResolution/10000.0 <= preferredResolution)
+	{
+		printf("WARNING: Current clock resolution is already <= the requested limit %d ms\n", preferredResolution);
 	}
-	if(sleepTime<preferredInterval) {
-		printf("WARNING: sleep time %lld ms is smaller than the preferred clock interval %d ms\n", sleepTime, preferredInterval);
+
+	printf("Requesting timer resolution of %d ms\n", preferredResolution);
+	MMRESULT result = timeBeginPeriod(preferredResolution);
+	if(result!=0) {
+		printf("WARNING: setting time resolution returned error code %d\n", result);
+	}
+	if(sleepTime<preferredResolution) {
+		printf("WARNING: sleep time %lld ms is smaller than the requested clock resolution %d ms\n", sleepTime, preferredResolution);
 	}
 
 	HANDLE l_oProcess = GetCurrentProcess();
@@ -429,6 +478,9 @@ int main(int argc, char** argv)
 #endif
 	spinTest("boost::posix_time", getBoostTime);
 #endif
+#if defined(TARGET_OS_Windows)
+	spinTest("ftime", getFTime);
+#endif
 
 	printf("Run time: %lld (s), Sleep time: %lld (ms)\n", runTime, sleepTime);
 
@@ -451,6 +503,7 @@ int main(int argc, char** argv)
 	l_vClocks.push_back(Clock("systemTime", getSystemTime));
 	l_vClocks.push_back(Clock("zgetTime1", zgetTime1));
 	l_vClocks.push_back(Clock("zgetTime2", zgetTime2));
+	l_vClocks.push_back(Clock("ftime", getFTime));
 #endif
 #define USE_NTP
 #if defined(USE_NTP)
@@ -484,6 +537,8 @@ int main(int argc, char** argv)
 	{
 		if (sleepTime > 0)
 		{
+			// @todo busy wait on a clock here to avoid confusion coming from sleep granularity (on Win, often resembles the clock resolution)
+			// do a separate test for sleep accuracy if needed.
 			boost::this_thread::sleep(boost::posix_time::millisec(sleepTime));
 			// Sleep(sleepTime);
 		}
@@ -534,7 +589,7 @@ int main(int argc, char** argv)
 	fclose(fe);
 
 #if defined(TARGET_OS_Windows)
-	timeEndPeriod(preferredInterval);
+	timeEndPeriod(preferredResolution);
 #endif
 
 	return 0;
