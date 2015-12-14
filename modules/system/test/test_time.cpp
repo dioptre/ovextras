@@ -443,7 +443,8 @@ int main(int argc, char** argv)
 		printf("WARNING: setting time resolution returned error code %d\n", result);
 	}
 	if(sleepTime<preferredResolution) {
-		printf("WARNING: sleep time %lld ms is smaller than the requested clock resolution %d ms\n", sleepTime, preferredResolution);
+		printf("WARNING: sleep time %lld ms is smaller than the requested clock resolution %d ms\n", 
+			static_cast<long long>(sleepTime), preferredResolution);
 	}
 
 	HANDLE l_oProcess = GetCurrentProcess();
@@ -482,14 +483,14 @@ int main(int argc, char** argv)
 	spinTest("ftime", getFTime);
 #endif
 
-	printf("Run time: %lld (s), Sleep time: %lld (ms)\n", runTime, sleepTime);
+	printf("Run time: %lld (s), Sleep time: %lld (ms)\n", static_cast<long long>(runTime), static_cast<long long>(sleepTime));
 
 	char filename[255];
-	sprintf(filename, "timetest-%lld-%lld-elapsed.csv", runTime, sleepTime);
+	sprintf(filename, "timetest-%lld-%lld-elapsed.csv", static_cast<long long>(runTime), static_cast<long long>(sleepTime));
 	FILE* f = fopen(filename, "w");
-	sprintf(filename, "timetest-%lld-%lld-delta.csv", runTime, sleepTime);
+	sprintf(filename, "timetest-%lld-%lld-delta.csv", static_cast<long long>(runTime), static_cast<long long>(sleepTime));
 	FILE* fd = fopen(filename, "w");
-	sprintf(filename, "timetest-%lld-%lld-errors.csv", runTime, sleepTime);
+	sprintf(filename, "timetest-%lld-%lld-errors.csv", static_cast<long long>(runTime), static_cast<long long>(sleepTime));
 	FILE* fe = fopen(filename, "w");
 
 	std::vector<Clock> l_vClocks;
@@ -551,7 +552,7 @@ int main(int argc, char** argv)
 
 		// Then do the rest, so each clock gets approx the same (tiny) delay from this
 
-		fprintf(f, "%d,%lld", pollCount, (pollCount+1)*sleepTime);
+		fprintf(f, "%d,%lld", pollCount, static_cast<long long>((pollCount+1)*sleepTime));
 		fprintf(fd, "%d", pollCount);
 
 		for(size_t i=0;i<l_vClocks.size();i++)
