@@ -182,7 +182,7 @@ void CPluginTCPTagging::startHook(const std::vector<OpenViBE::CString>& vSelecte
 	// Get POSIX time (number of milliseconds since epoch)
         timeb time_buffer;
         ftime(&time_buffer);
-        uint64 posixTime = time_buffer.time*1000 + time_buffer.millitm;
+        uint64 posixTime = time_buffer.time*1000ULL + time_buffer.millitm;
 
 	// Initialize time counters.
 	m_previousPosixTime = posixTime;
@@ -199,7 +199,7 @@ void CPluginTCPTagging::loopHook(std::vector < std::vector < OpenViBE::float32 >
 	// Get POSIX time (number of milliseconds since epoch)
         timeb time_buffer;
         ftime(&time_buffer);
-        uint64 posixTime = time_buffer.time*1000 + time_buffer.millitm;
+        uint64 posixTime = time_buffer.time*1000ULL + time_buffer.millitm;
 
         Tag tag;
 
@@ -207,9 +207,19 @@ void CPluginTCPTagging::loopHook(std::vector < std::vector < OpenViBE::float32 >
 	while(tagStream.pop(tag)) {
 		m_rKernelContext.getLogManager() << Kernel::LogLevel_Info << "New Tag received (" << tag.padding << ", " << tag.identifier << ", " << tag.timestamp << ")\n";
 
+		// add 10 ms delay to ensure that the timestamp fits in the time frame when it arrives just before updating the time counters
+		tag.timestamp += 10;
+
+		// check that the timestamp fits in the time frame
+		if (tag.timestamp < m_previousPosixTime) {
+			m_rKernelContext.getLogManager() << Kernel::LogLevel_Error << "The Tag is discarded because it arrives too late to be inserted in the current signal block\n";
+			continue;
+		}
+
 		// Marker time correction (simple local linear interpolation).
-		if (m_previousPosixTime != posixTime)
-			tag.timestamp = m_previousSampleTime + (tag.timestamp - m_previousPosixTime)* (sampleTime - m_previousSampleTime) / (posixTime - m_previousPosixTime);
+		if (m_previousPosixTime != posixTime) {
+			tag.timestamp = m_previousSampleTime + (tag.timestamp - m_previousPosixTime)*((sampleTime - m_previousSampleTime) / (posixTime - m_previousPosixTime));
+		}
 
 		// Insert tag into the stimulation set.
 		stimulationSet.appendStimulation(tag.identifier, tag.timestamp, 40 /* duration of tag (ms) */);
