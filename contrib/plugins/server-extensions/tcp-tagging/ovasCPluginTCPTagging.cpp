@@ -50,8 +50,8 @@ typedef boost::shared_ptr<TagSession> SharedSessionPtr;
 class TagSession : public boost::enable_shared_from_this<TagSession>
 {
 public:
- 	TagSession(boost::asio::io_service& io_service, std::set<SharedSessionPtr>& sessionSet, const SharedQueuePtr& queue) 
-		: m_socket(io_service), m_sessionSet(sessionSet), m_queuePtr(queue)
+ 	TagSession(boost::asio::io_service& io_service, const SharedQueuePtr& queue) 
+		: m_socket(io_service), m_queuePtr(queue)
 	{
 	}
 
@@ -62,7 +62,6 @@ public:
 
 	void start()
 	{
-		m_sessionSet.insert(shared_from_this());
 		startRead();
 	}
 
@@ -75,25 +74,22 @@ public:
 	void handleRead(const boost::system::error_code& error)
 	{
 		if (!error) {
-			// Correct endianness
+			// Correct endianness.
 			m_tag.padding = be64toh(m_tag.padding);
 			m_tag.identifier = be64toh(m_tag.identifier);
 			m_tag.timestamp = be64toh(m_tag.timestamp);
 
+			// Push tag to the queue.
 			m_queuePtr->push(m_tag);
+
 			// Continue reading.
  			startRead();
-		}
-		else {
-			// Eventually close the connection (once all shared references to this instance have been destroyed).
-			m_sessionSet.erase(shared_from_this());
 		}
 	}
 
 private:
 	Tag m_tag;
 	tcp::socket m_socket;
-	std::set<SharedSessionPtr>& m_sessionSet;
 	SharedQueuePtr m_queuePtr;
 };
 
@@ -124,7 +120,7 @@ public:
 private:
 	void startAccept()
 	{
- 		SharedSessionPtr newSession (new TagSession(m_ioService, m_sessionSet, m_queuePtr));
+ 		SharedSessionPtr newSession (new TagSession(m_ioService, m_queuePtr));
 		// Note: if this instance of TaggingSever is destroyed then the associated io_service is destroyed as well.
                 // Therefore the call-back will never be called if this instance is destroyed and it is safe to use this instead of shared pointer.
 		m_acceptor.async_accept(newSession->socket(), boost::bind(&TagServer::handleAccept, this, newSession, _1));
@@ -142,7 +138,6 @@ private:
 private:
 	boost::asio::io_service m_ioService;
 	tcp::acceptor m_acceptor;
-	std::set<SharedSessionPtr> m_sessionSet;
 	const SharedQueuePtr& m_queuePtr;
 };
 
