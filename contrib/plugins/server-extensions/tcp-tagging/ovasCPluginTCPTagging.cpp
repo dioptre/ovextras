@@ -14,7 +14,7 @@
 #include <endian.h>
 #elif defined TARGET_OS_Windows
 #include <winsock2.h>
-#define be64toh(x) htonll(x)
+#define be64toh(x) ntohll(x)
 #endif
 
 // Implementation of PluginTCPTagging.
