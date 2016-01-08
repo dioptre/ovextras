@@ -368,20 +368,16 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 	//std::cout<<rf64Class<<std::endl;
 	//std::cout<<"probability"<<std::endl;
 
-	//If we are not in these mode, label is NULL and there is no probability
+	//If we are not in these modes, label is NULL and there is no probability
 	if(m_pModel->param.svm_type == C_SVC || m_pModel->param.svm_type == NU_SVC)
 	{
+		rProbabilityValue.setSize(m_pModel->nr_class);
 		this->getLogManager() << LogLevel_Trace <<"Label predict: "<<rf64Class<<"\n";
 
 		for(int i=0;i<m_pModel->nr_class;i++)
 		{
 			this->getLogManager() << LogLevel_Trace << "index:"<<i<<" label:"<< m_pModel->label[i]<<" probability:"<<l_pProbEstimates[i]<<"\n";
-			if( m_pModel->label[i] == 1 )
-			{
-				rProbabilityValue.setSize(1);
-				rProbabilityValue[0]=l_pProbEstimates[i];
-
-			}
+			rProbabilityValue[i]=l_pProbEstimates[i];
 		}
 	}
 	else
