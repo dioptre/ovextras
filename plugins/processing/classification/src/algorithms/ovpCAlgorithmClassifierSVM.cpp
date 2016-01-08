@@ -264,14 +264,16 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 		m_oProb.y[i] = rFeatureVectorSet[i].getLabel();
 		for(uint32 j=0;j<m_ui32NumberOfFeatures;j++)
 		{
-			m_oProb.x[i][j].index=j;
+			m_oProb.x[i][j].index=j+1;
 			m_oProb.x[i][j].value=rFeatureVectorSet[i].getBuffer()[j];
 		}
 		m_oProb.x[i][m_ui32NumberOfFeatures].index=-1;
 	}
-	if(m_oParam.gamma == 0 && m_ui32NumberOfFeatures > 0)
+
+	// Gamma of zero is interpreted as a request for automatic selection
+	if(m_oParam.gamma == 0)
 	{
-		m_oParam.gamma = 1.0/m_ui32NumberOfFeatures;
+		m_oParam.gamma = 1.0/(m_ui32NumberOfFeatures > 0 ? m_ui32NumberOfFeatures : 1.0);
 	}
 
 	if(m_oParam.kernel_type == PRECOMPUTED)
@@ -336,13 +338,19 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 		this->getLogManager() << LogLevel_Error << "Classifier expected " << m_ui32NumberOfFeatures << " features, got " << rFeatureVector.getSize() << "\n";		
 		return false;
 	}
+	if(m_pModel->param.gamma == 0 &&
+		(m_pModel->param.kernel_type == POLY || m_pModel->param.kernel_type == RBF || m_pModel->param.kernel_type == SIGMOID))
+	{
+		m_pModel->param.gamma = 1.0/(m_ui32NumberOfFeatures > 0 ? m_ui32NumberOfFeatures : 1.0);
+		this->getLogManager() << LogLevel_Warning << "The SVM model had gamma=0. Setting it to [" << m_pModel->param.gamma << "].\n";		
+	}
 
 	//std::cout<<"create l_pX"<<std::endl;
 	svm_node* l_pX=new svm_node[rFeatureVector.getSize()+1];
 	//std::cout<<"rFeatureVector.getSize():"<<rFeatureVector.getSize()<<"m_ui32NumberOfFeatures"<<m_ui32NumberOfFeatures<<std::endl;
 	for(unsigned int i=0;i<rFeatureVector.getSize();i++)
 	{
-		l_pX[i].index=i;
+		l_pX[i].index=i+1;
 		l_pX[i].value=rFeatureVector.getBuffer()[i];
 		//std::cout<< l_pX[i].index << ";"<<l_pX[i].value<<" ";
 	}
@@ -646,7 +654,7 @@ void CAlgorithmClassifierSVM::loadParamNodeConfiguration(XML::IXMLNode *pParamNo
 	}
 
 	//gamma
-	l_pTempNode = pParamNode->getChildByName(c_sDegreeNodeName);
+	l_pTempNode = pParamNode->getChildByName(c_sGammaNodeName);
 	if(l_pTempNode != NULL)
 	{
 		std::stringstream l_sData(l_pTempNode->getPCData());
