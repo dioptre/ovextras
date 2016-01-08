@@ -430,7 +430,7 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 
 			if(!OpenViBEToolkit::Tools::Matrix::saveToTextFile(l_oSelectedVectors, m_sSpatialFilterConfigurationFilename, 10)) 
 			{
-				this->getLogManager() << "Save to file [" << m_sSpatialFilterConfigurationFilename << "] failed\n";
+				this->getLogManager() << LogLevel_Error << "Save to file [" << m_sSpatialFilterConfigurationFilename << "] failed\n";
 				return false;
 			}
 		}
