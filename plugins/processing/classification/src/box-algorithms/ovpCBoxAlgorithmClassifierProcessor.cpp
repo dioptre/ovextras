@@ -15,32 +15,21 @@ using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Classification;
 using namespace std;
 
-boolean CBoxAlgorithmClassifierProcessor::initialize(void)
+boolean CBoxAlgorithmClassifierProcessor::loadClassifier(const char* sFilename)
 {
-	m_pFeaturesDecoder = NULL;
-	m_pLabelsEncoder = NULL;
-	m_pClassificationStateEncoder = NULL;
-	m_pProbabilityValues=NULL;
-	m_pClassifier = NULL;
-
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-
-	//First of all, let's get the XML file for configuration
-	CString l_sConfigurationFilename;
-	l_rStaticBoxContext.getSettingValue(0, l_sConfigurationFilename);
-
-	if(l_sConfigurationFilename == CString("")) 
+	if(m_pClassifier)
 	{
-		this->getLogManager() << LogLevel_Error << "You need to specify a classifier .xml for the box (use Classifier Trainer to create one)\n";
-		return false;
+		m_pClassifier->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
+		m_pClassifier = NULL;
 	}
 
 	XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
-	XML::IXMLNode *l_pRootNode = l_pHandler->parseFile(l_sConfigurationFilename.toASCIIString());
+	XML::IXMLNode *l_pRootNode = l_pHandler->parseFile(sFilename);
 
 	if(!l_pRootNode) 
 	{
-		this->getLogManager() << LogLevel_Error << "Unable to get root node from [" << l_sConfigurationFilename << "]\n";
+		this->getLogManager() << LogLevel_Error << "Unable to get root node from [" << sFilename << "]\n";
 		return false;
 	}
 
@@ -87,7 +76,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		//If the algorithm is still unknown, that means that we face an error
 		if(l_oAlgorithmClassIdentifier==OV_UndefinedIdentifier)
 		{
-			this->getLogManager() << LogLevel_Error << "Couldn't restore a classifier from the file [" << l_sConfigurationFilename << "].\n";
+			this->getLogManager() << LogLevel_Error << "Couldn't restore a classifier from the file [" << sFilename << "].\n";
 			return false;
 		}
 	}
@@ -125,15 +114,6 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		this->getLogManager() << LogLevel_Warning << "The configuration file had no node " << c_sStimulationsNodeName << ". Trouble may appear later.\n";
 	}
 
-	m_pFeaturesDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_FeatureVectorStreamDecoder));
-	m_pFeaturesDecoder->initialize();
-
-	m_pLabelsEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
-	m_pLabelsEncoder->initialize();
-
-	m_pClassificationStateEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamEncoder));
-	m_pClassificationStateEncoder->initialize();
-
 	const CIdentifier l_oClassifierAlgorithmIdentifier = this->getAlgorithmManager().createAlgorithm(l_oAlgorithmClassIdentifier);
 	if(l_oClassifierAlgorithmIdentifier == OV_UndefinedIdentifier)
 	{
@@ -145,14 +125,14 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(l_oClassifierAlgorithmIdentifier);
 	m_pClassifier->initialize();
 
-	m_pProbabilityValues=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamEncoder));
-	m_pProbabilityValues->initialize();
+	// Connect the params to the new classifier
 
+	TParameterHandler < OpenViBE::IMatrix* > ip_oFeatureVector = m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector);
+	ip_oFeatureVector.setReferenceTarget(m_oFeaturesDecoder.getOutputMatrix());
 
-
-	m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)->setReferenceTarget(m_pFeaturesDecoder->getOutputParameter(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputParameterId_Matrix));
-	m_pClassificationStateEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
-	m_pProbabilityValues->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
+	m_oClassificationStateEncoder.getInputMatrix().setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
+	m_oProbabilityValuesEncoder.getInputMatrix().setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
+	// note: labelsencoder cannot be directly bound here as the classifier returns a float, but we need to output a stimulation
 
 	TParameterHandler < XML::IXMLNode* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 	ip_pClassificationConfiguration = l_pRootNode->getChildByName(c_sClassifierRoot)->getChild(0);
@@ -163,6 +143,37 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 
 	l_pRootNode->release();
 	l_pHandler->release();
+
+	return true;
+}
+
+boolean CBoxAlgorithmClassifierProcessor::initialize(void)
+{
+	m_pClassifier = NULL;
+
+	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+
+	//First of all, let's get the XML file for configuration
+	CString l_sConfigurationFilename;
+	l_rStaticBoxContext.getSettingValue(0, l_sConfigurationFilename);
+
+	if(l_sConfigurationFilename == CString("")) 
+	{
+		this->getLogManager() << LogLevel_Error << "You need to specify a classifier .xml for the box (use Classifier Trainer to create one)\n";
+		return false;
+	}
+
+	m_oFeaturesDecoder.initialize(*this,0);
+	m_oStimulationDecoder.initialize(*this, 1);
+
+	m_oLabelsEncoder.initialize(*this, 0);
+	m_oClassificationStateEncoder.initialize(*this, 1);
+	m_oProbabilityValuesEncoder.initialize(*this, 2);
+
+	if(!loadClassifier(l_sConfigurationFilename.toASCIIString()))
+	{
+		return false;
+	}
 
 	m_bOutputHeaderSent=false;
 	return true;
@@ -177,33 +188,12 @@ boolean CBoxAlgorithmClassifierProcessor::uninitialize(void)
 		m_pClassifier = NULL;
 	}
 
-	if(m_pClassificationStateEncoder)
-	{
-		m_pClassificationStateEncoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pClassificationStateEncoder);
-		m_pClassificationStateEncoder = NULL;
-	}
+	m_oClassificationStateEncoder.uninitialize();
+	m_oProbabilityValuesEncoder.uninitialize();
+	m_oLabelsEncoder.uninitialize();
 
-	if(m_pProbabilityValues)
-	{
-		m_pProbabilityValues->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pProbabilityValues);
-		m_pProbabilityValues = NULL;
-	}
-
-	if(m_pLabelsEncoder)
-	{
-		m_pLabelsEncoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pLabelsEncoder);
-		m_pLabelsEncoder = NULL;
-	}
-
-	if(m_pFeaturesDecoder)
-	{
-		m_pFeaturesDecoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_pFeaturesDecoder);
-		m_pFeaturesDecoder = NULL;
-	}
+	m_oFeaturesDecoder.uninitialize();
+	m_oStimulationDecoder.uninitialize();
 
 	return true;
 }
@@ -221,29 +211,16 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
-		uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
+		const uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
+		const uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
 
-		TParameterHandler < const IMemoryBuffer* > ip_pFeatureVectorMemoryBuffer(m_pFeaturesDecoder->getInputParameter(OVP_GD_Algorithm_FeatureVectorStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		TParameterHandler < IMemoryBuffer* > op_pLabelsMemoryBuffer(m_pLabelsEncoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-		TParameterHandler < IMemoryBuffer* > op_pClassificationStateMemoryBuffer(m_pClassificationStateEncoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-		TParameterHandler < IMemoryBuffer* > op_pProbabilityValues(m_pProbabilityValues->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-
-		TParameterHandler < IStimulationSet* > ip_pLabelsStimulationSet(m_pLabelsEncoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_InputParameterId_StimulationSet));
-		TParameterHandler < float64 > op_f64ClassificationStateClass(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
-
-		ip_pFeatureVectorMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
-		op_pLabelsMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
-		op_pClassificationStateMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(1);
-		op_pProbabilityValues = l_rDynamicBoxContext.getOutputChunk(2);
-
-		m_pFeaturesDecoder->process();
-		if(m_pFeaturesDecoder->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedHeader))
+		m_oFeaturesDecoder.decode(i);
+		if(m_oFeaturesDecoder.isHeaderReceived())
 		{
 			m_bOutputHeaderSent=false;
 		}
-		if(m_pFeaturesDecoder->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedBuffer))
-		{
+		if(m_oFeaturesDecoder.isBufferReceived())
+		{	
 			if(m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify))
 			{
 				if (m_pClassifier->isOutputTriggerActive(OVTK_Algorithm_Classifier_OutputTriggerId_Success))
@@ -251,23 +228,29 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 					//this->getLogManager() << LogLevel_Warning << "---Classification successful---\n";
 					if(!m_bOutputHeaderSent)
 					{
-						m_pLabelsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
-						m_pClassificationStateEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
-						m_pProbabilityValues->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeHeader);
+						m_oLabelsEncoder.encodeHeader();
+						m_oClassificationStateEncoder.encodeHeader();
+						m_oProbabilityValuesEncoder.encodeHeader();
+
 						l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64StartTime);
 						l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64StartTime);
 						l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64StartTime);
 						m_bOutputHeaderSent=true;
 					}
 
-					ip_pLabelsStimulationSet->setStimulationCount(1);
-					ip_pLabelsStimulationSet->setStimulationIdentifier(0, m_vStimulation[op_f64ClassificationStateClass]);
-					ip_pLabelsStimulationSet->setStimulationDate(0, l_ui64EndTime);
-					ip_pLabelsStimulationSet->setStimulationDuration(0, 0);
+					TParameterHandler < float64 > op_f64ClassificationStateClass(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
 
-					m_pLabelsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
-					m_pClassificationStateEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeBuffer);
-					m_pProbabilityValues->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeBuffer);
+					IStimulationSet* l_pSet = m_oLabelsEncoder.getInputStimulationSet();
+
+					l_pSet->setStimulationCount(1);
+					l_pSet->setStimulationIdentifier(0, m_vStimulation[op_f64ClassificationStateClass]);
+					l_pSet->setStimulationDate(0, l_ui64EndTime);
+					l_pSet->setStimulationDuration(0, 0);
+
+					m_oLabelsEncoder.encodeBuffer();
+					m_oClassificationStateEncoder.encodeBuffer();
+					m_oProbabilityValuesEncoder.encodeBuffer();
+
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 					l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
 					l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64EndTime);
@@ -284,17 +267,52 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 				return false;
 			}
 		}
-		if(m_pFeaturesDecoder->isOutputTriggerActive(OVP_GD_Algorithm_FeatureVectorStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if(m_oFeaturesDecoder.isEndReceived())
 		{
-			m_pLabelsEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeEnd);
-			m_pClassificationStateEncoder->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeEnd);
-			m_pProbabilityValues->process(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputTriggerId_EncodeEnd);
+			m_oLabelsEncoder.encodeEnd();
+			m_oClassificationStateEncoder.encodeEnd();
+			m_oProbabilityValuesEncoder.encodeEnd();
+
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64EndTime);
 		}
 
 		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
+	}
+
+	// Check if we have a command
+	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
+	{
+		m_oStimulationDecoder.decode(i);
+		if(m_oStimulationDecoder.isHeaderReceived())
+		{
+
+		}
+		if(m_oStimulationDecoder.isBufferReceived())
+		{
+			for(uint64 i=0;i<m_oStimulationDecoder.getOutputStimulationSet()->getStimulationCount();i++)
+			{
+				if(m_oStimulationDecoder.getOutputStimulationSet()->getStimulationIdentifier(i) == OVTK_StimulationId_TrainCompleted)
+				{
+					IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+
+					CString l_sConfigurationFilename;
+					l_rStaticBoxContext.getSettingValue(0, l_sConfigurationFilename);
+
+					this->getLogManager() << LogLevel_Trace << "Reloading classifier\n";
+					if(!loadClassifier(l_sConfigurationFilename.toASCIIString()))
+					{
+						this->getLogManager() << LogLevel_Error << "Error reloading classifier\n";
+						return false;
+					}
+				}
+			}
+		}
+		if(m_oStimulationDecoder.isEndReceived())
+		{
+
+		}
 	}
 
 	return true;

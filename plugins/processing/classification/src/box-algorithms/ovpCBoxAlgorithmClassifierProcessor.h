@@ -27,12 +27,18 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierProcessor)
 
+		protected:
+			virtual OpenViBE::boolean loadClassifier(const char *sFilename);
+
 		private:
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pFeaturesDecoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pLabelsEncoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pClassificationStateEncoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pProbabilityValues;
+			OpenViBEToolkit::TFeatureVectorDecoder< CBoxAlgorithmClassifierProcessor >  m_oFeaturesDecoder;
+			OpenViBEToolkit::TStimulationDecoder< CBoxAlgorithmClassifierProcessor >    m_oStimulationDecoder;
+
+			OpenViBEToolkit::TStimulationEncoder< CBoxAlgorithmClassifierProcessor >    m_oLabelsEncoder;
+			OpenViBEToolkit::TStreamedMatrixEncoder< CBoxAlgorithmClassifierProcessor > m_oClassificationStateEncoder;
+			OpenViBEToolkit::TStreamedMatrixEncoder< CBoxAlgorithmClassifierProcessor > m_oProbabilityValuesEncoder;
+			
 			OpenViBE::Kernel::IAlgorithmProxy* m_pClassifier;
 
 			std::map < OpenViBE::float64, OpenViBE::uint64 > m_vStimulation;
@@ -51,7 +57,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Generic classification, relying on several box algorithms"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Classifies incoming feature vectors using a previously learned classifier."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Classification"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("2.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("2.1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-apply"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_ClassifierProcessor; }
@@ -61,6 +67,7 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput  ("Features",                            OV_TypeId_FeatureVector);
+				rBoxAlgorithmPrototype.addInput  ("Commands",                            OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addOutput ("Labels",                              OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addOutput ("Hyperplane distance",                 OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addOutput ("Probability values",                  OV_TypeId_StreamedMatrix);
