@@ -13,15 +13,13 @@
 #include <map>
 #include <deque>
 
-#define Stimulation_Idle	0x320
-
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
 	{
 		enum EArrowDirection
 		{
-			EArrowDirection_None,
+			EArrowDirection_None	= 0,
 			EArrowDirection_Left,
 			EArrowDirection_Right,
 			EArrowDirection_Up,
@@ -52,17 +50,24 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process();
 
+			virtual void redraw();
+			virtual void resize(OpenViBE::uint32 ui32Width, OpenViBE::uint32 ui32Height);
+
+		protected:
+
 			virtual void setStimulation(const OpenViBE::uint32 ui32StimulationIndex, const OpenViBE::uint64 ui64StimulationIdentifier, const OpenViBE::uint64 ui64StimulationDate);
 
 			virtual void setMatrixBuffer(const OpenViBE::float64* pBuffer);
 
 			virtual void processState();
 
-			virtual void redraw();
-			virtual void resize(OpenViBE::uint32 ui32Width, OpenViBE::uint32 ui32Height);
+
 			virtual void drawReferenceCross();
 			virtual void drawArrow(EArrowDirection eDirection);
 			virtual void drawBar();
+			virtual void drawAccuracy();
+			virtual void updateConfusionMatrix(OpenViBE::float64 f64Prediction);
+			virtual OpenViBE::float64 aggregatePredictions(bool bIncludeAll);
 
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_GrazVisualization)
 
@@ -88,7 +93,6 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64StartTime;
 			OpenViBE::uint64 m_ui64EndTime;
 
-			OpenViBE::boolean m_bError;
 			OpenViBE::boolean m_bTwoValueInput;
 
 			GdkPixbuf * m_pOriginalBar;
@@ -108,14 +112,17 @@ namespace OpenViBEPlugins
 			GdkColor m_oBackgroundColor;
 			GdkColor m_oForegroundColor;
 
-			// Score
-			std::map<OpenViBE::uint32, OpenViBE::uint32> m_vWindowFailCount;
-			std::map<OpenViBE::uint32, OpenViBE::uint32> m_vWindowSuccessCount;
-			std::deque<OpenViBE::float64> m_vAmplitude;
-			OpenViBE::uint32 m_ui32WindowIndex;
+			std::deque<OpenViBE::float64> m_vAmplitude; // predictions for the current trial
 
 			OpenViBE::boolean m_bShowInstruction;
 			OpenViBE::boolean m_bShowFeedback;
+			OpenViBE::boolean m_bDelayFeedback;
+			OpenViBE::boolean m_bShowAccuracy;
+
+			OpenViBE::uint64 m_i64PredictionsToIntegrate;
+
+			OpenViBE::CMatrix m_oConfusion;
+
 		};
 
 		/**
@@ -125,12 +132,12 @@ namespace OpenViBEPlugins
 		{
 		public:
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Graz visualization"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Bruno Renier"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Bruno Renier, Jussi T. Lindgren"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Visualization plugin for the Graz experiment"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Visualization/Feedback plugin for the Graz experiment"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualisation/Presentation"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
 			virtual void release(void)                                   { }
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_GrazVisualization; }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-fullscreen"); }
@@ -146,14 +153,16 @@ namespace OpenViBEPlugins
 				rPrototype.addInput("Stimulations", OV_TypeId_Stimulations);
 				rPrototype.addInput("Amplitude", OV_TypeId_StreamedMatrix);
 
-				rPrototype.addSetting("Show instruction", OV_TypeId_Boolean, "true");
-				rPrototype.addSetting("Show feedback", OV_TypeId_Boolean, "false");
+				rPrototype.addSetting("Show instruction", OV_TypeId_Boolean,            "true");
+				rPrototype.addSetting("Show feedback", OV_TypeId_Boolean,               "false");
+				rPrototype.addSetting("Delay feedback", OV_TypeId_Boolean,              "false");
+				rPrototype.addSetting("Show accuracy", OV_TypeId_Boolean,               "false");
+				rPrototype.addSetting("Predictions to integrate", OV_TypeId_Integer,    "5");
 
 				return true;
 			}
 
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_GrazVisualizationDesc)
-
 		};
 
 	};

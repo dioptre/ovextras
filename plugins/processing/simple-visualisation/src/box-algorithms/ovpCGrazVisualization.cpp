@@ -46,9 +46,25 @@ namespace OpenViBEPlugins
 
 			switch(ui64StimulationIdentifier)
 			{
-				case Stimulation_Idle:
+				case OVTK_GDF_End_Of_Trial:
 					m_eCurrentState = EGrazVisualizationState_Idle;
 					l_bStateUpdated = true;
+					if(m_bShowAccuracy || m_bDelayFeedback)
+					{
+						const float64 l_f64Prediction = aggregatePredictions(true);
+						updateConfusionMatrix(l_f64Prediction);
+						m_f64BarScale = l_f64Prediction;
+					}
+					break;
+
+				case OVTK_GDF_End_Of_Session:
+					m_eCurrentState = EGrazVisualizationState_Idle;
+					l_bStateUpdated = true;
+					if(m_bShowFeedback)
+					{
+						m_f64BarScale = 0;
+						drawBar();
+					}
 					break;
 
 				case OVTK_GDF_Cross_On_Screen:
@@ -91,11 +107,16 @@ namespace OpenViBEPlugins
 					break;
 
 				case OVTK_GDF_Feedback_Continuous:
+					// New trial starts
+
 					m_eCurrentState = EGrazVisualizationState_ContinousFeedback;
-#if 1
-					m_ui32WindowIndex = 0;
 					m_vAmplitude.clear();
-#endif
+
+					// as some trials may have artifacts and hence very high responses from e.g. LDA
+					// its better to reset the max between trials
+					m_f64MaxAmplitude = -DBL_MAX;
+					m_f64BarScale = 0;
+
 					l_bStateUpdated = true;
 					break;
 			}
@@ -125,7 +146,6 @@ namespace OpenViBEPlugins
 					break;
 
 				case EGrazVisualizationState_Idle:
-					//m_f64MaxAmplitude = -DBL_MAX;
 					if(GTK_WIDGET(m_pDrawingArea)->window)
 						gdk_window_invalidate_rect(GTK_WIDGET(m_pDrawingArea)->window,
 								NULL,
@@ -155,7 +175,6 @@ namespace OpenViBEPlugins
 			m_eCurrentDirection(EArrowDirection_None),
 			m_f64MaxAmplitude(-DBL_MAX),
 			m_f64BarScale(0.0),
-			m_bError(false),
 			m_bTwoValueInput(false),
 			m_pOriginalBar(NULL),
 			m_pLeftBar(NULL),
@@ -169,7 +188,10 @@ namespace OpenViBEPlugins
 			m_pUpArrow(NULL),
 			m_pDownArrow(NULL),
 			m_bShowInstruction(true),
-			m_bShowFeedback(false)
+			m_bShowFeedback(false),
+			m_bDelayFeedback(false),
+			m_bShowAccuracy(false),
+			m_i64PredictionsToIntegrate(5)
 		{
 			m_oBackgroundColor.pixel = 0;
 			m_oBackgroundColor.red = 0;//0xFFFF;
@@ -180,23 +202,30 @@ namespace OpenViBEPlugins
 			m_oForegroundColor.red = 0;
 			m_oForegroundColor.green = 0x8000;
 			m_oForegroundColor.blue = 0;
+
+			m_oConfusion.setDimensionCount(2);
+			m_oConfusion.setDimensionSize(0,2);
+			m_oConfusion.setDimensionSize(1,2);
 		}
 
 		boolean CGrazVisualization::initialize()
 		{
-			CString l_sShowInstruction;
-			if(getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0, l_sShowInstruction))
+			m_bShowInstruction            = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+			m_bShowFeedback               = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+			m_bDelayFeedback              = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+			m_bShowAccuracy               = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+			m_i64PredictionsToIntegrate   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+
+			if(m_i64PredictionsToIntegrate<1) 
 			{
-				m_bShowInstruction=(l_sShowInstruction==CString("true")?true:false);
-			}
-			CString l_sShowFeedback;
-			if(getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1, l_sShowFeedback))
-			{
-				m_bShowFeedback=(l_sShowFeedback==CString("true")?true:false);
+				this->getLogManager() << LogLevel_Error << "Number of predictions to integrate must be at least 1!";
+				return false;
 			}
 
 			m_oStimulationDecoder.initialize(*this,0);
 			m_oMatrixDecoder.initialize(*this,1);
+
+			OpenViBEToolkit::Tools::Matrix::clearContent(m_oConfusion);
 
 			//load the gtk builder interface
 			m_pBuilderInterface=gtk_builder_new(); // glade_xml_new(OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/openvibe-simple-visualisation-GrazVisualization.ui", NULL, NULL);
@@ -241,8 +270,7 @@ namespace OpenViBEPlugins
 
 			if(!m_pOriginalLeftArrow || !m_pOriginalRightArrow || !m_pOriginalUpArrow || !m_pOriginalDownArrow)
 			{
-				this->getLogManager() << LogLevel_Error << "Error couldn't load arrow ressource files!\n";
-				m_bError = true;
+				this->getLogManager() << LogLevel_Error << "Error couldn't load arrow resource files!\n";
 
 				return false;
 			}
@@ -251,8 +279,7 @@ namespace OpenViBEPlugins
 			m_pOriginalBar = gdk_pixbuf_new_from_file_at_size(OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/openvibe-simple-visualisation-GrazVisualization-bar.png", -1, -1, NULL);
 			if(!m_pOriginalBar)
 			{
-				this->getLogManager() << LogLevel_Error <<"Error couldn't load bar ressource file!\n";
-				m_bError = true;
+				this->getLogManager() << LogLevel_Error <<"Error couldn't load bar resource file!\n";
 
 				return false;
 			}
@@ -307,11 +334,6 @@ namespace OpenViBEPlugins
 
 		boolean CGrazVisualization::processInput(uint32 ui32InputIndex)
 		{
-			if(m_bError)
-			{
-				return false;
-			}
-
 			getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 			return true;
 		}
@@ -342,26 +364,33 @@ namespace OpenViBEPlugins
 				{
 					const IMatrix* l_pMatrix = m_oMatrixDecoder.getOutputMatrix();
 	
-					if(l_pMatrix->getDimensionCount() != 1)
+					if(l_pMatrix->getDimensionCount() == 0)
 					{
-						this->getLogManager() << LogLevel_Error << "Error, dimension count isn't 1 for Amplitude input !\n";
-						m_bError = true;
+						this->getLogManager() << LogLevel_Error << "Error, dimension count is 0 for Amplitude input !\n";
 						return false;
 					}
 
-					if(l_pMatrix->getDimensionSize(0) != 1)
+					if(l_pMatrix->getDimensionCount() > 1)
 					{
-						if(l_pMatrix->getDimensionSize(0) == 2)
+						for(uint32 k=1;k<l_pMatrix->getDimensionSize(k);k++)
 						{
-							this->getLogManager() << LogLevel_Trace << "Got 2 value for feedback, feedback will be the difference between the 2 values.\n";
-							m_bTwoValueInput = true;
+							if(l_pMatrix->getDimensionSize(k) > 1)
+							{
+								this->getLogManager() << LogLevel_Error << "Error, only column vectors supported as Amplitude!\n";
+								return false;
+							}
 						}
-						else
-						{
-							this->getLogManager() << LogLevel_Error << "Error, dimension size isn't 1 for Amplitude input !\n";
-							m_bError = true;
-							return false;
-						}
+					}
+
+					if(l_pMatrix->getDimensionSize(0) == 0)
+					{
+						this->getLogManager() << LogLevel_Error << "Error, need at least 1 dimension in Amplitude input !\n";
+						return false;
+					}
+					else if(l_pMatrix->getDimensionSize(0) >= 2)
+					{
+						this->getLogManager() << LogLevel_Trace << "Got 2 or more dimensions for feedback, feedback will be the difference between the first two.\n";
+						m_bTwoValueInput = true;
 					}
 				}
 
@@ -390,12 +419,27 @@ namespace OpenViBEPlugins
 
 				case EGrazVisualizationState_ContinousFeedback:
 					drawReferenceCross();
-					if(m_bShowFeedback) drawBar();
+					if(m_bShowFeedback && !m_bDelayFeedback) 
+					{
+						drawBar();
+					}
+					break;
+
+				case EGrazVisualizationState_Idle:
+					if(m_bShowFeedback && m_bDelayFeedback)
+					{
+						drawBar();
+					}
 					break;
 
 				default:
 					break;
 			}
+			if(m_bShowAccuracy)
+			{
+				drawAccuracy();
+			}
+
 		}
 
 		void CGrazVisualization::drawReferenceCross()
@@ -501,81 +545,145 @@ namespace OpenViBEPlugins
 			}
 		}
 
+		void CGrazVisualization::drawAccuracy(void)
+		{
+			PangoLayout *layout;
+			char tmp[512];
+			layout = pango_layout_new(gdk_pango_context_get());
+
+			const float64* l_pBuffer = m_oConfusion.getBuffer();
+
+			sprintf(tmp, "L");
+			pango_layout_set_text(layout, tmp, -1);
+			gdk_draw_layout(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 8,     16, layout);
+
+			sprintf(tmp, "%.3d", (int)l_pBuffer[0]);
+			pango_layout_set_text(layout, tmp, -1);
+			gdk_draw_layout(m_pDrawingArea->window, m_pDrawingArea->style->white_gc,                                 8+16,  16, layout);
+
+			sprintf(tmp, "%.3d", (int)l_pBuffer[1]);
+			pango_layout_set_text(layout, tmp, -1);
+			gdk_draw_layout(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 8+56,  16, layout);
+
+			sprintf(tmp, "R");
+			pango_layout_set_text(layout, tmp, -1);
+			gdk_draw_layout(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 8,     32, layout);
+
+			sprintf(tmp, "%.3d", (int)l_pBuffer[2]);
+			pango_layout_set_text(layout, tmp, -1);
+			gdk_draw_layout(m_pDrawingArea->window, m_pDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pDrawingArea)], 8+16,  32, layout);
+
+			sprintf(tmp, "%.3d", (int)l_pBuffer[3]);
+			pango_layout_set_text(layout, tmp, -1);
+			gdk_draw_layout(m_pDrawingArea->window, m_pDrawingArea->style->white_gc,                                 8+56  ,32, layout);
+
+			uint32 l_i32Predictions=0;
+			for(uint32 i=0;i<4;i++) {
+				l_i32Predictions += (int)l_pBuffer[i];
+			}
+	
+			sprintf(tmp, "Acc = %3.1f%%", (l_i32Predictions == 0 ? 0 : 100.0*(l_pBuffer[0]+l_pBuffer[3])/(float64)l_i32Predictions));
+			pango_layout_set_text(layout, tmp, -1);
+			gdk_draw_layout(m_pDrawingArea->window, m_pDrawingArea->style->white_gc,                                 8+96, 32, layout);
+
+
+			g_object_unref(layout);
+		}
+
+		float64 CGrazVisualization::aggregatePredictions(bool bIncludeAll)
+		{
+			float64 l_f64VoteAggregate = 0;
+
+			// Do we have enough predictions to integrate a result?
+			if(m_vAmplitude.size()>=m_i64PredictionsToIntegrate)
+			{
+				// step backwards with rev iter to take the latest samples
+				uint64 count = 0;
+				for(std::deque<float64>::reverse_iterator a=m_vAmplitude.rbegin(); 
+					a!=m_vAmplitude.rend() && (bIncludeAll || count<m_i64PredictionsToIntegrate); a++,count++)
+				{
+					l_f64VoteAggregate += *a;
+					m_f64MaxAmplitude = std::max<float64>(m_f64MaxAmplitude, abs(*a));
+				}
+
+				l_f64VoteAggregate /= m_f64MaxAmplitude;
+				l_f64VoteAggregate /= count;
+
+			}
+
+			return l_f64VoteAggregate;
+		}
+
+		// @fixme for >2 classes
+		void CGrazVisualization::updateConfusionMatrix(float64 f64VoteAggregate)
+		{
+			if(m_eCurrentDirection == EArrowDirection_Left || m_eCurrentDirection == EArrowDirection_Right)
+			{
+				const uint32 l_ui32TrueDirection  = m_eCurrentDirection - 1;
+
+				const uint32 l_ui32ThisVote = (f64VoteAggregate < 0 ? 0 : 1);
+
+				(m_oConfusion.getBuffer())[l_ui32TrueDirection*2 + l_ui32ThisVote]++;
+
+				// std::cout << "Now " << l_ui32TrueDirection  << " vote " << l_ui32ThisVote << "\n";
+			}
+
+			// CString out;
+			// OpenViBEToolkit::Tools::Matrix::toString(m_oConfusion,out);
+			// this->getLogManager() << LogLevel_Info << "Trial conf " << out << "\n";
+		}
 
 		void CGrazVisualization::setMatrixBuffer(const float64* pBuffer)
 		{
-			if(m_bError)
+			if(m_eCurrentState != EGrazVisualizationState_ContinousFeedback)
 			{
+				// We're not inside a trial, discard the prediction
 				return;
 			}
 
-			float64 l_f64CurrentAmplitude = 0;
+			float64 l_f64PredictedAmplitude = 0;
 			if(m_bTwoValueInput)
 			{
-				m_vAmplitude.push_back(pBuffer[1] - pBuffer[0]);
+				// Ad-hoc forcing to probability (range [0,1], sum to 1). This will make scaling easier 
+				// if run forever in a continuous mode. If the input is already scaled this way, no effect.
+				// 
+				float64 l_f64Value0 = std::abs(pBuffer[0]);
+				float64 l_f64Value1 = std::abs(pBuffer[1]);
+				const float64 l_f64Sum = l_f64Value0 + l_f64Value1;
+				if(l_f64Sum!=0) 
+				{
+					l_f64Value0 = l_f64Value0 / l_f64Sum;
+					l_f64Value1 = l_f64Value1 / l_f64Sum;
+				}
+				else
+				{
+					l_f64Value0 = 0.5;
+					l_f64Value1 = 0.5;
+				}
+
+//				printf("%f %f\n", l_f64Value0, l_f64Value1);
+
+				l_f64PredictedAmplitude = l_f64Value1 - l_f64Value0;
 			}
 			else
 			{
-				m_vAmplitude.push_back(*pBuffer);
+				l_f64PredictedAmplitude = pBuffer[0];
 			}
 
-#if 1
-			if(m_vAmplitude.size()>5)
+			m_vAmplitude.push_back(l_f64PredictedAmplitude);
+
+			if(m_bShowFeedback && !m_bDelayFeedback)
 			{
-				m_vAmplitude.pop_front();
-			}
+				m_f64BarScale = aggregatePredictions(false);
 
-			for(std::deque<float64>::iterator a=m_vAmplitude.begin(); a!=m_vAmplitude.end(); a++)
-			{
-				l_f64CurrentAmplitude+=*a;
-			}
-			l_f64CurrentAmplitude/=m_vAmplitude.size();
-
-			if(m_eCurrentState==EGrazVisualizationState_ContinousFeedback)
-			{
-				if(!m_ui32WindowIndex)
-				{
-					uint32 l_ui32WindowCount=
-						m_vWindowSuccessCount.size()>m_vWindowFailCount.size()?
-						m_vWindowSuccessCount.size():m_vWindowFailCount.size();
-					for(uint32 i=0; i<l_ui32WindowCount; i++)
-					{
-						getBoxAlgorithmContext()->getPlayerContext()->getLogManager()
-							<< LogLevel_Trace
-							<< "Score estimation window " << i << " : [fail:success:ratio]=["
-							<< m_vWindowFailCount[i] << ":"
-							<< m_vWindowSuccessCount[i] << ":"
-							<< (((m_vWindowSuccessCount[i]*10000)/(m_vWindowSuccessCount[i]+m_vWindowFailCount[i])))/100.0<<"%]\n";
-					}
-				}
-
-				if((m_eCurrentDirection==EArrowDirection_Left && l_f64CurrentAmplitude>0)
-				|| (m_eCurrentDirection==EArrowDirection_Right && l_f64CurrentAmplitude<0))
-				{
-					m_vWindowFailCount[m_ui32WindowIndex]++;
-				}
-
-				if((m_eCurrentDirection==EArrowDirection_Right && l_f64CurrentAmplitude>0)
-				|| (m_eCurrentDirection==EArrowDirection_Left && l_f64CurrentAmplitude<0))
-				{
-					m_vWindowSuccessCount[m_ui32WindowIndex]++;
-				}
-
-				m_ui32WindowIndex++;
-
-				if(fabs(l_f64CurrentAmplitude) > m_f64MaxAmplitude)
-				{
-					m_f64MaxAmplitude = fabs(l_f64CurrentAmplitude);
-				}
-
-				m_f64BarScale = (l_f64CurrentAmplitude/m_f64MaxAmplitude);
+				//printf("bs %f\n", m_f64BarScale);
 
 				gdk_window_invalidate_rect(m_pDrawingArea->window,
-						NULL,
-						true);
+					NULL,
+					true);
 			}
-#endif
 		}
+
 
 		void CGrazVisualization::resize(uint32 ui32Width, uint32 ui32Height)
 		{
