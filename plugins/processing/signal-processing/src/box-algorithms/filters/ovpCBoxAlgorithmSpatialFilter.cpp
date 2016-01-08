@@ -48,6 +48,13 @@ OpenViBE::uint32 CBoxAlgorithmSpatialFilter::loadCoefficients(const OpenViBE::CS
 		}
 	}
 
+	if(l_u32count != nRows*nCols ) {
+		this->getLogManager() << LogLevel_Error << "Number of coefficients expected (" 
+			<< nRows * nCols << ") did not match the number counted ("
+			<< l_u32count << ")\n";
+		return false;
+	}
+
 	// Resize in one step for efficiency.
 	m_oFilterBank.setDimensionCount(2);
 	m_oFilterBank.setDimensionSize(0,nRows);
@@ -61,6 +68,11 @@ OpenViBE::uint32 CBoxAlgorithmSpatialFilter::loadCoefficients(const OpenViBE::CS
 	uint32 l_ui32currentIdx = 0;
 	while(*l_sPtr!=0) 
 	{
+		if(l_ui32currentIdx >= l_u32count) {
+			this->getLogManager() << LogLevel_Error << "Parsed too many coefficients\n";
+			return false;
+		}
+
 		const int BUFFSIZE=1024;
 		char l_sBuffer[BUFFSIZE];
 		// Skip separator characters
@@ -79,9 +91,15 @@ OpenViBE::uint32 CBoxAlgorithmSpatialFilter::loadCoefficients(const OpenViBE::CS
 			if(i<BUFFSIZE-1) {
 				l_sBuffer[i++] = *l_sPtr; 
 			}
+			else
+			{
+				break;
+			}
 			l_sPtr++;
 		}
 		l_sBuffer[i]=0;
+
+
 		// Finally, convert
 		if(!sscanf(l_sBuffer, "%lf", &l_pFilter[l_ui32currentIdx])) 
 		{
@@ -93,9 +111,6 @@ OpenViBE::uint32 CBoxAlgorithmSpatialFilter::loadCoefficients(const OpenViBE::CS
 			break;
 		}
 		l_ui32currentIdx++;
-	}
-	if(l_ui32currentIdx != l_u32count) {
-		this->getLogManager() << LogLevel_Warning << "Number of coefficients expected did not match the number read\n";
 	}
 
 	return l_ui32currentIdx;
@@ -162,9 +177,11 @@ boolean CBoxAlgorithmSpatialFilter::initialize(void)
 		// The double cast is needed until FSettingValueAutoCast supports uint32. 
 		const uint32 l_ui32OutputChannelCountSetting=(uint32)(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 		const uint32 l_ui32InputChannelCountSetting=(uint32)(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+		const uint32 l_ui32nCoefficients = loadCoefficients(l_sCoefficient, ' ', OV_Value_EnumeratedStringSeparator, l_ui32OutputChannelCountSetting, l_ui32InputChannelCountSetting);
 
-		if(loadCoefficients(l_sCoefficient, ' ', OV_Value_EnumeratedStringSeparator, l_ui32OutputChannelCountSetting, l_ui32InputChannelCountSetting) != l_ui32OutputChannelCountSetting * l_ui32InputChannelCountSetting)
+		if(l_ui32nCoefficients != l_ui32OutputChannelCountSetting * l_ui32InputChannelCountSetting)
 		{
+			this->getLogManager() << LogLevel_Error << "Unable to parse the expected number of filter coefficients.\n";
 			return false;
 		}
 #if defined(DEBUG)
