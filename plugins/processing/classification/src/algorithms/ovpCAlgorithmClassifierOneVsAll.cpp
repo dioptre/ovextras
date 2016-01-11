@@ -148,7 +148,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 		{
 			l_oClassificationVector.push_back(CClassifierOutput(static_cast<float64>(op_f64ClassificationStateClass), static_cast<IMatrix*>(op_pClassificationValues)));
 		}
-		this->getLogManager() << LogLevel_Debug << l_iClassifierCounter << " " << (float64)op_f64ClassificationStateClass << " " << (*op_pProbabilityValues)[0] << " " << (*op_pProbabilityValues)[1] << "\n";
+		this->getLogManager() << LogLevel_Debug << static_cast<int64>(l_iClassifierCounter) << " " << (float64)op_f64ClassificationStateClass << " " << (*op_pProbabilityValues)[0] << " " << (*op_pProbabilityValues)[1] << "\n";
 	}
 
 	//Now, we determine the best classification
