@@ -377,7 +377,7 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 		for(int i=0;i<m_pModel->nr_class;i++)
 		{
 			this->getLogManager() << LogLevel_Trace << "index:"<<i<<" label:"<< m_pModel->label[i]<<" probability:"<<l_pProbEstimates[i]<<"\n";
-			rProbabilityValue[i]=l_pProbEstimates[i];
+			rProbabilityValue[ (m_pModel->label[i])-1 ]=l_pProbEstimates[i];
 		}
 	}
 	else
