@@ -1278,6 +1278,7 @@ boolean CInterfacedScenario::pickInterfacedObject(int x, int y, int iSizeX, int 
 	return l_bRes;
 }
 
+//Fixme: this attribute is part of the saving process. That should not be the case.
 #define OV_ClassId_Selected OpenViBE::CIdentifier(0xC67A01DC, 0x28CE06C1)
 
 void CInterfacedScenario::undoCB(boolean bManageModifiedStatusFlag)

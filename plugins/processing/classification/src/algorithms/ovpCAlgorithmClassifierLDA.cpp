@@ -35,7 +35,7 @@ OpenViBE::int32 OpenViBEPlugins::Classification::LDAClassificationCompare(OpenVi
 	const OpenViBE::float64 l_f64MaxSecond = *(std::max_element(l_pClassificationValueBuffer, l_pClassificationValueBuffer+rSecondClassificationValue.getBufferElementCount()));
 
 	//Then we just compared them
-	if(!ov_float_equal(l_f64MaxFirst, l_f64MaxSecond))
+	if(ov_float_equal(l_f64MaxFirst, l_f64MaxSecond))
 	{
 		return 0;
 	}
@@ -229,6 +229,9 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		// Compute cov
 		if(!m_pCovarianceAlgorithm->process()) {
 			this->getLogManager() << LogLevel_Error << "Global covariance computation failed\n";
+
+			//Free memory before leaving
+			delete[] l_oPerClassMeans;
 			return false;
 		}
 
@@ -339,7 +342,7 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 	}
 	else
 	{
-		if(m_vDiscriminantFunctions.size() == 0)
+		if(m_vDiscriminantFunctions.empty())
 		{
 			this->getLogManager() << LogLevel_Error << "LDA discriminant function list is empty\n";
 			return false;
@@ -393,8 +396,8 @@ boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, 
 		}
 		rf64Class = m_vLabelList[l_ui32ClassIndex];
 
-		delete l_pValueArray;
-		delete l_pProbabilityValue;
+		delete[] l_pValueArray;
+		delete[] l_pProbabilityValue;
 	}
 	return true;
 }

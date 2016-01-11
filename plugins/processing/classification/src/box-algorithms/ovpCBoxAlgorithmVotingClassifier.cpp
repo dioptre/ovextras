@@ -17,50 +17,35 @@ using namespace OpenViBEPlugins::Classification;
 boolean CBoxAlgorithmVotingClassifier::initialize(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
-	uint32 i;
 
-	m_pClassificationChoiceEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
-	m_pClassificationChoiceEncoder->initialize();
-
-	ip_pClassificationChoiceStimulationSet.initialize(m_pClassificationChoiceEncoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_InputParameterId_StimulationSet));
-	op_pClassificationChoiceMemoryBuffer.initialize(m_pClassificationChoiceEncoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
+	m_oClassificationChoiceEncoder.initialize(*this, 0);
 
 	CIdentifier l_oTypeIdentifier;
 	l_rStaticBoxContext.getInputType(0, l_oTypeIdentifier);
 	m_bMatrixBased=(l_oTypeIdentifier==OV_TypeId_StreamedMatrix);
 
-	for(i=0; i<l_rStaticBoxContext.getInputCount(); i++)
+	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
 		SInput& l_rInput=m_vClassificationResults[i];
 		if(m_bMatrixBased)
 		{
-			l_rInput.m_pDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamDecoder));
-			l_rInput.m_pDecoder->initialize();
+			OpenViBEToolkit::TStreamedMatrixDecoder<CBoxAlgorithmVotingClassifier> *l_pDecoder = new OpenViBEToolkit::TStreamedMatrixDecoder<CBoxAlgorithmVotingClassifier>();
+			l_pDecoder->initialize(*this, i);
+			l_rInput.m_pDecoder= l_pDecoder;
 
-			l_rInput.ip_pMemoryBuffer.initialize(l_rInput.m_pDecoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			l_rInput.op_pMatrix.initialize(l_rInput.m_pDecoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputParameterId_Matrix));
+			l_rInput.op_pMatrix = l_pDecoder->getOutputMatrix();
 
 			l_rInput.m_bTwoValueInput = false;
-
-			m_oStreamDecoder_OutputTriggerId_ReceivedHeader=OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedHeader;
-			m_oStreamDecoder_OutputTriggerId_ReceivedBuffer=OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedBuffer;
-			m_oStreamDecoder_OutputTriggerId_ReceivedEnd=OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedEnd;
 		}
 		else
 		{
-			l_rInput.m_pDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-			l_rInput.m_pDecoder->initialize();
+			OpenViBEToolkit::TStimulationDecoder<CBoxAlgorithmVotingClassifier> *l_pDecoder = new OpenViBEToolkit::TStimulationDecoder<CBoxAlgorithmVotingClassifier>();
+			l_pDecoder->initialize(*this, i);
+			l_rInput.m_pDecoder= l_pDecoder;
 
-			l_rInput.ip_pMemoryBuffer.initialize(l_rInput.m_pDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			l_rInput.op_pStimulationSet.initialize(l_rInput.m_pDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+			l_rInput.op_pStimulationSet = l_pDecoder->getOutputStimulationSet();
 
 			l_rInput.m_bTwoValueInput = false;
-
-			m_oStreamDecoder_OutputTriggerId_ReceivedHeader=OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader;
-			m_oStreamDecoder_OutputTriggerId_ReceivedBuffer=OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer;
-			m_oStreamDecoder_OutputTriggerId_ReceivedEnd=OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd;
-
 		}
 	}
 
@@ -73,8 +58,8 @@ boolean CBoxAlgorithmVotingClassifier::initialize(void)
 
 	m_ui64LastTime=0;
 
-	m_pClassificationChoiceEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
-	l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastTime, this->getPlayerContext().getCurrentTime());
+	m_oClassificationChoiceEncoder.encodeHeader();
+	this->getDynamicBoxContext().markOutputAsReadyToSend(0, m_ui64LastTime, this->getPlayerContext().getCurrentTime());
 
 	return true;
 }
@@ -89,11 +74,10 @@ boolean CBoxAlgorithmVotingClassifier::uninitialize(void)
 	{
 		SInput& l_rInput=m_vClassificationResults[i];
 		l_rInput.m_pDecoder->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*l_rInput.m_pDecoder);
+		delete l_rInput.m_pDecoder;
 	}
 
-	m_pClassificationChoiceEncoder->uninitialize();
-	this->getAlgorithmManager().releaseAlgorithm(*m_pClassificationChoiceEncoder);
+	m_oClassificationChoiceEncoder.uninitialize();
 
 	return true;
 }
@@ -118,9 +102,9 @@ boolean CBoxAlgorithmVotingClassifier::process(void)
 		SInput& l_rInput=m_vClassificationResults[i];
 		for(j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
-			l_rInput.ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(i, j);
-			l_rInput.m_pDecoder->process();
-			if(l_rInput.m_pDecoder->isOutputTriggerActive(m_oStreamDecoder_OutputTriggerId_ReceivedHeader))
+			l_rInput.m_pDecoder->decode(j);
+
+			if(l_rInput.m_pDecoder->isHeaderReceived())
 			{
 				if(m_bMatrixBased)
 				{
@@ -139,7 +123,7 @@ boolean CBoxAlgorithmVotingClassifier::process(void)
 					}
 				}
 			}
-			if(l_rInput.m_pDecoder->isOutputTriggerActive(m_oStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(l_rInput.m_pDecoder->isBufferReceived())
 			{
 				if(m_bMatrixBased)
 				{
@@ -166,10 +150,11 @@ boolean CBoxAlgorithmVotingClassifier::process(void)
 					}
 				}
 			}
-			if(l_rInput.m_pDecoder->isOutputTriggerActive(m_oStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(l_rInput.m_pDecoder->isEndReceived())
 			{
+				m_oClassificationChoiceEncoder.encodeEnd();
+				l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastTime, this->getPlayerContext().getCurrentTime());
 			}
-			l_rDynamicBoxContext.markInputAsDeprecated(i, j);
 		}
 
 		if(l_rInput.m_vScore.size() < m_ui64NumberOfRepetitions)
@@ -223,12 +208,10 @@ boolean CBoxAlgorithmVotingClassifier::process(void)
 		{
 			this->getLogManager() << LogLevel_Trace << "Chosed rejection " << this->getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_Stimulation, l_ui64ResultClassLabel) << "\n";
 		}
+		m_oClassificationChoiceEncoder.getInputStimulationSet()->clear();
+		m_oClassificationChoiceEncoder.getInputStimulationSet()->appendStimulation(l_ui64ResultClassLabel, l_ui64Time, 0);
 
-		CStimulationSet l_oStimulationSet;
-		l_oStimulationSet.appendStimulation(l_ui64ResultClassLabel, l_ui64Time, 0);
-		ip_pClassificationChoiceStimulationSet=&l_oStimulationSet;
-		op_pClassificationChoiceMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
-		m_pClassificationChoiceEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
+		m_oClassificationChoiceEncoder.encodeBuffer();
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastTime, l_ui64Time);
 		m_ui64LastTime=l_ui64Time;
 	}

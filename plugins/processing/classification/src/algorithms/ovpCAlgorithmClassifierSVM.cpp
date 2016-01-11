@@ -36,7 +36,7 @@ extern const char* const c_sClassifierRoot;
 
 OpenViBE::int32 OpenViBEPlugins::Classification::SVMClassificationCompare(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
 {
-	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
+	if(ov_float_equal(::fabs(rFirstClassificationValue[0]), ::fabs(rSecondClassificationValue[0])))
 		return 0;
 	else if(::fabs(rFirstClassificationValue[0]) > ::fabs(rSecondClassificationValue[0]))
 		return -1;
