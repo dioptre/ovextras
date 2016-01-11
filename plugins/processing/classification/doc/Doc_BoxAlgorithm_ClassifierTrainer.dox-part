@@ -176,14 +176,14 @@ This algorithm provides both hyperplane distance and probabilities.
 
 \par Multilayer Perceptron (MLP)
 A classifier algorithm which relies on an artificial neural network (<a href="https://hal.inria.fr/inria-00099922/en">Laurent Bougrain. Practical introduction to artificial neural networks. IFAC symposium on automation in Mining, Mineral and Metal Processing - 
-MMM'04, Sep 2004, Nancy, France, 6 p, 2004.<a>). In OpenViBE, the MLP is a 2-layers neural networks. The hyperbolic tangent is the activation function of the
-neurons inside the hidden layer. The network is train using the backpropagation of the gradient. During the training, 80% of the training set is used to compute the gradient, 
-and 20% is used to validate the new model. The different weights and biases are updated only once per loop (just before validation). A coefficient alpha (learning coefficient) is used to moderate the importance of 
-the modification of weights and biases to avoid oscillations. The learning stop when the difference of the error per element (compute during validation) of two consecutive loops is under the value epsilon give in parameter.
+MMM'04, Sep 2004, Nancy, France, 6 p, 2004.</a>). In OpenViBE, the MLP is a 2-layer neural network. The hyperbolic tangent is the activation function of the
+neurons inside the hidden layer. The network is trained using the backpropagation of the gradient. During the training, 80% of the training set is used to compute the gradient, 
+and 20% is used to validate the new model. The different weights and biases are updated only once per iteration (just before the validation). A coefficient alpha (learning coefficient) is used to moderate the importance of 
+the modification of weights and biases to avoid oscillations. The learning stops when the difference of the error per element (computed during validation) of two consecutive iterations is under the value epsilon given as a parameter.
 \par
 \li Number of neurons in hidden layer: number of neurons that will be used in the hidden layer.
 \li Learning stop condition : the epsilon value used to stop the learning
-\li Learning coefficient: a coefficient which influence the speed of learning. The smaller the coefficient is, the longer the learning will take, the more chance you will have to have a good solution.
+\li Learning coefficient: a coefficient which influence the speed of learning. The smaller the coefficient is, the longer the learning will take, the more chance you will have to get a good solution.
 \par
 Note that feature vectors are normalized between -1 and 1 (using the min/max of the training set) to avoid saturation of the hyperbolic tangent.
 \par
