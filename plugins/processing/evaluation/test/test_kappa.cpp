@@ -22,9 +22,9 @@ int main (int argc, char** argv)
 		string line;
 		while(getline(file, line))
 		{
-			size_t pos;
 			if(line.find("Final value of Kappa") != string::npos)
 			{
+				size_t pos;
 				cout << "Found kappa line " << line << endl; 
 			  
 				pos = line.rfind(" ");

@@ -32,17 +32,16 @@ namespace OpenViBEPlugins
 
 		private:
 
-			OpenViBEToolkit::TFeatureVectorDecoder< CBoxAlgorithmClassifierProcessor >  m_oFeaturesDecoder;
-			OpenViBEToolkit::TStimulationDecoder< CBoxAlgorithmClassifierProcessor >    m_oStimulationDecoder;
+			OpenViBEToolkit::TFeatureVectorDecoder < CBoxAlgorithmClassifierProcessor > m_oFeatureVectorDecoder;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmClassifierProcessor > m_oStimulationDecoder;
 
-			OpenViBEToolkit::TStimulationEncoder< CBoxAlgorithmClassifierProcessor >    m_oLabelsEncoder;
-			OpenViBEToolkit::TStreamedMatrixEncoder< CBoxAlgorithmClassifierProcessor > m_oClassificationStateEncoder;
-			OpenViBEToolkit::TStreamedMatrixEncoder< CBoxAlgorithmClassifierProcessor > m_oProbabilityValuesEncoder;
-			
+			OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmClassifierProcessor > m_oLabelsEncoder;
+			OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmClassifierProcessor > m_oHyperplaneValuesEncoder;
+			OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmClassifierProcessor > m_oProbabilityValuesEncoder;
+
 			OpenViBE::Kernel::IAlgorithmProxy* m_pClassifier;
 
 			std::map < OpenViBE::float64, OpenViBE::uint64 > m_vStimulation;
-			OpenViBE::boolean m_bOutputHeaderSent;
 		};
 
 		class CBoxAlgorithmClassifierProcessorDesc : virtual public OpenViBE::Plugins::IBoxAlgorithmDesc

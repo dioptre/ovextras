@@ -148,7 +148,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 		{
 			l_oClassificationVector.push_back(CClassifierOutput(static_cast<float64>(op_f64ClassificationStateClass), static_cast<IMatrix*>(op_pClassificationValues)));
 		}
-		//this->getLogManager() << LogLevel_Info << l_iClassifierCounter << " " << (float64)op_f64ClassificationStateClass << " " << (*op_pClassificationValues)[0] << "\n";
+		this->getLogManager() << LogLevel_Debug << l_iClassifierCounter << " " << (float64)op_f64ClassificationStateClass << " " << (*op_pProbabilityValues)[0] << " " << (*op_pProbabilityValues)[1] << "\n";
 	}
 
 	//Now, we determine the best classification
@@ -167,7 +167,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 			}
 			else
 			{
-				if((*m_fAlgorithmComparison)((*l_oBest.second), *(l_pTemp.second)) < 0)
+				if((*m_fAlgorithmComparison)((*l_oBest.second), *(l_pTemp.second)) > 0)
 				{
 					l_oBest = l_pTemp;
 					rf64Class = l_iClassificationCount+1;
@@ -179,6 +179,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	//If no one recognize the class, let's take the more relevant
 	if(rf64Class == -1)
 	{
+		this->getLogManager() << LogLevel_Debug << "Unable to find a class in first instance\n";
 		for(uint32 l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
 		{
 			CClassifierOutput& l_pTemp = l_oClassificationVector[l_iClassificationCount];
@@ -190,7 +191,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 			else
 			{
 				//We take the one that is the least like the second class
-				if((*m_fAlgorithmComparison)((*l_oBest.second), *(l_pTemp.second)) > 0)
+				if((*m_fAlgorithmComparison)((*l_oBest.second), *(l_pTemp.second)) < 0)
 				{
 					l_oBest = l_pTemp;
 					rf64Class = l_iClassificationCount+1;

@@ -19,7 +19,7 @@ namespace
 	{
 		CBoxAlgorithmClassifierAccuracyMeasure* l_pClassifierAccuracyMeasure=reinterpret_cast<CBoxAlgorithmClassifierAccuracyMeasure*>(pUserData);
 		vector<CBoxAlgorithmClassifierAccuracyMeasure::SProgressBar>::iterator l_iter = l_pClassifierAccuracyMeasure->m_vProgressBar.begin();
-		for(;l_iter!=l_pClassifierAccuracyMeasure->m_vProgressBar.end();l_iter++)
+		for(;l_iter!=l_pClassifierAccuracyMeasure->m_vProgressBar.end();++l_iter)
 		{
 			l_iter->m_ui32Score = 0;
 			l_iter->m_ui32StimulationCount = 0;
@@ -212,7 +212,7 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::process(void)
 			// if the incoming chunk is in the timeline
 			if(l_ui64ChunkEndTime <= m_ui64CurrentProcessingTimeLimit)
 			{
-				if(m_mTargetsTimeLine.size() != 0)
+				if(m_mTargetsTimeLine.empty())
 				{
 					// we can process it
 					m_vpClassifierStimulationDecoder[ip-1]->decode(i);
@@ -240,7 +240,7 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::process(void)
 							while(l_itTarget != m_mTargetsTimeLine.end() && l_bContinue)
 							{
 								l_itNextTarget = l_itTarget;
-								l_itNextTarget++;
+								++l_itNextTarget;
 								if((l_itNextTarget == m_mTargetsTimeLine.end() || l_ui64StimulationFromClassifierDate < l_itNextTarget->first)
 								 && l_ui64StimulationFromClassifierDate > l_itTarget->first)
 								{
@@ -252,7 +252,7 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::process(void)
 									m_vProgressBar[ip-1].m_ui32StimulationCount++;
 									l_bContinue = false;
 								}
-								l_itTarget++;
+								++l_itTarget;
 							}
 
 							//std::map<uint64,uint64>::iterator l_itTarget = m_mTargetsTimeLine.lower_bound(l_ui64StimulationFromClassifierDate);

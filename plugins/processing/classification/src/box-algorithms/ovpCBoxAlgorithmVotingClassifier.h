@@ -46,8 +46,7 @@ namespace OpenViBEPlugins
 
 			typedef struct
 			{
-				OpenViBE::Kernel::IAlgorithmProxy* m_pDecoder;
-				OpenViBE::Kernel::TParameterHandler<const OpenViBE::IMemoryBuffer*> ip_pMemoryBuffer;
+				OpenViBEToolkit::TDecoder<CBoxAlgorithmVotingClassifier>* m_pDecoder;
 				OpenViBE::Kernel::TParameterHandler<OpenViBE::IStimulationSet*> op_pStimulationSet;
 				OpenViBE::Kernel::TParameterHandler<OpenViBE::IMatrix*> op_pMatrix;
 				OpenViBE::boolean m_bTwoValueInput;
@@ -56,15 +55,11 @@ namespace OpenViBEPlugins
 
 			std::map < OpenViBE::uint32, CBoxAlgorithmVotingClassifier::SInput > m_vClassificationResults;
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pClassificationChoiceEncoder;
+			OpenViBEToolkit::TStimulationEncoder<CBoxAlgorithmVotingClassifier> m_oClassificationChoiceEncoder;
 			OpenViBE::Kernel::TParameterHandler<const OpenViBE::IStimulationSet*> ip_pClassificationChoiceStimulationSet;
-			OpenViBE::Kernel::TParameterHandler<OpenViBE::IMemoryBuffer*> op_pClassificationChoiceMemoryBuffer;
 
 			OpenViBE::uint64 m_ui64LastTime;
 			OpenViBE::boolean m_bMatrixBased;
-			OpenViBE::CIdentifier m_oStreamDecoder_OutputTriggerId_ReceivedHeader;
-			OpenViBE::CIdentifier m_oStreamDecoder_OutputTriggerId_ReceivedBuffer;
-			OpenViBE::CIdentifier m_oStreamDecoder_OutputTriggerId_ReceivedEnd;
 		};
 
 
@@ -108,7 +103,7 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier)
 
 		protected:
 
@@ -153,7 +148,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const { return new CBoxAlgorithmVotingClassifierListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) { delete pBoxListener; }
 
-			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_VotingClassifierDesc);
+			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_VotingClassifierDesc)
 		};
 	};
 };

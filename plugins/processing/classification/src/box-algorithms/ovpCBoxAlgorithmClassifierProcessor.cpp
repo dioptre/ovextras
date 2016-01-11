@@ -1,7 +1,5 @@
 #include "ovpCBoxAlgorithmClassifierProcessor.h"
 
-#include <fstream>
-#include <iostream>
 #include <sstream>
 
 #include <xml/IXMLHandler.h>
@@ -128,9 +126,9 @@ boolean CBoxAlgorithmClassifierProcessor::loadClassifier(const char* sFilename)
 	// Connect the params to the new classifier
 
 	TParameterHandler < OpenViBE::IMatrix* > ip_oFeatureVector = m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector);
-	ip_oFeatureVector.setReferenceTarget(m_oFeaturesDecoder.getOutputMatrix());
+	ip_oFeatureVector.setReferenceTarget(m_oFeatureVectorDecoder.getOutputMatrix());
 
-	m_oClassificationStateEncoder.getInputMatrix().setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
+	m_oHyperplaneValuesEncoder.getInputMatrix().setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
 	m_oProbabilityValuesEncoder.getInputMatrix().setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
 	// note: labelsencoder cannot be directly bound here as the classifier returns a float, but we need to output a stimulation
 
@@ -163,11 +161,11 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		return false;
 	}
 
-	m_oFeaturesDecoder.initialize(*this,0);
+	m_oFeatureVectorDecoder.initialize(*this,0);
 	m_oStimulationDecoder.initialize(*this, 1);
 
 	m_oLabelsEncoder.initialize(*this, 0);
-	m_oClassificationStateEncoder.initialize(*this, 1);
+	m_oHyperplaneValuesEncoder.initialize(*this, 1);
 	m_oProbabilityValuesEncoder.initialize(*this, 2);
 
 	if(!loadClassifier(l_sConfigurationFilename.toASCIIString()))
@@ -175,7 +173,6 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		return false;
 	}
 
-	m_bOutputHeaderSent=false;
 	return true;
 }
 
@@ -188,12 +185,12 @@ boolean CBoxAlgorithmClassifierProcessor::uninitialize(void)
 		m_pClassifier = NULL;
 	}
 
-	m_oClassificationStateEncoder.uninitialize();
+	m_oHyperplaneValuesEncoder.uninitialize();
 	m_oProbabilityValuesEncoder.uninitialize();
 	m_oLabelsEncoder.uninitialize();
 
-	m_oFeaturesDecoder.uninitialize();
 	m_oStimulationDecoder.uninitialize();
+	m_oFeatureVectorDecoder.uninitialize();
 
 	return true;
 }
@@ -214,29 +211,24 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 		const uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
 		const uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
 
-		m_oFeaturesDecoder.decode(i);
-		if(m_oFeaturesDecoder.isHeaderReceived())
+		m_oFeatureVectorDecoder.decode(i);
+		if(m_oFeatureVectorDecoder.isHeaderReceived())
 		{
-			m_bOutputHeaderSent=false;
+			m_oLabelsEncoder.encodeHeader();
+			m_oHyperplaneValuesEncoder.encodeHeader();
+			m_oProbabilityValuesEncoder.encodeHeader();
+
+			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
+			l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
+			l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64EndTime);
 		}
-		if(m_oFeaturesDecoder.isBufferReceived())
+		if(m_oFeatureVectorDecoder.isBufferReceived())
 		{	
 			if(m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify))
 			{
 				if (m_pClassifier->isOutputTriggerActive(OVTK_Algorithm_Classifier_OutputTriggerId_Success))
 				{
 					//this->getLogManager() << LogLevel_Warning << "---Classification successful---\n";
-					if(!m_bOutputHeaderSent)
-					{
-						m_oLabelsEncoder.encodeHeader();
-						m_oClassificationStateEncoder.encodeHeader();
-						m_oProbabilityValuesEncoder.encodeHeader();
-
-						l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64StartTime);
-						l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64StartTime);
-						l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64StartTime);
-						m_bOutputHeaderSent=true;
-					}
 
 					TParameterHandler < float64 > op_f64ClassificationStateClass(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
 
@@ -248,7 +240,7 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 					l_pSet->setStimulationDuration(0, 0);
 
 					m_oLabelsEncoder.encodeBuffer();
-					m_oClassificationStateEncoder.encodeBuffer();
+					m_oHyperplaneValuesEncoder.encodeBuffer();
 					m_oProbabilityValuesEncoder.encodeBuffer();
 
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
@@ -257,8 +249,8 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 				}
 				else
 				{
-				//	this->getLogManager() << LogLevel_Error << "Classification failed (success trigger not active).\n";
-				//	return false;
+					this->getLogManager() << LogLevel_Error << "Classification failed (success trigger not active).\n";
+					return false;
 				}
 			}
 			else
@@ -267,10 +259,11 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 				return false;
 			}
 		}
-		if(m_oFeaturesDecoder.isEndReceived())
+
+		if(m_oFeatureVectorDecoder.isEndReceived())
 		{
 			m_oLabelsEncoder.encodeEnd();
-			m_oClassificationStateEncoder.encodeEnd();
+			m_oHyperplaneValuesEncoder.encodeEnd();
 			m_oProbabilityValuesEncoder.encodeEnd();
 
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
