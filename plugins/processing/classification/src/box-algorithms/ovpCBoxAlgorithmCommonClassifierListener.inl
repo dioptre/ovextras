@@ -356,6 +356,7 @@ namespace OpenViBEPlugins
 						if((l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVector)
 						&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet)
 						&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_Configuration)
+						&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_NumberOfClasses)
 						&& (l_oIdentifier!=OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter))
 						{
 							OpenViBE::CIdentifier l_oTypeIdentifier;
