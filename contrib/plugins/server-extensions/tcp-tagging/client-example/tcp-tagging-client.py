@@ -32,11 +32,6 @@ for i in range(100):
     event_id=list(to_byte(EVENT_ID, 8))
     timestamp=list(to_byte(int(time()*1000)+DELAY, 8))
 
-    # transform from little endian to big endian
-    padding.reverse()
-    event_id.reverse()
-    timestamp.reverse()
-
     # send tag and sleep
     s.sendall(bytes(padding+event_id+timestamp))
     sleep(1)
