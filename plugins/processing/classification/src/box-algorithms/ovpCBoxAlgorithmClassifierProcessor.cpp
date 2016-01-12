@@ -31,6 +31,8 @@ boolean CBoxAlgorithmClassifierProcessor::loadClassifier(const char* sFilename)
 		return false;
 	}
 
+	m_vStimulation.clear();
+
 	//Now check the version, and let's display a message if the version is not good
 	string l_sVersion;
 	if(l_pRootNode->hasAttribute(c_sXmlVersionAttributeName))
@@ -185,8 +187,8 @@ boolean CBoxAlgorithmClassifierProcessor::uninitialize(void)
 		m_pClassifier = NULL;
 	}
 
-	m_oHyperplaneValuesEncoder.uninitialize();
 	m_oProbabilityValuesEncoder.uninitialize();
+	m_oHyperplaneValuesEncoder.uninitialize();
 	m_oLabelsEncoder.uninitialize();
 
 	m_oStimulationDecoder.uninitialize();
@@ -206,6 +208,39 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
+	// Check if we have a command first
+	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
+	{
+		m_oStimulationDecoder.decode(i);
+		if(m_oStimulationDecoder.isHeaderReceived())
+		{
+		}
+		if(m_oStimulationDecoder.isBufferReceived())
+		{
+			for(uint64 i=0;i<m_oStimulationDecoder.getOutputStimulationSet()->getStimulationCount();i++)
+			{
+				if(m_oStimulationDecoder.getOutputStimulationSet()->getStimulationIdentifier(i) == OVTK_StimulationId_TrainCompleted)
+				{
+					IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+
+					CString l_sConfigurationFilename;
+					l_rStaticBoxContext.getSettingValue(0, l_sConfigurationFilename);
+
+					this->getLogManager() << LogLevel_Trace << "Reloading classifier\n";
+					if(!loadClassifier(l_sConfigurationFilename.toASCIIString()))
+					{
+						this->getLogManager() << LogLevel_Error << "Error reloading classifier\n";
+						return false;
+					}
+				}
+			}
+		}
+		if(m_oStimulationDecoder.isEndReceived())
+		{
+		}
+	}
+
+	// Classify data
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
 		const uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
@@ -246,6 +281,7 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 					l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
 					l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64EndTime);
+
 				}
 				else
 				{
@@ -258,7 +294,7 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 				this->getLogManager() << LogLevel_Error << "Classification algorithm failed.\n";
 				return false;
 			}
-		}
+		}		
 
 		if(m_oFeatureVectorDecoder.isEndReceived())
 		{
@@ -271,42 +307,9 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 			l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64EndTime);
 		}
 
-		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
 	}
 
-	// Check if we have a command
-	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
-	{
-		m_oStimulationDecoder.decode(i);
-		if(m_oStimulationDecoder.isHeaderReceived())
-		{
 
-		}
-		if(m_oStimulationDecoder.isBufferReceived())
-		{
-			for(uint64 i=0;i<m_oStimulationDecoder.getOutputStimulationSet()->getStimulationCount();i++)
-			{
-				if(m_oStimulationDecoder.getOutputStimulationSet()->getStimulationIdentifier(i) == OVTK_StimulationId_TrainCompleted)
-				{
-					IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-
-					CString l_sConfigurationFilename;
-					l_rStaticBoxContext.getSettingValue(0, l_sConfigurationFilename);
-
-					this->getLogManager() << LogLevel_Trace << "Reloading classifier\n";
-					if(!loadClassifier(l_sConfigurationFilename.toASCIIString()))
-					{
-						this->getLogManager() << LogLevel_Error << "Error reloading classifier\n";
-						return false;
-					}
-				}
-			}
-		}
-		if(m_oStimulationDecoder.isEndReceived())
-		{
-
-		}
-	}
 
 	return true;
 }
