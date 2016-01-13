@@ -29,7 +29,7 @@ boolean CAlgorithmPairingStrategy::process(void)
 	if(this->isInputTriggerActive(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture))
 	{
 		TParameterHandler < CIdentifier* > ip_pClassifierIdentifier(this->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
-		TParameterHandler < uint64 > ip_pClassCount(this->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassCount));
+		TParameterHandler < uint64 > ip_pClassCount(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_NumberOfClasses));
 
 		const uint64 l_ui64ClassCount = (uint64) ip_pClassCount;
 		const CIdentifier l_oClassifierIdentifier = *((CIdentifier*)ip_pClassifierIdentifier);

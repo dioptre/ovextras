@@ -8,6 +8,7 @@
 #include <xml/IXMLNode.h>
 
 #include <vector>
+#include <map>
 
 #define OVP_ClassId_Algorithm_ClassifierOneVsOne								OpenViBE::CIdentifier(0x638C2F90, 0xEAE10226)
 #define OVP_ClassId_Algorithm_ClassifierOneVsOneDesc							OpenViBE::CIdentifier(0xE78E7CDB, 0x369AA9EF)
@@ -20,13 +21,6 @@ namespace OpenViBEPlugins
 	{
 		extern OV_API void registerAvailableDecisionEnumeration(const OpenViBE::CIdentifier& rAlgorithmIdentifier, OpenViBE::CIdentifier pDecision);
 		extern OV_API OpenViBE::CIdentifier getAvailableDecisionEnumeration(const OpenViBE::CIdentifier& rAlgorithmIdentifier);
-
-
-		typedef struct{
-			OpenViBE::float64 m_f64FirstClass;
-			OpenViBE::float64 m_f64SecondClass;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pSubClassifierProxy;
-		} SSubClassifierDescriptor;
 
 		//The aim of this structure is to record informations returned by the sub-classifier. They will be used by
 		// pairwise decision algorithms to compute probability vector.
@@ -63,21 +57,26 @@ namespace OpenViBEPlugins
 
 		protected:
 
+			virtual OpenViBE::boolean createSubClassifiers(void);
 
 		private:
-			std::vector<SSubClassifierDescriptor> m_oSubClassifierDescriptorList;
+			OpenViBE::uint32 m_ui32NumberOfClasses;
+			OpenViBE::uint32 m_ui32NumberOfSubClassifiers;
+
+			std::map< std::pair<OpenViBE::uint32,OpenViBE::uint32>, OpenViBE::Kernel::IAlgorithmProxy* > m_oSubClassifiers;
 			fClassifierComparison m_fAlgorithmComparison;
 
 			OpenViBE::Kernel::IAlgorithmProxy* m_pDecisionStrategyAlgorithm;
 			OpenViBE::CIdentifier m_oPairwiseDecisionIdentifier;
 
-			XML::IXMLNode* getClassifierConfiguration(SSubClassifierDescriptor &rDescriptor);
+			XML::IXMLNode* getClassifierConfiguration(OpenViBE::float64 f64FirstClass, OpenViBE::float64 f64SecondClass, OpenViBE::Kernel::IAlgorithmProxy* pSubClassifier);
 			XML::IXMLNode* getPairwiseDecisionConfiguration(void);
-			OpenViBE::uint32 getClassCount(void) const;
+			
+			// OpenViBE::uint32 getClassCount(void) const;
 
 			OpenViBE::boolean loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 
-			SSubClassifierDescriptor& getSubClassifierDescriptor(const OpenViBE::uint32 f64FirstClass, const OpenViBE::uint32 f64SecondClass);
+			// SSubClassifierDescriptor& getSubClassifierDescriptor(const OpenViBE::uint32 f64FirstClass, const OpenViBE::uint32 f64SecondClass);
 			OpenViBE::boolean setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId);
 		};
 
@@ -93,7 +92,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString(""); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_ClassifierOneVsOne; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Classification::CAlgorithmClassifierOneVsOne; }

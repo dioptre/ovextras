@@ -115,17 +115,21 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 
 	m_vFeatureCount.clear();
 
+	if(l_rStaticBoxContext.getInputCount()<2)
+	{
+		// This shouldn't happen.
+		this->getLogManager() << LogLevel_Error << "Must have at least one feature input\n";
+		return false;
+	}
+
+	// Provide the number of classes to the classifier
+	const uint32 l_ui32ClassCount = l_rStaticBoxContext.getInputCount() - 1;
+	TParameterHandler< uint64 > ip_NumClasses = m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_NumberOfClasses);
+	ip_NumClasses = l_ui32ClassCount;
+
 	//If we have to deal with a pairing strategy we have to pass argument
 	if(l_bIsPairing)
 	{
-		TParameterHandler < uint64 > ip_pClassCount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassCount));
-		if(l_rStaticBoxContext.getInputCount()==0)
-		{
-			// This shouldn't happen.
-			this->getLogManager() << LogLevel_Error << "Must have more than 0 inputs\n";
-			return false;
-		}
-		ip_pClassCount = l_rStaticBoxContext.getInputCount() -1;	 // >=0 by above test. -1 because one input connector is for stimulations.
 		TParameterHandler < CIdentifier* > ip_oClassId(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
 		ip_oClassId = &l_oClassifierAlgorithmClassIdentifier;
 		if(!m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture))
@@ -382,10 +386,6 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 			l_oConfusion.setDimensionCount(2);
 			l_oConfusion.setDimensionSize(0, l_ui32ClassCount);
 			l_oConfusion.setDimensionSize(1, l_ui32ClassCount);
-
-			// Provide the number of classes to the classifier
-			TParameterHandler< uint64 > ip_NumClasses = m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_NumberOfClasses);
-			ip_NumClasses = l_ui32ClassCount;
 
 			if(m_ui64PartitionCount>=2)
 			{

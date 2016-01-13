@@ -89,9 +89,9 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
 	}
 
 	//And then we just change adapt the label for each feature vector but we don't copy them anymore
-	for(size_t l_iClassifierCounter = 1 ; l_iClassifierCounter <= m_oSubClassifierList.size() ; ++l_iClassifierCounter )
+	for(size_t l_iClassifierCounter = 0 ; l_iClassifierCounter < m_oSubClassifierList.size() ; ++l_iClassifierCounter )
 	{
-		TParameterHandler < IMatrix* > ip_pFeatureVectorSet(m_oSubClassifierList[l_iClassifierCounter-1]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
+		TParameterHandler < IMatrix* > ip_pFeatureVectorSet(m_oSubClassifierList[l_iClassifierCounter]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
 		ip_pFeatureVectorSet = (IMatrix*)ip_pFeatureVectorSetReference;
 
 		float64* l_pFeatureVectorSetBuffer=ip_pFeatureVectorSet->getBuffer();
@@ -101,16 +101,16 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
 			const float64 l_f64Class = rFeatureVectorSet[j].getLabel();
 			if(static_cast<uint32>(l_f64Class) == l_iClassifierCounter)
 			{
-				l_pFeatureVectorSetBuffer[l_ui32FeatureVectorSize]=1;
+				l_pFeatureVectorSetBuffer[l_ui32FeatureVectorSize]=0;
 			}
 			else
 			{
-				l_pFeatureVectorSetBuffer[l_ui32FeatureVectorSize]=2;
+				l_pFeatureVectorSetBuffer[l_ui32FeatureVectorSize]=1;
 			}
 			l_pFeatureVectorSetBuffer+=(l_ui32FeatureVectorSize+1);
 		}
 
-		m_oSubClassifierList[l_iClassifierCounter-1]->process(OVTK_Algorithm_Classifier_InputTriggerId_Train);
+		m_oSubClassifierList[l_iClassifierCounter]->process(OVTK_Algorithm_Classifier_InputTriggerId_Train);
 	}
 	return true;
 }
@@ -158,19 +158,19 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	for(size_t l_iClassificationCount = 0; l_iClassificationCount < l_oClassificationVector.size() ; ++l_iClassificationCount)
 	{
 		CClassifierOutput&   l_pTemp = l_oClassificationVector[l_iClassificationCount];
-		if(l_pTemp.first==1)
+		if(l_pTemp.first==0)		// Predicts its "own" class, class=0
 		{
 			if(l_oBest.second == NULL)
 			{
 				l_oBest = l_pTemp;
-				rf64Class = l_iClassificationCount+1;
+				rf64Class = l_iClassificationCount;
 			}
 			else
 			{
 				if((*m_fAlgorithmComparison)((*l_oBest.second), *(l_pTemp.second)) > 0)
 				{
 					l_oBest = l_pTemp;
-					rf64Class = l_iClassificationCount+1;
+					rf64Class = l_iClassificationCount;
 				}
 			}
 		}
@@ -186,7 +186,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 			if(l_oBest.second == NULL)
 			{
 				l_oBest = l_pTemp;
-				rf64Class = (static_cast<float64>(l_iClassificationCount))+1;
+				rf64Class = (static_cast<float64>(l_iClassificationCount));
 			}
 			else
 			{
@@ -194,7 +194,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 				if((*m_fAlgorithmComparison)((*l_oBest.second), *(l_pTemp.second)) < 0)
 				{
 					l_oBest = l_pTemp;
-					rf64Class = l_iClassificationCount+1;
+					rf64Class = l_iClassificationCount;
 				}
 			}
 		}
@@ -207,7 +207,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 	}
 
 	//Now that we made the calculation, we send the corresponding data
-	IAlgorithmProxy* l_pWinner = this->m_oSubClassifierList[static_cast<uint32>(rf64Class)-1];
+	IAlgorithmProxy* l_pWinner = this->m_oSubClassifierList[static_cast<uint32>(rf64Class)];
 	TParameterHandler < IMatrix* > op_pClassificationWinnerValues(l_pWinner->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
 	TParameterHandler < IMatrix* > op_pProbabilityWinnerValues(l_pWinner->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
 
@@ -232,6 +232,9 @@ boolean CAlgorithmClassifierOneVsAll::addNewClassifierAtBack(void)
 	}
 	IAlgorithmProxy* l_pSubClassifier = &this->getAlgorithmManager().getAlgorithm(l_oSubClassifierAlgorithm);
 	l_pSubClassifier->initialize();
+
+	TParameterHandler < uint64 > ip_pNumberOfClasses(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_NumberOfClasses));
+	ip_pNumberOfClasses = 2;
 
 	//Set a references to the extra parameters input of the pairing strategy
 	TParameterHandler< std::map<CString, CString>* > ip_pExtraParameters(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
