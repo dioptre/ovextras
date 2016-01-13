@@ -114,6 +114,7 @@ bool CModTemporalFilterBoxAlgorithm::updateSettings()
 
 	if(m_sFilterOrder!=l_oFilterOrder)
 	{
+		errno = 0;
 		int64 l_i64Integer64Parameter = strtol(l_oFilterOrder, &l_pEndPtr, 10);
 		if(l_i64Integer64Parameter <= 0 || (errno !=0 && l_i64Integer64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 		{
@@ -132,6 +133,8 @@ bool CModTemporalFilterBoxAlgorithm::updateSettings()
 	if(m_sLowBand!=l_oLowPassBandEdge)
 	{
 		TParameterHandler<float64> ip_f64HighCutFrequency(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_HighCutFrequency));
+
+		errno = 0;
 		float64 l_f64Float64Parameter = strtod(l_oLowPassBandEdge, &l_pEndPtr);
 		if(l_f64Float64Parameter < 0 || (errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 		{
@@ -156,6 +159,7 @@ bool CModTemporalFilterBoxAlgorithm::updateSettings()
 	if(m_sHighBand!=l_oHighPassBandEdge)
 	{
 		TParameterHandler<float64> ip_f64LowCutFrequency(m_pComputeModTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_LowCutFrequency));
+		errno = 0;
 		float64 l_f64Float64Parameter = strtod(l_oHighPassBandEdge, &l_pEndPtr);
 		if(l_f64Float64Parameter < 0 || (errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 		{
@@ -179,6 +183,7 @@ bool CModTemporalFilterBoxAlgorithm::updateSettings()
 
 	if(m_sPassBandRiple!=l_oPassBandRipple)
 	{
+		errno = 0;
 		float64 l_f64Float64Parameter = strtod(l_oPassBandRipple, &l_pEndPtr);;
 		if((errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 		{

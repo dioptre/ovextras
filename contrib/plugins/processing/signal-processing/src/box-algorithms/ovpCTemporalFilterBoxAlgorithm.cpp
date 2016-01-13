@@ -66,7 +66,7 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 	TParameterHandler<uint64> ip_ui64KindFilter(m_pComputeTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_FilterType));
 	ip_ui64KindFilter=l_ui64UInteger64Parameter;
 
-
+	errno = 0;
 	l_i64Integer64Parameter = strtol(l_oFilterOrder, &l_pEndPtr, 10);
 	if(l_i64Integer64Parameter <= 0 || (errno !=0 && l_i64Integer64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 	{
@@ -76,7 +76,7 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 	TParameterHandler<uint64> ip_ui64FilterOrder(m_pComputeTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_FilterOrder));
 	ip_ui64FilterOrder=l_i64Integer64Parameter;
 
-
+	errno = 0;
 	l_f64Float64Parameter = strtod(l_oLowPassBandEdge, &l_pEndPtr);
 	if(l_f64Float64Parameter < 0  || (errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 	{
@@ -86,7 +86,7 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 	TParameterHandler<float64> ip_f64LowCutFrequency(m_pComputeTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_LowCutFrequency));
 	ip_f64LowCutFrequency=l_f64Float64Parameter;
 
-
+	errno = 0;
 	l_f64Float64Parameter = strtod(l_oHighPassBandEdge, &l_pEndPtr);
 	if(l_f64Float64Parameter < 0 || (errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 	{
@@ -102,8 +102,7 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 	TParameterHandler<float64> ip_f64HighCutFrequency(m_pComputeTemporalFilterCoefficients->getInputParameter(OVP_Algorithm_ComputeTemporalFilterCoefficients_InputParameterId_HighCutFrequency));
 	ip_f64HighCutFrequency=l_f64Float64Parameter;
 
-
-
+	errno = 0;
 	l_f64Float64Parameter = strtod(l_oPassBandRipple, &l_pEndPtr);;
 	if((errno !=0 && l_f64Float64Parameter == 0) || *l_pEndPtr != '\0' || errno == ERANGE)
 	{

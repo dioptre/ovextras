@@ -220,6 +220,7 @@ namespace oscpkt {
             int sent = 0;
             do {
                 int res;
+				errno = 0;
                 if (isBound()) {
                     res = sendto(handle, (const char*)ptr, (int)sz, 0, &addr.addr(), (int)addr.actualLen());
                 } else {
