@@ -1,12 +1,5 @@
 #include "ovpCAlgorithmOVMatrixFileWriter.h"
 
-#include <system/ovCMemory.h>
-
-#include <sstream>
-#if defined TARGET_OS_Windows
-#include <cerrno>
-#endif
-
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;

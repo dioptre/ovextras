@@ -1,16 +1,5 @@
 #include "ovpCAlgorithmOVMatrixFileReader.h"
 
-#include <system/ovCMemory.h>
-
-#include <sstream>
-#include <locale>
-#if defined TARGET_OS_Windows
-#include <cerrno>
-#endif
-
-#include <cstring>
-#include <cstdlib>
-
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;

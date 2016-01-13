@@ -6,7 +6,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cfloat>
-
+#include <cerrno>
 
 // for save/load
 #include <fstream>
@@ -507,6 +507,7 @@ boolean OpenViBEToolkit::Tools::Matrix::fromString(OpenViBE::IMatrix& rMatrix, c
 						}
 
 						//retrieve value
+						errno = 0;
 						const float64 l_f64Value = atof(l_sCurString.c_str());
 #if defined TARGET_OS_Windows
 						if(errno == ERANGE)

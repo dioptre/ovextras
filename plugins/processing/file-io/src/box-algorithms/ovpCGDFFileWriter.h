@@ -15,7 +15,6 @@
 #include <stack>
 
 #include <cstdio>
-#include <cerrno>
 
 namespace OpenViBEPlugins
 {
