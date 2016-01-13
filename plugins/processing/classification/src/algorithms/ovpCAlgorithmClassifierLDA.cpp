@@ -194,7 +194,7 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 	{
 		if(l_vClassCounts[l_ui32classIdx]>0)
 		{
-			const float64 l_f64Label = m_vLabelList[l_ui32classIdx];
+			// const float64 l_f64Label = m_vLabelList[l_ui32classIdx];
 			const uint32 l_ui32nExamplesInClass = l_vClassCounts[l_ui32classIdx];
 
 			// Copy all the data of the class to a matrix
