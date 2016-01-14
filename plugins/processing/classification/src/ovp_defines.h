@@ -1,7 +1,8 @@
 #ifndef __OpenViBEPlugins_Defines_H__
 #define __OpenViBEPlugins_Defines_H__
 
-#define OVP_Classification_BoxTrainerXMLVersion								3
+#define OVP_Classification_BoxTrainerFormatVersion                  4
+#define OVP_Classification_BoxTrainerFormatVersionRequired          4
 
 //___________________________________________________________________//
 //                                                                   //
@@ -29,7 +30,7 @@
 #define OVP_TypeId_ClassificationPairwiseStrategy							OpenViBE::CIdentifier(0x0DD51C74, 0x3C4E74C9)
 
 
-extern const char* const c_sXmlVersionAttributeName;
+extern const char* const c_sFormatVersionAttributeName;
 extern const char* const c_sIdentifierAttributeName;
 
 extern const char* const c_sStrategyNodeName;

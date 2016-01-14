@@ -17,7 +17,11 @@
 //This needs to reachable from outside
 const char* const c_sClassifierRoot = "OpenViBE-Classifier";
 
-const char* const c_sXmlVersionAttributeName = "XMLVersion";
+const char* const c_sFormatVersionAttributeName = "FormatVersion";
+
+const char* const c_sCreatorAttributeName = "Creator";
+const char* const c_sCreatorVersionAttributeName = "CreatorVersion";
+
 const char* const c_sIdentifierAttributeName = "class-id";
 
 const char* const c_sStrategyNodeName = "Strategy-Identifier";
@@ -649,9 +653,14 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 
 	XML::IXMLNode *l_sRoot = XML::createNode(c_sClassificationBoxRoot);
 	std::stringstream l_sVersion;
-	l_sVersion << OVP_Classification_BoxTrainerXMLVersion;
-	l_sRoot->addAttribute(c_sXmlVersionAttributeName, l_sVersion.str().c_str());
+	l_sVersion << OVP_Classification_BoxTrainerFormatVersion;
+	l_sRoot->addAttribute(c_sFormatVersionAttributeName, l_sVersion.str().c_str());
 
+	l_sRoot->addAttribute(c_sCreatorAttributeName, OV_PROJECT_NAME);
+
+	std::stringstream l_sCreatorVersion;
+	l_sCreatorVersion << OV_VERSION_MAJOR << "." << OV_VERSION_MINOR << "." << OV_VERSION_PATCH;
+	l_sRoot->addAttribute(c_sCreatorVersionAttributeName, l_sCreatorVersion.str().c_str());
 
 	XML::IXMLNode *l_pTempNode = XML::createNode(c_sStrategyNodeName);
 	l_oStrategyClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationStrategy, (*m_pParameter)[c_sMulticlassStrategySettingName]);

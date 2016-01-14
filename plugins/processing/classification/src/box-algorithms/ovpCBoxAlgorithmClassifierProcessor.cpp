@@ -33,22 +33,29 @@ boolean CBoxAlgorithmClassifierProcessor::loadClassifier(const char* sFilename)
 
 	m_vStimulation.clear();
 
-	//Now check the version, and let's display a message if the version is not good
+	// Check the version of the file
 	string l_sVersion;
-	if(l_pRootNode->hasAttribute(c_sXmlVersionAttributeName))
+	if(l_pRootNode->hasAttribute(c_sFormatVersionAttributeName))
 	{
-		l_sVersion = l_pRootNode->getAttribute(c_sXmlVersionAttributeName);
+		l_sVersion = l_pRootNode->getAttribute(c_sFormatVersionAttributeName);
 		std::stringstream l_sData(l_sVersion);
 		uint32 l_ui32Version;
 		l_sData >> l_ui32Version;
-		if(l_ui32Version != OVP_Classification_BoxTrainerXMLVersion)
+		if(l_ui32Version > OVP_Classification_BoxTrainerFormatVersion)
 		{
-			this->getLogManager() << LogLevel_Warning << "The configuration file doesn't have the same version number as the box. Trouble may appear in loading process.\n";
+			this->getLogManager() << LogLevel_Warning << "The classifier configuration in [" << sFilename << "] was saved using a newer version of OpenViBE. Problems may occur.\n";
+		}
+		else if(l_ui32Version < OVP_Classification_BoxTrainerFormatVersionRequired)
+		{
+			this->getLogManager() << LogLevel_Error << "The classifier configuration in [" << sFilename << "] has XML version " << l_ui32Version << " but version " << OVP_Classification_BoxTrainerFormatVersionRequired
+				<< " is required. Please retrain the classifier using your current OpenViBE version.\n";
+			return false;
 		}
 	}
 	else
 	{
-		this->getLogManager() << LogLevel_Warning << "The configuration file has no version information. Trouble may appear in loading process.\n";
+		this->getLogManager() << LogLevel_Error << "The configuration file [" << sFilename << "] has no version information. Please retrain your classifier using your current OpenViBE version.\n";
+		return false;
 	}
 
 	CIdentifier l_oAlgorithmClassIdentifier = OV_UndefinedIdentifier;
