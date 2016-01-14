@@ -69,8 +69,6 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32NumCols;
 			OpenViBE::uint32 m_ui32NumClasses;
 
-			OpenViBE::boolean m_bv1Classification;
-
 			OpenViBE::Kernel::IAlgorithmProxy* m_pCovarianceAlgorithm;
 
 		private:
