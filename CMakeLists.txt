@@ -12,7 +12,7 @@ if(POLICY CMP0048)
   cmake_policy(SET CMP0048 OLD)
 endif()
 
-PROJECT(OpenVIBE)
+PROJECT(OpenViBE)
 
 # These versions are used by the subprojects by default.
 # If you wish to maintain specific version numbers for a subproject, please do so in the projects CMakeLists.txt
@@ -33,6 +33,11 @@ INCLUDE("FindOpenMP")
 IF(OPENMP_FOUND)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 ENDIF(OPENMP_FOUND)
+
+ADD_DEFINITIONS("-DOV_PROJECT_NAME=\"${PROJECT_NAME}\"")
+ADD_DEFINITIONS("-DOV_VERSION_MAJOR=\"${OV_GLOBAL_VERSION_MAJOR}\"")
+ADD_DEFINITIONS("-DOV_VERSION_MINOR=\"${OV_GLOBAL_VERSION_MINOR}\"")
+ADD_DEFINITIONS("-DOV_VERSION_PATCH=\"${OV_GLOBAL_VERSION_PATCH}\"")
 
 IF(WIN32)
 	ADD_DEFINITIONS("-DNOMINMAX -DBOOST_ALL_NO_LIB")
