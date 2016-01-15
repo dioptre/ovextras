@@ -5,6 +5,7 @@
 */
 
 #include "ovasCPluginExternalStimulations.h"
+#include "ovasCPluginTCPTagging.h"
 
 #include "ovasCDriverBrainmasterDiscovery.h"
 #include "ovasCDriverBrainProductsBrainVisionRecorder.h"
@@ -67,6 +68,9 @@ namespace OpenViBEContributions {
 #endif
 
 		pGUI->registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginExternalStimulations(rKernelContext));
+
+		// register tcp-tagging plugin
+		pGUI->registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginTCPTagging(rKernelContext));
 	}
 
 }
