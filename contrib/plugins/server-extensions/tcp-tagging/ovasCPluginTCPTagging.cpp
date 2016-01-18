@@ -231,7 +231,7 @@ void CPluginTCPTagging::loopHook(std::vector < std::vector < OpenViBE::float32 >
 
 	// Collect tags from the stream until exhaustion.
 	while(tagStream.pop(tag)) {
-		m_rKernelContext.getLogManager() << Kernel::LogLevel_Info << "New Tag received (" << tag.padding << ", " << tag.identifier << ", " << tag.timestamp << ")\n";
+		m_rKernelContext.getLogManager() << Kernel::LogLevel_Info << "New Tag received (" << tag.padding << ", " << tag.identifier << ", " << tag.timestamp << ") at " << posixTime << "\n";
 
 		// Add 10 ms delay to reduce the risk of a race condition.
 		// The duration (dt) between the moment when the tag is timestamped and the moment when it is received by the acquisition server is generally small.
