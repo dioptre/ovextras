@@ -30,6 +30,8 @@ for i in range(100):
     # create the three pieces of the tag, padding, event_id and timestamp
     padding=[0]*8
     event_id=list(to_byte(EVENT_ID, 8))
+
+    # timestamp can be either the posix time in ms, or 0 to let the acquisition server timestamp the tag itself.
     timestamp=list(to_byte(int(time()*1000)+DELAY, 8))
 
     # send tag and sleep

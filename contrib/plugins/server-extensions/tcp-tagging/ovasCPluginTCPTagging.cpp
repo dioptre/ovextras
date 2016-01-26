@@ -97,6 +97,17 @@ public:
 	void handleRead(const boost::system::error_code& error)
 	{
 		if (!error) {
+			// If the timestamp is 0, set timestamp to current posix time.
+			if (m_tag.timestamp==0) {
+        			// Get POSIX time (number of milliseconds since epoch)
+        			timeb time_buffer;
+        			ftime(&time_buffer);
+        			uint64 posixTime = time_buffer.time*1000ULL + time_buffer.millitm;
+
+				// edit timestamp
+				m_tag.timestamp=posixTime;
+			} 
+
 			// Push tag to the queue.
 			m_queuePtr->push(m_tag);
 
@@ -231,18 +242,12 @@ void CPluginTCPTagging::loopHook(std::vector < std::vector < OpenViBE::float32 >
 
 	// Collect tags from the stream until exhaustion.
 	while(tagStream.pop(tag)) {
-		m_rKernelContext.getLogManager() << Kernel::LogLevel_Info << "New Tag received (" << tag.padding << ", " << tag.identifier << ", " << tag.timestamp << ") at " << posixTime << "\n";
+		m_rKernelContext.getLogManager() << Kernel::LogLevel_Info << "New Tag received (" << tag.padding << ", " << tag.identifier << ", " << tag.timestamp << ") at " << posixTime << " (posix time in ms)\n";
 
-		// Add 10 ms delay to reduce the risk of a race condition.
-		// The duration (dt) between the moment when the tag is timestamped and the moment when it is received by the acquisition server is generally small.
-		// Typically dt<1ms for localhost. Nonetheless it may still happen that timestamp + dt > m_previousPosixTime.
-		// This would result in a tag loss. The delay allows to compensate for dt. Its value is empirical and should be >= max(dt).
-		tag.timestamp += 10;
-
-		// Check that the timestamp fits in the time frame.
+		// Check that the timestamp fits the current chunk.
 		if (tag.timestamp < m_previousPosixTime) {
-			m_rKernelContext.getLogManager() << Kernel::LogLevel_Error << "The Tag is discarded because it arrives too late to be inserted in the current signal block\n";
-			continue;
+			m_rKernelContext.getLogManager() << Kernel::LogLevel_Warning << "The Tag has arrived before the beginning of the current chunk and will be inserted at the beginning of this chunk\n";
+			tag.timestamp = m_previousPosixTime;
 		}
 
 		// Marker time correction (simple local linear interpolation).
