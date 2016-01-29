@@ -17,6 +17,8 @@
 #include "box-algorithms/ovpCBoxAlgorithmClassifierTrainer.h"
 #include "box-algorithms/ovpCBoxAlgorithmClassifierProcessor.h"
 
+#include "box-algorithms/ovpCBoxAlgorithmOutlierRemoval.h"
+
 #if defined TARGET_HAS_ThirdPartyEIGEN
 #include "algorithms/ovpCAlgorithmConditionedCovariance.h"
 #include "algorithms/ovpCAlgorithmClassifierLDA.h"
@@ -95,6 +97,8 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_ClassId_Algorithm_ClassifierMLP_DecisionAvailable, "HT", OVP_ClassId_Algorithm_PairwiseDecision_HT.toUInteger());
 	OpenViBEPlugins::Classification::registerAvailableDecisionEnumeration(OVP_ClassId_Algorithm_ClassifierMLP, OVP_ClassId_Algorithm_ClassifierMLP_DecisionAvailable);
 #endif // TARGET_HAS_ThirdPartyEIGEN
+
+	OVP_Declare_New(OpenViBEPlugins::Classification::CBoxAlgorithmOutlierRemovalDesc);
 
 OVP_Declare_End();
 
