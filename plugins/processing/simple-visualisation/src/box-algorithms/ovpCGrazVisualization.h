@@ -13,6 +13,8 @@
 #include <map>
 #include <deque>
 
+class StimulusSender; // fwd declare
+
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
@@ -118,11 +120,15 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bShowFeedback;
 			OpenViBE::boolean m_bDelayFeedback;
 			OpenViBE::boolean m_bShowAccuracy;
+			OpenViBE::boolean m_bPositiveFeedbackOnly;
 
 			OpenViBE::uint64 m_i64PredictionsToIntegrate;
 
 			OpenViBE::CMatrix m_oConfusion;
+			
+			StimulusSender* m_pStimulusSender;
 
+			OpenViBE::uint64 m_ui64LastStimulation;
 		};
 
 		/**
@@ -158,6 +164,7 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Delay feedback", OV_TypeId_Boolean,              "false");
 				rPrototype.addSetting("Show accuracy", OV_TypeId_Boolean,               "false");
 				rPrototype.addSetting("Predictions to integrate", OV_TypeId_Integer,    "5");
+				rPrototype.addSetting("Positive feedback only", OV_TypeId_Boolean,      "false");
 
 				return true;
 			}

@@ -18,6 +18,103 @@ using namespace OpenViBEToolkit;
 
 using namespace std;
 
+////////////////////////
+
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+
+#include <boost/array.hpp>
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <sys/timeb.h>
+
+using boost::asio::ip::tcp;
+
+/*
+ * \class StimulusSender
+ * \brief Basic illustratation of how to read from TCPWriter using boost::asio
+ */
+class StimulusSender {
+public:
+	~StimulusSender()
+	{
+		if(m_oStimulusSocket.is_open())
+		{
+			std::cout << "Disconnecting\n";
+			m_oStimulusSocket.close();
+		}
+	}
+
+	StimulusSender(void)
+		: m_oStimulusSocket(m_ioService), m_bConnectedOnce(false)
+	{
+	}
+	
+	boolean connect(const char* sAddress, const char* sStimulusPort)
+	{
+		//m_pStimulusSocket = new tcp::socket(m_ioService);
+		boost::system::error_code error;
+		tcp::resolver resolver(m_ioService);
+			
+		// Stimulus port
+		std::cout << "Connecting to stimulus port [" << sAddress << " : " << sStimulusPort << "]\n";
+		tcp::resolver::query query = tcp::resolver::query(tcp::v4(), sAddress, sStimulusPort);
+		m_oStimulusSocket.connect(*resolver.resolve(query), error);
+		if(error)
+		{
+			std::cout << "Connection error: " << error << "\n";
+			return false;
+		}
+		
+		m_bConnectedOnce = true;
+
+		return true;
+	}
+
+	boolean sendStimuli(uint64 ui64Stimuli) 
+	{
+		if(!m_bConnectedOnce) {
+			return false;
+		}	
+
+		timeb time_buffer;
+		ftime(&time_buffer);
+		const uint64 posixTime = time_buffer.time*1000ULL + time_buffer.millitm;
+
+		if(!m_oStimulusSocket.is_open())
+		{
+			std::cout << "Cannot send stimulation, socket is not open\n";
+			return false;
+		}
+
+		uint64 l_ui64tmp = 0;
+		try
+		{
+			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
+			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&ui64Stimuli, sizeof(uint64)));
+			//boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&posixTime, sizeof(uint64)));
+			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
+		} 
+		catch (boost::system::system_error l_oError) 
+		{
+			std::cout << "Issue '" << l_oError.code().message().c_str() << "' with writing stimulus to server\n";
+		}
+
+		return true;
+	}
+
+private:
+
+	boost::asio::io_service m_ioService;
+
+	tcp::socket m_oStimulusSocket;
+
+	OpenViBE::boolean m_bConnectedOnce;
+};
+
+//////////////////////////
+
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
@@ -44,6 +141,7 @@ namespace OpenViBEPlugins
 			*/
 			boolean l_bStateUpdated = false;
 
+			m_ui64LastStimulation = ui64StimulationIdentifier;
 			switch(ui64StimulationIdentifier)
 			{
 				case OVTK_GDF_End_Of_Trial:
@@ -56,6 +154,7 @@ namespace OpenViBEPlugins
 						m_f64BarScale = l_f64Prediction;
 					}
 					break;
+					m_pStimulusSender->sendStimuli(m_ui64LastStimulation);
 
 				case OVTK_GDF_End_Of_Session:
 					m_eCurrentState = EGrazVisualizationState_Idle;
@@ -66,6 +165,7 @@ namespace OpenViBEPlugins
 						drawBar();
 					}
 					break;
+					m_pStimulusSender->sendStimuli(m_ui64LastStimulation);
 
 				case OVTK_GDF_Cross_On_Screen:
 					m_eCurrentState = EGrazVisualizationState_Reference;
@@ -191,7 +291,10 @@ namespace OpenViBEPlugins
 			m_bShowFeedback(false),
 			m_bDelayFeedback(false),
 			m_bShowAccuracy(false),
-			m_i64PredictionsToIntegrate(5)
+			m_bPositiveFeedbackOnly(false),
+			m_i64PredictionsToIntegrate(5),
+			m_pStimulusSender(NULL),
+			m_ui64LastStimulation(0)
 		{
 			m_oBackgroundColor.pixel = 0;
 			m_oBackgroundColor.red = 0;//0xFFFF;
@@ -215,6 +318,7 @@ namespace OpenViBEPlugins
 			m_bDelayFeedback              = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 			m_bShowAccuracy               = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
 			m_i64PredictionsToIntegrate   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+			m_bPositiveFeedbackOnly       = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
 
 			if(m_i64PredictionsToIntegrate<1) 
 			{
@@ -288,13 +392,24 @@ namespace OpenViBEPlugins
 			gtk_widget_show_all(m_pMainWindow);
 #endif
 			getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pDrawingArea);
+			
+			m_pStimulusSender = new StimulusSender();
+
+			if(!m_pStimulusSender->connect("localhost", "15361"))
+			{
+				this->getLogManager() << LogLevel_Warning << "Unable to connect to AS TCP Tagging, stimuli wont be forwarded.\n";
+			}
 
 			return true;
 		}
 
 		boolean CGrazVisualization::uninitialize()
 		{
-			
+			if(m_pStimulusSender)
+			{
+				delete m_pStimulusSender;
+			}
+
 			m_oStimulationDecoder.uninitialize();
 			m_oMatrixDecoder.uninitialize();
 			
@@ -410,6 +525,7 @@ namespace OpenViBEPlugins
 			{
 				case EGrazVisualizationState_Reference:
 					drawReferenceCross();
+					m_pStimulusSender->sendStimuli(m_ui64LastStimulation);
 					break;
 
 				case EGrazVisualizationState_Cue:
@@ -512,22 +628,34 @@ namespace OpenViBEPlugins
 				default:
 					break;
 			}
-
+			m_pStimulusSender->sendStimuli(m_ui64LastStimulation);
 		}
 
 		void CGrazVisualization::drawBar()
 		{
-			gint l_iWindowWidth = m_pDrawingArea->allocation.width;
-			gint l_iWindowHeight = m_pDrawingArea->allocation.height;
+			const gint l_iWindowWidth = m_pDrawingArea->allocation.width;
+			const gint l_iWindowHeight = m_pDrawingArea->allocation.height;
 
-			gint l_iRectangleWidth = static_cast<gint>(fabs(l_iWindowWidth * fabs(m_f64BarScale) / 2));
+			float64 l_f64UsedScale = m_f64BarScale;
+			if(m_bPositiveFeedbackOnly)
+			{
+				// @fixme for multiclass
+				const uint32 l_ui32TrueDirection  = m_eCurrentDirection - 1;
+				const uint32 l_ui32ThisVote = (m_f64BarScale < 0 ? 0 : 1);
+				if(l_ui32TrueDirection != l_ui32ThisVote)
+				{
+					l_f64UsedScale = 0;
+				}
+			}
+
+			gint l_iRectangleWidth = static_cast<gint>(fabs(l_iWindowWidth * fabs(l_f64UsedScale) / 2));
 
 			l_iRectangleWidth = (l_iRectangleWidth>(l_iWindowWidth/2)) ? (l_iWindowWidth/2) : l_iRectangleWidth;
 
-			gint l_iRectangleHeight = l_iWindowHeight/6;
+			const gint l_iRectangleHeight = l_iWindowHeight/6;
 
 			gint l_iRectangleTopLeftX = l_iWindowWidth / 2;
-			gint l_iRectangleTopLeftY = (l_iWindowHeight/2)-(l_iRectangleHeight/2);
+			const gint l_iRectangleTopLeftY = (l_iWindowHeight/2)-(l_iRectangleHeight/2);
 
 			if(m_f64BarScale<0)
 			{
@@ -731,4 +859,23 @@ namespace OpenViBEPlugins
 	};
 };
 
+
+/*
+int main(int argc, char** argv)
+{
+	try {
+
+		StimulusSender client("localhost", "15361");
+		client.sendStimuli(666);
+
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return 1;
+	}
+
+    return 0;
+}
+*/
 
