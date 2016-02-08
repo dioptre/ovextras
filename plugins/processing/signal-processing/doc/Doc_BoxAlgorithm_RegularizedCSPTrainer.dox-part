@@ -115,12 +115,14 @@ __________________________________________________________________
  
  Note that the usage of the CSP filters before classification training can make the cross-validation results optimistic, unless strictly non-overlapping parts of the data were used to train the CSP and the classifier (disjoint sets for each). 
  
- The trace normalization can be found in the literature [2]. Presumably the idea is to normalize the 
- scale of each chunk in order to compensate for a possible signal power drift over time during the EEG recording, 
- making each chunks' covariance contribute similarly to the aggregate regardless of the current chunks average power. 
+ The trace normalization can be found in the literature [2]. The idea is to normalize the scale of each chunk in order to 
+ compensate for a possible signal power drift over time during the EEG recording, making each chunks' covariance contribute 
+ similarly to the aggregate regardless of the current chunks average power. 
 				
  To get the "CSP with Diagonal Loading" of Lotte & Guan paper [1], set shrinkage to a positive value and Tikhonov to 0. To get the 
  "CSP with Tikhonov regularization", do the opposite. You can also try a mixture of the two. Note that the Guan & Lotte paper does not appear to use trace normalization.
+ 
+ To get the CSP resembling the one in the Muller-Gerkin paper, set Trace Normalization to True and the Covariance method to Chunk Average, with no regularization. Then, feed the algorithm each trial as a separate chunk (with Stimulation based epoching box). This is also the classic OV way of computing the CSP.
  
  Once the spatial filters are computed and saved in the configuration file, you can load the configuration into the \ref Doc_BoxAlgorithm_SpatialFilter "Spatial Filter" box.
  
