@@ -30,7 +30,7 @@ namespace OpenViBEAcquisitionServer
 				virtual void startHook(const std::vector<OpenViBE::CString>& vSelectedChannelNames, OpenViBE::uint32 ui32SamplingFrequency, OpenViBE::uint32 ui32ChannelCount, OpenViBE::uint32 ui32SampleCountPerSentBlock);
 				virtual void stopHook();
 				virtual void loopHook(std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer,
-					OpenViBE::CStimulationSet& stimulationSet, OpenViBE::uint64 start, OpenViBE::uint64 end);
+					OpenViBE::CStimulationSet& stimulationSet, OpenViBE::uint64 start, OpenViBE::uint64 end, OpenViBE::uint64 sampleTime);
 
 				// Plugin implementation
 
