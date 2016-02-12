@@ -16,6 +16,8 @@
 #define OVP_ClassId_BoxAlgorithm_P300SpellerVisualisation     OpenViBE::CIdentifier(0x195E41D6, 0x6E684D47)
 #define OVP_ClassId_BoxAlgorithm_P300SpellerVisualisationDesc OpenViBE::CIdentifier(0x31DE2B0D, 0x028202E7)
 
+class StimulusSender; // fwd declare
+
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
@@ -115,6 +117,8 @@ namespace OpenViBEPlugins
 
 			std::map < unsigned long, std::map < unsigned long, CBoxAlgorithmP300SpellerVisualisation::SWidgetStyle > > m_vCache;
 			std::list < std::pair < int, int > > m_vTargetHistory;
+
+			StimulusSender* m_pStimulusSender;
 		};
 
 		class CBoxAlgorithmP300SpellerVisualisationDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc

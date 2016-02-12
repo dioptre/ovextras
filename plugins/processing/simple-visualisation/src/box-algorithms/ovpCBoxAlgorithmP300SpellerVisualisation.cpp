@@ -7,12 +7,104 @@
 #include <string>
 #include <algorithm>
 
+// For stimulussender
+#include <iostream>
+#include <boost/array.hpp>
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <sys/timeb.h>
+using boost::asio::ip::tcp;
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::SimpleVisualisation;
+
+/*
+ * \class StimulusSender
+ * \brief Simple client to send stimuli to Acquisition Server TCP Tagging
+ * \todo Refactor to its own file
+ */
+class StimulusSender {
+public:
+	~StimulusSender()
+	{
+		if(m_oStimulusSocket.is_open())
+		{
+			std::cout << "Disconnecting\n";
+			m_oStimulusSocket.close();
+		}
+	}
+
+	StimulusSender(void)
+		: m_oStimulusSocket(m_ioService), m_bConnectedOnce(false)
+	{
+	}
+	
+	boolean connect(const char* sAddress, const char* sStimulusPort)
+	{
+		//m_pStimulusSocket = new tcp::socket(m_ioService);
+		boost::system::error_code error;
+		tcp::resolver resolver(m_ioService);
+			
+		// Stimulus port
+		std::cout << "Connecting to stimulus port [" << sAddress << " : " << sStimulusPort << "]\n";
+		tcp::resolver::query query = tcp::resolver::query(tcp::v4(), sAddress, sStimulusPort);
+		m_oStimulusSocket.connect(*resolver.resolve(query), error);
+		if(error)
+		{
+			std::cout << "Connection error: " << error << "\n";
+			return false;
+		}
+		
+		m_bConnectedOnce = true;
+
+		return true;
+	}
+
+	boolean sendStimuli(uint64 ui64Stimuli) 
+	{
+		if(!m_bConnectedOnce) {
+			return false;
+		}	
+
+		timeb time_buffer;
+		ftime(&time_buffer);
+		const uint64 posixTime = time_buffer.time*1000ULL + time_buffer.millitm;
+
+		if(!m_oStimulusSocket.is_open())
+		{
+			std::cout << "Cannot send stimulation, socket is not open\n";
+			return false;
+		}
+
+		uint64 l_ui64tmp = 0;
+		try
+		{
+			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
+			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&ui64Stimuli, sizeof(uint64)));
+			//boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&posixTime, sizeof(uint64)));
+			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
+		} 
+		catch (boost::system::system_error l_oError) 
+		{
+			std::cout << "Issue '" << l_oError.code().message().c_str() << "' with writing stimulus to server\n";
+		}
+
+		return true;
+	}
+
+private:
+
+	boost::asio::io_service m_ioService;
+
+	tcp::socket m_oStimulusSocket;
+
+	OpenViBE::boolean m_bConnectedOnce;
+};
+
 
 namespace
 {
@@ -175,6 +267,14 @@ boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 	m_iSelectedRow=-1;
 	m_iSelectedColumn=-1;
 
+	m_pStimulusSender = new StimulusSender();
+
+	if(!m_pStimulusSender->connect("localhost", "15361"))
+	{
+		this->getLogManager() << LogLevel_Warning << "Unable to connect to AS TCP Tagging, stimuli wont be forwarded.\n";
+	}
+
+
 	m_bTableInitialized=false;
 
 	return true;
@@ -182,6 +282,12 @@ boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 
 boolean CBoxAlgorithmP300SpellerVisualisation::uninitialize(void)
 {
+	if(m_pStimulusSender)
+	{
+		delete m_pStimulusSender;
+		m_pStimulusSender = NULL;
+	}
+
 	if(m_pSelectedFontDescription)
 	{
 		pango_font_description_free(m_pSelectedFontDescription);
@@ -315,31 +421,22 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 				boolean l_bFlash=false;
 				int l_iRow=-1;
 				int l_iColumn=-1;
+				boolean l_bIsTarget = false;
+
+				// Pass the stimulation to AS in any case
+				m_pStimulusSender->sendStimuli(l_ui64StimulationIdentifier);
+
 				if(l_ui64StimulationIdentifier >= m_ui64RowStimulationBase && l_ui64StimulationIdentifier < m_ui64RowStimulationBase+m_ui64RowCount)
 				{
 					l_iRow=(int)(l_ui64StimulationIdentifier-m_ui64RowStimulationBase);
 					l_bFlash=true;
-					if(l_iRow==m_iLastTargetRow)
-					{
-						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_Target, l_pStimulationSet->getStimulationDate(j), 0);
-					}
-					else
-					{
-						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_NonTarget, l_pStimulationSet->getStimulationDate(j), 0);
-					}
+					l_bIsTarget = (l_iRow==m_iLastTargetRow);
 				}
 				if(l_ui64StimulationIdentifier >= m_ui64ColumnStimulationBase && l_ui64StimulationIdentifier < m_ui64ColumnStimulationBase+m_ui64ColumnCount)
 				{
 					l_iColumn=(int)(l_ui64StimulationIdentifier-m_ui64ColumnStimulationBase);
 					l_bFlash=true;
-					if(l_iColumn==m_iLastTargetColumn)
-					{
-						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_Target, l_pStimulationSet->getStimulationDate(j), 0);
-					}
-					else
-					{
-						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_NonTarget, l_pStimulationSet->getStimulationDate(j), 0);
-					}
+					l_bIsTarget = (l_iColumn==m_iLastTargetColumn);
 				}
 				if(l_ui64StimulationIdentifier == OVTK_StimulationId_VisualStimulationStop)
 				{
@@ -377,6 +474,18 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 						&CBoxAlgorithmP300SpellerVisualisation::_cache_change_font_cb_,
 						m_pFlashFontDescription,
 						m_pNoFlashFontDescription);
+
+					if(l_bIsTarget)
+					{
+						m_pStimulusSender->sendStimuli(OVTK_StimulationId_Target);
+						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_Target, l_pStimulationSet->getStimulationDate(j), 0);
+					}
+					else
+					{
+						m_pStimulusSender->sendStimuli(OVTK_StimulationId_NonTarget);
+						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_NonTarget, l_pStimulationSet->getStimulationDate(j), 0);
+					}
+
 				}
 			}
 			m_pTargetFlaggingStimulationEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
@@ -457,6 +566,11 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 							&CBoxAlgorithmP300SpellerVisualisation::_cache_collect_child_widget_cb_,
 							&l_vWidgets,
 							NULL);
+
+						m_pStimulusSender->sendStimuli(OVTK_StimulationId_BaselineStart);
+						m_pStimulusSender->sendStimuli(m_iTargetRow + m_ui64RowStimulationBase);
+						m_pStimulusSender->sendStimuli(m_iTargetColumn + m_ui64ColumnStimulationBase);
+						m_pStimulusSender->sendStimuli(OVTK_StimulationId_BaselineStop);
 
 						if(l_vWidgets.size() == 1)
 						{
