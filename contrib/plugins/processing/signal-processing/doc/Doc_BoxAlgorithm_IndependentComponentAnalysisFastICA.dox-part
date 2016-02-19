@@ -43,46 +43,50 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting1|
  *
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting2|
- * How many seconds of sample to collect to estimate the ICA model?
+ * Which decomposition is desired?
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting2|
  *
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting3|
- * Decomposition type. Deflation is an approach where each component is
- * estimated separately in turns. Symmetric estimation optimizes all 
- * components at once.
+ * How many seconds of sample to collect to estimate the ICA model?
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting3|
  *
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting4|
- * Maximum number of iterations
+ * Decomposition type. Deflation is an approach where each component is
+ * estimated separately in turns. Symmetric estimation optimizes all 
+ * components at once.
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting4|
  *
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting5|
- * Enable fine tuning?
+ * Maximum number of iterations
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting5|
  *
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting6|
- * Maximum number of iterations for the fine tuning
+ * Enable fine tuning?
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting6|
- * 
- * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting7|
- * Used nonlinearity type
- * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting7|
  *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting7|
+ * Maximum number of iterations for the fine tuning
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting7|
+ * 
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting8|
- * Mu parameter
+ * Used nonlinearity type
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting8|
  *
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting9|
- * Epsilon parameter
+ * Mu parameter
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting9|
  *
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting10|
- * Filename to save the estimated decomposition matrix W to
+ * Epsilon parameter
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting10|
  *
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting11|
- * Should the matrix W be saved to a file?
+ * Filename to save the estimated decomposition matrix W to
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting11|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting12|
+ * Should the matrix W be saved to a file?
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting12|
  * 
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Settings|
  
