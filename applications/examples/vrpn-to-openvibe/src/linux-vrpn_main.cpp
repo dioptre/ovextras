@@ -12,8 +12,13 @@ int main(int argc, char** argv)
 {
 	GenericVRPNServer* vrpnServer = GenericVRPNServer::getInstance(DEFAULT_PORT);
 
-	vrpnServer->addButton("button_test", 1);
-	vrpnServer->addAnalog("analog_test", 2);
+	const char *buttonDevice = "button_test";
+	const char *analogDevice = "analog_test";
+	
+	std::cout << "Creating devices [" << buttonDevice << "] and [" << analogDevice << "] using port [" << DEFAULT_PORT << "]\n";
+
+	vrpnServer->addButton(buttonDevice, 1);
+	vrpnServer->addAnalog(analogDevice, 2);
 
 	double time = 0;
 	double period = 0;
@@ -22,11 +27,11 @@ int main(int argc, char** argv)
 	{
 		if (period >= 2 * M_PI)
 		{
-			vrpnServer->changeButtonState("button_test", 0, 1 - vrpnServer->getButtonState("button_test", 0));
+			vrpnServer->changeButtonState(buttonDevice, 0, 1 - vrpnServer->getButtonState(buttonDevice, 0));
 			period = 0;
 		}
 
-		vrpnServer->changeAnalogState("analog_test", sin(time), cos(time));
+		vrpnServer->changeAnalogState(analogDevice, sin(time), cos(time));
 
 		time = time + 0.01;
 		period = period + 0.01;

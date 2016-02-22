@@ -1,3 +1,5 @@
+
+
 #ifndef __OpenViBEPlugins_BoxAlgorithm_SpatialFilter_H__
 #define __OpenViBEPlugins_BoxAlgorithm_SpatialFilter_H__
 
@@ -6,6 +8,10 @@
 #include <toolkit/ovtk_all.h>
 
 #include <vector>
+
+// do undef for testing without eigen ...
+// #undef TARGET_HAS_ThirdPartyEIGEN
+
 /* */
 #define OVP_ClassId_BoxAlgorithm_SpatialFilter     OpenViBE::CIdentifier(0xDD332C6C, 0x195B4FD4)
 #define OVP_ClassId_BoxAlgorithm_SpatialFilterDesc OpenViBE::CIdentifier(0x72A01C92, 0xF8C1FA24)
@@ -33,22 +39,14 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamDecoder;
-			OpenViBE::Kernel::TParameterHandler < const OpenViBE::IMemoryBuffer* > ip_pMemoryBuffer;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pMatrix;
+			OpenViBEToolkit::TDecoder < CBoxAlgorithmSpatialFilter >* m_pStreamDecoder;
+			OpenViBEToolkit::TEncoder < CBoxAlgorithmSpatialFilter >* m_pStreamEncoder;
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamEncoder;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > ip_pMatrix;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pMemoryBuffer;
+			OpenViBE::CMatrix m_oFilterBank;
 
-			std::vector < OpenViBE::float64 > m_vCoefficient;
-/*
-			OpenViBE::uint32 m_ui32OutputChannelCount;
-			OpenViBE::uint32 m_ui32InputChannelCount;
-*/
 		private:
 			// Loads the m_vCoefficient vector (representing a matrix) from the given string. c1 and c2 are separator characters between floats.
-			OpenViBE::uint32 loadCoefficients(const OpenViBE::CString &rCoefficients, const char c1, const char c2);
+			OpenViBE::uint32 loadCoefficients(const OpenViBE::CString &rCoefficients, const char c1, const char c2,  OpenViBE::uint32 nRows, OpenViBE::uint32 nCols);
 
 		};
 
@@ -82,12 +80,12 @@ namespace OpenViBEPlugins
 			virtual void release(void) { }
 
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Spatial Filter"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard"); }
-			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard, Jussi T. Lindgren"); }
+			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Maps M inputs to N outputs by multiplying the each input vector with a matrix"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("The applied coefficient matrix must be specified as a box parameter. The filter processes each sample independently of the past samples."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Filtering"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-missing-image"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_SpatialFilter; }
@@ -103,6 +101,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Spatial Filter Coefficients", OV_TypeId_String,  "1;0;0;0;0;1;0;0;0;0;1;0;0;0;0;1");
 				rBoxAlgorithmPrototype.addSetting("Number of Output Channels",   OV_TypeId_Integer, "4");
 				rBoxAlgorithmPrototype.addSetting("Number of Input Channels",    OV_TypeId_Integer, "4");
+				rBoxAlgorithmPrototype.addSetting("Filter matrix file",          OV_TypeId_Filename,  "");
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 

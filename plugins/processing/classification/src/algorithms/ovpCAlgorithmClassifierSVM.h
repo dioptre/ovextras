@@ -36,7 +36,7 @@ namespace OpenViBEPlugins
 {
 	namespace Classification
 	{
-		OpenViBE::int32 getSVMBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
+		OpenViBE::int32 SVMClassificationCompare(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue);
 
 
 		class CAlgorithmClassifierSVM : public OpenViBEToolkit::CAlgorithmClassifier
@@ -60,9 +60,13 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString modelToString();
 			virtual OpenViBE::CString problemToString(svm_problem *pProb);
 
+			virtual OpenViBE::uint32 getOutputProbabilityVectorLength();
+			virtual OpenViBE::uint32 getOutputDistanceVectorLength();
+
 			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierSVM);
 
 		protected:
+
 			std::vector <OpenViBE::float64> m_vClass;
 			struct svm_parameter m_oParam;
 
@@ -78,16 +82,12 @@ namespace OpenViBEPlugins
 			//todo a modifier en fonction de svn_save_model
 			//vector m_oCoefficients;
 
-			XML::IXMLNode *m_pConfigurationNode;
-
 		private:
 			void loadParamNodeConfiguration(XML::IXMLNode *pParamNode);
 			void loadModelNodeConfiguration(XML::IXMLNode *pModelNode);
 			void loadModelSVsNodeConfiguration(XML::IXMLNode* pSVsNodeParam);
 
 			void setParameter(void);
-
-			void generateConfigurationNode(void);
 
 			void deleteModel(svm_model *pModel, bool bFreeSupportVectors);
 

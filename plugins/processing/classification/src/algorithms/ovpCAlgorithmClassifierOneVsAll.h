@@ -27,26 +27,29 @@ namespace OpenViBEPlugins
 											   , OpenViBE::float64& rf64Class
 											   , OpenViBEToolkit::IVector& rDistanceValue
 											   , OpenViBEToolkit::IVector& rProbabilityValue);
-			virtual OpenViBE::boolean designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassAmount);
+			virtual OpenViBE::boolean designArchitecture(const OpenViBE::CIdentifier& rId, OpenViBE::uint32 rClassCount);
 
 			virtual XML::IXMLNode* saveConfiguration(void);
 			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
 
+			virtual OpenViBE::uint32 getOutputProbabilityVectorLength();
+			virtual OpenViBE::uint32 getOutputDistanceVectorLength();
+
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::CAlgorithmPairingStrategy, OVP_ClassId_Algorithm_ClassifierOneVsAll)
+
+		protected:
+
 
 		private:
 			XML::IXMLNode* getClassifierConfiguration(OpenViBE::Kernel::IAlgorithmProxy* classifier);
 			OpenViBE::boolean addNewClassifierAtBack(void);
 			void removeClassifierAtBack(void);
 			OpenViBE::boolean setSubClassifierIdentifier(const OpenViBE::CIdentifier &rId);
-			OpenViBE::uint32 getClassAmount(void) const;
+			OpenViBE::uint32 getClassCount(void) const;
 
 			OpenViBE::boolean loadSubClassifierConfiguration(XML::IXMLNode *pSubClassifiersNode);
 
-			void generateConfigurationNode(void);
-
 			std::vector<OpenViBE::Kernel::IAlgorithmProxy*> m_oSubClassifierList;
-			XML::IXMLNode *m_pConfigurationNode;
 			fClassifierComparison m_fAlgorithmComparison;
 		};
 

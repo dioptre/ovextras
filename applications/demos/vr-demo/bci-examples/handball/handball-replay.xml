@@ -864,6 +864,13 @@
 					<Value>10</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
+				<Setting>
+					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
+					<Name>Filter matrix file</Name>
+					<DefaultValue></DefaultValue>
+					<Value></Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
@@ -884,7 +891,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0xded89dca, 0x2c66d6a3)</Value>
+					<Value>(0x81db9bf9, 0xf1cf4ed7)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x527ad68d, 0x16d746a0)</Identifier>
@@ -1719,7 +1726,7 @@ in which step the experiment is. It also triggers
 the instructions given to the user.
 
 The &lt;b&gt;Analog Server&lt;/b&gt; provides the feedback value
-computed by the classifier (distance to LDA hyperplan).</Text>
+computed by the classifier (distance to LDA hyperplane).</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>

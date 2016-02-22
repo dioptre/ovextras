@@ -28,12 +28,18 @@ namespace OpenViBEPlugins
 		public:
 
 			CBoxAlgorithmCommonClassifierListener(const OpenViBE::uint32 ui32CustomSettingBase)
-				:m_ui32CustomSettingBase(ui32CustomSettingBase)
+				:m_oClassifierClassIdentifier(OV_UndefinedIdentifier),
+				  m_oStrategyClassIdentifier(0x0),//OV_UndefinedIdentifier is already use for the native, We initialize to an unused identifier in the strategy list
+				  m_pClassifier(NULL),
+				  m_pStrategy(NULL),
+				  m_ui32CustomSettingBase(ui32CustomSettingBase),
+				  m_i32StrategyAmountSettings(-1)
 			{
 			}
 
 			virtual OpenViBE::boolean initialize(void)
 			{
+				//Even if everything should have been set in constructor, we still set everything in initialize (in case of)
 				m_oClassifierClassIdentifier=OV_UndefinedIdentifier;
 				m_pClassifier=NULL;
 
@@ -87,7 +93,7 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::int32 getStrategySettingsCount(OpenViBE::Kernel::IBox& rBox)
 			{
-				if(m_i32StrategyAmountSettings < 0)//The value have never been intialized
+				if(m_i32StrategyAmountSettings < 0)//The value have never been initialized
 				{
 					initializedStrategy(rBox);
 				}
@@ -110,7 +116,7 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				//ui32Index represent the numero of the class (because of rejected offset)
+				//ui32Index represent the number of the class (because of rejected offset)
 				char l_sBuffer[64];
 				sprintf(l_sBuffer, "Class %d label", ui32Index);
 				char l_sStimulation[64];
@@ -147,7 +153,7 @@ namespace OpenViBEPlugins
 				rBox.getSettingName(getStrategyIndex()+2, l_sStrategyName);//this one is a class label
 				std::string l_sSettingName(l_sStrategyName.toASCIIString());
 
-				if(l_sSettingName.find("Class ") == std::string::npos)//We doesn't intialized the box so let's do it)
+				if(l_sSettingName.find("Class ") == std::string::npos)//We haven't initialized the box so let's do it
 				{
 					//Now added Settings for classes
 					for(OpenViBE::uint32 i = 1 ; i< rBox.getInputCount() ; ++i)

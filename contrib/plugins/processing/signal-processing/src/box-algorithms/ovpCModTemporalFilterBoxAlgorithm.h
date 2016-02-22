@@ -52,6 +52,8 @@ namespace OpenViBEPlugins
 			OpenViBE::CString m_sLowBand;
 			OpenViBE::CString m_sHighBand;
 			OpenViBE::CString m_sPassBandRiple;
+
+			OpenViBE::boolean m_bHasBeenInit;
 		};
 
 		class CModTemporalFilterBoxAlgorithmDesc : virtual public OpenViBE::Plugins::IBoxAlgorithmDesc

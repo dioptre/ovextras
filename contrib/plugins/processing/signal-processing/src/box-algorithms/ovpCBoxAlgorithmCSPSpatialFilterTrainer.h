@@ -43,6 +43,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64StimulationIdentifier;
 			OpenViBE::CString m_sSpatialFilterConfigurationFilename;
 			OpenViBE::uint64 m_ui64FilterDimension;
+			OpenViBE::boolean m_bSaveAsBoxConfig;
 		};
 
 		class CBoxAlgorithmCSPSpatialFilterTrainerDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -71,6 +72,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Train Trigger",                OV_TypeId_Stimulation, "OVTK_GDF_End_Of_Session");
 				rBoxAlgorithmPrototype.addSetting("Spatial filter configuration", OV_TypeId_Filename, "");
 				rBoxAlgorithmPrototype.addSetting("Filter dimension",             OV_TypeId_Integer, "2");
+				rBoxAlgorithmPrototype.addSetting("Save as box config",           OV_TypeId_Boolean, "true");
 				
 				rBoxAlgorithmPrototype.addOutput ("Train-completed Flag",         OV_TypeId_Stimulations);
 

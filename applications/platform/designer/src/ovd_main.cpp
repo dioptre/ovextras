@@ -280,6 +280,7 @@ typedef struct _SConfiguration
 {
 	_SConfiguration(void)
 		:m_eNoGui(CommandLineFlag_None)
+		,m_eNoVisualisation(CommandLineFlag_None)
 		,m_eNoCheckColorDepth(CommandLineFlag_None)
 		,m_eNoManageSession(CommandLineFlag_None)
 	{
@@ -287,18 +288,29 @@ typedef struct _SConfiguration
 
 	OpenViBEDesigner::ECommandLineFlag getFlags(void)
 	{
-		return OpenViBEDesigner::ECommandLineFlag(m_eNoGui|m_eNoCheckColorDepth|m_eNoManageSession);
+		return OpenViBEDesigner::ECommandLineFlag(m_eNoGui|m_eNoCheckColorDepth|m_eNoManageSession|m_eNoVisualisation);
 	}
 
 	std::map < ECommandLineFlag, std::string > m_oFlag;
 	OpenViBEDesigner::ECommandLineFlag m_eNoGui;
+	OpenViBEDesigner::ECommandLineFlag m_eNoVisualisation;
 	OpenViBEDesigner::ECommandLineFlag m_eNoCheckColorDepth;
 	OpenViBEDesigner::ECommandLineFlag m_eNoManageSession;
 	std::map < std::string, std::string > m_oTokenMap;
 
 } SConfiguration;
 
-
+/* About hide/show flags.
+ * no-gui => hides the designer main window, shows visualisation widgets.
+ * no-visualisation => shows the designer main window, hides display of visualisation widgets.
+ * invisible => hides both designer main window and visualisation widgets.
+ *
+ * About implied option flag.
+ * If the designer main window is not visible the flag no-session-management must be activated to avoid to increase the amount of open scenarios at
+ * each launch.
+ * If the designer main window is not visible, the flag no-check-color-depth can be activated (the color depth has been reported to cause trouble
+ * only in the designer main window).
+ */
 boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 {
 	SConfiguration l_oConfiguration;
@@ -372,6 +384,18 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 			l_oConfiguration.m_eNoCheckColorDepth=CommandLineFlag_NoCheckColorDepth;
 			l_oConfiguration.m_eNoManageSession=CommandLineFlag_NoManageSession;
 		}
+		else if(*it=="--no-visualisation")
+		{
+			l_oConfiguration.m_eNoVisualisation=CommandLineFlag_NoVisualisation;
+		}
+		else if(*it=="--invisible")
+		{
+			// no-gui + no-visualisation
+			l_oConfiguration.m_eNoVisualisation=CommandLineFlag_NoVisualisation;
+			l_oConfiguration.m_eNoGui=CommandLineFlag_NoGui;
+			l_oConfiguration.m_eNoCheckColorDepth=CommandLineFlag_NoCheckColorDepth;
+			l_oConfiguration.m_eNoManageSession=CommandLineFlag_NoManageSession;
+		}
 		else if(*it=="--no-check-color-depth")
 		{
 			l_oConfiguration.m_eNoCheckColorDepth=CommandLineFlag_NoCheckColorDepth;
@@ -387,8 +411,8 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else
 		{
-			std::cout << "Error: Unknown argument [" << *it << "]\n";
-			return false;
+			// The argument may be relevant to GTK, do not stop here
+			std::cout << "Note: Unknown argument [" << *it << "], passing it on to gtk...\n";
 		}
 	}
 
@@ -426,7 +450,9 @@ int go(int argc, char ** argv)
 		cout << "  --define token value    : specify configuration token with a given value\n";
 		cout << "  --help                  : displays this help message and exits\n";
 		cout << "  --kernel filename       : path to openvibe kernel library\n";
-		cout << "  --no-gui                : hides the designer graphical user interface (assumes --no-check-color-depth)\n";
+		cout << "  --no-gui                : hides the designer graphical user interface (assumes --no-check-color-depth and --no-session-management)\n";
+		cout << "  --no-visualisation      : hides the visualisation widgets\n";
+		cout << "  --invisible             : hides the designer and the visualisation widgets (assumes --no-check-color-depth and --no-session-management)\n";
 		cout << "  --no-check-color-depth  : does not check 24/32 bits color depth\n";
 		cout << "  --no-session-management : neither restore last used scenarios nor saves them at exit\n";
 		cout << "  --open filename         : opens a scenario (see also --no-session-management)\n";
@@ -543,7 +569,18 @@ int go(int argc, char ** argv)
 				setlocale( LC_ALL, l_sLocale.toASCIIString() );
 
 				//initialise Gtk before 3D context
-				gtk_init(&argc, &argv);
+				if(!gtk_init_check(&argc, &argv))
+				{
+					l_rLogManager << LogLevel_Error << "Unable to initialize GTK. Possibly the display could not be opened. Exiting.\n";
+				
+					OpenViBEToolkit::uninitialize(*l_pKernelContext);
+					l_pKernelDesc->releaseKernel(l_pKernelContext);
+
+					l_oKernelLoader.uninitialize();
+					l_oKernelLoader.unload();
+
+					return -2;
+				}
 				// gtk_rc_parse(OpenViBE::Directories::getDataDir() + "/applications/designer/interface.gtkrc");
 
 #ifdef TARGET_OS_Linux
@@ -561,7 +598,8 @@ int go(int argc, char ** argv)
 
 				if(l_oConfiguration.m_oFlag.count(CommandLineFlag_RandomSeed)) 
 				{
-					System::Math::initializeRandomMachine(atol(l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed].c_str()));
+					const int32 l_i32Seed = atol(l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed].c_str());
+					System::Math::initializeRandomMachine(static_cast<const uint32>(l_i32Seed));
 				} 
 				else
 				{

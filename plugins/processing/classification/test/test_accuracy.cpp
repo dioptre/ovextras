@@ -4,17 +4,22 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+#include <cerrno>
 
 using namespace std;
 
-const double threshold = 72;
+double threshold = 72;
 
 int main (int argc, char** argv)
 {
-	if(argc!=2) 
+	if(argc!=2 && argc!=3) 
 	{
-		cout << "Usage: test_accuracy <filename>\n";
+		cout << "Usage: test_accuracy <filename> <threshold>\n";
 		return 3;
+	}
+	if(argc==3) 
+	{
+		threshold = atof(argv[2]);
 	}
 
 	ifstream file(argv[1], ios::in);
@@ -50,8 +55,16 @@ int main (int argc, char** argv)
 				}
 			}
 		}
+		cout << "Error: EOF of log file reached without finding the cross-validation accuracy string.\n";
+		return 4;
 	}
-	cout << "Error: Problem opening [" << argv[1] << "]\n";
+	else
+	{
+		cout << "Error: Problem opening [" << argv[1] << "]\n";
+		cerr << "Error: Code is " << strerror(errno) << "\n";
 
-	return 2;
+		return 5;
+	}
+
+	return 2; // shouldn't happen
 }

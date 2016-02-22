@@ -69,6 +69,12 @@ boolean CBoxAlgorithmCrop::initialize(void)
 	getStaticBoxContext().getSettingValue(2, l_sSettingValue);
 	m_f64MaxCropValue=::atof(l_sSettingValue);
 
+	if(m_f64MinCropValue >= m_f64MaxCropValue)
+	{
+		this->getLogManager() << LogLevel_Error << "The minimum crop value (" << m_f64MinCropValue << ") should be lower than the maximum crop value (" << m_f64MaxCropValue << ").\n";
+		return false;
+	}
+
 	return true;
 }
 

@@ -1089,8 +1089,8 @@ boolean CPlayerVisualisation::deleteToolbarCB(GtkWidget* pToolbarWidget)
 
 void CPlayerVisualisation::showWidget(GtkWidget *pWidget)
 {
-	//We show widget only if no gui is off
-	if(!m_rApplication.isNoGuiActive())
+	//We show widget only if no visualisation is off
+	if(!m_rApplication.isNoVisualisation())
 	{
 		gtk_widget_show(pWidget);
 	}
@@ -1098,8 +1098,8 @@ void CPlayerVisualisation::showWidget(GtkWidget *pWidget)
 
 void CPlayerVisualisation::showAllWidget(GtkWidget *pWidget)
 {
-	//We show widget only if no gui is off
-	if(!m_rApplication.isNoGuiActive())
+	//We show widget only if no visualisation is off
+	if(!m_rApplication.isNoVisualisation())
 	{
 		gtk_widget_show_all(pWidget);
 	}

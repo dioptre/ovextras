@@ -19,6 +19,7 @@
 #include "ovasCDriverOpenALAudioCapture.h"
 #include "ovasCDriverOpenEEGModularEEG.h"
 #include "ovasCDriverOpenBCI.h"
+#include "ovasCDriverEEGO.h"
 
 namespace OpenViBEContributions {
 
@@ -58,6 +59,12 @@ namespace OpenViBEContributions {
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverOpenEEGModularEEG(pAcquisitionServer->getDriverContext()));
 		
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverOpenBCI(pAcquisitionServer->getDriverContext()));
+
+#if defined(TARGET_HAS_ThirdPartyEEGOAPI)
+#if defined TARGET_OS_Windows
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverEEGO(pAcquisitionServer->getDriverContext()));
+#endif
+#endif
 
 		pGUI->registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginExternalStimulations(rKernelContext));
 	}

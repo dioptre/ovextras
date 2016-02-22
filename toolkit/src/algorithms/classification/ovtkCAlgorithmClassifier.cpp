@@ -67,17 +67,17 @@ boolean CAlgorithmClassifier::process(void)
 	if(this->isInputTriggerActive(OVTK_Algorithm_Classifier_InputTriggerId_Classify))
 	{
 		IMatrix* l_pFeatureVector=ip_pFeatureVector;
-		float64 l_f64Class=0;
 		IMatrix* l_pClassificationValues=op_pClassificationValues;
 		IMatrix* l_pProbabilityValues=op_pProbabilityValues;
 
-		if(!l_pFeatureVector || !l_pClassificationValues)
+		if(!l_pFeatureVector || !l_pClassificationValues || !l_pProbabilityValues)
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Either feature vector matrix is NULL or classification values matrix is NULL\n";
+			this->getLogManager() << LogLevel_ImportantWarning << "Either feature vector matrix or classification values matrix or probability values matrix is NULL\n";
 			this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Failed, true);
 		}
 		else
 		{
+			float64 l_f64Class=0;
 			CFeatureVector l_oFeatureVectorAdapter(*l_pFeatureVector);
 			CVector l_oClassificationValuesAdapter(*l_pClassificationValues);
 			CVector l_oProbabilityValuesAdapter(*l_pProbabilityValues);
@@ -135,6 +135,9 @@ boolean CAlgorithmClassifier::process(void)
 			if(this->loadConfiguration(l_pNode))
 			{
 				this->activateOutputTrigger(OVTK_Algorithm_Classifier_OutputTriggerId_Success, true);
+				//Now we need to parametrize the two output Matrix for values
+				setMatrixOutputDimension(op_pProbabilityValues, this->getOutputProbabilityVectorLength());
+				setMatrixOutputDimension(op_pClassificationValues, this->getOutputDistanceVectorLength());
 			}
 			else
 			{
@@ -171,6 +174,12 @@ CString& CAlgorithmClassifier::getParameterValue(const CIdentifier &rParameterId
 {
 	CString l_pParameterName = m_pAlgorithmProxy->getInputParameterName(rParameterIdentifier);
 	return (*static_cast<std::map<CString, CString>* >(m_pExtraParameter))[l_pParameterName];
+}
+
+void CAlgorithmClassifier::setMatrixOutputDimension(TParameterHandler<IMatrix*> &rMatrix, uint32 ui32Length)
+{
+	rMatrix->setDimensionCount(1);
+	rMatrix->setDimensionSize(0, ui32Length);
 }
 
 int64 CAlgorithmClassifier::getInt64Parameter(const CIdentifier &rParameterIdentifier)

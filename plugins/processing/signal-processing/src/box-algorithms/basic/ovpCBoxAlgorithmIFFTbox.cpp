@@ -23,6 +23,10 @@ boolean CBoxAlgorithmIFFTbox::initialize(void)
 	// Signal stream encoder
 	m_oAlgo1_SignalEncoder.initialize(*this,0);
 	
+	m_ui32SampleCount = 0;
+
+	m_bHeaderSent = false;
+
 	return true;
 }
 /*******************************************************************************/
@@ -143,74 +147,98 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 		return false;
 	}
 	
-	if(l_ui32HeaderCount)
-	{
-		m_frequencyBuffer.resize(m_channelsNumber);
-		m_signalBuffer.resize(m_channelsNumber);
-		for(uint32 channel=0; channel< m_channelsNumber; channel++)
-		{
-			m_signalBuffer[channel].set_size(m_ui32SampleCount);
-			m_frequencyBuffer[channel].set_size(m_ui32SampleCount);
-		}
-		m_oAlgo1_SignalEncoder.getInputSamplingRate()=m_ui32SampleCount;
-		m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionCount(2);
-		m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionSize(0,m_channelsNumber);
-		m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionSize(1,m_ui32SampleCount);
-		for(uint32 channel=0; channel< m_channelsNumber; channel++)
-		{
-			m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionLabel(0, channel, 
-													m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionLabel(0, channel));
-		}
-
-		// Pass the header to the next boxes, by encoding a header on the output 0:
-		m_oAlgo1_SignalEncoder.encodeHeader();
-		// send the output chunk containing the header. The dates are the same as the input chunk:
-		l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, 0), l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
-																					
-	}
 	if(l_ui32BufferCount)
 	{
-			const float64* bufferInput0= m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getBuffer();
-			const float64* bufferInput1= m_oAlgo0_SpectrumDecoder[1].getOutputMatrix()->getBuffer();
+		if(!m_ui32SampleCount) 
+		{
+			this->getLogManager() << LogLevel_Error << "Received buffer before header, shouldn't happen\n";
+			return false;
+		}
 
-			const uint32 l_ui32HalfSize = m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionSize(1);
+		if(!m_bHeaderSent) 
+		{
+			// As the spectrum stream doesn't contain sampling rate, we need to guesstimate 
+			// and for that we need the first signal buffer chunk times that are not available in the header.
+			// Since l_ui32BufferCount>0, we know that this chunk is a buffer.
+			const uint64 l_ui64StartTime = l_rDynamicBoxContext.getInputChunkStartTime(0, 0); 
+			const uint64 l_ui64EndTime = l_rDynamicBoxContext.getInputChunkEndTime(0, 0); 
+
+			const uint64 l_ui64BufferDuration = l_ui64EndTime - l_ui64StartTime;
+			const uint64 l_ui64SampleDuration = ((uint64)1<<32) * m_ui32SampleCount;
+	
+			const uint32 l_ui32EstimatedFrequency = (uint32) ( l_ui64SampleDuration / l_ui64BufferDuration );
+			if(l_ui32EstimatedFrequency == 0) 
+			{
+				this->getLogManager() << LogLevel_Error << "The chunk size is too small, estimated zero output frequency\n";
+				return false;
+			}
+
+			m_frequencyBuffer.resize(m_channelsNumber);
+			m_signalBuffer.resize(m_channelsNumber);
 			for(uint32 channel=0; channel< m_channelsNumber; channel++)
 			{
-				m_frequencyBuffer[channel][0].real(bufferInput0[channel*l_ui32HalfSize+0]);
-				m_frequencyBuffer[channel][0].imag(bufferInput1[channel*l_ui32HalfSize+0]);
-
-				for(uint32 j=1; j< l_ui32HalfSize; j++)
-				{
-					m_frequencyBuffer[channel][j].real(bufferInput0[channel*l_ui32HalfSize+j]);
-					m_frequencyBuffer[channel][j].imag(bufferInput1[channel*l_ui32HalfSize+j]);
-
-					m_frequencyBuffer[channel][m_ui32SampleCount-j].real(bufferInput0[channel*l_ui32HalfSize+j]);
-					m_frequencyBuffer[channel][m_ui32SampleCount-j].imag(bufferInput1[channel*l_ui32HalfSize+j]);
-				}
-
-				m_signalBuffer[channel]= itpp::ifft_real(m_frequencyBuffer[channel]);
-
-				// Test block
-				// std::cout << "Iy: " << m_frequencyBuffer[channel].size() << ", y=" << m_frequencyBuffer[channel] << "\n";
-				// std::cout << "Ix: " << m_signalBuffer[channel].size() << ", x'=" << m_signalBuffer[channel] << "\n";
-
-				float64* bufferOutput=m_oAlgo1_SignalEncoder.getInputMatrix()->getBuffer();
-				for(uint32 j=0; j< m_ui32SampleCount; j++)
-				{
-					bufferOutput[channel*m_ui32SampleCount+j]= m_signalBuffer[channel][j];
-				}
+				m_signalBuffer[channel].set_size(m_ui32SampleCount);
+				m_frequencyBuffer[channel].set_size(m_ui32SampleCount);
 			}
-			// Encode the output buffer :
-			m_oAlgo1_SignalEncoder.encodeBuffer();
-			// and send it to the next boxes :
-			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, 0), 	l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
+			m_oAlgo1_SignalEncoder.getInputSamplingRate()=l_ui32EstimatedFrequency;
+			m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionCount(2);
+			m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionSize(0,m_channelsNumber);
+			m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionSize(1,m_ui32SampleCount);
+			for(uint32 channel=0; channel< m_channelsNumber; channel++)
+			{
+				m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionLabel(0, channel, 
+														m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionLabel(0, channel));
+			}
+
+			// Pass the header to the next boxes, by encoding a header on the output 0:
+			m_oAlgo1_SignalEncoder.encodeHeader();
+			// send the output chunk containing the header. The dates are the same as the input chunk:
+			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, 0), l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
+				
+			m_bHeaderSent = true;
+		}
+
+		const float64* bufferInput0= m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getBuffer();
+		const float64* bufferInput1= m_oAlgo0_SpectrumDecoder[1].getOutputMatrix()->getBuffer();
+
+		const uint32 l_ui32HalfSize = m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionSize(1);
+		for(uint32 channel=0; channel< m_channelsNumber; channel++)
+		{
+			m_frequencyBuffer[channel][0].real(bufferInput0[channel*l_ui32HalfSize+0]);
+			m_frequencyBuffer[channel][0].imag(bufferInput1[channel*l_ui32HalfSize+0]);
+
+			for(uint32 j=1; j< l_ui32HalfSize; j++)
+			{
+				m_frequencyBuffer[channel][j].real(bufferInput0[channel*l_ui32HalfSize+j]);
+				m_frequencyBuffer[channel][j].imag(bufferInput1[channel*l_ui32HalfSize+j]);
+
+				m_frequencyBuffer[channel][m_ui32SampleCount-j].real(bufferInput0[channel*l_ui32HalfSize+j]);
+				m_frequencyBuffer[channel][m_ui32SampleCount-j].imag(bufferInput1[channel*l_ui32HalfSize+j]);
+			}
+
+			m_signalBuffer[channel]= itpp::ifft_real(m_frequencyBuffer[channel]);
+
+			// Test block
+			// std::cout << "Iy: " << m_frequencyBuffer[channel].size() << ", y=" << m_frequencyBuffer[channel] << "\n";
+			// std::cout << "Ix: " << m_signalBuffer[channel].size() << ", x'=" << m_signalBuffer[channel] << "\n";
+
+			float64* bufferOutput=m_oAlgo1_SignalEncoder.getInputMatrix()->getBuffer();
+			for(uint32 j=0; j< m_ui32SampleCount; j++)
+			{
+				bufferOutput[channel*m_ui32SampleCount+j]= m_signalBuffer[channel][j];
+			}
+		}
+		// Encode the output buffer :
+		m_oAlgo1_SignalEncoder.encodeBuffer();
+		// and send it to the next boxes :
+		l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, 0), 	l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
 		
 	}																										
 	if(l_ui32EndCount)
 	{
-				// End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
-			m_oAlgo1_SignalEncoder.encodeEnd();
-			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, 0), l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
+		// End of stream received. This happens only once when pressing "stop". Just pass it to the next boxes so they receive the message :
+		m_oAlgo1_SignalEncoder.encodeEnd();
+		l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, 0), l_rDynamicBoxContext.getInputChunkEndTime(0, 0));
 	}																								
 
 	return true;

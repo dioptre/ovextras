@@ -1,0 +1,19 @@
+
+IF(WIN32)
+	SET(EXT cmd)
+	SET(OS_FLAGS "--no-pause")
+ELSE(WIN32)
+	SET(EXT sh)
+	SET(OS_FLAGS "")
+ENDIF(WIN32)
+
+############ 
+
+SET(TEST_NAME "matrix_read_write_txt")
+
+ADD_TEST(clean_${TEST_NAME} "rm" "-f" "output_matrix.txt")
+ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_matrix_read_write_txt.${EXT}" ${OS_FLAGS})
+
+SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES DEPENDS clean_${TEST_NAME})
+
+

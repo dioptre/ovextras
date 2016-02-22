@@ -79,7 +79,7 @@ cd /D %ov_build_dir%
 echo Generating makefiles for %VSCMake% using %BuildType% config.
 echo Building to %ov_build_dir% ...
 
-cmake %ov_script_dir%\.. -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir%
+%ov_script_dir%\..\dependencies\cmake\bin\cmake %ov_script_dir%\.. -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir%
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
 
 echo.

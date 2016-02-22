@@ -156,6 +156,7 @@ namespace OpenViBEPlugins
 			m_f64MaxAmplitude(-DBL_MAX),
 			m_f64BarScale(0.0),
 			m_bError(false),
+			m_bTwoValueInput(false),
 			m_pOriginalBar(NULL),
 			m_pLeftBar(NULL),
 			m_pRightBar(NULL),
@@ -350,9 +351,17 @@ namespace OpenViBEPlugins
 
 					if(l_pMatrix->getDimensionSize(0) != 1)
 					{
-						this->getLogManager() << LogLevel_Error << "Error, dimension size isn't 1 for Amplitude input !\n";
-						m_bError = true;
-						return false;
+						if(l_pMatrix->getDimensionSize(0) == 2)
+						{
+							this->getLogManager() << LogLevel_Trace << "Got 2 value for feedback, feedback will be the difference between the 2 values.\n";
+							m_bTwoValueInput = true;
+						}
+						else
+						{
+							this->getLogManager() << LogLevel_Error << "Error, dimension size isn't 1 for Amplitude input !\n";
+							m_bError = true;
+							return false;
+						}
 					}
 				}
 
@@ -500,11 +509,17 @@ namespace OpenViBEPlugins
 				return;
 			}
 
-			float64 l_f64CurrentAmplitude = *pBuffer;
+			float64 l_f64CurrentAmplitude = 0;
+			if(m_bTwoValueInput)
+			{
+				m_vAmplitude.push_back(pBuffer[1] - pBuffer[0]);
+			}
+			else
+			{
+				m_vAmplitude.push_back(*pBuffer);
+			}
 
 #if 1
-			l_f64CurrentAmplitude=0;
-			m_vAmplitude.push_back(*pBuffer);
 			if(m_vAmplitude.size()>5)
 			{
 				m_vAmplitude.pop_front();

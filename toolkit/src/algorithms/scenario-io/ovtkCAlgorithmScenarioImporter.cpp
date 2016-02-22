@@ -251,6 +251,15 @@ boolean CAlgorithmScenarioImporter::process(void)
 			}
 			for(s=b->m_vSetting.begin(); s!=b->m_vSetting.end(); s++)
 			{
+				const CIdentifier& l_oType = s->m_oTypeIdentifier;
+				if(l_oType!=OV_TypeId_Boolean && l_oType!=OV_TypeId_Integer && l_oType!=OV_TypeId_Float && l_oType!=OV_TypeId_String
+						&& l_oType!=OV_TypeId_Filename && l_oType!=OV_TypeId_Script && l_oType!=OV_TypeId_Color && l_oType!=OV_TypeId_ColorGradient
+						&& !(this->getTypeManager().isEnumeration(l_oType)) && (!this->getTypeManager().isBitMask(l_oType)))
+				{
+					this->getLogManager() << LogLevel_Warning << "The type of the setting " << s->m_sName <<" (" << l_oType.toString()
+										  << ") from box " << b->m_sName << " cannot be recognized.\n";
+				}
+
 				l_pBox->addSetting(
 							s->m_sName,
 							s->m_oTypeIdentifier,

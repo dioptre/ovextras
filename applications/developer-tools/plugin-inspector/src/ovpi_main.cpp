@@ -187,7 +187,6 @@ int main(int argc, char ** argv)
 			{
 				l_sConfigPath = CString(l_oConfiguration.m_sConfigPath.c_str());
 			}
-
 			l_pKernelContext=l_pKernelDesc->createKernel("plugin-inspector", l_sConfigPath );
 			if(!l_pKernelContext)
 			{

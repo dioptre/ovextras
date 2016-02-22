@@ -24,15 +24,10 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TAlgorithm < OpenViBE::Plugins::IAlgorithm >, OVP_ClassId_Algorithm_OVMatrixFileWriter);
 
 		protected:
-			OpenViBE::boolean dumpHeader();
-
-			OpenViBE::boolean dumpBuffer(
-				OpenViBE::uint32 ui32DimensionIndex,
-				OpenViBE::uint32& ui32ElementIndex);
 
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::CString* > ip_sFilename;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::CMatrix* > ip_pMatrix;
-			std::ofstream m_oDataFile;
+
 		};
 
 		class CAlgorithmOVMatrixFileWriterDesc : public OpenViBE::Plugins::IAlgorithmDesc
@@ -47,7 +42,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("File reading and writing"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Algorithm_OVMatrixFileWriter; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::FileIO::CAlgorithmOVMatrixFileWriter; }
@@ -57,8 +52,6 @@ namespace OpenViBEPlugins
 			{
 				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_OVMatrixFileWriter_InputParameterId_Filename, "Filename", OpenViBE::Kernel::ParameterType_String);
 				rAlgorithmPrototype.addInputParameter (OVP_Algorithm_OVMatrixFileWriter_InputParameterId_Matrix,   "Matrix",   OpenViBE::Kernel::ParameterType_Matrix);
-				//rAlgorithmPrototype.addOutputTrigger  (OVP_Algorithm_OVMatrixFileWriter_OutputTriggerId_Error,              "Error");
-				//rAlgorithmPrototype.addOutputTrigger  (OVP_Algorithm_OVMatrixFileWriter_OutputTriggerId_DataProduced,       "Data produced");
 				return true;
 			}
 

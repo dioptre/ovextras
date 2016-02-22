@@ -34,9 +34,9 @@ namespace{
 
 extern const char* const c_sClassifierRoot;
 
-OpenViBE::int32 OpenViBEPlugins::Classification::getSVMBestClassification(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
+OpenViBE::int32 OpenViBEPlugins::Classification::SVMClassificationCompare(OpenViBE::IMatrix& rFirstClassificationValue, OpenViBE::IMatrix& rSecondClassificationValue)
 {
-	if(ov_float_equal(rFirstClassificationValue[0], ::fabs(rSecondClassificationValue[0])))
+	if(ov_float_equal(::fabs(rFirstClassificationValue[0]), ::fabs(rSecondClassificationValue[0])))
 		return 0;
 	else if(::fabs(rFirstClassificationValue[0]) > ::fabs(rSecondClassificationValue[0]))
 		return -1;
@@ -264,14 +264,16 @@ boolean CAlgorithmClassifierSVM::train(const IFeatureVectorSet& rFeatureVectorSe
 		m_oProb.y[i] = rFeatureVectorSet[i].getLabel();
 		for(uint32 j=0;j<m_ui32NumberOfFeatures;j++)
 		{
-			m_oProb.x[i][j].index=j;
+			m_oProb.x[i][j].index=j+1;
 			m_oProb.x[i][j].value=rFeatureVectorSet[i].getBuffer()[j];
 		}
 		m_oProb.x[i][m_ui32NumberOfFeatures].index=-1;
 	}
-	if(m_oParam.gamma == 0 && m_ui32NumberOfFeatures > 0)
+
+	// Gamma of zero is interpreted as a request for automatic selection
+	if(m_oParam.gamma == 0)
 	{
-		m_oParam.gamma = 1.0/m_ui32NumberOfFeatures;
+		m_oParam.gamma = 1.0/(m_ui32NumberOfFeatures > 0 ? m_ui32NumberOfFeatures : 1.0);
 	}
 
 	if(m_oParam.kernel_type == PRECOMPUTED)
@@ -323,20 +325,32 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 	//std::cout<<"classify"<<std::endl;
 	if(m_pModel==NULL)
 	{
-		this->getLogManager() << LogLevel_Error << "classify impossible with a model equal NULL\n";
+		this->getLogManager() << LogLevel_Error << "Classification is impossible with a model equalling NULL\n";
 		return false;
 	}
 	if(m_pModel->nr_class==0||m_pModel->rho==NULL)
 	{
-		this->getLogManager() << LogLevel_Error << "the model wasn't load correctly\n";
+		this->getLogManager() << LogLevel_Error << "The model wasn't loaded correctly\n";
 		return false;
 	}
+	if(m_ui32NumberOfFeatures != rFeatureVector.getSize())
+	{
+		this->getLogManager() << LogLevel_Error << "Classifier expected " << m_ui32NumberOfFeatures << " features, got " << rFeatureVector.getSize() << "\n";		
+		return false;
+	}
+	if(m_pModel->param.gamma == 0 &&
+		(m_pModel->param.kernel_type == POLY || m_pModel->param.kernel_type == RBF || m_pModel->param.kernel_type == SIGMOID))
+	{
+		m_pModel->param.gamma = 1.0/(m_ui32NumberOfFeatures > 0 ? m_ui32NumberOfFeatures : 1.0);
+		this->getLogManager() << LogLevel_Warning << "The SVM model had gamma=0. Setting it to [" << m_pModel->param.gamma << "].\n";		
+	}
+
 	//std::cout<<"create l_pX"<<std::endl;
 	svm_node* l_pX=new svm_node[rFeatureVector.getSize()+1];
 	//std::cout<<"rFeatureVector.getSize():"<<rFeatureVector.getSize()<<"m_ui32NumberOfFeatures"<<m_ui32NumberOfFeatures<<std::endl;
 	for(unsigned int i=0;i<rFeatureVector.getSize();i++)
 	{
-		l_pX[i].index=i;
+		l_pX[i].index=i+1;
 		l_pX[i].value=rFeatureVector.getBuffer()[i];
 		//std::cout<< l_pX[i].index << ";"<<l_pX[i].value<<" ";
 	}
@@ -354,20 +368,16 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 	//std::cout<<rf64Class<<std::endl;
 	//std::cout<<"probability"<<std::endl;
 
-	//If we are not in these mode, label is NULL and there is no probability
+	//If we are not in these modes, label is NULL and there is no probability
 	if(m_pModel->param.svm_type == C_SVC || m_pModel->param.svm_type == NU_SVC)
 	{
+		rProbabilityValue.setSize(m_pModel->nr_class);
 		this->getLogManager() << LogLevel_Trace <<"Label predict: "<<rf64Class<<"\n";
 
 		for(int i=0;i<m_pModel->nr_class;i++)
 		{
 			this->getLogManager() << LogLevel_Trace << "index:"<<i<<" label:"<< m_pModel->label[i]<<" probability:"<<l_pProbEstimates[i]<<"\n";
-			if( m_pModel->label[i] == 1 )
-			{
-				rProbabilityValue.setSize(1);
-				rProbabilityValue[0]=l_pProbEstimates[i];
-
-			}
+			rProbabilityValue[ (m_pModel->label[i])-1 ]=l_pProbEstimates[i];
 		}
 	}
 	else
@@ -385,7 +395,7 @@ boolean CAlgorithmClassifierSVM::classify(const IFeatureVector& rFeatureVector, 
 	return true;
 }
 
-void CAlgorithmClassifierSVM::generateConfigurationNode(void)
+XML::IXMLNode* CAlgorithmClassifierSVM::saveConfiguration(void)
 {
 	//xml file
 	//std::cout<<"model save"<<std::endl;
@@ -436,8 +446,6 @@ void CAlgorithmClassifierSVM::generateConfigurationNode(void)
 		l_vSVCoef.push_back(CString(l_sSVCoef.str().c_str()));
 		l_vSVValue.push_back(CString(l_sSVValue.str().c_str()));
 	}
-	//std::cout<<"xml save"<<std::endl;
-	m_pConfigurationNode = XML::createNode(c_sClassifierRoot);
 
 	XML::IXMLNode *l_pSVMNode = XML::createNode(c_sTypeNodeName);
 
@@ -573,13 +581,7 @@ void CAlgorithmClassifierSVM::generateConfigurationNode(void)
 		l_pModelNode->addChild(l_pSVsNode);
 	}
 	l_pSVMNode->addChild(l_pModelNode);
-	m_pConfigurationNode->addChild(l_pSVMNode);
-}
-
-XML::IXMLNode* CAlgorithmClassifierSVM::saveConfiguration(void)
-{
-	generateConfigurationNode();
-	return m_pConfigurationNode;
+	return l_pSVMNode;
 }
 
 boolean CAlgorithmClassifierSVM::loadConfiguration(XML::IXMLNode *pConfigurationNode)
@@ -600,8 +602,8 @@ boolean CAlgorithmClassifierSVM::loadConfiguration(XML::IXMLNode *pConfiguration
 	m_pModel->nSV = NULL;
 	m_i32IndexSV=-1;
 
-	loadParamNodeConfiguration(pConfigurationNode->getChild(0)->getChildByName(c_sParamNodeName));
-	loadModelNodeConfiguration(pConfigurationNode->getChild(0)->getChildByName(c_sModelNodeName));
+	loadParamNodeConfiguration(pConfigurationNode->getChildByName(c_sParamNodeName));
+	loadModelNodeConfiguration(pConfigurationNode->getChildByName(c_sModelNodeName));
 
 	this->getLogManager() << LogLevel_Trace << modelToString();
 	return true;
@@ -648,7 +650,7 @@ void CAlgorithmClassifierSVM::loadParamNodeConfiguration(XML::IXMLNode *pParamNo
 	}
 
 	//gamma
-	l_pTempNode = pParamNode->getChildByName(c_sDegreeNodeName);
+	l_pTempNode = pParamNode->getChildByName(c_sGammaNodeName);
 	if(l_pTempNode != NULL)
 	{
 		std::stringstream l_sData(l_pTempNode->getPCData());
@@ -894,4 +896,14 @@ CString CAlgorithmClassifierSVM::problemToString(svm_problem *pProb)
 	l_sProb << "\tnb features: " << m_ui32NumberOfFeatures << "\n";
 
 	return CString(l_sProb.str().c_str());
+}
+
+uint32 CAlgorithmClassifierSVM::getOutputProbabilityVectorLength()
+{
+	return 1;
+}
+
+uint32 CAlgorithmClassifierSVM::getOutputDistanceVectorLength()
+{
+	return 0;
 }

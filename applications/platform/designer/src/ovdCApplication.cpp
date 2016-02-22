@@ -447,6 +447,7 @@ static	void window_menu_check_item_toggled_cb(GtkCheckMenuItem* pCheckMenuItem, 
 
 	static gboolean searchbox_focus_in_cb(::GtkWidget* pWidget, ::GdkEvent* pEvent, CApplication* pApplication)
 	{
+		//TODO check if this line is necessary
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pApplication->m_pBuilderInterface, "openvibe-menu_edit")), false);
 
 		return false;
@@ -924,20 +925,19 @@ void CApplication::initialize(ECommandLineFlag eCommandLineFlags)
 	}
 	refresh_search_no_data_cb(NULL, this);
 
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"), LogLevel_Debug, "${Designer_DebugCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench"), LogLevel_Benchmark, "${Designer_BenchCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace"), LogLevel_Trace, "${Designer_TraceCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info"), LogLevel_Info, "${Designer_InfoCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_warning"), LogLevel_Warning, "${Designer_WarningCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning"), LogLevel_ImportantWarning, "${Designer_ImportantWarningCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"), LogLevel_Error, "${Designer_ErrorCanal}");
+	logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"), LogLevel_Fatal, "${Designer_FatalCanal}");
+
 	if(!(m_eCommandLineFlags&CommandLineFlag_NoGui))
 	{
 		m_pLogListenerDesigner = new CLogListenerDesigner(m_rKernelContext, m_pBuilderInterface);
 		m_rKernelContext.getLogManager().addListener(m_pLogListenerDesigner);
-
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_debug"), LogLevel_Debug, "${Designer_DebugCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_bench"), LogLevel_Benchmark, "${Designer_BenchCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_trace"), LogLevel_Trace, "${Designer_TraceCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_info"), LogLevel_Info, "${Designer_InfoCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_warning"), LogLevel_Warning, "${Designer_WarningCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_impwarning"), LogLevel_ImportantWarning, "${Designer_ImportantWarningCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_error"), LogLevel_Error, "${Designer_ErrorCanal}");
-		logLevelRestore(gtk_builder_get_object(m_pBuilderInterface, "openvibe-messages_tb_fatal"), LogLevel_Fatal, "${Designer_FatalCanal}");
-
 
 		CIdentifier l_oTokenIdentifier;
 		l_oTokenIdentifier = m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier("Designer_LogExpanderStatus");
@@ -1255,7 +1255,7 @@ boolean CApplication::hasUnsavedScenario(void)
 
 CInterfacedScenario* CApplication::getCurrentInterfacedScenario(void)
 {
-	if(m_i32CurrentScenarioPage<static_cast<int32>(m_vInterfacedScenario.size()) && m_i32CurrentScenarioPage >= 0)
+	if(m_i32CurrentScenarioPage < static_cast<int32>(m_vInterfacedScenario.size()) && m_i32CurrentScenarioPage >= 0)
 	{
 		return m_vInterfacedScenario[m_i32CurrentScenarioPage];
 	}
@@ -1756,6 +1756,9 @@ void CApplication::closeScenarioCB(CInterfacedScenario* pInterfacedScenario)
 			//This is the last, we need to reset the volatile scenario dir
 			resetVolatileScenarioDirectoryToken();
 			changeCurrentScenario(-1);
+		}
+		else{
+			changeCurrentScenario(static_cast<uint32>(gtk_notebook_get_current_page(m_pScenarioNotebook)));
 		}
 	}
 }
@@ -2537,7 +2540,7 @@ void CApplication::changeCurrentScenario(int32 i32PageIndex)
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), true);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_next")),       true);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_forward")),    l_ePlayerStatus!=PlayerStatus_Forward);
-		gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), (l_ePlayerStatus==PlayerStatus_Stop || l_ePlayerStatus==PlayerStatus_Pause || l_ePlayerStatus==PlayerStatus_Uninitialized) ? GTK_STOCK_MEDIA_PLAY : GTK_STOCK_MEDIA_PAUSE);
+		gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_play_pause")), (l_ePlayerStatus==PlayerStatus_Play) ? GTK_STOCK_MEDIA_PAUSE : GTK_STOCK_MEDIA_PLAY);
 
 		g_signal_handlers_disconnect_by_func(G_OBJECT(gtk_builder_get_object(m_pBuilderInterface, "openvibe-togglebutton_cpu_usage")), G_CALLBACK2(cpu_usage_cb), this);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-button_windowmanager")), l_ePlayerStatus==PlayerStatus_Stop);
@@ -2645,4 +2648,9 @@ boolean CApplication::isLogAreaClicked()
 boolean CApplication::isNoGuiActive()
 {
 	return ( (m_eCommandLineFlags & CommandLineFlag_NoGui) ? true : false);
+}
+
+boolean CApplication::isNoVisualisation()
+{
+	return ( (m_eCommandLineFlags & CommandLineFlag_NoVisualisation) ? true : false);
 }

@@ -159,6 +159,14 @@ namespace OpenViBEToolkit
 			{
 				return m_rConfigurationManager.expandAsFloat(m_sSettingValue);
 			}
+			operator OpenViBE::uint32 (void)
+			{
+				return static_cast<OpenViBE::uint32>(FSettingValueAutoCast::operator OpenViBE::uint64());
+			}
+			operator OpenViBE::int32 (void)
+			{
+				return static_cast<OpenViBE::int32>(FSettingValueAutoCast::operator OpenViBE::int64());
+			}
 			operator OpenViBE::boolean (void)
 			{
 				return m_rConfigurationManager.expandAsBoolean(m_sSettingValue);
