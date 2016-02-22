@@ -6,7 +6,7 @@
 #include <fs/IEntryEnumerator.h>
 #include <fs/Files.h>
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <cstdio>
 #include <iostream>
@@ -111,7 +111,6 @@ namespace OpenViBE
 				{
 					this->getLogManager() << LogLevel_Warning << "No 'plugin object descriptor' found from [" << CString(rEntry.getName()) << "] even if it looked like a plugin module\n";
 				}
-
 				return true;
 			}
 
@@ -324,6 +323,45 @@ namespace
 			m_oHash=m_oHash.toUInteger()^v;
 			return true;
 		}
+
+		virtual boolean addSetting(const CString& sName,const CIdentifier& rTypeIdentifier,const CString& sDefaultValue, const boolean bModifiable)
+		{
+			return addSetting(sName, rTypeIdentifier, sDefaultValue);
+		}
+
+		virtual OpenViBE::boolean addInputSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
+		{
+			uint64 v=rTypeIdentifier.toUInteger();
+			swap_byte(v, m_ui64OutputCountHash);
+			swap_byte(m_ui64OutputCountHash, 0xCBB66A5B893AA4E9LL);
+			m_oHash=m_oHash.toUInteger()^v;
+			return true;
+		}
+		virtual OpenViBE::boolean addInputAndDerivedSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
+		{
+			uint64 v=rTypeIdentifier.toUInteger();
+			swap_byte(v, m_ui64OutputCountHash);
+			swap_byte(m_ui64OutputCountHash, 0xCBB66A5B893AA4E9LL);
+			m_oHash=m_oHash.toUInteger()^v;
+			return true;
+		}
+		virtual OpenViBE::boolean addOutputSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
+		{
+			uint64 v=rTypeIdentifier.toUInteger();
+			swap_byte(v, m_ui64OutputCountHash);
+			swap_byte(m_ui64OutputCountHash, 0xCBB66A5B893AA4E9LL);
+			m_oHash=m_oHash.toUInteger()^v;
+			return true;
+		}
+		virtual OpenViBE::boolean addOutputAndDerivedSupport(const OpenViBE::CIdentifier &rTypeIdentifier)
+		{
+			uint64 v=rTypeIdentifier.toUInteger();
+			swap_byte(v, m_ui64OutputCountHash);
+			swap_byte(m_ui64OutputCountHash, 0xCBB66A5B893AA4E9LL);
+			m_oHash=m_oHash.toUInteger()^v;
+			return true;
+		}
+
 		virtual boolean addFlag(const EBoxFlag eBoxFlag)
 		{
 			switch(eBoxFlag)

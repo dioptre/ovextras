@@ -17,6 +17,11 @@ INCLUDE("FindOpenViBECommon")
 INCLUDE("FindOpenViBEToolkit")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyBoost_System")
+INCLUDE("FindThirdPartyLSL")
+
+#so that boost won't need to link against DateTime when using the interprocess communication library
+#shared memory writer box
+ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
 
 # ---------------------------------
 # Finds standard library winmm

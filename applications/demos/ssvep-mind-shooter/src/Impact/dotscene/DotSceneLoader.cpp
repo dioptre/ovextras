@@ -1,3 +1,5 @@
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 /*
  * @author Ogre
  * @note This code likely originates from the Ogre project
@@ -1443,3 +1445,5 @@ void DotSceneLoader::processUserDataReference(rapidxml::xml_node<>* XMLNode, Ogr
 	Ogre::String str = XMLNode->first_attribute("id")->value();
 	pEntity->setUserAny(Ogre::Any(str));
 }
+
+#endif

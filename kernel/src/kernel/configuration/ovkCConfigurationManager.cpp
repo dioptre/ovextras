@@ -3,8 +3,8 @@
 #include <fs/IEntryEnumerator.h>
 #include <fs/Files.h>
 
-#include <system/Time.h>
-#include <system/CMath.h>
+#include <system/ovCTime.h>
+#include <system/ovCMath.h>
 
 #include <stack>
 #include <string>
@@ -308,6 +308,21 @@ boolean CConfigurationManager::setConfigurationTokenValue(
 
 	itConfigurationToken->second.m_sConfigurationValue=rConfigurationTokenValue;
 	return true;
+}
+
+boolean CConfigurationManager::addOrReplaceConfigurationToken(
+	const CString& rConfigurationTokenName,
+	const CString& rConfigurationTokenValue)
+{
+	const CIdentifier l_oOldIdentifier = this->lookUpConfigurationTokenIdentifier(rConfigurationTokenName, false);
+	if(l_oOldIdentifier == OV_UndefinedIdentifier)
+	{
+		return OV_UndefinedIdentifier != this->createConfigurationToken(rConfigurationTokenName,rConfigurationTokenValue);
+	}
+	else
+	{
+		return this->setConfigurationTokenValue(l_oOldIdentifier, rConfigurationTokenValue);
+	}
 }
 
 // ----------------------------------------------------------------------------------------------------------------------------

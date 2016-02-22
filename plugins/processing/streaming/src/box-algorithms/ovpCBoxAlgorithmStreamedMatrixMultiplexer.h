@@ -30,8 +30,8 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			std::vector < OpenViBE::Kernel::IAlgorithmProxy* > m_vStreamDecoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamEncoder;
+			//std::vector < OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmStreamedMatrixMultiplexer >* > m_vStreamDecoder;
+			//OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmStreamedMatrixMultiplexer >* m_pStreamEncoder;
 			OpenViBE::uint64 m_ui64LastStartTime;
 			OpenViBE::uint64 m_ui64LastEndTime;
 
@@ -143,10 +143,17 @@ namespace OpenViBEPlugins
 			{
 				rBoxAlgorithmPrototype.addInput  ("Input stream 1", OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addInput  ("Input stream 2", OV_TypeId_StreamedMatrix);
-				rBoxAlgorithmPrototype.addOutput ("Multiplexerd streamed matrix", OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addOutput ("Multiplexed streamed matrix", OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
+
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_ChannelLocalisation);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_FeatureVector);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Spectrum);
+
 				return true;
 			}
 

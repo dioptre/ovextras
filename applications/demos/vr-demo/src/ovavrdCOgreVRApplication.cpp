@@ -1,6 +1,9 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovavrdCOgreVRApplication.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 #include <fs/Files.h>
 
 #include <iostream>
@@ -169,8 +172,11 @@ bool COgreVRApplication::setup()
 	this->initCEGUI(OpenViBE::Directories::getLogDir() + "/openvibe-vr-demo-cegui.log");
 
 	//VRPN
-	m_poVrpnPeripheral = new CAbstractVrpnPeripheral("openvibe-vrpn@localhost");
+	const std::string l_sVRPNAddress("openvibe-vrpn@localhost");
+	m_poVrpnPeripheral = new CAbstractVrpnPeripheral(l_sVRPNAddress);
 	m_poVrpnPeripheral->init();
+
+	std::cout << "Listening to VRPN address [" << l_sVRPNAddress << "]\n";
 
 	return true;
 }
@@ -404,3 +410,5 @@ void COgreVRApplication::windowResized(RenderWindow* rw)
 {
 	CEGUI::System::getSingleton().notifyDisplaySizeChanged(CEGUI::Size((float)rw->getWidth(), (float)rw->getHeight()));
 }
+
+#endif

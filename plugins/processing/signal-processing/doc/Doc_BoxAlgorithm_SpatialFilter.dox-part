@@ -57,6 +57,10 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_SpatialFilter_Setting3|
  * Number of input channels to compute from
  * |OVP_DocEnd_BoxAlgorithm_SpatialFilter_Setting3|
+ 
+ * |OVP_DocBegin_BoxAlgorithm_SpatialFilter_Setting4|
+ * Filter matrix. You can alternatively provide the filter coefficients as an ASCII file. 
+ * |OVP_DocEnd_BoxAlgorithm_SpatialFilter_Setting4| 
 __________________________________________________________________
 
 Examples description
@@ -79,6 +83,7 @@ __________________________________________________________________
  * \endcode
  *
  * This is basically a Surface Laplacian around C4 and C5.
+ *
  * |OVP_DocEnd_BoxAlgorithm_SpatialFilter_Examples|
 __________________________________________________________________
 
@@ -86,5 +91,27 @@ Miscellaneous description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_SpatialFilter_Miscellaneous|
+ *
+ * For large filters, it is somewhat faster to provide the matrix in an ASCII file than having the coefficients in scenario.xml directly. 
+ * If a file is used, the filter size is read from the file and the other parameters of the box are ignored.
+ *
+ * To provide the filter matrix as a file, the format is the same as is used for storing electrode localizations. E.g. for 3x3 identity matrix, the file would be
+ *
+ * \code
+ * [
+ *       [ "row1" "row2" "row3" ]
+ *       [ "col1" "col2" "col3" ]
+ * ]
+ * [
+ * [ 1 0 0 ]
+ * ]
+ * [
+ * [ 0 1 0 ]
+ * ]
+ * [
+ * [ 0 0 1 ]
+ * ]
+ * \endcode 
+ *
  * |OVP_DocEnd_BoxAlgorithm_SpatialFilter_Miscellaneous|
  */

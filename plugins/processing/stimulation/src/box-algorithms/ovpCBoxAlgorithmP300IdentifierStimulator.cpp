@@ -25,6 +25,7 @@ namespace
 		State_TrialRest,
 	};
 
+#if 0
 	CString state_to_string(uint32 ui32State)
 	{
 		switch(ui32State)
@@ -39,6 +40,7 @@ namespace
 		}
 		return "unknown";
 	}
+#endif
 };
 
 uint64 CBoxAlgorithmP300IdentifierStimulator::getClockFrequency(void)

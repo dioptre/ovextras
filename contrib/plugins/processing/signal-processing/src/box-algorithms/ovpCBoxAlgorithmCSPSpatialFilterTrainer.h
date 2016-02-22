@@ -16,7 +16,7 @@
 
 namespace OpenViBEPlugins
 {
-	namespace SignalProcessingGpl
+	namespace SignalProcessing
 	{
 		class CBoxAlgorithmCSPSpatialFilterTrainer : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
@@ -33,15 +33,17 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStimulationDecoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pSignalDecoderCondition1;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pSignalDecoderCondition2;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >* m_pStimulationDecoder;
+			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >* m_pSignalDecoderCondition1;
+			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >* m_pSignalDecoderCondition2;
+
 
 			OpenViBEToolkit::TStimulationEncoder<CBoxAlgorithmCSPSpatialFilterTrainer> m_oStimulationEncoder;
 
 			OpenViBE::uint64 m_ui64StimulationIdentifier;
 			OpenViBE::CString m_sSpatialFilterConfigurationFilename;
 			OpenViBE::uint64 m_ui64FilterDimension;
+			OpenViBE::boolean m_bSaveAsBoxConfig;
 		};
 
 		class CBoxAlgorithmCSPSpatialFilterTrainerDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -59,7 +61,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_CSPSpatialFilterTrainer; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessingGpl::CBoxAlgorithmCSPSpatialFilterTrainer; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CBoxAlgorithmCSPSpatialFilterTrainer; }
 
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
@@ -70,6 +72,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Train Trigger",                OV_TypeId_Stimulation, "OVTK_GDF_End_Of_Session");
 				rBoxAlgorithmPrototype.addSetting("Spatial filter configuration", OV_TypeId_Filename, "");
 				rBoxAlgorithmPrototype.addSetting("Filter dimension",             OV_TypeId_Integer, "2");
+				rBoxAlgorithmPrototype.addSetting("Save as box config",           OV_TypeId_Boolean, "true");
 				
 				rBoxAlgorithmPrototype.addOutput ("Train-completed Flag",         OV_TypeId_Stimulations);
 

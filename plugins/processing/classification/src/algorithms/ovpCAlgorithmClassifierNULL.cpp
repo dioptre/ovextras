@@ -29,6 +29,9 @@ boolean CAlgorithmClassifierNULL::initialize(void)
 	ip_f64Parameter2 = 3.141592654;
 	ip_ui64Parameter3 = OVTK_StimulationId_Label_00;
 
+	TParameterHandler < XML::IXMLNode* > op_pConfiguration(this->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
+	op_pConfiguration=NULL;
+
 	return CAlgorithmClassifier::initialize();
 }
 
@@ -45,18 +48,41 @@ boolean CAlgorithmClassifierNULL::train(const IFeatureVectorSet& rFeatureVectorS
 	return true;
 }
 
-boolean CAlgorithmClassifierNULL::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues)
+boolean CAlgorithmClassifierNULL::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
 	rf64Class=1+(::rand()%3);
+
+	rClassificationValues.setSize(1);
+	rProbabilityValue.setSize(1);
+	if(rf64Class == 1)
+	{
+		rClassificationValues[0]=-1;
+		rProbabilityValue[0] = 1;
+	}
+	else
+	{
+		rClassificationValues[0]=1;
+		rProbabilityValue[0] = 0;
+	}
 	return true;
 }
 
-boolean CAlgorithmClassifierNULL::saveConfiguration(IMemoryBuffer& rMemoryBuffer)
+XML::IXMLNode* CAlgorithmClassifierNULL::saveConfiguration(void)
+{
+	return NULL;
+}
+
+boolean CAlgorithmClassifierNULL::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
 	return true;
 }
 
-boolean CAlgorithmClassifierNULL::loadConfiguration(const IMemoryBuffer& rMemoryBuffer)
+uint32 CAlgorithmClassifierNULL::getOutputProbabilityVectorLength()
 {
-	return true;
+	return 1;
+}
+
+uint32 CAlgorithmClassifierNULL::getOutputDistanceVectorLength()
+{
+	return 1;
 }

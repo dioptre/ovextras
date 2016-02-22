@@ -110,7 +110,7 @@ function initialize(box)
 
 	-- create the configuration file for the stimulation-based-epoching
 	-- this file is used during classifier training only
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/configuration/stimulation-based-epoching.cfg"), "w")
+	cfg_file = io.open(box:get_config("${Player_ScenarioDirectory}/configuration/stimulation-based-epoching.cfg"), "w")
 
 	cfg_file:write("<OpenViBE-SettingsOverride>\n")
 	cfg_file:write("	<SettingValue>", stimulation_duration, "</SettingValue>\n")
@@ -121,7 +121,7 @@ function initialize(box)
 	cfg_file:close()
 
 	-- create the configuration file for the training program
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/appconf/generic-configuration.conf"), "w")
+	cfg_file = io.open(box:get_config("${Player_ScenarioDirectory}/appconf/generic-configuration.conf"), "w")
 
 	cfg_file:write("# This file was automatically generated!\n\n")
 	cfg_file:write("# If you want to change the SSVEP trainer configuration\n")

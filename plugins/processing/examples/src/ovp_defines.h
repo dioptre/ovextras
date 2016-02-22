@@ -8,6 +8,12 @@
 //                                                                   //
 
 
+#define OVP_ClassId_BoxAlgorithm_Clock                      OpenViBE::CIdentifier(0x14CB4CFC, 0x6D064CB3)
+#define OVP_ClassId_BoxAlgorithm_ClockDesc                  OpenViBE::CIdentifier(0x754C233D, 0x37DF04A3)
+
+#define OVP_ClassId_Log                                     OpenViBE::CIdentifier(0x00BE3E25, 0x274F2075)
+#define OVP_ClassId_LogDesc                                 OpenViBE::CIdentifier(0x00780136, 0x57633D46)
+
 //___________________________________________________________________//
 //                                                                   //
 // Plugin Object Descriptor Class Identifiers                        //

@@ -2,7 +2,7 @@
 
 #include "ovasCConfigurationNeuroskyMindset.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <sstream>
 

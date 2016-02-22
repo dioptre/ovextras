@@ -342,11 +342,12 @@ IBox* CScenario::getBoxDetails(
 }
 
 boolean CScenario::addBox(
-	CIdentifier& rBoxIdentifier)
+	CIdentifier& rBoxIdentifier,
+	const CIdentifier& rSuggestedBoxIdentifier)
 {
 	this->getLogManager() << LogLevel_Trace << "Adding new empty box in scenario\n";
 
-	rBoxIdentifier=getUnusedIdentifier();
+	rBoxIdentifier=getUnusedIdentifier(rSuggestedBoxIdentifier);
 	CBox* l_pBox=new CBox(this->getKernelContext(), *this);
 	l_pBox->setIdentifier(rBoxIdentifier);
 
@@ -355,12 +356,13 @@ boolean CScenario::addBox(
 }
 
 boolean CScenario::addBox(
+	CIdentifier& rBoxIdentifier,
 	const IBox& rBox,
-	CIdentifier& rBoxIdentifier)
+	const CIdentifier& rSuggestedBoxIdentifier)
 {
 	this->getLogManager() << LogLevel_Trace << "Adding a new box in the scenario based on an existing one\n";
 
-	if(!addBox(rBoxIdentifier))
+	if(!addBox(rBoxIdentifier, rSuggestedBoxIdentifier))
 	{
 		return false;
 	}
@@ -375,12 +377,13 @@ boolean CScenario::addBox(
 }
 
 boolean CScenario::addBox(
+	CIdentifier& rBoxIdentifier,
 	const CIdentifier& rBoxAlgorithmIdentifier,
-	CIdentifier& rBoxIdentifier)
+	const CIdentifier& rSuggestedBoxIdentifier)
 {
 	this->getLogManager() << LogLevel_Trace << "Adding new box in scenario\n";
 
-	if(!addBox(rBoxIdentifier))
+	if(!addBox(rBoxIdentifier, rSuggestedBoxIdentifier))
 	{
 		return false;
 	}
@@ -509,11 +512,12 @@ IComment* CScenario::getCommentDetails(
 }
 
 boolean CScenario::addComment(
-	CIdentifier& rCommentIdentifier)
+	CIdentifier& rCommentIdentifier,
+	const CIdentifier& rSuggestedCommentIdentifier)
 {
 	this->getLogManager() << LogLevel_Trace << "Adding new empty comment in scenario\n";
 
-	rCommentIdentifier=getUnusedIdentifier();
+	rCommentIdentifier=getUnusedIdentifier(rSuggestedCommentIdentifier);
 	CComment* l_pComment=new CComment(this->getKernelContext(), *this);
 	l_pComment->setIdentifier(rCommentIdentifier);
 
@@ -522,12 +526,13 @@ boolean CScenario::addComment(
 }
 
 boolean CScenario::addComment(
+	CIdentifier& rCommentIdentifier,
 	const IComment& rComment,
-	CIdentifier& rCommentIdentifier)
+	const CIdentifier& rSuggestedCommentIdentifier)
 {
 	this->getLogManager() << LogLevel_Trace << "Adding a new comment in the scenario based on an existing one\n";
 
-	if(!addComment(rCommentIdentifier))
+	if(!addComment(rCommentIdentifier, rSuggestedCommentIdentifier))
 	{
 		return false;
 	}
@@ -724,11 +729,12 @@ ILink* CScenario::getMessageLinkDetails(
 }
 
 boolean CScenario::connect(
+	CIdentifier& rLinkIdentifier,
 	const CIdentifier& rSourceBoxIdentifier,
 	const uint32 ui32SourceBoxOutputIndex,
 	const CIdentifier& rTargetBoxIdentifier,
 	const uint32 ui32TargetBoxInputIndex,
-	CIdentifier& rLinkIdentifier)
+	const CIdentifier& rSuggestedLinkIdentifier)
 {
 	this->getLogManager() << LogLevel_Trace << "Connecting boxes\n";
 
@@ -772,7 +778,7 @@ boolean CScenario::connect(
 		}
 	}
 
-	rLinkIdentifier=getUnusedIdentifier();
+	rLinkIdentifier=getUnusedIdentifier(rSuggestedLinkIdentifier);
 
 	CLink* l_pLink=new CLink(this->getKernelContext(), *this);
 	l_pLink->setIdentifier(rLinkIdentifier);
@@ -786,11 +792,12 @@ boolean CScenario::connect(
 
 
 boolean CScenario::connectMessage(
+	CIdentifier& rLinkIdentifier,
 	const CIdentifier& rSourceBoxIdentifier,
 	const uint32 ui32SourceBoxOutputIndex,
 	const CIdentifier& rTargetBoxIdentifier,
 	const uint32 ui32TargetBoxInputIndex,
-	CIdentifier& rLinkIdentifier)
+	const CIdentifier& rSuggestedMessageLinkIdentifier)
 {
 	this->getLogManager() << LogLevel_Debug << "(Message) Connecting boxes\n";
 
@@ -849,7 +856,7 @@ boolean CScenario::connectMessage(
 		}
 	}
 
-	rLinkIdentifier=getUnusedIdentifier();
+	rLinkIdentifier=getUnusedIdentifier(rSuggestedMessageLinkIdentifier);
 
 	CMessageLink* l_pLink=new CMessageLink(this->getKernelContext(), *this);
 	l_pLink->setIdentifier(rLinkIdentifier);
@@ -1034,12 +1041,13 @@ IProcessingUnit* CScenario::getProcessingUnitDetails(
 }
 
 boolean CScenario::addProcessingUnit(
-	CIdentifier& rProcessingUnitIdentifier)
+	CIdentifier& rProcessingUnitIdentifier,
+	const CIdentifier& rSuggestedProcessingUnitIdentifier)
 {
 	this->getLogManager() << LogLevel_Trace << "Adding new processing unit in scenario\n";
 
 	CProcessingUnit* l_pProcessingUnit=new CProcessingUnit(getKernelContext());
-	rProcessingUnitIdentifier=getUnusedIdentifier();
+	rProcessingUnitIdentifier=getUnusedIdentifier(rSuggestedProcessingUnitIdentifier);
 	l_pProcessingUnit->setIdentifier(rProcessingUnitIdentifier);
 
 	m_vProcessingUnit[rProcessingUnitIdentifier]=l_pProcessingUnit;
@@ -1149,21 +1157,28 @@ boolean CScenario::acceptVisitor(
 //___________________________________________________________________//
 //                                                                   //
 
-CIdentifier CScenario::getUnusedIdentifier(void) const
+CIdentifier CScenario::getUnusedIdentifier(const CIdentifier& rSuggestedIdentifier) const
 {
-	uint64 l_ui64Identifier=(((uint64)rand())<<32)+((uint64)rand());
+	uint64 l_ui64Identifier = (((uint64)rand())<<32)+((uint64)rand());
+	if(rSuggestedIdentifier != OV_UndefinedIdentifier)
+	{
+		l_ui64Identifier = rSuggestedIdentifier.toUInteger()-1;
+	}
+
 	CIdentifier l_oResult;
-	map<CIdentifier, CBox*>::const_iterator i;
-	map<CIdentifier, CLink*>::const_iterator j;
-	map<CIdentifier, CMessageLink*>::const_iterator k;
+	map<CIdentifier, CBox*>::const_iterator l_itBox;
+	map<CIdentifier, CComment*>::const_iterator l_itComment;
+	map<CIdentifier, CLink*>::const_iterator l_itLink;
+	map<CIdentifier, CMessageLink*>::const_iterator l_itMessageLink;
 	do
 	{
 		l_ui64Identifier++;
 		l_oResult=CIdentifier(l_ui64Identifier);
-		i=m_vBox.find(l_oResult);
-		j=m_vLink.find(l_oResult);
-		k=m_vMessageLink.find(l_oResult);
+		l_itBox=m_vBox.find(l_oResult);
+		l_itComment=m_vComment.find(l_oResult);
+		l_itLink=m_vLink.find(l_oResult);
+		l_itMessageLink=m_vMessageLink.find(l_oResult);
 	}
-	while(i!=m_vBox.end() || j!= m_vLink.end() || k!= m_vMessageLink.end() || l_oResult==OV_UndefinedIdentifier);
+	while(l_itBox!=m_vBox.end() || l_itComment!= m_vComment.end() || l_itLink!= m_vLink.end() || l_itMessageLink!= m_vMessageLink.end() || l_oResult==OV_UndefinedIdentifier);
 	return l_oResult;
 }

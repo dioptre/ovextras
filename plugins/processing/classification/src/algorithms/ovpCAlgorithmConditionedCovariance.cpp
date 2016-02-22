@@ -6,8 +6,8 @@
  * Ledoit & Wolf: "A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices", 2004.
  *
  */
-
 #if defined TARGET_HAS_ThirdPartyEIGEN
+#include <iostream>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -34,7 +34,7 @@ void CAlgorithmConditionedCovariance::dumpMatrix(OpenViBE::Kernel::ILogManager &
 	}
 }
 #else 
-void CAlgorithmConditionedCovariance::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { };
+void CAlgorithmConditionedCovariance::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr */, const MatrixXdRowMajor& /*mat*/, const CString& /*desc*/) { }
 #endif
 
 OpenViBE::boolean CAlgorithmConditionedCovariance::initialize(void) 
@@ -63,7 +63,7 @@ OpenViBE::boolean CAlgorithmConditionedCovariance::process(void)
 		this->getLogManager() << LogLevel_Error << "Max shrinkage parameter value is 1.0\n";
 		return false;
 	}
-	
+
 	if(ip_pFeatureVectorSet->getDimensionCount() !=2 ) 
 	{
 		this->getLogManager() << LogLevel_Error << "Feature vector set should have dim=2\n";
@@ -120,7 +120,7 @@ OpenViBE::boolean CAlgorithmConditionedCovariance::process(void)
 		l_f64Shrinkage = std::max<float64>(0,std::min<float64>(1,l_f64kappa/(double)l_ui32nRows));
 		
 		this->getLogManager() << LogLevel_Debug << "Phi " << l_f64phi << " Gamma " << l_f64gamma << " kappa " << l_f64kappa << "\n";
-		this->getLogManager() << LogLevel_Debug << "Estimated shrinkage weight as " << l_f64Shrinkage << "\n";		
+		this->getLogManager() << LogLevel_Trace << "Estimated shrinkage weight to be " << l_f64Shrinkage << "\n";
 
 		dumpMatrix(this->getLogManager(), l_oPhiMat, "PhiMat");
 	}

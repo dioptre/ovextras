@@ -2,6 +2,7 @@
 	SetCompressorDictSize 16
 
 	!include "MUI.nsh"
+	!include "Sections.nsh"
 	!include "zipdll.nsh"
 
 	;Name and file
@@ -95,6 +96,8 @@ SectionGroupEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
+SectionGroup Required
+
 Section "DirectX Runtime"
 
 	SetOutPath "$INSTDIR"
@@ -122,26 +125,6 @@ Section "Visual Redistributable Packages"
 
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
-
-	IfFileExists "arch\openvibe-vcredist-2005-sp1.exe" no_need_to_download_vcredist_2005_sp1
-	NSISdl::download "http://download.microsoft.com/download/a/3/7/a379292d-24f2-4bbb-841b-c2aeb1100471/vcredist_x86.exe" "arch\openvibe-vcredist-2005-sp1.exe"
-	Pop $R0 ; Get the return value
-		StrCmp $R0 "success" +3
-			MessageBox MB_OK "Download failed: $R0" /SD IDOK
-			Quit
-no_need_to_download_vcredist_2005_sp1:
-	ExecWait '"arch\openvibe-vcredist-2005-sp1.exe" /q'
-;no_need_to_install_vcredist_2005_sp1:
-
-	IfFileExists "arch\openvibe-vcredist-2008-sp1.exe" no_need_to_download_vcredist_2008_sp1
-	NSISdl::download "http://download.microsoft.com/download/9/e/d/9edd8390-011b-4c6d-9806-d8dc2b10c0fb/vcredist_x86.exe" "arch\openvibe-vcredist-2008-sp1.exe"
-	Pop $R0 ; Get the return value
-		StrCmp $R0 "success" +3
-			MessageBox MB_OK "Download failed: $R0" /SD IDOK
-			Quit
-no_need_to_download_vcredist_2008_sp1:
-	ExecWait '"arch\openvibe-vcredist-2008-sp1.exe" /q'
-;no_need_to_install_vcredist_2008_sp1:
 
 	IfFileExists "arch\openvibe-vcredist-2010.exe" no_need_to_download_vcredist_2010
 	NSISdl::download "http://download.microsoft.com/download/5/B/C/5BC5DBB3-652D-4DCE-B14A-475AB85EEF6E/vcredist_x86.exe" "arch\openvibe-vcredist-2010.exe"
@@ -173,10 +156,9 @@ Section "CMake"
 no_need_to_download_cmake:
 	ZipDLL::extractall "arch\cmake-2.8.7-win32-x86-ov2.zip" ""
 
-	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
-	FileSeek $0 0 END
-	FileWrite $0 "SET PATH=$INSTDIR\cmake\bin;%PATH%$\r$\n"
-	FileClose $0
+	; Note: Do NOT put cmake bin on the PATH, as/if it contains MSVC* libraries. These have been
+	; observed to have been picked up by third-party software like the python interpreter 
+	; and caused hard-to-trace manifest errors.
 
 SectionEnd
 
@@ -226,6 +208,8 @@ no_need_to_download_boost:
 
 SectionEnd
 
+
+;##########################################################################################################################################################
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
@@ -285,35 +269,6 @@ no_need_to_download_gtk_runtime:
 	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
 	FileSeek $0 0 END
 	FileWrite $0 "SET PATH=$INSTDIR\gtk\bin;%PATH%$\r$\n"	
-	FileClose $0
-
-SectionEnd
-
-;##########################################################################################################################################################
-;##########################################################################################################################################################
-;##########################################################################################################################################################
-
-Section /o "GTK+ themes"
-
-	SetOutPath "$INSTDIR"
-	CreateDirectory "$INSTDIR\arch"
-
-	IfFileExists "arch\gtk-themes-2009.09.07.zip" no_need_to_download_gtk_themes
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/gtk-themes-2009.09.07.zip "arch\gtk-themes-2009.09.07.zip"
-	Pop $R0 ; Get the return value
-		StrCmp $R0 "success" +3
-			MessageBox MB_OK "Download failed: $R0" /SD IDOK
-			Quit
-no_need_to_download_gtk_themes:
-	ZipDLL::extractall "arch\gtk-themes-2009.09.07.zip" "gtk"
-
-	FileOpen $0 "$INSTDIR\gtk\etc\gtk-2.0\gtkrc" w
-	FileWrite $0 "gtk-theme-name = $\"Redmond$\"$\r$\n"
-	FileWrite $0 "style $\"user-font$\"$\r$\n"
-	FileWrite $0 "{$\r$\n"
-	FileWrite $0 "	font_name=$\"Sans 8$\"$\r$\n"
-	FileWrite $0 "}$\r$\n"
-	FileWrite $0 "widget_class $\"*$\" style $\"user-font$\"$\r$\n"
 	FileClose $0
 
 SectionEnd
@@ -383,14 +338,14 @@ Section "Lua"
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
 
-	IfFileExists "arch\lua-5.1.4-30.zip" no_need_to_download_lua
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/lua-5.1.4-30.zip "arch\lua-5.1.4-30.zip"
+	IfFileExists "arch\lua-5.1.4-$suffix.zip" no_need_to_download_lua
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/lua-5.1.4-$suffix.zip "arch\lua-5.1.4-$suffix.zip"
 	Pop $R0 ; Get the return value
 		StrCmp $R0 "success" +3
 			MessageBox MB_OK "Download failed: $R0" /SD IDOK
 			Quit
 no_need_to_download_lua:
-	ZipDLL::extractall "arch\lua-5.1.4-30.zip" "lua"
+	ZipDLL::extractall "arch\lua-5.1.4-$suffix.zip" ""
 
 	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
 	FileSeek $0 0 END
@@ -488,23 +443,23 @@ Section "VRPN"
 	SetOutPath "$INSTDIR"
 	CreateDirectory "$INSTDIR\arch"
 
-	IfFileExists "arch\vrpn-7.26-$suffix-dev.zip" no_need_to_download_vrpn_dev
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/vrpn-7.26-$suffix-dev.zip "arch\vrpn-7.26-$suffix-dev.zip"
+	IfFileExists "arch\vrpn-7.31-$suffix-dev.zip" no_need_to_download_vrpn_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/vrpn-7.31-$suffix-dev.zip "arch\vrpn-7.31-$suffix-dev.zip"
 	Pop $R0 ; Get the return value
 		StrCmp $R0 "success" +3
 			MessageBox MB_OK "Download failed: $R0" /SD IDOK
 			Quit
 no_need_to_download_vrpn_dev:
-	ZipDLL::extractall "arch\vrpn-7.26-$suffix-dev.zip" "vrpn"
+	ZipDLL::extractall "arch\vrpn-7.31-$suffix-dev.zip" ""
 
-	IfFileExists "arch\vrpn-7.26-runtime.zip" no_need_to_download_vrpn_runtime
-	NSISdl::download http://openvibe.inria.fr/dependencies/win32/vrpn-7.26-runtime.zip "arch\vrpn-7.26-runtime.zip"
+	IfFileExists "arch\vrpn-7.31-$suffix-runtime.zip" no_need_to_download_vrpn_runtime
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/vrpn-7.31-$suffix-runtime.zip "arch\vrpn-7.31-$suffix-runtime.zip"
 	Pop $R0 ; Get the return value
 		StrCmp $R0 "success" +3
 			MessageBox MB_OK "Download failed: $R0" /SD IDOK
 			Quit
 no_need_to_download_vrpn_runtime:
-	ZipDLL::extractall "arch\vrpn-7.26-runtime.zip" "vrpn"
+	ZipDLL::extractall "arch\vrpn-7.31-$suffix-runtime.zip" ""
 
 	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
 	FileSeek $0 0 END
@@ -720,6 +675,377 @@ no_need_to_download_lsl_runtime:
 
 SectionEnd
 
+SectionGroupEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+SectionGroup Optional optionalGroup
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+/* 
+ * CoAdapt p300
+ 
+Section /o "GLFW"
+
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\glfw-3.0.4-$suffix.zip" no_need_to_download_glfw
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/glfw-3.0.4-$suffix.zip "arch\glfw-3.0.4-$suffix.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_glfw:
+	ZipDLL::extractall "arch\glfw-3.0.4-$suffix.zip" ""
+
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\glfw\lib;%PATH%$\r$\n"
+	FileClose $0	
+
+SectionEnd
+ */
+ 
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "GTK+ themes"
+
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\gtk-themes-2009.09.07.zip" no_need_to_download_gtk_themes
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/gtk-themes-2009.09.07.zip "arch\gtk-themes-2009.09.07.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_gtk_themes:
+	ZipDLL::extractall "arch\gtk-themes-2009.09.07.zip" "gtk"
+
+	FileOpen $0 "$INSTDIR\gtk\etc\gtk-2.0\gtkrc" w
+	FileWrite $0 "gtk-theme-name = $\"Redmond$\"$\r$\n"
+	FileWrite $0 "style $\"user-font$\"$\r$\n"
+	FileWrite $0 "{$\r$\n"
+	FileWrite $0 "	font_name=$\"Sans 8$\"$\r$\n"
+	FileWrite $0 "}$\r$\n"
+	FileWrite $0 "widget_class $\"*$\" style $\"user-font$\"$\r$\n"
+	FileClose $0
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+/* 
+ * coadapt p300
+ 
+Section /o "inpout32"
+
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\inpout32-$suffix.zip" no_need_to_download_inpout32
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/inpout32-$suffix.zip "arch\inpout32-$suffix.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_inpout32:
+	ZipDLL::extractall "arch\inpout32-$suffix.zip" ""
+
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\inpout32\lib;%PATH%$\r$\n"
+	FileClose $0	
+
+SectionEnd
+
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+/*
+ * coadapt p300
+ 
+Section /o "presage"
+
+; todo skip presage properly on vs2008
+StrCmp $suffix "vs100" 0 nopresage
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\presage-0.8.9-$suffix.zip" no_need_to_download_presage
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/presage-0.8.9-$suffix.zip "arch\presage-0.8.9-$suffix.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_presage:
+	ZipDLL::extractall "arch\presage-0.8.9-$suffix.zip" ""
+
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\presage\lib;%PATH%$\r$\n"
+	FileClose $0	
+	goto presagepassed
+	
+nopresage:
+	MessageBox MB_OK "Note: Presage not available for VS2008" /SD IDOK
+
+presagepassed:	
+	
+SectionEnd
+*/
+
+
+SectionGroupEnd
+
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+SectionGroup Drivers DriverGroup
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device PKG: Mensia NeuroRT collection"
+
+	; Provides Mensia acquisition driver / NeuroRT driver collection, requires vc2013 redist
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\vcredist_2013_x86.exe" no_need_to_install_vc2013_redist
+	NSISdl::download "http://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x86.exe" "arch\vcredist_2013_x86.exe"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0$\nCheck your Internet connection and your firewall settings.$\nMensia acquisition driver wont be installed...$\n" /SD IDOK
+			Goto skip_mensia_acquisition
+	ExecWait '"arch\vcredist_2013_x86.exe" /Q'
+no_need_to_install_vc2013_redist:
+	
+	IfFileExists "arch\sdk-mensia-acquisition-driver-vs120-20150925.zip" no_need_to_download_mensia_acquisition
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-mensia-acquisition-driver-vs120-20150925.zip "arch\sdk-mensia-acquisition-driver-vs120-20150925.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Goto skip_mensia_acquisition
+no_need_to_download_mensia_acquisition:
+	ZipDLL::extractall "arch\sdk-mensia-acquisition-driver-vs120-20150925.zip" "sdk-mensia-acquisition-driver"
+	
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\sdk-mensia-acquisition-driver\;%PATH%$\r$\n"
+	FileClose $0
+	
+skip_mensia_acquisition:
+	
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device SDK: BrainProducts ActiCHamp"
+
+	; For BrainProducts ActiCHamp driver
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-brainproducts-actichamp.zip" no_need_to_download_brainproducts_actichamp_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-brainproducts-actichamp.zip "arch\sdk-brainproducts-actichamp.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_brainproducts_actichamp_dev:
+	ZipDLL::extractall "arch\sdk-brainproducts-actichamp.zip" ""	
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device SDK: Eemagine EEGO"
+
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-eemagine-eego-31165-dev.zip" no_need_to_download_eego_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-eemagine-eego-31165-dev.zip "arch\sdk-eemagine-eego-31165-dev.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_eego_dev:
+	ZipDLL::extractall "arch\sdk-eemagine-eego-31165-dev.zip" ""
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device SDK: MCS NVX"
+
+	; For MCS NVX driver
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-mcs-b-$suffix-dev.zip" no_need_to_download_mcs_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-mcs-b-$suffix-dev.zip "arch\sdk-mcs-b-$suffix-dev.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_mcs_dev:
+	ZipDLL::extractall "arch\sdk-mcs-b-$suffix-dev.zip" ""
+	
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device SDK: Micromed"
+
+	; For Micromed driver
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-micromed-$suffix.zip" no_need_to_download_micromed_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-micromed-$suffix.zip "arch\sdk-micromed-$suffix.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_micromed_dev:
+	ZipDLL::extractall "arch\sdk-micromed-$suffix.zip" ""
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device SDK: MindMedia NeXus"
+
+	; For NeXus driver
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-nexus.zip" no_need_to_download_nexus_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-nexus.zip "arch\sdk-nexus.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_nexus_dev:
+	ZipDLL::extractall "arch\sdk-nexus.zip" ""	
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device SDK: Mitsar"
+
+	; For mitsar driver
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-mitsar.zip" no_need_to_download_mitsar_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-mitsar.zip "arch\sdk-mitsar.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_mitsar_dev:
+	ZipDLL::extractall "arch\sdk-mitsar.zip" ""
+	
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device SDK: NeuroElectrics Enobio3G"
+
+	; For Neuroelectrics Enobio 3G driver
+	
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\enobio3g-1.2.1-$suffix-dev.zip" no_need_to_download_enobio_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/enobio3g-1.2.1-$suffix-dev.zip "arch\enobio3g-1.2.1-$suffix-dev.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_enobio_dev:
+	ZipDLL::extractall "arch\enobio3g-1.2.1-$suffix-dev.zip" ""
+	
+	IfFileExists "arch\enobio3g-1.2.1-$suffix-runtime.zip" no_need_to_download_enobio_runtime
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/enobio3g-1.2.1-$suffix-runtime.zip "arch\enobio3g-1.2.1-$suffix-runtime.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_enobio_runtime:
+	ZipDLL::extractall "arch\enobio3g-1.2.1-$suffix-runtime.zip" ""
+
+	FileOpen $0 "$EXEDIR\win32-dependencies.cmd" a
+	FileSeek $0 0 END
+	FileWrite $0 "SET PATH=$INSTDIR\enobio3g\MSVC\;%PATH%$\r$\n"
+	FileClose $0
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+Section /o "Device SDK: TMSi"
+
+	; For TMSi universal driver
+	SetOutPath "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+
+	IfFileExists "arch\sdk-tmsi.zip" no_need_to_download_tmsi_dev
+	NSISdl::download http://openvibe.inria.fr/dependencies/win32/sdk-tmsi.zip "arch\sdk-tmsi.zip"
+	Pop $R0 ; Get the return value
+		StrCmp $R0 "success" +3
+			MessageBox MB_OK "Download failed: $R0" /SD IDOK
+			Quit
+no_need_to_download_tmsi_dev:
+	ZipDLL::extractall "arch\sdk-tmsi.zip" ""	
+
+SectionEnd
+
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+;##########################################################################################################################################################
+
+
+SectionGroupEnd
 
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
@@ -742,7 +1068,10 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\liblsl"
 	RMDir /r "$INSTDIR\tmp"
 	RMDir /r "$INSTDIR\pthreads"
-
+	RMDir /r "$INSTDIR\enobio3g"
+	RMDir /r "$INSTDIR\sdk-*"
+	RMDir /r "$INSTDIR\mcs"
+		
 	Delete "$INSTDIR\..\scripts\win32-dependencies.cmd"
 
 	Delete "$INSTDIR\Uninstall.exe"
@@ -755,8 +1084,28 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
+Function EnableOptionals
+
+  SectionGetFlags ${optionalGroup} $0 
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${optionalGroup} $0
+
+  SectionGetFlags ${driverGroup} $0 
+  IntOp $0 $0 | ${SF_SELECTED}
+  SectionSetFlags ${driverGroup} $0
+
+FunctionEnd
+
 Function .onInit
   StrCpy $9 ${vs90}
+ 
+  ; Note that for logging to work, you will need a logging-enabled build of nsis. 
+  ; At the time of writing this, you could get one from http://nsis.sourceforge.net/Special_Builds 
+  LogSet on
+
+  ; On silent install, we install all components
+  IfSilent 0 +2
+	Call EnableOptionals
 FunctionEnd
 
 Function .onSelChange

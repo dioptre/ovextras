@@ -5,12 +5,6 @@
 
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/IReader.h>
-#include <ebml/IReaderHelper.h>
-
-#include <ebml/TReaderCallbackProxy.h>
-#include <ebml/TWriterCallbackProxy.h>
-
 #include <vector>
 #include <string>
 #include <map>
@@ -39,26 +33,10 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, OVP_ClassId_MouseControl)
 
-			virtual void setMatrixDimensionCount(const OpenViBE::uint32 ui32DimensionCount);
-			virtual void setMatrixDimensionSize(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionSize);
-			virtual void setMatrixDimensionLabel(const OpenViBE::uint32 ui32DimensionIndex, const OpenViBE::uint32 ui32DimensionEntryIndex, const char* sDimensionLabel);
-			virtual void setMatrixBuffer(const OpenViBE::float64* pBuffer);
-
 		protected:
 
-			//ebml
-			EBML::IReader* m_pReader;
-			OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback* m_pStreamedMatrixReaderCallBack;
-			OpenViBEToolkit::IBoxAlgorithmStreamedMatrixInputReaderCallback::TCallbackProxy1<OpenViBEPlugins::Tools::CMouseControl> m_oStreamedMatrixReaderCallBackProxy;
-
-			//Start and end time of the last buffer
-			OpenViBE::uint64 m_ui64StartTime;
-			OpenViBE::uint64 m_ui64EndTime;
-
-			//the current input buffer being processed
-			const OpenViBE::float64* m_pInputBuffer;
-
-			OpenViBE::boolean m_bError;
+			//codec
+			OpenViBEToolkit::TStreamedMatrixDecoder < CMouseControl >* m_pStreamedMatrixDecoder;
 
 #if defined TARGET_OS_Linux
 			::Display* m_pMainDisplay;
@@ -74,7 +52,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Guillaume Gibert"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INSERM"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Mouse Control for Feedback"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Move the mouse with respect of input value"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Experimental box to move the mouse in x direction with respect to the input value. Only implemented on Linux."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Tools"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
 			virtual void release(void)                                   { }
@@ -85,6 +63,9 @@ namespace OpenViBEPlugins
 			{
 				rPrototype.addInput("Amplitude", OV_TypeId_StreamedMatrix);
 				rPrototype.addFlag (OpenViBE::Kernel::BoxFlag_IsUnstable);
+
+				rPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+
 				return true;
 			}
 

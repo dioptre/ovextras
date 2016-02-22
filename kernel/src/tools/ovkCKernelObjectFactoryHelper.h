@@ -1,5 +1,5 @@
-#ifndef __OpenViBEKernel_Tools_CKernelFactoryHelper_H__
-#define __OpenViBEKernel_Tools_CKernelFactoryHelper_H__
+#ifndef __OpenViBEKernel_Tools_CKernelObjectFactoryHelper_H__
+#define __OpenViBEKernel_Tools_CKernelObjectFactoryHelper_H__
 
 #include "../ovk_base.h"
 
@@ -47,4 +47,4 @@ namespace OpenViBE
 	};
 };
 
-#endif // __OpenViBEKernel_Tools_CKernelFactoryHelper_H__
+#endif // __OpenViBEKernel_Tools_CKernelObjectFactoryHelper_H__

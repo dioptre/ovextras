@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCBasicPainter.h"
 #include "ovassvepCApplication.h"
 
@@ -166,4 +169,4 @@ void CBasicPainter::paintText(
 }
 
 
-
+#endif

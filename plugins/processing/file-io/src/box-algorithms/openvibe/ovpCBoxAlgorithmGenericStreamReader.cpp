@@ -1,5 +1,7 @@
 #include "ovpCBoxAlgorithmGenericStreamReader.h"
 
+#include <iostream>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -9,6 +11,7 @@ using namespace OpenViBEPlugins::FileIO;
 
 CBoxAlgorithmGenericStreamReader::CBoxAlgorithmGenericStreamReader(void)
 	:m_oReader(*this)
+	,m_bHasEBMLHeader(false)
 	,m_pFile(NULL)
 {
 }
@@ -21,13 +24,6 @@ uint64 CBoxAlgorithmGenericStreamReader::getClockFrequency(void)
 boolean CBoxAlgorithmGenericStreamReader::initialize(void)
 {
 	getStaticBoxContext().getSettingValue(0, m_sFilename);
-
-	m_pFile=::fopen(m_sFilename.toASCIIString(), "rb");
-	if(!m_pFile)
-	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFilename << "]\n";
-		return false;
-	}
 
 	m_bPending=false;
 	m_bUseCompression=false;
@@ -49,6 +45,18 @@ boolean CBoxAlgorithmGenericStreamReader::uninitialize(void)
 	return true;
 }
 
+boolean CBoxAlgorithmGenericStreamReader::initializeFile()
+{
+
+	m_pFile=::fopen(m_sFilename.toASCIIString(), "rb");
+	if(!m_pFile)
+	{
+		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFilename << "]\n";
+		return false;
+	}
+	return true;
+}
+
 boolean CBoxAlgorithmGenericStreamReader::processClock(IMessageClock& rMessageClock)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
@@ -58,6 +66,13 @@ boolean CBoxAlgorithmGenericStreamReader::processClock(IMessageClock& rMessageCl
 
 boolean CBoxAlgorithmGenericStreamReader::process(void)
 {
+	if(m_pFile == NULL)
+	{
+		if(!initializeFile())
+		{
+			return false;
+		}
+	}
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
@@ -135,11 +150,12 @@ boolean CBoxAlgorithmGenericStreamReader::process(void)
 
 EBML::boolean CBoxAlgorithmGenericStreamReader::isMasterChild(const EBML::CIdentifier& rIdentifier)
 {
+	if(rIdentifier==EBML_Identifier_Header                        ) return true;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header              ) return true;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header_Compression  ) return false;
-	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header_ChannelType  ) return false;
+	if(rIdentifier==OVP_NodeId_OpenViBEStream_Header_StreamType  ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer              ) return true;
-	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_ChannelIndex ) return false;
+	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_StreamIndex ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_StartTime    ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_EndTime      ) return false;
 	if(rIdentifier==OVP_NodeId_OpenViBEStream_Buffer_Content      ) return false;
@@ -152,6 +168,17 @@ void CBoxAlgorithmGenericStreamReader::openChild(const EBML::CIdentifier& rIdent
 
 	EBML::CIdentifier& l_rTop=m_vNodes.top();
 
+	if(l_rTop == EBML_Identifier_Header)
+	{
+		m_bHasEBMLHeader = true;
+	}
+	if(l_rTop==OVP_NodeId_OpenViBEStream_Header)
+	{
+		if(!m_bHasEBMLHeader)
+		{
+			this->getLogManager() << LogLevel_Info << "The file " << m_sFilename << " uses an outdated (but still compatible) version of the .ov file format\n";
+		}
+	}
 	if(l_rTop==OVP_NodeId_OpenViBEStream_Header)
 	{
 		m_vStreamIndexToOutputIndex.clear();
@@ -163,6 +190,11 @@ void CBoxAlgorithmGenericStreamReader::processChildData(const void* pBuffer, con
 {
 	EBML::CIdentifier& l_rTop=m_vNodes.top();
 
+	if(l_rTop == EBML_Identifier_EBMLVersion)
+	{
+		const uint64 l_ui64VersionNumber=(uint64)m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize);
+		this->getLogManager() << LogLevel_Trace << "The file " << m_sFilename << " uses version " << l_ui64VersionNumber << " of the .ov file format\n";
+	}
 	if(l_rTop==OVP_NodeId_OpenViBEStream_Header_Compression)
 	{
 		if(m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize)!=0)
@@ -175,12 +207,12 @@ void CBoxAlgorithmGenericStreamReader::processChildData(const void* pBuffer, con
 			m_bUseCompression=false;
 		}
 	}
-	if(l_rTop==OVP_NodeId_OpenViBEStream_Header_ChannelType)
+	if(l_rTop==OVP_NodeId_OpenViBEStream_Header_StreamType)
 	{
 		m_vStreamIndexToTypeIdentifier[m_vStreamIndexToTypeIdentifier.size()]=m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize);
 	}
 
-	if(l_rTop==OVP_NodeId_OpenViBEStream_Buffer_ChannelIndex)
+	if(l_rTop==OVP_NodeId_OpenViBEStream_Buffer_StreamIndex)
 	{
 		uint32 l_ui32StreamIndex=(uint32)m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize);
 		if(m_vStreamIndexToTypeIdentifier.find(l_ui32StreamIndex)!=m_vStreamIndexToTypeIdentifier.end())
@@ -189,7 +221,7 @@ void CBoxAlgorithmGenericStreamReader::processChildData(const void* pBuffer, con
 		}
 		else
 		{
-			this->getLogManager() << LogLevel_Trace << "Discarded buffer on stream " << l_ui32StreamIndex << " that has no corresponding output\n";
+			this->getLogManager() << LogLevel_Trace << "Discarded buffer in stream " << l_ui32StreamIndex << " that has no corresponding output\n";
 		}
 	}
 	if(l_rTop==OVP_NodeId_OpenViBEStream_Buffer_StartTime)
@@ -236,36 +268,56 @@ void CBoxAlgorithmGenericStreamReader::closeChild(void)
 					{
 						if(l_oOutputTypeIdentifier==it->second)
 						{
-							this->getLogManager() << LogLevel_Trace << "Found output " << i << " for stream " << it->first << " with corresponding type identifier " << l_oOutputTypeIdentifier << "\n";
+							const CString l_sTypeName=this->getTypeManager().getTypeName(it->second);
+							this->getLogManager() << LogLevel_Trace << "Found output " << i+1 << " for stream " << it->first << " with corresponding type identifier " << l_oOutputTypeIdentifier << "  (" << l_sTypeName << ")\n";
 							l_ui32Index=i;
 						}
 					}
 				}
 			}
 
-			// In case no suiting output was found, look for a derived one
+			// In case no suitable output was found, see if we can downcast some type
 			for(uint32 i=0; i<l_rStaticBoxContext.getOutputCount() && l_ui32Index==(uint32)-1; i++)
 			{
 				if(l_rStaticBoxContext.getOutputType(i, l_oOutputTypeIdentifier))
 				{
 					if(l_vOutputIndexToStreamIndex.find(i)==l_vOutputIndexToStreamIndex.end())
 					{
-						if(this->getTypeManager().isDerivedFromStream(l_oOutputTypeIdentifier, it->second))
+						if(this->getTypeManager().isDerivedFromStream(it->second, l_oOutputTypeIdentifier))
 						{
-							this->getLogManager() << LogLevel_Trace << "Found output " << i << " for stream " << it->first << " with corresponding derived type identifier " << l_oOutputTypeIdentifier << " " << it->second << "\n";
-							l_ui32Index=i;
+							const CString l_sSourceTypeName=this->getTypeManager().getTypeName(it->second);
+							const CString l_sOutputTypeName=this->getTypeManager().getTypeName(l_oOutputTypeIdentifier);
+							this->getLogManager() << LogLevel_Info << "Note: downcasting output " << i+1 << " from " 
+								<< l_sSourceTypeName << " to " << l_sOutputTypeName << ", as there is no exactly type-matching output connector.\n";
+							l_ui32Index=i;								
 						}
 					}
 				}
 			}
 
-			// In case it was not find
+			// In case it was not found
 			if(l_ui32Index==(uint32)-1)
 			{
 				CString l_sTypeName=this->getTypeManager().getTypeName(it->second);
-				this->getLogManager() << LogLevel_Warning << "Did not find output for stream " << it->first << " of type identifier " << it->second << " (type name is [" << l_sTypeName << "])\n";
+				this->getLogManager() << LogLevel_Warning << "No free output connector for stream " << it->first << " of type " << it->second << " (" << l_sTypeName << ")\n";
 				m_vStreamIndexToOutputIndex[it->first]=(uint32)-1;
 				l_bLostStreams=true;
+
+				// In case no suitable output was found, just check if the user made a mistake and inform of that
+				for(uint32 i=0; i<l_rStaticBoxContext.getOutputCount() && l_ui32Index==(uint32)-1; i++)
+				{
+					if(l_rStaticBoxContext.getOutputType(i, l_oOutputTypeIdentifier))
+					{
+						if(l_vOutputIndexToStreamIndex.find(i)==l_vOutputIndexToStreamIndex.end())
+						{
+							if(this->getTypeManager().isDerivedFromStream(l_oOutputTypeIdentifier, it->second))
+							{
+								this->getLogManager() << LogLevel_Warning << "Note that output " << i+1 << " has a derived type identifier for the stream. This is not supported. Please change the connector type.\n";
+								
+							}
+						}
+					}
+				}
 			}
 			else
 			{
@@ -279,7 +331,7 @@ void CBoxAlgorithmGenericStreamReader::closeChild(void)
 		{
 			if(l_vOutputIndexToStreamIndex.find(i)==l_vOutputIndexToStreamIndex.end())
 			{
-				this->getLogManager() << LogLevel_Warning << "Output " << i << " did not find a stream candidate from the input file\n";
+				this->getLogManager() << LogLevel_Warning << "Output " << i+1 << " did not find a stream candidate from the input file\n";
 				l_bLastOutputs=true;
 			}
 		}

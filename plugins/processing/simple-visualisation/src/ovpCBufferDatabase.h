@@ -6,20 +6,11 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-#include <ebml/IReader.h>
-
 #include <vector>
 #include <deque>
 #include <queue>
 #include <string>
 #include <cfloat>
-
-#ifdef TARGET_OS_Windows
-#ifndef NDEBUG
-		//#define ELAN_VALIDATION
-		#define NB_ELAN_CHANNELS 143
-#endif
-#endif
 
 #include <iostream>
 
@@ -116,6 +107,11 @@ namespace OpenViBEPlugins
 			/*! Time step separating the start times of 2 consecutive buffers.
 			Computed once, but not constant when sampling frequency is not a multiple of buffer size!*/
 			OpenViBE::uint64 m_ui64BufferStep;
+
+			// When did the last inserted buffer end
+			OpenViBE::uint64 m_ui64LastBufferEndTime;
+			// Did we print a warning about noncontinuity?
+			OpenViBE::boolean m_bWarningPrinted;
 
 			//! Pointer to the drawable object to update (if needed)
 			CSignalDisplayDrawable * m_pDrawable;
@@ -242,6 +238,8 @@ namespace OpenViBEPlugins
 			//! Returns the min/max values currently displayed (all channels taken into account)
 			virtual void getDisplayedGlobalMinMaxValue(OpenViBE::float64& f64Min, OpenViBE::float64& f64Max);
 
+			virtual void getDisplayedChannelLocalMeanValue(OpenViBE::uint32 ui32Channel, OpenViBE::float64& f64Mean);
+
 			//! Returns the min/max values of the last buffer arrived for the given channel
 			virtual void getLastBufferChannelLocalMinMaxValue(OpenViBE::uint32 ui32Channel, OpenViBE::float64& f64Min, OpenViBE::float64& f64Max)
 			{
@@ -348,10 +346,17 @@ namespace OpenViBEPlugins
 				const OpenViBE::uint32 ui32DimensionIndex,
 				const OpenViBE::uint32 ui32DimensionEntryIndex,
 				const char* sDimensionLabel);
-			virtual void setMatrixBuffer(
+
+			// Returns false on failure
+			virtual OpenViBE::boolean setMatrixBuffer(
 				const OpenViBE::float64* pBuffer,
 				OpenViBE::uint64 ui64StartTime,
 				OpenViBE::uint64 ui64EndTime);
+
+			// Sets the sampling frequency. If this is not called, the frequency is estimated from the stream chunk properties.
+			// Mainly used to force a warning if stream-specified rate differs from the chunk-estimated rate.
+			virtual OpenViBE::boolean setSamplingFrequency(
+				OpenViBE::uint32 ui32SamplingFrequency);
 
 			virtual void setStimulationCount(
 				const OpenViBE::uint32 ui32StimulationCount);

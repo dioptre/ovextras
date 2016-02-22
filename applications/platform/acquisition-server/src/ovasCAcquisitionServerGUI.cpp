@@ -8,22 +8,32 @@
 #include "contribAcquisitionServer.inl"
 #endif
 
+#include "ovasCPluginLSLOutput.h"
 
-#include "generic-oscilator/ovasCDriverGenericOscilator.h"
+#include "generic-oscillator/ovasCDriverGenericOscillator.h"
 #include "generic-sawtooth/ovasCDriverGenericSawTooth.h"
 #include "generic-raw-reader/ovasCDriverGenericRawFileReader.h"
 #include "generic-raw-reader/ovasCDriverGenericRawTelnetReader.h"
+
+#include "biosemi-activetwo/ovasCDriverBioSemiActiveTwo.h"
+#include "brainproducts-actichamp/ovasCDriverBrainProductsActiCHamp.h"
 #include "brainproducts-brainampseries/ovasCDriverBrainProductsBrainampSeries.h"
 #include "brainproducts-vamp/ovasCDriverBrainProductsVAmp.h"
 #include "egi-ampserver/ovasCDriverEGIAmpServer.h"
 #include "emotiv-epoc/ovasCDriverEmotivEPOC.h"
+#include "labstreaminglayer/ovasCDriverLabStreamingLayer.h"
 #include "micromed-systemplusevolution/ovasCDriverMicromedSystemPlusEvolution.h"
 #include "mindmedia-nexus32b/ovasCDriverMindMediaNeXus32B.h"
+#include "mcs-nvx/ovasCDriverMCSNVXDriver.h"
+#include "neuroelectrics-enobio3g/ovasCDriverEnobio3G.h"
 #include "neurosky-mindset/ovasCDriverNeuroskyMindset.h"
+#include "tmsi/ovasCDriverTMSi.h"
 #include "tmsi-refa32b/ovasCDriverTMSiRefa32B.h"
 
-#include <system/Memory.h>
-#include <system/Time.h>
+#include "mensia-acquisition/ovasCDriverMensiaAcquisition.h"
+
+#include <system/ovCMemory.h>
+#include <system/ovCTime.h>
 #include <limits>
 
 #include <toolkit/ovtk_all.h>
@@ -36,6 +46,7 @@
 #include <sstream>
 
 #include <string>
+#include <vector>
 #include <algorithm>
 #include <functional>
 #include <cctype>
@@ -139,63 +150,119 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	m_vDriver.push_back(new CDriverGenericRawTelnetReader(m_pAcquisitionServer->getDriverContext()));
 
 #if defined TARGET_OS_Windows
-
-	m_vDriver.push_back(new CDriverMicromedSystemPlusEvolution(m_pAcquisitionServer->getDriverContext()));
-	m_vDriver.push_back(new CDriverMindMediaNeXus32B(m_pAcquisitionServer->getDriverContext()));
-	m_vDriver.push_back(new CDriverTMSiRefa32B(m_pAcquisitionServer->getDriverContext()));
 	m_vDriver.push_back(new CDriverBrainProductsBrainampSeries(m_pAcquisitionServer->getDriverContext()));
+#endif
+
+#if defined TARGET_HAS_ThirdPartyActiCHampAPI
+	m_vDriver.push_back(new CDriverBrainProductsActiCHamp(m_pAcquisitionServer->getDriverContext()));
+#endif
+
+#if defined TARGET_HAS_ThirdPartyBioSemiAPI
+	m_vDriver.push_back(new CDriverBioSemiActiveTwo(m_pAcquisitionServer->getDriverContext()));
 #endif
 
 	m_vDriver.push_back(new CDriverEGIAmpServer(m_pAcquisitionServer->getDriverContext()));
 
-#if defined TARGET_HAS_ThirdPartyUSBFirstAmpAPI
-	m_vDriver.push_back(new CDriverBrainProductsVAmp(m_pAcquisitionServer->getDriverContext()));
-#endif
 #if defined TARGET_HAS_ThirdPartyEmotivAPI
 	m_vDriver.push_back(new CDriverEmotivEPOC(m_pAcquisitionServer->getDriverContext()));
+#endif
+#if defined TARGET_HAS_ThirdPartyEnobioAPI
+	m_vDriver.push_back(new CDriverEnobio3G(m_pAcquisitionServer->getDriverContext()));
+#endif
+#if defined TARGET_HAS_ThirdPartyMCS
+	m_vDriver.push_back(new CDriverMKSNVXDriver(m_pAcquisitionServer->getDriverContext()));
+#endif
+#if defined(TARGET_HAS_ThirdPartyMicromed)
+	m_vDriver.push_back(new CDriverMicromedSystemPlusEvolution(m_pAcquisitionServer->getDriverContext()));
+#endif
+#if defined(TARGET_HAS_ThirdPartyNeXus)
+	m_vDriver.push_back(new CDriverMindMediaNeXus32B(m_pAcquisitionServer->getDriverContext()));
+	m_vDriver.push_back(new CDriverTMSiRefa32B(m_pAcquisitionServer->getDriverContext()));
 #endif
 #if defined TARGET_HAS_ThirdPartyThinkGearAPI
 	m_vDriver.push_back(new CDriverNeuroskyMindset(m_pAcquisitionServer->getDriverContext()));
 #endif
+#if defined TARGET_HAS_ThirdPartyTMSi
+	m_vDriver.push_back(new CDriverTMSi(m_pAcquisitionServer->getDriverContext()));
+#endif
+#if defined TARGET_HAS_ThirdPartyUSBFirstAmpAPI
+	m_vDriver.push_back(new CDriverBrainProductsVAmp(m_pAcquisitionServer->getDriverContext()));
+#endif
+#if defined TARGET_HAS_ThirdPartyLSL
+	m_vDriver.push_back(new CDriverLabStreamingLayer(m_pAcquisitionServer->getDriverContext()));
+#endif
 
+	// BEGIN MENSIA ACQUISITION DRIVERS
+#if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver
+
+	m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Loading Mensia Driver Collection\n";
+	CString l_sMensiaDLLPath = m_pAcquisitionServer->getDriverContext().getConfigurationManager().expand("${Path_Bin}/openvibe-driver-mensia-acquisition.dll");
+	if(!std::ifstream(l_sMensiaDLLPath.toASCIIString()).is_open())
+	{
+		m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Couldn't open" <<
+			" dll file [" << l_sMensiaDLLPath.toASCIIString() <<"], perhaps it was not installed.\n";
+	}
+	else 
+	{
+		HINSTANCE l_oLibMensiaAcquisition; // Library Handle
+		l_oLibMensiaAcquisition = ::LoadLibrary(l_sMensiaDLLPath.toASCIIString());
+
+		//if it can't be open return FALSE;
+		if( l_oLibMensiaAcquisition == NULL)
+		{
+			m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Warning << "Couldn't load DLL: [" << l_sMensiaDLLPath << "]. Got error: [" << static_cast<uint64>(GetLastError()) << "]\n";
+		}
+		else
+		{	
+			typedef int32 (*MACQ_InitializeMensiaAcquisitionLibrary)();
+			MACQ_InitializeMensiaAcquisitionLibrary l_fpInitializeMensiaAcquisitionLibrary;
+			l_fpInitializeMensiaAcquisitionLibrary = (MACQ_InitializeMensiaAcquisitionLibrary)::GetProcAddress(l_oLibMensiaAcquisition, "initializeAcquisitionLibrary");
+			typedef const char* (*MACQ_GetDriverId)(unsigned int uiDriverId);
+			MACQ_GetDriverId l_fpGetDriverID;
+			l_fpGetDriverID = (MACQ_GetDriverId)::GetProcAddress(l_oLibMensiaAcquisition, "getDriverId");
+
+			int32 l_i32MensiaDeviceCount = l_fpInitializeMensiaAcquisitionLibrary();
+
+			if (l_i32MensiaDeviceCount >= 0)
+			{
+				for (size_t l_uiDeviceIndex = 0; l_uiDeviceIndex < static_cast<uint32>(l_i32MensiaDeviceCount); l_uiDeviceIndex++)
+				{
+					char l_sDriverIdentifier[1024];
+
+					strcpy(l_sDriverIdentifier, l_fpGetDriverID(l_uiDeviceIndex));
+					if (strcmp(l_sDriverIdentifier, "") != 0)
+					{
+						m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Found driver [" << l_sDriverIdentifier << "] in Mensia Driver Collection" << "\n";
+						m_vDriver.push_back(new CDriverMensiaAcquisition(m_pAcquisitionServer->getDriverContext(), l_sDriverIdentifier));
+					}
+
+				}
+			}
+			else
+			{
+				m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Error << "Error occurred while initializing Mensia Acquisition Library" << "\n";
+			}
+
+			::FreeLibrary(l_oLibMensiaAcquisition);
+		}
+	}
+#endif
+	// END MENSIA ACQUISITION DRIVERS
+	
 #if defined TARGET_HAS_OpenViBEContributions
 	OpenViBEContributions::initiateContributions(this, m_pAcquisitionServer, rKernelContext, &m_vDriver);
+#endif
+
+	// Plugins that just send out data must be the last in list (since other plugins may modify the data)
+
+#if defined TARGET_HAS_ThirdPartyLSL
+	registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginLSLOutput(rKernelContext));
 #endif
 
 	std::sort(m_vDriver.begin(), m_vDriver.end(), compare_driver_names);
 
 	scanPluginSettings();
 
-#ifdef OV_BOOST_SETTINGS
-	// Load plugin settings
-
-	for (size_t setting_index = 0; setting_index < m_vPluginSettings.size(); ++setting_index)
-	{
-		PluginSetting* l_pCurrentSetting = m_vPluginSettings[setting_index].setting_ptr;
-
-		if (m_rKernelContext.getConfigurationManager().lookUpConfigurationTokenIdentifier(m_vPluginSettings[setting_index].unique_name) != OV_UndefinedIdentifier)
-		{
-			CString l_sConfigurationNameExpression = CString("${" + m_vPluginSettings[setting_index].unique_name + "}");
-
-			if (l_pCurrentSetting->type == OVTK_TypeId_Boolean)
-			{
-				l_pCurrentSetting->value = m_rKernelContext.getConfigurationManager().expandAsBoolean(l_sConfigurationNameExpression);
-			}
-			else if (l_pCurrentSetting->type == OVTK_TypeId_Integer)
-			{
-				l_pCurrentSetting->value = m_rKernelContext.getConfigurationManager().expandAsInteger(l_sConfigurationNameExpression);
-			}
-			else if (l_pCurrentSetting->type == OVTK_TypeId_String)
-			{
-				l_pCurrentSetting->value = m_rKernelContext.getConfigurationManager().expand(l_sConfigurationNameExpression);
-			}
-			else
-			{
-				// in the case where no valid type is defined we do nothing
-			}
-		}
-	}
-#endif
 	m_pAcquisitionServerThread=new CAcquisitionServerThread(m_rKernelContext, *this, *m_pAcquisitionServer);
 
 	// Initialize GTK objects as the thread started below may refer to them quickly
@@ -227,7 +294,7 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 		::fprintf(l_pFile, "AcquisitionServer_JitterEstimationCountForDrift = %llu\n", m_pAcquisitionServer->getJitterEstimationCountForDrift());
 		::fprintf(l_pFile, "AcquisitionServer_DriftToleranceDuration = %llu\n", m_pAcquisitionServer->getDriftToleranceDuration());
 		::fprintf(l_pFile, "AcquisitionServer_OverSamplingFactor = %llu\n", m_pAcquisitionServer->getOversamplingFactor());
-		::fprintf(l_pFile, "AcquisitionServer_CheckImpedance = %s\n", (m_pAcquisitionServer->isImpedanceCheckRequested() ? "True" : "False"));
+		::fprintf(l_pFile, "AcquisitionServer_ChannelSelection = %s\n", (m_pAcquisitionServer->isChannelSelectionRequested() ? "True" : "False"));
 		::fprintf(l_pFile, "AcquisitionServer_NaNReplacementPolicy = %s\n", m_pAcquisitionServer->getNaNReplacementPolicyStr().toASCIIString());
 
 		::fprintf(l_pFile, "# Settings for various device drivers\n");
@@ -255,39 +322,16 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 			::fprintf(l_pFile, "%s = %s\n", l_vTokens[i].c_str(), tokenValue.toASCIIString());
 		}
 
-#ifdef OV_BOOST_SETTINGS
-		::fprintf(l_pFile, "# Settings for server plugins\n");
-		for (size_t setting_index = 0; setting_index < m_vPluginSettings.size(); ++setting_index)
-		{
-			PluginSetting* l_pCurrentSetting = m_vPluginSettings[setting_index].setting_ptr;
-
-			if (l_pCurrentSetting->type == OVTK_TypeId_Boolean)
-			{
-				::fprintf(l_pFile, m_vPluginSettings[setting_index].unique_name + " = %s\n", l_pCurrentSetting->getValue<bool>() ? "True" : "False");
-			}
-			else if (l_pCurrentSetting->type == OVTK_TypeId_Integer)
-			{
-				::fprintf(l_pFile, m_vPluginSettings[setting_index].unique_name + " = %llu\n", l_pCurrentSetting->getValue<int64>());
-			}
-			else if (l_pCurrentSetting->type == OVTK_TypeId_String)
-			{
-				::fprintf(l_pFile, m_vPluginSettings[setting_index].unique_name + " = %s\n", (l_pCurrentSetting->getValue<CString>()).toASCIIString());
-			}
-			else
-			{
-				// in the case where no valid type is defined we do nothing
-			}
-		}
-#endif
-
 		::fclose(l_pFile);
 	}
 
 	vector<IDriver*>::iterator itDriver;
 	for(itDriver=m_vDriver.begin(); itDriver!=m_vDriver.end(); itDriver++)
 	{
+		m_rKernelContext.getLogManager() << LogLevel_Debug << "Deleting " << (*itDriver)->getName() << "\n";
 		delete (*itDriver);
 	}
+
 	m_vDriver.clear();
 	m_pDriver=NULL;
 
@@ -311,11 +355,13 @@ boolean CAcquisitionServerGUI::initialize(void)
 
 	// Connects custom GTK signals
 
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_preference"),                    "pressed", G_CALLBACK(button_preference_pressed_cb), this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_configure"),                     "pressed", G_CALLBACK(button_configure_pressed_cb),  this);
+	// Note: Seems the signals below have to be "clicked", not "pressed", or the underlined keyboard shortcuts
+	// of gtk stock items that can be activated with alt key ("mnemonics") do not work.
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_preference"),                    "clicked", G_CALLBACK(button_preference_pressed_cb), this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_configure"),                     "clicked", G_CALLBACK(button_configure_pressed_cb),  this);
 	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "togglebutton_connect"),                 "toggled", G_CALLBACK(button_connect_toggled_cb),    this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_play"),                          "pressed", G_CALLBACK(button_start_pressed_cb),      this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_stop"),                          "pressed", G_CALLBACK(button_stop_pressed_cb),       this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_play"),                          "clicked", G_CALLBACK(button_start_pressed_cb),      this);
+	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "button_stop"),                          "clicked", G_CALLBACK(button_stop_pressed_cb),       this);
 	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "combobox_driver"),                      "changed", G_CALLBACK(combobox_driver_changed_cb),   this);
 	g_signal_connect(gtk_builder_get_object(m_pBuilderInterface, "combobox_sample_count_per_sent_block"), "changed", G_CALLBACK(combobox_sample_count_per_sent_block_changed_cb),  this);
 	gtk_builder_connect_signals(m_pBuilderInterface, NULL);
@@ -406,9 +452,20 @@ boolean CAcquisitionServerGUI::initialize(void)
 	uint64 l_ui64DefaultConnectionPort=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_DefaultConnectionPort}", 1024);
 	gtk_spin_button_set_value(l_pSpinButtonConnectionPort, (gdouble)l_ui64DefaultConnectionPort);
 
-	// Shows main window
+	// Optionnally autostarts
 
-	gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-acquisition-server")));
+	if(m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_AutoStart}", false))
+	{
+		::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "togglebutton_connect")), TRUE);
+		::gtk_button_pressed(GTK_BUTTON(::gtk_builder_get_object(m_pBuilderInterface, "button_play")));
+	}
+
+
+	// Shows main window
+	if(!m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_NoGUI}", false))
+	{
+		gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "openvibe-acquisition-server")));
+	}
 
 	return true;
 }
@@ -699,111 +756,18 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 	::GtkSpinButton* l_pDriftTolerance=GTK_SPIN_BUTTON(::gtk_builder_get_object(l_pInterface, "spinbutton_drift_tolerance"));
 	::GtkSpinButton* l_pJitterMeasureCount=GTK_SPIN_BUTTON(::gtk_builder_get_object(l_pInterface, "spinbutton_jitter_measure_count"));
 	::GtkSpinButton* l_pOverSamplingFactor=GTK_SPIN_BUTTON(::gtk_builder_get_object(l_pInterface, "spinbutton_oversampling_factor"));
-	::GtkToggleButton* l_pImpedanceCheck=GTK_TOGGLE_BUTTON(::gtk_builder_get_object(l_pInterface, "checkbutton_impedance"));
+	::GtkToggleButton* l_ChannelSelection=GTK_TOGGLE_BUTTON(::gtk_builder_get_object(l_pInterface, "checkbutton_channel_selection"));
 
 	::gtk_combo_box_set_active(l_pDriftCorrectionPolicy, (int)m_pAcquisitionServer->getDriftCorrectionPolicy());
 	::gtk_spin_button_set_value(l_pDriftTolerance, (gdouble)m_pAcquisitionServer->getDriftToleranceDuration());
 	::gtk_spin_button_set_value(l_pJitterMeasureCount, (gdouble)m_pAcquisitionServer->getJitterEstimationCountForDrift());
 	::gtk_spin_button_set_value(l_pOverSamplingFactor, (gdouble)m_pAcquisitionServer->getOversamplingFactor());
-	::gtk_toggle_button_set_active(l_pImpedanceCheck, m_pAcquisitionServer->isImpedanceCheckRequested()?TRUE:FALSE);
+	::gtk_toggle_button_set_active(l_ChannelSelection, m_pAcquisitionServer->isChannelSelectionRequested()?TRUE:FALSE);
 	::gtk_combo_box_set_active(l_pNaNReplacementPolicy, (int)m_pAcquisitionServer->getNaNReplacementPolicy());
 
 	// Load the settings for the plugins
 
 	::GtkTable* l_pSettingsTable = GTK_TABLE(::gtk_builder_get_object(l_pInterface, "table-pluginsettings"));
-
-#ifdef OV_BOOST_SETTINGS
-
-	gtk_table_resize(l_pSettingsTable, m_vPluginSettings.size(), 2);
-
-	for (size_t setting_index = 0; setting_index < m_vPluginSettings.size(); ++setting_index)
-	{
-		const PluginSetting* l_pCurrentSetting = m_vPluginSettings[setting_index].setting_ptr;
-
-		// Create label
-		::GtkWidget* l_pSettingLabel = gtk_label_new(m_vPluginSettings[setting_index].setting_name);
-
-		// Create the setting controller widget
-		::GtkWidget* l_pSettingControl;
-
-		if (l_pCurrentSetting->type == OVTK_TypeId_Boolean)
-		{
-			// create the check button and assign it the current value of the setting
-			l_pSettingControl = gtk_check_button_new();
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pSettingControl), l_pCurrentSetting->getValue<bool>());
-		}
-		else if (l_pCurrentSetting->type == OVTK_TypeId_Integer)
-		{
-			// create the check button and assign it the current value of the setting
-
-			l_pSettingControl = gtk_spin_button_new_with_range((gdouble)std::numeric_limits<int64>::min(), (gdouble)std::numeric_limits<int64>::max(), 1.0);
-			gtk_spin_button_set_value(GTK_SPIN_BUTTON(l_pSettingControl), (gdouble)l_pCurrentSetting->getValue<int64>());
-
-		}
-		else if (l_pCurrentSetting->type == OVTK_TypeId_String)
-		{
-			// create the check button and assign it the current value of the setting
-			l_pSettingControl = gtk_entry_new();
-			gtk_entry_append_text(GTK_ENTRY(l_pSettingControl), l_pCurrentSetting->getValue<OpenViBE::CString>());
-		}
-		else
-		{
-			// in the case where no valid type is defined we create a placeholder label
-			l_pSettingControl = gtk_label_new("Undefined Type");
-		}
-
-		// insert the settings into the table
-		gtk_table_attach_defaults(l_pSettingsTable, l_pSettingLabel, 0, 1, setting_index, setting_index+1);
-		gtk_table_attach_defaults(l_pSettingsTable, l_pSettingControl, 1, 2, setting_index, setting_index+1);
-
-		m_vPluginSettings[setting_index].gui_widget = l_pSettingControl;
-		gtk_widget_show(l_pSettingLabel);
-		gtk_widget_show(l_pSettingControl);
-	}
-
-	gint l_iResponseId=::gtk_dialog_run(l_pDialog);
-	switch(l_iResponseId)
-	{
-		case GTK_RESPONSE_APPLY:
-		case GTK_RESPONSE_OK:
-		case GTK_RESPONSE_YES:
-			m_pAcquisitionServer->setNaNReplacementPolicy((ENaNReplacementPolicy)::gtk_combo_box_get_active(l_pNaNReplacementPolicy));
-			m_pAcquisitionServer->setDriftCorrectionPolicy((EDriftCorrectionPolicy)::gtk_combo_box_get_active(l_pDriftCorrectionPolicy));
-			m_pAcquisitionServer->setDriftToleranceDuration(::gtk_spin_button_get_value_as_int(l_pDriftTolerance));
-			m_pAcquisitionServer->setJitterEstimationCountForDrift(::gtk_spin_button_get_value_as_int(l_pJitterMeasureCount));
-			m_pAcquisitionServer->setOversamplingFactor(::gtk_spin_button_get_value_as_int(l_pOverSamplingFactor));
-			m_pAcquisitionServer->setImpedanceCheckRequest(::gtk_toggle_button_get_active(l_pImpedanceCheck)?true:false);
-
-			for (size_t setting_index = 0; setting_index < m_vPluginSettings.size(); ++setting_index)
-			{
-				PluginSetting* l_pCurrentSetting = m_vPluginSettings[setting_index].setting_ptr;
-
-				if (l_pCurrentSetting->type == OVTK_TypeId_Boolean)
-				{
-					l_pCurrentSetting->value = ::gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_vPluginSettings[setting_index].gui_widget)) ? true : false;
-				}
-				else if (l_pCurrentSetting->type == OVTK_TypeId_Integer)
-				{
-					l_pCurrentSetting->value = static_cast<int64>(::gtk_spin_button_get_value(GTK_SPIN_BUTTON(m_vPluginSettings[setting_index].gui_widget)));
-				}
-				else if (l_pCurrentSetting->type == OVTK_TypeId_String)
-				{
-					l_pCurrentSetting->value = CString(::gtk_entry_get_text(GTK_ENTRY(m_vPluginSettings[setting_index].gui_widget)));
-				}
-				else
-				{
-					// in the case where no valid type is defined we do nothing
-				}
-			}
-
-
-			break;
-		case GTK_RESPONSE_CANCEL:
-		case GTK_RESPONSE_NO:
-			break;
-	}
-
-#else
 
 	gtk_table_resize(l_pSettingsTable, m_vPluginProperties.size(), 2);
 
@@ -842,8 +806,11 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 			// Create label
 			::GtkWidget* l_pSettingLabel = gtk_label_new( l_pCurrentProperty->getName().toASCIIString() );
 
+			// align to left
+			gtk_misc_set_alignment( GTK_MISC(l_pSettingLabel), 0.0, 0.0 );
+
 			// insert the settings into the table
-			gtk_table_attach_defaults(l_pSettingsTable, l_pSettingLabel, 0, 1, setting_index, setting_index+1);
+			gtk_table_attach(l_pSettingsTable, l_pSettingLabel,   0, 1, setting_index, setting_index+1, GTK_FILL, GTK_SHRINK,   2, 0);
 			gtk_table_attach_defaults(l_pSettingsTable, l_pSettingControl, 1, 2, setting_index, setting_index+1);
 
 			m_vPluginProperties[setting_index].m_pWidget = l_pSettingControl;
@@ -863,7 +830,7 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 			m_pAcquisitionServer->setDriftToleranceDuration(::gtk_spin_button_get_value_as_int(l_pDriftTolerance));
 			m_pAcquisitionServer->setJitterEstimationCountForDrift(::gtk_spin_button_get_value_as_int(l_pJitterMeasureCount));
 			m_pAcquisitionServer->setOversamplingFactor(::gtk_spin_button_get_value_as_int(l_pOverSamplingFactor));
-			m_pAcquisitionServer->setImpedanceCheckRequest(::gtk_toggle_button_get_active(l_pImpedanceCheck)?true:false);
+			m_pAcquisitionServer->setChannelSelectionRequest(::gtk_toggle_button_get_active(l_ChannelSelection)?true:false);
 
 			for (size_t setting_index = 0; setting_index < m_vPluginProperties.size(); ++setting_index)
 			{
@@ -899,7 +866,6 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 		case GTK_RESPONSE_NO:
 			break;
 	}
-#endif
 
 	::gtk_widget_destroy(GTK_WIDGET(l_pDialog));
 	g_object_unref(l_pInterface);
@@ -953,40 +919,6 @@ void CAcquisitionServerGUI::registerPlugin(IAcquisitionServerPlugin* plugin)
 void CAcquisitionServerGUI::scanPluginSettings()
 {
 	vector<IAcquisitionServerPlugin*> l_vPlugins = m_pAcquisitionServer->getPlugins();
-
-#ifdef OV_BOOST_SETTINGS
-
-	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
-	{
-		IAcquisitionServerPlugin* l_pPlugin = dynamic_cast<IAcquisitionServerPlugin*>(*itp);
-
-		typedef std::map<OpenViBE::CString, PluginSetting> PluginSettingMap;
-		PluginSettingMap& l_rSettings = l_pPlugin->getProperties().settings;
-
-		// Iterate over the settings of the plugin
-		for (PluginSettingMap::iterator settings_it = l_rSettings.begin(); settings_it != l_rSettings.end(); ++settings_it)
-		{
-			// Creates a setting reference, containing the name of the plugin (not used yet, except for the creation of the unique name)
-			// the name of the setting and a pointer to the setting in the plugin itself
-			PluginSettingReference l_sSettingReference = PluginSettingReference(
-				std::string(l_pPlugin->getProperties().name.toASCIIString()),
-				std::string((*settings_it).first.toASCIIString()),
-				&((*settings_it).second));
-
-			m_vPluginSettings.push_back(l_sSettingReference);
-
-		}
-
-		SettingsHelper& tmp = l_pPlugin->getSettingsHelper();
-		const std::map<OpenViBE::CString, Property*>& props = tmp.getAllProperties();
-
-		std::map<OpenViBE::CString, Property*>::const_iterator prop_it = props.begin();
-		for(;prop_it!=props.end();++prop_it) {
-			m_vPluginProperties.push_back( PropertyAndWidget(prop_it->second, NULL) );
-		}
-
-	}
-#endif
 
 	m_vPluginProperties.clear();
 

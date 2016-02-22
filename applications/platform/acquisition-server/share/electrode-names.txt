@@ -99,4 +99,14 @@ EMG2
 EMG3
 EMG4
 
+ECG1
+ECG2
+ECG3
+ECG4
+
+Aux1
+Aux2
+Aux3
+Aux4
+
 Reference

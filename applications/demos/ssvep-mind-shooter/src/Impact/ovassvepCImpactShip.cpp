@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCImpactShip.h"
 
 #include "ovassvepCImpactEnemyShip.h"
@@ -461,3 +464,5 @@ bool CImpactShip::evaluateHit(CImpactEnemyShip* poEnemy)
 
 	return false;
 }
+
+#endif

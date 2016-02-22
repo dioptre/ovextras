@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include <sstream>
 #include <locale>
 #if defined TARGET_OS_Windows
@@ -515,6 +518,7 @@ boolean COgreObject::loadWorldMatrix()
 					//stop at first whitespace char or when vector end is found
 					if(std::isspace(*l_oIt, l_oLocale) == true || *l_oIt == ']')
 					{
+						errno = 0;
 						float64 l_f64Value = atof(l_sCurString.c_str());
 #if defined TARGET_OS_Windows
 						if(errno == ERANGE)
@@ -555,6 +559,7 @@ boolean COgreObject::loadWorldMatrix()
 					//stop at first whitespace char or when vector end is found
 					if(std::isspace(*l_oIt, l_oLocale) == true || *l_oIt == ']')
 					{
+						errno = 0;
 						float64 l_f64Value = atof(l_sCurString.c_str());
 #if defined TARGET_OS_Windows
 						if(errno == ERANGE)
@@ -595,6 +600,7 @@ boolean COgreObject::loadWorldMatrix()
 					//stop at first whitespace char or when vector end is found
 					if(std::isspace(*l_oIt, l_oLocale) == true || *l_oIt == ']')
 					{
+						errno = 0;
 						float64 l_f64Value = atof(l_sCurString.c_str());
 #if defined TARGET_OS_Windows
 						if(errno == ERANGE)
@@ -1046,3 +1052,6 @@ boolean COgreObject::getWorldBoundingBox(float32& rMinX, float32& rMinY, float32
 
 	return true;
 }
+
+
+#endif

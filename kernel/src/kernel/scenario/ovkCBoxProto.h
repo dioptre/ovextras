@@ -25,12 +25,26 @@ namespace OpenViBE
 			virtual OpenViBE::boolean addOutput(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier);
+
+			/*
 			virtual OpenViBE::boolean addSetting(
 				const OpenViBE::CString& sName,
 				const OpenViBE::CIdentifier& rTypeIdentifier,
 				const OpenViBE::CString& sDefaultValue);
+				//*/
+
+			virtual OpenViBE::boolean addSetting(
+				const OpenViBE::CString& sName,
+				const OpenViBE::CIdentifier& rTypeIdentifier,
+				const OpenViBE::CString& sDefaultValue,
+				const OpenViBE::boolean bModifiable = false);
+
 			virtual OpenViBE::boolean addFlag(
 				const OpenViBE::Kernel::EBoxFlag eBoxFlag);
+			virtual OpenViBE::boolean addInputSupport(
+				const OpenViBE::CIdentifier &rTypeIdentifier);
+			virtual OpenViBE::boolean addOutputSupport(
+				const OpenViBE::CIdentifier &rTypeIdentifier);
 
 			_IsDerivedFromClass_Final_(OpenViBE::Kernel::IBoxProto, OVK_ClassId_Kernel_Scenario_BoxProto)
 

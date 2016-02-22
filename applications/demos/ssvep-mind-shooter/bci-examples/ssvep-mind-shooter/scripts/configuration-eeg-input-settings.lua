@@ -27,9 +27,9 @@ function process(box)
 
 	-- create material
 
-	box:log("Info", box:get_config("Writing file '${__volatile_ScenarioDir}/configuration/channel-selector.cfg'"))
+	box:log("Info", box:get_config("Writing file '${Player_ScenarioDirectory}/configuration/channel-selector.cfg'"))
 
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/configuration/channel-selector.cfg"), "w")
+	cfg_file = io.open(box:get_config("${Player_ScenarioDirectory}/configuration/channel-selector.cfg"), "w")
 
 	if cfg_file == nil then
 		box:log("Error", "Could not open config file for writing")
@@ -43,9 +43,9 @@ function process(box)
 
 	cfg_file:close()
 
-	box:log("Info", box:get_config("Writing file '${__volatile_ScenarioDir}/configuration/file-reader-training.cfg'"))
+	box:log("Info", box:get_config("Writing file '${Player_ScenarioDirectory}/configuration/file-reader-training.cfg'"))
 
-	cfg_file = assert(io.open(box:get_config("${__volatile_ScenarioDir}/configuration/file-reader-training.cfg"), "w"))
+	cfg_file = assert(io.open(box:get_config("${Player_ScenarioDirectory}/configuration/file-reader-training.cfg"), "w"))
 
 	cfg_file:write("<OpenViBE-SettingsOverride>\n")
 	cfg_file:write(string.format("<SettingValue>%s</SettingValue>\n", training_datafile))
@@ -54,9 +54,9 @@ function process(box)
 
 	cfg_file:close()
 
-	box:log("Info", box:get_config("Writing file '${__volatile_ScenarioDir}/configuration/file-reader-testing.cfg'"))
+	box:log("Info", box:get_config("Writing file '${Player_ScenarioDirectory}/configuration/file-reader-testing.cfg'"))
 
-	cfg_file = assert(io.open(box:get_config("${__volatile_ScenarioDir}/configuration/file-reader-testing.cfg"), "w"))
+	cfg_file = assert(io.open(box:get_config("${Player_ScenarioDirectory}/configuration/file-reader-testing.cfg"), "w"))
 
 	cfg_file:write("<OpenViBE-SettingsOverride>\n")
 	cfg_file:write(string.format("<SettingValue>%s</SettingValue>\n", testing_datafile))

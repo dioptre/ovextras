@@ -8,7 +8,6 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
-#include <ebml/TWriterCallbackProxy.h>
 
 namespace OpenViBEPlugins
 {
@@ -34,16 +33,17 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean process_channelLocalisation(void);
 			OpenViBE::boolean process_featureVector(void);
 			OpenViBE::boolean process_spectrum(void);
-			void convertVectorDataToMatrix(OpenViBE::IMatrix* matrix);
-			//void split(OpenViBE::CString line, OpenViBE::CString delim, std::vector < std::string *>* split);
+			OpenViBE::boolean convertVectorDataToMatrix(OpenViBE::IMatrix* matrix);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_CSVFileReader);
 
+
 		protected:
+			OpenViBE::boolean initializeFile();
 
 			::FILE* m_pFile;
 			std::string m_sSeparator;
-			OpenViBE::boolean m_bNotUseTimer;
+			OpenViBE::boolean m_bDoNotUseFileTime;
 			OpenViBE::CString m_sFilename;
 			OpenViBE::boolean m_bUseCompression;
 
@@ -55,14 +55,7 @@ namespace OpenViBEPlugins
 
 			OpenViBE::boolean (OpenViBEPlugins::FileIO::CBoxAlgorithmCSVFileReader::*m_fpRealProcess)(void);
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pAlgorithmEncoder;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pMemoryBuffer;
-
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pMatrix;
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::boolean> ip_pDynamic; //channelLocalisation stream
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pMinMaxFrequencyBands; //spectrum stream
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_pSamplingRate; //signals stream
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::IStimulationSet*> ip_pStimulationSet; // stimulation stream
+			OpenViBEToolkit::TEncoder < CBoxAlgorithmCSVFileReader >* m_pAlgorithmEncoder;
 
 			OpenViBE::boolean m_bHeaderSent;
 			std::vector<std::string> m_vLastLineSplit;
@@ -70,6 +63,9 @@ namespace OpenViBEPlugins
 			std::vector<std::vector<std::string> > m_vDataMatrix;
 
 			OpenViBE::float64 m_f64NextTime;
+
+			OpenViBE::uint64 m_ui64ChunkStartTime;
+			OpenViBE::uint64 m_ui64ChunkEndTime;
 
 			static const OpenViBE::uint32 m_ui32bufferLen = 16384; // Side-effect: a maximum allowed length for a line of a CSV file
 		};
@@ -82,33 +78,34 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getOutputType(ui32Index, l_oTypeIdentifier);
-				if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_Spectrum))
+				if(l_oTypeIdentifier == OV_TypeId_Spectrum)
 				{
-					rBox.setOutputName(ui32Index, "Streamed matrix");
-					rBox.setSettingName(3,"");
+					rBox.setSettingName(3,"Unused parameter");
 					rBox.setSettingValue(3,"0");
 				}
-				else if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier,OV_TypeId_ChannelLocalisation))
+				else if(l_oTypeIdentifier == OV_TypeId_ChannelLocalisation)
 				{
-					rBox.setOutputName(ui32Index, "Streamed matrix");
 					rBox.setSettingName(3,"Channels number");
 					rBox.setSettingValue(3,"32");
 				}
-				else if(this->getTypeManager().isDerivedFromStream(l_oTypeIdentifier, OV_TypeId_StreamedMatrix))
+				else if(l_oTypeIdentifier == OV_TypeId_FeatureVector)
 				{
-					rBox.setOutputName(ui32Index, "Streamed matrix");
+					rBox.setSettingName(3,"Unused parameter");
+					rBox.setSettingValue(3,"0");
+				}
+				else if(l_oTypeIdentifier == OV_TypeId_StreamedMatrix)
+				{
 					rBox.setSettingName(3,"Samples per buffer");
 					rBox.setSettingValue(3,"32");
 				}
 				else if(l_oTypeIdentifier==OV_TypeId_Stimulations)
 				{
-					rBox.setOutputName(ui32Index, "Stimulations");
-					rBox.setSettingName(3,"");
+					rBox.setSettingName(3,"Unused parameter");
 					rBox.setSettingValue(3,"0");
 				}
 				else
 				{
-					rBox.setOutputName(ui32Index, "Streamed matrix");
+					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Unsupported stream type " << l_oTypeIdentifier << "\n";
 					rBox.setOutputType(ui32Index, OV_TypeId_Signal);
 					rBox.setSettingName(3,"Samples per buffer");
 					rBox.setSettingValue(3,"32");
@@ -143,15 +140,22 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
-				rBoxAlgorithmPrototype.addOutput ("Streamed matrix", OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutput ("Output stream", OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addSetting("Filename", OV_TypeId_Filename, "");
 				rBoxAlgorithmPrototype.addSetting("Column separator", OV_TypeId_String, ";");
-				rBoxAlgorithmPrototype.addSetting("don't use the file time",OV_TypeId_Boolean, "false");
+				rBoxAlgorithmPrototype.addSetting("Don't use the file time",OV_TypeId_Boolean, "false");
 				rBoxAlgorithmPrototype.addSetting("Samples per buffer", OV_TypeId_Integer,"32");
 
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsUnstable);
+
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_FeatureVector);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_ChannelLocalisation);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Stimulations);
 				return true;
 			}
 

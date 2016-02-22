@@ -1,6 +1,8 @@
 #ifndef __OpenViBEKernel_Kernel_Visualisation_CVisualisationTree_H__
 #define __OpenViBEKernel_Kernel_Visualisation_CVisualisationTree_H__
 
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "../ovkTKernelObject.h"
 
 #include "../scenario/ovkTAttributable.h"
@@ -42,7 +44,8 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier& rParentIdentifier,
 				OpenViBE::uint32 ui32ParentIndex,
 				const OpenViBE::CIdentifier& rBoxIdentifier,
-				OpenViBE::uint32 ui32NbChildren);
+				OpenViBE::uint32 ui32NbChildren,
+				const OpenViBE::CIdentifier& rSuggestedIdentifier);
 			OpenViBE::boolean getVisualisationWidgetIndex(
 				const OpenViBE::CIdentifier& rIdentifier,
 				OpenViBE::uint32& rIndex) const;
@@ -238,7 +241,7 @@ namespace OpenViBE
 			OpenViBE::boolean _destroyHierarchy(
 				const OpenViBE::CIdentifier& rIdentifier,
 				OpenViBE::boolean bDestroyVisualisationBoxes);
-			OpenViBE::CIdentifier getUnusedIdentifier(void) const;
+			OpenViBE::CIdentifier getUnusedIdentifier(const CIdentifier& rSuggestedIdentifier) const;
 
 			OpenViBE::boolean _findChildNodeFromParent(
 				::GtkTreeIter* pIter,
@@ -275,3 +278,5 @@ namespace OpenViBE
 };
 
 #endif // __OpenViBEKernel_Kernel_Visualisation_CVisualisationTree_H__
+
+#endif

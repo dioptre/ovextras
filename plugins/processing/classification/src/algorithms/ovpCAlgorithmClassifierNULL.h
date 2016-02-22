@@ -5,6 +5,8 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
+#include <xml/IXMLNode.h>
+
 #define OVP_ClassId_Algorithm_ClassifierNULL                                        OpenViBE::CIdentifier(0x043D09AB, 0xCB5E4859)
 #define OVP_ClassId_Algorithm_ClassifierNULLDesc                                    OpenViBE::CIdentifier(0x3B365233, 0x812C47DD)
 
@@ -25,14 +27,22 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize(void);
 
 			virtual OpenViBE::boolean train(const OpenViBEToolkit::IFeatureVectorSet& rFeatureVectorSet);
-			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector, OpenViBE::float64& rf64Class, OpenViBEToolkit::IVector& rClassificationValues);
+			virtual OpenViBE::boolean classify(const OpenViBEToolkit::IFeatureVector& rFeatureVector
+											   , OpenViBE::float64& rf64Class
+											   , OpenViBEToolkit::IVector& rDistanceValue
+											   , OpenViBEToolkit::IVector& rProbabilityValue);
 
-			virtual OpenViBE::boolean saveConfiguration(OpenViBE::IMemoryBuffer& rMemoryBuffer);
-			virtual OpenViBE::boolean loadConfiguration(const OpenViBE::IMemoryBuffer& rMemoryBuffer);
+			virtual XML::IXMLNode* saveConfiguration(void);
+			virtual OpenViBE::boolean loadConfiguration(XML::IXMLNode *pConfigurationNode);
+
+			virtual OpenViBE::uint32 getOutputProbabilityVectorLength();
+			virtual OpenViBE::uint32 getOutputDistanceVectorLength();
 
 			_IsDerivedFromClass_Final_(CAlgorithmClassifier, OVP_ClassId_Algorithm_ClassifierNULL);
 
 		protected:
+
+
 		};
 
 		class CAlgorithmClassifierNULLDesc : public OpenViBEToolkit::CAlgorithmClassifierDesc

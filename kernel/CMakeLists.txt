@@ -75,7 +75,6 @@ IF(UNIX)
 	ADD_DEFINITIONS(-DTARGET_COMPILER_GCC)
 ENDIF(UNIX)
 
-
 # -----------------------------
 # Install files
 # -----------------------------
@@ -84,6 +83,23 @@ INSTALL(TARGETS ${PROJECT_NAME}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 
-INSTALL(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/kernel   PATTERN ".svn" EXCLUDE)
+INSTALL(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/kernel   PATTERN ".svn" EXCLUDE PATTERN "*-base" EXCLUDE)
 
 #INSTALL(DIRECTORY src/   DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "doc" EXCLUDE)
+
+# -----------------------------
+# Install and configure .conf
+# -----------------------------
+
+# This construct is to fetch the documentation specific to this version. 
+# In addition, it tweaks the patch version to allow the "1.0.0+git" style version to 
+# fetch the "1.0.0" (base) version documentation as we don't have git version docs on the web.
+STRING(REGEX REPLACE "[^0-9]" "" PROJECT_VERSION_PATCH_PRUNED ${PROJECT_VERSION_PATCH})
+SET(OV_PROJECT_BASE_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH_PRUNED})
+
+CONFIGURE_FILE(share/openvibe.conf-base "${CMAKE_CURRENT_BINARY_DIR}/openvibe.conf" @ONLY)
+CONFIGURE_FILE(share/openvibe_test.conf-base "${CMAKE_CURRENT_BINARY_DIR}/openvibe_test.conf" @ONLY)
+
+INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/openvibe.conf" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/kernel)
+INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/openvibe_test.conf" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/kernel)
+

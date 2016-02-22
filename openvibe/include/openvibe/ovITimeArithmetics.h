@@ -1,5 +1,5 @@
-#ifndef __OpenViBE_Kernel_TimeArithmetics_H__
-#define __OpenViBE_Kernel_TimeArithmetics_H__
+#ifndef __OpenViBE_Kernel_ITimeArithmetics_H__
+#define __OpenViBE_Kernel_ITimeArithmetics_H__
 
 #include "ov_types.h"
 

@@ -3,6 +3,8 @@
 
 #include "ovd_base.h"
 
+#include "ovdCApplication.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -15,11 +17,14 @@ namespace OpenViBEDesigner
 		CPlayerVisualisation(
 			const OpenViBE::Kernel::IKernelContext& rKernelContext,
 			OpenViBE::Kernel::IVisualisationTree& rVisualisationTree,
+			OpenViBEDesigner::CApplication& rApplication,
 			CInterfacedScenario& rInterfacedScenario);
 
 		virtual ~CPlayerVisualisation();
 
 		void init();
+
+		std::vector < ::GtkWindow* > getTopLevelWindows(void);
 
 		/** \name ITreeViewCB interface implementation */
 		//@{
@@ -36,12 +41,24 @@ namespace OpenViBEDesigner
 		//@}
 
 		void showTopLevelWindows();
+		void showSelectedWindow(OpenViBE::uint32 ui32Index);
+		void hideSelectedWindow(OpenViBE::uint32 ui32Index);
 		void hideTopLevelWindows();
+
+
 
 	protected:
 		OpenViBE::boolean parentWidgetBox(
 			OpenViBE::Kernel::IVisualisationWidget* pWidget,
 			::GtkBox* pWidgetBox);
+
+		static gboolean hide_window_cb(
+			::GtkWidget* pWidget,
+			::GdkEvent  *event,
+			gpointer user_data);
+		void hideWindowCB(
+			::GtkWidget* pWidget,
+			gpointer pUserData);
 
 		static gboolean configure_event_cb(
 			::GtkWidget* widget,
@@ -83,11 +100,17 @@ namespace OpenViBEDesigner
       gpointer   user_data);
 		OpenViBE::boolean deleteToolbarCB(::GtkWidget* pWidget);
 
+
 	private:
+		//Show on widget if no-gui is off
+		void showWidget(GtkWidget *pWidget);
+		void showAllWidget(GtkWidget* pWidget);
 
 		const OpenViBE::Kernel::IKernelContext&	m_rKernelContext;
 		OpenViBE::Kernel::IVisualisationTree& m_rVisualisationTree;
+		OpenViBEDesigner::CApplication& m_rApplication;
 		OpenViBEDesigner::CInterfacedScenario& m_rInterfacedScenario;
+
 
 		/**
 		 * \brief Vector of top level windows

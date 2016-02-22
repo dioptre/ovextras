@@ -1,5 +1,5 @@
-#ifndef __OpenViBEKernel_Kernel_ITypeManager_H__
-#define __OpenViBEKernel_Kernel_ITypeManager_H__
+#ifndef __OpenViBEKernel_Kernel_CTypeManager_H__
+#define __OpenViBEKernel_Kernel_CTypeManager_H__
 
 #include "ovkTKernelObject.h"
 
@@ -107,4 +107,4 @@ namespace OpenViBE
 	};
 };
 
-#endif // __OpenViBEKernel_Kernel_ITypeManager_H__
+#endif // __OpenViBEKernel_Kernel_CTypeManager_H__

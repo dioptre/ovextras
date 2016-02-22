@@ -112,6 +112,11 @@ IF(doxygen_bin)
 		CreateDoxygen.cmake
 		@ONLY)
 
+	CONFIGURE_FILE(
+		openvibe.dox-base
+		openvibe.dox
+		@ONLY)	
+		
 IF(WIN32)
 	ADD_CUSTOM_COMMAND(
 		TARGET ${PROJECT_NAME}

@@ -39,7 +39,9 @@ root of the repository
     + <ebml>
     + <socket>
     + ...
-
+ + <contrib> (third-party components, author retains code ownership)
+    + ...
+	
 Each software module is organized as a UNIX-like tree (empty folders not
 included):
 

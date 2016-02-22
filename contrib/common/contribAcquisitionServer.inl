@@ -7,7 +7,6 @@
 #include "ovasCPluginExternalStimulations.h"
 
 #include "ovasCDriverBrainmasterDiscovery.h"
-#include "ovasCDriverBrainProductsActiCHamp.h"
 #include "ovasCDriverBrainProductsBrainVisionRecorder.h"
 #include "ovasCDriverCognionics.h"
 #include "ovasCDriverCtfVsmMeg.h"
@@ -15,10 +14,12 @@
 #include "ovasCDriverGTecGUSBampLegacy.h"
 #include "ovasCDriverGTecGMobiLabPlus.h"
 #include "ovasCDriverFieldtrip.h"
+#include "ovasCDriverMBTSmarting.h"
 #include "ovasCDriverMitsarEEG202A.h"
 #include "ovasCDriverOpenALAudioCapture.h"
 #include "ovasCDriverOpenEEGModularEEG.h"
-
+#include "ovasCDriverOpenBCI.h"
+#include "ovasCDriverEEGO.h"
 
 namespace OpenViBEContributions {
 
@@ -40,13 +41,14 @@ namespace OpenViBEContributions {
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverGTecGMobiLabPlus(pAcquisitionServer->getDriverContext()));
 #endif
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverFieldtrip(pAcquisitionServer->getDriverContext()));
-#if defined TARGET_OS_Windows
+
 #if defined TARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBrainmasterDiscovery(pAcquisitionServer->getDriverContext()));
 #endif
-#if defined TARGET_HAS_ThirdPartyActiCHampAPI
-		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBrainProductsActiCHamp(pAcquisitionServer->getDriverContext()));
-#endif
+ 
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverMBTSmarting(pAcquisitionServer->getDriverContext()));
+		
+#if defined(TARGET_HAS_ThirdPartyMitsar)
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverMitsarEEG202A(pAcquisitionServer->getDriverContext()));
 #endif
 
@@ -55,6 +57,14 @@ namespace OpenViBEContributions {
 #endif
 
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverOpenEEGModularEEG(pAcquisitionServer->getDriverContext()));
+		
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverOpenBCI(pAcquisitionServer->getDriverContext()));
+
+#if defined(TARGET_HAS_ThirdPartyEEGOAPI)
+#if defined TARGET_OS_Windows
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverEEGO(pAcquisitionServer->getDriverContext()));
+#endif
+#endif
 
 		pGUI->registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginExternalStimulations(rKernelContext));
 	}

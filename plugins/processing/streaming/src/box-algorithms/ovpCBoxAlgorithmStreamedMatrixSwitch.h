@@ -43,7 +43,6 @@ namespace OpenViBEPlugins
 		protected:
 			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmStreamedMatrixSwitch > m_oStimulationDecoder;
 			OpenViBEToolkit::TDecoder < CBoxAlgorithmStreamedMatrixSwitch > * m_pStreamDecoder;
-			//OpenViBEToolkit::TEncoder < CBoxAlgorithmStreamedMatrixSwitch > * m_pStreamEncoder;
 
 			std::map <OpenViBE::uint64, OpenViBE::uint32> m_mStimulationOutputIndexMap;
 			OpenViBE::int32 m_i32ActiveOutputIndex;
@@ -65,14 +64,6 @@ namespace OpenViBEPlugins
 				
 				OpenViBE::CIdentifier l_oIdentifier;
 				rBox.getInputType(1,l_oIdentifier);
-				
-				//The input can be only streamed matrix or children streams
-				if(!this->getTypeManager().isDerivedFromStream(l_oIdentifier, OV_TypeId_StreamedMatrix))
-				{
-					OpenViBE::CIdentifier l_oOutputIdentifier;
-					rBox.getOutputType(0,l_oOutputIdentifier);
-					rBox.setInputType(ui32Index, l_oOutputIdentifier);
-				}
 
 				// all output must have the input type
 				for(OpenViBE::uint32 i = 0; i < rBox.getOutputCount(); i++)
@@ -98,7 +89,15 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onOutputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				rBox.removeSetting(ui32Index);
+				rBox.removeSetting(1+ui32Index);		// +1 for the first setting which doesn't correspond to a stream
+				
+				// Rename the rest to match the changed indexing
+				for(OpenViBE::uint32 i=(1+ui32Index);i<rBox.getSettingCount();i++)
+				{
+					char l_sName[1024];
+					::sprintf(l_sName, "Switch stim for output %i", i);
+					rBox.setSettingName(i, l_sName);
+				}
 				return true;
 			}
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);

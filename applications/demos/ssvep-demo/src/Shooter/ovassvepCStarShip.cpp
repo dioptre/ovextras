@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCStarShip.h"
 
 #include "../ovassvepCApplication.h"
@@ -178,3 +181,5 @@ std::pair<Ogre::Real, Ogre::Real> CStarShip::getShotCoordinates()
 {
 	return std::make_pair( -Ogre::Math::Sin(m_rCurrentAngle) * m_rShotDistance, Ogre::Math::Cos(m_rCurrentAngle) * m_rShotDistance);
 }
+
+#endif

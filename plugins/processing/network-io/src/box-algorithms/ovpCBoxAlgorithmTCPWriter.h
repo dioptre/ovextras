@@ -1,6 +1,8 @@
 #ifndef __OpenViBEPlugins_BoxAlgorithm_TCPWriter_H__
 #define __OpenViBEPlugins_BoxAlgorithm_TCPWriter_H__
 
+#ifdef TARGET_HAS_Boost
+
 #include "../ovp_defines.h"
 
 #include <openvibe/ov_all.h>
@@ -16,7 +18,8 @@
 #define OVP_ClassId_BoxAlgorithm_TCPWriter OpenViBE::CIdentifier(0x02F24947, 0x17FA0477)
 #define OVP_ClassId_BoxAlgorithm_TCPWriterDesc OpenViBE::CIdentifier(0x3C32489D, 0x46F565D3)
 
-#define OVP_TypeID_TCPWriter_OutputStyle OpenViBE::CIdentifier(0x6D7E53DD, 0x6A0A4753)
+#define OVP_TypeID_TCPWriter_OutputStyle     OpenViBE::CIdentifier(0x6D7E53DD, 0x6A0A4753)
+#define OVP_TypeID_TCPWriter_RawOutputStyle  OpenViBE::CIdentifier(0x77D3E238, 0xB954EC48)
 
 enum { TCPWRITER_RAW, TCPWRITER_HEX, TCPWRITER_STRING }; // stimulation output types
 
@@ -58,13 +61,13 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			OpenViBE::boolean sendToClients(void *pBuffer, OpenViBE::uint32 ui32BufferLength);
+			OpenViBE::boolean sendToClients(const void* pBuffer, OpenViBE::uint32 ui32BufferLength);
 
 			// Stream decoder
-			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmTCPWriter > m_StimulationDecoder;
-			OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmTCPWriter > m_MatrixDecoder;
-			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmTCPWriter > m_SignalDecoder;
-			OpenViBEToolkit::TDecoder < CBoxAlgorithmTCPWriter > *m_pActiveDecoder;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmTCPWriter > m_oStimulationDecoder;
+			OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmTCPWriter > m_oMatrixDecoder;
+			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmTCPWriter > m_oSignalDecoder;
+			OpenViBEToolkit::TDecoder < CBoxAlgorithmTCPWriter >* m_pActiveDecoder;
 
 			boost::asio::io_service m_oIOService;
 			boost::asio::ip::tcp::acceptor* m_pAcceptor;
@@ -91,44 +94,32 @@ namespace OpenViBEPlugins
 		class CBoxAlgorithmTCPWriterListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
 		{
 			public:
+			CBoxAlgorithmTCPWriterListener(): m_oLastType(OV_UndefinedIdentifier)
+			{			}
 
 			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) {
 				OpenViBE::CIdentifier l_oNewInputType;
 				rBox.getInputType(ui32Index, l_oNewInputType);
-				if(l_oNewInputType != OV_TypeId_StreamedMatrix && 
-				   l_oNewInputType != OV_TypeId_Signal &&
-				   l_oNewInputType != OV_TypeId_Stimulations) 
+				// Set the right enumeration according to the type if we actualy change it
+				// TODO find a way to init m_oLastType with the right value
+				if(m_oLastType != l_oNewInputType)
 				{
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Only StreamedMatrix, Signal and Stimulation are supported\n";
-					rBox.setInputType(ui32Index, OV_TypeId_StreamedMatrix);
-					return false;
-				}
-				// Set output type to RAW if the new input is not stimulations
-				if(l_oNewInputType != OV_TypeId_Stimulations) 
-				{
-					rBox.setSettingValue(1, "Raw");
-				}
-				return true;
-			}
-
-			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) {
-				// Test that output type is RAW if the input are not stimulations
-				if(ui32Index == 1) 
-				{
-					OpenViBE::CIdentifier l_oCurrentInputType;
-					OpenViBE::CString l_sNewValue;
-
-					rBox.getInputType(0, l_oCurrentInputType);
-					rBox.getSettingValue(1, l_sNewValue);
-					if(l_oCurrentInputType != OV_TypeId_Stimulations && l_sNewValue != OpenViBE::CString("Raw"))
+					if(l_oNewInputType != OV_TypeId_Stimulations)
 					{
-						rBox.setSettingValue(1, "Raw");
-						this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Only RAW output accepted for this input type\n";
-						return false;
+						rBox.setSettingType(1, OVP_TypeID_TCPWriter_RawOutputStyle);
 					}
+					else
+					{
+						rBox.setSettingType(1, OVP_TypeID_TCPWriter_OutputStyle);
+					}
+					rBox.setSettingValue(1, "Raw");
+					m_oLastType = l_oNewInputType;
 				}
 				return true;
 			}
+
+		private:
+			OpenViBE::CIdentifier m_oLastType;
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 
@@ -153,7 +144,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Send input stream out via a TCP socket"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("\n"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Acquisition and network IO"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-connect"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_TCPWriter; }
@@ -170,11 +161,14 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Port",OV_TypeId_Integer,"5678");
 				rBoxAlgorithmPrototype.addSetting("Stimulus output", OVP_TypeID_TCPWriter_OutputStyle, "Raw");
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
 
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Stimulations);
+
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
-				
+
 				return true;
 			}
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_TCPWriterDesc);
@@ -183,3 +177,5 @@ namespace OpenViBEPlugins
 };
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_TCPWriter_H__
+
+#endif // TARGET_HAS_Boost

@@ -24,7 +24,8 @@ namespace OpenViBEDesigner
 		CommandLineFlag_Define           =0x00000040,
 		CommandLineFlag_Config           =0x00000080,
 		CommandLineFlag_Kernel           =0x00000100,
-		CommandLineFlag_RandomSeed       =0x00000200
+		CommandLineFlag_RandomSeed       =0x00000200,
+		CommandLineFlag_NoVisualisation  =0x00000400  /** flag to hide visualisation widget */
 	} ECommandLineFlag;
 
 	enum
@@ -128,6 +129,13 @@ namespace OpenViBEDesigner
 		Mode_Connect,
 		Mode_EditSettings,
 	};
+
+	enum
+	{
+		Log_NotAvailable = 0,
+		Log_AvailableNotActivate = 1,
+		Log_AvailableActivate = 2
+	};
 };
 
 //___________________________________________________________________//
@@ -139,5 +147,7 @@ namespace OpenViBEDesigner
 #ifdef TARGET_HAS_ThirdPartyOpenViBEPluginsGlobalDefines
  #include "ovp_global_defines.h"
 #endif // TARGET_HAS_ThirdPartyOpenViBEPluginsGlobalDefines
+
+
 
 #endif // __OpenViBEDesigner_defines_H__

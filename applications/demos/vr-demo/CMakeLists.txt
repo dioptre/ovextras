@@ -11,6 +11,12 @@ IF(NOT PATH_VRPN)
 	RETURN()
 ENDIF(NOT PATH_VRPN)
 
+INCLUDE("FindThirdPartyCEGUI_Check")
+IF(NOT CEGUI_FOUND OR NOT OgreCEGUIRenderer_FOUND)
+        MESSAGE(STATUS "    --> Not building ${PROJECT_NAME}")
+        RETURN()
+ENDIF(NOT CEGUI_FOUND OR NOT OgreCEGUIRenderer_FOUND)
+
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
 ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
 
@@ -65,11 +71,11 @@ ENDIF(UNIX)
 # ----------------------
 IF(WIN32)
 	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-handball" "handball")
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-tie-fighter" "tie-fighter")
+	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-spaceship" "spaceship")
 ENDIF(WIN32)
 IF(UNIX)
 	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-handball" "handball")
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-tie-fighter" "tie-fighter")
+	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-spaceship" "spaceship")
 ENDIF(UNIX)
 
 # -----------------------------

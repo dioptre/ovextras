@@ -129,6 +129,22 @@ namespace OpenViBE
 				const OpenViBE::CString& rConfigurationTokenValue)=0;
 
 			/**
+			 * \brief Adds a token or replaces the value of a token.
+			 * \param rConfigurationTokenName [in] : the name of the token which value should be changed
+			 * \param rConfigurationTokenValue [in] : the new value of the configuration token
+			 * \return \e true in case of success
+			 * \return \e false in case of error
+			 * \note new tokens can be added with this function
+			 * \note this call is not recursive
+			 * \sa IConfigurationManager::createConfigurationToken
+			 * \sa IConfigurationManager::addConfigurationFromFile
+			 * \sa IConfigurationManager::setConfigurationTokenName
+			 */
+			virtual OpenViBE::boolean addOrReplaceConfigurationToken(
+				const OpenViBE::CString& rConfigurationTokenName,
+				const OpenViBE::CString& rConfigurationTokenValue)=0;
+
+			/**
 			 * \brief Searches the identifier of a token with a given name
 			 * \param rConfigurationTokenName [in] : the name of the token which identifier should be found
 			 * \param bRecursive [in] : when set to true, asks this configuration manager to propagate
@@ -138,8 +154,8 @@ namespace OpenViBE
 			 * \note if \c bRecursive is set to \e true then the returned identifier should
 			 *       not be considered as the identifier of an existing token in this configuration manager
 			 *       as it may have been returned from a parent configuration manager. Instead, one must consider
-			 *       the returned identifier as a kind of boolean value : suck token actually exists or such
-			 *       token does not exists.
+			 *       the returned identifier as a kind of boolean value : such token actually exists or such
+			 *       token does not exist.
 			 */
 			virtual OpenViBE::CIdentifier lookUpConfigurationTokenIdentifier(
 				const OpenViBE::CString& rConfigurationTokenName,

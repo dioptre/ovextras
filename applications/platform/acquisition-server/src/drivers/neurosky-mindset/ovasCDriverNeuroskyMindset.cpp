@@ -4,7 +4,7 @@
 #include "ovasCConfigurationNeuroskyMindset.h"
 
 #include <sstream>
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
 #include <thinkgear.h>
 

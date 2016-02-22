@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "OgreRoot.h"
 #include "ovkCOgreFrameListener.h"
 #include "OgreRenderWindow.h"
@@ -77,3 +80,5 @@ void COgreFrameListener::updateStats(void)
 	}
 	catch(...) { /* ignore */ }
 }
+
+#endif

@@ -6,8 +6,8 @@
 
 #include <ovp_global_defines.h>
 
-#include <system/Memory.h>
-#include <system/Time.h>
+#include <system/ovCMemory.h>
+#include <system/ovCTime.h>
 
 #include <fstream>
 #include <sstream>
@@ -78,6 +78,11 @@ namespace OpenViBEAcquisitionServer
 		virtual boolean isImpedanceCheckRequested(void) const
 		{
 			return m_rAcquisitionServer.isImpedanceCheckRequested();
+		}
+
+		virtual boolean isChannelSelectionRequested(void) const
+		{
+			return m_rAcquisitionServer.isChannelSelectionRequested();
 		}
 
 		virtual int64 getDriftSampleCount(void) const
@@ -244,7 +249,11 @@ CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
 	ip_ui64SignalSamplingRate.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SignalSamplingRate));
 	ip_pStimulationSet.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_StimulationSet));
 	ip_ui64BufferDuration.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_BufferDuration));
+	ip_pChannelUnits.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_ChannelUnits));
 	op_pEncodedMemoryBuffer.initialize(m_pStreamEncoder->getOutputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
+
+	ip_bEncodeChannelLocalisationData.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelLocalisationData));
+	ip_bEncodeChannelUnitData.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelUnitData));
 
 	CString l_sNaNReplacementPolicy=m_rKernelContext.getConfigurationManager().expand("${AcquisitionServer_NaNReplacementPolicy}");
 	if(l_sNaNReplacementPolicy==CString("Disabled"))
@@ -279,6 +288,7 @@ CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
 	this->setJitterEstimationCountForDrift(m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_JitterEstimationCountForDrift}", 128));
 	this->setOversamplingFactor(m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_OverSamplingFactor}", 1));
 	this->setImpedanceCheckRequest(m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_CheckImpedance}", false));
+	this->setChannelSelectionRequest(m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_ChannelSelection}", false));
 
 	m_ui64StartedDriverSleepDuration=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_StartedDriverSleepDuration}", 2);
 	m_ui64StoppedDriverSleepDuration=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_StoppedDriverSleepDuration}", 100);
@@ -317,14 +327,14 @@ CAcquisitionServer::~CAcquisitionServer(void)
 		m_pConnectionServer=NULL;
 	}
 
-/* -- should already be empty after call to stop -- */
-/*
-	list < pair < Socket::IConnection*, SConnectionInfo > >::iterator itConnection=m_vConnection.begin();
-	while(itConnection!=m_vConnection.end())
-	{
-		itConnection->first->release();
-		itConnection=m_vConnection.erase(itConnection);
-	}
+	/* -- should already be empty after call to stop -- */
+	/*
+    list < pair < Socket::IConnection*, SConnectionInfo > >::iterator itConnection=m_vConnection.begin();
+    while(itConnection!=m_vConnection.end())
+    {
+	itConnection->first->release();
+	itConnection=m_vConnection.erase(itConnection);
+    }
 */
 
 	ip_ui64SubjectIdentifier.uninitialize();
@@ -335,6 +345,10 @@ CAcquisitionServer::~CAcquisitionServer(void)
 	ip_pStimulationSet.uninitialize();
 	ip_ui64BufferDuration.uninitialize();
 	op_pEncodedMemoryBuffer.uninitialize();
+	ip_pChannelUnits.uninitialize();
+
+	ip_bEncodeChannelLocalisationData.uninitialize();
+	ip_bEncodeChannelUnitData.uninitialize();
 
 	m_pStreamEncoder->uninitialize();
 	m_rKernelContext.getAlgorithmManager().releaseAlgorithm(*m_pStreamEncoder);
@@ -395,26 +409,28 @@ boolean CAcquisitionServer::loop(void)
 				// acq server is started, send the header
 
 				// Computes inner data to skip
-				int64 l_i64SignedTheoricalSampleCountToSkip=0;
+				int64 l_i64SignedTheoreticalSampleCountToSkip=0;
 				if(m_bDriftCorrectionCalled)
 				{
-					l_i64SignedTheoricalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64StartTime)*m_ui32SamplingFrequency)>>32)-m_ui64SampleCount+m_vPendingBuffer.size();
+					l_i64SignedTheoreticalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64StartTime)*m_ui32SamplingFrequency)>>32)-m_ui64SampleCount+m_vPendingBuffer.size();
 				}
 				else
 				{
-					l_i64SignedTheoricalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64LastDeliveryTime)*m_ui32SamplingFrequency)>>32)+m_vPendingBuffer.size();
+					l_i64SignedTheoreticalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64LastDeliveryTime)*m_ui32SamplingFrequency)>>32)+m_vPendingBuffer.size();
 				}
 
-				uint64 l_ui64TheoricalSampleCountToSkip=(l_i64SignedTheoricalSampleCountToSkip<0?0:uint64(l_i64SignedTheoricalSampleCountToSkip));
+				uint64 l_ui64TheoreticalSampleCountToSkip=(l_i64SignedTheoreticalSampleCountToSkip<0?0:uint64(l_i64SignedTheoreticalSampleCountToSkip));
 
-				m_rKernelContext.getLogManager() << LogLevel_Trace << "Sample count offset at connection : " << l_ui64TheoricalSampleCountToSkip << "\n";
+				m_rKernelContext.getLogManager() << LogLevel_Trace << "Sample count offset at connection : " << l_ui64TheoreticalSampleCountToSkip << "\n";
 
 				SConnectionInfo l_oInfo;
 				l_oInfo.m_ui64ConnectionTime=itConnection->second.m_ui64ConnectionTime;
-				l_oInfo.m_ui64StimulationTimeOffset=ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64TheoricalSampleCountToSkip+m_ui64SampleCount-m_vPendingBuffer.size());
-				l_oInfo.m_ui64SignalSampleCountToSkip=l_ui64TheoricalSampleCountToSkip;
+				l_oInfo.m_ui64StimulationTimeOffset=ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64TheoreticalSampleCountToSkip+m_ui64SampleCount-m_vPendingBuffer.size());
+				l_oInfo.m_ui64SignalSampleCountToSkip=l_ui64TheoreticalSampleCountToSkip;
 				l_oInfo.m_pConnectionClientHandlerThread=new CConnectionClientHandlerThread(*this, *l_pConnection);
 				l_oInfo.m_pConnectionClientHandlerBoostThread=new boost::thread(boost::bind(&start_connection_client_handler_thread, l_oInfo.m_pConnectionClientHandlerThread));
+				l_oInfo.m_bChannelLocalisationSent = false;
+				l_oInfo.m_bChannelUnitsSent = false;
 				//applyPriority(l_oInfo.m_pConnectionClientHandlerBoostThread,15);
 
 				m_vConnection.push_back(pair < Socket::IConnection*, SConnectionInfo >(l_pConnection, l_oInfo));
@@ -519,9 +535,22 @@ boolean CAcquisitionServer::loop(void)
 	// sends data to connected client(s)
 	while(m_vPendingBuffer.size() >= m_ui32SampleCountPerSentBlock*2)
 	{
-		uint64 start;
-	    uint64 end;
+		const int64 p = m_ui64SampleCount-m_vPendingBuffer.size();
+		if (p < 0)
+			m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << " (case A)\n";
 
+		const uint64 l_ui64BufferStartSamples = m_ui64SampleCount-m_vPendingBuffer.size();
+		const uint64 l_ui64BufferEndSamples   = m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock;
+		const uint64 l_ui64BufferStartTime    = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferStartSamples);
+		const uint64 l_ui64BufferEndTime      = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferEndSamples);
+
+		// Pass the stimuli and buffer to all plugins; note that they may modify them
+		for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
+		{
+			(*itp)->loopHook(m_vPendingBuffer, m_oPendingStimulationSet, l_ui64BufferStartTime, l_ui64BufferEndTime);
+		}
+
+		// Handle connections
 		for(itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); itConnection++)
 		{
 			// Socket::IConnection* l_pConnection=itConnection->first;
@@ -542,35 +571,45 @@ boolean CAcquisitionServer::loop(void)
 					}
 				}
 
-				// Stimulation buffer
-				CStimulationSet l_oStimulationSet;
-//				int l = l_oStimulationSet.getStimulationCount();
-				
-				int64 p = m_ui64SampleCount-m_vPendingBuffer.size()+l_rInfo.m_ui64SignalSampleCountToSkip;
+				//				int l = l_oStimulationSet.getStimulationCount();
+
+				const int64 p = l_ui64BufferStartSamples+l_rInfo.m_ui64SignalSampleCountToSkip;
 				if (p < 0)
-					m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << "\n";
+					m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << " (case B)\n";
 
-				//l_rInfo.m_ui64SignalSampleCountToSkip = 0;
-
-				start = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, (m_ui64SampleCount-m_vPendingBuffer.size()+0                            ) + l_rInfo.m_ui64SignalSampleCountToSkip);
-				end   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, (m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock) + l_rInfo.m_ui64SignalSampleCountToSkip);
-
-				OpenViBEToolkit::Tools::StimulationSet::appendRange(
-					l_oStimulationSet,
-					m_oPendingStimulationSet,
-					start,end);
+				const uint64 l_ui64ConnBlockStartTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferStartSamples + l_rInfo.m_ui64SignalSampleCountToSkip);
+				const uint64 l_ui64ConnBlockEndTime   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferEndSamples   + l_rInfo.m_ui64SignalSampleCountToSkip);
 
 				//m_rKernelContext.getLogManager() << LogLevel_Info << "start: " << time64(start) << "end: " << time64(end) << "\n";
 
-				for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
-				{
-					(*itp)->loopHook(l_oStimulationSet, start, end);
-				}
+				// Stimulation buffer
+				CStimulationSet l_oStimulationSet;
+
+				// Take the stimuli range valid for the connection
+				OpenViBEToolkit::Tools::StimulationSet::appendRange(
+							l_oStimulationSet,
+							m_oPendingStimulationSet,
+							l_ui64ConnBlockStartTime,l_ui64ConnBlockEndTime);
+
 				OpenViBEToolkit::Tools::StimulationSet::copy(*ip_pStimulationSet, l_oStimulationSet, -int64(l_rInfo.m_ui64StimulationTimeOffset));
 
+				// Send a chunk of channel units? Note that we'll always send the units header.
+				if(!l_rInfo.m_bChannelUnitsSent)
+				{
+					// If default values in channel units, don't bother sending unit data chunk
+					ip_bEncodeChannelUnitData = m_pHeaderCopy->isChannelUnitSet();
+					// std::cout << "Set " <<  ip_pChannelUnits->getBufferElementCount()  << "\n";
+				}
 
 				op_pEncodedMemoryBuffer->setSize(0, true);
 				m_pStreamEncoder->process(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputTriggerId_EncodeBuffer);
+
+				if(!l_rInfo.m_bChannelUnitsSent)
+				{
+					// Do not send again
+					l_rInfo.m_bChannelUnitsSent = true;
+					ip_bEncodeChannelUnitData = false;
+				}
 
 #if 0
 				uint64 l_ui64MemoryBufferSize=op_pEncodedMemoryBuffer->getSize();
@@ -588,10 +627,10 @@ boolean CAcquisitionServer::loop(void)
 
 		// Clears pending stimulations
 		OpenViBEToolkit::Tools::StimulationSet::removeRange(
-			m_oPendingStimulationSet,
-			ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size()),
-			ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock)
-			);
+					m_oPendingStimulationSet,
+					l_ui64BufferStartTime,
+					l_ui64BufferEndTime
+					);
 
 		// Clears pending signal
 		m_vPendingBuffer.erase(m_vPendingBuffer.begin(), m_vPendingBuffer.begin()+m_ui32SampleCountPerSentBlock);
@@ -609,6 +648,7 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 
 	m_i64InnerLatencySampleCount=0;
 	m_pDriver=&rDriver;
+	m_pHeaderCopy=&rHeaderCopy;
 	m_ui32SampleCountPerSentBlock=ui32SamplingCountPerSentBlock;
 
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Connecting to device [" << CString(m_pDriver->getName()) << "]...\n";
@@ -626,13 +666,52 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Connection succeeded !\n";
 
 	const IHeader& l_rHeader=*rDriver.getHeader();
+	IHeader::copy(rHeaderCopy, l_rHeader);
 
-	m_ui32ChannelCount=l_rHeader.getChannelCount();
-	m_ui32SamplingFrequency=(uint32)(l_rHeader.getSamplingFrequency()*m_ui64OverSamplingFactor);
+	m_ui32ChannelCount=rHeaderCopy.getChannelCount();
+	m_ui32SamplingFrequency=(uint32)(rHeaderCopy.getSamplingFrequency()*m_ui64OverSamplingFactor);
+
+	m_vSelectedChannels.clear();
+	if (m_bIsChannelSelectionRequested)
+	{
+		for (OpenViBE::uint32 i=0,l=0;i<m_ui32ChannelCount;++i) {
+			const std::string name = rHeaderCopy.getChannelName(i);
+			if (name!="") {
+				m_vSelectedChannels.push_back(i);
+				rHeaderCopy.setChannelName(l,name.c_str());
+
+				uint32 l_ui32Unit = 0, l_ui32Factor = 0;
+				if(rHeaderCopy.isChannelUnitSet())
+				{
+					rHeaderCopy.getChannelUnits(i, l_ui32Unit, l_ui32Factor); // no need to check, will be defaults on failure
+					rHeaderCopy.setChannelUnits(l, l_ui32Unit, l_ui32Factor);
+				}
+				l++;
+			}
+		}
+		rHeaderCopy.setChannelCount(m_vSelectedChannels.size());
+		m_ui32ChannelCount = rHeaderCopy.getChannelCount();
+
+	} else {
+
+		for (OpenViBE::uint32 i=0;i<m_ui32ChannelCount;++i)
+			m_vSelectedChannels.push_back(i);
+	}
+	
+	// These are passed to plugins
+	m_vSelectedChannelNames.clear();
+	for(uint32 i=0;i<rHeaderCopy.getChannelCount();i++) 
+	{
+		m_vSelectedChannelNames.push_back(CString(rHeaderCopy.getChannelName(i)));
+	}
 
 	if(m_ui32ChannelCount==0)
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Error << "Driver claimed to have " << uint32(0) << " channel\n";
+		std::stringstream ss;
+		ss << "Driver claimed to have " << uint32(0) << " channel";
+		if (isChannelSelectionRequested())
+			ss << "(check whether the property `Select only named channel' is set).\n";
+		m_rKernelContext.getLogManager() << LogLevel_Error << ss.str().c_str();
 		return false;
 	}
 
@@ -683,9 +762,9 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 
 		ip_ui64BufferDuration=ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui32SampleCountPerSentBlock);
 
-		ip_ui64SubjectIdentifier=l_rHeader.getExperimentIdentifier();
-		ip_ui64SubjectAge=l_rHeader.getSubjectAge();
-		ip_ui64SubjectGender=l_rHeader.getSubjectGender();
+		ip_ui64SubjectIdentifier=rHeaderCopy.getExperimentIdentifier();
+		ip_ui64SubjectAge=rHeaderCopy.getSubjectAge();
+		ip_ui64SubjectGender=rHeaderCopy.getSubjectGender();
 
 		ip_ui64SignalSamplingRate=m_ui32SamplingFrequency;
 		ip_pSignalMatrix->setDimensionCount(2);
@@ -698,7 +777,7 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 
 		for(uint32 i=0; i<m_ui32ChannelCount; i++)
 		{
-			string l_sChannelName=l_rHeader.getChannelName(i);
+			const std::string l_sChannelName=rHeaderCopy.getChannelName(i);
 			if(l_sChannelName!="")
 			{
 				ip_pSignalMatrix->setDimensionLabel(0, i, l_sChannelName.c_str());
@@ -712,7 +791,47 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 			m_rKernelContext.getLogManager() << LogLevel_Trace << "Channel name      : " << CString(ip_pSignalMatrix->getDimensionLabel(0, i)) << "\n";
 		}
 
-		// TODO Gain is ignored
+		// Construct channel units stream header & matrix
+		// Note: Channel units, although part of IHeader, will be sent as a matrix chunk during loop() once - if at all - to each client
+		if(m_pHeaderCopy->isChannelUnitSet())
+		{
+			ip_pChannelUnits->setDimensionCount(2);
+			ip_pChannelUnits->setDimensionSize(0, m_ui32ChannelCount);
+			ip_pChannelUnits->setDimensionSize(1,2);                    // Units, Factor
+			for(uint32 c=0;c<m_ui32ChannelCount;c++)
+			{
+				ip_pChannelUnits->setDimensionLabel(0, c, m_pHeaderCopy->getChannelName(c));
+				if(m_pHeaderCopy->isChannelUnitSet())
+				{
+					uint32 l_ui32Unit = 0, l_ui32Factor = 0;
+				
+					m_pHeaderCopy->getChannelUnits(c, l_ui32Unit, l_ui32Factor); // no need to check, will be defaults on failure
+
+					ip_pChannelUnits->getBuffer()[c*2+0] = static_cast<float64>(l_ui32Unit);
+					ip_pChannelUnits->getBuffer()[c*2+1] = static_cast<float64>(l_ui32Factor);
+
+					m_rKernelContext.getLogManager() << LogLevel_Trace << "Channel Unit      : " << l_ui32Unit << ", factor=" << OVTK_DECODE_FACTOR(l_ui32Factor) << "\n";
+				}
+			}
+			ip_pChannelUnits->setDimensionLabel(1, 0, "Unit");
+			ip_pChannelUnits->setDimensionLabel(1, 1, "Factor");
+		}
+		else
+		{
+			// Driver did not set units. Convention: send empty header matrix in this case.
+			ip_pChannelUnits->setDimensionCount(2);
+			ip_pChannelUnits->setDimensionSize(0,0);
+			ip_pChannelUnits->setDimensionSize(0,0);
+			m_rKernelContext.getLogManager() << LogLevel_Trace << "Driver did not set units, sending empty channel units matrix\n";
+		}
+
+		// @TODO Channel localisation
+		{
+			ip_bEncodeChannelLocalisationData = false; // never at the moment
+
+		}
+
+		// @TODO Gain is ignored
 	}
 	else
 	{
@@ -723,7 +842,6 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 	m_pConnectionServerHandlerBoostThread=new boost::thread(CConnectionServerHandlerThread(*this, *m_pConnectionServer));
 	//applyPriority(m_pConnectionServerHandlerBoostThread,15);
 
-	IHeader::copy(rHeaderCopy, l_rHeader);
 	return true;
 }
 
@@ -760,7 +878,7 @@ boolean CAcquisitionServer::start(void)
 
 	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
 	{
-		(*itp)->startHook();
+		(*itp)->startHook(m_vSelectedChannelNames, m_ui32SamplingFrequency, m_ui32ChannelCount, m_ui32SampleCountPerSentBlock);
 	}
 
 	m_bStarted=true;
@@ -774,29 +892,30 @@ boolean CAcquisitionServer::stop(void)
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Stopping the acquisition.\n";
 
 	int64 l_i64DriftSampleCount=m_i64DriftSampleCount-(m_i64DriftCorrectionSampleCountAdded-m_i64DriftCorrectionSampleCountRemoved);
-	uint64 l_ui64TheoricalSampleCount=m_ui64SampleCount-m_i64DriftSampleCount;
+	uint64 l_ui64TheoreticalSampleCount=m_ui64SampleCount-m_i64DriftSampleCount;
 	uint64 l_ui64ReceivedSampleCount=m_ui64SampleCount-(m_i64DriftCorrectionSampleCountAdded-m_i64DriftCorrectionSampleCountRemoved);
 	float64 l_f64DriftRatio=(l_ui64ReceivedSampleCount?((l_i64DriftSampleCount*10000)/int64(l_ui64ReceivedSampleCount))/100.:0);
 	float64 l_f64AddedRatio=(l_ui64ReceivedSampleCount?((m_i64DriftCorrectionSampleCountAdded*10000)/int64(l_ui64ReceivedSampleCount))/100.:0);
 	float64 l_f64RemovedRatio=(l_ui64ReceivedSampleCount?((m_i64DriftCorrectionSampleCountRemoved*10000)/int64(l_ui64ReceivedSampleCount))/100.:0);
+	
 	if(-m_i64DriftToleranceSampleCount * 5 <= m_i64DriftSampleCount && m_i64DriftSampleCount <= m_i64DriftToleranceSampleCount * 5 && l_f64DriftRatio <= 5)
 	{
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "For information, after " << (((System::Time::zgetTime()-m_ui64StartTime) * 1000) >> 32) * .001f << " seconds we got the following statistics :\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Received : " << l_ui64ReceivedSampleCount << " samples\n";
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Should have received : " << l_ui64TheoricalSampleCount << " samples\n";
+		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Should have received : " << l_ui64TheoreticalSampleCount << " samples\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Drift was : " << l_i64DriftSampleCount << " samples (" << l_f64DriftRatio << "%)\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Added : " << m_i64DriftCorrectionSampleCountAdded << " samples (" << l_f64AddedRatio << "%)\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "  Removed : " << m_i64DriftCorrectionSampleCountRemoved << " samples (" << l_f64RemovedRatio << "%)\n";
 	}
 	else
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "After " << (((System::Time::zgetTime()-m_ui64StartTime) * 1000) >> 32) * .001f << " seconds, theorical samples per second does not match real samples per second\n";
+		m_rKernelContext.getLogManager() << LogLevel_Warning << "After " << (((System::Time::zgetTime()-m_ui64StartTime) * 1000) >> 32) * .001f << " seconds, theoretical samples per second does not match real samples per second\n";
 		m_rKernelContext.getLogManager() << LogLevel_Warning << "  Received : " << l_ui64ReceivedSampleCount << " samples\n";
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "  Should have received : " << l_ui64TheoricalSampleCount << " samples\n";
+		m_rKernelContext.getLogManager() << LogLevel_Warning << "  Should have received : " << l_ui64TheoreticalSampleCount << " samples\n";
 		m_rKernelContext.getLogManager() << LogLevel_Warning << "  Drift was : " << l_i64DriftSampleCount << " samples (" << l_f64DriftRatio << "%)\n";
 		if(m_i64DriftCorrectionSampleCountAdded==0 && m_i64DriftCorrectionSampleCountRemoved==0)
 		{
-			m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "  The driver did not try to correct this difference\n";
+			m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "  The driver did not try to correct this difference. This may be a feature of the driver.\n";
 		}
 		else
 		{
@@ -804,7 +923,7 @@ boolean CAcquisitionServer::stop(void)
 			m_rKernelContext.getLogManager() << LogLevel_Warning << "  Removed : " << m_i64DriftCorrectionSampleCountRemoved << " samples (" << l_f64RemovedRatio << "%)\n";
 			m_rKernelContext.getLogManager() << LogLevel_Warning << "  The driver obviously tried to correct this difference\n";
 		}
-		m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "  Please submit a bug report (including the acquisition server log file or at least this complete message) for the driver you are using\n";
+		// m_rKernelContext.getLogManager() << LogLevel_ImportantWarning << "  Please submit a bug report (including the acquisition server log file or at least this complete message) for the driver you are using\n";
 	}
 
 	// Stops driver
@@ -894,22 +1013,21 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 			}
 			for(uint32 k=0; k<m_ui64OverSamplingFactor; k++)
 			{
-				float32 alpha=float32(k+1)/m_ui64OverSamplingFactor;
+				const float32 alpha=float32(k+1)/m_ui64OverSamplingFactor;
+
+				bool l_bHadNaN = false;
+
 				for(uint32 j=0; j<m_ui32ChannelCount; j++)
 				{
+					const uint32 l_ui32Channel = m_vSelectedChannels[j];
+
 #ifdef TARGET_OS_Windows
-					if(_isnan(pSample[j*ui32SampleCount+i]) || !_finite(pSample[j*ui32SampleCount+i])) // NaN or infinite values
+					if(_isnan(pSample[l_ui32Channel*ui32SampleCount+i]) || !_finite(pSample[l_ui32Channel*ui32SampleCount+i])) // NaN or infinite values
 #else
-					if(isnan(pSample[j*ui32SampleCount+i]) || !finite(pSample[j*ui32SampleCount+i])) // NaN or infinite values
+					if(std::isnan(pSample[l_ui32Channel*ui32SampleCount+i]) || !finite(pSample[l_ui32Channel*ui32SampleCount+i])) // NaN or infinite values
 #endif
 					{
-						if(!m_bReplacementInProgress)
-						{
-							uint64 l_ui64StimulationTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount + j*ui32SampleCount + i);
-
-							m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Incorrect, l_ui64StimulationTime, 0);
-							m_bReplacementInProgress = true;
-						}
+						l_bHadNaN = true;
 
 						switch(m_eNaNReplacementPolicy)
 						{
@@ -928,17 +1046,38 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 					}
 					else
 					{
-						if(m_bReplacementInProgress)
-						{
-							// @note -1 input discrepancy to similar line above, is this intentional? if yes, please explain here.
-							uint64 l_ui64StimulationTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount + j*ui32SampleCount + i -1);
-
-							m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Correct, l_ui64StimulationTime, 0);
-							m_bReplacementInProgress = false;
-						}
-						m_vSwapBuffer[j]=alpha*pSample[j*ui32SampleCount+i]+(1-alpha)*m_vOverSamplingSwapBuffer[j];
+						m_vSwapBuffer[j]=alpha*pSample[l_ui32Channel*ui32SampleCount+i]+(1-alpha)*m_vOverSamplingSwapBuffer[j];
 					}
 				}
+		
+				const uint64 l_ui64CurrentSampleIndex = m_ui64SampleCount + i*m_ui64OverSamplingFactor + k;		// j is not included here as all channels have the equal sample time
+
+				if(l_bHadNaN)
+				{
+					// When a NaN is encountered at time t1 on any channel, OVTK_GDF_Incorrect stimulus is sent. When a first good sample is encountered 
+					// after the last bad sample t2, OVTK_GDF_Correct stimulus is sent, i.e. specifying a range of bad data : [t1,t2]. The stimuli are global 
+					// and not specific to channels.
+
+					if(!m_bReplacementInProgress)
+					{
+						const uint64 l_ui64IncorrectBlockStarts = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64CurrentSampleIndex);
+
+						m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Incorrect, l_ui64IncorrectBlockStarts, 0);
+						m_bReplacementInProgress = true;
+					}
+				} 
+				else 
+				{
+					if(m_bReplacementInProgress)
+					{
+						// @note -1 is used here because the incorrect-correct range is inclusive, [a,b]. So when sample is good at b+1, we set the end point at b.
+						const uint64 l_ui64IncorrectBlockStops = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64CurrentSampleIndex - 1);
+
+						m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Correct, l_ui64IncorrectBlockStops, 0);
+						m_bReplacementInProgress = false;
+					}
+				}
+
 				m_vPendingBuffer.push_back(m_vSwapBuffer);
 			}
 		}
@@ -946,9 +1085,10 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 		m_ui64SampleCount+=ui32SampleCount*m_ui64OverSamplingFactor;
 
 		{
-			uint64 l_ui64TheoricalSampleCount=(m_ui32SamplingFrequency * (System::Time::zgetTime()-m_ui64StartTime))>>32;
-			int64 l_i64JitterSampleCount=int64(m_ui64SampleCount-l_ui64TheoricalSampleCount)+m_i64InnerLatencySampleCount;
-
+			const uint64 l_ui64ElapsedTime = System::Time::zgetTime()-m_ui64StartTime;
+			const uint64 l_ui64TheoricalSampleCount= (m_ui32SamplingFrequency * l_ui64ElapsedTime) >> 32;
+			const int64 l_i64JitterSampleCount=int64(m_ui64SampleCount-l_ui64TheoricalSampleCount)+m_i64InnerLatencySampleCount;
+			
 			m_vJitterSampleCount.push_back(l_i64JitterSampleCount);
 			if(m_vJitterSampleCount.size() > m_ui64JitterEstimationCountForDrift)
 			{
@@ -1105,12 +1245,12 @@ int64 CAcquisitionServer::getInnerLatencySampleCount(void) const
 
 boolean CAcquisitionServer::updateImpedance(const uint32 ui32ChannelIndex, const float64 f64Impedance)
 {
-	if(ui32ChannelIndex >= m_vImpedance.size())
-	{
-		return false;
-	}
-	m_vImpedance[ui32ChannelIndex]=f64Impedance;
-	return true;
+	for (OpenViBE::uint32 i=0;i<m_vSelectedChannels.size();++i)
+		if (ui32ChannelIndex==m_vSelectedChannels[i]) {
+			m_vImpedance[i] = f64Impedance;
+			return true;
+		}
+	return false;
 }
 
 // ____________________________________________________________________________
@@ -1187,7 +1327,16 @@ boolean CAcquisitionServer::setDriftCorrectionPolicy(EDriftCorrectionPolicy eDri
 
 boolean CAcquisitionServer::isImpedanceCheckRequested(void)
 {
-	return m_bIsImpedanceCheckRequested;
+	if (m_pDriver)
+	{
+		return m_pDriver->getHeader()->isImpedanceCheckRequested();
+	}
+	return false;
+}
+
+boolean CAcquisitionServer::isChannelSelectionRequested(void)
+{
+	return m_bIsChannelSelectionRequested;
 }
 
 boolean CAcquisitionServer::setDriftToleranceDuration(uint64 ui64DriftToleranceDuration)
@@ -1216,6 +1365,12 @@ boolean CAcquisitionServer::setImpedanceCheckRequest(boolean bActive)
 	return true;
 }
 
+boolean CAcquisitionServer::setChannelSelectionRequest(const boolean bActive)
+{
+	m_bIsChannelSelectionRequested=bActive;
+	return true;
+}
+
 // ____________________________________________________________________________
 //
 
@@ -1238,6 +1393,9 @@ boolean CAcquisitionServer::acceptNewConnection(Socket::IConnection* pConnection
 	l_oInfo.m_ui64SignalSampleCountToSkip=0; // not used
 	l_oInfo.m_pConnectionClientHandlerThread=NULL; // not used
 	l_oInfo.m_pConnectionClientHandlerBoostThread=NULL; // not used
+	l_oInfo.m_bChannelLocalisationSent = false;
+	l_oInfo.m_bChannelUnitsSent = false;
+
 	m_vPendingConnection.push_back(pair < Socket::IConnection*, SConnectionInfo > (pConnection, l_oInfo));
 
 	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)

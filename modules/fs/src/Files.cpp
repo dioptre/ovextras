@@ -12,6 +12,7 @@
 
 #include <boost/filesystem.hpp>
 #include <iostream>
+#include <cstring>
 
 using namespace FS;
 using namespace std;

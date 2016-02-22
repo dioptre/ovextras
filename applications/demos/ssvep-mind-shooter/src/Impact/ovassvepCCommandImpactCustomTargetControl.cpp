@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCCommandImpactCustomTargetControl.h"
 #include "ovassvepCImpactApplication.h"
 
@@ -55,3 +58,5 @@ void CCommandImpactCustomTargetControl::execute(int iButton, int iState)
 		l_poImpactApplication->addTarget(3);
 	}
 }
+
+#endif

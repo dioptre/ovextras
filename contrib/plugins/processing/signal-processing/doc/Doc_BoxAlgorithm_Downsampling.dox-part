@@ -10,8 +10,8 @@ __________________________________________________________________
  * This plugin is used to downsample the input signal. First, a
  * low-pass filter is applied to the input signal for anti-aliasing.
  * Then, the input signal is downsampled at the new sampling rate.
- * This plugin allows the selection of the kinf of filter (Butterworth,
- * Chebychev, Yule-Walker), the new sampling rate and the frequency
+ * This plugin allows the selection of the kind of filter (Butterworth
+ * or Chebychev), the new sampling rate and the frequency
  * cutoff for the filter.
  *
  * |OVP_DocEnd_BoxAlgorithm_Downsampling_Description|
@@ -54,7 +54,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_Downsampling_Setting2|
  *
  * |OVP_DocBegin_BoxAlgorithm_Downsampling_Setting3|
- * Select the kind of filter between Butterworth, Chebychev and Yule-Walker.
+ * Select the kind of filter between Butterworth and Chebychev.
  * |OVP_DocEnd_BoxAlgorithm_Downsampling_Setting3|
  *
  * |OVP_DocBegin_BoxAlgorithm_Downsampling_Setting4|

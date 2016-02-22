@@ -4,6 +4,10 @@
 #include <map>
 #include <string>
 
+#ifdef TARGET_OS_Linux
+#include <string.h>	// strcmp, strcpy
+#endif
+
 #include "ebml/IReader.h"
 #include "ebml/IReaderHelper.h"
 
@@ -155,6 +159,12 @@ int main(int argc, char** argv)
 	IReader* l_pReader=createReader(cb);
 
 	FILE* file=fopen(argv[1], "rb");
+	if(!file) 
+	{
+		printf("Unable to open %s\n", argv[1]);
+		return 1;
+	}
+
 	unsigned char buffer[102400];
 	while(!feof(file))
 	{

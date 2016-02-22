@@ -1,9 +1,9 @@
 #include "ovpCBufferDatabase.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
+#include <openvibe/ovITimeArithmetics.h>
 
 #include <algorithm>
-
 #include <cmath>
 #include <cstring>
 
@@ -31,6 +31,8 @@ CBufferDatabase::CBufferDatabase(OpenViBEToolkit::TBoxAlgorithm<Plugins::IBoxAlg
 	,m_ui64BufferDuration(0)
 	,m_ui64TotalStep(0)
 	,m_ui64BufferStep(0)
+	,m_ui64LastBufferEndTime(0)
+	,m_bWarningPrinted(false)
 	,m_pDrawable(NULL)
 	,m_oParentPlugin(oPlugin)
 	,m_bError(false)
@@ -285,6 +287,10 @@ void CBufferDatabase::setMatrixDimensionCount(const uint32 ui32DimensionCount)
 		m_bError = true;
 		m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Caller tried to set a " << ui32DimensionCount << "-dimensional matrix. Only 2-dimensional matrices are supported (e.g. [rows X cols]).\n";
 	}
+	if(ui32DimensionCount == 1)
+	{
+		m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Note: For 1-dimensional matrices, you may try Matrix Transpose box to upgrade the stream to [N X 1] first.\n";
+	}
 }
 
 void CBufferDatabase::setMatrixDimensionSize(const uint32 ui32DimensionIndex, const uint32 ui32DimensionSize)
@@ -318,13 +324,25 @@ void CBufferDatabase::setMatrixDimensionLabel(const uint32 ui32DimensionIndex, c
 	m_pDimensionLabels[ui32DimensionIndex][ui32DimensionEntryIndex] = sDimensionLabel;
 }
 
-void CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTime, uint64 ui64EndTime)
+boolean CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTime, uint64 ui64EndTime)
 {
 	//if an error has occurred, do nothing
 	if(m_bError)
 	{
-		return;
+		return false;
 	}
+
+	// Check for time-continuity
+	if(ui64StartTime < m_ui64LastBufferEndTime && !m_bWarningPrinted) 
+	{
+		m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Your signal does not appear to be continuous in time. "
+			<< "Previously inserted buffer ended at " << ITimeArithmetics::timeToSeconds(m_ui64LastBufferEndTime) 
+			<< "s, the current starts at " << ITimeArithmetics::timeToSeconds(ui64StartTime)
+			<< "s. The display may be incorrect.\n";
+		m_bWarningPrinted = true;
+	}
+	m_ui64LastBufferEndTime = ui64EndTime;
+
 
 	//if this the first buffer, perform some precomputations
 	if(m_bFirstBufferReceived == false)
@@ -337,11 +355,31 @@ void CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTi
 			m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Error : buffer start time and end time are equal : " << ui64StartTime << "\n";
 
 			m_bError = true;
-			return;
+
+			return false;
 		}
 
-		//computes the sampling frequency
-		m_ui32SamplingFrequency = (uint32) ( ((uint64)1<<32) * m_pDimensionSizes[1] / (m_ui64BufferDuration) );
+		//computes the sampling frequency for sanity checking or if the setter has not been called
+		const uint64 l_ui64SampleDuration = ((uint64)1<<32) * m_pDimensionSizes[1];
+		uint32 l_ui32EstimatedFrequency = (uint32) ( l_ui64SampleDuration / m_ui64BufferDuration );
+		if(l_ui32EstimatedFrequency==0)
+		{
+			// Complain if estimate is bad
+			m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "The integer sampling frequency was estimated from the chunk size to be 0"
+				<< " (nSamples " << m_pDimensionSizes[1] << " / bufferLength " << ITimeArithmetics::timeToSeconds(m_ui64BufferDuration) << "s = 0). This is not supported. Forcing the rate to 1. This may lead to problems.\n";
+			l_ui32EstimatedFrequency = 1;
+		}
+		if(m_ui32SamplingFrequency==0) 
+		{
+			// use chunking duration estimate if setter hasn't been used
+			m_ui32SamplingFrequency = l_ui32EstimatedFrequency;
+		}
+		if(m_ui32SamplingFrequency != l_ui32EstimatedFrequency)
+		{
+			m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning
+				<< "Sampling rate [" << l_ui32EstimatedFrequency << "] suggested by chunk properties differs from stream-specified rate [" << m_ui32SamplingFrequency << "]. There may be a problem with an upstream box. Trying to use the estimated rate.\n";
+			m_ui32SamplingFrequency = l_ui32EstimatedFrequency;
+		}
 
 		//computes the number of buffer necessary to display the interval
 		adjustNumberOfDisplayedBuffers(-1);
@@ -353,7 +391,10 @@ void CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTi
 
 	if(m_bChannelLookupTableInitialized == false)
 	{
-		fillChannelLookupTable();
+		fillChannelLookupTable();  //to retrieve the unrecognized electrode warning
+		// The above call will fail if no electrode localisation data...
+		// m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Unable to fill lookup table\n";
+		//	return false;
 	}
 	else
 	{
@@ -368,12 +409,8 @@ void CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTi
 		}
 	}
 
-#ifdef ELAN_VALIDATION
-	return;
-#endif
-
 	float64* l_pBufferToWrite = NULL;
-	uint64 l_ui64NumberOfSamplesPerBuffer = m_pDimensionSizes[0] * m_pDimensionSizes[1];
+	const uint64 l_ui64NumberOfSamplesPerBuffer = m_pDimensionSizes[0] * m_pDimensionSizes[1];
 
 	//if old buffers need to be removed
 	if(m_oSampleBuffers.size() == m_ui64NumberOfBufferToDisplay)
@@ -465,6 +502,20 @@ void CBufferDatabase::setMatrixBuffer(const float64* pBuffer, uint64 ui64StartTi
 	{
 		m_pDrawable->redraw();
 	}
+
+	return true;
+}
+
+boolean CBufferDatabase::setSamplingFrequency(uint32 ui32Frequency)
+{
+	m_ui32SamplingFrequency = ui32Frequency;
+
+	return true;
+}
+
+void CBufferDatabase::getDisplayedChannelLocalMeanValue(uint32 ui32Channel, float64& f64Mean)
+{
+
 }
 
 void CBufferDatabase::getDisplayedChannelLocalMinMaxValue(uint32 ui32Channel, float64& f64Min, float64& f64Max)
@@ -688,14 +739,6 @@ boolean CBufferDatabase::fillChannelLookupTable()
 		return false;
 	}
 
-#ifdef ELAN_VALIDATION
-		setMatrixDimensionSize(0, NB_ELAN_CHANNELS);
-		for(uint32 i=0; i<m_pDimensionSizes[0]; i++)
-		{
-			m_pDimensionLabels[0][i] = m_oChannelLocalisationLabels[i].toASCIIString();	//use elan database
-		}
-#endif
-
 	boolean res = true;
 
 	//resize lookup array and initialize lookup indices to 0
@@ -748,7 +791,7 @@ boolean CBufferDatabase::fillChannelLookupTable()
 		//unrecognized electrode!
 		if(l_bLabelRecognized == false)
 		{
-			m_oParentPlugin.getLogManager() << LogLevel_Trace
+			m_oParentPlugin.getLogManager() << LogLevel_Warning
 				<< "Unrecognized electrode name (index=" << (uint32)i
 				<< ", name=" << m_pDimensionLabels[0][i].c_str()
 				<< ")!\n";

@@ -15,8 +15,6 @@ namespace OpenViBEPlugins
 	{
 
 		CPowerSpectrumDisplay::CPowerSpectrumDisplay() :
-			m_pReader(NULL),
-			m_pSpectrumReaderCallBack(NULL),
 			m_pPowerSpectrumDisplayView(NULL),
 			m_pPowerSpectrumDisplayDatabase(NULL)
 		{
@@ -24,9 +22,7 @@ namespace OpenViBEPlugins
 
 		OpenViBE::boolean CPowerSpectrumDisplay::initialize()
 		{
-			//initializes the ebml input
-			m_pSpectrumReaderCallBack = createBoxAlgorithmSpectrumInputReaderCallback(*this);
-			m_pReader=EBML::createReader(*m_pSpectrumReaderCallBack);
+			m_oSpectrumDecoder.initialize(*this,0);
 
 			m_pPowerSpectrumDisplayDatabase = new CPowerSpectrumDatabase(*this);
 
@@ -55,11 +51,7 @@ namespace OpenViBEPlugins
 
 		OpenViBE::boolean CPowerSpectrumDisplay::uninitialize()
 		{
-			//release the ebml reader
-			releaseBoxAlgorithmSpectrumInputReaderCallback(m_pSpectrumReaderCallBack);
-
-			m_pReader->release();
-			m_pReader=NULL;
+			m_oSpectrumDecoder.uninitialize();
 
 			delete m_pPowerSpectrumDisplayView;
 			delete m_pPowerSpectrumDisplayDatabase;
@@ -79,52 +71,37 @@ namespace OpenViBEPlugins
 
 			for(uint32 i=0; i<l_pDynamicBoxContext->getInputChunkCount(0); i++)
 			{
-				uint64 l_ui64ChunkSize;
-				const uint8* l_pChunkBuffer=NULL;
+				m_oSpectrumDecoder.decode(i);
 
-				if(l_pDynamicBoxContext->getInputChunk(0, i, m_ui64StartTime, m_ui64EndTime, l_ui64ChunkSize, l_pChunkBuffer))
+				if(m_oSpectrumDecoder.isHeaderReceived())
 				{
-					m_pReader->processData(l_pChunkBuffer, l_ui64ChunkSize);
-					l_pDynamicBoxContext->markInputAsDeprecated(0, i);
+					const IMatrix *l_pMatrix = m_oSpectrumDecoder.getOutputMatrix();
+
+					m_pPowerSpectrumDisplayDatabase->setChannelCount(l_pMatrix->getDimensionSize(0));
+					for(uint32 c=0;c<l_pMatrix->getDimensionSize(0);c++)
+					{
+						m_pPowerSpectrumDisplayDatabase->setChannelName(c, l_pMatrix->getDimensionLabel(0,c));
+					}
+
+					const IMatrix *l_pBandMatrix = m_oSpectrumDecoder.getOutputMinMaxFrequencyBands();
+					m_pPowerSpectrumDisplayDatabase->setFrequencyBandCount(l_pMatrix->getDimensionSize(1));
+					for(uint32 c=0;c<l_pMatrix->getDimensionSize(1);c++)
+					{
+						m_pPowerSpectrumDisplayDatabase->setFrequencyBandName(c, l_pMatrix->getDimensionLabel(1,c));
+						m_pPowerSpectrumDisplayDatabase->setFrequencyBandStart(c, l_pBandMatrix->getBuffer()[c*2+0]);
+						m_pPowerSpectrumDisplayDatabase->setFrequencyBandStop(c, l_pBandMatrix->getBuffer()[c*2+1]);
+					}
+				}
+
+				if(m_oSpectrumDecoder.isBufferReceived())
+				{
+					const IMatrix *l_pMatrix = m_oSpectrumDecoder.getOutputMatrix();
+
+					m_pPowerSpectrumDisplayDatabase->setBuffer(l_pMatrix->getBuffer());
 				}
 			}
 
 			return true;
-		}
-
-		void CPowerSpectrumDisplay::setChannelCount(const OpenViBE::uint32 ui32ChannelCount)
-		{
-			m_pPowerSpectrumDisplayDatabase->setChannelCount(ui32ChannelCount);
-		}
-
-		void CPowerSpectrumDisplay::setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName)
-		{
-			m_pPowerSpectrumDisplayDatabase->setChannelName(ui32ChannelIndex, sChannelName);
-		}
-
-		void CPowerSpectrumDisplay::setFrequencyBandCount(const OpenViBE::uint32 ui32FrequencyBandCount)
-		{
-			m_pPowerSpectrumDisplayDatabase->setFrequencyBandCount(ui32FrequencyBandCount);
-		}
-
-		void CPowerSpectrumDisplay::setFrequencyBandName(const OpenViBE::uint32 ui32FrequencyBandIndex, const char* sFrequencyBandName)
-		{
-			m_pPowerSpectrumDisplayDatabase->setFrequencyBandName(ui32FrequencyBandIndex, sFrequencyBandName);
-		}
-
-		void CPowerSpectrumDisplay::setFrequencyBandStart(const OpenViBE::uint32 ui32FrequencyBandIndex, const OpenViBE::float64 f64FrequencyBandStart)
-		{
-			m_pPowerSpectrumDisplayDatabase->setFrequencyBandStart(ui32FrequencyBandIndex, f64FrequencyBandStart);
-		}
-
-		void CPowerSpectrumDisplay::setFrequencyBandStop(const OpenViBE::uint32 ui32FrequencyBandIndex, const OpenViBE::float64 f64FrequencyBandStop)
-		{
-			m_pPowerSpectrumDisplayDatabase->setFrequencyBandStop(ui32FrequencyBandIndex, f64FrequencyBandStop);
-		}
-
-		void CPowerSpectrumDisplay::setBuffer(const OpenViBE::float64* pBuffer)
-		{
-			m_pPowerSpectrumDisplayDatabase->setBuffer(pBuffer);
 		}
 	};
 };

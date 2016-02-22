@@ -23,7 +23,8 @@ namespace OpenViBEAcquisitionServer
 								  OpenViBE::boolean& rTriggerInput,
 								  vector<string> rDevicesSerials,
 								  string& rMasterDeviceIndex,
-								  OpenViBE::boolean& rBipolar
+								  OpenViBE::boolean& rBipolar,
+								  OpenViBE::boolean& rCalibrationSignalEnabled
 								  );
 
 		virtual OpenViBE::boolean preConfigure(void);
@@ -49,6 +50,7 @@ namespace OpenViBEAcquisitionServer
 		vector<OpenViBE::uint32> m_vComboBoxBandPassFilterIndex;
 		vector<OpenViBE::uint32> m_vComboBoxNotchFilterIndex;
 		OpenViBE::boolean& m_rBipolarEnabled;
+		OpenViBE::boolean& m_rCalibrationSignalEnabled;
 		
 	private:
 		::GtkWidget* m_pCalibrateDialog;

@@ -302,6 +302,10 @@ namespace OpenViBEDesigner
 		GtkItemFactory *m_pVisualisationBoxItemFactory, *m_pUndefinedItemFactory, *m_pSplitItemFactory;
 		//strings identifying top, left, right and bottom event boxes
 		std::string m_sTopEventBoxData, m_sLeftEventBoxData, m_sRightEventBoxData, m_sBottomEventBoxData;
+
+		//numbers of boxes that possess modUI
+		OpenViBE::uint32 m_ui32ModifiableSettingsBoxes;
+
 	};
 };
 

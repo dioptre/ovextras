@@ -20,31 +20,12 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkListStore" id="model2">
-    <columns>
-      <!-- column-name gchararray -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">128</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">256</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">512</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">1024</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">2048</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">4096</col>
-      </row>
-    </data>
+  <object class="GtkAdjustment" id="adjustment_sampling_frequency">
+    <property name="value">256</property>
+    <property name="lower">4</property>
+    <property name="upper">4096</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
   </object>
   <object class="GtkDialog" id="openvibe-acquisition-server-settings">
     <property name="border_width">5</property>
@@ -195,15 +176,12 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkComboBox" id="combobox_sampling_frequency">
+                      <object class="GtkSpinButton" id="combobox_sampling_frequency">
                         <property name="visible">True</property>
-                        <property name="model">model2</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="renderer2"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
-                        </child>
+                        <property name="can_focus">True</property>
+                        <property name="adjustment">adjustment_sampling_frequency</property>
+                        <property name="snap_to_ticks">True</property>
+                        <property name="numeric">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>

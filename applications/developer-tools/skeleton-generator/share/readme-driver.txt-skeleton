@@ -27,8 +27,9 @@ You can put this file in here in your local repository:
      [openvibe-repository]/contrib/plugins/server-drivers/[my-device]/share/
 
 Don't forget to declare your driver to the Acquisition Server application.
-This happens in ./contrib/common/contribAcquisitionServer.inl, there you 
-will find examples of such declarations.
+This happens in "./contrib/common/contribAcquisitionServer.inl", there you 
+will find examples of such declarations. You also need to register the source
+files to CMake, modifying the corresponding "contribAcquisitionServer.cmake".
 
 For more information about building a new driver and filling your skeleton, please read the official tutorial:
 http://openvibe.inria.fr/tutorial-creating-a-new-driver-for-the-acquisition-server/

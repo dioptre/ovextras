@@ -16,12 +16,14 @@ boolean CAcquisitionEncoder::initialize(void)
 	ip_pSignalStream.initialize(getInputParameter(OVP_Algorithm_AcquisitionStreamEncoder_InputParameterId_SignalStream));
 	ip_pStimulationStream.initialize(getInputParameter(OVP_Algorithm_AcquisitionStreamEncoder_InputParameterId_StimulationStream));
 	ip_pChannelLocalisationStream.initialize(getInputParameter(OVP_Algorithm_AcquisitionStreamEncoder_InputParameterId_ChannelLocalisationStream));
+	ip_pChannelUnitsStream.initialize(getInputParameter(OVP_Algorithm_AcquisitionStreamEncoder_InputParameterId_ChannelUnitsStream));
 
 	return true;
 }
 
 boolean CAcquisitionEncoder::uninitialize(void)
 {
+	ip_pChannelUnitsStream.uninitialize();	
 	ip_pChannelLocalisationStream.uninitialize();
 	ip_pStimulationStream.uninitialize();
 	ip_pSignalStream.uninitialize();
@@ -53,6 +55,9 @@ boolean CAcquisitionEncoder::processHeader(void)
 	m_pEBMLWriterHelper->openChild(OVTK_NodeId_Acquisition_Header_ChannelLocalisation);
 	 m_pEBMLWriterHelper->setBinaryAsChildData(ip_pChannelLocalisationStream->getDirectPointer(), ip_pChannelLocalisationStream->getSize());
 	m_pEBMLWriterHelper->closeChild();
+	m_pEBMLWriterHelper->openChild(OVTK_NodeId_Acquisition_Header_ChannelUnits);
+	 m_pEBMLWriterHelper->setBinaryAsChildData(ip_pChannelUnitsStream->getDirectPointer(), ip_pChannelUnitsStream->getSize());
+	m_pEBMLWriterHelper->closeChild();
 
 	return true;
 }
@@ -70,6 +75,9 @@ boolean CAcquisitionEncoder::processBuffer(void)
 	m_pEBMLWriterHelper->closeChild();
 	m_pEBMLWriterHelper->openChild(OVTK_NodeId_Acquisition_Buffer_ChannelLocalisation);
 	 m_pEBMLWriterHelper->setBinaryAsChildData(ip_pChannelLocalisationStream->getDirectPointer(), ip_pChannelLocalisationStream->getSize());
+	m_pEBMLWriterHelper->closeChild();
+	m_pEBMLWriterHelper->openChild(OVTK_NodeId_Acquisition_Buffer_ChannelUnits);
+	 m_pEBMLWriterHelper->setBinaryAsChildData(ip_pChannelUnitsStream->getDirectPointer(), ip_pChannelUnitsStream->getSize());
 	m_pEBMLWriterHelper->closeChild();
 
 	return true;

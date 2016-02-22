@@ -1,7 +1,7 @@
 #include "ovd_base.h"
 
-#include <system/Time.h>
-#include <system/CMath.h>
+#include <system/ovCTime.h>
+#include <system/ovCMath.h>
 
 #include <stack>
 #include <vector>
@@ -280,6 +280,7 @@ typedef struct _SConfiguration
 {
 	_SConfiguration(void)
 		:m_eNoGui(CommandLineFlag_None)
+		,m_eNoVisualisation(CommandLineFlag_None)
 		,m_eNoCheckColorDepth(CommandLineFlag_None)
 		,m_eNoManageSession(CommandLineFlag_None)
 	{
@@ -287,15 +288,29 @@ typedef struct _SConfiguration
 
 	OpenViBEDesigner::ECommandLineFlag getFlags(void)
 	{
-		return OpenViBEDesigner::ECommandLineFlag(m_eNoGui|m_eNoCheckColorDepth|m_eNoManageSession);
+		return OpenViBEDesigner::ECommandLineFlag(m_eNoGui|m_eNoCheckColorDepth|m_eNoManageSession|m_eNoVisualisation);
 	}
 
 	std::map < ECommandLineFlag, std::string > m_oFlag;
 	OpenViBEDesigner::ECommandLineFlag m_eNoGui;
+	OpenViBEDesigner::ECommandLineFlag m_eNoVisualisation;
 	OpenViBEDesigner::ECommandLineFlag m_eNoCheckColorDepth;
 	OpenViBEDesigner::ECommandLineFlag m_eNoManageSession;
+	std::map < std::string, std::string > m_oTokenMap;
+
 } SConfiguration;
 
+/* About hide/show flags.
+ * no-gui => hides the designer main window, shows visualisation widgets.
+ * no-visualisation => shows the designer main window, hides display of visualisation widgets.
+ * invisible => hides both designer main window and visualisation widgets.
+ *
+ * About implied option flag.
+ * If the designer main window is not visible the flag no-session-management must be activated to avoid to increase the amount of open scenarios at
+ * each launch.
+ * If the designer main window is not visible, the flag no-check-color-depth can be activated (the color depth has been reported to cause trouble
+ * only in the designer main window).
+ */
 boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 {
 	SConfiguration l_oConfiguration;
@@ -316,7 +331,28 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else if(*it=="-c" || *it=="--config")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_Config] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --config needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_Config] = *it;
+		}
+		else if(*it=="-d" || *it=="--define")
+		{
+			if(*++it=="") {
+				std::cout << "Error: Need two arguments after -d / --define.\n";
+				return false;
+			}
+
+			// Were not using = as a separator for token/value, as on Windows its a problem passing = to the cmd interpreter 
+			// which is used to launch the actual designer exe.
+			const std::string& l_rToken = *it;
+			if(*++it=="") {
+				std::cout << "Error: Need two arguments after -d / --define.\n";
+				return false;
+			}
+
+			const std::string& l_rValue = *it;	// iterator will increment later
+			
+			l_oConfiguration.m_oTokenMap[l_rToken] = l_rValue;
+
 		}
 		else if(*it=="-h" || *it=="--help")
 		{
@@ -324,22 +360,38 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else if(*it=="-k" || *it=="--kernel")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_Kernel] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --kernel needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_Kernel] = *it;
 		}
 		else if(*it=="-o" || *it=="--open")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_Open] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --open needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_Open] = *it;
 		}
 		else if(*it=="-p" || *it=="--play")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_Play] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --play needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_Play] = *it;
 		}
 		else if(*it=="-pf" || *it=="--play-fast")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_PlayFast] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --play-fast needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_PlayFast] = *it;
 		}
 		else if(*it=="--no-gui")
 		{
+			l_oConfiguration.m_eNoGui=CommandLineFlag_NoGui;
+			l_oConfiguration.m_eNoCheckColorDepth=CommandLineFlag_NoCheckColorDepth;
+			l_oConfiguration.m_eNoManageSession=CommandLineFlag_NoManageSession;
+		}
+		else if(*it=="--no-visualisation")
+		{
+			l_oConfiguration.m_eNoVisualisation=CommandLineFlag_NoVisualisation;
+		}
+		else if(*it=="--invisible")
+		{
+			// no-gui + no-visualisation
+			l_oConfiguration.m_eNoVisualisation=CommandLineFlag_NoVisualisation;
 			l_oConfiguration.m_eNoGui=CommandLineFlag_NoGui;
 			l_oConfiguration.m_eNoCheckColorDepth=CommandLineFlag_NoCheckColorDepth;
 			l_oConfiguration.m_eNoManageSession=CommandLineFlag_NoManageSession;
@@ -354,19 +406,13 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		}
 		else if(*it=="--random-seed")
 		{
-			l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed] = *++it;
+			if(*++it=="") { std::cout << "Error: Switch --random-seed needs an argument\n"; return false; }
+			l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed] = *it;
 		}
-//		else if(*it=="--define")
-//		{
-//			l_oConfiguration.m_oFlag.push_back(std::make_pair(Flag_NoGui, *++it));
-//		}
 		else
 		{
-#if 0
-			// Assumes we just open a scenario - this is for retro compatibility and should not be supported in the future
-			l_oConfiguration.m_oFlag.push_back(std::make_pair(CommandLineFlag_Open, *++it));
-#endif
-			return false;
+			// The argument may be relevant to GTK, do not stop here
+			std::cout << "Note: Unknown argument [" << *it << "], passing it on to gtk...\n";
 		}
 	}
 
@@ -386,6 +432,7 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 
 int go(int argc, char ** argv)
 {
+	boolean errorWhileLoadingScenario = false;
 	/*
 		{ 0,     0,     0,     0 },
 		{ 0, 16383, 16383, 16383 },
@@ -400,9 +447,12 @@ int go(int argc, char ** argv)
 		cout << "Syntax : " << argv[0] << " [ switches ]\n";
 		cout << "Possible switches :\n";
 		cout << "  --config filename       : path to config file\n";
+		cout << "  --define token value    : specify configuration token with a given value\n";
 		cout << "  --help                  : displays this help message and exits\n";
 		cout << "  --kernel filename       : path to openvibe kernel library\n";
-		cout << "  --no-gui                : hides the designer graphical user interface (assumes --no-check-color-depth)\n";
+		cout << "  --no-gui                : hides the designer graphical user interface (assumes --no-check-color-depth and --no-session-management)\n";
+		cout << "  --no-visualisation      : hides the visualisation widgets\n";
+		cout << "  --invisible             : hides the designer and the visualisation widgets (assumes --no-check-color-depth and --no-session-management)\n";
 		cout << "  --no-check-color-depth  : does not check 24/32 bits color depth\n";
 		cout << "  --no-session-management : neither restore last used scenarios nor saves them at exit\n";
 		cout << "  --open filename         : opens a scenario (see also --no-session-management)\n";
@@ -449,6 +499,7 @@ int go(int argc, char ** argv)
 //                                                                   //
 
 	CKernelLoader l_oKernelLoader;
+
 
 	cout<<"[  INF  ] Created kernel loader, trying to load kernel module"<<"\n";
 	CString l_sError;
@@ -500,6 +551,15 @@ int go(int argc, char ** argv)
 
 				l_pKernelContext->getPluginManager().addPluginsFromFiles(l_rConfigurationManager.expand("${Kernel_Plugins}"));
 
+				std::map<std::string, std::string>::const_iterator itr;
+				for(itr=l_oConfiguration.m_oTokenMap.begin();
+					itr!=l_oConfiguration.m_oTokenMap.end();
+					itr++)
+				{
+					l_rLogManager << LogLevel_Trace << "Adding command line configuration token [" << (*itr).first.c_str() << " = " << (*itr).second.c_str() << "]\n";
+					l_rConfigurationManager.addOrReplaceConfigurationToken((*itr).first.c_str(), (*itr).second.c_str());
+				}
+
 				//FIXME : set locale only when needed
 				CString l_sLocale = l_rConfigurationManager.expand("${Designer_Locale}");
 				if(l_sLocale == CString(""))
@@ -509,10 +569,28 @@ int go(int argc, char ** argv)
 				setlocale( LC_ALL, l_sLocale.toASCIIString() );
 
 				//initialise Gtk before 3D context
-				gtk_init(&argc, &argv);
+				if(!gtk_init_check(&argc, &argv))
+				{
+					l_rLogManager << LogLevel_Error << "Unable to initialize GTK. Possibly the display could not be opened. Exiting.\n";
+				
+					OpenViBEToolkit::uninitialize(*l_pKernelContext);
+					l_pKernelDesc->releaseKernel(l_pKernelContext);
+
+					l_oKernelLoader.uninitialize();
+					l_oKernelLoader.unload();
+
+					return -2;
+				}
 				// gtk_rc_parse(OpenViBE::Directories::getDataDir() + "/applications/designer/interface.gtkrc");
 
-
+#ifdef TARGET_OS_Linux
+				// Replace the gtk signal handlers with the default ones. As a result, 
+				// the following exits on terminating signals won't be graceful, 
+				// but its better than not exiting at all (gtk default on Linux apparently)
+				signal(SIGHUP, SIG_DFL);
+				signal(SIGINT, SIG_DFL);
+				signal(SIGQUIT, SIG_DFL);
+#endif
 				if(l_rConfigurationManager.expandAsBoolean("${Kernel_3DVisualisationEnabled}"))
 				{
 					l_pKernelContext->getVisualisationManager().initialize3DContext();
@@ -520,7 +598,8 @@ int go(int argc, char ** argv)
 
 				if(l_oConfiguration.m_oFlag.count(CommandLineFlag_RandomSeed)) 
 				{
-					System::Math::initializeRandomMachine(atol(l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed].c_str()));
+					const int32 l_i32Seed = atol(l_oConfiguration.m_oFlag[CommandLineFlag_RandomSeed].c_str());
+					System::Math::initializeRandomMachine(static_cast<const uint32>(l_i32Seed));
 				} 
 				else
 				{
@@ -530,7 +609,6 @@ int go(int argc, char ** argv)
 				{
 					::CApplication app(*l_pKernelContext);
 					app.initialize(l_oConfiguration.getFlags());
-
 					// FIXME is it necessary to keep next line uncomment ?
 					//boolean l_bIsScreenValid=true;
 					if(!l_oConfiguration.m_eNoCheckColorDepth)
@@ -553,10 +631,10 @@ int go(int argc, char ** argv)
 							}
 						}
 					}
-
 					std::map < ECommandLineFlag, std::string >::iterator it;
 					for(it=l_oConfiguration.m_oFlag.begin(); it!=l_oConfiguration.m_oFlag.end(); it++)
 					{
+
 						switch(it->first)
 						{
 							case CommandLineFlag_Open:
@@ -567,14 +645,20 @@ int go(int argc, char ** argv)
 								l_rLogManager << LogLevel_Info << "Opening and playing scenario [" << CString(it->second.c_str()) << "]\n";
 								if(app.openScenario(it->second.c_str()))
 								{
-									app.playScenarioCB();
+									if(!app.playScenarioCB())
+									{
+										errorWhileLoadingScenario = true;
+									}
 								}
 								break;
 							case CommandLineFlag_PlayFast:
 								l_rLogManager << LogLevel_Info << "Opening and fast playing scenario [" << CString(it->second.c_str()) << "]\n";
 								if(app.openScenario(it->second.c_str()))
 								{
-									app.forwardScenarioCB();
+									if(!app.forwardScenarioCB())
+									{
+										errorWhileLoadingScenario = true;
+									}
 								}
 								break;
 //								case CommandLineFlag_Define:
@@ -583,7 +667,6 @@ int go(int argc, char ** argv)
 								break;
 						}
 					}
-
 					if(app.m_vInterfacedScenario.empty())
 					{
 						app.newScenarioCB();
@@ -621,6 +704,10 @@ int go(int argc, char ** argv)
 		}
 		l_oKernelLoader.uninitialize();
 		l_oKernelLoader.unload();
+	}
+	if(errorWhileLoadingScenario && l_oConfiguration.m_eNoGui == CommandLineFlag_NoGui)
+	{
+		return -1;
 	}
 
 	return 0;

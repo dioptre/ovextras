@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCCommandCamera.h"
 #include "ovassvepCApplication.h"
 #include "ovassvepCVRPNServer.h"
@@ -169,3 +172,5 @@ void CCommandCamera::receiveMouseEvent(const OIS::MouseEvent &arg)
 	}
 
 }
+
+#endif

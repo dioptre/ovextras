@@ -65,10 +65,23 @@ boolean CBoxAlgorithmRunCommand::process(void)
 					std::vector < CString >::const_iterator itCommand=l_rCommand.begin();
 					while(itCommand!=l_rCommand.end())
 					{
-						this->getLogManager() << LogLevel_Debug << "Running command [" << *itCommand << "]\n";
-						if(::system(itCommand->toASCIIString())<0)
+						CString l_sCommand = *itCommand;
+#if defined(WIN32)
+						// On Windows, we pad the call with quotes. This addresses the situation where both the
+						// command and some of its arguments have spaces, e.g. the call being like
+						//
+						// "C:\Program Files\blah.exe" --something "C:\Program Files\duh.dat"
+						//
+						// Without padding the whole line with quotes, it doesn't seem work. 
+						l_sCommand = CString("\"") + l_sCommand + CString ("\"");
+#else
+						// On other platforms, we pass the call as-is. We cannot pad the call in the scenario as the
+						// Linux shell - on the other hand - doesn't like calls like ""blah blah" "blah""
+#endif
+						this->getLogManager() << LogLevel_Debug << "Running command [" << l_sCommand << "]\n";
+						if(::system(l_sCommand.toASCIIString())<0)
 						{
-							this->getLogManager() << LogLevel_Warning << "Could not run command " << *itCommand << "\n";
+							this->getLogManager() << LogLevel_Warning << "Could not run command " << l_sCommand << "\n";
 						}
 						itCommand++;
 					}

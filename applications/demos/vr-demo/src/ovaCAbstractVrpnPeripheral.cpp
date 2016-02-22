@@ -45,6 +45,7 @@ namespace
 
 CAbstractVrpnPeripheral::CAbstractVrpnPeripheral(void)
 {
+	m_pDevice = NULL;
 	m_dAnalogScale=1;
 	m_dAnalogOffset=0;
 	m_sDeviceAddress = "openvibe-vrpn@localhost";
@@ -52,6 +53,7 @@ CAbstractVrpnPeripheral::CAbstractVrpnPeripheral(void)
 
 CAbstractVrpnPeripheral::CAbstractVrpnPeripheral(const std::string serverName)
 {
+	m_pDevice = NULL;
 	m_dAnalogScale=1;
 	m_dAnalogOffset=0;
 	m_sDeviceAddress = serverName;
@@ -59,6 +61,13 @@ CAbstractVrpnPeripheral::CAbstractVrpnPeripheral(const std::string serverName)
 
 CAbstractVrpnPeripheral::~CAbstractVrpnPeripheral(void)
 {
+	if(m_pDevice)
+	{
+		delete m_pDevice->m_pAnalog;
+		delete m_pDevice->m_pButton;
+		delete m_pDevice;
+		m_pDevice = NULL;
+	}
 }
 
 void CAbstractVrpnPeripheral::init(void)

@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 /************************************************************************/
 /* This file is part of openMask(c) INRIA, CNRS, Universite de Rennes 1 */
 /* 1993-2002, thereinafter the Software                                 */
@@ -438,3 +441,5 @@ Ogre::String IUpdateMaterial::getUniqueMaterialName( const Ogre::String& name )
 }
 //-----------------------------------------------------------------------------
 
+
+#endif

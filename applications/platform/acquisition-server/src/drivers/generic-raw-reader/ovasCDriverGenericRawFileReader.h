@@ -12,6 +12,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverGenericRawFileReader
+	 * \author Yann Renard (INRIA)
+	 */
 	class CDriverGenericRawFileReader : public OpenViBEAcquisitionServer::CDriverGenericRawReader
 	{
 	public:

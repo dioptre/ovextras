@@ -37,21 +37,27 @@ namespace OpenViBEAcquisitionServer
 			virtual OpenViBE::boolean isSubjectAgeSet(void) const;
 			virtual OpenViBE::boolean isSubjectGenderSet(void) const;
 
+			virtual OpenViBE::boolean setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested);
+			virtual OpenViBE::boolean isImpedanceCheckRequested(void) const;
+
 			// Chanel information
 			virtual OpenViBE::boolean setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
 			virtual OpenViBE::boolean setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
 			virtual OpenViBE::boolean setChannelGain(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::float32 f32ChannelGain);
+			virtual OpenViBE::boolean setChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::uint32 ui32ChannelUnit, const OpenViBE::uint32 ui32ChannelFactor);
 			// virtual OpenViBE::boolean setChannelLocation(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::float32 ui32ChannelLocationX, const OpenViBE::float32 ui32ChannelLocationY, const OpenViBE::float32 ui32ChannelLocationZ);
 
 			virtual OpenViBE::uint32 getChannelCount(void) const;
 			virtual const char* getChannelName(const OpenViBE::uint32 ui32ChannelIndex) const;
 			virtual OpenViBE::float32 getChannelGain(const OpenViBE::uint32 ui32ChannelIndex) const;
+			virtual OpenViBE::boolean getChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, OpenViBE::uint32& ui32ChannelUnit, OpenViBE::uint32& ui32ChannelFactor) const;
 			// virtual getChannelLocation(const OpenViBE::uint32 ui32ChannelIndex) const;
 
 			virtual OpenViBE::boolean isChannelCountSet(void) const;
 			virtual OpenViBE::boolean isChannelNameSet(void) const;
 			virtual OpenViBE::boolean isChannelGainSet(void) const;
 			// virtual OpenViBE::boolean isChannelLocationSet(void) const;
+			virtual OpenViBE::boolean isChannelUnitSet(void) const;
 
 			// Samples information
 			virtual OpenViBE::boolean setSamplingFrequency(const OpenViBE::uint32 ui32SamplingFrequency);
@@ -71,9 +77,13 @@ namespace OpenViBEAcquisitionServer
 			OpenViBE::uint32 m_ui32ChannelCount;
 			std::map<OpenViBE::uint32, std::string> m_vChannelName;
 			std::map<OpenViBE::uint32, OpenViBE::float32> m_vChannelGain;
+			std::map<OpenViBE::uint32, std::pair<uint32, uint32> > m_vChannelUnits;
 
 			// Samples information
 			OpenViBE::uint32 m_ui32SamplingFrequency;
+
+			// Impedance check
+			OpenViBE::boolean m_bIsImpedanceCheckRequested;
 		};
 	};
 };
@@ -87,6 +97,7 @@ CHeaderImpl::CHeaderImpl(void)
 	,m_ui32SubjectGender(OVTK_Value_Gender_NotSpecified)
 	,m_ui32ChannelCount(_NoValueI_)
 	,m_ui32SamplingFrequency(_NoValueI_)
+	,m_bIsImpedanceCheckRequested(false)
 {
 }
 
@@ -102,7 +113,9 @@ void CHeaderImpl::reset(void)
 	m_ui32ChannelCount=_NoValueI_;
 	m_vChannelName.clear();
 	m_vChannelGain.clear();
+	m_vChannelUnits.clear();
 	m_ui32SamplingFrequency=_NoValueI_;
+	m_bIsImpedanceCheckRequested=false;
 }
 
 //___________________________________________________________________//
@@ -140,6 +153,17 @@ uint32 CHeaderImpl::getSubjectAge(void) const
 uint32 CHeaderImpl::getSubjectGender(void) const
 {
 	return m_ui32SubjectGender;
+}
+
+boolean CHeaderImpl::setImpedanceCheckRequested(const boolean bImpedanceCheckRequested)
+{
+	m_bIsImpedanceCheckRequested = bImpedanceCheckRequested;
+	return true;
+}
+
+boolean CHeaderImpl::isImpedanceCheckRequested(void) const
+{
+	return m_bIsImpedanceCheckRequested;
 }
 
 boolean CHeaderImpl::isExperimentIdentifierSet(void) const
@@ -182,6 +206,12 @@ boolean CHeaderImpl::setChannelGain(const uint32 ui32ChannelIndex, const float32
 	return ui32ChannelIndex<m_ui32ChannelCount;
 }
 
+boolean CHeaderImpl::setChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::uint32 ui32ChannelUnit, const OpenViBE::uint32 ui32ChannelFactor) 
+{
+	m_vChannelUnits[ui32ChannelIndex]=std::pair<OpenViBE::uint32,OpenViBE::uint32>(ui32ChannelUnit,ui32ChannelFactor);
+	return ui32ChannelIndex<m_ui32ChannelCount;
+}
+
 // boolean CHeaderImpl::setChannelLocation(const uint32 ui32ChannelIndex, const float32 ui32ChannelLocationX, const float32 ui32ChannelLocationY, const float32 ui32ChannelLocationZ);
 
 uint32 CHeaderImpl::getChannelCount(void) const
@@ -209,6 +239,24 @@ float32 CHeaderImpl::getChannelGain(const uint32 ui32ChannelIndex) const
 	return i->second;
 }
 
+boolean CHeaderImpl::getChannelUnits(const uint32 ui32ChannelIndex, uint32& ui32ChannelUnit, uint32& ui32ChannelFactor) const
+{
+	map<uint32, std::pair<uint32,uint32> >::const_iterator i=m_vChannelUnits.find(ui32ChannelIndex);
+	if(i==m_vChannelUnits.end())
+	{
+		ui32ChannelUnit = OVTK_UNIT_Unspecified;
+		ui32ChannelFactor = OVTK_FACTOR_Base;
+
+		return false;
+	}
+
+	ui32ChannelUnit = (i->second).first;
+	ui32ChannelFactor = (i->second).second;
+
+	return true;
+}
+
+
 // CHeaderImpl::getChannelLocation(const uint32 ui32ChannelIndex) const;
 
 boolean CHeaderImpl::isChannelCountSet(void) const
@@ -227,6 +275,12 @@ boolean CHeaderImpl::isChannelGainSet(void) const
 }
 
 // boolean CHeaderImpl::isChannelLocationSet(void) const
+
+boolean CHeaderImpl::isChannelUnitSet(void) const
+{
+	return m_vChannelUnits.size() > 0;
+}
+
 
 //___________________________________________________________________//
 //                                                                   //
@@ -319,6 +373,19 @@ boolean CHeader::isSubjectGenderSet(void) const
 //___________________________________________________________________//
 //                                                                   //
 
+boolean CHeader::setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested)
+{
+	return m_pHeaderImpl->setImpedanceCheckRequested(bImpedanceCheckRequested);
+}
+
+boolean CHeader::isImpedanceCheckRequested(void) const
+{
+	return m_pHeaderImpl->isImpedanceCheckRequested();
+}
+
+//___________________________________________________________________//
+//                                                                   //
+
 // Chanel information
 
 boolean CHeader::setChannelCount(const uint32 ui32ChannelCount)
@@ -336,6 +403,11 @@ boolean CHeader::setChannelGain(const uint32 ui32ChannelIndex, const float32 f32
 	return m_pHeaderImpl->setChannelGain(ui32ChannelIndex, f32ChannelGain);
 }
 
+boolean CHeader::setChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::uint32 ui32ChannelUnit, const OpenViBE::uint32 ui32ChannelFactor)
+{
+	return m_pHeaderImpl->setChannelUnits(ui32ChannelIndex, ui32ChannelUnit, ui32ChannelFactor);
+}
+
 // boolean CHeader::setChannelLocation(const uint32 ui32ChannelIndex, const float32 ui32ChannelLocationX, const float32 ui32ChannelLocationY, const float32 ui32ChannelLocationZ);
 
 uint32 CHeader::getChannelCount(void) const
@@ -351,6 +423,11 @@ const char* CHeader::getChannelName(const uint32 ui32ChannelIndex) const
 float32 CHeader::getChannelGain(const uint32 ui32ChannelIndex) const
 {
 	return m_pHeaderImpl->getChannelGain(ui32ChannelIndex);
+}
+
+boolean CHeader::getChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, OpenViBE::uint32& ui32ChannelUnit, OpenViBE::uint32& ui32ChannelFactor) const
+{
+	return m_pHeaderImpl->getChannelUnits(ui32ChannelIndex, ui32ChannelUnit, ui32ChannelFactor);
 }
 
 // CHeader::getChannelLocation(const uint32 ui32ChannelIndex) const;
@@ -371,6 +448,12 @@ boolean CHeader::isChannelGainSet(void) const
 }
 
 // boolean CHeader::isChannelLocationSet(void) const
+
+boolean CHeader::isChannelUnitSet(void) const
+{
+	return m_pHeaderImpl->isChannelUnitSet();
+}
+
 
 //___________________________________________________________________//
 //                                                                   //

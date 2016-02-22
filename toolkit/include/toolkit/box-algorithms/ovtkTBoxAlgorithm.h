@@ -145,7 +145,7 @@ namespace OpenViBEToolkit
 					OpenViBE::uint64 l_ui64StimId=m_rTypeManager.getEnumerationEntryValueFromName(m_oSettingType, m_sSettingValue);
 					if(l_ui64StimId==0xffffffffffffffffll)
 					{
-						m_rLogManager << OpenViBE::Kernel::LogLevel_ImportantWarning << "Did not find an enumeration value for [" << m_rTypeManager.getTypeName(m_oSettingType) << ":" << m_sSettingValue << "]\n";
+						m_rLogManager << OpenViBE::Kernel::LogLevel_ImportantWarning << "Did not find an enumeration value for [" << m_rTypeManager.getTypeName(m_oSettingType) << "] =  [" << m_sSettingValue << "]\n";
 					}
 					return l_ui64StimId;
 				}
@@ -158,6 +158,14 @@ namespace OpenViBEToolkit
 			operator OpenViBE::float64 (void)
 			{
 				return m_rConfigurationManager.expandAsFloat(m_sSettingValue);
+			}
+			operator OpenViBE::uint32 (void)
+			{
+				return static_cast<OpenViBE::uint32>(FSettingValueAutoCast::operator OpenViBE::uint64());
+			}
+			operator OpenViBE::int32 (void)
+			{
+				return static_cast<OpenViBE::int32>(FSettingValueAutoCast::operator OpenViBE::int64());
 			}
 			operator OpenViBE::boolean (void)
 			{
@@ -226,7 +234,8 @@ namespace OpenViBEToolkit
 			OpenViBE::Kernel::IBoxListenerContext& rBoxListenerContext,
 			const OpenViBE::Kernel::EBoxModification eBoxModificationType)
 		{
-			CScopedBoxListener l_oScopedBoxListener(m_pBoxListenerContext, &rBoxListenerContext);
+			//CScopedBoxListener l_oScopedBoxListener(m_pBoxListenerContext, &rBoxListenerContext);
+			m_pBoxListenerContext = &rBoxListenerContext;
 			switch(eBoxModificationType)
 			{
 				case OpenViBE::Kernel::BoxModification_Initialized: return this->onInitialized(m_pBoxListenerContext->getBox());

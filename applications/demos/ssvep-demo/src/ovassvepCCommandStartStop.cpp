@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3D)
+
 #include "ovassvepCCommandStartStop.h"
 #include "ovassvepCApplication.h"
 #include "ovassvepCVRPNServer.h"
@@ -47,3 +50,5 @@ void CCommandStartStop::receiveKeyReleasedEvent( const OIS::KeyCode oKey )
 		m_poVRPNServer->changeButtonState("SSVEP_VRPN_StartStop", 0, 0);
 	}	
 }
+
+#endif

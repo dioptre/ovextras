@@ -29,7 +29,7 @@ function initialize(box)
 
 	box:log("Info", string.format("Number of goals in sequence: [%d]", number_of_cycles))
 
-	cfg_file = io.open(box:get_config("${__volatile_ScenarioDir}/configuration/stimulation-based-epoching.cfg"), "w")
+	cfg_file = io.open(box:get_config("${Player_ScenarioDirectory}/configuration/stimulation-based-epoching.cfg"), "w")
 
 	cfg_file:write("<OpenViBE-SettingsOverride>\n")
 	cfg_file:write("	<SettingValue>", stimulation_duration, "</SettingValue>\n")

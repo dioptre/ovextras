@@ -464,7 +464,7 @@ void CBoxAlgorithmSkeletonGenerator::buttonCheckCB(void)
 
 void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 {
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Generating files... \n";
+	m_rKernelContext.getLogManager() << LogLevel_Info << "Generating files, please wait ... \n";
 	CString l_sLogMessages = "Generating files...\n";
 	::GtkWidget * l_pTooltipTextview = GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "sg-box-tooltips-textview"));
 	::GtkTextBuffer * l_pTextBuffer  = gtk_text_view_get_buffer(GTK_TEXT_VIEW(l_pTooltipTextview));
@@ -631,8 +631,11 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 	l_mSubstitutions[CString("@@ProcessInputComment@@")] = (m_bProcessInput ? "" : "//");
 	l_mSubstitutions[CString("@@ProcessMessageComment@@")] = (m_bProcessMessage ? "" : "//");
 	l_mSubstitutions[CString("@@ProcessClockCommentIn@@")] = (m_bProcessClock ? "" : "/*");
+	l_mSubstitutions[CString("@@ProcessClockCommentOut@@")] = (m_bProcessClock ? "" : "*/");
 	l_mSubstitutions[CString("@@ProcessInputCommentIn@@")] = (m_bProcessInput ? "" : "/*");
+	l_mSubstitutions[CString("@@ProcessInputCommentOut@@")] = (m_bProcessInput ? "" : "*/");
 	l_mSubstitutions[CString("@@ProcessMessageCommentIn@@")] = (m_bProcessMessage ? "" : "/*");
+	l_mSubstitutions[CString("@@ProcessMessageCommentOut@@")] = (m_bProcessMessage ? "" : "*/");
 	stringstream ss; ss << m_ui32ClockFrequency << "LL<<32";
 	l_mSubstitutions[CString("@@ClockFrequency@@")] = ss.str().c_str();
 	
@@ -648,17 +651,24 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 			-1);
 		l_bSuccess = false;
 	}
+
+	CString l_sPattern;
+	CString l_sSubstitute;
+
 	//--------------------------------------------------------------------------------------
 	//Inputs
 	//--------------------------------------------------------------------------------------
-	CString l_sCommandSed = "s/@@Inputs@@/";
-	if(m_vInputs.empty()) l_sCommandSed = l_sCommandSed + "\\/\\/No input specified.To add inputs use :\\n\\/\\/rBoxAlgorithmPrototype.addInput(\\\"Input Name\\\",OV_TypeId_XXXX);\\n";
+
+	l_sPattern = "@@Inputs@@";
+	l_sSubstitute = "";
+
+	if(m_vInputs.empty()) l_sSubstitute = l_sSubstitute + "\\/\\/No input specified.To add inputs use :\\n\\/\\/rBoxAlgorithmPrototype.addInput(\\\"Input Name\\\",OV_TypeId_XXXX);\\n";
 	for(vector<IOSStruct>::iterator it = m_vInputs.begin(); it != m_vInputs.end(); it++)
 	{
 		if(it != m_vInputs.begin()) 
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t\\t";
+			l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\t";
 		//add the CIdentifier corresponding to type
-		//l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addInput(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+");\\n";
+		//l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addInput(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+");\\n";
 		//reconstruct the type_id
 		string l_sTypeName((const char *)(*it)._type);
 		for(uint32 s=0; s<l_sTypeName.length(); s++)
@@ -669,22 +679,22 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 				if(l_sTypeName[s] >= 'a' && l_sTypeName[s]<= 'z') l_sTypeName.replace(s,1,1,(char)(l_sTypeName[s]+'A'-'a'));
 			}
 		}
-		l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addInput(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+");\\n";
+		l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addInput(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+");\\n";
 	}
-	l_sCommandSed = l_sCommandSed +  "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//--------------------------------------------------------------------------------------
 	//Outputs
 	//--------------------------------------------------------------------------------------
-	l_sCommandSed = " s/@@Outputs@@/";
-	if(m_vOutputs.empty()) l_sCommandSed = l_sCommandSed + "\\/\\/No output specified.To add outputs use :\\n\\/\\/rBoxAlgorithmPrototype.addOutput(\\\"Output Name\\\",OV_TypeId_XXXX);\\n";
+	l_sPattern = "@@Outputs@@";
+	l_sSubstitute = "";
+	if(m_vOutputs.empty()) l_sSubstitute = l_sSubstitute + "\\/\\/No output specified.To add outputs use :\\n\\/\\/rBoxAlgorithmPrototype.addOutput(\\\"Output Name\\\",OV_TypeId_XXXX);\\n";
 	for(vector<IOSStruct>::iterator it = m_vOutputs.begin(); it != m_vOutputs.end(); it++)
 	{
 		if(it != m_vOutputs.begin()) 
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t\\t";
+			l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\t";
 		//add the CIdentifier corresponding to type
-		//l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addOutput(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+");\\n";
+		//l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addOutput(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+");\\n";
 		//reconstruct the type_id
 		string l_sTypeName((const char *)(*it)._type);
 		for(uint32 s=0; s<l_sTypeName.length(); s++)
@@ -695,50 +705,52 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 				if(l_sTypeName[s] >= 'a' && l_sTypeName[s]<= 'z') l_sTypeName.replace(s,1,1,(char)(l_sTypeName[s]+'A'-'a'));
 			}
 		}
-		l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addOutput(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+");\\n";
+		l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addOutput(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+");\\n";
 	}
-	l_sCommandSed = l_sCommandSed +  "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//--------------------------------------------------------------------------------------
 	//Message Inputs
 	//--------------------------------------------------------------------------------------
-	l_sCommandSed = "s/@@MessageInputs@@/";
-	if(m_vMessageInputs.empty()) l_sCommandSed = l_sCommandSed + "\\/\\/No Message input specified.To add Message inputs use :\\n\\/\\/rBoxAlgorithmPrototype.addMessageInput(\\\"Input Name\\\");\\n";
+	l_sPattern = "@@MessageInputs@@";
+	l_sSubstitute = "";
+	if(m_vMessageInputs.empty()) l_sSubstitute = l_sSubstitute + "\\/\\/No Message input specified.To add Message inputs use :\\n\\/\\/rBoxAlgorithmPrototype.addMessageInput(\\\"Input Name\\\");\\n";
 	for(vector<IOSStruct>::iterator it = m_vMessageInputs.begin(); it != m_vMessageInputs.end(); it++)
 	{
 		if(it != m_vMessageInputs.begin())
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t\\t";
-		l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addMessageInput(\\\""+(*it)._name+"\\\");\\n";
+			l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\t";
+		l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addMessageInput(\\\""+(*it)._name+"\\\");\\n";
 	}
-	l_sCommandSed = l_sCommandSed +  "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//--------------------------------------------------------------------------------------
 	//Message Outputs
 	//--------------------------------------------------------------------------------------
-	l_sCommandSed = " s/@@MessageOutputs@@/";
-	if(m_vMessageOutputs.empty()) l_sCommandSed = l_sCommandSed + "\\/\\/No Message output specified.To add Message outputs use :\\n\\/\\/rBoxAlgorithmPrototype.addMessageOutput(\\\"Output Name\\\");\\n";
+	l_sPattern = "@@MessageOutputs@@";
+	l_sSubstitute = "";
+
+	if(m_vMessageOutputs.empty()) l_sSubstitute = l_sSubstitute + "\\/\\/No Message output specified.To add Message outputs use :\\n\\/\\/rBoxAlgorithmPrototype.addMessageOutput(\\\"Output Name\\\");\\n";
 	for(vector<IOSStruct>::iterator it = m_vMessageOutputs.begin(); it != m_vMessageOutputs.end(); it++)
 	{
 		if(it != m_vMessageOutputs.begin())
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t\\t";
-		l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addMessageOutput(\\\""+(*it)._name+"\\\");\\n";
+			l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\t";
+		l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addMessageOutput(\\\""+(*it)._name+"\\\");\\n";
 	}
-	l_sCommandSed = l_sCommandSed +  "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//--------------------------------------------------------------------------------------
 	//Settings
 	//--------------------------------------------------------------------------------------
-	l_sCommandSed = "s/@@Settings@@/";
-	if(m_vSettings.empty()) l_sCommandSed = l_sCommandSed + "\\/\\/No setting specified.To add settings use :\\n\\/\\/rBoxAlgorithmPrototype.addSetting(\\\"Setting Name\\\",OV_TypeId_XXXX,\\\"default value\\\");\\n";
+	l_sPattern = "@@Settings@@";
+	l_sSubstitute = "";
+
+	if(m_vSettings.empty()) l_sSubstitute = l_sSubstitute + "\\/\\/No setting specified.To add settings use :\\n\\/\\/rBoxAlgorithmPrototype.addSetting(\\\"Setting Name\\\",OV_TypeId_XXXX,\\\"default value\\\");\\n";
 	for(vector<IOSStruct>::iterator it = m_vSettings.begin(); it != m_vSettings.end(); it++)
 	{
 		if(it != m_vSettings.begin()) 
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t\\t";
+			l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\t";
 		//add the CIdentifier corresponding to type
-		//l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addSetting(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+",\\\""+(*it)._defaultValue+"\\\");\\n";
+		//l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addSetting(\\\""+(*it)._name+"\\\", OpenViBE::Cidentifier"+(*it)._typeId+",\\\""+(*it)._defaultValue+"\\\");\\n";
 		//reconstruct the type_id by erasing the spaces and upcasing the following letter
 		string l_sTypeName((const char *)(*it)._type);
 		for(uint32 s=0; s<l_sTypeName.length(); s++)
@@ -749,44 +761,79 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 				if(l_sTypeName[s] >= 'a' && l_sTypeName[s]<= 'z') l_sTypeName.replace(s,1,1,(char)(l_sTypeName[s]+'A'-'a'));
 			}
 		}
-		l_sCommandSed = l_sCommandSed + "rBoxAlgorithmPrototype.addSetting(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+",\\\""+(*it)._defaultValue+"\\\");\\n";
+		l_sSubstitute = l_sSubstitute + "rBoxAlgorithmPrototype.addSetting(\\\""+(*it)._name+"\\\",OV_TypeId_"+CString(l_sTypeName.c_str())+",\\\""+(*it)._defaultValue+"\\\");\\n";
 	}
-	l_sCommandSed = l_sCommandSed +  "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//--------------------------------------------------------------------------------------
 	//Codecs algorithms
 	//--------------------------------------------------------------------------------------
-	l_sCommandSed = "s/@@Algorithms@@/";
-	if(m_vAlgorithms.size() == 0)
+	l_sPattern = "@@Algorithms@@";
+	l_sSubstitute = "";
+
+	if(m_vInputs.size() == 0)
 	{
-		l_sCommandSed = l_sCommandSed + "\\/\\/ No codec algorithms were specified in the skeleton-generator.\\n";
+		l_sSubstitute = l_sSubstitute + "\\/\\/ No Input decoder.\\n";
 	}
 	else
 	{
-		l_sCommandSed = l_sCommandSed + "\\/\\/ Codec algorithms specified in the skeleton-generator:\\n";
+		l_sSubstitute = l_sSubstitute + "\\/\\/ Input decoder:\\n";
 	}
-	for(uint32 a=0; a<m_vAlgorithms.size(); a++)
+	int index = 0;
+	for(vector<IOSStruct>::iterator it = m_vInputs.begin() ; it != m_vInputs.end(); it++)
 	{
-		/*if(a != 0) 
-			l_sCommandSed = l_sCommandSed + "\\t\\t\\t";
-*/
-		string l_sBlock = string((const char *)m_mAlgorithmHeaderDeclaration[m_vAlgorithms[a]]);
-		stringstream ss; ss << "Algo" << a << "_";
-		string l_sUniqueMarker = ss.str();
-		for(uint32 s=0; s<l_sBlock.length(); s++)
+		l_sSubstitute = l_sSubstitute + "\\t\\t\\t";
+		string l_sTypeName((const char *)(*it)._type);
+		//The stream type is Stimulations but the decoder is tStimulationDecoder
+		if( l_sTypeName == "Stimulations")
 		{
-			if(l_sBlock[s]=='@')
+			l_sTypeName = "Stimulation";
+		}
+		for(uint32 s=0; s<l_sTypeName.length(); s++)
+		{
+			if(l_sTypeName[s]==' ')
 			{
-				l_sBlock.erase(s,1);
-				l_sBlock.insert(s,l_sUniqueMarker);
+				l_sTypeName.erase(s,1);
+				if(l_sTypeName[s] >= 'a' && l_sTypeName[s]<= 'z') l_sTypeName.replace(s,1,1,(char)(l_sTypeName[s]+'A'-'a'));
 			}
 		}
-		l_sCommandSed = l_sCommandSed + CString(l_sBlock.c_str());
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+		l_sSubstitute = l_sSubstitute + "OpenViBEToolkit::T" + CString(l_sTypeName.c_str()) +"Decoder < CBoxAlgorithm"+m_sClassName+" > m_oInput"+ CString(l_sIndex.str().c_str()) + "Decoder;\\n";
+		++index;
 	}
-		
-	l_sCommandSed = l_sCommandSed + "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	index = 0;
+	if(m_vInputs.size() == 0)
+	{
+		l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\/\\/ No Output decoder.\\n";
+	}
+	else
+	{
+		l_sSubstitute = l_sSubstitute + "\\t\\t\\t\\/\\/ Output decoder:\\n";
+	}
+	for(vector<IOSStruct>::iterator it = m_vOutputs.begin(); it != m_vOutputs.end(); it++)
+	{
+		l_sSubstitute = l_sSubstitute + "\\t\\t\\t";
+		string l_sTypeName((const char *)(*it)._type);
+		//The stream type is Stimulations but the encoder is tStimulationEncoder
+		if( l_sTypeName == "Stimulations")
+		{
+			l_sTypeName = "Stimulation";
+		}
+		for(uint32 s=0; s<l_sTypeName.length(); s++)
+		{
+			if(l_sTypeName[s]==' ')
+			{
+				l_sTypeName.erase(s,1);
+				if(l_sTypeName[s] >= 'a' && l_sTypeName[s]<= 'z') l_sTypeName.replace(s,1,1,(char)(l_sTypeName[s]+'A'-'a'));
+			}
+		}
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+		l_sSubstitute = l_sSubstitute + "OpenViBEToolkit::T" + CString(l_sTypeName.c_str()) +"Encoder < CBoxAlgorithm"+m_sClassName+"> m_oOutput"+ CString(l_sIndex.str().c_str()) + "Encoder;\\n";
+		++index;
+	}
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------//
 	// box.cpp
@@ -808,34 +855,37 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 	}
 
 	// Codec Algorithm stuff. too complicated for the simple SED primitives.
-	l_sCommandSed = "s/@@AlgorithmInitialisation@@/";
-	for(uint32 a=0; a<m_vAlgorithms.size(); a++)
+	l_sPattern = "@@AlgorithmInitialisation@@";
+	l_sSubstitute = "";
+	//We initialize the codec algorithm by give them this, and the index of the input/output
+	index = 0;
+	for(vector<IOSStruct>::iterator it = m_vInputs.begin(); it != m_vInputs.end(); it++)
 	{
-		string l_sBlock = string((const char *)m_mAlgorithmInitialisation[m_vAlgorithms[a]]);
-		stringstream ss; ss << "Algo" << a << "_";
-		string l_sUniqueMarker = ss.str();
-		for(uint32 s=0; s<l_sBlock.length(); s++)
-		{
-			if(l_sBlock[s]=='@')
-			{
-				l_sBlock.erase(s,1);
-				l_sBlock.insert(s,l_sUniqueMarker);
-			}
-		}
-		l_sCommandSed = l_sCommandSed + CString(l_sBlock.c_str());
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+
+		l_sSubstitute = l_sSubstitute + "\\t";
+		l_sSubstitute = l_sSubstitute + "m_oInput" + CString(l_sIndex.str().c_str())+ "Decoder.initialize(*this, " + CString(l_sIndex.str().c_str()) + ");\n";
+
+		++index;
 	}
-	l_sCommandSed = l_sCommandSed + "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	index = 0;
+	for(vector<IOSStruct>::iterator it = m_vOutputs.begin(); it != m_vOutputs.end(); it++)
+	{
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+
+		l_sSubstitute = l_sSubstitute + "\\t";
+		l_sSubstitute = l_sSubstitute + "m_oOutput" + CString(l_sIndex.str().c_str())+ "Encoder.initialize(*this, " + CString(l_sIndex.str().c_str()) + ");\n";
+
+		++index;
+	}
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 		
-	l_sCommandSed = "s/@@AlgorithmInitialisationReferenceTargets@@/";
-	if(m_bUseCodecToolkit)
-	{
-		l_sCommandSed = l_sCommandSed + "\\t\\/\\/ If you need to, you can manually set the reference targets to link the codecs input and output. To do so, you can use :\\n";
-		l_sCommandSed = l_sCommandSed + "\\t\\/\\/m_oEncoder.getInputX().setReferenceTarget(m_oDecoder.getOutputX())\\n";
-		l_sCommandSed = l_sCommandSed + "\\t\\/\\/ Where 'X' depends on the codec type. Please refer to the Codec Toolkit Reference Page\\n";
-		l_sCommandSed = l_sCommandSed + "\\t\\/\\/ (http:\\/\\/openvibe.inria.fr\\/documentation\\/unstable\\/Doc_Tutorial_Developer_SignalProcessing_CodecToolkit_Ref.html) for a complete list.\\n";
-	}
-	else
+	l_sPattern = "@@AlgorithmInitialisationReferenceTargets@@";
+	l_sSubstitute = "";
+
+	if(!m_bUseCodecToolkit)
 	{
 		for(uint32 a=0; a<m_vAlgorithms.size(); a++)
 		{
@@ -850,31 +900,38 @@ void CBoxAlgorithmSkeletonGenerator::buttonOkCB(void)
 					l_sBlock.insert(s,l_sUniqueMarker);
 				}
 			}
-			l_sCommandSed = l_sCommandSed + CString(l_sBlock.c_str());
+			l_sSubstitute = l_sSubstitute + CString(l_sBlock.c_str());
 		}
 	}
-	l_sCommandSed = l_sCommandSed + "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 		
 		
-	l_sCommandSed = "s/@@AlgorithmUninitialisation@@/";
-	for(uint32 a=0; a<m_vAlgorithms.size(); a++)
+	l_sPattern = "@@AlgorithmUninitialisation@@";
+	l_sSubstitute = "";
+	//We initialize the codec algorithm by give them this, and the index of the input/output
+	index = 0;
+	for(vector<IOSStruct>::iterator it = m_vInputs.begin(); it != m_vInputs.end(); it++)
 	{
-		string l_sBlock = string((const char *)m_mAlgorithmUninitialisation[m_vAlgorithms[a]]);
-		stringstream ss; ss << "Algo" << a << "_";
-		string l_sUniqueMarker = ss.str();
-		for(uint32 s=0; s<l_sBlock.length(); s++)
-		{
-			if(l_sBlock[s]=='@')
-			{
-				l_sBlock.erase(s,1);
-				l_sBlock.insert(s,l_sUniqueMarker);
-			}
-		}
-		l_sCommandSed = l_sCommandSed + CString(l_sBlock.c_str());
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+
+		l_sSubstitute = l_sSubstitute + "\\t";
+		l_sSubstitute = l_sSubstitute + "m_oInput" + CString(l_sIndex.str().c_str())+ "Decoder.uninitialize();\n";
+
+		++index;
 	}
-	l_sCommandSed = l_sCommandSed + "/g";
-	l_bSuccess &= executeSedCommand(l_sDest, l_sCommandSed);
+	index = 0;
+	for(vector<IOSStruct>::iterator it = m_vOutputs.begin(); it != m_vOutputs.end(); it++)
+	{
+		std::stringstream l_sIndex;
+		l_sIndex << index;
+
+		l_sSubstitute = l_sSubstitute + "\\t";
+		l_sSubstitute = l_sSubstitute + "m_oOutput" + CString(l_sIndex.str().c_str())+ "Encoder.uninitialize();\n";
+
+		++index;
+	}
+	l_bSuccess &= regexReplace(l_sDest, l_sPattern, l_sSubstitute);
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------//
 	// readme-box.cpp
@@ -1446,12 +1503,12 @@ OpenViBE::boolean CBoxAlgorithmSkeletonGenerator::initialize( void )
 //	m_vTooltips[l_pTooltipButton_UseCodecToolkit]    = CString("Codec Toolkit: \nTells the generator to use or not the Codec Toolkit in the box implementation. \nThe Codec Toolkit makes the decoding and encoding process much more simpler.\nCurrently the Skeleton Generator only creates templates using the codec toolkit.\n\n\n\n\n");
 	m_vTooltips[l_pTooltipButton_BoxListener]        = CString("Box Listener: \nImplement or not a box listener class in the header.\nA box listener has various callbacks that you can overwrite, related to any modification of the box structure.\n------\nExample:\nThe Identity box uses a box listener with 2 callbacks: 'onInputAdded' and 'onOutputAdded'.\nWhenever an input (output) is added, the listener automatically add an output (input) of the same type.\n");
 	//
-	m_vTooltips[l_pTooltipButton_Messageinputs]             = CString("MessageInputs: \nUse the 'Add' and 'Remove' buttons to set all the message inputs your box will have.\nWhen pressing 'Add' a dialog window will appear to know the name and type of the new input.\n------\nExample:\n'Incoming Signal' of type 'Signal'\n\n");
-	m_vTooltips[l_pTooltipButton_Messageinputs_modify]      = CString("Modify: \nCheck this option if the input(s) of your box can be modified (type and name) in the Designer by right-clicking the box.\nIn the implementation, this option decides whether or not the box will have the flag 'BoxFlag_CanModifyInput'.\n\n\n\n\n");
-	m_vTooltips[l_pTooltipButton_Messageinputs_addRemove]   = CString("Add/Remove: \nCheck this option if the user must be able to add (or remove) inputs, by right-clicking the box.\nIn the implementation, this option decides whether or not the box will have the flag 'BoxFlag_CanAddInput'.\n\n\n\n");
-	m_vTooltips[l_pTooltipButton_Messageoutputs]            = CString("MessageOutputs: \nUse the 'Add' and 'Remove' buttons to set all the message outputs your box will have.\nWhen pressing 'Add' a dialog window will appear to know the name and type of the new output.\n------\nExample:\n'Filtered Signal' of type 'Signal'\n\n");
-	m_vTooltips[l_pTooltipButton_Messageoutputs_modify]     = CString("Modify: \nCheck this option if the output(s) of your box can be modified (type and name) in the Designer by right-clicking the box.\nIn the implementation, this option decides whether or not the box will have the flag 'BoxFlag_CanModifyOutput'.\n\n\n\n\n");
-	m_vTooltips[l_pTooltipButton_Messageoutputs_addRemove]  = CString("Add/Remove: \nCheck this option if the user must be able to add (or remove) outputs, by right-clicking the box.\nIn the implementation, this option decides whether or not the box will have the flag 'BoxFlag_CanAddOutput'.\n\n\n\n");
+	m_vTooltips[l_pTooltipButton_Messageinputs]             = CString("MessageInputs: \nUse the 'Add' and 'Remove' buttons to set all the message inputs your box will have.\nWhen pressing 'Add' a dialog window will appear to know the name of the new message input.\n------\nExample:\n'Incoming Signal'\n\n");
+	m_vTooltips[l_pTooltipButton_Messageinputs_modify]      = CString("Modify: \nCheck this option if the message input(s) of your box can be modified (name) in the Designer by right-clicking the box.\nIn the implementation, this option decides whether or not the box will have the flag 'BoxFlag_CanModifyMessageInput'.\n\n\n\n\n");
+	m_vTooltips[l_pTooltipButton_Messageinputs_addRemove]   = CString("Add/Remove: \nCheck this option if the user must be able to add (or remove) message inputs, by right-clicking the box.\nIn the implementation, this option decides whether or not the box will have the flag 'BoxFlag_CanAddMessageInput'.\n\n\n\n");
+	m_vTooltips[l_pTooltipButton_Messageoutputs]            = CString("MessageOutputs: \nUse the 'Add' and 'Remove' buttons to set all the message outputs your box will have.\nWhen pressing 'Add' a dialog window will appear to know the name of the new message output.\n------\nExample:\n'Filtered Signal'\n\n");
+	m_vTooltips[l_pTooltipButton_Messageoutputs_modify]     = CString("Modify: \nCheck this option if the message output(s) of your box can be modified (name) in the Designer by right-clicking the box.\nIn the implementation, this option decides whether or not the box will have the flag 'BoxFlag_CanModifyMessageOutput'.\n\n\n\n\n");
+	m_vTooltips[l_pTooltipButton_Messageoutputs_addRemove]  = CString("Add/Remove: \nCheck this option if the user must be able to add (or remove) message outputs, by right-clicking the box.\nIn the implementation, this option decides whether or not the box will have the flag 'BoxFlag_CanAddMessageOutput'.\n\n\n\n");
 
 	//
 

@@ -36,11 +36,14 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process(void);
 
+			OpenViBE::boolean generateFileHeader(void);
+
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_GenericStreamWriter);
 
 		protected:
 
 			OpenViBE::boolean m_bUseCompression;
+			OpenViBE::boolean m_bIsHeaderGenerate;
 			OpenViBE::CString m_sFilename;
 			EBML::CWriter m_oWriter;
 			EBML::CWriterHelper m_oWriterHelper;
@@ -59,15 +62,23 @@ namespace OpenViBEPlugins
 		{
 		public:
 
+			//it seems the only purpose of the check was to give a name when adding an input
+			//without it, the input configuration dialog display random characters in the name field
+			//the check is unnecessary when removing/changing inputs and on already named inputs
 			OpenViBE::boolean check(OpenViBE::Kernel::IBox& rBox)
 			{
 				char l_sName[1024];
-				OpenViBE::uint32 i;
+				OpenViBE::uint32 i = rBox.getInputCount()-1;
+				//only check last input (we assume previous inputs have benn named, how could they not?)
+				sprintf(l_sName, "Input stream %u", i+1);
+				rBox.setInputName(i, l_sName);
+				/*
 				for(i=0; i<rBox.getInputCount(); i++)
 				{
 					sprintf(l_sName, "Input stream %u", i+1);
 					rBox.setInputName(i, l_sName);
 				}
+				//*/
 				return true;
 			}
 
@@ -80,13 +91,13 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				this->check(rBox);
+				//this->check(rBox);
 				return true;
 			}
 
 			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				this->check(rBox);
+				//this->check(rBox);
 				return true;
 			}
 
@@ -118,7 +129,7 @@ namespace OpenViBEPlugins
 			{
 				rBoxAlgorithmPrototype.addInput  ("Input stream 1",  OV_TypeId_EBMLStream);
 				rBoxAlgorithmPrototype.addSetting("Filename",        OV_TypeId_Filename, "record-[$core{date}-$core{time}].ov");
-				rBoxAlgorithmPrototype.addSetting("Use compression", OV_TypeId_Boolean, "true");
+				rBoxAlgorithmPrototype.addSetting("Use compression", OV_TypeId_Boolean, "false");
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				return true;

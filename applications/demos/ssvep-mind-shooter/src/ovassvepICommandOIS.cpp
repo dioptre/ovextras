@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepICommandOIS.h"
 #include "ovassvepCApplication.h"
 
@@ -115,3 +118,5 @@ bool ICommandOIS::mouseMoved( const OIS::MouseEvent &oEvent )
 
 	return true;
 }
+
+#endif

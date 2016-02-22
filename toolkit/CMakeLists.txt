@@ -25,7 +25,15 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
 INCLUDE("FindOpenViBEModuleEBML")
+INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindOpenViBEModuleSystem")
+
+# ---------------------------------
+# Test applications
+# ---------------------------------
+IF(OV_COMPILE_TESTS)
+	ADD_SUBDIRECTORY(test)
+ENDIF(OV_COMPILE_TESTS)
 
 # ---------------------------------
 # Target macros

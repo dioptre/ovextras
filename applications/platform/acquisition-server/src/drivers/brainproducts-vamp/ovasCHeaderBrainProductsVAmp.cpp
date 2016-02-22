@@ -2,7 +2,7 @@
 #include "ovasCConfigurationBrainProductsVAmp.h"
 #include "../ovasCHeader.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #if defined TARGET_HAS_ThirdPartyUSBFirstAmpAPI
 
@@ -61,17 +61,17 @@ void CHeaderBrainProductsVAmp::reset(void)
 
 uint32 CHeaderBrainProductsVAmp::getEEGChannelCount(uint32 ui32AcquisitionMode)
 {
-	return ::g_vEEGChannelCount[ui32AcquisitionMode];
+	return g_vEEGChannelCount[ui32AcquisitionMode];
 }
 
 uint32 CHeaderBrainProductsVAmp::getAuxiliaryChannelCount(uint32 ui32AcquisitionMode)
 {
-	return ::g_vAuxiliaryChannelCount[ui32AcquisitionMode];
+	return g_vAuxiliaryChannelCount[ui32AcquisitionMode];
 }
 
 uint32 CHeaderBrainProductsVAmp::getTriggerChannelCount(uint32 ui32AcquisitionMode)
 {
-	return ::g_vTriggerChannelCount[ui32AcquisitionMode];
+	return g_vTriggerChannelCount[ui32AcquisitionMode];
 }
 
 // Pair information
@@ -93,6 +93,12 @@ boolean CHeaderBrainProductsVAmp::setPairName(const uint32 ui32PairIndex, const 
 boolean CHeaderBrainProductsVAmp::setPairGain(const uint32 ui32PairIndex, const float32 f32PairGain)
 {
 	m_vPairGain[ui32PairIndex]=f32PairGain;
+	return ui32PairIndex<m_ui32PairCount;
+}
+
+boolean CHeaderBrainProductsVAmp::setPairUnits(const uint32 ui32PairIndex, const uint32 ui32PairUnit, const uint32 ui32PairFactor)
+{
+	m_vPairUnit[ui32PairIndex]=std::pair<uint32,uint32>(ui32PairUnit, ui32PairFactor);
 	return ui32PairIndex<m_ui32PairCount;
 }
 
@@ -127,6 +133,22 @@ float32 CHeaderBrainProductsVAmp::getPairGain(const uint32 ui32PairIndex) const
 	return i->second;
 }
 
+boolean CHeaderBrainProductsVAmp::getPairUnits(const uint32 ui32PairIndex, uint32& ui32PairUnit, uint32& ui32PairFactor) const
+{
+	map<uint32, std::pair<uint32,uint32> >::const_iterator i=m_vPairUnit.find(ui32PairIndex);
+	if(i==m_vPairUnit.end())
+	{
+		ui32PairUnit = OVTK_UNIT_Unspecified;
+		ui32PairFactor = OVTK_FACTOR_Base;
+
+		return false;
+	}
+	ui32PairUnit = (i->second).first;
+	ui32PairFactor = (i->second).second;
+
+	return true;
+}
+
 t_faDataModeSettings CHeaderBrainProductsVAmp::getFastModeSettings(void) const
 {
 	return m_tFastModeSettings;
@@ -147,6 +169,12 @@ boolean CHeaderBrainProductsVAmp::isPairGainSet(void) const
 	return isPairCountSet();
 }
 
+boolean CHeaderBrainProductsVAmp::isPairUnitSet(void) const
+{
+	return isPairCountSet();
+}
+
+
 //___________________________________________________________________//
 //                                                                   //
 
@@ -164,6 +192,15 @@ boolean CHeaderBrainProductsVAmp::setSubjectAge(const uint32 ui32SubjectAge)
 boolean CHeaderBrainProductsVAmp::setSubjectGender(const uint32 ui32SubjectGender)
 {
 	return m_pBasicHeader->setSubjectGender(ui32SubjectGender);
+}
+boolean CHeaderBrainProductsVAmp::setImpedanceCheckRequested(const boolean bImpedanceCheckRequested)
+{
+	return m_pBasicHeader->setImpedanceCheckRequested(bImpedanceCheckRequested);
+}
+
+boolean CHeaderBrainProductsVAmp::isImpedanceCheckRequested(void) const
+{
+	return m_pBasicHeader->isImpedanceCheckRequested();
 }
 
 uint32 CHeaderBrainProductsVAmp::getExperimentIdentifier(void) const
@@ -272,6 +309,19 @@ boolean CHeaderBrainProductsVAmp::setChannelGain(const uint32 ui32ChannelIndex, 
 	}
 }
 
+boolean CHeaderBrainProductsVAmp::setChannelUnits(const uint32 ui32ChannelIndex, const uint32 ui32ChannelUnit, const uint32 ui32ChannelFactor)
+{
+	if(m_ui32AcquisitionMode == AcquisitionMode_VAmp4Fast)
+	{
+		// in fast mode the channel count is the pair count (to display in the designer as a "channel")
+		return this->setPairUnits(ui32ChannelIndex,ui32ChannelUnit, ui32ChannelFactor);
+	}
+	else
+	{
+		return m_pBasicHeader->setChannelUnits(ui32ChannelIndex,ui32ChannelUnit, ui32ChannelFactor);
+	}
+}
+
 uint32 CHeaderBrainProductsVAmp::getChannelCount(void) const
 {
 	if(m_ui32AcquisitionMode == AcquisitionMode_VAmp4Fast)
@@ -308,6 +358,18 @@ float32 CHeaderBrainProductsVAmp::getChannelGain(const uint32 ui32ChannelIndex) 
 	else
 	{
 		return m_pBasicHeader->getChannelGain(ui32ChannelIndex);
+	}
+}
+	
+boolean CHeaderBrainProductsVAmp::getChannelUnits(const OpenViBE::uint32 ui32ChannelIndex, OpenViBE::uint32& ui32ChannelUnit, OpenViBE::uint32& ui32ChannelFactor) const
+{
+	if(m_ui32AcquisitionMode == AcquisitionMode_VAmp4Fast)
+	{
+		return this->getPairUnits(ui32ChannelIndex, ui32ChannelUnit, ui32ChannelFactor);
+	}
+	else
+	{
+		return m_pBasicHeader->getChannelUnits(ui32ChannelIndex, ui32ChannelUnit, ui32ChannelFactor);
 	}
 }
 
@@ -347,6 +409,19 @@ boolean CHeaderBrainProductsVAmp::isChannelGainSet(void) const
 	else
 	{
 		return m_pBasicHeader->isChannelGainSet();
+	}
+}
+
+boolean CHeaderBrainProductsVAmp::isChannelUnitSet(void) const
+{
+	if(m_ui32AcquisitionMode == AcquisitionMode_VAmp4Fast)
+	{
+		// in fast mode the channel count is the pair count (to display in the designer as a "channel")
+		return this->isPairUnitSet();
+	}
+	else
+	{
+		return m_pBasicHeader->isChannelUnitSet();
 	}
 }
 

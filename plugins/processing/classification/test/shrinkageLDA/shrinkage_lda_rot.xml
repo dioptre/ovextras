@@ -35,7 +35,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename to save configuration to</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/alg2.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/alg2.cfg</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x2c132d6e, 0x44ab0d97)</TypeIdentifier>
@@ -128,7 +128,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename to save configuration to</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/alg1.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/alg1.cfg</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x2c132d6e, 0x44ab0d97)</TypeIdentifier>
@@ -538,7 +538,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/class2rot.csv</Value>
+					<Value>${Player_ScenarioDirectory}/class2rot.csv</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
@@ -674,7 +674,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/classifier-training-flipswitch.lua</Value>
+					<Value>${Player_ScenarioDirectory}/classifier-training-flipswitch.lua</Value>
 				</Setting>
 			</Settings>
 			<Attributes>
@@ -743,7 +743,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${__volatile_ScenarioDir}/class1rot.csv</Value>
+					<Value>${Player_ScenarioDirectory}/class1rot.csv</Value>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>

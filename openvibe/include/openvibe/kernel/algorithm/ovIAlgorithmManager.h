@@ -27,7 +27,7 @@ namespace OpenViBE
 			 * \param rAlgorithmClassIdentifier [out] : the class identifier of
 			 *        the newly created algorithm
 			 * \return \e true in case of success.
-			 * \return \e false in case of error.
+			 * \return \e OV_UndefinedIdentifier in case of error.
 			 */
 			virtual OpenViBE::CIdentifier createAlgorithm(
 				const OpenViBE::CIdentifier& rAlgorithmClassIdentifier)=0;

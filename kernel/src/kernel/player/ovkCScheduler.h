@@ -3,7 +3,7 @@
 
 #include "../ovkTKernelObject.h"
 
-#include <system/CChrono.h>
+#include <system/ovCChrono.h>
 
 #include <map>
 #include <list>
@@ -12,6 +12,12 @@ namespace OpenViBE
 {
 	namespace Kernel
 	{
+		enum SchedulerInitializationCode{
+			SchedulerInitialization_Success,
+			SchedulerInitialization_BoxInitializationFailed,
+			SchedulerInitialization_Failed
+		};
+
 		class CSimulatedBox;
 		class CChunk;
 		class CPlayer;
@@ -28,7 +34,7 @@ namespace OpenViBE
 			virtual OpenViBE::boolean setFrequency(
 				const OpenViBE::uint64 ui64Frequency);
 
-			virtual OpenViBE::boolean initialize(void);
+			virtual SchedulerInitializationCode initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 
 			virtual OpenViBE::boolean loop(void);

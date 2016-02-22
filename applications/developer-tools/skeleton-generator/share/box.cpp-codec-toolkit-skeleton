@@ -42,6 +42,7 @@ boolean CBoxAlgorithm@@ClassName@@::processClock(IMessageClock& rMessageClock)
 
 	return true;
 }
+@@ProcessClockCommentOut@@
 /*******************************************************************************/
 
 @@ProcessClockCommentIn@@
@@ -50,6 +51,7 @@ uint64 CBoxAlgorithm@@ClassName@@::getClockFrequency(void)
 	// Note that the time is coded on a 64 bits unsigned integer, fixed decimal point (32:32)
 	return @@ClockFrequency@@; // the box clock frequency
 }
+@@ProcessClockCommentOut@@
 /*******************************************************************************/
 
 @@ProcessInputCommentIn@@
@@ -62,6 +64,7 @@ boolean CBoxAlgorithm@@ClassName@@::processInput(uint32 ui32InputIndex)
 
 	return true;
 }
+@@ProcessInputCommentOut@@
 /*******************************************************************************/
 
 @@ProcessMessageCommentIn@@
@@ -105,6 +108,7 @@ boolean CBoxAlgorithm@@ClassName@@::processMessage(const IMessageWithData& msg, 
 	// Remember to return false in case the message was unexpected (user has made a wrong connection)	
 	return true;
 }
+@@ProcessMessageCommentOut@@
 /*******************************************************************************/
 
 boolean CBoxAlgorithm@@ClassName@@::process(void)
@@ -136,8 +140,8 @@ boolean CBoxAlgorithm@@ClassName@@::process(void)
 	//iterate over all chunk on input 0
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		// decode the chunk i on input 0
-		m_oSignalDecoder.decode(0,i);
+		// decode the chunk i
+		m_oSignalDecoder.decode(i);
 		// the decoder may have decoded 3 different parts : the header, a buffer or the end of stream.
 		if(m_oSignalDecoder.isHeaderReceived())
 		{

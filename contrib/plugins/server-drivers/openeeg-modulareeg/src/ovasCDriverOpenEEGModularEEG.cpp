@@ -1,10 +1,16 @@
+/*
+ * \author Christoph Veigl, Yann Renard
+ *
+ * \copyright AGPL3
+ *
+ */
 #include "ovasCDriverOpenEEGModularEEG.h"
 #include "ovasCConfigurationOpenEEGModularEEG.h"
 
 #include <toolkit/ovtk_all.h>
 
-#include <system/Time.h>
-#include <system/Memory.h>
+#include <system/ovCTime.h>
+#include <system/ovCMemory.h>
 #include <cmath>
 #include <iostream>
 

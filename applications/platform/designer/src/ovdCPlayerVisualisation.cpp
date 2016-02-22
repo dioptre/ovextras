@@ -17,13 +17,34 @@ static ::GtkTargetEntry targets [] =
 	{ (gchar*)"text/plain", 0, 0 },
 };
 
-static void dummy_callback(::GtkWidget*)
+/*static void dummy_callback(::GtkWidget*)
 {
+}*/
+
+//This callback transmits signal to the application to handle global shortcuts
+//data contains a pointer to Application
+static gboolean key_pressed_callback(GtkWidget *pWidget, GdkEventKey *pEvent, gpointer pData)
+{
+	static_cast<CApplication*>(pData)->keyPressEventCB(pWidget, pEvent);
+	return false;
 }
 
-CPlayerVisualisation::CPlayerVisualisation(const IKernelContext& rKernelContext, IVisualisationTree& rVisualisationTree, CInterfacedScenario& rInterfacedScenario) :
+
+
+//when the widget is in the visualisation manager, it does not have the focus and the key pressed are not detected
+//so when clicked, give the focus back to the widget, then the key pressed will be correctly handled by the widget's callback (define in box code)
+static gboolean KeyboardStimulator_KeyPressCallback(GtkWidget *widget, GdkEventKey *thisEvent, gpointer data)
+{
+	//std::cout << "button pressed, grab focus\n";
+	gtk_widget_grab_focus(widget);
+	return false; // the event propagates further, this is needed e.g. for mouse control of 3D widgets
+}
+
+
+CPlayerVisualisation::CPlayerVisualisation(const IKernelContext& rKernelContext, IVisualisationTree& rVisualisationTree, CApplication &rApplication, CInterfacedScenario& rInterfacedScenario) :
 	m_rKernelContext(rKernelContext),
 	m_rVisualisationTree(rVisualisationTree),
+	m_rApplication(rApplication),
 	m_rInterfacedScenario(rInterfacedScenario),
 	m_pActiveToolbarButton(NULL)
 {
@@ -60,11 +81,15 @@ void CPlayerVisualisation::init(void)
 
 	m_pActiveToolbarButton = NULL;
 
+
 	//register towards tree store
 	m_rVisualisationTree.setTreeViewCB(this);
 
-	//rebuild widgets
+	//rebuild widgets;
 	m_rVisualisationTree.reloadTree();
+
+	//must be called after the previous call to reload tree
+	m_rInterfacedScenario.setModifiableSettingsWidgets();
 }
 
 ::GtkWidget* CPlayerVisualisation::loadTreeWidget(IVisualisationWidget* pVisualisationWidget)
@@ -215,7 +240,7 @@ void CPlayerVisualisation::init(void)
 			gtk_window_set_title(GTK_WINDOW(l_pTreeWidget), (const char*)pVisualisationWidget->getName());
 
 			//set it transient for main window
-			gtk_window_set_transient_for(GTK_WINDOW(l_pTreeWidget), GTK_WINDOW(m_rInterfacedScenario.m_rApplication.m_pMainWindow));
+			//gtk_window_set_transient_for(GTK_WINDOW(l_pTreeWidget), GTK_WINDOW(m_rInterfacedScenario.m_rApplication.m_pMainWindow));
 
 			//centered on the main window
 			if(m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_WindowManager_Center}", false))
@@ -226,14 +251,16 @@ void CPlayerVisualisation::init(void)
 			//FIXME wrong spelling (-)
 			gtk_signal_connect(GTK_OBJECT(l_pTreeWidget), "configure_event", G_CALLBACK(configure_event_cb), this);
 			//FIXME wrong spelling (-)
-			g_signal_connect(l_pTreeWidget, "delete_event", G_CALLBACK(dummy_callback), NULL);
+			g_signal_connect(l_pTreeWidget, "delete_event", G_CALLBACK(hide_window_cb), this);
+			g_signal_connect(l_pTreeWidget, "key-press-event", G_CALLBACK(key_pressed_callback), &(m_rInterfacedScenario.m_rApplication));
 		}
+
 	}
 
 	//show newly created widget
 	if(l_pTreeWidget != NULL && pVisualisationWidget->getType() != EVisualisationWidget_VisualisationWindow)
 	{
-		gtk_widget_show(l_pTreeWidget);
+		showWidget(l_pTreeWidget);
 	}
 
 #if 0
@@ -245,6 +272,7 @@ void CPlayerVisualisation::init(void)
 		gtk_signal_connect(GTK_OBJECT(l_pTreeWidget), "expose-event", G_CALLBACK(widget_expose_event_cb), this);
 	}
 #endif
+
 
 	return l_pTreeWidget;
 }
@@ -273,6 +301,7 @@ void CPlayerVisualisation::endLoadTreeWidget(OpenViBE::Kernel::IVisualisationWid
 			gtk_container_add(GTK_CONTAINER((GtkWidget*)l_pTreeWidget), (GtkWidget*)l_pChildTreeWidget);
 		}
 	}
+
 }
 
 boolean CPlayerVisualisation::setToolbar(const CIdentifier& rBoxIdentifier, ::GtkWidget* pToolbarWidget)
@@ -409,6 +438,11 @@ boolean CPlayerVisualisation::setWidget(const CIdentifier& rBoxIdentifier, ::Gtk
 	gtk_drag_source_set(GTK_WIDGET(l_pButton), GDK_BUTTON1_MASK, targets, sizeof(targets)/sizeof(::GtkTargetEntry), GDK_ACTION_COPY);
 	g_signal_connect(G_OBJECT(l_pButton), "drag_data_get", G_CALLBACK(drag_data_get_from_widget_cb), this);
 
+	g_signal_connect(G_OBJECT(pWidget), "button-press-event", G_CALLBACK(KeyboardStimulator_KeyPressCallback), NULL);
+
+
+
+
 	//store plugin widget and toolbar button
 	CIdentifier l_oIdentifier = l_pVisualisationWidget->getIdentifier();
 	m_mPlugins[l_oIdentifier].m_pWidget = pWidget;
@@ -432,7 +466,7 @@ boolean CPlayerVisualisation::setWidget(const CIdentifier& rBoxIdentifier, ::Gtk
 	gtk_box_pack_start(l_pVBox, pWidget, TRUE, TRUE, 0);
 
 	//show vbox hierarchy
-	gtk_widget_show_all(GTK_WIDGET(l_pVBox));
+	showAllWidget(GTK_WIDGET(l_pVBox));
 
 	//parent box at the appropriate location
 	parentWidgetBox(l_pVisualisationWidget, l_pVBox);
@@ -456,6 +490,7 @@ boolean CPlayerVisualisation::parentWidgetBox(IVisualisationWidget* pWidget, ::G
 		//create a top level window
 		::GtkWidget* l_pWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 		m_vWindows.push_back(GTK_WINDOW(l_pWindow));
+
 #if 1
 		uint64 l_ui64DefaultWidth = m_rKernelContext.getConfigurationManager().expandAsUInteger("${Designer_UnaffectedVisualisationWindowWidth}", 400);
 		uint64 l_ui64DefaultHeight = m_rKernelContext.getConfigurationManager().expandAsUInteger("${Designer_UnaffectedVisualisationWindowHeight}", 400);
@@ -475,11 +510,12 @@ boolean CPlayerVisualisation::parentWidgetBox(IVisualisationWidget* pWidget, ::G
 		//set its title
 		gtk_window_set_title(GTK_WINDOW(l_pWindow), (const char*)pWidget->getName());
 		//set it transient for main window
-		gtk_window_set_transient_for(GTK_WINDOW(l_pWindow), GTK_WINDOW(m_rInterfacedScenario.m_rApplication.m_pMainWindow));
+		//gtk_window_set_transient_for(GTK_WINDOW(l_pWindow), GTK_WINDOW(m_rInterfacedScenario.m_rApplication.m_pMainWindow));
 		//insert box in top level window
 		gtk_container_add(GTK_CONTAINER(l_pWindow), (::GtkWidget*)pWidgetBox);
 		//prevent user from closing this window
-		g_signal_connect(l_pWindow, "delete_event", G_CALLBACK(dummy_callback), NULL);
+		g_signal_connect(l_pWindow, "delete_event", G_CALLBACK(hide_window_cb), this);
+		g_signal_connect(l_pWindow, "key-press-event", G_CALLBACK(key_pressed_callback), &(m_rInterfacedScenario.m_rApplication));
 
 		//position: centered in the main window
 		if(m_rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_WindowManager_Center}", false))
@@ -490,7 +526,7 @@ boolean CPlayerVisualisation::parentWidgetBox(IVisualisationWidget* pWidget, ::G
 		if(l_bMute==false)
 		{
 			//show window (and realize widget in doing so)
-			gtk_widget_show(l_pWindow);
+			showWidget(l_pWindow);
 		}
 	}
 	else //retrieve parent widget in which to insert current widget
@@ -575,7 +611,7 @@ boolean CPlayerVisualisation::parentWidgetBox(IVisualisationWidget* pWidget, ::G
 					m_rVisualisationTree.getPointerValueFromTreeIter(&l_oWindowIter, l_pWindowWidget, EVisualisationTreeColumn_PointerWidget);
 
 					//show parent window
-					gtk_widget_show(GTK_WIDGET(l_pWindowWidget));
+					showWidget(GTK_WIDGET(l_pWindowWidget));
 					// gtk_widget_realize(GTK_WIDGET(l_pWindowWidget));
 					// gdk_flush();
 
@@ -592,30 +628,86 @@ boolean CPlayerVisualisation::parentWidgetBox(IVisualisationWidget* pWidget, ::G
 	return true;
 }
 
-//called upon Player start
+//called upon Player start -- Not really, called when switching back on playing scenario tab
 void CPlayerVisualisation::showTopLevelWindows(void)
 {
+
 	for(unsigned int i=0; i<m_vWindows.size(); i++)
 	{
-		gtk_widget_show(GTK_WIDGET(m_vWindows[i]));
+		showWidget(GTK_WIDGET(m_vWindows[i]));
 	}
 	if(m_pActiveToolbarButton != NULL)
 	{
 		//show active toolbar
-		gtk_widget_show(m_mToolbars[m_pActiveToolbarButton]);
+		showWidget(m_mToolbars[m_pActiveToolbarButton]);
 	}
 	std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
 	while(it!=m_mPlugins.end())
 	{
-		if(GTK_IS_WIDGET(it->second.m_pWidget))
+		if((GTK_IS_WIDGET(it->second.m_pWidget))&&(!it->second.m_Muted))
 		{
-			gtk_widget_show(it->second.m_pWidget);
+			showWidget(it->second.m_pWidget);
 		}
 		it++;
 	}
 }
 
-//called upon Player stop
+//called when a visualisation window is open from window-menu
+void CPlayerVisualisation::showSelectedWindow(OpenViBE::uint32 ui32Index)
+{
+	// printf("Show %p\n", GTK_WIDGET(m_vWindows[ui32Index]));
+	showWidget(GTK_WIDGET(m_vWindows[ui32Index]));
+	boolean l_bShowWindow = false;
+
+	// Show widgets which are in the window (unless muted)
+	std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
+	while(it!=m_mPlugins.end())
+	{
+		if((GTK_IS_WIDGET(it->second.m_pWidget))&&(!it->second.m_Muted))
+		{
+			GtkWidget *l_pTopLevelWidget = gtk_widget_get_toplevel(it->second.m_pWidget);
+			if(l_pTopLevelWidget == GTK_WIDGET(m_vWindows[ui32Index]))
+			{
+				// printf("ShowPlugin %p\n", it->second.m_pWidget);
+				showWidget(it->second.m_pWidget);
+				l_bShowWindow = true;
+			}
+		}
+		it++;
+	}
+
+	//if the window contains no widget to show, hide it back
+	if(!l_bShowWindow)
+	{
+		gtk_widget_hide(GTK_WIDGET(m_vWindows[ui32Index]));
+	}
+
+}
+
+//called when a visualisation window is closed from window-menu
+void CPlayerVisualisation::hideSelectedWindow(OpenViBE::uint32 ui32Index)
+{
+	// printf("Hide %p\n", GTK_WIDGET(m_vWindows[ui32Index]));
+	gtk_widget_hide(GTK_WIDGET(m_vWindows[ui32Index]));
+
+	// Hide widgets which are in the window
+	std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
+	while(it!=m_mPlugins.end())
+	{
+		if(GTK_IS_WIDGET(it->second.m_pWidget))
+		{
+			GtkWidget *l_pTopLevelWidget = gtk_widget_get_toplevel(it->second.m_pWidget);
+			if(l_pTopLevelWidget == GTK_WIDGET(m_vWindows[ui32Index]))
+			{
+				// printf("HidePlugin %p\n", it->second.m_pWidget);
+				gtk_widget_hide(it->second.m_pWidget);
+			}
+		}
+		it++;
+	}
+}
+
+//called upon Player stop -- called when change current scenario
 void CPlayerVisualisation::hideTopLevelWindows(void)
 {
 	std::map < OpenViBE::CIdentifier, CPlayerVisualisation::CPluginWidgets >::iterator it=m_mPlugins.begin();
@@ -631,11 +723,35 @@ void CPlayerVisualisation::hideTopLevelWindows(void)
 	{
 		gtk_widget_hide(GTK_WIDGET(m_vWindows[i]));
 	}
+	//disable window menu check items
+	m_rInterfacedScenario.hideWindowMenu();
 	if(m_pActiveToolbarButton != NULL)
 	{
 		//hide active toolbar
 		gtk_widget_hide(m_mToolbars[m_pActiveToolbarButton]);
 	}
+}
+
+std::vector < ::GtkWindow* > CPlayerVisualisation::getTopLevelWindows(void)
+{
+	std::vector < ::GtkWindow* > l_vWindows = this->m_vWindows;
+	return l_vWindows;
+}
+
+//closing window when press close button
+gboolean CPlayerVisualisation::hide_window_cb(::GtkWidget* pWidget, ::GdkEvent  *event, gpointer user_data)
+{
+	static_cast<CPlayerVisualisation*>(user_data)->hideWindowCB(pWidget, user_data);
+	return(TRUE);
+}
+
+
+void CPlayerVisualisation::hideWindowCB(::GtkWidget* pWidget, gpointer pUserData)
+{
+	const char* l_cWindowTitle = (char*) gtk_window_get_title(GTK_WINDOW(pWidget));
+	m_rInterfacedScenario.onWindowClosed(l_cWindowTitle);
+//	printf("HideCB for %p\n", pWidget);
+	gtk_widget_hide(pWidget);
 }
 
 //event generated whenever window changes size, including when it is first created
@@ -904,7 +1020,7 @@ boolean CPlayerVisualisation::toggleToolbarCB(::GtkToggleButton* pToolbarButton)
 		}
 		else //showing active toolbar
 		{
-			gtk_widget_show(l_pToolbar);
+			showWidget(l_pToolbar);
 		}
 	}
 	else //a new toolbar is to be shown
@@ -931,7 +1047,7 @@ boolean CPlayerVisualisation::toggleToolbarCB(::GtkToggleButton* pToolbarButton)
 		}
 */
 		//show new toolbar
-		gtk_widget_show(l_pToolbar);
+		showWidget(l_pToolbar);
 
 		//update active toolbar button
 		m_pActiveToolbarButton = pToolbarButton;
@@ -969,4 +1085,22 @@ boolean CPlayerVisualisation::deleteToolbarCB(GtkWidget* pToolbarWidget)
 	m_pActiveToolbarButton = NULL;
 
 	return TRUE;
+}
+
+void CPlayerVisualisation::showWidget(GtkWidget *pWidget)
+{
+	//We show widget only if no visualisation is off
+	if(!m_rApplication.isNoVisualisation())
+	{
+		gtk_widget_show(pWidget);
+	}
+}
+
+void CPlayerVisualisation::showAllWidget(GtkWidget *pWidget)
+{
+	//We show widget only if no visualisation is off
+	if(!m_rApplication.isNoVisualisation())
+	{
+		gtk_widget_show_all(pWidget);
+	}
 }

@@ -8,13 +8,13 @@ set InitEnvScript=win32-init_env_command.cmd
 set PAUSE=pause
 if /i "%1"=="-h" (
 	echo Usage: win32-build.cmd [Build Type] [Init-env Script]
-	echo -- Build Type option can be : --release (-r^) or --debug (-d^). Default is release.
+	echo -- Build Type option can be : --release (-r^), --debug (-d^) or --debug-symbols. Default is Release.
 	echo -- Default Init-env script is: win32-init_env_command.cmd
 	pause
 	exit 0
 ) else if /i "%1"=="--help" (
 	echo Usage: win32-build.cmd [Build Type] [Init-env Script]
-	echo -- Build Type option can be : --release (-r^) or --debug (-d^). Default is Release.
+	echo -- Build Type option can be : --release (-r^), --debug (-d^) or --debug-symbols. Default is Release.
 	echo -- Default Init-env script is: win32-init_env_command.cmd
 	pause
 	exit 0
@@ -30,6 +30,11 @@ if /i "%1"=="-h" (
 	if not "%2"=="" (
 		set !InitEnvScript!=%2
 	)	
+) else if /i "%1"=="--debug-symbols" (
+	set BuildType=RelWithDebInfo
+	if not "%2"=="" (
+		set !InitEnvScript!=%2
+	)		
 ) else if /i "%1"=="-r" (
 	set BuildType=Release
 	if not "%2"=="" (
@@ -74,7 +79,7 @@ cd /D %ov_build_dir%
 echo Generating makefiles for %VSCMake% using %BuildType% config.
 echo Building to %ov_build_dir% ...
 
-cmake %ov_script_dir%\.. -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir%
+%ov_script_dir%\..\dependencies\cmake\bin\cmake %ov_script_dir%\.. -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir%
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
 
 echo.

@@ -22,6 +22,8 @@
 #include "ovkIGtkOVCustomHandler.h"
 #include "ovkGtkOVCustom.h"
 
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #if defined( __WIN32__ ) || defined( _WIN32 )
 #  include <gdk/gdkwin32.h>
 #else
@@ -424,3 +426,6 @@ void GtkOVCustom::show_cb(GtkWidget *pWidget, gpointer user_data)
 void GtkOVCustom::visibility_notify_event_cb(GtkWidget *pWidget, GdkEventVisibility* pEvent, gpointer user_data)
 {
 }
+
+
+#endif

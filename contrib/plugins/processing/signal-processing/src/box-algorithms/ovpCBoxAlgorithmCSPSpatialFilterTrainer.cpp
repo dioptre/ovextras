@@ -2,7 +2,7 @@
 
 #include "ovpCBoxAlgorithmCSPSpatialFilterTrainer.h"
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <complex>
 #include <sstream>
@@ -23,7 +23,7 @@ using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
-using namespace OpenViBEPlugins::SignalProcessingGpl;
+using namespace OpenViBEPlugins::SignalProcessing;
 
 using namespace itpp;
 
@@ -78,20 +78,21 @@ namespace itppextcsp
 
 boolean CBoxAlgorithmCSPSpatialFilterTrainer::initialize(void)
 {
-	m_pStimulationDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-	m_pStimulationDecoder->initialize();
+	m_pStimulationDecoder=new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >();
+	m_pStimulationDecoder->initialize(*this,0);
 
-	m_pSignalDecoderCondition1=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-	m_pSignalDecoderCondition1->initialize();
+	m_pSignalDecoderCondition1=new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >();
+	m_pSignalDecoderCondition1->initialize(*this,1);
 
-	m_pSignalDecoderCondition2=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_SignalStreamDecoder));
-	m_pSignalDecoderCondition2->initialize();
+	m_pSignalDecoderCondition2=new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmCSPSpatialFilterTrainer >();
+	m_pSignalDecoderCondition2->initialize(*this,2);
 
-	m_oStimulationEncoder.initialize(*this);
+	m_oStimulationEncoder.initialize(*this,0);
 
 	m_ui64StimulationIdentifier=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sSpatialFilterConfigurationFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 	m_ui64FilterDimension=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+	m_bSaveAsBoxConfig=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
 
 	return true;
 }
@@ -99,18 +100,14 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::initialize(void)
 boolean CBoxAlgorithmCSPSpatialFilterTrainer::uninitialize(void)
 {
 	m_pSignalDecoderCondition1->uninitialize();
+	delete m_pSignalDecoderCondition1;
 	m_pSignalDecoderCondition2->uninitialize();
+	delete m_pSignalDecoderCondition2;
 	m_pStimulationDecoder->uninitialize();
+	delete m_pStimulationDecoder;
 
 	m_oStimulationEncoder.uninitialize();
 
-	this->getAlgorithmManager().releaseAlgorithm(*m_pSignalDecoderCondition1);
-	this->getAlgorithmManager().releaseAlgorithm(*m_pSignalDecoderCondition2);
-	this->getAlgorithmManager().releaseAlgorithm(*m_pStimulationDecoder);
-
-	m_pSignalDecoderCondition1=NULL;
-	m_pSignalDecoderCondition2=NULL;
-	m_pStimulationDecoder=NULL;
 
 	return true;
 }
@@ -130,17 +127,15 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		TParameterHandler < const IMemoryBuffer* > ip_pMemoryBuffer(m_pStimulationDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
-		m_pStimulationDecoder->process();
-		if(m_pStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+		m_pStimulationDecoder->decode(i);
+		if(m_pStimulationDecoder->isHeaderReceived())
 		{
-			m_oStimulationEncoder.encodeHeader(0);
+			m_oStimulationEncoder.encodeHeader();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_rDynamicBoxContext.getInputChunkStartTime(0, i),l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
-		if(m_pStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if(m_pStimulationDecoder->isBufferReceived())
 		{
-			TParameterHandler < IStimulationSet* > op_pStimulationSet(m_pStimulationDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
+			TParameterHandler < IStimulationSet* > op_pStimulationSet(m_pStimulationDecoder->getOutputStimulationSet());
 			for(uint32 j=0; j<op_pStimulationSet->getStimulationCount(); j++)
 			{
 				l_bShouldTrain |= (op_pStimulationSet->getStimulationIdentifier(j)==m_ui64StimulationIdentifier);
@@ -152,9 +147,9 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 				l_ui64TrainChunkEndTime = l_rDynamicBoxContext.getInputChunkEndTime(0, i);
 			}
 		}
-		if(m_pStimulationDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if(m_pStimulationDecoder->isEndReceived())
 		{
-			m_oStimulationEncoder.encodeEnd(0);
+			m_oStimulationEncoder.encodeEnd();
 		}
 		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
 	}
@@ -163,65 +158,87 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 	{
 		this->getLogManager() << LogLevel_Info << "Received train stimulation - be patient\n";
 
-		this->getLogManager() << LogLevel_Trace << "Decoding motor signal 1...\n";
+		this->getLogManager() << LogLevel_Trace << "Estimating cov for condition 1...\n";
 
 		itpp::mat l_oCovarianceMatrixCondition1;
 		int l_iNumberOfCondition1Trials = 0;
+		int l_iCondition1ChunkSize = 0;
+		int l_iCondition2ChunkSize = 0;
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
 		{
-			TParameterHandler<const IMemoryBuffer*> ip_pMemoryBuffer(m_pSignalDecoderCondition1->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(1, i);
-			m_pSignalDecoderCondition1->process();
-			if(m_pSignalDecoderCondition1->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedHeader))
+			m_pSignalDecoderCondition1->decode(i);
+			if(m_pSignalDecoderCondition1->isHeaderReceived())
 			{
-				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition1->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition1->getOutputMatrix());
 				l_oCovarianceMatrixCondition1.set_size(ip_pMatrix->getDimensionSize(0),ip_pMatrix->getDimensionSize(0));
 				l_oCovarianceMatrixCondition1.zeros();
+
+				l_iCondition1ChunkSize = ip_pMatrix->getDimensionSize(1);
+				this->getLogManager() << LogLevel_Debug << "Cov matrix size for condition 1 is [" 
+					<< ip_pMatrix->getDimensionSize(0) << "x" << ip_pMatrix->getDimensionSize(0) 
+					<< "], chunk size is " << l_iCondition1ChunkSize << " samples\n";
 			}
-			if(m_pSignalDecoderCondition1->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_pSignalDecoderCondition1->isBufferReceived())
 			{
-				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition1->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition1->getOutputMatrix());
 				itpp::mat l_oMatrix=itppextcsp::convert(*ip_pMatrix);
 				l_oCovarianceMatrixCondition1 += itppextcsp::cov(l_oMatrix);
 				l_iNumberOfCondition1Trials++;
 			}
-			if(m_pSignalDecoderCondition1->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_pSignalDecoderCondition1->isEndReceived())
 			{
 			}
 			l_rDynamicBoxContext.markInputAsDeprecated(1, i);
 		}
 		l_oCovarianceMatrixCondition1 = l_oCovarianceMatrixCondition1/ ((double)l_iNumberOfCondition1Trials);
-		this->getLogManager() << LogLevel_Debug << "Number of trials for condition 1: " << l_iNumberOfCondition1Trials << "\n";
+		this->getLogManager() << LogLevel_Trace << "Number of chunks for condition 1: " << l_iNumberOfCondition1Trials << "\n";
 
-		this->getLogManager() << LogLevel_Trace << "Decoding motor signal 2...\n";
+		this->getLogManager() << LogLevel_Trace << "Estimating cov for condition 2...\n";
 
 		itpp::mat l_oCovarianceMatrixCondition2;
 		int l_iNumberOfCondition2Trials = 0;
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(2); i++)
 		{
-			TParameterHandler<const IMemoryBuffer*> ip_pMemoryBuffer(m_pSignalDecoderCondition2->getInputParameter(OVP_GD_Algorithm_SignalStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(2, i);
-			m_pSignalDecoderCondition2->process();
-			if(m_pSignalDecoderCondition2->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedHeader))
+			m_pSignalDecoderCondition2->decode(i);
+			if(m_pSignalDecoderCondition2->isHeaderReceived())
 			{
-				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition2->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition2->getOutputMatrix());
 				l_oCovarianceMatrixCondition2.set_size(ip_pMatrix->getDimensionSize(0),ip_pMatrix->getDimensionSize(0));
 				l_oCovarianceMatrixCondition2.zeros();
+
+				l_iCondition2ChunkSize = ip_pMatrix->getDimensionSize(1);
+				this->getLogManager() << LogLevel_Debug << "Cov matrix size for condition 2 is [" 
+					<< ip_pMatrix->getDimensionSize(0) << "x" << ip_pMatrix->getDimensionSize(0) 
+					<< "], chunk size is " << l_iCondition2ChunkSize << " samples\n";
 			}
-			if(m_pSignalDecoderCondition2->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_pSignalDecoderCondition2->isBufferReceived())
 			{
-				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition2->getOutputParameter(OVP_GD_Algorithm_SignalStreamDecoder_OutputParameterId_Matrix));
+				TParameterHandler<IMatrix*> ip_pMatrix(m_pSignalDecoderCondition2->getOutputMatrix());
 				itpp::mat l_oMatrix=itppextcsp::convert(*ip_pMatrix);
 				l_oCovarianceMatrixCondition2 += itppextcsp::cov(l_oMatrix);
 				l_iNumberOfCondition2Trials++;
 			}
-			if(m_pSignalDecoderCondition2->isOutputTriggerActive(OVP_GD_Algorithm_SignalStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_pSignalDecoderCondition2->isEndReceived())
 			{
 			}
 			l_rDynamicBoxContext.markInputAsDeprecated(2, i);
 		}
 		l_oCovarianceMatrixCondition2 = l_oCovarianceMatrixCondition2/ ((double)l_iNumberOfCondition2Trials);
-		this->getLogManager() << LogLevel_Debug << "Number of trials for condition 2: " << l_iNumberOfCondition2Trials << "\n";
+
+		if(l_oCovarianceMatrixCondition1.cols() != l_oCovarianceMatrixCondition2.cols())
+		{
+			this->getLogManager() << LogLevel_Error << "The two inputs do not seem to have the same number of channels, "
+				<< l_oCovarianceMatrixCondition1.cols() << " vs " << l_oCovarianceMatrixCondition2.cols() << "\n";
+			return false;
+		}
+
+		this->getLogManager() << LogLevel_Info << "Data covariance dims are [" << l_oCovarianceMatrixCondition1.rows() << "x"
+			<< l_oCovarianceMatrixCondition1.cols() 
+			<< "]. Number of samples per condition : \n";
+		this->getLogManager() << LogLevel_Info << "  cond1 = " 
+			<< l_iNumberOfCondition1Trials << " chunks, sized " << l_iCondition1ChunkSize << " -> " << l_iNumberOfCondition1Trials*l_iCondition1ChunkSize << " samples\n";
+		this->getLogManager() << LogLevel_Info << "  cond2 = " 
+			<< l_iNumberOfCondition2Trials << " chunks, sized " << l_iCondition2ChunkSize << " -> " << l_iNumberOfCondition2Trials*l_iCondition2ChunkSize << " samples\n";
 
 		if(l_iNumberOfCondition1Trials==0 || l_iNumberOfCondition2Trials==0)
 		{
@@ -244,19 +261,15 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 				l_vEigenVector[itpp::real(l_oEigenValue)[i]]=itpp::real(l_oVector);
 			}
 
-			FILE* l_pFile=::fopen(m_sSpatialFilterConfigurationFilename.toASCIIString(), "wb");
-			if(!l_pFile)
-			{
-				this->getLogManager() << LogLevel_Error << "The file [" << m_sSpatialFilterConfigurationFilename << "] could not be opened for writing...\n";
-				return false;
-			}
+			// Collect the output vectors here
+			CMatrix l_oOutputVectors;
+			l_oOutputVectors.setDimensionCount(2);
+			l_oOutputVectors.setDimensionSize(0, static_cast<uint32>(m_ui64FilterDimension));
+			l_oOutputVectors.setDimensionSize(1, l_ui32ChannelCount);
 
-
+			uint32 l_u32Steps=0,cnt=0;
 			std::map < double, itpp::vec >::const_iterator it_forward;
-			::fprintf(l_pFile, "<OpenViBE-SettingsOverride>\n");
-			::fprintf(l_pFile, "\t<SettingValue>");
 			this->getLogManager() << LogLevel_Debug << "lowest eigenvalues: " << "\n";
-			uint32 l_u32Steps;
 			for(it_forward=l_vEigenVector.begin(), l_u32Steps = 0; 
 				it_forward!=l_vEigenVector.end() && l_u32Steps < ::ceil(m_ui64FilterDimension/2.0);
 				it_forward++, l_u32Steps++)
@@ -264,7 +277,7 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 				this->getLogManager() << LogLevel_Debug << it_forward->first << ", ";
 				for(uint32 j=0; j<l_ui32ChannelCount; j++)
 				{
-					::fprintf(l_pFile, "%e ", it_forward->second[j]);
+					l_oOutputVectors.getBuffer()[cnt++] = it_forward->second[j];
 				}
 			}
 			this->getLogManager() << LogLevel_Debug << "\n";
@@ -278,16 +291,45 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 				this->getLogManager() << LogLevel_Debug << it_backward->first << ", ";
 				for(uint32 j=0; j<l_ui32ChannelCount; j++)
 				{
-					::fprintf(l_pFile, "%e ", it_backward->second[j]);
+					l_oOutputVectors.getBuffer()[cnt++] = it_backward->second[j];
 				}
 			}
 			this->getLogManager() << LogLevel_Debug << "\n";
-			::fprintf(l_pFile, "</SettingValue>\n");
-			::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", uint32(m_ui64FilterDimension));
-			::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", l_ui32ChannelCount);
-			::fprintf(l_pFile, "</OpenViBE-SettingsOverride>\n");
-			::fclose(l_pFile);
 
+			if(m_bSaveAsBoxConfig) {
+				FILE* l_pFile=::fopen(m_sSpatialFilterConfigurationFilename.toASCIIString(), "wb");
+				if(!l_pFile)
+				{
+					this->getLogManager() << LogLevel_Error << "The file [" << m_sSpatialFilterConfigurationFilename << "] could not be opened for writing...\n";
+					return false;
+				}
+
+				::fprintf(l_pFile, "<OpenViBE-SettingsOverride>\n");
+				::fprintf(l_pFile, "\t<SettingValue>");
+
+				cnt=0;
+				for(uint32 i=0;i<m_ui64FilterDimension;i++)
+				{
+					for(uint32 j=0; j<l_ui32ChannelCount; j++)
+					{
+						::fprintf(l_pFile, "%e ", l_oOutputVectors.getBuffer()[cnt++]);
+					}
+				}
+
+				::fprintf(l_pFile, "</SettingValue>\n");
+				::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", uint32(m_ui64FilterDimension));
+				::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", l_ui32ChannelCount);
+				::fprintf(l_pFile, "\t<SettingValue></SettingValue>\n");
+				::fprintf(l_pFile, "</OpenViBE-SettingsOverride>\n");
+				::fclose(l_pFile);
+			} 
+			else
+			{
+				if(!OpenViBEToolkit::Tools::Matrix::saveToTextFile(l_oOutputVectors, m_sSpatialFilterConfigurationFilename)) {
+					this->getLogManager() << LogLevel_Error << "Unable to save to [" << m_sSpatialFilterConfigurationFilename << "\n";
+					return false;
+				}
+			}
 		}
 		else
 		{
@@ -296,8 +338,11 @@ boolean CBoxAlgorithmCSPSpatialFilterTrainer::process(void)
 		}
 
 		this->getLogManager() << LogLevel_Info << "CSP Spatial filter trained successfully.\n";
+
+		m_oStimulationEncoder.getInputStimulationSet()->clear();
 		m_oStimulationEncoder.getInputStimulationSet()->appendStimulation(OVTK_StimulationId_TrainCompleted, l_ui64TrainDate, 0);
-		m_oStimulationEncoder.encodeBuffer(0);
+		m_oStimulationEncoder.encodeBuffer();
+
 		l_rDynamicBoxContext.markOutputAsReadyToSend(0,l_ui64TrainChunkStartTime,l_ui64TrainChunkEndTime);
 	}
 

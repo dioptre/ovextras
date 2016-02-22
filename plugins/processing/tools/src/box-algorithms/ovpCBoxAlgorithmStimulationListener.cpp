@@ -1,4 +1,5 @@
 #include "ovpCBoxAlgorithmStimulationListener.h"
+#include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -11,10 +12,8 @@ boolean CBoxAlgorithmStimulationListener::initialize(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
-	{
-		IAlgorithmProxy* m_pStreamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-		m_pStreamDecoder->initialize();
-		m_vStreamDecoder.push_back(m_pStreamDecoder);
+	{		
+		m_vStimulationDecoder.push_back(new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmStimulationListener >(*this,i));
 	}
 
 	CString l_sSettingValue;
@@ -29,10 +28,10 @@ boolean CBoxAlgorithmStimulationListener::uninitialize(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		m_vStreamDecoder[i]->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_vStreamDecoder[i]);
+		m_vStimulationDecoder[i]->uninitialize();
+		delete m_vStimulationDecoder[i];
 	}
-	m_vStreamDecoder.clear();
+	m_vStimulationDecoder.clear();
 
 	return true;
 }
@@ -52,16 +51,14 @@ boolean CBoxAlgorithmStimulationListener::process(void)
 	{
 		for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
-			TParameterHandler < const IMemoryBuffer* > ip_pMemoryBufferToDecode(m_vStreamDecoder[i]->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			TParameterHandler < const IStimulationSet* > op_pStimulationSet(m_vStreamDecoder[i]->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
-			ip_pMemoryBufferToDecode=l_rDynamicBoxContext.getInputChunk(i, j);
-
-			m_vStreamDecoder[i]->process();
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+			m_vStimulationDecoder[i]->decode(j);
+			if(m_vStimulationDecoder[i]->isHeaderReceived())
 			{
 			}
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_vStimulationDecoder[i]->isBufferReceived())
 			{
+				const IStimulationSet* op_pStimulationSet = m_vStimulationDecoder[i]->getOutputStimulationSet();
+
 				CString l_sInputName;
 				l_rStaticBoxContext.getInputName(i, l_sInputName);
 				for(uint64 k=0; k<op_pStimulationSet->getStimulationCount(); k++)
@@ -81,8 +78,16 @@ boolean CBoxAlgorithmStimulationListener::process(void)
 							<< " and chunk range is [" << time64(l_rDynamicBoxContext.getInputChunkStartTime(i, j)) << ", " << time64(l_rDynamicBoxContext.getInputChunkEndTime(i, j)) << "]\n";
 					}
 				}
+				/*
+				if(ITimeArithmetics::timeToSeconds(l_rDynamicBoxContext.getInputChunkStartTime(i, j)) > 234 && op_pStimulationSet->getStimulationCount()==0) 
+				{
+								this->getLogManager() << LogLevel_Info
+							<< "Chunk is empty at ["
+							<< time64(l_rDynamicBoxContext.getInputChunkStartTime(i, j)) << ", " << time64(l_rDynamicBoxContext.getInputChunkEndTime(i, j)) << "]\n";
+				}
+				*/
 			}
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_vStimulationDecoder[i]->isEndReceived())
 			{
 			}
 			l_rDynamicBoxContext.markInputAsDeprecated(i, j);

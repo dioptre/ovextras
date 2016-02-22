@@ -41,6 +41,7 @@ namespace OpenViBEPlugins
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_GenericStreamReader);
 
+
 		protected:
 
 			OpenViBE::CString m_sFilename;
@@ -55,6 +56,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32OutputIndex;
 			OpenViBE::boolean m_bPending;
 			OpenViBE::boolean m_bUseCompression;
+			OpenViBE::boolean m_bHasEBMLHeader;
 
 			::FILE* m_pFile;
 			std::stack < EBML::CIdentifier > m_vNodes;
@@ -62,6 +64,7 @@ namespace OpenViBEPlugins
 			std::map < OpenViBE::uint32, OpenViBE::CIdentifier > m_vStreamIndexToTypeIdentifier;
 
 		private:
+			OpenViBE::boolean initializeFile();
 
 			virtual EBML::boolean isMasterChild(const EBML::CIdentifier& rIdentifier);
 			virtual void openChild(const EBML::CIdentifier& rIdentifier);

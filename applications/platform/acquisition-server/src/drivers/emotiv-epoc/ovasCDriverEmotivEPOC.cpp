@@ -5,9 +5,9 @@
 
 #include "edk.h"
 
-#include <system/Time.h>
+#include <system/ovCTime.h>
 
-#include <system/Memory.h>
+#include <system/ovCMemory.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -105,12 +105,14 @@ boolean CDriverEmotivEPOC::initialize(
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: Failed to get the ENV variable PATH.\n";
 		return false;
 	}
-		
+
+#if defined TARGET_OS_Windows
 	if(_putenv_s("PATH",m_sCommandForPathModification) != 0)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: Failed to modify the environment PATH with the Emotiv SDK path.\n";
 		return false;
 	}
+#endif
 	
 	m_oHeader.setChannelCount(14);
 	if(m_bUseGyroscope)
@@ -140,6 +142,22 @@ boolean CDriverEmotivEPOC::initialize(
 	}
 
 	m_oHeader.setSamplingFrequency(128); // let's hope so...
+
+	// Set channel units
+	// Various sources (e.g. http://emotiv.com/forum/forum15/topic879/messages/?PAGEN_1=3
+	// and http://www.bci2000.org/wiki/index.php/Contributions:Emotiv ) suggested
+	// that the units from the device are in microvolts, but with a typical DC offset around 4000. 
+	// Hard to find official source.
+	for(uint32 c=0;c<14;c++) 
+	{
+		m_oHeader.setChannelUnits(c, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
+	}
+	if(m_bUseGyroscope)
+	{
+		// Even less sure about the units of these, leaving as unspecified.
+		m_oHeader.setChannelUnits(14, OVTK_UNIT_Unspecified, OVTK_FACTOR_Base);
+		m_oHeader.setChannelUnits(15, OVTK_UNIT_Unspecified, OVTK_FACTOR_Base);
+	}
 
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "INIT called.\n";
 	if(m_rDriverContext.isConnected())
@@ -174,14 +192,22 @@ boolean CDriverEmotivEPOC::initialize(
 	// Hardware initialization
 
 	m_bReadyToCollect = false;
-
+#if defined TARGET_OS_Windows
 	// First call to a function from EDK.DLL: guard the call with __try/__except clauses.
 	__try
+#elif defined TARGET_OS_Linux
+	try
+#endif
 	{
 		m_tEEEventHandle = EE_EmoEngineEventCreate();
 		m_ui32EDK_LastErrorCode = EE_EngineConnect();
+
 	}
+#if defined TARGET_OS_Windows
 	__except(EXCEPTION_EXECUTE_HANDLER)
+#elif defined TARGET_OS_Linux
+	catch(...)
+#endif
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: First call to 'edk.dll' failed.\n"
 			<< "\tTo use this driver you must have the Emotiv SDK Research Edition (or above) installed on your computer.\n"

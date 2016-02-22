@@ -1,3 +1,8 @@
+IF(OV_DISABLE_GTK)
+  MESSAGE(STATUS  "Skipping Plugins: Simple Visualisation, no GTK")
+  RETURN()
+ENDIF(OV_DISABLE_GTK)
+
 PROJECT(openvibe-plugins-simple-visualisation)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})
@@ -18,7 +23,7 @@ INCLUDE("FindOpenViBEToolkit")
 INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindThirdPartyGTK")
-
+INCLUDE("FindThirdPartyBoost")#need boost for erp plot
 # ---------------------------------
 # Target macros
 # Defines target operating system

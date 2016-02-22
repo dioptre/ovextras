@@ -5,7 +5,7 @@
 #include "ovkCSimulatedBox.h"
 #include "ovkCPlayer.h"
 
-#include <system/Time.h>
+#include "ovkCBoxSettingModifierVisitor.h"
 
 #include <xml/IReader.h>
 
@@ -27,156 +27,7 @@ using namespace OpenViBE::Plugins;
 //___________________________________________________________________//
 //                                                                   //
 
-#define OVD_AttributeId_SettingOverrideFilename             OpenViBE::CIdentifier(0x8D21FF41, 0xDF6AFE7E)
 
-class CBoxSettingModifierVisitor : public IObjectVisitor, public XML::IReaderCallback
-{
-public:
-
-
-	CBoxSettingModifierVisitor(IConfigurationManager* pConfigurationManager = NULL) :
-		IObjectVisitor(),
-		m_pConfigurationManager(pConfigurationManager)
-	{}
-
-	virtual void openChild(const char* sName, const char** sAttributeName, const char** sAttributeValue, XML::uint64 ui64AttributeCount)
-	{
-		if(!m_bIsParsingSettingOverride)
-		{
-			if(string(sName)==string("OpenViBE-SettingsOverride"))
-			{
-				m_bIsParsingSettingOverride=true;
-			}
-		}
-		else if(string(sName)==string("SettingValue"))
-		{
-			m_bIsParsingSettingValue=true;
-		}
-		else
-		{
-			m_bIsParsingSettingValue=false;
-		}
-	}
-
-	virtual void processChildData(const char* sData)
-	{
-		if(m_bIsParsingSettingValue)
-		{
-			m_pObjectVisitorContext->getLogManager() << LogLevel_Debug << "Using [" << CString(sData) << "] as setting " << m_ui32SettingIndex << "...\n";
-			m_pBox->setSettingValue(m_ui32SettingIndex, sData);
-			m_ui32SettingIndex++;
-		}
-	}
-
-	virtual void closeChild(void)
-	{
-		m_bIsParsingSettingValue=false;
-	}
-
-	virtual boolean processBegin(IObjectVisitorContext& rObjectVisitorContext, IBox& rBox)
-	{
-		boolean l_bReturnValue = true;
-
-		m_pObjectVisitorContext=&rObjectVisitorContext;
-
-		// checks if this box should override
-		// settings from external file
-		if(rBox.hasAttribute(OVD_AttributeId_SettingOverrideFilename))
-		{
-			CString l_sSettingOverrideFilename=rBox.getAttributeValue(OVD_AttributeId_SettingOverrideFilename);
-			CString l_sSettingOverrideFilenameFinal;
-			if (m_pConfigurationManager == NULL)
-			{
-				l_sSettingOverrideFilenameFinal=rObjectVisitorContext.getConfigurationManager().expand(l_sSettingOverrideFilename);
-			}
-			else
-			{
-				l_sSettingOverrideFilenameFinal = m_pConfigurationManager->expand(l_sSettingOverrideFilename);
-			}
-
-			// message
-			rObjectVisitorContext.getLogManager() << LogLevel_Trace << "Trying to override [" << rBox.getName() << "] box settings with file [" << l_sSettingOverrideFilename << " which expands to " << l_sSettingOverrideFilenameFinal << "] !\n";
-
-			// creates XML reader
-			XML::IReader* l_pReader=XML::createReader(*this);
-
-			// adds new box settings
-			m_pBox=&rBox;
-			m_ui32SettingIndex=0;
-			m_bIsParsingSettingValue=false;
-			m_bIsParsingSettingOverride=false;
-
-			// 1. Open settings file (binary because read would conflict with tellg for text files)
-			// 2. Loop until end of file, reading it
-			//    and sending what is read to the XML parser
-			// 3. Close the settings file
-			ifstream l_oFile(l_sSettingOverrideFilenameFinal.toASCIIString(), ios::binary);
-			if(l_oFile.is_open())
-			{
-				char l_sBuffer[1024];
-				std::streamoff l_iBufferLen=0;
-				bool l_bStatusOk=true;
-				l_oFile.seekg(0, ios::end);
-				std::streamoff l_iFileLen=l_oFile.tellg();
-				l_oFile.seekg(0, ios::beg);
-				while(l_iFileLen && l_bStatusOk)
-				{
-					// File length is always positive so this is safe
-					l_iBufferLen=(unsigned(l_iFileLen)>sizeof(l_sBuffer)?sizeof(l_sBuffer):l_iFileLen);
-					l_oFile.read(l_sBuffer, l_iBufferLen);
-					l_iFileLen-=l_iBufferLen;
-					l_bStatusOk=l_pReader->processData(l_sBuffer, l_iBufferLen);
-				}
-				l_oFile.close();
-
-				// message
-				if(m_ui32SettingIndex == rBox.getSettingCount())
-				{
-					rObjectVisitorContext.getLogManager() << LogLevel_Trace << "Overrode " << m_ui32SettingIndex << " setting(s) with this configuration file...\n";
-				}
-				else
-				{
-					rObjectVisitorContext.getLogManager() << LogLevel_Warning << "Overrode " << m_ui32SettingIndex << " setting(s) with configuration file [" << l_sSettingOverrideFilenameFinal << "]. That does not match the box setting count " << rBox.getSettingCount() << "...\n";
-				}
-			}
-			else
-			{
-				// override file was not found
-				rObjectVisitorContext.getLogManager() << LogLevel_Error << "Could not override [" << rBox.getName() << "] settings because configuration file [" << l_sSettingOverrideFilenameFinal << "] could not be opened\n";
-				l_bReturnValue = false;
-			}
-
-			// cleans up internal state
-			m_pBox=NULL;
-			m_ui32SettingIndex=0;
-			m_bIsParsingSettingValue=false;
-			m_bIsParsingSettingOverride=false;
-
-			// releases XML reader
-			l_pReader->release();
-			l_pReader=NULL;
-		}
-
-		return l_bReturnValue;
-	}
-
-	virtual boolean processEnd(IObjectVisitorContext& rObjectVisitorContext, IBox& rBox)
-	{
-		m_pObjectVisitorContext=&rObjectVisitorContext;
-		return true;
-	}
-
-	IObjectVisitorContext* m_pObjectVisitorContext;
-	IBox* m_pBox;
-	uint32 m_ui32SettingIndex;
-	boolean m_bIsParsingSettingValue;
-	boolean m_bIsParsingSettingOverride;
-	IConfigurationManager* m_pConfigurationManager;
-
-#undef boolean
-	_IsDerivedFromClass_Final_(IObjectVisitor, OV_UndefinedIdentifier);
-#define boolean OpenViBE::boolean
-};
 
 //___________________________________________________________________//
 //                                                                   //
@@ -211,7 +62,7 @@ boolean CScheduler::setScenario(
 
 	if(m_bIsInitialized)
 	{
-		this->getLogManager() << LogLevel_Warning << "Trying to configure an intialized scheduler !\n";
+		this->getLogManager() << LogLevel_Warning << "Trying to configure an initialized scheduler !\n";
 		return false;
 	}
 
@@ -227,7 +78,7 @@ boolean CScheduler::setFrequency(
 
 	if(m_bIsInitialized)
 	{
-		this->getLogManager() << LogLevel_Warning << "Trying to configure an intialized scheduler !\n";
+		this->getLogManager() << LogLevel_Warning << "Trying to configure an initialized scheduler !\n";
 		return false;
 	}
 
@@ -238,28 +89,28 @@ boolean CScheduler::setFrequency(
 //___________________________________________________________________//
 //                                                                   //
 
-boolean CScheduler::initialize(void)
+SchedulerInitializationCode CScheduler::initialize(void)
 {
 	this->getLogManager() << LogLevel_Trace << "Scheduler initialize\n";
 
 	if(m_bIsInitialized)
 	{
-		this->getLogManager() << LogLevel_Warning << "Trying to initialize an intialized scheduler !\n";
-		return false;
+		this->getLogManager() << LogLevel_Warning << "Trying to initialize an initialized scheduler !\n";
+		return SchedulerInitialization_Failed;
 	}
 
 	m_pScenario=&getScenarioManager().getScenario(m_oScenarioIdentifier);
 	if(!m_pScenario)
 	{
 		this->getLogManager() << LogLevel_ImportantWarning << "Scenario " << m_oScenarioIdentifier << " does not exist !\n";
-		return false;
+		return SchedulerInitialization_Failed;
 	}
 
 	CBoxSettingModifierVisitor l_oBoxSettingModifierVisitor(&getKernelContext().getConfigurationManager());
 	if(!m_pScenario->acceptVisitor(l_oBoxSettingModifierVisitor)) 
 	{
 		this->getLogManager() << LogLevel_Error << "Scenario " << m_oScenarioIdentifier << " setting modification with acceptVisitor() failed\n";
-		return false;
+		return SchedulerInitialization_Failed;
 	}
 
 	CIdentifier l_oBoxIdentifier;
@@ -300,13 +151,18 @@ boolean CScheduler::initialize(void)
 		m_vSimulatedBoxChrono[l_oBoxIdentifier].reset(static_cast<uint32>(m_ui64Frequency));
 	}
 
+	boolean l_bBoxInitialization = true;
+
 	for(map < pair < int32, CIdentifier >, CSimulatedBox* >::iterator itSimulatedBox=m_vSimulatedBox.begin(); itSimulatedBox!=m_vSimulatedBox.end(); itSimulatedBox++)
 	{
 		const IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
 		this->getLogManager() << LogLevel_Trace << "Scheduled box : id = " << itSimulatedBox->first.second << " priority = " << -itSimulatedBox->first.first << " name = " << l_pBox->getName() << "\n";
 		if(itSimulatedBox->second ) // we initialize regardless of mute so that we can bring the box back during the run (in theory...)
 		{
-			itSimulatedBox->second->initialize();
+			if(!itSimulatedBox->second->initialize())
+			{
+				l_bBoxInitialization = false;
+			}
 		}
 	}
 
@@ -315,7 +171,11 @@ boolean CScheduler::initialize(void)
 	m_bIsInitialized=true;
 
 	m_oBenchmarkChrono.reset((System::uint32)m_ui64Frequency);
-	return true;
+	if(l_bBoxInitialization)
+	{
+		return SchedulerInitialization_Success;
+	}
+	return SchedulerInitialization_BoxInitializationFailed;
 
 }
 
@@ -365,8 +225,13 @@ boolean CScheduler::loop(void)
 		CSimulatedBox* l_pSimulatedBox=itSimulatedBox->second;
 		System::CChrono& l_rSimulatedBoxChrono=m_vSimulatedBoxChrono[itSimulatedBox->first.second];
 
-		// we check once a cycle if the box is indeed muted.
 		IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
+		if(!l_pBox) {
+			this->getLogManager() << LogLevel_Warning << "Unable to get box details for box with id " << itSimulatedBox->first.second << "\n";
+			continue;
+		}
+
+		// we check once a cycle if the box is indeed muted.
 		boolean l_bIsMuted = false;
 		if(l_pBox->hasAttribute(OV_AttributeId_Box_Muted))
 		{
@@ -378,28 +243,35 @@ boolean CScheduler::loop(void)
 		}
 
 		l_rSimulatedBoxChrono.stepIn();
-		if(l_pSimulatedBox && !l_bIsMuted)
+		if(l_pSimulatedBox)
 		{
-			l_pSimulatedBox->processClock();
-
-			if(l_pSimulatedBox->isReadyToProcess())
+			if(!l_bIsMuted)
 			{
-				l_pSimulatedBox->process();
+				l_pSimulatedBox->processClock();
+
+				if(l_pSimulatedBox->isReadyToProcess())
+				{
+					l_pSimulatedBox->process();
+				}
 			}
 
+			//if the box is muted we still have to erase chunks that arrives at the input
 			map < uint32, list < CChunk > >& l_rSimulatedBoxInput=m_vSimulatedBoxInput[itSimulatedBox->first.second];
 			map < uint32, list < CChunk > >::iterator itSimulatedBoxInput;
 			for(itSimulatedBoxInput=l_rSimulatedBoxInput.begin(); itSimulatedBoxInput!=l_rSimulatedBoxInput.end(); itSimulatedBoxInput++)
 			{
 				list < CChunk >& l_rSimulatedBoxInputChunkList=itSimulatedBoxInput->second;
-				list < CChunk >::iterator itSimulatedBoxInputChunkList;
-				for(itSimulatedBoxInputChunkList=l_rSimulatedBoxInputChunkList.begin(); itSimulatedBoxInputChunkList!=l_rSimulatedBoxInputChunkList.end(); itSimulatedBoxInputChunkList++)
+				if(!l_bIsMuted)
 				{
-					l_pSimulatedBox->processInput(itSimulatedBoxInput->first, *itSimulatedBoxInputChunkList);
-
-					if(l_pSimulatedBox->isReadyToProcess())
+					list < CChunk >::iterator itSimulatedBoxInputChunkList;
+					for(itSimulatedBoxInputChunkList=l_rSimulatedBoxInputChunkList.begin(); itSimulatedBoxInputChunkList!=l_rSimulatedBoxInputChunkList.end(); itSimulatedBoxInputChunkList++)
 					{
-						l_pSimulatedBox->process();
+						l_pSimulatedBox->processInput(itSimulatedBoxInput->first, *itSimulatedBoxInputChunkList);
+
+						if(l_pSimulatedBox->isReadyToProcess())
+						{
+							l_pSimulatedBox->process();
+						}
 					}
 				}
 				l_rSimulatedBoxInputChunkList.clear();
@@ -411,7 +283,6 @@ boolean CScheduler::loop(void)
 
 		if(l_rSimulatedBoxChrono.hasNewEstimation())
 		{
-			IBox* l_pBox=m_pScenario->getBoxDetails(itSimulatedBox->first.second);
 			l_pBox->addAttribute(OV_AttributeId_Box_ComputationTimeLastSecond, "");
 			l_pBox->setAttributeValue(OV_AttributeId_Box_ComputationTimeLastSecond, CIdentifier(l_rSimulatedBoxChrono.getTotalStepInDuration()).toString());
 		}

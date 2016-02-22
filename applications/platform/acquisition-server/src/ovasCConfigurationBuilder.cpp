@@ -7,6 +7,7 @@
 #include <fstream>
 #include <list>
 #include <cstdlib>
+#include <cstring>
 
 #define OVAS_ElectrodeNames_File           OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/electrode-names.txt"
 #define OVAS_ConfigureGUIElectrodes_File   OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-channel-names.ui"
@@ -80,8 +81,18 @@ static void treeview_apply_channel_name_cb(::GtkTreeView* pTreeview, ::GtkTreePa
 
 CConfigurationBuilder::CConfigurationBuilder(const char* sGtkBuilderFileName)
 	:m_pBuilderConfigureInterface(NULL)
+	,m_pBuilderConfigureChannelInterface(NULL)
+	,m_pDialog(NULL)
+	,m_pIdentifier(NULL)
+	,m_pAge(NULL)
+	,m_pNumberOfChannels(NULL)
+	,m_pSamplingFrequency(NULL)
+	,m_pGender(NULL)
+	,m_pImpedanceCheck(NULL)
 	,m_pElectrodeNameListStore(NULL)
 	,m_pChannelNameListStore(NULL)
+	,m_pElectrodeNameTreeView(NULL)
+	,m_pChannelNameTreeView(NULL)
 	,m_sGtkBuilderFileName(sGtkBuilderFileName?sGtkBuilderFileName:"")
 	,m_sElectrodeFileName(OVAS_ElectrodeNames_File)
 	,m_sGtkBuilderChannelsFileName(OVAS_ConfigureGUIElectrodes_File)
@@ -98,15 +109,34 @@ CConfigurationBuilder::~CConfigurationBuilder(void)
 
 boolean CConfigurationBuilder::configure(IHeader& rHeader)
 {
-	m_bApplyConfiguration=false;
+	m_bApplyConfiguration = true;
 
 	m_pHeader=&rHeader;
-	this->preConfigure();
-	m_bApplyConfiguration=this->doConfigure();
-	this->postConfigure();
+	if(!this->preConfigure())
+	{
+		std::cout << "Error: Driver preconfigure failed\n";
+		m_bApplyConfiguration = false;
+	}
+
+	// Only run if preConfig succeeded
+	EErrorCode l_oErrorCode;
+	if(m_bApplyConfiguration && !this->doConfigure(l_oErrorCode))
+	{
+		if(l_oErrorCode != Error_UserCancelled)
+		{
+			std::cout << "Note: Driver doConfigure failed with code " << l_oErrorCode << "\n";
+		}
+		m_bApplyConfiguration = false;
+	}
+
+	// Run the postconfigure in any case to close a possible dialog
+	if(!this->postConfigure()) {
+		std::cout << "Error: Driver postconfigure failed\n";
+		m_bApplyConfiguration = false;
+	}
 	m_pHeader=NULL;
 
-	return m_bApplyConfiguration;
+	return m_bApplyConfiguration; 
 }
 
 boolean CConfigurationBuilder::preConfigure(void)
@@ -114,20 +144,40 @@ boolean CConfigurationBuilder::preConfigure(void)
 	// Prepares interface
 
 	m_pBuilderConfigureInterface=gtk_builder_new(); // glade_xml_new(m_sGtkBuilderFileName.c_str(), NULL, NULL);
-	gtk_builder_add_from_file(m_pBuilderConfigureInterface, m_sGtkBuilderFileName.c_str(), NULL);
+	GError* l_pGtkError = NULL;
+	if(!gtk_builder_add_from_file(m_pBuilderConfigureInterface, m_sGtkBuilderFileName.c_str(), &l_pGtkError))
+	{
+		std::cout << "Error: Unable to load interface from " << m_sGtkBuilderFileName << ", code " << l_pGtkError->code << " (" << l_pGtkError->message << ")\n";
+		return false;
+	}
 
 	m_pBuilderConfigureChannelInterface=gtk_builder_new(); // glade_xml_new(m_sGtkBuilderChannelsFileName.c_str(), NULL, NULL);
-	gtk_builder_add_from_file(m_pBuilderConfigureChannelInterface, m_sGtkBuilderChannelsFileName.c_str(), NULL);
+	if(!gtk_builder_add_from_file(m_pBuilderConfigureChannelInterface, m_sGtkBuilderChannelsFileName.c_str(), &l_pGtkError))
+	{
+		std::cout << "Error: Unable to load channels from " << m_sGtkBuilderChannelsFileName << ", code " << l_pGtkError->code << " (" << l_pGtkError->message << ")\n";
+		return false;
+	}
 
 	// Finds all the widgets
 
 	m_pDialog=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "openvibe-acquisition-server-settings"));
+	if(!m_pDialog)
+	{
+		std::cout << "Error: Unable to find even the basic settings dialog from " << m_sGtkBuilderFileName << "\n";
+		return false;
+	}
 
 	m_pIdentifier=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_identifier"));
 	m_pAge=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_age"));
 	m_pNumberOfChannels=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_number_of_channels"));
+	// NB: sampling_frequency is not really a "combobox" everywhere (eg telnet reader), should update in every UI the ID name
 	m_pSamplingFrequency=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_sampling_frequency"));
 	m_pGender=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_gender"));
+
+	if (gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_impedance"))
+	{
+		m_pImpedanceCheck = GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_impedance"));
+	}
 
 	m_pElectrodeNameTreeView=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureChannelInterface, "treeview_electrode_names"));
 	m_pChannelNameTreeView=GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureChannelInterface, "treeview_channel_names"));
@@ -184,15 +234,34 @@ boolean CConfigurationBuilder::preConfigure(void)
 	{
 		char l_sSamplingFrequency[1024];
 		sprintf(l_sSamplingFrequency, "%i", (int)m_pHeader->getSamplingFrequency());
-		gtk_combo_box_set_active_text(
-			GTK_COMBO_BOX(m_pSamplingFrequency),
-			l_sSamplingFrequency);
+		
+		// sampling frequency could be set to an Int through a spin button instead of regular combo box (eg: telnet reader)
+		if (std::strcmp(G_OBJECT_TYPE_NAME(m_pSamplingFrequency),"GtkSpinButton")==0) {
+			gtk_spin_button_set_value(
+				GTK_SPIN_BUTTON(m_pSamplingFrequency),
+				m_pHeader->getSamplingFrequency());
+		}
+		// would be a "GtkComboBox"
+		else {
+			gtk_combo_box_set_active_text(
+				GTK_COMBO_BOX(m_pSamplingFrequency),
+				l_sSamplingFrequency);
+		}
 	}
 	else
 	{
-		gtk_combo_box_set_active(
-			GTK_COMBO_BOX(m_pSamplingFrequency),
-			0);
+	        // sampling frequency could be set to an Int through a spin button instead of regular combo box (eg: telnet reader)
+		if (std::strcmp(G_OBJECT_TYPE_NAME(m_pSamplingFrequency),"GtkSpinButton")==0) {
+			gtk_spin_button_set_value(
+				GTK_SPIN_BUTTON(m_pSamplingFrequency),
+				0);
+		}
+		// would be a "GtkComboBox"
+		else {
+			gtk_combo_box_set_active(
+				GTK_COMBO_BOX(m_pSamplingFrequency),
+				0);
+		}
 	}
 	if(m_pHeader->isSubjectGenderSet())
 	{
@@ -210,6 +279,11 @@ boolean CConfigurationBuilder::preConfigure(void)
 			0);
 	}
 
+	if (m_pImpedanceCheck)
+	{
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(m_pImpedanceCheck), m_pHeader->isImpedanceCheckRequested());
+	}
+
 	// Prepares channel name cache
 	if(m_pHeader->isChannelCountSet())
 	{
@@ -222,9 +296,28 @@ boolean CConfigurationBuilder::preConfigure(void)
 	return true;
 }
 
-boolean CConfigurationBuilder::doConfigure(void)
+boolean CConfigurationBuilder::doConfigure(EErrorCode& errorCode)
 {
-	return gtk_dialog_run(GTK_DIALOG(m_pDialog))==GTK_RESPONSE_APPLY;
+	if(!m_pDialog)
+	{
+		errorCode = Error_Unknown;
+		return false;
+	}
+
+	const gint l_oResponse = gtk_dialog_run(GTK_DIALOG(m_pDialog));
+	
+	switch(l_oResponse)
+	{
+		case GTK_RESPONSE_APPLY:
+			errorCode = Error_NoError;
+			return true;
+		case GTK_RESPONSE_CANCEL:
+			errorCode = Error_UserCancelled;
+			return false;
+		default:
+			errorCode = Error_Unknown;
+			return false;
+	}
 }
 
 boolean CConfigurationBuilder::postConfigure(void)
@@ -235,12 +328,21 @@ boolean CConfigurationBuilder::postConfigure(void)
 		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pAge));
 		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pNumberOfChannels));
 
-		gchar* l_sSamplingFrequency=gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pSamplingFrequency));
 		string l_sGender=gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pGender));
 		m_pHeader->setExperimentIdentifier(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pIdentifier)));
 		m_pHeader->setSubjectAge(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pAge)));
 		m_pHeader->setChannelCount(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pNumberOfChannels)));
-		m_pHeader->setSamplingFrequency(l_sSamplingFrequency?atoi(l_sSamplingFrequency):0);
+		// sampling frequency could be set to an Int through a spin button instead of regular combo box (eg: telnet reader)
+		if (std::strcmp(G_OBJECT_TYPE_NAME(m_pSamplingFrequency),"GtkSpinButton")==0) {
+			gtk_spin_button_update(GTK_SPIN_BUTTON(m_pSamplingFrequency));
+			m_pHeader->setSamplingFrequency(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(m_pSamplingFrequency)));
+		}
+		// would be a "GtkComboBox"
+		else {
+			gchar* l_sSamplingFrequency=gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pSamplingFrequency));
+			m_pHeader->setSamplingFrequency(l_sSamplingFrequency?atoi(l_sSamplingFrequency):0);
+			
+		}
 		m_pHeader->setSubjectGender(
 			l_sGender=="male"?OVTK_Value_Gender_Male:
 			l_sGender=="female"?OVTK_Value_Gender_Female:
@@ -250,14 +352,33 @@ boolean CConfigurationBuilder::postConfigure(void)
 		{
 			m_pHeader->setChannelName(i, m_vChannelName[i].c_str());
 		}
+
+		if (m_pImpedanceCheck)
+		{
+			m_pHeader->setImpedanceCheckRequested(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_pImpedanceCheck)) != FALSE);
+		}
+		else
+		{
+			m_pHeader->setImpedanceCheckRequested(false);
+		}
 	}
 
-	gtk_widget_hide(m_pDialog);
+	if(m_pDialog)
+	{
+		gtk_widget_hide(m_pDialog);
+	}
 
-	g_object_unref(m_pBuilderConfigureInterface);
-	g_object_unref(m_pBuilderConfigureChannelInterface);
-	m_pBuilderConfigureInterface=NULL;
-	m_pBuilderConfigureChannelInterface=NULL;
+	if(m_pBuilderConfigureInterface)
+	{
+		g_object_unref(m_pBuilderConfigureInterface);
+		m_pBuilderConfigureInterface=NULL;
+	}
+
+	if(m_pBuilderConfigureChannelInterface) 
+	{
+		g_object_unref(m_pBuilderConfigureChannelInterface);
+		m_pBuilderConfigureChannelInterface=NULL;
+	}
 
 	m_vChannelName.clear();
 
@@ -373,10 +494,15 @@ void CConfigurationBuilder::buttonChangeChannelNamesCB(void)
 						if(l_oFile.is_open())
 						{
 							// Reads channel names from file
-							while(!l_oFile.eof())
+							string l_sElectrodeName;
+							while(getline(l_oFile, l_sElectrodeName))
 							{
-								string l_sElectrodeName;
-								l_oFile >> l_sElectrodeName;
+								//if line is empty, skip the channel by setting empty string as name
+								//if we do not, loading will squeeze the channels together.
+								if(l_sElectrodeName.empty())
+								{
+									l_sElectrodeName = "";
+								}
 								l_vElectrodeName.push_back(l_sElectrodeName);
 							}
 							l_oFile.close();

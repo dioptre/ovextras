@@ -1,9 +1,10 @@
 #include "ovpCAlgorithmBrainampFileReader.h"
 
-#include <system/Memory.h>
-
+#include <system/ovCMemory.h>
 #include <sstream>
 #include <cstdlib>
+
+#include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -37,6 +38,11 @@ boolean CAlgorithmBrainampFileReader::initialize(void)
 
 boolean CAlgorithmBrainampFileReader::uninitialize(void)
 {
+	if(m_oDataFile.is_open()) 
+	{
+		m_oDataFile.close();
+	}
+
 	op_pStimulations.uninitialize();
 	op_pSignalMatrix.uninitialize();
 	op_ui64SamplingRate.uninitialize();
@@ -60,11 +66,9 @@ boolean CAlgorithmBrainampFileReader::process(void)
 	{
 		std::string l_sMarkerFilename;
 		std::string l_sDataFilename;
-		uint64 l_ui64SamplingInterval;
 
 		m_ui32BinaryFormat=BinaryFormat_Integer16;
 		m_ui32ChannelCount=0;
-		m_ui64SamplingInterval=0;
 		m_ui64StartSampleIndex=0;
 		m_ui64EndSampleIndex=0;
 		m_ui64SampleCountPerBuffer=0;
@@ -195,16 +199,15 @@ boolean CAlgorithmBrainampFileReader::process(void)
 								}
 								else if(l_sOptionName=="SamplingInterval")
 								{
-									l_ui64SamplingInterval=atoi(l_sOptionValue.c_str());
+									float64 l_f64SamplingInterval=atof(l_sOptionValue.c_str());
 
-									m_ui64SampleCountPerBuffer=((int64)((ip_f64EpochDuration*1000000.)/l_ui64SamplingInterval)); // $$$ Casted in (int64) because of Ubuntu 7.10 crash !
-									op_pSignalMatrix->setDimensionSize(1, (uint32)m_ui64SampleCountPerBuffer);
-									op_ui64SamplingRate=1000000/l_ui64SamplingInterval;
+									op_ui64SamplingRate=static_cast<uint64>(0.5+1000000.0/l_f64SamplingInterval);	// +0.5 for rounding
+
+									m_ui64SampleCountPerBuffer=static_cast<int64>(ip_f64EpochDuration*op_ui64SamplingRate); // $$$ Casted in (int64) because of Ubuntu 7.10 crash !
+									op_pSignalMatrix->setDimensionSize(1, static_cast<uint32>(m_ui64SampleCountPerBuffer));
 
 									// TODO warn if approximated sampling rate
 									getLogManager() << LogLevel_Trace << "| -> Calculated sampling frequency " << op_ui64SamplingRate << "Hz\n";
-
-									m_ui64SamplingInterval=(l_ui64SamplingInterval<<32)/1000000;
 								}
 								else
 								{
@@ -459,6 +462,10 @@ boolean CAlgorithmBrainampFileReader::process(void)
 			uint8* l_pFileBuffer=m_pBuffer; \
 			T l_tValue; \
 			m_oDataFile.read((char*)l_pFileBuffer, op_pSignalMatrix->getBufferElementCount()*sizeof(T)); \
+			if(m_oDataFile.eof()) \
+			{ \
+				System::Memory::set(l_pFileBuffer, op_pSignalMatrix->getBufferElementCount()*sizeof(T), 0); \
+			} \
 			boolean (*l_fpFileToHost)(const uint8*, T*); \
 			if(m_ui32Endianness==Endianness_LittleEndian) \
 			{ \
@@ -494,8 +501,8 @@ boolean CAlgorithmBrainampFileReader::process(void)
 		m_ui64StartSampleIndex=m_ui64EndSampleIndex;
 		m_ui64EndSampleIndex+=m_ui64SampleCountPerBuffer;
 
-		op_ui64CurrentStartTime=m_ui64StartSampleIndex*m_ui64SamplingInterval;
-		op_ui64CurrentEndTime=m_ui64EndSampleIndex*m_ui64SamplingInterval;
+		op_ui64CurrentStartTime=ITimeArithmetics::sampleCountToTime(op_ui64SamplingRate,m_ui64StartSampleIndex);
+		op_ui64CurrentEndTime=ITimeArithmetics::sampleCountToTime(op_ui64SamplingRate,m_ui64EndSampleIndex);
 
 		// find stimulations in this range
 		uint64 l_ui64StimulationCount=0;
@@ -514,9 +521,12 @@ boolean CAlgorithmBrainampFileReader::process(void)
 		{
 			if(m_ui64StartSampleIndex <= itStimulation->m_ui64StartIndex && itStimulation->m_ui64StartIndex < m_ui64EndSampleIndex)
 			{
+				uint64 l_ui64Date = ITimeArithmetics::sampleCountToTime(op_ui64SamplingRate,itStimulation->m_ui64StartIndex);
+				uint64 l_ui64Duration = ITimeArithmetics::sampleCountToTime(op_ui64SamplingRate,itStimulation->m_ui64Duration);
+
 				op_pStimulations->setStimulationIdentifier(l_ui64StimulationCount, itStimulation->m_ui64Identifier);
-				op_pStimulations->setStimulationDate(l_ui64StimulationCount, itStimulation->m_ui64StartIndex*m_ui64SamplingInterval);
-				op_pStimulations->setStimulationDuration(l_ui64StimulationCount, itStimulation->m_ui64Duration*m_ui64SamplingInterval);
+				op_pStimulations->setStimulationDate(l_ui64StimulationCount, l_ui64Date);
+				op_pStimulations->setStimulationDuration(l_ui64StimulationCount, l_ui64Duration);
 				l_ui64StimulationCount++;
 			}
 		}

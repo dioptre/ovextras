@@ -1,5 +1,5 @@
-#ifndef __OpenViBEKernel_Kernel_Algorithm_IAlgorithmManager_H__
-#define __OpenViBEKernel_Kernel_Algorithm_IAlgorithmManager_H__
+#ifndef __OpenViBEKernel_Kernel_Algorithm_CAlgorithmManager_H__
+#define __OpenViBEKernel_Kernel_Algorithm_CAlgorithmManager_H__
 
 #include "../ovkTKernelObject.h"
 
@@ -43,4 +43,4 @@ namespace OpenViBE
 	};
 };
 
-#endif // __OpenViBEKernel_Kernel_Algorithm_IAlgorithmManager_H__
+#endif // __OpenViBEKernel_Kernel_Algorithm_CAlgorithmManager_H__

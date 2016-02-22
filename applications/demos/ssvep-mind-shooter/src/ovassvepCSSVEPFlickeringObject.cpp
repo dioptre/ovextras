@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
+
 #include "ovassvepCSSVEPFlickeringObject.h"
 #include <iostream>
 #include <cmath>
@@ -50,3 +53,5 @@ void CSSVEPFlickeringObject::processFrame()
 
 
 }
+
+#endif

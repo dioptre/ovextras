@@ -130,34 +130,48 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier& rBoxIdentifier)=0;
 			/**
 			 * \brief Adds a new box in the scenario
-			 * \param rBoxIdentifier [out] : The identifier of
-			 *        the created box
+			 * \param rBoxIdentifier [out] : The identifier of the created box
+			 * \param rSuggestedBoxIdentifier [in] : a suggestion for the new
+			 *        box identifier. If this specific identifier is not
+			 *        yet used, this scenario might use it. If the identifier
+			 *        is already used or \c OV_UndefinedIdentifier is passed,
+			 *        then a random unused identifier will be used.
 			 * \return \e true in case of success.
 			 * \return \e false in case of error. In such case,
 			 *         \c rBoxIdentifier remains unchanged.
 			 * \note This produces an empty and unconfigured box !
 			 */
 			virtual OpenViBE::boolean addBox(
-				OpenViBE::CIdentifier& rBoxIdentifier)=0;
+				OpenViBE::CIdentifier& rBoxIdentifier,
+				const OpenViBE::CIdentifier& rSuggestedBoxIdentifier)=0;
 			/**
 			 * \brief Adds a new box in the scenario based on an existing box
+			 * \param rBoxIdentifier [out] : The identifier of the created box
 			 * \param rBox [in] : the box to copy in this scenario
-			 * \param rBoxIdentifier [out] : The identifier of
-			 *        the created box
+			 * \param rSuggestedBoxIdentifier [in] : a suggestion for the new
+			 *        box identifier. If this specific identifier is not
+			 *        yet used, this scenario might use it. If the identifier
+			 *        is already used or \c OV_UndefinedIdentifier is passed,
+			 *        then a random unused identifier will be used.
 			 * \return \e true in case of success.
 			 * \return \e false in case of error. In such case,
 			 *         \c rBoxIdentifier remains unchanged.
 			 */
 			virtual OpenViBE::boolean addBox(
+				OpenViBE::CIdentifier& rBoxIdentifier,
 				const OpenViBE::Kernel::IBox& rBox,
-				OpenViBE::CIdentifier& rBoxIdentifier)=0;
+				const OpenViBE::CIdentifier& rSuggestedBoxIdentifier)=0;
 			/**
 			 * \brief Adds a new box in the scenario
+			 * \param rBoxIdentifier [out] : The identifier of the created box
 			 * \param rBoxAlgorithmClassIdentifier [in] : The
 			 *        class identifier of the algorithm for
 			 *        this box
-			 * \param rBoxIdentifier [out] : The identifier of
-			 *        the created box
+			 * \param rSuggestedBoxIdentifier [in] : a suggestion for the new
+			 *        box identifier. If this specific identifier is not
+			 *        yet used, this scenario might use it. If the identifier
+			 *        is already used or \c OV_UndefinedIdentifier is passed,
+			 *        then a random unused identifier will be used.
 			 * \return \e true in case of success.
 			 * \return \e false in case of error. In such case,
 			 *         \c rBoxIdentifier remains unchanged.
@@ -165,8 +179,9 @@ namespace OpenViBE
 			 *       to its algorithm class identifier !
 			 */
 			virtual OpenViBE::boolean addBox(
+				OpenViBE::CIdentifier& rBoxIdentifier,
 				const OpenViBE::CIdentifier& rBoxAlgorithmClassIdentifier,
-				OpenViBE::CIdentifier& rBoxIdentifier)=0;
+				const OpenViBE::CIdentifier& rSuggestedBoxIdentifier)=0;
 			/**
 			 * \brief Removes a box of the scenario
 			 * \param rBoxIdentifier [in] : The box identifier
@@ -289,37 +304,34 @@ namespace OpenViBE
 
 			/**
 			 * \brief Creates a connection between two boxes
-			 * \param rSourceBoxIdentifier [in] : The source
-			 *        box identifier
-			 * \param ui32SourceBoxOutputIndex [in] : The output
-			 *        index for the given source box
-			 * \param rTargetBoxIdentifier [in] : The target
-			 *        box identifier
-			 * \param ui32TargetBoxInputIndex [in] : The input
-			 *        index for the given target box
-			 * \param rLinkIdentifier [out] : The created link
-			 *        identifier.
+			 * \param rLinkIdentifier [out] : The created link identifier.
+			 * \param rSourceBoxIdentifier [in] : The source box identifier
+			 * \param ui32SourceBoxOutputIndex [in] : The output index for the given source box
+			 * \param rTargetBoxIdentifier [in] : The target box identifier
+			 * \param ui32TargetBoxInputIndex [in] : The input index for the given target box
+			 * \param rSuggestedLinkIdentifier [in] : a suggestion for the new
+			 *        link identifier. If this specific identifier is not
+			 *        yet used, this scenario might use it. If the identifier
+			 *        is already used or \c OV_UndefinedIdentifier is passed,
+			 *        then a random unused identifier will be used.
 			 * \return \e true in case of success.
 			 * \return \e false in case of error. In such case,
 			 *         rLinkIdentifier remains unchanged.
 			 */
 			virtual OpenViBE::boolean connect(
+				OpenViBE::CIdentifier& rLinkIdentifier,
 				const OpenViBE::CIdentifier& rSourceBoxIdentifier,
 				const OpenViBE::uint32 ui32SourceBoxOutputIndex,
 				const OpenViBE::CIdentifier& rTargetBoxIdentifier,
 				const OpenViBE::uint32 ui32TargetBoxInputIndex,
-				OpenViBE::CIdentifier& rLinkIdentifier)=0;
+				const OpenViBE::CIdentifier& rSuggestedLinkIdentifier)=0;
 
 			/**
 			 * \brief Deletes a connection between two boxes
-			 * \param rSourceBoxIdentifier [in] : The source
-			 *        box identifier
-			 * \param ui32SourceBoxOutputIndex [in] : The output
-			 *        index for the given source box
-			 * \param rTargetBoxIdentifier [in] : The target
-			 *        box identifier
-			 * \param ui32TargetBoxInputIndex [in] : The input
-			 *        index for the given target box
+			 * \param rSourceBoxIdentifier [in] : The source box identifier
+			 * \param ui32SourceBoxOutputIndex [in] : The output index for the given source box
+			 * \param rTargetBoxIdentifier [in] : The target box identifier
+			 * \param ui32TargetBoxInputIndex [in] : The input index for the given target box
 			 * \return \e true in case of success.
 			 * \return \e false in case of error.
 			 */
@@ -331,8 +343,7 @@ namespace OpenViBE
 
 			/**
 			 * \brief Deletes a connection between two boxes
-			 * \param rLinkIdentifier [out] : The identifier
-			 *        for the link to be deleted
+			 * \param rLinkIdentifier [out] : The identifier for the link to be deleted
 			 * \return \e true in case of success.
 			 * \return \e false in case of error.
 			 */
@@ -449,26 +460,28 @@ namespace OpenViBE
 
 			/**
 			 * \brief Creates a message connection between two boxes
-			 * \param rSourceBoxIdentifier [in] : The source
-			 *        box identifier
-			 * \param ui32SourceBoxOutputIndex [in] : The output
-			 *        index for the given source box
-			 * \param rTargetBoxIdentifier [in] : The target
-			 *        box identifier
-			 * \param ui32TargetBoxInputIndex [in] : The input
-			 *        index for the given target box
-			 * \param rLinkIdentifier [out] : The created link
-			 *        identifier.
+			 * \param rLinkIdentifier [out] : The created link identifier.
+			 * \param rSourceBoxIdentifier [in] : The source box identifier
+			 * \param ui32SourceBoxOutputIndex [in] : The output index for the given source box
+			 * \param rTargetBoxIdentifier [in] : The target box identifier
+			 * \param ui32TargetBoxInputIndex [in] : The input index for the given target box
+			 * \param rSuggestedMessageLinkIdentifier [in] : a suggestion for the new
+			 *        message link identifier. If this specific identifier is not
+			 *        yet used, this scenario might use it. If the identifier
+			 *        is already used or \c OV_UndefinedIdentifier is passed,
+			 *        then a random unused identifier will be used.
 			 * \return \e true in case of success.
 			 * \return \e false in case of error. In such case,
 			 *         rLinkIdentifier remains unchanged.
 			 */
 			virtual OpenViBE::boolean connectMessage(
+				OpenViBE::CIdentifier& rLinkIdentifier,
 				const OpenViBE::CIdentifier& rSourceBoxIdentifier,
 				const OpenViBE::uint32 ui32SourceBoxOutputIndex,
 				const OpenViBE::CIdentifier& rTargetBoxIdentifier,
 				const OpenViBE::uint32 ui32TargetBoxInputIndex,
-				OpenViBE::CIdentifier& rLinkIdentifier)=0;
+				const OpenViBE::CIdentifier& rSuggestedMessageLinkIdentifier)=0;
+
 			/**
 			 * \brief Deletes a message connection between two boxes
 			 * \param rSourceBoxIdentifier [in] : The source
@@ -483,10 +496,10 @@ namespace OpenViBE
 			 * \return \e false in case of error.
 			 */
 			virtual OpenViBE::boolean disconnectMessage(
-							const OpenViBE::CIdentifier& rSourceBoxIdentifier,
-							const OpenViBE::uint32 ui32SourceBoxOutputIndex,
-							const OpenViBE::CIdentifier& rTargetBoxIdentifier,
-							const OpenViBE::uint32 ui32TargetBoxInputIndex)=0;
+				const OpenViBE::CIdentifier& rSourceBoxIdentifier,
+				const OpenViBE::uint32 ui32SourceBoxOutputIndex,
+				const OpenViBE::CIdentifier& rTargetBoxIdentifier,
+				const OpenViBE::uint32 ui32TargetBoxInputIndex)=0;
 			/**
 			 * \brief Deletes a message connection between two boxes
 			 * \param rLinkIdentifier [out] : The identifier
@@ -495,7 +508,7 @@ namespace OpenViBE
 			 * \return \e false in case of error.
 			 */
 			virtual OpenViBE::boolean disconnectMessage(
-							const OpenViBE::CIdentifier& rLinkIdentifier)=0;
+				const OpenViBE::CIdentifier& rLinkIdentifier)=0;
 
 			//@}
 			/** \name Comment management */
@@ -536,27 +549,37 @@ namespace OpenViBE
 				const OpenViBE::CIdentifier& rCommentIdentifier)=0;
 			/**
 			 * \brief Adds a new comment in the scenario
-			 * \param rCommentIdentifier [out] : The identifier of
-			 *        the created comment
+			 * \param rCommentIdentifier [out] : The identifier of the created comment
+			 * \param rSuggestedCommentIdentifier [in] : a suggestion for the new
+			 *        comment identifier. If this specific identifier is not
+			 *        yet used, this scenario might use it. If the identifier
+			 *        is already used or \c OV_UndefinedIdentifier is passed,
+			 *        then a random unused identifier will be used.
 			 * \return \e true in case of success.
 			 * \return \e false in case of error. In such case,
 			 *         \c rCommentIdentifier remains unchanged.
 			 * \note This produces an empty and unconfigured comment !
 			 */
 			virtual OpenViBE::boolean addComment(
-				OpenViBE::CIdentifier& rCommentIdentifier)=0;
+				OpenViBE::CIdentifier& rCommentIdentifier,
+				const OpenViBE::CIdentifier& rSuggestedCommentIdentifier)=0;
 			/**
 			 * \brief Adds a new comment in the scenario based on an existing comment
+			 * \param rCommentIdentifier [out] : The identifier of the created comment
 			 * \param rComment [in] : the comment to copy in this scenario
-			 * \param rCommentIdentifier [out] : The identifier of
-			 *        the created comment
+			 * \param rSuggestedCommentIdentifier [in] : a suggestion for the new
+			 *        comment identifier. If this specific identifier is not
+			 *        yet used, this scenario might use it. If the identifier
+			 *        is already used or \c OV_UndefinedIdentifier is passed,
+			 *        then a random unused identifier will be used.
 			 * \return \e true in case of success.
 			 * \return \e false in case of error. In such case,
 			 *         \c rCommentIdentifier remains unchanged.
 			 */
 			virtual OpenViBE::boolean addComment(
+				OpenViBE::CIdentifier& rCommentIdentifier,
 				const OpenViBE::Kernel::IComment& rComment,
-				OpenViBE::CIdentifier& rCommentIdentifier)=0;
+				const OpenViBE::CIdentifier& rSuggestedCommentIdentifier)=0;
 			/**
 			 * \brief Removes a comment of the scenario
 			 * \param rCommentIdentifier [in] : The comment identifier
@@ -604,11 +627,17 @@ namespace OpenViBE
 			/**
 			 * \brief Adds a new processing unit in the scenario
 			 * \param rProcessingUnitIdentifier [out] : the newly created identifier
+			 * \param rSuggestedProcessingUnitIdentifier [in] : a suggestion for the new
+			 *        processing unit identifier. If this specific identifier is not
+			 *        yet used, this scenario might use it. If the identifier
+			 *        is already used or \c OV_UndefinedIdentifier is passed,
+			 *        then a random unused identifier will be used.
 			 * \return \e true in case of success.
 			 * \return \e false in case of error.
 			 */
 			virtual OpenViBE::boolean addProcessingUnit(
-				OpenViBE::CIdentifier& rProcessingUnitIdentifier)=0;
+				OpenViBE::CIdentifier& rProcessingUnitIdentifier,
+				const OpenViBE::CIdentifier& rSuggestedProcessingUnitIdentifier)=0;
 			/**
 			 * \brief Removes a processing unit in the scenario
 			 * \param rProcessingUnitIdentifier [in] : the identifier of the processing unit to remove

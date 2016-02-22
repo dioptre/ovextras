@@ -1,3 +1,6 @@
+
 INCLUDE("FindThirdPartyBrainmasterCodeMakerAPI")
-INCLUDE("FindThirdPartyActiCHampAPI")
+INCLUDE("FindThirdPartyEemagineEEGO")
+INCLUDE("FindThirdPartyGMobiLabPlusAPI")
 INCLUDE("FindThirdPartyGUSBampCAPI")
+INCLUDE("FindThirdPartyMitsar")

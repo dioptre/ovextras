@@ -1,6 +1,8 @@
 #ifndef __OpenViBE_AcquisitionServer_CDriverMicromedSystemPlusEvolution_H__
 #define __OpenViBE_AcquisitionServer_CDriverMicromedSystemPlusEvolution_H__
 
+#if defined(TARGET_HAS_ThirdPartyMicromed)
+
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
@@ -16,6 +18,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverMicromedSystemPlusEvolution
+	 * \author Yann Renard (INRIA)
+	 */
 	class CDriverMicromedSystemPlusEvolution : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:
@@ -91,4 +97,6 @@ namespace OpenViBEAcquisitionServer
 };
 
 #endif
+#endif
+
 #endif // __OpenViBE_AcquisitionServer_CDriverMicromedSystemPlusEvolution_H__

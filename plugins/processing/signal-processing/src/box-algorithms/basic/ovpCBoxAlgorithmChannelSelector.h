@@ -46,14 +46,15 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getOutputType(0, l_oTypeIdentifier);
-				if(l_oTypeIdentifier==OV_TypeId_Signal || l_oTypeIdentifier==OV_TypeId_Spectrum)
+				if(l_oTypeIdentifier==OV_TypeId_Signal || l_oTypeIdentifier==OV_TypeId_Spectrum
+					|| l_oTypeIdentifier==OV_TypeId_StreamedMatrix)
 				{
 					rBox.setInputType(0, l_oTypeIdentifier);
 					return true;
 				}
 				else
 				{
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are Signal and Spectrum, change refused.\n";
+					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are Signal, Spectrum and Streamed Matrix, change refused.\n";
 
 					rBox.getInputType(0, l_oTypeIdentifier);
 					rBox.setOutputType(0, l_oTypeIdentifier);
@@ -65,20 +66,68 @@ namespace OpenViBEPlugins
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getInputType(0, l_oTypeIdentifier);
-				if(l_oTypeIdentifier==OV_TypeId_Signal || l_oTypeIdentifier==OV_TypeId_Spectrum)
+				if(l_oTypeIdentifier==OV_TypeId_Signal || l_oTypeIdentifier==OV_TypeId_Spectrum
+					|| l_oTypeIdentifier == OV_TypeId_StreamedMatrix )
 				{
 					rBox.setOutputType(0, l_oTypeIdentifier);
 					return true;
 				}
 				else
 				{
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are Signal and Spectrum, change refused.\n";
+					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Supported types are Signal, Spectrum and Streamed Matrix, change refused.\n";
 
 					rBox.getOutputType(0, l_oTypeIdentifier);
 					rBox.setInputType(0, l_oTypeIdentifier);
 					return false;
 				}
 			}
+
+			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			{
+				//we are only interested in the setting 0 and the type changes (select or reject)
+				if((ui32Index==0 || ui32Index==1) && (!m_bHasUserSetName))
+				{
+					OpenViBE::CString l_sChannels;
+					rBox.getSettingValue(0, l_sChannels);
+
+					OpenViBE::CString l_sSelectionMethod;
+					OpenViBE::CIdentifier l_oSelectionEnumIdentifier;
+					rBox.getSettingValue(1, l_sSelectionMethod);
+					rBox.getSettingType(1, l_oSelectionEnumIdentifier);
+				
+					const OpenViBE::CIdentifier l_oSelectionMethodIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(l_oSelectionEnumIdentifier, l_sSelectionMethod);
+
+					if(l_oSelectionMethodIdentifier==OVP_TypeId_SelectionMethod_Reject)
+					{
+						l_sChannels = OpenViBE::CString("!") + l_sChannels;
+					}
+					rBox.setName(l_sChannels);
+				}
+				return true;
+			}
+
+			virtual OpenViBE::boolean onNameChanged(OpenViBE::Kernel::IBox &rBox)//when user set box name manually
+			{
+				if(m_bHasUserSetName)
+				{
+					OpenViBE::CString l_sRename;
+					l_sRename = rBox.getName();
+					if(l_sRename==OpenViBE::CString("Channel Selector"))//default name, we switch back to default behaviour
+						m_bHasUserSetName=false;
+				}
+				else
+					m_bHasUserSetName=true;
+				return true;
+			}
+
+			virtual OpenViBE::boolean initialize()
+			{
+				m_bHasUserSetName=false;//need to initialize this value
+				return true;
+			}
+
+		private:
+			OpenViBE::boolean m_bHasUserSetName;
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 		};
@@ -111,8 +160,17 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Channel List",             OV_TypeId_String, ":");
 				rBoxAlgorithmPrototype.addSetting("Action",                   OVP_TypeId_SelectionMethod, OVP_TypeId_SelectionMethod_Select.toString());
 				rBoxAlgorithmPrototype.addSetting("Channel Matching Method",  OVP_TypeId_MatchMethod,     OVP_TypeId_MatchMethod_Smart.toString());
+
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
+
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
+
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Signal);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Spectrum);
+				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_StreamedMatrix);
 				return true;
 			}
 

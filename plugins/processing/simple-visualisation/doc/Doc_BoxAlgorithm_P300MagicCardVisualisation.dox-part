@@ -86,7 +86,7 @@ exact stimulation code to the first input. Flashing the second card needs this s
 
  * |OVP_DocBegin_BoxAlgorithm_P300MagicCardVisualisation_Setting6|
 Default background image for every card (the image displayed when the card is NOT flashed).
-If this setting is empty, the background image for every card must be named "<i>cardname</i>-offscreen" (e.g. "pacman.png-offscreen").
+If this setting is empty, the background image for every card must be named "<i>cardname</i>-offscreen" (e.g. "01.png-offscreen").
  * |OVP_DocEnd_BoxAlgorithm_P300MagicCardVisualisation_Setting6|
 
  * |OVP_DocBegin_BoxAlgorithm_P300MagicCardVisualisation_Setting7|

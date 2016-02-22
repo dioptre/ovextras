@@ -27,6 +27,12 @@ namespace
 	};
 };
 
+CInputChannel::CInputChannel()
+{
+	m_oMatrixBuffer[0] = NULL;
+	m_oMatrixBuffer[1] = NULL;
+}
+
 CInputChannel::~CInputChannel()
 { 
 	if(m_oMatrixBuffer[0]) {delete m_oMatrixBuffer[0];}

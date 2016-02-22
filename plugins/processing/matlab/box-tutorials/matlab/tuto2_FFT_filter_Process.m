@@ -11,10 +11,13 @@ function box_out = tuto2_FFT_filter_Process(box_in)
             % The output is the input + noise, only on first channel
             box_in.outputs{1}.header = box_in.inputs{1}.header;
             box_in.outputs{1}.header.nb_channels = 1;
+			box_in.outputs{1}.header.channel_names = {'FFT'};
             box_in.user_data.is_headerset = 1;
             % We print the header in the console
             disp('Input header is :')
             box_in.inputs{1}.header
+            disp('Output header is :')
+            box_in.outputs{1}.header
         end
         
         % we increment the matrix count

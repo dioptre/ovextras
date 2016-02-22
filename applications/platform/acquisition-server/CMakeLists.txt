@@ -1,3 +1,9 @@
+
+IF(OV_DISABLE_GTK)
+  MESSAGE(STATUS  "Skipping Acquisition Server, no GTK")
+  RETURN()
+ENDIF(OV_DISABLE_GTK)
+
 PROJECT(openvibe-acquisition-server)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})
@@ -12,9 +18,23 @@ IF(PATH_OPENVIBE_CONTRIBUTIONS)
 	INCLUDE("${CMAKE_SOURCE_DIR}/contrib/common/contribAcquisitionServer.cmake")
 ENDIF(PATH_OPENVIBE_CONTRIBUTIONS)
 
+SET(ADDITIONAL_PATH "${CMAKE_SOURCE_DIR}/plugins/server-extensions/")
+FILE(GLOB_RECURSE additional_source_files ${ADDITIONAL_PATH}/*.cpp ${ADDITIONAL_PATH}/*.h)
+SET(source_files "${source_files};${additional_source_files}")
+
 ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
 INCLUDE_DIRECTORIES("src/drivers")
 INCLUDE_DIRECTORIES("include")
+
+# add include paths for non-contrib server plugins
+FILE(GLOB children ${ADDITIONAL_PATH}/*)
+FOREACH(FILENAME ${children})
+	# MESSAGE("Testing ${FILENAME}")
+	IF(IS_DIRECTORY ${FILENAME})
+		# MESSAGE("Adding ${FILENAME}")
+		INCLUDE_DIRECTORIES(${FILENAME})
+	ENDIF(IS_DIRECTORY ${FILENAME})
+ENDFOREACH(FILENAME)
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
@@ -24,18 +44,35 @@ INCLUDE("FindOpenViBEModuleSocket")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleFS")
 INCLUDE("FindThirdPartyGTK")
-INCLUDE("FindThirdPartyGMobiLabPlusAPI")
-INCLUDE("FindThirdPartyUSBFirstAmpAPI")
-INCLUDE("FindThirdPartyThinkGearAPI")
+
+# These scripts will also add directives to copy the necessary bin dlls if any
+INCLUDE("FindThirdPartyActiCHampAPI")
+INCLUDE("FindThirdPartyBioSemiLabViewAPI")
 INCLUDE("FindThirdPartyEmotivAPI")
+INCLUDE("FindThirdPartyNeXus")
+INCLUDE("FindThirdPartyMCS")
+INCLUDE("FindThirdPartyMensiaAcquisition")
+INCLUDE("FindThirdPartyMicromed")
+INCLUDE("FindThirdPartyNeuroelectricsEnobio3G")
+INCLUDE("FindThirdPartyThinkGearAPI")
+INCLUDE("FindThirdPartyTMSi")
+INCLUDE("FindThirdPartyUSBFirstAmpAPI")
+
 INCLUDE("FindThirdPartyOpenAL")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyBoost_Thread")
 INCLUDE("FindThirdPartyPThreadsVCE2")	# for Windows Fieldtrip
 
+INCLUDE("FindThirdPartyLSL")
+
 IF(PATH_OPENVIBE_CONTRIBUTIONS)
 	INCLUDE("${CMAKE_SOURCE_DIR}/contrib/common/contribAcquisitionServerLinkLibs.cmake")
 ENDIF(PATH_OPENVIBE_CONTRIBUTIONS)
+
+IF(NOT(DISABLE_MENSIA_ACQUISITION_DRIVER))
+	ADD_DEFINITIONS(-DTARGET_HasMensiaAcquisitionDriver)
+ENDIF()
+
 
 # ---------------------------------
 # Target macros
@@ -73,10 +110,9 @@ INSTALL(TARGETS ${PROJECT_NAME}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 
-IF(WIN32)
-	# Device driver .dlls
-	INSTALL(DIRECTORY bin/	 DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}	PATTERN ".dll" PATTERN ".svn" EXCLUDE)	
-ENDIF(WIN32)
-INSTALL(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/applications/acquisition-server PATTERN ".svn" EXCLUDE)
+CONFIGURE_FILE("share/interface.ui-base" "${CMAKE_CURRENT_BINARY_DIR}/interface.ui")
+
+INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/interface.ui" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/applications/acquisition-server)
+INSTALL(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/applications/acquisition-server PATTERN ".svn" EXCLUDE PATTERN "*-base" EXCLUDE)
 
 #INSTALL(DIRECTORY src/   DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "doc" EXCLUDE)

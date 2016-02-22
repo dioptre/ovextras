@@ -22,6 +22,7 @@ namespace OpenViBEPlugins
 			CSignalDisplayLeftRuler(
 				OpenViBE::int32 i32WidthRequest,
 				OpenViBE::int32 i32HeightRequest);
+			//	CSignalChannelDisplay* pParentChannelDisplay);
 
 			/**
 			 * \brief Destructor
@@ -51,6 +52,8 @@ namespace OpenViBEPlugins
 			OpenViBE::float64 m_f64MaximumDisplayedValue;
 			OpenViBE::float64 m_f64MinimumDisplayedValue;
 			OpenViBE::uint64 m_ui64PixelsPerLeftRulerLabel;
+//			CSignalChannelDisplay* m_pParentChannelDisplay;
+
 		};
 
 	};

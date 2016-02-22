@@ -6,6 +6,10 @@
 
 namespace OpenViBEAcquisitionServer
 {
+	/**
+	 * \class CDriverGenericSawTooth 
+	 * \author Yann Renard (INRIA)
+	 */
 	class CDriverGenericSawTooth : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:

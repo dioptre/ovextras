@@ -13,6 +13,8 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
+			virtual OpenViBE::boolean processHeader(void);
+
 			_IsDerivedFromClass_Final_(OpenViBEPlugins::StreamCodecs::CStreamedMatrixEncoder, OVP_ClassId_Algorithm_FeatureVectorStreamEncoder);
 		};
 

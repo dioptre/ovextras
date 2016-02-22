@@ -61,6 +61,13 @@ __________________________________________________________________
  * consider writing a script that does the work. This way, you'll keep
  * the box configuration simple.
  *
+ * If either the command path or some argument contains spaces, you can
+ * try to enclose each such an item in double quotes. 
+ *
+ * \code
+ * "C:/Program Files/program.exe" --open "C:/Temp/data file.dat"
+ * \endcode
+ *
  * Default behavior is to launch the command synchronously. It means
  * that the command you launch should not be time consuming. If you want
  * asynchronous call, then you have to postfix the command with

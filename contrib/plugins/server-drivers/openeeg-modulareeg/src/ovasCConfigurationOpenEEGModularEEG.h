@@ -1,3 +1,9 @@
+/*
+ * \author Christoph Veigl, Yann Renard
+ *
+ * \copyright AGPL3
+ *
+ */
 #ifndef __OpenViBE_AcquisitionServer_CConfigurationOpenEEGModularEEG_H__
 #define __OpenViBE_AcquisitionServer_CConfigurationOpenEEGModularEEG_H__
 

@@ -132,7 +132,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Matlab executable (path)",      OV_TypeId_Filename, "C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe");
 #else
 #endif
-				rBoxAlgorithmPrototype.addSetting("Matlab working directory",   OV_TypeId_String, "${__volatile_ScenarioDir}");
+				rBoxAlgorithmPrototype.addSetting("Matlab working directory",   OV_TypeId_String, "${Player_ScenarioDirectory}");
 				rBoxAlgorithmPrototype.addSetting("Initialize function",        OV_TypeId_String, "matlab_Initialize");
 				rBoxAlgorithmPrototype.addSetting("Process function",           OV_TypeId_String, "matlab_Process");
 				rBoxAlgorithmPrototype.addSetting("Uninitialize function",      OV_TypeId_String, "matlab_Uninitialize");
