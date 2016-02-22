@@ -7,6 +7,8 @@
 #include <iostream>
 #include <cstring>
 
+#include <algorithm>		 // std::min, etc on VS2013
+
 #include <xml/IReader.h>
 #include <xml/IWriter.h>
 #include <xml/IXMLHandler.h>

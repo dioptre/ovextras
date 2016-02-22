@@ -20,6 +20,8 @@
 
 #include <cstdlib>
 
+#include <algorithm>  // std::min, etc on VS2013
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;

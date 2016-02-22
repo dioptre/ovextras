@@ -13,14 +13,21 @@ SET "OV_PATH_DATA=%OV_PATH_ROOT%\share\openvibe"
 SET "OV_PATH_LIB=%OV_PATH_ROOT%\bin"
 SET "PATH=%OV_PATH_ROOT%\bin;%PATH%"
 
-REM Choose Visual Studio, try the non-free version first ...
+REM Choose Visual Studio
 
+REM Try the non-free version first ...
 IF EXIST "%VSINSTALLDIR%\Common7\IDE\devenv.exe" (
     "%VSINSTALLDIR%\Common7\IDE\devenv.exe" ..\local-tmp\visual\OpenViBE.sln
-) else (
-	if defined OV_USE_VS2012 (
-		"%VSINSTALLDIR%\Common7\IDE\WDExpress.exe" ..\local-tmp\visual\OpenViBE.sln
-	) else (
-		"%VSINSTALLDIR%\Common7\IDE\VCExpress.exe" ..\local-tmp\visual\OpenViBE.sln
-	)
+	goto terminate
 )
+
+REM VS2012 Express
+IF EXIST "%VSINSTALLDIR%\Common7\IDE\WDExpress.exe"
+	"%VSINSTALLDIR%\Common7\IDE\WDExpress.exe" ..\local-tmp\visual\OpenViBE.sln
+	goto terminate
+)
+
+REM Default, e.g. 2010 Express
+"%VSINSTALLDIR%\Common7\IDE\VCExpress.exe" ..\local-tmp\visual\OpenViBE.sln
+
+:terminate

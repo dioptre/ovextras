@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <algorithm> // std::min, etc on VS2013
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -151,7 +153,7 @@ void CBoxAlgorithmEBMLStreamSpy::processBinaryBlock(const void* pBuffer, const E
 {
 	uint64 l_ui64Count=(ui64BufferSize/sizeof(T));
 	const T* l_pBuffer=static_cast<const T*>(pBuffer);
-	for(uint64 i=0; i<min(m_ui64ExpandValuesCount, l_ui64Count); i++)
+	for(uint64 i=0; i<std::min(m_ui64ExpandValuesCount, l_ui64Count); i++)
 	{
 		getLogManager() << (i==0?"":" ") << l_pBuffer[i];
 	}

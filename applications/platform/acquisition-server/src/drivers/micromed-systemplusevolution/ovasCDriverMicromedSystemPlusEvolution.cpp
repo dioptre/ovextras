@@ -19,6 +19,8 @@
 #include <windows.h>
 #include <cstring>
 
+#include <algorithm> // std::min, etc on VS2013
+
 #include <openvibe/ovITimeArithmetics.h>
 
 #define boolean OpenViBE::boolean
@@ -664,7 +666,7 @@ boolean CDriverMicromedSystemPlusEvolution::dropData(void)
 
 	do
 	{
-		uint32 l_ui32MaxByteRecv=min((uint32)m_oFgetStructBuffDataSize(), (uint32)(m_oFgetDataLength()-l_ui32TotalReceived));
+		uint32 l_ui32MaxByteRecv=std::min((uint32)m_oFgetStructBuffDataSize(), (uint32)(m_oFgetDataLength()-l_ui32TotalReceived));
 		if(this->MyReceive((char*)m_pStructBuffData, l_ui32MaxByteRecv)==-1)
 		{
 			return false;
@@ -728,7 +730,7 @@ boolean CDriverMicromedSystemPlusEvolution::loop(void)
 					uint32 l_ui32ReceivedSampleCount=0;
 					do
 					{
-						l_ui32MaxByteRecv=min(m_ui32BuffSize, min(m_oFgetDataLength()-l_ui32TotalReceived, (m_ui32nbSamplesBlock-m_ui32BuffDataIndex*m_oHeader.getChannelCount())*m_ui32DataSizeInByte));
+						l_ui32MaxByteRecv=std::min(m_ui32BuffSize, std::min(m_oFgetDataLength()-l_ui32TotalReceived, (m_ui32nbSamplesBlock-m_ui32BuffDataIndex*m_oHeader.getChannelCount())*m_ui32DataSizeInByte));
 						if(this->MyReceive((char*)m_pStructBuffData, l_ui32MaxByteRecv)==-1)
 						{
 							return false;

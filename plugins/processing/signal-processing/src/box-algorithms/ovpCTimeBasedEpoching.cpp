@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include <algorithm> // std::min, etc on VS2013
+
 #include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;
@@ -134,7 +136,7 @@ bool CTimeBasedEpoching::COutputHandler::process()
 		if(m_ui32SampleIndex<m_ui32SampleCountPerEpoch) // Some samples should be filled
 		{
 			// Copies samples to buffer
-			const uint32 l_ui32SamplesToFill=min(m_ui32SampleCountPerEpoch-m_ui32SampleIndex, l_ui32InputSampleCount-l_ui32SamplesProcessed);
+			const uint32 l_ui32SamplesToFill=std::min(m_ui32SampleCountPerEpoch-m_ui32SampleIndex, l_ui32InputSampleCount-l_ui32SamplesProcessed);
 			for(uint32 i=0; i<m_ui32ChannelCount; i++)
 			{
 				System::Memory::copy(
@@ -180,7 +182,7 @@ bool CTimeBasedEpoching::COutputHandler::process()
 		else
 		{
 			// The next few samples are useless
-			const uint32 l_ui32SamplesToSkip=min(m_ui32SampleCountBetweenEpoch-m_ui32SampleIndex, l_ui32InputSampleCount-l_ui32SamplesProcessed);
+			const uint32 l_ui32SamplesToSkip=std::min(m_ui32SampleCountBetweenEpoch-m_ui32SampleIndex, l_ui32InputSampleCount-l_ui32SamplesProcessed);
 			m_ui32SampleIndex+=l_ui32SamplesToSkip;
 			l_ui32SamplesProcessed+=l_ui32SamplesToSkip;
 

@@ -15,7 +15,9 @@
 // - Steffen Heimes
 
 // Define if you have the strtoll variants.
-#if _MSC_VER >= 1300
+#if _MSC_VER >= 1800
+// ...
+#elif _MSC_VER >= 1300
 # define HAVE_STRTOULL 1
 namespace std {
 	static inline long long strtoull(char const* str, char** str_end, int base)
