@@ -39,7 +39,7 @@ IF(WIN32)
 	# Switch /arch:SSE2 enables vectorization. Remove if your CPU/compiler doesn't support it.
 	SET(OV_EIGEN_FLAGS "/arch:SSE2")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4355 /MP ${OV_EIGEN_FLAGS}")
-	SET(OV_WIN32_BOOST_VERSION "1_47")
+	SET(OV_WIN32_BOOST_VERSION "1_55")
 ELSEIF(UNIX)
 	# check for c++11 support
 	INCLUDE(CheckCXXCompilerFlag)

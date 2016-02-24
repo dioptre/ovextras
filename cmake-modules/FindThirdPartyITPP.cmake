@@ -15,6 +15,9 @@
 # ---------------------------------
 
 IF(WIN32)
+	MESSAGE(STATUS "Disabling ITPP until recompiled with VC120 ...")
+	RETURN()
+	
 	FIND_PATH(PATH_ITPP include/itpp/itbase.h PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/itpp)
 	IF(PATH_ITPP)
 		SET(ITPP_FOUND TRUE)
@@ -24,6 +27,7 @@ IF(WIN32)
 		SET(ITPP_LIBRARIES_DEBUG itppd)	
 		SET(ITPP_LIBRARY_DIRS ${PATH_ITPP}/lib )
 	ENDIF(PATH_ITPP)
+	
 ENDIF(WIN32)
 
 IF(UNIX)
