@@ -28,18 +28,21 @@ MESSAGE(STATUS "Appending compilation flags...")
 
 SET(OV_CUSTOM_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
-# If OpenMP is available, it will allow Eigen to use multiple cores in matrix math.
+# If OpenMP is available, using it will allow Eigen to use multiple cores in matrix math.
 INCLUDE("FindOpenMP")
 IF(OPENMP_FOUND)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 ENDIF(OPENMP_FOUND)
 
 IF(WIN32)
-	ADD_DEFINITIONS("-DNOMINMAX -DBOOST_ALL_NO_LIB")
 	# Switch /arch:SSE2 enables vectorization. Remove if your CPU/compiler doesn't support it.
 	SET(OV_EIGEN_FLAGS "/arch:SSE2")
+	# The following is needed to keep OpenMP from hogging all the cores. Note that this works only for VS2013+. On VS2010, it may be better to disable OpenMP.
+	SET(OV_OMP_WAIT_POLICY "PASSIVE")
+	# Disable /MP if you don't like VS using all the cores for compilation
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4355 /MP ${OV_EIGEN_FLAGS}")
 	SET(OV_WIN32_BOOST_VERSION "1_55")
+	ADD_DEFINITIONS("-DNOMINMAX -DBOOST_ALL_NO_LIB")	
 ELSEIF(UNIX)
 	# check for c++11 support
 	INCLUDE(CheckCXXCompilerFlag)
