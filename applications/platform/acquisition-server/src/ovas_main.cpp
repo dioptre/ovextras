@@ -7,6 +7,11 @@
 
 #include <iostream>
 
+#if defined(TARGET_OS_Windows)
+  #include <Windows.h>
+  #include <MMSystem.h>
+#endif
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace std;
@@ -104,6 +109,25 @@ int main(int argc, char ** argv)
 		return -1;
 	}
 
+#if defined(TARGET_OS_Windows)
+	HANDLE l_oProcess = GetCurrentProcess();
+
+	// Some sources claim this is needed for accurate timing. Microsoft disagrees, so we do not use it. You can try, or try google. 
+	//SetThreadAffinityMask(hProcess, threadMask);
+
+	// Set the clock interval to 1ms (default on Win7: 15ms). This is needed to get under 15ms accurate sleeps,
+	// and the precision of all the non-QPC clocks.
+	timeBeginPeriod(1); 
+
+	// Since AS is just sleeping when its not acquiring, a high priority should not be a problem. 
+	// As a result of these calls, the server should have a 'normal' priority INSIDE the 'realtime' priority class.
+	// However, unless you run AS with admin priviledges, Windows probably will truncate these priorities lower.
+	// n.b. For correct timing, it may be preferable to set the priority here globally and not mess with it in the drivers;
+	// any child threads should inherit this automagically.
+	SetPriorityClass(l_oProcess, REALTIME_PRIORITY_CLASS);		// The highest priority class
+	SetThreadPriority(l_oProcess, THREAD_PRIORITY_NORMAL);		// Even higher options: THREAD_PRIORITY_HIGHEST, THREAD_PRIORITY_TIME_CRITICAL
+#endif
+
 	CKernelLoader l_oKernelLoader;
 
 	cout<<"[  INF  ] Created kernel loader, trying to load kernel module"<<endl;
@@ -182,6 +206,10 @@ int main(int argc, char ** argv)
 					l_oKernelLoader.uninitialize();
 					l_oKernelLoader.unload();
 
+#if defined(TARGET_OS_Windows)
+					timeEndPeriod(1);
+#endif
+
 					return -2;
 				}
 
@@ -207,6 +235,8 @@ int main(int argc, char ** argv)
 					// If this is encapsulated by gdk_threads_enter() and gdk_threads_exit(), m_pThread->join() can hang when gtk_main() returns before destructor of app has been called.
 					OpenViBEAcquisitionServer::CAcquisitionServerGUI app(*l_pKernelContext);
 
+
+
 					try
 					{
 						gdk_threads_enter();	
@@ -217,6 +247,8 @@ int main(int argc, char ** argv)
 					{
 						l_pKernelContext->getLogManager() << LogLevel_Fatal << "Catched top level exception\n";
 					}
+
+
 				}
 
 				cout<<"[  INF  ] Application terminated, releasing allocated objects"<<endl;
@@ -229,6 +261,10 @@ int main(int argc, char ** argv)
 		l_oKernelLoader.uninitialize();
 		l_oKernelLoader.unload();
 	}
+			
+#if defined(TARGET_OS_Windows)
+	timeEndPeriod(1);
+#endif
 
 	return 0;
 }

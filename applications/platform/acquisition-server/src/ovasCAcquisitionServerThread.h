@@ -46,7 +46,7 @@ namespace OpenViBEAcquisitionServer
 					m_oProtectionLock.unlock();
 
 					l_ui32ClientCount=m_rAcquisitionServer.getClientCount();
-					l_f64Drift=(m_ui32Status==Status_Started?m_rAcquisitionServer.getDrift():0);
+					l_f64Drift=(m_ui32Status==Status_Started?m_rAcquisitionServer.m_oDriftCorrection.getDrift():0);
 
 					switch(m_ui32Status)
 					{
