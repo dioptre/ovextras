@@ -52,7 +52,7 @@ OpenViBE::uint32 CBoxAlgorithmSpatialFilter::loadCoefficients(const OpenViBE::CS
 		this->getLogManager() << LogLevel_Error << "Number of coefficients expected (" 
 			<< nRows * nCols << ") did not match the number counted ("
 			<< l_u32count << ")\n";
-		return false;
+		return 0;
 	}
 
 	// Resize in one step for efficiency.
@@ -68,11 +68,6 @@ OpenViBE::uint32 CBoxAlgorithmSpatialFilter::loadCoefficients(const OpenViBE::CS
 	uint32 l_ui32currentIdx = 0;
 	while(*l_sPtr!=0) 
 	{
-		if(l_ui32currentIdx >= l_u32count) {
-			this->getLogManager() << LogLevel_Error << "Parsed too many coefficients\n";
-			return false;
-		}
-
 		const int BUFFSIZE=1024;
 		char l_sBuffer[BUFFSIZE];
 		// Skip separator characters
@@ -99,6 +94,10 @@ OpenViBE::uint32 CBoxAlgorithmSpatialFilter::loadCoefficients(const OpenViBE::CS
 		}
 		l_sBuffer[i]=0;
 
+		if(l_ui32currentIdx >= l_u32count) {
+			this->getLogManager() << LogLevel_Error << "Parsed coefficient number exceeds what we counted before, shouldn't happen\n";
+			return 0;
+		}
 
 		// Finally, convert
 		if(!sscanf(l_sBuffer, "%lf", &l_pFilter[l_ui32currentIdx])) 
@@ -108,7 +107,7 @@ OpenViBE::uint32 CBoxAlgorithmSpatialFilter::loadCoefficients(const OpenViBE::CS
 
 			this->getLogManager() << LogLevel_Error << "Error parsing coefficient nr. " << l_ui32currentIdx 
 				<< " for matrix position (" << l_ui32currentRow << "," << l_ui32currentCol << "), stopping.\n";
-			break;
+			return 0;
 		}
 		l_ui32currentIdx++;
 	}
