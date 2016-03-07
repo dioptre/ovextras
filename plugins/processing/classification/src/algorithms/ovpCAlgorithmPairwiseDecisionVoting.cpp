@@ -72,13 +72,13 @@ boolean CAlgorithmPairwiseDecisionVoting::compute(std::vector< SClassificationIn
 	for(uint32 i =0 ; i < pClassificationValueList.size() ; ++i)
 	{
 		SClassificationInfo & l_rTemp = pClassificationValueList[i];
-		if(l_rTemp.m_f64ClassLabel == 1)
+		if(l_rTemp.m_f64ClassLabel == 0)
 		{
-			++(l_pWinCount[(uint32)(l_rTemp.m_f64FirstClass-1)]);
+			++(l_pWinCount[(uint32)(l_rTemp.m_f64FirstClass)]);
 		}
 		else
 		{
-			++(l_pWinCount[(uint32)(l_rTemp.m_f64SecondClass-1)]);
+			++(l_pWinCount[(uint32)(l_rTemp.m_f64SecondClass)]);
 		}
 
 	}

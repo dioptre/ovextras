@@ -75,26 +75,17 @@ void CAlgorithmClassifierLDA::dumpMatrix(OpenViBE::Kernel::ILogManager& /* rMgr 
 
 uint32 CAlgorithmClassifierLDA::getOutputProbabilityVectorLength()
 {
-	if(m_bv1Classification){
-		return 1;
-	} else{
-		return m_vDiscriminantFunctions.size();
-	}
+	return m_vDiscriminantFunctions.size();
 }
 
 uint32 CAlgorithmClassifierLDA::getOutputDistanceVectorLength()
 {
-	if(m_bv1Classification){
-		return 1;
-	} else{
-		return m_vDiscriminantFunctions.size();
-	}
+	return m_vDiscriminantFunctions.size();
 }
 
 
 boolean CAlgorithmClassifierLDA::initialize(void)
 {
-	m_bv1Classification = false;
 	// Initialize the Conditioned Covariance Matrix algorithm
 	m_pCovarianceAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ConditionedCovariance));
 	m_pCovarianceAlgorithm->initialize();
@@ -137,7 +128,8 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		l_pDiagonalCov = this->getBooleanParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_DiagonalCov);
 
 	}
-	else{
+	else
+	{
 		//If we don't use shrinkage we need to set lambda to 0.
 		TParameterHandler< float64 > ip_f64Shrinkage(this->getInputParameter(OVP_Algorithm_ClassifierLDA_InputParameterId_Shrinkage));
 		ip_f64Shrinkage = 0.0;
@@ -147,8 +139,6 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		l_pDiagonalCov = false;
 	}
 	this->uninitializeExtraParameterMechanism();
-
-
 
 	// IO to the covariance alg
 	TParameterHandler < OpenViBE::IMatrix* > op_pMean(m_pCovarianceAlgorithm->getOutputParameter(OVP_Algorithm_ConditionedCovariance_OutputParameterId_Mean));
@@ -165,51 +155,64 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		return false;
 	}
 
-	// Count the classes
-	std::map < float64, uint32 > l_vClassCounts;
+	// The max amount of classes to be expected
+	TParameterHandler < uint64 > ip_pNumberOfClasses(this->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_NumberOfClasses));
+	m_ui32NumClasses = static_cast<uint32>(ip_pNumberOfClasses);
+
+	// Count the classes actually present
+	std::vector< uint32 > l_vClassCounts;
+	l_vClassCounts.resize(m_ui32NumClasses);
+
 	for(uint32 i=0; i<rFeatureVectorSet.getFeatureVectorCount(); i++)
 	{
-		l_vClassCounts[rFeatureVectorSet[i].getLabel()]++;
+		uint32 classIdx = static_cast<uint32>(rFeatureVectorSet[i].getLabel());
+		l_vClassCounts[classIdx]++;
 	}
 
-	const uint32 l_ui32nClasses = l_vClassCounts.size();
-
 	// Get class labels
-	for(std::map < float64, uint32 >::iterator iter = l_vClassCounts.begin() ; iter != l_vClassCounts.end() ; ++iter)
+	for(uint32 i=0;i<m_ui32NumClasses;i++)
 	{
-		m_vLabelList.push_back(iter->first);
+		m_vLabelList.push_back(i);
 		m_vDiscriminantFunctions.push_back(CAlgorithmLDADiscriminantFunction());
 	}
 
 	// Per-class means and a global covariance are used to form the LDA model
-	MatrixXd* l_oPerClassMeans = new MatrixXd[l_ui32nClasses];
+	MatrixXd* l_oPerClassMeans = new MatrixXd[m_ui32NumClasses];
 	MatrixXd l_oGlobalCov = MatrixXd::Zero(l_ui32nCols,l_ui32nCols);
 
 	// We need the means per class
-	for(uint32 l_ui32classIdx=0;l_ui32classIdx<l_ui32nClasses;l_ui32classIdx++) 
+	for(uint32 l_ui32classIdx=0;l_ui32classIdx<m_ui32NumClasses;l_ui32classIdx++) 
 	{
-		const float64 l_f64Label = m_vLabelList[l_ui32classIdx];
-		const uint32 l_ui32nExamplesInClass = l_vClassCounts[l_f64Label];
-
-		// Copy all the data of the class to a matrix
-		CMatrix l_oClassData;
-		l_oClassData.setDimensionCount(2);
-		l_oClassData.setDimensionSize(0, l_ui32nExamplesInClass);
-		l_oClassData.setDimensionSize(1, l_ui32nCols);
-		float64 *l_pBuffer = l_oClassData.getBuffer();
-		for(uint32 i=0;i<l_ui32nRows;i++)
+		if(l_vClassCounts[l_ui32classIdx]>0)
 		{
-			if(rFeatureVectorSet[i].getLabel() == l_f64Label) 
-			{
-				System::Memory::copy(l_pBuffer, rFeatureVectorSet[i].getBuffer(), l_ui32nCols*sizeof(float64));
-				l_pBuffer += l_ui32nCols;
-			}
-		}
+			// const float64 l_f64Label = m_vLabelList[l_ui32classIdx];
+			const uint32 l_ui32nExamplesInClass = l_vClassCounts[l_ui32classIdx];
 
-		// Get the mean out of it
-		Map<MatrixXdRowMajor> l_oDataMapper(l_oClassData.getBuffer(), l_ui32nExamplesInClass, l_ui32nCols);
-		const MatrixXd l_oClassMean = l_oDataMapper.colwise().mean().transpose();
-		l_oPerClassMeans[l_ui32classIdx] = l_oClassMean;
+			// Copy all the data of the class to a matrix
+			CMatrix l_oClassData;
+			l_oClassData.setDimensionCount(2);
+			l_oClassData.setDimensionSize(0, l_ui32nExamplesInClass);
+			l_oClassData.setDimensionSize(1, l_ui32nCols);
+			float64 *l_pBuffer = l_oClassData.getBuffer();
+			for(uint32 i=0;i<l_ui32nRows;i++)
+			{
+				if(rFeatureVectorSet[i].getLabel() == l_ui32classIdx) 
+				{
+					System::Memory::copy(l_pBuffer, rFeatureVectorSet[i].getBuffer(), l_ui32nCols*sizeof(float64));
+					l_pBuffer += l_ui32nCols;
+				}
+			}
+		
+			// Get the mean out of it
+			Map<MatrixXdRowMajor> l_oDataMapper(l_oClassData.getBuffer(), l_ui32nExamplesInClass, l_ui32nCols);
+			const MatrixXd l_oClassMean = l_oDataMapper.colwise().mean().transpose();
+			l_oPerClassMeans[l_ui32classIdx] = l_oClassMean;
+		}
+		else
+		{
+			MatrixXd l_oTmp; l_oTmp.resize(l_ui32nCols, 1); l_oTmp.setZero();
+			l_oPerClassMeans[l_ui32classIdx] = l_oTmp;
+		}
 	}
 
 	// We need a global covariance, use the regularized cov algorithm
@@ -265,27 +268,53 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 			l_oEigenValues(i) = 1.0/l_oEigenValues(i);
 		}
 	}
-
 	const MatrixXd l_oGlobalCovInv = l_oEigenSolver.eigenvectors() * l_oEigenValues.asDiagonal() * l_oEigenSolver.eigenvectors().inverse();	
+
+	// const MatrixXd l_oGlobalCovInv = l_oGlobalCov.inverse();
 	//We send the bias and the weight of each class to ComputationHelper
 	for(size_t i = 0 ; i < getClassCount() ; ++i)
 	{
-		const float64 l_f64ExamplesInClass = l_vClassCounts[m_vLabelList[i]];
-		const uint32 l_ui32TotalExamples = rFeatureVectorSet.getFeatureVectorCount();
+		const float64 l_f64ExamplesInClass = l_vClassCounts[i];
+		if(l_f64ExamplesInClass > 0)
+		{
+			const uint32 l_ui32TotalExamples = rFeatureVectorSet.getFeatureVectorCount();
 
-		// This formula e.g. in Hastie, Tibshirani & Friedman: "Elements...", 2nd ed., p. 109
-		const VectorXd l_oWeight = (l_oGlobalCovInv * l_oPerClassMeans[i]);
-		const MatrixXd l_oInter = -0.5 * l_oPerClassMeans[i].transpose() * l_oGlobalCovInv * l_oPerClassMeans[i];
-		const float64 l_f64Bias = l_oInter(0,0) + std::log(l_f64ExamplesInClass/l_ui32TotalExamples);
+			// This formula e.g. in Hastie, Tibshirani & Friedman: "Elements...", 2nd ed., p. 109
+			const VectorXd l_oWeight = (l_oGlobalCovInv * l_oPerClassMeans[i]);
+			const MatrixXd l_oInter = -0.5 * l_oPerClassMeans[i].transpose() * l_oGlobalCovInv * l_oPerClassMeans[i];
+			const float64 l_f64Bias = l_oInter(0,0) + std::log(l_f64ExamplesInClass/l_ui32TotalExamples);
 
-		// this->getLogManager() << LogLevel_Info << "Bias for " << i << " is " << l_f64Bias << ", from " << l_f64ExamplesInClass / l_ui32TotalExamples 
-		// 	<< ", " << stuffInClass << "/" << featVectors 
-		// 	<< "\n";
-		// dumpMatrix(this->getLogManager(), l_oPerClassMeans[i], "Means");
+			 this->getLogManager() << LogLevel_Debug << "Bias for " << i << " is " << l_f64Bias << ", from " << l_f64ExamplesInClass / l_ui32TotalExamples 
+		 		<< ", " << l_f64ExamplesInClass << "/" << l_ui32TotalExamples << ", int=" << l_oInter(0,0) 
+		 		<< "\n";
+			// dumpMatrix(this->getLogManager(), l_oPerClassMeans[i], "Means");
 
-		m_vDiscriminantFunctions[i].setWeight(l_oWeight);
-		m_vDiscriminantFunctions[i].setBias(l_f64Bias);
+			m_vDiscriminantFunctions[i].setWeight(l_oWeight);
+			m_vDiscriminantFunctions[i].setBias(l_f64Bias);
+		}
+		else
+		{
+			 this->getLogManager() << LogLevel_Debug << "Class " << i << " has no examples\n"; 
+		}
+	}
 
+	// Hack for classes with zero examples, give them valid models but such that will always lose
+	uint32 l_ui32NonZeroClassIdx=0;
+	for(size_t i = 0; i < getClassCount() ; i++)
+	{
+		if(l_vClassCounts[i]>0)
+		{
+			l_ui32NonZeroClassIdx = i;
+			break;
+		}
+	}
+	for(size_t i = 0; i < getClassCount() ; i++)
+	{
+		if(l_vClassCounts[i]==0)
+		{
+			m_vDiscriminantFunctions[i].setWeight(m_vDiscriminantFunctions[l_ui32NonZeroClassIdx].getWeight());
+			m_vDiscriminantFunctions[i].setBias(m_vDiscriminantFunctions[l_ui32NonZeroClassIdx].getBias() - 1.0); // Will always lose to the orig
+		}
 	}
 
 	m_ui32NumCols = l_ui32nCols;
@@ -303,108 +332,72 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 
 boolean CAlgorithmClassifierLDA::classify(const IFeatureVector& rFeatureVector, float64& rf64Class, IVector& rClassificationValues, IVector& rProbabilityValue)
 {
-	if(m_bv1Classification)
+	if(m_vDiscriminantFunctions.empty())
 	{
-		const Map<MatrixXdRowMajor> l_oFeatureVec(const_cast<float64*>(rFeatureVector.getBuffer()), 1, rFeatureVector.getSize());
-
-		const uint32 l_ui32nColsWithBiasTerm = m_oCoefficients.size();
-
-		if(rFeatureVector.getSize()+1!=l_ui32nColsWithBiasTerm)
-		{
-			this->getLogManager() << LogLevel_Warning << "Feature vector size " << rFeatureVector.getSize() << " + 1 and hyperplane parameter size " << l_ui32nColsWithBiasTerm << " do not match\n";
-			return false;
-		}
-
-		// Catenate 1.0 to match the bias term
-		MatrixXd l_oWeights(1, l_ui32nColsWithBiasTerm);
-		l_oWeights(0,0) = 1.0;
-		l_oWeights.block(0,1,1,l_ui32nColsWithBiasTerm-1) = l_oFeatureVec;
-
-		const float64 l_f64Result = (l_oWeights*m_oCoefficients.transpose()).col(0)(0);
-
-		rClassificationValues.setSize(1);
-		rClassificationValues[0]= -l_f64Result;
-
-		const float64 l_f64a =(m_oWeights * l_oFeatureVec.transpose()).col(0)(0) + m_f64w0;
-		const float64 l_f64P1 = 1 / (1 + exp(-l_f64a));
-
-		rProbabilityValue.setSize(1);
-		rProbabilityValue[0] = l_f64P1;
-
-		if(l_f64P1 >= 0.5)
-		{
-			rf64Class=m_vLabelList[0];
-		}
-		else
-		{
-			rf64Class=m_vLabelList[1];
-		}
+		this->getLogManager() << LogLevel_Error << "LDA discriminant function list is empty\n";
+		return false;
 	}
-	else
+
+	if(rFeatureVector.getSize() != m_vDiscriminantFunctions[0].getWeightVectorSize())
 	{
-		if(m_vDiscriminantFunctions.empty())
-		{
-			this->getLogManager() << LogLevel_Error << "LDA discriminant function list is empty\n";
-			return false;
-		}
-
-		if(rFeatureVector.getSize() != m_vDiscriminantFunctions[0].getWeightVectorSize())
-		{
-			this->getLogManager() << LogLevel_Error << "Classifier expected " << m_vDiscriminantFunctions[0].getWeightVectorSize() << " features, got " << rFeatureVector.getSize() << "\n";
-			return false;
-		}
-
-		const Map<VectorXd> l_oFeatureVec(const_cast<float64*>(rFeatureVector.getBuffer()), rFeatureVector.getSize());
-		const VectorXd l_oWeights = l_oFeatureVec;
-		const uint32 l_ui32ClassCount = getClassCount();
-
-		float64 *l_pValueArray = new float64[l_ui32ClassCount];
-		float64 *l_pProbabilityValue = new float64[l_ui32ClassCount];
-		//We ask for all computation helper to give the corresponding class value
-		for(size_t i = 0; i < l_ui32ClassCount ; ++i)
-		{
-			l_pValueArray[i] = m_vDiscriminantFunctions[i].getValue(l_oWeights);
-		}
-
-		//p(Ck | x) = exp(ak) / sum[j](exp (aj))
-		// with aj = (Weight for class j).transpose() * x + (Bias for class j)
-
-		//Exponential can lead to nan results, so we reduce the computation and instead compute
-		// p(Ck | x) = 1 / sum[j](exp(aj - ak))
-
-		//All ak are given by computation helper
-		for(size_t i = 0 ; i < l_ui32ClassCount ; ++i)
-		{
-			float64 l_f64ExpSum = 0.;
-			for(size_t j = 0 ; j < l_ui32ClassCount ; ++j)
-			{
-				l_f64ExpSum += exp(l_pValueArray[j] - l_pValueArray[i]);
-			}
-			l_pProbabilityValue[i] = 1/l_f64ExpSum;
-		}
-
-		//Then we just found the highest score and took it as results
-		uint32 l_ui32ClassIndex = std::distance(l_pValueArray, std::max_element(l_pValueArray, l_pValueArray+l_ui32ClassCount));
-
-		rClassificationValues.setSize(l_ui32ClassCount);
-		rProbabilityValue.setSize(l_ui32ClassCount);
-
-		for(size_t i = 0 ; i < l_ui32ClassCount ; ++i)
-		{
-			rClassificationValues[i] = l_pValueArray[i];
-			rProbabilityValue[i] = l_pProbabilityValue[i];
-		}
-		rf64Class = m_vLabelList[l_ui32ClassIndex];
-
-		delete[] l_pValueArray;
-		delete[] l_pProbabilityValue;
+		this->getLogManager() << LogLevel_Error << "Classifier expected " << m_vDiscriminantFunctions[0].getWeightVectorSize() << " features, got " << rFeatureVector.getSize() << "\n";
+		return false;
 	}
+
+	const Map<VectorXd> l_oFeatureVec(const_cast<float64*>(rFeatureVector.getBuffer()), rFeatureVector.getSize());
+	const VectorXd l_oWeights = l_oFeatureVec;
+	const uint32 l_ui32ClassCount = getClassCount();
+
+	float64 *l_pValueArray = new float64[l_ui32ClassCount];
+	float64 *l_pProbabilityValue = new float64[l_ui32ClassCount];
+	//We ask for all computation helper to give the corresponding class value
+	for(size_t i = 0; i < l_ui32ClassCount ; ++i)
+	{
+		l_pValueArray[i] = m_vDiscriminantFunctions[i].getValue(l_oWeights);
+	}
+
+	//p(Ck | x) = exp(ak) / sum[j](exp (aj))
+	// with aj = (Weight for class j).transpose() * x + (Bias for class j)
+
+	//Exponential can lead to nan results, so we reduce the computation and instead compute
+	// p(Ck | x) = 1 / sum[j](exp(aj - ak))
+
+	//All ak are given by computation helper
+	errno = 0;
+	for(size_t i = 0 ; i < l_ui32ClassCount ; ++i)
+	{
+		float64 l_f64ExpSum = 0.;
+		for(size_t j = 0 ; j < l_ui32ClassCount ; ++j)
+		{
+			l_f64ExpSum += exp(l_pValueArray[j] - l_pValueArray[i]);
+		}
+		l_pProbabilityValue[i] = 1/l_f64ExpSum;
+		// std::cout << "p " << i << " = " << l_pProbabilityValue[i] << ", v=" << l_pValueArray[i] << ", " << errno << "\n";
+	}
+
+	//Then we just find the highest probability and take it as a result
+	uint32 l_ui32ClassIndex = std::distance(l_pValueArray, std::max_element(l_pValueArray, l_pValueArray+l_ui32ClassCount));
+
+	rClassificationValues.setSize(l_ui32ClassCount);
+	rProbabilityValue.setSize(l_ui32ClassCount);
+
+	for(size_t i = 0 ; i < l_ui32ClassCount ; ++i)
+	{
+		rClassificationValues[i] = l_pValueArray[i];
+		rProbabilityValue[i] = l_pProbabilityValue[i];
+	}
+
+	rf64Class = m_vLabelList[l_ui32ClassIndex];
+
+	delete[] l_pValueArray;
+	delete[] l_pProbabilityValue;
+
 	return true;
 }
 
 uint32 CAlgorithmClassifierLDA::getClassCount()
 {
-	return m_vLabelList.size();
+	return m_ui32NumClasses;
 }
 
 XML::IXMLNode* CAlgorithmClassifierLDA::saveConfiguration(void)
@@ -435,6 +428,7 @@ XML::IXMLNode* CAlgorithmClassifierLDA::saveConfiguration(void)
 	return l_pAlgorithmNode;
 }
 
+
 //Extract a float64 from the PCDATA of a node
 float64 getFloatFromNode(XML::IXMLNode *pNode)
 {
@@ -448,13 +442,10 @@ float64 getFloatFromNode(XML::IXMLNode *pNode)
 boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfigurationNode)
 {
 	//If the attribute exist, we deal with the new version
-	if(pConfigurationNode->hasAttribute(c_sLDAConfigFileVersionAttributeName))
+	if(!pConfigurationNode->hasAttribute(c_sLDAConfigFileVersionAttributeName))
 	{
-		m_bv1Classification = false;
-	}
-	else
-	{
-		m_bv1Classification = true;
+		this->getLogManager() << LogLevel_Error << "The model was trained with an old version of LDA. Please retrain the classifier.\n";
+		return false;
 	}
 
 	m_vLabelList.clear();
@@ -468,44 +459,16 @@ boolean CAlgorithmClassifierLDA::loadConfiguration(XML::IXMLNode *pConfiguration
 	}
 	loadClassesFromNode(l_pTempNode);
 
-	if(m_bv1Classification)
+
+	//We send corresponding data to the computation helper
+	XML::IXMLNode* l_pConfigsNode = pConfigurationNode->getChildByName(c_sComputationHelpersConfigurationNode);
+
+	for(size_t i = 0 ; i < l_pConfigsNode->getChildCount() ; ++i)
 	{
-		if((l_pTempNode = pConfigurationNode->getChildByName(c_sCoefficientsNodeName)) == NULL)
-		{
-			return false;
-		}
-		loadCoefficientsFromNode(l_pTempNode);
-
-		if((l_pTempNode = pConfigurationNode->getChildByName(c_sBiasDistanceNodeName)) == NULL)
-		{
-			return false;
-		}
-		m_f64BiasDistance = getFloatFromNode(l_pTempNode);
-
-		if((l_pTempNode = pConfigurationNode->getChildByName(c_sCoefficientProbabilityNodeName)) == NULL)
-		{
-			return false;
-		}
-		m_f64w0 = getFloatFromNode(l_pTempNode);
-
-		//Now we initialize the coefficients vector according to Weights and bias (distance)
-		m_oCoefficients.resize(1, m_oWeights.cols()+1 );
-		m_oCoefficients(0,0) = m_f64BiasDistance;
-		m_oCoefficients.block(0,1,1,m_oWeights.cols()) = m_oWeights;
+		m_vDiscriminantFunctions.push_back(CAlgorithmLDADiscriminantFunction());
+		m_vDiscriminantFunctions[i].loadConfiguration(l_pConfigsNode->getChild(i));
 	}
 
-	else
-	{
-		//We send corresponding data to the computation helper
-		XML::IXMLNode* l_pConfigsNode = pConfigurationNode->getChildByName(c_sComputationHelpersConfigurationNode);
-
-		for(size_t i = 0 ; i < l_pConfigsNode->getChildCount() ; ++i)
-		{
-			m_vDiscriminantFunctions.push_back(CAlgorithmLDADiscriminantFunction());
-			m_vDiscriminantFunctions[i].loadConfiguration(l_pConfigsNode->getChild(i));
-		}
-
-	}
 	return true;
 }
 
@@ -517,6 +480,7 @@ void CAlgorithmClassifierLDA::loadClassesFromNode(XML::IXMLNode *pNode)
 	{
 		m_vLabelList.push_back(l_f64Temp);
 	}
+	m_ui32NumClasses = m_vLabelList.size();
 }
 
 //Load the weight vector

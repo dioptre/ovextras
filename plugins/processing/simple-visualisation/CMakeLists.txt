@@ -24,6 +24,8 @@ INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindThirdPartyGTK")
 INCLUDE("FindThirdPartyBoost")#need boost for erp plot
+INCLUDE("FindThirdPartyBoost_System") # needed for Graz visu tcp connection
+
 # ---------------------------------
 # Target macros
 # Defines target operating system

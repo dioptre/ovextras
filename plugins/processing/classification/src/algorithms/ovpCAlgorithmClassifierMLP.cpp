@@ -158,7 +158,7 @@ boolean CAlgorithmClassifierMLP::train(const IFeatureVectorSet &rFeatureVectorSe
 	{
 		VectorXd l_oTarget = VectorXd::Zero(l_ui32ClassCount);
 		//class 1 is at index 0
-		l_oTarget[static_cast<uint32>(m_oLabelList[i]) -1 ] = 1.;
+		l_oTarget[static_cast<uint32>(m_oLabelList[i]) ] = 1.;
 		l_oTargetList[m_oLabelList[i]] = l_oTarget;
 	}
 

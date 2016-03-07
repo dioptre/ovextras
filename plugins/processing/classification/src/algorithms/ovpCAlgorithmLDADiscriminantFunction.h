@@ -31,6 +31,9 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean loadConfiguration(const XML::IXMLNode* pConfiguration);
 			XML::IXMLNode* getConfiguration(void);
 
+			const Eigen::VectorXd& getWeight(void) const { return m_oWeight; };
+			OpenViBE::float64 getBias(void) const { return m_f64Bias; };
+
 		private:
 			OpenViBE::uint32 m_ui32NumCol;
 			OpenViBE::float64 m_f64Bias;

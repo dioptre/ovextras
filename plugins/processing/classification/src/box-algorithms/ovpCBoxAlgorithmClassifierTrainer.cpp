@@ -17,7 +17,11 @@
 //This needs to reachable from outside
 const char* const c_sClassifierRoot = "OpenViBE-Classifier";
 
-const char* const c_sXmlVersionAttributeName = "XMLVersion";
+const char* const c_sFormatVersionAttributeName = "FormatVersion";
+
+const char* const c_sCreatorAttributeName = "Creator";
+const char* const c_sCreatorVersionAttributeName = "CreatorVersion";
+
 const char* const c_sIdentifierAttributeName = "class-id";
 
 const char* const c_sStrategyNodeName = "Strategy-Identifier";
@@ -39,9 +43,7 @@ using namespace std;
 boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 {
 	m_pClassifier = NULL;
-
-	m_oLabelsDecoder.initialize(*this, 0);
-	m_oStimulationsEncoder.initialize(*this, 0);
+	m_pParameter = NULL;
 
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	//As we add some parameter in the middle of "static" parameters, we cannot rely on settings index.
@@ -102,29 +104,36 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 	}
 	m_ui64PartitionCount=uint64(l_i64PartitionCount);
 
+	m_oStimulationDecoder.initialize(*this,0);
 	for(uint32 i=1; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		m_vFeatureVectorsDecoder.push_back(new OpenViBEToolkit::TFeatureVectorDecoder<CBoxAlgorithmClassifierTrainer>());
-		m_vFeatureVectorsDecoder[i-1]->initialize(*this, i);
+		m_vFeatureVectorDecoder.push_back(new OpenViBEToolkit::TFeatureVectorDecoder<CBoxAlgorithmClassifierTrainer>());
+		m_vFeatureVectorDecoder.back()->initialize(*this, i);
 	}
 
 	//We link the parameters to the extra parameters input parameter to transmit them
 	TParameterHandler < map<CString , CString> * > ip_pExtraParameter(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_ExtraParameter));
 	ip_pExtraParameter = m_pParameter;
 
+	m_oStimulationEncoder.initialize(*this, 0);
+
 	m_vFeatureCount.clear();
+
+	if(l_rStaticBoxContext.getInputCount()<2)
+	{
+		// This shouldn't happen.
+		this->getLogManager() << LogLevel_Error << "Must have at least one feature input\n";
+		return false;
+	}
+
+	// Provide the number of classes to the classifier
+	const uint32 l_ui32ClassCount = l_rStaticBoxContext.getInputCount() - 1;
+	TParameterHandler< uint64 > ip_NumClasses = m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_NumberOfClasses);
+	ip_NumClasses = l_ui32ClassCount;
 
 	//If we have to deal with a pairing strategy we have to pass argument
 	if(l_bIsPairing)
 	{
-		TParameterHandler < uint64 > ip_pClassCount(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_ClassCount));
-		if(l_rStaticBoxContext.getInputCount()==0)
-		{
-			// This shouldn't happen.
-			this->getLogManager() << LogLevel_Error << "Must have more than 0 inputs\n";
-			return false;
-		}
-		ip_pClassCount = l_rStaticBoxContext.getInputCount() -1;	 // >=0 by above test. -1 because one input connector is for stimulations.
 		TParameterHandler < CIdentifier* > ip_oClassId(m_pClassifier->getInputParameter(OVTK_Algorithm_PairingStrategy_InputParameterId_SubClassifierAlgorithm));
 		ip_oClassId = &l_oClassifierAlgorithmClassIdentifier;
 		if(!m_pClassifier->process(OVTK_Algorithm_PairingStrategy_InputTriggerId_DesignArchitecture))
@@ -139,8 +148,8 @@ boolean CBoxAlgorithmClassifierTrainer::initialize(void)
 
 boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
 {
-	m_oLabelsDecoder.uninitialize();
-	m_oStimulationsEncoder.uninitialize();
+	m_oStimulationDecoder.uninitialize();
+	m_oStimulationEncoder.uninitialize();
 
 	if(m_pClassifier) 
 	{
@@ -148,19 +157,28 @@ boolean CBoxAlgorithmClassifierTrainer::uninitialize(void)
 		this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
 	}
 
-	for(uint32 i=0; i<m_vFeatureVectorsDecoder.size(); i++)
+	for(uint32 i=0; i<m_vFeatureVectorDecoder.size(); i++)
 	{
-		m_vFeatureVectorsDecoder[i]->uninitialize();
-		delete m_vFeatureVectorsDecoder[i];
+		m_vFeatureVectorDecoder[i]->uninitialize();
+		delete m_vFeatureVectorDecoder[i];
 	}
-	m_vFeatureVectorsDecoder.clear();
+	m_vFeatureVectorDecoder.clear();
 
-	for(uint32 i=0;i<m_vFeatureVector.size();i++) {
-		delete m_vFeatureVector[i].m_pFeatureVectorMatrix;
-		m_vFeatureVector[i].m_pFeatureVectorMatrix = NULL;
+	m_oStimulationEncoder.uninitialize();
+
+	m_oStimulationDecoder.uninitialize();
+
+	for(uint32 i=0;i<m_vDataset.size();i++) {
+		delete m_vDataset[i].m_pFeatureVectorMatrix;
+		m_vDataset[i].m_pFeatureVectorMatrix = NULL;
 	}
-	m_vFeatureVector.clear();
-	m_vFeatureVectorIndex.clear();
+	m_vDataset.clear();
+
+	if(m_pParameter)
+	{
+		delete m_pParameter;
+		m_pParameter = NULL;
+	}
 
 	// @fixme who frees this? freeing here -> crash
 	/*
@@ -180,6 +198,66 @@ boolean CBoxAlgorithmClassifierTrainer::processInput(uint32 ui32InputIndex)
 	return true;
 }
 
+// Find the most likely class and resample the dataset so that each class is as likely
+boolean CBoxAlgorithmClassifierTrainer::balanceDataset()
+{
+	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+
+	const uint32 l_ui32ClassCount = l_rStaticBoxContext.getInputCount() - 1;
+
+	this->getLogManager() << LogLevel_Info << "Balancing dataset...\n";
+	
+	// Collect index set of feature vectors per class 
+	std::vector< std::vector<uint32> > l_vClassIndexes;
+	l_vClassIndexes.resize(l_ui32ClassCount);
+	for(size_t i=0; i<m_vDataset.size();i++)
+	{
+		l_vClassIndexes[m_vDataset[i].m_ui32InputIndex].push_back(i);
+	}
+
+	// Count how many vectors the largest class has
+	uint32 l_ui32MaxCount = 0;
+	for(uint32 i=0;i<l_ui32ClassCount;i++) {
+		l_ui32MaxCount = std::max<uint32>(l_ui32MaxCount,l_vClassIndexes[i].size());
+	}
+	
+	m_vBalancedDataset.clear();
+
+	// Pad those classes with resampled examples (sampling with replacement) that have fewer examples than the largest class
+	for(uint32 i=0;i<l_ui32ClassCount;i++)
+	{
+		const uint32 l_ui32ExamplesInClass = l_vClassIndexes[i].size();
+		const uint32 l_ui32PaddingNeeded = l_ui32MaxCount - l_ui32ExamplesInClass;
+		if(l_ui32ExamplesInClass == 0)
+		{
+			this->getLogManager() << LogLevel_Debug << "Cannot resample class " << i << ", 0 examples\n";
+			continue;
+		}
+		else if(l_ui32PaddingNeeded>0)
+		{
+			this->getLogManager() << LogLevel_Debug << "Padding class " << i << " with " << l_ui32PaddingNeeded << " examples\n";
+		}
+
+		// Copy all the examples first to a temporary array so we don't mess with the original data. 
+		// This is not too bad as instead of data, we copy the pointer. m_vDataset owns the data pointer.
+		const std::vector<uint32>& l_vThisClassesIndexes = l_vClassIndexes[i];
+		for(uint32 j=0;j<l_ui32ExamplesInClass;j++)
+		{
+			m_vBalancedDataset.push_back(m_vDataset[l_vThisClassesIndexes[j]]);
+		}
+
+		for(uint32 j=0;j<l_ui32PaddingNeeded;j++)
+		{
+			const uint32 l_ui32SampledIndex = System::Math::randomUInteger32WithCeiling(l_ui32ExamplesInClass);
+			const SFeatureVector& l_rSourceVector = m_vDataset[l_vThisClassesIndexes[l_ui32SampledIndex]];
+			m_vBalancedDataset.push_back(l_rSourceVector);
+		}
+	}
+
+	return true;
+}
+
+
 boolean CBoxAlgorithmClassifierTrainer::process(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
@@ -191,43 +269,40 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 	// Parses stimulations
 	for(i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		TParameterHandler < IStimulationSet* > op_pStimulationSet = m_oLabelsDecoder.getOutputStimulationSet();
-		TParameterHandler < IStimulationSet* > ip_pStimulationSet = m_oStimulationsEncoder.getInputStimulationSet();
+		m_oStimulationDecoder.decode(i);
 
-		m_oLabelsDecoder.decode(i);
-
-		if(m_oLabelsDecoder.isHeaderReceived())
+		if(m_oStimulationDecoder.isHeaderReceived())
 		{
-			m_oStimulationsEncoder.encodeHeader();
-
-			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+			m_oStimulationEncoder.encodeHeader();
+			l_rDynamicBoxContext.markOutputAsReadyToSend(0, 0, 0);
 		}
-		if(m_oLabelsDecoder.isBufferReceived())
+		if(m_oStimulationDecoder.isBufferReceived())
 		{
-			for(uint64 j=0; j<op_pStimulationSet->getStimulationCount(); j++)
+			const IStimulationSet* l_oInputStimulationSet = m_oStimulationDecoder.getOutputStimulationSet();
+			IStimulationSet* l_oOutputStimulationSet = m_oStimulationEncoder.getInputStimulationSet();
+			l_oOutputStimulationSet->clear();
+
+			for(uint64 j=0; j<l_oInputStimulationSet->getStimulationCount(); j++)
 			{
-				if(op_pStimulationSet->getStimulationIdentifier(j)==m_ui64TrainStimulation)
+				if(l_oInputStimulationSet->getStimulationIdentifier(j)==m_ui64TrainStimulation)
 				{
 					l_bTrainStimulationReceived=true;
 
 					this->getLogManager() << LogLevel_Trace << "Raising train-completed Flag.\n";
 					uint64 l_ui32TrainCompletedStimulation = this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation,"OVTK_StimulationId_TrainCompleted");
-					ip_pStimulationSet->appendStimulation(l_ui32TrainCompletedStimulation, op_pStimulationSet->getStimulationDate(j), 0);
+					l_oOutputStimulationSet->appendStimulation(l_ui32TrainCompletedStimulation, l_oInputStimulationSet->getStimulationDate(j), 0);
 				}
 			}
-			m_oStimulationsEncoder.encodeBuffer();
+			m_oStimulationEncoder.encodeBuffer();
 
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
-		if(m_oLabelsDecoder.isEndReceived())
+		if(m_oStimulationDecoder.isEndReceived())
 		{
-			m_oStimulationsEncoder.encodeEnd();
+			m_oStimulationEncoder.encodeEnd();
 
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 		}
-
-
-		//l_rDynamicBoxContext.markInputAsDeprecated(0, i);
 	}
 
 	// Parses feature vectors
@@ -235,64 +310,79 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 	{
 		for(j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
-			TParameterHandler < IMatrix* > op_pFeatureVectorMatrix = m_vFeatureVectorsDecoder[i-1]->getOutputMatrix();
-			m_vFeatureVectorsDecoder[i-1]->decode(j);
+			m_vFeatureVectorDecoder[i-1]->decode(j);
 
-			if(m_vFeatureVectorsDecoder[i-1]->isHeaderReceived())
+			if(m_vFeatureVectorDecoder[i-1]->isHeaderReceived())
 			{
 			}
-			if(m_vFeatureVectorsDecoder[i-1]->isBufferReceived())
+			if(m_vFeatureVectorDecoder[i-1]->isBufferReceived())
 			{
+				const IMatrix* pFeatureVectorMatrix = m_vFeatureVectorDecoder[i-1]->getOutputMatrix();
+
 				CBoxAlgorithmClassifierTrainer::SFeatureVector l_oFeatureVector;
 				l_oFeatureVector.m_pFeatureVectorMatrix=new CMatrix();
-				l_oFeatureVector.m_ui32InputIndex=i;
-				OpenViBEToolkit::Tools::Matrix::copy(*l_oFeatureVector.m_pFeatureVectorMatrix, *op_pFeatureVectorMatrix);
-				m_vFeatureVector.push_back(l_oFeatureVector);
+				l_oFeatureVector.m_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(i, j);
+				l_oFeatureVector.m_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(i, j);
+				l_oFeatureVector.m_ui32InputIndex=i-1;
+
+				OpenViBEToolkit::Tools::Matrix::copy(*l_oFeatureVector.m_pFeatureVectorMatrix, *pFeatureVectorMatrix);
+				m_vDataset.push_back(l_oFeatureVector);
 				m_vFeatureCount[i]++;
 			}
-			if(m_vFeatureVectorsDecoder[i-1]->isEndReceived())
+			if(m_vFeatureVectorDecoder[i-1]->isEndReceived())
 			{
 			}
-			//l_rDynamicBoxContext.markInputAsDeprecated(i, j);
 		}
 	}
 
 	// On train stimulation reception, build up the labelled feature vector set matrix and go on training
 	if(l_bTrainStimulationReceived)
 	{
-		if(m_vFeatureVector.size()<m_ui64PartitionCount) 
+		if(m_vDataset.size()<m_ui64PartitionCount) 
 		{
-			this->getLogManager() << LogLevel_Error << "Fewer examples (" << (uint32)m_vFeatureVector.size() << ") than the specified partition count (" << m_ui64PartitionCount << ").\n";
+			this->getLogManager() << LogLevel_Error << "Fewer examples (" << (uint32)m_vDataset.size() << ") than the specified partition count (" << m_ui64PartitionCount << ").\n";
 			return false;
 		}
-		if(m_vFeatureVector.empty())
+		if(m_vDataset.empty())
 		{
 			this->getLogManager() << LogLevel_Warning << "Received train stimulation but no training examples received\n";
 		}
 		else
 		{
-			this->getLogManager() << LogLevel_Info << "Received train stimulation. Data dim is [" << (uint32) m_vFeatureVector.size() << "x" 
-				<< m_vFeatureVector[0].m_pFeatureVectorMatrix->getBufferElementCount() << "]\n";
+			this->getLogManager() << LogLevel_Info << "Received train stimulation. Data dim is [" << (uint32) m_vDataset.size() << "x" 
+				<< m_vDataset[0].m_pFeatureVectorMatrix->getBufferElementCount() << "]\n";
 			for(i=1; i<l_rStaticBoxContext.getInputCount(); i++)
 			{
-				this->getLogManager() << LogLevel_Trace << "For information, we have " << m_vFeatureCount[i] << " feature vector(s) for input " << i << "\n";
+				this->getLogManager() << LogLevel_Info << "For information, we have " << m_vFeatureCount[i] << " feature vector(s) for input " << i << "\n";
 			}
+
+			const boolean l_bBalanceDataset = this->getConfigurationManager().expandAsBoolean((*m_pParameter)[c_sBalanceSettingName]);
+			if(l_bBalanceDataset)
+			{
+				balanceDataset();
+			}
+
+			const std::vector < SFeatureVector >& l_rActualDataset = (l_bBalanceDataset ? m_vBalancedDataset : m_vDataset);
+
+			float64 l_f64PartitionAccuracy=0;
+			float64 l_f64FinalAccuracy=0;
 
 			vector<float64> l_vPartitionAccuracies((unsigned int)m_ui64PartitionCount);
 
-			boolean l_bRandomizeVectorOrder = (&(this->getConfigurationManager()))->expandAsBoolean("${Plugin_Classification_RandomizeKFoldTestData}");
+			const boolean l_bRandomizeVectorOrder = (&(this->getConfigurationManager()))->expandAsBoolean("${Plugin_Classification_RandomizeKFoldTestData}");
 
 			// create a vector used for mapping feature vectors (initialize it as v[i] = i)
-			for (uint32 i = 0; i < m_vFeatureVector.size(); i++)
+			std::vector < size_t > l_vFeaturePermutation;
+			for (size_t i = 0; i < l_rActualDataset.size(); i++)
 			{
-				m_vFeatureVectorIndex.push_back(i);
+				l_vFeaturePermutation.push_back(i);
 			}
 
 			// randomize the vector if necessary
 			if (l_bRandomizeVectorOrder)
 			{
 				this->getLogManager() << LogLevel_Info << "Randomizing the feature vector set\n";
-				random_shuffle(m_vFeatureVectorIndex.begin(), m_vFeatureVectorIndex.end(), System::Math::randomUInteger32WithCeiling);
+				random_shuffle(l_vFeaturePermutation.begin(), l_vFeaturePermutation.end(), System::Math::randomUInteger32WithCeiling);
 			}
 
 			const uint32 l_ui32ClassCount = l_rStaticBoxContext.getInputCount() - 1;
@@ -311,13 +401,13 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 				this->getLogManager() << LogLevel_Info << "k-fold test could take quite a long time, be patient\n";
 				for(uint64 i=0; i<m_ui64PartitionCount; i++)
 				{
-					size_t l_uiStartIndex=(size_t)(((i  )*m_vFeatureVector.size())/m_ui64PartitionCount);
-					size_t l_uiStopIndex =(size_t)(((i+1)*m_vFeatureVector.size())/m_ui64PartitionCount);
+					const size_t l_uiStartIndex=(size_t)(((i  )*l_rActualDataset.size())/m_ui64PartitionCount);
+					const size_t l_uiStopIndex =(size_t)(((i+1)*l_rActualDataset.size())/m_ui64PartitionCount);
 
 					this->getLogManager() << LogLevel_Trace << "Training on partition " << i << " (feature vectors " << (uint32)l_uiStartIndex << " to " << (uint32)l_uiStopIndex-1 << ")...\n";
-					if(this->train(l_uiStartIndex, l_uiStopIndex))
+					if(this->train(l_rActualDataset, l_vFeaturePermutation, l_uiStartIndex, l_uiStopIndex))
 					{
-						l_f64PartitionAccuracy=this->getAccuracy(l_uiStartIndex, l_uiStopIndex, l_oConfusion);
+						l_f64PartitionAccuracy = this->getAccuracy(l_rActualDataset, l_vFeaturePermutation, l_uiStartIndex, l_uiStopIndex, l_oConfusion);
 						l_vPartitionAccuracies[(unsigned int)i]=l_f64PartitionAccuracy;
 						l_f64FinalAccuracy+=l_f64PartitionAccuracy;
 					} else {
@@ -327,12 +417,12 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 					this->getLogManager() << LogLevel_Info << "Finished with partition " << i+1 << " / " << m_ui64PartitionCount << " (performance : " << l_f64PartitionAccuracy << "%)\n";
 				}
 
-				float64 l_fMean = l_f64FinalAccuracy/m_ui64PartitionCount;
+				const float64 l_fMean = l_f64FinalAccuracy/m_ui64PartitionCount;
 				float64 l_fDeviation = 0;
 
 				for (uint64 i = 0; i < m_ui64PartitionCount; i++)
 				{
-					float64 l_fDiff = l_vPartitionAccuracies[(unsigned int)i] - l_fMean;
+					const float64 l_fDiff = l_vPartitionAccuracies[(unsigned int)i] - l_fMean;
 					l_fDeviation += l_fDiff * l_fDiff;
 				}
 				l_fDeviation = sqrt( l_fDeviation / m_ui64PartitionCount );
@@ -347,28 +437,34 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 				this->getLogManager() << LogLevel_Info << "*** Reported training set accuracy will be optimistic ***\n";
 			}
 
+		
 			this->getLogManager() << LogLevel_Trace << "Training final classifier on the whole set...\n";
-			if(!this->train(0, 0))
+			if(!this->train(l_rActualDataset, l_vFeaturePermutation, 0, 0))
 			{
 				this->getLogManager() << LogLevel_Error << "Bailing out (from whole set training)...\n";
 				return false;
 			}
 
+			
 			OpenViBEToolkit::Tools::Matrix::clearContent(l_oConfusion);
+			const float64 l_f64TrainAccuracy = this->getAccuracy(l_rActualDataset, l_vFeaturePermutation, 0, l_rActualDataset.size(), l_oConfusion);
 
-			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << this->getAccuracy(0, m_vFeatureVector.size(), l_oConfusion) << "% (optimistic)\n";
+			this->getLogManager() << LogLevel_Info << "Training set accuracy is " << l_f64TrainAccuracy << "% (optimistic)\n";
 
 			printConfusionMatrix(l_oConfusion);
-
 			if(!this->saveConfiguration())
+			{
+				this->getLogManager() << LogLevel_Error << "Error saving classifier\n";
 				return false;
+			}
 		}
 	}
 
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const size_t uiStopIndex)
+boolean CBoxAlgorithmClassifierTrainer::train(const std::vector < SFeatureVector >& rDataset, 
+	const std::vector< size_t >& rPermutation, const size_t uiStartIndex, const size_t uiStopIndex)
 {
 	if(uiStopIndex-uiStartIndex==1)
 	{
@@ -376,22 +472,23 @@ boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const s
 		return false;
 	}
 
-	uint32 l_ui32FeatureVectorCount=m_vFeatureVector.size()-(uiStopIndex-uiStartIndex);
-	uint32 l_ui32FeatureVectorSize=m_vFeatureVector[0].m_pFeatureVectorMatrix->getBufferElementCount();
+	const uint32 l_ui32FeatureVectorCount=rDataset.size()-(uiStopIndex-uiStartIndex);
+	const uint32 l_ui32FeatureVectorSize=rDataset[0].m_pFeatureVectorMatrix->getBufferElementCount();
 
 	TParameterHandler < IMatrix* > ip_pFeatureVectorSet(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
+
 	ip_pFeatureVectorSet->setDimensionCount(2);
 	ip_pFeatureVectorSet->setDimensionSize(0, l_ui32FeatureVectorCount);
 	ip_pFeatureVectorSet->setDimensionSize(1, l_ui32FeatureVectorSize+1);
 
 	float64* l_pFeatureVectorSetBuffer=ip_pFeatureVectorSet->getBuffer();
-	for(size_t j=0; j<m_vFeatureVector.size()-(uiStopIndex-uiStartIndex); j++)
+	for(size_t j=0; j<rDataset.size()-(uiStopIndex-uiStartIndex); j++)
 	{
-		size_t k=m_vFeatureVectorIndex[(j<uiStartIndex?j:j+(uiStopIndex-uiStartIndex))];
-		float64 l_f64Class=(float64)m_vFeatureVector[k].m_ui32InputIndex;
+		size_t k=rPermutation[(j<uiStartIndex?j:j+(uiStopIndex-uiStartIndex))];
+		float64 l_f64Class=(float64)rDataset[k].m_ui32InputIndex;
 		System::Memory::copy(
 			l_pFeatureVectorSetBuffer,
-			m_vFeatureVector[k].m_pFeatureVectorMatrix->getBuffer(),
+			rDataset[k].m_pFeatureVectorMatrix->getBuffer(),
 			l_ui32FeatureVectorSize*sizeof(float64));
 
 		l_pFeatureVectorSetBuffer[l_ui32FeatureVectorSize]=l_f64Class;
@@ -417,17 +514,17 @@ boolean CBoxAlgorithmClassifierTrainer::train(const size_t uiStartIndex, const s
 	return l_bReturnValue;
 }
 
-float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, const size_t uiStopIndex, CMatrix& oConfusionMatrix)
+// Note that this function is incremental for oConfusionMatrix and can be called many times; so we don't clear the matrix
+float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const std::vector < CBoxAlgorithmClassifierTrainer::SFeatureVector >& rDataset, 
+	const std::vector< size_t >& rPermutation, const size_t uiStartIndex, const size_t uiStopIndex, CMatrix& oConfusionMatrix)
 {
-	size_t l_iSuccessfullTrainerCount=0;
-
 	if(uiStopIndex-uiStartIndex==0)
 	{
 		this->getLogManager() << LogLevel_Error << "Start and stop indexes are the same (" << static_cast<uint64>(uiStartIndex) << ")\n";
 		return 0;
 	}
 
-	uint32 l_ui32FeatureVectorSize=m_vFeatureVector[0].m_pFeatureVectorMatrix->getBufferElementCount();
+	const uint32 l_ui32FeatureVectorSize=rDataset[0].m_pFeatureVectorMatrix->getBufferElementCount();
 
 	TParameterHandler < XML::IXMLNode* > op_pConfiguration(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Configuration));
 	XML::IXMLNode * l_pNode = op_pConfiguration;//Requested for affectation
@@ -441,34 +538,46 @@ float64 CBoxAlgorithmClassifierTrainer::getAccuracy(const size_t uiStartIndex, c
 	ip_pFeatureVector->setDimensionCount(1);
 	ip_pFeatureVector->setDimensionSize(0, l_ui32FeatureVectorSize);
 
+	size_t l_iSuccessCount=0;
+
 	for(size_t j=uiStartIndex; j<uiStopIndex; j++)
 	{
-		const size_t k = m_vFeatureVectorIndex[j];
-
+		const size_t k = rPermutation[j];
 
 		float64* l_pFeatureVectorBuffer=ip_pFeatureVector->getBuffer();
-		const float64 l_f64CorrectValue=(float64)m_vFeatureVector[k].m_ui32InputIndex;
+		const float64 l_f64CorrectValue=(float64)rDataset[k].m_ui32InputIndex;
 
 		this->getLogManager() << LogLevel_Debug << "Try to recognize " << l_f64CorrectValue << "\n";
+
 		System::Memory::copy(
 			l_pFeatureVectorBuffer,
-			m_vFeatureVector[k].m_pFeatureVectorMatrix->getBuffer(),
+			rDataset[k].m_pFeatureVectorMatrix->getBuffer(),
 			l_ui32FeatureVectorSize*sizeof(float64));
 
 		m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify);
 
 		const float64 l_f64PredictedValue = op_f64ClassificationStateClass;
+
 		this->getLogManager() << LogLevel_Debug << "Recognize " << l_f64PredictedValue << "\n";
+
 		if(l_f64PredictedValue==l_f64CorrectValue)
 		{
-			l_iSuccessfullTrainerCount++;
+			l_iSuccessCount++;
 		}
 
-		oConfusionMatrix[static_cast<uint32>(l_f64CorrectValue-1)*oConfusionMatrix.getDimensionSize(1) + 
-			static_cast<uint32>(l_f64PredictedValue-1)] += 1.0;
+		if(l_f64PredictedValue<oConfusionMatrix.getDimensionSize(0) && l_f64CorrectValue<oConfusionMatrix.getDimensionSize(0))
+		{
+			float64* buf = oConfusionMatrix.getBuffer();
+			buf[static_cast<uint32>(l_f64CorrectValue)*oConfusionMatrix.getDimensionSize(1) + 
+				static_cast<uint32>(l_f64PredictedValue)] += 1.0;
+		}
+		else
+		{
+			std::cout << "errorn\n";
+		}
 	}
 
-	return static_cast<float64>((l_iSuccessfullTrainerCount*100.0)/(uiStopIndex-uiStartIndex));
+	return static_cast<float64>((l_iSuccessCount*100.0)/(uiStopIndex-uiStartIndex));
 }
 
 boolean CBoxAlgorithmClassifierTrainer::printConfusionMatrix(const CMatrix& oMatrix)
@@ -544,9 +653,14 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 
 	XML::IXMLNode *l_sRoot = XML::createNode(c_sClassificationBoxRoot);
 	std::stringstream l_sVersion;
-	l_sVersion << OVP_Classification_BoxTrainerXMLVersion;
-	l_sRoot->addAttribute(c_sXmlVersionAttributeName, l_sVersion.str().c_str());
+	l_sVersion << OVP_Classification_BoxTrainerFormatVersion;
+	l_sRoot->addAttribute(c_sFormatVersionAttributeName, l_sVersion.str().c_str());
 
+	l_sRoot->addAttribute(c_sCreatorAttributeName, OV_PROJECT_NAME);
+
+	std::stringstream l_sCreatorVersion;
+	l_sCreatorVersion << OV_VERSION_MAJOR << "." << OV_VERSION_MINOR << "." << OV_VERSION_PATCH;
+	l_sRoot->addAttribute(c_sCreatorVersionAttributeName, l_sCreatorVersion.str().c_str());
 
 	XML::IXMLNode *l_pTempNode = XML::createNode(c_sStrategyNodeName);
 	l_oStrategyClassIdentifier = this->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_ClassificationStrategy, (*m_pParameter)[c_sMulticlassStrategySettingName]);
@@ -570,7 +684,7 @@ boolean CBoxAlgorithmClassifierTrainer::saveConfiguration(void)
 
 		l_pTempNode = XML::createNode(c_sClassStimulationNodeName);
 		std::stringstream l_sBuffer;
-		l_sBuffer << i;
+		l_sBuffer << (i-1);
 		l_pTempNode->addAttribute(c_sIdentifierAttributeName, l_sBuffer.str().c_str());
 		l_pTempNode->setPCData((*m_pParameter)[l_sBufferSettingName].toASCIIString());
 		l_pStimulationsNode->addChild(l_pTempNode);

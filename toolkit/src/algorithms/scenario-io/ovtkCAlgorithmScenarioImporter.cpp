@@ -398,6 +398,8 @@ boolean CAlgorithmScenarioImporterContext::processStart(const CIdentifier& rIden
 {
 	if(false) { }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_OpenViBEScenario)                         { }
+	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Creator)                                  { }
+	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_CreatorVersion)                           { }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_VisualisationTree)                        { }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_VisualisationWidget)                      { m_oSymbolicScenario.m_vVisualisationWidget.push_back(SVisualisationWidget()); }
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_VisualisationWidget_Attributes)           {  }
