@@ -183,6 +183,7 @@ ADD_DEFINITIONS(-DOV_CMAKE_PATH_BIN="${CMAKE_INSTALL_FULL_BINDIR}")
 ADD_DEFINITIONS(-DOV_CMAKE_PATH_DATA="${CMAKE_INSTALL_FULL_DATADIR}/openvibe")
 ADD_DEFINITIONS(-DOV_CMAKE_PATH_LIB="${CMAKE_INSTALL_FULL_LIBDIR}")
 
+ADD_SUBDIRECTORY("build-tool/")
 # Traverse these directories and build their components
 ADD_SUBDIRECTORY("common/")
 ADD_SUBDIRECTORY("openvibe/")
@@ -199,6 +200,8 @@ ADD_SUBDIRECTORY("documentation/") # needs to be the last since it uses the list
 IF(openvibe-documentation)
 	ADD_DEPENDENCIES(openvibe-documentation openvibe-plugin-inspector)
 ENDIF(openvibe-documentation)
+
+ADD_DEPENDENCIES(openvibe-toolkit openvibe-stimulation-generator )
 # make a copy of the dependency script, this is done so we can use the same launch scripts both in win install and win devel situations.
 IF(WIN32)
 	INSTALL(PROGRAMS ${CMAKE_SOURCE_DIR}/scripts/win32-dependencies.cmd DESTINATION ${CMAKE_INSTALL_FULL_BINDIR} RENAME "openvibe-set-env.cmd")
