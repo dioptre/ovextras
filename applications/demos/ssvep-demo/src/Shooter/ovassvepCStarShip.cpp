@@ -46,7 +46,8 @@ CStarShip::CStarShip(CApplication* poApplication, Ogre::SceneNode* poParentNode,
 
 	SceneNode* l_poDrawnObjectNode;
 	MovableObject* l_poDrawnObject;
-	Ogre::Rectangle l_oWingRectangle = { - rRadius * 0.4f, rRadius * 0.4f, rRadius * 0.4f, -rRadius * 0.4f };
+	// Ogre::RealRect l_oWingRectangle = { - rRadius * 0.4f, rRadius * 0.4f, rRadius * 0.4f, -rRadius * 0.4f };
+	Ogre::RealRect l_oWingRectangle(-rRadius * 0.4f, rRadius * 0.4f, rRadius * 0.4f, -rRadius * 0.4f );
 
 	// paint the cannon
 

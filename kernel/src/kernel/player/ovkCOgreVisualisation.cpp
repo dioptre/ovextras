@@ -412,9 +412,10 @@ void COgreVisualisation::addResourceLocations(const std::string& resourcesFile)
 {
 	try
 	{
+		this->getLogManager() << LogLevel_Trace << "Loading resources file\n";
+
 		//load resource paths from config file
 		ConfigFile configFile;
-		this->getLogManager() << LogLevel_Trace << "Loading resources file\n";
 		configFile.load(resourcesFile);
 
 		String resourceGroupName;

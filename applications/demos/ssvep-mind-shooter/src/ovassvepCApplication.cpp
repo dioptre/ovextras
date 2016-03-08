@@ -284,14 +284,23 @@ void CApplication::initCEGUI()
 	(*m_poLogManager) << LogLevel_Debug << "+ Creating CEGUI Ogre bootstrap\n";
 	m_roGUIRenderer = &(CEGUI::OgreRenderer::bootstrapSystem(*m_poWindow));
 	(*m_poLogManager) << LogLevel_Debug << "+ Creating CEGUI Scheme Manager\n";
+
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+	CEGUI::SchemeManager::getSingleton().createFromFile((CEGUI::utf8*)"TaharezLook-ov.scheme");
+#else
 	CEGUI::SchemeManager::getSingleton().create((CEGUI::utf8*)"TaharezLook-ov.scheme");
+#endif
 
 	(*m_poLogManager) << LogLevel_Debug << "+ Creating CEGUI WindowManager\n";
 	m_poGUIWindowManager = CEGUI::WindowManager::getSingletonPtr();
 	m_poSheet = m_poGUIWindowManager->createWindow("DefaultWindow", "RootSheet");
 
 	(*m_poLogManager) << LogLevel_Debug << "+ Setting CEGUI StyleSheet\n";
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+	// @FIXME
+#else
 	CEGUI::System::getSingleton().setGUISheet(m_poSheet);
+#endif
 }
 
 void CApplication::resizeViewport()

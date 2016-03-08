@@ -13,6 +13,13 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBESSVEP;
 
+#if !((CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7))
+namespace CEGUI
+{
+	typedef CEGUI::UVector2 USize;
+};
+#endif
+
 CShooterApplication::CShooterApplication()
 	: CApplication(),
 	  m_bTargetRequest( false ),
@@ -42,11 +49,15 @@ bool CShooterApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContex
 
 	m_poInstructionsReady = m_poGUIWindowManager->createWindow("TaharezLook/StaticImage", "InstructionsReady");
 	m_poInstructionsReady->setPosition(CEGUI::UVector2(cegui_reldim(0.0f), cegui_reldim(0.0f)) );
-	m_poInstructionsReady->setSize(CEGUI::UVector2(CEGUI::UDim(0.0f, 640.f), CEGUI::UDim(0.0f, 32.f)));
+	m_poInstructionsReady->setSize(CEGUI::USize(CEGUI::UDim(0.0f, 640.f), CEGUI::UDim(0.0f, 32.f)));
 
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+	m_poSheet->addChild(m_poInstructionsReady);
+	CEGUI::ImageManager::getSingleton().addFromImageFile("InstructionsReady","InstructionText-Start.png");
+#else
 	m_poSheet->addChildWindow(m_poInstructionsReady);
-
-	CEGUI::ImagesetManager::getSingleton().createFromImageFile("InstructionsReady","InstructionText-Start.png");
+	CEGUI::ImagesetManager::getSingleton().createFromImageFile("InstructionsReady", "InstructionText-Start.png");
+#endif
 
 	m_poInstructionsReady->setProperty("Image","set:InstructionsReady image:full_image");
 	m_poInstructionsReady->setProperty("FrameEnabled","False");

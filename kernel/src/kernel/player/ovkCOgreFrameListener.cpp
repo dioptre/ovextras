@@ -7,15 +7,24 @@
 #include "OgreRenderSystem.h"
 #include "OgreStringConverter.h"
 
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+	#include "Overlay/OgreOverlayManager.h"
+	#include "Overlay/OgreOverlayElement.h"
+#endif
+
 using namespace std;
 using namespace Ogre;
 
 COgreFrameListener::COgreFrameListener(RenderWindow* win) :
 m_pRenderWindow(win),
-m_pDebugOverlay(0)
+m_pDebugOverlay(NULL)
 {
 	//FIXME : the overlay should be cloned for each window, as opposed to shared betwen windows!!
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+	// @FIXME
+#else
 	m_pDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
+#endif
 
 	//Register as a Window listener
 	//WindowEventUtilities::addWindowEventListener(m_pRenderWindow, this);
@@ -50,6 +59,11 @@ bool COgreFrameListener::frameEnded(const FrameEvent& evt)
 
 void COgreFrameListener::updateStats(void)
 {
+	if (!m_pDebugOverlay)
+	{
+		return;
+	}
+
 	static String currFps = "Current FPS: ";
 	static String avgFps = "Average FPS: ";
 	static String bestFps = "Best FPS: ";

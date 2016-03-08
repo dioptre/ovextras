@@ -5,6 +5,10 @@
 
 #include <Ogre.h>
 
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+#include "Overlay/OgreOverlayManager.h"
+#endif
+
 #define SSVEP_DEFAULT_COLOUR Ogre::ColourValue(1.0f, 1.0f, 1.0f)
 
 namespace OpenViBESSVEP
@@ -22,8 +26,8 @@ namespace OpenViBESSVEP
 				return m_poSceneManager;
 			}
 
-			Ogre::ManualObject* paintRectangle( Ogre::Rectangle oRectangle, Ogre::ColourValue oColour = SSVEP_DEFAULT_COLOUR, int iPlane = 1 );
-			Ogre::ManualObject* paintTexturedRectangle( Ogre::Rectangle oRectangle, Ogre::String sSurface, int iPlane = 1 );
+			Ogre::ManualObject* paintRectangle( Ogre::RealRect oRectangle, Ogre::ColourValue oColour = SSVEP_DEFAULT_COLOUR, int iPlane = 1 );
+			Ogre::ManualObject* paintTexturedRectangle( Ogre::RealRect oRectangle, Ogre::String sSurface, int iPlane = 1 );
 			Ogre::ManualObject* paintTriangle( Ogre::Vector2 oP1, Ogre::Vector2 oP2, Ogre::Vector2 oP3, Ogre::ColourValue oColour = SSVEP_DEFAULT_COLOUR, int iPlane = 1 );
 			Ogre::ManualObject* paintTriangle( Ogre::Vector3 oP1, Ogre::Vector3 oP2, Ogre::Vector3 oP3, Ogre::ColourValue oColour = SSVEP_DEFAULT_COLOUR, int iPlane = 1 );
 			Ogre::ManualObject* paintTexturedTriangle( Ogre::Vector2 oP1, Ogre::Vector2 oP2, Ogre::Vector2 oP3, Ogre::String sSurface, int iPlane = 1 );
