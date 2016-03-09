@@ -101,7 +101,7 @@ boolean CBoxAlgorithmElectrodeLocalisationFileReader::process(void)
 		//op_pChannelLocalisationMemoryBuffer = l_rDynamicBoxContext.getOutputChunk(0);
 
 		//open file and load matrix dimensions
-		m_pOVMatrixFileReader->process(OVP_Algorithm_BrainampFileReader_InputTriggerId_Open);
+		// m_pOVMatrixFileReader->process(OVP_Algorithm_BrainampFileReader_InputTriggerId_Open);
 
 		// Produces header
 		IMatrix* l_pInputMatrix = m_pChannelLocalisationStreamEncoder->getInputMatrix();
