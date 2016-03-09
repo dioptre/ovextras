@@ -193,7 +193,6 @@ ADD_SUBDIRECTORY("toolkit/")
 ADD_SUBDIRECTORY("plugins/")
 ADD_SUBDIRECTORY("applications/")
 ADD_SUBDIRECTORY("externals/")
-ADD_SUBDIRECTORY("contrib/")
 ADD_SUBDIRECTORY("documentation/") # needs to be the last since it uses the list of collected projects
 
 #add dependency to plugin inspector to the documentation
