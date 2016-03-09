@@ -23,4 +23,5 @@ INSTALL(TARGETS ${PROJECT_NAME}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 
 #Install the signal file required for testing
-INSTALL(DIRECTORY ../../../../applications/demos/ssvep-demo/signals      DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/   PATTERN ".svn" EXCLUDE)
+# @FIXME CertiViBE
+# INSTALL(DIRECTORY ../../../../applications/demos/ssvep-demo/signals      DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/   PATTERN ".svn" EXCLUDE)
