@@ -16,16 +16,16 @@ ENDIF(WIN32)
 
 ### Do not enable the commented out sikuli tests unless you 
 ### or your lab commits to keep them passing in the long term.
-FIND_PROGRAM(SIKULI NAMES sikuli-ide)
-IF(SIKULI)
-	IF(UNIX)
-		# ADD_TEST(sikuli_basic_interface_designer "${SIKULI}" -t testStartInterface.UNIX.sikuli)
-		ADD_TEST(sikuli_boxSetAttribute "${SIKULI}" -t testBoxSetAttribute.UNIX.sikuli)
-		ADD_TEST(sikuli_DrawPerformance3Boxes_designer "${SIKULI}" -t testDrawPerformance3boxes.UNIX.sikuli)
-		ADD_TEST(sikuli_DrawPerformance400Boxes_designer "${SIKULI}" -t testDrawPerformance400boxes.UNIX.sikuli)
-		# ADD_TEST(sikuli_ChangeSettingsOnLine "${SIKULI}" -t testModUI.UNIX.sikuli)
-	ENDIF(UNIX)
-ENDIF(SIKULI)
+#FIND_PROGRAM(SIKULI NAMES sikuli-ide)
+#IF(SIKULI)
+#	IF(UNIX)
+#		ADD_TEST(sikuli_basic_interface_designer "${SIKULI}" -t testStartInterface.UNIX.sikuli)
+#		ADD_TEST(sikuli_boxSetAttribute "${SIKULI}" -t testBoxSetAttribute.UNIX.sikuli)
+#		ADD_TEST(sikuli_DrawPerformance3Boxes_designer "${SIKULI}" -t testDrawPerformance3boxes.UNIX.sikuli)
+#		ADD_TEST(sikuli_DrawPerformance400Boxes_designer "${SIKULI}" -t testDrawPerformance400boxes.UNIX.sikuli)
+#		ADD_TEST(sikuli_ChangeSettingsOnLine "${SIKULI}" -t testModUI.UNIX.sikuli)
+#	ENDIF(UNIX)
+#ENDIF(SIKULI)
 
 
 
