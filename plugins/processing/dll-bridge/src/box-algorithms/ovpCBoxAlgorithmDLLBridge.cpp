@@ -155,14 +155,20 @@ namespace OpenViBEPlugins
 
 			}
 		
+			this->getLogManager() << LogLevel_Trace << "DLL box_init() : Calling\n";
+
 			// Do some initialization in DLL
 			int32 l_i32ParamsLength = m_sParameters.length();
 			int32 l_i32ErrorCode = 0;
 			m_pInitialize(&l_i32ParamsLength, m_sParameters.toASCIIString(), &l_i32ErrorCode);
 			if(l_i32ErrorCode) 
 			{
-				this->getLogManager() << LogLevel_Error << "DLL box_init() returned error code " << l_i32ErrorCode << "\n";
+				this->getLogManager() << LogLevel_Error << "DLL box_init() : Returned error code " << l_i32ErrorCode << "\n";
 				return false;
+			}
+			else
+			{
+				this->getLogManager() << LogLevel_Trace << "DLL box_init() : Return ok\n";
 			}
 			return true;
 		}
@@ -187,14 +193,20 @@ namespace OpenViBEPlugins
 
 			if(m_pUninitialize)
 			{
+				this->getLogManager() << LogLevel_Trace << "DLL box_uninit() : Calling\n";
+
 				// Do some uninitialization in DLL
 				int32 l_i32ErrorCode = 0;			
 				m_pUninitialize(&l_i32ErrorCode);
 
 				if(l_i32ErrorCode) 
 				{
-					this->getLogManager() << LogLevel_Error << "DLL box_uninit() returned error code " << l_i32ErrorCode << "\n";
+					this->getLogManager() << LogLevel_Error << "DLL box_uninit() : Returned error code " << l_i32ErrorCode << "\n";
 					return false;
+				}
+				else
+				{
+					this->getLogManager() << LogLevel_Trace << "DLL box_uninit() : Return ok\n";
 				}
 			}
 
@@ -253,10 +265,26 @@ namespace OpenViBEPlugins
 					int32 l_i32nRowsIn = l_pDecoder->getOutputMatrix()->getDimensionSize(0);
 					int32 l_i32nColsIn = l_pDecoder->getOutputMatrix()->getDimensionSize(1);
 
+					this->getLogManager() << LogLevel_Trace << "DLL box_process_header() : Calling\n";
+
 					int32 l_i32ErrorCode = 0;
 					int32 l_i32nRowsOut=0,l_i32nColsOut=0;
 					int32 l_i32SamplingRateOut = 0;
 					m_pProcessHeader(&l_i32nRowsIn,&l_i32nColsIn, &l_i32SamplingRateIn, &l_i32nRowsOut, &l_i32nColsOut, &l_i32SamplingRateOut, &l_i32ErrorCode);
+					if(l_i32ErrorCode) 
+					{
+						this->getLogManager() << LogLevel_Error << "DLL box_process_header() : Returned error code " << l_i32ErrorCode << "\n";
+						return false;
+					}
+					else
+					{
+						this->getLogManager() << LogLevel_Trace << "DLL box_process_header() : Return ok\n";
+						this->getLogManager() << LogLevel_Trace << "The function declared" 
+							<< " rowsOut=" << l_i32nRowsOut
+							<< " colsOut=" << l_i32nColsOut
+							<< " sRateOut=" << l_i32SamplingRateOut
+							<< "\n";
+					}
 
 					l_pEncoder->getInputMatrix()->setDimensionCount(2);
 					l_pEncoder->getInputMatrix()->setDimensionSize(0, l_i32nRowsOut);
@@ -277,13 +305,19 @@ namespace OpenViBEPlugins
 					float64* l_pInput = l_pDecoder->getOutputMatrix()->getBuffer();
 					float64* l_pOutput = l_pEncoder->getInputMatrix()->getBuffer();
 
+					this->getLogManager() << LogLevel_Trace << "DLL box_process() : Calling\n";
+
 					// Process the sample chunk in DLL
 					int32 l_i32ErrorCode = 0;
 					m_pProcess(l_pInput, l_pOutput, &l_i32ErrorCode);
 					if(l_i32ErrorCode) 
 					{
-						this->getLogManager() << LogLevel_Error << "DLL box_process() returned error code " << l_i32ErrorCode << "\n";
+						this->getLogManager() << LogLevel_Error << "DLL box_process() : Returned error code " << l_i32ErrorCode << "\n";
 						return false;
+					}
+					else
+					{
+						this->getLogManager() << LogLevel_Trace << "DLL box_process() : Return ok\n";
 					}
 
 					l_pEncoder->encodeBuffer();
