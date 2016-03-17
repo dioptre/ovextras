@@ -13,54 +13,49 @@ using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Classification;
 using namespace std;
 
-boolean CBoxAlgorithmClassifierProcessor::initialize(void)
+boolean CBoxAlgorithmClassifierProcessor::loadClassifier(const char* sFilename)
 {
-	m_pClassifier = NULL;
-
-	m_oFeatureVectorDecoder.initialize(*this, 0);
-
-	m_oLabelsEncoder.initialize(*this, 0);
-	m_oHyperplanValuesEncoder.initialize(*this, 1);
-	m_oProbabilitiesValuesEncoder.initialize(*this, 2);
-
-
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-
-	//First of all, let's get the XML file for configuration
-	CString l_sConfigurationFilename;
-	l_rStaticBoxContext.getSettingValue(0, l_sConfigurationFilename);
-
-	if(l_sConfigurationFilename == CString("")) 
+	if(m_pClassifier)
 	{
-		this->getLogManager() << LogLevel_Error << "You need to specify a classifier .xml for the box (use Classifier Trainer to create one)\n";
-		return false;
+		m_pClassifier->uninitialize();
+		this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
+		m_pClassifier = NULL;
 	}
 
 	XML::IXMLHandler *l_pHandler = XML::createXMLHandler();
-	XML::IXMLNode *l_pRootNode = l_pHandler->parseFile(l_sConfigurationFilename.toASCIIString());
+	XML::IXMLNode *l_pRootNode = l_pHandler->parseFile(sFilename);
 
 	if(!l_pRootNode) 
 	{
-		this->getLogManager() << LogLevel_Error << "Unable to get root node from [" << l_sConfigurationFilename << "]\n";
+		this->getLogManager() << LogLevel_Error << "Unable to get root node from [" << sFilename << "]\n";
 		return false;
 	}
 
-	//Now check the version, and let's display a message if the version is not good
+	m_vStimulation.clear();
+
+	// Check the version of the file
 	string l_sVersion;
-	if(l_pRootNode->hasAttribute(c_sXmlVersionAttributeName))
+	if(l_pRootNode->hasAttribute(c_sFormatVersionAttributeName))
 	{
-		l_sVersion = l_pRootNode->getAttribute(c_sXmlVersionAttributeName);
+		l_sVersion = l_pRootNode->getAttribute(c_sFormatVersionAttributeName);
 		std::stringstream l_sData(l_sVersion);
 		uint32 l_ui32Version;
 		l_sData >> l_ui32Version;
-		if(l_ui32Version != OVP_Classification_BoxTrainerXMLVersion)
+		if(l_ui32Version > OVP_Classification_BoxTrainerFormatVersion)
 		{
-			this->getLogManager() << LogLevel_Warning << "The configuration file doesn't have the same version number as the box. Trouble may appear in loading process.\n";
+			this->getLogManager() << LogLevel_Warning << "The classifier configuration in [" << sFilename << "] was saved using a newer version of OpenViBE. Problems may occur.\n";
+		}
+		else if(l_ui32Version < OVP_Classification_BoxTrainerFormatVersionRequired)
+		{
+			this->getLogManager() << LogLevel_Error << "The classifier configuration in [" << sFilename << "] has XML version " << l_ui32Version << " but version " << OVP_Classification_BoxTrainerFormatVersionRequired
+				<< " is required. Please retrain the classifier using your current OpenViBE version.\n";
+			return false;
 		}
 	}
 	else
 	{
-		this->getLogManager() << LogLevel_Warning << "The configuration file has no version information. Trouble may appear in loading process.\n";
+		this->getLogManager() << LogLevel_Error << "The configuration file [" << sFilename << "] has no version information. Please retrain your classifier using your current OpenViBE version.\n";
+		return false;
 	}
 
 	CIdentifier l_oAlgorithmClassIdentifier = OV_UndefinedIdentifier;
@@ -88,7 +83,7 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 		//If the algorithm is still unknown, that means that we face an error
 		if(l_oAlgorithmClassIdentifier==OV_UndefinedIdentifier)
 		{
-			this->getLogManager() << LogLevel_Error << "Couldn't restore a classifier from the file [" << l_sConfigurationFilename << "].\n";
+			this->getLogManager() << LogLevel_Error << "Couldn't restore a classifier from the file [" << sFilename << "].\n";
 			return false;
 		}
 	}
@@ -137,11 +132,14 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	m_pClassifier=&this->getAlgorithmManager().getAlgorithm(l_oClassifierAlgorithmIdentifier);
 	m_pClassifier->initialize();
 
-	TParameterHandler < IMatrix* > ip_pClassifierStimulationSet(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));
-	ip_pClassifierStimulationSet.setReferenceTarget(m_oFeatureVectorDecoder.getOutputMatrix());
+	// Connect the params to the new classifier
 
-	m_oHyperplanValuesEncoder.getInputMatrix().setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
-	m_oProbabilitiesValuesEncoder.getInputMatrix().setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
+	TParameterHandler < OpenViBE::IMatrix* > ip_oFeatureVector = m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector);
+	ip_oFeatureVector.setReferenceTarget(m_oFeatureVectorDecoder.getOutputMatrix());
+
+	m_oHyperplaneValuesEncoder.getInputMatrix().setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ClassificationValues));
+	m_oProbabilityValuesEncoder.getInputMatrix().setReferenceTarget(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_ProbabilityValues));
+	// note: labelsencoder cannot be directly bound here as the classifier returns a float, but we need to output a stimulation
 
 	TParameterHandler < XML::IXMLNode* > ip_pClassificationConfiguration(m_pClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_Configuration));
 	ip_pClassificationConfiguration = l_pRootNode->getChildByName(c_sClassifierRoot)->getChild(0);
@@ -156,19 +154,52 @@ boolean CBoxAlgorithmClassifierProcessor::initialize(void)
 	return true;
 }
 
+boolean CBoxAlgorithmClassifierProcessor::initialize(void)
+{
+	m_pClassifier = NULL;
+
+	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+
+	//First of all, let's get the XML file for configuration
+	CString l_sConfigurationFilename;
+	l_rStaticBoxContext.getSettingValue(0, l_sConfigurationFilename);
+
+	if(l_sConfigurationFilename == CString("")) 
+	{
+		this->getLogManager() << LogLevel_Error << "You need to specify a classifier .xml for the box (use Classifier Trainer to create one)\n";
+		return false;
+	}
+
+	m_oFeatureVectorDecoder.initialize(*this,0);
+	m_oStimulationDecoder.initialize(*this, 1);
+
+	m_oLabelsEncoder.initialize(*this, 0);
+	m_oHyperplaneValuesEncoder.initialize(*this, 1);
+	m_oProbabilityValuesEncoder.initialize(*this, 2);
+
+	if(!loadClassifier(l_sConfigurationFilename.toASCIIString()))
+	{
+		return false;
+	}
+
+	return true;
+}
+
 boolean CBoxAlgorithmClassifierProcessor::uninitialize(void)
 {
-	m_oFeatureVectorDecoder.uninitialize();
-	m_oLabelsEncoder.uninitialize();
-	m_oHyperplanValuesEncoder.uninitialize();
-	m_oProbabilitiesValuesEncoder.uninitialize();
-
 	if(m_pClassifier)
 	{
 		m_pClassifier->uninitialize();
 		this->getAlgorithmManager().releaseAlgorithm(*m_pClassifier);
 		m_pClassifier = NULL;
 	}
+
+	m_oProbabilityValuesEncoder.uninitialize();
+	m_oHyperplaneValuesEncoder.uninitialize();
+	m_oLabelsEncoder.uninitialize();
+
+	m_oStimulationDecoder.uninitialize();
+	m_oFeatureVectorDecoder.uninitialize();
 
 	return true;
 }
@@ -184,45 +215,80 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
+	// Check if we have a command first
+	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
+	{
+		m_oStimulationDecoder.decode(i);
+		if(m_oStimulationDecoder.isHeaderReceived())
+		{
+		}
+		if(m_oStimulationDecoder.isBufferReceived())
+		{
+			for(uint64 i=0;i<m_oStimulationDecoder.getOutputStimulationSet()->getStimulationCount();i++)
+			{
+				if(m_oStimulationDecoder.getOutputStimulationSet()->getStimulationIdentifier(i) == OVTK_StimulationId_TrainCompleted)
+				{
+					IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+
+					CString l_sConfigurationFilename;
+					l_rStaticBoxContext.getSettingValue(0, l_sConfigurationFilename);
+
+					this->getLogManager() << LogLevel_Trace << "Reloading classifier\n";
+					if(!loadClassifier(l_sConfigurationFilename.toASCIIString()))
+					{
+						this->getLogManager() << LogLevel_Error << "Error reloading classifier\n";
+						return false;
+					}
+				}
+			}
+		}
+		if(m_oStimulationDecoder.isEndReceived())
+		{
+		}
+	}
+
+	// Classify data
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
-		uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
-
-		TParameterHandler < IStimulationSet* > &ip_pLabelsStimulationSet = m_oLabelsEncoder.getInputStimulationSet();
-		TParameterHandler < float64 > op_f64ClassificationStateClass(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
+		const uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
+		const uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
 
 		m_oFeatureVectorDecoder.decode(i);
-
 		if(m_oFeatureVectorDecoder.isHeaderReceived())
 		{
 			m_oLabelsEncoder.encodeHeader();
-			m_oHyperplanValuesEncoder.encodeHeader();
-			m_oProbabilitiesValuesEncoder.encodeHeader();
+			m_oHyperplaneValuesEncoder.encodeHeader();
+			m_oProbabilityValuesEncoder.encodeHeader();
 
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64EndTime);
 		}
 		if(m_oFeatureVectorDecoder.isBufferReceived())
-		{
+		{	
 			if(m_pClassifier->process(OVTK_Algorithm_Classifier_InputTriggerId_Classify))
 			{
 				if (m_pClassifier->isOutputTriggerActive(OVTK_Algorithm_Classifier_OutputTriggerId_Success))
 				{
 					//this->getLogManager() << LogLevel_Warning << "---Classification successful---\n";
-					ip_pLabelsStimulationSet->setStimulationCount(1);
-					ip_pLabelsStimulationSet->setStimulationIdentifier(0, m_vStimulation[op_f64ClassificationStateClass]);
-					ip_pLabelsStimulationSet->setStimulationDate(0, l_ui64EndTime);
-					ip_pLabelsStimulationSet->setStimulationDuration(0, 0);
+
+					TParameterHandler < float64 > op_f64ClassificationStateClass(m_pClassifier->getOutputParameter(OVTK_Algorithm_Classifier_OutputParameterId_Class));
+
+					IStimulationSet* l_pSet = m_oLabelsEncoder.getInputStimulationSet();
+
+					l_pSet->setStimulationCount(1);
+					l_pSet->setStimulationIdentifier(0, m_vStimulation[op_f64ClassificationStateClass]);
+					l_pSet->setStimulationDate(0, l_ui64EndTime);
+					l_pSet->setStimulationDuration(0, 0);
 
 					m_oLabelsEncoder.encodeBuffer();
-					m_oHyperplanValuesEncoder.encodeBuffer();
-					m_oProbabilitiesValuesEncoder.encodeBuffer();
+					m_oHyperplaneValuesEncoder.encodeBuffer();
+					m_oProbabilityValuesEncoder.encodeBuffer();
 
 					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 					l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
 					l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64EndTime);
+
 				}
 				else
 				{
@@ -235,20 +301,22 @@ boolean CBoxAlgorithmClassifierProcessor::process(void)
 				this->getLogManager() << LogLevel_Error << "Classification algorithm failed.\n";
 				return false;
 			}
-		}
+		}		
+
 		if(m_oFeatureVectorDecoder.isEndReceived())
 		{
 			m_oLabelsEncoder.encodeEnd();
-			m_oHyperplanValuesEncoder.encodeEnd();
-			m_oProbabilitiesValuesEncoder.encodeEnd();
+			m_oHyperplaneValuesEncoder.encodeEnd();
+			m_oProbabilityValuesEncoder.encodeEnd();
 
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_ui64StartTime, l_ui64EndTime);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(1, l_ui64StartTime, l_ui64EndTime);
 			l_rDynamicBoxContext.markOutputAsReadyToSend(2, l_ui64StartTime, l_ui64EndTime);
 		}
 
-		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
 	}
+
+
 
 	return true;
 }

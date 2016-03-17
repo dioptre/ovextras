@@ -41,6 +41,9 @@ boolean CAlgorithmXMLScenarioExporter::exportStart(IMemoryBuffer& rMemoryBuffer,
 	if(false) { }
 
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_OpenViBEScenario                         ) l_sNodeName="OpenViBE-Scenario";
+	
+	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Creator                                  ) l_sNodeName="Creator";
+	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_CreatorVersion                           ) l_sNodeName="CreatorVersion";
 
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Boxes                                    ) l_sNodeName="Boxes";
 	else if(rIdentifier==OVTK_Algorithm_ScenarioExporter_NodeId_Box                                      ) l_sNodeName="Box";

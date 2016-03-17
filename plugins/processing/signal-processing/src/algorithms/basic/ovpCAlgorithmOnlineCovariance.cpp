@@ -127,8 +127,8 @@ OpenViBE::boolean CAlgorithmOnlineCovariance::process(void)
 
 			if(ip_bTraceNormalization) 
 			{
-				// The origin of this trick has been lost. Presumably the idea is to normalize the scale of 
-				// each chunk in order to compensate for possible signal power drift over time during the EEG recording, 
+				// This normalization can be seen e.g. Muller-Gerkin & al., 1999. Presumably the idea is to normalize the 
+				// scale of each chunk in order to compensate for possible signal power drift over time during the EEG recording, 
 				// making each chunks' covariance contribute similarly to the average regardless of
 				// the current average power. Such a normalization could also be implemented in its own 
 				// box and not done here.

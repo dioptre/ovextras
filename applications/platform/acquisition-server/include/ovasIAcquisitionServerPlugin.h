@@ -43,7 +43,8 @@ namespace OpenViBEAcquisitionServer
 			virtual void loopHook(std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer, 
 								  OpenViBE::CStimulationSet& oStimulationSet, 
 								  OpenViBE::uint64 start, 
-								  OpenViBE::uint64 end) {}
+								  OpenViBE::uint64 end,
+								  OpenViBE::uint64 sampleTime) {}
 
 			/// Hook called at the end of the acceptNewConnection() function of AcquisitionServer
 			virtual void acceptNewConnectionHook() {}

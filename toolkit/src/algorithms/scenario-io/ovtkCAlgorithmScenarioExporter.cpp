@@ -1,5 +1,6 @@
 #include "ovtkCAlgorithmScenarioExporter.h"
 #include <vector>
+#include <sstream>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -75,6 +76,12 @@ boolean CAlgorithmScenarioExporter::process(void)
 	}
 
 	this->exportStart(l_oTemporaryMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_OpenViBEScenario);
+
+	this->exportString(l_oTemporaryMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Creator, CString(OV_PROJECT_NAME));
+
+	std::stringstream l_sOpenViBEVersion;
+	l_sOpenViBEVersion << OV_VERSION_MAJOR << "." << OV_VERSION_MINOR << "." << OV_VERSION_PATCH;
+	this->exportString(l_oTemporaryMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_CreatorVersion, CString(l_sOpenViBEVersion.str().c_str()));
 
 	 this->exportStart(l_oTemporaryMemoryBuffer, OVTK_Algorithm_ScenarioExporter_NodeId_Boxes);
 	  while((l_oBoxIdentifer=l_pScenario->getNextBoxIdentifier(l_oBoxIdentifer))!=OV_UndefinedIdentifier)
