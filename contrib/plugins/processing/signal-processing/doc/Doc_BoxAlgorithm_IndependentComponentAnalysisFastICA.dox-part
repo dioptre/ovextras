@@ -1,13 +1,13 @@
 /**
- * \page BoxAlgorithm_IndependentComponentAnalysisFastICA Independent Component AnalysisFast (FastICA) - 
+ * \page BoxAlgorithm_IndependentComponentAnalysisFastICA Independent Component Analysis (FastICA)
 __________________________________________________________________
 
 Detailed description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Description|
- * This plugin is used to decompose into independent components the
- * input signal. This plugin is based on the Fast ICA algorithm.
+ * This box attempts to find a decomposition of the signal to its
+ * independent components. The approach is based on the FastICA algorithm.
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Description|
 __________________________________________________________________
 
@@ -29,6 +29,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Outputs|
  *
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Output1|
+ * The decomposed signal.
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Output1|
 __________________________________________________________________
 
@@ -36,16 +37,68 @@ Settings description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Settings|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting1|
+ * Number of independent components to extract (equals PCA dimension reduction)
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting1|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting2|
+ * How many seconds of sample to collect to estimate the ICA model?
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting2|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting3|
+ * Decomposition type. Deflation is an approach where each component is
+ * estimated separately in turns. Symmetric estimation optimizes all 
+ * components at once.
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting3|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting4|
+ * Maximum number of iterations
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting4|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting5|
+ * Enable fine tuning?
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting5|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting6|
+ * Maximum number of iterations for the fine tuning
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting6|
+ * 
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting7|
+ * Used nonlinearity type
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting7|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting8|
+ * Mu parameter
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting8|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting9|
+ * Epsilon parameter
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting9|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting10|
+ * Filename to save the estimated decomposition matrix W to
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting10|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting11|
+ * Should the matrix W be saved to a file?
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting11|
+ * 
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Settings|
+ 
+
+ 
 __________________________________________________________________
 
 Examples description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Examples|
- * Let's consider our input signal.
- * To decompose the input signal and to enlight for example the blinks,
- * apply the FastICA. One of the new component will contain blinks.
+ * One use-case of ICA is to attempt to separate the signal of interest from
+ * nuisance artifacts. For example, supposing that ICA makes a meaningful decomposition
+ * of your EEG signal, you will see artifacts such as those from eyeblinks more 
+ * clearly segregated to specific output channels instead of contaminating 
+ * all of the channels.
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Examples|
 __________________________________________________________________
 
@@ -53,6 +106,20 @@ Miscellaneous description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Miscellaneous|
- * This plugin applies the Fast ICA algorithm to the input signal.
+ * This plugin applies the FastICA algorithm to the input signal. The box can store the
+ * estimated decomposition matrix W to a file. This file can then be used later
+ * in the spatial filter box to apply the decomposition on fresh data.
+ *
+ * The box also outputs the decomposed signal, but the decomposition is active only
+ * after the model has been estimated (after the specified number of samples have been collected).
+ * If you wish to decompose the whole data, then you can first train the ICA model, save the matrix,
+ * and then separately apply it to the original data with the spatial filter.
+ *
+ * The FastICA algorithm is described in
+ *
+ * A. Hyvärinen. "Fast and Robust Fixed-Point Algorithms for Independent Component Analysis", IEEE Transactions on Neural Networks 10(3):626-634, 1999.
+ *
+ * The implementation used by the box is from the ITPP toolkit.
+ *
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Miscellaneous|
  */
