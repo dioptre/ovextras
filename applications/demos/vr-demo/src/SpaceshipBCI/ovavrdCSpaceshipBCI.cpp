@@ -32,7 +32,7 @@ static const float g_fOffset = 2.0f;
  #define _strcmpi strcasecmp
 #endif
 
-#if !( (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7) )
+#if !( (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8) )
 namespace CEGUI
 { 
 	typedef CEGUI::UVector2 USize;
@@ -145,57 +145,61 @@ void CSpaceshipBCI::loadGUI()
 	CEGUI::Window * l_poMove  = m_poGUIWindowManager->createWindow("TaharezLook/StaticImage", "Move");
 	l_poMove->setPosition(CEGUI::UVector2(cegui_reldim(0.35f), cegui_reldim(0.8f)) );
 	l_poMove->setSize(CEGUI::USize(CEGUI::UDim(0.3f, 0.f), CEGUI::UDim(0.2f, 0.f)));
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
 	m_poSheet->addChild(l_poMove);	
 	CEGUI::ImageManager::getSingleton().addFromImageFile("ImageMove",l_sMoveImage); 
+	l_poMove->setProperty("Image", "ImageMove");
 #else
 	m_poSheet->addChildWindow(l_poMove);
 	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageMove", l_sMoveImage);
+	l_poMove->setProperty("Image", "set:ImageMove image:full_image");
 #endif
-	l_poMove->setProperty("Image","set:ImageMove image:full_image");
 	l_poMove->setProperty("FrameEnabled","False");
 	l_poMove->setProperty("BackgroundEnabled","False");
 
 	CEGUI::Window * l_poNoMove  = m_poGUIWindowManager->createWindow("TaharezLook/StaticImage", "NoMove");
 	l_poNoMove->setPosition(CEGUI::UVector2(cegui_reldim(0.35f), cegui_reldim(0.8f)) );
 	l_poNoMove->setSize(CEGUI::USize(CEGUI::UDim(0.3f, 0.f), CEGUI::UDim(0.2f, 0.f)));
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
 	m_poSheet->addChild(l_poNoMove);	
 	CEGUI::ImageManager::getSingleton().addFromImageFile("ImageNoMove",l_sStopImage); 
+	l_poNoMove->setProperty("Image","ImageNoMove");
 #else
 	m_poSheet->addChildWindow(l_poNoMove);
 	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageNoMove", l_sStopImage);
+	l_poNoMove->setProperty("Image", "set:ImageNoMove image:full_image");
 #endif
 
-	l_poNoMove->setProperty("Image","set:ImageNoMove image:full_image");
 	l_poNoMove->setProperty("FrameEnabled","False");
 	l_poNoMove->setProperty("BackgroundEnabled","False");
 
 	CEGUI::Window * l_poCalibration  = m_poGUIWindowManager->createWindow("TaharezLook/StaticImage", "Calibration");
 	l_poCalibration->setPosition(CEGUI::UVector2(cegui_reldim(0.35f), cegui_reldim(0.8f)) );
 	l_poCalibration->setSize(CEGUI::USize(CEGUI::UDim(0.3f, 0.f), CEGUI::UDim(0.2f, 0.f)));
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
 	m_poSheet->addChild(l_poCalibration);	
 	CEGUI::ImageManager::getSingleton().addFromImageFile("ImageCalibration",l_sInitImage); 
+	l_poCalibration->setProperty("Image","ImageCalibration");
 #else
 	m_poSheet->addChildWindow(l_poCalibration);
 	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageCalibration", l_sInitImage);
+	l_poCalibration->setProperty("Image", "set:ImageCalibration image:full_image");
 #endif
-	l_poCalibration->setProperty("Image","set:ImageCalibration image:full_image");
 	l_poCalibration->setProperty("FrameEnabled","False");
 	l_poCalibration->setProperty("BackgroundEnabled","False");
 
 	CEGUI::Window * l_poStatsImage  = m_poGUIWindowManager->createWindow("TaharezLook/StaticImage", "StatsImage");
 	l_poStatsImage->setPosition(CEGUI::UVector2(cegui_reldim(0.25f), cegui_reldim(0.2f)) );
 	l_poStatsImage->setSize(CEGUI::USize(CEGUI::UDim(0.5f, 0.f), CEGUI::UDim(0.2f, 0.f)));
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
 	m_poSheet->addChild(l_poStatsImage);	
 	CEGUI::ImageManager::getSingleton().addFromImageFile("ImageStatistics",l_sEndImage); 
+	l_poStatsImage->setProperty("Image", "ImageStatistics");
 #else
 	m_poSheet->addChildWindow(l_poStatsImage);
 	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageStatistics", l_sEndImage);
+	l_poStatsImage->setProperty("Image", "set:ImageStatistics image:full_image");
 #endif
-	l_poStatsImage->setProperty("Image","set:ImageStatistics image:full_image");
 	l_poStatsImage->setProperty("FrameEnabled","False");
 	l_poStatsImage->setProperty("BackgroundEnabled","False");
 	l_poStatsImage->setVisible(false);
@@ -203,21 +207,24 @@ void CSpaceshipBCI::loadGUI()
 	CEGUI::Window * l_poStatistics  = m_poGUIWindowManager->createWindow("TaharezLook/StaticText", "Statistics");
 	l_poStatistics->setPosition(CEGUI::UVector2(cegui_reldim(0.25f), cegui_reldim(0.35f)) );
 	l_poStatistics->setSize(CEGUI::USize(CEGUI::UDim(0.5f, 0.f), CEGUI::UDim(0.5f, 0.f)));
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
 	m_poSheet->addChild(l_poStatistics);
+	l_poStatistics->setFont("BlueHighway-24");
+	l_poStatistics->setProperty("HorzFormatting", "WordWrapCentreAligned");
+	l_poStatistics->setProperty("VertFormatting", "WordWrapCentreAligned");
+	l_poStatistics->setVisible(false);
 #else
 	m_poSheet->addChildWindow(l_poStatistics);
-#endif
-
 	l_poStatistics->setFont("BlueHighway-24");
-	l_poStatistics->setProperty("HorzFormatting","WordWrapCentred");
-	l_poStatistics->setProperty("VertFormatting","WordWrapCentred");
+	l_poStatistics->setProperty("HorzFormatting", "WordWrapCentred");
+	l_poStatistics->setProperty("VertFormatting", "WordWrapCentred");
 	l_poStatistics->setVisible(false);
+#endif
 
 	CEGUI::Window * l_poThreshold = m_poGUIWindowManager->createWindow("TaharezLook/StaticText", "Threshold");
 	l_poThreshold->setPosition(CEGUI::UVector2(cegui_reldim(0.01f), cegui_reldim(0.01f)) );
 	l_poThreshold->setSize(CEGUI::USize(CEGUI::UDim(0.15f, 0.f), CEGUI::UDim(0.08f, 0.f)));
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
 	m_poSheet->addChild(l_poThreshold);
 #else
 	m_poSheet->addChildWindow(l_poThreshold);
@@ -489,8 +496,8 @@ bool CSpaceshipBCI::process(double timeSinceLastProcess)
 			{
 				ss << " Merci d'avoir participe !" << "\n------------\n";
 
-				ss << "Le vaisseau s'est souleve pendant :\n" << m_dStat_SpaceshipLiftTime << " secondes.\n\n";
-				ss << "Temps moyen par essai :\n" << m_dStat_SpaceshipLiftTime/l_iCount << " secondes.\n\n";
+				ss << "Le vaisseau s'est souleve pendant :\n" << m_dStat_SpaceshipLiftTime << " secondes.\n";
+				ss << "Temps moyen par essai :\n" << m_dStat_SpaceshipLiftTime/l_iCount << " secondes.\n";
 				ss << "------------\n";
 				ss << "Votre rang : \n";
 				l_sRang = "- Apprenti -";
@@ -502,8 +509,8 @@ bool CSpaceshipBCI::process(double timeSinceLastProcess)
 			{
 				ss << " Thanks for your participation" << "\n------------\n";
 
-				ss << "You lifted the spaceship during :\n" << m_dStat_SpaceshipLiftTime << " seconds.\n\n";
-				ss << "Mean time per attempt :\n" << m_dStat_SpaceshipLiftTime/l_iCount << " seconds.\n\n";
+				ss << "You lifted the spaceship during :\n" << m_dStat_SpaceshipLiftTime << " seconds.\n";
+				ss << "Mean time per attempt :\n" << m_dStat_SpaceshipLiftTime/l_iCount << " seconds.\n";
 				ss << "------------\n";
 				ss << "Rank : \n";
 				l_sRang = "- Apprentice -";

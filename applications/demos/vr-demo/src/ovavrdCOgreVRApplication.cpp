@@ -269,18 +269,15 @@ bool COgreVRApplication::initCEGUI(const char *logFilename)
 
 	m_rGUIRenderer = &(CEGUI::OgreRenderer::bootstrapSystem(*m_poWindow));
 
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
-	CEGUI::SchemeManager::getSingleton().createFromFile((CEGUI::utf8*)"TaharezLook-ov.scheme");
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	CEGUI::SchemeManager::getSingleton().createFromFile((CEGUI::utf8*)"TaharezLook-ov-0.8.scheme");
+	m_poGUIWindowManager = CEGUI::WindowManager::getSingletonPtr();
+	m_poSheet = m_poGUIWindowManager->createWindow("DefaultWindow", "root");
+	CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(m_poSheet);
 #else
 	CEGUI::SchemeManager::getSingleton().create((CEGUI::utf8*)"TaharezLook-ov.scheme");
-#endif
-
 	m_poGUIWindowManager = CEGUI::WindowManager::getSingletonPtr();
 	m_poSheet = m_poGUIWindowManager->createWindow("DefaultGUISheet", "Sheet");
-
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
-	// @FIXME
-#else
 	CEGUI::System::getSingleton().setGUISheet(m_poSheet);
 #endif
 
@@ -416,7 +413,7 @@ bool COgreVRApplication::frameStarted(const FrameEvent& evt)
 
 void COgreVRApplication::windowResized(RenderWindow* rw)
 {
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
 	CEGUI::System::getSingleton().notifyDisplaySizeChanged(CEGUI::Sizef((float)rw->getWidth(), (float)rw->getHeight()));
 #else
 	CEGUI::System::getSingleton().notifyDisplaySizeChanged(CEGUI::Size((float)rw->getWidth(), (float)rw->getHeight()));

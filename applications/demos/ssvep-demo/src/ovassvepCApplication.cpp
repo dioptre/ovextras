@@ -210,8 +210,8 @@ void CApplication::initCEGUI(const char *logFilename)
 	m_roGUIRenderer = &(CEGUI::OgreRenderer::bootstrapSystem(*m_poWindow));
 	(*m_poLogManager) << LogLevel_Debug << "+ Creating CEGUI Scheme Manager\n";
 
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
-	CEGUI::SchemeManager::getSingleton().createFromFile((CEGUI::utf8*)"TaharezLook-ov.scheme");
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	CEGUI::SchemeManager::getSingleton().createFromFile((CEGUI::utf8*)"TaharezLook-ov-0.8.scheme");
 #else
 	CEGUI::SchemeManager::getSingleton().create((CEGUI::utf8*)"TaharezLook-ov.scheme");
 #endif
@@ -222,8 +222,8 @@ void CApplication::initCEGUI(const char *logFilename)
 
 	(*m_poLogManager) << LogLevel_Debug << "+ Setting CEGUI StyleSheet\n";
 
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
-	// @FIXME
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(m_poSheet);
 #else
 	CEGUI::System::getSingleton().setGUISheet(m_poSheet);
 #endif

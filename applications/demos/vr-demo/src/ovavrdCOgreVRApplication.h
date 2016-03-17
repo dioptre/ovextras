@@ -5,7 +5,7 @@
 #include <Ogre.h>
 #include <OIS.h>
 #include <CEGUI.h>
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
 #include <CEGUI/RendererModules/Ogre/Renderer.h>
 #else
 #include <RendererModules/Ogre/CEGUIOgreRenderer.h>

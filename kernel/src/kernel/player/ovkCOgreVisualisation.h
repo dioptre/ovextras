@@ -11,6 +11,11 @@ class COgreScene;
 class COgreWindow;
 class COgreResourceGroup;
 
+namespace Ogre
+{
+	class OverlaySystem;
+}
+
 /**
  * \class COgreVisualisation
  * \author Vincent Delannoy (INRIA/IRISA)
@@ -237,6 +242,8 @@ public:
 	 */
 	OpenViBE::boolean isOgreStatsOverlayEnabled();
 
+	Ogre::OverlaySystem* getOverlaySystem() { return m_pOverlaySystem; }
+
 	_IsDerivedFromClass_Final_(OpenViBE::Kernel::TKernelObject<OpenViBE::IObject>, OV_UndefinedIdentifier);
 
 private:
@@ -271,6 +278,9 @@ private:
 	std::map<OpenViBE::CIdentifier, COgreWindow*> m_mOgreWindows;
 	/// Maps resource group Ids to resource groups
 	std::map<OpenViBE::CIdentifier, COgreResourceGroup*> m_mOgreResourceGroups;
+
+	Ogre::OverlaySystem* m_pOverlaySystem;
+
 };
 
 #endif // __OpenViBEKernel_Kernel_Player_COgreVisualisation_H__

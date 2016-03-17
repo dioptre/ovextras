@@ -20,11 +20,7 @@ m_pRenderWindow(win),
 m_pDebugOverlay(NULL)
 {
 	//FIXME : the overlay should be cloned for each window, as opposed to shared betwen windows!!
-#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
-	// @FIXME
-#else
 	m_pDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
-#endif
 
 	//Register as a Window listener
 	//WindowEventUtilities::addWindowEventListener(m_pRenderWindow, this);
@@ -38,16 +34,18 @@ COgreFrameListener::~COgreFrameListener()
 
 void COgreFrameListener::showDebugOverlay(bool bShow)
 {
-	if (m_pDebugOverlay)
+	if(!m_pDebugOverlay)
 	{
-		if(bShow == true)
-		{
-			m_pDebugOverlay->show();
-		}
-		else
-		{
-			m_pDebugOverlay->hide();
-		}
+		return;
+	}
+
+	if(bShow == true)
+	{
+		m_pDebugOverlay->show();
+	}
+	else
+	{
+		m_pDebugOverlay->hide();
 	}
 }
 

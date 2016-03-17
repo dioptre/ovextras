@@ -10,6 +10,10 @@
 #include "ovkCOgreVisualisation.h"
 #include "ovkCOgreScene.h"
 
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+#include "Overlay/OgreOverlaySystem.h"
+#endif
+
 using namespace std;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -83,6 +87,10 @@ boolean COgreScene::init()
 			<< "Failed to create scene manager : " << e.what() << "\n";
 		return false;
 	}
+
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+	m_pSceneManager->addRenderQueueListener(m_pOgreVis->getOverlaySystem());
+#endif
 
 	//create default lights
 	m_pSceneManager->setAmbientLight(Ogre::ColourValue(0.1f, 0.1f, 0.1f, 1));

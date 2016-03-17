@@ -6,6 +6,7 @@
 
 #if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
 #include "Overlay/OgreOverlayManager.h"
+#include "Overlay/OgreOverlaySystem.h"
 #endif
 
 using namespace Ogre;
@@ -17,6 +18,12 @@ using namespace OpenViBE::Kernel;
 		m_poSceneManager( poApplication->getSceneManager() )
 {
 	m_oAABInf.setInfinite();
+
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+	// on Ogre 1.9, overlay system needs to be manually created
+	Ogre::OverlaySystem* pOverlaySystem = OGRE_NEW Ogre::OverlaySystem();
+	m_poSceneManager->addRenderQueueListener(pOverlaySystem);
+#endif
 
 	m_poOverlayManager = Ogre::OverlayManager::getSingletonPtr();
 

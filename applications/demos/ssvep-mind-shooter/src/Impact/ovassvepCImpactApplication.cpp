@@ -29,7 +29,7 @@ using namespace OpenViBESSVEP;
 //#define NO_KEYBOARD
 //#define NO_VRPN
 
-#if !((CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7))
+#if !((CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8))
 namespace CEGUI
 {
 	typedef CEGUI::UVector2 USize;
@@ -71,7 +71,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 
 	poKernelContext->getLogManager().activate(LogLevel_First, LogLevel_Last, true);
 
-	ILogListener* l_poLogListenerFileBuffered = new CLogListenerFileBuffered(*poKernelContext, "ssvep-stimulator",
+	ILogListener* l_poLogListenerFileBuffered = new CLogListenerFileBuffered(*poKernelContext, "ssvep-mind-shooter-stimulator",
 															 l_poConfigurationManager->expand("${SSVEP_UserDataFolder}/log-[$core{date}-$core{time}].log"));
 	poKernelContext->getLogManager().addListener(l_poLogListenerFileBuffered);
 
@@ -128,7 +128,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	m_poStatusWindow->setFont("BlueHighway-impact");
 	m_poStatusWindow->hide();
 
-#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR > 7)
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
 	m_poSheet->addChild(m_poStatusWindow);
 	m_poSheet->addChild(m_poInstructionWindow);
 #else

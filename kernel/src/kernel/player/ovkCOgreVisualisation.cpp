@@ -7,6 +7,10 @@
 #include "ovkCOgreResourceGroup.h"
 #include "ovkCOgreVisualisation.h"
 
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+	#include "Overlay/OgreOverlaySystem.h"
+#endif
+
 using namespace std;
 using namespace Ogre;
 using namespace OpenViBE;
@@ -21,6 +25,7 @@ COgreVisualisation::COgreVisualisation(const OpenViBE::Kernel::IKernelContext& r
 	,m_bResourcesInitialised(false)
 	,m_pRoot(NULL)
 	,m_pLog(NULL)
+	,m_pOverlaySystem(NULL)
 {
 }
 
@@ -79,7 +84,14 @@ boolean COgreVisualisation::initializeOgre(void) throw (std::exception)
 		//--------------------
 		LogManager* l_pLogManager = new LogManager();
 		//create custom log
-		m_pLog = l_pLogManager->createLog("" /* log filename */, true /* is default log */, false /* send log messages to debugger */, true /* suppress file log */);
+		const CString l_sLogFile = this->getConfigurationManager().expand("${Kernel_3DVisualisationOgreLogPath}");
+		m_pLog = l_pLogManager->createLog(l_sLogFile.toASCIIString(),
+			true /* is default log */, false /* send log messages to debugger */, (l_sLogFile == CString("") ? true : false) /* suppress file log */);
+		if (!m_pLog)
+		{
+			this->getLogManager() << LogLevel_Error << "Creating ogre logger failed with file [" << l_sLogFile << "]\n";
+			return false;
+		}
 		//get log messages to forward them to OV's log manager, if required
 		m_pLog->addListener(this);
 
@@ -120,6 +132,12 @@ boolean COgreVisualisation::initializeOgre(void) throw (std::exception)
 			m_pRoot->initialise(false);
 			m_bOgreInitialised = true;
 		}
+
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+		// on Ogre 1.9, overlay system needs to be manually created
+		m_pOverlaySystem = OGRE_NEW Ogre::OverlaySystem();
+#endif
+
 	}
 	catch(Ogre::Exception& e)
 	{
@@ -202,6 +220,7 @@ boolean COgreVisualisation::finish()
 			delete m_pRoot;
 			m_pRoot = NULL;
 		}
+
 	}
 	catch(Ogre::Exception)
 	{
