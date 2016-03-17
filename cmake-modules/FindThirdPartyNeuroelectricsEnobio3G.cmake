@@ -4,7 +4,7 @@
 # Adds include path
 # ---------------------------------
 IF(WIN32)
-	SET(ENOBIOAPI_DIR ${OV_CUSTOM_DEPENDENCIES_PATH}/enobio3g/enobio3g)
+	SET(ENOBIOAPI_DIR ${OV_CUSTOM_DEPENDENCIES_PATH}/sdk-enobio3g/enobio3g)
 
   	FIND_PATH(PATH_ENOBIOAPI enobio3g.h PATHS ${ENOBIOAPI_DIR})
 	IF(NOT PATH_ENOBIOAPI)

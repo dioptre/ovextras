@@ -48,17 +48,10 @@ if exist "%VS100COMNTOOLS%vsvars32.bat" (
 )
 
 
-:VS2008
-if exist "%VS90COMNTOOLS%vsvars32.bat" (
-	echo Found VS90 tools at "%VS90COMNTOOLS%" ...
-	CALL "%VS90COMNTOOLS%vsvars32.bat"
-	SET VSCMake=Visual Studio 9 2008
-	goto terminate
-)
-
 echo ######################################################################################
 echo ##                                                                                  ##
 echo ##  ERROR : Microsoft Visual Studio Common tools initialisation script not found    ##
+echo ##  for supported VS version (2010 or 2013)                                         ##
 echo ##                                                                                  ##
 echo ######################################################################################
 goto terminate
