@@ -44,6 +44,9 @@
 
 Section "-base"
 
+	CreateDirectory "$INSTDIR"
+	CreateDirectory "$INSTDIR\arch"
+	
 	;Finds Microsoft Platform SDK
 
 	ReadRegStr $r0 HKLM "SOFTWARE\Microsoft\Win32SDK\Directories" "Install Dir"
@@ -103,7 +106,6 @@ Section "DirectX Runtime"
     SectionIn RO
 	
 	SetOutPath "$INSTDIR"
-	CreateDirectory "$INSTDIR\arch"
 
 	IfFileExists "$SYSDIR\d3dx9_42.dll" no_need_to_install_directx
 	IfFileExists "arch\openvibe-directx.exe" no_need_to_download_directx
@@ -123,11 +125,10 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section "Visual Redistributable Packages"
+Section "Visual C++ Redistributable Packages"
     SectionIn RO
 	
 	SetOutPath "$INSTDIR"
-	CreateDirectory "$INSTDIR\arch"
 
 	IfFileExists "arch\vcredist-2010.exe" no_need_to_download_vc2010_redist
 	NSISdl::download "http://download.microsoft.com/download/5/B/C/5BC5DBB3-652D-4DCE-B14A-475AB85EEF6E/vcredist_x86.exe" "arch\vcredist-2010.exe"
@@ -153,11 +154,10 @@ SectionEnd
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 
-Section "Other"
+Section "Everything else"
     SectionIn RO
 	
 	SetOutPath "$INSTDIR"
-	CreateDirectory "$INSTDIR\arch"
 
 	IfFileExists "arch\ov-dependencies-1.2.0-$suffix-dev.zip" no_need_to_download_dependencies_dev
 	NSISdl::download http://openvibe.inria.fr/dependencies/win32/ov-dependencies-1.2.0-$suffix-dev.zip "arch\ov-dependencies-1.2.0-$suffix-dev.zip"

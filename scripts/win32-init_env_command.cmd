@@ -17,7 +17,7 @@ REM ############################################################################
 REM #
 REM # By default, this script tries to find the newest VS first. If you want to use another version, execute e.g. GOTO VS2012
 REM # 
-REM GOTO VS2012
+REM GOTO VS2010
 
 :VS2013
 if exist "%VS120COMNTOOLS%vsvars32.bat" (

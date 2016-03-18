@@ -28,21 +28,46 @@ MESSAGE(STATUS "Appending compilation flags...")
 
 SET(OV_CUSTOM_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
-# If OpenMP is available, using it will allow Eigen to use multiple cores in matrix math.
-INCLUDE("FindOpenMP")
-IF(OPENMP_FOUND)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-ENDIF(OPENMP_FOUND)
-
 IF(WIN32)
 	# Switch /arch:SSE2 enables vectorization. Remove if your CPU/compiler doesn't support it.
 	SET(OV_EIGEN_FLAGS "/arch:SSE2")
-	# The following is needed to keep OpenMP from hogging all the cores. Note that this works only for VS2013+. On VS2010, it may be better to disable OpenMP.
+	# The following is needed to keep OpenMP from hogging all the cores. Note that this env var works only for VS2013+. 
+	# On VS2010, it may be better to disable OpenMP.
 	SET(OV_OMP_WAIT_POLICY "PASSIVE")
 	# Disable /MP if you don't like VS using all the cores for compilation
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4355 /MP ${OV_EIGEN_FLAGS}")
-	SET(OV_WIN32_BOOST_VERSION "1_55")
 	ADD_DEFINITIONS("-DNOMINMAX -DBOOST_ALL_NO_LIB")	
+
+	# Find out the compiler version, deps may use this
+	IF(${CMAKE_MAJOR_VERSION} LESS 3)
+		INCLUDE(CMakeDetermineVSServicePack)
+		DetermineVSServicePack( MSVC_SERVICE_PACK )
+	ELSE(${CMAKE_MAJOR_VERSION} LESS 3)
+		SET(MSVC_SERVICE_PACK "unknown")
+		MESSAGE(STATUS "st ${CMAKE_CXX_COMPILER_VERSION}")
+		IF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "16.0.0")
+			SET(MSVC_SERVICE_PACK "vc100")	
+		ENDIF()			
+		IF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "17.0.0")
+			SET(MSVC_SERVICE_PACK "vc110")
+		ENDIF()		
+		IF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "18.0.0")
+			SET(MSVC_SERVICE_PACK "vc120")
+		ENDIF()
+	ENDIF(${CMAKE_MAJOR_VERSION} LESS 3)
+	STRING(REGEX MATCH "vc120.*" MSVC_VER120 ${MSVC_SERVICE_PACK})
+	IF(MSVC_VER120) 
+		# If OpenMP is available, using it will allow Eigen to use multiple cores in matrix math. Only on VS120,
+		# as VS100 allocates the cores too aggressively when OpenMP is on.
+		INCLUDE("FindOpenMP")
+		IF(OPENMP_FOUND)
+		  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+		ENDIF(OPENMP_FOUND)
+	ENDIF(MSVC_VER120)
+	MESSAGE(STATUS "MSVC version is ${MSVC_SERVICE_PACK}")
+	
+	SET(OV_WIN32_BOOST_VERSION "1_55")
+
 ELSEIF(UNIX)
 	# check for c++11 support
 	INCLUDE(CheckCXXCompilerFlag)
@@ -58,6 +83,12 @@ ELSEIF(UNIX)
 		MESSAGE(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. In the future this may be required.")
 	ENDIF(COMPILER_SUPPORTS_CXX11)
 
+	# If OpenMP is available, using it will allow Eigen to use multiple cores in matrix math.
+	INCLUDE("FindOpenMP")
+	IF(OPENMP_FOUND)
+	  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+	ENDIF(OPENMP_FOUND)
+	
 	# Switch -msse2 enables vectorization. Remove if your CPU/compiler doesn't support it.
 	SET(OV_EIGEN_FLAGS "-msse2")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall ${OV_EIGEN_FLAGS}")

@@ -22,7 +22,7 @@ IF EXIST "%VSINSTALLDIR%\Common7\IDE\devenv.exe" (
 )
 
 REM VS2012 Express
-IF EXIST "%VSINSTALLDIR%\Common7\IDE\WDExpress.exe"
+IF EXIST "%VSINSTALLDIR%\Common7\IDE\WDExpress.exe" (
 	"%VSINSTALLDIR%\Common7\IDE\WDExpress.exe" ..\local-tmp\visual\OpenViBE.sln
 	goto terminate
 )
