@@ -292,7 +292,7 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 		::fprintf(l_pFile, "# Last Preferences set in the acquisition server\n");
 		::fprintf(l_pFile, "AcquisitionServer_DriftCorrectionPolicy = %s\n", m_pAcquisitionServer->m_oDriftCorrection.getDriftCorrectionPolicyStr().toASCIIString());
 		::fprintf(l_pFile, "AcquisitionServer_JitterEstimationCountForDrift = %llu\n", m_pAcquisitionServer->m_oDriftCorrection.getJitterEstimationCountForDrift());
-		::fprintf(l_pFile, "AcquisitionServer_DriftToleranceDuration = %llu\n", m_pAcquisitionServer->m_oDriftCorrection.getDriftToleranceDuration());
+		::fprintf(l_pFile, "AcquisitionServer_DriftToleranceDuration = %llu\n", m_pAcquisitionServer->m_oDriftCorrection.getDriftToleranceDurationMs());
 		::fprintf(l_pFile, "AcquisitionServer_OverSamplingFactor = %llu\n", m_pAcquisitionServer->getOversamplingFactor());
 		::fprintf(l_pFile, "AcquisitionServer_ChannelSelection = %s\n", (m_pAcquisitionServer->isChannelSelectionRequested() ? "True" : "False"));
 		::fprintf(l_pFile, "AcquisitionServer_NaNReplacementPolicy = %s\n", m_pAcquisitionServer->getNaNReplacementPolicyStr().toASCIIString());
@@ -501,10 +501,10 @@ void CAcquisitionServerGUI::setClientCount(uint32 ui32ClientCount)
 	::gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), l_sLabel);
 }
 
-void CAcquisitionServerGUI::setDrift(float64 f64Drift)
+void CAcquisitionServerGUI::setDriftMs(float64 f64DriftMs)
 {
-	const uint64 l_ui64DriftToleranceDuration = m_pAcquisitionServer->m_oDriftCorrection.getDriftToleranceDuration();
-	float64 l_f64DriftRatio = f64Drift / static_cast<float64>(l_ui64DriftToleranceDuration);
+	const uint64 l_ui64DriftToleranceDurationMs = m_pAcquisitionServer->m_oDriftCorrection.getDriftToleranceDurationMs();
+	float64 l_f64DriftRatio = f64DriftMs / static_cast<float64>(l_ui64DriftToleranceDurationMs);
 	boolean l_bDriftWarning=false;
 	char l_sLabel[1024];
 
@@ -537,11 +537,11 @@ void CAcquisitionServerGUI::setDrift(float64 f64Drift)
 
 	if(l_bDriftWarning)
 	{
-		::sprintf(l_sLabel, "<b>Device drift is too high</b> : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %llu ms) --&gt; early</small>", f64Drift, l_ui64DriftToleranceDuration);
+		::sprintf(l_sLabel, "<b>Device drift is too high</b> : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %llu ms) --&gt; early</small>", f64DriftMs, l_ui64DriftToleranceDurationMs);
 	}
 	else
 	{
-		::sprintf(l_sLabel, "Device drift : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %llu ms) --&gt; early</small>", f64Drift, l_ui64DriftToleranceDuration);
+		::sprintf(l_sLabel, "Device drift : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %llu ms) --&gt; early</small>", f64DriftMs, l_ui64DriftToleranceDurationMs);
 	}
 	::gtk_label_set_markup(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_drift")), l_sLabel);
 }
@@ -761,7 +761,7 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 	::GtkToggleButton* l_ChannelSelection=GTK_TOGGLE_BUTTON(::gtk_builder_get_object(l_pInterface, "checkbutton_channel_selection"));
 
 	::gtk_combo_box_set_active(l_pDriftCorrectionPolicy, (int)m_pAcquisitionServer->m_oDriftCorrection.getDriftCorrectionPolicy());
-	::gtk_spin_button_set_value(l_pDriftTolerance, (gdouble)m_pAcquisitionServer->m_oDriftCorrection.getDriftToleranceDuration());
+	::gtk_spin_button_set_value(l_pDriftTolerance, (gdouble)m_pAcquisitionServer->m_oDriftCorrection.getDriftToleranceDurationMs());
 	::gtk_spin_button_set_value(l_pJitterMeasureCount, (gdouble)m_pAcquisitionServer->m_oDriftCorrection.getJitterEstimationCountForDrift());
 	::gtk_spin_button_set_value(l_pOverSamplingFactor, (gdouble)m_pAcquisitionServer->getOversamplingFactor());
 	::gtk_toggle_button_set_active(l_ChannelSelection, m_pAcquisitionServer->isChannelSelectionRequested()?TRUE:FALSE);
@@ -829,13 +829,13 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 		case GTK_RESPONSE_YES:
 			m_pAcquisitionServer->setNaNReplacementPolicy((ENaNReplacementPolicy)::gtk_combo_box_get_active(l_pNaNReplacementPolicy));
 			m_pAcquisitionServer->m_oDriftCorrection.setDriftCorrectionPolicy((EDriftCorrectionPolicy)::gtk_combo_box_get_active(l_pDriftCorrectionPolicy));
-			m_pAcquisitionServer->m_oDriftCorrection.setDriftToleranceDuration(::gtk_spin_button_get_value_as_int(l_pDriftTolerance));
+			m_pAcquisitionServer->m_oDriftCorrection.setDriftToleranceDurationMs(::gtk_spin_button_get_value_as_int(l_pDriftTolerance));
 			m_pAcquisitionServer->m_oDriftCorrection.setJitterEstimationCountForDrift(::gtk_spin_button_get_value_as_int(l_pJitterMeasureCount));
 			m_pAcquisitionServer->setOversamplingFactor(::gtk_spin_button_get_value_as_int(l_pOverSamplingFactor));
 			m_pAcquisitionServer->setChannelSelectionRequest(::gtk_toggle_button_get_active(l_ChannelSelection)?true:false);
 
 			// Side-effect: Update the tolerance ms
-			setDrift(0);
+			setDriftMs(0);
 
 			for (size_t setting_index = 0; setting_index < m_vPluginProperties.size(); ++setting_index)
 			{
