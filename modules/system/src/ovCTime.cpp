@@ -2,32 +2,41 @@
 
 #include <cmath>
 
-// \note On Windows, unless timeBeginPeriod(1) is set, all the non-QPC functions here may have only 15ms accuracy.
+// \note On Windows, unless timeBeginPeriod(1) is set, the non-QPC functions here may have only 15ms accuracy.
 // \warning On Windows, avoid "using namespace System;" here as it may cause confusion with stuff coming from windows/boost
+// 
+// To find code based on boost::posix_time, look into earlier versions of this file. That clock may not have a monotonicy guarantee.
+//
 
 #if defined(TARGET_HAS_Boost_Chrono)
 #define OV_BOOST_CHRONO_TIME               // Use timing routines based on boost::chrono.
 #else
 #define OV_CLASSIC_TIME                    // Use the 'classic' openvibe timing routines.
 #endif
-           
-//#define OV_BOOST_POSIX_TIME              // Use timing routines based on boost::posix_time, may not have a monotonic guarantee?
 
-#if defined(OV_CLASSIC_TIME)
-
-#if defined TARGET_OS_Linux
- #include <unistd.h>
- #include <ctime>
- #include <sys/time.h>
-#elif defined TARGET_OS_Windows
- #include <windows.h>
-#else
+#if defined(OV_BOOST_CHRONO_TIME)
+ #define BOOST_CHRONO_HEADER_ONLY
+ #include <boost/chrono.hpp>
+ #include <boost/thread.hpp>
 #endif
 
-// using namespace System;
+#if defined(OV_CLASSIC_TIME)
+ #if defined TARGET_OS_Linux
+  #include <unistd.h>
+  #include <ctime>
+  #include <sys/time.h>
+ #elif defined TARGET_OS_Windows
+  #include <windows.h>
+ #else
+  //
+ #endif
+#endif
+
 #define boolean System::boolean
 #define uint32 System::uint32
 #define uint64 System::uint64
+
+#if defined(OV_CLASSIC_TIME)
 
 boolean System::Time::sleep(const uint32 ui32MilliSeconds)
 {
@@ -213,13 +222,9 @@ uint64 System::Time::zgetTime(void)
 
 #endif
 
-#elif defined(OV_BOOST_POSIX_TIME) || defined(OV_BOOST_CHRONO_TIME)
+#endif // OV_CLASSIC_TIME
 
-#include <boost/thread.hpp>
-
-#define boolean System::boolean
-#define uint32 System::uint32
-#define uint64 System::uint64
+#if defined(OV_BOOST_CHRONO_TIME)
 
 boolean System::Time::sleep(const uint32 ui32MilliSeconds)
 {
@@ -249,36 +254,7 @@ uint32 System::Time::getTime(void)
 	return static_cast<uint32>((zgetTime()*1000)>>32);
 }
 
-#if defined(OV_BOOST_POSIX_TIME) 
 
-uint64 System::Time::zgetTime(void)
-{
-	static boolean l_bInitialized = false;
-	static boost::posix_time::ptime l_oStartTime;
-	if(!l_bInitialized)
-	{
-		l_bInitialized = true;
-		l_oStartTime =  boost::posix_time::microsec_clock::local_time();
-	}
-
-	const boost::posix_time::ptime l_oTimeNow = boost::posix_time::microsec_clock::local_time();
-
-	const boost::posix_time::time_duration l_oElapsed = l_oTimeNow - l_oStartTime;
-
-	const uint64 l_ui64TicksPerSecond = l_oElapsed.ticks_per_second();
-	const uint64 l_ui64Seconds = l_oElapsed.ticks() / l_ui64TicksPerSecond;
-	const uint64 l_ui64Fraction = l_oElapsed.ticks() % l_ui64TicksPerSecond;
-	const uint64 l_ui64FractionStep = 0xFFFFFFFFLL/l_ui64TicksPerSecond;
-	// Scale the fraction from [0,td.ticks_per_second[ range to [0,2^32-1] (=0xFFFFFFFF)
-	const uint64 l_ui64ReturnValue = (l_ui64Seconds<<32) + l_ui64Fraction*l_ui64FractionStep;
-
-	return l_ui64ReturnValue;
-}
-
-#elif defined(OV_BOOST_CHRONO_TIME)
-
-#define BOOST_CHRONO_HEADER_ONLY
-#include <boost/chrono.hpp>
 
 uint64 System::Time::zgetTime(void)
 {
@@ -302,12 +278,11 @@ uint64 System::Time::zgetTime(void)
 	const uint64_t l_ui64Fraction = l_oElapsedMs.count() % l_ui64MicrosPerSecond;
 
 	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
-	const uint64_t l_ui64ReturnValue =  (l_ui64Seconds<<32) + l_ui64Fraction*(0xFFFFFFFF/l_ui64MicrosPerSecond);
+	const uint64_t l_ui64ReturnValue =  (l_ui64Seconds<<32) + l_ui64Fraction*(0xFFFFFFFFLL / (l_ui64MicrosPerSecond-1) );
 
 	return l_ui64ReturnValue;
 }
 
 #endif // OV_BOOST_CHRONO_TIME
 
-#endif // OV_BOOST_POSIX_TIME || OV_BOOST_CHRONO_TIME
 

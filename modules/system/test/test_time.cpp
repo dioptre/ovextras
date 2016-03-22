@@ -1,17 +1,25 @@
 /*
  * \author Nathanael Foy, Jozef Legeny, Jussi T. Lindgren
- * \date 2015
- * \brief Some tests for timing
+ * \date 2015-2016
+ * \brief Performs comparison of clock functions. 
+ *
+ * This compares the potential timing facilities (clocks) available on the platform in a few different ways. 
+ * 
+ * It is not meant for integration testing or testing of Openvibe per ce. However, bad results may indicate
+ * a problem on the time accuracy of the system in general (esp. if from ovCTime clock)
+ *
+ * The test will poll the clocks repeatedly between sleeps and write a .csv file. Each column gives the time each clock gave.
+ *
  */
 
 
-//#include "stdafx.h"
 #include <iostream>
 #include <stdio.h>
-// #include <stdint.h>
 
 #include <string>
 #include <iostream>
+
+#include <ovCTime.h>
 
 //Components of the Boost Library
 #include <boost/array.hpp>
@@ -29,8 +37,6 @@
  #include <unistd.h>
  #include <ctime>
  #include <sys/time.h>
-
-// typedef signed long long int64_t;
 
 #elif defined(TARGET_OS_Windows)
  #include <Windows.h>
@@ -57,6 +63,8 @@ namespace OpenViBE {
 }
 
 #if defined(TARGET_OS_Windows)
+
+// Classic OV time functions, these are copies from ovCTime.h/ovCTime.cpp as we don't know which functions it has enabled (todo: refactor)
 
 static uint64_t zgetTime1(void)
 {
@@ -173,26 +181,7 @@ static uint64_t win32_zgetTime(void)
 	return l_ui64Result;
 }
 
-uint64_t getSystemTime(void)
-{
-	FILETIME ft;
-
-	GetSystemTimeAsFileTime(&ft);
-
-	// 100 nanosecond intervals
-	uint64_t ll_now = (LONGLONG)ft.dwLowDateTime + ((LONGLONG)(ft.dwHighDateTime) << 32LL);
-
-	static const uint64_t l_ui64IntervalsPerSecond = 10*1000*1000; // 100ns -> ms -> s 
-
-	uint64_t seconds = ll_now / l_ui64IntervalsPerSecond;		
-	uint64_t fraction = ll_now % l_ui64IntervalsPerSecond;
-
-	// below in fraction part, scale [0,l_uiIntervalsPerSecond-1] to 32bit integer range
-	return (seconds<<32) + fraction*(0xFFFFFFFF/l_ui64IntervalsPerSecond);
-}
-
-#endif
-
+#endif // TARGET_OS_Windows
 	
 uint64_t zgetTime(void)
 {
@@ -224,14 +213,38 @@ uint64_t zgetTime(void)
 #endif
 }
 
+#if defined(TARGET_OS_Windows)
+
+// Alternative based on GetSystemTimeAsFileTime()
+uint64_t getSystemTime(void)
+{
+	FILETIME ft;
+
+	GetSystemTimeAsFileTime(&ft);
+
+	// 100 nanosecond intervals
+	uint64_t ll_now = (LONGLONG)ft.dwLowDateTime + ((LONGLONG)(ft.dwHighDateTime) << 32LL);
+
+	static const uint64_t l_ui64IntervalsPerSecond = 10*1000*1000; // 100ns -> ms -> s 
+
+	uint64_t seconds = ll_now / l_ui64IntervalsPerSecond;		
+	uint64_t fraction = ll_now % l_ui64IntervalsPerSecond;
+
+	// below in fraction part, scale [0,l_uiIntervalsPerSecond-1] to 32bit integer range
+	return (seconds<<32) + fraction*(0xFFFFFFFF/l_ui64IntervalsPerSecond);
+}
+
+#endif // TARGET_OS_Windows
+
+// Alternative based on boost::posix_time
+
 uint64_t getBoostTime(void)
 {
-	boost::posix_time::ptime epoch(boost::posix_time::from_time_t(0));
-	// boost::posix_time::ptime time_t_epoch(boost::local_time::date(1970,1,1)); 
+	const boost::posix_time::ptime epoch(boost::posix_time::from_time_t(0));
 
-	boost::posix_time::ptime mst1 = boost::posix_time::microsec_clock::local_time();
+	const boost::posix_time::ptime mst1 = boost::posix_time::microsec_clock::local_time();
 
-	boost::posix_time::time_duration td = mst1-epoch;
+	const boost::posix_time::time_duration td = mst1-epoch;
 	
 	const uint64_t micros = td.total_microseconds();
 
@@ -241,12 +254,15 @@ uint64_t getBoostTime(void)
 	const uint64_t fraction = micros % l_ui64MicrosPerSecond;
 
 	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
-	const uint64_t retVal =  (seconds<<32) + fraction*(0xFFFFFFFF/l_ui64MicrosPerSecond);
+	const uint64_t retVal =  (seconds<<32) + fraction*(0xFFFFFFFF / (l_ui64MicrosPerSecond-1) );
 
 	return retVal;
 }
 
 #if defined(TARGET_HAS_Boost_Chrono)
+
+// Alternative based on boost::chrono
+
 uint64_t getBoostChronoTime(void)
 {
 	static bool l_bInitialized=false;
@@ -270,11 +286,13 @@ uint64_t getBoostChronoTime(void)
 	const uint64_t fraction = l_oElapsedMs.count() % l_ui64MicrosPerSecond;
 
 	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
-	const uint64_t retVal =  (seconds<<32) + fraction*(0xFFFFFFFF/l_ui64MicrosPerSecond);
+	const uint64_t retVal =  (seconds<<32) + fraction*(0xFFFFFFFFLL / (l_ui64MicrosPerSecond-1) );
 
 	return retVal;
 }
 #endif
+
+// Alternative from NTP time server
 
 uint64_t getNTPTime(void)
 {
@@ -293,6 +311,8 @@ uint64_t getNTPTime(void)
 }
 
 #if defined(TARGET_OS_Windows)
+
+// Alternative from ftime()
 
 #include <sys/timeb.h>
 
@@ -329,6 +349,8 @@ uint64_t getFTime(void)
 }
 
 #endif
+
+// This encapsulates a clock getter and its first poll time, last time, and current time - used to test different clocks in the same loop code.
 
 class Clock
 {
@@ -406,21 +428,19 @@ void getClockResolution(uint32_t& minimum, uint32_t& maximum, uint32_t& current)
 
 int main(int argc, char** argv)
 {
-	int64_t runTime = 1;
-	int64_t sleepTime = 0;
+	int64_t runTime = 120;
+	int64_t sleepTime = 5;
 
 	if (argc > 1)
 	{
-		printf("Will run for %s seconds\n", argv[1]);
 		runTime = atoi(argv[1]);
 	}
 
 	if (argc > 2)
 	{
-		printf("Will sleep for %s milliseconds between calls\n", argv[2]);
 		sleepTime = atoi(argv[2]);
 	}
-	
+
 	const double errorThMs = 5.0;					// If clock delta is more than this, count an error
 
 #if defined(TARGET_OS_Windows)
@@ -455,33 +475,34 @@ int main(int argc, char** argv)
 	boost::this_thread::sleep(boost::posix_time::millisec(1000));
 #endif
 
-#if 0
 	// boost sleep accuracy test
-	boost::posix_time::ptime t1 = boost::posix_time::second_clock::local_time();
-	boost::this_thread::sleep(boost::posix_time::millisec(500));
-	boost::posix_time::ptime t2 = boost::posix_time::second_clock::local_time();
-	boost::posix_time::time_duration diff = t2 - t1;
-	std::cout << "boost1 : " << diff.total_milliseconds() << std::endl;
-
 	boost::posix_time::ptime mst1 = boost::posix_time::microsec_clock::local_time();
 	boost::this_thread::sleep(boost::posix_time::millisec(500));
 	boost::posix_time::ptime mst2 = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::time_duration msdiff = mst2 - mst1;
-	std::cout << "boost2 : " << msdiff.total_milliseconds() << std::endl;
+	std::cout << "boost::this_thread::sleep accuracy : " << msdiff.total_milliseconds() << "ms slept (500ms asked, posix clock)" << std::endl;
+
+#if defined(TARGET_HAS_Boost_Chrono)
+	boost::chrono::steady_clock::time_point cmst1 = boost::chrono::steady_clock::now();
+	boost::this_thread::sleep(boost::posix_time::millisec(500));
+	boost::chrono::steady_clock::time_point cmst2 = boost::chrono::steady_clock::now();
+	const boost::chrono::steady_clock::duration cmsdiff = cmst2 - cmst1;
+	std::cout << "boost::this_thread::sleep accuracy : " <<  (boost::chrono::duration_cast<boost::chrono::milliseconds>(cmsdiff)).count() << "ms slept (500ms asked, chrono clock)" << std::endl;
 #endif
 
-#if 1
-	// todo: if needed, test the other clocks
+	// Estimate clock granularity
+	spinTest("ovCTime", System::Time::zgetTime);
 #if defined(TARGET_HAS_Boost_Chrono)
 	spinTest("boost::chrono", getBoostChronoTime);
 #else
 	spinTest("zgetTime", zgetTime);
 #endif
-	spinTest("boost::posix_time", getBoostTime);
-#endif
 #if defined(TARGET_OS_Windows)
 	spinTest("ftime", getFTime);
 #endif
+	spinTest("boost::posix_time", getBoostTime);
+	
+	printf("Starting sleep/poll test...\n");
 
 	printf("Run time: %lld (s), Sleep time: %lld (ms)\n", static_cast<long long>(runTime), static_cast<long long>(sleepTime));
 
@@ -495,11 +516,12 @@ int main(int argc, char** argv)
 
 	std::vector<Clock> l_vClocks;
 
-	l_vClocks.push_back(Clock("zgetTime", zgetTime));						// the first clock controls the duration of the test
-	l_vClocks.push_back(Clock("BoostTime", getBoostTime));
+	l_vClocks.push_back(Clock("ovCTime", System::Time::zgetTime));				// the first clock controls the duration of the test
 #if defined(TARGET_HAS_Boost_Chrono)
 	l_vClocks.push_back(Clock("BoostChronoTime", getBoostChronoTime));
 #endif
+	l_vClocks.push_back(Clock("zgetTime", zgetTime));					            
+	l_vClocks.push_back(Clock("BoostTime", getBoostTime));
 #if defined(TARGET_OS_Windows)
 	l_vClocks.push_back(Clock("systemTime", getSystemTime));
 	l_vClocks.push_back(Clock("zgetTime1", zgetTime1));
@@ -541,7 +563,6 @@ int main(int argc, char** argv)
 			// @todo busy wait on a clock here to avoid confusion coming from sleep granularity (on Win, often resembles the clock resolution)
 			// do a separate test for sleep accuracy if needed.
 			boost::this_thread::sleep(boost::posix_time::millisec(sleepTime));
-			// Sleep(sleepTime);
 		}
 
 		// First poll all the clocks
