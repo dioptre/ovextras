@@ -10,6 +10,9 @@
  *
  * The test will poll the clocks repeatedly between sleeps and write a .csv file. Each column gives the time each clock gave.
  *
+ * Note that as modules are not supposed to depend on openvibe or its
+ * kernel, we currently reimplement some functions here.
+ *
  */
 
 
@@ -60,6 +63,13 @@ namespace OpenViBE {
 		static const uint32_t m_ui32Shift = 32-m_ui32DecimalPrecision;			// 22
 		static const uint32_t m_ui32Multiplier = 1L << m_ui32DecimalPrecision;	// 1024
 	};
+}
+	
+
+// A uint64_t wrapper for openvibe time getter for compilers
+// that are not happy mixing uint64_t and System::uint64
+uint64_t ovGetTime(void) {
+	return static_cast<uint64_t>( System::Time::zgetTime() );
 }
 
 #if defined(TARGET_OS_Windows)
@@ -488,10 +498,12 @@ int main(int argc, char** argv)
 	boost::chrono::steady_clock::time_point cmst2 = boost::chrono::steady_clock::now();
 	const boost::chrono::steady_clock::duration cmsdiff = cmst2 - cmst1;
 	std::cout << "boost::this_thread::sleep accuracy : " <<  (boost::chrono::duration_cast<boost::chrono::milliseconds>(cmsdiff)).count() << "ms slept (500ms asked, chrono clock)" << std::endl;
+#else
+	std::cout << "Note: Boost chrono was not available during compilation, skipping\n";
 #endif
 
 	// Estimate clock granularity
-	spinTest("ovCTime", System::Time::zgetTime);
+	spinTest("ovCTime", ovGetTime);
 #if defined(TARGET_HAS_Boost_Chrono)
 	spinTest("boost::chrono", getBoostChronoTime);
 #else
