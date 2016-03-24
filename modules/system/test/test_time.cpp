@@ -53,6 +53,12 @@ using namespace std;
 namespace OpenViBE {
 	class ITimeArithmetics {
 	public:
+		// From ITimeArithmetics
+		static uint64_t subsecondsToTime(const uint64_t ui64Seconds, const uint64_t ui64Subseconds, const uint64_t ui64SubsInSecond) 
+		{
+			return (ui64Seconds << 32) + (ui64Subseconds << 32) / ui64SubsInSecond;
+		}
+
 		static double timeToSeconds(const uint64_t ui64Time)
 		{
 			return (ui64Time>>m_ui32Shift)/double(m_ui32Multiplier);
@@ -106,8 +112,8 @@ static uint64_t zgetTime1(void)
 	LARGE_INTEGER l_oPerformanceCounter;
 	QueryPerformanceCounter(&l_oPerformanceCounter);
 	l_ui64Counter=l_oPerformanceCounter.QuadPart-l_ui64CounterStart;
-
-	l_ui64Result=((l_ui64Counter/l_ui64Frequency)<<32)+(((l_ui64Counter%l_ui64Frequency)<<32)/l_ui64Frequency);
+	
+	l_ui64Result=OpenViBE::ITimeArithmetics::subsecondsToTime(l_ui64Counter/l_ui64Frequency, l_ui64Counter%l_ui64Frequency, l_ui64Frequency);
 
 	return l_ui64Result;
 }
@@ -126,7 +132,7 @@ static uint64_t zgetTime2(void)
 	uint64_t l_ui64Counter;
 
 	l_ui64Counter=uint64_t(timeGetTime());
-	l_ui64Counter=((l_ui64Counter/1000)<<32)+(((l_ui64Counter%1000)<<32)/1000);
+	l_ui64Counter=OpenViBE::ITimeArithmetics::subsecondsToTime(l_ui64Counter/1000, l_ui64Counter%1000, 1000);
 
 	if(!l_bInitialized)
 	{
@@ -214,10 +220,12 @@ uint64_t zgetTime(void)
 	uint64_t l_ui64SecDiff=(uint64_t)(l_oTimeValue.tv_sec-l_oTimeValueStart.tv_sec);
 	uint64_t l_ui64USecDiff=(uint64_t)(l_oTimeValue.tv_usec-l_oTimeValueStart.tv_usec);
 
-	l_ui64TimeMicroSecond+=l_ui64SecDiff*1000000;
+	const uint64_t l_ui64MicrosInSecond = 1000*1000;
+
+	l_ui64TimeMicroSecond+=l_ui64SecDiff*l_ui64MicrosInSecond;
 	l_ui64TimeMicroSecond+=l_ui64USecDiff;
 
-	uint64_t l_ui64Result=((l_ui64TimeMicroSecond/1000000)<<32)+(((l_ui64TimeMicroSecond%1000000)<<32)/1000000);
+	uint64_t l_ui64Result=OpenViBE::ITimeArithmetics::subsecondsToTime(l_ui64TimeMicroSecond/l_ui64MicrosInSecond, l_ui64TimeMicroSecond % l_ui64MicrosInSecond, l_ui64MicrosInSecond);
 
 	return l_ui64Result;
 #endif
@@ -237,11 +245,11 @@ uint64_t getSystemTime(void)
 
 	static const uint64_t l_ui64IntervalsPerSecond = 10*1000*1000; // 100ns -> ms -> s 
 
-	uint64_t seconds = ll_now / l_ui64IntervalsPerSecond;		
-	uint64_t fraction = ll_now % l_ui64IntervalsPerSecond;
+	const uint64_t seconds = ll_now / l_ui64IntervalsPerSecond;		
+	const uint64_t fraction = ll_now % l_ui64IntervalsPerSecond;
 
 	// below in fraction part, scale [0,l_uiIntervalsPerSecond-1] to 32bit integer range
-	return (seconds<<32) + fraction*(0xFFFFFFFF/l_ui64IntervalsPerSecond);
+	return OpenViBE::ITimeArithmetics::subsecondsToTime(seconds, fraction, l_ui64IntervalsPerSecond);
 }
 
 #endif // TARGET_OS_Windows
@@ -264,7 +272,7 @@ uint64_t getBoostTime(void)
 	const uint64_t fraction = micros % l_ui64MicrosPerSecond;
 
 	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
-	const uint64_t retVal =  (seconds<<32) + fraction*(0xFFFFFFFF / (l_ui64MicrosPerSecond-1) );
+	const uint64_t retVal = OpenViBE::ITimeArithmetics::subsecondsToTime(seconds, fraction, l_ui64MicrosPerSecond);
 
 	return retVal;
 }
@@ -296,7 +304,7 @@ uint64_t getBoostChronoTime(void)
 	const uint64_t fraction = l_oElapsedMs.count() % l_ui64MicrosPerSecond;
 
 	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
-	const uint64_t retVal =  (seconds<<32) + fraction*(0xFFFFFFFFLL / (l_ui64MicrosPerSecond-1) );
+	const uint64_t retVal = OpenViBE::ITimeArithmetics::subsecondsToTime(seconds, fraction, l_ui64MicrosPerSecond);
 
 	return retVal;
 }
@@ -352,7 +360,7 @@ uint64_t getFTime(void)
 	const uint64_t fraction = l_ui64ElapsedMs % l_ui64MillisPerSecond;
 
 	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
-	const uint64_t retVal =  (seconds<<32) + fraction*(0xFFFFFFFF/l_ui64MillisPerSecond);
+	const uint64_t retVal = OpenViBE::ITimeArithmetics::subsecondsToTime(seconds, fraction, l_ui64MillisPerSecond);
 
 	return retVal;
 
@@ -506,9 +514,8 @@ int main(int argc, char** argv)
 	spinTest("ovCTime", ovGetTime);
 #if defined(TARGET_HAS_Boost_Chrono)
 	spinTest("boost::chrono", getBoostChronoTime);
-#else
-	spinTest("zgetTime", zgetTime);
 #endif
+	spinTest("zgetTime", zgetTime);
 #if defined(TARGET_OS_Windows)
 	spinTest("ftime", getFTime);
 #endif
@@ -528,7 +535,7 @@ int main(int argc, char** argv)
 
 	std::vector<Clock> l_vClocks;
 
-	l_vClocks.push_back(Clock("ovCTime", System::Time::zgetTime));				// the first clock controls the duration of the test
+	l_vClocks.push_back(Clock("ovCTime", ovGetTime));				// the first clock controls the duration of the test
 #if defined(TARGET_HAS_Boost_Chrono)
 	l_vClocks.push_back(Clock("BoostChronoTime", getBoostChronoTime));
 #endif
@@ -540,8 +547,8 @@ int main(int argc, char** argv)
 	l_vClocks.push_back(Clock("zgetTime2", zgetTime2));
 	l_vClocks.push_back(Clock("ftime", getFTime));
 #endif
-#define USE_NTP
-#if defined(USE_NTP)
+// #define OV_TEST_USE_NTP
+#if defined(OV_TEST_USE_NTP)
 	l_vClocks.push_back(Clock("NTP", getNTPTime));
 	// NTP clock needs a moment to complete the poll, call once to start
 	getNTPTime(); 

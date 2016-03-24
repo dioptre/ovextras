@@ -11,7 +11,7 @@
 #if defined(TARGET_HAS_Boost_Chrono)
 #define OV_BOOST_CHRONO_TIME               // Use timing routines based on boost::chrono.
 #else
-#define OV_CLASSIC_TIME                    // Use the 'classic' openvibe timing routines.
+#define OV_CLASSIC_TIME                    // Use the 'classic' openvibe timing routines. deprecated, should be removed after a transition period.
 #endif
 
 #if defined(OV_BOOST_CHRONO_TIME)
@@ -35,6 +35,12 @@
 #define boolean System::boolean
 #define uint32 System::uint32
 #define uint64 System::uint64
+
+// From ITimeArithmetics
+static uint64 subsecondsToTime(const uint64 ui64Seconds, const uint64 ui64Subseconds, const uint64 ui64SubsInSecond) 
+{
+	return (ui64Seconds << 32) + (ui64Subseconds << 32) / ui64SubsInSecond;
+}
 
 #if defined(OV_CLASSIC_TIME)
 
@@ -78,7 +84,7 @@ namespace
 		QueryPerformanceCounter(&l_oPerformanceCounter);
 		l_ui64Counter=l_oPerformanceCounter.QuadPart-l_ui64CounterStart;
 
-		l_ui64Result=((l_ui64Counter/l_ui64Frequency)<<32)+(((l_ui64Counter%l_ui64Frequency)<<32)/l_ui64Frequency);
+		l_ui64Result=subsecondsToTime(l_ui64Counter/l_ui64Frequency, l_ui64Counter%l_ui64Frequency, l_ui64Frequency);
 
 		return l_ui64Result;
 	}
@@ -97,7 +103,7 @@ namespace
 		uint64 l_ui64Counter;
 
 		l_ui64Counter=uint64(timeGetTime());
-		l_ui64Counter=((l_ui64Counter/1000)<<32)+(((l_ui64Counter%1000)<<32)/1000);
+		l_ui64Counter=subsecondsToTime(l_ui64Counter/1000, l_ui64Counter%1000, 1000);
 
 		if(!l_bInitialized)
 		{
@@ -206,7 +212,9 @@ uint64 System::Time::zgetTime(void)
 	l_i64TimeMicroSecond+=l_i64SecDiff*1000000;
 	l_i64TimeMicroSecond+=l_i64USecDiff;
 
-	l_ui64Result=((l_i64TimeMicroSecond/1000000)<<32)+(((l_i64TimeMicroSecond%1000000)<<32)/1000000);
+	const uint64 l_ui64MicrosInSecond = 1000*1000;
+
+	l_ui64Result=subsecondsToTime(l_i64TimeMicroSecond/l_ui64MicrosInSecond, l_i64TimeMicroSecond % l_ui64MicrosInSecond, l_ui64MicrosInSecond);
 
 	return l_ui64Result;
 }
@@ -278,7 +286,7 @@ uint64 System::Time::zgetTime(void)
 	const uint64_t l_ui64Fraction = l_oElapsedMs.count() % l_ui64MicrosPerSecond;
 
 	// below in fraction part, scale [0,l_ui64MicrosPerSecond-1] to 32bit integer range
-	const uint64_t l_ui64ReturnValue =  (l_ui64Seconds<<32) + l_ui64Fraction*(0xFFFFFFFFLL / (l_ui64MicrosPerSecond-1) );
+	const uint64_t l_ui64ReturnValue =  subsecondsToTime(l_ui64Seconds, l_ui64Fraction, l_ui64MicrosPerSecond);
 
 	return l_ui64ReturnValue;
 }

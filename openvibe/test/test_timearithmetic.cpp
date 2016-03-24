@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <cstdlib> // abs() on Linux
 #include <bitset>
+#include <vector>
 
 #include <openvibe/ovITimeArithmetics.h>
 
@@ -408,7 +409,7 @@ int main(int argc, char *argv[])
 	// 
 	// 1ms obtained by (1LL<<32)/1000LL is                0x418937 -> about 2x difference to method 1
 	// 1ms obtained by ov secondstoTime is                0x400000
-	// 1ms obtained by (2^32/1000 is        4294967.296 = 0x418937 + 0.296
+	// 1ms obtained by (2^32)/1000 is       4294967.296 = 0x418937 + 0.296
 	// 1ms obtained by (2^32-1)/1000 is     4294967.295 = 0x418937 + 0.295
 	//
 
@@ -455,6 +456,37 @@ int main(int argc, char *argv[])
 	std::cout << ITimeArithmetics::timeToSeconds(test2/512) << "\n";
 	std::cout << ITimeArithmetics::timeToSeconds(test3) << "->" << ITimeArithmetics::timeToSeconds(test3/10) << "\n";
 	*/
+
+	// Fraction test, converting <secs,ms> pair to 32:32 fixed point
+
+	const uint64 microsInSecond = 1000*1000;
+
+	std::vector< std::pair<uint64,uint64> > tmp;
+	tmp.push_back(std::pair<uint64,uint64>(0LL,0LL));                    // 0s
+	tmp.push_back(std::pair<uint64,uint64>(0LL,1LL));                    // 1s + 1us
+	tmp.push_back(std::pair<uint64,uint64>(0LL,2LL));
+	tmp.push_back(std::pair<uint64,uint64>(0LL,(microsInSecond / 2LL))); // 500ms
+	tmp.push_back(std::pair<uint64,uint64>(0LL,microsInSecond-2));
+	tmp.push_back(std::pair<uint64,uint64>(0LL,microsInSecond-1));       // 1 step below 1s
+	tmp.push_back(std::pair<uint64,uint64>(1LL,0LL));                    // 1s
+	tmp.push_back(std::pair<uint64,uint64>(1LL,1LL));                    // 1 step above 1s
+	tmp.push_back(std::pair<uint64,uint64>(0LL,microsInSecond+1));       // same as (1LL,1LL), but shouldn't happen as micro fraction is meant to be capped under 1s
+	tmp.push_back(std::pair<uint64,uint64>(1LL,2LL));
+	tmp.push_back(std::pair<uint64,uint64>(1LL,1000LL));                 // 1s + 1ms
+	tmp.push_back(std::pair<uint64,uint64>(1LL,2000LL));                 // 1s + 2ms
+
+	for(size_t i=0;i<tmp.size();i++) 
+	{
+		const uint64 l_ui64FixedPoint = ITimeArithmetics::subsecondsToTime(tmp[i].first, tmp[i].second, microsInSecond);
+		cout << "m9 pair (" << tmp[i].first << "s, " << tmp[i].second << "us) as float=" 
+			<< ITimeArithmetics::timeToSeconds( l_ui64FixedPoint ) << "s, parts secs=" 
+			<< (l_ui64FixedPoint>>32) << " fract=" << (l_ui64FixedPoint & 0xFFFFFFFFLL) << "\n";
+	}
+
+	// These should be approx equal
+	cout << "m9 Diff 1 " << ITimeArithmetics::subsecondsToTime(tmp[1].first,tmp[1].second,microsInSecond)-ITimeArithmetics::subsecondsToTime(tmp[0].first,tmp[0].second,microsInSecond) << "\n";
+	cout << "m9 Diff 1 " << ITimeArithmetics::subsecondsToTime(tmp[6].first,tmp[6].second,microsInSecond)-ITimeArithmetics::subsecondsToTime(tmp[5].first,tmp[5].second,microsInSecond) << "\n";
+	cout << "m9 Diff 1 " << ITimeArithmetics::subsecondsToTime(tmp[7].first,tmp[7].second,microsInSecond)-ITimeArithmetics::subsecondsToTime(tmp[6].first,tmp[6].second,microsInSecond) << "\n";
 
 	return retVal;
 } 
