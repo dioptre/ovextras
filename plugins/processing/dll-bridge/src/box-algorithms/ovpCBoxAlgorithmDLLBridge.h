@@ -44,6 +44,7 @@ namespace OpenViBEPlugins
 			OpenViBE::CString m_sParameters;
 
 			// These functions are expected from the DLL library
+			// @note the inputs are non-const on purpose to ensure maximum compatibility with non-C++ dlls
 			typedef void (* INITFUNC)(OpenViBE::int32* paramsLength, const char *params, OpenViBE::int32 *errorCode);
 			typedef void (* UNINITFUNC)(OpenViBE::int32 *errorCode);
 			typedef void (* PROCESSHEADERFUNC)(

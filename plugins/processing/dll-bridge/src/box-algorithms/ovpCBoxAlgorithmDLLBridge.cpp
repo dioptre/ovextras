@@ -131,28 +131,34 @@ namespace OpenViBEPlugins
 			IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 			l_rStaticBoxContext.getInputType(0, m_oInputType);
 			if(m_oInputType == OV_TypeId_StreamedMatrix) {
-				OpenViBEToolkit::TStreamedMatrixDecoder < OpenViBEPlugins::DLLBridge::CDLLBridge >* l_pDecoder
-					= new OpenViBEToolkit::TStreamedMatrixDecoder < OpenViBEPlugins::DLLBridge::CDLLBridge >;
-				OpenViBEToolkit::TStreamedMatrixEncoder < OpenViBEPlugins::DLLBridge::CDLLBridge >* l_pEncoder
-					= new OpenViBEToolkit::TStreamedMatrixEncoder < OpenViBEPlugins::DLLBridge::CDLLBridge >;
+				OpenViBEToolkit::TStreamedMatrixDecoder< CDLLBridge >* l_pDecoder
+					= new OpenViBEToolkit::TStreamedMatrixDecoder< CDLLBridge >;
+				OpenViBEToolkit::TStreamedMatrixEncoder< CDLLBridge >* l_pEncoder
+					= new OpenViBEToolkit::TStreamedMatrixEncoder< CDLLBridge >;
 
 				l_pDecoder->initialize(*this, 0);
 				l_pEncoder->initialize(*this, 0);
 
 				m_pDecoder = l_pDecoder;
 				m_pEncoder = l_pEncoder;
-			} else {
-				OpenViBEToolkit::TSignalDecoder < OpenViBEPlugins::DLLBridge::CDLLBridge >* l_pDecoder
-					= new OpenViBEToolkit::TSignalDecoder < OpenViBEPlugins::DLLBridge::CDLLBridge >;
-				OpenViBEToolkit::TSignalEncoder < OpenViBEPlugins::DLLBridge::CDLLBridge >* l_pEncoder
-					= new OpenViBEToolkit::TSignalEncoder < OpenViBEPlugins::DLLBridge::CDLLBridge >;
+			} 
+			else if(m_oInputType == OV_TypeId_Signal)
+			{
+				OpenViBEToolkit::TSignalDecoder< CDLLBridge >* l_pDecoder
+					= new OpenViBEToolkit::TSignalDecoder < CDLLBridge >;
+				OpenViBEToolkit::TSignalEncoder< CDLLBridge >* l_pEncoder
+					= new OpenViBEToolkit::TSignalEncoder< CDLLBridge >;
 
 				l_pDecoder->initialize(*this, 0);
 				l_pEncoder->initialize(*this, 0);
 
 				m_pDecoder = l_pDecoder;
 				m_pEncoder = l_pEncoder;
-
+			}
+			else
+			{
+				this->getLogManager() << LogLevel_Error << "Unknown input type " << m_oInputType << ". This should never happen.\n";
+				return false;
 			}
 		
 			this->getLogManager() << LogLevel_Trace << "DLL box_init() : Calling\n";
@@ -178,19 +184,6 @@ namespace OpenViBEPlugins
 		{
 			this->getLogManager() << LogLevel_Debug << "Uninitializing\n";
 
-			if(m_pEncoder)
-			{
-				m_pEncoder->uninitialize();
-				delete m_pEncoder;
-				m_pEncoder = NULL;
-			}
-			if(m_pDecoder)
-			{
-				m_pDecoder->uninitialize();
-				delete m_pDecoder;
-				m_pDecoder = NULL;
-			}
-
 			if(m_pUninitialize)
 			{
 				this->getLogManager() << LogLevel_Trace << "DLL box_uninit() : Calling\n";
@@ -208,6 +201,19 @@ namespace OpenViBEPlugins
 				{
 					this->getLogManager() << LogLevel_Trace << "DLL box_uninit() : Return ok\n";
 				}
+			}
+
+			if(m_pEncoder)
+			{
+				m_pEncoder->uninitialize();
+				delete m_pEncoder;
+				m_pEncoder = NULL;
+			}
+			if(m_pDecoder)
+			{
+				m_pDecoder->uninitialize();
+				delete m_pDecoder;
+				m_pDecoder = NULL;
 			}
 
 			if(m_pLibrary) 
@@ -239,11 +245,15 @@ namespace OpenViBEPlugins
 		
 			for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 			{
-				// Ok, casting to base class
-				OpenViBEToolkit::TStreamedMatrixDecoder < OpenViBEPlugins::DLLBridge::CDLLBridge >* l_pDecoder 
-					= (OpenViBEToolkit::TStreamedMatrixDecoder < OpenViBEPlugins::DLLBridge::CDLLBridge >*)m_pDecoder;
-				OpenViBEToolkit::TStreamedMatrixEncoder < OpenViBEPlugins::DLLBridge::CDLLBridge >* l_pEncoder 
-					= (OpenViBEToolkit::TStreamedMatrixEncoder < OpenViBEPlugins::DLLBridge::CDLLBridge >*)m_pEncoder;
+				// m_pDecoder/m_pEncoder should point to StreamedMatrix*coder or Signal*Coder by construction,
+				// the latter appears to be static castable to the former, in practice. 
+				// n.b. dynamic cast does not work here runtime (this does, for the moment). I do not hazard 
+				// an explanation here. Anybody wanting to find out the reasons be prepared to digest the 
+				// codec template inheritance relationships in toolkit for a while.
+				OpenViBEToolkit::TStreamedMatrixDecoder< CDLLBridge >* l_pDecoder 
+					= static_cast< OpenViBEToolkit::TStreamedMatrixDecoder< CDLLBridge >* >(m_pDecoder);
+				OpenViBEToolkit::TStreamedMatrixEncoder< CDLLBridge >* l_pEncoder 
+					= static_cast< OpenViBEToolkit::TStreamedMatrixEncoder< CDLLBridge >* >(m_pEncoder);
 
 				l_pDecoder->decode(i);
 			
@@ -259,7 +269,10 @@ namespace OpenViBEPlugins
 
 					if(m_oInputType == OV_TypeId_Signal)
 					{
-						l_i32SamplingRateIn = (int32)((OpenViBEToolkit::TSignalDecoder < OpenViBEPlugins::DLLBridge::CDLLBridge >*)l_pDecoder)->getOutputSamplingRate();
+						OpenViBEToolkit::TSignalDecoder< CDLLBridge >* l_pSignalDecoder 
+							= static_cast< OpenViBEToolkit::TSignalDecoder< CDLLBridge >* >(m_pDecoder);
+
+						l_i32SamplingRateIn = static_cast<int32>(l_pSignalDecoder->getOutputSamplingRate());
 					}
 
 					int32 l_i32nRowsIn = l_pDecoder->getOutputMatrix()->getDimensionSize(0);
@@ -270,7 +283,7 @@ namespace OpenViBEPlugins
 					int32 l_i32ErrorCode = 0;
 					int32 l_i32nRowsOut=0,l_i32nColsOut=0;
 					int32 l_i32SamplingRateOut = 0;
-					m_pProcessHeader(&l_i32nRowsIn,&l_i32nColsIn, &l_i32SamplingRateIn, &l_i32nRowsOut, &l_i32nColsOut, &l_i32SamplingRateOut, &l_i32ErrorCode);
+					m_pProcessHeader(&l_i32nRowsIn, &l_i32nColsIn, &l_i32SamplingRateIn, &l_i32nRowsOut, &l_i32nColsOut, &l_i32SamplingRateOut, &l_i32ErrorCode);
 					if(l_i32ErrorCode) 
 					{
 						this->getLogManager() << LogLevel_Error << "DLL box_process_header() : Returned error code " << l_i32ErrorCode << "\n";
@@ -292,7 +305,10 @@ namespace OpenViBEPlugins
 
 					if(m_oInputType == OV_TypeId_Signal)
 					{
-						((OpenViBEToolkit::TSignalEncoder < OpenViBEPlugins::DLLBridge::CDLLBridge >*)l_pEncoder)->getInputSamplingRate() = l_i32SamplingRateOut;
+						OpenViBEToolkit::TSignalEncoder< CDLLBridge >* l_pSignalEncoder 
+							= static_cast< OpenViBEToolkit::TSignalEncoder< CDLLBridge >* >(m_pEncoder);
+
+						l_pSignalEncoder->getInputSamplingRate() = l_i32SamplingRateOut;
 					}
 
 					l_pEncoder->encodeHeader();
