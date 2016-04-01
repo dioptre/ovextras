@@ -9,98 +9,6 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkListStore" id="SamplingRateModel">
-    <columns>
-      <!-- column-name gchararray -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">500</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">512</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">1000</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">1024</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">2000</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">2048</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">4000</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">4096</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">8000</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">8192</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">16000</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">16384</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkListStore" id="SignalRangeModelBIP">
-    <columns>
-      <!-- column-name SignalRanges -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">350</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">700</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">1500</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">4000</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkListStore" id="SignalRangeModelEEG">
-    <columns>
-      <!-- column-name SignalRanges -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">150</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">750</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">1000</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkAdjustment" id="adjustment1">
-    <property name="upper">100</property>
-    <property name="value">18</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="adjustment2">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
   <object class="GtkWindow" id="dummy_settings">
     <property name="can_focus">False</property>
     <child>
@@ -109,6 +17,171 @@
         <property name="can_focus">False</property>
         <property name="n_rows">7</property>
         <property name="n_columns">8</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
         <child>
           <placeholder/>
         </child>
@@ -456,6 +529,98 @@
       </object>
     </child>
   </object>
+  <object class="GtkListStore" id="SamplingRateModel">
+    <columns>
+      <!-- column-name gchararray -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">500</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">512</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1000</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1024</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">2000</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">2048</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">4000</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">4096</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">8000</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">8192</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">16000</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">16384</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="SignalRangeModelBIP">
+    <columns>
+      <!-- column-name SignalRanges -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">350</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">700</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1500</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">4000</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="SignalRangeModelEEG">
+    <columns>
+      <!-- column-name SignalRanges -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">150</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">750</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1000</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">100</property>
+    <property name="value">18</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment2">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkListStore" id="model1">
     <columns>
       <!-- column-name gchararray -->
@@ -570,7 +735,7 @@
                   <object class="GtkTable" id="table2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="n_rows">9</property>
+                    <property name="n_rows">10</property>
                     <property name="n_columns">2</property>
                     <property name="homogeneous">True</property>
                     <child>
@@ -851,6 +1016,32 @@
                         <property name="right_attach">2</property>
                         <property name="top_attach">8</property>
                         <property name="bottom_attach">9</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Check impedance :</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">9</property>
+                        <property name="bottom_attach">10</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="checkbutton_impedance">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">9</property>
+                        <property name="bottom_attach">10</property>
                       </packing>
                     </child>
                   </object>
