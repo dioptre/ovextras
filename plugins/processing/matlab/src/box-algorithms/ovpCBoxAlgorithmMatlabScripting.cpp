@@ -313,6 +313,9 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 	// executes the pre-run routine that defines the global identifiers for streams and stimulations codes
 	l_sCommand = CString("run '") + OpenViBE::Directories::getDataDir() + "/plugins/matlab/OV_define.m'";
 	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while calling OV_define.m")) return false;
+	
+	l_sCommand = CString("run '") + OpenViBE::Directories::getDataDir() + "/plugins/matlab/OV_stimulations.m'";
+	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while calling OV_stimulations.m")) return false;
 
 	// executes the pre-run routine that construct the ov_box object
 	char l_sInputCount[32]; sprintf(l_sInputCount, "%i", this->getStaticBoxContext().getInputCount());
