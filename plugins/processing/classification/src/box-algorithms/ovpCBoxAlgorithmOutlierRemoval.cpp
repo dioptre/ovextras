@@ -121,7 +121,7 @@ boolean CBoxAlgorithmOutlierRemoval::pruneSet(std::vector<SFeatureVector>& l_vPr
 
 		l_vKeptIndexes = l_vIntersection;
 
-		this->getLogManager() << LogLevel_Debug << "After analyzing feat " << f << ", kept " << l_vKeptIndexes.size() << " examples.\n";
+		this->getLogManager() << LogLevel_Debug << "After analyzing feat " << static_cast<OpenViBE::uint32>(f) << ", kept " << static_cast<OpenViBE::int32>(l_vKeptIndexes.size()) << " examples.\n";
 	
 	}
 

@@ -80,7 +80,6 @@ public:
 
 		timeb time_buffer;
 		ftime(&time_buffer);
-		const uint64 posixTime = time_buffer.time*1000ULL + time_buffer.millitm;
 
 		if(!m_oStimulusSocket.is_open())
 		{
@@ -93,7 +92,6 @@ public:
 		{
 			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
 			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&ui64Stimuli, sizeof(uint64)));
-			//boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&posixTime, sizeof(uint64)));
 			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
 		} 
 		catch (boost::system::system_error l_oError) 

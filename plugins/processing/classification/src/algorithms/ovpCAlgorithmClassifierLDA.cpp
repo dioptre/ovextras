@@ -284,7 +284,7 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 			const MatrixXd l_oInter = -0.5 * l_oPerClassMeans[i].transpose() * l_oGlobalCovInv * l_oPerClassMeans[i];
 			const float64 l_f64Bias = l_oInter(0,0) + std::log(l_f64ExamplesInClass/l_ui32TotalExamples);
 
-			 this->getLogManager() << LogLevel_Debug << "Bias for " << i << " is " << l_f64Bias << ", from " << l_f64ExamplesInClass / l_ui32TotalExamples 
+			 this->getLogManager() << LogLevel_Debug << "Bias for " << static_cast<int32>(i) << " is " << l_f64Bias << ", from " << l_f64ExamplesInClass / l_ui32TotalExamples 
 		 		<< ", " << l_f64ExamplesInClass << "/" << l_ui32TotalExamples << ", int=" << l_oInter(0,0) 
 		 		<< "\n";
 			// dumpMatrix(this->getLogManager(), l_oPerClassMeans[i], "Means");
@@ -294,7 +294,7 @@ boolean CAlgorithmClassifierLDA::train(const IFeatureVectorSet& rFeatureVectorSe
 		}
 		else
 		{
-			 this->getLogManager() << LogLevel_Debug << "Class " << i << " has no examples\n"; 
+			 this->getLogManager() << LogLevel_Debug << "Class " << static_cast<int32>(i) << " has no examples\n"; 
 		}
 	}
 

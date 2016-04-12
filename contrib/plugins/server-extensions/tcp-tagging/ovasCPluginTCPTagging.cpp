@@ -207,8 +207,6 @@ CPluginTCPTagging::CPluginTCPTagging(const OpenViBE::Kernel::IKernelContext& rKe
 	: IAcquisitionServerPlugin(rKernelContext, CString("AcquisitionServer_Plugin_TCPTagging"))
 {
 	m_rKernelContext.getLogManager() << Kernel::LogLevel_Info << "Loading plugin: TCP Tagging\n";
-        bool truc;
-        m_oSettingsHelper.add("Truc", &truc)
 }
 
 CPluginTCPTagging::~CPluginTCPTagging()
