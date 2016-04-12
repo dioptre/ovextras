@@ -87,50 +87,67 @@ boolean CDriverEEGO::initialize(
 	if(m_rDriverContext.isConnected()) return false;
 	if(!m_oHeader.isChannelCountSet()||!m_oHeader.isSamplingFrequencySet()) return false;
 
-	// Builds up a buffer to store
-	// acquired samples. This buffer
-	// will be sent to the acquisition
-	// server later...
-	m_pSample=new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
-	m_ui32SamplesInBuffer=0;
-	if(!m_pSample)
-	{
-		delete [] m_pSample;
-		m_pSample=NULL;
-		return false;
-	}
-
-
-	// To initialize we need to locate the path of the DLL
-	// Create path to the dll
-	const OpenViBE::CString l_oLibDir=Directories::getBinDir()+"\\eego-SDK.dll";
-	auto l_sPath=l_oLibDir.toASCIIString();
-
-	// create the amplifier factory
-	es::factory fact(l_sPath);
-
-	// to check what is going on case of error; Log version
-	const auto version=fact.getVersion();
-	m_rDriverContext.getLogManager()<<LogLevel_Info<<"EEGO RT: Version: "<<version.major<<"."<<version.minor<<"."<<version.micro<<"."<<version.build<<"\n";
-
-	// Get the amplifier. If none is connected an exception will be thrown
 	try
 	{
-		m_pAmplifier=fact.getAmplifier();
+		// Builds up a buffer to store
+		// acquired samples. This buffer
+		// will be sent to the acquisition
+		// server later...
+		m_pSample = new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
+		m_ui32SamplesInBuffer = 0;
+		if (!m_pSample)
+		{
+			throw std::exception("Failed to allocate sample buffer");
+		}
+
+		// create the amplifier factory
+		// To initialize we need to locate the path of the DLL
+		// Create path to the dll
+		const OpenViBE::CString l_oLibDir = Directories::getBinDir() + "\\eego-SDK.dll";
+		auto l_sPath = l_oLibDir.toASCIIString();
+		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll path: " << l_sPath << "\n";
+		es::factory fact(l_sPath);
+
+		// to check what is going on case of error; Log version
+		const auto version = fact.getVersion();
+		m_rDriverContext.getLogManager() << LogLevel_Info << "EEGO RT: Version: " << version.major << "." << version.minor << "." << version.micro << "." << version.build << "\n";
+
+		// Get the amplifier. If none is connected an exception will be thrown
+		try
+		{
+			m_pAmplifier = fact.getAmplifier();
+		}
+		catch (const std::exception& ex)
+		{
+			m_rDriverContext.getLogManager() << LogLevel_Warning << "Failure to get an amplifier! Reason: " << ex.what() << "\n";
+			throw;
+		}
+		
+		if (m_rDriverContext.isImpedanceCheckRequested())
+		{
+			// After init we are in impedance mode until the recording is started
+			OpenViBE::uint64 l_i64MaskEEG = getRefChannelMask();   // Only the reference channels can be measured
+			m_pStream = m_pAmplifier->OpenImpedanceStream(l_i64MaskEEG);
+		}
 	}
 	catch (const std::exception& ex)
 	{
-		m_rDriverContext.getLogManager()<<LogLevel_Warning<<"Failure to get an amplifier! Reason: "<<ex.what()<<"\n";
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Failed to initialize the driver. Exception: " << ex.what() << "\n";
+
+		// Cleanup
+		delete[] m_pSample;
+		m_pSample = NULL;
+		delete m_pAmplifier;
+		m_pAmplifier = NULL;
+		delete m_pStream;
+		m_pStream = NULL;
+		
 		return false;
 	}
 
-	// Saves parameters
+	// Save parameters
 	m_pCallback=&rCallback;
 	m_ui32SampleCountPerSentBlock=ui32SampleCountPerSentBlock;
-
-	// After init we are in impedance mode until the recording is started
-	OpenViBE::uint64 l_i64MaskEEG=getRefChannelMask();   // Only the reference channels can be measured
-	m_pStream=m_pAmplifier->OpenImpedanceStream(l_i64MaskEEG);
 
 	return true;
 }
@@ -264,11 +281,16 @@ boolean CDriverEEGO::start(void)
 boolean CDriverEEGO::loop(void)
 {
 	if(!m_rDriverContext.isConnected()) return false;
+
+	if (!m_rDriverContext.isStarted()
+		&& !m_rDriverContext.isImpedanceCheckRequested())
+		return true; // Nothing to be done here!
+
 	if(!m_pStream) return false;
 	// Check if we really provide enough channels
 	// When doing impedance only the normal EEG channels are tested. This is fine and handled.
 	if(m_pStream->getChannelList().size() < m_oHeader.getChannelCount()
-	   && m_rDriverContext.isStarted())  // !started -> impedance  
+	   && m_rDriverContext.isStarted())  // !started -> impedance
 	{
 		m_rDriverContext.getLogManager()<<LogLevel_Error<<"The amplifier got asked for more channels than it could provide";
 		return false;
@@ -340,25 +362,26 @@ boolean CDriverEEGO::loop(void)
 	}
 	else // Impedance
 	{
-		// Get the impedance data, here the data is always the most current state. 
+		// Get the impedance data, here the data is always the most current state.
 		// The method can block if impedance still needs to be calculated.
 		eemagine::sdk::buffer data;
 		try
 		{
-			data=m_pStream->getData();
+			data = m_pStream->getData();
 		}
-		catch(const std::exception& ex)
+		catch (const std::exception& ex)
 		{
-			m_rDriverContext.getLogManager()<<LogLevel_Error<<"Error fetching data: "<<ex.what();
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Error fetching data: " << ex.what();
 			return false;
 		}
 
 		// We have to take care not to r/w over any boundary.
-		OpenViBE::uint32 minChannels=min(data.getChannelCount(), m_oHeader.getChannelCount());
-		for(OpenViBE::uint32 channel=0; channel < minChannels; channel++)
+		OpenViBE::uint32 minChannels = min(data.getChannelCount(), m_oHeader.getChannelCount());
+		for (OpenViBE::uint32 channel = 0; channel < minChannels; channel++)
 		{
 			m_rDriverContext.updateImpedance(channel, data.getSample(channel, 0));
 		}
+
 	}
 
 	return true;
@@ -375,7 +398,10 @@ boolean CDriverEEGO::stop(void)
 	// ...
 	delete m_pStream;
 	m_pStream=NULL;   // Deletion of the stream stops the streaming.
-	m_pStream=m_pAmplifier->OpenImpedanceStream(getRefChannelMask()); // And we can stream Impedances once more.
+	if (m_rDriverContext.isImpedanceCheckRequested())
+	{
+		m_pStream = m_pAmplifier->OpenImpedanceStream(getRefChannelMask()); // And we can stream Impedances once more.
+	}
 
 	return true;
 }
