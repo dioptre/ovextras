@@ -1,6 +1,16 @@
 #!/usr/bin/python3
 
 # Example of tcp tagging client
+# The tag format is the same as with Shared Memory Tagging. It comprises three blocks of 8 bytes:
+#
+# ----------------------------------------------------------------------
+# |  padding  (8 bytes) |  event id (8 bytes)  |  timestamp (8 bytes)  |
+# ----------------------------------------------------------------------
+#  
+# The padding is only for consistency with Shared Memory Tagging and has no utility.
+# The event id informs about the type of event happening.
+# The timestamp is the posix time (ms since Epoch) at the moment of the event.
+# It the latter is set to 0, the acquisition server issues its own timestamp upon reception of the stimulation.
 
 import sys
 import socket
@@ -10,7 +20,7 @@ from time import time, sleep
 HOST = '127.0.0.1'
 PORT = 15361
 
-# Event identifier
+# Event identifier (See stimulation codes in OpenVibe documentation)
 EVENT_ID = 5+0x8100
 
 # Artificial delay (ms). It may need to be increased if the time to send the tag is too long and causes tag loss.

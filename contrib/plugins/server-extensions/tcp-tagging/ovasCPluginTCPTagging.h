@@ -3,7 +3,21 @@
 
 /**
   * \brief Acquisition Server plugin adding the capability to receive stimulations from external sources
-  * via TCP.
+  * via TCP/IP.
+  * 
+  * The stimulation format is the same as with Shared Memory Tagging. It comprises three blocks of 8 bytes:
+  *
+  * ----------------------------------------------------------------------
+  * |  padding  (8 bytes) |  event id (8 bytes)  |  timestamp (8 bytes)  |
+  * ----------------------------------------------------------------------
+  *  
+  * The padding is only for consistency with Shared Memory Tagging and has no utility.
+  * The event id informs about the type of event happening.
+  * The timestamp is the posix time (ms since Epoch) at the moment of the event.
+  * It the latter is set to 0, the acquisition server issues its own timestamp upon reception of the stimulation.
+  *
+  * Have a look at contrib/plugins/server-extensions/tcp-tagging/client-example to learn about the protocol
+  * to send stimulations from the client. 
   */
 
 #include "ovasIAcquisitionServerPlugin.h"

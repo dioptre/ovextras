@@ -90,7 +90,7 @@ public:
 
 	void startRead()
 	{
-		// Caveat: a shared pointer is used (instead of simply using this) to ensure that this instance of TagSession is still alive when the call-back is called.
+		// Caveat: a shared pointer is used (instead of simply using this) to ensure that this instance of TagSession is still alive when the callback is called.
 		boost::asio::async_read(m_socket, boost::asio::buffer((void *) &m_tag, sizeof(Tag)), boost::bind(&TagSession::handleRead, shared_from_this(), _1));
 	}
 
@@ -207,6 +207,8 @@ CPluginTCPTagging::CPluginTCPTagging(const OpenViBE::Kernel::IKernelContext& rKe
 	: IAcquisitionServerPlugin(rKernelContext, CString("AcquisitionServer_Plugin_TCPTagging"))
 {
 	m_rKernelContext.getLogManager() << Kernel::LogLevel_Info << "Loading plugin: TCP Tagging\n";
+        bool truc;
+        m_oSettingsHelper.add("Truc", &truc)
 }
 
 CPluginTCPTagging::~CPluginTCPTagging()
