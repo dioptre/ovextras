@@ -36,10 +36,6 @@ void CPluginTCPTagging::startHook(const std::vector<OpenViBE::CString>& vSelecte
 	// Initialize time counters.
 	m_previousPosixTime = posixTime;
 	m_previousSampleTime = 0;
-
-	// Clear Tag stream
-	Tag tag;
-	while(m_scopedTagStream->pop(tag));
 }
 
 void CPluginTCPTagging::stopHook()
