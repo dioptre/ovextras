@@ -92,7 +92,7 @@ void CLogListenerFile::log(const time64 time64Value)
 			ss << " (0x" << hex << time64Value.m_ui64TimeValue << ")";
 		}
 
-		m_fsFileStream << ss;
+		m_fsFileStream << ss.str();
 	}
 	else
 	{

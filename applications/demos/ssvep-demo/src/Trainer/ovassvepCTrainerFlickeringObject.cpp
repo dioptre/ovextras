@@ -81,7 +81,7 @@ CTrainerFlickeringObject::CTrainerFlickeringObject( OpenViBE::float32 f32PosX, O
 	m_poObjectNode = m_poElementNode->createChildSceneNode();
 	l_poPointerNode = m_poElementNode->createChildSceneNode();
 
-	Ogre::Rectangle l_oRectangle = { f32PosX - m_f32TargetWidth / 2, f32PosY + m_f32TargetHeight / 2, f32PosX + m_f32TargetWidth / 2, f32PosY - m_f32TargetHeight / 2};
+	Ogre::RealRect l_oRectangle(f32PosX - m_f32TargetWidth / 2, f32PosY + m_f32TargetHeight / 2, f32PosX + m_f32TargetWidth / 2, f32PosY - m_f32TargetHeight / 2);
 
 	l_poLitObject = m_poPainter->paintRectangle( l_oRectangle, oColour );
 

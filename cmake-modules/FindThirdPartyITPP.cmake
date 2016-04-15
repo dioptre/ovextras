@@ -19,11 +19,25 @@ IF(WIN32)
 	IF(PATH_ITPP)
 		SET(ITPP_FOUND TRUE)
 		SET(ITPP_INCLUDE_DIRS ${PATH_ITPP}/include)
-		SET(ITPP_LIBRARIES libblas.a libfftw3-3 liblapack.a libgcc.a libg2c.a)
-		SET(ITPP_LIBRARIES_RELEASE itpp)
-		SET(ITPP_LIBRARIES_DEBUG itppd)	
+		
+		# Currently the different versions we package for different VS have a bit different lib names...		
+		STRING(REGEX MATCH "vc100.*" MSVC_VER100 ${MSVC_SERVICE_PACK})
+		STRING(REGEX MATCH "vc120.*" MSVC_VER120 ${MSVC_SERVICE_PACK})
+	
+		IF(MSVC_VER100) 
+			SET(ITPP_LIBRARIES libblas.a libfftw3-3 liblapack.a libgcc.a libg2c.a)	
+			SET(ITPP_LIBRARIES_RELEASE itpp)
+			SET(ITPP_LIBRARIES_DEBUG itppd)
+		ENDIF(MSVC_VER100)	
+		IF(MSVC_VER120) 
+			SET(ITPP_LIBRARIES libfftw3-3_win32)
+			SET(ITPP_LIBRARIES_RELEASE blas_win32_MT lapack_win32_MT itpp)
+			SET(ITPP_LIBRARIES_DEBUG blas_win32_MTd lapack_win32_MTd itppd)			
+		ENDIF(MSVC_VER120)	
+		
 		SET(ITPP_LIBRARY_DIRS ${PATH_ITPP}/lib )
 	ENDIF(PATH_ITPP)
+	
 ENDIF(WIN32)
 
 IF(UNIX)

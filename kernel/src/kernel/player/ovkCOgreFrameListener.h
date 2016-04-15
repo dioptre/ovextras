@@ -5,6 +5,10 @@
 #include "OgreStringConverter.h"
 #include "OgreException.h"
 
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+	#include "Overlay/OgreOverlay.h"
+#endif
+
 class COgreFrameListener: public Ogre::FrameListener//, public Ogre::WindowEventListener
 {
 public:

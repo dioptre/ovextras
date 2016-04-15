@@ -3,6 +3,11 @@
 
 #include <Ogre.h>
 
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+	#include "Overlay/OgreOverlay.h"
+	#include "Overlay/OgreOverlayContainer.h"
+#endif
+
 #define SSVEP_DEFAULT_COLOUR Ogre::ColourValue(1.0f, 1.0f, 1.0f)
 
 namespace OpenViBESSVEP
@@ -25,7 +30,7 @@ namespace OpenViBESSVEP
 			CBasicPainter( CApplication* poApplication );
 			~CBasicPainter() {};
 
-			Ogre::ManualObject* paintRectangle( Ogre::Rectangle oRectangle, Ogre::ColourValue oColour = SSVEP_DEFAULT_COLOUR, int iPlane = 1 );
+			Ogre::ManualObject* paintRectangle( Ogre::RealRect oRectangle, Ogre::ColourValue oColour = SSVEP_DEFAULT_COLOUR, int iPlane = 1 );
 			Ogre::ManualObject* paintTriangle( Point oP1, Point oP2, Point oP3, Ogre::ColourValue oColour = SSVEP_DEFAULT_COLOUR, int iPlane = 1 );
 			Ogre::ManualObject* paintCircle( Ogre::Real rX, Ogre::Real rY, Ogre::Real rR, Ogre::ColourValue = SSVEP_DEFAULT_COLOUR, bool bFilled = true, int iPlane = 1);
 			

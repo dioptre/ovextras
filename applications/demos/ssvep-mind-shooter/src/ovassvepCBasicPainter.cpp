@@ -4,6 +4,11 @@
 #include "ovassvepCBasicPainter.h"
 #include "ovassvepCApplication.h"
 
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+#include "Overlay/OgreOverlaySystem.h"
+#include "Overlay/OgreOverlayContainer.h"
+#include "Overlay/OgreOverlayElement.h"
+#endif
 
 using namespace Ogre;
 using namespace OpenViBESSVEP;
@@ -14,6 +19,12 @@ using namespace OpenViBE::Kernel;
 		m_poSceneManager( poApplication->getSceneManager() )
 {
 	m_oAABInf.setInfinite();
+
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+	// on Ogre 1.9, overlay system needs to be manually created
+	Ogre::OverlaySystem* pOverlaySystem = OGRE_NEW Ogre::OverlaySystem();
+	m_poSceneManager->addRenderQueueListener(pOverlaySystem);
+#endif
 
 	m_poOverlayManager = Ogre::OverlayManager::getSingletonPtr();
 
@@ -32,7 +43,7 @@ using namespace OpenViBE::Kernel;
 
 
 
-ManualObject* CBasicPainter::paintRectangle( Ogre::Rectangle oRectangle, Ogre::ColourValue oColour, int iPlane )
+ManualObject* CBasicPainter::paintRectangle( Ogre::RealRect oRectangle, Ogre::ColourValue oColour, int iPlane )
 {
 	ManualObject *l_poObject;
 
@@ -69,7 +80,7 @@ ManualObject* CBasicPainter::paintRectangle( Ogre::Rectangle oRectangle, Ogre::C
 	return l_poObject;
 }
 
-ManualObject* CBasicPainter::paintTexturedRectangle( Ogre::Rectangle oRectangle, Ogre::String sSurface, int iPlane)
+ManualObject* CBasicPainter::paintTexturedRectangle( Ogre::RealRect oRectangle, Ogre::String sSurface, int iPlane)
 {
 	ManualObject *l_poObject;
 

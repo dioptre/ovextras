@@ -74,6 +74,7 @@ Kernel_3DVisualisationOgrePluginsWindowsPostFixRelease =
 Kernel_3DVisualisationOgrePluginsWindows = $Environment{OGRE_HOME}/bin/${Kernel_3DVisualisationOgrePluginsWindowsSubDirectory${BuildType}}/Plugins${Kernel_3DVisualisationOgrePluginsWindowsPostFix${BuildType}}.cfg
 Kernel_3DVisualisationOgrePlugins = ${Kernel_3DVisualisationOgrePlugins${OperatingSystem}}
 Kernel_3DVisualisationOgreLogLevel = Debug
+Kernel_3DVisualisationOgreLogPath = ${Path_Log}/${ApplicationName}-ogre.log
 
 #####################################################################################
 # OpenViBE plugin configuration

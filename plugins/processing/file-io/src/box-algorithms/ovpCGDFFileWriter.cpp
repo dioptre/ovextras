@@ -4,6 +4,8 @@
 #include <cfloat>
 #include <cstring>
 
+#include <algorithm> // std::min, etc on VS2013
+
 using namespace OpenViBE;
 using namespace OpenViBE::Plugins;
 using namespace OpenViBE::Kernel;

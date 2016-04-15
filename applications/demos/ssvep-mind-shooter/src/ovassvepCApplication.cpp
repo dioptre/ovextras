@@ -85,7 +85,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	CString l_sOgreLog = l_poConfigurationManager->expand("${Path_Log}") + "/openvibe-ssvep-mind-shooter-ogre.log";
 	(*m_poLogManager) << LogLevel_Info << "Ogre log file : " << l_sOgreLog << "\n";
 	FS::Files::createParentPath(l_sOgreLog);
-	l_poLogManager->createLog(l_sOgreLog.toASCIIString(), true, l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_LogToConsole}", false), true );
+	l_poLogManager->createLog(l_sOgreLog.toASCIIString(), true, l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_LogToConsole}", false), false );
 
 	// Root creation
 	CString l_sOgreCfg = l_poConfigurationManager->expand("${Path_UserData}") + "/openvibe-ssvep-mind-shooter-ogre.cfg";
@@ -149,7 +149,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	m_poPainter = new CBasicPainter( this );
 
 	(*m_poLogManager) << LogLevel_Debug << "  * initializing CEGUI\n";
-	this->initCEGUI();
+	this->initCEGUI(OpenViBE::Directories::getLogDir() + "/openvibe-ssvep-mind-shooter-demo-cegui.log");
 	(*m_poLogManager) << LogLevel_Debug << "  * CEGUI initialized\n";
 
 	// create the vector of stimulation frequencies
@@ -279,19 +279,37 @@ bool CApplication::configure()
 }
 
 
-void CApplication::initCEGUI()
+void CApplication::initCEGUI(const char *logFilename)
 {
+	// Instantiate logger before bootstrapping the system, this way we will be able to get the log redirected
+	if (!CEGUI::Logger::getSingletonPtr())
+	{
+		new CEGUI::DefaultLogger();		// singleton; instantiate only, no delete
+	}
+	(*m_poLogManager) << LogLevel_Info << "+ CEGUI log will be in '" << logFilename << "'\n";
+	FS::Files::createParentPath(logFilename);
+	CEGUI::Logger::getSingleton().setLogFilename(logFilename, false);
+
 	(*m_poLogManager) << LogLevel_Debug << "+ Creating CEGUI Ogre bootstrap\n";
 	m_roGUIRenderer = &(CEGUI::OgreRenderer::bootstrapSystem(*m_poWindow));
 	(*m_poLogManager) << LogLevel_Debug << "+ Creating CEGUI Scheme Manager\n";
+
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	CEGUI::SchemeManager::getSingleton().createFromFile((CEGUI::utf8*)"TaharezLook-ov-0.8.scheme");
+#else
 	CEGUI::SchemeManager::getSingleton().create((CEGUI::utf8*)"TaharezLook-ov.scheme");
+#endif
 
 	(*m_poLogManager) << LogLevel_Debug << "+ Creating CEGUI WindowManager\n";
 	m_poGUIWindowManager = CEGUI::WindowManager::getSingletonPtr();
 	m_poSheet = m_poGUIWindowManager->createWindow("DefaultWindow", "RootSheet");
 
 	(*m_poLogManager) << LogLevel_Debug << "+ Setting CEGUI StyleSheet\n";
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(m_poSheet);
+#else
 	CEGUI::System::getSingleton().setGUISheet(m_poSheet);
+#endif
 }
 
 void CApplication::resizeViewport()

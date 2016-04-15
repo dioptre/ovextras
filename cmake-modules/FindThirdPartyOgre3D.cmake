@@ -26,11 +26,21 @@ IF(WIN32)
 		SET(OIS_FOUND TRUE)
 		SET(Ogre3D_INCLUDE_DIRS ${PATH_Ogre3D}/include/OGRE ${PATH_Ogre3D}/include/OIS)
 
-		SET(Ogre3D_LIBRARIES_RELEASE OgreMain OIS)
-		SET(Ogre3D_LIBRARY_DIRS_RELEASE ${PATH_Ogre3D}/lib/Release)
-						
-		SET(Ogre3D_LIBRARIES_DEBUG OgreMain_d OIS_d)
-		SET(Ogre3D_LIBRARY_DIRS_DEBUG ${PATH_Ogre3D}/lib/Debug)
+		# Currently the different versions we package for different VS have a bit different libs...
+		STRING(REGEX MATCH "vc100.*" MSVC_VER100 ${MSVC_SERVICE_PACK})
+		STRING(REGEX MATCH "vc120.*" MSVC_VER120 ${MSVC_SERVICE_PACK})
+		IF(MSVC_VER100) 
+			SET(Ogre3D_LIBRARIES_RELEASE OgreMain OIS)
+			SET(Ogre3D_LIBRARIES_DEBUG OgreMain_d OIS_d)
+			SET(Ogre3D_LIBRARY_DIRS_DEBUG ${PATH_Ogre3D}/lib/Debug)
+		ENDIF(MSVC_VER100)
+		IF(MSVC_VER120) 		
+			SET(Ogre3D_LIBRARIES_RELEASE OgreMain OgreOverlay OIS)	
+			SET(Ogre3D_LIBRARIES_DEBUG OgreMain_d OgreOverlay_d OIS_d)	
+		ENDIF(MSVC_VER120) 
+		
+		SET(Ogre3D_LIBRARY_DIRS_DEBUG ${PATH_Ogre3D}/lib/Debug)		
+		SET(Ogre3D_LIBRARY_DIRS_RELEASE ${PATH_Ogre3D}/lib/Release)			
 	ENDIF(PATH_Ogre3D)
 ENDIF(WIN32)
 

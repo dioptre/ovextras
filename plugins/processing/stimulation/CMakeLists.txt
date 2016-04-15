@@ -22,6 +22,7 @@ INCLUDE("FindThirdPartyLua")
 INCLUDE("FindThirdPartyOpenAL")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyBoost_Thread")
+INCLUDE("FindThirdPartyBoost_System")
 
 # ---------------------------------
 # Finds standard library winmm

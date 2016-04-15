@@ -10,35 +10,48 @@ if exist "win32-dependencies.cmd" (
 	
 )
 
-REM ########################################################################################################################
-
-REM # To force build with VS 2008 with VS 2010 installed as well, set the following to 1
-SET SKIP_VS2010=0
-
 SET VSTOOLS=
 SET VSCMake=
 
-if %SKIP_VS2010% == 1 (
-	echo Visual Studio 2010 detection skipped as requested
-) else (
-	if exist "%VS100COMNTOOLS%vsvars32.bat" (
-		echo Found VS100 tools at "%VS100COMNTOOLS%" ...
-		CALL "%VS100COMNTOOLS%vsvars32.bat"
-		SET VSCMake=Visual Studio 10
-		goto terminate
-	)
-)
+REM ########################################################################################################################
+REM #
+REM # By default, this script tries to find the newest VS first. If you want to use another version, execute e.g. GOTO VS2012
+REM # 
+REM GOTO VS2010
 
-if exist "%VS90COMNTOOLS%vsvars32.bat" (
-	echo Found VS90 tools at "%VS90COMNTOOLS%" ...
-	CALL "%VS90COMNTOOLS%vsvars32.bat"
-	SET VSCMake=Visual Studio 9 2008
+:VS2013
+if exist "%VS120COMNTOOLS%vsvars32.bat" (
+	echo Found VS120 tools at "%VS120COMNTOOLS%" ...
+	CALL "%VS120COMNTOOLS%vsvars32.bat"
+	SET VSCMake=Visual Studio 12
+	SET OV_USE_VS2013=1
 	goto terminate
 )
+
+:VS2012
+if exist "%VS110COMNTOOLS%vsvars32.bat" (
+	echo Found VS110 tools at "%VS110COMNTOOLS%" ...
+	echo But VS2012 is not officially supported, if you want to try to use it, edit this script.
+	REM echo Found VS110 tools at "%VS120COMNTOOLS%" ...
+	REM CALL "%VS110COMNTOOLS%vsvars32.bat"
+	REM SET VSCMake=Visual Studio 11
+	REM SET OV_USE_VS2012=1
+	REM goto terminate
+)
+
+:VS2010
+if exist "%VS100COMNTOOLS%vsvars32.bat" (
+	echo Found VS100 tools at "%VS100COMNTOOLS%" ...
+	CALL "%VS100COMNTOOLS%vsvars32.bat"
+	SET VSCMake=Visual Studio 10
+	goto terminate
+)
+
 
 echo ######################################################################################
 echo ##                                                                                  ##
 echo ##  ERROR : Microsoft Visual Studio Common tools initialisation script not found    ##
+echo ##  for supported VS version (2010 or 2013)                                         ##
 echo ##                                                                                  ##
 echo ######################################################################################
 goto terminate

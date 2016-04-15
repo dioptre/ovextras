@@ -274,7 +274,10 @@ namespace OpenViBEPlugins
 			uint32 count = 0;
 			for( ; count<m_ui32SamplesPerBuffer && !m_bEndOfFile; count++)
 			{
-				m_bEndOfFile = (getline(m_oSignalFile, l_oLine) == NULL);
+				if( !getline(m_oSignalFile, l_oLine) )
+				{
+					m_bEndOfFile = true;
+				}
 
 				l_oStringStream.clear();
 				l_oStringStream.str(l_oLine);

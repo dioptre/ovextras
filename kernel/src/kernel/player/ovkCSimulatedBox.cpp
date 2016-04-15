@@ -10,6 +10,8 @@
 #include "../visualisation/ovkCVisualisationManager.h"
 #include "../ovkGtkOVCustom.h"
 
+#include <algorithm> // std::min, etc on VS2013
+
 #if defined(TARGET_HAS_ThirdPartyOgre3D)
 #include "ovkCOgreVisualisation.h"
 #include "ovkCOgreObject.h"
@@ -1478,8 +1480,8 @@ boolean CSimulatedBox::markOutputAsReadyToSend(
 	}
 
 	// sets start and end time
-	m_vCurrentOutput[ui32OutputIndex].setStartTime(min(ui64StartTime, ui64EndTime));
-	m_vCurrentOutput[ui32OutputIndex].setEndTime(max(ui64StartTime, ui64EndTime));
+	m_vCurrentOutput[ui32OutputIndex].setStartTime(std::min(ui64StartTime, ui64EndTime));
+	m_vCurrentOutput[ui32OutputIndex].setEndTime(std::max(ui64StartTime, ui64EndTime));
 
 	// copies chunk
 	m_vOutput[ui32OutputIndex].push_back(m_vCurrentOutput[ui32OutputIndex]);

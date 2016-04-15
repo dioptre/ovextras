@@ -32,6 +32,13 @@ static const float g_fOffset = 2.0f;
  #define _strcmpi strcasecmp
 #endif
 
+#if !( (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8) )
+namespace CEGUI
+{ 
+	typedef CEGUI::UVector2 USize;
+};
+#endif
+
 CSpaceshipBCI::CSpaceshipBCI(string s_localization) : 
 	COgreVRApplication(OpenViBE::Directories::getDataDir() + "/applications/vr-demo/spaceship")
 {
@@ -128,7 +135,7 @@ void CSpaceshipBCI::loadGUI()
 
 	/*CEGUI::Window * l_poWidget  = m_poGUIWindowManager->createWindow("TaharezLook/StaticText", "score");
 	l_poWidget->setPosition(CEGUI::UVector2(cegui_reldim(0.01f), cegui_reldim(0.01f)) );
-	l_poWidget->setSize(CEGUI::UVector2(CEGUI::UDim(0.2f, 0.f), CEGUI::UDim(0.08f, 0.f)));
+	l_poWidget->setSize(CEGUI::USize(CEGUI::UDim(0.2f, 0.f), CEGUI::UDim(0.08f, 0.f)));
 	m_poSheet->addChildWindow(l_poWidget);
 	l_poWidget->setFont("BlueHighway-24");
 	l_poWidget->setText("Score: 0\n");
@@ -137,54 +144,91 @@ void CSpaceshipBCI::loadGUI()
 
 	CEGUI::Window * l_poMove  = m_poGUIWindowManager->createWindow("TaharezLook/StaticImage", "Move");
 	l_poMove->setPosition(CEGUI::UVector2(cegui_reldim(0.35f), cegui_reldim(0.8f)) );
-	l_poMove->setSize(CEGUI::UVector2(CEGUI::UDim(0.3f, 0.f), CEGUI::UDim(0.2f, 0.f)));
-	m_poSheet->addChildWindow(l_poMove);	
-	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageMove",l_sMoveImage); 
-	l_poMove->setProperty("Image","set:ImageMove image:full_image");
+	l_poMove->setSize(CEGUI::USize(CEGUI::UDim(0.3f, 0.f), CEGUI::UDim(0.2f, 0.f)));
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	m_poSheet->addChild(l_poMove);	
+	CEGUI::ImageManager::getSingleton().addFromImageFile("ImageMove",l_sMoveImage); 
+	l_poMove->setProperty("Image", "ImageMove");
+#else
+	m_poSheet->addChildWindow(l_poMove);
+	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageMove", l_sMoveImage);
+	l_poMove->setProperty("Image", "set:ImageMove image:full_image");
+#endif
 	l_poMove->setProperty("FrameEnabled","False");
 	l_poMove->setProperty("BackgroundEnabled","False");
 
 	CEGUI::Window * l_poNoMove  = m_poGUIWindowManager->createWindow("TaharezLook/StaticImage", "NoMove");
 	l_poNoMove->setPosition(CEGUI::UVector2(cegui_reldim(0.35f), cegui_reldim(0.8f)) );
-	l_poNoMove->setSize(CEGUI::UVector2(CEGUI::UDim(0.3f, 0.f), CEGUI::UDim(0.2f, 0.f)));
-	m_poSheet->addChildWindow(l_poNoMove);	
-	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageNoMove",l_sStopImage); 
-	l_poNoMove->setProperty("Image","set:ImageNoMove image:full_image");
+	l_poNoMove->setSize(CEGUI::USize(CEGUI::UDim(0.3f, 0.f), CEGUI::UDim(0.2f, 0.f)));
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	m_poSheet->addChild(l_poNoMove);	
+	CEGUI::ImageManager::getSingleton().addFromImageFile("ImageNoMove",l_sStopImage); 
+	l_poNoMove->setProperty("Image","ImageNoMove");
+#else
+	m_poSheet->addChildWindow(l_poNoMove);
+	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageNoMove", l_sStopImage);
+	l_poNoMove->setProperty("Image", "set:ImageNoMove image:full_image");
+#endif
+
 	l_poNoMove->setProperty("FrameEnabled","False");
 	l_poNoMove->setProperty("BackgroundEnabled","False");
 
 	CEGUI::Window * l_poCalibration  = m_poGUIWindowManager->createWindow("TaharezLook/StaticImage", "Calibration");
 	l_poCalibration->setPosition(CEGUI::UVector2(cegui_reldim(0.35f), cegui_reldim(0.8f)) );
-	l_poCalibration->setSize(CEGUI::UVector2(CEGUI::UDim(0.3f, 0.f), CEGUI::UDim(0.2f, 0.f)));
-	m_poSheet->addChildWindow(l_poCalibration);	
-	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageCalibration",l_sInitImage); 
-	l_poCalibration->setProperty("Image","set:ImageCalibration image:full_image");
+	l_poCalibration->setSize(CEGUI::USize(CEGUI::UDim(0.3f, 0.f), CEGUI::UDim(0.2f, 0.f)));
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	m_poSheet->addChild(l_poCalibration);	
+	CEGUI::ImageManager::getSingleton().addFromImageFile("ImageCalibration",l_sInitImage); 
+	l_poCalibration->setProperty("Image","ImageCalibration");
+#else
+	m_poSheet->addChildWindow(l_poCalibration);
+	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageCalibration", l_sInitImage);
+	l_poCalibration->setProperty("Image", "set:ImageCalibration image:full_image");
+#endif
 	l_poCalibration->setProperty("FrameEnabled","False");
 	l_poCalibration->setProperty("BackgroundEnabled","False");
 
 	CEGUI::Window * l_poStatsImage  = m_poGUIWindowManager->createWindow("TaharezLook/StaticImage", "StatsImage");
 	l_poStatsImage->setPosition(CEGUI::UVector2(cegui_reldim(0.25f), cegui_reldim(0.2f)) );
-	l_poStatsImage->setSize(CEGUI::UVector2(CEGUI::UDim(0.5f, 0.f), CEGUI::UDim(0.2f, 0.f)));
-	m_poSheet->addChildWindow(l_poStatsImage);	
-	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageStatistics",l_sEndImage); 
-	l_poStatsImage->setProperty("Image","set:ImageStatistics image:full_image");
+	l_poStatsImage->setSize(CEGUI::USize(CEGUI::UDim(0.5f, 0.f), CEGUI::UDim(0.2f, 0.f)));
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	m_poSheet->addChild(l_poStatsImage);	
+	CEGUI::ImageManager::getSingleton().addFromImageFile("ImageStatistics",l_sEndImage); 
+	l_poStatsImage->setProperty("Image", "ImageStatistics");
+#else
+	m_poSheet->addChildWindow(l_poStatsImage);
+	CEGUI::ImagesetManager::getSingleton().createFromImageFile("ImageStatistics", l_sEndImage);
+	l_poStatsImage->setProperty("Image", "set:ImageStatistics image:full_image");
+#endif
 	l_poStatsImage->setProperty("FrameEnabled","False");
 	l_poStatsImage->setProperty("BackgroundEnabled","False");
 	l_poStatsImage->setVisible(false);
 
 	CEGUI::Window * l_poStatistics  = m_poGUIWindowManager->createWindow("TaharezLook/StaticText", "Statistics");
 	l_poStatistics->setPosition(CEGUI::UVector2(cegui_reldim(0.25f), cegui_reldim(0.35f)) );
-	l_poStatistics->setSize(CEGUI::UVector2(CEGUI::UDim(0.5f, 0.f), CEGUI::UDim(0.5f, 0.f)));
+	l_poStatistics->setSize(CEGUI::USize(CEGUI::UDim(0.5f, 0.f), CEGUI::UDim(0.5f, 0.f)));
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	m_poSheet->addChild(l_poStatistics);
+	l_poStatistics->setFont("BlueHighway-24");
+	l_poStatistics->setProperty("HorzFormatting", "WordWrapCentreAligned");
+	l_poStatistics->setProperty("VertFormatting", "WordWrapCentreAligned");
+	l_poStatistics->setVisible(false);
+#else
 	m_poSheet->addChildWindow(l_poStatistics);
 	l_poStatistics->setFont("BlueHighway-24");
-	l_poStatistics->setProperty("HorzFormatting","WordWrapCentred");
-	l_poStatistics->setProperty("VertFormatting","WordWrapCentred");
+	l_poStatistics->setProperty("HorzFormatting", "WordWrapCentred");
+	l_poStatistics->setProperty("VertFormatting", "WordWrapCentred");
 	l_poStatistics->setVisible(false);
+#endif
 
 	CEGUI::Window * l_poThreshold = m_poGUIWindowManager->createWindow("TaharezLook/StaticText", "Threshold");
 	l_poThreshold->setPosition(CEGUI::UVector2(cegui_reldim(0.01f), cegui_reldim(0.01f)) );
-	l_poThreshold->setSize(CEGUI::UVector2(CEGUI::UDim(0.15f, 0.f), CEGUI::UDim(0.08f, 0.f)));
+	l_poThreshold->setSize(CEGUI::USize(CEGUI::UDim(0.15f, 0.f), CEGUI::UDim(0.08f, 0.f)));
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	m_poSheet->addChild(l_poThreshold);
+#else
 	m_poSheet->addChildWindow(l_poThreshold);
+#endif
 	l_poThreshold->setFont("BlueHighway-12");
 	l_poThreshold->setProperty("HorzFormatting","WordWrapCentred");
 	l_poThreshold->setProperty("VertFormatting","WordWrapCentred");
@@ -397,23 +441,23 @@ bool CSpaceshipBCI::process(double timeSinceLastProcess)
 	switch(m_iPhase)
 	{
 		case Phase_Rest:
-			m_poGUIWindowManager->getWindow("Move")->setVisible(false);
-			m_poGUIWindowManager->getWindow("NoMove")->setVisible(false);
+			m_poSheet->getChild("Move")->setVisible(false);
+			m_poSheet->getChild("NoMove")->setVisible(false);
 			break;
 
 		case Phase_Move:
-			m_poGUIWindowManager->getWindow("Move")->setVisible(true);
-			m_poGUIWindowManager->getWindow("NoMove")->setVisible(false);
+			m_poSheet->getChild("Move")->setVisible(true);
+			m_poSheet->getChild("NoMove")->setVisible(false);
 			break;
 
 		case Phase_NoMove:
-			m_poGUIWindowManager->getWindow("Move")->setVisible(false);
-			m_poGUIWindowManager->getWindow("NoMove")->setVisible(true);
+			m_poSheet->getChild("Move")->setVisible(false);
+			m_poSheet->getChild("NoMove")->setVisible(true);
 			break;
 
 		default:
-			m_poGUIWindowManager->getWindow("Move")->setVisible(false);
-			m_poGUIWindowManager->getWindow("NoMove")->setVisible(false);
+			m_poSheet->getChild("Move")->setVisible(false);
+			m_poSheet->getChild("NoMove")->setVisible(false);
 			break;
 	}
 	std::stringstream ss;
@@ -422,38 +466,38 @@ bool CSpaceshipBCI::process(double timeSinceLastProcess)
 	switch(m_iStage)
 	{
 		case Stage_Baseline:
-			m_poGUIWindowManager->getWindow("Move")->setVisible(false);
-			m_poGUIWindowManager->getWindow("NoMove")->setVisible(false);
-			m_poGUIWindowManager->getWindow("Calibration")->setVisible(true);
-			m_poGUIWindowManager->getWindow("Statistics")->setVisible(false);
-			m_poGUIWindowManager->getWindow("StatsImage")->setVisible(false);
+			m_poSheet->getChild("Move")->setVisible(false);
+			m_poSheet->getChild("NoMove")->setVisible(false);
+			m_poSheet->getChild("Calibration")->setVisible(true);
+			m_poSheet->getChild("Statistics")->setVisible(false);
+			m_poSheet->getChild("StatsImage")->setVisible(false);
 			break;
 		case Stage_FreetimeReal:
-			m_poGUIWindowManager->getWindow("Calibration")->setVisible(false);
-			m_poGUIWindowManager->getWindow("Statistics")->setVisible(false);
-			m_poGUIWindowManager->getWindow("StatsImage")->setVisible(false);
+			m_poSheet->getChild("Calibration")->setVisible(false);
+			m_poSheet->getChild("Statistics")->setVisible(false);
+			m_poSheet->getChild("StatsImage")->setVisible(false);
 			processStageFreetime(timeSinceLastProcess);
 			break;
 		case Stage_FreetimeImaginary:
-			m_poGUIWindowManager->getWindow("Calibration")->setVisible(false);
-			m_poGUIWindowManager->getWindow("Statistics")->setVisible(false);
-			m_poGUIWindowManager->getWindow("StatsImage")->setVisible(false);
+			m_poSheet->getChild("Calibration")->setVisible(false);
+			m_poSheet->getChild("Statistics")->setVisible(false);
+			m_poSheet->getChild("StatsImage")->setVisible(false);
 			processStageFreetime(timeSinceLastProcess);
 			break;
 		case Stage_Statistics :
 			l_iCount = 10;
-			m_poGUIWindowManager->getWindow("Move")->setVisible(false);
-			m_poGUIWindowManager->getWindow("NoMove")->setVisible(false);
-			m_poGUIWindowManager->getWindow("Calibration")->setVisible(false);
-			m_poGUIWindowManager->getWindow("Statistics")->setVisible(true);
-			m_poGUIWindowManager->getWindow("StatsImage")->setVisible(true);	
+			m_poSheet->getChild("Move")->setVisible(false);
+			m_poSheet->getChild("NoMove")->setVisible(false);
+			m_poSheet->getChild("Calibration")->setVisible(false);
+			m_poSheet->getChild("Statistics")->setVisible(true);
+			m_poSheet->getChild("StatsImage")->setVisible(true);	
 			
 			if(_strcmpi(m_sLocalization.c_str(),"fr") == 0)
 			{
 				ss << " Merci d'avoir participe !" << "\n------------\n";
 
-				ss << "Le vaisseau s'est souleve pendant :\n" << m_dStat_SpaceshipLiftTime << " secondes.\n\n";
-				ss << "Temps moyen par essai :\n" << m_dStat_SpaceshipLiftTime/l_iCount << " secondes.\n\n";
+				ss << "Le vaisseau s'est souleve pendant :\n" << m_dStat_SpaceshipLiftTime << " secondes.\n";
+				ss << "Temps moyen par essai :\n" << m_dStat_SpaceshipLiftTime/l_iCount << " secondes.\n";
 				ss << "------------\n";
 				ss << "Votre rang : \n";
 				l_sRang = "- Apprenti -";
@@ -465,8 +509,8 @@ bool CSpaceshipBCI::process(double timeSinceLastProcess)
 			{
 				ss << " Thanks for your participation" << "\n------------\n";
 
-				ss << "You lifted the spaceship during :\n" << m_dStat_SpaceshipLiftTime << " seconds.\n\n";
-				ss << "Mean time per attempt :\n" << m_dStat_SpaceshipLiftTime/l_iCount << " seconds.\n\n";
+				ss << "You lifted the spaceship during :\n" << m_dStat_SpaceshipLiftTime << " seconds.\n";
+				ss << "Mean time per attempt :\n" << m_dStat_SpaceshipLiftTime/l_iCount << " seconds.\n";
 				ss << "------------\n";
 				ss << "Rank : \n";
 				l_sRang = "- Apprentice -";
@@ -475,7 +519,7 @@ bool CSpaceshipBCI::process(double timeSinceLastProcess)
 				ss << l_sRang << "\n";
 			}
 
-			m_poGUIWindowManager->getWindow("Statistics")->setText(ss.str());
+			m_poSheet->getChild("Statistics")->setText(ss.str());
 			break;
 		
 		default:
@@ -486,7 +530,7 @@ bool CSpaceshipBCI::process(double timeSinceLastProcess)
 	// End of computation
 	std::stringstream ss2;
 	ss2 << "Offset : "<<m_iBetaOffsetPercentage<<"%";
-	m_poGUIWindowManager->getWindow("Threshold")->setText(ss2.str());
+	m_poSheet->getChild("Threshold")->setText(ss2.str());
 
 	m_dLastFeedback=m_dFeedback;
 	m_iLastPhase=m_iPhase;
@@ -509,8 +553,8 @@ bool CSpaceshipBCI::keyPressed(const OIS::KeyEvent& evt)
 	}
 	if(evt.key == OIS::KC_END)
 	{
-		bool l_bVisibility = m_poGUIWindowManager->getWindow("Threshold")->isVisible();
-		m_poGUIWindowManager->getWindow("Threshold")->setVisible(!l_bVisibility);
+		bool l_bVisibility = m_poSheet->getChild("Threshold")->isVisible();
+		m_poSheet->getChild("Threshold")->setVisible(!l_bVisibility);
 	}
 	if(evt.key == OIS::KC_UP)
 	{
@@ -609,7 +653,7 @@ void CSpaceshipBCI::processStageFreetime(double timeSinceLastProcess)
 	m_poSceneManager->getSceneNode("ShipNode")->rotate(Vector3::UNIT_Y,Radian(Math::PI/2.f));
 
 	//score
-// 	CEGUI::Window * l_poWidget  = m_poGUIWindowManager->getWindow("score");
+// 	CEGUI::Window * l_poWidget  = m_poSheet->getChild("score");
 // 	stringstream ss;
 // 	ss << "Score: "<< m_iScore << " / "<<m_iAttemptCount<<"\n";
 // 	l_poWidget->setText(ss.str());

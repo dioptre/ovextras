@@ -9,7 +9,11 @@
 #include <Ogre.h>
 #include <vector>
 #include <CEGUI.h>
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+#include <CEGUI/RendererModules/Ogre/Renderer.h>
+#else
 #include <RendererModules/Ogre/CEGUIOgreRenderer.h>
+#endif
 
 #include "ovassvepICommand.h"
 #include "ovassvepCBasicPainter.h"
@@ -112,7 +116,7 @@ namespace OpenViBESSVEP
 
 
 		private:
-			void initCEGUI();
+			void initCEGUI(const char *logFilename);
 			Ogre::uint32 m_ui32WindowWidth;
 			Ogre::uint32 m_ui32WindowHeight;
 

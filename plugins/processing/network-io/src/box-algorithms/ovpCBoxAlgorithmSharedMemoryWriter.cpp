@@ -54,7 +54,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 			m_vDecoder.push_back(new OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmSharedMemoryWriter >());
 			ShmString l_sShmVariableName("Matrix", alloc_inst_string);
 			l_sShmVariableName += ShmString(convert.str().c_str(), alloc_inst_string);
-			l_vMetaInfoVector->insert(std::make_pair<const ShmString,CIdentifier>(l_sShmVariableName,l_oTypeIdentifier));
+			l_vMetaInfoVector->insert(std::make_pair(l_sShmVariableName, l_oTypeIdentifier));
 
 			const ShmemAllocatorMatrix alloc_inst(m_oSharedMemoryArray.get_segment_manager());
 			m_vStreamedMatrix.push_back(m_oSharedMemoryArray.construct<MyVectorStreamedMatrix>(l_sShmVariableName.c_str())(alloc_inst));
@@ -66,7 +66,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 			m_vDecoder.push_back(new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmSharedMemoryWriter >());
 			ShmString l_sShmVariableName("Stimuli", alloc_inst_string);
 			l_sShmVariableName += ShmString(convert.str().c_str(), alloc_inst_string);
-			l_vMetaInfoVector->insert(std::make_pair<const ShmString,CIdentifier>(l_sShmVariableName,l_oTypeIdentifier));
+			l_vMetaInfoVector->insert(std::make_pair(l_sShmVariableName, l_oTypeIdentifier));
 			
 			const ShmemAllocatorStimulation alloc_inst(m_oSharedMemoryArray.get_segment_manager());
 			m_vStimuliSet.push_back(m_oSharedMemoryArray.construct<MyVectorStimulation>(l_sShmVariableName.c_str())(alloc_inst));

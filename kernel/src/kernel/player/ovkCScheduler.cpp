@@ -15,6 +15,8 @@
 #include <cstdlib>
 #include <limits>
 
+#include <algorithm> // std::min, etc on VS2013
+
 //___________________________________________________________________//
 //                                                                   //
 

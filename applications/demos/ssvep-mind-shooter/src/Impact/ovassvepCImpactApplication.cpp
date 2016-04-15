@@ -29,6 +29,13 @@ using namespace OpenViBESSVEP;
 //#define NO_KEYBOARD
 //#define NO_VRPN
 
+#if !((CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8))
+namespace CEGUI
+{
+	typedef CEGUI::UVector2 USize;
+};
+#endif
+
 CImpactApplication::CImpactApplication(CString sScenarioDir, CString sApplicationSubtype)
 	: CApplication(sScenarioDir),
 	  m_poCurrentEnemy( NULL ),
@@ -64,7 +71,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 
 	poKernelContext->getLogManager().activate(LogLevel_First, LogLevel_Last, true);
 
-	ILogListener* l_poLogListenerFileBuffered = new CLogListenerFileBuffered(*poKernelContext, "ssvep-stimulator",
+	ILogListener* l_poLogListenerFileBuffered = new CLogListenerFileBuffered(*poKernelContext, "ssvep-mind-shooter-stimulator",
 															 l_poConfigurationManager->expand("${SSVEP_UserDataFolder}/log-[$core{date}-$core{time}].log"));
 	poKernelContext->getLogManager().addListener(l_poLogListenerFileBuffered);
 
@@ -121,8 +128,13 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	m_poStatusWindow->setFont("BlueHighway-impact");
 	m_poStatusWindow->hide();
 
+#if (CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8)
+	m_poSheet->addChild(m_poStatusWindow);
+	m_poSheet->addChild(m_poInstructionWindow);
+#else
 	m_poSheet->addChildWindow(m_poStatusWindow);
 	m_poSheet->addChildWindow(m_poInstructionWindow);
+#endif
 
 	// Create commands
 
@@ -184,7 +196,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 
 		// draw the initial text
 		m_poInstructionWindow->show();
-		m_poInstructionWindow->setSize( CEGUI::UVector2( CEGUI::UDim( 0.50f, 0 ), CEGUI::UDim( 0.10f, 0 ) ) );
+		m_poInstructionWindow->setSize( CEGUI::USize( CEGUI::UDim( 0.50f, 0 ), CEGUI::UDim( 0.10f, 0 ) ) );
 		m_poInstructionWindow->setPosition( CEGUI::UVector2( CEGUI::UDim( 0.25f, 0 ), CEGUI::UDim( 0.45f, 0 ) ) );
 		// m_poInstructionWindow->setText("Appuyez sur la touche ESPACE pour commencer le jeu ...");
 		m_poInstructionWindow->setText("Press SPACE to start the game ...");
@@ -195,7 +207,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 
 		// draw the initial text
 		m_poInstructionWindow->show();
-		m_poInstructionWindow->setSize( CEGUI::UVector2( CEGUI::UDim( 0.50f, 0 ), CEGUI::UDim( 0.15f, 0 ) ) );
+		m_poInstructionWindow->setSize( CEGUI::USize( CEGUI::UDim( 0.50f, 0 ), CEGUI::UDim( 0.15f, 0 ) ) );
 		m_poInstructionWindow->setPosition( CEGUI::UVector2( CEGUI::UDim( 0.25f, 0 ), CEGUI::UDim( 0.425f, 0 ) ) );
 		// m_poInstructionWindow->setText("Le systeme a besoin de faire quelques reglages.\nVeuillez vous concentrer sur les cibles indiques par les instructions.\n\nAppuyez sur la touche ESPACE pour commencer l'entrainement ...");
 		m_poInstructionWindow->setText("The system needs to calibrate.\nPlease concentrate on the targets as instructed.\n\nPlease press SPACE to start the process ...");
@@ -474,7 +486,7 @@ void CImpactApplication::addTarget(OpenViBE::uint32 ui32TargetPosition)
 			break;
 		}
 
-		m_poInstructionWindow->setSize( CEGUI::UVector2( CEGUI::UDim( l_fTextSize, 0 ), CEGUI::UDim( 0.10f, 0 ) ) );
+		m_poInstructionWindow->setSize( CEGUI::USize( CEGUI::UDim( l_fTextSize, 0 ), CEGUI::UDim( 0.10f, 0 ) ) );
 		m_poInstructionWindow->setPosition( CEGUI::UVector2( CEGUI::UDim( (1.0f - l_fTextSize) / 2.0f, 0 ), CEGUI::UDim( 0.45f, 0 ) ) );
 		m_poInstructionWindow->show();
 		m_ui32DialogHideDelay = DIALOG_CYCLES_TO_REMOVE;
@@ -541,7 +553,7 @@ void CImpactApplication::startExperiment()
 		m_poInstructionWindow->hide();
 		m_ui32DialogHideDelay = 0;
 		m_poStatusWindow->setPosition( CEGUI::UVector2( CEGUI::UDim( 0.0f, 0 ), CEGUI::UDim( 0.0f, 0 ) ) );
-		m_poStatusWindow->setSize( CEGUI::UVector2( CEGUI::UDim( 0.15f, 0 ), CEGUI::UDim( 0.05f, 0 ) ) );
+		m_poStatusWindow->setSize( CEGUI::USize( CEGUI::UDim( 0.15f, 0 ), CEGUI::UDim( 0.05f, 0 ) ) );
 		m_poStatusWindow->setText("Score: 0");
 		m_poStatusWindow->show();
 		m_eGameState = STARTED;
@@ -566,7 +578,7 @@ void CImpactApplication::stopExperiment()
 			OpenViBE::float32 l_fTextSize = 0.35f;
 			// m_poInstructionWindow->setText("L'application va prendre quelque temps pour le calcul, veuillez patienter.\nLe jeu va commencer automatiquement une fois l'application est prete.");
 			m_poInstructionWindow->setText("The application needs some time to compute, please be patient.\nThe game starts automatically when the application is ready.");
-			m_poInstructionWindow->setSize( CEGUI::UVector2( CEGUI::UDim( l_fTextSize, 0 ), CEGUI::UDim( 0.10f, 0 ) ) );
+			m_poInstructionWindow->setSize( CEGUI::USize( CEGUI::UDim( l_fTextSize, 0 ), CEGUI::UDim( 0.10f, 0 ) ) );
 			m_poInstructionWindow->setPosition( CEGUI::UVector2( CEGUI::UDim( (1.0f - l_fTextSize) / 2.0f, 0 ), CEGUI::UDim( 0.45f, 0 ) ) );
 			m_poInstructionWindow->show();
 
@@ -581,7 +593,7 @@ void CImpactApplication::stopExperiment()
 		// sprintf(l_sText, "Bravo!\nVous avez obtenu %d points!\nAppuyez sur ECHAP pour fermer le programme", m_iScore);
 		sprintf(l_sText, "Bravo!\nYou have obtained %d points!\nPress ESC to close the program", m_iScore);
 		m_poInstructionWindow->setText(l_sText);
-		m_poInstructionWindow->setSize( CEGUI::UVector2( CEGUI::UDim( l_fTextSize, 0 ), CEGUI::UDim( 0.10f, 0 ) ) );
+		m_poInstructionWindow->setSize( CEGUI::USize( CEGUI::UDim( l_fTextSize, 0 ), CEGUI::UDim( 0.10f, 0 ) ) );
 		m_poInstructionWindow->setPosition( CEGUI::UVector2( CEGUI::UDim( (1.0f - l_fTextSize) / 2.0f, 0 ), CEGUI::UDim( 0.45f, 0 ) ) );
 		m_poInstructionWindow->show();
 		m_bActive = false;
