@@ -148,11 +148,6 @@ boolean CDriverMBTSmarting::loop(void)
 	// whether the buffer is full, send it to the acquisition server
 	//...
 
-	#ifdef TARGET_OS_Windows
-		HANDLE current_thread =  GetCurrentThread();
-		SetThreadPriority(current_thread, THREAD_PRIORITY_HIGHEST);
-	#endif
-
 	unsigned char* receiveBuffer = new unsigned char[MAX_PACKAGE_SIZE];
 
 	int readed = m_pSmartingAmp->read(receiveBuffer, MAX_PACKAGE_SIZE);
