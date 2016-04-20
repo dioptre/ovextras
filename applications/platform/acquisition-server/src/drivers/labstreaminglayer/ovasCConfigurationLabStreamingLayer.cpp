@@ -17,7 +17,6 @@ using namespace std;
 
 CConfigurationLabStreamingLayer::CConfigurationLabStreamingLayer(IDriverContext& rDriverContext, const char* sGtkBuilderFileName, 
 	IHeader& rHeader,
-	boolean& rLimitSpeed,
 	CString& rSignalStream,
 	CString& rSignalStreamID,
 	CString& rMarkerStream,
@@ -26,7 +25,6 @@ CConfigurationLabStreamingLayer::CConfigurationLabStreamingLayer(IDriverContext&
 	:CConfigurationBuilder(sGtkBuilderFileName)
 	,m_rDriverContext(rDriverContext) 
 	,m_rHeader(rHeader)
-	,m_rLimitSpeed(rLimitSpeed)
 	,m_rSignalStream(rSignalStream)
 	,m_rSignalStreamID(rSignalStreamID)
 	,m_rMarkerStream(rMarkerStream)
@@ -40,9 +38,6 @@ boolean CConfigurationLabStreamingLayer::preConfigure(void)
 	{
 		return false;
 	}
-
-	::GtkToggleButton* l_pToggleButtonSpeedLimit=GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_limit_speed"));
-	::gtk_toggle_button_set_active(l_pToggleButtonSpeedLimit, m_rLimitSpeed?TRUE:FALSE);
 
 	::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_signal_stream"));
 	if(!l_pComboBox)
@@ -133,9 +128,6 @@ boolean CConfigurationLabStreamingLayer::postConfigure(void)
 {
 	if(m_bApplyConfiguration)
 	{
-		::GtkToggleButton* l_pToggleButtonSpeedLimit=GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_limit_speed"));
-		m_rLimitSpeed=::gtk_toggle_button_get_active(l_pToggleButtonSpeedLimit)?true:false;
-
 		// Retrieve signal stream info
 		::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_signal_stream"));
 		if(!l_pComboBox)

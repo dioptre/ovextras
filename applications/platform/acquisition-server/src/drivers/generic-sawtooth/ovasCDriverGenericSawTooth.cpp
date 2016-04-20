@@ -21,7 +21,7 @@ CDriverGenericSawTooth::CDriverGenericSawTooth(IDriverContext& rDriverContext)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
 	,m_ui32TotalSampleCount(0)
-	,m_ui64StartTime(0)
+	,m_ui32StartTime(0)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGenericSawTooth::CDriverGenericSawTooth\n";
 
@@ -65,7 +65,8 @@ boolean CDriverGenericSawTooth::initialize(
 	m_pSample=new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
 	if(!m_pSample)
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Sawtooth: Memory allocation error\n";
+		delete [] m_pSample;
+		m_pSample=NULL;
 		return false;
 	}
 
@@ -83,12 +84,10 @@ boolean CDriverGenericSawTooth::start(void)
 	if(m_rDriverContext.isStarted()) { return false; }
 
 	m_ui32TotalSampleCount=0;
-	m_ui64StartTime=System::Time::zgetTime();
+	m_ui32StartTime=System::Time::getTime();
 
 	return true;
 }
-
-#include <iostream>
 
 boolean CDriverGenericSawTooth::loop(void)
 {
@@ -97,35 +96,29 @@ boolean CDriverGenericSawTooth::loop(void)
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(!m_rDriverContext.isStarted()) { return true; }
 
-	// Generate the data
-	for(uint32 j=0; j<m_oHeader.getChannelCount(); j++)
+	uint32 l_ui32CurrentTime=System::Time::getTime();
+
+	if(l_ui32CurrentTime-m_ui32StartTime > (1000*(m_ui32TotalSampleCount+m_ui32SampleCountPerSentBlock))/(m_oHeader.getSamplingFrequency()))
 	{
-		for(uint32 i=0; i<m_ui32SampleCountPerSentBlock; i++)
+		for(uint32 j=0; j<m_oHeader.getChannelCount(); j++)
 		{
-			m_pSample[j*m_ui32SampleCountPerSentBlock+i]=float32(i)/(m_ui32SampleCountPerSentBlock-1);
+			for(uint32 i=0; i<m_ui32SampleCountPerSentBlock; i++)
+			{
+				m_pSample[j*m_ui32SampleCountPerSentBlock+i]=float32(i)/(m_ui32SampleCountPerSentBlock-1);
+			}
 		}
+
+		CStimulationSet l_oStimulationSet;
+		l_oStimulationSet.appendStimulation((l_ui32CurrentTime-m_ui32StartTime)/1000, 0, 0);
+		l_oStimulationSet.appendStimulation((l_ui32CurrentTime-m_ui32StartTime)/1000, 
+			ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui32SampleCountPerSentBlock-1), 0);
+
+		m_pCallback->setSamples(m_pSample);
+		// m_pCallback->setStimulationSet(l_oStimulationSet);
+		m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
+
+		m_ui32TotalSampleCount+=m_ui32SampleCountPerSentBlock;
 	}
-
-	// If we're early, sleep before sending. Otherwise, push the chunk out immediately
-	const uint64 l_ui64CurrentTime = System::Time::zgetTime() - m_ui64StartTime;
-	const uint64 l_ui64NextTime = ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui32TotalSampleCount+m_ui32SampleCountPerSentBlock);
-	if(l_ui64NextTime>l_ui64CurrentTime)
-	{
-		const uint64 l_ui64SleepTime = l_ui64NextTime - l_ui64CurrentTime;
-		System::Time::zsleep(l_ui64SleepTime);
-	}
-
-#ifdef TIMINGDEBUG
-	m_rDriverContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64CurrentTime)*1000 << "ms filling for " 
-		<< ITimeArithmetics::timeToSeconds(l_ui64NextTime)*1000 << "ms  -> nSamples = " << m_ui32TotalSampleCount + m_ui32SampleCountPerSentBlock << "\n";
-#endif
-
-
-	m_pCallback->setSamples(m_pSample);
-
-	m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
-
-	m_ui32TotalSampleCount+=m_ui32SampleCountPerSentBlock;
 
 	return true;
 }

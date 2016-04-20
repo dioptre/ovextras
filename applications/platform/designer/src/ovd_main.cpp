@@ -16,11 +16,6 @@
 #include "ovdCInterfacedScenario.h"
 #include "ovdCApplication.h"
 
-#if defined(TARGET_OS_Windows)
-  #include <Windows.h>
-  #include <MMSystem.h>
-#endif
-
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -42,7 +37,7 @@ public:
 	{
 	}
 
-	virtual OpenViBE::boolean enumeratePluginObjectDesc(void)
+	virtual boolean enumeratePluginObjectDesc(void)
 	{
 		CIdentifier l_oIdentifier;
 		while((l_oIdentifier=m_rKernelContext.getPluginManager().getNextPluginObjectDescIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
@@ -52,7 +47,7 @@ public:
 		return true;
 	}
 
-	virtual OpenViBE::boolean enumeratePluginObjectDesc(
+	virtual boolean enumeratePluginObjectDesc(
 		const CIdentifier& rParentClassIdentifier)
 	{
 		CIdentifier l_oIdentifier;
@@ -63,7 +58,7 @@ public:
 		return true;
 	}
 
-	virtual OpenViBE::boolean callback(
+	virtual boolean callback(
 		const IPluginObjectDesc& rPluginObjectDesc)=0;
 
 protected:
@@ -84,7 +79,7 @@ public:
 	{
 	}
 
-	virtual OpenViBE::boolean callback(
+	virtual boolean callback(
 		const IPluginObjectDesc& rPluginObjectDesc)
 	{
 		string l_sFullName=string(rPluginObjectDesc.getCategory())+"/"+string(rPluginObjectDesc.getName());
@@ -120,7 +115,7 @@ public:
 	{
 	}
 
-	virtual OpenViBE::boolean callback(
+	virtual boolean callback(
 		const IPluginObjectDesc& rPluginObjectDesc)
 	{
 		// Outputs plugin info to console
@@ -155,7 +150,7 @@ static void insertPluginObjectDesc_to_GtkTreeStore(const IKernelContext& rKernel
 			l_sStockItemName=l_pBoxAlgorithmDesc->getStockItemName();
 		}
 
-		OpenViBE::boolean l_bShouldShow=true;
+		boolean l_bShouldShow=true;
 
 		if  (rKernelContext.getPluginManager().isPluginObjectFlaggedAsDeprecated(l_pPluginObjectDesc->getCreatedClass())
 		 && !rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_ShowDeprecated}", false))
@@ -165,7 +160,7 @@ static void insertPluginObjectDesc_to_GtkTreeStore(const IKernelContext& rKernel
 
 		/*
 		if  (rKernelContext.getPluginManager().isPluginObjectFlaggedAsUnstable(l_pPluginObjectDesc->getCreatedClass())
-		 && !rKernelContext.getConfigurationManager().expandAsOpenViBE::boolean("${Designer_ShowUnstable}", false))
+		 && !rKernelContext.getConfigurationManager().expandAsBoolean("${Designer_ShowUnstable}", false))
 		{
 			l_bShouldShow=false;
 		}
@@ -205,8 +200,8 @@ static void insertPluginObjectDesc_to_GtkTreeStore(const IKernelContext& rKernel
 			::GtkTreeIter* l_pGtkIterChild=&l_oGtkIter1;
 			for(it=l_vCategory.begin(); it!=l_vCategory.end(); it++)
 			{
-				OpenViBE::boolean l_bFound=false;
-				OpenViBE::boolean l_bValid=gtk_tree_model_iter_children(
+				boolean l_bFound=false;
+				boolean l_bValid=gtk_tree_model_iter_children(
 					GTK_TREE_MODEL(pTreeStore),
 					l_pGtkIterChild,
 					l_pGtkIterParent)?true:false;
@@ -316,7 +311,7 @@ typedef struct _SConfiguration
  * If the designer main window is not visible, the flag no-check-color-depth can be activated (the color depth has been reported to cause trouble
  * only in the designer main window).
  */
-OpenViBE::boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
+boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 {
 	SConfiguration l_oConfiguration;
 
@@ -437,7 +432,7 @@ OpenViBE::boolean parse_arguments(int argc, char** argv, SConfiguration& rConfig
 
 int go(int argc, char ** argv)
 {
-	OpenViBE::boolean errorWhileLoadingScenario = false;
+	boolean errorWhileLoadingScenario = false;
 	/*
 		{ 0,     0,     0,     0 },
 		{ 0, 16383, 16383, 16383 },
@@ -615,7 +610,7 @@ int go(int argc, char ** argv)
 					::CApplication app(*l_pKernelContext);
 					app.initialize(l_oConfiguration.getFlags());
 					// FIXME is it necessary to keep next line uncomment ?
-					//OpenViBE::boolean l_bIsScreenValid=true;
+					//boolean l_bIsScreenValid=true;
 					if(!l_oConfiguration.m_eNoCheckColorDepth)
 					{
 						if(GDK_IS_DRAWABLE(GTK_WIDGET(app.m_pMainWindow)->window))
@@ -720,12 +715,6 @@ int go(int argc, char ** argv)
 
 int main(int argc, char ** argv)
 {
-
-#if defined(TARGET_OS_Windows)
-	// Set the clock precision to 1ms (default on Win7: 15ms)
-	timeBeginPeriod(1);
-#endif
-
 	int l_iRet=-1;
 	try
 	{
@@ -735,10 +724,5 @@ int main(int argc, char ** argv)
 	{
 		std::cout << "Caught an exception at the very top...\nLeaving application!\n";
 	}
-
-#if defined(TARGET_OS_Windows)
-	timeEndPeriod(1);
-#endif
-
 	return l_iRet;
 }
