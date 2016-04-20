@@ -252,8 +252,6 @@ boolean CFastICA::process()
 			const uint64 l_ui64LastChunkStartTime = l_pDynamicBoxContext->getInputChunkStartTime(0,i);
 			const uint64 l_ui64LastChunkEndTime   = l_pDynamicBoxContext->getInputChunkEndTime(0,i);
 			
-			const uint32 l_ui32ChannelCount = m_oDecoder.getOutputMatrix()->getDimensionSize(0);
-
 			computeICA();
 
 			if((m_bSaveAsFile) && (m_bTrained) && (m_bFileSaved==false)) 

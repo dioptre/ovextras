@@ -364,9 +364,6 @@ boolean CBoxAlgorithmClassifierTrainer::process(void)
 
 			const std::vector < SFeatureVector >& l_rActualDataset = (l_bBalanceDataset ? m_vBalancedDataset : m_vDataset);
 
-			float64 l_f64PartitionAccuracy=0;
-			float64 l_f64FinalAccuracy=0;
-
 			vector<float64> l_vPartitionAccuracies((unsigned int)m_ui64PartitionCount);
 
 			const boolean l_bRandomizeVectorOrder = (&(this->getConfigurationManager()))->expandAsBoolean("${Plugin_Classification_RandomizeKFoldTestData}");
