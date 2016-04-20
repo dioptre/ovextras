@@ -1,6 +1,4 @@
 <OpenViBE-Scenario>
-	<Creator>OpenViBE</Creator>
-	<CreatorVersion>1.1.0+git</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x000000ea, 0x000057a1)</Identifier>
@@ -67,10 +65,6 @@
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
 					<Value>(0x00000000, 0x00ac1587)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xc67a01dc, 0x28ce06c1)</Identifier>
-					<Value></Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
@@ -947,19 +941,31 @@
 	<Comments>
 		<Comment>
 			<Identifier>(0x000028d1, 0x000038f6)</Identifier>
-			<Text>Note that by default this scenario reads from a file
-included in the OpenViBE distribution. To use live signal
-from a headset, replace the connections from
-Generic Stream Reader to connections from 
-Acquisition Client.</Text>
+			<Text>Here the data is streamed from the server to a file.</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>336.000000</Value>
+					<Value>417.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>-80.000000</Value>
+					<Value>96.000000</Value>
+				</Attribute>
+			</Attributes>
+		</Comment>
+		<Comment>
+			<Identifier>(0x0000363f, 0x00001c2b)</Identifier>
+			<Text>The P300 Speller Visualisation
+sends the markers (stimulations) directly to 
+Acquisition Server using TCP Tagging.</Text>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
+					<Value>1056.000000</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
+					<Value>-112.000000</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
@@ -981,19 +987,15 @@ Acquisition Client.</Text>
 			<Identifier>(0x00005d42, 0x00005589)</Identifier>
 			<Text>The use of these P300 examples are described in
 
-http://openvibe.inria.fr/openvibe-p300-speller/
-
-with important notes about timing in
-
-http://openvibe.inria.fr/using-the-p300-scenarios-inside-openvibe/</Text>
+http://openvibe.inria.fr/openvibe-p300-speller/</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>320.000000</Value>
+					<Value>1072.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>-240.000000</Value>
+					<Value>-320.000000</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
@@ -1010,6 +1012,36 @@ from (token ${Player_ScenarioDirectory})</Text>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
 					<Value>96.000000</Value>
+				</Attribute>
+			</Attributes>
+		</Comment>
+		<Comment>
+			<Identifier>(0x19b8795c, 0x039f26f7)</Identifier>
+			<Text>&lt;u&gt;&lt;b&gt;&lt;big&gt;Overview&lt;/big&gt;&lt;/b&gt;&lt;/u&gt;
+
+This scenario can be used as a first
+step to collect some training data. The
+data will later be used to train a
+classifier for online use.
+
+The flast sequence will start after 20 sec.
+
+You will then be presented a blue letter that
+you have to focus on, followed by a 12 times
+flashing sequence of the whole grid. This will
+be repeated 10 times.
+
+&lt;small&gt;&lt;i&gt;&lt;b&gt;note:&lt;/b&gt; the recorded files go to the
+folder where the scenario xml is located
+(&lt;span color=&quot;darkblue&quot;&gt;${Player_ScenarioDirectory}/&lt;/span&gt;).&lt;/i&gt;&lt;/small&gt;</Text>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
+					<Value>384.000000</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
+					<Value>-176.000000</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
@@ -1062,7 +1094,7 @@ from (token ${Player_ScenarioDirectory})</Text>
 	<Attributes>
 		<Attribute>
 			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>
-			<Value></Value>
+			<Value>Jussi T. Lindgren</Value>
 		</Attribute>
 		<Attribute>
 			<Identifier>(0x8c1fc55b, 0x7b433dc2)</Identifier>
@@ -1070,7 +1102,7 @@ from (token ${Player_ScenarioDirectory})</Text>
 		</Attribute>
 		<Attribute>
 			<Identifier>(0x9f5c4075, 0x4a0d3666)</Identifier>
-			<Value></Value>
+			<Value>Basic P300 1/4</Value>
 		</Attribute>
 		<Attribute>
 			<Identifier>(0xf36a1567, 0xd13c53da)</Identifier>

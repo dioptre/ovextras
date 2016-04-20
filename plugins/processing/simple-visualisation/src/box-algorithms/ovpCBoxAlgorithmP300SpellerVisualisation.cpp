@@ -33,7 +33,6 @@ public:
 	{
 		if(m_oStimulusSocket.is_open())
 		{
-			std::cout << "Disconnecting\n";
 			m_oStimulusSocket.close();
 		}
 	}
@@ -45,7 +44,6 @@ public:
 	
 	boolean connect(const char* sAddress, const char* sStimulusPort)
 	{
-		//m_pStimulusSocket = new tcp::socket(m_ioService);
 		boost::system::error_code error;
 		tcp::resolver resolver(m_ioService);
 			
@@ -76,7 +74,7 @@ public:
 
 		if(!m_oStimulusSocket.is_open())
 		{
-			std::cout << "Cannot send stimulation, socket is not open\n";
+			std::cout << "Error: Cannot send stimulation, socket is not open\n";
 			return false;
 		}
 
