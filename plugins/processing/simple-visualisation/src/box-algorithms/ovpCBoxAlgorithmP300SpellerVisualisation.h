@@ -9,6 +9,10 @@
 #include <map>
 #include <list>
 
+#include <boost/thread.hpp>
+#include <boost/thread/condition.hpp>
+#include <boost/version.hpp>
+
 // TODO:
 // - please move the identifier definitions in ovp_defines.h
 // - please include your desciptor in ovp_main.cpp
@@ -57,6 +61,10 @@ namespace OpenViBEPlugins
 			void _cache_change_font_cb_(CBoxAlgorithmP300SpellerVisualisation::SWidgetStyle& rWidgetStyle, void* pUserData);
 			void _cache_collect_widget_cb_(CBoxAlgorithmP300SpellerVisualisation::SWidgetStyle& rWidgetStyle, void* pUserData);
 			void _cache_collect_child_widget_cb_(CBoxAlgorithmP300SpellerVisualisation::SWidgetStyle& rWidgetStyle, void* pUserData);
+
+		public:
+
+			void flushQueue(void);					// Sends all accumulated stimuli to the TCP Tagging
 
 		protected:
 
@@ -115,8 +123,13 @@ namespace OpenViBEPlugins
 
 			OpenViBE::boolean m_bTableInitialized;
 
+			// @todo refactor to std::pair<long,long> ?
 			std::map < unsigned long, std::map < unsigned long, CBoxAlgorithmP300SpellerVisualisation::SWidgetStyle > > m_vCache;
 			std::list < std::pair < int, int > > m_vTargetHistory;
+
+			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
+			guint m_uiIdleFuncTag;
+			boost::mutex m_oIdleFuncMutex;
 
 			StimulusSender* m_pStimulusSender;
 		};
@@ -148,7 +161,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput ("Row selection stimulations",       OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addInput ("Column selection stimulations",    OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addOutput("Target / Non target flagging",     OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addOutput("Target / Non target flagging (deprecated)",     OV_TypeId_Stimulations);
 
 				rBoxAlgorithmPrototype.addSetting("Interface filename",              OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-speller.ui");
 				rBoxAlgorithmPrototype.addSetting("Row stimulation base",            OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");

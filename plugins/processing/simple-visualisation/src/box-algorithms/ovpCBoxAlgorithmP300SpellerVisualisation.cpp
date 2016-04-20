@@ -141,6 +141,15 @@ namespace
 	}
 };
 
+// This callback flushes all accumulated stimulations to the TCP Tagging 
+// after the rendering has completed.
+gboolean flush_callback(gpointer pUserData)
+{
+	((CBoxAlgorithmP300SpellerVisualisation*)pUserData)->flushQueue();
+	
+	return false;	// Only run once
+}
+
 boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
@@ -198,6 +207,11 @@ boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 	op_pTargetFlaggingMemoryBuffer.initialize(m_pTargetFlaggingStimulationEncoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
 
 	m_ui64LastTime=0;
+
+	m_pStimulusSender = NULL;
+
+	m_uiIdleFuncTag = 0;
+	m_vStimuliQueue.clear();
 
 	m_pMainWidgetInterface=gtk_builder_new(); // glade_xml_new(m_sInterfaceFilename.toASCIIString(), "p300-speller-main", NULL);
 	if(!gtk_builder_add_from_file(m_pMainWidgetInterface, m_sInterfaceFilename.toASCIIString(), NULL))
@@ -274,7 +288,6 @@ boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 		this->getLogManager() << LogLevel_Warning << "Unable to connect to AS TCP Tagging, stimuli wont be forwarded.\n";
 	}
 
-
 	m_bTableInitialized=false;
 
 	return true;
@@ -282,6 +295,16 @@ boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 
 boolean CBoxAlgorithmP300SpellerVisualisation::uninitialize(void)
 {
+	{
+		boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+		if(m_uiIdleFuncTag)
+		{
+			m_vStimuliQueue.clear();
+			g_source_remove(m_uiIdleFuncTag);
+			m_uiIdleFuncTag = 0;
+		}
+	}
+
 	if(m_pStimulusSender)
 	{
 		delete m_pStimulusSender;
@@ -388,6 +411,17 @@ boolean CBoxAlgorithmP300SpellerVisualisation::processInput(uint32 ui32Index)
 
 boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 {
+	
+	// Remove possibly dangling idle func, this construct makes sure only one idle func is registered at a time. 
+	{
+		boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+		if(m_uiIdleFuncTag)
+		{
+			g_source_remove(m_uiIdleFuncTag);
+			m_uiIdleFuncTag = 0;
+		}
+	}
+
 	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
@@ -422,9 +456,6 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 				int l_iRow=-1;
 				int l_iColumn=-1;
 				boolean l_bIsTarget = false;
-
-				// Pass the stimulation to AS in any case
-				m_pStimulusSender->sendStimuli(l_ui64StimulationIdentifier);
 
 				if(l_ui64StimulationIdentifier >= m_ui64RowStimulationBase && l_ui64StimulationIdentifier < m_ui64RowStimulationBase+m_ui64RowCount)
 				{
@@ -475,17 +506,26 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 						m_pFlashFontDescription,
 						m_pNoFlashFontDescription);
 
+					// We now know if this flash corresponds to the current target or not, merge this to the outgoing stimulation stream
 					if(l_bIsTarget)
 					{
-						m_pStimulusSender->sendStimuli(OVTK_StimulationId_Target);
+						boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+						m_vStimuliQueue.push_back(OVTK_StimulationId_Target);
 						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_Target, l_pStimulationSet->getStimulationDate(j), 0);
 					}
 					else
 					{
-						m_pStimulusSender->sendStimuli(OVTK_StimulationId_NonTarget);
+						boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+						m_vStimuliQueue.push_back(OVTK_StimulationId_NonTarget);
 						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_NonTarget, l_pStimulationSet->getStimulationDate(j), 0);
 					}
+				}
 
+				// Pass the stimulation to the server also as-is. If its a flash, it can be differentiated from a 'target' spec because
+				// its NOT between OVTK_StimulationId_RestStart and OVTK_StimulationId_RestStop stimuli in the generated P300 timeline.
+				{
+					boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+					m_vStimuliQueue.push_back(l_ui64StimulationIdentifier);
 				}
 			}
 			m_pTargetFlaggingStimulationEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
@@ -567,10 +607,14 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 							&l_vWidgets,
 							NULL);
 
-						m_pStimulusSender->sendStimuli(OVTK_StimulationId_BaselineStart);
-						m_pStimulusSender->sendStimuli(m_iTargetRow + m_ui64RowStimulationBase);
-						m_pStimulusSender->sendStimuli(m_iTargetColumn + m_ui64ColumnStimulationBase);
-						m_pStimulusSender->sendStimuli(OVTK_StimulationId_BaselineStop);
+						// Merge the current target into the stimulation stream. It can be differentiated
+						// from a 'flash' spec because it IS between OVTK_StimulationId_RestStart and
+						// OVTK_StimulationId_RestStop stimulations in the P300 timeline.
+						{
+							boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+							m_vStimuliQueue.push_back(m_iTargetRow + m_ui64RowStimulationBase);
+							m_vStimuliQueue.push_back(m_iTargetColumn + m_ui64ColumnStimulationBase);
+						}
 
 						if(l_vWidgets.size() == 1)
 						{
@@ -708,6 +752,10 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 											{
 												l_sString="<span color=\"darkorange\">" + l_sString + "</span>";
 											}
+											else
+											{
+												l_sString="<span color=\"darkred\">" + l_sString + "</span>";
+											}
 										}
 										l_sString=std::string(gtk_label_get_label(m_pResult))+l_sString;
 										gtk_label_set_markup(m_pResult, l_sString.c_str());
@@ -744,6 +792,12 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 				l_rDynamicBoxContext.markInputAsDeprecated(k, i);
 			}
 		}
+	}
+
+	// After any possible rendering, we flush the accumulated stimuli. The default idle func is low priority, so it should be run after rendering by gtk.
+	{
+		boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+		m_uiIdleFuncTag = g_idle_add(flush_callback, this);
 	}
 
 	return true;
@@ -891,4 +945,18 @@ void CBoxAlgorithmP300SpellerVisualisation::_cache_collect_child_widget_cb_(CBox
 	{
 		((std::vector < ::GtkWidget* >*)pUserData)->push_back(rWidgetStyle.pChildWidget);
 	}
+}
+
+void CBoxAlgorithmP300SpellerVisualisation::flushQueue(void)
+{
+	boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+
+	for(size_t i=0;i<m_vStimuliQueue.size();i++)
+	{
+		m_pStimulusSender->sendStimuli(m_vStimuliQueue[i]);
+	}
+	m_vStimuliQueue.clear();
+
+	// This function will be automatically removed after completion, so set to 0
+	m_uiIdleFuncTag = 0;
 }
