@@ -1,5 +1,7 @@
 #include "ovpCBoxAlgorithmLuaStimulator.h"
 
+#include <openvibe/ovITimeArithmetics.h>
+
 #if defined TARGET_HAS_ThirdPartyLua
 
 using namespace OpenViBE;
@@ -183,7 +185,7 @@ static int lua_get_current_time_cb(lua_State* pState)
 	if(!lua_check_argument_count(pState, "get_current_time", 0)) return 0;
 
 	__CB_Assert__(l_pThis->getCurrentTimeCB(l_ui64Time));
-	lua_pushnumber(pState, (float64(l_ui64Time))/(1LL<<32));
+	lua_pushnumber(pState, ITimeArithmetics::timeToSeconds(l_ui64Time));
 	return 1;
 }
 
@@ -226,8 +228,8 @@ static int lua_get_stimulation_cb(lua_State* pState)
 
 	__CB_Assert__(l_pThis->getStimulationCB(lua_tointeger(pState, 2)-1, lua_tointeger(pState, 3)-1, l_ui64Identifier, l_ui64Time, l_ui64Duration));
 	lua_pushinteger(pState, (lua_Integer)l_ui64Identifier);
-	lua_pushnumber(pState, l_ui64Time/float64(1LL<<32));
-	lua_pushnumber(pState, l_ui64Duration/float64(1LL<<32));
+	lua_pushnumber(pState, ITimeArithmetics::timeToSeconds(l_ui64Time));
+	lua_pushnumber(pState, ITimeArithmetics::timeToSeconds(l_ui64Duration));
 	return 3;
 }
 
@@ -255,8 +257,9 @@ static int lua_send_stimulation_cb(lua_State* pState)
 	__CB_Assert__(l_pThis->sendStimulationCB(
 			lua_tointeger(pState, 2)-1,
 			lua_tointeger(pState, 3),
-			uint64(lua_tonumber(pState, 4)*(1LL<<32)),
-			l_iArguments==5?uint64(lua_tonumber(pState, 5)*(1LL<<32)):0));
+			ITimeArithmetics::secondsToTime( lua_tonumber(pState, 4) ),
+			(l_iArguments == 5 ? ITimeArithmetics::secondsToTime( lua_tonumber(pState, 5) ) : 0 ) )
+	);
 	return 0;
 }
 
@@ -312,6 +315,19 @@ static int lua_keep_processing_cb(lua_State* pState)
 	return 0;
 }
 
+
+static int lua_set_filter_mode_cb(lua_State* pState) 
+{
+	CBoxAlgorithmLuaStimulator* l_pThis=static_cast < CBoxAlgorithmLuaStimulator* >(lua_touserdata(pState, lua_upvalueindex(1)));
+	__CB_Assert__(l_pThis != NULL);
+	
+	if(!lua_check_argument_count(pState, "set_filter_mode", 1)) return 0;
+
+	l_pThis->m_bFilterMode = (lua_tointeger(pState, 2) == 0 ? false : true);
+
+	return 0;
+}
+
 CBoxAlgorithmLuaStimulator::CBoxAlgorithmLuaStimulator(void)
 	: m_ui32State(State_Unstarted)
 	,m_pLuaState(NULL)
@@ -335,12 +351,31 @@ CBoxAlgorithmLuaStimulator::~CBoxAlgorithmLuaStimulator(void)
 
 uint64 CBoxAlgorithmLuaStimulator::getClockFrequency(void)
 {
-	return 128LL<<32; // the box clock frequency
+	if(m_bFilterMode)
+	{
+		return 0;         // Only when input received
+	}
+	else
+	{
+		return 128LL<<32; // the box clock frequency
+	}
 }
 
 boolean CBoxAlgorithmLuaStimulator::processClock(CMessageClock& rMessageClock)
 {
-	this->getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
+	if(!m_bFilterMode)
+	{
+		this->getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
+	}
+	return true;
+}
+
+boolean CBoxAlgorithmLuaStimulator::processInput(uint32 ui32InputIndex)
+{
+	if(m_bFilterMode) 
+	{
+		getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
+	}
 	return true;
 }
 
@@ -351,6 +386,8 @@ boolean CBoxAlgorithmLuaStimulator::initialize(void)
 
 	CString l_sLuaScriptFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	l_sLuaScriptFilename=this->getConfigurationManager().expand(l_sLuaScriptFilename);
+
+	m_bFilterMode = false;
 
 	m_ui32State=State_Unstarted;
 	m_pLuaState=luaL_newstate();
@@ -373,6 +410,7 @@ boolean CBoxAlgorithmLuaStimulator::initialize(void)
 	lua_setcallback(m_pLuaState, "send_stimulation", ::lua_send_stimulation_cb, this);
 	lua_setcallback(m_pLuaState, "log", ::lua_log_cb, this);
 	lua_setcallback(m_pLuaState, "keep_processing", ::lua_keep_processing_cb, this);
+	lua_setcallback(m_pLuaState, "set_filter_mode", ::lua_set_filter_mode_cb, this);
 
 	if(!lua_report(this->getLogManager(), m_pLuaState, luaL_dostring(m_pLuaState, "function initialize(box) end"))) return false;
 	if(!lua_report(this->getLogManager(), m_pLuaState, luaL_dostring(m_pLuaState, "function uninitialize(box) end"))) return false;
@@ -386,15 +424,17 @@ boolean CBoxAlgorithmLuaStimulator::initialize(void)
 
 	for(i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		IAlgorithmProxy* l_pSteamDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-		l_pSteamDecoder->initialize();
-		m_vStreamDecoder.push_back(l_pSteamDecoder);
+		OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmLuaStimulator >* l_pStreamDecoder = new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmLuaStimulator >;
+		l_pStreamDecoder->initialize(*this, i);
+
+		m_vStreamDecoder.push_back(l_pStreamDecoder);
 	}
 
 	for(i=0; i<l_rStaticBoxContext.getOutputCount(); i++)
 	{
-		IAlgorithmProxy* l_pStreamEncoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
-		l_pStreamEncoder->initialize();
+		OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmLuaStimulator >* l_pStreamEncoder = new OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmLuaStimulator >;
+		l_pStreamEncoder->initialize(*this, i);
+
 		m_vStreamEncoder.push_back(l_pStreamEncoder);
 	}
 
@@ -475,14 +515,14 @@ boolean CBoxAlgorithmLuaStimulator::uninitialize(void)
 	for(uint32 i=0; i<m_vStreamDecoder.size(); i++)
 	{
 		m_vStreamDecoder[i]->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_vStreamDecoder[i]);
+		delete m_vStreamDecoder[i];
 	}
 	m_vStreamDecoder.clear();
 
 	for(uint32 i=0; i<m_vStreamEncoder.size(); i++)
 	{
 		m_vStreamEncoder[i]->uninitialize();
-		this->getAlgorithmManager().releaseAlgorithm(*m_vStreamEncoder[i]);
+		delete m_vStreamEncoder[i];
 	}
 	m_vStreamEncoder.clear();
 
@@ -496,33 +536,78 @@ boolean CBoxAlgorithmLuaStimulator::process(void)
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-	uint64 l_ui64CurrentTime=this->getPlayerContext().getCurrentTime();
+	const uint64 l_ui64CurrentTime=this->getPlayerContext().getCurrentTime();
+	
+	// Default time range for the generated stimulation chunk
+	uint64 l_ui64StartTime = (m_bFilterMode ? std::numeric_limits<uint64>::max() : m_ui64LastTime); 
+	uint64 l_ui64EndTime = (m_bFilterMode ? 0 : l_ui64CurrentTime);
+
+	if(l_ui64CurrentTime == 0)
+	{
+		// Send all headers
+		for(size_t i=0;i<m_vStreamEncoder.size();i++)
+		{
+			m_vStreamEncoder[i]->encodeHeader();
+			l_rDynamicBoxContext.markOutputAsReadyToSend(i, 0, 0);
+		}
+	}
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
 		for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
-			TParameterHandler < const IMemoryBuffer* > ip_pMemoryBuffer(m_vStreamDecoder[i]->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-			TParameterHandler < const IStimulationSet* > op_pStimulationSet(m_vStreamDecoder[i]->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));;
-			ip_pMemoryBuffer=l_rDynamicBoxContext.getInputChunk(i, j);
-			m_vStreamDecoder[i]->process();
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+			m_vStreamDecoder[i]->decode(j);
+			if(m_vStreamDecoder[i]->isHeaderReceived())
 			{
 			}
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+			if(m_vStreamDecoder[i]->isBufferReceived())
 			{
-				for(uint32 k=0; k<op_pStimulationSet->getStimulationCount(); k++)
+				const IStimulationSet* l_pStimulationSet = m_vStreamDecoder[i]->getOutputStimulationSet();
+
+				for(uint32 k=0; k<l_pStimulationSet->getStimulationCount(); k++)
 				{
-					m_vInputStimulation[i].insert(std::make_pair(op_pStimulationSet->getStimulationDate(k), std::make_pair(op_pStimulationSet->getStimulationIdentifier(k), op_pStimulationSet->getStimulationDuration(k))));
+					m_vInputStimulation[i].insert(std::make_pair(l_pStimulationSet->getStimulationDate(k), std::make_pair(l_pStimulationSet->getStimulationIdentifier(k), l_pStimulationSet->getStimulationDuration(k))));
+				}
+
+				if(m_bFilterMode)
+				{
+					// In this mode, the output chunk time range contains all the current input chunk time ranges
+					l_ui64StartTime = std::min<uint64>(l_ui64StartTime, l_rDynamicBoxContext.getInputChunkStartTime(i,j));
+					l_ui64EndTime = std::max<uint64>(l_ui64EndTime, l_rDynamicBoxContext.getInputChunkEndTime(i,j));
+					if(l_ui64StartTime < m_ui64LastTime)
+					{
+						this->getLogManager() << LogLevel_Warning << "Earliest current input chunk start time " 
+							<< time64(l_ui64StartTime) << " is older than the last sent block end time "
+							<< time64(m_ui64LastTime) << "\n";
+					}
 				}
 			}
-			if(m_vStreamDecoder[i]->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+			if(m_vStreamDecoder[i]->isEndReceived())
 			{
 			}
 			l_rDynamicBoxContext.markInputAsDeprecated(i, j);
 		}
 	}
 
+	runLuaThread();
+
+	// Send unless endtime=0 (then either we're at header time, or no chunks were received in filter mode)
+	if(l_ui64EndTime>0)
+	{
+		sendStimulations(l_ui64StartTime, l_ui64EndTime);
+	}
+
+	if(!m_pLuaThread && m_bLuaThreadHadError) 
+	{
+		// Lua thread has exit, so it was ok to check m_bLuaThreadHadError without a lock
+		return false;
+	}
+
+	return true;
+}
+
+boolean CBoxAlgorithmLuaStimulator::runLuaThread(void)
+{
 	m_oOuterLock.lock();
 
 	// Executes one step of the thread
@@ -582,47 +667,40 @@ boolean CBoxAlgorithmLuaStimulator::process(void)
 
 	m_oOuterLock.unlock();
 
+	return true;
+}
+
+boolean CBoxAlgorithmLuaStimulator::sendStimulations(uint64 ui64StartTime, uint64 ui64EndTime)
+{
+	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
+
 	for(uint32 i=0; i<l_rStaticBoxContext.getOutputCount(); i++)
 	{
-		CStimulationSet l_oStimulationSet;
-		TParameterHandler < const IStimulationSet* > ip_pStimulationSet(m_vStreamEncoder[i]->getInputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_InputParameterId_StimulationSet));
-		TParameterHandler < IMemoryBuffer* > op_pMemoryBuffer(m_vStreamEncoder[i]->getOutputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-		ip_pStimulationSet=&l_oStimulationSet;
-		op_pMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(i);
+		IStimulationSet* l_pStimulationSet = m_vStreamEncoder[i]->getInputStimulationSet();
+		l_pStimulationSet->clear();
 
 		std::multimap < uint64, std::pair < uint64, uint64 > >::iterator itStimulation = m_vOutputStimulation[i].begin();
-		while(itStimulation!=m_vOutputStimulation[i].end() && itStimulation->first <= l_ui64CurrentTime)
+		while(itStimulation!=m_vOutputStimulation[i].end() && itStimulation->first < ui64EndTime)
 		{
 			std::multimap < uint64, std::pair < uint64, uint64 > >::iterator l_itStimulation = itStimulation;
 			itStimulation++;
 
-			l_oStimulationSet.appendStimulation(
+			l_pStimulationSet->appendStimulation(
 				l_itStimulation->second.first,
 				l_itStimulation->first,
 				l_itStimulation->second.second);
-			this->getLogManager() << LogLevel_Debug << "On output " << i << " - should send stimulation " << l_itStimulation->second.first << " at date " << l_itStimulation->first << " with duration " << l_itStimulation->second.second << "\n";
+			this->getLogManager() << LogLevel_Debug << "On output " << i << " - should send stimulation " << l_itStimulation->second.first << " at date " << time64(l_itStimulation->first) << " with duration " << l_itStimulation->second.second << "\n";
 
 			m_vOutputStimulation[i].erase(l_itStimulation);
 		}
 
-		if(l_ui64CurrentTime==m_ui64LastTime)
-		{
-			m_vStreamEncoder[i]->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
-		}
-		else
-		{
-			m_vStreamEncoder[i]->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
-		}
-		l_rDynamicBoxContext.markOutputAsReadyToSend(i, m_ui64LastTime, l_ui64CurrentTime);
+		m_vStreamEncoder[i]->encodeBuffer();
+
+		l_rDynamicBoxContext.markOutputAsReadyToSend(i, ui64StartTime, ui64EndTime);
 	}
 
-	m_ui64LastTime=l_ui64CurrentTime;
-
-	if(!m_pLuaThread && m_bLuaThreadHadError) 
-	{
-		// Lua thread has exit, so it was ok to check m_bLuaThreadHadError without a lock
-		return false;
-	}
+	m_ui64LastTime=ui64EndTime;
 
 	return true;
 }
@@ -764,14 +842,14 @@ boolean CBoxAlgorithmLuaStimulator::sendStimulationCB(uint32 ui32OutputIndex, ui
 {
 	if(ui32OutputIndex < m_vOutputStimulation.size())
 	{
-		if(ui64Time >= this->getPlayerContext().getCurrentTime())
+		if(ui64Time >= m_ui64LastTime)
 		{
 			this->getLogManager() << LogLevel_Debug << "sendStimulationCB " << (ui32OutputIndex+1) << " " << ui64Identifier << " " << ui64Time << " " << ui64Duration << "\n";
 			m_vOutputStimulation[ui32OutputIndex].insert(std::make_pair(ui64Time, std::make_pair(ui64Identifier, ui64Duration)));
 		}
 		else
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Ignored outdated stimulation " << ui64Identifier << " " << time64(ui64Time) << " " << time64(ui64Duration) << " sent on output " << (ui32OutputIndex+1) << " - current time is " << time64(this->getPlayerContext().getCurrentTime()) << "\n";
+			this->getLogManager() << LogLevel_ImportantWarning << "Ignored outdated stimulation " << ui64Identifier << " " << time64(ui64Time) << " " << time64(ui64Duration) << " sent on output " << (ui32OutputIndex+1) << " - older than last chunk end time " << time64(m_ui64LastTime) << "\n";
 		}
 	}
 	else

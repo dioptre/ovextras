@@ -47,7 +47,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 			virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
-			// virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_LuaStimulator);
@@ -82,6 +82,7 @@ namespace OpenViBEPlugins
 
 			OpenViBE::uint32 m_ui32State;
 			OpenViBE::boolean m_bLuaThreadHadError;		// Set to true by the lua thread if there were issues
+			OpenViBE::boolean m_bFilterMode;            // Output chunk generation driven by inputs (true) or by clock (false)
 
 		protected:
 
@@ -101,12 +102,16 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			std::vector < OpenViBE::Kernel::IAlgorithmProxy* > m_vStreamDecoder;
-			std::vector < OpenViBE::Kernel::IAlgorithmProxy* > m_vStreamEncoder;
+			std::vector < OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmLuaStimulator >* > m_vStreamDecoder;
+			std::vector < OpenViBEToolkit::TStimulationEncoder < CBoxAlgorithmLuaStimulator >* > m_vStreamEncoder;
 
 		private:
 
 			CBoxAlgorithmLuaStimulator(const CBoxAlgorithmLuaStimulator&);
+
+			OpenViBE::boolean runLuaThread(void);
+			OpenViBE::boolean sendStimulations(OpenViBE::uint64 ui64StartTime, OpenViBE::uint64 ui64EndTime);
+
 		};
 
 		class CBoxAlgorithmLuaStimulatorListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
@@ -149,7 +154,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Generates some stimulations according to an Lua script"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Scripting"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-missing-image"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_LuaStimulator; }
@@ -161,7 +166,9 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addOutput ("Stimulations", OV_TypeId_Stimulations);
+
 				rBoxAlgorithmPrototype.addSetting("Lua Script", OV_TypeId_Script, "");
+
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddOutput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddInput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddSetting);
