@@ -1,23 +1,23 @@
 #ifndef __OpenViBE_AcquisitionServer_TCPTagSession_H__
 #define __OpenViBE_AcquisitionServer_TCPTagSession_H__
 
-#include <set>
 #include <queue>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
-// PluginTCPTagging relies on four auxilliary classes: TagQueue, TagSession, TagServer and TagStream.
-// TagQueue implements a trivial queue to store tags with exclusive locking.
-// TagServer implements a server that simply binds to a port and waits for incoming connections.
-// TagSession represents an individual connection with a client and holds a connection handle (socket)
+// PluginTCPTagging relies on four auxilliary classes: CTagQueue, CTagSession, CTagServer and CTagStream.
+// CTagQueue implements a trivial queue to store tags with exclusive locking.
+// CTagServer implements a server that simply binds to a port and waits for incoming connections.
+// CTagSession represents an individual connection with a client and holds a connection handle (socket)
 // and a data buffer to store incoming data.
 // The use of shared pointers is instrumental to ensure that instances are still alive when call-backs are
 // called and avoid memory corruption.
-// The TagStream class implements a stream to allow to collect tags. Upon instantiation, it creates an instance
-// of TagServer and starts the server in an auxilliary thread.
+// The CTagStream class implements a stream to allow to collect tags. Upon instantiation, it creates an instance
+// of CTagServer and starts the server in an auxilliary thread.
 // The exchange of data between the main tread and the auxilliary thread is performed via a lockfree queue (boost).
 
 namespace OpenViBEAcquisitionServer
@@ -33,11 +33,14 @@ struct Tag
 	unsigned long long padding, identifier, timestamp;
 };
 
-class CTagSession; // forward declaration of TagSession to define SharedSessionPtr
-class CTagQueue; // forward declaration of TagQueue to define SharedQueuePtr
+class CTagSession; // forward declaration of CTagSession to define SharedSessionPtr
+class CTagQueue; // forward declaration of CTagQueue to define SharedQueuePtr
+class CTagServer; // forward declaration of CTagServer to define ScopedServerPtr
 
 typedef boost::shared_ptr<CTagQueue> SharedQueuePtr;
 typedef boost::shared_ptr<CTagSession> SharedSessionPtr;
+typedef boost::scoped_ptr<CTagServer> ScopedServerPtr;
+typedef boost::scoped_ptr<boost::thread> ScopedThreadPtr;
 
 // A trivial implementation of a queue to store Tags with exclusive locking
 class CTagQueue
@@ -55,7 +58,7 @@ private:
 	boost::mutex m_mutex;
 };
 
-// An instance of TagSession is associated to every client connecting to the Tagging Server.
+// An instance of CTagSession is associated to every client connecting to the Tagging Server.
 // It contains a connection handle and data buffer.
 class CTagSession : public boost::enable_shared_from_this<CTagSession>
 {
@@ -76,14 +79,15 @@ private:
 	SharedQueuePtr m_queuePtr;
 };
 
-// TagServer implements a server that binds to a port and accepts new connections.
-// It also has a field sessionSet that holds shared pointers to all exisiting sessions
+// CTagServer implements a server that binds to a port and accepts new connections.
 class CTagServer
 {
 public:
 	CTagServer(const SharedQueuePtr& queue, int port = 15361);
+	~CTagServer();
 
 	void run();
+	void stop();
 
 private:
 	void startAccept();
@@ -96,7 +100,7 @@ private:
 	const SharedQueuePtr& m_queuePtr;
 };
 
-// TagStream allows to collect tags received via TCP.
+// CTagStream allows to collect tags received via TCP.
 class CTagStream
 {
 	// Initial memory allocation of lockfree queue.
@@ -104,6 +108,7 @@ class CTagStream
 
 public:
 	CTagStream(int port = 15361);
+	~CTagStream();
 
 	bool pop(Tag& tag);
 
@@ -112,6 +117,8 @@ private:
 
 private:
 	SharedQueuePtr m_queuePtr;
+	ScopedServerPtr m_serverPtr;
+	ScopedThreadPtr m_threadPtr;
 	int m_port;
 };
 

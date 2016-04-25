@@ -25,8 +25,22 @@ CPluginTCPTagging::~CPluginTCPTagging()
 void CPluginTCPTagging::startHook(const std::vector<OpenViBE::CString>& vSelectedChannelNames,
 	OpenViBE::uint32 ui32SamplingFrequency, OpenViBE::uint32 ui32ChannelCount, OpenViBE::uint32 ui32SampleCountPerSentBlock)
 {
+	// get port from configuration
+        uint32 l_port=0;
+	for (unsigned i=0; i<m_port.length(); i++)
+	{
+		l_port*=10;
+		l_port+=m_port[i]-'0';	
+	}
+
 	// initialize tag stream
-	m_scopedTagStream.reset(new CTagStream());
+	// this may throw exceptions, e.g. when the port is already in use.
+	try {
+		m_scopedTagStream.reset(new CTagStream(l_port));
+	}
+	catch (std::exception& e) {
+		m_rKernelContext.getLogManager() << Kernel::LogLevel_Error << "Could not create tag stream: " << e.what();
+	}
 
 	// Get POSIX time (number of milliseconds since epoch)
 	timeb time_buffer;
@@ -54,7 +68,7 @@ void CPluginTCPTagging::loopHook(std::vector < std::vector < OpenViBE::float32 >
 	Tag tag;
 
 	// Collect tags from the stream until exhaustion.
-	while(m_scopedTagStream->pop(tag)) {
+	while(m_scopedTagStream.get() && m_scopedTagStream->pop(tag)) {
 		m_rKernelContext.getLogManager() << Kernel::LogLevel_Info << "New Tag received (" << tag.padding << ", " << tag.identifier << ", " << tag.timestamp << ") at " << posixTime << " (posix time in ms)\n";
 
 		// Check that the timestamp fits the current chunk.

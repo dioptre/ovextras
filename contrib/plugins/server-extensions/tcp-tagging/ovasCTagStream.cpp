@@ -81,16 +81,24 @@ void CTagServer::run()
 		m_ioService.run();
 	}
 	catch(std::exception& e) {
-		// TODO: log error message
+		// TODO: log error message (needs to be thread-safe)
 	}
 }
 
+CTagServer::~CTagServer()
+{
+}
+
+void CTagServer::stop()
+{
+	m_ioService.stop();
+}
 
 void CTagServer::startAccept()
 {
 	SharedSessionPtr newSession (new CTagSession(m_ioService, m_queuePtr));
-	// Note: if this instance of TaggingSever is destroyed then the associated io_service is destroyed as well.
-	// Therefore the call-back will never be called if this instance is destroyed and it is safe to use this instead of shared pointer.
+	// Note: if this instance of CTagSever is destroyed then the associated io_service is destroyed as well.
+	// Therefore the call-back will never be called if this instance is destroyed and it is safe to use this instead of a shared pointer.
 	m_acceptor.async_accept(newSession->socket(), boost::bind(&CTagServer::handleAccept, this, newSession, _1));
 }
 
@@ -108,7 +116,9 @@ void CTagServer::handleAccept(SharedSessionPtr session, const boost::system::err
 CTagStream::CTagStream(int port)
 	: m_queuePtr(new CTagQueue), m_port(port)
 {
-	boost::thread thread (&CTagStream::startServer, this);
+	// can throw exceptions, e.g. when the port is already in use.
+	m_serverPtr.reset(new CTagServer(m_queuePtr, m_port));
+	m_threadPtr.reset(new boost::thread(&CTagStream::startServer, this));
 }
 
 
@@ -120,6 +130,12 @@ bool CTagStream::pop(Tag &tag)
 
 void CTagStream::startServer()
 {
-	CTagServer server(m_queuePtr, m_port);
-	server.run();
+	m_serverPtr->run();
+}
+
+CTagStream::~CTagStream()
+{
+	// m_serverPtr and m_threadPtr cannot be null
+	m_serverPtr->stop();
+	m_threadPtr->join();
 }
