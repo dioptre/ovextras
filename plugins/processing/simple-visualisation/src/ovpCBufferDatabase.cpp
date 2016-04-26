@@ -301,6 +301,13 @@ void CBufferDatabase::setMatrixDimensionSize(const uint32 ui32DimensionIndex, co
 		return;
 	}
 
+	if (m_pDimensionSizes[ui32DimensionIndex] != 0 && m_pDimensionSizes[ui32DimensionIndex] != ui32DimensionSize)
+	{
+		m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Upstream tried to change the data chunk size after the first header, this is not supported.\n";
+		m_bError = true;
+		return;
+	}
+
 	m_pDimensionSizes[ui32DimensionIndex] = ui32DimensionSize;
 	m_pDimensionLabels[ui32DimensionIndex].resize(ui32DimensionSize);
 
@@ -315,6 +322,11 @@ void CBufferDatabase::setMatrixDimensionSize(const uint32 ui32DimensionIndex, co
 
 void CBufferDatabase::setMatrixDimensionLabel(const uint32 ui32DimensionIndex, const uint32 ui32DimensionEntryIndex, const char* sDimensionLabel)
 {
+	if (m_bError)
+	{
+		return;
+	}
+
 	if(ui32DimensionIndex>=2) {
 		m_bError = true;
 		m_oParentPlugin.getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Tried to access dimension " << ui32DimensionIndex << ", only 0 and 1 supported\n";
