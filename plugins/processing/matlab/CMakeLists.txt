@@ -7,7 +7,7 @@ SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/share/OV_stimulations.m
     DEPENDS openvibe-stimulation-generator ${openvibe-toolkit_SOURCE_DIR}/share/stimulation_list.txt
-    COMMAND ${stim_generator_path}/openvibe-stimulation-generator
+    COMMAND openvibe-stimulation-generator
     --matlab
     ${openvibe-toolkit_SOURCE_DIR}/share/stimulation_list.txt
     ${CMAKE_CURRENT_SOURCE_DIR}/share/OV_stimulations.m
