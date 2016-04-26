@@ -1,1 +1,0 @@
-ADD_TEST(run_test_tagstream "$ENV{OV_BINARY_PATH}/test_tagstream")
