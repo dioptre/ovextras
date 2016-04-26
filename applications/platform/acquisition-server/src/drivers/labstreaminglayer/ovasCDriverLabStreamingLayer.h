@@ -72,6 +72,7 @@ namespace OpenViBEAcquisitionServer
 		lsl::stream_info m_oMarkerStream;
 		lsl::stream_inlet* m_pMarkerInlet;
 
+		OpenViBE::boolean m_bLimitSpeed;
 		OpenViBE::CString m_sSignalStream;
 		OpenViBE::CString m_sSignalStreamID;
 		OpenViBE::CString m_sMarkerStream;

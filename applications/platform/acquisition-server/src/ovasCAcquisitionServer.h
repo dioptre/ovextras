@@ -4,6 +4,7 @@
 #include "ovas_base.h"
 #include "ovasIDriver.h"
 #include "ovasIHeader.h"
+#include "ovasCDriftCorrection.h"
 
 #include <socket/IConnectionServer.h>
 
@@ -15,7 +16,6 @@
 #include <vector>
 #include <list>
 #include <deque>
-
 
 
 namespace OpenViBEAcquisitionServer
@@ -37,13 +37,6 @@ namespace OpenViBEAcquisitionServer
 
 	typedef enum
 	{
-		DriftCorrectionPolicy_DriverChoice=0,
-		DriftCorrectionPolicy_Forced,
-		DriftCorrectionPolicy_Disabled,
-	} EDriftCorrectionPolicy;
-
-	typedef enum
-	{
 		NaNReplacementPolicy_LastCorrectValue=0,
 		NaNReplacementPolicy_Zero,
 		NaNReplacementPolicy_Disabled,
@@ -60,7 +53,6 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBEAcquisitionServer::IDriverContext& getDriverContext();
 
 		OpenViBE::uint32 getClientCount(void);
-		OpenViBE::float64 getDrift(void);
 		OpenViBE::float64 getImpedance(const OpenViBE::uint32 ui32ChannelIndex);
 
 		OpenViBE::boolean loop(void);
@@ -78,28 +70,15 @@ namespace OpenViBEAcquisitionServer
 		// Driver context callback
 		virtual OpenViBE::boolean isConnected(void) const { return m_bInitialized; }
 		virtual OpenViBE::boolean isStarted(void) const { return m_bStarted; }
-		virtual OpenViBE::int64 getDriftSampleCount(void) const { return m_eDriftCorrectionPolicy==DriftCorrectionPolicy_Disabled?0:m_i64DriftSampleCount; }
-		virtual OpenViBE::int64 getDriftToleranceSampleCount(void) const { return m_i64DriftToleranceSampleCount; }
-		virtual OpenViBE::boolean correctDriftSampleCount(OpenViBE::int64 i64SampleCount);
-		virtual OpenViBE::int64 getSuggestedDriftCorrectionSampleCount(void) const;
-		virtual OpenViBE::boolean setInnerLatencySampleCount(OpenViBE::int64 i64SampleCount);
-		virtual OpenViBE::int64 getInnerLatencySampleCount(void) const;
 		virtual OpenViBE::boolean updateImpedance(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::float64 f64Impedance);
 
 		// General parameters configurable from the GUI
 		OpenViBEAcquisitionServer::ENaNReplacementPolicy getNaNReplacementPolicy(void);
 		OpenViBE::CString getNaNReplacementPolicyStr(void);
-		OpenViBEAcquisitionServer::EDriftCorrectionPolicy getDriftCorrectionPolicy(void);
-		OpenViBE::CString getDriftCorrectionPolicyStr(void);
-		OpenViBE::uint64 getDriftToleranceDuration(void);
-		OpenViBE::uint64 getJitterEstimationCountForDrift(void);
 		OpenViBE::uint64 getOversamplingFactor(void);
 		OpenViBE::boolean setNaNReplacementPolicy(OpenViBEAcquisitionServer::ENaNReplacementPolicy eNaNReplacementPolicy);
-		OpenViBE::boolean setDriftCorrectionPolicy(OpenViBEAcquisitionServer::EDriftCorrectionPolicy eDriftCorrectionPolicy);
 		OpenViBE::boolean isImpedanceCheckRequested(void);
 		OpenViBE::boolean isChannelSelectionRequested(void);
-		OpenViBE::boolean setDriftToleranceDuration(OpenViBE::uint64 ui64DriftToleranceDuration);
-		OpenViBE::boolean setJitterEstimationCountForDrift(OpenViBE::uint64 ui64JitterEstimationCountForDrift);
 		OpenViBE::boolean setOversamplingFactor(OpenViBE::uint64 ui64OversamplingFactor);
 		OpenViBE::boolean setImpedanceCheckRequest(OpenViBE::boolean bActive);
 		OpenViBE::boolean setChannelSelectionRequest(OpenViBE::boolean bActive);
@@ -150,8 +129,6 @@ namespace OpenViBEAcquisitionServer
 		std::vector < OpenViBE::CString >  m_vSelectedChannelNames;
 		Socket::IConnectionServer* m_pConnectionServer;
 
-		OpenViBEAcquisitionServer::EDriftCorrectionPolicy m_eDriftCorrectionPolicy;
-
 		OpenViBEAcquisitionServer::ENaNReplacementPolicy m_eNaNReplacementPolicy;
 		OpenViBE::boolean m_bReplacementInProgress;
 
@@ -160,7 +137,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bIsImpedanceCheckRequested;
 		OpenViBE::boolean m_bIsChannelSelectionRequested;
 		OpenViBE::boolean m_bGotData;
-		OpenViBE::boolean m_bDriftCorrectionCalled;
 		OpenViBE::uint64 m_ui64OverSamplingFactor;
 		OpenViBE::uint32 m_ui32ChannelCount;
 		OpenViBE::uint32 m_ui32SamplingFrequency;
@@ -170,14 +146,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint64 m_ui64StartTime;
 		OpenViBE::uint64 m_ui64LastDeliveryTime;
 
-		std::list < OpenViBE::int64 > m_vJitterSampleCount;
-		OpenViBE::uint64 m_ui64DriftToleranceDuration;
-		OpenViBE::float64 m_f64DriftSampleCount;
-		OpenViBE::int64 m_i64DriftSampleCount;
-		OpenViBE::int64 m_i64DriftToleranceSampleCount;
-		OpenViBE::int64 m_i64DriftCorrectionSampleCountAdded;
-		OpenViBE::int64 m_i64DriftCorrectionSampleCountRemoved;
-		OpenViBE::int64 m_i64InnerLatencySampleCount;
+		CDriftCorrection m_oDriftCorrection;
 
 		OpenViBE::uint64 m_ui64JitterEstimationCountForDrift;
 		OpenViBE::uint64 m_ui64DriverTimeoutDuration;

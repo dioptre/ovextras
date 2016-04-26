@@ -68,10 +68,12 @@ CDriverLabStreamingLayer::CDriverLabStreamingLayer(IDriverContext& rDriverContex
 	,m_pBuffer(NULL)
 	,m_pSignalInlet(NULL)
 	,m_pMarkerInlet(NULL)
+	,m_bLimitSpeed(false)
 {	
 	// The following class allows saving and loading driver settings from the acquisition server .conf file
 	m_oSettings.add("Header", &m_oHeader);
 	// To save your custom driver settings, register each variable to the SettingsHelper
+	m_oSettings.add("LimitSpeed",       &m_bLimitSpeed);
 	m_oSettings.add("SignalStreamName", &m_sSignalStream);
 	m_oSettings.add("SignalStreamID",   &m_sSignalStreamID);
 	m_oSettings.add("MarkerStreamName", &m_sMarkerStream);
@@ -250,10 +252,6 @@ boolean CDriverLabStreamingLayer::loop(void)
 	uint32 l_ui32TimeOutAt = 0;
 	bool l_bBlockStartTimeSet = false;
 	float64 l_f64BlockStartTime = 0;
-
-	const float64 l_f64OneSampleInSeconds = 1.0/static_cast<float64>(m_oHeader.getSamplingFrequency()); 
-	const uint64 l_ui64TimeLengthOfOneSample = ITimeArithmetics::secondsToTime(l_f64OneSampleInSeconds);
-	const uint64 l_ui64TimeLimitForBuffer = m_ui64StartTime + (m_ui64SampleCount+m_ui32SampleCountPerSentBlock)*l_ui64TimeLengthOfOneSample;
 	
 	// receive signal from the stream
 	for(uint32 i=0;i<m_ui32SampleCountPerSentBlock;i++)
@@ -301,23 +299,25 @@ boolean CDriverLabStreamingLayer::loop(void)
 		m_rDriverContext.getLogManager() << LogLevel_Info << "Timeout reading sample from " << l_ui32TimeOutAt << ", filled rest of block with NaN\n";
 	} 
 
-	m_ui64SampleCount += m_ui32SampleCountPerSentBlock;
-
-	// If we were faster than what the AS expects, sleep.
-	const uint64 l_ui64TimeNow = System::Time::zgetTime();
-	if(l_ui64TimeNow < l_ui64TimeLimitForBuffer)
+	if(m_bLimitSpeed)
 	{
-		const uint64 l_ui64TimeToSleep = l_ui64TimeLimitForBuffer - l_ui64TimeNow;
+		// If we were faster than what the AS expects, sleep.
+		const uint64 l_ui64TimeNow = System::Time::zgetTime() - m_ui64StartTime;
+		const uint64 l_ui64TimeLimitForBuffer = ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui64SampleCount+m_ui32SampleCountPerSentBlock);
 
-		System::Time::zsleep(l_ui64TimeToSleep);
+		if(l_ui64TimeNow < l_ui64TimeLimitForBuffer)
+		{
+			const uint64 l_ui64TimeToSleep = l_ui64TimeLimitForBuffer - l_ui64TimeNow;
+
+//			std::cout << "PostNap " << ITimeArithmetics::timeToSeconds(l_ui64TimeToSleep)*1000 << "ms at " << m_ui64SampleCount+m_ui32SampleCountPerSentBlock << "\n";
+
+			System::Time::zsleep(l_ui64TimeToSleep);
+		}
 	}
 
-	m_pCallback->setSamples(m_pSample);
+	m_ui64SampleCount += m_ui32SampleCountPerSentBlock;
 
-	// LSL is not forcing the sample stream to confirm to the nominal sample rate. Hence, data may be incoming
-	// with slower or faster speed than implied by the rate (a little like reading from a file). In some
-	// cases it may be meaningful to disable the following drift correction from the AS settings.
-	m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
+	m_pCallback->setSamples(m_pSample);
 
 	// receive and pass markers. Markers are timed wrt the beginning of the signal block.
 	OpenViBE::CStimulationSet l_oStimulationSet;
@@ -354,6 +354,11 @@ boolean CDriverLabStreamingLayer::loop(void)
 	}
 
 	m_pCallback->setStimulationSet(l_oStimulationSet);
+
+	// LSL is not forcing the sample stream to confirm to the nominal sample rate. Hence, data may be incoming
+	// with slower or faster speed than implied by the rate (a little like reading from a file). In some
+	// cases it may be meaningful to disable the following drift correction from the AS settings.
+	m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
 
 	return true;
 }
@@ -417,6 +422,7 @@ boolean CDriverLabStreamingLayer::configure(void)
 	CConfigurationLabStreamingLayer m_oConfiguration(m_rDriverContext, 
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-LabStreamingLayer.ui",
 		m_oHeader,
+		m_bLimitSpeed,
 		m_sSignalStream,
 		m_sSignalStreamID,
 		m_sMarkerStream,

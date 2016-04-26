@@ -65,6 +65,16 @@ namespace OpenViBE
 			return ((uint64)(f64Time*double(m_ui32Multiplier)))<<m_ui32Shift;
 		}
 
+		// \brief Convert seconds and subseconds pair to fixed point
+		// \param ui64Seconds : Number of seconds
+		// \param ui64Subseconds : Number of subseconds
+		// \param ui64SubsInSecond : Maximum subseconds in a second (e.g. 1000*1000 if subseconds are microseconds, 1000 for millis)
+		// \return Time in fixed point format
+		static uint64 subsecondsToTime(const uint64 ui64Seconds, const uint64 ui64Subseconds, const uint64 ui64SubsInSecond) 
+		{
+			return (ui64Seconds << 32) + (ui64Subseconds << 32) / ui64SubsInSecond;
+		}
+
 		// Increase m_ui32DecimalPrecision to get more precision in decimals for timeToSeconds() and secondsToTime().
 		// The default value of 10 bits suffices for (1/2^10)s=(1/1024)s precision in time, i.e. a bit under 1ms. 
 		// Using higher sampling rates than 1024hz would require a correspondingly higher decimal precision.
