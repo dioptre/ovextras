@@ -41,7 +41,9 @@ IF(WIN32)
 	SET(OV_OMP_WAIT_POLICY "PASSIVE")
 	# Disable /MP if you don't like VS using all the cores for compilation
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4355 /MP ${OV_EIGEN_FLAGS}")
-	ADD_DEFINITIONS("-DNOMINMAX -DBOOST_ALL_NO_LIB")	
+	ADD_DEFINITIONS("-DNOMINMAX -DBOOST_ALL_NO_LIB")
+	# At least Windows Vista target - if you target Windows XP (0x0501), some components may not compile
+	ADD_DEFINITIONS("-D_WIN32_WINNT=0x0600")
 
 	# Find out the compiler version, deps may use this
 	IF(${CMAKE_MAJOR_VERSION} LESS 3)
@@ -62,8 +64,11 @@ IF(WIN32)
 	ENDIF(${CMAKE_MAJOR_VERSION} LESS 3)
 	STRING(REGEX MATCH "vc120.*" MSVC_VER120 ${MSVC_SERVICE_PACK})
 	IF(MSVC_VER120) 
-		# If OpenMP is available, using it will allow Eigen to use multiple cores in matrix math. Only on VS120,
-		# as VS100 allocates the cores too aggressively when OpenMP is on.
+		# Boost 1.55 asio causes several compiler warnings on VS2013 we cannot do much about. try removing the following when boost is upgraded.
+		ADD_DEFINITIONS("-D_WINSOCK_DEPRECATED_NO_WARNINGS") 
+
+		# If OpenMP is available, using it will allow Eigen to use multiple cores in matrix math. Only used on VS120,
+		# as VS100 allocates the cores too aggressively when OpenMP is enabled.
 		INCLUDE("FindOpenMP")
 		IF(OPENMP_FOUND)
 		  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")

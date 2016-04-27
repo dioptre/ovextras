@@ -18,7 +18,6 @@
 
 // The interface to the driver
 // We have to setup the binding method and the unicode support first
-#define EEGO_SDK_BIND_DYNAMIC
 #define _UNICODE
 #if defined(_MBCS) // Only unicode should be supported. Better stay away from MBCS methods!
 #undef _MBCS
