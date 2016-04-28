@@ -174,7 +174,8 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 						{
 							for (uint32 si=0; si<l_pStimSet->getStimulationCount(); si++)
 							{
-								m_vStimuliSet[l_ui32StimulusInputCounter]->push_back(l_pStimSet->getStimulationIdentifier(si)); 					
+								// @fixme m_vStimuliSet defined as 32bit will only work correctly with stimuli that fit in 32bits (OV stimulations can be 64bit)
+								m_vStimuliSet[l_ui32StimulusInputCounter]->push_back(static_cast<uint32>(l_pStimSet->getStimulationIdentifier(si)));
 								this->getLogManager() << LogLevel_Info << "Added stimulus with id " << m_vStimuliSet[l_ui32StimulusInputCounter]->back() << " to shared memory variable\n";
 							}
 							l_rDynamicBoxContext.markInputAsDeprecated(j,i);
