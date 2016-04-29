@@ -7,13 +7,7 @@
 #include <string>
 #include <algorithm>
 
-// For stimulussender
-#include <iostream>
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <sys/timeb.h>
-using boost::asio::ip::tcp;
+#include "../ovpCStimulusSender.h"
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -21,98 +15,6 @@ using namespace OpenViBE::Plugins;
 
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::SimpleVisualisation;
-
-/*
- * \class StimulusSender
- * \brief Simple client to send stimuli to Acquisition Server TCP Tagging
- * \todo Refactor to its own file
- */
-class StimulusSender {
-public:
-	~StimulusSender()
-	{
-		if(m_oStimulusSocket.is_open())
-		{
-			m_oStimulusSocket.close();
-		}
-	}
-
-	StimulusSender(void)
-		: m_oStimulusSocket(m_ioService), m_bConnectedOnce(false)
-	{
-	}
-	
-	boolean connect(const char* sAddress, const char* sStimulusPort)
-	{
-		tcp::resolver resolver(m_ioService);
-			
-		// Stimulus port
-		std::cout << "Connecting to stimulus port [" << sAddress << " : " << sStimulusPort << "]\n";
-		try
-		{
-			boost::system::error_code error;
-
-			tcp::resolver::query query = tcp::resolver::query(tcp::v4(), sAddress, sStimulusPort, boost::asio::ip::resolver_query_base::numeric_service);
-			tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-			m_oStimulusSocket.connect(*endpoint_iterator, error);
-			if(error)
-			{
-				std::cout << "Connection error: " << error << "\n";
-				return false;
-			}
-		} 
-		catch (boost::system::system_error l_oError) 
-		{
-			std::cout << "Issue '" << l_oError.code().message().c_str() << "' with opening connection to server\n";
-			return false;
-		}
-		
-		m_bConnectedOnce = true;
-
-		return true;
-	}
-
-	boolean sendStimuli(uint64 ui64Stimuli) 
-	{
-		if(!m_bConnectedOnce) {
-			return false;
-		}	
-
-		timeb time_buffer;
-		ftime(&time_buffer);
-		const uint64 posixTime = time_buffer.time*1000ULL + time_buffer.millitm;
-
-		if(!m_oStimulusSocket.is_open())
-		{
-			std::cout << "Error: Cannot send stimulation, socket is not open\n";
-			return false;
-		}
-
-		uint64 l_ui64tmp = 0;
-		try
-		{
-			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
-			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&ui64Stimuli, sizeof(uint64)));
-			//boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&posixTime, sizeof(uint64)));
-			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
-		} 
-		catch (boost::system::system_error l_oError) 
-		{
-			std::cout << "Issue '" << l_oError.code().message().c_str() << "' with writing stimulus to server\n";
-		}
-
-		return true;
-	}
-
-private:
-
-	boost::asio::io_service m_ioService;
-
-	tcp::socket m_oStimulusSocket;
-
-	OpenViBE::boolean m_bConnectedOnce;
-};
-
 
 namespace
 {
@@ -961,7 +863,7 @@ void CBoxAlgorithmP300SpellerVisualisation::flushQueue(void)
 
 	for(size_t i=0;i<m_vStimuliQueue.size();i++)
 	{
-		m_pStimulusSender->sendStimuli(m_vStimuliQueue[i]);
+		m_pStimulusSender->sendStimulation(m_vStimuliQueue[i]);
 	}
 	m_vStimuliQueue.clear();
 
