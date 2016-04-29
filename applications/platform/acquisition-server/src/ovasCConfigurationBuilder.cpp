@@ -541,7 +541,7 @@ void CConfigurationBuilder::buttonChangeChannelNamesCB(void)
 					::GtkWidget* l_pWidgetDialogOpen=gtk_file_chooser_dialog_new(
 						"Select file to save to...",
 						NULL,
-						GTK_FILE_CHOOSER_ACTION_OPEN,
+						GTK_FILE_CHOOSER_ACTION_SAVE,
 						GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 						GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
 						NULL);

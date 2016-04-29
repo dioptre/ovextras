@@ -89,6 +89,7 @@ CDriverGTecGUSBampLinux::CDriverGTecGUSBampLinux(IDriverContext& rDriverContext)
     GT_FreeDeviceList(l_pDeviceList,l_ui32ListSize);
 
     // Now retrieve all those configs from the settings file if they are there to be found (don't need to worry about sample rate or channel number though since they're already in the header)
+	m_oSettings.add("Header", &m_oHeader);
     m_oSettings.add("DeviceName", (string*)&m_oDeviceName);
     m_oSettings.add("Mode", (int*)&m_oConfig.mode);
     m_oSettings.add("EnableTrigger", (bool*)&m_oConfig.enable_trigger_line);

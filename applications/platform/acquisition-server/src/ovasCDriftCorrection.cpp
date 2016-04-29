@@ -9,6 +9,7 @@
 #include <cmath> // std::abs
 #include <sstream>
 #include <iomanip>
+#include <algorithm> // std::min, std::max
 
 #define boolean OpenViBE::boolean
 
