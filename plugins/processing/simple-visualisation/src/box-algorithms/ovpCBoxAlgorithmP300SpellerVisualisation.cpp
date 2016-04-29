@@ -44,16 +44,26 @@ public:
 	
 	boolean connect(const char* sAddress, const char* sStimulusPort)
 	{
-		boost::system::error_code error;
 		tcp::resolver resolver(m_ioService);
 			
 		// Stimulus port
 		std::cout << "Connecting to stimulus port [" << sAddress << " : " << sStimulusPort << "]\n";
-		tcp::resolver::query query = tcp::resolver::query(tcp::v4(), sAddress, sStimulusPort);
-		m_oStimulusSocket.connect(*resolver.resolve(query), error);
-		if(error)
+		try
 		{
-			std::cout << "Connection error: " << error << "\n";
+			boost::system::error_code error;
+
+			tcp::resolver::query query = tcp::resolver::query(tcp::v4(), sAddress, sStimulusPort, boost::asio::ip::resolver_query_base::numeric_service);
+			tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+			m_oStimulusSocket.connect(*endpoint_iterator, error);
+			if(error)
+			{
+				std::cout << "Connection error: " << error << "\n";
+				return false;
+			}
+		} 
+		catch (boost::system::system_error l_oError) 
+		{
+			std::cout << "Issue '" << l_oError.code().message().c_str() << "' with opening connection to server\n";
 			return false;
 		}
 		
