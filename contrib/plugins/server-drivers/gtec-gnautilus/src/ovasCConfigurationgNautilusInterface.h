@@ -1,6 +1,8 @@
 #ifndef __OpenViBE_AcquisitionServer_CConfigurationgNautilusInterface_H__
 #define __OpenViBE_AcquisitionServer_CConfigurationgNautilusInterface_H__
 
+#if defined(TARGET_HAS_ThirdPartyGNEEDaccessAPI)
+
 #include "../ovasCConfigurationBuilder.h"
 #include "ovasIDriver.h"
 
@@ -114,5 +116,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bConnectionOpen;
 	};
 };
+
+#endif // TARGET_HAS_ThirdPartyGNEEDaccessAPI
 
 #endif // __OpenViBE_AcquisitionServer_CConfigurationgNautilusInterface_H__

@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyGNEEDaccessAPI)
+
 #include "ovasCConfigurationgNautilusInterface.h"
 
 using namespace OpenViBE;
@@ -652,6 +655,7 @@ boolean CConfigurationgNautilusInterface::preConfigure(void)
 		l_bFunctionReturn = openDevice();
 		if (!l_bFunctionReturn)
 		{
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Unable to open a suitable device\n";
 			return false;
 		}
 	}
@@ -1033,3 +1037,6 @@ boolean CConfigurationgNautilusInterface::closeDevice(void)
 
 	return true;
 }
+
+#endif // TARGET_HAS_ThirdPartyGNEEDaccessAPI
+

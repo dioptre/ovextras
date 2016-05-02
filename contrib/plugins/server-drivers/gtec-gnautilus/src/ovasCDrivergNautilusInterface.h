@@ -1,6 +1,8 @@
 #ifndef __OpenViBE_AcquisitionServer_CDrivergNautilusInterface_H__
 #define __OpenViBE_AcquisitionServer_CDrivergNautilusInterface_H__
 
+#if defined(TARGET_HAS_ThirdPartyGNEEDaccessAPI)
+
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 #include <openvibe/ov_all.h>
@@ -107,5 +109,7 @@ namespace OpenViBEAcquisitionServer
 		// OpenViBE::uint32 m_ui32ConnectionID;
 	};
 };
+
+#endif // TARGET_HAS_ThirdPartyGNEEDaccessAPI
 
 #endif // __OpenViBE_AcquisitionServer_CDrivergNautilusInterface_H__

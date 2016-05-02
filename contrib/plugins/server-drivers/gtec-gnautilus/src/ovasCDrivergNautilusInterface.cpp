@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyGNEEDaccessAPI)
+
 #include "ovasCDrivergNautilusInterface.h"
 #include "ovasCConfigurationgNautilusInterface.h"
 
@@ -511,3 +514,7 @@ void OnDataReadyEventHandler(GDS_HANDLE connection_handle, void *usr_data)
 		// insert error handling if necessary
 	}
 }
+
+#endif // TARGET_HAS_ThirdPartyGNEEDaccessAPI
+
+
