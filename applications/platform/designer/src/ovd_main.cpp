@@ -437,7 +437,7 @@ OpenViBE::boolean parse_arguments(int argc, char** argv, SConfiguration& rConfig
 
 int go(int argc, char ** argv)
 {
-	OpenViBE::boolean errorWhileLoadingScenario = false;
+	OpenViBE::boolean l_bErrorWhileLoadingScenario = false;
 	/*
 		{ 0,     0,     0,     0 },
 		{ 0, 16383, 16383, 16383 },
@@ -636,6 +636,9 @@ int go(int argc, char ** argv)
 							}
 						}
 					}
+
+					OpenViBE::boolean l_bPlayRequested = false;
+
 					std::map < ECommandLineFlag, std::string >::iterator it;
 					for(it=l_oConfiguration.m_oFlag.begin(); it!=l_oConfiguration.m_oFlag.end(); it++)
 					{
@@ -644,27 +647,29 @@ int go(int argc, char ** argv)
 						{
 							case CommandLineFlag_Open:
 								l_rLogManager << LogLevel_Info << "Opening scenario [" << CString(it->second.c_str()) << "]\n";
-								app.openScenario(it->second.c_str());
+								if (!app.openScenario(it->second.c_str()))
+								{
+									l_rLogManager << LogLevel_Error << "Scenario open error.\n";
+									l_bErrorWhileLoadingScenario = true;
+								}
 								break;
 							case CommandLineFlag_Play:
 								l_rLogManager << LogLevel_Info << "Opening and playing scenario [" << CString(it->second.c_str()) << "]\n";
-								if(app.openScenario(it->second.c_str()))
+								if(!app.openScenario(it->second.c_str()) || !app.playScenarioCB())	// lazy eval
 								{
-									if(!app.playScenarioCB())
-									{
-										errorWhileLoadingScenario = true;
-									}
+									l_rLogManager << LogLevel_Error << "Scenario open or load error with --play.\n";
+									l_bErrorWhileLoadingScenario = true;
 								}
+								l_bPlayRequested = true;
 								break;
 							case CommandLineFlag_PlayFast:
 								l_rLogManager << LogLevel_Info << "Opening and fast playing scenario [" << CString(it->second.c_str()) << "]\n";
-								if(app.openScenario(it->second.c_str()))
+								if(!app.openScenario(it->second.c_str()) || !app.forwardScenarioCB())	// lazy eval
 								{
-									if(!app.forwardScenarioCB())
-									{
-										errorWhileLoadingScenario = true;
-									}
+									l_rLogManager << LogLevel_Error << "Scenario open or load error with --play-fast.\n";
+									l_bErrorWhileLoadingScenario = true;
 								}
+								l_bPlayRequested = true;
 								break;
 //								case CommandLineFlag_Define:
 //									break;
@@ -672,6 +677,12 @@ int go(int argc, char ** argv)
 								break;
 						}
 					}
+
+					if(!l_bPlayRequested && l_oConfiguration.m_eNoGui == CommandLineFlag_NoGui)
+					{
+						l_rLogManager << LogLevel_Info << "Switch --no-gui is enabled but no play operation was requested. Designer will exit automatically.\n";
+					}
+
 					if(app.m_vInterfacedScenario.empty())
 					{
 						app.newScenarioCB();
@@ -697,6 +708,7 @@ int go(int argc, char ** argv)
 						{
 							l_pKernelContext->getLogManager() << LogLevel_Fatal << "Catched top level exception\n";
 						}
+
 					}
 				}
 
@@ -710,7 +722,7 @@ int go(int argc, char ** argv)
 		l_oKernelLoader.uninitialize();
 		l_oKernelLoader.unload();
 	}
-	if(errorWhileLoadingScenario && l_oConfiguration.m_eNoGui == CommandLineFlag_NoGui)
+	if(l_bErrorWhileLoadingScenario && l_oConfiguration.m_eNoGui == CommandLineFlag_NoGui)
 	{
 		return -1;
 	}

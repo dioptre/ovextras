@@ -89,7 +89,7 @@ boolean CAlgorithmClassifierOneVsAll::train(const IFeatureVectorSet& rFeatureVec
 	}
 
 	//And then we just change adapt the label for each feature vector but we don't copy them anymore
-	for(size_t l_iClassifierCounter = 0 ; l_iClassifierCounter < m_oSubClassifierList.size() ; ++l_iClassifierCounter )
+	for(uint32 l_iClassifierCounter = 0 ; l_iClassifierCounter < static_cast<uint32>(m_oSubClassifierList.size()) ; ++l_iClassifierCounter )
 	{
 		TParameterHandler < IMatrix* > ip_pFeatureVectorSet(m_oSubClassifierList[l_iClassifierCounter]->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVectorSet));
 		ip_pFeatureVectorSet = (IMatrix*)ip_pFeatureVectorSetReference;
@@ -121,7 +121,7 @@ boolean CAlgorithmClassifierOneVsAll::classify(const IFeatureVector& rFeatureVec
 
 	const uint32 l_ui32FeatureVectorSize=rFeatureVector.getSize();
 
-	for(uint64 l_iClassifierCounter = 0 ; l_iClassifierCounter < m_oSubClassifierList.size() ; ++l_iClassifierCounter )
+	for(uint32 l_iClassifierCounter = 0 ; l_iClassifierCounter < static_cast<uint32>(m_oSubClassifierList.size()) ; ++l_iClassifierCounter )
 	{
 		IAlgorithmProxy* l_pSubClassifier = this->m_oSubClassifierList[l_iClassifierCounter];
 		TParameterHandler < IMatrix* > ip_pFeatureVector(l_pSubClassifier->getInputParameter(OVTK_Algorithm_Classifier_InputParameterId_FeatureVector));

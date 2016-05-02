@@ -157,6 +157,7 @@ boolean CBox::setAlgorithmClassIdentifier(
 		CBoxListenerContext l_oContext(this->getKernelContext(), *this, 0xffffffff);
 		m_pBoxListener->uninitialize(l_oContext);
 		m_pBoxAlgorithmDescriptor->releaseBoxListener(m_pBoxListener);
+		m_pBoxListener = NULL;
 	}
 
 	const IPluginObjectDesc* l_pPluginObjectDescriptor=getKernelContext().getPluginManager().getPluginObjectDescCreating(rAlgorithmClassIdentifier);
@@ -1020,6 +1021,7 @@ void CBox::clear(void)
 		CBoxListenerContext l_oContext(this->getKernelContext(), *this, 0xffffffff);
 		m_pBoxListener->uninitialize(l_oContext);
 		m_pBoxAlgorithmDescriptor->releaseBoxListener(m_pBoxListener);
+		m_pBoxListener = NULL;
 	}
 
 	m_pBoxAlgorithmDescriptor=NULL;
