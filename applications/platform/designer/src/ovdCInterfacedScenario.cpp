@@ -461,6 +461,30 @@ CInterfacedScenario::CInterfacedScenario(const IKernelContext& rKernelContext, C
 
 	m_pTooltip=GTK_WIDGET(gtk_builder_get_object(m_pBuilderTooltip, "tooltip"));
 	gtk_widget_set_name(m_pTooltip, "gtk-tooltips");
+
+	// Output a log message if any box of the scenario is in some special state
+	CIdentifier l_oBoxIdentifier = OV_UndefinedIdentifier;
+	boolean l_bWarningUpdate = false, l_bWarningDeprecated = false, l_bNoteUnstable = false;
+	while ((l_oBoxIdentifier = m_rScenario.getNextBoxIdentifier(l_oBoxIdentifier)) != OV_UndefinedIdentifier)
+	{
+		const IBox *l_pBox = m_rScenario.getBoxDetails(l_oBoxIdentifier);
+		const CBoxProxy l_oBoxProxy(m_rKernelContext, *l_pBox);
+		if (!l_bWarningUpdate && !l_oBoxProxy.isUpToDate())
+		{
+			m_rKernelContext.getLogManager() << LogLevel_Warning << "Scenario requires 'update' of some box(es). You need to replace these boxes or the scenario may not work correctly.\n";
+			l_bWarningUpdate = true;
+		}
+		if (!l_bWarningDeprecated && l_oBoxProxy.isDeprecated())
+		{
+			m_rKernelContext.getLogManager() << LogLevel_Warning << "Scenario has deprecated box(es). Please consider using other boxes instead.\n";
+			l_bWarningDeprecated = true;
+		}
+		if (!l_bNoteUnstable && l_oBoxProxy.isUnstable())
+		{
+			m_rKernelContext.getLogManager() << LogLevel_Debug << "Scenario has unstable box(es).\n";
+			l_bNoteUnstable = true;
+		}
+	}
 }
 
 CInterfacedScenario::~CInterfacedScenario(void)

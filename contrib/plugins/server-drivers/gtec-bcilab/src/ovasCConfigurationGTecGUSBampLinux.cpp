@@ -99,7 +99,7 @@ void CConfigurationGTecGUSBampLinux::UpdateFilters(void)
     gt_size l_ui32SampleRate = (gt_size)strtol(gtk_combo_box_get_active_text(l_pComboBoxSamplingFrequency),NULL,10);
 
     // This takes a while so we'll keep the user informed via the console - might have to put this in a thread at some point though
-    m_rDriverContext.getLogManager() << LogLevel_Info << "Opening device...\n";
+    m_rDriverContext.getLogManager() << LogLevel_Info << "Opening device [" << l_pDeviceName << "] to query filters ...\n";
 
     // Try opening the device
     if(GT_OpenDevice(l_pDeviceName))
@@ -404,7 +404,7 @@ void CConfigurationGTecGUSBampLinux::OnButtonCheckImpedanceClicked()
     char* l_pDeviceName = gtk_combo_box_get_active_text(l_pComboBoxDevice);
 
     // This takes a while so we'll keep the user informed via the console - might have to put this in a thread at some point though
-    m_rDriverContext.getLogManager() << LogLevel_Info << "Opening device...\n";
+    m_rDriverContext.getLogManager() << LogLevel_Info << "Opening device [" << l_pDeviceName << "] for impedance check ...\n";
 
     // Try opening the device
     if(GT_OpenDevice(l_pDeviceName))
@@ -595,7 +595,6 @@ boolean CConfigurationGTecGUSBampLinux::postConfigure(void)
             m_pConfig->bandpass[i] = l_ui32Value;
         }
     }
-
     if(!CConfigurationBuilder::postConfigure()) // normal header is filled (Subject ID, Age, Gender, channels, sampling frequency), ressources are realesed
         return false;
 

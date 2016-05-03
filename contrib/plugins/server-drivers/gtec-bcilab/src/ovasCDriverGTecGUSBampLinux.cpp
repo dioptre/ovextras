@@ -24,6 +24,7 @@ CDriverGTecGUSBampLinux::CDriverGTecGUSBampLinux(IDriverContext& rDriverContext)
     m_ui32CurrentSample(0),
     m_ui32CurrentChannel(0)
 {
+	// Default values
     m_oHeader.setSamplingFrequency(512);
     m_oHeader.setChannelCount(16);
 
@@ -37,9 +38,6 @@ CDriverGTecGUSBampLinux::CDriverGTecGUSBampLinux(IDriverContext& rDriverContext)
     m_oAnalogOutConfig.amplitude = 0;
     m_oAnalogOutConfig.offset = 0;
 
-    // Set the sampling rate
-    m_oConfig.sample_rate = 512;
-
     // This pretty much has to be GT_NOS_AUTOSET, don't know why, so says the documentation
     m_oConfig.number_of_scans = GT_NOS_AUTOSET;
     // Disable the trigger line, digital io scan, slave mode and the shortcut
@@ -47,9 +45,6 @@ CDriverGTecGUSBampLinux::CDriverGTecGUSBampLinux(IDriverContext& rDriverContext)
 
     // Set the mode to just take readings
     m_oConfig.mode = GT_MODE_NORMAL;
-
-    // Number of channels to read from
-    m_oConfig.num_analog_in = m_oHeader.getChannelCount();
 
     // Set all the blocks A-D to use the common ground and reference voltages
     for (unsigned int i = 0; i < GT_USBAMP_NUM_GROUND; i++)
@@ -59,7 +54,7 @@ CDriverGTecGUSBampLinux::CDriverGTecGUSBampLinux(IDriverContext& rDriverContext)
     }
 
     // Configure each input
-    for (unsigned char i = 0; i < m_oConfig.num_analog_in; i++)
+    for (unsigned char i = 0; i < GT_USBAMP_NUM_ANALOG_IN; i++)
     {
         // Should be from 1 - 16, specifies which channel to observe as input i
         m_oConfig.analog_in_channel[i] = i + 1;
@@ -89,6 +84,7 @@ CDriverGTecGUSBampLinux::CDriverGTecGUSBampLinux(IDriverContext& rDriverContext)
     GT_FreeDeviceList(l_pDeviceList,l_ui32ListSize);
 
     // Now retrieve all those configs from the settings file if they are there to be found (don't need to worry about sample rate or channel number though since they're already in the header)
+	m_oSettings.add("Header", &m_oHeader);
     m_oSettings.add("DeviceName", (string*)&m_oDeviceName);
     m_oSettings.add("Mode", (int*)&m_oConfig.mode);
     m_oSettings.add("EnableTrigger", (bool*)&m_oConfig.enable_trigger_line);
@@ -111,7 +107,7 @@ CDriverGTecGUSBampLinux::CDriverGTecGUSBampLinux(IDriverContext& rDriverContext)
     }
 
     // Configure each input
-    for (unsigned int i = 0; i < m_oConfig.num_analog_in; i++)
+    for (unsigned int i = 0; i < GT_USBAMP_NUM_ANALOG_IN; i++)
     {
         stringstream l_oBandpassConfigName, l_oNotchConfigName, l_oBipolarConfigName;
         l_oBandpassConfigName << "Bandpass" << i;
@@ -122,7 +118,15 @@ CDriverGTecGUSBampLinux::CDriverGTecGUSBampLinux(IDriverContext& rDriverContext)
         m_oSettings.add(l_oBipolarConfigName.str().c_str(), (int*)&m_oConfig.bipolar[i]);
     }
 
-    m_oSettings.load();   
+	// This restores saved settings if any, such as sampling rate
+    m_oSettings.load();  
+
+	// Set the sampling rate that may have been changed by load
+    m_oConfig.sample_rate = m_oHeader.getSamplingFrequency();
+
+	// Number of channels that may have been changed by load
+    m_oConfig.num_analog_in = m_oHeader.getChannelCount();
+
 }
 
 CDriverGTecGUSBampLinux::~CDriverGTecGUSBampLinux(void)
@@ -145,7 +149,8 @@ boolean CDriverGTecGUSBampLinux::initialize(const uint32 ui32SampleCountPerSentB
     // If the scan digital inputs flag is set, the API will return one extra channel outside of the analog data requested, so we need to match that on the header
     if(m_oConfig.scan_dio == GT_TRUE)
     {
-        m_oHeader.setChannelCount(m_oHeader.getChannelCount() + 1);
+        m_oHeader.setChannelCount(m_oConfig.num_analog_in + 1);
+		m_oHeader.setChannelName(m_oConfig.num_analog_in, "Digital");
     }
 
     // Allocate buffers for...
@@ -320,7 +325,10 @@ boolean CDriverGTecGUSBampLinux::configure(void)
         return false;
     }
 
-    m_oSettings.save();
+	m_oHeader.setChannelCount(m_oConfig.num_analog_in);
+	m_oHeader.setSamplingFrequency(m_oConfig.sample_rate);
+
+	m_oSettings.save();
 
     return true;
 }
