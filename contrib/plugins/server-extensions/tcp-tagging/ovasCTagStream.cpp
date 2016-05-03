@@ -80,7 +80,7 @@ void CTagServer::run()
 		startAccept();
 		m_ioService.run();
 	}
-	catch(std::exception& e) {
+	catch(std::exception&) {
 		// TODO: log error message (needs to be thread-safe)
 	}
 }
