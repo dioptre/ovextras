@@ -69,11 +69,11 @@ void CPluginTCPTagging::loopHook(std::vector < std::vector < OpenViBE::float32 >
 
 	// Collect tags from the stream until exhaustion.
 	while(m_scopedTagStream.get() && m_scopedTagStream->pop(tag)) {
-		m_rKernelContext.getLogManager() << Kernel::LogLevel_Info << "New Tag received (" << tag.padding << ", " << tag.identifier << ", " << tag.timestamp << ") at " << posixTime << " (posix time in ms)\n";
+		m_rKernelContext.getLogManager() << Kernel::LogLevel_Trace << "New Tag received (" << tag.padding << ", " << tag.identifier << ", " << tag.timestamp << ") at " << posixTime << " (posix time in ms)\n";
 
 		// Check that the timestamp fits the current chunk.
 		if (tag.timestamp < m_previousPosixTime) {
-			m_rKernelContext.getLogManager() << Kernel::LogLevel_Warning << "The Tag has arrived before the beginning of the current chunk and will be inserted at the beginning of this chunk\n";
+			m_rKernelContext.getLogManager() << Kernel::LogLevel_Trace << "The Tag has arrived before the beginning of the current chunk and will be inserted at the beginning of this chunk\n";
 			tag.timestamp = m_previousPosixTime;
 		}
 

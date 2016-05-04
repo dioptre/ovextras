@@ -23,9 +23,9 @@ INCLUDE("FindOpenViBEToolkit")
 INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindThirdPartyGTK")
-INCLUDE("FindThirdPartyBoost")#need boost for erp plot
-INCLUDE("FindThirdPartyBoost_System") # needed for Graz visu tcp connection
-
+INCLUDE("FindThirdPartyBoost")          # need boost for erp plot
+INCLUDE("FindThirdPartyBoost_System")   # P300 visualizer ASIO part needs this
+   
 # ---------------------------------
 # Target macros
 # Defines target operating system

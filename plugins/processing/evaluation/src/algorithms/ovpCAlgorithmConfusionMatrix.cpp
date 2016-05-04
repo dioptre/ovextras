@@ -176,6 +176,13 @@ boolean CAlgorithmConfusionMatrix::process(void)
 			{
 				this->getLogManager() << LogLevel_Trace << "Result received : " << l_ui64StimulationFromClassifierIdentifier << ". Corresponding target : "
 									  << l_ui64StimulationTargeted << ".\n";
+
+				if(!op_pConfusionMatrix->getBuffer())
+				{
+					this->getLogManager() << LogLevel_Error << "The confusion matrix buffer has not yet been initialized\n";
+					return false;
+				}
+
 				// now we found the target, let's update the confusion matrix
 				// we need to update the whole line vector for the targeted class
 				uint32 l_ui32OldAttemptCount = m_mapClassificationAttemptCountPerClass[l_ui64StimulationTargeted];

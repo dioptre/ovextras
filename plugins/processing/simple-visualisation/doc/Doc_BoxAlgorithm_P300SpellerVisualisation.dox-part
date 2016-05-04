@@ -7,9 +7,9 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_P300SpellerVisualisation_Description|
 This box can be used with the \ref Doc_BoxAlgorithm_P300SpellerStimulator box in order to
-establish a P300 speller application. The visualisation consists in a matrix of 6 lines and
+implement a P300 speller application. The visualisation consists in a matrix of 6 lines and
 columns containing 26 characters and 10 numbers. The lines and columns can be flashed sequentially
-resulting in an evoked potential in the user's brain activity. This evoked potential can be
+to cause an evoked potential in the user's brain activity. This evoked potential can be
 detected and used to find which line and which column the user was focused on, thus resulting
 in the ability to write text.
 
@@ -69,10 +69,12 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_P300SpellerVisualisation_Outputs|
 
  * |OVP_DocBegin_BoxAlgorithm_P300SpellerVisualisation_Output1|
+DEPRECATED. This output should not be used anymore. See Miscellaneous Description below.
+
 This output is used to translate incoming flash stimulations depending if they are target or not.
 The actual target is determined with the second input. As soon as the target is known, each flash
 can be considered as a target flash or not. This can be later use for selecting evoked response
-potentials against other responses.
+potentials against other responses. 
  * |OVP_DocEnd_BoxAlgorithm_P300SpellerVisualisation_Output1|
 __________________________________________________________________
 
@@ -170,5 +172,10 @@ Miscellaneous description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_P300SpellerVisualisation_Miscellaneous|
+ The box relies on the TCP Tagging plugin of the OpenViBE Acquisition Server. A stimulation stream including target/nontarget 
+ stimulations will be sent to the Acquisition Server directly after rendering. This 'software tagging' approach tries to
+ align the stimulations as well as possible with relation to the underlying EEG stream. It should be more time-accurate than using 
+ the stimulations from the output socket of the box (deprecated). An even better option would be 'hardware tagging', i.e. to
+ send the stimulations to the amplifier. Hardware tagging is currently not supported due to a lack of a standard for such.
  * |OVP_DocEnd_BoxAlgorithm_P300SpellerVisualisation_Miscellaneous|
  */
