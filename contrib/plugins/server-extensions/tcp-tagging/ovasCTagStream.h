@@ -1,5 +1,5 @@
-#ifndef __OpenViBE_AcquisitionServer_TCPTagSession_H__
-#define __OpenViBE_AcquisitionServer_TCPTagSession_H__
+#ifndef __OpenViBE_AcquisitionServer_TCPTagStream_H__
+#define __OpenViBE_AcquisitionServer_TCPTagStream_H__
 
 #include <queue>
 #include <boost/bind.hpp>
@@ -126,4 +126,4 @@ private:
 
 }
 
-#endif // __OpenViBE_AcquisitionServer_TCPTagSession_H__
+#endif // __OpenViBE_AcquisitionServer_TCPTagStream_H__

@@ -49,6 +49,7 @@ foreach (_variableName ${_variableNames})
 endforeach()
 
 
+SUBDIRS("${CTEST_SOURCE_DIRECTORY}/contrib/plugins/server-extensions/tcp-tagging/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/acquisition/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/turbofieldtrip/test")
 SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/tools/test")

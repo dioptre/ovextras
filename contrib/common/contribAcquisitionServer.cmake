@@ -7,7 +7,7 @@ SET(source_files "${source_files};${additional_source_files}")
 
 SET(ADDITIONAL_PATH "${CMAKE_SOURCE_DIR}/contrib/plugins/server-extensions/tcp-tagging/")
 INCLUDE_DIRECTORIES(${ADDITIONAL_PATH})
-FILE(GLOB_RECURSE additional_source_files ${ADDITIONAL_PATH}/*.cpp ${ADDITIONAL_PATH}/*.h)
+FILE(GLOB additional_source_files ${ADDITIONAL_PATH}/*.cpp ${ADDITIONAL_PATH}/*.h)
 SET(source_files "${source_files};${additional_source_files}")
 
 FUNCTION(OV_ADD_CONTRIB_DRIVER DRIVER_PATH)
@@ -62,3 +62,6 @@ IF(WIN32)
 	ENDIF(PATH_EEGOAPI)
 ENDIF(WIN32)
 
+IF(OV_COMPILE_TESTS)
+ADD_SUBDIRECTORY("../../../contrib/plugins/server-extensions/tcp-tagging/test" "./test")
+ENDIF(OV_COMPILE_TESTS)
