@@ -62,5 +62,5 @@ IF(WIN32)
 ENDIF(WIN32)
 
 IF(OV_COMPILE_TESTS)
-ADD_SUBDIRECTORY("${CMAKE_SOURCE_DIR}/contrib/plugins/server-extensions/tcp-tagging/test")
+ADD_SUBDIRECTORY("../../../contrib/plugins/server-extensions/tcp-tagging/test" "./test")
 ENDIF(OV_COMPILE_TESTS)
