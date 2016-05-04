@@ -15,6 +15,7 @@
 #include "ovasCDriverGTecGUSBampLegacy.h"
 #include "ovasCDriverGTecGUSBampLinux.h"
 #include "ovasCDriverGTecGMobiLabPlus.h"
+#include "ovasCDrivergNautilusInterface.h"
 #include "ovasCDriverFieldtrip.h"
 #include "ovasCDriverMBTSmarting.h"
 #include "ovasCDriverMitsarEEG202A.h"
@@ -44,6 +45,9 @@ namespace OpenViBEContributions {
 #endif
 #if defined TARGET_HAS_ThirdPartyGMobiLabPlusAPI
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverGTecGMobiLabPlus(pAcquisitionServer->getDriverContext()));
+#endif
+#if defined TARGET_HAS_ThirdPartyGNEEDaccessAPI
+		vDriver->push_back(new OpenViBEAcquisitionServer::CDrivergNautilusInterface(pAcquisitionServer->getDriverContext()));
 #endif
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverFieldtrip(pAcquisitionServer->getDriverContext()));
 
