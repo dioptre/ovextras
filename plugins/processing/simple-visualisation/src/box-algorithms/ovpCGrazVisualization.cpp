@@ -1,3 +1,6 @@
+
+// @todo for clarity, the StimulusSender related code blocks should be pushed inside the class and away from here
+
 #include "ovpCGrazVisualization.h"
 
 #include <cmath>
@@ -24,92 +27,9 @@ using namespace std;
 #include <fstream>
 #include <cstdlib>
 
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <sys/timeb.h>
 
-using boost::asio::ip::tcp;
-
-/*
- * \class StimulusSender
- * \brief Basic illustratation of how to read from TCPWriter using boost::asio
- */
-class StimulusSender {
-public:
-	~StimulusSender()
-	{
-		if(m_oStimulusSocket.is_open())
-		{
-			std::cout << "Disconnecting\n";
-			m_oStimulusSocket.close();
-		}
-	}
-
-	StimulusSender(void)
-		: m_oStimulusSocket(m_ioService), m_bConnectedOnce(false)
-	{
-	}
-	
-	boolean connect(const char* sAddress, const char* sStimulusPort)
-	{
-		//m_pStimulusSocket = new tcp::socket(m_ioService);
-		boost::system::error_code error;
-		tcp::resolver resolver(m_ioService);
-			
-		// Stimulus port
-		std::cout << "Connecting to stimulus port [" << sAddress << " : " << sStimulusPort << "]\n";
-		tcp::resolver::query query = tcp::resolver::query(tcp::v4(), sAddress, sStimulusPort);
-		m_oStimulusSocket.connect(*resolver.resolve(query), error);
-		if(error)
-		{
-			std::cout << "Connection error: " << error << "\n";
-			return false;
-		}
-		
-		m_bConnectedOnce = true;
-
-		return true;
-	}
-
-	boolean sendStimuli(uint64 ui64Stimuli) 
-	{
-		if(!m_bConnectedOnce) {
-			return false;
-		}	
-
-		timeb time_buffer;
-		ftime(&time_buffer);
-
-		if(!m_oStimulusSocket.is_open())
-		{
-			std::cout << "Cannot send stimulation, socket is not open\n";
-			return false;
-		}
-
-		uint64 l_ui64tmp = 0;
-		try
-		{
-			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
-			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&ui64Stimuli, sizeof(uint64)));
-			boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
-		} 
-		catch (boost::system::system_error l_oError) 
-		{
-			std::cout << "Issue '" << l_oError.code().message().c_str() << "' with writing stimulus to server\n";
-		}
-
-		return true;
-	}
-
-private:
-
-	boost::asio::io_service m_ioService;
-
-	tcp::socket m_oStimulusSocket;
-
-	OpenViBE::boolean m_bConnectedOnce;
-};
+#include "../ovpCStimulusSender.h"
 
 //////////////////////////
 
@@ -117,6 +37,15 @@ namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
 	{
+		// This callback flushes all accumulated stimulations to the TCP Tagging 
+		// after the rendering has completed.
+		gboolean flush_callback(gpointer pUserData)
+		{
+			((CGrazVisualization*)pUserData)->flushQueue();
+	
+			return false;	// Only run once
+		}
+
 		gboolean GrazVisualization_SizeAllocateCallback(GtkWidget *widget, GtkAllocation *allocation, gpointer data)
 		{
 			reinterpret_cast<CGrazVisualization*>(data)->resize((uint32)allocation->width, (uint32)allocation->height);
@@ -152,7 +81,6 @@ namespace OpenViBEPlugins
 						m_f64BarScale = l_f64Prediction;
 					}
 					break;
-					m_pStimulusSender->sendStimuli(m_ui64LastStimulation);
 
 				case OVTK_GDF_End_Of_Session:
 					m_eCurrentState = EGrazVisualizationState_Idle;
@@ -163,7 +91,6 @@ namespace OpenViBEPlugins
 						drawBar();
 					}
 					break;
-					m_pStimulusSender->sendStimuli(m_ui64LastStimulation);
 
 				case OVTK_GDF_Cross_On_Screen:
 					m_eCurrentState = EGrazVisualizationState_Reference;
@@ -222,6 +149,12 @@ namespace OpenViBEPlugins
 			if(l_bStateUpdated)
 			{
 				processState();
+			}
+			
+			// Queue the stimulation to be sent to TCP Tagging
+			{
+				boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+				m_vStimuliQueue.push_back(m_ui64LastStimulation);
 			}
 		}
 
@@ -318,6 +251,11 @@ namespace OpenViBEPlugins
 			m_i64PredictionsToIntegrate   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 			m_bPositiveFeedbackOnly       = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
 
+			m_pStimulusSender = NULL;
+
+			m_uiIdleFuncTag = 0;
+			m_vStimuliQueue.clear();
+
 			if(m_i64PredictionsToIntegrate<1) 
 			{
 				this->getLogManager() << LogLevel_Error << "Number of predictions to integrate must be at least 1!";
@@ -395,7 +333,7 @@ namespace OpenViBEPlugins
 
 			if(!m_pStimulusSender->connect("localhost", "15361"))
 			{
-				this->getLogManager() << LogLevel_Warning << "Unable to connect to AS TCP Tagging, stimuli wont be forwarded.\n";
+				this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
 			}
 
 			return true;
@@ -403,6 +341,16 @@ namespace OpenViBEPlugins
 
 		boolean CGrazVisualization::uninitialize()
 		{
+			{
+				boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+				if(m_uiIdleFuncTag)
+				{
+					m_vStimuliQueue.clear();
+					g_source_remove(m_uiIdleFuncTag);
+					m_uiIdleFuncTag = 0;
+				}
+			}
+
 			if(m_pStimulusSender)
 			{
 				delete m_pStimulusSender;
@@ -453,6 +401,16 @@ namespace OpenViBEPlugins
 
 		boolean CGrazVisualization::process()
 		{
+			// Remove possibly dangling idle func, this construct makes sure only one idle func is registered at a time. 
+			{
+				boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+				if(m_uiIdleFuncTag)
+				{
+					g_source_remove(m_uiIdleFuncTag);
+					m_uiIdleFuncTag = 0;
+				}
+			}
+
 			const IBoxIO* l_pBoxIO=getBoxAlgorithmContext()->getDynamicBoxContext();
 
 			for(uint32 chunk=0; chunk<l_pBoxIO->getInputChunkCount(0); chunk++)
@@ -514,6 +472,12 @@ namespace OpenViBEPlugins
 
 			}
 
+			// After any possible rendering, we flush the accumulated stimuli. The default idle func is low priority, so it should be run after rendering by gtk.
+			{
+				boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+				m_uiIdleFuncTag = g_idle_add(flush_callback, this);
+			}
+
 			return true;
 		}
 
@@ -523,7 +487,6 @@ namespace OpenViBEPlugins
 			{
 				case EGrazVisualizationState_Reference:
 					drawReferenceCross();
-					m_pStimulusSender->sendStimuli(m_ui64LastStimulation);
 					break;
 
 				case EGrazVisualizationState_Cue:
@@ -626,7 +589,6 @@ namespace OpenViBEPlugins
 				default:
 					break;
 			}
-			m_pStimulusSender->sendStimuli(m_ui64LastStimulation);
 		}
 
 		void CGrazVisualization::drawBar()
@@ -854,26 +816,21 @@ namespace OpenViBEPlugins
 			m_pRightBar = gdk_pixbuf_scale_simple(m_pOriginalBar, ui32Width, ui32Height/6, GDK_INTERP_BILINEAR);
 			m_pLeftBar = gdk_pixbuf_flip(m_pRightBar, true);
 		}
+
+		void CGrazVisualization::flushQueue(void)
+		{
+			boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+
+			for(size_t i=0;i<m_vStimuliQueue.size();i++)
+			{
+				m_pStimulusSender->sendStimulation(m_vStimuliQueue[i]);
+			}
+			m_vStimuliQueue.clear();
+
+			// This function will be automatically removed after completion, so set to 0
+			m_uiIdleFuncTag = 0;
+		}
+
 	};
 };
-
-
-/*
-int main(int argc, char** argv)
-{
-	try {
-
-		StimulusSender client("localhost", "15361");
-		client.sendStimuli(666);
-
-	}
-	catch (std::exception& e)
-	{
-		std::cerr << e.what() << std::endl;
-		return 1;
-	}
-
-    return 0;
-}
-*/
 

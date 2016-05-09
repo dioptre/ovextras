@@ -25,7 +25,7 @@ boolean StimulusSender::connect(const char* sAddress, const char* sStimulusPort)
 	tcp::resolver resolver(m_ioService);
 			
 	// Stimulus port
-	std::cout << "Connecting to stimulus port [" << sAddress << " : " << sStimulusPort << "]\n";
+	std::cout << "Connecting to Acquisition Server's TCP Tagging [" << sAddress << " , port " << sStimulusPort << "]\n";
 	try
 	{
 		boost::system::error_code error;
@@ -35,13 +35,13 @@ boolean StimulusSender::connect(const char* sAddress, const char* sStimulusPort)
 		m_oStimulusSocket.connect(*endpoint_iterator, error);
 		if(error)
 		{
-			std::cout << "Connection error: " << error << "\n";
+			std::cout << "-- Boost ASIO connection error: " << error << "\n";
 			return false;
 		}
 	} 
 	catch (boost::system::system_error l_oError) 
 	{
-		std::cout << "Issue '" << l_oError.code().message().c_str() << "' with opening connection to server\n";
+		std::cout << "-- Issue '" << l_oError.code().message().c_str() << "' with opening connection to server\n";
 		return false;
 	}
 		
