@@ -317,7 +317,7 @@ boolean CMatlabHelper::getStreamedMatrixOutputHeader(uint32 ui32OutputIndex, IMa
 	for(uint32 i = 0; i<l_ui32NbDimensions;i++)
 	{
 		pMatrix->setDimensionSize(i,(uint32) mxGetPr(l_pDimensionSizes)[i]);
-		for(uint32 x = 0; x<pMatrix->getDimensionSize(i); x++)
+		for(uint32 x = 0; x<pMatrix->getDimensionSize(i) && l_ui32Index < l_oNbCells ; x++)
 		{
 			CString l_sNameTmp = l_pNameList[l_ui32Index];
 			pMatrix->setDimensionLabel(i,x,escapeMatlabString(l_sNameTmp));
