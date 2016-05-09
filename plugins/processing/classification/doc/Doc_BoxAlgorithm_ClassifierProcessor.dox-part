@@ -33,6 +33,12 @@ This input should be connected to the feature vector stream to classify. Each ti
 a classification process will be triggered. Consequently, a classification stimulation will be sent on the
 first output of this box.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierProcessor_Input1|
+ 
+ * |OVP_DocBegin_BoxAlgorithm_ClassifierProcessor_Input2|
+If this input receives the stimulation OVTK_StimulationId_TrainCompleted, the box will reload the classifier
+from the disk. It can be used to implement simple incremental learning.
+ * |OVP_DocEnd_BoxAlgorithm_ClassifierProcessor_Input2|
+ 
 __________________________________________________________________
 
 Outputs description

@@ -72,7 +72,7 @@ parameters you will have available. This will depend on the classification algor
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Settings|
  * 
  *  * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainer_Setting1|
-This is the stimulation to consider to trigger the training process.	
+This is the stimulation to consider to trigger the training process and save the learned classifier to disk.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Setting1|
  * 
  *  * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainer_Setting2|
@@ -111,8 +111,14 @@ the classifier trained with the whole data. The cross-validation is only an erro
 the resulting model. See the miscellaneous section for details on how the k-fold test is done in this box, and possible 
 caveats about the cross-validation procedure.
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Setting10|
- 
 
+ * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainer_Setting11| 
+If the number of class labels is unbalanced, the classifiers tend to be biased towards the majority labels.
+This option can be used to resample the dataset to feature all classes equally. Doing this may make sense 
+if the box is used for incremental learning, where all classes may not be equally represented in the training data 
+obtained so far, even if the design itself is balanced. Note that enabling this will make the cross-validation 
+results optimistic. In most conditions, the feature should be disabled.
+ * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainer_Setting11|
 
 __________________________________________________________________
 
@@ -257,6 +263,14 @@ a problem if the design is supposed to be balanced. The problem may originate e.
 source, the signal processing chains for the different classes, or the classifier learning algorithm. These need
 then to be investigated. Also, if very low accuracies are observed in these matrices, it may give reason 
 to suspect that prediction accuracies on fresh data might be likewise lacking -- or worse.
+
+Incremental Learning
+
+The box can also be used for simple incremental (online) learning. To achieve this, simply send the box the training
+stimulation and it will train a classifier with all the data it has received so far. You can give it more
+feature vectors later, and trigger the learning again by sending another stimulation. Likewise, the corresponding 
+classifier processor box can be made to load new classifiers during playback. With classifiers like LDA, 
+this practice is usually feasible when the data is reasonable sized (as in basic motor imagery).
 
  * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Miscellaneous|
  */
