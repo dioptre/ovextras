@@ -13,7 +13,7 @@ int main()
 		// The construction of the second TagStream must fail because of port already in use.
 		CTagStream tagStream2;
 	}
-	catch(std::exception &e) {
+	catch( std::exception& ) {
 		ok=true;
 	}
 

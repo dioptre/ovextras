@@ -202,11 +202,23 @@ boolean CConfigurationBuilder::preConfigure(void)
 	gtk_tree_view_append_column(l_pChannelNameTreeView, l_pChannelNameValueTreeViewColumn);
 
 	// Connects custom GTK signals
+	GObject* l_pTmp[4];
+	l_pTmp[0] = gtk_builder_get_object(m_pBuilderConfigureInterface,        "button_change_channel_names");
+	l_pTmp[1] = gtk_builder_get_object(m_pBuilderConfigureChannelInterface, "button_apply_channel_name");
+	l_pTmp[2] = gtk_builder_get_object(m_pBuilderConfigureChannelInterface, "button_remove_channel_name");
+	l_pTmp[3] = gtk_builder_get_object(m_pBuilderConfigureChannelInterface, "treeview_electrode_names");
+	if(l_pTmp[0]) g_signal_connect(l_pTmp[0],    "pressed",       G_CALLBACK(button_change_channel_names_cb), this);	
+	if(l_pTmp[1]) g_signal_connect(l_pTmp[1],    "pressed",       G_CALLBACK(button_apply_channel_name_cb),   this);
+	if(l_pTmp[2]) g_signal_connect(l_pTmp[2],    "pressed",       G_CALLBACK(button_remove_channel_name_cb),  this);
+	if(l_pTmp[3]) g_signal_connect(l_pTmp[3],    "row-activated", G_CALLBACK(treeview_apply_channel_name_cb), this);
+	if(!l_pTmp[0] || !l_pTmp[1] || !l_pTmp[2] || !l_pTmp[3])
+	{
+		// @fixme should make a log entry if any NULL but no manager here
+#if defined _DEBUG_Callbacks_
+		cout << "Note: The driver UI file lacks some of the expected buttons or elements. This may be intentional." << endl;
+#endif
+	}
 
-	g_signal_connect(gtk_builder_get_object(m_pBuilderConfigureInterface,        "button_change_channel_names"), "pressed",       G_CALLBACK(button_change_channel_names_cb), this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderConfigureChannelInterface, "button_apply_channel_name"),   "pressed",       G_CALLBACK(button_apply_channel_name_cb),   this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderConfigureChannelInterface, "button_remove_channel_name"),  "pressed",       G_CALLBACK(button_remove_channel_name_cb),  this);
-	g_signal_connect(gtk_builder_get_object(m_pBuilderConfigureChannelInterface, "treeview_electrode_names"),    "row-activated", G_CALLBACK(treeview_apply_channel_name_cb), this);
 	gtk_builder_connect_signals(m_pBuilderConfigureInterface, NULL);
 	gtk_builder_connect_signals(m_pBuilderConfigureChannelInterface, NULL);
 
