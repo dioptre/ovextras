@@ -1,3 +1,6 @@
+
+// @todo for clarity, the StimulusSender related code blocks should be pushed inside the class and away from here
+
 #include "ovpCBoxAlgorithmP300SpellerVisualisation.h"
 
 #include <system/ovCMemory.h>

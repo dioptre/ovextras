@@ -11,7 +11,7 @@
 #include <vector>
 #include <iostream>
 
-//#define OV_DEBUG_CLASSIFIER_LISTENER
+// #define OV_DEBUG_CLASSIFIER_LISTENER
 
 #ifdef OV_DEBUG_CLASSIFIER_LISTENER
 #define DEBUG_PRINT(x) x
@@ -403,8 +403,9 @@ namespace OpenViBEPlugins
 
 							if(l_bValid)
 							{
-								rBox.addSetting(l_sParameterName, l_oTypeIdentifier, l_sBuffer, rBox.getSettingCount()-1);
-								DEBUG_PRINT(std::cout << "Adding setting (case A) " << l_sParameterName << " : " << l_sBuffer << "\n";)
+								// @FIXME argh, the -2 is a hard coding that the classifier trainer has 2 settings after the classifier setting... ouch
+								DEBUG_PRINT(std::cout << "Adding setting (case A) " << l_sParameterName << " : " << l_sBuffer << " to slot " << rBox.getSettingCount()-2 << "\n";)
+								rBox.addSetting(l_sParameterName, l_oTypeIdentifier, l_sBuffer, rBox.getSettingCount()-2);
 								i++;
 							}
 						}

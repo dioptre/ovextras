@@ -13,12 +13,16 @@
 #include <map>
 #include <deque>
 
-class StimulusSender; // fwd declare
+#include <boost/thread.hpp>
+#include <boost/thread/condition.hpp>
+#include <boost/version.hpp>
 
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
 	{
+		class StimulusSender; // fwd declare
+
 		enum EArrowDirection
 		{
 			EArrowDirection_None	= 0,
@@ -54,6 +58,10 @@ namespace OpenViBEPlugins
 
 			virtual void redraw();
 			virtual void resize(OpenViBE::uint32 ui32Width, OpenViBE::uint32 ui32Height);
+
+		public:
+
+			void flushQueue(void);					// Sends all accumulated stimuli to the TCP Tagging
 
 		protected:
 
@@ -126,6 +134,10 @@ namespace OpenViBEPlugins
 
 			OpenViBE::CMatrix m_oConfusion;
 			
+			// For queuing stimulations to the TCP Tagging
+			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
+			guint m_uiIdleFuncTag;
+			boost::mutex m_oIdleFuncMutex;
 			StimulusSender* m_pStimulusSender;
 
 			OpenViBE::uint64 m_ui64LastStimulation;
