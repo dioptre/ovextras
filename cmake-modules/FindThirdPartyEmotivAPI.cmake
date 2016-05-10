@@ -43,5 +43,5 @@ ELSE(LIB_EmotivAPI)
 ENDIF(LIB_EmotivAPI)
 
 ELSE(PATH_EmotivAPI)
-        MESSAGE(STATUS "  FAILED to find Emotiv API")
+        MESSAGE(STATUS "  FAILED to find Emotiv API (optional)")
 ENDIF(PATH_EmotivAPI)
