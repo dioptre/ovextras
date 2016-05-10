@@ -224,7 +224,7 @@ boolean CMatlabHelper::addStreamedMatrixInputBuffer(uint32 ui32InputIndex, IMatr
 	l_sCommand = l_sCommand + CString(l_sBuffer) + CString(",OV_MATRIX_TMP');");
 	// please note the transpose operator ' to put the matrix with  1 channel per line
 
-	delete l_pDims;
+	delete[] l_pDims;
 
 	return ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand) == 0;
 }
@@ -301,6 +301,12 @@ boolean CMatlabHelper::getStreamedMatrixOutputHeader(uint32 ui32OutputIndex, IMa
 	for(uint32 cell = 0; cell < l_oNbCells; cell++)
 	{
 		mxArray * l_pCell = mxGetCell(l_pDimensionLabels, cell);
+		if(!l_pCell)
+		{
+			l_pNameList[cell] = new char[1];
+			l_pNameList[cell][0] = '\0';
+			continue;
+		}
 		const mwSize * l_pCellSizes  = mxGetDimensions(l_pCell);
 		char * l_sName = new char[l_pCellSizes[1]+1];
 		l_sName[l_pCellSizes[1]] = '\0';
@@ -321,6 +327,7 @@ boolean CMatlabHelper::getStreamedMatrixOutputHeader(uint32 ui32OutputIndex, IMa
 		{
 			CString l_sNameTmp = l_pNameList[l_ui32Index];
 			pMatrix->setDimensionLabel(i,x,escapeMatlabString(l_sNameTmp));
+			delete[] l_pNameList[l_ui32Index];
 			l_ui32Index++;
 		}
 	}
@@ -376,6 +383,7 @@ boolean CMatlabHelper::getFeatureVectorOutputHeader(uint32 ui32OutputIndex, IMat
 	{
 		CString l_sNameTmp = l_pNameList[x];
 		pMatrix->setDimensionLabel(0,x,escapeMatlabString(l_sNameTmp));
+		delete[] l_pNameList[x];
 	}
 
 	delete[] l_pNameList;
@@ -439,6 +447,7 @@ boolean CMatlabHelper::getSignalOutputHeader(uint32 ui32OutputIndex, IMatrix * p
 	{
 		CString l_sNameTmp = l_pNameList[x];
 		pMatrix->setDimensionLabel(0,x,escapeMatlabString(l_sNameTmp));
+		delete[] l_pNameList[x];
 	}
 
 	delete[] l_pNameList;
@@ -499,6 +508,7 @@ boolean CMatlabHelper::getChannelLocalisationOutputHeader(uint32 ui32OutputIndex
 	{
 		CString l_sNameTmp = l_pNameList[x];
 		pMatrix->setDimensionLabel(0,x,escapeMatlabString(l_sNameTmp));
+		delete[] l_pNameList[x];
 	}
 
 	delete[] l_pNameList;
@@ -590,11 +600,13 @@ boolean CMatlabHelper::getSpectrumOutputHeader(uint32 ui32OutputIndex, IMatrix *
 	{
 		CString l_sNameTmp = l_pNameList[x];
 		pMatrix->setDimensionLabel(0,x,escapeMatlabString(l_sNameTmp));
+		delete[] l_pNameList[x];
 	}
 	for(uint32 x=0;x<l_ui32NbBands;x++)
 	{
 		CString l_sNameTmp = l_pBandNameList[x];
 		pMatrix->setDimensionLabel(1,x,escapeMatlabString(l_sNameTmp));
+		delete[] l_pBandNameList[x];
 	}
 
 	delete[] l_pNameList;
