@@ -1,4 +1,6 @@
 <OpenViBE-Scenario>
+	<Creator>OpenViBE</Creator>
+	<CreatorVersion>1.1.0+git</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x00001c48, 0x00005598)</Identifier>
@@ -451,10 +453,6 @@
 					<Value>193</Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0xc67a01dc, 0x28ce06c1)</Identifier>
-					<Value></Value>
-				</Attribute>
-				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
 					<Value>false</Value>
 				</Attribute>
@@ -760,6 +758,23 @@ server&lt;/u&gt; are compatible with the actual
 			</Attributes>
 		</Comment>
 		<Comment>
+			<Identifier>(0x000010db, 0x00003fcd)</Identifier>
+			<Text>For prerecorded data to test this P300, see
+
+&lt;b&gt;http://openvibe.inria.fr/datasets/&lt;/b&gt;
+</Text>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
+					<Value>816.000000</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
+					<Value>112.000000</Value>
+				</Attribute>
+			</Attributes>
+		</Comment>
+		<Comment>
 			<Identifier>(0x000049d6, 0x00006e67)</Identifier>
 			<Text>&lt;u&gt;&lt;b&gt;&lt;big&gt;Overview&lt;/big&gt;&lt;/b&gt;&lt;/u&gt;
 
@@ -781,11 +796,11 @@ If you want details on this values, you should read
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>864</Value>
+					<Value>800.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>0</Value>
+					<Value>-80.000000</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
@@ -795,11 +810,11 @@ If you want details on this values, you should read
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>400</Value>
+					<Value>304.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>-208</Value>
+					<Value>-192.000000</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
