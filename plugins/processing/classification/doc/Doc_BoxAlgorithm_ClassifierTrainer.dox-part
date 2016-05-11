@@ -118,7 +118,7 @@ This option can be used to resample the dataset to feature all classes equally. 
 if the box is used for incremental learning, where all classes may not be equally represented in the training data 
 obtained so far, even if the design itself is balanced. Note that enabling this will make the cross-validation 
 results optimistic. In most conditions, the feature should be disabled.
- * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainer_Setting11|
+ * |OVP_DocEnd_BoxAlgorithm_ClassifierTrainer_Setting11|
 
 __________________________________________________________________
 
@@ -138,6 +138,8 @@ Miscellaneous description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_ClassifierTrainer_Miscellaneous|
+
+The box supports various mtulticlass strategies and classifiers as plugins.
  
 \par Available strategy:
 Strategy refers to how feature vectors are routed to one or more classifiers, which possibly can handle only 2 classes themselves.
@@ -195,7 +197,7 @@ Note that feature vectors are normalized between -1 and 1 (using the min/max of 
 \par
 This algorithm provides both hyperplane distance (identity of output layer) and probabilites (softmax function on output layer).
  
-Cross Validation 
+\par Cross Validation 
  
 In this section, we will detail how the k-fold test is implemented in this box. For the k-fold test to be performed, you
 have to choose more than 1 partition in the related settings. Suppose you chose \c n partitions. Then when trigger stimulation
@@ -243,16 +245,16 @@ In conclusion, be careful when choosing this k-fold test setting. Typical value 
 test on 25% - 4 times) to 10 partitions (train on 90% of the feature vectors and test on 10% - 10 times).
 
 Note that the cross-validation performed by the classifier trainer box in OpenViBE may be optimistic.
-The cross-validation is working as it should, but it cannot take into account what happens outside it. 
-In OpenViBE scenarios, there may be e.g. time overlap from epoching, examples drawn from the same epoch 
-ending up in the same cross-validation partition, and (supervised) preprocessing 
-such as CSP or XDawn potentially overfitting the data before its given to the classifier trainer. 
-Such situations are not compatible with the theoretical assumption that the classified examples are 
+The cross-validation computation is working as it should, but it cannot take into account what happens outside
+the classifier trainer box. In OpenViBE scenarios, there may be e.g. time overlap from epoching, feature
+vectors drawn from the same epoch ending up in the same cross-validation partition, and (supervised) 
+preprocessing such as CSP or xDAWN potentially overfitting the data before its given to the classifier trainer. 
+Such situations are not compatible with the theoretical assumption that the feature vectors are 
 independent and identically distributed (the typical iid assumption in machine learning) across
 train and test. To do cross-validation controlling for such issues, we have provided
-a more advanced cross-validation tutorial in the OpenViBE web documentation.
+a more advanced cross-validation tutorial as part of the OpenViBE web documentation.
 
-Confusion Matrices
+\par Confusion Matrices
 
 At the end of the training, the box will print one or two confusion matrices, depending if cross-validation
 was used: one matrix for the cross-validation, the other for the training data. Each matrix will contain true 
@@ -264,7 +266,7 @@ source, the signal processing chains for the different classes, or the classifie
 then to be investigated. Also, if very low accuracies are observed in these matrices, it may give reason 
 to suspect that prediction accuracies on fresh data might be likewise lacking -- or worse.
 
-Incremental Learning
+\par Incremental Learning
 
 The box can also be used for simple incremental (online) learning. To achieve this, simply send the box the training
 stimulation and it will train a classifier with all the data it has received so far. You can give it more

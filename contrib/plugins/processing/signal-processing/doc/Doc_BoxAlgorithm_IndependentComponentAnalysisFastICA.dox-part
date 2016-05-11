@@ -37,6 +37,7 @@ Settings description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Settings|
+ * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Settings|
  *
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting1|
  * Number of independent components to extract (equals PCA dimension reduction)
@@ -83,11 +84,8 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting11|
  * Should the matrix W be saved to a file?
  * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Setting11|
- * 
- * |OVP_DocEnd_BoxAlgorithm_IndependentComponentAnalysisFastICA_Settings|
- 
 
- 
+  
 __________________________________________________________________
 
 Examples description

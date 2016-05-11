@@ -15,15 +15,51 @@ Output:
 
 1) If the outputs of the box are raw numeric values, the box first sends every connecting client eight variables of uint32: format version number (in network byte order), endianness of the stream (in network byte order, 0==unknown, 1==little, 2==big, 3==pdp), sampling frequency of the signal, the number of channels, the number of samples per chunk and three variables of padding, 8*4=32 bytes in total. The last 6 variables are in the byte order of the stream. Note that only those variables will be non-zero that are meaningful for the input in question. 
 
+Header layout as a table,
+
+\verbatim
+| Name                | Type          | Bytes from start |
+| ------------------- | ------------- | ---------------- |
+| Format version      | uint32        | 0                |
+| Endianness          | uint32        | 4                |
+| Sampling frequency  | uint32        | 8                |
+| Number of channels  | uint32        | 12               |
+| Samples per chunk   | uint32        | 16               |
+| Reserved0           | uint32        | 20               |
+| Reserved1           | uint32        | 24               |
+| Reserved2           | uint32        | 28               |
+\endverbatim
+	
 1b) If the output is chosen as hex string or descriptive string (these are valid for Stimulation input only), no header is sent.
 
 2) After the possible global header, the data itself is sent. The data is a stream of float64 chunks for Signal and StreamedMatrix. 
 Each chunk is a matrix [nChannels x nSamples], sent in row-major order, i.e. all samples for one channel are sent in a sequence (a row), 
-then all samples of the next sample (next row), and so on. For Stimulations, the data is uint64 if the user chooses raw, 
-or char strings otherwise.
+then all samples of the next channel (next row), and so on. This is the same order that OpenViBE uses internally for signal chunks. 
 
-Multiple clients can connect to the socket of the box. The box keeps sending data to each client until either the scenario is stopped or the client disconnects. The box does not guarantee that the client starts to receive the input stream from any particular location. When kernel calls box::process() at time t, all clients connected at time t get forwarded the chunks given to box::process() at t. However, if a client establish a connection during box::process(), it may get a partial chunk of t and the whole chunk of t+1 and so on.
+Signal/matrix data layout as a table (k = nSamples, n = nChannels),
 
+\verbatim
+| Name                  | Type          | Bytes from start   |
+| --------------------  | ------------- | ------------------ |
+| Channel 1, sample 1   | float64       | 32 + (k*0+0)*8     |
+| Channel 1, sample 2   | float64       | 32 + (k*0+1)*8     |
+| ...                   | ...           | ...                |
+| Channel 1, sample k   | float64       | 32 + (k*0+(k-1))*8 | 
+| Channel 2, sample 1   | float64       | 32 + (k*1+0)*8     |
+| Channel 2, sample 2   | float64       | 32 + (k*1+1)*8     |
+| ...                   | ...           | ...                |
+| Channel 1, sample k+1 | float64       | 32 + (k*n+0)*8     |
+| ...                   | ...           | ....               |
+\endverbatim
+
+For Stimulations, the data is a sequence of uint64 if the user chooses raw output, or char strings otherwise.
+
+Multiple clients can connect to the socket of the box. The box keeps sending data to 
+each client until either the scenario is stopped or that client disconnects. When
+kernel calls box::process() at time t, all clients connected before or at t, 
+get forwarded the chunks that are pending in box::process() at time t. Note that
+the information how long time has elapsed between the acquisition or scenario startup 
+and the client connection is not currently relayed by TCP Writer.
  * |OVP_DocEnd_BoxAlgorithm_TCPWriter_Description|
 __________________________________________________________________
 
@@ -81,7 +117,8 @@ __________________________________________________________________
  
  Detected transmission errors will cause a disconnection of the client.
  
- Streamed Matrix can be recognized from the TCPWriter header by the sampling rate 0. If the stream is a signal, the sampling rate is a positive number.
+ Streamed Matrix can be recognized from the TCPWriter header by the sampling rate 0. If the stream is a signal, 
+the sampling rate is a positive number. Raw stimulation streams have channel and sample counts per buffer 0 as well.
  
  Known issues: Note that it can be difficult to time-synchronize signals and stimulations exactly on the client side when the client receives data from
  two TCP Writer boxes. Maintaining such synchronization was not a design goal of this box. If you need synchronized streams, it is advised to build
