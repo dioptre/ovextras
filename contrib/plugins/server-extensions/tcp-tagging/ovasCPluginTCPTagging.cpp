@@ -15,7 +15,8 @@ CPluginTCPTagging::CPluginTCPTagging(const OpenViBE::Kernel::IKernelContext& rKe
 	  m_port("15361")
 {
 	m_rKernelContext.getLogManager() << Kernel::LogLevel_Info << "Loading plugin: TCP Tagging\n";
-	m_oSettingsHelper.add("TCP Tagging Port", &m_port);
+	m_oSettingsHelper.add("TCP_Tagging_Port", &m_port);
+	m_oSettingsHelper.load();
 }
 
 CPluginTCPTagging::~CPluginTCPTagging()

@@ -6,6 +6,9 @@
   *
   * \author Anton Andreev
   * \author Jozef Legeny
+  *
+  * \note This plugin is deprecated. The users are recommended to use the TCP Tagging plugin instead. (11.05.2016)
+  *
   */
 
 #include <boost/thread.hpp>

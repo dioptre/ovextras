@@ -1,3 +1,4 @@
+
 #include "ovasCPluginExternalStimulations.h"
 
 #include <boost/interprocess/ipc/message_queue.hpp>
@@ -20,11 +21,11 @@ using namespace OpenViBEAcquisitionServerPlugins;
 using namespace std;
 
 CPluginExternalStimulations::CPluginExternalStimulations(const IKernelContext& rKernelContext) :
-	IAcquisitionServerPlugin(rKernelContext, CString("AcquisitionServer_Plugin_SoftwareTagging")),
+	IAcquisitionServerPlugin(rKernelContext, CString("AcquisitionServer_Plugin_ExternalStimulations")),
 	m_bIsExternalStimulationsEnabled(false),
 	m_sExternalStimulationsQueueName("openvibeExternalStimulations")
 {
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Loading plugin: Software Tagging\n";
+	m_rKernelContext.getLogManager() << LogLevel_Info << "Loading plugin: ExternalStimulations (deprecated)\n";
 
 	m_oSettingsHelper.add("EnableExternalStimulations", &m_bIsExternalStimulationsEnabled);
 	m_oSettingsHelper.add("ExternalStimulationQueueName", &m_sExternalStimulationsQueueName);
@@ -47,7 +48,7 @@ void CPluginExternalStimulations::startHook(const std::vector<OpenViBE::CString>
 		ftime(&m_CTStartTime);
 		m_bIsESThreadRunning = true;
 		m_ESthreadPtr.reset(new boost::thread( boost::bind(&CPluginExternalStimulations::readExternalStimulations , this )));
-		m_rKernelContext.getLogManager() << LogLevel_Info << "Software tagging activated...\n";
+		m_rKernelContext.getLogManager() << LogLevel_Info << "External stimulations (deprecated) activated...\n";
 	}
 	m_vExternalStimulations.clear();
 
