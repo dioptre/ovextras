@@ -31,5 +31,5 @@ IF(WIN32)
 ENDIF(WIN32)
 
 IF(UNIX)
-	MESSAGE(STATUS "The ThinkGear API for Neurosky MindSet is only available on windows.")
+	MESSAGE(STATUS "  Skipped ThinkGear API for Neurosky MindSet, only available on windows.")
 ENDIF(UNIX)
