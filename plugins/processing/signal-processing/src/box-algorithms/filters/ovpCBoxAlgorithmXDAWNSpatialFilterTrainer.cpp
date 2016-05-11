@@ -3,6 +3,7 @@
 #include "ovpCBoxAlgorithmXDAWNSpatialFilterTrainer.h"
 
 #include <system/ovCMemory.h>
+#include <openvibe/ovITimeArithmetics.h>
 
 #include <complex>
 #include <sstream>
@@ -198,7 +199,10 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 			m_pSignalDecoder.decode(i);
 			if(m_pSignalDecoder.isHeaderReceived())
 			{
-				for(it=l_vSignalChunk.begin(); it!=l_vSignalChunk.end(); it++) delete it->m_pMatrix;
+				for(it=l_vSignalChunk.begin(); it!=l_vSignalChunk.end(); it++) 
+				{
+					delete it->m_pMatrix;
+				}
 				l_vSignalChunk.clear();
 
 				l_bIsContinuous=true;
@@ -208,7 +212,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 			}
 			if(m_pSignalDecoder.isBufferReceived())
 			{
-				IMatrix* ip_pMatrix = m_pSignalDecoder.getOutputMatrix();
+				const IMatrix* ip_pMatrix = m_pSignalDecoder.getOutputMatrix();
 				SChunk l_oChunk;
 				l_oChunk.m_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(1, i);
 				l_oChunk.m_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(1, i);
@@ -240,12 +244,15 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 			m_pEvokedPotentialDecoder.decode(i);
 			if(m_pSignalDecoder.isHeaderReceived())
 			{
-				for(it=l_vEvokedPotential.begin(); it!=l_vEvokedPotential.end(); it++) delete it->m_pMatrix;
+				for(it=l_vEvokedPotential.begin(); it!=l_vEvokedPotential.end(); it++) 
+				{
+					delete it->m_pMatrix;
+				}
 				l_vEvokedPotential.clear();
 			}
 			if(m_pEvokedPotentialDecoder.isBufferReceived())
 			{
-				IMatrix* ip_pMatrix = m_pEvokedPotentialDecoder.getOutputMatrix();
+				const IMatrix* ip_pMatrix = m_pEvokedPotentialDecoder.getOutputMatrix();
 				SChunk l_oChunk;
 				l_oChunk.m_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(2, i);
 				l_oChunk.m_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(2, i);
@@ -299,18 +306,18 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 
 		this->getLogManager() << LogLevel_Trace << "Converting OpenViBE matrices to IT++ matrices...\n";
 
-		uint32 l_ui32ChunkCount=l_vSignalChunk.size();
-		uint32 l_ui32ChannelCount=l_vSignalChunk.begin()->m_pMatrix->getDimensionSize(0);
-		uint32 l_ui32SampleCountPerChunk=l_vSignalChunk.begin()->m_pMatrix->getDimensionSize(1);
-		uint32 l_ui32SampleCountPerERP=l_oAveragedERPMatrixOV.getDimensionSize(1);
-		uint64 l_ui64SignalStartTime=l_vSignalChunk.begin()->m_ui64StartTime;
-		uint64 l_ui64SignalEndTime=l_vSignalChunk.rbegin()->m_ui64EndTime;
+		const uint32 l_ui32ChunkCount=l_vSignalChunk.size();
+		const uint32 l_ui32ChannelCount=l_vSignalChunk.begin()->m_pMatrix->getDimensionSize(0);
+		const uint32 l_ui32SampleCountPerChunk=l_vSignalChunk.begin()->m_pMatrix->getDimensionSize(1);
+		const uint32 l_ui32SampleCountPerERP=l_oAveragedERPMatrixOV.getDimensionSize(1);
+		const uint64 l_ui64SignalStartTime=l_vSignalChunk.begin()->m_ui64StartTime;
+		const uint64 l_ui64SignalEndTime=l_vSignalChunk.rbegin()->m_ui64EndTime;
 
 		itpp::mat l_oSignalMatrix(l_ui32ChannelCount, l_ui32ChunkCount*l_ui32SampleCountPerChunk);
 		it=l_vSignalChunk.begin();
 		for(uint32 i=0; it!=l_vSignalChunk.end(); it++, i++)
 		{
-			itpp::mat l_oMatrix=itppext::convert(*it->m_pMatrix);
+			const itpp::mat l_oMatrix=itppext::convert(*it->m_pMatrix);
 			l_oSignalMatrix.set_submatrix(0, i*l_ui32SampleCountPerChunk, l_oMatrix);
 		}
 
@@ -321,8 +328,10 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		l_oDMatrix.clear();
 		for(it=l_vEvokedPotential.begin(); it!=l_vEvokedPotential.end(); it++)
 		{
-			uint64 l_ui64ERPStartTime=it->m_ui64StartTime;
-			uint32 l_ui32ERPStartIndex=(uint32)(((l_ui64ERPStartTime-l_ui64SignalStartTime)*(l_ui32SampleCountPerChunk*l_ui32ChunkCount))/(l_ui64SignalEndTime-l_ui64SignalStartTime));
+			// Compute index of the sample corresponding to the start of the ERP
+			const uint64 l_ui64ERPStartTime = it->m_ui64StartTime;
+			const uint32 l_ui32ERPStartIndex = static_cast<uint32>(ITimeArithmetics::timeToSampleCount(m_pSignalDecoder.getOutputSamplingRate(), l_ui64ERPStartTime));
+
 			for(uint32 k=0; k<l_ui32SampleCountPerERP; k++)
 			{
 				l_oDMatrix(l_ui32ERPStartIndex+k,k)=1;
@@ -347,14 +356,14 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		this->getLogManager() << LogLevel_Info << l_oSignalMatrix.rows() << "x" << l_oSignalMatrix.cols() << "\n";
 #endif
 
-		itpp::mat A=(l_oAveragedERPMatrix*itpp::inv(l_oDMatrix.transpose()*l_oDMatrix)*l_oAveragedERPMatrix.transpose()) * double(l_vEvokedPotential.size()) / double(l_ui32SampleCountPerChunk*l_ui32ChunkCount);
+		const itpp::mat A=(l_oAveragedERPMatrix*itpp::inv(l_oDMatrix.transpose()*l_oDMatrix)*l_oAveragedERPMatrix.transpose()) * double(l_vEvokedPotential.size()) / double(l_ui32SampleCountPerChunk*l_ui32ChunkCount);
 #if 1
 		std::stringstream s4;
 		s4 << "A :\n" << A << "\n";
 		this->getLogManager() << LogLevel_Debug << s4.str().c_str() << "\n";
 #endif
 
-		itpp::mat B=(l_oSignalMatrix*l_oSignalMatrix.transpose()) / double(l_ui32SampleCountPerChunk*l_ui32ChunkCount);
+		const itpp::mat B=(l_oSignalMatrix*l_oSignalMatrix.transpose()) / double(l_ui32SampleCountPerChunk*l_ui32ChunkCount);
 #if 1
 		std::stringstream s5;
 		s5 << "B :\n" << B << "\n";
@@ -389,7 +398,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 			std::map < double, itpp::vec >::const_reverse_iterator it = l_vEigenVector.rbegin();
 			uint32 l_ui32Cnt=0;
 			//We need to compute the size of the first dimension before setting the matrix
-			uint32 l_ui32Dimension1Size = l_vEigenVector.size() < static_cast<uint32>(m_ui64FilterDimension)?l_vEigenVector.size():static_cast<uint32>(m_ui64FilterDimension);
+			const uint32 l_ui32Dimension1Size = l_vEigenVector.size() < static_cast<uint32>(m_ui64FilterDimension)?l_vEigenVector.size():static_cast<uint32>(m_ui64FilterDimension);
 
 			CMatrix l_oOutputVectors;
 			l_oOutputVectors.setDimensionCount(2);
