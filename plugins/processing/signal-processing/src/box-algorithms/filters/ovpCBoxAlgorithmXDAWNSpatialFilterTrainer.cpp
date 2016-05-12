@@ -310,8 +310,6 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		const uint32 l_ui32ChannelCount=l_vSignalChunk.begin()->m_pMatrix->getDimensionSize(0);
 		const uint32 l_ui32SampleCountPerChunk=l_vSignalChunk.begin()->m_pMatrix->getDimensionSize(1);
 		const uint32 l_ui32SampleCountPerERP=l_oAveragedERPMatrixOV.getDimensionSize(1);
-		const uint64 l_ui64SignalStartTime=l_vSignalChunk.begin()->m_ui64StartTime;
-		const uint64 l_ui64SignalEndTime=l_vSignalChunk.rbegin()->m_ui64EndTime;
 
 		itpp::mat l_oSignalMatrix(l_ui32ChannelCount, l_ui32ChunkCount*l_ui32SampleCountPerChunk);
 		it=l_vSignalChunk.begin();
