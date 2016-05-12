@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ov_build_type=Release
+ov_build_type=RelWithDebInfo
 if [ "$1" == "--debug" ]; then
 	ov_build_type=Debug
 	shift
