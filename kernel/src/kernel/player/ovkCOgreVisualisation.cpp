@@ -24,6 +24,7 @@ COgreVisualisation::COgreVisualisation(const OpenViBE::Kernel::IKernelContext& r
 	,m_bOgreInitialised(false)
 	,m_bResourcesInitialised(false)
 	,m_pRoot(NULL)
+	,m_pLogManager(NULL)
 	,m_pLog(NULL)
 	,m_pOverlaySystem(NULL)
 {
@@ -82,10 +83,13 @@ boolean COgreVisualisation::initializeOgre(void) throw (std::exception)
 
 		//configure custom log
 		//--------------------
-		LogManager* l_pLogManager = new LogManager();
+		m_pLogManager = new LogManager();
 		//create custom log
 		const CString l_sLogFile = this->getConfigurationManager().expand("${Kernel_3DVisualisationOgreLogPath}");
-		m_pLog = l_pLogManager->createLog(l_sLogFile.toASCIIString(),
+
+		this->getLogManager() << LogLevel_Trace << "Ogre log will be written to [" << l_sLogFile << "]\n";
+
+		m_pLog = m_pLogManager->createLog(l_sLogFile.toASCIIString(),
 			true /* is default log */, false /* send log messages to debugger */, (l_sLogFile == CString("") ? true : false) /* suppress file log */);
 		if (!m_pLog)
 		{
@@ -142,8 +146,7 @@ boolean COgreVisualisation::initializeOgre(void) throw (std::exception)
 	catch(Ogre::Exception& e)
 	{
 		this->getLogManager()
-			<< LogLevel_Trace << "<" << LogColor_PushStateBit << LogColor_ForegroundBlue << "Ogre3D" << LogColor_PopStateBit << "::Exception> "
-			<< "Failed to initialize Ogre : " << e.what() << "\n";
+			<< LogLevel_Error << "<Ogre3D::Exception> Failed to initialize Ogre : " << e.what() << "\n";
 	}
 
 	return m_bOgreInitialised;
@@ -170,8 +173,7 @@ boolean COgreVisualisation::initializeResources() throw (Ogre::Exception)
 	catch(Ogre::Exception& e)
 	{
 		this->getLogManager()
-			<< LogLevel_Trace << "<" << LogColor_PushStateBit << LogColor_ForegroundBlue << "Ogre3D" << LogColor_PopStateBit << "::Exception> "
-			<< "Failed to initialize Ogre resources : " << e.what() << "\n";
+			<< LogLevel_Error << "<Ogre3D::Exception> Failed to initialize Ogre resources : " << e.what() << "\n";
 	}
 
 	m_bResourcesInitialised = true;
@@ -215,16 +217,34 @@ boolean COgreVisualisation::finish()
 			itResources = m_mOgreResourceGroups.begin();
 		}
 
+#if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
+		if(m_pOverlaySystem) 
+		{
+			OGRE_DELETE m_pOverlaySystem;
+			m_pOverlaySystem = NULL;
+		}
+#endif
+
 		if(m_pRoot != NULL)
 		{
 			delete m_pRoot;
 			m_pRoot = NULL;
 		}
 
+		if(m_pLog) {
+			m_pLog->removeListener(this);
+			m_pLogManager->destroyLog(m_pLog);
+			m_pLog = NULL;
+		}
+
+		if(m_pLogManager) {
+			delete m_pLogManager;
+			m_pLogManager = NULL;
+		}
 	}
-	catch(Ogre::Exception)
+	catch(Ogre::Exception e)
 	{
-		//
+		this->getLogManager() << LogLevel_Error << "<Ogre3D::Exception> During finish() : " << e.what() << "\n";
 		return false;
 	}
 
