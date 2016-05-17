@@ -112,11 +112,13 @@ ELSEIF(UNIX)
 	endif ()
 
 	if(EXISTS "/etc/debian_version")
-	   set (PLATFORM "Debian")
+		set (PLATFORM "Debian")
+		ADD_DEFINITIONS("-DTARGET_OS_Linux_Debian")
 	endif(EXISTS "/etc/debian_version")
 
 	if(EXISTS "/etc/fedora-release")
-	   set (PLATFORM "Fedora")
+		set (PLATFORM "Fedora")
+		ADD_DEFINITIONS("-DTARGET_OS_Linux_Fedora")
 	endif(EXISTS "/etc/fedora-release")
 
 ELSE(WIN32)

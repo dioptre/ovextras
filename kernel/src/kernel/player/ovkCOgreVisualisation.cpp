@@ -11,6 +11,26 @@
 	#include "Overlay/OgreOverlaySystem.h"
 #endif
 
+#if defined(TARGET_OS_Linux_Fedora)
+	// @FIXME this is an awful hack to avoid crashes on our Fedora CI running on CloudStack VM.
+	// It seems that there we get difficult to track X11 errors from inside Ogre that
+	// 1) abort the application
+	// 2) do not seem to appear on a non-VM computer
+	// 3) seem to be of no concern to the automatic testing?
+	// Hence we just specify a dummy error handler until we can solve the problem.
+	#include <stdio.h>
+	#include <X11/Xlib.h>
+
+	static int errorHandlerHack(Display *display, XErrorEvent *event)
+	{
+		(void) fprintf(stderr,
+						"WARNING: Ignored Xlib error: error_code=%d, request_code=%d\n",
+						event->error_code,
+						event->request_code) ;
+		return 0 ;
+	}
+#endif
+
 using namespace std;
 using namespace Ogre;
 using namespace OpenViBE;
@@ -135,6 +155,10 @@ boolean COgreVisualisation::initializeOgre(void) throw (std::exception)
 			//init Ogre w/o creating a default window
 			m_pRoot->initialise(false);
 			m_bOgreInitialised = true;
+
+#if defined(TARGET_OS_Linux_Fedora)
+			XSetErrorHandler(errorHandlerHack);
+#endif
 		}
 
 #if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
