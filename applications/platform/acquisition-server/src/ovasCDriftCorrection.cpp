@@ -332,6 +332,9 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 			}
 		}
 
+		oPendingStimulationSet.appendStimulation(OVTK_GDF_Incorrect, l_ui64LastSampleDate, 0);
+		oPendingStimulationSet.appendStimulation(OVTK_GDF_Correct,   l_ui64LastSampleDate, 0);
+
 		m_f64DriftEstimate-=l_ui64SamplesToRemove;
 
 		m_ui64CorrectedSampleCount-=l_ui64SamplesToRemove;
