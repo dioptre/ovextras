@@ -107,16 +107,17 @@ Section "DirectX Runtime"
 	
 	SetOutPath "$INSTDIR"
 
-	IfFileExists "$SYSDIR\d3dx9_42.dll" no_need_to_install_directx
-	IfFileExists "arch\openvibe-directx.exe" no_need_to_download_directx
-	NSISdl::download "http://www.microsoft.com/downloads/info.aspx?na=90&p=&SrcDisplayLang=en&SrcCategoryId=&SrcFamilyId=04ac064b-00d1-474e-b7b1-442d8712d553&u=http%3a%2f%2fdownload.microsoft.com%2fdownload%2fB%2f7%2f9%2fB79FC9D7-47B8-48B7-A75E-101DEBEB5AB4%2fdirectx_aug2009_redist.exe" "arch\openvibe-directx.exe"
+	IfFileExists "$SYSDIR\d3dx9_43.dll" no_need_to_install_directx
+	IfFileExists "arch\directx-jun2010.exe" no_need_to_download_directx
+	NSISdl::download "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" "arch\directx-jun2010.exe"
 	Pop $R0 ; Get the return value
 		StrCmp $R0 "success" +3
 			MessageBox MB_OK "Download failed: $R0" /SD IDOK
 			Quit
 no_need_to_download_directx:
-	ExecWait '"arch\openvibe-directx.exe" /T:"$INSTDIR\tmp" /Q'
+	ExecWait '"arch\directx-jun2010.exe" /T:"$INSTDIR\tmp" /Q'
 	ExecWait '"$INSTDIR\tmp\DXSETUP.exe" /silent'
+	RMDir /r "$INSTDIR\tmp"
 no_need_to_install_directx:
 
 SectionEnd
