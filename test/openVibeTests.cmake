@@ -268,12 +268,12 @@ message(STATUS "  INFO : submit(...) returned '${res}'")
 
 message(" -- Finished ${MODEL}  - ${CTEST_BUILD_NAME} --")
 
-# IF(${MODEL} MATCHES Nightly)
-# 	message(" -- clean ${MODEL}  - ${CTEST_BUILD_NAME} --")
-# 	ctest_empty_binary_directory(${CTEST_SOURCE_DIRECTORY})
-#	ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
-#   exec_program("rm" ARGS "-rf ${CTEST_SOURCE_DIRECTORY}" OUTPUT_VARIABLE "cleanScript")
-# ENDIF(${MODEL} MATCHES Nightly)
+IF(${MODEL} MATCHES Nightly)
+	message(" -- clean ${MODEL}  - ${CTEST_BUILD_NAME} --")
+ 	ctest_empty_binary_directory(${CTEST_SOURCE_DIRECTORY})
+	ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
+	exec_program("rm" ARGS "-rf ${CTEST_SOURCE_DIRECTORY}" OUTPUT_VARIABLE "cleanScript")
+ENDIF(${MODEL} MATCHES Nightly)
 
 ## unlock if continous build
 IF(${MODEL} MATCHES Continuous)
