@@ -1443,7 +1443,7 @@ Ogre::String DotSceneLoader::getProperty(const Ogre::String &ndNm, const Ogre::S
 void DotSceneLoader::processUserDataReference(rapidxml::xml_node<>* XMLNode, Ogre::Entity *pEntity)
 {
 	Ogre::String str = XMLNode->first_attribute("id")->value();
-	pEntity->setUserAny(Ogre::Any(str));
+	pEntity->getUserObjectBindings().setUserAny(Ogre::Any(str));
 }
 
 #endif
