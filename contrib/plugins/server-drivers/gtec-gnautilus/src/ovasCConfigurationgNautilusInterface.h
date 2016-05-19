@@ -51,7 +51,7 @@ namespace OpenViBEAcquisitionServer
 										 OpenViBE::boolean& rBatteryLevelEnabled,
 										 OpenViBE::boolean& rValidationIndicatorEnabled,
 										 vector<OpenViBE::uint16>& rSelectedChannels,
-										 vector<OpenViBE::uint16>& rBipolarChannels,
+										 vector<OpenViBE::int32>& rBipolarChannels,
 										 vector<OpenViBE::boolean>& rCAR,
 										 vector<OpenViBE::boolean>& rNoiseReduction
 										 );
@@ -90,7 +90,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean& m_rBatteryLevelEnabled;
 		OpenViBE::boolean& m_rValidationIndicatorEnabled;
 		vector<OpenViBE::uint16>& m_vSelectedChannels;
-		vector<OpenViBE::uint16>& m_vBipolarChannels;
+		vector<OpenViBE::int32>& m_vBipolarChannels;
 		vector<OpenViBE::boolean>& m_vCAR;
 		vector<OpenViBE::boolean>& m_vNoiseReduction;
 		vector<OpenViBE::int32> m_vComboBoxBandpassFilterIndex;

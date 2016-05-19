@@ -89,7 +89,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bBatteryLevelEnabled;
 		OpenViBE::boolean m_bValidationIndicatorEnabled;
 		vector<OpenViBE::uint16> m_vSelectedChannels;
-		vector<OpenViBE::uint16> m_vBipolarChannels;
+		vector<OpenViBE::int32> m_vBipolarChannels;
 		vector<OpenViBE::boolean> m_vNoiseReduction;
 		vector<OpenViBE::boolean> m_vCAR;
 		OpenViBE::uint32 m_ui32AcquiredChannelCount;

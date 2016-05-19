@@ -83,6 +83,8 @@ boolean CDrivergNautilusInterface::initialize(
 	const uint32 ui32SampleCountPerSentBlock,
 	IDriverCallback& rCallback)
 {
+	unsigned __int32 i;
+
 	if(m_rDriverContext.isConnected())
 	{
 		return false;
@@ -94,55 +96,75 @@ boolean CDrivergNautilusInterface::initialize(
 	
 	if (ui32SampleCountPerSentBlock > 250)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Sample count per sent block cannot be higher than 250 samples for g.Nautilus\n";
 		return false;
 	}
 
 	// initialize basic GDS functions before the first GDS function itself is called
 	GDS_Initialize();
 
+	// get number of channels actually acquired
+	m_ui32AcquiredChannelCount = 0;
+	for (i = 0; i < GDS_GNAUTILUS_CHANNELS_MAX; i++)
+	{
+		if (find(m_vSelectedChannels.begin(),m_vSelectedChannels.end(),(i + 1)) != m_vSelectedChannels.end())
+		{
+			m_oHeader.setChannelUnits(m_ui32AcquiredChannelCount, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
+			m_ui32AcquiredChannelCount += 1;
+		}
+	}
+
+	m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
+
 	// g.Nautilus provides some extra channel, add them to the channels count
 	// and provide corresponding names
-	m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
-	if(m_bDigitalInputEnabled)
-	{
-		m_oHeader.setChannelCount(m_ui32AcquiredChannelCount+1);
-		m_oHeader.setChannelName(m_ui32AcquiredChannelCount, "CH_Event");
-		m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
-	}
+	unsigned __int32 l_ui32AcquiredChannelCount = m_ui32AcquiredChannelCount;
 	if (m_bAccelerationDataEnabled)
 	{
-		m_oHeader.setChannelCount(m_ui32AcquiredChannelCount+3);
-		m_oHeader.setChannelName(m_ui32AcquiredChannelCount-2, "CH_Accel_x");
-		m_oHeader.setChannelName(m_ui32AcquiredChannelCount-1, "CH_Accel_y");
-		m_oHeader.setChannelName(m_ui32AcquiredChannelCount, "CH_Accel_z");
-		m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
+		m_oHeader.setChannelCount(l_ui32AcquiredChannelCount+3);
+		m_oHeader.setChannelName(l_ui32AcquiredChannelCount, "CH_Accel_x");
+		m_oHeader.setChannelName(l_ui32AcquiredChannelCount + 1, "CH_Accel_y");
+		m_oHeader.setChannelName(l_ui32AcquiredChannelCount + 2, "CH_Accel_z");
+		m_oHeader.setChannelUnits(l_ui32AcquiredChannelCount, OVTK_UNIT_Meter_Per_Second_Squared, OVTK_FACTOR_Base);
+		m_oHeader.setChannelUnits(l_ui32AcquiredChannelCount + 1, OVTK_UNIT_Meter_Per_Second_Squared, OVTK_FACTOR_Base);
+		m_oHeader.setChannelUnits(l_ui32AcquiredChannelCount + 2, OVTK_UNIT_Meter_Per_Second_Squared, OVTK_FACTOR_Base);
+		l_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
 	}
 	if(m_bCounterEnabled)
 	{
-		m_oHeader.setChannelCount(m_ui32AcquiredChannelCount+1);
-		m_oHeader.setChannelName(m_ui32AcquiredChannelCount, "CH_Counter");
-		m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
+		m_oHeader.setChannelCount(l_ui32AcquiredChannelCount+1);
+		m_oHeader.setChannelName(l_ui32AcquiredChannelCount, "CH_Counter");
+		m_oHeader.setChannelUnits(l_ui32AcquiredChannelCount,OVTK_UNIT_Dimensionless,OVTK_FACTOR_Base);
+		l_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
 	}
 	if(m_bLinkQualityEnabled)
 	{
-		m_oHeader.setChannelCount(m_ui32AcquiredChannelCount+1);
-		m_oHeader.setChannelName(m_ui32AcquiredChannelCount, "CH_LQ");
-		m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
+		m_oHeader.setChannelCount(l_ui32AcquiredChannelCount+1);
+		m_oHeader.setChannelName(l_ui32AcquiredChannelCount, "CH_LQ");
+		m_oHeader.setChannelUnits(l_ui32AcquiredChannelCount,OVTK_UNIT_10_2_Percent,OVTK_FACTOR_Base);
+		l_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
 	}
 	if (m_bBatteryLevelEnabled)
 	{
-		m_oHeader.setChannelCount(m_ui32AcquiredChannelCount+1);
-		m_oHeader.setChannelName(m_ui32AcquiredChannelCount, "CH_Battery");
-		m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
+		m_oHeader.setChannelCount(l_ui32AcquiredChannelCount+1);
+		m_oHeader.setChannelName(l_ui32AcquiredChannelCount, "CH_Battery");
+		m_oHeader.setChannelUnits(l_ui32AcquiredChannelCount,OVTK_UNIT_10_2_Percent,OVTK_FACTOR_Base);
+		l_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
+	}
+	if(m_bDigitalInputEnabled)
+	{
+		m_oHeader.setChannelCount(l_ui32AcquiredChannelCount+1);
+		m_oHeader.setChannelName(l_ui32AcquiredChannelCount, "CH_Event");
+		m_oHeader.setChannelUnits(l_ui32AcquiredChannelCount,OVTK_UNIT_Dimensionless,OVTK_FACTOR_Base);
+		l_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
 	}
 	if(m_bValidationIndicatorEnabled)
 	{
-		m_oHeader.setChannelCount(m_ui32AcquiredChannelCount+1);
-		m_oHeader.setChannelName(m_ui32AcquiredChannelCount, "CH_Valid");
-		m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
+		m_oHeader.setChannelCount(l_ui32AcquiredChannelCount+1);
+		m_oHeader.setChannelName(l_ui32AcquiredChannelCount, "CH_Valid");
+		m_oHeader.setChannelUnits(l_ui32AcquiredChannelCount,OVTK_UNIT_Dimensionless,OVTK_FACTOR_Base);
+		l_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
 	}
-	
-	m_ui32AcquiredChannelCount = m_oHeader.getChannelCount();
 
 	// initialize connection and open connection handle and get serial of connected g.Nautilus
 	GDS_DEVICE_CONNECTION_INFO *l_pConnectedDevicesInfo;
@@ -151,7 +173,6 @@ boolean CDrivergNautilusInterface::initialize(
 	GDS_ENDPOINT l_epLocalEp;
 	OpenViBE::uint8 l_bByteIP[4];
 	char l_sTempIP[16];
-	unsigned __int32 i;
 	
 	l_bByteIP[0] = 1;
 	l_bByteIP[1] = 0;
@@ -173,6 +194,7 @@ boolean CDrivergNautilusInterface::initialize(
 	m_oGdsResult = GDS_GetConnectedDevices(l_epHostEp, l_epLocalEp, &l_pConnectedDevicesInfo, &l_ui32ConnectedDevicesCount);
 	if(m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	for(i = 0; i < l_ui32ConnectedDevicesCount; i++)
@@ -201,6 +223,7 @@ boolean CDrivergNautilusInterface::initialize(
 	}
 	if(l_bDeviceFound == false)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "No g.Nautilus device found\n";
 		return false;
 	}
 	
@@ -214,25 +237,11 @@ boolean CDrivergNautilusInterface::initialize(
 	m_oGdsResult = GDS_Connect(l_epHostEp, l_epLocalEp, l_sDeviceNames, m_ui32DeviceCount, l_bOpenExclusively, &m_pDevice, &l_bIsCreator);
 	if(m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
-	// get and set electrode names for selected electrodes
-	unsigned __int32 l_ui32MountedModulesCount, l_ui32ElectrodeNamesCount;
-	m_oGdsResult = GDS_GNAUTILUS_GetChannelNames(m_pDevice, l_sDeviceNames, &l_ui32MountedModulesCount, NULL, &l_ui32ElectrodeNamesCount);
-	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
-	{
-		return false;
-	}
-
-	char (*l_sElectrodeNames)[GDS_GNAUTILUS_ELECTRODE_NAME_LENGTH_MAX] = new char[l_ui32ElectrodeNamesCount][GDS_GNAUTILUS_ELECTRODE_NAME_LENGTH_MAX];
-	m_oGdsResult = GDS_GNAUTILUS_GetChannelNames(m_pDevice, l_sDeviceNames, &l_ui32MountedModulesCount, l_sElectrodeNames, &l_ui32ElectrodeNamesCount);
-	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
-	{
-		return false;
-	}
-
-	unsigned __int16 l_ui16SelectedChannelsCount = 0;
+	m_rDriverContext.getLogManager() << LogLevel_Info << "Connected to device : " << m_sDeviceSerial.c_str() << "\n";
 
 	m_oNautilusDeviceCfg.SamplingRate = m_oHeader.getSamplingFrequency();
 	m_oNautilusDeviceCfg.NumberOfScans = ui32SampleCountPerSentBlock;
@@ -287,12 +296,17 @@ boolean CDrivergNautilusInterface::initialize(
 		}
 	}
 
-	// Builds up a buffer to store
-	// acquired samples. This buffer
-	// will be sent to the acquisition
-	// server later...
+	// Free memory allocated for list of connected devices by GDS_GetConnectedDevices
+	m_oGdsResult = GDS_FreeConnectedDevicesList(&l_pConnectedDevicesInfo, l_ui32ConnectedDevicesCount);
+	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
+		return false;
+	}
 
-	m_pSample=new float[m_ui32AcquiredChannelCount*m_oNautilusDeviceCfg.NumberOfScans];
+	// Builds up a buffer to store acquired samples. This buffer
+	// will be sent to the acquisition server later...
+	m_pSample=new float[l_ui32AcquiredChannelCount*m_oNautilusDeviceCfg.NumberOfScans];
 	if(!m_pSample)
 	{
 		delete [] m_pSample;
@@ -300,21 +314,14 @@ boolean CDrivergNautilusInterface::initialize(
 		return false;
 	}
 	// set up data buffer for gds getdata function
-	m_pBuffer = new float[m_ui32AcquiredChannelCount*m_oNautilusDeviceCfg.NumberOfScans];
+	m_pBuffer = new float[l_ui32AcquiredChannelCount*m_oNautilusDeviceCfg.NumberOfScans];
 	if(!m_pBuffer)
 	{
 		delete [] m_pBuffer;
 		m_pBuffer = NULL;
 		return false;
 	}
-	m_ui32BufferSize = m_ui32AcquiredChannelCount*m_oNautilusDeviceCfg.NumberOfScans;
-
-	// ...
-	// initialize hardware and get
-	// available header information
-	// from it
-	// Using for example the connection ID provided by the configuration (m_ui32ConnectionID)
-	// ...
+	m_ui32BufferSize = l_ui32AcquiredChannelCount*m_oNautilusDeviceCfg.NumberOfScans;
 
 	// Saves parameters
 	m_pCallback=&rCallback;
@@ -337,11 +344,15 @@ boolean CDrivergNautilusInterface::start(void)
 	l_oGdsDeviceConfigurations[0].Configuration = &m_oNautilusDeviceCfg;
 	l_oGdsDeviceConfigurations[0].DeviceInfo.DeviceType = GDS_DEVICE_TYPE_GNAUTILUS;
 	strcpy_s(l_oGdsDeviceConfigurations[0].DeviceInfo.Name,m_sDeviceSerial.c_str());
+	unsigned __int32 l_ui32ScanCount = 0;
+	unsigned __int32 l_ui32ChannelsPerDevice = 0;
+	unsigned __int32 l_ui32BufferSizeInSamples = 0;
 
-	// TODO: add error handling if gds_result.ErrorCode != 0
+	// set device configuration
 	m_oGdsResult = GDS_SetConfiguration(m_pDevice,l_oGdsDeviceConfigurations,m_ui32DeviceCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -351,8 +362,12 @@ boolean CDrivergNautilusInterface::start(void)
 	m_oGdsResult = GDS_SetDataReadyCallback(m_pDevice, (GDS_Callback)OnDataReadyEventHandler,m_oNautilusDeviceCfg.NumberOfScans,NULL);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
+
+	// set number of scans getdata function will return
+	m_ui32AvailableScans = m_oNautilusDeviceCfg.NumberOfScans;
 
 	// ...
 	// request hardware to start
@@ -362,12 +377,21 @@ boolean CDrivergNautilusInterface::start(void)
 	m_oGdsResult = GDS_StartAcquisition(m_pDevice);
 	if(m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	// start data stream from server
 	m_oGdsResult = GDS_StartStreaming(m_pDevice);
 	if(m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
+		return false;
+	}
+
+	m_oGdsResult = GDS_GetDataInfo(m_pDevice, &l_ui32ScanCount, NULL, &l_ui32ChannelsPerDevice, &l_ui32BufferSizeInSamples);
+	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -381,29 +405,29 @@ boolean CDrivergNautilusInterface::loop(void)
 
 	OpenViBE::CStimulationSet l_oStimulationSet;
 
-	// set number of scans getdata function will return
-	m_ui32AvailableScans = m_oNautilusDeviceCfg.NumberOfScans;
-
 	if(m_rDriverContext.isStarted())
 	{
 		DWORD dw_ret = WaitForSingleObject(g_oDataReadyEventHandle,5000);
 		if(dw_ret == WAIT_TIMEOUT)
 		{
 			// if data ready event is not triggered in 5000ms add a timeout handler
+			m_rDriverContext.getLogManager() << LogLevel_Error << "No data received in 5 seconds\n";
 			return false;
 		}
 		// when data is ready call get data function with amount of scans to return
 		m_oGdsResult = GDS_GetData(m_pDevice,&m_ui32AvailableScans,m_pBuffer,m_ui32BufferSize);
 		if(m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 		{
+			m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 			return false;
 		}
+		
 		// put data from receiving buffer to application buffer
-		for(uint32 i=0; i<m_ui32AcquiredChannelCount; i++)
+		for(uint32 i=0; i<m_oHeader.getChannelCount(); i++)
 		{
 			for(uint32 j=0; j<m_ui32SampleCountPerSentBlock; j++)
 			{
-				m_pSample[i*m_ui32SampleCountPerSentBlock+j]=m_pBuffer[j*(m_ui32AcquiredChannelCount)+i];
+				m_pSample[i*m_ui32SampleCountPerSentBlock+j]=m_pBuffer[j*(m_oHeader.getChannelCount())+i];
 			}
 		}
 	}
@@ -415,8 +439,8 @@ boolean CDrivergNautilusInterface::loop(void)
 	//...
 	m_pCallback->setSamples(m_pSample);
 	
-	// When your sample buffer is fully loaded, 
-	// it is advised to ask the acquisition server 
+	// When your sample buffer is fully loaded,
+	// it is advised to ask the acquisition server
 	// to correct any drift in the acquisition automatically.
 	m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
 
@@ -444,6 +468,7 @@ boolean CDrivergNautilusInterface::stop(void)
 	m_oGdsResult = GDS_StopStreaming(m_pDevice);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -451,6 +476,7 @@ boolean CDrivergNautilusInterface::stop(void)
 	m_oGdsResult = GDS_StopAcquisition(m_pDevice);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -469,6 +495,7 @@ boolean CDrivergNautilusInterface::uninitialize(void)
 	m_oGdsResult = GDS_Disconnect(&m_pDevice);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -478,6 +505,8 @@ boolean CDrivergNautilusInterface::uninitialize(void)
 
 	// uninitialize basic GDS functions after last GDS function is called
 	GDS_Uninitialize();
+
+	m_rDriverContext.getLogManager() << LogLevel_Info << "Disconnected from device : " << m_sDeviceSerial.c_str() << "\n";
 
 	return true;
 }

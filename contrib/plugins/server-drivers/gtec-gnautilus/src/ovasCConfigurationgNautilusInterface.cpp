@@ -16,7 +16,7 @@ Example with a button that launch a calibration of the device:
 */
 
 //Callback connected to a dedicated gtk button (button_select_channels_bipolar_car_noise):
-static void button_channel_settings_cb(::GtkButton* pButton, void* pUserData)
+static void button_channel_settings_cb(GtkButton* pButton, void* pUserData)
 {
 	CConfigurationgNautilusInterface* l_pConfig=static_cast<CConfigurationgNautilusInterface*>(pUserData);
 	l_pConfig->buttonChannelSettingsPressedCB();
@@ -34,7 +34,7 @@ void CConfigurationgNautilusInterface::buttonChannelSettingsPressedCB(void)
 }
 
 //Callback connected to a dedicated gtk button (button_select_sensitivity_filters):
-static void button_sensitivity_filters_cb(::GtkButton* pButton, void* pUserData)
+static void button_sensitivity_filters_cb(GtkButton* pButton, void* pUserData)
 {
 	CConfigurationgNautilusInterface* l_pConfig=static_cast<CConfigurationgNautilusInterface*>(pUserData);
 	l_pConfig->buttonSensitivityFiltersPressedCB();
@@ -51,7 +51,7 @@ void CConfigurationgNautilusInterface::buttonSensitivityFiltersPressedCB(void)
 }
 
 //Callback connected to a dedicated gtk button (button_sensitivity_filters_apply):
-static void button_sensitivity_filters_apply_cb(::GtkButton* pButton, void* pUserData)
+static void button_sensitivity_filters_apply_cb(GtkButton* pButton, void* pUserData)
 {
 	CConfigurationgNautilusInterface* l_pConfig=static_cast<CConfigurationgNautilusInterface*>(pUserData);
 	l_pConfig->buttonSensitivityFiltersApplyPressedCB();
@@ -66,7 +66,7 @@ void CConfigurationgNautilusInterface::buttonSensitivityFiltersApplyPressedCB(vo
 }
 
 //Callback connected to a dedicated gtk button (button_channel_apply):
-static void button_channel_settings_apply_cb(::GtkButton* pButton, void* pUserData)
+static void button_channel_settings_apply_cb(GtkButton* pButton, void* pUserData)
 {
 	CConfigurationgNautilusInterface* l_pConfig=static_cast<CConfigurationgNautilusInterface*>(pUserData);
 	l_pConfig->buttonChannelSettingsApplyPressedCB();
@@ -89,8 +89,12 @@ void CConfigurationgNautilusInterface::buttonChannelSettingsApplyPressedCB(void)
 		sprintf_s(&l_sTemporary[0],30,"checkbutton_channel_%d",(i + 1));
 		GtkButton *l_pCheckButton = GTK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,l_sTemporary));
 		if (l_pCheckButton)
-			if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButton)))
+		{
+			if ((gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButton))) && (gtk_widget_get_visible(GTK_WIDGET(l_pCheckButton))))
+			{
 				l_ui16NumberOfChannels += 1;
+			}
+		}
 	}
 
 	GtkSpinButton *l_pSpinButton = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,"spinbutton_number_of_channels"));
@@ -99,7 +103,7 @@ void CConfigurationgNautilusInterface::buttonChannelSettingsApplyPressedCB(void)
 }
 
 // catch combobox sampling rate changed signal and call function which handles event
-static void sample_rate_changed_cb(::GtkComboBox* pComboBox, void *pUserData)
+static void sample_rate_changed_cb(GtkComboBox* pComboBox, void *pUserData)
 {
 	CConfigurationgNautilusInterface* l_pConfig=static_cast<CConfigurationgNautilusInterface*>(pUserData);
 	l_pConfig->comboboxSampleRateChangedCB();
@@ -112,12 +116,12 @@ void CConfigurationgNautilusInterface::comboboxSampleRateChangedCB()
 	OpenViBE::boolean l_bFunctionReturn = getFiltersForNewSamplingRate();
 	if (!l_bFunctionReturn)
 	{
-		// TODO: add error handling
+		// error logged in getFiltersForNewSamplingRate
 	}
 }
 
 // catch noise reduction checkbox toggled signal and call function which handles event
-static void noise_reduction_changed_cb(::GtkCheckButton* pCheckbutton, void* pUserData)
+static void noise_reduction_changed_cb(GtkCheckButton* pCheckbutton, void* pUserData)
 {
 	CConfigurationgNautilusInterface* l_pConfig = static_cast<CConfigurationgNautilusInterface*>(pUserData);
 	l_pConfig->checkbuttonNoiseReductionChangedCB();
@@ -127,23 +131,27 @@ static void noise_reduction_changed_cb(::GtkCheckButton* pCheckbutton, void* pUs
 void CConfigurationgNautilusInterface::checkbuttonNoiseReductionChangedCB()
 {
 	// activate/deactivate noise reduction checkboxes in dialog_select_channels_bipolar_car_noise
-	GtkCheckButton *l_pCheckButtonNoiseReduction = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,"checkbutton_noise_reduction"));
-	gboolean l_bCheckButtonValue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButtonNoiseReduction));
+	GtkCheckButton *l_pCheckButtonNoise = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,"checkbutton_noise_reduction"));
+	gboolean l_bCheckButtonValue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButtonNoise));
+	GtkCheckButton *l_pCheckButtonNoiseChannel;
 	char l_sTemporary[45];
 	for (unsigned __int16 i = 0; i < GDS_GNAUTILUS_CHANNELS_MAX; i++)
 	{
 		sprintf_s(&l_sTemporary[0],45,"checkbutton_noise_channel_%d",(i + 1));
-		l_pCheckButtonNoiseReduction = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,l_sTemporary));
+		l_pCheckButtonNoiseChannel = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,l_sTemporary));
 		
-		if (l_pCheckButtonNoiseReduction)
+		if (l_pCheckButtonNoiseChannel)
 		{
-			gtk_widget_set_sensitive(GTK_WIDGET(l_pCheckButtonNoiseReduction),l_bCheckButtonValue);
+			if (gtk_widget_get_visible(GTK_WIDGET(l_pCheckButtonNoiseChannel)))
+			{
+				gtk_widget_set_sensitive(GTK_WIDGET(l_pCheckButtonNoiseChannel),l_bCheckButtonValue);
+			}
 		}
 	}
 }
 
 // catch car checkbox toggled signal and call function which handles event
-static void car_changed_cb(::GtkCheckButton* pCheckbutton, void* pUserData)
+static void car_changed_cb(GtkCheckButton* pCheckbutton, void* pUserData)
 {
 	CConfigurationgNautilusInterface* l_pConfig = static_cast<CConfigurationgNautilusInterface*>(pUserData);
 	l_pConfig->checkbuttonCARChangedCB();
@@ -155,15 +163,18 @@ void CConfigurationgNautilusInterface::checkbuttonCARChangedCB()
 	// activate/deactivate car checkboxes in dialog_select_channels_bipolar_car_noise
 	GtkCheckButton *l_pCheckButtonCAR = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,"checkbutton_car"));
 	gboolean l_bCheckButtonValue = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButtonCAR));
+	GtkCheckButton *l_pCheckButtonCarChannel;
 	char l_sTemporary[45];
 	for (unsigned __int16 i = 0; i < GDS_GNAUTILUS_CHANNELS_MAX; i++)
 	{
 		sprintf_s(&l_sTemporary[0],45,"checkbutton_car_channel_%d",(i + 1));
-		l_pCheckButtonCAR = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,l_sTemporary));
-		
-		if (l_pCheckButtonCAR)
+		l_pCheckButtonCarChannel = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,l_sTemporary));
+		if (l_pCheckButtonCarChannel)
 		{
-			gtk_widget_set_sensitive(GTK_WIDGET(l_pCheckButtonCAR),l_bCheckButtonValue);
+			if (gtk_widget_get_visible(GTK_WIDGET(l_pCheckButtonCarChannel)))
+			{
+				gtk_widget_set_sensitive(GTK_WIDGET(l_pCheckButtonCarChannel),l_bCheckButtonValue);
+			}
 		}
 	}
 }
@@ -181,12 +192,14 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getHardwareSettings(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetSupportedNetworkChannels(m_ui64DeviceHandle, m_sDeviceNames, NULL, &l_ui32SupportedNWChannelsCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	l_pSupportedNWChannels = new unsigned __int32[l_ui32SupportedNWChannelsCount];
 	m_oGdsResult = GDS_GNAUTILUS_GetSupportedNetworkChannels(m_ui64DeviceHandle, m_sDeviceNames, l_pSupportedNWChannels, &l_ui32SupportedNWChannelsCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	// get network channel currently used between base station and headstage
@@ -194,6 +207,7 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getHardwareSettings(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetNetworkChannel(m_ui64DeviceHandle, m_sDeviceNames, &l_ui32NetworkChannel);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -232,6 +246,7 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getHardwareSettings(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetSupportedSamplingRates(m_ui64DeviceHandle, m_sDeviceNames, NULL, &l_ui32SupportedSamplingRatesCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -240,6 +255,7 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getHardwareSettings(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetSupportedSamplingRates(m_ui64DeviceHandle, m_sDeviceNames, l_pSupportedSamplingRates, &l_ui32SupportedSamplingRatesCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	
@@ -271,7 +287,7 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getHardwareSettings(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetSupportedSensitivities(m_ui64DeviceHandle, m_sDeviceNames, NULL, &l_ui32SupportedSensitivitiesCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
-		// TODO: add error handling
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	// get sensitivities
@@ -279,7 +295,7 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getHardwareSettings(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetSupportedSensitivities(m_ui64DeviceHandle, m_sDeviceNames, l_pSupportedSensitivities, &l_ui32SupportedSensitivitiesCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
-		// TODO: add error handling
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	// set items in dialog item combobox_select_sensitivity
@@ -306,7 +322,7 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getHardwareSettings(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetSupportedInputSources(m_ui64DeviceHandle, m_sDeviceNames, NULL, &l_ui32SupportedInputSourcesCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
-		// TODO: add error handling
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	// allocate memory to hold input sources
@@ -315,7 +331,7 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getHardwareSettings(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetSupportedInputSources(m_ui64DeviceHandle, m_sDeviceNames, l_pSupportedInputSources, &l_ui32SupportedInputSourcesCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
-		// TODO: add error handling
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -371,6 +387,7 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getChannelNames(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetChannelNames(m_ui64DeviceHandle,m_sDeviceNames,&l_ui32MountedModulesCount,NULL,&l_ui32ElectrodeNamesCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	// set array of electrode names according to names currently available
@@ -379,6 +396,7 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getChannelNames(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetChannelNames(m_ui64DeviceHandle,m_sDeviceNames,&l_ui32MountedModulesCount,l_pElectrodeNames,&l_ui32ElectrodeNamesCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -402,9 +420,10 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getChannelNames(void)
 			gtk_list_store_append(GTK_LIST_STORE(l_pListStoreBipolarChannels), &l_iter);
 			gtk_list_store_set(GTK_LIST_STORE(l_pListStoreBipolarChannels), &l_iter, 0, &l_pElectrodeNames[i][0],-1);
 		}
-		else if ((l_pCheckButtonChannel) && (i > l_ui32ElectrodeNamesCount))
+		else if ((l_pCheckButtonChannel) && (i >= l_ui32ElectrodeNamesCount))
 		{
 			gtk_widget_set_sensitive(GTK_WIDGET(l_pCheckButtonChannel),false);
+			gtk_button_set_label(l_pCheckButtonChannel, "");
 		}
 	}
 	for (i = 0; i < GDS_GNAUTILUS_CHANNELS_MAX; i++)
@@ -444,6 +463,7 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getAvailableChannels(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetAvailableChannels(m_ui64DeviceHandle,m_sDeviceNames,&l_bAvailableChannels);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -453,12 +473,24 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getAvailableChannels(void)
 	{
 		sprintf_s(&l_sTemporary[0],30,"checkbutton_channel_%d",(i + 1));
 		GtkCheckButton *l_pCheckButtonChannel = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,l_sTemporary));
+		sprintf_s(&l_sTemporary[0],30,"label_channel_%d",(i + 1));
+		GtkLabel *l_pLabelChannel = GTK_LABEL(gtk_builder_get_object(m_pBuilderConfigureInterface,l_sTemporary));
+		sprintf_s(&l_sTemporary[0],30,"combobox_channel_%d",(i + 1));
+		GtkComboBox *l_pComboBoxChannel = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface,l_sTemporary));
+		sprintf_s(&l_sTemporary[0],30,"checkbutton_car_channel_%d",(i + 1));
+		GtkCheckButton *l_pCheckButtonCARChannel = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,l_sTemporary));
+		sprintf_s(&l_sTemporary[0],30,"checkbutton_noise_channel_%d",(i + 1));
+		GtkCheckButton *l_pCheckButtonNoiseChannel = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface,l_sTemporary));
 		if (l_bAvailableChannels[i] == 1)
 		{
 			if (l_pCheckButtonChannel)
 			{
-				gtk_widget_set_sensitive(GTK_WIDGET(l_pCheckButtonChannel),true);
+				gtk_widget_set_visible(GTK_WIDGET(l_pCheckButtonChannel),true);
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pCheckButtonChannel),true);
+				gtk_widget_set_visible(GTK_WIDGET(l_pLabelChannel),true);
+				gtk_widget_set_visible(GTK_WIDGET(l_pComboBoxChannel),true);
+				gtk_widget_set_visible(GTK_WIDGET(l_pCheckButtonCARChannel),true);
+				gtk_widget_set_visible(GTK_WIDGET(l_pCheckButtonNoiseChannel),true);
 			}
 			m_vAvailableChannels[i] = true;
 		}
@@ -466,8 +498,11 @@ OpenViBE::boolean CConfigurationgNautilusInterface::getAvailableChannels(void)
 		{
 			if (l_pCheckButtonChannel)
 			{
-				gtk_widget_set_sensitive(GTK_WIDGET(l_pCheckButtonChannel),false);
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pCheckButtonChannel),false);
+				gtk_widget_set_visible(GTK_WIDGET(l_pCheckButtonChannel),false);
+				gtk_widget_set_visible(GTK_WIDGET(l_pLabelChannel),false);
+				gtk_widget_set_visible(GTK_WIDGET(l_pComboBoxChannel),false);
+				gtk_widget_set_visible(GTK_WIDGET(l_pCheckButtonCARChannel),false);
+				gtk_widget_set_visible(GTK_WIDGET(l_pCheckButtonNoiseChannel),false);
 			}
 			m_vAvailableChannels[i] = false;
 		}
@@ -497,6 +532,7 @@ boolean CConfigurationgNautilusInterface::getFiltersForNewSamplingRate(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetBandpassFilters(m_ui64DeviceHandle, m_sDeviceNames, NULL, &l_ui32BandPassFiltersCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	l_pBandPassFilters = new GDS_FILTER_INFO[l_ui32BandPassFiltersCount];
@@ -504,12 +540,14 @@ boolean CConfigurationgNautilusInterface::getFiltersForNewSamplingRate(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetBandpassFilters(m_ui64DeviceHandle, m_sDeviceNames, l_pBandPassFilters, &l_ui32BandPassFiltersCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage;
 		return false;
 	}
 	// get number of notch filters and allocate filter array correspondingly
 	m_oGdsResult = GDS_GNAUTILUS_GetNotchFilters(m_ui64DeviceHandle, m_sDeviceNames, NULL, &l_ui32NotchFiltersCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	l_pNotchFilters = new GDS_FILTER_INFO[l_ui32NotchFiltersCount];
@@ -517,6 +555,7 @@ boolean CConfigurationgNautilusInterface::getFiltersForNewSamplingRate(void)
 	m_oGdsResult = GDS_GNAUTILUS_GetNotchFilters(m_ui64DeviceHandle, m_sDeviceNames, l_pNotchFilters, &l_ui32NotchFiltersCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -605,7 +644,7 @@ boolean CConfigurationgNautilusInterface::getFiltersForNewSamplingRate(void)
 CConfigurationgNautilusInterface::CConfigurationgNautilusInterface(IDriverContext& rDriverContext, const char* sGtkBuilderFileName, string& rDeviceSerial, OpenViBE::int32& rInputSource, OpenViBE::uint32& rNetworkChannel, OpenViBE::int32& rBandpassFilterIndex,
 																   OpenViBE::int32& rNotchFilterIndex, OpenViBE::float64& rSensitivity, OpenViBE::boolean& rDigitalInputEnabled, OpenViBE::boolean& rNoiseReductionEnabled, OpenViBE::boolean& rCAREnabled,
 																   OpenViBE::boolean& rAccelerationDataEnabled, OpenViBE::boolean& rCounterEnabled, OpenViBE::boolean& rLinkQualityEnabled, OpenViBE::boolean& rBatteryLevelEnabled, OpenViBE::boolean& rValidationIndicatorEnabled,
-																   vector<OpenViBE::uint16>& rSelectedChannels, vector<OpenViBE::uint16>& rBipolarChannels, vector<OpenViBE::boolean>& rCAR, vector<OpenViBE::boolean>& rNoiseReduction)
+																   vector<OpenViBE::uint16>& rSelectedChannels, vector<OpenViBE::int32>& rBipolarChannels, vector<OpenViBE::boolean>& rCAR, vector<OpenViBE::boolean>& rNoiseReduction)
 	: CConfigurationBuilder(sGtkBuilderFileName)
 	,m_rDriverContext(rDriverContext)
 	,m_rDeviceSerial(rDeviceSerial)
@@ -655,7 +694,7 @@ boolean CConfigurationgNautilusInterface::preConfigure(void)
 		l_bFunctionReturn = openDevice();
 		if (!l_bFunctionReturn)
 		{
-			m_rDriverContext.getLogManager() << LogLevel_Error << "Unable to open a suitable device\n";
+			// error logged in openDevice;
 			return false;
 		}
 	}
@@ -664,6 +703,7 @@ boolean CConfigurationgNautilusInterface::preConfigure(void)
 	l_bFunctionReturn = getHardwareSettings();
 	if (!l_bFunctionReturn)
 	{
+		// error logged in getHardwareSettings
 		return false;
 	}
 
@@ -671,12 +711,14 @@ boolean CConfigurationgNautilusInterface::preConfigure(void)
 	l_bFunctionReturn = getAvailableChannels();
 	if(!l_bFunctionReturn)
 	{
+		// error logged in getAvailableChannels
 		return false;
 	}
 
 	l_bFunctionReturn = getChannelNames();
 	if (!l_bFunctionReturn)
 	{
+		// error logged in getChannelNames
 		return false;
 	}
 
@@ -791,6 +833,11 @@ boolean CConfigurationgNautilusInterface::postConfigure(void)
 		GtkEntry *l_pEntrySerial = GTK_ENTRY(gtk_builder_get_object(m_pBuilderConfigureInterface, "entry_device_serial"));
 		m_rDeviceSerial = gtk_entry_get_text(l_pEntrySerial);
 
+		// get selected input source from dialog
+		GtkComboBox *l_pComboBoxInputSources = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_input_source"));
+		l_ui32ComboBoxIndex = gtk_combo_box_get_active(l_pComboBoxInputSources);
+		m_rInputSource = m_vComboBoxInputSources[l_ui32ComboBoxIndex];
+
 		// get selected channels
 		char l_sTemporary[45];
 		m_vSelectedChannels.clear();
@@ -820,7 +867,10 @@ boolean CConfigurationgNautilusInterface::postConfigure(void)
 			sprintf_s(&l_sTemporary[0],45,"combobox_channel_%d", (i + 1));
 			GtkComboBox *l_pComboBoxBipolarChannels = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface,l_sTemporary));
 			if (l_pComboBoxBipolarChannels)
-				m_vBipolarChannels.push_back((OpenViBE::uint16)gtk_combo_box_get_active(l_pComboBoxBipolarChannels));
+			{
+				// bipolar is 0 based for the channels, -1 indicates no bipolar derivation
+				m_vBipolarChannels.push_back(gtk_combo_box_get_active(l_pComboBoxBipolarChannels) - 1);
+			}
 		}
 
 		// set bandpass and notch filter indices to correponding variables
@@ -939,6 +989,7 @@ boolean CConfigurationgNautilusInterface::postConfigure(void)
 		boolean l_bFunctionReturn = closeDevice();
 		if (!l_bFunctionReturn)
 		{
+			// error logged in closeDevice
 			return false;
 		}
 	}
@@ -983,6 +1034,7 @@ boolean CConfigurationgNautilusInterface::openDevice(void)
 	m_oGdsResult = GDS_GetConnectedDevices(l_epHostEp, l_epLocalEp, &l_pConnectedDevicesInfo, &l_ui32DeviceCount);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 	
@@ -1005,6 +1057,7 @@ boolean CConfigurationgNautilusInterface::openDevice(void)
 
 	if (l_ui32DeviceCount == 0)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "No g.Nautilus connected\n";
 		return false;
 	}
 
@@ -1015,6 +1068,15 @@ boolean CConfigurationgNautilusInterface::openDevice(void)
 	m_oGdsResult = GDS_Connect(l_epHostEp, l_epLocalEp, m_sDeviceNames, l_ui32DeviceCount, l_bOpenExclusively, &m_ui64DeviceHandle, &l_bIsCreator);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
+		return false;
+	}
+
+	// free connected devices list allocated by GDS_GetConnectedDevices
+	m_oGdsResult = GDS_FreeConnectedDevicesList(&l_pConnectedDevicesInfo,l_ui32DeviceCount);
+	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
@@ -1029,6 +1091,7 @@ boolean CConfigurationgNautilusInterface::closeDevice(void)
 	m_oGdsResult = GDS_Disconnect(&m_ui64DeviceHandle);
 	if (m_oGdsResult.ErrorCode != GDS_ERROR_SUCCESS)
 	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << m_oGdsResult.ErrorMessage << "\n";
 		return false;
 	}
 
