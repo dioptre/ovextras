@@ -270,6 +270,8 @@ private:
 	OpenViBE::boolean m_bResourcesInitialised;
 	/// Ogre3D root
 	Ogre::Root* m_pRoot;
+	/// Ogre log manager
+	Ogre::LogManager* m_pLogManager;
 	/// Ogre log
 	Ogre::Log* m_pLog;
 	/// Maps scene Ids to scene pointers

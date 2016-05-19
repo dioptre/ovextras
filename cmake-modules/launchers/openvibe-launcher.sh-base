@@ -6,6 +6,9 @@
 #export OV_PATH_LIB="$OV_PATH_ROOT/lib"
 #export OV_PATH_DATA="$OV_PATH_ROOT/share/openvibe"
 
+# Dump core...
+# ulimit -c unlimited
+
 # Tries to locate matlab executable from $PATH, and set the library path to the corresponding matlab libs.
 if [ "`which matlab`" != "" ] ; then
         MATLAB_ROOT=`matlab -e | grep "^MATLAB=" | sed -e "s/^MATLAB=//"`
