@@ -12,7 +12,7 @@
 # Adds include path
 # ---------------------------------
 IF(WIN32)
-	FIND_PATH(PATH_ActiCHampAPI ActiChamp.h PATHS ${OV_CUSTOM_DEPENDENCIES_PATH})
+	FIND_PATH(PATH_ActiCHampAPI ActiChamp.h PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/sdk-brainproducts-actichamp)
 	IF(PATH_ActiCHampAPI)
 		MESSAGE(STATUS "  Found actiCHamp API...")
 		INCLUDE_DIRECTORIES(${PATH_ActiCHampAPI})

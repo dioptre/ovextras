@@ -122,7 +122,7 @@ no_need_to_install_directx:
 	ZipDLL::extractall "arch\ov-dependencies-1.2.0-vc120-runtime.zip" ""
 	
 	SetOutPath "$INSTDIR"
-	; Export binaries (except the mensia acquisition dll, it will be installed optionally as part of neurort drivers choice)
+	; Export binaries
 	File /nonfatal /r ..\dist\bin
 	; Export launch scripts
 	File /nonfatal ..\dist\*.cmd
@@ -169,7 +169,6 @@ no_need_to_patch_3d_functionnality:
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libvorbis\win32\bin\release;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libogg\win32\bin\release\;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\liblsl\lib\;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\enobio3g\MSVC\;%PATH%$\r$\n"	
 	FileClose $0
 	
 	FileOpen $0 "$INSTDIR\dependencies\cegui\resources.cfg" w
