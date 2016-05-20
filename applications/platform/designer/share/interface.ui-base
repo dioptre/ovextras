@@ -36,28 +36,26 @@ Project Leader :
 Lead Software Engineer :
  - Jussi T. Lindgren, Inria
 
-Core Developers :
- - Nathanaël Foy, Inria
- - Guillaume Serrière, Inria
-
+Core Developers 2016 :
+ - Nathanaël Foy, Research Engineer, Inria
+ - Jozef Legény, Certification Tech Lead, Mensia Tech.
+ - Charles Garraud, Software Engineer, Inria
+ - Jerome Chabrol, QA Engineer, Inria
+ 
 SED Support Engineer :
  - Guillermo Andrade-Barroso, Inria
 
-Current contributors :
- - Mensia Technologies (France)
- - Joao-Pedro Berti-Ligabo (France)
- - Jeremy Frey (France)
- - mBrainTrain dev team (Serbia)
- - MCS / MKS (Russia)
- - Ozan Caglayan, Galatasaray Univ. (Turkey)
- - Steffen Heimes, eemagine GmbH (Germany)
+Contributors to this version :
+ - g.tec medical engineering GmbH (Austria)
+ - Tom Steward (University of Tsukuba, Japan)
+ - Jeff B.
+ - Steffen Heimes / eemagine GmbH (Germany)
+ - Guillaume Serrière, Inria
  
 Previous Contributors : 
  - http://openvibe.inria.fr/contributors/
  
-Former Core Developers
- - Alison Cellard, Inria
- - Loic Mahe, Inria
+Former Core Developers :
  - Yann Renard, Inria
  - Laurent Bonnet, Inria
  - Jozef Legény, Inria
@@ -65,7 +63,10 @@ Former Core Developers
  - Fabien Lotte, Inria
  - Bruno Renier, Inria
  - Baptiste Payan, Inria
-
+ - Alison Cellard, Inria
+ - Loic Mahe, Inria
+ - Guillaume Serrière, Inria
+ 
 Scientific Steering Committee :
  - Laurent Bougrain, Inria
  - Maureen Clerc, Inria
