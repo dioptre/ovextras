@@ -5,8 +5,8 @@
 	!include "zipdll.nsh"
 
 	;Name and file
-	Name "OpenViBE 1.2.0"
-	OutFile "openvibe-1.2.0-setup.exe"
+	Name "OpenViBE 1.2.0-1"
+	OutFile "openvibe-1.2.0-1-setup.exe"
 
 	;Default installation folder
 	InstallDir "$PROGRAMFILES\openvibe"
@@ -115,8 +115,8 @@ no_need_to_install_directx:
 	File "..\dependencies\arch\vcredist-2010.exe"
 	File "..\dependencies\arch\vcredist-2013_x86.exe"
 
-	ExecWait '"arch\vcredist-2010.exe" /q'
-	ExecWait '"arch\vcredist-2013_x86.exe" /install /quiet'
+	ExecWait '"vcredist-2010.exe" /q'
+	ExecWait '"vcredist-2013_x86.exe" /install /quiet'
 	
 	SetOutPath "$INSTDIR\dependencies"
 	ZipDLL::extractall "arch\ov-dependencies-1.2.0-vc120-runtime.zip" ""
