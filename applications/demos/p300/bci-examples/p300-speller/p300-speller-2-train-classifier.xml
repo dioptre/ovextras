@@ -1,6 +1,6 @@
 <OpenViBE-Scenario>
 	<Creator>OpenViBE</Creator>
-	<CreatorVersion>1.1.0+git</CreatorVersion>
+	<CreatorVersion>1.2.0</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x0000018f, 0x00000cf9)</Identifier>
@@ -257,7 +257,7 @@
 					<TypeIdentifier>(0x2c132d6e, 0x44ab0d97)</TypeIdentifier>
 					<Name>Train trigger</Name>
 					<DefaultValue>OVTK_StimulationId_Train</DefaultValue>
-					<Value>OVTK_StimulationId_Train</Value>
+					<Value>OVTK_StimulationId_ExperimentStop</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -351,6 +351,10 @@
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
 					<Value>118</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xc67a01dc, 0x28ce06c1)</Identifier>
+					<Value></Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
