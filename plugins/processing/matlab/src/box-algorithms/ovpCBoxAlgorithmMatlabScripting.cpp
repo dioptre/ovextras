@@ -263,6 +263,10 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 		}
 		this->getLogManager() << LogLevel_Trace << "Matlab Path '" << m_sMatlabPath << "' added to Windows PATH environment variable.\n";
 	}
+	else
+	{
+		this->getLogManager() << LogLevel_Trace << "No need to add matlab to PATH\n";
+	}
 #endif
 
 	if(!OpenMatlabEngineSafely()) return false;
@@ -370,7 +374,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 			uint64 l_oStimCode  = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),i);
 			stringstream ss1;
 			ss1 << l_oStimCode;
-			l_sSettingValues = l_sSettingValues +  CString(ss1.str().c_str());
+			l_sSettingValues = l_sSettingValues +  CString(ss1.str().c_str()) + CString(" ");
 			// we keep the stimulation codes as doubles, to be able to put them in arrays with other doubles (such as timings). 
 			// they are still comparable with uint64 matlab values.
 		}
@@ -785,14 +789,23 @@ boolean CBoxAlgorithmMatlabScripting::printOutputBufferWithFormat()
 	l_ssMatlabBuffer<<m_sMatlabBuffer;
 	if(l_ssMatlabBuffer.str().size()>0)
 	{
-		size_t l_oErrorIndex=l_ssMatlabBuffer.str().find("??? ");
-		if(l_oErrorIndex==std::string::npos) 
+		const size_t l_oErrorIndex1 = l_ssMatlabBuffer.str().find("??? ");
+		const size_t l_oErrorIndex2 = l_ssMatlabBuffer.str().find("Error: ");
+		const size_t l_oErrorIndex3 = l_ssMatlabBuffer.str().find("Error ");
+
+		// Find the earliest error message
+		size_t l_oErrorIndex = std::string::npos;
+		if (l_oErrorIndex == std::string::npos || (l_oErrorIndex1 != std::string::npos && l_oErrorIndex1 < l_oErrorIndex))
 		{
-			l_oErrorIndex=l_ssMatlabBuffer.str().find("Error: ");
-		} 
-		if(l_oErrorIndex==std::string::npos) 
+			l_oErrorIndex = l_oErrorIndex1;
+		}
+		if (l_oErrorIndex == std::string::npos || (l_oErrorIndex2 != std::string::npos && l_oErrorIndex2 < l_oErrorIndex))
 		{
-			l_oErrorIndex=l_ssMatlabBuffer.str().find("Error in ");
+			l_oErrorIndex = l_oErrorIndex2;
+		}
+		if (l_oErrorIndex == std::string::npos || (l_oErrorIndex3 != std::string::npos && l_oErrorIndex3 < l_oErrorIndex))
+		{
+			l_oErrorIndex = l_oErrorIndex3;
 		}
 
 		size_t l_oWarningIndex=l_ssMatlabBuffer.str().find("Warning: ");
