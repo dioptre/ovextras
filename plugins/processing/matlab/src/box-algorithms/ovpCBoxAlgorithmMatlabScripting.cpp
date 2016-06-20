@@ -3,6 +3,8 @@
 #include "ovpCBoxAlgorithmMatlabScripting.h"
 
 #include <system/ovCMemory.h>
+#include <system/ovCMath.h>
+
 #include <iostream>
 #include <stdio.h>
 #include <sstream>
@@ -128,18 +130,6 @@ boolean CBoxAlgorithmMatlabScripting::OpenMatlabEngineSafely(void)
 boolean CBoxAlgorithmMatlabScripting::initialize(void)
 {
 	m_pMatlabEngineHandle = NULL;
-	m_sMatlabBuffer = NULL;
-
-	m_sBoxInstanceVariableName = "OV_BOX_";
-	// we add a random identifier
-	srand((unsigned int)time(NULL));
-	unsigned short int l_ui16Value1=(rand()&0xffff);
-	unsigned short int l_ui16Value2=(rand()&0xffff);
-	unsigned short int l_ui16Value3=(rand()&0xffff);
-	unsigned short int l_ui16Value4=(rand()&0xffff);
-	char l_sBuffer[1024];
-	sprintf(l_sBuffer,"0x%04X%04X_0x%04X%04X", (int)l_ui16Value1, (int)l_ui16Value2, (int)l_ui16Value3, (int)l_ui16Value4);
-	m_sBoxInstanceVariableName = m_sBoxInstanceVariableName + CString(l_sBuffer);
 	m_sMatlabBuffer = NULL;
 
 	CString l_sSettingValue;
@@ -273,6 +263,10 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 		}
 		this->getLogManager() << LogLevel_Trace << "Matlab Path '" << m_sMatlabPath << "' added to Windows PATH environment variable.\n";
 	}
+	else
+	{
+		this->getLogManager() << LogLevel_Trace << "No need to add matlab to PATH\n";
+	}
 #endif
 
 	if(!OpenMatlabEngineSafely()) return false;
@@ -305,6 +299,16 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 	CString l_sWorkingDir;
 	getStaticBoxContext().getSettingValue(2, l_sWorkingDir); // working directory
 	sanitizePath(l_sWorkingDir);
+
+	// Try to find an unused box instance variable name
+	do
+	{
+		char l_sBuffer[1024];
+		sprintf(l_sBuffer, "OV_BOX_0x%08X_0x%08X", System::Math::randomUInteger32(), System::Math::randomUInteger32());
+		m_sBoxInstanceVariableName = CString(l_sBuffer);
+		this->getLogManager() << LogLevel_Trace << "Checking if variable " << m_sBoxInstanceVariableName << " is in use...\n";
+	} while (engGetVariable(m_pMatlabEngine, m_sBoxInstanceVariableName.toASCIIString() ) != NULL);
+	this->getLogManager() << LogLevel_Trace << "Selected variable name " << m_sBoxInstanceVariableName << "\n";
 
 	this->getLogManager() << LogLevel_Trace << "Setting working directory to " << l_sWorkingDir << "\n";
 	l_sCommand = CString("cd '") + l_sWorkingDir + CString("'");
@@ -370,7 +374,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 			uint64 l_oStimCode  = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),i);
 			stringstream ss1;
 			ss1 << l_oStimCode;
-			l_sSettingValues = l_sSettingValues +  CString(ss1.str().c_str());
+			l_sSettingValues = l_sSettingValues +  CString(ss1.str().c_str()) + CString(" ");
 			// we keep the stimulation codes as doubles, to be able to put them in arrays with other doubles (such as timings). 
 			// they are still comparable with uint64 matlab values.
 		}
@@ -785,14 +789,23 @@ boolean CBoxAlgorithmMatlabScripting::printOutputBufferWithFormat()
 	l_ssMatlabBuffer<<m_sMatlabBuffer;
 	if(l_ssMatlabBuffer.str().size()>0)
 	{
-		size_t l_oErrorIndex=l_ssMatlabBuffer.str().find("??? ");
-		if(l_oErrorIndex==std::string::npos) 
+		const size_t l_oErrorIndex1 = l_ssMatlabBuffer.str().find("??? ");
+		const size_t l_oErrorIndex2 = l_ssMatlabBuffer.str().find("Error: ");
+		const size_t l_oErrorIndex3 = l_ssMatlabBuffer.str().find("Error ");
+
+		// Find the earliest error message
+		size_t l_oErrorIndex = std::string::npos;
+		if (l_oErrorIndex == std::string::npos || (l_oErrorIndex1 != std::string::npos && l_oErrorIndex1 < l_oErrorIndex))
 		{
-			l_oErrorIndex=l_ssMatlabBuffer.str().find("Error: ");
-		} 
-		if(l_oErrorIndex==std::string::npos) 
+			l_oErrorIndex = l_oErrorIndex1;
+		}
+		if (l_oErrorIndex == std::string::npos || (l_oErrorIndex2 != std::string::npos && l_oErrorIndex2 < l_oErrorIndex))
 		{
-			l_oErrorIndex=l_ssMatlabBuffer.str().find("Error in ");
+			l_oErrorIndex = l_oErrorIndex2;
+		}
+		if (l_oErrorIndex == std::string::npos || (l_oErrorIndex3 != std::string::npos && l_oErrorIndex3 < l_oErrorIndex))
+		{
+			l_oErrorIndex = l_oErrorIndex3;
 		}
 
 		size_t l_oWarningIndex=l_ssMatlabBuffer.str().find("Warning: ");
