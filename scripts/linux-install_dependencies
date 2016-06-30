@@ -358,12 +358,18 @@ if [[ ! -e "$ov_target_folder_hit/no-native-packages.hit" ]]; then
 		ov_native_package_installed=true
 		ov_native_package_log_file="$ov_target_folder_log/native-packages.log"
 		ov_ubuntu_version=`lsb_release -r -s 2>/dev/null`
-		if [[ `expr $ov_ubuntu_version \>= 14.04` == 1 ]]; then
-			# at the time of writing this, there was a conflict between libogre-dev and libboost-thread-dev dependencies in 13.10 and 14.04
-			echo "  Ubuntu $ov_ubuntu_version detected, suggesting specific set of packages..."
+		# Ubuntu versions might need slightly different packages...
+		if [[ `expr $ov_ubuntu_version \>= 16.04` == 1 ]]; then
+			echo "  Ubuntu >= 16.04 detected, suggesting specific set of packages..."
+			ov_lib_ogre_dev=libogre-1.9-dev
+			ov_lib_libboost_chrono_dev=libboost-chrono1.58-dev
+
+		elif [[ `expr $ov_ubuntu_version \>= 14.04` == 1 ]]; then
+			echo "  Ubuntu >= 14.04 detected, suggesting specific set of packages..."
 			ov_lib_ogre_dev=libogre-1.8-dev
 			ov_lib_libboost_chrono_dev=libboost-chrono1.54-dev
 		else
+			echo "  Ubuntu seems older than v14.04 ..."
 			ov_lib_ogre_dev=libogre-dev
 			ov_lib_libboost_chrono_dev=
 		fi;
@@ -521,7 +527,7 @@ ov_package_url_itpp=http://openvibe.inria.fr/dependencies/linux-x86/itpp-4.0.7.t
 ov_package_url_vrpn=http://openvibe.inria.fr/dependencies/linux-x86/vrpn_07_31-ov.zip
 
 # LabStreamingLayer
-ov_package_url_liblsl=http://openvibe.inria.fr/dependencies/linux-x86/liblsl-1.04-src.tar.bz2
+ov_package_url_liblsl=http://openvibe.inria.fr/dependencies/linux-x86/liblsl-1.04.ov1-src.tar.bz2
 
 ##############################################
 ##                                          ##

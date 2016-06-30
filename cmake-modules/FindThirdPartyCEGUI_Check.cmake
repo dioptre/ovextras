@@ -24,18 +24,18 @@ ENDIF(WIN32)
 IF(UNIX)
 	INCLUDE("FindPkgConfig")
 	SET(CEGUI_FOUND "-NOTFOUND")
-	pkg_check_modules(CEGUI CEGUI)
+	pkg_check_modules(CEGUI QUIET CEGUI)
 	IF(NOT CEGUI_FOUND)
 		# we have this mess as the cegui filenames & paths are different on Fedora 21 at least,
 		# and the include_dirs doesn't contain the CEGUI/ part ... I'd put that to the .h/.cpp IF the same path
 		# convention was the case on all platforms... but it is not  
-		pkg_check_modules(CEGUI CEGUI-0)
+		pkg_check_modules(CEGUI QUIET CEGUI-0)
 		SET(CEGUI_INCLUDE_DIRS "${CEGUI_INCLUDE_DIRS}/CEGUI")
 	ENDIF(NOT CEGUI_FOUND)
 	SET(OgreCEGUIRenderer_FOUND "-NOTFOUND")
-	pkg_check_modules(OgreCEGUIRenderer CEGUI-OGRE)
+	pkg_check_modules(OgreCEGUIRenderer QUIET CEGUI-OGRE)
 	IF(NOT OgreCEGUIRenderer_FOUND)
-		pkg_check_modules(OgreCEGUIRenderer CEGUI-0-OGRE)
+		pkg_check_modules(OgreCEGUIRenderer QUIET CEGUI-0-OGRE)
 	ENDIF(NOT OgreCEGUIRenderer_FOUND)
 ENDIF(UNIX)
 
