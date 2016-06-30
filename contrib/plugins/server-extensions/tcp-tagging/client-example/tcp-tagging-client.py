@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 
 # Example of tcp tagging client
 # The tag format is the same as with Shared Memory Tagging. It comprises three blocks of 8 bytes:
@@ -45,7 +45,7 @@ for i in range(100):
     timestamp=list(to_byte(int(time()*1000)+DELAY, 8))
 
     # send tag and sleep
-    s.sendall(bytes(padding+event_id+timestamp))
+    s.sendall(bytearray(padding+event_id+timestamp))
     sleep(1)
 
 s.close()
