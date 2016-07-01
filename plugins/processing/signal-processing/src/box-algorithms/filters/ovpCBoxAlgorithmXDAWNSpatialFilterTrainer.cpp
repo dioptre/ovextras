@@ -190,25 +190,14 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		this->getLogManager() << LogLevel_Trace << "Decoding signal...\n";
 
 		boolean l_bIsContinuous=true;
-		// TODO Is next line needed 
-		// uint64 l_ui64StartTime=uint64(-1);
-		uint64 l_ui64EndTime=uint64(-1);
+		uint64 l_ui64EndTime = 0; 
 		std::vector < SChunk > l_vSignalChunk;
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
 		{
 			m_pSignalDecoder.decode(i);
 			if(m_pSignalDecoder.isHeaderReceived())
 			{
-				for(it=l_vSignalChunk.begin(); it!=l_vSignalChunk.end(); it++) 
-				{
-					delete it->m_pMatrix;
-				}
-				l_vSignalChunk.clear();
-
-				l_bIsContinuous=true;
-				// TODO Is next line needed 
-				//l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(1, i);
-				l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(1, i);
+				// In OV, there's never two headers, so no need to do anything here.
 			}
 			if(m_pSignalDecoder.isBufferReceived())
 			{
@@ -224,10 +213,10 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 
 				if(l_oChunk.m_ui64StartTime!=l_ui64EndTime)
 				{
+					this->getLogManager() << LogLevel_Error << "Chunk start time != chunk end time [" 
+						<< l_oChunk.m_ui64StartTime << " vs " << l_ui64EndTime << "]\n";
 					l_bIsContinuous=false;
 				}
-				// TODO Is next line needed 
-				//l_ui64StartTime=l_oChunk.m_ui64StartTime;
 				l_ui64EndTime=l_oChunk.m_ui64EndTime;
 			}
 			if(m_pSignalDecoder.isEndReceived())
@@ -242,13 +231,9 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(2); i++)
 		{
 			m_pEvokedPotentialDecoder.decode(i);
-			if(m_pSignalDecoder.isHeaderReceived())
+			if(m_pEvokedPotentialDecoder.isHeaderReceived())
 			{
-				for(it=l_vEvokedPotential.begin(); it!=l_vEvokedPotential.end(); it++) 
-				{
-					delete it->m_pMatrix;
-				}
-				l_vEvokedPotential.clear();
+				// In OV, there's never two headers, so no need to do anything here.
 			}
 			if(m_pEvokedPotentialDecoder.isBufferReceived())
 			{
@@ -270,14 +255,16 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 
 		if(!l_bIsContinuous)
 		{
+			// @fixme mem leak
 			this->getLogManager() << LogLevel_Error << "Input signal is not continuous... Can't continue\n";
-			return true;
+			return false;
 		}
 
 		if(l_vEvokedPotential.size()==0)
 		{
+			// @fixme mem leak
 			this->getLogManager() << LogLevel_Error << "No evoked potential received... Can't continue\n";
-			return true;
+			return false;
 		}
 
 		this->getLogManager() << LogLevel_Trace << "Averaging evoked response potential...\n";
@@ -368,6 +355,19 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		this->getLogManager() << LogLevel_Debug << s5.str().c_str() << "\n";
 #endif
 
+		// Free resources
+		for (it = l_vSignalChunk.begin(); it != l_vSignalChunk.end(); it++)
+		{
+			delete it->m_pMatrix;
+		}
+		l_vSignalChunk.clear();
+
+		for (it = l_vEvokedPotential.begin(); it != l_vEvokedPotential.end(); it++)
+		{
+			delete it->m_pMatrix;
+		}
+		l_vEvokedPotential.clear();
+
 		this->getLogManager() << LogLevel_Trace << "Computing generalized eigen vector decomposition...\n";
 
 		itpp::mat l_oEigenVector;
@@ -449,8 +449,8 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 		}
 		else
 		{
-			this->getLogManager() << LogLevel_ImportantWarning << "Generalized eigen vector decomposition failed...\n";
-			return true;
+			this->getLogManager() << LogLevel_Error << "Generalized eigen vector decomposition failed...\n";
+			return false;
 		}
 
 		this->getLogManager() << LogLevel_Info << "xDAWN Spatial filter trained successfully.\n";

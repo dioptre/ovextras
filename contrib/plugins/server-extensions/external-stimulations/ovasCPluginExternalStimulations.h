@@ -14,6 +14,7 @@
 #include <boost/thread.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/version.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <sys/timeb.h>
 

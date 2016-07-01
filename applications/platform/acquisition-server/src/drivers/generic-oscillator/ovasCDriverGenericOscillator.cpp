@@ -66,12 +66,14 @@ boolean CDriverGenericOscillator::initialize(
 		return false;
 	}
 
-	for(uint32 i=0;i<m_oHeader.getChannelCount();i++)
+	for (uint32 i = 0; i < m_oHeader.getChannelCount(); i++)
 	{
-		std::stringstream ss; ss << "Oscillator " << (i+1);
-
 		m_oHeader.setChannelUnits(i, OVTK_UNIT_Volts, OVTK_FACTOR_Base);
-		m_oHeader.setChannelName(i, ss.str().c_str());
+		if (CString(m_oHeader.getChannelName(i)) == CString(""))
+		{
+			std::stringstream ss; ss << "Oscillator " << (i + 1);
+			m_oHeader.setChannelName(i, ss.str().c_str());
+		}
 	}
 
 	m_pSample=new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
