@@ -350,29 +350,68 @@ echo ""
 ##                                ##
 ####################################
 
+version_greater() {
+  expr "$1" = "`echo -e "$1\n$2" | sort -n | tail -n1`" 2>/dev/null
+}
+
 if [[ ! -e "$ov_target_folder_hit/no-native-packages.hit" ]]; then
 
 	echo "Checking native dependencies..."
 
-	if [[ "`grep -E 'Ubuntu|LinuxMint' /etc/lsb-release 2> /dev/null`" != "" || "`grep -E 'Raspbian' /etc/os-release 2> /dev/null`" != "" || "`grep Debian /etc/issue 2> /dev/null`" != "" ]]; then
+	[[ -z `grep -E 'Debian' /etc/issue 2> /dev/null` ]] ; is_debian=$?
+        [[ -z `grep -E 'Ubuntu' /etc/lsb-release 2> /dev/null` ]] ; is_ubuntu=$? 
+        [[ -z `grep -E 'LinuxMint' /etc/lsb-release 2> /dev/null` ]] ; is_mint=$? 
+        [[ -z `grep -E 'Raspbian' /etc/os-release 2> /dev/null` ]] ; is_raspbian=$?
+
+	if [[ $is_debian -eq 1 || $is_ubuntu -eq 1 || $is_raspbian -eq 1 || $is_mint -eq 1 ]]; then
+			
+		echo "  You are currently running a Debian/Ubuntu based distribution"
+
 		ov_native_package_installed=true
 		ov_native_package_log_file="$ov_target_folder_log/native-packages.log"
-		ov_ubuntu_version=`lsb_release -r -s 2>/dev/null`
-		# Ubuntu versions might need slightly different packages...
-		if [[ `expr $ov_ubuntu_version \>= 16.04` == 1 ]]; then
-			echo "  Ubuntu >= 16.04 detected, suggesting specific set of packages..."
-			ov_lib_ogre_dev=libogre-1.9-dev
-			ov_lib_libboost_chrono_dev=libboost-chrono1.58-dev
+		ov_distro_version=`lsb_release -r -s 2>/dev/null`
+		echo "  Found distro version $ov_distro_version ..."
+		# Different distros and versions might need slightly different packages
+		if [[ $is_ubuntu -eq 1 ]]; then
+			if [[ `version_greater $ov_distro_version 16.04` == 1 ]]; then
+				echo "  Ubuntu >= v16.04 detected, guessing specific set of packages..."
+				ov_lib_ogre_dev=libogre-1.9-dev
+				ov_lib_libboost_chrono_dev=libboost-chrono1.58-dev
 
-		elif [[ `expr $ov_ubuntu_version \>= 14.04` == 1 ]]; then
-			echo "  Ubuntu >= 14.04 detected, suggesting specific set of packages..."
-			ov_lib_ogre_dev=libogre-1.8-dev
-			ov_lib_libboost_chrono_dev=libboost-chrono1.54-dev
-		else
-			echo "  Ubuntu seems older than v14.04 ..."
+			elif [[ `version_greater $ov_distro_version 14.04` == 1 ]]; then
+				echo "  Ubuntu >= v14.04 detected, guessing specific set of packages..."
+				ov_lib_ogre_dev=libogre-1.8-dev
+				ov_lib_libboost_chrono_dev=libboost-chrono1.54-dev
+			else
+				echo "  Ubuntu seems older than v14.04 ..."
+				ov_lib_ogre_dev=libogre-dev
+				ov_lib_libboost_chrono_dev=
+			fi;
+		fi;
+		if [[ $is_debian -eq 1 ]]; then
+			if [[ `version_greater $ov_distro_version 8` == 1 ]]; then
+				echo "  Debian >= v8 detected, guessing specific set of packages..."
+				# although 1.9 is available, it doesn't seem to play well together with cegui, so we use 1.8 ...
+				ov_lib_ogre_dev=libogre-1.8-dev
+				ov_lib_libboost_chrono_dev=libboost-chrono1.55-dev
+			else
+				echo "  Debian seems older than v8 ..."
+				ov_lib_ogre_dev=libogre-dev
+				ov_lib_libboost_chrono_dev=
+			fi
+		fi;
+		if [[ $is_mint -eq 1 ]]; then
+			# hack the correct versions here...
+			echo "  Mint detected, guessing specific set of packages..."
 			ov_lib_ogre_dev=libogre-dev
 			ov_lib_libboost_chrono_dev=
-		fi;
+		fi
+		if [[ $is_raspbian -eq 1 ]]; then
+			# hack the correct versions here...
+			echo "  Raspbian detected, guessing specific set of packages..."			
+			ov_lib_ogre_dev=libogre-dev
+			ov_lib_libboost_chrono_dev=
+		fi
 		ov_ubuntu_packages="wget doxygen make automake autoconf cmake unzip gcc g++ libgtk2.0-dev libglade2-dev gfortran libgsl0-dev libexpat1-dev libreadline-dev libzzip-dev libtool libxaw7-dev libpcre3-dev libfreeimage-dev libglu1-mesa-dev libalut-dev libvorbis-dev libncurses5-dev python-dev python-numpy libeigen3-dev $ov_lib_ogre_dev libcegui-mk2-dev libois-dev libboost-dev libboost-thread-dev liblua5.1-0-dev libboost-regex-dev libboost-filesystem-dev $ov_lib_libboost_chrono_dev libitpp-dev sqlite libsqlite0-dev libfftw3-dev"
 			
 		for package in $ov_ubuntu_packages; do
@@ -388,7 +427,6 @@ if [[ ! -e "$ov_target_folder_hit/no-native-packages.hit" ]]; then
 		done;
 
 		if [[ $ov_native_package_installed == false ]]; then
-			echo "  You are currently running a Debian/Ubuntu based distribution"
 			echo ""
 			echo "  Root access is required to install needed packages."
 			echo ""
