@@ -253,8 +253,9 @@ bool CImpactApplication::enemyDestroyed(CImpactEnemyShip* es)
 
 void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
 {
+	const int l_iNChannels = 3;
 	static int l_iSkipControl = 0;
-	static int l_vPreviousLevels[3] = {0, 0, 0};
+	static int l_vPreviousLevels[l_iNChannels] = { 0, 0, 0 };
 
 	if (l_iSkipControl < 2)
 	{
@@ -266,29 +267,45 @@ void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
 		l_iSkipControl = 0;
 	}
 
+	double l_vFeedback[l_iNChannels];
+	if (iChannelCount == 6)
+	{
+		// Assume input is layered like [prob1pos,prop1neg,prop2pos,prop2neg,prop3pos,prop3neg];
+		l_vFeedback[0] = pChannel[0];
+		l_vFeedback[1] = pChannel[2];
+		l_vFeedback[2] = pChannel[4];
+	}
+	else if (iChannelCount == 3)
+	{
+		// Assume input is layered like [prob1,prob2,prob3]
+		l_vFeedback[0] = pChannel[0];
+		l_vFeedback[1] = pChannel[1];
+		l_vFeedback[2] = pChannel[2];
+	}
+	else
+	{
+		this->getLogManager() << LogLevel_Error << "Incorrect analog VRPN input with " << iChannelCount << " channels. This will not work.\n";
+		l_vFeedback[0] = 0;
+		l_vFeedback[1] = 0;
+		l_vFeedback[2] = 0;
+	}
 
 	if (m_poAdvancedControl != NULL)
 	{
-		m_poAdvancedControl->processFrame(pChannel[0], pChannel[1], pChannel[2]);
+		m_poAdvancedControl->processFrame(l_vFeedback[0], l_vFeedback[1], l_vFeedback[2]);
 	}
 
-	int l_vLevel[3];
-
-	// @FIXME bad, modifying non-ref input parameter
-	if(iChannelCount!=3) {
-		getLogManager() << LogLevel_Warning << "Changing iChannelCount from " << iChannelCount << " to 3\n";
-	}
-	iChannelCount = 3;
+	int l_vLevel[l_iNChannels];
 
 	//std::cout << "feedback: ";
-	for (int i = 0; i < iChannelCount; i++)
+	for (int i = 0; i < l_iNChannels; i++)
 	{
-		if (pChannel[i] > m_pMaxFeedbackLevel[i])
+		if (l_vFeedback[i] > m_pMaxFeedbackLevel[i])
 		{
 			m_pMaxFeedbackLevel[i] += 0.1;
 		}
 
-		float64 l_f64CLevel = pChannel[i] / m_pMaxFeedbackLevel[i];
+		float64 l_f64CLevel = l_vFeedback[i] / m_pMaxFeedbackLevel[i];
 
 		//std::cout << cLevel << ", ";
 		l_vLevel[i] = 0;
