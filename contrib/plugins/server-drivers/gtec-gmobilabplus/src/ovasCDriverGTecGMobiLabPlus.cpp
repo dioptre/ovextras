@@ -42,6 +42,7 @@ CDriverGTecGMobiLabPlus::CDriverGTecGMobiLabPlus(IDriverContext& rDriverContext)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
 	,m_bTestMode(false)
+	,m_pLibrary(NULL)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGTecGMobiLabPlus::CDriverGTecGMobiLabPlus\n";
 
@@ -82,6 +83,7 @@ CDriverGTecGMobiLabPlus::~CDriverGTecGMobiLabPlus(void)
 void CDriverGTecGMobiLabPlus::release(void)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGTecGMobiLabPlus::release\n";
+
 	delete this;
 }
 
@@ -133,6 +135,38 @@ boolean CDriverGTecGMobiLabPlus::configure(void)
 //___________________________________________________________________//
 //                                                                   //
 
+boolean CDriverGTecGMobiLabPlus::registerLibraryFunctions(void)
+{
+	// Lets open the DLL
+	m_pLibrary = LoadLibrary("gMOBIlabplus.dll");
+	if (!m_pLibrary)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "CDriverGTecGMobiLabPlus:: Unable to open gMOBIlabplus.dll\n";
+		return false;
+	}
+
+	m_fOpenDevice = (OV_GT_OpenDevice)GetProcAddress(m_pLibrary, "GT_OpenDevice");
+	m_fCloseDevice = (OV_GT_CloseDevice)GetProcAddress(m_pLibrary, "GT_CloseDevice");
+	m_fSetTestmode = (OV_GT_SetTestmode)GetProcAddress(m_pLibrary, "GT_SetTestmode");
+	m_fStartAcquisition = (OV_GT_StartAcquisition)GetProcAddress(m_pLibrary, "GT_StartAcquisition");
+	m_fGetData = (OV_GT_GetData)GetProcAddress(m_pLibrary, "GT_GetData");
+	m_fInitChannels = (OV_GT_InitChannels)GetProcAddress(m_pLibrary, "GT_InitChannels");
+	m_fStopAcquisition = (OV_GT_StopAcquisition)GetProcAddress(m_pLibrary, "GT_StopAcquisition");
+	m_fGetLastError = (OV_GT_GetLastError)GetProcAddress(m_pLibrary, "GT_GetLastError");
+	m_fTranslateErrorCode = (OV_GT_TranslateErrorCode)GetProcAddress(m_pLibrary, "GT_TranslateErrorCode");
+	
+	if (!m_fOpenDevice || !m_fCloseDevice || !m_fSetTestmode 
+		|| !m_fStartAcquisition || !m_fGetData || !m_fInitChannels 
+		|| !m_fStopAcquisition || !m_fGetLastError || !m_fTranslateErrorCode)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "CDriverGTecGMobiLabPlus:: Unable to find all the required functions from the gMOBIlabplus.dll\n";
+		return false;
+	}
+
+	return true;
+}
+
+
 /*
  * initialisation
  */
@@ -149,6 +183,11 @@ boolean CDriverGTecGMobiLabPlus::initialize(const uint32 ui32SampleCountPerSentB
 	if(!m_pHeader->isChannelCountSet() || !m_pHeader->isSamplingFrequencySet())
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Either channel count or sampling frequency is not set\n";
+		return false;
+	}
+
+	if (!registerLibraryFunctions())
+	{
 		return false;
 	}
 
@@ -189,13 +228,18 @@ boolean CDriverGTecGMobiLabPlus::initialize(const uint32 ui32SampleCountPerSentB
 	// available header information
 	// from it
 #if defined(TARGET_OS_Windows)
-	m_oDevice=::GT_OpenDevice((LPSTR)m_oPortName.c_str());
+	m_oDevice = m_fOpenDevice((LPSTR)m_oPortName.c_str());
 #else
 	m_oDevice=::GT_OpenDevice(m_oPortName.c_str());
 #endif
 	if(m_oDevice==0)
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Unable to connect to [" << m_oPortName.c_str() << "]\n";
+		UINT l_uErrorCode = 0;
+		_ERRSTR l_sErrorString;
+		m_fGetLastError(&l_uErrorCode);
+		m_fTranslateErrorCode(&l_sErrorString, l_uErrorCode);
+
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Unable to connect to [" << m_oPortName.c_str() << "], error code " << l_uErrorCode << ", " << l_sErrorString.Error << "\n";
 		delete [] m_oBuffer.pBuffer;
 		delete [] m_pSample;
 		return false;
@@ -209,15 +253,18 @@ boolean CDriverGTecGMobiLabPlus::initialize(const uint32 ui32SampleCountPerSentB
 
 boolean CDriverGTecGMobiLabPlus::uninitialize(void)
 {
+	boolean l_bOk = true;
+
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGTecGMobiLabPlus::uninitialize\n";
 
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(m_rDriverContext.isStarted()) { return false; }
 
 	// uninitializes hardware here
-	if (!::GT_CloseDevice(m_oDevice))
+	if (!m_fCloseDevice(m_oDevice))
 	{
-		return false;
+		m_rDriverContext.getLogManager() << LogLevel_Error << "GT_CloseDevice() failed\n";
+		l_bOk = false;
 	}
 
 	// frees memory
@@ -237,8 +284,14 @@ boolean CDriverGTecGMobiLabPlus::uninitialize(void)
 	m_oAnalogIn.ain6 = false;
 	m_oAnalogIn.ain7 = false;
 	m_oAnalogIn.ain8 = false;
+	
+	if (m_pLibrary)
+	{
+		FreeLibrary(m_pLibrary);
+		m_pLibrary = NULL;
+	}
 
-	return true;
+	return l_bOk;
 }
 
 const IHeader* CDriverGTecGMobiLabPlus::getHeader(void)
@@ -272,17 +325,17 @@ boolean CDriverGTecGMobiLabPlus::start(void)
 	l_oDigitalInOut.dio8_enable = false;
 
 	// channel initialisation
-	if(!::GT_InitChannels(m_oDevice, m_oAnalogIn, l_oDigitalInOut))
+	if(!m_fInitChannels(m_oDevice, m_oAnalogIn, l_oDigitalInOut))
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Trace << "GT_InitChannels failed\n";
 		return false;
 	}
 
 	// are we interested in test signal?
-	GT_SetTestmode(m_oDevice, m_bTestMode);
+	m_fSetTestmode(m_oDevice, m_bTestMode);
 
 	// requests hardware to start sending data
-	if(!::GT_StartAcquisition(m_oDevice))
+	if(!m_fStartAcquisition(m_oDevice))
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Trace << "GT_StartAcquisition failed\n";
 		return false;
@@ -306,7 +359,7 @@ boolean CDriverGTecGMobiLabPlus::loop(void)
 	for(i=0 ; i<m_ui32SampleCountPerSentBlock ; i++)
 	{
 #if defined(TARGET_OS_Windows)
-		if (!::GT_GetData(m_oDevice, &m_oBuffer, &m_oOverlap))// receive samples from hardware (one per channel)
+		if (!m_fGetData(m_oDevice, &m_oBuffer, &m_oOverlap))// receive samples from hardware (one per channel)
 		{
 			m_rDriverContext.getLogManager() << LogLevel_Error << "GT_GetData failed\n";
 			return false;
@@ -350,7 +403,7 @@ boolean CDriverGTecGMobiLabPlus::stop(void)
 	if(!m_rDriverContext.isStarted()) { return false; }
 
 	// requests the hardware to stop sending data
-	if(!::GT_StopAcquisition(m_oDevice))
+	if(!m_fStopAcquisition(m_oDevice))
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Trace << "GT_StopAcquisition failed\n";
 		return false;

@@ -81,6 +81,37 @@ namespace OpenViBEAcquisitionServer
 	private:
 
 		void allowAnalogInputs(OpenViBE::uint32 ui32ChannelIndex);
+
+		// Register the function pointers from the dll. (The dll approach
+		// is used with gMobilab to avoid conflicts with the gUSBAmp lib)
+		OpenViBE::boolean registerLibraryFunctions(void);
+		
+		// These gtec function calls are found from the dll library
+		typedef HANDLE(__stdcall *OV_GT_OpenDevice)(LPSTR lpPort);
+		typedef BOOL(__stdcall *OV_GT_CloseDevice)(HANDLE hDevice);
+		typedef BOOL(__stdcall *OV_GT_SetTestmode)(HANDLE hDevice, BOOL Testmode);
+		typedef BOOL(__stdcall *OV_GT_StartAcquisition)(HANDLE hDevice);
+		typedef BOOL(__stdcall *OV_GT_GetData)(HANDLE hDevice, _BUFFER_ST *buffer, LPOVERLAPPED lpOvl);
+		typedef BOOL(__stdcall *OV_GT_InitChannels)(HANDLE hDevice, _AIN analogCh, _DIO digitalCh);
+		typedef	BOOL(__stdcall *OV_GT_StopAcquisition)(HANDLE hDevice);
+		typedef BOOL(__stdcall *OV_GT_GetLastError)(UINT * LastError);
+		typedef BOOL(__stdcall *OV_GT_TranslateErrorCode)(_ERRSTR *ErrorString, UINT ErrorCode);
+
+		OV_GT_OpenDevice m_fOpenDevice;
+		OV_GT_CloseDevice m_fCloseDevice;
+		OV_GT_SetTestmode m_fSetTestmode;
+		OV_GT_StartAcquisition m_fStartAcquisition;
+		OV_GT_GetData m_fGetData;
+		OV_GT_InitChannels m_fInitChannels;
+		OV_GT_StopAcquisition m_fStopAcquisition;
+		OV_GT_GetLastError m_fGetLastError;
+		OV_GT_TranslateErrorCode m_fTranslateErrorCode;
+
+#if defined(TARGET_OS_Windows)
+		HINSTANCE m_pLibrary;
+#elif defined(TARGET_OS_Linux)
+		void* m_pLibrary;
+#endif
 	};
 };
 
