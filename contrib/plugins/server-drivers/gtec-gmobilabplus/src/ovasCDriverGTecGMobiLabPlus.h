@@ -80,12 +80,10 @@ namespace OpenViBEAcquisitionServer
 		HINSTANCE m_pLibrary;
 #elif defined(TARGET_OS_Linux)
 		void* m_pLibrary;
-
+#endif
 	private:
 
 		void allowAnalogInputs(OpenViBE::uint32 ui32ChannelIndex);
-
-#endif
 	};
 };
 

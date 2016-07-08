@@ -382,12 +382,12 @@ boolean CDriverGTecGMobiLabPlus::loop(void)
 	for(i=0 ; i<m_ui32SampleCountPerSentBlock ; i++)
 	{
 #if defined(TARGET_OS_Windows)
-		if (!m_pGtec->m_fGetData(m_pGtec->m_oDevice, &m_pGtec->m_oBuffer, &m_oOverlap))// receive samples from hardware (one per channel)
+		if (!m_pGtec->m_fGetData(m_pGtec->m_oDevice, &m_pGtec->m_oBuffer, &m_pGtec->m_oOverlap))// receive samples from hardware (one per channel)
 		{
 			m_rDriverContext.getLogManager() << LogLevel_Error << "GT_GetData failed\n";
 			return false;
 		}
-		if (WaitForSingleObject(m_oOverlap.hEvent, 1000) == WAIT_TIMEOUT)
+		if (WaitForSingleObject(m_pGtec->m_oOverlap.hEvent, 1000) == WAIT_TIMEOUT)
 		{
 			m_rDriverContext.getLogManager() << LogLevel_Warning << "Timeout in reading from the device\n";
 			return false;
