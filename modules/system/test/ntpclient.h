@@ -6,6 +6,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/config.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace std;
 
