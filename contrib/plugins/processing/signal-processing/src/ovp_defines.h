@@ -100,6 +100,20 @@
 
 #define OVP_ClassId_FastICA                                                             OpenViBE::CIdentifier(0x00649B6E, 0x6C88CD17)
 #define OVP_ClassId_FastICADesc                                                         OpenViBE::CIdentifier(0x00E9436C, 0x41C904CA)
+#define OVP_TypeId_FastICA_OperatingMode                                                OpenViBE::CIdentifier(0x43A71032, 0x4AF96B9F)
+#define OVP_TypeId_FastICA_OperatingMode_PCA                                            OpenViBE::CIdentifier(0x402C62BC, 0x0F522DEE)
+#define OVP_TypeId_FastICA_OperatingMode_Whiten                                         OpenViBE::CIdentifier(0x01746382, 0x276A5DAA)
+#define OVP_TypeId_FastICA_OperatingMode_ICA                                            OpenViBE::CIdentifier(0x3470053F, 0x0E5E4F93)
+#define OVP_TypeId_FastICA_DecompositionType                                            OpenViBE::CIdentifier(0x7B876033, 0x13590B93)
+#define OVP_TypeId_FastICA_DecompositionType_Symmetric                                  OpenViBE::CIdentifier(         0,          1)  // Must match ITPP
+#define OVP_TypeId_FastICA_DecompositionType_Deflate                                    OpenViBE::CIdentifier(         0,          2)
+#define OVP_TypeId_FastICA_Nonlinearity                                                 OpenViBE::CIdentifier(0x4313472F, 0x37FD5961)
+#define OVP_TypeId_FastICA_Nonlinearity_POW3                                            OpenViBE::CIdentifier(         0,          10) // Use x^3 non-linearity. Must match ITPP.
+#define OVP_TypeId_FastICA_Nonlinearity_TANH                                            OpenViBE::CIdentifier(         0,          20) // Use tanh(x) non-linearity. 
+#define OVP_TypeId_FastICA_Nonlinearity_GAUSS                                           OpenViBE::CIdentifier(         0,          30) // Use Gaussian non-linearity. 
+#define OVP_TypeId_FastICA_Nonlinearity_SKEW                                            OpenViBE::CIdentifier(         0,          40) // Use skew non-linearity. 
+
+
 
 // @END inserm-gpl
 

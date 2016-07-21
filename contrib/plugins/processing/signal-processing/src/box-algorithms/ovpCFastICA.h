@@ -13,12 +13,7 @@
 #include <vector>
 #include <map>
 #include <string>
-
-#define FICA_NONLIN_POW3   10 // Use x^3 non-linearity. 
-#define FICA_NONLIN_TANH   20 // Use tanh(x) non-linearity. 
-#define FICA_NONLIN_GAUSS  30 // Use Gaussian non-linearity. 
-#define FICA_NONLIN_SKEW   40 // Use skew non-linearity. 
-
+ 
 // TODO create a member function to get rid of this
 #ifndef  CString2Boolean
 	#define CString2Boolean(string) (strcmp(string,"true"))?0:1
@@ -74,8 +69,9 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bSetFineTune;
 			OpenViBE::float64 m_ui64Set_Mu;
 			OpenViBE::float64 m_ui64Epsilon;
-			OpenViBE::uint32  m_ui32Non_Lin;
-			OpenViBE::uint32  m_ui32Type;
+			OpenViBE::uint64  m_ui64Non_Lin;
+			OpenViBE::uint64  m_ui64Type;
+			OpenViBE::uint64  m_ui64Mode;
 
 		};
 
@@ -100,17 +96,18 @@ namespace OpenViBEPlugins
 				rPrototype.addInput ("Input signal",  OV_TypeId_Signal);
 				rPrototype.addOutput("Output signal", OV_TypeId_Signal);
 
-				rPrototype.addSetting("Number of independent components to extract",    OV_TypeId_Integer,  "14");
+				rPrototype.addSetting("Number of components to extract",                OV_TypeId_Integer,  "4");
+				rPrototype.addSetting("Operating mode",                                 OVP_TypeId_FastICA_OperatingMode,     OVP_TypeId_FastICA_OperatingMode_ICA.toString());
 				rPrototype.addSetting("Sample size (seconds) for estimation",           OV_TypeId_Integer,  "120");
-				rPrototype.addSetting("Decomposition type (0==deflate, 1==symmetric)",  OV_TypeId_Integer,  "1");
+				rPrototype.addSetting("Decomposition type",                             OVP_TypeId_FastICA_DecompositionType,  OVP_TypeId_FastICA_DecompositionType_Symmetric.toString());
 				rPrototype.addSetting("Max number of reps for the ICA convergence",     OV_TypeId_Integer,  "100000");
 				rPrototype.addSetting("Fine tuning",                                    OV_TypeId_Boolean,  "true");
 				rPrototype.addSetting("Max number of reps for the fine tuning",         OV_TypeId_Integer,  "100");
-				rPrototype.addSetting("Non linearity (10: POW3, 20: TANH, 30: GAUSS)",  OV_TypeId_Integer,  "20");
+				rPrototype.addSetting("Used nonlinearity",                              OVP_TypeId_FastICA_Nonlinearity,       OVP_TypeId_FastICA_Nonlinearity_TANH.toString());
 				rPrototype.addSetting("Internal Mu parameter for FastICA",              OV_TypeId_Float,    "1.0");
 				rPrototype.addSetting("Internal Epsilon parameter for FastICA",         OV_TypeId_Float,    "0.0001");
 				rPrototype.addSetting("Spatial filter filename",                        OV_TypeId_Filename, "");
-				rPrototype.addSetting("Save the spatial filter/demixing matrix",        OV_TypeId_Boolean,  "true");
+				rPrototype.addSetting("Save the spatial filter/demixing matrix",        OV_TypeId_Boolean,  "false");
 
 				rPrototype.addFlag  (OpenViBE::Kernel::BoxFlag_IsUnstable);
 

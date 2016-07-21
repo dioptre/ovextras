@@ -75,12 +75,27 @@ OVP_Declare_Begin();
 #if defined TARGET_HAS_ThirdPartyITPP
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CSpectralAnalysisDesc);
+
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CFastICADesc);
+	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_FastICA_OperatingMode, "Operating mode");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FastICA_OperatingMode, "PCA",    OVP_TypeId_FastICA_OperatingMode_PCA.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FastICA_OperatingMode, "Whiten", OVP_TypeId_FastICA_OperatingMode_Whiten.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FastICA_OperatingMode, "ICA",    OVP_TypeId_FastICA_OperatingMode_ICA.toUInteger());
+
+	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_FastICA_DecompositionType,     "Decomposition type");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FastICA_DecompositionType,     "Symmetric",  OVP_TypeId_FastICA_DecompositionType_Symmetric.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FastICA_DecompositionType,     "Deflate",    OVP_TypeId_FastICA_DecompositionType_Deflate.toUInteger());
+
+	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_FastICA_Nonlinearity,     "Nonlinearity");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FastICA_Nonlinearity,     "Pow3",     OVP_TypeId_FastICA_Nonlinearity_POW3.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FastICA_Nonlinearity,     "Tanh",     OVP_TypeId_FastICA_Nonlinearity_TANH.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FastICA_Nonlinearity,     "Gauss",    OVP_TypeId_FastICA_Nonlinearity_GAUSS.toUInteger());
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_FastICA_Nonlinearity,     "Skew",     OVP_TypeId_FastICA_Nonlinearity_SKEW.toUInteger());
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CWindowingFunctionsDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CComputeTemporalFilterCoefficientsDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CTemporalFilterBoxAlgorithmDesc);
-OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CModTemporalFilterBoxAlgorithmDesc);
+	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CModTemporalFilterBoxAlgorithmDesc);
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CApplyTemporalFilterDesc);
 #endif // TARGET_HAS_ThirdPartyITPP
 
