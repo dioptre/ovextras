@@ -4,12 +4,6 @@
 # Adds include path
 # ---------------------------------
 
-IF(OV_ThirdPartyGMobilab)
-	MESSAGE(STATUS "  NOTE gtec Mobilab has already been found, cannot have gUSBAmp driver in the same executable")
-	MESSAGE(STATUS "    [ SKIP ] gUSBBampCAPI...")
-	RETURN()
-ENDIF(OV_ThirdPartyGMobilab)
-
 IF(WIN32)
 	FIND_PATH(PATH_GUSBampCAPI gUSBamp.h PATHS 
 		"C:/Program Files/gtec/gUSBampCAPI/API" 

@@ -60,7 +60,7 @@ namespace OpenViBEVRDemos {
 			bool m_bGoalMarkedAtThisPhase;
 
 			float m_fBallSpeed;
-			float m_fBallPosition;
+			float m_fBallPosition;		// n.b. The coordinate system of this seems to be inverted wrt the [-left,+right] convention
 			float m_fLastBallPosition;
 			float m_fBallOrientation;
 

@@ -157,8 +157,12 @@ bool CHandballBCI::process(double timeSinceLastProcess)
 	{
 		std::list < double >& l_rVrpnAnalogState=m_poVrpnPeripheral->m_vAnalog.front();
 
-		//we take the last value from the server
-		double l_dAnalog=*(l_rVrpnAnalogState.begin());
+		//we take the last value from the server. 
+		// The input is a probability [0,1] for the left class, map it to [-1,1] to indicate [left,right] range
+		double l_dAnalog = (*l_rVrpnAnalogState.begin());
+		l_dAnalog = 2.0*(-l_dAnalog) + 1.0;
+
+//		std::cout << "list size" << l_rVrpnAnalogState.size() << " head " << l_dAnalog << "\n";
 
 		//we updtae the max and min values
 		// A. VLG : we should compute the min/max only in the ACTIVE phase
@@ -218,9 +222,9 @@ bool CHandballBCI::process(double timeSinceLastProcess)
 		{
 			case Phase_Rest:
 				std::cout << "### PHASE REST ###" <<std::endl;
-				if(m_iLastMark==Mark_Left && m_fBallPosition<0) { m_iLeftScore++;}
-				if(m_iLastMark==Mark_Right&& m_fBallPosition>0) { m_iRightScore++;}
-				
+				if(m_iLastMark==Mark_Left && m_fBallPosition>0) { m_iLeftScore++;}
+				if(m_iLastMark==Mark_Right&& m_fBallPosition<0) { m_iRightScore++;}
+
 				std::cout << "- Current Score: " <<std::endl;
 				std::cout << "--- GOAL:  " <<m_iGoalScore<<"/"<<(m_iTrialRightCount+m_iTrialLeftCount)<<std::endl;
 				std::cout << "--- LEFT:  " <<m_iLeftScore<<"/"<<m_iTrialLeftCount<<std::endl;
@@ -253,6 +257,8 @@ bool CHandballBCI::process(double timeSinceLastProcess)
 				l_poGetReadyBallPivot->setVisible(true);
 				l_poPassiveBallPivot->setVisible(false);
 				l_poActiveBallPivot->setVisible(false);
+
+				m_bGoalMarkedAtThisPhase = false;
 
 				break;
 
@@ -293,8 +299,8 @@ bool CHandballBCI::process(double timeSinceLastProcess)
 
 		case Phase_Active:
 			m_fBallSpeed=-(float)(m_dFeedback * 0.1);
-			if(m_iMark==Mark_Left && m_fBallPosition==-GOAL_DISTANCE && !m_bGoalMarkedAtThisPhase) { m_iGoalScore++; m_bGoalMarkedAtThisPhase=true; }
-			if(m_iMark==Mark_Right&& m_fBallPosition== GOAL_DISTANCE && !m_bGoalMarkedAtThisPhase) { m_iGoalScore++; m_bGoalMarkedAtThisPhase=true; }
+			if(m_iMark==Mark_Left && m_fBallPosition>= GOAL_DISTANCE && !m_bGoalMarkedAtThisPhase) { m_iGoalScore++; m_bGoalMarkedAtThisPhase=true; }
+			if(m_iMark==Mark_Right&& m_fBallPosition<= -GOAL_DISTANCE && !m_bGoalMarkedAtThisPhase) { m_iGoalScore++; m_bGoalMarkedAtThisPhase=true; }
 			if(m_iMark==Mark_Left && m_dFeedback<0) { m_iClassificationScore++;}
 			if(m_iMark==Mark_Right&& m_dFeedback>0) { m_iClassificationScore++;}
 

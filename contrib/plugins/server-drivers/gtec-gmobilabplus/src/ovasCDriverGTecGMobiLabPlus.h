@@ -11,7 +11,6 @@
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 
-
 #include "../ovasCSettingsHelper.h"
 #include "../ovasCSettingsHelperOperators.h"
 
@@ -19,10 +18,11 @@
 #ifdef TARGET_OS_Windows
 #include <Windows.h>
 #endif
-#include <gMOBIlabplus.h>
 
 namespace OpenViBEAcquisitionServer
 {
+	class CDriverGTecGMobiLabPlusPrivate; // fwd declare
+
 	/**
 	 * \class CDriverGTecGMobiLabPlus
 	 * \author Lucie Daubigney (Supelec Metz)
@@ -68,16 +68,19 @@ namespace OpenViBEAcquisitionServer
 		//params
 		std::string m_oPortName;
 		OpenViBE::boolean m_bTestMode;
-
-		//usefull data to communicate with the gTec module
-		_BUFFER_ST m_oBuffer;
-		HANDLE m_oDevice;
-		_AIN m_oAnalogIn;
-
+				
+		// Pointers do gtec-specific data and function pointers
+		OpenViBEAcquisitionServer::CDriverGTecGMobiLabPlusPrivate* m_pGtec;
+		
+		// Register the function pointers from the dll. (The dll approach
+		// is used with gMobilab to avoid conflicts with the gUSBAmp lib)
+		OpenViBE::boolean registerLibraryFunctions(void);
+		
 #if defined(TARGET_OS_Windows)
-		OVERLAPPED m_oOverlap;
+		HINSTANCE m_pLibrary;
+#elif defined(TARGET_OS_Linux)
+		void* m_pLibrary;
 #endif
-
 	private:
 
 		void allowAnalogInputs(OpenViBE::uint32 ui32ChannelIndex);
