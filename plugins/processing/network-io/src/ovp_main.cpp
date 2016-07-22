@@ -20,7 +20,7 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeID_TCPWriter_OutputStyle,"Hex",TCPWRITER_HEX);
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeID_TCPWriter_OutputStyle,"String",TCPWRITER_STRING);
 
-	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeID_TCPWriter_RawOutputStyle,"Stimulus output");
+	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeID_TCPWriter_RawOutputStyle,"Raw output");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeID_TCPWriter_RawOutputStyle,"Raw",TCPWRITER_RAW);
 #endif
 
