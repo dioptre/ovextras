@@ -2,15 +2,101 @@
  * OpenBCI driver for OpenViBE
  *
  * \author Jeremy Frey
- *
- * \note Based on OpenEEG code; inherits its AGPL3 license conditions
+ * \author Yann Renard
  *
  */
 #include "ovasCConfigurationOpenBCI.h"
+#include <algorithm>
+#include <string>
 
+#if defined TARGET_OS_Windows
+ #include <windows.h>
+ #include <winbase.h>
+ #include <cstdio>
+ #include <cstdlib>
+ #include <commctrl.h>
+ #include <winsock2.h> // htons and co.
+ //#define TERM_SPEED 57600
+ #define TERM_SPEED CBR_115200 // OpenBCI is a bit faster than others
+#elif defined TARGET_OS_Linux
+ #include <cstdio>
+ #include <unistd.h>
+ #include <fcntl.h>
+ #include <termios.h>
+ #include <sys/select.h>
+ #include <netinet/in.h> // htons and co.
+ #include <unistd.h>
+ #define TERM_SPEED B115200
+#else
+#endif
+
+#define boolean OpenViBE::boolean
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEAcquisitionServer;
+
+#define MAXIMUM_SERIAL_TTY     (32)
+#define MAXIMUM_SERIAL_USB_TTY (256-MAXIMUM_SERIAL_TTY)
+
+uint32 OpenViBEAcquisitionServer::CConfigurationOpenBCI::getMaximumTTYCount(void)
+{
+	return MAXIMUM_SERIAL_USB_TTY + MAXIMUM_SERIAL_TTY;
+}
+
+CString OpenViBEAcquisitionServer::CConfigurationOpenBCI::getTTYFileName(const uint32 ui32TTYNumber)
+{
+	char l_sBuffer[1024];
+#if defined TARGET_OS_Windows
+	::sprintf(l_sBuffer, "\\\\.\\COM%u", ui32TTYNumber);
+#elif defined TARGET_OS_Linux
+	if(ui32TTYNumber<MAXIMUM_SERIAL_USB_TTY)
+	{
+		::sprintf(l_sBuffer, "/dev/ttyUSB%u", ui32TTYNumber);
+	}
+	else
+	{
+		::sprintf(l_sBuffer, "/dev/ttyS%u", ui32TTYNumber-MAXIMUM_SERIAL_USB_TTY);
+	}
+#else
+	::sprintf(l_sBuffer, "");
+#endif
+	return l_sBuffer;
+}
+
+bool OpenViBEAcquisitionServer::CConfigurationOpenBCI::isTTYFile(const CString& sFileName)
+{
+#if defined TARGET_OS_Windows
+	HANDLE l_pFile=::CreateFile(
+		(LPCSTR)sFileName,
+		GENERIC_READ,
+		0,
+		0,
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL,
+		0);
+	if(l_pFile == INVALID_HANDLE_VALUE || l_pFile == NULL)
+	{
+		return false;
+	}
+	CloseHandle(l_pFile);
+	return true;
+#elif defined TARGET_OS_Linux
+	int l_iFile=::open(sFileName, O_RDONLY);
+	if(l_iFile < 0)
+	{
+		return false;
+	}
+	close(l_iFile);
+	return true;
+#else
+	// Caution, this path will claim all serial ports do exist because there was no platform specific implementation
+	return true;
+#endif
+}
+static void checkbutton_daisy_module_cb(::GtkToggleButton* pButton, CConfigurationOpenBCI* pConfigurationOpenBCI)
+{
+	pConfigurationOpenBCI->checkbuttonDaisyModuleCB(gtk_toggle_button_get_active(pButton)?CConfigurationOpenBCI::DaisyStatus_Active:CConfigurationOpenBCI::DaisyStatus_Inactive);
+}
 
 CConfigurationOpenBCI::CConfigurationOpenBCI(const char* sGtkBuilderFileName, OpenViBE::uint32& rUSBIndex)
 	:CConfigurationBuilder(sGtkBuilderFileName)
@@ -31,46 +117,55 @@ boolean CConfigurationOpenBCI::preConfigure(void)
 		return false;
 	}
 
+#if 0
 	::GtkEntry* l_pEntryComInit=GTK_ENTRY(gtk_builder_get_object(m_pBuilderConfigureInterface, "entry_com_init"));
-	::gtk_entry_set_text(l_pEntryComInit, m_sComInit.toASCIIString());
+	::gtk_entry_set_text(l_pEntryComInit, m_sAdditionalCommands.toASCIIString());
+#else
+	std::string l_sAdditionalCommands=m_sAdditionalCommands.toASCIIString();
+	std::replace(l_sAdditionalCommands.begin(), l_sAdditionalCommands.end(), '\255', '\n');
+	::GtkTextView* l_pTextViewComInit=GTK_TEXT_VIEW(gtk_builder_get_object(m_pBuilderConfigureInterface, "text_view_com_init"));
+	::GtkTextBuffer* l_pTextBufferComInit=::gtk_text_view_get_buffer(l_pTextViewComInit);
+	::gtk_text_buffer_set_text(l_pTextBufferComInit, l_sAdditionalCommands.c_str(), -1);
+#endif
 
-	::GtkSpinButton* l_pSpinButtonComDelay=GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_com_delay"));
-	::gtk_spin_button_set_value(l_pSpinButtonComDelay, m_iComDelay);
-	
+	::GtkSpinButton* l_pSpinButtonReadBoardReplyTimeout=GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_read_board_reply_timeout"));
+	::gtk_spin_button_set_value(l_pSpinButtonReadBoardReplyTimeout, m_iReadBoardReplyTimeout);
+
+	::GtkSpinButton* l_pSpinButtonFlushBoardReplyTimeout=GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_flush_board_reply_timeout"));
+	::gtk_spin_button_set_value(l_pSpinButtonFlushBoardReplyTimeout, m_iFlushBoardReplyTimeout);
+
 	::GtkToggleButton* l_pToggleButtonDaisyModule=GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_daisy_module"));
 	::gtk_toggle_button_set_active(l_pToggleButtonDaisyModule, m_bDaisyModule?true:false);
-		
+
+	::g_signal_connect(::gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_daisy_module"), "toggled", G_CALLBACK(checkbutton_daisy_module_cb), this);
+	this->checkbuttonDaisyModuleCB(m_bDaisyModule?DaisyStatus_Active:DaisyStatus_Inactive);
+
 	::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_device"));
 
 	g_object_unref(m_pListStore);
 	m_pListStore=gtk_list_store_new(1, G_TYPE_STRING);
+	m_vComboSlotIndexToSerialPort.clear();
 
 	gtk_combo_box_set_model(l_pComboBox, GTK_TREE_MODEL(m_pListStore));
 
-	char l_sBuffer[1024];
 	boolean l_bSelected=false;
 
-	for(uint32 i=1; i<17; i++)
+	m_vComboSlotIndexToSerialPort[0]=-1;
+	::gtk_combo_box_append_text(l_pComboBox, "Automatic");
+
+	for(uint32 i=0, j=1; i<CConfigurationOpenBCI::getMaximumTTYCount(); i++)
 	{
-#if defined TARGET_OS_Windows
-		::sprintf(l_sBuffer, "\\\\.\\COM%i", i);
-#elif defined TARGET_OS_Linux
-		if(i<10)
+		CString l_sFileName = CConfigurationOpenBCI::getTTYFileName(i);
+		if(CConfigurationOpenBCI::isTTYFile(l_sFileName))
 		{
-			::sprintf(l_sBuffer, i<10?"/dev/ttyS%d":"/dev/ttyUSB%d", i);
-		}
-		else
-		{
-			::sprintf(l_sBuffer, "/dev/ttyUSB%d", i-10);
-		}
-#else
-		::sprintf(l_sBuffer, "");
-#endif
-		::gtk_combo_box_append_text(l_pComboBox, l_sBuffer);
-		if(m_rUSBIndex==i)
-		{
-			::gtk_combo_box_set_active(l_pComboBox, i-1);
-			l_bSelected=true;
+			m_vComboSlotIndexToSerialPort[j]=i;
+			::gtk_combo_box_append_text(l_pComboBox, l_sFileName.toASCIIString());
+			if(m_rUSBIndex==i)
+			{
+				::gtk_combo_box_set_active(l_pComboBox, j);
+				l_bSelected=true;
+			}
+			j++;
 		}
 	}
 
@@ -88,21 +183,41 @@ boolean CConfigurationOpenBCI::postConfigure(void)
 
 	if(m_bApplyConfiguration)
 	{
-		int l_iUSBIndex=gtk_combo_box_get_active(l_pComboBox);
+		int l_iUSBIndex=m_vComboSlotIndexToSerialPort[gtk_combo_box_get_active(l_pComboBox)];
 		if(l_iUSBIndex>=0)
 		{
-			m_rUSBIndex=(uint32)l_iUSBIndex+1;
+			m_rUSBIndex=(uint32)l_iUSBIndex;
 		}
-		
+		else
+		{
+			m_rUSBIndex=(uint32)-1;
+		}
+
+#if 0
 		::GtkEntry* l_pEntryComInit=GTK_ENTRY(gtk_builder_get_object(m_pBuilderConfigureInterface, "entry_com_init"));
-		m_sComInit=::gtk_entry_get_text(l_pEntryComInit);
-		
-		::GtkSpinButton* l_pSpinButtonComDelay=GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_com_delay"));
-		gtk_spin_button_update(GTK_SPIN_BUTTON(l_pSpinButtonComDelay));
-		m_iComDelay=::gtk_spin_button_get_value_as_int(l_pSpinButtonComDelay);
-		
+		m_sAdditionalCommands=::gtk_entry_get_text(l_pEntryComInit);
+#else
+		::GtkTextView* l_pTextViewComInit=GTK_TEXT_VIEW(gtk_builder_get_object(m_pBuilderConfigureInterface, "text_view_com_init"));
+		::GtkTextBuffer* l_pTextBufferComInit=::gtk_text_view_get_buffer(l_pTextViewComInit);
+		::GtkTextIter l_oStartIter;
+		::GtkTextIter l_oEndIter;
+		::gtk_text_buffer_get_start_iter(l_pTextBufferComInit, &l_oStartIter);
+		::gtk_text_buffer_get_end_iter(l_pTextBufferComInit, &l_oEndIter);
+		std::string l_sAdditionalCommands=::gtk_text_buffer_get_text(l_pTextBufferComInit, &l_oStartIter, &l_oEndIter, FALSE);
+		std::replace(l_sAdditionalCommands.begin(), l_sAdditionalCommands.end(), '\n', '\255');
+		m_sAdditionalCommands = l_sAdditionalCommands.c_str();
+#endif
+
+		::GtkSpinButton* l_pSpinButtonReadBoardReplyTimeout=GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_read_board_reply_timeout"));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(l_pSpinButtonReadBoardReplyTimeout));
+		m_iReadBoardReplyTimeout=::gtk_spin_button_get_value_as_int(l_pSpinButtonReadBoardReplyTimeout);
+
+		::GtkSpinButton* l_pSpinButtonFlushBoardReplyTimeout=GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_flush_board_reply_timeout"));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(l_pSpinButtonFlushBoardReplyTimeout));
+		m_iFlushBoardReplyTimeout=::gtk_spin_button_get_value_as_int(l_pSpinButtonFlushBoardReplyTimeout);
+
 		::GtkToggleButton* l_pToggleButtonDaisyModule=GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_daisy_module"));
-		m_bDaisyModule=::gtk_toggle_button_get_active(l_pToggleButtonDaisyModule)?true:false;	
+		m_bDaisyModule=::gtk_toggle_button_get_active(l_pToggleButtonDaisyModule)?true:false;
 	}
 
 	if(!CConfigurationBuilder::postConfigure())
@@ -112,28 +227,37 @@ boolean CConfigurationOpenBCI::postConfigure(void)
 	return true;
 }
 
-boolean CConfigurationOpenBCI::setComInit(const CString& sComInit)
+boolean CConfigurationOpenBCI::setAdditionalCommands(const CString& sAdditionalCommands)
 {
-        m_sComInit=sComInit;
+        m_sAdditionalCommands=sAdditionalCommands;
         return true;
 }
 
-
-CString CConfigurationOpenBCI::getComInit(void) const
+CString CConfigurationOpenBCI::getAdditionalCommands(void) const
 {
-        return m_sComInit;
+        return m_sAdditionalCommands;
 }
 
-boolean CConfigurationOpenBCI::setComDelay(uint32 iComDelay)
+boolean CConfigurationOpenBCI::setReadBoardReplyTimeout(uint32 iReadBoardReplyTimeout)
 {
-        m_iComDelay=iComDelay;
+        m_iReadBoardReplyTimeout=iReadBoardReplyTimeout;
         return true;
 }
 
-
-uint32 CConfigurationOpenBCI::getComDelay(void) const
+uint32 CConfigurationOpenBCI::getReadBoardReplyTimeout(void) const
 {
-        return m_iComDelay;
+        return m_iReadBoardReplyTimeout;
+}
+
+boolean CConfigurationOpenBCI::setFlushBoardReplyTimeout(uint32 iFlushBoardReplyTimeout)
+{
+        m_iFlushBoardReplyTimeout=iFlushBoardReplyTimeout;
+        return true;
+}
+
+uint32 CConfigurationOpenBCI::getFlushBoardReplyTimeout(void) const
+{
+        return m_iFlushBoardReplyTimeout;
 }
 
 bool CConfigurationOpenBCI::setDaisyModule(bool bDaisyModule)
@@ -142,8 +266,53 @@ bool CConfigurationOpenBCI::setDaisyModule(bool bDaisyModule)
         return true;
 }
 
-
 bool CConfigurationOpenBCI::getDaisyModule(void) const
 {
         return m_bDaisyModule;
 }
+
+void CConfigurationOpenBCI::checkbuttonDaisyModuleCB(EDaisyStatus eStatus)
+{
+	SDaisyInformation l_oDaisyInformation=this->getDaisyInformation(eStatus);
+
+	char l_sBuffer[1024];
+
+	::sprintf(l_sBuffer, "%i EEG Channels", l_oDaisyInformation.iEEGChannelCount);
+	::gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(m_pBuilderConfigureInterface, "label_status_eeg_channel_count")), l_sBuffer);
+
+	::sprintf(l_sBuffer, "%i Accelerometer Channels", l_oDaisyInformation.iAccChannelCount);
+	::gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(m_pBuilderConfigureInterface, "label_status_acc_channel_count")), l_sBuffer);
+
+	::sprintf(l_sBuffer, "%i Hz Sampling Rate", l_oDaisyInformation.iSamplingRate);
+	::gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(m_pBuilderConfigureInterface, "label_status_sampling_rate")), l_sBuffer);
+
+	::gtk_spin_button_set_value(GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_number_of_channels")), l_oDaisyInformation.iEEGChannelCount+l_oDaisyInformation.iAccChannelCount);
+}
+
+CConfigurationOpenBCI::SDaisyInformation CConfigurationOpenBCI::getDaisyInformation(EDaisyStatus eStatus)
+{
+	SDaisyInformation l_oResult;
+	switch(eStatus)
+	{
+		case DaisyStatus_Inactive:
+			l_oResult.iEEGChannelCount = DefaultEEGChannelCount;
+			l_oResult.iAccChannelCount = DefaultAccChannelCount;
+			l_oResult.iSamplingRate = DefaultSamplingRate;
+			break;
+
+		case DaisyStatus_Active:
+			l_oResult.iEEGChannelCount = DefaultEEGChannelCount*2;
+			l_oResult.iAccChannelCount = DefaultAccChannelCount;
+			l_oResult.iSamplingRate = DefaultSamplingRate/2;
+			break;
+
+		default:
+			l_oResult.iEEGChannelCount = 0;
+			l_oResult.iAccChannelCount = 0;
+			l_oResult.iSamplingRate = 0;
+			break;
+	}
+
+	return l_oResult;
+}
+
