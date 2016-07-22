@@ -159,7 +159,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput("Input 1",OV_TypeId_StreamedMatrix);
 				
 				rBoxAlgorithmPrototype.addSetting("Port",OV_TypeId_Integer,"5678");
-				rBoxAlgorithmPrototype.addSetting("Stimulus output", OVP_TypeID_TCPWriter_OutputStyle, "Raw");
+				rBoxAlgorithmPrototype.addSetting("Output format", OVP_TypeID_TCPWriter_RawOutputStyle, "Raw");
 
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
 
