@@ -99,7 +99,8 @@ namespace OpenViBE
 
 		protected:
 
-			std::map<OpenViBE::CIdentifier, OpenViBE::CString> m_vName;
+			std::map<OpenViBE::CIdentifier, OpenViBE::CString> m_vName;		// TypeID -> Name
+			std::map<OpenViBE::CString, OpenViBE::CIdentifier> m_vType;		// Name -> TypeID
 			std::map<OpenViBE::CIdentifier, std::map<OpenViBE::uint64, OpenViBE::CString> > m_vEnumeration;
 			std::map<OpenViBE::CIdentifier, std::map<OpenViBE::uint64, OpenViBE::CString> > m_vBitMask;
 			std::map<OpenViBE::CIdentifier, OpenViBE::CIdentifier> m_vStream;

@@ -42,9 +42,16 @@ boolean CTypeManager::registerType(
 {
 	if(isRegistered(rTypeIdentifier))
 	{
+		this->getLogManager() << LogLevel_Error << "Trying to register type " << rTypeIdentifier << " that already exists\n";
 		return false;
 	}
+	if (m_vType.find(sTypeName) != m_vType.end())
+	{
+		this->getLogManager() << LogLevel_Warning << "Trying to register type " << rTypeIdentifier << " with a name that already exists ( " << sTypeName << ")\n";
+	}
+	
 	m_vName[rTypeIdentifier]=sTypeName;
+	m_vType[sTypeName] = rTypeIdentifier;
 	this->getLogManager() << LogLevel_Trace << "Registered type id " << rTypeIdentifier << " - " << sTypeName << "\n";
 	return true;
 }
@@ -56,13 +63,19 @@ boolean CTypeManager::registerStreamType(
 {
 	if(isRegistered(rTypeIdentifier))
 	{
+		this->getLogManager() << LogLevel_Error << "Trying to register stream type " << rTypeIdentifier << " that already exists\n";
 		return false;
+	}
+	if (m_vType.find(sTypeName) != m_vType.end())
+	{
+		this->getLogManager() << LogLevel_Warning << "Trying to register stream type " << rTypeIdentifier << " with a name that already exists ( " << sTypeName << ")\n";
 	}
 	if(rParentTypeIdentifier!=OV_UndefinedIdentifier && !isStream(rParentTypeIdentifier))
 	{
 		return false;
 	}
 	m_vName[rTypeIdentifier]=sTypeName;
+	m_vType[sTypeName] = rTypeIdentifier;
 	m_vStream[rTypeIdentifier]=rParentTypeIdentifier;
 	this->getLogManager() << LogLevel_Trace << "Registered stream type id " << rTypeIdentifier << "::" << rParentTypeIdentifier << " - " << sTypeName << "\n";
 	return true;
@@ -74,9 +87,16 @@ boolean CTypeManager::registerEnumerationType(
 {
 	if(isRegistered(rTypeIdentifier))
 	{
+		this->getLogManager() << LogLevel_Error << "Trying to register enum type " << rTypeIdentifier << " that already exists\n";
 		return false;
 	}
+	if (m_vType.find(sTypeName) != m_vType.end())
+	{
+		this->getLogManager() << LogLevel_Warning << "Trying to register enum type " << rTypeIdentifier << " with a name that already exists ( " << sTypeName << ")\n";
+	}
+
 	m_vName[rTypeIdentifier]=sTypeName;
+	m_vType[sTypeName] = rTypeIdentifier;
 	m_vEnumeration[rTypeIdentifier];
 	this->getLogManager() << LogLevel_Trace << "Registered enumeration type id " << rTypeIdentifier << " - " << sTypeName << "\n";
 	return true;
@@ -107,9 +127,16 @@ boolean CTypeManager::registerBitMaskType(
 {
 	if(isRegistered(rTypeIdentifier))
 	{
+		this->getLogManager() << LogLevel_Error << "Trying to register bitmask type " << rTypeIdentifier << " that already exists\n";
 		return false;
 	}
+	if (m_vType.find(sTypeName) != m_vType.end())
+	{
+		this->getLogManager() << LogLevel_Warning << "Trying to register bitmask type " << rTypeIdentifier << " with a name that already exists ( " << sTypeName << ")\n";
+	}
+
 	m_vName[rTypeIdentifier]=sTypeName;
+	m_vType[sTypeName] = rTypeIdentifier;
 	m_vBitMask[rTypeIdentifier];
 	this->getLogManager() << LogLevel_Trace << "Registered bitmask type id " << rTypeIdentifier << " - " << sTypeName << "\n";
 	return true;
