@@ -10,12 +10,10 @@
 
 #if defined TARGET_HAS_ThirdPartyGMobiLabPlusAPI
 
-#ifndef GMOBILABPLUS_API
-#ifdef TARGET_OS_Windows
-#include <Windows.h>
-#endif
-#include <gMOBIlabplus.h>
-#endif
+// #ifdef TARGET_OS_Windows
+// 	#include <Windows.h>
+// #endif
+
 
 #include <gtk/gtk.h>
 
