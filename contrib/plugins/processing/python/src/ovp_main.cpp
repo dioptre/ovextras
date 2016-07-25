@@ -6,6 +6,8 @@
 
 #include "box-algorithms/ovpCBoxAlgorithmPython.h"
 
+#if defined(PY_MAJOR_VERSION) && (PY_MAJOR_VERSION == 2)
+
 #ifdef TARGET_OS_Windows
 #include "windows.h"
 #endif
@@ -118,6 +120,10 @@ OVP_Declare_Begin();
 	}
 
 OVP_Declare_End();
+
+#else
+#pragma message ("WARNING: Python 2.x headers are required to build the Python plugin, different includes found, skipped")
+#endif // #if defined(PY_MAJOR_VERSION) && (PY_MAJOR_VERSION == 2)
 
 #endif // TARGET_HAS_ThirdPartyPython
 

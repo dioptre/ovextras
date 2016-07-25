@@ -6,6 +6,7 @@
 
 #include "ovpCBoxAlgorithmPython.h"
 
+#if defined(PY_MAJOR_VERSION) && (PY_MAJOR_VERSION == 2)
 
 #include <iostream>
 
@@ -2069,5 +2070,6 @@ OpenViBE::boolean CBoxAlgorithmPython::process(void)
 	return true;
 }
 
+#endif // #if defined(PY_MAJOR_VERSION) && (PY_MAJOR_VERSION == 2)
 #endif // TARGET_HAS_ThirdPartyPython
 #endif
