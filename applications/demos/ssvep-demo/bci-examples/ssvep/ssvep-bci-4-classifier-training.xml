@@ -2083,7 +2083,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename to save configuration to</Name>
 					<DefaultValue>${Path_UserData}/my-classifier.xml</DefaultValue>
-					<Value>${Player_ScenarioDirectory}/classifiers/classifier-2.cfg</Value>
+					<Value>${Player_ScenarioDirectory}/classifiers/classifier-3.cfg</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
