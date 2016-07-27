@@ -86,7 +86,7 @@ namespace OpenViBEAcquisitionServer
 		static const int QUEUE_SIZE = 8;//4 default		 //the number of GT_GetData calls that will be queued during acquisition to avoid loss of data
 		static const int NUMBER_OF_SCANS = 32;           //the number of scans that should be received simultaneously (depending on the _sampleRate; see C-API documentation for this value!)
 		
-		OpenViBE::uint32 numDevices;                 //currently this driver supports 1 device 
+		OpenViBE::uint32 numDevices;					
 
 		static const OpenViBE::uint32 nPoints = NUMBER_OF_SCANS * (GTEC_NUM_CHANNELS + 1);
 		int validPoints;
@@ -104,7 +104,7 @@ namespace OpenViBEAcquisitionServer
 		
 		OpenViBE::float32* m_pSample;
 
-		OpenViBE::uint32 m_ui32ActualImpedanceIndex;
+		OpenViBE::uint32 m_ui32GlobalImpedanceIndex;
 
 		OpenViBE::uint8 m_ui8CommonGndAndRefBitmap;
 
@@ -117,7 +117,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::boolean m_bReconfigurationRequired; // After some gt calls, we may need reconfig
 
-		OpenViBE::uint32 m_ui32AcquiredChannelCount;      //number of channels 1..16 specified bu user
+		OpenViBE::uint32 m_ui32AcquiredChannelCount;      //number of channels 1..16 specified by user
 
 		OpenViBE::uint32 m_ui32TotalHardwareStimulations; //since start button clicked
 		OpenViBE::uint32 m_ui32TotalDriverChunksLost;     //since start button clicked
@@ -160,6 +160,7 @@ namespace OpenViBEAcquisitionServer
 
 		vector<string> m_vDevicesSerials;
 
+		vector<OpenViBE::int32> m_vChannelMap;			// Map channels from gtec indexes to selected channels sample buffer, -1 skip this channel
 	};
 };
 
