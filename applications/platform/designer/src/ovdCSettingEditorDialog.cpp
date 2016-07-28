@@ -62,16 +62,20 @@ boolean CSettingEditorDialog::run(void)
 
 	CIdentifier l_oCurrentTypeIdentifier;
 	gint l_iActive=-1;
+	uint32 l_ui32NumSettings = 0; // Cannot rely on m_vSettingTypes.size() -- if there are any duplicates, it wont increment properly (and should be an error anyway) ...
 	while((l_oCurrentTypeIdentifier=m_rKernelContext.getTypeManager().getNextTypeIdentifier(l_oCurrentTypeIdentifier))!=OV_UndefinedIdentifier)
 	{
 		if(!m_rKernelContext.getTypeManager().isStream(l_oCurrentTypeIdentifier))
 		{
-			gtk_combo_box_append_text(GTK_COMBO_BOX(m_pType), m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString());
+			const CString l_sThisType = m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier);
+				
+			gtk_combo_box_append_text(GTK_COMBO_BOX(m_pType), l_sThisType.toASCIIString());
 			if(l_oCurrentTypeIdentifier==l_oSettingType)
 			{
-				l_iActive=m_vSettingTypes.size();
+				l_iActive = l_ui32NumSettings;
 			}
-			m_vSettingTypes[m_rKernelContext.getTypeManager().getTypeName(l_oCurrentTypeIdentifier).toASCIIString()]=l_oCurrentTypeIdentifier;
+			m_vSettingTypes[l_sThisType.toASCIIString()] = l_oCurrentTypeIdentifier;
+			l_ui32NumSettings++;
 		}
 	}
 
@@ -135,7 +139,8 @@ boolean CSettingEditorDialog::run(void)
 
 void CSettingEditorDialog::typeChangedCB(void)
 {
-	CIdentifier l_oSettingType=m_vSettingTypes[gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pType))];
+	const std::string l_sActiveSetting = gtk_combo_box_get_active_text(GTK_COMBO_BOX(m_pType));
+	CIdentifier l_oSettingType=m_vSettingTypes[l_sActiveSetting];
 	m_rBox.setSettingType(m_ui32SettingIndex, l_oSettingType);
 	if(m_pSettingView != NULL)
 	{

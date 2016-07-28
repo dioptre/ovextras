@@ -322,7 +322,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::ConfigureDevice(OpenViBE::uint32 deviceNum
 
     if(!::GT_SetSampleRate(o_pDevice, m_oHeader.getSamplingFrequency())) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetSampleRate\n";
 
-	if(l_ui32Mode = M_NORMAL)
+	if(l_ui32Mode == M_NORMAL)
 	{
 		if(!::GT_SetReference(o_pDevice, l_oReference)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetReference\n";
 		if(!::GT_SetGround(o_pDevice, l_oGround)) m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetGround\n";

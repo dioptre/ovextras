@@ -1,8 +1,10 @@
 <OpenViBE-Scenario>
+	<Creator>OpenViBE</Creator>
+	<CreatorVersion>1.2.1+git</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x00005174, 0x00007bed)</Identifier>
-			<Name>Filtered signal</Name>
+			<Name>Filtered signal (fixed scale)</Name>
 			<AlgorithmClassIdentifier>(0x0055be5f, 0x087bdd12)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -106,11 +108,11 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>103</Value>
+					<Value>187</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
-					<Value>(0x00000000, 0x0058c3ed)</Value>
+					<Value>(0x00000000, 0x0017ebaf)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
@@ -128,7 +130,7 @@
 		</Box>
 		<Box>
 			<Identifier>(0x00006c69, 0x00002365)</Identifier>
-			<Name>Raw signal</Name>
+			<Name>Raw signal (autoscale)</Name>
 			<AlgorithmClassIdentifier>(0x0055be5f, 0x087bdd12)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -212,7 +214,7 @@
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
-					<Value>272.000000</Value>
+					<Value>304.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
@@ -232,11 +234,11 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>80</Value>
+					<Value>157</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
-					<Value>(0x00000000, 0x006a7edc)</Value>
+					<Value>(0x00000000, 0x0029ae51)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
@@ -310,7 +312,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
-					<Value>(0x00000000, 0x00a1ff2e)</Value>
+					<Value>(0x00000000, 0x0022574e)</Value>
 				</Attribute>
 			</Attributes>
 		</Box>
@@ -348,7 +350,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
-					<Value>176</Value>
+					<Value>190.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
@@ -356,7 +358,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>256</Value>
+					<Value>256.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x30a4e5c9, 0x83502953)</Identifier>
@@ -372,7 +374,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
-					<Value>(0x00000000, 0x00b2c9f7)</Value>
+					<Value>(0x00000000, 0x00577d72)</Value>
 				</Attribute>
 			</Attributes>
 		</Box>
@@ -459,7 +461,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
-					<Value>(0x00000000, 0x00a7d4a2)</Value>
+					<Value>(0x00000000, 0x004f4c72)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
@@ -494,7 +496,7 @@
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
-					<Value>199</Value>
+					<Value>213</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
@@ -502,7 +504,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
-					<Value>246</Value>
+					<Value>278</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
@@ -523,7 +525,7 @@
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
-					<Value>199</Value>
+					<Value>213</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
@@ -531,7 +533,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
-					<Value>246</Value>
+					<Value>278</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
@@ -665,48 +667,57 @@ stream of the OpenViBE platform into a file.</Text>
 		</Comment>
 		<Comment>
 			<Identifier>(0x22866850, 0x7c657523)</Identifier>
-			<Text>The &lt;i&gt;&lt;b&gt;Signal Display&lt;/b&gt;&lt;/i&gt; box displays
-the content of the file in EEG mode.</Text>
+			<Text>This &lt;i&gt;&lt;b&gt;Signal Display&lt;/b&gt;&lt;/i&gt; box displays
+the content in a fixed, specified scale.</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>1136</Value>
+					<Value>1136.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>336</Value>
+					<Value>352.000000</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
 		<Comment>
 			<Identifier>(0x405767d6, 0x682e6c4b)</Identifier>
-			<Text>The &lt;i&gt;&lt;b&gt;Signal Display&lt;/b&gt;&lt;/i&gt; box displays
-the content of the file in standard mode.</Text>
+			<Text>This &lt;i&gt;&lt;b&gt;Signal Display&lt;/b&gt;&lt;/i&gt; box displays
+the content of the file in a mode where each 
+channel is automatically vertically scaled, 
+independently of the other channels.
+
+The red blip in the plot means the scale was changed.</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>496</Value>
+					<Value>512.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>288</Value>
+					<Value>304.000000</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
 		<Comment>
 			<Identifier>(0x4548e33f, 0x52be494b)</Identifier>
-			<Text>There is now two &quot;mode&quot; in signal display, wether the input signal is filtered eeg signal or not.
-In eeg mode, all signals are in the same drawing area, and vertical scale is optimize for eeg dispaly (verticale scale of 100)
+			<Text>This scenario illustrates the &lt;b&gt;Signal Display&lt;/b&gt; box.
 
-You can enable eeg mode by checking EEG display in box settings.</Text>
+For serious use, it is recommended to configure the box to use a scaling
+suitable for your data to get minimal amount of run-time autoscale changes.
+
+- Very different channel scales: Use per-channel scale
+- All channels similar, scale known: Use global scale
+- Data is well-behaved: Use fixed scale and specify it
+</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>768</Value>
+					<Value>770.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>48</Value>
+					<Value>48.000000</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
@@ -716,11 +727,11 @@ You can enable eeg mode by checking EEG display in box settings.</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>768</Value>
+					<Value>464.000000</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>432</Value>
+					<Value>400.000000</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
