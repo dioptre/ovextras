@@ -197,7 +197,7 @@ boolean CDriverOpenBCI::initialize(
 	m_rDriverContext.getLogManager() << LogLevel_Debug << CString(this->getName()) << " driver initialized.\n";
 
 	// init scale factor
-	m_f32UnitsToMicroVolts = (float32) (float32) (ADS1299_VREF / ((pow(2.,23)-1) * ADS1299_GAIN * 1000000.));
+	m_f32UnitsToMicroVolts = (float32) (float32) ((ADS1299_VREF * 1000000) / ((pow(2.,23)-1) * ADS1299_GAIN));
 	m_f32UnitsToRadians = (float32) (0.002 / pow(2.,4)); // @aj told me - this is undocumented and may have been taken from the OpenBCI plugin for processing
 
 #if 0
