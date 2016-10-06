@@ -28,8 +28,8 @@ ENDIF(WIN32)
 #first we begin with the calibration phase
 #the calibration folder contains the 2 scenarios and the calibration data needed
 #and write the configuration files necessary for the other tests
-ADD_TEST(calibration_XDawn "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" "./Calibration/p300-speller-2-train-xdawn.xml")
-ADD_TEST(calibration_classifier "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--play-fast" "./Calibration/p300-speller-3-train-classifier.xml")
+ADD_TEST(calibration_XDawn "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible" "--play-fast" "./Calibration/p300-speller-2-train-xdawn.xml")
+ADD_TEST(calibration_classifier "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible" "--play-fast" "./Calibration/p300-speller-3-train-classifier.xml")
 
 
 ADD_TEST(clean_resultBuffer "rm" "-f" "$ENV{OV_USERDATA}/xP300-resultStack.txt")
