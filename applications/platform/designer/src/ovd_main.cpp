@@ -596,7 +596,7 @@ int go(int argc, char ** argv)
 				signal(SIGINT, SIG_DFL);
 				signal(SIGQUIT, SIG_DFL);
 #endif
-				if(l_rConfigurationManager.expandAsBoolean("${Kernel_3DVisualisationEnabled}"))
+				if(!l_oConfiguration.m_eNoVisualisation && l_rConfigurationManager.expandAsBoolean("${Kernel_3DVisualisationEnabled}"))
 				{
 					l_pKernelContext->getVisualisationManager().initialize3DContext();
 				}
