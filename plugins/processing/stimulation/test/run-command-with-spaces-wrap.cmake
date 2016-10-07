@@ -9,7 +9,7 @@ ENDIF(WIN32)
 # MESSAGE(STATUS "PROC ${SCENARIO_BASE}")
 
 EXECUTE_PROCESS(
-	COMMAND "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--no-gui" "--no-session-management" "--play" "${SCENARIO_BASE}.xml" 
+	COMMAND "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible" "--no-session-management" "--play" "${SCENARIO_BASE}.xml" 
 	COMMAND "grep" "TestRunCommand Params:" 
 	OUTPUT_VARIABLE OV_RESULT
 	OUTPUT_FILE "${SCENARIO_BASE}.txt")
