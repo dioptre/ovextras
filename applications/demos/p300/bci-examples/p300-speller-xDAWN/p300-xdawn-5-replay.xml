@@ -364,9 +364,9 @@
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
-					<TypeIdentifier>(0x2af426d1, 0x72fb7bac)</TypeIdentifier>
+					<TypeIdentifier>(0x2c132d6e, 0x44ab0d97)</TypeIdentifier>
 					<Name>Segment start</Name>
-					<DefaultValue>C-SVC</DefaultValue>
+					<DefaultValue>OVTK_StimulationId_TrialStart</DefaultValue>
 					<Value>OVTK_StimulationId_TrialStart</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>

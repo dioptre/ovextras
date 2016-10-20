@@ -166,19 +166,25 @@ function process(box)
 			local maxRowIdx, maxRowValue = arrayMax(row_votes)
 			local maxColIdx, maxColValue = arrayMax(col_votes)
 
-			local rowVotes = 0
-			local colVotes = 0
-			for ir, val in pairs(row_votes) do
-				rowVotes = rowVotes + val
-			end
-			for ir, val in pairs(col_votes) do
-				colVotes = colVotes + val
+			if maxRowValue == 0 and maxColValue == 0 then
+				box:log("Warning", string.format("Classifier predicted 'no p300' for all flashes of the trial"));
 			end
 			
 			if do_debug then
+				local rowVotes = 0
+				local colVotes = 0
+				for ir, val in pairs(row_votes) do
+					rowVotes = rowVotes + val
+				end
+				for ir, val in pairs(col_votes) do
+					colVotes = colVotes + val
+				end
+			
 				box:log("Info", string.format("Vote [%d %d] wt [%d,%d]", maxRowIdx+row_base, maxColIdx+col_base, maxRowValue, maxColValue))	
 				box:log("Info", string.format("  Total [%d %d]", rowVotes, colVotes))
 			end
+			
+
 			
 			local now = box:get_current_time()
 			
