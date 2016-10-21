@@ -270,11 +270,15 @@ void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
 	double l_vFeedback[l_iNChannels];
 	if (iChannelCount == 6)
 	{
-		// Assume input is layered like [prob1pos,prop1neg,prop2pos,prop2neg,prop3pos,prop3neg];
+		// Assume input is layered like [prob1pos,prob1neg,prob2pos,prob2neg,prob3pos,prob3neg] as is the
+		// the case when multiple probability vectors have been pooled together from different 2 class classifiers; 
+		// They are assumed to be on the same scale.
 		l_vFeedback[0] = pChannel[0];
 		l_vFeedback[1] = pChannel[2];
 		l_vFeedback[2] = pChannel[4];
 	}
+#ifdef FUTURE_SHOOTER
+	// When the shooter is used with a true multiclass classifier, switch to the following
 	else if (iChannelCount == 3)
 	{
 		// Assume input is layered like [prob1,prob2,prob3]
@@ -282,9 +286,10 @@ void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
 		l_vFeedback[1] = pChannel[1];
 		l_vFeedback[2] = pChannel[2];
 	}
+#endif
 	else
 	{
-		this->getLogManager() << LogLevel_Error << "Incorrect analog VRPN input with " << iChannelCount << " channels. This will not work.\n";
+		this->getLogManager() << LogLevel_Error << "Incorrect analog VRPN input with " << iChannelCount << " channels. Need 3x2=6 channels. This will not work.\n";
 		l_vFeedback[0] = 0;
 		l_vFeedback[1] = 0;
 		l_vFeedback[2] = 0;

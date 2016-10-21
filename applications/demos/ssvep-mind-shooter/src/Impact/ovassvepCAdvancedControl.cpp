@@ -42,21 +42,21 @@ void CAdvancedControl::processFrame(double fShoot, double fLeft, double fRight)
 	m_vCommandStates[2] = 0;
 
 
-	if (fShoot <= 0.0 && m_poApplication->getShip()->getTargetState(0) != CImpactShip::TS_OFF)
+	if (fShoot > fLeft && fShoot > fRight && m_poApplication->getShip()->getTargetState(0) != CImpactShip::TS_OFF)
 	{
 		m_vCommandStates[0] = 1;
 		l_iCommandsActivated++;
 		l_eCommand = SHOOT;
 	}
 
-	if (fLeft <= 0.0 && m_poApplication->getShip()->getTargetState(1) != CImpactShip::TS_OFF)
+	if (fLeft > fShoot && fLeft > fRight && m_poApplication->getShip()->getTargetState(1) != CImpactShip::TS_OFF)
 	{
 		m_vCommandStates[1] = 1;
 		l_iCommandsActivated++;
 		l_eCommand = MOVE_LEFT;
 	}
 
-	if (fRight <= 0.0 && m_poApplication->getShip()->getTargetState(2) != CImpactShip::TS_OFF)
+	if (fRight > fShoot && fRight > fLeft && m_poApplication->getShip()->getTargetState(2) != CImpactShip::TS_OFF)
 	{
 		m_vCommandStates[2] = 1;
 		l_iCommandsActivated++;
