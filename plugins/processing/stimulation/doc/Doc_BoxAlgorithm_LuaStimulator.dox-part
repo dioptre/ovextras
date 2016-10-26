@@ -93,7 +93,16 @@ If you use an invalid value, then \c Debug is used.
 - \c line_of_text can be any line of text you want to print
 
 \subsection LuaScriptAPI_set_filter_mode box:set_filter_mode(active)
-By default the Lua scripting box works in a clock-driven mode: it runs with a certain frequency, and on each run it outputs a stimulus chunk. When the filter mode is active (=1), the input stimulation stream drives the output chunk generation instead. In filter mode, you can copy input stimulations to the output while keeping their exact timestamps. Explanation: Lua box generates stimulation chunk stream [t1,t2[[t2,t3[[t3,t4[... with a high frequency (small chunks). The input stream may have chunks with bigger granularity such as [t1,t3[[t3,t5[... . Now if the box receives stimulation tagged at time t1 from such an input, it will have already sent out the chunk [t1,t2] as the time by then is at least t3. Hence the stimulation at t1 must be dropped as OpenViBE stimulation stream guarantees that if a stimuli tagged at t has not been received by time t+eps, there will never be one. Note that for the filter mode operation it is necessary that the upstream generates a meaningful stimulation stream or the box will not output anything.
+
+By default the Lua scripting box works in a clock-driven mode: it runs with a certain frequency, and each time the process code is run, it outputs a stimulus chunk. 
+When the filter mode is active (=1), the input stimulation stream drives the output chunk generation instead. In filter mode, you can copy input stimulations to the output while keeping their exact timestamps. 
+
+Explanation: Lua box generates a stimulation chunk stream \[t1,t2\[, \[t2,t3\[, \[t3,t4\[, ... , with a high frequency (small chunks). The t are the start and end times of each chunk. 
+However, the input stream may have chunks with a bigger granularity such as \[t1,t3\[, \[t3,t5\[, ..., and so on. 
+Now if the box receives stimulation tagged at time t1 from such a bigger granularity input stream, it will have already sent out the chunk \[t1,t2\] as the current time by then is at least t3 as chunk \[t1,t3\[ was received. 
+Hence the stimulation at t1 must be dropped as OpenViBE stimulation stream guarantees that if a stimuli tagged at time t has not been received by the time a chunk with its beginning timestamp greater than t is received, there will never be a stimuli at t. 
+
+Note that for the filter mode operation it is necessary that the upstream generates a meaningful stimulation stream. If not, the box will not output stimulations when the filter mode is active.
 
 \subsection LuaScriptAPI_get_config box:get_config(token)
 This function uses the configuration manager to expand a configuration token. The configuration token
