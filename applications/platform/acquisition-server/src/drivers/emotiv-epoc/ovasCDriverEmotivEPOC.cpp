@@ -3,8 +3,6 @@
 #include "ovasCDriverEmotivEPOC.h"
 #include "ovasCConfigurationEmotivEPOC.h"
 
-#include "edk.h"
-
 #include <system/ovCTime.h>
 
 #include <system/ovCMemory.h>
@@ -15,6 +13,10 @@
 #include <iostream>
 #include <vector>
 
+#if defined(TARGET_OS_Windows)
+#include <delayimp.h>
+#endif
+
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -22,6 +24,19 @@ using namespace std;
 
 #define boolean OpenViBE::boolean
 
+#if defined(TARGET_HAS_ThirdPartyEmotivResearchAPI3x)
+static const IEE_DataChannel_t g_ChannelList[] = 
+{
+	IED_AF3, IED_F7, IED_F3, IED_FC5, IED_T7, IED_P7, IED_O1, IED_O2, IED_P8, IED_T8, IED_FC6, IED_F4, IED_F8, IED_AF4, 
+	IED_GYROX, IED_GYROY,
+	IED_COUNTER,
+	IED_TIMESTAMP, 
+	IED_FUNC_ID, IED_FUNC_VALUE, 
+	IED_MARKER, 
+	IED_SYNC_SIGNAL
+};
+#else
+// Old API
 static const EE_DataChannel_t g_ChannelList[] = 
 {
 	ED_AF3, ED_F7, ED_F3, ED_FC5, ED_T7, ED_P7, ED_O1, ED_O2, ED_P8, ED_T8, ED_FC6, ED_F4, ED_F8, ED_AF4, 
@@ -32,6 +47,7 @@ static const EE_DataChannel_t g_ChannelList[] =
 	ED_MARKER, 
 	ED_SYNC_SIGNAL
 };
+#endif
 
 CDriverEmotivEPOC::CDriverEmotivEPOC(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
@@ -65,6 +81,20 @@ const char* CDriverEmotivEPOC::getName(void)
 	return "Emotiv EPOC";
 }
 
+boolean CDriverEmotivEPOC::restoreState(void)
+{
+	// Restore the previous path
+	if(m_sOldPath.length() > 0) {
+		_putenv_s("PATH",m_sOldPath);
+	}
+
+#if defined TARGET_OS_Windows
+	__FUnloadDelayLoadedDLL2("edk.dll");
+#endif
+
+	return true;
+}
+
 boolean CDriverEmotivEPOC::buildPath(void)
 {
 	char * l_sPath = getenv("PATH");
@@ -73,6 +103,8 @@ boolean CDriverEmotivEPOC::buildPath(void)
 		return false;
 	}
 	
+	m_sOldPath = l_sPath;
+
 	string l_sStrPath = string(l_sPath);
 	size_t l_pFound = l_sStrPath.find((const char *)m_sPathToEmotivSDK);
 
@@ -89,6 +121,8 @@ boolean CDriverEmotivEPOC::buildPath(void)
 		m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] Emotiv Driver: Using the existing PATH.\n";
 	}
 
+
+
 	return true;
 }
 
@@ -98,6 +132,8 @@ boolean CDriverEmotivEPOC::initialize(
 	const uint32 ui32SampleCountPerSentBlock,
 	IDriverCallback& rCallback)
 {
+	m_tEEEventHandle = NULL;
+
 	//we need to add the path to Emotiv SDK to PATH: done in external function 
 	//because SEH (__try/__except) does not allow the use of local variables with destructor.
 	if(!this->buildPath())
@@ -107,6 +143,8 @@ boolean CDriverEmotivEPOC::initialize(
 	}
 
 #if defined TARGET_OS_Windows
+	// m_rDriverContext.getLogManager() << LogLevel_Info << "[INIT] Emotiv Driver: Setting PATH as " << m_sCommandForPathModification << "\n";
+
 	if(_putenv_s("PATH",m_sCommandForPathModification) != 0)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: Failed to modify the environment PATH with the Emotiv SDK path.\n";
@@ -163,6 +201,7 @@ boolean CDriverEmotivEPOC::initialize(
 	if(m_rDriverContext.isConnected())
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: Driver already initialized.\n";
+		restoreState();
 		return false;
 	}
 
@@ -170,6 +209,7 @@ boolean CDriverEmotivEPOC::initialize(
 	 ||!m_oHeader.isSamplingFrequencySet())
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: Channel count or frequency not set.\n";
+		restoreState();
 		return false;
 	}
 
@@ -185,6 +225,7 @@ boolean CDriverEmotivEPOC::initialize(
 		m_pSample=NULL;
 		//m_pBuffer=NULL;
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: Samples allocation failed.\n";
+		restoreState();
 		return false;
 	}
 
@@ -199,8 +240,8 @@ boolean CDriverEmotivEPOC::initialize(
 	try
 #endif
 	{
-		m_tEEEventHandle = EE_EmoEngineEventCreate();
-		m_ui32EDK_LastErrorCode = EE_EngineConnect();
+		m_tEEEventHandle = IEE_EmoEngineEventCreate();
+		m_ui32EDK_LastErrorCode = IEE_EngineConnect();
 
 	}
 #if defined TARGET_OS_Windows
@@ -210,23 +251,44 @@ boolean CDriverEmotivEPOC::initialize(
 #endif
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: First call to 'edk.dll' failed.\n"
-			<< "\tTo use this driver you must have the Emotiv SDK Research Edition (or above) installed on your computer.\n"
-			<< "\tAt first use please provide in the driver properties the path to your Emotiv SDK (root directory)\n"
-			<< "\te.g. \"C:\\Program Files (x86)\\Emotiv Research Edition SDK_v1.0.0.4-PREMIUM\"\n"
-			<< "\tThis path will be saved for further use automatically.\n";
+			<< "\tThis driver needs Emotiv SDK Research Edition (or better)\n"
+			<< "\tinstalled on your computer.\n"
+			<< "\tYou have configured the driver to use path [" << m_sPathToEmotivSDK << "].\n"
+			<< "\tIf there is an 'edk.dll' there, its version may be incompatible.\n"
+			<< "\tThis driver was built against 32-bit (x86) Emotiv SDK v "
+#if defined(TARGET_HAS_ThirdPartyEmotivResearchAPI3x)
+			<< "3.x.x.\n";
+#else
+			<< "1.x.x.\n";
+#endif
 
+		restoreState();
 		return false;
 	}
 
 	if (m_ui32EDK_LastErrorCode != EDK_OK)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[INIT] Emotiv Driver: Can't connect to EmoEngine. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
+		restoreState();
 		return false;
 	}
 	else
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Trace << "[INIT] Emotiv Driver: Connection to EmoEngine successful.\n";
 	}
+
+#if defined(TARGET_HAS_ThirdPartyEmotivResearchAPI)
+	unsigned long l_ulHwVersion = 0;
+	unsigned long l_ulBuildNum = 0;
+	char l_sVersion[16];
+
+	IEE_HardwareGetVersion(m_ui32UserID, &l_ulHwVersion);
+	IEE_SoftwareGetVersion(l_sVersion, 16, &l_ulBuildNum);
+
+	m_rDriverContext.getLogManager() << LogLevel_Info << "Emotiv Driver: "
+		<< "headset version " << uint64(l_ulHwVersion && 0xFFFF) << " / "  << uint64(l_ulHwVersion >> 16) 
+		<< ", software " << l_sVersion << ", build " << uint64(l_ulBuildNum) << "\n";
+#endif
 
 	//__________________________________
 	// Saves parameters
@@ -250,10 +312,10 @@ boolean CDriverEmotivEPOC::start(void)
 		return false;
 	}
 
-	m_tDataHandle = EE_DataCreate();
+	m_tDataHandle = IEE_DataCreate();
 	//float l_fBufferSizeInSeconds = (float32)m_ui32SampleCountPerSentBlock/(float32)m_oHeader.getSamplingFrequency();
 	float l_fBufferSizeInSeconds = 1;
-	m_ui32EDK_LastErrorCode = EE_DataSetBufferSizeInSec(l_fBufferSizeInSeconds);
+	m_ui32EDK_LastErrorCode = IEE_DataSetBufferSizeInSec(l_fBufferSizeInSeconds);
 	if (m_ui32EDK_LastErrorCode != EDK_OK) {
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[START] Emotiv Driver: Set buffer size to ["<<l_fBufferSizeInSeconds<< "] sec failed. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
 		return false;
@@ -273,17 +335,17 @@ boolean CDriverEmotivEPOC::loop(void)
 	if(m_rDriverContext.isStarted())
 	{
 		// we enable the acquisiton for every new headset (user) ever added
-		if(EE_EngineGetNextEvent(m_tEEEventHandle) == EDK_OK)
+		if(IEE_EngineGetNextEvent(m_tEEEventHandle) == EDK_OK)
 		{
-			EE_Event_t l_tEventType = EE_EmoEngineEventGetType(m_tEEEventHandle);
+			IEE_Event_t l_tEventType = IEE_EmoEngineEventGetType(m_tEEEventHandle);
 			
 
-			if (l_tEventType == EE_UserAdded)
+			if (l_tEventType == IEE_UserAdded)
 			{
 				uint32 l_ui32NewUserID;
-				EE_EmoEngineEventGetUserId(m_tEEEventHandle, &l_ui32NewUserID);
+				IEE_EmoEngineEventGetUserId(m_tEEEventHandle, &l_ui32NewUserID);
 				m_rDriverContext.getLogManager() << LogLevel_Trace << "[LOOP] Emotiv Driver: User #" << l_ui32NewUserID << " registered.\n";
-				m_ui32EDK_LastErrorCode = EE_DataAcquisitionEnable(l_ui32NewUserID, true);
+				m_ui32EDK_LastErrorCode = IEE_DataAcquisitionEnable(l_ui32NewUserID, true);
 				if (m_ui32EDK_LastErrorCode != EDK_OK) 
 				{
 					m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: Enabling acquisition failed. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
@@ -297,13 +359,13 @@ boolean CDriverEmotivEPOC::loop(void)
 		if(m_bReadyToCollect)
 		{
 			uint32 l_ui32nSamplesTaken=0;
-			m_ui32EDK_LastErrorCode = EE_DataUpdateHandle(m_ui32UserID, m_tDataHandle);
+			m_ui32EDK_LastErrorCode = IEE_DataUpdateHandle(m_ui32UserID, m_tDataHandle);
 			if(m_ui32EDK_LastErrorCode != EDK_OK)
 			{
 				m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occurred while updating the DataHandle. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
 				return false;
 			}
-			m_ui32EDK_LastErrorCode = EE_DataGetNumberOfSample(m_tDataHandle, &l_ui32nSamplesTaken);
+			m_ui32EDK_LastErrorCode = IEE_DataGetNumberOfSample(m_tDataHandle, &l_ui32nSamplesTaken);
 			if(m_ui32EDK_LastErrorCode != EDK_OK)
 			{
 				m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occurred while getting new samples from device. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
@@ -318,7 +380,7 @@ boolean CDriverEmotivEPOC::loop(void)
 				for(uint32 s=0;s<l_ui32nSamplesTaken;s++)
 				{
 					double* l_pBuffer = new double[l_ui32nSamplesTaken];
-					m_ui32EDK_LastErrorCode = EE_DataGet(m_tDataHandle, g_ChannelList[i], l_pBuffer, l_ui32nSamplesTaken);
+					m_ui32EDK_LastErrorCode = IEE_DataGet(m_tDataHandle, g_ChannelList[i], l_pBuffer, l_ui32nSamplesTaken);
 					if(m_ui32EDK_LastErrorCode != EDK_OK)
 					{
 						m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occurred while getting new samples from device. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
@@ -339,7 +401,7 @@ boolean CDriverEmotivEPOC::loop(void)
 			{
 				for(uint32 i=0; i<m_oHeader.getChannelCount(); i++)
 				{
-					m_ui32EDK_LastErrorCode = EE_DataGet(m_tDataHandle, g_ChannelList[i], l_pBuffer, l_ui32nSamplesTaken);
+					m_ui32EDK_LastErrorCode = IEE_DataGet(m_tDataHandle, g_ChannelList[i], l_pBuffer, l_ui32nSamplesTaken);
 					if(m_ui32EDK_LastErrorCode != EDK_OK)
 					{
 						m_rDriverContext.getLogManager() << LogLevel_Error << "[LOOP] Emotiv Driver: An error occurred while getting new samples from device. EDK Error Code [" << m_ui32EDK_LastErrorCode << "]\n";
@@ -373,26 +435,22 @@ boolean CDriverEmotivEPOC::stop(void)
 		return false;
 	}
 
-	EE_DataFree(m_tDataHandle);
+	IEE_DataFree(m_tDataHandle);
 
 	return true;
 }
 
 boolean CDriverEmotivEPOC::uninitialize(void)
 {
-	if(!m_rDriverContext.isConnected())
-	{
-		return false;
+	IEE_EngineDisconnect();
+
+	if(m_tEEEventHandle) {
+		IEE_EmoEngineEventFree(m_tEEEventHandle);
+		m_tEEEventHandle = NULL;
 	}
 
-	if(m_rDriverContext.isStarted())
-	{
-		return false;
-	}
+	restoreState();
 
-	EE_EngineDisconnect();
-	EE_EmoEngineEventFree(m_tEEEventHandle);
-		
 	return true;
 }
 
