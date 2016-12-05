@@ -109,7 +109,7 @@ namespace OpenViBEAcquisitionServer
 		
 		OpenViBE::float32* m_pSample;
 
-		OpenViBE::uint32 m_ui32ActualImpedanceIndex;
+		OpenViBE::uint32 m_ui32GlobalImpedanceIndex;
 
 		OpenViBE::uint8 m_ui8CommonGndAndRefBitmap;
 
@@ -123,7 +123,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::boolean m_bReconfigurationRequired; // After some gt calls, we may need reconfig
 
-		OpenViBE::uint32 m_ui32AcquiredChannelCount;      //number of channels 1..16 specified bu user
+		OpenViBE::uint32 m_ui32AcquiredChannelCount;      //number of channels 1..16 specified by user
 
 		OpenViBE::uint32 m_ui32TotalHardwareStimulations; //since start button clicked
 		OpenViBE::uint32 m_ui32TotalDriverChunksLost;     //since start button clicked
@@ -168,6 +168,7 @@ namespace OpenViBEAcquisitionServer
 
 		std::string CDriverGTecGUSBamp::getSerialByHandler(HANDLE o_pDevice);
 
+		vector<OpenViBE::int32> m_vChannelMap;			// Map channels from gtec indexes to selected channels sample buffer, -1 skip this channel
 	};
 };
 

@@ -92,6 +92,12 @@ OpenViBE::boolean CConfigurationGTecGUSBamp::preConfigure(void)
 
 		if (masterIndex!=-1)
 		    ::gtk_combo_box_set_active(l_pComboBox, masterIndex);
+
+		// In multiamp mode, disable the functions which are not working correctly
+		::GtkWidget* l_pChannelNames = GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "button_change_channel_names"));
+		::gtk_widget_set_sensitive(l_pChannelNames, false);
+		::GtkSpinButton* l_pNumChannels = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_number_of_channels"));
+		::gtk_widget_set_sensitive(GTK_WIDGET(l_pNumChannels), false);
 	}
 	
 	uint32 l_iCount = this->m_rDevicesSerials.size();
@@ -345,7 +351,7 @@ void CConfigurationGTecGUSBamp::setHardwareFiltersDialog()
 		if(!GT_GetNumberOfFilter(&l_iNbBandPassFilters)) { std::cout << "err GT_GetNumberOfFilter\n"; }
 		if (l_iNbBandPassFilters == 0)
 		{
-			std::cout << "err No band pass filters foundatt all!\n";
+			std::cout << "err No band pass filters found at all!\n";
 		}
 		if(!GT_GetNumberOfNotch(&l_iNbNotchFilters)) { std::cout << "err GT_GetNumberOfNotch\n"; }
 		if (l_iNbNotchFilters==0)
