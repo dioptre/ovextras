@@ -44,7 +44,7 @@ static void button_filters_pressed_cb(::GtkButton* pButton, void* pUserData)
 }
 
 CConfigurationGTecGUSBamp::CConfigurationGTecGUSBamp(
-	            const char* sGtkBuilderFileName,uint32& rUSBIndex,uint8& rCommonGndAndRefBitmap, int32& rNotchFilterIndex, int32& rBandPassFilterIndex,OpenViBE::boolean& rTriggerInput,vector<string> rDevicesSerials,string& rMasterDeviceIndex, OpenViBE::boolean& rBipolar, OpenViBE::boolean& rCalibrationSignalEnabled)
+	const char* sGtkBuilderFileName, uint32& rUSBIndex, uint8& rCommonGndAndRefBitmap, int32& rNotchFilterIndex, int32& rBandPassFilterIndex, OpenViBE::boolean& rTriggerInput, vector<string> rDevicesSerials, string& rMasterDeviceIndex, OpenViBE::boolean& rBipolar, OpenViBE::boolean& rCalibrationSignalEnabled, OpenViBE::boolean& rShowDeviceName)
 	: CConfigurationBuilder(sGtkBuilderFileName)
 	,m_rUSBIndex(rUSBIndex)
 	,m_rCommonGndAndRefBitmap(rCommonGndAndRefBitmap)
@@ -55,6 +55,7 @@ CConfigurationGTecGUSBamp::CConfigurationGTecGUSBamp(
 	,m_rMasterDeviceIndex(rMasterDeviceIndex)
 	,m_rBipolarEnabled(rBipolar)
 	,m_rCalibrationSignalEnabled(rCalibrationSignalEnabled)
+	,m_rShowDeviceName(rShowDeviceName)
 {
 }
 
@@ -70,6 +71,9 @@ OpenViBE::boolean CConfigurationGTecGUSBamp::preConfigure(void)
 
 	::GtkCheckButton* l_pCheckButton_Bipolar=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_Bipolar"));
 	::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pCheckButton_Bipolar), m_rBipolarEnabled);
+
+	::GtkCheckButton* l_pCheckButton_ShowDeviceName = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_ShowDeviceName"));
+	::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pCheckButton_ShowDeviceName), m_rShowDeviceName);
 
 	::GtkCheckButton* l_pCheckButton_CalibrationMode=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_CalibrationSignal"));
 	::gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pCheckButton_CalibrationMode), m_rCalibrationSignalEnabled);
@@ -223,6 +227,9 @@ OpenViBE::boolean CConfigurationGTecGUSBamp::postConfigure(void)
 
 		::GtkCheckButton* l_pCheckButton_HardwareTagging=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_EventChannel"));
 		m_rTriggerInput=(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButton_HardwareTagging)) ? true : false);
+
+		::GtkCheckButton* l_pCheckButton_ShowDeviceName = GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_ShowDeviceName"));
+		m_rShowDeviceName = (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButton_ShowDeviceName)) ? true : false);
 
 		::GtkCheckButton* l_pCheckButton_Bipolar=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_Bipolar"));
 		m_rBipolarEnabled=(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButton_Bipolar)) ? true : false);
