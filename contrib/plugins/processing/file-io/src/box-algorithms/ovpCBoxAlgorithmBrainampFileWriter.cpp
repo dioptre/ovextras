@@ -6,7 +6,8 @@
  * as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Brain Invaders. If not, see http://www.gnu.org/licenses/.*/
+ * You should have received a copy of the GNU General Public License along with Brain Invaders. If not, see http://www.gnu.org/licenses/.
+ */
  
 #include "ovpCBoxAlgorithmBrainampFileWriter.h"
 
@@ -23,6 +24,8 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::FileIO;
 
+//documentation Appendix B EEG file format: http://tsgdoc.socsci.ru.nl/images/d/d1/BrainVision_Recorder_UM.pdf
+
 CBoxAlgorithmBrainampFileWriter::CBoxAlgorithmBrainampFileWriter(void)
 	:
 	m_pStreamDecoder(NULL)
@@ -35,6 +38,8 @@ CBoxAlgorithmBrainampFileWriter::CBoxAlgorithmBrainampFileWriter(void)
 boolean CBoxAlgorithmBrainampFileWriter::initialize(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+
+	m_bIsVmrkHeaderFileWritten = false;
 
 	//init input signal 1
 	m_pStreamDecoder=new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmBrainampFileWriter >(*this,0);
@@ -156,7 +161,7 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 		  m_pMatrix=m_pStreamDecoder->getOutputMatrix();
 		  m_ui64SamplingFrequency = m_pStreamDecoder->getOutputSamplingRate();
 
-			writeHeaderFile();
+		  writeHeaderFile();
 		}
 
 		//BUFFER
@@ -193,12 +198,10 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
 	{
 		// uint64 l_ui64ChunkStartTime =l_rDynamicBoxContext.getInputChunkStartTime(0, i);
-
 		
 		m_pStimulationDecoderTrigger->decode(i);
 		
-		//header
-		if(m_pStimulationDecoderTrigger->isHeaderReceived())
+		if (!m_bIsVmrkHeaderFileWritten)
 		{
 			boost::posix_time::ptime l_dtNow = boost::posix_time::second_clock::local_time();
 		    std::string l_ftFormated(FormatTime(l_dtNow));
@@ -216,6 +219,8 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 				<< "; Fields are delimited by commas, some fields might be omitted (empty)." <<std::endl
 				<< "; Commas in type or description text are coded as \"\\1\"." <<std::endl
 				<< "Mk1=New Segment,,1,1,0," << l_ftFormated.c_str() << "000000" <<std::endl;
+
+			m_bIsVmrkHeaderFileWritten = true;
 			    
 		}
     
@@ -266,11 +271,10 @@ OpenViBE::boolean CBoxAlgorithmBrainampFileWriter::writeHeaderFile()
 				break;
 
 		case BinaryFormat_Float32: 
-				format = "IEEE_FLOAT_32"; //TODO: should be "IEEE_FLOAT_32", but OpenVibe Brainamp reader uses "FLOAT_32" for due to bug
-				//this->getLogManager() << LogLevel_ImportantWarning<< "The BinaryFormat will be saved as 'FLOAT_32' instead of 'IEEE_FLOAT_32'. This can be a problem for other programs that read Brainamp format.\n";
+				format = "IEEE_FLOAT_32";
 				break;
 		default:
-				// Should not happen
+				this->getLogManager() << LogLevel_Error << "EEG format unknown!\n";
 				break;
 	}
 

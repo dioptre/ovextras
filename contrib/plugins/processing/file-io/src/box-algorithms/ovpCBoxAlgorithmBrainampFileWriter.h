@@ -40,7 +40,8 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process(void);
 
-			OpenViBE::boolean writeHeaderFile(void);
+			OpenViBE::boolean writeHeaderFile(void); //write the .vhdr file
+
 			std::string getShortName(std::string fullpath); //of a file
 			std::string FormatTime(boost::posix_time::ptime now);
 	        
@@ -102,6 +103,8 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32 m_ui32BinaryFormat;
 
 			OpenViBE::uint32 m_uint32StimulationCounter;
+
+			OpenViBE::boolean m_bIsVmrkHeaderFileWritten; //Is the beginning of the .vmrk (file with stimulations is written)
 		};
 
 		class CBoxAlgorithmBrainampFileWriterListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
@@ -125,10 +128,10 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Brainamp file writer"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Anton Andreev"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Gipsa-lab"); }
-			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Writes signal in the Brainamp file format. Stimulations are outputed as OpenVibe interger codes."); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("You must select the location of the output header file .vhdr. The .eeg and .vmrk files will be created with the same name and in the same folder."); }
+			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Writes signal in the Brainamp file format."); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("You must select the location of the output header file .vhdr. The .eeg and .vmrk files will be created with the same name and in the same folder. Integer codes of OpenVibe stimulations are saved in the .vmrk file. OV Stimulation with code 233 will be saved as S233 on the .vmrk file."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("File reading and writing/Brainamp"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-save"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_BrainampFileWriter; }
