@@ -199,6 +199,12 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 		}
 	}
 
+	//add the name of the amplifier to the name of the channel 
+	for (unsigned int i = 0; i < NumDevices(); i++)
+	{
+		addDeviceName(i);
+	}
+
 	return true;
 }
 
@@ -346,12 +352,6 @@ OpenViBE::boolean CDriverGTecGUSBamp::start(void)
 			ConfigureDevice(i);
 		}
 		m_bReconfigurationRequired = false;
-	}
-
-	//add the name of the amplifier to the name of the channel 
-	for (unsigned int i = 0; i < NumDevices(); i++)
-	{
-		addDeviceName(i);
 	}
 
 	m_ui32TotalHardwareStimulations = 0;
