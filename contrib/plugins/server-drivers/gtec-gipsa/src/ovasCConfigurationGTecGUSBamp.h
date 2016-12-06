@@ -16,7 +16,6 @@ namespace OpenViBEAcquisitionServer
 	{
 	public:
 		CConfigurationGTecGUSBamp(const char* sGtkBuilderFileName,
-			                      OpenViBE::uint32& rUSBIndex,
 								  OpenViBE::uint8& rCommonGndAndRefBitmap,
 								  OpenViBE::int32& rNotchFilterIndex, 
 								  OpenViBE::int32& rBandPassFilterIndex,
@@ -40,7 +39,6 @@ namespace OpenViBEAcquisitionServer
 		void buttonFiltersApplyPressedCB(void);
 
 	protected:
-		OpenViBE::uint32& m_rUSBIndex;
 		OpenViBE::uint8& m_rCommonGndAndRefBitmap;
 
 		OpenViBE::int32& m_rNotchFilterIndex;

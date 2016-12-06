@@ -105,8 +105,6 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
 
-		OpenViBE::uint32 m_ui32DeviceIndex;
-		
 		OpenViBE::float32* m_pSample;
 
 		OpenViBE::uint32 m_ui32GlobalImpedanceIndex;
@@ -123,7 +121,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::boolean m_bReconfigurationRequired; // After some gt calls, we may need reconfig
 
-		OpenViBE::uint32 m_ui32AcquiredChannelCount;      //number of channels 1..16 specified by user
+		OpenViBE::uint32 m_ui32AcquiredChannelCount;      //number of channels specified by the user, never counts the event channels
 
 		OpenViBE::uint32 m_ui32TotalHardwareStimulations; //since start button clicked
 		OpenViBE::uint32 m_ui32TotalDriverChunksLost;     //since start button clicked
@@ -162,13 +160,23 @@ namespace OpenViBEAcquisitionServer
 	    OpenViBE::uint32 m_slavesCnt;
 	    string m_masterSerial;
 
-		void addDeviceName(int deviceNumber); //adds the device name to the name of the channel
+		void remapChannelNames(void);   // Converts channel names while adding the device name and handling event channels
+		void restoreChannelNames(void); // Restores channel names without the device
 
+		vector<std::string> m_vOriginalChannelNames;
 		vector<GDevice> m_vGDevices;
 
 		std::string CDriverGTecGUSBamp::getSerialByHandler(HANDLE o_pDevice);
 
-		vector<OpenViBE::int32> m_vChannelMap;			// Map channels from gtec indexes to selected channels sample buffer, -1 skip this channel
+		// Stores the OpenViBE channel index and the channel name
+		struct Channel
+		{
+			OpenViBE::int32 l_i32Index;			
+			OpenViBE::int32 l_i32OldIndex;
+			bool l_bIsEventChannel;
+		};
+
+		vector<Channel> m_vChannelMap;			// Map channels from gtec indexes to selected channels in the sample buffer, -1 skip this channel
 	};
 };
 

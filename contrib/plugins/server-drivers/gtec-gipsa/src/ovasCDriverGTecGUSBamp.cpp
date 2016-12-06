@@ -52,7 +52,6 @@ CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 	,m_oSettings("AcquisitionServer_Driver_GTecGUSBamp", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
-	,m_ui32DeviceIndex(uint32(-1))
 	,m_pSample(NULL)
 	,m_ui8CommonGndAndRefBitmap(0)
 	,m_i32NotchFilterIndex(-1)
@@ -67,15 +66,14 @@ CDriverGTecGUSBamp::CDriverGTecGUSBamp(IDriverContext& rDriverContext)
 	,m_bShowDeviceName(false)
 {
 	m_oHeader.setSamplingFrequency(512);
-	m_oHeader.setChannelCount(GTEC_NUM_CHANNELS);	
+	m_oHeader.setChannelCount(0);	
 
+	// Settings to be saved to .conf MUST be registered here
 	m_oSettings.add("Header", &m_oHeader);
-	m_oSettings.add("DeviceIndex", &m_ui32DeviceIndex);
 	m_oSettings.add("CommonGndAndRefBitmap", &m_ui8CommonGndAndRefBitmap);
 	m_oSettings.add("NotchFilterIndex", &m_i32NotchFilterIndex);
 	m_oSettings.add("BandPassFilterIndex", &m_i32BandPassFilterIndex);
 	m_oSettings.add("TriggerInputEnabled", &m_bTriggerInputEnabled);
-	m_oSettings.add("DeviceSerials", &m_vGDevices);
 	m_oSettings.add("MasterSerial", &m_masterSerial);
 	m_oSettings.add("Bipolar", &m_bBipolarEnabled);
 	m_oSettings.add("CalibrationSignal", &m_bCalibrationSignalEnabled);
@@ -104,18 +102,33 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 	const uint32 ui32SampleCountPerSentBlock,
 	IDriverCallback& rCallback)
 {
-	if(m_rDriverContext.isConnected()) return false;
+	if (m_rDriverContext.isConnected()) return false;
 
-	if(!m_oHeader.isChannelCountSet()
-	 ||!m_oHeader.isSamplingFrequencySet())
+	if (!m_oHeader.isChannelCountSet()
+		|| !m_oHeader.isSamplingFrequencySet())
 	{
 		return false;
-	}                         
-	
+	}
+
 	detectDevices();
 
 	if (NumDevices() == 0) return false;
-	
+
+	// See if we can find the selected master serial from the currently available devices
+	bool m_bDeviceFound = false;
+	for (uint32 i = 0; i< NumDevices(); i++)
+	{
+		if (m_vGDevices[i].serial == m_masterSerial)
+		{
+			m_bDeviceFound = true;
+			break;
+		}
+	}
+	if (!m_bDeviceFound)
+	{
+		m_masterSerial = "";
+	}
+
 	//assign automatically the last device as master if no master has been selected from "Device properties" before that
 	if (NumDevices() > 1 && m_masterSerial == "")
 	{
@@ -124,74 +137,34 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 
 	m_rDriverContext.getLogManager() << LogLevel_Info << "Number of devices: " << NumDevices() << "\n";
 
-	//add the trigger channel
-	if (m_bTriggerInputEnabled)
-	{
-		m_oHeader.setChannelCount((m_ui32AcquiredChannelCount + 1) * NumDevices());
-	}
-	else
-	{
-		m_oHeader.setChannelCount(m_ui32AcquiredChannelCount * NumDevices());
-	}
-
-	m_ui32GlobalImpedanceIndex=0;
-	m_ui32SampleCountPerSentBlock=ui32SampleCountPerSentBlock;
-	m_pCallback=&rCallback;
+	m_ui32GlobalImpedanceIndex = 0;
+	m_ui32SampleCountPerSentBlock = ui32SampleCountPerSentBlock;
+	m_pCallback = &rCallback;
 
 	//create the temporary data buffers (the device will write data into those)
 	validPoints = NUMBER_OF_SCANS * (GTEC_NUM_CHANNELS + 1) * NumDevices();
 	m_buffers = new BYTE**[NumDevices()];
-	m_overlapped = new OVERLAPPED * [NumDevices()];
+	m_overlapped = new OVERLAPPED *[NumDevices()];
 	m_pSample = new float[nPoints * NumDevices()]; //needed later when data is being acquired
 	m_bufferReceivedData = new float[validPoints];
 
 	m_RingBuffer.Initialize(BUFFER_SIZE_SECONDS * m_oHeader.getSamplingFrequency() * (GTEC_NUM_CHANNELS + 1) * NumDevices());
 
-	if (NumDevices() > 1)
-	{
-		// Channel names are currently fixed in the multiamp case
-		uint32 l_ui32ChannelWithSkip = 0;	// Channel index with the event channel skipped
-		for (uint32 i = 0; i < m_oHeader.getChannelCount(); i++)
-		{
-			const uint32 l_ui32NumChannels = (m_bTriggerInputEnabled ? (m_ui32AcquiredChannelCount + 1) : m_ui32AcquiredChannelCount);
-			const uint32 l_ui32DeviceIndex = i / l_ui32NumChannels;
-			const uint32 l_ui32ChannelIndex = i % l_ui32NumChannels;
-
-			ostringstream ss; ss << "Channel " << (l_ui32DeviceIndex + 1) << "." << (l_ui32ChannelIndex + 1);
-
-			m_oHeader.setChannelName(i, ss.str().c_str());
-		}
-	}
-
 	for (uint32 i = 0; i< NumDevices(); i++)
 	{
-		if (m_bTriggerInputEnabled) 
-		{
-			int channelIndex = i * (m_ui32AcquiredChannelCount+1) + m_ui32AcquiredChannelCount;
-
-			string str = "CH_Event";
-			if (NumDevices() > 1) //It will set event channels CH_Event0,1,2 and if 1 device then it will be just "CH_Event"
-			{
-				string number = static_cast<ostringstream*>( &(ostringstream() << i) )->str();
-				str = str.append(number);
-			}
-			m_oHeader.setChannelName(channelIndex, str.c_str());
-			m_rDriverContext.getLogManager() << LogLevel_Trace << "Channel name: " << m_oHeader.getChannelName(channelIndex) << "\n";
-		}
-
 		//Configure each device
 		ConfigureDevice(i);
 	}
-	
+
 	//Set Master and slaves
 	if (NumDevices() > 1)
 	{
-	    m_rDriverContext.getLogManager() << LogLevel_Warning << "Please configure the sync cable according to the above master/slave configuration or set your master from \"Device properties\"\n";
-	    setMasterDevice(m_masterSerial);
-    }
+		m_rDriverContext.getLogManager() << LogLevel_Warning << "Please configure the sync cable according to the above master/slave configuration or set your master from \"Device properties\"\n";
+		setMasterDevice(m_masterSerial);
+	}
 	else if (NumDevices() == 1) //a single device must be Master
 	{
-		if(::GT_SetSlave(m_vGDevices[0].handle, false)) 
+		if (::GT_SetSlave(m_vGDevices[0].handle, false))
 		{
 			m_masterSerial = m_vGDevices[0].serial;
 
@@ -200,14 +173,14 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 		}
 		else m_rDriverContext.getLogManager() << LogLevel_Error << "Unexpected error while calling GT_SetSlave\n";
 	}
-	
+
 	// Set channel units
-	for(uint32 c=0;c<m_oHeader.getChannelCount(); c++) 
+	for (uint32 c = 0; c < m_oHeader.getChannelCount(); c++)
 	{
-		if(!m_bCalibrationSignalEnabled)
+		if (!m_bCalibrationSignalEnabled)
 		{
 			m_oHeader.setChannelUnits(c, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
-		} 
+		}
 		else
 		{
 			// For calibration, the outputs are before-scaling raw values from the unit
@@ -217,37 +190,45 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 		}
 	}
 
-	//add the name of the amplifier to the name of the channel 
-	for (unsigned int i = 0; i < NumDevices(); i++)
-	{
-		addDeviceName(i);
-	}
-
 	// Make the channel map
 	
-	uint32 l_ui32OutputChannel = 0;
+	const uint32 l_ui32TotalChannels = (GTEC_NUM_CHANNELS + 1) * NumDevices();
 	m_vChannelMap.clear();
-	m_vChannelMap.resize( (GTEC_NUM_CHANNELS + 1) * NumDevices() );
-	for (uint32 i = 0; i < NumDevices() * (GTEC_NUM_CHANNELS+1) ; i++)
+	m_vChannelMap.resize( l_ui32TotalChannels );
+	for (uint32 i = 0, l_ui32SignalChannels = 0, l_ui32EventChannels = 0; i < l_ui32TotalChannels ; i++)
 	{
-		const uint32 l_ui32NumChannels = (GTEC_NUM_CHANNELS + 1);
-		const uint32 l_ui32DeviceIndex = i / l_ui32NumChannels;
-		const uint32 l_ui32ChannelIndex = i % l_ui32NumChannels;
+		const uint32 l_ui32NumChannelsPerDevice = (GTEC_NUM_CHANNELS + 1);
+		const uint32 l_ui32DeviceIndex = i / l_ui32NumChannelsPerDevice;
+		// const uint32 l_ui32ChannelIndex = i % l_ui32NumChannelsPerDevice;
 
-		if (l_ui32ChannelIndex < m_ui32AcquiredChannelCount)
+		if ((i + 1) % (GTEC_NUM_CHANNELS + 1) == 0)
 		{
-			m_vChannelMap[i] = l_ui32OutputChannel++;
+			m_vChannelMap[i].l_i32Index = (m_bTriggerInputEnabled ? (l_ui32SignalChannels + l_ui32EventChannels) : -1);
+			m_vChannelMap[i].l_i32OldIndex = -1;
+			m_vChannelMap[i].l_bIsEventChannel = true;
+			if (m_bTriggerInputEnabled) {
+				l_ui32EventChannels++;
+			}
 		}
-		else if ( (i+1) % (GTEC_NUM_CHANNELS+1) == 0 && m_bTriggerInputEnabled)
+		else if (l_ui32SignalChannels < m_ui32AcquiredChannelCount)
 		{
-			m_vChannelMap[i] = l_ui32OutputChannel++;
+			m_vChannelMap[i].l_i32Index = l_ui32SignalChannels + l_ui32EventChannels;
+			m_vChannelMap[i].l_i32OldIndex = l_ui32SignalChannels;
+			m_vChannelMap[i].l_bIsEventChannel = false;
+			l_ui32SignalChannels++;
 		}
 		else
 		{
-			m_vChannelMap[i] = -1;
+			m_vChannelMap[i].l_i32Index = -1;
+			m_vChannelMap[i].l_i32OldIndex = -1;
+			m_vChannelMap[i].l_bIsEventChannel = false;
 		}
-		// std::cout << "cm: " << i << " -> " << m_vChannelMap[i] << "\n";
+//		std::cout << "cm: " << i << " -> " << m_vChannelMap[i].l_i32Index << ", old=" << m_vChannelMap[i].l_i32OldIndex 
+//			<< ", event=" << m_vChannelMap[i].l_bIsEventChannel << "\n";
 	}	
+
+	// Take into account user might or might not want event channels + add amp name if requested
+	remapChannelNames();
 
 	return true;
 }
@@ -470,7 +451,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 
 		for (uint32 i = 0; i < l_ui32TotalChannels; i++)
 		{
-			const int32 l_i32OutputChannel = m_vChannelMap[i];
+			const int32 l_i32OutputChannel = m_vChannelMap[i].l_i32Index;
 			if (l_i32OutputChannel >= 0)
 			{
 				for (uint32 j = 0; j < NUMBER_OF_SCANS; j++)
@@ -492,11 +473,13 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 	{
 		if(m_rDriverContext.isImpedanceCheckRequested())
 		{
-			const uint32 l_ui32NumChannels = (m_bTriggerInputEnabled ? (m_ui32AcquiredChannelCount + 1) : m_ui32AcquiredChannelCount);
-			const uint32 l_ui32DeviceIndex = m_ui32GlobalImpedanceIndex / l_ui32NumChannels;
-			const uint32 l_ui32ChannelIndex = m_ui32GlobalImpedanceIndex % l_ui32NumChannels;
+			const uint32 l_ui32ChannelsPerDevice = (GTEC_NUM_CHANNELS + 1);
 
-			if (l_ui32ChannelIndex == m_ui32AcquiredChannelCount)
+			const uint32 l_ui32NumChannels = m_ui32AcquiredChannelCount;
+			const uint32 l_ui32DeviceIndex = m_ui32GlobalImpedanceIndex / l_ui32ChannelsPerDevice;
+			const uint32 l_ui32ChannelIndex = m_ui32GlobalImpedanceIndex % l_ui32ChannelsPerDevice;
+
+			if (m_bTriggerInputEnabled && l_ui32ChannelIndex == GTEC_NUM_CHANNELS)
 			{
 				// This is the event channel
 				m_rDriverContext.updateImpedance(m_ui32GlobalImpedanceIndex, 0);
@@ -798,6 +781,8 @@ OpenViBE::boolean CDriverGTecGUSBamp::uninitialize(void)
 	delete[] m_buffers;
 	m_buffers = NULL;
 	
+	restoreChannelNames();
+
 	return true;
 }
 
@@ -905,27 +890,29 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 {
 	detectDevices();
 
-	string targetMasterSerial = (NumDevices() > 1) ? m_masterSerial : "";
-
 	vector<string> serials;
 	for (unsigned int i = 0; i < NumDevices(); i++)
 		serials.push_back(m_vGDevices[i].serial);
 
-	CConfigurationGTecGUSBamp m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-GTec-GUSBamp.ui", 
-		m_ui32DeviceIndex, 
-		m_ui8CommonGndAndRefBitmap, 
-		m_i32NotchFilterIndex, 
+	CConfigurationGTecGUSBamp m_oConfiguration(OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-GTec-GUSBamp.ui",
+//		m_ui32DeviceIndex,
+		m_ui8CommonGndAndRefBitmap,
+		m_i32NotchFilterIndex,
 		m_i32BandPassFilterIndex,
 		m_bTriggerInputEnabled,
 		serials,
-		targetMasterSerial,
+		m_masterSerial,
 		m_bBipolarEnabled,
 		m_bCalibrationSignalEnabled,
 		m_bShowDeviceName);
 
-	// In the multidevice case, the number of channels is fixed to the maximum. here we never increment with the trigger channel.
-	m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
-	
+
+	// The number of channels is initially the maximum with the trigger channels not counted
+	if (m_oHeader.getChannelCount() == 0) {
+		const uint32 l_ui32TotalChannelCount = NumDevices() * GTEC_NUM_CHANNELS;
+		m_oHeader.setChannelCount(l_ui32TotalChannelCount);
+	}
+
 	if(!m_oConfiguration.configure(m_oHeader))
 	{
 		return false;
@@ -938,18 +925,9 @@ OpenViBE::boolean CDriverGTecGUSBamp::configure(void)
 
 	//start reconfigure based on the new input:
 
-	if (targetMasterSerial!="")
-	    setMasterDevice(targetMasterSerial);
+	if (NumDevices() > 1)
+	    setMasterDevice(m_masterSerial);
 
-	//expand the value from one device to all devices
-	if (m_bTriggerInputEnabled)
-	{
-		m_oHeader.setChannelCount((m_ui32AcquiredChannelCount + 1) * NumDevices());
-	}
-	else
-	{
-		m_oHeader.setChannelCount(m_ui32AcquiredChannelCount * NumDevices());
-	}
     //end reconfigure based on the new input
 
 	return true;
@@ -1039,39 +1017,75 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 }
 
 //Adds the amplifier ID to the channel name
-void CDriverGTecGUSBamp::addDeviceName(int deviceNumber)
+void CDriverGTecGUSBamp::remapChannelNames(void)
 {
-	if (m_bShowDeviceName)
+	// Store original channel names
+	m_vOriginalChannelNames.clear();
+	for (size_t i = 0; i < m_ui32AcquiredChannelCount; i++)
 	{
-		//channel mapping is executed later than this code and overrides this functionality
-		m_rDriverContext.getLogManager() << LogLevel_Warning << "Electrodes mapping overrides the visualization of the device name in the channel's name. Remove mapping.\n";
+		m_vOriginalChannelNames.push_back(m_oHeader.getChannelName(i));
 	}
 
-	const uint32 l_ui32MaxChannels = (m_bTriggerInputEnabled ? (GTEC_NUM_CHANNELS + 1) : GTEC_NUM_CHANNELS );
-
-	for (uint32 i = 0; i < l_ui32MaxChannels; i++)
+	// Add the trigger channels
+	if (m_bTriggerInputEnabled)
 	{
-		int index = (deviceNumber * l_ui32MaxChannels) + i;
+		m_oHeader.setChannelCount(m_ui32AcquiredChannelCount + NumDevices());
+	}
+	else
+	{
+		m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
+	}
 
-		if (m_bShowDeviceName)
+	for (size_t i = 0; i < m_vChannelMap.size(); i++)
+	{
+		if (m_vChannelMap[i].l_i32Index >= 0)
 		{
-			if (m_bTriggerInputEnabled && i == 16)
-				m_oHeader.setChannelName(index, (std::string("CH_Event") + 
-												 ((NumDevices() == 1) ? std::string("") : std::to_string(deviceNumber)) + 
-												 "_" 
-												 + m_vGDevices[deviceNumber].serial).c_str());
+			const uint32 l_ui32MaxChannelsPerAmp = (GTEC_NUM_CHANNELS + 1);
+			const uint32 l_ui32DeviceIndex = i / l_ui32MaxChannelsPerAmp;
+
+			std::string l_sChannelName;
+			if (m_vChannelMap[i].l_bIsEventChannel)
+			{
+				l_sChannelName = "CH_Event" + to_string(l_ui32DeviceIndex);
+			}
 			else
-				m_oHeader.setChannelName(index, (std::to_string(i + 1) + "_" + m_vGDevices[deviceNumber].serial).c_str());
-		}
-		else
-		{
-			if (m_bTriggerInputEnabled && i == 16)
-				m_oHeader.setChannelName(index, (std::string("CH_Event") +
-				((NumDevices() == 1) ? std::string("") : std::to_string(deviceNumber))).c_str());
-			else
-				m_oHeader.setChannelName(index, "");
+			{
+				l_sChannelName = m_vOriginalChannelNames[m_vChannelMap[i].l_i32OldIndex];
+			}
+
+			if (l_sChannelName.length() == 0) {
+				if (!m_bShowDeviceName)
+				{
+					l_sChannelName = "Channel ";
+				}
+
+				l_sChannelName = l_sChannelName + std::to_string(m_vChannelMap[i].l_i32OldIndex + 1);
+			}
+
+			if (m_bShowDeviceName) 
+			{
+				l_sChannelName = l_sChannelName + "_" + m_vGDevices[l_ui32DeviceIndex].serial.c_str();
+			}
+
+//			printf("%d to '%s'\n", m_vChannelMap[i].l_i32Index, l_sChannelName.c_str());
+
+			m_oHeader.setChannelName(m_vChannelMap[i].l_i32Index, l_sChannelName.c_str());
+
 		}
 	}
+}
+
+void CDriverGTecGUSBamp::restoreChannelNames(void)
+{
+	// Restore channel count without event channels
+	m_oHeader.setChannelCount(m_ui32AcquiredChannelCount);
+
+	// Reset the original channel names
+	for (uint32 i = 0; i < m_ui32AcquiredChannelCount; i++)
+	{
+		m_oHeader.setChannelName(i,m_vOriginalChannelNames[i].c_str());
+	}
+
 }
 
 inline OpenViBE::uint32 CDriverGTecGUSBamp::NumDevices()

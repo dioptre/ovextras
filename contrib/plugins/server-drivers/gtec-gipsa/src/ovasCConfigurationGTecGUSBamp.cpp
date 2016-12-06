@@ -18,6 +18,7 @@ static void button_apply_filters_pressed_cb(::GtkButton* pButton, void* pUserDat
 	l_pConfig->buttonFiltersApplyPressedCB();
 }
 
+
 static void button_calibrate_pressed_cb(::GtkButton* pButton, void* pUserData)
 {
 	CConfigurationGTecGUSBamp* l_pConfig=static_cast<CConfigurationGTecGUSBamp*>(pUserData);
@@ -44,9 +45,8 @@ static void button_filters_pressed_cb(::GtkButton* pButton, void* pUserData)
 }
 
 CConfigurationGTecGUSBamp::CConfigurationGTecGUSBamp(
-	const char* sGtkBuilderFileName, uint32& rUSBIndex, uint8& rCommonGndAndRefBitmap, int32& rNotchFilterIndex, int32& rBandPassFilterIndex, OpenViBE::boolean& rTriggerInput, vector<string> rDevicesSerials, string& rMasterDeviceIndex, OpenViBE::boolean& rBipolar, OpenViBE::boolean& rCalibrationSignalEnabled, OpenViBE::boolean& rShowDeviceName)
+	const char* sGtkBuilderFileName, uint8& rCommonGndAndRefBitmap, int32& rNotchFilterIndex, int32& rBandPassFilterIndex, OpenViBE::boolean& rTriggerInput, vector<string> rDevicesSerials, string& rMasterDeviceIndex, OpenViBE::boolean& rBipolar, OpenViBE::boolean& rCalibrationSignalEnabled, OpenViBE::boolean& rShowDeviceName)
 	: CConfigurationBuilder(sGtkBuilderFileName)
-	,m_rUSBIndex(rUSBIndex)
 	,m_rCommonGndAndRefBitmap(rCommonGndAndRefBitmap)
 	,m_rNotchFilterIndex(rNotchFilterIndex)
 	,m_rBandPassFilterIndex(rBandPassFilterIndex)
@@ -80,26 +80,32 @@ OpenViBE::boolean CConfigurationGTecGUSBamp::preConfigure(void)
 
 	::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_master_device"));
 
-	if(m_rDevicesSerials.size()>1)
+	// Default active device is the last one
+	if (m_rDevicesSerials.size() > 0)
 	{
-		uint32 masterIndex = -1;
-		for(uint32 i=0; i<m_rDevicesSerials.size(); i++)
-		{
-			::gtk_combo_box_append_text(l_pComboBox, m_rDevicesSerials[i].c_str());
-			if (this->m_rMasterDeviceIndex == m_rDevicesSerials[i])
-				masterIndex = i;
-		}
-
-		if (masterIndex!=-1)
-		    ::gtk_combo_box_set_active(l_pComboBox, masterIndex);
-
-		// In multiamp mode, disable the functions which are not working correctly
-		::GtkWidget* l_pChannelNames = GTK_WIDGET(gtk_builder_get_object(m_pBuilderConfigureInterface, "button_change_channel_names"));
-		::gtk_widget_set_sensitive(l_pChannelNames, false);
-		::GtkSpinButton* l_pNumChannels = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_number_of_channels"));
-		::gtk_widget_set_sensitive(GTK_WIDGET(l_pNumChannels), false);
+		::gtk_combo_box_set_active(l_pComboBox, m_rDevicesSerials.size() - 1);
 	}
-	
+
+	// If a device is already set, try to use that as the combo box selection; if not found, use last (set above).
+	int32 masterIndex = m_rDevicesSerials.size()-1;
+	for (uint32 i = 0; i < m_rDevicesSerials.size(); i++)
+	{
+		::gtk_combo_box_append_text(l_pComboBox, m_rDevicesSerials[i].c_str());
+		if (this->m_rMasterDeviceIndex == m_rDevicesSerials[i])
+		{
+			masterIndex = i;
+		}
+	}
+
+	if (masterIndex >= 0)
+	{
+		::gtk_combo_box_set_active(l_pComboBox, masterIndex);
+	}
+
+	// Sets the channel limits depending on the number of amps
+	::GtkSpinButton* l_pNumChannels = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_number_of_channels"));
+	::gtk_spin_button_set_range(l_pNumChannels, 1, m_rDevicesSerials.size() * 16);	// GTEC_NUM_CHANNELS
+
 	uint32 l_iCount = this->m_rDevicesSerials.size();
 
 	/*char l_sBuffer[1024];
@@ -279,14 +285,6 @@ void CConfigurationGTecGUSBamp::idleCalibrateCB(void)
 	::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_master_device"));
 
 	m_bCalibrationDone=false;
-	//int l_iUSBIndex=0;
-	/*const char* l_sUSBIndex=::gtk_combo_box_get_active_text(l_pComboBox);
-
-	if(l_sUSBIndex)
-	{
-		if(::sscanf(l_sUSBIndex, "USB port %i", &l_iUSBIndex)==1)
-		{*/
-	//if (this->m_rMasterDeviceIndex)
 
 	//calibrate all detected devices
 	for(uint32 i=0;i< this->m_rDevicesSerials.size();i++)
