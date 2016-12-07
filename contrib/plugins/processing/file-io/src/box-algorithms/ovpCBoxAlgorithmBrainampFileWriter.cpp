@@ -194,35 +194,35 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
 	}
 
+	// Make sure the marker file header is written in any case
+	if (!m_bIsVmrkHeaderFileWritten)
+	{
+		boost::posix_time::ptime l_dtNow = boost::posix_time::second_clock::local_time();
+		std::string l_ftFormated(FormatTime(l_dtNow));
+
+		m_oMarkerFile
+			<< "Brain Vision Data Exchange Marker File, Version 1.0" << std::endl
+			<< std::endl
+			<< "[Common Infos]" << std::endl
+			<< "Codepage=ANSI" << std::endl
+			<< "DataFile=" << getShortName(m_sDataFilename).c_str() << std::endl
+			<< std::endl
+			<< "[Marker Infos]" << std::endl
+			<< "; Each entry: Mk<Marker number>=<Type>,<Description>,<Position in data points>," << std::endl
+			<< "; <Size in data points>, <Channel number (0 = marker is related to all channels)>" << std::endl
+			<< "; Fields are delimited by commas, some fields might be omitted (empty)." << std::endl
+			<< "; Commas in type or description text are coded as \"\\1\"." << std::endl
+			<< "Mk1=New Segment,,1,1,0," << l_ftFormated.c_str() << "000000" << std::endl;
+
+		m_bIsVmrkHeaderFileWritten = true;
+	}
+
 	//2. Process stimulations - input channel 1
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(1); i++)
 	{
 		// uint64 l_ui64ChunkStartTime =l_rDynamicBoxContext.getInputChunkStartTime(0, i);
 		
 		m_pStimulationDecoderTrigger->decode(i);
-		
-		if (!m_bIsVmrkHeaderFileWritten)
-		{
-			boost::posix_time::ptime l_dtNow = boost::posix_time::second_clock::local_time();
-		    std::string l_ftFormated(FormatTime(l_dtNow));
-
-			m_oMarkerFile 
-				<< "Brain Vision Data Exchange Marker File, Version 1.0" <<std::endl
-				<< std::endl
-				<< "[Common Infos]" <<std::endl
-				<< "Codepage=ANSI" <<std::endl
-				<< "DataFile=" << getShortName(m_sDataFilename).c_str() << std::endl 
-				<< std::endl
-				<< "[Marker Infos]" <<std::endl
-				<< "; Each entry: Mk<Marker number>=<Type>,<Description>,<Position in data points>," <<std::endl
-				<< "; <Size in data points>, <Channel number (0 = marker is related to all channels)>" <<std::endl
-				<< "; Fields are delimited by commas, some fields might be omitted (empty)." <<std::endl
-				<< "; Commas in type or description text are coded as \"\\1\"." <<std::endl
-				<< "Mk1=New Segment,,1,1,0," << l_ftFormated.c_str() << "000000" <<std::endl;
-
-			m_bIsVmrkHeaderFileWritten = true;
-			    
-		}
     
 		//buffer 
 		if(m_pStimulationDecoderTrigger->isBufferReceived())
