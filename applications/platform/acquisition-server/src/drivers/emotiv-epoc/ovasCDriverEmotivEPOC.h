@@ -11,9 +11,34 @@
 
 #include <openvibe/ov_all.h>
 
+#if defined(TARGET_HAS_ThirdPartyEmotivResearchAPI3x)
+#include "IEmoStateDLL.h"
+#include "Iedk.h"
+#include "IedkErrorCode.h"
+#include "IEegData.h"
+#else 
+// Old API
 #include "EmoStateDLL.h"
 #include "edk.h"
 #include "edkErrorCode.h"
+
+#define IEE_DataAcquisitionEnable                   EE_DataAcquisitionEnable
+#define IEE_DataCreate                              EE_DataCreate
+#define IEE_DataFree                                EE_DataFree
+#define IEE_DataGet                                 EE_DataGet
+#define IEE_DataGetNumberOfSample                   EE_DataGetNumberOfSample
+#define IEE_DataSetBufferSizeInSec                  EE_DataSetBufferSizeInSec
+#define IEE_DataUpdateHandle                        EE_DataUpdateHandle
+#define IEE_EmoEngineEventCreate                    EE_EmoEngineEventCreate
+#define IEE_EmoEngineEventFree                      EE_EmoEngineEventFree
+#define IEE_EmoEngineEventGetType                   EE_EmoEngineEventGetType
+#define IEE_EmoEngineEventGetUserId                 EE_EmoEngineEventGetUserId
+#define IEE_EngineConnect                           EE_EngineConnect
+#define IEE_EngineDisconnect                        EE_EngineDisconnect
+#define IEE_EngineGetNextEvent                      EE_EngineGetNextEvent
+#define IEE_Event_t                                 EE_Event_t
+#define IEE_UserAdded                               EE_UserAdded
+#endif
 
 #include <vector>
 
@@ -78,7 +103,10 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bUseGyroscope;
 		OpenViBE::CString m_sPathToEmotivSDK;
 		OpenViBE::CString m_sCommandForPathModification;
+		OpenViBE::CString m_sOldPath;
+
 		virtual OpenViBE::boolean buildPath(void);
+		virtual OpenViBE::boolean restoreState(void);
 
 	};
 };
