@@ -526,7 +526,7 @@ boolean CGDFFileReader::readFileHeader()
 		}
 
 		// We may need to skip header3 with its tags and take its size into account
-		if(m_f32FileVersion > 1.90) 
+		if(m_f32FileVersion >= 2.10) 
 		{
 #ifdef DEBUG_FILE_POSITIONS
 			this->getLogManager() << LogLevel_Info << "Before header3, file is at " << m_oFile.tellg() << "\n";
@@ -537,7 +537,7 @@ boolean CGDFFileReader::readFileHeader()
 			while(true) {
 				char l_sBuffer[4];
 				m_oFile.read((char*)&l_sBuffer,4);
-				if(m_oFile.bad()) 
+				if(m_oFile.bad() || m_oFile.eof()) 
 				{
 					break;
 				}
@@ -558,12 +558,18 @@ boolean CGDFFileReader::readFileHeader()
 				m_ui64Header3Length += l_ui32Length;
 			}
 			// Skip possible padding
-			int m_ui64PaddingRequired = (256-m_ui64Header3Length) % 256;
-			m_ui64Header3Length += m_ui64PaddingRequired;
-			m_oFile.seekg(m_ui64PaddingRequired, ios::cur);
+			const uint64 l_ui64PaddingRequired = (256-m_ui64Header3Length) % 256;
+			m_ui64Header3Length += l_ui64PaddingRequired;
+			m_oFile.seekg(l_ui64PaddingRequired, ios::cur);
+
+			if (m_oFile.eof() || m_oFile.tellg() <= 0) 
+			{
+				this->getLogManager() << LogLevel_Error << "File ended by trying to skip the header.\n";
+				return false;
+			}
 
 #ifdef DEBUG_FILE_POSITIONS
-			this->getLogManager() << LogLevel_Info << "After header3, file is at " << m_oFile.tellg() << "\n";
+			this->getLogManager() << LogLevel_Info << "After header3, file is at " << m_oFile.tellg() << ". Header length: " << m_ui64Header3Length << ", padding was " << l_ui64PaddingRequired << "\n";
 #endif
 		}
 

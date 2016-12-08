@@ -212,7 +212,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("GDF file reader"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Reads .GDF format files"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("File reading and writing/GDF"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.9"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.9.1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-open"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_GDFFileReader; }
