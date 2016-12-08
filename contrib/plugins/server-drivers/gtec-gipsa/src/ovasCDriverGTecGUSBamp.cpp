@@ -135,7 +135,14 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 		m_masterSerial = m_vGDevices[NumDevices() - 1].serial;//serial;
 	}
 
-	m_rDriverContext.getLogManager() << LogLevel_Info << "Number of devices: " << NumDevices() << "\n";
+	// Already printed by detectDevices() ...
+	// m_rDriverContext.getLogManager() << LogLevel_Info << "Number of devices: " << NumDevices() << "\n";
+
+	if (NumDevices() > 1 && m_ui32AcquiredChannelCount != NumDevices() * GTEC_NUM_CHANNELS)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Warning << "You have selected " << m_ui32AcquiredChannelCount 
+			<< " channels in a " << NumDevices()*GTEC_NUM_CHANNELS << " channel multiamp situation. If this is intentional, please ignore this warning.\n";
+	}
 
 	m_ui32GlobalImpedanceIndex = 0;
 	m_ui32SampleCountPerSentBlock = ui32SampleCountPerSentBlock;
@@ -159,9 +166,12 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 	//Set Master and slaves
 	if (NumDevices() > 1)
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Warning << "Please configure the sync cable according to the above master/slave configuration or set your master from \"Device properties\"\n";
+		m_rDriverContext.getLogManager() << LogLevel_Info << "Multiamplifier mode enabled. Sync cable should be used between the amps.\n";
+		m_rDriverContext.getLogManager() << LogLevel_Info << "  Please configure the sync cable according to the above master/slave configuration.\n";
+		m_rDriverContext.getLogManager() << LogLevel_Info << "  Alternatively, set your master from \"Driver properties\".\n";
 		setMasterDevice(m_masterSerial);
 	}
+
 	else if (NumDevices() == 1) //a single device must be Master
 	{
 		if (::GT_SetSlave(m_vGDevices[0].handle, false))
@@ -809,9 +819,9 @@ OpenViBE::boolean CDriverGTecGUSBamp::setMasterDevice(string targetMasterSerial)
 		if (targetDeviceIndex != lastIndex)
 		{
 			std::swap(m_vGDevices[lastIndex], m_vGDevices[targetDeviceIndex]);
-			m_rDriverContext.getLogManager() << LogLevel_Info << "Now the last device is: " << m_vGDevices[lastIndex].serial.c_str() << "\n";
+			m_rDriverContext.getLogManager() << LogLevel_Trace << "Now the last device is: " << m_vGDevices[lastIndex].serial.c_str() << "\n";
 		}
-		else m_rDriverContext.getLogManager() << LogLevel_Info << "Last device was the desired one: " << m_vGDevices[lastIndex].serial.c_str() << "\n";
+		else m_rDriverContext.getLogManager() << LogLevel_Trace << "Last device was the desired one: " << m_vGDevices[lastIndex].serial.c_str() << "\n";
 
 		//set slaves and new master
 		m_slavesCnt = 0;
@@ -828,12 +838,12 @@ OpenViBE::boolean CDriverGTecGUSBamp::setMasterDevice(string targetMasterSerial)
 
 			if (isSlave)
 			{
-				m_rDriverContext.getLogManager() << LogLevel_Warning << "Configured as slave device: " << m_vGDevices[i].serial.c_str() << "\n";
+				m_rDriverContext.getLogManager() << LogLevel_Info << "Configured as slave device: " << m_vGDevices[i].serial.c_str() << "\n";
 				m_slavesCnt++;
 			}
 			else 
 			{
-				m_rDriverContext.getLogManager() << LogLevel_Warning << "Configured as MASTER device: " << m_vGDevices[i].serial.c_str() << " (the master is always last in the acquisition sequence) \n";
+				m_rDriverContext.getLogManager() << LogLevel_Info << "Configured as MASTER device: " << m_vGDevices[i].serial.c_str() << " (the master is always last in the acquisition sequence) \n";
 				m_mastersCnt++;
 				m_masterSerial = m_vGDevices[i].serial;
 			}
@@ -857,7 +867,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::verifySyncMode()
 	//g.tec check list
 	if (NumDevices() > 1)
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Warning << "More than 1 device detected, performing some basic sync checks.\n";
+		m_rDriverContext.getLogManager() << LogLevel_Info << "More than 1 device detected, performing some basic sync checks.\n";
 
 		//Test that only one device is master
 		if ((m_mastersCnt + m_slavesCnt != NumDevices()) || (m_mastersCnt != 1))
