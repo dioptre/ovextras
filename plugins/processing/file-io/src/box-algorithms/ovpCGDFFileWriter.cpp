@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include <algorithm> // std::min, etc on VS2013
+#include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Plugins;
@@ -362,14 +363,15 @@ void CGDFFileWriter::saveEvents()
 	System::Memory::hostToLittleEndian((uint32)m_oEvents.size(), l_pLittleEndianBuffer);
 	m_oFile.write(reinterpret_cast<char *>(l_pLittleEndianBuffer), sizeof(l_pLittleEndianBuffer));
 
-	uint32 l_ui32Position;
-	uint16 l_ui16Type;
-
 	//events
 	vector<pair<uint64, uint64> >::iterator l_oIterator;
 	for(l_oIterator=m_oEvents.begin() ; l_oIterator!=m_oEvents.end() ; l_oIterator++)
 	{
-		l_ui32Position = (uint32)(((l_oIterator->second + 1) * m_ui64SamplingFrequency - 1)>>32);
+		const uint32 l_ui32Position = static_cast<uint32>(ITimeArithmetics::timeToSampleCount(m_ui64SamplingFrequency, l_oIterator->second));
+		// Legacy code: 
+		// l_ui32Position = (uint32)(((l_oIterator->second + 1) * m_ui64SamplingFrequency - 1)>>32);
+		// std::cout << "Time " << ITimeArithmetics::timeToSeconds(l_oIterator->second) << "s to " << l_ui32Position
+		//	<< " samples, is " << ITimeArithmetics::timeToSeconds( ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, l_ui32Position)) << "sec backmapped\n";
 
 		System::Memory::hostToLittleEndian(l_ui32Position+1, l_pLittleEndianBuffer);
 		m_oFile.write(reinterpret_cast<char *>(l_pLittleEndianBuffer), 4);
@@ -379,7 +381,7 @@ void CGDFFileWriter::saveEvents()
 	for(l_oIterator=m_oEvents.begin() ; l_oIterator!=m_oEvents.end() ; l_oIterator++)
 	{
 		//Force to use only 16bits stimulations IDs
-		l_ui16Type = (uint16)(l_oIterator->first&0xFFFF);
+		const uint16 l_ui16Type = (uint16)(l_oIterator->first&0xFFFF);
 
 		System::Memory::hostToLittleEndian(l_ui16Type, l_pLittleEndianBuffer);
 		m_oFile.write(reinterpret_cast<char *>(l_pLittleEndianBuffer), 2);
