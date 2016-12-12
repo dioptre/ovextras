@@ -8,7 +8,7 @@
 #include "fs/Files.h"
 
 using namespace OpenViBE;
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 using namespace OpenViBE::Kernel;
 
 CApplication::CApplication(CString scenarioDir)

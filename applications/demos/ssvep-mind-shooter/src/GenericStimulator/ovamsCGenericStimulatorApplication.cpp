@@ -12,7 +12,7 @@
 using namespace Ogre;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 
 #if !((CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8))
 namespace CEGUI

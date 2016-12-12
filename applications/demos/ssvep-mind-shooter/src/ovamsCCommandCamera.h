@@ -5,7 +5,7 @@
 
 #include "ovamsICommandOIS.h"
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CVRPNServer;
 

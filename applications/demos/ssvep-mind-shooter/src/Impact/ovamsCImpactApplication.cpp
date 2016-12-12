@@ -23,7 +23,7 @@
 using namespace Ogre;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 
 #define DIALOG_CYCLES_TO_REMOVE 180
 //#define NO_KEYBOARD

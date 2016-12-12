@@ -3,7 +3,7 @@
 
 #include "ovamsICommandVRPNButton.h"
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CApplication;
 

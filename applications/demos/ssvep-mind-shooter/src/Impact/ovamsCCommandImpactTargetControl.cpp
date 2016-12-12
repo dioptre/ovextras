@@ -4,7 +4,7 @@
 #include "ovamsCCommandImpactTargetControl.h"
 #include "ovamsCImpactApplication.h"
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 using namespace OpenViBE::Kernel;
 
 CCommandImpactTargetControl::CCommandImpactTargetControl(CImpactApplication* poApplication)

@@ -7,7 +7,7 @@
 #include <vrpn_Connection.h>
 #include <vrpn_Analog.h>
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 using namespace OpenViBE::Kernel;
 
 
@@ -15,7 +15,7 @@ namespace
 {
 	void VRPN_CALLBACK ssvep_vrpn_callback_analog(void *command, vrpn_ANALOGCB analog)
 	{
-		((OpenViBESSVEP::ICommandVRPNAnalog*)command)->execute(analog.num_channel, analog.channel);
+		((OpenViBESSVEPMindShooter::ICommandVRPNAnalog*)command)->execute(analog.num_channel, analog.channel);
 	}
 }
 

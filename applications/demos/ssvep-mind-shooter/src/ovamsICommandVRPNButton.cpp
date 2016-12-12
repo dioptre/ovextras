@@ -7,7 +7,7 @@
 #include <vrpn_Connection.h>
 #include <vrpn_Button.h>
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 using namespace OpenViBE::Kernel;
 
 
@@ -15,7 +15,7 @@ namespace
 {
 	void VRPN_CALLBACK ssvep_vrpn_callback_button(void *command, vrpn_BUTTONCB button)
 	{
-		((OpenViBESSVEP::ICommandVRPNButton*)command)->execute(button.button, button.state);
+		((OpenViBESSVEPMindShooter::ICommandVRPNButton*)command)->execute(button.button, button.state);
 	}
 }
 

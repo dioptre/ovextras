@@ -5,7 +5,7 @@
 
 class vrpn_Button_Remote;
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class ICommandVRPNButton : public ICommand
 	{

@@ -15,7 +15,7 @@
 #define IMPACTSHIP_SIZE 0.2f
 #define IMPACTSHIP_SPEEDFACTOR 0.7f
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 using namespace Ogre;
 
 //SP CImpactShip::CImpactShip(CImpactApplication* poApplication, Ogre::SceneNode* poParentNode, std::vector<std::pair<OpenViBE::uint32, OpenViBE::uint32> >* pFrequencies) :

@@ -4,7 +4,7 @@
 #include "ovamsCCommandImpactShipControl.h"
 #include "ovamsCImpactApplication.h"
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 
 CCommandImpactShipControl::CCommandImpactShipControl(CImpactApplication* poApplication)
 	: ICommandVRPNButton(poApplication, "SSVEP_VRPN_ShipControl")

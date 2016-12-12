@@ -4,7 +4,7 @@
 #include "ovamsCAdvancedControl.h"
 #include "ovamsCImpactApplication.h"
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 
 CAdvancedControl::CAdvancedControl(CImpactApplication* poApplication) :
 	m_poApplication( poApplication )

@@ -8,7 +8,7 @@
 
 #define SSVEP_SHOOTER_TARGET_SIZE 0.15f
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CImpactApplication;
 

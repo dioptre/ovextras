@@ -6,7 +6,7 @@
 
 #define SSVEP_NO_MOUSE_CAPTURE
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 using namespace OpenViBE::Kernel;
 using namespace OIS;
 

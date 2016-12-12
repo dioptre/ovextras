@@ -12,7 +12,7 @@
 class vrpn_Connection;
 class vrpn_Button_Server;
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CApplication;
 

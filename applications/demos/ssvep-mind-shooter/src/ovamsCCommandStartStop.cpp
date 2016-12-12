@@ -5,7 +5,7 @@
 #include "ovamsCApplication.h"
 #include "ovamsCVRPNServer.h"
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 using namespace OpenViBE::Kernel;
 
 CCommandStartStop::CCommandStartStop(CApplication* poApplication)

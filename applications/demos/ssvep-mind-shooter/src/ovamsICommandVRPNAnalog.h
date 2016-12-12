@@ -5,7 +5,7 @@
 
 class vrpn_Analog_Remote;
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class ICommandVRPNAnalog : public ICommand
 	{

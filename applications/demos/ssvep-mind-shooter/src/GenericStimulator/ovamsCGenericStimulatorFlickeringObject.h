@@ -10,7 +10,7 @@
 
 /**
  */
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CGenericStimulatorApplication;
 

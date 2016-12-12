@@ -7,7 +7,7 @@
 #define IMPACTSHIP_SIZE 0.2f
 #define SCREEN_RATIO ( 16.0f / 9.0f )
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 using namespace Ogre;
 
 CImpactApplication* CImpactEnemyShip::m_poApplication = NULL;

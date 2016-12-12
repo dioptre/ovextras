@@ -1,4 +1,12 @@
 
+/*
+ * Notes:
+ *
+ * - This demo used to be called 'Impact Shooter' before being renamed to 'Mind Shooter'. The various 
+ * mentions of 'Impact' are propagating from that time and should be cleaned up one day.
+ *
+ *
+ */ 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
 #include "ovams_defines.h"
@@ -120,20 +128,20 @@ int main(int argc, char** argv)
 
 
 
-	OpenViBESSVEP::CApplication* l_pApp = NULL;
+	OpenViBESSVEPMindShooter::CApplication* l_pApp = NULL;
 
 
 
 	if (l_sApplicationType == CString("generic"))
 	{
-		(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Debug << "+ app = new OpenViBESSVEP::CGenericStimulatorApplication(...)\n";
-		l_pApp = new OpenViBESSVEP::CGenericStimulatorApplication(l_sScenarioFolder);
+		(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Debug << "+ app = new OpenViBESSVEPMindShooter::CGenericStimulatorApplication(...)\n";
+		l_pApp = new OpenViBESSVEPMindShooter::CGenericStimulatorApplication(l_sScenarioFolder);
 	}
 	else if (l_sApplicationType == CString("impact"))
 	{
-		(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Debug << "+ app = new OpenViBESSVEP::CImpactApplication(...)\n";
+		(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Debug << "+ app = new OpenViBESSVEPMindShooter::CImpactApplication(...)\n";
 		(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Info << "application subtype " << l_sApplicationSubtype << "\n";
-		l_pApp = new OpenViBESSVEP::CImpactApplication(l_sScenarioFolder, l_sApplicationSubtype);
+		l_pApp = new OpenViBESSVEPMindShooter::CImpactApplication(l_sScenarioFolder, l_sApplicationSubtype);
 	}
 	else
 	{

@@ -4,7 +4,7 @@
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CApplication;
 

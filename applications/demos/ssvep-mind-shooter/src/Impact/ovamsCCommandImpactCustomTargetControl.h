@@ -6,7 +6,7 @@
 #include "../ovamsICommandVRPNButton.h"
 #include "../ovamsCVRPNServer.h"
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CImpactApplication;
 

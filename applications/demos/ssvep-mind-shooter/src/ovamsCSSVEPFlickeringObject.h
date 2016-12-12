@@ -5,7 +5,7 @@
 #include <toolkit/ovtk_all.h>
 #include <Ogre.h>
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CSSVEPFlickeringObject
 	{

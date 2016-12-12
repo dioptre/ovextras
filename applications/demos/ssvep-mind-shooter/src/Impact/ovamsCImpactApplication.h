@@ -13,7 +13,7 @@
 #include "ovamsCImpactShip.h"
 
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CAdvancedControl;
 

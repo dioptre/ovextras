@@ -7,7 +7,7 @@
 #include <cmath>
 
 using namespace Ogre;
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 
 SceneNode* CGenericStimulatorFlickeringObject::m_poParentNode = NULL;
 CBasicPainter* CGenericStimulatorFlickeringObject::m_poPainter = NULL;

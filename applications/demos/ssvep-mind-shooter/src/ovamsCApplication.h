@@ -18,7 +18,7 @@
 #include "ovamsICommand.h"
 #include "ovamsCBasicPainter.h"
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CApplication : public Ogre::FrameListener, public Ogre::WindowEventListener
 	{

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cmath>
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 
 // SPCSSVEPFlickeringObject::CSSVEPFlickeringObject(Ogre::SceneNode* poObjectNode, OpenViBE::uint32 ui32LitFrames, OpenViBE::uint32 ui32DarkFrames) :
 CSSVEPFlickeringObject::CSSVEPFlickeringObject(Ogre::SceneNode* poObjectNode, OpenViBE::uint64 ui64StimulationPattern):

@@ -11,7 +11,7 @@
 #endif
 
 using namespace Ogre;
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 using namespace OpenViBE::Kernel;
 
 	CBasicPainter::CBasicPainter( CApplication* poApplication ) :

@@ -4,7 +4,7 @@
 #include "ovamsCCommandImpactShipControlOIS.h"
 #include "ovamsCImpactApplication.h"
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 
 CCommandImpactShipControlOIS::CCommandImpactShipControlOIS(CImpactApplication* poApplication)
 	: ICommandOIS(poApplication)

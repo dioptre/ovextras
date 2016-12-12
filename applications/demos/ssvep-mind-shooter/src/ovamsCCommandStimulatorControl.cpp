@@ -4,7 +4,7 @@
 #include "ovamsCCommandStimulatorControl.h"
 #include "ovamsCApplication.h"
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 
 CCommandStimulatorControl::CCommandStimulatorControl(CApplication* poApplication)
 	: ICommandVRPNButton(poApplication, "SSVEP_VRPN_StimulatorControl")

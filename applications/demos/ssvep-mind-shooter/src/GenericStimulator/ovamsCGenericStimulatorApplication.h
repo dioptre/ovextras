@@ -7,7 +7,7 @@
 #include "../ovamsCApplication.h"
 #include "ovamsCGenericStimulatorFlickeringObject.h"
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 
 	class CGenericStimulatorApplication : public CApplication

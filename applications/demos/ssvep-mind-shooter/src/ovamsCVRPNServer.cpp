@@ -7,7 +7,7 @@
 #include <vrpn_Connection.h>
 #include <vrpn_Button.h>
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 using namespace OpenViBE::Kernel;
 
 CVRPNServer* CVRPNServer::m_poVRPNServerInstance = NULL;

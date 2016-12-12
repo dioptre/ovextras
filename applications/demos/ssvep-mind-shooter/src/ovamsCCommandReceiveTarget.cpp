@@ -4,7 +4,7 @@
 #include "ovamsCCommandReceiveTarget.h"
 #include "ovamsCApplication.h"
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 
 CCommandReceiveTarget::CCommandReceiveTarget(CApplication* poApplication)
 	: ICommandVRPNButton(poApplication, "SSVEP_VRPN_TargetControl")

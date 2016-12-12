@@ -8,7 +8,7 @@
 #include <OISMouse.h>
 #include "ovamsICommand.h"
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 
 	class ICommandOIS : public ICommand, OIS::KeyListener, OIS::MouseListener

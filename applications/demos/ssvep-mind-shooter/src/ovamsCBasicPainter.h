@@ -11,7 +11,7 @@
 
 #define SSVEP_DEFAULT_COLOUR Ogre::ColourValue(1.0f, 1.0f, 1.0f)
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CApplication;
 

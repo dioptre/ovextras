@@ -3,7 +3,7 @@
 
 #include "../ovamsICommandVRPNAnalog.h"
 
-namespace OpenViBESSVEP
+namespace OpenViBESSVEPMindShooter
 {
 	class CImpactApplication;
 

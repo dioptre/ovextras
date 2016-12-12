@@ -4,7 +4,7 @@
 #include "ovamsCCommandFeedbackHandler.h"
 #include "ovamsCImpactApplication.h"
 
-using namespace OpenViBESSVEP;
+using namespace OpenViBESSVEPMindShooter;
 
 CCommandFeedbackHandler::CCommandFeedbackHandler(CImpactApplication* poApplication)
 	: ICommandVRPNAnalog(poApplication, "SSVEP_VRPN_Feedback")
