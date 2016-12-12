@@ -3,7 +3,7 @@
 #ifndef __OpenViBEApplication_CCommandImpactShipControl_H__
 #define __OpenViBEApplication_CCommandImpactShipControl_H__
 
-#include "../ovassvepICommandVRPNButton.h"
+#include "../ovamsICommandVRPNButton.h"
 
 namespace OpenViBESSVEP
 {

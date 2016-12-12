@@ -1,22 +1,22 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCImpactApplication.h"
+#include "ovamsCImpactApplication.h"
 
 #include "openvibe/ov_all.h"
 
-#include "../ovassvepCCommandStartStop.h"
-#include "../ovassvepCCommandStimulatorControl.h"
-#include "../ovassvepCCommandCamera.h"
-#include "ovassvepCCommandImpactTargetControl.h"
-#include "ovassvepCCommandImpactCustomTargetControl.h"
-#include "ovassvepCCommandImpactShipControl.h"
-#include "ovassvepCCommandImpactShipControlOIS.h"
-#include "ovassvepCCommandFeedbackHandler.h"
+#include "../ovamsCCommandStartStop.h"
+#include "../ovamsCCommandStimulatorControl.h"
+#include "../ovamsCCommandCamera.h"
+#include "ovamsCCommandImpactTargetControl.h"
+#include "ovamsCCommandImpactCustomTargetControl.h"
+#include "ovamsCCommandImpactShipControl.h"
+#include "ovamsCCommandImpactShipControlOIS.h"
+#include "ovamsCCommandFeedbackHandler.h"
 
 #include "../log/ovkCLogListenerFileBuffered.h"
 
-#include "ovassvepCAdvancedControl.h"
+#include "ovamsCAdvancedControl.h"
 
 #include <ctime>
 

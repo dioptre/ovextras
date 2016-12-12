@@ -1,7 +1,7 @@
 #ifndef __OpenViBEApplication_CCommandReceiveTarget_H__
 #define __OpenViBEApplication_CCommandReceiveTarget_H__
 
-#include "ovassvepICommandVRPNButton.h"
+#include "ovamsICommandVRPNButton.h"
 
 namespace OpenViBESSVEP
 {

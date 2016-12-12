@@ -1,7 +1,7 @@
 #ifndef __OpenViBEApplication_ICommandVRPNAnalog_H__
 #define __OpenViBEApplication_ICommandVRPNAnalog_H__
 
-#include "ovassvepICommand.h"
+#include "ovamsICommand.h"
 
 class vrpn_Analog_Remote;
 

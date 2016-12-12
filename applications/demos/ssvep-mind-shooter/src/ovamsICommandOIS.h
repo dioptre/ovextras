@@ -6,7 +6,7 @@
 #include <OIS.h>
 #include <OISKeyboard.h>
 #include <OISMouse.h>
-#include "ovassvepICommand.h"
+#include "ovamsICommand.h"
 
 namespace OpenViBESSVEP
 {

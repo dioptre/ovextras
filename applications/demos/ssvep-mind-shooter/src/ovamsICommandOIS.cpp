@@ -1,8 +1,8 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepICommandOIS.h"
-#include "ovassvepCApplication.h"
+#include "ovamsICommandOIS.h"
+#include "ovamsCApplication.h"
 
 #define SSVEP_NO_MOUSE_CAPTURE
 

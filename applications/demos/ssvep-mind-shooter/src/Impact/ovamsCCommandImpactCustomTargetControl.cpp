@@ -1,8 +1,8 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCCommandImpactCustomTargetControl.h"
-#include "ovassvepCImpactApplication.h"
+#include "ovamsCCommandImpactCustomTargetControl.h"
+#include "ovamsCImpactApplication.h"
 
 using namespace OpenViBESSVEP;
 using namespace OpenViBE::Kernel;

@@ -2,7 +2,7 @@
 #define __OpenViBEApplication_CCommandStartStop_H__
 
 
-#include "ovassvepICommandOIS.h"
+#include "ovamsICommandOIS.h"
 
 namespace OpenViBESSVEP
 {

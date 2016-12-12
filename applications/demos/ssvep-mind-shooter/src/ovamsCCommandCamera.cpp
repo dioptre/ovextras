@@ -1,9 +1,9 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCCommandCamera.h"
-#include "ovassvepCApplication.h"
-#include "ovassvepCVRPNServer.h"
+#include "ovamsCCommandCamera.h"
+#include "ovamsCApplication.h"
+#include "ovamsCVRPNServer.h"
 
 using namespace OpenViBESSVEP;
 using namespace OpenViBE::Kernel;

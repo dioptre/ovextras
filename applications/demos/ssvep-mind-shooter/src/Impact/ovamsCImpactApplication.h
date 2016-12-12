@@ -8,9 +8,9 @@
 
 #include "dotscene/DotSceneLoader.h"
 
-#include "../ovassvepCApplication.h"
-#include "ovassvepCImpactEnemyShip.h"
-#include "ovassvepCImpactShip.h"
+#include "../ovamsCApplication.h"
+#include "ovamsCImpactEnemyShip.h"
+#include "ovamsCImpactShip.h"
 
 
 namespace OpenViBESSVEP

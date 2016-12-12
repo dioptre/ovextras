@@ -1,7 +1,7 @@
 #ifndef __OpenViBEApplication_ICommandVRPNButton_H__
 #define __OpenViBEApplication_ICommandVRPNButton_H__
 
-#include "ovassvepICommand.h"
+#include "ovamsICommand.h"
 
 class vrpn_Button_Remote;
 

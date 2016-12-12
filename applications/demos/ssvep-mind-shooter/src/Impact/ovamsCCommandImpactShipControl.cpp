@@ -1,8 +1,8 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCCommandImpactShipControl.h"
-#include "ovassvepCImpactApplication.h"
+#include "ovamsCCommandImpactShipControl.h"
+#include "ovamsCImpactApplication.h"
 
 using namespace OpenViBESSVEP;
 

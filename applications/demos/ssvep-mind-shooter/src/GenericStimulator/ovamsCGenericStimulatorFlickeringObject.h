@@ -5,8 +5,8 @@
 #include <toolkit/ovtk_all.h>
 #include <Ogre.h>
 
-#include "../ovassvepCSSVEPFlickeringObject.h"
-#include "../ovassvepCBasicPainter.h"
+#include "../ovamsCSSVEPFlickeringObject.h"
+#include "../ovamsCBasicPainter.h"
 
 /**
  */

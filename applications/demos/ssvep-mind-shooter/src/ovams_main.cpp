@@ -1,14 +1,14 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvep_defines.h"
+#include "ovams_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ov_directories.h>
 
-#include "ovassvepCApplication.h"
-#include "GenericStimulator/ovassvepCGenericStimulatorApplication.h"
-#include "Impact/ovassvepCImpactApplication.h"
+#include "ovamsCApplication.h"
+#include "GenericStimulator/ovamsCGenericStimulatorApplication.h"
+#include "Impact/ovamsCImpactApplication.h"
 
 using namespace OpenViBE;
 

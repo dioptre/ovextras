@@ -1,11 +1,11 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCImpactShip.h"
+#include "ovamsCImpactShip.h"
 
-#include "ovassvepCImpactEnemyShip.h"
-#include "ovassvepCImpactApplication.h"
-#include "../ovassvepCSSVEPFlickeringObject.h"
+#include "ovamsCImpactEnemyShip.h"
+#include "ovamsCImpactApplication.h"
+#include "../ovamsCSSVEPFlickeringObject.h"
 
 #define SSVEP_SHIP_HULL_COLOUR Ogre::ColourValue(0.0f, 0.5f, 0.5f)
 #define SIGN(x) ( (x) / abs(x) )

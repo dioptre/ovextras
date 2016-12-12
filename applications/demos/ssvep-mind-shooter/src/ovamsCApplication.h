@@ -1,7 +1,7 @@
 #ifndef __OpenViBEApplication_CApplication_H__
 #define __OpenViBEApplication_CApplication_H__
 
-#include "ovassvep_defines.h"
+#include "ovams_defines.h"
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
@@ -15,8 +15,8 @@
 #include <RendererModules/Ogre/CEGUIOgreRenderer.h>
 #endif
 
-#include "ovassvepICommand.h"
-#include "ovassvepCBasicPainter.h"
+#include "ovamsICommand.h"
+#include "ovamsCBasicPainter.h"
 
 namespace OpenViBESSVEP
 {

@@ -4,7 +4,7 @@
 #include <Ogre.h>
 #include <iostream>
 
-#include "../ovassvepCBasicPainter.h"
+#include "../ovamsCBasicPainter.h"
 
 #define SSVEP_SHOOTER_TARGET_SIZE 0.15f
 

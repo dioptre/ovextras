@@ -1,13 +1,13 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCGenericStimulatorApplication.h"
+#include "ovamsCGenericStimulatorApplication.h"
 
 #include "../log/ovkCLogListenerFileBuffered.h"
 
-#include "../ovassvepCCommandStartStop.h"
-#include "../ovassvepCCommandStimulatorControl.h"
-#include "../ovassvepCCommandReceiveTarget.h"
+#include "../ovamsCCommandStartStop.h"
+#include "../ovamsCCommandStimulatorControl.h"
+#include "../ovamsCCommandReceiveTarget.h"
 
 using namespace Ogre;
 using namespace OpenViBE;

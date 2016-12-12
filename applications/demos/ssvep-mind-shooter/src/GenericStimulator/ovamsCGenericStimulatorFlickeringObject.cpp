@@ -1,8 +1,8 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCGenericStimulatorFlickeringObject.h"
-#include "ovassvepCGenericStimulatorApplication.h"
+#include "ovamsCGenericStimulatorFlickeringObject.h"
+#include "ovamsCGenericStimulatorApplication.h"
 
 #include <cmath>
 

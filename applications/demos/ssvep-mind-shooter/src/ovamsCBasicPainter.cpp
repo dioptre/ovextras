@@ -1,8 +1,8 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCBasicPainter.h"
-#include "ovassvepCApplication.h"
+#include "ovamsCBasicPainter.h"
+#include "ovamsCApplication.h"
 
 #if (OGRE_VERSION_MAJOR > 1) || ((OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR >= 9))
 #include "Overlay/OgreOverlaySystem.h"

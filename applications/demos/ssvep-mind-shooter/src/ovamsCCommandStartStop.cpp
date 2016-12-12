@@ -1,9 +1,9 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCCommandStartStop.h"
-#include "ovassvepCApplication.h"
-#include "ovassvepCVRPNServer.h"
+#include "ovamsCCommandStartStop.h"
+#include "ovamsCApplication.h"
+#include "ovamsCVRPNServer.h"
 
 using namespace OpenViBESSVEP;
 using namespace OpenViBE::Kernel;

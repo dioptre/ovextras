@@ -1,8 +1,8 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCCommandReceiveTarget.h"
-#include "ovassvepCApplication.h"
+#include "ovamsCCommandReceiveTarget.h"
+#include "ovamsCApplication.h"
 
 using namespace OpenViBESSVEP;
 

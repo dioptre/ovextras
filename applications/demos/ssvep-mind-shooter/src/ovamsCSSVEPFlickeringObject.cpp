@@ -1,7 +1,7 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCSSVEPFlickeringObject.h"
+#include "ovamsCSSVEPFlickeringObject.h"
 #include <iostream>
 #include <cmath>
 

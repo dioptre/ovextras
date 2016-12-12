@@ -1,8 +1,8 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepICommandVRPNButton.h"
-#include "ovassvepCApplication.h"
+#include "ovamsICommandVRPNButton.h"
+#include "ovamsCApplication.h"
 
 #include <vrpn_Connection.h>
 #include <vrpn_Button.h>

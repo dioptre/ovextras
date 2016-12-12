@@ -1,7 +1,7 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCApplication.h"
+#include "ovamsCApplication.h"
 #include <cmath>
 #include <algorithm>
 

@@ -1,8 +1,8 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovassvepCImpactEnemyShip.h"
-#include "ovassvepCImpactApplication.h"
+#include "ovamsCImpactEnemyShip.h"
+#include "ovamsCImpactApplication.h"
 
 #define IMPACTSHIP_SIZE 0.2f
 #define SCREEN_RATIO ( 16.0f / 9.0f )

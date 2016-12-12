@@ -4,8 +4,8 @@
 #include <iostream>
 #include <CEGUI.h>
 
-#include "../ovassvepCApplication.h"
-#include "ovassvepCGenericStimulatorFlickeringObject.h"
+#include "../ovamsCApplication.h"
+#include "ovamsCGenericStimulatorFlickeringObject.h"
 
 namespace OpenViBESSVEP
 {

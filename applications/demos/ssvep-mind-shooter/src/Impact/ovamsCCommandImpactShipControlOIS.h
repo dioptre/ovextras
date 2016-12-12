@@ -5,7 +5,7 @@
 
 #include <map>
 
-#include "../ovassvepICommandOIS.h"
+#include "../ovamsICommandOIS.h"
 
 namespace OpenViBESSVEP
 {

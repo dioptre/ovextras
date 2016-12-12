@@ -3,8 +3,8 @@
 #ifndef __OpenViBEApplication_CCommandCustomImpactTargetControl_
 #define __OpenViBEApplication_CCommandCustomImpactTargetControl_
 
-#include "../ovassvepICommandVRPNButton.h"
-#include "../ovassvepCVRPNServer.h"
+#include "../ovamsICommandVRPNButton.h"
+#include "../ovamsCVRPNServer.h"
 
 namespace OpenViBESSVEP
 {

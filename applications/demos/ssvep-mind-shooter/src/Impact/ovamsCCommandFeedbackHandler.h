@@ -1,7 +1,7 @@
 #ifndef __OpenViBEApplication_CCommandFeedbackHandler_H__
 #define __OpenViBEApplication_CCommandFeedbackHandler_H__
 
-#include "../ovassvepICommandVRPNAnalog.h"
+#include "../ovamsICommandVRPNAnalog.h"
 
 namespace OpenViBESSVEP
 {
