@@ -32,8 +32,7 @@ void CSSVEPFlickeringObject::setVisible( bool bVisibility )
 
 void CSSVEPFlickeringObject::processFrame()
 {
-
-//SP	if (m_ui32CurrentFrame < m_ui32LitFrames)
+	// If the bit for the frame is '1', set to visible
 	if (((m_ui64StimulationPattern >> m_ui32CurrentFrame) % 2) == 1)
 	{
 		this->setVisible( true );
@@ -45,13 +44,11 @@ void CSSVEPFlickeringObject::processFrame()
 
 	m_ui32CurrentFrame++;
 
-//SP	if (m_ui32CurrentFrame == m_ui32LitFrames + m_ui32DarkFrames)
+	// Start over when only '1' is left
 	if (m_ui64StimulationPattern >> m_ui32CurrentFrame == 1)
 	{
 		m_ui32CurrentFrame = 0;
 	}
-
-
 }
 
 #endif

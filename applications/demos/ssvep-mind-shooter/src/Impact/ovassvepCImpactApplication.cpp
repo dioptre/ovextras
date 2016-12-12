@@ -67,7 +67,17 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	}
 
 	IConfigurationManager* l_poConfigurationManager = &(m_poKernelContext->getConfigurationManager());
-	l_poConfigurationManager->addConfigurationFromFile(m_sScenarioDir + "/appconf/impact-configuration.conf");
+
+	if (m_sApplicationSubtype == CString("shooter"))
+	{
+		// A config file appended for the online session
+		const CString l_sConfigFile = m_sScenarioDir + "/appconf/impact-configuration.conf";
+		if (!l_poConfigurationManager->addConfigurationFromFile(l_sConfigFile))
+		{
+			this->getLogManager() << LogLevel_Error << "Unable to open [" << l_sConfigFile << "]. Has the shooter-controller.lua been run?\n";
+			return false;
+		}
+	}
 
 	poKernelContext->getLogManager().activate(LogLevel_First, LogLevel_Last, true);
 
@@ -80,7 +90,8 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 
 	std::stringstream l_sEnemyOrder;
 	l_sEnemyOrder << l_poConfigurationManager->expand("${SSVEP_EnemyOrder}");
-	std::cout << "enemy order " << l_poConfigurationManager->expand("${SSVEP_EnemyOrder}");
+
+	(*m_poLogManager) << LogLevel_Info << "Enemy order: " << l_poConfigurationManager->expand("${SSVEP_EnemyOrder}");
 
 	while (l_sEnemyOrder.peek() != EOF)
 	{

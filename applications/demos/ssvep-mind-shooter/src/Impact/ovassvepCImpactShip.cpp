@@ -32,7 +32,8 @@ CImpactShip::CImpactShip(CImpactApplication* poApplication, Ogre::SceneNode* poP
 	m_rOrigin(0.0),
 	m_rOldPosition(0)
 {
-	std::cout << "Loading Ship\n";
+	m_poApplication->getLogManager() << OpenViBE::Kernel::LogLevel_Info << "Loading ship\n";
+
 	m_poApplication->getSceneLoader()->parseDotScene( "v5.scene", "SSVEPImpact", m_poApplication->getSceneManager());
 
 	m_vTargetStates[0] = TS_NORMAL;

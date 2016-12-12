@@ -81,7 +81,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	(*m_poLogManager) << LogLevel_Debug << "+ Creating Ogre logmanager\n";
 	Ogre::LogManager* l_poLogManager = new Ogre::LogManager();
 	(*m_poLogManager) << LogLevel_Info << "Log level: " << l_poConfigurationManager->expand("${Kernel_ConsoleLogLevel}") << "\n";
-	(*m_poLogManager) << LogLevel_Info << "Application will output Ogre Log : " << l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_LogToConsole}", false) << "\n";
+	(*m_poLogManager) << LogLevel_Info << "Application will output Ogre console log : " << l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_LogToConsole}", false) << "\n";
 	CString l_sOgreLog = l_poConfigurationManager->expand("${Path_Log}") + "/openvibe-ssvep-mind-shooter-ogre.log";
 	(*m_poLogManager) << LogLevel_Info << "Ogre log file : " << l_sOgreLog << "\n";
 	FS::Files::createParentPath(l_sOgreLog);
@@ -114,10 +114,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 
 	int l_iWidth = (int) l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenWidth}", 800);
 	int l_iHeight = (int) l_poConfigurationManager->expandAsInteger("${SSVEP_Ogre_ScreenHeight}", 600);
-	OpenViBE::boolean l_bFullScreen = l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_FullScreen}", false);
-
-	(*m_poLogManager) << LogLevel_Info << "Fullscreen : " << l_poConfigurationManager->expand("${SSVEP_Ogre_FullScreen}") << "\n";
-
+	const OpenViBE::boolean l_bFullScreen = l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_FullScreen}", false);
 
 	(*m_poLogManager) << LogLevel_Info << "Width : " << l_iWidth << " Height : " << l_iHeight << " Fullscreen : " << l_bFullScreen << "\n";
 
@@ -149,14 +146,19 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	m_poPainter = new CBasicPainter( this );
 
 	(*m_poLogManager) << LogLevel_Debug << "  * initializing CEGUI\n";
-	this->initCEGUI(OpenViBE::Directories::getLogDir() + "/openvibe-ssvep-mind-shooter-demo-cegui.log");
+	this->initCEGUI(l_poConfigurationManager->expand("${Path_Log}") + "/openvibe-ssvep-mind-shooter-cegui.log");
 	(*m_poLogManager) << LogLevel_Debug << "  * CEGUI initialized\n";
 
 	// create the vector of stimulation frequencies
 
 	m_f64ScreenRefreshRate = (OpenViBE::uint32)(l_poConfigurationManager->expandAsUInteger("${SSVEP_ScreenRefreshRate}", 60));
-
 	(*m_poLogManager) << LogLevel_Info << "Specified screen refresh rate :" << m_f64ScreenRefreshRate << "Hz\n";
+
+	if (m_f64ScreenRefreshRate > 64)
+	{
+		(*m_poLogManager) << LogLevel_Error << "Screen refresh rate exceeds the max bit pattern length of 64\n";
+		return false;
+	}
 
 	OpenViBE::uint32 i = 1;
 
@@ -193,46 +195,40 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 		// Load frequencies
 		while (l_poConfigurationManager->lookUpConfigurationTokenIdentifier(l_poConfigurationManager->expand("SSVEP_Frequency_${SSVEP_FrequencyId}")) != OV_UndefinedIdentifier)
 		{
-			OpenViBE::uint64 l_ui64StimulationPattern = 0;
-			OpenViBE::uint32 l_ui32FramesL;
-			OpenViBE::uint32 l_ui32FramesD;
+			const float64 l_f64CurrentFrequency = (OpenViBE::float64)(l_poConfigurationManager->expandAsFloat("${SSVEP_Frequency_${SSVEP_FrequencyId}}"));
 
+			const float64 l_f64ApproximatedFrameCount= m_f64ScreenRefreshRate / l_f64CurrentFrequency;
 
-			OpenViBE::float64 l_f64CurrentFrequency;
-			OpenViBE::float64 l_f64ApproximatedFrameCount;
-
-			l_f64CurrentFrequency = (OpenViBE::float64)(l_poConfigurationManager->expandAsFloat("${SSVEP_Frequency_${SSVEP_FrequencyId}}"));
-
-			l_f64ApproximatedFrameCount= m_f64ScreenRefreshRate / l_f64CurrentFrequency;
+			const uint32 l_ui32RoundedFrameCount = static_cast<uint32>(floor(l_f64ApproximatedFrameCount + 0.5));
 
 			// test if the desired frequency can be reasonably created on the screen
-			if (fabs(l_f64ApproximatedFrameCount - floor(l_f64ApproximatedFrameCount + 0.5)) < 0.003)
+			if (fabs(l_f64ApproximatedFrameCount - l_ui32RoundedFrameCount) < 0.003)
 			{
+				const uint32 l_ui32FramesL = l_ui32RoundedFrameCount / 2 + l_ui32RoundedFrameCount % 2;
+				const uint32 l_ui32FramesD = l_ui32RoundedFrameCount / 2;
 
-				l_ui32FramesL = int(floor(l_f64ApproximatedFrameCount + 0.5)) / 2 + int(floor(l_f64ApproximatedFrameCount + 0.5)) % 2;
-				l_ui32FramesD = int(floor(l_f64ApproximatedFrameCount + 0.5)) / 2;
+				// the pattern is procedurally generated and always starts by a 1, 
+				// following by as many 0s as there are Dark frames and finally as many 1s as there are Light frames.
+				// The frame loop will consume one bit per frame from the right and then reset when the reset marker is hit.
 
-				// the pattern is procedurally generated and always starts by a 1, following by as many 0s as there are Light frames and finally as many 1s as
-				// there are Dark frames
-				l_ui64StimulationPattern = 1;
-				l_ui64StimulationPattern <<= 1;
+				// Start with the reset marker
+				OpenViBE::uint64 l_ui64StimulationPattern = 1;
 
-				for (OpenViBE::uint32 j = 0; j < l_ui32FramesL + l_ui32FramesD; j++)
+				// The dark zeroes
+				l_ui64StimulationPattern <<= l_ui32FramesD;
+
+				// The light ones
+				for (OpenViBE::uint32 j = 0; j < l_ui32FramesL; j++)
 				{
-					if (j >= l_ui32FramesD)
-					{
-						l_ui64StimulationPattern += 1;
-					}
-
-					if (j < l_ui32FramesL + l_ui32FramesD - 1)
-					{
-						l_ui64StimulationPattern = l_ui64StimulationPattern << 1;
-					}
+					l_ui64StimulationPattern <<= 1;
+					l_ui64StimulationPattern += 1;
 				}
 
-
-				(*m_poLogManager) << LogLevel_Info << "Frequency number " << i << ": " << l_f64CurrentFrequency << "Hz / " << floor(l_f64ApproximatedFrameCount + 0.5) << " ( " << l_ui32FramesL << ", " << l_ui32FramesD << ") frames @ " << m_f64ScreenRefreshRate << "fps\n";
+				(*m_poLogManager) << LogLevel_Info << "Frequency number " << i << ": " << l_f64CurrentFrequency << "Hz / " << floor(l_f64ApproximatedFrameCount + 0.5) << " ( " << l_ui32FramesL << " light, " << l_ui32FramesD << " dark) frames @ " << m_f64ScreenRefreshRate << "fps\n";
 				(*m_poLogManager) << LogLevel_Info << "Frequency number " << i << " pattern : " << l_ui64StimulationPattern << "\n";
+
+				std::stringstream l_ssBinary; l_ssBinary << std::bitset<64>(l_ui64StimulationPattern);
+				(*m_poLogManager) << LogLevel_Info << "Frequency number " << i << " binary  : " << l_ssBinary.str().c_str() << "\n";
 
 				m_oFrequencies.push_back(l_ui64StimulationPattern);
 				l_ui32PatternsLoaded++;
@@ -282,7 +278,7 @@ bool CApplication::configure()
 void CApplication::initCEGUI(const char *logFilename)
 {
 	// Instantiate logger before bootstrapping the system, this way we will be able to get the log redirected
-	if (!CEGUI::Logger::getSingletonPtr())
+	if (!CEGUI::Logger::getSingletonPtr()) 
 	{
 		new CEGUI::DefaultLogger();		// singleton; instantiate only, no delete
 	}
@@ -310,6 +306,7 @@ void CApplication::initCEGUI(const char *logFilename)
 #else
 	CEGUI::System::getSingleton().setGUISheet(m_poSheet);
 #endif
+
 }
 
 void CApplication::resizeViewport()
