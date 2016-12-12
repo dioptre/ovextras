@@ -50,6 +50,12 @@ namespace OpenViBEAcquisitionServer
 	 * acquisition to work properly and these are checked in verifySyncMode().
 	 */
 
+	struct GDevice
+	{
+		HANDLE handle;
+		std::string   serial;
+	};
+
 	class CDriverGTecGUSBamp : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:
@@ -86,7 +92,7 @@ namespace OpenViBEAcquisitionServer
 		static const int QUEUE_SIZE = 8;//4 default		 //the number of GT_GetData calls that will be queued during acquisition to avoid loss of data
 		static const int NUMBER_OF_SCANS = 32;           //the number of scans that should be received simultaneously (depending on the _sampleRate; see C-API documentation for this value!)
 		
-		OpenViBE::uint32 numDevices;                 //currently this driver supports 1 device 
+		OpenViBE::uint32 NumDevices();
 
 		static const OpenViBE::uint32 nPoints = NUMBER_OF_SCANS * (GTEC_NUM_CHANNELS + 1);
 		int validPoints;
@@ -99,12 +105,9 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
 
-		OpenViBE::uint32 m_ui32DeviceIndex;
-		//OpenViBE::uint32 m_ui32ActualDeviceIndex;
-		
 		OpenViBE::float32* m_pSample;
 
-		OpenViBE::uint32 m_ui32ActualImpedanceIndex;
+		OpenViBE::uint32 m_ui32GlobalImpedanceIndex;
 
 		OpenViBE::uint8 m_ui8CommonGndAndRefBitmap;
 
@@ -114,10 +117,11 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bTriggerInputEnabled;
 		OpenViBE::boolean m_bBipolarEnabled; //electrodes are substracted in sepecific sequence 1-2=1, ... 15-16=15 which results in 8 instead of 16 electrodes - used for EMG
 		OpenViBE::boolean m_bCalibrationSignalEnabled;
+		OpenViBE::boolean m_bShowDeviceName; //adds the amplifier serial number to the name of the channel 
 
 		OpenViBE::boolean m_bReconfigurationRequired; // After some gt calls, we may need reconfig
 
-		OpenViBE::uint32 m_ui32AcquiredChannelCount;      //number of channels 1..16 specified bu user
+		OpenViBE::uint32 m_ui32AcquiredChannelCount;      //number of channels specified by the user, never counts the event channels
 
 		OpenViBE::uint32 m_ui32TotalHardwareStimulations; //since start button clicked
 		OpenViBE::uint32 m_ui32TotalDriverChunksLost;     //since start button clicked
@@ -144,8 +148,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::float32 *m_bufferReceivedData;
 		boost::condition  m_itemAvailable;
 
-		deque<HANDLE> m_callSequenceHandles; //stores the handles to the currently opened devices
-
 		OpenViBE::boolean ConfigureDevice(OpenViBE::uint32 deviceNumber);
 
 		OpenViBE::boolean verifySyncMode();//Checks if devices are configured correctly when acquiring data from multiple devices
@@ -158,8 +160,23 @@ namespace OpenViBEAcquisitionServer
 	    OpenViBE::uint32 m_slavesCnt;
 	    string m_masterSerial;
 
-		vector<string> m_vDevicesSerials;
+		void remapChannelNames(void);   // Converts channel names while adding the device name and handling event channels
+		void restoreChannelNames(void); // Restores channel names without the device
 
+		vector<std::string> m_vOriginalChannelNames;
+		vector<GDevice> m_vGDevices;
+
+		std::string CDriverGTecGUSBamp::getSerialByHandler(HANDLE o_pDevice);
+
+		// Stores the OpenViBE channel index and the channel name
+		struct Channel
+		{
+			OpenViBE::int32 l_i32Index;			
+			OpenViBE::int32 l_i32OldIndex;
+			bool l_bIsEventChannel;
+		};
+
+		vector<Channel> m_vChannelMap;			// Map channels from gtec indexes to selected channels in the sample buffer, -1 skip this channel
 	};
 };
 

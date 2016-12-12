@@ -16,7 +16,6 @@ namespace OpenViBEAcquisitionServer
 	{
 	public:
 		CConfigurationGTecGUSBamp(const char* sGtkBuilderFileName,
-			                      OpenViBE::uint32& rUSBIndex,
 								  OpenViBE::uint8& rCommonGndAndRefBitmap,
 								  OpenViBE::int32& rNotchFilterIndex, 
 								  OpenViBE::int32& rBandPassFilterIndex,
@@ -24,7 +23,8 @@ namespace OpenViBEAcquisitionServer
 								  vector<string> rDevicesSerials,
 								  string& rMasterDeviceIndex,
 								  OpenViBE::boolean& rBipolar,
-								  OpenViBE::boolean& rCalibrationSignalEnabled
+								  OpenViBE::boolean& rCalibrationSignalEnabled,
+								  OpenViBE::boolean& rShowDeviceName
 								  );
 
 		virtual OpenViBE::boolean preConfigure(void);
@@ -39,7 +39,6 @@ namespace OpenViBEAcquisitionServer
 		void buttonFiltersApplyPressedCB(void);
 
 	protected:
-		OpenViBE::uint32& m_rUSBIndex;
 		OpenViBE::uint8& m_rCommonGndAndRefBitmap;
 
 		OpenViBE::int32& m_rNotchFilterIndex;
@@ -51,6 +50,7 @@ namespace OpenViBEAcquisitionServer
 		vector<OpenViBE::uint32> m_vComboBoxNotchFilterIndex;
 		OpenViBE::boolean& m_rBipolarEnabled;
 		OpenViBE::boolean& m_rCalibrationSignalEnabled;
+		OpenViBE::boolean& m_rShowDeviceName;
 		
 	private:
 		::GtkWidget* m_pCalibrateDialog;
