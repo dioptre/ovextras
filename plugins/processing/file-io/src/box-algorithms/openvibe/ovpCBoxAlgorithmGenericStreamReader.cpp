@@ -51,7 +51,7 @@ boolean CBoxAlgorithmGenericStreamReader::initializeFile()
 	m_pFile=::fopen(m_sFilename.toASCIIString(), "rb");
 	if(!m_pFile)
 	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFilename << "]\n";
+		this->getLogManager() << LogLevel_Error << "Could not open file [" << m_sFilename << "]\n";
 		return false;
 	}
 	return true;

@@ -98,11 +98,6 @@ namespace itppext
 
 boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::initialize(void)
 {
-	// CString   l_sSettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-	// uint64 l_ui64SettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-	// float64 l_f64SettingValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
-	// ...
-
 	m_pStimulationDecoder.initialize(*this,0);
 	m_pSignalDecoder.initialize(*this,1);
 	m_pEvokedPotentialDecoder.initialize(*this,2);
@@ -187,7 +182,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 	{
 		this->getLogManager() << LogLevel_Info << "Received train stimulation - be patient\n";
 
-		this->getLogManager() << LogLevel_Trace << "Decoding signal...\n";
+		this->getLogManager() << LogLevel_Trace << "Decoding signal chunks ...\n";
 
 		boolean l_bIsContinuous=true;
 		uint64 l_ui64EndTime = 0; 
@@ -197,7 +192,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 			m_pSignalDecoder.decode(i);
 			if(m_pSignalDecoder.isHeaderReceived())
 			{
-				// In OV, there's never two headers, so no need to do anything here.
+				// Don't care about the header
 			}
 			if(m_pSignalDecoder.isBufferReceived())
 			{
@@ -213,9 +208,10 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 
 				if(l_oChunk.m_ui64StartTime!=l_ui64EndTime)
 				{
-					this->getLogManager() << LogLevel_Error << "Chunk start time != chunk end time [" 
+					this->getLogManager() << LogLevel_Error << "Chunk " << i << " start time != last chunk end time [" 
 						<< l_oChunk.m_ui64StartTime << " vs " << l_ui64EndTime << "]\n";
 					l_bIsContinuous=false;
+					break;
 				}
 				l_ui64EndTime=l_oChunk.m_ui64EndTime;
 			}
@@ -225,7 +221,14 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 			l_rDynamicBoxContext.markInputAsDeprecated(1, i);
 		}
 
-		this->getLogManager() << LogLevel_Trace << "Decoding evoked response potential...\n";
+		if (!l_bIsContinuous)
+		{
+			// @fixme mem leak
+			this->getLogManager() << LogLevel_Error << "Input signal is not continuous... Can't continue\n";
+			return false;
+		}
+
+		this->getLogManager() << LogLevel_Trace << "Decoding evoked response potential chunks ...\n";
 
 		std::vector < SChunk > l_vEvokedPotential;
 		for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(2); i++)
@@ -233,7 +236,7 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 			m_pEvokedPotentialDecoder.decode(i);
 			if(m_pEvokedPotentialDecoder.isHeaderReceived())
 			{
-				// In OV, there's never two headers, so no need to do anything here.
+				// Don't care about the header
 			}
 			if(m_pEvokedPotentialDecoder.isBufferReceived())
 			{
@@ -253,17 +256,10 @@ boolean CBoxAlgorithmXDAWNSpatialFilterTrainer::process(void)
 			l_rDynamicBoxContext.markInputAsDeprecated(2, i);
 		}
 
-		if(!l_bIsContinuous)
-		{
-			// @fixme mem leak
-			this->getLogManager() << LogLevel_Error << "Input signal is not continuous... Can't continue\n";
-			return false;
-		}
-
 		if(l_vEvokedPotential.size()==0)
 		{
 			// @fixme mem leak
-			this->getLogManager() << LogLevel_Error << "No evoked potential received... Can't continue\n";
+			this->getLogManager() << LogLevel_Error << "No evoked potentials received... Can't continue\n";
 			return false;
 		}
 
