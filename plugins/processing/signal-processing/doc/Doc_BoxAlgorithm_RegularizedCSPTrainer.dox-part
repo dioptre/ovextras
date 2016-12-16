@@ -8,20 +8,26 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Description|
  
  The box estimates a filter bank of spatial filters using Common Spatial Patterns (CSP) algorithm. The algorithm tries to find a linear transform of the data that 
- makes the two signal conditions (or classes) more distinct, when the data is projected to the matrix of the filters found by the algorithm (i.e. s=Wx, where we
+ makes the signal conditions (or classes) more distinct, when the data is projected to the matrix of the filters found by the algorithm (i.e. s=Wx, where we
  assume x is the signal sample, W is the discovered filter bank, and s a lower-dimensional representation of the sample). The spatial filters are constructed 
- to maximize the variance of the signals of the first condition while at the same time minimizing it for the second condition. This approach may 
- aid the discrimination of the signals for two-class designs such as motor-imagery tasks (e.g. left versus right hand movement). 
- It can be useful in situations where designing spatial filter masks such as Laplacians manually is cumbersome or when it is believed
- that a filter optimized to the current data/user would produce better results than using an one-size-fits all filter.
+ for two conditions to maximize the variance of the signals of the first condition while at the same time minimizing it for the second condition. 
+ If signal variance contains discriminatory information, CSP filters can be useful in classification situations where designing spatial filter masks 
+ such as Laplacians manually is cumbersome or when it is believed that a filter optimized to the current data/user would produce better 
+ results than using an one-size-fits all filter.
 
- In principle CSP can be useful in two-class experiments where there is discriminative information in the variance (or power) of the signal conditions.
+ In principle CSP can be useful in experiments where there is discriminative information in the variance (or power) of the signal conditions,
+ for example motor imagery or SSVEP.
  
  The box implements some of the methods described e.g. by Lotte & Guan [1]. Especially, it 
  allows using the methods called "CSP with Diagonal Loading" and "CSP with Tikhonov Regularization" in the paper. In the approach of
  the paper, the filters for condition 1 are found by eigenvector decomposition of inv(Sigma1+rho*I)*Sigma2, where Sigma1 and Sigma2 are 
  empirical covariance matrices for the two conditions, rho the amount of Tikhonov regularization and I an identity matrix. For condition 2, 
- the formula is the same with the sigmas swapped. The matrices Sigma1 and Sigma2 may be optionally shrunk towards diagonal matrices.
+ the formula is the same with the sigmas swapped. The matrices Sigma1 and Sigma2 may be optionally shrunk towards diagonal matrices. 
+ 
+ In situations with more than two conditions, the box implements a one-vs-all approach, where each class gives a Sigma1 in turn, with the 
+ covariances of the other classes combined with a class frequency weighted average to obtain Sigma2. Hence, for k classes, k pairings 
+ are estimated, and out of each pair, a requested amount of filters is selected separately. This results in k times the amount of filters
+ requested in total.
  
  To avoid caching the whole dataset in the box, the algorithm tries to estimate the required covariances incrementally. The box supports
  a few different incremental ways to compute the covariances. The 'block average' approach takes an average of all the covariances of the incoming 
@@ -82,7 +88,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting2|
 
  * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting3|
- How many spatial filters should be output. Each condition will have half this amount of filters specific to it.
+ How many spatial filters should be selected per class.
  * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Setting3|
 
  * |OVP_DocBegin_BoxAlgorithm_RegularizedCSPTrainer_Setting4|
@@ -124,17 +130,16 @@ __________________________________________________________________
  
  To get the CSP resembling the one in the Muller-Gerkin paper, set Trace Normalization to True and the Covariance method to Chunk Average, with no regularization. Then, feed the algorithm each trial as a separate chunk (with Stimulation based epoching box). This is also the classic OV way of computing the CSP.
  
- Once the spatial filters are computed and saved in the configuration file, you can load the configuration into the \ref Doc_BoxAlgorithm_SpatialFilter "Spatial Filter" box.
- 
- For the moment the Regularized CSP Trainer supports only two classes. 
+ Once the spatial filters are computed and saved, you can load and apply the filters with the \ref Doc_BoxAlgorithm_SpatialFilter "Spatial Filter" box.
+
 
  References
  
- 1) Lotte & Guan: "Regularizing common spatial patterns...", 2011.
+ 1) Lotte & Guan: "Regularizing common spatial patterns to Improve BCI Designs: Unified Theory and New Algorithms", 2011.
   
  2) Muller-Gerkin & al., "Designing optimal spatial filters for single-trial EEG classification in a movement task", 1999.
  
- 3) Chan, Golub & Leveq, "Updating formulae and a pairwise algorithm...", 1979.
+ 3) Chan, Golub & Leveq, "Updating formulae and a pairwise algorithm  for computing sample variances", 1979.
  
 
  * |OVP_DocEnd_BoxAlgorithm_RegularizedCSPTrainer_Miscellaneous|

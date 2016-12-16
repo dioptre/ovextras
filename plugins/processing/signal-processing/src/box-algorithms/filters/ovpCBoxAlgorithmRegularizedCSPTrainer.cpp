@@ -58,38 +58,41 @@ void CBoxAlgorithmRegularizedCSPTrainer::dumpVector(OpenViBE::Kernel::ILogManage
 void CBoxAlgorithmRegularizedCSPTrainer::dumpMatrixFile(const MatrixXd& mat, const char *fn) { }
 #endif
 
+
 boolean CBoxAlgorithmRegularizedCSPTrainer::initialize(void)
 {
 	m_oStimulationDecoder.initialize(*this,0);
 	m_oStimulationEncoder.initialize(*this,0);
 
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
-	for(uint32 i=0;i<2;i++)
+	m_ui32NumClasses = l_rStaticBoxContext.getInputCount() - 1;
+
+	m_vIncrementalCov.resize(m_ui32NumClasses);
+	for(uint32 i=0;i<m_ui32NumClasses;i++)
 	{
-		m_pIncrementalCov[i] = NULL;
+		m_vIncrementalCov[i] = NULL;
 	}
 
 	m_ui64StimulationIdentifier=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sSpatialFilterConfigurationFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-	m_ui32FilterDimension=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+	m_ui32FiltersPerClass = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 	m_bSaveAsBoxConf = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
 
-	if(m_ui32FilterDimension%2 != 0)
+	if(m_ui32FiltersPerClass <= 0)
 	{
-		m_bHasBeenInitialized = false;
-		this->getLogManager() << LogLevel_Error << "Filter dimension must be an even number\n";
-		return false;
-	}
-	else if(m_ui32FilterDimension == 0)
-	{
-		this->getLogManager() << LogLevel_Error << "CSP filter dimension cannot be 0.\n";
+		this->getLogManager() << LogLevel_Error << "CSP filter dimension cannot be <= 0.\n";
 		return false;
 	}
 	m_bHasBeenInitialized = true;
 
-	for(uint32 i=0;i<2;i++)
+	m_vNumBuffers.resize(m_ui32NumClasses);
+	m_vNumSamples.resize(m_ui32NumClasses);
+
+	m_vSignalDecoders.resize(m_ui32NumClasses);
+	for(uint32 i=0;i<m_ui32NumClasses;i++)
 	{
-		m_oSignalDecoders[i].initialize(*this,i+1);
+		m_vSignalDecoders[i].initialize(*this,i+1);
 
 		const CIdentifier l_oCovAlgId = this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_OnlineCovariance);
 		if(l_oCovAlgId == OV_UndefinedIdentifier)
@@ -98,24 +101,24 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::initialize(void)
 			return false;
 		}
 
-		m_pIncrementalCov[i] = &this->getAlgorithmManager().getAlgorithm(l_oCovAlgId);
-		if(!m_pIncrementalCov[i]->initialize())
+		m_vIncrementalCov[i] = &this->getAlgorithmManager().getAlgorithm(l_oCovAlgId);
+		if(!m_vIncrementalCov[i]->initialize())
 		{
 			this->getLogManager() << LogLevel_Error << "Unable to initiate the online cov algorithm\n";
 			return false;
 		}
 
 		// Set the params of the cov algorithm
-		OpenViBE::Kernel::TParameterHandler < uint64 > ip_ui64UpdateMethod(m_pIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_UpdateMethod));
-		OpenViBE::Kernel::TParameterHandler < boolean > ip_bTraceNormalization(m_pIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_TraceNormalization));
-		OpenViBE::Kernel::TParameterHandler < float64 > ip_f64Shrinkage(m_pIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_Shrinkage));
+		OpenViBE::Kernel::TParameterHandler < uint64 > ip_ui64UpdateMethod(m_vIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_UpdateMethod));
+		OpenViBE::Kernel::TParameterHandler < boolean > ip_bTraceNormalization(m_vIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_TraceNormalization));
+		OpenViBE::Kernel::TParameterHandler < float64 > ip_f64Shrinkage(m_vIncrementalCov[i]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_Shrinkage));
 
 		ip_ui64UpdateMethod = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 		ip_bTraceNormalization = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
 		ip_f64Shrinkage = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
 
-		m_ui64nBuffers[i] = 0;
-		m_ui64nSamples[i] = 0;
+		m_vNumBuffers[i] = 0;
+		m_vNumSamples[i] = 0;
 	}
 
 	m_f64Tikhonov = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 7);
@@ -136,13 +139,13 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::uninitialize(void)
 
 	if(m_bHasBeenInitialized)
 	{
-		for(uint32 i=0;i<2;i++)
+		for(uint32 i=0;i<m_ui32NumClasses;i++)
 		{
-			m_oSignalDecoders[i].uninitialize();
-			if(m_pIncrementalCov[i])
+			m_vSignalDecoders[i].uninitialize();
+			if(m_vIncrementalCov[i])
 			{
-				m_pIncrementalCov[i]->uninitialize();
-				getAlgorithmManager().releaseAlgorithm(*m_pIncrementalCov[i]);
+				m_vIncrementalCov[i]->uninitialize();
+				getAlgorithmManager().releaseAlgorithm(*m_vIncrementalCov[i]);
 			}
 		}
 	}
@@ -156,31 +159,31 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::processInput(uint32 ui32InputIndex)
 	return true;
 }
 
-boolean CBoxAlgorithmRegularizedCSPTrainer::updateCov(int index)
+boolean CBoxAlgorithmRegularizedCSPTrainer::updateCov(uint32 ui32Index)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(index+1); i++)
+	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(ui32Index+1); i++)
 	{
-		OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmRegularizedCSPTrainer >* l_oDecoder = &m_oSignalDecoders[index];			
+		OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmRegularizedCSPTrainer >* l_oDecoder = &m_vSignalDecoders[ui32Index];			
 		const IMatrix* l_pInputSignal = l_oDecoder->getOutputMatrix();
 		
 		l_oDecoder->decode(i);
 		if(l_oDecoder->isHeaderReceived())
 		{
-			TParameterHandler < OpenViBE::IMatrix* > ip_pFeatureVectorSet(m_pIncrementalCov[index]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_InputVectors));
+			TParameterHandler < OpenViBE::IMatrix* > ip_pFeatureVectorSet(m_vIncrementalCov[ui32Index]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_InputVectors));
 
 			ip_pFeatureVectorSet->setDimensionCount(2);
 			ip_pFeatureVectorSet->setDimensionSize(0, l_pInputSignal->getDimensionSize(1));
 			ip_pFeatureVectorSet->setDimensionSize(1, l_pInputSignal->getDimensionSize(0));
 			
-			if(m_ui32FilterDimension>l_pInputSignal->getDimensionSize(0)) {
-				this->getLogManager() << LogLevel_Error << "CSP filter dimension cannot exceed the number of input channels (" << l_pInputSignal->getDimensionSize(1) << ") in the stream " << i+1 << "\n";
+			if(m_ui32FiltersPerClass>l_pInputSignal->getDimensionSize(0)) {
+				this->getLogManager() << LogLevel_Error << "CSP filter count cannot exceed the number of input channels (" << l_pInputSignal->getDimensionSize(1) << ") in the stream " << i+1 << "\n";
 				return false;
 			}
 
-			m_pIncrementalCov[index]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_Reset, true);
-			if(!m_pIncrementalCov[index]->process())
+			m_vIncrementalCov[ui32Index]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_Reset, true);
+			if(!m_vIncrementalCov[ui32Index]->process())
 			{
 				this->getLogManager() << LogLevel_Error << "Something went wrong during the parametrization of the covariance algorithm.\n";
 				return false;
@@ -188,7 +191,7 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::updateCov(int index)
 		}
 		if(l_oDecoder->isBufferReceived())
 		{
-			TParameterHandler < OpenViBE::IMatrix* > ip_pFeatureVectorSet(m_pIncrementalCov[index]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_InputVectors));
+			TParameterHandler < OpenViBE::IMatrix* > ip_pFeatureVectorSet(m_vIncrementalCov[ui32Index]->getInputParameter(OVP_Algorithm_OnlineCovariance_InputParameterId_InputVectors));
 
 			// transpose data
 			const uint32 l_ui32nChannels = l_pInputSignal->getDimensionSize(0);
@@ -198,11 +201,11 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::updateCov(int index)
 			Map<MatrixXdRowMajor> l_oOutputMapper(ip_pFeatureVectorSet->getBuffer(), l_ui32nSamples, l_ui32nChannels);
 			l_oOutputMapper = l_oInputMapper.transpose();
 
-			m_pIncrementalCov[index]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_Update, true);
-			m_pIncrementalCov[index]->process();
+			m_vIncrementalCov[ui32Index]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_Update, true);
+			m_vIncrementalCov[ui32Index]->process();
 
-			m_ui64nBuffers[index]++;
-			m_ui64nSamples[index]+=l_ui32nSamples;
+			m_vNumBuffers[ui32Index]++;
+			m_vNumSamples[ui32Index]+=l_ui32nSamples;
 		}
 		if(l_oDecoder->isEndReceived())
 		{
@@ -212,6 +215,63 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::updateCov(int index)
 
 	return true;
 }		
+
+//
+// Returns a sample-weighted average of given covariance matrices that does not include the cov of ui32SkipIndex
+//
+// @todo error handling is a bit scarce
+//
+// @note This will recompute the weights on every call, but given how small amount of 
+// computations we're speaking of, there's not much point in optimizing.
+//
+boolean CBoxAlgorithmRegularizedCSPTrainer::outclassCovAverage(uint32 ui32SkipIndex, const std::vector<MatrixXd>& vCov, MatrixXd &oCovAvg)
+{
+	if (vCov.size() == 0 || ui32SkipIndex >= vCov.size()) 
+	{
+		return false;
+	}
+
+	std::vector<float64> l_vClassWeights;
+	uint64 l_ui64TotalOutclassSamples = 0;
+
+	// Compute the total number of samples
+	for (uint32 i = 0; i < m_ui32NumClasses; i++)
+	{
+		if (i == ui32SkipIndex)
+		{
+			continue;
+		}
+		l_ui64TotalOutclassSamples += m_vNumSamples[i];
+
+	}
+
+	// Compute weigths for averaging
+	l_vClassWeights.resize(m_ui32NumClasses);
+	for (uint32 i = 0; i < m_ui32NumClasses; i++)
+	{
+		if (i == ui32SkipIndex)
+		{
+			// Ignore the in-class in the average
+			l_vClassWeights[i] = 0;
+		}
+		else
+		{
+			l_vClassWeights[i] = m_vNumSamples[i] / static_cast<float64>(l_ui64TotalOutclassSamples);
+		}
+		this->getLogManager() << LogLevel_Debug << "Condition " << i + 1 << " averaging weight = " << l_vClassWeights[i] << "\n";
+	}
+
+	// Average the covs
+	oCovAvg.resizeLike(vCov[0]);
+	oCovAvg.setZero();
+	for (uint32 i = 0; i < m_ui32NumClasses; i++)
+	{
+		oCovAvg += (l_vClassWeights[i] * vCov[i]);
+
+	}
+
+	return true;
+}
 
 boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 {
@@ -251,7 +311,7 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 	}
 
 	// Update all covs with the current data chunks (if any)
-	for(uint32 i=0;i<2;i++)
+	for(uint32 i=0;i<m_ui32NumClasses;i++)
 	{
 		if(!updateCov(i)) 
 		{
@@ -259,79 +319,94 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 		}
 	}
 	
-	if(l_bShouldTrain)
+	if (l_bShouldTrain)
 	{
-		this->getLogManager() << LogLevel_Info << "Received train stimulation - be patient\n";	
+		this->getLogManager() << LogLevel_Info << "Received train stimulation - be patient\n";
 
-		const IMatrix* l_pInput = m_oSignalDecoders[0].getOutputMatrix();
+		const IMatrix* l_pInput = m_vSignalDecoders[0].getOutputMatrix();
 		const uint32 l_ui32nChannels = l_pInput->getDimensionSize(0);
 
 		this->getLogManager() << LogLevel_Debug << "Computing eigen vector decomposition...\n";
 
-
 		// Get out the covariances
-		MatrixXd l_oCov[2],l_oCovRaw[2];	
-		for(uint32 i=0;i<2;i++) {
+		std::vector<MatrixXd> l_vCov, l_vCovRaw;
 
-			if(m_ui64nSamples[i] < 2)
+		l_vCov.resize(m_ui32NumClasses);
+		l_vCovRaw.resize(m_ui32NumClasses);
+
+		for (uint32 i = 0; i < m_ui32NumClasses; i++) {
+
+			if (m_vNumSamples[i] < 2)
 			{
-				this->getLogManager() << LogLevel_Error << "Condition " << i << " had only " << m_ui64nSamples[i] << "samples\n";
+				this->getLogManager() << LogLevel_Error << "Condition " << i << " had only " << m_vNumSamples[i] << " samples\n";
 				return false;
 			}
 
-			TParameterHandler < OpenViBE::IMatrix* > op_pCovarianceMatrix(m_pIncrementalCov[i]->getOutputParameter(OVP_Algorithm_OnlineCovariance_OutputParameterId_CovarianceMatrix));
-		
+			TParameterHandler < OpenViBE::IMatrix* > op_pCovarianceMatrix(m_vIncrementalCov[i]->getOutputParameter(OVP_Algorithm_OnlineCovariance_OutputParameterId_CovarianceMatrix));
+
 			// Get regularized cov
-			m_pIncrementalCov[i]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_GetCov, true);
-			if(!m_pIncrementalCov[i]->process()) {
+			m_vIncrementalCov[i]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_GetCov, true);
+			if (!m_vIncrementalCov[i]->process()) {
 				return false;
 			}
 
 			Map<MatrixXdRowMajor> l_oCovMapper(op_pCovarianceMatrix->getBuffer(), l_ui32nChannels, l_ui32nChannels);
-			l_oCov[i] = l_oCovMapper;
+			l_vCov[i] = l_oCovMapper;
 
 			// std::stringstream ss; ss << "C:/jl/dump_cov" << i << ".csv";
 			// CString tmp(ss.str().c_str());
 			// dumpMatrixFile(l_oCov[i], tmp);
-			
+
 			// Get vanilla cov
-			m_pIncrementalCov[i]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_GetCovRaw, true);
-			if(!m_pIncrementalCov[i]->process()) {
+			m_vIncrementalCov[i]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_GetCovRaw, true);
+			if (!m_vIncrementalCov[i]->process()) {
 				return false;
 			}
 
-			l_oCovRaw[i] = l_oCovMapper;
+			l_vCovRaw[i] = l_oCovMapper;
 
 			// ss.str(""); ss << "C:/jl/dump_covraw" << i << ".csv";
 			// tmp = CString(ss.str().c_str());
 			// dumpMatrixFile(l_oCovRaw[i], tmp);
 		}
 
-		if(l_oCov[0].rows() != l_oCov[1].rows() || l_oCov[0].cols() != l_oCov[1].cols() )
+		for (uint32 i = 1; i < m_ui32NumClasses; i++) 
 		{
-			this->getLogManager() << LogLevel_Error << "The input streams had different numbers of channels\n";
-			return false;
+			if (l_vCov[0].rows() != l_vCov[i].rows() || l_vCov[0].cols() != l_vCov[i].cols())
+			{
+				this->getLogManager() << LogLevel_Error << "The samples for conditions 1 and " << i + 1 << " had different numbers of channels\n";
+				return false;
+			}
+		}
+	
+		this->getLogManager() << LogLevel_Info << "Data covariance dims are [" << static_cast<uint32>(l_vCov[0].rows()) << "x" << static_cast<uint32>(l_vCov[0].cols())
+			<< "]. Number of samples per condition : \n";
+		for (uint32 i = 0; i < m_ui32NumClasses; i++)
+		{
+			this->getLogManager() << LogLevel_Info << "  cond " << i + 1 << " = "
+				<< m_vNumBuffers[i] << " chunks, sized " << l_pInput->getDimensionSize(1) << " -> " << m_vNumSamples[i] << " samples\n";
+			// this->getLogManager() << LogLevel_Info << "Using shrinkage coeff " << m_f64Shrinkage << " ...\n";
 		}
 
-		this->getLogManager() << LogLevel_Info << "Data covariance dims are [" << static_cast<uint32>(l_oCov[0].rows()) << "x" << static_cast<uint32>(l_oCov[0].cols())
-			<< "]. Number of samples per condition : \n";
-		this->getLogManager() << LogLevel_Info << "  cond1 = " 
-			<< m_ui64nBuffers[0] << " chunks, sized " << l_pInput->getDimensionSize(1) << " -> " << m_ui64nSamples[0] << " samples\n";
-		this->getLogManager() << LogLevel_Info << "  cond2 = " 
-			<< m_ui64nBuffers[1] << " chunks, sized " << l_pInput->getDimensionSize(1) << " -> " << m_ui64nSamples[1] << " samples\n";
-		// this->getLogManager() << LogLevel_Info << "Using shrinkage coeff " << m_f64Shrinkage << " ...\n";
-
 		// We wouldn't need to store all this -- they are kept for debugging purposes
-		VectorXd l_oEigenValues[2];
-		MatrixXd l_oEigenVectors[2];
-		VectorXd l_oSortedEigenValues[2];
-		MatrixXd l_oSortedEigenVectors[2];
-		MatrixXd l_oCovInv[2];
-		MatrixXd l_oCovProd[2];
+		std::vector<VectorXd> l_oEigenValues;
+		std::vector<MatrixXd> l_oEigenVectors;
+		std::vector<VectorXd> l_oSortedEigenValues;
+		std::vector<MatrixXd> l_oSortedEigenVectors;
+		std::vector<MatrixXd> l_oCovInv;
+		std::vector<MatrixXd> l_oCovProd;
 		MatrixXd l_oTikhonov;
-		l_oTikhonov.resizeLike(l_oCov[0]);
+		MatrixXd l_oOutclassCov;
+		l_oTikhonov.resizeLike(l_vCov[0]);
 		l_oTikhonov.setIdentity();
 		l_oTikhonov *= m_f64Tikhonov;
+
+		l_oEigenValues.resize(m_ui32NumClasses);
+		l_oEigenVectors.resize(m_ui32NumClasses);
+		l_oSortedEigenValues.resize(m_ui32NumClasses);
+		l_oSortedEigenVectors.resize(m_ui32NumClasses);
+		l_oCovInv.resize(m_ui32NumClasses);
+		l_oCovProd.resize(m_ui32NumClasses);
 
 		// To get the CSP filters, we compute two sets of eigenvectors,
 		// eig(inv(sigma2+tikhonov)*sigma1) and eig(inv(sigma1+tikhonov)*sigma2
@@ -342,16 +417,23 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 	
 		EigenSolver<MatrixXd> l_oEigenSolverGeneral;
 
-		for(uint32 c=0;c<2;c++) 
+		for(uint32 c=0;c<m_ui32NumClasses;c++) 
 		{
 			try {
-				l_oCovInv[c] = (l_oCov[c]+l_oTikhonov).inverse();
+				l_oCovInv[c] = (l_vCov[c]+l_oTikhonov).inverse();
 			} catch(...) {
 				this->getLogManager() << LogLevel_Error << "Inverse failed for condition " << c+1 << "\n";
 				return false;
 			}
 
-			l_oCovProd[c] = l_oCovInv[c] * l_oCov[1-c];
+			// Compute covariance in all the classes except 'c'.
+			if (!outclassCovAverage(c, l_vCov, l_oOutclassCov))
+			{
+				this->getLogManager() << LogLevel_Error << "Outclass cov computation failed for condition " << c + 1 << "\n";
+				return false;
+			}
+
+			l_oCovProd[c] = l_oCovInv[c] * l_oOutclassCov;
 
 			// std::stringstream fn; fn << "C:/jl/dump_covprod" << c << ".csv";
 			// dumpMatrixFile(l_oCovProd[c], fn.str().c_str());
@@ -384,20 +466,20 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 			}
 		}
 	
-		const uint32 l_ui32HowMany = (m_ui32FilterDimension/2);
-
 		CMatrix l_oSelectedVectors;
 		l_oSelectedVectors.setDimensionCount(2);
-		l_oSelectedVectors.setDimensionSize(0, m_ui32FilterDimension);
+		l_oSelectedVectors.setDimensionSize(0, m_ui32FiltersPerClass * m_ui32NumClasses);
 		l_oSelectedVectors.setDimensionSize(1, l_ui32nChannels);
 
-		Map<MatrixXdRowMajor> l_oSelectedVectorsMapper(l_oSelectedVectors.getBuffer(), m_ui32FilterDimension, l_ui32nChannels);
-		l_oSelectedVectorsMapper  << 
-			l_oSortedEigenVectors[0].block(0,0,l_ui32nChannels, l_ui32HowMany).transpose() , 
-			l_oSortedEigenVectors[1].block(0,0,l_ui32nChannels, l_ui32HowMany).transpose();
+		Map<MatrixXdRowMajor> l_oSelectedVectorsMapper(l_oSelectedVectors.getBuffer(), m_ui32FiltersPerClass * m_ui32NumClasses, l_ui32nChannels);
 
-		this->getLogManager() << LogLevel_Info << "The filter(s) for cond " << 1 << " cover " << 100.0*l_oSortedEigenValues[0].head(m_ui32FilterDimension).sum()/l_oSortedEigenValues[0].sum() << "% of corresp. eigenvalues\n";
-		this->getLogManager() << LogLevel_Info << "The filter(s) for cond " << 2 << " cover " << 100.0*l_oSortedEigenValues[1].head(m_ui32FilterDimension).sum()/l_oSortedEigenValues[1].sum() << "% of corresp. eigenvalues\n";
+		for (uint32 c = 0; c < m_ui32NumClasses; c++)
+		{
+			l_oSelectedVectorsMapper.block(c*m_ui32FiltersPerClass, 0, m_ui32FiltersPerClass, l_ui32nChannels) =
+				l_oSortedEigenVectors[c].block(0, 0, l_ui32nChannels, m_ui32FiltersPerClass).transpose();
+
+			this->getLogManager() << LogLevel_Info << "The " << m_ui32FiltersPerClass << " filter(s) for cond " << c + 1 << " cover " << 100.0*l_oSortedEigenValues[c].head(m_ui32FiltersPerClass).sum() / l_oSortedEigenValues[c].sum() << "% of corresp. eigenvalues\n";
+		}
 
 		if(m_bSaveAsBoxConf)
 		{
@@ -411,14 +493,14 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 			::fprintf(l_pFile, "<OpenViBE-SettingsOverride>\n");
 			::fprintf(l_pFile, "\t<SettingValue>");
 
-			const uint32 l_ui32numCoefficients = m_ui32FilterDimension*l_ui32nChannels;
+			const uint32 l_ui32numCoefficients = m_ui32FiltersPerClass*m_ui32NumClasses*l_ui32nChannels;
 			for(uint32 i=0;i<l_ui32numCoefficients;i++)
 			{
 				::fprintf(l_pFile, "%e ", l_oSelectedVectors.getBuffer()[i]);
 			}
 		
 			::fprintf(l_pFile, "</SettingValue>\n");
-			::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", m_ui32FilterDimension);
+			::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", m_ui32FiltersPerClass*m_ui32NumClasses);
 			::fprintf(l_pFile, "\t<SettingValue>%d</SettingValue>\n", l_ui32nChannels);
 			::fprintf(l_pFile, "\t<SettingValue></SettingValue>\n");
 			::fprintf(l_pFile, "</OpenViBE-SettingsOverride>\n");
@@ -427,6 +509,12 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 		}
 		else
 		{
+			for (uint32 i = 0; i < l_oSelectedVectors.getDimensionSize(0); i++) {
+				std::stringstream l_oLabel; l_oLabel << "Cond " << static_cast<uint32>(i / m_ui32FiltersPerClass) + 1
+					<< " filter " <<  i % m_ui32FiltersPerClass + 1;
+
+				l_oSelectedVectors.setDimensionLabel(0, i, l_oLabel.str().c_str());
+			}
 
 			if(!OpenViBEToolkit::Tools::Matrix::saveToTextFile(l_oSelectedVectors, m_sSpatialFilterConfigurationFilename, 10)) 
 			{
@@ -439,11 +527,11 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 
 		// Clean data, so if there's a new train stimulation, we'll start again.
 		// @note possibly this should be a parameter in the future to allow incremental training
-		for(uint32 i=0;i<2;i++)
+		for(uint32 i=0;i<m_ui32NumClasses;i++)
 		{
-			m_pIncrementalCov[i]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_Reset, true);
-			m_ui64nSamples[i] = 0;
-			m_ui64nBuffers[i] = 0;
+			m_vIncrementalCov[i]->activateInputTrigger(OVP_Algorithm_OnlineCovariance_Process_Reset, true);
+			m_vNumSamples[i] = 0;
+			m_vNumBuffers[i] = 0;
 		}
 
 		m_oStimulationEncoder.getInputStimulationSet()->clear();
