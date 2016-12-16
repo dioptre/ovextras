@@ -273,6 +273,91 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::outclassCovAverage(uint32 ui32SkipIn
 	return true;
 }
 
+boolean CBoxAlgorithmRegularizedCSPTrainer::computeCSP(const std::vector<Eigen::MatrixXd>& vCov, std::vector<Eigen::MatrixXd>& vSortedEigenVectors,
+	std::vector<Eigen::VectorXd>& vSortedEigenValues)
+{
+	// We wouldn't need to store all this -- they are kept for debugging purposes
+	std::vector<VectorXd> l_vEigenValues;
+	std::vector<MatrixXd> l_vEigenVectors;
+	std::vector<MatrixXd> l_vCovInv;
+	std::vector<MatrixXd> l_vCovProd;
+	MatrixXd l_oTikhonov;
+	MatrixXd l_oOutclassCov;
+	l_oTikhonov.resizeLike(vCov[0]);
+	l_oTikhonov.setIdentity();
+	l_oTikhonov *= m_f64Tikhonov;
+
+	l_vEigenValues.resize(m_ui32NumClasses);
+	l_vEigenVectors.resize(m_ui32NumClasses);
+	l_vCovInv.resize(m_ui32NumClasses);
+	l_vCovProd.resize(m_ui32NumClasses);
+
+	vSortedEigenVectors.resize(m_ui32NumClasses);
+	vSortedEigenValues.resize(m_ui32NumClasses);
+
+	// To get the CSP filters, we compute two sets of eigenvectors,
+	// eig(inv(sigma2+tikhonov)*sigma1) and eig(inv(sigma1+tikhonov)*sigma2
+	// and pick the ones corresponding to the largest eigenvalues as
+	// spatial filters [following Lotte & Guan 2011]. Assumes the shrink
+	// of the sigmas (if its used) has been performed inside the cov 
+	// computation algorithm.
+
+	EigenSolver<MatrixXd> l_oEigenSolverGeneral;
+
+	for (uint32 c = 0; c < m_ui32NumClasses; c++)
+	{
+		try {
+			l_vCovInv[c] = (vCov[c] + l_oTikhonov).inverse();
+		}
+		catch (...) {
+			this->getLogManager() << LogLevel_Error << "Inverse failed for condition " << c + 1 << "\n";
+			return false;
+		}
+
+		// Compute covariance in all the classes except 'c'.
+		if (!outclassCovAverage(c, vCov, l_oOutclassCov))
+		{
+			this->getLogManager() << LogLevel_Error << "Outclass cov computation failed for condition " << c + 1 << "\n";
+			return false;
+		}
+
+		l_vCovProd[c] = l_vCovInv[c] * l_oOutclassCov;
+
+		// std::stringstream fn; fn << "C:/jl/dump_covprod" << c << ".csv";
+		// dumpMatrixFile(l_oCovProd[c], fn.str().c_str());
+
+		try {
+			l_oEigenSolverGeneral.compute(l_vCovProd[c]);
+		}
+		catch (...) {
+			this->getLogManager() << LogLevel_Error << "EigenSolver failed for condition " << c + 1 << "\n";
+			return false;
+		}
+
+		l_vEigenValues[c] = l_oEigenSolverGeneral.eigenvalues().real();
+		l_vEigenVectors[c] = l_oEigenSolverGeneral.eigenvectors().real();
+
+		// Sort the vectors -_- 
+		std::vector< std::pair<float64, int> > l_oIndexes;
+		for (int i = 0; i < l_vEigenValues[c].size(); i++)
+		{
+			l_oIndexes.push_back(std::make_pair((l_vEigenValues[c])[i], i));
+		}
+		std::sort(l_oIndexes.begin(), l_oIndexes.end(), std::greater< std::pair<float64, int> >());
+
+		vSortedEigenValues[c].resizeLike(l_vEigenValues[c]);
+		vSortedEigenVectors[c].resizeLike(l_vEigenVectors[c]);
+		for (int i = 0; i < l_vEigenValues[c].size(); i++)
+		{
+			(vSortedEigenValues[c])[i]     = (l_vEigenValues[c])[l_oIndexes[i].second];
+			vSortedEigenVectors[c].col(i) = l_vEigenVectors[c].col(l_oIndexes[i].second);
+			// this->getLogManager() << LogLevel_Info << "E " << i << " " << (l_oSortedEigenValues[c])[i] << "\n";
+		}
+	}
+	return true;
+
+}
+
 boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
@@ -370,7 +455,8 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 			// dumpMatrixFile(l_oCovRaw[i], tmp);
 		}
 
-		for (uint32 i = 1; i < m_ui32NumClasses; i++) 
+		// Sanity check
+		for (uint32 i = 1; i < m_ui32NumClasses; i++)
 		{
 			if (l_vCov[0].rows() != l_vCov[i].rows() || l_vCov[0].cols() != l_vCov[i].cols())
 			{
@@ -378,7 +464,7 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 				return false;
 			}
 		}
-	
+
 		this->getLogManager() << LogLevel_Info << "Data covariance dims are [" << static_cast<uint32>(l_vCov[0].rows()) << "x" << static_cast<uint32>(l_vCov[0].cols())
 			<< "]. Number of samples per condition : \n";
 		for (uint32 i = 0; i < m_ui32NumClasses; i++)
@@ -388,84 +474,15 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 			// this->getLogManager() << LogLevel_Info << "Using shrinkage coeff " << m_f64Shrinkage << " ...\n";
 		}
 
-		// We wouldn't need to store all this -- they are kept for debugging purposes
-		std::vector<VectorXd> l_oEigenValues;
-		std::vector<MatrixXd> l_oEigenVectors;
-		std::vector<VectorXd> l_oSortedEigenValues;
-		std::vector<MatrixXd> l_oSortedEigenVectors;
-		std::vector<MatrixXd> l_oCovInv;
-		std::vector<MatrixXd> l_oCovProd;
-		MatrixXd l_oTikhonov;
-		MatrixXd l_oOutclassCov;
-		l_oTikhonov.resizeLike(l_vCov[0]);
-		l_oTikhonov.setIdentity();
-		l_oTikhonov *= m_f64Tikhonov;
-
-		l_oEigenValues.resize(m_ui32NumClasses);
-		l_oEigenVectors.resize(m_ui32NumClasses);
-		l_oSortedEigenValues.resize(m_ui32NumClasses);
-		l_oSortedEigenVectors.resize(m_ui32NumClasses);
-		l_oCovInv.resize(m_ui32NumClasses);
-		l_oCovProd.resize(m_ui32NumClasses);
-
-		// To get the CSP filters, we compute two sets of eigenvectors,
-		// eig(inv(sigma2+tikhonov)*sigma1) and eig(inv(sigma1+tikhonov)*sigma2
-		// and pick the ones corresponding to the largest eigenvalues as
-		// spatial filters [following Lotte & Guan 2011]. Assumes the shrink
-		// of the sigmas (if its used) has been performed inside the cov 
-		// computation algorithm.
-	
-		EigenSolver<MatrixXd> l_oEigenSolverGeneral;
-
-		for(uint32 c=0;c<m_ui32NumClasses;c++) 
+		// Compute the actual CSP using the obtained covariance matrices
+		std::vector<Eigen::MatrixXd> l_vSortedEigenVectors;
+		std::vector<Eigen::VectorXd> l_vSortedEigenValues;
+		if (!computeCSP(l_vCov, l_vSortedEigenVectors, l_vSortedEigenValues)) 
 		{
-			try {
-				l_oCovInv[c] = (l_vCov[c]+l_oTikhonov).inverse();
-			} catch(...) {
-				this->getLogManager() << LogLevel_Error << "Inverse failed for condition " << c+1 << "\n";
-				return false;
-			}
-
-			// Compute covariance in all the classes except 'c'.
-			if (!outclassCovAverage(c, l_vCov, l_oOutclassCov))
-			{
-				this->getLogManager() << LogLevel_Error << "Outclass cov computation failed for condition " << c + 1 << "\n";
-				return false;
-			}
-
-			l_oCovProd[c] = l_oCovInv[c] * l_oOutclassCov;
-
-			// std::stringstream fn; fn << "C:/jl/dump_covprod" << c << ".csv";
-			// dumpMatrixFile(l_oCovProd[c], fn.str().c_str());
-
-			try {
-				l_oEigenSolverGeneral.compute(l_oCovProd[c]);
-			} catch(...) {
-				this->getLogManager() << LogLevel_Error << "EigenSolver failed for condition " << c+1 << "\n";
-				return false;
-			}
-
-			l_oEigenValues[c] = l_oEigenSolverGeneral.eigenvalues().real();
-			l_oEigenVectors[c] = l_oEigenSolverGeneral.eigenvectors().real();
-
-			// Sort the vectors -_- 
-			std::vector< std::pair<float64, int> > l_oIndexes;
-			for(int i=0; i<l_oEigenValues[c].size(); i++)
-			{
-				l_oIndexes.push_back( std::make_pair( (l_oEigenValues[c])[i], i));
-			}
-			std::sort( l_oIndexes.begin(), l_oIndexes.end(), std::greater< std::pair<float64,int> >() );
-
-			l_oSortedEigenValues[c].resizeLike(l_oEigenValues[c]);
-			l_oSortedEigenVectors[c].resizeLike(l_oEigenVectors[c]);
-			for(int i=0; i<l_oEigenValues[c].size(); i++)
-			{
-				(l_oSortedEigenValues[c])[i] = (l_oEigenValues[c])[l_oIndexes[i].second];
-				l_oSortedEigenVectors[c].col(i) = l_oEigenVectors[c].col(l_oIndexes[i].second);
-				// this->getLogManager() << LogLevel_Info << "E " << i << " " << (l_oSortedEigenValues[c])[i] << "\n";
-			}
+			return false;
 		}
 	
+		// Create a CMatrix mapper that can spool the filters to a file
 		CMatrix l_oSelectedVectors;
 		l_oSelectedVectors.setDimensionCount(2);
 		l_oSelectedVectors.setDimensionSize(0, m_ui32FiltersPerClass * m_ui32NumClasses);
@@ -476,9 +493,9 @@ boolean CBoxAlgorithmRegularizedCSPTrainer::process(void)
 		for (uint32 c = 0; c < m_ui32NumClasses; c++)
 		{
 			l_oSelectedVectorsMapper.block(c*m_ui32FiltersPerClass, 0, m_ui32FiltersPerClass, l_ui32nChannels) =
-				l_oSortedEigenVectors[c].block(0, 0, l_ui32nChannels, m_ui32FiltersPerClass).transpose();
+				l_vSortedEigenVectors[c].block(0, 0, l_ui32nChannels, m_ui32FiltersPerClass).transpose();
 
-			this->getLogManager() << LogLevel_Info << "The " << m_ui32FiltersPerClass << " filter(s) for cond " << c + 1 << " cover " << 100.0*l_oSortedEigenValues[c].head(m_ui32FiltersPerClass).sum() / l_oSortedEigenValues[c].sum() << "% of corresp. eigenvalues\n";
+			this->getLogManager() << LogLevel_Info << "The " << m_ui32FiltersPerClass << " filter(s) for cond " << c + 1 << " cover " << 100.0*l_vSortedEigenValues[c].head(m_ui32FiltersPerClass).sum() / l_vSortedEigenValues[c].sum() << "% of corresp. eigenvalues\n";
 		}
 
 		if(m_bSaveAsBoxConf)

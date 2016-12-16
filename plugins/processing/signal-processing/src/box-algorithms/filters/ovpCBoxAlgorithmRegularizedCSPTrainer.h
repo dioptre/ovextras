@@ -41,6 +41,8 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean updateCov(OpenViBE::uint32 ui32Index);
 			virtual OpenViBE::boolean outclassCovAverage(OpenViBE::uint32 ui32SkipIndex, const std::vector<Eigen::MatrixXd>& vCov, Eigen::MatrixXd& oCovAvg);
+			virtual OpenViBE::boolean computeCSP(const std::vector<Eigen::MatrixXd>& vCov, std::vector<Eigen::MatrixXd>& vSortedEigenVectors,
+				std::vector<Eigen::VectorXd>& vSortedEigenValues);
 
 			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmRegularizedCSPTrainer > m_oStimulationDecoder;
 
