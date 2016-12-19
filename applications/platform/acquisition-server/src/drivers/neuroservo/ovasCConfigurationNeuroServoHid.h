@@ -8,7 +8,9 @@
 
 #ifndef __OpenViBE_AcquisitionServer_CConfigurationNeuroServoHid_H__
 #define __OpenViBE_AcquisitionServer_CConfigurationNeuroServoHid_H__
+
 #if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyNeuroServo
 
 #include "../ovasCConfigurationBuilder.h"
 #include "ovasIDriver.h"
@@ -63,5 +65,7 @@ namespace OpenViBEAcquisitionServer
 	};
 };
 
+#endif
 #endif // TARGET_OS_Windows
+
 #endif // __OpenViBE_AcquisitionServer_CConfigurationNeuroServoHid_H__

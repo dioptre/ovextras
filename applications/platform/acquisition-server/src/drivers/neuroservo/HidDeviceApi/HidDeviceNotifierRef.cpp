@@ -8,6 +8,7 @@
 */
 
 #if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyNeuroServo
 
 #include <windows.h>
 #include <stdio.h>
@@ -497,4 +498,6 @@ void ErrorHandler(
 	LocalFree(lpMsgBuf);
 	LocalFree(lpDisplayBuf);
 }
+
+#endif
 #endif // TARGET_OS_Windows

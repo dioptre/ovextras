@@ -7,6 +7,9 @@
 *
 */
 
+#if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyNeuroServo
+
 #pragma once
 
 #include <Windows.h>
@@ -86,3 +89,5 @@ private:
 	OVERLAPPED _hidOverlapped;
 };
 
+#endif
+#endif

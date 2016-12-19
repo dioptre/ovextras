@@ -26,6 +26,7 @@
 #include "mindmedia-nexus32b/ovasCDriverMindMediaNeXus32B.h"
 #include "mcs-nvx/ovasCDriverMCSNVXDriver.h"
 #include "neuroelectrics-enobio3g/ovasCDriverEnobio3G.h"
+#include "neuroservo/ovasCDriverNeuroServoHid.h"
 #include "neurosky-mindset/ovasCDriverNeuroskyMindset.h"
 #include "tmsi/ovasCDriverTMSi.h"
 #include "tmsi-refa32b/ovasCDriverTMSiRefa32B.h"
@@ -175,6 +176,10 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 #if defined(TARGET_HAS_ThirdPartyMicromed)
 	m_vDriver.push_back(new CDriverMicromedSystemPlusEvolution(m_pAcquisitionServer->getDriverContext()));
 #endif
+#if defined(TARGET_HAS_ThirdPartyNeuroServo)
+	m_vDriver.push_back(new CDriverNeuroServoHid(m_pAcquisitionServer->getDriverContext()));
+#endif
+
 #if defined(TARGET_HAS_ThirdPartyNeXus)
 	m_vDriver.push_back(new CDriverMindMediaNeXus32B(m_pAcquisitionServer->getDriverContext()));
 	m_vDriver.push_back(new CDriverTMSiRefa32B(m_pAcquisitionServer->getDriverContext()));

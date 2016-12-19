@@ -7,6 +7,9 @@
 *
 */
 
+#if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyNeuroServo
+
 #include <iostream>
 
 #include "HidDevice.h"
@@ -390,3 +393,6 @@ void HidDevice::deviceOnDetached()
 	}
 }
 
+
+#endif
+#endif

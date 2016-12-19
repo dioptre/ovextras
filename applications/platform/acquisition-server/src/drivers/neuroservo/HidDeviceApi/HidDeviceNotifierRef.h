@@ -8,6 +8,7 @@
 */
 
 #if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyNeuroServo
 
 #pragma once
 
@@ -15,4 +16,6 @@
 
 // Register Device Notification method
 int registerNotification(HidDeviceNotifier* notifier);
+
+#endif
 #endif // TARGET_OS_Windows

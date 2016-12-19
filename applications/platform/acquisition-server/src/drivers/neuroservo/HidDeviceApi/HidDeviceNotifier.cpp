@@ -8,6 +8,7 @@
 */
 
 #if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyNeuroServo
 
 #include <windows.h>
 #include <stdio.h>
@@ -49,4 +50,7 @@ void HidDeviceNotifier::startRegistration()
 	std::thread notifierThread(registerNotification, this);
 	notifierThread.detach();
 }
+
+#endif
+
 #endif // TARGET_OS_Windows

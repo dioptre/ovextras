@@ -7,6 +7,7 @@
 */
 
 #if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyNeuroServo
 
 #include "ovasCConfigurationNeuroServoHid.h"
 
@@ -151,4 +152,6 @@ void CConfigurationNeuroServoHid::setRadioDeviceLightEnable(OpenViBE::boolean st
 {
 	m_bDeviceLightEnable = state;
 }
+
+#endif
 #endif // TARGET_OS_Windows

@@ -5,7 +5,9 @@
 * \date Wed Nov 23 00:24:00 2016
 *
 */
+
 #if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyNeuroServo
 
 #include "ovasCDriverNeuroServoHid.h"
 #include "ovasCConfigurationNeuroServoHid.h"
@@ -486,4 +488,6 @@ void CDriverNeuroServoHid::deviceShutdownAndLightConfiguration()
 		m_oHidDevice.writeToDevice(data, m_ui16DataSize);
 	}
 }
+
+#endif
 #endif // TARGET_OS_Windows

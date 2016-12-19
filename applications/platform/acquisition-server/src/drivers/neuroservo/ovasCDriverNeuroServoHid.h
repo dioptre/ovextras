@@ -8,7 +8,9 @@
 
 #ifndef __OpenViBE_AcquisitionServer_CDriverNeuroServoHid_H__
 #define __OpenViBE_AcquisitionServer_CDriverNeuroServoHid_H__
+
 #if defined TARGET_OS_Windows
+#if defined TARGET_HAS_ThirdPartyNeuroServo
 
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
@@ -125,5 +127,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bIsDeviceConnected;
 	};
 };
+
+#endif
 #endif // TARGET_OS_Windows
+
 #endif // __OpenViBE_AcquisitionServer_CDriverNeuroServoHid_H__
