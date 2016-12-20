@@ -13,7 +13,8 @@ SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_
 
 INCLUDE("FindOpenViBEContributions")
 
-FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl include/*.h)
+FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl include/*.h ${CMAKE_SOURCE_DIR}/contrib/common/contribAcquisitionServer.*)
+
 IF(PATH_OPENVIBE_CONTRIBUTIONS)
 	INCLUDE("${CMAKE_SOURCE_DIR}/contrib/common/contribAcquisitionServer.cmake")
 ENDIF(PATH_OPENVIBE_CONTRIBUTIONS)
@@ -54,6 +55,7 @@ INCLUDE("FindThirdPartyMCS")
 INCLUDE("FindThirdPartyMensiaAcquisition")
 INCLUDE("FindThirdPartyMicromed")
 INCLUDE("FindThirdPartyNeuroelectricsEnobio3G")
+INCLUDE("FindThirdPartyNeuroServoDeps")
 INCLUDE("FindThirdPartyThinkGearAPI")
 INCLUDE("FindThirdPartyTMSi")
 INCLUDE("FindThirdPartyUSBFirstAmpAPI")
