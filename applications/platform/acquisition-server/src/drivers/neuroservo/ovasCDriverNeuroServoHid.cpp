@@ -4,6 +4,8 @@
 * \author (NeuroServo)
 * \date Wed Nov 23 00:24:00 2016
 *
+* \note This driver will not compile with VS2010 due to missing HID library. Use VS2013.
+*
 */
 
 #if defined TARGET_OS_Windows
