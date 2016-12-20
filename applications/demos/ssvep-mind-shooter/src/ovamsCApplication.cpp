@@ -82,13 +82,13 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	Ogre::LogManager* l_poLogManager = new Ogre::LogManager();
 	(*m_poLogManager) << LogLevel_Info << "Log level: " << l_poConfigurationManager->expand("${Kernel_ConsoleLogLevel}") << "\n";
 	(*m_poLogManager) << LogLevel_Info << "Application will output Ogre console log : " << l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_LogToConsole}", false) << "\n";
-	CString l_sOgreLog = l_poConfigurationManager->expand("${Path_Log}") + "/openvibe-ssvep-mind-shooter-ogre.log";
+	CString l_sOgreLog = l_poConfigurationManager->expand("${SSVEP_UserDataFolder}/mind-shooter-[$core{date}-$core{time}]-ogre.log");
 	(*m_poLogManager) << LogLevel_Info << "Ogre log file : " << l_sOgreLog << "\n";
 	FS::Files::createParentPath(l_sOgreLog);
 	l_poLogManager->createLog(l_sOgreLog.toASCIIString(), true, l_poConfigurationManager->expandAsBoolean("${SSVEP_Ogre_LogToConsole}", false), false );
 
 	// Root creation
-	CString l_sOgreCfg = l_poConfigurationManager->expand("${Path_UserData}") + "/openvibe-ssvep-mind-shooter-ogre.cfg";
+	CString l_sOgreCfg = l_poConfigurationManager->expand("${SSVEP_MindShooterScenarioPath}") + "/appconf/mind-shooter-ogre.conf";
 	(*m_poLogManager) << LogLevel_Debug << "+ m_poRoot = new Ogre::Root(...)\n";
 	(*m_poLogManager) << LogLevel_Info << "Ogre cfg file : " << l_sOgreCfg << "\n";
 	m_poRoot = new Ogre::Root(l_oPluginsPath, l_sOgreCfg.toASCIIString(), l_sOgreLog.toASCIIString());
@@ -146,7 +146,8 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	m_poPainter = new CBasicPainter( this );
 
 	(*m_poLogManager) << LogLevel_Debug << "  * initializing CEGUI\n";
-	this->initCEGUI(l_poConfigurationManager->expand("${Path_Log}") + "/openvibe-ssvep-mind-shooter-cegui.log");
+	this->initCEGUI(l_poConfigurationManager->expand("${SSVEP_UserDataFolder}/mind-shooter-[$core{date}-$core{time}]-cegui.log"));
+
 	(*m_poLogManager) << LogLevel_Debug << "  * CEGUI initialized\n";
 
 	// create the vector of stimulation frequencies
@@ -253,13 +254,29 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 		return false;
 	}
 
+	m_oStimulusSender.connect("localhost", "15361");
+
 	return true;
+}
+
+// Set hard-coded parameters, VSync in particular, for all known render systems
+void CApplication::setOgreParameters(void)
+{
+	const OpenViBE::boolean l_bFullScreen = m_poKernelContext->getConfigurationManager().expandAsBoolean("${SSVEP_Ogre_FullScreen}", false);
+	const Ogre::RenderSystemList& l_oList = m_poRoot->getAvailableRenderers();
+	for (size_t i = 0; i < l_oList.size(); i++)
+	{
+		l_oList[i]->setConfigOption("VSync", "Yes");
+		l_oList[i]->setConfigOption("Full Screen", (l_bFullScreen ? "Yes" : "No"));
+	}
 }
 
 bool CApplication::configure()
 {
 	if(! m_poRoot->restoreConfig())
 	{
+		setOgreParameters();
+
 		if( ! m_poRoot->showConfigDialog() )
 		{
 			(*m_poLogManager) << LogLevel_Error << "No configuration created from the dialog window.\n";
@@ -267,9 +284,12 @@ bool CApplication::configure()
 		}
 	}
 
-	// Set hard-coded parameters, VSync in particular
-	m_poRoot->getRenderSystem()->setConfigOption("VSync", "True");
-
+	// Override 'unsuitable' user choices
+	(*m_poLogManager) << LogLevel_Info << "Forcing vsync and using fullscreen settings from configuration scenario.\n";
+	setOgreParameters();
+	
+	// Save the config again after we have forced the params, otherwise the conf file looks misleading
+	m_poRoot->saveConfig();
 
 	return true;
 }

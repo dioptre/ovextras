@@ -79,10 +79,11 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 		}
 	}
 
+	// @fixme allow more limited log levels!
 	poKernelContext->getLogManager().activate(LogLevel_First, LogLevel_Last, true);
 
 	ILogListener* l_poLogListenerFileBuffered = new CLogListenerFileBuffered(*poKernelContext, "ssvep-mind-shooter-stimulator",
-															 l_poConfigurationManager->expand("${SSVEP_UserDataFolder}/log-[$core{date}-$core{time}].log"));
+															 l_poConfigurationManager->expand("${SSVEP_UserDataFolder}/mind-shooter-[$core{date}-$core{time}]-app.log"));
 	poKernelContext->getLogManager().addListener(l_poLogListenerFileBuffered);
 
 
@@ -91,7 +92,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	std::stringstream l_sEnemyOrder;
 	l_sEnemyOrder << l_poConfigurationManager->expand("${SSVEP_EnemyOrder}");
 
-	(*m_poLogManager) << LogLevel_Info << "Enemy order: " << l_poConfigurationManager->expand("${SSVEP_EnemyOrder}");
+	(*m_poLogManager) << LogLevel_Info << "Enemy order: " << l_poConfigurationManager->expand("${SSVEP_EnemyOrder}") << "\n";
 
 	while (l_sEnemyOrder.peek() != EOF)
 	{
@@ -264,10 +265,18 @@ bool CImpactApplication::enemyDestroyed(CImpactEnemyShip* es)
 
 void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
 {
+	if (iChannelCount != 4)
+	{
+		this->getLogManager() << LogLevel_Error << "Incorrect analog VRPN input with " << iChannelCount << " channels. Mind Shooter needs 4 channels.\n";
+		return;
+	}
+
+	// We only use the predictions of the 3 channels related to the flickering targets (channel 4 == 'focus on the middle of the ship')
 	const int l_iNChannels = 3;
-	static int l_iSkipControl = 0;
 	static int l_vPreviousLevels[l_iNChannels] = { 0, 0, 0 };
 
+	/*
+	static int l_iSkipControl = 0;
 	if (l_iSkipControl < 2)
 	{
 		l_iSkipControl++;
@@ -277,34 +286,14 @@ void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
 	{
 		l_iSkipControl = 0;
 	}
+	*/
 
 	double l_vFeedback[l_iNChannels];
-	if (iChannelCount == 6)
-	{
-		// Assume input is layered like [prob1pos,prob1neg,prob2pos,prob2neg,prob3pos,prob3neg] as is the
-		// the case when multiple probability vectors have been pooled together from different 2 class classifiers; 
-		// They are assumed to be on the same scale.
-		l_vFeedback[0] = pChannel[0];
-		l_vFeedback[1] = pChannel[2];
-		l_vFeedback[2] = pChannel[4];
-	}
-#ifdef FUTURE_SHOOTER
-	// When the shooter is used with a true multiclass classifier, switch to the following
-	else if (iChannelCount == 3)
-	{
-		// Assume input is layered like [prob1,prob2,prob3]
-		l_vFeedback[0] = pChannel[0];
-		l_vFeedback[1] = pChannel[1];
-		l_vFeedback[2] = pChannel[2];
-	}
-#endif
-	else
-	{
-		this->getLogManager() << LogLevel_Error << "Incorrect analog VRPN input with " << iChannelCount << " channels. Need 3x2=6 channels. This will not work.\n";
-		l_vFeedback[0] = 0;
-		l_vFeedback[1] = 0;
-		l_vFeedback[2] = 0;
-	}
+
+	// Assume input is layered like [prob1,prob2,prob3,prob4]. Last ignored.
+	l_vFeedback[0] = pChannel[0];
+	l_vFeedback[1] = pChannel[1];
+	l_vFeedback[2] = pChannel[2];
 
 	if (m_poAdvancedControl != NULL)
 	{
@@ -498,24 +487,28 @@ void CImpactApplication::addTarget(OpenViBE::uint32 ui32TargetPosition)
 			l_fTextSize = 0.35f;
 			// m_poInstructionWindow->setText("Regardez au milieu (MIDDLE) du vaisseau!");
 			m_poInstructionWindow->setText("Focus on the MIDDLE of the ship");
+			this->m_oStimulusSender.sendStimulation(OVTK_StimulationId_Label_00);
 			break;
 
 		case 1:
 			l_fTextSize = 0.35f;
 			// m_poInstructionWindow->setText("Regardez le CANON (CANNON) du vaisseau pour tirer!");
 			m_poInstructionWindow->setText("Focus on the CANNON to fire!");
+			this->m_oStimulusSender.sendStimulation(OVTK_StimulationId_Label_01);
 			break;
 
 		case 2:
 			l_fTextSize = 0.50f;
 			// m_poInstructionWindow->setText("Regardez l'aile GAUCHE (LEFT WING) du vaisseau pour de`placer le vaisseau vers la gauche");
 			m_poInstructionWindow->setText("Focus on the LEFT WING to turn the ship to the left");
+			this->m_oStimulusSender.sendStimulation(OVTK_StimulationId_Label_02);
 			break;
 
 		case 3:
 			l_fTextSize = 0.50f;
 			// m_poInstructionWindow->setText("Regardez l'aile DROITE (RIGHT WING) du vaisseau pour de`placer le vaisseau vers la droite");
 			m_poInstructionWindow->setText("Focus on the RIGHT WING to turn the ship to the right");
+			this->m_oStimulusSender.sendStimulation(OVTK_StimulationId_Label_03);
 			break;
 		}
 

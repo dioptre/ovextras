@@ -121,7 +121,11 @@ int main(int argc, char** argv)
 					exit(3);
 				}
 
+				// This folder contains resources such as textures etc
 				l_poConfigurationManager->createConfigurationToken("SSVEP_MindShooterFolderName", "ssvep-mind-shooter");
+
+				// This folder is the runtime scenario path
+				l_poConfigurationManager->createConfigurationToken("SSVEP_MindShooterScenarioPath", l_sScenarioFolder);
 			}
 		}
 	}

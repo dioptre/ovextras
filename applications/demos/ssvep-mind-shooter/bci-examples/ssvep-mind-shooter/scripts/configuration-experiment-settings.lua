@@ -138,30 +138,27 @@ function process(box)
 
 		cfg_file:close()
 
-		box:log("Info", string.format(box:get_config("Writing file '${Player_ScenarioDirectory}/configuration/csp-spatial-filter-trainer-%db.cfg'"), i))
-
-		cfg_file = assert(io.open(string.format(box:get_config("${Player_ScenarioDirectory}/configuration/csp-spatial-filter-trainer-%db.cfg"), i), "w"))
-		cfg_file:write("<OpenViBE-SettingsOverride>\n")
-		cfg_file:write("	<SettingValue>OVTK_StimulationId_ExperimentStop</SettingValue>\n")
-		cfg_file:write(string.format(box:get_config("	<SettingValue>${Player_ScenarioDirectory}/classifiers/csp-%db</SettingValue>\n"), i))
-		cfg_file:write(string.format("	<SettingValue>%d</SettingValue>\n", csp_filter_order))
-		cfg_file:write("	<SettingValue></SettingValue>\n")
-		cfg_file:write("</OpenViBE-SettingsOverride>\n")
-		cfg_file:close()
-
-		box:log("Info", string.format(box:get_config("Writing file '${Player_ScenarioDirectory}/configuration/csp-spatial-filter-trainer-%dh1.cfg'"), i))
-
-		cfg_file = assert(io.open(string.format(box:get_config("${Player_ScenarioDirectory}/configuration/csp-spatial-filter-trainer-%dh1.cfg"), i), "w"))
-		cfg_file:write("<OpenViBE-SettingsOverride>\n")
-		cfg_file:write("	<SettingValue>OVTK_StimulationId_ExperimentStop</SettingValue>\n")
-		cfg_file:write(string.format(box:get_config("	<SettingValue>${Player_ScenarioDirectory}/classifiers/csp-%dh1</SettingValue>\n"), i))
-		cfg_file:write(string.format("	<SettingValue>%d</SettingValue>\n", csp_filter_order))
-		cfg_file:write("	<SettingValue></SettingValue>\n")
-		cfg_file:write("</OpenViBE-SettingsOverride>\n")
-		cfg_file:close()
 
 	end
 
+	-- create configuration file for CSP Trainer
+	cfg_filename = box:get_config("${Player_ScenarioDirectory}/configuration/regularized-csp-trainer.cfg")
+	
+	box:log("Info", "Writing file '" .. cfg_filename .. "'")
+
+	cfg_file = assert(io.open(cfg_filename, "w"))
+	cfg_file:write("<OpenViBE-SettingsOverride>\n")
+	cfg_file:write("	<SettingValue>OVTK_StimulationId_ExperimentStop</SettingValue>\n")
+	cfg_file:write("    <SettingValue>${Player_ScenarioDirectory}/classifiers/csp-filters.cfg</SettingValue>\n")
+	cfg_file:write(string.format("	<SettingValue>%d</SettingValue>\n", csp_filter_order))
+	cfg_file:write("    <SettingValue>false</SettingValue>\n")
+	cfg_file:write("    <SettingValue>Chunk average</SettingValue>\n")
+	cfg_file:write("    <SettingValue>true</SettingValue>\n")
+	cfg_file:write("    <SettingValue>0.0</SettingValue>\n")
+	cfg_file:write("    <SettingValue>0.0</SettingValue>\n")
+	cfg_file:write("</OpenViBE-SettingsOverride>\n")
+	cfg_file:close()
+	
 	-- create configuration file for time based epoching
 	box:log("Info", box:get_config("Writing file '${Player_ScenarioDirectory}/configuration/time-based-epoching.cfg'"))
 
@@ -181,8 +178,6 @@ function process(box)
 	cfg_file:write("<SettingValue>false</SettingValue>\n")
 	cfg_file:write("</OpenViBE-SettingsOverride>\n")
 	cfg_file:close()
-	
-	box:log("Info", box:get_config("Writing file '${Player_ScenarioDirectory}/configuration/csp-filter.cfg'"))
 
 	-- notify the scenario that the configuration process is complete
 	box:send_stimulation(1, OVTK_StimulationId_TrainCompleted, box:get_current_time() + 0.2, 0)

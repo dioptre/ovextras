@@ -32,6 +32,8 @@ INCLUDE("FindThirdPartyOgre3D")
 INCLUDE("FindThirdPartyOgre3DTerrain")	# OGRE + OIS included, pulls boost thread
 INCLUDE("FindThirdPartyBoost")			# Using Ogre headers on Win32 causes dependency to Boost thread library
 INCLUDE("FindThirdPartyBoost_Thread")	# Note that this is a potential issue on Windows, as the dependencies/ogre/boost and dependencies/boost are not the same at the time of writing this.
+INCLUDE("FindThirdPartyBoost_System")   # Asio for TCP Tagging client
+
 
 # ---------------------------------
 # Finds standard library pthread

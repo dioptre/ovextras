@@ -31,10 +31,11 @@ function initialize(box)
 
 	cfg_file = io.open(box:get_config("${Player_ScenarioDirectory}/configuration/stimulation-based-epoching.cfg"), "w")
 
+	-- The delay is set to 0, as the token marks the start of the integration period, not the start of the trial.
 	cfg_file:write("<OpenViBE-SettingsOverride>\n")
 	cfg_file:write("	<SettingValue>", stimulation_duration, "</SettingValue>\n")
-	cfg_file:write("	<SettingValue>", flickering_delay, "</SettingValue>\n")
-	cfg_file:write("	<SettingValue>OVTK_StimulationId_Target</SettingValue>\n")
+	cfg_file:write("	<SettingValue>", 0, "</SettingValue>\n")
+	cfg_file:write("	<SettingValue>OVTK_StimulationId_VisualStimulationStart</SettingValue>\n")
 	cfg_file:write("</OpenViBE-SettingsOverride>\n")
 
 	cfg_file:close()
