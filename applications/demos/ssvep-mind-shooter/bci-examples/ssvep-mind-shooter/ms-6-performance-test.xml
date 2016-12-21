@@ -1833,8 +1833,8 @@
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
-					<DefaultValue></DefaultValue>
-					<Value>E:/jl/wip/jussi-mind-shooter/signals/ssvep-record-current.ov</Value>
+					<DefaultValue>Will-be-overridden</DefaultValue>
+					<Value>Will-be-overriden</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>

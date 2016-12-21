@@ -191,6 +191,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 
 		if (l_poConfigurationManager->expandAsBoolean("${SSVEP_AdvancedControl}"))
 		{
+			(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandAdvancedControl(...))\n";
 			m_poAdvancedControl = new CAdvancedControl( this );
 		}
 		else
@@ -271,7 +272,12 @@ void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
 		return;
 	}
 
-	// We only use the predictions of the 3 channels related to the flickering targets (channel 4 == 'focus on the middle of the ship')
+	// We only use the predictions of the 3 channels related to the flickering targets.
+	// The class coding is assumed as follows, 
+	//  0 == 'focus on the middle of the ship')
+	//  1 == focus tip
+	//  2 == focus left
+	//  3 == focus right
 	const int l_iNChannels = 3;
 	static int l_vPreviousLevels[l_iNChannels] = { 0, 0, 0 };
 
@@ -290,10 +296,10 @@ void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
 
 	double l_vFeedback[l_iNChannels];
 
-	// Assume input is layered like [prob1,prob2,prob3,prob4]. Last ignored.
-	l_vFeedback[0] = pChannel[0];
-	l_vFeedback[1] = pChannel[1];
-	l_vFeedback[2] = pChannel[2];
+	// Assume input is layered like [prob1,prob2,prob3,prob4]. First ignored (middle of ship).
+	l_vFeedback[0] = pChannel[1];
+	l_vFeedback[1] = pChannel[2];
+	l_vFeedback[2] = pChannel[3];
 
 	if (m_poAdvancedControl != NULL)
 	{
