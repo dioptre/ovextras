@@ -2758,7 +2758,9 @@ Note that if you use the same file for training
 and testing, the results are likely very optimistic.
 
 n.b. The scenario does not test the numeric 
-probability outputs that actually drive the Mind Shooter.</Text>
+probability outputs that drive the Mind Shooter
+in the analog control mode. Only discrete 
+control is tested.</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>

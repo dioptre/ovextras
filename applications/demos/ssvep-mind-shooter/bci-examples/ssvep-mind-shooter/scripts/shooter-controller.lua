@@ -9,7 +9,9 @@ function initialize(box)
 	s_pilot_assist = box:get_setting(5)
 	s_feedback = box:get_setting(6)
 	s_onebyone = box:get_setting(7)
-
+	s_analog_control = box:get_setting(8)
+	s_log_level = box:get_setting(9)
+	
 	box:log("Info", string.format("Target Types Sequence : [%s]\n", s_sequence_types))
 
 	for target in s_sequence_positions:gmatch("%d+") do
@@ -17,13 +19,16 @@ function initialize(box)
 	end
 	
 	-- create the configuration file for the shooter application
-	cfg_file = io.open(box:get_config("${Player_ScenarioDirectory}/appconf/impact-configuration.conf"), "w")
+	cfg_file = io.open(box:get_config("${Player_ScenarioDirectory}/appconf/shooter-configuration.conf"), "w")
 
 	cfg_file:write("SSVEP_EnemyOrder = ", s_sequence_types, "\n")
 	cfg_file:write("SSVEP_TargetLockdown = ", s_target_lockdown, "\n")
 	cfg_file:write("SSVEP_PilotAssist = ", s_pilot_assist, "\n")
 	cfg_file:write("SSVEP_Feedback = ", s_feedback, "\n")
 	cfg_file:write("SSVEP_OneByOne = ", s_onebyone, "\n")
+	cfg_file:write("SSVEP_AnalogControl = ", s_analog_control, "\n")
+	cfg_file:write("SSVEP_LogLevel = ", s_log_level, "\n")
+	
 	cfg_file:close()
 end
 

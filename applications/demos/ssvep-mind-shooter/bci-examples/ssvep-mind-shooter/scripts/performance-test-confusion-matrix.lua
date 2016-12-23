@@ -2,7 +2,7 @@ classes = nil
 
 current_target = nil
 start_time = 0;
-stop_time = 0;
+stop_time = -1;
 
 do_debug = false;
 
@@ -28,22 +28,27 @@ function uninitialize(box)
 	for j = 1, classes do
 		
 		output = string.format("Target %d : ", j - 1)
+		inClass = 0
 		
 		for i = 1, classes do
-			output = output .. string.format("%d : %3d, ", i - 1, score[j][i])
+			inClass = inClass + score[j][i]
+		end
 
-			if j ~= 1 and i == 1 then
+		for i = 1, classes do
+			output = output .. string.format("%d : %5.1f%%, ", i - 1, 100*score[j][i]/inClass)
+
+			if i == j then
+				correct = correct + score[j][i]	
+			else
 				incorrect = incorrect + score[j][i]
-			elseif i == j then
-				correct = correct + score[j][i]
 			end
 		end
 
-		box:log("Info", string.format("%s", output))
+		box:log("Info", string.format("%s total %d", output, inClass))
 	end
 
-	box:log("Info", string.format("Correct   %4d -> %f2.1%%", correct, 100*correct/(correct+incorrect)))
-	box:log("Info", string.format("Incorrect %4d -> %f2.1%%", incorrect, 100*incorrect/(correct+incorrect)))
+	box:log("Info", string.format("Correct   %4d -> %5.1f%%", correct, 100*correct/(correct+incorrect)))
+	box:log("Info", string.format("Incorrect %4d -> %5.1f%%", incorrect, 100*incorrect/(correct+incorrect)))
 
 end
 
@@ -67,7 +72,8 @@ function process(box)
 			elseif s_code == OVTK_StimulationId_VisualStimulationStart then
 				if do_debug then box:log("Info", "Trial started at " .. s_date) end
 				start_time = s_date
-				stop_time = s_date
+				-- We don't know the stop time yet, so for now accept anything in range [start_time, infty]
+				stop_time = -1 
 				
 			elseif s_code == OVTK_StimulationId_VisualStimulationStop then
 				if do_debug then box:log("Info", "Trial ended at " .. s_date) end
@@ -83,9 +89,9 @@ function process(box)
 			s_code, s_date, s_duration = box:get_stimulation(2, 1)
 			box:remove_stimulation(2, 1)
 
-			-- box:log("Info", string.format("Received prediction %d", s_code))
+			if do_debug then box:log("Info", string.format("Received prediction %d at ", s_code) .. s_date) end
 			
-			if s_date >= start_time and s_date < stop_time and (s_code >= OVTK_StimulationId_Label_00 and s_code <= OVTK_StimulationId_Label_1F) then
+			if s_date >= start_time and (stop_time < 0 or s_date < stop_time) and (s_code >= OVTK_StimulationId_Label_00 and s_code <= OVTK_StimulationId_Label_1F) then
 
 				if do_debug then box:log("Info", string.format("Accepted prediction %d at ", s_code) .. s_date) end
 

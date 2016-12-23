@@ -1,7 +1,7 @@
 /// Control ship movements with the keyboard
 
-#ifndef __OpenViBEApplication_CCommandImpactShipControlOIS_H__
-#define __OpenViBEApplication_CCommandImpactShipControlOIS_H__
+#ifndef __OpenViBEApplication_CCommandControlDiscreteOIS_H__
+#define __OpenViBEApplication_CCommandControlDiscreteOIS_H__
 
 #include <map>
 
@@ -11,11 +11,11 @@ namespace OpenViBESSVEPMindShooter
 {
 	class CImpactApplication;
 
-	class CCommandImpactShipControlOIS : public ICommandOIS
+	class CCommandControlDiscreteOIS : public ICommandOIS
 	{
 	public:
-		CCommandImpactShipControlOIS(CImpactApplication* poApplication);
-		~CCommandImpactShipControlOIS() {}
+		CCommandControlDiscreteOIS(CImpactApplication* poApplication);
+		~CCommandControlDiscreteOIS() {}
 
 		void processFrame();
 
@@ -31,4 +31,4 @@ namespace OpenViBESSVEPMindShooter
 }
 
 
-#endif // __OpenViBEApplication_CCommandImpactShipControlOIS_H__
+#endif // __OpenViBEApplication_CCommandControlDiscreteOIS_H__
