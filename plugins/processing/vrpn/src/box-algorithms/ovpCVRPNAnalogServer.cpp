@@ -34,6 +34,13 @@ boolean CVRPNAnalogServer::initialize()
 	IVRPNServerManager::getInstance().initialize();
 	IVRPNServerManager::getInstance().addServer(l_oServerName, m_oServerIdentifier);
 
+	// We don't know the analog count yet before we get a header, so set to zero.
+	// This convention will avoid client problems that misleadingly report 'no response from server'.
+	// The client should check that the channel amount is positive and use that as
+	// an indication of the box having received at least a proper header.
+	IVRPNServerManager::getInstance().setAnalogCount(m_oServerIdentifier, 0);
+	IVRPNServerManager::getInstance().reportAnalog(m_oServerIdentifier);
+
 	return true;
 }
 
@@ -58,6 +65,9 @@ boolean CVRPNAnalogServer::uninitialize()
 
 boolean CVRPNAnalogServer::processClock(IMessageClock& rMessageClock)
 {
+	// Note: This call doesn't seem to be necessary for VRPN sending the
+	// data with reportAnarog(). Its utility is likely in keeping the
+	// connection functional during periods with no data.
 	IVRPNServerManager::getInstance().process();
 	return true;
 }

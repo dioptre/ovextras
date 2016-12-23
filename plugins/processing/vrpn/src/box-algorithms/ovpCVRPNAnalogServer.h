@@ -19,7 +19,7 @@ namespace OpenViBEPlugins
 
 			CVRPNAnalogServer();
 			virtual void release(void) { delete this; }
-			virtual OpenViBE::uint64 getClockFrequency(void) { return 64LL<<32; }
+			virtual OpenViBE::uint64 getClockFrequency(void) { return 64LL<<32; } // 64hz
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
 			virtual OpenViBE::boolean processClock(OpenViBE::Kernel::IMessageClock& rMessageClock);
