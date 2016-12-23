@@ -66,7 +66,7 @@ boolean CBoxAlgorithmLSLExport::uninitialize(void)
 
 	if(m_pSingleSampleBuffer)
 	{
-		delete m_pSingleSampleBuffer;
+		delete[] m_pSingleSampleBuffer;
 		m_pSingleSampleBuffer = NULL;
 	}
 
@@ -98,6 +98,10 @@ boolean CBoxAlgorithmLSLExport::process(void)
 			const uint32 l_ui32SamplesPerBlock = m_oSignalDecoder.getOutputMatrix()->getDimensionSize(1);
 			const uint32 l_ui32Frequency = static_cast<uint32>(m_oSignalDecoder.getOutputSamplingRate());
 
+			if (m_pSingleSampleBuffer)
+			{
+				delete[] m_pSingleSampleBuffer;
+			}
 			m_pSingleSampleBuffer = new float[l_ui32ChannelCount];
 
 			// Open a signal stream 
