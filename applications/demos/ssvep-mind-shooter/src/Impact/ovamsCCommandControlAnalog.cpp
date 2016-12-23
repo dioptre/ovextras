@@ -23,31 +23,59 @@ CCommandControlAnalog::CCommandControlAnalog(CImpactApplication* poApplication, 
 
 void CCommandControlAnalog::execute(int iChannelCount, double* pChannel)
 {
+
 	CImpactApplication* l_poImpactApplication = dynamic_cast<CImpactApplication*>(m_poApplication);
 
-	if (iChannelCount != 4)
-	{
-		l_poImpactApplication->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Incorrect analog VRPN input with " << iChannelCount << " channels. Mind Shooter needs 4 channels.\n";
-		return;
-	}
-	
-	/*
-	std::cout << "Probs " << pChannel[0] << " "
-		<< pChannel[1] << " "
-		<< pChannel[2] << " "
-		<< pChannel[3] << "\n";
-	*/
 
-	// We only use the predictions of the 3 channels related to the flickering targets.
-	// The class coding is assumed as follows, 
-	//  0 == 'focus on the middle of the ship')
-	//  1 == focus tip
-	//  2 == focus left
-	//  3 == focus right
+	// l_poImpactApplication->getLogManager() << OpenViBE::Kernel::LogLevel_Info << " Channel count is " << iChannelCount << "\n";
+
+	/*
+	std::cout << "Probs ";
+	for(uint32 i=0; i<iChannelCount; i++)
+	{
+		std::cout << " " << pChannel[i];
+	}
+	std::cout << "\n";
+	*/
 
 	if (m_bInControl)
 	{
-		commandeerShip(pChannel);
+		if (iChannelCount == 4)
+		{
+			// 'Modern'  multiclass Mind Shooter assumed
+			// The input class coding is assumed to contain the following probabilities, 
+			//  0 == 'focus on the middle of the ship')
+			//  1 == focus tip
+			//  2 == focus left
+			//  3 == focus right
+
+			commandeerShip(pChannel);
+		}
+		else if (iChannelCount == 6)
+		{
+			// 'Classic' Mind Shooter. The input class probabilities are assumed as follows [class1in,class1Out,class2In,class2Out,class3In,class3Out]
+			double pProbs[4];
+			pProbs[0] = 0;
+			pProbs[1] = pChannel[0];	
+			pProbs[2] = pChannel[2];   
+			pProbs[3] = pChannel[4];
+
+			const double pProbSum = pProbs[1] + pProbs[2] + pProbs[3];
+
+			if (pProbSum > 0)
+			{
+				pProbs[1] = pProbs[1] / pProbSum;
+				pProbs[2] = pProbs[2] / pProbSum;
+				pProbs[3] = pProbs[3] / pProbSum;
+			}
+			commandeerShip(pProbs);
+		}
+		else
+		{
+			l_poImpactApplication->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Incorrect analog VRPN input with " << iChannelCount << " channels. Mind Shooter needs 4 or 6 channels.\n";
+			return;
+		}
+
 	}
 
 	const int l_iNChannels = 3;

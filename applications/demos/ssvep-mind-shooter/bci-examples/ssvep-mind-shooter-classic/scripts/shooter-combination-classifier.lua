@@ -10,37 +10,35 @@ end
 
 function process(box)
 
-	local finished = false
+	while box:keep_processing() do
 
-	while not finished do
-
-		time = box:get_current_time()
-
-		while box:keep_processing() and box:get_stimulation_count(1) > 0 do
+		if box:get_stimulation_count(1) > 0 then
 
 			local decision = 0
-			local decided = false
-
+			local conflict = false
+			
 			-- check each input
 			for i = 1, class_count do
 				-- if the frequency is considered as stimulated
-				if (box:get_stimulation(i, 1) - OVTK_StimulationId_Label_00 == 1) then
-					if not decided then
-						decision = i
-						decided = true
-					else
-						decision = 0
+				stim_id = box:get_stimulation(i, 1)
+				-- box:log("Info", string.format("Received %d from %d", stim_id, i))	
+				if stim_id == OVTK_StimulationId_Label_01 then
+					if decision ~= 0 then
+						conflict = true
 					end
-
+					decision = i
 				end
 				box:remove_stimulation(i, 1)
 			end
 
-			if decision ~= 0 then
-				box:send_stimulation(1, OVTK_StimulationId_Label_00 + decision - 1, box:get_current_time() + 0.01, 0)
+			-- If several classifiers predict 'in class', predict no action class 0 instead.
+			if conflict then
+				decision = 0
 			end
-
+			
+			box:send_stimulation(1, OVTK_StimulationId_Label_00 + decision, box:get_current_time() + 0.01, 0)		
 		end
+		
 		box:sleep()
 	end
 end
