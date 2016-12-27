@@ -10,7 +10,7 @@
 #include <string>
 #include <algorithm>
 
-#include "../ovpCStimulusSender.h"
+#include <tcptagging/IStimulusSender.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -194,7 +194,7 @@ boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 	m_iSelectedRow=-1;
 	m_iSelectedColumn=-1;
 
-	m_pStimulusSender = new StimulusSender();
+	m_pStimulusSender = TCPTagging::createStimulusSender();
 
 	if(!m_pStimulusSender->connect("localhost", "15361"))
 	{

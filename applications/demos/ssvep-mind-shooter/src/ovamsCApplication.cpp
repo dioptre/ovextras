@@ -16,12 +16,15 @@ CApplication::CApplication(CString scenarioDir)
 	  m_bContinueRendering( true ),
 	  m_ui32CurrentFrame( 0 ),
 	  m_ui64CurrentTime( 0 ),
-	  m_roGUIRenderer( NULL )
+	  m_roGUIRenderer( NULL ),
+	  m_pStimulusSender(NULL)
 {
+	m_pStimulusSender = TCPTagging::createStimulusSender();
 }
 
 CApplication::~CApplication()
 {
+	delete m_pStimulusSender;
 
 	if (m_poPainter != NULL)
 	{
@@ -254,7 +257,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 		return false;
 	}
 
-	m_oStimulusSender.connect("localhost", "15361");
+	m_pStimulusSender->connect("localhost", "15361");
 
 	return true;
 }

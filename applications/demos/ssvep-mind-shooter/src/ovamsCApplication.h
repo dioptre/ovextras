@@ -18,7 +18,7 @@
 #include "ovamsICommand.h"
 #include "ovamsCBasicPainter.h"
 
-#include "ovpCStimulusSender.h"
+#include <tcptagging/IStimulusSender.h>
 
 namespace OpenViBESSVEPMindShooter
 {
@@ -81,7 +81,7 @@ namespace OpenViBESSVEPMindShooter
 
 			OpenViBE::CString m_sScenarioDir;
 
-			OpenViBEPlugins::SimpleVisualisation::StimulusSender m_oStimulusSender;
+			TCPTagging::IStimulusSender* m_pStimulusSender;
 
 		protected:
 			OpenViBE::Kernel::IKernelContext* m_poKernelContext;

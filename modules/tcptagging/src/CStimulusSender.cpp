@@ -1,18 +1,17 @@
 
-#include "ovpCStimulusSender.h"
+#include "CStimulusSender.h"
 
 #include <iostream>
 #include <boost/array.hpp>
 #include <sys/timeb.h>
 
-using namespace OpenViBE;
-using namespace OpenViBEPlugins::SimpleVisualisation;
+using namespace TCPTagging;
 
 using boost::asio::ip::tcp;
 
-// @fixme we're using std::cout here and there as this component may be run out of a box process() scope where the LogManager is available...
+// @fixme Should use some logging facility instead of std::cout
 
-StimulusSender::~StimulusSender()
+CStimulusSender::~CStimulusSender()
 {
 	if(m_oStimulusSocket.is_open())
 	{
@@ -20,7 +19,7 @@ StimulusSender::~StimulusSender()
 	}
 }
 	
-boolean StimulusSender::connect(const char* sAddress, const char* sStimulusPort)
+boolean CStimulusSender::connect(const char* sAddress, const char* sStimulusPort)
 {
 	tcp::resolver resolver(m_ioService);
 			
@@ -50,15 +49,11 @@ boolean StimulusSender::connect(const char* sAddress, const char* sStimulusPort)
 	return true;
 }
 
-boolean StimulusSender::sendStimulation(uint64 ui64Stimulation) 
+boolean CStimulusSender::sendStimulation(uint64 ui64Stimulation, uint64 ui64Timestamp /* = 0 */) 
 {
 	if(!m_bConnectedOnce) {
 		return false;
 	}	
-
-	timeb time_buffer;
-	ftime(&time_buffer);
-	// const uint64 posixTime = time_buffer.time*1000ULL + time_buffer.millitm;
 
 	if(!m_oStimulusSocket.is_open())
 	{
@@ -66,17 +61,17 @@ boolean StimulusSender::sendStimulation(uint64 ui64Stimulation)
 		return false;
 	}
 
-	uint64 l_ui64tmp = 0;
+	uint64 l_ui64Zero = 0;
 	try
 	{
-		boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
+		boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64Zero, sizeof(uint64)));
 		boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&ui64Stimulation, sizeof(uint64)));
-		//boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&posixTime, sizeof(uint64)));
-		boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64tmp, sizeof(uint64)));
+		boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&ui64Timestamp, sizeof(uint64)));
 	} 
 	catch (boost::system::system_error l_oError) 
 	{
 		std::cout << "Issue '" << l_oError.code().message().c_str() << "' with writing stimulus to server\n";
+		return false;
 	}
 
 	return true;

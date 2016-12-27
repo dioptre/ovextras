@@ -404,28 +404,28 @@ void CImpactApplication::addTarget(OpenViBE::uint32 ui32TargetPosition)
 			l_fTextSize = 0.35f;
 			// m_poInstructionWindow->setText("Regardez au milieu (MIDDLE) du vaisseau!");
 			m_poInstructionWindow->setText("Focus on the MIDDLE of the ship");
-			this->m_oStimulusSender.sendStimulation(OVTK_StimulationId_Label_00);
+			this->m_pStimulusSender->sendStimulation(OVTK_StimulationId_Label_00);
 			break;
 
 		case 1:
 			l_fTextSize = 0.35f;
 			// m_poInstructionWindow->setText("Regardez le CANON (CANNON) du vaisseau pour tirer!");
 			m_poInstructionWindow->setText("Focus on the CANNON to fire!");
-			this->m_oStimulusSender.sendStimulation(OVTK_StimulationId_Label_01);
+			this->m_pStimulusSender->sendStimulation(OVTK_StimulationId_Label_01);
 			break;
 
 		case 2:
 			l_fTextSize = 0.50f;
 			// m_poInstructionWindow->setText("Regardez l'aile GAUCHE (LEFT WING) du vaisseau pour de`placer le vaisseau vers la gauche");
 			m_poInstructionWindow->setText("Focus on the LEFT WING to turn the ship to the left");
-			this->m_oStimulusSender.sendStimulation(OVTK_StimulationId_Label_02);
+			this->m_pStimulusSender->sendStimulation(OVTK_StimulationId_Label_02);
 			break;
 
 		case 3:
 			l_fTextSize = 0.50f;
 			// m_poInstructionWindow->setText("Regardez l'aile DROITE (RIGHT WING) du vaisseau pour de`placer le vaisseau vers la droite");
 			m_poInstructionWindow->setText("Focus on the RIGHT WING to turn the ship to the right");
-			this->m_oStimulusSender.sendStimulation(OVTK_StimulationId_Label_03);
+			this->m_pStimulusSender->sendStimulation(OVTK_StimulationId_Label_03);
 			break;
 		}
 

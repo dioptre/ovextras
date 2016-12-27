@@ -17,11 +17,15 @@
 #include <boost/thread/condition.hpp>
 #include <boost/version.hpp>
 
+namespace TCPTagging
+{
+	class IStimulusSender; // fwd declare
+};
+
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
 	{
-		class StimulusSender; // fwd declare
 
 		enum EArrowDirection
 		{
@@ -138,7 +142,7 @@ namespace OpenViBEPlugins
 			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
 			guint m_uiIdleFuncTag;
 			boost::mutex m_oIdleFuncMutex;
-			StimulusSender* m_pStimulusSender;
+			TCPTagging::IStimulusSender* m_pStimulusSender;
 
 			OpenViBE::uint64 m_ui64LastStimulation;
 		};

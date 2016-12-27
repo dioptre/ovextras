@@ -20,11 +20,16 @@
 #define OVP_ClassId_BoxAlgorithm_P300SpellerVisualisation     OpenViBE::CIdentifier(0x195E41D6, 0x6E684D47)
 #define OVP_ClassId_BoxAlgorithm_P300SpellerVisualisationDesc OpenViBE::CIdentifier(0x31DE2B0D, 0x028202E7)
 
+namespace TCPTagging
+{
+	class IStimulusSender; // fwd declare
+};
+
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
 	{
-		class StimulusSender; // fwd declare
+
 
 		class CBoxAlgorithmP300SpellerVisualisation : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
@@ -131,7 +136,7 @@ namespace OpenViBEPlugins
 			guint m_uiIdleFuncTag;
 			boost::mutex m_oIdleFuncMutex;
 
-			 OpenViBEPlugins::SimpleVisualisation::StimulusSender* m_pStimulusSender;
+			TCPTagging::IStimulusSender* m_pStimulusSender;
 		};
 
 		class CBoxAlgorithmP300SpellerVisualisationDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
