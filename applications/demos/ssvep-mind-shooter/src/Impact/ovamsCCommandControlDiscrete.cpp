@@ -4,6 +4,14 @@
 #include "ovamsCCommandControlDiscrete.h"
 #include "ovamsCImpactApplication.h"
 
+#include <CEGUI.h>
+#if !((CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8))
+namespace CEGUI
+{
+    typedef CEGUI::UVector2 USize;
+};
+#endif
+
 using namespace OpenViBESSVEPMindShooter;
 
 CCommandControlDiscrete::CCommandControlDiscrete(CImpactApplication* poApplication, OpenViBE::boolean bTakeControl)

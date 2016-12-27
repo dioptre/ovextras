@@ -7,6 +7,15 @@
 using namespace OpenViBE;
 using namespace OpenViBESSVEPMindShooter;
 
+#include <CEGUI.h>
+#if !((CEGUI_VERSION_MAJOR > 0) || (CEGUI_VERSION_MINOR >= 8))
+namespace CEGUI
+{
+    typedef CEGUI::UVector2 USize;
+};
+#endif
+
+
 CCommandControlAnalog::CCommandControlAnalog(CImpactApplication* poApplication, boolean bTakeControl) :
 	ICommandVRPNAnalog(poApplication, "SSVEP_VRPN_AnalogControl"), 
 	m_poApplication( poApplication ),
@@ -54,6 +63,7 @@ void CCommandControlAnalog::execute(int iChannelCount, double* pChannel)
 		else if (iChannelCount == 6)
 		{
 			// 'Classic' Mind Shooter. The input class probabilities are assumed as follows [class1in,class1Out,class2In,class2Out,class3In,class3Out]
+			// Note that with this control scheme, class 0 will never be selected.
 			double pProbs[4];
 			pProbs[0] = 0;
 			pProbs[1] = pChannel[0];	
@@ -169,7 +179,7 @@ void CCommandControlAnalog::commandeerShip(const double *pProbs)
 	m_vCommandStates[2] = 0;
 
 	// If true, a NOP classification (class 0) will never be selected
-	const boolean l_bIgnoreIdle = false;
+	// const boolean l_bIgnoreIdle = false;
 
 	// Find the strongest activation. 
 	uint32 l_ui32MaxIdx = 0;
