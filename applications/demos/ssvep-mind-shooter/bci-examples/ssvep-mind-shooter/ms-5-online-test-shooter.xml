@@ -4486,7 +4486,7 @@ classifier for BCI control of the Mind Shooter!</Text>
 	<Attributes>
 		<Attribute>
 			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>
-			<Value>Jozef Legeny</Value>
+			<Value>Jussi T. Lindgren, Jozef Legeny</Value>
 		</Attribute>
 		<Attribute>
 			<Identifier>(0x8c1fc55b, 0x7b433dc2)</Identifier>

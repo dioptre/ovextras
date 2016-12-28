@@ -44,7 +44,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Stimulation Frequencies</Name>
 					<DefaultValue>20;15;12</DefaultValue>
-					<Value>10;12;15</Value>
+					<Value>5.454545;6.6666;7.5</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -213,10 +213,6 @@
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
 					<Value>(0x00000000, 0x007b56c4)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xc67a01dc, 0x28ce06c1)</Identifier>
-					<Value></Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc80ce8af, 0xf699f813)</Identifier>
@@ -566,6 +562,23 @@ around the stimulation frequency used for classification.</Text>
 			</Attributes>
 		</Comment>
 		<Comment>
+			<Identifier>(0x0000288f, 0x00005f55)</Identifier>
+			<Text>&lt;b&gt;Welcome to the 'multiclass' SSVEP Mind Shooter&lt;/b&gt;
+
+Multiclass classifiers and CSP are used 
+by the signal processing pipelines.</Text>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
+					<Value>-160.000000</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
+					<Value>-192.000000</Value>
+				</Attribute>
+			</Attributes>
+		</Comment>
+		<Comment>
 			<Identifier>(0x000031b0, 0x00003fa0)</Identifier>
 			<Text>&lt;big&gt;&lt;b&gt;Scenario description&lt;/b&gt;&lt;/big&gt;
 
@@ -674,7 +687,7 @@ documentation page.</Text>
 	<Attributes>
 		<Attribute>
 			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>
-			<Value>Jozef Legeny</Value>
+			<Value>Jussi T. Lindgren, Jozef Legeny</Value>
 		</Attribute>
 		<Attribute>
 			<Identifier>(0x8c1fc55b, 0x7b433dc2)</Identifier>
