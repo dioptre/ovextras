@@ -13,11 +13,11 @@ using namespace OpenViBE::Kernel;
 
 CApplication::CApplication(CString scenarioDir)
 	: m_sScenarioDir(scenarioDir),
+	  m_pStimulusSender(NULL),
 	  m_bContinueRendering( true ),
 	  m_ui32CurrentFrame( 0 ),
 	  m_ui64CurrentTime( 0 ),
-	  m_roGUIRenderer( NULL ),
-	  m_pStimulusSender(NULL)
+	  m_roGUIRenderer( NULL )
 {
 	m_pStimulusSender = TCPTagging::createStimulusSender();
 }
