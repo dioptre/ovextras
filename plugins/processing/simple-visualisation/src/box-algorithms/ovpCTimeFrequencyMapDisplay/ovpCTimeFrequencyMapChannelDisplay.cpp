@@ -199,7 +199,9 @@ void CTimeFrequencyMapChannelDisplay::update()
 	gint l_iHeight = 0;
 	gdk_drawable_get_size(m_pDisplay->window, &l_iWidth, &l_iHeight);
 	float64 l_f64WidthPerPoint = 0;
-	if(m_rSpectrumDatabase.getMaxBufferCount() > 0)
+
+	// Testing for buffer time step computation avoids clearing too little in the beginning of the plot.
+	if (m_rSpectrumDatabase.isBufferTimeStepComputed() && m_rSpectrumDatabase.getMaxBufferCount() > 0)
 	{
 		l_f64WidthPerPoint = static_cast<float64>(l_iWidth) / static_cast<float64>(m_rSpectrumDatabase.getMaxBufferCount());
 	}
@@ -435,6 +437,7 @@ void CTimeFrequencyMapChannelDisplay::resizeRGBBuffer(uint32 ui32Width, uint32 u
 		delete[] m_pRGBBuffer;
 	}
 	m_pRGBBuffer = new guchar[m_ui32Rowstride*ui32Height];
+	memset(m_pRGBBuffer, 0xFF, sizeof(guchar)*m_ui32Rowstride*ui32Height);
 
 	m_ui32RGBBufferWidth=ui32Width;
 	m_ui32RGBBufferHeight=ui32Height;

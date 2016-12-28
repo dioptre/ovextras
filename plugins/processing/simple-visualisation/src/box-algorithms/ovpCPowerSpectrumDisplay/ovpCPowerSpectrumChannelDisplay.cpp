@@ -334,6 +334,7 @@ namespace OpenViBEPlugins
 				delete[] m_pRGBBuffer;
 			}
 			m_pRGBBuffer = new guchar[m_ui32Rowstride*ui32Height];
+			memset(m_pRGBBuffer, 0xFF, sizeof(guchar)*m_ui32Rowstride*ui32Height);
 
 			m_ui32RGBBufferWidth=ui32Width;
 			m_ui32RGBBufferHeight=ui32Height;
