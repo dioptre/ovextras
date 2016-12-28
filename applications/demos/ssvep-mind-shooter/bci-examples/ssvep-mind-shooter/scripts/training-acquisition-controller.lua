@@ -4,13 +4,7 @@ number_of_cycles = 0
 stimulation_duration = 7
 break_duration = 2
 flickering_delay = 3.5
-
-stimulationLabels = {
-	0x00008100,
-	0x00008101,
-	0x00008102,
-	0x00008103,
-}
+epoching_delay = 1
 
 function initialize(box)
 	dofile(box:get_config("${Path_Data}") .. "/plugins/stimulation/lua-stimulator-stim-codes.lua")
@@ -26,15 +20,22 @@ function initialize(box)
 	stimulation_duration = box:get_setting(3)
 	break_duration = box:get_setting(4)
 	flickering_delay = box:get_setting(5)
+	epoching_delay = box:get_setting(6)
 
 	box:log("Info", string.format("Number of goals in sequence: [%d]", number_of_cycles))
 
+	if stimulation_duration-epoching_delay <= 0 then
+		box:log("Error", "Stimulation duration - epoching delay is not greater than 0.")
+	end
+
+	-- These specify how long and with what offset data will be collected after the flicker start
+	-- for csp/classifier training. A positive epoching delay is to avoid the ERP effect due to stimulus onset 
 	cfg_file = io.open(box:get_config("${Player_ScenarioDirectory}/configuration/stimulation-based-epoching.cfg"), "w")
 
 	cfg_file:write("<OpenViBE-SettingsOverride>\n")
-	cfg_file:write("	<SettingValue>", stimulation_duration, "</SettingValue>\n")
-	cfg_file:write("	<SettingValue>", flickering_delay, "</SettingValue>\n")
-	cfg_file:write("	<SettingValue>OVTK_StimulationId_Target</SettingValue>\n")
+	cfg_file:write("	<SettingValue>", stimulation_duration-epoching_delay, "</SettingValue>\n")
+	cfg_file:write("	<SettingValue>", epoching_delay, "</SettingValue>\n")
+	cfg_file:write("	<SettingValue>OVTK_StimulationId_VisualStimulationStart</SettingValue>\n")
 	cfg_file:write("</OpenViBE-SettingsOverride>\n")
 
 	cfg_file:close()

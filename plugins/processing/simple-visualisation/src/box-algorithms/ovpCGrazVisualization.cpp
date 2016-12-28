@@ -29,7 +29,7 @@ using namespace std;
 
 #include <sys/timeb.h>
 
-#include "../ovpCStimulusSender.h"
+#include <tcptagging/IStimulusSender.h>
 
 //////////////////////////
 
@@ -329,7 +329,7 @@ namespace OpenViBEPlugins
 #endif
 			getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pDrawingArea);
 			
-			m_pStimulusSender = new StimulusSender();
+			m_pStimulusSender = TCPTagging::createStimulusSender();
 
 			if(!m_pStimulusSender->connect("localhost", "15361"))
 			{

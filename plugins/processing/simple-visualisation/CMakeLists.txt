@@ -22,9 +22,9 @@ INCLUDE("FindOpenViBECommon")
 INCLUDE("FindOpenViBEToolkit")
 INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleSystem")
+INCLUDE("FindOpenViBEModuleTCPTagging")
 INCLUDE("FindThirdPartyGTK")
 INCLUDE("FindThirdPartyBoost")          # need boost for erp plot
-INCLUDE("FindThirdPartyBoost_System")   # P300 visualizer ASIO part needs this
    
 # ---------------------------------
 # Target macros

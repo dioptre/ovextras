@@ -1,17 +1,17 @@
 
 #if defined(TARGET_HAS_ThirdPartyOgre3DTerrain)
 
-#include "ovamsCCommandImpactShipControlOIS.h"
+#include "ovamsCCommandControlDiscreteOIS.h"
 #include "ovamsCImpactApplication.h"
 
 using namespace OpenViBESSVEPMindShooter;
 
-CCommandImpactShipControlOIS::CCommandImpactShipControlOIS(CImpactApplication* poApplication)
+CCommandControlDiscreteOIS::CCommandControlDiscreteOIS(CImpactApplication* poApplication)
 	: ICommandOIS(poApplication)
 {
 }
 
-void CCommandImpactShipControlOIS::processFrame()
+void CCommandControlDiscreteOIS::processFrame()
 {
 	ICommandOIS::processFrame();
 
@@ -33,7 +33,7 @@ void CCommandImpactShipControlOIS::processFrame()
 	}
 }
 
-void CCommandImpactShipControlOIS::receiveKeyPressedEvent( const OIS::KeyCode oKey )
+void CCommandControlDiscreteOIS::receiveKeyPressedEvent( const OIS::KeyCode oKey )
 {
 	if (oKey == OIS::KC_UP)
 	{
@@ -56,7 +56,7 @@ void CCommandImpactShipControlOIS::receiveKeyPressedEvent( const OIS::KeyCode oK
 	}
 }
 
-void CCommandImpactShipControlOIS::receiveKeyReleasedEvent( const OIS::KeyCode oKey )
+void CCommandControlDiscreteOIS::receiveKeyReleasedEvent( const OIS::KeyCode oKey )
 {
 	if (oKey == OIS::KC_UP)
 	{

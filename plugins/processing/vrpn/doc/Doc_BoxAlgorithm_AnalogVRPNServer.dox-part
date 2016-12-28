@@ -74,6 +74,9 @@ __________________________________________________________________
  * Default \e VRPN connection port is \c 3883. But it may be possible that
  * you want to expose §OpenViBE§ on another port. This is not currently possible.
  *
+ * Note that if the box receives no input header or data, the clients
+ * will see a channel count of 0 until header has been processed by the box.
+ *
  * For \e buttons emulation, you way want to look at the
  * \ref Doc_BoxAlgorithm_ButtonVRPNServer documentation that does almost
  * the same as this box but transcoding stimulations to button states.

@@ -18,6 +18,8 @@
 #include "ovamsICommand.h"
 #include "ovamsCBasicPainter.h"
 
+#include <tcptagging/IStimulusSender.h>
+
 namespace OpenViBESSVEPMindShooter
 {
 	class CApplication : public Ogre::FrameListener, public Ogre::WindowEventListener
@@ -77,8 +79,10 @@ namespace OpenViBESSVEPMindShooter
 				return (*m_poLogManager);
 			}
 
-
 			OpenViBE::CString m_sScenarioDir;
+
+			TCPTagging::IStimulusSender* m_pStimulusSender;
+
 		protected:
 			OpenViBE::Kernel::IKernelContext* m_poKernelContext;
 			OpenViBE::Kernel::ILogManager* m_poLogManager;
@@ -113,9 +117,10 @@ namespace OpenViBESSVEPMindShooter
 
 			bool configure();
 			void setupResources();
-
-
+			
 		private:
+			void setOgreParameters(void);	// Set some render parameters
+
 			void initCEGUI(const char *logFilename);
 
 			Ogre::uint32 m_ui32WindowWidth;

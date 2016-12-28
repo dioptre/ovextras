@@ -10,13 +10,13 @@
 #include "../ovamsCCommandCamera.h"
 #include "ovamsCCommandImpactTargetControl.h"
 #include "ovamsCCommandImpactCustomTargetControl.h"
-#include "ovamsCCommandImpactShipControl.h"
-#include "ovamsCCommandImpactShipControlOIS.h"
-#include "ovamsCCommandFeedbackHandler.h"
+
+#include "ovamsCCommandControlAnalog.h"
+#include "ovamsCCommandControlDiscrete.h"
+#include "ovamsCCommandControlDiscreteOIS.h"
 
 #include "../log/ovkCLogListenerFileBuffered.h"
 
-#include "ovamsCAdvancedControl.h"
 
 #include <ctime>
 
@@ -45,7 +45,6 @@ CImpactApplication::CImpactApplication(CString sScenarioDir, CString sApplicatio
 	  m_sApplicationSubtype( sApplicationSubtype ),
 	  m_eGameState( BOOTING ),
 	  m_bActive(false),
-	  m_poAdvancedControl( NULL ),
 	  m_poStatusWindow( NULL ),
 	  m_poInstructionWindow( NULL ),
 	  m_ui32DialogHideDelay(0),
@@ -71,7 +70,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	if (m_sApplicationSubtype == CString("shooter"))
 	{
 		// A config file appended for the online session
-		const CString l_sConfigFile = m_sScenarioDir + "/appconf/impact-configuration.conf";
+		const CString l_sConfigFile = m_sScenarioDir + "/appconf/shooter-configuration.conf";
 		if (!l_poConfigurationManager->addConfigurationFromFile(l_sConfigFile))
 		{
 			this->getLogManager() << LogLevel_Error << "Unable to open [" << l_sConfigFile << "]. Has the shooter-controller.lua been run?\n";
@@ -79,10 +78,15 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 		}
 	}
 
-	poKernelContext->getLogManager().activate(LogLevel_First, LogLevel_Last, true);
+	const OpenViBE::uint64 l_ui64LogLevel = poKernelContext->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_LogLevel, l_poConfigurationManager->expand("${SSVEP_LogLevel}"));
+	this->getLogManager() << LogLevel_Info << "Parsed loglevel is " << l_ui64LogLevel << "\n";
+	if (l_ui64LogLevel != 0xffffffffffffffffLL)
+	{
+		poKernelContext->getLogManager().activate(OpenViBE::Kernel::ELogLevel(l_ui64LogLevel), LogLevel_Last, true);
+	}
 
 	ILogListener* l_poLogListenerFileBuffered = new CLogListenerFileBuffered(*poKernelContext, "ssvep-mind-shooter-stimulator",
-															 l_poConfigurationManager->expand("${SSVEP_UserDataFolder}/log-[$core{date}-$core{time}].log"));
+															 l_poConfigurationManager->expand("${SSVEP_UserDataFolder}/mind-shooter-[$core{date}-$core{time}]-app.log"));
 	poKernelContext->getLogManager().addListener(l_poLogListenerFileBuffered);
 
 
@@ -91,7 +95,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	std::stringstream l_sEnemyOrder;
 	l_sEnemyOrder << l_poConfigurationManager->expand("${SSVEP_EnemyOrder}");
 
-	(*m_poLogManager) << LogLevel_Info << "Enemy order: " << l_poConfigurationManager->expand("${SSVEP_EnemyOrder}");
+	(*m_poLogManager) << LogLevel_Info << "Enemy order: " << l_poConfigurationManager->expand("${SSVEP_EnemyOrder}") << "\n";
 
 	while (l_sEnemyOrder.peek() != EOF)
 	{
@@ -114,10 +118,6 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("SSVEPImpact");
 
 	setupScene();
-
-	m_pMaxFeedbackLevel[0] = 0.5;
-	m_pMaxFeedbackLevel[1] = 0.5;
-	m_pMaxFeedbackLevel[2] = 0.5;
 
 	// Create the StarShip object
 	(*m_poLogManager) << LogLevel_Debug << "+ m_poShip = new CStarShip(...)\n";
@@ -156,7 +156,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	this->addCommand(new CCommandCamera( this ));
 
 	(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandShipControlOIS(...))\n";
-	this->addCommand(new CCommandImpactShipControlOIS( this ));
+	this->addCommand(new CCommandControlDiscreteOIS( this ));
 #endif
 
 #ifndef NO_VRPN
@@ -174,7 +174,7 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 	}
 	else
 	{
-		if (l_poConfigurationManager->expandAsBoolean("${SSVEP_OneByOne}"))
+		if (l_poConfigurationManager->expandAsBoolean("${SSVEP_OneByOne}", false))
 		{
 			(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandTargetControl(...)\n";
 			this->addCommand(new CCommandImpactTargetControl( this ));
@@ -185,18 +185,15 @@ bool CImpactApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext
 			this->addCommand(new CCommandImpactCustomTargetControl( this ));
 		}
 
-		(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandFeedbackHandler(...)\n";
-		this->addCommand(new CCommandFeedbackHandler( this ));
+		const boolean l_bAnalogControls = l_poConfigurationManager->expandAsBoolean("${SSVEP_AnalogControl}", false);
+		
+		(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandControlAnalog(...))\n";
+		this->addCommand(new CCommandControlAnalog( this, l_bAnalogControls ));
 
-		if (l_poConfigurationManager->expandAsBoolean("${SSVEP_AdvancedControl}"))
-		{
-			m_poAdvancedControl = new CAdvancedControl( this );
-		}
-		else
-		{
-			(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandImpactShipControl(...))\n";
-			this->addCommand(new CCommandImpactShipControl( this ));
-		}
+		(*m_poLogManager) << LogLevel_Debug << "+ addCommand(new CCommandControlDiscrete(...))\n";
+		this->addCommand(new CCommandControlDiscrete( this, !l_bAnalogControls ));
+
+		(*m_poLogManager) << LogLevel_Info << "Analog control mode: " << (l_bAnalogControls ? "true" : "false") << "\n";
 	}
 #endif
 
@@ -262,98 +259,7 @@ bool CImpactApplication::enemyDestroyed(CImpactEnemyShip* es)
 	return es->isDestroyed();
 }
 
-void CImpactApplication::calculateFeedback(int iChannelCount, double *pChannel)
-{
-	const int l_iNChannels = 3;
-	static int l_iSkipControl = 0;
-	static int l_vPreviousLevels[l_iNChannels] = { 0, 0, 0 };
 
-	if (l_iSkipControl < 2)
-	{
-		l_iSkipControl++;
-		return;
-	}
-	else
-	{
-		l_iSkipControl = 0;
-	}
-
-	double l_vFeedback[l_iNChannels];
-	if (iChannelCount == 6)
-	{
-		// Assume input is layered like [prob1pos,prob1neg,prob2pos,prob2neg,prob3pos,prob3neg] as is the
-		// the case when multiple probability vectors have been pooled together from different 2 class classifiers; 
-		// They are assumed to be on the same scale.
-		l_vFeedback[0] = pChannel[0];
-		l_vFeedback[1] = pChannel[2];
-		l_vFeedback[2] = pChannel[4];
-	}
-#ifdef FUTURE_SHOOTER
-	// When the shooter is used with a true multiclass classifier, switch to the following
-	else if (iChannelCount == 3)
-	{
-		// Assume input is layered like [prob1,prob2,prob3]
-		l_vFeedback[0] = pChannel[0];
-		l_vFeedback[1] = pChannel[1];
-		l_vFeedback[2] = pChannel[2];
-	}
-#endif
-	else
-	{
-		this->getLogManager() << LogLevel_Error << "Incorrect analog VRPN input with " << iChannelCount << " channels. Need 3x2=6 channels. This will not work.\n";
-		l_vFeedback[0] = 0;
-		l_vFeedback[1] = 0;
-		l_vFeedback[2] = 0;
-	}
-
-	if (m_poAdvancedControl != NULL)
-	{
-		m_poAdvancedControl->processFrame(l_vFeedback[0], l_vFeedback[1], l_vFeedback[2]);
-	}
-
-	int l_vLevel[l_iNChannels];
-
-	//std::cout << "feedback: ";
-	for (int i = 0; i < l_iNChannels; i++)
-	{
-		if (l_vFeedback[i] > m_pMaxFeedbackLevel[i])
-		{
-			m_pMaxFeedbackLevel[i] += 0.1;
-		}
-
-		float64 l_f64CLevel = l_vFeedback[i] / m_pMaxFeedbackLevel[i];
-
-		//std::cout << cLevel << ", ";
-		l_vLevel[i] = 0;
-
-		if (l_f64CLevel < 0.7)
-		{
-			l_vLevel[i]++;
-		}
-		if (l_f64CLevel < 0.3)
-		{
-			l_vLevel[i]++;
-		}
-		if (l_f64CLevel <= 0.0)
-		{
-			l_vLevel[i]++;
-		}
-	}
-	//std::cout << "\n";
-
-
-	if (l_vLevel[0] != l_vPreviousLevels[0] || l_vLevel[1] != l_vPreviousLevels[1] || l_vLevel[2] != l_vPreviousLevels[2])
-	{
-		logPrefix() << "Feedback levels : " << l_vLevel[0] << " " << l_vLevel[1] << " " << l_vLevel[2] << "\n";
-
-		l_vPreviousLevels[0] = l_vLevel[0];
-		l_vPreviousLevels[1] = l_vLevel[1];
-		l_vPreviousLevels[2] = l_vLevel[2];
-
-		m_poShip->setFeedbackLevels(l_vLevel[0], l_vLevel[1], l_vLevel[2]);
-	}
-
-}
 
 void CImpactApplication::processFrame(OpenViBE::uint32 ui32CurrentFrame)
 {
@@ -498,24 +404,28 @@ void CImpactApplication::addTarget(OpenViBE::uint32 ui32TargetPosition)
 			l_fTextSize = 0.35f;
 			// m_poInstructionWindow->setText("Regardez au milieu (MIDDLE) du vaisseau!");
 			m_poInstructionWindow->setText("Focus on the MIDDLE of the ship");
+			this->m_pStimulusSender->sendStimulation(OVTK_StimulationId_Label_00);
 			break;
 
 		case 1:
 			l_fTextSize = 0.35f;
 			// m_poInstructionWindow->setText("Regardez le CANON (CANNON) du vaisseau pour tirer!");
 			m_poInstructionWindow->setText("Focus on the CANNON to fire!");
+			this->m_pStimulusSender->sendStimulation(OVTK_StimulationId_Label_01);
 			break;
 
 		case 2:
 			l_fTextSize = 0.50f;
 			// m_poInstructionWindow->setText("Regardez l'aile GAUCHE (LEFT WING) du vaisseau pour de`placer le vaisseau vers la gauche");
 			m_poInstructionWindow->setText("Focus on the LEFT WING to turn the ship to the left");
+			this->m_pStimulusSender->sendStimulation(OVTK_StimulationId_Label_02);
 			break;
 
 		case 3:
 			l_fTextSize = 0.50f;
 			// m_poInstructionWindow->setText("Regardez l'aile DROITE (RIGHT WING) du vaisseau pour de`placer le vaisseau vers la droite");
 			m_poInstructionWindow->setText("Focus on the RIGHT WING to turn the ship to the right");
+			this->m_pStimulusSender->sendStimulation(OVTK_StimulationId_Label_03);
 			break;
 		}
 

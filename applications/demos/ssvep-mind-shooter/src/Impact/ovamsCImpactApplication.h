@@ -15,8 +15,6 @@
 
 namespace OpenViBESSVEPMindShooter
 {
-	class CAdvancedControl;
-
 	class CImpactApplication : public CApplication
 	{
 		public:
@@ -65,13 +63,14 @@ namespace OpenViBESSVEPMindShooter
 			void insertEnemy( int ui32TargetPosition );
 			CImpactEnemyShip* m_poCurrentEnemy;
 			CImpactEnemyShip* getCurrentEnemy();
-			void calculateFeedback(int iChannelCount, double* channel);
 
 			bool m_bTargetRequest;
 			Ogre::Real m_rNextOrigin;
 			OpenViBE::CString getSubtype() { return m_sApplicationSubtype; }
 			GameState getState() { return m_eGameState; }
 			DotSceneLoader* getSceneLoader() { return m_poSceneLoader; }
+
+			CEGUI::Window* getInstructionWindow(void) { return m_poInstructionWindow; }
 
 		private:
 			void setupScene();
@@ -83,14 +82,12 @@ namespace OpenViBESSVEPMindShooter
 			GameState m_eGameState;
 
 			std::queue<int> m_oEnemyOrder;
-			OpenViBE::float64 m_pMaxFeedbackLevel[3];
+
 
 			bool m_bActive;
 
 			time_t m_ttStartTime;
 
-			CAdvancedControl* m_poAdvancedControl;
-			
 			void processFrame(OpenViBE::uint32 ui32CurrentFrame);
 
 			CEGUI::Window* m_poStatusWindow;
