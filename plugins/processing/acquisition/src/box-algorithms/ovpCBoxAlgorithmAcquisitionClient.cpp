@@ -17,7 +17,7 @@ uint64 CBoxAlgorithmAcquisitionClient::getClockFrequency(void)
 
 boolean CBoxAlgorithmAcquisitionClient::initialize(void)
 {
-	m_pAcquisitionStreamDecoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_AcquisitionStreamDecoder));
+	m_pAcquisitionStreamDecoder = &getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_AcquisitionStreamDecoder));
 
 	m_pAcquisitionStreamDecoder->initialize();
 
@@ -29,9 +29,16 @@ boolean CBoxAlgorithmAcquisitionClient::initialize(void)
 	op_pChannelLocalisationMemoryBuffer.initialize(m_pAcquisitionStreamDecoder->getOutputParameter(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputParameterId_ChannelLocalisationStream));
 	op_pChannelUnitsMemoryBuffer.initialize(m_pAcquisitionStreamDecoder->getOutputParameter(OVP_GD_Algorithm_AcquisitionStreamDecoder_OutputParameterId_ChannelUnitsStream));
 
-	m_ui64LastChunkStartTime=0;
-	m_ui64LastChunkEndTime=0;
-	m_pConnectionClient=NULL;
+	m_ui64LastChunkStartTime = 0;
+	m_ui64LastChunkEndTime = 0;
+	m_pConnectionClient = NULL;
+
+	IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+	if (l_rStaticBoxContext.getOutputCount() < 5)
+	{
+		this->getLogManager() << LogLevel_Error << "Code expects at least 5 box outputs. Did you update the box?\n";
+		return false;
+	}
 
 	return true;
 }
@@ -100,7 +107,6 @@ boolean CBoxAlgorithmAcquisitionClient::process(void)
 
 	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
-
 
 	op_pExperimentInformationMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
 	op_pSignalMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(1);
