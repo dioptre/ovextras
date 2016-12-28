@@ -117,6 +117,10 @@ Designer_ConsoleLogTimePrecision = 3
 #####################################################################################
 # OpenViBE application acquisition server configuration
 #####################################################################################
+AcquisitionServer_PluginsPatternLinux = ${Path_Lib}/libopenvibe-plugins-stream-codecs*.so
+AcquisitionServer_PluginsPatternWindows = ${Path_Bin}/openvibe-plugins-stream-codecs*.dll
+AcquisitionServer_Plugins = ${AcquisitionServer_PluginsPattern${OperatingSystem}}
+
 AcquisitionServer_ShowUnstable = true
 AcquisitionServer_HostName = localhost
 

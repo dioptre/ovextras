@@ -178,7 +178,7 @@ int main(int argc, char ** argv)
 
 				IConfigurationManager& l_rConfigurationManager=l_pKernelContext->getConfigurationManager();
 
-				l_pKernelContext->getPluginManager().addPluginsFromFiles(l_rConfigurationManager.expand("${Kernel_Plugins}"));
+				l_pKernelContext->getPluginManager().addPluginsFromFiles(l_rConfigurationManager.expand("${AcquisitionServer_Plugins}"));
 
 				std::map<std::string, std::string>::const_iterator itr;
 				for(itr=l_oConfiguration.m_oTokenMap.begin();
