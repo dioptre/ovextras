@@ -11,25 +11,28 @@
 # Adds library to target
 # Adds include path
 # ---------------------------------
+
+GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyActiCHampAPI)
+
 IF(WIN32)
 	FIND_PATH(PATH_ActiCHampAPI ActiChamp.h PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/sdk-brainproducts-actichamp)
 	IF(PATH_ActiCHampAPI)
-		MESSAGE(STATUS "  Found actiCHamp API...")
+		OV_PRINT(OV_PRINTED "  Found actiCHamp API...")
 		INCLUDE_DIRECTORIES(${PATH_ActiCHampAPI})
 
 		FIND_LIBRARY(LIB_ActiCHampAPI ActiChamp_x86 PATHS ${PATH_ActiCHampAPI} )
 		IF(LIB_ActiCHampAPI)
-			MESSAGE(STATUS "    [  OK  ] lib ${LIB_ActiCHampAPI}")
+			OV_PRINT(OV_PRINTED "    [  OK  ] lib ${LIB_ActiCHampAPI}")
 			TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_ActiCHampAPI} )
 		ELSE(LIB_ActiCHampAPI)
-			MESSAGE(STATUS "    [FAILED] lib actiCHamp")
+			OV_PRINT(OV_PRINTED "    [FAILED] lib actiCHamp")
 		ENDIF(LIB_ActiCHampAPI)
 
 		FIND_FILE(FIRMWARE_ActiCHampAPI ActiChamp.bit PATHS ${PATH_ActiCHampAPI} )
 		IF(FIRMWARE_ActiCHampAPI)
-			MESSAGE(STATUS "    [  OK  ] firmware ${FIRMWARE_ActiCHampAPI}")
+			OV_PRINT(OV_PRINTED "    [  OK  ] firmware ${FIRMWARE_ActiCHampAPI}")
 		ELSE(FIRMWARE_ActiCHampAPI)
-			MESSAGE(STATUS "    [FAILED] firmware actiCHamp")
+			OV_PRINT(OV_PRINTED "    [FAILED] firmware actiCHamp")
 		ENDIF(FIRMWARE_ActiCHampAPI)
 
 		# Copy the DLL file at install
@@ -40,6 +43,9 @@ IF(WIN32)
 		
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyActiCHampAPI)
 	ELSE(PATH_ActiCHampAPI)
-		MESSAGE(STATUS "  FAILED to find actiCHamp API (optional)")
+		OV_PRINT(OV_PRINTED "  FAILED to find actiCHamp API (optional)")
 	ENDIF(PATH_ActiCHampAPI)
 ENDIF(WIN32)
+
+SET_PROPERTY(GLOBAL PROPERTY OV_TRIED_ThirdPartyActiCHampAPI "Yes")
+

@@ -1,3 +1,6 @@
+
+GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyEemagineEEGO)
+
 # ---------------------------------
 # Finds the Eemagine EEGO API & library
 # Adds library to target
@@ -10,15 +13,15 @@ IF(WIN32)
 	
   	FIND_PATH(PATH_EEGOAPI amplifier.h PATHS ${EEGOAPI_DIR}/eemagine/sdk/)
 	IF(NOT PATH_EEGOAPI)
-		MESSAGE(STATUS "  FAILED to find EEGO API - cmake looked in '${EEGOAPI_DIR}/eemagine/sdk/', skipping EEGO.")
+		OV_PRINT(OV_PRINTED "  FAILED to find EEGO API - cmake looked in '${EEGOAPI_DIR}/eemagine/sdk/', skipping EEGO.")
 		RETURN()
 	ENDIF(NOT PATH_EEGOAPI)
 	
-	MESSAGE(STATUS "  Found EEGO API in ${PATH_EEGOAPI}...")
+	OV_PRINT(OV_PRINTED "  Found EEGO API in ${PATH_EEGOAPI}...")
 
 	FIND_FILE(LIB_EEGOAPI NAMES eego-SDK.dll PATHS ${EEGOAPI_DIR}/eemagine/bin/)
 	IF(NOT LIB_EEGOAPI)
-		MESSAGE(STATUS "    [FAILED] EEGO lib not found in ${EEGOAPI_DIR}/eemagine/bin/, skipping EEGO.")	
+		OV_PRINT(OV_PRINTED "    [FAILED] EEGO lib not found in ${EEGOAPI_DIR}/eemagine/bin/, skipping EEGO.")	
 		RETURN()
 	ENDIF(NOT LIB_EEGOAPI)
 	
@@ -27,8 +30,11 @@ IF(WIN32)
 	ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyEEGOAPI)	
 	ADD_DEFINITIONS(-DEEGO_SDK_BIND_DYNAMIC)
 	
-	MESSAGE(STATUS "    [  OK  ] lib ${LIB_EEGOAPI}")
+	OV_PRINT(OV_PRINTED "    [  OK  ] lib ${LIB_EEGOAPI}")
 
 ENDIF(WIN32)
 
+
+
+SET_PROPERTY(GLOBAL PROPERTY OV_TRIED_ThirdPartyEemagineEEGO "Yes")
 

@@ -5,6 +5,8 @@
 #
 # ---------
 
+GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyFFTW3)
+
 # On windows, we take the itpp one.
 
 IF(WIN32)
@@ -30,7 +32,7 @@ ENDIF(UNIX)
 
 IF(FFTW3_FOUND)
 	SET(FFTW3_LOCATED_LIBS "")
-	MESSAGE(STATUS "  Found fftw3 includes...")	
+	OV_PRINT(OV_PRINTED "  Found fftw3 includes...")	
 	FOREACH(FFTW3_LIB ${FFTW3_LIBRARIES})
 		SET(FFTW3_LIB1 "FFTW3_LIB1-NOTFOUND")
 		# The list is 'fftw3 m' on Fedora 19. CMake gets confused unless the two following lines are used ... 
@@ -39,10 +41,10 @@ IF(FFTW3_FOUND)
 		# 2) catch fftw3 from found paths, and libm from usual system paths, i.e. default path is allowed. (covers other systems + libm on fedora).
 		FIND_LIBRARY(FFTW3_LIB1 NAMES ${FFTW3_LIB} PATHS ${FFTW3_LIBRARY_DIRS})
 		IF(FFTW3_LIB1)
-			MESSAGE(STATUS "    [  OK  ] Third party lib ${FFTW3_LIB1}")
+			OV_PRINT(OV_PRINTED "    [  OK  ] Third party lib ${FFTW3_LIB1}")
 			LIST(APPEND FFTW3_LOCATED_LIBS ${FFTW3_LIB1})
 		ELSE(FFTW3_LIB1)
-			MESSAGE(STATUS "    [FAILED] Third party lib ${FFTW3_LIB}")
+			OV_PRINT(OV_PRINTED "    [FAILED] Third party lib ${FFTW3_LIB}")
 			SET(FFTW3_FOUND "-NOTFOUND")
 			BREAK()
 		ENDIF(FFTW3_LIB1)	
@@ -59,5 +61,8 @@ IF(FFTW3_FOUND)
 
 	ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyFFTW3)	
 ELSE(FFTW3_FOUND)
-	MESSAGE(STATUS "  FAILED to find fftw3...")
+	OV_PRINT(OV_PRINTED "  FAILED to find fftw3...")
 ENDIF(FFTW3_FOUND)
+
+SET_PROPERTY(GLOBAL PROPERTY OV_TRIED_ThirdPartyFFTW3 "Yes")
+

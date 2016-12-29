@@ -4,6 +4,8 @@
 # Adds include path
 # ---------------------------------
 
+GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyEmotivAPI)
+
 # Put the path to the Emotiv SDK followed by *
 FILE(GLOB PATH_Candidates
         "C:/Program Files/Emotiv Development Kit*"
@@ -16,7 +18,7 @@ FILE(GLOB PATH_Candidates
         #Put here the path to the directory where you installed the emotiv sdk
 )
 FOREACH(Candidate_folder ${PATH_Candidates})
-        # MESSAGE(STATUS "Found path ${PATH_Candidate}")
+        # OV_PRINT(OV_PRINTED "Found path ${PATH_Candidate}")
         #Version 1 of sdk
         LIST(APPEND PATH_Candidates ${Candidate_folder}/doc/examples/include)
         #Version 2 of sdk
@@ -28,7 +30,7 @@ ENDFOREACH(Candidate_folder ${PATH_Candidates})
 SET(PATH_EmotivAPI "-NOTFOUND")
 FIND_PATH(PATH_EmotivAPI1 edk.h PATHS ${PATH_Candidates} ${OV_CUSTOM_DEPENDENCIES_PATH})
 IF(PATH_EmotivAPI1)
-    MESSAGE(STATUS "  Found Emotiv Research API 1.x ...")
+    OV_PRINT(OV_PRINTED "  Found Emotiv Research API 1.x ...")
 	SET(OV_EMOTIV_VERSION "research-1")
 	SET(PATH_EmotivAPI ${PATH_EmotivAPI1})
 	SET(OV_EMOTIV_PATHS "${PATH_EmotivAPI}/../lib" "${PATH_EmotivAPI}/../../lib" "${PATH_EmotivAPI}/../../../lib")
@@ -36,7 +38,7 @@ ENDIF(PATH_EmotivAPI1)
 	
 FIND_PATH(PATH_EmotivAPI2 IEdk.h PATHS ${PATH_Candidates} ${OV_CUSTOM_DEPENDENCIES_PATH})
 IF(PATH_EmotivAPI2)
-    MESSAGE(STATUS "  Found Emotiv API 3.x ...")
+    OV_PRINT(OV_PRINTED "  Found Emotiv API 3.x ...")
 	SET(OV_EMOTIV_VERSION "community")
 	SET(PATH_EmotivAPI ${PATH_EmotivAPI2})	
 	SET(OV_EMOTIV_PATHS "${PATH_EmotivAPI}/../x86" "${PATH_EmotivAPI}/../../x86" "${PATH_EmotivAPI}/../../../x86")	
@@ -44,7 +46,7 @@ ENDIF(PATH_EmotivAPI2)
 	
 FIND_PATH(PATH_EmotivAPI3 IEegData.h PATHS ${PATH_Candidates} ${OV_CUSTOM_DEPENDENCIES_PATH})
 IF(PATH_EmotivAPI3)
-    MESSAGE(STATUS "  Found Emotiv Research API 3.x ...")
+    OV_PRINT(OV_PRINTED "  Found Emotiv Research API 3.x ...")
 	SET(OV_EMOTIV_VERSION "research-3")
 	SET(PATH_EmotivAPI ${PATH_EmotivAPI3})		
 	SET(OV_EMOTIV_PATHS "${PATH_EmotivAPI}/../x86" "${PATH_EmotivAPI}/../../x86" "${PATH_EmotivAPI}/../../../x86")
@@ -53,8 +55,8 @@ ENDIF(PATH_EmotivAPI3)
 IF(PATH_EmotivAPI)
     FIND_LIBRARY(LIB_EmotivAPI edk PATHS ${OV_EMOTIV_PATHS})
     IF(LIB_EmotivAPI)
-        MESSAGE(STATUS "    [  OK  ] api ${PATH_EmotivAPI}")
-        MESSAGE(STATUS "    [  OK  ] lib ${LIB_EmotivAPI}")
+        OV_PRINT(OV_PRINTED "    [  OK  ] api ${PATH_EmotivAPI}")
+        OV_PRINT(OV_PRINTED "    [  OK  ] lib ${LIB_EmotivAPI}")
 		INCLUDE_DIRECTORIES(${PATH_EmotivAPI})
         TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_EmotivAPI} )
 IF(WIN32)
@@ -73,9 +75,12 @@ ENDIF(WIN32)
 			ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyEmotivResearchAPI3x)		
 		ENDIF(${OV_EMOTIV_VERSION} STREQUAL "community")
 ELSE(LIB_EmotivAPI)
-    MESSAGE(STATUS "    [FAILED] lib Emotiv edk.lib")
+    OV_PRINT(OV_PRINTED "    [FAILED] lib Emotiv edk.lib")
 ENDIF(LIB_EmotivAPI)
 
 ELSE(PATH_EmotivAPI)
-        MESSAGE(STATUS "  FAILED to find Emotiv API (optional)")
+        OV_PRINT(OV_PRINTED "  FAILED to find Emotiv API (optional)")
 ENDIF(PATH_EmotivAPI)
+
+SET_PROPERTY(GLOBAL PROPERTY OV_TRIED_ThirdPartyEmotivAPI "Yes")
+

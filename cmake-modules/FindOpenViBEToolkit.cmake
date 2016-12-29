@@ -3,6 +3,9 @@
 # Adds library to target
 # Adds include path
 # ---------------------------------
+
+GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_OpenViBEToolkit)
+
 OPTION(DYNAMIC_LINK_OPENVIBE_TOOLKIT "Dynamically link openvibe-toolkit" ON)
 
 IF(DYNAMIC_LINK_OPENVIBE_TOOLKIT)
@@ -15,7 +18,7 @@ set(SRC_DIR ${OV_BASE_DIR}/toolkit/include)
 
 FIND_PATH(PATH_OPENVIBE_TOOLKIT toolkit/ovtk_all.h PATHS ${SRC_DIR} NO_DEFAULT_PATH)
 IF(PATH_OPENVIBE_TOOLKIT)
-	MESSAGE(STATUS "  Found openvibe-toolkit...")
+	OV_PRINT(OV_PRINTED "  Found openvibe-toolkit...")
 	INCLUDE_DIRECTORIES(${PATH_OPENVIBE_TOOLKIT}/)
 
         INCLUDE("FindOpenViBEModuleXML")
@@ -24,7 +27,10 @@ IF(PATH_OPENVIBE_TOOLKIT)
 
 	ADD_DEFINITIONS(-DTARGET_HAS_OpenViBEToolkit)
 ELSE(PATH_OPENVIBE_TOOLKIT)
-	MESSAGE(STATUS "  FAILED to find openvibe-toolkit...")
+	OV_PRINT(OV_PRINTED "  FAILED to find openvibe-toolkit...")
 ENDIF(PATH_OPENVIBE_TOOLKIT)
 
+
+
+SET_PROPERTY(GLOBAL PROPERTY OV_TRIED_OpenViBEToolkit "Yes")
 

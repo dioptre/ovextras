@@ -2,6 +2,8 @@
 # Finds Matlab toolkit
 # ---------------------------------
 
+GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyMatlab)
+
 # Clear cached variables, otherwise repeated builds lead to trouble
 SET(Matlab_EXECUTABLE "Matlab_EXECUTABLE-NOTFOUND")
 SET(Matlab_INCLUDE "Matlab_INCLUDE-NOTFOUND")
@@ -28,13 +30,13 @@ ENDIF(UNIX)
 
 # Figure out the paths to libs and includes
 IF(Matlab_EXECUTABLE)
-	# MESSAGE(STATUS "Have Matlab_EXECUTABLE ${Matlab_EXECUTABLE}")
+	# OV_PRINT(OV_PRINTED "Have Matlab_EXECUTABLE ${Matlab_EXECUTABLE}")
 	# Try relative to the executable path
 	GET_FILENAME_COMPONENT(Matlab_ROOT ${Matlab_EXECUTABLE} PATH)
 	IF(Matlab_ROOT)
-		# MESSAGE(STATUS "Have Matlab_ROOT ${Matlab_ROOT}")
+		# OV_PRINT(OV_PRINTED "Have Matlab_ROOT ${Matlab_ROOT}")
 		SET(Matlab_ROOT ${Matlab_ROOT}/../)
-		# MESSAGE(STATUS " -> ${Matlab_ROOT}")	
+		# OV_PRINT(OV_PRINTED " -> ${Matlab_ROOT}")	
 		FIND_PATH(Matlab_INCLUDE "mex.h" PATHS ${Matlab_ROOT}/extern/include ${Matlab_ROOT}/extern/include/extern)
 	ENDIF(Matlab_ROOT)
 
@@ -46,7 +48,7 @@ IF(Matlab_EXECUTABLE)
 	ENDIF((NOT Matlab_INCLUDE) AND UNIX)
 
 	IF(Matlab_INCLUDE)
-		# MESSAGE(STATUS "Have Matlab_INCLUDE ${Matlab_INCLUDE}")
+		# OV_PRINT(OV_PRINTED "Have Matlab_INCLUDE ${Matlab_INCLUDE}")
 		IF(UNIX)
 			SET(Matlab_LIBRARIES mex mx eng)
 			IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -69,7 +71,7 @@ IF(Matlab_EXECUTABLE)
 ENDIF(Matlab_EXECUTABLE)
 
 IF(Matlab_FOUND)
-	MESSAGE(STATUS "  Found Matlab in [${Matlab_ROOT}]")
+	OV_PRINT(OV_PRINTED "  Found Matlab in [${Matlab_ROOT}]")
 	SET(Matlab_LIB_FOUND TRUE)
 	INCLUDE_DIRECTORIES(${Matlab_INCLUDE})
 	
@@ -78,19 +80,22 @@ IF(Matlab_FOUND)
 		FIND_LIBRARY(Matlab_LIB1 NAMES ${Matlab_LIB} PATHS ${Matlab_LIB_DIRECTORIES} NO_DEFAULT_PATH)
 		FIND_LIBRARY(Matlab_LIB1 NAMES ${Matlab_LIB})
 		IF(Matlab_LIB1)
-			MESSAGE(STATUS "	[  OK  ] Third party lib ${Matlab_LIB1}")
+			OV_PRINT(OV_PRINTED "    [  OK  ] Third party lib ${Matlab_LIB1}")
 			TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Matlab_LIB1})
 		ELSE(Matlab_LIB1)
-			MESSAGE(STATUS "	[FAILED] Third party lib ${Matlab_LIB}")
+			OV_PRINT(OV_PRINTED "    [FAILED] Third party lib ${Matlab_LIB}")
 			SET(Matlab_LIB_FOUND FALSE)
 		ENDIF(Matlab_LIB1)
 	ENDFOREACH(Matlab_LIB)
 	IF(Matlab_LIB_FOUND)
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyMatlab)
 	ELSE(Matlab_LIB_FOUND)
-		MESSAGE(STATUS "  FAILED to find Matlab Libs, the plugins won't be built. Please ensure you have a valid MATLAB installation (32 bits only).")
+		OV_PRINT(OV_PRINTED "  FAILED to find Matlab Libs, the plugins won't be built. Please ensure you have a valid MATLAB installation (32 bits only).")
 	ENDIF(Matlab_LIB_FOUND)
 ELSE(Matlab_FOUND)
-	MESSAGE(STATUS "  FAILED to find Matlab...")
+	OV_PRINT(OV_PRINTED "  FAILED to find Matlab...")
 ENDIF(Matlab_FOUND)
+
+
+SET_PROPERTY(GLOBAL PROPERTY OV_TRIED_ThirdPartyMatlab "Yes")
 

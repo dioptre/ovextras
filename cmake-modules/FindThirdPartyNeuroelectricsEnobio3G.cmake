@@ -3,20 +3,23 @@
 # Adds library to target
 # Adds include path
 # ---------------------------------
+
+GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyNeuroelectricsEnobio3G)
+
 IF(WIN32)
 	SET(ENOBIOAPI_DIR ${OV_CUSTOM_DEPENDENCIES_PATH}/sdk-enobio3g/enobio3g)
 
   	FIND_PATH(PATH_ENOBIOAPI enobio3g.h PATHS ${ENOBIOAPI_DIR})
 	IF(NOT PATH_ENOBIOAPI)
-		MESSAGE(STATUS "  FAILED to find ENOBIO API - cmake looked in '${ENOBIOAPI_DIR}', skipping Enobio.")
+		OV_PRINT(OV_PRINTED "  FAILED to find ENOBIO API - cmake looked in '${ENOBIOAPI_DIR}', skipping Enobio.")
 		RETURN()
 	ENDIF(NOT PATH_ENOBIOAPI)
 	
-	MESSAGE(STATUS "  Found ENOBIO API...")
+	OV_PRINT(OV_PRINTED "  Found ENOBIO API...")
 
 	FIND_LIBRARY(LIB_ENOBIOAPI Enobio3GAPI PATHS ${PATH_ENOBIOAPI}/../MSVC/ )
 	IF(NOT LIB_ENOBIOAPI)
-		MESSAGE(STATUS "    [FAILED] Enobio libs not found, skipping Enobio.")	
+		OV_PRINT(OV_PRINTED "    [FAILED] Enobio libs not found, skipping Enobio.")	
 		RETURN()
 	ENDIF(NOT LIB_ENOBIOAPI)
 	
@@ -25,13 +28,13 @@ IF(WIN32)
 	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_ENOBIOAPI} )
 	ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyEnobioAPI)	
 			
-	MESSAGE(STATUS "    [  OK  ] lib ${LIB_ENOBIOAPI}")
+	OV_PRINT(OV_PRINTED "    [  OK  ] lib ${LIB_ENOBIOAPI}")
 
 ENDIF(WIN32)
 
 # For now, the Linux building of Enobio3G is disabled as it has not been tested with a recent Neuroelectrics lib.
 IF(UNIX)
-	MESSAGE(STATUS "  Skipped Enobio3G, its work in progress.")
+	OV_PRINT(OV_PRINTED "  Skipped Enobio3G, its work in progress.")
 	RETURN()
 ENDIF(UNIX)
 
@@ -41,29 +44,29 @@ IF(UNIX)
 	
 	FIND_PATH(PATH_ENOBIOAPI enobio3g.h PATHS $ENV{OpenViBE_dependencies} ${OV_BASE_DIR}/contrib/plugins/server-drivers/enobio3G/Enobio3GAPI.linux/)
 	IF(PATH_ENOBIOAPI)
-		MESSAGE(STATUS "  Found ENOBIO API...")
+		OV_PRINT(OV_PRINTED "  Found ENOBIO API...")
 		INCLUDE_DIRECTORIES(${PATH_ENOBIOAPI})
 		FIND_PATH(PATH_QTCORE_INCLUDE QtCore/QtCore ${QTCORE_INCLUDE_PREFIX})
 		IF(PATH_QTCORE_INCLUDE)
-		  MESSAGE(STATUS "    [  OK  ] QtCore include ${PATH_QTCORE_INCLUDE}/")
+		  OV_PRINT(OV_PRINTED "    [  OK  ] QtCore include ${PATH_QTCORE_INCLUDE}/")
 		  INCLUDE_DIRECTORIES(${PATH_QTCORE_INCLUDE}/)
 		ELSE(PATH_QTCORE_INCLUDE)
-		  MESSAGE(STATUS "    FAILED TO FIND QtCore include PATH")
+		  OV_PRINT(OV_PRINTED "    FAILED TO FIND QtCore include PATH")
 		ENDIF(PATH_QTCORE_INCLUDE)
 		FIND_LIBRARY(LIB_ENOBIOAPI Enobio3GAPI PATHS ${PATH_ENOBIOAPI}/libs/ )
 		IF(LIB_ENOBIOAPI)
-			MESSAGE(STATUS "    [  OK  ] lib ${LIB_ENOBIOAPI}")
+			OV_PRINT(OV_PRINTED "    [  OK  ] lib ${LIB_ENOBIOAPI}")
 			TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_ENOBIOAPI} )
 		ELSE(LIB_ENOBIOAPI)
-			MESSAGE(STATUS "    [FAILED] lib ENOBIO")
+			OV_PRINT(OV_PRINTED "    [FAILED] lib ENOBIO")
 		ENDIF(LIB_ENOBIOAPI)
 
 		FIND_LIBRARY(LIB_QT QtCore ${QTCORE_LIB_PREFIX})
 		IF(LIB_QT)
-		  MESSAGE(STATUS "    [  OK  ] lib ${LIB_QT}")
+		  OV_PRINT(OV_PRINTED "    [  OK  ] lib ${LIB_QT}")
 		  TARGET_LINK_LIBRARIES(${PROJECT_NAME} -L${LIB_QT} -lQtCore)
 		ELSE(LIB_QT)
-		  MESSAGE(STATUS "    [  FAILED  ] lib QT ${QTCORE_LIB_PREFIX}")
+		  OV_PRINT(OV_PRINTED "    [  FAILED  ] lib QT ${QTCORE_LIB_PREFIX}")
 		ENDIF(LIB_QT)
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyEnobioAPI)
 		
@@ -76,6 +79,9 @@ IF(UNIX)
 				COMMENT "      --->   Copying lib file ${LIB_ENOBIOAPI} for the Neuroelectrics Enobio driver."
 			VERBATIM)
 	ELSE(PATH_ENOBIOAPI)
-		MESSAGE(STATUS "  FAILED to find ENOBIO API - cmake looked in $ENV{OpenViBE_dependencies} and in ${OV_BASE_DIR}/contrib/plugins/server-drivers/enobio3G/Enobio3GAPI/")
+		OV_PRINT(OV_PRINTED "  FAILED to find ENOBIO API - cmake looked in $ENV{OpenViBE_dependencies} and in ${OV_BASE_DIR}/contrib/plugins/server-drivers/enobio3G/Enobio3GAPI/")
 	ENDIF(PATH_ENOBIOAPI)
 ENDIF(UNIX)
+
+SET_PROPERTY(GLOBAL PROPERTY OV_TRIED_ThirdPartyNeuroelectricsEnobio3G "Yes")
+

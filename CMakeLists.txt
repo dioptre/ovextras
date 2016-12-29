@@ -51,7 +51,7 @@ IF(WIN32)
 		DetermineVSServicePack( MSVC_SERVICE_PACK )
 	ELSE(${CMAKE_MAJOR_VERSION} LESS 3)
 		SET(MSVC_SERVICE_PACK "unknown")
-		MESSAGE(STATUS "st ${CMAKE_CXX_COMPILER_VERSION}")
+		# MESSAGE(STATUS "st ${CMAKE_CXX_COMPILER_VERSION}")
 		IF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "16.0.0")
 			SET(MSVC_SERVICE_PACK "vc100")	
 		ENDIF()			
@@ -166,6 +166,7 @@ SET(SKIP_DOCUMENTATION "1")
 #SET(SKIP_CONTRIB_APPLICATIONS "1")
 
 
+
 IF(UNIX)
 	# On Linux, the presence of matlab plugin .so can cause crashes in Simple DSP box as the two may use different versions of boost which are
 	# then wrongly exposed to the other party due to the dlopen() flag RTLD_GLOBAL. Unfortunately this flag is needed or the python plugin
@@ -209,6 +210,7 @@ SET_PROPERTY(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_RELWITHDEBINFO "TARGE
 INCLUDE("OvAddProjects")
 INCLUDE("OvInstallLaunchScript")
 INCLUDE("OvLinkBoostLib")
+INCLUDE("OvPrint")
 
 # Setup knowledge of GNU-style install path variables
 INCLUDE("GNUInstallDirs")
