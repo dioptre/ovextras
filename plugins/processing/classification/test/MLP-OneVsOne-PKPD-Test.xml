@@ -1203,7 +1203,7 @@
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
-					<TypeIdentifier>(0xf3fab4be, 0xdc401261)</TypeIdentifier>
+					<TypeIdentifier>(0x0dd51c74, 0x3c4e74c9)</TypeIdentifier>
 					<Name>Pairwise Decision Strategy</Name>
 					<DefaultValue>PKPD</DefaultValue>
 					<Value>PKPD</Value>
