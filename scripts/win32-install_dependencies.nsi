@@ -160,6 +160,10 @@ Section "Everything else"
 	
 	SetOutPath "$INSTDIR"
 
+	; Note that the dependencies package version number corresponds to the *first* openvibe 
+	; version that requires this package. Later openvibes may use it as well.
+	; OV 1.2.x -> dependencies-1.2.0
+	; OV 1.3.0 -> dependencies-1.2.0
 	IfFileExists "arch\ov-dependencies-1.2.0-$suffix-dev.zip" no_need_to_download_dependencies_dev
 	NSISdl::download http://openvibe.inria.fr/dependencies/win32/ov-dependencies-1.2.0-$suffix-dev.zip "arch\ov-dependencies-1.2.0-$suffix-dev.zip"
 	Pop $R0 ; Get the return value
