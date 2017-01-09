@@ -1,6 +1,4 @@
 
-// @todo for clarity, the StimulusSender related code blocks should be pushed inside the class and away from here
-
 #include "ovpCGrazVisualization.h"
 
 #include <cmath>
@@ -41,7 +39,7 @@ namespace OpenViBEPlugins
 		// after the rendering has completed.
 		gboolean flush_callback(gpointer pUserData)
 		{
-			((CGrazVisualization*)pUserData)->flushQueue();
+			reinterpret_cast<CGrazVisualization*>(pUserData)->flushQueue();
 	
 			return false;	// Only run once
 		}

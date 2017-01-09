@@ -8,6 +8,8 @@
   #include <unistd.h>
 #endif
 
+#include <tcptagging/IStimulusSender.h>
+
 using namespace OpenViBE;
 using namespace Plugins;
 using namespace Kernel;
@@ -19,10 +21,20 @@ using namespace OpenViBEToolkit;
 
 using namespace std;
 
+
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
 	{
+		// This callback flushes all accumulated stimulations to the TCP Tagging 
+		// after the rendering has completed.
+		gboolean DisplayCueImage_flush_callback(gpointer pUserData)
+		{
+			reinterpret_cast<CDisplayCueImage*>(pUserData)->flushQueue();
+
+			return false;	// Only run once
+		}
+
 		gboolean DisplayCueImage_SizeAllocateCallback(GtkWidget *widget, GtkAllocation *allocation, gpointer data)
 		{
 			reinterpret_cast<CDisplayCueImage*>(data)->resize((uint32)allocation->width, (uint32)allocation->height);
@@ -50,7 +62,8 @@ namespace OpenViBEPlugins
 			m_pImageNames(NULL),
 			m_bFullScreen(false),
 			m_ui64LastOutputChunkDate(-1),
-			m_bError(false)
+			m_bError(false),
+			m_pStimulusSender(NULL)
 		{
 			//m_pReader[0] = NULL;
 
@@ -68,6 +81,8 @@ namespace OpenViBEPlugins
 		boolean CDisplayCueImage::initialize()
 		{
 			m_bError=false;
+
+			m_pStimulusSender = NULL;
 
 			//>>>> Reading Settings:
 
@@ -141,6 +156,15 @@ namespace OpenViBEPlugins
 
 			getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pDrawingArea);
 
+			m_vStimuliQueue.clear();
+
+			m_pStimulusSender = TCPTagging::createStimulusSender();
+
+			if (!m_pStimulusSender->connect("localhost", "15361"))
+			{
+				this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
+			}
+
 			return true;
 		}
 
@@ -148,6 +172,11 @@ namespace OpenViBEPlugins
 		{
 			m_oStimulationDecoder.uninitialize();
 			m_oStimulationEncoder.uninitialize();
+
+			if (m_pStimulusSender)
+			{
+				delete m_pStimulusSender;
+			}
 
 			//destroy drawing area
 			if(m_pDrawingArea)
@@ -205,8 +234,8 @@ namespace OpenViBEPlugins
 			if(m_bImageDrawn)
 			{
 				// this is first redraw() for that image or clear screen
-				// we send a stimulation to signal it.
-
+				// we send a stimulation to signal it. 
+				// @note this practice is deprecated, the TCP Tagging should be used. We pass the stimulus here for compatibility.
 
 				if (m_int32DrawnImageID>=0)
 				{
@@ -367,6 +396,12 @@ namespace OpenViBEPlugins
 				}
 			}
 
+			// After any possible rendering, we flush the accumulated stimuli. The default idle func is low priority, so it should be run after rendering by gtk.
+			{
+				boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+				m_uiIdleFuncTag = g_idle_add(DisplayCueImage_flush_callback, this);
+			}
+
 			return true;
 		}
 
@@ -383,6 +418,14 @@ namespace OpenViBEPlugins
 				m_bImageRequested = false;
 				m_bImageDrawn = true;
 				m_int32DrawnImageID = m_int32RequestedImageID;
+
+				// Queue the stimulation to be sent to TCP Tagging
+				{
+					boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+
+					const uint64 l_ui64SentStimulation = (m_int32RequestedImageID >= 0 ? m_pStimulationsId[m_int32RequestedImageID] : m_ui64ClearScreenStimulation);
+					m_vStimuliQueue.push_back(l_ui64SentStimulation);
+				}
 			}
 		}
 
@@ -439,5 +482,20 @@ namespace OpenViBEPlugins
 				}
 			}
 		}
+
+		void CDisplayCueImage::flushQueue(void)
+		{
+			boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
+
+			for (size_t i = 0; i<m_vStimuliQueue.size(); i++)
+			{
+				m_pStimulusSender->sendStimulation(m_vStimuliQueue[i]);
+			}
+			m_vStimuliQueue.clear();
+
+			// This function will be automatically removed after completion, so set to 0
+			m_uiIdleFuncTag = 0;
+		}
+
 	};
 };
