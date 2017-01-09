@@ -43,7 +43,7 @@ IF(WIN32)
 		
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyActiCHampAPI)
 	ELSE(PATH_ActiCHampAPI)
-		OV_PRINT(OV_PRINTED "  FAILED to find actiCHamp API (optional)")
+		OV_PRINT(OV_PRINTED "  FAILED to find actiCHamp API (optional driver)")
 	ENDIF(PATH_ActiCHampAPI)
 ENDIF(WIN32)
 

@@ -27,7 +27,7 @@ IF(WIN32)
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyBioSemiAPI)
 	ELSE(PATH_BioSemiAPI)
-		OV_PRINT(OV_PRINTED "  FAILED to find BioSemi LabView API")
+		OV_PRINT(OV_PRINTED "  FAILED to find BioSemi LabView API (optional driver)")
 	ENDIF(PATH_BioSemiAPI)
 ENDIF(WIN32)
 

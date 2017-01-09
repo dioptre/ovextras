@@ -12,7 +12,7 @@ IF(PATH_MENSIA)
 	INSTALL(DIRECTORY "${PATH_MENSIA}/" DESTINATION "${CMAKE_INSTALL_FULL_BINDIR}/" FILES_MATCHING PATTERN "*.dll")
 	ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyMensiaAcquisition)
 ELSE(PATH_MENSIA)
-	OV_PRINT(OV_PRINTED "  FAILED to find Mensia Acquisition driver (optional)")
+	OV_PRINT(OV_PRINTED "  FAILED to find Mensia Acquisition driver (optional driver)")
 ENDIF(PATH_MENSIA)
 
 

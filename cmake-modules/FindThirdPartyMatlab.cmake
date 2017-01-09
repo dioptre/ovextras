@@ -93,7 +93,7 @@ IF(Matlab_FOUND)
 		OV_PRINT(OV_PRINTED "  FAILED to find Matlab Libs, the plugins won't be built. Please ensure you have a valid MATLAB installation (32 bits only).")
 	ENDIF(Matlab_LIB_FOUND)
 ELSE(Matlab_FOUND)
-	OV_PRINT(OV_PRINTED "  FAILED to find Matlab...")
+	OV_PRINT(OV_PRINTED "  FAILED to find Matlab (optional) ...")
 ENDIF(Matlab_FOUND)
 
 

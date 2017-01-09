@@ -31,7 +31,7 @@ IF(WIN32)
 		SET(OV_ThirdPartyGUSBAmp "YES")
 		 
 	ELSE(PATH_GUSBampCAPI)
-		OV_PRINT(OV_PRINTED "  FAILED to find gUSBampCAPI (optional)")
+		OV_PRINT(OV_PRINTED "  FAILED to find gUSBampCAPI (optional driver)")
 	ENDIF(PATH_GUSBampCAPI)
 ENDIF(WIN32)
 

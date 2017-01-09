@@ -24,7 +24,7 @@ IF(WIN32)
 		
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyUSBFirstAmpAPI)
 	ELSE(PATH_USBFirstAmpAPI)
-		OV_PRINT(OV_PRINTED "  FAILED to find FirstAmp API - cmake looked in 'C:/Program Files/FaSDK' and 'C:/Program Files (x86)/FaSDK'")
+		OV_PRINT(OV_PRINTED "  FAILED to find FirstAmp API (optional driver) - cmake looked in 'C:/Program Files/FaSDK' and 'C:/Program Files (x86)/FaSDK'")
 	ENDIF(PATH_USBFirstAmpAPI)
 ENDIF(WIN32)
 

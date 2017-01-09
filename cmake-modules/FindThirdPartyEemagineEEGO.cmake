@@ -13,7 +13,7 @@ IF(WIN32)
 	
   	FIND_PATH(PATH_EEGOAPI amplifier.h PATHS ${EEGOAPI_DIR}/eemagine/sdk/)
 	IF(NOT PATH_EEGOAPI)
-		OV_PRINT(OV_PRINTED "  FAILED to find EEGO API - cmake looked in '${EEGOAPI_DIR}/eemagine/sdk/', skipping EEGO.")
+		OV_PRINT(OV_PRINTED "  FAILED to find EEGO API (optional driver) - cmake looked in '${EEGOAPI_DIR}/eemagine/sdk/', skipping EEGO.")
 		RETURN()
 	ENDIF(NOT PATH_EEGOAPI)
 	

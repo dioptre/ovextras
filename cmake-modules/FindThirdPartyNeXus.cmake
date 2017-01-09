@@ -12,7 +12,7 @@ IF(PATH_NEXUS)
 	INSTALL(PROGRAMS "${PATH_NEXUS}/NeXusDll.dll" "${PATH_NEXUS}/RTInst.dll" DESTINATION "bin")
 	ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyNeXus)
 ELSE(PATH_NEXUS)
-	OV_PRINT(OV_PRINTED "  FAILED to find MindMedia NeXus device dll (optional)")
+	OV_PRINT(OV_PRINTED "  FAILED to find MindMedia NeXus device dll (optional driver)")
 ENDIF(PATH_NEXUS)
 
 SET_PROPERTY(GLOBAL PROPERTY OV_TRIED_ThirdPartyNeXus "Yes")

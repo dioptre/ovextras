@@ -31,7 +31,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 IF(UNIX)
-	# Prefert Python 2.7 supported by OV python-plugin
+	# Prefer Python 2.7 supported by OV python-plugin
 	SET(Python_ADDITIONAL_VERSIONS 2.7)
 	INCLUDE("FindPythonLibs")
 	IF(PYTHONLIBS_FOUND)
@@ -52,7 +52,7 @@ IF(UNIX)
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyPython)
 	ELSE(PYTHONLIBS_FOUND)
-		OV_PRINT(OV_PRINTED "  FAILED to find Python")	
+		OV_PRINT(OV_PRINTED "  FAILED to find Python (optional)")	
 	ENDIF(PYTHONLIBS_FOUND)
 ENDIF(UNIX)
 

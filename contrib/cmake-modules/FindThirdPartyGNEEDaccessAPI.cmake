@@ -71,7 +71,7 @@ IF(WIN32)
 			SET(OV_ThirdPartyGNEEDaccess "YES")
 		ENDIF(PATH_ClientLIB AND LIB_GDSClientAPI AND PATH_ServerDLL AND LIB_GDSServer)
 	ELSE(PATH_GNEEDaccessAPI)
-		MESSAGE(STATUS "  FAILED to find gNEEDaccessAPI (optional)")
+		MESSAGE(STATUS "  FAILED to find gNEEDaccessAPI (optional driver)")
 	ENDIF(PATH_GNEEDaccessAPI)
 ENDIF(WIN32)
 

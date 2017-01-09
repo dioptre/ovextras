@@ -35,7 +35,7 @@ IF(WIN32)
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI)
 	ELSE(PATH_BrainmasterCodeMakerAPI)
-		OV_PRINT(OV_PRINTED "  FAILED to find Brainmaster Code Maker API (optional)")
+		OV_PRINT(OV_PRINTED "  FAILED to find Brainmaster Code Maker API (optional driver)")
 	ENDIF(PATH_BrainmasterCodeMakerAPI)
 ENDIF(WIN32)
 

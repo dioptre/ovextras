@@ -12,7 +12,7 @@ IF(PATH_MITSAR)
 	INSTALL(PROGRAMS "${PATH_MITSAR}/MitsarDll.dll" DESTINATION "bin")
 	ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyMitsar)
 ELSE(PATH_MITSAR)
-	OV_PRINT(OV_PRINTED "  FAILED to find Mitsar device dll (optional)")
+	OV_PRINT(OV_PRINTED "  FAILED to find Mitsar device dll (optional driver)")
 ENDIF(PATH_MITSAR)
 
 SET_PROPERTY(GLOBAL PROPERTY OV_TRIED_ThirdPartyMitsar "Yes")

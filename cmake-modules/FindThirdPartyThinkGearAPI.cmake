@@ -29,7 +29,7 @@ IF(WIN32)
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyThinkGearAPI)
 	ELSE(PATH_ThinkGearAPI)
-		OV_PRINT(OV_PRINTED "  FAILED to find a valid ThinkGear API - cmake looked in 'C:/Program Files/MindSet Development Tools/ThinkGear Communications Driver/win32' and 'C:/Program Files (x86)/MindSet Development Tools/ThinkGear Communications Driver/win32'")
+		OV_PRINT(OV_PRINTED "  FAILED to find a valid ThinkGear API (optional driver) - cmake looked in 'C:/Program Files/MindSet Development Tools/ThinkGear Communications Driver/win32' and 'C:/Program Files (x86)/MindSet Development Tools/ThinkGear Communications Driver/win32'")
 	ENDIF(PATH_ThinkGearAPI)
 ENDIF(WIN32)
 

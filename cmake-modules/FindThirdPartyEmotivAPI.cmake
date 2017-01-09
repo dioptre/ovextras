@@ -79,7 +79,7 @@ ELSE(LIB_EmotivAPI)
 ENDIF(LIB_EmotivAPI)
 
 ELSE(PATH_EmotivAPI)
-        OV_PRINT(OV_PRINTED "  FAILED to find Emotiv API (optional)")
+        OV_PRINT(OV_PRINTED "  FAILED to find Emotiv API (optional driver)")
 ENDIF(PATH_EmotivAPI)
 
 SET_PROPERTY(GLOBAL PROPERTY OV_TRIED_ThirdPartyEmotivAPI "Yes")

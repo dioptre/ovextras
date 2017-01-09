@@ -11,7 +11,7 @@ IF(WIN32)
 
   	FIND_PATH(PATH_ENOBIOAPI enobio3g.h PATHS ${ENOBIOAPI_DIR})
 	IF(NOT PATH_ENOBIOAPI)
-		OV_PRINT(OV_PRINTED "  FAILED to find ENOBIO API - cmake looked in '${ENOBIOAPI_DIR}', skipping Enobio.")
+		OV_PRINT(OV_PRINTED "  FAILED to find ENOBIO API (optional driver) - cmake looked in '${ENOBIOAPI_DIR}', skipping Enobio.")
 		RETURN()
 	ENDIF(NOT PATH_ENOBIOAPI)
 	
