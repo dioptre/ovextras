@@ -9,6 +9,7 @@
 #endif
 
 #include <tcptagging/IStimulusSender.h>
+#include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;
 using namespace Plugins;
@@ -51,22 +52,14 @@ namespace OpenViBEPlugins
 			m_pBuilderInterface(NULL),
 			m_pMainWindow(NULL),
 			m_pDrawingArea(NULL),
-			//m_pStimulationReaderCallBack(NULL),
 			m_bImageRequested(false),
 			m_int32RequestedImageID(-1),
 			m_bImageDrawn(false),
 			m_int32DrawnImageID(-1),
-			m_pOriginalPicture(NULL),
-			m_pScaledPicture(NULL),
-			m_pStimulationsId(NULL),
-			m_pImageNames(NULL),
 			m_bFullScreen(false),
 			m_ui64LastOutputChunkDate(-1),
-			m_bError(false),
 			m_pStimulusSender(NULL)
 		{
-			//m_pReader[0] = NULL;
-
 			m_oBackgroundColor.pixel = 0;
 			m_oBackgroundColor.red = 0;
 			m_oBackgroundColor.green = 0;
@@ -80,15 +73,13 @@ namespace OpenViBEPlugins
 
 		boolean CDisplayCueImage::initialize()
 		{
-			m_bError=false;
-
 			m_pStimulusSender = NULL;
 
 			//>>>> Reading Settings:
 
 			//Number of Cues:
 			CString l_sSettingValue;
-			m_ui32NuberOfCue = getStaticBoxContext().getSettingCount()/2 -1;
+			m_ui32NumberOfCues = getStaticBoxContext().getSettingCount()/2 -1;
 
 			//Do we display the images in full screen?
 			getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0, l_sSettingValue);
@@ -99,13 +90,13 @@ namespace OpenViBEPlugins
 			m_ui64ClearScreenStimulation=getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sSettingValue);
 
 			//Stimulation ID and images file names for each cue
-			m_pImageNames = new CString[m_ui32NuberOfCue];
-			m_pStimulationsId = new uint64[m_ui32NuberOfCue];
-			for(uint32 i=0; i<m_ui32NuberOfCue; i++)
+			m_vImageNames.resize(m_ui32NumberOfCues);
+			m_vStimulationsId.resize(m_ui32NumberOfCues);
+			for(uint32 i=0; i<m_ui32NumberOfCues; i++)
 			{
-				getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(2*i+2, m_pImageNames[i]);
+				getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(2*i+2, m_vImageNames[i]);
 				getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(2*i+3, l_sSettingValue);
-				m_pStimulationsId[i]=getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sSettingValue);
+				m_vStimulationsId[i]=getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sSettingValue);
 			}
 
 			//>>>> Initialisation
@@ -118,8 +109,7 @@ namespace OpenViBEPlugins
 
 			if(!m_pBuilderInterface)
 			{
-				m_bError = true;
-				getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_ImportantWarning << "Couldn't load the interface !";
+				getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Couldn't load the interface !";
 				return false;
 			}
 
@@ -139,17 +129,16 @@ namespace OpenViBEPlugins
 			gtk_widget_modify_fg(m_pDrawingArea, GTK_STATE_ACTIVE, &m_oForegroundColor);
 
 			//Load the pictures:
-			m_pOriginalPicture = new GdkPixbuf*[m_ui32NuberOfCue];
-			m_pScaledPicture = new GdkPixbuf*[m_ui32NuberOfCue];
+			m_vOriginalPicture.resize(m_ui32NumberOfCues);
+			m_vScaledPicture.resize(m_ui32NumberOfCues);
 
-			for(uint32 i=0; i<m_ui32NuberOfCue; i++)
+			for(uint32 i=0; i<m_ui32NumberOfCues; i++)
 			{
-				m_pOriginalPicture[i] = gdk_pixbuf_new_from_file_at_size(m_pImageNames[i], -1, -1, NULL);
-				m_pScaledPicture[i]=0;
-				if(!m_pOriginalPicture[i])
+				m_vOriginalPicture[i] = gdk_pixbuf_new_from_file_at_size(m_vImageNames[i], -1, -1, NULL);
+				m_vScaledPicture[i]=NULL;
+				if(!m_vOriginalPicture[i])
 				{
-					getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_ImportantWarning << "Error couldn't load ressource file : " << m_pImageNames[i] << "!\n";
-					m_bError = true;
+					getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Error couldn't load resource file : " << m_vImageNames[i] << "!\n";
 					return false;
 				}
 			}
@@ -176,6 +165,7 @@ namespace OpenViBEPlugins
 			if (m_pStimulusSender)
 			{
 				delete m_pStimulusSender;
+				m_pStimulusSender = NULL;
 			}
 
 			//destroy drawing area
@@ -192,35 +182,25 @@ namespace OpenViBEPlugins
 				m_pBuilderInterface=NULL;
 			}
 
-			if(m_pStimulationsId) 
+			m_vStimulationsId.clear();
+			m_vImageNames.clear();
+
+			if(m_vOriginalPicture.size()>0) 
 			{
-				delete[] m_pStimulationsId;
-				m_pStimulationsId = NULL;
-			}
-			if(m_pImageNames)
-			{
-				delete[] m_pImageNames;
-				m_pImageNames = NULL;
+				for(uint32 i=0; i<m_ui32NumberOfCues; i++)
+				{
+					if(m_vOriginalPicture[i]){ g_object_unref(G_OBJECT(m_vOriginalPicture[i])); }
+				}
+				m_vOriginalPicture.clear();
 			}
 
-			if(m_pOriginalPicture) 
+			if (m_vScaledPicture.size()>0)
 			{
-				for(uint32 i=0; i<m_ui32NuberOfCue; i++)
+				for(uint32 i=0; i<m_ui32NumberOfCues; i++)
 				{
-					if(m_pOriginalPicture[i]){ g_object_unref(G_OBJECT(m_pOriginalPicture[i])); }
+					if(m_vScaledPicture[i]){ g_object_unref(G_OBJECT(m_vScaledPicture[i])); }
 				}
-				delete[] m_pOriginalPicture;
-				m_pOriginalPicture = NULL;
-			}
-
-			if(m_pScaledPicture) 
-			{
-				for(uint32 i=0; i<m_ui32NuberOfCue; i++)
-				{
-					if(m_pScaledPicture[i]){ g_object_unref(G_OBJECT(m_pScaledPicture[i])); }
-				}
-				delete[] m_pScaledPicture;
-				m_pScaledPicture = NULL;
+				m_vScaledPicture.clear();
 			}
 
 			return true;
@@ -241,7 +221,7 @@ namespace OpenViBEPlugins
 				{
 					// it was a image
 					m_oStimulationEncoder.getInputStimulationSet()->appendStimulation(
-								m_pStimulationsId[m_int32DrawnImageID],
+								m_vStimulationsId[m_int32DrawnImageID],
 								this->getPlayerContext().getCurrentTime(),
 								0);
 				}
@@ -261,26 +241,26 @@ namespace OpenViBEPlugins
 					// We must be late...
 					getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "One image may have been skipped => we must be late...\n";
 				}
+
 			}
 
 			m_oStimulationEncoder.encodeBuffer();
 			l_pBoxIO->markOutputAsReadyToSend(0, m_ui64LastOutputChunkDate, this->getPlayerContext().getCurrentTime());
 			m_ui64LastOutputChunkDate = this->getPlayerContext().getCurrentTime();
 
-			// We check if some images must be display
+			// We check if some images must be displayed
 			for(uint32 stim = 0; stim < m_oPendingStimulationSet.getStimulationCount() ; )
 			{
-				uint64 l_ui64StimDate = m_oPendingStimulationSet.getStimulationDate(stim);
-				uint64 l_ui64Time = this->getPlayerContext().getCurrentTime();
+				const uint64 l_ui64StimDate = m_oPendingStimulationSet.getStimulationDate(stim);
+				const uint64 l_ui64Time = this->getPlayerContext().getCurrentTime();
 				if (l_ui64StimDate < l_ui64Time)
 				{
-					float l_fDelay = (float)(((l_ui64Time - l_ui64StimDate)>> 16) / 65.5360); //delay in ms
-					if (l_fDelay>50)
-						getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Image was late: "<< l_fDelay <<" ms \n";
+					const float64 l_f64Delay = ITimeArithmetics::timeToSeconds(l_ui64Time - l_ui64StimDate) * 1000; // delay in ms
+					if (l_f64Delay>50)
+						getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Image was late: "<< l_f64Delay <<" ms \n";
 
-
-					uint64 l_ui64StimID =   m_oPendingStimulationSet.getStimulationIdentifier(stim);
-					if(l_ui64StimID== m_ui64ClearScreenStimulation)
+					const uint64 l_ui64StimID = m_oPendingStimulationSet.getStimulationIdentifier(stim);
+					if(l_ui64StimID == m_ui64ClearScreenStimulation)
 					{
 						if (m_bImageRequested)
 							getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_ImportantWarning << "One image was skipped => Not enough time between two images!!\n";
@@ -289,9 +269,9 @@ namespace OpenViBEPlugins
 					}
 					else
 					{
-						for(uint32 i=0; i<=m_ui32NuberOfCue; i++)
+						for(uint32 i=0; i < m_ui32NumberOfCues; i++)
 						{
-							if(l_ui64StimID == m_pStimulationsId[i])
+							if(l_ui64StimID == m_vStimulationsId[i])
 							{
 								if (m_bImageRequested)
 									getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_ImportantWarning << "One image was skipped => Not enough time between two images!!\n";
@@ -306,13 +286,14 @@ namespace OpenViBEPlugins
 
 					if(GTK_WIDGET(m_pDrawingArea)->window)
 					{
+						// this will trigger the callback redraw()
 						gdk_window_invalidate_rect(GTK_WIDGET(m_pDrawingArea)->window,NULL,true);
-						// it will trigger the callback redraw()
 					}
 
 				}
 				else
 				{
+					// Stim is still in the future, skip for now
 					stim++;
 				}
 			}
@@ -322,11 +303,6 @@ namespace OpenViBEPlugins
 
 		boolean CDisplayCueImage::processInput(uint32 ui32InputIndex)
 		{
-			if(m_bError)
-			{
-				return false;
-			}
-
 			getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 			return true;
 		}
@@ -351,31 +327,37 @@ namespace OpenViBEPlugins
 					{
 						for(uint32 stim = 0; stim < m_oStimulationDecoder.getOutputStimulationSet()->getStimulationCount(); stim++)
 						{
-							uint64 l_ui64StimID =  m_oStimulationDecoder.getOutputStimulationSet()->getStimulationIdentifier(stim);
+							const uint64 l_ui64StimID =  m_oStimulationDecoder.getOutputStimulationSet()->getStimulationIdentifier(stim);
 
-
+							// Is it a clear screen or a stim we recognize?
 							boolean l_bAddStim = false;
-							if(l_ui64StimID == m_ui64ClearScreenStimulation)
+							if (l_ui64StimID == m_ui64ClearScreenStimulation)
+							{
 								l_bAddStim = true;
+							}
 							else
-								for(uint32 i=0; i<=m_ui32NuberOfCue; i++)
-									if(l_ui64StimID == m_pStimulationsId[i])
+							{
+								for (uint32 i = 0; i < m_ui32NumberOfCues; i++)
+								{
+									if (l_ui64StimID == m_vStimulationsId[i])
 									{
 										l_bAddStim = true;
 										break;
 									}
+								}
+							}
 
 							if (l_bAddStim)
 							{
-								uint64 l_ui64StimDate =     m_oStimulationDecoder.getOutputStimulationSet()->getStimulationDate(stim);
-								uint64 l_ui64StimDuration = m_oStimulationDecoder.getOutputStimulationSet()->getStimulationDuration(stim);
+								const uint64 l_ui64StimDate =     m_oStimulationDecoder.getOutputStimulationSet()->getStimulationDate(stim);
+								const uint64 l_ui64StimDuration = m_oStimulationDecoder.getOutputStimulationSet()->getStimulationDuration(stim);
 
-								uint64 l_ui64Time = this->getPlayerContext().getCurrentTime();
+								const uint64 l_ui64Time = this->getPlayerContext().getCurrentTime();
 								if (l_ui64StimDate < l_ui64Time)
 								{
-									float l_fDelay = (float)(((l_ui64Time - l_ui64StimDate)>> 16) / 65.5360); //delay in ms
-									if (l_fDelay>50)
-										getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Stimulation was received late: "<< l_fDelay <<" ms \n";
+									const float64 l_f64Delay = ITimeArithmetics::timeToSeconds(l_ui64Time - l_ui64StimDate) * 1000; //delay in ms
+									if (l_f64Delay>50)
+										getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Stimulation was received late: "<< l_f64Delay <<" ms \n";
 								}
 
 								if (l_ui64StimDate < l_pBoxIO->getInputChunkStartTime(input, chunk))
@@ -396,12 +378,6 @@ namespace OpenViBEPlugins
 				}
 			}
 
-			// After any possible rendering, we flush the accumulated stimuli. The default idle func is low priority, so it should be run after rendering by gtk.
-			{
-				boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
-				m_uiIdleFuncTag = g_idle_add(DisplayCueImage_flush_callback, this);
-			}
-
 			return true;
 		}
 
@@ -410,7 +386,6 @@ namespace OpenViBEPlugins
 		{
 			if (m_int32RequestedImageID >= 0)
 			{
-
 				drawCuePicture(m_int32RequestedImageID);
 			}
 			if(m_bImageRequested)
@@ -419,55 +394,60 @@ namespace OpenViBEPlugins
 				m_bImageDrawn = true;
 				m_int32DrawnImageID = m_int32RequestedImageID;
 
-				// Queue the stimulation to be sent to TCP Tagging
+				// TCP Tagging block
 				{
 					boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
 
-					const uint64 l_ui64SentStimulation = (m_int32RequestedImageID >= 0 ? m_pStimulationsId[m_int32RequestedImageID] : m_ui64ClearScreenStimulation);
+					// Queue the stimulation
+					const uint64 l_ui64SentStimulation = (m_int32RequestedImageID >= 0 ? m_vStimulationsId[m_int32RequestedImageID] : m_ui64ClearScreenStimulation);
 					m_vStimuliQueue.push_back(l_ui64SentStimulation);
+
+					// Set the handler to push out the stim after the actual rendering
+					m_uiIdleFuncTag = g_idle_add(DisplayCueImage_flush_callback, this);
 				}
+
 			}
 		}
 
 		void CDisplayCueImage::drawCuePicture(OpenViBE::uint32 uint32CueID)
 		{
-			gint l_iWindowWidth = m_pDrawingArea->allocation.width;
-			gint l_iWindowHeight = m_pDrawingArea->allocation.height;
+			const gint l_iWindowWidth = m_pDrawingArea->allocation.width;
+			const gint l_iWindowHeight = m_pDrawingArea->allocation.height;
 
 			if(m_bFullScreen)
 			{
-				gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pScaledPicture[uint32CueID], 0, 0, 0, 0, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
+				gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_vScaledPicture[uint32CueID], 0, 0, 0, 0, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
 			}
 			else
 			{
-				gint l_iX = (l_iWindowWidth/2) - gdk_pixbuf_get_width(m_pScaledPicture[uint32CueID])/2;
-				gint l_iY = (l_iWindowHeight/2) - gdk_pixbuf_get_height(m_pScaledPicture[uint32CueID])/2;;
-				gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_pScaledPicture[uint32CueID], 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
+				const gint l_iX = (l_iWindowWidth/2) - gdk_pixbuf_get_width(m_vScaledPicture[uint32CueID])/2;
+				const gint l_iY = (l_iWindowHeight/2) - gdk_pixbuf_get_height(m_vScaledPicture[uint32CueID])/2;;
+				gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_vScaledPicture[uint32CueID], 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
 			}
 		}
 
 		void CDisplayCueImage::resize(uint32 ui32Width, uint32 ui32Height)
 		{
-			for(uint32 i=0; i<m_ui32NuberOfCue; i++)
+			for(uint32 i=0; i<m_ui32NumberOfCues; i++)
 			{
-				if(m_pScaledPicture[i]){ g_object_unref(G_OBJECT(m_pScaledPicture[i])); }
+				if(m_vScaledPicture[i]){ g_object_unref(G_OBJECT(m_vScaledPicture[i])); }
 			}
 
 			if(m_bFullScreen)
 			{
-				for(uint32 i=0; i<m_ui32NuberOfCue; i++)
+				for(uint32 i=0; i<m_ui32NumberOfCues; i++)
 				{
-					m_pScaledPicture[i] = gdk_pixbuf_scale_simple(m_pOriginalPicture[i], ui32Width, ui32Height, GDK_INTERP_BILINEAR);
+					m_vScaledPicture[i] = gdk_pixbuf_scale_simple(m_vOriginalPicture[i], ui32Width, ui32Height, GDK_INTERP_BILINEAR);
 				}
 			}
 			else
 			{
-				float l_fX = (float)(ui32Width<64?64:ui32Width);
-				float l_fY = (float)(ui32Height<64?64:ui32Height);
-				for(uint32 i=0; i<m_ui32NuberOfCue; i++)
+				const float l_fX = (float)(ui32Width<64?64:ui32Width);
+				const float l_fY = (float)(ui32Height<64?64:ui32Height);
+				for(uint32 i=0; i<m_ui32NumberOfCues; i++)
 				{
-					float l_fx = (float)gdk_pixbuf_get_width(m_pOriginalPicture[i]);
-					float l_fy = (float)gdk_pixbuf_get_height(m_pOriginalPicture[i]);
+					float l_fx = (float)gdk_pixbuf_get_width(m_vOriginalPicture[i]);
+					float l_fy = (float)gdk_pixbuf_get_height(m_vOriginalPicture[i]);
 					if((l_fX/l_fx) < (l_fY/l_fy))
 					{
 						l_fy = l_fX*l_fy/(3*l_fx);
@@ -478,7 +458,7 @@ namespace OpenViBEPlugins
 						l_fx = l_fY*l_fx/(3*l_fy);
 						l_fy = l_fY/3;
 					}
-					m_pScaledPicture[i] = gdk_pixbuf_scale_simple(m_pOriginalPicture[i], (int)l_fx, (int)l_fy, GDK_INTERP_BILINEAR);
+					m_vScaledPicture[i] = gdk_pixbuf_scale_simple(m_vOriginalPicture[i], (int)l_fx, (int)l_fy, GDK_INTERP_BILINEAR);
 				}
 			}
 		}
@@ -489,6 +469,7 @@ namespace OpenViBEPlugins
 
 			for (size_t i = 0; i<m_vStimuliQueue.size(); i++)
 			{
+				// Timestamp is not used on purpose as we do not have the same clock scheme with AS
 				m_pStimulusSender->sendStimulation(m_vStimuliQueue[i]);
 			}
 			m_vStimuliQueue.clear();

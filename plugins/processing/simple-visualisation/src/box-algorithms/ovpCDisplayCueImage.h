@@ -40,7 +40,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean initialize();
 			virtual OpenViBE::boolean uninitialize();
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
-			virtual OpenViBE::uint64 getClockFrequency(void){ return (128LL<<32); }
+			virtual OpenViBE::uint64 getClockFrequency(void){ return (128LL<<32); }				// 128hz
 			virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
 			virtual OpenViBE::boolean process();
 			virtual void redraw(void);
@@ -75,17 +75,17 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bImageDrawn;            //when true: the new image has been drawn
 			OpenViBE::int32   m_int32DrawnImageID;      //ID of the drawn image. -1 => clear the screen
 
-
-			::GdkPixbuf** m_pOriginalPicture;
-			::GdkPixbuf** m_pScaledPicture;
+			// Data corresponding to each cue image. Could be refactored to a vector of structs.
+			std::vector<::GdkPixbuf*> m_vOriginalPicture;
+			std::vector<::GdkPixbuf*> m_vScaledPicture;
+			std::vector<OpenViBE::uint64> m_vStimulationsId;
+			std::vector<OpenViBE::CString> m_vImageNames;
 
 			::GdkColor m_oBackgroundColor;
 			::GdkColor m_oForegroundColor;
 
 			//Settings
-			OpenViBE::uint32   m_ui32NuberOfCue;
-			OpenViBE::uint64*  m_pStimulationsId;
-			OpenViBE::CString* m_pImageNames;
+			OpenViBE::uint32   m_ui32NumberOfCues;
 			OpenViBE::uint64   m_ui64ClearScreenStimulation;
 			OpenViBE::boolean  m_bFullScreen;
 
@@ -96,8 +96,6 @@ namespace OpenViBEPlugins
 
 			//We save the received stimulations
 			OpenViBE::CStimulationSet m_oPendingStimulationSet;
-
-			OpenViBE::boolean m_bError;
 
 			// For queuing stimulations to the TCP Tagging
 			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
@@ -164,7 +162,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Joan Fruitet"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA Sophia"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Display cue images when receiving stimulations"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Display cue images when receiving specified stimulations and a fixation cross for OVTK_GDF_Cross_On_Screen"); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Display cue images when receiving specified stimulations. Forwards the stimulations to AS using TCP Tagging."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualisation/Presentation"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.2"); }
 			virtual void release(void)                                   { }
