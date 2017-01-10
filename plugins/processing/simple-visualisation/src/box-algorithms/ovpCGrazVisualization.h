@@ -13,10 +13,6 @@
 #include <map>
 #include <deque>
 
-#include <boost/thread.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/version.hpp>
-
 namespace TCPTagging
 {
 	class IStimulusSender; // fwd declare
@@ -141,7 +137,6 @@ namespace OpenViBEPlugins
 			// For queuing stimulations to the TCP Tagging
 			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
 			guint m_uiIdleFuncTag;
-			boost::mutex m_oIdleFuncMutex;
 			TCPTagging::IStimulusSender* m_pStimulusSender;
 
 			OpenViBE::uint64 m_ui64LastStimulation;

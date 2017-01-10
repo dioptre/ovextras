@@ -11,6 +11,8 @@
 #include <tcptagging/IStimulusSender.h>
 #include <openvibe/ovITimeArithmetics.h>
 
+#include <algorithm> // std::min
+
 using namespace OpenViBE;
 using namespace Plugins;
 using namespace Kernel;
@@ -74,8 +76,8 @@ namespace OpenViBEPlugins
 
 		boolean CDisplayCueImage::initialize()
 		{
+			m_uiIdleFuncTag = 0;
 			m_pStimulusSender = NULL;
-
 			//>>>> Reading Settings:
 
 			//Number of Cues:
@@ -177,6 +179,13 @@ namespace OpenViBEPlugins
 
 		boolean CDisplayCueImage::uninitialize()
 		{
+			// Remove the possibly dangling idle loop. 
+			if (m_uiIdleFuncTag)
+			{
+				g_source_remove(m_uiIdleFuncTag);
+				m_uiIdleFuncTag = 0;
+			}
+
 			m_oStimulationDecoder.uninitialize();
 			m_oStimulationEncoder.uninitialize();
 
@@ -430,14 +439,15 @@ namespace OpenViBEPlugins
 
 				// TCP Tagging block
 				{
-					boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
-
 					// Queue the stimulation
 					const uint64 l_ui64SentStimulation = (m_int32RequestedImageID >= 0 ? m_vStimulationsId[m_int32RequestedImageID] : m_ui64ClearScreenStimulation);
 					m_vStimuliQueue.push_back(l_ui64SentStimulation);
 
 					// Set the handler to push out the stim after the actual rendering
-					m_uiIdleFuncTag = g_idle_add(DisplayCueImage_flush_callback, this);
+					if (m_uiIdleFuncTag == 0)
+					{
+						m_uiIdleFuncTag = g_idle_add(DisplayCueImage_flush_callback, this);
+					}
 				}
 
 			}
@@ -514,10 +524,9 @@ namespace OpenViBEPlugins
 			}
 		}
 
+		// Note that we don't need concurrency control here as gtk callbacks run in the main thread
 		void CDisplayCueImage::flushQueue(void)
 		{
-			boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
-
 			for (size_t i = 0; i<m_vStimuliQueue.size(); i++)
 			{
 				// Timestamp is not used on purpose as we do not have the same clock scheme with AS

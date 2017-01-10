@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <algorithm> // std::min, max
 
 #if defined TARGET_OS_Linux
  #include <unistd.h>
@@ -150,10 +151,7 @@ namespace OpenViBEPlugins
 			}
 			
 			// Queue the stimulation to be sent to TCP Tagging
-			{
-				boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
-				m_vStimuliQueue.push_back(m_ui64LastStimulation);
-			}
+			m_vStimuliQueue.push_back(m_ui64LastStimulation);
 		}
 
 		void CGrazVisualization::processState()
@@ -339,14 +337,11 @@ namespace OpenViBEPlugins
 
 		boolean CGrazVisualization::uninitialize()
 		{
+			if(m_uiIdleFuncTag)
 			{
-				boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
-				if(m_uiIdleFuncTag)
-				{
-					m_vStimuliQueue.clear();
-					g_source_remove(m_uiIdleFuncTag);
-					m_uiIdleFuncTag = 0;
-				}
+				m_vStimuliQueue.clear();
+				g_source_remove(m_uiIdleFuncTag);
+				m_uiIdleFuncTag = 0;
 			}
 
 			if(m_pStimulusSender)
@@ -399,16 +394,6 @@ namespace OpenViBEPlugins
 
 		boolean CGrazVisualization::process()
 		{
-			// Remove possibly dangling idle func, this construct makes sure only one idle func is registered at a time. 
-			{
-				boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
-				if(m_uiIdleFuncTag)
-				{
-					g_source_remove(m_uiIdleFuncTag);
-					m_uiIdleFuncTag = 0;
-				}
-			}
-
 			const IBoxIO* l_pBoxIO=getBoxAlgorithmContext()->getDynamicBoxContext();
 
 			for(uint32 chunk=0; chunk<l_pBoxIO->getInputChunkCount(0); chunk++)
@@ -471,8 +456,9 @@ namespace OpenViBEPlugins
 			}
 
 			// After any possible rendering, we flush the accumulated stimuli. The default idle func is low priority, so it should be run after rendering by gtk.
+			// Only register a single idle func, if the previous is there its just as good
+			if (m_uiIdleFuncTag == 0)
 			{
-				boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
 				m_uiIdleFuncTag = g_idle_add(flush_callback, this);
 			}
 
@@ -815,10 +801,9 @@ namespace OpenViBEPlugins
 			m_pLeftBar = gdk_pixbuf_flip(m_pRightBar, true);
 		}
 
+		// Note that we don't need concurrency control here as gtk callbacks run in the main thread
 		void CGrazVisualization::flushQueue(void)
 		{
-			boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
-
 			for(size_t i=0;i<m_vStimuliQueue.size();i++)
 			{
 				m_pStimulusSender->sendStimulation(m_vStimuliQueue[i]);

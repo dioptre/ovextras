@@ -208,14 +208,11 @@ boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 
 boolean CBoxAlgorithmP300SpellerVisualisation::uninitialize(void)
 {
+	if(m_uiIdleFuncTag)
 	{
-		boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
-		if(m_uiIdleFuncTag)
-		{
-			m_vStimuliQueue.clear();
-			g_source_remove(m_uiIdleFuncTag);
-			m_uiIdleFuncTag = 0;
-		}
+		m_vStimuliQueue.clear();
+		g_source_remove(m_uiIdleFuncTag);
+		m_uiIdleFuncTag = 0;
 	}
 
 	if(m_pStimulusSender)
@@ -324,17 +321,6 @@ boolean CBoxAlgorithmP300SpellerVisualisation::processInput(uint32 ui32Index)
 
 boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 {
-	
-	// Remove possibly dangling idle func, this construct makes sure only one idle func is registered at a time. 
-	{
-		boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
-		if(m_uiIdleFuncTag)
-		{
-			g_source_remove(m_uiIdleFuncTag);
-			m_uiIdleFuncTag = 0;
-		}
-	}
-
 	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
@@ -422,13 +408,11 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 					// We now know if this flash corresponds to the current target or not, merge this to the outgoing stimulation stream
 					if(l_bIsTarget)
 					{
-						boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
 						m_vStimuliQueue.push_back(OVTK_StimulationId_Target);
 						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_Target, l_pStimulationSet->getStimulationDate(j), 0);
 					}
 					else
 					{
-						boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
 						m_vStimuliQueue.push_back(OVTK_StimulationId_NonTarget);
 						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_NonTarget, l_pStimulationSet->getStimulationDate(j), 0);
 					}
@@ -436,10 +420,7 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 
 				// Pass the stimulation to the server also as-is. If its a flash, it can be differentiated from a 'target' spec because
 				// its NOT between OVTK_StimulationId_RestStart and OVTK_StimulationId_RestStop stimuli in the generated P300 timeline.
-				{
-					boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
-					m_vStimuliQueue.push_back(l_ui64StimulationIdentifier);
-				}
+				m_vStimuliQueue.push_back(l_ui64StimulationIdentifier);
 			}
 			m_pTargetFlaggingStimulationEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
 		}
@@ -524,7 +505,6 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 						// from a 'flash' spec because it IS between OVTK_StimulationId_RestStart and
 						// OVTK_StimulationId_RestStop stimulations in the P300 timeline.
 						{
-							boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
 							m_vStimuliQueue.push_back(m_iTargetRow + m_ui64RowStimulationBase);
 							m_vStimuliQueue.push_back(m_iTargetColumn + m_ui64ColumnStimulationBase);
 						}
@@ -708,8 +688,8 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 	}
 
 	// After any possible rendering, we flush the accumulated stimuli. The default idle func is low priority, so it should be run after rendering by gtk.
+	if (m_uiIdleFuncTag == 0)
 	{
-		boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
 		m_uiIdleFuncTag = g_idle_add(flush_callback, this);
 	}
 
@@ -860,10 +840,9 @@ void CBoxAlgorithmP300SpellerVisualisation::_cache_collect_child_widget_cb_(CBox
 	}
 }
 
+// Note that we don't need concurrency control here as gtk callbacks run in the main thread
 void CBoxAlgorithmP300SpellerVisualisation::flushQueue(void)
 {
-	boost::mutex::scoped_lock lock(m_oIdleFuncMutex);
-
 	for(size_t i=0;i<m_vStimuliQueue.size();i++)
 	{
 		m_pStimulusSender->sendStimulation(m_vStimuliQueue[i]);

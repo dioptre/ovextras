@@ -9,10 +9,6 @@
 #include <map>
 #include <list>
 
-#include <boost/thread.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/version.hpp>
-
 // TODO:
 // - please move the identifier definitions in ovp_defines.h
 // - please include your desciptor in ovp_main.cpp
@@ -132,10 +128,9 @@ namespace OpenViBEPlugins
 			std::map < unsigned long, std::map < unsigned long, CBoxAlgorithmP300SpellerVisualisation::SWidgetStyle > > m_vCache;
 			std::list < std::pair < int, int > > m_vTargetHistory;
 
+			// TCP Tagging
 			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
 			guint m_uiIdleFuncTag;
-			boost::mutex m_oIdleFuncMutex;
-
 			TCPTagging::IStimulusSender* m_pStimulusSender;
 		};
 

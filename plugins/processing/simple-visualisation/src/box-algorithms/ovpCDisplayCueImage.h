@@ -11,10 +11,6 @@
 #include <map>
 #include <deque>
 
-#include <boost/thread.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/version.hpp>
-
 #define OVP_ClassId_DisplayCueImage                                            OpenViBE::CIdentifier(0x005789A4, 0x3AB78A36)
 #define OVP_ClassId_DisplayCueImageDesc                                        OpenViBE::CIdentifier(0x086185A4, 0x796A854C)
 
@@ -97,9 +93,8 @@ namespace OpenViBEPlugins
 			OpenViBE::CStimulationSet m_oPendingStimulationSet;
 
 			// For queuing stimulations to the TCP Tagging
-			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
-			guint m_uiIdleFuncTag;								// This is not really used, its for debugging purposes
-			boost::mutex m_oIdleFuncMutex;
+			std::vector< OpenViBE::uint64 > m_vStimuliQueue;	
+			guint m_uiIdleFuncTag;
 			TCPTagging::IStimulusSender* m_pStimulusSender;
 		};
 
