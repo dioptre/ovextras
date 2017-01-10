@@ -12,8 +12,13 @@
 #include <iostream>
 #include <vector>
 
-#define OVP_ClassId_BoxAlgorithm_OpenALSoundPlayer  OpenViBE::CIdentifier(0x7AC2396F, 0x7EE52EFE)
+#define OVP_ClassId_BoxAlgorithm_OpenALSoundPlayer      OpenViBE::CIdentifier(0x7AC2396F, 0x7EE52EFE)
 #define OVP_ClassId_BoxAlgorithm_OpenALSoundPlayerDesc  OpenViBE::CIdentifier(0x6FD040EF, 0x7E2F1284)
+
+namespace TCPTagging
+{
+	class IStimulusSender; // fwd declare
+};
 
 namespace OpenViBEPlugins
 {
@@ -34,29 +39,26 @@ namespace OpenViBEPlugins
 				FILE_FORMAT_UNSUPPORTED
 			};
 
+			CBoxAlgorithmOpenALSoundPlayer(void);
+
 			virtual void release(void) { delete this; }
 
 			virtual OpenViBE::uint64 getClockFrequency(void){ return (128LL<<32); }
 			virtual OpenViBE::boolean initialize(void);
 			virtual OpenViBE::boolean uninitialize(void);
-			// virtual OpenViBE::boolean processSignal(OpenViBE::CMessageSignal& rMessageSignal);
 			virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
-			//virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::boolean process(void);
 
 			virtual OpenViBE::boolean openSoundFile();
 			virtual OpenViBE::boolean playSound();
 			virtual OpenViBE::boolean stopSound();
 		
-			
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_OpenALSoundPlayer);
 
 		protected:
 
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamDecoder;
-			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamEncoder;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > ip_pStimulationSet;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pMemoryBuffer;
+			OpenViBEToolkit::TStimulationDecoder<CBoxAlgorithmOpenALSoundPlayer> m_oStreamDecoder;
+			OpenViBEToolkit::TStimulationEncoder<CBoxAlgorithmOpenALSoundPlayer> m_oStreamEncoder;
 
 			OpenViBE::uint64 m_ui64LastOutputChunkDate;
 			OpenViBE::boolean m_bStartOfSoundSent;
@@ -76,7 +78,8 @@ namespace OpenViBEPlugins
 			OggVorbisStream m_oOggVorbisStream;
 			std::vector < char > m_vRawOggBufferFromFile;
 			
-
+			// For sending stimulations to the TCP Tagging
+			TCPTagging::IStimulusSender* m_pStimulusSender;
 		};
 
 		class CBoxAlgorithmOpenALSoundPlayerDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -91,7 +94,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Play/Stop a sound, with or without loop."); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Available format : WAV / OGG. Play and stop with input stimulations. Box based on OpenAL."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Stimulation"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_OpenALSoundPlayer; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Stimulation::CBoxAlgorithmOpenALSoundPlayer; }
@@ -101,8 +104,8 @@ namespace OpenViBEPlugins
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput  ("Input triggers", OV_TypeId_Stimulations);
-				rBoxAlgorithmPrototype.addOutput ("Resync triggers", OV_TypeId_Stimulations);
-				rBoxAlgorithmPrototype.addSetting("PLAY trigger", OV_TypeId_Stimulation,"OVTK_StimulationId_Label_00");
+				rBoxAlgorithmPrototype.addOutput ("Resync triggers (deprecated)", OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addSetting("PLAY trigger", OV_TypeId_Stimulation, "OVTK_StimulationId_Label_00");
 				rBoxAlgorithmPrototype.addSetting("STOP trigger", OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");
 				rBoxAlgorithmPrototype.addSetting("File to play", OV_TypeId_Filename, "${Path_Data}/plugins/stimulation/ov_beep.wav");
 				rBoxAlgorithmPrototype.addSetting("Loop", OV_TypeId_Boolean, "false");

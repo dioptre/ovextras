@@ -1,6 +1,8 @@
-#include "ovpCBoxAlgorithmOpenALSoundPlayer.h"
 
 #if defined TARGET_HAS_ThirdPartyOpenAL
+
+#include "ovpCBoxAlgorithmOpenALSoundPlayer.h"
+#include <tcptagging/IStimulusSender.h>
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -16,17 +18,17 @@ using namespace std;
 #define BUFFER_SIZE 32768
 #define UNIQUE_SOURCE 1
 
+CBoxAlgorithmOpenALSoundPlayer::CBoxAlgorithmOpenALSoundPlayer(void)
+: m_pStimulusSender(NULL) 
+{ 
+	// nop
+}
+
 boolean CBoxAlgorithmOpenALSoundPlayer::initialize(void)
 {
 
-	m_pStreamDecoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
-	m_pStreamDecoder->initialize();
-
-	m_pStreamEncoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamEncoder));
-	m_pStreamEncoder->initialize();
-	ip_pStimulationSet.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_InputParameterId_StimulationSet));
-	op_pMemoryBuffer.initialize(m_pStreamEncoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamEncoder_OutputParameterId_EncodedMemoryBuffer));
-
+	m_oStreamDecoder.initialize(*this, 0);
+	m_oStreamEncoder.initialize(*this, 0);
 
 	m_ui64PlayTrigger = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),0);
 	m_ui64StopTrigger = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),1);
@@ -62,19 +64,24 @@ boolean CBoxAlgorithmOpenALSoundPlayer::initialize(void)
 	{
 		m_iFileFormat = FILE_FORMAT_OGG;
 	}
+
+	m_pStimulusSender = TCPTagging::createStimulusSender();
+
+	if (!m_pStimulusSender->connect("localhost", "15361"))
+	{
+		this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
+	}
+
 	return openSoundFile();
 }
 
 boolean CBoxAlgorithmOpenALSoundPlayer::uninitialize(void)
 {
-	m_pStreamDecoder->uninitialize();
-	getAlgorithmManager().releaseAlgorithm(*m_pStreamDecoder);
-	m_pStreamEncoder->uninitialize();
-	getAlgorithmManager().releaseAlgorithm(*m_pStreamEncoder);
+
+	m_oStreamDecoder.uninitialize();
+	m_oStreamEncoder.uninitialize();
 	
 	boolean l_bStatus = stopSound();
-
-
 
 #if UNIQUE_SOURCE
 	alDeleteSources(1, &m_uiSourceHandle);
@@ -96,6 +103,12 @@ boolean CBoxAlgorithmOpenALSoundPlayer::uninitialize(void)
 		}
 	}
 
+	if (m_pStimulusSender)
+	{
+		delete m_pStimulusSender;
+		m_pStimulusSender = NULL;
+	}
+
 	return l_bStatus;
 
 }
@@ -110,85 +123,72 @@ boolean CBoxAlgorithmOpenALSoundPlayer::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-	op_pMemoryBuffer=l_rDynamicBoxContext.getOutputChunk(0);
-	
-	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
+	// Look for command stimulations
+	for (uint32 i = 0; i < l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
-		TParameterHandler < const IMemoryBuffer* > l_ipMemoryBuffer(m_pStreamDecoder->getInputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_InputParameterId_MemoryBufferToDecode));
-		l_ipMemoryBuffer=l_rDynamicBoxContext.getInputChunk(0, i);
-		m_pStreamDecoder->process();
+		m_oStreamDecoder.decode(i);
 
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedHeader))
+		if (m_oStreamDecoder.isHeaderReceived())
 		{
-			m_pStreamEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeHeader);
+			m_oStreamEncoder.encodeHeader();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 			m_ui64LastOutputChunkDate = l_rDynamicBoxContext.getInputChunkEndTime(0, i);
 		}
 
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedBuffer))
+		if (m_oStreamDecoder.isBufferReceived())
 		{
-			TParameterHandler < IStimulationSet* > l_opStimulationSet(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_StimulationStreamDecoder_OutputParameterId_StimulationSet));
-			for(uint32 j=0; j<l_opStimulationSet->getStimulationCount(); j++)
+			const IStimulationSet* l_pStimulationSet = m_oStreamDecoder.getOutputStimulationSet();
+
+			for(uint32 j=0; j<l_pStimulationSet->getStimulationCount(); j++)
 			{
-				if(l_opStimulationSet->getStimulationIdentifier(j) == m_ui64PlayTrigger)
+				if(l_pStimulationSet->getStimulationIdentifier(j) == m_ui64PlayTrigger)
 				{
 					playSound();
 					m_bEndOfSoundSent = false;
 					m_bStartOfSoundSent = false;
 				}
-				if(l_opStimulationSet->getStimulationIdentifier(j) == m_ui64StopTrigger)
+				if(l_pStimulationSet->getStimulationIdentifier(j) == m_ui64StopTrigger)
 				{
 					stopSound();
 				}
 			}
 		}
 
-		if(m_pStreamDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StimulationStreamDecoder_OutputTriggerId_ReceivedEnd))
+		if (m_oStreamDecoder.isEndReceived())
 		{
-			m_pStreamEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeEnd);
+			m_oStreamEncoder.encodeEnd();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
 			m_ui64LastOutputChunkDate = l_rDynamicBoxContext.getInputChunkEndTime(0, i);
 		}
-
-		l_rDynamicBoxContext.markInputAsDeprecated(0, i);
-
 	}
 
-
+	// n.b. TCP Tagging should be used instead of this socket output. This code is kept for backwards compatibility.
+	IStimulationSet* l_pOutputStimulationSet = m_oStreamEncoder.getInputStimulationSet();
+	l_pOutputStimulationSet->clear();
 
 	ALint l_uiStatus;
 	alGetSourcei(m_uiSourceHandle, AL_SOURCE_STATE, &l_uiStatus);
 	// CASE : the sound has stopped, and we need to send the stimulation
 	if(l_uiStatus == AL_STOPPED && !m_bEndOfSoundSent)
 	{
-		ip_pStimulationSet->clear();
-		ip_pStimulationSet->appendStimulation(
+		l_pOutputStimulationSet->appendStimulation(
 			m_ui64StopTrigger,
 			this->getPlayerContext().getCurrentTime(),
 			0);
-		m_pStreamEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
-		l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastOutputChunkDate, this->getPlayerContext().getCurrentTime());
 		m_bEndOfSoundSent = true;
 	}
 	// CASE : the sound has started playing, and we need to send the stimulation
 	if(l_uiStatus == AL_PLAYING && !m_bStartOfSoundSent)
 	{
-		ip_pStimulationSet->clear();
-		ip_pStimulationSet->appendStimulation(
+		l_pOutputStimulationSet->appendStimulation(
 			m_ui64PlayTrigger,
 			this->getPlayerContext().getCurrentTime(),
 			0);
-		m_pStreamEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
-		l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastOutputChunkDate, this->getPlayerContext().getCurrentTime());
 		m_bStartOfSoundSent = true;
 	}
-	// CASE : the sound has stopped (or is playing), but there is no need to send anything but empty set (the box is "idle" stop or in a middle of a sound)
-	if((l_uiStatus == AL_STOPPED && m_bEndOfSoundSent) || (l_uiStatus == AL_PLAYING && m_bStartOfSoundSent) || l_uiStatus == AL_INITIAL)
-	{
-		ip_pStimulationSet->clear();
-		m_pStreamEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
-		l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastOutputChunkDate, this->getPlayerContext().getCurrentTime());
-	}
+
+	m_oStreamEncoder.encodeBuffer();
+	l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastOutputChunkDate, this->getPlayerContext().getCurrentTime());
 
 	m_ui64LastOutputChunkDate = this->getPlayerContext().getCurrentTime();
 
@@ -314,6 +314,9 @@ boolean CBoxAlgorithmOpenALSoundPlayer::playSound()
 			return false;
 		}
 	}
+
+	m_pStimulusSender->sendStimulation(m_ui64PlayTrigger, 0);		// n.b. 0 is intentional
+
 	return true;
 }
 boolean CBoxAlgorithmOpenALSoundPlayer::stopSound()
@@ -343,6 +346,8 @@ boolean CBoxAlgorithmOpenALSoundPlayer::stopSound()
 			return false;
 		}
 	}
+
+	m_pStimulusSender->sendStimulation(m_ui64StopTrigger, 0);	// n.b. 0 is intentional
 
 	return true;
 }

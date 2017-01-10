@@ -8,7 +8,7 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_SoundPlayer_Description|
  The Sound Player box can play a sound in WAV or OGG format. It is based on the OpenAL library.
  The box has to be configured to define the stimulations used as "play" and "stop" triggers.
- When the file is stopped, manually or not, the "stop" stimulation is output.
+ When the playback is stopped, manually or not, the "stop" stimulation is output.
  * |OVP_DocEnd_BoxAlgorithm_SoundPlayer_Description|
 __________________________________________________________________
 
@@ -30,7 +30,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_SoundPlayer_Outputs|
 
  * |OVP_DocBegin_BoxAlgorithm_SoundPlayer_Output1|
- The box outputs the "play" and "stop" triggers when the sound is actually started and stopped (manually or at the end of file). These stimulations are synchronized with the OpenAL engine, which timing may differ slightly with the input triggers.
+ The box outputs the "play" and "stop" triggers when the sound is actually started and stopped (manually or at the end of file). These stimulations are synchronized with the OpenAL engine, which timing may differ slightly with the input triggers. Note that this output is deprecated.
  * |OVP_DocEnd_BoxAlgorithm_SoundPlayer_Output1|
 __________________________________________________________________
 
@@ -62,6 +62,7 @@ Examples description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_SoundPlayer_Examples|
+The box can be used to design auditory BCI scenarios or to launch audio events for Event-Related Potential (ERP) data recording.
  * |OVP_DocEnd_BoxAlgorithm_SoundPlayer_Examples|
 __________________________________________________________________
 
@@ -70,5 +71,7 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_SoundPlayer_Miscellaneous|
  This box is based on OpenAL (through Alut) and uses the libogg and libvorbis libraries.
+ 
+ The box sends the recognized stimulations to the Acquisition Server using TCP Tagging after the corresponding play or stop events have triggered. This is the mechanism to replace the deprecated stimulation output of the box.
  * |OVP_DocEnd_BoxAlgorithm_SoundPlayer_Miscellaneous|
  */
