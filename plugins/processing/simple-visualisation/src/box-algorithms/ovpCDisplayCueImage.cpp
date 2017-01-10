@@ -57,6 +57,7 @@ namespace OpenViBEPlugins
 			m_bImageDrawn(false),
 			m_int32DrawnImageID(-1),
 			m_bFullScreen(false),
+			m_bScaleImages(false),
 			m_ui64LastOutputChunkDate(-1),
 			m_pStimulusSender(NULL)
 		{
@@ -79,24 +80,24 @@ namespace OpenViBEPlugins
 
 			//Number of Cues:
 			CString l_sSettingValue;
-			m_ui32NumberOfCues = getStaticBoxContext().getSettingCount()/2 -1;
+			m_ui32NumberOfCues = (getStaticBoxContext().getSettingCount() - m_ui32NonCueSettingsCount) / 2;
 
 			//Do we display the images in full screen?
-			getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0, l_sSettingValue);
-			m_bFullScreen=(l_sSettingValue==CString("true")?true:false);
+			m_bFullScreen = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+
+			getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1, l_sSettingValue);
+			m_bScaleImages = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 			//Clear screen stimulation:
-			getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1, l_sSettingValue);
-			m_ui64ClearScreenStimulation=getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sSettingValue);
+			m_ui64ClearScreenStimulation = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
 			//Stimulation ID and images file names for each cue
 			m_vImageNames.resize(m_ui32NumberOfCues);
 			m_vStimulationsId.resize(m_ui32NumberOfCues);
 			for(uint32 i=0; i<m_ui32NumberOfCues; i++)
 			{
-				getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(2*i+2, m_vImageNames[i]);
-				getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(2*i+3, l_sSettingValue);
-				m_vStimulationsId[i]=getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sSettingValue);
+				m_vImageNames[i]     = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), m_ui32NonCueSettingsCount + 2 * i);
+				m_vStimulationsId[i] = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), m_ui32NonCueSettingsCount + 2 * i + 1);
 			}
 
 			//>>>> Initialisation
@@ -105,11 +106,16 @@ namespace OpenViBEPlugins
 
 			//load the gtk builder interface
 			m_pBuilderInterface=gtk_builder_new();
-			gtk_builder_add_from_file(m_pBuilderInterface, OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/openvibe-simple-visualisation-DisplayCueImage.ui", NULL);
-
-			if(!m_pBuilderInterface)
+			if (!m_pBuilderInterface)
 			{
 				getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Couldn't load the interface !";
+				return false;
+			}
+
+			const CString l_sUIFile = OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/openvibe-simple-visualisation-DisplayCueImage.ui";
+			if (!gtk_builder_add_from_file(m_pBuilderInterface, l_sUIFile, NULL))
+			{
+				getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Error << "Could not load the .ui file " << l_sUIFile << "\n";
 				return false;
 			}
 
@@ -142,9 +148,6 @@ namespace OpenViBEPlugins
 					return false;
 				}
 			}
-
-			getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pDrawingArea);
-
 			m_vStimuliQueue.clear();
 
 			m_pStimulusSender = TCPTagging::createStimulusSender();
@@ -152,6 +155,21 @@ namespace OpenViBEPlugins
 			if (!m_pStimulusSender->connect("localhost", "15361"))
 			{
 				this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
+			}
+
+			if (m_bFullScreen)
+			{
+				GtkWidget *l_pWindow = gtk_widget_get_toplevel(m_pDrawingArea);
+				gtk_window_fullscreen(GTK_WINDOW(l_pWindow));
+				gtk_widget_show(l_pWindow);
+
+				// @fixme small mem leak?
+				GdkCursor* l_pCursor = gdk_cursor_new(GDK_BLANK_CURSOR);
+				gdk_window_set_cursor(gtk_widget_get_window(l_pWindow), l_pCursor);
+			}
+			else
+			{
+				getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pDrawingArea);
 			}
 
 			return true;
@@ -166,6 +184,14 @@ namespace OpenViBEPlugins
 			{
 				delete m_pStimulusSender;
 				m_pStimulusSender = NULL;
+			}
+
+			// Close the full screen
+			if (m_bFullScreen)
+			{
+				GtkWidget *l_pWindow = gtk_widget_get_toplevel(m_pDrawingArea);
+				gtk_window_unfullscreen(GTK_WINDOW(l_pWindow));
+				gtk_widget_destroy(l_pWindow);
 			}
 
 			//destroy drawing area
@@ -284,6 +310,14 @@ namespace OpenViBEPlugins
 
 					m_oPendingStimulationSet.removeStimulation(stim);
 
+					// We should show the cue image now. How this works:
+					// - The gtk drawing area is invalidated
+					// - Gtk will request a redraw
+					// - The redraw puts in instructions to render the new image
+					// - The corresponding stimulation is buffered to TCP Tagging 
+					// - Callback to flush the TCP Tagging buffer is registered to be run by gtk once after the rendering
+					// - Gtk renders
+					// - Callback to flush the TCP Tagging buffer is called by gtk
 					if(GTK_WIDGET(m_pDrawingArea)->window)
 					{
 						// this will trigger the callback redraw()
@@ -414,37 +448,54 @@ namespace OpenViBEPlugins
 			const gint l_iWindowWidth = m_pDrawingArea->allocation.width;
 			const gint l_iWindowHeight = m_pDrawingArea->allocation.height;
 
-			if(m_bFullScreen)
-			{
-				gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_vScaledPicture[uint32CueID], 0, 0, 0, 0, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
-			}
-			else
-			{
-				const gint l_iX = (l_iWindowWidth/2) - gdk_pixbuf_get_width(m_vScaledPicture[uint32CueID])/2;
-				const gint l_iY = (l_iWindowHeight/2) - gdk_pixbuf_get_height(m_vScaledPicture[uint32CueID])/2;;
-				gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_vScaledPicture[uint32CueID], 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
-			}
+			// Center image
+			const gint l_iX = (l_iWindowWidth/2) - gdk_pixbuf_get_width(m_vScaledPicture[uint32CueID])/2;
+			const gint l_iY = (l_iWindowHeight/2) - gdk_pixbuf_get_height(m_vScaledPicture[uint32CueID])/2;;
+			gdk_draw_pixbuf(m_pDrawingArea->window, NULL, m_vScaledPicture[uint32CueID], 0, 0, l_iX, l_iY, -1, -1, GDK_RGB_DITHER_NONE, 0, 0);
 		}
 
 		void CDisplayCueImage::resize(uint32 ui32Width, uint32 ui32Height)
 		{
-			for(uint32 i=0; i<m_ui32NumberOfCues; i++)
+			for(uint32 i=0; i<m_vScaledPicture.size(); i++)
 			{
 				if(m_vScaledPicture[i]){ g_object_unref(G_OBJECT(m_vScaledPicture[i])); }
 			}
 
+			if (!m_bScaleImages)
+			{
+				for (uint32 i = 0; i < m_vScaledPicture.size(); i++)
+				{
+					m_vScaledPicture[i] = gdk_pixbuf_copy(m_vOriginalPicture[i]);
+				}
+				return;
+			}
+
+			// Scale
 			if(m_bFullScreen)
 			{
-				for(uint32 i=0; i<m_ui32NumberOfCues; i++)
+				for (uint32 i = 0; i < m_vScaledPicture.size(); i++)
 				{
-					m_vScaledPicture[i] = gdk_pixbuf_scale_simple(m_vOriginalPicture[i], ui32Width, ui32Height, GDK_INTERP_BILINEAR);
+					// Keep aspect ratio when scaling
+					const int l_iWidth = gdk_pixbuf_get_width(m_vOriginalPicture[i]);
+					const int l_iHeight = gdk_pixbuf_get_height(m_vOriginalPicture[i]);
+
+					const float64 l_iWidthScale = ui32Width / static_cast<float64>(l_iWidth);
+					const float64 l_iHeightScale = ui32Height / static_cast<float64>(l_iHeight);
+
+					const float64 l_fMinScale = std::min<float64>(l_iWidthScale, l_iHeightScale);
+
+					const int l_iNewWidth = static_cast<int>(l_fMinScale * l_iWidth);
+					const int l_iNewHeight = static_cast<int>(l_fMinScale * l_iHeight);
+
+					// printf("Old aspect %f new aspect %f\n", l_iWidth / (float)l_iHeight, l_iNewWidth / (float)l_iNewHeight);
+					m_vScaledPicture[i] = gdk_pixbuf_scale_simple(m_vOriginalPicture[i], l_iNewWidth, l_iNewHeight, GDK_INTERP_BILINEAR);
 				}
 			}
 			else
 			{
 				const float l_fX = (float)(ui32Width<64?64:ui32Width);
 				const float l_fY = (float)(ui32Height<64?64:ui32Height);
-				for(uint32 i=0; i<m_ui32NumberOfCues; i++)
+				for(uint32 i=0; i<m_vScaledPicture.size(); i++)
 				{
 					float l_fx = (float)gdk_pixbuf_get_width(m_vOriginalPicture[i]);
 					float l_fy = (float)gdk_pixbuf_get_height(m_vOriginalPicture[i]);

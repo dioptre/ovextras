@@ -52,6 +52,8 @@ namespace OpenViBEPlugins
 
 			void flushQueue(void);					// Sends all accumulated stimuli to the TCP Tagging
 
+			static const OpenViBE::uint32 m_ui32NonCueSettingsCount = 3; // fullscreen + scale + clear
+
 		protected:
 
 			virtual void drawCuePicture(OpenViBE::uint32 uint32CueID);
@@ -64,10 +66,6 @@ namespace OpenViBEPlugins
 			OpenViBEToolkit::TStimulationDecoder<CDisplayCueImage> m_oStimulationDecoder;
 			OpenViBEToolkit::TStimulationEncoder<CDisplayCueImage> m_oStimulationEncoder;
 
-			/*penViBE::Kernel::IAlgorithmProxy* m_pStreamEncoder;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > ip_pStimulationSet;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pMemoryBuffer;*/
-
 			// For the display of the images:
 			OpenViBE::boolean m_bImageRequested;        //when true: a new image must be drawn
 			OpenViBE::int32   m_int32RequestedImageID;  //ID of the requested image. -1 => clear the screen
@@ -76,8 +74,8 @@ namespace OpenViBEPlugins
 			OpenViBE::int32   m_int32DrawnImageID;      //ID of the drawn image. -1 => clear the screen
 
 			// Data corresponding to each cue image. Could be refactored to a vector of structs.
-			std::vector<::GdkPixbuf*> m_vOriginalPicture;
-			std::vector<::GdkPixbuf*> m_vScaledPicture;
+			std::vector< GdkPixbuf* > m_vOriginalPicture;
+			std::vector< GdkPixbuf* > m_vScaledPicture;
 			std::vector<OpenViBE::uint64> m_vStimulationsId;
 			std::vector<OpenViBE::CString> m_vImageNames;
 
@@ -88,6 +86,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint32   m_ui32NumberOfCues;
 			OpenViBE::uint64   m_ui64ClearScreenStimulation;
 			OpenViBE::boolean  m_bFullScreen;
+			OpenViBE::boolean  m_bScaleImages;
 
 			//Start and end time of the last buffer
 			OpenViBE::uint64 m_ui64StartTime;
@@ -99,7 +98,7 @@ namespace OpenViBEPlugins
 
 			// For queuing stimulations to the TCP Tagging
 			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
-			guint m_uiIdleFuncTag;
+			guint m_uiIdleFuncTag;								// This is not really used, its for debugging purposes
 			boost::mutex m_oIdleFuncMutex;
 			TCPTagging::IStimulusSender* m_pStimulusSender;
 		};
@@ -110,25 +109,44 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean onSettingAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				OpenViBE::CString l_sDefaultName = OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/p300-magic-card/02.png";
+				const OpenViBE::uint32 l_ui32PreviousCues = ((ui32Index - 1) - CDisplayCueImage::m_ui32NonCueSettingsCount) / 2 + 1;
+				const OpenViBE::uint32 l_ui32CueNumber = l_ui32PreviousCues + 1;
 
-				rBox.setSettingDefaultValue(ui32Index, l_sDefaultName.toASCIIString());
-				rBox.setSettingValue(ui32Index, l_sDefaultName.toASCIIString());
+				char l_sValue[1024];
+				sprintf(l_sValue, "${Path_Data}/plugins/simple-visualisation/p300-magic-card/%02d.png", l_ui32CueNumber);
 
-				char l_sName[1024];
-				sprintf(l_sName, "OVTK_StimulationId_Label_%02X", ui32Index/2);
-				rBox.addSetting("", OV_TypeId_Stimulation, l_sName);
-				rBox.setSettingDefaultValue(ui32Index+1, l_sName);
-				rBox.setSettingValue(ui32Index+1, l_sName);
+				rBox.setSettingDefaultValue(ui32Index, l_sValue);
+				rBox.setSettingValue(ui32Index, l_sValue);
 
-				this->checkSettingNames(rBox);
+				sprintf(l_sValue, "OVTK_StimulationId_Label_%02X", l_ui32CueNumber);
+				rBox.addSetting("", OV_TypeId_Stimulation, l_sValue);
+				rBox.setSettingDefaultValue(ui32Index+1, l_sValue);
+				rBox.setSettingValue(ui32Index+1, l_sValue);
+
+				checkSettingNames(rBox);
+
 				return true;
 			}
 
 			virtual OpenViBE::boolean onSettingRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
-				rBox.removeSetting((ui32Index/2)*2);
-				this->checkSettingNames(rBox);
+				// Remove also the associated setting in the other slot
+				const OpenViBE::uint32 l_ui32IndexNumber = (ui32Index - CDisplayCueImage::m_ui32NonCueSettingsCount);
+
+				if (l_ui32IndexNumber % 2 == 0)
+				{
+					// This was the 'cue image' setting, remove 'stimulation setting'
+					// when onSettingRemoved is called, ui32Index has already been removed, so using it will effectively mean 'remove next setting'.
+					rBox.removeSetting(ui32Index);
+				}
+				else
+				{
+					// This was the 'stimulation setting'. Remove the 'cue image' setting.
+					rBox.removeSetting(ui32Index - 1);
+				}
+
+				checkSettingNames(rBox);
+
 				return true;
 			}
 
@@ -136,17 +154,18 @@ namespace OpenViBEPlugins
 
 		private:
 
+			// This function is used to make sure the setting names and types are correct
 			OpenViBE::boolean checkSettingNames(OpenViBE::Kernel::IBox& rBox)
 			{
 				char l_sName[1024];
-				for(OpenViBE::uint32 i=2; i<rBox.getSettingCount()-1; i+=2)
+				for (OpenViBE::uint32 i = CDisplayCueImage::m_ui32NonCueSettingsCount; i < rBox.getSettingCount() - 1; i += 2)
 				{
-					sprintf(l_sName, "Cue Image %i", i/2);
+					sprintf(l_sName, "Cue Image %i", i / 2);
 					rBox.setSettingName(i, l_sName);
 					rBox.setSettingType(i, OV_TypeId_Filename);
-					sprintf(l_sName, "Stimulation %i", i/2);
-					rBox.setSettingName(i+1, l_sName);
-					rBox.setSettingType(i+1, OV_TypeId_Stimulation);
+					sprintf(l_sName, "Stimulation %i", i / 2);
+					rBox.setSettingName(i + 1, l_sName);
+					rBox.setSettingType(i + 1, OV_TypeId_Stimulation);
 				}
 				return true;
 			}
@@ -159,10 +178,10 @@ namespace OpenViBEPlugins
 		{
 		public:
 			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Display cue image"); }
-			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Joan Fruitet"); }
-			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA Sophia"); }
+			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Joan Fruitet, Jussi T. Lindgren"); }
+			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria Sophia, Inria Rennes"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Display cue images when receiving stimulations"); }
-			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Display cue images when receiving specified stimulations. Forwards the stimulations to AS using TCP Tagging."); }
+			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Display cue images when receiving specified stimulations. Forwards the stimulations to the AS using TCP Tagging."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualisation/Presentation"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.2"); }
 			virtual void release(void)                                   { }
@@ -182,6 +201,7 @@ namespace OpenViBEPlugins
 				rPrototype.addInput  ("Stimulations", OV_TypeId_Stimulations);
 				rPrototype.addOutput ("Stimulations (deprecated)", OV_TypeId_Stimulations);
 				rPrototype.addSetting("Display images in full screen", OV_TypeId_Boolean, "false");
+				rPrototype.addSetting("Scale images to fit", OV_TypeId_Boolean, "false");
 				rPrototype.addSetting("Clear screen Stimulation", OV_TypeId_Stimulation, "OVTK_StimulationId_VisualStimulationStop");
 				rPrototype.addSetting("Cue Image 1", OV_TypeId_Filename, "${Path_Data}/plugins/simple-visualisation/p300-magic-card/01.png");
 				rPrototype.addSetting("Stimulation 1", OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");

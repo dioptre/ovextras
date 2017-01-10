@@ -6,7 +6,7 @@ Detailed description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_DisplayCueImage_Description|
- Displays an image or another according to the input stimulations. User can define as many image as needed, with one stimulation associated to each image. A last stimulation clear the screen.
+ Displays different images according to the input stimulations. User can define as many images as needed, with one stimulation associated to each image. A specific stimulation clears the screen.
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Description|
 __________________________________________________________________
 
@@ -28,7 +28,7 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Outputs|
 
  * |OVP_DocBegin_BoxAlgorithm_DisplayCueImage_Output1|
- The input stimulations are output when the GTK rendering is actually finished (image is displayed or scren is cleared). These stimulations have precise timing, for the applications that need precise  synchronization.
+ The input stimulations are output when the GTK rendering is actually finished (image is displayed or screen is cleared). This output is deprecated.
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Output1|
 __________________________________________________________________
 
@@ -39,20 +39,24 @@ __________________________________________________________________
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Settings|
 
  * |OVP_DocBegin_BoxAlgorithm_DisplayCueImage_Setting1|
- Uses or not the full widget window to display the image.
+Render the images in fullscreen, centered.
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Setting1|
 
  * |OVP_DocBegin_BoxAlgorithm_DisplayCueImage_Setting2|
- The stimulation that clear the screen, leaving it black. 
+Scale the images to fit the displayed area.
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Setting2|
-
+ 
  * |OVP_DocBegin_BoxAlgorithm_DisplayCueImage_Setting3|
- The first image to display.
+The stimulation that clears the screen to black.
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Setting3|
 
  * |OVP_DocBegin_BoxAlgorithm_DisplayCueImage_Setting4|
- The stimulation used to display the first image. 
+The first image to display.
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Setting4|
+
+ * |OVP_DocBegin_BoxAlgorithm_DisplayCueImage_Setting5|
+The stimulation used to display the first image. 
+ * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Setting5|
 __________________________________________________________________
 
 Online visualisation settings
@@ -67,6 +71,7 @@ Examples description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_DisplayCueImage_Examples|
+The Display Cue Image box can be used to make scenarios that record Event-Related Potentials (ERPs) based on visual events. Use the Lua Stimulator box with a .lua script to create a timeline of stimulations to drive the box (e.g. SSVEP scenarios have examples of such lua scripts). Then, capture the recorded data and events with the Acquisition Client box and feed to Generic Stream Writer.
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Examples|
 __________________________________________________________________
 
@@ -74,5 +79,6 @@ Miscellaneous description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_DisplayCueImage_Miscellaneous|
+After rendering each image, the Display Cue Image box sends the corresponding stimulations to the Acquisition Server using TCP Tagging.
  * |OVP_DocEnd_BoxAlgorithm_DisplayCueImage_Miscellaneous|
  */
