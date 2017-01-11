@@ -57,6 +57,9 @@ namespace OpenViBEPlugins
 			return TRUE;
 		}
 
+		// n.b. This reacts immediately to the received stimulation and doesn't use the date. Usually stimulations come from the upstream with
+		// chunks having a very narrow time range, so its alright for Graz that changes state only rarely. Note if multiple stimulations are 
+		// received in the same chunk, they'll be passed to TCP Tagging with the true delay between them lost.
 		void CGrazVisualization::setStimulation(const uint32 ui32StimulationIndex, const uint64 ui64StimulationIdentifier, const uint64 ui64StimulationDate)
 		{
 			/*

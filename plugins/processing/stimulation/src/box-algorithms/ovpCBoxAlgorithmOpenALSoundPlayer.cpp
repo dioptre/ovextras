@@ -141,15 +141,21 @@ boolean CBoxAlgorithmOpenALSoundPlayer::process(void)
 
 			for(uint32 j=0; j<l_pStimulationSet->getStimulationCount(); j++)
 			{
-				if(l_pStimulationSet->getStimulationIdentifier(j) == m_ui64PlayTrigger)
+				const uint64 l_ui64Stimulation = l_pStimulationSet->getStimulationIdentifier(j);
+				if(l_ui64Stimulation == m_ui64PlayTrigger)
 				{
 					playSound();
 					m_bEndOfSoundSent = false;
 					m_bStartOfSoundSent = false;
 				}
-				if(l_pStimulationSet->getStimulationIdentifier(j) == m_ui64StopTrigger)
+				else if(l_ui64Stimulation == m_ui64StopTrigger)
 				{
 					stopSound();
+				}
+				else
+				{
+					// Immediate passthrough
+					m_pStimulusSender->sendStimulation(l_ui64Stimulation);
 				}
 			}
 		}
