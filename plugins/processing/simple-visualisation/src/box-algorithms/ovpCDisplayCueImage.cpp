@@ -174,6 +174,12 @@ namespace OpenViBEPlugins
 				getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pDrawingArea);
 			}
 
+			// Invalidate the drawing area in order to get the image resize already called at this point. The actual run will be smoother.
+			if (GTK_WIDGET(m_pDrawingArea)->window)
+			{
+				gdk_window_invalidate_rect(GTK_WIDGET(m_pDrawingArea)->window, NULL, true);
+			}
+
 			return true;
 		}
 
@@ -283,6 +289,8 @@ namespace OpenViBEPlugins
 			l_pBoxIO->markOutputAsReadyToSend(0, m_ui64LastOutputChunkDate, this->getPlayerContext().getCurrentTime());
 			m_ui64LastOutputChunkDate = this->getPlayerContext().getCurrentTime();
 
+			bool l_bStimulusMatchedBefore = false;
+
 			// We check if some images must be displayed
 			for(uint32 stim = 0; stim < m_oPendingStimulationSet.getStimulationCount() ; )
 			{
@@ -290,16 +298,15 @@ namespace OpenViBEPlugins
 				const uint64 l_ui64Time = this->getPlayerContext().getCurrentTime();
 				if (l_ui64StimDate < l_ui64Time)
 				{
-					const float64 l_f64Delay = ITimeArithmetics::timeToSeconds(l_ui64Time - l_ui64StimDate) * 1000; // delay in ms
-					if (l_f64Delay>50)
-						getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Image was late: "<< l_f64Delay <<" ms \n";
-
 					const uint64 l_ui64StimID = m_oPendingStimulationSet.getStimulationIdentifier(stim);
+					bool l_bStimulusMatchedNow = false;
 					if(l_ui64StimID == m_ui64ClearScreenStimulation)
 					{
 						if (m_bImageRequested)
-							getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_ImportantWarning << "One image was skipped => Not enough time between two images!!\n";
+							getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_ImportantWarning << "Clear screen was received before previous cue image in slot " << m_int32RequestedImageID+1  << " was displayed!!\n";
 						m_bImageRequested = true;
+						l_bStimulusMatchedBefore = true;
+						l_bStimulusMatchedNow = true;
 						m_int32RequestedImageID = -1;
 					}
 					else
@@ -309,37 +316,68 @@ namespace OpenViBEPlugins
 							if(l_ui64StimID == m_vStimulationsId[i])
 							{
 								if (m_bImageRequested)
-									getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_ImportantWarning << "One image was skipped => Not enough time between two images!!\n";
+									getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_ImportantWarning 
+										<< "Previous request of slot " << m_int32RequestedImageID+1 << " image was replaced by request for slot " << i+1 << " => Not enough time between two images!!\n";
 								m_bImageRequested = true;
+								l_bStimulusMatchedBefore = true;
+								l_bStimulusMatchedNow = true;
 								m_int32RequestedImageID = i;
 								break;
 							}
 						}
 					}
 
-					m_oPendingStimulationSet.removeStimulation(stim);
-
-					// We should show the cue image now. How this works:
-					// - The gtk drawing area is invalidated
-					// - Gtk will request a redraw
-					// - The redraw puts in instructions to render the new image
-					// - The corresponding stimulation is buffered to TCP Tagging 
-					// - Callback to flush the TCP Tagging buffer is registered to be run by gtk once after the rendering
-					// - Gtk renders
-					// - Callback to flush the TCP Tagging buffer is called by gtk
-					if(GTK_WIDGET(m_pDrawingArea)->window)
+					if (l_bStimulusMatchedNow)
 					{
-						// this will trigger the callback redraw()
-						gdk_window_invalidate_rect(GTK_WIDGET(m_pDrawingArea)->window,NULL,true);
+						// Queue the recognized stimulation to TCP Tagging to be sent after rendering
+						const uint64 l_ui64SentStimulation = (m_int32RequestedImageID >= 0 ? m_vStimulationsId[m_int32RequestedImageID] : m_ui64ClearScreenStimulation);
+						m_vStimuliQueue.push_back(l_ui64SentStimulation);
+					}
+					else
+					{
+						// Pass unrecognized stimulations to TCP Tagging. Be careful when modifying the code that the
+						// stimuli received by AS keep their original time order despite the delays introduced to rendered stimuli.
+
+						if (l_bStimulusMatchedBefore)
+						{
+							// We have queued a cue to be drawn, so we should delay this stimulation to TCP Tagging to be processed after the cue rendering to keep the time order
+							m_vStimuliQueue.push_back(l_ui64StimID);
+						}
+						else
+						{
+							// We have not yet queued anything to be drawn, so we can forward immediately.
+							m_pStimulusSender->sendStimulation(l_ui64StimID);
+						}
 					}
 
+					const float64 l_f64Delay = ITimeArithmetics::timeToSeconds(l_ui64Time - l_ui64StimDate) * 1000; // delay in ms
+					if (l_f64Delay>50)
+						getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Stimulation " << l_ui64StimID << " was late in processClock() : "<< l_f64Delay <<" ms \n";
+
+					m_oPendingStimulationSet.removeStimulation(stim);
 				}
 				else
 				{
-					// Stim is still in the future, skip for now
+					// Stim is still in the future, skip it for now
 					stim++;
 				}
 			}
+
+			// We should show the cue image now. How this works:
+			// - The gtk drawing area is invalidated
+			// - Gtk will request a redraw
+			// - The redraw puts in instructions to render the new image
+			// - The corresponding stimulation is buffered to TCP Tagging 
+			// - Callback to flush the TCP Tagging buffer is registered to be run by gtk once after the rendering
+			// - Gtk renders
+			// - Callback to flush the TCP Tagging buffer is called by gtk
+			if (m_bImageRequested && GTK_WIDGET(m_pDrawingArea)->window)
+			{
+				// this will trigger the callback redraw(). Since the draw will happen after the exit from this function, no point calling this in the loop above
+				gdk_window_invalidate_rect(GTK_WIDGET(m_pDrawingArea)->window, NULL, true);
+			}
+
+
 
 			return true;
 		}
@@ -368,56 +406,32 @@ namespace OpenViBEPlugins
 					}
 					if(m_oStimulationDecoder.isBufferReceived())
 					{
-						for(uint32 stim = 0; stim < m_oStimulationDecoder.getOutputStimulationSet()->getStimulationCount(); stim++)
+						for (uint32 stim = 0; stim < m_oStimulationDecoder.getOutputStimulationSet()->getStimulationCount(); stim++)
 						{
-							const uint64 l_ui64StimID =  m_oStimulationDecoder.getOutputStimulationSet()->getStimulationIdentifier(stim);
+							// We always add the stimulations to the set to allow passing them to TCP Tagging in order in processClock()
+							const uint64 l_ui64StimID = m_oStimulationDecoder.getOutputStimulationSet()->getStimulationIdentifier(stim);
+							const uint64 l_ui64StimDate = m_oStimulationDecoder.getOutputStimulationSet()->getStimulationDate(stim);
+							const uint64 l_ui64StimDuration = m_oStimulationDecoder.getOutputStimulationSet()->getStimulationDuration(stim);
 
-							// Is it a clear screen or a stim we recognize?
-							boolean l_bAddStim = false;
-							if (l_ui64StimID == m_ui64ClearScreenStimulation)
+							const uint64 l_ui64Time = this->getPlayerContext().getCurrentTime();
+							if (l_ui64StimDate < l_ui64Time)
 							{
-								l_bAddStim = true;
-							}
-							else
-							{
-								for (uint32 i = 0; i < m_ui32NumberOfCues; i++)
-								{
-									if (l_ui64StimID == m_vStimulationsId[i])
-									{
-										l_bAddStim = true;
-										break;
-									}
-								}
+								const float64 l_f64Delay = ITimeArithmetics::timeToSeconds(l_ui64Time - l_ui64StimDate) * 1000; //delay in ms
+								if (l_f64Delay>50)
+									getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Stimulation " << l_ui64StimID << " was received late: " << l_f64Delay << " ms \n";
 							}
 
-							if (l_bAddStim)
+							if (l_ui64StimDate < l_pBoxIO->getInputChunkStartTime(input, chunk))
 							{
-								const uint64 l_ui64StimDate =     m_oStimulationDecoder.getOutputStimulationSet()->getStimulationDate(stim);
-								const uint64 l_ui64StimDuration = m_oStimulationDecoder.getOutputStimulationSet()->getStimulationDuration(stim);
-
-								const uint64 l_ui64Time = this->getPlayerContext().getCurrentTime();
-								if (l_ui64StimDate < l_ui64Time)
-								{
-									const float64 l_f64Delay = ITimeArithmetics::timeToSeconds(l_ui64Time - l_ui64StimDate) * 1000; //delay in ms
-									if (l_f64Delay>50)
-										getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Warning << "Stimulation was received late: "<< l_f64Delay <<" ms \n";
-								}
-
-								if (l_ui64StimDate < l_pBoxIO->getInputChunkStartTime(input, chunk))
-								{
-									this->getLogManager() << LogLevel_ImportantWarning << "Input Stimulation Date before beginning of the buffer\n";
-								}
-
-								m_oPendingStimulationSet.appendStimulation(
-											l_ui64StimID,
-											l_ui64StimDate,
-											l_ui64StimDuration);
+								this->getLogManager() << LogLevel_ImportantWarning << "Input Stimulation Date before beginning of the buffer\n";
 							}
 
-
+							m_oPendingStimulationSet.appendStimulation(
+								l_ui64StimID,
+								l_ui64StimDate,
+								l_ui64StimDuration);
 						}
 					}
-					l_pBoxIO->markInputAsDeprecated(input, chunk);
 				}
 			}
 
@@ -437,19 +451,11 @@ namespace OpenViBEPlugins
 				m_bImageDrawn = true;
 				m_int32DrawnImageID = m_int32RequestedImageID;
 
-				// TCP Tagging block
+				// Set the handler to push out the queued stims after the actual rendering
+				if (m_uiIdleFuncTag == 0)
 				{
-					// Queue the stimulation
-					const uint64 l_ui64SentStimulation = (m_int32RequestedImageID >= 0 ? m_vStimulationsId[m_int32RequestedImageID] : m_ui64ClearScreenStimulation);
-					m_vStimuliQueue.push_back(l_ui64SentStimulation);
-
-					// Set the handler to push out the stim after the actual rendering
-					if (m_uiIdleFuncTag == 0)
-					{
-						m_uiIdleFuncTag = g_idle_add(DisplayCueImage_flush_callback, this);
-					}
+					m_uiIdleFuncTag = g_idle_add(DisplayCueImage_flush_callback, this);
 				}
-
 			}
 		}
 
