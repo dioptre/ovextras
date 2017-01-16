@@ -339,5 +339,7 @@ boolean CDriverEGIAmpServer::execute(const char* sScriptFilename)
 		}
 	}
 
+	fclose(l_pFile);
+
 	return true;
 }
