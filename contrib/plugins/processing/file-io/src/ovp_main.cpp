@@ -10,6 +10,10 @@
 #include "box-algorithms/ovpCBoxAlgorithmBrainampFileWriter.h"
 // @END GIPSA
 
+#ifdef TARGET_HAS_Protobuf
+#include "box-algorithms/muse/ovpCBoxAlgorithmMuseFileReader.h"
+#endif
+
 OVP_Declare_Begin();
 
 // @BEGIN CICIT-GARCHES
@@ -25,6 +29,11 @@ OVP_Declare_Begin();
 
 	OVP_Declare_New(OpenViBEPlugins::FileIO::CBoxAlgorithmBrainampFileWriterDesc)
 // @END GIPSA
+
+#ifdef TARGET_HAS_Protobuf
+	OVP_Declare_New(OpenViBEPlugins::FileIO::CBoxAlgorithmMuseFileReaderDesc)
+#endif
+
 
 OVP_Declare_End();
 	
