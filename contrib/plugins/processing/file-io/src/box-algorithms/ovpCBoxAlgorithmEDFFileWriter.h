@@ -47,9 +47,7 @@ namespace OpenViBEPlugins
 			int m_iSampleFrequency;
 			int m_iNumberOfChannels;
 			int m_iNumberOfSamplesPerChunk;
-			std::queue < OpenViBE::float64, std::deque<OpenViBE::float64> > buffer;
-			double * m_pTemporyBuffer;
-			double * m_pTemporyBufferToWrite;
+			std::queue < OpenViBE::float64, std::deque<OpenViBE::float64> > m_vBuffer;
 			//int * m_pTemporyBuffer;
 			//int * m_pTemporyBufferToWrite;
 
