@@ -141,7 +141,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 	if (NumDevices() > 1 && m_ui32AcquiredChannelCount != NumDevices() * GTEC_NUM_CHANNELS)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Warning << "You have selected " << m_ui32AcquiredChannelCount 
-			<< " channels in a " << NumDevices()*GTEC_NUM_CHANNELS << " channel multiamp situation. If this is intentional, please ignore this warning.\n";
+			<< " channels in a " << NumDevices()*GTEC_NUM_CHANNELS << " channel setup. If this is intentional, please ignore this warning.\n";
 	}
 
 	m_ui32GlobalImpedanceIndex = 0;
@@ -200,8 +200,8 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 		}
 	}
 
-	// Make the channel map
-	
+	// Make the channel map that converts from global system level indexes to gtec and openvibe indexes
+	// This mapping is used to handle situations where the user toggles event channels on/off, changes number of channels, etc.
 	const uint32 l_ui32TotalChannels = (GTEC_NUM_CHANNELS + 1) * NumDevices();
 	m_vChannelMap.clear();
 	m_vChannelMap.resize( l_ui32TotalChannels );
@@ -209,35 +209,41 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 	{
 		const uint32 l_ui32NumChannelsPerDevice = (GTEC_NUM_CHANNELS + 1);
 		const uint32 l_ui32DeviceIndex = i / l_ui32NumChannelsPerDevice;
-		// const uint32 l_ui32ChannelIndex = i % l_ui32NumChannelsPerDevice;
+		const uint32 l_ui32ChannelIndex = i % l_ui32NumChannelsPerDevice;
+
+		m_vChannelMap[i].m_i32GtecDeviceIndex = l_ui32DeviceIndex;
+		m_vChannelMap[i].m_i32GtecChannelIndex = l_ui32ChannelIndex;
 
 		if ((i + 1) % (GTEC_NUM_CHANNELS + 1) == 0)
 		{
-			m_vChannelMap[i].l_i32Index = (m_bTriggerInputEnabled ? (l_ui32SignalChannels + l_ui32EventChannels) : -1);
-			m_vChannelMap[i].l_i32OldIndex = -1;
-			m_vChannelMap[i].l_bIsEventChannel = true;
+			// This is the digital IO or event channel
+			m_vChannelMap[i].m_i32Index = (m_bTriggerInputEnabled ? (l_ui32SignalChannels + l_ui32EventChannels) : -1);
+			m_vChannelMap[i].m_i32OldIndex = -1;
+			m_vChannelMap[i].m_bIsEventChannel = true;
 			if (m_bTriggerInputEnabled) {
 				l_ui32EventChannels++;
 			}
 		}
 		else if (l_ui32SignalChannels < m_ui32AcquiredChannelCount)
 		{
-			m_vChannelMap[i].l_i32Index = l_ui32SignalChannels + l_ui32EventChannels;
-			m_vChannelMap[i].l_i32OldIndex = l_ui32SignalChannels;
-			m_vChannelMap[i].l_bIsEventChannel = false;
+			// This is a normal signal channel
+			m_vChannelMap[i].m_i32Index = l_ui32SignalChannels + l_ui32EventChannels;
+			m_vChannelMap[i].m_i32OldIndex = l_ui32SignalChannels;
+			m_vChannelMap[i].m_bIsEventChannel = false;
 			l_ui32SignalChannels++;
 		}
 		else
 		{
-			m_vChannelMap[i].l_i32Index = -1;
-			m_vChannelMap[i].l_i32OldIndex = -1;
-			m_vChannelMap[i].l_bIsEventChannel = false;
+			// Unused channel
+			m_vChannelMap[i].m_i32Index = -1;
+			m_vChannelMap[i].m_i32OldIndex = -1;
+			m_vChannelMap[i].m_bIsEventChannel = false;
 		}
 //		std::cout << "cm: " << i << " -> " << m_vChannelMap[i].l_i32Index << ", old=" << m_vChannelMap[i].l_i32OldIndex 
 //			<< ", event=" << m_vChannelMap[i].l_bIsEventChannel << "\n";
 	}	
 
-	// Take into account user might or might not want event channels + add amp name if requested
+	// Take into account user might (or might not) want event channels + add amp name if requested
 	remapChannelNames();
 
 	return true;
@@ -461,7 +467,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 
 		for (uint32 i = 0; i < l_ui32TotalChannels; i++)
 		{
-			const int32 l_i32OutputChannel = m_vChannelMap[i].l_i32Index;
+			const int32 l_i32OutputChannel = m_vChannelMap[i].m_i32Index;
 			if (l_i32OutputChannel >= 0)
 			{
 				for (uint32 j = 0; j < NUMBER_OF_SCANS; j++)
@@ -481,17 +487,25 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 	}
     else
 	{
-		if(m_rDriverContext.isImpedanceCheckRequested())
+		if (m_rDriverContext.isImpedanceCheckRequested())
 		{
-			const uint32 l_ui32ChannelsPerDevice = (GTEC_NUM_CHANNELS + 1);
+			// The impedance check loops over 'openvibe' channels. Look up the corresponding 'openvibe channel' from the hardware channel list.
+			size_t l_iGlobalIndex = 0;
+			for (size_t k = 0; k < m_vChannelMap.size(); k++) {
+				if (m_vChannelMap[k].m_i32Index == m_ui32GlobalImpedanceIndex) {
+					l_iGlobalIndex = k;
+					break;
+				}
+			}
 
-			const uint32 l_ui32NumChannels = m_ui32AcquiredChannelCount;
-			const uint32 l_ui32DeviceIndex = m_ui32GlobalImpedanceIndex / l_ui32ChannelsPerDevice;
-			const uint32 l_ui32ChannelIndex = m_ui32GlobalImpedanceIndex % l_ui32ChannelsPerDevice;
+			const uint32 l_ui32DeviceIndex = m_vChannelMap[l_iGlobalIndex].m_i32GtecDeviceIndex;
+			const uint32 l_ui32ChannelIndex = m_vChannelMap[l_iGlobalIndex].m_i32GtecChannelIndex + 1;
+			const bool l_bIsEventChannel = m_vChannelMap[l_iGlobalIndex].m_bIsEventChannel;
+			// m_rDriverContext.getLogManager() << LogLevel_Info << "Channel " << m_ui32GlobalImpedanceIndex + 1 << " -> "
+			//	<< l_ui32DeviceIndex << " : " << l_ui32ChannelIndex << "\n";
 
-			if (m_bTriggerInputEnabled && l_ui32ChannelIndex == GTEC_NUM_CHANNELS)
+			if (l_bIsEventChannel)
 			{
-				// This is the event channel
 				m_rDriverContext.updateImpedance(m_ui32GlobalImpedanceIndex, 0);
 			}
 			else
@@ -499,10 +513,10 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 				HANDLE o_pDevice = m_vGDevices[l_ui32DeviceIndex].handle;
 
 				double l_dImpedance = DBL_MAX;
-				if (!::GT_GetImpedance(o_pDevice, l_ui32ChannelIndex + 1, &l_dImpedance))
+				if (!::GT_GetImpedance(o_pDevice, l_ui32ChannelIndex, &l_dImpedance))
 				{
-					m_rDriverContext.getLogManager() << LogLevel_Error << "Impedance check failed for channel " << m_ui32GlobalImpedanceIndex + 1 
-						<< " (amp " << l_ui32DeviceIndex+1 << ", chn " << l_ui32ChannelIndex+1 << ")"
+					m_rDriverContext.getLogManager() << LogLevel_Error << "Impedance check failed for channel " << m_ui32GlobalImpedanceIndex + 1
+						<< " (amp " << l_ui32DeviceIndex + 1 << ", chn " << l_ui32ChannelIndex << ")"
 						<< ". The amp may need a reset.\n";
 				}
 				else
@@ -512,7 +526,8 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 
 				if (l_dImpedance < 0)
 				{
-					l_dImpedance *= -1;
+					m_rDriverContext.getLogManager() << LogLevel_Trace << "Channel " << m_ui32GlobalImpedanceIndex + 1 << " had negative impedance " << l_dImpedance << ", set to a high value instead.\n";
+					l_dImpedance = 999 * 1000;
 				}
 
 				m_rDriverContext.updateImpedance(m_ui32GlobalImpedanceIndex, l_dImpedance);
@@ -522,8 +537,11 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 			m_ui32GlobalImpedanceIndex %= m_oHeader.getChannelCount();
 
 			// Mark next channel as being measured
-			m_rDriverContext.updateImpedance(m_ui32GlobalImpedanceIndex, -1);
-
+			if (m_oHeader.getChannelCount() > 1)
+			{
+				// Do this only if there's more than 1 channel selected as otherwise AS will always show 'Measuring...'
+				m_rDriverContext.updateImpedance(m_ui32GlobalImpedanceIndex, -1);
+			}
 			m_bReconfigurationRequired = true;
 		}
 		else
@@ -949,13 +967,15 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 	int32 nrOfFilters;
 	const float32 mySamplingRate = static_cast<float32>(m_oHeader.getSamplingFrequency());
 
+	m_rDriverContext.getLogManager() << LogLevel_Trace << getSerialByHandler(o_pDevice).c_str() << ": Notch filter index " << m_i32NotchFilterIndex << ", bandpass filter index " << m_i32BandPassFilterIndex << "\n";
+
 	//Set BandPass
 	
 	// get the number of available filters
 	status = GT_GetNumberOfFilter(&nrOfFilters);
 	if (status==false) 
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the number of dsp filters! Filtering is disabled.\n";	
+		m_rDriverContext.getLogManager() << LogLevel_Error << getSerialByHandler(o_pDevice).c_str() << ": Could not get the number of dsp filters!Filtering is disabled.\n";	
 		return;
 	}
 
@@ -966,7 +986,7 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 	status = GT_GetFilterSpec(filters);
 	if (status==false) 
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the list of dsp filters! Filtering is disabled.\n";
+		m_rDriverContext.getLogManager() << LogLevel_Error << getSerialByHandler(o_pDevice).c_str() << ": Could not get the list of dsp filters! Filtering is disabled.\n";
 		delete[] filters;
 		return;
 	}
@@ -976,15 +996,20 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 		status = GT_SetBandPass(o_pDevice, i, m_i32BandPassFilterIndex);
 		if (status==false) 
 		{ 
-			m_rDriverContext.getLogManager() << LogLevel_Error << "Could not set band pass filter on channel " << i << " on device " << getSerialByHandler(o_pDevice).c_str() << "\n";
+			m_rDriverContext.getLogManager() << LogLevel_Error << getSerialByHandler(o_pDevice).c_str() << ": Could not set band pass filter on channel " << i << "\n";
 			delete[] filters;
 			return;
 		}
 	}
 	
-	if (m_i32BandPassFilterIndex ==-1) m_rDriverContext.getLogManager() << LogLevel_Info << "No BandPass filter applied.\n";
-	else m_rDriverContext.getLogManager() << LogLevel_Info << "Bandpass filter applied: between " << filters[m_i32BandPassFilterIndex].fu << " and " << filters[m_i32BandPassFilterIndex].fo << ", order = " << filters[m_i32BandPassFilterIndex].order << ", type = " << ((filters[m_i32BandPassFilterIndex].type == 1) ? "butterworth" : "chebyshev") << ", frequency = " << mySamplingRate << "\n";
-	
+	if (m_i32BandPassFilterIndex == -1)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Info << getSerialByHandler(o_pDevice).c_str() << ": No BandPass filter applied.\n";
+	}
+	else
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Info << getSerialByHandler(o_pDevice).c_str() << ": Bandpass filter applied: between " << filters[m_i32BandPassFilterIndex].fu << " and " << filters[m_i32BandPassFilterIndex].fo << ", order = " << filters[m_i32BandPassFilterIndex].order << ", type = " << ((filters[m_i32BandPassFilterIndex].type == 1) ? "butterworth" : "chebyshev") << ", frequency = " << mySamplingRate << "\n";
+	}
 	delete[] filters;
 
 	//Set Notch
@@ -993,7 +1018,7 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 	status = GT_GetNumberOfNotch(&nrOfFilters);
 	if (status==false) 
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the number of notch filters! Filtering is disabled.\n";
+		m_rDriverContext.getLogManager() << LogLevel_Error << getSerialByHandler(o_pDevice).c_str() << ": Could not get the number of notch filters! Filtering is disabled.\n";
 		return;
 	}
 
@@ -1004,7 +1029,7 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 	status = GT_GetNotchSpec(filters);
 	if (status==false) 
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not get the list of notch filters! Filtering is disabled.\n";
+		m_rDriverContext.getLogManager() << LogLevel_Error << getSerialByHandler(o_pDevice).c_str() << ": Could not get the list of notch filters! Filtering is disabled.\n";
 		delete[] filters;
 		return;
 	}
@@ -1014,14 +1039,29 @@ void CDriverGTecGUSBamp::ConfigFiltering(HANDLE o_pDevice)
 		status = GT_SetNotch(o_pDevice, i, m_i32NotchFilterIndex);
 		if (status==0) 
 		{ 
-			m_rDriverContext.getLogManager() << LogLevel_Error << "Could not set notch filter on channel " << i << " on device " << getSerialByHandler(o_pDevice).c_str() << "\n";
+			m_rDriverContext.getLogManager() << LogLevel_Error << getSerialByHandler(o_pDevice).c_str() << ": Could not set notch filter on channel " << i << "\n";
 			delete[] filters;
 			return;
 		}
 	}
 	
-	if (m_i32NotchFilterIndex ==-1) m_rDriverContext.getLogManager() << LogLevel_Info << "No Notch filter applied.\n";
-	else m_rDriverContext.getLogManager() << LogLevel_Info << "Notch filter applied: " << (filters[m_i32NotchFilterIndex].fo +  filters[m_i32NotchFilterIndex].fu) /2 << " Hz.\n";	
+	if (m_i32NotchFilterIndex == -1)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Info << getSerialByHandler(o_pDevice).c_str() << ": No Notch filter applied.\n";
+	}
+	else
+	{
+		const uint32 l_ui32Frequency = static_cast<uint32>((filters[m_i32NotchFilterIndex].fo + filters[m_i32NotchFilterIndex].fu) / 2);
+		std::string l_sCountry("Unknown countries");
+		if (l_ui32Frequency == 50) {
+			l_sCountry = "Europe";
+		}
+		else if (l_ui32Frequency == 60) {
+			l_sCountry = "USA";	
+		}
+		
+		m_rDriverContext.getLogManager() << LogLevel_Info << getSerialByHandler(o_pDevice).c_str() << ": Notch filter applied: " << l_ui32Frequency << " Hz (usually used e.g. in " << l_sCountry.c_str() << ")\n";
+	}
 
 	delete[] filters;
 }
@@ -1048,19 +1088,19 @@ void CDriverGTecGUSBamp::remapChannelNames(void)
 
 	for (size_t i = 0; i < m_vChannelMap.size(); i++)
 	{
-		if (m_vChannelMap[i].l_i32Index >= 0)
+		if (m_vChannelMap[i].m_i32Index >= 0)
 		{
 			const uint32 l_ui32MaxChannelsPerAmp = (GTEC_NUM_CHANNELS + 1);
 			const uint32 l_ui32DeviceIndex = i / l_ui32MaxChannelsPerAmp;
 
 			std::string l_sChannelName;
-			if (m_vChannelMap[i].l_bIsEventChannel)
+			if (m_vChannelMap[i].m_bIsEventChannel)
 			{
 				l_sChannelName = "CH_Event" + to_string(l_ui32DeviceIndex);
 			}
 			else
 			{
-				l_sChannelName = m_vOriginalChannelNames[m_vChannelMap[i].l_i32OldIndex];
+				l_sChannelName = m_vOriginalChannelNames[m_vChannelMap[i].m_i32OldIndex];
 			}
 
 			if (l_sChannelName.length() == 0) {
@@ -1069,7 +1109,7 @@ void CDriverGTecGUSBamp::remapChannelNames(void)
 					l_sChannelName = "Channel ";
 				}
 
-				l_sChannelName = l_sChannelName + std::to_string(m_vChannelMap[i].l_i32OldIndex + 1);
+				l_sChannelName = l_sChannelName + std::to_string(m_vChannelMap[i].m_i32OldIndex + 1);
 			}
 
 			if (m_bShowDeviceName) 
@@ -1079,7 +1119,7 @@ void CDriverGTecGUSBamp::remapChannelNames(void)
 
 //			printf("%d to '%s'\n", m_vChannelMap[i].l_i32Index, l_sChannelName.c_str());
 
-			m_oHeader.setChannelName(m_vChannelMap[i].l_i32Index, l_sChannelName.c_str());
+			m_oHeader.setChannelName(m_vChannelMap[i].m_i32Index, l_sChannelName.c_str());
 
 		}
 	}

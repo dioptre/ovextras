@@ -41,11 +41,6 @@ namespace OpenViBEAcquisitionServer
 	 *
 	 * Hardware triggers on the parallel port are supported.
 	 *
-	 * This driver also sets the current process to higher priority when started and reverts to normal when stopped. 
-	 *
-	 * It can also set the GTEC thread (the one that fills the ring buffer with data from the amplifier) to higher priority, but 
-	 * you should enable this according to your needs.
-	 *
 	 * The driver supports several g.tec devices working with the provided async cables. There are several requirements for async
 	 * acquisition to work properly and these are checked in verifySyncMode().
 	 */
@@ -80,17 +75,14 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::boolean CDriverGTecGUSBamp::acquire(void);
 
-		//sets priority - could be used for higher frequencies
-		//15 gives you realtime priority
-		void applyPriority(boost::thread* thread, int priority);
 		void ConfigFiltering(HANDLE o_pDevice);
 
 	protected:
 
-		static const int BUFFER_SIZE_SECONDS = 2;		         //the size of the GTEC ring buffer in seconds
+		static const int BUFFER_SIZE_SECONDS = 2;         //the size of the GTEC ring buffer in seconds
 		static const int GTEC_NUM_CHANNELS = 16;          //the number of channels without countig the trigger channel
-		static const int QUEUE_SIZE = 8;//4 default		 //the number of GT_GetData calls that will be queued during acquisition to avoid loss of data
-		static const int NUMBER_OF_SCANS = 32;           //the number of scans that should be received simultaneously (depending on the _sampleRate; see C-API documentation for this value!)
+		static const int QUEUE_SIZE = 8;//4 default		  //the number of GT_GetData calls that will be queued during acquisition to avoid loss of data
+		static const int NUMBER_OF_SCANS = 32;            //the number of scans that should be received simultaneously (depending on the _sampleRate; see C-API documentation for this value!)
 		
 		OpenViBE::uint32 NumDevices();
 
@@ -160,23 +152,27 @@ namespace OpenViBEAcquisitionServer
 	    OpenViBE::uint32 m_slavesCnt;
 	    string m_masterSerial;
 
-		void remapChannelNames(void);   // Converts channel names while adding the device name and handling event channels
-		void restoreChannelNames(void); // Restores channel names without the device
+		void remapChannelNames(void);   // Converts channel names while appending the device name and handling event channels
+		void restoreChannelNames(void); // Restores channel names without the device name
 
-		vector<std::string> m_vOriginalChannelNames;
-		vector<GDevice> m_vGDevices;
+		vector<std::string> m_vOriginalChannelNames;        // Channel names without the device name inserted
+		vector<GDevice> m_vGDevices;                        // List of amplifiers
 
 		std::string CDriverGTecGUSBamp::getSerialByHandler(HANDLE o_pDevice);
 
-		// Stores the OpenViBE channel index and the channel name
+		// Stores information related to each channel available in the recording system
 		struct Channel
 		{
-			OpenViBE::int32 l_i32Index;			
-			OpenViBE::int32 l_i32OldIndex;
-			bool l_bIsEventChannel;
+			OpenViBE::int32 m_i32Index;             // Channel index in openvibe Designer, -1 is unused
+			OpenViBE::int32 m_i32OldIndex;          // Channel index in the user-settable channel name list
+			OpenViBE::int32 m_i32GtecDeviceIndex;   // Device index of the gtec amplifier this channel is in
+			OpenViBE::int32 m_i32GtecChannelIndex;  // Channel index in the device-specific numbering
+			bool m_bIsEventChannel;                 // Is this the special digital channel?
 		};
 
-		vector<Channel> m_vChannelMap;			// Map channels from gtec indexes to selected channels in the sample buffer, -1 skip this channel
+		// Channel indexes are seen as a sequence [dev1chn1, dev1chn2,...,dev1chnN, dev2chn1, dev2chn2, ..., dev2chnN, ...]
+		// The following vector is used to map these 'system indexes' to openvibe channels
+		vector<Channel> m_vChannelMap;
 	};
 };
 
