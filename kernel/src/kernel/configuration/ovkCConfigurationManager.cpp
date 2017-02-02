@@ -19,6 +19,8 @@
 
 #include <cstdlib>
 
+#include <regex>
+
 #if defined TARGET_OS_Linux
  #include <unistd.h> // for getpid
 #elif defined TARGET_OS_Windows
@@ -411,6 +413,16 @@ namespace
 
 boolean CConfigurationManager::internalExpand(const std::string& sValue, std::string& sResult) const
 {
+	// Sanity check for the token conformity
+	// This block attempts to address Mantis #180. A problem arises when strings contain $ without 
+	// being tokens. For example, network directory paths can have a $ sign apparently.
+	if (!std::regex_search(sValue, std::regex("\\$.*\\{.*\\}")))
+	{
+		// Probably not a token as it lacks a $foo{bar} type pattern, lets take the risk to pass it out as-is
+		sResult = sValue;
+		return true;
+	}
+
 	std::stack < std::pair < ENodeType, std::string > > l_vChildren;
 	l_vChildren.push(std::make_pair(NodeType_Value, std::string()));
 
