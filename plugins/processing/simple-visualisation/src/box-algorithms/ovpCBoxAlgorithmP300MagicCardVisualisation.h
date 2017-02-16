@@ -15,6 +15,11 @@
 #define OVP_ClassId_BoxAlgorithm_P300MagicCardVisualisation     OpenViBE::CIdentifier(0x841F46EF, 0x471AA2A4)
 #define OVP_ClassId_BoxAlgorithm_P300MagicCardVisualisationDesc OpenViBE::CIdentifier(0x37FAFF20, 0xA74685DB)
 
+namespace TCPTagging
+{
+	class IStimulusSender; // fwd declare
+};
+
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
@@ -30,6 +35,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32Index);
 			virtual OpenViBE::boolean process(void);
 
+			void flushQueue(void);					// Sends all accumulated stimuli to the TCP Tagging
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_P300MagicCardVisualisation);
 
 		private:
@@ -93,6 +99,11 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bTableInitialized;
 
 			std::map < unsigned long, CBoxAlgorithmP300MagicCardVisualisation::SWidgetStyle > m_vCache;
+
+			// TCP Tagging
+			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
+			guint m_uiIdleFuncTag;
+			TCPTagging::IStimulusSender* m_pStimulusSender;
 		};
 
 		class CBoxAlgorithmP300MagicCardVisualisationDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
