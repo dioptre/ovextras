@@ -93,6 +93,11 @@ namespace OpenViBEPlugins
 			//Clear screen stimulation:
 			m_ui64ClearScreenStimulation = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
+			//Get TCP Tagging server address and port:
+
+			OpenViBE::CString l_sTCPTaggingHostAddress = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+			OpenViBE::CString l_sTCPTaggingHostPort = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+
 			//Stimulation ID and images file names for each cue
 			m_vImageNames.resize(m_ui32NumberOfCues);
 			m_vStimulationsId.resize(m_ui32NumberOfCues);
@@ -154,7 +159,7 @@ namespace OpenViBEPlugins
 
 			m_pStimulusSender = TCPTagging::createStimulusSender();
 
-			if (!m_pStimulusSender->connect("localhost", "15361"))
+			if (!m_pStimulusSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort))
 			{
 				this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
 			}

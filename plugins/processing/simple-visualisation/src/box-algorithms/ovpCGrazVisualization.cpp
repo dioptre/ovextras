@@ -249,7 +249,8 @@ namespace OpenViBEPlugins
 			m_bShowAccuracy               = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
 			m_i64PredictionsToIntegrate   = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 			m_bPositiveFeedbackOnly       = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
-
+			OpenViBE::CString l_sTCPTaggingHostAddress = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
+			OpenViBE::CString l_sTCPTaggingHostPort = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 7);
 			m_pStimulusSender = NULL;
 
 			m_uiIdleFuncTag = 0;
@@ -330,7 +331,7 @@ namespace OpenViBEPlugins
 			
 			m_pStimulusSender = TCPTagging::createStimulusSender();
 
-			if(!m_pStimulusSender->connect("localhost", "15361"))
+			if (!m_pStimulusSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort))
 			{
 				this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
 			}

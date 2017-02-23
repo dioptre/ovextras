@@ -176,6 +176,8 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Show accuracy", OV_TypeId_Boolean,               "false");
 				rPrototype.addSetting("Predictions to integrate", OV_TypeId_Integer,    "5");
 				rPrototype.addSetting("Positive feedback only", OV_TypeId_Boolean,      "false");
+				rPrototype.addSetting("TCP Tagging Host address", OV_TypeId_String, "localhost");
+				rPrototype.addSetting("TCP Tagging Host port", OV_TypeId_Integer, "15361");
 
 				return true;
 			}

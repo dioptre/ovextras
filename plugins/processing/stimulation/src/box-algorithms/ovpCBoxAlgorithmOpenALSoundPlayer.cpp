@@ -34,6 +34,8 @@ boolean CBoxAlgorithmOpenALSoundPlayer::initialize(void)
 	m_ui64StopTrigger = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),1);
 	m_sFileName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),2);
 	m_bLoop = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),3);
+	OpenViBE::CString l_sTCPTaggingHostAddress = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+	OpenViBE::CString l_sTCPTaggingHostPort = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
 
 	m_ui64LastOutputChunkDate = -1;
 	m_bStartOfSoundSent = false;
@@ -67,7 +69,7 @@ boolean CBoxAlgorithmOpenALSoundPlayer::initialize(void)
 
 	m_pStimulusSender = TCPTagging::createStimulusSender();
 
-	if (!m_pStimulusSender->connect("localhost", "15361"))
+	if (!m_pStimulusSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort))
 	{
 		this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
 	}

@@ -60,8 +60,10 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::initialize(void)
 	m_oSelectedBackgroundColor=_AutoCast_(*this->getBoxAlgorithmContext(), 3);
 	m_ui64CardStimulationBase =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 	CString l_sBackgroundImageFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
+	OpenViBE::CString l_sTCPTaggingHostAddress = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
+	OpenViBE::CString l_sTCPTaggingHostPort = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 7);
 
-	for(uint32 i=6; i<l_rStaticBoxContext.getSettingCount(); i++)
+	for(uint32 i=8; i<l_rStaticBoxContext.getSettingCount(); i++)
 	{
 		GError *l_pError = NULL;
 
@@ -154,7 +156,7 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::initialize(void)
 	m_uiIdleFuncTag = 0;
 	m_vStimuliQueue.clear();
 	m_pStimulusSender = TCPTagging::createStimulusSender();
-	if (!m_pStimulusSender->connect("localhost", "15361"))
+	if (!m_pStimulusSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort))
 	{
 		this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
 	}

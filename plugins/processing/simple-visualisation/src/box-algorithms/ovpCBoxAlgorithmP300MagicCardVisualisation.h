@@ -140,6 +140,8 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Selected background color",       OV_TypeId_Color,       "70,20,20");
 				rBoxAlgorithmPrototype.addSetting("Card stimulation base",           OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");
 				rBoxAlgorithmPrototype.addSetting("Default background filename",     OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-magic-card/openvibe-logo.png-offscreen");
+				rBoxAlgorithmPrototype.addSetting("TCP Tagging Host address",        OV_TypeId_String,      "localhost");
+				rBoxAlgorithmPrototype.addSetting("TCP Tagging Host port",           OV_TypeId_Integer,     "15361");
 				rBoxAlgorithmPrototype.addSetting("Card filename",                   OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-magic-card/01.png");
 				rBoxAlgorithmPrototype.addSetting("Card filename",                   OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-magic-card/02.png");
 				rBoxAlgorithmPrototype.addSetting("Card filename",                   OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-magic-card/03.png");

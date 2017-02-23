@@ -92,7 +92,8 @@ boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 	m_oSelectedBackgroundColor   =_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 12);
 	m_oSelectedForegroundColor   =_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 13);
 	m_ui64SelectedFontSize       =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 14);
-
+	OpenViBE::CString l_sTCPTaggingHostAddress = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 15);
+	OpenViBE::CString l_sTCPTaggingHostPort = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 16);
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	m_pSequenceStimulationDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
@@ -196,7 +197,7 @@ boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 
 	m_pStimulusSender = TCPTagging::createStimulusSender();
 
-	if(!m_pStimulusSender->connect("localhost", "15361"))
+	if (!m_pStimulusSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort))
 	{
 		this->getLogManager() << LogLevel_Warning << "Unable to connect to AS TCP Tagging, stimuli wont be forwarded.\n";
 	}

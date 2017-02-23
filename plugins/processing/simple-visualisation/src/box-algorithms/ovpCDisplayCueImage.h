@@ -48,7 +48,7 @@ namespace OpenViBEPlugins
 
 			void flushQueue(void);					// Sends all accumulated stimuli to the TCP Tagging
 
-			static const OpenViBE::uint32 m_ui32NonCueSettingsCount = 3; // fullscreen + scale + clear
+			static const OpenViBE::uint32 m_ui32NonCueSettingsCount = 5; // fullscreen + scale + clear + hostaddr + hostport
 
 		protected:
 
@@ -198,6 +198,8 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Display images in full screen", OV_TypeId_Boolean, "false");
 				rPrototype.addSetting("Scale images to fit", OV_TypeId_Boolean, "false");
 				rPrototype.addSetting("Clear screen Stimulation", OV_TypeId_Stimulation, "OVTK_StimulationId_VisualStimulationStop");
+				rPrototype.addSetting("TCP Tagging Host address", OV_TypeId_String, "localhost");
+				rPrototype.addSetting("TCP Tagging Host port", OV_TypeId_Integer, "15361");
 				rPrototype.addSetting("Cue Image 1", OV_TypeId_Filename, "${Path_Data}/plugins/simple-visualisation/p300-magic-card/01.png");
 				rPrototype.addSetting("Stimulation 1", OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");
 				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddSetting);

@@ -109,7 +109,8 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("STOP trigger", OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");
 				rBoxAlgorithmPrototype.addSetting("File to play", OV_TypeId_Filename, "${Path_Data}/plugins/stimulation/ov_beep.wav");
 				rBoxAlgorithmPrototype.addSetting("Loop", OV_TypeId_Boolean, "false");
-				
+				rBoxAlgorithmPrototype.addSetting("TCP Tagging Host address", OV_TypeId_String, "localhost");
+				rBoxAlgorithmPrototype.addSetting("TCP Tagging Host port", OV_TypeId_Integer, "15361");
 				return true;
 			}
 

@@ -183,6 +183,8 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Selected foreground color",       OV_TypeId_Color,       "30,10,10");
 				rBoxAlgorithmPrototype.addSetting("Selected font size",              OV_TypeId_Integer,     "100");
 
+				rBoxAlgorithmPrototype.addSetting("TCP Tagging Host address",        OV_TypeId_String,      "localhost");
+				rBoxAlgorithmPrototype.addSetting("TCP Tagging Host port",           OV_TypeId_Integer,     "15361");
 				return true;
 			}
 
