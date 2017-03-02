@@ -147,8 +147,16 @@ namespace OpenViBEToolkit
 					if(l_ui64StimId==0xffffffffffffffffll)
 					{
 						l_ui64StimId = m_rTypeManager.getEnumerationEntryValueFromName(m_oSettingType, m_sSettingDefaultValue);
-						m_rLogManager << OpenViBE::Kernel::LogLevel_ImportantWarning << "Did not find an enumeration value for [" << m_rTypeManager.getTypeName(m_oSettingType) << "] =  [" << m_sSettingValue << "]. ";
-						m_rLogManager << "Using default value [" << m_sSettingDefaultValue << "] instead.\n";
+						if (l_ui64StimId == 0xffffffffffffffffll)
+						{
+							m_rLogManager << OpenViBE::Kernel::LogLevel_ImportantWarning << "Did not find an enumeration value for [" << m_rTypeManager.getTypeName(m_oSettingType) << "] =  [" << m_sSettingValue << "]. ";
+							m_rLogManager << "Please correct the value or set a default setting.\n";
+						}
+						else 
+						{
+							m_rLogManager << OpenViBE::Kernel::LogLevel_ImportantWarning << "Did not find an enumeration value for [" << m_rTypeManager.getTypeName(m_oSettingType) << "] =  [" << m_sSettingValue << "]. ";
+							m_rLogManager << "Using default value [" << m_sSettingDefaultValue << "] instead.\n";
+						}
 					}
 					return l_ui64StimId;
 				}
