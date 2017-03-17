@@ -174,9 +174,17 @@ int main(int argc, char ** argv)
 			}
 			else
 			{
-				OpenViBEToolkit::initialize(*l_pKernelContext);
+				// @FIXME CERT what is the correct initialization convention? The legacy style from toolkit crashes.
+				// OpenViBEToolkit::initialize(*l_pKernelContext);
+				l_pKernelContext->initialize();
 
 				IConfigurationManager& l_rConfigurationManager=l_pKernelContext->getConfigurationManager();
+
+				// @FIXME CERT silent fail if missing file is provided
+				l_rConfigurationManager.addConfigurationFromFile(l_rConfigurationManager.expand("${Path_Data}/applications/acquisition-server/acquisition-server-defaults.conf"));
+
+				// User configuration mods
+				l_rConfigurationManager.addConfigurationFromFile(l_rConfigurationManager.expand("${Path_UserData}/openvibe-acquisition-server.conf"));
 
 				l_pKernelContext->getPluginManager().addPluginsFromFiles(l_rConfigurationManager.expand("${AcquisitionServer_Plugins}"));
 

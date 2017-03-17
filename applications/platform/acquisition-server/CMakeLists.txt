@@ -45,6 +45,12 @@ INCLUDE("FindOpenViBEModuleSocket")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleFS")
 INCLUDE("FindThirdPartyGTK")
+INCLUDE("FindThirdPartyBoost_System")
+
+IF(WIN32)	
+	# Since cert, getting timeBeginPeriod() linker issues without this
+	TARGET_LINK_LIBRARIES(${PROJECT_NAME} winmm)
+ENDIF(WIN32)
 
 # These scripts will also add directives to copy the necessary bin dlls if any
 INCLUDE("FindThirdPartyActiCHampAPI")

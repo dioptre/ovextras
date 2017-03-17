@@ -22,7 +22,26 @@
 
 #include <iostream>
 
-
+// @FIXME CERT
+#pragma message("WARNING: Hard-coding some CIdentifiers that should be obtainable from Certivibe in the future")
+#define OVP_GD_ClassId_Algorithm_MasterAcquisitionStreamEncoder                                               OpenViBE::CIdentifier(0x2D15E00B, 0x51414EB6)
+#define OVP_GD_ClassId_Algorithm_MasterAcquisitionStreamEncoderDesc                                           OpenViBE::CIdentifier(0xE6EC841D, 0x9E75A8FB)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SubjectIdentifier                    OpenViBE::CIdentifier(0xD5BB5231, 0x59389B72)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SubjectAge                           OpenViBE::CIdentifier(0x9EF355E4, 0xC8531112)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SubjectGender                        OpenViBE::CIdentifier(0xA9056AE3, 0x57FE6AF0)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SignalMatrix                         OpenViBE::CIdentifier(0xE9AC8077, 0xE369A51D)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SignalSamplingRate                   OpenViBE::CIdentifier(0xB84AD0CA, 0x4F316DD3)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_StimulationSet                       OpenViBE::CIdentifier(0x5B728D37, 0xFD088887)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_BufferDuration                       OpenViBE::CIdentifier(0xE1FC7385, 0x586A4F3F)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_ChannelLocalisation                  OpenViBE::CIdentifier(0x227E13F0, 0x206B44F9)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_ChannelUnits                         OpenViBE::CIdentifier(0x740060C2, 0x7D2B4F57)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelLocalisationData          OpenViBE::CIdentifier(0x26EE1F81, 0x3DB00D5D)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelUnitData                  OpenViBE::CIdentifier(0x19DC533C, 0x56301D0B)
+#define OVP_GD_Algorithm_AcquisitionStreamEncoder_OutputParameterId_EncodedMemoryBuffer                                         OpenViBE::CIdentifier(0xa3d8b171, 0xf8734734)
+#define OVP_GD_Algorithm_AcquisitionStreamEncoder_InputTriggerId_EncodeBuffer                                                   OpenViBE::CIdentifier(0x1b7076fd, 0x449bc70a)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_OutputParameterId_EncodedMemoryBuffer                                   OpenViBE::CIdentifier(0xa3d8b171, 0xf8734734)
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputTriggerId_EncodeHeader                                             OpenViBE::CIdentifier(0x878eaf60, 0xf9d5303f) 
+#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputTriggerId_EncodeBuffer                                             OpenViBE::CIdentifier(0x1b7076fd, 0x449bc70a)
 
 #define boolean OpenViBE::boolean
 

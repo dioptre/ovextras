@@ -198,7 +198,8 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 #endif
 
 	// BEGIN MENSIA ACQUISITION DRIVERS
-#if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver
+// @FIXME CERT Mensia Acquisition Driver crashes, disabled
+#if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver && defined(false)
 
 	m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Loading Mensia Driver Collection\n";
 	CString l_sMensiaDLLPath = m_pAcquisitionServer->getDriverContext().getConfigurationManager().expand("${Path_Bin}/openvibe-driver-mensia-acquisition.dll");
@@ -284,7 +285,7 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 	savePluginSettings();
 
 	// Saves current configuration
-	FILE* l_pFile=::fopen(m_rKernelContext.getConfigurationManager().expand("${CustomConfigurationApplication}").toASCIIString(), "wt");
+	FILE* l_pFile=::fopen(m_rKernelContext.getConfigurationManager().expand("${Path_UserData}/openvibe-acquisition-server.conf").toASCIIString(), "wt");
 	if(l_pFile)
 	{
 		::fprintf(l_pFile, "# This file is generated\n");
