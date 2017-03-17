@@ -28,7 +28,7 @@ uint64 CBoxAlgorithmVRPNButtonClient::getClockFrequency(void)
 
 boolean CBoxAlgorithmVRPNButtonClient::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getOutputCount(); i++)
 	{
@@ -56,7 +56,7 @@ boolean CBoxAlgorithmVRPNButtonClient::initialize(void)
 
 boolean CBoxAlgorithmVRPNButtonClient::uninitialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	delete m_pVRPNButtonRemote;
 	m_pVRPNButtonRemote=NULL;
@@ -85,7 +85,7 @@ boolean CBoxAlgorithmVRPNButtonClient::processClock(IMessageClock& rMessageClock
 boolean CBoxAlgorithmVRPNButtonClient::process(void)
 {
 
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 	uint32 i;
 
@@ -135,7 +135,7 @@ boolean CBoxAlgorithmVRPNButtonClient::process(void)
 
 void CBoxAlgorithmVRPNButtonClient::setButton(uint32 ui32ButtonIndex, boolean bPressed)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	if(ui32ButtonIndex>=l_rStaticBoxContext.getOutputCount())
 	{
