@@ -422,6 +422,9 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 			<< " * box and turn to another \"equivalent\" one.\n";
 	}
 
+#pragma message("WARNING: 'Unstable' block commented out due to Certivibe")
+
+	/*
 	boolean l_bUnstable=m_rKernelContext.getPluginManager().isPluginObjectFlaggedAsUnstable(rPluginObjectDesc.getCreatedClassIdentifier());
 	if(l_bUnstable)
 	{
@@ -431,6 +434,7 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 			<< " * under well known conditions. It may possibly crash or cause data loss.\n"
 			<< " * Use this box at your own risk, you've been warned.</b>\n";
 	}
+	*/
 
 	l_oFileSkeleton
 		<< " *\n"
@@ -576,6 +580,9 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 		}
 	}
 
+#pragma message("WARNING: PluginFunctionality_Visualization block commented out due to Certivibe")
+
+	/*
 	if(rPluginObjectDesc.hasFunctionality(PluginFunctionality_Visualization))
 	{
 		l_oFileSkeleton
@@ -592,6 +599,7 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 			<< " * |OVP_DocBegin_" << l_sFilename.c_str() << "_OnlineVisualizationSettings|\n"
 			<< " * |OVP_DocEnd_" << l_sFilename.c_str() << "_OnlineVisualizationSettings|\n";
 	}
+	*/
 
 	l_oFileSkeleton
 		<< " *\n"
