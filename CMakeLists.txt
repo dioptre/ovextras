@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
 
 # Here we set a few policies to get rid of warnings on newer cmakes.
 # we should update the scripts after upgrading each platform's cmake to 3.x.
@@ -11,6 +11,7 @@ endif()
 if(POLICY CMP0048)
   cmake_policy(SET CMP0048 OLD)
 endif()
+cmake_policy(SET CMP0057 NEW)  # IF(IN_LIST)
 
 PROJECT(OpenViBE)
 
@@ -27,6 +28,11 @@ SET(OV_GLOBAL_VERSION_PATCH 0+git)
 MESSAGE(STATUS "Appending compilation flags...")
 
 SET(OV_CUSTOM_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
+
+# Path to CERTIVIBE; this points to the extracted certivibe package; in future
+# it should be made automagic that ov debug build should depend on cert debug build.
+#SET(OPENVIBE_SDK_PATH "${OV_CUSTOM_DEPENDENCIES_PATH}/certivibe-release")
+SET(OPENVIBE_SDK_PATH "${OV_CUSTOM_DEPENDENCIES_PATH}/certivibe-debug")
 
 ADD_DEFINITIONS("-DOV_PROJECT_NAME=\"${PROJECT_NAME}\"")
 ADD_DEFINITIONS("-DOV_VERSION_MAJOR=\"${OV_GLOBAL_VERSION_MAJOR}\"")
@@ -165,8 +171,6 @@ SET(SKIP_DOCUMENTATION "1")
 #SET(SKIP_APPLICATIONS_DEMOS "1")
 #SET(SKIP_CONTRIB_APPLICATIONS "1")
 
-
-
 IF(UNIX)
 	# On Linux, the presence of matlab plugin .so can cause crashes in Simple DSP box as the two may use different versions of boost which are
 	# then wrongly exposed to the other party due to the dlopen() flag RTLD_GLOBAL. Unfortunately this flag is needed or the python plugin
@@ -184,8 +188,11 @@ ENDIF(UNIX)
 #SET(SKIP_MODULES_SYSTEM "1")
 #SET(SKIP_MODULES_XML "1")
 #SET(SKIP_APPLICATIONS_PLATFORM_ACQUISITION-SERVER "1")
-#SET(SKIP_APPLICATIONS_PLATFORM_DESIGNER "1")
 #SET(SKIP_PLUGINS_PROCESSING_EXAMPLES "1")
+
+# From certivibe designer repo in the future
+SET(SKIP_APPLICATIONS_PLATFORM_DESIGNER "1")	
+SET(SKIP_APPLICATIONS_EXAMPLES_CONVERT "1")		# depends on Designer
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
 
@@ -197,6 +204,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
 SET_PROPERTY(GLOBAL PROPERTY OV_PROP_CURRENT_PROJECTS "")
 SET_PROPERTY(GLOBAL PROPERTY OV_PROP_CURRENT_PROJECTS_BUILD_DIR "")
 
+# Used by the various Find* scripts to locate OpenViBE modules
 # Used by the various Find* scripts to locate OpenViBE modules
 SET(OV_BASE_DIR ${CMAKE_SOURCE_DIR})
 
@@ -225,15 +233,17 @@ ADD_DEFINITIONS(-DOV_CMAKE_PATH_LIB="${CMAKE_INSTALL_FULL_LIBDIR}")
 
 ADD_SUBDIRECTORY("build-tool/")
 # Traverse these directories and build their components
-ADD_SUBDIRECTORY("common/")
-ADD_SUBDIRECTORY("openvibe/")
-ADD_SUBDIRECTORY("kernel/")
-ADD_SUBDIRECTORY("modules/")
-ADD_SUBDIRECTORY("toolkit/")
-ADD_SUBDIRECTORY("plugins/")
+# ADD_SUBDIRECTORY("common/")	# from cert
+# ADD_SUBDIRECTORY("openvibe/")	# from cert
+# ADD_SUBDIRECTORY("kernel/")	# from cert
+# ADD_SUBDIRECTORY("modules/")	# from cert
+# ADD_SUBDIRECTORY("toolkit/")  # from cert
+ADD_SUBDIRECTORY("modules/tcptagging") 
+# ADD_SUBDIRECTORY("plugins/")					# @TODO enable, prune, make work
+ADD_SUBDIRECTORY("plugins/processing/vrpn/")	# just as a post-cert example until the rest are fixed
 ADD_SUBDIRECTORY("applications/")
 ADD_SUBDIRECTORY("externals/")
-ADD_SUBDIRECTORY("contrib/")
+# ADD_SUBDIRECTORY("contrib/")					# @TODO enable, prune, make work
 ADD_SUBDIRECTORY("documentation/") # needs to be the last since it uses the list of collected projects
 
 #add dependency to plugin inspector to the documentation
@@ -241,7 +251,9 @@ IF(openvibe-documentation)
 	ADD_DEPENDENCIES(openvibe-documentation openvibe-plugin-inspector)
 ENDIF(openvibe-documentation)
 
-ADD_DEPENDENCIES(openvibe-toolkit openvibe-stimulation-generator )
+# @FIXME CERT sort out the consequences of commenting this out (was needed to compile with cert)
+# ADD_DEPENDENCIES(openvibe-toolkit openvibe-stimulation-generator )
+
 # make a copy of the dependency script, this is done so we can use the same launch scripts both in win install and win devel situations.
 IF(WIN32)
 	INSTALL(PROGRAMS ${CMAKE_SOURCE_DIR}/scripts/win32-dependencies.cmd DESTINATION ${CMAKE_INSTALL_FULL_BINDIR} RENAME "openvibe-set-env.cmd")
