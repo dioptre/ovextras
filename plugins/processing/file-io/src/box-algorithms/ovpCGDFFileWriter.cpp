@@ -106,7 +106,7 @@ void CGDFFileWriter::setSampleBuffer(const float64* pBuffer)
 		m_vSampleCount[j]+=m_ui32SamplesPerChannel;
 	}
 
-	// this->getLogManager() << LogLevel_Trace << "Received up to " << m_vSampleCount[0] << "\n";
+ 	// this->getLogManager() << LogLevel_Info << "Received up to " << m_vSampleCount[0] << " samples\n";
 
 	//save in the file
 	saveMatrixData();
@@ -227,6 +227,9 @@ boolean CGDFFileWriter::initialize()
 
 boolean CGDFFileWriter::uninitialize()
 {
+	// See that no event is outside the signal by padding the signal with zeroes if necessary
+	padByEvents();
+
 	//If the file is not open, that mean that the box is muted. If the file is not open because of a bug, it should have already been notify
 	if(m_oFile.is_open())
 	{
@@ -333,6 +336,48 @@ void CGDFFileWriter::saveMatrixData()
 	}
 }
 
+void CGDFFileWriter::padByEvents()
+{
+	if (!m_oFile.is_open())
+	{
+		m_oFile.open(m_sFileName, ios::binary | ios::trunc);
+
+		if (!m_oFile.good())
+		{
+			m_bError = true;
+
+			getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << m_sFileName << "]\n";
+			return;
+		}
+	}
+
+	// Make sure first that the stims are not outside the file boundary; if so, pad the file with zeroes
+	vector<pair<uint64, uint64> >::iterator l_oIterator;
+	uint32 l_ui32MaxPos = 0;
+	for (l_oIterator = m_oEvents.begin(); l_oIterator != m_oEvents.end(); l_oIterator++)
+	{
+		// GDF Spec v2.51, #33: sample indexing starts from 1, hence +1
+		const uint32 l_ui32Position = static_cast<uint32>(ITimeArithmetics::timeToSampleCount(m_ui64SamplingFrequency, l_oIterator->second)) + 1;
+		if (l_ui32Position > m_vSampleCount[0] + 1)
+		{
+			this->getLogManager() << LogLevel_Warning << "Stimulation " << (uint16)(l_oIterator->first & 0xFFFF) << " will be written at " << l_ui32Position << " (after last sample at " << m_vSampleCount[0] + 1 << "), padding the signal\n";
+			l_ui32MaxPos = std::max<uint32>(l_ui32Position, l_ui32MaxPos);
+		}
+	}
+	if (l_ui32MaxPos > 0)
+	{
+		const IMatrix* l_pOutputMatrix = m_pSignalDecoder->getOutputMatrix();
+		CMatrix l_oZeros;
+		OpenViBEToolkit::Tools::Matrix::copyDescription(l_oZeros, *l_pOutputMatrix);
+		OpenViBEToolkit::Tools::Matrix::clearContent(l_oZeros);
+
+		while (l_ui32MaxPos >= m_vSampleCount[0] + 1)
+		{
+			setSampleBuffer(l_oZeros.getBuffer());
+		}
+	}
+}
+
 void CGDFFileWriter::saveEvents()
 {
 	if(!m_oFile.is_open())
@@ -363,21 +408,22 @@ void CGDFFileWriter::saveEvents()
 	System::Memory::hostToLittleEndian((uint32)m_oEvents.size(), l_pLittleEndianBuffer);
 	m_oFile.write(reinterpret_cast<char *>(l_pLittleEndianBuffer), sizeof(l_pLittleEndianBuffer));
 
-	//events
+	// write event positions
 	vector<pair<uint64, uint64> >::iterator l_oIterator;
-	for(l_oIterator=m_oEvents.begin() ; l_oIterator!=m_oEvents.end() ; l_oIterator++)
+	for (l_oIterator = m_oEvents.begin(); l_oIterator != m_oEvents.end(); l_oIterator++)
 	{
-		const uint32 l_ui32Position = static_cast<uint32>(ITimeArithmetics::timeToSampleCount(m_ui64SamplingFrequency, l_oIterator->second));
+		// GDF Spec v2.51, #33: sample indexing starts from 1, hence +1
+		const uint32 l_ui32Position = static_cast<uint32>(ITimeArithmetics::timeToSampleCount(m_ui64SamplingFrequency, l_oIterator->second)) + 1;
 		// Legacy code: 
 		// l_ui32Position = (uint32)(((l_oIterator->second + 1) * m_ui64SamplingFrequency - 1)>>32);
 		// std::cout << "Time " << ITimeArithmetics::timeToSeconds(l_oIterator->second) << "s to " << l_ui32Position
 		//	<< " samples, is " << ITimeArithmetics::timeToSeconds( ITimeArithmetics::sampleCountToTime(m_ui64SamplingFrequency, l_ui32Position)) << "sec backmapped\n";
 
-		System::Memory::hostToLittleEndian(l_ui32Position+1, l_pLittleEndianBuffer);
+		System::Memory::hostToLittleEndian(l_ui32Position, l_pLittleEndianBuffer);
 		m_oFile.write(reinterpret_cast<char *>(l_pLittleEndianBuffer), 4);
-
 	}
 
+	// write event types
 	for(l_oIterator=m_oEvents.begin() ; l_oIterator!=m_oEvents.end() ; l_oIterator++)
 	{
 		//Force to use only 16bits stimulations IDs

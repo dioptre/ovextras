@@ -447,7 +447,6 @@ boolean CGDFFileReader::readFileHeader()
 
 		m_ui32NumberOfSamplesPerRecord = l_pNumberOfSamplesPerRecordArray[0];
 
-
 		for(int i=1 ; i<m_ui16NumberOfChannels ; i++)
 		{
 			//If all the channels don't have the same sampling rate
@@ -862,22 +861,22 @@ boolean CGDFFileReader::process()
 	}
 
 	//Events
-	if(m_bSignalDescriptionSent && !m_bEventsSent)
+	if (m_bSignalDescriptionSent && !m_bEventsSent)
 	{
 		//reads the events table header if it hasn't been done already
-		if(!m_pEventsPositionBuffer)
+		if (!m_pEventsPositionBuffer)
 		{
 			std::streamoff l_oBackupPosition = m_oFile.tellg();
 
-			std::streamoff l_oEventDataPosition = (std::streamoff)((256 * (m_ui16NumberOfChannels+1)) + m_ui64Header3Length + (m_ui64NumberOfDataRecords*m_ui64DataRecordSize));
+			std::streamoff l_oEventDataPosition = (std::streamoff)((256 * (m_ui16NumberOfChannels + 1)) + m_ui64Header3Length + (m_ui64NumberOfDataRecords*m_ui64DataRecordSize));
 
 			//checks if there are event information
-			if((uint64)l_oEventDataPosition+1 < m_ui64FileSize)
+			if ((uint64)l_oEventDataPosition + 1 < m_ui64FileSize)
 			{
 				m_oFile.seekg(l_oEventDataPosition);
 
 				//reads the event table mode
-				m_oFile>>m_ui8EventTableMode;
+				m_oFile >> m_ui8EventTableMode;
 			}
 			//no event information
 			else
@@ -889,17 +888,17 @@ boolean CGDFFileReader::process()
 			}
 
 			uint32 l_pEventTableHeaderMain[7];
-			uint8* l_pEventTableHeader=reinterpret_cast<uint8*>(l_pEventTableHeaderMain);
+			uint8* l_pEventTableHeader = reinterpret_cast<uint8*>(l_pEventTableHeaderMain);
 			System::Memory::set(l_pEventTableHeaderMain, sizeof(l_pEventTableHeaderMain), 0);
 			m_oFile.read(reinterpret_cast<char*>(l_pEventTableHeader), 7);
 
-			if(m_f32FileVersion > 1.90)
+			if (m_f32FileVersion > 1.90)
 			{
-				m_ui32NumberOfEvents = *(reinterpret_cast<uint32*>(l_pEventTableHeader +0));
+				m_ui32NumberOfEvents = *(reinterpret_cast<uint32*>(l_pEventTableHeader + 0));
 			}
 			else
 			{
-				m_ui32NumberOfEvents = *(reinterpret_cast<uint32*>(l_pEventTableHeader +3));
+				m_ui32NumberOfEvents = *(reinterpret_cast<uint32*>(l_pEventTableHeader + 3));
 			}
 
 			this->getLogManager() << LogLevel_Trace << "The file has " << m_ui32NumberOfEvents << " events\n";
@@ -913,22 +912,45 @@ boolean CGDFFileReader::process()
 
 			m_oFile.seekg(l_oBackupPosition);
 
+			// Sanity check the events & shift -1 sample
+			for (uint32 i = 0; i < m_ui32NumberOfEvents; i++)
+			{
+				// GDF Spec v2.51, #33: sample indexing starts from 1, hence here we compensate with -1 as in OV the first sample is in index 0
+				if (m_pEventsPositionBuffer[i] > 0) m_pEventsPositionBuffer[i]--;
+
+				if (m_pEventsPositionBuffer[i] >= (m_ui64NumberOfDataRecords * m_ui32NumberOfSamplesPerRecord)) 
+				{
+					this->getLogManager() << LogLevel_Warning << "File has stimulation " << m_pEventsTypeBuffer[i] << " at sample count " << m_pEventsPositionBuffer[i] <<
+						" but the file has only " << (m_ui64NumberOfDataRecords * m_ui32NumberOfSamplesPerRecord) << " samples of signal. Stimulation will be dropped.\n";
+					// Note that with the current design of this box its not possible to keep producing stimulation chunks after the signal has ended, and
+					// it'd be an openvibe stream convention violation to append the stimulation at t to any chunk where t \notin [chunkStart,chunkEnd].
+					// Hence drop.
+				}
+
+			}
+
 			m_pStimulationEncoder->encodeHeader();
 			l_pBoxIO->markOutputAsReadyToSend(GDFReader_StimulationOutput, 0, 0);
 		}
 
 		GDF::CGDFEvent l_oEvent;
 
+		/*
+		if (m_ui32CurrentEvent < m_ui32NumberOfEvents) 
+		{
+			this->getLogManager() << LogLevel_Info << "Stimulation at " << m_pEventsPositionBuffer[m_ui32CurrentEvent] << ", chunk range ["
+			<< m_ui32SentSampleCount - m_pSignalDescription.m_ui32SampleCount << "," << m_ui32SentSampleCount << "[\n";
+		}
+		*/
+
 		//todo check inclusive/exclusive conditions
-		while( (m_ui32CurrentEvent != m_ui32NumberOfEvents)  &&
-			(m_pEventsPositionBuffer[m_ui32CurrentEvent]>=m_ui32SentSampleCount-m_pSignalDescription.m_ui32SampleCount) &&
-			(m_pEventsPositionBuffer[m_ui32CurrentEvent]<m_ui32SentSampleCount))
+		while( (m_ui32CurrentEvent != m_ui32NumberOfEvents) 
+			&& m_pEventsPositionBuffer[m_ui32CurrentEvent]>=m_ui32SentSampleCount-m_pSignalDescription.m_ui32SampleCount 
+			&& m_pEventsPositionBuffer[m_ui32CurrentEvent]<m_ui32SentSampleCount )          // In current chunk range
 		{
 			//reads an event
 			l_oEvent.m_ui32Position = m_pEventsPositionBuffer[m_ui32CurrentEvent];
 			l_oEvent.m_ui16Type = m_pEventsTypeBuffer[m_ui32CurrentEvent];
-
-			if(l_oEvent.m_ui32Position > 0) l_oEvent.m_ui32Position--;
 
 			//adds it to the list of events
 			m_oEvents.push_back(l_oEvent);
