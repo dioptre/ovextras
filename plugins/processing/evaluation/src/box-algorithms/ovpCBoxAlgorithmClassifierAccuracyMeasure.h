@@ -1,6 +1,8 @@
 #ifndef __OpenViBEPlugins_BoxAlgorithm_ClassifierAccuracyMeasure_H__
 #define __OpenViBEPlugins_BoxAlgorithm_ClassifierAccuracyMeasure_H__
 
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
@@ -130,5 +132,7 @@ namespace OpenViBEPlugins
 		};
 	};
 };
+
+#endif // TARGET_HAS_ThirdPartyGTK
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_ClassifierAccuracyMeasure_H__

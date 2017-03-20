@@ -1,6 +1,8 @@
 #ifndef __OpenViBEPlugins_BoxAlgorithm_ROCCurve_H__
 #define __OpenViBEPlugins_BoxAlgorithm_ROCCurve_H__
 
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "../ovp_defines.h"
 
 #include <openvibe/ov_all.h>
@@ -182,5 +184,7 @@ namespace OpenViBEPlugins
 		};
 	}
 }
+
+#endif // TARGET_HAS_ThirdPartyGTK
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_ROCCurve_H__

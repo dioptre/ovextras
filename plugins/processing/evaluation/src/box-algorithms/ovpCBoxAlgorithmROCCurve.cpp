@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "ovpCBoxAlgorithmROCCurve.h"
 
 #include <iostream>
@@ -225,3 +228,6 @@ boolean CBoxAlgorithmROCCurve::computeOneROCCurve(const CIdentifier& rClassIdent
 
 	return true;
 }
+
+#endif
+

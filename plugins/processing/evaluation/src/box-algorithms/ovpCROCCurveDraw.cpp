@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "ovpCROCCurveDraw.h"
 
 #include <iostream>
@@ -228,3 +231,5 @@ void CROCCurveDraw::drawBottomMark(OpenViBE::uint32 ui32W, OpenViBE::uint32 ui32
 
 	g_object_unref(l_pGc);
 }
+
+#endif // TARGET_HAS_ThirdPartyGTK

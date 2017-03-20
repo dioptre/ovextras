@@ -1,6 +1,8 @@
 #ifndef __OpenViBEPlugins_BoxAlgorithm_KappaCoefficient_H__
 #define __OpenViBEPlugins_BoxAlgorithm_KappaCoefficient_H__
 
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 //You may have to change this path to match your folder organisation
 #include "../ovp_defines.h"
 
@@ -167,5 +169,7 @@ namespace OpenViBEPlugins
 		};
 	}
 }
+
+#endif // TARGET_HAS_ThirdPartyGTK
 
 #endif // __OpenViBEPlugins_BoxAlgorithm_KappaCoefficient_H__

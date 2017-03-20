@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "ovpCBoxAlgorithmKappaCoefficient.h"
 #include "../algorithms/ovpCAlgorithmConfusionMatrix.h"
 
@@ -224,3 +227,7 @@ void CBoxAlgorithmKappaCoefficient::updateKappaValue()
 	l_sStream << m_f64KappaCoefficient;
 	gtk_label_set(GTK_LABEL(m_pKappaLabel), l_sStream.str().c_str());
 }
+
+
+#endif
+
