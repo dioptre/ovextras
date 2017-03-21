@@ -1,3 +1,10 @@
+
+// WARNING: The External Stimulations are a deprecated technique. 
+// Please use the TCP Tagging approach instead. You can find examples of 
+// TCP Tagging usage e.g. in the Graz Visualization and the Display Cue Image boxes.
+// It is described in the OV web documentation. A simple client can be found
+// under modules/tcptagging/.
+
 #include "openvibeStimulationConnection.h"
 
 
@@ -22,6 +29,8 @@
 
 int main()
 {
+	std::cout << "WARNING: External Stimulations approach is deprecated.\nFor new code please use the TCP Tagging approach.\n";
+
 	std::cout << "Creating a new OpenvibeStimulationConnection object" << std::endl;
 	OpenViBE::StimulationConnection* osc = new OpenViBE::StimulationConnection();
 
