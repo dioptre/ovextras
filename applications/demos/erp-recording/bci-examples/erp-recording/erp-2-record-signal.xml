@@ -399,6 +399,20 @@
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
+					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
+					<Name>TCP Tagging Host address</Name>
+					<DefaultValue>localhost</DefaultValue>
+					<Value>localhost</Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
+				<Setting>
+					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
+					<Name>TCP Tagging Host port</Name>
+					<DefaultValue>15361</DefaultValue>
+					<Value>15361</Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
+				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Cue Image 1</Name>
 					<DefaultValue>${Path_Data}/plugins/simple-visualisation/p300-magic-card/01.png</DefaultValue>
@@ -484,7 +498,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x18869d2c, 0x1a544d63)</Value>
+					<Value>(0x0e529e93, 0xde37b1be)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x61d11811, 0x71e65362)</Identifier>
