@@ -29,15 +29,6 @@ namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
 	{
-		// This callback flushes all accumulated stimulations to the TCP Tagging 
-		// after the rendering has completed.
-		gboolean DisplayCueImage_flush_callback(gpointer pUserData)
-		{
-			reinterpret_cast<CDisplayCueImage*>(pUserData)->flushQueue();
-
-			return false;	// Only run once
-		}
-
 		gboolean DisplayCueImage_SizeAllocateCallback(GtkWidget *widget, GtkAllocation *allocation, gpointer data)
 		{
 			reinterpret_cast<CDisplayCueImage*>(data)->resize((uint32)allocation->width, (uint32)allocation->height);
@@ -60,8 +51,7 @@ namespace OpenViBEPlugins
 			m_int32DrawnImageID(-1),
 			m_bFullScreen(false),
 			m_bScaleImages(false),
-			m_ui64LastOutputChunkDate(-1),
-			m_pStimulusSender(NULL)
+			m_ui64LastOutputChunkDate(-1)
 		{
 			m_oBackgroundColor.pixel = 0;
 			m_oBackgroundColor.red = 0;
@@ -76,8 +66,8 @@ namespace OpenViBEPlugins
 
 		boolean CDisplayCueImage::initialize()
 		{
-			m_uiIdleFuncTag = 0;
-			m_pStimulusSender = NULL;
+			//m_uiIdleFuncTag = 0;
+			//m_pStimulusSender = NULL;
 			//>>>> Reading Settings:
 
 			//Number of Cues:
@@ -155,11 +145,9 @@ namespace OpenViBEPlugins
 					return false;
 				}
 			}
-			m_vStimuliQueue.clear();
 
-			m_pStimulusSender = TCPTagging::createStimulusSender();
-
-			if (!m_pStimulusSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort))
+			m_pStimulusMultiSender = TCPTagging::createStimulusMultiSender();
+			if (!m_pStimulusMultiSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort))
 			{
 				this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
 			}
@@ -190,21 +178,21 @@ namespace OpenViBEPlugins
 
 		boolean CDisplayCueImage::uninitialize()
 		{
+
 			// Remove the possibly dangling idle loop. 
-			if (m_uiIdleFuncTag)
+			if (m_pStimulusMultiSender && m_pStimulusMultiSender->isCurrentlySending())
 			{
-				g_source_remove(m_uiIdleFuncTag);
-				m_uiIdleFuncTag = 0;
+				g_source_remove(m_pStimulusMultiSender->getExecutionIndex());
+				m_pStimulusMultiSender->setExecutionIndex(0);
+			}
+			if (!m_pStimulusMultiSender)
+			{
+				delete m_pStimulusMultiSender;
+				m_pStimulusMultiSender = nullptr;
 			}
 
 			m_oStimulationDecoder.uninitialize();
 			m_oStimulationEncoder.uninitialize();
-
-			if (m_pStimulusSender)
-			{
-				delete m_pStimulusSender;
-				m_pStimulusSender = NULL;
-			}
 
 			// Close the full screen
 			if (m_bFullScreen)
@@ -336,7 +324,7 @@ namespace OpenViBEPlugins
 					{
 						// Queue the recognized stimulation to TCP Tagging to be sent after rendering
 						const uint64 l_ui64SentStimulation = (m_int32RequestedImageID >= 0 ? m_vStimulationsId[m_int32RequestedImageID] : m_ui64ClearScreenStimulation);
-						m_vStimuliQueue.push_back(l_ui64SentStimulation);
+						m_pStimulusMultiSender->addStimulationToWaitingList(l_ui64SentStimulation);
 					}
 					else
 					{
@@ -346,12 +334,12 @@ namespace OpenViBEPlugins
 						if (l_bStimulusMatchedBefore)
 						{
 							// We have queued a cue to be drawn, so we should delay this stimulation to TCP Tagging to be processed after the cue rendering to keep the time order
-							m_vStimuliQueue.push_back(l_ui64StimID);
+							m_pStimulusMultiSender->addStimulationToWaitingList(l_ui64StimID);
 						}
 						else
 						{
 							// We have not yet queued anything to be drawn, so we can forward immediately.
-							m_pStimulusSender->sendStimulation(l_ui64StimID);
+							m_pStimulusMultiSender->sendStimulationNow(l_ui64StimID);
 						}
 					}
 
@@ -457,10 +445,20 @@ namespace OpenViBEPlugins
 				m_int32DrawnImageID = m_int32RequestedImageID;
 
 				// Set the handler to push out the queued stims after the actual rendering
-				if (m_uiIdleFuncTag == 0)
+				if (!m_pStimulusMultiSender->isCurrentlySending())
 				{
-					m_uiIdleFuncTag = g_idle_add(DisplayCueImage_flush_callback, this);
+					m_pStimulusMultiSender->setExecutionIndex(
+						g_idle_add(
+						    [](gpointer pUserData) -> gboolean
+							{
+								reinterpret_cast<CDisplayCueImage*>(pUserData)->flushQueue();
+								return false;   // Only run once
+							},
+							this));
+
+					//m_pStimulusMultiSender->setExecutionIndex(g_idle_add(DisplayCueImage_flush_callback, this));
 				}
+
 			}
 		}
 
@@ -535,18 +533,9 @@ namespace OpenViBEPlugins
 			}
 		}
 
-		// Note that we don't need concurrency control here as gtk callbacks run in the main thread
 		void CDisplayCueImage::flushQueue(void)
 		{
-			for (size_t i = 0; i<m_vStimuliQueue.size(); i++)
-			{
-				// Timestamp is not used on purpose as we do not have the same clock scheme with AS
-				m_pStimulusSender->sendStimulation(m_vStimuliQueue[i]);
-			}
-			m_vStimuliQueue.clear();
-
-			// This function will be automatically removed after completion, so set to 0
-			m_uiIdleFuncTag = 0;
+			m_pStimulusMultiSender->sendStimulations();
 		}
 
 	};

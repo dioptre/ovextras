@@ -16,7 +16,7 @@
 
 namespace TCPTagging
 {
-	class IStimulusSender; // fwd declare
+	class IStimulusMultiSender;
 };
 
 namespace OpenViBEPlugins
@@ -92,10 +92,7 @@ namespace OpenViBEPlugins
 			//We save the received stimulations
 			OpenViBE::CStimulationSet m_oPendingStimulationSet;
 
-			// For queuing stimulations to the TCP Tagging
-			std::vector< OpenViBE::uint64 > m_vStimuliQueue;	
-			guint m_uiIdleFuncTag;
-			TCPTagging::IStimulusSender* m_pStimulusSender;
+			TCPTagging::IStimulusMultiSender* m_pStimulusMultiSender;
 		};
 
 		class CDisplayCueImageListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >

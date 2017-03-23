@@ -18,7 +18,7 @@
 
 namespace TCPTagging
 {
-	class IStimulusSender; // fwd declare
+	class IStimulusMultiSender; // fwd declare
 };
 
 namespace OpenViBEPlugins
@@ -129,9 +129,7 @@ namespace OpenViBEPlugins
 			std::list < std::pair < int, int > > m_vTargetHistory;
 
 			// TCP Tagging
-			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
-			guint m_uiIdleFuncTag;
-			TCPTagging::IStimulusSender* m_pStimulusSender;
+			TCPTagging::IStimulusMultiSender* m_pStimulusMultiSender;
 		};
 
 		class CBoxAlgorithmP300SpellerVisualisationDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc

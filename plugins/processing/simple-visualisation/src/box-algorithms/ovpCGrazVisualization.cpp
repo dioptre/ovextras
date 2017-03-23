@@ -36,15 +36,6 @@ namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
 	{
-		// This callback flushes all accumulated stimulations to the TCP Tagging 
-		// after the rendering has completed.
-		gboolean flush_callback(gpointer pUserData)
-		{
-			reinterpret_cast<CGrazVisualization*>(pUserData)->flushQueue();
-	
-			return false;	// Only run once
-		}
-
 		gboolean GrazVisualization_SizeAllocateCallback(GtkWidget *widget, GtkAllocation *allocation, gpointer data)
 		{
 			reinterpret_cast<CGrazVisualization*>(data)->resize((uint32)allocation->width, (uint32)allocation->height);
@@ -154,7 +145,7 @@ namespace OpenViBEPlugins
 			}
 			
 			// Queue the stimulation to be sent to TCP Tagging
-			m_vStimuliQueue.push_back(m_ui64LastStimulation);
+			m_pStimulusMultiSender->addStimulationToWaitingList(m_ui64LastStimulation);
 		}
 
 		void CGrazVisualization::processState()
@@ -223,8 +214,8 @@ namespace OpenViBEPlugins
 			m_bShowAccuracy(false),
 			m_bPositiveFeedbackOnly(false),
 			m_i64PredictionsToIntegrate(5),
-			m_pStimulusSender(NULL),
-			m_ui64LastStimulation(0)
+			m_ui64LastStimulation(0),
+			m_pStimulusMultiSender(nullptr)
 		{
 			m_oBackgroundColor.pixel = 0;
 			m_oBackgroundColor.red = 0;//0xFFFF;
@@ -251,10 +242,6 @@ namespace OpenViBEPlugins
 			m_bPositiveFeedbackOnly       = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
 			OpenViBE::CString l_sTCPTaggingHostAddress = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
 			OpenViBE::CString l_sTCPTaggingHostPort = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 7);
-			m_pStimulusSender = NULL;
-
-			m_uiIdleFuncTag = 0;
-			m_vStimuliQueue.clear();
 
 			if(m_i64PredictionsToIntegrate<1) 
 			{
@@ -329,9 +316,9 @@ namespace OpenViBEPlugins
 #endif
 			getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pDrawingArea);
 			
-			m_pStimulusSender = TCPTagging::createStimulusSender();
+			m_pStimulusMultiSender = TCPTagging::createStimulusMultiSender();
 
-			if (!m_pStimulusSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort))
+			if (!m_pStimulusMultiSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort))
 			{
 				this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
 			}
@@ -341,16 +328,15 @@ namespace OpenViBEPlugins
 
 		boolean CGrazVisualization::uninitialize()
 		{
-			if(m_uiIdleFuncTag)
+			if (m_pStimulusMultiSender && m_pStimulusMultiSender->isCurrentlySending())
 			{
-				m_vStimuliQueue.clear();
-				g_source_remove(m_uiIdleFuncTag);
-				m_uiIdleFuncTag = 0;
+				g_source_remove(m_pStimulusMultiSender->getExecutionIndex());
+				m_pStimulusMultiSender->setExecutionIndex(0);
 			}
-
-			if(m_pStimulusSender)
+			if (!m_pStimulusMultiSender)
 			{
-				delete m_pStimulusSender;
+				delete m_pStimulusMultiSender;
+				m_pStimulusMultiSender = nullptr;
 			}
 
 			m_oStimulationDecoder.uninitialize();
@@ -461,9 +447,16 @@ namespace OpenViBEPlugins
 
 			// After any possible rendering, we flush the accumulated stimuli. The default idle func is low priority, so it should be run after rendering by gtk.
 			// Only register a single idle func, if the previous is there its just as good
-			if (m_uiIdleFuncTag == 0)
+			if (!m_pStimulusMultiSender->isCurrentlySending())
 			{
-				m_uiIdleFuncTag = g_idle_add(flush_callback, this);
+				m_pStimulusMultiSender->setExecutionIndex(
+					g_idle_add(
+						[](gpointer pUserData) -> gboolean
+						{
+							((CGrazVisualization*)pUserData)->flushQueue();
+							return false;	// Only run once
+						},
+						this));
 			}
 
 			return true;
@@ -808,14 +801,7 @@ namespace OpenViBEPlugins
 		// Note that we don't need concurrency control here as gtk callbacks run in the main thread
 		void CGrazVisualization::flushQueue(void)
 		{
-			for(size_t i=0;i<m_vStimuliQueue.size();i++)
-			{
-				m_pStimulusSender->sendStimulation(m_vStimuliQueue[i]);
-			}
-			m_vStimuliQueue.clear();
-
-			// This function will be automatically removed after completion, so set to 0
-			m_uiIdleFuncTag = 0;
+			m_pStimulusMultiSender->sendStimulations();
 		}
 
 	};

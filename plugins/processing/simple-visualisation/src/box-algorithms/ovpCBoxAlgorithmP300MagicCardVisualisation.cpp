@@ -38,15 +38,6 @@ namespace
 	};
 };
 
-// This callback flushes all accumulated stimulations to the TCP Tagging 
-// after the rendering has completed.
-gboolean flush_callbackb(gpointer pUserData)
-{
-	((CBoxAlgorithmP300MagicCardVisualisation*)pUserData)->flushQueue();
-
-	return false;	// Only run once
-}
-
 boolean CBoxAlgorithmP300MagicCardVisualisation::initialize(void)
 {
 	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
@@ -153,10 +144,8 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::initialize(void)
 	this->_cache_for_each_(&CBoxAlgorithmP300MagicCardVisualisation::_cache_change_background_cb_, &m_oBackgroundColor);
 
 	//TCP TAGGING
-	m_uiIdleFuncTag = 0;
-	m_vStimuliQueue.clear();
-	m_pStimulusSender = TCPTagging::createStimulusSender();
-	if (!m_pStimulusSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort))
+	m_pStimulusMultiSender = TCPTagging::createStimulusMultiSender();
+	if (!m_pStimulusMultiSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort))
 	{
 		this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
 	}
@@ -167,6 +156,16 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::initialize(void)
 
 boolean CBoxAlgorithmP300MagicCardVisualisation::uninitialize(void)
 {
+	if (m_pStimulusMultiSender && m_pStimulusMultiSender->isCurrentlySending())
+	{
+		g_source_remove(m_pStimulusMultiSender->getExecutionIndex());
+		m_pStimulusMultiSender->setExecutionIndex(0);
+	}
+	if (!m_pStimulusMultiSender)
+	{
+		delete m_pStimulusMultiSender;
+		m_pStimulusMultiSender = nullptr;
+	}
 	if(m_pToolbarWidgetInterface)
 	{
 		g_object_unref(m_pToolbarWidgetInterface);
@@ -216,14 +215,6 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::uninitialize(void)
 		m_pSequenceStimulationDecoder=NULL;
 	}
 
-
-	//TCP TAGGING
-	m_vStimuliQueue.clear();
-	if (m_pStimulusSender)
-	{
-		delete m_pStimulusSender;
-		m_pStimulusSender = NULL;
-	}
 	return true;
 }
 
@@ -277,12 +268,12 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::process(void)
 					int l_iCard=(int)(l_ui64StimulationIdentifier-m_ui64CardStimulationBase);
 					if(l_iCard==m_iTargetCard)
 					{
-						m_vStimuliQueue.push_back(OVTK_StimulationId_Target);
+						m_pStimulusMultiSender->addStimulationToWaitingList(OVTK_StimulationId_Target);
 						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_Target, l_pStimulationSet->getStimulationDate(j), 0);
 					}
 					else
 					{
-						m_vStimuliQueue.push_back(OVTK_StimulationId_NonTarget);
+						m_pStimulusMultiSender->addStimulationToWaitingList(OVTK_StimulationId_NonTarget);
 						l_oFlaggingStimulationSet.appendStimulation(OVTK_StimulationId_NonTarget, l_pStimulationSet->getStimulationDate(j), 0);
 					}
 
@@ -308,7 +299,7 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::process(void)
 				}
 				// Pass the stimulation to the server also as-is. If its a flash, it can be differentiated from a 'target' spec because
 				// its NOT between OVTK_StimulationId_RestStart and OVTK_StimulationId_RestStop stimuli in the generated P300 timeline.
-				m_vStimuliQueue.push_back(l_ui64StimulationIdentifier);
+				m_pStimulusMultiSender->addStimulationToWaitingList(l_ui64StimulationIdentifier);
 			}
 
 			m_pTargetFlaggingStimulationEncoder->process(OVP_GD_Algorithm_StimulationStreamEncoder_InputTriggerId_EncodeBuffer);
@@ -366,7 +357,7 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::process(void)
 						// OVTK_StimulationId_RestStop stimulations in the P300 timeline.
 						{
 							//or just l_ui64StimulationIdentifier
-							m_vStimuliQueue.push_back(m_iTargetCard + m_ui64CardStimulationBase);
+							m_pStimulusMultiSender->addStimulationToWaitingList(m_iTargetCard + m_ui64CardStimulationBase);
 						}
 
 					}
@@ -443,9 +434,16 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::process(void)
 	}
 
 	// After any possible rendering, we flush the accumulated stimuli. The default idle func is low priority, so it should be run after rendering by gtk.
-	if (m_uiIdleFuncTag == 0)
+	if (!m_pStimulusMultiSender->isCurrentlySending())
 	{
-		m_uiIdleFuncTag = g_idle_add(flush_callbackb, this);
+		m_pStimulusMultiSender->setExecutionIndex(
+			g_idle_add(
+			[](gpointer pUserData) -> gboolean
+			{
+				((CBoxAlgorithmP300MagicCardVisualisation*)pUserData)->flushQueue();
+				return false;	// Only run once
+			},
+			this));
 	}
 
 	return true;
@@ -544,12 +542,5 @@ void CBoxAlgorithmP300MagicCardVisualisation::_cache_change_background_cb_(CBoxA
 // Note that we don't need concurrency control here as gtk callbacks run in the main thread
 void CBoxAlgorithmP300MagicCardVisualisation::flushQueue(void)
 {
-	for (size_t i = 0; i<m_vStimuliQueue.size(); i++)
-	{
-		m_pStimulusSender->sendStimulation(m_vStimuliQueue[i]);
-	}
-	m_vStimuliQueue.clear();
-
-	// This function will be automatically removed after completion, so set to 0
-	m_uiIdleFuncTag = 0;
+	m_pStimulusMultiSender->sendStimulations();
 }

@@ -26,6 +26,28 @@ namespace TCPTagging
 
 	// Clients are constructed via this call.
 	extern OV_API TCPTagging::IStimulusSender* createStimulusSender(void);
+
+	class OV_API IStimulusMultiSender {
+	public:
+		virtual TCPTagging::boolean connect(const char* sAddress, const char* sStimulusPort) = 0;
+
+		virtual void addStimulationToWaitingList(TCPTagging::uint64 ui64Stimulation, TCPTagging::uint64 ui64Timestamp = 0) = 0;
+
+		virtual TCPTagging::boolean sendStimulations(void) = 0;
+
+		virtual TCPTagging::boolean sendStimulationNow(TCPTagging::uint64 ui64Stimulation, TCPTagging::uint64 ui64Timestamp = 0) = 0;
+
+		virtual bool isCurrentlySending(void) = 0;
+
+		virtual unsigned int getExecutionIndex(void) = 0;
+
+		virtual void setExecutionIndex(unsigned int index) = 0;
+
+		virtual ~IStimulusMultiSender(void) { }
+	};
+
+	extern OV_API TCPTagging::IStimulusMultiSender* createStimulusMultiSender(void);
+
 }
 
 #endif

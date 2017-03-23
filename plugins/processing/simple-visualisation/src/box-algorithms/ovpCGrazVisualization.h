@@ -12,10 +12,11 @@
 #include <string>
 #include <map>
 #include <deque>
+#include <memory>
 
 namespace TCPTagging
 {
-	class IStimulusSender; // fwd declare
+	class IStimulusMultiSender; // fwd declare
 };
 
 namespace OpenViBEPlugins
@@ -134,10 +135,7 @@ namespace OpenViBEPlugins
 
 			OpenViBE::CMatrix m_oConfusion;
 			
-			// For queuing stimulations to the TCP Tagging
-			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
-			guint m_uiIdleFuncTag;
-			TCPTagging::IStimulusSender* m_pStimulusSender;
+			TCPTagging::IStimulusMultiSender* m_pStimulusMultiSender;
 
 			OpenViBE::uint64 m_ui64LastStimulation;
 		};

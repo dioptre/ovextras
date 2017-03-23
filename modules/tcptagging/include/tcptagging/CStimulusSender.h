@@ -39,6 +39,63 @@ namespace TCPTagging
 		TCPTagging::boolean m_bConnectedOnce;
 
 	};
+
+	// Tentative name
+	class CStimulusMultiSender : public IStimulusMultiSender {
+	public :
+		CStimulusMultiSender(void)
+			: m_uiGtkExecutionIndex(0)
+		{
+		}
+		virtual ~CStimulusMultiSender() {}
+
+		virtual TCPTagging::boolean connect(const char* sAddress, const char* sStimulusPort)
+		{
+			return m_sender.connect(sAddress, sStimulusPort);
+		}
+
+		virtual void addStimulationToWaitingList(TCPTagging::uint64 ui64Stimulation, TCPTagging::uint64 ui64Timestamp = 0)
+		{
+			m_vStimuliQueue.push_back(ui64Stimulation);
+		}
+
+		virtual TCPTagging::boolean sendStimulations(void)
+		{
+			TCPTagging::boolean res = true;
+			for (const TCPTagging::uint64& stim : m_vStimuliQueue)
+			{
+				res &= m_sender.sendStimulation(stim);
+			}
+			m_vStimuliQueue.clear();
+			m_uiGtkExecutionIndex = 0;
+			return res;
+		}
+
+		virtual TCPTagging::boolean sendStimulationNow(TCPTagging::uint64 ui64Stimulation, TCPTagging::uint64 ui64Timestamp = 0)
+		{
+			return m_sender.sendStimulation(ui64Stimulation, ui64Timestamp);
+		}
+
+		virtual bool isCurrentlySending(void)
+		{
+			return m_uiGtkExecutionIndex != 0;
+		}
+
+		virtual unsigned int getExecutionIndex(void)
+		{
+			return m_uiGtkExecutionIndex;
+		}
+
+		virtual void setExecutionIndex(unsigned int index) 
+		{ 
+			m_uiGtkExecutionIndex = index; 
+		}
+
+	protected :
+		std::vector< TCPTagging::uint64 > m_vStimuliQueue;
+	    unsigned int m_uiGtkExecutionIndex;
+		CStimulusSender m_sender;
+	};
 }
 
 #endif
