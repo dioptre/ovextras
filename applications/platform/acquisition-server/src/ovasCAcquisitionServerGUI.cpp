@@ -18,6 +18,7 @@
 #include "biosemi-activetwo/ovasCDriverBioSemiActiveTwo.h"
 #include "brainproducts-actichamp/ovasCDriverBrainProductsActiCHamp.h"
 #include "brainproducts-brainampseries/ovasCDriverBrainProductsBrainampSeries.h"
+#include "brainproducts-liveamp/ovasCDriverBrainProductsLiveAmp.h"
 #include "brainproducts-vamp/ovasCDriverBrainProductsVAmp.h"
 #include "egi-ampserver/ovasCDriverEGIAmpServer.h"
 #include "emotiv-epoc/ovasCDriverEmotivEPOC.h"
@@ -169,6 +170,9 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 #endif
 #if defined TARGET_HAS_ThirdPartyEnobioAPI
 	m_vDriver.push_back(new CDriverEnobio3G(m_pAcquisitionServer->getDriverContext()));
+#endif
+#if defined TARGET_HAS_ThirdPartyLiveAmpAPI
+	m_vDriver.push_back(new CDriverBrainProductsLiveAmp(m_pAcquisitionServer->getDriverContext()));
 #endif
 #if defined TARGET_HAS_ThirdPartyMCS
 	m_vDriver.push_back(new CDriverMKSNVXDriver(m_pAcquisitionServer->getDriverContext()));
