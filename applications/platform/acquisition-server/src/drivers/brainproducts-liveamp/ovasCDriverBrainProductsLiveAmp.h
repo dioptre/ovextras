@@ -89,12 +89,13 @@ namespace OpenViBEAcquisitionServer
 			
 		std::vector <OpenViBE::float32> m_vSample;
 		std::deque <std::vector<OpenViBE::float32>> m_vSampleCache;		
-		std::vector<std::vector<OpenViBE::float64>> m_vSendBuffer;
+		std::vector<std::vector<OpenViBE::float32>> m_vSendBuffer;
 		std::vector<OpenViBE::uint32> m_vSamplingRatesArray; 
 		std::vector<OpenViBE::uint16> m_vTriggerIndices;
 		std::vector<OpenViBE::uint16> m_vLastTriggerStates;
 		std::vector<OpenViBE::uint16> m_vDataTypeArray;
 
+		OpenViBE::boolean m_bSimulationMode;
 		/**
 		* \function initializeLiveAmp
 		* \param rInputValue[in] : 
@@ -167,7 +168,7 @@ namespace OpenViBEAcquisitionServer
 		* \return 
 		* \brief Extracts acquired data from the buffer, and puts them into the double vector 'extractData' , in the appropriate format.
 		*/
-		void liveAmpExtractData(OpenViBE::int32 samplesRead, std::vector<std::vector<OpenViBE::float64>> &extractData);
+		void liveAmpExtractData(OpenViBE::int32 samplesRead, std::vector<std::vector<OpenViBE::float32>> &extractData);
 		
 		/**
 		* \function liveAmpExtractImpedanceData
@@ -176,7 +177,7 @@ namespace OpenViBEAcquisitionServer
 		* \return 
 		* \brief Extracts acquired impedance measurements from the buffer, and puts them into the double vector 'extractData', in the appropriate format. 
 		*/
-		void liveAmpExtractImpedanceData(OpenViBE::int32 samplesRead, std::vector<std::vector<OpenViBE::float64>> &extractData);
+		void liveAmpExtractImpedanceData(OpenViBE::int32 samplesRead, std::vector<std::vector<OpenViBE::float32>> &extractData);
 	};
 };
 

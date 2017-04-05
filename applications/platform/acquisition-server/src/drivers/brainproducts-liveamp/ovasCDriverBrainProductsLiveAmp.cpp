@@ -17,6 +17,12 @@
  * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301, USA.
  */
+/*********************************************************************
+* History
+* [2017-03-29] ver 1.0											          - RP
+* [2017-04-04] ver 1.1 Cosmetic changes: int32/uint32, static_cast<>...   - RP
+*              Function loop: optimized buffer copying. 
+*********************************************************************/
 #if defined TARGET_HAS_ThirdPartyLiveAmpAPI
 
 #include "ovasCDriverBrainProductsLiveAmp.h"
@@ -30,8 +36,6 @@ using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace std;
-
-bool simulation = false;
 
 
 //___________________________________________________________________//
@@ -60,6 +64,7 @@ CDriverBrainProductsLiveAmp::CDriverBrainProductsLiveAmp(IDriverContext& rDriver
 	,m_ui32ImpedanceChannels(0)
 	,m_ui32UsedChannelsCounter(0)
 	,m_ui32EnabledChannels(0)	
+	,m_bSimulationMode(false)
 {
 	// set default sampling rates:
 	m_vSamplingRatesArray.push_back(250);
@@ -256,7 +261,7 @@ boolean CDriverBrainProductsLiveAmp::loop(void)
 	if (m_rDriverContext.isStarted())
 	{
 		OpenViBE::CStimulationSet l_oStimulationSet;
-		std::vector<std::vector<float64>> l_vTemp_buffer(1, std::vector<float64>(1));
+		std::vector<std::vector<float32>> l_vTemp_buffer(1, std::vector<float32>(1));
 	
 		while (1)
 		{
@@ -274,35 +279,34 @@ boolean CDriverBrainProductsLiveAmp::loop(void)
 			int32 l_i32SampCount = l_i32SamplesRead / m_ui32SampleSize;
 			for( int32 sample = 0; sample < l_i32SampCount; sample++ )
 			{
-				std::vector<float64> loc_buffer (m_ui32UsedChannelsCounter);			
-				for( int32 ch = 0; ch < m_ui32UsedChannelsCounter; ch++ )			
+				std::vector<float32> loc_buffer (m_ui32UsedChannelsCounter);			
+				for( uint32 ch = 0; ch < m_ui32UsedChannelsCounter; ch++ )			
 					loc_buffer[ch] = l_vTemp_buffer[sample][ch];	// access only with available indices
 
 				m_vSendBuffer.push_back(loc_buffer);
 			}
-	
-			if(m_vSendBuffer.size() >= m_ui32SampleCountPerSentBlock)
+			
+			int32 l_i32ReadToSend = m_vSendBuffer.size() - m_ui32SampleCountPerSentBlock; // must check buffer size in that way !!!
+			if (l_i32ReadToSend > 0)
 			{
-				// for debug only...
-				//m_rDriverContext.getLogManager() << LogLevel_Info << "[info] Buffer size = " << m_vSendBuffer.size() << "\n";
-
+				// for debug only: m_rDriverContext.getLogManager() << LogLevel_Info << "[info] Buffer size = " << m_vSendBuffer.size() << "\n";
 				m_vSample.clear();
 				m_vSample.resize(l_ui32LocChannelCount*m_ui32SampleCountPerSentBlock);			 
 			
-				for( int32 ch = 0, i=0; ch <  m_oHeader.getChannelCount(); ch++ )		
+				for( uint32 ch = 0, i=0; ch <  m_oHeader.getChannelCount(); ch++ )		
 				{
-					for( int32 sample = 0; sample < m_ui32SampleCountPerSentBlock; sample++ )				
-						m_vSample[i++] = m_vSendBuffer[sample][ch];
+					for( uint32 sample = 0; sample < m_ui32SampleCountPerSentBlock; sample++ )				
+						m_vSample[i++] =  m_vSendBuffer[sample][ch];
 				}
 
 				// receive events from hardware
 				// and put them the correct way in a CStimulationSet object
 				//m_pCallback->setStimulationSet(l_oStimulationSet);
-				for( int32 sample = 0; sample < m_ui32SampleCountPerSentBlock; sample++ )	
+				for( uint32 sample = 0; sample < m_ui32SampleCountPerSentBlock; sample++ )	
 				{	// check triggers:
-					for (int32 t=0; t < m_vTriggerIndices.size(); t++)
+					for (uint32 t=0; t < m_vTriggerIndices.size(); t++)
 					{					
-						uint16 trigg = uint16(m_vSendBuffer[sample][m_vTriggerIndices[t]]);
+						uint16 trigg = static_cast<uint16>(m_vSendBuffer[sample][m_vTriggerIndices[t]]);
 						if(trigg != m_vLastTriggerStates[t])
 						{
 							uint64 l_ui64StimulationTime = ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), uint64(sample));
@@ -323,42 +327,11 @@ boolean CDriverBrainProductsLiveAmp::loop(void)
 				// to correct any drift in the acquisition automatically.
 				m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
 			
-				// copy rest of samples to copy buffer
-				int32 l_i32ElemCopy = m_vSendBuffer.size() - m_ui32SampleCountPerSentBlock;
-
-				if(l_i32ElemCopy == 0)
-				{
-					m_vSendBuffer.clear();
-					break;
-				}
-
-				std::vector<std::vector<float64>> l_vCopyBuffer;			
-				for (int32 i = 0; i < l_i32ElemCopy; i++)
-				{
-					int32 l_i32ArySize = m_vSendBuffer[m_ui32SampleCountPerSentBlock + i].size();
-					std::vector<float64> loc_buffer (l_i32ArySize);
-		
-					for( int32 ch = 0; ch < l_ui32LocChannelCount; ch++ )			
-						loc_buffer[ch] = m_vSendBuffer[m_ui32SampleCountPerSentBlock + i][ch];	
-
-					l_vCopyBuffer.push_back(loc_buffer);
-				}
-
-				m_vSendBuffer.clear();
-				for (int32 i = 0; i < l_vCopyBuffer.size(); i++)
-				{
-					int32 l_i32ArySize = l_vCopyBuffer[i].size();
-					std::vector<float64> loc_buffer (l_i32ArySize);
-		
-					for( int32 ch = 0; ch < l_i32ArySize; ch++ )			
-						loc_buffer[ch] = l_vCopyBuffer[i][ch];	
-
-					m_vSendBuffer.push_back(loc_buffer);
-				}		
-
+				// delete sent samples
+				m_vSendBuffer.erase(m_vSendBuffer.begin(), m_vSendBuffer.begin() + m_ui32SampleCountPerSentBlock);				
 				break;
 			}
-			if(simulation)
+			if (m_bSimulationMode)
 				Sleep(100);
 		}
 	}	
@@ -367,7 +340,7 @@ boolean CDriverBrainProductsLiveAmp::loop(void)
 		if(m_iRecordingMode != RM_IMPEDANCE)
 			return true; // go out of the loop
 		
-		std::vector<std::vector<float64>> l_vTempBuffer(1, std::vector<float64>(1));
+		std::vector<std::vector<float32>> l_vTempBuffer(1, std::vector<float32>(1));
 		uint32 l_ui32SamplesRead = ampGetImpedanceData(m_pHandle, m_pSampleBuffer, m_ui32BufferSize);
 		if(l_ui32SamplesRead < 1)
 			return true;
@@ -377,10 +350,10 @@ boolean CDriverBrainProductsLiveAmp::loop(void)
 		uint32 l_ui32CountOfMeasuredChannles = (m_ui32ImpedanceChannels - 2)  / 2 ; // GND, REF and pairs of ch+ and ch-, countOfMeasuredChannles can be different than  m_oHeader.getChannelCount()
 
 		uint32 l_ui32SmpCount = l_ui32SamplesRead / m_ui32SampleSize;
-		for( int32 sample = 0; sample < l_ui32SmpCount; sample++ )
+		for( uint32 sample = 0; sample < l_ui32SmpCount; sample++ )
 		{			
 			// must extract impedance values for each cEEG channel, and or Bipolar channel
-			for( int32 ch = 0;  ch < l_ui32CountOfMeasuredChannles; ch++ )	
+			for( uint32 ch = 0;  ch < l_ui32CountOfMeasuredChannles; ch++ )	
 			{
 				int32 l_i32Type;
 				int32 l_i32Res = ampGetProperty(m_pHandle, PG_CHANNEL, ch, CPROP_I32_Type, &l_i32Type, sizeof(l_i32Type));		
@@ -461,7 +434,7 @@ boolean CDriverBrainProductsLiveAmp::configure(void)
 {
 	// get sampling rate index:
 	uint32 sampRateIndex = -1;
-	for (int32 i=0; i < m_vSamplingRatesArray.size(); i++)
+	for (uint32 i=0; i < m_vSamplingRatesArray.size(); i++)
 	{
 		if(m_ui32PhysicalSampleRate == m_vSamplingRatesArray[i])
 			sampRateIndex = i;
@@ -511,7 +484,7 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::initializeLiveAmp()
 
 	if(strcmp(HWI, "SIM") == 0)	
 	{
-		simulation = true;
+		m_bSimulationMode = true;
 		serialN = "054201-0001";   // 32 channels
 		//serialN = "054201-0010"; // 64 channels
 	}
@@ -604,7 +577,7 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::initializeLiveAmp()
 OpenViBE::boolean CDriverBrainProductsLiveAmp::configureLiveAmp(void)
 {	
 	// amplifier configuration
-	float32 l_f32Var = (float32) m_oHeader.getSamplingFrequency();
+	float32 l_f32Var = static_cast<float32> (m_oHeader.getSamplingFrequency());
 	int32 l_i32Res = ampSetProperty(m_pHandle, PG_DEVICE, 0, DPROP_F32_BaseSampleRate, &l_f32Var, sizeof(l_f32Var));
 	if(l_i32Res != AMP_OK)					
 	{
@@ -779,9 +752,9 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::getChannelIndices()
 
 	// enable channels and get indexes of channels to be used!
 	// The order of physical channels by LiveAmp: EEGs, AUXs, ACCs, TRIGs 
-	int32 l_i32EegCnt = 0;
-	int32 l_i32AuxCnt = 0;
-	int32 l_i32AccCnt = 0;
+	uint32 l_i32EegCnt = 0;
+	uint32 l_i32AuxCnt = 0;
+	uint32 l_i32AccCnt = 0;
 	
 	for (int32 c =0; c < l_i32Avlbchannels; c++ )	
 	{
@@ -882,13 +855,8 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::getChannelIndices()
 		}
 	}
 
-	if(m_oHeader.getChannelCount() !=   (m_ui32CountEEG + m_ui32CountAux + m_ui32CountACC))
-	{
-	}
-	
-
 	// initialize trigger states
-	for (int32 i=0; i < m_vTriggerIndices.size(); i++)
+	for (uint32 i=0; i < m_vTriggerIndices.size(); i++)
 		m_vLastTriggerStates.push_back(0);
 
 	return true;
@@ -1011,13 +979,13 @@ OpenViBE::uint32 CDriverBrainProductsLiveAmp::getLiveAmpSampleSize(void)
 	return l_i32ByteSize;
 }
 
-void CDriverBrainProductsLiveAmp::liveAmpExtractData(OpenViBE::int32 samplesRead, std::vector<std::vector<OpenViBE::float64>> &extractData)
+void CDriverBrainProductsLiveAmp::liveAmpExtractData(OpenViBE::int32 samplesRead, std::vector<std::vector<OpenViBE::float32>> &extractData)
 {
 	// extracts the samples for each channel, saves to in the appropriate format.
 	uint64 l_ui64SampCnt;
 	int32 l_i32NumSamples = samplesRead / m_ui32SampleSize;
 	int32 l_i32Offset = 0;
-	float64 l_f64Sample = 0;
+	float32 l_f32Sample = 0;
 
 	extractData.clear();
 	extractData.resize(l_i32NumSamples);
@@ -1030,64 +998,63 @@ void CDriverBrainProductsLiveAmp::liveAmpExtractData(OpenViBE::int32 samplesRead
 
 		extractData[s].resize(m_ui32UsedChannelsCounter);
 
-		for (int32 i=0; i < m_ui32UsedChannelsCounter; i++)
+		for (uint32 i=0; i < m_ui32UsedChannelsCounter; i++)
 		{
 			switch (m_vDataTypeArray[i])
 			{
 				case DT_INT16:
 					{
-						int16_t tmp = *(int16*)&m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset];
-						l_f64Sample = (float64) tmp;
+						int16_t tmp = reinterpret_cast<int16_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
+						l_f32Sample = static_cast<float32> (tmp);
 						l_i32Offset += 2;
 						break;
 					}
 				case DT_UINT16:
 					{
-						uint16_t tmp = *(uint16*)&m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset];
-						l_f64Sample = (float64) tmp;
+						uint16_t tmp = reinterpret_cast<uint16_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
+						l_f32Sample  = static_cast<float32> (tmp);
 						l_i32Offset += 2;
 						break;
 					}					
 				case DT_INT32:
 					{
-						int32_t tmp = *(int32*)&m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset];
-						l_f64Sample = (float64) tmp;
+						int32_t tmp = reinterpret_cast<int32_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
+						l_f32Sample = static_cast<float32> (tmp);
 						l_i32Offset += 4;
 						break;
 					}
 				case DT_UINT32:
 					{
-						uint32_t tmp = *(uint32*)&m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset];
-						l_f64Sample = (float64) tmp;
+						uint32_t tmp = reinterpret_cast<uint32_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
+						l_f32Sample  = static_cast<float32> (tmp);
 						l_i32Offset += 4;
 						break;
 					}
 				case DT_FLOAT32:
 					{
-						float32 tmp = *(float32*)&m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset];
-						l_f64Sample = (float64) tmp;
+						float32 tmp = reinterpret_cast<float32&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
+						l_f32Sample = tmp;
 						l_i32Offset += 4;
 						break;
 					}
 				case DT_INT64:
 					{
-						int64_t tmp = *(int64*)&m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset];
-						l_f64Sample = (float64) tmp;
+						int64_t tmp = reinterpret_cast<int64_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
+						l_f32Sample = static_cast<float32> (tmp);
 						l_i32Offset += 8;
 						break;
 					}
 				case DT_UINT64:
 					{
-						uint64_t tmp = *(uint64*)&m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset];
-						l_f64Sample = (float64) tmp;
+						uint64_t tmp = reinterpret_cast<uint64_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
+						l_f32Sample = static_cast<float32> (tmp);
 						l_i32Offset += 8;
 						break;
 					}
 				case DT_FLOAT64:
 					{
-						
-						float64 tmp = *(float64*)&m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset];
-						l_f64Sample = (float64) tmp;
+						float64 tmp = reinterpret_cast<float64&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
+						l_f32Sample = static_cast<float32> (tmp);
 						l_i32Offset += 8;
 						break;					
 					}					
@@ -1095,15 +1062,14 @@ void CDriverBrainProductsLiveAmp::liveAmpExtractData(OpenViBE::int32 samplesRead
 					break;
 			}
 			
-			extractData[s][i] = l_f64Sample;
+			extractData[s][i] = l_f32Sample;
 		}
 	}
 }
 
-void CDriverBrainProductsLiveAmp::liveAmpExtractImpedanceData(OpenViBE::int32 samplesRead, std::vector<std::vector<OpenViBE::float64>> &extractData)
+void CDriverBrainProductsLiveAmp::liveAmpExtractImpedanceData(OpenViBE::int32 samplesRead, std::vector<std::vector<OpenViBE::float32>> &extractData)
 {
 	// extracts samples of each channel. In this case, since it is a impedance measurements it extracts EEG-channel data.
-	uint64 l_ui64SamCnt;
 	int32 l_i32NumSamples = samplesRead / m_ui32SampleSize;
 	int32 l_i32Offset = 0;
 	int32 l_i32OffsetStep = sizeof(float32);
@@ -1115,10 +1081,10 @@ void CDriverBrainProductsLiveAmp::liveAmpExtractImpedanceData(OpenViBE::int32 sa
 	{		
 		extractData[s].resize(m_ui32ImpedanceChannels);
 
-		for (int32 i=0; i < m_ui32ImpedanceChannels; i++)
+		for (uint32 i=0; i < m_ui32ImpedanceChannels; i++)
 		{
-			l_ui64SamCnt = *(float32*)&m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset];	
-			extractData[s][i] = (float64) l_ui64SamCnt;
+			float32 l_f32Samp = *(float32*)&m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset];
+			extractData[s][i] = l_f32Samp;
 			l_i32Offset += l_i32OffsetStep; // sample counter offset
 		}
 	}
