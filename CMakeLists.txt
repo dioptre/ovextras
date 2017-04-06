@@ -233,7 +233,6 @@ ADD_DEFINITIONS(-DOV_CMAKE_PATH_LIB="${CMAKE_INSTALL_FULL_LIBDIR}")
 
 ADD_SUBDIRECTORY("build-tool/")
 # Traverse these directories and build their components
-# ADD_SUBDIRECTORY("toolkit/")  # from cert
 ADD_SUBDIRECTORY("modules/tcptagging") 
 # ADD_SUBDIRECTORY("plugins/")					# @TODO enable, prune, make work
 ADD_SUBDIRECTORY("plugins/processing/vrpn/")	# just as a post-cert example until the rest are fixed
