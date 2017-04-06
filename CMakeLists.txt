@@ -233,7 +233,6 @@ ADD_DEFINITIONS(-DOV_CMAKE_PATH_LIB="${CMAKE_INSTALL_FULL_LIBDIR}")
 
 ADD_SUBDIRECTORY("build-tool/")
 # Traverse these directories and build their components
-# ADD_SUBDIRECTORY("common/")	# from cert
 # ADD_SUBDIRECTORY("openvibe/")	# from cert
 # ADD_SUBDIRECTORY("kernel/")	# from cert
 # ADD_SUBDIRECTORY("modules/")	# from cert
