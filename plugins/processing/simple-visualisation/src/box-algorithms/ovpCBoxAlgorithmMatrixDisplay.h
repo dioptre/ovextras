@@ -97,7 +97,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Symetric min/max",  OV_TypeId_Boolean,       "false");
 				rBoxAlgorithmPrototype.addSetting("Real time min/max", OV_TypeId_Boolean,       "false");
 				rBoxAlgorithmPrototype.addInput  ("Matrix",            OV_TypeId_StreamedMatrix);
-				// rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsUnstable);
+				// rBoxAlgorithmPrototype.addFlag   (OV_AttributeId_Box_FlagIsUnstable);
 
 				return true;
 			}

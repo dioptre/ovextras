@@ -243,4 +243,7 @@
 #define OVP_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelUnitData                  OpenViBE::CIdentifier(0x19DC533C, 0x56301D0B)
 
 
+#define OV_AttributeId_Box_FlagIsUnstable                   OpenViBE::CIdentifier(0x666FFFFF, 0x666FFFFF)
+
+
 #endif // __OpenViBEPlugins_Defines_H__

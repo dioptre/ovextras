@@ -20,9 +20,9 @@ CSimpleDSP::CSimpleDSP(void)
 {
 }
 
-boolean CSimpleDSP::initialize(void)
+bool CSimpleDSP::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	uint32 i;
 
 	m_ppVariable=new float64*[l_rStaticBoxContext.getInputCount()];
@@ -142,9 +142,9 @@ boolean CSimpleDSP::uninitialize(void)
 	return true;
 }
 
-boolean CSimpleDSP::processInput(uint32 ui32InputIndex)
+bool CSimpleDSP::processInput(uint32_t ui32InputIndex)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	IDynamicBoxContext& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	if(l_rDynamicBoxContext.getInputChunkCount(0) == 0)
@@ -180,7 +180,7 @@ boolean CSimpleDSP::processInput(uint32 ui32InputIndex)
 
 boolean CSimpleDSP::process(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	IDynamicBoxContext& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	uint32 i;
@@ -257,7 +257,7 @@ boolean CSimpleDSP::process(void)
 
 void CSimpleDSP::evaluate(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{

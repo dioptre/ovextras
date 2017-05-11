@@ -143,7 +143,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Card filename",                   OV_TypeId_Filename,    "");
 				rBoxAlgorithmPrototype.addSetting("Card filename",                   OV_TypeId_Filename,    "");
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				return true;
 			}
 

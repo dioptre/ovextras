@@ -212,7 +212,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("End-of-file stimulation for input 1",OV_TypeId_Stimulation,"OVTK_StimulationId_ExperimentStop");
 				rBoxAlgorithmPrototype.addSetting("End-of-file stimulation for input 2",OV_TypeId_Stimulation,"OVTK_StimulationId_ExperimentStop");
 				
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				//rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

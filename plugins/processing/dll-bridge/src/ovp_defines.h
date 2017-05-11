@@ -15,6 +15,7 @@
 //                                                                   //
 #define OVP_ClassId_DLLBridge                           OpenViBE::CIdentifier(0x6F837408, 0x35BA0312)
 
+#define OV_AttributeId_Box_FlagIsUnstable               OpenViBE::CIdentifier(0x666FFFFF, 0x666FFFFF)
 
 
 #endif // __OpenViBEPlugins_Defines_H__

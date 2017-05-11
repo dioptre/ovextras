@@ -76,7 +76,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Spatial filter configuration", OV_TypeId_Filename,     "");
 				rBoxAlgorithmPrototype.addSetting("Filter dimension",             OV_TypeId_Integer,      "4");
 				rBoxAlgorithmPrototype.addSetting("Save as box config",           OV_TypeId_Boolean,      "true");
-				// rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				// rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				return true;
 			}
 

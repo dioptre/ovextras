@@ -8,10 +8,10 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Tools;
 
-boolean CBoxAlgorithmStimulationListener::initialize(void)
+bool CBoxAlgorithmStimulationListener::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+	for(uint32_t i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{		
 		m_vStimulationDecoder.push_back(new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmStimulationListener >(*this,i));
 	}
@@ -23,33 +23,33 @@ boolean CBoxAlgorithmStimulationListener::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmStimulationListener::uninitialize(void)
+bool CBoxAlgorithmStimulationListener::uninitialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+	for(auto& decoderPtr : m_vStimulationDecoder)
 	{
-		m_vStimulationDecoder[i]->uninitialize();
-		delete m_vStimulationDecoder[i];
+		decoderPtr->uninitialize();
+		delete decoderPtr;
 	}
 	m_vStimulationDecoder.clear();
 
 	return true;
 }
 
-boolean CBoxAlgorithmStimulationListener::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmStimulationListener::processInput(uint32_t ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 
-boolean CBoxAlgorithmStimulationListener::process(void)
+bool CBoxAlgorithmStimulationListener::process(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
+	for(uint32_t i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
-		for(uint32 j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
+		for(uint32_t j=0; j<l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
 			m_vStimulationDecoder[i]->decode(j);
 			if(m_vStimulationDecoder[i]->isHeaderReceived())
@@ -61,7 +61,7 @@ boolean CBoxAlgorithmStimulationListener::process(void)
 
 				CString l_sInputName;
 				l_rStaticBoxContext.getInputName(i, l_sInputName);
-				for(uint64 k=0; k<op_pStimulationSet->getStimulationCount(); k++)
+				for(uint64_t k=0; k<op_pStimulationSet->getStimulationCount(); k++)
 				{
 					this->getLogManager() << m_eLogLevel
 						<< "For input " << i << " with name " << l_sInputName

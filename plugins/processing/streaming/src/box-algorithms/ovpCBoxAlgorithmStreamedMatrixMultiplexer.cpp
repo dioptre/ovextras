@@ -100,7 +100,7 @@ boolean CBoxAlgorithmStreamedMatrixMultiplexer::processInput(uint32 ui32InputInd
 
 boolean CBoxAlgorithmStreamedMatrixMultiplexer::process(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 /*

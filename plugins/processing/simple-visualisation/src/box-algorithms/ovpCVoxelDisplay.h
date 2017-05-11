@@ -248,7 +248,7 @@ namespace OpenViBEPlugins
 			{
 				rPrototype.addSetting("Voxels filename", OV_TypeId_Filename, "");
 				rPrototype.addInput("Voxel activity levels", OV_TypeId_StreamedMatrix);
-				rPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				return true;
 			}
 

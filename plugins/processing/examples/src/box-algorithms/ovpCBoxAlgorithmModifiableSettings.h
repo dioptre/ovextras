@@ -155,8 +155,8 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("unit",OV_TypeId_MeasurementUnit, "V", true);
 				rBoxAlgorithmPrototype.addSetting("factor",OV_TypeId_Factor, "1e-01", true);
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
-				
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
+
 				return true;
 			}
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_ModifiableSettingsDesc);

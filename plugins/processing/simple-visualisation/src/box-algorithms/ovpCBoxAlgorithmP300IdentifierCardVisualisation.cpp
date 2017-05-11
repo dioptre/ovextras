@@ -37,9 +37,9 @@ namespace
 		CString m_sSettingValue;
 	};
 };
-boolean CBoxAlgorithmP300IdentifierCardVisualisation::initialize(void)
+bool CBoxAlgorithmP300IdentifierCardVisualisation::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_pMainWidgetInterface=NULL;
 

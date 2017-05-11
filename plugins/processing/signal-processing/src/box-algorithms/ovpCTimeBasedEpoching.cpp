@@ -213,9 +213,9 @@ void CTimeBasedEpoching::release(void)
 	delete this;
 }
 
-boolean CTimeBasedEpoching::initialize(void)
+bool CTimeBasedEpoching::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
 	m_oSignalDecoder.initialize(*this,0);
 

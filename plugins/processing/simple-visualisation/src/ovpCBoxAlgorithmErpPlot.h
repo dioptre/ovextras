@@ -229,7 +229,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Line color 1",OV_TypeId_Color,"0,0,0");
 				rBoxAlgorithmPrototype.addSetting("Line label 1",OV_TypeId_String,"curve 1");
 				
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

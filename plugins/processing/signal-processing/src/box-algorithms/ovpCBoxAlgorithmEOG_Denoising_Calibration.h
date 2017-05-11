@@ -152,7 +152,7 @@ namespace OpenViBEPlugins
 
                 rBoxAlgorithmPrototype.addOutput ("Train-completed Flag",OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

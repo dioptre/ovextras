@@ -96,7 +96,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addOutput("Envelope",OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addOutput("Phase",OV_TypeId_Signal);
 				
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

@@ -11,7 +11,7 @@ using namespace OpenViBEPlugins::Streaming;
 
 boolean CBoxAlgorithmSignalMerger::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
@@ -25,7 +25,7 @@ boolean CBoxAlgorithmSignalMerger::initialize(void)
 
 boolean CBoxAlgorithmSignalMerger::uninitialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_pStreamEncoder->uninitialize();
 	delete m_pStreamEncoder;
@@ -42,7 +42,7 @@ boolean CBoxAlgorithmSignalMerger::uninitialize(void)
 
 boolean CBoxAlgorithmSignalMerger::processInput(uint32 ui32InputIndex)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IDynamicBoxContext& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	if(l_rDynamicBoxContext.getInputChunkCount(0) == 0)
@@ -69,7 +69,7 @@ boolean CBoxAlgorithmSignalMerger::processInput(uint32 ui32InputIndex)
 
 boolean CBoxAlgorithmSignalMerger::process(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	const uint32 l_ui32NumChunks=l_rDynamicBoxContext.getInputChunkCount(0);

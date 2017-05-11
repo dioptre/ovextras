@@ -96,6 +96,8 @@
  #include "ovp_global_defines.h"
 #endif // TARGET_HAS_ThirdPartyOpenViBEPluginsGlobalDefines
 
+#define OV_AttributeId_Box_FlagIsUnstable                   OpenViBE::CIdentifier(0x666FFFFF, 0x666FFFFF)
+
 //___________________________________________________________________//
 //                                                                   //
 // Some enumerations                                                 //

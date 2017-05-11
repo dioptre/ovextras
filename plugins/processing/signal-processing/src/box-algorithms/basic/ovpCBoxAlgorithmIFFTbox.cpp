@@ -43,7 +43,7 @@ boolean CBoxAlgorithmIFFTbox::uninitialize(void)
 
 boolean CBoxAlgorithmIFFTbox::processInput(uint32 ui32InputIndex)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	IDynamicBoxContext& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	if(l_rDynamicBoxContext.getInputChunkCount(0) == 0)
@@ -79,7 +79,7 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 {
 	
 	// the static box context describes the box inputs, outputs, settings structures
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 	

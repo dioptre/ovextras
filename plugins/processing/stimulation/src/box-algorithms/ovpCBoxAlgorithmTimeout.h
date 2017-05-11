@@ -92,7 +92,7 @@ namespace OpenViBEPlugins
 					rBoxAlgorithmPrototype.addSetting("Timeout delay",OV_TypeId_Integer,"5");
 					rBoxAlgorithmPrototype.addSetting("Output Stimulation",OV_TypeId_Stimulation,"OVTK_StimulationId_Label_00");
 
-					rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+					rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 
 					return true;
 				}

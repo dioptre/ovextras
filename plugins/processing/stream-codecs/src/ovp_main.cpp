@@ -24,6 +24,7 @@
 #include "box-algorithms/ovpCEncoderAlgorithmTest.h"
 
 OVP_Declare_Begin()
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_BoxAlgorithmFlag, OV_AttributeId_Box_FlagIsUnstable.toString(), 1);
 	OVP_Declare_New(OpenViBEPlugins::StreamCodecs::CAcquisitionDecoderDesc)
 	OVP_Declare_New(OpenViBEPlugins::StreamCodecs::CExperimentInformationDecoderDesc)
 	OVP_Declare_New(OpenViBEPlugins::StreamCodecs::CChannelLocalisationDecoderDesc)

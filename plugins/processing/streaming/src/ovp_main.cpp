@@ -8,6 +8,7 @@
 #include <vector>
 
 OVP_Declare_Begin()
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_BoxAlgorithmFlag, OV_AttributeId_Box_FlagIsUnstable.toString(), 1);
 	OVP_Declare_New(OpenViBEPlugins::Streaming::CBoxAlgorithmStreamedMatrixMultiplexerDesc);
 	OVP_Declare_New(OpenViBEPlugins::Streaming::CBoxAlgorithmSignalMergerDesc);
 	OVP_Declare_New(OpenViBEPlugins::Streaming::CBoxAlgorithmStreamedMatrixSwitchDesc);

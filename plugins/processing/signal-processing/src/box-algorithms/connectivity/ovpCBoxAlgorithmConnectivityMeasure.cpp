@@ -63,7 +63,7 @@ namespace
 
 boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
 	m_ui32InputCount = l_rStaticBoxContext.getInputCount();
 	m_ui32OutputCount = l_rStaticBoxContext.getOutputCount();
@@ -186,7 +186,7 @@ boolean CBoxAlgorithmConnectivityMeasure::uninitialize(void)
 boolean CBoxAlgorithmConnectivityMeasure::processInput(uint32 ui32InputIndex)
 {
 
-		IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+		const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 		IDynamicBoxContext& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 		if(l_rDynamicBoxContext.getInputChunkCount(0) == 0)

@@ -146,9 +146,8 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Don't use the file time",OV_TypeId_Boolean, "false");
 				rBoxAlgorithmPrototype.addSetting("Samples per buffer", OV_TypeId_Integer,"32");
 
-				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
-
-				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_FeatureVector);

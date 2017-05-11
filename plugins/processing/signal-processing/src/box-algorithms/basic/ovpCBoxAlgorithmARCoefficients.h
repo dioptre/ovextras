@@ -95,7 +95,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addOutput("AR Features",OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addSetting("Order",OV_TypeId_Integer,"1");
 		
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

@@ -165,7 +165,7 @@ namespace OpenViBEPlugins
                 rBoxAlgorithmPrototype.addSetting("Wavelet type",OVP_TypeId_WaveletType,"");
                 rBoxAlgorithmPrototype.addSetting("Wavelet decomposition levels",OVP_TypeId_WaveletLevel,"");
 				
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

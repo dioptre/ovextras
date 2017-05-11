@@ -117,7 +117,7 @@ OpenViBE::uint32 CBoxAlgorithmSpatialFilter::loadCoefficients(const OpenViBE::CS
 
 boolean CBoxAlgorithmSpatialFilter::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
 	m_pStreamDecoder=NULL;
 	m_pStreamEncoder=NULL;

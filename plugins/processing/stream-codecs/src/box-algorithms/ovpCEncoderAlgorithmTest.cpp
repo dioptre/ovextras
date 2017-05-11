@@ -94,7 +94,7 @@ boolean CEncoderAlgorithmTest::processClock(IMessageClock& rMessageClock)
 boolean CEncoderAlgorithmTest::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=getDynamicBoxContext();
-	IBox& l_rStaticBoxContext=getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=getStaticBoxContext();
 	IPlayerContext& l_rPlayerContext=getPlayerContext();
 
 	if(!m_bHasSentHeader)

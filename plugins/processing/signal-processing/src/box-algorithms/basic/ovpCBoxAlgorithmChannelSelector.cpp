@@ -51,9 +51,9 @@ namespace
 	}
 };
 
-boolean CBoxAlgorithmChannelSelector::initialize(void)
+bool CBoxAlgorithmChannelSelector::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
 	CIdentifier l_oTypeIdentifier;
 	l_rStaticBoxContext.getOutputType(0, l_oTypeIdentifier);

@@ -12,7 +12,7 @@ using namespace std;
 
 boolean CBoxAlgorithmMatrixValidityChecker::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
 		m_vStreamDecoder.push_back(new OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmMatrixValidityChecker >(*this,i));
@@ -27,7 +27,7 @@ boolean CBoxAlgorithmMatrixValidityChecker::initialize(void)
 
 boolean CBoxAlgorithmMatrixValidityChecker::uninitialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
 		m_vStreamDecoder[i]->uninitialize();
@@ -46,7 +46,7 @@ boolean CBoxAlgorithmMatrixValidityChecker::processInput(uint32 ui32InputIndex)
 
 boolean CBoxAlgorithmMatrixValidityChecker::process(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)

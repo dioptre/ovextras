@@ -39,7 +39,7 @@ namespace
 
 boolean CBoxAlgorithmP300MagicCardVisualisation::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
 	m_pMainWidgetInterface=NULL;
 	m_pToolbarWidgetInterface=NULL;

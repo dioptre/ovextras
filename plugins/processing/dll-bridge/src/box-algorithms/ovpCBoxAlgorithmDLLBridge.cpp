@@ -43,7 +43,7 @@ namespace OpenViBEPlugins
 	{
 
 		// This function is called once when user presses play in Designer
-		OpenViBE::boolean CDLLBridge::initialize()
+		bool CDLLBridge::initialize()
 		{		
 			this->getLogManager() << LogLevel_Debug << "Initializing\n";
 
@@ -128,7 +128,7 @@ namespace OpenViBEPlugins
 				return false;
 			}
 
-			IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+			const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 			l_rStaticBoxContext.getInputType(0, m_oInputType);
 			if(m_oInputType == OV_TypeId_StreamedMatrix) {
 				OpenViBEToolkit::TStreamedMatrixDecoder< CDLLBridge >* l_pDecoder
@@ -164,8 +164,8 @@ namespace OpenViBEPlugins
 			this->getLogManager() << LogLevel_Trace << "DLL box_init() : Calling\n";
 
 			// Do some initialization in DLL
-			int32 l_i32ParamsLength = m_sParameters.length();
-			int32 l_i32ErrorCode = 0;
+			int32_t l_i32ParamsLength = m_sParameters.length();
+			int32_t l_i32ErrorCode = 0;
 			m_pInitialize(&l_i32ParamsLength, m_sParameters.toASCIIString(), &l_i32ErrorCode);
 			if(l_i32ErrorCode) 
 			{
@@ -180,7 +180,7 @@ namespace OpenViBEPlugins
 		}
 
 		// This function is called once when user presses Stop in Designer
-		OpenViBE::boolean CDLLBridge::uninitialize()
+		bool CDLLBridge::uninitialize()
 		{
 			this->getLogManager() << LogLevel_Debug << "Uninitializing\n";
 
@@ -189,7 +189,7 @@ namespace OpenViBEPlugins
 				this->getLogManager() << LogLevel_Trace << "DLL box_uninit() : Calling\n";
 
 				// Do some uninitialization in DLL
-				int32 l_i32ErrorCode = 0;			
+				int32_t l_i32ErrorCode = 0;
 				m_pUninitialize(&l_i32ErrorCode);
 
 				if(l_i32ErrorCode) 
@@ -229,7 +229,7 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-		OpenViBE::boolean CDLLBridge::processInput(uint32 ui32InputIndex)
+		bool CDLLBridge::processInput(uint32 ui32InputIndex)
 		{
 			getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 
@@ -237,7 +237,7 @@ namespace OpenViBEPlugins
 		}
 
 		// This function is called for every signal chunk (matrix of N samples [channels x samples]).
-		OpenViBE::boolean CDLLBridge::process()
+		bool CDLLBridge::process()
 		{
 			this->getLogManager() << LogLevel_Debug << "Process chunk\n";
 
@@ -265,24 +265,24 @@ namespace OpenViBEPlugins
 						return false;
 					}
 
-					int32 l_i32SamplingRateIn = 0;
+					int32_t l_i32SamplingRateIn = 0;
 
 					if(m_oInputType == OV_TypeId_Signal)
 					{
 						OpenViBEToolkit::TSignalDecoder< CDLLBridge >* l_pSignalDecoder 
 							= static_cast< OpenViBEToolkit::TSignalDecoder< CDLLBridge >* >(m_pDecoder);
 
-						l_i32SamplingRateIn = static_cast<int32>(l_pSignalDecoder->getOutputSamplingRate());
+						l_i32SamplingRateIn = static_cast<int32_t>(l_pSignalDecoder->getOutputSamplingRate());
 					}
 
-					int32 l_i32nRowsIn = l_pDecoder->getOutputMatrix()->getDimensionSize(0);
-					int32 l_i32nColsIn = l_pDecoder->getOutputMatrix()->getDimensionSize(1);
+					int32_t l_i32nRowsIn = l_pDecoder->getOutputMatrix()->getDimensionSize(0);
+					int32_t l_i32nColsIn = l_pDecoder->getOutputMatrix()->getDimensionSize(1);
 
 					this->getLogManager() << LogLevel_Trace << "DLL box_process_header() : Calling\n";
 
-					int32 l_i32ErrorCode = 0;
-					int32 l_i32nRowsOut=0,l_i32nColsOut=0;
-					int32 l_i32SamplingRateOut = 0;
+					int32_t l_i32ErrorCode = 0;
+					int32_t l_i32nRowsOut=0,l_i32nColsOut=0;
+					int32_t l_i32SamplingRateOut = 0;
 					m_pProcessHeader(&l_i32nRowsIn, &l_i32nColsIn, &l_i32SamplingRateIn, &l_i32nRowsOut, &l_i32nColsOut, &l_i32SamplingRateOut, &l_i32ErrorCode);
 					if(l_i32ErrorCode) 
 					{
@@ -324,7 +324,7 @@ namespace OpenViBEPlugins
 					this->getLogManager() << LogLevel_Trace << "DLL box_process() : Calling\n";
 
 					// Process the sample chunk in DLL
-					int32 l_i32ErrorCode = 0;
+					int32_t l_i32ErrorCode = 0;
 					m_pProcess(l_pInput, l_pOutput, &l_i32ErrorCode);
 					if(l_i32ErrorCode) 
 					{

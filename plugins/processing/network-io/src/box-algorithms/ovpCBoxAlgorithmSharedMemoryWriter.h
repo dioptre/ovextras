@@ -35,8 +35,8 @@ namespace OpenViBEPlugins
 		
 		struct SMatrix
 		{
-			OpenViBE::uint32 rowDimension;
-			OpenViBE::uint32 columnDimension;
+			uint32_t rowDimension;
+			uint32_t columnDimension;
 			offset_ptr<OpenViBE::float64> data;
 		};
 
@@ -47,9 +47,9 @@ namespace OpenViBEPlugins
 		typedef allocator< std::pair<const ShmString, OpenViBE::CIdentifier > , managed_shared_memory::segment_manager>  ShmemAllocatorMetaInfo;
 		typedef map<ShmString, OpenViBE::CIdentifier, std::less<ShmString>, ShmemAllocatorMetaInfo> MyVectorMetaInfo;
 		
-		typedef allocator<OpenViBE::uint32, managed_shared_memory::segment_manager>  ShmemAllocatorStimulation;
+		typedef allocator<uint32_t, managed_shared_memory::segment_manager>  ShmemAllocatorStimulation;
 		typedef allocator<offset_ptr<SMatrix>, managed_shared_memory::segment_manager>  ShmemAllocatorMatrix;
-		typedef vector<OpenViBE::uint32, ShmemAllocatorStimulation> MyVectorStimulation;
+		typedef vector<uint32_t, ShmemAllocatorStimulation> MyVectorStimulation;
 		typedef vector<offset_ptr<SMatrix>, ShmemAllocatorMatrix> MyVectorStreamedMatrix;	
 
 		class CBoxAlgorithmSharedMemoryWriter : virtual public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
@@ -58,19 +58,19 @@ namespace OpenViBEPlugins
 			
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
 				
 			//Here is the different process callbacks possible
 			// - On clock ticks :
-			//virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
+			//virtual bool processClock(OpenViBE::CMessageClock& rMessageClock);
 			// - On new input received (the most common behaviour for signal processing) :
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool processInput(uint32_t ui32InputIndex);
 			
 			// If you want to use processClock, you must provide the clock frequency.
 			//virtual OpenViBE::uint64 getClockFrequency(void);
 			
-			virtual OpenViBE::boolean process(void);
+			virtual bool process(void);
 
 			// As we do with any class in openvibe, we use the macro below 
 			// to associate this box to an unique identifier. 
@@ -88,9 +88,9 @@ namespace OpenViBEPlugins
 
 			OpenViBE::CString m_sSharedMemoryName;
 			managed_shared_memory m_oSharedMemoryArray;
-			//OpenViBE::uint32 * m_pInputStimuliSet;
+			//uint32_t * m_pInputStimuliSet;
 			//MyVector * m_pInputStimuliSet;
-			//OpenViBE::uint32 m_ui32InputCounter;
+			//uint32_t m_ui32InputCounter;
 
 
 		private:
@@ -108,7 +108,7 @@ namespace OpenViBEPlugins
 		// For example, if your box has a variable number of input, but all of them must be stimulation inputs.
 		// The following listener callback will ensure that any newly added input is stimulations :
 		/*		
-		virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+		virtual bool onInputAdded(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index)
 		{
 			rBox.setInputType(ui32Index, OV_TypeId_Stimulations);
 		};
@@ -121,30 +121,30 @@ namespace OpenViBEPlugins
 		{
 		public:
 
-			//virtual OpenViBE::boolean onInitialized(OpenViBE::Kernel::IBox& rBox) { return true; };
-			//virtual OpenViBE::boolean onNameChanged(OpenViBE::Kernel::IBox& rBox) { return true; };
-			//virtual OpenViBE::boolean onInputConnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onInputDisconnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			virtual OpenViBE::boolean onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) 
+			//virtual bool onInitialized(OpenViBE::Kernel::IBox& rBox) { return true; };
+			//virtual bool onNameChanged(OpenViBE::Kernel::IBox& rBox) { return true; };
+			//virtual bool onInputConnected(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onInputDisconnected(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			virtual bool onInputAdded(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			virtual bool onInputRemoved(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			virtual bool onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index)
 			{ 
 			
 				return true; 
 			};
-			//virtual OpenViBE::boolean onInputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputConnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputDisconnected(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onOutputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingDefaultValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
-			//virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) { return true; };
+			//virtual bool onInputNameChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onOutputConnected(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onOutputDisconnected(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onOutputAdded(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onOutputRemoved(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onOutputTypeChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onOutputNameChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onSettingAdded(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onSettingRemoved(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onSettingTypeChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onSettingNameChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onSettingDefaultValueChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
+			//virtual bool onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) { return true; };
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 		};
@@ -179,7 +179,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmSharedMemoryWriterListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 			
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput("prediction1",OV_TypeId_StreamedMatrix);
@@ -192,7 +192,7 @@ namespace OpenViBEPlugins
 				
 				rBoxAlgorithmPrototype.addSetting("SharedMemoryName",OV_TypeId_String,"SharedMemory_P300Stimulator");
 				
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Stimulations);

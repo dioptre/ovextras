@@ -303,4 +303,6 @@
 #define OVP_Value_CoupledStringSeparator                                '-'
 //#define OVP_Value_AllSelection											'*'
 
+#define OV_AttributeId_Box_FlagIsUnstable                   OpenViBE::CIdentifier(0x666FFFFF, 0x666FFFFF)
+
 #endif // __OpenViBEPlugins_Defines_H__
