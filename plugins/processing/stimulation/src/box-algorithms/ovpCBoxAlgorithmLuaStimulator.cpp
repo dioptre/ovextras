@@ -382,7 +382,7 @@ boolean CBoxAlgorithmLuaStimulator::processInput(uint32 ui32InputIndex)
 boolean CBoxAlgorithmLuaStimulator::initialize(void)
 {
 	uint32 i;
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	CString l_sLuaScriptFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	l_sLuaScriptFilename=this->getConfigurationManager().expand(l_sLuaScriptFilename);
@@ -533,7 +533,7 @@ boolean CBoxAlgorithmLuaStimulator::uninitialize(void)
 
 boolean CBoxAlgorithmLuaStimulator::process(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	const uint64 l_ui64CurrentTime=this->getPlayerContext().getCurrentTime();
@@ -672,7 +672,7 @@ boolean CBoxAlgorithmLuaStimulator::runLuaThread(void)
 
 boolean CBoxAlgorithmLuaStimulator::sendStimulations(uint64 ui64StartTime, uint64 ui64EndTime)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getOutputCount(); i++)

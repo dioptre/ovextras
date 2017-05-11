@@ -241,20 +241,18 @@ ADD_SUBDIRECTORY("plugins/processing/vrpn/")	# just as a post-cert example until
 ADD_SUBDIRECTORY("plugins/processing/tools/")
 #ADD_SUBDIRECTORY("plugins/processing/tests/")
 ADD_SUBDIRECTORY("plugins/processing/streaming/")
-#ADD_SUBDIRECTORY("plugins/processing/stream-codecs/")
 #ADD_SUBDIRECTORY("plugins/processing/stimulation/")
 #ADD_SUBDIRECTORY("plugins/processing/simple-visualisation/")
 #ADD_SUBDIRECTORY("plugins/processing/signal-processing/")
 ADD_SUBDIRECTORY("plugins/processing/network-io/")
 #ADD_SUBDIRECTORY("plugins/processing/matlab/")
 #ADD_SUBDIRECTORY("plugins/processing/file-io/")
-#ADD_SUBDIRECTORY("plugins/processing/feature-extraction/")
 #ADD_SUBDIRECTORY("plugins/processing/examples/")
 #ADD_SUBDIRECTORY("plugins/processing/evaluation/")
 ADD_SUBDIRECTORY("plugins/processing/dll-bridge/")
-#ADD_SUBDIRECTORY("plugins/processing/data-generation/")
+ADD_SUBDIRECTORY("plugins/processing/data-generation/")
 #ADD_SUBDIRECTORY("plugins/processing/classification/")
-#ADD_SUBDIRECTORY("plugins/processing/acquisition/")
+ADD_SUBDIRECTORY("plugins/processing/acquisition/")
 
 
 
