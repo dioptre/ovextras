@@ -23,10 +23,10 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::SignalProcessing;
 
-boolean CBoxAlgorithmDiscreteWaveletTransform::initialize(void)
+bool CBoxAlgorithmDiscreteWaveletTransform::initialize(void)
 {
 
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	// Signal stream decoder
 	m_oAlgo0_SignalDecoder.initialize(*this,0);
 
@@ -36,7 +36,7 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::initialize(void)
 	m_sWaveletType=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sDecompositionLevel=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
-	for (uint32 o = 0; o < l_rStaticBoxContext.getOutputCount()-1; o++)
+	for (uint32_t o = 0; o < l_rStaticBoxContext.getOutputCount()-1; o++)
 	{
 		m_vAlgoX_SignalEncoder.push_back(new OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmDiscreteWaveletTransform >(*this, o+1));
 	}
@@ -47,17 +47,17 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::initialize(void)
 }
 
 
-boolean CBoxAlgorithmDiscreteWaveletTransform::uninitialize(void)
+bool CBoxAlgorithmDiscreteWaveletTransform::uninitialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
 	m_oAlgo0_SignalDecoder.uninitialize();
 	m_oAlgoInfo_SignalEncoder.uninitialize();
 
-	for (uint32 o = 0; o < l_rStaticBoxContext.getOutputCount()-1; o++)
+	for (auto elem : m_vAlgoX_SignalEncoder)
 	{
-		m_vAlgoX_SignalEncoder[o]->uninitialize();
-		delete m_vAlgoX_SignalEncoder[o];
+		elem->uninitialize();
+		delete elem;
 	}
 	m_vAlgoX_SignalEncoder.clear();
 	
@@ -65,7 +65,7 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::uninitialize(void)
 }
 
 
-boolean CBoxAlgorithmDiscreteWaveletTransform::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmDiscreteWaveletTransform::processInput(uint32_t ui32InputIndex)
 {
 	// some pre-processing code if needed...
 
@@ -76,7 +76,7 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::processInput(uint32 ui32InputInde
 }
 
 
-boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
+bool CBoxAlgorithmDiscreteWaveletTransform::process(void)
 {
 	
 	// the static box context describes the box inputs, outputs, settings structures
@@ -87,7 +87,7 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 	const int J = std::atoi(m_sDecompositionLevel);
 	const std::string nm (m_sWaveletType.toASCIIString());
 
-	for(uint32 ii=0; ii<l_rDynamicBoxContext.getInputChunkCount(0); ii++)
+	for(uint32_t ii=0; ii<l_rDynamicBoxContext.getInputChunkCount(0); ii++)
 	{
 		//Decode input signal
 		m_oAlgo0_SignalDecoder.decode(ii);
@@ -95,8 +95,8 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 		// Construct header when we receive one
 		if(m_oAlgo0_SignalDecoder.isHeaderReceived())
 		{
-			uint32 l_ui32NbChannels0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
-			uint32 l_ui32NbSamples0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
+			uint32_t l_ui32NbChannels0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(0);
+			uint32_t l_ui32NbSamples0 = m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionSize(1);
 
 			if (l_ui32NbSamples0<=std::pow(2.0,J+1))
 			{
@@ -109,7 +109,7 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 
 			//sig will be resized to the number of channels and the total number of samples (Channels x Samples)
 			m_sig.resize(l_ui32NbChannels0);
-			for(uint32 i = 0; i < l_ui32NbChannels0; i++)
+			for(uint32_t i = 0; i < l_ui32NbChannels0; i++)
 			{
 				m_sig[i].resize(l_ui32NbSamples0);
 			}
@@ -128,7 +128,7 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 			m_oAlgoInfo_SignalEncoder.getInputMatrix()->setDimensionSize(1,m_ui32Infolength);
 
 			// Set decomposition stream dimensions
-			for (uint32 o = 0; o < m_vAlgoX_SignalEncoder.size(); o++)
+			for (uint32_t o = 0; o < m_vAlgoX_SignalEncoder.size(); o++)
 			{
 				m_vAlgoX_SignalEncoder[o]->getInputMatrix()->setDimensionCount(2);
 				m_vAlgoX_SignalEncoder[o]->getInputMatrix()->setDimensionSize(0,l_ui32NbChannels0);
@@ -137,11 +137,11 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 			}
 
 			// Set decomposition stream channel names
-			for (uint32 d_i=0; d_i<l_ui32NbChannels0; d_i++)
+			for (uint32_t d_i=0; d_i<l_ui32NbChannels0; d_i++)
 			{
-				for (uint32 o = 0; o < m_vAlgoX_SignalEncoder.size(); o++)
+				for (auto& encoder : m_vAlgoX_SignalEncoder)
 				{
-					m_vAlgoX_SignalEncoder[o]->getInputMatrix()->setDimensionLabel(0,d_i,m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionLabel(0,d_i));
+					encoder->getInputMatrix()->setDimensionLabel(0,d_i,m_oAlgo0_SignalDecoder.getOutputMatrix()->getDimensionLabel(0,d_i));
 				}
 			}
 
@@ -152,7 +152,7 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 		
 			// Decomposition stream headers
-			for (uint32 o = 0; o < m_vAlgoX_SignalEncoder.size(); o++)
+			for (uint32_t o = 0; o < m_vAlgoX_SignalEncoder.size(); o++)
 			{
 				const float64 l_f64SamplingRate = static_cast<float64>(m_oAlgo0_SignalDecoder.getOutputSamplingRate()) / std::pow(2.0,static_cast<int32>(o));
 				m_vAlgoX_SignalEncoder[o]->getInputSamplingRate() = static_cast<uint64>(std::floor(l_f64SamplingRate));
@@ -167,13 +167,13 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 			const IMatrix* l_pMatrix_0 = m_oAlgo0_SignalDecoder.getOutputMatrix();
 			const float64* l_pBuffer0 = l_pMatrix_0->getBuffer();
 
-			const uint32 l_ui32NbChannels0 = l_pMatrix_0->getDimensionSize(0);
-			const uint32 l_ui32NbSamples0 = l_pMatrix_0->getDimensionSize(1);
+			const uint32_t l_ui32NbChannels0 = l_pMatrix_0->getDimensionSize(0);
+			const uint32_t l_ui32NbSamples0 = l_pMatrix_0->getDimensionSize(1);
 
 			//sig will store the samples of the different channels
-			for(uint32 i=0; i<l_ui32NbChannels0; i++)    //Number of EEG channels
+			for(uint32_t i=0; i<l_ui32NbChannels0; i++)    //Number of EEG channels
 			{
-				for(uint32 j=0; j<l_ui32NbSamples0; j++)    //Number of Samples per Chunk
+				for(uint32_t j=0; j<l_ui32NbSamples0; j++)    //Number of Samples per Chunk
 				{
 					m_sig[i][j]=(l_pBuffer0[j+i*l_ui32NbSamples0]);
 				}
@@ -188,39 +188,39 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 			l_dwt_output.resize(l_ui32NbChannels0);
 
 			//Calculation of wavelets coefficients for each channel.
-			for(uint32 i=0; i<l_ui32NbChannels0; i++)
+			for(uint32_t i=0; i<l_ui32NbChannels0; i++)
 			{
 				dwt(m_sig[i],J,nm,l_dwt_output[i],l_flag[i],l_length[i]);
 			}
 
 			//Transmission of some information (flag and legth) to the inverse dwt box
 			//@fixme since the data dimensions do not change runtime, it should be sufficient to send this only once
-			for(uint32 i=0; i<l_ui32NbChannels0; i++)
+			for(uint32_t i=0; i<l_ui32NbChannels0; i++)
 			{
-				uint32 f=0;
+				uint32_t f=0;
 				m_oAlgoInfo_SignalEncoder.getInputMatrix()->getBuffer()[f+i*m_ui32Infolength]=l_length[i].size();
-				for (uint32 l=0;l<l_length[i].size();l++)
+				for (uint32_t l=0;l<l_length[i].size();l++)
 				{
 					m_oAlgoInfo_SignalEncoder.getInputMatrix()->getBuffer()[l+1+i*m_ui32Infolength]=l_length[i][l];
 					f=l;
 				}
 				m_oAlgoInfo_SignalEncoder.getInputMatrix()->getBuffer()[f+2+i*m_ui32Infolength]=l_flag[i].size();
-				for (uint32 l=0;l<l_flag[i].size();l++)
+				for (uint32_t l=0;l<l_flag[i].size();l++)
 				{
 					m_oAlgoInfo_SignalEncoder.getInputMatrix()->getBuffer()[f+3+l+i*m_ui32Infolength]=l_flag[i][l];
 				}
 			}
 
 			//Decode the dwt coefficients of each decomposition level to separate channels
-			for(uint32 i=0; i<l_ui32NbChannels0; i++)
+			for(uint32_t i=0; i<l_ui32NbChannels0; i++)
 			{
-				for (uint32 o = 0, l_ui32Vector_Position = 0; o < m_vAlgoX_SignalEncoder.size() ; o++)
+				for (uint32_t o = 0, l_ui32Vector_Position = 0; o < m_vAlgoX_SignalEncoder.size() ; o++)
 				{  
 					IMatrix *l_pOutMatrix = m_vAlgoX_SignalEncoder[o]->getInputMatrix();
 					float64* l_pOutBuffer = l_pOutMatrix->getBuffer();
 
 					// loop levels
-					for (uint32 l=0; l<(uint32)l_length[i][o]; l++)
+					for (uint32_t l=0; l<(uint32)l_length[i][o]; l++)
 					{
 						l_pOutBuffer[l+i*l_length[i][o]] = l_dwt_output[i][l+l_ui32Vector_Position];
 					}
@@ -232,7 +232,7 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 			m_oAlgoInfo_SignalEncoder.encodeBuffer();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 
-			for (uint32 o = 0; o < m_vAlgoX_SignalEncoder.size(); o++)
+			for (uint32_t o = 0; o < m_vAlgoX_SignalEncoder.size(); o++)
 			{
 				m_vAlgoX_SignalEncoder[o]->encodeBuffer();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(o+1, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
@@ -244,7 +244,7 @@ boolean CBoxAlgorithmDiscreteWaveletTransform::process(void)
 			m_oAlgoInfo_SignalEncoder.encodeEnd();
 			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));
 
-			for (uint32 o = 0; o < m_vAlgoX_SignalEncoder.size(); o++)
+			for (uint32_t o = 0; o < m_vAlgoX_SignalEncoder.size(); o++)
 			{
 				m_vAlgoX_SignalEncoder[o]->encodeEnd();
 				l_rDynamicBoxContext.markOutputAsReadyToSend(o+1, l_rDynamicBoxContext.getInputChunkStartTime(0, ii), l_rDynamicBoxContext.getInputChunkEndTime(0, ii));

@@ -22,9 +22,9 @@ using namespace std;
 
 namespace
 {
-	inline uint32 _find_channel_(const IMatrix& rMatrix, const CString& rChannel, const CIdentifier& rMatchMethodIdentifier, uint32 uiStart=0)
+	inline uint32_t _find_channel_(const IMatrix& rMatrix, const CString& rChannel, const CIdentifier& rMatchMethodIdentifier, uint32_t uiStart=0)
 	{
-		uint32 i, l_ui32Result=uint32(-1);
+		uint32_t i, l_ui32Result = uint32_t(-1);
 
 		if(rMatchMethodIdentifier==OVP_TypeId_MatchMethod_Name)
 		{
@@ -42,16 +42,16 @@ namespace
 			if(::sscanf(rChannel.toASCIIString(), "%u", &value)==1)
 			{
 				value--; // => makes it 0-indexed !
-				if(uiStart <= uint32(value) && uint32(value) < rMatrix.getDimensionSize(0))
+				if(uiStart <= uint32_t(value) && uint32_t(value) < rMatrix.getDimensionSize(0))
 				{
-					l_ui32Result=uint32(value);
+					l_ui32Result=uint32_t(value);
 				}
 			}
 		}
 		else if(rMatchMethodIdentifier==OVP_TypeId_MatchMethod_Smart)
 		{
-			if(l_ui32Result==uint32(-1)) l_ui32Result=_find_channel_(rMatrix, rChannel, OVP_TypeId_MatchMethod_Name, uiStart);
-			if(l_ui32Result==uint32(-1)) l_ui32Result=_find_channel_(rMatrix, rChannel, OVP_TypeId_MatchMethod_Index, uiStart);
+			if(l_ui32Result==uint32_t(-1)) l_ui32Result=_find_channel_(rMatrix, rChannel, OVP_TypeId_MatchMethod_Name, uiStart);
+			if(l_ui32Result==uint32_t(-1)) l_ui32Result=_find_channel_(rMatrix, rChannel, OVP_TypeId_MatchMethod_Index, uiStart);
 		}
 
 		return l_ui32Result;
@@ -61,7 +61,7 @@ namespace
 
 
 
-boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
+bool CBoxAlgorithmConnectivityMeasure::initialize(void)
 {
 	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
@@ -74,11 +74,10 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 	l_oConnectivityAlgorithmClassIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_ClassId_ConnectivityAlgorithm, l_sConnectivityAlgorithmClassIdentifier);
 
 	// Display an error message if the algorithm is not recognized
-	if(l_oConnectivityAlgorithmClassIdentifier==OV_UndefinedIdentifier)
-	{
-		this->getLogManager() << LogLevel_Error << "Unknown connectivity algorithm [" << l_sConnectivityAlgorithmClassIdentifier << "]\n";
-		return false;
-	}
+	OV_ERROR_UNLESS_KRF(
+		l_oConnectivityAlgorithmClassIdentifier != OV_UndefinedIdentifier,
+		"Unknown connectivity algorithm [" << l_sConnectivityAlgorithmClassIdentifier << "]",
+		OpenViBE::Kernel::ErrorType::BadSetting);
 
 	// Create algorithm instance of type ConnectivityAlgorithm
 	m_pConnectivityMethod = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(l_oConnectivityAlgorithmClassIdentifier));
@@ -127,14 +126,14 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 		ip_ui64WindowMethod.initialize(m_pConnectivityMethod->getInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Window));
 		ip_ui64SegmentsLength.initialize(m_pConnectivityMethod->getInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_SegLength));
 		ip_ui64Overlap.initialize(m_pConnectivityMethod->getInputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_InputParameterId_Overlap));
-		op_pFrequencyVector.initialize(m_pConnectivityMethod->getOutputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_OutputParameterId_FreqVector));
 
 		ip_ui64WindowMethod = l_oWindowMethodIdentifier.toUInteger();
 		ip_ui64SegmentsLength = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
 		ip_ui64Overlap = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 
 		m_oAlgo3_SpectrumEncoder.getInputMatrix().setReferenceTarget(op_pMatrix2);
-		m_oAlgo3_SpectrumEncoder.getInputMinMaxFrequencyBands().setReferenceTarget(op_pFrequencyVector);
+		m_oAlgo3_SpectrumEncoder.getInputFrequencyAbscissa().setReferenceTarget(m_pConnectivityMethod->getOutputParameter(OVP_Algorithm_MagnitudeSquaredCoherence_OutputParameterId_FreqVector));
+		m_oAlgo3_SpectrumEncoder.getInputSamplingRate().setReferenceTarget(m_oAlgo0_SignalDecoder.getOutputSamplingRate());
 	}
 
 
@@ -161,7 +160,7 @@ boolean CBoxAlgorithmConnectivityMeasure::initialize(void)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmConnectivityMeasure::uninitialize(void)
+bool CBoxAlgorithmConnectivityMeasure::uninitialize(void)
 {
 	m_pConnectivityMethod->uninitialize();
 	this->getAlgorithmManager().releaseAlgorithm(*m_pConnectivityMethod);
@@ -183,7 +182,7 @@ boolean CBoxAlgorithmConnectivityMeasure::uninitialize(void)
 }
 
 
-boolean CBoxAlgorithmConnectivityMeasure::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmConnectivityMeasure::processInput(uint32_t ui32InputIndex)
 {
 
 		const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
@@ -197,7 +196,7 @@ boolean CBoxAlgorithmConnectivityMeasure::processInput(uint32 ui32InputIndex)
 		uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, 0);
 		uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, 0);
 
-		for(uint32 i=1; i<l_rStaticBoxContext.getInputCount(); i++)
+		for(uint32_t i=1; i<l_rStaticBoxContext.getInputCount(); i++)
 		{
 			if(l_rDynamicBoxContext.getInputChunkCount(i)==0)
 			{
@@ -205,12 +204,12 @@ boolean CBoxAlgorithmConnectivityMeasure::processInput(uint32 ui32InputIndex)
 			}
 			else
 			{
-				boolean l_bValidDates=true;
+				bool l_bValidDates=true;
 				if(l_ui64StartTime!=l_rDynamicBoxContext.getInputChunkStartTime(i, 0)) { l_bValidDates=false; }
 				if(l_ui64EndTime!=l_rDynamicBoxContext.getInputChunkEndTime(i, 0)) { l_bValidDates=false; }
 				if(!l_bValidDates)
 				{
-					this->getLogManager() << LogLevel_Warning << "Chunk dates mismatch, check stream structure or parameters\n";
+					OV_WARNING_K("Chunk dates mismatch, check stream structure or parameters");
 					return l_bValidDates;
 				}
 			}
@@ -223,7 +222,7 @@ boolean CBoxAlgorithmConnectivityMeasure::processInput(uint32 ui32InputIndex)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmConnectivityMeasure::process(void)
+bool CBoxAlgorithmConnectivityMeasure::process(void)
 {
 	
 	// the static box context describes the box inputs, outputs, settings structures
@@ -231,12 +230,12 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-	boolean l_bHeaderReceived = false;
-	boolean l_bBufferReceived = false;
-	boolean l_bEndReceived = false;
+	bool l_bHeaderReceived = false;
+	bool l_bBufferReceived = false;
+	bool l_bEndReceived = false;
 
 	// we decode the input signal chunks
-	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
+	for(uint32_t i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
 		m_oAlgo0_SignalDecoder.decode(i);
 
@@ -284,27 +283,27 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 			m_vChannelTable.clear();
 
 			std::vector < CString > l_sPairs;
-			uint32 l_ui32PairsCount = Tools::String::split(l_sChannelList, Tools::String::TSplitCallback < std::vector < CString > >(l_sPairs), OV_Value_EnumeratedStringSeparator);
+			uint32_t l_ui32PairsCount = Tools::String::split(l_sChannelList, Tools::String::TSplitCallback < std::vector < CString > >(l_sPairs), OV_Value_EnumeratedStringSeparator);
 
-			for(uint32 pair=0; pair<l_ui32PairsCount; pair++)
+			for(uint32_t pair=0; pair<l_ui32PairsCount; pair++)
 			{
 				m_bRange1 = false;
 				m_bRange2 = false;
 				std::vector < CString > l_sChannel;
-				uint32 l_ui32ChannelCount = Tools::String::split(l_sPairs[pair], Tools::String::TSplitCallback < std::vector < CString > >(l_sChannel), OVP_Value_CoupledStringSeparator);
+				uint32_t l_ui32ChannelCount = Tools::String::split(l_sPairs[pair], Tools::String::TSplitCallback < std::vector < CString > >(l_sChannel), OVP_Value_CoupledStringSeparator);
 
-				for(uint32 chan=0; chan<l_ui32ChannelCount; chan=chan+2)
+				for(uint32_t chan=0; chan<l_ui32ChannelCount; chan=chan+2)
 				{
 					std::vector < CString > l_sSubChannel;
 					std::vector < CString > l_sSubChannel2;
 
-					uint32 range1 = Tools::String::split(l_sChannel[chan], OpenViBEToolkit::Tools::String::TSplitCallback < std::vector < CString > >(l_sSubChannel), OV_Value_RangeStringSeparator);
-					uint32 range2 = Tools::String::split(l_sChannel[chan+1], OpenViBEToolkit::Tools::String::TSplitCallback < std::vector < CString > >(l_sSubChannel2), OV_Value_RangeStringSeparator);
+					uint32_t range1 = Tools::String::split(l_sChannel[chan], OpenViBEToolkit::Tools::String::TSplitCallback < std::vector < CString > >(l_sSubChannel), OV_Value_RangeStringSeparator);
+					uint32_t range2 = Tools::String::split(l_sChannel[chan+1], OpenViBEToolkit::Tools::String::TSplitCallback < std::vector < CString > >(l_sSubChannel2), OV_Value_RangeStringSeparator);
 
-					uint32 l_ui32RangeStartIndex = uint32(-1);
-					uint32 l_ui32RangeEndIndex = uint32(-1);
-					uint32 l_ui32RangeStartIndex2 = uint32(-1);
-					uint32 l_ui32RangeEndIndex2 = uint32(-1);
+					uint32_t l_ui32RangeStartIndex = uint32(-1);
+					uint32_t l_ui32RangeEndIndex = uint32(-1);
+					uint32_t l_ui32RangeStartIndex2 = uint32(-1);
+					uint32_t l_ui32RangeEndIndex2 = uint32(-1);
 
 					if (Tools::String::isAlmostEqual(l_sSubChannel[0], "*", false)) // If all channels selected
 					{
@@ -341,19 +340,19 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 					// After these corrections, if either first or second token were not found, or if start index is greater than start index, consider this an error and invalid range
 					if(l_ui32RangeStartIndex == uint32(-1) || l_ui32RangeEndIndex  == uint32(-1) || l_ui32RangeStartIndex > l_ui32RangeEndIndex)
 					{
-						this->getLogManager() << LogLevel_Warning << "Invalid channel or range [" << l_sChannel[chan] << "]\n";
+						OV_WARNING_K("Invalid channel or range [" << l_sChannel[chan] << "]");
 					}
 					else if(l_ui32RangeStartIndex2 == uint32(-1) || l_ui32RangeEndIndex2 == uint32(-1) || l_ui32RangeStartIndex2 > l_ui32RangeEndIndex2)
 					{
-						this->getLogManager() << LogLevel_Warning << "Invalid channel or range [" << l_sChannel[chan+1] << "]\n";
+						OV_WARNING_K("Invalid channel or range [" << l_sChannel[chan+1] << "]");
 					}
 					else
 					{
 					// The ranges are valid so selects all the channels in those range
 						this->getLogManager() << LogLevel_Trace << "For range [" << l_sChannel[chan] << "] :\n";
-						for(uint32 k=l_ui32RangeStartIndex; k<=l_ui32RangeEndIndex; k++)
+						for(uint32_t k=l_ui32RangeStartIndex; k<=l_ui32RangeEndIndex; k++)
 						{
-							for(uint32 j=l_ui32RangeStartIndex2; j<=l_ui32RangeEndIndex2; j++)
+							for(uint32_t j=l_ui32RangeStartIndex2; j<=l_ui32RangeEndIndex2; j++)
 							{
 								m_vChannelTable.push_back(k);
 								m_vChannelTable.push_back(j);
@@ -371,7 +370,7 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 
 
 			// Copy the look up vector into the parameterHandler in order to pass it to the algorithm
-			for(uint32 cpt=0;cpt<m_vChannelTable.size();cpt++)
+			for(uint32_t cpt=0;cpt<m_vChannelTable.size();cpt++)
 			{
 				ip_pChannelTable->getBuffer()[cpt] = m_vChannelTable[cpt];
 			}
@@ -379,7 +378,7 @@ boolean CBoxAlgorithmConnectivityMeasure::process(void)
 			// Make sure the algo initialization was successful
 			if(!m_pConnectivityMethod->process(OVP_Algorithm_Connectivity_InputTriggerId_Initialize))
 			{
-				this->getLogManager() << LogLevel_Warning << "initialization was unsuccessful";
+				OV_WARNING_K("Initialization was unsuccessful");
 				return false;
 			}
 

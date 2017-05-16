@@ -14,7 +14,7 @@ using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::SignalProcessingBasic;
 
 
-boolean CBoxAlgorithmIFFTbox::initialize(void)
+bool CBoxAlgorithmIFFTbox::initialize(void)
 {
 	// Spectrum stream real part decoder
 	m_oAlgo0_SpectrumDecoder[0].initialize(*this,0);
@@ -31,7 +31,7 @@ boolean CBoxAlgorithmIFFTbox::initialize(void)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmIFFTbox::uninitialize(void)
+bool CBoxAlgorithmIFFTbox::uninitialize(void)
 {
 
 	m_oAlgo0_SpectrumDecoder[0].uninitialize();
@@ -41,7 +41,7 @@ boolean CBoxAlgorithmIFFTbox::uninitialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmIFFTbox::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmIFFTbox::processInput(uint32_t ui32InputIndex)
 {
 	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	IDynamicBoxContext& l_rDynamicBoxContext=this->getDynamicBoxContext();
@@ -50,22 +50,20 @@ boolean CBoxAlgorithmIFFTbox::processInput(uint32 ui32InputIndex)
 	{
 		return true;
 	}
-	uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, 0);
-	uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, 0);
-	for(uint32 i=1; i<l_rStaticBoxContext.getInputCount(); i++)
+	uint64_t l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, 0);
+	uint64_t l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, 0);
+	for(uint32_t i=1; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
 		if(l_rDynamicBoxContext.getInputChunkCount(i)==0)
 		{
 			return true;
 		}
 
-		boolean l_bValidDates=true;
-		if(l_ui64StartTime!=l_rDynamicBoxContext.getInputChunkStartTime(i, 0)) { l_bValidDates=false; }
-		if(l_ui64EndTime!=l_rDynamicBoxContext.getInputChunkEndTime(i, 0)) { l_bValidDates=false; }
-		if(!l_bValidDates)
+		if(l_ui64StartTime != l_rDynamicBoxContext.getInputChunkStartTime(i, 0)
+			|| l_ui64EndTime != l_rDynamicBoxContext.getInputChunkEndTime(i, 0))
 		{
-			this->getLogManager() << LogLevel_Warning << "Chunk dates mismatch, check stream structure or parameters\n";
-			return l_bValidDates;
+			OV_WARNING_K("Chunk dates mismatch, check stream structure or parameters");
+			return false;
 		}
 	}
 
@@ -75,7 +73,7 @@ boolean CBoxAlgorithmIFFTbox::processInput(uint32 ui32InputIndex)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmIFFTbox::process(void)
+bool CBoxAlgorithmIFFTbox::process(void)
 {
 	
 	// the static box context describes the box inputs, outputs, settings structures
@@ -83,11 +81,11 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 	
-	uint32 l_ui32HeaderCount=0;
-	uint32 l_ui32BufferCount=0;
-	uint32 l_ui32EndCount=0;
+	uint32_t l_ui32HeaderCount=0;
+	uint32_t l_ui32BufferCount=0;
+	uint32_t l_ui32EndCount=0;
 
-	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
+	for(uint32_t i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
 		m_oAlgo0_SpectrumDecoder[i].decode(0);
 		if(m_oAlgo0_SpectrumDecoder[i].isHeaderReceived())
@@ -99,11 +97,11 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 				// ... maybe do some process ...
 				m_channelsNumber=m_oAlgo0_SpectrumDecoder[i].getOutputMatrix()->getDimensionSize(0);
 				m_ui32SampleCount = m_oAlgo0_SpectrumDecoder[i].getOutputMatrix()->getDimensionSize(1);
-				if(m_channelsNumber == 0 || m_ui32SampleCount == 0)
-				{
-					this->getLogManager() << LogLevel_Error << "Both dims of the input matrix must have positive size\n";					
-					return false;
-				}
+				OV_ERROR_UNLESS_KRF(
+					m_channelsNumber > 0 && m_ui32SampleCount > 0,
+					"Both dims of the input matrix must have positive size",
+					OpenViBE::Kernel::ErrorType::BadProcessing);
+
 				m_ui32SampleCount = (m_ui32SampleCount-1)*2;
 				if(m_ui32SampleCount == 0) 
 				{
@@ -112,25 +110,33 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 			}
 			else
 			{
-				if(!OpenViBEToolkit::Tools::Matrix::isDescriptionSimilar(*m_oAlgo0_SpectrumDecoder[0].getOutputMatrix(), *m_oAlgo0_SpectrumDecoder[i].getOutputMatrix(), false))
-				{
-					// problem!
-					this->getLogManager() << LogLevel_Error << "The matrix components of the two streams have different properties, check stream structures or parameters\n";
-					return false;
-				}
-				if(!OpenViBEToolkit::Tools::Matrix::isDescriptionSimilar(*m_oAlgo0_SpectrumDecoder[0].getOutputMinMaxFrequencyBands(), *m_oAlgo0_SpectrumDecoder[i].getOutputMinMaxFrequencyBands(), false))
-				{
-					// problem!
-					this->getLogManager() << LogLevel_Error << "The band descriptors of the two streams have different properties, check stream structures or parameters\n";
-					return false;
-				}
-				if(m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionSize(1) != m_oAlgo0_SpectrumDecoder[i].getOutputMinMaxFrequencyBands()->getDimensionSize(1))
-				{
-					this->getLogManager() << LogLevel_Error << "Frequency band count " << m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionSize(1) 
-						<< " does not match the corresponding matrix chunk size " << m_oAlgo0_SpectrumDecoder[i].getOutputMinMaxFrequencyBands()->getDimensionSize(0) 
-						<< ", check stream structures or parameters\n";
-					return false;
-				}
+				OV_ERROR_UNLESS_KRF(
+					OpenViBEToolkit::Tools::Matrix::isDescriptionSimilar(*m_oAlgo0_SpectrumDecoder[0].getOutputMatrix(), *m_oAlgo0_SpectrumDecoder[i].getOutputMatrix(), false),
+					"The matrix components of the two streams have different properties, check stream structures or parameters",
+					OpenViBE::Kernel::ErrorType::BadProcessing);
+
+				OV_ERROR_UNLESS_KRF(
+					OpenViBEToolkit::Tools::Matrix::isDescriptionSimilar(*m_oAlgo0_SpectrumDecoder[0].getOutputFrequencyAbscissa(), *m_oAlgo0_SpectrumDecoder[i].getOutputFrequencyAbscissa(), false),
+					"The frequencies abscissas descriptors of the two streams have different properties, check stream structures or parameters",
+					OpenViBE::Kernel::ErrorType::BadProcessing);
+
+				OV_ERROR_UNLESS_KRF(
+					m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionSize(1) == m_oAlgo0_SpectrumDecoder[i].getOutputFrequencyAbscissa()->getDimensionSize(0),
+					"Frequencies abscissas count " <<  m_oAlgo0_SpectrumDecoder[i].getOutputFrequencyAbscissa()->getDimensionSize(0)
+						<< " does not match the corresponding matrix chunk size " << m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionSize(1)
+						<< ", check stream structures or parameters",
+					OpenViBE::Kernel::ErrorType::BadProcessing);
+
+				OV_ERROR_UNLESS_KRF(
+					m_oAlgo0_SpectrumDecoder[0].getOutputSamplingRate(),
+					"Sampling rate must be positive, check stream structures or parameters",
+					OpenViBE::Kernel::ErrorType::BadProcessing);
+
+				OV_ERROR_UNLESS_KRF(
+					m_oAlgo0_SpectrumDecoder[0].getOutputSamplingRate() == m_oAlgo0_SpectrumDecoder[i].getOutputSamplingRate(),
+					"Sampling rates don't match (" <<  m_oAlgo0_SpectrumDecoder[0].getOutputSamplingRate()
+						<< " != " << m_oAlgo0_SpectrumDecoder[i].getOutputSamplingRate() << "), please check stream structures or parameters",
+					OpenViBE::Kernel::ErrorType::BadProcessing);
 			}
 
 			l_ui32HeaderCount++;
@@ -143,48 +149,27 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 	|| (l_ui32BufferCount && l_ui32BufferCount!=l_rStaticBoxContext.getInputCount())
 	|| (l_ui32EndCount && l_ui32EndCount!=l_rStaticBoxContext.getInputCount()))
 	{
-		this->getLogManager() << LogLevel_Warning << "Stream structure mismatch\n";
+		OV_WARNING_K("Stream structure mismatch");
 		return false;
 	}
 	
 	if(l_ui32BufferCount)
 	{
-		if(!m_ui32SampleCount) 
-		{
-			this->getLogManager() << LogLevel_Error << "Received buffer before header, shouldn't happen\n";
-			return false;
-		}
+		OV_ERROR_UNLESS_KRF(
+			m_ui32SampleCount,
+			"Received buffer before header, shouldn't happen\n",
+			OpenViBE::Kernel::ErrorType::BadProcessing);
 
 		if(!m_bHeaderSent) 
 		{
-			// As the spectrum stream doesn't contain sampling rate, we need to guesstimate 
-			// and for that we need the first signal buffer chunk times that are not available in the header.
-			// Since l_ui32BufferCount>0, we know that this chunk is a buffer.
-			const uint64 l_ui64StartTime = l_rDynamicBoxContext.getInputChunkStartTime(0, 0); 
-			const uint64 l_ui64EndTime = l_rDynamicBoxContext.getInputChunkEndTime(0, 0); 
+			m_signalBuffer.set_size(m_ui32SampleCount);
+			m_frequencyBuffer.set_size(m_ui32SampleCount);
 
-			const uint64 l_ui64BufferDuration = l_ui64EndTime - l_ui64StartTime;
-			const uint64 l_ui64SampleDuration = ((uint64)1<<32) * m_ui32SampleCount;
-	
-			const uint32 l_ui32EstimatedFrequency = (uint32) ( l_ui64SampleDuration / l_ui64BufferDuration );
-			if(l_ui32EstimatedFrequency == 0) 
-			{
-				this->getLogManager() << LogLevel_Error << "The chunk size is too small, estimated zero output frequency\n";
-				return false;
-			}
-
-			m_frequencyBuffer.resize(m_channelsNumber);
-			m_signalBuffer.resize(m_channelsNumber);
-			for(uint32 channel=0; channel< m_channelsNumber; channel++)
-			{
-				m_signalBuffer[channel].set_size(m_ui32SampleCount);
-				m_frequencyBuffer[channel].set_size(m_ui32SampleCount);
-			}
-			m_oAlgo1_SignalEncoder.getInputSamplingRate()=l_ui32EstimatedFrequency;
+			m_oAlgo1_SignalEncoder.getInputSamplingRate() = m_oAlgo0_SpectrumDecoder[0].getOutputSamplingRate();
 			m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionCount(2);
 			m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionSize(0,m_channelsNumber);
 			m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionSize(1,m_ui32SampleCount);
-			for(uint32 channel=0; channel< m_channelsNumber; channel++)
+			for(uint32_t channel=0; channel< m_channelsNumber; channel++)
 			{
 				m_oAlgo1_SignalEncoder.getInputMatrix()->setDimensionLabel(0, channel, 
 														m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionLabel(0, channel));
@@ -201,31 +186,24 @@ boolean CBoxAlgorithmIFFTbox::process(void)
 		const float64* bufferInput0= m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getBuffer();
 		const float64* bufferInput1= m_oAlgo0_SpectrumDecoder[1].getOutputMatrix()->getBuffer();
 
-		const uint32 l_ui32HalfSize = m_oAlgo0_SpectrumDecoder[0].getOutputMatrix()->getDimensionSize(1);
-		for(uint32 channel=0; channel< m_channelsNumber; channel++)
+		for(uint32_t channel=0; channel< m_channelsNumber; channel++)
 		{
-			m_frequencyBuffer[channel][0].real(bufferInput0[channel*l_ui32HalfSize+0]);
-			m_frequencyBuffer[channel][0].imag(bufferInput1[channel*l_ui32HalfSize+0]);
-
-			for(uint32 j=1; j< l_ui32HalfSize; j++)
+			for(uint32_t j=0; j< m_ui32SampleCount; j++)
 			{
-				m_frequencyBuffer[channel][j].real(bufferInput0[channel*l_ui32HalfSize+j]);
-				m_frequencyBuffer[channel][j].imag(bufferInput1[channel*l_ui32HalfSize+j]);
-
-				m_frequencyBuffer[channel][m_ui32SampleCount-j].real(bufferInput0[channel*l_ui32HalfSize+j]);
-				m_frequencyBuffer[channel][m_ui32SampleCount-j].imag(bufferInput1[channel*l_ui32HalfSize+j]);
+				m_frequencyBuffer[j].real(bufferInput0[channel * m_ui32SampleCount + j]);
+				m_frequencyBuffer[j].imag(bufferInput1[channel * m_ui32SampleCount + j]);
 			}
 
-			m_signalBuffer[channel]= itpp::ifft_real(m_frequencyBuffer[channel]);
+			m_signalBuffer = itpp::ifft_real(m_frequencyBuffer);
 
 			// Test block
 			// std::cout << "Iy: " << m_frequencyBuffer[channel].size() << ", y=" << m_frequencyBuffer[channel] << "\n";
 			// std::cout << "Ix: " << m_signalBuffer[channel].size() << ", x'=" << m_signalBuffer[channel] << "\n";
 
-			float64* bufferOutput=m_oAlgo1_SignalEncoder.getInputMatrix()->getBuffer();
-			for(uint32 j=0; j< m_ui32SampleCount; j++)
+			float64* bufferOutput = m_oAlgo1_SignalEncoder.getInputMatrix()->getBuffer();
+			for(uint32_t j=0; j< m_ui32SampleCount; j++)
 			{
-				bufferOutput[channel*m_ui32SampleCount+j]= m_signalBuffer[channel][j];
+				bufferOutput[channel*m_ui32SampleCount+j] = m_signalBuffer[j];
 			}
 		}
 		// Encode the output buffer :

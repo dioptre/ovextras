@@ -16,11 +16,11 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
 
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
-			virtual OpenViBE::boolean process(void);
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, OVP_ClassId_BoxAlgorithm_EpochVariance)
 
@@ -32,8 +32,8 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::IAlgorithmProxy* m_pStreamEncoderForConfidenceBound;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pMatrixVariance;
 
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64MatrixCount;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64AveragingMethod;
+			OpenViBE::Kernel::TParameterHandler < uint64_t > ip_ui64MatrixCount;
+			OpenViBE::Kernel::TParameterHandler < uint64_t > ip_ui64AveragingMethod;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::float64 > ip_f64SignificanceLevel;
 		};
 
@@ -41,11 +41,11 @@ namespace OpenViBEPlugins
 		{
 		public:
 
-			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index)
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getInputType(ui32Index, l_oTypeIdentifier);
-				for (OpenViBE::uint32 i=0; i<rBox.getOutputCount(); i++)
+				for (uint32_t i=0; i<rBox.getOutputCount(); i++)
 					rBox.setOutputType(i, l_oTypeIdentifier);
 				return true;
 			}
@@ -72,7 +72,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CEpochVarianceListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				rPrototype.addInput  ("Input epochs",    OV_TypeId_StreamedMatrix);
