@@ -239,19 +239,19 @@ ADD_SUBDIRECTORY("modules/tcptagging")
 # ADD_SUBDIRECTORY("plugins/")					# @TODO enable, prune, make work
 ADD_SUBDIRECTORY("plugins/processing/vrpn/")	# just as a post-cert example until the rest are fixed
 ADD_SUBDIRECTORY("plugins/processing/tools/")
-#ADD_SUBDIRECTORY("plugins/processing/tests/")
+ADD_SUBDIRECTORY("plugins/processing/tests/")
 ADD_SUBDIRECTORY("plugins/processing/streaming/")
-#ADD_SUBDIRECTORY("plugins/processing/stimulation/")
-#ADD_SUBDIRECTORY("plugins/processing/simple-visualisation/")
+#ADD_SUBDIRECTORY("plugins/processing/stimulation/") # Require Visu toolkit
+#ADD_SUBDIRECTORY("plugins/processing/simple-visualisation/") # Require Visu toolkit
 ADD_SUBDIRECTORY("plugins/processing/signal-processing/")
 ADD_SUBDIRECTORY("plugins/processing/network-io/")
 #ADD_SUBDIRECTORY("plugins/processing/matlab/")
-#ADD_SUBDIRECTORY("plugins/processing/file-io/")
-#ADD_SUBDIRECTORY("plugins/processing/examples/")
-#ADD_SUBDIRECTORY("plugins/processing/evaluation/")
+ADD_SUBDIRECTORY("plugins/processing/file-io/")
+#ADD_SUBDIRECTORY("plugins/processing/examples/") # Require Visu toolkit
+#ADD_SUBDIRECTORY("plugins/processing/evaluation/") # Require Visu toolkit
 ADD_SUBDIRECTORY("plugins/processing/dll-bridge/")
 ADD_SUBDIRECTORY("plugins/processing/data-generation/")
-#ADD_SUBDIRECTORY("plugins/processing/classification/")
+#ADD_SUBDIRECTORY("plugins/processing/classification/") # Require linkng
 ADD_SUBDIRECTORY("plugins/processing/acquisition/")
 
 

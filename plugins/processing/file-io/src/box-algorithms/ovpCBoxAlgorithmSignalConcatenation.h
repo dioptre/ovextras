@@ -30,34 +30,34 @@ namespace OpenViBEPlugins
 		public:
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
 			
-			virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
+			virtual bool processClock(OpenViBE::CMessageClock& rMessageClock);
 			virtual OpenViBE::uint64 getClockFrequency(void) { return 8LL<<32; }
 
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
 			
 			
-			virtual OpenViBE::boolean process(void);
+			virtual bool process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_SignalConcatenation);
 
 		protected:
-			virtual OpenViBE::boolean concate(void);
-			OpenViBE::boolean m_bConcatenationFinished;
-			OpenViBE::boolean m_bResynchroDone;
+			virtual bool concate(void);
+			bool m_bConcatenationFinished;
+			bool m_bResynchroDone;
 			OpenViBE::uint64 m_ui64TimeOut;
 
-			OpenViBE::boolean m_bHeaderSent;
+			bool m_bHeaderSent;
 			OpenViBE::uint32 m_ui32HeaderReceivedCount;
 			OpenViBE::uint32 m_ui32EndReceivedCount;
-			OpenViBE::boolean m_bStimHeaderSent;
-			OpenViBE::boolean m_bEndSent;
-			OpenViBE::boolean m_bStatsPrinted;
+			bool m_bStimHeaderSent;
+			bool m_bEndSent;
+			bool m_bStatsPrinted;
 
 			std::vector < OpenViBE::uint64 > m_vEndOfFileStimulations;
-			std::vector < OpenViBE::boolean > m_vEndOfFileReached;
+			std::vector < bool > m_vEndOfFileReached;
 
 			struct Chunk
 			{
@@ -115,7 +115,7 @@ namespace OpenViBEPlugins
 		{
 		public:
 
-			OpenViBE::boolean check(OpenViBE::Kernel::IBox& rBox)
+			bool check(OpenViBE::Kernel::IBox& rBox)
 			{
 				char l_sName[1024];
 				OpenViBE::uint32 i;
@@ -137,7 +137,7 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			virtual OpenViBE::boolean onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				if(ui32Index&1)//odd index
 				{
@@ -153,7 +153,7 @@ namespace OpenViBEPlugins
 				return this->check(rBox);
 			}
 
-			virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				rBox.addInput("", OV_TypeId_Stimulations);
 				rBox.addSetting("",OV_TypeId_Stimulation,"OVTK_StimulationId_ExperimentStop");
@@ -193,7 +193,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmSignalConcatenationListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 			
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput("Input signal 1",OV_TypeId_Signal);

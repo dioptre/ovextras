@@ -14,8 +14,8 @@ namespace OpenViBEPlugins
 		public:
 
 			virtual void release(void);
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
-			virtual OpenViBE::boolean process(void);
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_HelloWorldWithInput)
 		};
@@ -26,7 +26,7 @@ namespace OpenViBEPlugins
 
 			// The purposes of the following functions is to make the output correspond to the input
 
-			virtual OpenViBE::boolean onInputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onInputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				OpenViBE::CString l_sInputName;
 				rBox.getInputName(ui32Index, l_sInputName);
@@ -34,20 +34,20 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				// Duplicate input as new output
 				rBox.addOutput("Temporary name", OV_TypeId_EBMLStream);
 				return true;
 			}
 
-			virtual OpenViBE::boolean onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onInputRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				rBox.removeOutput(ui32Index);
 				return true;
 			}
 
-			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				// Keep input and output types identical
 				OpenViBE::CIdentifier l_oTypeIdentifier;
@@ -78,7 +78,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CHelloWorldWithInputListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				rPrototype.addSetting("Message",			OV_TypeId_String, "Hello!");		// setting 0

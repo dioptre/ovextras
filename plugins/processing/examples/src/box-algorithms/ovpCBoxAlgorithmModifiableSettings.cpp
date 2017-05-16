@@ -8,7 +8,7 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Examples;
 
-boolean CBoxAlgorithmModifiableSettings::initialize(void)
+bool CBoxAlgorithmModifiableSettings::initialize(void)
 {
 	m_ui64LastTime = 0;
 	
@@ -16,7 +16,7 @@ boolean CBoxAlgorithmModifiableSettings::initialize(void)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmModifiableSettings::uninitialize(void)
+bool CBoxAlgorithmModifiableSettings::uninitialize(void)
 {
 	return true;
 }
@@ -29,7 +29,7 @@ uint64 CBoxAlgorithmModifiableSettings::getClockFrequency(void)
 	return 	(uint64)( double( (uint64)1<<32 ) * 5);
 }
 
-boolean CBoxAlgorithmModifiableSettings::processClock(OpenViBE::Kernel::IMessageClock& /* rMessageClock */)
+bool CBoxAlgorithmModifiableSettings::processClock(OpenViBE::Kernel::IMessageClock& /* rMessageClock */)
 {
 	uint64 l_ui64Time = (uint64)ITimeArithmetics::timeToSeconds(this->getPlayerContext().getCurrentTime());
 
@@ -50,10 +50,10 @@ boolean CBoxAlgorithmModifiableSettings::processClock(OpenViBE::Kernel::IMessage
 
 /*******************************************************************************/
 
-boolean CBoxAlgorithmModifiableSettings::updateSettings()
+bool CBoxAlgorithmModifiableSettings::updateSettings()
 {
 	m_vSettingsValue.clear();
-	IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	for(uint32 i=0; i<l_rStaticBoxContext.getSettingCount(); i++)
 	{
 		CString l_sSettingValue;
@@ -64,7 +64,7 @@ boolean CBoxAlgorithmModifiableSettings::updateSettings()
 }
 
 
-boolean CBoxAlgorithmModifiableSettings::process(void)
+bool CBoxAlgorithmModifiableSettings::process(void)
 {
 
 

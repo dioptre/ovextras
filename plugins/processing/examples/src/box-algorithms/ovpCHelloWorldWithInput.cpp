@@ -12,15 +12,15 @@ void CHelloWorldWithInput::release(void)
 	delete this;
 }
 
-boolean CHelloWorldWithInput::processInput(uint32 ui32InputIndex)
+bool CHelloWorldWithInput::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 
-boolean CHelloWorldWithInput::process(void)
+bool CHelloWorldWithInput::process(void)
 {
-	IBox* l_pStaticBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
+	const IBox* l_pStaticBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
 	IBoxIO* l_pDynamicBoxContext=getBoxAlgorithmContext()->getDynamicBoxContext();
 
 	uint64 l_ui64StartTime=0;
