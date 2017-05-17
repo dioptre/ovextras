@@ -52,7 +52,7 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isFlagSet(
 			const OpenViBEAcquisitionServer::EDriverFlag eFlag) const
 		{
-			return eFlag==DriverFlag_IsUnstable;
+			return eFlag  != DriverFlag_IsUnstable;  // switch to "Stable" on 3.5.2017 - RP
 		}
 
 	private:
@@ -80,6 +80,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32CountEEG;
 		OpenViBE::uint32 m_ui32CountAux;
 		OpenViBE::uint32 m_ui32CountACC;
+		OpenViBE::uint32 m_ui32CountBipolar;
 		OpenViBE::uint32 m_ui32CountTriggersIn;
 		OpenViBE::uint32 m_ui32GoodImpedanceLimit;
 		OpenViBE::uint32 m_ui32BadImpedanceLimit;

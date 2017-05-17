@@ -39,6 +39,11 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="adjustmentBipolar">
+    <property name="upper">8</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">2</property>
+  </object>
   <object class="GtkAdjustment" id="adjustmentEEGch">
     <property name="lower">1</property>
     <property name="upper">64</property>
@@ -155,7 +160,7 @@
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Brain Products LiveAmp
 
-This version supports LiveAmp 32 channels only.
+This version supports LiveAmp with 8, 16 and 32 channels.
 </property>
             <property name="justify">center</property>
             <attributes>
@@ -403,8 +408,8 @@ This version supports LiveAmp 32 channels only.
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
                       </packing>
                     </child>
                     <child>
@@ -425,8 +430,8 @@ This version supports LiveAmp 32 channels only.
                         <property name="label" translatable="yes">Number of AUX channels:</property>
                       </object>
                       <packing>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
                       </packing>
                     </child>
                     <child>
@@ -460,8 +465,8 @@ This version supports LiveAmp 32 channels only.
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
                       </packing>
                     </child>
                     <child>
@@ -471,8 +476,8 @@ This version supports LiveAmp 32 channels only.
                         <property name="label" translatable="yes">Inlcude ACC channels</property>
                       </object>
                       <packing>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
                       </packing>
                     </child>
                     <child>
@@ -488,8 +493,8 @@ This version supports LiveAmp 32 channels only.
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">5</property>
-                        <property name="bottom_attach">6</property>
+                        <property name="top_attach">6</property>
+                        <property name="bottom_attach">7</property>
                       </packing>
                     </child>
                     <child>
@@ -499,34 +504,37 @@ This version supports LiveAmp 32 channels only.
                         <property name="label" translatable="yes">Include Triggers</property>
                       </object>
                       <packing>
-                        <property name="top_attach">5</property>
-                        <property name="bottom_attach">6</property>
+                        <property name="top_attach">6</property>
+                        <property name="bottom_attach">7</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="checkbutton_use_bipolar_channels">
-                        <property name="label" translatable="yes">(last 8 channels will be bipolar)</property>
+                      <object class="GtkLabel" id="lblBipolarChannels">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Number of Bipolar channels</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="spinbutton_number_of_bipolar">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="draw_indicator">True</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
+                        <property name="adjustment">adjustmentBipolar</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">6</property>
-                        <property name="bottom_attach">7</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_use_bipolar_channels">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Use bipolar channels</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">6</property>
-                        <property name="bottom_attach">7</property>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
                       </packing>
                     </child>
                   </object>

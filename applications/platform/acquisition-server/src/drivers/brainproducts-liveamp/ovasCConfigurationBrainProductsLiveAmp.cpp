@@ -17,11 +17,17 @@
  * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301, USA.
  */
+/*********************************************************************
+* History
+* [2017-03-29] ver 1.0									          - RP
+* [2017-05-02] ver 1.1  Due to support for LiveAmp 8 and 16 channels, 
+*                       a new variable "m_rCountBip" added        - RP
+*
+*********************************************************************/
 
 #if defined TARGET_HAS_ThirdPartyLiveAmpAPI
 
 #include "ovasCConfigurationBrainProductsLiveAmp.h"
-//#include "ovasCDriverBrainProductsLiveAmp.h"
 #include <Amplifier_LIB.h>
 
 using namespace OpenViBE;
@@ -40,12 +46,6 @@ static void button_calibrate_pressed_cb(::GtkButton* pButton, void* pUserData)
 	CConfigurationBrainProductsLiveAmp* l_pConfig=static_cast<CConfigurationBrainProductsLiveAmp*>(pUserData);
 	l_pConfig->buttonCalibratePressedCB();
 }
-
-//Callback actually called:
-void CConfigurationGTecGUSBamp::buttonCalibratePressedCB(void)
-{
-	// Connect to the hardware, ask for calibration, verify the return code, etc.
-}
 _________________________________________________*/
 
 // If you added more reference attribute, initialize them here
@@ -54,6 +54,7 @@ CConfigurationBrainProductsLiveAmp::CConfigurationBrainProductsLiveAmp(
 	const char* sGtkBuilderFileName,	
 	uint32& rPhysicalSampleRate,
 	uint32& rCountEEG,
+	uint32& rCountBip,
 	uint32& rCountAUX,
 	uint32& rCountACC,
 	boolean& rUseAccChannels,
@@ -65,6 +66,7 @@ CConfigurationBrainProductsLiveAmp::CConfigurationBrainProductsLiveAmp(
 	,CConfigurationBuilder(sGtkBuilderFileName)
 	,m_rPhysicalSampleRate(rPhysicalSampleRate)
 	,m_rCountEEG(rCountEEG)
+	,m_rCountBip(rCountBip)
 	,m_rCountAUX(rCountAUX)
 	,m_rCountACC(rCountACC)
 	,m_rUseAccChannels(rUseAccChannels)
@@ -89,6 +91,7 @@ boolean CConfigurationBrainProductsLiveAmp::preConfigure(void)
 	m_pComboBoxPhysicalSampleRate=GTK_COMBO_BOX(::gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_sampling_frequency"));
 
 	m_pNumberEEGChannels = GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_number_of_channels"));
+	m_pNumberBipolar = GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_number_of_bipolar"));
 	m_pNumberAUXChannels = GTK_SPIN_BUTTON(::gtk_builder_get_object(m_pBuilderConfigureInterface, "spbBtnAUXchn"));
 	
 	m_pEnableACCChannels = GTK_TOGGLE_BUTTON(::gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_acc"));
@@ -111,11 +114,11 @@ boolean CConfigurationBrainProductsLiveAmp::preConfigure(void)
 	::gtk_entry_set_text(m_tSerialNumber, m_sSerialNumber.c_str());	
 	::gtk_combo_box_set_active(m_pComboBoxPhysicalSampleRate, m_rPhysicalSampleRate);
 	::gtk_spin_button_set_value(m_pNumberEEGChannels, m_rCountEEG);
+	::gtk_spin_button_set_value(m_pNumberBipolar, m_rCountBip);
 	::gtk_spin_button_set_value(m_pNumberAUXChannels, m_rCountAUX);
 	::gtk_spin_button_set_value(m_pSpinButtonGoodImpedanceLimit, m_rGoodImpedanceLimit);
 	::gtk_spin_button_set_value(m_pSpinButtonBadImpedanceLimit, m_rBadImpedanceLimit);
 	::gtk_toggle_button_set_active(m_pEnableACCChannels, m_rUseAccChannels);
-	::gtk_toggle_button_set_active(m_pUseBipolarChannels, m_rUseBipolarChannels);
 	
 	return true;
 }
@@ -130,6 +133,7 @@ boolean CConfigurationBrainProductsLiveAmp::postConfigure(void)
 		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pSpinButtonGoodImpedanceLimit));
 		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pSpinButtonGoodImpedanceLimit));
 		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pNumberEEGChannels));
+		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pNumberBipolar));
 		gtk_spin_button_update(GTK_SPIN_BUTTON(m_pNumberAUXChannels));
 		
 		const char*  serialNumber = ::gtk_entry_get_text (m_tSerialNumber);
@@ -140,10 +144,10 @@ boolean CConfigurationBrainProductsLiveAmp::postConfigure(void)
 		::GtkTreeModel* l_pWidgetResolutionFull = ::gtk_combo_box_get_model (m_pComboBoxPhysicalSampleRate);
 
 		m_rCountEEG = uint32(::gtk_spin_button_get_value(m_pNumberEEGChannels));
+		m_rCountBip = uint32(::gtk_spin_button_get_value(m_pNumberBipolar));
 		m_rCountAUX = uint32(::gtk_spin_button_get_value(m_pNumberAUXChannels));
 		
 		m_rUseAccChannels = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_pEnableACCChannels)) != 0;
-		m_rUseBipolarChannels = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_pUseBipolarChannels)) != 0;
 
 		if(m_rUseAccChannels)
 			m_rCountACC = 3;  // can be 3 or 6

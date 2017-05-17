@@ -22,6 +22,9 @@
 * [2017-03-29] ver 1.0											          - RP
 * [2017-04-04] ver 1.1 Cosmetic changes: int32/uint32, static_cast<>...   - RP
 *              Function loop: optimized buffer copying. 
+* [2017-04-28] ver 1.2 LiveAmp8 and LiveAmp16 channles support added.     - RP
+*			   Introduced checking of Bipolar channels.
+*
 *********************************************************************/
 #if defined TARGET_HAS_ThirdPartyLiveAmpAPI
 
@@ -56,6 +59,7 @@ CDriverBrainProductsLiveAmp::CDriverBrainProductsLiveAmp(IDriverContext& rDriver
 	,m_ui32CountEEG(32)
 	,m_ui32CountAux(0)
 	,m_ui32CountACC(0)	
+	,m_ui32CountBipolar(0)
 	,m_ui32BadImpedanceLimit(10000)
 	,m_ui32GoodImpedanceLimit(5000)
 	,m_sSerialNumber("05203-0077")
@@ -77,6 +81,7 @@ CDriverBrainProductsLiveAmp::CDriverBrainProductsLiveAmp(IDriverContext& rDriver
 	m_oSettings.add("EEGchannels", &m_ui32CountEEG);
 	m_oSettings.add("AUXchannels", &m_ui32CountAux);
 	m_oSettings.add("ACCchannels", &m_ui32CountACC);
+	m_oSettings.add("BipolarChannels", &m_ui32CountBipolar);
 	m_oSettings.add("IncludeACC",  &m_bUseAccChannels);
 	
 	m_oSettings.add("SerialNr",	   &m_sSerialNumber);	
@@ -89,7 +94,7 @@ CDriverBrainProductsLiveAmp::CDriverBrainProductsLiveAmp(IDriverContext& rDriver
 	m_oSettings.load();	
 
 	m_ui32PhysicalSampleRate = m_oHeader.getSamplingFrequency();
-	m_oHeader.setChannelCount(m_ui32CountEEG + m_ui32CountAux + m_ui32CountACC);
+	m_oHeader.setChannelCount(m_ui32CountEEG + m_ui32CountBipolar + m_ui32CountAux + m_ui32CountACC);
 }
 
 CDriverBrainProductsLiveAmp::~CDriverBrainProductsLiveAmp(void)
@@ -447,6 +452,7 @@ boolean CDriverBrainProductsLiveAmp::configure(void)
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-BrainProductsLiveAmp.ui",
 		sampRateIndex,
 		m_ui32CountEEG,
+		m_ui32CountBipolar,
 		m_ui32CountAux,
 		m_ui32CountACC,
 		m_bUseAccChannels,
@@ -465,7 +471,7 @@ boolean CDriverBrainProductsLiveAmp::configure(void)
 		m_ui32PhysicalSampleRate = m_vSamplingRatesArray[sampRateIndex];
 
 	m_oHeader.setSamplingFrequency(m_ui32PhysicalSampleRate);
-	m_oHeader.setChannelCount(m_ui32CountEEG + m_ui32CountAux + m_ui32CountACC);
+	m_oHeader.setChannelCount(m_ui32CountEEG + m_ui32CountBipolar + m_ui32CountAux + m_ui32CountACC);
 	
 	m_oSettings.save();
 	
@@ -616,6 +622,15 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::configureLiveAmp(void)
 
 OpenViBE::boolean CDriverBrainProductsLiveAmp::checkAvailableChannels(void)
 {
+	// check the "LiveAmp_Channel" version: LiveAmp8, LiveAmp16, LiveAmp32 or LiveAmp64
+	uint32 l_ui32ModuleChannels; // check number of channels that are allowed!
+	int32 l_i32Res = ampGetProperty(m_pHandle, PG_MODULE, 0, MPROP_I32_UseableChannels, &l_ui32ModuleChannels, sizeof(l_ui32ModuleChannels));
+	if (l_i32Res != AMP_OK)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "#1 MPROP_I32_UseableChannels, error code= " << l_i32Res << "\n";
+		return false;
+	}
+
 	// checks available channels, gets the count of each channel type
 	uint32 l_ui32AvailableEEG = 0;
 	uint32 l_ui32AvailableAUX = 0;
@@ -623,7 +638,7 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::checkAvailableChannels(void)
 	uint32 l_ui32AvailableTrig = 0;
 
 	int32 l_i32Avlbchannels;
-	int32 l_i32Res = ampGetProperty(m_pHandle, PG_DEVICE, 0, DPROP_I32_AvailableChannels, &l_i32Avlbchannels, sizeof(l_i32Avlbchannels));	
+	l_i32Res = ampGetProperty(m_pHandle, PG_DEVICE, 0, DPROP_I32_AvailableChannels, &l_i32Avlbchannels, sizeof(l_i32Avlbchannels));	
 		
 	for (int32 c = 0; c < l_i32Avlbchannels; c++)
 	{
@@ -666,18 +681,40 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::checkAvailableChannels(void)
 				l_ui32AvailableTrig += 1 + 8; // One LiveAmp trigger input + 8 digital inputs from AUX box		
 		}
 	}
+
+
+	//*********************************************************************************
+	// very important check !!! EEG + Bipolar must match configuration limitations
+	//*********************************************************************************
+	if (l_ui32ModuleChannels == 32)
+	{
+		// if there is any Bipolar channel, it means that last 8 physical channels must be Bipolar
+		if (m_ui32CountBipolar > 0 && m_ui32CountEEG > (32 - 8))
+		{
+			m_rDriverContext.getLogManager() << LogLevel_Error << "[Check] Number of EEG channels:" << m_ui32CountEEG << " and Bipolar channels: " << m_ui32CountBipolar << " don't match the LiveAmp configuration !!!\n";
+			return false;
+		}
+	}
+
 	
-	// Used EEG channels:	
-	if(m_ui32CountEEG > l_ui32AvailableEEG)
+	// Used EEG channels:
+	if (m_ui32CountEEG + m_ui32CountBipolar > l_ui32ModuleChannels)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "[Check] Number of used EEG and Bip. channels '" << (m_ui32CountEEG + m_ui32CountBipolar )<< "' don't match with number of channels from LiveAmp Channel configuration '" << l_ui32ModuleChannels << "\n";
+		return false;
+	}
+	
+	else if (m_ui32CountEEG + m_ui32CountBipolar > l_ui32AvailableEEG)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "[Check] Number of available EEG channels '" << l_ui32AvailableEEG << "' don't match with number of channels from Device configuration '" << m_ui32CountEEG << "\n";
 		return false;
-	}
-	else if (m_oHeader.getSamplingFrequency() >= 1000 && l_ui32AvailableEEG == 32 && m_ui32CountEEG > 24)
+	} 		 
+	else if (m_oHeader.getSamplingFrequency() >= 1000 && l_ui32ModuleChannels >= 32 && (m_ui32CountEEG + m_ui32CountBipolar)> 24)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "If the sampling rate is 1000Hz, there should be 24 EEG (or 21 EEG and 3 AUX)  channels used, to avoid sample loss due to Bluetooth connection.\n";
 		return false;
 	}
+
 
 	if(m_ui32CountAux > l_ui32AvailableAUX)
 	{
@@ -685,7 +722,7 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::checkAvailableChannels(void)
 		return false;
 	}
 
-	if (m_oHeader.getSamplingFrequency() >= 1000 && l_ui32AvailableEEG == 32 && (m_ui32CountEEG + m_ui32CountAux + m_ui32CountACC) > 24)
+	if (m_oHeader.getSamplingFrequency() >= 1000 && l_ui32ModuleChannels >= 32 && (m_ui32CountEEG + m_ui32CountBipolar +  m_ui32CountAux + m_ui32CountACC) > 24)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error <<  "If the sampling rate is 1000Hz, there should be 24 EEG (or 21 EEG and 3 AUX)  channels used, to avoid sample loss due to Bluetooth connection. \n ";
 		return false;
@@ -704,6 +741,7 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::disableAllAvailableChannels()
 		m_rDriverContext.getLogManager() << LogLevel_Error <<  " Get available channels, error code= " << l_i32Res << "\n";		
 		return false;
 	}
+
 
 	// now disable all channel first,	
 	for (int32 c = 0; c < l_i32Avlbchannels; c++)
@@ -750,9 +788,20 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::getChannelIndices()
 		return false;
 	}
 
+
+	// check the "LiveAmp_Channel" version: LiveAmp8, LiveAmp16, LiveAmp32 or LiveAmp64
+	uint32 l_ui32ModuleChannels; 
+	l_i32Res = ampGetProperty(m_pHandle, PG_MODULE, 0, MPROP_I32_UseableChannels, &l_ui32ModuleChannels, sizeof(l_ui32ModuleChannels));
+	if (l_i32Res != AMP_OK)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "#2 MPROP_I32_UseableChannels, error code= " << l_i32Res << "\n";
+		return false;
+	}
+
 	// enable channels and get indexes of channels to be used!
-	// The order of physical channels by LiveAmp: EEGs, AUXs, ACCs, TRIGs 
+	// The order of physical channels by LiveAmp: EEGs, BIPs, AUXs, ACCs, TRIGs 
 	uint32 l_i32EegCnt = 0;
+	uint32 l_i32BipCnt = 0;
 	uint32 l_i32AuxCnt = 0;
 	uint32 l_i32AccCnt = 0;
 	
@@ -765,32 +814,51 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::getChannelIndices()
 			m_rDriverContext.getLogManager() << LogLevel_Error << "[Check] GetProperty type error: " << l_i32Res << "\n";
 			return false;
 		}
-
+		
+		// type of channel is first EEG. After one of the channle is re-typed as Bipolar, that the rest of 8 channels in the group of 32 will be Bipolar as well
 		if (l_i32Type == CT_EEG || l_i32Type == CT_BIP)
 		{
-			if(l_i32EegCnt < m_ui32CountEEG)
+			if (l_i32EegCnt < m_ui32CountEEG)
 			{
 				int32 l_i32Res = ampSetProperty(m_pHandle, PG_CHANNEL, c, CPROP_B32_RecordingEnabled, &l_i32Enable, sizeof(l_i32Enable));
 				if (l_i32Res != AMP_OK)
 				{
-					m_rDriverContext.getLogManager() << LogLevel_Error << " Cannot enable channel: "<< c << "; error code= " << l_i32Res << "\n";
+					m_rDriverContext.getLogManager() << LogLevel_Error << " Cannot enable channel: " << c << "; error code= " << l_i32Res << "\n";
 					return false;
-				}
-				// if Bipolar channel will be used, set the l_i32Type here:
-				if(m_bUseBipolarChannels && l_i32EegCnt > 23 && c < 32 || (m_bUseBipolarChannels && l_i32EegCnt > 23+32 && c < 64))  // last 8 channels of 32ch module can be bipolar channels 
-				{	
-					int32 l_i32TP = CT_BIP;
-					int32	l_i32Res = ampSetProperty(m_pHandle, PG_CHANNEL, c, CPROP_I32_Type, &l_i32TP, sizeof(l_i32TP));	
-					if(l_i32Res != AMP_OK)
-					{
-						m_rDriverContext.getLogManager() << LogLevel_Error << "[Check] SetProperty type CT_BIP error: " << l_i32Res << "\n";
-						return false;
-					}
 				}
 
 				l_vAccessIndices.push_back(m_ui32EnabledChannels);
 				m_ui32EnabledChannels++;
 				l_i32EegCnt++;
+			}
+			else if (l_i32BipCnt < m_ui32CountBipolar)
+			{
+				//*********************************************************************************
+				// If Bipolar channel will be used, set the l_i32Type to Bipolar here!!!
+				// Still it works for LiveAmp8, LiveAmp16 and LiveAmp32.
+				// Bipolar channels can be only phisical channels from index 24 - 31 !!!
+				//*********************************************************************************
+				if ((c > 23 && c < 32) || (l_ui32ModuleChannels > 32 && c > 55 && c < 64))  // last 8 channels of 32ch module can be bipolar channels 
+				{	
+					int32 l_i32Res = ampSetProperty(m_pHandle, PG_CHANNEL, c, CPROP_B32_RecordingEnabled, &l_i32Enable, sizeof(l_i32Enable));
+					if (l_i32Res != AMP_OK)
+					{
+						m_rDriverContext.getLogManager() << LogLevel_Error << " Cannot enable channel: " << c << "; error code= " << l_i32Res << "\n";
+						return false;
+					}
+
+					int32 l_i32TP = CT_BIP;
+					l_i32Res = ampSetProperty(m_pHandle, PG_CHANNEL, c, CPROP_I32_Type, &l_i32TP, sizeof(l_i32TP));	
+					if(l_i32Res != AMP_OK)
+					{
+						m_rDriverContext.getLogManager() << LogLevel_Error << "[Check] SetProperty type CT_BIP error: " << l_i32Res << "\n";
+						return false;
+					}
+					
+					l_vAccessIndices.push_back(m_ui32EnabledChannels);
+				    m_ui32EnabledChannels++;
+				    l_i32BipCnt++;
+				}
 			}
 		}
 		else if (l_i32Type == CT_AUX)
@@ -858,6 +926,15 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::getChannelIndices()
 	// initialize trigger states
 	for (uint32 i=0; i < m_vTriggerIndices.size(); i++)
 		m_vLastTriggerStates.push_back(0);
+
+	// double check
+	int32 l_i32Avlbchannels2;
+	l_i32Res = ampGetProperty(m_pHandle, PG_DEVICE, 0, DPROP_I32_AvailableChannels, &l_i32Avlbchannels2, sizeof(l_i32Avlbchannels2));
+	if (l_i32Res != AMP_OK)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "#3 Get available channels, error code= " << l_i32Res << "\n";
+		return false;
+	}
 
 	return true;
 }

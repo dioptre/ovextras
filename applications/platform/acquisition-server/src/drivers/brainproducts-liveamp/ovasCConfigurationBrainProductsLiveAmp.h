@@ -32,6 +32,7 @@ namespace OpenViBEAcquisitionServer
 			const char* sGtkBuilderFileName,			
 			OpenViBE::uint32& rPhysicalSampleRate,
 			OpenViBE::uint32& rCountEEG,
+			OpenViBE::uint32& rCountBip,
 			OpenViBE::uint32& rCountAUX,
 			OpenViBE::uint32& rCountACC,
 			OpenViBE::boolean& rUseAccChannels,
@@ -59,6 +60,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::uint32& m_rPhysicalSampleRate;
 		OpenViBE::uint32& m_rCountEEG;
+		OpenViBE::uint32& m_rCountBip;
 		OpenViBE::uint32& m_rCountAUX;
 		OpenViBE::uint32& m_rCountACC;
 		OpenViBE::boolean& m_rUseAccChannels;
@@ -85,6 +87,7 @@ namespace OpenViBEAcquisitionServer
 		::GtkSpinButton* m_pSpinButtonBadImpedanceLimit;
 
 		::GtkSpinButton* m_pNumberEEGChannels;
+		::GtkSpinButton* m_pNumberBipolar;
 		::GtkSpinButton* m_pNumberAUXChannels;
 		::GtkToggleButton* m_pEnableACCChannels;
 		::GtkToggleButton* m_pUseBipolarChannels;
