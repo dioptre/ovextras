@@ -5,6 +5,11 @@ SET(PROJECT_VERSION_MINOR ${OV_GLOBAL_VERSION_MINOR})
 SET(PROJECT_VERSION_PATCH ${OV_GLOBAL_VERSION_PATCH})
 SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
+IF(NOT DEFINED openvibe-toolkit_SOURCE_DIR OR NOT IS_DIRECTORY openvibe-toolkit_SOURCE_DIR)
+MESSAGE("openvibe-toolkit_SOURCE_DIR is not defined or is empty. Please set it to build matlab plugin.")
+return()
+ENDIF()
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/share/OV_stimulations.m
     DEPENDS openvibe-stimulation-generator ${openvibe-toolkit_SOURCE_DIR}/share/stimulation_list.txt
     COMMAND openvibe-stimulation-generator

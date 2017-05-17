@@ -11,6 +11,8 @@
 #include "algorithms/ovpCAlgorithmClassifierMLP.h"
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
+#include "algorithms/ovpCAlgorithmClassifierOneVsOne.h"
+
 const char* const c_sPairwiseStrategyEnumerationName = "Pairwise Decision Strategy";
 
 OVP_Declare_Begin();

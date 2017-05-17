@@ -22,6 +22,12 @@ INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindThirdPartyEigen")
 
+# @FIXME CERT This uses guess to find the correct include dir; maybe we should use a user defined cmake var instead. TBD when merge method is defined
+INCLUDE_DIRECTORIES("${CMAKE_HOME_DIRECTORY}/../certivibe/plugins/processing/classification/src")
+FILE(GLOB classification_lib "${PATH_CERTIVIBE}/lib/*certivibe-plugins-classification*")
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${classification_lib})
+
+
 # ---------------------------------
 # Test applications
 # ---------------------------------
