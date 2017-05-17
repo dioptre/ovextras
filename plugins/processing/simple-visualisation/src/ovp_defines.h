@@ -120,5 +120,22 @@ namespace OpenViBEPlugins
 	};
 };
 
+namespace OpenViBE
+{
+	namespace Kernel
+	{
+		/**
+		* \brief Standard 3D objects
+		*/
+		enum EStandard3DObject
+		{
+			Standard3DObject_Invalid = -1,
+			Standard3DObject_Sphere,
+			Standard3DObject_Cone,
+			Standard3DObject_Cube,
+			Standard3DObject_Quad
+		};
+	};
+};
 
 #endif // __OpenViBEPlugins_Defines_H__

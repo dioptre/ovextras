@@ -38,46 +38,46 @@ namespace OpenViBEPlugins
 
 			virtual ~CSimple3DDatabase();
 
-			OpenViBE::boolean set3DWidgetIdentifier(
+			bool set3DWidgetIdentifier(
 				OpenViBE::CIdentifier o3DWidgetIdentifier);
 
-			OpenViBE::boolean createVisualObject(
+			bool createVisualObject(
 				OpenViBE::CString sObjectName,
 				OpenViBE::Kernel::EStandard3DObject eStandard3DObject);
 
-			OpenViBE::boolean createVisualObject(
+			bool createVisualObject(
 				OpenViBE::CString sObjectName,
 				OpenViBE::CString sObjectFileName);
 
-			OpenViBE::boolean deleteVisualObject(
+			bool deleteVisualObject(
 				OpenViBE::CString sObjectName);
 
-			OpenViBE::boolean setVisualObjectPosition(
+			bool setVisualObjectPosition(
 				OpenViBE::CString sObjectName,
 				OpenViBE::float32 pPosition[3]);
 /*
-			OpenViBE::boolean setVisualObjectOrientation(
+			bool setVisualObjectOrientation(
 				OpenViBE::CString sObjectName,
 				???);*/
 
-			OpenViBE::boolean setVisualObjectScale(
+			bool setVisualObjectScale(
 				OpenViBE::CString sObjectName,
 				OpenViBE::float32 f32ScaleX,
 				OpenViBE::float32 f32ScaleY,
 				OpenViBE::float32 f32ScaleZ);
 
-			OpenViBE::boolean setVisualObjectMaterialColor(
+			bool setVisualObjectMaterialColor(
 				OpenViBE::CString sObjectName,
 				OpenViBE::float32 pColor[4]);
 
-			OpenViBE::boolean setVisualObjectVertexColor(
+			bool setVisualObjectVertexColor(
 				OpenViBE::CString sObjectName,
 				OpenViBE::float32 pColor[4]);
 
-			OpenViBE::boolean repositionCamera();
+			bool repositionCamera();
 
 			//called by boxalgorithm's process func
-			OpenViBE::boolean process3D();
+			bool process3D();
 
 		private:
 			std::map<std::string, OpenViBE::CIdentifier> m_mSimulatedObjects;
@@ -85,38 +85,38 @@ namespace OpenViBEPlugins
 			OpenViBE::CIdentifier m_o3DWidgetIdentifier;
 
 			//create object
-			OpenViBE::boolean m_bCreateObject;
+			bool m_bCreateObject;
 			OpenViBE::CString m_sCreateObjectName;
 			OpenViBE::CString m_sCreateObjectFileName;
 			OpenViBE::Kernel::EStandard3DObject m_eStandard3DObject;
 
 			//delete object
-			OpenViBE::boolean m_bDeleteObject;
+			bool m_bDeleteObject;
 			OpenViBE::CString m_sDeleteObjectName;
 
 			//set position
-			OpenViBE::boolean m_bSetObjectPosition;
+			bool m_bSetObjectPosition;
 			OpenViBE::CString m_sPositionObjectName;
 			OpenViBE::float32 m_pPosition[3];
 
 			//set orientation
-			OpenViBE::boolean m_bSetObjectOrientation;
+			bool m_bSetObjectOrientation;
 			OpenViBE::CString m_sOrientationObjectName;
 			OpenViBE::float32 m_pOrientation[4]; //quaternion
 
 			//set scale
-			OpenViBE::boolean m_bSetObjectScale;
+			bool m_bSetObjectScale;
 			OpenViBE::CString m_sScaleObjectName;
 			OpenViBE::float32 m_f32ScaleX, m_f32ScaleY, m_f32ScaleZ;
 
 			//set color
-			OpenViBE::boolean m_bSetObjectMaterialColor;
-			OpenViBE::boolean m_bSetObjectVertexColor;
+			bool m_bSetObjectMaterialColor;
+			bool m_bSetObjectVertexColor;
 			OpenViBE::CString m_sColorObjectName;
 			OpenViBE::float32 m_pColor[4];
 
 			//reposition camera
-			OpenViBE::boolean m_bRepositionCamera;
+			bool m_bRepositionCamera;
 		};
 	};
 };

@@ -19,7 +19,7 @@ namespace{
 	const uint32 c_ui32ClassLabelOffset = 1;
 }
 
-boolean CBoxAlgorithmKappaCoefficient::initialize(void)
+bool CBoxAlgorithmKappaCoefficient::initialize(void)
 {
 	//Initialize input/output
 	m_oTargetStimulationDecoder.initialize(*this, 0);
@@ -31,10 +31,10 @@ boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 	m_pConfusionMatrixAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ConfusionMatrix));
 	m_pConfusionMatrixAlgorithm->initialize();
 
-	TParameterHandler < OpenViBE::boolean > ip_bPercentages(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_Percentage));
+	TParameterHandler<bool> ip_bPercentages(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_Percentage));
 	ip_bPercentages = false;
 
-	TParameterHandler<boolean> ip_bSums(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_Sums));
+	TParameterHandler<bool> ip_bSums(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_Sums));
 	ip_bSums = true;
 
 	m_ui32AmountClass=getBoxAlgorithmContext()->getStaticBoxContext()->getSettingCount() - c_ui32ClassLabelOffset;
@@ -87,7 +87,9 @@ boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 		(::GtkAttachOptions)(GTK_EXPAND|GTK_FILL),
 		0, 0);
 
-	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(GTK_WIDGET(l_pTable));
+
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+	m_visualizationContext->setWidget(*this, GTK_WIDGET(l_pTable));
 
 	PangoContext *l_pPangoContext = gtk_widget_get_pango_context(GTK_WIDGET(m_pKappaLabel));
 	PangoFontDescription *l_pFontDescription = pango_context_get_font_description(l_pPangoContext);
@@ -97,7 +99,7 @@ boolean CBoxAlgorithmKappaCoefficient::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmKappaCoefficient::uninitialize(void)
+bool CBoxAlgorithmKappaCoefficient::uninitialize(void)
 {
 	//Log for the automatic test
 	this->getLogManager() << LogLevel_Info << "Final value of Kappa " << m_f64KappaCoefficient << "\n";
@@ -108,17 +110,19 @@ boolean CBoxAlgorithmKappaCoefficient::uninitialize(void)
 	m_oTargetStimulationDecoder.uninitialize();
 	m_oClassifierStimulationDecoder.uninitialize();
 
+	this->releasePluginObject(m_visualizationContext);
+
 	return true;
 }
 
 
-boolean CBoxAlgorithmKappaCoefficient::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmKappaCoefficient::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 
-boolean CBoxAlgorithmKappaCoefficient::process(void)
+bool CBoxAlgorithmKappaCoefficient::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext = this->getDynamicBoxContext();
 

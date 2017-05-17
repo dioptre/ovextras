@@ -5,6 +5,7 @@
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include <visualization-toolkit/ovviz_all.h>
 
 #include <vector>
 #include <string>
@@ -28,10 +29,10 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize();
-			virtual OpenViBE::boolean uninitialize();
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
-			virtual OpenViBE::boolean process();
+			virtual bool initialize();
+			virtual bool uninitialize();
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool process();
 
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_SignalDisplay)
 
@@ -55,6 +56,8 @@ namespace OpenViBEPlugins
 
 			OpenViBE::float64 m_f64RefreshInterval;
 
+		private:
+			OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
 		};
 
 
@@ -63,7 +66,7 @@ namespace OpenViBEPlugins
 		{
 		public:
 
-			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) 
+			virtual bool onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				if(ui32Index==1)
 				{
@@ -112,12 +115,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CSignalDisplayListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 
-			virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
+			virtual bool getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				rPrototype.addSetting("Display Mode", OVP_TypeId_SignalDisplayMode, "Scan");
 				rPrototype.addSetting("Auto vertical scale", OVP_TypeId_SignalDisplayScaling, CSignalDisplayView::m_vScalingModes[0]);

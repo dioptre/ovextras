@@ -26,14 +26,14 @@ CVoxel::CVoxel()
 {
 }
 
-boolean CVoxel::setObjectIdentifiers(CIdentifier oCubeIdentifier, CIdentifier oSphereIdentifier)
+bool CVoxel::setObjectIdentifiers(CIdentifier oCubeIdentifier, CIdentifier oSphereIdentifier)
 {
 	m_oCubeIdentifier = oCubeIdentifier;
 	m_oSphereIdentifier = oSphereIdentifier;
 	return true;
 }
 
-boolean CVoxel::setPosition(float32 f32X, float32 f32Y, float32 f32Z)
+bool CVoxel::setPosition(float32 f32X, float32 f32Y, float32 f32Z)
 {
 	m_f32X = f32X;
 	m_f32Y = f32Y;
@@ -83,7 +83,7 @@ uint64 CVoxelDisplay::getClockFrequency(void)
 	return ((uint64)1LL)<<37;
 }
 
-boolean CVoxelDisplay::initialize(void)
+bool CVoxelDisplay::initialize(void)
 {
 	//TODO : read color scale from some database of flow header
 	m_ui32NbColors = 13;
@@ -130,7 +130,7 @@ boolean CVoxelDisplay::initialize(void)
 	m_pStreamedMatrixDatabase->setMaxBufferCount(2);
 
 	//retrieve box settings
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	//CString l_sFilename;
 	l_rStaticBoxContext.getSettingValue(0, *ip_sFilename/*l_sFilename*/);
 	//*ip_sFilename = l_sFilename;
@@ -143,31 +143,32 @@ boolean CVoxelDisplay::initialize(void)
 
 	//send widget pointers to visualisation context for parenting
 	::GtkWidget* l_pWidget=NULL;
-	m_o3DWidgetIdentifier = getBoxAlgorithmContext()->getVisualisationContext()->create3DWidget(l_pWidget);
-	if(!l_pWidget)
-	{
-		this->getLogManager() << LogLevel_Error << "Unable to create 3D rendering widget.\n";
-		return false;
-	}
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
 
-	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
+	m_o3DWidgetIdentifier = m_visualizationContext->create3DWidget(l_pWidget);
+	OV_ERROR_UNLESS_KRF(
+		l_pWidget,
+		"Unable to create 3D rendering widget.",
+		OpenViBE::Kernel::ErrorType::BadProcessing);
+
+	m_visualizationContext->setWidget(*this, l_pWidget);
 
 	::GtkWidget* l_pToolbarWidget=NULL;
 	m_pVoxelView->getToolbar(l_pToolbarWidget);
 	if(l_pToolbarWidget != NULL)
 	{
-		getBoxAlgorithmContext()->getVisualisationContext()->setToolbar(l_pToolbarWidget);
+		m_visualizationContext->setToolbar(*this, l_pToolbarWidget);
 	}
 
 	//resource group
-	getVisualisationContext().createResourceGroup(m_oResourceGroupIdentifier, "VoxelDisplayResources");
-	getVisualisationContext().addResourceLocation(m_oResourceGroupIdentifier, OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/voxeldisplay", ResourceType_Directory, false);
-	getVisualisationContext().initializeResourceGroup(m_oResourceGroupIdentifier);
+	m_visualizationContext->createResourceGroup(m_oResourceGroupIdentifier, "VoxelDisplayResources");
+	m_visualizationContext->addResourceLocation(m_oResourceGroupIdentifier, OpenViBE::Directories::getDataDir() + "/plugins/simple-visualisation/voxeldisplay", ResourceType_Directory, false);
+	m_visualizationContext->initializeResourceGroup(m_oResourceGroupIdentifier);
 
 	return true;
 }
 
-boolean CVoxelDisplay::uninitialize(void)
+bool CVoxelDisplay::uninitialize(void)
 {
 	delete m_pVoxelView;
 	m_pVoxelView = NULL;
@@ -186,16 +187,18 @@ boolean CVoxelDisplay::uninitialize(void)
 	//destroy resource group
 	if(m_oResourceGroupIdentifier!=OV_UndefinedIdentifier)
 	{
-		getVisualisationContext().destroyResourceGroup(m_oResourceGroupIdentifier);
+		m_visualizationContext.destroyResourceGroup(m_oResourceGroupIdentifier);
 		m_oResourceGroupIdentifier = OV_UndefinedIdentifier;
 	}
+
+	this->releasePluginObject(m_visualizationContext);
 
 	return true;
 }
 
-boolean CVoxelDisplay::processInput(uint32 ui32InputIndex)
+bool CVoxelDisplay::processInput(uint32 ui32InputIndex)
 {
-	if(!getBoxAlgorithmContext()->getVisualisationContext()->is3DWidgetRealized(m_o3DWidgetIdentifier))
+	if(!m_visualizationContext->is3DWidgetRealized(m_o3DWidgetIdentifier))
 	{
 		return true;
 	}
@@ -203,19 +206,19 @@ boolean CVoxelDisplay::processInput(uint32 ui32InputIndex)
 	return true;
 }
 
-boolean CVoxelDisplay::processClock(IMessageClock& rMessageClock)
+bool CVoxelDisplay::processClock(IMessageClock& rMessageClock)
 {
-	if(!getBoxAlgorithmContext()->getVisualisationContext()->is3DWidgetRealized(m_o3DWidgetIdentifier))
+	if(!m_visualizationContext->is3DWidgetRealized(m_o3DWidgetIdentifier))
 	{
 		return true;
 	}
 	updateCameraPosition();
-	getBoxAlgorithmContext()->getVisualisationContext()->update3DWidget(m_o3DWidgetIdentifier);
+	m_visualizationContext->update3DWidget(m_o3DWidgetIdentifier);
 	//getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 
-boolean CVoxelDisplay::process(void)
+bool CVoxelDisplay::process(void)
 {
 	IDynamicBoxContext* l_pDynamicBoxContext=getBoxAlgorithmContext()->getDynamicBoxContext();
 	uint32 i;
@@ -230,11 +233,11 @@ boolean CVoxelDisplay::process(void)
 		l_pDynamicBoxContext->markInputAsDeprecated(0, i);
 	}
 
-	boolean l_bProcess3D = process3D();
+	bool l_bProcess3D = process3D();
 
 	if(l_bProcess3D == true)
 	{
-		getBoxAlgorithmContext()->getVisualisationContext()->update3DWidget(m_o3DWidgetIdentifier);
+		m_visualizationContext->update3DWidget(m_o3DWidgetIdentifier);
 		return true;
 	}
 	else
@@ -244,7 +247,7 @@ boolean CVoxelDisplay::process(void)
 	}
 }
 
-boolean CVoxelDisplay::enableAutoCameraMovement(boolean bEnable)
+bool CVoxelDisplay::enableAutoCameraMovement(bool bEnable)
 {
 	m_bAutoCameraMovementEnabled = bEnable;
 	if(bEnable == true)
@@ -258,7 +261,7 @@ boolean CVoxelDisplay::enableAutoCameraMovement(boolean bEnable)
 	return true;
 }
 
-boolean CVoxelDisplay::setVoxelObject(EStandard3DObject eVoxelObject)
+bool CVoxelDisplay::setVoxelObject(EStandard3DObject eVoxelObject)
 {
 	m_bSetVoxelObject = true;
 	m_eVoxelObject = eVoxelObject;
@@ -271,65 +274,65 @@ boolean CVoxelDisplay::setVoxelObject(EStandard3DObject eVoxelObject)
 	return true;
 }
 
-boolean CVoxelDisplay::toggleColorModification(boolean bModifyColor)
+bool CVoxelDisplay::toggleColorModification(bool bModifyColor)
 {
 	m_bToggleColorModification = true;
 	m_bColorModificationToggled = bModifyColor;
 	return true;
 }
 
-boolean CVoxelDisplay::toggleTransparencyModification(boolean bModifyTransparency)
+bool CVoxelDisplay::toggleTransparencyModification(bool bModifyTransparency)
 {
 	m_bToggleTransparencyModification = true;
 	m_bTransparencyModificationToggled = bModifyTransparency;
 	return true;
 }
 
-boolean CVoxelDisplay::toggleSizeModification(boolean bModifySize)
+bool CVoxelDisplay::toggleSizeModification(bool bModifySize)
 {
 	m_bToggleSizeModification = true;
 	m_bSizeModificationToggled = bModifySize;
 	return true;
 }
 
-boolean CVoxelDisplay::setMinScaleFactor(float64 f64MinScaleFactor)
+bool CVoxelDisplay::setMinScaleFactor(float64 f64MinScaleFactor)
 {
 	m_f64MinScaleFactor = f64MinScaleFactor;
 	return true;
 }
 
-boolean CVoxelDisplay::setMaxScaleFactor(float64 f64MaxScaleFactor)
+bool CVoxelDisplay::setMaxScaleFactor(float64 f64MaxScaleFactor)
 {
 	m_f64MaxScaleFactor = f64MaxScaleFactor;
 	return true;
 }
 
-boolean CVoxelDisplay::setMinDisplayThreshold(float64 f64MinDisplayThreshold)
+bool CVoxelDisplay::setMinDisplayThreshold(float64 f64MinDisplayThreshold)
 {
 	m_f64MinDisplayThreshold = f64MinDisplayThreshold;
 	return true;
 }
 
-boolean CVoxelDisplay::setMaxDisplayThreshold(float64 f64MaxDisplayThreshold)
+bool CVoxelDisplay::setMaxDisplayThreshold(float64 f64MaxDisplayThreshold)
 {
 	m_f64MaxDisplayThreshold = f64MaxDisplayThreshold;
 	return true;
 }
 
-boolean CVoxelDisplay::setDisplayThresholdBoundaryType(boolean bInclusiveBoundary)
+bool CVoxelDisplay::setDisplayThresholdBoundaryType(bool bInclusiveBoundary)
 {
 	m_bInclusiveDisplayThresholdBoundary = bInclusiveBoundary;
 	return true;
 }
 
-boolean CVoxelDisplay::setSkullOpacity(float64 f64Opacity)
+bool CVoxelDisplay::setSkullOpacity(float64 f64Opacity)
 {
 	m_bSetSkullOpacity = true;
 	m_f64SkullOpacity = f64Opacity;
 	return true;
 }
 
-boolean CVoxelDisplay::repositionCamera()
+bool CVoxelDisplay::repositionCamera()
 {
 	m_bRepositionCamera = true;
 	return true;
@@ -342,7 +345,7 @@ static float32 s_f32ScaleFromOffset = 0.015f;
 static float32 s_f32VoxelScale = 0.05f;
 static const uint32 s_ui32VoxelStep = 1;
 
-boolean CVoxelDisplay::process3D()
+bool CVoxelDisplay::process3D()
 {
 	//load voxel coords
 	if(m_bVoxelsMatrixLoaded == false)
@@ -357,7 +360,7 @@ boolean CVoxelDisplay::process3D()
 	//objects have been created : auto position camera
 	else if(m_bCameraPositioned == false)
 	{
-		getVisualisationContext().setCameraToEncompassObjects(m_o3DWidgetIdentifier);
+		m_visualizationContext->setCameraToEncompassObjects(m_o3DWidgetIdentifier);
 		m_bCameraPositioned = true;
 		return true;
 	}
@@ -368,7 +371,7 @@ boolean CVoxelDisplay::process3D()
 	}
 }
 
-boolean CVoxelDisplay::loadVoxels()
+bool CVoxelDisplay::loadVoxels()
 {
 	m_bVoxelsMatrixLoaded = true;
 
@@ -384,19 +387,19 @@ boolean CVoxelDisplay::loadVoxels()
 	return true;
 }
 
-boolean CVoxelDisplay::createVoxels()
+bool CVoxelDisplay::createVoxels()
 {
 	//set background color
-	getVisualisationContext().setBackgroundColor(m_o3DWidgetIdentifier, 0, 0, 0);
+	m_visualizationContext->setBackgroundColor(m_o3DWidgetIdentifier, 0, 0, 0);
 
 	//load skull meshes
-	m_oFaceId = getVisualisationContext().createObject("ov_voxeldisplay_face");
-	m_oScalpId = getVisualisationContext().createObject("ov_voxeldisplay_scalp");
+	m_oFaceId = m_visualizationContext->createObject("ov_voxeldisplay_face");
+	m_oScalpId = m_visualizationContext->createObject("ov_voxeldisplay_scalp");
 	//initialize skull opacity
-	getVisualisationContext().setObjectVisible(m_oFaceId, m_f64SkullOpacity > 0);
-	getVisualisationContext().setObjectVisible(m_oScalpId, m_f64SkullOpacity > 0);
-	getVisualisationContext().setObjectTransparency(m_oFaceId, 1.f-(float32)m_f64SkullOpacity);
-	getVisualisationContext().setObjectTransparency(m_oScalpId, 1.f-(float32)m_f64SkullOpacity);
+	m_visualizationContext->setObjectVisible(m_oFaceId, m_f64SkullOpacity > 0);
+	m_visualizationContext->setObjectVisible(m_oScalpId, m_f64SkullOpacity > 0);
+	m_visualizationContext->setObjectTransparency(m_oFaceId, 1.f-(float32)m_f64SkullOpacity);
+	m_visualizationContext->setObjectTransparency(m_oScalpId, 1.f-(float32)m_f64SkullOpacity);
 
 	//create voxels
 	if(op_pVoxelsMatrix->getDimensionCount() != 2)
@@ -420,17 +423,17 @@ boolean CVoxelDisplay::createVoxels()
 
 		//load shapes
 		m_oVoxels[i].setObjectIdentifiers(
-			getVisualisationContext().createObject("ov_unitcube", &l_oParamsList),
+			m_visualizationContext->createObject("ov_unitcube", &l_oParamsList),
 			OV_UndefinedIdentifier/*getVisualisationContext().createObject("ov_unitsphere_80faces", &l_oParamsList)*/);
 
 		//show active shape and hide the other one
-		getVisualisationContext().setObjectVisible(m_oVoxels[i].m_oCubeIdentifier, m_eVoxelObject == Standard3DObject_Cube);
+		m_visualizationContext->setObjectVisible(m_oVoxels[i].m_oCubeIdentifier, m_eVoxelObject == Standard3DObject_Cube);
 		//getVisualisationContext().setObjectVisible(m_oVoxels[i].m_oSphereIdentifier, m_eVoxelObject == Standard3DObject_Sphere);
 		//position 3D objects
-		getVisualisationContext().setObjectPosition(m_oVoxels[i].m_oCubeIdentifier, m_oVoxels[i].m_f32X, m_oVoxels[i].m_f32Y, m_oVoxels[i].m_f32Z);
+		m_visualizationContext->setObjectPosition(m_oVoxels[i].m_oCubeIdentifier, m_oVoxels[i].m_f32X, m_oVoxels[i].m_f32Y, m_oVoxels[i].m_f32Z);
 		//getVisualisationContext().setObjectPosition(m_oVoxels[i].m_oSphereIdentifier, m_oVoxels[i].m_f32X, m_oVoxels[i].m_f32Y, m_oVoxels[i].m_f32Z);
 		//scale 3D objects
-		getVisualisationContext().setObjectScale(m_oVoxels[i].m_oCubeIdentifier, s_f32VoxelScale, s_f32VoxelScale, s_f32VoxelScale);
+		m_visualizationContext->setObjectScale(m_oVoxels[i].m_oCubeIdentifier, s_f32VoxelScale, s_f32VoxelScale, s_f32VoxelScale);
 		//getVisualisationContext().setObjectScale(m_oVoxels[i].m_oSphereIdentifier, s_f32VoxelScale, s_f32VoxelScale, s_f32VoxelScale);
 	}
 
@@ -440,7 +443,7 @@ boolean CVoxelDisplay::createVoxels()
 	return true;
 }
 
-boolean CVoxelDisplay::updateVoxels()
+bool CVoxelDisplay::updateVoxels()
 {
 	if(computeActivationLevels() == false)
 	{
@@ -560,7 +563,7 @@ inline float32 SquareRootFloat(const float32 & number)
 	return number * y;
 }
 
-boolean CVoxelDisplay::computeActivationLevels()
+bool CVoxelDisplay::computeActivationLevels()
 {
 	//retrieve sources matrix
 	const float64* l_pBuffer = m_pStreamedMatrixDatabase->getBuffer(m_pStreamedMatrixDatabase->getCurrentBufferCount()-1);
@@ -613,7 +616,7 @@ boolean CVoxelDisplay::computeActivationLevels()
 	return true;
 }
 
-boolean CVoxelDisplay::processActivationLevels()
+bool CVoxelDisplay::processActivationLevels()
 {
 	float64 l_f64InvPotentialStep = m_ui32NbColors / (m_f64MaxPotential - m_f64MinPotential);
 
@@ -627,7 +630,7 @@ boolean CVoxelDisplay::processActivationLevels()
 		//determine whether this voxel should be displayed
 		float64 l_f64ActivationFactor = (l_f64Potential - m_f64MinPotential) * l_f64InvPotentialInterval; //0<x<1
 
-		boolean l_bDisplayVoxel = false;
+		bool l_bDisplayVoxel = false;
 		if(m_bInclusiveDisplayThresholdBoundary == true)
 		{
 			l_bDisplayVoxel = (l_f64ActivationFactor >= m_f64MinDisplayThreshold && l_f64ActivationFactor <= m_f64MaxDisplayThreshold);
@@ -683,7 +686,7 @@ boolean CVoxelDisplay::processActivationLevels()
 	return true;
 }
 
-boolean CVoxelDisplay::updateCameraPosition()
+bool CVoxelDisplay::updateCameraPosition()
 {
 	const float32 l_f32PhiAmplitude = 2; //in degrees
 	const float32 l_f32ThetaAmplitude = 1;

@@ -30,7 +30,7 @@ namespace OpenViBEPlugins
 
 			virtual ~CSpectrumDatabase();
 
-			virtual OpenViBE::boolean initialize();
+			virtual bool initialize();
 
 			/**
 			 * \brief Set displayed frequency range
@@ -50,38 +50,37 @@ namespace OpenViBEPlugins
 			 * \brief Get number of frequency bands
 			 * \return Number of frequency bands
 			 */
-			OpenViBE::uint32 getFrequencyBandCount();
+			uint32_t getFrequencyAbscissaCount();
 
 			/**
 			 * \brief Get width of a frequency band (in Hz)
 			 * \return Frequency band width
 			 */
-			OpenViBE::float64 getFrequencyBandWidth();
+//			OpenViBE::float64 getFrequencyBandWidth();
 
 			/**
 			 * \brief Get frequency band start frequency
 			 * \param ui32FrequencyBandIndex Index of frequency band
 			 * \return Frequency band start if it could be retrieved, 0 otherwise
 			 */
-			OpenViBE::float64 getFrequencyBandStart(
-				OpenViBE::uint32 ui32FrequencyBandIndex);
+//			OpenViBE::float64 getFrequencyBandStart(
+//				uint32_t ui32FrequencyBandIndex);
 
 			/**
 			 * \brief Get frequency band stop frequency
 			 * \param ui32FrequencyBandIndex Index of frequency band
 			 * \return Frequency band stop if it could be retrieved, 0 otherwise
 			 */
-			OpenViBE::float64 getFrequencyBandStop(
-				OpenViBE::uint32 ui32FrequencyBandIndex);
+//			OpenViBE::float64 getFrequencyBandStop(
+//				uint32_t ui32FrequencyBandIndex);
 
 			//@}
 
 		protected:
-			virtual OpenViBE::boolean decodeHeader();
+			virtual bool decodeHeader();
 
 		private:
-			//frequency band pairs (start and stop frequencies)
-			std::vector< std::pair<OpenViBE::float64, OpenViBE::float64> > m_oFrequencyBands;
+			std::vector< OpenViBE::float64 > m_FrequencyAbscissa;
 		};
 	}
 }

@@ -4,6 +4,7 @@
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include <visualization-toolkit/ovviz_all.h>
 
 #include "ovpCPowerSpectrumDisplay/ovpCPowerSpectrumDatabase.h"
 #include "ovpCPowerSpectrumDisplay/ovpCPowerSpectrumDisplayView.h"
@@ -19,10 +20,10 @@ namespace OpenViBEPlugins
 				CPowerSpectrumDisplay();
 
 				virtual void release(void) { delete this; }
-				virtual OpenViBE::boolean initialize();
-				virtual OpenViBE::boolean uninitialize();
-				virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
-				virtual OpenViBE::boolean process();
+				virtual bool initialize();
+				virtual bool uninitialize();
+				virtual bool processInput(uint32_t ui32InputIndex);
+				virtual bool process();
 
 				_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_PowerSpectrumDisplay)
 
@@ -39,6 +40,9 @@ namespace OpenViBEPlugins
 				//Start and end time of the last buffer
 				OpenViBE::uint64 m_ui64StartTime;
 				OpenViBE::uint64 m_ui64EndTime;
+
+		private:
+			OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
 		};
 
 		class CPowerSpectrumDisplayDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -56,12 +60,12 @@ namespace OpenViBEPlugins
 				virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-zoom-fit"); }
 				virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SimpleVisualisation::CPowerSpectrumDisplay(); }
 
-				virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+				virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 				{
-					return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+					return functionalityIdentifier == OVD_Functionality_Visualization;
 				}
 
-				virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
+				virtual bool getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
 				{
 					rPrototype.addSetting("Minimum frequency to display", OV_TypeId_Float, "0");
 					rPrototype.addSetting("Maximum frequency to display", OV_TypeId_Float, "40");

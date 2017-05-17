@@ -24,6 +24,8 @@ INCLUDE("FindThirdPartyOpenAL")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyBoost_Thread")
 INCLUDE("FindThirdPartyBoost_System")
+INCLUDE("FindOpenViBEVisualizationToolkit")
+
 
 # ---------------------------------
 # Finds standard library winmm

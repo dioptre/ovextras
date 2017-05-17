@@ -152,20 +152,22 @@ boolean CTopographicMap3DDisplay::initialize(void)
 
 	//send widget pointers to visualisation context for parenting
 	::GtkWidget* l_pWidget=NULL;
-	m_o3DWidgetIdentifier = getBoxAlgorithmContext()->getVisualisationContext()->create3DWidget(l_pWidget);
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+	m_o3DWidgetIdentifier = m_visualizationContext->create3DWidget(l_pWidget);
+
 	if(!l_pWidget)
 	{
 		this->getLogManager() << LogLevel_Error << "Unable to create 3D rendering widget.\n";
 		return false;
 	}
 
-	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
+	m_visualizationContext->setWidget(*this, l_pWidget);
 
 	::GtkWidget* l_pToolbarWidget=NULL;
 	m_pTopographicMap3DView->getToolbar(l_pToolbarWidget);
 	if(l_pToolbarWidget != NULL)
 	{
-		getBoxAlgorithmContext()->getVisualisationContext()->setToolbar(l_pToolbarWidget);
+		m_visualizationContext->setToolbar(*this, l_pToolbarWidget);
 	}
 
 	//resource group
@@ -214,6 +216,8 @@ boolean CTopographicMap3DDisplay::uninitialize(void)
 		getVisualisationContext().destroyResourceGroup(m_oResourceGroupIdentifier);
 		m_oResourceGroupIdentifier = OV_UndefinedIdentifier;
 	}
+
+	this->releasePluginObject(m_visualizationContext);
 
 	return true;
 }

@@ -4,6 +4,7 @@
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include <visualization-toolkit/ovviz_all.h>
 
 #include <gtk/gtk.h>
 #include <map>
@@ -33,10 +34,10 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32Index);
-			virtual OpenViBE::boolean process(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
+			virtual bool processInput(OpenViBE::uint32 ui32Index);
+			virtual bool process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_P300SpellerVisualisation);
 
@@ -122,7 +123,7 @@ namespace OpenViBEPlugins
 			int m_iSelectedRow;
 			int m_iSelectedColumn;
 
-			OpenViBE::boolean m_bTableInitialized;
+			bool m_bTableInitialized;
 
 			// @todo refactor to std::pair<long,long> ?
 			std::map < unsigned long, std::map < unsigned long, CBoxAlgorithmP300SpellerVisualisation::SWidgetStyle > > m_vCache;
@@ -132,6 +133,8 @@ namespace OpenViBEPlugins
 			std::vector< OpenViBE::uint64 > m_vStimuliQueue;
 			guint m_uiIdleFuncTag;
 			TCPTagging::IStimulusSender* m_pStimulusSender;
+
+			OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
 		};
 
 		class CBoxAlgorithmP300SpellerVisualisationDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -152,8 +155,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_P300SpellerVisualisation; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmP300SpellerVisualisation; }
 
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const { return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization; }
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
+			{
+				return functionalityIdentifier == OVD_Functionality_Visualization;
+			}
+
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput ("Sequence stimulations",            OV_TypeId_Stimulations);

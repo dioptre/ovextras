@@ -16,7 +16,7 @@ CTimeFrequencyMapDisplay::CTimeFrequencyMapDisplay() :
 {
 }
 
-OpenViBE::boolean CTimeFrequencyMapDisplay::initialize()
+bool CTimeFrequencyMapDisplay::initialize()
 {
 	//create spectrum database
 	m_pSpectrumDatabase = new CSpectrumDatabase(*this);
@@ -46,29 +46,32 @@ OpenViBE::boolean CTimeFrequencyMapDisplay::initialize()
 	::GtkWidget* l_pToolbarWidget=NULL;
 	dynamic_cast<CTimeFrequencyMapDisplayView*>(m_pTimeFrequencyMapDisplayView)->getWidgets(l_pWidget, l_pToolbarWidget);
 
-	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+	m_visualizationContext->setWidget(*this, l_pWidget);
 	if(l_pToolbarWidget != NULL)
 	{
-		getBoxAlgorithmContext()->getVisualisationContext()->setToolbar(l_pToolbarWidget);
+		m_visualizationContext->setToolbar(*this, l_pToolbarWidget);
 	}
 
 	return true;
 }
 
-OpenViBE::boolean CTimeFrequencyMapDisplay::uninitialize()
+bool CTimeFrequencyMapDisplay::uninitialize()
 {
 	delete m_pTimeFrequencyMapDisplayView;
 	delete m_pSpectrumDatabase;
+	this->releasePluginObject(m_visualizationContext);
+
 	return true;
 }
 
-OpenViBE::boolean CTimeFrequencyMapDisplay::processInput(OpenViBE::uint32 ui32InputIndex)
+bool CTimeFrequencyMapDisplay::processInput(OpenViBE::uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 
-OpenViBE::boolean CTimeFrequencyMapDisplay::process()
+bool CTimeFrequencyMapDisplay::process()
 {
 	IDynamicBoxContext* l_pDynamicBoxContext=getBoxAlgorithmContext()->getDynamicBoxContext();
 

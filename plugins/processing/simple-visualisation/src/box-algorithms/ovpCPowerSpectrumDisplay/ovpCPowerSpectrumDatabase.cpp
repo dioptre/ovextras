@@ -25,11 +25,11 @@ namespace OpenViBEPlugins
 
 		CPowerSpectrumDatabase::CPowerSpectrumDatabase(OpenViBEToolkit::TBoxAlgorithm<Plugins::IBoxAlgorithm>& oPlugin) :
 			m_oParentPlugin(oPlugin),
-			m_pDrawable(NULL),
-			m_pBuffer(NULL),
+			m_pDrawable(nullptr),
+			m_pBuffer(nullptr),
 			m_bFirstBufferReceived(false),
-			m_ui32MinDisplayedFrequencyBand(0),
-			m_ui32MaxDisplayedFrequencyBand(0),
+			m_MinDisplayedFrequencyAbscissa(0),
+			m_MaxDisplayedFrequencyAbscissa(0),
 			m_f64MinDisplayedValue(+DBL_MAX),
 			m_f64MaxDisplayedValue(-DBL_MAX)
 		{
@@ -43,13 +43,13 @@ namespace OpenViBEPlugins
 			}
 		}
 
-		void CPowerSpectrumDatabase::setChannelCount(const uint32 ui32ChannelCount)
+		void CPowerSpectrumDatabase::setChannelCount(const uint32_t ui32ChannelCount)
 		{
 			m_pChannelLabels.resize(ui32ChannelCount);
 			m_oMinMaxDisplayedValues.resize(ui32ChannelCount);
 		}
 
-		void CPowerSpectrumDatabase::setChannelName(const uint32 ui32ChannelIndex, const char* sChannelName)
+		void CPowerSpectrumDatabase::setChannelName(const uint32_t ui32ChannelIndex, const char* sChannelName)
 		{
 			if(ui32ChannelIndex >= m_pChannelLabels.size())
 				m_pChannelLabels.resize(ui32ChannelIndex+1);
@@ -57,34 +57,26 @@ namespace OpenViBEPlugins
 			m_pChannelLabels[ui32ChannelIndex] = sChannelName;
 		}
 
-		void CPowerSpectrumDatabase::setFrequencyBandCount(const uint32 ui32FrequencyBandCount)
+		void CPowerSpectrumDatabase::setFrequencyAbscissaCount(const uint32_t ui32FrequencyAbscissaCount)
 		{
-			m_pFrequencyBandLabels.resize(ui32FrequencyBandCount);
-			m_pFrequencyBands.resize(ui32FrequencyBandCount);
+			m_pFrequencyAbscissaLabels.resize(ui32FrequencyAbscissaCount);
+			m_pFrequencyAbscissa.resize(ui32FrequencyAbscissaCount);
 		}
 
-		void CPowerSpectrumDatabase::setFrequencyBandName(const uint32 ui32FrequencyBandIndex, const char* sFrequencyBandName)
+		void CPowerSpectrumDatabase::setFrequencyAbscissaName(const uint32_t ui32FrequencyAbscissaIndex, const char* sFrequencyAbscissaName)
 		{
-			if(ui32FrequencyBandIndex >= m_pFrequencyBandLabels.size())
-				m_pFrequencyBandLabels.resize(ui32FrequencyBandIndex+1);
+			if(ui32FrequencyAbscissaIndex >= m_pFrequencyAbscissaLabels.size())
+				m_pFrequencyAbscissaLabels.resize(ui32FrequencyAbscissaIndex+1);
 
-			m_pFrequencyBandLabels[ui32FrequencyBandIndex] = sFrequencyBandName;
+			m_pFrequencyAbscissaLabels[ui32FrequencyAbscissaIndex] = sFrequencyAbscissaName;
 		}
 
-		void CPowerSpectrumDatabase::setFrequencyBandStart(const uint32 ui32FrequencyBandIndex, const float64 f64FrequencyBandStart)
+		void CPowerSpectrumDatabase::setFrequencyAbscissaValue(const uint32_t ui32FrequencyAbscissaIndex, const float64 f64FrequencyAbscissaValue)
 		{
-			if(ui32FrequencyBandIndex >= m_pFrequencyBandLabels.size())
-				m_pFrequencyBands.resize(ui32FrequencyBandIndex+1);
+			if(ui32FrequencyAbscissaIndex >= m_pFrequencyAbscissaLabels.size())
+				m_pFrequencyAbscissa.resize(ui32FrequencyAbscissaIndex+1);
 
-			m_pFrequencyBands[ui32FrequencyBandIndex].first = f64FrequencyBandStart;
-		}
-
-		void CPowerSpectrumDatabase::setFrequencyBandStop(const uint32 ui32FrequencyBandIndex, const float64 f64FrequencyBandStop)
-		{
-			if(ui32FrequencyBandIndex >= m_pFrequencyBandLabels.size())
-				m_pFrequencyBands.resize(ui32FrequencyBandIndex+1);
-
-			m_pFrequencyBands[ui32FrequencyBandIndex].second = f64FrequencyBandStop;
+			m_pFrequencyAbscissa[ui32FrequencyAbscissaIndex] = f64FrequencyAbscissaValue;
 		}
 
 		void CPowerSpectrumDatabase::setBuffer(const float64* pBuffer)
@@ -93,20 +85,20 @@ namespace OpenViBEPlugins
 			if(m_bFirstBufferReceived == false)
 			{
 				//initialize displayed frequency bands
-				if(m_pFrequencyBands.size() > 0)
+				if(m_pFrequencyAbscissa.size() > 0)
 				{
-					m_ui32MinDisplayedFrequencyBand = 0;
-					m_ui32MaxDisplayedFrequencyBand = m_pFrequencyBands.size()-1;
+					m_MinDisplayedFrequencyAbscissa = 0;
+					m_MaxDisplayedFrequencyAbscissa = m_pFrequencyAbscissa.size()-1;
 				}
 
 				m_pDrawable->init();
 
-				m_pBuffer = new float64[(size_t)m_pChannelLabels.size()*m_pFrequencyBandLabels.size()];
+				m_pBuffer = new float64[(size_t)m_pChannelLabels.size()*m_pFrequencyAbscissaLabels.size()];
 
 				m_bFirstBufferReceived = true;
 			}
 
-			System::Memory::copy(m_pBuffer, pBuffer, m_pChannelLabels.size()*m_pFrequencyBandLabels.size()*sizeof(float64));
+			System::Memory::copy(m_pBuffer, pBuffer, m_pChannelLabels.size()*m_pFrequencyAbscissaLabels.size()*sizeof(float64));
 
 			const float64* pCurChannel = pBuffer;
 
@@ -114,13 +106,13 @@ namespace OpenViBEPlugins
 			m_f64MaxDisplayedValue = 0;
 
 			//for each channel
-			for(uint32 c=0; c<m_pChannelLabels.size(); c++, pCurChannel += m_pFrequencyBands.size())
+			for(uint32_t c=0; c<m_pChannelLabels.size(); c++, pCurChannel += m_pFrequencyAbscissa.size())
 			{
 				m_oMinMaxDisplayedValues[c].first = 0;
 				m_oMinMaxDisplayedValues[c].second = 0;
 
 				//for each displayed frequency band
-				for(uint64 i=m_ui32MinDisplayedFrequencyBand; i<m_ui32MaxDisplayedFrequencyBand; i++)
+				for(uint64 i=m_MinDisplayedFrequencyAbscissa; i<m_MaxDisplayedFrequencyAbscissa; i++)
 				{
 					//update channel min/max values
 					if(pCurChannel[i] < m_oMinMaxDisplayedValues[c].first)
@@ -148,12 +140,8 @@ namespace OpenViBEPlugins
 			m_pDrawable->redraw();
 		}
 
-		uint32 CPowerSpectrumDatabase::getChannelCount()
-		{
-			return m_pChannelLabels.size();
-		}
 
-		boolean CPowerSpectrumDatabase::getChannelLabel(uint32 ui32ChannelIndex, CString& rChannelLabel)
+		bool CPowerSpectrumDatabase::getChannelLabel(uint32_t ui32ChannelIndex, CString& rChannelLabel)
 		{
 			if(ui32ChannelIndex >= m_pChannelLabels.size())
 			{
@@ -167,108 +155,57 @@ namespace OpenViBEPlugins
 			}
 		}
 
-		boolean CPowerSpectrumDatabase::setMinDisplayedFrequency(float64 f64MinDisplayedFrequency)
+		bool CPowerSpectrumDatabase::setMinDisplayedFrequency(float64 f64MinDisplayedFrequency)
 		{
-			if(m_pFrequencyBands.size() == 0)
+			if(m_pFrequencyAbscissa.size() == 0)
 			{
 				return false;
 			}
 
-			if(f64MinDisplayedFrequency < m_pFrequencyBands[0].first)
+			if(f64MinDisplayedFrequency < m_pFrequencyAbscissa[0])
 			{
-				m_ui32MinDisplayedFrequencyBand = 0;
+				m_MinDisplayedFrequencyAbscissa = 0;
 			}
 			else
 			{
-				uint32 i=0;
-				for(i=0; i<m_pFrequencyBands.size(); i++)
-				{
-					if(f64MinDisplayedFrequency < m_pFrequencyBands[i].second)
-					{
-						break;
-					}
-				}
-				m_ui32MinDisplayedFrequencyBand = i;
+				m_MinDisplayedFrequencyAbscissa = std::distance(m_pFrequencyAbscissa.begin(),
+					std::upper_bound(m_pFrequencyAbscissa.begin(), m_pFrequencyAbscissa.end(), f64MinDisplayedFrequency));
 			}
 			return true;
 		}
 
-		boolean CPowerSpectrumDatabase::setMaxDisplayedFrequency(float64 f64MaxDisplayedFrequency)
+		bool CPowerSpectrumDatabase::setMaxDisplayedFrequency(float64 f64MaxDisplayedFrequency)
 		{
-			if(m_pFrequencyBands.size() == 0)
+			if(m_pFrequencyAbscissa.size() == 0)
 			{
 				return false;
 			}
 
-			if(f64MaxDisplayedFrequency > m_pFrequencyBands.back().second)
+			if(f64MaxDisplayedFrequency > m_pFrequencyAbscissa.back())
 			{
-				m_ui32MaxDisplayedFrequencyBand = m_pFrequencyBands.size()-1;
+				m_MaxDisplayedFrequencyAbscissa = m_pFrequencyAbscissa.size()-1;
 			}
 			else
 			{
-				uint32 i=0;
-				for(i=0; i<m_pFrequencyBands.size(); i++)
-				{
-					if(f64MaxDisplayedFrequency <= m_pFrequencyBands[i].second)
-					{
-						break;
-					}
-				}
-				m_ui32MaxDisplayedFrequencyBand = i;
+				m_MaxDisplayedFrequencyAbscissa = std::distance(m_pFrequencyAbscissa.begin(),
+					std::upper_bound(m_pFrequencyAbscissa.begin(), m_pFrequencyAbscissa.end(), f64MaxDisplayedFrequency, [](OpenViBE::float64 a, OpenViBE::float64 b) -> bool { return a <= b;}));
+
 			}
 			return true;
 		}
 
-		boolean CPowerSpectrumDatabase::getInputFrequencyRange(float64& f64MinInputFrequency, float64& f64MaxInputFrequency)
+		bool CPowerSpectrumDatabase::getInputFrequencyRange(float64& f64MinInputFrequency, float64& f64MaxInputFrequency)
 		{
-			if(m_pFrequencyBands.size() == 0)
+			if(m_pFrequencyAbscissa.size() == 0)
 			{
 				return false;
 			}
-			f64MinInputFrequency = m_pFrequencyBands.front().first;
-			f64MaxInputFrequency = m_pFrequencyBands.back().second;
+			f64MinInputFrequency = m_pFrequencyAbscissa.front();
+			f64MaxInputFrequency = m_pFrequencyAbscissa.back();
 			return true;
 		}
 
-		uint32 CPowerSpectrumDatabase::getDisplayedFrequencyBandCount()
-		{
-			if(m_ui32MaxDisplayedFrequencyBand < m_ui32MinDisplayedFrequencyBand)
-			{
-				return 0;
-			}
-			else
-			{
-				return m_ui32MaxDisplayedFrequencyBand - m_ui32MinDisplayedFrequencyBand + 1;
-			}
-		}
-
-		uint32 CPowerSpectrumDatabase::getMinDisplayedFrequencyBandIndex()
-		{
-			return m_ui32MinDisplayedFrequencyBand;
-		}
-
-		uint32 CPowerSpectrumDatabase::getMaxDisplayedFrequencyBandIndex()
-		{
-			return m_ui32MaxDisplayedFrequencyBand;
-		}
-
-		boolean CPowerSpectrumDatabase::getFrequencyBandRange(uint32 ui32FrequencyBandIndex, float64& rFrequencyBandStart, float64& rFrequencyBandStop)
-		{
-			if(ui32FrequencyBandIndex >= m_pFrequencyBands.size())
-			{
-				return false;
-			}
-			rFrequencyBandStart = m_pFrequencyBands[ui32FrequencyBandIndex].first;
-			rFrequencyBandStop = m_pFrequencyBands[ui32FrequencyBandIndex].second;
-			return true;
-		}
-
-		void CPowerSpectrumDatabase::setDrawable(CSignalDisplayDrawable * pDrawable)
-		{
-			m_pDrawable=pDrawable;
-		}
-
-		boolean CPowerSpectrumDatabase::getLastBufferChannelMinMaxValue(uint32 ui32Channel, float64& f64Min, float64& f64Max)
+		bool CPowerSpectrumDatabase::getLastBufferChannelMinMaxValue(uint32_t ui32Channel, float64& f64Min, float64& f64Max)
 		{
 			if(ui32Channel >= m_oMinMaxDisplayedValues.size())
 			{
@@ -279,7 +216,7 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-		boolean CPowerSpectrumDatabase::getLastBufferMinMaxValue(float64& f64Min, float64& f64Max)
+		bool CPowerSpectrumDatabase::getLastBufferMinMaxValue(float64& f64Min, float64& f64Max)
 		{
 			if(m_bFirstBufferReceived == false)
 			{
@@ -290,7 +227,7 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-		float64* CPowerSpectrumDatabase::getLastBufferChannelPointer(uint32 ui32Channel)
+		float64* CPowerSpectrumDatabase::getLastBufferChannelPointer(uint32_t ui32Channel)
 		{
 			if(m_pBuffer == NULL)
 			{
@@ -298,7 +235,7 @@ namespace OpenViBEPlugins
 			}
 			else
 			{
-				return m_pBuffer + ui32Channel * m_pFrequencyBands.size();
+				return m_pBuffer + ui32Channel * m_pFrequencyAbscissa.size();
 			}
 		}
 /*

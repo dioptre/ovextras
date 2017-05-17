@@ -169,7 +169,8 @@ namespace OpenViBEPlugins
 			g_signal_connect(m_pWidget, "key-release-event", G_CALLBACK(KeyboardStimulator_KeyReleaseCallback), this);
 			g_object_unref(l_pBuilder);
 
-			this->getVisualisationContext().setWidget(m_pWidget);
+			m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+			m_visualizationContext->setWidget(*this, m_pWidget);
 
 			m_oEncoder.encodeHeader();
 
@@ -188,6 +189,7 @@ namespace OpenViBEPlugins
 				m_pWidget = NULL;
 			}
 
+			this->releasePluginObject(m_visualizationContext);
 			return true;
 		}
 

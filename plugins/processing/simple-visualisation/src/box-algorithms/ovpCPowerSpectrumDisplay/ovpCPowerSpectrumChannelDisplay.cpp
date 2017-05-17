@@ -112,7 +112,7 @@ namespace OpenViBEPlugins
 		void CPowerSpectrumChannelDisplay::update()
 		{
 			//do we have something to display?
-			if(m_pDatabase == NULL || m_pDatabase->getDisplayedFrequencyBandCount() == 0)
+			if(m_pDatabase == NULL || m_pDatabase->getDisplayedFrequencyAbscissaCount() == 0)
 			{
 				return;
 			}
@@ -133,7 +133,7 @@ namespace OpenViBEPlugins
 			drawBoxToBuffer(0, 0, m_ui32RGBBufferWidth, m_ui32RGBBufferHeight, 0xFF, 0xFF, 0xFF);
 
 			//get number of frequency bands to display
-			uint32 l_ui32FrequencyCount = m_pDatabase->getDisplayedFrequencyBandCount();
+			uint32_t l_ui32FrequencyCount = m_pDatabase->getDisplayedFrequencyAbscissaCount();
 
 			//get size of drawing area
 			gint l_iWidth = 0;
@@ -154,15 +154,15 @@ namespace OpenViBEPlugins
 			float64 l_f64CurrentBufferMin=DBL_MAX;
 			if(m_pParentDisplay->isAutoVerticalScaleEnabled() == true)
 			{
-				for(uint32 i=0; i<m_pDatabase->getChannelCount(); i++)
+				for(uint32_t i=0; i<m_pDatabase->getChannelCount(); i++)
 				{
 					if(m_pParentDisplay->isSelected(i))
 					{
 						float64 l_f64CurrentBufferMax2;
 						float64 l_f64CurrentBufferMin2;
 						m_pDatabase->getLastBufferChannelMinMaxValue(i, l_f64CurrentBufferMin2, l_f64CurrentBufferMax2);
-						if(l_f64CurrentBufferMax2 > l_f64CurrentBufferMax) l_f64CurrentBufferMax=l_f64CurrentBufferMax2;
-						if(l_f64CurrentBufferMin2 < l_f64CurrentBufferMin) l_f64CurrentBufferMin=l_f64CurrentBufferMin2;
+						l_f64CurrentBufferMax = std::max(l_f64CurrentBufferMax2, l_f64CurrentBufferMax);
+						l_f64CurrentBufferMin = std::min(l_f64CurrentBufferMin2, l_f64CurrentBufferMin);
 					}
 				}
 			}
@@ -176,8 +176,8 @@ namespace OpenViBEPlugins
 			float64* l_pChannelBuf = m_pDatabase->getLastBufferChannelPointer(m_ui32Channel);
 
 			//draw frequency bands
-			uint32 l_ui32MinDisplayedFrequencyBandIndex = m_pDatabase->getMinDisplayedFrequencyBandIndex();
-			uint32 l_ui32MaxDisplayedFrequencyBandIndex = m_pDatabase->getMaxDisplayedFrequencyBandIndex();
+			uint32_t l_ui32MinDisplayedFrequencyBandIndex = m_pDatabase->getMinDisplayedFrequencyAbscissaIndex();
+			uint32_t l_ui32MaxDisplayedFrequencyBandIndex = m_pDatabase->getMaxDisplayedFrequencyAbscissaIndex();
 
 			for(uint32 i=l_ui32MinDisplayedFrequencyBandIndex; i<=l_ui32MaxDisplayedFrequencyBandIndex; i++)
 			{

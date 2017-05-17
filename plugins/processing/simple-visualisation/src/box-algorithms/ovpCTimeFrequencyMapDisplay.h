@@ -5,6 +5,7 @@
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include <visualization-toolkit/ovviz_all.h>
 
 #include "../ovpCSpectrumDatabase.h"
 #include "ovpCTimeFrequencyMapDisplay/ovpCTimeFrequencyMapDisplayView.h"
@@ -28,10 +29,10 @@ namespace OpenViBEPlugins
 
 			/** \name IBoxAlgorithm implementation */
 			//@{
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
-			virtual OpenViBE::boolean process(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool process(void);
 			//@}
 
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithm, OVP_ClassId_TimeFrequencyMapDisplay)
@@ -41,6 +42,8 @@ namespace OpenViBEPlugins
 			CSpectrumDatabase* m_pSpectrumDatabase;
 			//GUI management
 			CTimeFrequencyMapDisplayView* m_pTimeFrequencyMapDisplayView;
+
+			OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
 		};
 
 		class CTimeFrequencyMapDisplayDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -58,12 +61,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-zoom-fit"); }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SimpleVisualisation::CTimeFrequencyMapDisplay(); }
 
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 
-			virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
+			virtual bool getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				rPrototype.addSetting("Time Scale", OV_TypeId_Float, "10");
 				rPrototype.addSetting("Minimum frequency to display", OV_TypeId_Float, "0");

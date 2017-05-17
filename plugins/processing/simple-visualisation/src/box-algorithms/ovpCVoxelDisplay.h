@@ -10,6 +10,8 @@
 
 #include "../ovpCStreamedMatrixDatabase.h"
 
+#include <visualization-toolkit/ovviz_all.h>
+
 namespace OpenViBEPlugins
 {
 	namespace SimpleVisualisation
@@ -21,11 +23,11 @@ namespace OpenViBEPlugins
 		public:
 			CVoxel();
 
-			OpenViBE::boolean setObjectIdentifiers(
+			bool setObjectIdentifiers(
 				OpenViBE::CIdentifier oCubeIdentifier,
 				OpenViBE::CIdentifier oSphereIdentifier);
 
-			OpenViBE::boolean setPosition(
+			bool setPosition(
 				OpenViBE::float32 f32X,
 				OpenViBE::float32 f32Y,
 				OpenViBE::float32 f32Z);
@@ -34,7 +36,7 @@ namespace OpenViBEPlugins
 			OpenViBE::CIdentifier m_oCubeIdentifier;
 			OpenViBE::CIdentifier m_oSphereIdentifier;
 			//current visibility state of active object
-			OpenViBE::boolean m_bVisible;
+			bool m_bVisible;
 			//coordinates of active object
 			OpenViBE::float32 m_f32X, m_f32Y, m_f32Z;
 		};
@@ -48,57 +50,57 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::uint64 getClockFrequency(void);
 
-			virtual OpenViBE::boolean initialize(void);
+			virtual bool initialize(void);
 
-			virtual OpenViBE::boolean uninitialize(void);
+			virtual bool uninitialize(void);
 
-			virtual OpenViBE::boolean processInput(
+			virtual bool processInput(
 				OpenViBE::uint32 ui32InputIndex);
 
-			virtual OpenViBE::boolean processClock(
+			virtual bool processClock(
 				OpenViBE::Kernel::IMessageClock& rMessageClock);
 
-			virtual OpenViBE::boolean process(void);
+			virtual bool process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_VoxelDisplay)
 
 			/** \name CVoxelView callbacks */
 			//@{
 
-			OpenViBE::boolean setVoxelObject(
+			bool setVoxelObject(
 				OpenViBE::Kernel::EStandard3DObject eStandard3DObject);
 
-			OpenViBE::boolean toggleColorModification(
-				OpenViBE::boolean bModifyColor);
+			bool toggleColorModification(
+				bool bModifyColor);
 
-			OpenViBE::boolean toggleTransparencyModification(
-				OpenViBE::boolean bModifyTransparency);
+			bool toggleTransparencyModification(
+				bool bModifyTransparency);
 
-			OpenViBE::boolean toggleSizeModification(
-				OpenViBE::boolean bModifySize);
+			bool toggleSizeModification(
+				bool bModifySize);
 
-			OpenViBE::boolean setMinScaleFactor(
+			bool setMinScaleFactor(
 				OpenViBE::float64 f64MinScaleFactor);
 
-			OpenViBE::boolean setMaxScaleFactor(
+			bool setMaxScaleFactor(
 				OpenViBE::float64 f64MaxScaleFactor);
 
-			OpenViBE::boolean setMinDisplayThreshold(
+			bool setMinDisplayThreshold(
 				OpenViBE::float64 f64MinDisplayThreshold);
 
-			OpenViBE::boolean setMaxDisplayThreshold(
+			bool setMaxDisplayThreshold(
 				OpenViBE::float64 f64MaxDisplayThreshold);
 
-			OpenViBE::boolean setDisplayThresholdBoundaryType(
-				OpenViBE::boolean bInclusiveBoundary);
+			bool setDisplayThresholdBoundaryType(
+				bool bInclusiveBoundary);
 
-			OpenViBE::boolean setSkullOpacity(
+			bool setSkullOpacity(
 				OpenViBE::float64 f64Opacity);
 
-			OpenViBE::boolean enableAutoCameraMovement(
-				OpenViBE::boolean bEnable);
+			bool enableAutoCameraMovement(
+				bool bEnable);
 
-			OpenViBE::boolean repositionCamera();
+			bool repositionCamera();
 
 			//@}
 
@@ -110,49 +112,49 @@ namespace OpenViBEPlugins
 			 * \remarks When this method returns false, the plugin is disabled
 			 * \return True if processing was successful, false otherwise
 			 */
-			OpenViBE::boolean process3D();
+			bool process3D();
 
 			/**
 			 * \brief Voxel grid loading
 			 * \return True if loading was successful, false otherwise
 			 */
-			OpenViBE::boolean loadVoxels();
+			bool loadVoxels();
 
 			/**
 			 * \brief Voxel 3D objects creation
 			 * \return True if creation was successful, false otherwise
 			 */
-			OpenViBE::boolean createVoxels();
+			bool createVoxels();
 
 			/**
 			 * \brief Voxels updating
 			 * \return True if updating was successful, false otherwise
 			 */
-			OpenViBE::boolean updateVoxels();
+			bool updateVoxels();
 
 			/**
 			 * \brief Voxel activation levels computation
 			 * \return True if computation was successful, false otherwise
 			 */
-			OpenViBE::boolean computeActivationLevels();
+			bool computeActivationLevels();
 
 			/**
 			 * \brief Voxel grid update based on latest activation levels
 			 * \return True if update was successful, false otherwise
 			 */
-			OpenViBE::boolean processActivationLevels();
+			bool processActivationLevels();
 
 			/**
 			 * \brief To enhance parallax feeling, camera may be automatically moved
 			 */
-			OpenViBE::boolean updateCameraPosition();
+			bool updateCameraPosition();
 
 		private:
 			//Voxel coordinates file reader
 			OpenViBE::Kernel::IAlgorithmProxy* m_pOVMatrixFileReader;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::CString* > ip_sFilename;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pVoxelsMatrix;
-			OpenViBE::boolean m_bVoxelsMatrixLoaded;
+			bool m_bVoxelsMatrixLoaded;
 			//Streamed matrix database
 			CStreamedMatrixDatabase* m_pStreamedMatrixDatabase;
 			//GUI management
@@ -161,8 +163,8 @@ namespace OpenViBEPlugins
 			OpenViBE::CIdentifier m_o3DWidgetIdentifier;
 			OpenViBE::CIdentifier m_oResourceGroupIdentifier;
 
-			OpenViBE::boolean m_bCameraPositioned;
-			OpenViBE::boolean m_bAutoCameraMovementEnabled;
+			bool m_bCameraPositioned;
+			bool m_bAutoCameraMovementEnabled;
 			//time when auto camera movement was last turned on. Theta/Phi offsets are computed from that time step.
 			OpenViBE::float64 m_f64AutoCameraMovementStartTime;
 			//total theta offset since auto camera movement was last turned on. Reset to 0 when movement is stopped.
@@ -185,39 +187,42 @@ namespace OpenViBEPlugins
 			/** \name Members modified by CVoxelView requests */
 			//@{
 			//set voxel object
-			OpenViBE::boolean m_bSetVoxelObject;
+			bool m_bSetVoxelObject;
 			OpenViBE::Kernel::EStandard3DObject m_eVoxelObject;
 
 			//toggle color modification
-			OpenViBE::boolean m_bToggleColorModification;
-			OpenViBE::boolean m_bColorModificationToggled;
+			bool m_bToggleColorModification;
+			bool m_bColorModificationToggled;
 
 			//toggle transparency modification
-			OpenViBE::boolean m_bToggleTransparencyModification;
-			OpenViBE::boolean m_bTransparencyModificationToggled;
+			bool m_bToggleTransparencyModification;
+			bool m_bTransparencyModificationToggled;
 
 			//toggle size modification
-			OpenViBE::boolean m_bToggleSizeModification;
-			OpenViBE::boolean m_bSizeModificationToggled;
+			bool m_bToggleSizeModification;
+			bool m_bSizeModificationToggled;
 
 			//scale factors
 			OpenViBE::float64 m_f64MinScaleFactor;
 			OpenViBE::float64 m_f64MaxScaleFactor;
 
 			//display threshold boundary type
-			OpenViBE::boolean m_bInclusiveDisplayThresholdBoundary;
+			bool m_bInclusiveDisplayThresholdBoundary;
 
 			//voxel display thresholds
 			OpenViBE::float64 m_f64MinDisplayThreshold;
 			OpenViBE::float64 m_f64MaxDisplayThreshold;
 
 			//set skull opacity
-			OpenViBE::boolean m_bSetSkullOpacity;
+			bool m_bSetSkullOpacity;
 			OpenViBE::float64 m_f64SkullOpacity;
 
 			//reposition camera
-			OpenViBE::boolean m_bRepositionCamera;
+			bool m_bRepositionCamera;
 			//@}
+
+			OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
+
 		};
 
 		class CVoxelDisplayDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -238,12 +243,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_VoxelDisplay; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SimpleVisualisation::CVoxelDisplay(); }
 
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				rPrototype.addSetting("Voxels filename", OV_TypeId_Filename, "");

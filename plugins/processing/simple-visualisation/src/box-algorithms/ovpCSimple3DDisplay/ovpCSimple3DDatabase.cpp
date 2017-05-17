@@ -68,13 +68,13 @@ namespace OpenViBEPlugins
 		{
 		}
 
-		boolean CSimple3DDatabase::set3DWidgetIdentifier(CIdentifier o3DWidgetIdentifier)
+		bool CSimple3DDatabase::set3DWidgetIdentifier(CIdentifier o3DWidgetIdentifier)
 		{
 			m_o3DWidgetIdentifier = o3DWidgetIdentifier;
 			return true;
 		}
 
-		boolean CSimple3DDatabase::createVisualObject(CString sObjectName, EStandard3DObject eStandard3DObject)
+		bool CSimple3DDatabase::createVisualObject(CString sObjectName, EStandard3DObject eStandard3DObject)
 		{
 			m_bCreateObject = true;
 			m_sCreateObjectName = sObjectName;
@@ -82,7 +82,7 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-		boolean CSimple3DDatabase::createVisualObject(CString sObjectName, CString sObjectFileName)
+		bool CSimple3DDatabase::createVisualObject(CString sObjectName, CString sObjectFileName)
 		{
 			m_bCreateObject = true;
 			m_sCreateObjectName = sObjectName;
@@ -90,14 +90,14 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-		boolean CSimple3DDatabase::deleteVisualObject(CString sObjectName)
+		bool CSimple3DDatabase::deleteVisualObject(CString sObjectName)
 		{
 			m_bDeleteObject = true;
 			m_sDeleteObjectName = sObjectName;
 			return true;
 		}
 
-		boolean CSimple3DDatabase::setVisualObjectPosition(CString sObjectName, float32 pPosition[3])
+		bool CSimple3DDatabase::setVisualObjectPosition(CString sObjectName, float32 pPosition[3])
 		{
 			m_bSetObjectPosition = true;
 			m_sPositionObjectName = sObjectName;
@@ -105,7 +105,7 @@ namespace OpenViBEPlugins
 			return true;
 		}
 		/*
-		boolean CSimple3DDatabase::setVisualObjectOrientation(CString sObjectName, ???)
+		bool CSimple3DDatabase::setVisualObjectOrientation(CString sObjectName, ???)
 		{
 			m_bSetObjectOrientation = true;
 			m_sOrientationObjectName = sObjectName;
@@ -113,7 +113,7 @@ namespace OpenViBEPlugins
 			return true;
 		}*/
 
-		boolean CSimple3DDatabase::setVisualObjectScale(CString sObjectName, float32 f32ScaleX, float32 f32ScaleY, float32 f32ScaleZ)
+		bool CSimple3DDatabase::setVisualObjectScale(CString sObjectName, float32 f32ScaleX, float32 f32ScaleY, float32 f32ScaleZ)
 		{
 			m_bSetObjectScale = true;
 			m_sScaleObjectName = sObjectName;
@@ -123,7 +123,7 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-		boolean CSimple3DDatabase::setVisualObjectMaterialColor(CString sObjectName, float32 pColor[4])
+		bool CSimple3DDatabase::setVisualObjectMaterialColor(CString sObjectName, float32 pColor[4])
 		{
 			m_bSetObjectMaterialColor = true;
 			m_sColorObjectName = sObjectName;
@@ -131,7 +131,7 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-		boolean CSimple3DDatabase::setVisualObjectVertexColor(CString sObjectName, float32 pColor[4])
+		bool CSimple3DDatabase::setVisualObjectVertexColor(CString sObjectName, float32 pColor[4])
 		{
 			m_bSetObjectVertexColor = true;
 			m_sColorObjectName = sObjectName;
@@ -139,13 +139,13 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-		boolean CSimple3DDatabase::repositionCamera()
+		bool CSimple3DDatabase::repositionCamera()
 		{
 			m_bRepositionCamera = true;
 			return true;
 		}
 
-		boolean CSimple3DDatabase::process3D()
+		bool CSimple3DDatabase::process3D()
 		{
 			if(m_bCreateObject == true)
 			{

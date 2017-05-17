@@ -5,10 +5,12 @@
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include <visualization-toolkit/ovviz_all.h>
 
 #include <gtk/gtk.h>
 
 #include "../ovpCTopographicMapDatabase.h"
+
 
 namespace OpenViBEPlugins
 {
@@ -25,13 +27,13 @@ namespace OpenViBEPlugins
 			virtual void release(void) { delete this; }
 
 			virtual OpenViBE::uint64 getClockFrequency(void);
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
-			virtual OpenViBE::boolean processInput(
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
+			virtual bool processInput(
 				OpenViBE::uint32 ui32InputIndex);
-			virtual OpenViBE::boolean processClock(
+			virtual bool processClock(
 				OpenViBE::Kernel::IMessageClock& rMessageClock);
-			virtual OpenViBE::boolean process(void);
+			virtual bool process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_TopographicMap3DDisplay)
 
@@ -59,7 +61,7 @@ namespace OpenViBEPlugins
 			/**
 			 * \brief Set pointer to values matrix (interpolation results)
 			 */
-			virtual OpenViBE::boolean setSampleValuesMatrix(
+			virtual bool setSampleValuesMatrix(
 				OpenViBE::IMatrix* pSampleValuesMatrix);
 
 			//@}
@@ -68,9 +70,9 @@ namespace OpenViBEPlugins
 			 * \brief Toggle electrodes on/off
 			 */
 			void toggleElectrodes(
-				OpenViBE::boolean);
+				bool);
 
-			//void toggleSamplingPoints(OpenViBE::boolean);
+			//void toggleSamplingPoints(bool);
 
 		protected:
 			/**
@@ -80,7 +82,7 @@ namespace OpenViBEPlugins
 			 * the coordinates in normalized frame as stored in database
 			 * \return True if initialization completed successfully
 			 */
-			OpenViBE::boolean initializeScalpData();
+			bool initializeScalpData();
 
 			/**
 			 * \brief Compute electrode coordinates in head model frame
@@ -89,7 +91,7 @@ namespace OpenViBEPlugins
 			 * between such rays and head model.
 			 * \return True if coordinates could be computed for all electrodes, false otherwise
 			 */
-			OpenViBE::boolean computeModelFrameChannelCoordinates();
+			bool computeModelFrameChannelCoordinates();
 
 			/**
 			 * \brief Looks for intersection between ray and triangle
@@ -102,7 +104,7 @@ namespace OpenViBEPlugins
 			 * \param[out] rT Intersection location from origin, if any
 			 * \return True if intersection found, false otherwise
 			 */
-			OpenViBE::boolean findRayTriangleIntersection(
+			bool findRayTriangleIntersection(
 				OpenViBE::float32* pOrigin,
 				OpenViBE::float32* pDirection,
 				OpenViBE::float32* pV0,
@@ -114,30 +116,30 @@ namespace OpenViBEPlugins
 			 * \brief Process 3D requests
 			 * \return True if plugin execution may go on, false if plugin must be stopped
 			 */
-			OpenViBE::boolean process3D();
+			bool process3D();
 
 			/**
 			 * \brief Create 3D skull
 			 * \return True if skull created, false otherwise
 			 */
-			OpenViBE::boolean createSkull();
+			bool createSkull();
 
 			/**
 			 * \brief Create 3D objects at sampling points locations
 			 * \return True if sampling points created, false otherwise
 			 */
-			OpenViBE::boolean createSamplingPoints();
+			bool createSamplingPoints();
 
 		private:
 			//error flag (plugin should be disabled when true)
-			OpenViBE::boolean m_bError;
+			bool m_bError;
 
 			//channel localisation decoder
 			OpenViBEToolkit::TChannelLocalisationDecoder < CTopographicMap3DDisplay >* m_pChannelLocalisationStreamDecoder;
 			//streamed matrix decoder
 			OpenViBEToolkit::TStreamedMatrixDecoder < CTopographicMap3DDisplay >* m_pDecoder;
 
-			OpenViBE::boolean m_bFirstBufferReceived;
+			bool m_bFirstBufferReceived;
 
 			//Name of file containing face mesh
 			OpenViBE::CString m_oFaceMeshFilename;
@@ -159,16 +161,16 @@ namespace OpenViBEPlugins
 			OpenViBE::CIdentifier m_oResourceGroupIdentifier;
 
 			//flag set to true once skull meshes are loaded
-			OpenViBE::boolean m_bSkullCreated;
+			bool m_bSkullCreated;
 			//flag set to true once camera is centered in front of 3D scene
-			OpenViBE::boolean m_bCameraPositioned;
+			bool m_bCameraPositioned;
 			//flag set to true once scalp data is initialized
-			OpenViBE::boolean m_bScalpDataInitialized;
+			bool m_bScalpDataInitialized;
 			//flag set to true once 3D electrode objects are created
-			OpenViBE::boolean m_bElectrodesCreated;
+			bool m_bElectrodesCreated;
 
 			//flag set to true once channel localisation buffer is received
-			OpenViBE::boolean m_bModelElectrodeCoordinatesInitialized;
+			bool m_bModelElectrodeCoordinatesInitialized;
 
 			//number of predefined colors
 			OpenViBE::uint32 m_ui32NbColors;
@@ -178,16 +180,16 @@ namespace OpenViBEPlugins
 			//IDs of electrode objects
 			std::vector<OpenViBE::CIdentifier> m_oElectrodeIds;
 			//flag set to true when electrode objects toggle status has changed
-			OpenViBE::boolean m_bNeedToggleElectrodes;
+			bool m_bNeedToggleElectrodes;
 			//flag specifying whether electrode objects must be toggled on or off
-			OpenViBE::boolean m_bElectrodesToggleState;
+			bool m_bElectrodesToggleState;
 
 			//IDs of sampling points (scalp vertices) objects
 			std::vector<OpenViBE::CIdentifier> m_oSamplingPointIds;
 			//flag set to true when sampling points objects toggle status has changed
-			OpenViBE::boolean m_bNeedToggleSamplingPoints;
+			bool m_bNeedToggleSamplingPoints;
 			//flag specifying whether sampling point objects must be toggled on or off
-			OpenViBE::boolean m_bSamplingPointsToggleState;
+			bool m_bSamplingPointsToggleState;
 
 			//ID of face object
 			OpenViBE::CIdentifier m_oFaceId;
@@ -203,6 +205,8 @@ namespace OpenViBEPlugins
 			OpenViBE::CMatrix m_oSampleCoordinatesMatrix;
 			//scalp vertex colors
 			OpenViBE::float32* m_pScalpColors;
+
+			OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
 		};
 
 		class CTopographicMap3DDisplayDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -223,12 +227,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_TopographicMap3DDisplay; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SimpleVisualisation::CTopographicMap3DDisplay(); }
 
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				rPrototype.addSetting("Interpolation type", OVP_TypeId_SphericalLinearInterpolationType, "1");

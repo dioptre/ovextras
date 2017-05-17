@@ -122,8 +122,9 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::initialize(void)
 	gtk_builder_connect_signals(m_pMainWidgetInterface, NULL);
 	gtk_builder_connect_signals(m_pToolbarWidgetInterface, NULL);
 
-	getVisualisationContext().setWidget(m_pMainWindow);
-	getVisualisationContext().setToolbar(m_pToolbarWidget);
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+	m_visualizationContext->setWidget(*this, m_pMainWindow);
+	m_visualizationContext->setToolbar(*this, m_pToolbarWidget);
 
 	guint l_uiRowCount=0;
 	guint l_uiColumnCount=0;
@@ -193,6 +194,8 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::uninitialize(void)
 		this->getAlgorithmManager().releaseAlgorithm(*m_pSequenceStimulationDecoder);
 		m_pSequenceStimulationDecoder=NULL;
 	}
+
+	this->releasePluginObject(m_visualizationContext);
 
 	return true;
 }

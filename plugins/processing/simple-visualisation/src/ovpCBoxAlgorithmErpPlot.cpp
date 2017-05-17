@@ -14,7 +14,11 @@ namespace
 	class _AutoCast_
 	{
 	public:
-		_AutoCast_(IBox& rBox, IConfigurationManager& rConfigurationManager, const uint32 ui32Index) : m_rConfigurationManager(rConfigurationManager) { rBox.getSettingValue(ui32Index, m_sSettingValue); }
+		_AutoCast_(const IBox& rBox, IConfigurationManager& rConfigurationManager, const uint32 ui32Index)
+			: m_rConfigurationManager(rConfigurationManager)
+		{
+			rBox.getSettingValue(ui32Index, m_sSettingValue);
+		}
 		operator ::GdkColor (void)
 		{
 			::GdkColor l_oColor;
@@ -432,10 +436,10 @@ float64* Graph::begin(int curveIndex)
 
 
 
-boolean CBoxAlgorithmErpPlot::initialize(void)
+bool CBoxAlgorithmErpPlot::initialize(void)
 {	
 	// If you need to retrieve setting values, use the FSettingValueAutoCast function.
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	m_sFigureFileName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_sTriggerToSave = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
@@ -468,7 +472,8 @@ boolean CBoxAlgorithmErpPlot::initialize(void)
 
 	m_pDrawWindow=GTK_WIDGET(gtk_builder_get_object(m_pMainWidgetInterface, "plot-window"));
 
-	this->getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pDrawWindow);
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+	m_visualizationContext->setWidget(*this, m_pDrawWindow);
 
 	g_signal_connect(m_pDrawWindow, "expose-event", G_CALLBACK (on_expose_event), m_lGraphList);
 	g_signal_connect(m_pDrawWindow, "configure-event", G_CALLBACK (on_configure_event), m_lGraphList);
@@ -484,7 +489,7 @@ boolean CBoxAlgorithmErpPlot::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmErpPlot::uninitialize(void)
+bool CBoxAlgorithmErpPlot::uninitialize(void)
 {
 	for (uint32 inputi=0; inputi<m_vDecoders.size(); inputi++)
 	{
@@ -502,10 +507,12 @@ boolean CBoxAlgorithmErpPlot::uninitialize(void)
 
 	while(!m_lGraphList->empty()) delete m_lGraphList->front(), m_lGraphList->pop_front();
 
+	this->releasePluginObject(m_visualizationContext);
+
 	return true;
 }
 
-boolean CBoxAlgorithmErpPlot::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmErpPlot::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 
@@ -513,7 +520,7 @@ boolean CBoxAlgorithmErpPlot::processInput(uint32 ui32InputIndex)
 }
 
 //saving the graph in png images
-boolean CBoxAlgorithmErpPlot::save(void)
+bool CBoxAlgorithmErpPlot::save(void)
 {
 	//main context
 	cairo_t * cairoContext;
@@ -546,10 +553,10 @@ boolean CBoxAlgorithmErpPlot::save(void)
 
 }
 
-boolean CBoxAlgorithmErpPlot::process(void)
+bool CBoxAlgorithmErpPlot::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	//listen for stimulation input
 	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)

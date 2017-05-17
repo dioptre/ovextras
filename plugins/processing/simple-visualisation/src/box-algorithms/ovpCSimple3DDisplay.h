@@ -5,6 +5,7 @@
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include <visualization-toolkit/ovviz_all.h>
 
 #include "ovpCSimple3DDisplay/ovpCSimple3DDatabase.h"
 #include "ovpCSimple3DDisplay/ovpCSimple3DView.h"
@@ -21,13 +22,13 @@ namespace OpenViBEPlugins
 			virtual void release(void) { delete this; }
 
 			virtual OpenViBE::uint64 getClockFrequency(void);
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
-			virtual OpenViBE::boolean processInput(
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
+			virtual bool processInput(
 				OpenViBE::uint32 ui32InputIndex);
-			virtual OpenViBE::boolean processClock(
+			virtual bool processClock(
 				OpenViBE::Kernel::IMessageClock& rMessageClock);
-			virtual OpenViBE::boolean process(void);
+			virtual bool process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_Simple3DDisplay)
 
@@ -35,6 +36,9 @@ namespace OpenViBEPlugins
 			CSimple3DDatabase* m_pSimple3DDatabase;
 			CSignalDisplayDrawable* m_pSimple3DView; //main object used for the display (contains all the GUI code)
 			OpenViBE::CIdentifier m_o3DWidgetIdentifier;
+		private:
+			OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
+
 		};
 
 		class CSimple3DDisplayDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -55,12 +59,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_Simple3DDisplay; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SimpleVisualisation::CSimple3DDisplay(); }
 
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				return true;

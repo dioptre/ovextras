@@ -26,7 +26,7 @@ uint64 CSimple3DDisplay::getClockFrequency(void)
 	return ((uint64)1LL)<<36;
 }
 
-boolean CSimple3DDisplay::initialize(void)
+bool CSimple3DDisplay::initialize(void)
 {
 	m_pSimple3DDatabase = new CSimple3DDatabase(*this);
 
@@ -36,21 +36,22 @@ boolean CSimple3DDisplay::initialize(void)
 
 	//send widget pointers to visualisation context for parenting
 	::GtkWidget* l_pWidget=NULL;
-	m_o3DWidgetIdentifier = getBoxAlgorithmContext()->getVisualisationContext()->create3DWidget(l_pWidget);
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+	m_o3DWidgetIdentifier = m_visualizationContext->create3DWidget(l_pWidget);
 	if(!l_pWidget)
 	{
 		this->getLogManager() << LogLevel_Error << "Unable to create 3D rendering widget.\n";
 		return false;
 	}
 
-	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
+	m_visualizationContext->setWidget(*this, l_pWidget);
 	
 
 	::GtkWidget* l_pToolbarWidget=NULL;
 	dynamic_cast<CSimple3DView*>(m_pSimple3DView)->getToolbar(l_pToolbarWidget);
 	if(l_pToolbarWidget != NULL)
 	{
-		getBoxAlgorithmContext()->getVisualisationContext()->setToolbar(l_pToolbarWidget);
+		m_visualizationContext->setToolbar(*this, l_pToolbarWidget);
 	}
 
 	m_pSimple3DDatabase->set3DWidgetIdentifier(m_o3DWidgetIdentifier);
@@ -73,19 +74,20 @@ boolean CSimple3DDisplay::initialize(void)
 	return true;
 }
 
-boolean CSimple3DDisplay::uninitialize(void)
+bool CSimple3DDisplay::uninitialize(void)
 {
 	delete m_pSimple3DView;
 	m_pSimple3DView = NULL;
 	delete m_pSimple3DDatabase;
 	m_pSimple3DDatabase = NULL;
+	this->releasePluginObject(m_visualizationContext);
 
 	return true;
 }
 
-OpenViBE::boolean CSimple3DDisplay::processInput(OpenViBE::uint32 ui32InputIndex)
+bool CSimple3DDisplay::processInput(OpenViBE::uint32 ui32InputIndex)
 {
-	if(!getBoxAlgorithmContext()->getVisualisationContext()->is3DWidgetRealized(m_o3DWidgetIdentifier))
+	if(!m_visualizationContext->is3DWidgetRealized(m_o3DWidgetIdentifier))
 	{
 		return true;
 	}
@@ -93,9 +95,9 @@ OpenViBE::boolean CSimple3DDisplay::processInput(OpenViBE::uint32 ui32InputIndex
 	return true;
 }
 
-boolean CSimple3DDisplay::processClock(IMessageClock& rMessageClock)
+bool CSimple3DDisplay::processClock(IMessageClock& rMessageClock)
 {
-	if(!getBoxAlgorithmContext()->getVisualisationContext()->is3DWidgetRealized(m_o3DWidgetIdentifier))
+	if(!m_visualizationContext->is3DWidgetRealized(m_o3DWidgetIdentifier))
 	{
 		return true;
 	}
@@ -103,10 +105,10 @@ boolean CSimple3DDisplay::processClock(IMessageClock& rMessageClock)
 	return true;
 }
 
-boolean CSimple3DDisplay::process(void)
+bool CSimple3DDisplay::process(void)
 {
 	m_pSimple3DDatabase->process3D();
-	getBoxAlgorithmContext()->getVisualisationContext()->update3DWidget(m_o3DWidgetIdentifier);
+	m_visualizationContext->update3DWidget(m_o3DWidgetIdentifier);
 
 	return true;
 }

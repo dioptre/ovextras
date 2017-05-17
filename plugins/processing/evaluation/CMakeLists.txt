@@ -19,6 +19,7 @@ INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleXML")
 INCLUDE("FindThirdPartyGTK")
+INCLUDE("FindOpenViBEVisualizationToolkit")
 
 # ---------------------------------
 # Test applications
