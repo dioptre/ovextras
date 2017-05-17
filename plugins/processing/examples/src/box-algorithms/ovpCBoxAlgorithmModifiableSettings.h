@@ -6,6 +6,7 @@
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include <visualization-toolkit/ovviz_all.h>
 
 #include <vector>
 
@@ -133,9 +134,9 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmModifiableSettingsListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 			*/
-			virtual bool hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 
 

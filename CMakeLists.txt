@@ -247,7 +247,7 @@ ADD_SUBDIRECTORY("plugins/processing/signal-processing/")
 ADD_SUBDIRECTORY("plugins/processing/network-io/")
 #ADD_SUBDIRECTORY("plugins/processing/matlab/")
 ADD_SUBDIRECTORY("plugins/processing/file-io/")
-#ADD_SUBDIRECTORY("plugins/processing/examples/") # Require Visu toolkit
+ADD_SUBDIRECTORY("plugins/processing/examples/") # Require Visu toolkit
 ADD_SUBDIRECTORY("plugins/processing/evaluation/") # Require Visu toolkit
 ADD_SUBDIRECTORY("plugins/processing/dll-bridge/")
 ADD_SUBDIRECTORY("plugins/processing/data-generation/")

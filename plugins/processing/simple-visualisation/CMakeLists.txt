@@ -11,8 +11,8 @@ SET(PROJECT_VERSION_PATCH ${OV_GLOBAL_VERSION_PATCH})
 SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
-LIST(LENGTH source_files chaton)
-MESSAGE(${chaton})
+
+# @FIXME CERT
 LIST(REMOVE_ITEM source_files
     "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCSimple3DDisplay.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCSimple3DDisplay.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCTopographicMap3DDisplay.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCTopographicMap3DDisplay.cpp"
@@ -30,11 +30,6 @@ LIST(REMOVE_ITEM source_files
     "${CMAKE_CURRENT_SOURCE_DIR}src/box-algorithms/ovpCTimeFrequencyMapDisplay/ovpCTimeFrequencyMapChannelDisplay.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCTimeFrequencyMapDisplay/ovpCTimeFrequencyMapChannelDisplay.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}src/box-algorithms/ovpCTimeFrequencyMapDisplay/ovpCTimeFrequencyMapDisplayView.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCTimeFrequencyMapDisplay/ovpCTimeFrequencyMapDisplayView.cpp")
 
-
-
-message(${source_files} " " )
-LIST(LENGTH source_files chaton)
-MESSAGE(${chaton})
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 	VERSION ${PROJECT_VERSION}
