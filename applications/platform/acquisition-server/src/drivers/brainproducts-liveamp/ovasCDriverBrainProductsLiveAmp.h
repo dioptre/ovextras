@@ -52,7 +52,11 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isFlagSet(
 			const OpenViBEAcquisitionServer::EDriverFlag eFlag) const
 		{
-			return eFlag  != DriverFlag_IsUnstable;  // switch to "Stable" on 3.5.2017 - RP
+			if (eFlag == DriverFlag_IsUnstable) 
+			{
+				return false;  // switch to "Stable" on 3.5.2017 - RP
+			}
+			return false; // No flags are set
 		}
 
 	private:
