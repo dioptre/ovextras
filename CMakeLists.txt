@@ -239,6 +239,11 @@ ADD_SUBDIRECTORY("modules/tcptagging")
 ADD_SUBDIRECTORY("plugins/")					# @TODO enable, prune, make work
 
 #ADD_SUBDIRECTORY("applications/")
+#ADD_SUBDIRECTORY("applications/demos")
+ADD_SUBDIRECTORY("applications/developer-tools")
+ADD_SUBDIRECTORY("applications/examples")
+ADD_SUBDIRECTORY("applications/platform")
+
 ADD_SUBDIRECTORY("externals/")
 # ADD_SUBDIRECTORY("contrib/")					# @TODO enable, prune, make work
 ADD_SUBDIRECTORY("documentation/") # needs to be the last since it uses the list of collected projects

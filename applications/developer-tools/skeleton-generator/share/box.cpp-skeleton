@@ -7,7 +7,7 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::@@Namespace@@;
 
-boolean CBoxAlgorithm@@ClassName@@::initialize(void)
+bool CBoxAlgorithm@@ClassName@@::initialize(void)
 {
 @@AlgorithmInitialisation@@	
 @@AlgorithmInitialisationReferenceTargets@@	
@@ -16,7 +16,7 @@ boolean CBoxAlgorithm@@ClassName@@::initialize(void)
 	// - CString setting at index 0 in the setting list :
 	// CString l_sSettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	// - unsigned int64 setting at index 1 in the setting list :
-	// uint64 l_ui64SettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+	// uint64_t l_ui64SettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 	// - float64 setting at index 2 in the setting list :
 	// float64 l_f64SettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 	// ...
@@ -25,7 +25,7 @@ boolean CBoxAlgorithm@@ClassName@@::initialize(void)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithm@@ClassName@@::uninitialize(void)
+bool CBoxAlgorithm@@ClassName@@::uninitialize(void)
 {
 @@AlgorithmUninitialisation@@
 	return true;
@@ -33,7 +33,7 @@ boolean CBoxAlgorithm@@ClassName@@::uninitialize(void)
 /*******************************************************************************/
 
 @@ProcessClockCommentIn@@
-boolean CBoxAlgorithm@@ClassName@@::processClock(IMessageClock& rMessageClock)
+bool CBoxAlgorithm@@ClassName@@::processClock(IMessageClock& rMessageClock)
 {
 	// some pre-processing code if needed...
 
@@ -45,7 +45,7 @@ boolean CBoxAlgorithm@@ClassName@@::processClock(IMessageClock& rMessageClock)
 /*******************************************************************************/
 
 @@ProcessClockCommentIn@@
-uint64 CBoxAlgorithm@@ClassName@@::getClockFrequency(void)
+uint64_t CBoxAlgorithm@@ClassName@@::getClockFrequency(void)
 {
 	// Note that the time is coded on a 64 bits unsigned integer, fixed decimal point (32:32)
 	return @@ClockFrequency@@; // the box clock frequency
@@ -53,7 +53,7 @@ uint64 CBoxAlgorithm@@ClassName@@::getClockFrequency(void)
 /*******************************************************************************/
 
 @@ProcessInputCommentIn@@
-boolean CBoxAlgorithm@@ClassName@@::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithm@@ClassName@@::processInput(uint32_t ui32InputIndex)
 {
 	// some pre-processing code if needed...
 
@@ -65,7 +65,7 @@ boolean CBoxAlgorithm@@ClassName@@::processInput(uint32 ui32InputIndex)
 /*******************************************************************************/
 
 @@ProcessMessageCommentIn@@
-OpenViBE::boolean CBoxAlgorithm@@ClassName@@::processMessage(const IMessageWithData& msg, uint32 inputIndex)
+OpenViBE::bool CBoxAlgorithm@@ClassName@@::processMessage(const IMessageWithData& msg, uint32_t inputIndex)
 {
 	//If you know what the message should contain, you can directly access the values by using 
 	//getters of the message class with known keys. Otherwise, you can loop over the contents to discover the keys.
@@ -81,7 +81,7 @@ OpenViBE::boolean CBoxAlgorithm@@ClassName@@::processMessage(const IMessageWithD
 		l_sKey = msg.getNextCStringToken(*l_sKey);
 		//and access the content with
 		CString* l_sContent;
-		boolean ok = msg.getValueCString(l_sKey, &l_sContent);
+		bool ok = msg.getValueCString(l_sKey, &l_sContent);
 		//if ok is false, the retrieval was not successful
 		//the message will be deleted when the function goes out of scope, store the value if you wish to use it later
 	}
@@ -93,7 +93,7 @@ OpenViBE::boolean CBoxAlgorithm@@ClassName@@::processMessage(const IMessageWithD
 		l_sMatrixKey = msg.getNextIMatrixToken(*l_sMatrixKey);
 		//and access the content with
 		IMatrix* l_oContent;
-		boolean ok = msg.getValueIMatrix(l_sMatrixKey, &l_oContent);
+		bool ok = msg.getValueIMatrix(l_sMatrixKey, &l_oContent);
 		//if ok is false, the retrieval was not successful
 		//the message will be deleted when the function goes out of scope, store the value if you wish to use it later
 		//for matrices, the copy is done that way
@@ -107,7 +107,7 @@ OpenViBE::boolean CBoxAlgorithm@@ClassName@@::processMessage(const IMessageWithD
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithm@@ClassName@@::process(void)
+bool CBoxAlgorithm@@ClassName@@::process(void)
 {
 	
 	// the static box context describes the box inputs, outputs, settings structures
@@ -137,7 +137,7 @@ boolean CBoxAlgorithm@@ClassName@@::process(void)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	//iterate over all chunk on input 0
-	for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
+	for(uint32_t i=0; i<l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
 		// fill the decoder input with input chunk
 		ip_pMemoryBufferToDecode=l_rDynamicBoxContext.getInputChunk(0, i);
