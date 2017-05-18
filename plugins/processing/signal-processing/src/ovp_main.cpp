@@ -1,5 +1,4 @@
 
-#include "algorithms/basic/ovpCMatrixAverage.h"
 #include "algorithms/epoching/ovpCAlgorithmStimulationBasedEpoching.h"
 
 
@@ -75,8 +74,6 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_WindowType, "Parzen", OVP_TypeId_WindowType_Parzen.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_WindowType, "Welch", OVP_TypeId_WindowType_Welch.toUInteger());
 #endif
-
-	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CMatrixAverageDesc)
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CAlgorithmStimulationBasedEpochingDesc)
 
 	OVP_Declare_New(OpenViBEPlugins::SignalProcessing::CBoxAlgorithmDifferentialIntegralDesc)

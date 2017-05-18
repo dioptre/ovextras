@@ -1,6 +1,5 @@
 #include "ovp_defines.h"
 
-#include "algorithms/ovpCAlgorithmSphericalSplineInterpolation.h"
 #include "algorithms/ovpCAlgorithmLevelMeasure.h"
 
 //Presentation
@@ -40,7 +39,6 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SignalDisplayScaling, OpenViBEPlugins::SimpleVisualisation::CSignalDisplayView::m_vScalingModes[OVP_TypeId_SignalDisplayScaling_None]      , OVP_TypeId_SignalDisplayScaling_None);
 
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CAlgorithmLevelMeasureDesc)
-	OVP_Declare_New(OpenViBEPlugins::Test::CAlgorithmSphericalSplineInterpolationDesc)
 
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CGrazVisualizationDesc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmP300SpellerVisualisationDesc)
