@@ -130,16 +130,16 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInput ("Target stimulations",              OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addInput ("Card selection stimulations",      OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addOutput("Target / Non target flagging",     OV_TypeId_Stimulations);
+				rBoxAlgorithmPrototype.addOutput("Target / Non target flagging (deprecated)",     OV_TypeId_Stimulations);
 
 				rBoxAlgorithmPrototype.addSetting("Interface filename",              OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-magic-card.ui");
 				rBoxAlgorithmPrototype.addSetting("Background color",                OV_TypeId_Color,       "90,90,90");
 				rBoxAlgorithmPrototype.addSetting("Target background color",         OV_TypeId_Color,       "10,40,10");
 				rBoxAlgorithmPrototype.addSetting("Selected background color",       OV_TypeId_Color,       "70,20,20");
 				rBoxAlgorithmPrototype.addSetting("Card stimulation base",           OV_TypeId_Stimulation, "OVTK_StimulationId_Label_01");
-				rBoxAlgorithmPrototype.addSetting("Default background filename",     OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-magic-card/openvibe-logo.png-offscreen");
 				rBoxAlgorithmPrototype.addSetting("TCP Tagging Host address",        OV_TypeId_String,      "localhost");
 				rBoxAlgorithmPrototype.addSetting("TCP Tagging Host port",           OV_TypeId_Integer,     "15361");
+				rBoxAlgorithmPrototype.addSetting("Background filename",             OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-magic-card/openvibe-logo.png-offscreen");
 				rBoxAlgorithmPrototype.addSetting("Card filename",                   OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-magic-card/01.png");
 				rBoxAlgorithmPrototype.addSetting("Card filename",                   OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-magic-card/02.png");
 				rBoxAlgorithmPrototype.addSetting("Card filename",                   OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-magic-card/03.png");

@@ -50,9 +50,9 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::initialize(void)
 	m_oTargetBackgroundColor  =_AutoCast_(*this->getBoxAlgorithmContext(), 2);
 	m_oSelectedBackgroundColor=_AutoCast_(*this->getBoxAlgorithmContext(), 3);
 	m_ui64CardStimulationBase =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
-	CString l_sBackgroundImageFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
-	OpenViBE::CString l_sTCPTaggingHostAddress = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
-	OpenViBE::CString l_sTCPTaggingHostPort = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 7);
+	OpenViBE::CString l_sTCPTaggingHostAddress = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
+	OpenViBE::CString l_sTCPTaggingHostPort = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
+	CString l_sBackgroundImageFilename = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 7);
 
 	for(uint32 i=8; i<l_rStaticBoxContext.getSettingCount(); i++)
 	{
