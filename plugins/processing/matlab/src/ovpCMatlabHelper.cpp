@@ -25,21 +25,19 @@ using namespace OpenViBEPlugins::Matlab;
 
 using namespace std;
 
-#define boolean OpenViBE::boolean
-
 //---------------------------------------------------------------------------------------------------------------
 
-boolean CMatlabHelper::setStreamedMatrixInputHeader(uint32 ui32InputIndex, IMatrix * pMatrix)
+bool CMatlabHelper::setStreamedMatrixInputHeader(uint32_t ui32InputIndex, IMatrix * pMatrix)
 {
 	char l_sBuffer[32];
 	CString l_sLabelList = "";
 	CString l_sDimensionSizes = "";
-	for(uint32 dim = 0; dim<pMatrix->getDimensionCount(); dim++)
+	for(uint32_t dim = 0; dim<pMatrix->getDimensionCount(); dim++)
 	{
 		sprintf(l_sBuffer, "%i",pMatrix->getDimensionSize(dim));
 		l_sDimensionSizes = l_sDimensionSizes + CString(l_sBuffer) + CString(" ");
 		l_sLabelList = l_sLabelList + CString("{");
-		for(uint32 lab = 0; lab<pMatrix->getDimensionSize(dim); lab++)
+		for(uint32_t lab = 0; lab<pMatrix->getDimensionSize(dim); lab++)
 		{
 			l_sLabelList = l_sLabelList + CString("'")+ escapeMatlabString(CString(pMatrix->getDimensionLabel(dim,lab))) + CString("' ");
 		}
@@ -61,12 +59,12 @@ boolean CMatlabHelper::setStreamedMatrixInputHeader(uint32 ui32InputIndex, IMatr
 	
 }
 
-boolean CMatlabHelper::setFeatureVectorInputHeader(uint32 ui32InputIndex, IMatrix * pMatrix)
+bool CMatlabHelper::setFeatureVectorInputHeader(uint32_t ui32InputIndex, IMatrix * pMatrix)
 {
 	CString l_sLabelList = "";
 	CString l_sDimensionSizes = "";
 	
-	for(uint32 i = 0; i<pMatrix->getDimensionSize(0); i++)
+	for(uint32_t i = 0; i<pMatrix->getDimensionSize(0); i++)
 	{
 			l_sLabelList = l_sLabelList + CString("'")+ escapeMatlabString(CString(pMatrix->getDimensionLabel(0,i))) + CString("' ");
 	}
@@ -85,10 +83,10 @@ boolean CMatlabHelper::setFeatureVectorInputHeader(uint32 ui32InputIndex, IMatri
 	return engEvalString(m_pMatlabEngine, (const char *)l_sCommand) == 0;
 }
 
-boolean CMatlabHelper::setSignalInputHeader(uint32 ui32InputIndex, IMatrix * pMatrix, uint64 ui64SamplingRate)
+bool CMatlabHelper::setSignalInputHeader(uint32_t ui32InputIndex, IMatrix * pMatrix, uint64_t ui64SamplingRate)
 {
 	CString l_sLabelList = "";
-	for(uint32 l = 0; l<pMatrix->getDimensionSize(0); l++)
+	for(uint32_t l = 0; l<pMatrix->getDimensionSize(0); l++)
 	{
 		l_sLabelList = l_sLabelList + CString("'")+ escapeMatlabString(CString(pMatrix->getDimensionLabel(0,l))) + CString("' ");
 	}
@@ -110,10 +108,10 @@ boolean CMatlabHelper::setSignalInputHeader(uint32 ui32InputIndex, IMatrix * pMa
 
 }
 
-boolean CMatlabHelper::setChannelLocalisationInputHeader(uint32 ui32InputIndex, IMatrix * pMatrix, boolean bDynamic)
+bool CMatlabHelper::setChannelLocalisationInputHeader(uint32_t ui32InputIndex, IMatrix * pMatrix, bool bDynamic)
 {
 	CString l_sLabelList = "";
-	for(uint32 l = 0; l<pMatrix->getDimensionSize(0); l++)
+	for(uint32_t l = 0; l<pMatrix->getDimensionSize(0); l++)
 	{
 		l_sLabelList = l_sLabelList + CString("'")+ escapeMatlabString(CString(pMatrix->getDimensionLabel(0,l))) + CString("' ");
 	}
@@ -132,30 +130,31 @@ boolean CMatlabHelper::setChannelLocalisationInputHeader(uint32 ui32InputIndex, 
 	return engEvalString(m_pMatlabEngine, (const char *) l_sCommand) == 0;
 }
 
-boolean CMatlabHelper::setSpectrumInputHeader(uint32 ui32InputIndex, IMatrix * pMatrix, IMatrix * pFrequencyBands)
+bool CMatlabHelper::setSpectrumInputHeader(uint32_t ui32InputIndex, IMatrix* pMatrix, IMatrix* pFrequencyAbscissa, uint64_t samplingRate)
 {
 	CString l_sLabelList = "";
-	for(uint32 l = 0; l<pMatrix->getDimensionSize(0); l++)
+	for(uint32_t l = 0; l<pMatrix->getDimensionSize(0); l++)
 	{
 		l_sLabelList = l_sLabelList + CString("'")+ escapeMatlabString(CString(pMatrix->getDimensionLabel(0,l))) + CString("' ");
 	}
 
-	CString l_sBandList = "";
-	for(uint32 l = 0; l<pMatrix->getDimensionSize(1); l++)
+	CString l_sAbscissaList = "";
+	for(uint32_t l = 0; l<pMatrix->getDimensionSize(1); l++)
 	{
-		l_sBandList = l_sBandList + CString("'")+ escapeMatlabString(CString(pMatrix->getDimensionLabel(1,l))) + CString("' ");
+		l_sAbscissaList = l_sAbscissaList + CString("'")+ escapeMatlabString(CString(pMatrix->getDimensionLabel(1,l))) + CString("' ");
 	}
 
+	// @FIXME CERT this is now one dim array
 	mxArray * l_pMatlabMatrix=::mxCreateDoubleMatrix(
-			pFrequencyBands->getDimensionSize(1),
-			pFrequencyBands->getDimensionSize(0),
+			pFrequencyAbscissa->getDimensionSize(0),
+			1,
 			mxREAL);
 					
-	System::Memory::copy(::mxGetPr(l_pMatlabMatrix), pFrequencyBands->getBuffer(), pFrequencyBands->getBufferElementCount()*sizeof(float64));
+	System::Memory::copy(::mxGetPr(l_pMatlabMatrix), pFrequencyAbscissa->getBuffer(), pFrequencyAbscissa->getBufferElementCount()*sizeof(float64));
 	::engPutVariable(m_pMatlabEngine, "OV_MATRIX_TMP", l_pMatlabMatrix);
 
 
-	//box_out = OV_setSpectrumInputHeader(box_in, input_index, nb_channels, channel_names, nb_bands, band_names, bands)
+	//box_out = OV_setSpectrumInputHeader(box_in, input_index, nb_channels, channel_names, nb_bands, band_names, bands, sampling_rate)
 	char l_sBuffer[32];
 	sprintf(l_sBuffer, "%i",(ui32InputIndex+1));
 	CString l_sCommand = "";
@@ -165,14 +164,16 @@ boolean CMatlabHelper::setSpectrumInputHeader(uint32 ui32InputIndex, IMatrix * p
 	l_sCommand = l_sCommand + CString(l_sBuffer) + CString(","); // nb_channels
 	l_sCommand = l_sCommand + CString("{")+ l_sLabelList + CString("},"); // channel_names
 	sprintf(l_sBuffer, "%i",pMatrix->getDimensionSize(1));
-	l_sCommand = l_sCommand + CString(l_sBuffer) + CString(","); // nb_bands
-	l_sCommand = l_sCommand + CString("{")+ l_sBandList + CString("},"); //band names
-	l_sCommand = l_sCommand + CString("OV_MATRIX_TMP);"); //bands
+	l_sCommand = l_sCommand + CString(l_sBuffer) + CString(","); // nb_freq abscissa
+	l_sCommand = l_sCommand + CString("{")+ l_sAbscissaList + CString("},"); //freq abscissa names
+	l_sCommand = l_sCommand + CString("OV_MATRIX_TMP,"); //bands
+	l_sCommand = l_sCommand + CString(std::to_string(samplingRate).c_str()) +  CString(");"); //sampling rate
+
 	
 	return engEvalString(m_pMatlabEngine, (const char *) l_sCommand) == 0;
 }
 
-boolean CMatlabHelper::setStimulationsInputHeader(uint32 ui32InputIndex)
+bool CMatlabHelper::setStimulationsInputHeader(uint32_t ui32InputIndex)
 {
 	
 	//box_out = OV_setStimulationInputHeader(box_in, input_index)
@@ -185,15 +186,15 @@ boolean CMatlabHelper::setStimulationsInputHeader(uint32 ui32InputIndex)
 	return engEvalString(m_pMatlabEngine, (const char *) l_sCommand) == 0;
 }
 
-//boolean setExperimentInformationInputHeader(IMatrix * pMatrix);
+//bool setExperimentInformationInputHeader(IMatrix * pMatrix);
 
 //---------------------------------------------------------------------------------------------------------------
 
-boolean CMatlabHelper::addStreamedMatrixInputBuffer(uint32 ui32InputIndex, IMatrix * pMatrix, uint64 ui64OpenvibeStartTime,uint64 ui64OpenvibeEndTime)
+bool CMatlabHelper::addStreamedMatrixInputBuffer(uint32_t ui32InputIndex, IMatrix * pMatrix, uint64_t ui64OpenvibeStartTime,uint64_t ui64OpenvibeEndTime)
 {
 	mwSize* l_pDims = new mwSize[pMatrix->getDimensionCount()];
-	uint32 j = pMatrix->getDimensionCount()-1;
-	for(uint32 i =0; i < pMatrix->getDimensionCount();i++)
+	uint32_t j = pMatrix->getDimensionCount()-1;
+	for(uint32_t i =0; i < pMatrix->getDimensionCount();i++)
 	{
 		l_pDims[i] = pMatrix->getDimensionSize(j);
 		j--;
@@ -206,7 +207,7 @@ boolean CMatlabHelper::addStreamedMatrixInputBuffer(uint32 ui32InputIndex, IMatr
 		mxREAL);
 
 	//test : channel 1 samples to '10'
-	//for(uint32 i = 0; i < 32;i++) pMatrix->getBuffer()[i] = 10;
+	//for(uint32_t i = 0; i < 32;i++) pMatrix->getBuffer()[i] = 10;
 
 	System::Memory::copy(::mxGetPr(l_pMatlabMatrix), pMatrix->getBuffer(), pMatrix->getBufferElementCount()*sizeof(float64));
 	::engPutVariable(m_pMatlabEngine, "OV_MATRIX_TMP", l_pMatlabMatrix);
@@ -229,7 +230,7 @@ boolean CMatlabHelper::addStreamedMatrixInputBuffer(uint32 ui32InputIndex, IMatr
 	return ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand) == 0;
 }
 
-boolean CMatlabHelper::addStimulationsInputBuffer(uint32 ui32InputIndex, IStimulationSet * pStimulationSet, uint64 ui64OpenvibeStartTime,uint64 ui64OpenvibeEndTime)
+bool CMatlabHelper::addStimulationsInputBuffer(uint32_t ui32InputIndex, IStimulationSet * pStimulationSet, uint64_t ui64OpenvibeStartTime,uint64_t ui64OpenvibeEndTime)
 {
 	if(pStimulationSet->getStimulationCount() == 0)
 	{
@@ -240,10 +241,10 @@ boolean CMatlabHelper::addStimulationsInputBuffer(uint32 ui32InputIndex, IStimul
 		// we create a 3xN matrix for N stims (access is easier in that order)
 		mxArray * l_pMatlabMatrix=::mxCreateDoubleMatrix(
 			3,
-			(uint32)pStimulationSet->getStimulationCount(),
+			(uint32_t)pStimulationSet->getStimulationCount(),
 			mxREAL);
 
-		for(uint32 i = 0; i<pStimulationSet->getStimulationCount(); i++)
+		for(uint32_t i = 0; i<pStimulationSet->getStimulationCount(); i++)
 		{
 			::mxGetPr(l_pMatlabMatrix)[i*3]   =  (double)pStimulationSet->getStimulationIdentifier(i);
 			::mxGetPr(l_pMatlabMatrix)[i*3+1] =  (pStimulationSet->getStimulationDate(i)>>16)/65536.;
@@ -263,26 +264,26 @@ boolean CMatlabHelper::addStimulationsInputBuffer(uint32 ui32InputIndex, IStimul
 	sprintf(l_sBuffer, "%f",(ui64OpenvibeEndTime>>16)/65536.);
 	l_sCommand = l_sCommand + CString(l_sBuffer) + CString(",OV_MATRIX_TMP);");
 
-	boolean res = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand) == 0;
+	bool res = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand) == 0;
 
 	return res;
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-boolean CMatlabHelper::getStreamedMatrixOutputHeader(uint32 ui32OutputIndex, IMatrix * pMatrix)
+bool CMatlabHelper::getStreamedMatrixOutputHeader(uint32_t ui32OutputIndex, IMatrix * pMatrix)
 {
 	char l_sBuffer[32];
 	sprintf(l_sBuffer, "%i",(ui32OutputIndex+1));
 	CString l_sCommand = "[OV_ERRNO, OV_NB_DIMENSIONS, OV_DIMENSION_SIZES, OV_DIMENSION_LABELS] = OV_getStreamedMatrixOutputHeader(" + m_sBoxInstanceVariableName + "," + CString(l_sBuffer) + ");";
-	uint32 l_ui32Result = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand);
+	uint32_t l_ui32Result = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand);
 	if(l_ui32Result != 0)
 	{
 		return false;
 	}
 
 	mxArray * l_pErrno           = ::engGetVariable(m_pMatlabEngine,"OV_ERRNO");
-	uint32 l_ui32Errno = (uint32) *mxGetPr(l_pErrno);
+	uint32_t l_ui32Errno = (uint32_t) *mxGetPr(l_pErrno);
 	if(l_ui32Errno != 0)
 	{
 		return false;
@@ -294,11 +295,11 @@ boolean CMatlabHelper::getStreamedMatrixOutputHeader(uint32 ui32OutputIndex, IMa
 	mxArray * l_pDimensionLabels = ::engGetVariable(m_pMatlabEngine,"OV_DIMENSION_LABELS");
 
 	
-	uint32 l_ui32NbDimensions = (uint32) *mxGetPr(l_pNbDimensions);
+	uint32_t l_ui32NbDimensions = (uint32_t) *mxGetPr(l_pNbDimensions);
 	mwSize l_oNbCells = mxGetNumberOfElements(l_pDimensionLabels);
 
 	char ** l_pNameList = new char*[l_oNbCells];
-	for(uint32 cell = 0; cell < l_oNbCells; cell++)
+	for(uint32_t cell = 0; cell < l_oNbCells; cell++)
 	{
 		mxArray * l_pCell = mxGetCell(l_pDimensionLabels, cell);
 		if(!l_pCell)
@@ -310,7 +311,7 @@ boolean CMatlabHelper::getStreamedMatrixOutputHeader(uint32 ui32OutputIndex, IMa
 		const mwSize * l_pCellSizes  = mxGetDimensions(l_pCell);
 		char * l_sName = new char[l_pCellSizes[1]+1];
 		l_sName[l_pCellSizes[1]] = '\0';
-		for(uint32 cellsize = 0; cellsize < (uint32)l_pCellSizes[1]; cellsize++)
+		for(uint32_t cellsize = 0; cellsize < (uint32_t)l_pCellSizes[1]; cellsize++)
 		{
 			l_sName[cellsize] = ((char *)::mxGetData(l_pCell))[cellsize*2];
 		}
@@ -319,11 +320,11 @@ boolean CMatlabHelper::getStreamedMatrixOutputHeader(uint32 ui32OutputIndex, IMa
 	
 	
 	pMatrix->setDimensionCount(l_ui32NbDimensions);
-	uint32 l_ui32Index = 0;
-	for(uint32 i = 0; i<l_ui32NbDimensions;i++)
+	uint32_t l_ui32Index = 0;
+	for(uint32_t i = 0; i<l_ui32NbDimensions;i++)
 	{
-		pMatrix->setDimensionSize(i,(uint32) mxGetPr(l_pDimensionSizes)[i]);
-		for(uint32 x = 0; x<pMatrix->getDimensionSize(i) && l_ui32Index < l_oNbCells ; x++)
+		pMatrix->setDimensionSize(i,(uint32_t) mxGetPr(l_pDimensionSizes)[i]);
+		for(uint32_t x = 0; x<pMatrix->getDimensionSize(i) && l_ui32Index < l_oNbCells ; x++)
 		{
 			CString l_sNameTmp = l_pNameList[l_ui32Index];
 			pMatrix->setDimensionLabel(i,x,escapeMatlabString(l_sNameTmp));
@@ -340,18 +341,18 @@ boolean CMatlabHelper::getStreamedMatrixOutputHeader(uint32 ui32OutputIndex, IMa
 	return true;
 }
 
-boolean CMatlabHelper::getFeatureVectorOutputHeader(uint32 ui32OutputIndex, IMatrix * pMatrix)
+bool CMatlabHelper::getFeatureVectorOutputHeader(uint32_t ui32OutputIndex, IMatrix * pMatrix)
 {
 	char l_sBuffer[32];
 	sprintf(l_sBuffer, "%i",(ui32OutputIndex+1));
 	CString l_sCommand = "[OV_ERRNO, OV_NB_FEATURES, OV_LABELS] = OV_getFeatureVectorOutputHeader(" + m_sBoxInstanceVariableName + "," + CString(l_sBuffer) + ");";
-	uint32 l_ui32Result = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand);
+	uint32_t l_ui32Result = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand);
 	if(l_ui32Result != 0)
 	{
 		return false;
 	}
 	mxArray * l_pErrno           = ::engGetVariable(m_pMatlabEngine,"OV_ERRNO");
-	uint32 l_ui32Errno = (uint32) *mxGetPr(l_pErrno);
+	uint32_t l_ui32Errno = (uint32_t) *mxGetPr(l_pErrno);
 	if(l_ui32Errno != 0)
 	{
 		return false;
@@ -360,16 +361,16 @@ boolean CMatlabHelper::getFeatureVectorOutputHeader(uint32 ui32OutputIndex, IMat
 	mxArray * l_pNbFeatures = ::engGetVariable(m_pMatlabEngine,"OV_NB_FEATURES");
 	mxArray * l_pNames      = ::engGetVariable(m_pMatlabEngine,"OV_LABELS");
 
-	uint32 l_ui32NbFeatures = (uint32) *mxGetPr(l_pNbFeatures);
+	uint32_t l_ui32NbFeatures = (uint32_t) *mxGetPr(l_pNbFeatures);
 	mwSize l_oNbCells = mxGetNumberOfElements(l_pNames);
 	char ** l_pNameList = new char*[l_oNbCells];
-	for(uint32 cell = 0; cell < l_oNbCells; cell++)
+	for(uint32_t cell = 0; cell < l_oNbCells; cell++)
 	{
 		mxArray * l_pCell = mxGetCell(l_pNames, cell);
 		const mwSize * l_pCellSizes  = mxGetDimensions(l_pCell);
 		char * l_sName = new char[l_pCellSizes[1]+1];
 		l_sName[l_pCellSizes[1]] = '\0';
-		for(uint32 cellsize = 0; cellsize < (uint32)l_pCellSizes[1]; cellsize++)
+		for(uint32_t cellsize = 0; cellsize < (uint32_t)l_pCellSizes[1]; cellsize++)
 		{
 			l_sName[cellsize] = ((char *)::mxGetData(l_pCell))[cellsize*2];
 		}
@@ -379,7 +380,7 @@ boolean CMatlabHelper::getFeatureVectorOutputHeader(uint32 ui32OutputIndex, IMat
 				
 	pMatrix->setDimensionCount(1);
 	pMatrix->setDimensionSize(0,l_ui32NbFeatures);
-	for(uint32 x=0;x<l_ui32NbFeatures;x++)
+	for(uint32_t x=0;x<l_ui32NbFeatures;x++)
 	{
 		CString l_sNameTmp = l_pNameList[x];
 		pMatrix->setDimensionLabel(0,x,escapeMatlabString(l_sNameTmp));
@@ -393,19 +394,19 @@ boolean CMatlabHelper::getFeatureVectorOutputHeader(uint32 ui32OutputIndex, IMat
 	return true;
 }
 
-boolean CMatlabHelper::getSignalOutputHeader(uint32 ui32OutputIndex, IMatrix * pMatrix, uint64& rSamplingFrequency)
+bool CMatlabHelper::getSignalOutputHeader(uint32_t ui32OutputIndex, IMatrix * pMatrix, uint64_t& rSamplingFrequency)
 {
 	char l_sBuffer[32];
 	sprintf(l_sBuffer, "%i",(ui32OutputIndex+1));
 	CString l_sCommand = "[OV_ERRNO, OV_NB_CHANNELS, OV_NB_SAMPLES_PER_BUFFER, OV_CHANNEL_NAMES, OV_SAMPLING_RATE] = OV_getSignalOutputHeader(" + m_sBoxInstanceVariableName + "," + CString(l_sBuffer) + ");";
-	uint32 l_ui32Result = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand);
+	uint32_t l_ui32Result = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand);
 	if(l_ui32Result != 0)
 	{
 		return false;
 	}
 	
 	mxArray * l_pErrno           = ::engGetVariable(m_pMatlabEngine,"OV_ERRNO");
-	uint32 l_ui32Errno = (uint32) *mxGetPr(l_pErrno);
+	uint32_t l_ui32Errno = (uint32_t) *mxGetPr(l_pErrno);
 	if(l_ui32Errno != 0)
 	{
 		return false;
@@ -416,22 +417,22 @@ boolean CMatlabHelper::getSignalOutputHeader(uint32 ui32OutputIndex, IMatrix * p
 	mxArray * l_pNames      = ::engGetVariable(m_pMatlabEngine,"OV_CHANNEL_NAMES");
 	mxArray * l_pRate       = ::engGetVariable(m_pMatlabEngine,"OV_SAMPLING_RATE");
 
-	uint32 l_ui32NbChannels = (uint32) *mxGetPr(l_pNbChannels);
-	uint32 l_ui32NbSamples  = (uint32) *mxGetPr(l_pNbSamples);
-	uint32 l_ui32Rate     = (uint32) *mxGetPr(l_pRate);
+	uint32_t l_ui32NbChannels = (uint32_t) *mxGetPr(l_pNbChannels);
+	uint32_t l_ui32NbSamples  = (uint32_t) *mxGetPr(l_pNbSamples);
+	uint32_t l_ui32Rate     = (uint32_t) *mxGetPr(l_pRate);
 	mwSize l_oNbCells = mxGetNumberOfElements(l_pNames);
 	if(l_oNbCells != l_ui32NbChannels)
 	{
 		return false;
 	}
 	char ** l_pNameList = new char*[l_oNbCells];
-	for(uint32 cell = 0; cell < l_oNbCells; cell++)
+	for(uint32_t cell = 0; cell < l_oNbCells; cell++)
 	{
 		mxArray * l_pCell = mxGetCell(l_pNames, cell);
 		const mwSize * l_pCellSizes  = mxGetDimensions(l_pCell);
 		char * l_sName = new char[l_pCellSizes[1]+1];
 		l_sName[l_pCellSizes[1]] = '\0';
-		for(uint32 cellsize = 0; cellsize < (uint32)l_pCellSizes[1]; cellsize++)
+		for(uint32_t cellsize = 0; cellsize < (uint32_t)l_pCellSizes[1]; cellsize++)
 		{
 			l_sName[cellsize] = ((char *)::mxGetData(l_pCell))[cellsize*2];
 		}
@@ -443,7 +444,7 @@ boolean CMatlabHelper::getSignalOutputHeader(uint32 ui32OutputIndex, IMatrix * p
 	pMatrix->setDimensionSize(0,l_ui32NbChannels);
 	pMatrix->setDimensionSize(1,l_ui32NbSamples);
 	rSamplingFrequency = l_ui32Rate;
-	for(uint32 x=0;x<l_ui32NbChannels;x++)
+	for(uint32_t x=0;x<l_ui32NbChannels;x++)
 	{
 		CString l_sNameTmp = l_pNameList[x];
 		pMatrix->setDimensionLabel(0,x,escapeMatlabString(l_sNameTmp));
@@ -460,19 +461,19 @@ boolean CMatlabHelper::getSignalOutputHeader(uint32 ui32OutputIndex, IMatrix * p
 
 }
 
-boolean CMatlabHelper::getChannelLocalisationOutputHeader(uint32 ui32OutputIndex, IMatrix * pMatrix, boolean& bDynamic)
+bool CMatlabHelper::getChannelLocalisationOutputHeader(uint32_t ui32OutputIndex, IMatrix * pMatrix, bool& bDynamic)
 {
 	char l_sBuffer[32];
 	sprintf(l_sBuffer, "%i",(ui32OutputIndex+1));
 	CString l_sCommand = "[OV_ERRNO, OV_NB_CHANNELS, OV_CHANNEL_NAMES, OV_DYNAMIC] = OV_getChannelLocalisationOutputHeader(" + m_sBoxInstanceVariableName + "," + CString(l_sBuffer) + ");";
-	uint32 l_ui32Result = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand);
+	uint32_t l_ui32Result = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand);
 	if(l_ui32Result != 0)
 	{
 		return false;
 	}
 
 	mxArray * l_pErrno           = ::engGetVariable(m_pMatlabEngine,"OV_ERRNO");
-	uint32 l_ui32Errno = (uint32) *mxGetPr(l_pErrno);
+	uint32_t l_ui32Errno = (uint32_t) *mxGetPr(l_pErrno);
 	if(l_ui32Errno != 0)
 	{
 		return false;
@@ -482,17 +483,17 @@ boolean CMatlabHelper::getChannelLocalisationOutputHeader(uint32 ui32OutputIndex
 	mxArray * l_pNames      = ::engGetVariable(m_pMatlabEngine,"OV_CHANNEL_NAMES");
 	mxArray * l_pDynamic    = ::engGetVariable(m_pMatlabEngine,"OV_DYNAMIC");
 
-	uint32 l_ui32NbChannels = (uint32) *mxGetPr(l_pNbChannels);
-	// boolean l_ui32Dynamic   = ((uint32) *mxGetPr(l_pDynamic) == 1);
+	uint32_t l_ui32NbChannels = (uint32_t) *mxGetPr(l_pNbChannels);
+	// bool l_ui32Dynamic   = ((uint32_t) *mxGetPr(l_pDynamic) == 1);
 	mwSize l_oNbCells = mxGetNumberOfElements(l_pNames);
 	char ** l_pNameList = new char*[l_oNbCells];
-	for(uint32 cell = 0; cell < l_oNbCells; cell++)
+	for(uint32_t cell = 0; cell < l_oNbCells; cell++)
 	{
 		mxArray * l_pCell = mxGetCell(l_pNames, cell);
 		const mwSize * l_pCellSizes  = mxGetDimensions(l_pCell);
 		char * l_sName = new char[l_pCellSizes[1]+1];
 		l_sName[l_pCellSizes[1]] = '\0';
-		for(uint32 cellsize = 0; cellsize < (uint32)l_pCellSizes[1]; cellsize++)
+		for(uint32_t cellsize = 0; cellsize < (uint32_t)l_pCellSizes[1]; cellsize++)
 		{
 			l_sName[cellsize] = ((char *)::mxGetData(l_pCell))[cellsize*2];
 		}
@@ -504,7 +505,7 @@ boolean CMatlabHelper::getChannelLocalisationOutputHeader(uint32 ui32OutputIndex
 	pMatrix->setDimensionSize(0,l_ui32NbChannels);
 	pMatrix->setDimensionSize(1,3);
 
-	for(uint32 x=0;x<l_ui32NbChannels;x++)
+	for(uint32_t x=0;x<l_ui32NbChannels;x++)
 	{
 		CString l_sNameTmp = l_pNameList[x];
 		pMatrix->setDimensionLabel(0,x,escapeMatlabString(l_sNameTmp));
@@ -520,19 +521,19 @@ boolean CMatlabHelper::getChannelLocalisationOutputHeader(uint32 ui32OutputIndex
 	return true;
 }
 
-boolean CMatlabHelper::getSpectrumOutputHeader(uint32 ui32OutputIndex, IMatrix * pMatrix, IMatrix * pFrequencyBands)
+bool CMatlabHelper::getSpectrumOutputHeader(uint32_t ui32OutputIndex, IMatrix * pMatrix, IMatrix * pFrequencyAbscissa, uint64_t& samplingRate)
 {
 	char l_sBuffer[32];
 	sprintf(l_sBuffer, "%i",(ui32OutputIndex+1));
-	CString l_sCommand = "[OV_ERRNO, OV_NB_CHANNELS, OV_CHANNEL_NAMES, OV_NB_BANDS, OV_BANDS_NAME, OV_BANDS_LINEAR] = OV_getSpectrumOutputHeader(" + m_sBoxInstanceVariableName + "," + CString(l_sBuffer) + ");";
-	uint32 l_ui32Result = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand);
+	CString l_sCommand = "[OV_ERRNO, OV_NB_CHANNELS, OV_CHANNEL_NAMES, OV_NB_BANDS, OV_BANDS_NAME, OV_BANDS_LINEAR, OV_SAMPLING_RATE] = OV_getSpectrumOutputHeader(" + m_sBoxInstanceVariableName + "," + CString(l_sBuffer) + ");";
+	uint32_t l_ui32Result = ::engEvalString(m_pMatlabEngine, (const char*)l_sCommand);
 	if(l_ui32Result != 0)
 	{
 		return false;
 	}
 
 	mxArray * l_pErrno           = ::engGetVariable(m_pMatlabEngine,"OV_ERRNO");
-	uint32 l_ui32Errno = (uint32) *mxGetPr(l_pErrno);
+	uint32_t l_ui32Errno = (uint32_t) *mxGetPr(l_pErrno);
 	if(l_ui32Errno != 0)
 	{
 		return false;
@@ -540,74 +541,75 @@ boolean CMatlabHelper::getSpectrumOutputHeader(uint32 ui32OutputIndex, IMatrix *
 
 	mxArray * l_pNbChannels = ::engGetVariable(m_pMatlabEngine,"OV_NB_CHANNELS");
 	mxArray * l_pNames      = ::engGetVariable(m_pMatlabEngine,"OV_CHANNEL_NAMES");
-	mxArray * l_pNbBands    = ::engGetVariable(m_pMatlabEngine,"OV_NB_BANDS");
-	mxArray * l_pBandNames  = ::engGetVariable(m_pMatlabEngine,"OV_BANDS_NAME");
-	mxArray * l_pBands      = ::engGetVariable(m_pMatlabEngine,"OV_BANDS_LINEAR");
+	mxArray * l_pNbAbscissa    = ::engGetVariable(m_pMatlabEngine,"OV_NB_ABSCISSAS");
+	mxArray * l_pFreqAbscissaNames = ::engGetVariable(m_pMatlabEngine,"OV_ABSCISSAS_NAME");
+	mxArray * l_pFreqAbscissa = ::engGetVariable(m_pMatlabEngine,"OV_ABSCISSAS_LINEAR");
+	mxArray * l_pSamplingRate = ::engGetVariable(m_pMatlabEngine,"OV_SAMPLING_RATE");
 
-	uint32 l_ui32NbChannels = (uint32) *mxGetPr(l_pNbChannels);
-	uint32 l_ui32NbBands    = (uint32) *mxGetPr(l_pNbBands);
-	
+	uint32_t l_ui32NbChannels = (uint32_t) *mxGetPr(l_pNbChannels);
+	uint32_t l_ui32NbAbscissa   = (uint32_t) *mxGetPr(l_pNbAbscissa);
+	samplingRate  = (uint64_t) *mxGetPr(l_pSamplingRate);
+
 	// getting the channel names
 	mwSize l_oNbCells = mxGetNumberOfElements(l_pNames);
 	char ** l_pNameList = new char*[l_oNbCells];
-	for(uint32 cell = 0; cell < l_oNbCells; cell++)
+	for(uint32_t cell = 0; cell < l_oNbCells; cell++)
 	{
 		mxArray * l_pCell = mxGetCell(l_pNames, cell);
 		const mwSize * l_pCellSizes  = mxGetDimensions(l_pCell);
 		char * l_sName = new char[l_pCellSizes[1]+1];
 		l_sName[l_pCellSizes[1]] = '\0';
-		for(uint32 cellsize = 0; cellsize < (uint32)l_pCellSizes[1]; cellsize++)
+		for(uint32_t cellsize = 0; cellsize < (uint32_t)l_pCellSizes[1]; cellsize++)
 		{
 			l_sName[cellsize] = ((char *)::mxGetData(l_pCell))[cellsize*2];
 		}
 		l_pNameList[cell] = l_sName;
 	}
 
-	// now getting the band names
-	l_oNbCells = mxGetNumberOfElements(l_pBandNames);
+	// now getting the frequency abscissa names
+	l_oNbCells = mxGetNumberOfElements(l_pFreqAbscissaNames);
 	char ** l_pBandNameList = new char*[l_oNbCells];
-	for(uint32 cell = 0; cell < l_oNbCells; cell++)
+	for(uint32_t cell = 0; cell < l_oNbCells; cell++)
 	{
-		mxArray * l_pCell = mxGetCell(l_pBandNames, cell);
+		mxArray * l_pCell = mxGetCell(l_pFreqAbscissaNames, cell);
 		const mwSize * l_pCellSizes  = mxGetDimensions(l_pCell);
 		char * l_sBandName = new char[l_pCellSizes[1]+1];
 		l_sBandName[l_pCellSizes[1]] = '\0';
-		for(uint32 cellsize = 0; cellsize < (uint32)l_pCellSizes[1]; cellsize++)
+		for(uint32_t cellsize = 0; cellsize < (uint32_t)l_pCellSizes[1]; cellsize++)
 		{
 			l_sBandName[cellsize] = ((char *)::mxGetData(l_pCell))[cellsize*2];
 		}
 		l_pBandNameList[cell] = l_sBandName;
 	}
 
-	//The Frequency band list has dimensions nb_bands x 2 values
-	pFrequencyBands->setDimensionCount(2);
-	pFrequencyBands->setDimensionSize(0,2);
-	pFrequencyBands->setDimensionSize(1,l_ui32NbBands);
-	for(uint32 x=0;x<l_ui32NbChannels;x++)
+	//The Frequency abscissa list has dimensions nb_bands
+	pFrequencyAbscissa->setDimensionCount(1);
+	pFrequencyAbscissa->setDimensionSize(0,l_ui32NbAbscissa);
+	for(uint32_t x=0;x<l_ui32NbChannels;x++)
 	{
 		CString l_sNameTmp = l_pNameList[x];
 		pFrequencyBands->setDimensionLabel(0,x,escapeMatlabString(l_sNameTmp));
 	}
-	pFrequencyBands->setDimensionLabel(1,0,"Min");
-	pFrequencyBands->setDimensionLabel(1,1,"Max");
+
 	// Adding the bands:
-	System::Memory::copy(pFrequencyBands->getBuffer(), ::mxGetPr(l_pBands), (uint64)l_ui32NbBands*sizeof(float64)*2);
+	System::Memory::copy(pFrequencyAbscissa->getBuffer(), ::mxGetPr(l_pFreqAbscissa), (uint64_t)l_ui32NbAbscissa*sizeof(float64));
 
 	pMatrix->setDimensionCount(2);
 	pMatrix->setDimensionSize(0,l_ui32NbChannels);
 	pMatrix->setDimensionSize(1,l_ui32NbBands);
-	for(uint32 x=0;x<l_ui32NbChannels;x++)
+	for(uint32_t x=0;x<l_ui32NbChannels;x++)
 	{
 		CString l_sNameTmp = l_pNameList[x];
 		pMatrix->setDimensionLabel(0,x,escapeMatlabString(l_sNameTmp));
 		delete[] l_pNameList[x];
 	}
-	for(uint32 x=0;x<l_ui32NbBands;x++)
+	for(uint32_t x=0;x<l_ui32NbBands;x++)
 	{
 		CString l_sNameTmp = l_pBandNameList[x];
 		pMatrix->setDimensionLabel(1,x,escapeMatlabString(l_sNameTmp));
 		delete[] l_pBandNameList[x];
 	}
+	// @FIXME CERT is it me or it never copy data to pMatrix ?
 
 	delete[] l_pNameList;
 	delete[] l_pBandNameList;
@@ -621,7 +623,7 @@ boolean CMatlabHelper::getSpectrumOutputHeader(uint32 ui32OutputIndex, IMatrix *
 	return true;
 }
 
-boolean CMatlabHelper::getStimulationsOutputHeader(uint32 ui32OutputIndex, IStimulationSet * pStimulationSet)
+bool CMatlabHelper::getStimulationsOutputHeader(uint32_t ui32OutputIndex, IStimulationSet * pStimulationSet)
 {
 	// Nothing to do, the stimulation header is empty.
 	return true;
@@ -629,11 +631,11 @@ boolean CMatlabHelper::getStimulationsOutputHeader(uint32 ui32OutputIndex, IStim
 
 //---------------------------------------------------------------------------------------------------------------
 
-boolean CMatlabHelper::popStreamedMatrixOutputBuffer(uint32 ui32OutputIndex, IMatrix * pMatrix, OpenViBE::uint64& rStartTime, OpenViBE::uint64& rEndTime)
+bool CMatlabHelper::popStreamedMatrixOutputBuffer(uint32_t ui32OutputIndex, IMatrix * pMatrix, uint64_t& rStartTime, uint64_t& rEndTime)
 {
 	char l_sBuffer[256];
 	sprintf(l_sBuffer,"[%s, OV_START_TIME, OV_END_TIME, OV_LINEAR_DATA_SIZE, OV_LINEAR_DATA] = OV_popOutputBufferReshape(%s, %i);",(const char*)m_sBoxInstanceVariableName,(const char*)m_sBoxInstanceVariableName,ui32OutputIndex+1);
-	uint32 l_ui32Result = ::engEvalString(m_pMatlabEngine, l_sBuffer);
+	uint32_t l_ui32Result = ::engEvalString(m_pMatlabEngine, l_sBuffer);
 	if(l_ui32Result != 0)
 	{
 		return false;
@@ -644,13 +646,13 @@ boolean CMatlabHelper::popStreamedMatrixOutputBuffer(uint32 ui32OutputIndex, IMa
 	mxArray * l_pSize      = ::engGetVariable(m_pMatlabEngine,"OV_LINEAR_DATA_SIZE");
 	mxArray * l_pData      = ::engGetVariable(m_pMatlabEngine,"OV_LINEAR_DATA");
 
-	uint64 l_ui64StartTime  = (uint64) ( ((float64*)::mxGetPr(l_pStartTime))[0] * 65536.);
+	uint64_t l_ui64StartTime  = (uint64_t) ( ((float64*)::mxGetPr(l_pStartTime))[0] * 65536.);
 	l_ui64StartTime = l_ui64StartTime << 16;
-	uint64 l_ui64EndTime = (uint64) ( ((float64*)::mxGetPr(l_pEndTime))[0] * 65536.);
+	uint64_t l_ui64EndTime = (uint64_t) ( ((float64*)::mxGetPr(l_pEndTime))[0] * 65536.);
 	l_ui64EndTime = l_ui64EndTime << 16;
 	
 	// ti be copied direclty in openvibe buffer, the linear matrix must be ordered line by line
-	System::Memory::copy(pMatrix->getBuffer(), ::mxGetPr(l_pData), (uint64)*mxGetPr(l_pSize)*sizeof(float64));
+	System::Memory::copy(pMatrix->getBuffer(), ::mxGetPr(l_pData), (uint64_t)*mxGetPr(l_pSize)*sizeof(float64));
 	rStartTime = l_ui64StartTime;
 	rEndTime = l_ui64EndTime;
 
@@ -662,11 +664,11 @@ boolean CMatlabHelper::popStreamedMatrixOutputBuffer(uint32 ui32OutputIndex, IMa
 	return true;
 }
 
-boolean CMatlabHelper::popStimulationsOutputBuffer(uint32 ui32OutputIndex, IStimulationSet * pStimulationSet, OpenViBE::uint64& rStartTime, OpenViBE::uint64& rEndTime)
+bool CMatlabHelper::popStimulationsOutputBuffer(uint32_t ui32OutputIndex, IStimulationSet * pStimulationSet, uint64_t& rStartTime, uint64_t& rEndTime)
 {
 	char l_sBuffer[256];
 	sprintf(l_sBuffer,"[%s, OV_START_TIME, OV_END_TIME, OV_LINEAR_MATRIX_SIZE, OV_LINEAR_DATA] = OV_popOutputBuffer(%s, %i);",(const char*)m_sBoxInstanceVariableName,(const char*)m_sBoxInstanceVariableName,ui32OutputIndex+1);
-	uint32 l_ui32Result = ::engEvalString(m_pMatlabEngine, l_sBuffer);
+	uint32_t l_ui32Result = ::engEvalString(m_pMatlabEngine, l_sBuffer);
 	if(l_ui32Result != 0)
 	{
 		return false;
@@ -677,20 +679,20 @@ boolean CMatlabHelper::popStimulationsOutputBuffer(uint32 ui32OutputIndex, IStim
 	mxArray * l_pSize      = ::engGetVariable(m_pMatlabEngine,"OV_LINEAR_MATRIX_SIZE");
 	mxArray * l_pData      = ::engGetVariable(m_pMatlabEngine,"OV_LINEAR_DATA");
 
-	uint64 l_ui64StartTime  = (uint64) ( ((float64*)::mxGetPr(l_pStartTime))[0] * 65536.);
+	uint64_t l_ui64StartTime  = (uint64_t) ( ((float64*)::mxGetPr(l_pStartTime))[0] * 65536.);
 	l_ui64StartTime = l_ui64StartTime << 16;
-	uint64 l_ui64EndTime = (uint64) ( ((float64*)::mxGetPr(l_pEndTime))[0] * 65536.);
+	uint64_t l_ui64EndTime = (uint64_t) ( ((float64*)::mxGetPr(l_pEndTime))[0] * 65536.);
 	l_ui64EndTime = l_ui64EndTime << 16;
 	
 	rStartTime = l_ui64StartTime;
 	rEndTime = l_ui64EndTime;
 
-	for(uint32 i = 0; i < (uint32)(*::mxGetPr(l_pSize)); i+=3)
+	for(uint32_t i = 0; i < (uint32_t)(*::mxGetPr(l_pSize)); i+=3)
 	{
-		uint64 l_ui64Identifier = (uint64) ( ((float64*)::mxGetPr(l_pData))[i]);
-		uint64 l_ui64Date       = (uint64) ( ((float64*)::mxGetPr(l_pData))[i+1] * 65536.);
+		uint64_t l_ui64Identifier = (uint64_t) ( ((float64*)::mxGetPr(l_pData))[i]);
+		uint64_t l_ui64Date       = (uint64_t) ( ((float64*)::mxGetPr(l_pData))[i+1] * 65536.);
 		l_ui64Date = l_ui64Date << 16;
-		uint64 l_ui64Duration   = (uint64) ( ((float64*)::mxGetPr(l_pData))[i+2] * 65536.);
+		uint64_t l_ui64Duration   = (uint64_t) ( ((float64*)::mxGetPr(l_pData))[i+2] * 65536.);
 		l_ui64Duration = l_ui64Duration << 16;
 		pStimulationSet->appendStimulation(l_ui64Identifier,l_ui64Date, l_ui64Duration);
 	}

@@ -42,8 +42,6 @@ using namespace OpenViBEPlugins::Matlab;
 
 using namespace std;
 
-#define boolean OpenViBE::boolean
-
 // Sanitizes a path so that it only has / or \ characters and has a / or \ in the end.
 // @fixme should move to plugins-FS possibly
 void CBoxAlgorithmMatlabScripting::sanitizePath(OpenViBE::CString &sPathToModify) const {
@@ -75,7 +73,7 @@ void CBoxAlgorithmMatlabScripting::sanitizePath(OpenViBE::CString &sPathToModify
 // If the result is false (the matlab call failed), the message msg is printed in the Error Log Level, and the macro returns false.
 // The Matlab output buffer is then printed. If an error message is detected in the buffer, the same error message is printed and
 // the macro returns false. 
-boolean CBoxAlgorithmMatlabScripting::checkFailureRoutine(boolean bResult, const OpenViBE::CString &msg) 
+bool CBoxAlgorithmMatlabScripting::checkFailureRoutine(bool bResult, const OpenViBE::CString &msg) 
 {
 	if(!bResult)
 	{ 
@@ -92,7 +90,7 @@ boolean CBoxAlgorithmMatlabScripting::checkFailureRoutine(boolean bResult, const
 	return true;
 }
 
-boolean CBoxAlgorithmMatlabScripting::OpenMatlabEngineSafely(void)
+bool CBoxAlgorithmMatlabScripting::OpenMatlabEngineSafely(void)
 {
 	this->getLogManager() << LogLevel_Trace << "Trying to open the Matlab engine\n";
 #if defined TARGET_OS_Linux
@@ -127,7 +125,7 @@ boolean CBoxAlgorithmMatlabScripting::OpenMatlabEngineSafely(void)
 	return true;
 }
 
-boolean CBoxAlgorithmMatlabScripting::initialize(void)
+bool CBoxAlgorithmMatlabScripting::initialize(void)
 {
 	m_pMatlabEngineHandle = NULL;
 	m_sMatlabBuffer = NULL;
@@ -136,7 +134,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 	getStaticBoxContext().getSettingValue(0, l_sSettingValue);
 	m_ui64ClockFrequency=::atoi(l_sSettingValue.toASCIIString());
 	
-	for(uint32 i=0; i<getStaticBoxContext().getInputCount(); i++)
+	for(uint32_t i=0; i<getStaticBoxContext().getInputCount(); i++)
 	{
 		CIdentifier l_oInputType;
 		getStaticBoxContext().getInputType(i, l_oInputType);
@@ -180,7 +178,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 		}
 	}
 
-	for(uint32 i=0; i<getStaticBoxContext().getOutputCount(); i++)
+	for(uint32_t i=0; i<getStaticBoxContext().getOutputCount(); i++)
 	{
 		CIdentifier l_oOutputType;
 		getStaticBoxContext().getOutputType(i, l_oOutputType);
@@ -283,7 +281,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 		this->getLogManager() << LogLevel_Error << "Failed to get the execution directory.\n";
 		return false;
 	}
-	for(uint32 i = 0; i<FILENAME_MAX;i++)
+	for(uint32_t i = 0; i<FILENAME_MAX;i++)
 		if(l_sCurrentDir[i] == '\\') l_sCurrentDir[i] = '/';
 	this->getConfigurationManager().createConfigurationToken(CString("Path_Bin_Abs"),CString(l_sCurrentDir));
 	
@@ -355,7 +353,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 	CString l_sTemp;
 	CIdentifier l_oType;
 
-	for(uint32 i = 6; i < getStaticBoxContext().getSettingCount(); i++)
+	for(uint32_t i = 6; i < getStaticBoxContext().getSettingCount(); i++)
 	{
 		// get the setting name
 		getStaticBoxContext().getSettingName(i,l_sTemp);
@@ -417,7 +415,7 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmMatlabScripting::CloseMatlabEngineSafely(void)
+bool CBoxAlgorithmMatlabScripting::CloseMatlabEngineSafely(void)
 {
 	if(m_pMatlabEngine == NULL)
 	{
@@ -449,7 +447,7 @@ boolean CBoxAlgorithmMatlabScripting::CloseMatlabEngineSafely(void)
 	return true;
 }
 
-boolean CBoxAlgorithmMatlabScripting::uninitialize(void)
+bool CBoxAlgorithmMatlabScripting::uninitialize(void)
 {
 	if(m_pMatlabEngine != NULL)
 	{
@@ -467,12 +465,12 @@ boolean CBoxAlgorithmMatlabScripting::uninitialize(void)
 		m_sMatlabBuffer = NULL;
 	}
 
-	for(uint32 i = 0; i< m_mDecoders.size(); i++)
+	for(uint32_t i = 0; i< m_mDecoders.size(); i++)
 	{
 		m_mDecoders[i]->uninitialize();
 		delete m_mDecoders[i];
 	}
-	for(uint32 i = 0; i< m_mEncoders.size(); i++)
+	for(uint32_t i = 0; i< m_mEncoders.size(); i++)
 	{
 		m_mEncoders[i]->uninitialize();
 		delete m_mEncoders[i];
@@ -486,7 +484,7 @@ uint64 CBoxAlgorithmMatlabScripting::getClockFrequency(void)
 	return m_ui64ClockFrequency<<32;
 }
 
-boolean CBoxAlgorithmMatlabScripting::processClock(IMessageClock& rMessageClock)
+bool CBoxAlgorithmMatlabScripting::processClock(IMessageClock& rMessageClock)
 {
 	if(!m_pMatlabEngine)
 	{
@@ -507,20 +505,20 @@ boolean CBoxAlgorithmMatlabScripting::processClock(IMessageClock& rMessageClock)
 	return true;
 }
 
-boolean CBoxAlgorithmMatlabScripting::process(void)
+bool CBoxAlgorithmMatlabScripting::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 	
-	for(uint32 i = 0; i < getStaticBoxContext().getInputCount(); i++)
+	for(uint32_t i = 0; i < getStaticBoxContext().getInputCount(); i++)
 	{
-		for(uint32 j = 0; j < l_rDynamicBoxContext.getInputChunkCount(i); j++)
+		for(uint32_t j = 0; j < l_rDynamicBoxContext.getInputChunkCount(i); j++)
 		{
 			m_mDecoders[i]->decode(j);
 			
 			CIdentifier l_oType;
 			getStaticBoxContext().getInputType(i,l_oType);
-			boolean l_bUnknownStream = true;
-			boolean l_bReceivedSomething = false;
+			bool l_bUnknownStream = true;
+			bool l_bReceivedSomething = false;
 
 			if(m_mDecoders[i]->isHeaderReceived())
 			{
@@ -558,8 +556,10 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 				if(l_oType == OV_TypeId_Spectrum)
 				{
 					IMatrix * l_pMatrix    = ((TSpectrumDecoder<CBoxAlgorithmMatlabScripting> *) m_mDecoders[i])->getOutputMatrix();
-					IMatrix * l_pFreqBands = ((TSpectrumDecoder<CBoxAlgorithmMatlabScripting> *) m_mDecoders[i])->getOutputMinMaxFrequencyBands();
-					if(!checkFailureRoutine(m_oMatlabHelper.setSpectrumInputHeader(i,l_pMatrix,l_pFreqBands),"Error calling [OV_setSpectrumInputHeader]\n")) return false;
+					IMatrix * l_pFreqAbscissa = ((TSpectrumDecoder<CBoxAlgorithmMatlabScripting> *) m_mDecoders[i])->getOutputFrequencyAbscissa();
+					uint64_t l_pSamplingRate = ((TSpectrumDecoder<CBoxAlgorithmMatlabScripting> *) m_mDecoders[i])->getOutputSamplingRate();
+
+					if(!checkFailureRoutine(m_oMatlabHelper.setSpectrumInputHeader(i, l_pMatrix, l_pFreqAbscissa, l_pSamplingRate),"Error calling [OV_setSpectrumInputHeader]\n")) return false;
 					
 					m_NbInputHeaderSent++;
 					l_bUnknownStream = false;
@@ -568,7 +568,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 				if(l_oType == OV_TypeId_ChannelLocalisation)
 				{
 					IMatrix * l_pMatrix = ((TChannelLocalisationDecoder<CBoxAlgorithmMatlabScripting> *) m_mDecoders[i])->getOutputMatrix();
-					boolean l_bDynamic  = ((TChannelLocalisationDecoder<CBoxAlgorithmMatlabScripting> *) m_mDecoders[i])->getOutputDynamic();
+					bool l_bDynamic  = ((TChannelLocalisationDecoder<CBoxAlgorithmMatlabScripting> *) m_mDecoders[i])->getOutputDynamic();
 					if(!checkFailureRoutine(m_oMatlabHelper.setChannelLocalisationInputHeader(i,l_pMatrix,l_bDynamic),"Error calling [OV_setChannelLocalizationInputHeader]\n")) return false;
 					
 					m_NbInputHeaderSent++;
@@ -648,7 +648,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sBuffer) == 0,"Error calling the Process function.\n")) return false;
 
 	// Go through every output in the matlab box and copy the data to the C++ side
-	for(uint32 i = 0; i < getStaticBoxContext().getOutputCount(); i++)
+	for(uint32_t i = 0; i < getStaticBoxContext().getOutputCount(); i++)
 	{
 		// now we check for pending output chunk to be sent (output type independent call)
 		sprintf(l_sBuffer,"OV_PENDING_COUNT_TMP = OV_getNbPendingOutputChunk(%s, %i);",(const char*) m_sBoxInstanceVariableName, i+1);
@@ -660,14 +660,14 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 		CIdentifier l_oType;
 		getStaticBoxContext().getOutputType(i,l_oType);
 
-		for(uint32 c = 0; c < (uint32)l_dPending; c++)
+		for(uint32_t c = 0; c < (uint32_t)l_dPending; c++)
 		{
 			// If no header were ever sent, we need to extract header information in the matlab box
 			// This header must have been set prior to sending the very first buffer. 
 			// @FIXME the practice used below of assigning to getters is nasty, it should be refactored to e.g. using getter/setter pairs
 			if(!m_mOutputHeaderState[i])
 			{
-				boolean l_bUnknownType = true;
+				bool l_bUnknownType = true;
 				if(l_oType == OV_TypeId_StreamedMatrix)
 				{
 					IMatrix * l_pMatrixToSend = ((TStreamedMatrixEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix();
@@ -698,8 +698,10 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 				if(l_oType == OV_TypeId_Spectrum)
 				{
 					IMatrix * l_pMatrixToSend = ((TSpectrumEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix();
-					IMatrix * l_pBands        = ((TSpectrumEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMinMaxFrequencyBands();
-					if(!checkFailureRoutine(m_oMatlabHelper.getSpectrumOutputHeader(i,l_pMatrixToSend,l_pBands),"Error calling [OV_getSpectrumOutputHeader]. Did you correctly set the output header in the matlab structure ?\n")) return false;
+					IMatrix * l_pFreqAbscissa = ((TSpectrumEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputFrequencyAbscissa();
+					uint64_t l_SamplingRate = ((TSpectrumEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputSamplingRate();
+
+					if(!checkFailureRoutine(m_oMatlabHelper.getSpectrumOutputHeader(i, l_pMatrixToSend, l_pFreqAbscissa, l_SamplingRate),"Error calling [OV_getSpectrumOutputHeader]. Did you correctly set the output header in the matlab structure ?\n")) return false;
 
 					l_bUnknownType = false;
 				}
@@ -707,7 +709,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 				if(l_oType == OV_TypeId_ChannelLocalisation)
 				{
 					IMatrix * l_pMatrixToSend = ((TChannelLocalisationEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputMatrix();
-					boolean   l_bDynamic      = ((TChannelLocalisationEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputDynamic();
+					bool   l_bDynamic      = ((TChannelLocalisationEncoder<CBoxAlgorithmMatlabScripting> *) m_mEncoders[i])->getInputDynamic();
 					if(!checkFailureRoutine(m_oMatlabHelper.getChannelLocalisationOutputHeader(i,l_pMatrixToSend,l_bDynamic),"Error calling [OV_getChannelLocalizationOutputHeader]. Did you correctly set the output header in the matlab structure ?\n")) return false;
 
 					// Set the new channel localisation
@@ -745,7 +747,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 			}
 
 			
-			boolean l_bUnknownType = true;
+			bool l_bUnknownType = true;
 			uint64 l_ui64StartTime = 0;
 			uint64 l_ui64EndTime   = 0;
 
@@ -782,7 +784,7 @@ boolean CBoxAlgorithmMatlabScripting::process(void)
 	return true;
 }
 
-boolean CBoxAlgorithmMatlabScripting::printOutputBufferWithFormat()
+bool CBoxAlgorithmMatlabScripting::printOutputBufferWithFormat()
 {
 	// the buffer for the console
 	std::stringstream l_ssMatlabBuffer;
