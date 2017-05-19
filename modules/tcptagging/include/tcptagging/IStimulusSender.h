@@ -13,7 +13,8 @@ namespace TCPTagging
 	class OV_API IStimulusSender {
 	public:
 
-		// Connect to the TCP Tagging plugin of the Acquisition Server
+		// Connect to the TCP Tagging plugin of the Acquisition Server.
+		// If sAddress is empty string, the StimulusSender will be inactive and connect() will not print an error but returns false.
 		virtual TCPTagging::boolean connect(const char* sAddress, const char* sStimulusPort) = 0;
 
 		// Send a stimulation. Set Timestamp to 0 for immediate tagging (also the default).
@@ -27,6 +28,11 @@ namespace TCPTagging
 	// Clients are constructed via this call.
 	extern OV_API TCPTagging::IStimulusSender* createStimulusSender(void);
 
+	/*
+	* \class IStimulusSender
+	* \author Thierry Gaugry / Inria
+	* \brief @todo Describe...
+	*/
 	class OV_API IStimulusMultiSender {
 	public:
 		virtual TCPTagging::boolean connect(const char* sAddress, const char* sStimulusPort) = 0;

@@ -22,7 +22,18 @@ CStimulusSender::~CStimulusSender()
 boolean CStimulusSender::connect(const char* sAddress, const char* sStimulusPort)
 {
 	tcp::resolver resolver(m_ioService);
-			
+
+	if (!sAddress || !sStimulusPort)
+	{
+		std::cout << "Error: Do not pass NULL pointers to CStimulusSender::connect()\n";
+		return false;
+	}
+	if (sAddress[0] == 0) 
+	{
+		// Empty string is ok, in that case Stimulus Sender is disabled
+		return false;
+	}
+
 	// Stimulus port
 	std::cout << "Connecting to Acquisition Server's TCP Tagging [" << sAddress << " , port " << sStimulusPort << "]\n";
 	try

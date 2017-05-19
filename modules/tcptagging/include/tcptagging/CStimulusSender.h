@@ -25,6 +25,7 @@ namespace TCPTagging
 		virtual ~CStimulusSender();
 
 		// Connect to the TCP Tagging plugin of the Acquisition Server
+		// If sAddress is empty string, the StimulusSender will be inactive and connect() will not print an error but returns false.
 		virtual TCPTagging::boolean connect(const char* sAddress, const char* sStimulusPort);
 
 		// Send a stimulation. Set Timestamp to 0 for immediate tagging (also the default).
