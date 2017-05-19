@@ -14,6 +14,11 @@
 #include <vector>
 #include <map>
 
+namespace TCPTagging
+{
+	class IStimulusSender; // fwd declare
+};
+
 namespace OpenViBEPlugins
 {
 	namespace Stimulation
@@ -65,9 +70,13 @@ namespace OpenViBEPlugins
 
 			OpenViBE::boolean m_bError;
 
+			// TCP Tagging
+			TCPTagging::IStimulusSender* m_pStimulusSender;
+
 		private:
 			OpenViBE::boolean m_bUnknownKeyPressed;
 			OpenViBE::uint32 m_ui32UnknownKeyCode;
+
 		};
 
 		/**
@@ -82,7 +91,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Stimulation generator"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Sends stimulations according to key presses"); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Stimulation"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.1"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
 			virtual void release(void)                                   { }
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_KeyboardStimulator; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Stimulation::CKeyboardStimulator(); }
@@ -97,6 +106,8 @@ namespace OpenViBEPlugins
 				rPrototype.addOutput("Outgoing Stimulations", OV_TypeId_Stimulations);
 
 				rPrototype.addSetting("Filename", OV_TypeId_Filename, "${Path_Data}/plugins/stimulation/simple-keyboard-to-stimulations.txt");
+				rPrototype.addSetting("TCP Tagging Host address", OV_TypeId_String, "");
+				rPrototype.addSetting("TCP Tagging Host port",    OV_TypeId_Integer, "15361");
 
 				return true;
 			}

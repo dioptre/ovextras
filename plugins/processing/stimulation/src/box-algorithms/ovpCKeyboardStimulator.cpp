@@ -8,6 +8,8 @@
 #include <string>
 #include <sstream>
 
+#include <tcptagging/IStimulusSender.h>
+
 using namespace OpenViBE;
 using namespace Plugins;
 using namespace Kernel;
@@ -55,11 +57,13 @@ namespace OpenViBEPlugins
 				if(bState)
 				{
 					// getLogManager() << LogLevel_Trace << "Pressed key code " << (uint32)uiKey << "\n";
+					m_pStimulusSender->sendStimulation(m_oKeyToStimulation[uiKey].m_ui64StimulationPress);
 					m_oStimulationToSend.push_back(m_oKeyToStimulation[uiKey].m_ui64StimulationPress);
 				}
 				else
 				{
 					// getLogManager() << LogLevel_Trace << "Released key code " << (uint32)uiKey << "\n";
+					m_pStimulusSender->sendStimulation(m_oKeyToStimulation[uiKey].m_ui64StimulationRelease);
 					m_oStimulationToSend.push_back(m_oKeyToStimulation[uiKey].m_ui64StimulationRelease);
 				}
 				m_oKeyToStimulation[uiKey].m_bStatus=bState;
@@ -129,6 +133,8 @@ namespace OpenViBEPlugins
 
 			// Parses box settings to find input file's name
 			l_pBoxContext->getSettingValue(0, l_sFileName);
+			OpenViBE::CString l_sTCPTaggingHostAddress = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+			OpenViBE::CString l_sTCPTaggingHostPort = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
 			if(!parseConfigurationFile((const char*)l_sFileName))
 			{
@@ -175,11 +181,24 @@ namespace OpenViBEPlugins
 
 			getBoxAlgorithmContext()->getDynamicBoxContext()->markOutputAsReadyToSend(0, 0, 0);
 
+			//TCP TAGGING
+			m_pStimulusSender = TCPTagging::createStimulusSender();
+			if (!m_pStimulusSender->connect(l_sTCPTaggingHostAddress, l_sTCPTaggingHostPort) && l_sTCPTaggingHostAddress.toASCIIString()[0]!=0)
+			{
+				this->getLogManager() << LogLevel_Warning << "Unable to connect to AS's TCP Tagging plugin, stimuli wont be forwarded.\n";
+			}
+
 			return true;
 		}
 
 		boolean CKeyboardStimulator::uninitialize()
 		{
+			if (m_pStimulusSender)
+			{
+				delete m_pStimulusSender;
+				m_pStimulusSender = nullptr;
+			}
+
 			m_oEncoder.uninitialize();
 			
 			if(m_pWidget)
@@ -226,6 +245,7 @@ namespace OpenViBEPlugins
 			}
 
 			m_ui64PreviousActivationTime = l_ui64CurrentTime;
+
 			return true;
 		}
 
@@ -233,6 +253,8 @@ namespace OpenViBEPlugins
 		{
 			return true;
 		}
+		
+
 	};
 };
 

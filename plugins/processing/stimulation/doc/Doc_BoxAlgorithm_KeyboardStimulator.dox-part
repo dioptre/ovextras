@@ -30,6 +30,14 @@ __________________________________________________________________
  * |OVP_DocBegin_BoxAlgorithm_KeyboardStimulator_Setting1|
  * The name of the file containing the associations between keys and stimulations
  * |OVP_DocEnd_BoxAlgorithm_KeyboardStimulator_Setting1|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_KeyboardStimulator_Setting2|
+ * TCP Tagging host address to send stimuli to (empty string: do not connect)
+ * |OVP_DocEnd_BoxAlgorithm_KeyboardStimulator_Setting2|
+ *
+ * |OVP_DocBegin_BoxAlgorithm_KeyboardStimulator_Setting3|
+ * TCP Tagging host port
+ * |OVP_DocEnd_BoxAlgorithm_KeyboardStimulator_Setting3|
 __________________________________________________________________
 
 Examples description
@@ -68,6 +76,12 @@ __________________________________________________________________
  *
  * For a complete listing of the key names, please consult GDK's "gdk/gdkkeysyms.h" header file.
  * The names are the same but without the leading "GDK_"
+ *
+ * If TCP Tagging hostname is specified, the stimulator will send the stimuli
+ * to Acquisition Server in that address for accurate alignment of the stimuli 
+ * to the EEG signal. If the keypresses are not wanted to be inserted into the signal, 
+ * set host address to an empty string. To send to an Acquisition Server running on the same computer, 
+ * use 'localhost' as the address. 
  *
  * |OVP_DocEnd_BoxAlgorithm_KeyboardStimulator_Miscellaneous|
 */

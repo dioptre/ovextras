@@ -148,6 +148,20 @@
 					<Value>${Path_Data}/plugins/stimulation/simple-keyboard-to-stimulations.txt</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
+				<Setting>
+					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
+					<Name>TCP Tagging Host address</Name>
+					<DefaultValue></DefaultValue>
+					<Value></Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
+				<Setting>
+					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
+					<Name>TCP Tagging Host port</Name>
+					<DefaultValue>15361</DefaultValue>
+					<Value>15361</Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
@@ -164,7 +178,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x8d89d3b7, 0x8339d210)</Value>
+					<Value>(0x9b5dd008, 0x475a2ecd)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
