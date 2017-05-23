@@ -54,7 +54,7 @@ bool CBoxAlgorithmDiscreteWaveletTransform::uninitialize(void)
 	m_oAlgo0_SignalDecoder.uninitialize();
 	m_oAlgoInfo_SignalEncoder.uninitialize();
 
-	for (auto elem : m_vAlgoX_SignalEncoder)
+	for (auto& elem : m_vAlgoX_SignalEncoder)
 	{
 		elem->uninitialize();
 		delete elem;

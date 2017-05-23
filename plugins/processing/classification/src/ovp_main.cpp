@@ -11,8 +11,6 @@
 #include "algorithms/ovpCAlgorithmClassifierMLP.h"
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
-#include "algorithms/ovpCAlgorithmClassifierOneVsOne.h"
-
 const char* const c_sPairwiseStrategyEnumerationName = "Pairwise Decision Strategy";
 
 OVP_Declare_Begin();
@@ -20,7 +18,6 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm, "Support Vector Machine (SVM)",OVP_ClassId_Algorithm_ClassifierSVM.toUInteger());
 	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierSVM, OpenViBEPlugins::Classification::SVMClassificationCompare);
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierSVMDesc);
-	OpenViBEPlugins::Classification::registerAvailableDecisionEnumeration(OVP_ClassId_Algorithm_ClassifierSVM, OVP_TypeId_ClassificationPairwiseStrategy);
 
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_SVMType,"SVM Type");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SVMType,"C-SVC",C_SVC);
@@ -32,12 +29,22 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SVMKernelType,"Radial basis function",RBF);
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SVMKernelType,"Sigmoid",SIGMOID);
 
+
+	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_ClassificationPairwiseStrategy, c_sPairwiseStrategyEnumerationName);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ClassificationPairwiseStrategy, "Support Vector Machine (SVM)", OVP_ClassId_Algorithm_ClassifierSVM.toUInteger());
+
+	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_OneVsOne_DecisionAlgorithms , "One vs One Decision Algorithms");
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_OneVsOne_DecisionAlgorithms, "SVM Kernel Type", OVP_TypeId_SVMType.toUInteger());
+
 #if defined TARGET_HAS_ThirdPartyEIGEN
 	//MLP section
 	OVP_Declare_New(OpenViBEPlugins::Classification::CAlgorithmClassifierMLPDesc);
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVTK_TypeId_ClassificationAlgorithm,   "Multi-layer Perceptron", OVP_ClassId_Algorithm_ClassifierMLP.toUInteger());
 	OpenViBEToolkit::registerClassificationComparisionFunction(OVP_ClassId_Algorithm_ClassifierMLP, OpenViBEPlugins::Classification::MLPClassificationCompare);
-	OpenViBEPlugins::Classification::registerAvailableDecisionEnumeration(OVP_ClassId_Algorithm_ClassifierMLP, OVP_TypeId_ClassificationPairwiseStrategy);
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_ClassificationPairwiseStrategy, "Multi-layer Perceptron", OVP_ClassId_Algorithm_ClassifierMLP.toUInteger());
+
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_OneVsOne_DecisionAlgorithms, "Multi-layer Perceptron", OVP_ClassId_Algorithm_ClassifierMLP.toUInteger());
+
 #endif // TARGET_HAS_ThirdPartyEIGEN
 
 	// Register boxes
