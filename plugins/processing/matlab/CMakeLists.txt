@@ -28,7 +28,7 @@ add_dependencies(openvibe-plugins-matlab generate_matlab_stimulations_file)
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 	VERSION ${PROJECT_VERSION}
 	SOVERSION ${PROJECT_VERSION_MAJOR}
-	COMPILE_FLAGS "-DOV_Exports -DOV_Shared")
+	COMPILE_FLAGS "-DOVP_Exports -DOVP_Shared")
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
