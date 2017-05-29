@@ -29,6 +29,7 @@ namespace OpenViBEPlugins
 			virtual bool uninitialize(void);
 			virtual bool processClock(OpenViBE::CMessageClock& rMessageClock);
 			virtual bool process(void);
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex) override;
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_MatlabScripting);
 

@@ -784,6 +784,14 @@ bool CBoxAlgorithmMatlabScripting::process(void)
 	return true;
 }
 
+bool CBoxAlgorithmMatlabScripting::processInput(unsigned int inputIndex)
+{
+	OV_ERROR_UNLESS_KRF(getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess(),
+		"Error while marking algorithm as ready to process",
+		ErrorType::Internal);
+	return true;
+}
+
 bool CBoxAlgorithmMatlabScripting::printOutputBufferWithFormat()
 {
 	// the buffer for the console
