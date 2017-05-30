@@ -48,7 +48,7 @@ namespace OpenViBEPlugins
 			bool OpenMatlabEngineSafely(void);
 			bool CloseMatlabEngineSafely(void);
 
-			CMatlabHelper m_oMatlabHelper;
+			CMatlabHelper* m_oMatlabHelper;
 
 			OpenViBE::CString m_sMatlabPath;           // On Linux, path of the executable. On Windows, the executable directory.
 			OpenViBE::CString m_sProcessFunction;
@@ -90,7 +90,7 @@ namespace OpenViBEPlugins
 				uint64_t l_ui64Value=::atoi(l_sSettingValue.toASCIIString());
 				if(ui32Index == 0 && (l_ui64Value < 1 || l_ui64Value > 128))
 				{
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Warning << "Clock Frequency must be an integer between 1 and 128 Hz. Falling back to default.\n";
+					OV_WARNING_K("Clock Frequency must be an integer between 1 and 128 Hz. Falling back to default.");
 					rBox.setSettingValue(ui32Index, "64");
 				}
 

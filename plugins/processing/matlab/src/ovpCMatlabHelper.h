@@ -16,6 +16,9 @@ namespace OpenViBEPlugins
 		class CMatlabHelper
 		{
 		public:
+			CMatlabHelper(OpenViBE::Kernel::ILogManager& logManager, OpenViBE::Kernel::IErrorManager& errorManager)
+				: m_pMatlabEngine(nullptr), m_pLogManager(logManager), m_pErrorManager(errorManager) {}
+
 			bool setStreamedMatrixInputHeader(uint32_t ui32InputIndex, OpenViBE::IMatrix * pMatrix);
 			bool setFeatureVectorInputHeader(uint32_t ui32InputIndex, OpenViBE::IMatrix * pMatrix);
 			bool setSignalInputHeader(uint32_t ui32InputIndex, OpenViBE::IMatrix * pMatrix, uint64_t ui64SamplingRate);
@@ -41,11 +44,22 @@ namespace OpenViBEPlugins
 			void setMatlabEngine(Engine * pEngine) { m_pMatlabEngine = pEngine; }
 			void setBoxInstanceVariableName(OpenViBE::CString sName) { m_sBoxInstanceVariableName = sName; }
 
-		private:
-			Engine * m_pMatlabEngine;
-			OpenViBE::CString m_sBoxInstanceVariableName; //must be unique
 
-			OpenViBE::CString escapeMatlabString(OpenViBE::CString sStringToEscape);
+			uint32_t getUint32FromEnv(const char* name);
+			uint64_t getUint64FromEnv(const char* name);
+			uint64_t genUint64FromEnvConverted(const char* name);
+			std::vector<OpenViBE::CString> getNamelist(const char* name);
+
+
+			OpenViBE::Kernel::ILogManager& getLogManager(void) const { return m_pLogManager; }
+			OpenViBE::Kernel::IErrorManager& getErrorManager(void) const { return m_pErrorManager; }
+
+		private:
+			Engine* m_pMatlabEngine;
+			OpenViBE::Kernel::ILogManager& m_pLogManager;
+			OpenViBE::Kernel::IErrorManager& m_pErrorManager;
+
+			OpenViBE::CString m_sBoxInstanceVariableName; //must be unique
 		};
 	};
 };
