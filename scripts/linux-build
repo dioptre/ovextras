@@ -1,26 +1,53 @@
 #!/bin/bash
 
 ov_build_type=Release
-if [ "$1" == "--debug" ]; then
-	ov_build_type=Debug
-	shift
-fi
-if [ "$1" == "--debug-symbols" ]; then
-	ov_build_type=RelWithDebInfo
-	shift
-fi
-if [ "$1" == "--profile" ]; then
-	ov_build_type=Profile
-	shift
-fi
+ov_script_dir="${PWD}"
+ov_build_dir="${ov_script_dir}/../local-tmp/linux-${ov_build_type}"
+ov_install_dir="${ov_script_dir}/../dist"
+
+while [[ $# -gt 0 ]]; do
+	key="$1"
+	case $key in
+		-h | --help)
+			usage
+			exit
+			;;
+		-v | --verbose)
+			verbose=1
+			;;
+		-d | --debug)
+			ov_build_type=Debug
+			;;
+		-r | --release)
+			ov_build_type=Release
+			;;
+		--debug-symbols)
+			ov_build_type=RelWithDebInfo
+			;;
+		--profile)
+			ov_build_type=Profile
+			;;
+		--build-dir)
+			ov_build_dir="$2"
+			shift
+			;;
+		--install-dir)
+			ov_install_dir="$2"
+			shift
+			;;
+		*)
+			echo "ERROR: Unknown parameter $i"
+			exit 1
+			;;
+	esac
+	shift # past argument or value
+done
+
+
 
 echo ""
 echo "_______________________________________________________________________________"
 echo ""
-		
-ov_script_dir="${PWD}"
-ov_build_dir="${ov_script_dir}/../local-tmp/linux-${ov_build_type}"
-ov_install_dir="${ov_script_dir}/../dist"
 
 mkdir -p "${ov_build_dir}" 2> /dev/null
 pushd "${ov_build_dir}" 2> /dev/null
