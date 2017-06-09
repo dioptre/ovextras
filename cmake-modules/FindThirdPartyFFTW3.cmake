@@ -10,7 +10,7 @@ GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyFFTW3)
 # On windows, we take the itpp one.
 
 IF(WIN32)
-	FIND_PATH(PATH_FFTW3 include/fftw3.h PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/itpp)
+	FIND_PATH(PATH_FFTW3 include/fftw3.h PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES itpp)
 	IF(PATH_FFTW3)
 		SET(FFTW3_FOUND TRUE)
 		# Of course the name of the library is this or that, depending on the circumstances ...
@@ -37,7 +37,7 @@ IF(FFTW3_FOUND)
 		SET(FFTW3_LIB1 "FFTW3_LIB1-NOTFOUND")
 		# The list is 'fftw3 m' on Fedora 19. CMake gets confused unless the two following lines are used ... 
 		# 1) catch fftw3 if its under dependencies/lib/ (fedora19)
-		FIND_LIBRARY(FFTW3_LIB1 NAMES ${FFTW3_LIB} PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib NO_DEFAULT_PATH)
+		FIND_LIBRARY(FFTW3_LIB1 NAMES ${FFTW3_LIB} PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib NO_DEFAULT_PATH)
 		# 2) catch fftw3 from found paths, and libm from usual system paths, i.e. default path is allowed. (covers other systems + libm on fedora).
 		FIND_LIBRARY(FFTW3_LIB1 NAMES ${FFTW3_LIB} PATHS ${FFTW3_LIBRARY_DIRS})
 		IF(FFTW3_LIB1)

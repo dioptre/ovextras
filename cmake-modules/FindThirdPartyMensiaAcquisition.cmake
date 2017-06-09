@@ -3,7 +3,7 @@ GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyMensiaAcquisition)
 
 
 IF(WIN32)
-	FIND_PATH(PATH_MENSIA openvibe-driver-mensia-acquisition.dll PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/sdk-mensia-acquisition-driver/ NO_DEFAULT_PATH)
+	FIND_PATH(PATH_MENSIA openvibe-driver-mensia-acquisition.dll PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES sdk-mensia-acquisition-driver NO_DEFAULT_PATH)
 ENDIF(WIN32)
 
 IF(PATH_MENSIA)

@@ -2,13 +2,44 @@
 
 REM ########################################################################################################################
 
-if exist "win32-dependencies.cmd" (
-	call "win32-dependencies.cmd"
-) else (
-	echo ERROR: win32-dependencies.cmd not found. Has the dependency installer been run?
-	goto terminate
+REM if exist "win32-dependencies.cmd" (
+	REM call "win32-dependencies.cmd"
+REM ) else (
+	REM echo ERROR: win32-dependencies.cmd not found. Has the dependency installer been run?
+	REM goto terminate
 	
+REM )
+set "SCRIPT_PATH=%~dp0"
+
+if "%1"=="" (
+	set args=%SCRIPT_PATH%\..\dependencies
+) else (
+	set args=%*
 )
+
+
+SET PATH=C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin;!PATH!
+call :addToPathIfExists cmake\bin
+call :addToPathIfExists ninja
+call :addToPathIfExists expat\bin
+call :addToPathIfExists itpp\bin
+call :addToPathIfExists lua\lib
+call :addToPathIfExists gtk\bin
+call :addToPathIfExists cegui\bin
+call :addToPathIfExists cegui\dependencies\bin
+call :addToPathIfExists pthreads\lib
+call :addToPathIfExists openal\libs\win32
+call :addToPathIfExists freealut\lib
+call :addToPathIfExists libogg\win32\bin\release
+call :addToPathIfExists libogg\win32\bin\debug
+call :addToPathIfExists libvorbis\win32\bin\release
+call :addToPathIfExists libvorbis\win32\bin\debug
+call :addToPathIfExists liblsl\lib
+call :addToPathIfExists ogre\bin\release
+call :addToPathIfExists ogre\bin\debug
+call :addToPathIfExists vrpn\bin
+REM SET VRPNROOT=C:\c\openvibe\scripts\..\dependencies\vrpn
+
 
 SET VSTOOLS=
 SET VSCMake=
@@ -57,5 +88,14 @@ echo ###########################################################################
 goto terminate
 
 REM #######################################################################################
+
+:addToPathIfExists
+for %%A in (%args%) DO (
+	if exist "%%A\%~1\" (
+		set "PATH=%%A\%~1;!PATH!"
+	)
+)
+exit /B 0
+
 
 :terminate

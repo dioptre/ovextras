@@ -6,8 +6,8 @@ REM no options / set to default
 set BuildType=Release
 set InitEnvScript=win32-init_env_command.cmd
 set PAUSE=pause
+set ov_script_dir=%CD%
 
-echo  (%*)
 :parameter_parse
 if /i "%1"=="-h" (
 	echo Usage: win32-build.cmd [Build Type] [Init-env Script]
@@ -50,6 +50,11 @@ if /i "%1"=="-h" (
 	REM set !InitEnvScript!=%2
 	SHIFT
 	Goto parameter_parse
+) else if /i "%1"=="--certsdk" (
+	set certsdk="-DOPENVIBE_SDK_PATH=%2"
+	SHIFT
+	SHIFT
+	Goto parameter_parse
 ) else if /i "%1"=="--studiosdk" (
 	set studiosdk="-DSTUDIO_SDK_PATH=%2"
 	SHIFT
@@ -62,6 +67,12 @@ if /i "%1"=="-h" (
 	Goto parameter_parse
 ) else if /i "%1"=="--install-dir" (
 	set ov_install_dir=%2
+	SHIFT
+	SHIFT
+	Goto parameter_parse
+) else if /i "%1"=="--dependencies-dir" (
+	set dependencies_path="-DLIST_DEPENDENCIES_PATH=%2"
+	set dependencies_base=%2
 	SHIFT
 	SHIFT
 	Goto parameter_parse
@@ -86,15 +97,12 @@ echo build type is set to: %BuildType%.
 echo Init-env Script to be called: !InitEnvScript!.
 echo bd %ov_build_dir%
 echo sdk %studiosdk%
-echo --
 
 REM #######################################################################################
 
-call "!InitEnvScript!"
+call "!InitEnvScript!" ov_script_dir\..\dependencies %dependencies_base%
 
 REM #######################################################################################
-
-set ov_script_dir=%CD%
 
 if not defined ov_build_dir (
 	set ov_build_dir=%ov_script_dir%\..\local-tmp\nmake-%BuildType%
@@ -112,7 +120,7 @@ cd /D %ov_build_dir%
 echo Generating makefiles for %VSCMake% using %BuildType% config.
 echo Building to %ov_build_dir% ...
 
-%ov_script_dir%\..\dependencies\cmake\bin\cmake %ov_script_dir%\.. -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %studiosdk%
+cmake %ov_script_dir%\.. -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %studiosdk% %certsdk% %dependencies_path%
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
 
 echo.

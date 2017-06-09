@@ -7,8 +7,8 @@
 GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyBoost_Regex)
 
 IF(UNIX)
-	FIND_LIBRARY(LIB_Boost_Regex NAMES "boost_regex-mt" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib NO_DEFAULT_PATH)
-	FIND_LIBRARY(LIB_Boost_Regex NAMES "boost_regex-mt" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib)
+	FIND_LIBRARY(LIB_Boost_Regex NAMES "boost_regex-mt" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib NO_DEFAULT_PATH)
+	FIND_LIBRARY(LIB_Boost_Regex NAMES "boost_regex-mt" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib)
 	
 	IF(LIB_Boost_Regex)
 		OV_PRINT(OV_PRINTED "    Found Boost regex...")
@@ -16,8 +16,8 @@ IF(UNIX)
 		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_Boost_Regex} )
 	ELSE(LIB_Boost_Regex)
 		# Fedora 20 and Ubuntu 13.10,14.04 have no more multi-thread boost libs ( *-mt ) so try if there are non -mt libs to link
-		FIND_LIBRARY(LIB_Boost_Regex NAMES "boost_regex" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib NO_DEFAULT_PATH)
-		FIND_LIBRARY(LIB_Boost_Regex NAMES "boost_regex" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib)
+		FIND_LIBRARY(LIB_Boost_Regex NAMES "boost_regex" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib NO_DEFAULT_PATH)
+		FIND_LIBRARY(LIB_Boost_Regex NAMES "boost_regex" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib)
 		IF(LIB_Boost_Regex)
 			OV_PRINT(OV_PRINTED "    Found Boost regex...")	
 			OV_PRINT(OV_PRINTED "    [  OK  ] lib ${LIB_Boost_Regex}")
