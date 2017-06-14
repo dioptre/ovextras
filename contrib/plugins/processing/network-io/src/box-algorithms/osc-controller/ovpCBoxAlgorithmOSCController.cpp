@@ -23,7 +23,7 @@ OpenViBE::boolean CBoxAlgorithmOSCController::initialize(void)
 	}
 
 	// the static box context describes the box inputs, outputs, settings structures
-	IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+    const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	
 	// Connect the socket 
 	std::string l_sAddress = std::string(l_sServerAddress.toASCIIString());
@@ -83,7 +83,7 @@ OpenViBE::boolean CBoxAlgorithmOSCController::process(void)
 {
 	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
 	IBoxIO& l_rDynamicBoxContext = this->getDynamicBoxContext();
-	IBox& l_rStaticBoxContext=getStaticBoxContext();
+    const IBox& l_rStaticBoxContext=getStaticBoxContext();
 
 	CIdentifier l_oStreamType;
 	l_rStaticBoxContext.getInputType(0, l_oStreamType);

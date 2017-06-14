@@ -15,7 +15,7 @@ namespace
 	class _AutoCast_
 	{
 	public:
-		_AutoCast_(IBox& rBox, IConfigurationManager& rConfigurationManager, const uint32 ui32Index) : m_rConfigurationManager(rConfigurationManager) { rBox.getSettingValue(ui32Index, m_sSettingValue); }
+        _AutoCast_(const IBox& rBox, IConfigurationManager& rConfigurationManager, const uint32 ui32Index) : m_rConfigurationManager(rConfigurationManager) { rBox.getSettingValue(ui32Index, m_sSettingValue); }
 		operator uint64 (void) { return m_rConfigurationManager.expandAsUInteger(m_sSettingValue); }
 		operator int64 (void) { return m_rConfigurationManager.expandAsInteger(m_sSettingValue); }
 		operator float64 (void) { return m_rConfigurationManager.expandAsFloat(m_sSettingValue); }

@@ -85,7 +85,7 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("High cut frequency (Hz)", OV_TypeId_Float,         "40", true);
 				rPrototype.addSetting("Pass band ripple (dB)",   OV_TypeId_Float,         "0.5", true);
 
-				rPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+                rPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				return true;
 			}
 

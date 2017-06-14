@@ -244,7 +244,7 @@ boolean CModTemporalFilterBoxAlgorithm::processInput(uint32 ui32InputIndex)
 boolean CModTemporalFilterBoxAlgorithm::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=getDynamicBoxContext();
-	IBox& l_rStaticBoxContext=getStaticBoxContext();
+    const IBox& l_rStaticBoxContext=getStaticBoxContext();
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
