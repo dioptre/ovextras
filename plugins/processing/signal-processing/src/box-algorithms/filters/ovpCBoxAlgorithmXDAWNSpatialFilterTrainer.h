@@ -11,8 +11,8 @@
 // - please move the identifier definitions in ovp_defines.h
 // - please include your desciptor in ovp_main.cpp
 
-#define OVP_ClassId_BoxAlgorithm_XDAWNSpatialFilterTrainer     OpenViBE::CIdentifier(0x27542F6E, 0x14AA3548)
-#define OVP_ClassId_BoxAlgorithm_XDAWNSpatialFilterTrainerDesc OpenViBE::CIdentifier(0x128A6013, 0x370B5C2C)
+#define OVP_ClassId_BoxAlgorithm_XDAWNSpatialFilterTrainer     OpenViBE::CIdentifier(0xAE241F9F, 0x599FAD88)
+#define OVP_ClassId_BoxAlgorithm_XDAWNSpatialFilterTrainerDesc OpenViBE::CIdentifier(0x46FFAD13, 0x5F5C68CE)
 
 
 namespace OpenViBEPlugins
@@ -52,7 +52,7 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("xDAWN Spatial Filter Trainer"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("xDAWN Trainer (INRIA)"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Computes spatial filter coeffcients in order to get better evoked potential classification (typically used for P300 detection)"); }

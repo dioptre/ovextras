@@ -87,7 +87,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Compute Inverse Fast Fourier Transformation"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Compute Inverse Fast Fourier Transformation (depends on ITPP/fftw)"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Spectral analysis"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Spectral Analysis"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-execute"); }
 

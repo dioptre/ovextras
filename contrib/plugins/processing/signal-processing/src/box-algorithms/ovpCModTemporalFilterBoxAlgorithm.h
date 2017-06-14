@@ -66,7 +66,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INSERM/U821 INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Applies temporal filtering on time signal, modifiable parameters"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("The user can choose among a variety of filter types to process the signal and change the settings online"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Filtering"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Temporal Filtering"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
 

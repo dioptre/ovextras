@@ -208,7 +208,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Plots event-related potentials"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("plots target ERP versus non-target ERP"); }
-                        virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualisation/Presentation"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualization/Presentation"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString(""); }
 

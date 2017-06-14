@@ -181,7 +181,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria Sophia, Inria Rennes"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Display cue images when receiving stimulations"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Display cue images when receiving specified stimulations. Forwards the stimulations to the AS using TCP Tagging."); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualisation/Presentation"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualization/Presentation"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.2"); }
 			virtual void release(void)                                   { }
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_DisplayCueImage; }

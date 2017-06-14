@@ -106,7 +106,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Displays the incoming stream"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This box can be used to visualize signal and matrix streams"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualisation/Basic"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualization/Basic"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.3"); }
 			virtual void release(void)                                   { }
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_SignalDisplay; }
