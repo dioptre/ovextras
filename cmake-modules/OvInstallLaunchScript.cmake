@@ -1,22 +1,19 @@
+INCLUDE(CMakeParseArguments)
 #
-# Creates launch script from a common OpenViBE template (in "cmake-modules/launchers/"), suitable for most apps
+# Creates launch script from a common OpenViBE template (in "cmake-modules/launchers/"), but dedicated to scenarios to be executed with the Designer
 #
 # The mandatory 1st argument SCRIPT_PREFIX specifies what the resulting script is called. A platform specific postfix will be added.
-# The optional 2nd argument ARGV1 specifies some extra argument or switch that is given to the launched executable by the script
+# The mandatory 2nd argument EXECUTABLE_NAME specifies what the resulting script will called eventually.
+# The optional 3nd argument ARGV1 specifies some extra argument or switch that is given to the launched executable by the script
 #
-FUNCTION(OV_INSTALL_LAUNCH_SCRIPT SCRIPT_PREFIX)
-	IF(WIN32)
-		SET(SCRIPT_POSTFIX ".cmd")
-	ENDIF(WIN32)
-	IF(UNIX)
-		# Debian recommends that extensions such as .sh are not used; On Linux, scripts with such extensions shouldn't be packaged
-		SET(SCRIPT_POSTFIX ".sh")	
-	ENDIF(UNIX)
+FUNCTION(OV_INSTALL_LAUNCH_SCRIPT)
+	SET(options PAUSE)
+	SET(oneValueArgs SCRIPT_PREFIX EXECUTABLE_NAME ICON_PATH)
+	SET(multiValueArgs PARAMETERS)
 	
-	# Extract the filename of the project executable, the variable in the script base will be replaced with it by CONFIGURE_FILE()
-	GET_TARGET_PROPERTY(TMP_PROJECT_TARGET_PATH ${PROJECT_NAME} LOCATION)	
-	GET_FILENAME_COMPONENT(OV_CMD_EXECUTABLE ${TMP_PROJECT_TARGET_PATH} NAME)
-	SET(SCRIPT_NAME ${SCRIPT_PREFIX}${SCRIPT_POSTFIX})
+        CMAKE_PARSE_ARGUMENTS(OV_INSTALL_LAUNCH_SCRIPT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+        #OV_CONFIGURE_RC(NAME ${OV_INSTALL_LAUNCH_SCRIPT_SCRIPT_PREFIX} ICON_PATH ${OV_INSTALL_LAUNCH_SCRIPT_ICON_PATH})
 	
 	# Install executable launcher if install_exe option is set to on, the os is WIN32, and no argument has been specified
         IF(WIN32 AND INSTALL_EXE AND NOT(OV_INSTALL_LAUNCH_SCRIPT_PAUSE) AND NOT(OV_INSTALL_LAUNCH_SCRIPT_PARAMETERS))
@@ -34,7 +31,7 @@ FUNCTION(OV_INSTALL_LAUNCH_SCRIPT SCRIPT_PREFIX)
 			SET(SCRIPT_POSTFIX ".sh")
 		ENDIF()
 		# Extract the filename of the project executable, the variable in the script base will be replaced with it by CONFIGURE_FILE()
-		GET_TARGET_PROPERTY(TMP_PROJECT_TARGET_PATH ${OV_INSTALL_LAUNCH_SCRIPT_EXECUTABLE_NAME} LOCATION)
+                GET_TARGET_PROPERTY(TMP_PROJECT_TARGET_PATH ${OV_INSTALL_LAUNCH_SCRIPT_EXECUTABLE_NAME} LOCATION)
 		GET_FILENAME_COMPONENT(OV_CMD_EXECUTABLE ${TMP_PROJECT_TARGET_PATH} NAME)
 
 		IF(${OV_CMD_EXECUTABLE} STREQUAL "TMP_PROJECT_TARGET_PATH-NOTFOUND")
@@ -73,8 +70,8 @@ ENDFUNCTION()
 #	ENDIF()
 #	SET(FILE_DESCRIPTION "${PROJECT_PRODUCT_NAME} for Win32")
 	
-	CONFIGURE_FILE(${CMAKE_MODULE_PATH}/launchers/openvibe-launcher${SCRIPT_POSTFIX}-base ${CMAKE_CURRENT_BINARY_DIR}/${SCRIPT_NAME} @ONLY)
-	
-	INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${SCRIPT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})	
-
-ENDFUNCTION(OV_INSTALL_LAUNCH_SCRIPT)
+#	CONFIGURE_FILE(
+#		${OV_LAUNCHER_SOURCE_PATH}/resource-file.rc-base
+#		${GENERATED_RC_FILE}
+#		@ONLY)
+#ENDFUNCTION()

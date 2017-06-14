@@ -71,12 +71,12 @@ ENDIF(UNIX)
 # Generate launch script
 # ----------------------
 IF(WIN32)
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-handball" "handball")
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-spaceship" "spaceship")
+        OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-vr-demo-handball" EXECUTABLE_NAME ${PROJECT_NAME} "handball")
+	OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-vr-demo-spaceship" EXECUTABLE_NAME ${PROJECT_NAME} "spaceship")
 ENDIF(WIN32)
 IF(UNIX)
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-handball" "handball")
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-spaceship" "spaceship")
+        OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-vr-demo-handball" EXECUTABLE_NAME ${PROJECT_NAME} "handball")
+	OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-vr-demo-spaceship" EXECUTABLE_NAME ${PROJECT_NAME} "spaceship")
 ENDIF(UNIX)
 
 # -----------------------------

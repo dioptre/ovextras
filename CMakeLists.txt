@@ -20,10 +20,13 @@ PROJECT(OpenViBE)
 SET(OV_GLOBAL_VERSION_MAJOR 1)
 SET(OV_GLOBAL_VERSION_MINOR 3)
 SET(OV_GLOBAL_VERSION_PATCH 0+git)
+SET(OV_GLOBAL_VERSION_STRING "${OV_GLOBAL_VERSION_MAJOR}.${OV_GLOBAL_VERSION_MINOR}.${OV_GLOBAL_VERSION_PATCH}")
 
 # Default is to build to dist/. If you wish a custom install, set your own MAKE_INSTALL_PREFIX when you call CMake. Safest to do under a fakeroot.
 #IF(NOT CMAKE_INSTALL_PREFIX)
 #ENDIF(NOT CMAKE_INSTALL_PREFIX)
+
+SET(DOCUMENTATION_TEMP_DIRECTORY "${CMAKE_INSTALL_PREFIX}/doc-tmp")
 
 MESSAGE(STATUS "Appending compilation flags...")
 
@@ -93,10 +96,10 @@ ELSEIF(UNIX)
 	CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 	IF(COMPILER_SUPPORTS_CXX11)
 	    # TODO maybe in future the next line will be uncommented
-	    # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 	ELSEIF(COMPILER_SUPPORTS_CXX0X)
 	    # TODO maybe in future the next line will be uncommented
-	    # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 	ELSE(COMPILER_SUPPORTS_CXX0X)
 		MESSAGE(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. In the future this may be required.")
 	ENDIF(COMPILER_SUPPORTS_CXX11)
@@ -193,10 +196,11 @@ ENDIF(UNIX)
 #SET(SKIP_PLUGINS_PROCESSING_EXAMPLES "1")
 
 # From certivibe designer repo in the future
-SET(SKIP_APPLICATIONS_PLATFORM_DESIGNER "1")	
+SET(SKIP_APPLICATIONS_PLATFORM_DESIGNER "0")
 SET(SKIP_APPLICATIONS_EXAMPLES_CONVERT "1")		# depends on Designer
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
+SET(OV_LAUNCHER_SOURCE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules/launchers")
 
 # If you wish you can uncomment the next line and add a file with additional information called OVBranches.cmake to
 # the cmake-modules folder. It makes modifying this very CMake file easier.
@@ -221,6 +225,7 @@ INCLUDE("OvAddProjects")
 INCLUDE("OvInstallLaunchScript")
 INCLUDE("OvLinkBoostLib")
 INCLUDE("OvPrint")
+INCLUDE("OvMessages")
 
 # Setup knowledge of GNU-style install path variables
 INCLUDE("GNUInstallDirs")
@@ -237,15 +242,9 @@ ADD_SUBDIRECTORY("build-tool/")
 # Traverse these directories and build their components
 ADD_SUBDIRECTORY("modules/tcptagging") 
 ADD_SUBDIRECTORY("plugins/")					# @TODO enable, prune, make work
-
-#ADD_SUBDIRECTORY("applications/")
-#ADD_SUBDIRECTORY("applications/demos")
-ADD_SUBDIRECTORY("applications/developer-tools")
-ADD_SUBDIRECTORY("applications/examples")
-ADD_SUBDIRECTORY("applications/platform")
-
+ADD_SUBDIRECTORY("applications/")
 ADD_SUBDIRECTORY("externals/")
-# ADD_SUBDIRECTORY("contrib/")					# @TODO enable, prune, make work
+ADD_SUBDIRECTORY("contrib/")					# @TODO enable, prune, make work
 ADD_SUBDIRECTORY("documentation/") # needs to be the last since it uses the list of collected projects
 
 #add dependency to plugin inspector to the documentation

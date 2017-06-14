@@ -1,0 +1,5 @@
+function(debug_message)
+	if(${Flag_VerboseOutput})
+		message(STATUS "${ARGV}")
+	endif()
+endfunction()
