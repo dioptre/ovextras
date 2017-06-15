@@ -15,19 +15,19 @@ else()
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set(STUDIO_SDK_PATH "${OV_CUSTOM_DEPENDENCIES_PATH}/openvibe-designer-debug" CACHE STRING "OpenViBE Designer Path")
+        set(DESIGNER_SDK_PATH "${OV_CUSTOM_DEPENDENCIES_PATH}/openvibe-designer-debug" CACHE STRING "OpenViBE Designer Path")
 else()
-	set(STUDIO_SDK_PATH "${OV_CUSTOM_DEPENDENCIES_PATH}/openvibe-designer-release" CACHE STRING "OpenViBE Designer Path")
+        set(DESIGNER_SDK_PATH "${OV_CUSTOM_DEPENDENCIES_PATH}/openvibe-designer-release" CACHE STRING "OpenViBE Designer Path")
 endif()
 
 set(PATH_OPENVIBE_VISUALIZATION_TOOLKIT "PATH_OPENVIBE_VISUALIZATION_TOOLKIT-NOTFOUND")
-find_path(PATH_OPENVIBE_VISUALIZATION_TOOLKIT visualization-toolkit/ovviz_all.h PATHS ${STUDIO_SDK_PATH}/include/ NO_DEFAULT_PATH)
+find_path(PATH_OPENVIBE_VISUALIZATION_TOOLKIT visualization-toolkit/ovviz_all.h PATHS ${DESIGNER_SDK_PATH}/include/ NO_DEFAULT_PATH)
 if(PATH_OPENVIBE_VISUALIZATION_TOOLKIT)
         message( "  Found openvibe-visualization-toolkit...  ${PATH_OPENVIBE_VISUALIZATION_TOOLKIT}")
 	include_directories(${PATH_OPENVIBE_VISUALIZATION_TOOLKIT}/)
 		
 	if(LINK_OPENVIBE_VISUALIZATION_TOOLKIT)
-		find_library(VISUALIZATION_TOOLKIT_LIBRARY openvibe-visualization-toolkit${OPENVIBE_VISUALIZATION_TOOLKIT_LINKING} PATHS ${STUDIO_SDK_PATH}/lib NO_DEFAULT_PATH)
+	        find_library(VISUALIZATION_TOOLKIT_LIBRARY openvibe-visualization-toolkit${OPENVIBE_VISUALIZATION_TOOLKIT_LINKING} PATHS ${DESIGNER_SDK_PATH}/lib NO_DEFAULT_PATH)
 		target_link_libraries(${PROJECT_NAME} ${VISUALIZATION_TOOLKIT_LIBRARY})
 	endif()
 
