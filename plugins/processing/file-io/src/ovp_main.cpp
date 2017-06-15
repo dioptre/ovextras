@@ -3,6 +3,9 @@
 #include "box-algorithms/ovpCGDFFileWriter.h"
 #include "box-algorithms/ovpCBCICompetitionIIIbReader.h"
 
+#include "box-algorithms/csv/ovpCBoxAlgorithmCSVFileReader.h"
+#include "box-algorithms/csv/ovpCBoxAlgorithmCSVFileWriter.h"
+
 #include "algorithms/brainamp/ovpCAlgorithmBrainampFileReader.h"
 
 #include "box-algorithms/brainamp/ovpCBoxAlgorithmBrainampFileReader.h"
@@ -15,6 +18,9 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_BoxAlgorithmFlag, OV_AttributeId_Box_FlagIsUnstable.toString(), 1);
 	OVP_Declare_New(OpenViBEPlugins::FileIO::CGDFFileReaderDesc)
 	OVP_Declare_New(OpenViBEPlugins::FileIO::CGDFFileWriterDesc)
+
+	OVP_Declare_New(OpenViBEPlugins::FileIO::CBoxAlgorithmCSVFileWriterDesc)
+	OVP_Declare_New(OpenViBEPlugins::FileIO::CBoxAlgorithmCSVFileReaderDesc)
 
 	OVP_Declare_New(OpenViBEPlugins::FileIO::CBCICompetitionIIIbReaderDesc)
 
