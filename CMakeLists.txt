@@ -32,10 +32,12 @@ MESSAGE(STATUS "Appending compilation flags...")
 
 LIST(APPEND LIST_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
-# Path to CERTIVIBE; this points to the extracted certivibe package; in future
-# it should be made automagic that ov debug build should depend on cert debug build.
-#SET(OPENVIBE_SDK_PATH "${OV_CUSTOM_DEPENDENCIES_PATH}/certivibe-release")
-SET(OPENVIBE_SDK_PATH "${OV_CUSTOM_DEPENDENCIES_PATH}/certivibe-debug" CACHE STRING "")
+# Path to CERTIVIBE; this points to the extracted certivibe package
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	FIND_PATH(OPENVIBE_SDK_PATH bin PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES certivibe-debug NO_DEFAULT_PATH)
+else()
+	FIND_PATH(OPENVIBE_SDK_PATH bin PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES certivibe-release NO_DEFAULT_PATH)
+endif()
 
 ADD_DEFINITIONS("-DOV_PROJECT_NAME=\"${PROJECT_NAME}\"")
 ADD_DEFINITIONS("-DOV_VERSION_MAJOR=\"${OV_GLOBAL_VERSION_MAJOR}\"")
