@@ -12,24 +12,6 @@ SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_
 
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
 
-# @FIXME CERT
-LIST(REMOVE_ITEM source_files
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCSimple3DDisplay.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCSimple3DDisplay.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCTopographicMap3DDisplay.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCTopographicMap3DDisplay.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCVoxelDisplay.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCVoxelDisplay.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCSimple3DDisplay/ovpCSimple3DDatabase.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCSimple3DDisplay/ovpCSimple3DDatabase.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCSimple3DDisplay/ovpCSimple3DView.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCSimple3DDisplay/ovpCSimple3DView.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}src/box-algorithms/ovpCTopographicMap3DDisplay/ovpCTopographicMap3DView.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCTopographicMap3DDisplay/ovpCTopographicMap3DView.cpp"
-
-    "${CMAKE_CURRENT_SOURCE_DIR}src/box-algorithms/ovpCPowerSpectrumDisplay/ovpCPowerSpectrumChannelDisplay.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCPowerSpectrumDisplay/ovpCPowerSpectrumChannelDisplay.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}src/box-algorithms/ovpCPowerSpectrumDisplay/ovpCPowerSpectrumDatabase.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCPowerSpectrumDisplay/ovpCPowerSpectrumDatabase.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}src/box-algorithms/ovpCPowerSpectrumDisplay/ovpCPowerSpectrumDisplayView.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCPowerSpectrumDisplay/ovpCPowerSpectrumDisplayView.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}src/box-algorithms/ovpCPowerSpectrumDisplay.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCPowerSpectrumDisplay.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}src/box-algorithms/ovpCVoxelDisplay/ovpCVoxelView.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCVoxelDisplay/ovpCVoxelView.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}src/box-algorithms/ovpCTimeFrequencyMapDisplay.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCTimeFrequencyMapDisplay.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}src/box-algorithms/ovpCTimeFrequencyMapDisplay/ovpCTimeFrequencyMapChannelDisplay.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCTimeFrequencyMapDisplay/ovpCTimeFrequencyMapChannelDisplay.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}src/box-algorithms/ovpCTimeFrequencyMapDisplay/ovpCTimeFrequencyMapDisplayView.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/box-algorithms/ovpCTimeFrequencyMapDisplay/ovpCTimeFrequencyMapDisplayView.cpp")
-
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 	VERSION ${PROJECT_VERSION}
