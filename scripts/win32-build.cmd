@@ -50,13 +50,13 @@ if /i "%1"=="-h" (
 	REM set !InitEnvScript!=%2
 	SHIFT
 	Goto parameter_parse
-) else if /i "%1"=="--certsdk" (
-	set certsdk="-DOPENVIBE_SDK_PATH=%2"
+) else if /i "%1"=="--sdk" (
+	set sdk="-DOPENVIBE_SDK_PATH=%2"
 	SHIFT
 	SHIFT
 	Goto parameter_parse
-) else if /i "%1"=="--studiosdk" (
-	set studiosdk="-DSTUDIO_SDK_PATH=%2"
+) else if /i "%1"=="--designer" (
+	set designer="-DDESIGNER_SDK_PATH=%2"
 	SHIFT
 	SHIFT
 	Goto parameter_parse
@@ -95,9 +95,6 @@ if /i "!InitEnvScript!"=="win32-init_env_command.cmd" (
 echo --
 echo build type is set to: %BuildType%.
 echo Init-env Script to be called: !InitEnvScript!.
-echo bd %ov_build_dir%
-echo sdk %studiosdk%
-
 REM #######################################################################################
 
 call "!InitEnvScript!" ov_script_dir\..\dependencies %dependencies_base%
@@ -120,7 +117,7 @@ cd /D %ov_build_dir%
 echo Generating makefiles for %VSCMake% using %BuildType% config.
 echo Building to %ov_build_dir% ...
 
-cmake %ov_script_dir%\.. -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %studiosdk% %certsdk% %dependencies_path%
+cmake %ov_script_dir%\.. -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path%
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
 
 echo.
