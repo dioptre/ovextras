@@ -11,13 +11,7 @@
 
 //2D plugins
 #include "box-algorithms/ovpCSignalDisplay.h"
-//#include "box-algorithms/ovpCTimeFrequencyMapDisplay.h"
-#include "box-algorithms/ovpCPowerSpectrumDisplay.h"
 #include "box-algorithms/ovpCBoxAlgorithmLevelMeasure.h"
-//3D plugins
-//#include "box-algorithms/ovpCSimple3DDisplay.h"
-//#include "box-algorithms/ovpCTopographicMap3DDisplay.h"
-//#include "box-algorithms/ovpCVoxelDisplay.h"
 
 #include "ovpCBoxAlgorithmErpPlot.h"
 
