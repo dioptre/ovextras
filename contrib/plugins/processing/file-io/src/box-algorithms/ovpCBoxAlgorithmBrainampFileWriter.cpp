@@ -37,7 +37,7 @@ CBoxAlgorithmBrainampFileWriter::CBoxAlgorithmBrainampFileWriter(void)
 
 boolean CBoxAlgorithmBrainampFileWriter::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_bIsVmrkHeaderFileWritten = false;
 

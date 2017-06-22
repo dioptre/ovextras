@@ -114,7 +114,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Stimulation range end",   OV_TypeId_Stimulation, "OVTK_StimulationId_Label_0F");
 
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddSetting);
-				// rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsUnstable);
+				// rBoxAlgorithmPrototype.addFlag   (OV_AttributeId_Box_FlagIsUnstable);
 				return true;
 			}
 

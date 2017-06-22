@@ -5,15 +5,20 @@ SET(PROJECT_VERSION_MINOR ${OV_GLOBAL_VERSION_MINOR})
 SET(PROJECT_VERSION_PATCH ${OV_GLOBAL_VERSION_PATCH})
 SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
+IF(NOT DEFINED openvibe-toolkit_SOURCE_DIR OR NOT IS_DIRECTORY openvibe-toolkit_SOURCE_DIR)
+MESSAGE("openvibe-toolkit_SOURCE_DIR is not defined or is empty. Please set it to build matlab plugin.")
+return()
+ENDIF()
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/share/OV_stimulations.m
-    DEPENDS openvibe-stimulation-generator ${openvibe-toolkit_SOURCE_DIR}/share/stimulation_list.txt
-    COMMAND openvibe-stimulation-generator
-    --matlab
-    ${openvibe-toolkit_SOURCE_DIR}/share/stimulation_list.txt
-    ${CMAKE_CURRENT_SOURCE_DIR}/share/OV_stimulations.m
-    COMMENT "Generating matlab stimulation sources..." )
+   DEPENDS openvibe-stimulation-generator ${openvibe-toolkit_SOURCE_DIR}/share/stimulation_list.txt
+   COMMAND openvibe-stimulation-generator
+   --matlab
+   ${openvibe-toolkit_SOURCE_DIR}/share/stimulation_list.txt
+   ${CMAKE_CURRENT_SOURCE_DIR}/share/OV_stimulations.m
+   COMMENT "Generating matlab stimulation sources..." )
     
-    add_custom_target(generate_matlab_stimulations_file DEPENDS share/OV_stimulations.m)
+   add_custom_target(generate_matlab_stimulations_file DEPENDS share/OV_stimulations.m)
 
 
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
@@ -23,7 +28,7 @@ add_dependencies(openvibe-plugins-matlab generate_matlab_stimulations_file)
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 	VERSION ${PROJECT_VERSION}
 	SOVERSION ${PROJECT_VERSION_MAJOR}
-	COMPILE_FLAGS "-DOV_Exports -DOV_Shared")
+	COMPILE_FLAGS "-DOVP_Exports -DOVP_Shared")
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")

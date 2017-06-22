@@ -7,8 +7,8 @@
 GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyBoost_Thread)
 
 IF(UNIX)
-	FIND_LIBRARY(LIB_Boost_Thread NAMES "boost_thread-mt" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib NO_DEFAULT_PATH)
-	FIND_LIBRARY(LIB_Boost_Thread NAMES "boost_thread-mt" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib)
+	FIND_LIBRARY(LIB_Boost_Thread NAMES "boost_thread-mt" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib NO_DEFAULT_PATH)
+	FIND_LIBRARY(LIB_Boost_Thread NAMES "boost_thread-mt" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib)
 
 	IF(LIB_Boost_Thread)
 		OV_PRINT(OV_PRINTED "  Found boost thread...")
@@ -16,8 +16,8 @@ IF(UNIX)
 		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_Boost_Thread} )
 	ELSE(LIB_Boost_Thread)
 		# Fedora 20 and Ubuntu 13.10,14.04 have no more multi-thread boost libs ( *-mt ) so try if there are non -mt libs to link
-		FIND_LIBRARY(LIB_Boost_Thread NAMES "boost_thread" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib NO_DEFAULT_PATH)
-		FIND_LIBRARY(LIB_Boost_Thread NAMES "boost_thread" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib)
+		FIND_LIBRARY(LIB_Boost_Thread NAMES "boost_thread" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib NO_DEFAULT_PATH)
+		FIND_LIBRARY(LIB_Boost_Thread NAMES "boost_thread" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib)
 		IF(LIB_Boost_Thread)
 			OV_PRINT(OV_PRINTED "  Found boost thread...")
 			OV_PRINT(OV_PRINTED "    [  OK  ] lib ${LIB_Boost_Thread}")

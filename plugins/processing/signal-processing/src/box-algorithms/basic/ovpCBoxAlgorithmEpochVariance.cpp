@@ -8,7 +8,7 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::SignalProcessing;
 
-boolean CEpochVariance::initialize(void)
+bool CEpochVariance::initialize(void)
 {
 	CIdentifier l_oInputTypeIdentifier;
 	getStaticBoxContext().getInputType(0, l_oInputTypeIdentifier);
@@ -66,18 +66,23 @@ boolean CEpochVariance::initialize(void)
 	}
 	else if(l_oInputTypeIdentifier==OV_TypeId_Spectrum)
 	{
-		m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_MinMaxFrequencyBands)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_MinMaxFrequencyBands));
-		m_pStreamEncoderForVariance->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_MinMaxFrequencyBands)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_MinMaxFrequencyBands));
-		m_pStreamEncoderForConfidenceBound->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_MinMaxFrequencyBands)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_MinMaxFrequencyBands));
+		m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_FrequencyAbscissa)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_FrequencyAbscissa));
+		m_pStreamEncoderForVariance->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_FrequencyAbscissa)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_FrequencyAbscissa));
+		m_pStreamEncoderForConfidenceBound->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_FrequencyAbscissa)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_FrequencyAbscissa));
+
+		m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_SamplingRate)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_SamplingRate));
+		m_pStreamEncoderForVariance->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_SamplingRate)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_SamplingRate));
+		m_pStreamEncoderForConfidenceBound->getInputParameter(OVP_GD_Algorithm_SpectrumStreamEncoder_InputParameterId_SamplingRate)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_SamplingRate));
+
 	}
 
 	ip_ui64AveragingMethod.initialize(m_pMatrixVariance->getInputParameter(OVP_Algorithm_MatrixVariance_InputParameterId_AveragingMethod));
 	ip_ui64MatrixCount.initialize(m_pMatrixVariance->getInputParameter(OVP_Algorithm_MatrixVariance_InputParameterId_MatrixCount));
 	ip_f64SignificanceLevel.initialize(m_pMatrixVariance->getInputParameter(OVP_Algorithm_MatrixVariance_InputParameterId_SignificanceLevel));
 
-	ip_ui64AveragingMethod=(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-	ip_ui64MatrixCount=(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-	ip_f64SignificanceLevel=(float64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+	ip_ui64AveragingMethod = static_cast<uint64_t>(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0));
+	ip_ui64MatrixCount = static_cast<uint64_t>(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1));
+	ip_f64SignificanceLevel = static_cast<float64>(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2));
 
 	m_pMatrixVariance->getInputParameter(OVP_Algorithm_MatrixVariance_InputParameterId_Matrix)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputParameterId_Matrix));
 	m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_StreamedMatrixStreamEncoder_InputParameterId_Matrix)->setReferenceTarget(m_pMatrixVariance->getOutputParameter(OVP_Algorithm_MatrixVariance_OutputParameterId_AveragedMatrix));
@@ -94,7 +99,7 @@ boolean CEpochVariance::initialize(void)
 	return true;
 }
 
-boolean CEpochVariance::uninitialize(void)
+bool CEpochVariance::uninitialize(void)
 {
 	ip_ui64AveragingMethod.uninitialize();
 	ip_ui64MatrixCount.uninitialize();
@@ -114,16 +119,16 @@ boolean CEpochVariance::uninitialize(void)
 	return true;
 }
 
-boolean CEpochVariance::processInput(uint32 ui32InputIndex)
+bool CEpochVariance::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 
-boolean CEpochVariance::process(void)
+bool CEpochVariance::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=getDynamicBoxContext();
-	IBox& l_rStaticBoxContext=getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=getStaticBoxContext();
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{

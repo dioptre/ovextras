@@ -37,9 +37,9 @@ namespace
 		CString m_sSettingValue;
 	};
 };
-boolean CBoxAlgorithmP300IdentifierCardVisualisation::initialize(void)
+bool CBoxAlgorithmP300IdentifierCardVisualisation::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_pMainWidgetInterface=NULL;
 
@@ -100,7 +100,9 @@ boolean CBoxAlgorithmP300IdentifierCardVisualisation::initialize(void)
 	gtk_builder_connect_signals(m_pMainWidgetInterface, NULL);
 	// gtk_builder_connect_signals(m_pToolbarWidgetInterface, NULL);
 
-	getVisualisationContext().setWidget(m_pMainWindow);
+
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+	m_visualizationContext->setWidget(*this, m_pMainWindow);
 	// getVisualisationContext().setToolbar(m_pToolbarWidget);
 
 	m_ui64CardCount=0;
@@ -218,6 +220,8 @@ boolean CBoxAlgorithmP300IdentifierCardVisualisation::uninitialize(void)
 		this->getAlgorithmManager().releaseAlgorithm(*m_pSequenceStimulationDecoder);
 		m_pSequenceStimulationDecoder=NULL;
 	}
+
+	this->releasePluginObject(m_visualizationContext);
 
 	return true;
 }

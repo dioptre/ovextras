@@ -33,7 +33,7 @@ boolean CBoxAlgorithmAcquisitionClient::initialize(void)
 	m_ui64LastChunkEndTime = 0;
 	m_pConnectionClient = NULL;
 
-	IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	if (l_rStaticBoxContext.getOutputCount() < 5)
 	{
 		this->getLogManager() << LogLevel_Error << "Code expects at least 5 box outputs. Did you update the box?\n";

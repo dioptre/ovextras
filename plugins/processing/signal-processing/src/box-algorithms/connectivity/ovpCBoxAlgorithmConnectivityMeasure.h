@@ -41,11 +41,11 @@ namespace OpenViBEPlugins
 		public:
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
 				
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
-			virtual OpenViBE::boolean process(void);
+			virtual bool processInput(uint32_t ui32InputIndex);
+			virtual bool process(void);
 
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ConnectivityMeasure);
@@ -61,28 +61,28 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::IAlgorithmProxy* m_pConnectivityMethod;
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pMatrix1;
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pMatrix2;
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_ui64SamplingRate1;
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_ui64SamplingRate2;
+			OpenViBE::Kernel::TParameterHandler <uint64_t> ip_ui64SamplingRate1;
+			OpenViBE::Kernel::TParameterHandler <uint64_t> ip_ui64SamplingRate2;
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pMatrix;// Output matrix, will store the connectivity measure
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pMatrix2; // In case of second input
 
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pChannelTable;
-			std::vector < OpenViBE::uint32 > m_vChannelTable; // Matrix storing the index of the channels required
+			std::vector < uint32_t > m_vChannelTable; // Matrix storing the index of the channels required
 
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_ui64WindowMethod;
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_ui64SegmentsLength;
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_ui64Overlap;
-//			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_ui64FFTSize;
+			OpenViBE::Kernel::TParameterHandler <uint64_t> ip_ui64WindowMethod;
+			OpenViBE::Kernel::TParameterHandler <uint64_t> ip_ui64SegmentsLength;
+			OpenViBE::Kernel::TParameterHandler <uint64_t> ip_ui64Overlap;
+//			OpenViBE::Kernel::TParameterHandler <uint64_t> ip_ui64FFTSize;
 
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pFrequencyVector;
 
 		private:
 
-			OpenViBE::uint32 m_ui32PairsCount; // Number of pairs of channel to measure connectivity between
-			OpenViBE::uint32 m_ui32InputCount; // Number of inputs (1 or 2)
-			OpenViBE::uint32 m_ui32OutputCount;
-			OpenViBE::boolean m_bRange1;
-			OpenViBE::boolean m_bRange2;
+			uint32_t m_ui32PairsCount; // Number of pairs of channel to measure connectivity between
+			uint32_t m_ui32InputCount; // Number of inputs (1 or 2)
+			uint32_t m_ui32OutputCount;
+			bool m_bRange1;
+			bool m_bRange2;
 
 		};
 
@@ -90,19 +90,19 @@ namespace OpenViBEPlugins
 		{
 			public:
 
-            CBoxAlgorithmConnectivityMeasureListener(const OpenViBE::uint32 ui32CustomSettingBase)
+			CBoxAlgorithmConnectivityMeasureListener(const uint32_t ui32CustomSettingBase)
                 :m_ui32CustomSettingBase(ui32CustomSettingBase)
             {
             }
 
-			virtual OpenViBE::boolean initialize(void)
+			virtual bool initialize(void)
 			{
 				m_oConnectivityAlgorithmClassIdentifier=OV_UndefinedIdentifier;
 				m_pConnectivityMethod=NULL;
 				return true;
 			}
 
-			virtual OpenViBE::boolean uninitialize(void)
+			virtual bool uninitialize(void)
 			{
 				if(m_pConnectivityMethod)
 				{
@@ -114,23 +114,23 @@ namespace OpenViBEPlugins
 			}
 
 
-			OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			bool onInputAdded(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index)
 			{
 				rBox.setInputType(ui32Index, OV_TypeId_Signal);
 				return true;
             }
 
-            virtual OpenViBE::boolean onInitialized(OpenViBE::Kernel::IBox& rBox)
+			virtual bool onInitialized(OpenViBE::Kernel::IBox& rBox)
             {
                 return this->onAlgorithmClassIdentifierChanged(rBox);
             }
 
-            virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index)
             {
             	return ui32Index==0?this->onAlgorithmClassIdentifierChanged(rBox):true;
             }
 
-            virtual OpenViBE::boolean onAlgorithmClassIdentifierChanged(OpenViBE::Kernel::IBox& rBox)
+			virtual bool onAlgorithmClassIdentifierChanged(OpenViBE::Kernel::IBox& rBox)
             {
 				OpenViBE::CString l_sConnectivityMethodName;
 				OpenViBE::CIdentifier l_oConnectivityMethodIdentifier;
@@ -172,7 +172,7 @@ namespace OpenViBEPlugins
 
 				if(m_pConnectivityMethod)
 				{
-					OpenViBE::uint32 j=1;
+					uint32_t j=1;
 					rBox.setOutputName(0, m_pConnectivityMethod->getOutputParameterName(OVP_Algorithm_Connectivity_OutputParameterId_OutputMatrix));
 					while((l_oIdentifier=m_pConnectivityMethod->getNextOutputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
 					{
@@ -190,7 +190,7 @@ namespace OpenViBEPlugins
 					}
 
 
-					OpenViBE::uint32 i=m_ui32CustomSettingBase;
+					uint32_t i=m_ui32CustomSettingBase;
 					while((l_oIdentifier=m_pConnectivityMethod->getNextInputParameterIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
 					{
 						if((l_oIdentifier!=OVP_Algorithm_Connectivity_InputParameterId_InputMatrix1)
@@ -203,9 +203,9 @@ namespace OpenViBEPlugins
                 			OpenViBE::CString l_sParameterName=m_pConnectivityMethod->getInputParameterName(l_oIdentifier);
                 			OpenViBE::Kernel::IParameter* l_pParameter=m_pConnectivityMethod->getInputParameter(l_oIdentifier);
                 			OpenViBE::Kernel::TParameterHandler < OpenViBE::int64 > ip_i64Parameter(l_pParameter);
-                			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > ip_ui64Parameter(l_pParameter);
+							OpenViBE::Kernel::TParameterHandler < uint64_t > ip_ui64Parameter(l_pParameter);
                 			OpenViBE::Kernel::TParameterHandler < OpenViBE::float64 > ip_f64Parameter(l_pParameter);
-                			OpenViBE::Kernel::TParameterHandler < OpenViBE::boolean > ip_bParameter(l_pParameter);
+							OpenViBE::Kernel::TParameterHandler < bool > ip_bParameter(l_pParameter);
                 			OpenViBE::Kernel::TParameterHandler < OpenViBE::CString* > ip_sParameter(l_pParameter);
                 			char l_sBuffer[1024];
                 			bool l_bValid=true;
@@ -218,12 +218,12 @@ namespace OpenViBEPlugins
 
                 				case OpenViBE::Kernel::ParameterType_Integer:
                 				case OpenViBE::Kernel::ParameterType_UInteger:
-                					::sprintf(l_sBuffer, "%lli", (OpenViBE::uint64)ip_ui64Parameter);
+									::sprintf(l_sBuffer, "%lli", (uint64_t)ip_ui64Parameter);
                 					l_oTypeIdentifier=OV_TypeId_Integer;
                 					break;
 
                 				case OpenViBE::Kernel::ParameterType_Boolean:
-                					::sprintf(l_sBuffer, "%s", ((OpenViBE::boolean)ip_bParameter)?"true":"false");
+									::sprintf(l_sBuffer, "%s", ((bool)ip_bParameter)?"true":"false");
                 					l_oTypeIdentifier=OV_TypeId_Boolean;
                 					break;
 
@@ -278,7 +278,7 @@ namespace OpenViBEPlugins
 
 			OpenViBE::CIdentifier m_oConnectivityAlgorithmClassIdentifier;
 			OpenViBE::Kernel::IAlgorithmProxy* m_pConnectivityMethod;
-			const OpenViBE::uint32 m_ui32CustomSettingBase;
+			const uint32_t m_ui32CustomSettingBase;
 		};
 
 		
@@ -311,7 +311,7 @@ namespace OpenViBEPlugins
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
 			
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput("Input Signal", OV_TypeId_Signal);
@@ -326,7 +326,7 @@ namespace OpenViBEPlugins
 
 //               rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

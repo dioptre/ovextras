@@ -9,7 +9,7 @@ using namespace OpenViBEPlugins::Tests;
 
 using namespace OpenViBEToolkit;
 
-boolean CTestCodecToolkit::initialize(void)
+bool CTestCodecToolkit::initialize(void)
 {
 	// You can also manipulate pointers to Codec object. Creation and destruction must be done like that :	
 	TStreamedMatrixDecoder < CTestCodecToolkit > * l_oStreamedMatrixDecoder = new TStreamedMatrixDecoder < CTestCodecToolkit >(*this,0);
@@ -71,7 +71,8 @@ boolean CTestCodecToolkit::initialize(void)
 	m_oSpectrumDecoder.initialize(*this,3);
 	m_oSpectrumEncoder.initialize(*this,3);
 	m_oSpectrumEncoder.getInputMatrix().setReferenceTarget(m_oSpectrumDecoder.getOutputMatrix());
-	m_oSpectrumEncoder.getInputMinMaxFrequencyBands().setReferenceTarget(m_oSpectrumDecoder.getOutputMinMaxFrequencyBands());
+	m_oSpectrumEncoder.getInputFrequencyAbscissa().setReferenceTarget(m_oSpectrumDecoder.getOutputFrequencyAbscissa());
+	m_oSpectrumEncoder.getInputSamplingRate().setReferenceTarget(m_oSpectrumDecoder.getOutputSamplingRate());
 	m_vDecoders.push_back(&m_oSpectrumDecoder);
 	m_vEncoders.push_back(&m_oSpectrumEncoder);
 
@@ -106,7 +107,7 @@ boolean CTestCodecToolkit::initialize(void)
 	return true;
 }
 
-boolean CTestCodecToolkit::uninitialize(void)
+bool CTestCodecToolkit::uninitialize(void)
 {
 	for(uint32 i = 0; i< m_vDecoders.size(); i++)
 	{
@@ -120,17 +121,17 @@ boolean CTestCodecToolkit::uninitialize(void)
 	return true;
 }
 
-boolean CTestCodecToolkit::processInput(uint32 ui32InputIndex)
+bool CTestCodecToolkit::processInput(uint32 ui32InputIndex)
 {
 	this->getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 
 	return true;
 }
 
-boolean CTestCodecToolkit::process(void)
+bool CTestCodecToolkit::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
@@ -165,8 +166,8 @@ boolean CTestCodecToolkit::process(void)
 				}
 				else if(l_oInputType==OV_TypeId_Spectrum)
 				{
-					IMatrix* l_pMatrix = m_oSpectrumDecoder.getOutputMinMaxFrequencyBands();
-					this->getLogManager() << LogLevel_Info << "Spectrum min/MAX bands received ("<<l_pMatrix->getBufferElementCount()<<" elements in matrix).\n";
+					IMatrix* l_pMatrix = m_oSpectrumDecoder.getOutputFrequencyAbscissa();
+					this->getLogManager() << LogLevel_Info << "Spectrum frequencies abscissas received ("<<l_pMatrix->getBufferElementCount()<<" elements in matrix).\n";
 				}
 				else if(l_oInputType==OV_TypeId_Signal)
 				{

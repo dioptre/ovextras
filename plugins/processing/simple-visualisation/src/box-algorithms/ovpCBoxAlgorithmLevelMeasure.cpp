@@ -9,7 +9,7 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::SimpleVisualisation;
 
-boolean CBoxAlgorithmLevelMeasure::initialize(void)
+bool CBoxAlgorithmLevelMeasure::initialize(void)
 {
 	// CString l_sSettingValue;
 	// getStaticBoxContext().getSettingValue(0, l_sSettingValue);
@@ -36,7 +36,7 @@ boolean CBoxAlgorithmLevelMeasure::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmLevelMeasure::uninitialize(void)
+bool CBoxAlgorithmLevelMeasure::uninitialize(void)
 {
 	op_pLevelMeasureToolbarWidget.uninitialize();
 	op_pLevelMeasureMainWidget.uninitialize();
@@ -54,17 +54,19 @@ boolean CBoxAlgorithmLevelMeasure::uninitialize(void)
 	delete m_pMatrix;
 	m_pMatrix=NULL;
 
+	this->releasePluginObject(m_visualizationContext);
+
 	return true;
 }
 
-boolean CBoxAlgorithmLevelMeasure::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmLevelMeasure::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 
 	return true;
 }
 
-boolean CBoxAlgorithmLevelMeasure::process(void)
+bool CBoxAlgorithmLevelMeasure::process(void)
 {
 	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
@@ -76,8 +78,9 @@ boolean CBoxAlgorithmLevelMeasure::process(void)
 		if(m_pStreamedMatrixDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedHeader))
 		{
 			m_pLevelMeasure->process(OVP_Algorithm_LevelMeasure_InputTriggerId_Reset);
-			getVisualisationContext().setWidget(op_pLevelMeasureMainWidget);
-			getVisualisationContext().setToolbar(op_pLevelMeasureToolbarWidget);
+			m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+			m_visualizationContext->setWidget(*this, op_pLevelMeasureMainWidget);
+			m_visualizationContext->setToolbar(*this, op_pLevelMeasureToolbarWidget);
 		}
 
 		if(m_pStreamedMatrixDecoder->isOutputTriggerActive(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputTriggerId_ReceivedBuffer))

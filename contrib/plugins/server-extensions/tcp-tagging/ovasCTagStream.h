@@ -30,7 +30,7 @@ namespace OpenViBEAcquisitionServerPlugins
 // and a timestamp corresponding to the time at which the event occurrs.
 struct Tag
 {
-	unsigned long long padding, identifier, timestamp;
+	uint64_t padding, identifier, timestamp;
 };
 
 class CTagSession; // forward declaration of CTagSession to define SharedSessionPtr

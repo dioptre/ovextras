@@ -78,7 +78,7 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Name of filter",         OVP_TypeId_FilterMethod, "Butterworth");
 				rPrototype.addSetting("Filter order",           OV_TypeId_Integer, "4");
 				rPrototype.addSetting("Pass band ripple (dB)",  OV_TypeId_Float, "0.5");
-				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsUnstable);
+                rPrototype.addFlag   (OV_AttributeId_Box_FlagIsUnstable);
 				return true;
 			}
 

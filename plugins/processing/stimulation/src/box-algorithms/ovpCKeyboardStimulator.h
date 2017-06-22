@@ -14,6 +14,8 @@
 #include <vector>
 #include <map>
 
+#include <visualization-toolkit/ovviz_all.h>
+
 namespace OpenViBEPlugins
 {
 	namespace Stimulation
@@ -68,6 +70,8 @@ namespace OpenViBEPlugins
 		private:
 			OpenViBE::boolean m_bUnknownKeyPressed;
 			OpenViBE::uint32 m_ui32UnknownKeyCode;
+
+			OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
 		};
 
 		/**
@@ -87,9 +91,9 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_KeyboardStimulator; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Stimulation::CKeyboardStimulator(); }
 
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 
 			virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const

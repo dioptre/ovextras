@@ -5,6 +5,7 @@
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include <visualization-toolkit/ovviz_all.h>
 
 #include <gtk/gtk.h>
 
@@ -51,10 +52,10 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize();
-			virtual OpenViBE::boolean uninitialize();
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
-			virtual OpenViBE::boolean process();
+			virtual bool initialize();
+			virtual bool uninitialize();
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool process();
 
 			virtual void redraw();
 			virtual void resize(OpenViBE::uint32 ui32Width, OpenViBE::uint32 ui32Height);
@@ -103,7 +104,7 @@ namespace OpenViBEPlugins
 			OpenViBE::uint64 m_ui64StartTime;
 			OpenViBE::uint64 m_ui64EndTime;
 
-			OpenViBE::boolean m_bTwoValueInput;
+			bool m_bTwoValueInput;
 
 			GdkPixbuf * m_pOriginalBar;
 			GdkPixbuf * m_pLeftBar;
@@ -124,11 +125,11 @@ namespace OpenViBEPlugins
 
 			std::deque<OpenViBE::float64> m_vAmplitude; // predictions for the current trial
 
-			OpenViBE::boolean m_bShowInstruction;
-			OpenViBE::boolean m_bShowFeedback;
-			OpenViBE::boolean m_bDelayFeedback;
-			OpenViBE::boolean m_bShowAccuracy;
-			OpenViBE::boolean m_bPositiveFeedbackOnly;
+			bool m_bShowInstruction;
+			bool m_bShowFeedback;
+			bool m_bDelayFeedback;
+			bool m_bShowAccuracy;
+			bool m_bPositiveFeedbackOnly;
 
 			OpenViBE::uint64 m_i64PredictionsToIntegrate;
 
@@ -140,6 +141,9 @@ namespace OpenViBEPlugins
 			TCPTagging::IStimulusSender* m_pStimulusSender;
 
 			OpenViBE::uint64 m_ui64LastStimulation;
+
+		private:
+			OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
 		};
 
 		/**
@@ -153,19 +157,19 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA/IRISA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Visualization plugin for the Graz experiment"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Visualization/Feedback plugin for the Graz experiment"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualisation/Presentation"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualization/Presentation"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
 			virtual void release(void)                                   { }
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_GrazVisualization; }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-fullscreen"); }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SimpleVisualisation::CGrazVisualization(); }
 
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 
-			virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
+			virtual bool getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				rPrototype.addInput("Stimulations", OV_TypeId_Stimulations);
 				rPrototype.addInput("Amplitude", OV_TypeId_StreamedMatrix);

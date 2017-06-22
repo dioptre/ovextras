@@ -28,7 +28,7 @@ void CBoxAlgorithmTCPWriter::startAccept()
 	// Since startAccept will only be called inside ioService.poll(), there is no need to access control m_vSockets
 	m_vSockets.push_back(l_pSocket);
 
-	this->getLogManager() << LogLevel_Debug << "We are now using " << (uint32)m_vSockets.size() << " socket(s)\n";
+	this->getLogManager() << LogLevel_Debug << "We are now using " << (uint32_t)m_vSockets.size() << " socket(s)\n";
 
 	m_pAcceptor->async_accept(*l_pSocket, 
 		boost::bind(&CBoxAlgorithmTCPWriter::handleAccept, this, boost::asio::placeholders::error, l_pSocket));
@@ -51,14 +51,14 @@ void CBoxAlgorithmTCPWriter::handleAccept(const boost::system::error_code& ec, b
 		{
 			try 
 			{
-				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32RawVersion, sizeof(uint32)));
-				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Endianness, sizeof(uint32)));
-				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Frequency, sizeof(uint32)));
-				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32NumberOfChannels, sizeof(uint32)));
-				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32NumberOfSamplesPerChunk, sizeof(uint32)));
-				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Reserved0, sizeof(uint32)));
-				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Reserved1, sizeof(uint32)));
-				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Reserved2, sizeof(uint32)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32RawVersion, sizeof(uint32_t)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Endianness, sizeof(uint32_t)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Frequency, sizeof(uint32_t)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32NumberOfChannels, sizeof(uint32_t)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32NumberOfSamplesPerChunk, sizeof(uint32_t)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Reserved0, sizeof(uint32_t)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Reserved1, sizeof(uint32_t)));
+				boost::asio::write(*pSocket, boost::asio::buffer((void *)&m_ui32Reserved2, sizeof(uint32_t)));
 			} 
 			catch (boost::system::system_error l_oError) 
 			{
@@ -75,9 +75,9 @@ void CBoxAlgorithmTCPWriter::handleAccept(const boost::system::error_code& ec, b
 	startAccept();
 } 
 
-boolean CBoxAlgorithmTCPWriter::initialize(void)
+bool CBoxAlgorithmTCPWriter::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
 	l_rStaticBoxContext.getInputType(0, m_oInputType);
 	if(m_oInputType == OV_TypeId_StreamedMatrix) 
@@ -94,7 +94,7 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	}
 	m_pActiveDecoder->initialize(*this,0);
 
-	const uint64 l_ui64Port = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	const uint64_t l_ui64Port = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_ui64OutputStyle = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 	m_ui32RawVersion = htonl(1); // TCP Writer output format version
@@ -122,7 +122,7 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 	{
 #ifdef TARGET_OS_Windows
 		// On Windows, unless we deny reuse_addr, it seems several different servers can bind to the same socket. This is not what we want.
-		m_pAcceptor = new tcp::acceptor(m_oIOService, tcp::endpoint(tcp::v4(), (uint32)l_ui64Port), false);
+		m_pAcceptor = new tcp::acceptor(m_oIOService, tcp::endpoint(tcp::v4(), (uint32_t)l_ui64Port), false);
 #else
 		// On Linux, unless we allow reuse_addr, disconnection may set the socket to TIME_WAIT state and prevent opening it again until that state expires
 		m_pAcceptor = new tcp::acceptor(m_oIOService, tcp::endpoint(tcp::v4(), (uint32)l_ui64Port), true);
@@ -148,7 +148,7 @@ boolean CBoxAlgorithmTCPWriter::initialize(void)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmTCPWriter::uninitialize(void)
+bool CBoxAlgorithmTCPWriter::uninitialize(void)
 {
 	if(m_pActiveDecoder) 
 	{
@@ -156,9 +156,8 @@ boolean CBoxAlgorithmTCPWriter::uninitialize(void)
 		m_pActiveDecoder=NULL;
 	}
 
-	for(uint32 i=0;i<m_vSockets.size();i++) 
+	for(boost::asio::ip::tcp::socket* l_oTmpSock : m_vSockets)
 	{
-		boost::asio::ip::tcp::socket* l_oTmpSock = m_vSockets[i];
 		if(l_oTmpSock->is_open()) 
 		{
 			try
@@ -177,20 +176,20 @@ boolean CBoxAlgorithmTCPWriter::uninitialize(void)
 
 	m_oIOService.stop();
 
-	for(uint32 i=0;i<m_vSockets.size();i++) 
+	for(boost::asio::ip::tcp::socket* l_oTmpSock : m_vSockets)
 	{
-		delete m_vSockets[i];
+		delete l_oTmpSock;
 	}
 	m_vSockets.clear();
 
 	delete m_pAcceptor;
-	m_pAcceptor = NULL;
+	m_pAcceptor = nullptr;
 	
 	return true;
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmTCPWriter::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmTCPWriter::processInput(uint32_t ui32InputIndex)
 {
 	// ready to process !
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
@@ -199,7 +198,7 @@ boolean CBoxAlgorithmTCPWriter::processInput(uint32 ui32InputIndex)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmTCPWriter::sendToClients(const void* pBuffer, uint32 ui32BufferLength)
+bool CBoxAlgorithmTCPWriter::sendToClients(const void* pBuffer, uint32_t ui32BufferLength)
 {
 	if(ui32BufferLength==0 || pBuffer == NULL)
 	{
@@ -249,7 +248,7 @@ boolean CBoxAlgorithmTCPWriter::sendToClients(const void* pBuffer, uint32 ui32Bu
 	return true;
 }
 
-boolean CBoxAlgorithmTCPWriter::process(void)
+bool CBoxAlgorithmTCPWriter::process(void)
 {
 	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
@@ -326,9 +325,9 @@ boolean CBoxAlgorithmTCPWriter::process(void)
 			else // stimulus
 			{
 				const IStimulationSet* l_pStimulations = m_oStimulationDecoder.getOutputStimulationSet();
-				for(uint32 j=0; j<l_pStimulations->getStimulationCount(); j++)
+				for(uint32_t j=0; j<l_pStimulations->getStimulationCount(); j++)
 				{
-					const uint64 l_ui64StimulationCode = l_pStimulations->getStimulationIdentifier(j);
+					const uint64_t l_ui64StimulationCode = l_pStimulations->getStimulationIdentifier(j);
 					// uint64 l_ui64StimulationDate = l_pStimulations->getStimulationDate(j);
 					this->getLogManager() << LogLevel_Trace << "Sending out " << l_ui64StimulationCode << "\n";
 

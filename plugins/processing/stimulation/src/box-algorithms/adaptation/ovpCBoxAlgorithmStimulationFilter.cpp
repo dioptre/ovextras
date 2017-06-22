@@ -11,7 +11,7 @@ using namespace OpenViBEPlugins::Stimulation;
 
 boolean CBoxAlgorithmStimulationFilter::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_ui64DefaultAction=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_ui64StartTime    =(uint64)(((float64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1)) * (1LL<<32));

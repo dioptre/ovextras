@@ -10,27 +10,27 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Evaluation;
 
-boolean compareCTimelineStimulationPair(const CTimestampLabelPair& rElt1, const CTimestampLabelPair& rElt2)
+bool compareCTimelineStimulationPair(const CTimestampLabelPair& rElt1, const CTimestampLabelPair& rElt2)
 {
 	return rElt1.first < rElt2.first;
 }
 
-boolean compareValueAndStimulationTimelinePair(const CTimestampLabelPair& rElt1, const CTimestampValuesPair& rElt2)
+bool compareValueAndStimulationTimelinePair(const CTimestampLabelPair& rElt1, const CTimestampValuesPair& rElt2)
 {
 	return rElt1.first < rElt2.first;
 }
 
-boolean compareRocValuePair(const CRocPairValue& rElt1, const CRocPairValue& rElt2)
+bool compareRocValuePair(const CRocPairValue& rElt1, const CRocPairValue& rElt2)
 {
 	return rElt1.second > rElt2.second;
 }
 
-boolean isPositive(const CRocPairValue &rElt1)
+bool isPositive(const CRocPairValue &rElt1)
 {
 	return rElt1.first;
 }
 
-boolean CBoxAlgorithmROCCurve::initialize(void)
+bool CBoxAlgorithmROCCurve::initialize(void)
 {
 	m_oExpectedDecoder.initialize(*this, 0);
 	m_oClassificationValueDecoder.initialize(*this, 1);
@@ -49,12 +49,14 @@ boolean CBoxAlgorithmROCCurve::initialize(void)
 
 		m_oDrawerList.push_back(new CROCCurveDraw(GTK_NOTEBOOK(m_pWidget), i-1, l_sClassName));
 	}
-	getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pWidget);
+
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+	m_visualizationContext->setWidget(*this, m_pWidget);
 
 	return true;
 }
 
-boolean CBoxAlgorithmROCCurve::uninitialize(void)
+bool CBoxAlgorithmROCCurve::uninitialize(void)
 {
 	m_oExpectedDecoder.uninitialize();
 	m_oClassificationValueDecoder.uninitialize();
@@ -69,18 +71,21 @@ boolean CBoxAlgorithmROCCurve::uninitialize(void)
 	{
 		delete m_oValueTimeline[i].second;
 	}
+
+	this->releasePluginObject(m_visualizationContext);
+
 	return true;
 }
 
 
-boolean CBoxAlgorithmROCCurve::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmROCCurve::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 
 
-boolean CBoxAlgorithmROCCurve::process(void)
+bool CBoxAlgorithmROCCurve::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
@@ -153,7 +158,7 @@ boolean CBoxAlgorithmROCCurve::process(void)
 	return true;
 }
 
-boolean CBoxAlgorithmROCCurve::computeROCCurves()
+bool CBoxAlgorithmROCCurve::computeROCCurves()
 {
 	//Now we assiociate all values to the corresponding label
 	std::sort(m_oStimulationTimeline.begin(), m_oStimulationTimeline.end(), compareCTimelineStimulationPair);//ensure the timeline is ok
@@ -193,7 +198,7 @@ boolean CBoxAlgorithmROCCurve::computeROCCurves()
 	return true;
 }
 
-boolean CBoxAlgorithmROCCurve::computeOneROCCurve(const CIdentifier& rClassIdentifier, uint32 ui32ClassIndex)
+bool CBoxAlgorithmROCCurve::computeOneROCCurve(const CIdentifier& rClassIdentifier, uint32 ui32ClassIndex)
 {
 	std::vector < CRocPairValue > l_oRocPairValueList;
 	for(std::vector< CLabelValuesPair >::iterator it = m_oLabelValueList.begin(); it != m_oLabelValueList.end(); ++it)

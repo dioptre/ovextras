@@ -25,7 +25,7 @@ uint64 CBoxAlgorithmBrainampFileReader::getClockFrequency(void)
 
 boolean CBoxAlgorithmBrainampFileReader::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	// IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	// Creates algorithms

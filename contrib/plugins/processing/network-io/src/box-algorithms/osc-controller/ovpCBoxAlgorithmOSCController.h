@@ -97,7 +97,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("OSC Server Port",OV_TypeId_Integer,"9001");
 				rBoxAlgorithmPrototype.addSetting("OSC Address",OV_TypeId_String,"/a/b/c");
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+                rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

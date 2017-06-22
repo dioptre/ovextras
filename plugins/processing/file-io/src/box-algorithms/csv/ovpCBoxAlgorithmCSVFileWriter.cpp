@@ -61,8 +61,10 @@ boolean CBoxAlgorithmCSVFileWriter::initialize(void)
 	}
 	else
 	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Invalid input type identifier " << this->getTypeManager().getTypeName(m_oTypeIdentifier) << "\n";
-		return false;
+		OV_ERROR_KRF(
+			"Invalid input type identifier " << this->getTypeManager().getTypeName(m_oTypeIdentifier),
+			OpenViBE::Kernel::ErrorType::BadInput
+		);
 	}
 
 	m_ui64SampleCount = 0;
@@ -95,11 +97,12 @@ boolean CBoxAlgorithmCSVFileWriter::initializeFile()
 	const uint64 l_ui64Precision=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
 	m_oFileStream.open(l_sFilename.toASCIIString(), std::ios::trunc);
-	if(!m_oFileStream.is_open())
-	{
-		this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << l_sFilename << "] for writing\n";
-		return false;
-	}
+
+	OV_ERROR_UNLESS_KRF(
+		m_oFileStream.is_open(),
+		"Error opening file [" << l_sFilename << "] for writing",
+		OpenViBE::Kernel::ErrorType::BadFileWrite
+	);
 
 	m_oFileStream << std::scientific;
 	m_oFileStream.precision(static_cast<std::streamsize>(l_ui64Precision));
@@ -132,7 +135,7 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 	{
 		const uint64 l_ui64StartTime=l_rDynamicBoxContext.getInputChunkStartTime(0, i);
 		const uint64 l_ui64EndTime=l_rDynamicBoxContext.getInputChunkEndTime(0, i);
-		
+
 		m_pStreamDecoder->decode(i);
 
 		if(m_pStreamDecoder->isHeaderReceived())
@@ -143,11 +146,11 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 
 				const IMatrix* l_pMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMatrix();
 
-				if(l_pMatrix->getDimensionCount() > 2 || l_pMatrix->getDimensionCount() < 1)
-				{
-					this->getLogManager() << LogLevel_ImportantWarning << "Input matrix does not have 1 or 2 dimensions - Cannot write content in CSV file...\n";
-					return false;
-				}
+				OV_ERROR_UNLESS_KRF(
+					l_pMatrix->getDimensionCount() == 1 || l_pMatrix->getDimensionCount() == 2,
+					"Invalid input matrix: must have 1 or 2 dimensions",
+					ErrorType::BadInput
+				);
 
 				if( l_pMatrix->getDimensionCount() == 1 || m_oTypeIdentifier==OV_TypeId_FeatureVector)
 				{
@@ -196,8 +199,7 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 			}
 			else
 			{
-				// Already received a header
-				this->getLogManager() << LogLevel_Warning << "Received matrix header more than once, not supported\n";
+				OV_ERROR_KRF("Multiple streamed matrix headers received", ErrorType::BadInput);
 			}
 		}
 		if(m_pStreamDecoder->isBufferReceived())
@@ -224,7 +226,7 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 
 					m_oFileStream << ITimeArithmetics::timeToSeconds(l_ui64SampleTime);
 				}
-				else if(m_oTypeIdentifier==OV_TypeId_Spectrum) 
+				else if(m_oTypeIdentifier==OV_TypeId_Spectrum)
 				{
 					m_oFileStream << ITimeArithmetics::timeToSeconds(l_ui64EndTime);
 				}
@@ -245,10 +247,14 @@ boolean CBoxAlgorithmCSVFileWriter::process_streamedMatrix(void)
 					}
 					else if(m_oTypeIdentifier==OV_TypeId_Spectrum)
 					{
-						const IMatrix* l_pMinMaxFrequencyBand =  ((OpenViBEToolkit::TSpectrumDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputMinMaxFrequencyBands();
-
-						m_oFileStream << m_sSeparator.toASCIIString() << l_pMinMaxFrequencyBand->getBuffer()[s*2+0];
-						m_oFileStream << m_sSeparator.toASCIIString() << l_pMinMaxFrequencyBand->getBuffer()[s*2+1];
+						// This should not be supported anymore
+						// This is not the correct formula
+						const IMatrix* l_pCenterFrequencyBand =  ((OpenViBEToolkit::TSpectrumDecoder < CBoxAlgorithmCSVFileWriter >*)m_pStreamDecoder)->getOutputFrequencyAbscissa();
+						double half = s > 0
+								? (l_pCenterFrequencyBand->getBuffer()[s] - l_pCenterFrequencyBand->getBuffer()[s-1])/2.
+								: (l_pCenterFrequencyBand->getBuffer()[s+1] - l_pCenterFrequencyBand->getBuffer()[s])/2.;
+						m_oFileStream << m_sSeparator.toASCIIString() << (l_pCenterFrequencyBand->getBuffer()[s] - half);
+						m_oFileStream << m_sSeparator.toASCIIString() << (l_pCenterFrequencyBand->getBuffer()[s] + half);
 					}
 					else
 					{
@@ -300,7 +306,7 @@ boolean CBoxAlgorithmCSVFileWriter::process_stimulation(void)
 			}
 			else
 			{
-				this->getLogManager() << LogLevel_Warning << "Received stimulation header more than once, not supported\n";
+				OV_ERROR_KRF("Multiple stimulation headers received", ErrorType::BadInput);
 			}
 		}
 		if(m_pStreamDecoder->isBufferReceived())
@@ -309,9 +315,9 @@ boolean CBoxAlgorithmCSVFileWriter::process_stimulation(void)
 			for(uint32 j=0; j<l_pStimulationSet->getStimulationCount(); j++)
 			{
 				m_oFileStream << ITimeArithmetics::timeToSeconds(l_pStimulationSet->getStimulationDate(j))
-					<< m_sSeparator.toASCIIString() 
+					<< m_sSeparator.toASCIIString()
 					<< l_pStimulationSet->getStimulationIdentifier(j)
-					<< m_sSeparator.toASCIIString() 
+					<< m_sSeparator.toASCIIString()
 					<< ITimeArithmetics::timeToSeconds(l_pStimulationSet->getStimulationDuration(j))
 					<< "\n";
 			}

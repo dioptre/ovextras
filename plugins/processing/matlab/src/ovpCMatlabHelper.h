@@ -16,36 +16,50 @@ namespace OpenViBEPlugins
 		class CMatlabHelper
 		{
 		public:
-			OpenViBE::boolean setStreamedMatrixInputHeader(OpenViBE::uint32 ui32InputIndex, OpenViBE::IMatrix * pMatrix);
-			OpenViBE::boolean setFeatureVectorInputHeader(OpenViBE::uint32 ui32InputIndex, OpenViBE::IMatrix * pMatrix);
-			OpenViBE::boolean setSignalInputHeader(OpenViBE::uint32 ui32InputIndex, OpenViBE::IMatrix * pMatrix, OpenViBE::uint64 ui64SamplingRate);
-			OpenViBE::boolean setChannelLocalisationInputHeader(OpenViBE::uint32 ui32InputIndex, OpenViBE::IMatrix * pMatrix, OpenViBE::boolean bDynamic);
-			OpenViBE::boolean setSpectrumInputHeader(OpenViBE::uint32 ui32InputIndex, OpenViBE::IMatrix * pMatrix, OpenViBE::IMatrix * pFrequencyBands);
-			OpenViBE::boolean setStimulationsInputHeader(OpenViBE::uint32 ui32InputIndex);
+			CMatlabHelper(OpenViBE::Kernel::ILogManager& logManager, OpenViBE::Kernel::IErrorManager& errorManager)
+				: m_pMatlabEngine(nullptr), m_pLogManager(logManager), m_pErrorManager(errorManager) {}
+
+			bool setStreamedMatrixInputHeader(uint32_t ui32InputIndex, OpenViBE::IMatrix * pMatrix);
+			bool setFeatureVectorInputHeader(uint32_t ui32InputIndex, OpenViBE::IMatrix * pMatrix);
+			bool setSignalInputHeader(uint32_t ui32InputIndex, OpenViBE::IMatrix * pMatrix, uint64_t ui64SamplingRate);
+			bool setChannelLocalisationInputHeader(uint32_t ui32InputIndex, OpenViBE::IMatrix * pMatrix, bool bDynamic);
+			bool setSpectrumInputHeader(uint32_t ui32InputIndex, OpenViBE::IMatrix * pMatrix, OpenViBE::IMatrix * pFrequencyAbscissa, uint64_t samplingRate);
+			bool setStimulationsInputHeader(uint32_t ui32InputIndex);
 			
 			// The input buffers for streamed matrix and its children streams are the same.
-			OpenViBE::boolean addStreamedMatrixInputBuffer(OpenViBE::uint32 ui32InputIndex, OpenViBE::IMatrix * pMatrix, OpenViBE::uint64 ui64OpenvibeStartTime,OpenViBE::uint64 ui64OpenvibeEndTime);
-			OpenViBE::boolean addStimulationsInputBuffer(OpenViBE::uint32 ui32InputIndex,OpenViBE::IStimulationSet * pStimulationSet, OpenViBE::uint64 ui64OpenvibeStartTime,OpenViBE::uint64 ui64OpenvibeEndTime);
+			bool addStreamedMatrixInputBuffer(uint32_t ui32InputIndex, OpenViBE::IMatrix * pMatrix, uint64_t ui64OpenvibeStartTime,uint64_t ui64OpenvibeEndTime);
+			bool addStimulationsInputBuffer(uint32_t ui32InputIndex,OpenViBE::IStimulationSet * pStimulationSet, uint64_t ui64OpenvibeStartTime,uint64_t ui64OpenvibeEndTime);
 			
-			OpenViBE::boolean getStreamedMatrixOutputHeader(OpenViBE::uint32 ui32OutputIndex, OpenViBE::IMatrix * pMatrix);
-			OpenViBE::boolean getFeatureVectorOutputHeader(OpenViBE::uint32 ui32OutputIndex, OpenViBE::IMatrix * pMatrix);
-			OpenViBE::boolean getSignalOutputHeader(OpenViBE::uint32 ui32OutputIndex, OpenViBE::IMatrix * pMatrix, OpenViBE::uint64 & rSamplingRate);
-			OpenViBE::boolean getChannelLocalisationOutputHeader(OpenViBE::uint32 ui32OutputIndex, OpenViBE::IMatrix * pMatrix, OpenViBE::boolean &bDynamic);
-			OpenViBE::boolean getSpectrumOutputHeader(OpenViBE::uint32 ui32OutputIndex, OpenViBE::IMatrix * pMatrix, OpenViBE::IMatrix * pFrequencyBands);
-			OpenViBE::boolean getStimulationsOutputHeader(OpenViBE::uint32 ui32OutputIndex, OpenViBE::IStimulationSet * pStimulationSet);
+			bool getStreamedMatrixOutputHeader(uint32_t ui32OutputIndex, OpenViBE::IMatrix * pMatrix);
+			bool getFeatureVectorOutputHeader(uint32_t ui32OutputIndex, OpenViBE::IMatrix * pMatrix);
+			bool getSignalOutputHeader(uint32_t ui32OutputIndex, OpenViBE::IMatrix * pMatrix, uint64_t & rSamplingRate);
+			bool getChannelLocalisationOutputHeader(uint32_t ui32OutputIndex, OpenViBE::IMatrix * pMatrix, bool &bDynamic);
+			bool getSpectrumOutputHeader(uint32_t ui32OutputIndex, OpenViBE::IMatrix * pMatrix, OpenViBE::IMatrix * pFrequencyAbscissa, uint64_t &samplingRate);
+			bool getStimulationsOutputHeader(uint32_t ui32OutputIndex, OpenViBE::IStimulationSet * pStimulationSet);
 			
 			// The output buffers for streamed matrix and its children streams are the same.
-			OpenViBE::boolean popStreamedMatrixOutputBuffer(OpenViBE::uint32 ui32OutputIndex, OpenViBE::IMatrix * pMatrix, OpenViBE::uint64& rStartTime, OpenViBE::uint64& rEndTime);
-			OpenViBE::boolean popStimulationsOutputBuffer(OpenViBE::uint32 ui32OutputIndex,OpenViBE::IStimulationSet * pStimulationSet, OpenViBE::uint64& rStartTime, OpenViBE::uint64& rEndTime);
+			bool popStreamedMatrixOutputBuffer(uint32_t ui32OutputIndex, OpenViBE::IMatrix * pMatrix, uint64_t& rStartTime, uint64_t& rEndTime);
+			bool popStimulationsOutputBuffer(uint32_t ui32OutputIndex,OpenViBE::IStimulationSet * pStimulationSet, uint64_t& rStartTime, uint64_t& rEndTime);
 		
 			void setMatlabEngine(Engine * pEngine) { m_pMatlabEngine = pEngine; }
 			void setBoxInstanceVariableName(OpenViBE::CString sName) { m_sBoxInstanceVariableName = sName; }
 
-		private:
-			Engine * m_pMatlabEngine;
-			OpenViBE::CString m_sBoxInstanceVariableName; //must be unique
 
-			OpenViBE::CString escapeMatlabString(OpenViBE::CString sStringToEscape);
+			uint32_t getUint32FromEnv(const char* name);
+			uint64_t getUint64FromEnv(const char* name);
+			uint64_t genUint64FromEnvConverted(const char* name);
+			std::vector<OpenViBE::CString> getNamelist(const char* name);
+
+
+			OpenViBE::Kernel::ILogManager& getLogManager(void) const { return m_pLogManager; }
+			OpenViBE::Kernel::IErrorManager& getErrorManager(void) const { return m_pErrorManager; }
+
+		private:
+			Engine* m_pMatlabEngine;
+			OpenViBE::Kernel::ILogManager& m_pLogManager;
+			OpenViBE::Kernel::IErrorManager& m_pErrorManager;
+
+			OpenViBE::CString m_sBoxInstanceVariableName; //must be unique
 		};
 	};
 };

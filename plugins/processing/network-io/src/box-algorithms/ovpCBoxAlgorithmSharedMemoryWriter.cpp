@@ -20,7 +20,7 @@ using namespace OpenViBEPlugins::FileReadingAndWriting;
 
 #define time2ms(x,y) ((x) * 1000 + y/1000.0) + 0.5
 
-boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
+bool CBoxAlgorithmSharedMemoryWriter::initialize(void)
 {
 	//m_oAlgo0_StimulationDecoder.initialize(*this);
 	//m_oAlgo0_StreamedMatrixDecoder.initialize(*this);
@@ -41,8 +41,8 @@ boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 	const StringAllocator alloc_inst_string(m_oSharedMemoryArray.get_segment_manager());
 	
 	//fill meta info vector and create shared vector variable for the appropriate types
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
-	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+	for(uint32_t i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{	
 		CIdentifier l_oTypeIdentifier;
 		std::ostringstream convert;   // stream used for the conversion
@@ -83,11 +83,11 @@ boolean CBoxAlgorithmSharedMemoryWriter::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmSharedMemoryWriter::uninitialize(void)
+bool CBoxAlgorithmSharedMemoryWriter::uninitialize(void)
 {
 	m_oSharedMemoryArray.destroy<MyVectorMetaInfo>("MetaInfo");
 	
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	for(int i=l_rStaticBoxContext.getInputCount()-1; i>=0; i--)
 	{
 		CIdentifier l_oTypeIdentifier;
@@ -98,7 +98,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::uninitialize(void)
 		if (l_oTypeIdentifier==OVTK_TypeId_StreamedMatrix)
 		{
 			this->getLogManager() << LogLevel_Debug << "Uninitialize shared memory variable associated with input " << i << "\n";
-			for (uint32 it=0; it<m_vStreamedMatrix.back()->size(); it++)
+			for (uint32_t it=0; it<m_vStreamedMatrix.back()->size(); it++)
 			{
 				m_oSharedMemoryArray.deallocate(m_vStreamedMatrix.back()->at(it)->data.get());
 				m_oSharedMemoryArray.deallocate(m_vStreamedMatrix.back()->at(it).get());
@@ -123,7 +123,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::uninitialize(void)
 	delete m_oMutex;
 	//m_oAlgo0_StimulationDecoder.uninitialize();
 	//m_oAlgo0_StreamedMatrixDecoder.uninitialize();
-	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
+	for(uint32_t i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{
 		m_vDecoder[i]->uninitialize();
 		delete m_vDecoder[i];
@@ -133,28 +133,28 @@ boolean CBoxAlgorithmSharedMemoryWriter::uninitialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmSharedMemoryWriter::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmSharedMemoryWriter::processInput(uint32_t ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 
 	return true;
 }
 
-boolean CBoxAlgorithmSharedMemoryWriter::process(void)
+bool CBoxAlgorithmSharedMemoryWriter::process(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
-	uint32 l_ui32StimulusInputCounter = 0;
-	uint32 l_ui32MatrixInputCounter = 0;
+	uint32_t l_ui32StimulusInputCounter = 0;
+	uint32_t l_ui32MatrixInputCounter = 0;
 	
-	for(uint32 j=0; j<l_rStaticBoxContext.getInputCount(); j++)
+	for(uint32_t j=0; j<l_rStaticBoxContext.getInputCount(); j++)
 	{
 		CIdentifier l_oTypeIdentifier;
 		l_rStaticBoxContext.getInputType(j,l_oTypeIdentifier);		
 		if (l_oTypeIdentifier==OVTK_TypeId_Stimulations)
 		{		
-			for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(j); i++)
+			for(uint32_t i=0; i<l_rDynamicBoxContext.getInputChunkCount(j); i++)
 			{			
 				//m_oAlgo0_StimulationDecoder.decode(j,i, false);
 				m_vDecoder[j]->decode(i,false);
@@ -172,17 +172,17 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 						scoped_lock<named_mutex> lock(*m_oMutex, try_to_lock);
 						if (lock)
 						{
-							for (uint32 si=0; si<l_pStimSet->getStimulationCount(); si++)
+							for (uint32_t si=0; si<l_pStimSet->getStimulationCount(); si++)
 							{
 								// @fixme m_vStimuliSet defined as 32bit will only work correctly with stimuli that fit in 32bits (OV stimulations can be 64bit)
-								m_vStimuliSet[l_ui32StimulusInputCounter]->push_back(static_cast<uint32>(l_pStimSet->getStimulationIdentifier(si)));
+								m_vStimuliSet[l_ui32StimulusInputCounter]->push_back(static_cast<uint32_t>(l_pStimSet->getStimulationIdentifier(si)));
 								this->getLogManager() << LogLevel_Info << "Added stimulus with id " << m_vStimuliSet[l_ui32StimulusInputCounter]->back() << " to shared memory variable\n";
 							}
 							l_rDynamicBoxContext.markInputAsDeprecated(j,i);
 						}
 						else
 						{
-							//this->getLogManager() << LogLevel_Warning  << "At time " << (uint32)currentLTime.tv_sec << "," << (uint32)currentLTime.tv_usec  << " shared memory writer could not lock mutex\n";		
+							//this->getLogManager() << LogLevel_Warning  << "At time " << (uint32_t)currentLTime.tv_sec << "," << (uint32_t)currentLTime.tv_usec  << " shared memory writer could not lock mutex\n";
 							this->getLogManager() << LogLevel_Warning  << "Shared memory writer could not lock mutex\n";	
 						}							
 					}	
@@ -201,7 +201,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 		}
 		else if (l_oTypeIdentifier==OVTK_TypeId_StreamedMatrix)
 		{
-			for(uint32 i=0; i<l_rDynamicBoxContext.getInputChunkCount(j); i++)
+			for(uint32_t i=0; i<l_rDynamicBoxContext.getInputChunkCount(j); i++)
 			{				
 				m_vDecoder[j]->decode(i, false);
 				IMatrix* l_pMatrix = ((OpenViBEToolkit::TStreamedMatrixDecoder < CBoxAlgorithmSharedMemoryWriter >*)m_vDecoder[j])->getOutputMatrix();
@@ -214,7 +214,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 					scoped_lock<named_mutex> lock(*m_oMutex, try_to_lock);
 					if (lock)
 					{
-						/*for (uint32 it=0; it<m_pInputStreamedMatrix->size(); it++)
+						/*for (uint32_t it=0; it<m_pInputStreamedMatrix->size(); it++)
 						{
 							m_oSharedMemoryArray.deallocate(m_pInputStreamedMatrix->at(it)->data.get());
 							m_oSharedMemoryArray.deallocate(m_pInputStreamedMatrix->at(it).get());
@@ -224,7 +224,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 						offset_ptr<SMatrix> l_ShmMatrix= static_cast<SMatrix*>(m_oSharedMemoryArray.allocate(sizeof(SMatrix)));
 
 						//if we receive a vector (second dimension to 0) we force to one otherwise no memory will be allocated
-						uint32 row = (l_pMatrix->getDimensionSize(1)==0)?1:l_pMatrix->getDimensionSize(1);
+						uint32_t row = (l_pMatrix->getDimensionSize(1)==0)?1:l_pMatrix->getDimensionSize(1);
 
 						l_ShmMatrix->rowDimension = row;
 						l_ShmMatrix->columnDimension = l_pMatrix->getDimensionSize(0);
@@ -235,7 +235,7 @@ boolean CBoxAlgorithmSharedMemoryWriter::process(void)
 						
 						l_ShmMatrix->data = static_cast<float64*>(m_oSharedMemoryArray.allocate(
 							l_pMatrix->getDimensionSize(0)*row*sizeof(float64)));
-						for (uint32 di=0; di<l_pMatrix->getBufferElementCount(); di++)
+						for (uint32_t di=0; di<l_pMatrix->getBufferElementCount(); di++)
 						{
 							*(l_ShmMatrix->data+di) = *(l_pMatrix->getBuffer()+di);
 							//std::cout << " " << *(l_ShmMatrix->data+di);

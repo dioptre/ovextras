@@ -35,14 +35,14 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
 				
 
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
 
 			
-			virtual OpenViBE::boolean process(void);
+			virtual bool process(void);
 			
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_DiscreteWaveletTransform);
@@ -71,7 +71,7 @@ namespace OpenViBEPlugins
 		{
 		public:
 
-			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 
 				if (ui32Index==0)
@@ -152,7 +152,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmDiscreteWaveletTransformListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput("Signal",OV_TypeId_Signal);
@@ -165,7 +165,7 @@ namespace OpenViBEPlugins
                 rBoxAlgorithmPrototype.addSetting("Wavelet type",OVP_TypeId_WaveletType,"");
                 rBoxAlgorithmPrototype.addSetting("Wavelet decomposition levels",OVP_TypeId_WaveletLevel,"");
 				
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

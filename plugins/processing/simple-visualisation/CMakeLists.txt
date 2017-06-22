@@ -11,11 +11,12 @@ SET(PROJECT_VERSION_PATCH ${OV_GLOBAL_VERSION_PATCH})
 SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
+
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 	VERSION ${PROJECT_VERSION}
 	SOVERSION ${PROJECT_VERSION_MAJOR}
-	COMPILE_FLAGS "-DOV_Exports -DOV_Shared")
+	COMPILE_FLAGS "-DOVP_Exports -DOVP_Shared")
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
@@ -25,6 +26,8 @@ INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleTCPTagging")
 INCLUDE("FindThirdPartyGTK")
 INCLUDE("FindThirdPartyBoost")          # need boost for erp plot
+INCLUDE("FindOpenViBEVisualizationToolkit")
+
    
 # ---------------------------------
 # Target macros

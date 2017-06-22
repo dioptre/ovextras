@@ -20,24 +20,33 @@ PROJECT(OpenViBE)
 SET(OV_GLOBAL_VERSION_MAJOR 1)
 SET(OV_GLOBAL_VERSION_MINOR 3)
 SET(OV_GLOBAL_VERSION_PATCH 0+git)
+SET(OV_GLOBAL_VERSION_STRING "${OV_GLOBAL_VERSION_MAJOR}.${OV_GLOBAL_VERSION_MINOR}.${OV_GLOBAL_VERSION_PATCH}")
 
 # Default is to build to dist/. If you wish a custom install, set your own MAKE_INSTALL_PREFIX when you call CMake. Safest to do under a fakeroot.
 #IF(NOT CMAKE_INSTALL_PREFIX)
 #ENDIF(NOT CMAKE_INSTALL_PREFIX)
 
+SET(DOCUMENTATION_TEMP_DIRECTORY "${CMAKE_INSTALL_PREFIX}/doc-tmp")
+
 MESSAGE(STATUS "Appending compilation flags...")
 
-SET(OV_CUSTOM_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
+LIST(APPEND LIST_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
-# Path to CERTIVIBE; this points to the extracted certivibe package; in future
-# it should be made automagic that ov debug build should depend on cert debug build.
-#SET(OPENVIBE_SDK_PATH "${OV_CUSTOM_DEPENDENCIES_PATH}/certivibe-release")
-SET(OPENVIBE_SDK_PATH "${OV_CUSTOM_DEPENDENCIES_PATH}/certivibe-debug")
-
+# Path to CERTIVIBE; this points to the extracted certivibe package
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	FIND_PATH(OPENVIBE_SDK_PATH bin PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES openvibe-sdk-debug NO_DEFAULT_PATH)
+else()
+	FIND_PATH(OPENVIBE_SDK_PATH bin PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES openvibe-sdk-release NO_DEFAULT_PATH)
+endif()
+if(NOT OPENVIBE_SDK_PATH)
+	MESSAGE(FATAL_ERROR "Could not find OPENVIBE_SDK_PATH (value : ${OPENVIBE_SDK_PATH}). Please either specify it or put OpenViBE sdk binaries into dependencies/openvibe-sdk-{debug/release} folder")
+endif()
 ADD_DEFINITIONS("-DOV_PROJECT_NAME=\"${PROJECT_NAME}\"")
 ADD_DEFINITIONS("-DOV_VERSION_MAJOR=\"${OV_GLOBAL_VERSION_MAJOR}\"")
 ADD_DEFINITIONS("-DOV_VERSION_MINOR=\"${OV_GLOBAL_VERSION_MINOR}\"")
 ADD_DEFINITIONS("-DOV_VERSION_PATCH=\"${OV_GLOBAL_VERSION_PATCH}\"")
+
+ADD_DEFINITIONS("-DOV_CONFIG_SUBDIR=\"openvibe\"")
 
 IF(WIN32)
 	# Switch /arch:SSE2 enables vectorization. Remove if your CPU/compiler doesn't support it.
@@ -91,10 +100,10 @@ ELSEIF(UNIX)
 	CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 	IF(COMPILER_SUPPORTS_CXX11)
 	    # TODO maybe in future the next line will be uncommented
-	    # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 	ELSEIF(COMPILER_SUPPORTS_CXX0X)
 	    # TODO maybe in future the next line will be uncommented
-	    # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 	ELSE(COMPILER_SUPPORTS_CXX0X)
 		MESSAGE(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. In the future this may be required.")
 	ENDIF(COMPILER_SUPPORTS_CXX11)
@@ -191,10 +200,11 @@ ENDIF(UNIX)
 #SET(SKIP_PLUGINS_PROCESSING_EXAMPLES "1")
 
 # From certivibe designer repo in the future
-SET(SKIP_APPLICATIONS_PLATFORM_DESIGNER "1")	
+SET(SKIP_APPLICATIONS_PLATFORM_DESIGNER "0")
 SET(SKIP_APPLICATIONS_EXAMPLES_CONVERT "1")		# depends on Designer
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
+SET(OV_LAUNCHER_SOURCE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules/launchers")
 
 # If you wish you can uncomment the next line and add a file with additional information called OVBranches.cmake to
 # the cmake-modules folder. It makes modifying this very CMake file easier.
@@ -219,6 +229,7 @@ INCLUDE("OvAddProjects")
 INCLUDE("OvInstallLaunchScript")
 INCLUDE("OvLinkBoostLib")
 INCLUDE("OvPrint")
+INCLUDE("OvMessages")
 
 # Setup knowledge of GNU-style install path variables
 INCLUDE("GNUInstallDirs")
@@ -234,11 +245,10 @@ ADD_DEFINITIONS(-DOV_CMAKE_PATH_LIB="${CMAKE_INSTALL_FULL_LIBDIR}")
 ADD_SUBDIRECTORY("build-tool/")
 # Traverse these directories and build their components
 ADD_SUBDIRECTORY("modules/tcptagging") 
-# ADD_SUBDIRECTORY("plugins/")					# @TODO enable, prune, make work
-ADD_SUBDIRECTORY("plugins/processing/vrpn/")	# just as a post-cert example until the rest are fixed
+ADD_SUBDIRECTORY("plugins/")					# @TODO enable, prune, make work
 ADD_SUBDIRECTORY("applications/")
 ADD_SUBDIRECTORY("externals/")
-# ADD_SUBDIRECTORY("contrib/")					# @TODO enable, prune, make work
+ADD_SUBDIRECTORY("contrib/")					# @TODO enable, prune, make work
 ADD_SUBDIRECTORY("documentation/") # needs to be the last since it uses the list of collected projects
 
 #add dependency to plugin inspector to the documentation
@@ -274,3 +284,8 @@ IF(UNIX)
 	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/openvibe-ogre-plugins.cfg DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe)
 ENDIF(UNIX)
 
+
+
+LIST(APPEND CMAKE_MODULE_PATH "${OPENVIBE_SDK_PATH}/share")
+SET(INCLUDED_CERTIVIBE_COMPONENTS DEPENDENCIES ALLPLUGINS)
+INCLUDE("AddCertivibeComponents")

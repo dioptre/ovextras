@@ -28,6 +28,7 @@
 
 
 #define OVP_TypeId_ClassificationPairwiseStrategy							OpenViBE::CIdentifier(0x0DD51C74, 0x3C4E74C9)
+#define OVP_TypeId_OneVsOne_DecisionAlgorithms                              OpenViBE::CIdentifier(0xDEC1510, 0xDEC1510)
 
 
 extern const char* const c_sFormatVersionAttributeName;

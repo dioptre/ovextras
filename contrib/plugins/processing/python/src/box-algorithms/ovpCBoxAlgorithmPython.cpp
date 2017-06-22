@@ -117,7 +117,7 @@ uint64 CBoxAlgorithmPython::getClockFrequency(void)
 
 void CBoxAlgorithmPython::buildPythonSettings(void)
 {  
-  IBox * l_rStaticBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
+  const IBox * l_rStaticBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
   for (uint32 i=2; i<l_rStaticBoxContext->getSettingCount(); i++)
   {
     CString l_sName;
@@ -332,7 +332,7 @@ OpenViBE::boolean CBoxAlgorithmPython::initialize(void)
 	}
 
 	//Create the decoders for the inputs
-	IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+    const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	OpenViBE::CIdentifier l_oTypeIdentifier;
 	for(uint32 input=0; input<l_rStaticBoxContext.getInputCount(); input++)
 	{
@@ -1922,7 +1922,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStimulationOutputChunksFromPython
 
 OpenViBE::boolean CBoxAlgorithmPython::process(void)
 {	
-	IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+    const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	OpenViBE::CIdentifier l_oTypeIdentifier;
 
 	for(uint32 input=0; input<l_rStaticBoxContext.getInputCount(); input++)

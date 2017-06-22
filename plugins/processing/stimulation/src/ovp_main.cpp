@@ -1,14 +1,8 @@
 
 #include "ovp_defines.h"
 
-#include "box-algorithms/ovpCBoxAlgorithmClockStimulator.h"
 #include "box-algorithms/ovpCKeyboardStimulator.h"
 #include "box-algorithms/ovpCSignChangeDetector.h"
-
-#include "box-algorithms/ovpCBoxAlgorithmPlayerController.h"
-
-#include "box-algorithms/ovpCBoxAlgorithmStimulationMultiplexer.h"
-#include "box-algorithms/ovpCBoxAlgorithmStimulationVoter.h"
 
 #include "box-algorithms/ovpCBoxAlgorithmRunCommand.h"
 #if defined TARGET_HAS_ThirdPartyLua
@@ -23,29 +17,24 @@
 #include "box-algorithms/ovpCBoxAlgorithmP300SpellerStimulator.h"
 #include "box-algorithms/ovpCBoxAlgorithmP300IdentifierStimulator.h"
 
-#include "box-algorithms/ovpCBoxAlgorithmTimeout.h"
-
 OVP_Declare_Begin();
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_BoxAlgorithmFlag, OV_AttributeId_Box_FlagIsUnstable.toString(), 1);
 	rPluginModuleContext.getTypeManager().registerEnumerationType(OVP_TypeId_StimulationFilterAction, "Stimulation Filter Action");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_StimulationFilterAction, "Select", OVP_TypeId_StimulationFilterAction_Select.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_StimulationFilterAction, "Reject", OVP_TypeId_StimulationFilterAction_Reject.toUInteger());
 
-	rPluginModuleContext.getTypeManager().registerEnumerationType(OV_TypeId_PlayerAction, "Player Action");
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Play", OV_TypeId_PlayerAction_Play.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Stop", OV_TypeId_PlayerAction_Stop.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Pause", OV_TypeId_PlayerAction_Pause.toUInteger());
-	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Forward", OV_TypeId_PlayerAction_Forward.toUInteger());
-
-	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmClockStimulatorDesc);
+	// @FIXME CERT doesn't seem to be used...
+//	rPluginModuleContext.getTypeManager().registerEnumerationType(OV_TypeId_PlayerAction, "Player Action");
+//	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Play", OV_TypeId_PlayerAction_Play.toUInteger());
+//	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Stop", OV_TypeId_PlayerAction_Stop.toUInteger());
+//	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Pause", OV_TypeId_PlayerAction_Pause.toUInteger());
+//	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_PlayerAction, "Forward", OV_TypeId_PlayerAction_Forward.toUInteger());
 
 #if defined(TARGET_HAS_ThirdPartyGTK)
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CKeyboardStimulatorDesc);
 #endif
 
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CSignChangeDetectorDesc);
-
-	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmPlayerControllerDesc);
-	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmStimulationMultiplexerDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmRunCommandDesc);
 #if defined TARGET_HAS_ThirdPartyLua
@@ -61,9 +50,6 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmP300SpellerStimulatorDesc);
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmP300IdentifierStimulatorDesc);
 
-	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmTimeoutDesc);
-
-	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmStimulationVoterDesc);
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_Voting_ClearVotes, "Clear votes");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Voting_ClearVotes, "When expires",  OVP_TypeId_Voting_ClearVotes_WhenExpires.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_Voting_ClearVotes, "After output", OVP_TypeId_Voting_ClearVotes_AfterOutput.toUInteger());

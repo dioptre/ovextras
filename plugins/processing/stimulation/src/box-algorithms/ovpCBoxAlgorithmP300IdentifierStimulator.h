@@ -118,7 +118,7 @@ namespace OpenViBEPlugins
 
 				// rBoxAlgorithmPrototype.addSetting("Avoid neighbor flashing",         OV_TypeId_Boolean,     "false");
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 
 				return true;
 			}

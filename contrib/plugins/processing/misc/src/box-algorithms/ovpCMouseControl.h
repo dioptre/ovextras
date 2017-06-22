@@ -62,7 +62,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				rPrototype.addInput("Amplitude", OV_TypeId_StreamedMatrix);
-				rPrototype.addFlag (OpenViBE::Kernel::BoxFlag_IsUnstable);
+                rPrototype.addFlag (OV_AttributeId_Box_FlagIsUnstable);
 
 				rPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
 

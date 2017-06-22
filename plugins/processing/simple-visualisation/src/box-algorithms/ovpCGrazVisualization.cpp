@@ -326,7 +326,8 @@ namespace OpenViBEPlugins
 #if 0
 			gtk_widget_show_all(m_pMainWindow);
 #endif
-			getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pDrawingArea);
+			m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+			m_visualizationContext->setWidget(*this, m_pDrawingArea);
 			
 			m_pStimulusSender = TCPTagging::createStimulusSender();
 
@@ -385,6 +386,8 @@ namespace OpenViBEPlugins
 			if(m_pOriginalRightArrow){ g_object_unref(G_OBJECT(m_pOriginalRightArrow)); }
 			if(m_pOriginalUpArrow){	g_object_unref(G_OBJECT(m_pOriginalUpArrow)); }
 			if(m_pOriginalDownArrow){ g_object_unref(G_OBJECT(m_pOriginalDownArrow)); }
+
+			this->releasePluginObject(m_visualizationContext);
 
 			return true;
 		}
