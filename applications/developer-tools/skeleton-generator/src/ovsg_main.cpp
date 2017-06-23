@@ -43,20 +43,22 @@ int main(int argc, char** argv)
 		{
 			cout<<"[  INF  ] Got kernel descriptor, trying to create kernel"<<endl;
 			l_pKernelContext=l_pKernelDesc->createKernel("skeleton-generator", OpenViBE::Directories::getDataDir() + "/kernel/openvibe.conf");
-			if(!l_pKernelContext)
+			if(!l_pKernelContext || !l_pKernelContext->initialize())
 			{
 				cout<<"[ FAILED ] No kernel created by kernel descriptor"<<endl;
 			}
 			else
 			{
+				l_pKernelContext->getConfigurationManager().addConfigurationFromFile(OpenViBE::Directories::getDataDir() + "/kernel/openvibe.conf");
+				l_pKernelContext->getConfigurationManager().addConfigurationFromFile(OpenViBE::Directories::getDataDir() + "/applications/skeleton-generator/skeleton-generator.conf");
 				OpenViBEToolkit::initialize(*l_pKernelContext);
 				IConfigurationManager& l_rConfigurationManager=l_pKernelContext->getConfigurationManager();
 				l_pKernelContext->getPluginManager().addPluginsFromFiles(l_rConfigurationManager.expand("${Kernel_Plugins}"));
-				
 				gtk_init(&argc, &argv);
 
 				::GtkBuilder * l_pBuilderInterface = gtk_builder_new();
 				const OpenViBE::CString l_sFilename = OpenViBE::Directories::getDataDir() + "/applications/skeleton-generator/generator-interface.ui";
+				std::cout << l_sFilename.toASCIIString() << std::endl;
 				if(!gtk_builder_add_from_file(l_pBuilderInterface, l_sFilename, NULL))
 				{
 					std::cout << "Problem loading [" << l_sFilename << "]\n";
