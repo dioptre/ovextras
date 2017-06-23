@@ -33,11 +33,17 @@ MESSAGE(STATUS "Appending compilation flags...")
 LIST(APPEND LIST_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
 # Path to CERTIVIBE; this points to the extracted certivibe package
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	FIND_PATH(OPENVIBE_SDK_PATH bin PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES openvibe-sdk-debug NO_DEFAULT_PATH)
-else()
-	FIND_PATH(OPENVIBE_SDK_PATH bin PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES openvibe-sdk-release NO_DEFAULT_PATH)
+if(WIN32)
+	set(OPENVIBE_SDK_PATH_NAME_TO_SEEK bin/openvibe.dll)
+elseif(UNIX)
+	set(OPENVIBE_SDK_PATH_NAME_TO_SEEK lib/libopenvibe.so)
 endif()
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	FIND_PATH(OPENVIBE_SDK_PATH ${OPENVIBE_SDK_PATH_NAME_TO_SEEK} PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES openvibe-sdk-debug NO_DEFAULT_PATH)
+else()
+	FIND_PATH(OPENVIBE_SDK_PATH ${OPENVIBE_SDK_PATH_NAME_TO_SEEK} PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES openvibe-sdk-release NO_DEFAULT_PATH)
+endif()
+
 if(NOT OPENVIBE_SDK_PATH)
 	MESSAGE(FATAL_ERROR "Could not find OPENVIBE_SDK_PATH (value : ${OPENVIBE_SDK_PATH}). Please either specify it or put OpenViBE sdk binaries into dependencies/openvibe-sdk-{debug/release} folder")
 endif()
@@ -48,6 +54,8 @@ ADD_DEFINITIONS("-DOV_VERSION_PATCH=\"${OV_GLOBAL_VERSION_PATCH}\"")
 
 ADD_DEFINITIONS("-DOV_CONFIG_SUBDIR=\"openvibe\"")
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 IF(WIN32)
 	# Switch /arch:SSE2 enables vectorization. Remove if your CPU/compiler doesn't support it.
 	SET(OV_EIGEN_FLAGS "/arch:SSE2")
@@ -94,20 +102,6 @@ IF(WIN32)
 	SET(OV_WIN32_BOOST_VERSION "1_55")
 
 ELSEIF(UNIX)
-	# check for c++11 support
-	INCLUDE(CheckCXXCompilerFlag)
-	CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-	CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-	IF(COMPILER_SUPPORTS_CXX11)
-	    # TODO maybe in future the next line will be uncommented
-            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-	ELSEIF(COMPILER_SUPPORTS_CXX0X)
-	    # TODO maybe in future the next line will be uncommented
-            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-	ELSE(COMPILER_SUPPORTS_CXX0X)
-		MESSAGE(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. In the future this may be required.")
-	ENDIF(COMPILER_SUPPORTS_CXX11)
-
 	# If OpenMP is available, using it will allow Eigen to use multiple cores in matrix math.
 	INCLUDE("FindOpenMP")
 	IF(OPENMP_FOUND)
