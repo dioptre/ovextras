@@ -23,6 +23,8 @@ public:
 
 protected:
 
+	virtual OpenViBE::Kernel::ILogManager& getLogManager(void) const { return m_rKernelContext.getLogManager(); }
+	virtual OpenViBE::Kernel::IErrorManager& getErrorManager(void) const { return m_rKernelContext.getErrorManager(); }
 	const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
 };
 

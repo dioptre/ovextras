@@ -376,7 +376,9 @@ boolean CPluginObjectDescEnumAlgorithmSnapshotGenerator::callback(const IPluginO
 		0, 0,
 		0, 0,
 		xSize+32, ySize+32);
-	gdk_pixbuf_save(l_pPixBuf, (l_sFilename+".png").c_str(), "png", NULL, NULL);
+	OV_WARNING_UNLESS_K(
+		gdk_pixbuf_save(l_pPixBuf, (l_sFilename+".png").c_str(), "png", NULL, NULL),
+		"Failed saving " << (l_sFilename+".png").c_str());
 
 	g_object_unref(l_pPixBuf);
 
