@@ -52,18 +52,18 @@ int main(int argc, char** argv)
 				l_pKernelContext->getConfigurationManager().addConfigurationFromFile(OpenViBE::Directories::getDataDir() + "/kernel/openvibe.conf");
 				l_pKernelContext->getConfigurationManager().addConfigurationFromFile(OpenViBE::Directories::getDataDir() + "/applications/skeleton-generator/skeleton-generator.conf");
 				OpenViBEToolkit::initialize(*l_pKernelContext);
-				IConfigurationManager& l_rConfigurationManager=l_pKernelContext->getConfigurationManager();
+				IConfigurationManager& l_rConfigurationManager = l_pKernelContext->getConfigurationManager();
 				l_pKernelContext->getPluginManager().addPluginsFromFiles(l_rConfigurationManager.expand("${Kernel_Plugins}"));
 				gtk_init(&argc, &argv);
 
 				::GtkBuilder * l_pBuilderInterface = gtk_builder_new();
 				const OpenViBE::CString l_sFilename = OpenViBE::Directories::getDataDir() + "/applications/skeleton-generator/generator-interface.ui";
-				std::cout << l_sFilename.toASCIIString() << std::endl;
-				if(!gtk_builder_add_from_file(l_pBuilderInterface, l_sFilename, NULL))
-				{
-					std::cout << "Problem loading [" << l_sFilename << "]\n";
-					return -1;
-				}
+
+				OV_ERROR_UNLESS(
+					gtk_builder_add_from_file(l_pBuilderInterface, l_sFilename, NULL),
+					"Problem loading [" << l_sFilename << "]",
+					OpenViBE::Kernel::ErrorType::BadFileRead,
+					-1, l_pKernelContext->getErrorManager(), l_pKernelContext->getLogManager());
 
 				//gtk_builder_connect_signals(l_pBuilderInterface, NULL);
 
@@ -95,11 +95,12 @@ int main(int argc, char** argv)
 					{
 						l_DriverGenerator.initialize();
 					}
-					if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pRadioAlgo)))
-					{
-						std::cout<< "NOT YET AVAILABLE." <<std::endl;
-						return 0;
-					}
+					OV_ERROR_UNLESS(
+						!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pRadioAlgo)),
+						"NOT YET AVAILABLE.",
+						OpenViBE::Kernel::ErrorType::Internal,
+						0, l_pKernelContext->getErrorManager(), l_pKernelContext->getLogManager());
+
 					if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pRadioBox)))
 					{
 						l_BoxGenerator.initialize();
