@@ -3,6 +3,8 @@
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include <openvibe/kernel/ovIKernelObject.h>
+
 //#include <configuration/ovkCConfigurationManager.h>
 
 #include <gtk/gtk.h>
@@ -28,35 +30,36 @@ namespace OpenViBESkeletonGenerator
 		OpenViBE::CString             m_sCompany;
 		OpenViBE::CString             m_sTargetDirectory;
 
-		virtual OpenViBE::boolean initialize(void)=0;
+		virtual bool initialize(void)=0;
 		
 		OpenViBE::CString m_sConfigurationFile; // basic application config file
-		OpenViBE::boolean m_bConfigurationFileLoaded;
+		bool m_bConfigurationFileLoaded;
 
 		void getCommonParameters(void);
-		OpenViBE::boolean saveCommonParameters(OpenViBE::CString sFileName);
-		OpenViBE::boolean loadCommonParameters(OpenViBE::CString sFileName);
+		bool saveCommonParameters(OpenViBE::CString sFileName);
+		bool loadCommonParameters(OpenViBE::CString sFileName);
 
-		OpenViBE::boolean cleanConfigurationFile(OpenViBE::CString sFileName);
+		bool cleanConfigurationFile(OpenViBE::CString sFileName);
 		
 		// returns a sed-compliant expression to be parsed in a substitution command
 		OpenViBE::CString ensureSedCompliancy(OpenViBE::CString sExpression); 
 		// executes a regex replace and builds a new file, by replacing the matching expressions by the substitute. If no destination file is provided, the template file is modified.
 		// Note that the input must be a valid sed format regex pattern, the function does not check.
-		OpenViBE::boolean regexReplace(const OpenViBE::CString& sTemplateFile, const OpenViBE::CString& sExpression, const OpenViBE::CString& sSubstitute, const OpenViBE::CString& sDestinationFile = OpenViBE::CString(""));
+		bool regexReplace(const OpenViBE::CString& sTemplateFile, const OpenViBE::CString& sExpression, const OpenViBE::CString& sSubstitute, const OpenViBE::CString& sDestinationFile = OpenViBE::CString(""));
 
 		// get the formatted string date
 		OpenViBE::CString getDate();
 		
 		// generate a new file, giving a template file, a destination file, and a map ofsubstitutions (Tag,Substitute)
 		// return false if an error occurred.
-		OpenViBE::boolean generate(OpenViBE::CString sTemplateFile, OpenViBE::CString sDestinationFile, std::map<OpenViBE::CString,OpenViBE::CString> mSubstitutions, OpenViBE::CString& rLog);
+		bool generate(OpenViBE::CString sTemplateFile, OpenViBE::CString sDestinationFile, std::map<OpenViBE::CString,OpenViBE::CString> mSubstitutions, OpenViBE::CString& rLog);
 
 		virtual void getCurrentParameters(void) = 0;
-		virtual OpenViBE::boolean save(OpenViBE::CString sFileName) = 0;
-		virtual OpenViBE::boolean load(OpenViBE::CString sFileName) = 0;
+		virtual bool save(OpenViBE::CString sFileName) = 0;
+		virtual bool load(OpenViBE::CString sFileName) = 0;
 		
-
+		virtual OpenViBE::Kernel::ILogManager& getLogManager(void) const { return m_rKernelContext.getLogManager(); }
+		virtual OpenViBE::Kernel::IErrorManager& getErrorManager(void) const { return m_rKernelContext.getErrorManager(); }
 	};
 
 }

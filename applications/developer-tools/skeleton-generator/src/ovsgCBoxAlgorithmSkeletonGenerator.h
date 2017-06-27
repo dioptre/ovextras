@@ -14,9 +14,9 @@ namespace OpenViBESkeletonGenerator
 			CBoxAlgorithmSkeletonGenerator(OpenViBE::Kernel::IKernelContext & rKernelContext,::GtkBuilder * pBuilderInterface);
 			virtual ~CBoxAlgorithmSkeletonGenerator(void);
 
-			OpenViBE::boolean initialize(void);
-			OpenViBE::boolean save(OpenViBE::CString sFileName);
-			OpenViBE::boolean load(OpenViBE::CString sFileName);
+			bool initialize(void);
+			bool save(OpenViBE::CString sFileName);
+			bool load(OpenViBE::CString sFileName);
 			void getCurrentParameters(void);
 		
 			// Box Description
@@ -26,7 +26,7 @@ namespace OpenViBESkeletonGenerator
 			OpenViBE::CString              m_sCategory;
 			OpenViBE::CString              m_sShortDescription;
 			OpenViBE::CString              m_sDetailedDescription;
-			OpenViBE::int32                m_i32GtkStockItemIndex;
+			int32_t               m_i32GtkStockItemIndex;
 			OpenViBE::CString              m_sGtkStockItemName;
 
 			struct IOSStruct{
@@ -37,69 +37,61 @@ namespace OpenViBESkeletonGenerator
 			};
 
 			// Inputs
-			OpenViBE::boolean              m_bCanModifyInputs;
-			OpenViBE::boolean              m_bCanAddInputs;
+			bool              m_bCanModifyInputs;
+			bool              m_bCanAddInputs;
 			std::vector<IOSStruct>         m_vInputs;
 			// Outputs
-			OpenViBE::boolean              m_bCanModifyOutputs;
-			OpenViBE::boolean              m_bCanAddOutputs;
+			bool              m_bCanModifyOutputs;
+			bool              m_bCanAddOutputs;
 			std::vector<IOSStruct>         m_vOutputs;
 			// Settings
-			OpenViBE::boolean              m_bCanModifySettings;
-			OpenViBE::boolean              m_bCanAddSettings;
+			bool              m_bCanModifySettings;
+			bool              m_bCanAddSettings;
 			std::vector<IOSStruct>         m_vSettings;
-			// Message Inputs
-			OpenViBE::boolean              m_bCanModifyMessageInputs;
-			OpenViBE::boolean              m_bCanAddMessageInputs;
-			std::vector<IOSStruct>         m_vMessageInputs;
-			// Message Outputs
-			OpenViBE::boolean              m_bCanModifyMessageOutputs;
-			OpenViBE::boolean              m_bCanAddMessageOutputs;
-			std::vector<IOSStruct>         m_vMessageOutputs;
 
 			//Algorithms
 			std::vector<OpenViBE::CString> m_vAlgorithms; // the algorithm selected by user
 			// Can be made non-const after '= false' produces working code
-			static const OpenViBE::boolean              m_bUseCodecToolkit = true; // use or not the codec toolkit for encoder and decoder algorithms
+			static const bool              m_bUseCodecToolkit = true; // use or not the codec toolkit for encoder and decoder algorithms
 			std::map <OpenViBE::CString, OpenViBE::CString> m_mAlgorithmHeaderDeclaration; //the map between algorithm and corresponding header declaration (all variables algo/input/output).
 			std::map <OpenViBE::CString, OpenViBE::CString> m_mAlgorithmInitialisation;//the map between algorithm and corresponding initialisation
 			std::map <OpenViBE::CString, OpenViBE::CString> m_mAlgorithmInitialisation_ReferenceTargets;//the map between algorithm and corresponding initialisation of ref targets
 			std::map <OpenViBE::CString, OpenViBE::CString> m_mAlgorithmUninitialisation;//the map between algorithm and corresponding uninitialisation
 			
 			// Box Listener
-			OpenViBE::boolean              m_bUseBoxListener;
+			bool              m_bUseBoxListener;
 			// input
-			OpenViBE::boolean              m_bBoxListenerOnInputAdded;
-			OpenViBE::boolean              m_bBoxListenerOnInputRemoved;
-			OpenViBE::boolean              m_bBoxListenerOnInputTypeChanged;
-			OpenViBE::boolean              m_bBoxListenerOnInputNameChanged;
-			OpenViBE::boolean              m_bBoxListenerOnInputConnected;
-			OpenViBE::boolean              m_bBoxListenerOnInputDisconnected;
+			bool              m_bBoxListenerOnInputAdded;
+			bool              m_bBoxListenerOnInputRemoved;
+			bool              m_bBoxListenerOnInputTypeChanged;
+			bool              m_bBoxListenerOnInputNameChanged;
+			bool              m_bBoxListenerOnInputConnected;
+			bool              m_bBoxListenerOnInputDisconnected;
 			// output
-			OpenViBE::boolean              m_bBoxListenerOnOutputAdded;
-			OpenViBE::boolean              m_bBoxListenerOnOutputRemoved;
-			OpenViBE::boolean              m_bBoxListenerOnOutputTypeChanged;
-			OpenViBE::boolean              m_bBoxListenerOnOutputNameChanged;
-			OpenViBE::boolean              m_bBoxListenerOnOutputConnected;
-			OpenViBE::boolean              m_bBoxListenerOnOutputDisconnected;
+			bool              m_bBoxListenerOnOutputAdded;
+			bool              m_bBoxListenerOnOutputRemoved;
+			bool              m_bBoxListenerOnOutputTypeChanged;
+			bool              m_bBoxListenerOnOutputNameChanged;
+			bool              m_bBoxListenerOnOutputConnected;
+			bool              m_bBoxListenerOnOutputDisconnected;
 			// setting
-			OpenViBE::boolean              m_bBoxListenerOnSettingAdded;
-			OpenViBE::boolean              m_bBoxListenerOnSettingRemoved;
-			OpenViBE::boolean              m_bBoxListenerOnSettingTypeChanged;
-			OpenViBE::boolean              m_bBoxListenerOnSettingNameChanged;
-			OpenViBE::boolean              m_bBoxListenerOnSettingDefaultValueChanged;
-			OpenViBE::boolean              m_bBoxListenerOnSettingValueChanged;
+			bool              m_bBoxListenerOnSettingAdded;
+			bool              m_bBoxListenerOnSettingRemoved;
+			bool              m_bBoxListenerOnSettingTypeChanged;
+			bool              m_bBoxListenerOnSettingNameChanged;
+			bool              m_bBoxListenerOnSettingDefaultValueChanged;
+			bool              m_bBoxListenerOnSettingValueChanged;
 			
-			OpenViBE::boolean              m_bProcessInput;
-			OpenViBE::boolean              m_bProcessClock;
-			OpenViBE::uint32               m_ui32ClockFrequency;
-			OpenViBE::boolean              m_bProcessMessage;
+			bool              m_bProcessInput;
+			bool              m_bProcessClock;
+			uint32_t               m_ui32ClockFrequency;
+			bool              m_bProcessMessage;
 
 			void buttonCheckCB(void);
 			void buttonOkCB(void);
 			void forceRecheckCB(void);
-			void toggleListenerCheckbuttonsStateCB(OpenViBE::boolean bNewState);
-			void toggleClockFrequencyStateCB(OpenViBE::boolean bNewState);
+			void toggleListenerCheckbuttonsStateCB(bool bNewState);
+			void toggleClockFrequencyStateCB(bool bNewState);
 			void buttonTooltipCB(::GtkButton* pButton);
 			void buttonExitCB(void);
 
@@ -113,12 +105,10 @@ namespace OpenViBESkeletonGenerator
 			void buttonRemoveAlgorithmCB(void);
 			void algorithmSelectedCB(OpenViBE::int32 i32IndexSelected);
 
-			void buttonAddMessageInputCB(void);
-			void buttonRemoveMessageInputCB(void);
-			void buttonAddMessageOutputCB(void);
-			void buttonRemoveMessageOutputCB(void);
-
 		private:
+
+			virtual OpenViBE::Kernel::ILogManager& getLogManager(void) const { return m_rKernelContext.getLogManager(); }
+			virtual OpenViBE::Kernel::IErrorManager& getErrorManager(void) const { return m_rKernelContext.getErrorManager(); }
 
 			std::map < ::GtkButton*, OpenViBE::CString > m_vTooltips;
 
@@ -127,7 +117,7 @@ namespace OpenViBESkeletonGenerator
 			std::vector<OpenViBE::CString> m_vParameterType_EnumTypeCorrespondance;
 
 			// Sanity checks that a string is not empty or consist of spaces
-			OpenViBE::boolean isStringValid(const char *string);
+			bool isStringValid(const char *string);
 	};
 
 	class CDummyAlgoProto : public OpenViBE::Kernel::IAlgorithmProto
@@ -138,23 +128,23 @@ namespace OpenViBESkeletonGenerator
 		std::vector<OpenViBE::CString> m_vInputTriggers;
 		std::vector<OpenViBE::CString> m_vOutputTriggers;
 	public:
-		OpenViBE::boolean addInputParameter(
+		bool addInputParameter(
 			const OpenViBE::CIdentifier& rInputParameterIdentifier,
 			const OpenViBE::CString& sInputName,
 			const OpenViBE::Kernel::EParameterType eParameterType,
 			const OpenViBE::CIdentifier& rSubTypeIdentifier=OV_UndefinedIdentifier);
 			
-		OpenViBE::boolean addOutputParameter(
+		bool addOutputParameter(
 			const OpenViBE::CIdentifier& rOutputParameterIdentifier,
 			const OpenViBE::CString& sOutputName,
 			const OpenViBE::Kernel::EParameterType eParameterType,
 			const OpenViBE::CIdentifier& rSubTypeIdentifier=OV_UndefinedIdentifier);
 			
-		OpenViBE::boolean addInputTrigger(
+		bool addInputTrigger(
 			const OpenViBE::CIdentifier& rInputTriggerIdentifier,
 			const OpenViBE::CString& rInputTriggerName);
 			
-		OpenViBE::boolean addOutputTrigger(
+		bool addOutputTrigger(
 			const OpenViBE::CIdentifier& rOutputTriggerIdentifier,
 			const OpenViBE::CString& rOutputTriggerName);
 

@@ -53,32 +53,29 @@ void CSkeletonGenerator::getCommonParameters()
 
 }
 
-boolean CSkeletonGenerator::saveCommonParameters(CString sFileName)
+bool CSkeletonGenerator::saveCommonParameters(CString sFileName)
 {
 	// we get the latest values
 	getCommonParameters();
 
 	FILE* l_pFile=::fopen(sFileName.toASCIIString(), "ab");
-	if(!l_pFile)
-	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "Saving the common entries in [" << sFileName << "] failed !\n";
-		return false;
-	}
+	OV_ERROR_UNLESS_KRF(
+		l_pFile,
+		"Saving the common entries in [" << sFileName << "] failed !",
+		OpenViBE::Kernel::ErrorType::BadFileRead);
+
 
 	// generator selected
 	CString l_sActive;
-	::GtkWidget* l_pWidget = GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "sg-driver-selection-radio-button"));
-	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pWidget)))
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "sg-driver-selection-radio-button"))))
 	{
 		l_sActive = "0";
 	}
-	l_pWidget = GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "sg-algo-selection-radio-button"));
-	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pWidget)))
+	else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "sg-algo-selection-radio-button"))))
 	{
 		l_sActive = "1";
 	}
-	l_pWidget = GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "sg-box-selection-radio-button"));
-	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pWidget)))
+	else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderInterface, "sg-box-selection-radio-button"))))
 	{
 		l_sActive = "2";
 	}
@@ -87,7 +84,7 @@ boolean CSkeletonGenerator::saveCommonParameters(CString sFileName)
 	::fprintf(l_pFile, "SkeletonGenerator_Common_Author = %s\n", m_sAuthor.toASCIIString());
 	::fprintf(l_pFile, "SkeletonGenerator_Common_Company = %s\n", m_sCompany.toASCIIString());
 	::fclose(l_pFile);
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Common entries saved in [" << sFileName << "]\n";
+	getLogManager() << LogLevel_Info << "Common entries saved in [" << sFileName << "]\n";
 
 	//we can reload the file, it may have changed
 	m_bConfigurationFileLoaded = false;
@@ -95,27 +92,25 @@ boolean CSkeletonGenerator::saveCommonParameters(CString sFileName)
 	return true;
 }
 
-boolean CSkeletonGenerator::cleanConfigurationFile(CString sFileName)
+bool CSkeletonGenerator::cleanConfigurationFile(CString sFileName)
 {
 	FILE* l_pFile=::fopen(sFileName.toASCIIString(), "wb");
-	if(!l_pFile)
-	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "Failed to clean [" << sFileName << "]\n";
-		return false;
-	}
+	OV_ERROR_UNLESS_KRF(
+		l_pFile,
+		"Failed to clean [" << sFileName << "]",
+		OpenViBE::Kernel::ErrorType::BadFileRead);
 
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Configuration file [" << sFileName << "] cleaned.\n";
+	getLogManager() << LogLevel_Info << "Configuration file [" << sFileName << "] cleaned.\n";
 	::fclose(l_pFile);
 	return true;
 }
 
-boolean CSkeletonGenerator::loadCommonParameters(CString sFileName)
+bool CSkeletonGenerator::loadCommonParameters(CString sFileName)
 {
-	if(!m_bConfigurationFileLoaded && !m_rKernelContext.getConfigurationManager().addConfigurationFromFile(sFileName))
-	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "Common: Configuration file [" << sFileName << "] could not be loaded. \n";
-		return false;
-	}
+	OV_ERROR_UNLESS_KRF(
+		m_bConfigurationFileLoaded || m_rKernelContext.getConfigurationManager().addConfigurationFromFile(sFileName),
+		"Common: Configuration file [" << sFileName << "] could not be loaded. \n",
+		OpenViBE::Kernel::ErrorType::BadFileRead);
 
 	::GtkWidget* l_pWidget = GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "sg-driver-selection-radio-button"));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pWidget), (m_rKernelContext.getConfigurationManager().expandAsUInteger("${SkeletonGenerator_GeneratorSelected}") == 0));
@@ -130,7 +125,7 @@ boolean CSkeletonGenerator::loadCommonParameters(CString sFileName)
 	::GtkWidget * l_pEntryAuthorName = GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "entry_author_name"));
 	gtk_entry_set_text(GTK_ENTRY(l_pEntryAuthorName),m_rKernelContext.getConfigurationManager().expand("${SkeletonGenerator_Common_Author}"));
 
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Common entries from [" << sFileName << "] loaded.\n";
+	getLogManager() << LogLevel_Info << "Common entries from [" << sFileName << "] loaded.\n";
 
 	m_bConfigurationFileLoaded = true;
 
@@ -198,7 +193,7 @@ CString CSkeletonGenerator::ensureSedCompliancy(CString sExpression)
 	return CString(l_sExpression.c_str());
 }
 
-boolean CSkeletonGenerator::regexReplace(const CString& sTemplateFile, const CString& sRegEx, const CString& sSubstitute, const CString& sDestinationFile)
+bool CSkeletonGenerator::regexReplace(const CString& sTemplateFile, const CString& sRegEx, const CString& sSubstitute, const CString& sDestinationFile)
 {
 	try {
 		// Read file to memory
@@ -252,28 +247,27 @@ CString CSkeletonGenerator::getDate()
 	return l_sDate;
 }
 
-boolean CSkeletonGenerator::generate(CString sTemplateFile, CString sDestinationFile, map<CString,CString> mSubstitutions, CString& rLog)
+bool CSkeletonGenerator::generate(CString sTemplateFile, CString sDestinationFile, map<CString,CString> mSubstitutions, CString& rLog)
 {
 	// we check if the template file is in place.
 	if(! g_file_test(sTemplateFile, G_FILE_TEST_EXISTS))
 	{
-		rLog = rLog + "[FAILED] the template file '"+sTemplateFile+"' is missing.\n";
-		m_rKernelContext.getLogManager() << LogLevel_Error << "The template file '"<<sTemplateFile<<"' is missing.\n";
-		return false;
+		rLog += "[FAILED] the template file '"+sTemplateFile+"' is missing.\n";
+		OV_ERROR_KRF("The template file '"<<sTemplateFile<<"' is missing.", OpenViBE::Kernel::ErrorType::BadInput);
 	}
 	
 	// we check the map
 	if(mSubstitutions.size() == 0)
 	{
-		rLog = rLog + "[WARNING] No substitution provided.\n";
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "No substitution provided.\n";
+		rLog += "[WARNING] No substitution provided.\n";
+		OV_WARNING_K("No substitution provided.");
 		return false;
 	}
 
-	boolean l_bSuccess = true;
+	bool l_bSuccess = true;
 
-	rLog = rLog +  "[   OK   ] -- template file '"+sTemplateFile+"' found.\n";
-	m_rKernelContext.getLogManager() << LogLevel_Info << " -- template file '" << sTemplateFile << "' found.\n";
+	rLog +=  "[   OK   ] -- template file '"+sTemplateFile+"' found.\n";
+	getLogManager() << LogLevel_Info << " -- template file '" << sTemplateFile << "' found.\n";
 
 	//we need to create the destination file by copying the template file, then do the first substitution
 	map<CString,CString>::const_iterator it = mSubstitutions.begin();
@@ -283,20 +277,18 @@ boolean CSkeletonGenerator::generate(CString sTemplateFile, CString sDestination
 	//next substitutions are done on the - incomplete - destination file itself
 	while(it != mSubstitutions.end() && l_bSuccess)
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "Executing substitution ["<<it->first<<"] ->["<<it->second<<"]\n";
+		getLogManager() << LogLevel_Trace << "Executing substitution ["<<it->first<<"] ->["<<it->second<<"]\n";
 		l_bSuccess &= regexReplace(sDestinationFile, it->first, ensureSedCompliancy(it->second));
 		it++;
 	}
 
 	if(! l_bSuccess)
 	{
-		rLog = rLog + "[FAILED] -- " + sDestinationFile + " cannot be written.\n";
-		m_rKernelContext.getLogManager() << LogLevel_Error << " -- " << sDestinationFile << " cannot be written.\n";
-		return false;
-
+		rLog += "[FAILED] -- " + sDestinationFile + " cannot be written.\n";
+		OV_ERROR_KRF(" -- " << sDestinationFile << " cannot be written.", OpenViBE::Kernel::ErrorType::BadFileWrite);
 	}
 
-	rLog = rLog + "[   OK   ] -- " + sDestinationFile + " written.\n";
-	m_rKernelContext.getLogManager() << LogLevel_Info << " -- " << sDestinationFile << " written.\n";
+	rLog += "[   OK   ] -- " + sDestinationFile + " written.\n";
+	getLogManager() << LogLevel_Info << " -- " << sDestinationFile << " written.\n";
 	return true;
 }

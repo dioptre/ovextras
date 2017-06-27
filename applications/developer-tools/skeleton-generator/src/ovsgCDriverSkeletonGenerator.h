@@ -15,9 +15,9 @@ namespace OpenViBESkeletonGenerator
 		CDriverSkeletonGenerator(OpenViBE::Kernel::IKernelContext & rKernelContext, ::GtkBuilder * pBuilderInterface);
 		virtual ~CDriverSkeletonGenerator(void);
 
-		OpenViBE::boolean initialize(void);
-		OpenViBE::boolean save(OpenViBE::CString sFileName);
-		OpenViBE::boolean load(OpenViBE::CString sFileName);
+		bool initialize(void);
+		bool save(OpenViBE::CString sFileName);
+		bool load(OpenViBE::CString sFileName);
 		void getCurrentParameters(void);
 		
 		OpenViBE::CString              m_sDriverName;
@@ -33,6 +33,9 @@ namespace OpenViBESkeletonGenerator
 		void buttonExitCB(void);
 
 	private:
+
+		virtual OpenViBE::Kernel::ILogManager& getLogManager(void) const { return m_rKernelContext.getLogManager(); }
+		virtual OpenViBE::Kernel::IErrorManager& getErrorManager(void) const { return m_rKernelContext.getErrorManager(); }
 
 		typedef enum
 		{
