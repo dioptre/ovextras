@@ -42,19 +42,9 @@ CPluginObjectDescEnumBoxAlgorithmDumper::~CPluginObjectDescEnumBoxAlgorithmDumpe
 	}
 }
 
-boolean CPluginObjectDescEnumBoxAlgorithmDumper::callback(const IPluginObjectDesc& rPluginObjectDesc)
+bool CPluginObjectDescEnumBoxAlgorithmDumper::callback(const IPluginObjectDesc& rPluginObjectDesc)
 {
-	
 	const CIdentifier l_oBoxIdentifier = rPluginObjectDesc.getCreatedClassIdentifier();
-
-	if(m_bWriteToFile)
-	{
-		m_oFile << "BoxAlgorithm " << transform(rPluginObjectDesc.getName().toASCIIString()) << " " << l_oBoxIdentifier.toString().toASCIIString() << "\n";
-	}
-	else
-	{
-		std::cout << "BoxAlgorithm " << transform(rPluginObjectDesc.getName().toASCIIString()) << " " << l_oBoxIdentifier.toString().toASCIIString() << "\n";	
-	}
-
+	(m_bWriteToFile ? m_oFile : std::cout) << "BoxAlgorithm " << transform(rPluginObjectDesc.getName().toASCIIString()) << " " << l_oBoxIdentifier.toString().toASCIIString() << "\n";
 	return true;
 }

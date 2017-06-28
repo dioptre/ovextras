@@ -1,5 +1,7 @@
 #include "ovpiCPluginObjectDescEnum.h"
 
+#include <cctype>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace OpenViBE::Plugins;
@@ -13,7 +15,7 @@ CPluginObjectDescEnum::~CPluginObjectDescEnum(void)
 {
 }
 
-boolean CPluginObjectDescEnum::enumeratePluginObjectDesc(void)
+bool CPluginObjectDescEnum::enumeratePluginObjectDesc(void)
 {
 	CIdentifier l_oIdentifier;
 	while((l_oIdentifier=m_rKernelContext.getPluginManager().getNextPluginObjectDescIdentifier(l_oIdentifier))!=OV_UndefinedIdentifier)
@@ -23,7 +25,7 @@ boolean CPluginObjectDescEnum::enumeratePluginObjectDesc(void)
 	return true;
 }
 
-boolean CPluginObjectDescEnum::enumeratePluginObjectDesc(
+bool CPluginObjectDescEnum::enumeratePluginObjectDesc(
 	const CIdentifier& rParentClassIdentifier)
 {
 	CIdentifier l_oIdentifier;
@@ -34,7 +36,7 @@ boolean CPluginObjectDescEnum::enumeratePluginObjectDesc(
 	return true;
 }
 
-std::string CPluginObjectDescEnum::transform(const std::string& sInput, const boolean bRemoveSlash)
+std::string CPluginObjectDescEnum::transform(const std::string& sInput, const bool bRemoveSlash)
 {
 	std::string l_sInput(sInput);
 	std::string l_sOutput;
@@ -42,7 +44,7 @@ std::string CPluginObjectDescEnum::transform(const std::string& sInput, const bo
 
 	for(std::string::size_type i=0; i<l_sInput.length(); i++)
 	{
-		if((l_sInput[i]>='a' && l_sInput[i]<='z') || (l_sInput[i]>='A' && l_sInput[i]<='Z') || (l_sInput[i]>='0' && l_sInput[i]<='9') || (!bRemoveSlash && l_sInput[i]=='/'))
+		if(std::isalpha(l_sInput[i]) || std::isdigit(l_sInput[i]) || (!bRemoveSlash && l_sInput[i]=='/'))
 		{
 			if(l_sInput[i]=='/')
 			{
@@ -50,21 +52,7 @@ std::string CPluginObjectDescEnum::transform(const std::string& sInput, const bo
 			}
 			else
 			{
-				if(l_bLastWasSeparator)
-				{
-					if('a' <= l_sInput[i] && l_sInput[i] <= 'z')
-					{
-						l_sOutput+=l_sInput[i]+'A'-'a';
-					}
-					else
-					{
-						l_sOutput+=l_sInput[i];
-					}
-				}
-				else
-				{
-					l_sOutput+=l_sInput[i];
-				}
+				l_sOutput += l_bLastWasSeparator ? std::toupper(l_sInput[i]) : l_sInput[i];
 			}
 			l_bLastWasSeparator=false;
 		}

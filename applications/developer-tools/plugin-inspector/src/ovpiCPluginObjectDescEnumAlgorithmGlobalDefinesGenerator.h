@@ -12,7 +12,7 @@ public:
 
 	CPluginObjectDescEnumAlgorithmGlobalDefinesGenerator(const OpenViBE::Kernel::IKernelContext& rKernelContext, const OpenViBE::CString& sFilename);
 	virtual ~CPluginObjectDescEnumAlgorithmGlobalDefinesGenerator(void);
-	virtual OpenViBE::boolean callback(const OpenViBE::Plugins::IPluginObjectDesc& rPluginObjectDesc);
+	virtual bool callback(const OpenViBE::Plugins::IPluginObjectDesc& rPluginObjectDesc);
 
 protected:
 
