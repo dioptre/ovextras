@@ -52,7 +52,7 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		if (*it=="-h" || *it=="--help")
 		{
 			std::cout << "Usage: " << argv[0] << " [-p <dir1:dir2...>] [-d <dump_path>] [-l boxListFile]" << std::endl;
-			return true;
+			exit(0);
 		}
 		// get a list of folders to load plugins from
 		else if (*it=="-p")
