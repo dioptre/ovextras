@@ -12,17 +12,19 @@ public:
 	CPluginObjectDescEnum(const OpenViBE::Kernel::IKernelContext& rKernelContext);
 	virtual ~CPluginObjectDescEnum(void);
 
-	virtual OpenViBE::boolean enumeratePluginObjectDesc(void);
-	virtual OpenViBE::boolean enumeratePluginObjectDesc(
+	virtual bool enumeratePluginObjectDesc(void);
+	virtual bool enumeratePluginObjectDesc(
 		const OpenViBE::CIdentifier& rParentClassIdentifier);
 
-	virtual OpenViBE::boolean callback(
+	virtual bool callback(
 		const OpenViBE::Plugins::IPluginObjectDesc& rPluginObjectDesc)=0;
 
-	static std::string transform(const std::string& sInput, const OpenViBE::boolean bRemoveSlash=false);
+	static std::string transform(const std::string& sInput, const bool bRemoveSlash=false);
 
 protected:
 
+	virtual OpenViBE::Kernel::ILogManager& getLogManager(void) const { return m_rKernelContext.getLogManager(); }
+	virtual OpenViBE::Kernel::IErrorManager& getErrorManager(void) const { return m_rKernelContext.getErrorManager(); }
 	const OpenViBE::Kernel::IKernelContext& m_rKernelContext;
 };
 
