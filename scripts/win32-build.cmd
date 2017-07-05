@@ -117,14 +117,14 @@ cd /D %ov_build_dir%
 echo Generating makefiles for %VSCMake% using %BuildType% config.
 echo Building to %ov_build_dir% ...
 
-cmake %ov_script_dir%\.. -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path%
+cmake %ov_script_dir%\.. -G"Ninja" -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path%
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
 
 echo.
 echo Building and installing ...
 echo.
 
-nmake install
+ninja install
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
 
 echo.

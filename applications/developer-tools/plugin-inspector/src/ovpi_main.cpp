@@ -52,7 +52,7 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 		if (*it=="-h" || *it=="--help")
 		{
 			std::cout << "Usage: " << argv[0] << " [-p <dir1:dir2...>] [-d <dump_path>] [-l boxListFile]" << std::endl;
-			return true;
+			exit(0);
 		}
 		// get a list of folders to load plugins from
 		else if (*it=="-p")
@@ -188,12 +188,14 @@ int main(int argc, char ** argv)
 				l_sConfigPath = CString(l_oConfiguration.m_sConfigPath.c_str());
 			}
 			l_pKernelContext=l_pKernelDesc->createKernel("plugin-inspector", l_sConfigPath );
-			if(!l_pKernelContext)
+			if(!l_pKernelContext || !l_pKernelContext->initialize())
 			{
 				cout<<"[ FAILED ] No kernel created by kernel descriptor"<<endl;
 			}
 			else
 			{
+				l_pKernelContext->getConfigurationManager().addConfigurationFromFile(OpenViBE::Directories::getDataDir() + "/kernel/openvibe.conf");
+				l_pKernelContext->getConfigurationManager().addConfigurationFromFile(OpenViBE::Directories::getDataDir() + "/applications/plugin-inspector/plugin-inspector.conf");
 				OpenViBEToolkit::initialize(*l_pKernelContext);
 
 				IConfigurationManager& l_rConfigurationManager=l_pKernelContext->getConfigurationManager();
