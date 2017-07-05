@@ -41,7 +41,7 @@ void CDriverSkeletonGenerator::buttonExitCB()
 	saveCommonParameters(m_sConfigurationFile);
 	save(m_sConfigurationFile);
 
-	m_rKernelContext.getLogManager() << LogLevel_Info << "All entries saved in ["<< m_sConfigurationFile<<"]. Exiting.\n";
+	getLogManager() << LogLevel_Info << "All entries saved in ["<< m_sConfigurationFile<<"]. Exiting.\n";
 }
 
 void CDriverSkeletonGenerator::buttonCheckCB()
@@ -50,7 +50,7 @@ void CDriverSkeletonGenerator::buttonCheckCB()
 	getCommonParameters();
 	getCurrentParameters();
 
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Checking values... \n";
+	getLogManager() << LogLevel_Info << "Checking values... \n";
 
 	bool l_bSuccess = true;
 
@@ -300,13 +300,13 @@ void CDriverSkeletonGenerator::buttonOkCB()
 	if(!l_bSuccess)
 	{
 		l_sLogMessages = l_sLogMessages + "Generation process did not completly succeed. Some files may have not been produced.\n";
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "Generation process did not completly succeed. Some files may have not been produced.\n";
+		OV_WARNING_K("Generation process did not completly succeed. Some files may have not been produced.");
 	}
 	else
 	{
 		l_sLogMessages = l_sLogMessages + "Generation process successful. All information saved in [" + m_sConfigurationFile + "]\n";
 		l_sLogMessages = l_sLogMessages + "Please read the file [README.txt] !\n";
-		m_rKernelContext.getLogManager() << LogLevel_Info << "Generation process successful. All information saved in [" << m_sConfigurationFile << "]\n";
+		getLogManager() << LogLevel_Info << "Generation process successful. All information saved in [" << m_sConfigurationFile << "]\n";
 	}
 
 	// Launch the browser to display the produced files

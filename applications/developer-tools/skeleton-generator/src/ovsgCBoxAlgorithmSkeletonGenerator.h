@@ -89,26 +89,24 @@ namespace OpenViBESkeletonGenerator
 
 			void buttonCheckCB(void);
 			void buttonOkCB(void);
-			void forceRecheckCB(void);
 			void toggleListenerCheckbuttonsStateCB(bool bNewState);
-			void toggleClockFrequencyStateCB(bool bNewState);
 			void buttonTooltipCB(::GtkButton* pButton);
 			void buttonExitCB(void);
 
 			void buttonAddInputCB(void);
-			void buttonRemoveInputCB(void);
 			void buttonAddOutputCB(void);
-			void buttonRemoveOutputCB(void);
 			void buttonAddSettingCB(void);
-			void buttonRemoveSettingCB(void);
 			void buttonAddAlgorithmCB(void);
-			void buttonRemoveAlgorithmCB(void);
+			void buttonRemoveGeneric(const char* buttonName);
+
 			void algorithmSelectedCB(OpenViBE::int32 i32IndexSelected);
+			void setSensitivity(const char* widgetName, bool isActive);
 
 		private:
 
 			virtual OpenViBE::Kernel::ILogManager& getLogManager(void) const { return m_rKernelContext.getLogManager(); }
 			virtual OpenViBE::Kernel::IErrorManager& getErrorManager(void) const { return m_rKernelContext.getErrorManager(); }
+
 
 			std::map < ::GtkButton*, OpenViBE::CString > m_vTooltips;
 
