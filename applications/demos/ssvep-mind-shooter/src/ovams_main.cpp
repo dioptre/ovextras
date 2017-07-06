@@ -99,6 +99,8 @@ int main(int argc, char** argv)
 			}
 			else
 			{
+				l_poKernelContext->initialize();
+				
 				OpenViBEToolkit::initialize(*l_poKernelContext);
 
 				l_poConfigurationManager = &(l_poKernelContext->getConfigurationManager());

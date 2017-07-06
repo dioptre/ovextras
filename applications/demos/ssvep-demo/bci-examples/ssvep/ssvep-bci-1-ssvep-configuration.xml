@@ -1,4 +1,7 @@
 <OpenViBE-Scenario>
+	<FormatVersion>1</FormatVersion>
+	<Creator>OpenVIBE</Creator>
+	<CreatorVersion>0.0.2</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x0de6da7d, 0x3a63884e)</Identifier>
@@ -16,12 +19,14 @@
 					<Name>Stimulation name</Name>
 					<DefaultValue>OVTK_StimulationId_Label_00</DefaultValue>
 					<Value>OVTK_StimulationId_TrainCompleted</Value>
+					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0xcc14d8d6, 0xf27ecb73)</TypeIdentifier>
 					<Name>Action to perform</Name>
 					<DefaultValue>Pause</DefaultValue>
 					<Value>Stop</Value>
+					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
 			<Attributes>
@@ -77,42 +82,49 @@
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
 					<Value>${Player_ScenarioDirectory}/scripts/configuration-experiment-settings.lua</Value>
+					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x7f45a2a9, 0x7db12219)</TypeIdentifier>
 					<Name>Target Light Color</Name>
 					<DefaultValue>100,0,0</DefaultValue>
 					<Value>100,0,0</Value>
+					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x7f45a2a9, 0x7db12219)</TypeIdentifier>
 					<Name>Target Dark Color</Name>
 					<DefaultValue>0,0,0</DefaultValue>
 					<Value>10,10,10</Value>
+					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Stimulation Frequencies</Name>
 					<DefaultValue>20;15;12</DefaultValue>
 					<Value>20;15;12</Value>
+					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x512a166f, 0x5c3ef83f)</TypeIdentifier>
 					<Name>Processing Epoch Duration</Name>
 					<DefaultValue>0.5</DefaultValue>
 					<Value>0.5</Value>
+					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x512a166f, 0x5c3ef83f)</TypeIdentifier>
 					<Name>Processing Epoch Interval</Name>
 					<DefaultValue>0.1</DefaultValue>
 					<Value>0.1</Value>
+					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x512a166f, 0x5c3ef83f)</TypeIdentifier>
 					<Name>Processing Frequency Tolerance</Name>
 					<DefaultValue>0.250</DefaultValue>
 					<Value>0.250</Value>
+					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
 			<Attributes>
@@ -182,12 +194,14 @@
 					<Name>Lua Script</Name>
 					<DefaultValue></DefaultValue>
 					<Value>${Player_ScenarioDirectory}/scripts/configuration-peripheral-settings.lua</Value>
+					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
 					<Name>Screen Refresh Rate</Name>
 					<DefaultValue>60</DefaultValue>
 					<Value>60</Value>
+					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
 			<Attributes>
@@ -309,7 +323,7 @@ Currently, the only supported setting is the screen refresh rate.
 &lt;b&gt;Screen Refresh Rate : &lt;/b&gt; The refresh rate of your screen, 
 refer to your screen's user manual to find this value.
 
-&lt;span color=&quot;red&quot;&gt;Important notice&lt;/span&gt;
+&lt;span color="red"&gt;Important notice&lt;/span&gt;
 
 Your screen will be able to reproduce only frequencies which
 are result of division of your screen refresh rate by an
@@ -329,7 +343,7 @@ integer. </Text>
 			<Identifier>(0x3974ed1f, 0x29aa94c8)</Identifier>
 			<Text>&lt;big&gt;&lt;b&gt;Scenario description&lt;/b&gt;&lt;/big&gt;
 
-&lt;b&gt;&lt;span color=&quot;red&quot;&gt;This scenario must be run at least once before
+&lt;b&gt;&lt;span color="red"&gt;This scenario must be run at least once before
 running any further SSVEP scenarios&lt;/span&gt;&lt;/b&gt;
 
 This is a scenario where you can configure your SSVEP experiment. There
@@ -354,7 +368,7 @@ documentation page.</Text>
 		</Comment>
 		<Comment>
 			<Identifier>(0x5604a66d, 0x71c42d00)</Identifier>
-			<Text>	&lt;b&gt;&lt;span color=&quot;#2060ff&quot;&gt;Configurable box&lt;/span&gt;&lt;/b&gt;	
+			<Text>	&lt;b&gt;&lt;span color="#2060ff"&gt;Configurable box&lt;/span&gt;&lt;/b&gt;	
 
 
 
@@ -410,7 +424,7 @@ around the stimulation frequency used for classification.</Text>
 		</Comment>
 		<Comment>
 			<Identifier>(0x6a410d4e, 0x61696337)</Identifier>
-			<Text>	&lt;b&gt;&lt;span color=&quot;#2060ff&quot;&gt;Configurable box&lt;/span&gt;&lt;/b&gt;	
+			<Text>	&lt;b&gt;&lt;span color="#2060ff"&gt;Configurable box&lt;/span&gt;&lt;/b&gt;	
 
 
 
@@ -429,42 +443,11 @@ around the stimulation frequency used for classification.</Text>
 			</Attributes>
 		</Comment>
 	</Comments>
-	<VisualisationTree>
-		<VisualisationWidget>
-			<Identifier>(0x48715606, 0x15ba4f24)</Identifier>
-			<Name>Default window</Name>
-			<Type>1</Type>
-			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x4c90d4ad, 0x7a2554ec)</Identifier>
-					<Value>1</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x7b814cca, 0x271df6dd)</Identifier>
-					<Value>1</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x3683b3e2, 0x7c4b4806)</Identifier>
-			<Name>Default tab</Name>
-			<Type>2</Type>
-			<ParentIdentifier>(0x48715606, 0x15ba4f24)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x1fb42682, 0x45866d35)</Identifier>
-			<Name>Empty</Name>
-			<Type>0</Type>
-			<ParentIdentifier>(0x3683b3e2, 0x7c4b4806)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-	</VisualisationTree>
+	<Metadata>
+		<Entry>
+			<Identifier>(0x0000775c, 0x000078ff)</Identifier>
+			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
+			<Data>[{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":1,"identifier":"(0x48715606, 0x15ba4f24)","index":0,"name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":1},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x3683b3e2, 0x7c4b4806)","index":0,"name":"Default tab","parentIdentifier":"(0x48715606, 0x15ba4f24)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":0,"identifier":"(0x1fb42682, 0x45866d35)","index":0,"name":"Empty","parentIdentifier":"(0x3683b3e2, 0x7c4b4806)","type":0}]</Data>
+		</Entry>
+	</Metadata>
 </OpenViBE-Scenario>

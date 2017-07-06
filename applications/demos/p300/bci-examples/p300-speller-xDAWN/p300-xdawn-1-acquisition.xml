@@ -1,4 +1,7 @@
 <OpenViBE-Scenario>
+	<FormatVersion>1</FormatVersion>
+	<Creator>OpenVIBE</Creator>
+	<CreatorVersion>0.0.2</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x000000ea, 0x000057a1)</Identifier>
@@ -937,7 +940,6 @@
 			</Attributes>
 		</Link>
 	</Links>
-	<MessageLinks></MessageLinks>
 	<Comments>
 		<Comment>
 			<Identifier>(0x0000363f, 0x00001c2b)</Identifier>
@@ -989,7 +991,7 @@ be repeated 10 times.
 
 &lt;small&gt;&lt;i&gt;&lt;b&gt;note:&lt;/b&gt; the recorded files go to the
 folder where the scenario xml is located
-(&lt;span color=&quot;darkblue&quot;&gt;${Player_ScenarioDirectory}/&lt;/span&gt;).&lt;/i&gt;&lt;/small&gt;</Text>
+(&lt;span color="darkblue"&gt;${Player_ScenarioDirectory}/&lt;/span&gt;).&lt;/i&gt;&lt;/small&gt;</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
@@ -1016,15 +1018,13 @@ folder where the scenario xml is located
 			</Attributes>
 		</Comment>
 	</Comments>
-	<VisualisationTree>
-		<VisualisationWidget>
-			<Identifier>(0x0000742d, 0x000050d7)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
-			<BoxIdentifier>(0x00002c69, 0x00000b43)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-	</VisualisationTree>
+	<Metadata>
+		<Entry>
+			<Identifier>(0x0000775c, 0x000078ff)</Identifier>
+			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
+			<Data>[{"boxIdentifier":"(0x00002c69, 0x00000b43)","childCount":0,"identifier":"(0x0000742d, 0x000050d7)","index":0,"parentIdentifier":"(0xffffffff, 0xffffffff)","type":3}]</Data>
+		</Entry>
+	</Metadata>
 	<Attributes>
 		<Attribute>
 			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>
