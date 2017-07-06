@@ -127,8 +127,8 @@ namespace OpenViBEPlugins
 			const IBox* l_pBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
 			CString l_sFileName;
 
-			// Parses box settings to find input file's name
-			l_pBoxContext->getSettingValue(0, l_sFileName);
+			// Parses box settings to find input file's name			
+			l_sFileName=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
 			if(!parseConfigurationFile((const char*)l_sFileName))
 			{

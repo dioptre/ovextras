@@ -1,4 +1,5 @@
 <OpenViBE-Scenario>
+	<FormatVersion>1</FormatVersion>
 	<Creator>OpenViBE</Creator>
 	<CreatorVersion>1.2.1+git</CreatorVersion>
 	<Boxes>
@@ -183,7 +184,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Path_Samples}/signals/neurofeedback.gdf</Value>
+					<Value>${Designer_DefaultWorkingDirectory}/signals/neurofeedback.gdf</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -997,7 +998,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x92ff5cdb, 0x273984ce)</Value>
+					<Value>(0xa8ffe2a3, 0x27038f03)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x527ad68d, 0x16d746a0)</Identifier>
@@ -1068,7 +1069,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x9d21e772, 0xde848964)</Value>
+					<Value>(0xc5ff41e9, 0xccc59a01)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1131,7 +1132,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0xcb3c7583, 0xf7e5e4fa)</Value>
+					<Value>(0x34ac5fe8, 0x089765a0)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x527ad68d, 0x16d746a0)</Identifier>
@@ -1585,7 +1586,6 @@
 			</Attributes>
 		</Link>
 	</Links>
-	<MessageLinks></MessageLinks>
 	<Comments>
 		<Comment>
 			<Identifier>(0x00000162, 0x00001957)</Identifier>
@@ -1753,97 +1753,13 @@ every 0.1sec.</Text>
 			</Attributes>
 		</Comment>
 	</Comments>
-	<VisualisationTree>
-		<VisualisationWidget>
-			<Identifier>(0x00003aab, 0x00002c17)</Identifier>
-			<Name>Operator</Name>
-			<Type>1</Type>
-			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x4c90d4ad, 0x7a2554ec)</Identifier>
-					<Value>400</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x7b814cca, 0x271df6dd)</Identifier>
-					<Value>372</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x0000221e, 0x00005cd6)</Identifier>
-			<Name>Default tab</Name>
-			<Type>2</Type>
-			<ParentIdentifier>(0x00003aab, 0x00002c17)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x000054b1, 0x00006a27)</Identifier>
-			<Name>Vertical split</Name>
-			<Type>4</Type>
-			<ParentIdentifier>(0x0000221e, 0x00005cd6)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>2</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x237e56d2, 0x10cd68ae)</Identifier>
-					<Value>355</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x54e45f5b, 0x76c036e2)</Identifier>
-					<Value>267</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00002440, 0x00003f75)</Identifier>
-			<Name>Vertical split</Name>
-			<Type>4</Type>
-			<ParentIdentifier>(0x000054b1, 0x00006a27)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>2</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x237e56d2, 0x10cd68ae)</Identifier>
-					<Value>251</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x54e45f5b, 0x76c036e2)</Identifier>
-					<Value>123</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00001ffd, 0x00007f5a)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x000054b1, 0x00006a27)</ParentIdentifier>
-			<Index>1</Index>
-			<BoxIdentifier>(0x00005aff, 0x0000311f)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x000073b3, 0x00005c8f)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00002440, 0x00003f75)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0x00003cd9, 0x00004082)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00006cd9, 0x0000558d)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00002440, 0x00003f75)</ParentIdentifier>
-			<Index>1</Index>
-			<BoxIdentifier>(0x00003418, 0x000038d7)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-	</VisualisationTree>
+	<Metadata>
+		<Entry>
+			<Identifier>(0x0000775c, 0x000078ff)</Identifier>
+			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
+			<Data>[{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":400,"identifier":"(0x00003aab, 0x00002c17)","index":0,"name":"Operator","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":372},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x0000221e, 0x00005cd6)","index":0,"name":"Default tab","parentIdentifier":"(0x00003aab, 0x00002c17)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":2,"dividerPosition":267,"identifier":"(0x000054b1, 0x00006a27)","index":0,"maxDividerPosition":355,"name":"Vertical split","parentIdentifier":"(0x0000221e, 0x00005cd6)","type":4},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":2,"dividerPosition":123,"identifier":"(0x00002440, 0x00003f75)","index":0,"maxDividerPosition":251,"name":"Vertical split","parentIdentifier":"(0x000054b1, 0x00006a27)","type":4},{"boxIdentifier":"(0x00005aff, 0x0000311f)","childCount":0,"identifier":"(0x00001ffd, 0x00007f5a)","index":1,"parentIdentifier":"(0x000054b1, 0x00006a27)","type":3},{"boxIdentifier":"(0x00003cd9, 0x00004082)","childCount":0,"identifier":"(0x000073b3, 0x00005c8f)","index":0,"parentIdentifier":"(0x00002440, 0x00003f75)","type":3},{"boxIdentifier":"(0x00003418, 0x000038d7)","childCount":0,"identifier":"(0x00006cd9, 0x0000558d)","index":1,"parentIdentifier":"(0x00002440, 0x00003f75)","type":3}]</Data>
+		</Entry>
+	</Metadata>
 	<Attributes>
 		<Attribute>
 			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>

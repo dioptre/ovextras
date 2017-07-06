@@ -73,8 +73,9 @@ ENDIF(UNIX)
 # ----------------------
 # Generate launch script
 # ----------------------
-OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-ssvep-demo-trainer" EXECUTABLE_NAME ${PROJECT_NAME} "trainer")
-OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-ssvep-demo-shooter" EXECUTABLE_NAME ${PROJECT_NAME} "shooter")
+OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-ssvep-demo-trainer" EXECUTABLE_NAME ${PROJECT_NAME} PARAMETERS "trainer")
+OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-ssvep-demo-shooter" EXECUTABLE_NAME ${PROJECT_NAME} PARAMETERS "shooter")
+
 
 # -----------------------------
 # Install files
