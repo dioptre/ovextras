@@ -38,8 +38,6 @@ namespace OpenViBEPlugins
 			@@ProcessClockComment@@virtual bool processClock(OpenViBE::CMessageClock& rMessageClock);		
 			// - On new input received (the most common behaviour for signal processing) :
 			@@ProcessInputComment@@virtual bool processInput(uint32_t ui32InputIndex);
-			// - On message received :
-			@@ProcessMessageComment@@virtual bool processMessage(const OpenViBE::Kernel::IMessageWithData& msg, uint32_t inputIndex);	
 			
 			// If you want to use processClock, you must provide the clock frequency.
 			@@ProcessClockComment@@virtual uint64_t getClockFrequency(void);
@@ -139,14 +137,6 @@ namespace OpenViBEPlugins
 				@@Outputs@@
 				@@OutputFlagCanModify@@
 				@@OutputFlagCanAdd@@
-
-				@@MessageInputs@@
-				@@MessageInputFlagCanModify@@
-				@@MessageInputFlagCanAdd@@
-
-				@@MessageOutputs@@
-				@@MessageOutputFlagCanModify@@
-				@@MessageOutputFlagCanAdd@@
 
 				@@Settings@@
 				@@SettingFlagCanModify@@

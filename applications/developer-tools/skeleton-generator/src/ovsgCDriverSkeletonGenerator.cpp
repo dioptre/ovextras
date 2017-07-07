@@ -41,7 +41,7 @@ void CDriverSkeletonGenerator::buttonExitCB()
 	saveCommonParameters(m_sConfigurationFile);
 	save(m_sConfigurationFile);
 
-	m_rKernelContext.getLogManager() << LogLevel_Info << "All entries saved in ["<< m_sConfigurationFile<<"]. Exiting.\n";
+	getLogManager() << LogLevel_Info << "All entries saved in ["<< m_sConfigurationFile<<"]. Exiting.\n";
 }
 
 void CDriverSkeletonGenerator::buttonCheckCB()
@@ -50,9 +50,9 @@ void CDriverSkeletonGenerator::buttonCheckCB()
 	getCommonParameters();
 	getCurrentParameters();
 
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Checking values... \n";
+	getLogManager() << LogLevel_Info << "Checking values... \n";
 
-	boolean l_bSuccess = true;
+	bool l_bSuccess = true;
 
 	stringstream l_ssTextBuffer;
 	l_ssTextBuffer << "----- STATUS -----\n";
@@ -63,13 +63,13 @@ void CDriverSkeletonGenerator::buttonCheckCB()
 	const boost::regex l_RegExpDriverName("([a-z]|[A-Z]|[0-9])+([a-z]|[A-Z]|[0-9]|[ \t\r\n]|[\\.-_\\(\\)])*",boost::regex::perl);
 	if(boost::regex_match(string(m_sDriverName),l_RegExpDriverName) == false)
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "-- Driver Name: INVALID\n";
+		OV_WARNING_K("-- Driver Name: INVALID");
 		l_bSuccess = false;
 		l_ssTextBuffer << "[FAILED] Invalid driver name. Please use only characters (lower or uppercase) and numbers (blanck allowed).\n";
 	}
 	else
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Info << "-- Driver Name: VALID (" << (const char *)m_sDriverName << ")\n";
+		getLogManager() << LogLevel_Info << "-- Driver Name: VALID (" << (const char *)m_sDriverName << ")\n";
 		l_ssTextBuffer << "[   OK   ] Valid driver name.\n";
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------//
@@ -78,13 +78,13 @@ void CDriverSkeletonGenerator::buttonCheckCB()
 	const boost::regex l_RegExpClassName("([a-z]|[A-Z]|[0-9])+",boost::regex::perl);
 	if(boost::regex_match(string(m_sClassName),l_RegExpClassName) == false)
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "-- Class Name: INVALID\n";
+		OV_WARNING_K("-- Class Name: INVALID");
 		l_bSuccess = false;
 		l_ssTextBuffer << "[FAILED] Invalid class name. Please use only characters (lower or uppercase) and numbers  (no blanck allowed).\n";
 	}
 	else
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Info << "-- Class Name: VALID (" << (const char *)m_sClassName << ")\n";
+		getLogManager() << LogLevel_Info << "-- Class Name: VALID (" << (const char *)m_sClassName << ")\n";
 		l_ssTextBuffer << "[   OK   ] Valid class name.\n";
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------//
@@ -97,13 +97,13 @@ void CDriverSkeletonGenerator::buttonCheckCB()
 	//m_sMaxChannel = CString(ss2.str().c_str());
 	if(gtk_spin_button_get_value(GTK_SPIN_BUTTON(l_pSpinbuttonMinChannel)) > gtk_spin_button_get_value(GTK_SPIN_BUTTON(l_pSpinbuttonMaxChannel)))
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "-- Channels: INVALID\n";
+		OV_WARNING_K(LogLevel_Warning << "-- Channels: INVALID");
 		l_bSuccess = false;
 		l_ssTextBuffer << "[FAILED] Invalid channel count. Be sure that Min <= Max.\n";
 	}
 	else
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Info << "-- Channels: VALID (" << (const char *)m_sMinChannel << "/" << (const char *)m_sMaxChannel << ")\n";
+		getLogManager() << LogLevel_Info << "-- Channels: VALID (" << (const char *)m_sMinChannel << "/" << (const char *)m_sMaxChannel << ")\n";
 		l_ssTextBuffer << "[   OK   ] Valid channel count.\n";
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------//
@@ -112,7 +112,7 @@ void CDriverSkeletonGenerator::buttonCheckCB()
 	*/const boost::regex l_RegExpSamplingFrequencies("(([1-9][0-9]*);)*([1-9][0-9]*)",boost::regex::perl);
 	if(boost::regex_match(string(m_sSamplingFrequencies),l_RegExpSamplingFrequencies) == false)
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "-- Sampling frequencies: INVALID\n";
+		OV_WARNING_K("-- Sampling frequencies: INVALID");
 		l_bSuccess = false;
 		l_ssTextBuffer << "[FAILED] Invalid sampling frequencies. Please use only whole numbers separated with ';' (no blanck allowed).\n";
 	}
@@ -120,12 +120,12 @@ void CDriverSkeletonGenerator::buttonCheckCB()
 	{
 		// Maximum 16 frequencies
 		int l_pSF[16];
-		uint32 l_ui32SamplingFrequencyCount =  sscanf((const char *)m_sSamplingFrequencies,
+		uint32_t l_ui32SamplingFrequencyCount =  sscanf((const char *)m_sSamplingFrequencies,
 			"%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d",
 			&l_pSF[0],&l_pSF[1],&l_pSF[2],&l_pSF[3],&l_pSF[4],&l_pSF[5],&l_pSF[6],&l_pSF[7],
 			&l_pSF[8],&l_pSF[9],&l_pSF[10],&l_pSF[11],&l_pSF[12],&l_pSF[13],&l_pSF[14],&l_pSF[15]);
 
-		m_rKernelContext.getLogManager() << LogLevel_Info << "-- Sampling frequencies: VALID\n";
+		getLogManager() << LogLevel_Info << "-- Sampling frequencies: VALID\n";
 		m_vSamplingFrequencies.clear();
 		for(unsigned int i = 0;i<l_ui32SamplingFrequencyCount;i++)
 		{
@@ -148,13 +148,13 @@ void CDriverSkeletonGenerator::buttonCheckCB()
 	if(((string)m_sTargetDirectory).rfind(space) != string::npos)
 	{
 		l_ssTextBuffer << "[FAILED] Invalid destination folder :" << (const char *)m_sTargetDirectory << ".\n";
-		m_rKernelContext.getLogManager() << LogLevel_Error << "Invalid destination folder :" << (const char *)m_sTargetDirectory << ".\n";
+		getLogManager() << LogLevel_Error << "Invalid destination folder :" << (const char *)m_sTargetDirectory << ".\n";
 		l_bSuccess = false;
 	}
 	else
 #endif
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Info << "-- Target directory: " << (const char *)m_sTargetDirectory << "\n";
+		getLogManager() << LogLevel_Info << "-- Target directory: " << (const char *)m_sTargetDirectory << "\n";
 		l_ssTextBuffer << "[   OK   ] Valid target directory: " << (const char *)m_sTargetDirectory << "\n";
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------//
@@ -181,10 +181,10 @@ void CDriverSkeletonGenerator::buttonCheckCB()
 void CDriverSkeletonGenerator::buttonOkCB()
 {
 
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Generating files... \n";
+	getLogManager() << LogLevel_Info << "Generating files... \n";
 	CString l_sLogMessages = "Generating files...\n";
 	
-	boolean l_bSuccess = true;
+	bool l_bSuccess = true;
 
 	CString l_sDate = getDate();
 
@@ -300,13 +300,13 @@ void CDriverSkeletonGenerator::buttonOkCB()
 	if(!l_bSuccess)
 	{
 		l_sLogMessages = l_sLogMessages + "Generation process did not completly succeed. Some files may have not been produced.\n";
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "Generation process did not completly succeed. Some files may have not been produced.\n";
+		OV_WARNING_K("Generation process did not completly succeed. Some files may have not been produced.");
 	}
 	else
 	{
 		l_sLogMessages = l_sLogMessages + "Generation process successful. All information saved in [" + m_sConfigurationFile + "]\n";
 		l_sLogMessages = l_sLogMessages + "Please read the file [README.txt] !\n";
-		m_rKernelContext.getLogManager() << LogLevel_Info << "Generation process successful. All information saved in [" << m_sConfigurationFile << "]\n";
+		getLogManager() << LogLevel_Info << "Generation process successful. All information saved in [" << m_sConfigurationFile << "]\n";
 	}
 
 	// Launch the browser to display the produced files
@@ -377,7 +377,7 @@ CDriverSkeletonGenerator::~CDriverSkeletonGenerator(void)
 {
 }
 
-OpenViBE::boolean CDriverSkeletonGenerator::initialize( void )
+bool CDriverSkeletonGenerator::initialize( void )
 {
 	::GtkWidget * l_pWindowDriver = GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "sg-driver-window"));
 
@@ -429,14 +429,14 @@ OpenViBE::boolean CDriverSkeletonGenerator::initialize( void )
 	return true;
 }
 
-boolean CDriverSkeletonGenerator::save(OpenViBE::CString sFileName)
+bool CDriverSkeletonGenerator::save(OpenViBE::CString sFileName)
 {
 	FILE* l_pFile=::fopen(sFileName.toASCIIString(), "ab");
-	if(!l_pFile)
-	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "Saving the driver entries in [" << m_sConfigurationFile << "] failed !\n";
-		return false;
-	}
+	OV_ERROR_UNLESS_KRF(
+		l_pFile,
+		"Saving the driver entries in [" << m_sConfigurationFile << "] failed !",
+		OpenViBE::Kernel::ErrorType::BadFileWrite);
+
 	::fprintf(l_pFile, "# ----------------------DRIVER-------------------------\n");
 	string::iterator it;
 	string l_sTempTargetDirectory(m_sTargetDirectory.toASCIIString());
@@ -456,18 +456,18 @@ boolean CDriverSkeletonGenerator::save(OpenViBE::CString sFileName)
 	::fprintf(l_pFile, "SkeletonGenerator_Driver_TargetDirectory = %s\n", l_sTempTargetDirectory.c_str());
 	::fprintf(l_pFile, "# -----------------------------------------------------\n");
 	::fclose(l_pFile);
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Driver entries saved in [" << m_sConfigurationFile << "]\n";
+	getLogManager() << LogLevel_Info << "Driver entries saved in [" << m_sConfigurationFile << "]\n";
 
 	m_bConfigurationFileLoaded = false;
 
 	return true;
 }
 
-boolean CDriverSkeletonGenerator::load(OpenViBE::CString sFileName)
+bool CDriverSkeletonGenerator::load(OpenViBE::CString sFileName)
 {
 	if(!m_bConfigurationFileLoaded && !m_rKernelContext.getConfigurationManager().addConfigurationFromFile(sFileName))
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "Driver: Configuration file [" << sFileName << "] could not be loaded. It will be automatically generated after first use.\n";
+		OV_WARNING_K("Driver: Configuration file [" << sFileName << "] could not be loaded. It will be automatically generated after first use.");
 		return false;
 	}
 
@@ -491,10 +491,10 @@ boolean CDriverSkeletonGenerator::load(OpenViBE::CString sFileName)
 
 	// if the user specified a target directory, it has full priority
 	l_sTargetDirectory = m_rKernelContext.getConfigurationManager().expand("${SkeletonGenerator_TargetDirectory}");
-	boolean l_bNeedFilePrefix = false;
+	bool l_bNeedFilePrefix = false;
 	if((string)l_sTargetDirectory != string(""))
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Debug << "Target dir user  [" << l_sTargetDirectory << "]\n";
+		getLogManager() << LogLevel_Debug << "Target dir user  [" << l_sTargetDirectory << "]\n";
 		l_bNeedFilePrefix = true;
 	}
 	else
@@ -503,13 +503,13 @@ boolean CDriverSkeletonGenerator::load(OpenViBE::CString sFileName)
 		l_sTargetDirectory = m_rKernelContext.getConfigurationManager().expand("${SkeletonGenerator_Driver_TargetDirectory}");
 		if((string)l_sTargetDirectory != string(""))
 		{
-			m_rKernelContext.getLogManager() << LogLevel_Debug << "Target previous  [" << l_sTargetDirectory << "]\n";
+			getLogManager() << LogLevel_Debug << "Target previous  [" << l_sTargetDirectory << "]\n";
 			l_bNeedFilePrefix = true;
 		}
 		else
 		{
 			//default path = dist
-			m_rKernelContext.getLogManager() << LogLevel_Debug << "Target default  [dist]\n";
+			getLogManager() << LogLevel_Debug << "Target default  [dist]\n";
 #ifdef TARGET_OS_Linux
 			l_sTargetDirectory = CString(gtk_file_chooser_get_current_folder_uri(GTK_FILE_CHOOSER(l_pFileChooser)));
 			l_sTargetDirectory = l_sTargetDirectory + "/..";
@@ -525,7 +525,7 @@ boolean CDriverSkeletonGenerator::load(OpenViBE::CString sFileName)
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(l_pFileChooser),(const char *)l_sTargetDirectory);
 #endif
 
-	m_rKernelContext.getLogManager() << LogLevel_Info << "Driver entries from [" << sFileName << "] loaded.\n";
+	getLogManager() << LogLevel_Info << "Driver entries from [" << sFileName << "] loaded.\n";
 	return true;
 }
 

@@ -40,8 +40,8 @@ const char* CDriver@@ClassName@@::getName(void)
 //___________________________________________________________________//
 //                                                                   //
 
-boolean CDriver@@ClassName@@::initialize(
-	const uint32 ui32SampleCountPerSentBlock,
+bool CDriver@@ClassName@@::initialize(
+	const uint32_t ui32SampleCountPerSentBlock,
 	IDriverCallback& rCallback)
 {
 	if(m_rDriverContext.isConnected()) return false;
@@ -72,7 +72,7 @@ boolean CDriver@@ClassName@@::initialize(
 	return true;
 }
 
-boolean CDriver@@ClassName@@::start(void)
+bool CDriver@@ClassName@@::start(void)
 {
 	if(!m_rDriverContext.isConnected()) return false;
 	if(m_rDriverContext.isStarted()) return false;
@@ -85,7 +85,7 @@ boolean CDriver@@ClassName@@::start(void)
 	return true;
 }
 
-boolean CDriver@@ClassName@@::loop(void)
+bool CDriver@@ClassName@@::loop(void)
 {
 	if(!m_rDriverContext.isConnected()) return false;
 	if(!m_rDriverContext.isStarted()) return true;
@@ -113,7 +113,7 @@ boolean CDriver@@ClassName@@::loop(void)
 	return true;
 }
 
-boolean CDriver@@ClassName@@::stop(void)
+bool CDriver@@ClassName@@::stop(void)
 {
 	if(!m_rDriverContext.isConnected()) return false;
 	if(!m_rDriverContext.isStarted()) return false;
@@ -126,7 +126,7 @@ boolean CDriver@@ClassName@@::stop(void)
 	return true;
 }
 
-boolean CDriver@@ClassName@@::uninitialize(void)
+bool CDriver@@ClassName@@::uninitialize(void)
 {
 	if(!m_rDriverContext.isConnected()) return false;
 	if(m_rDriverContext.isStarted()) return false;
@@ -144,12 +144,12 @@ boolean CDriver@@ClassName@@::uninitialize(void)
 
 //___________________________________________________________________//
 //                                                                   //
-boolean CDriver@@ClassName@@::isConfigurable(void)
+bool CDriver@@ClassName@@::isConfigurable(void)
 {
 	return true; // change to false if your device is not configurable
 }
 
-boolean CDriver@@ClassName@@::configure(void)
+bool CDriver@@ClassName@@::configure(void)
 {
 	// Change this line if you need to specify some references to your driver attribute that need configuration, e.g. the connection ID.
 	CConfiguration@@ClassName@@ m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-@@ClassName@@.ui");

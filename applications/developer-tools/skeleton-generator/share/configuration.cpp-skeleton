@@ -31,7 +31,7 @@ CConfiguration@@ClassName@@::CConfiguration@@ClassName@@(IDriverContext& rDriver
 {
 }
 
-boolean CConfiguration@@ClassName@@::preConfigure(void)
+bool CConfiguration@@ClassName@@::preConfigure(void)
 {
 	if(! CConfigurationBuilder::preConfigure())
 	{
@@ -50,7 +50,7 @@ boolean CConfiguration@@ClassName@@::preConfigure(void)
 	return true;
 }
 
-boolean CConfiguration@@ClassName@@::postConfigure(void)
+bool CConfiguration@@ClassName@@::postConfigure(void)
 {
 	if(m_bApplyConfiguration)
 	{
