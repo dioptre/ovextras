@@ -255,7 +255,12 @@ ENDIF(openvibe-documentation)
 
 # make a copy of the dependency script, this is done so we can use the same launch scripts both in win install and win devel situations.
 IF(WIN32)
-	INSTALL(PROGRAMS ${CMAKE_SOURCE_DIR}/scripts/win32-dependencies.cmd DESTINATION ${CMAKE_INSTALL_FULL_BINDIR} RENAME "openvibe-set-env.cmd")
+
+	FIND_PATH(OV_DEPENDENCY_CMD_PATH win32-dependencies.cmd PATHS ${LIST_DEPENDENCIES_PATH} NO_DEFAULT_PATH)
+	IF(NOT OV_DEPENDENCY_CMD_PATH)
+		MESSAGE(FATAL_ERROR "Dependency installer should have generated 'win32-dependencies.cmd'. Looked from ${LIST_DEPENDENCIES_PATH}.")
+	ENDIF()
+	INSTALL(PROGRAMS ${OV_DEPENDENCY_CMD_PATH}/win32-dependencies.cmd DESTINATION ${CMAKE_INSTALL_FULL_BINDIR} RENAME "openvibe-set-env.cmd")
 ENDIF(WIN32)
 
 # ----------------------
