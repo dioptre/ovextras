@@ -201,7 +201,7 @@ no_need_to_download_dependencies_runtime:
 	FileWrite $0 "SET PATH=$INSTDIR\cegui\dependencies\bin;%PATH%$\r$\n"	
 	FileWrite $0 "SET VRPNROOT=$INSTDIR\vrpn$\r$\n"
 	FileWrite $0 "SET PATH=%VRPNROOT%\bin;%PATH%$\r$\n"	
-	FileWrite $0 "SET PATH=$INSTDIR\pthreads\lib;%PATH%$\r$\n"	
+	FileWrite $0 "SET PATH=$INSTDIR\pthread\lib;%PATH%$\r$\n"	
 	FileWrite $0 "SET PATH=$INSTDIR\openal\libs\win32;%PATH%$\r$\n"	
 	FileWrite $0 "SET PATH=$INSTDIR\freealut\lib;%PATH%$\r$\n"	
 	FileWrite $0 "SET PATH=$INSTDIR\libogg\win32\bin\release;$INSTDIR\libogg\win32\bin\debug;%PATH%$\r$\n"	
