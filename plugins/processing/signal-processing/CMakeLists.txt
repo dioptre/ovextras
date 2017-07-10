@@ -25,9 +25,6 @@ INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyEigen")
 INCLUDE("FindThirdPartyFFTW3")		# used by the wavelet library
 INCLUDE("FindThirdPartyITPP")		# note that itpp gives the fftw3 on Win
-#for additionnal coadapt plugins, the following
-# INCLUDE("FindThirdPartyBoost_Math")
-# INCLUDE("FindOpenViBEModuleXML")
 
 # ---------------------------------
 # Target macros
