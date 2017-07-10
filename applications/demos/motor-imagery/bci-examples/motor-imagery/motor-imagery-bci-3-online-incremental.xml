@@ -591,6 +591,10 @@
 					<Value>true</Value>
 				</Attribute>
 				<Attribute>
+					<Identifier>(0x341d3912, 0x1478de86)</Identifier>
+ 					<Value>1</Value>
+				</Attribute>
+				<Attribute>
 					<Identifier>(0xfba64161, 0x65304e21)</Identifier>
 					<Value></Value>
 				</Attribute>
@@ -1704,6 +1708,10 @@
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
 					<Value>true</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x341d3912, 0x1478de86)</Identifier>
+ 					<Value>1</Value>
 				</Attribute>
 			</Attributes>
 		</Box>
