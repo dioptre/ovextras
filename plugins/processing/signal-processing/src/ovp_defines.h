@@ -139,27 +139,6 @@
 #define OVP_ClassId_SignalConcatenation                                                OpenViBE::CIdentifier(0x6568D29B, 0x0D753CCA)
 #define OVP_ClassId_BoxAlgorithm_QuadraticForm                                         OpenViBE::CIdentifier(0x54E73B81, 0x1AD356C6)
 
-/*/Dieter p300 stuff
-#define OVP_ClassId_BoxAlgorithm_TwoSampleTTestDesc		OpenViBE::CIdentifier(0x020300BF, 0xB4BAC0A1)
-#define OVP_ClassId_BoxAlgorithm_LikelinessDistributorDesc      OpenViBE::CIdentifier(0xE5103C63, 0x08D825E0)
-
-#define OVP_ClassId_BoxAlgorithm_TwoSampleTTest			OpenViBE::CIdentifier(0x16DFF805, 0x0BC431BF)
-#define OVP_ClassId_BoxAlgorithm_LikelinessDistributor		OpenViBE::CIdentifier(0x781F51CA, 0xE6E3B0B8)
-
-
-
-#define OVP_ClassId_BoxAlgorithm_XDAWNSpatialFilterTrainerCoAdapt     OpenViBE::CIdentifier(0xEE31A115, 0x00B25FE1)
-#define OVP_ClassId_BoxAlgorithm_XDAWNSpatialFilterTrainerCoAdaptDesc OpenViBE::CIdentifier(0xB59256B0, 0xC3389515)
-#define OVP_ClassId_BoxAlgorithm_SpatialFilterWithUpdate     OpenViBE::CIdentifier(0x8E7CD4B3, 0xDAAD41C1)
-#define OVP_ClassId_BoxAlgorithm_SpatialFilterWithUpdateDesc OpenViBE::CIdentifier(0xE2E6A1D6, 0xCBCEEE3A)
-
-#define OVP_ClassId_ConditionalIdentity OpenViBE::CIdentifier(0xE4CE5D77, 0xBCC64C3F)
-#define OVP_ClassId_ConditionalIdentityDesc OpenViBE::CIdentifier(0xDDE86CE9, 0xE75B0A29)
-
-#define OVP_ClassId_BoxAlgorithm_MultipleSpatialFilters	 	OpenViBE::CIdentifier(0x04C1466C, 0xFC89B739)
-#define OVP_ClassId_BoxAlgorithm_MultipleSpatialFiltersDesc	OpenViBE::CIdentifier(0xB1A96C51, 0xD75136A6)
-//*///End of Dieter's stuff
-
 #define OVP_ClassId_BoxAlgorithm_EpochVariance                  OpenViBE::CIdentifier(0x335384EA, 0x88C917D9)
 #define OVP_ClassId_BoxAlgorithm_EpochVarianceDesc              OpenViBE::CIdentifier(0xA15EAEC5, 0xAB0CE73D)
 #define OVP_ClassId_Algorithm_MatrixVarianceDesc 		OpenViBE::CIdentifier(0xE405260B, 0x59EEFAE4)
@@ -180,47 +159,8 @@
 
 // @BEGIN JP
 
-/*
-#define OVP_ClassId_Algorithm_RegressionAnalysis                                       OpenViBE::CIdentifier(0xFBFC00F8, 0x2D962BC0)
-#define OVP_ClassId_Algorithm_RegressionAnalysisDesc                                   OpenViBE::CIdentifier(0x46C3A63E, 0x849E9890)
-
-#define OVP_Algorithm_RegressionAnalysis_InputParameterId_Matrix0                      OpenViBE::CIdentifier(0x97DD0514, 0x5DD4E799)
-#define OVP_Algorithm_RegressionAnalysis_InputParameterId_Matrix1                      OpenViBE::CIdentifier(0xBA8FFD91, 0x99B00152)
-#define OVP_Algorithm_RegressionAnalysis_OutputParameterId_Matrix                      OpenViBE::CIdentifier(0x14EE5B8F, 0xE9A7C9DD)
-#define OVP_Algorithm_RegressionAnalysis_InputTriggerId_Initialize                     OpenViBE::CIdentifier(0x9D9615C1, 0xDDD91FAF)
-#define OVP_Algorithm_RegressionAnalysis_InputTriggerId_Process                        OpenViBE::CIdentifier(0xEB8827CE, 0xD5FFE7E6)
-#define OVP_Algorithm_RegressionAnalysis_OutputTriggerId_ProcessDone                   OpenViBE::CIdentifier(0x260CA56C, 0x66B98B64)
-#define OVP_Algorithm_RegressionAnalysis_InputParameterFilename                        OpenViBE::CIdentifier(0xA6CE7CD8, 0xB2788B53)
-*/
-
-
 #define OVP_ClassId_BoxAlgorithm_EOG_Denoising_Calibration                             OpenViBE::CIdentifier(0xE8DFE002, 0x70389932)
 #define OVP_ClassId_BoxAlgorithm_EOG_Denoising_CalibrationDesc                         OpenViBE::CIdentifier(0xF4D74831, 0x88B80DCF)
-
-/*
-#define OVP_ClassId_Algorithm_RegressionAnalysisCalibration                            OpenViBE::CIdentifier(0x2AB3E6DC, 0x1DC3E29D)
-#define OVP_ClassId_Algorithm_RegressionAnalysisCalibrationDesc                        OpenViBE::CIdentifier(0x1F1C316C, 0xAF7E5BDC)
-
-#define OVP_Algorithm_RegressionAnalysisCalibration_InputParameterId_Matrix0           OpenViBE::CIdentifier(0x6D68A402, 0x27B4F10E)
-#define OVP_Algorithm_RegressionAnalysisCalibration_InputParameterId_Matrix1           OpenViBE::CIdentifier(0xF0B8ABE9, 0x3D2DE4DF)
-#define OVP_Algorithm_RegressionAnalysisCalibration_InputTriggerId_Initialize          OpenViBE::CIdentifier(0xECE6CADD, 0x128912F7)
-#define OVP_Algorithm_RegressionAnalysisCalibration_InputTriggerId_Process             OpenViBE::CIdentifier(0xB7E93840, 0x13A8CCE1)
-#define OVP_Algorithm_RegressionAnalysisCalibration_OutputTriggerId_ProcessDone        OpenViBE::CIdentifier(0x3CC023B2, 0xFEC907D2)
-*/
-
-
-
-
-
-/*
-#define OVP_ClassId_Algorithm_MatrixMaximum                     OpenViBE::CIdentifier(0x3B7723EC, 0x16C30A39)
-#define OVP_ClassId_Algorithm_MatrixMaximumDesc                 OpenViBE::CIdentifier(0x11BE2168, 0x5B444BBB)
-#define OVP_Algorithm_MatrixMaximum_InputParameterId_Matrix     OpenViBE::CIdentifier(0x56254223, 0x42180588)
-#define OVP_Algorithm_MatrixMaximum_OutputParameterId_Matrix    OpenViBE::CIdentifier(0x025A4450, 0x6DFD17DB)
-#define OVP_Algorithm_MatrixMaximum_InputTriggerId_Initialize   OpenViBE::CIdentifier(0x41803B07, 0x667A69BC)
-#define OVP_Algorithm_MatrixMaximum_InputTriggerId_Process      OpenViBE::CIdentifier(0x641A59C0, 0x12FB7F74)
-#define OVP_Algorithm_MatrixMaximum_OutputTriggerId_ProcessDone OpenViBE::CIdentifier(0x37802521, 0x785D51FD)
-*/
 
 #define OVP_ClassId_BoxAlgorithm_Inverse_DWT                        OpenViBE::CIdentifier(0x5B5B8468, 0x212CF963)
 #define OVP_ClassId_BoxAlgorithm_Inverse_DWTDesc                    OpenViBE::CIdentifier(0x01B9BC9A, 0x34766AE9)
@@ -281,8 +221,6 @@
 #define OVP_TypeId_WaveletLevel_3                                   OpenViBE::CIdentifier(0xDAADEACA, 0x5D55FF60)
 #define OVP_TypeId_WaveletLevel_4                                   OpenViBE::CIdentifier(0x3447C01C, 0x0B0467FD)
 #define OVP_TypeId_WaveletLevel_5                                   OpenViBE::CIdentifier(0x36278DFC, 0xDDBC678C)
-
-
 
 // @END JP
 
