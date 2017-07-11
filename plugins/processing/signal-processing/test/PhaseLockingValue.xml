@@ -1,7 +1,7 @@
 <OpenViBE-Scenario>
 	<FormatVersion>1</FormatVersion>
-	<Creator>OpenVIBE</Creator>
-	<CreatorVersion>0.0.2</CreatorVersion>
+	<Creator>openvibe</Creator>
+	<CreatorVersion>2.0</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x00000ed4, 0x0000252d)</Identifier>
@@ -294,7 +294,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Path_Data}/scenarios/signals/real-hand-movements.gdf</Value>
+					<Value>${Designer_DefaultWorkingDirectory}/signals/real-hand-movements.gdf</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>

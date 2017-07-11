@@ -1,4 +1,7 @@
 <OpenViBE-Scenario>
+	<FormatVersion>1</FormatVersion>
+	<Creator>openvibe</Creator>
+	<CreatorVersion>2.0</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x00003b19, 0x00002e65)</Identifier>
@@ -315,7 +318,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Path_Samples}/signals/eog-artifact.gdf</Value>
+					<Value>${Path_Data}/scenarios/signals/eog-artifact.gdf</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -897,12 +900,11 @@
 			</Attributes>
 		</Link>
 	</Links>
-	<MessageLinks></MessageLinks>
 	<Comments>
 		<Comment>
 			<Identifier>(0x00007d4d, 0x00006501)</Identifier>
 			<Text>This scenario performs denoising following 
-the work of Schlögl and al., 2007. 
+the work of Schl&#246;gl and al., 2007. 
 
 The model should be first calibrated using 
 the 'eog-calibration.xml' scenario. 
@@ -922,70 +924,13 @@ and attempts to clean the EEG input of artifacts.
 			</Attributes>
 		</Comment>
 	</Comments>
-	<VisualisationTree>
-		<VisualisationWidget>
-			<Identifier>(0x00006444, 0x00003b19)</Identifier>
-			<Name>Default window</Name>
-			<Type>1</Type>
-			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x4c90d4ad, 0x7a2554ec)</Identifier>
-					<Value>320</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x7b814cca, 0x271df6dd)</Identifier>
-					<Value>467</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x0000408e, 0x00005287)</Identifier>
-			<Name>Default tab</Name>
-			<Type>2</Type>
-			<ParentIdentifier>(0x00006444, 0x00003b19)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00004ee6, 0x00007589)</Identifier>
-			<Name>Vertical split</Name>
-			<Type>4</Type>
-			<ParentIdentifier>(0x0000408e, 0x00005287)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>2</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x237e56d2, 0x10cd68ae)</Identifier>
-					<Value>275</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x54e45f5b, 0x76c036e2)</Identifier>
-					<Value>135</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00004fca, 0x000005fa)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00004ee6, 0x00007589)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0x0000721d, 0x00006b03)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00005ad7, 0x00000e3a)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00004ee6, 0x00007589)</ParentIdentifier>
-			<Index>1</Index>
-			<BoxIdentifier>(0x00004d05, 0x00007de5)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-	</VisualisationTree>
+	<Metadata>
+		<Entry>
+			<Identifier>(0x0000775c, 0x000078ff)</Identifier>
+			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
+			<Data>[{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":320,"identifier":"(0x00006444, 0x00003b19)","index":0,"name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":467},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x0000408e, 0x00005287)","index":0,"name":"Default tab","parentIdentifier":"(0x00006444, 0x00003b19)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":2,"dividerPosition":135,"identifier":"(0x00004ee6, 0x00007589)","index":0,"maxDividerPosition":275,"name":"Vertical split","parentIdentifier":"(0x0000408e, 0x00005287)","type":4},{"boxIdentifier":"(0x0000721d, 0x00006b03)","childCount":0,"identifier":"(0x00004fca, 0x000005fa)","index":0,"parentIdentifier":"(0x00004ee6, 0x00007589)","type":3},{"boxIdentifier":"(0x00004d05, 0x00007de5)","childCount":0,"identifier":"(0x00005ad7, 0x00000e3a)","index":1,"parentIdentifier":"(0x00004ee6, 0x00007589)","type":3}]</Data>
+		</Entry>
+	</Metadata>
 	<Attributes>
 		<Attribute>
 			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>
