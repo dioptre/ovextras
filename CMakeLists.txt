@@ -47,6 +47,7 @@ endif()
 if(NOT OPENVIBE_SDK_PATH)
 	MESSAGE(FATAL_ERROR "Could not find OPENVIBE_SDK_PATH (value : ${OPENVIBE_SDK_PATH}). Please either specify it or put OpenViBE sdk binaries into dependencies/openvibe-sdk-{debug/release} folder")
 endif()
+
 ADD_DEFINITIONS("-DOV_PROJECT_NAME=\"${PROJECT_NAME}\"")
 ADD_DEFINITIONS("-DOV_VERSION_MAJOR=\"${OV_GLOBAL_VERSION_MAJOR}\"")
 ADD_DEFINITIONS("-DOV_VERSION_MINOR=\"${OV_GLOBAL_VERSION_MINOR}\"")

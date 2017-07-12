@@ -7,6 +7,8 @@ set BuildType=Release
 set InitEnvScript=win32-init_env_command.cmd
 set PAUSE=pause
 set ov_script_dir=%CD%
+set generator=-G"Ninja"
+set builder=Ninja
 
 :parameter_parse
 if /i "%1"=="-h" (
@@ -56,7 +58,7 @@ if /i "%1"=="-h" (
 	SHIFT
 	Goto parameter_parse
 ) else if /i "%1"=="--designer" (
-	set designer="-DDESIGNER_SDK_PATH=%2"
+	set designer=-DDESIGNER_SDK_PATH=%2
 	SHIFT
 	SHIFT
 	Goto parameter_parse
@@ -76,6 +78,16 @@ if /i "%1"=="-h" (
 	SHIFT
 	SHIFT
 	Goto parameter_parse
+) else if /i "%1"=="--vsproject" (
+	set vsgenerate=TRUE
+	set builder=None
+	SHIFT
+	Goto parameter_parse
+) else if /i "%1"=="--vsbuild" (
+	set vsgenerate=TRUE
+	set builder=Visual
+	SHIFT
+	Goto parameter_parse
 ) else if not "%1" == "" (
 	echo unrecognized option [%1]
 	Goto terminate_error
@@ -92,15 +104,18 @@ if /i "!InitEnvScript!"=="win32-init_env_command.cmd" (
 	echo No script specified. Default will be used.
 )
 
+
 echo --
 echo build type is set to: %BuildType%.
 echo Init-env Script to be called: !InitEnvScript!.
 REM #######################################################################################
 
-call "!InitEnvScript!" ov_script_dir\..\dependencies %dependencies_base%
+call "!InitEnvScript!" %ov_script_dir%\..\dependencies %dependencies_base%
 
 REM #######################################################################################
-
+if defined vsgenerate (
+	set generator=-G"%VSCMake%" -T "v120"
+)
 if not defined ov_build_dir (
 	set ov_build_dir=%ov_script_dir%\..\local-tmp\nmake-%BuildType%
 )
@@ -117,8 +132,10 @@ cd /D %ov_build_dir%
 echo Generating makefiles for %VSCMake% using %BuildType% config.
 echo Building to %ov_build_dir% ...
 
-cmake %ov_script_dir%\.. -G"Ninja" -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path%
+cmake %ov_script_dir%\..  %generator% -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path%
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
+
+if defined vsgenerate goto terminate_success
 
 echo.
 echo Building and installing ...
@@ -126,6 +143,19 @@ echo.
 
 ninja install
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
+
+if !builder! == None (
+	goto terminate_success
+) else if !builder! == Ninja (
+	ninja install
+	if not "!ERRORLEVEL!" == "0" goto terminate_error
+) else if !builder! == Visual (
+	msbuild OpenVIBE.sln
+	if not "!ERRORLEVEL!" == "0" goto terminate_error
+
+	cmake --build . --target install
+	if not "!ERRORLEVEL!" == "0" goto terminate_error
+)
 
 echo.
 echo Install completed !
