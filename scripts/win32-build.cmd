@@ -135,14 +135,9 @@ echo Building to %ov_build_dir% ...
 cmake %ov_script_dir%\..  %generator% -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path%
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
 
-if defined vsgenerate goto terminate_success
-
 echo.
 echo Building and installing ...
 echo.
-
-ninja install
-IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
 
 if !builder! == None (
 	goto terminate_success
