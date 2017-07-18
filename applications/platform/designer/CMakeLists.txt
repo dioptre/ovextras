@@ -91,4 +91,3 @@ endif()
 install(DIRECTORY
         ${DESIGNER_SDK_PATH}/share/
 	DESTINATION ${CMAKE_INSTALL_FULL_DATADIR})
-
