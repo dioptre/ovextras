@@ -140,6 +140,32 @@ IF(NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE "Release")
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
+FUNCTION(SET_BUILD_PLATFORM)
+    IF("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+            ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_x64)
+    ELSEIF("${CMAKE_SIZEOF_VOID_P}" EQUAL "4")
+            ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
+    ELSE()
+            ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_Unknown)
+    ENDIF()
+
+    IF(WIN32)
+            ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
+	    ADD_DEFINITIONS(-DTARGET_OS_Windows)
+	    ADD_DEFINITIONS(-DTARGET_COMPILER_VisualStudio)
+    ELSEIF(APPLE)
+            ADD_DEFINITIONS(-fnon-call-exceptions)
+	    ADD_DEFINITIONS(-DTARGET_OS_MacOS)
+	    # ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_x64)
+	    ADD_DEFINITIONS(-DTARGET_COMPILER_LLVM)
+    ELSEIF(UNIX)
+            # ADD_DEFINITIONS(-fvisibility=hidden) # This flag should be present... man gcc
+	    ADD_DEFINITIONS(-fnon-call-exceptions)
+	    ADD_DEFINITIONS(-DTARGET_OS_Linux)
+	    ADD_DEFINITIONS(-DTARGET_COMPILER_GCC)
+    ENDIF()
+ENDFUNCTION()
+
 # Print the used compilation parameters (for transparency)
 GET_DIRECTORY_PROPERTY(TMP_DEFINITIONS COMPILE_DEFINITIONS)
 MESSAGE(STATUS "Compilation flags used at source root: ")
@@ -251,13 +277,13 @@ ENDIF(openvibe-documentation)
 
 # make a copy of the dependency script, this is done so we can use the same launch scripts both in win install and win devel situations.
 IF(WIN32)
-
 	FIND_PATH(OV_DEPENDENCY_CMD_PATH win32-dependencies.cmd PATHS ${LIST_DEPENDENCIES_PATH} NO_DEFAULT_PATH)
 	IF(NOT OV_DEPENDENCY_CMD_PATH)
 		MESSAGE(FATAL_ERROR "Dependency installer should have generated 'win32-dependencies.cmd'. Looked from ${LIST_DEPENDENCIES_PATH}.")
 	ENDIF()
 	INSTALL(PROGRAMS ${OV_DEPENDENCY_CMD_PATH}/win32-dependencies.cmd DESTINATION ${CMAKE_INSTALL_FULL_BINDIR} RENAME "openvibe-set-env.cmd")
 ENDIF(WIN32)
+
 
 # ----------------------
 # Generate 'external application launcher' script
