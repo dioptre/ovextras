@@ -9,10 +9,8 @@
 #include "box-algorithms/ovpCBoxAlgorithmClock.h"
 
 OVP_Declare_Begin();
-	if( std::string(rPluginModuleContext.getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_BoxAlgorithmFlag, OV_AttributeId_Box_FlagIsUnstable.toUInteger()).toASCIIString()) == std::string(""))
-	{
-		rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_BoxAlgorithmFlag, OV_AttributeId_Box_FlagIsUnstable.toString(), OV_AttributeId_Box_FlagIsUnstable.toUInteger());
-	}
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_BoxAlgorithmFlag, OV_AttributeId_Box_FlagIsUnstable.toString(), OV_AttributeId_Box_FlagIsUnstable.toUInteger());
+
 	OVP_Declare_New(OpenViBEPlugins::Examples::CHelloWorldDesc);
 	OVP_Declare_New(OpenViBEPlugins::Examples::CHelloWorldWithInputDesc);
 	OVP_Declare_New(OpenViBEPlugins::Examples::CBoxAlgorithmModifiableSettingsDesc);

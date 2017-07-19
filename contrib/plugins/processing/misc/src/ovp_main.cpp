@@ -9,10 +9,7 @@ OVP_Declare_Begin();
 
 // @BEGIN inserm
 	OVP_Declare_New(OpenViBEPlugins::Tools::CMouseControlDesc);
-	if( std::string(rPluginModuleContext.getTypeManager().getEnumerationEntryNameFromValue(OV_TypeId_BoxAlgorithmFlag, OV_AttributeId_Box_FlagIsUnstable.toUInteger()).toASCIIString()) == std::string(""))
-	{
-		rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_BoxAlgorithmFlag, OV_AttributeId_Box_FlagIsUnstable.toString(), OV_AttributeId_Box_FlagIsUnstable.toUInteger());
-	}
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_BoxAlgorithmFlag, OV_AttributeId_Box_FlagIsUnstable.toString(), OV_AttributeId_Box_FlagIsUnstable.toUInteger());
 // @END inserm
 
 	 
