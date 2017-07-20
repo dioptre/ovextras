@@ -1,4 +1,7 @@
 <OpenViBE-Scenario>
+	<FormatVersion>1</FormatVersion>
+	<Creator>openvibe</Creator>
+	<CreatorVersion>2.0</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x00001df7, 0x00000c56)</Identifier>
@@ -566,7 +569,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x9d21e772, 0xde848964)</Value>
+					<Value>(0xc5ff41e9, 0xccc59a01)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -645,7 +648,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x9d21e772, 0xde848964)</Value>
+					<Value>(0xc5ff41e9, 0xccc59a01)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -1132,7 +1135,6 @@
 			</Attributes>
 		</Link>
 	</Links>
-	<MessageLinks></MessageLinks>
 	<Comments>
 		<Comment>
 			<Identifier>(0x00000f01, 0x00005c83)</Identifier>
@@ -1250,70 +1252,13 @@ See connectivity-phase-locking-value-fft-filter.xml tutorial scenario for an exa
 			</Attributes>
 		</Comment>
 	</Comments>
-	<VisualisationTree>
-		<VisualisationWidget>
-			<Identifier>(0x00000612, 0x0000516b)</Identifier>
-			<Name>Default window</Name>
-			<Type>1</Type>
-			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x4c90d4ad, 0x7a2554ec)</Identifier>
-					<Value>320</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x7b814cca, 0x271df6dd)</Identifier>
-					<Value>470</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00005ba4, 0x00006934)</Identifier>
-			<Name>Default tab</Name>
-			<Type>2</Type>
-			<ParentIdentifier>(0x00000612, 0x0000516b)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00001617, 0x000015ae)</Identifier>
-			<Name>Vertical split</Name>
-			<Type>4</Type>
-			<ParentIdentifier>(0x00005ba4, 0x00006934)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>2</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x237e56d2, 0x10cd68ae)</Identifier>
-					<Value>275</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x54e45f5b, 0x76c036e2)</Identifier>
-					<Value>135</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x0000577d, 0x0000011a)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00001617, 0x000015ae)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0x00003787, 0x00006f10)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x000062d4, 0x000072aa)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00001617, 0x000015ae)</ParentIdentifier>
-			<Index>1</Index>
-			<BoxIdentifier>(0x00001df7, 0x00000c56)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-	</VisualisationTree>
+	<Metadata>
+		<Entry>
+			<Identifier>(0x0000775c, 0x000078ff)</Identifier>
+			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
+			<Data>[{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":320,"identifier":"(0x00000612, 0x0000516b)","index":0,"name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":470},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x00005ba4, 0x00006934)","index":0,"name":"Default tab","parentIdentifier":"(0x00000612, 0x0000516b)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":2,"dividerPosition":135,"identifier":"(0x00001617, 0x000015ae)","index":0,"maxDividerPosition":275,"name":"Vertical split","parentIdentifier":"(0x00005ba4, 0x00006934)","type":4},{"boxIdentifier":"(0x00003787, 0x00006f10)","childCount":0,"identifier":"(0x0000577d, 0x0000011a)","index":0,"parentIdentifier":"(0x00001617, 0x000015ae)","type":3},{"boxIdentifier":"(0x00001df7, 0x00000c56)","childCount":0,"identifier":"(0x000062d4, 0x000072aa)","index":1,"parentIdentifier":"(0x00001617, 0x000015ae)","type":3}]</Data>
+		</Entry>
+	</Metadata>
 	<Attributes>
 		<Attribute>
 			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>

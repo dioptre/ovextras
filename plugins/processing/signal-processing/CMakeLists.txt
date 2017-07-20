@@ -48,8 +48,7 @@ IF(UNIX)
 ENDIF(UNIX)
 
 IF(OV_COMPILE_TESTS)
-    # @FIXME CERT
-#    ADD_SUBDIRECTORY("test")
+	ADD_SUBDIRECTORY("test")
 ENDIF(OV_COMPILE_TESTS)
 
 # -----------------------------

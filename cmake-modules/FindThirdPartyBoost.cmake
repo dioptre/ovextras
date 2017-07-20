@@ -7,7 +7,7 @@
 GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyBoost)
 
 FIND_PATH(PATH_BOOST "include/boost/config/auto_link.hpp" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES boost NO_DEFAULT_PATH)
-# FIND_PATH(PATH_BOOST "include/boost/config/auto_link.hpp" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH} PATH_SUFFIXES boost)
+FIND_PATH(PATH_BOOST "include/boost/config/auto_link.hpp" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES boost)
 
 IF(PATH_BOOST)
 	OV_PRINT(OV_PRINTED "  Found boost includes...")

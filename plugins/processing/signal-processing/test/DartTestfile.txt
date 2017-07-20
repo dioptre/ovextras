@@ -109,9 +109,9 @@ FOREACH(TEST_NAME ${TEST_SCENARIOS})
 	LIST(GET TEST_TIKHONOVS 0 PARAM_TIKHONOV)
 	LIST(GET TEST_THRESHOLDS 0 COMPARE_THRESHOLD)	
 	
-	ADD_TEST(run_${TEST_NAME}_Train "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" "--config" "$ENV{OV_BINARY_PATH}/share/openvibe/kernel/openvibe_test.conf"  --random-seed 123 --define TEST_TIKHONOV ${PARAM_TIKHONOV} --define TEST_SHRINK ${PARAM_SHRINK} --define TEST_FILTER output-${TEST_NAME}.txt  "--play-fast" "test-regularizedcsp-train.xml")	
+	ADD_TEST(run_${TEST_NAME}_Train "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" --define Plugin_Classification_RandomizeKFoldTestData true  --random-seed 123 --define TEST_TIKHONOV ${PARAM_TIKHONOV} --define TEST_SHRINK ${PARAM_SHRINK} --define TEST_FILTER output-${TEST_NAME}.txt  "--play-fast" "test-regularizedcsp-train.xml")	
 	
-	ADD_TEST(run_${TEST_NAME}_Test "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" "--config" "$ENV{OV_BINARY_PATH}/share/openvibe/kernel/openvibe_test.conf" --random-seed 456 --define TEST_FILTER output-${TEST_NAME}.txt "--play-fast" "test-regularizedcsp-test.xml")
+	ADD_TEST(run_${TEST_NAME}_Test "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" --define Plugin_Classification_RandomizeKFoldTestData true --random-seed 456 --define TEST_FILTER output-${TEST_NAME}.txt "--play-fast" "test-regularizedcsp-test.xml")
 	
 	ADD_TEST(compare_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${OV_LOGFILE}" ${COMPARE_THRESHOLD})
 
