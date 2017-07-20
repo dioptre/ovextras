@@ -19,6 +19,7 @@
 #include "brainproducts-actichamp/ovasCDriverBrainProductsActiCHamp.h"
 #include "brainproducts-brainampseries/ovasCDriverBrainProductsBrainampSeries.h"
 #include "brainproducts-vamp/ovasCDriverBrainProductsVAmp.h"
+#include "brainproducts-liveamp/ovasCDriverBrainProductsLiveAmp.h"
 #include "egi-ampserver/ovasCDriverEGIAmpServer.h"
 #include "emotiv-epoc/ovasCDriverEmotivEPOC.h"
 #include "labstreaminglayer/ovasCDriverLabStreamingLayer.h"
@@ -156,6 +157,10 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 
 #if defined TARGET_HAS_ThirdPartyActiCHampAPI
 	m_vDriver.push_back(new CDriverBrainProductsActiCHamp(m_pAcquisitionServer->getDriverContext()));
+#endif
+
+#if defined TARGET_HAS_ThirdPartyLiveAmpAPI
+	m_vDriver.push_back(new CDriverBrainProductsLiveAmp(m_pAcquisitionServer->getDriverContext()));
 #endif
 
 #if defined TARGET_HAS_ThirdPartyBioSemiAPI

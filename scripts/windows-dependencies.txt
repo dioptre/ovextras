@@ -20,6 +20,7 @@ openal-1.1-dev.zip;openal;http://openvibe.inria.fr/dependencies/win32/2.0.0/open
 openal-1.1-runtime.zip;openal;http://openvibe.inria.fr/dependencies/win32/2.0.0/openal-1.1-runtime.zip
 pthread-2.8.0.zip;pthread;http://openvibe.inria.fr/dependencies/win32/2.0.0/pthread-2.8.0.zip
 sdk-brainproducts-actichamp.zip;sdk-brainproducts-actichamp;http://openvibe.inria.fr/dependencies/win32/2.0.0/sdk-brainproducts-actichamp.zip
+sdk-brainproducts-liveamp.zip;sdk-brainproducts-liveamp;http://openvibe.inria.fr/dependencies/win32/2.0.0/sdk-brainproducts-liveamp.zip
 sdk-eemagine-eego.zip;sdk-eemagine-eego;http://openvibe.inria.fr/dependencies/win32/2.0.0/sdk-eemagine-eego.zip
 sdk-enobio3g.zip;sdk-enobio3g;http://openvibe.inria.fr/dependencies/win32/2.0.0/sdk-enobio3g.zip
 sdk-mcs.zip;sdk-mcs;http://openvibe.inria.fr/dependencies/win32/2.0.0/sdk-mcs.zip

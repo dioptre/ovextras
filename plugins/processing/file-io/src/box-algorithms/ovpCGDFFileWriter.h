@@ -53,6 +53,7 @@ namespace OpenViBEPlugins
 
 			void saveMatrixData();
 			void saveEvents();
+			void padByEvents();
 
 		public:
 			std::ofstream m_oFile;

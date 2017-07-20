@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_ThirdPartyGTK)
+
 #include "ovpCBoxAlgorithmClassifierAccuracyMeasure.h"
 
 #include <string>
@@ -294,3 +297,6 @@ bool CBoxAlgorithmClassifierAccuracyMeasure::process(void)
 
 	return true;
 }
+
+#endif
+

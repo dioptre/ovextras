@@ -65,6 +65,7 @@ INCLUDE("FindThirdPartyNeuroServoDeps")
 INCLUDE("FindThirdPartyThinkGearAPI")
 INCLUDE("FindThirdPartyTMSi")
 INCLUDE("FindThirdPartyUSBFirstAmpAPI")
+INCLUDE("FindThirdPartyLiveAmpAPI")
 
 INCLUDE("FindThirdPartyOpenAL")
 INCLUDE("FindThirdPartyBoost")
