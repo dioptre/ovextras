@@ -17,12 +17,12 @@ IF(WIN32)
 	FIND_PATH(PATH_GMobiLabCAPI GMobiLabPlus.h PATHS 
 		"C:/Program Files/gtec/GMobiLabCAPI/Lib" 
 		"C:/Program Files (x86)/gtec/GMobiLabCAPI/Lib" 
-		${OV_CUSTOM_DEPENDENCIES_PATH})
+		${LIST_DEPENDENCIES_PATH})
 	# We need to copy the DLL on install
 	FIND_PATH(PATH_GMobiLabDLL gMOBIlabplus.dll PATHS 
 		"C:/Windows/System32" 
 		"C:/Windows/SysWOW64" 
-		${OV_CUSTOM_DEPENDENCIES_PATH})		
+		${LIST_DEPENDENCIES_PATH})		
 	FIND_LIBRARY(LIB_GMobiLabCAPI GMobiLabplus PATHS ${PATH_GMobiLabCAPI}/x86)
 	
 	IF(PATH_GMobiLabCAPI AND PATH_GMobiLabDLL AND LIB_GMobiLabCAPI)
