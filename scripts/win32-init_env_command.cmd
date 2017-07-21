@@ -38,6 +38,14 @@ call :addToPathIfExists liblsl\lib
 call :addToPathIfExists ogre\bin\release
 call :addToPathIfExists ogre\bin\debug
 call :addToPathIfExists vrpn\bin
+call :addToPathIfExists openal\libs\Win32
+call :addToPathIfExists liblsl\lib
+call :addToPathIfExists sdk-brainproducts-actichamp
+call :addToPathIfExists sdk-mcs\lib
+call :addToPathIfExists xerces-c\lib
+call :addToPathIfExists vcredist
+
+REM pthread\lib
 REM SET VRPNROOT=C:\c\openvibe\scripts\..\dependencies\vrpn
 
 
