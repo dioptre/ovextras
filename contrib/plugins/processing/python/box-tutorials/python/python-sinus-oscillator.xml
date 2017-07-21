@@ -1,7 +1,7 @@
 <OpenViBE-Scenario>
 	<FormatVersion>1</FormatVersion>
-	<Creator>openvibe</Creator>
-	<CreatorVersion>2.0</CreatorVersion>
+	<Creator>OpenVIBE</Creator>
+	<CreatorVersion>2.0.0</CreatorVersion>
 	<Settings></Settings>
 	<Inputs></Inputs>
 	<Outputs></Outputs>
@@ -1137,15 +1137,17 @@ Three boxes are used:
 - Sinus generator : generates signal
 - Clock stimulator : generates stimulations
 - Mean : transforms signal
-</Text>
+
+&lt;b&gt;Note:&lt;/b&gt; This tutorial needs the &lt;b&gt;numpy&lt;/b&gt; package
+installed for your Python distribution!</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
-					<Value>512</Value>
+					<Value>480</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>32</Value>
+					<Value>48</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
