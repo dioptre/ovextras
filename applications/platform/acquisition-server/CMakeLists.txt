@@ -48,7 +48,7 @@ INCLUDE("FindThirdPartyGTK")
 INCLUDE("FindThirdPartyBoost_System")
 
 IF(WIN32)	
-	# Since cert, getting timeBeginPeriod() linker issues without this
+	# @FIXME CERT getting timeBeginPeriod() linker issues without this
 	TARGET_LINK_LIBRARIES(${PROJECT_NAME} winmm)
 ENDIF(WIN32)
 

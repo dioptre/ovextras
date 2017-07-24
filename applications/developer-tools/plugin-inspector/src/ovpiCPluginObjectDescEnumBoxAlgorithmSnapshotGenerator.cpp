@@ -402,6 +402,7 @@ bool CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPluginO
 			<< " * box and turn to another \"equivalent\" one.\n";
 	}
 
+// @FIXME CERT
 #pragma message("WARNING: 'Unstable' block commented out due to Certivibe")
 
 	/*
@@ -560,6 +561,7 @@ bool CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPluginO
 		}
 	}
 
+// @FIXME CERT
 #pragma message("WARNING: PluginFunctionality_Visualization block commented out due to Certivibe")
 
 	/*

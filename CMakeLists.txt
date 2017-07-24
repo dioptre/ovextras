@@ -32,7 +32,7 @@ MESSAGE(STATUS "Appending compilation flags...")
 
 LIST(APPEND LIST_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
-# Path to OpenViBE SDK; this points to the root of the dist tree
+# Path to the OpenViBE SDK extracted package
 if(WIN32)
 	set(OPENVIBE_SDK_PATH_NAME_TO_SEEK bin/openvibe.dll)
 elseif(UNIX)
@@ -219,9 +219,10 @@ ENDIF(UNIX)
 #SET(SKIP_APPLICATIONS_PLATFORM_ACQUISITION-SERVER "1")
 #SET(SKIP_PLUGINS_PROCESSING_EXAMPLES "1")
 
+# FIXME CERT > From OpenViBE designer repo in the future
 # Designer is currently in another repository; taken from there
-#SET(SKIP_APPLICATIONS_PLATFORM_DESIGNER "0")
-#SET(SKIP_APPLICATIONS_EXAMPLES_CONVERT "0")		# Convert depends on Designer
+SET(SKIP_APPLICATIONS_PLATFORM_DESIGNER "0")
+SET(SKIP_APPLICATIONS_EXAMPLES_CONVERT "0")		# Convert depends on Designer
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
 SET(OV_LAUNCHER_SOURCE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules/launchers")
