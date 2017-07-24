@@ -43,19 +43,6 @@ namespace
 	}
 #endif
 
-	class _AutoCast_
-	{
-	public:
-		_AutoCast_(const IBox& rBox, IConfigurationManager& rConfigurationManager, const uint32 ui32Index) : m_rConfigurationManager(rConfigurationManager) { rBox.getSettingValue(ui32Index, m_sSettingValue); }
-		operator uint64 (void) { return m_rConfigurationManager.expandAsUInteger(m_sSettingValue); }
-		operator int64 (void) { return m_rConfigurationManager.expandAsInteger(m_sSettingValue); }
-		operator float64 (void) { return m_rConfigurationManager.expandAsFloat(m_sSettingValue); }
-		operator boolean (void) { return m_rConfigurationManager.expandAsBoolean(m_sSettingValue); }
-		operator const CString (void) { return m_sSettingValue; }
-	protected:
-		IConfigurationManager& m_rConfigurationManager;
-		CString m_sSettingValue;
-	};
 };
 
 uint64 CBoxAlgorithmP300SpellerStimulator::getClockFrequency(void)
@@ -70,12 +57,12 @@ boolean CBoxAlgorithmP300SpellerStimulator::initialize(void)
 	m_pStimulationDecoder=NULL;
 	m_pStimulationEncoder=NULL;
 
-	m_ui64StartStimulation       =this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, _AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 0));
-	m_ui64RowStimulationBase     =this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, _AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 1));
-	m_ui64ColumnStimulationBase  =this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, _AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 2));
+	m_ui64StartStimulation       =this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0));
+	m_ui64RowStimulationBase = this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1));
+	m_ui64ColumnStimulationBase = this->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2));
 
-	m_ui64RowCount               =_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 3);
-	m_ui64ColumnCount            =_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 4);
+	m_ui64RowCount = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+	m_ui64ColumnCount = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 
 	if(m_ui64RowCount==0 || m_ui64ColumnCount==0)
 	{
@@ -89,20 +76,14 @@ boolean CBoxAlgorithmP300SpellerStimulator::initialize(void)
 		return false;
 	}
 
-	m_ui64RepetitionCountInTrial =_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 5);
-	m_ui64TrialCount             =_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 6);
-	m_ui64FlashDuration          =(uint64)(((float64)_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 7))*float64(1LL<<32));
-	m_ui64NoFlashDuration        =(uint64)(((float64)_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 8))*float64(1LL<<32));
-	m_ui64InterRepetitionDuration=(uint64)(((float64)_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 9))*float64(1LL<<32));
-	m_ui64InterTrialDuration     =(uint64)(((float64)_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 10))*float64(1LL<<32));
-/*
-	m_ui64FlashDuration          = ITimeArithmetics::secondsToTime((float64)_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 7));
-	m_ui64NoFlashDuration        = ITimeArithmetics::secondsToTime((float64)_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 8));
-	m_ui64InterRepetitionDuration= ITimeArithmetics::secondsToTime((float64)_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 9));
-	m_ui64InterTrialDuration     = ITimeArithmetics::secondsToTime((float64)_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 10));
-*/
+	m_ui64RepetitionCountInTrial = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
+	m_ui64TrialCount = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
+	m_ui64FlashDuration = ITimeArithmetics::secondsToTime((float64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 7));
+	m_ui64NoFlashDuration = ITimeArithmetics::secondsToTime((float64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 8));
+	m_ui64InterRepetitionDuration = ITimeArithmetics::secondsToTime((float64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 9));
+	m_ui64InterTrialDuration = ITimeArithmetics::secondsToTime((float64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 10));
 
-	m_bAvoidNeighborFlashing     =_AutoCast_(l_rStaticBoxContext, this->getConfigurationManager(), 11);
+	m_bAvoidNeighborFlashing = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 11);
 
 	const uint64 l_ui64DurationThreshold = (10LL<<32)/1000;	// 10ms
 	if(m_ui64InterRepetitionDuration<l_ui64DurationThreshold)

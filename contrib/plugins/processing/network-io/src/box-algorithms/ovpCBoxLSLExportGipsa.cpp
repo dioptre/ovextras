@@ -26,8 +26,8 @@ boolean CBoxAlgorithmLSLExportGipsa::initialize(void)
 
 	m_oCInputChannel1.initialize(this);
 
-	l_pStaticBoxContext->getSettingValue(0, m_sStreamName);
-	l_pStaticBoxContext->getSettingValue(1, m_sStreamType);
+	m_sStreamName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	m_sStreamType = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 	m_outlet = NULL;
 	m_stims.clear();

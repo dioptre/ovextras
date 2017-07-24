@@ -56,8 +56,7 @@ bool CBoxAlgorithmModifiableSettings::updateSettings()
 	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	for(uint32 i=0; i<l_rStaticBoxContext.getSettingCount(); i++)
 	{
-		CString l_sSettingValue;
-		getStaticBoxContext().getSettingValue(i, l_sSettingValue);
+		CString l_sSettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
 		m_vSettingsValue.push_back(l_sSettingValue);
 	}
 	return true;

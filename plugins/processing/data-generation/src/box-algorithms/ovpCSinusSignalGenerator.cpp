@@ -34,15 +34,9 @@ boolean CSinusSignalGenerator::initialize(void)
 	m_oSignalEncoder.initialize(*this,0);
 
 	// Parses box settings to try connecting to server
-	CString l_sChannelCount;
-	CString l_sSamplingFrequency;
-	CString l_sGeneratedEpochSampleCount;
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0, l_sChannelCount);
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1, l_sSamplingFrequency);
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(2, l_sGeneratedEpochSampleCount);
-	m_ui32ChannelCount=atoi(l_sChannelCount);
-	m_ui32SamplingFrequency=atoi(l_sSamplingFrequency);
-	m_ui32GeneratedEpochSampleCount=atoi(l_sGeneratedEpochSampleCount);
+	m_ui32ChannelCount = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0); 
+	m_ui32SamplingFrequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+	m_ui32GeneratedEpochSampleCount = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 	m_bHeaderSent=false;
 
 	if(m_ui32ChannelCount == 0)

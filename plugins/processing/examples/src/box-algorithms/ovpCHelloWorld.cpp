@@ -4,6 +4,7 @@
 #include "ovpCHelloWorld.h"
 
 #include <cstdlib>		// atof
+#include <openvibe/ovITimeArithmetics.h>
 
 using namespace OpenViBE;
 using namespace OpenViBEPlugins::Examples;
@@ -11,11 +12,10 @@ using namespace OpenViBEPlugins::Examples;
 
 OpenViBE::uint64 CHelloWorld::getClockFrequency(void)
 {
-	CString l_sFrequency;
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0, l_sFrequency);
+	const float64 l_f64Frequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
-	// Once a second
-	return 	(uint64)( double( (uint64)1<<32 ) * atof(l_sFrequency));
+	// We need the freq in 32:32 fixed point time
+	return ITimeArithmetics::secondsToTime(l_f64Frequency);
 }
 
 void CHelloWorld::release(void)
@@ -26,8 +26,7 @@ void CHelloWorld::release(void)
 boolean CHelloWorld::processClock(OpenViBE::Kernel::IMessageClock& /* rMessageClock */)
 {
 
-	CString l_sMyGreeting;
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1, l_sMyGreeting);
+	const CString l_sMyGreeting = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 	getLogManager() << OpenViBE::Kernel::LogLevel_Info << ": " << l_sMyGreeting << "\n";
 

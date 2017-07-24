@@ -56,19 +56,17 @@ namespace OpenViBEPlugins
 
 			const IBox* l_pBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
 
-			CString l_oParameter;
-
 			// Parses box settings to find filename
-			l_pBoxContext->getSettingValue(0, l_oParameter);
+			const CString l_sSignalFile = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
 			//opens the file
-			if(l_oParameter)
+			if(l_sSignalFile)
 			{
-				m_oSignalFile.open(l_oParameter);
+				m_oSignalFile.open(l_sSignalFile);
 			}
 			if(!m_oSignalFile.good())
 			{
-				this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << l_oParameter << "]\n";
+				this->getLogManager() << LogLevel_ImportantWarning << "Could not open file [" << l_sSignalFile << "]\n";
 				return false;
 			}
 
@@ -80,24 +78,21 @@ namespace OpenViBEPlugins
 			std::istringstream l_oStringStream;
 
 			//get trial length
-			l_pBoxContext->getSettingValue(10, l_oParameter);
-			m_f64TrialLength = atof((const char*) l_oParameter);
+			m_f64TrialLength = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 10);
 
 			//get CUE display start
-			l_pBoxContext->getSettingValue(11, l_oParameter);
-			m_f64CueDisplayStart = atof((const char*) l_oParameter);
+			m_f64CueDisplayStart = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 11);
 
 			//get feedback start
-			l_pBoxContext->getSettingValue(12, l_oParameter);
-			m_f64FeedbackStart = atof((const char*) l_oParameter);
+			m_f64FeedbackStart = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 12);
 
 			//read triggers
 			std::ifstream l_oTriggerFile;
-			l_pBoxContext->getSettingValue(1, l_oParameter);
+			const CString l_sTriggerFile = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
-			if(l_oParameter)
+			if(l_sTriggerFile)
 			{
-				l_oTriggerFile.open(l_oParameter);
+				l_oTriggerFile.open(l_sTriggerFile);
 			}
 
 			uint64 l_ui64Trigger;
@@ -116,11 +111,11 @@ namespace OpenViBEPlugins
 
 			//read labels
 			std::ifstream l_oLabelsFile;
-			l_pBoxContext->getSettingValue(2, l_oParameter);
+			const CString l_sLabelsFile = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
-			if(l_oParameter)
+			if(l_sLabelsFile)
 			{
-				l_oLabelsFile.open(l_oParameter);
+				l_oLabelsFile.open(l_sLabelsFile);
 			}
 
 			uint64 l_ui64Label;
@@ -142,11 +137,11 @@ namespace OpenViBEPlugins
 
 			//read artifacts
 			std::ifstream l_oArtifactFile;
-			l_pBoxContext->getSettingValue(3, l_oParameter);
+			const CString l_sArtifactFile = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
 
-			if(l_oParameter)
+			if(l_sArtifactFile)
 			{
-				l_oArtifactFile.open(l_oParameter);
+				l_oArtifactFile.open(l_sArtifactFile);
 			}
 
 			uint64 l_ui64Artifact;
@@ -161,10 +156,10 @@ namespace OpenViBEPlugins
 
 			//read true labels
 			std::ifstream l_oTrueLabelsFile;
-			l_pBoxContext->getSettingValue(4, l_oParameter);
-			if(l_oParameter)
+			const CString l_sTrueLabelsFile = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+			if(l_sTrueLabelsFile)
 			{
-				l_oTrueLabelsFile.open(l_oParameter);
+				l_oTrueLabelsFile.open(l_sTrueLabelsFile);
 			}
 			while(getline(l_oTrueLabelsFile, l_oLine))
 			{
@@ -176,12 +171,11 @@ namespace OpenViBEPlugins
 			l_oTrueLabelsFile.close();
 
 			// Gets the size of output buffers
-			l_pBoxContext->getSettingValue(5, l_oParameter);
-			m_ui32SamplesPerBuffer = static_cast<uint32>(atoi((const char*)l_oParameter));
+			m_ui32SamplesPerBuffer = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
 
 			//Offline/Online
-			l_pBoxContext->getSettingValue(6, l_oParameter);
-			if(l_oParameter == CString("false"))
+			const bool l_bOffline = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
+			if(!l_bOffline)
 			{
 				//computes clock frequency
 				if(m_ui32SamplesPerBuffer <= m_ui32SamplingRate)
@@ -207,12 +201,9 @@ namespace OpenViBEPlugins
 			}
 
 			//Test/Training
-			l_pBoxContext->getSettingValue(7, l_oParameter);
-			m_bKeepTrainingSamples = (l_oParameter == CString("true"));
-			l_pBoxContext->getSettingValue(8, l_oParameter);
-			m_bKeepTestSamples = (l_oParameter == CString("true"));
-			l_pBoxContext->getSettingValue(9, l_oParameter);
-			m_bKeepArtifactSamples = (l_oParameter == CString("true"));
+			m_bKeepTrainingSamples = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 7);
+			m_bKeepTestSamples = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 8);
+			m_bKeepArtifactSamples = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 9);
 
 			writeSignalInformation();
 

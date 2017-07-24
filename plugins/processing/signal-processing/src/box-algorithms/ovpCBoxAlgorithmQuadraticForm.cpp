@@ -46,10 +46,7 @@ boolean CBoxAlgorithmQuadraticForm::initialize(void)
 	//reading the quadratic operator (matrix) values
 
 	//the number of rows/columns
-	CString l_sRowsNumber;
-	getStaticBoxContext().getSettingValue(1, l_sRowsNumber);
-	uint32 l_ui32RowsNumber;
-	l_ui32RowsNumber = ::atoi(l_sRowsNumber);
+	uint32 l_ui32RowsNumber = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 	//setting the size of the matrix
 	m_oQuadraticOperator.setDimensionCount(2);
@@ -57,8 +54,7 @@ boolean CBoxAlgorithmQuadraticForm::initialize(void)
 	m_oQuadraticOperator.setDimensionSize(1, l_ui32RowsNumber);
 
 	//the coefficients
-	CString l_sMatrixCoefficients;
-	getStaticBoxContext().getSettingValue(0, l_sMatrixCoefficients);
+	CString l_sMatrixCoefficients = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	const char * l_sCMatrixCoefficients = l_sMatrixCoefficients.toASCIIString();
 	float64 * l_pMatrixBuffer = m_oQuadraticOperator.getBuffer();
 

@@ -28,6 +28,7 @@ namespace
 			: m_rConfigurationManager(rConfigurationManager)
 		{
 			rBox.getSettingValue(ui32Index, m_sSettingValue);
+			m_sSettingValue = m_rConfigurationManager.expand(m_sSettingValue);
 		}
 		operator ::GdkColor (void)
 		{

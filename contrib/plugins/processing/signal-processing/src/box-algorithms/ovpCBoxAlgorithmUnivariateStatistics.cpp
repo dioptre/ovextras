@@ -122,38 +122,16 @@ boolean CBoxUnivariateStatistic::initialize(void)
 	ip_bStatisticPercentileActive.initialize(m_pMatrixStatistic->getInputParameter(OVP_Algorithm_UnivariateStatistic_InputParameterId_PercentActive));
 
 	//get dis/enabled output wanted
-#if 0 // this can be replaced by later auto-cast code
-	CString l_sSettings;
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0, l_sSettings);
-	ip_bStatisticMeanActive=(l_sSettings == CString("true")? true : false);
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1, l_sSettings);
-	ip_bStatisticVarianceActive =(l_sSettings == CString("true")? true : false);
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(2, l_sSettings);
-	ip_bStatisticRangeActive =(l_sSettings == CString("true")? true : false);
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(3, l_sSettings);
-	ip_bStatisticMedianActive =(l_sSettings == CString("true")? true : false);
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(4, l_sSettings);
-	ip_bStatisticIQRActive =(l_sSettings == CString("true")? true : false);
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(5, l_sSettings);
-	ip_bStatisticPercentileActive =(l_sSettings == CString("true")? true : false);
-#else
 	ip_bStatisticMeanActive      =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	ip_bStatisticVarianceActive  =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 	ip_bStatisticRangeActive     =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 	ip_bStatisticMedianActive    =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
 	ip_bStatisticIQRActive       =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 	ip_bStatisticPercentileActive=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
-#endif
 
 	//the percentile value
-#if 0 // this can be replaced by later auto-cast code
-	getStaticBoxContext().getSettingValue(6, l_sSettings);
-	ip_ui64StatisticParameterValue.initialize(m_pMatrixStatistic->getInputParameter(OVP_Algorithm_UnivariateStatistic_InputParameterId_PercentValue));
-	ip_ui64StatisticParameterValue=uint32(::atoi(l_sSettings));
-#else
 	ip_ui64StatisticParameterValue.initialize(m_pMatrixStatistic->getInputParameter(OVP_Algorithm_UnivariateStatistic_InputParameterId_PercentValue));
 	ip_ui64StatisticParameterValue=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 6);
-#endif
 
 	return true;
 }

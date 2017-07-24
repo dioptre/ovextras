@@ -11,10 +11,6 @@ using namespace OpenViBEPlugins::SimpleVisualisation;
 
 bool CBoxAlgorithmLevelMeasure::initialize(void)
 {
-	// CString l_sSettingValue;
-	// getStaticBoxContext().getSettingValue(0, l_sSettingValue);
-	// ...
-
 	m_pMatrix=new CMatrix();
 
 	m_pStreamedMatrixDecoder=&getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StreamedMatrixStreamDecoder));

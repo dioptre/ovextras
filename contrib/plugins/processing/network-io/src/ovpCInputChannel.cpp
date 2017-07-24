@@ -10,23 +10,6 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::SignalProcessing;
 
-namespace
-{
-	class _AutoCast_
-	{
-	public:
-		_AutoCast_(IBox& rBox, IConfigurationManager& rConfigurationManager, const uint32 ui32Index) : m_rConfigurationManager(rConfigurationManager) { rBox.getSettingValue(ui32Index, m_sSettingValue); }
-		operator uint64 (void) { return m_rConfigurationManager.expandAsUInteger(m_sSettingValue); }
-		operator int64 (void) { return m_rConfigurationManager.expandAsInteger(m_sSettingValue); }
-		operator float64 (void) { return m_rConfigurationManager.expandAsFloat(m_sSettingValue); }
-		operator boolean (void) { return m_rConfigurationManager.expandAsBoolean(m_sSettingValue); }
-		operator const CString (void) { return m_sSettingValue; }
-	protected:
-		IConfigurationManager& m_rConfigurationManager;
-		CString m_sSettingValue;
-	};
-};
-
 CInputChannel::CInputChannel(const OpenViBE::uint16 ui16InputIndex /*= 0*/)
 	: m_ui32SignalChannel(ui16InputIndex*NB_CHANNELS + SIGNAL_CHANNEL)
 	, m_ui32StimulationChannel(ui16InputIndex*NB_CHANNELS + STIMULATION_CHANNEL)

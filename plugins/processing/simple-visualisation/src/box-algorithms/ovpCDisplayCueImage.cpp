@@ -82,13 +82,11 @@ namespace OpenViBEPlugins
 			//>>>> Reading Settings:
 
 			//Number of Cues:
-			CString l_sSettingValue;
 			m_ui32NumberOfCues = (getStaticBoxContext().getSettingCount() - m_ui32NonCueSettingsCount) / 2;
 
 			//Do we display the images in full screen?
 			m_bFullScreen = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
-			getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1, l_sSettingValue);
 			m_bScaleImages = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 			//Clear screen stimulation:

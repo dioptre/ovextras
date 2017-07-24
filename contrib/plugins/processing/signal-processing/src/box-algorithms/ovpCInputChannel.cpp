@@ -20,7 +20,7 @@ namespace
 		operator int64 (void) { return m_rConfigurationManager.expandAsInteger(m_sSettingValue); }
 		operator float64 (void) { return m_rConfigurationManager.expandAsFloat(m_sSettingValue); }
 		operator boolean (void) { return m_rConfigurationManager.expandAsBoolean(m_sSettingValue); }
-		operator const CString (void) { return m_sSettingValue; }
+		operator const CString (void) { return m_rConfigurationManager.expand(m_sSettingValue); }
 	protected:
 		IConfigurationManager& m_rConfigurationManager;
 		CString m_sSettingValue;

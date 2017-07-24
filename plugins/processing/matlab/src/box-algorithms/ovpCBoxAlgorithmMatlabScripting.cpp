@@ -126,10 +126,8 @@ bool CBoxAlgorithmMatlabScripting::initialize(void)
 	m_sMatlabBuffer = NULL;
 	m_oMatlabHelper = new CMatlabHelper(this->getLogManager(), this->getErrorManager());
 
-	CString l_sSettingValue;
-	getStaticBoxContext().getSettingValue(0, l_sSettingValue);
-	m_ui64ClockFrequency=::atoi(l_sSettingValue.toASCIIString());
-	
+	m_ui64ClockFrequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+		
 	for(uint32_t i=0; i<getStaticBoxContext().getInputCount(); i++)
 	{
 		CIdentifier l_oInputType;
@@ -218,7 +216,7 @@ bool CBoxAlgorithmMatlabScripting::initialize(void)
 		}
 	}
 
-	getStaticBoxContext().getSettingValue(1, m_sMatlabPath);
+	m_sMatlabPath = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 #if defined TARGET_OS_Windows
 	if(!FS::Files::directoryExists(m_sMatlabPath) && FS::Files::fileExists(m_sMatlabPath)) 
@@ -288,8 +286,7 @@ bool CBoxAlgorithmMatlabScripting::initialize(void)
 	// resulting in warning messages in the buffer. We don't print them.
 	// this->printOutputBufferWithFormat(); 
 
-	CString l_sWorkingDir;
-	getStaticBoxContext().getSettingValue(2, l_sWorkingDir); // working directory
+	CString l_sWorkingDir = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 	sanitizePath(l_sWorkingDir);
 
 	// Try to find an unused box instance variable name
@@ -327,9 +324,9 @@ bool CBoxAlgorithmMatlabScripting::initialize(void)
 		"Failed to create the box instance with OV_createBoxInstance function.",
 		OpenViBE::Kernel::ErrorType::BadProcessing);
 	
-	getStaticBoxContext().getSettingValue(3,m_sInitializeFunction);
-	getStaticBoxContext().getSettingValue(4,m_sProcessFunction);
-	getStaticBoxContext().getSettingValue(5,m_sUninitializeFunction);
+	m_sInitializeFunction = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+	m_sProcessFunction = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+	m_sUninitializeFunction = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
 
 	// Check that the files actually exist
 	CString l_sFilename;
@@ -368,7 +365,8 @@ bool CBoxAlgorithmMatlabScripting::initialize(void)
 		l_sSettingTypes = l_sSettingTypes + "uint64("+CString(ss.str().c_str()) + ") ";
 		
 		//setting value, typed
-		getStaticBoxContext().getSettingValue(i,l_sTemp);
+		
+		l_sTemp = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
 		if(l_oType == OV_TypeId_Stimulation)
 		{
 			uint64 l_oStimCode  = FSettingValueAutoCast(*this->getBoxAlgorithmContext(),i);
@@ -404,7 +402,7 @@ bool CBoxAlgorithmMatlabScripting::initialize(void)
 	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, (const char *)l_sCommand)==0,"Error calling [OV_setSettings]\n")) return false;
 
 	// we set the box clock frequency in the box structure, so it's accessible in the user scripts if needed
-	getStaticBoxContext().getSettingValue(0,l_sTemp);
+	l_sTemp = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	l_sCommand = m_sBoxInstanceVariableName + ".clock_frequency = " + l_sTemp + ";";
 	if(!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while setting the clock frequency\n")) return false;
 

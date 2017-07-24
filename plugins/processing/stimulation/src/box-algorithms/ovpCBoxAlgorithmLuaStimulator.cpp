@@ -762,7 +762,9 @@ boolean CBoxAlgorithmLuaStimulator::getSettingCB(uint32 ui32SettingIndex, CStrin
 		return true;
 	}
 
-	return this->getStaticBoxContext().getSettingValue(ui32SettingIndex, rsSetting);
+	rsSetting = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), ui32SettingIndex);
+	
+	return true;
 }
 
 boolean CBoxAlgorithmLuaStimulator::getConfigCB(const CString& rsString, CString& rsConfig)

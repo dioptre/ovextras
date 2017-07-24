@@ -22,8 +22,7 @@ boolean CVRPNButtonServer::initialize()
 
 
 	//get server name, and creates a button server for this server
-	CString l_oServerName;
-	l_pBox->getSettingValue(0, l_oServerName);
+	CString l_oServerName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
 	IVRPNServerManager::getInstance().initialize();
 	IVRPNServerManager::getInstance().addServer(l_oServerName, m_oServerIdentifier);
@@ -34,10 +33,8 @@ boolean CVRPNButtonServer::initialize()
 	//get stim id
 	for(uint32 i=0; i<l_pBox->getInputCount(); i++)
 	{
-		CString l_sOnStimulationIdentifier;
-		CString l_sOffStimulationIdentifier;
-		l_pBox->getSettingValue(1+i*2, l_sOnStimulationIdentifier);
-		l_pBox->getSettingValue(2+i*2, l_sOffStimulationIdentifier);
+		CString l_sOnStimulationIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1+i*2);
+		CString l_sOffStimulationIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2+i*2);
 		m_vStimulationPair[i]=
 			pair<uint64, uint64>(
 				getBoxAlgorithmContext()->getPlayerContext()->getTypeManager().getEnumerationEntryValueFromName(OVTK_TypeId_Stimulation, l_sOnStimulationIdentifier),

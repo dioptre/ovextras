@@ -73,13 +73,9 @@ boolean CBoxAlgorithmAcquisitionClient::processClock(IMessageClock& rMessageCloc
 {
 	if(!m_pConnectionClient)
 	{
-		CString l_sSettingValue;
 
-		getStaticBoxContext().getSettingValue(0, l_sSettingValue);
-		CString l_sServerName=this->getConfigurationManager().expand(l_sSettingValue);
-
-		getStaticBoxContext().getSettingValue(1, l_sSettingValue);
-		uint32 l_ui32ServerPort=::atoi(l_sSettingValue.toASCIIString());
+		CString l_sServerName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+		uint32 l_ui32ServerPort = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 		m_pConnectionClient=Socket::createConnectionClient();
 		m_pConnectionClient->connect(l_sServerName, l_ui32ServerPort);

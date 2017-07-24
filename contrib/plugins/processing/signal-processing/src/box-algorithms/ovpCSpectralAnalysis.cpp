@@ -35,8 +35,7 @@ void CSpectralAnalysis::release(void)
 boolean CSpectralAnalysis::initialize()
 {
 	//reads the plugin settings
-	CString l_sSpectralComponents;
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0, l_sSpectralComponents);
+	const CString l_sSpectralComponents = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	uint64 l_ui64SpectralComponents=this->getTypeManager().getBitMaskEntryCompositionValueFromName(OVP_TypeId_SpectralComponent, l_sSpectralComponents);
 
 	m_bAmplitudeSpectrum = ((l_ui64SpectralComponents & OVP_TypeId_SpectralComponent_Amplitude.toUInteger())>0);

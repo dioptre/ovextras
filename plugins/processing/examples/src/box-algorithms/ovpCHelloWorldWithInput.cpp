@@ -39,8 +39,7 @@ bool CHelloWorldWithInput::process(void)
 		}
 	}
 
-	CString l_sMyGreeting;
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0, l_sMyGreeting);
+	const CString l_sMyGreeting = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	getLogManager() << OpenViBE::Kernel::LogLevel_Info << ": " << l_sMyGreeting << "\n";
 
 	return true;

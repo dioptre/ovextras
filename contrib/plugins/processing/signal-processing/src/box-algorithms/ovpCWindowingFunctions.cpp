@@ -77,8 +77,7 @@ void CWindowingFunctions::release(void)
 boolean CWindowingFunctions::initialize()
 {
 	//reads the plugin settings
-	CString l_sWindowMethod;
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0, l_sWindowMethod);
+	const CString l_sWindowMethod = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_ui64WindowMethod=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_WindowMethod, l_sWindowMethod);
 
 	m_pSignalDecoder = new OpenViBEToolkit::TSignalDecoder < CWindowingFunctions >(*this,0);

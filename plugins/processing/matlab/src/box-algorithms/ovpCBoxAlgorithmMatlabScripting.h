@@ -87,7 +87,7 @@ namespace OpenViBEPlugins
 				
 				OpenViBE::CString l_sSettingValue;
 				rBox.getSettingValue(0, l_sSettingValue);
-				uint64_t l_ui64Value=::atoi(l_sSettingValue.toASCIIString());
+				uint64_t l_ui64Value = ::atoi(l_sSettingValue.toASCIIString());
 				if(ui32Index == 0 && (l_ui64Value < 1 || l_ui64Value > 128))
 				{
 					OV_WARNING_K("Clock Frequency must be an integer between 1 and 128 Hz. Falling back to default.");

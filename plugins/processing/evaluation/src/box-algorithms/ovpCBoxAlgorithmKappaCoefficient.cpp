@@ -45,8 +45,7 @@ bool CBoxAlgorithmKappaCoefficient::initialize(void)
 	l_vClassCodes.resize(m_ui32AmountClass);
 	for(uint32 i = 0; i< m_ui32AmountClass; i++)
 	{
-		CString l_sClassValue;
-		getStaticBoxContext().getSettingValue(i+c_ui32ClassLabelOffset, l_sClassValue); // classes are settings from 2 to n
+		 // classes are settings from 2 to n
 		l_vClassCodes[i] =(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i+c_ui32ClassLabelOffset);
 	}
 
@@ -57,8 +56,7 @@ bool CBoxAlgorithmKappaCoefficient::initialize(void)
 		{
 			if(l_vClassCodes[i] == l_vClassCodes[j])
 			{
-				CString l_sClassValue;
-				getStaticBoxContext().getSettingValue(i + c_ui32ClassLabelOffset, l_sClassValue);
+				const CString l_sClassValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i + c_ui32ClassLabelOffset);
 				getLogManager() << LogLevel_Error << "You must use unique classes to compute a Kappa coefficient. Class "<<i+1<<" and "<<j+1<< " are the same ("<<l_sClassValue.toASCIIString()<<").\n";
 				return false;
 			}

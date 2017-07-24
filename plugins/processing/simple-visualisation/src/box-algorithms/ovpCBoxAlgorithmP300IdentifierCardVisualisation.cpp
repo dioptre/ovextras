@@ -20,20 +20,26 @@ namespace
 	class _AutoCast_
 	{
 	public:
-		_AutoCast_(IBoxAlgorithmContext& rBoxAlgorithtmContext, const uint32 ui32Index) : m_rBoxAlgorithmContext(rBoxAlgorithtmContext) { m_rBoxAlgorithmContext.getStaticBoxContext()->getSettingValue(ui32Index, m_sSettingValue); }
-		operator ::GdkColor (void)
+		_AutoCast_(const IBox& rBox, IConfigurationManager& rConfigurationManager, const uint32 ui32Index)
+			: m_rConfigurationManager(rConfigurationManager)
+		{
+			rBox.getSettingValue(ui32Index, m_sSettingValue);
+			m_sSettingValue = m_rConfigurationManager.expand(m_sSettingValue);
+		}
+		operator ::GdkColor(void)
 		{
 			::GdkColor l_oColor;
-			int r=0, g=0, b=0;
+			int r = 0, g = 0, b = 0;
 			sscanf(m_sSettingValue.toASCIIString(), "%i,%i,%i", &r, &g, &b);
-			l_oColor.pixel=0;
-			l_oColor.red=(r*65535)/100;
-			l_oColor.green=(g*65535)/100;
-			l_oColor.blue=(b*65535)/100;
+			l_oColor.pixel = 0;
+			l_oColor.red = (r * 65535) / 100;
+			l_oColor.green = (g * 65535) / 100;
+			l_oColor.blue = (b * 65535) / 100;
+			// std::cout << r << " " << g << " " << b << "\n";
 			return l_oColor;
 		}
 	protected:
-		IBoxAlgorithmContext& m_rBoxAlgorithmContext;
+		IConfigurationManager& m_rConfigurationManager;
 		CString m_sSettingValue;
 	};
 };
@@ -44,11 +50,11 @@ bool CBoxAlgorithmP300IdentifierCardVisualisation::initialize(void)
 	m_pMainWidgetInterface=NULL;
 
 	//get value of settings given in the configuration box
-	m_sInterfaceFilename      =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-	m_oBackgroundColor        =_AutoCast_(*this->getBoxAlgorithmContext(), 1);
-	m_oTargetBackgroundColor  =_AutoCast_(*this->getBoxAlgorithmContext(), 2);
-	m_oSelectedBackgroundColor=_AutoCast_(*this->getBoxAlgorithmContext(), 3);
-	m_ui64CardStimulationBase =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+	m_sInterfaceFilename       = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	m_oBackgroundColor         = _AutoCast_(getStaticBoxContext(), getConfigurationManager(), 1);
+	m_oTargetBackgroundColor   = _AutoCast_(getStaticBoxContext(), getConfigurationManager(), 2);
+	m_oSelectedBackgroundColor = _AutoCast_(getStaticBoxContext(), getConfigurationManager(), 3);
+	m_ui64CardStimulationBase  = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------
 

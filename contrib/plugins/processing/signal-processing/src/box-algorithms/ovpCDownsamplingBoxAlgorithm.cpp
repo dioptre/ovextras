@@ -58,19 +58,11 @@ boolean CDownsamplingBoxAlgorithm::initialize(void)
 	m_pDownsampling->initialize();
 
 	// Compute filter coefs settings
-	CString l_oNewSamplingRate;
-	CString l_oNameFilter;
-	CString l_oFilterOrder;
-	CString l_oPassBandRipple;
-	CString l_oRatio;
-
-	getStaticBoxContext().getSettingValue(0, l_oNewSamplingRate);
-	getStaticBoxContext().getSettingValue(1, l_oRatio);
-	getStaticBoxContext().getSettingValue(2, l_oNameFilter);
-	getStaticBoxContext().getSettingValue(3, l_oFilterOrder);
-	getStaticBoxContext().getSettingValue(4, l_oPassBandRipple);
-
-	m_ui64NewSamplingRate = atoi(l_oNewSamplingRate);
+	m_ui64NewSamplingRate = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	const CString l_oRatio = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+	const CString l_oNameFilter = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+	const CString l_oFilterOrder = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+	const CString l_oPassBandRipple = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
 
 	float64 l_f64Ratio = 1.0/4;
 	if(this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_FrequencyCutOffRatio, l_oRatio)==OVP_TypeId_FrequencyCutOffRatio_14)
