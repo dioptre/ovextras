@@ -23,7 +23,7 @@
 #include <iostream>
 
 // @FIXME CERT
-#pragma message("WARNING: Hard-coding some CIdentifiers that should be obtainable from Certivibe in the future")
+#pragma message("WARNING: Hard-coding some CIdentifiers that should be obtainable from OpenViBE SDK in the future")
 #define OVP_GD_ClassId_Algorithm_MasterAcquisitionStreamEncoder                                               OpenViBE::CIdentifier(0x2D15E00B, 0x51414EB6)
 #define OVP_GD_ClassId_Algorithm_MasterAcquisitionStreamEncoderDesc                                           OpenViBE::CIdentifier(0xE6EC841D, 0x9E75A8FB)
 #define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SubjectIdentifier                    OpenViBE::CIdentifier(0xD5BB5231, 0x59389B72)
