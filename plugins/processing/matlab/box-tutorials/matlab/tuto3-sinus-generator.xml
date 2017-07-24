@@ -28,8 +28,8 @@
 				<Setting>
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Matlab executable (path)</Name>
-					<DefaultValue>C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe</DefaultValue>
-					<Value>C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe</Value>
+					<DefaultValue>C:/Program Files (x86)/MATLAB/R2013b/bin/win32/matlab.exe</DefaultValue>
+					<Value>C:/Program Files (x86)/MATLAB/R2013b/bin/win32/matlab.exe</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>

@@ -130,7 +130,7 @@ namespace OpenViBEPlugins
 				// Background: Matlab's engOpen() takes a different argument on Windows and on Linux. On Windows, we need to have Matlab
 				// on PATH, in Linux we need to provide a full path of the executable. However, we'd like our example scenarios to give
 				// correct instructions to the user on both platforms, hence we use a setting that contains the information for both use-cases.
-				rBoxAlgorithmPrototype.addSetting("Matlab executable (path)",      OV_TypeId_Filename, "C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe");
+				rBoxAlgorithmPrototype.addSetting("Matlab executable (path)",      OV_TypeId_Filename, "C:/Program Files (x86)/MATLAB/R2013b/bin/win32/matlab.exe");
 #else
 #endif
 				rBoxAlgorithmPrototype.addSetting("Matlab working directory",   OV_TypeId_String, "${Player_ScenarioDirectory}");
