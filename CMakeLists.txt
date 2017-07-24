@@ -32,7 +32,7 @@ MESSAGE(STATUS "Appending compilation flags...")
 
 LIST(APPEND LIST_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
-# Path to CERTIVIBE; this points to the extracted certivibe package
+# Path to OpenViBE SDK; this points to the root of the dist tree
 if(WIN32)
 	set(OPENVIBE_SDK_PATH_NAME_TO_SEEK bin/openvibe.dll)
 elseif(UNIX)
@@ -95,20 +95,20 @@ IF(WIN32)
 		# as VS100 allocates the cores too aggressively when OpenMP is enabled.
 		INCLUDE("FindOpenMP")
 		IF(OPENMP_FOUND)
-		  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 		ENDIF(OPENMP_FOUND)
 	ENDIF(MSVC_VER120)
 	MESSAGE(STATUS "MSVC version is ${MSVC_SERVICE_PACK}")
-	
+
 	SET(OV_WIN32_BOOST_VERSION "1_55")
 
 ELSEIF(UNIX)
 	# If OpenMP is available, using it will allow Eigen to use multiple cores in matrix math.
 	INCLUDE("FindOpenMP")
 	IF(OPENMP_FOUND)
-	  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 	ENDIF(OPENMP_FOUND)
-	
+
 	# Switch -msse2 enables vectorization. Remove if your CPU/compiler doesn't support it.
 	SET(OV_EIGEN_FLAGS "-msse2")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall ${OV_EIGEN_FLAGS}")
@@ -141,33 +141,33 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
 FUNCTION(SET_BUILD_PLATFORM)
-    IF(WIN32)
+	IF(WIN32)
 		# For some drivers/libs we presently need i386 (at least for Acquisition Server)
-	    ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
+		ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
 	ELSE()
-    	IF("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-		    ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_x64)
+		IF("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+			ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_x64)
 		ELSEIF("${CMAKE_SIZEOF_VOID_P}" EQUAL "4")
-		    ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
-	    ELSE()
-		    ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_Unknown)
-	    ENDIF()
+			ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
+		ELSE()
+			ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_Unknown)
+		ENDIF()
 	ENDIF()
 
-    IF(WIN32)
-	    ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
-	    ADD_DEFINITIONS(-DTARGET_OS_Windows)
-	    ADD_DEFINITIONS(-DTARGET_COMPILER_VisualStudio)
-    ELSEIF(APPLE)
-	    ADD_DEFINITIONS(-fnon-call-exceptions)
-	    ADD_DEFINITIONS(-DTARGET_OS_MacOS)
-	    ADD_DEFINITIONS(-DTARGET_COMPILER_LLVM)
-    ELSEIF(UNIX)
-	    # ADD_DEFINITIONS(-fvisibility=hidden) # This flag should be present... man gcc
-	    ADD_DEFINITIONS(-fnon-call-exceptions)
-	    ADD_DEFINITIONS(-DTARGET_OS_Linux)
-	    ADD_DEFINITIONS(-DTARGET_COMPILER_GCC)
-    ENDIF()
+	IF(WIN32)
+		ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
+		ADD_DEFINITIONS(-DTARGET_OS_Windows)
+		ADD_DEFINITIONS(-DTARGET_COMPILER_VisualStudio)
+	ELSEIF(APPLE)
+		ADD_DEFINITIONS(-fnon-call-exceptions)
+		ADD_DEFINITIONS(-DTARGET_OS_MacOS)
+		ADD_DEFINITIONS(-DTARGET_COMPILER_LLVM)
+	ELSEIF(UNIX)
+		# ADD_DEFINITIONS(-fvisibility=hidden) # This flag should be present... man gcc
+		ADD_DEFINITIONS(-fnon-call-exceptions)
+		ADD_DEFINITIONS(-DTARGET_OS_Linux)
+		ADD_DEFINITIONS(-DTARGET_COMPILER_GCC)
+	ENDIF()
 ENDFUNCTION()
 
 # Print the used compilation parameters (for transparency)
@@ -197,7 +197,7 @@ SET(SKIP_DOCUMENTATION "1")
 #SET(SKIP_CONTRIB_PLUGINS_PROCESSING_PYTHON "1")
 
 # Skipping demos can speed up compilation a lot, if you don't need them
-SET(SKIP_APPLICATIONS_DEMOS "1")
+#SET(SKIP_APPLICATIONS_DEMOS "1")
 #SET(SKIP_CONTRIB_APPLICATIONS "1")
 
 IF(UNIX)
@@ -219,9 +219,9 @@ ENDIF(UNIX)
 #SET(SKIP_APPLICATIONS_PLATFORM_ACQUISITION-SERVER "1")
 #SET(SKIP_PLUGINS_PROCESSING_EXAMPLES "1")
 
-# From certivibe designer repo in the future
-SET(SKIP_APPLICATIONS_PLATFORM_DESIGNER "0")
-SET(SKIP_APPLICATIONS_EXAMPLES_CONVERT "1")		# depends on Designer
+# Designer is currently in another repository; taken from there
+#SET(SKIP_APPLICATIONS_PLATFORM_DESIGNER "0")
+#SET(SKIP_APPLICATIONS_EXAMPLES_CONVERT "0")		# Convert depends on Designer
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
 SET(OV_LAUNCHER_SOURCE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules/launchers")
@@ -265,19 +265,16 @@ ADD_DEFINITIONS(-DOV_CMAKE_PATH_LIB="${CMAKE_INSTALL_FULL_LIBDIR}")
 ADD_SUBDIRECTORY("build-tool/")
 # Traverse these directories and build their components
 ADD_SUBDIRECTORY("modules/tcptagging") 
-ADD_SUBDIRECTORY("plugins/")					# @TODO enable, prune, make work
+ADD_SUBDIRECTORY("plugins/")
 ADD_SUBDIRECTORY("applications/")
 ADD_SUBDIRECTORY("externals/")
-ADD_SUBDIRECTORY("contrib/")					# @TODO enable, prune, make work
+ADD_SUBDIRECTORY("contrib/")
 ADD_SUBDIRECTORY("documentation/") # needs to be the last since it uses the list of collected projects
 
 #add dependency to plugin inspector to the documentation
 IF(openvibe-documentation)
 	ADD_DEPENDENCIES(openvibe-documentation openvibe-plugin-inspector)
 ENDIF(openvibe-documentation)
-
-# @FIXME CERT sort out the consequences of commenting this out (was needed to compile with cert)
-# ADD_DEPENDENCIES(openvibe-toolkit openvibe-stimulation-generator )
 
 # make a copy of the dependency script, this is done so we can use the same launch scripts both in win install and win devel situations.
 IF(WIN32)
