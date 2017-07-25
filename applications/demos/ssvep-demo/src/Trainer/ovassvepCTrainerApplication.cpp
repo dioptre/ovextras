@@ -28,7 +28,10 @@ CTrainerApplication::CTrainerApplication() :
 
 bool CTrainerApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 {
-	CApplication::setup(poKernelContext);
+	if (!CApplication::setup(poKernelContext))
+	{
+		return false;
+	}
 
 	(*m_poLogManager) << LogLevel_Debug << "  * CTrainerApplication::setup()\n";
 
