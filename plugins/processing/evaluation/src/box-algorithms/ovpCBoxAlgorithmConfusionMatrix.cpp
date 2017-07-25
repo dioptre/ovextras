@@ -153,14 +153,14 @@ boolean CBoxAlgorithmConfusionMatrix::process(void)
 				if(m_pConfusionMatrixAlgorithm->isOutputTriggerActive(OVP_Algorithm_ConfusionMatrixAlgorithm_OutputTriggerId_ConfusionPerformed))
 				{
 					m_oOutputMatrixEncoder.encodeBuffer();
-					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(1, i));
 				}
 			}
 
 			if(m_oClassifierStimulationDecoder.isEndReceived())
 			{
 				m_oOutputMatrixEncoder.encodeEnd();
-				l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+				l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(1, i));
 			}
 
 			l_rDynamicBoxContext.markInputAsDeprecated(1, i);
