@@ -726,7 +726,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Path_Samples}/signals/bci-motor-imagery.ov</Value>
+					<Value>${Path_Data}/scenarios/signals/bci-motor-imagery.ov</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
