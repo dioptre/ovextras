@@ -35,6 +35,18 @@ while [[ $# -gt 0 ]]; do
 			ov_install_dir="$2"
 			shift
 			;;
+		--sdk)
+			ov_sdk_dir="$2"
+			shift
+			;;
+		--designer)
+			ov_designer_dir="$2"
+			shift
+			;;
+		--sdk-src)
+			ov_sdk_src_dir="$2"
+			shift
+			;;
 		*)
 			echo "ERROR: Unknown parameter $i"
 			exit 1
