@@ -207,6 +207,7 @@ no_need_to_download_dependencies_runtime:
 	FileWrite $0 "SET PATH=$INSTDIR\libogg\win32\bin\release;$INSTDIR\libogg\win32\bin\debug;%PATH%$\r$\n"	
 	FileWrite $0 "SET PATH=$INSTDIR\libvorbis\win32\bin\release;$INSTDIR\libvorbis\win32\bin\debug;%PATH%$\r$\n"	
 	FileWrite $0 "SET PATH=$INSTDIR\liblsl\lib\;%PATH%$\r$\n"	
+	FileWrite $0 "SET PATH=$INSTDIR\vcredist;%PATH%$\r$\n"	
 	
 	FileClose $0
 	
@@ -285,6 +286,7 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\ogre"
 	RMDir /r "$INSTDIR\openal"	
 	RMDir /r "$INSTDIR\pthreads"	
+	RMDir /r "$INSTDIR\vcredist"
 	RMDir /r "$INSTDIR\vrpn"
 		
 	Delete "$INSTDIR\..\scripts\win32-dependencies.cmd"

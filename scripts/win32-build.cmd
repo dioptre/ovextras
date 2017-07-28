@@ -132,7 +132,7 @@ cd /D %ov_build_dir%
 echo Generating makefiles for %VSCMake% using %BuildType% config.
 echo Building to %ov_build_dir% ...
 
-cmake %ov_script_dir%\..  %generator% -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path%
+cmake %ov_script_dir%\..  %generator% -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path% -Dopenvibe-toolkit_SOURCE_DIR=C:\ovm\sdk\toolkit
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
 
 echo.

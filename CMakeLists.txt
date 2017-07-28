@@ -17,10 +17,10 @@ PROJECT(OpenViBE)
 
 # These versions are used by the subprojects by default.
 # If you wish to maintain specific version numbers for a subproject, please do so in the projects CMakeLists.txt
-SET(OV_GLOBAL_VERSION_MAJOR 1)
-SET(OV_GLOBAL_VERSION_MINOR 3)
-SET(OV_GLOBAL_VERSION_PATCH 0+git)
-SET(OV_GLOBAL_VERSION_STRING "${OV_GLOBAL_VERSION_MAJOR}.${OV_GLOBAL_VERSION_MINOR}.${OV_GLOBAL_VERSION_PATCH}")
+SET(OV_GLOBAL_VERSION_MAJOR 2)
+SET(OV_GLOBAL_VERSION_MINOR 0)
+SET(OV_GLOBAL_VERSION_PATCH 0)
+SET(OV_GLOBAL_VERSION_STRING "${OV_GLOBAL_VERSION_MAJOR}.${OV_GLOBAL_VERSION_MINOR}.${OV_GLOBAL_VERSION_PATCH}-BETA")
 
 # Default is to build to dist/. If you wish a custom install, set your own MAKE_INSTALL_PREFIX when you call CMake. Safest to do under a fakeroot.
 #IF(NOT CMAKE_INSTALL_PREFIX)

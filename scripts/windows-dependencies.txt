@@ -29,5 +29,6 @@ sdk-micromed.zip;sdk-micromed;http://openvibe.inria.fr/dependencies/win32/2.0.0/
 sdk-mitsar.zip;sdk-mitsar;http://openvibe.inria.fr/dependencies/win32/2.0.0/sdk-mitsar.zip
 sdk-nexus.zip;sdk-nexus;http://openvibe.inria.fr/dependencies/win32/2.0.0/sdk-nexus.zip
 sdk-tmsi.zip;sdk-tmsi;http://openvibe.inria.fr/dependencies/win32/2.0.0/sdk-tmsi.zip
+vcredist.zip;vcredist;http://openvibe.inria.fr/dependencies/win32/2.0.0/vcredist.zip
 vrpn-7.31-dev.zip;vrpn;http://openvibe.inria.fr/dependencies/win32/2.0.0/vrpn-7.31-dev.zip
 vrpn-7.31-runtime.zip;vrpn;http://openvibe.inria.fr/dependencies/win32/2.0.0/vrpn-7.31-runtime.zip

@@ -12,8 +12,6 @@
 #ADD_TEST(LS_BINARY_PATH "ls" "-all")
 #ADD_TEST(PWD_BINARY_PATH "pwd")
 
-
-
 ## -- Other Tests : Place a file named DartTestfile.txt in path with tests.
 
 # ${TEST_LOCAL} is repleased by "FALSE" only by automatic test call, else {TEST_LOCAL} is not defined
@@ -31,12 +29,17 @@ IF(NOT (LOCAL MATCHES "FALSE"))
 	set(ENV{OV_BINARY_PATH} "${OV_ROOT_DIR}/dist")
 	message("running local test here= $ENV{OV_BINARY_PATH}")
 
+	IF(NOT DEFINED ENV{OV_UserDataSubdir})
+		SET(ENV{OV_UserDataSubDir} "openvibe")
+	ENDIF
+	
 	IF(WIN32)
-	  SET(ENV{OV_USERDATA} "$ENV{APPDATA}/openvibe/")
+		SET(ENV{OV_USERDATA} "$ENV{APPDATA}/$ENV{OV_UserDataSubdir}/")
 	ELSE(WIN32)
-	  SET(ENV{OV_USERDATA} "$ENV{HOME}/.config/OpenVIBE/")
-	ENDIF(WIN32)
-	  
+		SET(ENV{OV_USERDATA} "$ENV{HOME}/.config/$ENV{OV_UserDataSubdir}/")
+	ENDIF(WIN32)	
+
+	message("ENV $ENV{OV_USERDATA} and $ENV{OV_UserDataSubdir}")
 ENDIF(NOT (LOCAL MATCHES "FALSE"))
 
 # this is the folder where test scenarios can be run under

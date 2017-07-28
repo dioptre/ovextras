@@ -31,8 +31,8 @@ file(COPY ${DESIGNER_SDK_PATH}/doc-tmp/ DESTINATION ${DOCUMENTATION_TEMP_DIRECTO
 if(WIN32)
         install(FILES
 	        ${DESIGNER_SDK_PATH}/bin/openvibe-designer.exe
-			${DESIGNER_SDK_PATH}/bin/openvibe-plugins-simple-visualization.dll
-			${DESIGNER_SDK_PATH}/bin/openvibe-plugins-mensia-advanced-visualization.dll
+			${DESIGNER_SDK_PATH}/bin/openvibe-plugins-designer-simple-visualization.dll
+			${DESIGNER_SDK_PATH}/bin/openvibe-plugins-designer-advanced-visualization.dll
 			${DESIGNER_SDK_PATH}/bin/openvibe-visualization-toolkit.dll
                 DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
         install(DIRECTORY
