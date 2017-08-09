@@ -7,9 +7,6 @@ SET "OMP_WAIT_POLICY=@OV_OMP_WAIT_POLICY@"
 
 REM Get the directory location of this script, assume it contains the OpenViBE dist tree. These variables will be used by OpenViBE executables.
 SET "OV_PATH_ROOT=%~dp0"
-SET "OV_PATH_BIN=%OV_PATH_ROOT%\bin"
-SET "OV_PATH_LIB=%OV_PATH_ROOT%\bin"
-SET "OV_PATH_DATA=%OV_PATH_ROOT%\share\openvibe"
 
 REM Default behavior
 SET OV_PAUSE=PAUSE

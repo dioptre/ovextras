@@ -1,6 +1,6 @@
 
-# INSTALL(DIRECTORY signals      DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/   PATTERN ".svn" EXCLUDE)
-INSTALL(DIRECTORY bci-examples DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/   PATTERN ".svn" EXCLUDE)
+# INSTALL(DIRECTORY signals      DESTINATION ${DIST_DATADIR}/openvibe/scenarios/)
+INSTALL(DIRECTORY bci-examples DESTINATION ${DIST_DATADIR}/openvibe/scenarios/)
 
 
 

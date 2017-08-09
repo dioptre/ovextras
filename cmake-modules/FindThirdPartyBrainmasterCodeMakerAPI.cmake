@@ -31,7 +31,7 @@ IF(WIN32)
 		ENDFOREACH(LIB_BrainmasterCodeMakerAPI)
 
 		# Copy the DLL file at install
-		INSTALL(PROGRAMS "${PATH_BrainmasterCodeMakerAPI}/bmrcm.dll" DESTINATION "bin")
+		INSTALL(PROGRAMS "${PATH_BrainmasterCodeMakerAPI}/bmrcm.dll" DESTINATION ${DIST_BINDIR})
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI)
 	ELSE(PATH_BrainmasterCodeMakerAPI)
