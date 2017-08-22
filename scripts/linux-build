@@ -35,6 +35,18 @@ while [[ $# -gt 0 ]]; do
 			ov_install_dir="$2"
 			shift
 			;;
+		--sdk)
+			ov_sdk_dir="$2"
+			shift
+			;;
+		--designer)
+			ov_designer_dir="$2"
+			shift
+			;;
+		--sdk-src)
+			ov_sdk_src_dir="$2"
+			shift
+			;;
 		*)
 			echo "ERROR: Unknown parameter $i"
 			exit 1
@@ -58,9 +70,9 @@ echo ""
 
 
 if [ ${ov_build_type} == Profile ]; then
-	cmake ${ov_script_dir}/.. -DCMAKE_CXX_FLAGS_RELWITHDEBINFO='-O2 -g -DNDEBUG -pg' -DCMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=${ov_install_dir}
+	cmake ${ov_script_dir}/.. -DCMAKE_CXX_FLAGS_RELWITHDEBINFO='-O2 -g -DNDEBUG -pg' -DCMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=${ov_install_dir} -DOPENVIBE_SDK_PATH=${ov_sdk_dir} -DDESIGNER_SDK_PATH=${ov_designer_dir}
 else
-	cmake ${ov_script_dir}/.. -DCMAKE_BUILD_TYPE=${ov_build_type} -DCMAKE_INSTALL_PREFIX=${ov_install_dir}
+	cmake ${ov_script_dir}/.. -DCMAKE_BUILD_TYPE=${ov_build_type} -DCMAKE_INSTALL_PREFIX=${ov_install_dir} -DOV_SDK_SOURCE_PATH=${ov_sdk_src_dir} -DOPENVIBE_SDK_PATH=${ov_sdk_dir} -DDESIGNER_SDK_PATH=${ov_designer_dir} 
 fi
 
  

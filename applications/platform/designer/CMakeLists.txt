@@ -79,8 +79,7 @@ elseif(UNIX)
 	        ${DESIGNER_SDK_PATH}/lib/
                 DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
                 FILES_MATCHING
-                PATTERN "libopenvibe-plugins-simple-visualization*so*"
-                PATTERN "libopenvibe-plugins-mensia-advanced-visualization*so*"
+                PATTERN "libopenvibe-plugins-*so*"
                 PATTERN "libopenvibe-visualization-toolkit*so*")
         install(DIRECTORY
                 ${OPENVIBE_SDK_PATH}/lib/

@@ -1,6 +1,6 @@
 # Adds the current project to the global properties
 FUNCTION(OV_ADD_THIS_TO_PROJECT_LIST)
-	# MESSAGE(STATUS "ADDING: ${CMAKE_CURRENT_SOURCE_DIR}")
+	MESSAGE(STATUS "ADDING: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 	# Add the dir to be parsed for documentation later. We need to do this before adding subdir, in case the subdir is the actual docs dir
 	GET_PROPERTY(OV_TMP GLOBAL PROPERTY OV_PROP_CURRENT_PROJECTS)
@@ -8,6 +8,17 @@ FUNCTION(OV_ADD_THIS_TO_PROJECT_LIST)
 	SET_PROPERTY(GLOBAL PROPERTY OV_PROP_CURRENT_PROJECTS ${OV_TMP})
 
 ENDFUNCTION(OV_ADD_THIS_TO_PROJECT_LIST)
+
+
+# Adds the given directory to the CMake build
+FUNCTION(OV_ADD_SOURCE_DIR CURRENT_SOURCE_DIR)
+	MESSAGE(STATUS "ADDING SOURCE DIR: ${CURRENT_SOURCE_DIR}")
+	
+	GET_PROPERTY(OV_TMP GLOBAL PROPERTY OV_PROP_CURRENT_PROJECTS)
+	SET(OV_TMP "${OV_TMP};${CURRENT_SOURCE_DIR}")
+	SET_PROPERTY(GLOBAL PROPERTY OV_PROP_CURRENT_PROJECTS ${OV_TMP})
+
+ENDFUNCTION(OV_ADD_SOURCE_DIR)
 
 #
 # Adds all directories as subdirectories to the CMake build, using the branch specified (if any) in the root CMakeList.txt or

@@ -16,31 +16,23 @@ SET(ov_doxy_input "@ov_doxy_input@")
 SET(CURRENT_PROJECTS "@CURRENT_PROJECTS@")
 SET(CMAKE_CURRENT_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@")
 
-
-FOREACH(current_project ${CURRENT_PROJECTS})
-	STRING(REGEX REPLACE " +$" "" current_project ${current_project})
-	SET(current_project_src "${current_project}/src")
-	# updates the doxyfile variable for input directories
-	SET(ov_plugin_inspector_load_path "${ov_plugin_inspector_load_path}#${current_project}")
-ENDFOREACH(current_project)
-
 MESSAGE(STATUS "Running plugin inspector")
 
-#MESSAGE(STATUS ${ov_plugin_inspector_load_path})
+#MESSAGE(STATUS "@CMAKE_INSTALL_FULL_BINDIR@/../lib/")
 IF(UNIX)
 	EXECUTE_PROCESS(
-		COMMAND @CMAKE_CURRENT_BINARY_DIR@/../../applications/developer-tools/plugin-inspector/openvibe-plugin-inspector
-			-d "@CMAKE_CURRENT_BINARY_DIR@" -p ${ov_plugin_inspector_load_path}
-			-k "@CMAKE_CURRENT_BINARY_DIR@/../../kernel/"
-			-c "@CMAKE_SOURCE_DIR@/kernel/share/openvibe.conf-base"
-		WORKING_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@/../../applications/developer-tools/plugin-inspector"
+		COMMAND  @CMAKE_INSTALL_FULL_BINDIR@/../openvibe-plugin-inspector.sh 
+			-d "@CMAKE_CURRENT_BINARY_DIR@" -p @CMAKE_INSTALL_FULL_BINDIR@/../lib/ 
+			-k "@CMAKE_INSTALL_FULL_BINDIR@/../lib/" 
+			-c "@CMAKE_INSTALL_FULL_BINDIR@/../share/openvibe/kernel/openvibe.conf" 
+		WORKING_DIRECTORY "@CMAKE_INSTALL_FULL_BINDIR@/"
 	)
 ELSEIF(WIN32)
 	EXECUTE_PROCESS(
-		COMMAND	@CMAKE_CURRENT_SOURCE_DIR@/openvibe-plugin-inspector.cmd @CMAKE_SOURCE_DIR@ @CMAKE_CURRENT_BINARY_DIR@/../..
-			-d "@CMAKE_CURRENT_BINARY_DIR@" -p ${ov_plugin_inspector_load_path}
-			-k "@CMAKE_CURRENT_BINARY_DIR@/../../kernel"
-			-c "@CMAKE_SOURCE_DIR@/kernel/share/openvibe.conf-base"
+		COMMAND	@CMAKE_CURRENT_SOURCE_DIR@/openvibe-plugin-inspector.cmd @CMAKE_INSTALL_FULL_BINDIR@ @CMAKE_CURRENT_BINARY_DIR@/../..
+			-d "@CMAKE_CURRENT_BINARY_DIR@" -p @CMAKE_INSTALL_FULL_BINDIR@/../lib/
+			-k "@CMAKE_INSTALL_FULL_BINDIR@/../lib/"
+			-c "@CMAKE_INSTALL_FULL_BINDIR@/../share/openvibe/kernel/openvibe.conf"
 		WORKING_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@/../../applications/developer-tools/plugin-inspector"
 	)
 ENDIF(UNIX)
