@@ -1,11 +1,11 @@
 /**
- * \page BoxAlgorithm_XDAWNSpatialFilterTrainer xDAWN Spatial Filter Trainer
+ * \page BoxAlgorithm_XDAWNTrainerINRIA xDAWN Spatial Filter Trainer
 __________________________________________________________________
 
 Detailed description
 __________________________________________________________________
 
- * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Description|
+ * |OVP_DocBegin_BoxAlgorithm_XDAWNTrainerINRIA_Description|
  * This box can be used in order to compute a spatial filter in order to enhance the
  * detection of evoked response potentials. In order to compute such filter, this box
  * needs to receive the whole contain of a session on the first hand, and a succession
@@ -21,29 +21,28 @@ __________________________________________________________________
  * the number of output channels you want. For example, reducing 16 electrodes to 3 channels
  * for P300 detection is OK.
  *
- * For more details about xDAWN, see <a href="http://www.icp.inpg.fr/~rivetber/Publications/references/Rivet2009a.pdf">Rivet et al. 2009</a>
- * or in case this links disappears, <a href="http://www.ncbi.nlm.nih.gov/pubmed/19174332">this website</a>.
- * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Description|
+ * For more details about xDAWN, see <a href="https://www.gipsa-lab.grenoble-inp.fr/~bertrand.rivet/references/Rivet2009a.pdf">Rivet et al. 2009</a>
+ * |OVP_DocEnd_BoxAlgorithm_XDAWNTrainerINRIA_Description|
 __________________________________________________________________
 
 Inputs description
 __________________________________________________________________
 
- * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Inputs|
- * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Inputs|
+ * |OVP_DocBegin_BoxAlgorithm_XDAWNTrainerINRIA_Inputs|
+ * |OVP_DocEnd_BoxAlgorithm_XDAWNTrainerINRIA_Inputs|
 
- * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Input1|
+ * |OVP_DocBegin_BoxAlgorithm_XDAWNTrainerINRIA_Input1|
  * This input receives the experiment stimulations. As soon as the "train"
  * stimulation is received, the spatial filter is computed.
- * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Input1|
+ * |OVP_DocEnd_BoxAlgorithm_XDAWNTrainerINRIA_Input1|
 
- * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Input2|
+ * |OVP_DocBegin_BoxAlgorithm_XDAWNTrainerINRIA_Input2|
  * This input should receive the whole signal of the session.
- * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Input2|
+ * |OVP_DocEnd_BoxAlgorithm_XDAWNTrainerINRIA_Input2|
 
- * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Input3|
+ * |OVP_DocBegin_BoxAlgorithm_XDAWNTrainerINRIA_Input3|
  * This input should receive the multiple evoked response potentials.
- * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Input3|
+ * |OVP_DocEnd_BoxAlgorithm_XDAWNTrainerINRIA_Input3|
 __________________________________________________________________
 
 Outputs description
@@ -60,33 +59,33 @@ __________________________________________________________________
 Settings description
 __________________________________________________________________
 
- * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Settings|
- * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Settings|
+ * |OVP_DocBegin_BoxAlgorithm_XDAWNTrainerINRIA_Settings|
+ * |OVP_DocEnd_BoxAlgorithm_XDAWNTrainerINRIA_Settings|
 
- * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Setting1|
+ * |OVP_DocBegin_BoxAlgorithm_XDAWNTrainerINRIA_Setting1|
  * This setting contains the stimulation to use to trigger the training process.
- * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Setting1|
+ * |OVP_DocEnd_BoxAlgorithm_XDAWNTrainerINRIA_Setting1|
 
- * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Setting2|
+ * |OVP_DocBegin_BoxAlgorithm_XDAWNTrainerINRIA_Setting2|
  * This setting tells the box what configuration file to generate. This configuration file can
  * be used to set the correct values of a \ref Doc_BoxAlgorithm_SpatialFilter box.
- * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Setting2|
+ * |OVP_DocEnd_BoxAlgorithm_XDAWNTrainerINRIA_Setting2|
 
- * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Setting3|
+ * |OVP_DocBegin_BoxAlgorithm_XDAWNTrainerINRIA_Setting3|
  * This setting tells how many dimension should be kept out of the spatial filter.
- * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Setting3|
+ * |OVP_DocEnd_BoxAlgorithm_XDAWNTrainerINRIA_Setting3|
 __________________________________________________________________
 
 Examples description
 __________________________________________________________________
 
- * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Examples|
- * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Examples|
+ * |OVP_DocBegin_BoxAlgorithm_XDAWNTrainerINRIA_Examples|
+ * |OVP_DocEnd_BoxAlgorithm_XDAWNTrainerINRIA_Examples|
 __________________________________________________________________
 
 Miscellaneous description
 __________________________________________________________________
 
- * |OVP_DocBegin_BoxAlgorithm_XDAWNSpatialFilterTrainer_Miscellaneous|
- * |OVP_DocEnd_BoxAlgorithm_XDAWNSpatialFilterTrainer_Miscellaneous|
+ * |OVP_DocBegin_BoxAlgorithm_XDAWNTrainerINRIA_Miscellaneous|
+ * |OVP_DocEnd_BoxAlgorithm_XDAWNTrainerINRIA_Miscellaneous|
  */
