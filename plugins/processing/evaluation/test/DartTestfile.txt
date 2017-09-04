@@ -5,11 +5,11 @@
 IF(WIN32)
 	SET(EXT cmd)
 	SET(OS_FLAGS "--no-pause")
-	SET(OV_LOGFILE "$ENV{APPDATA}/openvibe/log/openvibe-designer.log")
+	SET(OV_LOGFILE "$ENV{APPDATA}/${OV_CONFIG_SUBDIR}/log/openvibe-designer.log")
 ELSE(WIN32)
 	SET(EXT sh)
 	SET(OS_FLAGS "")
-	SET(OV_LOGFILE "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")	
+	SET(OV_LOGFILE "$ENV{HOME}/.config/${OV_CONFIG_SUBDIR}/log/openvibe-designer.log")	
 ENDIF(WIN32)
 
 ADD_TEST(clean_Evaluation_kappa rm -f ${OV_LOGFILE})
