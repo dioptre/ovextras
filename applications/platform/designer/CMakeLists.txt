@@ -21,23 +21,23 @@ OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-designer" EXECUTABLE_NAME  "${P
 install(DIRECTORY ${DESIGNER_SDK_PATH}/include/ DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 install(DIRECTORY ${DESIGNER_SDK_PATH}/share/openvibe/applications/designer DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/applications)
 
-SET(INCLUDED_CERTIVIBE_COMPONENTS DEPENDENCIES)
+SET(INCLUDED_OV_SDK_COMPONENTS DEPENDENCIES)
 
 SET(CMAKE_MODULE_PATH "${OPENVIBE_SDK_PATH}/share")
-INCLUDE("AddCertivibeComponents")
+INCLUDE("AddOpenViBESDKComponents")
 
 file(COPY ${DESIGNER_SDK_PATH}/doc-tmp/ DESTINATION ${DOCUMENTATION_TEMP_DIRECTORY})
 
 if(WIN32)
         install(FILES
 	        ${DESIGNER_SDK_PATH}/bin/openvibe-designer.exe
-			${DESIGNER_SDK_PATH}/bin/openvibe-plugins-simple-visualization.dll
-			${DESIGNER_SDK_PATH}/bin/openvibe-plugins-mensia-advanced-visualization.dll
+			${DESIGNER_SDK_PATH}/bin/openvibe-plugins-designer-simple-visualization.dll
+			${DESIGNER_SDK_PATH}/bin/openvibe-plugins-designer-advanced-visualization.dll
 			${DESIGNER_SDK_PATH}/bin/openvibe-visualization-toolkit.dll
                 DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
         install(DIRECTORY
                 ${OPENVIBE_SDK_PATH}/bin/
-                DESTINATION ${CMAKE_INSTALL_FULL_BINDIR} FILES_MATCHING PATTERN "certivibe-plugins*dll")
+                DESTINATION ${CMAKE_INSTALL_FULL_BINDIR} FILES_MATCHING PATTERN "openvibe-plugins*dll")
         install(DIRECTORY
 			${DESIGNER_SDK_PATH}/bin/
                 DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
@@ -84,7 +84,7 @@ elseif(UNIX)
                 PATTERN "libopenvibe-visualization-toolkit*so*")
         install(DIRECTORY
                 ${OPENVIBE_SDK_PATH}/lib/
-                DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR} FILES_MATCHING PATTERN "libcertivibe-plugins*so*")
+                DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR} FILES_MATCHING PATTERN "libopenvibe-plugins*so*")
 
 endif()
 

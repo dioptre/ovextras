@@ -44,7 +44,7 @@ bool CBoxAlgorithmROCCurve::initialize(void)
 
 	for(size_t i = 2; i < this->getStaticBoxContext().getSettingCount() ; ++i)
 	{
-		CIdentifier l_oClassLabel = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
+		CIdentifier l_oClassLabel(FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i));
 		CString l_sClassName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
 
 		m_oClassStimulationSet.insert(l_oClassLabel);
