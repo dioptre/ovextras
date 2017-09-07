@@ -1,0 +1,88 @@
+/**
+ * \page BoxAlgorithm_OutlierRemoval Outlier Removal
+__________________________________________________________________
+
+Detailed description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Description|
+The outlier removal box discards extremal feature vectors. The user can specify the desired quantile limits [min,max]. 
+The algorithm loops through the feature dimensions and computes range r(j)=[quantile(min),quantile(max)] for each dimension j. 
+If each feature j of example i is inside r(j), the example i is kept. Otherwise it is discarded. The box is intended to 
+be sent all the vectors of interest before being given the stimulation to start the removal.
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Description|
+__________________________________________________________________
+
+Inputs description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Inputs|
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Inputs|
+
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Input1|
+ The stimulation to start the removal.
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Input1|
+
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Input2|
+ The feature vectors to prune.
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Input2|
+__________________________________________________________________
+
+Outputs description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Outputs|
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Outputs|
+
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Output1|
+The stimulation to announce that the removal is complete.
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Output1|
+ 
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Output2|
+The kept feature vectors.
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Output2|
+ 
+______________________________________________________
+__________________________________________________________________
+
+Settings description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Settings|
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Settings|
+
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Setting1| 
+Lower quantile threshold. In [0,1].
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Setting1|
+ 
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Setting2|
+Upper quantile threshold. In [0,1].
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Setting2|
+
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Setting3|
+Stimulation to start the removal at and to pass out after.
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Setting3|
+
+__________________________________________________________________
+
+Examples description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Examples|
+Choice [0.02,0.95] truncates at 2% of the lowest feature values and at 95% of the highest feature values, per dimension.
+
+If the quantile range is specified as [0,1], the box will pass out the original vector set. 
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Examples|
+__________________________________________________________________
+
+Miscellaneous description
+__________________________________________________________________
+
+ * |OVP_DocBegin_BoxAlgorithm_OutlierRemoval_Miscellaneous|
+The box can be attempted to remove artifacts when training classifiers that are sensitive to extremal values, for example LDA. In band-power based Motor Imagery, eye blinks can cause really strong band powers, which can then bias the classifier training. With proper control of the upper quantile of this box, such examples can be pruned from the training set.
+
+An intuitive way to think about the filtering made by the box is to imagine a hypercube (rectangle) in the data space. The boundaries of the cube correspond to the estimated quantiles. Each feature vector that is fully inside the cube is kept.
+
+It may be difficult to choose meaningful quantile limits without looking at the feature values. The latter can be attempted with Signal Display. It is also possible to have outliers that are not in any way extremal. Such outliers can be wrongly placed in the feature space or have a wrong associated class label. This box cannot catch such problems.
+ * |OVP_DocEnd_BoxAlgorithm_OutlierRemoval_Miscellaneous|
+ */
