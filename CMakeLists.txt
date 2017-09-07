@@ -252,6 +252,20 @@ INCLUDE("OvLinkBoostLib")
 INCLUDE("OvPrint")
 INCLUDE("OvMessages")
 
+
+# For boxes documentation, qdd sdk dependencies dox-part folder
+IF(NOT(${SKIP_DOCUMENTATION}))
+	file(COPY ${OPENVIBE_SDK_PATH}/doc-tmp/ DESTINATION ${DOCUMENTATION_TEMP_DIRECTORY})
+	OV_ADD_SOURCE_DIR("${DOCUMENTATION_TEMP_DIRECTORY}/openvibe")
+	IF (OV_SDK_SOURCE_PATH)
+		OV_ADD_SOURCE_DIR("${OV_SDK_SOURCE_PATH}")
+	ELSE()
+		MESSAGE(WARNING,"Please set OV_SDK_SOURCE_PATH to enable sources documentation of sdk")
+	ENDIF()
+ENDIF()
+
+
+
 # Setup knowledge of GNU-style install path variables
 INCLUDE("GNUInstallDirs")
 SET(CMAKE_INSTALL_FULL_DOCDIR "${CMAKE_INSTALL_FULL_BINDIR}/../doc/html")
