@@ -53,7 +53,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0xb73cee83, 0xf7215d60)</Value>
+					<Value>(0x34ac5fe8, 0x089765a0)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x527ad68d, 0x16d746a0)</Identifier>
@@ -323,8 +323,8 @@
 				<Setting>
 					<TypeIdentifier>(0x512a166f, 0x5c3ef83f)</TypeIdentifier>
 					<Name>Gain</Name>
-					<DefaultValue>1</DefaultValue>
-					<Value>1</Value>
+					<DefaultValue>0.05</DefaultValue>
+					<Value>0.05</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
