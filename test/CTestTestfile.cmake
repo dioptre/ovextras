@@ -1,31 +1,21 @@
-# This file specifies the test which should be executed
-
-# The file should be placed in the binary directory ${CTEST_BINARY_DIRECTORY}.
-
-#Each test consists of:
-
-#    The unique name of the test ( eg.: testname1 )
-#    The full path to the executable of the test ( eg.: "$ENV{HOME}/bin/TEST_EXECUTABLE_1.sh" )
-#    A List of arguments to the executable ( eg.: "ARGUMENT_1" "ARGUMENT_2" etc. ) 
-	
-# basic test (just for sample) check that binary directory is readable 
-#ADD_TEST(LS_BINARY_PATH "ls" "-all")
-#ADD_TEST(PWD_BINARY_PATH "pwd")
-
+# This file is the entry with which the test should be executed. It sets the environement to correct values for the tests.
+# After building the project a correctly configured copy of this file should be available in the build folder.
+# Executing "ctest -T Test" in the build folder should execute the tests automatically using this file.
 
 set(ENV{OV_BINARY_PATH} "@DIST_ROOT@")
-set(OV_CONFIG_SUBDIR @OV_CONFIG_SUBDIR@) # This is used in the drt files
+set(OV_CONFIG_SUBDIR @OV_CONFIG_SUBDIR@) # This is used in the dart files
 set(CMAKE_COMMAND "@CMAKE_COMMAND@")
-IF(WIN32)
-  SET(ENV{OV_USERDATA} "$ENV{APPDATA}/${OV_CONFIG_SUBDIR}/")
-ELSE()
-  SET(ENV{OV_USERDATA} "$ENV{HOME}/.config/${OV_CONFIG_SUBDIR}/")
-ENDIF()
+if(WIN32)
+	set(ENV{OV_USERDATA} "$ENV{APPDATA}/${OV_CONFIG_SUBDIR}/")
+else()
+	SET(ENV{OV_USERDATA} "$ENV{HOME}/.config/${OV_CONFIG_SUBDIR}/")
+endif()
+SET(OV_LOGFILE "$ENV{OV_USERDATA}/log/openvibe-designer.log") 
 
 set(CTEST_SOURCE_DIRECTORY "@CMAKE_SOURCE_DIR@")
 
 # this is the folder where test scenarios can be run under
-SET(ENV{OV_TEST_DEPLOY_PATH} "${CTEST_SOURCE_DIRECTORY}/local-tmp/test-deploy/")
+set(ENV{OV_TEST_DEPLOY_PATH} "${CTEST_SOURCE_DIRECTORY}/local-tmp/test-deploy/")
 
 # subdirs command is deprecated and should be replaced by add_subdirectory calls as per the documentation recommendations, 
 # however the 2 command do not have the same behavior with ctest. Doing the change currently breaks tests.

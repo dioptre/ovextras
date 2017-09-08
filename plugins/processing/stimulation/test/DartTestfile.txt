@@ -3,11 +3,9 @@
 IF(WIN32)
 	SET(EXT cmd)
 	SET(OS_FLAGS "--no-pause")
-	SET(OV_LOGFILE "$ENV{APPDATA}/${OV_CONFIG_SUBDIR}/log/openvibe-designer.log")	
 ELSE()
 	SET(EXT sh)
 	SET(OS_FLAGS "")
-	SET(OV_LOGFILE "$ENV{HOME}/.config/${OV_CONFIG_SUBDIR}/log/openvibe-designer.log")	
 ENDIF()
 
 
