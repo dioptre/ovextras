@@ -47,7 +47,9 @@ CALL "%OV_ENVIRONMENT_FILE%"
 
 REM cmake variable OV_CMD_ARGS below may specify additional arguments outside this script
 
-%OV_RUN_IN_BG% "%OV_PATH_ROOT%\bin\@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ %ARGS%
+@PY_FIX_PREFIX@
+%OV_RUN_IN_BG% "%OV_PATH_ROOT%\bin\@OV_CMD_EXECUTABLE@" @OV_CMD_ARGS@ %ARGS% @PY_FIX_REDIR@
+@PY_FIX_POSTFIX@
 	
 :EndOfScript
 
