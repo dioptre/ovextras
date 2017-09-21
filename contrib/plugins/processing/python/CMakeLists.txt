@@ -39,8 +39,8 @@ INSTALL(TARGETS ${PROJECT_NAME}
 IF(WIN32)
 	# The pygame scenario doesn't work on Windows, so do not install it
 	INSTALL(DIRECTORY box-tutorials DESTINATION ${DIST_DATADIR}/openvibe/scenarios/ PATTERN "*-pygame-*" EXCLUDE)
-ELSE(WIN32)	
+ELSE()	
 	INSTALL(DIRECTORY box-tutorials DESTINATION ${DIST_DATADIR}/openvibe/scenarios/)
-ENDIF(WIN32)
+ENDIF()
 
-INSTALL(DIRECTORY share/        DESTINATION ${DIST_DATADIR}/openvibe/plugins/python PATTERN ".svn" EXCLUDE)
+INSTALL(DIRECTORY share/ DESTINATION ${DIST_DATADIR}/openvibe/plugins/python)
