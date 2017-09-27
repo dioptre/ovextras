@@ -77,6 +77,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Filter dimension",             OV_TypeId_Integer,      "4");
 				rBoxAlgorithmPrototype.addSetting("Save as box config",           OV_TypeId_Boolean,      "true");
 				// rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsDeprecated);
 				return true;
 			}
 
