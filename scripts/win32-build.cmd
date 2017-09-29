@@ -53,12 +53,14 @@ if /i "%1"=="-h" (
 	SHIFT
 	Goto parameter_parse
 ) else if /i "%1"=="--sdk" (
-	set sdk="-DOPENVIBE_SDK_PATH=%2"
+	set sdk=-DOPENVIBE_SDK_PATH=%2
+	set sdk_val=%2
 	SHIFT
 	SHIFT
 	Goto parameter_parse
 ) else if /i "%1"=="--designer" (
 	set designer=-DDESIGNER_SDK_PATH=%2
+	set designer_val=%2
 	SHIFT
 	SHIFT
 	Goto parameter_parse
@@ -106,22 +108,48 @@ if /i "!InitEnvScript!"=="win32-init_env_command.cmd" (
 
 
 echo --
-echo build type is set to: %BuildType%.
+if defined vsgenerate (
+	echo Build type is set to: MultiType.
+) else (
+	echo Build type is set to: %BuildType%.
+)
 echo Init-env Script to be called: !InitEnvScript!.
 REM #######################################################################################
 
 call "!InitEnvScript!" %ov_script_dir%\..\dependencies %dependencies_base%
 
 REM #######################################################################################
+
 if defined vsgenerate (
 	set generator=-G"%VSCMake%" -T "v120"
+	if not defined build_dir (
+		set build_dir=%root_dir%\..\openvibe-extras-build\vs-project
+	)
+	if not defined install_dir (
+		set install_dir=%root_dir%\..\openvibe-extras-build\dist
+	)
+) else (
+	set build_type="-DCMAKE_BUILD_TYPE=%BuildType%"
+	if not defined build_dir (
+		set build_dir=%root_dir%\..\openvibe-extras-build\build-%BuildType%
+	)
+	if not defined install_dir (
+		set install_dir=%root_dir%\..\openvibe-extras-build\dist-%BuildType%
+	)
 )
-if not defined ov_build_dir (
-	set ov_build_dir=%ov_script_dir%\..\local-tmp\nmake-%BuildType%
+if defined sdk (
+	echo SDK is located at %sdk_val%
+) else (
+	echo "Using default for SDK path (check CMake for inferred value)"
 )
-if not defined ov_install_dir (
-	set ov_install_dir=%ov_script_dir%\..\dist
+
+if defined designer (
+	echo Designer is located at %designer_val%
+) else (
+	echo "Using default for Designer path (check CMake for inferred value)"
 )
+
+
 echo.
 echo _______________________________________________________________________________
 echo.
@@ -129,10 +157,10 @@ echo.
 mkdir %ov_build_dir% 2>NUL
 cd /D %ov_build_dir%
 
-echo Generating makefiles for %VSCMake% using %BuildType% config.
+echo Generating makefiles for %VSCMake%.
 echo Building to %ov_build_dir% ...
 
-cmake %ov_script_dir%\..  %generator% -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path%
+cmake %ov_script_dir%\..  %generator% %build_type% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path%
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
 
 echo.
@@ -145,10 +173,10 @@ if !builder! == None (
 	ninja install
 	if not "!ERRORLEVEL!" == "0" goto terminate_error
 ) else if !builder! == Visual (
-	msbuild OpenVIBE.sln
+	msbuild Openvibe.sln /p:Configuration=%BuildType%
 	if not "!ERRORLEVEL!" == "0" goto terminate_error
-
-	cmake --build . --target install
+	
+	cmake --build . --config %BuildType% --target install
 	if not "!ERRORLEVEL!" == "0" goto terminate_error
 )
 

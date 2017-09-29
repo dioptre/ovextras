@@ -90,6 +90,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Column separator", OV_TypeId_String, ";");
 				rBoxAlgorithmPrototype.addSetting("Precision",        OV_TypeId_Integer, "10");
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsDeprecated);
 
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);

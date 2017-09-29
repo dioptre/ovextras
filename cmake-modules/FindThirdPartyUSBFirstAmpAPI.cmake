@@ -20,7 +20,7 @@ IF(WIN32)
 		ENDIF(LIB_USBFirstAmpAPI)
 
 		# Copy the DLL file at install
-		INSTALL(PROGRAMS "${PATH_USBFirstAmpAPI}/FirstAmp.dll" DESTINATION "bin")
+		INSTALL(PROGRAMS "${PATH_USBFirstAmpAPI}/FirstAmp.dll" DESTINATION ${DIST_BINDIR})
 		
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyUSBFirstAmpAPI)
 	ELSE(PATH_USBFirstAmpAPI)

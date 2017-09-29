@@ -9,7 +9,7 @@ ENDIF(WIN32)
 IF(PATH_MITSAR)
 	OV_PRINT(OV_PRINTED "  Found Mitsar dll...")
 
-	INSTALL(PROGRAMS "${PATH_MITSAR}/MitsarDll.dll" DESTINATION "bin")
+	INSTALL(PROGRAMS "${PATH_MITSAR}/MitsarDll.dll" DESTINATION ${DIST_BINDIR})
 	ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyMitsar)
 ELSE(PATH_MITSAR)
 	OV_PRINT(OV_PRINTED "  FAILED to find Mitsar device dll (optional driver)")

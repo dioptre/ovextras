@@ -2,7 +2,13 @@
 IF(OV_DISABLE_GTK)
   MESSAGE(STATUS  "Skipping Convert, no GTK (no Designer)")
   RETURN()
-ENDIF(OV_DISABLE_GTK)
+ENDIF()
+
+# @FIXME CERT Disable if designer is not installed ?
+IF(NOT DESIGNER_SDK_PATH)
+  MESSAGE(STATUS  "Skipping Convert, no designer not found")
+  RETURN()
+ENDIF()
 
 PROJECT(openvibe-convert)
 
@@ -14,17 +20,16 @@ SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_
 ADD_CUSTOM_TARGET(openvibe-convert SOURCES
 	CMakeLists.txt src/openvibe-convert-real.cmd-base src/openvibe-convert-real.sh-base)
 
-ADD_DEPENDENCIES(openvibe-convert openvibe-designer openvibe-plugins-file-io)
+ADD_DEPENDENCIES(openvibe-convert openvibe-plugins-file-io)
 
 # ----------------------
 # Generate launch script
 # ----------------------
 IF(WIN32) 
 	SET(OV_EXTENSION "cmd")
-ENDIF(WIN32)
-IF(UNIX)
+ELSEIF(UNIX)
 	SET(OV_EXTENSION "sh")
-ENDIF(UNIX)
+ENDIF()
 
 # Create the actual script thats run
 CONFIGURE_FILE(src/openvibe-convert-real.${OV_EXTENSION}-base ${CMAKE_CURRENT_BINARY_DIR}/openvibe-convert-real.${OV_EXTENSION} @ONLY)
@@ -39,7 +44,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LOCATION openvibe-convert-real.
 # This will call the actual script
 OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "${PROJECT_NAME}" EXECUTABLE_NAME  "${PROJECT_NAME}")
 
-INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/openvibe-convert-real.${OV_EXTENSION} DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/openvibe-convert-real.${OV_EXTENSION} DESTINATION ${DIST_BINDIR})
 
-INSTALL(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/convert PATTERN ".svn" EXCLUDE)
+INSTALL(DIRECTORY share/ DESTINATION ${DIST_DATADIR}/openvibe/scenarios/convert)
 
