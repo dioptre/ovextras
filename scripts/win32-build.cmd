@@ -9,6 +9,8 @@ set PAUSE=pause
 set ov_script_dir=%CD%
 set generator=-G"Ninja"
 set builder=Ninja
+set PlatformTarget=x86
+
 
 :parameter_parse
 if /i "%1"=="-h" (
@@ -95,6 +97,12 @@ if /i "%1"=="-h" (
 	SHIFT
 	SHIFT
 	Goto parameter_parse
+REM Not available yet
+REM ) else if /i "%1"=="--platform-target" (
+	REM set PlatformTarget=%2
+	REM SHIFT
+	REM SHIFT
+	REM Goto parameter_parse
 ) else if not "%1" == "" (
 	echo unrecognized option [%1]
 	Goto terminate_error
@@ -111,8 +119,6 @@ if /i "!InitEnvScript!"=="win32-init_env_command.cmd" (
 	echo No script specified. Default will be used.
 )
 
-
-echo --
 if defined vsgenerate (
 	echo Build type is set to: MultiType.
 ) else (
@@ -178,7 +184,12 @@ if !builder! == None (
 	ninja install
 	if not "!ERRORLEVEL!" == "0" goto terminate_error
 ) else if !builder! == Visual (
-	msbuild Openvibe.sln /p:Configuration=%BuildType%
+	if %PlatformTarget% == x86 (
+		set msplatform=Win32
+	) else (
+		set msplatform=%PlatformTarget%
+	)
+	msbuild Openvibe.sln /p:Configuration=%BuildType% /p:Platform="!msplatform!"
 	if not "!ERRORLEVEL!" == "0" goto terminate_error
 	
 	cmake --build . --config %BuildType% --target install
