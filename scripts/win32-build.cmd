@@ -90,6 +90,11 @@ if /i "%1"=="-h" (
 	set builder=Visual
 	SHIFT
 	Goto parameter_parse
+) else if /i "%1" == "--userdata-subdir" (
+	set UserDataSubdir="-DOV_CONFIG_SUBDIR=%2"
+	SHIFT
+	SHIFT
+	Goto parameter_parse
 ) else if not "%1" == "" (
 	echo unrecognized option [%1]
 	Goto terminate_error
@@ -160,7 +165,7 @@ cd /D %ov_build_dir%
 echo Generating makefiles for %VSCMake%.
 echo Building to %ov_build_dir% ...
 
-cmake %ov_script_dir%\..  %generator% %build_type% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path%
+cmake %ov_script_dir%\..  %generator% %build_type% -DCMAKE_INSTALL_PREFIX=%ov_install_dir% %designer% %sdk% %dependencies_path% %UserDataSubdir%
 IF NOT "!ERRORLEVEL!" == "0" goto terminate_error
 
 echo.
