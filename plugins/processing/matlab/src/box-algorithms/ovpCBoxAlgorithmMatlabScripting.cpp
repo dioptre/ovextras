@@ -301,13 +301,19 @@ boolean CBoxAlgorithmMatlabScripting::initialize(void)
 	sanitizePath(l_sWorkingDir);
 
 	// Try to find an unused box instance variable name
-	do
+	while (true)
 	{
 		char l_sBuffer[1024];
 		sprintf(l_sBuffer, "OV_BOX_0x%08X_0x%08X", System::Math::randomUInteger32(), System::Math::randomUInteger32());
 		m_sBoxInstanceVariableName = CString(l_sBuffer);
 		this->getLogManager() << LogLevel_Trace << "Checking if variable " << m_sBoxInstanceVariableName << " is in use...\n";
-	} while (engGetVariable(m_pMatlabEngine, m_sBoxInstanceVariableName.toASCIIString() ) != NULL);
+		mxArray * l_pTmp = engGetVariable(m_pMatlabEngine, m_sBoxInstanceVariableName.toASCIIString());
+		if (!l_pTmp) {
+			// Found unused name
+			break;
+		}
+		mxDestroyArray(l_pTmp);
+	}
 	this->getLogManager() << LogLevel_Trace << "Selected variable name " << m_sBoxInstanceVariableName << "\n";
 
 	this->getLogManager() << LogLevel_Trace << "Setting working directory to " << l_sWorkingDir << "\n";
@@ -458,6 +464,12 @@ boolean CBoxAlgorithmMatlabScripting::uninitialize(void)
 		{ 
 			// NOP, we still want to deallocate below
 		} 
+		// Remove the box from the matlab workspace
+		l_sCommand = "clear " + m_sBoxInstanceVariableName + ";";
+		if (!checkFailureRoutine(::engEvalString(m_pMatlabEngine, l_sCommand) == 0, "An error occurred while clearing the box\n"))
+		{
+			// NOP, we still want to deallocate below
+		}
 	}
 
 	CloseMatlabEngineSafely();

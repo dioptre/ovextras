@@ -154,6 +154,7 @@ boolean CMatlabHelper::setSpectrumInputHeader(uint32 ui32InputIndex, IMatrix * p
 	System::Memory::copy(::mxGetPr(l_pMatlabMatrix), pFrequencyBands->getBuffer(), pFrequencyBands->getBufferElementCount()*sizeof(float64));
 	::engPutVariable(m_pMatlabEngine, "OV_MATRIX_TMP", l_pMatlabMatrix);
 
+	mxDestroyArray(l_pMatlabMatrix);
 
 	//box_out = OV_setSpectrumInputHeader(box_in, input_index, nb_channels, channel_names, nb_bands, band_names, bands)
 	char l_sBuffer[32];
@@ -211,6 +212,8 @@ boolean CMatlabHelper::addStreamedMatrixInputBuffer(uint32 ui32InputIndex, IMatr
 	System::Memory::copy(::mxGetPr(l_pMatlabMatrix), pMatrix->getBuffer(), pMatrix->getBufferElementCount()*sizeof(float64));
 	::engPutVariable(m_pMatlabEngine, "OV_MATRIX_TMP", l_pMatlabMatrix);
 
+	mxDestroyArray(l_pMatlabMatrix);
+
 	char l_sBuffer[32];
 	sprintf(l_sBuffer, "%i",(ui32InputIndex+1));
 	CString l_sCommand = "";
@@ -251,6 +254,8 @@ boolean CMatlabHelper::addStimulationsInputBuffer(uint32 ui32InputIndex, IStimul
 		}
 
 		::engPutVariable(m_pMatlabEngine, "OV_MATRIX_TMP", l_pMatlabMatrix);
+
+		mxDestroyArray(l_pMatlabMatrix);
 	}
 
 	char l_sBuffer[32];
@@ -333,6 +338,7 @@ boolean CMatlabHelper::getStreamedMatrixOutputHeader(uint32 ui32OutputIndex, IMa
 	}
 
 	delete[] l_pNameList;
+	mxDestroyArray(l_pErrno);
 	mxDestroyArray(l_pNbDimensions);
 	mxDestroyArray(l_pDimensionSizes);
 	mxDestroyArray(l_pDimensionLabels);
@@ -387,6 +393,7 @@ boolean CMatlabHelper::getFeatureVectorOutputHeader(uint32 ui32OutputIndex, IMat
 	}
 
 	delete[] l_pNameList;
+	mxDestroyArray(l_pErrno);
 	mxDestroyArray(l_pNbFeatures);
 	mxDestroyArray(l_pNames);
 	
@@ -451,6 +458,7 @@ boolean CMatlabHelper::getSignalOutputHeader(uint32 ui32OutputIndex, IMatrix * p
 	}
 
 	delete[] l_pNameList;
+	mxDestroyArray(l_pErrno);
 	mxDestroyArray(l_pNbChannels);
 	mxDestroyArray(l_pNbSamples);
 	mxDestroyArray(l_pNames);
@@ -512,7 +520,7 @@ boolean CMatlabHelper::getChannelLocalisationOutputHeader(uint32 ui32OutputIndex
 	}
 
 	delete[] l_pNameList;
-
+	mxDestroyArray(l_pErrno);
 	mxDestroyArray(l_pNbChannels);
 	mxDestroyArray(l_pNames);
 	mxDestroyArray(l_pDynamic);
@@ -612,6 +620,7 @@ boolean CMatlabHelper::getSpectrumOutputHeader(uint32 ui32OutputIndex, IMatrix *
 	delete[] l_pNameList;
 	delete[] l_pBandNameList;
 
+	mxDestroyArray(l_pErrno);
 	mxDestroyArray(l_pNbChannels);
 	mxDestroyArray(l_pNames);
 	mxDestroyArray(l_pNbBands);
