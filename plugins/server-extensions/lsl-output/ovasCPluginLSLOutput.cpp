@@ -71,7 +71,7 @@ CPluginLSLOutput::~CPluginLSLOutput()
 // Hooks
 
 
-void CPluginLSLOutput::startHook(const std::vector<OpenViBE::CString>& vSelectedChannelNames, OpenViBE::uint32 ui32SamplingFrequency, OpenViBE::uint32 ui32ChannelCount, OpenViBE::uint32 ui32SampleCountPerSentBlock)
+void CPluginLSLOutput::startHook(const std::vector<OpenViBE::CString>& vSelectedChannelNames, uint32_t ui32SamplingFrequency, uint32_t ui32ChannelCount, uint32_t ui32SampleCountPerSentBlock)
 {
 
 	m_ui32SampleCountPerSentBlock = ui32SampleCountPerSentBlock;
@@ -86,10 +86,10 @@ void CPluginLSLOutput::startHook(const std::vector<OpenViBE::CString>& vSelected
 
 		lsl::xml_element l_oChannels = l_oSignalInfo.desc().append_child("channels");
 
-		for (uint32 i=0;i<ui32ChannelCount;i++)
+		for (uint32_t i=0;i<ui32ChannelCount;i++)
 		{
 			l_oChannels.append_child("channel")
-				.append_child_value("label",vSelectedChannelNames[i])
+				.append_child_value("label",vSelectedChannelNames[i].toASCIIString())
 				.append_child_value("unit","unknown")
 				.append_child_value("type","signal");
 		}
@@ -114,7 +114,7 @@ void CPluginLSLOutput::startHook(const std::vector<OpenViBE::CString>& vSelected
 
 }
 
-void CPluginLSLOutput::loopHook(std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer, CStimulationSet &stimulationSet, uint64 start, uint64 end, uint64 /* sampleTime */)
+void CPluginLSLOutput::loopHook(std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer, CStimulationSet &stimulationSet, uint64_t start, uint64_t end, uint64_t /* sampleTime */)
 {
 	if (m_bIsLSLOutputEnabled)
 	{
@@ -125,7 +125,7 @@ void CPluginLSLOutput::loopHook(std::vector < std::vector < OpenViBE::float32 > 
 			const float64 l_f64Start = ITimeArithmetics::timeToSeconds(start);
 			const float64 l_f64Step = ITimeArithmetics::timeToSeconds(end-start)/static_cast<float64>(m_ui32SampleCountPerSentBlock);
 
-			for(uint32 i=0;i<m_ui32SampleCountPerSentBlock;i++)
+			for(uint32_t i=0;i<m_ui32SampleCountPerSentBlock;i++)
 			{
 				m_oSignalOutlet->push_sample(vPendingBuffer[i], l_f64Start + i*l_f64Step);
 			}
@@ -137,12 +137,12 @@ void CPluginLSLOutput::loopHook(std::vector < std::vector < OpenViBE::float32 > 
 		// Output stimuli
 		if(m_oStimulusOutlet->have_consumers())
 		{
-			for(uint32 i=0;i<stimulationSet.getStimulationCount();i++)
+			for(uint32_t i=0;i<stimulationSet.getStimulationCount();i++)
 			{	
 				if(stimulationSet.getStimulationDate(i) >= start &&
 				  stimulationSet.getStimulationDate(i) < end)
 				{
-					const int32 l_i32StimulationCode = static_cast<int32>(stimulationSet.getStimulationIdentifier(i));
+					const int32_t l_i32StimulationCode = static_cast<int32_t>(stimulationSet.getStimulationIdentifier(i));
 					const float64 l_f64StimulationDate = ITimeArithmetics::timeToSeconds(stimulationSet.getStimulationDate(i));
 
 					// m_rKernelContext.getLogManager() << LogLevel_Info << "Push stim " << l_i32StimulationCode << " at " << l_f64StimulationDate << "s\n";
