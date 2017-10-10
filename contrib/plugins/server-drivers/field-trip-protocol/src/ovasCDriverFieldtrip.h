@@ -5,6 +5,8 @@
 #ifndef __OpenViBE_AcquisitionServer_CDriverFieldtrip_H__
 #define __OpenViBE_AcquisitionServer_CDriverFieldtrip_H__
 
+#if defined(TARGET_HAS_PThread)
+
 #include "ovasIDriver.h"
 #include "../ovasCHeader.h"
 #include <openvibe/ov_all.h>
@@ -98,3 +100,5 @@ namespace OpenViBEAcquisitionServer
 };
 
 #endif // __OpenViBE_AcquisitionServer_CDriverFieldtrip_H__
+
+#endif

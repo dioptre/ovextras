@@ -70,7 +70,7 @@ INCLUDE("FindThirdPartyLiveAmpAPI")
 INCLUDE("FindThirdPartyOpenAL")
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyBoost_Thread")
-INCLUDE("FindThirdPartyPThreadsVCE2")	# for Windows Fieldtrip
+INCLUDE("FindThirdPartyPThread")	# for Windows Fieldtrip
 
 INCLUDE("FindThirdPartyLSL")
 

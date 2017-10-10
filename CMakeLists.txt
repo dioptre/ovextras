@@ -140,7 +140,7 @@ IF(WIN32)
 	ENDIF()
 	MESSAGE(STATUS "MSVC version is ${MSVC_SERVICE_PACK}")
 
-	SET(OV_WIN32_BOOST_VERSION "1_55")
+	SET(OV_WIN32_BOOST_VERSION "1_58")
 ELSEIF(UNIX)
 	# If OpenMP is available, using it will allow Eigen to use multiple cores in matrix math.
 	INCLUDE("FindOpenMP")
