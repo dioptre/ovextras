@@ -7,10 +7,10 @@
 #include <system/ovCTime.h>
 
 // fwd declare of gtk idle callbacks
-gboolean idle_updateclientcount_cb(void* pUserData);
-gboolean idle_updateimpedance_cb(void* pUserData);
-gboolean idle_updatedrift_cb(void* pUserData);
-gboolean idle_updatedisconnect_cb(void* pUserData);
+static gboolean idle_updateclientcount_cb(void* pUserData);
+static gboolean idle_updateimpedance_cb(void* pUserData);
+static gboolean idle_updatedrift_cb(void* pUserData);
+static gboolean idle_updatedisconnect_cb(void* pUserData);
 
 namespace OpenViBEAcquisitionServer
 {
