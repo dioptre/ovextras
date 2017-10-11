@@ -60,6 +60,7 @@ namespace OpenViBEAcquisitionServer
 	private:
 
 		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
+		OpenViBE::uint32 m_ui32LSLFallbackSamplingRate;
 		OpenViBE::float32* m_pSample;
 		OpenViBE::float32* m_pBuffer;
 
