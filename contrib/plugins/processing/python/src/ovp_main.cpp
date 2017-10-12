@@ -32,6 +32,11 @@ private:
 #ifdef TARGET_OS_Windows
 bool CPythonInitializer::checkPythonPath()
 {
+	if (std::system("%OV_PATH_ROOT%\\bin\\openvibe-py2-check.exe"))
+	{
+		std::cout << "Python will crash at runtime if loading of python box continue. Please check that Python 2.7 is installed and/or fix your PYTHONPATH/PYTHONHOME" << std::endl;
+		return false;
+	}
 	std::string l_sPath = Py_GetPath();
 
 	int found;
