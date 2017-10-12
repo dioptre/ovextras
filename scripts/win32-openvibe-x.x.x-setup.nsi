@@ -169,8 +169,15 @@ no_need_to_patch_3d_functionnality:
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libvorbis\win32\bin\release;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libogg\win32\bin\release\;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\liblsl\lib\;%PATH%$\r$\n"
+	FileWrite $0 "$\r$\n"
+	FileWrite $0 "REM Apply user-provided Python2.7 paths if available$\r$\n"
+	FileWrite $0 "IF NOT !PYTHONHOME27!==!EMPTY!  IF NOT !PYTHONPATH27!==!EMPTY! SET REPLACE_PYTHON=true$\r$\n"
+	FileWrite $0 "IF NOT !REPLACE_PYTHON!==!EMPTY! ($\r$\n"
+	FileWrite $0 "  SET $\"PYTHONHOME=%PYTHONHOME27%$\"$\r$\n"
+	FileWrite $0 "  SET $\"PYTHONPATH=%PYTHONPATH27%$\"$\r$\n"
+	FileWrite $0 ")$\r$\n"	
 	FileClose $0
-	
+
 	FileOpen $0 "$INSTDIR\dependencies\cegui\resources.cfg" w
 	FileWrite $0 "FileSystem=$INSTDIR\dependencies\cegui\datafiles\configs$\r$\n"
 	FileWrite $0 "FileSystem=$INSTDIR\dependencies\cegui\datafiles\fonts$\r$\n"

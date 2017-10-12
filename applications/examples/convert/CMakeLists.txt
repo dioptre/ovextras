@@ -4,12 +4,6 @@ IF(OV_DISABLE_GTK)
   RETURN()
 ENDIF()
 
-# @FIXME CERT Disable if designer is not installed ?
-IF(NOT DESIGNER_SDK_PATH)
-  MESSAGE(STATUS  "Skipping Convert, no designer not found")
-  RETURN()
-ENDIF()
-
 PROJECT(openvibe-convert)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})
