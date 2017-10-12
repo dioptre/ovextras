@@ -34,7 +34,9 @@ bool CPythonInitializer::checkPythonPath()
 {
 	if (std::system("%OV_PATH_ROOT%\\bin\\openvibe-py2-check.exe"))
 	{
-		std::cout << "Python will crash at runtime if loading of python box continue. Please check that Python 2.7 is installed and/or fix your PYTHONPATH/PYTHONHOME" << std::endl;
+		std::cout << "Warning: The Python version found does not seem to be compatible and using it would cause Designer to crash.";
+		std::cout << "Check that Python 2.7 is installed and/or your PYTHONPATH/PYTHONHOME is set correctly." << std::endl;
+		std::cout << "Disabling the Python scripting box for now." << std::endl;
 		return false;
 	}
 	std::string l_sPath = Py_GetPath();

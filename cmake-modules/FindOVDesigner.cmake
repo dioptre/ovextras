@@ -72,29 +72,7 @@ if(INSTALL_DESIGNER)
 					set(SCRIPT_NAME ${base_name}${SCRIPT_POSTFIX})
 					set(OV_CMD_ARGS "")
 					set(OV_PAUSE "")
-					if(WIN32 AND base_name STREQUAL "openvibe-designer" )
-						set(PY_FIX_PREFIX "type NUL > %Temp%\\designer_error.txt")
-						set(PY_FIX_REDIR "2>%Temp%\\designer_error.txt")
-						set(PY_FIX_POSTFIX 
-"if %errorlevel% == 1 (\n\
-	type %Temp%\\designer_error.txt\n\
-	for /f \"tokens=*\" %%c in (%Temp%\\designer_error.txt) do ( set errors=%%c )\n\
-	if \"!errors!\" == \"SyntaxError: invalid syntax \" (\n\
-		echo This is a python compatibility error. To solve this, please correct your PYTHONHOME/PYTHONPATH. Current values :\n\
-		echo PYTHONHOME = %PYTHONHOME%\n\
-		echo PYTHONPATH = %PYTHONPATH%\n\
-		echo Now trying to launch Designer without PYTHONHOME/PYTHONPATH :\n\
-		set PYTHONHOME=\n\
-		set PYTHONPATH=\n\
-		%OV_RUN_IN_BG% \"%OV_PATH_ROOT%\\bin\\${OV_CMD_EXECUTABLE}\" ${OV_CMD_ARGS} %ARGS%\n\
-	)\n\
-)\n\
-DEL /Q %Temp%\\designer_error.txt")
-					else()
-						unset(PY_FIX_PREFIX)
-						unset(PY_FIX_REDIR)
-						unset(PY_FIX_POSTFIX)
-					endif()
+
 					configure_file(${OV_LAUNCHER_SOURCE_PATH}/openvibe-launcher${SCRIPT_POSTFIX}-base ${CMAKE_CURRENT_BINARY_DIR}/${SCRIPT_NAME} @ONLY)
 					install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${SCRIPT_NAME} DESTINATION ${DIST_ROOT})
 				endforeach()
