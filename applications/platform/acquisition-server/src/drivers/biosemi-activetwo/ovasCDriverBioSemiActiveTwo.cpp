@@ -93,12 +93,51 @@ const char* CDriverBioSemiActiveTwo::getName(void)
 	return "BioSemi Active Two (MkI and MkII)";
 }
 
+void CDriverBioSemiActiveTwo::setupInformationWindow(void)
+{
+	if (!m_pInformationWindow)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Information window not allocated\n";
+		return;
+	}
+
+	boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+	
+	m_pInformationWindow->m_pBuilderConfigureInterface=gtk_builder_new();
+	if(!gtk_builder_add_from_file(m_pInformationWindow->m_pBuilderConfigureInterface, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-BioSemi-ActiveTwo.ui", NULL))
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "File not found: "<<  OpenViBE::Directories::getDataDir() << "/applications/acquisition-server/interface-BioSemi-ActiveTwo.ui\n";
+		return;
+	}
+		
+	gtk_label_set_markup(GTK_LABEL(gtk_builder_get_object(m_pInformationWindow->m_pBuilderConfigureInterface, "label-device-type")), (m_oBridge.isDeviceMarkII() ? "- <i>ActiveTwo Mark II</i> -" : "- <i>ActiveTwo Mark I</i> -"));
+	m_pInformationWindow->m_bIsCMSInRange = m_oBridge.isCMSInRange();
+	m_pInformationWindow->m_bIsBatteryLow = m_oBridge.isBatteryLow();
+	m_pInformationWindow->m_bIsChanged = true;
+	gtk_widget_show_all(GTK_WIDGET(gtk_builder_get_object(m_pInformationWindow->m_pBuilderConfigureInterface, "device-information")));
+
+	return;
+}
 
 //___________________________________________________________________//
 //                                                                   //
 
+gint setup_information_window_callback(void* pUserData)
+{
+	CDriverBioSemiActiveTwo* pTmp = static_cast<CDriverBioSemiActiveTwo*>(pUserData);
+	
+	pTmp->setupInformationWindow();
+
+	return FALSE; // Don't run again
+}
+
 gint information_window_callback(void* pInformationWindow)
 {
+	if (!pInformationWindow)
+	{
+		// Not initialized yet?
+		return TRUE;
+	}
 	SInformationWindow* l_pInformationWindow = reinterpret_cast<SInformationWindow*>(pInformationWindow);
 	boost::mutex::scoped_lock l_lock(reinterpret_cast<SInformationWindow*>(pInformationWindow)->m_oMutex);
 	// If nothing changed, directly return from the callback
@@ -111,6 +150,11 @@ gint information_window_callback(void* pInformationWindow)
 		// If the acquisition is ended, delete the window
 		gtk_widget_destroy(GTK_WIDGET(gtk_builder_get_object(l_pInformationWindow->m_pBuilderConfigureInterface, "device-information")));
 		g_object_unref(l_pInformationWindow->m_pBuilderConfigureInterface);
+		
+		// If we get here, we know that the other thread has passed uninialize() and will no longer access
+		// informationwindow.
+		l_lock.unlock();
+		delete l_pInformationWindow;
 		// The loop should now be stopped
 		return FALSE;
 	}
@@ -230,23 +274,15 @@ boolean CDriverBioSemiActiveTwo::initialize(
 		}
 	}
 
-	// Initialize information window
-	gdk_threads_enter();
 	m_pInformationWindow = new SInformationWindow();
-	m_pInformationWindow->m_pBuilderConfigureInterface=gtk_builder_new();
-	if(!gtk_builder_add_from_file(m_pInformationWindow->m_pBuilderConfigureInterface, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-BioSemi-ActiveTwo.ui", NULL))
-	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "File not found: "<<  OpenViBE::Directories::getDataDir() << "/applications/acquisition-server/interface-BioSemi-ActiveTwo.ui\n";
-	}
-	gtk_label_set_markup(GTK_LABEL(gtk_builder_get_object(m_pInformationWindow->m_pBuilderConfigureInterface, "label-device-type")), (m_oBridge.isDeviceMarkII() ? "- <i>ActiveTwo Mark II</i> -" : "- <i>ActiveTwo Mark I</i> -"));
-	m_pInformationWindow->m_bIsCMSInRange = m_oBridge.isCMSInRange();
-	m_pInformationWindow->m_bIsBatteryLow = m_oBridge.isBatteryLow();
-	m_pInformationWindow->m_bIsChanged = true;
-	gtk_widget_show_all(GTK_WIDGET(gtk_builder_get_object(m_pInformationWindow->m_pBuilderConfigureInterface, "device-information")));
+
+	// Initialize information window
+	// n.b. do all gtk stuff from callbacks to avoid threading issues.
+	gdk_threads_add_idle(setup_information_window_callback, this);
 
 	//Launch idle loop: update the information window in a separate glib thread
-	g_idle_add(information_window_callback, m_pInformationWindow);
-	gdk_threads_leave();
+	gdk_threads_add_idle(information_window_callback, m_pInformationWindow);
+
 	return true;
 }
 
@@ -500,9 +536,12 @@ boolean CDriverBioSemiActiveTwo::uninitialize(void)
 {
 	{
 		boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+
 		m_pInformationWindow->m_bIsChanged = true;
 		m_pInformationWindow->m_bIsAcquisitionEnded = true;
+		m_pInformationWindow = NULL; // The callback will free the memory
 	}
+
 	// Rename EX channels as "" so that the names are not saved as settings
 	if(m_oBridge.isUseEXChannels())
 	{

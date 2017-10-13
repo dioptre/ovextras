@@ -94,7 +94,11 @@ namespace OpenViBEAcquisitionServer
 		virtual const OpenViBEAcquisitionServer::IHeader* getHeader(void) { return &m_oHeader; }
 		//OpenViBE::uint32 getChannelCount();
 
+		// Called from gtk callback
+		void setupInformationWindow(void);
+		
 	protected:
+	
 		SettingsHelper m_oSettings;
 
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
