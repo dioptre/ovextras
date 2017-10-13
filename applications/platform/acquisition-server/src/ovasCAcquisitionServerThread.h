@@ -93,32 +93,30 @@ namespace OpenViBEAcquisitionServer
 					// backends (esp. Windows), delegate the work to g_idle_add() functions.
 					// As a result, we need to protect access to the variables that the callbacks use
 					{
-						boost::mutex::scoped_lock lock(m_oGUIVariableMutex);
-
 						if (l_ui32ClientCount != m_ui32ClientCount)
 						{
 							m_ui32ClientCount = l_ui32ClientCount;
 
-							g_idle_add(idle_updateclientcount_cb, (void *)this);
+							 gdk_threads_add_idle(idle_updateclientcount_cb, (void *)this);
 						}
 
 						if (m_vImpedance != m_vImpedanceLast)
 						{
 							m_vImpedanceLast = m_vImpedance;
 
-							g_idle_add(idle_updateimpedance_cb, (void *)this);
+							 gdk_threads_add_idle(idle_updateimpedance_cb, (void *)this);
 						}
 
 						if (l_f64DriftMs != m_f64LastDriftMs)
 						{
 							m_f64LastDriftMs = l_f64DriftMs;
 
-							g_idle_add(idle_updatedrift_cb, (void *)this);
+							 gdk_threads_add_idle(idle_updatedrift_cb, (void *)this);
 						}
 
 						if (l_bShouldDisconnect)
 						{
-							g_idle_add(idle_updatedisconnect_cb, (void *)this);
+							 gdk_threads_add_idle(idle_updatedisconnect_cb, (void *)this);
 						}
 					}
 
@@ -150,7 +148,6 @@ namespace OpenViBEAcquisitionServer
 			}
 
 			{
-				boost::mutex::scoped_lock lock(m_oGUIVariableMutex);
 				m_vImpedance.resize(m_rGUI.getHeaderCopy().getChannelCount(), OVAS_Impedance_NotAvailable);
 				m_vImpedanceLast.resize(m_rGUI.getHeaderCopy().getChannelCount(), OVAS_Impedance_NotAvailable);
 			}
@@ -203,7 +200,6 @@ namespace OpenViBEAcquisitionServer
 
 			m_rAcquisitionServer.disconnect();
 
-			boost::mutex::scoped_lock lock(m_oGUIVariableMutex);
 			m_vImpedance.clear();
 			m_vImpedanceLast.clear();
 
@@ -236,13 +232,19 @@ namespace OpenViBEAcquisitionServer
 		// GTK C callbacks call these from the main thread to update the GUI
 		void updateGUIClientCount(void)
 		{
-			boost::mutex::scoped_lock  lock(m_oGUIVariableMutex);
+			boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
+			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
+			m_oProtectionLock.unlock();
+
 			m_rGUI.setClientCount(m_ui32ClientCount);
 		}
 
 		void updateGUIImpedance(void)
 		{
-			boost::mutex::scoped_lock lock (m_oGUIVariableMutex);
+			boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
+			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
+			m_oProtectionLock.unlock();
+
 			for (size_t i = 0; i < m_vImpedanceLast.size(); i++)
 			{
 				m_rGUI.setImpedance(i, m_vImpedanceLast[i]);
@@ -251,13 +253,20 @@ namespace OpenViBEAcquisitionServer
 
 		void updateGUIDrift(void)
 		{
-			boost::mutex::scoped_lock lock(m_oGUIVariableMutex);
+			boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
+			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
+			m_oProtectionLock.unlock();
+
 			m_rGUI.setDriftMs(m_f64LastDriftMs);
 		}
 
 		void updateGUIDisconnect(void)
 		{
-			boost::mutex::scoped_lock lock(m_oGUIVariableMutex);
+			// nb locking mutexes here would call a recursive lock apparently..
+			// boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
+			// boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
+			// m_oProtectionLock.unlock();
+
 			m_rGUI.disconnect();
 		}
 
@@ -275,8 +284,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBEAcquisitionServer::CAcquisitionServerGUI& m_rGUI;
 		OpenViBEAcquisitionServer::CAcquisitionServer& m_rAcquisitionServer;
 		OpenViBE::uint32 m_ui32Status;
-
-		boost::mutex m_oGUIVariableMutex; // Protects the following variables that gtk main thread can look at from callbacks
 
 		OpenViBE::uint32 m_ui32ClientCount;
 		OpenViBE::float64 m_f64LastDriftMs;
