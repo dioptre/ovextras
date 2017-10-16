@@ -8,9 +8,8 @@
 
 #include <socket/IConnectionServer.h>
 
-#include <boost/thread.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/version.hpp>
+#include <mutex>
+#include <thread>
 
 #include <string>
 #include <vector>
@@ -30,7 +29,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint64 m_ui64StimulationTimeOffset;
 		OpenViBE::uint64 m_ui64SignalSampleCountToSkip;
 		CConnectionClientHandlerThread* m_pConnectionClientHandlerThread;
-		boost::thread* m_pConnectionClientHandlerBoostThread;
+		std::thread* m_pConnectionClientHandlerStdThread;
 		bool m_bChannelUnitsSent; 
 		bool m_bChannelLocalisationSent;
 	} SConnectionInfo;
@@ -41,6 +40,28 @@ namespace OpenViBEAcquisitionServer
 		NaNReplacementPolicy_Zero,
 		NaNReplacementPolicy_Disabled,
 	} ENaNReplacementPolicy;
+
+	// Concurrency handling
+	class DoubleLock {
+		// Implements
+		//   lock(mutex1);
+		//   lock(mutex2);
+		//   unlock(mutex1);
+		// mutex2 lock is released when the object goes out of scope
+		//
+		// @details The two mutex 'pattern' is used to avoid thread starving which can happen e.g.
+		// on Linux if just a single mutex is used; apparently the main loop just takes the 
+		// mutex repeatedly without the gui thread sitting on the mutex being unlocked.
+		// n.b. potentially calls for redesign
+	public:
+		DoubleLock(std::mutex* m1, std::mutex* m2) : lock2(*m2, std::defer_lock)
+		{
+			std::lock_guard<std::mutex> lock1(*m1);
+			lock2.lock();
+		}
+	private:
+		std::unique_lock<std::mutex> lock2;
+	};
 
 	class CDriverContext;
 	class CAcquisitionServer : public OpenViBEAcquisitionServer::IDriverCallback
@@ -90,13 +111,14 @@ namespace OpenViBEAcquisitionServer
 
 	public:
 
-		boost::mutex m_oExecutionMutex;
-		boost::mutex m_oProtectionMutex;
+		// See class DoubleLock
+		std::mutex m_oProtectionMutex;
+		std::mutex m_oExecutionMutex;
 
-		boost::mutex m_oPendingConnectionExectutionMutex;
-		boost::mutex m_oPendingConnectionProtectionMutex;
+		std::mutex m_oPendingConnectionProtectionMutex;
+		std::mutex m_oPendingConnectionExecutionMutex;
 
-		boost::thread* m_pConnectionServerHandlerBoostThread;
+		std::thread* m_pConnectionServerHandlerStdThread;
 
 	public:
 

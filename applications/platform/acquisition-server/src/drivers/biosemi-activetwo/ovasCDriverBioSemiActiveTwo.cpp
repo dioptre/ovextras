@@ -101,7 +101,7 @@ void CDriverBioSemiActiveTwo::setupInformationWindow(void)
 		return;
 	}
 
-	boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+	std::lock_guard<std::mutex> l_lock(m_pInformationWindow->m_oMutex);
 	
 	m_pInformationWindow->m_pBuilderConfigureInterface=gtk_builder_new();
 	if(!gtk_builder_add_from_file(m_pInformationWindow->m_pBuilderConfigureInterface, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-BioSemi-ActiveTwo.ui", NULL))
@@ -139,7 +139,7 @@ gint information_window_callback(void* pInformationWindow)
 		return TRUE;
 	}
 	SInformationWindow* l_pInformationWindow = reinterpret_cast<SInformationWindow*>(pInformationWindow);
-	boost::mutex::scoped_lock l_lock(reinterpret_cast<SInformationWindow*>(pInformationWindow)->m_oMutex);
+	std::lock_guard<std::mutex> l_lock(reinterpret_cast<SInformationWindow*>(pInformationWindow)->m_oMutex);
 	// If nothing changed, directly return from the callback
 	if(!l_pInformationWindow->m_bIsChanged)
 	{
@@ -151,9 +151,8 @@ gint information_window_callback(void* pInformationWindow)
 		gtk_widget_destroy(GTK_WIDGET(gtk_builder_get_object(l_pInformationWindow->m_pBuilderConfigureInterface, "device-information")));
 		g_object_unref(l_pInformationWindow->m_pBuilderConfigureInterface);
 		
-		// If we get here, we know that the other thread has passed uninialize() and will no longer access
-		// informationwindow.
-		l_lock.unlock();
+		// If we get here, we know that the other thread has passed uninitialize() and will no longer access
+		// l_pInformationMindow.
 		delete l_pInformationWindow;
 		// The loop should now be stopped
 		return FALSE;
@@ -320,7 +319,7 @@ boolean CDriverBioSemiActiveTwo::loop(void)
 				// we consume one sample per channel, values are given in uV
 				if(!m_oBridge.consumeOneSamplePerChannel(&m_vSample[0], l_ui32Max))
 				{
-					boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+					std::lock_guard<std::mutex> l_lock(m_pInformationWindow->m_oMutex);
 					m_rDriverContext.getLogManager() << LogLevel_Error << "Something bad happened while consuming samples from device.\n";
 					m_pInformationWindow->m_bIsChanged = true;
 					m_pInformationWindow->m_sErrorMessage = "<span color=\"darkred\">Something bad happened while consuming samples from device.</span>\n";
@@ -384,7 +383,7 @@ boolean CDriverBioSemiActiveTwo::loop(void)
 						m_rDriverContext.getLogManager() << "\t  The corresponding sample range has been tagged with OVTK_StimulationId_SegmentStart and OVTK_StimulationId_SegmentStop.\n";
 						m_rDriverContext.getLogManager() << "\t  Possible causes include broken wires, damaged cable isolation, bad connector contacts, defect IC inside the electrode.\n";
 						{
-							boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+							std::lock_guard<std::mutex> l_lock(m_pInformationWindow->m_oMutex);
 							m_pInformationWindow->m_bIsCMSInRange = false;
 							m_pInformationWindow->m_bIsChanged = true;
 						}
@@ -418,7 +417,7 @@ boolean CDriverBioSemiActiveTwo::loop(void)
 						m_bCMSBackInRange = true;
 						m_rDriverContext.getLogManager() << LogLevel_Info << "Back in range \n";
 						{
-							boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+							std::lock_guard<std::mutex> l_lock(m_pInformationWindow->m_oMutex);
 							m_pInformationWindow->m_bIsCMSInRange = true;
 							m_pInformationWindow->m_bIsChanged = true;
 						}
@@ -433,7 +432,7 @@ boolean CDriverBioSemiActiveTwo::loop(void)
 						l_bWarningDisplayed = true;
 						m_rDriverContext.getLogManager() << LogLevel_Warning << "("<<((System::Time::getTime() - m_ui32StartTime)/1000)<<"') Device battery is low !\n";
 						{
-							boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+							std::lock_guard<std::mutex> l_lock(m_pInformationWindow->m_oMutex);
 							m_pInformationWindow->m_bIsBatteryLow = true;
 							m_pInformationWindow->m_bIsChanged = true;
 						}
@@ -456,7 +455,7 @@ boolean CDriverBioSemiActiveTwo::loop(void)
 						m_bBatteryBackOk = true;
 						m_rDriverContext.getLogManager() << LogLevel_Info << "Back in range \n";
 						{
-							boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+							std::lock_guard<std::mutex> l_lock(m_pInformationWindow->m_oMutex);
 							m_pInformationWindow->m_bIsBatteryLow = false;
 							m_pInformationWindow->m_bIsChanged = true;
 						}
@@ -478,7 +477,7 @@ boolean CDriverBioSemiActiveTwo::loop(void)
 			m_rDriverContext.getLogManager() << LogLevel_Error << "An error occured while reading data from device !\n";
 			m_bAcquisitionStopped = true;
 			{
-				boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+				std::lock_guard<std::mutex> l_lock(m_pInformationWindow->m_oMutex);
 				m_pInformationWindow->m_sErrorMessage = "<span color=\"darkred\">An error occured while reading data from device !</span>";
 				m_pInformationWindow->m_bIsChanged = true;
 			}
@@ -498,7 +497,7 @@ boolean CDriverBioSemiActiveTwo::loop(void)
 				m_rDriverContext.getLogManager() << LogLevel_Error << "An error occured while dropping samples.\n";
 				m_bAcquisitionStopped = true;
 				{
-					boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+					std::lock_guard<std::mutex> l_lock(m_pInformationWindow->m_oMutex);
 					m_pInformationWindow->m_sErrorMessage = "<span color=\"darkred\">An error occured while dropping samples.</span>";
 					m_pInformationWindow->m_bIsChanged = true;
 				}
@@ -511,7 +510,7 @@ boolean CDriverBioSemiActiveTwo::loop(void)
 			m_rDriverContext.getLogManager() << LogLevel_Error << "An error occured while reading data from device (drop)!\n";
 			m_bAcquisitionStopped = true;
 			{
-				boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+				std::lock_guard<std::mutex> l_lock(m_pInformationWindow->m_oMutex);
 				m_pInformationWindow->m_sErrorMessage = "<span color=\"darkred\">An error occured while reading data from device (drop)!</span>";
 				m_pInformationWindow->m_bIsChanged = true;
 			}
@@ -535,7 +534,7 @@ boolean CDriverBioSemiActiveTwo::stop(void)
 boolean CDriverBioSemiActiveTwo::uninitialize(void)
 {
 	{
-		boost::mutex::scoped_lock l_lock(m_pInformationWindow->m_oMutex);
+		std::lock_guard<std::mutex> l_lock(m_pInformationWindow->m_oMutex);
 
 		m_pInformationWindow->m_bIsChanged = true;
 		m_pInformationWindow->m_bIsAcquisitionEnded = true;
@@ -559,7 +558,7 @@ boolean CDriverBioSemiActiveTwo::uninitialize(void)
 		m_rDriverContext.getLogManager() << LogLevel_Warning << "Could not close the device.\n";
 		return false;
 	}
-	m_rDriverContext.getLogManager() << LogLevel_Error << "Driver uninitialized...\n";
+	m_rDriverContext.getLogManager() << LogLevel_Info << "Driver uninitialized...\n";
 	return true;
 }
 

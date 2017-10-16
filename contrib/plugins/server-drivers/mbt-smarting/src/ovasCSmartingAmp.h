@@ -19,9 +19,10 @@
 #include <boost/system/error_code.hpp>
 #include <boost/system/system_error.hpp>
 #include <boost/bind.hpp>
-#include <boost/thread.hpp>
 #include <boost/utility.hpp>
-#include <boost/bind.hpp>
+
+#include <mutex>
+#include <thread>
 
 #define OK_RESPONSE_SIZE 4
 #define MAX_PACKAGE_SIZE 4096
@@ -118,21 +119,21 @@ private:
 	
 	std::vector<unsigned char> m_byteArray;
 
-	boost::mutex m_on_receive_lock;
+	std::mutex m_on_receive_lock;
 	
-	boost::mutex m_read_complete_lock;
+	std::mutex m_read_complete_lock;
 	
-	boost::mutex m_samples_lock;
+	std::mutex m_samples_lock;
 	
-	boost::mutex m_bytes_readed_lock;
+	std::mutex m_bytes_readed_lock;
 	
-	boost::mutex m_timer_expired_lock;
+	std::mutex m_timer_expired_lock;
 
 	int m_failedSamples;
 	
 	int m_receivedSamples;
 
-	boost::shared_ptr< boost::thread > acquire_t;
+	boost::shared_ptr< std::thread > acquire_t;
 
 	boost::shared_ptr< boost::asio::deadline_timer > m_timer;
 

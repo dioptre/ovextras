@@ -47,9 +47,7 @@ namespace OpenViBEAcquisitionServer
 				OpenViBE::float64 l_f64DriftMs;
 
 				{
-					boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
-					boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
-					m_oProtectionLock.unlock();
+					DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
 
 					l_ui32ClientCount = m_rAcquisitionServer.getClientCount();
 					l_f64DriftMs = (m_ui32Status == Status_Started ? m_rAcquisitionServer.m_oDriftCorrection.getDriftMs() : 0);
@@ -132,9 +130,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::boolean connect(void)
 		{
-			boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
-			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
-			m_oProtectionLock.unlock();
+			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
 
 			m_rKernelContext.getLogManager() << OpenViBE::Kernel::LogLevel_Trace << "CAcquisitionServerThread::connect()\n";
 
@@ -156,9 +152,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::boolean start(void)
 		{
-			boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
-			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
-			m_oProtectionLock.unlock();
+			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
 
 			m_rKernelContext.getLogManager() << OpenViBE::Kernel::LogLevel_Trace << "CAcquisitionServerThread::start()\n";
 			if(!m_rAcquisitionServer.start())
@@ -175,9 +169,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::boolean stop(void)
 		{
-			boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
-			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
-			m_oProtectionLock.unlock();
+			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
 
 			m_rKernelContext.getLogManager() << OpenViBE::Kernel::LogLevel_Trace << "CAcquisitionServerThread::stop()\n";
 			m_rAcquisitionServer.stop();
@@ -187,9 +179,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::boolean disconnect(void)
 		{
-			boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
-			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
-			m_oProtectionLock.unlock();
+			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
 
 			m_rKernelContext.getLogManager() << OpenViBE::Kernel::LogLevel_Trace << "CAcquisitionServerThread::disconnect()\n";
 
@@ -209,9 +199,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::boolean terminate(void)
 		{
-			boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
-			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
-			m_oProtectionLock.unlock();
+			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
 
 			m_rKernelContext.getLogManager() << OpenViBE::Kernel::LogLevel_Trace << "CAcquisitionServerThread::terminate()\n";
 
@@ -232,18 +220,14 @@ namespace OpenViBEAcquisitionServer
 		// GTK C callbacks call these from the main thread to update the GUI
 		void updateGUIClientCount(void)
 		{
-			boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
-			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
-			m_oProtectionLock.unlock();
+			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
 
 			m_rGUI.setClientCount(m_ui32ClientCount);
 		}
 
 		void updateGUIImpedance(void)
 		{
-			boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
-			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
-			m_oProtectionLock.unlock();
+			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
 
 			for (size_t i = 0; i < m_vImpedanceLast.size(); i++)
 			{
@@ -253,19 +237,14 @@ namespace OpenViBEAcquisitionServer
 
 		void updateGUIDrift(void)
 		{
-			boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
-			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
-			m_oProtectionLock.unlock();
+			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
 
 			m_rGUI.setDriftMs(m_f64LastDriftMs);
 		}
 
 		void updateGUIDisconnect(void)
 		{
-			// nb locking mutexes here would call a recursive lock apparently..
-			// boost::mutex::scoped_lock m_oProtectionLock(m_rAcquisitionServer.m_oProtectionMutex);
-			// boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
-			// m_oProtectionLock.unlock();
+			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
 
 			m_rGUI.disconnect();
 		}
@@ -273,7 +252,7 @@ namespace OpenViBEAcquisitionServer
 /*
 		uint32 getStatus(void)
 		{
-			boost::mutex::scoped_lock m_oExecutionLock(m_rAcquisitionServer.m_oExecutionMutex);
+			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);	
 
 			return m_ui32Status;
 		}

@@ -7,7 +7,9 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
-#include <boost/thread.hpp>
+
+#include <mutex>
+#include <thread>
 
 // PluginTCPTagging relies on four auxilliary classes: CTagQueue, CTagSession, CTagServer and CTagStream.
 // CTagQueue implements a trivial queue to store tags with exclusive locking.
@@ -40,7 +42,7 @@ class CTagServer; // forward declaration of CTagServer to define ScopedServerPtr
 typedef boost::shared_ptr<CTagQueue> SharedQueuePtr;
 typedef boost::shared_ptr<CTagSession> SharedSessionPtr;
 typedef boost::scoped_ptr<CTagServer> ScopedServerPtr;
-typedef boost::scoped_ptr<boost::thread> ScopedThreadPtr;
+typedef boost::scoped_ptr<std::thread> ScopedThreadPtr;
 
 // A trivial implementation of a queue to store Tags with exclusive locking
 class CTagQueue
@@ -55,7 +57,7 @@ public:
 	bool pop(Tag& tag);
 private:
 	std::queue<Tag> m_queue;
-	boost::mutex m_mutex;
+	std::mutex m_mutex;
 };
 
 // An instance of CTagSession is associated to every client connecting to the Tagging Server.

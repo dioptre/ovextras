@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <algorithm> // std::min
+
 //#include <afxwin.h>
 
 /*
