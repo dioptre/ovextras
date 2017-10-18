@@ -22,6 +22,13 @@ MESSAGE(STATUS "Appending compilation flags...")
 
 LIST(APPEND LIST_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
+# Create a path usable by Unix shell scripts (used by .sh launchers)
+SET(OV_PATH_DEPENCENCY_LIBS "")
+FOREACH(TMP ${LIST_DEPENDENCIES_PATH})
+  LIST(APPEND OV_PATH_DEPENDENCY_LIBS "${TMP}/lib")
+ENDFOREACH()
+string(REPLACE ";" ":" OV_PATH_PATH_DEPENDENCY_LIBS "${OV_PATH_DEPENDENCY_LIBS}")
+
 # Setup knowledge of GNU-style install path variables
 INCLUDE("GNUInstallDirs")
 
