@@ -95,7 +95,7 @@ IF(doxygen_bin)
 	SET(resource_files ${resource_files} ${resource_files_tmp})
 
 	IF(resource_files)
-		INSTALL(FILES ${resource_files} DESTINATION "${CMAKE_INSTALL_FULL_DOCDIR}")
+		INSTALL(FILES ${resource_files} DESTINATION "${DIST_DOCDIR}")
 	ENDIF(resource_files)
 	
 	# the final doxyfile filename is generated, platform compliantly
@@ -156,7 +156,7 @@ ELSEIF(UNIX)
         )
 ENDIF(WIN32)
 	
-INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../doc/" DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR} PATTERN ".svn" EXCLUDE)
+INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../doc/" DESTINATION ${DIST_DOCDIR})
 
 ELSE(doxygen_bin)
 

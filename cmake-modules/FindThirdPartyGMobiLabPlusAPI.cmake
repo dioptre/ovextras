@@ -34,7 +34,7 @@ IF(WIN32)
 		# Do not link to the dll! Its opened runtime with dlopen()
 		# TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_GMobiLabCAPI} )
 			
-		INSTALL(PROGRAMS ${PATH_GMobiLabDLL}/gMOBIlabplus.dll DESTINATION "bin")
+		INSTALL(PROGRAMS ${PATH_GMobiLabDLL}/gMOBIlabplus.dll DESTINATION ${DIST_BINDIR})
 		
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyGMobiLabPlusAPI)
 		SET(OV_ThirdPartyGMobilab "YES")

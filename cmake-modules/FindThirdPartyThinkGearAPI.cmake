@@ -25,7 +25,7 @@ IF(WIN32)
 		ENDIF(LIB_ThinkGearAPI)
 
 		# Copy the DLL file at install
-		INSTALL(PROGRAMS "${PATH_ThinkGearAPI}/thinkgear.dll" DESTINATION "bin")
+		INSTALL(PROGRAMS "${PATH_ThinkGearAPI}/thinkgear.dll" DESTINATION ${DIST_BINDIR})
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyThinkGearAPI)
 	ELSE(PATH_ThinkGearAPI)

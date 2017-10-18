@@ -52,7 +52,7 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("xDAWN Trainer (INRIA)"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("xDAWN Trainer (Deprecated)"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Yann Renard"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Computes spatial filter coeffcients in order to get better evoked potential classification (typically used for P300 detection)"); }
@@ -77,6 +77,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Filter dimension",             OV_TypeId_Integer,      "4");
 				rBoxAlgorithmPrototype.addSetting("Save as box config",           OV_TypeId_Boolean,      "true");
 				// rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsDeprecated);
 				return true;
 			}
 

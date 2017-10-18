@@ -36,10 +36,10 @@ IF(WIN32)
 		ENDIF(FIRMWARE_ActiCHampAPI)
 
 		# Copy the DLL file at install
-		INSTALL(PROGRAMS "${PATH_ActiCHampAPI}/ActiChamp_x86.dll" DESTINATION "bin")
+		INSTALL(PROGRAMS "${PATH_ActiCHampAPI}/ActiChamp_x86.dll" DESTINATION ${DIST_BINDIR})
 
 		# Copy the firmware file at install
-		INSTALL(PROGRAMS "${FIRMWARE_ActiCHampAPI}" DESTINATION "bin")
+		INSTALL(PROGRAMS "${FIRMWARE_ActiCHampAPI}" DESTINATION ${DIST_BINDIR})
 		
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyActiCHampAPI)
 	ELSE(PATH_ActiCHampAPI)

@@ -1,4 +1,4 @@
-PROJECT(openvibe-plugins-tests)
+PROJECT(openvibe-py2-check)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})
 SET(PROJECT_VERSION_MINOR ${OV_GLOBAL_VERSION_MINOR})
@@ -6,18 +6,8 @@ SET(PROJECT_VERSION_PATCH ${OV_GLOBAL_VERSION_PATCH})
 SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl)
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files})
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
-	VERSION ${PROJECT_VERSION}
-	SOVERSION ${PROJECT_VERSION_MAJOR}
-	COMPILE_FLAGS "-DOVP_Exports -DOVP_Shared")
-
-INCLUDE("FindOpenViBE")
-INCLUDE("FindOpenViBECommon")
-INCLUDE("FindOpenViBEToolkit")
-INCLUDE("FindOpenViBEModuleEBML")
-INCLUDE("FindOpenViBEModuleSystem")
-INCLUDE("FindOpenViBEModuleXML")
+ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
+INCLUDE("FindThirdPartyPython")
 
 # ---------------------------------
 # Target macros
@@ -26,6 +16,13 @@ INCLUDE("FindOpenViBEModuleXML")
 # Defines target compiler
 # ---------------------------------
 SET_BUILD_PLATFORM()
+if(WIN32)
+	add_definitions("-DWIN32")
+endif()
+# ----------------------
+# Generate launch script
+# ----------------------
+OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-py2-check" EXECUTABLE_NAME "${PROJECT_NAME}" PAUSE)
 
 # -----------------------------
 # Install files

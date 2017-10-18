@@ -2,6 +2,8 @@
  * See http://www.ru.nl/fcdonders/fieldtrip for details.
  */
 
+#if defined(TARGET_HAS_PThread)
+ 
 #include "ovasCDriverFieldtrip.h"
 #include "ovasCConfigurationFieldtrip.h"
 
@@ -601,3 +603,5 @@ void CDriverFieldtrip::FreeResponse(message_t * response, const char* message)
 	free(response);
 	response = NULL;
 }
+
+#endif

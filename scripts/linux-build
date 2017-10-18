@@ -25,7 +25,8 @@ while [[ $# -gt 0 ]]; do
 			ov_build_type=RelWithDebInfo
 			;;
 		--profile)
-			ov_build_type=Profile
+			ov_build_type=RelWithDebInfo
+			extra_flags="-DCMAKE_CXX_FLAGS_RELWITHDEBINFO='-O2 -g -DNDEBUG -pg' -DCMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO='-pg'"
 			;;
 		--build-dir)
 			ov_build_dir="$2"
@@ -51,8 +52,12 @@ while [[ $# -gt 0 ]]; do
 			ov_sdk_src_dir="$2"
 			shift
 			;;
+		--userdata-subdir)
+			UserDataSubdir="-DOV_CONFIG_SUBDIR=$2"
+			shift
+			;;
 		*)
-			echo "ERROR: Unknown parameter $i"
+			echo "ERROR: Unknown parameter $key"
 			exit 1
 			;;
 	esac
@@ -72,14 +77,7 @@ echo ""
 echo "Creating makefiles..."
 echo ""
 
-
-if [ ${ov_build_type} == Profile ]; then
-	cmake ${ov_script_dir}/.. -DCMAKE_CXX_FLAGS_RELWITHDEBINFO='-O2 -g -DNDEBUG -pg' -DCMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=${ov_install_dir} -DOPENVIBE_SDK_PATH=${ov_sdk_dir} -DDESIGNER_SDK_PATH=${ov_designer_dir}
-else
-	cmake ${ov_script_dir}/.. -DCMAKE_BUILD_TYPE=${ov_build_type} -DCMAKE_INSTALL_PREFIX=${ov_install_dir} ${ov_sdk_dir} ${ov_designer_dir} ${dependencies_path}
-fi
-
- 
+cmake ${ov_script_dir}/.. -DCMAKE_BUILD_TYPE=${ov_build_type} ${extra_flags} -DCMAKE_INSTALL_PREFIX=${ov_install_dir} ${ov_sdk_dir} ${ov_designer_dir} ${dependencies_path} ${UserDataSubdir}
 
 if [ $? -eq 0 ]; then
 	echo CMake has been called successfully !

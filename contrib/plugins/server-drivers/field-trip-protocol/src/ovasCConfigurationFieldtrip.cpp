@@ -1,3 +1,6 @@
+
+#if defined(TARGET_HAS_PThread)
+
 #include "ovasCConfigurationFieldtrip.h"
 
 #include <toolkit/ovtk_all.h>
@@ -120,3 +123,5 @@ boolean CConfigurationFieldtrip::postConfigure(void)
 
 	return CConfigurationBuilder::postConfigure();
 }
+
+#endif

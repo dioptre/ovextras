@@ -1,17 +1,11 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.4)
 
 # Here we set a few policies to get rid of warnings on newer cmakes.
 # we should update the scripts after upgrading each platform's cmake to 3.x.
-if(POLICY CMP0026)
-  cmake_policy(SET CMP0026 OLD)
-endif()
-if(POLICY CMP0043)
-  cmake_policy(SET CMP0043 OLD)
-endif()
-if(POLICY CMP0048)
-  cmake_policy(SET CMP0048 OLD)
-endif()
-cmake_policy(SET CMP0057 NEW)  # IF(IN_LIST)
+cmake_policy(SET CMP0026 OLD)
+cmake_policy(SET CMP0043 OLD)
+cmake_policy(SET CMP0048 OLD)
+cmake_policy(SET CMP0057 NEW) # IF(IN_LIST)
 
 PROJECT(OpenViBE)
 
@@ -22,45 +16,89 @@ SET(OV_GLOBAL_VERSION_MINOR 3)
 SET(OV_GLOBAL_VERSION_PATCH 0+git)
 SET(OV_GLOBAL_VERSION_STRING "${OV_GLOBAL_VERSION_MAJOR}.${OV_GLOBAL_VERSION_MINOR}.${OV_GLOBAL_VERSION_PATCH}")
 
-# Default is to build to dist/. If you wish a custom install, set your own MAKE_INSTALL_PREFIX when you call CMake. Safest to do under a fakeroot.
-#IF(NOT CMAKE_INSTALL_PREFIX)
-#ENDIF(NOT CMAKE_INSTALL_PREFIX)
-
 SET(DOCUMENTATION_TEMP_DIRECTORY "${CMAKE_INSTALL_PREFIX}/doc-tmp")
 
 MESSAGE(STATUS "Appending compilation flags...")
 
 LIST(APPEND LIST_DEPENDENCIES_PATH "${CMAKE_SOURCE_DIR}/dependencies")
 
-# Create a path usable by Unix shell scripts (used by .sh launchers)
-SET(OV_PATH_DEPENCENCY_LIBS "")
-FOREACH(TMP ${LIST_DEPENDENCIES_PATH})
-  LIST(APPEND OV_PATH_DEPENDENCY_LIBS "${TMP}/lib")
-ENDFOREACH()
-string(REPLACE ";" ":" OV_PATH_PATH_DEPENDENCY_LIBS "${OV_PATH_DEPENDENCY_LIBS}")
+# Setup knowledge of GNU-style install path variables
+INCLUDE("GNUInstallDirs")
 
-# Path to the OpenViBE SDK extracted package
-if(WIN32)
-	set(OPENVIBE_SDK_PATH_NAME_TO_SEEK bin/openvibe.dll)
-elseif(UNIX)
-	set(OPENVIBE_SDK_PATH_NAME_TO_SEEK lib/libopenvibe.so)
-endif()
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	FIND_PATH(OPENVIBE_SDK_PATH ${OPENVIBE_SDK_PATH_NAME_TO_SEEK} PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES openvibe-sdk-debug NO_DEFAULT_PATH)
+if(NOT CMAKE_BUILD_TYPE AND CMAKE_GENERATOR MATCHES "Visual Studio*")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}/bin" )
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib" )
+	foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+		string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIGU )
+		string(CONCAT DIST_ROOT ${DIST_ROOT} $<$<CONFIG:${OUTPUTCONFIGU}>:${CMAKE_INSTALL_PREFIX}/${OUTPUTCONFIG}>)
+		set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIGU} "${CMAKE_INSTALL_PREFIX}/${OUTPUTCONFIG}/bin" )
+		set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIGU} "${CMAKE_INSTALL_PREFIX}/${OUTPUTCONFIG}/lib" )
+	endforeach()
+	set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "OV_CMAKE_PATH_ROOT=\"${DIST_ROOT}\"")
+	set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "OV_CMAKE_PATH_BIN=\"${DIST_ROOT}/bin\"")
+	set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "OV_CMAKE_PATH_LIB=\"${DIST_ROOT}/lib\"")
+	set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "OV_CMAKE_PATH_DATA=\"${DIST_ROOT}/share/openvibe\"")
+	set(DIST_BINDIR ${DIST_ROOT}/bin)
+	set(DIST_LIBDIR ${DIST_ROOT}/lib)
+	set(DIST_INCLUDEDIR ${DIST_ROOT}/include)
+	set(DIST_DATADIR ${DIST_ROOT}/share)
+	set(DIST_DOCDIR ${DIST_ROOT}/doc)
+	set(DIST_DOCTMP ${DIST_ROOT}/doc-tmp)
+	set(DIST_SYSCONFDIR ${DIST_ROOT}/etc)
+elseif(CMAKE_BUILD_TYPE AND OV_PACKAGE)
+	message(FATAL_ERROR "Package function not implemented (yet) !")
+elseif(CMAKE_BUILD_TYPE)
+	# Add directories that OpenViBE will use to look for its components runtime, unless overridden by environment variables in the launch scripts.
+	# These defines should only be used in "openvibe/ov_directories.h".
+	add_definitions(-DOV_CMAKE_PATH_ROOT="${CMAKE_INSTALL_PREFIX}")
+	add_definitions(-DOV_CMAKE_PATH_BIN="${CMAKE_INSTALL_FULL_BINDIR}")
+	add_definitions(-DOV_CMAKE_PATH_LIB="${CMAKE_INSTALL_FULL_LIBDIR}")
+	add_definitions(-DOV_CMAKE_PATH_DATA="${CMAKE_INSTALL_FULL_DATADIR}/openvibe")
+	
+	set(DIST_ROOT ${CMAKE_INSTALL_PREFIX})
+	set(DIST_BINDIR ${DIST_ROOT}/bin)
+	set(DIST_LIBDIR ${DIST_ROOT}/lib)
+	set(DIST_INCLUDEDIR ${DIST_ROOT}/include)
+	set(DIST_DATADIR ${DIST_ROOT}/share)
+	set(DIST_DOCDIR ${DIST_ROOT}/doc)
+	set(DIST_SYSCONFDIR ${DIST_ROOT}/etc)
 else()
-	FIND_PATH(OPENVIBE_SDK_PATH ${OPENVIBE_SDK_PATH_NAME_TO_SEEK} PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES openvibe-sdk-release NO_DEFAULT_PATH)
+	message(FATAL_ERROR "Build should specify a type or use a multi-type generator (like Visual Studio)")
 endif()
 
-if(NOT OPENVIBE_SDK_PATH)
-	MESSAGE(FATAL_ERROR "Could not find OPENVIBE_SDK_PATH (value : ${OPENVIBE_SDK_PATH}). Please either specify it or put OpenViBE sdk binaries into dependencies/openvibe-sdk-{debug/release} folder")
+
+if(CMAKE_BUILD_TYPE)
+	string(TOLOWER ${CMAKE_BUILD_TYPE}"" CMAKE_BUILD_TYPE_LOWER)
+	find_path(SDK_MODULE_PATH NAMES AddOpenViBESDKComponents.cmake PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES openvibe-sdk-${CMAKE_BUILD_TYPE}/share  NO_DEFAULT_PATH) # Find "regular builds
 endif()
+find_path(SDK_MODULE_PATH NAMES AddOpenViBESDKComponents.cmake PATHS ${OPENVIBE_SDK_PATH} PATH_SUFFIXES share NO_DEFAULT_PATH) # Finds multi-type builds and dev builds
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
+if(SDK_MODULE_PATH)
+	LIST(APPEND CMAKE_MODULE_PATH ${SDK_MODULE_PATH})
+endif()
+
+SET(OV_LAUNCHER_SOURCE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules/launchers")
+# OpenViBE-specific helper functions that are used by the CMakeLists of the subprojects.
+#INCLUDE("OvAddSingleProject")
+INCLUDE("OvAddProjects")
+INCLUDE("OvInstallLaunchScript")
+INCLUDE("OvLinkBoostLib")
+INCLUDE("OvPrint")
+INCLUDE("OvMessages")
+#Install early, so they can be overwritten !
+set(INSTALL_SDK 1)
+set(INSTALL_DESIGNER 1)
+include(FindOVSDK)
+include(FindOVDesigner)
+# Path to the OpenViBE SDK and designer extracted packages
+include(AddOpenViBESDKComponents)
 
 ADD_DEFINITIONS("-DOV_PROJECT_NAME=\"${PROJECT_NAME}\"")
 ADD_DEFINITIONS("-DOV_VERSION_MAJOR=\"${OV_GLOBAL_VERSION_MAJOR}\"")
 ADD_DEFINITIONS("-DOV_VERSION_MINOR=\"${OV_GLOBAL_VERSION_MINOR}\"")
 ADD_DEFINITIONS("-DOV_VERSION_PATCH=\"${OV_GLOBAL_VERSION_PATCH}\"")
 
-SET(OV_CONFIG_SUBDIR OpenVIBE)
+SET(OV_CONFIG_SUBDIR OpenVIBE CACHE STRING "Subdirectory under user directory when configuration and logs will be saved")
 ADD_DEFINITIONS("-DOV_CONFIG_SUBDIR=\"${OV_CONFIG_SUBDIR}\"")
 
 set(CMAKE_CXX_STANDARD 11)
@@ -78,22 +116,16 @@ IF(WIN32)
 	ADD_DEFINITIONS("-D_WIN32_WINNT=0x0600")
 
 	# Find out the compiler version, deps may use this
-	IF(${CMAKE_MAJOR_VERSION} LESS 3)
-		INCLUDE(CMakeDetermineVSServicePack)
-		DetermineVSServicePack( MSVC_SERVICE_PACK )
-	ELSE(${CMAKE_MAJOR_VERSION} LESS 3)
-		SET(MSVC_SERVICE_PACK "unknown")
-		# MESSAGE(STATUS "st ${CMAKE_CXX_COMPILER_VERSION}")
-		IF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "16.0.0")
-			SET(MSVC_SERVICE_PACK "vc100")	
-		ENDIF()			
-		IF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "17.0.0")
-			SET(MSVC_SERVICE_PACK "vc110")
-		ENDIF()		
-		IF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "18.0.0")
-			SET(MSVC_SERVICE_PACK "vc120")
-		ENDIF()
-	ENDIF(${CMAKE_MAJOR_VERSION} LESS 3)
+	SET(MSVC_SERVICE_PACK "unknown")
+	# MESSAGE(STATUS "st ${CMAKE_CXX_COMPILER_VERSION}")
+	IF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "18.0.0")
+		SET(MSVC_SERVICE_PACK "vc120")
+	ELSEIF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "17.0.0")
+		SET(MSVC_SERVICE_PACK "vc110")
+	ELSEIF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "16.0.0")
+		SET(MSVC_SERVICE_PACK "vc100")	
+	ENDIF()			
+	
 	STRING(REGEX MATCH "vc120.*" MSVC_VER120 ${MSVC_SERVICE_PACK})
 	IF(MSVC_VER120) 
 		# Boost 1.55 asio causes several compiler warnings on VS2013 we cannot do much about. try removing the following when boost is upgraded.
@@ -104,18 +136,17 @@ IF(WIN32)
 		INCLUDE("FindOpenMP")
 		IF(OPENMP_FOUND)
 			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-		ENDIF(OPENMP_FOUND)
-	ENDIF(MSVC_VER120)
+		ENDIF()
+	ENDIF()
 	MESSAGE(STATUS "MSVC version is ${MSVC_SERVICE_PACK}")
 
-	SET(OV_WIN32_BOOST_VERSION "1_55")
-
+	SET(OV_WIN32_BOOST_VERSION "1_58")
 ELSEIF(UNIX)
 	# If OpenMP is available, using it will allow Eigen to use multiple cores in matrix math.
 	INCLUDE("FindOpenMP")
 	IF(OPENMP_FOUND)
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-	ENDIF(OPENMP_FOUND)
+	ENDIF()
 
 	# Switch -msse2 enables vectorization. Remove if your CPU/compiler doesn't support it.
 	SET(OV_EIGEN_FLAGS "-msse2")
@@ -138,15 +169,14 @@ ELSEIF(UNIX)
 		set (PLATFORM "Fedora")
 		ADD_DEFINITIONS("-DTARGET_OS_Linux_Fedora")
 	endif(EXISTS "/etc/fedora-release")
-
-ELSE(WIN32)
+ELSE()
 	MESSAGE(WARNING "Warning: unknown platform")
-ENDIF(WIN32)
+ENDIF()
 
-IF(NOT CMAKE_BUILD_TYPE)
-	MESSAGE(STATUS "Setting default build type to Release")
-	SET(CMAKE_BUILD_TYPE "Release")
-ENDIF(NOT CMAKE_BUILD_TYPE)
+# IF(NOT CMAKE_BUILD_TYPE)
+	# MESSAGE(STATUS "Setting default build type to Release")
+	# SET(CMAKE_BUILD_TYPE "Release")
+# ENDIF()
 
 FUNCTION(SET_BUILD_PLATFORM)
 	IF(WIN32)
@@ -215,7 +245,7 @@ IF(UNIX)
 	# but be aware of the consequences.
 	MESSAGE(STATUS "Note: Disabling Matlab plugin compilation by default")
 	SET(SKIP_PLUGINS_PROCESSING_MATLAB "1")
-ENDIF(UNIX)
+ENDIF()
 
 #SET(SKIP_MODULES_AUTOMATON "1")
 #SET(SKIP_MODULES_EBML "1")
@@ -231,9 +261,6 @@ ENDIF(UNIX)
 # Designer is currently in another repository; taken from there
 SET(SKIP_APPLICATIONS_PLATFORM_DESIGNER "0")
 SET(SKIP_APPLICATIONS_EXAMPLES_CONVERT "0")		# Convert depends on Designer
-
-SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
-SET(OV_LAUNCHER_SOURCE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules/launchers")
 
 # If you wish you can uncomment the next line and add a file with additional information called OVBranches.cmake to
 # the cmake-modules folder. It makes modifying this very CMake file easier.
@@ -252,38 +279,7 @@ SET_PROPERTY(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG "TARGET_BUILDTY
 SET_PROPERTY(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE "TARGET_BUILDTYPE_Release")
 SET_PROPERTY(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_RELWITHDEBINFO "TARGET_BUILDTYPE_Release")
 
-# OpenViBE-specific helper functions that are used by the CMakeLists of the subprojects.
-#INCLUDE("OvAddSingleProject")
-INCLUDE("OvAddProjects")
-INCLUDE("OvInstallLaunchScript")
-INCLUDE("OvLinkBoostLib")
-INCLUDE("OvPrint")
-INCLUDE("OvMessages")
-
-
-# For boxes documentation, qdd sdk dependencies dox-part folder
-IF(NOT(${SKIP_DOCUMENTATION}))
-	file(COPY ${OPENVIBE_SDK_PATH}/doc-tmp/ DESTINATION ${DOCUMENTATION_TEMP_DIRECTORY})
-	OV_ADD_SOURCE_DIR("${DOCUMENTATION_TEMP_DIRECTORY}/openvibe")
-	IF (OV_SDK_SOURCE_PATH)
-		OV_ADD_SOURCE_DIR("${OV_SDK_SOURCE_PATH}")
-	ELSE()
-		MESSAGE(WARNING,"Please set OV_SDK_SOURCE_PATH to enable sources documentation of sdk")
-	ENDIF()
-ENDIF()
-
-
-
-# Setup knowledge of GNU-style install path variables
-INCLUDE("GNUInstallDirs")
 SET(CMAKE_INSTALL_FULL_DOCDIR "${CMAKE_INSTALL_FULL_BINDIR}/../doc/html")
-
-# Add directories that OpenViBE will use to look for its components runtime, unless overridden by environment variables in the launch scripts.
-# These defines should only be used in "openvibe/ov_directories.h".
-ADD_DEFINITIONS(-DOV_CMAKE_PATH_ROOT="${CMAKE_INSTALL_PREFIX}")
-ADD_DEFINITIONS(-DOV_CMAKE_PATH_BIN="${CMAKE_INSTALL_FULL_BINDIR}")
-ADD_DEFINITIONS(-DOV_CMAKE_PATH_DATA="${CMAKE_INSTALL_FULL_DATADIR}/openvibe")
-ADD_DEFINITIONS(-DOV_CMAKE_PATH_LIB="${CMAKE_INSTALL_FULL_LIBDIR}")
 
 ADD_SUBDIRECTORY("build-tool/")
 # Traverse these directories and build their components
@@ -305,7 +301,7 @@ IF(WIN32)
 	IF(NOT OV_DEPENDENCY_CMD_PATH)
 		MESSAGE(FATAL_ERROR "Dependency installer should have generated 'win32-dependencies.cmd'. Looked from ${LIST_DEPENDENCIES_PATH}.")
 	ENDIF()
-	INSTALL(PROGRAMS ${OV_DEPENDENCY_CMD_PATH}/win32-dependencies.cmd DESTINATION ${CMAKE_INSTALL_FULL_BINDIR} RENAME "openvibe-set-env.cmd")
+	INSTALL(PROGRAMS ${OV_DEPENDENCY_CMD_PATH}/win32-dependencies.cmd DESTINATION ${DIST_BINDIR} RENAME "openvibe-set-env.cmd")
 ENDIF(WIN32)
 
 
@@ -314,26 +310,21 @@ ENDIF(WIN32)
 # ----------------------
 IF(WIN32)
 	SET(OV_EXT_CMD_FILE "openvibe-external-application-launcher.cmd")
-ENDIF(WIN32)
-IF(UNIX)
+ELSEIF(UNIX)
 	SET(OV_EXT_CMD_FILE "openvibe-external-application-launcher")
-ENDIF(UNIX)
+ENDIF()
 
-CONFIGURE_FILE("${CMAKE_MODULE_PATH}/launchers/${OV_EXT_CMD_FILE}-base" "${CMAKE_CURRENT_BINARY_DIR}/${OV_EXT_CMD_FILE}")
-INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${OV_EXT_CMD_FILE} DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+CONFIGURE_FILE("${OV_LAUNCHER_SOURCE_PATH}/${OV_EXT_CMD_FILE}-base" "${CMAKE_CURRENT_BINARY_DIR}/${OV_EXT_CMD_FILE}")
+INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${OV_EXT_CMD_FILE} DESTINATION ${DIST_BINDIR})
 
 # create the openvibe-ogre-plugins.cfg file for Ogre on UNIX
 IF(UNIX)
 	execute_process(COMMAND pkg-config --variable=plugindir OGRE OUTPUT_VARIABLE OGRE3D_PLUGIN_PATH)
-	CONFIGURE_FILE("${CMAKE_MODULE_PATH}/launchers/openvibe-ogre-plugins.cfg-base" "${CMAKE_CURRENT_BINARY_DIR}/openvibe-ogre-plugins.cfg")
-	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/openvibe-ogre-plugins.cfg DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe)
-ENDIF(UNIX)
+	CONFIGURE_FILE("${OV_LAUNCHER_SOURCE_PATH}/openvibe-ogre-plugins.cfg-base" "${CMAKE_CURRENT_BINARY_DIR}/openvibe-ogre-plugins.cfg")
+	INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/openvibe-ogre-plugins.cfg DESTINATION ${DIST_DATADIR}/openvibe)
+ENDIF()
 
-
-
-LIST(APPEND CMAKE_MODULE_PATH "${OPENVIBE_SDK_PATH}/share")
 SET(INCLUDED_OV_SDK_COMPONENTS DEPENDENCIES ALLPLUGINS)
 INCLUDE("AddOpenViBESDKComponents")
 
-set(DIST_ROOT ${CMAKE_INSTALL_PREFIX}) # Temporary
 configure_file(test/CTestTestfile.cmake . @ONLY)

@@ -29,7 +29,7 @@ IF(WIN32)
 		ENDIF(LIB_LiveAmpAPI)
 
 		# Copy the DLL file at install
-		INSTALL(PROGRAMS "${PATH_LiveAmpAPI}/LiveAmpLib2.dll" DESTINATION "bin")
+		INSTALL(PROGRAMS "${PATH_LiveAmpAPI}/LiveAmpLib2.dll" DESTINATION ${DIST_BINDIR})
 		
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyLiveAmpAPI)
 	ELSE(PATH_LiveAmpAPI)

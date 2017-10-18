@@ -49,7 +49,9 @@ namespace OpenViBEContributions {
 #if defined TARGET_HAS_ThirdPartyGNEEDaccessAPI
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDrivergNautilusInterface(pAcquisitionServer->getDriverContext()));
 #endif
+#if defined TARGET_HAS_PThread
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverFieldtrip(pAcquisitionServer->getDriverContext()));
+#endif
 
 #if defined TARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBrainmasterDiscovery(pAcquisitionServer->getDriverContext()));

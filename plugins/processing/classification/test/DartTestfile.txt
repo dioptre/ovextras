@@ -5,12 +5,10 @@
 IF(WIN32)
 	SET(EXT cmd)
 	SET(OS_FLAGS "--no-pause")
-	SET(OV_LOGFILE "$ENV{APPDATA}/openvibe/log/openvibe-designer.log")
-ELSE(WIN32)
+ELSE()
 	SET(EXT sh)
 	SET(OS_FLAGS "")
-	SET(OV_LOGFILE "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-ENDIF(WIN32)
+ENDIF()
 
 # Misc classifier tests
 

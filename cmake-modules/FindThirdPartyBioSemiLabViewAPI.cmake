@@ -24,7 +24,7 @@ IF(WIN32)
 		ENDIF(LIB_BioSemiAPI)
 
 		# Copy the DLL file at install
-		INSTALL(PROGRAMS "${PATH_BioSemiAPI}/Labview_DLL.dll" DESTINATION "bin")
+		INSTALL(PROGRAMS "${PATH_BioSemiAPI}/Labview_DLL.dll" DESTINATION ${DIST_BINDIR})
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyBioSemiAPI)
 	ELSE(PATH_BioSemiAPI)

@@ -201,6 +201,7 @@ bool CMatlabHelper::setSpectrumInputHeader(uint32_t ui32InputIndex, IMatrix* pMa
 	System::Memory::copy(::mxGetPr(l_pMatlabMatrix), pFrequencyAbscissa->getBuffer(), pFrequencyAbscissa->getBufferElementCount()*sizeof(float64));
 	::engPutVariable(m_pMatlabEngine, "OV_MATRIX_TMP", l_pMatlabMatrix);
 
+	mxDestroyArray(l_pMatlabMatrix);
 
 	//box_out = OV_setSpectrumInputHeader(box_in, input_index, nb_channels, channel_names, nb_bands, band_names, bands, sampling_rate)
 	std::string l_sCommand = std::string(m_sBoxInstanceVariableName) + " = OV_setSpectrumInputHeader("
@@ -250,6 +251,8 @@ bool CMatlabHelper::addStreamedMatrixInputBuffer(uint32_t ui32InputIndex, IMatri
 
 	System::Memory::copy(::mxGetPr(l_pMatlabMatrix), pMatrix->getBuffer(), pMatrix->getBufferElementCount()*sizeof(float64));
 	::engPutVariable(m_pMatlabEngine, "OV_MATRIX_TMP", l_pMatlabMatrix);
+	
+	mxDestroyArray(l_pMatlabMatrix);
 
 	std::string l_sCommand = std::string(m_sBoxInstanceVariableName) + " = OV_addInputBuffer(" + (const char*)m_sBoxInstanceVariableName + ","
 			+ std::to_string(ui32InputIndex + 1) + ","
@@ -284,6 +287,8 @@ bool CMatlabHelper::addStimulationsInputBuffer(uint32_t ui32InputIndex, IStimula
 		}
 
 		::engPutVariable(m_pMatlabEngine, "OV_MATRIX_TMP", l_pMatlabMatrix);
+
+		mxDestroyArray(l_pMatlabMatrix);
 	}
 
 	std::string l_sCommand = std::string(m_sBoxInstanceVariableName) + " = OV_addInputBuffer(" + (const char*)m_sBoxInstanceVariableName + ","
@@ -450,6 +455,7 @@ bool CMatlabHelper::getSpectrumOutputHeader(uint32_t ui32OutputIndex, IMatrix * 
 	// @FIXME CERT is it me or it never copy data to pMatrix ?
 
 	mxDestroyArray(l_pFreqAbscissa);
+
 	return true;
 }
 

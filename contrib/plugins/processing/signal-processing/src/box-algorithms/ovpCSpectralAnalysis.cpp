@@ -109,7 +109,6 @@ boolean CSpectralAnalysis::process()
             l_pFrequencyBands->setDimensionCount(1);
 
 			// For real signals, if N is sample count, bins [0,N/2] (inclusive) contain non-redundant information, i.e. N/2+1 entries.
-            // @FIXME CERT  : why is it / 2 ?
             m_ui32HalfFFTSize = m_ui32SampleCount / 2 + 1;
 			m_ui32FrequencyBandCount = m_ui32HalfFFTSize;
 
