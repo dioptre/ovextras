@@ -1,3 +1,6 @@
+//
+// @todo the code logic in process() should be simplified and made more clear, perhaps by adding more states to the machine
+//
 #include "ovpCBoxAlgorithmP300SpellerStimulator.h"
 
 #include <list>
@@ -24,6 +27,7 @@ namespace
 		State_NoFlash,
 		State_RepetitionRest,
 		State_TrialRest,
+		State_ExperimentStop
 	};
 
 #if 0
@@ -215,48 +219,57 @@ boolean CBoxAlgorithmP300SpellerStimulator::process(void)
 		}
 		else
 		{
-			uint64 l_ui64CurrentTimeInTrial     =l_ui64CurrentTime-m_ui64TrialStartTime;
-			uint64 l_ui64CurrentTimeInRepetition=l_ui64CurrentTimeInTrial%(m_ui64RepetitionDuration+m_ui64InterRepetitionDuration);
-			// FIXME is it necessary to keep next line uncomment ?
-			//uint64 l_ui64RepritionIndexInTrial  =l_ui64CurrentTimeInTrial/(m_ui64RepetitionDuration+m_ui64InterRepetitionDuration);
-			uint64 l_ui64FlashIndexInRepetition =l_ui64CurrentTimeInRepetition/(m_ui64FlashDuration+m_ui64NoFlashDuration);
-
-			l_ui64FlashIndex=l_ui64FlashIndexInRepetition;
-			// FIXME is it necessary to keep next line uncomment ?
-			//l_ui64RepetitionIndex=l_ui64RepritionIndexInTrial;
-
-			if(l_ui64CurrentTimeInTrial >= m_ui64TrialDuration)
+			if ((m_ui64TrialIndex>m_ui64TrialCount) && (m_ui64TrialCount>0)) 
 			{
-				if(m_ui64TrialCount==0 || m_ui64TrialIndex<m_ui64TrialCount)
-				{
-					m_ui64TrialStartTime=l_ui64CurrentTime+m_ui64InterTrialDuration;
-					l_ui32State=State_TrialRest;
-					l_ui64FlashIndex=(uint64)-1;
-					// FIXME is it necessary to keep next line uncomment ?
-					//l_ui64RepetitionIndex=(uint64)-1;
-					m_ui64TrialIndex++;
-				}
-				else
-				{
-					l_ui32State=State_None;
-				}
+				l_ui32State=State_ExperimentStop;
 			}
 			else
 			{
-				if(l_ui64CurrentTimeInRepetition >= m_ui64RepetitionDuration)
+				uint64 l_ui64CurrentTimeInTrial     =l_ui64CurrentTime-m_ui64TrialStartTime;
+				uint64 l_ui64CurrentTimeInRepetition=l_ui64CurrentTimeInTrial%(m_ui64RepetitionDuration+m_ui64InterRepetitionDuration);
+				
+				// FIXME is it necessary to keep next line uncomment ?
+				//uint64 l_ui64RepritionIndexInTrial  =l_ui64CurrentTimeInTrial/(m_ui64RepetitionDuration+m_ui64InterRepetitionDuration);
+				uint64 l_ui64FlashIndexInRepetition =l_ui64CurrentTimeInRepetition/(m_ui64FlashDuration+m_ui64NoFlashDuration);
+				
+				l_ui64FlashIndex=l_ui64FlashIndexInRepetition;
+				// FIXME is it necessary to keep next line uncomment ?
+				//l_ui64RepetitionIndex=l_ui64RepritionIndexInTrial;
+				
+				if(l_ui64CurrentTimeInTrial >= m_ui64TrialDuration)
 				{
-					l_ui32State=State_RepetitionRest;
-					l_ui64FlashIndex=(uint64)-1;
-				}
-				else
-				{
-					if(l_ui64CurrentTimeInRepetition%(m_ui64FlashDuration+m_ui64NoFlashDuration)<m_ui64FlashDuration)
-					{
-						l_ui32State=State_Flash;
+					if(m_ui64TrialCount==0 || m_ui64TrialIndex<=m_ui64TrialCount)
+					{					
+						m_ui64TrialStartTime=l_ui64CurrentTime+m_ui64InterTrialDuration;					
+						l_ui32State=State_TrialRest;
+						l_ui64FlashIndex=(uint64)-1;
+						// FIXME is it necessary to keep next line uncomment ?
+						//l_ui64RepetitionIndex=(uint64)-1;
+						m_ui64TrialIndex++;
 					}
 					else
 					{
-						l_ui32State=State_NoFlash;
+						m_ui64TrialStartTime=l_ui64CurrentTime+m_ui64InterTrialDuration;
+						l_ui32State=State_None;
+					}
+				}
+				else
+				{
+					if(l_ui64CurrentTimeInRepetition >= m_ui64RepetitionDuration)
+					{
+						l_ui32State=State_RepetitionRest;
+						l_ui64FlashIndex=(uint64)-1;
+					}
+					else
+					{
+						if(l_ui64CurrentTimeInRepetition%(m_ui64FlashDuration+m_ui64NoFlashDuration)<m_ui64FlashDuration)
+						{
+							l_ui32State=State_Flash;
+						}
+						else
+						{
+							l_ui32State=State_NoFlash;
+						}
 					}
 				}
 			}
@@ -287,17 +300,23 @@ boolean CBoxAlgorithmP300SpellerStimulator::process(void)
 					break;
 
 				case State_TrialRest:
-					l_oStimulationSet.appendStimulation(OVTK_StimulationId_RestStop, l_ui64CurrentTime, 0);
-					_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_RestStop\n");
-					l_oStimulationSet.appendStimulation(OVTK_StimulationId_TrialStart, l_ui64CurrentTime, 0);
-					_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_TrialStart\n");
-					l_oStimulationSet.appendStimulation(OVTK_StimulationId_SegmentStart, l_ui64CurrentTime, 0);
-					_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_SegmentStart\n");
+					if (m_ui64TrialIndex<=m_ui64TrialCount)
+					{
+						l_oStimulationSet.appendStimulation(OVTK_StimulationId_RestStop, l_ui64CurrentTime, 0);
+						_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_RestStop\n");
+						l_oStimulationSet.appendStimulation(OVTK_StimulationId_TrialStart, l_ui64CurrentTime, 0);
+						_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_TrialStart\n");
+						l_oStimulationSet.appendStimulation(OVTK_StimulationId_SegmentStart, l_ui64CurrentTime, 0);
+						_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_SegmentStart\n");
+					}
 					break;
 
 				case State_None:
-					l_oStimulationSet.appendStimulation(OVTK_StimulationId_ExperimentStart, l_ui64CurrentTime, 0);
-					_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_ExperimentStart\n");
+					if (m_ui64TrialIndex<=m_ui64TrialCount)
+					{
+						l_oStimulationSet.appendStimulation(OVTK_StimulationId_ExperimentStart, l_ui64CurrentTime, 0);
+						_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_ExperimentStart\n");
+					}
 					break;
 
 				default:
@@ -333,8 +352,11 @@ boolean CBoxAlgorithmP300SpellerStimulator::process(void)
 						l_oStimulationSet.appendStimulation(OVTK_StimulationId_TrialStop, l_ui64CurrentTime, 0);
 						_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_TrialStop\n");
 					}
-					l_oStimulationSet.appendStimulation(OVTK_StimulationId_RestStart, l_ui64CurrentTime, 0);
-					_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_RestStart\n");
+					if (m_ui64TrialIndex<=m_ui64TrialCount)
+					{
+						l_oStimulationSet.appendStimulation(OVTK_StimulationId_RestStart, l_ui64CurrentTime, 0);
+						_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_RestStart\n");
+					}
 					break;
 
 				case State_None:
@@ -344,10 +366,13 @@ boolean CBoxAlgorithmP300SpellerStimulator::process(void)
 						_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_SegmentStop\n");
 					}
 					l_oStimulationSet.appendStimulation(OVTK_StimulationId_TrialStop, l_ui64CurrentTime, 0);
-					_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_TrialStop\n");
-					l_oStimulationSet.appendStimulation(OVTK_StimulationId_ExperimentStop, l_ui64CurrentTime, 0);
-					_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_ExperimentStop\n");
+					_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_TrialStop\n");					
 					break;
+				case State_ExperimentStop:
+					// The experiment stop is sent with some delay to allow the last flash / letter to be processed gracefully by the DSP later
+					l_oStimulationSet.appendStimulation(OVTK_StimulationId_ExperimentStop, l_ui64CurrentTime + ITimeArithmetics::secondsToTime(3.0), 0);
+					_OPTIONAL_LOG_(this->getLogManager(), LogLevel_Trace << "sends OVTK_StimulationId_ExperimentStop\n");
+					break;			
 
 				default:
 					break;
