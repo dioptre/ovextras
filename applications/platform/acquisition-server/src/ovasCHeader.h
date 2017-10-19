@@ -28,6 +28,8 @@ namespace OpenViBEAcquisitionServer
 
 		virtual OpenViBE::boolean setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested);
 		virtual OpenViBE::boolean isImpedanceCheckRequested(void) const;
+		virtual OpenViBE::uint32 getImpedanceLimit(void) const;
+		virtual OpenViBE::boolean setImpedanceLimit(const OpenViBE::uint32 ui32ImpedanceLimit);
 
 		// Chanel information
 		virtual OpenViBE::boolean setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
@@ -83,6 +85,8 @@ namespace OpenViBEAcquisitionServer
 		
 		virtual OpenViBE::boolean setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested){ return m_rAdaptedHeader.setImpedanceCheckRequested(bImpedanceCheckRequested); }
 		virtual OpenViBE::boolean isImpedanceCheckRequested(void) const { return m_rAdaptedHeader.isImpedanceCheckRequested(); }
+		virtual OpenViBE::uint32 getImpedanceLimit(void) const { return m_rAdaptedHeader.getImpedanceLimit(); }
+		virtual OpenViBE::boolean setImpedanceLimit(const OpenViBE::uint32 ui32ImpedanceLimit) { return m_rAdaptedHeader.setImpedanceLimit(ui32ImpedanceLimit); }
 
 		// Channel information
 		virtual OpenViBE::boolean setChannelCount(const OpenViBE::uint32 ui32ChannelCount) { return m_rAdaptedHeader.setChannelCount(ui32ChannelCount); }

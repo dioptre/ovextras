@@ -39,6 +39,8 @@ namespace OpenViBEAcquisitionServer
 
 			virtual OpenViBE::boolean setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested);
 			virtual OpenViBE::boolean isImpedanceCheckRequested(void) const;
+			virtual OpenViBE::uint32 getImpedanceLimit(void) const;
+			virtual OpenViBE::boolean setImpedanceLimit(const OpenViBE::uint32 ui32ImpedanceLimit);
 
 			// Chanel information
 			virtual OpenViBE::boolean setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
@@ -84,6 +86,7 @@ namespace OpenViBEAcquisitionServer
 
 			// Impedance check
 			OpenViBE::boolean m_bIsImpedanceCheckRequested;
+			OpenViBE::uint32 m_ui32ImpedanceLimit;
 		};
 	};
 };
@@ -98,6 +101,7 @@ CHeaderImpl::CHeaderImpl(void)
 	,m_ui32ChannelCount(_NoValueI_)
 	,m_ui32SamplingFrequency(_NoValueI_)
 	,m_bIsImpedanceCheckRequested(false)
+	,m_ui32ImpedanceLimit(_NoValueI_)
 {
 }
 
@@ -116,6 +120,7 @@ void CHeaderImpl::reset(void)
 	m_vChannelUnits.clear();
 	m_ui32SamplingFrequency=_NoValueI_;
 	m_bIsImpedanceCheckRequested=false;
+	m_ui32ChannelCount=_NoValueI_;
 }
 
 //___________________________________________________________________//
@@ -164,6 +169,17 @@ boolean CHeaderImpl::setImpedanceCheckRequested(const boolean bImpedanceCheckReq
 boolean CHeaderImpl::isImpedanceCheckRequested(void) const
 {
 	return m_bIsImpedanceCheckRequested;
+}
+
+uint32 CHeaderImpl::getImpedanceLimit(void) const
+{
+	return m_ui32ImpedanceLimit;
+}
+
+bool CHeaderImpl::setImpedanceLimit(const uint32 ui32ImpedanceLimit)
+{
+	m_ui32ImpedanceLimit = ui32ImpedanceLimit;
+	return true;
 }
 
 boolean CHeaderImpl::isExperimentIdentifierSet(void) const
@@ -383,6 +399,15 @@ boolean CHeader::isImpedanceCheckRequested(void) const
 	return m_pHeaderImpl->isImpedanceCheckRequested();
 }
 
+uint32 CHeader::getImpedanceLimit(void) const
+{
+	return m_pHeaderImpl->getImpedanceLimit();
+}
+
+bool CHeader::setImpedanceLimit(const uint32 ui32ImpedanceLimit)
+{
+	return m_pHeaderImpl->setImpedanceLimit(ui32ImpedanceLimit);
+}
 //___________________________________________________________________//
 //                                                                   //
 
