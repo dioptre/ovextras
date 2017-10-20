@@ -16,6 +16,8 @@ SET PATH=%dependencies_base%\freealut\lib;%PATH%
 SET PATH=%dependencies_base%\libogg\win32\bin\release;%dependencies_base%\libogg\win32\bin\debug;%PATH%
 SET PATH=%dependencies_base%\libvorbis\win32\bin\release;%dependencies_base%\libvorbis\win32\bin\debug;%PATH%
 SET PATH=%dependencies_base%\liblsl\lib\;%PATH%
+SET PATH=%dependencies_base%\vcredist-100\;%PATH%
+SET PATH=%dependencies_base%\vcredist\;%PATH%
 
 REM Apply user-provided Python2.7 paths if available
 IF NOT !PYTHONHOME27!==!EMPTY!  IF NOT !PYTHONPATH27!==!EMPTY! SET REPLACE_PYTHON=true

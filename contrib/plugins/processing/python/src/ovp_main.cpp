@@ -32,7 +32,8 @@ private:
 #ifdef TARGET_OS_Windows
 bool CPythonInitializer::checkPythonPath()
 {
-	if (std::system("%OV_PATH_ROOT%\\bin\\openvibe-py2-check.exe"))
+	const OpenViBE::CString testCmd = "\"" + OpenViBE::Directories::getBinDir() + "\\openvibe-py2-check.exe\"";
+	if (std::system(testCmd.toASCIIString()))
 	{
 		std::cout << "Warning: The Python version found does not seem to be compatible and using it would cause Designer to crash.";
 		std::cout << "Check that Python 2.7 is installed and/or your PYTHONPATH/PYTHONHOME is set correctly." << std::endl;

@@ -31,3 +31,5 @@ build/windows/sdk-nexus.zip;sdk-nexus;0.0.0
 build/windows/sdk-tmsi.zip;sdk-tmsi;0.0.0
 build/windows/vrpn-7.31-dev.zip;vrpn;7.31
 build/windows/vrpn-7.31-runtime.zip;vrpn;7.31
+build/windows/vcredist_x86_vc100.zip;vcredist-100;1.0
+build/windows/vcredist_x86_vc120.zip;vcredist;1.0
