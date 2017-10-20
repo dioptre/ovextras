@@ -86,7 +86,7 @@ namespace OpenViBEAcquisitionServer
 
 		std::thread* m_pThread;		
 #if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver
-		void* m_oLibMensiaAcquisition;
+		void* m_pLibMensiaAcquisition;
 #endif
 	};
 };

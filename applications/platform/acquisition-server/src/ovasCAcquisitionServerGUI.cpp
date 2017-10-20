@@ -142,7 +142,6 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	,m_pBuilderInterface(NULL)
 	,m_pImpedanceWindow(NULL)
 	,m_pThread(NULL)
-	,m_oLibMensiaAcquisition(NULL)
 {
 	// boolean l_bShowUnstable=m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_ShowUnstable}", false);
 
@@ -208,6 +207,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 #if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver
 
 	m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Loading Mensia Driver Collection\n";
+	m_pLibMensiaAcquisition = nullptr;
 	CString l_sMensiaDLLPath = m_pAcquisitionServer->getDriverContext().getConfigurationManager().expand("${Path_Bin}/openvibe-driver-mensia-acquisition.dll");
 	if(!std::ifstream(l_sMensiaDLLPath.toASCIIString()).is_open())
 	{
@@ -216,8 +216,8 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	}
 	else 
 	{
-		m_oLibMensiaAcquisition = System::WindowsUtilities::utf16CompliantLoadLibrary(l_sMensiaDLLPath.toASCIIString());
-		HINSTANCE l_oLibMensiaAcquisition = static_cast<HINSTANCE>(m_oLibMensiaAcquisition);
+		m_pLibMensiaAcquisition = System::WindowsUtilities::utf16CompliantLoadLibrary(l_sMensiaDLLPath.toASCIIString());
+		HINSTANCE l_oLibMensiaAcquisition = static_cast<HINSTANCE>(m_pLibMensiaAcquisition);
 
 		//if it can't be open return FALSE;
 		if( l_oLibMensiaAcquisition == NULL)
@@ -352,7 +352,7 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 #if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver
 	typedef int32 (*MACQ_ReleaseMensiaAcquisitionLibrary)();
 	MACQ_ReleaseMensiaAcquisitionLibrary l_fpReleaseMensiaAcquisitionLibrary;
-	l_fpReleaseMensiaAcquisitionLibrary = (MACQ_ReleaseMensiaAcquisitionLibrary)::GetProcAddress(static_cast<HINSTANCE>(m_oLibMensiaAcquisition), "releaseAcquisitionLibrary");
+	l_fpReleaseMensiaAcquisitionLibrary = (MACQ_ReleaseMensiaAcquisitionLibrary)::GetProcAddress(static_cast<HINSTANCE>(m_pLibMensiaAcquisition), "releaseAcquisitionLibrary");
 //	l_fpReleaseMensiaAcquisitionLibrary();
 #endif
 	// END MENSIA ACQUISITION DRIVERS
