@@ -66,6 +66,12 @@ else()
 	message(FATAL_ERROR "Build should specify a type or use a multi-type generator (like Visual Studio)")
 endif()
 
+# Create a path usable by Unix shell scripts (used by .sh launchers)
+SET(OV_PATH_DEPENCENCY_LIBS "")
+FOREACH(TMP ${LIST_DEPENDENCIES_PATH})
+  LIST(APPEND OV_PATH_DEPENDENCY_LIBS "${TMP}/lib")
+ENDFOREACH()
+string(REPLACE ";" ":" OV_PATH_PATH_DEPENDENCY_LIBS "${OV_PATH_DEPENDENCY_LIBS}")
 
 if(CMAKE_BUILD_TYPE)
 	string(TOLOWER ${CMAKE_BUILD_TYPE}"" CMAKE_BUILD_TYPE_LOWER)
@@ -99,6 +105,7 @@ ADD_DEFINITIONS("-DOV_VERSION_MINOR=\"${OV_GLOBAL_VERSION_MINOR}\"")
 ADD_DEFINITIONS("-DOV_VERSION_PATCH=\"${OV_GLOBAL_VERSION_PATCH}\"")
 
 SET(OV_CONFIG_SUBDIR OpenVIBE CACHE STRING "Subdirectory under user directory when configuration and logs will be saved")
+
 ADD_DEFINITIONS("-DOV_CONFIG_SUBDIR=\"${OV_CONFIG_SUBDIR}\"")
 
 set(CMAKE_CXX_STANDARD 11)
