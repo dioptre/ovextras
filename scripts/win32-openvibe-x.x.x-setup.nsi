@@ -110,7 +110,7 @@ Section "!OpenViBE" Section1
 	
 	${If} $OLDINSTDIR != ""
 		RMDir /r $OLDINSTDIR
-		RMDir /r "$SMPROGRAMS\OpenViBE-2.0"
+		RMDir /r "$SMPROGRAMS\OpenViBE 2.0"
 	${EndIf}
 
 	SetOutPath $INSTDIR
@@ -252,16 +252,16 @@ no_need_to_patch_3d_functionnality:
 	FileWrite $0 "widget_class $\"*$\" style $\"user-font$\"$\r$\n"
 	FileClose $0
 
-	CreateDirectory "$SMPROGRAMS\OpenViBE-2.0"
-	CreateDirectory "$SMPROGRAMS\OpenViBE-2.0\Developer tools"
-	CreateShortCut "$SMPROGRAMS\OpenViBE-2.0\Developer tools\openvibe id generator.lnk"       "$INSTDIR\openvibe-id-generator.cmd"        "" "%SystemRoot%\system32\shell32.dll" 57
-	CreateShortCut "$SMPROGRAMS\OpenViBE-2.0\Developer tools\openvibe plugin inspector.lnk"   "$INSTDIR\openvibe-plugin-inspector.cmd"    "" "%SystemRoot%\system32\shell32.dll" 57
-	CreateShortCut "$SMPROGRAMS\OpenViBE-2.0\Developer tools\openvibe skeleton generator.lnk" "$INSTDIR\openvibe-skeleton-generator.cmd"  "" "%SystemRoot%\system32\shell32.dll" 57
-	CreateShortCut "$SMPROGRAMS\OpenViBE-2.0\openvibe designer.lnk"                           "$INSTDIR\openvibe-designer.cmd"            "" "%SystemRoot%\system32\shell32.dll" 137
-	CreateShortCut "$SMPROGRAMS\OpenViBE-2.0\openvibe acquisition server.lnk"                 "$INSTDIR\openvibe-acquisition-server.cmd"  "" "%SystemRoot%\system32\shell32.dll" 18
-	CreateShortCut "$SMPROGRAMS\OpenViBE-2.0\openvibe vr-demo spaceship.lnk"                  "$INSTDIR\openvibe-vr-demo-spaceship.cmd"   "" "%SystemRoot%\system32\shell32.dll" 200
-	CreateShortCut "$SMPROGRAMS\OpenViBE-2.0\openvibe vr-demo handball.lnk"                   "$INSTDIR\openvibe-vr-demo-handball.cmd"    "" "%SystemRoot%\system32\shell32.dll" 200
-	CreateShortCut "$SMPROGRAMS\OpenViBE-2.0\uninstall.lnk"                                   "$INSTDIR\Uninstall.exe"
+	CreateDirectory "$SMPROGRAMS\OpenViBE 2.0"
+	CreateDirectory "$SMPROGRAMS\OpenViBE 2.0\Developer tools"
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\Developer tools\openvibe id generator.lnk"       "$INSTDIR\openvibe-id-generator.cmd"        "" "%SystemRoot%\system32\shell32.dll" 57
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\Developer tools\openvibe plugin inspector.lnk"   "$INSTDIR\openvibe-plugin-inspector.cmd"    "" "%SystemRoot%\system32\shell32.dll" 57
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\Developer tools\openvibe skeleton generator.lnk" "$INSTDIR\openvibe-skeleton-generator.cmd"  "" "%SystemRoot%\system32\shell32.dll" 57
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\openvibe designer.lnk"                           "$INSTDIR\openvibe-designer.cmd"            "" "%SystemRoot%\system32\shell32.dll" 137
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\openvibe acquisition server.lnk"                 "$INSTDIR\openvibe-acquisition-server.cmd"  "" "%SystemRoot%\system32\shell32.dll" 18
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\openvibe vr-demo spaceship.lnk"                  "$INSTDIR\openvibe-vr-demo-spaceship.cmd"   "" "%SystemRoot%\system32\shell32.dll" 200
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\openvibe vr-demo handball.lnk"                   "$INSTDIR\openvibe-vr-demo-handball.cmd"    "" "%SystemRoot%\system32\shell32.dll" 200
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\uninstall.lnk"                                   "$INSTDIR\Uninstall.exe"
 
 	
 	; AccessControl::EnableFileInheritance "$INSTDIR"
@@ -272,7 +272,7 @@ SectionEnd
 Section "Uninstall"
 
 	RMDir /r $INSTDIR
-	RMDir /r "$SMPROGRAMS\OpenViBE-2.0"
+	RMDir /r "$SMPROGRAMS\OpenViBE 2.0"
 
 SectionEnd
 
