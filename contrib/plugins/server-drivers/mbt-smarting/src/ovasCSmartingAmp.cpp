@@ -256,7 +256,8 @@ bool SmartingAmp::start()
 
 	acquire();
 
-	auto f = boost::bind(&boost::asio::io_service::run, &m_io);
+	auto f = [this]() { this->m_io.run(); };
+	// auto f = boost::bind(&boost::asio::io_service::run, &m_io);
 
 	acquire_t.reset(new std::thread( f ));
 
@@ -370,7 +371,7 @@ void SmartingAmp::read_with_timeout(int size, size_t timeout)
 
 	m_bytes_readed = 0;
 
-	m_port->async_read_some( 
+	m_port->async_read_some(
 		boost::asio::buffer(m_commandReceiveBuffer, size),
 		boost::bind(
 			&SmartingAmp::read_complete,

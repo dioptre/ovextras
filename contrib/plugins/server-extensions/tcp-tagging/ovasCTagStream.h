@@ -3,9 +3,6 @@
 
 #include <queue>
 #include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
 
 #include <mutex>
@@ -39,10 +36,10 @@ class CTagSession; // forward declaration of CTagSession to define SharedSession
 class CTagQueue; // forward declaration of CTagQueue to define SharedQueuePtr
 class CTagServer; // forward declaration of CTagServer to define ScopedServerPtr
 
-typedef boost::shared_ptr<CTagQueue> SharedQueuePtr;
-typedef boost::shared_ptr<CTagSession> SharedSessionPtr;
-typedef boost::scoped_ptr<CTagServer> ScopedServerPtr;
-typedef boost::scoped_ptr<std::thread> ScopedThreadPtr;
+typedef std::shared_ptr<CTagQueue> SharedQueuePtr;
+typedef std::shared_ptr<CTagSession> SharedSessionPtr;
+typedef std::unique_ptr<CTagServer> ScopedServerPtr;
+typedef std::unique_ptr<std::thread> ScopedThreadPtr;
 
 // A trivial implementation of a queue to store Tags with exclusive locking
 class CTagQueue
@@ -62,7 +59,7 @@ private:
 
 // An instance of CTagSession is associated to every client connecting to the Tagging Server.
 // It contains a connection handle and data buffer.
-class CTagSession : public boost::enable_shared_from_this<CTagSession>
+class CTagSession : public std::enable_shared_from_this<CTagSession>
 {
 public:
 	CTagSession(boost::asio::io_service& io_service, const SharedQueuePtr& queue);

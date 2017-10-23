@@ -8,7 +8,6 @@
 #include "../ovasCSettingsHelper.h"
 #include "../ovasCSettingsHelperOperators.h"
 
-#include <boost/shared_ptr.hpp>
 #include "ovasCSmartingAmp.h"
 
 namespace OpenViBEAcquisitionServer
@@ -73,7 +72,7 @@ namespace OpenViBEAcquisitionServer
 		 * Example :
 		 */
 		OpenViBE::uint32 m_ui32ConnectionID;
-		boost::shared_ptr< SmartingAmp > m_pSmartingAmp;
+		std::shared_ptr< SmartingAmp > m_pSmartingAmp;
 		std::vector< unsigned char > m_byteArray;
 		int sample_number;
 		int latency;

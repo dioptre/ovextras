@@ -15,8 +15,6 @@
 #include <mutex>
 #include <condition_variable>
 
-#include <boost/scoped_ptr.hpp>
-
 #include <sys/timeb.h>
 
 #include "ovasIAcquisitionServerPlugin.h"
@@ -75,7 +73,7 @@ namespace OpenViBEAcquisitionServer
 				int m_iDebugStimulationsBuffered;
 
 				//added for acquiring external stimulations
-				boost::scoped_ptr<std::thread> m_ESthreadPtr;
+				std::unique_ptr<std::thread> m_ESthreadPtr;
 				OpenViBE::boolean m_bIsESThreadRunning;
 				std::mutex m_es_mutex;
 				std::condition_variable  m_esAvailable;

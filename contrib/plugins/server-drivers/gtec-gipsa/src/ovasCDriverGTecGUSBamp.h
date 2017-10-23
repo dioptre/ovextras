@@ -20,8 +20,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-
-#include <boost\scoped_ptr.hpp>
+#include <memory> // unique_ptr
 
 #include <deque>
 using namespace std;
@@ -134,7 +133,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::uint32 m_ui32CurrentQueueIndex;
 
-		boost::scoped_ptr<std::thread> m_ThreadPtr;
+		std::unique_ptr<std::thread> m_ThreadPtr;
 		OpenViBE::boolean m_bIsThreadRunning;
 
 		std::mutex m_io_mutex;

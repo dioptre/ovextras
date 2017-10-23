@@ -21,6 +21,8 @@
 #include <boost/bind.hpp>
 #include <boost/utility.hpp>
 
+#include <memory> // shared_ptr
+
 #include <mutex>
 #include <thread>
 
@@ -109,7 +111,7 @@ private:
    
 	boost::asio::io_service m_io;
     
-	boost::shared_ptr< boost::asio::serial_port > m_port;
+	std::shared_ptr< boost::asio::serial_port > m_port;
 
 	unsigned char m_receiveBuffer[MAX_PACKAGE_SIZE];
 	
@@ -133,9 +135,9 @@ private:
 	
 	int m_receivedSamples;
 
-	boost::shared_ptr< std::thread > acquire_t;
+	std::shared_ptr< std::thread > acquire_t;
 
-	boost::shared_ptr< boost::asio::deadline_timer > m_timer;
+	std::shared_ptr< boost::asio::deadline_timer > m_timer;
 
 	// read with timeout
 	int m_bytes_readed;
