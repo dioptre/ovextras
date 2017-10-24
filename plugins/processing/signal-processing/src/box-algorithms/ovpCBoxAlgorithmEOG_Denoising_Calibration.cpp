@@ -24,10 +24,10 @@ boolean CBoxAlgorithmEOG_Denoising_Calibration::initialize(void)
     m_oStimulationEncoder.initialize(*this,0);
 
     m_sRegressionDenoisingCalibrationFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-    m_f64StartTime=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
-    m_f64EndTime=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
-    m_ui64StimulationIdentifier=FSettingValueAutoCast(*this->getBoxAlgorithmContext(),3);
+    m_ui64StimulationIdentifier=FSettingValueAutoCast(*this->getBoxAlgorithmContext(),1);
 
+	m_f64StartTime = 0;
+	m_f64EndTime = 0;
     m_ui32ChunksCount = 0;
     m_ui32ChunksVerify = -1;
     m_bEndProcess = false;
