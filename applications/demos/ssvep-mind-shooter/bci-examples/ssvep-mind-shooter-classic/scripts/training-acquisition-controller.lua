@@ -71,6 +71,8 @@ function process(box)
 		current_time = current_time + break_duration
 	end
 
+	current_time = current_time + 2
+	
 	box:send_stimulation(1, OVTK_StimulationId_ExperimentStop, current_time, 0)
 
 	box:sleep()
