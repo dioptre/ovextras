@@ -3,12 +3,10 @@ build/windows/cegui-0.8.4-dev.zip;cegui;0.8.4
 build/windows/cegui-0.8.4-runtime.zip;cegui;0.8.4
 build/windows/cmake-3.4.0.zip;cmake;3.4.0
 build/windows/eigen-3.2.0.zip;eigen;3.2.0
-build/windows/expat_2.1.0.1_x86_vc120_dev.zip;expat;2.1.0.1
 build/windows/freealut-1.1.0.zip;freealut;1.1.0
 build/windows/gtk_2.24.31_x86_vc120_dev.zip;gtk;2.24.31
 build/windows/gtk_2.24.31_x86_vc120_runtime.zip;gtk;2.24.31
-build/windows/itpp-4.3.1-dev.zip;itpp;4.3.1
-build/windows/itpp-4.3.1-runtime.zip;itpp;4.3.1
+build/windows/itpp-4.3.1.zip;itpp;4.3.1
 build/windows/liblsl-1.05.zip;liblsl;1.05
 build/windows/libogg-1.2.1.zip;libogg;1.2.1
 build/windows/libvorbis-1.3.2.zip;libvorbis;1.3.2
@@ -16,8 +14,7 @@ build/windows/lua-5.4.1.zip;lua;5.4.1
 build/windows/ninja-1.4.0.zip;ninja;1.4.0
 build/windows/ogre-1.9.0-dev.zip;ogre;1.9.0
 build/windows/ogre-1.9.0-runtime.zip;ogre;1.9.0
-build/windows/openal-1.1-dev.zip;openal;1.1
-build/windows/openal-1.1-runtime.zip;openal;1.1
+build/windows/openal-1.1.zip;openal;1.1
 build/windows/pthread_2.9.1_x86_vc120_dev.zip;pthread;2.9.1
 build/windows/sdk-brainproducts-actichamp.zip;sdk-brainproducts;actichamp;0.0.0
 build/windows/sdk-brainproducts-liveamp.zip;sdk-brainproducts-liveamp;0.0.0

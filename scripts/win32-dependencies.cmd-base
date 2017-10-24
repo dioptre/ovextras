@@ -1,8 +1,6 @@
 
 SET PATH=C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\\bin;%PATH%
-SET PATH=%dependencies_base%\expat\bin;%PATH%
-SET PATH=%dependencies_base%\itpp\bin;%PATH%
-SET PATH=%dependencies_base%\lua\lib;%PATH%
+
 SET PATH=%dependencies_base%\gtk\bin;%PATH%
 SET OGRE_HOME=%dependencies_base%\ogre
 SET PATH=%OGRE_HOME%\bin\release;%OGRE_HOME%\bin\debug;%PATH%
@@ -10,12 +8,7 @@ SET PATH=%dependencies_base%\cegui\bin;%PATH%
 SET PATH=%dependencies_base%\cegui\dependencies\bin;%PATH%
 SET VRPNROOT=%dependencies_base%\vrpn
 SET PATH=%VRPNROOT%\bin;%PATH%
-SET PATH=%dependencies_base%\pthread\lib;%PATH%
-SET PATH=%dependencies_base%\openal\libs\win32;%PATH%
-SET PATH=%dependencies_base%\freealut\lib;%PATH%
-SET PATH=%dependencies_base%\libogg\win32\bin\release;%dependencies_base%\libogg\win32\bin\debug;%PATH%
-SET PATH=%dependencies_base%\libvorbis\win32\bin\release;%dependencies_base%\libvorbis\win32\bin\debug;%PATH%
-SET PATH=%dependencies_base%\liblsl\lib\;%PATH%
+
 SET PATH=%dependencies_base%\vcredist-100\;%PATH%
 SET PATH=%dependencies_base%\vcredist\;%PATH%
 
