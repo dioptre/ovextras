@@ -1,7 +1,10 @@
 <OpenViBE-Scenario>
 	<FormatVersion>1</FormatVersion>
-	<Creator>openvibe</Creator>
-	<CreatorVersion>2.0</CreatorVersion>
+	<Creator>OpenVIBE</Creator>
+	<CreatorVersion>0.2.99</CreatorVersion>
+	<Settings></Settings>
+	<Inputs></Inputs>
+	<Outputs></Outputs>
 	<Boxes>
 		<Box>
 			<Identifier>(0x441e2100, 0x610e711c)</Identifier>
@@ -33,10 +36,6 @@
 					<Value>224</Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>57</Value>
-				</Attribute>
-				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
 					<Value>256</Value>
 				</Attribute>
@@ -55,10 +54,6 @@
 				<Attribute>
 					<Identifier>(0x61d11811, 0x71e65362)</Identifier>
 					<Value></Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>180</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xce18836a, 0x9c0eb403)</Identifier>
@@ -104,10 +99,6 @@
 					<Value>352</Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>57</Value>
-				</Attribute>
-				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
 					<Value>256</Value>
 				</Attribute>
@@ -126,10 +117,6 @@
 				<Attribute>
 					<Identifier>(0x61d11811, 0x71e65362)</Identifier>
 					<Value></Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>180</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xce18836a, 0x9c0eb403)</Identifier>
@@ -175,10 +162,6 @@
 					<Value>416</Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>57</Value>
-				</Attribute>
-				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
 					<Value>256</Value>
 				</Attribute>
@@ -197,10 +180,6 @@
 				<Attribute>
 					<Identifier>(0x61d11811, 0x71e65362)</Identifier>
 					<Value></Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>180</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xce18836a, 0x9c0eb403)</Identifier>
@@ -274,7 +253,7 @@ the same time.</Text>
 			<Text>&lt;big&gt;&lt;b&gt;&lt;span color="red"&gt;Warning&lt;/span&gt;&lt;/b&gt;&lt;/big&gt;
 
 For the time being multiprocessing and pygame only work
-on &lt;b&gt;Linux&lt;/b&gt; operating system.</Text>
+on &lt;b&gt;Linux&lt;/b&gt; operating system provided &lt;span color="red"&gt;you have installed &lt;i&gt;pygame&lt;/i&gt; module&lt;/span&gt; in Python.</Text>
 			<Attributes>
 				<Attribute>
 					<Identifier>(0x473d9a43, 0x97fc0a97)</Identifier>
@@ -291,7 +270,7 @@ on &lt;b&gt;Linux&lt;/b&gt; operating system.</Text>
 		<Entry>
 			<Identifier>(0x0000775c, 0x000078ff)</Identifier>
 			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
-			<Data>[{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":1,"identifier":"(0x71777b71, 0x7d9b955c)","index":0,"name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":1},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x3587c6af, 0x788f3c37)","index":0,"name":"Default tab","parentIdentifier":"(0x71777b71, 0x7d9b955c)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":0,"identifier":"(0x5aab9723, 0x14698840)","index":0,"name":"Empty","parentIdentifier":"(0x3587c6af, 0x788f3c37)","type":0}]</Data>
+			<Data>[{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":1,"identifier":"(0x71777b71, 0x7d9b955c)","name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":1},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x3587c6af, 0x788f3c37)","index":0,"name":"Default tab","parentIdentifier":"(0x71777b71, 0x7d9b955c)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":0,"identifier":"(0x5aab9723, 0x14698840)","index":0,"name":"Empty","parentIdentifier":"(0x3587c6af, 0x788f3c37)","type":0}]</Data>
 		</Entry>
 	</Metadata>
 </OpenViBE-Scenario>
