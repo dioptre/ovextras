@@ -85,6 +85,9 @@ namespace OpenViBEAcquisitionServer
 		std::vector < ::GtkWidget* > m_vLevelMesure;
 
 		std::thread* m_pThread;		
+#if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver
+		void* m_pLibMensiaAcquisition;
+#endif
 	};
 };
 

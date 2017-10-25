@@ -5,7 +5,8 @@
 
 #include <toolkit/ovtk_all.h>
 
-#include <windows.h>
+//#include <Windows.h>
+#include <system/WindowsUtilities.h>
 
 #include <cmath>
 #include <string>
@@ -16,9 +17,74 @@ using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 
-static OpenViBE::CString s_sMensiaDLL = "openvibe-driver-mensia-acquisition.dll";
-HINSTANCE m_oLibMensiaAcquisition; // Library Handle
+namespace
+{
+	enum EAcquisitionMode
+	{
+		AcquisitionMode_Undefined = 0,
+		AcquisitionMode_Data = 1,
+		AcquisitionMode_Impedance = 2,
+	};
 
+	OpenViBE::CString s_sMensiaDLL = "openvibe-driver-mensia-acquisition.dll";
+	HINSTANCE m_oLibMensiaAcquisition; // Library Handle
+
+	typedef int32 (* MACQ_InitializeAcquisitionDriver) (const char* sDeviceIdentifier, IDriverContext& rDriverContext);
+
+	typedef const char* (* MACQ_GetName) (size_t);
+
+	typedef const char* (* MACQ_GetDeviceURL) (size_t);
+
+	typedef bool (*MACQ_Preconfigure) (size_t, const char*);
+	typedef bool (*MACQ_Configure) (size_t, const char*);
+	typedef uint32 (*MACQ_GetSamplingRate) (size_t);
+	typedef uint32 (*MACQ_GetChannelCount) (size_t);
+	typedef const char* (*MACQ_GetChannelName) (size_t, size_t);
+	typedef bool (*MACQ_IsImpedanceCheckRequested) (size_t);
+	typedef void (*MACQ_SetImpedanceCheckRequested) (size_t, bool);
+	typedef float (*MACQ_GetChannelImpedance) (size_t, size_t);
+	typedef uint32 (*MACQ_GetImpedanceLimit) (size_t);
+	typedef void (*MACQ_SetImpedanceLimit) (size_t, uint32);
+	typedef uint32 (*MACQ_GetExperimentIdentifier) (size_t);
+	typedef uint32 (*MACQ_SetExperimentIdentifier) (size_t, uint32);
+	typedef uint32 (*MACQ_GetSubjectAge) (size_t);
+	typedef uint32 (*MACQ_SetSubjectAge) (size_t, uint32);
+	typedef uint32 (*MACQ_GetSubjectGender) (size_t);
+	typedef uint32 (*MACQ_SetSubjectGender) (size_t, uint32);
+	typedef uint32 (*MACQ_SetSampleCountPerBuffer) (size_t, uint32);
+	typedef bool (*MACQ_Initialize) (size_t, IDriverCallback*, uint32, const char*, EAcquisitionMode);
+	typedef bool (*MACQ_Start) (size_t);
+	typedef bool (*MACQ_Stop) (size_t);
+	typedef bool (*MACQ_Uninitialize) (size_t);
+	typedef bool (*MACQ_Loop) (size_t);
+
+	MACQ_InitializeAcquisitionDriver m_fpInitializeAcquisitionDriver;
+	MACQ_GetName m_fpGetName;
+	MACQ_GetDeviceURL m_fpGetDeviceURL;
+
+	MACQ_Preconfigure m_fpPreconfigure;
+	MACQ_Configure m_fpConfigure;
+	MACQ_GetSamplingRate m_fpGetSamplingRate;
+	MACQ_GetChannelCount m_fpGetChannelCount;
+	MACQ_GetChannelName m_fpGetChannelName;
+	MACQ_IsImpedanceCheckRequested m_fpIsImpedanceCheckRequested;
+	MACQ_SetImpedanceCheckRequested m_fpSetImpedanceCheckRequested;
+	MACQ_GetChannelImpedance m_fpGetChannelImpedance;
+	MACQ_GetImpedanceLimit m_fpGetImpedanceLimit;
+	MACQ_SetImpedanceLimit m_fpSetImpedanceLimit;
+	MACQ_GetExperimentIdentifier m_fpGetExperimentIdentifier;
+	MACQ_SetExperimentIdentifier m_fpSetExperimentIdentifier;
+	MACQ_GetSubjectAge m_fpGetSubjectAge;
+	MACQ_SetSubjectAge m_fpSetSubjectAge;
+	MACQ_GetSubjectGender m_fpGetSubjectGender;
+	MACQ_SetSubjectGender m_fpSetSubjectGender;
+	MACQ_SetSampleCountPerBuffer m_fpSetSampleCountPerBuffer;
+	MACQ_Initialize m_fpInitialize;
+	MACQ_Start m_fpStart;
+	MACQ_Stop m_fpStop;
+	MACQ_Uninitialize m_fpUninitialize;
+	MACQ_Loop m_fpLoop;
+}
 
 template<typename T>
 void CDriverMensiaAcquisition::loadDLLfunct(T* functionPointer, const char* functionName)
@@ -31,60 +97,16 @@ void CDriverMensiaAcquisition::loadDLLfunct(T* functionPointer, const char* func
 	}
 }
 
-typedef int32 (* MACQ_InitializeAcquisitionDriver) (const char* sDeviceIdentifier, IDriverContext& rDriverContexts);
-
-typedef const char* (* MACQ_GetName) (size_t);
-
-typedef const char* (* MACQ_GetDeviceURL) (size_t);
-
-typedef boolean (* MACQ_Preconfigure) (size_t, const char*);
-typedef boolean (* MACQ_Configure) (size_t, const char*);
-typedef uint32 (* MACQ_GetSamplingRate) (size_t);
-typedef uint32 (* MACQ_GetChannelCount) (size_t);
-typedef const char* (* MACQ_GetChannelName) (size_t, size_t);
-typedef uint32 (* MACQ_GetExperimentIdentifier) (size_t);
-typedef uint32 (* MACQ_SetExperimentIdentifier) (size_t, uint32);
-typedef uint32 (* MACQ_GetSubjectAge) (size_t);
-typedef uint32 (* MACQ_SetSubjectAge) (size_t, uint32);
-typedef uint32 (* MACQ_GetSubjectGender) (size_t);
-typedef uint32 (* MACQ_SetSubjectGender) (size_t, uint32);
-typedef boolean (* MACQ_Initialize) (size_t, IDriverCallback*, uint32, const char*);
-typedef boolean (* MACQ_Start) (size_t);
-typedef boolean (* MACQ_Stop) (size_t);
-typedef boolean (* MACQ_Uninitialize) (size_t);
-typedef boolean (* MACQ_Loop) (size_t);
-
-MACQ_InitializeAcquisitionDriver m_fpInitializeAcquisitionDriver;
-MACQ_GetName m_fpGetName;
-MACQ_GetDeviceURL m_fpGetDeviceURL;
-
-MACQ_Preconfigure m_fpPreconfigure;
-MACQ_Configure m_fpConfigure;
-MACQ_GetSamplingRate m_fpGetSamplingRate;
-MACQ_GetChannelCount m_fpGetChannelCount;
-MACQ_GetChannelName m_fpGetChannelName;
-MACQ_GetExperimentIdentifier m_fpGetExperimentIdentifier;
-MACQ_SetExperimentIdentifier m_fpSetExperimentIdentifier;
-MACQ_GetSubjectAge m_fpGetSubjectAge;
-MACQ_SetSubjectAge m_fpSetSubjectAge;
-MACQ_GetSubjectGender m_fpGetSubjectGender;
-MACQ_SetSubjectGender m_fpSetSubjectGender;
-MACQ_Initialize m_fpInitialize;
-MACQ_Start m_fpStart;
-MACQ_Stop m_fpStop;
-MACQ_Uninitialize m_fpUninitialize;
-MACQ_Loop m_fpLoop;
-
 
 CDriverMensiaAcquisition::CDriverMensiaAcquisition(IDriverContext& rDriverContext, const char* sDriverIdentifier)
-	:IDriver(rDriverContext)
+    :IDriver(rDriverContext)
     // This hax only works because m_oSettings does creates a copy of the string
     ,m_oSettings(std::string( std::string("AcquisitionServer_Driver_MensiaAcquisition_") + sDriverIdentifier).c_str(), m_rDriverContext.getConfigurationManager())
-	,m_pCallback(NULL)
-	,m_ui32SampleCountPerSentBlock(0)
-	,m_pSample(NULL)
-	,m_ui32TotalSampleCount(0)
-	,m_ui64StartTime(0)
+    ,m_pCallback(NULL)
+    ,m_ui32SampleCountPerSentBlock(0)
+    ,m_pSample(NULL)
+    ,m_ui32TotalSampleCount(0)
+    ,m_ui64StartTime(0)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverMensiaAcquisition::CDriverMensiaAcquisition\n";
 	m_bValid = true;
@@ -94,16 +116,16 @@ CDriverMensiaAcquisition::CDriverMensiaAcquisition(IDriverContext& rDriverContex
 	if(!std::ifstream(l_sPath.toASCIIString()).is_open())
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverMensiaAcquisition::CDriverMensiaAcquisition: " <<
-			" dll file [" << l_sPath.toASCIIString() <<"] not openable, perhaps it was not installed.\n";
+		                                    " dll file [" << l_sPath.toASCIIString() <<"] not openable, perhaps it was not installed.\n";
 		m_bValid = false;
 		return;
 	}
 
-	m_oLibMensiaAcquisition = LoadLibrary(l_sPath);
+	m_oLibMensiaAcquisition = static_cast<HINSTANCE>(System::WindowsUtilities::utf16CompliantLoadLibrary(l_sPath.toASCIIString()));
 	if(!m_oLibMensiaAcquisition)
 	{
-		m_rDriverContext.getLogManager() << "CDriverMensiaAcquisition::CDriverMensiaAcquisition: LoadLibrary failed to load: [" << 
-			l_sPath.toASCIIString() <<"] with error [" << static_cast<uint64>(GetLastError()) << "]\n";
+		m_rDriverContext.getLogManager() << "CDriverMensiaAcquisition::CDriverMensiaAcquisition: utf16CompliantLoadLibrary failed to load: " << 
+			l_sPath.toASCIIString() <<" with error " << static_cast<uint64>(GetLastError()) << "\n";
 	}
 
 	loadDLLfunct<MACQ_InitializeAcquisitionDriver>(&m_fpInitializeAcquisitionDriver, "initializeAcquisitionDriver");
@@ -114,12 +136,18 @@ CDriverMensiaAcquisition::CDriverMensiaAcquisition(IDriverContext& rDriverContex
 	loadDLLfunct<MACQ_GetSamplingRate>(&m_fpGetSamplingRate, "getSamplingRate");
 	loadDLLfunct<MACQ_GetChannelCount>(&m_fpGetChannelCount, "getChannelCount");
 	loadDLLfunct<MACQ_GetChannelName>(&m_fpGetChannelName, "getChannelName");
+	loadDLLfunct<MACQ_IsImpedanceCheckRequested>(&m_fpIsImpedanceCheckRequested, "isImpedanceCheckRequested");
+	loadDLLfunct<MACQ_SetImpedanceCheckRequested>(&m_fpSetImpedanceCheckRequested, "setImpedanceCheckRequested");
+	loadDLLfunct<MACQ_GetChannelImpedance>(&m_fpGetChannelImpedance, "getChannelImpedance");
+	loadDLLfunct<MACQ_GetImpedanceLimit>(&m_fpGetImpedanceLimit, "getImpedanceLimit");
+	loadDLLfunct<MACQ_SetImpedanceLimit>(&m_fpSetImpedanceLimit, "setImpedanceLimit");
 	loadDLLfunct<MACQ_GetExperimentIdentifier>(&m_fpGetExperimentIdentifier, "getExperimentIdentifier");
 	loadDLLfunct<MACQ_SetExperimentIdentifier>(&m_fpSetExperimentIdentifier, "setExperimentIdentifier");
 	loadDLLfunct<MACQ_GetSubjectAge>(&m_fpGetSubjectAge, "getSubjectAge");
 	loadDLLfunct<MACQ_SetSubjectAge>(&m_fpSetSubjectAge, "setSubjectAge");
 	loadDLLfunct<MACQ_GetSubjectGender>(&m_fpGetSubjectGender, "getSubjectGender");
 	loadDLLfunct<MACQ_SetSubjectGender>(&m_fpSetSubjectGender, "setSubjectGender");
+	loadDLLfunct<MACQ_SetSampleCountPerBuffer>(&m_fpSetSampleCountPerBuffer, "setSampleCountPerBuffer");
 	loadDLLfunct<MACQ_Initialize>(&m_fpInitialize, "initialize");
 	loadDLLfunct<MACQ_Start>(&m_fpStart, "start");
 	loadDLLfunct<MACQ_Stop>(&m_fpStop, "stop");
@@ -128,7 +156,7 @@ CDriverMensiaAcquisition::CDriverMensiaAcquisition(IDriverContext& rDriverContex
 
 	if (!m_bValid)
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Warning << "Could not initialize Mensia Acqsuisition Driver driver\n";
+		m_rDriverContext.getLogManager() << LogLevel_Warning << "Could not initialize Mensia Acquisition Driver driver\n";
 		return;
 	}
 
@@ -139,7 +167,7 @@ CDriverMensiaAcquisition::CDriverMensiaAcquisition(IDriverContext& rDriverContex
 	// Negative value is considered an error
 	if (l_i32DriverId < 0)
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Warning << "Could not initialize Mensia Acqsuisition Driver driver\n";
+		m_rDriverContext.getLogManager() << LogLevel_Warning << "Could not initialize Mensia Acquisition Driver driver\n";
 		return;
 	}
 	m_ui32DriverId = static_cast<uint32>(l_i32DriverId);
@@ -161,6 +189,9 @@ CDriverMensiaAcquisition::CDriverMensiaAcquisition(IDriverContext& rDriverContex
 	m_fpSetExperimentIdentifier(m_ui32DriverId, m_oHeader.getExperimentIdentifier());
 	m_fpSetSubjectAge(m_ui32DriverId, m_oHeader.getSubjectAge());
 	m_fpSetSubjectGender(m_ui32DriverId, m_oHeader.getSubjectGender());
+
+	m_fpSetImpedanceCheckRequested(m_ui32DriverId, m_oHeader.isImpedanceCheckRequested());
+	m_fpSetImpedanceLimit(m_ui32DriverId, m_oHeader.getImpedanceLimit());
 
 	m_fpPreconfigure(m_ui32DriverId, m_sDeviceURL.toASCIIString());
 
@@ -189,17 +220,23 @@ const char* CDriverMensiaAcquisition::getName(void)
 //                                                                   //
 
 boolean CDriverMensiaAcquisition::initialize(
-	const uint32 ui32SampleCountPerSentBlock,
-	IDriverCallback& rCallback)
+        const uint32 ui32SampleCountPerSentBlock,
+        IDriverCallback& rCallback)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverMensiaAcquisition::initialize\n";
 
 	if(m_rDriverContext.isConnected()) { return false; }
 
-	m_ui32SampleCountPerSentBlock=ui32SampleCountPerSentBlock;
+	m_ui32SampleCountPerSentBlock = ui32SampleCountPerSentBlock;
+	m_fpSetSampleCountPerBuffer(m_ui32DriverId, m_ui32SampleCountPerSentBlock);
+	m_sDeviceURL = CString(m_fpGetDeviceURL(m_ui32DriverId));
+
 	m_pCallback=&rCallback;
 
-	if (!m_fpInitialize(m_ui32DriverId, m_pCallback, m_ui32SampleCountPerSentBlock, m_sDeviceURL.toASCIIString()))
+	m_oHeader.setImpedanceCheckRequested(m_fpIsImpedanceCheckRequested(m_ui32DriverId));
+	EAcquisitionMode l_eAcquisitionMode = m_oHeader.isImpedanceCheckRequested() ? 
+		EAcquisitionMode::AcquisitionMode_Impedance : EAcquisitionMode::AcquisitionMode_Data;
+	if (!m_fpInitialize(m_ui32DriverId, m_pCallback, m_ui32SampleCountPerSentBlock, m_sDeviceURL.toASCIIString(), l_eAcquisitionMode))
 	{
 		return false;
 	}
@@ -213,7 +250,9 @@ boolean CDriverMensiaAcquisition::initialize(
 	m_oHeader.setExperimentIdentifier(m_fpGetExperimentIdentifier(m_ui32DriverId));
 	m_oHeader.setSubjectAge(m_fpGetSubjectAge(m_ui32DriverId));
 	m_oHeader.setSubjectGender(m_fpGetSubjectGender(m_ui32DriverId));
-
+	m_oHeader.setImpedanceLimit(m_fpGetImpedanceLimit(m_ui32DriverId));
+	m_oHeader.setImpedanceCheckRequested(m_fpIsImpedanceCheckRequested(m_ui32DriverId));
+	
 
 	for (size_t uiChannelIndex = 0; uiChannelIndex < m_oHeader.getChannelCount(); uiChannelIndex++)
 	{
@@ -258,15 +297,15 @@ boolean CDriverMensiaAcquisition::loop(void)
 		{
 			return false;
 		}
-		// TODO_JL impedance check here
-/*		if(m_rDriverContext.isImpedanceCheckRequested())
+		// impedance check here
+		if(m_rDriverContext.isImpedanceCheckRequested())
 		{
 			for(uint32 j=0; j<m_oHeader.getChannelCount(); j++)
 			{
-				m_rDriverContext.updateImpedance(j, 1);
+				m_rDriverContext.updateImpedance(j, m_fpGetChannelImpedance(m_ui32DriverId, j));
 			}
 		}
-		*/
+		
 	}
 
 	return true;
@@ -356,6 +395,8 @@ boolean CDriverMensiaAcquisition::configure(void)
 		m_oHeader.setExperimentIdentifier(m_fpGetExperimentIdentifier(m_ui32DriverId));
 		m_oHeader.setSubjectAge(m_fpGetSubjectAge(m_ui32DriverId));
 		m_oHeader.setSubjectGender(m_fpGetSubjectGender(m_ui32DriverId));
+		m_oHeader.setImpedanceLimit(m_fpGetImpedanceLimit(m_ui32DriverId));
+		m_oHeader.setImpedanceCheckRequested(m_fpIsImpedanceCheckRequested(m_ui32DriverId));
 		/*
 		m_fpSetExperimentIdentifier(m_ui32DriverId, m_oHeader.getExperimentIdentifier());
 		m_fpSetSubjectAge(m_ui32DriverId, m_oHeader.getSubjectAge());

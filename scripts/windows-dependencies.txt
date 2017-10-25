@@ -21,7 +21,7 @@ build/windows/sdk-brainproducts-liveamp.zip;sdk-brainproducts-liveamp;0.0.0
 build/windows/sdk-eemagine-eego.zip;sdk-eemagine-eego;0.0.0
 build/windows/sdk-enobio3g.zip;sdk-enobio3g;0.0.0
 build/windows/sdk-mcs.zip;sdk-mcs;0.0.0
-build/windows/sdk-mensia-acquisition-driver.zip;sdk-mensia-acquisition-driver;0.0.0
+build/windows/sdk-mensia-acquisition-driver-3.0.99.zip;sdk-mensia-acquisition-driver;3.0.99
 build/windows/sdk-micromed.zip;sdk-micromed;0.0.0
 build/windows/sdk-mitsar.zip;sdk-mitsar;0.0.0
 build/windows/sdk-nexus.zip;sdk-nexus;0.0.0
