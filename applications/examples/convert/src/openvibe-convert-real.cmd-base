@@ -72,7 +72,7 @@ if %To%==false (
   goto:EOF
 )
 
-set "ScenarioFolder=%OV_PATH_DATA%\scenarios\convert\"
+set "ScenarioFolder=%OV_PATH_ROOT%\share\openvibe\scenarios\convert\"
 
 set "ScenarioToOpen=%Extension%2%DestinationExtension%.xml"
 
@@ -80,8 +80,8 @@ set OV_CONVERT_SRC=%1
 set OV_CONVERT_DEST=%2
 
 REM launch designer
-REM echo "%OV_PATH_BIN%\openvibe-designer" --no-gui --no-session-management --play-fast "!ScenarioFolder!!ScenarioToOpen!"
-"%OV_PATH_BIN%\openvibe-designer" --no-gui --no-session-management --play-fast "!ScenarioFolder!!ScenarioToOpen!"
+REM echo "%OV_PATH_ROOT%\bin\openvibe-designer" --no-gui --no-session-management --play-fast "!ScenarioFolder!!ScenarioToOpen!"
+"%OV_PATH_ROOT%\bin\openvibe-designer" --no-gui --no-session-management --play-fast "!ScenarioFolder!!ScenarioToOpen!"
 
 endlocal
 
