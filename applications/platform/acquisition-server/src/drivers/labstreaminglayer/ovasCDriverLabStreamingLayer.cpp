@@ -292,7 +292,7 @@ boolean CDriverLabStreamingLayer::initialize(
 				float64 l_f64CurrentCaptureTime = l_f64StartCaptureTime;
 				while(l_f64CurrentCaptureTime != 0.0 && l_f64CurrentCaptureTime-l_f64StartCaptureTime < g_LSL_samplingRateEstimatationDuration)
 				{
-					float l_fPulledSampleTime = l_oTmpInlet.pull_sample(m_pBuffer, m_oHeader.getChannelCount(), g_LSL_readTimeOut);
+					double l_fPulledSampleTime = l_oTmpInlet.pull_sample(m_pBuffer, m_oHeader.getChannelCount(), g_LSL_readTimeOut);
 					if (l_fPulledSampleTime != 0)
 					{
 						l_ui32SampleCount++;

@@ -21,6 +21,7 @@ CDriverGenericOscillator::CDriverGenericOscillator(IDriverContext& rDriverContex
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_ui64TotalSampleCount(0)
+	,m_ui64StartTime(0)
 	,m_bSendPeriodicStimulations(false)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGenericOscillator::CDriverGenericOscillator\n";
@@ -90,6 +91,7 @@ boolean CDriverGenericOscillator::start(void)
 	if(m_rDriverContext.isStarted()) { return false; }
 
 	m_ui64TotalSampleCount=0;
+	m_ui64StartTime = System::Time::zgetTime();
 
 	return true;
 }
@@ -112,7 +114,7 @@ boolean CDriverGenericOscillator::loop(void)
 			l_oStimulationSet.setStimulationDuration(0, 0);
 		}
 
-		const uint64 l_ui64Elapsed = System::Time::zgetTime() - m_rDriverContext.getStartTime();
+		const uint64 l_ui64Elapsed = System::Time::zgetTime() - m_ui64StartTime;
 		const uint64 l_ui64SamplesNeededSoFar = ITimeArithmetics::timeToSampleCount(m_oHeader.getSamplingFrequency(), l_ui64Elapsed);
 		if (l_ui64SamplesNeededSoFar <= m_ui64TotalSampleCount)
 		{

@@ -41,6 +41,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::uint64 m_ui64TotalSampleCount;
 
+		OpenViBE::uint64 m_ui64StartTime;
 	};
 };
 

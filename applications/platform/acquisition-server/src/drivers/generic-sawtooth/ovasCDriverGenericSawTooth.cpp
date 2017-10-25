@@ -21,6 +21,7 @@ CDriverGenericSawTooth::CDriverGenericSawTooth(IDriverContext& rDriverContext)
 	,m_ui32ExternalBlockSize(0)
 	,m_vSample(NULL)
 	,m_ui64TotalSampleCount(0)
+	,m_ui64StartTime(0)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGenericSawTooth::CDriverGenericSawTooth\n";
 
@@ -79,6 +80,7 @@ boolean CDriverGenericSawTooth::start(void)
 	if(m_rDriverContext.isStarted()) { return false; }
 
 	m_ui64TotalSampleCount=0;
+	m_ui64StartTime = System::Time::zgetTime();
 
 	return true;
 }
@@ -93,7 +95,7 @@ boolean CDriverGenericSawTooth::loop(void)
 	if(!m_rDriverContext.isStarted()) { return true; }
 
 	// Find out how many samples to send
-	const uint64 l_ui64Elapsed = System::Time::zgetTime() - m_rDriverContext.getStartTime();
+	const uint64 l_ui64Elapsed = System::Time::zgetTime() - m_ui64StartTime;
 	const uint64 l_ui64SamplesNeededSoFar = ITimeArithmetics::timeToSampleCount(m_oHeader.getSamplingFrequency(), l_ui64Elapsed);
 	if (l_ui64SamplesNeededSoFar <= m_ui64TotalSampleCount)
 	{
