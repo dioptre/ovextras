@@ -124,6 +124,11 @@ namespace OpenViBEAcquisitionServer
 			return m_rAcquisitionServer.updateImpedance(ui32ChannelIndex, f64Impedance);
 		}
 
+		virtual uint64 getStartTime(void) const
+		{
+			return m_rAcquisitionServer.m_ui64StartTime;
+		}
+
 	protected:
 
 		const IKernelContext& m_rKernelContext;
@@ -239,6 +244,8 @@ CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
 	,m_bReplacementInProgress(false)
 	,m_bInitialized(false)
 	,m_bStarted(false)
+	,m_ui64StartTime(0)
+	,m_ui64LastDeliveryTime(0)
 	,m_oDriftCorrection(rKernelContext)
 {
 	m_pDriverContext=new CDriverContext(rKernelContext, *this);
@@ -636,7 +643,6 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 	if(!m_pDriver->initialize(m_ui32SampleCountPerSentBlock, *this))
 	{
 		m_rKernelContext.getLogManager() << LogLevel_Error << "Connection failed...\n";
-		m_ui64StartTime=System::Time::zgetTime();
 		return false;
 	}
 
@@ -823,16 +829,13 @@ boolean CAcquisitionServer::start(void)
 	// Starts driver
 	if(!m_pDriver->start())
 	{
-		m_ui64StartTime=System::Time::zgetTime();
-		m_ui64LastDeliveryTime=m_ui64StartTime;
-
 		m_rKernelContext.getLogManager() << LogLevel_Error << "Starting failed !\n";
 		return false;
 	}
 	// m_pDriverContext->onStart(*m_pDriver->getHeader());
 
-	m_ui64StartTime=System::Time::zgetTime();
-	m_ui64LastDeliveryTime=m_ui64StartTime;
+	m_ui64StartTime = System::Time::zgetTime();
+	m_ui64LastDeliveryTime = m_ui64StartTime;
 
 	m_oDriftCorrection.start(m_ui32SamplingFrequency, m_ui64StartTime);
 
@@ -1010,6 +1013,7 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 				m_vPendingBuffer.push_back(m_vSwapBuffer);
 			}
 		}
+
 		m_ui64LastSampleCount=m_ui64SampleCount;
 		m_ui64SampleCount+=ui32SampleCount*m_ui64OverSamplingFactor;
 

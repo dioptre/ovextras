@@ -18,9 +18,9 @@ using namespace OpenViBE::Kernel;
 CDriverGenericSawTooth::CDriverGenericSawTooth(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
 	,m_pCallback(NULL)
-	,m_ui32SampleCountPerSentBlock(0)
-	,m_pSample(NULL)
-	,m_ui32TotalSampleCount(0)
+	,m_ui32ExternalBlockSize(0)
+	,m_vSample(NULL)
+	,m_ui64TotalSampleCount(0)
 	,m_ui64StartTime(0)
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverGenericSawTooth::CDriverGenericSawTooth\n";
@@ -62,15 +62,12 @@ boolean CDriverGenericSawTooth::initialize(
 		return false;
 	}
 
-	m_pSample=new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
-	if(!m_pSample)
-	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Sawtooth: Memory allocation error\n";
-		return false;
-	}
+
+	m_vSample.resize(m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock);
 
 	m_pCallback=&rCallback;
-	m_ui32SampleCountPerSentBlock=ui32SampleCountPerSentBlock;
+
+	m_ui32ExternalBlockSize=ui32SampleCountPerSentBlock;
 
 	return true;
 }
@@ -82,8 +79,8 @@ boolean CDriverGenericSawTooth::start(void)
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(m_rDriverContext.isStarted()) { return false; }
 
-	m_ui32TotalSampleCount=0;
-	m_ui64StartTime=System::Time::zgetTime();
+	m_ui64TotalSampleCount=0;
+	m_ui64StartTime = System::Time::zgetTime();
 
 	return true;
 }
@@ -97,35 +94,34 @@ boolean CDriverGenericSawTooth::loop(void)
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(!m_rDriverContext.isStarted()) { return true; }
 
+	// Find out how many samples to send
+	const uint64 l_ui64Elapsed = System::Time::zgetTime() - m_ui64StartTime;
+	const uint64 l_ui64SamplesNeededSoFar = ITimeArithmetics::timeToSampleCount(m_oHeader.getSamplingFrequency(), l_ui64Elapsed);
+	if (l_ui64SamplesNeededSoFar <= m_ui64TotalSampleCount)
+	{
+		// Too early
+		return true;
+	}
+	const uint32 l_ui32RemainingSamples = static_cast<uint32>(l_ui64SamplesNeededSoFar - m_ui64TotalSampleCount);
+	if (l_ui32RemainingSamples * m_oHeader.getChannelCount() > m_vSample.size())
+	{
+		m_vSample.resize(l_ui32RemainingSamples * m_oHeader.getChannelCount());
+	}
+
 	// Generate the data
-	for(uint32 j=0; j<m_oHeader.getChannelCount(); j++)
+	// The result should be a linear ramp between [0,1] for each block sent *out* by the acquisition server
+	for(uint32 i=0; i<l_ui32RemainingSamples; i++)
 	{
-		for(uint32 i=0; i<m_ui32SampleCountPerSentBlock; i++)
+		for (uint32 j = 0; j<m_oHeader.getChannelCount(); j++)
 		{
-			m_pSample[j*m_ui32SampleCountPerSentBlock+i]=float32(i)/(m_ui32SampleCountPerSentBlock-1);
+			m_vSample[j*l_ui32RemainingSamples + i] = float32(m_ui64TotalSampleCount % m_ui32ExternalBlockSize) / (m_ui32ExternalBlockSize - 1);
 		}
+		m_ui64TotalSampleCount++;
 	}
 
-	// If we're early, sleep before sending. Otherwise, push the chunk out immediately
-	const uint64 l_ui64CurrentTime = System::Time::zgetTime() - m_ui64StartTime;
-	const uint64 l_ui64NextTime = ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui32TotalSampleCount+m_ui32SampleCountPerSentBlock);
-	if(l_ui64NextTime>l_ui64CurrentTime)
-	{
-		const uint64 l_ui64SleepTime = l_ui64NextTime - l_ui64CurrentTime;
-		System::Time::zsleep(l_ui64SleepTime);
-	}
-
-#ifdef TIMINGDEBUG
-	m_rDriverContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64CurrentTime)*1000 << "ms filling for " 
-		<< ITimeArithmetics::timeToSeconds(l_ui64NextTime)*1000 << "ms  -> nSamples = " << m_ui32TotalSampleCount + m_ui32SampleCountPerSentBlock << "\n";
-#endif
-
-
-	m_pCallback->setSamples(m_pSample);
+	m_pCallback->setSamples(&m_vSample[0],l_ui32RemainingSamples);
 
 	m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
-
-	m_ui32TotalSampleCount+=m_ui32SampleCountPerSentBlock;
 
 	return true;
 }
@@ -146,8 +142,6 @@ boolean CDriverGenericSawTooth::uninitialize(void)
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(m_rDriverContext.isStarted()) { return false; }
 
-	delete [] m_pSample;
-	m_pSample=NULL;
 	m_pCallback=NULL;
 
 	return true;

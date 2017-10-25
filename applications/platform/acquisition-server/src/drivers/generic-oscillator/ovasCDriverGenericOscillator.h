@@ -42,9 +42,10 @@ namespace OpenViBEAcquisitionServer
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 
 		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
-		OpenViBE::float32* m_pSample;
+		std::vector<OpenViBE::float32> m_vSample;
 
-		OpenViBE::uint32 m_ui32TotalSampleCount;
+		OpenViBE::uint32 m_ui64TotalSampleCount;
+
 		OpenViBE::uint64 m_ui64StartTime;
 
 	private:
