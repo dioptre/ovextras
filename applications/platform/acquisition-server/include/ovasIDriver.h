@@ -196,6 +196,17 @@ namespace OpenViBEAcquisitionServer
 		 * If \c f64Impedance is any other negative value, then the impedance is considered as "unknown"
 		 */
 		virtual OpenViBE::boolean updateImpedance(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::float64 f64Impedance)=0;
+
+		/**
+		 *\brief Gets the acquisition start time
+		 * \return \e 32:32 fixed point timestamp
+		 *
+		 * This function can be used by 'generator' type of artificial drivers to 
+		 * get a start time which is the same as the one used by drift correction.
+		 *
+		 */
+		virtual OpenViBE::uint64 getStartTime(void) const = 0;
+
 	};
 
 	/**

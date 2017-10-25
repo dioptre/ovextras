@@ -468,6 +468,7 @@ boolean CDriverLabStreamingLayer::loop(void)
 	if(m_bLimitSpeed)
 	{
 		// If we were faster than what the AS expects, sleep.
+		// n.b. This sleep may not be accurate on Windows (it may oversleep)
 		const uint64 l_ui64TimeNow = System::Time::zgetTime() - m_ui64StartTime;
 		const uint64 l_ui64TimeLimitForBuffer = ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui64SampleCount+m_ui32SampleCountPerSentBlock);
 

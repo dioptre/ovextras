@@ -116,7 +116,9 @@ int main(int argc, char ** argv)
 	//SetThreadAffinityMask(hProcess, threadMask);
 
 	// Set the clock interval to 1ms (default on Win7: 15ms). This is needed to get under 15ms accurate sleeps,
-	// and the precision of all the non-QPC clocks.
+	// and improves the precision of non-QPC clocks. Note that since boost 1.58, the sleeps no longer seem
+	// to be 1ms accurate on Windows (as they seemed to be on 1.55), and sleep can oversleep even 10ms even with 
+	// timeBeginPeriod(1) called. @todo in the future, make sure nothing relies on sleep accuracy in openvibe
 	timeBeginPeriod(1); 
 
 	// Since AS is just sleeping when its not acquiring, a high priority should not be a problem. 
