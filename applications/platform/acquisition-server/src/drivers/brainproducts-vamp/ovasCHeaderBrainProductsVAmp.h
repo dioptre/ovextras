@@ -45,6 +45,9 @@ namespace OpenViBEAcquisitionServer
 
 		virtual OpenViBE::boolean setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested);
 		virtual OpenViBE::boolean isImpedanceCheckRequested(void) const;
+		virtual OpenViBE::uint32 getImpedanceLimit(void) const { return m_ui32ImpedanceLimit; };
+		virtual OpenViBE::boolean setImpedanceLimit(const OpenViBE::uint32 ui32ImpedanceLimit) { m_ui32ImpedanceLimit = ui32ImpedanceLimit; return true; };
+
 		// Channel information
 		virtual OpenViBE::boolean setChannelCount(const OpenViBE::uint32 ui32ChannelCount);
 		virtual OpenViBE::boolean setChannelName(const OpenViBE::uint32 ui32ChannelIndex, const char* sChannelName);
@@ -115,6 +118,8 @@ namespace OpenViBEAcquisitionServer
 		std::map<OpenViBE::uint32, std::string> m_vPairName;
 		std::map<OpenViBE::uint32, OpenViBE::float32> m_vPairGain;
 		std::map<OpenViBE::uint32, std::pair<OpenViBE::uint32, OpenViBE::uint32> > m_vPairUnit;
+
+		OpenViBE::uint32 m_ui32ImpedanceLimit = 5000; // 5kOhm
 	};
 }
 

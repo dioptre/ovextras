@@ -125,12 +125,12 @@ namespace OpenViBEAcquisitionServer
 
 		/**
 		* \brief Get impedance limit
-		* \return \e the chosen impedance limit.
+		* \return \e the chosen impedance limit (ohms)
 		*/
 		virtual OpenViBE::uint32 getImpedanceLimit(void) const = 0;
 		/**
 		* \brief Set impedance limit
-		 * \param ui32ImpedanceLimit [in] : the new value for impedance limit
+		 * \param ui32ImpedanceLimit [in] : the new value for impedance limit (ohms)
 		* \return \e true in case of success.
 		* \return \e false in case of error.
 		*/
