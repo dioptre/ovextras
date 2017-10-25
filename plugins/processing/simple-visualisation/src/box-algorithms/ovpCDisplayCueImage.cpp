@@ -60,7 +60,7 @@ namespace OpenViBEPlugins
 			m_int32DrawnImageID(-1),
 			m_bFullScreen(false),
 			m_bScaleImages(false),
-			m_ui64LastOutputChunkDate(-1),
+			m_ui64LastOutputChunkDate(0),
 			m_pStimulusSender(nullptr),
 			m_visualizationContext(nullptr)
 		{
@@ -402,9 +402,9 @@ namespace OpenViBEPlugins
 					m_oStimulationDecoder.decode(chunk,true);
 					if(m_oStimulationDecoder.isHeaderReceived())
 					{
-						m_ui64LastOutputChunkDate = this->getPlayerContext().getCurrentTime();
 						m_oStimulationEncoder.encodeHeader();
-						l_pBoxIO->markOutputAsReadyToSend(0, 0, m_ui64LastOutputChunkDate);
+						l_pBoxIO->markOutputAsReadyToSend(0, m_ui64LastOutputChunkDate,this->getPlayerContext().getCurrentTime());
+						m_ui64LastOutputChunkDate = this->getPlayerContext().getCurrentTime();
 					}
 					if(m_oStimulationDecoder.isBufferReceived())
 					{
