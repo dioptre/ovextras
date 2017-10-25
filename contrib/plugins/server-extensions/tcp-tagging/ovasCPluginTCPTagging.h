@@ -23,8 +23,6 @@
 #include "ovasIAcquisitionServerPlugin.h"
 #include "ovasCTagStream.h"
 
-#include <boost/scoped_ptr.hpp>
-
 namespace OpenViBEAcquisitionServer
 {
 	namespace OpenViBEAcquisitionServerPlugins
@@ -49,7 +47,7 @@ namespace OpenViBEAcquisitionServer
 			private:
 				OpenViBE::uint64 m_previousPosixTime;
 				OpenViBE::uint64 m_previousSampleTime;
-				boost::scoped_ptr<CTagStream> m_scopedTagStream;
+				std::unique_ptr<CTagStream> m_scopedTagStream;
 				OpenViBE::CString m_port;
 		};
 

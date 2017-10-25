@@ -7,6 +7,8 @@
 #include <ctime>
 #include <iostream>
 
+#include <system/ovCTime.h>
+
 #include <openvibe/ovITimeArithmetics.h>
 
 #include "../ovasCSettingsHelper.h"
@@ -47,7 +49,7 @@ void CPluginExternalStimulations::startHook(const std::vector<OpenViBE::CString>
 	{
 		ftime(&m_CTStartTime);
 		m_bIsESThreadRunning = true;
-		m_ESthreadPtr.reset(new boost::thread( boost::bind(&CPluginExternalStimulations::readExternalStimulations , this )));
+		m_ESthreadPtr.reset(new std::thread( std::bind(&CPluginExternalStimulations::readExternalStimulations , this )));
 		m_rKernelContext.getLogManager() << LogLevel_Info << "External stimulations (deprecated) activated...\n";
 	}
 	m_vExternalStimulations.clear();
@@ -139,13 +141,13 @@ void CPluginExternalStimulations::readExternalStimulations()
 		{
 			//m_bIsESThreadRunning = false;
 			//m_rKernelContext.getLogManager() << LogLevel_Error << "Problem with message queue in external stimulations:" << ex.what() << "\n";
-			boost::this_thread::sleep(boost::posix_time::milliseconds(pause_time));
+			System::Time::sleep(pause_time);
 			continue;
 		}
 
 		if (!success)
 		{
-			boost::this_thread::sleep(boost::posix_time::milliseconds(pause_time));
+			System::Time::sleep(pause_time);
 			continue;
 		}
 
@@ -174,7 +176,7 @@ void CPluginExternalStimulations::readExternalStimulations()
 			{
 				m_iDebugStimulationsLost++;
 				//m_rKernelContext.getLogManager() << LogLevel_Warning <<  "AS: external stimulation time is invalid, probably stimulation is before reference point, total invalid so far: " << m_i32FlashesLost << "\n";
-				boost::this_thread::sleep(boost::posix_time::milliseconds(pause_time));
+				System::Time::sleep(pause_time);
 				continue; //we skip this stimulation
 			}
 			//2. Convert to OpenVibe time
@@ -188,7 +190,7 @@ void CPluginExternalStimulations::readExternalStimulations()
 			//3. Store, the main thread will process it
 			{
 				//lock
-				boost::mutex::scoped_lock lock(m_es_mutex);
+				std::lock_guard<std::mutex> lock(m_es_mutex);
 
 				m_vExternalStimulations.push_back(stim);
 				m_iDebugStimulationsBuffered++;
@@ -196,7 +198,7 @@ void CPluginExternalStimulations::readExternalStimulations()
 				//unlock
 			}
 
-			boost::this_thread::sleep(boost::posix_time::milliseconds(pause_time));
+			System::Time::sleep(pause_time);
 
 		}
 	}
@@ -207,7 +209,7 @@ void CPluginExternalStimulations::addExternalStimulations(OpenViBE::CStimulation
 	uint64 duration_ms = 40;
 	{
 		//lock
-		boost::mutex::scoped_lock lock(m_es_mutex);
+		std::lock_guard<std::mutex> lock(m_es_mutex);
 
 		vector<SExternalStimulation>::iterator cii;
 

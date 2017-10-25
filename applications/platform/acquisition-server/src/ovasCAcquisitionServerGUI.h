@@ -8,9 +8,8 @@
 
 #include <socket/IConnectionServer.h>
 
-#include <boost/thread.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/version.hpp>
+#include <thread>
+
 #include <boost/algorithm/string.hpp>
 
 #include <gtk/gtk.h>
@@ -85,7 +84,7 @@ namespace OpenViBEAcquisitionServer
 		::GtkWidget* m_pImpedanceWindow;
 		std::vector < ::GtkWidget* > m_vLevelMesure;
 
-		boost::thread* m_pThread;		
+		std::thread* m_pThread;		
 	};
 };
 

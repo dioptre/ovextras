@@ -20,28 +20,9 @@
 
 #include <cassert>
 
-#include <iostream>
+#include <mutex>
 
-// @FIXME CERT
-#pragma message("WARNING: Hard-coding some CIdentifiers that should be obtainable from OpenViBE SDK in the future")
-#define OVP_GD_ClassId_Algorithm_MasterAcquisitionStreamEncoder                                               OpenViBE::CIdentifier(0x2D15E00B, 0x51414EB6)
-#define OVP_GD_ClassId_Algorithm_MasterAcquisitionStreamEncoderDesc                                           OpenViBE::CIdentifier(0xE6EC841D, 0x9E75A8FB)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SubjectIdentifier                    OpenViBE::CIdentifier(0xD5BB5231, 0x59389B72)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SubjectAge                           OpenViBE::CIdentifier(0x9EF355E4, 0xC8531112)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SubjectGender                        OpenViBE::CIdentifier(0xA9056AE3, 0x57FE6AF0)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SignalMatrix                         OpenViBE::CIdentifier(0xE9AC8077, 0xE369A51D)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SignalSamplingRate                   OpenViBE::CIdentifier(0xB84AD0CA, 0x4F316DD3)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_StimulationSet                       OpenViBE::CIdentifier(0x5B728D37, 0xFD088887)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_BufferDuration                       OpenViBE::CIdentifier(0xE1FC7385, 0x586A4F3F)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_ChannelLocalisation                  OpenViBE::CIdentifier(0x227E13F0, 0x206B44F9)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_ChannelUnits                         OpenViBE::CIdentifier(0x740060C2, 0x7D2B4F57)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelLocalisationData          OpenViBE::CIdentifier(0x26EE1F81, 0x3DB00D5D)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_EncodeChannelUnitData                  OpenViBE::CIdentifier(0x19DC533C, 0x56301D0B)
-#define OVP_GD_Algorithm_AcquisitionStreamEncoder_OutputParameterId_EncodedMemoryBuffer                                         OpenViBE::CIdentifier(0xa3d8b171, 0xf8734734)
-#define OVP_GD_Algorithm_AcquisitionStreamEncoder_InputTriggerId_EncodeBuffer                                                   OpenViBE::CIdentifier(0x1b7076fd, 0x449bc70a)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_OutputParameterId_EncodedMemoryBuffer                                   OpenViBE::CIdentifier(0xa3d8b171, 0xf8734734)
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputTriggerId_EncodeHeader                                             OpenViBE::CIdentifier(0x878eaf60, 0xf9d5303f) 
-#define OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputTriggerId_EncodeBuffer                                             OpenViBE::CIdentifier(0x1b7076fd, 0x449bc70a)
+#include <iostream>
 
 #define boolean OpenViBE::boolean
 
@@ -189,9 +170,8 @@ namespace OpenViBEAcquisitionServer
 				CMemoryBuffer* l_pMemoryBuffer=NULL;
 
 				{
-					boost::mutex::scoped_lock l_oProtectionLock(m_oPendingBufferProtectionMutex);
-					boost::mutex::scoped_lock l_oExecutionLock(m_oPendingBufferExectutionMutex);
-					l_oProtectionLock.unlock();
+					DoubleLock lock(&m_oPendingBufferProtectionMutex, &m_oPendingBufferExecutionMutex);
+
 					if(m_vPendingBuffer.size())
 					{
 						l_pMemoryBuffer=m_vPendingBuffer.front();
@@ -223,9 +203,9 @@ namespace OpenViBEAcquisitionServer
 		void scheduleBuffer(const IMemoryBuffer& rMemoryBuffer)
 		{
 			CMemoryBuffer* l_pMemoryBuffer=new CMemoryBuffer(rMemoryBuffer);
-			boost::mutex::scoped_lock l_oProtectionLock(m_oPendingBufferProtectionMutex);
-			boost::mutex::scoped_lock l_oExecutionLock(m_oPendingBufferExectutionMutex);
-			l_oProtectionLock.unlock();
+
+			DoubleLock lock(&m_oPendingBufferProtectionMutex, &m_oPendingBufferExecutionMutex);
+
 			m_vPendingBuffer.push_back(l_pMemoryBuffer);
 		}
 
@@ -233,8 +213,10 @@ namespace OpenViBEAcquisitionServer
 		Socket::IConnection& m_rConnection;
 
 		std::deque < CMemoryBuffer* > m_vPendingBuffer;
-		boost::mutex m_oPendingBufferExectutionMutex;
-		boost::mutex m_oPendingBufferProtectionMutex;
+
+		// See class DoubleLock
+		std::mutex m_oPendingBufferProtectionMutex;
+		std::mutex m_oPendingBufferExecutionMutex;
 	};
 
 	static void start_connection_client_handler_thread(CConnectionClientHandlerThread* pThread)
@@ -247,7 +229,7 @@ namespace OpenViBEAcquisitionServer
 //                                                                   //
 
 CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
-	:m_pConnectionServerHandlerBoostThread(NULL)
+	:m_pConnectionServerHandlerStdThread(NULL)
 	,m_rKernelContext(rKernelContext)
 	,m_pDriverContext(NULL)
 	,m_pDriver(NULL)
@@ -391,9 +373,7 @@ boolean CAcquisitionServer::loop(void)
 	// Searches for new connection(s)
 	if(m_pConnectionServer)
 	{
-		boost::mutex::scoped_lock m_oProtectionLock(m_oPendingConnectionProtectionMutex);
-		boost::mutex::scoped_lock m_oExecutionLock(m_oPendingConnectionExectutionMutex);
-		m_oProtectionLock.unlock();
+		DoubleLock lock(&m_oPendingConnectionProtectionMutex, &m_oPendingConnectionExecutionMutex);
 
 		for(itConnection=m_vPendingConnection.begin(); itConnection!=m_vPendingConnection.end(); itConnection++)
 		{
@@ -425,10 +405,10 @@ boolean CAcquisitionServer::loop(void)
 				l_oInfo.m_ui64StimulationTimeOffset=ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64TheoreticalSampleCountToSkip+m_ui64SampleCount-m_vPendingBuffer.size());
 				l_oInfo.m_ui64SignalSampleCountToSkip=l_ui64TheoreticalSampleCountToSkip;
 				l_oInfo.m_pConnectionClientHandlerThread=new CConnectionClientHandlerThread(*this, *l_pConnection);
-				l_oInfo.m_pConnectionClientHandlerBoostThread=new boost::thread(boost::bind(&start_connection_client_handler_thread, l_oInfo.m_pConnectionClientHandlerThread));
+				l_oInfo.m_pConnectionClientHandlerStdThread=new std::thread(std::bind(&start_connection_client_handler_thread, l_oInfo.m_pConnectionClientHandlerThread));
 				l_oInfo.m_bChannelLocalisationSent = false;
 				l_oInfo.m_bChannelUnitsSent = false;
-				//applyPriority(l_oInfo.m_pConnectionClientHandlerBoostThread,15);
+				//applyPriority(l_oInfo.m_pConnectionClientHandlerStdThread,15);
 
 				m_vConnection.push_back(pair < Socket::IConnection*, SConnectionInfo >(l_pConnection, l_oInfo));
 
@@ -467,10 +447,10 @@ boolean CAcquisitionServer::loop(void)
 		if(!l_pConnection->isConnected())
 		{
 			l_pConnection->release();
-			if(itConnection->second.m_pConnectionClientHandlerBoostThread)
+			if(itConnection->second.m_pConnectionClientHandlerStdThread)
 			{
-				itConnection->second.m_pConnectionClientHandlerBoostThread->join();
-				delete itConnection->second.m_pConnectionClientHandlerBoostThread;
+				itConnection->second.m_pConnectionClientHandlerStdThread->join();
+				delete itConnection->second.m_pConnectionClientHandlerStdThread;
 				delete itConnection->second.m_pConnectionClientHandlerThread;
 			}
 			itConnection=m_vConnection.erase(itConnection);
@@ -822,8 +802,8 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 		return false;
 	}
 
-	m_pConnectionServerHandlerBoostThread=new boost::thread(CConnectionServerHandlerThread(*this, *m_pConnectionServer));
-	//applyPriority(m_pConnectionServerHandlerBoostThread,15);
+	m_pConnectionServerHandlerStdThread=new std::thread(CConnectionServerHandlerThread(*this, *m_pConnectionServer));
+	//applyPriority(m_pConnectionServerHandlerStdThread,15);
 
 	return true;
 }
@@ -884,10 +864,10 @@ boolean CAcquisitionServer::stop(void)
 	while(itConnection!=m_vConnection.end())
 	{
 		itConnection->first->close();
-		if(itConnection->second.m_pConnectionClientHandlerBoostThread)
+		if(itConnection->second.m_pConnectionClientHandlerStdThread)
 		{
-			itConnection->second.m_pConnectionClientHandlerBoostThread->join();
-			delete itConnection->second.m_pConnectionClientHandlerBoostThread;
+			itConnection->second.m_pConnectionClientHandlerStdThread->join();
+			delete itConnection->second.m_pConnectionClientHandlerStdThread;
 			delete itConnection->second.m_pConnectionClientHandlerThread;
 		}
 		itConnection->first->release();
@@ -930,11 +910,11 @@ boolean CAcquisitionServer::disconnect(void)
 
 	// Thread joining must be done after
 	// switching m_bInitialized to false
-	if(m_pConnectionServerHandlerBoostThread)
+	if(m_pConnectionServerHandlerStdThread)
 	{
-		m_pConnectionServerHandlerBoostThread->join();
-		delete m_pConnectionServerHandlerBoostThread;
-		m_pConnectionServerHandlerBoostThread=NULL;
+		m_pConnectionServerHandlerStdThread->join();
+		delete m_pConnectionServerHandlerStdThread;
+		m_pConnectionServerHandlerStdThread=NULL;
 	}
 
 	return true;
@@ -1149,16 +1129,14 @@ boolean CAcquisitionServer::acceptNewConnection(Socket::IConnection* pConnection
 
 	uint64 l_ui64Time=System::Time::zgetTime();
 
-	boost::mutex::scoped_lock m_oProtectionLock(m_oPendingConnectionProtectionMutex);
-	boost::mutex::scoped_lock m_oExecutionLock(m_oPendingConnectionExectutionMutex);
-	m_oProtectionLock.unlock();
+	DoubleLock lock(&m_oPendingConnectionProtectionMutex, &m_oPendingConnectionExecutionMutex);
 
 	SConnectionInfo l_oInfo;
 	l_oInfo.m_ui64ConnectionTime=l_ui64Time;
 	l_oInfo.m_ui64StimulationTimeOffset=0; // not used
 	l_oInfo.m_ui64SignalSampleCountToSkip=0; // not used
 	l_oInfo.m_pConnectionClientHandlerThread=NULL; // not used
-	l_oInfo.m_pConnectionClientHandlerBoostThread=NULL; // not used
+	l_oInfo.m_pConnectionClientHandlerStdThread=NULL; // not used
 	l_oInfo.m_bChannelLocalisationSent = false;
 	l_oInfo.m_bChannelUnitsSent = false;
 

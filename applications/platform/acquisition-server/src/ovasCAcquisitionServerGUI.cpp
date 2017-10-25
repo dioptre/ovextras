@@ -279,7 +279,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	// Initialize GTK objects as the thread started below may refer to them quickly
 	this->initialize(); 
 
-	m_pThread=new boost::thread(CAcquisitionServerThreadHandle(*m_pAcquisitionServerThread));
+	m_pThread=new std::thread(CAcquisitionServerThreadHandle(*m_pAcquisitionServerThread));
 }
 
 CAcquisitionServerGUI::~CAcquisitionServerGUI(void)

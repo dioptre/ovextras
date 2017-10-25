@@ -33,8 +33,10 @@
 #include "mCBridgeBioSemiActiveTwo.h"
 
 #include "gtk/gtk.h"
-#include "boost/thread.hpp"
+
 #include <vector>
+#include <thread>
+#include <mutex>
 
 namespace OpenViBEAcquisitionServer
 {
@@ -65,7 +67,7 @@ namespace OpenViBEAcquisitionServer
 		// The window is changed in a idle loop in function of m_bIsCMSInRange, 
 		// m_bIsBatteryLow and m_sErrorMessage that change in the driver loop
 		// A mutex is necessary to secure the access to the data
-		boost::mutex m_oMutex;
+		std::mutex m_oMutex;
 	} SInformationWindow;
 
 	/**
@@ -94,7 +96,11 @@ namespace OpenViBEAcquisitionServer
 		virtual const OpenViBEAcquisitionServer::IHeader* getHeader(void) { return &m_oHeader; }
 		//OpenViBE::uint32 getChannelCount();
 
+		// Called from gtk callback
+		void setupInformationWindow(void);
+		
 	protected:
+	
 		SettingsHelper m_oSettings;
 
 		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;

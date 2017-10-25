@@ -25,6 +25,9 @@
 #include <cstdio>
 #include <limits>
 
+#include <mutex>
+#include <thread>
+
 #include <gUSBamp.h>
 
 using namespace OpenViBEAcquisitionServer;
@@ -401,7 +404,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::start(void)
 	m_ui32TotalDataUnavailable = 0;
 
 	{
-		boost::mutex::scoped_lock lock(m_io_mutex);
+		std::lock_guard<std::mutex> lock(m_io_mutex);
 		m_RingBuffer.Reset();
 	}
 
@@ -416,7 +419,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::start(void)
 	m_bufferOverrun = false;
 	m_ui32CurrentQueueIndex = 0;
 
-	m_ThreadPtr.reset(new boost::thread( boost::bind(&CDriverGTecGUSBamp::acquire , this )));
+	m_ThreadPtr.reset(new std::thread( std::bind(&CDriverGTecGUSBamp::acquire , this )));
 
 	return true;
 }
@@ -431,7 +434,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 		bool l_bDataAvailable = false;
 
 		{
-			boost::mutex::scoped_lock lock(m_io_mutex);
+			std::unique_lock<std::mutex> lock(m_io_mutex);
 
 			while (m_RingBuffer.GetSize() < validPoints)
 			{
@@ -647,7 +650,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 				{
 					//to store the received data into the application data buffer at once, lock it
 					{
-						boost::mutex::scoped_lock lock(m_io_mutex);
+						std::lock_guard<std::mutex> lock(m_io_mutex);
 						try
 						{
 							//if we are going to overrun on writing the received data into the buffer, set the appropriate flag; the reading thread will handle the overrun

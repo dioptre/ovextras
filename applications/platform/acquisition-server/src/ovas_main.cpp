@@ -197,13 +197,6 @@ int main(int argc, char ** argv)
 					l_rConfigurationManager.addOrReplaceConfigurationToken((*itr).first.c_str(), (*itr).second.c_str());
 				}
 
-				//initialise Gtk before 3D context
-#if !GLIB_CHECK_VERSION(2,32,0)
-				// although deprecated in newer GTKs (no more needed after (at least) 2.24.13, deprecated in 2.32), we need to use this on Windows with the older GTK (2.22.1), or acquisition server will crash on startup
-				g_thread_init(NULL);
-#endif
-				gdk_threads_init();
-
 				if(!gtk_init_check(&argc, &argv))
 				{
 					l_pKernelContext->getLogManager() << LogLevel_Error << "Unable to initialize GTK. Possibly the display could not be opened. Exiting.\n";
@@ -247,9 +240,7 @@ int main(int argc, char ** argv)
 
 					try
 					{
-						gdk_threads_enter();	
-						gtk_main();
-						gdk_threads_leave();			
+						gtk_main();	
 					}
 					catch(...)
 					{

@@ -17,10 +17,11 @@
 #include <vector>
 
 //threading
-#include <boost\thread\thread.hpp>
-#include <boost\bind\bind.hpp>
-#include <boost\scoped_ptr.hpp>
-#include "boost/thread/condition.hpp"
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <memory> // unique_ptr
+
 #include <deque>
 using namespace std;
 
@@ -132,13 +133,13 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::uint32 m_ui32CurrentQueueIndex;
 
-		boost::scoped_ptr<boost::thread> m_ThreadPtr;
+		std::unique_ptr<std::thread> m_ThreadPtr;
 		OpenViBE::boolean m_bIsThreadRunning;
 
-		boost::mutex m_io_mutex;
+		std::mutex m_io_mutex;
 
 		OpenViBE::float32 *m_bufferReceivedData;
-		boost::condition  m_itemAvailable;
+		std::condition_variable  m_itemAvailable;
 
 		OpenViBE::boolean ConfigureDevice(OpenViBE::uint32 deviceNumber);
 

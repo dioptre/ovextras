@@ -69,8 +69,8 @@ INCLUDE("FindThirdPartyLiveAmpAPI")
 
 INCLUDE("FindThirdPartyOpenAL")
 INCLUDE("FindThirdPartyBoost")
-INCLUDE("FindThirdPartyBoost_Thread")
 INCLUDE("FindThirdPartyPThread")	# for Windows Fieldtrip
+INCLUDE("FindThirdPartyRT")  # external stims shared memory needs this
 
 INCLUDE("FindThirdPartyLSL")
 
