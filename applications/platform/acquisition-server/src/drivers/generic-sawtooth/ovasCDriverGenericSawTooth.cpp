@@ -19,7 +19,6 @@ CDriverGenericSawTooth::CDriverGenericSawTooth(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
 	,m_pCallback(NULL)
 	,m_ui32ExternalBlockSize(0)
-	,m_vSample(NULL)
 	,m_ui64TotalSampleCount(0)
 	,m_ui64StartTime(0)
 {

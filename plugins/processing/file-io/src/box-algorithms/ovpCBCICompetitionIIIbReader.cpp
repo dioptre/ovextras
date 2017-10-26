@@ -274,11 +274,7 @@ namespace OpenViBEPlugins
 				l_oStringStream.str(l_oLine);
 
 				l_oStringStream>>l_f64Sample;
-#ifdef TARGET_OS_Windows
-                if(_isnan(l_f64Sample))
-#else
-                if(std::isnan(l_f64Sample))
-#endif
+				if(std::isnan(l_f64Sample))
 				{
 					l_pBuffer[count] = (count != 0) ? l_pBuffer[count-1] : 0.0;
 				}
@@ -288,11 +284,7 @@ namespace OpenViBEPlugins
 				}
 
 				l_oStringStream>>l_f64Sample;
-#ifdef TARGET_OS_Windows
-                if(_isnan(l_f64Sample))
-#else
-                if(std::isnan(l_f64Sample))
-#endif
+				if(std::isnan(l_f64Sample))
 				{
 					l_pBuffer[count+m_ui32SamplesPerBuffer] = (count != 0) ? l_pBuffer[count+m_ui32SamplesPerBuffer-1] : 0.0;
 				}

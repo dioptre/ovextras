@@ -17,6 +17,7 @@
 #include <functional>
 #include <cctype>
 #include <cstring>
+#include <cmath> // std::isnan, std::isfinite
 
 #include <cassert>
 
@@ -953,11 +954,7 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 				{
 					const uint32 l_ui32Channel = m_vSelectedChannels[j];
 
-#ifdef TARGET_OS_Windows
-					if(_isnan(pSample[l_ui32Channel*ui32SampleCount+i]) || !_finite(pSample[l_ui32Channel*ui32SampleCount+i])) // NaN or infinite values
-#else
-					if(std::isnan(pSample[l_ui32Channel*ui32SampleCount+i]) || !finite(pSample[l_ui32Channel*ui32SampleCount+i])) // NaN or infinite values
-#endif
+					if(std::isnan(pSample[l_ui32Channel*ui32SampleCount+i]) || !std::isfinite(pSample[l_ui32Channel*ui32SampleCount+i])) // NaN or infinite values
 					{
 						l_bHadNaN = true;
 
