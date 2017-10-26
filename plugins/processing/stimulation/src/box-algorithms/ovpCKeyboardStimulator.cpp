@@ -172,10 +172,6 @@ namespace OpenViBEPlugins
 			m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
 			m_visualizationContext->setWidget(*this, m_pWidget);
 
-			m_oEncoder.encodeHeader();
-
-			getBoxAlgorithmContext()->getDynamicBoxContext()->markOutputAsReadyToSend(0, 0, 0);
-
 			return true;
 		}
 
@@ -195,7 +191,7 @@ namespace OpenViBEPlugins
 
 		boolean CKeyboardStimulator::processClock(CMessageClock &rMessageClock)
 		{
-			if(m_bError)
+			if (m_bError)
 			{
 				return false;
 			}
@@ -206,7 +202,13 @@ namespace OpenViBEPlugins
 				m_bUnknownKeyPressed = false;
 			}
 
-			const uint64 l_ui64CurrentTime=rMessageClock.getTime();
+			const uint64 l_ui64CurrentTime = rMessageClock.getTime();
+
+			if (l_ui64CurrentTime == 0)
+			{
+				m_oEncoder.encodeHeader();
+				getBoxAlgorithmContext()->getDynamicBoxContext()->markOutputAsReadyToSend(0, 0, 0);
+			}
 
 			if(l_ui64CurrentTime!=m_ui64PreviousActivationTime)
 			{

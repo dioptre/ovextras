@@ -60,7 +60,7 @@ namespace OpenViBEPlugins
 			m_int32DrawnImageID(-1),
 			m_bFullScreen(false),
 			m_bScaleImages(false),
-			m_ui64LastOutputChunkDate(-1),
+			m_ui64LastOutputChunkDate(0),
 			m_pStimulusSender(nullptr),
 			m_visualizationContext(nullptr)
 		{
@@ -254,6 +254,13 @@ namespace OpenViBEPlugins
 			IBoxIO* l_pBoxIO=getBoxAlgorithmContext()->getDynamicBoxContext();
 			m_oStimulationEncoder.getInputStimulationSet()->clear();
 
+			if (this->getPlayerContext().getCurrentTime() == 0)
+			{
+				// Always send header first
+				m_oStimulationEncoder.encodeHeader();
+				l_pBoxIO->markOutputAsReadyToSend(0, 0, 0);
+			}
+
 			if(m_bImageDrawn)
 			{
 				// this is first redraw() for that image or clear screen
@@ -402,9 +409,7 @@ namespace OpenViBEPlugins
 					m_oStimulationDecoder.decode(chunk,true);
 					if(m_oStimulationDecoder.isHeaderReceived())
 					{
-						m_ui64LastOutputChunkDate = this->getPlayerContext().getCurrentTime();
-						m_oStimulationEncoder.encodeHeader();
-						l_pBoxIO->markOutputAsReadyToSend(0, 0, m_ui64LastOutputChunkDate);
+						// nop
 					}
 					if(m_oStimulationDecoder.isBufferReceived())
 					{
