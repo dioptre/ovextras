@@ -32,6 +32,7 @@ private:
 #ifdef TARGET_OS_Windows
 bool CPythonInitializer::checkPythonPath()
 {
+#ifdef HAVE_WORKING_PYCHECK
 	const OpenViBE::CString testCmd = "\"" + OpenViBE::Directories::getBinDir() + "\\openvibe-py2-check.exe\"";
 	if (std::system(testCmd.toASCIIString()))
 	{
@@ -40,8 +41,9 @@ bool CPythonInitializer::checkPythonPath()
 		std::cout << "Disabling the Python scripting box for now." << std::endl;
 		return false;
 	}
+#endif
 	std::string l_sPath = Py_GetPath();
-
+	
 	int found;
 	found = l_sPath.find_first_of(";");
 	while(found != std::string::npos)

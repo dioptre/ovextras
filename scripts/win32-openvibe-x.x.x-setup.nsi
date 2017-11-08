@@ -172,9 +172,12 @@ no_need_to_install_directx:
 	; Export launch scripts
 	File /nonfatal ..\..\dist\extras-Release\*.cmd
 	; File /nonfatal /r ..\dist\doc
-	; File /nonfatal /r ..\dist\etc
 	; File /nonfatal /r ..\dist\include
-	; File /nonfatal /r ..\dist\lib
+	
+	; etc and lib folders are needed for the gtk theme
+	File /nonfatal /r /x *.lib ..\..\dist\extras-Release\lib
+	File /nonfatal /r ..\..\dist\extras-Release\etc
+	
 	File /nonfatal /r ..\..\dist\extras-Release\log
 	File /nonfatal /r ..\..\dist\extras-Release\share
 	; File /nonfatal /r ..\dist\tmp

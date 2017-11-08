@@ -22,9 +22,12 @@ IF(PythonLibs_FOUND)
 		# TARGET_LINK_LIBRARIES(${PROJECT_NAME} optimized ${PYTHON_LIB})
 	# ENDFOREACH(PYTHON_LIB)
 	
-	# TARGET_LINK_LIBRARIES(${PROJECT_NAME} optimized Delayimp )
-	# SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/DELAYLOAD:python27.dll")
-
+	IF(WIN32)
+		# These are needed not to cause a popup on machines missing the dll 
+		TARGET_LINK_LIBRARIES(${PROJECT_NAME} optimized Delayimp )
+		SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/DELAYLOAD:python27.dll")
+	ENDIF()
+	
 	ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyPython)
 ELSE()
 	OV_PRINT(OV_PRINTED "  FAILED to find Python")

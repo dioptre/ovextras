@@ -1,3 +1,9 @@
+
+#
+# Disabled until it behaves gracefully on a system without Python dll
+#
+RETURN()
+
 PROJECT(openvibe-py2-check)
 
 SET(PROJECT_VERSION_MAJOR ${OV_GLOBAL_VERSION_MAJOR})

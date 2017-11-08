@@ -10,6 +10,7 @@ SET VRPNROOT=%dependencies_base%\vrpn
 SET PATH=%VRPNROOT%\bin;%PATH%
 
 SET PATH=%dependencies_base%\vcredist-100\;%PATH%
+SET PATH=%dependencies_base%\vcredist-110\;%PATH%
 SET PATH=%dependencies_base%\vcredist\;%PATH%
 
 REM Apply user-provided Python2.7 paths if available
