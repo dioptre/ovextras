@@ -14,11 +14,11 @@ SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_
 # ---------------------------------
 SET_BUILD_PLATFORM()
 
-if(NOT CMAKE_BUILD_TYPE AND CMAKE_GENERATOR MATCHES "Visual Studio*")
+if(NOT(CMAKE_BUILD_TYPE) AND CMAKE_GENERATOR MATCHES "Visual Studio*")
 	set(MULTI_BUILD TRUE)
 endif()
 
-IF(NOT ${SKIP_DOCUMENTATION})
+IF(NOT(${SKIP_DOCUMENTATION}))
 	if(MULTI_BUILD) # Replace with generator expression in CMake 3.5+
 		foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
 			string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIGU)
@@ -53,9 +53,7 @@ IF(NOT ${SKIP_DOCUMENTATION})
 	ENDIF()
 
 	add_subdirectory(src)
-	
-	# Install scenarios files related to documentation
-	INSTALL(DIRECTORY ${DOCUMENTATION_TEMP_DIRECTORY}/openvibe/scenarios DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe)
+		
 ENDIF()
 
 

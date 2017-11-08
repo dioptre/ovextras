@@ -159,7 +159,7 @@ ELSEIF(UNIX)
 	SET(OV_EIGEN_FLAGS "-msse2")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall ${OV_EIGEN_FLAGS}")
 	# This ENV var is needed to locate our custom IT++ on Linux
-	SET(ENV{PKG_CONFIG_PATH} "${OV_CUSTOM_DEPENDENCIES_PATH}/lib/pkgconfig")	
+	SET(ENV{PKG_CONFIG_PATH} "${LIST_DEPENDENCIES_PATH}/lib/pkgconfig")	
 
 	if (${CMAKE_SYSTEM_PROCESSOR} MATCHES i386|i586|i686)
 		set ( BIT_MODE "32")
