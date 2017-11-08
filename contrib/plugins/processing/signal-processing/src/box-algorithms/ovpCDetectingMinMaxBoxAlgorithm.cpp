@@ -34,13 +34,10 @@ boolean CDetectingMinMaxBoxAlgorithm::initialize(void)
 	m_pDetectingMinMax->initialize();
 
 	// compute filter coefs settings
-	CString l_oMinMax;
-	CString l_oTimeWindowStart;
-	CString l_oTimeWindowEnd;
+	const CString l_oMinMax = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	m_bMaxFlag = false;
 	m_bMinFlag = false;
 
-	getStaticBoxContext().getSettingValue(0, l_oMinMax);
 	if(this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_MinMax, l_oMinMax)==OVP_TypeId_MinMax_Min)
 	{
 		m_bMinFlag = true;
@@ -50,10 +47,8 @@ boolean CDetectingMinMaxBoxAlgorithm::initialize(void)
 		m_bMaxFlag = true;
 	}
 
-	getStaticBoxContext().getSettingValue(1, l_oTimeWindowStart);
-	float64 l_f64TimeWindowStart=atof(l_oTimeWindowStart);
-	getStaticBoxContext().getSettingValue(2, l_oTimeWindowEnd);
-	float64 l_f64TimeWindowEnd=atoi(l_oTimeWindowEnd);
+	const float64 l_f64TimeWindowStart = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+	const float64 l_f64TimeWindowEnd = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
 	// DetectingMinMax settings
 	m_pDetectingMinMax->getInputParameter(OVP_Algorithm_DetectingMinMax_InputParameterId_SignalMatrix)->setReferenceTarget(m_pStreamDecoder->getOutputParameter(OVP_GD_Algorithm_StreamedMatrixStreamDecoder_OutputParameterId_Matrix));
@@ -91,7 +86,7 @@ boolean CDetectingMinMaxBoxAlgorithm::processInput(uint32 ui32InputIndex)
 boolean CDetectingMinMaxBoxAlgorithm::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=getDynamicBoxContext();
-	IBox& l_rStaticBoxContext=getStaticBoxContext();
+    const IBox& l_rStaticBoxContext=getStaticBoxContext();
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{

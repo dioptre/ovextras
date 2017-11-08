@@ -26,7 +26,7 @@ public:
 
 	CPluginObjectDescEnumBoxAlgorithmDumper(const OpenViBE::Kernel::IKernelContext& rKernelContext, const OpenViBE::CString& sOutFile);
 	virtual ~CPluginObjectDescEnumBoxAlgorithmDumper(void);
-	virtual OpenViBE::boolean callback(const OpenViBE::Plugins::IPluginObjectDesc& rPluginObjectDesc);
+	virtual bool callback(const OpenViBE::Plugins::IPluginObjectDesc& rPluginObjectDesc);
 
 protected:
 

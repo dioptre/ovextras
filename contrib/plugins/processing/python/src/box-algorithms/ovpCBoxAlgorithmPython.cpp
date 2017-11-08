@@ -117,17 +117,16 @@ uint64 CBoxAlgorithmPython::getClockFrequency(void)
 
 void CBoxAlgorithmPython::buildPythonSettings(void)
 {  
-  IBox * l_rStaticBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
-  for (uint32 i=2; i<l_rStaticBoxContext->getSettingCount(); i++)
-  {
-    CString l_sName;
-    l_rStaticBoxContext->getSettingName(i, l_sName);
+	const IBox * l_rStaticBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
+	for (uint32 i=2; i<l_rStaticBoxContext->getSettingCount(); i++)
+	{
+		CString l_sName;
+		l_rStaticBoxContext->getSettingName(i, l_sName);
 
-    CString l_sValue;
-    l_rStaticBoxContext->getSettingValue(i, l_sValue);
+		const CString l_sValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i);
 
-    PyDict_SetItemString(m_pBoxSetting, l_sName, PyString_FromString(l_sValue));
-  }
+		PyDict_SetItemString(m_pBoxSetting, l_sName, PyString_FromString(l_sValue));
+	}
 }
 
 OpenViBE::boolean CBoxAlgorithmPython::initializePythonSafely()
@@ -320,11 +319,9 @@ OpenViBE::boolean CBoxAlgorithmPython::initialize(void)
 
 
 	//Initialize the clock frequency of the box depending on the first setting of the box
-	CString l_sSettingValue;
-	getStaticBoxContext().getSettingValue(0, l_sSettingValue);
-	m_ui64ClockFrequency=::atoi(l_sSettingValue.toASCIIString());
+	m_ui64ClockFrequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	m_sScriptFilename = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
-	getStaticBoxContext().getSettingValue(1, m_sScriptFilename);
 	if(strlen(m_sScriptFilename.toASCIIString()) == 0)
 	{
 		this->getLogManager() << LogLevel_Error << "You have to choose a script.\n";
@@ -332,7 +329,7 @@ OpenViBE::boolean CBoxAlgorithmPython::initialize(void)
 	}
 
 	//Create the decoders for the inputs
-	IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+    const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	OpenViBE::CIdentifier l_oTypeIdentifier;
 	for(uint32 input=0; input<l_rStaticBoxContext.getInputCount(); input++)
 	{
@@ -1922,7 +1919,7 @@ OpenViBE::boolean CBoxAlgorithmPython::transferStimulationOutputChunksFromPython
 
 OpenViBE::boolean CBoxAlgorithmPython::process(void)
 {	
-	IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+    const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	OpenViBE::CIdentifier l_oTypeIdentifier;
 
 	for(uint32 input=0; input<l_rStaticBoxContext.getInputCount(); input++)

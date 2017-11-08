@@ -196,6 +196,7 @@ namespace OpenViBEAcquisitionServer
 		 * If \c f64Impedance is any other negative value, then the impedance is considered as "unknown"
 		 */
 		virtual OpenViBE::boolean updateImpedance(const OpenViBE::uint32 ui32ChannelIndex, const OpenViBE::float64 f64Impedance)=0;
+
 	};
 
 	/**

@@ -51,8 +51,8 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 	{
 		if (*it=="-h" || *it=="--help")
 		{
-			std::cout << "Usage: " << argv[0] << " [-p <dir1:dir2...>] [-d <dump_path>] [-l boxListFile]" << std::endl;
-			return true;
+			std::cout << "Usage: " << argv[0] << " [-p <dir1#dir2...>] [-d <dump_path>] [-l boxListFile]" << std::endl;
+			exit(0);
 		}
 		// get a list of folders to load plugins from
 		else if (*it=="-p")
@@ -188,12 +188,14 @@ int main(int argc, char ** argv)
 				l_sConfigPath = CString(l_oConfiguration.m_sConfigPath.c_str());
 			}
 			l_pKernelContext=l_pKernelDesc->createKernel("plugin-inspector", l_sConfigPath );
-			if(!l_pKernelContext)
+			if(!l_pKernelContext || !l_pKernelContext->initialize())
 			{
 				cout<<"[ FAILED ] No kernel created by kernel descriptor"<<endl;
 			}
 			else
 			{
+				l_pKernelContext->getConfigurationManager().addConfigurationFromFile(l_sConfigPath);
+				l_pKernelContext->getConfigurationManager().addConfigurationFromFile(OpenViBE::Directories::getDataDir() + "/applications/plugin-inspector/plugin-inspector.conf");
 				OpenViBEToolkit::initialize(*l_pKernelContext);
 
 				IConfigurationManager& l_rConfigurationManager=l_pKernelContext->getConfigurationManager();
@@ -203,19 +205,15 @@ int main(int argc, char ** argv)
 					l_pKernelContext->getLogManager() << LogLevel_Info << "Loading plugins from specified folders\n";
 
 					std::string l_sPluginPattern;
+					for (const auto &libpath :  l_oConfiguration.m_vPluginPaths)
+					{
 					// Choose the right pattern for libraries to load depending on the OS
 					#if defined TARGET_OS_Windows
-						l_sPluginPattern = "openvibe-plugins-*.dll";
+						l_sPluginPattern = libpath + "/openvibe-plugins-*.dll;" ;
 					#elif defined TARGET_OS_Linux
-						l_sPluginPattern = "libopenvibe-plugins-*.so";
+						l_sPluginPattern = libpath + "/libopenvibe-plugins-*.so;"; // + *it + "/lib???.so"
 					#endif
-
-					typedef std::vector<std::string>::iterator stringVectorIt;
-					for (stringVectorIt it = l_oConfiguration.m_vPluginPaths.begin(); it != l_oConfiguration.m_vPluginPaths.end(); ++it)
-					{
-						std::string l_sPluginPath = *it + "/" + l_sPluginPattern;
-						std::cout << l_sPluginPath << std::endl;
-						l_pKernelContext->getPluginManager().addPluginsFromFiles(CString(l_sPluginPath.c_str()));
+						l_pKernelContext->getPluginManager().addPluginsFromFiles(CString(l_sPluginPattern.c_str()));
 					}
 				}
 				else

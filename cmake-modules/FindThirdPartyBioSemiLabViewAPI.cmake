@@ -8,9 +8,10 @@ GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyBioSemiLabViewAPI)
 
 IF(WIN32)
 	FIND_PATH(PATH_BioSemiAPI labview_dll.h PATHS 
-		"C:/Program Files/BioSemi/Developers_kit/C-code" 
-		"C:/Program Files (x86)/BioSemi/Developers_kit/C-code"
-		${OV_CUSTOM_DEPENDENCIES_PATH})
+		"C:/Program Files" 
+		"C:/Program Files (x86)"
+		${LIST_DEPENDENCIES_PATH}
+		PATH_SUFFIXES "BioSemi/Developers_kit/C-code")
 	IF(PATH_BioSemiAPI)
 		OV_PRINT(OV_PRINTED "  Found BioSemi LabView API...")
 		INCLUDE_DIRECTORIES(${PATH_BioSemiAPI})
@@ -23,7 +24,7 @@ IF(WIN32)
 		ENDIF(LIB_BioSemiAPI)
 
 		# Copy the DLL file at install
-		INSTALL(PROGRAMS "${PATH_BioSemiAPI}/Labview_DLL.dll" DESTINATION "bin")
+		INSTALL(PROGRAMS "${PATH_BioSemiAPI}/Labview_DLL.dll" DESTINATION ${DIST_BINDIR})
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyBioSemiAPI)
 	ELSE(PATH_BioSemiAPI)

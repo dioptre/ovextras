@@ -112,10 +112,11 @@ namespace OpenViBEPlugins
 			::GtkWidget* l_pWidget=NULL;
 			::GtkWidget* l_pToolbarWidget=NULL;
 			dynamic_cast<CSignalDisplayView*>(m_pSignalDisplayView)->getWidgets(l_pWidget, l_pToolbarWidget);
-			getBoxAlgorithmContext()->getVisualisationContext()->setWidget(l_pWidget);
+			m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+			m_visualizationContext->setWidget(*this, l_pWidget);
 			if(l_pToolbarWidget != NULL)
 			{
-				getBoxAlgorithmContext()->getVisualisationContext()->setToolbar(l_pToolbarWidget);
+				m_visualizationContext->setToolbar(*this, l_pToolbarWidget);
 			}
 
 			m_ui64LastScaleRefreshTime = 0;
@@ -137,6 +138,8 @@ namespace OpenViBEPlugins
 			delete m_pBufferDatabase;
 			m_pSignalDisplayView=NULL;
 			m_pBufferDatabase=NULL;
+
+			this->releasePluginObject(m_visualizationContext);
 
 			return true;
 		}

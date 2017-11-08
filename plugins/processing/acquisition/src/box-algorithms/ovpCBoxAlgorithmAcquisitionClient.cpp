@@ -1,5 +1,6 @@
 #include "ovpCBoxAlgorithmAcquisitionClient.h"
 #include <cstdlib>
+#include <limits>
 
 #include <openvibe/ovITimeArithmetics.h>
 
@@ -10,12 +11,12 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Acquisition;
 
-uint64 CBoxAlgorithmAcquisitionClient::getClockFrequency(void)
+uint64_t CBoxAlgorithmAcquisitionClient::getClockFrequency(void)
 {
 	return 64LL<<32;
 }
 
-boolean CBoxAlgorithmAcquisitionClient::initialize(void)
+bool CBoxAlgorithmAcquisitionClient::initialize(void)
 {
 	m_pAcquisitionStreamDecoder = &getAlgorithmManager().getAlgorithm(getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_AcquisitionStreamDecoder));
 
@@ -33,7 +34,7 @@ boolean CBoxAlgorithmAcquisitionClient::initialize(void)
 	m_ui64LastChunkEndTime = 0;
 	m_pConnectionClient = NULL;
 
-	IBox& l_rStaticBoxContext = this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	if (l_rStaticBoxContext.getOutputCount() < 5)
 	{
 		this->getLogManager() << LogLevel_Error << "Code expects at least 5 box outputs. Did you update the box?\n";
@@ -43,7 +44,7 @@ boolean CBoxAlgorithmAcquisitionClient::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmAcquisitionClient::uninitialize(void)
+bool CBoxAlgorithmAcquisitionClient::uninitialize(void)
 {
 	if(m_pConnectionClient)
 	{
@@ -69,17 +70,23 @@ boolean CBoxAlgorithmAcquisitionClient::uninitialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmAcquisitionClient::processClock(IMessageClock& rMessageClock)
+bool CBoxAlgorithmAcquisitionClient::processClock(IMessageClock& rMessageClock)
 {
 	if(!m_pConnectionClient)
 	{
-		CString l_sSettingValue;
 
-		getStaticBoxContext().getSettingValue(0, l_sSettingValue);
-		CString l_sServerName=this->getConfigurationManager().expand(l_sSettingValue);
-
-		getStaticBoxContext().getSettingValue(1, l_sSettingValue);
-		uint32 l_ui32ServerPort=::atoi(l_sSettingValue.toASCIIString());
+		CString l_sServerName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+		uint32_t l_ui32ServerPort = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+		if(l_sServerName.length() == 0)
+		{
+			this->getLogManager() << LogLevel_Warning << "Empty server name, please set it to a correct value or set AcquisitionServer_HostName in config files. Defaulting to \"localhost\".\n";
+			l_sServerName = "localhost";
+		}
+		if(l_ui32ServerPort == std::numeric_limits<uint32_t>::max() || l_ui32ServerPort == std::numeric_limits<uint32_t>::min())
+		{
+			this->getLogManager() << LogLevel_Error << "Invalid value for port : " << l_ui32ServerPort << ". Please set the port to a positive non-zero integer value.\n";
+			return false;
+		}
 
 		m_pConnectionClient=Socket::createConnectionClient();
 		m_pConnectionClient->connect(l_sServerName, l_ui32ServerPort);
@@ -98,7 +105,7 @@ boolean CBoxAlgorithmAcquisitionClient::processClock(IMessageClock& rMessageCloc
 	return true;
 }
 
-boolean CBoxAlgorithmAcquisitionClient::process(void)
+bool CBoxAlgorithmAcquisitionClient::process(void)
 {
 	if(!m_pConnectionClient || !m_pConnectionClient->isConnected())
 	{
@@ -116,7 +123,7 @@ boolean CBoxAlgorithmAcquisitionClient::process(void)
 
 	while(m_pConnectionClient->isReadyToReceive())
 	{
-		uint64 l_ui64MemoryBufferSize=0;
+		uint64_t l_ui64MemoryBufferSize=0;
 		if(!m_pConnectionClient->receiveBufferBlocking(&l_ui64MemoryBufferSize, sizeof(l_ui64MemoryBufferSize)))
 		{
 			getLogManager() << LogLevel_Error << "Could not receive memory buffer size from the server. Is the server on 'Play'?\n";
@@ -127,7 +134,7 @@ boolean CBoxAlgorithmAcquisitionClient::process(void)
 			getLogManager() << LogLevel_Error << "Could not re allocate memory buffer with size " << l_ui64MemoryBufferSize << "\n";
 			return false;
 		}
-		if(!m_pConnectionClient->receiveBufferBlocking(ip_pAcquisitionMemoryBuffer->getDirectPointer(), static_cast<uint32>(l_ui64MemoryBufferSize)))
+		if(!m_pConnectionClient->receiveBufferBlocking(ip_pAcquisitionMemoryBuffer->getDirectPointer(), static_cast<uint32_t>(l_ui64MemoryBufferSize)))
 		{
 			getLogManager() << LogLevel_Error << "Could not receive memory buffer content of size " << l_ui64MemoryBufferSize << "\n";
 			return false;

@@ -109,7 +109,7 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Spatial filter filename",                        OV_TypeId_Filename, "");
 				rPrototype.addSetting("Save the spatial filter/demixing matrix",        OV_TypeId_Boolean,  "false");
 
-				rPrototype.addFlag  (OpenViBE::Kernel::BoxFlag_IsUnstable);
+                rPrototype.addFlag  (OV_AttributeId_Box_FlagIsUnstable);
 
 				return true;
 			}

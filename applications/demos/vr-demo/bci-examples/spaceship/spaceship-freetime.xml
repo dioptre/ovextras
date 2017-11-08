@@ -1,4 +1,5 @@
 <OpenViBE-Scenario>
+	<FormatVersion>1</FormatVersion>
 	<Creator>OpenViBE</Creator>
 	<CreatorVersion>1.2.1+git</CreatorVersion>
 	<Boxes>
@@ -139,7 +140,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x92ff5cdb, 0x273984ce)</Value>
+					<Value>(0xa8ffe2a3, 0x27038f03)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x527ad68d, 0x16d746a0)</Identifier>
@@ -681,7 +682,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x9d21e772, 0xde848964)</Value>
+					<Value>(0xc5ff41e9, 0xccc59a01)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -929,7 +930,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Path_Samples}/signals/spaceship-freetime.gdf</Value>
+					<Value>${Designer_DefaultWorkingDirectory}/signals/spaceship-freetime.gdf</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -1113,7 +1114,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0xcb3c7583, 0xf7e5e4fa)</Value>
+					<Value>(0xb73cee83, 0xf7215d60)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x527ad68d, 0x16d746a0)</Identifier>
@@ -1712,7 +1713,6 @@
 			</Attributes>
 		</Link>
 	</Links>
-	<MessageLinks></MessageLinks>
 	<Comments>
 		<Comment>
 			<Identifier>(0x00000ae4, 0x00000978)</Identifier>
@@ -1776,68 +1776,11 @@ The &lt;b&gt;Analog Server&lt;/b&gt; provides the feedback value.</Text>
 			</Attributes>
 		</Comment>
 	</Comments>
-	<VisualisationTree>
-		<VisualisationWidget>
-			<Identifier>(0x000011cc, 0x00007087)</Identifier>
-			<Name>Default window</Name>
-			<Type>1</Type>
-			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x4c90d4ad, 0x7a2554ec)</Identifier>
-					<Value>400</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x7b814cca, 0x271df6dd)</Identifier>
-					<Value>383</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00005470, 0x00002f9b)</Identifier>
-			<Name>Default tab</Name>
-			<Type>2</Type>
-			<ParentIdentifier>(0x000011cc, 0x00007087)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00002aab, 0x00000093)</Identifier>
-			<Name>Vertical split</Name>
-			<Type>4</Type>
-			<ParentIdentifier>(0x00005470, 0x00002f9b)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>2</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x237e56d2, 0x10cd68ae)</Identifier>
-					<Value>355</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x54e45f5b, 0x76c036e2)</Identifier>
-					<Value>175</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00002e3f, 0x00004b05)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00002aab, 0x00000093)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0x00007134, 0x0000322d)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00007138, 0x000064f4)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00002aab, 0x00000093)</ParentIdentifier>
-			<Index>1</Index>
-			<BoxIdentifier>(0x00001222, 0x0000295e)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-	</VisualisationTree>
+	<Metadata>
+		<Entry>
+			<Identifier>(0x0000775c, 0x000078ff)</Identifier>
+			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
+			<Data>[{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":400,"identifier":"(0x000011cc, 0x00007087)","index":0,"name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":383},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x00005470, 0x00002f9b)","index":0,"name":"Default tab","parentIdentifier":"(0x000011cc, 0x00007087)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":2,"dividerPosition":175,"identifier":"(0x00002aab, 0x00000093)","index":0,"maxDividerPosition":355,"name":"Vertical split","parentIdentifier":"(0x00005470, 0x00002f9b)","type":4},{"boxIdentifier":"(0x00007134, 0x0000322d)","childCount":0,"identifier":"(0x00002e3f, 0x00004b05)","index":0,"parentIdentifier":"(0x00002aab, 0x00000093)","type":3},{"boxIdentifier":"(0x00001222, 0x0000295e)","childCount":0,"identifier":"(0x00007138, 0x000064f4)","index":1,"parentIdentifier":"(0x00002aab, 0x00000093)","type":3}]</Data>
+		</Entry>
+	</Metadata>
 </OpenViBE-Scenario>

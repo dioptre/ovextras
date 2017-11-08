@@ -1,6 +1,7 @@
 <OpenViBE-Scenario>
-	<Creator>OpenViBE</Creator>
-	<CreatorVersion>1.2.1+git</CreatorVersion>
+	<FormatVersion>1</FormatVersion>
+	<Creator>openvibe</Creator>
+	<CreatorVersion>2.0</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x00005174, 0x00007bed)</Identifier>
@@ -277,7 +278,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Path_Samples}/signals/bci-motor-imagery.ov</Value>
+					<Value>${Path_Data}/scenarios/signals/bci-motor-imagery.ov</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
@@ -339,7 +340,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Path_Samples}/signals/bci-motor-imagery.ov</Value>
+					<Value>${Path_Data}/scenarios/signals/bci-motor-imagery.ov</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
@@ -629,7 +630,6 @@
 			</Attributes>
 		</Link>
 	</Links>
-	<MessageLinks></MessageLinks>
 	<Comments>
 		<Comment>
 			<Identifier>(0x0b7b1bf9, 0x154c9b65)</Identifier>
@@ -736,70 +736,13 @@ suitable for your data to get minimal amount of run-time autoscale changes.
 			</Attributes>
 		</Comment>
 	</Comments>
-	<VisualisationTree>
-		<VisualisationWidget>
-			<Identifier>(0x7c1b6671, 0x13abdd97)</Identifier>
-			<Name>Default window</Name>
-			<Type>1</Type>
-			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x4c90d4ad, 0x7a2554ec)</Identifier>
-					<Value>583</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x7b814cca, 0x271df6dd)</Identifier>
-					<Value>578</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x7631555b, 0x63aa0d68)</Identifier>
-			<Name>Default tab</Name>
-			<Type>2</Type>
-			<ParentIdentifier>(0x7c1b6671, 0x13abdd97)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00002f97, 0x00001a6e)</Identifier>
-			<Name>Vertical split</Name>
-			<Type>4</Type>
-			<ParentIdentifier>(0x7631555b, 0x63aa0d68)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>2</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x237e56d2, 0x10cd68ae)</Identifier>
-					<Value>533</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x54e45f5b, 0x76c036e2)</Identifier>
-					<Value>263</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00004e10, 0x00003d21)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00002f97, 0x00001a6e)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0x00006c69, 0x00002365)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00007cba, 0x00001aa6)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00002f97, 0x00001a6e)</ParentIdentifier>
-			<Index>1</Index>
-			<BoxIdentifier>(0x00005174, 0x00007bed)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-	</VisualisationTree>
+	<Metadata>
+		<Entry>
+			<Identifier>(0x0000775c, 0x000078ff)</Identifier>
+			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
+			<Data>[{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":583,"identifier":"(0x7c1b6671, 0x13abdd97)","index":0,"name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":578},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x7631555b, 0x63aa0d68)","index":0,"name":"Default tab","parentIdentifier":"(0x7c1b6671, 0x13abdd97)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":2,"dividerPosition":263,"identifier":"(0x00002f97, 0x00001a6e)","index":0,"maxDividerPosition":533,"name":"Vertical split","parentIdentifier":"(0x7631555b, 0x63aa0d68)","type":4},{"boxIdentifier":"(0x00006c69, 0x00002365)","childCount":0,"identifier":"(0x00004e10, 0x00003d21)","index":0,"parentIdentifier":"(0x00002f97, 0x00001a6e)","type":3},{"boxIdentifier":"(0x00005174, 0x00007bed)","childCount":0,"identifier":"(0x00007cba, 0x00001aa6)","index":1,"parentIdentifier":"(0x00002f97, 0x00001a6e)","type":3}]</Data>
+		</Entry>
+	</Metadata>
 	<Attributes>
 		<Attribute>
 			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>

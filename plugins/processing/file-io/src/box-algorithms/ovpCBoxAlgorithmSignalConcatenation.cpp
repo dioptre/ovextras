@@ -12,7 +12,7 @@ using namespace OpenViBEPlugins::FileIO;
 
 using namespace std;
 
-boolean CBoxAlgorithmSignalConcatenation::initialize(void)
+bool CBoxAlgorithmSignalConcatenation::initialize(void)
 {
 	m_vSignalChunkBuffers.resize(this->getStaticBoxContext().getInputCount() >> 1);
 	m_vStimulationChunkBuffers.resize(this->getStaticBoxContext().getInputCount() >> 1);
@@ -69,7 +69,7 @@ boolean CBoxAlgorithmSignalConcatenation::initialize(void)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmSignalConcatenation::uninitialize(void)
+bool CBoxAlgorithmSignalConcatenation::uninitialize(void)
 {
 	m_oStimulationEncoder.uninitialize();
 	m_oSignalEncoder.uninitialize();
@@ -108,14 +108,14 @@ boolean CBoxAlgorithmSignalConcatenation::uninitialize(void)
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmSignalConcatenation::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmSignalConcatenation::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmSignalConcatenation::processClock(CMessageClock& rMessageClock)
+bool CBoxAlgorithmSignalConcatenation::processClock(CMessageClock& rMessageClock)
 {
 	if(!m_bHeaderSent || m_bConcatenationFinished)
 	{
@@ -139,10 +139,10 @@ boolean CBoxAlgorithmSignalConcatenation::processClock(CMessageClock& rMessageCl
 }
 /*******************************************************************************/
 
-boolean CBoxAlgorithmSignalConcatenation::process(void)
+bool CBoxAlgorithmSignalConcatenation::process(void)
 {
 	
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	//SIGNAL INPUTS
@@ -317,7 +317,7 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 		}
 	}
 
-	boolean l_bShouldConcatenate = true;
+	bool l_bShouldConcatenate = true;
 	for(uint32 i = 0; i < m_vEndOfFileReached.size(); i++)
 	{
 		l_bShouldConcatenate &= m_vEndOfFileReached[i];
@@ -373,7 +373,7 @@ boolean CBoxAlgorithmSignalConcatenation::process(void)
 }
 
 
-boolean CBoxAlgorithmSignalConcatenation::concate(void)
+bool CBoxAlgorithmSignalConcatenation::concate(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 	if(!m_bResynchroDone)

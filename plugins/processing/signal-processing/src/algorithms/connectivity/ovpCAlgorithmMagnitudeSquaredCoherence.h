@@ -29,13 +29,13 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			OpenViBE::boolean computePeriodogram(const Eigen::VectorXd& vecXcdInput, Eigen::MatrixXcd& matXcdPeriodograms,const Eigen::VectorXd& vecXdWindow, const OpenViBE::uint32& ui32NSegments, const OpenViBE::uint32& ui32LSegments, const OpenViBE::uint32& ui32NOverlap);
-			OpenViBE::boolean powerSpectralDensity(const Eigen::VectorXd& vecXdInput, Eigen::VectorXd& vecXdOutput, const Eigen::VectorXd& vecXdWindow, const OpenViBE::uint32& ui32NSegments, const OpenViBE::uint32& ui32LSegments, const OpenViBE::uint32& ui32NOverlap);
-			OpenViBE::boolean crossSpectralDensity(const Eigen::VectorXd& vecXdInput1, const Eigen::VectorXd& vecXdInput2, Eigen::VectorXcd& vecXcdOutput, const Eigen::VectorXd& vecXdWindow, const OpenViBE::uint32& ui32NSegments, const OpenViBE::uint32& ui32LSegments, const OpenViBE::uint32& ui32NOverlap);
+			bool computePeriodogram(const Eigen::VectorXd& vecXcdInput, Eigen::MatrixXcd& matXcdPeriodograms,const Eigen::VectorXd& vecXdWindow, const uint32_t& ui32NSegments, const uint32_t& ui32LSegments, const uint32_t& ui32NOverlap);
+			bool powerSpectralDensity(const Eigen::VectorXd& vecXdInput, Eigen::VectorXd& vecXdOutput, const Eigen::VectorXd& vecXdWindow, const uint32_t& ui32NSegments, const uint32_t& ui32LSegments, const uint32_t& ui32NOverlap);
+			bool crossSpectralDensity(const Eigen::VectorXd& vecXdInput1, const Eigen::VectorXd& vecXdInput2, Eigen::VectorXcd& vecXcdOutput, const Eigen::VectorXd& vecXdWindow, const uint32_t& ui32NSegments, const uint32_t& ui32LSegments, const uint32_t& ui32NOverlap);
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
-			virtual OpenViBE::boolean process(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
+			virtual bool process(void);
 
 
 			_IsDerivedFromClass_Final_(OpenViBEPlugins::CConnectivityAlgorithm, OVP_TypeId_Algorithm_MagnitudeSquaredCoherence);
@@ -46,17 +46,17 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pSignal1;
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pSignal2;
 
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_ui64SamplingRate;
+			OpenViBE::Kernel::TParameterHandler <uint64_t > ip_ui64SamplingRate;
 
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> ip_pChannelPairs;
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pMatrixMean;
 			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pMatrixSpectrum;
 
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_ui64SegmentLength;
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_ui64Overlap;
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::uint64> ip_ui64WindowType;
+			OpenViBE::Kernel::TParameterHandler <uint64_t > ip_ui64SegmentLength;
+			OpenViBE::Kernel::TParameterHandler <uint64_t > ip_ui64Overlap;
+			OpenViBE::Kernel::TParameterHandler <uint64_t > ip_ui64WindowType;
 
-			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_pFrequencyBandVector;
+			OpenViBE::Kernel::TParameterHandler <OpenViBE::IMatrix*> op_FrequencyAbscissaVector;
 
 		private:
 			// why members?
@@ -91,7 +91,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_TypeId_Algorithm_MagnitudeSquaredCoherence; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessing::CAlgorithmMagnitudeSquaredCoherence; }
 
-			virtual OpenViBE::boolean getAlgorithmPrototype(
+			virtual bool getAlgorithmPrototype(
 					OpenViBE::Kernel::IAlgorithmProto& rAlgorithmPrototype) const
 			{
 

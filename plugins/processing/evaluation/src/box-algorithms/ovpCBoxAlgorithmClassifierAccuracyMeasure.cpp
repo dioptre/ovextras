@@ -42,9 +42,9 @@ namespace
 	}
 };
 
-boolean CBoxAlgorithmClassifierAccuracyMeasure::initialize(void)
+bool CBoxAlgorithmClassifierAccuracyMeasure::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_vProgressBar.resize(getStaticBoxContext().getInputCount()-1); //-1 because the first input is the target
 
@@ -75,8 +75,9 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::initialize(void)
 	m_pMainWidget=GTK_WIDGET(gtk_builder_get_object(m_pMainWidgetInterface, "classifier-accuracy-measure-table"));
 	m_pToolbarWidget=GTK_WIDGET(gtk_builder_get_object(m_pToolbarWidgetInterface, "classifier-accuracy-measure-toolbar"));
 
-	getVisualisationContext().setWidget(m_pMainWidget);
-	getVisualisationContext().setToolbar(m_pToolbarWidget);
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+	m_visualizationContext->setWidget(*this, m_pMainWidget);
+	m_visualizationContext->setToolbar(*this, m_pToolbarWidget);
 
 	m_bShowPercentages=(gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pToolbarWidgetInterface, "show-percentages-toggle-button")))?true:false);
 	m_bShowScores=(gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(gtk_builder_get_object(m_pToolbarWidgetInterface, "show-scores-toggle-button")))?true:false);
@@ -84,9 +85,9 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierAccuracyMeasure::uninitialize(void)
+bool CBoxAlgorithmClassifierAccuracyMeasure::uninitialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	//decoders
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount()-1; i++)
@@ -105,19 +106,21 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::uninitialize(void)
 	g_object_unref(m_pMainWidgetInterface);
 	m_pMainWidgetInterface=NULL;
 
+	this->releasePluginObject(m_visualizationContext);
+
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierAccuracyMeasure::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmClassifierAccuracyMeasure::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 
 	return true;
 }
 
-boolean CBoxAlgorithmClassifierAccuracyMeasure::process(void)
+bool CBoxAlgorithmClassifierAccuracyMeasure::process(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	//input chunk 0 = targets
@@ -239,7 +242,7 @@ boolean CBoxAlgorithmClassifierAccuracyMeasure::process(void)
 
 							std::map<uint64,uint64>::iterator l_itTarget = m_mTargetsTimeLine.begin();
 							std::map<uint64,uint64>::iterator l_itNextTarget;
-							boolean l_bContinue = true;
+							bool l_bContinue = true;
 							while(l_itTarget != m_mTargetsTimeLine.end() && l_bContinue)
 							{
 								l_itNextTarget = l_itTarget;

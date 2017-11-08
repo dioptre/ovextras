@@ -127,8 +127,8 @@ namespace OpenViBEPlugins
 			const IBox* l_pBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
 			CString l_sFileName;
 
-			// Parses box settings to find input file's name
-			l_pBoxContext->getSettingValue(0, l_sFileName);
+			// Parses box settings to find input file's name			
+			l_sFileName=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
 			if(!parseConfigurationFile((const char*)l_sFileName))
 			{
@@ -169,11 +169,8 @@ namespace OpenViBEPlugins
 			g_signal_connect(m_pWidget, "key-release-event", G_CALLBACK(KeyboardStimulator_KeyReleaseCallback), this);
 			g_object_unref(l_pBuilder);
 
-			this->getVisualisationContext().setWidget(m_pWidget);
-
-			m_oEncoder.encodeHeader();
-
-			getBoxAlgorithmContext()->getDynamicBoxContext()->markOutputAsReadyToSend(0, 0, 0);
+			m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+			m_visualizationContext->setWidget(*this, m_pWidget);
 
 			return true;
 		}
@@ -188,12 +185,13 @@ namespace OpenViBEPlugins
 				m_pWidget = NULL;
 			}
 
+			this->releasePluginObject(m_visualizationContext);
 			return true;
 		}
 
 		boolean CKeyboardStimulator::processClock(CMessageClock &rMessageClock)
 		{
-			if(m_bError)
+			if (m_bError)
 			{
 				return false;
 			}
@@ -204,7 +202,13 @@ namespace OpenViBEPlugins
 				m_bUnknownKeyPressed = false;
 			}
 
-			const uint64 l_ui64CurrentTime=rMessageClock.getTime();
+			const uint64 l_ui64CurrentTime = rMessageClock.getTime();
+
+			if (l_ui64CurrentTime == 0)
+			{
+				m_oEncoder.encodeHeader();
+				getBoxAlgorithmContext()->getDynamicBoxContext()->markOutputAsReadyToSend(0, 0, 0);
+			}
 
 			if(l_ui64CurrentTime!=m_ui64PreviousActivationTime)
 			{

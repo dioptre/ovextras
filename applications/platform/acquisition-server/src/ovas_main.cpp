@@ -116,7 +116,9 @@ int main(int argc, char ** argv)
 	//SetThreadAffinityMask(hProcess, threadMask);
 
 	// Set the clock interval to 1ms (default on Win7: 15ms). This is needed to get under 15ms accurate sleeps,
-	// and the precision of all the non-QPC clocks.
+	// and improves the precision of non-QPC clocks. Note that since boost 1.58, the sleeps no longer seem
+	// to be 1ms accurate on Windows (as they seemed to be on 1.55), and sleep can oversleep even 10ms even with 
+	// timeBeginPeriod(1) called. @todo in the future, make sure nothing relies on sleep accuracy in openvibe
 	timeBeginPeriod(1); 
 
 	// Since AS is just sleeping when its not acquiring, a high priority should not be a problem. 
@@ -174,9 +176,17 @@ int main(int argc, char ** argv)
 			}
 			else
 			{
-				OpenViBEToolkit::initialize(*l_pKernelContext);
+				// @FIXME CERT what is the correct initialization convention? The legacy style from toolkit crashes.
+				// OpenViBEToolkit::initialize(*l_pKernelContext);
+				l_pKernelContext->initialize();
 
 				IConfigurationManager& l_rConfigurationManager=l_pKernelContext->getConfigurationManager();
+
+				// @FIXME CERT silent fail if missing file is provided
+				l_rConfigurationManager.addConfigurationFromFile(l_rConfigurationManager.expand("${Path_Data}/applications/acquisition-server/acquisition-server-defaults.conf"));
+
+				// User configuration mods
+				l_rConfigurationManager.addConfigurationFromFile(l_rConfigurationManager.expand("${Path_UserData}/openvibe-acquisition-server.conf"));
 
 				l_pKernelContext->getPluginManager().addPluginsFromFiles(l_rConfigurationManager.expand("${AcquisitionServer_Plugins}"));
 
@@ -188,13 +198,6 @@ int main(int argc, char ** argv)
 					l_pKernelContext->getLogManager() << LogLevel_Trace << "Adding command line configuration token [" << (*itr).first.c_str() << " = " << (*itr).second.c_str() << "]\n";
 					l_rConfigurationManager.addOrReplaceConfigurationToken((*itr).first.c_str(), (*itr).second.c_str());
 				}
-
-				//initialise Gtk before 3D context
-#if !GLIB_CHECK_VERSION(2,32,0)
-				// although deprecated in newer GTKs (no more needed after (at least) 2.24.13, deprecated in 2.32), we need to use this on Windows with the older GTK (2.22.1), or acquisition server will crash on startup
-				g_thread_init(NULL);
-#endif
-				gdk_threads_init();
 
 				if(!gtk_init_check(&argc, &argv))
 				{
@@ -239,9 +242,7 @@ int main(int argc, char ** argv)
 
 					try
 					{
-						gdk_threads_enter();	
-						gtk_main();
-						gdk_threads_leave();			
+						gtk_main();	
 					}
 					catch(...)
 					{

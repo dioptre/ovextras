@@ -17,11 +17,11 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::uint64 getClockFrequency(void);
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
-			virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
-			virtual OpenViBE::boolean process(void);
+			virtual uint64_t getClockFrequency(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
+			virtual bool processClock(OpenViBE::CMessageClock& rMessageClock);
+			virtual bool process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_AcquisitionClient);
 
@@ -30,7 +30,7 @@ namespace OpenViBEPlugins
 			OpenViBE::Kernel::IAlgorithmProxy* m_pAcquisitionStreamDecoder;
 
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > ip_pAcquisitionMemoryBuffer;
-			OpenViBE::Kernel::TParameterHandler < OpenViBE::uint64 > op_ui64BufferDuration;
+			OpenViBE::Kernel::TParameterHandler < uint64_t > op_ui64BufferDuration;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pExperimentInformationMemoryBuffer;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pSignalMemoryBuffer;
 			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMemoryBuffer* > op_pStimulationMemoryBuffer;
@@ -39,8 +39,8 @@ namespace OpenViBEPlugins
 
 			Socket::IConnectionClient* m_pConnectionClient;
 
-			OpenViBE::uint64 m_ui64LastChunkStartTime;
-			OpenViBE::uint64 m_ui64LastChunkEndTime;
+			uint64_t m_ui64LastChunkStartTime;
+			uint64_t m_ui64LastChunkEndTime;
 		};
 
 		class CBoxAlgorithmAcquisitionClientDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
@@ -61,7 +61,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Acquisition::CBoxAlgorithmAcquisitionClient; }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-connect"); }
 
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addOutput ("Experiment information",      OV_TypeId_ExperimentInformation);

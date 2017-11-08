@@ -125,7 +125,7 @@ public:
         rBoxAlgorithmPrototype.addOutput("EEG_Corrected",OV_TypeId_Signal);
         rBoxAlgorithmPrototype.addSetting("Filename b Matrix", OV_TypeId_Filename, "b-Matrix-EEG.txt");
 
-        rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+		rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 
         return true;
     }

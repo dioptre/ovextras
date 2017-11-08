@@ -119,6 +119,13 @@ boolean CBoxAlgorithmOpenALSoundPlayer::processClock(OpenViBE::CMessageClock& rM
 	return true;
 }
 
+boolean CBoxAlgorithmOpenALSoundPlayer::processInput(uint32 ui32InputIndex)
+{
+	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
+
+	return true;
+}
+
 boolean CBoxAlgorithmOpenALSoundPlayer::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();

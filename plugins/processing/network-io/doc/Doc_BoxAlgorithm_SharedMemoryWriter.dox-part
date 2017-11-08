@@ -46,8 +46,6 @@ Miscellaneous description
 __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_SharedMemoryWriter_Miscellaneous|
-	You can see how to read the shared memory from another application in the CoAdapt p300 stimulator code. 
-
-	You can also use the test_sharedmemory application to test the shared memory.
+	You can use the test_sharedmemory application to test the shared memory.
  * |OVP_DocEnd_BoxAlgorithm_SharedMemoryWriter_Miscellaneous|
  */

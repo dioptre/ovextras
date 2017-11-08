@@ -35,8 +35,7 @@ void CSpectralAnalysis::release(void)
 boolean CSpectralAnalysis::initialize()
 {
 	//reads the plugin settings
-	CString l_sSpectralComponents;
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0, l_sSpectralComponents);
+	const CString l_sSpectralComponents = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	uint64 l_ui64SpectralComponents=this->getTypeManager().getBitMaskEntryCompositionValueFromName(OVP_TypeId_SpectralComponent, l_sSpectralComponents);
 
 	m_bAmplitudeSpectrum = ((l_ui64SpectralComponents & OVP_TypeId_SpectralComponent_Amplitude.toUInteger())>0);
@@ -107,41 +106,32 @@ boolean CSpectralAnalysis::process()
 			//we need two matrices for the spectrum encoders, the Frequency bands and the one inherited form streamed matrix (see doc for details)
 			CMatrix* l_pFrequencyBands = new CMatrix();
 			CMatrix* l_pStreamedMatrix = new CMatrix();
-			l_pFrequencyBands->setDimensionCount(2);
+            l_pFrequencyBands->setDimensionCount(1);
 
 			// For real signals, if N is sample count, bins [0,N/2] (inclusive) contain non-redundant information, i.e. N/2+1 entries.
-			m_ui32HalfFFTSize = m_ui32SampleCount / 2 + 1;
+            m_ui32HalfFFTSize = m_ui32SampleCount / 2 + 1;
 			m_ui32FrequencyBandCount = m_ui32HalfFFTSize;
 
 			OpenViBEToolkit::Tools::MatrixManipulation::copyDescription(*l_pStreamedMatrix, *m_oSignalDecoder.getOutputMatrix());
-			l_pStreamedMatrix->setDimensionSize(1,m_ui32FrequencyBandCount);
-			l_pFrequencyBands->setDimensionSize(0,2);
-			l_pFrequencyBands->setDimensionSize(1,m_ui32FrequencyBandCount);
+			l_pStreamedMatrix->setDimensionSize(1,m_ui32FrequencyBandCount);		
+            l_pFrequencyBands->setDimensionSize(0,m_ui32FrequencyBandCount);
 			float64* l_pBuffer = l_pFrequencyBands->getBuffer();
 
 			// @fixme would be more proper to use 'bins', one bin with a hz tag per array entry
 			for (uint32 j=0; j < m_ui32FrequencyBandCount; j++)
-			{
-				l_float64BandStart = static_cast<float64>(j*(m_ui32SamplingRate/(float64)m_ui32SampleCount));
-				l_float64BandStop = static_cast<float64>((j+1)*(m_ui32SamplingRate/(float64)m_ui32SampleCount));
-				if (l_float64BandStop <l_float64BandStart )
-				{
-					l_float64BandStop = l_float64BandStart;
-				}
-
-				*(l_pBuffer+2*j) = l_float64BandStart;
-				*(l_pBuffer+2*j+1) = l_float64BandStop;
-
-
-				sprintf(l_sFrequencyBandName, "%lg-%lg", l_float64BandStart, l_float64BandStop);
-				l_pStreamedMatrix->setDimensionLabel(1,j,l_sFrequencyBandName);//set the names of the frequency bands
+            {
+                l_pBuffer[j] = j * (static_cast<double>(m_ui32SamplingRate) / m_ui32SampleCount);
+                sprintf(l_sFrequencyBandName, "%lg", l_pBuffer[j]);
+                l_pStreamedMatrix->setDimensionLabel(0,j,l_sFrequencyBandName);//set the names of the frequency bands
 			}
+
 
 			for(uint32 i=0;i<4;i++)
 			{
 				//copy the information for each encoder
-				OpenViBEToolkit::Tools::MatrixManipulation::copy(*m_vSpectrumEncoder[i].getInputMinMaxFrequencyBands(),*l_pFrequencyBands);
+				OpenViBEToolkit::Tools::MatrixManipulation::copy(*m_vSpectrumEncoder[i].getInputFrequencyAbscissa(),*l_pFrequencyBands);
 				OpenViBEToolkit::Tools::MatrixManipulation::copy(*m_vSpectrumEncoder[i].getInputMatrix(),*l_pStreamedMatrix);
+				m_vSpectrumEncoder[i].getInputSamplingRate().setReferenceTarget(m_oSignalDecoder.getOutputSamplingRate());
 			}
 
 			if (m_bAmplitudeSpectrum)

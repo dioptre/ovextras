@@ -25,17 +25,13 @@ boolean CBoxAlgorithmConfusionMatrix::initialize(void)
 	m_pConfusionMatrixAlgorithm = &this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_ClassId_Algorithm_ConfusionMatrix));
 	m_pConfusionMatrixAlgorithm->initialize();
 
-	CString l_sPercentageSetting;
 	TParameterHandler < OpenViBE::boolean > ip_bPercentages(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_Percentage));
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0,l_sPercentageSetting);
-	ip_bPercentages = this->getConfigurationManager().expandAsBoolean(l_sPercentageSetting);
+	ip_bPercentages = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
 	TParameterHandler<boolean> ip_bSums(m_pConfusionMatrixAlgorithm->getInputParameter(OVP_Algorithm_ConfusionMatrixAlgorithm_InputParameterId_Sums));
 	if(!(boolean)ip_bPercentages)
 	{
-		CString l_sSumsSetting;
-		getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1,l_sSumsSetting);
-		ip_bSums = this->getConfigurationManager().expandAsBoolean(l_sSumsSetting);
+		ip_bSums = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 	}
 	else
 	{
@@ -50,8 +46,7 @@ boolean CBoxAlgorithmConfusionMatrix::initialize(void)
 	l_vClassCodes.resize(l_ui32ClassCount);
 	for(uint32 i = 0; i< l_ui32ClassCount; i++)
 	{
-		CString l_sClassValue;
-		getStaticBoxContext().getSettingValue(i+FIRST_CLASS_SETTING_INDEX, l_sClassValue); // classes are settings from 2 to n
+		// classes are settings from 2 to n
 		l_vClassCodes[i] =(uint64)FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i+FIRST_CLASS_SETTING_INDEX);
 	}
 	// verification...
@@ -61,8 +56,7 @@ boolean CBoxAlgorithmConfusionMatrix::initialize(void)
 		{
 			if(l_vClassCodes[i] == l_vClassCodes[j])
 			{
-				CString l_sClassValue;
-				getStaticBoxContext().getSettingValue(i+FIRST_CLASS_SETTING_INDEX, l_sClassValue);
+				CString l_sClassValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), i + FIRST_CLASS_SETTING_INDEX);
 				getLogManager() << LogLevel_Error << "You must use unique classes to compute a confusion matrix. Class "<<i+1<<" and "<<j+1<< " are the same ("<<l_sClassValue.toASCIIString()<<").\n";
 				return false;
 			}
@@ -159,14 +153,14 @@ boolean CBoxAlgorithmConfusionMatrix::process(void)
 				if(m_pConfusionMatrixAlgorithm->isOutputTriggerActive(OVP_Algorithm_ConfusionMatrixAlgorithm_OutputTriggerId_ConfusionPerformed))
 				{
 					m_oOutputMatrixEncoder.encodeBuffer();
-					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+					l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(1, i));
 				}
 			}
 
 			if(m_oClassifierStimulationDecoder.isEndReceived())
 			{
 				m_oOutputMatrixEncoder.encodeEnd();
-				l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
+				l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(1, i), l_rDynamicBoxContext.getInputChunkEndTime(1, i));
 			}
 
 			l_rDynamicBoxContext.markInputAsDeprecated(1, i);

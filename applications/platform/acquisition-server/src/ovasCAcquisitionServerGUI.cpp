@@ -55,6 +55,7 @@
 #include <cstring>
 
 #include <cassert>
+#include <system/WindowsUtilities.h>
 //
 
 #define boolean OpenViBE::boolean
@@ -206,6 +207,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 #if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver
 
 	m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Loading Mensia Driver Collection\n";
+	m_pLibMensiaAcquisition = nullptr;
 	CString l_sMensiaDLLPath = m_pAcquisitionServer->getDriverContext().getConfigurationManager().expand("${Path_Bin}/openvibe-driver-mensia-acquisition.dll");
 	if(!std::ifstream(l_sMensiaDLLPath.toASCIIString()).is_open())
 	{
@@ -214,8 +216,8 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	}
 	else 
 	{
-		HINSTANCE l_oLibMensiaAcquisition; // Library Handle
-		l_oLibMensiaAcquisition = ::LoadLibrary(l_sMensiaDLLPath.toASCIIString());
+		m_pLibMensiaAcquisition = System::WindowsUtilities::utf16CompliantLoadLibrary(l_sMensiaDLLPath.toASCIIString());
+		HINSTANCE l_oLibMensiaAcquisition = static_cast<HINSTANCE>(m_pLibMensiaAcquisition);
 
 		//if it can't be open return FALSE;
 		if( l_oLibMensiaAcquisition == NULL)
@@ -242,7 +244,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 					strcpy(l_sDriverIdentifier, l_fpGetDriverID(l_uiDeviceIndex));
 					if (strcmp(l_sDriverIdentifier, "") != 0)
 					{
-						m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Found driver [" << l_sDriverIdentifier << "] in Mensia Driver Collection" << "\n";
+						m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Info << "Found driver [" << l_sDriverIdentifier << "] in Mensia Driver Collection" << "\n";
 						m_vDriver.push_back(new CDriverMensiaAcquisition(m_pAcquisitionServer->getDriverContext(), l_sDriverIdentifier));
 					}
 
@@ -278,7 +280,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	// Initialize GTK objects as the thread started below may refer to them quickly
 	this->initialize(); 
 
-	m_pThread=new boost::thread(CAcquisitionServerThreadHandle(*m_pAcquisitionServerThread));
+	m_pThread=new std::thread(CAcquisitionServerThreadHandle(*m_pAcquisitionServerThread));
 }
 
 CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
@@ -289,7 +291,7 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 	savePluginSettings();
 
 	// Saves current configuration
-	FILE* l_pFile=::fopen(m_rKernelContext.getConfigurationManager().expand("${CustomConfigurationApplication}").toASCIIString(), "wt");
+	FILE* l_pFile=::fopen(m_rKernelContext.getConfigurationManager().expand("${Path_UserData}/openvibe-acquisition-server.conf").toASCIIString(), "wt");
 	if(l_pFile)
 	{
 		::fprintf(l_pFile, "# This file is generated\n");
@@ -344,6 +346,16 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 
 	m_vDriver.clear();
 	m_pDriver=NULL;
+
+	// BEGIN MENSIA ACQUISITION DRIVERS
+	// For future implementation
+#if defined TARGET_OS_Windows && defined TARGET_HasMensiaAcquisitionDriver
+	typedef int32 (*MACQ_ReleaseMensiaAcquisitionLibrary)();
+	MACQ_ReleaseMensiaAcquisitionLibrary l_fpReleaseMensiaAcquisitionLibrary;
+	l_fpReleaseMensiaAcquisitionLibrary = (MACQ_ReleaseMensiaAcquisitionLibrary)::GetProcAddress(static_cast<HINSTANCE>(m_pLibMensiaAcquisition), "releaseAcquisitionLibrary");
+//	l_fpReleaseMensiaAcquisitionLibrary();
+#endif
+	// END MENSIA ACQUISITION DRIVERS
 
 	delete m_pThread;
 	m_pThread=NULL;

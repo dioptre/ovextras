@@ -15,7 +15,10 @@ using namespace OpenViBE::Kernel;
 	CApplication::CApplication()
 : m_bContinueRendering( true ),
 	m_ui32CurrentFrame( 0 ),
-	m_roGUIRenderer( NULL )
+	m_roGUIRenderer( NULL ),
+	m_poSceneNode( NULL ),
+	m_poPainter( NULL ),
+	m_poRoot( NULL )
 {
 }
 
@@ -63,7 +66,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	OpenViBE::CString l_sPluginsPath = l_poConfigurationManager->expand("${Kernel_3DVisualisationOgrePlugins}");
 
 	// Create LogManager to stop Ogre flooding the console and creating random files
-	
+	(*m_poLogManager) << LogLevel_Info << "Ogre plugins path is " << l_sPluginsPath << "\n";
 	
 	(*m_poLogManager) << LogLevel_Debug << "+ Creating Ogre logmanager\n";
 	Ogre::LogManager* l_poLogManager = new Ogre::LogManager();
@@ -115,7 +118,7 @@ bool CApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 	m_poCamera->setAspectRatio(Ogre::Real(m_poViewport->getActualWidth()) / Ogre::Real(m_poViewport->getActualHeight()));
 
 	m_poSceneNode = m_poSceneManager->getRootSceneNode()->createChildSceneNode("SSVEPApplicationNode");
-
+	
 	// initialize the painter object
 	(*m_poLogManager) << LogLevel_Debug << "+ m_poPainter = new CBasicPainter(...)\n";
 	m_poPainter = new CBasicPainter( this );

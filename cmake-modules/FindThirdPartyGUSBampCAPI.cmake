@@ -12,7 +12,7 @@ IF(WIN32)
 		"C:/Program Files (x86)/gtec/gUSBampCAPI/API" 
 		"C:/Program Files/gtec/gUSBampCAPI/API/Win32" 
 		"C:/Program Files (x86)/gtec/gUSBampCAPI/API/Win32"
-		${OV_CUSTOM_DEPENDENCIES_PATH})
+		${LIST_DEPENDENCIES_PATH})
 	IF(PATH_GUSBampCAPI)
 		OV_PRINT(OV_PRINTED "  Found gUSBampCAPI...")
 		INCLUDE_DIRECTORIES(${PATH_GUSBampCAPI})
@@ -25,7 +25,7 @@ IF(WIN32)
 		ENDIF(LIB_GUSBampCAPI)
 
 		# Copy the DLL file at install
-		INSTALL(PROGRAMS "${PATH_GUSBampCAPI}/gUSBamp.dll" DESTINATION "bin")
+		INSTALL(PROGRAMS "${PATH_GUSBampCAPI}/gUSBamp.dll" DESTINATION ${DIST_BINDIR})
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyGUSBampCAPI)
 		SET(OV_ThirdPartyGUSBAmp "YES")

@@ -66,8 +66,10 @@ int main(int argc, char** argv)
 			}
 			else
 			{
+				l_poKernelContext->initialize();
+				
 				OpenViBEToolkit::initialize(*l_poKernelContext);
-
+				
 				l_poConfigurationManager = &(l_poKernelContext->getConfigurationManager());
 				l_poConfigurationManager->createConfigurationToken("SSVEP_ApplicationDescriptor", CString(argv[1]));
 
@@ -79,8 +81,18 @@ int main(int argc, char** argv)
 		}
 	}
 
+	if (l_poConfigurationManager->expand("$Env{OGRE_HOME}").length() == 0) 
+	{
+		std::cout << "Error: OGRE_HOME environment variable is not set, this likely will not work.\n";
+		// Don't exit as we don't have any way to get the return value seen in designer
+	}
 
-
+	// We need this to address BuildType no longer in SDK 2.0
+#if defined(DEBUG)
+	l_poConfigurationManager->addOrReplaceConfigurationToken("BuildType", "Debug");
+#else
+	l_poConfigurationManager->addOrReplaceConfigurationToken("BuildType", "Release");
+#endif
 
 	OpenViBESSVEP::CApplication* app = NULL;
 
@@ -106,7 +118,13 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	app->setup(l_poKernelContext);
+	if (!app->setup(l_poKernelContext))
+	{
+		std::cout << "Aborting\n";
+		delete app;
+		return -1;
+	}
+		
 	app->go();
 
 	(*l_poLogManager) << OpenViBE::Kernel::LogLevel_Debug << "- app\n";

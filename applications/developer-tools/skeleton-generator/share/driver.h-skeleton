@@ -28,20 +28,20 @@ namespace OpenViBEAcquisitionServer
 		virtual ~CDriver@@ClassName@@(void);
 		virtual const char* getName(void);
 
-		virtual OpenViBE::boolean initialize(
-			const OpenViBE::uint32 ui32SampleCountPerSentBlock,
+		virtual bool initialize(
+			const uint32_t ui32SampleCountPerSentBlock,
 			OpenViBEAcquisitionServer::IDriverCallback& rCallback);
-		virtual OpenViBE::boolean uninitialize(void);
+		virtual bool uninitialize(void);
 
-		virtual OpenViBE::boolean start(void);
-		virtual OpenViBE::boolean stop(void);
-		virtual OpenViBE::boolean loop(void);
+		virtual bool start(void);
+		virtual bool stop(void);
+		virtual bool loop(void);
 
-		virtual OpenViBE::boolean isConfigurable(void);
-		virtual OpenViBE::boolean configure(void);
+		virtual bool isConfigurable(void);
+		virtual bool configure(void);
 		virtual const OpenViBEAcquisitionServer::IHeader* getHeader(void) { return &m_oHeader; }
 		
-		virtual OpenViBE::boolean isFlagSet(
+		virtual bool isFlagSet(
 			const OpenViBEAcquisitionServer::EDriverFlag eFlag) const
 		{
 			return eFlag==DriverFlag_IsUnstable;
@@ -56,7 +56,7 @@ namespace OpenViBEAcquisitionServer
 		// Replace this generic Header with any specific header you might have written
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 
-		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
+		uint32_t m_ui32SampleCountPerSentBlock;
 		OpenViBE::float32* m_pSample;
 	
 	private:
@@ -65,7 +65,7 @@ namespace OpenViBEAcquisitionServer
 		 * Insert here all specific attributes, such as USB port number or device ID.
 		 * Example :
 		 */
-		// OpenViBE::uint32 m_ui32ConnectionID;
+		// uint32_t m_ui32ConnectionID;
 	};
 };
 

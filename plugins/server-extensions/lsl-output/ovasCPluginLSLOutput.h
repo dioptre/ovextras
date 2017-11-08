@@ -27,14 +27,14 @@ namespace OpenViBEAcquisitionServer
 				CPluginLSLOutput(const OpenViBE::Kernel::IKernelContext& rKernelContext);
 				virtual ~CPluginLSLOutput();
 
-				virtual void startHook(const std::vector<OpenViBE::CString>& vSelectedChannelNames, OpenViBE::uint32 ui32SamplingFrequency, OpenViBE::uint32 ui32ChannelCount, OpenViBE::uint32 ui32SampleCountPerSentBlock);
+				virtual void startHook(const std::vector<OpenViBE::CString>& vSelectedChannelNames, uint32_t ui32SamplingFrequency, uint32_t ui32ChannelCount, uint32_t ui32SampleCountPerSentBlock);
 				virtual void stopHook();
 				virtual void loopHook(std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer,
-					OpenViBE::CStimulationSet& stimulationSet, OpenViBE::uint64 start, OpenViBE::uint64 end, OpenViBE::uint64 sampleTime);
+					OpenViBE::CStimulationSet& stimulationSet, uint64_t start, uint64_t end, uint64_t sampleTime);
 
 				// Plugin implementation
 
-				OpenViBE::boolean m_bIsLSLOutputEnabled;
+				bool m_bIsLSLOutputEnabled;
 				OpenViBE::CString m_sSignalStreamName;
 				OpenViBE::CString m_sSignalStreamID;
 				OpenViBE::CString m_sMarkerStreamName;
@@ -45,7 +45,7 @@ namespace OpenViBEAcquisitionServer
 				lsl::stream_outlet* m_oSignalOutlet;
 				lsl::stream_outlet* m_oStimulusOutlet;
 
-				OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
+				uint32_t m_ui32SampleCountPerSentBlock;
 		};
 
 

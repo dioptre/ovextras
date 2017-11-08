@@ -30,7 +30,8 @@ namespace OpenViBEAcquisitionServer
 			OpenViBE::CString& rSignalStream,
 			OpenViBE::CString& rSignalStreamID,
 			OpenViBE::CString& rMarkerStream,
-			OpenViBE::CString& rMarkerStreamID);
+			OpenViBE::CString& rMarkerStreamID,
+			OpenViBE::uint32& ui32FallbackSamplingRate);
 
 		virtual OpenViBE::boolean preConfigure(void);
 		virtual OpenViBE::boolean postConfigure(void);
@@ -48,6 +49,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::CString& m_rSignalStreamID;
 		OpenViBE::CString& m_rMarkerStream;
 		OpenViBE::CString& m_rMarkerStreamID;
+		OpenViBE::uint32& m_ui32FallbackSamplingRate;
 
 		std::vector<lsl::stream_info> m_vStreams;
 		std::vector<OpenViBE::int32> m_vSignalIndex;

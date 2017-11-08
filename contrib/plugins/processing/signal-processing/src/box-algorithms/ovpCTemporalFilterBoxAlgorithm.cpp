@@ -26,19 +26,12 @@ boolean CTemporalFilterBoxAlgorithm::initialize(void)
 	m_ui64LastEndTime = 0;
 
 	// compute filter coefs settings
-	CString l_oNameFilter;
-	CString l_oKindFilter;
-	CString l_oFilterOrder;
-	CString l_oLowPassBandEdge;
-	CString l_oHighPassBandEdge;
-	CString l_oPassBandRipple;
-
-	getStaticBoxContext().getSettingValue(0, l_oNameFilter);
-	getStaticBoxContext().getSettingValue(1, l_oKindFilter);
-	getStaticBoxContext().getSettingValue(2, l_oFilterOrder);
-	getStaticBoxContext().getSettingValue(3, l_oLowPassBandEdge);
-	getStaticBoxContext().getSettingValue(4, l_oHighPassBandEdge);
-	getStaticBoxContext().getSettingValue(5, l_oPassBandRipple);
+	const CString l_oNameFilter = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	const CString l_oKindFilter = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+	const CString l_oFilterOrder = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+	const CString l_oLowPassBandEdge = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
+	const CString l_oHighPassBandEdge = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+	const CString l_oPassBandRipple = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
 
 	uint64 l_ui64UInteger64Parameter;
 	int64 l_i64Integer64Parameter;
@@ -155,7 +148,7 @@ boolean CTemporalFilterBoxAlgorithm::processInput(uint32 ui32InputIndex)
 boolean CTemporalFilterBoxAlgorithm::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=getDynamicBoxContext();
-	IBox& l_rStaticBoxContext=getStaticBoxContext();
+    const IBox& l_rStaticBoxContext=getStaticBoxContext();
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
 	{

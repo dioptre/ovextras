@@ -19,37 +19,43 @@ namespace
 	class _AutoCast_
 	{
 	public:
-		_AutoCast_(IBoxAlgorithmContext& rBoxAlgorithtmContext, const uint32 ui32Index) : m_rBoxAlgorithmContext(rBoxAlgorithtmContext) { m_rBoxAlgorithmContext.getStaticBoxContext()->getSettingValue(ui32Index, m_sSettingValue); }
-		operator ::GdkColor (void)
+		_AutoCast_(const IBox& rBox, IConfigurationManager& rConfigurationManager, const uint32 ui32Index)
+			: m_rConfigurationManager(rConfigurationManager)
+		{
+			rBox.getSettingValue(ui32Index, m_sSettingValue);
+			m_sSettingValue = m_rConfigurationManager.expand(m_sSettingValue);
+		}
+		operator ::GdkColor(void)
 		{
 			::GdkColor l_oColor;
-			int r=0, g=0, b=0;
+			int r = 0, g = 0, b = 0;
 			sscanf(m_sSettingValue.toASCIIString(), "%i,%i,%i", &r, &g, &b);
-			l_oColor.pixel=0;
-			l_oColor.red=(r*65535)/100;
-			l_oColor.green=(g*65535)/100;
-			l_oColor.blue=(b*65535)/100;
+			l_oColor.pixel = 0;
+			l_oColor.red = (r * 65535) / 100;
+			l_oColor.green = (g * 65535) / 100;
+			l_oColor.blue = (b * 65535) / 100;
+			// std::cout << r << " " << g << " " << b << "\n";
 			return l_oColor;
 		}
 	protected:
-		IBoxAlgorithmContext& m_rBoxAlgorithmContext;
+		IConfigurationManager& m_rConfigurationManager;
 		CString m_sSettingValue;
 	};
 };
 
 boolean CBoxAlgorithmP300MagicCardVisualisation::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
 	m_pMainWidgetInterface=NULL;
 	m_pToolbarWidgetInterface=NULL;
 
-	m_sInterfaceFilename      =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
-	m_oBackgroundColor        =_AutoCast_(*this->getBoxAlgorithmContext(), 1);
-	m_oTargetBackgroundColor  =_AutoCast_(*this->getBoxAlgorithmContext(), 2);
-	m_oSelectedBackgroundColor=_AutoCast_(*this->getBoxAlgorithmContext(), 3);
-	m_ui64CardStimulationBase =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
-	CString l_sBackgroundImageFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
+	m_sInterfaceFilename               = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	m_oBackgroundColor                 = _AutoCast_(getStaticBoxContext(), getConfigurationManager(), 1);
+	m_oTargetBackgroundColor           = _AutoCast_(getStaticBoxContext(), getConfigurationManager(), 2);
+	m_oSelectedBackgroundColor         = _AutoCast_(getStaticBoxContext(), getConfigurationManager(), 3);
+	m_ui64CardStimulationBase          = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 4);
+	CString l_sBackgroundImageFilename = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 5);
 
 	for(uint32 i=6; i<l_rStaticBoxContext.getSettingCount(); i++)
 	{
@@ -122,8 +128,9 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::initialize(void)
 	gtk_builder_connect_signals(m_pMainWidgetInterface, NULL);
 	gtk_builder_connect_signals(m_pToolbarWidgetInterface, NULL);
 
-	getVisualisationContext().setWidget(m_pMainWindow);
-	getVisualisationContext().setToolbar(m_pToolbarWidget);
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+	m_visualizationContext->setWidget(*this, m_pMainWindow);
+	m_visualizationContext->setToolbar(*this, m_pToolbarWidget);
 
 	guint l_uiRowCount=0;
 	guint l_uiColumnCount=0;
@@ -193,6 +200,8 @@ boolean CBoxAlgorithmP300MagicCardVisualisation::uninitialize(void)
 		this->getAlgorithmManager().releaseAlgorithm(*m_pSequenceStimulationDecoder);
 		m_pSequenceStimulationDecoder=NULL;
 	}
+
+	this->releasePluginObject(m_visualizationContext);
 
 	return true;
 }

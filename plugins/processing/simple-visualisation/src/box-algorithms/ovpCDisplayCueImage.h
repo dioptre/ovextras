@@ -4,6 +4,7 @@
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
+#include <visualization-toolkit/ovviz_all.h>
 
 #include <gtk/gtk.h>
 #include <vector>
@@ -33,12 +34,12 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize();
-			virtual OpenViBE::boolean uninitialize();
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool initialize();
+			virtual bool uninitialize();
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
 			virtual OpenViBE::uint64 getClockFrequency(void){ return (128LL<<32); }				// 128hz
-			virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
-			virtual OpenViBE::boolean process();
+			virtual bool processClock(OpenViBE::CMessageClock& rMessageClock);
+			virtual bool process();
 			virtual void redraw(void);
 			virtual void resize(OpenViBE::uint32 ui32Width, OpenViBE::uint32 ui32Height);
 
@@ -63,10 +64,10 @@ namespace OpenViBEPlugins
 			OpenViBEToolkit::TStimulationEncoder<CDisplayCueImage> m_oStimulationEncoder;
 
 			// For the display of the images:
-			OpenViBE::boolean m_bImageRequested;        //when true: a new image must be drawn
+			bool m_bImageRequested;        //when true: a new image must be drawn
 			OpenViBE::int32   m_int32RequestedImageID;  //ID of the requested image. -1 => clear the screen
 
-			OpenViBE::boolean m_bImageDrawn;            //when true: the new image has been drawn
+			bool m_bImageDrawn;            //when true: the new image has been drawn
 			OpenViBE::int32   m_int32DrawnImageID;      //ID of the drawn image. -1 => clear the screen
 
 			// Data corresponding to each cue image. Could be refactored to a vector of structs.
@@ -81,8 +82,8 @@ namespace OpenViBEPlugins
 			//Settings
 			OpenViBE::uint32   m_ui32NumberOfCues;
 			OpenViBE::uint64   m_ui64ClearScreenStimulation;
-			OpenViBE::boolean  m_bFullScreen;
-			OpenViBE::boolean  m_bScaleImages;
+			bool  m_bFullScreen;
+			bool  m_bScaleImages;
 
 			//Start and end time of the last buffer
 			OpenViBE::uint64 m_ui64StartTime;
@@ -96,13 +97,16 @@ namespace OpenViBEPlugins
 			std::vector< OpenViBE::uint64 > m_vStimuliQueue;	
 			guint m_uiIdleFuncTag;
 			TCPTagging::IStimulusSender* m_pStimulusSender;
+
+		private:
+			OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
 		};
 
 		class CDisplayCueImageListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
 		{
 		public:
 
-			virtual OpenViBE::boolean onSettingAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onSettingAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				const OpenViBE::uint32 l_ui32PreviousCues = ((ui32Index - 1) - CDisplayCueImage::m_ui32NonCueSettingsCount) / 2 + 1;
 				const OpenViBE::uint32 l_ui32CueNumber = l_ui32PreviousCues + 1;
@@ -123,7 +127,7 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			virtual OpenViBE::boolean onSettingRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onSettingRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				// Remove also the associated setting in the other slot
 				const OpenViBE::uint32 l_ui32IndexNumber = (ui32Index - CDisplayCueImage::m_ui32NonCueSettingsCount);
@@ -150,7 +154,7 @@ namespace OpenViBEPlugins
 		private:
 
 			// This function is used to make sure the setting names and types are correct
-			OpenViBE::boolean checkSettingNames(OpenViBE::Kernel::IBox& rBox)
+			bool checkSettingNames(OpenViBE::Kernel::IBox& rBox)
 			{
 				char l_sName[1024];
 				for (OpenViBE::uint32 i = CDisplayCueImage::m_ui32NonCueSettingsCount; i < rBox.getSettingCount() - 1; i += 2)
@@ -177,7 +181,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Inria Sophia, Inria Rennes"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Display cue images when receiving stimulations"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Display cue images when receiving specified stimulations. Forwards the stimulations to the AS using TCP Tagging."); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualisation/Presentation"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Visualization/Presentation"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.2"); }
 			virtual void release(void)                                   { }
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_DisplayCueImage; }
@@ -186,12 +190,13 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SimpleVisualisation::CDisplayCueImage(); }
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CDisplayCueImageListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 
-			virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
+			virtual bool getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				rPrototype.addInput  ("Stimulations", OV_TypeId_Stimulations);
 				rPrototype.addOutput ("Stimulations (deprecated)", OV_TypeId_Stimulations);

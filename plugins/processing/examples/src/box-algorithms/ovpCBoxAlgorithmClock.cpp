@@ -21,13 +21,10 @@ uint64 CBoxAlgorithmClock::getClockFrequency(void)
 
 boolean CBoxAlgorithmClock::initialize(void)
 {
-	CString l_sSettingValue;
+	m_ui64ClockFrequency = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
-	getStaticBoxContext().getSettingValue(1, l_sSettingValue);
+	const CString l_sSettingValue = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 	m_eLogLevel=static_cast<ELogLevel>(getBoxAlgorithmContext()->getPlayerContext()->getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_LogLevel, l_sSettingValue));
-
-	getStaticBoxContext().getSettingValue(0, l_sSettingValue);
-	m_ui64ClockFrequency=::atoi(l_sSettingValue.toASCIIString());
 
 	getLogManager() << m_eLogLevel << "Clock frequency tuned to " << m_ui64ClockFrequency << "\n";
 

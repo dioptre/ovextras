@@ -1,26 +1,74 @@
 #!/bin/bash
 
 ov_build_type=Release
-if [ "$1" == "--debug" ]; then
-	ov_build_type=Debug
-	shift
-fi
-if [ "$1" == "--debug-symbols" ]; then
-	ov_build_type=RelWithDebInfo
-	shift
-fi
-if [ "$1" == "--profile" ]; then
-	ov_build_type=Profile
-	shift
-fi
+ov_script_dir="${PWD}"
+ov_build_dir="${ov_script_dir}/../local-tmp/linux-${ov_build_type}"
+ov_install_dir="${ov_script_dir}/../dist"
+
+while [[ $# -gt 0 ]]; do
+	key="$1"
+	case $key in
+		-h | --help)
+			usage
+			exit
+			;;
+		-v | --verbose)
+			verbose=1
+			;;
+		-d | --debug)
+			ov_build_type=Debug
+			;;
+		-r | --release)
+			ov_build_type=Release
+			;;
+		--debug-symbols)
+			ov_build_type=RelWithDebInfo
+			;;
+		--profile)
+			ov_build_type=RelWithDebInfo
+			extra_flags="-DCMAKE_CXX_FLAGS_RELWITHDEBINFO='-O2 -g -DNDEBUG -pg' -DCMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO='-pg'"
+			;;
+		--build-dir)
+			ov_build_dir="$2"
+			shift
+			;;
+		--install-dir)
+			ov_install_dir="$2"
+			shift
+			;;
+		--sdk)
+			ov_sdk_dir="-DOPENVIBE_SDK_PATH=$2"
+			shift
+			;;
+		--designer)
+			ov_designer_dir="-DDESIGNER_SDK_PATH=$2"
+			shift
+			;;
+		--dependencies-dir)
+			dependencies_path="-DLIST_DEPENDENCIES_PATH=$2"
+			shift
+			;;
+		--sdk-src)
+			ov_sdk_src_dir="$2"
+			shift
+			;;
+		--userdata-subdir)
+			UserDataSubdir="-DOV_CONFIG_SUBDIR=$2"
+			shift
+			;;
+		*)
+			echo "ERROR: Unknown parameter $key"
+			exit 1
+			;;
+	esac
+	shift # past argument or value
+done
+
+
 
 echo ""
 echo "_______________________________________________________________________________"
 echo ""
-		
-ov_script_dir="${PWD}"
-ov_build_dir="${ov_script_dir}/../local-tmp/linux-${ov_build_type}"
-ov_install_dir="${ov_script_dir}/../dist"
 
 mkdir -p "${ov_build_dir}" 2> /dev/null
 pushd "${ov_build_dir}" 2> /dev/null
@@ -29,14 +77,7 @@ echo ""
 echo "Creating makefiles..."
 echo ""
 
-
-if [ ${ov_build_type} == Profile ]; then
-	cmake ${ov_script_dir}/.. -DCMAKE_CXX_FLAGS_RELWITHDEBINFO='-O2 -g -DNDEBUG -pg' -DCMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO='-pg' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=${ov_install_dir}
-else
-	cmake ${ov_script_dir}/.. -DCMAKE_BUILD_TYPE=${ov_build_type} -DCMAKE_INSTALL_PREFIX=${ov_install_dir}
-fi
-
- 
+cmake ${ov_script_dir}/.. -DCMAKE_BUILD_TYPE=${ov_build_type} ${extra_flags} -DCMAKE_INSTALL_PREFIX=${ov_install_dir} ${ov_sdk_dir} ${ov_designer_dir} ${dependencies_path} ${UserDataSubdir}
 
 if [ $? -eq 0 ]; then
 	echo CMake has been called successfully !

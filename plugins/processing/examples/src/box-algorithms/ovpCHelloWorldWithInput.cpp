@@ -12,15 +12,15 @@ void CHelloWorldWithInput::release(void)
 	delete this;
 }
 
-boolean CHelloWorldWithInput::processInput(uint32 ui32InputIndex)
+bool CHelloWorldWithInput::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 
-boolean CHelloWorldWithInput::process(void)
+bool CHelloWorldWithInput::process(void)
 {
-	IBox* l_pStaticBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
+	const IBox* l_pStaticBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
 	IBoxIO* l_pDynamicBoxContext=getBoxAlgorithmContext()->getDynamicBoxContext();
 
 	uint64 l_ui64StartTime=0;
@@ -39,8 +39,7 @@ boolean CHelloWorldWithInput::process(void)
 		}
 	}
 
-	CString l_sMyGreeting;
-	getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(0, l_sMyGreeting);
+	const CString l_sMyGreeting = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 	getLogManager() << OpenViBE::Kernel::LogLevel_Info << ": " << l_sMyGreeting << "\n";
 
 	return true;

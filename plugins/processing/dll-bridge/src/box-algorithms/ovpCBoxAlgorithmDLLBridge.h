@@ -25,12 +25,12 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize();
-			virtual OpenViBE::boolean uninitialize();
+			virtual bool initialize();
+			virtual bool uninitialize();
 
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
 			
-			virtual OpenViBE::boolean process();
+			virtual bool process();
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm<OpenViBE::Plugins::IBoxAlgorithm>, OVP_ClassId_DLLBridge)
 
@@ -69,7 +69,7 @@ namespace OpenViBEPlugins
 		class CDLLBridgeListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
 		{
 		public:
-			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index)
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getInputType(ui32Index, l_oTypeIdentifier);
@@ -77,7 +77,7 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			virtual OpenViBE::boolean onOutputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onOutputTypeChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index)
 			{
 				OpenViBE::CIdentifier l_oTypeIdentifier;
 				rBox.getOutputType(ui32Index, l_oTypeIdentifier);
@@ -107,7 +107,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new OpenViBEPlugins::DLLBridge::CDLLBridgeListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
-			virtual OpenViBE::boolean getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
+			virtual bool getBoxPrototype(OpenViBE::Kernel::IBoxProto& rPrototype) const
 			{
 				rPrototype.addSetting("DLL file", OV_TypeId_Filename, "");
 				rPrototype.addSetting("Parameters", OV_TypeId_String, "");
@@ -123,7 +123,7 @@ namespace OpenViBEPlugins
 				rPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyInput);
 				rPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 
-				rPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 
 				return true;
 			}

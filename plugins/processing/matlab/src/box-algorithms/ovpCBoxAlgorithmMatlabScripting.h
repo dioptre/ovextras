@@ -24,30 +24,31 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::uint64 getClockFrequency(void);
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
-			virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
-			virtual OpenViBE::boolean process(void);
+			virtual uint64_t getClockFrequency(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
+			virtual bool processClock(OpenViBE::CMessageClock& rMessageClock);
+			virtual bool process(void);
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex) override;
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_MatlabScripting);
 
 		private:
-			OpenViBE::uint64 m_ui64ClockFrequency;
+			uint64_t m_ui64ClockFrequency;
 
-			std::map<OpenViBE::uint32,OpenViBEToolkit::TDecoder<CBoxAlgorithmMatlabScripting>*> m_mDecoders;
-			OpenViBE::uint32 m_NbInputHeaderSent;
+			std::map<uint32_t,OpenViBEToolkit::TDecoder<CBoxAlgorithmMatlabScripting>*> m_mDecoders;
+			uint32_t m_NbInputHeaderSent;
 
-			std::map<OpenViBE::uint32,OpenViBEToolkit::TEncoder<CBoxAlgorithmMatlabScripting>*> m_mEncoders;
-			std::map<OpenViBE::uint32,OpenViBE::boolean> m_mOutputHeaderState;
+			std::map<uint32_t,OpenViBEToolkit::TEncoder<CBoxAlgorithmMatlabScripting>*> m_mEncoders;
+			std::map<uint32_t,bool> m_mOutputHeaderState;
 
 
 			void* m_pMatlabEngineHandle;
 			OpenViBE::CString m_sBoxInstanceVariableName; //must be unique
-			OpenViBE::boolean OpenMatlabEngineSafely(void);
-			OpenViBE::boolean CloseMatlabEngineSafely(void);
+			bool OpenMatlabEngineSafely(void);
+			bool CloseMatlabEngineSafely(void);
 
-			CMatlabHelper m_oMatlabHelper;
+			CMatlabHelper* m_oMatlabHelper;
 
 			OpenViBE::CString m_sMatlabPath;           // On Linux, path of the executable. On Windows, the executable directory.
 			OpenViBE::CString m_sProcessFunction;
@@ -55,9 +56,9 @@ namespace OpenViBEPlugins
 			OpenViBE::CString m_sUninitializeFunction;
 
 			char* m_sMatlabBuffer;
-			OpenViBE::boolean m_bErrorDetected;
-			OpenViBE::boolean printOutputBufferWithFormat(void);
-			OpenViBE::boolean checkFailureRoutine(OpenViBE::boolean bResult, const OpenViBE::CString &msg);
+			bool m_bErrorDetected;
+			bool printOutputBufferWithFormat(void);
+			bool checkFailureRoutine(bool bResult, const OpenViBE::CString &msg);
 			void sanitizePath(OpenViBE::CString &sPathToModify) const;
 
 			//void sendOutputHeader(OpenViBE::CIdentifier idOutputType);
@@ -69,7 +70,7 @@ namespace OpenViBEPlugins
 
 		public:
 
-			virtual OpenViBE::boolean onSettingTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onSettingTypeChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index)
 			{
 				//we must have the first STATIC_SETTINGS_COUNT settings
 				if(ui32Index < 6)
@@ -80,16 +81,16 @@ namespace OpenViBEPlugins
 
 				return true;
 			}
-			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index)
 			{
 				//we must have the first STATIC_SETTINGS_COUNT settings
 				
 				OpenViBE::CString l_sSettingValue;
 				rBox.getSettingValue(0, l_sSettingValue);
-				OpenViBE::uint64 l_ui64Value=::atoi(l_sSettingValue.toASCIIString());
+				uint64_t l_ui64Value = ::atoi(l_sSettingValue.toASCIIString());
 				if(ui32Index == 0 && (l_ui64Value < 1 || l_ui64Value > 128))
 				{
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Warning << "Clock Frequency must be an integer between 1 and 128 Hz. Falling back to default.\n";
+					OV_WARNING_K("Clock Frequency must be an integer between 1 and 128 Hz. Falling back to default.");
 					rBox.setSettingValue(ui32Index, "64");
 				}
 
@@ -117,7 +118,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_MatlabScripting; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::Matlab::CBoxAlgorithmMatlabScripting; }
 
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addSetting("Box clock frequency in Hz",   OV_TypeId_Integer, "64");
@@ -129,7 +130,7 @@ namespace OpenViBEPlugins
 				// Background: Matlab's engOpen() takes a different argument on Windows and on Linux. On Windows, we need to have Matlab
 				// on PATH, in Linux we need to provide a full path of the executable. However, we'd like our example scenarios to give
 				// correct instructions to the user on both platforms, hence we use a setting that contains the information for both use-cases.
-				rBoxAlgorithmPrototype.addSetting("Matlab executable (path)",      OV_TypeId_Filename, "C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe");
+				rBoxAlgorithmPrototype.addSetting("Matlab executable (path)",      OV_TypeId_Filename, "C:/Program Files (x86)/MATLAB/R2013b/bin/win32/matlab.exe");
 #else
 #endif
 				rBoxAlgorithmPrototype.addSetting("Matlab working directory",   OV_TypeId_String, "${Player_ScenarioDirectory}");
@@ -144,7 +145,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 
-				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				//rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 
 				return true;
 			}

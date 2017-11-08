@@ -47,6 +47,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32TotalSampleCount;
 		OpenViBE::uint64 m_ui64StartTime;
 
+		OpenViBE::uint32* m_pSampleCountPerBuffer;
+
 	private:
 		// Settings
 		OpenViBE::CString m_sDeviceURL;

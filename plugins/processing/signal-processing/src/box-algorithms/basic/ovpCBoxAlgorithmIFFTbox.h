@@ -33,19 +33,19 @@ namespace OpenViBEPlugins
 		public:
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
 				
 			//Here is the different process callbacks possible
 			// - On clock ticks :
-			//virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
+			//virtual bool processClock(OpenViBE::CMessageClock& rMessageClock);
 			// - On new input received (the most common behaviour for signal processing) :
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool processInput(uint32_t ui32InputIndex);
 			
 			// If you want to use processClock, you must provide the clock frequency.
 			//virtual OpenViBE::uint64 getClockFrequency(void);
 			
-			virtual OpenViBE::boolean process(void);
+			virtual bool process(void);
 
 			// As we do with any class in openvibe, we use the macro below 
 			// to associate this box to an unique identifier. 
@@ -60,13 +60,13 @@ namespace OpenViBEPlugins
 			// Signal stream encoder
 			OpenViBEToolkit::TSignalEncoder < CBoxAlgorithmIFFTbox > m_oAlgo1_SignalEncoder;
 		private:
-			std::vector<itpp::Vec<std::complex<double> > > m_frequencyBuffer;
-			std::vector<itpp::Vec<double> > m_signalBuffer;
-			OpenViBE::uint32 m_bufferStartTime;
-			OpenViBE::uint32 m_bufferEndTime;
-			OpenViBE::uint32 m_ui32SampleCount;
-			OpenViBE::uint32 m_channelsNumber;
-			OpenViBE::boolean m_bHeaderSent;
+			itpp::Vec<std::complex<double> > m_frequencyBuffer;
+			itpp::Vec<double> m_signalBuffer;
+			uint32_t m_bufferStartTime;
+			uint32_t m_bufferEndTime;
+			uint32_t m_ui32SampleCount;
+			uint32_t m_channelsNumber;
+			bool m_bHeaderSent;
 		};
 
 		/**
@@ -87,14 +87,14 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Compute Inverse Fast Fourier Transformation"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("Compute Inverse Fast Fourier Transformation (depends on ITPP/fftw)"); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Spectral analysis"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("Signal processing/Spectral Analysis"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("0.2"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-execute"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_IFFTbox; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::SignalProcessingBasic::CBoxAlgorithmIFFTbox; }
 			
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput("real part",OV_TypeId_Spectrum);
@@ -102,7 +102,7 @@ namespace OpenViBEPlugins
 				
 				rBoxAlgorithmPrototype.addOutput("Signal output",OV_TypeId_Signal);
 				
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

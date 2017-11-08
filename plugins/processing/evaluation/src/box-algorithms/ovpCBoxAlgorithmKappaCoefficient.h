@@ -12,6 +12,8 @@
 #include <sstream>
 #include <gtk/gtk.h>
 
+#include <visualization-toolkit/ovviz_all.h>
+
 #define OVP_ClassId_BoxAlgorithm_KappaCoefficient OpenViBE::CIdentifier         (0x160D8F1B, 0xD864C5BB)
 #define OVP_ClassId_BoxAlgorithm_KappaCoefficientDesc OpenViBE::CIdentifier     (0xD8BA2199, 0xD252BECB)
 
@@ -32,31 +34,33 @@ namespace OpenViBEPlugins
 		public:
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
 				
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
-			virtual OpenViBE::boolean process(void);
+			virtual bool processInput(uint32_t ui32InputIndex);
+			virtual bool process(void);
 			
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_KappaCoefficient)
 
 		protected:
-				void updateKappaValue();
+			void updateKappaValue();
 
-				OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmKappaCoefficient > m_oTargetStimulationDecoder;
-				OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmKappaCoefficient > m_oClassifierStimulationDecoder;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmKappaCoefficient > m_oTargetStimulationDecoder;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmKappaCoefficient > m_oClassifierStimulationDecoder;
 
-				OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmKappaCoefficient > m_oOutputMatrixEncoder;
+			OpenViBEToolkit::TStreamedMatrixEncoder < CBoxAlgorithmKappaCoefficient > m_oOutputMatrixEncoder;
 
-				OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pConfusionMatrix;
+			OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > op_pConfusionMatrix;
 
-				OpenViBE::Kernel::IAlgorithmProxy* m_pConfusionMatrixAlgorithm;
+			OpenViBE::Kernel::IAlgorithmProxy* m_pConfusionMatrixAlgorithm;
 
-				OpenViBE::uint32 m_ui32AmountClass;
-				OpenViBE::uint64 m_ui64CurrentProcessingTimeLimit;
-				OpenViBE::float64 m_f64KappaCoefficient;
+			uint32_t m_ui32AmountClass;
+			uint64_t m_ui64CurrentProcessingTimeLimit;
+			OpenViBE::float64 m_f64KappaCoefficient;
 
-				::GtkWidget* m_pKappaLabel;
+			::GtkWidget* m_pKappaLabel;
+		private:
+			OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
 		};
 		
 		
@@ -66,7 +70,7 @@ namespace OpenViBEPlugins
 		{
 		public:
 
-			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) {
+			virtual bool onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) {
 				if(ui32Index == 0)
 				{
 					OpenViBE::CString l_sClassCount;
@@ -143,12 +147,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmKappaCoefficientListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePluginFunctionality) const
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePluginFunctionality == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput("Expected stimulations",       OV_TypeId_Stimulations);
@@ -161,7 +165,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Stimulation of class 2",    OV_TypeId_Stimulation, "OVTK_StimulationId_Label_02");
 
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

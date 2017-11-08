@@ -226,6 +226,8 @@ boolean CDriftCorrection::estimateDrift(const uint64 ui64NewSamples)
 
 	const uint64 l_ui64CurrentTime = System::Time::zgetTime();
 
+//	m_rKernelContext.getLogManager() << LogLevel_Info << "Drift measured at " << ITimeArithmetics::timeToSeconds(l_ui64CurrentTime - m_ui64StartTime) * 1000 << "ms.\n";
+
 	const float64 l_f64Jitter = computeJitter(l_ui64CurrentTime);
 
 	m_vJitterEstimate.push_back(l_f64Jitter);

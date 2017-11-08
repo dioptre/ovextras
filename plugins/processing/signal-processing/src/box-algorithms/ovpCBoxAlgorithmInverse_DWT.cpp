@@ -22,10 +22,10 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::SignalProcessing;
 
-boolean CBoxAlgorithmInverse_DWT::initialize(void)
+bool CBoxAlgorithmInverse_DWT::initialize(void)
 {
 
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_AlgoInfo_SignalDecoder.initialize(*this,0);
 
@@ -43,9 +43,9 @@ boolean CBoxAlgorithmInverse_DWT::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmInverse_DWT::uninitialize(void)
+bool CBoxAlgorithmInverse_DWT::uninitialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 
 	m_AlgoInfo_SignalDecoder.uninitialize();
 
@@ -69,18 +69,18 @@ boolean CBoxAlgorithmInverse_DWT::uninitialize(void)
 
 
 
-boolean CBoxAlgorithmInverse_DWT::processInput(uint32 ui32InputIndex)
+bool CBoxAlgorithmInverse_DWT::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 
 	return true;
 }
 
-boolean CBoxAlgorithmInverse_DWT::process(void)
+bool CBoxAlgorithmInverse_DWT::process(void)
 {
 
 	// the static box context describes the box inputs, outputs, settings structures
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext = this->getStaticBoxContext();
 	// the dynamic box context describes the current state of the box inputs and outputs (i.e. the chunks)
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 

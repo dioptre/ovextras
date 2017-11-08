@@ -16,10 +16,6 @@ uint64 CBoxAlgorithmNothing::getClockFrequency(void)
 
 boolean CBoxAlgorithmNothing::initialize(void)
 {
-	// CString l_sSettingValue;
-	// getStaticBoxContext().getSettingValue(0, l_sSettingValue);
-	// ...
-
 	return true;
 }
 

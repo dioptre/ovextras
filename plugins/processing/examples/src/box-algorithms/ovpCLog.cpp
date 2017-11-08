@@ -42,7 +42,7 @@ boolean CLog::process(void)
 {
 	getBoxAlgorithmContext()->getPlayerContext()->getLogManager() << LogLevel_Info << "process\n";
 
-	IBox* l_pStaticBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
+	const IBox* l_pStaticBoxContext=getBoxAlgorithmContext()->getStaticBoxContext();
 	IBoxIO* l_pDynamicBoxContext=getBoxAlgorithmContext()->getDynamicBoxContext();
 
 	for(uint32 i=0; i<l_pStaticBoxContext->getInputCount(); i++)

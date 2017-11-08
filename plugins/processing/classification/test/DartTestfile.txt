@@ -5,12 +5,10 @@
 IF(WIN32)
 	SET(EXT cmd)
 	SET(OS_FLAGS "--no-pause")
-	SET(OV_LOGFILE "$ENV{APPDATA}/openvibe/log/openvibe-designer.log")
-ELSE(WIN32)
+ELSE()
 	SET(EXT sh)
 	SET(OS_FLAGS "")
-	SET(OV_LOGFILE "$ENV{HOME}/.config/openvibe/log/openvibe-designer.log")
-ENDIF(WIN32)
+ENDIF()
 
 # Misc classifier tests
 
@@ -21,9 +19,9 @@ FOREACH(TEST_NAME ${TEST_SCENARIOS})
 	SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
 	ADD_TEST(clean_Classification_${TEST_NAME} rm -f ${OV_LOGFILE} classifiers/multiclass.xml)
-	ADD_TEST(run_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" "--config" "$ENV{OV_BINARY_PATH}/share/openvibe/kernel/openvibe_test.conf" "--play-fast" ${SCENARIO_TO_TEST})
+	ADD_TEST(run_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" --define Plugin_Classification_RandomizeKFoldTestData true "--play-fast" ${SCENARIO_TO_TEST})
 	ADD_TEST(compare_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${OV_LOGFILE}")
-	ADD_TEST(run_Classification_${TEST_NAME}_ProcessorBox "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" "--config" "$ENV{OV_BINARY_PATH}/share/openvibe/kernel/openvibe_test.conf" "--play-fast" "ProcessorBox-Test.xml")
+	ADD_TEST(run_Classification_${TEST_NAME}_ProcessorBox "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" --define Plugin_Classification_RandomizeKFoldTestData true "--play-fast" "ProcessorBox-Test.xml")
 	
 	# It would be better to clean last, but we can't do this as it will delete the 
 	# output we wish to include, and we can't prevent clean from running if a prev. test fails
@@ -49,7 +47,7 @@ FOREACH(TEST_NAME ${TEST_SCENARIOS})
 	SET(SCENARIO_TO_TEST "shrinkageLDA/${TEST_NAME}.xml")
 
 	ADD_TEST(clean_Classification_${TEST_NAME} rm -f ${OV_LOGFILE})
-	ADD_TEST(run_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" "--config" "$ENV{OV_BINARY_PATH}/share/openvibe/kernel/openvibe_test.conf" "--play-fast" ${SCENARIO_TO_TEST})
+	ADD_TEST(run_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" --define Plugin_Classification_RandomizeKFoldTestData true "--play-fast" ${SCENARIO_TO_TEST})
 	ADD_TEST(compare_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${OV_LOGFILE}" "${TEST_THRESHOLD}")
 	
 	# It would be better to clean last, but we can't do this as it will delete the 

@@ -12,7 +12,9 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED ${source_files}
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
 	VERSION ${PROJECT_VERSION}
 	SOVERSION ${PROJECT_VERSION_MAJOR}
-	COMPILE_FLAGS "-DOV_Exports -DOV_Shared")
+	COMPILE_FLAGS "-DOVP_Exports -DOVP_Shared")
+
+INCLUDE_DIRECTORIES("../../../contrib/packages/wavelet2d")
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
@@ -23,9 +25,6 @@ INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyEigen")
 INCLUDE("FindThirdPartyFFTW3")		# used by the wavelet library
 INCLUDE("FindThirdPartyITPP")		# note that itpp gives the fftw3 on Win
-#for additionnal coadapt plugins, the following
-# INCLUDE("FindThirdPartyBoost_Math")
-# INCLUDE("FindOpenViBEModuleXML")
 
 # ---------------------------------
 # Target macros
@@ -33,34 +32,20 @@ INCLUDE("FindThirdPartyITPP")		# note that itpp gives the fftw3 on Win
 # Defines target architecture
 # Defines target compiler
 # ---------------------------------
-IF(WIN32)
-	ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
-	ADD_DEFINITIONS(-DTARGET_OS_Windows)
-	ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
-	ADD_DEFINITIONS(-DTARGET_COMPILER_VisualStudio)
-ENDIF(WIN32)
-IF(UNIX)
-	# ADD_DEFINITIONS(-fvisibility=hidden) # This flag should be present... man gcc
-	ADD_DEFINITIONS(-g)
-	ADD_DEFINITIONS(-fnon-call-exceptions)
-	ADD_DEFINITIONS(-DTARGET_OS_Linux)
-	ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
-	ADD_DEFINITIONS(-DTARGET_COMPILER_GCC)
-ENDIF(UNIX)
+SET_BUILD_PLATFORM()
 
 IF(OV_COMPILE_TESTS)
-    ADD_SUBDIRECTORY("test")
+	ADD_SUBDIRECTORY("test")
 ENDIF(OV_COMPILE_TESTS)
 
 # -----------------------------
 # Install files
 # -----------------------------
 INSTALL(TARGETS ${PROJECT_NAME}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+	RUNTIME DESTINATION ${DIST_BINDIR}
+	LIBRARY DESTINATION ${DIST_LIBDIR}
+	ARCHIVE DESTINATION ${DIST_LIBDIR})
 
-INSTALL(DIRECTORY signals/       DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/signals         PATTERN ".svn" EXCLUDE)
-INSTALL(DIRECTORY box-tutorials/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/box-tutorials   PATTERN ".svn" EXCLUDE)
+INSTALL(DIRECTORY signals/       DESTINATION ${DIST_DATADIR}/openvibe/scenarios/signals)
+INSTALL(DIRECTORY box-tutorials/ DESTINATION ${DIST_DATADIR}/openvibe/scenarios/box-tutorials)
 	
-#INSTALL(DIRECTORY src/   DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "doc" EXCLUDE)

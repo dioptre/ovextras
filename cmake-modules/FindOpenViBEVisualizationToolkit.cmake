@@ -1,0 +1,63 @@
+# ---------------------------------
+# Finds openvibe-toolkit
+# Adds library to target
+# Adds include path
+# ---------------------------------
+option(LINK_OPENVIBE_VISUALIZATION_TOOLKIT "By default, link openvibe-visualization-toolkit, otherwise only use the includes" ON)
+option(DYNAMIC_LINK_OPENVIBE_VISUALIZATION_TOOLKIT "Dynamically link openvibe-visualization-toolkit" ON)
+
+if(NOT CMAKE_BUILD_TYPE AND CMAKE_GENERATOR MATCHES "Visual Studio*")
+	set(MULTI_BUILD TRUE)
+elseif(CMAKE_BUILD_TYPE AND OV_PACKAGE)
+	set(SOLO_PACKAGE TRUE)
+elseif(CMAKE_BUILD_TYPE)
+	set(SOLO_BUILD TRUE)
+else()
+	message(FATAL_ERROR "Build should specify a type or use a multi-type generator (like Visual Studio)")
+endif()
+
+if(DYNAMIC_LINK_OPENVIBE_VISUALIZATION_TOOLKIT)
+	set(OPENVIBE_VISUALIZATION_TOOLKIT_LINKING "")
+	add_definitions(-DOVVIZ_Shared)
+	if(WIN32)
+		set(LIB_EXT lib)
+	elseif(APPLE)
+		set(LIB_PREFIX "lib")
+		set(LIB_EXT "dylib")
+	elseif(UNIX)
+		set(LIB_PREFIX "lib")
+		set(LIB_EXT "so")
+	endif()
+else()
+	set(OPENVIBE_VISUALIZATION_TOOLKIT_LINKING "-static")
+	add_definitions(-DOVVIZ_Static)
+	if(WIN32)
+		set(LIB_EXT lib)
+	elseif(UNIX)
+		set(LIB_PREFIX "lib")
+		set(LIB_EXT "a")
+	endif()
+endif()
+
+# set(PATH_OPENVIBE_VISUALIZATION_TOOLKIT "PATH_OPENVIBE_VISUALIZATION_TOOLKIT-NOTFOUND")
+if(MULTI_BUILD)
+	# set(DESIGNER_SDK_PATH ${DESIGNER_SDK_PATH}/$<UPPER_CASE:$<CONFIG>>)
+	set(PATH_OPENVIBE_VISUALIZATION_TOOLKIT ${DESIGNER_SDK_PATH}/include)
+else()
+	find_path(PATH_OPENVIBE_VISUALIZATION_TOOLKIT visualization-toolkit/ovviz_all.h PATHS ${DESIGNER_SDK_PATH}/include/ NO_DEFAULT_PATH)
+endif()
+
+if(PATH_OPENVIBE_VISUALIZATION_TOOLKIT)
+    message(STATUS "  Found openvibe-visualization-toolkit...  ${PATH_OPENVIBE_VISUALIZATION_TOOLKIT}")
+	include_directories(${PATH_OPENVIBE_VISUALIZATION_TOOLKIT}/)
+		
+	if(LINK_OPENVIBE_VISUALIZATION_TOOLKIT)
+	    # find_library(VISUALIZATION_TOOLKIT_LIBRARY openvibe-visualization-toolkit${OPENVIBE_VISUALIZATION_TOOLKIT_LINKING} PATHS ${DESIGNER_SDK_PATH}/lib NO_DEFAULT_PATH)
+		set(VISUALIZATION_TOOLKIT_LIBRARY ${DESIGNER_SDK_PATH}/lib/${LIB_PREFIX}openvibe-visualization-toolkit${OPENVIBE_VISUALIZATION_TOOLKIT_LINKING}.${LIB_EXT})
+		target_link_libraries(${PROJECT_NAME} ${VISUALIZATION_TOOLKIT_LIBRARY})
+	endif()
+
+	add_definitions(-DTARGET_HAS_OpenViBEVisualizationToolkit)
+else()
+	message(WARNING "  FAILED to find openvibe-visualization-toolkit... [${PATH_OPENVIBE_VISUALIZATION_TOOLKIT}]")
+endif()

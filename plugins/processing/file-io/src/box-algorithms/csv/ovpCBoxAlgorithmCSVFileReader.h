@@ -1,13 +1,15 @@
 #ifndef __OpenViBEPlugins_BoxAlgorithm_CSVFileReader_H__
 #define __OpenViBEPlugins_BoxAlgorithm_CSVFileReader_H__
 
-#include "../../ovp_defines.h"
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
 
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
+
+#define OVP_ClassId_BoxAlgorithm_CSVFileReaderDesc 							   OpenViBE::CIdentifier(0x193F22E9, 0x26A67233)
+#define OVP_ClassId_BoxAlgorithm_CSVFileReader     							   OpenViBE::CIdentifier(0x641D0717, 0x02884107)
 
 namespace OpenViBEPlugins
 {
@@ -45,10 +47,9 @@ namespace OpenViBEPlugins
 			std::string m_sSeparator;
 			OpenViBE::boolean m_bDoNotUseFileTime;
 			OpenViBE::CString m_sFilename;
-			OpenViBE::boolean m_bUseCompression;
 
 			OpenViBE::CIdentifier m_oTypeIdentifier;
-			OpenViBE::uint32 m_ui32NbColumn;
+			OpenViBE::uint32 m_ui32ColumnCount;
 			OpenViBE::uint64 m_ui64SamplingRate;
 			OpenViBE::uint32 m_ui32SamplesPerBuffer;
 			OpenViBE::uint32 m_ui32ChannelNumberPerBuffer;
@@ -105,11 +106,14 @@ namespace OpenViBEPlugins
 				}
 				else
 				{
-					this->getLogManager() << OpenViBE::Kernel::LogLevel_Error << "Unsupported stream type " << l_oTypeIdentifier << "\n";
 					rBox.setOutputType(ui32Index, OV_TypeId_Signal);
 					rBox.setSettingName(3,"Samples per buffer");
 					rBox.setSettingValue(3,"32");
-					return false;
+
+					OV_ERROR_KRF(
+						"Unsupported stream type " << l_oTypeIdentifier.toString(),
+						OpenViBE::Kernel::ErrorType::BadOutput
+					);
 				}
 				return true;
 			}
@@ -123,14 +127,16 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("CSV File Reader"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("CSV File Reader (Deprecated)"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Baptiste Payan"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("INRIA"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Read signal in a CSV (text based) file"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString(""); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("File reading and writing/CSV"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.0"); }
-			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-open"); }
+			virtual OpenViBE::CString getSoftwareComponent(void) const   { return OpenViBE::CString("openvibe-sdk"); }
+			virtual OpenViBE::CString getAddedSoftwareVersion(void) const   { return OpenViBE::CString("0.0.0"); }
+			virtual OpenViBE::CString getUpdatedSoftwareVersion(void) const { return OpenViBE::CString("0.0.0"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_CSVFileReader; }
 			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::FileIO::CBoxAlgorithmCSVFileReader; }
@@ -146,9 +152,8 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Don't use the file time",OV_TypeId_Boolean, "false");
 				rBoxAlgorithmPrototype.addSetting("Samples per buffer", OV_TypeId_Integer,"32");
 
-				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanModifyOutput);
-
-				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsDeprecated);
 
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_FeatureVector);

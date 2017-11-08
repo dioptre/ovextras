@@ -196,47 +196,54 @@ OpenViBE::boolean CConfigurationGTecGUSBamp::postConfigure(void)
 {
 	::GtkComboBox* l_pComboBox=GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_master_device"));
 
-	if(m_bApplyConfiguration)
+	if (m_bApplyConfiguration)
 	{
 		/*int l_iUSBIndex=0;
 		const char* l_sUSBIndex=::gtk_combo_box_get_active_text(l_pComboBox);
 		if(l_sUSBIndex)
 		{
-			if(::sscanf(l_sUSBIndex, "USB port %i", &l_iUSBIndex)==1)
-			{
-				m_rUSBIndex=(uint32)l_iUSBIndex;
-			}
-		}*/
-		if (this->m_rDevicesSerials.size()>1)
+		if(::sscanf(l_sUSBIndex, "USB port %i", &l_iUSBIndex)==1)
 		{
-			char* selectedSerial = gtk_combo_box_get_active_text (l_pComboBox);
-		    m_rMasterDeviceIndex = (selectedSerial == NULL) ? "" : selectedSerial;
+		m_rUSBIndex=(uint32)l_iUSBIndex;
+		}
+		}*/
+		if (this->m_rDevicesSerials.size() > 1)
+		{
+			char* selectedSerial = gtk_combo_box_get_active_text(l_pComboBox);
+			m_rMasterDeviceIndex = (selectedSerial == NULL) ? "" : selectedSerial;
 		}
 
 		::GtkToggleButton * l_pCheckBox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton-gnd-blockA"));
-		m_rCommonGndAndRefBitmap = (gtk_toggle_button_get_active(l_pCheckBox)?1:0);
+		m_rCommonGndAndRefBitmap = (gtk_toggle_button_get_active(l_pCheckBox) ? 1 : 0);
 		l_pCheckBox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton-gnd-blockB"));
-		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox)?(1<<1):0);
+		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox) ? (1 << 1) : 0);
 		l_pCheckBox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton-gnd-blockC"));
-		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox)?(1<<2):0);
+		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox) ? (1 << 2) : 0);
 		l_pCheckBox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton-gnd-blockD"));
-		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox)?(1<<3):0);
-	
+		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox) ? (1 << 3) : 0);
+
 		l_pCheckBox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton-ref-blockA"));
-		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox)?(1<<4):0);
+		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox) ? (1 << 4) : 0);
 		l_pCheckBox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton-ref-blockB"));
-		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox)?(1<<5):0);
+		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox) ? (1 << 5) : 0);
 		l_pCheckBox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton-ref-blockC"));
-		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox)?(1<<6):0);
+		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox) ? (1 << 6) : 0);
 		l_pCheckBox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton-ref-blockD"));
-		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox)?(1<<7):0);
+		m_rCommonGndAndRefBitmap = m_rCommonGndAndRefBitmap + (gtk_toggle_button_get_active(l_pCheckBox) ? (1 << 7) : 0);
 
 		GtkComboBox * l_pComboBoxNotch = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox-notch"));
-		m_rNotchFilterIndex = (gtk_combo_box_get_active(l_pComboBoxNotch)==-1 || gtk_combo_box_get_active(l_pComboBoxNotch)==0) ? -1 : m_vComboBoxNotchFilterIndex[gtk_combo_box_get_active(l_pComboBoxNotch)-1];//-1 because there is one more in the beginning
-
+		if (gtk_combo_box_get_active(l_pComboBoxNotch) >= 0)
+		{
+			// Only update the filter index if the user chose something. This is needed so going to the Configuration menu doesn't
+			// change previous filter choices.
+			m_rNotchFilterIndex = ((gtk_combo_box_get_active(l_pComboBoxNotch) == 0) ? -1 : m_vComboBoxNotchFilterIndex[gtk_combo_box_get_active(l_pComboBoxNotch) - 1] ); //-1 because there is one more in the beginning
+		}
 		GtkComboBox * l_pComboBoxBandPass = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox-band-pass"));
-		m_rBandPassFilterIndex = (gtk_combo_box_get_active(l_pComboBoxBandPass)==-1 || gtk_combo_box_get_active(l_pComboBoxBandPass)==0) ? -1 : m_vComboBoxBandPassFilterIndex[gtk_combo_box_get_active(l_pComboBoxBandPass)-1];//-1 because there is one more in the beginning
-
+		if (gtk_combo_box_get_active(l_pComboBoxBandPass) >= 0)
+		{
+			// Only update the filter index if the user chose something
+			m_rBandPassFilterIndex = ( (gtk_combo_box_get_active(l_pComboBoxBandPass) == 0) ? -1 : m_vComboBoxBandPassFilterIndex[gtk_combo_box_get_active(l_pComboBoxBandPass) - 1] ); //-1 because there is one more in the beginning
+		}
 		::GtkCheckButton* l_pCheckButton_HardwareTagging=GTK_CHECK_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "checkbutton_EventChannel"));
 		m_rTriggerInput=(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(l_pCheckButton_HardwareTagging)) ? true : false);
 
@@ -338,7 +345,6 @@ void CConfigurationGTecGUSBamp::setHardwareFiltersDialog()
 	GtkTreeModel * l_pNotchListStore = gtk_combo_box_get_model(l_pComboBoxNotch);
 	gtk_list_store_clear(GTK_LIST_STORE(l_pNotchListStore));
 
-
 	// To check for available filters in the amplifier, we must connect to it.
 	if (m_rDevicesSerials[0].size()>0)
 	{
@@ -377,6 +383,8 @@ void CConfigurationGTecGUSBamp::setHardwareFiltersDialog()
 
 		int32 cbBandPassSelectedIndex = -1;
 		
+		// std::cout << "The device reports " << l_iNbBandPassFilters << " band pass filters and " << l_iNbNotchFilters << " notch filters\n";
+
 		if (l_iNbBandPassFilters > 0)
 		{
 			for(int32 i = 0 ; i < l_iNbBandPassFilters ; i++)

@@ -13,7 +13,7 @@ IF(WIN32)
 		"C:/Program Files (x86)/Atlantis and Discovery SW DLL 1-11-12" 	
 		"C:/Program Files/Atlantis & Discovery SW DLL 1-11-12" 
 		"C:/Program Files (x86)/Atlantis & Discovery SW DLL 1-11-12" 
-		${OV_CUSTOM_DEPENDENCIES_PATH})
+		${LIST_DEPENDENCIES_PATH})
 	IF(PATH_BrainmasterCodeMakerAPI)
 		OV_PRINT(OV_PRINTED "  Found Brainmaster Code Maker API...")
 		INCLUDE_DIRECTORIES(${PATH_BrainmasterCodeMakerAPI})
@@ -31,7 +31,7 @@ IF(WIN32)
 		ENDFOREACH(LIB_BrainmasterCodeMakerAPI)
 
 		# Copy the DLL file at install
-		INSTALL(PROGRAMS "${PATH_BrainmasterCodeMakerAPI}/bmrcm.dll" DESTINATION "bin")
+		INSTALL(PROGRAMS "${PATH_BrainmasterCodeMakerAPI}/bmrcm.dll" DESTINATION ${DIST_BINDIR})
 
 		ADD_DEFINITIONS(-DTARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI)
 	ELSE(PATH_BrainmasterCodeMakerAPI)

@@ -4,8 +4,8 @@
 
 
 // @BEGIN inserm-gpl
-#define OVP_ClassId_SpectralAnalysis                                                    OpenViBE::CIdentifier(0x84218FF8, 0xA87E7995)
-#define OVP_ClassId_SpectralAnalysisDesc                                                OpenViBE::CIdentifier(0x0051E63C, 0x68E83AD1)
+#define OVP_ClassId_SpectralAnalysis                                                    OpenViBE::CIdentifier(0x1491AFA8, 0xF81E49D5)
+#define OVP_ClassId_SpectralAnalysisDesc                                                OpenViBE::CIdentifier(0xD011A66C, 0x61EF37D0)
 #define OVP_TypeId_SpectralComponent                                                    OpenViBE::CIdentifier(0x764E148A, 0xC704D4F5)
 #define OVP_TypeId_SpectralComponent_Amplitude                                          OpenViBE::CIdentifier(0x00000000, 0x00000001)
 #define OVP_TypeId_SpectralComponent_Phase                                              OpenViBE::CIdentifier(0x00000000, 0x00000002)
@@ -79,8 +79,8 @@
 #define OVP_Algorithm_ComputeTemporalFilterCoefficients_InputTriggerId_Initialize           OpenViBE::CIdentifier(0x3D2CBA61, 0x3FCF0DAC)
 #define OVP_Algorithm_ComputeTemporalFilterCoefficients_InputTriggerId_ComputeCoefficients  OpenViBE::CIdentifier(0x053A2C6E, 0x3A878825)
 
-#define OVP_ClassId_Algorithm_ApplyTemporalFilter                                       OpenViBE::CIdentifier(0x916B558F, 0xE501A2F4)
-#define OVP_ClassId_Algorithm_ApplyTemporalFilterDesc                                   OpenViBE::CIdentifier(0xCCBD104B, 0xAC1C7D3E)
+#define OVP_ClassId_Algorithm_ApplyTemporalFilter                                       OpenViBE::CIdentifier(0x9662518A, 0xE301A6FF)
+#define OVP_ClassId_Algorithm_ApplyTemporalFilterDesc                                   OpenViBE::CIdentifier(0xAC0D004F, 0x0CFC5D9E)
 #define OVP_Algorithm_ApplyTemporalFilter_InputParameterId_FilterCoefficientsMatrix     OpenViBE::CIdentifier(0xD316C4E7, 0xE4E89FD3)
 #define OVP_Algorithm_ApplyTemporalFilter_InputParameterId_SignalMatrix                 OpenViBE::CIdentifier(0xD5339105, 0x1D1293F0)
 #define OVP_Algorithm_ApplyTemporalFilter_OutputParameterId_FilteredSignalMatrix        OpenViBE::CIdentifier(0x463276D1, 0xEAEE8AAD)
@@ -88,15 +88,15 @@
 #define OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_ApplyFilter                    OpenViBE::CIdentifier(0xBC1F5655, 0x9807B400)
 #define OVP_Algorithm_ApplyTemporalFilter_InputTriggerId_ApplyFilterWithHistoric        OpenViBE::CIdentifier(0xB7B7D546, 0x6000FF51)
 
-#define OVP_ClassId_Box_TemporalFilterBoxAlgorithm                                      OpenViBE::CIdentifier(0xB4F9D042, 0x9D79F2E5)
-#define OVP_ClassId_Box_TemporalFilterBoxAlgorithmDesc                                  OpenViBE::CIdentifier(0x7BF6BA62, 0xAF829A37)
+#define OVP_ClassId_Box_TemporalFilterBoxAlgorithm                                      OpenViBE::CIdentifier(0x4469F0B2, 0x1DA995E5)
+#define OVP_ClassId_Box_TemporalFilterBoxAlgorithmDesc                                  OpenViBE::CIdentifier(0x8BF6DD60, 0xBF02FA77)
 
 #define OVP_ClassId_Box_ModTemporalFilterBoxAlgorithm                                      OpenViBE::CIdentifier(0xBF49D042, 0x9D79FE52)
 #define OVP_ClassId_Box_ModTemporalFilterBoxAlgorithmDesc                                  OpenViBE::CIdentifier(0x7BF4BA62, 0xAF829A73)
 
 
-#define OVP_ClassId_WindowingFunctions                                                  OpenViBE::CIdentifier(0x002034AE, 0x6509FD8F)
-#define OVP_ClassId_WindowingFunctionsDesc                                              OpenViBE::CIdentifier(0x602CF89F, 0x65BA6DA0)
+#define OVP_ClassId_WindowingFunctions                                                  OpenViBE::CIdentifier(0x0B2F38AE, 0x6B0CF98F)
+#define OVP_ClassId_WindowingFunctionsDesc                                              OpenViBE::CIdentifier(0x40BFF79E, 0xA7BA6EAE)
 
 #define OVP_ClassId_FastICA                                                             OpenViBE::CIdentifier(0x00649B6E, 0x6C88CD17)
 #define OVP_ClassId_FastICADesc                                                         OpenViBE::CIdentifier(0x00E9436C, 0x41C904CA)
@@ -113,6 +113,7 @@
 #define OVP_TypeId_FastICA_Nonlinearity_GAUSS                                           OpenViBE::CIdentifier(         0,          30) // Use Gaussian non-linearity. 
 #define OVP_TypeId_FastICA_Nonlinearity_SKEW                                            OpenViBE::CIdentifier(         0,          40) // Use skew non-linearity. 
 
+#define OV_AttributeId_Box_FlagIsUnstable                                               OpenViBE::CIdentifier(0x666FFFFF, 0x666FFFFF)
 
 
 // @END inserm-gpl

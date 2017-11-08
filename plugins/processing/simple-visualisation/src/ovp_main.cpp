@@ -1,6 +1,5 @@
 #include "ovp_defines.h"
 
-#include "algorithms/ovpCAlgorithmSphericalSplineInterpolation.h"
 #include "algorithms/ovpCAlgorithmLevelMeasure.h"
 
 //Presentation
@@ -12,19 +11,13 @@
 
 //2D plugins
 #include "box-algorithms/ovpCSignalDisplay.h"
-#include "box-algorithms/ovpCTimeFrequencyMapDisplay.h"
-#include "box-algorithms/ovpCPowerSpectrumDisplay.h"
-#include "box-algorithms/ovpCTopographicMap2DDisplay.h"
 #include "box-algorithms/ovpCBoxAlgorithmLevelMeasure.h"
-#include "box-algorithms/ovpCBoxAlgorithmMatrixDisplay.h"
-//3D plugins
-#include "box-algorithms/ovpCSimple3DDisplay.h"
-#include "box-algorithms/ovpCTopographicMap3DDisplay.h"
-#include "box-algorithms/ovpCVoxelDisplay.h"
 
 #include "ovpCBoxAlgorithmErpPlot.h"
 
 OVP_Declare_Begin()
+
+	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OV_TypeId_BoxAlgorithmFlag, OV_AttributeId_Box_FlagIsUnstable.toString(), OV_AttributeId_Box_FlagIsUnstable.toUInteger());
 
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_SphericalLinearInterpolationType, "Spherical linear interpolation type");
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SphericalLinearInterpolationType, "Spline (potentials)", OVP_TypeId_SphericalLinearInterpolationType_Spline);
@@ -40,7 +33,6 @@ OVP_Declare_Begin()
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_SignalDisplayScaling, OpenViBEPlugins::SimpleVisualisation::CSignalDisplayView::m_vScalingModes[OVP_TypeId_SignalDisplayScaling_None]      , OVP_TypeId_SignalDisplayScaling_None);
 
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CAlgorithmLevelMeasureDesc)
-	OVP_Declare_New(OpenViBEPlugins::Test::CAlgorithmSphericalSplineInterpolationDesc)
 
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CGrazVisualizationDesc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmP300SpellerVisualisationDesc)
@@ -48,15 +40,13 @@ OVP_Declare_Begin()
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CDisplayCueImageDesc)
 
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CSignalDisplayDesc)
-	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CTimeFrequencyMapDisplayDesc)
-	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CPowerSpectrumDisplayDesc)
-	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CTopographicMap2DDisplayDesc)
+//	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CTimeFrequencyMapDisplayDesc)
+//	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CPowerSpectrumDisplayDesc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmLevelMeasureDesc)
-	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmMatrixDisplayDesc)
 
-	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CSimple3DDisplayDesc)
-	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CTopographicMap3DDisplayDesc)
-	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CVoxelDisplayDesc)
+//	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CSimple3DDisplayDesc)
+//	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CTopographicMap3DDisplayDesc)
+//	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CVoxelDisplayDesc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmP300IdentifierCardVisualisationDesc)
 
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmErpPlotDesc)

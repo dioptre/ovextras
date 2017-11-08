@@ -123,6 +123,19 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean setImpedanceCheckRequested(const OpenViBE::boolean bImpedanceCheckRequested) = 0;
 		virtual OpenViBE::boolean isImpedanceCheckRequested(void) const = 0;
 
+		/**
+		* \brief Get impedance limit
+		* \return \e the chosen impedance limit (ohms)
+		*/
+		virtual OpenViBE::uint32 getImpedanceLimit(void) const = 0;
+		/**
+		* \brief Set impedance limit
+		 * \param ui32ImpedanceLimit [in] : the new value for impedance limit (ohms)
+		* \return \e true in case of success.
+		* \return \e false in case of error.
+		*/
+		virtual OpenViBE::boolean setImpedanceLimit(const OpenViBE::uint32 ui32ImpedanceLimit) = 0;
+
 		//@}
 		/** \name Chanel information */
 		//@{

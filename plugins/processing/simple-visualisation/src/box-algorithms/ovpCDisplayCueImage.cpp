@@ -60,8 +60,9 @@ namespace OpenViBEPlugins
 			m_int32DrawnImageID(-1),
 			m_bFullScreen(false),
 			m_bScaleImages(false),
-			m_ui64LastOutputChunkDate(-1),
-			m_pStimulusSender(NULL)
+			m_ui64LastOutputChunkDate(0),
+			m_pStimulusSender(nullptr),
+			m_visualizationContext(nullptr)
 		{
 			m_oBackgroundColor.pixel = 0;
 			m_oBackgroundColor.red = 0;
@@ -74,20 +75,18 @@ namespace OpenViBEPlugins
 			m_oForegroundColor.blue = 0xFFFF;
 		}
 
-		boolean CDisplayCueImage::initialize()
+		bool CDisplayCueImage::initialize()
 		{
 			m_uiIdleFuncTag = 0;
 			m_pStimulusSender = NULL;
 			//>>>> Reading Settings:
 
 			//Number of Cues:
-			CString l_sSettingValue;
 			m_ui32NumberOfCues = (getStaticBoxContext().getSettingCount() - m_ui32NonCueSettingsCount) / 2;
 
 			//Do we display the images in full screen?
 			m_bFullScreen = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
-			getBoxAlgorithmContext()->getStaticBoxContext()->getSettingValue(1, l_sSettingValue);
 			m_bScaleImages = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 
 			//Clear screen stimulation:
@@ -171,7 +170,8 @@ namespace OpenViBEPlugins
 			}
 			else
 			{
-				getBoxAlgorithmContext()->getVisualisationContext()->setWidget(m_pDrawingArea);
+				m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+				m_visualizationContext->setWidget(*this, m_pDrawingArea);
 			}
 
 			// Invalidate the drawing area in order to get the image resize already called at this point. The actual run will be smoother.
@@ -183,7 +183,7 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-		boolean CDisplayCueImage::uninitialize()
+		bool CDisplayCueImage::uninitialize()
 		{
 			// Remove the possibly dangling idle loop. 
 			if (m_uiIdleFuncTag)
@@ -244,13 +244,22 @@ namespace OpenViBEPlugins
 				m_vScaledPicture.clear();
 			}
 
+			this->releasePluginObject(m_visualizationContext);
+
 			return true;
 		}
 
-		boolean CDisplayCueImage::processClock(CMessageClock& rMessageClock)
+		bool CDisplayCueImage::processClock(CMessageClock& rMessageClock)
 		{
 			IBoxIO* l_pBoxIO=getBoxAlgorithmContext()->getDynamicBoxContext();
 			m_oStimulationEncoder.getInputStimulationSet()->clear();
+
+			if (this->getPlayerContext().getCurrentTime() == 0)
+			{
+				// Always send header first
+				m_oStimulationEncoder.encodeHeader();
+				l_pBoxIO->markOutputAsReadyToSend(0, 0, 0);
+			}
 
 			if(m_bImageDrawn)
 			{
@@ -382,13 +391,13 @@ namespace OpenViBEPlugins
 			return true;
 		}
 
-		boolean CDisplayCueImage::processInput(uint32 ui32InputIndex)
+		bool CDisplayCueImage::processInput(uint32 ui32InputIndex)
 		{
 			getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 			return true;
 		}
 
-		boolean CDisplayCueImage::process()
+		bool CDisplayCueImage::process()
 		{
 			IBoxIO* l_pBoxIO=getBoxAlgorithmContext()->getDynamicBoxContext();
 
@@ -400,9 +409,7 @@ namespace OpenViBEPlugins
 					m_oStimulationDecoder.decode(chunk,true);
 					if(m_oStimulationDecoder.isHeaderReceived())
 					{
-						m_ui64LastOutputChunkDate = this->getPlayerContext().getCurrentTime();
-						m_oStimulationEncoder.encodeHeader();
-						l_pBoxIO->markOutputAsReadyToSend(0, 0, m_ui64LastOutputChunkDate);
+						// nop
 					}
 					if(m_oStimulationDecoder.isBufferReceived())
 					{

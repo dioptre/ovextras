@@ -1,93 +1,61 @@
-# This file specifies the test which should be executed
+# This file is the entry with which the test should be executed. It sets the environement to correct values for the tests.
+# After building the project a correctly configured copy of this file should be available in the build folder.
+# Executing "ctest -T Test" in the build folder should execute the tests automatically using this file.
 
-# The file should be placed in the binary directory ${CTEST_BINARY_DIRECTORY}.
+set(ENV{OV_BINARY_PATH} "@DIST_ROOT@")
+set(OV_CONFIG_SUBDIR @OV_CONFIG_SUBDIR@) # This is used in the dart files
+set(CMAKE_COMMAND "@CMAKE_COMMAND@")
+if(WIN32)
+	set(ENV{OV_USERDATA} "$ENV{APPDATA}/${OV_CONFIG_SUBDIR}/")
+else()
+	SET(ENV{OV_USERDATA} "$ENV{HOME}/.config/${OV_CONFIG_SUBDIR}/")
+endif()
+SET(OV_LOGFILE "$ENV{OV_USERDATA}/log/openvibe-designer.log") 
 
-#Each test consists of:
-
-#    The unique name of the test ( eg.: testname1 )
-#    The full path to the executable of the test ( eg.: "$ENV{HOME}/bin/TEST_EXECUTABLE_1.sh" )
-#    A List of arguments to the executable ( eg.: "ARGUMENT_1" "ARGUMENT_2" etc. ) 
-	
-# basic test (just for sample) check that binary directory is readable 
-#ADD_TEST(LS_BINARY_PATH "ls" "-all")
-#ADD_TEST(PWD_BINARY_PATH "pwd")
-
-
-
-## -- Other Tests : Place a file named DartTestfile.txt in path with tests.
-
-# ${TEST_LOCAL} is repleased by "FALSE" only by automatic test call, else {TEST_LOCAL} is not defined
-SET(LOCAL ${TEST_LOCAL})
-IF(NOT (LOCAL MATCHES "FALSE"))
-	IF(WIN32)
-		# triky way to get absolute path for ../. directory in windows with cygwin
-		# todo: try to find a cmake way to get this for simple call to ctest in OV_ROOT_DIR\test directory in the aim to run all test
-		exec_program("cygpath" ARGS "-a -w ../." OUTPUT_VARIABLE "OV_ROOT_DIR")
-	ELSE(WIN32)
-		set(OV_ROOT_DIR              "$ENV{PWD}/..")
-	ENDIF(WIN32)
-	
-	set(CTEST_SOURCE_DIRECTORY		"${OV_ROOT_DIR}")
-	set(ENV{OV_BINARY_PATH} "${OV_ROOT_DIR}/dist")
-	message("running local test here= $ENV{OV_BINARY_PATH}")
-
-	IF(WIN32)
-	  SET(ENV{OV_USERDATA} "$ENV{APPDATA}/openvibe/")
-	ELSE(WIN32)
-	  SET(ENV{OV_USERDATA} "$ENV{HOME}/.config/openvibe/")
-	ENDIF(WIN32)
-	  
-ENDIF(NOT (LOCAL MATCHES "FALSE"))
+set(CTEST_SOURCE_DIRECTORY "@CMAKE_SOURCE_DIR@")
 
 # this is the folder where test scenarios can be run under
-SET(ENV{OV_TEST_DEPLOY_PATH} "${CTEST_SOURCE_DIRECTORY}/local-tmp/test-deploy/")
-MESSAGE("Set the test deploy path to $ENV{OV_TEST_DEPLOY_PATH}")
+set(ENV{OV_TEST_DEPLOY_PATH} "${CTEST_SOURCE_DIRECTORY}/local-tmp/test-deploy/")
 
-get_cmake_property(_variableNames VARIABLES)
-foreach (_variableName ${_variableNames})
-    message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
-
-
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/contrib/plugins/server-extensions/tcp-tagging/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/acquisition/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/turbofieldtrip/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/tools/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/vrpn/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/stimulation/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/feature-extraction/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/signal-processing/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/simple-visualisation/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/file-io/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/data-generation/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/examples/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/classification/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/stream-codecs/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/python/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/streaming/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/matlab/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/plugins/processing/evaluation/test")
-# SUBDIRS("${CTEST_SOURCE_DIRECTORY}/applications/external-stimulation-connection-example/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/applications/platform/acquisition-server/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/applications/platform/designer/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/applications/demos/ssvep-demo/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/applications/demos/vr-demo/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/applications/developer-tools/id-generator/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/applications/developer-tools/skeleton-generator/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/applications/developer-tools/vrpn-simulator/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/applications/developer-tools/plugin-inspector/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/documentation/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/toolkit/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/scenarios/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/openvibe/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/kernel/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/xml/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/automaton/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/stream/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/ebml/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/socket/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/fs/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/modules/system/test")
-SUBDIRS("${CTEST_SOURCE_DIRECTORY}/scripts/software/tmp/vrpn/java_vrpn/test")
-
-
+# subdirs command is deprecated and should be replaced by add_subdirectory calls as per the documentation recommendations, 
+# however the 2 command do not have the same behavior with ctest. Doing the change currently breaks tests.
+subdirs("${CTEST_SOURCE_DIRECTORY}/contrib/plugins/server-extensions/tcp-tagging/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/acquisition/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/turbofieldtrip/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/tools/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/vrpn/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/stimulation/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/feature-extraction/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/signal-processing/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/simple-visualisation/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/file-io/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/data-generation/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/examples/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/classification/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/stream-codecs/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/python/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/streaming/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/matlab/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/plugins/processing/evaluation/test")
+# subdirs("${CTEST_SOURCE_DIRECTORY}/applications/external-stimulation-connection-example/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/applications/platform/acquisition-server/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/applications/platform/designer/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/applications/demos/ssvep-demo/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/applications/demos/vr-demo/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/applications/developer-tools/id-generator/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/applications/developer-tools/skeleton-generator/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/applications/developer-tools/vrpn-simulator/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/applications/developer-tools/plugin-inspector/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/documentation/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/toolkit/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/scenarios/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/openvibe/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/kernel/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/modules/xml/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/modules/automaton/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/modules/stream/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/modules/ebml/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/modules/socket/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/modules/fs/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/modules/system/test")
+subdirs("${CTEST_SOURCE_DIRECTORY}/scripts/software/tmp/vrpn/java_vrpn/test")

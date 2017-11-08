@@ -2,19 +2,22 @@
 
 #include <sys/timeb.h>
 
+#include <thread>
+#include <mutex>
+
 using namespace boost::asio::ip;
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBEAcquisitionServerPlugins;
 
 void CTagQueue::push(const Tag &tag)
 {
-	boost::lock_guard<boost::mutex> guard(m_mutex);
+	std::lock_guard<std::mutex> guard(m_mutex);
 	m_queue.push(tag);
 }
 
 bool CTagQueue::pop(Tag &tag)
 {
-	boost::lock_guard<boost::mutex> guard(m_mutex);
+	std::lock_guard<std::mutex> guard(m_mutex);
 	if (m_queue.size()==0) return false;
 	else {
 		tag = m_queue.front();
@@ -118,7 +121,7 @@ CTagStream::CTagStream(int port)
 {
 	// can throw exceptions, e.g. when the port is already in use.
 	m_serverPtr.reset(new CTagServer(m_queuePtr, m_port));
-	m_threadPtr.reset(new boost::thread(&CTagStream::startServer, this));
+	m_threadPtr.reset(new std::thread(&CTagStream::startServer, this));
 }
 
 

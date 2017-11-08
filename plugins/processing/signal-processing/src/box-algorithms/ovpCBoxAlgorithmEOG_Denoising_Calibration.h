@@ -144,15 +144,11 @@ namespace OpenViBEPlugins
                 rBoxAlgorithmPrototype.addInput  ("Stimulations", OV_TypeId_Stimulations);
 
                 rBoxAlgorithmPrototype.addSetting("Filename b Matrix", OV_TypeId_Filename, "b-Matrix-EEG.cfg");
-
-//                rBoxAlgorithmPrototype.addSetting("Start time (s)", OV_TypeId_Float, "3");
-//                rBoxAlgorithmPrototype.addSetting("End time (s)", OV_TypeId_Float, "40");
-
                 rBoxAlgorithmPrototype.addSetting("End trigger", OV_TypeId_Stimulation, "OVTK_GDF_End_Of_Session");
 
                 rBoxAlgorithmPrototype.addOutput ("Train-completed Flag",OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

@@ -7,16 +7,16 @@
 GET_PROPERTY(OV_PRINTED GLOBAL PROPERTY OV_TRIED_ThirdPartyBoost_System)
 
 IF(UNIX)
-	FIND_LIBRARY(LIB_Boost_System NAMES "boost_system-mt" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib NO_DEFAULT_PATH)
-	FIND_LIBRARY(LIB_Boost_System NAMES "boost_system-mt" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib)
+	FIND_LIBRARY(LIB_Boost_System NAMES "boost_system-mt" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib NO_DEFAULT_PATH)
+	FIND_LIBRARY(LIB_Boost_System NAMES "boost_system-mt" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib)
 
 	IF(LIB_Boost_System)
 		OV_PRINT(OV_PRINTED "    [  OK  ] lib ${LIB_Boost_System}")
 		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_Boost_System} )
 	ELSE(LIB_Boost_System)
 		# Fedora 20 and Ubuntu 13.10,14.04 have no more multi-thread boost libs ( *-mt ) so try if there are non -mt libs to link
-		FIND_LIBRARY(LIB_Boost_System NAMES "boost_system" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib NO_DEFAULT_PATH)
-		FIND_LIBRARY(LIB_Boost_System NAMES "boost_system" PATHS ${OV_CUSTOM_DEPENDENCIES_PATH}/lib)
+		FIND_LIBRARY(LIB_Boost_System NAMES "boost_system" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib NO_DEFAULT_PATH)
+		FIND_LIBRARY(LIB_Boost_System NAMES "boost_system" PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES lib)
 		IF(LIB_Boost_System)
 			OV_PRINT(OV_PRINTED "    [  OK  ] lib ${LIB_Boost_System}")
 			TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIB_Boost_System})

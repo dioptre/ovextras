@@ -108,7 +108,7 @@ Note that for the filter mode operation it is necessary that the upstream genera
 This function uses the configuration manager to expand a configuration token. The configuration token
 are listed in the \c openvibe.conf file and can contain valuable information about the OpenViBE
 environment.
-- \c token can be any string containing configuration variables (e.g. <em>${Path_Samples}/my-experiment</em>).
+- \c token can be any string containing configuration variables (e.g. <em>${Path_Data}/scenarios/signals/my-experiment</em>).
 
 \subsection LuaScriptAPI_get_current_time box:get_current_time()
 This function returns the elapsed time in seconds since the scenario started. The returned value is a float.

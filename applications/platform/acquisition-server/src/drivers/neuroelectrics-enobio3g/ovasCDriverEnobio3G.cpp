@@ -153,7 +153,7 @@ boolean CDriverEnobio3G::loop(void) {
 	// query new data flag state
 	OpenViBE::boolean l_bNewData;
 	{
-		boost::mutex::scoped_lock lock(m_oMutex);
+		std::lock_guard<std::mutex> lock(m_oMutex);
 		l_bNewData = m_bNewData;
 	}
 
@@ -166,7 +166,7 @@ boolean CDriverEnobio3G::loop(void) {
 		m_pCallback->setSamples(m_pSample[m_ui32lastBufferFilled]);
 		// lower new data flag
 		{
-			boost::mutex::scoped_lock lock(m_oMutex);
+			std::lock_guard<std::mutex> lock(m_oMutex);
 			m_bNewData = false;
 		}
 		// When your sample buffer is fully loaded, 
@@ -270,7 +270,7 @@ void CDriverEnobio3G::receiveData(const PData &data){
 
 	// mutex for writing header and new data flag
 	{
-		boost::mutex::scoped_lock lock(m_oMutex);
+		std::lock_guard<std::mutex> lock(m_oMutex);
 
 		m_ui32bufHead++;
 		// if we already filled the current buffer we need to raise the new data flag

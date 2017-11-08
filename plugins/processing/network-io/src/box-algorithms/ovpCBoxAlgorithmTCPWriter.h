@@ -39,19 +39,19 @@ namespace OpenViBEPlugins
 		public:
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
 				
 			//Here is the different process callbacks possible
 			// - On clock ticks :
-			//virtual OpenViBE::boolean processClock(OpenViBE::CMessageClock& rMessageClock);
+			//virtual bool processClock(OpenViBE::CMessageClock& rMessageClock);
 			// - On new input received (the most common behaviour for signal processing) :
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool processInput(uint32_t ui32InputIndex);
 			
 			// If you want to use processClock, you must provide the clock frequency.
 			//virtual OpenViBE::uint64 getClockFrequency(void);
 			
-			virtual OpenViBE::boolean process(void);
+			virtual bool process(void);
 
 			// As we do with any class in openvibe, we use the macro below 
 			// to associate this box to an unique identifier. 
@@ -61,7 +61,7 @@ namespace OpenViBEPlugins
 
 		protected:
 
-			OpenViBE::boolean sendToClients(const void* pBuffer, OpenViBE::uint32 ui32BufferLength);
+			bool sendToClients(const void* pBuffer, uint32_t ui32BufferLength);
 
 			// Stream decoder
 			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmTCPWriter > m_oStimulationDecoder;
@@ -78,14 +78,14 @@ namespace OpenViBEPlugins
 			OpenViBE::CIdentifier m_oInputType;
 
 			// Data written as global output header, 8*4 = 32 bytes. Padding allows dumb readers to step with float64 (==8 bytes).
-			OpenViBE::uint32 m_ui32RawVersion;					// in network byte order, version of the raw stream
-			OpenViBE::uint32 m_ui32Endianness;					// in network byte order, 0==unknown, 1==little, 2==big, 3==pdp
-			OpenViBE::uint32 m_ui32Frequency;					// this and the rest are in host byte order
-			OpenViBE::uint32 m_ui32NumberOfChannels;
-			OpenViBE::uint32 m_ui32NumberOfSamplesPerChunk;
-			OpenViBE::uint32 m_ui32Reserved0;
-			OpenViBE::uint32 m_ui32Reserved1;
-			OpenViBE::uint32 m_ui32Reserved2;
+			uint32_t m_ui32RawVersion;					// in network byte order, version of the raw stream
+			uint32_t m_ui32Endianness;					// in network byte order, 0==unknown, 1==little, 2==big, 3==pdp
+			uint32_t m_ui32Frequency;					// this and the rest are in host byte order
+			uint32_t m_ui32NumberOfChannels;
+			uint32_t m_ui32NumberOfSamplesPerChunk;
+			uint32_t m_ui32Reserved0;
+			uint32_t m_ui32Reserved1;
+			uint32_t m_ui32Reserved2;
 
 			void startAccept();
 			void handleAccept(const boost::system::error_code& ec, boost::asio::ip::tcp::socket* pSocket);
@@ -97,7 +97,7 @@ namespace OpenViBEPlugins
 			CBoxAlgorithmTCPWriterListener(): m_oLastType(OV_UndefinedIdentifier)
 			{			}
 
-			virtual OpenViBE::boolean onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) {
+			virtual bool onInputTypeChanged(OpenViBE::Kernel::IBox& rBox, const uint32_t ui32Index) {
 				OpenViBE::CIdentifier l_oNewInputType;
 				rBox.getInputType(ui32Index, l_oNewInputType);
 				// Set the right enumeration according to the type if we actualy change it
@@ -153,7 +153,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmTCPWriterListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput("Input 1",OV_TypeId_StreamedMatrix);
@@ -167,7 +167,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Stimulations);
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 
 				return true;
 			}

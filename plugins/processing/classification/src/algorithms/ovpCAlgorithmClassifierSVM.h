@@ -8,7 +8,7 @@
 #include <xml/IXMLNode.h>
 
 #include <stack>
-#include "../../../contrib/packages/libSVM/svm.h"
+#include "../../../../../contrib/packages/libSVM/svm.h"
 
 #define OVP_ClassId_Algorithm_ClassifierSVM                                        OpenViBE::CIdentifier(0x50486EC2, 0x6F2417FC)
 #define OVP_ClassId_Algorithm_ClassifierSVM_DecisionAvailable                      OpenViBE::CIdentifier(0x21A61E69, 0xD522CE01)

@@ -1,6 +1,8 @@
 #ifndef __OpenViBE_AcquisitionServer_CConfigurationFieldtrip_H__
 #define __OpenViBE_AcquisitionServer_CConfigurationFieldtrip_H__
 
+#if defined(TARGET_HAS_PThread)
+
 #include "../ovasCConfigurationBuilder.h"
 
 namespace OpenViBEAcquisitionServer
@@ -53,3 +55,5 @@ namespace OpenViBEAcquisitionServer
 };
 
 #endif // __OpenViBE_AcquisitionServer_CConfigurationFieldtrip_H__
+
+#endif

@@ -37,7 +37,7 @@ CBoxAlgorithmBrainampFileWriter::CBoxAlgorithmBrainampFileWriter(void)
 
 boolean CBoxAlgorithmBrainampFileWriter::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	// const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_bIsVmrkHeaderFileWritten = false;
 
@@ -52,8 +52,7 @@ boolean CBoxAlgorithmBrainampFileWriter::initialize(void)
 
 	//Get binary format
 	CIdentifier l_oBinaryFormatIdentifier;
-	CString l_sBinaryFormatIdentifier;
-	l_rStaticBoxContext.getSettingValue(1, l_sBinaryFormatIdentifier);
+	CString l_sBinaryFormatIdentifier = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
 	l_oBinaryFormatIdentifier=this->getTypeManager().getEnumerationEntryValueFromName(OVP_TypeId_BinaryFormat, l_sBinaryFormatIdentifier);
 
 	if (l_oBinaryFormatIdentifier == OVP_TypeId_BinaryFormat_int16) m_ui32BinaryFormat = BinaryFormat_Integer16;
@@ -107,7 +106,6 @@ boolean CBoxAlgorithmBrainampFileWriter::initialize(void)
 
 boolean CBoxAlgorithmBrainampFileWriter::uninitialize(void)
 {
-
 	if(m_pStreamDecoder)
 	{
 		m_pStreamDecoder->uninitialize();

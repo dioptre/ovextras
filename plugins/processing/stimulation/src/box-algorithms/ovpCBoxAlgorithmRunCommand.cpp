@@ -8,9 +8,9 @@ using namespace OpenViBE::Plugins;
 using namespace OpenViBEPlugins;
 using namespace OpenViBEPlugins::Stimulation;
 
-boolean CBoxAlgorithmRunCommand::initialize(void)
+bool CBoxAlgorithmRunCommand::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_pStimulationDecoder=&this->getAlgorithmManager().getAlgorithm(this->getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_StimulationStreamDecoder));
 	m_pStimulationDecoder->initialize();
@@ -25,7 +25,7 @@ boolean CBoxAlgorithmRunCommand::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmRunCommand::uninitialize(void)
+bool CBoxAlgorithmRunCommand::uninitialize(void)
 {
 	op_pStimulationSet.uninitialize();
 	ip_pMemoryBuffer.uninitialize();

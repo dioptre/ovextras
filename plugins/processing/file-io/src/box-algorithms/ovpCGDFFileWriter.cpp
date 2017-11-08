@@ -218,7 +218,7 @@ boolean CGDFFileWriter::initialize()
 	m_pStimulationDecoder->initialize(*this,2);
 
 	// Parses box settings to find filename
-	l_pBox->getSettingValue(0, m_sFileName);
+	m_sFileName=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
 	m_f64Precision = 1000.0;
 

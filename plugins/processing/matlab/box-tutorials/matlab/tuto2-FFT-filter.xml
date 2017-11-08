@@ -1,4 +1,7 @@
 <OpenViBE-Scenario>
+	<FormatVersion>1</FormatVersion>
+	<Creator>openvibe</Creator>
+	<CreatorVersion>2.0</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x000008b2, 0x000031dd)</Identifier>
@@ -173,7 +176,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x9d21e772, 0xde848964)</Value>
+					<Value>(0xc5ff41e9, 0xccc59a01)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
@@ -294,7 +297,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Path_Samples}/signals/bci-ssvep-training.ov</Value>
+					<Value>${Path_Data}/scenarios/signals/bci-ssvep-training.ov</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
@@ -354,10 +357,10 @@
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
-					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
+					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Matlab executable (path)</Name>
-					<DefaultValue>C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe</DefaultValue>
-					<Value>C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe</Value>
+					<DefaultValue>C:/Program Files (x86)/MATLAB/R2013b/bin/win32/matlab.exe</DefaultValue>
+					<Value>C:/Program Files (x86)/MATLAB/R2013b/bin/win32/matlab.exe</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -738,7 +741,6 @@
 			</Attributes>
 		</Link>
 	</Links>
-	<MessageLinks></MessageLinks>
 	<Comments>
 		<Comment>
 			<Identifier>(0x000020c1, 0x00005db7)</Identifier>
@@ -759,7 +761,7 @@ every 2 seconds</Text>
 			<Identifier>(0x000032ad, 0x000007b4)</Identifier>
 			<Text>&lt;b&gt;Configure the Matlab Scripting box:&lt;/b&gt;
 
-&lt;span color=&quot;red&quot;&gt; Set the matlab executable path
+&lt;span color="red"&gt; Set the matlab executable path
 and the working directory before use !&lt;/span&gt;
 
 If you want to add a sinusoid noise to the signal
@@ -811,68 +813,11 @@ on a 2 seconds horizontal scale</Text>
 			</Attributes>
 		</Comment>
 	</Comments>
-	<VisualisationTree>
-		<VisualisationWidget>
-			<Identifier>(0x00005a65, 0x00005347)</Identifier>
-			<Name>Default window</Name>
-			<Type>1</Type>
-			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x4c90d4ad, 0x7a2554ec)</Identifier>
-					<Value>362</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x7b814cca, 0x271df6dd)</Identifier>
-					<Value>442</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00007762, 0x000022c1)</Identifier>
-			<Name>Default tab</Name>
-			<Type>2</Type>
-			<ParentIdentifier>(0x00005a65, 0x00005347)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00007f9f, 0x00002f07)</Identifier>
-			<Name>Vertical split</Name>
-			<Type>4</Type>
-			<ParentIdentifier>(0x00007762, 0x000022c1)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>2</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x237e56d2, 0x10cd68ae)</Identifier>
-					<Value>317</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x54e45f5b, 0x76c036e2)</Identifier>
-					<Value>156</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00006697, 0x000030ae)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00007f9f, 0x00002f07)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0x00007f47, 0x00001bc6)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x000062cd, 0x0000001e)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x00007f9f, 0x00002f07)</ParentIdentifier>
-			<Index>1</Index>
-			<BoxIdentifier>(0x000008b2, 0x000031dd)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-	</VisualisationTree>
+	<Metadata>
+		<Entry>
+			<Identifier>(0x0000775c, 0x000078ff)</Identifier>
+			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
+			<Data>[{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":362,"identifier":"(0x00005a65, 0x00005347)","index":0,"name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":442},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x00007762, 0x000022c1)","index":0,"name":"Default tab","parentIdentifier":"(0x00005a65, 0x00005347)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":2,"dividerPosition":156,"identifier":"(0x00007f9f, 0x00002f07)","index":0,"maxDividerPosition":317,"name":"Vertical split","parentIdentifier":"(0x00007762, 0x000022c1)","type":4},{"boxIdentifier":"(0x00007f47, 0x00001bc6)","childCount":0,"identifier":"(0x00006697, 0x000030ae)","index":0,"parentIdentifier":"(0x00007f9f, 0x00002f07)","type":3},{"boxIdentifier":"(0x000008b2, 0x000031dd)","childCount":0,"identifier":"(0x000062cd, 0x0000001e)","index":1,"parentIdentifier":"(0x00007f9f, 0x00002f07)","type":3}]</Data>
+		</Entry>
+	</Metadata>
 </OpenViBE-Scenario>

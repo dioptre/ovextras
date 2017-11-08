@@ -45,6 +45,12 @@ INCLUDE("FindOpenViBEModuleSocket")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleFS")
 INCLUDE("FindThirdPartyGTK")
+INCLUDE("FindThirdPartyBoost_System")
+
+IF(WIN32)	
+	# @FIXME CERT getting timeBeginPeriod() linker issues without this
+	TARGET_LINK_LIBRARIES(${PROJECT_NAME} winmm)
+ENDIF(WIN32)
 
 # These scripts will also add directives to copy the necessary bin dlls if any
 INCLUDE("FindThirdPartyActiCHampAPI")
@@ -63,8 +69,8 @@ INCLUDE("FindThirdPartyLiveAmpAPI")
 
 INCLUDE("FindThirdPartyOpenAL")
 INCLUDE("FindThirdPartyBoost")
-INCLUDE("FindThirdPartyBoost_Thread")
-INCLUDE("FindThirdPartyPThreadsVCE2")	# for Windows Fieldtrip
+INCLUDE("FindThirdPartyPThread")	# for Windows Fieldtrip
+INCLUDE("FindThirdPartyRT")  # external stims shared memory needs this
 
 INCLUDE("FindThirdPartyLSL")
 
@@ -84,38 +90,25 @@ ENDIF()
 # Defines target compiler
 # ---------------------------------
 IF(WIN32)
-	#ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
-	ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
-	ADD_DEFINITIONS(-DTARGET_OS_Windows)
-	ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
-	ADD_DEFINITIONS(-DTARGET_COMPILER_VisualStudio)
 	ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
 ENDIF(WIN32)
-IF(UNIX)
-	# ADD_DEFINITIONS(-fvisibility=hidden) # This flag should be present... man gcc
-	ADD_DEFINITIONS(-g)
-	ADD_DEFINITIONS(-fnon-call-exceptions)
-	ADD_DEFINITIONS(-DTARGET_OS_Linux)
-	ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
-	ADD_DEFINITIONS(-DTARGET_COMPILER_GCC)
-ENDIF(UNIX)
+SET_BUILD_PLATFORM()
 
 # ----------------------
 # Generate launch script
 # ----------------------
-OV_INSTALL_LAUNCH_SCRIPT("openvibe-acquisition-server")
+OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "${PROJECT_NAME}" EXECUTABLE_NAME  "${PROJECT_NAME}")
 
 # -----------------------------
 # Install files
 # -----------------------------
 INSTALL(TARGETS ${PROJECT_NAME}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+	RUNTIME DESTINATION ${DIST_BINDIR}
+	LIBRARY DESTINATION ${DIST_LIBDIR}
+	ARCHIVE DESTINATION ${DIST_LIBDIR})
 
 CONFIGURE_FILE("share/interface.ui-base" "${CMAKE_CURRENT_BINARY_DIR}/interface.ui")
 
-INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/interface.ui" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/applications/acquisition-server)
-INSTALL(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/applications/acquisition-server PATTERN ".svn" EXCLUDE PATTERN "*-base" EXCLUDE)
+INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/interface.ui" DESTINATION ${DIST_DATADIR}/openvibe/applications/acquisition-server)
+INSTALL(DIRECTORY share/ DESTINATION ${DIST_DATADIR}/openvibe/applications/acquisition-server PATTERN "*-base" EXCLUDE)
 
-#INSTALL(DIRECTORY src/   DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "doc" EXCLUDE)

@@ -96,6 +96,8 @@
  #include "ovp_global_defines.h"
 #endif // TARGET_HAS_ThirdPartyOpenViBEPluginsGlobalDefines
 
+#define OV_AttributeId_Box_FlagIsUnstable                   OpenViBE::CIdentifier(0x666FFFFF, 0x666FFFFF)
+
 //___________________________________________________________________//
 //                                                                   //
 // Some enumerations                                                 //
@@ -118,5 +120,22 @@ namespace OpenViBEPlugins
 	};
 };
 
+namespace OpenViBE
+{
+	namespace Kernel
+	{
+		/**
+		* \brief Standard 3D objects
+		*/
+		enum EStandard3DObject
+		{
+			Standard3DObject_Invalid = -1,
+			Standard3DObject_Sphere,
+			Standard3DObject_Cone,
+			Standard3DObject_Cube,
+			Standard3DObject_Quad
+		};
+	};
+};
 
 #endif // __OpenViBEPlugins_Defines_H__

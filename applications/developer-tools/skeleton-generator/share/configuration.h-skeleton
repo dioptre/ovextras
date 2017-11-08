@@ -27,8 +27,8 @@ namespace OpenViBEAcquisitionServer
 		//CConfiguration@@ClassName@@(OpenViBEAcquisitionServer::IDriverContext& rDriverContext, const char* sGtkBuilderFileName, OpenViBE::uint32& rConnectionId);
 		CConfiguration@@ClassName@@(OpenViBEAcquisitionServer::IDriverContext& rDriverContext, const char* sGtkBuilderFileName);
 
-		virtual OpenViBE::boolean preConfigure(void);
-		virtual OpenViBE::boolean postConfigure(void);
+		virtual bool preConfigure(void);
+		virtual bool postConfigure(void);
 
 	protected:
 
@@ -41,7 +41,7 @@ namespace OpenViBEAcquisitionServer
 		 * use references to directly modify the corresponding attribute of the driver
 		 * Example:
 		 */
-		// OpenViBE::uint32& m_ui32ConnectionID;
+		// uint32_t& m_ui32ConnectionID;
 	};
 };
 

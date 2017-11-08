@@ -244,6 +244,7 @@ boolean CDriverNeuroServoHid::loop(void)
 	if (m_ui64SendBlockRequiredTime>l_ui64ElapsedTimeSinceLastSentBlock)
 	{
 		// If we're early, sleep before sending. This code regulate the data drift
+		// @fixme the code should not rely on zsleep() as its time precision can not be guaranteed; it can oversleep esp. on Windows + boost 1.58
 		const uint64 l_ui64SleepTime = m_ui64SendBlockRequiredTime - l_ui64ElapsedTimeSinceLastSentBlock;
 		System::Time::zsleep((uint64)(l_ui64SleepTime + m_i64DriftAutoCorrectionDelay));
 	}

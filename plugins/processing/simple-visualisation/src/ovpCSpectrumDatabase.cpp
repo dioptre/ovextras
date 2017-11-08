@@ -24,7 +24,7 @@ CSpectrumDatabase::~CSpectrumDatabase()
 {
 }
 
-boolean CSpectrumDatabase::initialize()
+bool CSpectrumDatabase::initialize()
 {
 	if(m_pDecoder != NULL)
 	{
@@ -39,57 +39,57 @@ boolean CSpectrumDatabase::initialize()
 	return true;
 }
 
-uint32 CSpectrumDatabase::getFrequencyBandCount()
+uint32_t CSpectrumDatabase::getFrequencyAbscissaCount()
 {
-	return m_oFrequencyBands.size();
+	return m_FrequencyAbscissa.size();
 }
 
-float64 CSpectrumDatabase::getFrequencyBandWidth()
-{
-	if(m_oFrequencyBands.size() == 0)
-	{
-		return 0;
-	}
-	else
-	{
-		return m_oFrequencyBands[0].second - m_oFrequencyBands[0].first;
-	}
-}
+//float64 CSpectrumDatabase::getFrequencyBandWidth()
+//{
+//	if(m_FrequencyAbscissa.size() == 0)
+//	{
+//		return 0;
+//	}
+//	else
+//	{
+//		return m_oFrequencyBands[0].second - m_oFrequencyBands[0].first;
+//	}
+//}
 
-float64 CSpectrumDatabase::getFrequencyBandStart(uint32 ui32FrequencyBandIndex)
-{
-	if(m_oFrequencyBands.size() == 0)
-	{
-		return 0;
-	}
-	else
-	{
-		return m_oFrequencyBands[ui32FrequencyBandIndex].first;
-	}
-}
+//float64 CSpectrumDatabase::getFrequencyBandStart(uint32 ui32FrequencyBandIndex)
+//{
+//	if(m_oFrequencyBands.size() == 0)
+//	{
+//		return 0;
+//	}
+//	else
+//	{
+//		return m_oFrequencyBands[ui32FrequencyBandIndex].first;
+//	}
+//}
 
-float64 CSpectrumDatabase::getFrequencyBandStop(uint32 ui32FrequencyBandIndex)
-{
-	if(ui32FrequencyBandIndex >= m_oFrequencyBands.size())
-	{
-		return 0;
-	}
-	else
-	{
-		return m_oFrequencyBands[ui32FrequencyBandIndex].second;
-	}
-}
+//float64 CSpectrumDatabase::getFrequencyBandStop(uint32 ui32FrequencyBandIndex)
+//{
+//	if(ui32FrequencyBandIndex >= m_oFrequencyBands.size())
+//	{
+//		return 0;
+//	}
+//	else
+//	{
+//		return m_oFrequencyBands[ui32FrequencyBandIndex].second;
+//	}
+//}
 
-boolean CSpectrumDatabase::decodeHeader()
+bool CSpectrumDatabase::decodeHeader()
 {
 	//retrieve spectrum header
-	OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > l_oFrequencyBandsMatrix;
-	l_oFrequencyBandsMatrix.initialize(m_pDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_MinMaxFrequencyBands));
+	OpenViBE::Kernel::TParameterHandler < OpenViBE::IMatrix* > frequencyAbscissaMatrix;
+	frequencyAbscissaMatrix.initialize(m_pDecoder->getOutputParameter(OVP_GD_Algorithm_SpectrumStreamDecoder_OutputParameterId_FrequencyAbscissa));
 
 	//store frequency bands
-	for(uint32 i=0; i<l_oFrequencyBandsMatrix->getBufferElementCount(); i+=2)
+	for(uint32_t i=0; i< frequencyAbscissaMatrix->getDimensionSize(0); i++)
 	{
-		m_oFrequencyBands.push_back(std::pair<float64, float64>(*(l_oFrequencyBandsMatrix->getBuffer()+i),*(l_oFrequencyBandsMatrix->getBuffer()+i+1)));
+		m_FrequencyAbscissa.push_back(frequencyAbscissaMatrix->getBuffer()[i]);
 	}
 
 	CStreamedMatrixDatabase::decodeHeader();

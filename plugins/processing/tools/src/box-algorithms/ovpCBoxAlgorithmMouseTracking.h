@@ -137,7 +137,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Sampling Frequency",OV_TypeId_Integer,"16");
 				rBoxAlgorithmPrototype.addSetting("Generated epoch sample count",OV_TypeId_Integer,"1");
 				
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

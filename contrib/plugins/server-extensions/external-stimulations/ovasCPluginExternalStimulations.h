@@ -11,10 +11,9 @@
   *
   */
 
-#include <boost/thread.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/version.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include <sys/timeb.h>
 
@@ -74,10 +73,10 @@ namespace OpenViBEAcquisitionServer
 				int m_iDebugStimulationsBuffered;
 
 				//added for acquiring external stimulations
-				boost::scoped_ptr<boost::thread> m_ESthreadPtr;
+				std::unique_ptr<std::thread> m_ESthreadPtr;
 				OpenViBE::boolean m_bIsESThreadRunning;
-				boost::mutex m_es_mutex;
-				boost::condition  m_esAvailable;
+				std::mutex m_es_mutex;
+				std::condition_variable  m_esAvailable;
 		};
 
 

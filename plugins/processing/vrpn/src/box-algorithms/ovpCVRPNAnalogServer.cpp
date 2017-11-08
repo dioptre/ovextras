@@ -17,11 +17,10 @@ CVRPNAnalogServer::CVRPNAnalogServer()
 
 boolean CVRPNAnalogServer::initialize()
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	// Gets server name, and creates an analog server for this server
-	CString l_oServerName;
-	l_rStaticBoxContext.getSettingValue(0, l_oServerName);
+	CString l_oServerName = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
 
 	// Creates the stream decoders
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
@@ -46,7 +45,7 @@ boolean CVRPNAnalogServer::initialize()
 
 boolean CVRPNAnalogServer::uninitialize()
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	// Releases decoders
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)
@@ -80,7 +79,7 @@ boolean CVRPNAnalogServer::processInput(uint32 ui32InputIndex)
 
 boolean CVRPNAnalogServer::process()
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	for(uint32 i=0; i<l_rStaticBoxContext.getInputCount(); i++)

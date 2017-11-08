@@ -10,6 +10,8 @@
 #include <map>
 #include <vector>
 
+#include <visualization-toolkit/ovviz_all.h>
+
 #define OVP_ClassId_BoxAlgorithm_ClassifierAccuracyMeasure      OpenViBE::CIdentifier(0x48395CE7, 0x17D62550)
 #define OVP_ClassId_BoxAlgorithm_ClassifierAccuracyMeasureDesc  OpenViBE::CIdentifier(0x067F38CC, 0x084A6ED3)
 
@@ -23,10 +25,10 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
-			virtual OpenViBE::boolean process(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ClassifierAccuracyMeasure);
 
@@ -60,16 +62,18 @@ namespace OpenViBEPlugins
 			} SProgressBar;
 
 			std::vector<SProgressBar> m_vProgressBar;
-			OpenViBE::boolean m_bShowPercentages;
-			OpenViBE::boolean m_bShowScores;
+			bool m_bShowPercentages;
+			bool m_bShowScores;
 
+		private:
+				OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
 		};
 
 		class CBoxAlgorithmClassifierAccuracyMeasureListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
 		{
 
 		public:
-			virtual OpenViBE::boolean onInputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onInputNameChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				if(ui32Index == 0)
 				{
@@ -78,7 +82,7 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			virtual OpenViBE::boolean onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
+			virtual bool onInputAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
 			{
 				rBox.setInputType(ui32Index, OV_TypeId_Stimulations); // all inputs must be stimulations
 				return true;
@@ -108,12 +112,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmClassifierAccuracyMeasureListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePluginFunctionality) const
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePluginFunctionality == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput("Targets",      OV_TypeId_Stimulations);
@@ -123,7 +127,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addFlag (OpenViBE::Kernel::BoxFlag_CanModifyInput);
 
 				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Stimulations);
-				// rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsUnstable);
+				// rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 
 				return true;
 			}

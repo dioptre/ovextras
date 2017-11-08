@@ -29,6 +29,7 @@ INCLUDE("FindThirdPartyVRPN")
 INCLUDE("FindThirdPartyOgre3D") 		# OGRE + OIS included
 INCLUDE("FindThirdPartyBoost")			# Using Ogre headers on Win32 causes dependency to Boost thread library
 INCLUDE("FindThirdPartyBoost_Thread")	# Note that this is a potential issue on Windows, as the dependencies/ogre/boost and dependencies/boost are not the same at the time of writing this.
+INCLUDE("FindThirdPartyBoost_System")	# Note that this is a potential issue on Windows, as the dependencies/ogre/boost and dependencies/boost are not the same at the time of writing this.
 
 # ---------------------------------
 # Finds standard library pthread
@@ -51,44 +52,29 @@ ENDIF(UNIX)
 # Defines target architecture
 # Defines target compiler
 # ---------------------------------
-IF(WIN32)
-	ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
-	ADD_DEFINITIONS(-DTARGET_OS_Windows)
-	ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
-	ADD_DEFINITIONS(-DTARGET_COMPILER_VisualStudio)
-ENDIF(WIN32)
-IF(UNIX)
-	# ADD_DEFINITIONS(-fvisibility=hidden) # This flag should be present... man gcc
-	ADD_DEFINITIONS(-g)
-	ADD_DEFINITIONS(-fnon-call-exceptions)
-	ADD_DEFINITIONS(-DTARGET_OS_Linux)
-	ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
-	ADD_DEFINITIONS(-DTARGET_COMPILER_GCC)
-ENDIF(UNIX)
+SET_BUILD_PLATFORM()
 
 # ----------------------
 # Generate launch script
 # ----------------------
 IF(WIN32)
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-handball" "handball")
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-spaceship" "spaceship")
+        OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-vr-demo-handball" EXECUTABLE_NAME ${PROJECT_NAME} PARAMETERS "handball")
+	OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-vr-demo-spaceship" EXECUTABLE_NAME ${PROJECT_NAME} PARAMETERS "spaceship")
 ENDIF(WIN32)
 IF(UNIX)
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-handball" "handball")
-	OV_INSTALL_LAUNCH_SCRIPT("openvibe-vr-demo-spaceship" "spaceship")
+        OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-vr-demo-handball" EXECUTABLE_NAME ${PROJECT_NAME} PARAMETERS "handball")
+	OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-vr-demo-spaceship" EXECUTABLE_NAME ${PROJECT_NAME} PARAMETERS "spaceship")
 ENDIF(UNIX)
 
 # -----------------------------
 # Install files
 # -----------------------------
 INSTALL(TARGETS ${PROJECT_NAME}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
-	LIBRARY DESTINATION  DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-	ARCHIVE DESTINATION  DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+	RUNTIME DESTINATION ${DIST_BINDIR}
+	LIBRARY DESTINATION  DESTINATION ${DIST_LIBDIR}
+	ARCHIVE DESTINATION  DESTINATION ${DIST_LIBDIR})
 
-INSTALL(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/applications/vr-demo   PATTERN ".svn" EXCLUDE)
+INSTALL(DIRECTORY share/ DESTINATION ${DIST_DATADIR}/openvibe/applications/vr-demo)
 
-INSTALL(DIRECTORY signals      DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/   PATTERN ".svn" EXCLUDE)
-INSTALL(DIRECTORY bci-examples DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/   PATTERN ".svn" EXCLUDE)
-
-#INSTALL(DIRECTORY src/   DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "doc" EXCLUDE)
+INSTALL(DIRECTORY signals      DESTINATION ${DIST_DATADIR}/openvibe/scenarios/)
+INSTALL(DIRECTORY bci-examples DESTINATION ${DIST_DATADIR}/openvibe/scenarios/)

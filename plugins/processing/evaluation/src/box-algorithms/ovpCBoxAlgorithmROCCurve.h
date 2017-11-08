@@ -17,6 +17,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <visualization-toolkit/ovviz_all.h>
+
 #define OVP_ClassId_BoxAlgorithm_ROCCurve OpenViBE::CIdentifier(0x06FE5B1B, 0xDE066FEC)
 #define OVP_ClassId_BoxAlgorithm_ROCCurveDesc OpenViBE::CIdentifier(0xCB5DFCEA, 0xAF41EAB2)
 
@@ -28,7 +30,7 @@ namespace OpenViBEPlugins
 		typedef std::pair < OpenViBE::uint64, OpenViBE::float64* > CTimestampValuesPair;
 		typedef std::pair < OpenViBE::uint64, OpenViBE::float64* > CLabelValuesPair;
 
-		typedef std::pair < OpenViBE::boolean, OpenViBE::float64 > CRocPairValue;
+		typedef std::pair < bool, OpenViBE::float64 > CRocPairValue;
 
 		/**
 		 * \class CBoxAlgorithmROCCurve
@@ -44,18 +46,18 @@ namespace OpenViBEPlugins
 		public:
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
 			
-			virtual OpenViBE::boolean process(void);
+			virtual bool process(void);
 			
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_ROCCurve)
 
 		private:
-			OpenViBE::boolean computeROCCurves();
-			OpenViBE::boolean computeOneROCCurve(const OpenViBE::CIdentifier& rClassIdentifier, OpenViBE::uint32 ui32ClassIndex);
+			bool computeROCCurves();
+			bool computeOneROCCurve(const OpenViBE::CIdentifier& rClassIdentifier, OpenViBE::uint32 ui32ClassIndex);
 
 			// Input decoder:
 			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmROCCurve > m_oExpectedDecoder;
@@ -72,6 +74,9 @@ namespace OpenViBEPlugins
 			//Display section
 			::GtkWidget* m_pWidget;
 			std::vector < CROCCurveDraw* > m_oDrawerList;
+
+		private:
+				OpenViBEVisualizationToolkit::IVisualizationContext* m_visualizationContext;
 		};
 
 		// The box listener can be used to call specific callbacks whenever the box structure changes : input added, name changed, etc.
@@ -80,7 +85,7 @@ namespace OpenViBEPlugins
 		{
 		public:
 
-			virtual OpenViBE::boolean onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) {
+			virtual bool onSettingValueChanged(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index) {
 				if(ui32Index == 1)
 				{
 					OpenViBE::CString l_sClassCount;
@@ -158,12 +163,12 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmROCCurveListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
-			virtual OpenViBE::boolean hasFunctionality(OpenViBE::Kernel::EPluginFunctionality ePF) const
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
 			{
-				return ePF == OpenViBE::Kernel::PluginFunctionality_Visualization;
+				return functionalityIdentifier == OVD_Functionality_Visualization;
 			}
 			
-			virtual OpenViBE::boolean getBoxPrototype(
+			virtual bool getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addInput("Expected labels",       OV_TypeId_Stimulations);
@@ -176,7 +181,7 @@ namespace OpenViBEPlugins
 
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
 				
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

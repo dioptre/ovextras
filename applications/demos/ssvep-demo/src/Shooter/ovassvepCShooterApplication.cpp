@@ -35,7 +35,12 @@ CShooterApplication::~CShooterApplication()
 
 bool CShooterApplication::setup(OpenViBE::Kernel::IKernelContext* poKernelContext)
 {
-	CApplication::setup(poKernelContext);
+	if (!CApplication::setup(poKernelContext))
+	{
+		// If setup failed, logmanager may be in an unusable state, use cout
+		std::cout << "Error: Base application setup failed\n";
+		return false;	
+	}
 
 	// Create the StarShip object
 	(*m_poLogManager) << LogLevel_Debug << "+ m_poShip = new CStarShip(...)\n";

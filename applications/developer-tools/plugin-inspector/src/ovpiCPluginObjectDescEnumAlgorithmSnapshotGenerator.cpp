@@ -166,21 +166,17 @@ CPluginObjectDescEnumAlgorithmSnapshotGenerator::~CPluginObjectDescEnumAlgorithm
 		<< " *\n"
 		<< " * Available algorithms :\n";
 
-	uint32 l_ui32Level=0;
+	uint32_t l_ui32Level=0;
 	string l_sLastCategory;
 	vector < string > l_vLastSplittedCategory;
-	vector < pair < string, string > >::iterator itCategories;
 	std::sort(m_vCategories.begin(), m_vCategories.end());
-	for(itCategories=m_vCategories.begin(); itCategories!=m_vCategories.end(); itCategories++)
+	for(const auto& category : m_vCategories)
 	{
-		string l_sCategory=itCategories->first;
-		string l_sName=itCategories->second;
+		string l_sCategory=category.first;
+		string l_sName=category.second;
 
 		if(l_sLastCategory!=l_sCategory)
 		{
-			vector < string >::iterator itLastSplittedCategory;
-			vector < string >::iterator itSplittedCategory1;
-			vector < string >::iterator itSplittedCategory2;
 			vector < string > l_vSplittedCategory;
 			size_t i=(size_t)-1;
 			size_t j;
@@ -201,17 +197,13 @@ CPluginObjectDescEnumAlgorithmSnapshotGenerator::~CPluginObjectDescEnumAlgorithm
 			}
 			l_ui32Level=l_vSplittedCategory.size();
 
-			for(itLastSplittedCategory =l_vLastSplittedCategory.begin(), itSplittedCategory1 =l_vSplittedCategory.begin();
-			    itLastSplittedCategory!=l_vLastSplittedCategory.end() && itSplittedCategory1!=l_vSplittedCategory.end() && *itLastSplittedCategory==*itSplittedCategory1;
-			    itLastSplittedCategory++, itSplittedCategory1++);
+			auto itSplittedCategory1 = l_vLastSplittedCategory.size() < l_vSplittedCategory.size()
+				? std::mismatch(l_vLastSplittedCategory.begin(), l_vLastSplittedCategory.end(), l_vSplittedCategory.begin()).second
+				: std::mismatch(l_vSplittedCategory.begin(), l_vSplittedCategory.end(), l_vLastSplittedCategory.begin()).first;
 
 			for(; itSplittedCategory1!=l_vSplittedCategory.end(); itSplittedCategory1++)
 			{
-				l_oAlgorithmsFile << " * ";
-				for(itSplittedCategory2=l_vSplittedCategory.begin(); itSplittedCategory2!=itSplittedCategory1; itSplittedCategory2++)
-				{
-					l_oAlgorithmsFile << "   ";
-				}
+				l_oAlgorithmsFile << " * " << std::string((itSplittedCategory1 - l_vSplittedCategory.begin()) * 3, ' ');
 				l_oAlgorithmsFile << " - " << *itSplittedCategory1 << " : \n";
 			}
 
@@ -219,9 +211,7 @@ CPluginObjectDescEnumAlgorithmSnapshotGenerator::~CPluginObjectDescEnumAlgorithm
 			l_vLastSplittedCategory=l_vSplittedCategory;
 		}
 
-		l_oAlgorithmsFile << " * ";
-		for(uint32 k=0; k<l_ui32Level+1; k++)
-			l_oAlgorithmsFile << "   ";
+		l_oAlgorithmsFile << " * " << std::string(3 * (l_ui32Level + 1), ' ');
 		l_oAlgorithmsFile << " - \\subpage Doc_algorithm_" << transform(l_sCategory+"/"+l_sName).c_str() << " \"" << l_sName << "\"\n";
 	}
 
@@ -229,7 +219,7 @@ CPluginObjectDescEnumAlgorithmSnapshotGenerator::~CPluginObjectDescEnumAlgorithm
 	l_oAlgorithmsFile.close();
 }
 
-boolean CPluginObjectDescEnumAlgorithmSnapshotGenerator::callback(const IPluginObjectDesc& rPluginObjectDesc)
+bool CPluginObjectDescEnumAlgorithmSnapshotGenerator::callback(const IPluginObjectDesc& rPluginObjectDesc)
 {
 	string l_sFullName=string(rPluginObjectDesc.getCategory().toASCIIString()) + "/" + string(rPluginObjectDesc.getName().toASCIIString());
 	string l_sFilename=m_sSnapshotDirectory+"/Algorithm_"+transform(l_sFullName);
@@ -376,7 +366,9 @@ boolean CPluginObjectDescEnumAlgorithmSnapshotGenerator::callback(const IPluginO
 		0, 0,
 		0, 0,
 		xSize+32, ySize+32);
-	gdk_pixbuf_save(l_pPixBuf, (l_sFilename+".png").c_str(), "png", NULL, NULL);
+	OV_WARNING_UNLESS_K(
+		gdk_pixbuf_save(l_pPixBuf, (l_sFilename+".png").c_str(), "png", NULL, NULL),
+		"Failed saving " << (l_sFilename+".png").c_str());
 
 	g_object_unref(l_pPixBuf);
 

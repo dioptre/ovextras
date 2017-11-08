@@ -57,39 +57,23 @@ ENDIF(UNIX)
 # Defines target architecture
 # Defines target compiler
 # ---------------------------------
-IF(WIN32)
-	ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
-	ADD_DEFINITIONS(-DTARGET_OS_Windows)
-	ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
-	ADD_DEFINITIONS(-DTARGET_COMPILER_VisualStudio)
-ENDIF(WIN32)
-IF(UNIX)
-	# ADD_DEFINITIONS(-fvisibility=hidden) # This flag should be present... man gcc
-	ADD_DEFINITIONS(-g)
-	ADD_DEFINITIONS(-fnon-call-exceptions)
-	ADD_DEFINITIONS(-DTARGET_OS_Linux)
-	ADD_DEFINITIONS(-DTARGET_ARCHITECTURE_i386)
-	ADD_DEFINITIONS(-DTARGET_COMPILER_GCC)
-ENDIF(UNIX)
+SET_BUILD_PLATFORM()
 
 # ----------------------
 # Generate launch script
 # ----------------------
-OV_INSTALL_LAUNCH_SCRIPT("openvibe-ssvep-mind-shooter-trainer" "impact-trainer")
-OV_INSTALL_LAUNCH_SCRIPT("openvibe-ssvep-mind-shooter-shooter" "impact-shooter")
-OV_INSTALL_LAUNCH_SCRIPT("openvibe-ssvep-stimulator-generic" "generic")
-
+OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-ssvep-mind-shooter-trainer" EXECUTABLE_NAME ${PROJECT_NAME} PARAMETERS "impact-trainer")
+OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-ssvep-mind-shooter-shooter" EXECUTABLE_NAME ${PROJECT_NAME} PARAMETERS "impact-shooter")
+OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "openvibe-ssvep-stimulator-generic" EXECUTABLE_NAME ${PROJECT_NAME} PARAMETERS "generic")
 
 # -----------------------------
 # Install files
 # -----------------------------
 INSTALL(TARGETS ${PROJECT_NAME}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
-	LIBRARY DESTINATION  DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-	ARCHIVE DESTINATION  DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+	RUNTIME DESTINATION ${DIST_BINDIR}
+	LIBRARY DESTINATION  DESTINATION ${DIST_LIBDIR}
+	ARCHIVE DESTINATION  DESTINATION ${DIST_LIBDIR})
 
-INSTALL(DIRECTORY share/ DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/applications/ssvep-mind-shooter  PATTERN ".svn" EXCLUDE)
+INSTALL(DIRECTORY share/ DESTINATION ${DIST_DATADIR}/openvibe/applications/ssvep-mind-shooter)
 
-INSTALL(DIRECTORY bci-examples DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/openvibe/scenarios/   PATTERN ".svn" EXCLUDE)
-
-#INSTALL(DIRECTORY src/   DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "doc" EXCLUDE)
+INSTALL(DIRECTORY bci-examples DESTINATION ${DIST_DATADIR}/openvibe/scenarios/)

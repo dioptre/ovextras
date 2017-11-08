@@ -95,7 +95,7 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addOutput("State",OV_TypeId_Signal);
 				rBoxAlgorithmPrototype.addSetting("File name",OV_TypeId_Filename,"");
 				rBoxAlgorithmPrototype.addSetting("Samples per buffer",OV_TypeId_Integer,"16");
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable); // meuh non !
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable); // meuh non !
 
 				return true;
 			}

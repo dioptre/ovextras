@@ -3,6 +3,11 @@
 using namespace std;
 using namespace boost;
 
+#include <system/ovCTime.h>
+
+#include <thread>
+#include <functional>
+
 #define CHANNEL_SCALAR_FACTOR 2.235174445530706e-2
 #define GYRO_SCALAR_FACTOR 0.00875
 
@@ -49,7 +54,7 @@ void SmartingAmp::acquire()
 
 void SmartingAmp::on_receive(const boost::system::error_code& ec, size_t bytes_transferred)
 {
-	boost::mutex::scoped_lock m(m_on_receive_lock);
+	std::lock_guard<std::mutex> m(m_on_receive_lock);
 	if (m_port.get() == NULL || !m_port->is_open()) return;
 	
 	if (ec) {
@@ -196,8 +201,8 @@ bool SmartingAmp::connect(std::string& port_name)
 	}
 	
 	// NOTE: After connection is established wait 3s and then you can start using the amp 
-	boost::this_thread::sleep(boost::posix_time::millisec(3000));
-	
+	System::Time::sleep(3000);
+
 	// NOTE: Leaving MAX_PORT_SIZE bytes to read for the first time because we are not sure
 	// how many bytes are in serial port buffer
 	read_with_timeout(MAX_PORT_SIZE, 3000);
@@ -251,7 +256,10 @@ bool SmartingAmp::start()
 
 	acquire();
 
-	acquire_t.reset(new boost::thread(boost::bind(&boost::asio::io_service::run, &m_io)));
+	auto f = [this]() { this->m_io.run(); };
+	// auto f = boost::bind(&boost::asio::io_service::run, &m_io);
+
+	acquire_t.reset(new std::thread( f ));
 
 	return true;
 }
@@ -363,7 +371,7 @@ void SmartingAmp::read_with_timeout(int size, size_t timeout)
 
 	m_bytes_readed = 0;
 
-	m_port->async_read_some( 
+	m_port->async_read_some(
 		boost::asio::buffer(m_commandReceiveBuffer, size),
 		boost::bind(
 			&SmartingAmp::read_complete,

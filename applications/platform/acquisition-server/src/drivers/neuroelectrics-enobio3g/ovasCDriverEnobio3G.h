@@ -15,8 +15,7 @@
 
 #include "enobio3g.h"
 #include "StatusData.h"
-#include <boost/thread.hpp>
-#include <boost/thread/condition.hpp>
+#include <mutex>
 
 #ifndef _ENOBIO_SAMPLE_RATE_
  #ifdef FREQ_SAMP
@@ -99,7 +98,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32lastBufferFilled; // last buffer filled with data ready to be submitted
 		OpenViBE::boolean m_bNewData; // if there is a new buffer with data ready to be submitted
 		
-		boost::mutex m_oMutex;
+		std::mutex m_oMutex;
 	};
 };
 

@@ -14,10 +14,11 @@ boolean CSignChangeDetector::initialize(void)
 
 	// we read the settings:
 	// The stimulations names:
-	getStaticBoxContext().getSettingValue(0, l_sSettingValue);
-	m_ui64OnStimulationId=getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sSettingValue);
-	getStaticBoxContext().getSettingValue(1, l_sSettingValue);
-	m_ui64OffStimulationId=getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sSettingValue);
+	const CString l_sOn = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	const CString l_sOff = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+
+	m_ui64OnStimulationId=getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sOn);
+	m_ui64OffStimulationId=getTypeManager().getEnumerationEntryValueFromName(OV_TypeId_Stimulation, l_sOff);
 
 	m_f64LastSample=0;
 	m_bFirstSample=true;

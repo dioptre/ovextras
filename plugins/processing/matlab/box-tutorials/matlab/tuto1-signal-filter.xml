@@ -1,4 +1,7 @@
 <OpenViBE-Scenario>
+	<FormatVersion>1</FormatVersion>
+	<Creator>openvibe</Creator>
+	<CreatorVersion>2.0</CreatorVersion>
 	<Boxes>
 		<Box>
 			<Identifier>(0x00002bed, 0x00001e7e)</Identifier>
@@ -151,10 +154,10 @@
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
-					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
+					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Matlab executable (path)</Name>
-					<DefaultValue>C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe</DefaultValue>
-					<Value>C:/Program Files (x86)/MATLAB/R2011b/bin/win32/matlab.exe</Value>
+					<DefaultValue>C:/Program Files (x86)/MATLAB/R2013b/bin/win32/matlab.exe</DefaultValue>
+					<Value>C:/Program Files (x86)/MATLAB/R2013b/bin/win32/matlab.exe</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -603,7 +606,6 @@
 			</Attributes>
 		</Link>
 	</Links>
-	<MessageLinks></MessageLinks>
 	<Comments>
 		<Comment>
 			<Identifier>(0x00000f2b, 0x00004d77)</Identifier>
@@ -626,7 +628,7 @@ The documentation page for this tutorial is available at:
 			<Identifier>(0x00002ca7, 0x00004cd8)</Identifier>
 			<Text>&lt;b&gt;Configure the Matlab Scripting box:&lt;/b&gt;
 
-&lt;span color=&quot;red&quot;&gt; Set the matlab executable path before use !&lt;/span&gt;
+&lt;span color="red"&gt; Set the matlab executable path before use !&lt;/span&gt;
 
 Enter the path to your local Matlab installation.
 
@@ -644,75 +646,11 @@ that will set all input samples to 0</Text>
 			</Attributes>
 		</Comment>
 	</Comments>
-	<VisualisationTree>
-		<VisualisationWidget>
-			<Identifier>(0x00001cbe, 0x000035db)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
-			<BoxIdentifier>(0x00006b9e, 0x0000124c)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x0000500a, 0x00001fd8)</Identifier>
-			<Name>Default window</Name>
-			<Type>1</Type>
-			<ParentIdentifier>(0xffffffff, 0xffffffff)</ParentIdentifier>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x4c90d4ad, 0x7a2554ec)</Identifier>
-					<Value>492</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x7b814cca, 0x271df6dd)</Identifier>
-					<Value>634</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x0000288c, 0x00006c84)</Identifier>
-			<Name>Default tab</Name>
-			<Type>2</Type>
-			<ParentIdentifier>(0x0000500a, 0x00001fd8)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>1</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x000017f0, 0x00006465)</Identifier>
-			<Name>Vertical split</Name>
-			<Type>4</Type>
-			<ParentIdentifier>(0x0000288c, 0x00006c84)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0xffffffff, 0xffffffff)</BoxIdentifier>
-			<NumChildren>2</NumChildren>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x237e56d2, 0x10cd68ae)</Identifier>
-					<Value>447</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x54e45f5b, 0x76c036e2)</Identifier>
-					<Value>221</Value>
-				</Attribute>
-			</Attributes>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x00006c72, 0x00007d16)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x000017f0, 0x00006465)</ParentIdentifier>
-			<Index>0</Index>
-			<BoxIdentifier>(0x00002bed, 0x00001e7e)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-		<VisualisationWidget>
-			<Identifier>(0x000073ee, 0x00006c76)</Identifier>
-			<Type>3</Type>
-			<ParentIdentifier>(0x000017f0, 0x00006465)</ParentIdentifier>
-			<Index>1</Index>
-			<BoxIdentifier>(0x00004e6e, 0x00000d13)</BoxIdentifier>
-			<NumChildren>0</NumChildren>
-		</VisualisationWidget>
-	</VisualisationTree>
+	<Metadata>
+		<Entry>
+			<Identifier>(0x0000775c, 0x000078ff)</Identifier>
+			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
+			<Data>[{"boxIdentifier":"(0x00006b9e, 0x0000124c)","childCount":0,"identifier":"(0x00001cbe, 0x000035db)","index":0,"parentIdentifier":"(0xffffffff, 0xffffffff)","type":3},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":492,"identifier":"(0x0000500a, 0x00001fd8)","index":0,"name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":634},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x0000288c, 0x00006c84)","index":0,"name":"Default tab","parentIdentifier":"(0x0000500a, 0x00001fd8)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":2,"dividerPosition":221,"identifier":"(0x000017f0, 0x00006465)","index":0,"maxDividerPosition":447,"name":"Vertical split","parentIdentifier":"(0x0000288c, 0x00006c84)","type":4},{"boxIdentifier":"(0x00002bed, 0x00001e7e)","childCount":0,"identifier":"(0x00006c72, 0x00007d16)","index":0,"parentIdentifier":"(0x000017f0, 0x00006465)","type":3},{"boxIdentifier":"(0x00004e6e, 0x00000d13)","childCount":0,"identifier":"(0x000073ee, 0x00006c76)","index":1,"parentIdentifier":"(0x000017f0, 0x00006465)","type":3}]</Data>
+		</Entry>
+	</Metadata>
 </OpenViBE-Scenario>

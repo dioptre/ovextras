@@ -24,7 +24,12 @@ namespace
 	class _AutoCast_
 	{
 	public:
-		_AutoCast_(IBox& rBox, IConfigurationManager& rConfigurationManager, const uint32 ui32Index) : m_rConfigurationManager(rConfigurationManager) { rBox.getSettingValue(ui32Index, m_sSettingValue); }
+		_AutoCast_(const IBox& rBox, IConfigurationManager& rConfigurationManager, const uint32 ui32Index)
+			: m_rConfigurationManager(rConfigurationManager)
+		{
+			rBox.getSettingValue(ui32Index, m_sSettingValue);
+			m_sSettingValue = m_rConfigurationManager.expand(m_sSettingValue);
+		}
 		operator ::GdkColor (void)
 		{
 			::GdkColor l_oColor;
@@ -63,9 +68,9 @@ gboolean flush_callback(gpointer pUserData)
 	return false;	// Only run once
 }
 
-boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
+bool CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_pMainWidgetInterface=NULL;
 	m_pToolbarWidgetInterface=NULL;
@@ -151,8 +156,9 @@ boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 	g_signal_connect(gtk_builder_get_object(m_pToolbarWidgetInterface, "toolbutton-show_result_text"),             "toggled", G_CALLBACK(toggle_button_show_hide_cb), gtk_builder_get_object(m_pMainWidgetInterface, "label-result"));
 	g_signal_connect(gtk_builder_get_object(m_pToolbarWidgetInterface, "toolbutton-show_result_text"),             "toggled", G_CALLBACK(toggle_button_show_hide_cb), gtk_builder_get_object(m_pMainWidgetInterface, "label-result-title"));
 
-	getVisualisationContext().setWidget(m_pMainWindow);
-	getVisualisationContext().setToolbar(m_pToolbarWidget);
+	m_visualizationContext = dynamic_cast<OpenViBEVisualizationToolkit::IVisualizationContext*>(this->createPluginObject(OVP_ClassId_Plugin_VisualizationContext));
+	m_visualizationContext->setWidget(*this, m_pMainWindow);
+	m_visualizationContext->setToolbar(*this, m_pToolbarWidget);
 
 	guint l_uiRowCount=0;
 	guint l_uiColumnCount=0;
@@ -206,7 +212,7 @@ boolean CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmP300SpellerVisualisation::uninitialize(void)
+bool CBoxAlgorithmP300SpellerVisualisation::uninitialize(void)
 {
 	if(m_uiIdleFuncTag)
 	{
@@ -301,10 +307,12 @@ boolean CBoxAlgorithmP300SpellerVisualisation::uninitialize(void)
 		m_pSequenceStimulationDecoder=NULL;
 	}
 
+	this->releasePluginObject(m_visualizationContext);
+
 	return true;
 }
 
-boolean CBoxAlgorithmP300SpellerVisualisation::processInput(uint32 ui32Index)
+bool CBoxAlgorithmP300SpellerVisualisation::processInput(uint32 ui32Index)
 {
 	this->getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 
@@ -319,7 +327,7 @@ boolean CBoxAlgorithmP300SpellerVisualisation::processInput(uint32 ui32Index)
 	return true;
 }
 
-boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
+bool CBoxAlgorithmP300SpellerVisualisation::process(void)
 {
 	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
@@ -351,10 +359,10 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 			for(j=0; j<l_pStimulationSet->getStimulationCount(); j++)
 			{
 				uint64 l_ui64StimulationIdentifier=l_pStimulationSet->getStimulationIdentifier(j);
-				boolean l_bFlash=false;
+				bool l_bFlash=false;
 				int l_iRow=-1;
 				int l_iColumn=-1;
-				boolean l_bIsTarget = false;
+				bool l_bIsTarget = false;
 
 				if(l_ui64StimulationIdentifier >= m_ui64RowStimulationBase && l_ui64StimulationIdentifier < m_ui64RowStimulationBase+m_ui64RowCount)
 				{
@@ -453,7 +461,7 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 				for(j=0; j<l_pStimulationSet->getStimulationCount(); j++)
 				{
 					uint64 l_ui64StimulationIdentifier=l_pStimulationSet->getStimulationIdentifier(j);
-					boolean l_bTarget=false;
+					bool l_bTarget=false;
 					if(l_ui64StimulationIdentifier >= m_ui64RowStimulationBase && l_ui64StimulationIdentifier < m_ui64RowStimulationBase+m_ui64RowCount)
 					{
 						this->getLogManager() << LogLevel_Debug << "Received Target Row " << l_ui64StimulationIdentifier << "\n";
@@ -570,7 +578,7 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 					for(j=0; j<l_pStimulationSet->getStimulationCount(); j++)
 					{
 						uint64 l_ui64StimulationIdentifier=l_pStimulationSet->getStimulationIdentifier(j);
-						boolean l_bSelected=false;
+						bool l_bSelected=false;
 						if(l_ui64StimulationIdentifier >= m_ui64RowStimulationBase && l_ui64StimulationIdentifier < m_ui64RowStimulationBase+m_ui64RowCount)
 						{
 							this->getLogManager() << LogLevel_Debug << "Received Selected Row " << l_ui64StimulationIdentifier << "\n";
@@ -634,8 +642,8 @@ boolean CBoxAlgorithmP300SpellerVisualisation::process(void)
 										if(m_vTargetHistory.size())
 										{
 											std::list < std::pair < int, int > >::const_iterator it=m_vTargetHistory.begin();
-											boolean l_bCorrect=(it->first==m_iSelectedRow && it->second==m_iSelectedColumn);
-											boolean l_bHalfCorrect=(it->first==m_iSelectedRow || it->second==m_iSelectedColumn);
+											bool l_bCorrect=(it->first==m_iSelectedRow && it->second==m_iSelectedColumn);
+											bool l_bHalfCorrect=(it->first==m_iSelectedRow || it->second==m_iSelectedColumn);
 											m_vTargetHistory.pop_front();
 											if(l_bCorrect)
 											{
@@ -754,11 +762,11 @@ void CBoxAlgorithmP300SpellerVisualisation::_cache_for_each_if_(int iLine, int i
 	{
 		for(j=i->second.begin(); j!=i->second.end(); j++)
 		{
-			boolean l_bLine=(iLine!=-1);
-			boolean l_bColumn=(iColumn!=-1);
-			boolean l_bInLine=false;
-			boolean l_bInColumn=false;
-			boolean l_bIf;
+			bool l_bLine=(iLine!=-1);
+			bool l_bColumn=(iColumn!=-1);
+			bool l_bInLine=false;
+			bool l_bInColumn=false;
+			bool l_bIf;
 
 			if(l_bLine && (unsigned long)iLine==i->first)
 			{

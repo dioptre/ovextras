@@ -3,13 +3,13 @@
 
 	!include "MUI.nsh"
 	!include "zipdll.nsh"
-
+  
 	;Name and file
-	Name "OpenViBE 1.3.0+git"
-	OutFile "openvibe-1.3.0+git-setup.exe"
+	Name "OpenViBE 2.0.0"
+	OutFile "openvibe-2.0.0-setup.exe"
 
 	;Default installation folder
-	InstallDir "$PROGRAMFILES\openvibe"
+	InstallDir "$PROGRAMFILES\openvibe-2.0"
 	Var OLDINSTDIR
 	Var DIRECTX_MISSING
 
@@ -60,11 +60,11 @@ Function .onInit
 		Quit
 has_admin_rights:
 
-	ReadRegStr $0 HKLM SOFTWARE\openvibe InstallDir
+	ReadRegStr $0 HKLM SOFTWARE\openvibe20 InstallDir
 
 	${If} $0 != ""
 		IfFileExists "$0\Uninstall.exe" +1 +5
-			MessageBox MB_YESNO "A previous installation of OpenViBE is installed under $0.$\nContinuing the install procedure will remove previous installation of OpenViBE (including all files you eventually added in the installation directory).$\nWould you like to accept this removal and continue on installation process ?" /SD IDYES IDNO +1 IDYES +2
+			MessageBox MB_YESNO "A previous installation of OpenViBE 2.0 is installed under $0.$\nContinuing the install procedure will remove previous installation of OpenViBE 2.0 (including all files you eventually added in the installation directory).$\nWould you like to accept this removal and continue on installation process ?" /SD IDYES IDNO +1 IDYES +2
 			Abort
 		StrCpy $OLDINSTDIR $0
 		StrCpy $INSTDIR $0
@@ -77,6 +77,29 @@ has_admin_rights:
 	
 FunctionEnd
 
+; Returns characters before -, _ or .
+Function GetFirstStrPart
+  Exch $R0
+  Push $R1
+  Push $R2
+  StrLen $R1 $R0
+  IntOp $R1 $R1 + 1
+  loop:
+    IntOp $R1 $R1 - 1
+    StrCpy $R2 $R0 1 -$R1
+    StrCmp $R2 "" exit2
+    StrCmp $R2 "-" exit1 
+    StrCmp $R2 "_" exit1
+    StrCmp $R2 "." exit1
+  Goto loop
+  exit1:
+    StrCpy $R0 $R0 -$R1
+  exit2:
+    Pop $R2
+    Pop $R1
+    Exch $R0
+FunctionEnd
+
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
 ;##########################################################################################################################################################
@@ -87,11 +110,11 @@ Section "!OpenViBE" Section1
 	
 	${If} $OLDINSTDIR != ""
 		RMDir /r $OLDINSTDIR
-		RMDir /r "$SMPROGRAMS\OpenViBE"
+		RMDir /r "$SMPROGRAMS\OpenViBE 2.0"
 	${EndIf}
 
 	SetOutPath $INSTDIR
-	WriteRegStr HKLM "SOFTWARE\openvibe" "InstallDir" "$INSTDIR"
+	WriteRegStr HKLM "SOFTWARE\openvibe20" "InstallDir" "$INSTDIR"
 	WriteUninstaller Uninstall.exe
 
 	CreateDirectory "$INSTDIR\dependencies\arch"
@@ -110,28 +133,53 @@ Section "!OpenViBE" Section1
 	RMDir /r "$INSTDIR\tmp"
 no_need_to_install_directx:
 
+	; This is the destination path where the zips will be copied to
 	SetOutPath "$INSTDIR\dependencies\arch"
-	File "..\dependencies\arch\ov-dependencies-1.2.0-vc120-runtime.zip"
-	File "..\dependencies\arch\vcredist-2010.exe"
-	File "..\dependencies\arch\vcredist-2013_x86.exe"
-
-	ExecWait '"vcredist-2010.exe" /q'
-	ExecWait '"vcredist-2013_x86.exe" /install /quiet'
+	; The following source paths are relative to this .nsi script location
+	File "..\..\dependencies\arch\build\windows\*runtime.zip"	
+	File "..\..\dependencies\arch\build\windows\pthread*.zip"		
+	; All vcredist packages extracted to the same folder
+	File "..\..\dependencies\arch\build\windows\vcredist*.zip"
 	
+	; The zips are extracted here by the installer
 	SetOutPath "$INSTDIR\dependencies"
-	ZipDLL::extractall "arch\ov-dependencies-1.2.0-vc120-runtime.zip" ""
+	
+	; Extract all the zip archives
+	; n.b. this thing will freeze on exec if there is no - or _ in the filename
+	ClearErrors
+	FindFirst $R0 $R1 "arch\*.zip"
+	ZipLoop:
+		IfErrors ZipDone
+
+		; find the base name, push to R2
+		Push "$R1"
+		Call GetFirstStrPart
+		Pop "$R2"
+
+		ZipDLL::extractall "arch\$R1" "$R2"
+
+		ClearErrors
+		FindNext $R0 $R1
+		Goto ZipLoop
+	ZipDone:
+	FindClose $R0
+
+	; Zip extract hopefully done now
 	
 	SetOutPath "$INSTDIR"
 	; Export binaries
-	File /nonfatal /r ..\dist\bin
+	File /nonfatal /r ..\..\dist\extras-Release\bin
 	; Export launch scripts
-	File /nonfatal ..\dist\*.cmd
+	File /nonfatal ..\..\dist\extras-Release\*.cmd
 	; File /nonfatal /r ..\dist\doc
-	; File /nonfatal /r ..\dist\etc
 	; File /nonfatal /r ..\dist\include
-	; File /nonfatal /r ..\dist\lib
-	File /nonfatal /r ..\dist\log
-	File /nonfatal /r ..\dist\share
+	
+	; etc and lib folders are needed for the gtk theme
+	File /nonfatal /r /x *.lib ..\..\dist\extras-Release\lib
+	File /nonfatal /r ..\..\dist\extras-Release\etc
+	
+	File /nonfatal /r ..\..\dist\extras-Release\log
+	File /nonfatal /r ..\..\dist\extras-Release\share
 	; File /nonfatal /r ..\dist\tmp
 
 	StrCmp $DIRECTX_MISSING "false" no_need_to_patch_3d_functionnality
@@ -154,23 +202,24 @@ no_need_to_patch_3d_functionnality:
 	FileWrite $0 "SET OGRE_HOME=$INSTDIR\dependencies\ogre$\r$\n"
 	FileWrite $0 "SET VRPNROOT=$INSTDIR\dependencies\vrpn$\r$\n"
 	FileWrite $0 "$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\lua\lib;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\itpp\bin;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\expat\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\gtk\bin;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\itpp\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\cegui\bin;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=$INSTDIR\dependencies\cegui\dependencies\bin;%PATH%$\r$\n"	
 	FileWrite $0 "SET PATH=%OGRE_HOME%\bin\release;%OGRE_HOME%\bin\debug;%PATH%$\r$\n"
 	FileWrite $0 "SET PATH=%VRPNROOT%\bin;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\pthreads\lib;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\openal\libs\Win32;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\freealut\lib;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libvorbis\win32\bin\release;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\libogg\win32\bin\release\;%PATH%$\r$\n"
-	FileWrite $0 "SET PATH=$INSTDIR\dependencies\liblsl\lib\;%PATH%$\r$\n"
-	FileClose $0
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\pthread\lib;%PATH%$\r$\n"
+	FileWrite $0 "SET PATH=$INSTDIR\dependencies\vcredist\;%PATH%$\r$\n"	
 	
+	FileWrite $0 "$\r$\n"
+	FileWrite $0 "REM Apply user-provided Python2.7 paths if available$\r$\n"
+	FileWrite $0 "IF NOT !PYTHONHOME27!==!EMPTY!  IF NOT !PYTHONPATH27!==!EMPTY! SET REPLACE_PYTHON=true$\r$\n"
+	FileWrite $0 "IF NOT !REPLACE_PYTHON!==!EMPTY! ($\r$\n"
+	FileWrite $0 "  SET $\"PYTHONHOME=%PYTHONHOME27%$\"$\r$\n"
+	FileWrite $0 "  SET $\"PYTHONPATH=%PYTHONPATH27%$\"$\r$\n"
+	FileWrite $0 ")$\r$\n"	
+
+	FileClose $0
+
 	FileOpen $0 "$INSTDIR\dependencies\cegui\resources.cfg" w
 	FileWrite $0 "FileSystem=$INSTDIR\dependencies\cegui\datafiles\configs$\r$\n"
 	FileWrite $0 "FileSystem=$INSTDIR\dependencies\cegui\datafiles\fonts$\r$\n"
@@ -191,16 +240,16 @@ no_need_to_patch_3d_functionnality:
 	FileWrite $0 "widget_class $\"*$\" style $\"user-font$\"$\r$\n"
 	FileClose $0
 
-	CreateDirectory "$SMPROGRAMS\OpenViBE"
-	CreateDirectory "$SMPROGRAMS\OpenViBE\Developer tools"
-	CreateShortCut "$SMPROGRAMS\OpenViBE\Developer tools\openvibe id generator.lnk"       "$INSTDIR\openvibe-id-generator.cmd"        "" "%SystemRoot%\system32\shell32.dll" 57
-	CreateShortCut "$SMPROGRAMS\OpenViBE\Developer tools\openvibe plugin inspector.lnk"   "$INSTDIR\openvibe-plugin-inspector.cmd"    "" "%SystemRoot%\system32\shell32.dll" 57
-	CreateShortCut "$SMPROGRAMS\OpenViBE\Developer tools\openvibe skeleton generator.lnk" "$INSTDIR\openvibe-skeleton-generator.cmd"  "" "%SystemRoot%\system32\shell32.dll" 57
-	CreateShortCut "$SMPROGRAMS\OpenViBE\openvibe designer.lnk"                           "$INSTDIR\openvibe-designer.cmd"            "" "%SystemRoot%\system32\shell32.dll" 137
-	CreateShortCut "$SMPROGRAMS\OpenViBE\openvibe acquisition server.lnk"                 "$INSTDIR\openvibe-acquisition-server.cmd"  "" "%SystemRoot%\system32\shell32.dll" 18
-	CreateShortCut "$SMPROGRAMS\OpenViBE\openvibe vr-demo spaceship.lnk"                  "$INSTDIR\openvibe-vr-demo-spaceship.cmd"   "" "%SystemRoot%\system32\shell32.dll" 200
-	CreateShortCut "$SMPROGRAMS\OpenViBE\openvibe vr-demo handball.lnk"                   "$INSTDIR\openvibe-vr-demo-handball.cmd"    "" "%SystemRoot%\system32\shell32.dll" 200
-	CreateShortCut "$SMPROGRAMS\OpenViBE\uninstall.lnk"                                   "$INSTDIR\Uninstall.exe"
+	CreateDirectory "$SMPROGRAMS\OpenViBE 2.0"
+	CreateDirectory "$SMPROGRAMS\OpenViBE 2.0\Developer tools"
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\Developer tools\openvibe id generator.lnk"       "$INSTDIR\openvibe-id-generator.cmd"        "" "%SystemRoot%\system32\shell32.dll" 57
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\Developer tools\openvibe plugin inspector.lnk"   "$INSTDIR\openvibe-plugin-inspector.cmd"    "" "%SystemRoot%\system32\shell32.dll" 57
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\Developer tools\openvibe skeleton generator.lnk" "$INSTDIR\openvibe-skeleton-generator.cmd"  "" "%SystemRoot%\system32\shell32.dll" 57
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\openvibe designer.lnk"                           "$INSTDIR\openvibe-designer.cmd"            "" "%SystemRoot%\system32\shell32.dll" 137
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\openvibe acquisition server.lnk"                 "$INSTDIR\openvibe-acquisition-server.cmd"  "" "%SystemRoot%\system32\shell32.dll" 18
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\openvibe vr-demo spaceship.lnk"                  "$INSTDIR\openvibe-vr-demo-spaceship.cmd"   "" "%SystemRoot%\system32\shell32.dll" 200
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\openvibe vr-demo handball.lnk"                   "$INSTDIR\openvibe-vr-demo-handball.cmd"    "" "%SystemRoot%\system32\shell32.dll" 200
+	CreateShortCut "$SMPROGRAMS\OpenViBE 2.0\uninstall.lnk"                                   "$INSTDIR\Uninstall.exe"
 
 	
 	; AccessControl::EnableFileInheritance "$INSTDIR"
@@ -211,7 +260,7 @@ SectionEnd
 Section "Uninstall"
 
 	RMDir /r $INSTDIR
-	RMDir /r "$SMPROGRAMS\OpenViBE"
+	RMDir /r "$SMPROGRAMS\OpenViBE 2.0"
 
 SectionEnd
 

@@ -43,14 +43,7 @@ namespace
 	static ::GdkColor colorFromIdentifier(const CIdentifier& rIdentifier)
 	{
 		::GdkColor l_oGdkColor;
-		unsigned int l_ui32Value1=0;
-		unsigned int l_ui32Value2=0;
-		uint64 l_ui64Result=0;
-
-		sscanf(rIdentifier.toString(), "(0x%08X, 0x%08X)", &l_ui32Value1, &l_ui32Value2);
-		l_ui64Result+=l_ui32Value1;
-		l_ui64Result<<=32;
-		l_ui64Result+=l_ui32Value2;
+		uint64_t l_ui64Result = rIdentifier.toUInteger();
 
 		l_oGdkColor.pixel=(guint16)0;
 		l_oGdkColor.red  =(guint16)(((l_ui64Result    )&0xffff)|0x8000);
@@ -170,21 +163,17 @@ CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::~CPluginObjectDescEnumBoxAlg
 		<< " *\n"
 		<< " * Available box algorithms :\n";
 
-	uint32 l_ui32Level=0;
+	uint32_t l_ui32Level=0;
 	string l_sLastCategory;
 	vector < string > l_vLastSplittedCategory;
-	vector < pair < string, string > >::iterator itCategories;
 	std::sort(m_vCategories.begin(), m_vCategories.end());
-	for(itCategories=m_vCategories.begin(); itCategories!=m_vCategories.end(); itCategories++)
+	for(const auto& category : m_vCategories)
 	{
-		string l_sCategory=itCategories->first;
-		string l_sName=itCategories->second;
+		string l_sCategory = category.first;
+		string l_sName = category.second;
 
 		if(l_sLastCategory!=l_sCategory)
 		{
-			vector < string >::iterator itLastSplittedCategory;
-			vector < string >::iterator itSplittedCategory1;
-			vector < string >::iterator itSplittedCategory2;
 			vector < string > l_vSplittedCategory;
 			size_t i=(size_t)-1;
 			size_t j;
@@ -204,18 +193,14 @@ CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::~CPluginObjectDescEnumBoxAlg
 				}
 			}
 			l_ui32Level=l_vSplittedCategory.size();
-
-			for(itLastSplittedCategory =l_vLastSplittedCategory.begin(), itSplittedCategory1 =l_vSplittedCategory.begin();
-			    itLastSplittedCategory!=l_vLastSplittedCategory.end() && itSplittedCategory1!=l_vSplittedCategory.end() && *itLastSplittedCategory==*itSplittedCategory1;
-			    itLastSplittedCategory++, itSplittedCategory1++);
+			// @FIXME C++14 : auto itSplittedCategory1 = std::mismatch(l_vLastSplittedCategory.begin(), l_vLastSplittedCategory.end(), l_vSplittedCategory.begin(), l_vSplittedCategory.end()).second;
+			auto itSplittedCategory1 = l_vLastSplittedCategory.size() < l_vSplittedCategory.size()
+				? std::mismatch(l_vLastSplittedCategory.begin(), l_vLastSplittedCategory.end(), l_vSplittedCategory.begin()).second
+				: std::mismatch(l_vSplittedCategory.begin(), l_vSplittedCategory.end(), l_vLastSplittedCategory.begin()).first;
 
 			for(; itSplittedCategory1!=l_vSplittedCategory.end(); itSplittedCategory1++)
 			{
-				l_oBoxAlgorithmsFile << " * ";
-				for(itSplittedCategory2=l_vSplittedCategory.begin(); itSplittedCategory2!=itSplittedCategory1; itSplittedCategory2++)
-				{
-					l_oBoxAlgorithmsFile << "   ";
-				}
+				l_oBoxAlgorithmsFile << " * " << std::string((itSplittedCategory1 - l_vSplittedCategory.begin()) * 3, ' ');
 				l_oBoxAlgorithmsFile << " - " << *itSplittedCategory1 << " : \n";
 			}
 
@@ -223,9 +208,7 @@ CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::~CPluginObjectDescEnumBoxAlg
 			l_vLastSplittedCategory=l_vSplittedCategory;
 		}
 
-		l_oBoxAlgorithmsFile << " * ";
-		for(uint32 k=0; k<l_ui32Level; k++)
-			l_oBoxAlgorithmsFile << "   ";
+		l_oBoxAlgorithmsFile << " * " << std::string(3 * l_ui32Level, ' ');
 		l_oBoxAlgorithmsFile << " - \\subpage Doc_BoxAlgorithm_" << transform(l_sName).c_str() << " \"" << l_sName << "\"\n";
 	}
 
@@ -233,20 +216,18 @@ CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::~CPluginObjectDescEnumBoxAlg
 	l_oBoxAlgorithmsFile.close();
 }
 
-boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPluginObjectDesc& rPluginObjectDesc)
+bool CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPluginObjectDesc& rPluginObjectDesc)
 {
 	string l_sFullName=string(rPluginObjectDesc.getCategory().toASCIIString()) + "/" + string(rPluginObjectDesc.getName().toASCIIString());
 	string l_sFilename="BoxAlgorithm_"+transform(rPluginObjectDesc.getName().toASCIIString());
 	CIdentifier l_oBoxIdentifier;
 	if(!m_pScenario->addBox(l_oBoxIdentifier, rPluginObjectDesc.getCreatedClassIdentifier(), OV_UndefinedIdentifier))
 	{
-		m_rKernelContext.getLogManager() << LogLevel_Warning << "Skipped [" << CString(l_sFilename.c_str()) << "] (could not create corresponding box)\n";
+		OV_WARNING_K("Skipped [" << CString(l_sFilename.c_str()) << "] (could not create corresponding box)");
 		return true;
 	}
-	IBox& l_rBox=*m_pScenario->getBoxDetails(l_oBoxIdentifier);
-	IBox& rBox=*m_pScenario->getBoxDetails(l_oBoxIdentifier);
-
-	m_rKernelContext.getLogManager() << LogLevel_Trace << "Working on [" << CString(l_sFilename.c_str()) << "]\n";
+	IBox& l_rBox = *m_pScenario->getBoxDetails(l_oBoxIdentifier);
+	getLogManager() << LogLevel_Trace << "Working on [" << CString(l_sFilename.c_str()) << "]\n";
 
 	::PangoContext* l_pPangoContext=gtk_widget_get_pango_context(m_pWidget);
 	::PangoLayout* l_pPangoLayout=pango_layout_new(l_pPangoContext);
@@ -256,11 +237,10 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 	pango_layout_set_text(l_pPangoLayout, rPluginObjectDesc.getName(), -1);
 	pango_layout_get_pixel_extents(l_pPangoLayout, NULL, &l_oPangoRectangle);
 
-		uint32 i;
-		const int xMargin=5;
-		const int yMargin=5;
-		const int iCircleSize=11;
-		const int iCircleSpace=4;
+	const int xMargin=5;
+	const int yMargin=5;
+	const int iCircleSize=11;
+	const int iCircleSpace=4;
 
 	int xSize=l_oPangoRectangle.width+xMargin*2;
 	int ySize=l_oPangoRectangle.height+yMargin*2;
@@ -279,15 +259,15 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 
 	::GdkGC* l_pDrawGC=gdk_gc_new(m_pWidget->window);
 
-		boolean l_bDeprecated=m_rKernelContext.getPluginManager().isPluginObjectFlaggedAsDeprecated(rBox.getAlgorithmClassIdentifier());
-		if(l_bDeprecated)
-		{
-			gdk_gc_set_rgb_fg_color(l_pDrawGC, &m_vColors[Color_BoxBackgroundDeprecated]);
-		}
-		else
-		{
-			gdk_gc_set_rgb_fg_color(l_pDrawGC, &m_vColors[Color_BoxBackground]);
-		}
+	bool l_bDeprecated=m_rKernelContext.getPluginManager().isPluginObjectFlaggedAsDeprecated(l_rBox.getAlgorithmClassIdentifier());
+	if(l_bDeprecated)
+	{
+		gdk_gc_set_rgb_fg_color(l_pDrawGC, &m_vColors[Color_BoxBackgroundDeprecated]);
+	}
+	else
+	{
+		gdk_gc_set_rgb_fg_color(l_pDrawGC, &m_vColors[Color_BoxBackground]);
+	}
 
 	gdk_draw_rounded_rectangle(
 		m_pWidget->window,
@@ -302,24 +282,24 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 		xStart, yStart, xSize, ySize);
 
 	int l_iInputOffset=(xSize-l_rBox.getInputCount()*(iCircleSpace+iCircleSize)+iCircleSize/2)/2;
-	for(i=0; i<l_rBox.getInputCount(); i++)
+	for(uint32_t i = 0; i<l_rBox.getInputCount(); i++)
 	{
 		CIdentifier l_oInputIdentifier;
 		l_rBox.getInputType(i, l_oInputIdentifier);
 		::GdkColor l_oInputColor=colorFromIdentifier(l_oInputIdentifier);
 
-			::GdkPoint l_vPoint[4];
-			l_vPoint[0].x=iCircleSize>>1;
-			l_vPoint[0].y=iCircleSize;
-			l_vPoint[1].x=0;
-			l_vPoint[1].y=0;
-			l_vPoint[2].x=iCircleSize-1;
-			l_vPoint[2].y=0;
-			for(int j=0; j<3; j++)
-			{
-				l_vPoint[j].x+=xStart+i*(iCircleSpace+iCircleSize)+l_iInputOffset;
-				l_vPoint[j].y+=yStart-(iCircleSize>>1);
-			}
+		::GdkPoint l_vPoint[4];
+		l_vPoint[0].x=iCircleSize>>1;
+		l_vPoint[0].y=iCircleSize;
+		l_vPoint[1].x=0;
+		l_vPoint[1].y=0;
+		l_vPoint[2].x=iCircleSize-1;
+		l_vPoint[2].y=0;
+		for(int j=0; j<3; j++)
+		{
+			l_vPoint[j].x+=xStart+i*(iCircleSpace+iCircleSize)+l_iInputOffset;
+			l_vPoint[j].y+=yStart-(iCircleSize>>1);
+		}
 
 		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oInputColor);
 		gdk_draw_polygon(
@@ -338,24 +318,24 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 	}
 
 	int l_iOutputOffset=(xSize-l_rBox.getOutputCount()*(iCircleSpace+iCircleSize)+iCircleSize/2)/2;
-	for(i=0; i<l_rBox.getOutputCount(); i++)
+	for(uint32_t i=0; i<l_rBox.getOutputCount(); i++)
 	{
 		CIdentifier l_oOutputIdentifier;
 		l_rBox.getOutputType(i, l_oOutputIdentifier);
 		::GdkColor l_oOutputColor=colorFromIdentifier(l_oOutputIdentifier);
 
-			::GdkPoint l_vPoint[4];
-			l_vPoint[0].x=iCircleSize>>1;
-			l_vPoint[0].y=iCircleSize;
-			l_vPoint[1].x=0;
-			l_vPoint[1].y=0;
-			l_vPoint[2].x=iCircleSize-1;
-			l_vPoint[2].y=0;
-			for(int j=0; j<3; j++)
-			{
-				l_vPoint[j].x+=xStart+i*(iCircleSpace+iCircleSize)+l_iOutputOffset;
-				l_vPoint[j].y+=yStart-(iCircleSize>>1)+ySize;
-			}
+		::GdkPoint l_vPoint[4];
+		l_vPoint[0].x=iCircleSize>>1;
+		l_vPoint[0].y=iCircleSize;
+		l_vPoint[1].x=0;
+		l_vPoint[1].y=0;
+		l_vPoint[2].x=iCircleSize-1;
+		l_vPoint[2].y=0;
+		for(int j=0; j<3; j++)
+		{
+			l_vPoint[j].x+=xStart+i*(iCircleSpace+iCircleSize)+l_iOutputOffset;
+			l_vPoint[j].y+=yStart-(iCircleSize>>1)+ySize;
+		}
 
 		gdk_gc_set_rgb_fg_color(l_pDrawGC, &l_oOutputColor);
 		gdk_draw_polygon(
@@ -413,7 +393,7 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 		<< " * - Short description : " << rPluginObjectDesc.getShortDescription() << "\n"
 		<< " * - Documentation template generation date : " << __DATE__ << "\n";
 
-	boolean l_bDeprectated=m_rKernelContext.getPluginManager().isPluginObjectFlaggedAsDeprecated(rPluginObjectDesc.getCreatedClassIdentifier());
+	bool l_bDeprectated=m_rKernelContext.getPluginManager().isPluginObjectFlaggedAsDeprecated(rPluginObjectDesc.getCreatedClassIdentifier());
 	if(l_bDeprectated)
 	{
 		l_oFileSkeleton
@@ -422,7 +402,11 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 			<< " * box and turn to another \"equivalent\" one.\n";
 	}
 
-	boolean l_bUnstable=m_rKernelContext.getPluginManager().isPluginObjectFlaggedAsUnstable(rPluginObjectDesc.getCreatedClassIdentifier());
+// @FIXME CERT
+#pragma message("WARNING: 'Unstable' block commented out due to Certivibe")
+
+	/*
+	bool l_bUnstable=m_rKernelContext.getPluginManager().isPluginObjectFlaggedAsUnstable(rPluginObjectDesc.getCreatedClassIdentifier());
 	if(l_bUnstable)
 	{
 		l_oFileSkeleton
@@ -431,6 +415,7 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 			<< " * under well known conditions. It may possibly crash or cause data loss.\n"
 			<< " * Use this box at your own risk, you've been warned.</b>\n";
 	}
+	*/
 
 	l_oFileSkeleton
 		<< " *\n"
@@ -468,7 +453,7 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 			<< " * |OVP_DocBegin_" << l_sFilename.c_str() << "_Inputs|\n"
 			<< " * |OVP_DocEnd_" << l_sFilename.c_str() << "_Inputs|\n";
 
-		for(i=0; i<l_rBox.getInputCount(); i++)
+		for(uint32_t i = 0; i<l_rBox.getInputCount(); i++)
 		{
 			CString l_sName;
 			CIdentifier l_oTypeIdentifier;
@@ -508,7 +493,7 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 			<< " * |OVP_DocBegin_" << l_sFilename.c_str() << "_Outputs|\n"
 			<< " * |OVP_DocEnd_" << l_sFilename.c_str() << "_Outputs|\n";
 
-		for(i=0; i<l_rBox.getOutputCount(); i++)
+		for(uint32_t i=0; i<l_rBox.getOutputCount(); i++)
 		{
 			CString l_sName;
 			CIdentifier l_oTypeIdentifier;
@@ -548,7 +533,7 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 			<< " * |OVP_DocBegin_" << l_sFilename.c_str() << "_Settings|\n"
 			<< " * |OVP_DocEnd_" << l_sFilename.c_str() << "_Settings|\n";
 
-		for(i=0; i<l_rBox.getSettingCount(); i++)
+		for(uint32_t i=0; i<l_rBox.getSettingCount(); i++)
 		{
 			CString l_sName;
 			CIdentifier l_oTypeIdentifier;
@@ -576,6 +561,10 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 		}
 	}
 
+// @FIXME CERT
+#pragma message("WARNING: PluginFunctionality_Visualization block commented out due to Certivibe")
+
+	/*
 	if(rPluginObjectDesc.hasFunctionality(PluginFunctionality_Visualization))
 	{
 		l_oFileSkeleton
@@ -592,6 +581,7 @@ boolean CPluginObjectDescEnumBoxAlgorithmSnapshotGenerator::callback(const IPlug
 			<< " * |OVP_DocBegin_" << l_sFilename.c_str() << "_OnlineVisualizationSettings|\n"
 			<< " * |OVP_DocEnd_" << l_sFilename.c_str() << "_OnlineVisualizationSettings|\n";
 	}
+	*/
 
 	l_oFileSkeleton
 		<< " *\n"

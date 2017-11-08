@@ -35,14 +35,14 @@ namespace OpenViBEPlugins
 
 			virtual void release(void) { delete this; }
 
-			virtual OpenViBE::boolean initialize(void);
-			virtual OpenViBE::boolean uninitialize(void);
+			virtual bool initialize(void);
+			virtual bool uninitialize(void);
 				
 
-			virtual OpenViBE::boolean processInput(OpenViBE::uint32 ui32InputIndex);
+			virtual bool processInput(OpenViBE::uint32 ui32InputIndex);
 
 			
-			virtual OpenViBE::boolean process(void);
+			virtual bool process(void);
 			
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_Inverse_DWT);
@@ -160,7 +160,7 @@ namespace OpenViBEPlugins
                 rBoxAlgorithmPrototype.addSetting("Wavelet type",OVP_TypeId_WaveletType,"");
                 rBoxAlgorithmPrototype.addSetting("Wavelet decomposition levels",OVP_TypeId_WaveletLevel,"");
 				
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_IsUnstable);
+				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 				
 				return true;
 			}

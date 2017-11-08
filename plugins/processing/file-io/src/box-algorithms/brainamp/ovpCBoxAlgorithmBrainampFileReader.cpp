@@ -25,7 +25,7 @@ uint64 CBoxAlgorithmBrainampFileReader::getClockFrequency(void)
 
 boolean CBoxAlgorithmBrainampFileReader::initialize(void)
 {
-	IBox& l_rStaticBoxContext=this->getStaticBoxContext();
+	const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	// IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
 	// Creates algorithms
@@ -63,15 +63,9 @@ boolean CBoxAlgorithmBrainampFileReader::initialize(void)
 	ip_pStimulations.setReferenceTarget(op_pStimulations);
 
 	// Configures settings according to box
-	CString l_sSettingValue;
-
-	l_rStaticBoxContext.getSettingValue(0, l_sSettingValue);
-	*ip_sFilename=l_sSettingValue;
-
-	l_rStaticBoxContext.getSettingValue(1, l_sSettingValue);
-	ip_f64EpochDuration=atof(l_sSettingValue.toASCIIString());
-
-	ip_bConvertStimuli=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
+	*ip_sFilename = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
+	ip_f64EpochDuration = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 1);
+	ip_bConvertStimuli = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 2);
 
 	m_bHeaderSent=false;
 

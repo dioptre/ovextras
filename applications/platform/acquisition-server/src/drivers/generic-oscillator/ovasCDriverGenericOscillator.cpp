@@ -20,8 +20,7 @@ CDriverGenericOscillator::CDriverGenericOscillator(IDriverContext& rDriverContex
 	,m_oSettings("AcquisitionServer_Driver_GenericOscillator", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
-	,m_pSample(NULL)
-	,m_ui32TotalSampleCount(0)
+	,m_ui64TotalSampleCount(0)
 	,m_ui64StartTime(0)
 	,m_bSendPeriodicStimulations(false)
 {
@@ -76,12 +75,7 @@ boolean CDriverGenericOscillator::initialize(
 		}
 	}
 
-	m_pSample=new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
-	if(!m_pSample)
-	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "GenericOscillator: Memory allocation error\n";
-		return false;
-	}
+	m_vSample.resize(m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock);
 
 	m_pCallback=&rCallback;
 	m_ui32SampleCountPerSentBlock=ui32SampleCountPerSentBlock;
@@ -96,8 +90,8 @@ boolean CDriverGenericOscillator::start(void)
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(m_rDriverContext.isStarted()) { return false; }
 
-	m_ui32TotalSampleCount=0;
-	m_ui64StartTime=System::Time::zgetTime();
+	m_ui64TotalSampleCount=0;
+	m_ui64StartTime = System::Time::zgetTime();
 
 	return true;
 }
@@ -108,7 +102,7 @@ boolean CDriverGenericOscillator::loop(void)
 
 	if(!m_rDriverContext.isConnected()) { return false; }
 
-	if(m_rDriverContext.isStarted())
+	if (m_rDriverContext.isStarted())
 	{
 		// Generate the contents we want to send next
 		CStimulationSet l_oStimulationSet;
@@ -120,40 +114,37 @@ boolean CDriverGenericOscillator::loop(void)
 			l_oStimulationSet.setStimulationDuration(0, 0);
 		}
 
-		for(uint32 j=0; j<m_oHeader.getChannelCount(); j++)
+		const uint64 l_ui64Elapsed = System::Time::zgetTime() - m_ui64StartTime;
+		const uint64 l_ui64SamplesNeededSoFar = ITimeArithmetics::timeToSampleCount(m_oHeader.getSamplingFrequency(), l_ui64Elapsed);
+		if (l_ui64SamplesNeededSoFar <= m_ui64TotalSampleCount)
 		{
-			for(uint32 i=0; i<m_ui32SampleCountPerSentBlock; i++)
+			// Too early
+			return true;
+		}
+		const uint32 l_ui32RemainingSamples = static_cast<uint32>(l_ui64SamplesNeededSoFar - m_ui64TotalSampleCount);
+		if (l_ui32RemainingSamples * m_oHeader.getChannelCount() > m_vSample.size())
+		{
+			m_vSample.resize(l_ui32RemainingSamples * m_oHeader.getChannelCount());
+		}
+
+		// std::cout << "At " << ITimeArithmetics::timeToSeconds(l_ui64Elapsed) * 1000 << "ms, remaining " << l_ui32RemainingSamples << " samples\n";
+		for (uint32 i = 0; i<l_ui32RemainingSamples; i++)
+		{
+			for (uint32 j = 0; j<m_oHeader.getChannelCount(); j++)
 			{
-#if 1
 				const float64 l_f64Value=
-					::sin(((i+m_ui32TotalSampleCount)*(j+1)*12.3)/m_oHeader.getSamplingFrequency())+
-					::sin(((i+m_ui32TotalSampleCount)*(j+1)* 4.5)/m_oHeader.getSamplingFrequency())+
-					::sin(((i+m_ui32TotalSampleCount)*(j+1)*67.8)/m_oHeader.getSamplingFrequency());
-				m_pSample[j*m_ui32SampleCountPerSentBlock+i]=(float32)l_f64Value;
-#else
-				m_pSample[j*m_ui32SampleCountPerSentBlock+i]=j;
-#endif
+					::sin((m_ui64TotalSampleCount*(j+1)*12.3)/m_oHeader.getSamplingFrequency())+
+					::sin((m_ui64TotalSampleCount*(j+1)* 4.5)/m_oHeader.getSamplingFrequency())+
+					::sin((m_ui64TotalSampleCount*(j+1)*67.8)/m_oHeader.getSamplingFrequency());
+				m_vSample[j*l_ui32RemainingSamples + i] = (float32)l_f64Value;
 			}
+			m_ui64TotalSampleCount++;
 		}
 
-		// If we're early, sleep before sending. Otherwise, push the chunk out immediately
-		const uint64 l_ui64CurrentTime = System::Time::zgetTime() - m_ui64StartTime;
-		const uint64 l_ui64NextTime = ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui32TotalSampleCount+m_ui32SampleCountPerSentBlock);
-		if(l_ui64NextTime>l_ui64CurrentTime)
-		{
-			const uint64 l_ui64SleepTime = l_ui64NextTime - l_ui64CurrentTime;
-			System::Time::zsleep(l_ui64SleepTime);
-		}
-
-#ifdef TIMINGDEBUG
-		m_rDriverContext.getLogManager() << LogLevel_Info << "At " << ITimeArithmetics::timeToSeconds(l_ui64CurrentTime)*1000 << "ms filled for " 
-			<< ITimeArithmetics::timeToSeconds(l_ui64NextTime)*1000 << "ms  -> nSamples = " << m_ui32TotalSampleCount + m_ui32SampleCountPerSentBlock << "\n";
-#endif
-
-		m_ui32TotalSampleCount+=m_ui32SampleCountPerSentBlock;
-		m_pCallback->setSamples(m_pSample);
+		m_pCallback->setSamples(&m_vSample[0], l_ui32RemainingSamples);
 		m_pCallback->setStimulationSet(l_oStimulationSet);
 		m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
+
 	}
 	else
 	{
@@ -185,8 +176,6 @@ boolean CDriverGenericOscillator::uninitialize(void)
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(m_rDriverContext.isStarted()) { return false; }
 
-	delete [] m_pSample;
-	m_pSample=NULL;
 	m_pCallback=NULL;
 
 	return true;
