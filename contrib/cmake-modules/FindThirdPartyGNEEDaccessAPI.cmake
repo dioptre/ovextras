@@ -57,10 +57,10 @@ IF(WIN32)
 		# Only add the compile/install directive if all necessary components were found
 		IF(PATH_ClientLIB AND LIB_GDSClientAPI AND PATH_ServerDLL AND LIB_GDSServer)
 			# Copy the DLL file at install
-			INSTALL(PROGRAMS "${PATH_ClientLIB}/GDSClientAPI.dll" DESTINATION "bin")
-			INSTALL(PROGRAMS "${PATH_ClientLIB}/gAPI.dll" DESTINATION "bin")
-			INSTALL(PROGRAMS "${PATH_ClientLIB}/Networking.dll" DESTINATION "bin")
-			INSTALL(PROGRAMS "${PATH_ServerDLL}/GDSServer.dll" DESTINATION "bin")
+			INSTALL(PROGRAMS "${PATH_ClientLIB}/GDSClientAPI.dll" DESTINATION ${DIST_BINDIR})
+			INSTALL(PROGRAMS "${PATH_ClientLIB}/gAPI.dll" DESTINATION ${DIST_BINDIR})
+			INSTALL(PROGRAMS "${PATH_ClientLIB}/Networking.dll" DESTINATION ${DIST_BINDIR})
+			INSTALL(PROGRAMS "${PATH_ServerDLL}/GDSServer.dll" DESTINATION ${DIST_BINDIR})
 		
 			INCLUDE_DIRECTORIES(${PATH_GNEEDaccessAPI})
 			
