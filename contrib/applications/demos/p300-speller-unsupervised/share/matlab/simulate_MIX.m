@@ -1,4 +1,4 @@
-function C = simulate_MIX(data,stimuli,sequence,y,nr_ept,A,gamma,trials)
+function C = simulate_MIX(C,data,stimuli,sequence,y,nr_ept,A,gamma,trials,verbose)
 %% This function simulates/trains an unsupervised mixing classifier
 %
 % Terminology:
@@ -17,6 +17,7 @@ function C = simulate_MIX(data,stimuli,sequence,y,nr_ept,A,gamma,trials)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Input / Data Format:
 %
+% C         --  Pre-estimated classifier, can be empty ([])
 % data      --  Array of size (N X feat_dim) feature matrix
 % stimuli   --  Array of size (nr_commands X N) matrix, BINARY ARRAY
 %               to indicate whether command was intensified during stimulus s_i
@@ -63,6 +64,10 @@ function C = simulate_MIX(data,stimuli,sequence,y,nr_ept,A,gamma,trials)
 %
 % Jul, 2017
 
+if(nargin<10)
+	verbose = true;
+end
+
 % Adjustable parameters
 nr_em_steps = 5;        % Number of EM-steps [Default = 5]
 
@@ -91,19 +96,30 @@ else
     trials = 1:nr_trials;
 end
 
-disp('-------Start simulated online experiment!--------')
-disp('The classifier starts from a random initalization and is retrained after each trial.');
-disp('The binary target-vs-non target area under the curve (AUC) on all data ');
-disp('until the current trial is then reported, if label information are available.');
-disp('Additionally, the mixing coefficient for the target and non-target classes are reported.')
-fprintf('-----------------------------------------------------\n\n');
+if(verbose)
+	disp('-------Start simulated online experiment!--------')
+	disp('The classifier starts from a random initalization and is retrained after each trial.');
+	disp('The binary target-vs-non target area under the curve (AUC) on all data ');
+	disp('until the current trial is then reported, if label information are available.');
+	disp('Additionally, the mixing coefficient for the target and non-target classes are reported.')
+	fprintf('-----------------------------------------------------\n\n');
+end
 
 % Init classifier
-C = init_classifier(randn(feat_dim,1),feat_dim,nr_commands,nr_ept,nr_tpt);
+start_idx = 1;
+if(isempty(C))
+	C = init_classifier(randn(feat_dim,1),feat_dim,nr_commands,nr_ept,nr_tpt);
+else
+	% If we get classifier passed in, assume the caller is already accumulating data 
+	% in trials and that we just want to integrate everything so far
+	start_idx = nr_trials;
+end
 
 % Loop over new trials
-for c_i = 1:nr_trials
-    fprintf('Trial %3d. ', trials(c_i));
+for c_i = start_idx:nr_trials
+	if(verbose)
+		fprintf('Trial %3d. ', trials(c_i));
+	end
     tic();
     N = c_i*nr_ept;
     
@@ -213,10 +229,14 @@ for c_i = 1:nr_trials
         auc=loss_rocArea([y(1:length(total_projection)); ...
             1-y(1:length(total_projection))],total_projection);
         C.statistics.auc = [C.statistics.auc auc];
-        fprintf('AUC: %.3f%%. ',100*auc);
+		if(verbose)
+			fprintf('AUC: %.3f%%. ',100*auc);
+		end
     end
-    fprintf('Gamma_pos: %.3f, Gamma_neg: %.3f. Runtime: %.3fs\n', gamma_pos, gamma_neg, toc());
-    
+	if(verbose)
+		fprintf('Gamma_pos: %.3f, Gamma_neg: %.3f. Runtime: %.3fs\n', gamma_pos, gamma_neg, toc());
+    end
+	
     % Store informative results in C.statistics
     C.statistics.projection{end+1} = projection;
     C.statistics.data_log_likelihood = [C.statistics.data_log_likelihood C.classifier.data_log_likelihood];
@@ -226,8 +246,11 @@ for c_i = 1:nr_trials
     C.statistics.gamma_neg = [C.statistics.gamma_neg gamma_neg];
 end
 
-fprintf('\n-----------------------------------------------------\n');
-disp('Simulation completed.')
-disp('Find the final classifier in C.classifier.');
-disp('Statistics are saved in C.statistics.');
-fprintf('-----------------------------------------------------\n\n');
+if(verbose)
+	fprintf('\n-----------------------------------------------------\n');
+	disp('Simulation completed.')
+	disp('Find the final classifier in C.classifier.');
+	disp('Statistics are saved in C.statistics.');
+	fprintf('-----------------------------------------------------\n\n');
+end
+

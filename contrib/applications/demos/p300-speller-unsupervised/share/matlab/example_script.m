@@ -18,7 +18,7 @@
 % @David Hübner, Jul, 2017
 
 % !! Set your data path !!
-your_data_path = '';
+your_data_path = 'data';
 
 % Change to the current folder and add required paths to the Matlab repository
 addpath('EM')
@@ -72,7 +72,7 @@ rng(1234);
 trials = 1:23;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Run %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-C = simulate_MIX(data,stimuli,sequence,y,nr_ept,A,gamma,trials);
+C = simulate_MIX([],data,stimuli,sequence,y,nr_ept,A,gamma,trials);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Obtain and display spelled symbols
