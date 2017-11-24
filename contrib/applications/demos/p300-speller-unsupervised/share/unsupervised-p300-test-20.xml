@@ -7,6 +7,56 @@
 	<Outputs></Outputs>
 	<Boxes>
 		<Box>
+			<Identifier>(0x00001754, 0x00001e0e)</Identifier>
+			<Name>Epochs</Name>
+			<AlgorithmClassIdentifier>(0x336a3d9a, 0x753f1ba4)</AlgorithmClassIdentifier>
+			<Outputs>
+				<Output>
+					<TypeIdentifier>(0x17341935, 0x152ff448)</TypeIdentifier>
+					<Name>Output stream</Name>
+				</Output>
+				<Output>
+					<TypeIdentifier>(0x6f752dd0, 0x082a321e)</TypeIdentifier>
+					<Name>Output stimulation</Name>
+				</Output>
+			</Outputs>
+			<Settings>
+				<Setting>
+					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
+					<Name>Filename</Name>
+					<DefaultValue></DefaultValue>
+					<Value>${Player_ScenarioDirectory}/signals-new/01-epoched-data.csv</Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
+			</Settings>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
+					<Value>160</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
+					<Value>288</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x30a4e5c9, 0x83502953)</Identifier>
+					<Value></Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
+					<Value>(0xa9cdc629, 0xb153eb33)</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xc80ce8af, 0xf699f813)</Identifier>
+					<Value>2</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xce18836a, 0x9c0eb403)</Identifier>
+					<Value>1</Value>
+				</Attribute>
+			</Attributes>
+		</Box>
+		<Box>
 			<Identifier>(0x00003223, 0x000036b6)</Identifier>
 			<Name>Feature aggregator</Name>
 			<AlgorithmClassIdentifier>(0x00682417, 0x453635f9)</AlgorithmClassIdentifier>
@@ -213,13 +263,17 @@
 			</Attributes>
 		</Box>
 		<Box>
-			<Identifier>(0x00003e0a, 0x0000079c)</Identifier>
-			<Name>CSV File Reader (Deprecated)</Name>
-			<AlgorithmClassIdentifier>(0x641d0717, 0x02884107)</AlgorithmClassIdentifier>
+			<Identifier>(0x00003956, 0x00001418)</Identifier>
+			<Name>Group</Name>
+			<AlgorithmClassIdentifier>(0x336a3d9a, 0x753f1ba4)</AlgorithmClassIdentifier>
 			<Outputs>
 				<Output>
 					<TypeIdentifier>(0x17341935, 0x152ff448)</TypeIdentifier>
 					<Name>Output stream</Name>
+				</Output>
+				<Output>
+					<TypeIdentifier>(0x6f752dd0, 0x082a321e)</TypeIdentifier>
+					<Name>Output stimulation</Name>
 				</Output>
 			</Outputs>
 			<Settings>
@@ -227,28 +281,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Player_ScenarioDirectory}/signals-old/01-epoched-data.csv</Value>
-					<Modifiability>false</Modifiability>
-				</Setting>
-				<Setting>
-					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
-					<Name>Column separator</Name>
-					<DefaultValue>;</DefaultValue>
-					<Value>;</Value>
-					<Modifiability>false</Modifiability>
-				</Setting>
-				<Setting>
-					<TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>
-					<Name>Don't use the file time</Name>
-					<DefaultValue>false</DefaultValue>
-					<Value>true</Value>
-					<Modifiability>false</Modifiability>
-				</Setting>
-				<Setting>
-					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
-					<Name>Unused parameter</Name>
-					<DefaultValue>32</DefaultValue>
-					<Value>0</Value>
+					<Value>${Player_ScenarioDirectory}/signals-new/02-stimuli.csv</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
@@ -259,7 +292,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>288</Value>
+					<Value>464</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x30a4e5c9, 0x83502953)</Identifier>
@@ -267,149 +300,15 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x3bf57676, 0xad3aaefa)</Value>
+					<Value>(0xa9cdc629, 0xb153eb33)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc80ce8af, 0xf699f813)</Identifier>
-					<Value>1</Value>
+					<Value>2</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xce18836a, 0x9c0eb403)</Identifier>
-					<Value>4</Value>
-				</Attribute>
-			</Attributes>
-		</Box>
-		<Box>
-			<Identifier>(0x00003e0a, 0x0000079d)</Identifier>
-			<Name>CSV File Reader (Deprecated)</Name>
-			<AlgorithmClassIdentifier>(0x641d0717, 0x02884107)</AlgorithmClassIdentifier>
-			<Outputs>
-				<Output>
-					<TypeIdentifier>(0x17341935, 0x152ff448)</TypeIdentifier>
-					<Name>Output stream</Name>
-				</Output>
-			</Outputs>
-			<Settings>
-				<Setting>
-					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
-					<Name>Filename</Name>
-					<DefaultValue></DefaultValue>
-					<Value>${Player_ScenarioDirectory}/signals-old/02-stimuli.csv</Value>
-					<Modifiability>false</Modifiability>
-				</Setting>
-				<Setting>
-					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
-					<Name>Column separator</Name>
-					<DefaultValue>;</DefaultValue>
-					<Value>;</Value>
-					<Modifiability>false</Modifiability>
-				</Setting>
-				<Setting>
-					<TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>
-					<Name>Don't use the file time</Name>
-					<DefaultValue>false</DefaultValue>
-					<Value>true</Value>
-					<Modifiability>false</Modifiability>
-				</Setting>
-				<Setting>
-					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
-					<Name>Unused parameter</Name>
-					<DefaultValue>32</DefaultValue>
-					<Value>0</Value>
-					<Modifiability>false</Modifiability>
-				</Setting>
-			</Settings>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
-					<Value>160</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>480</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x30a4e5c9, 0x83502953)</Identifier>
-					<Value></Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x3bf57676, 0xad3aaefa)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xc80ce8af, 0xf699f813)</Identifier>
 					<Value>1</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xce18836a, 0x9c0eb403)</Identifier>
-					<Value>4</Value>
-				</Attribute>
-			</Attributes>
-		</Box>
-		<Box>
-			<Identifier>(0x00003e0a, 0x0000079e)</Identifier>
-			<Name>CSV File Reader (Deprecated)</Name>
-			<AlgorithmClassIdentifier>(0x641d0717, 0x02884107)</AlgorithmClassIdentifier>
-			<Outputs>
-				<Output>
-					<TypeIdentifier>(0x17341935, 0x152ff448)</TypeIdentifier>
-					<Name>Output stream</Name>
-				</Output>
-			</Outputs>
-			<Settings>
-				<Setting>
-					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
-					<Name>Filename</Name>
-					<DefaultValue></DefaultValue>
-					<Value>${Player_ScenarioDirectory}/signals-old/03-sequence.csv</Value>
-					<Modifiability>false</Modifiability>
-				</Setting>
-				<Setting>
-					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
-					<Name>Column separator</Name>
-					<DefaultValue>;</DefaultValue>
-					<Value>;</Value>
-					<Modifiability>false</Modifiability>
-				</Setting>
-				<Setting>
-					<TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>
-					<Name>Don't use the file time</Name>
-					<DefaultValue>false</DefaultValue>
-					<Value>true</Value>
-					<Modifiability>false</Modifiability>
-				</Setting>
-				<Setting>
-					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
-					<Name>Unused parameter</Name>
-					<DefaultValue>32</DefaultValue>
-					<Value>0</Value>
-					<Modifiability>false</Modifiability>
-				</Setting>
-			</Settings>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
-					<Value>160</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>672</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x30a4e5c9, 0x83502953)</Identifier>
-					<Value></Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0x3bf57676, 0xad3aaefa)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xc80ce8af, 0xf699f813)</Identifier>
-					<Value>1</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xce18836a, 0x9c0eb403)</Identifier>
-					<Value>4</Value>
 				</Attribute>
 			</Attributes>
 		</Box>
@@ -592,6 +491,127 @@
 			</Attributes>
 		</Box>
 		<Box>
+			<Identifier>(0x00004f30, 0x00005502)</Identifier>
+			<Name>Sequence</Name>
+			<AlgorithmClassIdentifier>(0x336a3d9a, 0x753f1ba4)</AlgorithmClassIdentifier>
+			<Outputs>
+				<Output>
+					<TypeIdentifier>(0x17341935, 0x152ff448)</TypeIdentifier>
+					<Name>Output stream</Name>
+				</Output>
+				<Output>
+					<TypeIdentifier>(0x6f752dd0, 0x082a321e)</TypeIdentifier>
+					<Name>Output stimulation</Name>
+				</Output>
+			</Outputs>
+			<Settings>
+				<Setting>
+					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
+					<Name>Filename</Name>
+					<DefaultValue></DefaultValue>
+					<Value>${Player_ScenarioDirectory}/signals-new/03-sequence.csv</Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
+			</Settings>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
+					<Value>160</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
+					<Value>672</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x30a4e5c9, 0x83502953)</Identifier>
+					<Value></Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
+					<Value>(0xa9cdc629, 0xb153eb33)</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xc80ce8af, 0xf699f813)</Identifier>
+					<Value>2</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xce18836a, 0x9c0eb403)</Identifier>
+					<Value>1</Value>
+				</Attribute>
+			</Attributes>
+		</Box>
+		<Box>
+			<Identifier>(0x00005503, 0x000066b0)</Identifier>
+			<Name>EBML stream spy</Name>
+			<AlgorithmClassIdentifier>(0x0ed76695, 0x01a69cc3)</AlgorithmClassIdentifier>
+			<Inputs>
+				<Input>
+					<TypeIdentifier>(0x434f6587, 0x2efd2b7e)</TypeIdentifier>
+					<Name>Spied EBML stream 1</Name>
+				</Input>
+			</Inputs>
+			<Settings>
+				<Setting>
+					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
+					<Name>EBML nodes description</Name>
+					<DefaultValue>${Path_Data}/plugins/tools/config-ebml-stream-spy.txt</DefaultValue>
+					<Value>${Path_Data}/plugins/tools/config-ebml-stream-spy.txt</Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
+				<Setting>
+					<TypeIdentifier>(0xa88b3667, 0x0871638c)</TypeIdentifier>
+					<Name>Log level to use</Name>
+					<DefaultValue>Information</DefaultValue>
+					<Value>Information</Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
+				<Setting>
+					<TypeIdentifier>(0x2cdb2f0b, 0x12f231ea)</TypeIdentifier>
+					<Name>Expand binary blocks</Name>
+					<DefaultValue>false</DefaultValue>
+					<Value>true</Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
+				<Setting>
+					<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
+					<Name>Number of values in expanded blocks</Name>
+					<DefaultValue>4</DefaultValue>
+					<Value>4</Value>
+					<Modifiability>false</Modifiability>
+				</Setting>
+			</Settings>
+			<Attributes>
+				<Attribute>
+					<Identifier>(0x1fa7a38f, 0x54edbe0b)</Identifier>
+					<Value>240</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
+					<Value>512</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x341d3912, 0x1478de86)</Identifier>
+					<Value>1</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
+					<Value>(0x23ce0a10, 0xc2eabb47)</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xce18836a, 0x9c0eb403)</Identifier>
+					<Value>4</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xcfad85b0, 0x7c6d841c)</Identifier>
+					<Value>1</Value>
+				</Attribute>
+				<Attribute>
+					<Identifier>(0xfba64161, 0x65304e21)</Identifier>
+					<Value></Value>
+				</Attribute>
+			</Attributes>
+		</Box>
+		<Box>
 			<Identifier>(0x000060ba, 0x00001bb1)</Identifier>
 			<Name>EBML stream spy</Name>
 			<AlgorithmClassIdentifier>(0x0ed76695, 0x01a69cc3)</AlgorithmClassIdentifier>
@@ -746,13 +766,35 @@
 			</Target>
 		</Link>
 		<Link>
-			<Identifier>(0x0000336d, 0x00005678)</Identifier>
+			<Identifier>(0x00000887, 0x00001e02)</Identifier>
 			<Source>
-				<BoxIdentifier>(0x00003e0a, 0x0000079c)</BoxIdentifier>
+				<BoxIdentifier>(0x00003956, 0x00001418)</BoxIdentifier>
+				<BoxOutputIndex>0</BoxOutputIndex>
+			</Source>
+			<Target>
+				<BoxIdentifier>(0x00005503, 0x000066b0)</BoxIdentifier>
+				<BoxInputIndex>0</BoxInputIndex>
+			</Target>
+		</Link>
+		<Link>
+			<Identifier>(0x00001cbd, 0x00001800)</Identifier>
+			<Source>
+				<BoxIdentifier>(0x00004f30, 0x00005502)</BoxIdentifier>
 				<BoxOutputIndex>0</BoxOutputIndex>
 			</Source>
 			<Target>
 				<BoxIdentifier>(0x000043a1, 0x00007d94)</BoxIdentifier>
+				<BoxInputIndex>2</BoxInputIndex>
+			</Target>
+		</Link>
+		<Link>
+			<Identifier>(0x00002180, 0x00007dab)</Identifier>
+			<Source>
+				<BoxIdentifier>(0x00001754, 0x00001e0e)</BoxIdentifier>
+				<BoxOutputIndex>0</BoxOutputIndex>
+			</Source>
+			<Target>
+				<BoxIdentifier>(0x00006e63, 0x000063b4)</BoxIdentifier>
 				<BoxInputIndex>0</BoxInputIndex>
 			</Target>
 		</Link>
@@ -779,47 +821,25 @@
 			</Target>
 		</Link>
 		<Link>
-			<Identifier>(0x00006c51, 0x00002b3a)</Identifier>
+			<Identifier>(0x00004785, 0x00006f75)</Identifier>
 			<Source>
-				<BoxIdentifier>(0x00003e0a, 0x0000079d)</BoxIdentifier>
-				<BoxOutputIndex>0</BoxOutputIndex>
-			</Source>
-			<Target>
-				<BoxIdentifier>(0x000060ba, 0x00001bb1)</BoxIdentifier>
-				<BoxInputIndex>0</BoxInputIndex>
-			</Target>
-		</Link>
-		<Link>
-			<Identifier>(0x00006ded, 0x00005d6c)</Identifier>
-			<Source>
-				<BoxIdentifier>(0x00003e0a, 0x0000079e)</BoxIdentifier>
+				<BoxIdentifier>(0x00001754, 0x00001e0e)</BoxIdentifier>
 				<BoxOutputIndex>0</BoxOutputIndex>
 			</Source>
 			<Target>
 				<BoxIdentifier>(0x000043a1, 0x00007d94)</BoxIdentifier>
-				<BoxInputIndex>2</BoxInputIndex>
+				<BoxInputIndex>0</BoxInputIndex>
 			</Target>
 		</Link>
 		<Link>
-			<Identifier>(0x00007706, 0x0000298b)</Identifier>
+			<Identifier>(0x00004f43, 0x000058e6)</Identifier>
 			<Source>
-				<BoxIdentifier>(0x00003e0a, 0x0000079d)</BoxIdentifier>
+				<BoxIdentifier>(0x00003956, 0x00001418)</BoxIdentifier>
 				<BoxOutputIndex>0</BoxOutputIndex>
 			</Source>
 			<Target>
 				<BoxIdentifier>(0x000043a1, 0x00007d94)</BoxIdentifier>
 				<BoxInputIndex>1</BoxInputIndex>
-			</Target>
-		</Link>
-		<Link>
-			<Identifier>(0x00007b3f, 0x00005363)</Identifier>
-			<Source>
-				<BoxIdentifier>(0x00003e0a, 0x0000079c)</BoxIdentifier>
-				<BoxOutputIndex>0</BoxOutputIndex>
-			</Source>
-			<Target>
-				<BoxIdentifier>(0x00006e63, 0x000063b4)</BoxIdentifier>
-				<BoxInputIndex>0</BoxInputIndex>
 			</Target>
 		</Link>
 	</Links>

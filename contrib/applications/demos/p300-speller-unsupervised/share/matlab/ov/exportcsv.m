@@ -1,4 +1,4 @@
-function exportcsv( fn, mat )
+function exportcsv( fn, mat, isint )
 % Can be read as feature vectors in openvibe
 
 	h=fopen(fn,'w');
@@ -8,8 +8,12 @@ function exportcsv( fn, mat )
 	end
 	fprintf(h,'\n');
 	fclose(h);
-
-	dlmwrite(fn,mat,'-append','delimiter',';');
-
+	
+	if(isint)
+		dlmwrite(fn,mat,'-append','delimiter',';');
+	else
+		dlmwrite(fn,mat,'-append','delimiter',';','precision','%.3f');
+		% dlmwrite(fn,mat,'-append','delimiter',';','precision','%.6f');
+	end
 end
 

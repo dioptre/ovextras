@@ -5,6 +5,7 @@
 //Presentation
 #include "box-algorithms/ovpCGrazVisualization.h"
 #include "box-algorithms/ovpCBoxAlgorithmP300SpellerVisualisation.h"
+#include "box-algorithms/ovpCBoxAlgorithmP300SpellerVisualisation2.h"
 #include "box-algorithms/ovpCBoxAlgorithmP300MagicCardVisualisation.h"
 #include "box-algorithms/ovpCBoxAlgorithmP300IdentifierCardVisualisation.h"
 #include "box-algorithms/ovpCDisplayCueImage.h"
@@ -36,6 +37,7 @@ OVP_Declare_Begin()
 
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CGrazVisualizationDesc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmP300SpellerVisualisationDesc)
+	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmP300SpellerVisualisation2Desc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmP300MagicCardVisualisationDesc)
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CDisplayCueImageDesc)
 
