@@ -78,7 +78,7 @@ bool CBoxAlgorithmP300SpellerVisualisation::initialize(void)
 	m_pNoFlashFontDescription=NULL;
 	m_pTargetFontDescription=NULL;
 	m_pSelectedFontDescription=NULL;
-
+	m_visualizationContext = NULL;
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	m_sInterfaceFilename         =FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
@@ -307,7 +307,10 @@ bool CBoxAlgorithmP300SpellerVisualisation::uninitialize(void)
 		m_pSequenceStimulationDecoder=NULL;
 	}
 
-	this->releasePluginObject(m_visualizationContext);
+	if (m_visualizationContext)
+	{
+		this->releasePluginObject(m_visualizationContext);
+	}
 
 	return true;
 }
