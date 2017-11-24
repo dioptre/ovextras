@@ -796,10 +796,16 @@ bool CBoxAlgorithmMatlabScripting::processInput(unsigned int inputIndex)
 bool CBoxAlgorithmMatlabScripting::printOutputBufferWithFormat()
 {
 	// the buffer for the console
+
+	// @FIXME allow seeing more of the error message!
+
 	std::stringstream l_ssMatlabBuffer;
 	l_ssMatlabBuffer<<m_sMatlabBuffer;
 	if(l_ssMatlabBuffer.str().size()>0)
 	{
+        // Showing the whole buffer is probably too much
+		// this->getLogManager() << LogLevel_Info << m_sMatlabBuffer << "\n";
+
 		const size_t l_oErrorIndex1 = l_ssMatlabBuffer.str().find("??? ");
 		const size_t l_oErrorIndex2 = l_ssMatlabBuffer.str().find("Error: ");
 		const size_t l_oErrorIndex3 = l_ssMatlabBuffer.str().find("Error ");
@@ -837,6 +843,7 @@ bool CBoxAlgorithmMatlabScripting::printOutputBufferWithFormat()
 			m_bErrorDetected = true;
 		}
 	}
+
 	return true;
 }
 

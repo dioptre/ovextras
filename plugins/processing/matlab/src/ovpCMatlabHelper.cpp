@@ -55,11 +55,15 @@ static std::string genLabelsList(IMatrix* pMatrix, int axis = 0)
 
 static uint64_t convertFromMArray(mxArray* array, int index)
 {
-	   return static_cast<uint64_t>(static_cast<float64*>(::mxGetPr(array))[index] * 65536.) << 16;
+	const double* ptr = ::mxGetPr(array);
+	const float64 timeValue = static_cast<float64>(ptr[index]);
+	return ITimeArithmetics::secondsToTime(timeValue);
 }
 static uint64_t castFromMArray(mxArray* array, int index)
 {
-	   return static_cast<uint64_t>(static_cast<float64*>(::mxGetPr(array))[index]);
+	const double* ptr = ::mxGetPr(array);
+	const float64 value = static_cast<float64>(ptr[index]);
+	return static_cast<uint64_t>(value);
 }
 
 static CString getNameFromCell(mxArray* l_pNames, int cellIndex)
@@ -86,6 +90,12 @@ std::vector<CString> CMatlabHelper::getNamelist(const char* name)
 	std::vector<CString> res;
 
 	mxArray* marray = ::engGetVariable(m_pMatlabEngine, name);
+	if (!marray)
+	{
+		this->getLogManager() << LogLevel_Error << "Nonexisting variable [" << name << "]\n";
+		return res;
+	}
+
 	mwSize nbCells = mxGetNumberOfElements(marray);
 	for(uint32_t cell = 0; cell < nbCells; cell++)
 	{
@@ -98,24 +108,41 @@ std::vector<CString> CMatlabHelper::getNamelist(const char* name)
 
 uint32_t CMatlabHelper::getUint32FromEnv(const char* name)
 {
-	   mxArray* array = ::engGetVariable(m_pMatlabEngine, name);
-	   uint32_t res = static_cast<uint32_t> (*mxGetPr(array));
-	   mxDestroyArray(array);
+	   mxArray* marray = ::engGetVariable(m_pMatlabEngine, name);
+	   if (!marray)
+	   {
+		   this->getLogManager() << LogLevel_Error << "Nonexisting variable [" << name << "]\n";
+		   return 0;
+	   }
+	   uint32_t res = static_cast<uint32_t> (*mxGetPr(marray));
+	   mxDestroyArray(marray);
 	   return res;
 }
 
 uint64_t CMatlabHelper::getUint64FromEnv(const char* name)
 {
-	   mxArray* array = ::engGetVariable(m_pMatlabEngine, name);
-	   uint64_t res = static_cast<uint64_t> (*mxGetPr(array));
-	   mxDestroyArray(array);
+	   mxArray* marray = ::engGetVariable(m_pMatlabEngine, name);
+	   if (!marray)
+	   {
+		   this->getLogManager() << LogLevel_Error << "Nonexisting variable [" << name << "]\n";
+		   return 0;
+	   }
+	   uint64_t res = static_cast<uint64_t> (*mxGetPr(marray));
+	   mxDestroyArray(marray);
 	   return res;
 }
 
 uint64_t CMatlabHelper::genUint64FromEnvConverted(const char* name)
 {
 		mxArray* marray = ::engGetVariable(m_pMatlabEngine, name);
-		uint64_t res = static_cast<uint64_t>(static_cast<float64*>(::mxGetPr(marray))[0] * 65536.) << 16;
+		if (!marray)
+		{
+			this->getLogManager() << LogLevel_Error << "Nonexisting variable [" << name << "]\n";
+			return 0;
+		}
+
+		const float64 value = static_cast<float64>(*mxGetPr(marray));
+		uint64_t res = ITimeArithmetics::secondsToTime(value);
 		mxDestroyArray(marray);
 		return res;
 }
@@ -256,8 +283,8 @@ bool CMatlabHelper::addStreamedMatrixInputBuffer(uint32_t ui32InputIndex, IMatri
 
 	std::string l_sCommand = std::string(m_sBoxInstanceVariableName) + " = OV_addInputBuffer(" + (const char*)m_sBoxInstanceVariableName + ","
 			+ std::to_string(ui32InputIndex + 1) + ","
-			+ std::to_string((ui64OpenvibeStartTime>>16)/65536.) + ","
-			+ std::to_string((ui64OpenvibeEndTime>>16)/65536.) + ",OV_MATRIX_TMP');";
+			+ std::to_string(ITimeArithmetics::timeToSeconds(ui64OpenvibeStartTime)) + ","
+			+ std::to_string(ITimeArithmetics::timeToSeconds(ui64OpenvibeEndTime)) + ",OV_MATRIX_TMP');";
 	// please note the transpose operator ' to put the matrix with  1 channel per line
 
 	delete[] l_pDims;
@@ -282,8 +309,8 @@ bool CMatlabHelper::addStimulationsInputBuffer(uint32_t ui32InputIndex, IStimula
 		for(uint32_t i = 0; i<pStimulationSet->getStimulationCount(); i++)
 		{
 			::mxGetPr(l_pMatlabMatrix)[i*3]   =  (double)pStimulationSet->getStimulationIdentifier(i);
-			::mxGetPr(l_pMatlabMatrix)[i*3+1] =  (pStimulationSet->getStimulationDate(i)>>16)/65536.;
-			::mxGetPr(l_pMatlabMatrix)[i*3+2] =  (pStimulationSet->getStimulationDuration(i)>>16)/65536.;
+			::mxGetPr(l_pMatlabMatrix)[i * 3 + 1] = ITimeArithmetics::timeToSeconds(pStimulationSet->getStimulationDate(i));
+			::mxGetPr(l_pMatlabMatrix)[i * 3 + 2] = ITimeArithmetics::timeToSeconds(pStimulationSet->getStimulationDuration(i));
 		}
 
 		::engPutVariable(m_pMatlabEngine, "OV_MATRIX_TMP", l_pMatlabMatrix);
@@ -293,8 +320,8 @@ bool CMatlabHelper::addStimulationsInputBuffer(uint32_t ui32InputIndex, IStimula
 
 	std::string l_sCommand = std::string(m_sBoxInstanceVariableName) + " = OV_addInputBuffer(" + (const char*)m_sBoxInstanceVariableName + ","
 			+ std::to_string(ui32InputIndex + 1) + ","
-			+ std::to_string((ui64OpenvibeStartTime>>16)/65536.) + ","
-			+ std::to_string((ui64OpenvibeEndTime>>16)/65536.) + ",OV_MATRIX_TMP');";
+			+ std::to_string(ITimeArithmetics::timeToSeconds(ui64OpenvibeStartTime)) + ","
+			+ std::to_string(ITimeArithmetics::timeToSeconds(ui64OpenvibeEndTime)) + ",OV_MATRIX_TMP');";
 
 	return ::engEvalString(m_pMatlabEngine, l_sCommand.c_str()) == 0;
 }
@@ -311,6 +338,12 @@ bool CMatlabHelper::getStreamedMatrixOutputHeader(uint32_t ui32OutputIndex, IMat
 	
 	uint32_t l_ui32NbDimensions = getUint32FromEnv("OV_NB_DIMENSIONS");
 	mxArray * l_pDimensionSizes  = ::engGetVariable(m_pMatlabEngine,"OV_DIMENSION_SIZES");
+	if (!l_pDimensionSizes)
+	{
+		this->getLogManager() << LogLevel_Error << "Nonexisting variable [OV_DIMENSION_SIZES]\n";
+		return false;
+	}
+
 	std::vector<CString> l_pNameList = getNamelist("OV_DIMENSION_LABELS");
 	
 	pMatrix->setDimensionCount(l_ui32NbDimensions);
@@ -395,6 +428,11 @@ bool CMatlabHelper::getChannelLocalisationOutputHeader(uint32_t ui32OutputIndex,
 	uint32_t l_ui32NbChannels = getUint32FromEnv("OV_NB_CHANNELS");
 	std::vector<CString> l_pNameList = getNamelist("OV_CHANNEL_NAMES");
 	mxArray * l_pDynamic    = ::engGetVariable(m_pMatlabEngine,"OV_DYNAMIC");
+	if (!l_pDynamic)
+	{
+		this->getLogManager() << LogLevel_Error << "Nonexisting variable [OV_DYNAMIC]\n";
+		return false;
+	}
 
 	if(l_pNameList.size() != l_ui32NbChannels)
 	{
@@ -428,6 +466,12 @@ bool CMatlabHelper::getSpectrumOutputHeader(uint32_t ui32OutputIndex, IMatrix * 
 	uint32_t l_ui32NbAbscissa = getUint32FromEnv("OV_NB_ABSCISSAS");
 	std::vector<CString>  l_pFreqAbscissaNames = getNamelist("OV_ABSCISSAS_NAME");
 	mxArray* l_pFreqAbscissa = ::engGetVariable(m_pMatlabEngine,"OV_ABSCISSAS_LINEAR");
+	if (!l_pFreqAbscissa)
+	{
+		this->getLogManager() << LogLevel_Error << "Nonexisting variable [OV_ABSCISSAS_LINEAR]\n";
+		return false;
+	}
+
 	samplingRate = getUint64FromEnv("OV_SAMPLING_RATE");
 
 	//The Frequency abscissa list has dimensions nb_bands
@@ -480,6 +524,11 @@ bool CMatlabHelper::popStreamedMatrixOutputBuffer(uint32_t ui32OutputIndex, IMat
 	rEndTime = genUint64FromEnvConverted("OV_END_TIME");
 	uint64_t l_pSize = getUint64FromEnv("OV_LINEAR_DATA_SIZE");
 	mxArray * l_pData      = ::engGetVariable(m_pMatlabEngine,"OV_LINEAR_DATA");
+	if (!l_pData)
+	{
+		this->getLogManager() << LogLevel_Error << "Nonexisting variable [OV_LINEAR_DATA]\n";
+		return false;
+	}
 
 	// ti be copied direclty in openvibe buffer, the linear matrix must be ordered line by line
 	System::Memory::copy(pMatrix->getBuffer(), ::mxGetPr(l_pData), l_pSize*sizeof(float64));
@@ -500,10 +549,15 @@ bool CMatlabHelper::popStimulationsOutputBuffer(uint32_t ui32OutputIndex, IStimu
 	rEndTime = genUint64FromEnvConverted("OV_END_TIME");
 	uint32_t l_pSize = getUint32FromEnv("OV_LINEAR_MATRIX_SIZE");
 	mxArray* l_pData = ::engGetVariable(m_pMatlabEngine,"OV_LINEAR_DATA");
+	if (!l_pData)
+	{
+		this->getLogManager() << LogLevel_Error << "Nonexisting variable [OV_LINEAR_DATA]\n";
+		return false;
+	}
 
 	for(uint32_t i = 0; i < l_pSize; i+=3)
 	{
-		uint64_t l_ui64Identifier = castFromMArray(l_pData, i+1);
+		uint64_t l_ui64Identifier = castFromMArray(l_pData,    i+0);
 		uint64_t l_ui64Date       = convertFromMArray(l_pData, i+1);
 		uint64_t l_ui64Duration   = convertFromMArray(l_pData, i+2);
 		pStimulationSet->appendStimulation(l_ui64Identifier,l_ui64Date, l_ui64Duration);
