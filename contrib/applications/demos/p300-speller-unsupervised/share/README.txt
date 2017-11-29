@@ -71,7 +71,7 @@ How to test & debug
 
 * See the scenarios named like unsupervised-p300-test*xml. Required data files can be imported 
 from the format used by David Huber & co. ( https://zenodo.org/record/192684 ) by the script
-'ov/dump_data_to_csv.m'. Using the S1.mat file from the aforementioned url should get
+'matlab-test/dump_data_to_csv.m'. Using the S1.mat file from the aforementioned url should get
 the 'epoched' test scenarios to print 'franzy_jagt_im'... etc.
 
 

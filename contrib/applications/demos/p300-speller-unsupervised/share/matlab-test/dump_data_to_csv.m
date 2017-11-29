@@ -8,10 +8,7 @@
 
 clear;
 
-% Change to the current folder and add required paths to the Matlab repository
-addpath('EM')
-addpath('helpers')
-addpath('ov')
+addpath('../matlab/helpers')
 
 haveNonEpoched = false;
 haveEpoched = false;
@@ -22,10 +19,11 @@ end
 if(exist('S1.mat','file'))
 	haveEpoched = true;
 end
+assert(haveEpoched || haveNonEpoched);
 
 if(haveNonEpoched)
 	rawdata = load('S1_cnt_mrk.mat');
-	exportcsv('../signals-test/01-raw-data.csv',[(0:(size(rawdata.cnt.x,1)-1))'/rawdata.cnt.fs,rawdata.cnt.x]);
+	exportcsv('../signals-test/01-raw-data.csv',[(0:(size(rawdata.cnt.x,1)-1))'/rawdata.cnt.fs,rawdata.cnt.x], rawdata.cnt.fs);
 	featTime = rawdata.mrk.time'/1000; % orig time is in milliseconds	
 	tightTime = (0:(size(featTime,1)-1))'.*0.005; % this is a kludge to get a kind of fifo behavior from openvibe for groups & sequence
 	
