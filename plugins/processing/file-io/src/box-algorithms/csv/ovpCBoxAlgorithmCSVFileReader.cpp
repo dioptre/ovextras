@@ -78,7 +78,7 @@ boolean CBoxAlgorithmCSVFileReader::initialize(void)
 	{
 		m_ui32SamplesPerBuffer = FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 3);
 	}
-
+	OV_WARNING_UNLESS_K(!(m_oTypeIdentifier == OV_TypeId_FeatureVector && m_bDoNotUseFileTime), "'Do not use file time' setting does not work with feature vectors\n");
 	m_f64NextTime=0.;
 
 	m_ui64ChunkStartTime=0;
