@@ -36,10 +36,12 @@ namespace OpenViBEPlugins
 		public:
 
 			virtual void release(void) { delete this; }
-
+			
+			virtual uint64_t getClockFrequency(void);
 			virtual bool initialize(void);
 			virtual bool uninitialize(void);
 			virtual bool processInput(OpenViBE::uint32 ui32Index);
+			virtual bool processClock(OpenViBE::CMessageClock& messageClock);
 			virtual bool process(void);
 
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_P300SpellerVisualisation2);
@@ -99,7 +101,6 @@ namespace OpenViBEPlugins
 
 			OpenViBEToolkit::TFeatureVectorDecoder<CBoxAlgorithmP300SpellerVisualisation2> m_oFlashGroupDecoder;
 			OpenViBEToolkit::TStimulationDecoder<CBoxAlgorithmP300SpellerVisualisation2> m_oTimelineDecoder;
-			OpenViBEToolkit::TStimulationDecoder<CBoxAlgorithmP300SpellerVisualisation2> m_oTargetDecoder;
 			OpenViBEToolkit::TStimulationDecoder<CBoxAlgorithmP300SpellerVisualisation2> m_oSelectionDecoder;
 
 			::GtkBuilder* m_pMainWidgetInterface;
@@ -114,6 +115,8 @@ namespace OpenViBEPlugins
 
 			int m_iSelectedRow;
 			int m_iSelectedColumn;
+			int m_iLastSelectedRow;
+			int m_iLastSelectedColumn;
 
 			bool m_bTableInitialized;
 			bool m_bTargetSettingMode;
@@ -168,7 +171,6 @@ namespace OpenViBEPlugins
 			{
 				rBoxAlgorithmPrototype.addInput("Flash patterns",                   OV_TypeId_FeatureVector);
 				rBoxAlgorithmPrototype.addInput("Timeline",                         OV_TypeId_Stimulations);
-				rBoxAlgorithmPrototype.addInput("Target stimulations",              OV_TypeId_Stimulations);
 				rBoxAlgorithmPrototype.addInput("Selection stimulations",           OV_TypeId_Stimulations);
 
 				rBoxAlgorithmPrototype.addSetting("Interface filename",              OV_TypeId_Filename,    "${Path_Data}/plugins/simple-visualisation/p300-speller-hash.ui");

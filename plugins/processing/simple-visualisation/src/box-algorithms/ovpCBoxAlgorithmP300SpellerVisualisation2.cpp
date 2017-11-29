@@ -102,8 +102,7 @@ bool CBoxAlgorithmP300SpellerVisualisation2::initialize(void)
 
 	m_oFlashGroupDecoder.initialize(*this, 0);
 	m_oTimelineDecoder.initialize(*this, 1);
-	m_oTargetDecoder.initialize(*this, 2);
-	m_oSelectionDecoder.initialize(*this, 3);
+	m_oSelectionDecoder.initialize(*this, 2);
 
 	m_visualizationContext = NULL;
 	m_pStimulusSender = NULL;
@@ -173,6 +172,8 @@ bool CBoxAlgorithmP300SpellerVisualisation2::initialize(void)
 
 	pango_font_description_free(l_pMaxFontDescription);
 
+	m_iLastSelectedRow = -1;
+	m_iLastSelectedRow = -1;
 	m_iSelectedRow = -1;
 	m_iSelectedColumn = -1;
 	m_iTargetRow = -1;
@@ -247,7 +248,6 @@ bool CBoxAlgorithmP300SpellerVisualisation2::uninitialize(void)
 
 	m_oFlashGroupDecoder.uninitialize();
 	m_oTimelineDecoder.uninitialize();
-	m_oTargetDecoder.uninitialize();
 	m_oSelectionDecoder.uninitialize();
 
 	if (m_visualizationContext)
@@ -262,6 +262,20 @@ bool CBoxAlgorithmP300SpellerVisualisation2::uninitialize(void)
 		delete tmp;
 	}
 
+	return true;
+}
+
+uint64_t CBoxAlgorithmP300SpellerVisualisation2::getClockFrequency(void)
+{
+	return 128LL << 32; // the box clock frequency
+}
+
+// This box attempts to run more smoothly by being called also when no current input
+bool CBoxAlgorithmP300SpellerVisualisation2::processClock(IMessageClock& rMessageClock)
+{
+	OV_ERROR_UNLESS_KRF(getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess(),
+		"Failed to mark clock algorithm as ready to process",
+		ErrorType::Internal);
 	return true;
 }
 
@@ -318,11 +332,28 @@ bool CBoxAlgorithmP300SpellerVisualisation2::setSelection(uint64 ui64Stimulation
 	{
 		// Beginning of text specification
 		m_sSpelledText = "";
+		m_iSelectedRow = -1;
+		m_iSelectedColumn = -1;
 	}
 	else if (ui64StimulationIdentifier == OVTK_StimulationId_NonTarget || !isMultiCharacter)
 	{
+		// this->getLogManager() << LogLevel_Info << "Setting " << m_sSpelledText.c_str() << "\n";
+
 		// End of text specification
 		gtk_label_set_markup(m_pResult, m_sSpelledText.c_str());
+		// Highlight last letter
+		const std::pair< int, int > cacheIdx((int)m_iLastSelectedRow, (int)m_iLastSelectedColumn);
+		// no need to test, we've returned false already if the above indexes are outside table
+
+		SWidgetStyle& selectedWidget = m_vCache[cacheIdx];
+
+		// Highlight the last letter
+		_cache_change_background_cb_(selectedWidget, &m_oSelectedBackgroundColor);
+		_cache_change_foreground_cb_(selectedWidget, &m_oSelectedForegroundColor);
+		_cache_change_font_cb_(selectedWidget, m_pSelectedFontDescription);
+
+		m_iSelectedRow = -1;
+		m_iSelectedColumn = -1;
 	}
 	else if (ui64StimulationIdentifier >= m_ui64RowStimulationBase && ui64StimulationIdentifier < m_ui64RowStimulationBase + m_ui64RowCount)
 	{
@@ -357,11 +388,6 @@ bool CBoxAlgorithmP300SpellerVisualisation2::setSelection(uint64 ui64Stimulation
 		}
 
 		SWidgetStyle& selectedWidget = m_vCache[cacheIdx];
-		
-		// Change the cell in question, @fixme should only change last
-		_cache_change_background_cb_(selectedWidget, &m_oSelectedBackgroundColor);
-		_cache_change_foreground_cb_(selectedWidget, &m_oSelectedForegroundColor);
-		_cache_change_font_cb_(selectedWidget, m_pSelectedFontDescription);
 
 		// Write the letter out
 		std::string l_sLetter = gtk_label_get_text(GTK_LABEL(selectedWidget.pChildWidget));
@@ -371,13 +397,13 @@ bool CBoxAlgorithmP300SpellerVisualisation2::setSelection(uint64 ui64Stimulation
 			m_sSpelledText += "<span color=\"darkgreen\">" + l_sLetter + "</span>";
 		}
 
+		m_iLastSelectedRow = m_iSelectedRow;
+		m_iLastSelectedColumn = m_iSelectedColumn;
 		m_iSelectedRow = -1;
 		m_iSelectedColumn = -1;
-
-		return true;
 	}
 
-	return false;
+	return true;
 }
 
 bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
@@ -481,48 +507,45 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 		}
 	}
 
-	// --- Read target letter
-	for (uint32 i = 0; i < l_rDynamicBoxContext.getInputChunkCount(2); i++)
-	{
-		m_oTargetDecoder.decode(i);
-
-		// nop really, remove socket
-	}
-
 	// --- Selection stimulations
-	for (uint32 i = 0; i < l_rDynamicBoxContext.getInputChunkCount(3); i++)
+	for (uint32 i = 0; i < l_rDynamicBoxContext.getInputChunkCount(2); i++)
 	{
 		m_oSelectionDecoder.decode(i);
 
 		if (m_oSelectionDecoder.isBufferReceived())
 		{
 			IStimulationSet* oSet = m_oSelectionDecoder.getOutputStimulationSet();
-	//		uint64 numStim = oSet - oSet.getStimulationCount();
-	//		if (numStim != 0 && numStim < 3)
-	//		{
-	//			this->getLogManager() << LogLevel_Warning << "Expecting at least 3 stimulations from classifier\n";
-	//		}
+			const bool l_bIsMultiCharacter = (oSet->getStimulationCount()!=2);  // If its a single character, its rows+cols. Otherwise its Target+[row,col,row,col,...]+NonTarget
 			for (uint32 j = 0; j < oSet->getStimulationCount(); j++)
 			{
 				uint64 l_ui64StimulationIdentifier = oSet->getStimulationIdentifier(j);
-				setSelection(l_ui64StimulationIdentifier,
-					oSet->getStimulationCount()>1);
+				if (!setSelection(l_ui64StimulationIdentifier,
+					l_bIsMultiCharacter)) {
+					return false;
+				}
 			}
 		}
 	}
 
 	// If we have everything we need, lets flash
-	if (m_vNextFlashTime.size() > 0 && m_vNextFlashTime.front() <= l_ui64CurrentTime && m_vFlashGroup.size() > 0)
+	if (m_vNextFlashTime.size() > 0 && m_vNextFlashTime.front() <= l_ui64CurrentTime)
 	{
-		// this->getLogManager() << LogLevel_Info << "Doing flash\n";
-		CMatrix* l_pFlashGroup = m_vFlashGroup.front();
-		flashNow(*l_pFlashGroup);
-		m_vNextFlashTime.pop();
-		m_vFlashGroup.pop();
-		delete l_pFlashGroup;
-		m_vStimuliQueue.push_back(OVTK_StimulationId_VisualStimulationStart); // delay until rendered
+		if (m_vFlashGroup.size() > 0)
+		{
+			// this->getLogManager() << LogLevel_Info << "Doing flash\n";
+			CMatrix* l_pFlashGroup = m_vFlashGroup.front();
+			flashNow(*l_pFlashGroup);
+			m_vNextFlashTime.pop();
+			m_vFlashGroup.pop();
+			delete l_pFlashGroup;
+			m_vStimuliQueue.push_back(OVTK_StimulationId_VisualStimulationStart); // delay until rendered
+		}
+		else
+		{
+			getLogManager() << LogLevel_Warning << "Should flash but no group received yet\n";
+		}
 	}
-
+	
 	// Should we clear?
 	if (m_vNextFlashStopTime.size() > 0 && m_vNextFlashStopTime.front() <= l_ui64CurrentTime)
 	{

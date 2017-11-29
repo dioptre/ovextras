@@ -52,7 +52,7 @@ function process(box)
 			rowidx = tonumber(string.format("%d", idx / (keyboard_cols)))
 			-- colidx = idx - rowidx * keyboard_cols
 			colidx = idx % keyboard_cols
-			io.write(string.format("for %d %s idx is %d -> %d,%d\n", i, text_to_spell:sub(i,i), idx, rowidx, colidx))
+			-- io.write(string.format("for %d %s idx is %d -> %d,%d\n", i, text_to_spell:sub(i,i), idx, rowidx, colidx))
 			box:send_stimulation(1, OVTK_StimulationId_Label_01+rowidx, t, 0);
 			box:send_stimulation(1, OVTK_StimulationId_Label_08+colidx, t, 0);	
 		end
@@ -84,18 +84,19 @@ function process(box)
 			box:send_stimulation(1, OVTK_StimulationId_VisualStimulationStart, t, 0)
 			t = t + flash_duration
 		
-			box:send_stimulation(1, OVTK_StimulationId_VisualStimulationStop, t, 0.10)
+			box:send_stimulation(1, OVTK_StimulationId_VisualStimulationStop, t, 0)
 			t = t + post_flash_duration
 			
 		end
 
 		-- testing
-		box:send_stimulation(1, OVTK_StimulationId_Label_01 + (i % 6) -1, t, 0)
-		box:send_stimulation(1, OVTK_StimulationId_Label_08 + (i % 7) -1, t, 0)	
-		t = t + 1
+		-- box:send_stimulation(1, OVTK_StimulationId_Label_01 + (i % 6) -1, t, 0)
+		-- box:send_stimulation(1, OVTK_StimulationId_Label_08 + (i % 7) -1, t, 0)	
+		-- t = t + 1
 
+		-- trial end + rest
 		box:send_stimulation(1, OVTK_GDF_End_Of_Trial, t, 0)
-		t = t + 1
+		t = t + 3
 		
 	end
 
