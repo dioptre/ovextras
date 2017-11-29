@@ -277,7 +277,7 @@ bool CBoxAlgorithmMatlabScripting::initialize(void)
 	std::string curDirString = l_sCurrentDir;
 	std::replace(curDirString.begin(), curDirString.end(), '\\', '/');
 
-	this->getConfigurationManager().createConfigurationToken(CString("Path_Bin_Abs"),CString(curDirString.c_str()));
+	this->getConfigurationManager().addOrReplaceConfigurationToken(CString("Path_Bin_Abs"),CString(curDirString.c_str()));
 	
 	CString l_sCommand = CString("addpath('") + OpenViBE::Directories::getDataDir() + "/plugins/matlab');";
 	::engEvalString(m_pMatlabEngine, (const char * )l_sCommand);
@@ -505,7 +505,7 @@ bool CBoxAlgorithmMatlabScripting::processClock(IMessageClock& rMessageClock)
 	}
 
 	std::string l_sCommand = std::string(m_sBoxInstanceVariableName)
-			+ ".clock = " + std::to_string((this->getPlayerContext().getCurrentTime()>>16)/65536.) + ";";
+			+ ".clock = " + std::to_string(ITimeArithmetics::timeToSeconds(this->getPlayerContext().getCurrentTime())) + ";";
 	OV_ERROR_UNLESS_KRF(
 		::engEvalString(m_pMatlabEngine, l_sCommand.c_str()) == 0,
 		"An error occurred while updating the box clock.",
