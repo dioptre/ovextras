@@ -15,6 +15,7 @@
 #include "box-algorithms/adaptation/ovpCBoxAlgorithmStimulationFilter.h"
 
 #include "box-algorithms/ovpCBoxAlgorithmP300SpellerStimulator.h"
+#include "box-algorithms/ovpCBoxAlgorithmP300SpellerStimulator2.h"
 #include "box-algorithms/ovpCBoxAlgorithmP300IdentifierStimulator.h"
 
 OVP_Declare_Begin();
@@ -41,6 +42,7 @@ OVP_Declare_Begin();
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmStimulationFilterDesc);
 
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmP300SpellerStimulatorDesc);
+	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmP300SpellerStimulator2Desc);	
 	OVP_Declare_New(OpenViBEPlugins::Stimulation::CBoxAlgorithmP300IdentifierStimulatorDesc);
 
 	rPluginModuleContext.getTypeManager().registerEnumerationType (OVP_TypeId_Voting_ClearVotes, "Clear votes");
