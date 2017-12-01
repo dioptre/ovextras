@@ -8,10 +8,10 @@
 function box_out = p300_Process(box_in)	
 	
 	% to use some global variables, we need to declare them
-	global OVTK_StimulationId_Target;
+	global OVTK_StimulationId_SegmentStart;
 	global OVTK_StimulationId_Label_01;
 	global OVTK_StimulationId_Label_08;
-	global OVTK_StimulationId_NonTarget;
+	global OVTK_StimulationId_SegmentStop;
 
 	haveChunk = (OV_getNbPendingInputChunk(box_in,1)>0) && ...
 		        (OV_getNbPendingInputChunk(box_in,2)>0) && ...
@@ -123,12 +123,12 @@ function box_out = p300_Process(box_in)
 		rowidx = floor(select / box_in.user_data.keyboard_cols);
 		colidx = rem(select, box_in.user_data.keyboard_cols);
 	
-		stim_set = [double(OVTK_StimulationId_Target); time_now; 0];
+		stim_set = [double(OVTK_StimulationId_SegmentStart); time_now; 0];
 		for q=1:length(rowidx)
 			stim_set = [stim_set, [rowidx(q) + double(OVTK_StimulationId_Label_01); time_now; 0]];
 			stim_set = [stim_set, [colidx(q) + double(OVTK_StimulationId_Label_08); time_now; 0]];
 		end
-		stim_set = [stim_set, [double(OVTK_StimulationId_NonTarget); time_now; 0]];
+		stim_set = [stim_set, [double(OVTK_StimulationId_SegmentStop); time_now; 0]];
 		
 		box_in = OV_addOutputBuffer(box_in,1,box_in.user_data.previous_time,time_now,stim_set);	
 	else

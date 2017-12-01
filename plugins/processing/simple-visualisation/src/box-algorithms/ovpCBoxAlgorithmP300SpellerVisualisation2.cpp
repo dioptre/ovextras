@@ -191,6 +191,10 @@ bool CBoxAlgorithmP300SpellerVisualisation2::initialize(void)
 
 	m_bTableInitialized = false;
 	m_bTargetSettingMode = false;
+	
+	m_oState = State_Other;
+
+	m_ui64TrialCount = 0;
 
 	return true;
 }
@@ -328,14 +332,14 @@ bool CBoxAlgorithmP300SpellerVisualisation2::flashNow(const CMatrix& oFlashGroup
 
 bool CBoxAlgorithmP300SpellerVisualisation2::setSelection(uint64 ui64StimulationIdentifier, bool isMultiCharacter)
 {
-	if (ui64StimulationIdentifier == OVTK_StimulationId_Target && isMultiCharacter)
+	if (ui64StimulationIdentifier == OVTK_StimulationId_SegmentStart && isMultiCharacter)
 	{
 		// Beginning of text specification
 		m_sSpelledText = "";
 		m_iSelectedRow = -1;
 		m_iSelectedColumn = -1;
 	}
-	else if (ui64StimulationIdentifier == OVTK_StimulationId_NonTarget || !isMultiCharacter)
+	else if (ui64StimulationIdentifier == OVTK_StimulationId_SegmentStop || !isMultiCharacter)
 	{
 		// this->getLogManager() << LogLevel_Info << "Setting " << m_sSpelledText.c_str() << "\n";
 
@@ -436,69 +440,124 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 			for (uint32 j = 0; j < oSet->getStimulationCount(); j++)
 			{
 				const uint64 l_ui64StimulationIdentifier = oSet->getStimulationIdentifier(j);
-				if (l_ui64StimulationIdentifier == OVTK_StimulationId_VisualStimulationStart)
+				if (l_ui64StimulationIdentifier == OVTK_StimulationId_ExperimentStart)
 				{
+					m_oState = State_ExperimentStart;
+				} 
+				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_TrialStart)
+				{
+					m_oState = State_Other;
+				} 
+				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_TrialStop)
+				{
+					m_oState = State_Other;
+					m_ui64TrialCount++;
+				} 
+				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_VisualStimulationStart)
+				{
+					m_oState = State_Other;
 					this->getLogManager() << LogLevel_Debug << "Received OVTK_StimulationId_VisualStimulationStart - flashes\n";
 					m_vNextFlashTime.push(oSet->getStimulationDate(j));
 				}
 				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_VisualStimulationStop)
 				{
+					m_oState = State_Other;
 					this->getLogManager() << LogLevel_Debug << "Received OVTK_StimulationId_VisualStimulationStop - resets grid\n";
 					m_vNextFlashStopTime.push(oSet->getStimulationDate(j));
 				}
 				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_Reset)
 				{
+					m_oState = State_Other;
 					this->getLogManager() << LogLevel_Debug << "Received OVTK_StimulationId_Reset - clears text\n";
 					m_sTargetText = "";
 					m_sSpelledText = "";
 					gtk_label_set_text(m_pTarget, "");
 					gtk_label_set_text(m_pResult, "");
-					m_vStimuliQueue.push_back(l_ui64StimulationIdentifier); // delay until rendered
+					m_ui64TrialCount = 0;
 				}
-				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_Target)
+				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_RestStop)
 				{
-					m_bTargetSettingMode = true;
-					m_sTargetText = "";
-					m_pStimulusSender->sendStimulation(l_ui64StimulationIdentifier); // pass immediately
+					m_oState = State_Other;
+					// Clear 
+					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_background_cb_, &m_oNoFlashBackgroundColor);
+					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_foreground_cb_, &m_oNoFlashForegroundColor);
+					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_font_cb_, m_pNoFlashFontDescription);
 				}
-				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_NonTarget)
+				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_SegmentStart)
 				{
-					m_bTargetSettingMode = false;
-					m_pStimulusSender->sendStimulation(l_ui64StimulationIdentifier); // pass immediately
+					m_oState = State_Other;
+					// Show target letter
+					if(m_sTargetText.length()>0)
+					{
+						const char letter = m_sTargetText[size_t(m_ui64TrialCount)];
+
+						// Find widget
+						for(auto wIter = m_vCache.begin();wIter!=m_vCache.end();wIter++)
+						{
+							SWidgetStyle& selectedWidget = wIter->second;
+
+							if(*gtk_label_get_text(GTK_LABEL(selectedWidget.pChildWidget)) == letter)
+							{
+								// Highlight
+								_cache_change_background_cb_(selectedWidget, &m_oTargetBackgroundColor);
+								_cache_change_foreground_cb_(selectedWidget, &m_oTargetForegroundColor);
+								_cache_change_font_cb_(selectedWidget, m_pTargetFontDescription);
+								break;
+							}
+						}
+					}
+					else
+					{
+						// Trial start but no target letter, not sure what should be done here, probably nothing drastic to 
+						// avoid eliticing strong ERPs
+					}
+				}
+				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_SegmentStop)
+				{
+					m_oState = State_Other;
+					// Clear
+					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_background_cb_, &m_oNoFlashBackgroundColor);
+					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_foreground_cb_, &m_oNoFlashForegroundColor);
+					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_font_cb_, m_pNoFlashFontDescription);
 				}
 				else if (l_ui64StimulationIdentifier >= m_ui64RowStimulationBase &&  l_ui64StimulationIdentifier < m_ui64RowStimulationBase + m_ui64RowCount)
 				{
-					if (m_bTargetSettingMode)
-					{
-						m_iTargetRow = int(l_ui64StimulationIdentifier - m_ui64RowStimulationBase);
-					}
-					m_pStimulusSender->sendStimulation(l_ui64StimulationIdentifier); // pass immediately
+					// Target spec, dont change state
+					m_iTargetRow = int(l_ui64StimulationIdentifier - m_ui64RowStimulationBase);
 				} 
 				else if (l_ui64StimulationIdentifier >= m_ui64ColumnStimulationBase &&  l_ui64StimulationIdentifier < m_ui64ColumnStimulationBase + m_ui64ColumnCount)
 				{
-					if (m_bTargetSettingMode)
-					{
-						m_iTargetColumn = int(l_ui64StimulationIdentifier - m_ui64ColumnStimulationBase);
-					}
-					m_pStimulusSender->sendStimulation(l_ui64StimulationIdentifier); // pass immediately
+					// Target spec, dont change state
+					m_iTargetColumn = int(l_ui64StimulationIdentifier - m_ui64ColumnStimulationBase);
 				}
 				else
 				{
-					m_pStimulusSender->sendStimulation(l_ui64StimulationIdentifier); // pass immediately
+					// Hmm, unknown stimulation
 				}
 				
-				// Set a target letter
+				m_vStimuliQueue.push_back(l_ui64StimulationIdentifier); // delay until rendered
+
+				// Has a letter been received on the timeline? 
 				if (m_iTargetColumn != -1 && m_iTargetRow != -1)
 				{
-					std::pair<int, int> idx(m_iTargetRow, m_iTargetColumn);
+					if(m_oState==State_ExperimentStart)
+					{
+						std::pair<int, int> idx(m_iTargetRow, m_iTargetColumn);
 
-					m_sTargetText += gtk_label_get_text(GTK_LABEL(m_vCache[idx].pChildWidget));
+						const gchar* letter = gtk_label_get_text(GTK_LABEL(m_vCache[idx].pChildWidget));
 
-					gchar *escaped = g_markup_escape_text(m_sTargetText.c_str(),-1);
-					gtk_label_set_text(m_pTarget, escaped);
-					g_free(escaped);
+						m_sTargetText += letter;
 
-				//	this->getLogManager() << LogLevel_Info << "Target so far" << m_sTargetText.c_str() << "\n";
+						gchar *escaped = g_markup_escape_text(m_sTargetText.c_str(),-1);
+						gtk_label_set_text(m_pTarget, escaped);
+						g_free(escaped);
+
+					//	this->getLogManager() << LogLevel_Info << "Target so far" << m_sTargetText.c_str() << "\n";
+					}
+					else
+					{
+						OV_WARNING_K("Received row,col pair at unexpected time");
+					}
 
 					m_iTargetColumn = -1;
 					m_iTargetRow = -1;
@@ -527,8 +586,10 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 		}
 	}
 
+	OV_WARNING_UNLESS_K(! (m_vNextFlashTime.size() > 0 && m_vNextFlashTime.front() > l_ui64CurrentTime), "Received flash in the future");
+
 	// If we have everything we need, lets flash
-	if (m_vNextFlashTime.size() > 0 && m_vNextFlashTime.front() <= l_ui64CurrentTime)
+	while (m_vNextFlashTime.size() > 0 && m_vNextFlashTime.front() <= l_ui64CurrentTime)
 	{
 		if (m_vFlashGroup.size() > 0)
 		{
@@ -538,16 +599,16 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 			m_vNextFlashTime.pop();
 			m_vFlashGroup.pop();
 			delete l_pFlashGroup;
-			m_vStimuliQueue.push_back(OVTK_StimulationId_VisualStimulationStart); // delay until rendered
 		}
 		else
 		{
 			getLogManager() << LogLevel_Warning << "Should flash but no group received yet\n";
+			break;
 		}
 	}
 	
 	// Should we clear?
-	if (m_vNextFlashStopTime.size() > 0 && m_vNextFlashStopTime.front() <= l_ui64CurrentTime)
+	while (m_vNextFlashStopTime.size() > 0 && m_vNextFlashStopTime.front() <= l_ui64CurrentTime)
 	{
 		// this->getLogManager() << LogLevel_Info << "Doing clear\n";
 
@@ -556,7 +617,6 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 		this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_font_cb_, m_pNoFlashFontDescription);
 
 		m_vNextFlashStopTime.pop();
-		m_vStimuliQueue.push_back(OVTK_StimulationId_VisualStimulationStop); // delay until rendered
 	}
 
 	// After any possible rendering, we flush the accumulated stimuli. The default idle func is low priority, so it should be run after rendering by gtk.

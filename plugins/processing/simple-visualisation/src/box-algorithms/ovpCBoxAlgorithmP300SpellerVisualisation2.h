@@ -13,10 +13,6 @@
 #include <list>
 #include <queue>
 
-// TODO:
-// - please move the identifier definitions in ovp_defines.h
-// - please include your desciptor in ovp_main.cpp
-
 #define OVP_ClassId_BoxAlgorithm_P300SpellerVisualisation2     OpenViBE::CIdentifier(0x1B255925, 0x258C3852)
 #define OVP_ClassId_BoxAlgorithm_P300SpellerVisualisation2Desc OpenViBE::CIdentifier(0x8412A601, 0x92375D35)
 
@@ -34,6 +30,12 @@ namespace OpenViBEPlugins
 		class CBoxAlgorithmP300SpellerVisualisation2 : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
 		public:
+
+			enum TimelineState
+			{
+				State_ExperimentStart,
+				State_Other
+			};
 
 			virtual void release(void) { delete this; }
 			
@@ -123,6 +125,9 @@ namespace OpenViBEPlugins
 
 			int m_iTargetRow;
 			int m_iTargetColumn;
+
+			TimelineState m_oState;
+			OpenViBE::uint64 m_ui64TrialCount;
 
 			std::string m_sTargetText;
 			std::string m_sSpelledText;
