@@ -13,13 +13,13 @@
 
 #include <socket/IConnectionClient.h>
 
-#ifndef DEFINE_GUID
-	#define DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-		GUID name = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
+#ifndef M_DEFINE_GUID
+#define M_DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+	GUID name = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
 #endif
 
-#ifndef COMPARE_GUID
-	#define COMPARE_GUID(name1, name2) \
+#ifndef M_COMPARE_GUID
+    #define M_COMPARE_GUID(name1, name2) \
 		(	name1.Data1 == name2.Data1 && name1.Data2 == name2.Data2 && \
 			name1.Data3 == name2.Data3 && name1.Data4[0] == name2.Data4[0] && \
 			name1.Data4[1] == name2.Data4[1] && name1.Data4[2] == name2.Data4[2] &&\
@@ -31,12 +31,6 @@
 
 namespace OpenViBEAcquisitionServer
 {
-	/**
-	 * \class CDriverBrainProductsBrainVisionRecorder
-	 * \author Guillaume Gibert (INSERM)
-	 * 
-	 * Author assignation is a guess based on SVN history
-	 */
 	class CDriverBrainProductsBrainVisionRecorder : public OpenViBEAcquisitionServer::IDriver
 	{
 	public:
@@ -72,15 +66,17 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
 		OpenViBE::float32* m_pSample;
-		OpenViBE::uint64 m_ui64SampleSize;			// Size of the sample buffer so far
 
 		OpenViBE::uint32 m_ui32IndexIn;
 		OpenViBE::uint32 m_ui32IndexOut;
 		OpenViBE::uint32 m_ui32BuffDataIndex;
 
 		OpenViBE::uint32 m_ui32MarkerCount;
+		OpenViBE::uint32 m_ui32NumberOfMarkers;
 
-		OpenViBE::boolean m_bMarkerWarningGiven;	// Only warn once about non-numeric markers
+		std::vector<OpenViBE::uint32> m_vStimulationIdentifier;
+		std::vector<OpenViBE::uint64> m_vStimulationDate;
+		std::vector<OpenViBE::uint64> m_vStimulationSample;
 
 		#pragma pack(push)
 		#pragma pack(1)
@@ -139,11 +135,11 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_MessageHeader* m_pStructRDA_MessageHeader;
 		char* m_pcharStructRDA_MessageHeader;
-		OpenViBE::uint64 m_ui64HeaderSize;			// Size of the header buffer so far
 
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_MessageStart* m_pStructRDA_MessageStart;
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_MessageStop* m_pStructRDA_MessageStop;
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_MessageData32* m_pStructRDA_MessageData32;
+		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_Marker* m_pStructRDA_Marker;
 
 	};
 };
