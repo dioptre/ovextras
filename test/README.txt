@@ -43,7 +43,7 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible" "--play" ${SCENARIO_TO_TEST})
-ADD_TEST(comparator_${TEST_NAME} "diff" "${TEST_NAME}.csv" "${TEST_NAME}.ref.csv")
+ADD_TEST(comparator_${TEST_NAME} "git" "diff" "--no-index" "${TEST_NAME}.csv" "${TEST_NAME}.ref.csv")
 
 ## add some properties that help to debug 
 SET_TESTS_PROPERTIES(run_${TEST_NAME} PROPERTIES ATTACHED_FILES_ON_FAIL "${OV_LOGFILE}"}

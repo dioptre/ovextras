@@ -1,3 +1,12 @@
+; define a default for dep dir
+!ifndef DEPENDENCIES_DIR
+	!define DEPENDENCIES_DIR "..\..\dependencies"
+!endif
+
+!ifndef OUTFILE
+	!define OUTFILE "openvibe-2.0.0-setup.exe"
+!endif
+	
 	SetCompressor /FINAL /SOLID lzma
 	SetCompressorDictSize 16
 
@@ -6,7 +15,7 @@
   
 	;Name and file
 	Name "OpenViBE 2.0.0"
-	OutFile "openvibe-2.0.0-setup.exe"
+	OutFile ${OUTFILE}
 
 	;Default installation folder
 	InstallDir "$PROGRAMFILES\openvibe-2.0"
@@ -136,10 +145,10 @@ no_need_to_install_directx:
 	; This is the destination path where the zips will be copied to
 	SetOutPath "$INSTDIR\dependencies\arch"
 	; The following source paths are relative to this .nsi script location
-	File "..\..\dependencies\arch\build\windows\*runtime.zip"	
-	File "..\..\dependencies\arch\build\windows\pthread*.zip"		
+	File "${DEPENDENCIES_DIR}\arch\build\windows\*runtime.zip"	
+	File "${DEPENDENCIES_DIR}\arch\build\windows\pthread*.zip"		
 	; All vcredist packages extracted to the same folder
-	File "..\..\dependencies\arch\build\windows\vcredist*.zip"
+	File "${DEPENDENCIES_DIR}\arch\build\windows\vcredist*.zip"
 	
 	; The zips are extracted here by the installer
 	SetOutPath "$INSTDIR\dependencies"

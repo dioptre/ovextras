@@ -175,7 +175,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Command 1</Name>
 					<DefaultValue></DefaultValue>
-					<Value>touch test-timeout.txt</Value>
+					<Value>echo "" > test-timeout.txt</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
