@@ -68,7 +68,7 @@ void CDriverGTecGUSBampLegacy::release(void)
 
 const char* CDriverGTecGUSBampLegacy::getName(void)
 {
-	return "g.Tec gUSBamp (Legacy)";
+	return "g.Tec gUSBamp Legacy";
 }
 
 //___________________________________________________________________//

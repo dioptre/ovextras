@@ -38,7 +38,7 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isFlagSet(
 			const OpenViBEAcquisitionServer::EDriverFlag eFlag) const
 		{
-			return eFlag==DriverFlag_IsUnstable;
+			return (eFlag==DriverFlag_IsUnstable) || (eFlag==DriverFlag_IsDeprecated);
 		}
 
 		virtual OpenViBE::boolean initialize(

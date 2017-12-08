@@ -79,6 +79,8 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Filter order",           OV_TypeId_Integer, "4");
 				rPrototype.addSetting("Pass band ripple (dB)",  OV_TypeId_Float, "0.5");
                 rPrototype.addFlag   (OV_AttributeId_Box_FlagIsUnstable);
+				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_IsDeprecated);
+
 				return true;
 			}
 

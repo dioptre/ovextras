@@ -417,18 +417,19 @@ boolean CAcquisitionServerGUI::initialize(void)
 		gtk_tree_store_append(l_pDriverTreeStore, &l_oIter, NULL);
 
 		string l_sDriverName=m_vDriver[i]->getName();
-		if(m_vDriver[i]->isFlagSet(DriverFlag_IsUnstable))
-		{
-			gtk_tree_store_set(l_pDriverTreeStore, &l_oIter,
-				Resource_StringMarkup, (string("<span foreground=\"#6f6f6f\">")+l_sDriverName+string("</span> <span size=\"smaller\" style=\"italic\">(<span foreground=\"#202060\">unstable</span>)</span>")).c_str(),
-				-1);
-		}
-		else
-		{
-			gtk_tree_store_set(l_pDriverTreeStore, &l_oIter,
-				Resource_StringMarkup, (string("")+l_sDriverName+string("")).c_str(),
-				-1);
-		}
+
+		const bool l_bUnstable = m_vDriver[i]->isFlagSet(DriverFlag_IsUnstable);
+		const bool l_bDeprecated = m_vDriver[i]->isFlagSet(DriverFlag_IsDeprecated);
+
+		const std::string l_sStringToDisplay =
+			   std::string((l_bUnstable || l_bDeprecated) ? "<span foreground=\"#6f6f6f\">" : "")
+			+= l_sDriverName 
+			+= std::string((l_bUnstable || l_bDeprecated) ? "</span>" : "")
+			+= std::string(l_bUnstable ?  " <span size=\"smaller\" style=\"italic\">(<span foreground=\"#202060\">unstable</span>)</span>" : "")
+			+= std::string(l_bDeprecated ?  " <span size=\"smaller\" style=\"italic\">(<span foreground=\"#602020\">deprecated</span>)</span>" : "");
+
+		gtk_tree_store_set(l_pDriverTreeStore, &l_oIter,
+			Resource_StringMarkup, l_sStringToDisplay.c_str(), -1);
 
 		transform(l_sDriverName.begin(), l_sDriverName.end(), l_sDriverName.begin(), ::to_lower<string::value_type>);
 		if(l_sDefaultDriverName==l_sDriverName)

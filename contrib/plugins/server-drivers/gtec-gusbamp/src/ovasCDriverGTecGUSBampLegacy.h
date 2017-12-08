@@ -41,6 +41,12 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isConfigurable(void);
 		virtual OpenViBE::boolean configure(void);
 		virtual const OpenViBEAcquisitionServer::IHeader* getHeader(void) { return &m_oHeader; }
+	
+		virtual OpenViBE::boolean isFlagSet(
+			const OpenViBEAcquisitionServer::EDriverFlag eFlag) const
+		{
+			return eFlag==DriverFlag_IsDeprecated;
+		}
 
 	protected:
 

@@ -10,6 +10,7 @@ namespace OpenViBEAcquisitionServer
 	typedef enum
 	{
 		DriverFlag_IsUnstable,
+		DriverFlag_IsDeprecated,
 	} EDriverFlag;
 
 	/**

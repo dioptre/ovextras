@@ -7,6 +7,9 @@ __________________________________________________________________
 
  * |OVP_DocBegin_BoxAlgorithm_Downsampling_Description|
  *
+ * NOTE: This box has been deprecated. Please use 
+ * Signal Resampling box instead.
+ *
  * This plugin is used to downsample the input signal. First, a
  * low-pass filter is applied to the input signal for anti-aliasing.
  * Then, the input signal is downsampled at the new sampling rate.
