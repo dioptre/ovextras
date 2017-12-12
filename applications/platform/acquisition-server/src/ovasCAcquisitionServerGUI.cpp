@@ -12,6 +12,7 @@
 
 #include "generic-oscillator/ovasCDriverGenericOscillator.h"
 #include "generic-sawtooth/ovasCDriverGenericSawTooth.h"
+#include "generic-time-signal/ovasCDriverGenericTimeSignal.h"
 #include "generic-raw-reader/ovasCDriverGenericRawFileReader.h"
 #include "generic-raw-reader/ovasCDriverGenericRawTelnetReader.h"
 
@@ -149,6 +150,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 
 	m_vDriver.push_back(new CDriverGenericOscillator(m_pAcquisitionServer->getDriverContext()));
 	m_vDriver.push_back(new CDriverGenericSawTooth(m_pAcquisitionServer->getDriverContext()));
+	m_vDriver.push_back(new CDriverGenericTimeSignal(m_pAcquisitionServer->getDriverContext()));
 	m_vDriver.push_back(new CDriverGenericRawFileReader(m_pAcquisitionServer->getDriverContext()));
 	m_vDriver.push_back(new CDriverGenericRawTelnetReader(m_pAcquisitionServer->getDriverContext()));
 
