@@ -130,6 +130,14 @@ boolean CBoxAlgorithmOpenALSoundPlayer::process(void)
 {
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
 
+	if(m_ui64LastOutputChunkDate==(uint64)(-1))
+	{
+		// Send header on initialize
+		m_oStreamEncoder.encodeHeader();
+		l_rDynamicBoxContext.markOutputAsReadyToSend(0, 0, 0);
+		m_ui64LastOutputChunkDate=0;
+	}
+
 	// Look for command stimulations
 	for (uint32 i = 0; i < l_rDynamicBoxContext.getInputChunkCount(0); i++)
 	{
@@ -137,9 +145,7 @@ boolean CBoxAlgorithmOpenALSoundPlayer::process(void)
 
 		if (m_oStreamDecoder.isHeaderReceived())
 		{
-			m_oStreamEncoder.encodeHeader();
-			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
-			m_ui64LastOutputChunkDate = l_rDynamicBoxContext.getInputChunkEndTime(0, i);
+			// NOP
 		}
 
 		if (m_oStreamDecoder.isBufferReceived())
@@ -169,9 +175,10 @@ boolean CBoxAlgorithmOpenALSoundPlayer::process(void)
 
 		if (m_oStreamDecoder.isEndReceived())
 		{
+			// @fixme potentially bad behavior: the box may send chunks after sending this end
 			m_oStreamEncoder.encodeEnd();
-			l_rDynamicBoxContext.markOutputAsReadyToSend(0, l_rDynamicBoxContext.getInputChunkStartTime(0, i), l_rDynamicBoxContext.getInputChunkEndTime(0, i));
-			m_ui64LastOutputChunkDate = l_rDynamicBoxContext.getInputChunkEndTime(0, i);
+			l_rDynamicBoxContext.markOutputAsReadyToSend(0, m_ui64LastOutputChunkDate, this->getPlayerContext().getCurrentTime());
+			m_ui64LastOutputChunkDate = this->getPlayerContext().getCurrentTime();
 		}
 	}
 
