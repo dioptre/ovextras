@@ -33,6 +33,7 @@ using namespace std;
 #define NEUROSERVO_DATA_SIZE		OpenViBE::uint16(65)
 #define NEUROSERVO_DRIVER_NAME		"NeuroServo"
 #define NEUROSERVO_SENDDATA_BLOCK	OpenViBE::uint32(1024)
+#define ADC_TO_uVOLTS 0.0118
 
 /*
 General define
@@ -57,6 +58,8 @@ CDriverNeuroServoHid::CDriverNeuroServoHid(IDriverContext& rDriverContext)
 {
 	m_oHeader.setSamplingFrequency(2048);
 	m_oHeader.setChannelCount(1);
+	m_oHeader.setChannelUnits(0, OVTK_UNIT_Volts, OVTK_FACTOR_Micro);
+	m_oHeader.setChannelName(0, "FP1-FPz");
 
 	// Set the Device basic infos
 	m_ui16VendorId = NEUROSERVO_VID;
@@ -159,7 +162,7 @@ boolean CDriverNeuroServoHid::start(void)
 
 	// Build the data to be sent to the device
 	BYTE data[65];
-	data[0] = 0x02; // HID Report ID
+	data[0] = 0x00; // HID Report ID
 	data[1] = 0x09; // Cmd
 	data[2] = 0x01; // 0x01 (Reserved)
 	data[3] = 0x01; // Start acquisition
@@ -204,7 +207,7 @@ boolean CDriverNeuroServoHid::loop(void)
 			// We wait for stabilisation before warn
 			m_bQueueUnderflow = true;
 		}
-		m_pSample[i] = m_f32SampleValue; // N.B. Last sample value is sent if queue was empty
+		m_pSample[i] = (m_f32SampleValue * (float32)ADC_TO_uVOLTS); // N.B. Last sample value is sent if queue was empty
 	}
 
 	int64 l_i64CurrentDriftSampleCount = m_rDriverContext.getDriftSampleCount();
@@ -255,16 +258,10 @@ boolean CDriverNeuroServoHid::loop(void)
 	m_rDriverContext.correctDriftSampleCount(OvAutoCorrection);
 	m_pCallback->setStimulationSet(m_oStimulationSet);
 	m_oStimulationSet.clear();
-	if (OvAutoCorrection != 0)
-	{
-		// We do not apply driver time correction
-		m_i64LastDriftSampleCount = 0;
-	}
-	else
-	{
-		// We will apply driver time auto correction on next loop
-		m_i64LastDriftSampleCount = l_i64CurrentDriftSampleCount;
-	}
+
+	// We will apply driver time auto correction on next loop
+	m_i64LastDriftSampleCount = l_i64CurrentDriftSampleCount;
+
 	if (m_bQueueUnderflow)
 	{
 		m_bQueueUnderflow = false;
@@ -287,7 +284,7 @@ boolean CDriverNeuroServoHid::stop(void)
 
 	// Build the data to be sent to the device
 	BYTE data[65];
-	data[0] = 0x02; // HID Report ID
+	data[0] = 0x00; // HID Report ID
 	data[1] = 0x09; // Cmd
 	data[2] = 0x01; // 0x01 (Reserved)
 	data[3] = 0x00; // Stop acquisition
@@ -315,7 +312,7 @@ boolean CDriverNeuroServoHid::uninitialize(void)
 		if (m_bShutdownOnDriverDisconnect)
 		{
 			BYTE data[65];
-			data[0] = 0x02; // HID Report ID
+			data[0] = 0x00; // HID Report ID
 			data[1] = 0x16; // Cmd
 			data[2] = 0x01; // 0x01 (Reserved)
 			data[3] = 0x01; // Shutdown the device
@@ -326,13 +323,13 @@ boolean CDriverNeuroServoHid::uninitialize(void)
 			// Set device to normal user mode		
 
 			BYTE data[65];
-			data[0] = 0x02; // HID Report ID
+			data[0] = 0x00; // HID Report ID
 			data[1] = 0x17; // Cmd
 			data[2] = 0x01; // 0x01 (Reserved)
 			data[3] = 0x01; // ask the device to switch off automatically
 			m_oHidDevice.writeToDevice(data, m_ui16DataSize);
 
-			data[0] = 0x02; // HID Report ID
+			data[0] = 0x00; // HID Report ID
 			data[1] = 0x18; // Cmd
 			data[2] = 0x01; // 0x01 (Reserved)
 			data[3] = 0x01; // Enable the device light
@@ -464,7 +461,7 @@ void CDriverNeuroServoHid::deviceAttached()
 void CDriverNeuroServoHid::deviceShutdownAndLightConfiguration()
 {
 	BYTE data[65];
-	data[0] = 0x02; // HID Report ID
+	data[0] = 0x00; // HID Report ID
 	data[2] = 0x01; // 0x01 (Reserved)
 
 	data[1] = 0x17; // Cmd
