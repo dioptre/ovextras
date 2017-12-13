@@ -225,6 +225,8 @@ namespace OpenViBEAcquisitionServer
 		 * This function is called by the driver during the \e IDriver::loop
 		 * and should give an array of \c nSamplesPerChannel x \c nChannel
 		 * organised by channel first.
+		 * 
+		 * The caller retains the ownership of the pSample pointer.
 		 *
 		 * \code
 		 * pSample[0] is channel 0 sample 0
@@ -251,6 +253,8 @@ namespace OpenViBEAcquisitionServer
 		 * This function is called by the driver during the \e IDriver::loop
 		 * and should give an array of \c nSamplesPerChannel x \c nChannel
 		 * organised by channel first.
+		 * 
+		 * The caller retains the ownership of the pSample pointer.
 		 *
 		 * \code
 		 * pSample[0] is channel 0 sample 0

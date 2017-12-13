@@ -28,7 +28,6 @@ CDriverBrainProductsBrainVisionRecorder::CDriverBrainProductsBrainVisionRecorder
 	,m_sServerHostName("localhost")
 	,m_ui32ServerHostPort(51244)
 	,m_ui32SampleCountPerSentBlock(0)
-	,m_pSample(NULL)
 {
 	m_oSettings.add("Header", &m_oHeader);
 	m_oSettings.add("ServerHostName", &m_sServerHostName);
@@ -102,7 +101,7 @@ bool CDriverBrainProductsBrainVisionRecorder::initialize(
 	}
 
 	// Check for correct header GUID.
-    if (!M_COMPARE_GUID(l_structRDA_MessageHeader.guid, GUID_RDAHeader))
+	if (!M_COMPARE_GUID(l_structRDA_MessageHeader.guid, GUID_RDAHeader))
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "GUID received is not correct!\n";
 		return false;
@@ -304,13 +303,14 @@ bool CDriverBrainProductsBrainVisionRecorder::loop(void)
 		m_ui32MarkerCount += m_pStructRDA_MessageData32->nMarkers;
 	}
 
-	m_pSample=new float32[m_oHeader.getChannelCount()*(uint32)m_pStructRDA_MessageData32->nPoints];
+	std::vector<float32> l_vBuffer;
+	l_vBuffer.resize(m_oHeader.getChannelCount()*(uint32)m_pStructRDA_MessageData32->nPoints);
 
 	for (uint32 i=0; i < m_oHeader.getChannelCount(); i++)
 	{
 		for (uint32 j=0; j < (uint32)m_pStructRDA_MessageData32->nPoints; j++)
 		{
-			m_pSample[j + (i*(uint32)m_pStructRDA_MessageData32->nPoints)] = (float32)m_pStructRDA_MessageData32->fData[(m_oHeader.getChannelCount()*j) + i]*m_oHeader.getChannelGain(i);
+			l_vBuffer[j + (i*(uint32)m_pStructRDA_MessageData32->nPoints)] = (float32)m_pStructRDA_MessageData32->fData[(m_oHeader.getChannelCount()*j) + i]*m_oHeader.getChannelGain(i);
 		}
 	}
 
@@ -324,7 +324,7 @@ bool CDriverBrainProductsBrainVisionRecorder::loop(void)
 		l_oStimulationSet.setStimulationDuration(i, 0);
 	}
 
-	m_pCallback->setSamples(m_pSample,(uint32)m_pStructRDA_MessageData32->nPoints);
+	m_pCallback->setSamples(&l_vBuffer[0],(uint32)m_pStructRDA_MessageData32->nPoints);
 	m_pCallback->setStimulationSet(l_oStimulationSet);
 	m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
 
@@ -355,8 +355,6 @@ bool CDriverBrainProductsBrainVisionRecorder::uninitialize(void)
 	if (m_pStructRDA_MessageData32!=NULL) m_pStructRDA_MessageData32=NULL;
 	if (m_pStructRDA_Marker!=NULL) m_pStructRDA_Marker=NULL;
 
-	delete [] m_pSample;
-	m_pSample=NULL;
 	m_pCallback=NULL;
 
 	// Cleans up client connection
