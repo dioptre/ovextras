@@ -518,12 +518,14 @@ IHeader& CAcquisitionServerGUI::getHeaderCopy(void)
 	return m_oHeaderCopy;
 }
 
-void CAcquisitionServerGUI::setClientCount(uint32 ui32ClientCount)
+void CAcquisitionServerGUI::setClientText(const char *sClientText)
 {
-	// Updates 'host count' label when needed
-	char l_sLabel[1024];
-	::sprintf(l_sLabel, "%u host%s connected...", (unsigned int)ui32ClientCount, ui32ClientCount?"s":"");
-	::gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), l_sLabel);
+	gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), sClientText);
+}
+
+void CAcquisitionServerGUI::setStateText(const char *sStateText)
+{
+	gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), sStateText);
 }
 
 void CAcquisitionServerGUI::setDriftMs(float64 f64DriftMs)
@@ -558,6 +560,12 @@ void CAcquisitionServerGUI::setDriftMs(float64 f64DriftMs)
 	{
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(gtk_builder_get_object(m_pBuilderInterface, "progressbar_drift_1")), 0);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(gtk_builder_get_object(m_pBuilderInterface, "progressbar_drift_2")), l_f64DriftRatio);
+	}
+
+	if(std::abs(f64DriftMs)<0.01)
+	{
+		// To keep the display steady when fluctuating around 0
+		f64DriftMs = 0;
 	}
 
 	if(l_bDriftWarning)
@@ -689,9 +697,6 @@ void CAcquisitionServerGUI::buttonConnectToggledCB(::GtkToggleButton* pButton)
 			gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "spinbutton_connection_port")), false);
 			gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "combobox_sample_count_per_sent_block")), false);
 			gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "combobox_driver")), false);
-
-			gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "Connected ! Ready...");
-			gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), "0 host connected...");
 		}
 		else
 		{
@@ -725,8 +730,7 @@ void CAcquisitionServerGUI::buttonConnectToggledCB(::GtkToggleButton* pButton)
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "combobox_sample_count_per_sent_block")), true);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "combobox_driver")), true);
 
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "");
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), "");
+		setClientText("");
 	}
 }
 
@@ -744,12 +748,12 @@ void CAcquisitionServerGUI::buttonStartPressedCB(::GtkButton* pButton)
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "button_play")), false);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "button_stop")), true);
 
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "Sending...");
+		setStateText("Starting...");
 	}
 	else
 	{
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "Failed !");
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), "");
+		setStateText("Start failed !");
+		setClientText("");
 	}
 }
 
@@ -761,13 +765,11 @@ void CAcquisitionServerGUI::buttonStopPressedCB(::GtkButton* pButton)
 	{
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "button_play")), true);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "button_stop")), false);
-
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "Connected ! Ready...");
 	}
 	else
 	{
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "Failed !");
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), "");
+		setStateText("Stop failed !");
+		setClientText("");
 	}
 }
 

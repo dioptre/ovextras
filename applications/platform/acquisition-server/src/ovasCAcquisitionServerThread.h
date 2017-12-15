@@ -7,10 +7,10 @@
 #include <system/ovCTime.h>
 
 // fwd declare of gtk idle callbacks
-static gboolean idle_updateclientcount_cb(void* pUserData);
 static gboolean idle_updateimpedance_cb(void* pUserData);
 static gboolean idle_updatedrift_cb(void* pUserData);
 static gboolean idle_updatedisconnect_cb(void* pUserData);
+static gboolean idle_updatestatus_cb(void* pUserData);
 
 namespace OpenViBEAcquisitionServer
 {
@@ -31,7 +31,8 @@ namespace OpenViBEAcquisitionServer
 			, m_rGUI(rGUI)
 			, m_rAcquisitionServer(rAcquisitionServer)
 			, m_ui32Status(Status_Idle)
-			, m_ui32ClientCount(-1)
+			, m_ui32LastStatus(-1)	// Always call update on start
+			, m_ui32ClientCount(0)
 			, m_f64LastDriftMs(-1)
 		{
 		}
@@ -91,11 +92,11 @@ namespace OpenViBEAcquisitionServer
 					// backends (esp. Windows), delegate the work to g_idle_add() functions.
 					// As a result, we need to protect access to the variables that the callbacks use
 					{
-						if (l_ui32ClientCount != m_ui32ClientCount)
+						if (m_ui32LastStatus != m_ui32Status || l_ui32ClientCount != m_ui32ClientCount)
 						{
+							m_ui32LastStatus = m_ui32Status;
 							m_ui32ClientCount = l_ui32ClientCount;
-
-							 gdk_threads_add_idle(idle_updateclientcount_cb, (void *)this);
+							gdk_threads_add_idle(idle_updatestatus_cb, (void *)this);
 						}
 
 						if (m_vImpedance != m_vImpedanceLast)
@@ -105,7 +106,7 @@ namespace OpenViBEAcquisitionServer
 							 gdk_threads_add_idle(idle_updateimpedance_cb, (void *)this);
 						}
 
-						if (l_f64DriftMs != m_f64LastDriftMs)
+						if (std::abs(l_f64DriftMs-m_f64LastDriftMs) > 0.01)
 						{
 							m_f64LastDriftMs = l_f64DriftMs;
 
@@ -116,6 +117,8 @@ namespace OpenViBEAcquisitionServer
 						{
 							 gdk_threads_add_idle(idle_updatedisconnect_cb, (void *)this);
 						}
+
+
 					}
 
 					if (l_bShouldSleep)
@@ -218,13 +221,6 @@ namespace OpenViBEAcquisitionServer
 		}
 
 		// GTK C callbacks call these from the main thread to update the GUI
-		void updateGUIClientCount(void)
-		{
-			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
-
-			m_rGUI.setClientCount(m_ui32ClientCount);
-		}
-
 		void updateGUIImpedance(void)
 		{
 			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
@@ -240,6 +236,44 @@ namespace OpenViBEAcquisitionServer
 			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
 
 			m_rGUI.setDriftMs(m_f64LastDriftMs);
+		}
+
+		void updateGUIStatus(void)
+		{
+			DoubleLock lock(&m_rAcquisitionServer.m_oProtectionMutex, &m_rAcquisitionServer.m_oExecutionMutex);
+
+			std::string l_sState;
+			std::string l_sClientText;
+
+			switch(m_ui32Status)
+			{
+				case Status_Started:
+					if(m_ui32ClientCount==0)
+					{
+						l_sState = "Receiving...";
+					}
+					else
+					{
+						l_sState = "Receiving and sending...";
+					}
+					char l_sLabel[1024];
+					::sprintf(l_sLabel, "%u client%s connected...", (unsigned int)m_ui32ClientCount, (m_ui32ClientCount!=1 ? "s" : ""));
+					l_sClientText = l_sLabel;
+					break;
+				case Status_Idle:
+					l_sState = "Disconnected";
+					break;
+				case Status_Connected:
+					l_sState = "Connected to device!";
+					l_sClientText = "Press play to start...";
+
+					break;
+				default:
+					l_sState = "Unknown";
+					break;
+			}
+			m_rGUI.setStateText(l_sState.c_str());
+			m_rGUI.setClientText(l_sClientText.c_str());
 		}
 
 		void updateGUIDisconnect(void)
@@ -263,6 +297,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBEAcquisitionServer::CAcquisitionServerGUI& m_rGUI;
 		OpenViBEAcquisitionServer::CAcquisitionServer& m_rAcquisitionServer;
 		OpenViBE::uint32 m_ui32Status;
+		OpenViBE::uint32 m_ui32LastStatus;
 
 		OpenViBE::uint32 m_ui32ClientCount;
 		OpenViBE::float64 m_f64LastDriftMs;
@@ -294,7 +329,7 @@ static gboolean idle_updateclientcount_cb(void* pUserData)
 {
 	OpenViBEAcquisitionServer::CAcquisitionServerThread* l_pPtr = static_cast<OpenViBEAcquisitionServer::CAcquisitionServerThread*>(pUserData);
 
-	l_pPtr->updateGUIClientCount();
+	l_pPtr->updateGUIStatus();		// Delegate to GUI status change
 
 	return FALSE; // don't call again
 }
@@ -313,6 +348,15 @@ static gboolean idle_updatedrift_cb(void* pUserData)
 	OpenViBEAcquisitionServer::CAcquisitionServerThread* l_pPtr = static_cast<OpenViBEAcquisitionServer::CAcquisitionServerThread*>(pUserData);
 
 	l_pPtr->updateGUIDrift();
+
+	return FALSE; // don't call again
+}
+
+static gboolean idle_updatestatus_cb(void* pUserData)
+{
+	OpenViBEAcquisitionServer::CAcquisitionServerThread* l_pPtr = static_cast<OpenViBEAcquisitionServer::CAcquisitionServerThread*>(pUserData);
+
+	l_pPtr->updateGUIStatus();
 
 	return FALSE; // don't call again
 }
