@@ -109,6 +109,10 @@ namespace OpenViBEAcquisitionServer
 		//
 		virtual OpenViBE::boolean acceptNewConnection(Socket::IConnection* pConnection);
 
+	protected:
+
+		bool CAcquisitionServer::requestClientThreadQuit(CConnectionClientHandlerThread* th);
+
 	public:
 
 		// See class DoubleLock
