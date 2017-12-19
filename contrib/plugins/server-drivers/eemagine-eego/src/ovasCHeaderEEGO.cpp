@@ -22,14 +22,78 @@ CHeaderEEGO::CHeaderEEGO()
 {
 }
 
+OpenViBE::uint32 CHeaderEEGO::getEEGRange() const
+{
+	return m_iEEGRange;
+}
+
+void CHeaderEEGO::setEEGRange(OpenViBE::uint32 range)
+{
+	m_iEEGRange = range;
+	m_bEEGRangeSet = true;
+}
+
+OpenViBE::boolean CHeaderEEGO::isEEGRangeSet() const
+{
+	return m_bEEGRangeSet;
+}
+
+OpenViBE::CString CHeaderEEGO::getEEGMask() const
+{
+	return m_sEEGMask;
+}
+
 OpenViBE::uint64 CHeaderEEGO::getEEGMaskInt() const
 {
 	return strtoull(m_sEEGMask, nullptr, 0);
 }
 
+void CHeaderEEGO::setEEGMask(const OpenViBE::CString mask)
+{
+	m_sEEGMask = mask;
+	m_bEEGMaskSet = true;
+}
+
+OpenViBE::boolean CHeaderEEGO::isEEGMaskSet() const
+{
+	return m_bEEGMaskSet;
+}
+
+OpenViBE::uint32 CHeaderEEGO::getBIPRange() const
+{
+	return m_iBIPRange;
+}
+
 OpenViBE::uint64 CHeaderEEGO::getBIPMaskInt() const
 {
 	return strtoull(m_sBIPMask, nullptr, 0);
+}
+
+void CHeaderEEGO::setBIPRange(OpenViBE::uint32 range)
+{
+	m_iBIPRange = range;
+	m_bBIPRangeSet = true;
+}
+
+OpenViBE::boolean CHeaderEEGO::isBIPRangeSet() const
+{
+	return m_bBIPRangeSet;
+}
+
+OpenViBE::CString CHeaderEEGO::getBIPMask() const
+{
+	return m_sBIPMask;
+}
+
+void CHeaderEEGO::setBIPMask(const OpenViBE::CString mask)
+{
+	m_sBIPMask = mask;
+	m_bBIPMaskSet = true;
+}
+
+OpenViBE::boolean CHeaderEEGO::isBIPMaskSet() const
+{
+	return m_bBIPMaskSet;
 }
 
 /* static */

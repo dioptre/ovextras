@@ -89,8 +89,9 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32SamplesInBuffer;
 		OpenViBE::uint32 m_i32TriggerChannel;
 		OpenViBE::CStimulationSet m_oStimulationSet; // Storing the samples over time
-		OpenViBE::uint32 m_ui32LastTriggerValue;
+
 		// To detect flanks in the trigger signal. The last state on the trigger input.
+		OpenViBE::uint32 m_ui32LastTriggerValue;
 
 		// For setting store/load
 		OpenViBE::uint32 m_iBIPRange; // [mV]
