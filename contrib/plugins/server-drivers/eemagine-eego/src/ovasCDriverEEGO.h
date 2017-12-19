@@ -25,8 +25,6 @@ namespace eemagine
 	}
 }
 
-
-
 namespace OpenViBEAcquisitionServer
 {
 	/**
@@ -57,11 +55,11 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean isConfigurable(void);
 		virtual OpenViBE::boolean configure(void);
 		virtual const OpenViBEAcquisitionServer::IHeader* getHeader(void) { return &m_oHeader; }
-		
+
 		virtual OpenViBE::boolean isFlagSet(
 			const OpenViBEAcquisitionServer::EDriverFlag eFlag) const
 		{
-			return eFlag==DriverFlag_IsUnstable;
+			return eFlag == DriverFlag_IsUnstable;
 		}
 
 	private:
@@ -73,7 +71,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint64 getRefChannelMask() const;
 		OpenViBE::uint64 getBipChannelMask() const;
 		eemagine::sdk::factory& factory();
-
 
 	protected:
 

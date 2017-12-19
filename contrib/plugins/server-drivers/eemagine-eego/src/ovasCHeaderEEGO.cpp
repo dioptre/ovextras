@@ -31,18 +31,17 @@ namespace std {
 #endif // _MSC_VER >= 1300
 #endif // _MSC_VER
 
-
 using namespace OpenViBEAcquisitionServer;
 
 CHeaderEEGO::CHeaderEEGO()
 	:m_iEEGRange(1000)
-	,m_bEEGRangeSet(false)
-	,m_iBIPRange(1500)
-	,m_bBIPRangeSet(false)
-	,m_sEEGMask("0xFFFFFFFFFFFFFFFF")
-	,m_sBIPMask("0xFFFFFF")
-	,m_bEEGMaskSet(false)
-	,m_bBIPMaskSet(false)
+	, m_bEEGRangeSet(false)
+	, m_iBIPRange(1500)
+	, m_bBIPRangeSet(false)
+	, m_sEEGMask("0xFFFFFFFFFFFFFFFF")
+	, m_sBIPMask("0xFFFFFF")
+	, m_bEEGMaskSet(false)
+	, m_bBIPMaskSet(false)
 {}
 
 OpenViBE::uint64 CHeaderEEGO::getEEGMaskInt() const
@@ -65,15 +64,15 @@ OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_
 
 	std::string l_oString(str);  //easier substring handling etc. Minor performance penalty which should not matter.
 	boost::algorithm::trim(l_oString); // Make sure to handle whitespace correctly
-	
+
 	// check prefixes
-	if(boost::algorithm::istarts_with(l_oString, "0b"))
+	if (boost::algorithm::istarts_with(l_oString, "0b"))
 	{
 		// binary
 		const auto substring = l_oString.substr(2);
 
 		// check for valid string members
-		if(!std::all_of(substring.begin(), substring.end(), [&](const char& chr){ return chr == '0' || chr == '1'; }))
+		if (!std::all_of(substring.begin(), substring.end(), [&](const char& chr) { return chr == '0' || chr == '1'; }))
 		{
 			l_bParseError = true;
 		}
@@ -83,13 +82,13 @@ OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_
 			r_oOutValue = strtoull(substring.c_str(), NULL, 2);
 		}
 	}
-	else if (boost::algorithm::istarts_with(l_oString, "0x"))	
+	else if (boost::algorithm::istarts_with(l_oString, "0x"))
 	{
 		// hex
 		const auto substring = l_oString.substr(2);
 		std::locale loc;
 
-		if(!std::all_of(substring.begin(), substring.end(), [&](const char& chr){ return std::isxdigit(chr, loc); }))
+		if (!std::all_of(substring.begin(), substring.end(), [&](const char& chr) { return std::isxdigit(chr, loc); }))
 		{
 			l_bParseError = true;
 		}
@@ -98,13 +97,13 @@ OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_
 			r_oOutValue = strtoull(substring.c_str(), NULL, 16);
 		}
 	}
-	else if (boost::algorithm::istarts_with(l_oString, "0"))	
+	else if (boost::algorithm::istarts_with(l_oString, "0"))
 	{
 		// octal
 		const auto substring = l_oString.substr(1);
 		std::locale loc;
 
-		if(!std::all_of(substring.begin(), substring.end(), [&](const char& chr){ return chr >= '0' && chr < '8'; }))
+		if (!std::all_of(substring.begin(), substring.end(), [&](const char& chr) { return chr >= '0' && chr < '8'; }))
 		{
 			l_bParseError = true;
 		}
@@ -119,7 +118,7 @@ OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_
 		const auto substring = l_oString;
 		std::locale loc;
 
-		if(!std::all_of(substring.begin(), substring.end(), [&](const char& chr){ return std::isdigit(chr, loc); }))
+		if (!std::all_of(substring.begin(), substring.end(), [&](const char& chr) { return std::isdigit(chr, loc); }))
 		{
 			l_bParseError = true;
 		}

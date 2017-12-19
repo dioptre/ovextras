@@ -1,4 +1,3 @@
-
 #if defined(TARGET_HAS_ThirdPartyEEGOAPI)
 
 #if defined TARGET_OS_Windows
@@ -26,24 +25,24 @@ namespace OpenViBEAcquisitionServer
 	{
 	public:
 
-		CConfigurationEEGO(OpenViBEAcquisitionServer::IDriverContext& rDriverContext, 
-			const char* sGtkBuilderFileName, 
+		CConfigurationEEGO(OpenViBEAcquisitionServer::IDriverContext& rDriverContext,
+			const char* sGtkBuilderFileName,
 			OpenViBEAcquisitionServer::CHeaderEEGO& rEEGOHeader);
 
 		virtual OpenViBE::boolean preConfigure(void);
 		virtual OpenViBE::boolean postConfigure(void);
 
-	// Data
+		// Data
 	protected:
 
 		OpenViBEAcquisitionServer::IDriverContext&		m_rDriverContext;
-		
-	// Methods
+
+		// Methods
 	private:
 
 		static void update_channel_num_cb(GtkWidget *widget, CConfigurationEEGO* pThis);
 
-	// Data
+		// Data
 	private:
 
 		OpenViBEAcquisitionServer::CHeaderEEGO&	m_rEEGOHeader;
