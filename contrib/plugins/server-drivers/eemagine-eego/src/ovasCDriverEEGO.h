@@ -35,29 +35,29 @@ namespace OpenViBEAcquisitionServer
 	 *
 	 * \sa CConfigurationEEGO
 	 */
-	class CDriverEEGO : public OpenViBEAcquisitionServer::IDriver
+	class CDriverEEGO : public IDriver
 	{
 	public:
 
-		CDriverEEGO(OpenViBEAcquisitionServer::IDriverContext& rDriverContext);
+		CDriverEEGO(IDriverContext& rDriverContext);
 		virtual ~CDriverEEGO(void);
-		virtual const char* getName(void);
+		const char* getName(void) override;
 
-		virtual OpenViBE::boolean initialize(
+		OpenViBE::boolean initialize(
 			const OpenViBE::uint32 ui32SampleCountPerSentBlock,
-			OpenViBEAcquisitionServer::IDriverCallback& rCallback);
-		virtual OpenViBE::boolean uninitialize(void);
+			IDriverCallback& rCallback) override;
+		OpenViBE::boolean uninitialize(void) override;
 
-		virtual OpenViBE::boolean start(void);
-		virtual OpenViBE::boolean stop(void);
-		virtual OpenViBE::boolean loop(void);
+		OpenViBE::boolean start(void) override;
+		OpenViBE::boolean stop(void) override;
+		OpenViBE::boolean loop(void) override;
 
-		virtual OpenViBE::boolean isConfigurable(void);
-		virtual OpenViBE::boolean configure(void);
-		virtual const OpenViBEAcquisitionServer::IHeader* getHeader(void) { return &m_oHeader; }
+		OpenViBE::boolean isConfigurable(void) override;
+		OpenViBE::boolean configure(void) override;
+		const IHeader* getHeader(void) override { return &m_oHeader; }
 
-		virtual OpenViBE::boolean isFlagSet(
-			const OpenViBEAcquisitionServer::EDriverFlag eFlag) const
+		OpenViBE::boolean isFlagSet(
+			const EDriverFlag eFlag) const override
 		{
 			return eFlag == DriverFlag_IsUnstable;
 		}
@@ -74,29 +74,30 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
-		SettingsHelper								m_oSettings;
-		OpenViBEAcquisitionServer::IDriverCallback* m_pCallback;
-		OpenViBEAcquisitionServer::CHeaderEEGO		m_oHeader;
+		SettingsHelper m_oSettings;
+		IDriverCallback* m_pCallback;
+		CHeaderEEGO m_oHeader;
 
-		OpenViBE::uint32	m_ui32SampleCountPerSentBlock;
-		OpenViBE::float32*	m_pSample;
+		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
+		OpenViBE::float32* m_pSample;
 
 		eemagine::sdk::amplifier* m_pAmplifier;
-		eemagine::sdk::stream*	  m_pStream;
+		eemagine::sdk::stream* m_pStream;
 		std::unique_ptr<eemagine::sdk::factory> m_pFactory;
 
 	private:
 
-		OpenViBE::uint32			m_ui32SamplesInBuffer;
-		OpenViBE::uint32			m_i32TriggerChannel;
-		OpenViBE::CStimulationSet	m_oStimulationSet; // Storing the samples over time
-		OpenViBE::uint32			m_ui32LastTriggerValue; // To detect flanks in the trigger signal. The last state on the trigger input.
+		OpenViBE::uint32 m_ui32SamplesInBuffer;
+		OpenViBE::uint32 m_i32TriggerChannel;
+		OpenViBE::CStimulationSet m_oStimulationSet; // Storing the samples over time
+		OpenViBE::uint32 m_ui32LastTriggerValue;
+		// To detect flanks in the trigger signal. The last state on the trigger input.
 
 		// For setting store/load
-		OpenViBE::uint32	m_iBIPRange; // [mV]
-		OpenViBE::uint32	m_iEEGRange; // [mV]
-		OpenViBE::CString	m_sEEGMask; // String interpreted as value to be interpreted as bitfield
-		OpenViBE::CString	m_sBIPMask; // String interpreted as value to be interpreted as bitfield
+		OpenViBE::uint32 m_iBIPRange; // [mV]
+		OpenViBE::uint32 m_iEEGRange; // [mV]
+		OpenViBE::CString m_sEEGMask; // String interpreted as value to be interpreted as bitfield
+		OpenViBE::CString m_sBIPMask; // String interpreted as value to be interpreted as bitfield
 	};
 };
 

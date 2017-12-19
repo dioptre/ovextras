@@ -34,24 +34,25 @@ namespace std {
 using namespace OpenViBEAcquisitionServer;
 
 CHeaderEEGO::CHeaderEEGO()
-	:m_iEEGRange(1000)
-	, m_bEEGRangeSet(false)
+	: m_iEEGRange(1000)
 	, m_iBIPRange(1500)
-	, m_bBIPRangeSet(false)
 	, m_sEEGMask("0xFFFFFFFFFFFFFFFF")
 	, m_sBIPMask("0xFFFFFF")
+	, m_bEEGRangeSet(false)
+	, m_bBIPRangeSet(false)
 	, m_bEEGMaskSet(false)
 	, m_bBIPMaskSet(false)
-{}
+{
+}
 
 OpenViBE::uint64 CHeaderEEGO::getEEGMaskInt() const
 {
-	return strtoull(m_sEEGMask, NULL, 0);
+	return strtoull(m_sEEGMask, nullptr, 0);
 }
 
 OpenViBE::uint64 CHeaderEEGO::getBIPMaskInt() const
 {
-	return strtoull(m_sBIPMask, NULL, 0);
+	return strtoull(m_sBIPMask, nullptr, 0);
 }
 
 /* static */
@@ -62,7 +63,7 @@ OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_
 	// init r_outValue anyway
 	r_oOutValue = 0;
 
-	std::string l_oString(str);  //easier substring handling etc. Minor performance penalty which should not matter.
+	std::string l_oString(str); //easier substring handling etc. Minor performance penalty which should not matter.
 	boost::algorithm::trim(l_oString); // Make sure to handle whitespace correctly
 
 	// check prefixes
@@ -79,7 +80,7 @@ OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_
 		else
 		{
 			// use the substring for string to number conversion as base 2
-			r_oOutValue = strtoull(substring.c_str(), NULL, 2);
+			r_oOutValue = strtoull(substring.c_str(), nullptr, 2);
 		}
 	}
 	else if (boost::algorithm::istarts_with(l_oString, "0x"))
@@ -94,7 +95,7 @@ OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_
 		}
 		else
 		{
-			r_oOutValue = strtoull(substring.c_str(), NULL, 16);
+			r_oOutValue = strtoull(substring.c_str(), nullptr, 16);
 		}
 	}
 	else if (boost::algorithm::istarts_with(l_oString, "0"))
@@ -109,7 +110,7 @@ OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_
 		}
 		else
 		{
-			r_oOutValue = strtoull(substring.c_str(), NULL, 8);
+			r_oOutValue = strtoull(substring.c_str(), nullptr, 8);
 		}
 	}
 	else
@@ -124,7 +125,7 @@ OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_
 		}
 		else
 		{
-			r_oOutValue = strtoull(substring.c_str(), NULL, 10);
+			r_oOutValue = strtoull(substring.c_str(), nullptr, 10);
 		}
 	}
 

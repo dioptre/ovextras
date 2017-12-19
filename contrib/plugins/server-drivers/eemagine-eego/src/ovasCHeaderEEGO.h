@@ -17,27 +17,45 @@ namespace OpenViBEAcquisitionServer
 
 		// EEG, referential channels
 		// range
-		OpenViBE::uint32	getEEGRange() const { return m_iEEGRange; };
-		void				setEEGRange(OpenViBE::uint32 range) { m_iEEGRange = range; m_bEEGRangeSet = true; };
-		OpenViBE::boolean	isEEGRangeSet() const { return m_bEEGRangeSet; };
+		OpenViBE::uint32 getEEGRange() const { return m_iEEGRange; };
+
+		void setEEGRange(OpenViBE::uint32 range)
+		{
+			m_iEEGRange = range;
+			m_bEEGRangeSet = true;
+		};
+		OpenViBE::boolean isEEGRangeSet() const { return m_bEEGRangeSet; };
 
 		// mask
-		OpenViBE::CString	getEEGMask() const { return m_sEEGMask; };
-		OpenViBE::uint64	getEEGMaskInt() const; // Same as method above. Only string parsing has been done
-		void				setEEGMask(const OpenViBE::CString mask) { m_sEEGMask = mask; m_bEEGMaskSet = true; };
-		OpenViBE::boolean	isEEGMaskSet() const { return m_bEEGMaskSet; };
+		OpenViBE::CString getEEGMask() const { return m_sEEGMask; };
+		OpenViBE::uint64 getEEGMaskInt() const; // Same as method above. Only string parsing has been done
+		void setEEGMask(const OpenViBE::CString mask)
+		{
+			m_sEEGMask = mask;
+			m_bEEGMaskSet = true;
+		};
+		OpenViBE::boolean isEEGMaskSet() const { return m_bEEGMaskSet; }
 
 		// Bipolar channels
 		// range
-		OpenViBE::uint32	getBIPRange() const { return m_iBIPRange; };
-		OpenViBE::uint64	getBIPMaskInt() const; // Same as method above. Only string parsing has been done
-		void				setBIPRange(OpenViBE::uint32 range) { m_iBIPRange = range; m_bBIPRangeSet = true; };
-		OpenViBE::boolean	isBIPRangeSet() const { return m_bBIPRangeSet; };
+		OpenViBE::uint32 getBIPRange() const { return m_iBIPRange; };
+		OpenViBE::uint64 getBIPMaskInt() const; // Same as method above. Only string parsing has been done
+		void setBIPRange(OpenViBE::uint32 range)
+		{
+			m_iBIPRange = range;
+			m_bBIPRangeSet = true;
+		};
+		OpenViBE::boolean isBIPRangeSet() const { return m_bBIPRangeSet; };
 
 		// mask
-		OpenViBE::CString	getBIPMask() const { return m_sBIPMask; };
-		void				setBIPMask(const OpenViBE::CString mask) { m_sBIPMask = mask; m_bBIPMaskSet = true; };
-		OpenViBE::boolean	isBIPMaskSet() const { return m_bBIPMaskSet; };
+		OpenViBE::CString getBIPMask() const { return m_sBIPMask; };
+
+		void setBIPMask(const OpenViBE::CString mask)
+		{
+			m_sBIPMask = mask;
+			m_bBIPMaskSet = true;
+		};
+		OpenViBE::boolean isBIPMaskSet() const { return m_bBIPMaskSet; };
 
 	public:
 		// Converts a string representing a number to this number as unsigned 64 bit value.
@@ -56,14 +74,14 @@ namespace OpenViBEAcquisitionServer
 
 		// data
 	protected:
-		OpenViBE::uint32	m_iEEGRange;
-		OpenViBE::uint32	m_iBIPRange;
-		OpenViBE::CString	m_sEEGMask;
-		OpenViBE::CString	m_sBIPMask;
-		OpenViBE::boolean	m_bEEGRangeSet;
-		OpenViBE::boolean	m_bBIPRangeSet;
-		OpenViBE::boolean	m_bEEGMaskSet;
-		OpenViBE::boolean	m_bBIPMaskSet;
+		OpenViBE::uint32 m_iEEGRange;
+		OpenViBE::uint32 m_iBIPRange;
+		OpenViBE::CString m_sEEGMask;
+		OpenViBE::CString m_sBIPMask;
+		OpenViBE::boolean m_bEEGRangeSet;
+		OpenViBE::boolean m_bBIPRangeSet;
+		OpenViBE::boolean m_bEEGMaskSet;
+		OpenViBE::boolean m_bBIPMaskSet;
 	};
 }
 

@@ -14,12 +14,12 @@ using namespace OpenViBEAcquisitionServer;
 // Copied from ovasCConfigurationBuilder. Seems to be OK, albeit it is strange to have the code duplication,
 // but other amplifier drivers do it too.
 // Would be nicer if the method would move to some utilities provider.
-static void gtk_combo_box_set_active_text(::GtkComboBox* pComboBox, const gchar* sActiveText)
+static void gtk_combo_box_set_active_text(GtkComboBox* pComboBox, const gchar* sActiveText)
 {
-	::GtkTreeModel* l_pTreeModel = gtk_combo_box_get_model(pComboBox);
-	::GtkTreeIter itComboEntry;
+	GtkTreeModel* l_pTreeModel = gtk_combo_box_get_model(pComboBox);
+	GtkTreeIter itComboEntry;
 	int l_iIndex = 0;
-	gchar* l_sComboEntryName = NULL;
+	gchar* l_sComboEntryName = nullptr;
 	if (gtk_tree_model_get_iter_first(l_pTreeModel, &itComboEntry))
 	{
 		do
@@ -30,11 +30,9 @@ static void gtk_combo_box_set_active_text(::GtkComboBox* pComboBox, const gchar*
 				gtk_combo_box_set_active(pComboBox, l_iIndex);
 				return;
 			}
-			else
-			{
-				l_iIndex++;
-			}
-		} while (gtk_tree_model_iter_next(l_pTreeModel, &itComboEntry));
+			l_iIndex++;
+		}
+		while (gtk_tree_model_iter_next(l_pTreeModel, &itComboEntry));
 	}
 }
 
@@ -42,15 +40,15 @@ static void gtk_combo_box_set_active_text(::GtkComboBox* pComboBox, const gchar*
 CConfigurationEEGO::CConfigurationEEGO(
 	IDriverContext& rDriverContext,
 	const char* sGtkBuilderFileName,
-	OpenViBEAcquisitionServer::CHeaderEEGO& rEEGOHeader)
-	:CConfigurationBuilder(sGtkBuilderFileName)
+	CHeaderEEGO& rEEGOHeader)
+	: CConfigurationBuilder(sGtkBuilderFileName)
 	, m_rDriverContext(rDriverContext)
-	, m_pEEGRangeComboBox(NULL)
-	, m_pBIPRangeComboBox(NULL)
-	, m_pBIPEntryMask(NULL)
-	, m_pEEGEntryMask(NULL)
-	, m_pNumChannelEntry(NULL)
 	, m_rEEGOHeader(rEEGOHeader)
+	, m_pEEGRangeComboBox(nullptr)
+	, m_pBIPRangeComboBox(nullptr)
+	, m_pEEGEntryMask(nullptr)
+	, m_pBIPEntryMask(nullptr)
+	, m_pNumChannelEntry(nullptr)
 {
 }
 
@@ -159,14 +157,15 @@ OpenViBE::boolean CConfigurationEEGO::postConfigure(void)
 	const std::bitset<64> l_oBitsetEEG(l_i64MaskEEG);
 	const std::bitset<24> l_oBitsetBIP(l_i64MaskBIP);
 
-	m_pHeader->setChannelCount(l_oBitsetEEG.count() + l_oBitsetBIP.count() + 2); // Plus status channels: trigger and sample counter
+	m_pHeader->setChannelCount(l_oBitsetEEG.count() + l_oBitsetBIP.count() + 2);
+	// Plus status channels: trigger and sample counter
 
 	return true;
 }
 
 /// GTK Callbacks
 /* static */
-void CConfigurationEEGO::update_channel_num_cb(GtkWidget *widget, CConfigurationEEGO* pThis)
+void CConfigurationEEGO::update_channel_num_cb(GtkWidget* widget, CConfigurationEEGO* pThis)
 {
 	// get the values
 	const gchar* l_sMaskBIP = gtk_entry_get_text(pThis->m_pBIPEntryMask);
@@ -187,7 +186,8 @@ void CConfigurationEEGO::update_channel_num_cb(GtkWidget *widget, CConfiguration
 	{
 		l_ss << l_oBitsetEEG.count();
 	}
-	else {
+	else
+	{
 		l_ss << "Error";
 	}
 
@@ -197,7 +197,8 @@ void CConfigurationEEGO::update_channel_num_cb(GtkWidget *widget, CConfiguration
 	{
 		l_ss << l_oBitsetBIP.count();
 	}
-	else {
+	else
+	{
 		l_ss << "Error";
 	}
 

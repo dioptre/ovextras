@@ -26,23 +26,23 @@
 // Namespaces
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
-using namespace OpenViBE::Kernel;
+using namespace Kernel;
 namespace es = eemagine::sdk;
 
 //___________________________________________________________________//
 //                                                                   //
 
 CDriverEEGO::CDriverEEGO(IDriverContext& rDriverContext)
-	:IDriver(rDriverContext)
+	: IDriver(rDriverContext)
 	, m_oSettings("AcquisitionServer_Driver_EEGO", m_rDriverContext.getConfigurationManager())
-	, m_pCallback(NULL)
+	, m_pCallback(nullptr)
 	, m_ui32SampleCountPerSentBlock(0)
-	, m_pSample(NULL)
+	, m_pSample(nullptr)
+	, m_pAmplifier(nullptr)
+	, m_pStream(nullptr)
 	, m_ui32SamplesInBuffer(0)
 	, m_i32TriggerChannel(-1) // == Nonexistent
 	, m_ui32LastTriggerValue(~0) // Set every bit to 1
-	, m_pAmplifier(NULL)
-	, m_pStream(NULL)
 	, m_iBIPRange(1500)
 	, m_iEEGRange(1000)
 	, m_sEEGMask("0xFFFFFFFFFFFFFFFF") // 64 channels
@@ -90,7 +90,7 @@ boolean CDriverEEGO::initialize(
 		// acquired samples. This buffer
 		// will be sent to the acquisition
 		// server later...
-		m_pSample = new float32[m_oHeader.getChannelCount()*ui32SampleCountPerSentBlock];
+		m_pSample = new float32[m_oHeader.getChannelCount() * ui32SampleCountPerSentBlock];
 		m_ui32SamplesInBuffer = 0;
 		if (!m_pSample)
 		{
@@ -111,7 +111,7 @@ boolean CDriverEEGO::initialize(
 		if (m_rDriverContext.isImpedanceCheckRequested())
 		{
 			// After init we are in impedance mode until the recording is started
-			OpenViBE::uint64 l_i64MaskEEG = getRefChannelMask();   // Only the reference channels can be measured
+			uint64 l_i64MaskEEG = getRefChannelMask(); // Only the reference channels can be measured
 			m_pStream = m_pAmplifier->OpenImpedanceStream(l_i64MaskEEG);
 		}
 	}
@@ -121,11 +121,11 @@ boolean CDriverEEGO::initialize(
 
 		// Cleanup
 		delete[] m_pSample;
-		m_pSample = NULL;
+		m_pSample = nullptr;
 		delete m_pAmplifier;
-		m_pAmplifier = NULL;
+		m_pAmplifier = nullptr;
 		delete m_pStream;
-		m_pStream = NULL;
+		m_pStream = nullptr;
 
 		return false;
 	}
@@ -140,8 +140,8 @@ boolean CDriverEEGO::initialize(
 boolean CDriverEEGO::check_configuration(void)
 {
 	// get masks from configuration
-	const OpenViBE::uint64 l_i64MaskBIP = getBipChannelMask();
-	const OpenViBE::uint64 l_i64MaskEEG = getRefChannelMask();
+	const uint64 l_i64MaskBIP = getBipChannelMask();
+	const uint64 l_i64MaskEEG = getRefChannelMask();
 
 	const std::bitset<64> l_oBitsetEEG(l_i64MaskEEG);
 	const std::bitset<24> l_oBitsetBIP(l_i64MaskBIP);
@@ -151,7 +151,7 @@ boolean CDriverEEGO::check_configuration(void)
 	{
 		// Not enough channels, we have to reduce them
 		GtkWidget* l_pDialogue = gtk_message_dialog_new(
-			NULL, // parent
+			nullptr, // parent
 			GTK_DIALOG_MODAL, // Behavoir
 			GTK_MESSAGE_QUESTION, // Type
 			GTK_BUTTONS_OK_CANCEL, // buttons
@@ -159,7 +159,7 @@ boolean CDriverEEGO::check_configuration(void)
 			"Change the amount of channels to %d?", l_iAllChannels, m_oHeader.getChannelCount(), l_iAllChannels);
 		gint l_iResult = gtk_dialog_run(GTK_DIALOG(l_pDialogue));
 		gtk_widget_destroy(l_pDialogue);
-		l_pDialogue = NULL;
+		l_pDialogue = nullptr;
 		switch (l_iResult)
 		{
 		case GTK_RESPONSE_OK:
@@ -175,9 +175,9 @@ boolean CDriverEEGO::check_configuration(void)
 	return true;
 }
 
-OpenViBE::uint64 CDriverEEGO::getRefChannelMask() const
+uint64 CDriverEEGO::getRefChannelMask() const
 {
-	OpenViBE::uint64 l_i64MaskEEG(0);
+	uint64 l_i64MaskEEG(0);
 	if (!CHeaderEEGO::convertMask(m_sEEGMask, l_i64MaskEEG))
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Warning << "Error converting mask: m_sEEGMask: " << m_sEEGMask;
@@ -185,9 +185,9 @@ OpenViBE::uint64 CDriverEEGO::getRefChannelMask() const
 	return l_i64MaskEEG;
 }
 
-OpenViBE::uint64 CDriverEEGO::getBipChannelMask() const
+uint64 CDriverEEGO::getBipChannelMask() const
 {
-	OpenViBE::uint64 l_i64MaskBIP(0);
+	uint64 l_i64MaskBIP(0);
 	if (!CHeaderEEGO::convertMask(m_sBIPMask, l_i64MaskBIP))
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Warning << "Error converting mask: l_i64MaskBIP: " << l_i64MaskBIP << "\n";
@@ -202,7 +202,7 @@ eemagine::sdk::factory& CDriverEEGO::factory()
 		// create the amplifier factory
 		// To initialize we need to locate the path of the DLL
 		// Create path to the dll
-		const OpenViBE::CString l_oLibDir = Directories::getBinDir() + "\\eego-SDK.dll";
+		const CString l_oLibDir = Directories::getBinDir() + "\\eego-SDK.dll";
 		auto l_sPath = l_oLibDir.toASCIIString();
 		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll path: " << l_sPath << "\n";
 		m_pFactory = std::make_unique<es::factory>(l_sPath);
@@ -235,7 +235,7 @@ boolean CDriverEEGO::start(void)
 	{
 		// Close the impedance stream
 		delete m_pStream;
-		m_pStream = NULL;
+		m_pStream = nullptr;
 
 		// Create the eeg stream
 		m_pStream = m_pAmplifier->OpenEegStream(
@@ -261,7 +261,7 @@ boolean CDriverEEGO::start(void)
 
 		if (triggerIterator == list.end())
 		{
-			m_i32TriggerChannel = -1;   // Unkown
+			m_i32TriggerChannel = -1; // Unkown
 		}
 		else
 		{
@@ -295,7 +295,7 @@ boolean CDriverEEGO::loop(void)
 	// Check if we really provide enough channels
 	// When doing impedance only the normal EEG channels are tested. This is fine and handled.
 	if (m_pStream->getChannelList().size() < m_oHeader.getChannelCount()
-		&& m_rDriverContext.isStarted())  // !started -> impedance
+		&& m_rDriverContext.isStarted()) // !started -> impedance
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "The amplifier got asked for more channels than it could provide";
 		return false;
@@ -315,18 +315,18 @@ boolean CDriverEEGO::loop(void)
 			return false;
 		}
 
-		const OpenViBE::uint32 l_ui32SampleCount = data.getSampleCount();
+		const uint32 l_ui32SampleCount = data.getSampleCount();
 
 		// For EEGO the with every index increment, the channel is incremented.
 		// For OpenVibe it means next sample. Therefor we have to transpose the data
-		for (OpenViBE::uint32 sample = 0; sample < l_ui32SampleCount; sample++)
+		for (uint32 sample = 0; sample < l_ui32SampleCount; sample++)
 		{
-			for (OpenViBE::uint32 channel = 0; channel < m_oHeader.getChannelCount(); channel++)
+			for (uint32 channel = 0; channel < m_oHeader.getChannelCount(); channel++)
 			{
 				const int ovIdx = m_ui32SamplesInBuffer + channel * m_ui32SampleCountPerSentBlock;
 
 				const double& sampleVal = data.getSample(channel, sample);
-				m_pSample[ovIdx] = (OpenViBE::float32)(sampleVal);
+				m_pSample[ovIdx] = (float32)(sampleVal);
 			}
 
 			// Add potential triggers to stimulation set
@@ -335,13 +335,14 @@ boolean CDriverEEGO::loop(void)
 			{
 				// A trigger is detected when the level changes in positive direction, all additional bits are seen as trigger code
 				// a change from 1 to 0 is ignored
-				const OpenViBE::uint32 currentTriggers = (const OpenViBE::uint32)data.getSample(m_i32TriggerChannel, sample);
-				const OpenViBE::uint32 currentNewTriggers = currentTriggers & ~m_ui32LastTriggerValue;
+				const uint32 currentTriggers = (const uint32)data.getSample(m_i32TriggerChannel, sample);
+				const uint32 currentNewTriggers = currentTriggers & ~m_ui32LastTriggerValue;
 				m_ui32LastTriggerValue = currentTriggers;
 
 				if (currentNewTriggers != 0)
 				{
-					const OpenViBE::uint64 currentTime = OpenViBE::ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui32SamplesInBuffer);
+					const uint64 currentTime = ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(),
+						m_ui32SamplesInBuffer);
 					m_oStimulationSet.appendStimulation(OVTK_StimulationId_Label(currentNewTriggers), currentTime, 0);
 				}
 			}
@@ -381,8 +382,8 @@ boolean CDriverEEGO::loop(void)
 		}
 
 		// We have to take care not to r/w over any boundary.
-		OpenViBE::uint32 minChannels = std::min(data.getChannelCount(), m_oHeader.getChannelCount());
-		for (OpenViBE::uint32 channel = 0; channel < minChannels; channel++)
+		uint32 minChannels = std::min(data.getChannelCount(), m_oHeader.getChannelCount());
+		for (uint32 channel = 0; channel < minChannels; channel++)
 		{
 			m_rDriverContext.updateImpedance(channel, data.getSample(channel, 0));
 		}
@@ -401,7 +402,7 @@ boolean CDriverEEGO::stop(void)
 	// sending data
 	// ...
 	delete m_pStream;
-	m_pStream = NULL;   // Deletion of the stream stops the streaming.
+	m_pStream = nullptr; // Deletion of the stream stops the streaming.
 	if (m_rDriverContext.isImpedanceCheckRequested())
 	{
 		m_pStream = m_pAmplifier->OpenImpedanceStream(getRefChannelMask()); // And we can stream Impedances once more.
@@ -421,15 +422,15 @@ boolean CDriverEEGO::uninitialize(void)
 
 	// stop impedance, or any other streaming
 	delete m_pStream;
-	m_pStream = NULL;   // Thats it!
+	m_pStream = nullptr; // Thats it!
 
 	// Deltion of the amplifier makes it usable again.
 	delete m_pAmplifier;
-	m_pAmplifier = NULL;
+	m_pAmplifier = nullptr;
 
 	delete[] m_pSample;
-	m_pSample = NULL;
-	m_pCallback = NULL;
+	m_pSample = nullptr;
+	m_pCallback = nullptr;
 	m_ui32SamplesInBuffer = 0;
 
 	return true;
@@ -445,7 +446,9 @@ boolean CDriverEEGO::isConfigurable(void)
 boolean CDriverEEGO::configure(void)
 {
 	// Change this line if you need to specify some references to your driver attribute that need configuration, e.g. the connection ID.
-	CConfigurationEEGO m_oConfiguration(m_rDriverContext, OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-EEGO.ui", m_oHeader);
+	CConfigurationEEGO m_oConfiguration(m_rDriverContext,
+		Directories::getDataDir() + "/applications/acquisition-server/interface-EEGO.ui",
+		m_oHeader);
 
 	m_oHeader.setBIPRange(m_iBIPRange);
 	m_oHeader.setEEGRange(m_iEEGRange);
