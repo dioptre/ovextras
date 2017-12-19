@@ -56,10 +56,9 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean configure(void) override;
 		const IHeader* getHeader(void) override { return &m_oHeader; }
 
-		OpenViBE::boolean isFlagSet(
-			const EDriverFlag eFlag) const override
+		OpenViBE::boolean isFlagSet(const EDriverFlag eFlag) const override
 		{
-			return eFlag == DriverFlag_IsUnstable;
+			return false; // The only currently used flag is for checking for unstability. eego is stable now.
 		}
 
 	private:
