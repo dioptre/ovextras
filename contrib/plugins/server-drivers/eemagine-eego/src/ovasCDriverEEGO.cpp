@@ -37,9 +37,6 @@ CDriverEEGO::CDriverEEGO(IDriverContext& rDriverContext)
 	, m_oSettings("AcquisitionServer_Driver_EEGO", m_rDriverContext.getConfigurationManager())
 	, m_pCallback(nullptr)
 	, m_ui32SampleCountPerSentBlock(0)
-	, m_pSample(nullptr)
-	, m_pAmplifier(nullptr)
-	, m_pStream(nullptr)
 	, m_ui32SamplesInBuffer(0)
 	, m_i32TriggerChannel(-1) // == Nonexistent
 	, m_ui32LastTriggerValue(~0) // Set every bit to 1
@@ -74,15 +71,16 @@ const char* CDriverEEGO::getName(void)
 	return "EEGO";
 }
 
-//___________________________________________________________________//
-//                                                                   //
-
 boolean CDriverEEGO::initialize(
 	const uint32 ui32SampleCountPerSentBlock,
 	IDriverCallback& rCallback)
 {
-	if (m_rDriverContext.isConnected()) return false;
-	if (!m_oHeader.isChannelCountSet() || !m_oHeader.isSamplingFrequencySet()) return false;
+	if (m_rDriverContext.isConnected()
+		|| !m_oHeader.isChannelCountSet()
+		|| !m_oHeader.isSamplingFrequencySet())
+	{
+		return false;
+	}
 
 	try
 	{
@@ -90,7 +88,7 @@ boolean CDriverEEGO::initialize(
 		// acquired samples. This buffer
 		// will be sent to the acquisition
 		// server later...
-		m_pSample = new float32[m_oHeader.getChannelCount() * ui32SampleCountPerSentBlock];
+		m_pSample = std::make_unique<float32[]>(m_oHeader.getChannelCount() * ui32SampleCountPerSentBlock);
 		m_ui32SamplesInBuffer = 0;
 		if (!m_pSample)
 		{
@@ -100,7 +98,7 @@ boolean CDriverEEGO::initialize(
 		// Get the amplifier. If none is connected an exception will be thrown
 		try
 		{
-			m_pAmplifier = factory().getAmplifier();
+			m_pAmplifier.reset(factory().getAmplifier());
 		}
 		catch (const std::exception& ex)
 		{
@@ -110,22 +108,20 @@ boolean CDriverEEGO::initialize(
 
 		if (m_rDriverContext.isImpedanceCheckRequested())
 		{
+			// end streaming first, if started
+			m_pStream.reset();
+
 			// After init we are in impedance mode until the recording is started
-			uint64 l_i64MaskEEG = getRefChannelMask(); // Only the reference channels can be measured
-			m_pStream = m_pAmplifier->OpenImpedanceStream(l_i64MaskEEG);
+			m_pStream.reset(m_pAmplifier->OpenImpedanceStream(getRefChannelMask()));
 		}
 	}
 	catch (const std::exception& ex)
 	{
 		m_rDriverContext.getLogManager() << LogLevel_Error << "Failed to initialize the driver. Exception: " << ex.what() << "\n";
 
-		// Cleanup
-		delete[] m_pSample;
-		m_pSample = nullptr;
-		delete m_pAmplifier;
-		m_pAmplifier = nullptr;
-		delete m_pStream;
-		m_pStream = nullptr;
+		m_pSample.reset();
+		m_pAmplifier.reset();
+		m_pStream.reset();
 
 		return false;
 	}
@@ -233,17 +229,16 @@ boolean CDriverEEGO::start(void)
 
 	try
 	{
-		// Close the impedance stream
-		delete m_pStream;
-		m_pStream = nullptr;
-
+		// stop old streams, if existing
+		m_pStream.reset();
 		// Create the eeg stream
-		m_pStream = m_pAmplifier->OpenEegStream(
-			m_oHeader.getSamplingFrequency(),
-			l_fEEGRange,
-			l_fBIPRange,
-			getRefChannelMask(),
-			getBipChannelMask());
+		m_pStream.reset(
+			m_pAmplifier->OpenEegStream(
+				m_oHeader.getSamplingFrequency(),
+				l_fEEGRange,
+				l_fBIPRange,
+				getRefChannelMask(),
+				getBipChannelMask()));
 
 		// Error check
 		if (!m_pStream)
@@ -326,7 +321,7 @@ boolean CDriverEEGO::loop(void)
 				const int ovIdx = m_ui32SamplesInBuffer + channel * m_ui32SampleCountPerSentBlock;
 
 				const double& sampleVal = data.getSample(channel, sample);
-				m_pSample[ovIdx] = (float32)(sampleVal);
+				m_pSample[ovIdx] = static_cast<float32>(sampleVal);
 			}
 
 			// Add potential triggers to stimulation set
@@ -353,7 +348,7 @@ boolean CDriverEEGO::loop(void)
 			// Send buffer is full, so send it
 			if (m_ui32SamplesInBuffer == m_ui32SampleCountPerSentBlock)
 			{
-				m_pCallback->setSamples(m_pSample);
+				m_pCallback->setSamples(m_pSample.get());
 				m_pCallback->setStimulationSet(m_oStimulationSet);
 
 				// When your sample buffer is fully loaded,
@@ -401,11 +396,18 @@ boolean CDriverEEGO::stop(void)
 	// request the hardware to stop
 	// sending data
 	// ...
-	delete m_pStream;
-	m_pStream = nullptr; // Deletion of the stream stops the streaming.
 	if (m_rDriverContext.isImpedanceCheckRequested())
 	{
-		m_pStream = m_pAmplifier->OpenImpedanceStream(getRefChannelMask()); // And we can stream Impedances once more.
+		try
+		{
+			m_pStream.reset();
+			m_pStream.reset(m_pAmplifier->OpenImpedanceStream(getRefChannelMask())); // And we can stream Impedances once more.
+		}
+		catch (const std::exception& ex)
+		{
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Error restarting impedance: " << ex.what() << "\n";
+			return false;
+		}
 	}
 
 	return true;
@@ -419,17 +421,10 @@ boolean CDriverEEGO::uninitialize(void)
 	// ...
 	// uninitialize hardware here
 	// ...
+	m_pStream.reset();
+	m_pAmplifier.reset();
+	m_pSample.reset();
 
-	// stop impedance, or any other streaming
-	delete m_pStream;
-	m_pStream = nullptr; // Thats it!
-
-	// Deltion of the amplifier makes it usable again.
-	delete m_pAmplifier;
-	m_pAmplifier = nullptr;
-
-	delete[] m_pSample;
-	m_pSample = nullptr;
 	m_pCallback = nullptr;
 	m_ui32SamplesInBuffer = 0;
 

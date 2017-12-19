@@ -79,11 +79,11 @@ namespace OpenViBEAcquisitionServer
 		CHeaderEEGO m_oHeader;
 
 		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
-		OpenViBE::float32* m_pSample;
+		std::unique_ptr<OpenViBE::float32[]> m_pSample;
 
-		eemagine::sdk::amplifier* m_pAmplifier;
-		eemagine::sdk::stream* m_pStream;
 		std::unique_ptr<eemagine::sdk::factory> m_pFactory;
+		std::unique_ptr<eemagine::sdk::amplifier> m_pAmplifier;
+		std::unique_ptr<eemagine::sdk::stream> m_pStream;
 
 	private:
 
