@@ -27,7 +27,6 @@
 using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
-using namespace std;
 namespace es = eemagine::sdk;
 
 //___________________________________________________________________//
@@ -144,8 +143,8 @@ boolean CDriverEEGO::check_configuration(void)
 	const OpenViBE::uint64 l_i64MaskBIP = getBipChannelMask();
 	const OpenViBE::uint64 l_i64MaskEEG = getRefChannelMask();
 
-	const bitset<64> l_oBitsetEEG(l_i64MaskEEG);
-	const bitset<24> l_oBitsetBIP(l_i64MaskBIP);
+	const std::bitset<64> l_oBitsetEEG(l_i64MaskEEG);
+	const std::bitset<24> l_oBitsetBIP(l_i64MaskBIP);
 
 	const size_t l_iAllChannels = l_oBitsetBIP.count() + l_oBitsetEEG.count() + 2; // trigger and sample count as additional channels
 	if (l_iAllChannels < m_oHeader.getChannelCount())
@@ -382,7 +381,7 @@ boolean CDriverEEGO::loop(void)
 		}
 
 		// We have to take care not to r/w over any boundary.
-		OpenViBE::uint32 minChannels = min(data.getChannelCount(), m_oHeader.getChannelCount());
+		OpenViBE::uint32 minChannels = std::min(data.getChannelCount(), m_oHeader.getChannelCount());
 		for (OpenViBE::uint32 channel = 0; channel < minChannels; channel++)
 		{
 			m_rDriverContext.updateImpedance(channel, data.getSample(channel, 0));

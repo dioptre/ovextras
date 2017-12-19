@@ -9,7 +9,6 @@
 
 using namespace OpenViBE::Kernel;
 using namespace OpenViBEAcquisitionServer;
-using namespace std;
 
 // Function to set a predefined string in the combobox.
 // Copied from ovasCConfigurationBuilder. Seems to be OK, albeit it is strange to have the code duplication,
@@ -26,7 +25,7 @@ static void gtk_combo_box_set_active_text(::GtkComboBox* pComboBox, const gchar*
 		do
 		{
 			gtk_tree_model_get(l_pTreeModel, &itComboEntry, 0, &l_sComboEntryName, -1);
-			if (string(l_sComboEntryName) == string(sActiveText))
+			if (std::string(l_sComboEntryName) == std::string(sActiveText))
 			{
 				gtk_combo_box_set_active(pComboBox, l_iIndex);
 				return;
