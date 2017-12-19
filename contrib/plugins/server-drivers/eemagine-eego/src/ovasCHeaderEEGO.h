@@ -67,11 +67,6 @@ namespace OpenViBEAcquisitionServer
 		// Here the string is checked against all invalid chars and an error will be returned.
 		static OpenViBE::boolean convertMask(char const* str, OpenViBE::uint64& r_oOutValue);
 
-		// static helper methods. Reason to put it in here is to provide the service to configuration, header and driver.
-		// Not nice, should go to generic utilities or just go when VS10 is gone.
-	private:
-		static OpenViBE::uint64 strtoull(char const* str, char** str_end, int base);
-
 		// data
 	protected:
 		OpenViBE::uint32 m_iEEGRange;
