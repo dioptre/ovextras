@@ -1,10 +1,11 @@
-
 #if defined(TARGET_HAS_ThirdPartyEEGOAPI)
 
 #if defined TARGET_OS_Windows
 
 #ifndef __OpenViBE_AcquisitionServer_CDriverEEGO_H__
 #define __OpenViBE_AcquisitionServer_CDriverEEGO_H__
+
+#include <memory>
 
 #include "ovasIDriver.h"
 #include "ovasCHeaderEEGO.h"
@@ -20,6 +21,7 @@ namespace eemagine
 	{
 		class amplifier;
 		class stream;
+		class factory;
 	}
 }
 
@@ -70,6 +72,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean check_configuration(void);
 		OpenViBE::uint64 getRefChannelMask() const;
 		OpenViBE::uint64 getBipChannelMask() const;
+		eemagine::sdk::factory& factory();
+
 
 	protected:
 
@@ -82,6 +86,7 @@ namespace OpenViBEAcquisitionServer
 
 		eemagine::sdk::amplifier* m_pAmplifier;
 		eemagine::sdk::stream*	  m_pStream;
+		std::unique_ptr<eemagine::sdk::factory> m_pFactory;
 
 	private:
 

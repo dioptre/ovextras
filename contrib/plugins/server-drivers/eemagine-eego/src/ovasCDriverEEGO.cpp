@@ -99,22 +99,10 @@ boolean CDriverEEGO::initialize(
 			throw std::exception("Failed to allocate sample buffer");
 		}
 
-		// create the amplifier factory
-		// To initialize we need to locate the path of the DLL
-		// Create path to the dll
-		const OpenViBE::CString l_oLibDir = Directories::getBinDir() + "\\eego-SDK.dll";
-		auto l_sPath = l_oLibDir.toASCIIString();
-		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll path: " << l_sPath << "\n";
-		es::factory fact(l_sPath);
-
-		// to check what is going on case of error; Log version
-		const auto version = fact.getVersion();
-		m_rDriverContext.getLogManager() << LogLevel_Info << "EEGO RT: Version: " << version.major << "." << version.minor << "." << version.micro << "." << version.build << "\n";
-
 		// Get the amplifier. If none is connected an exception will be thrown
 		try
 		{
-			m_pAmplifier = fact.getAmplifier();
+			m_pAmplifier = factory().getAmplifier();
 		}
 		catch (const std::exception& ex)
 		{
@@ -204,9 +192,29 @@ OpenViBE::uint64 CDriverEEGO::getBipChannelMask() const
 	OpenViBE::uint64 l_i64MaskBIP(0);
 	if(!CHeaderEEGO::convertMask(m_sBIPMask, l_i64MaskBIP))
 	{
-		m_rDriverContext.getLogManager()<<LogLevel_Warning<<"Error converting mask: l_i64MaskBIP: " << l_i64MaskBIP;
+		m_rDriverContext.getLogManager()<<LogLevel_Warning<<"Error converting mask: l_i64MaskBIP: " << l_i64MaskBIP<<"\n";
 	}
 	return l_i64MaskBIP;
+}
+
+eemagine::sdk::factory& CDriverEEGO::factory()
+{
+	if (m_pFactory == nullptr)
+	{
+		// create the amplifier factory
+		// To initialize we need to locate the path of the DLL
+		// Create path to the dll
+		const OpenViBE::CString l_oLibDir = Directories::getBinDir() + "\\eego-SDK.dll";
+		auto l_sPath = l_oLibDir.toASCIIString();
+		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll path: " << l_sPath << "\n";
+		m_pFactory = std::make_unique<es::factory>(l_sPath);
+
+		// to check what is going on case of error; Log version
+		const auto version = m_pFactory->getVersion();
+		m_rDriverContext.getLogManager() << LogLevel_Info << "EEGO RT: Version: " << version.major << "." << version.minor << "." << version.micro << "." << version.build << "\n";
+	}
+
+	return *m_pFactory;
 }
 
 boolean CDriverEEGO::start(void)
