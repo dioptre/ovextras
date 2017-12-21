@@ -40,6 +40,8 @@ namespace OpenViBEAcquisitionServer
 		void main(void)
 		{
 			OpenViBE::boolean l_bFinished = false;
+			OpenViBE::uint64 l_ui64LastGUIUpdate = 0;
+
 			while (!l_bFinished)
 			{
 				OpenViBE::boolean l_bShouldSleep = false;
@@ -86,11 +88,15 @@ namespace OpenViBEAcquisitionServer
 				}
 
 				if (!l_bFinished)
-				{
+				{	
+					const OpenViBE::uint64 l_ui64TimeNow = System::Time::zgetTime();
+
 					// Update the GUI if the variables have changed. In order to avoid 
 					// gdk_threads_enter()/gdk_threads_exit() calls that may not work on all 
 					// backends (esp. Windows), delegate the work to g_idle_add() functions.
-					// As a result, we need to protect access to the variables that the callbacks use
+					// As a result, we need to protect access to the variables that the callbacks use;
+					// this protection is done inside the callbacks.
+					if(l_ui64TimeNow - l_ui64LastGUIUpdate > (1LL<<32)/2LL )  // update at most every 0.5sec to avoid hammering the gui
 					{
 						if (m_ui32LastStatus != m_ui32Status || l_ui32ClientCount != m_ui32ClientCount)
 						{
@@ -118,7 +124,7 @@ namespace OpenViBEAcquisitionServer
 							 gdk_threads_add_idle(idle_updatedisconnect_cb, (void *)this);
 						}
 
-
+						l_ui64LastGUIUpdate = l_ui64TimeNow;
 					}
 
 					if (l_bShouldSleep)
@@ -257,7 +263,7 @@ namespace OpenViBEAcquisitionServer
 						l_sState = "Receiving and sending...";
 					}
 					char l_sLabel[1024];
-					::sprintf(l_sLabel, "%u client%s connected...", (unsigned int)m_ui32ClientCount, (m_ui32ClientCount!=1 ? "s" : ""));
+					::sprintf(l_sLabel, "%u client%s connected", (unsigned int)m_ui32ClientCount, (m_ui32ClientCount!=1 ? "s" : ""));
 					l_sClientText = l_sLabel;
 					break;
 				case Status_Idle:

@@ -111,7 +111,7 @@ namespace OpenViBEAcquisitionServer
 
 	protected:
 
-		bool CAcquisitionServer::requestClientThreadQuit(CConnectionClientHandlerThread* th);
+		bool requestClientThreadQuit(CConnectionClientHandlerThread* th);
 
 	public:
 
@@ -175,9 +175,9 @@ namespace OpenViBEAcquisitionServer
 		CDriftCorrection m_oDriftCorrection;
 
 		OpenViBE::uint64 m_ui64JitterEstimationCountForDrift;
-		OpenViBE::uint64 m_ui64DriverTimeoutDuration;
-		OpenViBE::uint64 m_ui64StartedDriverSleepDuration;
-		OpenViBE::uint64 m_ui64StoppedDriverSleepDuration;
+		OpenViBE::uint64 m_ui64DriverTimeoutDuration;               // ms after which the driver is considered having time-outed
+		OpenViBE::int64 m_i64StartedDriverSleepDuration;            // ms, <0 == spin, 0 == yield thread, >0 sleep. Used when driver does not return samples.
+		OpenViBE::uint64 m_ui64StoppedDriverSleepDuration;          // ms to sleep when driver is not running
 
 		OpenViBE::uint8* m_pSampleBuffer;
 		OpenViBE::CStimulationSet m_oPendingStimulationSet;

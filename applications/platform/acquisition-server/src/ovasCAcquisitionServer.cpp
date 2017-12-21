@@ -311,7 +311,7 @@ CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
 	this->setImpedanceCheckRequest(m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_CheckImpedance}", false));
 	this->setChannelSelectionRequest(m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_ChannelSelection}", false));
 
-	m_ui64StartedDriverSleepDuration=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_StartedDriverSleepDuration}", 0);
+	m_i64StartedDriverSleepDuration= m_rKernelContext.getConfigurationManager().expandAsInteger("${AcquisitionServer_StartedDriverSleepDuration}", 0);
 	m_ui64StoppedDriverSleepDuration=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_StoppedDriverSleepDuration}", 100);
 	m_ui64DriverTimeoutDuration=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_DriverTimeoutDuration}", 5000);
 
@@ -401,14 +401,12 @@ boolean CAcquisitionServer::loop(void)
 {
 	// m_rKernelContext.getLogManager() << LogLevel_Debug << "idleCB\n";
 
-	list < pair < Socket::IConnection*, SConnectionInfo > >::iterator itConnection;
-
 	// Searches for new connection(s)
 	if(m_pConnectionServer)
 	{
 		DoubleLock lock(&m_oPendingConnectionProtectionMutex, &m_oPendingConnectionExecutionMutex);
 
-		for(itConnection=m_vPendingConnection.begin(); itConnection!=m_vPendingConnection.end(); itConnection++)
+		for(auto itConnection=m_vPendingConnection.begin(); itConnection!=m_vPendingConnection.end(); itConnection++)
 		{
 			m_rKernelContext.getLogManager() << LogLevel_Info << "Received new connection...\n";
 
@@ -474,7 +472,7 @@ boolean CAcquisitionServer::loop(void)
 	}
 
 	// Cleans disconnected client(s)
-	for(itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); )
+	for(auto itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); )
 	{
 		Socket::IConnection* l_pConnection=itConnection->first;
 		if(!l_pConnection->isConnected())
@@ -514,8 +512,26 @@ boolean CAcquisitionServer::loop(void)
 				l_bResult=m_pDriver->loop();
 				if(!m_bGotData)
 				{
-					System::Time::sleep((uint32)m_ui64StartedDriverSleepDuration);
 					l_bTimeout=(System::Time::getTime()>l_ui32TimeBeforeCall+m_ui64DriverTimeoutDuration);
+
+					if(m_i64StartedDriverSleepDuration>0) 
+					{
+						// This may cause jitter due to inaccuracies in sleep duration, but has the
+						// benefit that it frees the CPU core for other tasks
+						System::Time::sleep( static_cast<uint32_t>(m_i64StartedDriverSleepDuration) );
+					} 
+					else if(m_i64StartedDriverSleepDuration==0)
+					{
+						// Generally spins, but gives other threads a chance. Note that there is no guarantee when
+						// the scheduler reschedules this thread.
+						std::this_thread::yield();
+					}
+					else
+					{
+						// < 0 -> NOP, spins, doesn't offer to yield 
+						// n.b. Unless the driver waits for samples (preferably with a hardware event), 
+						// this choice will spin one core fully.
+					}
 				}
 			}
 			if(l_bTimeout)
@@ -565,7 +581,7 @@ boolean CAcquisitionServer::loop(void)
 		}
 
 		// Handle connections
-		for(itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); itConnection++)
+		for(auto itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); itConnection++)
 		{
 			// Socket::IConnection* l_pConnection=itConnection->first;
 			SConnectionInfo& l_rInfo=itConnection->second;
@@ -753,7 +769,7 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Oversampling factor set to " << m_ui64OverSamplingFactor << "\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Sampling frequency set to " << m_ui32SamplingFrequency << "Hz\n";
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "Started driver sleeping duration is " << m_ui64StartedDriverSleepDuration << " milliseconds\n";
+		m_rKernelContext.getLogManager() << LogLevel_Trace << "Started driver sleeping duration is " << m_i64StartedDriverSleepDuration << " milliseconds\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Stopped driver sleeping duration is " << m_ui64StoppedDriverSleepDuration << " milliseconds\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Driver timeout duration set to " << m_ui64DriverTimeoutDuration << " milliseconds\n";
 
