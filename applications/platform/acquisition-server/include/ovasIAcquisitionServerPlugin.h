@@ -8,6 +8,7 @@
 
 #include "boost/variant.hpp"
 #include <map>
+#include <deque>
 
 /**
   * \brief Interface for acquisition server plugins
@@ -40,7 +41,7 @@ namespace OpenViBEAcquisitionServer
 			  * This hook is called before sending the stimulations or signal to the connected clients.
 			  * It gets a reference to the current signal buffer and the stimulation set with its start and end dates.
 			  */
-			virtual void loopHook(std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer, 
+			virtual void loopHook(std::deque < std::vector < OpenViBE::float32 > >& vPendingBuffer, 
 								  OpenViBE::CStimulationSet& oStimulationSet, 
 								  OpenViBE::uint64 start, 
 								  OpenViBE::uint64 end,

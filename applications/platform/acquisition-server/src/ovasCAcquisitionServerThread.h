@@ -55,6 +55,7 @@ namespace OpenViBEAcquisitionServer
 					l_ui32ClientCount = m_rAcquisitionServer.getClientCount();
 					l_f64DriftMs = (m_ui32Status == Status_Started ? m_rAcquisitionServer.m_oDriftCorrection.getDriftMs() : 0);
 
+
 					switch (m_ui32Status)
 					{
 						case Status_Idle:
@@ -112,7 +113,7 @@ namespace OpenViBEAcquisitionServer
 							 gdk_threads_add_idle(idle_updateimpedance_cb, (void *)this);
 						}
 
-						if (std::abs(l_f64DriftMs-m_f64LastDriftMs) > 0.01)
+						if (std::abs(l_f64DriftMs-m_f64LastDriftMs) > 0)
 						{
 							m_f64LastDriftMs = l_f64DriftMs;
 
@@ -263,7 +264,7 @@ namespace OpenViBEAcquisitionServer
 						l_sState = "Receiving and sending...";
 					}
 					char l_sLabel[1024];
-					::sprintf(l_sLabel, "%u client%s connected", (unsigned int)m_ui32ClientCount, (m_ui32ClientCount!=1 ? "s" : ""));
+					::sprintf(l_sLabel, "%u client%s connected", static_cast<unsigned int>(m_ui32ClientCount), (m_ui32ClientCount!=1 ? "s" : ""));
 					l_sClientText = l_sLabel;
 					break;
 				case Status_Idle:
@@ -329,15 +330,6 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBEAcquisitionServer::CAcquisitionServerThread& m_rAcquisitionServerThread;
 	};
-}
-
-static gboolean idle_updateclientcount_cb(void* pUserData)
-{
-	OpenViBEAcquisitionServer::CAcquisitionServerThread* l_pPtr = static_cast<OpenViBEAcquisitionServer::CAcquisitionServerThread*>(pUserData);
-
-	l_pPtr->updateGUIStatus();		// Delegate to GUI status change
-
-	return FALSE; // don't call again
 }
 
 static gboolean idle_updateimpedance_cb(void* pUserData)

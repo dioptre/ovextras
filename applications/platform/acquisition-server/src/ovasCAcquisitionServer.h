@@ -28,8 +28,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint64 m_ui64ConnectionTime;
 		OpenViBE::uint64 m_ui64StimulationTimeOffset;
 		OpenViBE::uint64 m_ui64SignalSampleCountToSkip;
-		CConnectionClientHandlerThread* m_pConnectionClientHandlerThread;
-		std::thread* m_pConnectionClientHandlerStdThread;
+		CConnectionClientHandlerThread* m_pConnectionClientHandlerThread;  // Ptr to the class object that is executed by the client connection handler thread
+		std::thread* m_pConnectionClientHandlerStdThread;                  // The actual thread handle
 		bool m_bChannelUnitsSent; 
 		bool m_bChannelLocalisationSent;
 	} SConnectionInfo;
@@ -147,7 +147,7 @@ namespace OpenViBEAcquisitionServer
 
 		std::list < std::pair < Socket::IConnection*, SConnectionInfo > > m_vConnection;
 		std::list < std::pair < Socket::IConnection*, SConnectionInfo > > m_vPendingConnection;
-		std::vector < std::vector < OpenViBE::float32 > > m_vPendingBuffer;
+		std::deque < std::vector < OpenViBE::float32 > > m_vPendingBuffer;
 		std::vector < OpenViBE::float32 > m_vSwapBuffer;
 		std::vector < OpenViBE::float32 > m_vOverSamplingSwapBuffer;
 		std::vector < OpenViBE::float64 > m_vImpedance;

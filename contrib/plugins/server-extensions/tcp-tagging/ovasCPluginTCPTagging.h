@@ -41,7 +41,7 @@ namespace OpenViBEAcquisitionServer
 				void stopHook();
 
 				// Overrides virtual method loopHook inherited from class IAcquisitionServerPlugin.
-				void loopHook(std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer, 
+				void loopHook(std::deque < std::vector < OpenViBE::float32 > >& vPendingBuffer, 
 					OpenViBE::CStimulationSet& stimulationSet, OpenViBE::uint64 start, OpenViBE::uint64 end, OpenViBE::uint64 sampleTime);
 
 			private:

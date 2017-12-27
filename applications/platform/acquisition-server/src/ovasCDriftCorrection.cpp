@@ -270,7 +270,7 @@ boolean CDriftCorrection::estimateDrift(const uint64 ui64NewSamples)
 }
 
 
-boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSamples, std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer, OpenViBE::CStimulationSet& oPendingStimulationSet, 
+boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSamples, std::deque < std::vector < OpenViBE::float32 > >& vPendingBuffer, OpenViBE::CStimulationSet& oPendingStimulationSet, 
 	const std::vector < OpenViBE::float32 >& vPaddingBuffer)
 {
 	if(!m_bStarted)

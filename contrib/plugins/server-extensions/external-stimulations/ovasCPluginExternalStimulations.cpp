@@ -64,7 +64,7 @@ void CPluginExternalStimulations::startHook(const std::vector<OpenViBE::CString>
 
 }
 
-void CPluginExternalStimulations::loopHook(std::vector < std::vector < OpenViBE::float32 > >& /* vPendingBuffer */, CStimulationSet &stimulationSet, uint64 start, uint64 end, uint64 /* sampleTime */)
+void CPluginExternalStimulations::loopHook(std::deque < std::vector < OpenViBE::float32 > >& /* vPendingBuffer */, CStimulationSet &stimulationSet, uint64 start, uint64 end, uint64 /* sampleTime */)
 {
 	if (m_bIsExternalStimulationsEnabled)
 	{

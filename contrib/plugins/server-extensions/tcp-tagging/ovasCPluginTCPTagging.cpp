@@ -58,7 +58,7 @@ void CPluginTCPTagging::stopHook()
     m_scopedTagStream.reset();
 }
 
-void CPluginTCPTagging::loopHook(std::vector < std::vector < OpenViBE::float32 > >& /*vPendingBuffer*/,
+void CPluginTCPTagging::loopHook(std::deque < std::vector < OpenViBE::float32 > >& /*vPendingBuffer*/,
 	OpenViBE::CStimulationSet& stimulationSet, uint64 start, uint64 end, uint64 sampleTime)
 {
 	// Get POSIX time (number of milliseconds since epoch)

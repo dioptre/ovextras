@@ -305,9 +305,9 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 		::fprintf(l_pFile, "AcquisitionServer_LastConnectionPort = %i\n", this->getTCPPort());
 		::fprintf(l_pFile, "# Last Preferences set in the acquisition server\n");
 		::fprintf(l_pFile, "AcquisitionServer_DriftCorrectionPolicy = %s\n", m_pAcquisitionServer->m_oDriftCorrection.getDriftCorrectionPolicyStr().toASCIIString());
-		::fprintf(l_pFile, "AcquisitionServer_JitterEstimationCountForDrift = %llu\n", m_pAcquisitionServer->m_oDriftCorrection.getJitterEstimationCountForDrift());
-		::fprintf(l_pFile, "AcquisitionServer_DriftToleranceDuration = %llu\n", m_pAcquisitionServer->m_oDriftCorrection.getDriftToleranceDurationMs());
-		::fprintf(l_pFile, "AcquisitionServer_OverSamplingFactor = %llu\n", m_pAcquisitionServer->getOversamplingFactor());
+		::fprintf(l_pFile, "AcquisitionServer_JitterEstimationCountForDrift = %u\n", static_cast<unsigned int>(m_pAcquisitionServer->m_oDriftCorrection.getJitterEstimationCountForDrift()));
+		::fprintf(l_pFile, "AcquisitionServer_DriftToleranceDuration = %u\n", static_cast<unsigned int>(m_pAcquisitionServer->m_oDriftCorrection.getDriftToleranceDurationMs()));
+		::fprintf(l_pFile, "AcquisitionServer_OverSamplingFactor = %u\n", static_cast<unsigned int>(m_pAcquisitionServer->getOversamplingFactor()));
 		::fprintf(l_pFile, "AcquisitionServer_ChannelSelection = %s\n", (m_pAcquisitionServer->isChannelSelectionRequested() ? "True" : "False"));
 		::fprintf(l_pFile, "AcquisitionServer_NaNReplacementPolicy = %s\n", m_pAcquisitionServer->getNaNReplacementPolicyStr().toASCIIString());
 
@@ -339,8 +339,7 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 		::fclose(l_pFile);
 	}
 
-	vector<IDriver*>::iterator itDriver;
-	for(itDriver=m_vDriver.begin(); itDriver!=m_vDriver.end(); itDriver++)
+	for(auto itDriver=m_vDriver.begin(); itDriver!=m_vDriver.end(); itDriver++)
 	{
 		m_rKernelContext.getLogManager() << LogLevel_Debug << "Deleting " << (*itDriver)->getName() << "\n";
 		delete (*itDriver);
@@ -410,18 +409,19 @@ boolean CAcquisitionServerGUI::initialize(void)
 	::GtkTreeStore* l_pDriverTreeStore=gtk_tree_store_new(1, G_TYPE_STRING);
 	gtk_combo_box_set_model(l_pComboBoxDriver, GTK_TREE_MODEL(l_pDriverTreeStore));
 
-	vector<IDriver*>::size_type i;
 	string l_sDefaultDriverName=m_rKernelContext.getConfigurationManager().expand("${AcquisitionServer_DefaultDriver}").toASCIIString();
 	transform(l_sDefaultDriverName.begin(), l_sDefaultDriverName.end(), l_sDefaultDriverName.begin(), ::to_lower<string::value_type>);
-	for(i=0; i<m_vDriver.size(); i++)
+	for(size_t i=0; i<m_vDriver.size(); i++) // n.b. dont use iterator here as we need a numeric index for gtk later anyway
 	{
+		IDriver *l_pDriver = m_vDriver[i];
+
 		::GtkTreeIter l_oIter;
 		gtk_tree_store_append(l_pDriverTreeStore, &l_oIter, NULL);
 
-		string l_sDriverName=m_vDriver[i]->getName();
+		string l_sDriverName=l_pDriver->getName();
 
-		const bool l_bUnstable = m_vDriver[i]->isFlagSet(DriverFlag_IsUnstable);
-		const bool l_bDeprecated = m_vDriver[i]->isFlagSet(DriverFlag_IsDeprecated);
+		const bool l_bUnstable = l_pDriver->isFlagSet(DriverFlag_IsUnstable);
+		const bool l_bDeprecated = l_pDriver->isFlagSet(DriverFlag_IsDeprecated);
 
 		const std::string l_sStringToDisplay =
 			   std::string((l_bUnstable || l_bDeprecated) ? "<span foreground=\"#6f6f6f\">" : "")
@@ -562,19 +562,13 @@ void CAcquisitionServerGUI::setDriftMs(float64 f64DriftMs)
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(gtk_builder_get_object(m_pBuilderInterface, "progressbar_drift_2")), l_f64DriftRatio);
 	}
 
-	if(std::abs(f64DriftMs)<0.01)
-	{
-		// To keep the display steady when fluctuating around 0
-		f64DriftMs = 0;
-	}
-
 	if(l_bDriftWarning)
 	{
-		::sprintf(l_sLabel, "<b>Device drift is too high</b> : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %llu ms) --&gt; early</small>", f64DriftMs, l_ui64DriftToleranceDurationMs);
+		::sprintf(l_sLabel, "<b>Device drift is too high</b> : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %u ms) --&gt; early</small>", f64DriftMs, static_cast<unsigned int>(l_ui64DriftToleranceDurationMs));
 	}
 	else
 	{
-		::sprintf(l_sLabel, "Device drift : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %llu ms) --&gt; early</small>", f64DriftMs, l_ui64DriftToleranceDurationMs);
+		::sprintf(l_sLabel, "Device drift : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %u ms) --&gt; early</small>", f64DriftMs, static_cast<unsigned int>(l_ui64DriftToleranceDurationMs));
 	}
 	::gtk_label_set_markup(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_drift")), l_sLabel);
 }
@@ -660,16 +654,16 @@ void CAcquisitionServerGUI::buttonConnectToggledCB(::GtkToggleButton* pButton)
 		{
 			// Impedance window creation
 			{
-				uint64 l_ui64ColumnCount=m_rKernelContext.getConfigurationManager().expandAsInteger("${AcquisitionServer_CheckImpedance_ColumnCount}", 8);
-				uint32 l_ui32LineCount=(uint32)(m_oHeaderCopy.getChannelCount()/l_ui64ColumnCount);
-				uint32 l_ui32LastCount=(uint32)(m_oHeaderCopy.getChannelCount()%l_ui64ColumnCount);
+				const uint64 l_ui64ColumnCount=m_rKernelContext.getConfigurationManager().expandAsInteger("${AcquisitionServer_CheckImpedance_ColumnCount}", 8);
+				const uint32 l_ui32LineCount=(uint32)(m_oHeaderCopy.getChannelCount()/l_ui64ColumnCount);
+				const uint32 l_ui32LastCount=(uint32)(m_oHeaderCopy.getChannelCount()%l_ui64ColumnCount);
 
 				::GtkWidget* l_pTable=gtk_table_new((gint)(l_ui32LineCount+(l_ui32LastCount?1:0)), (gint)((l_ui32LineCount?l_ui64ColumnCount:l_ui32LastCount)), true);
 
 				for(uint32 i=0; i<m_oHeaderCopy.getChannelCount(); i++)
 				{
-					uint32 j=(uint32)(i/l_ui64ColumnCount);
-					uint32 k=(uint32)(i%l_ui64ColumnCount);
+					const uint32 j=(uint32)(i/l_ui64ColumnCount);
+					const uint32 k=(uint32)(i%l_ui64ColumnCount);
 					::GtkWidget* l_pProgressBar=::gtk_progress_bar_new();
 					::gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(l_pProgressBar), GTK_PROGRESS_BOTTOM_TO_TOP);
 					::gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(l_pProgressBar), 0);
@@ -954,15 +948,14 @@ void CAcquisitionServerGUI::scanPluginSettings()
 
 	m_vPluginProperties.clear();
 
-	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
+	for(auto itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
 	{
 		IAcquisitionServerPlugin* l_pPlugin = dynamic_cast<IAcquisitionServerPlugin*>(*itp);
 
 		SettingsHelper& tmp = l_pPlugin->getSettingsHelper();
 		const std::map<OpenViBE::CString, Property*>& props = tmp.getAllProperties();
 
-		std::map<OpenViBE::CString, Property*>::const_iterator prop_it = props.begin();
-		for(;prop_it!=props.end();++prop_it) {
+		for(auto prop_it = props.begin();prop_it!=props.end();++prop_it) {
 			m_vPluginProperties.push_back( PropertyAndWidget(prop_it->second, NULL) );
 		}
 
@@ -974,7 +967,7 @@ void CAcquisitionServerGUI::savePluginSettings()
 {
 	vector<IAcquisitionServerPlugin*> l_vPlugins = m_pAcquisitionServer->getPlugins();
 
-	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
+	for(auto itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
 	{
 		IAcquisitionServerPlugin* l_pPlugin = dynamic_cast<IAcquisitionServerPlugin*>(*itp);
 

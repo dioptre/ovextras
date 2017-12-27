@@ -114,7 +114,7 @@ void CPluginLSLOutput::startHook(const std::vector<OpenViBE::CString>& vSelected
 
 }
 
-void CPluginLSLOutput::loopHook(std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffer, CStimulationSet &stimulationSet, uint64_t start, uint64_t end, uint64_t /* sampleTime */)
+void CPluginLSLOutput::loopHook(std::deque < std::vector < OpenViBE::float32 > >& vPendingBuffer, CStimulationSet &stimulationSet, uint64_t start, uint64_t end, uint64_t /* sampleTime */)
 {
 	if (m_bIsLSLOutputEnabled)
 	{
