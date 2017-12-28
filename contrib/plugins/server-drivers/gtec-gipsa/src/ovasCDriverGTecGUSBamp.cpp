@@ -249,6 +249,11 @@ OpenViBE::boolean CDriverGTecGUSBamp::initialize(
 	// Take into account user might (or might not) want event channels + add amp name if requested
 	remapChannelNames();
 
+	if(m_oHeader.getSamplingFrequency()>4800)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Warning << "Sampling rates >4800 may need specific steps to work properly. See gusbamp manuals provided by gtec.\n";
+	}
+
 	return true;
 }
 
@@ -400,6 +405,7 @@ OpenViBE::boolean CDriverGTecGUSBamp::start(void)
 
 	m_ui32TotalHardwareStimulations = 0;
 	m_ui32TotalDriverChunksLost = 0;
+	m_ui32TotalDriverTimeouts = 0;
 	m_ui32TotalRingBufferOverruns = 0;
 	m_ui32TotalDataUnavailable = 0;
 
@@ -559,8 +565,6 @@ OpenViBE::boolean CDriverGTecGUSBamp::loop(void)
 //This function is as close to the original as possible: DoAcquisition in gUSBampSyncDemo.cpp
 OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 {		
-	DWORD numBytesReceived = 0;
-
 	//we can not make these checks even if they look good
 	//if(!m_rDriverContext.isConnected()) return false;
 	//if(!m_rDriverContext.isStarted()) return false;
@@ -617,8 +621,9 @@ OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 		{
 			try
 			{
-				OpenViBE::boolean m_flagChunkLostDetected=false;
-				OpenViBE::boolean m_flagChunkTimeOutDetected=false;
+				DWORD numBytesReceived = 0;
+				OpenViBE::boolean flagChunkLostDetected = false;
+				OpenViBE::boolean flagChunkTimeOutDetected = false;
 
 				//acquire data from the amplifier(s)
 				for (uint32 deviceIndex = 0; deviceIndex < NumDevices(); deviceIndex++)
@@ -629,8 +634,9 @@ OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 					if (WaitForSingleObject(m_overlapped[deviceIndex][m_ui32CurrentQueueIndex].hEvent, 1000) == WAIT_TIMEOUT)
 					{
 						//cout << "Error on data transfer: timeout occurred." << "\n";
-						m_flagChunkTimeOutDetected = true;
-					}
+						m_ui32TotalDriverTimeouts++;
+						flagChunkTimeOutDetected = true;
+					}	
 
 					//get number of received bytes...
 					GetOverlappedResult(hDevice, &m_overlapped[deviceIndex][m_ui32CurrentQueueIndex], &numBytesReceived, false);
@@ -639,12 +645,12 @@ OpenViBE::boolean CDriverGTecGUSBamp::acquire(void)
 					if (numBytesReceived != bufferSizeBytes)
 					{
 						m_ui32TotalDriverChunksLost++;
-						m_flagChunkLostDetected = true;
+						flagChunkLostDetected = true;
 					}
 				}
 
 				//this line is commented on purpose
-				//if (m_flagChunkTimeOutDetected==false && m_flagChunkLostDetected==false)
+				//if (flagChunkTimeOutDetected==false && flagChunkLostDetected==false)
 
 				//store to ring buffer
 				{
@@ -763,6 +769,15 @@ OpenViBE::boolean CDriverGTecGUSBamp::stop(void)
 	m_rDriverContext.getLogManager() << LogLevel_Debug << "Total chunks lost: " << m_ui32TotalDriverChunksLost << "\n";
 	m_rDriverContext.getLogManager() << LogLevel_Debug << "Total internal ring buffer overruns: " << m_ui32TotalRingBufferOverruns << "\n";
 	m_rDriverContext.getLogManager() << LogLevel_Debug << "Total times GTEC ring data buffer was empty: " << 	m_ui32TotalDataUnavailable << "\n";
+
+	if(m_ui32TotalDriverChunksLost>0)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Warning << "The driver lost " << m_ui32TotalDriverChunksLost << " chunks during the run.\n";
+	}
+	if(m_ui32TotalDriverTimeouts>0)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Warning << "The driver had " << m_ui32TotalDriverTimeouts << " timeout(s) during the run.\n";	
+	}
 
 	return true;
 }
