@@ -141,11 +141,19 @@ void CDriftCorrection::printStats(void) const
 	const float64 l_f64DriftRatioTooFastMax = getDriftTooFastMax()/static_cast<float64>(l_ui64DriftToleranceDurationMs);
 	const float64 l_f64DriftRatioTooSlowMax = getDriftTooSlowMax()/static_cast<float64>(l_ui64DriftToleranceDurationMs);
 
+	const float64 l_f64EstimatedSamplingRate = static_cast<float64>(m_ui64ReceivedSampleCount) / l_f64ElapsedTime;
+	const float64 l_f64DeviationPercent =  100.0*(l_f64EstimatedSamplingRate / static_cast<float64>(m_ui32SamplingFrequency));
+
+	
 	if( l_f64DriftRatioTooFastMax > 1.0 || l_f64DriftRatioTooSlowMax > 1.0 || std::abs(l_f64DriftRatio) > 1.0 )
 	{
 		// Drift tolerance was exceeded, print some stats
 
-		m_rKernelContext.getLogManager() << LogLevel_Info << "Stats after " << l_f64ElapsedTime << " seconds of " << m_ui32SamplingFrequency << "hz sampling,\n";
+		m_rKernelContext.getLogManager() << LogLevel_Info << "Stats after " << l_f64ElapsedTime << " second session of " << m_ui32SamplingFrequency << "hz sampling (declared rate),\n";
+
+		m_rKernelContext.getLogManager() << LogLevel_Info << "  Estimate : Driver samples at " << std::round(l_f64EstimatedSamplingRate*10.0)/10.0
+			<< "hz (" << std::round(l_f64DeviationPercent*10.0)/10.0 << "% of declared)\n";
+
 		m_rKernelContext.getLogManager() << LogLevel_Info << "  Received : " << m_ui64ReceivedSampleCount << " samples\n";
 		m_rKernelContext.getLogManager() << LogLevel_Info << "  Expected : " << l_ui64TheoreticalSampleCount << " samples\n";
 		m_rKernelContext.getLogManager() << LogLevel_Info << "  Returned : " << m_ui64CorrectedSampleCount << " samples " 
@@ -163,14 +171,16 @@ void CDriftCorrection::printStats(void) const
 			<< "  Fast peak  : " << m_f64DriftEstimateTooFastMax << " samples (" << getDriftTooFastMax() << "ms early, " << 100*l_f64DriftRatioTooFastMax << "% of tol.)\n";
 
 		m_rKernelContext.getLogManager() << (std::abs(l_f64DriftRatio) > 1.0 ? LogLevel_Warning : LogLevel_Info) 
-			<< "  Last estim : " << m_f64DriftEstimate << " samples (" << getDriftMs() << "ms, " << 100*l_f64DriftRatio << "% of tol.)"
+			<< "  Last estim : " << m_f64DriftEstimate << " samples (" << getDriftMs() << "ms, " << 100*l_f64DriftRatio << "% of tol., "
+			<< std::round(100.0* (getDriftMs()/1000.0) / l_f64ElapsedTime * 10.0) / 10.0 << "% of session length)"
 			<< (m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled ? "" : ", after corr.")
 			<< "\n";
 
 		const int64 l_i64RemainingDriftCount = (static_cast<int64>(m_ui64CorrectedSampleCount) - static_cast<int64>(l_ui64TheoreticalSampleCount));
 		const float64 l_f64RemainingDriftMs = 1000.0 * l_i64RemainingDriftCount / static_cast<float64>(m_ui32SamplingFrequency);
-		m_rKernelContext.getLogManager() << (std::abs(l_f64RemainingDriftMs) > l_ui64DriftToleranceDurationMs ? LogLevel_ImportantWarning : LogLevel_Info)
-			<< "  Remaining  : " << l_i64RemainingDriftCount << " samples (" << l_f64RemainingDriftMs << "ms, " << 100*l_f64RemainingDriftMs/l_ui64DriftToleranceDurationMs << "% of tol.)"
+		m_rKernelContext.getLogManager() << (std::abs(l_f64RemainingDriftMs) > l_ui64DriftToleranceDurationMs ? LogLevel_Warning : LogLevel_Info)
+			<< "  Remaining  : " << l_i64RemainingDriftCount << " samples (" << l_f64RemainingDriftMs << "ms, " << 100*l_f64RemainingDriftMs/l_ui64DriftToleranceDurationMs << "% of tol., "
+			<< std::round(100.0* (l_f64RemainingDriftMs/1000.0) / l_f64ElapsedTime * 10.0) / 10.0 << "% of session length)"
 			<< (m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled ? "" : ", after corr.")
 			<< "\n";
 
