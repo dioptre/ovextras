@@ -11,7 +11,7 @@ ELSE()
 	SET(OS_FLAGS "")
 ENDIF()
 
-ADD_TEST(clean_${TEST_NAME} "rm" "-f" "${TEST_NAME}.csv")
+ADD_TEST(clean_${TEST_NAME} "${CMAKE_COMMAND}" "-E" "remove" "-f" "${TEST_NAME}.csv")
 ADD_TEST(run_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible" "--play" ${SCENARIO_TO_TEST})
 ADD_TEST(compare_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_thresholdDataComparison.${EXT}" ${OS_FLAGS} "${TEST_NAME}.csv" "${TEST_NAME}.ref.csv" 0.001)
 

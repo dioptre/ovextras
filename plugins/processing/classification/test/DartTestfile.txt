@@ -18,7 +18,7 @@ FOREACH(TEST_NAME ${TEST_SCENARIOS})
 
 	SET(SCENARIO_TO_TEST "${TEST_NAME}.xml")
 
-	ADD_TEST(clean_Classification_${TEST_NAME} rm -f ${OV_LOGFILE} classifiers/multiclass.xml)
+	ADD_TEST(clean_Classification_${TEST_NAME} "${CMAKE_COMMAND}" "-E" "remove" "-f" ${OV_LOGFILE} classifiers/multiclass.xml)
 	ADD_TEST(run_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" --define Plugin_Classification_RandomizeKFoldTestData true "--play-fast" ${SCENARIO_TO_TEST})
 	ADD_TEST(compare_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${OV_LOGFILE}")
 	ADD_TEST(run_Classification_${TEST_NAME}_ProcessorBox "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" --define Plugin_Classification_RandomizeKFoldTestData true "--play-fast" "ProcessorBox-Test.xml")
@@ -46,7 +46,7 @@ FOREACH(TEST_NAME ${TEST_SCENARIOS})
 
 	SET(SCENARIO_TO_TEST "shrinkageLDA/${TEST_NAME}.xml")
 
-	ADD_TEST(clean_Classification_${TEST_NAME} rm -f ${OV_LOGFILE})
+	ADD_TEST(clean_Classification_${TEST_NAME} "${CMAKE_COMMAND}" "-E" "remove" "-f" ${OV_LOGFILE})
 	ADD_TEST(run_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" --define Plugin_Classification_RandomizeKFoldTestData true "--play-fast" ${SCENARIO_TO_TEST})
 	ADD_TEST(compare_Classification_${TEST_NAME} "$ENV{OV_BINARY_PATH}/test_accuracy.${EXT}" "${OS_FLAGS}" "${OV_LOGFILE}" "${TEST_THRESHOLD}")
 	

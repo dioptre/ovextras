@@ -1,3 +1,4 @@
+start
 TestRunCommand Params: 1="has space" 2= 3= 4=
 TestRunCommand Params: 1=nospace 2= 3= 4=
 TestRunCommand Params: 1="has space" 2=two 3= 4=

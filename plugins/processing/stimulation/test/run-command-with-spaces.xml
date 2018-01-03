@@ -25,7 +25,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Command 1</Name>
 					<DefaultValue></DefaultValue>
-					<Value>echo start</Value>
+					<Value>echo start > ${OUTFILE}</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -39,7 +39,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Command 2</Name>
 					<DefaultValue></DefaultValue>
-					<Value>"${Player_ScenarioDirectory}/space test/echoparams.bat" "has space"</Value>
+					<Value>"${Player_ScenarioDirectory}/space test/echoparams.${EXT}" "has space" >> ${OUTFILE}</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -53,7 +53,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Command 3</Name>
 					<DefaultValue></DefaultValue>
-					<Value>"${Player_ScenarioDirectory}/space test/echoparams.bat" nospace</Value>
+					<Value>"${Player_ScenarioDirectory}/space test/echoparams.${EXT}" nospace >> ${OUTFILE}</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -67,7 +67,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Command 4</Name>
 					<DefaultValue></DefaultValue>
-					<Value>"${Player_ScenarioDirectory}/space test/echoparams.bat" "has space" two</Value>
+					<Value>"${Player_ScenarioDirectory}/space test/echoparams.${EXT}" "has space" two >> ${OUTFILE}</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -81,7 +81,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Command 5</Name>
 					<DefaultValue></DefaultValue>
-					<Value>"${Player_ScenarioDirectory}/space test/echoparams.bat"</Value>
+					<Value>"${Player_ScenarioDirectory}/space test/echoparams.${EXT}" >> ${OUTFILE}</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
@@ -95,7 +95,7 @@
 					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
 					<Name>Command 6</Name>
 					<DefaultValue></DefaultValue>
-					<Value>"${Player_ScenarioDirectory}/space test/echoparams.bat" arg1 arg2 arg3</Value>
+					<Value>"${Player_ScenarioDirectory}/space test/echoparams.${EXT}" arg1 arg2 arg3 >> ${OUTFILE}</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>

@@ -10,7 +10,7 @@ ELSE(WIN32)
 	SET(OS_FLAGS "")
 ENDIF(WIN32)
 
-ADD_TEST(clean_Evaluation_kappa rm -f ${OV_LOGFILE})
+ADD_TEST(clean_Evaluation_kappa "${CMAKE_COMMAND}" "-E" "remove" "-f" ${OV_LOGFILE})
 ADD_TEST(run_Evaluation_kappa "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" --define Plugin_Classification_RandomizeKFoldTestData true "--play-fast" Test-kappa.xml)
 ADD_TEST(compare_Evaluation_kappa "$ENV{OV_BINARY_PATH}/test_evaluation.${EXT}" "${OS_FLAGS}" "${OV_LOGFILE}")
 	
@@ -25,8 +25,8 @@ SET_TESTS_PROPERTIES(compare_Evaluation_kappa PROPERTIES ATTACHED_FILES_ON_FAIL 
 
 
 ADD_TEST(run_Evaluation_statistic_generator "$ENV{OV_BINARY_PATH}/openvibe-designer.${EXT}" ${OS_FLAGS} "--invisible"  "--no-session-management" --define Plugin_Classification_RandomizeKFoldTestData true "--play-fast" Test-StatisticGenerator.xml)
-ADD_TEST(compare_Evaluation_statistic_generator "diff" "--ignore-all-space" "stat.xml" "data/Statistic_comparison.xml")
-ADD_TEST(clean_Evaluation_statistic_generator rm -f stat.xml)
+ADD_TEST(compare_Evaluation_statistic_generator "git" "diff" "--no-index" "--ignore-space-change" "stat.xml" "data/Statistic_comparison.xml")
+ADD_TEST(clean_Evaluation_statistic_generator "${CMAKE_COMMAND}" "-E" "remove" "-f" stat.xml)
 
 
 SET_TESTS_PROPERTIES(compare_Evaluation_statistic_generator PROPERTIES DEPENDS run_Evaluation_statistic_generator)
@@ -37,7 +37,7 @@ SET_TESTS_PROPERTIES(compare_Evaluation_statistic_generator PROPERTIES ATTACHED_
 #FIND_PROGRAM(SIKULI NAMES sikuli-ide)
 #IF(SIKULI)
 #	IF(UNIX)
-#		ADD_TEST(sikuli_clean_Evaluation_ROC rm -f ${OV_LOGFILE} screenshot.png)
+#		ADD_TEST(sikuli_clean_Evaluation_ROC "${CMAKE_COMMAND}" "-E" "remove" "-f" ${OV_LOGFILE} screenshot.png)
 #		ADD_TEST(sikuli_run_Evaluation_ROC "${SIKULI}" -t testROCCurve.UNIX.sikuli)
 #		
 #		SET_TESTS_PROPERTIES(sikuli_run_Evaluation_ROC PROPERTIES DEPENDS sikuli_clean_Evaluation_ROC)
