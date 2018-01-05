@@ -26,8 +26,6 @@ namespace OpenViBEAcquisitionServer
 	typedef struct
 	{
 		OpenViBE::uint64 m_ui64ConnectionTime;
-		OpenViBE::uint64 m_ui64StimulationTimeOffset;
-		OpenViBE::uint64 m_ui64SignalSampleCountToSkip;
 		CConnectionClientHandlerThread* m_pConnectionClientHandlerThread;  // Ptr to the class object that is executed by the client connection handler thread
 		std::thread* m_pConnectionClientHandlerStdThread;                  // The actual thread handle
 		bool m_bChannelUnitsSent; 
@@ -167,10 +165,15 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 m_ui32ChannelCount;
 		OpenViBE::uint32 m_ui32SamplingFrequency;
 		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
+
+		// Samples received from the device
 		OpenViBE::uint64 m_ui64SampleCount;
 		OpenViBE::uint64 m_ui64LastSampleCount;
 		OpenViBE::uint64 m_ui64StartTime;
 		OpenViBE::uint64 m_ui64LastDeliveryTime;
+		
+		// Samples sent to a client
+		OpenViBE::uint64 m_ui64SentSampleCount;
 
 		CDriftCorrection m_oDriftCorrection;
 

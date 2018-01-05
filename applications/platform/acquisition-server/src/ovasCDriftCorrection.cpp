@@ -313,6 +313,7 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 
 	if(i64Correction > 0)
 	{
+		// We need to add samples
 		for(int64 i=0; i<i64Correction; i++)
 		{
 			vPendingBuffer.push_back(vPaddingBuffer);
@@ -331,6 +332,7 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 	}
 	else if(i64Correction < 0)
 	{
+		// We need to remove samples
 		const uint64 l_ui64SamplesToRemove=std::min<uint64>( uint64(-i64Correction), uint64(vPendingBuffer.size()) );
 
 		vPendingBuffer.erase(vPendingBuffer.begin()+vPendingBuffer.size()-(int)l_ui64SamplesToRemove, vPendingBuffer.begin()+vPendingBuffer.size());

@@ -279,6 +279,7 @@ CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
 	,m_bStarted(false)
 	,m_ui64StartTime(0)
 	,m_ui64LastDeliveryTime(0)
+	,m_ui64SentSampleCount(0)
 	,m_oDriftCorrection(rKernelContext)
 {
 	m_pDriverContext=new CDriverContext(rKernelContext, *this);
@@ -414,30 +415,12 @@ boolean CAcquisitionServer::loop(void)
 				// When a new connection is found and the
 				// acq server is started, send the header
 
-				// Computes inner data to skip
-				int64 l_i64SignedTheoreticalSampleCountToSkip=0;
-				if(m_oDriftCorrection.isActive())
-				{
-					l_i64SignedTheoreticalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64StartTime)*m_ui32SamplingFrequency)>>32)-m_ui64SampleCount+m_vPendingBuffer.size();
-				}
-				else
-				{
-					l_i64SignedTheoreticalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64LastDeliveryTime)*m_ui32SamplingFrequency)>>32)+m_vPendingBuffer.size();
-				}
-
-				uint64 l_ui64TheoreticalSampleCountToSkip=(l_i64SignedTheoreticalSampleCountToSkip<0?0:uint64(l_i64SignedTheoreticalSampleCountToSkip));
-
-				m_rKernelContext.getLogManager() << LogLevel_Trace << "Sample count offset at connection : " << l_ui64TheoreticalSampleCountToSkip << "\n";
-
 				SConnectionInfo l_oInfo;
-				l_oInfo.m_ui64ConnectionTime=itConnection->second.m_ui64ConnectionTime;
-				l_oInfo.m_ui64StimulationTimeOffset=ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64TheoreticalSampleCountToSkip+m_ui64SampleCount-m_vPendingBuffer.size());
-				l_oInfo.m_ui64SignalSampleCountToSkip=l_ui64TheoreticalSampleCountToSkip;
+				l_oInfo.m_ui64ConnectionTime=0;
 				l_oInfo.m_pConnectionClientHandlerThread=new CConnectionClientHandlerThread(*this, *l_pConnection);
 				l_oInfo.m_pConnectionClientHandlerStdThread=new std::thread(std::bind(&start_connection_client_handler_thread, l_oInfo.m_pConnectionClientHandlerThread));
 				l_oInfo.m_bChannelLocalisationSent = false;
 				l_oInfo.m_bChannelUnitsSent = false;
-				//applyPriority(l_oInfo.m_pConnectionClientHandlerStdThread,15);
 
 				m_vConnection.push_back(pair < Socket::IConnection*, SConnectionInfo >(l_pConnection, l_oInfo));
 
@@ -558,113 +541,119 @@ boolean CAcquisitionServer::loop(void)
 		}
 	}
 
-	// Eventually builds up buffer and
-	// sends data to connected client(s)
-	while(m_vPendingBuffer.size() >= m_ui32SampleCountPerSentBlock*2)
+	while(m_vPendingBuffer.size() >= m_ui32SampleCountPerSentBlock)
 	{
-		const int64 p = m_ui64SampleCount-m_vPendingBuffer.size();
-		if (p < 0)
-			m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << " (case A)\n";
+		// We only send to clients when we have accumulated a full buffer
 
-		const uint64 l_ui64BufferStartSamples = m_ui64SampleCount-m_vPendingBuffer.size();
-		const uint64 l_ui64BufferEndSamples   = m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock;
-		const uint64 l_ui64BufferStartTime    = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferStartSamples);
-		const uint64 l_ui64BufferEndTime      = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferEndSamples);
-		const uint64 l_ui64SampleTime         = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount);
+		// Queues a single buffer to connected client(s)
+		// n.b. here we use arithmetic based on buffer duration so that we are in perfect agreement with
+		// Acquisition Client box that sets the chunk starts and ends by steps of buffer duration.
+		const uint64 l_ui64BufferDuration     = ip_ui64BufferDuration;
+		const uint64 l_ui64SentBufferCount    = m_ui64SentSampleCount / m_ui32SampleCountPerSentBlock;
+		const uint64 l_ui64BufferStartTime    = l_ui64SentBufferCount * l_ui64BufferDuration;
+		const uint64 l_ui64BufferEndTime      = l_ui64BufferStartTime + l_ui64BufferDuration;
+
+		// Note: if pendingbuffer has multiple chunks worth of data, the lastSampleTime will be the same for 
+		// multiple calls of loopHook().
+		const uint64 l_ui64LastSampleTime     = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount); // theoretical time of the last sample from the device
 
 		// Pass the stimuli and buffer to all plugins; note that they may modify them
 		for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
 		{
-			(*itp)->loopHook(m_vPendingBuffer, m_oPendingStimulationSet, l_ui64BufferStartTime, l_ui64BufferEndTime, l_ui64SampleTime);
+			// n.b. this potentially passes in more than 1 chunk; the receiver should nevertheless just act on the first one
+			(*itp)->loopHook(m_vPendingBuffer, m_oPendingStimulationSet, l_ui64BufferStartTime, l_ui64BufferEndTime, l_ui64LastSampleTime);
 		}
 
-		// Handle connections
+		// Prepare the buffer for all clients
+		for(uint32 j=0; j<m_ui32ChannelCount; j++)
+		{
+			for(uint32 i=0; i<m_ui32SampleCountPerSentBlock; i++)
+			{
+				ip_pSignalMatrix->getBuffer()[j*m_ui32SampleCountPerSentBlock+i]=m_vPendingBuffer[i][j];
+			}
+		}
+
+		// Verify stimulation dates
+		for(size_t k = 0 ; k<m_oPendingStimulationSet.getStimulationCount();k++)
+		{
+			if(m_oPendingStimulationSet.getStimulationDate(k)<l_ui64BufferStartTime)
+			{
+				m_rKernelContext.getLogManager() << LogLevel_Warning << "Stimulation " << m_oPendingStimulationSet.getStimulationIdentifier(k)
+					<< " at " << ITimeArithmetics::timeToSeconds(m_oPendingStimulationSet.getStimulationDate(k)) << "s is too old for buffer at ["
+					<<  ITimeArithmetics::timeToSeconds(l_ui64BufferStartTime) << "," << ITimeArithmetics::timeToSeconds(l_ui64BufferEndTime) << "]s\n";
+			}	
+		}
+
+		// Pass the buffer to each current connection 
 		for(auto itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); itConnection++)
 		{
-			// Socket::IConnection* l_pConnection=itConnection->first;
 			SConnectionInfo& l_rInfo=itConnection->second;
 
-			if(l_rInfo.m_ui64SignalSampleCountToSkip<m_ui32SampleCountPerSentBlock)
+			if(l_rInfo.m_ui64ConnectionTime==0)
 			{
-#if DEBUG_STREAM
-				m_rKernelContext.getLogManager() << LogLevel_Debug << "Creating buffer for connection " << uint64(l_pConnection) << "\n";
-#endif
-
-				// Signal buffer
-				for(uint32 j=0; j<m_ui32ChannelCount; j++)
-				{
-					for(uint32 i=0; i<m_ui32SampleCountPerSentBlock; i++)
-					{
-						ip_pSignalMatrix->getBuffer()[j*m_ui32SampleCountPerSentBlock+i]=m_vPendingBuffer[(int)(i+l_rInfo.m_ui64SignalSampleCountToSkip)][j];
-					}
-				}
-
-				//				int l = l_oStimulationSet.getStimulationCount();
-
-				const int64 p = l_ui64BufferStartSamples+l_rInfo.m_ui64SignalSampleCountToSkip;
-				if (p < 0)
-					m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << " (case B)\n";
-
-				const uint64 l_ui64ConnBlockStartTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferStartSamples + l_rInfo.m_ui64SignalSampleCountToSkip);
-				const uint64 l_ui64ConnBlockEndTime   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferEndSamples   + l_rInfo.m_ui64SignalSampleCountToSkip);
-
-				//m_rKernelContext.getLogManager() << LogLevel_Info << "start: " << time64(start) << "end: " << time64(end) << "\n";
-
-				// Stimulation buffer
-				CStimulationSet l_oStimulationSet;
-
-				// Take the stimuli range valid for the connection
-				OpenViBEToolkit::Tools::StimulationSet::appendRange(
-							l_oStimulationSet,
-							m_oPendingStimulationSet,
-							l_ui64ConnBlockStartTime,l_ui64ConnBlockEndTime);
-
-				OpenViBEToolkit::Tools::StimulationSet::copy(*ip_pStimulationSet, l_oStimulationSet, -int64(l_rInfo.m_ui64StimulationTimeOffset));
-
-				// Send a chunk of channel units? Note that we'll always send the units header.
-				if(!l_rInfo.m_bChannelUnitsSent)
-				{
-					// If default values in channel units, don't bother sending unit data chunk
-					ip_bEncodeChannelUnitData = m_pHeaderCopy->isChannelUnitSet();
-					// std::cout << "Set " <<  ip_pChannelUnits->getBufferElementCount()  << "\n";
-				}
-
-				op_pEncodedMemoryBuffer->setSize(0, true);
-				m_pStreamEncoder->process(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputTriggerId_EncodeBuffer);
-
-				if(!l_rInfo.m_bChannelUnitsSent)
-				{
-					// Do not send again
-					l_rInfo.m_bChannelUnitsSent = true;
-					ip_bEncodeChannelUnitData = false;
-				}
-
-#if 0
-				uint64 l_ui64MemoryBufferSize=op_pEncodedMemoryBuffer->getSize();
-				l_pConnection->sendBufferBlocking(&l_ui64MemoryBufferSize, sizeof(l_ui64MemoryBufferSize));
-				l_pConnection->sendBufferBlocking(op_pEncodedMemoryBuffer->getDirectPointer(), (uint32)op_pEncodedMemoryBuffer->getSize());
-#else
-				l_rInfo.m_pConnectionClientHandlerThread->scheduleBuffer(*op_pEncodedMemoryBuffer);
-#endif
+				l_rInfo.m_ui64ConnectionTime = l_ui64BufferStartTime;
 			}
-			else
+
+	#if DEBUG_STREAM
+			m_rKernelContext.getLogManager() << LogLevel_Debug << "Creating buffer for connection " << uint64(l_pConnection) << "\n";
+	#endif
+
+			// Stimulation buffer
+			IStimulationSet& l_oStimulationSet = *ip_pStimulationSet;
+			l_oStimulationSet.clear();
+
+			// Take the stimuli range valid for the buffer and adjust wrt connection time (stamp at connection = stamp at time 0 for the client)
+			for(size_t k=0;k<m_oPendingStimulationSet.getStimulationCount();k++)
 			{
-				// Here sample count to skip >= block size. n.b. This is the reason why the pending buffer size needs to be 2x, 
-				// as the skip can be up to 1x bufferSize and after that we need a full buffer to send. Note that by this construction
-				// the count to skip can never underflow but remains >= 0 (the other if branch doesnt decrement). 
-				l_rInfo.m_ui64SignalSampleCountToSkip-=m_ui32SampleCountPerSentBlock;
+				const uint64 lDate = m_oPendingStimulationSet.getStimulationDate(k); // this date is wrt the whole acquisition time in the server
+				if(lDate <= l_ui64BufferEndTime)
+				{
+					// Note that we push a pending stim out even if it is old. This is because it likely signifies and error somewhere,
+					// and it is better to expose the issue to the designer side than drop it.
+
+					// The new date is wrt the specific connection time of the client (i.e. the chunk times on Designer side)
+					const uint64 lNewDate = ( (lDate > l_rInfo.m_ui64ConnectionTime) ? (lDate - l_rInfo.m_ui64ConnectionTime) : 0 );
+					
+					l_oStimulationSet.appendStimulation(m_oPendingStimulationSet.getStimulationIdentifier(k), lNewDate, m_oPendingStimulationSet.getStimulationDuration(k));
+
+					m_rKernelContext.getLogManager() << LogLevel_Info << "map: " << m_oPendingStimulationSet.getStimulationIdentifier(k) << " from " << ITimeArithmetics::timeToSeconds(lDate) << " to " << ITimeArithmetics::timeToSeconds(lNewDate) << "\n";
+	//				m_rKernelContext.getLogManager() << LogLevel_Info << "map: " << m_oPendingStimulationSet.getStimulationIdentifier(k) << " from " << lDate << " to " << lNewDate << "\n";
+				}
 			}
+
+			// Send a chunk of channel units? Note that we'll always send the units header.
+			if(!l_rInfo.m_bChannelUnitsSent)
+			{
+				// If default values in channel units, don't bother sending unit data chunk
+				ip_bEncodeChannelUnitData = m_pHeaderCopy->isChannelUnitSet();
+				// std::cout << "Set " <<  ip_pChannelUnits->getBufferElementCount()  << "\n";
+			}
+
+			op_pEncodedMemoryBuffer->setSize(0, true);
+			m_pStreamEncoder->process(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputTriggerId_EncodeBuffer);
+
+			if(!l_rInfo.m_bChannelUnitsSent)
+			{
+				// Do not send again
+				l_rInfo.m_bChannelUnitsSent = true;
+				ip_bEncodeChannelUnitData = false;
+			}
+
+			l_rInfo.m_pConnectionClientHandlerThread->scheduleBuffer(*op_pEncodedMemoryBuffer);
 		}
 
-		// Clears pending stimulations
+		// Clear stimulations that are now in the past
 		OpenViBEToolkit::Tools::StimulationSet::removeRange(
 					m_oPendingStimulationSet,
-					l_ui64BufferStartTime,
+					0,
 					l_ui64BufferEndTime
 					);
 
-		// Clears pending signal
+		// Clear the buffer from the samples we sent
 		m_vPendingBuffer.erase(m_vPendingBuffer.begin(), m_vPendingBuffer.begin()+m_ui32SampleCountPerSentBlock);
+
+		m_ui64SentSampleCount += m_ui32SampleCountPerSentBlock;
+
 	}
 
 	return true;
@@ -867,6 +856,8 @@ boolean CAcquisitionServer::start(void)
 
 	m_ui64SampleCount=0;
 	m_ui64LastSampleCount=0;
+
+	m_ui64SentSampleCount=0;
 
 	// Starts driver
 	if(!m_pDriver->start())
@@ -1194,8 +1185,6 @@ boolean CAcquisitionServer::acceptNewConnection(Socket::IConnection* pConnection
 
 	SConnectionInfo l_oInfo;
 	l_oInfo.m_ui64ConnectionTime=l_ui64Time;
-	l_oInfo.m_ui64StimulationTimeOffset=0; // not used
-	l_oInfo.m_ui64SignalSampleCountToSkip=0; // not used
 	l_oInfo.m_pConnectionClientHandlerThread=NULL; // not used
 	l_oInfo.m_pConnectionClientHandlerStdThread=NULL; // not used
 	l_oInfo.m_bChannelLocalisationSent = false;
