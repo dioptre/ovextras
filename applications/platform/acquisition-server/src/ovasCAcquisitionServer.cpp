@@ -214,6 +214,8 @@ namespace OpenViBEAcquisitionServer
 
 			}
 
+			oLock.lock();
+
 			// We're done, clean any possible pending buffers
 			for(auto it = m_vClientPendingBuffer.begin(); it!=m_vClientPendingBuffer.end(); it++)
 			{
@@ -221,19 +223,23 @@ namespace OpenViBEAcquisitionServer
 			}
 			m_vClientPendingBuffer.clear();
 
+			oLock.unlock();
+
 			// The thread will exit here and can be joined
 		}
 
 		void scheduleBuffer(const IMemoryBuffer& rMemoryBuffer)
 		{
-			CMemoryBuffer* l_pMemoryBuffer=new CMemoryBuffer(rMemoryBuffer);
-
 			{
 				std::lock_guard<std::mutex> oLock(m_oClientThreadMutex);
-
-				m_vClientPendingBuffer.push_back(l_pMemoryBuffer);
+				if(!m_bPleaseQuit)
+				{
+					CMemoryBuffer* l_pMemoryBuffer=new CMemoryBuffer(rMemoryBuffer);
+					m_vClientPendingBuffer.push_back(l_pMemoryBuffer);
+				}
 			}
 
+			// No big harm notifying in any case, though if in 'quit' state, the quit request has already notified
 			m_oPendingBufferCondition.notify_one();
 		}
 
