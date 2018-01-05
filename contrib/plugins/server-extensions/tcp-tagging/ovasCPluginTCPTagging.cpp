@@ -1,9 +1,15 @@
+
 #include "ovasCPluginTCPTagging.h"
 
-#include <sys/timeb.h>
+#include <system/ovCTime.h>
 
 #include "../ovasCSettingsHelper.h"
 #include "../ovasCSettingsHelperOperators.h"
+
+// #define TCPTAGGING_DEBUG
+#if defined(TCPTAGGING_DEBUG)
+#include <iomanip>
+#endif
 
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
@@ -12,7 +18,7 @@ using namespace OpenViBEAcquisitionServerPlugins;
 
 CPluginTCPTagging::CPluginTCPTagging(const OpenViBE::Kernel::IKernelContext& rKernelContext)
 	: IAcquisitionServerPlugin(rKernelContext, "AcquisitionServer_Plugin_TCPTagging"),
-	  m_port("15361")
+	  m_port(15361)
 {
 	m_rKernelContext.getLogManager() << Kernel::LogLevel_Info << "Loading plugin: TCP Tagging\n";
 	m_oSettingsHelper.add("TCP_Tagging_Port", &m_port);
@@ -26,31 +32,19 @@ CPluginTCPTagging::~CPluginTCPTagging()
 void CPluginTCPTagging::startHook(const std::vector<OpenViBE::CString>& vSelectedChannelNames,
 	OpenViBE::uint32 ui32SamplingFrequency, OpenViBE::uint32 ui32ChannelCount, OpenViBE::uint32 ui32SampleCountPerSentBlock)
 {
-	// get port from configuration
-        uint32 l_port=0;
-	for (unsigned i=0; i<m_port.length(); i++)
-	{
-		l_port*=10;
-		l_port+=m_port[i]-'0';	
-	}
-
 	// initialize tag stream
 	// this may throw exceptions, e.g. when the port is already in use.
 	try {
-		m_scopedTagStream.reset(new CTagStream(l_port));
+		m_scopedTagStream.reset(new CTagStream(m_port));
 	}
 	catch (std::exception& e) {
 		m_rKernelContext.getLogManager() << Kernel::LogLevel_Error << "Could not create tag stream: " << e.what();
 	}
 
-	// Get POSIX time (number of milliseconds since epoch)
-	timeb time_buffer;
-	ftime(&time_buffer);
-	uint64 posixTime = time_buffer.time*1000ULL + time_buffer.millitm;
-
 	// Initialize time counters.
-	m_previousPosixTime = posixTime;
+	m_previousClockTime = System::Time::zgetTime();
 	m_previousSampleTime = 0;
+	m_bWarningPrinted = false;
 }
 
 void CPluginTCPTagging::stopHook()
@@ -58,36 +52,48 @@ void CPluginTCPTagging::stopHook()
     m_scopedTagStream.reset();
 }
 
+// n.b. With this version of tcp tagging, all the timestamps are in fixed point
 void CPluginTCPTagging::loopHook(std::deque < std::vector < OpenViBE::float32 > >& /*vPendingBuffer*/,
-	OpenViBE::CStimulationSet& stimulationSet, uint64 start, uint64 end, uint64 sampleTime)
+	OpenViBE::CStimulationSet& stimulationSet, uint64 /* start */, uint64 /* end */, uint64 lastSampleTime)
 {
-	// Get POSIX time (number of milliseconds since epoch)
-	timeb time_buffer;
-	ftime(&time_buffer);
-	uint64 posixTime = time_buffer.time*1000ULL + time_buffer.millitm;
+	const uint64 clockTime = System::Time::zgetTime(); 
 
 	Tag tag;
 
 	// Collect tags from the stream until exhaustion.
 	while(m_scopedTagStream.get() && m_scopedTagStream->pop(tag)) {
-		m_rKernelContext.getLogManager() << Kernel::LogLevel_Trace << "New Tag received (" << tag.padding << ", " << tag.identifier << ", " << tag.timestamp << ") at " << posixTime << " (posix time in ms)\n";
+		m_rKernelContext.getLogManager() << Kernel::LogLevel_Trace << "New Tag received (" << tag.flags << ", " << tag.identifier << ", " 
+			<< ITimeArithmetics::timeToSeconds(tag.timestamp) << "s) at " 
+			<< ITimeArithmetics::timeToSeconds(clockTime) << "s\n";
 
 		// Check that the timestamp fits the current chunk.
-		if (tag.timestamp < m_previousPosixTime) {
+		if (tag.timestamp < m_previousClockTime) {
 			m_rKernelContext.getLogManager() << Kernel::LogLevel_Trace << "The Tag has arrived before the beginning of the current chunk and will be inserted at the beginning of this chunk\n";
-			tag.timestamp = m_previousPosixTime;
+			tag.timestamp = m_previousClockTime;
 		}
 
-		// Marker time correction (simple local linear interpolation).
-		if (m_previousPosixTime != posixTime) {
-			tag.timestamp = m_previousSampleTime + (tag.timestamp - m_previousPosixTime)*((sampleTime - m_previousSampleTime) / (posixTime - m_previousPosixTime));
-		}
+		const uint64 tagOffsetClock = tag.timestamp - m_previousClockTime;  // How far in time the marker is from the last call to this function
+
+		const uint64 adjustedTagTime = m_previousSampleTime + tagOffsetClock;	// Time since the beginning of the current buffer (as approx by time of the last sample of the prev. run)
+
+#if defined(TCPTAGGING_DEBUG)
+		std::cout << "Set tag " << tag.identifier 
+			<< " at " << std::setprecision(6) << ITimeArithmetics::timeToSeconds(adjustedTagTime)
+			<< " (prevS = " << ITimeArithmetics::timeToSeconds(m_previousSampleTime) << "s, "
+			<< " prevC = " << ITimeArithmetics::timeToSeconds(m_previousClockTime) << "s, "
+			<< " tag = " << ITimeArithmetics::timeToSeconds(tag.timestamp) << "s, "
+			<< " d = " << ITimeArithmetics::timeToSeconds(tagOffsetClock)*1000.0 << "ms)"
+			<< "\n";
+#endif
 
 		// Insert tag into the stimulation set.
-		stimulationSet.appendStimulation(tag.identifier, tag.timestamp, 0 /* duration of tag (ms) */);
+		stimulationSet.appendStimulation(tag.identifier, adjustedTagTime, 0 /* duration of tag (ms) */);
 	}
 
-	// Update time counters.
-	m_previousPosixTime = posixTime;
-	m_previousSampleTime = sampleTime;
+	// Update time counters. Basically these counters allow to map the time a stamp was received to the time related to the sample buffers,
+	// as we know this function is called right after receiving samples from a device.
+	m_previousClockTime = clockTime;
+	m_previousSampleTime = lastSampleTime;
+
 }
+

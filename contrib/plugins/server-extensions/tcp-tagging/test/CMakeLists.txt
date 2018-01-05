@@ -11,6 +11,7 @@ INCLUDE_DIRECTORIES(../)
 ADD_EXECUTABLE(${PROJECT_NAME} test_tagstream.cpp ../ovasCTagStream.cpp)
 
 INCLUDE("FindOpenViBE")
+INCLUDE("FindOpenViBEModuleSystem")		# Time getter from here in the future
 INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyBoost_System")
 INCLUDE("FindThirdPartyBoost_Thread")

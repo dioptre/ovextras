@@ -5,6 +5,8 @@
 #include <boost/array.hpp>
 #include <sys/timeb.h>
 
+#include <system/ovCTime.h>
+
 using namespace TCPTagging;
 
 using boost::asio::ip::tcp;
@@ -49,7 +51,7 @@ boolean CStimulusSender::connect(const char* sAddress, const char* sStimulusPort
 	return true;
 }
 
-boolean CStimulusSender::sendStimulation(uint64 ui64Stimulation, uint64 ui64Timestamp /* = 0 */) 
+boolean CStimulusSender::sendStimulation(uint64_t ui64Stimulation, uint64_t ui64Timestamp /* = 0 */, uint64_t ui64Flags /* = FPTIME|CLIENTSIDE */) 
 {
 	if(!m_bConnectedOnce) {
 		return false;
@@ -61,10 +63,16 @@ boolean CStimulusSender::sendStimulation(uint64 ui64Stimulation, uint64 ui64Time
 		return false;
 	}
 
-	uint64 l_ui64Zero = 0;
+	if(ui64Flags & IStimulusSender::TCP_Tagging_Flags::FLAG_AUTOSTAMP_CLIENTSIDE)
+	{
+		// @FIXME change to getter that has same starting point as the corresponding server getter
+		ui64Timestamp = System::Time::zgetTime();
+		ui64Flags |= IStimulusSender::TCP_Tagging_Flags::FLAG_FPTIME;
+	}
+
 	try
 	{
-		boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&l_ui64Zero, sizeof(uint64)));
+		boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&ui64Flags, sizeof(uint64)));
 		boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&ui64Stimulation, sizeof(uint64)));
 		boost::asio::write(m_oStimulusSocket, boost::asio::buffer((void *)&ui64Timestamp, sizeof(uint64)));
 	} 

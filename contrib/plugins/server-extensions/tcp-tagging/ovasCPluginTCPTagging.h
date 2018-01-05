@@ -45,10 +45,13 @@ namespace OpenViBEAcquisitionServer
 					OpenViBE::CStimulationSet& stimulationSet, OpenViBE::uint64 start, OpenViBE::uint64 end, OpenViBE::uint64 sampleTime);
 
 			private:
-				OpenViBE::uint64 m_previousPosixTime;
+				OpenViBE::uint64 m_previousClockTime;
 				OpenViBE::uint64 m_previousSampleTime;
+
 				std::unique_ptr<CTagStream> m_scopedTagStream;
-				OpenViBE::CString m_port;
+				OpenViBE::uint32 m_port;
+
+				bool m_bWarningPrinted;
 		};
 
 

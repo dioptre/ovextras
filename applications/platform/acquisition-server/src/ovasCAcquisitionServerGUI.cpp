@@ -813,6 +813,12 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 			l_pSettingControl = gtk_entry_new();
 			gtk_entry_append_text(GTK_ENTRY(l_pSettingControl), r->getData()->toASCIIString());
 		} 
+		else if( const TypedProperty<uint32>* r = dynamic_cast< const TypedProperty<uint32>* >(l_pCurrentProperty)) 
+		{
+			// cout << "uinteger\n";
+			l_pSettingControl = gtk_spin_button_new_with_range((gdouble)std::numeric_limits<uint32>::min(), (gdouble)std::numeric_limits<uint32>::max(), 1.0);
+			gtk_spin_button_set_value(GTK_SPIN_BUTTON(l_pSettingControl), (gdouble)*(r->getData()));
+		} 
 		else if( const TypedProperty<int64>* r = dynamic_cast< const TypedProperty<int64>* >(l_pCurrentProperty)) 
 		{
 			// cout << "integer\n";
