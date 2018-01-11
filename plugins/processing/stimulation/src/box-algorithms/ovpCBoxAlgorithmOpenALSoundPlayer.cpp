@@ -81,7 +81,7 @@ boolean CBoxAlgorithmOpenALSoundPlayer::uninitialize(void)
 	m_oStreamDecoder.uninitialize();
 	m_oStreamEncoder.uninitialize();
 	
-	boolean l_bStatus = stopSound();
+	boolean l_bStatus = stopSound(false);
 
 #if UNIQUE_SOURCE
 	alDeleteSources(1, &m_uiSourceHandle);
@@ -163,7 +163,7 @@ boolean CBoxAlgorithmOpenALSoundPlayer::process(void)
 				}
 				else if(l_ui64Stimulation == m_ui64StopTrigger)
 				{
-					stopSound();
+					stopSound(true);
 				}
 				else
 				{
@@ -335,11 +335,11 @@ boolean CBoxAlgorithmOpenALSoundPlayer::playSound()
 		}
 	}
 
-	m_pStimulusSender->sendStimulation(m_ui64PlayTrigger, 0);		// n.b. 0 is intentional
+	m_pStimulusSender->sendStimulation(m_ui64PlayTrigger);
 
 	return true;
 }
-boolean CBoxAlgorithmOpenALSoundPlayer::stopSound()
+boolean CBoxAlgorithmOpenALSoundPlayer::stopSound(bool bForwardStim)
 {
 	switch(m_iFileFormat)
 	{
@@ -367,7 +367,10 @@ boolean CBoxAlgorithmOpenALSoundPlayer::stopSound()
 		}
 	}
 
-	m_pStimulusSender->sendStimulation(m_ui64StopTrigger, 0);	// n.b. 0 is intentional
+	if(bForwardStim)
+	{
+		m_pStimulusSender->sendStimulation(m_ui64StopTrigger);
+	}
 
 	return true;
 }

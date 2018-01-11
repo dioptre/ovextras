@@ -52,7 +52,7 @@ namespace OpenViBEPlugins
 
 			virtual OpenViBE::boolean openSoundFile();
 			virtual OpenViBE::boolean playSound();
-			virtual OpenViBE::boolean stopSound();
+			virtual OpenViBE::boolean stopSound(bool bForwardStim);
 		
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_OpenALSoundPlayer);
 
