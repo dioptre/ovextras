@@ -58,27 +58,17 @@ void CTagSession::handleRead(const boost::system::error_code &error)
 		if(m_tag.timestamp == 0 || (m_tag.flags & TCP_Tagging_Flags::FLAG_AUTOSTAMP_SERVERSIDE))
 		{
 			// Client didn't provide timestamp or asked the server to do it. Stamp current time.
-			m_tag.timestamp = System::Time::zgetTime();
+			m_tag.timestamp = System::Time::zgetTimeRaw(false);
 		}
 		else if(!(m_tag.flags & TCP_Tagging_Flags::FLAG_FPTIME))
 		{
 			// Client provided stamp but not in FPTIME
-			m_tag.timestamp = System::Time::zgetTime();
+			m_tag.timestamp = System::Time::zgetTimeRaw(false);
 			if(!(m_errorState & (1LL<<1)))
 			{
 				// @fixme not appropriate to print errors from a thread, but better than silent fail
 				std::cout << "[WARNING] TCP Tagging: Received tag(s) not in fixed point time. Not supported, will replace with server time.\n";
 				m_errorState |= (1LL<<1);
-			}
-		}
-		else if(m_tag.flags & TCP_Tagging_Flags::FLAG_AUTOSTAMP_CLIENTSIDE)
-		{
-			// @FIXME remove this branch after zgetTimeRaw(false) becomes available in SDK; fix CStimulusSender.cpp and all refs to zgetTime() in tagging context to use the raw version.
-			m_tag.timestamp = System::Time::zgetTime();
-			if(!(m_errorState & (1LL<<2)))
-			{
-				std::cout << "[WARNING] TCP Tagging: Client side stamping not currently supported. Using server receiving time for tags.\n";
-				m_errorState |= (1LL<<2);
 			}
 		}
 

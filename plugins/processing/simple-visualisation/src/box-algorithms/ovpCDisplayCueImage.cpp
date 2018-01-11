@@ -540,9 +540,8 @@ namespace OpenViBEPlugins
 		// Note that we don't need concurrency control here as gtk callbacks run in the main thread
 		void CDisplayCueImage::flushQueue(void)
 		{
-			for (size_t i = 0; i<m_vStimuliQueue.size(); i++)
+			for(size_t i=0;i<m_vStimuliQueue.size();i++)
 			{
-				// Timestamp is not used on purpose as we do not have the same clock scheme with AS
 				m_pStimulusSender->sendStimulation(m_vStimuliQueue[i]);
 			}
 			m_vStimuliQueue.clear();

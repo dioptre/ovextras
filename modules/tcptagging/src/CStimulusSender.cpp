@@ -65,8 +65,7 @@ boolean CStimulusSender::sendStimulation(uint64_t ui64Stimulation, uint64_t ui64
 
 	if(ui64Flags & IStimulusSender::TCP_Tagging_Flags::FLAG_AUTOSTAMP_CLIENTSIDE)
 	{
-		// @FIXME change to getter that has same starting point as the corresponding server getter
-		ui64Timestamp = System::Time::zgetTime();
+		ui64Timestamp = System::Time::zgetTimeRaw(false);
 		ui64Flags |= IStimulusSender::TCP_Tagging_Flags::FLAG_FPTIME;
 	}
 
@@ -84,3 +83,4 @@ boolean CStimulusSender::sendStimulation(uint64_t ui64Stimulation, uint64_t ui64
 
 	return true;
 }
+

@@ -42,7 +42,7 @@ void CPluginTCPTagging::startHook(const std::vector<OpenViBE::CString>& vSelecte
 	}
 
 	// Initialize time counters.
-	m_previousClockTime = System::Time::zgetTime();
+	m_previousClockTime = System::Time::zgetTimeRaw(false);
 	m_previousSampleTime = 0;
 	m_bWarningPrinted = false;
 }
@@ -56,9 +56,13 @@ void CPluginTCPTagging::stopHook()
 void CPluginTCPTagging::loopHook(std::deque < std::vector < OpenViBE::float32 > >& /*vPendingBuffer*/,
 	OpenViBE::CStimulationSet& stimulationSet, uint64 /* start */, uint64 /* end */, uint64 lastSampleTime)
 {
-	const uint64 clockTime = System::Time::zgetTime(); 
+	const uint64 clockTime = System::Time::zgetTimeRaw(false); 
 
 	Tag tag;
+	
+	// n.b. the last chunk received but not yet sent is between timestamps [previousClockTime,clockTime]. Note 
+	// that more stims may be arriving in the loop meaning that they are newer than 'clockTime'. This is not an issue,
+	// they will be scheduled with future samples.
 
 	// Collect tags from the stream until exhaustion.
 	while(m_scopedTagStream.get() && m_scopedTagStream->pop(tag)) {
