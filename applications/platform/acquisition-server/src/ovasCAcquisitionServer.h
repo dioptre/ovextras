@@ -25,9 +25,9 @@ namespace OpenViBEAcquisitionServer
 
 	typedef struct
 	{
-		OpenViBE::uint64 m_ui64ConnectionTime;
-		OpenViBE::uint64 m_ui64StimulationTimeOffset;
-		OpenViBE::uint64 m_ui64SignalSampleCountToSkip;
+		OpenViBE::uint64 m_ui64ConnectionTime;                              // Time the client connected
+		OpenViBE::uint64 m_ui64StimulationTimeOffset;                       // Time offset wrt acquisition start
+		OpenViBE::uint64 m_ui64SignalSampleCountToSkip;                     // How many samples to skip wrt current buffer start. n.b. not a constant.
 		CConnectionClientHandlerThread* m_pConnectionClientHandlerThread;  // Ptr to the class object that is executed by the client connection handler thread
 		std::thread* m_pConnectionClientHandlerStdThread;                  // The actual thread handle
 		bool m_bChannelUnitsSent; 
