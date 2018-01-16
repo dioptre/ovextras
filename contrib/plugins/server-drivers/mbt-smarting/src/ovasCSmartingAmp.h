@@ -25,6 +25,7 @@
 
 #include <mutex>
 #include <thread>
+#include <condition_variable>
 
 #define OK_RESPONSE_SIZE 4
 #define MAX_PACKAGE_SIZE 4096
@@ -91,7 +92,7 @@ public:
 
 	void on_receive(const boost::system::error_code& ec, size_t bytes_transferred);
 
-	float* get_sample();
+	bool get_sample(std::vector<float*>& samples, uint32_t maxSamples);
 	
 	float* convert_data(std::vector<unsigned char> byte_array);
 
@@ -117,7 +118,7 @@ private:
 	
 	unsigned char m_commandReceiveBuffer[MAX_PORT_SIZE];
 
-	std::queue<float*> m_samplesBuffer;
+	std::queue< float* > m_samplesBuffer;
 	
 	std::vector<unsigned char> m_byteArray;
 
@@ -141,6 +142,8 @@ private:
 
 	// read with timeout
 	int m_bytes_readed;
+
+	std::condition_variable m_oHaveSamplesCondition;
 };
 
 #endif

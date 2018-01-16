@@ -63,7 +63,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBEAcquisitionServer::CHeader m_oHeader;
 
 		OpenViBE::uint32 m_ui32SampleCountPerSentBlock;
-		OpenViBE::float32* m_pSample;
 	
 	private:
 
@@ -72,10 +71,10 @@ namespace OpenViBEAcquisitionServer
 		 * Example :
 		 */
 		OpenViBE::uint32 m_ui32ConnectionID;
-		std::shared_ptr< SmartingAmp > m_pSmartingAmp;
-		std::vector< unsigned char > m_byteArray;
-		int sample_number;
-		int latency;
+		SmartingAmp* m_pSmartingAmp;
+
+		std::vector< OpenViBE::float32 > m_vSamples;			        // Buffer sent outwards, size is channels * blocksize
+
 	};
 };
 

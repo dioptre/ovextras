@@ -164,7 +164,8 @@
                     <child>
                       <object class="GtkSpinButton" id="spinbutton_number_of_channels">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
+						<property name="sensitive">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="secondary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">True</property>
@@ -193,28 +194,8 @@
                         <property name="bottom_attach">4</property>
                       </packing>
                     </child>
-					<child>
-                      <object class="GtkSpinButton" id="spinbutton_port_number">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="primary_icon_activatable">False</property>
-                        <property name="secondary_icon_activatable">False</property>
-                        <property name="primary_icon_sensitive">True</property>
-                        <property name="secondary_icon_sensitive">True</property>
-                        <property name="adjustment">adjustment4</property>
-                        <property name="snap_to_ticks">True</property>
-                        <property name="numeric">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
-                      </packing>
-                    </child>
-
                     <child>
-                      <object class="GtkLabel" id="label_device">
+                      <object class="GtkLabel" id="label_port_number">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Port number :</property>
@@ -226,6 +207,25 @@
                         <property name="bottom_attach">5</property>
                       </packing>
                     </child>
+					<child>
+                      <object class="GtkSpinButton" id="spinbutton_port_number">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
+                        <property name="adjustment">adjustment2</property>
+                        <property name="snap_to_ticks">True</property>
+                        <property name="numeric">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
+                      </packing>
+                    </child>					
                     <child>
                       <object class="GtkComboBox" id="combobox_gender">
                         <property name="visible">True</property>

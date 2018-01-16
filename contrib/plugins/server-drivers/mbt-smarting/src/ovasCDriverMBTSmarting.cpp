@@ -11,6 +11,8 @@ using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace std;
 
+#define MBT_CHANNEL_COUNT 27
+
 //___________________________________________________________________//
 //                                                                   //
 
@@ -19,16 +21,18 @@ CDriverMBTSmarting::CDriverMBTSmarting(IDriverContext& rDriverContext)
 	,m_oSettings("AcquisitionServer_Driver_MBTSmarting", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
-	,m_pSample(NULL)
+	,m_ui32ConnectionID(1)
+	,m_pSmartingAmp(nullptr)
 {
 	m_oHeader.setSamplingFrequency(500);
-	m_oHeader.setChannelCount(27);
+	m_oHeader.setChannelCount(MBT_CHANNEL_COUNT);
 	
 	// The following class allows saving and loading driver settings from the acquisition server .conf file
 	m_oSettings.add("Header", &m_oHeader);
 	// To save your custom driver settings, register each variable to the SettingsHelper
-	//m_oSettings.add("SettingName", &variable);
+	m_oSettings.add("ConnectionID", &m_ui32ConnectionID);
 	m_oSettings.load();	
+
 }
 
 CDriverMBTSmarting::~CDriverMBTSmarting(void)
@@ -50,18 +54,9 @@ boolean CDriverMBTSmarting::initialize(
 	if(m_rDriverContext.isConnected()) return false;
 	if(!m_oHeader.isChannelCountSet()||!m_oHeader.isSamplingFrequencySet()) return false;
 	
-	// Builds up a buffer to store
-	// acquired samples. This buffer
-	// will be sent to the acquisition
-	// server later...
-	m_pSample=new float32[m_oHeader.getChannelCount()];
-	if(!m_pSample)
-	{
-		delete [] m_pSample;
-		m_pSample=NULL;
-		return false;
-	}
-	
+	// n.b. We force it to be 27 despite user choice
+	m_oHeader.setChannelCount(MBT_CHANNEL_COUNT);
+
 	// ...
 	// initialize hardware and get
 	// available header information
@@ -69,7 +64,7 @@ boolean CDriverMBTSmarting::initialize(
 	// Using for example the connection ID provided by the configuration (m_ui32ConnectionID)
 	// ...
 	
-	m_pSmartingAmp.reset(new SmartingAmp);
+	m_pSmartingAmp = new SmartingAmp();
 	
 	stringstream port_ss;
 	#ifdef TARGET_OS_Windows
@@ -95,6 +90,10 @@ boolean CDriverMBTSmarting::initialize(
 			m_rDriverContext.getLogManager() << LogLevel_Info << "Setting the sampling frequency at " << 500 <<"\n";
 			m_pSmartingAmp->send_command(FREQUENCY_500);
 			break;
+		default:
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Only sampling frequencies 250 and 500 are supported\n";
+			return false;
+			break;
 		}
 
 		// Declare channel units
@@ -105,6 +104,10 @@ boolean CDriverMBTSmarting::initialize(
 		m_oHeader.setChannelUnits(24, OVTK_UNIT_Degree_Per_Second, OVTK_FACTOR_Base); // gyroscope outputs
 		m_oHeader.setChannelUnits(25, OVTK_UNIT_Degree_Per_Second, OVTK_FACTOR_Base);
 		m_oHeader.setChannelUnits(26, OVTK_UNIT_Degree_Per_Second, OVTK_FACTOR_Base);
+
+		m_oHeader.setChannelName(24, "Gyro 1");
+		m_oHeader.setChannelName(25, "Gyro 2");
+		m_oHeader.setChannelName(26, "Gyro 3");
 
 		// Saves parameters
 		m_pCallback=&rCallback;
@@ -126,11 +129,9 @@ boolean CDriverMBTSmarting::start(void)
 	// sending data
 	// ...
 
-	m_pSmartingAmp->send_command(ON);
-	m_byteArray.clear();
-	
-	sample_number = 1;
-	latency = 1;
+	m_pSmartingAmp->start();
+
+	m_vSamples.resize(MBT_CHANNEL_COUNT * m_ui32SampleCountPerSentBlock);
 
 	return true;
 }
@@ -148,65 +149,28 @@ boolean CDriverMBTSmarting::loop(void)
 	// whether the buffer is full, send it to the acquisition server
 	//...
 
-	unsigned char* receiveBuffer = new unsigned char[MAX_PACKAGE_SIZE];
-
-	int readed = m_pSmartingAmp->read(receiveBuffer, MAX_PACKAGE_SIZE);
-
-	for (int i = 0; i < readed; i++)
+	std::vector<float*> samples;
+	while(samples.size() < m_ui32SampleCountPerSentBlock)
 	{
-		if (m_byteArray.size() > 0)
+		if(!m_pSmartingAmp->get_sample(samples, m_ui32SampleCountPerSentBlock))
 		{
-			m_byteArray.push_back(receiveBuffer[i]);
-			if(m_byteArray.size() == 83)
-			{
-				if(m_byteArray[82] == '<')
-				{
-					if (sample_number % 5000 == 0)
-					{
-						sample_number = 1;
-						
-						if (m_rDriverContext.getDriftSampleCount() < 2)
-						{
-							m_pSample = m_pSmartingAmp->convert_data(m_byteArray);
-							m_pCallback->setSamples(m_pSample, 1);
-							m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
-						}
-					}
-					else
-					{
-						sample_number++;
-
-						m_pSample = m_pSmartingAmp->convert_data(m_byteArray);
-						m_pCallback->setSamples(m_pSample, 1);
-						m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
-					
-					}
-	
-				}
-				
-				m_byteArray.clear();
-				
-			}
-		}
-
-		if(m_byteArray.size() == 0 && receiveBuffer[i] == '>')
-		{
-			m_byteArray.push_back(receiveBuffer[i]);
+			m_rDriverContext.getLogManager() << LogLevel_Error << "The Smarting thread returned 0 samples, unexpected.\n";
+			return false;
 		}
 	}
 
-	if (latency == 300)
+	for(uint32_t s=0;s<m_ui32SampleCountPerSentBlock;s++)
 	{
-		latency = 0;
-		m_rDriverContext.setInnerLatencySampleCount(-m_rDriverContext.getDriftSampleCount());
-	}
-	else
-	{
-		if (latency != 0)
+		float* pSample = samples[s];
+		for(size_t c=0;c<MBT_CHANNEL_COUNT;c++)
 		{
-			latency++;
+			m_vSamples[c*m_ui32SampleCountPerSentBlock+s] = pSample[c];	
 		}
+		delete[] pSample;
 	}
+
+	m_pCallback->setSamples(&m_vSamples[0]);
+	m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
 
 	// ...
 	// receive events from hardware
@@ -227,7 +191,8 @@ boolean CDriverMBTSmarting::stop(void)
 	// sending data
 	// ...
 	m_rDriverContext.setInnerLatencySampleCount(0);
-	m_pSmartingAmp->off();
+
+	m_pSmartingAmp->stop();
 
 	return true;
 }
@@ -243,8 +208,9 @@ boolean CDriverMBTSmarting::uninitialize(void)
 
 	m_pSmartingAmp->disconnect();
 
-	delete [] m_pSample;
-	m_pSample=NULL;
+	delete m_pSmartingAmp;
+	m_pSmartingAmp = nullptr;
+
 	m_pCallback=NULL;
 
 	return true;

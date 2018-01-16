@@ -18,7 +18,8 @@ SmartingAmp::SmartingAmp()
 }
 
 SmartingAmp::~SmartingAmp()
-{}
+{
+}
 
 void SmartingAmp::disconnect()
 {
@@ -41,7 +42,6 @@ int SmartingAmp::read(unsigned char *data, size_t size)
 
 void SmartingAmp::acquire()
 {
-
 	if (m_port.get() == NULL || !m_port->is_open()) return;
 
 	m_port->async_read_some( 
@@ -58,9 +58,12 @@ void SmartingAmp::on_receive(const boost::system::error_code& ec, size_t bytes_t
 	if (m_port.get() == NULL || !m_port->is_open()) return;
 	
 	if (ec) {
+		// Had an error ...
 		//acquire();
 		return;
 	}
+	
+	bool gotSomething = false;
 
 	for (unsigned int i = 0; i < bytes_transferred; i++)
 	{
@@ -78,6 +81,8 @@ void SmartingAmp::on_receive(const boost::system::error_code& ec, size_t bytes_t
 					m_samples_lock.lock();
 					m_samplesBuffer.push(sample);
 					m_samples_lock.unlock();
+					
+					gotSomething = true;
 				}
 				else
 				{
@@ -91,6 +96,10 @@ void SmartingAmp::on_receive(const boost::system::error_code& ec, size_t bytes_t
 		{
 			m_byteArray.push_back(m_receiveBuffer[i]);
 		}
+	}
+	if(gotSomething)
+	{
+		m_oHaveSamplesCondition.notify_one();
 	}
 	acquire();
 }
@@ -252,29 +261,40 @@ bool SmartingAmp::start()
 	m_failedSamples = 0;
 	m_receivedSamples = 0;
 
-	// start reading
-
+	// start reading. 
 	acquire();
 
+	// the acquire callback will be run in the ioservice thread f.
 	auto f = [this]() { this->m_io.run(); };
-	// auto f = boost::bind(&boost::asio::io_service::run, &m_io);
 
 	acquire_t.reset(new std::thread( f ));
 
 	return true;
 }
 
-float* SmartingAmp::get_sample()
+bool SmartingAmp::get_sample(std::vector<float*>& samples, uint32_t maxSamples)
 {
-	if (m_samplesBuffer.size() > 0)
+	std::unique_lock<std::mutex> oLock(m_samples_lock);
+
+	// Wait until something interesting happens...
+	m_oHaveSamplesCondition.wait(oLock,
+		[this]() { return (m_io.stopped() ||  m_samplesBuffer.size()>0); }
+	);
+	if(m_io.stopped())
 	{
-		m_samples_lock.lock();
+		oLock.unlock();
+		return false;
+	}
+
+	while(m_samplesBuffer.size()>0 && samples.size() < maxSamples)
+	{
 		float* sample = m_samplesBuffer.front();
 		m_samplesBuffer.pop();
-		m_samples_lock.unlock();
-		return sample;
+		samples.push_back(sample);
 	}
-	return NULL;
+
+	oLock.unlock();
+	return true;
 }
 
 bool SmartingAmp::stop()
@@ -286,23 +306,31 @@ bool SmartingAmp::stop()
 	{
 		// cancel all async operations
 		m_io.stop();
+		acquire_t->join();
 		m_io.reset();
-
-		// TODO: Implement proper stopping of the acquiring thread		
+		acquire_t.reset();	
 	}
 	catch (std::exception&)
 	{
-		// to do
+		return false;
 	}
 
-	// NOTE: Currently, I am very unhappy with flushing
+	// Clear buffers that were not sent; as thread was joined, no need to lock
+	while( m_samplesBuffer.size() > 0)
+	{
+		float* sample = m_samplesBuffer.front();
+		m_samplesBuffer.pop();
+		delete[] sample;
+	}
+
+	// @FIXME is this still relevant: "NOTE: Currently, I am very unhappy with flushing
 	// It slows down everything and after 6 play/stops open vibe is blocked
-	// flush();
+	// flush();"
 
 	//cout << "Failed " << m_failedSamples << endl;
 	//cout << "Received " << m_receivedSamples << endl;
-	
-	return false;
+
+	return true;
 }
 
 float* SmartingAmp::convert_data(std::vector<unsigned char> byte_array)
