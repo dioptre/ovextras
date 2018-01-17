@@ -3,8 +3,6 @@
 
 #if defined TARGET_HAS_ThirdPartyEEGOAPI
 
-#if defined TARGET_OS_Windows
-
 #include "../ovasCHeader.h"
 
 namespace OpenViBEAcquisitionServer
@@ -62,8 +60,6 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bBIPMaskSet;
 	};
 }
-
-#endif // TARGET_OS_Windows
 
 #endif
 

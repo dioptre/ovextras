@@ -172,6 +172,5 @@ OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_
 	return !l_bParseError;
 }
 
-#endif // TARGET_OS_Windows
 
 #endif

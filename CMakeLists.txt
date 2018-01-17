@@ -54,7 +54,7 @@ elseif(CMAKE_BUILD_TYPE)
 	add_definitions(-DOV_CMAKE_PATH_BIN="${CMAKE_INSTALL_FULL_BINDIR}")
 	add_definitions(-DOV_CMAKE_PATH_LIB="${CMAKE_INSTALL_FULL_LIBDIR}")
 	add_definitions(-DOV_CMAKE_PATH_DATA="${CMAKE_INSTALL_FULL_DATADIR}/openvibe")
-	
+
 	set(DIST_ROOT ${CMAKE_INSTALL_PREFIX})
 	set(DIST_BINDIR ${DIST_ROOT}/bin)
 	set(DIST_LIBDIR ${DIST_ROOT}/lib)
@@ -108,12 +108,12 @@ SET(OV_CONFIG_SUBDIR OpenVIBE CACHE STRING "Subdirectory under user directory wh
 
 ADD_DEFINITIONS("-DOV_CONFIG_SUBDIR=\"${OV_CONFIG_SUBDIR}\"")
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 IF(WIN32)
 	# Switch /arch:SSE2 enables vectorization. Remove if your CPU/compiler doesn't support it.
 	SET(OV_EIGEN_FLAGS "/arch:SSE2")
-	# The following is needed to keep OpenMP from hogging all the cores. Note that this env var works only for VS2013+. 
+	# The following is needed to keep OpenMP from hogging all the cores. Note that this env var works only for VS2013+.
 	# On VS2010, it may be better to disable OpenMP.
 	SET(OV_OMP_WAIT_POLICY "PASSIVE")
 	# Disable /MP if you don't like VS using all the cores for compilation
@@ -130,13 +130,13 @@ IF(WIN32)
 	ELSEIF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "17.0.0")
 		SET(MSVC_SERVICE_PACK "vc110")
 	ELSEIF(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "16.0.0")
-		SET(MSVC_SERVICE_PACK "vc100")	
-	ENDIF()			
-	
+		SET(MSVC_SERVICE_PACK "vc100")
+	ENDIF()
+
 	STRING(REGEX MATCH "vc120.*" MSVC_VER120 ${MSVC_SERVICE_PACK})
-	IF(MSVC_VER120) 
+	IF(MSVC_VER120)
 		# Boost 1.55 asio causes several compiler warnings on VS2013 we cannot do much about. try removing the following when boost is upgraded.
-		ADD_DEFINITIONS("-D_WINSOCK_DEPRECATED_NO_WARNINGS") 
+		ADD_DEFINITIONS("-D_WINSOCK_DEPRECATED_NO_WARNINGS")
 
 		# If OpenMP is available, using it will allow Eigen to use multiple cores in matrix math. Only used on VS120,
 		# as VS100 allocates the cores too aggressively when OpenMP is enabled.
@@ -159,7 +159,7 @@ ELSEIF(UNIX)
 	SET(OV_EIGEN_FLAGS "-msse2")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall ${OV_EIGEN_FLAGS}")
 	# This ENV var is needed to locate our custom IT++ on Linux
-	SET(ENV{PKG_CONFIG_PATH} "${LIST_DEPENDENCIES_PATH}/lib/pkgconfig")	
+	SET(ENV{PKG_CONFIG_PATH} "${LIST_DEPENDENCIES_PATH}/lib/pkgconfig")
 
 	if (${CMAKE_SYSTEM_PROCESSOR} MATCHES i386|i586|i686)
 		set ( BIT_MODE "32")
@@ -290,7 +290,7 @@ SET(CMAKE_INSTALL_FULL_DOCDIR "${CMAKE_INSTALL_FULL_BINDIR}/../doc/html")
 
 ADD_SUBDIRECTORY("build-tool/")
 # Traverse these directories and build their components
-ADD_SUBDIRECTORY("modules/tcptagging") 
+ADD_SUBDIRECTORY("modules/tcptagging")
 ADD_SUBDIRECTORY("plugins/")
 ADD_SUBDIRECTORY("applications/")
 ADD_SUBDIRECTORY("externals/")

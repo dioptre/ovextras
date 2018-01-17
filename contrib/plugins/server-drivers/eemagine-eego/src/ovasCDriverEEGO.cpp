@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <bitset>
 #include <exception>
+#include <memory>
 
 // OV includes
 #include <toolkit/ovtk_all.h>
