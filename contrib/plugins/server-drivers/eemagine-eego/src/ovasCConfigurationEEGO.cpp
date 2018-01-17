@@ -1,7 +1,5 @@
 #if defined(TARGET_HAS_ThirdPartyEEGOAPI)
 
-#if defined TARGET_OS_Windows
-
 #include <bitset>
 #include <sstream>
 
@@ -208,6 +206,7 @@ void CConfigurationEEGO::update_channel_num_cb(GtkWidget* widget, CConfiguration
 	gtk_entry_set_text(pThis->m_pNumChannelEntry, l_ss.str().c_str());
 
 	const OpenViBE::uint32 l_oNumChannels = l_oBitsetEEG.count() + l_oBitsetBIP.count() + 2;
+
 	pThis->m_pHeader->setChannelCount(l_oNumChannels);
 
 	// Workaround! The current channel number is not derived from the channel count. It is retrieved from the /here hidden/
@@ -219,5 +218,3 @@ void CConfigurationEEGO::update_channel_num_cb(GtkWidget* widget, CConfiguration
 }
 
 #endif // TARGET_OS_Windows
-
-#endif

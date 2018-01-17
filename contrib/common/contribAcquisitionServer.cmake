@@ -53,13 +53,9 @@ OV_ADD_CONTRIB_DRIVER("${CMAKE_SOURCE_DIR}/contrib/plugins/server-drivers/openee
 OV_ADD_CONTRIB_DRIVER("${CMAKE_SOURCE_DIR}/contrib/plugins/server-drivers/openbci")
 
 OV_ADD_CONTRIB_DRIVER("${CMAKE_SOURCE_DIR}/contrib/plugins/server-drivers/eemagine-eego")
-# Bad hack to get one eego source file we need but that we don't want in git
-IF(WIN32)
-	FIND_PATH(PATH_EEGOAPI amplifier.h PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES sdk-eemagine-eego/eemagine/sdk/)
-	IF(PATH_EEGOAPI)
-	  SET(source_files "${source_files};${PATH_EEGOAPI}/wrapper.cc")
-	ENDIF(PATH_EEGOAPI)
-ENDIF(WIN32)
+IF(PATH_EEGOAPI)
+  SET(source_files "${source_files};${PATH_EEGOAPI}/wrapper.cc")
+ENDIF(PATH_EEGOAPI)
 
 IF(OV_COMPILE_TESTS)
 ADD_SUBDIRECTORY("../../../contrib/plugins/server-extensions/tcp-tagging/test" "./test")

@@ -1,7 +1,5 @@
 #if defined TARGET_HAS_ThirdPartyEEGOAPI
 
-#if defined TARGET_OS_Windows
-
 #include <algorithm>
 #include <locale>
 #include <boost/algorithm/string.hpp>

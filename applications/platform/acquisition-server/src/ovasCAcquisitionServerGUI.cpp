@@ -119,7 +119,7 @@ static void combobox_sample_count_per_sent_block_changed_cb(::GtkComboBox* pComb
 }
 
 static bool compare_driver_names(OpenViBEAcquisitionServer::IDriver* a,
-	OpenViBEAcquisitionServer::IDriver* b) 
+	OpenViBEAcquisitionServer::IDriver* b)
 {
 	std::string l_sA = a->getName();
 	std::string l_sB = b->getName();
@@ -187,6 +187,10 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 #if defined(TARGET_HAS_ThirdPartyNeuroServo)
 	m_vDriver.push_back(new CDriverNeuroServoHid(m_pAcquisitionServer->getDriverContext()));
 #endif
+//#if defined TARGET_HAS_ThirdPartyEEGOAPI
+//    m_vDriver.push_back(new CDriverEEGO(m_pAcquisitionServer->getDriverContext()));
+//#endif
+
 
 #if defined(TARGET_HAS_ThirdPartyNeXus)
 	m_vDriver.push_back(new CDriverMindMediaNeXus32B(m_pAcquisitionServer->getDriverContext()));
@@ -216,7 +220,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 		m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Trace << "Couldn't open" <<
 			" dll file [" << l_sMensiaDLLPath.toASCIIString() <<"], perhaps it was not installed.\n";
 	}
-	else 
+	else
 	{
 		m_pLibMensiaAcquisition = System::WindowsUtilities::utf16CompliantLoadLibrary(l_sMensiaDLLPath.toASCIIString());
 		HINSTANCE l_oLibMensiaAcquisition = static_cast<HINSTANCE>(m_pLibMensiaAcquisition);
@@ -227,7 +231,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 			m_pAcquisitionServer->getDriverContext().getLogManager() << LogLevel_Warning << "Couldn't load DLL: [" << l_sMensiaDLLPath << "]. Got error: [" << static_cast<uint64>(GetLastError()) << "]\n";
 		}
 		else
-		{	
+		{
 			typedef int32 (*MACQ_InitializeMensiaAcquisitionLibrary)();
 			MACQ_InitializeMensiaAcquisitionLibrary l_fpInitializeMensiaAcquisitionLibrary;
 			l_fpInitializeMensiaAcquisitionLibrary = (MACQ_InitializeMensiaAcquisitionLibrary)::GetProcAddress(l_oLibMensiaAcquisition, "initializeAcquisitionLibrary");
@@ -262,7 +266,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	}
 #endif
 	// END MENSIA ACQUISITION DRIVERS
-	
+
 #if defined TARGET_HAS_OpenViBEContributions
 	OpenViBEContributions::initiateContributions(this, m_pAcquisitionServer, rKernelContext, &m_vDriver);
 #endif
@@ -280,7 +284,7 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	m_pAcquisitionServerThread=new CAcquisitionServerThread(m_rKernelContext, *this, *m_pAcquisitionServer);
 
 	// Initialize GTK objects as the thread started below may refer to them quickly
-	this->initialize(); 
+	this->initialize();
 
 	m_pThread=new std::thread(CAcquisitionServerThreadHandle(*m_pAcquisitionServerThread));
 }
@@ -322,7 +326,7 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 			const std::string prefix2("AcquisitionServer_Plugin_");
 			CString tokenName = l_pConfigurationManager->getConfigurationTokenName(l_oTokenIdentifier);
 			if(std::string(tokenName.toASCIIString()).compare(0,prefix.length(), prefix) == 0 ||
-				std::string(tokenName.toASCIIString()).compare(0,prefix.length(), prefix2) == 0) 
+				std::string(tokenName.toASCIIString()).compare(0,prefix.length(), prefix2) == 0)
 			{
 				std::string token = std::string(tokenName.toASCIIString());
 				l_vTokens.push_back(token);
@@ -805,25 +809,25 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 		// Create the setting controller widget
 		::GtkWidget* l_pSettingControl = NULL;
 
-		if ( const TypedProperty<boolean>* r = dynamic_cast< const TypedProperty<boolean>* >(l_pCurrentProperty)) 
+		if ( const TypedProperty<boolean>* r = dynamic_cast< const TypedProperty<boolean>* >(l_pCurrentProperty))
 		{
 			// cout << "bool\n";
 			l_pSettingControl = gtk_check_button_new();
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(l_pSettingControl), *(r->getData()));
-		} 
-		else if( const TypedProperty<CString>* r = dynamic_cast< const TypedProperty<CString>* >(l_pCurrentProperty)) 
+		}
+		else if( const TypedProperty<CString>* r = dynamic_cast< const TypedProperty<CString>* >(l_pCurrentProperty))
 		{
 			// cout << "string\n";
 			l_pSettingControl = gtk_entry_new();
 			gtk_entry_append_text(GTK_ENTRY(l_pSettingControl), r->getData()->toASCIIString());
-		} 
-		else if( const TypedProperty<int64>* r = dynamic_cast< const TypedProperty<int64>* >(l_pCurrentProperty)) 
+		}
+		else if( const TypedProperty<int64>* r = dynamic_cast< const TypedProperty<int64>* >(l_pCurrentProperty))
 		{
 			// cout << "integer\n";
 			l_pSettingControl = gtk_spin_button_new_with_range((gdouble)std::numeric_limits<int64>::min(), (gdouble)std::numeric_limits<int64>::max(), 1.0);
 			gtk_spin_button_set_value(GTK_SPIN_BUTTON(l_pSettingControl), (gdouble)*(r->getData()));
-		} 
-		else 
+		}
+		else
 		{
 			// cout << "unknown\n";
 			l_pSettingControl = gtk_label_new("Undefined Type");
@@ -866,25 +870,25 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 			{
 				Property* l_pCurrentProperty = m_vPluginProperties[setting_index].m_pProperty;
 
-				if ( TypedProperty<boolean>* r = dynamic_cast< TypedProperty<boolean>* >(l_pCurrentProperty)) 
+				if ( TypedProperty<boolean>* r = dynamic_cast< TypedProperty<boolean>* >(l_pCurrentProperty))
 				{
 					// cout << "bool\n";
 					boolean tmp = ::gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_vPluginProperties[setting_index].m_pWidget)) ? true : false;
 					r->replaceData(tmp);
-				} 
-				else if( TypedProperty<CString>* r = dynamic_cast< TypedProperty<CString>* >(l_pCurrentProperty)) 
+				}
+				else if( TypedProperty<CString>* r = dynamic_cast< TypedProperty<CString>* >(l_pCurrentProperty))
 				{
 					CString tmp = CString(::gtk_entry_get_text(GTK_ENTRY(m_vPluginProperties[setting_index].m_pWidget)));
 					// cout << "string: " << tmp.toASCIIString() << "\n";
 					r->replaceData( tmp );
-				} 
-				else if( TypedProperty<int64>* r = dynamic_cast< TypedProperty<int64>* >(l_pCurrentProperty)) 
+				}
+				else if( TypedProperty<int64>* r = dynamic_cast< TypedProperty<int64>* >(l_pCurrentProperty))
 				{
 					// cout << "integer\n";
 					int64 tmp = static_cast<int64>(::gtk_spin_button_get_value(GTK_SPIN_BUTTON(m_vPluginProperties[setting_index].m_pWidget)));
 					r->replaceData( tmp );
-				} 
-				else 
+				}
+				else
 				{
 					// cout << "unknown\n";
 				}
