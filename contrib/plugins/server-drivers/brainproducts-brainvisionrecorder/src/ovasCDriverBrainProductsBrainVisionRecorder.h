@@ -134,12 +134,18 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_MessageHeader* m_pStructRDA_MessageHeader;
 		char* m_pcharStructRDA_MessageHeader;
+		size_t m_uHeaderBufferSize;
 
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_MessageStart* m_pStructRDA_MessageStart;
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_MessageStop* m_pStructRDA_MessageStop;
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_MessageData32* m_pStructRDA_MessageData32;
 		OpenViBEAcquisitionServer::CDriverBrainProductsBrainVisionRecorder::RDA_Marker* m_pStructRDA_Marker;
 
+		std::vector<OpenViBE::float32> m_vSignalBuffer;
+
+	private:
+
+		bool reallocateHeaderBuffer(size_t newSize);
 	};
 };
 
