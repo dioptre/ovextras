@@ -321,8 +321,8 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 		const uint64 l_ui64TimeOfIncorrect     = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64CorrectedSampleCount-1);
 		const uint64 l_ui64DurationOfIncorrect = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, i64Correction);
 		const uint64 l_ui64TimeOfCorrect       = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64CorrectedSampleCount-1+i64Correction);
-		oPendingStimulationSet.appendStimulation(OVTK_GDF_Incorrect, l_ui64TimeOfIncorrect, l_ui64DurationOfIncorrect);
-		oPendingStimulationSet.appendStimulation(OVTK_GDF_Correct,   l_ui64TimeOfCorrect, 0);
+		oPendingStimulationSet.appendStimulation(OVTK_StimulationId_AddedSamplesBegin, l_ui64TimeOfIncorrect, l_ui64DurationOfIncorrect);
+		oPendingStimulationSet.appendStimulation(OVTK_StimulationId_AddedSamplesEnd,   l_ui64TimeOfCorrect, 0);
 
 		m_f64DriftEstimate+=i64Correction;
 
@@ -344,8 +344,7 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 			}
 		}
 
-		oPendingStimulationSet.appendStimulation(OVTK_GDF_Incorrect, l_ui64LastSampleDate, 0);
-		oPendingStimulationSet.appendStimulation(OVTK_GDF_Correct,   l_ui64LastSampleDate, 0);
+		oPendingStimulationSet.appendStimulation(OVTK_StimulationId_RemovedSamples, l_ui64LastSampleDate, 0);
 
 		m_f64DriftEstimate-=l_ui64SamplesToRemove;
 
