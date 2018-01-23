@@ -135,6 +135,7 @@ namespace OpenViBEPlugins
 			std::queue<OpenViBE::CMatrix*> m_vFlashGroup;
 			std::queue<OpenViBE::uint64> m_vNextFlashTime;
 			std::queue<OpenViBE::uint64> m_vNextFlashStopTime;
+			std::queue<OpenViBE::uint64> m_vNextFlashType;
 
 			// Maps from keyboard coordinates to the widget
 			std::map < std::pair< int, int >, CBoxAlgorithmP300SpellerVisualisation2::SWidgetStyle > m_vCache;

@@ -55,9 +55,18 @@ function box_out = p300_Process(box_in)
 			% change to row vector
 			features = features(:)';
 		else
+			baselineDuration = 200/1000;  % 0.2sec baseline
 			a = [50 120; 121 200; 201 280;281 380;381 530; 531 700]/1000; % ms
-			a = round(a*100); % -> sampleIdx @fixme assume hz=100
+			a = floor((baselineDuration+a)*100); % -> sampleIdx @fixme assume hz=100;
 
+			baselineStop = round(baselineDuration*100);
+			
+			% baseline subtraction
+			baseline = mean(features(1:baselineStop,:),1);
+			features = features - repmat(baseline,[size(features,1) 1]);
+			% save('E:\jl\debug.mat');
+			% fprintf(1,'%d %d\n', size(baseline,1), size(baseline,2));
+			
 			features = [ mean(features(a(1,1):a(1,2),:),1), ...
 				mean(features(a(2,1):a(2,2),:),1), ...
 				mean(features(a(3,1):a(3,2),:),1), ...

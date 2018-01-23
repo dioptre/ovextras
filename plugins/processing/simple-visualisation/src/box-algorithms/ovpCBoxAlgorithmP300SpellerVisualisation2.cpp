@@ -443,27 +443,32 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 				if (l_ui64StimulationIdentifier == OVTK_StimulationId_ExperimentStart)
 				{
 					m_oState = State_ExperimentStart;
+					m_pStimulusSender->sendStimulation(l_ui64StimulationIdentifier); // Immediate
 				} 
 				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_TrialStart)
 				{
 					m_oState = State_Other;
+					m_pStimulusSender->sendStimulation(l_ui64StimulationIdentifier); // Immediate
 				} 
 				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_TrialStop)
 				{
 					m_oState = State_Other;
 					m_ui64TrialCount++;
+					m_pStimulusSender->sendStimulation(l_ui64StimulationIdentifier); // Immediate
 				} 
 				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_VisualStimulationStart)
 				{
 					m_oState = State_Other;
 					this->getLogManager() << LogLevel_Debug << "Received OVTK_StimulationId_VisualStimulationStart - flashes\n";
 					m_vNextFlashTime.push(oSet->getStimulationDate(j));
+					// Don't send stimuli yet
 				}
 				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_VisualStimulationStop)
 				{
 					m_oState = State_Other;
 					this->getLogManager() << LogLevel_Debug << "Received OVTK_StimulationId_VisualStimulationStop - resets grid\n";
 					m_vNextFlashStopTime.push(oSet->getStimulationDate(j));
+					// Don't send stimuli yet
 				}
 				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_Reset)
 				{
@@ -474,14 +479,16 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 					gtk_label_set_text(m_pTarget, "");
 					gtk_label_set_text(m_pResult, "");
 					m_ui64TrialCount = 0;
+					m_vStimuliQueue.push_back(l_ui64StimulationIdentifier); // delay until rendered
 				}
-				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_RestStop)
+				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_RestStart || l_ui64StimulationIdentifier == OVTK_StimulationId_RestStop)
 				{
 					m_oState = State_Other;
 					// Clear 
 					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_background_cb_, &m_oNoFlashBackgroundColor);
 					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_foreground_cb_, &m_oNoFlashForegroundColor);
 					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_font_cb_, m_pNoFlashFontDescription);
+					m_vStimuliQueue.push_back(l_ui64StimulationIdentifier); // delay until rendered
 				}
 				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_SegmentStart)
 				{
@@ -511,6 +518,7 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 						// Trial start but no target letter, not sure what should be done here, probably nothing drastic to 
 						// avoid eliticing strong ERPs
 					}
+					m_vStimuliQueue.push_back(l_ui64StimulationIdentifier); // delay until rendered
 				}
 				else if (l_ui64StimulationIdentifier == OVTK_StimulationId_SegmentStop)
 				{
@@ -519,23 +527,29 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_background_cb_, &m_oNoFlashBackgroundColor);
 					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_foreground_cb_, &m_oNoFlashForegroundColor);
 					this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_font_cb_, m_pNoFlashFontDescription);
+					m_vStimuliQueue.push_back(l_ui64StimulationIdentifier); // delay until rendered
 				}
 				else if (l_ui64StimulationIdentifier >= m_ui64RowStimulationBase &&  l_ui64StimulationIdentifier < m_ui64RowStimulationBase + m_ui64RowCount)
 				{
 					// Target spec, dont change state
 					m_iTargetRow = int(l_ui64StimulationIdentifier - m_ui64RowStimulationBase);
+					m_pStimulusSender->sendStimulation(l_ui64StimulationIdentifier); // Immediate
 				} 
 				else if (l_ui64StimulationIdentifier >= m_ui64ColumnStimulationBase &&  l_ui64StimulationIdentifier < m_ui64ColumnStimulationBase + m_ui64ColumnCount)
 				{
 					// Target spec, dont change state
 					m_iTargetColumn = int(l_ui64StimulationIdentifier - m_ui64ColumnStimulationBase);
+					m_pStimulusSender->sendStimulation(l_ui64StimulationIdentifier); // Immediate
+				}
+				else if(l_ui64StimulationIdentifier == OVTK_StimulationId_Target || l_ui64StimulationIdentifier == OVTK_StimulationId_NonTarget)
+				{
+					// Note that the unsupervised speller does not use the target/nontarget labels; pass through for other uses e.g. debugging
+					m_vNextFlashType.push(l_ui64StimulationIdentifier);
 				}
 				else
 				{
-					// Hmm, unknown stimulation
+					// Hmm, unknown stimulation; drop
 				}
-				
-				m_vStimuliQueue.push_back(l_ui64StimulationIdentifier); // delay until rendered
 
 				// Has a letter been received on the timeline? 
 				if (m_iTargetColumn != -1 && m_iTargetRow != -1)
@@ -589,7 +603,7 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 	OV_WARNING_UNLESS_K(! (m_vNextFlashTime.size() > 0 && m_vNextFlashTime.front() > l_ui64CurrentTime), "Received flash in the future");
 
 	// If we have everything we need, lets flash
-	while (m_vNextFlashTime.size() > 0 && m_vNextFlashTime.front() <= l_ui64CurrentTime)
+	if(m_vNextFlashTime.size() > 0 && m_vNextFlashTime.front() <= l_ui64CurrentTime)
 	{
 		if (m_vFlashGroup.size() > 0)
 		{
@@ -598,12 +612,17 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 			flashNow(*l_pFlashGroup);
 			m_vNextFlashTime.pop();
 			m_vFlashGroup.pop();
-			delete l_pFlashGroup;
+			delete l_pFlashGroup;	
+			m_vStimuliQueue.push_back(OVTK_StimulationId_VisualStimulationStart); // delay until rendered
 		}
 		else
 		{
 			getLogManager() << LogLevel_Warning << "Should flash but no group received yet\n";
-			break;
+		}
+		if(m_vNextFlashType.size()>0)
+		{
+			m_vStimuliQueue.push_back(m_vNextFlashType.front());		 		// delay until rendered
+			m_vNextFlashType.pop();
 		}
 	}
 	
@@ -615,6 +634,7 @@ bool CBoxAlgorithmP300SpellerVisualisation2::process(void)
 		this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_background_cb_, &m_oNoFlashBackgroundColor);
 		this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_foreground_cb_, &m_oNoFlashForegroundColor);
 		this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_font_cb_, m_pNoFlashFontDescription);
+		m_vStimuliQueue.push_back(OVTK_StimulationId_VisualStimulationStop); // delay until rendered
 
 		m_vNextFlashStopTime.pop();
 	}
