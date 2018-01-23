@@ -9,6 +9,7 @@
 #endif
 
 #include "ovasCPluginLSLOutput.h"
+#include "ovasCPluginFiddler.h"
 
 #include "generic-oscillator/ovasCDriverGenericOscillator.h"
 #include "generic-sawtooth/ovasCDriverGenericSawTooth.h"
@@ -272,6 +273,8 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 #if defined TARGET_HAS_ThirdPartyLSL
 	registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginLSLOutput(rKernelContext));
 #endif
+
+	registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginFiddler(rKernelContext));
 
 	std::sort(m_vDriver.begin(), m_vDriver.end(), compare_driver_names);
 
@@ -825,6 +828,14 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 			l_pSettingControl = gtk_spin_button_new_with_range((gdouble)std::numeric_limits<int64>::min(), (gdouble)std::numeric_limits<int64>::max(), 1.0);
 			gtk_spin_button_set_value(GTK_SPIN_BUTTON(l_pSettingControl), (gdouble)*(r->getData()));
 		} 
+		else if( const TypedProperty<float32>* r = dynamic_cast< const TypedProperty<float32>* >(l_pCurrentProperty)) 
+		{
+			// cout << "float32\n";
+			l_pSettingControl = gtk_spin_button_new_with_range((gdouble)std::numeric_limits<float32>::min(), (gdouble)std::numeric_limits<float32>::max(), 1.0);
+			gtk_spin_button_set_digits(GTK_SPIN_BUTTON(l_pSettingControl), 5);
+			gtk_spin_button_set_increments(GTK_SPIN_BUTTON(l_pSettingControl), 0.1f, 1.0f);
+			gtk_spin_button_set_value(GTK_SPIN_BUTTON(l_pSettingControl), (gdouble)*(r->getData()));
+		} 
 		else 
 		{
 			// cout << "unknown\n";
@@ -884,6 +895,12 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 				{
 					// cout << "integer\n";
 					int64 tmp = static_cast<int64>(::gtk_spin_button_get_value(GTK_SPIN_BUTTON(m_vPluginProperties[setting_index].m_pWidget)));
+					r->replaceData( tmp );
+				} 
+				else if( TypedProperty<float32>* r = dynamic_cast< TypedProperty<float32>* >(l_pCurrentProperty)) 
+				{
+					// cout << "float32\n";
+					float32 tmp = static_cast<float32>(::gtk_spin_button_get_value(GTK_SPIN_BUTTON(m_vPluginProperties[setting_index].m_pWidget)));
 					r->replaceData( tmp );
 				} 
 				else 
