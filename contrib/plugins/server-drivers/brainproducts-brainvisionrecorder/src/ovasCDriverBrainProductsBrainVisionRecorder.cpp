@@ -28,6 +28,8 @@ CDriverBrainProductsBrainVisionRecorder::CDriverBrainProductsBrainVisionRecorder
 	,m_sServerHostName("localhost")
 	,m_ui32ServerHostPort(51244)
 	,m_ui32SampleCountPerSentBlock(0)
+	,m_pStructRDA_MessageHeader(NULL)
+	,m_uHeaderBufferSize(0)
 {
 	m_oSettings.add("Header", &m_oHeader);
 	m_oSettings.add("ServerHostName", &m_sServerHostName);
@@ -115,32 +117,29 @@ bool CDriverBrainProductsBrainVisionRecorder::initialize(
 		return false;
 	}
 
-	// Retrieve rest of data
-	if (!(*(&m_pStructRDA_MessageHeader) = (RDA_MessageHeader*)malloc(l_structRDA_MessageHeader.nSize)))
+	// Check if we need a larger buffer, allocate
+	if(!reallocateHeaderBuffer(l_structRDA_MessageHeader.nSize))
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Couldn't allocate memory\n";
 		return false;
 	}
-	else
-	{
-		memcpy(*(&m_pStructRDA_MessageHeader), &l_structRDA_MessageHeader, sizeof(l_structRDA_MessageHeader));
-		m_pcharStructRDA_MessageHeader = (char*)(*(&m_pStructRDA_MessageHeader)) + sizeof(l_structRDA_MessageHeader);
-		l_ui32Received=0;
-		l_ui32ReqLength = 0;
-		l_ui32Result = 0;
-		l_ui32Datasize = l_structRDA_MessageHeader.nSize - sizeof(l_structRDA_MessageHeader);
-		while(l_ui32Received < l_ui32Datasize)
-		{
-			l_ui32ReqLength = l_ui32Datasize -  l_ui32Received;
-			l_ui32Result = m_pConnectionClient->receiveBuffer((char*)m_pcharStructRDA_MessageHeader, l_ui32ReqLength);
 
-			l_ui32Received += l_ui32Result;
-			m_pcharStructRDA_MessageHeader += l_ui32Result;
-		}
+	// Retrieve rest of data
+	memcpy(*(&m_pStructRDA_MessageHeader), &l_structRDA_MessageHeader, sizeof(l_structRDA_MessageHeader));
+	m_pcharStructRDA_MessageHeader = (char*)(*(&m_pStructRDA_MessageHeader)) + sizeof(l_structRDA_MessageHeader);
+	l_ui32Received=0;
+	l_ui32ReqLength = 0;
+	l_ui32Result = 0;
+	l_ui32Datasize = l_structRDA_MessageHeader.nSize - sizeof(l_structRDA_MessageHeader);
+	while(l_ui32Received < l_ui32Datasize)
+	{
+		l_ui32ReqLength = l_ui32Datasize -  l_ui32Received;
+		l_ui32Result = m_pConnectionClient->receiveBuffer((char*)m_pcharStructRDA_MessageHeader, l_ui32ReqLength);
+
+		l_ui32Received += l_ui32Result;
+		m_pcharStructRDA_MessageHeader += l_ui32Result;
 	}
 
-	m_pStructRDA_MessageStart = NULL;
-	m_pStructRDA_MessageStart = (RDA_MessageStart*)m_pStructRDA_MessageHeader;
+	m_pStructRDA_MessageStart = (RDA_MessageStart*)m_pStructRDA_MessageHeader; // pHeader will retain the pointer ownership
 
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "> Header received\n";
 
@@ -243,30 +242,28 @@ bool CDriverBrainProductsBrainVisionRecorder::loop(void)
 		return false;
 	}
 
-	// Retrieve rest of block.
-	if (!(*(&m_pStructRDA_MessageHeader) = (RDA_MessageHeader*)malloc(l_structRDA_MessageHeader.nSize)))
+	// Check if we need a larger buffer, allocate
+	if(!reallocateHeaderBuffer(l_structRDA_MessageHeader.nSize))
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Couldn't allocate memory\n";
 		return false;
 	}
-	else
-	{
-		memcpy(*(&m_pStructRDA_MessageHeader), &l_structRDA_MessageHeader, sizeof(l_structRDA_MessageHeader));
-		m_pcharStructRDA_MessageHeader = (char*)(*(&m_pStructRDA_MessageHeader)) + sizeof(l_structRDA_MessageHeader);
-		l_ui32Received=0;
-		l_ui32ReqLength = 0;
-		l_ui32Result = 0;
-		l_ui32Datasize = l_structRDA_MessageHeader.nSize - sizeof(l_structRDA_MessageHeader);
-		while(l_ui32Received < l_ui32Datasize)
-		{
-			l_ui32ReqLength = l_ui32Datasize -  l_ui32Received;
-			l_ui32Result = m_pConnectionClient->receiveBuffer((char*)m_pcharStructRDA_MessageHeader, l_ui32ReqLength);
 
-			l_ui32Received += l_ui32Result;
-			m_pcharStructRDA_MessageHeader += l_ui32Result;
-		}
-		m_ui32BuffDataIndex++;
+	// Retrieve rest of block.
+	memcpy(*(&m_pStructRDA_MessageHeader), &l_structRDA_MessageHeader, sizeof(l_structRDA_MessageHeader));
+	m_pcharStructRDA_MessageHeader = (char*)(*(&m_pStructRDA_MessageHeader)) + sizeof(l_structRDA_MessageHeader);
+	l_ui32Received=0;
+	l_ui32ReqLength = 0;
+	l_ui32Result = 0;
+	l_ui32Datasize = l_structRDA_MessageHeader.nSize - sizeof(l_structRDA_MessageHeader);
+	while(l_ui32Received < l_ui32Datasize)
+	{
+		l_ui32ReqLength = l_ui32Datasize -  l_ui32Received;
+		l_ui32Result = m_pConnectionClient->receiveBuffer((char*)m_pcharStructRDA_MessageHeader, l_ui32ReqLength);
+
+		l_ui32Received += l_ui32Result;
+		m_pcharStructRDA_MessageHeader += l_ui32Result;
 	}
+	m_ui32BuffDataIndex++;
 
 	// Put the data into MessageData32 structure
 	m_pStructRDA_MessageData32 = NULL;
@@ -303,14 +300,17 @@ bool CDriverBrainProductsBrainVisionRecorder::loop(void)
 		m_ui32MarkerCount += m_pStructRDA_MessageData32->nMarkers;
 	}
 
-	std::vector<float32> l_vBuffer;
-	l_vBuffer.resize(m_oHeader.getChannelCount()*(uint32)m_pStructRDA_MessageData32->nPoints);
+	const uint32 l_ui32DataSize = m_oHeader.getChannelCount()*(uint32)m_pStructRDA_MessageData32->nPoints;
+	if(m_vSignalBuffer.size() < l_ui32DataSize)
+	{
+		m_vSignalBuffer.resize(l_ui32DataSize);
+	}
 
 	for (uint32 i=0; i < m_oHeader.getChannelCount(); i++)
 	{
 		for (uint32 j=0; j < (uint32)m_pStructRDA_MessageData32->nPoints; j++)
 		{
-			l_vBuffer[j + (i*(uint32)m_pStructRDA_MessageData32->nPoints)] = (float32)m_pStructRDA_MessageData32->fData[(m_oHeader.getChannelCount()*j) + i]*m_oHeader.getChannelGain(i);
+			m_vSignalBuffer[j + (i*(uint32)m_pStructRDA_MessageData32->nPoints)] = (float32)m_pStructRDA_MessageData32->fData[(m_oHeader.getChannelCount()*j) + i]*m_oHeader.getChannelGain(i);
 		}
 	}
 
@@ -324,7 +324,7 @@ bool CDriverBrainProductsBrainVisionRecorder::loop(void)
 		l_oStimulationSet.setStimulationDuration(i, 0);
 	}
 
-	m_pCallback->setSamples(&l_vBuffer[0],(uint32)m_pStructRDA_MessageData32->nPoints);
+	m_pCallback->setSamples(&m_vSignalBuffer[0],(uint32)m_pStructRDA_MessageData32->nPoints);
 	m_pCallback->setStimulationSet(l_oStimulationSet);
 	m_rDriverContext.correctDriftSampleCount(m_rDriverContext.getSuggestedDriftCorrectionSampleCount());
 
@@ -348,14 +348,22 @@ bool CDriverBrainProductsBrainVisionRecorder::uninitialize(void)
 	if(!m_rDriverContext.isConnected()) { return false; }
 	if(m_rDriverContext.isStarted()) { return false; }
 
-	if (m_pcharStructRDA_MessageHeader!=NULL) m_pcharStructRDA_MessageHeader=NULL;
-	if (m_pStructRDA_MessageHeader!=NULL) m_pStructRDA_MessageHeader= NULL;
-	if (m_pStructRDA_MessageStart!=NULL) m_pStructRDA_MessageStart=NULL;
-	if (m_pStructRDA_MessageStop!=NULL) m_pStructRDA_MessageStop=NULL;
-	if (m_pStructRDA_MessageData32!=NULL) m_pStructRDA_MessageData32=NULL;
-	if (m_pStructRDA_Marker!=NULL) m_pStructRDA_Marker=NULL;
+	if (m_pStructRDA_MessageHeader) 
+	{
+		free(m_pStructRDA_MessageHeader);
+		m_pStructRDA_MessageHeader= NULL;
+	}
+
+	m_pcharStructRDA_MessageHeader=NULL;
+	m_pStructRDA_MessageStart=NULL;
+	m_pStructRDA_MessageStop=NULL;
+	m_pStructRDA_MessageData32=NULL;
+	m_pStructRDA_Marker=NULL;
 
 	m_pCallback=NULL;
+
+	m_uHeaderBufferSize = 0;
+	m_vSignalBuffer.clear();
 
 	// Cleans up client connection
 	m_pConnectionClient->close();
@@ -392,4 +400,24 @@ bool CDriverBrainProductsBrainVisionRecorder::configure(void)
 	}
 
 	return false;
+}
+
+bool CDriverBrainProductsBrainVisionRecorder::reallocateHeaderBuffer(size_t newSize)
+{
+	// Reallocate buffer?
+	if(newSize>m_uHeaderBufferSize)
+	{
+		if(m_pStructRDA_MessageHeader) 
+		{
+			free(m_pStructRDA_MessageHeader);
+		}
+		m_uHeaderBufferSize = newSize;
+		m_pStructRDA_MessageHeader = (RDA_MessageHeader*)malloc(m_uHeaderBufferSize);
+		if(!m_pStructRDA_MessageHeader)
+		{
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Couldn't allocate memory\n";
+			return false;		
+		}
+	}
+	return true;
 }

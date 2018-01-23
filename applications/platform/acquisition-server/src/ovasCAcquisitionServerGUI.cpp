@@ -9,6 +9,7 @@
 #endif
 
 #include "ovasCPluginLSLOutput.h"
+#include "ovasCPluginFiddler.h"
 
 #include "generic-oscillator/ovasCDriverGenericOscillator.h"
 #include "generic-sawtooth/ovasCDriverGenericSawTooth.h"
@@ -273,6 +274,8 @@ CAcquisitionServerGUI::CAcquisitionServerGUI(const IKernelContext& rKernelContex
 	registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginLSLOutput(rKernelContext));
 #endif
 
+	registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginFiddler(rKernelContext));
+
 	std::sort(m_vDriver.begin(), m_vDriver.end(), compare_driver_names);
 
 	scanPluginSettings();
@@ -305,9 +308,9 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 		::fprintf(l_pFile, "AcquisitionServer_LastConnectionPort = %i\n", this->getTCPPort());
 		::fprintf(l_pFile, "# Last Preferences set in the acquisition server\n");
 		::fprintf(l_pFile, "AcquisitionServer_DriftCorrectionPolicy = %s\n", m_pAcquisitionServer->m_oDriftCorrection.getDriftCorrectionPolicyStr().toASCIIString());
-		::fprintf(l_pFile, "AcquisitionServer_JitterEstimationCountForDrift = %llu\n", m_pAcquisitionServer->m_oDriftCorrection.getJitterEstimationCountForDrift());
-		::fprintf(l_pFile, "AcquisitionServer_DriftToleranceDuration = %llu\n", m_pAcquisitionServer->m_oDriftCorrection.getDriftToleranceDurationMs());
-		::fprintf(l_pFile, "AcquisitionServer_OverSamplingFactor = %llu\n", m_pAcquisitionServer->getOversamplingFactor());
+		::fprintf(l_pFile, "AcquisitionServer_JitterEstimationCountForDrift = %u\n", static_cast<unsigned int>(m_pAcquisitionServer->m_oDriftCorrection.getJitterEstimationCountForDrift()));
+		::fprintf(l_pFile, "AcquisitionServer_DriftToleranceDuration = %u\n", static_cast<unsigned int>(m_pAcquisitionServer->m_oDriftCorrection.getDriftToleranceDurationMs()));
+		::fprintf(l_pFile, "AcquisitionServer_OverSamplingFactor = %u\n", static_cast<unsigned int>(m_pAcquisitionServer->getOversamplingFactor()));
 		::fprintf(l_pFile, "AcquisitionServer_ChannelSelection = %s\n", (m_pAcquisitionServer->isChannelSelectionRequested() ? "True" : "False"));
 		::fprintf(l_pFile, "AcquisitionServer_NaNReplacementPolicy = %s\n", m_pAcquisitionServer->getNaNReplacementPolicyStr().toASCIIString());
 
@@ -339,8 +342,7 @@ CAcquisitionServerGUI::~CAcquisitionServerGUI(void)
 		::fclose(l_pFile);
 	}
 
-	vector<IDriver*>::iterator itDriver;
-	for(itDriver=m_vDriver.begin(); itDriver!=m_vDriver.end(); itDriver++)
+	for(auto itDriver=m_vDriver.begin(); itDriver!=m_vDriver.end(); itDriver++)
 	{
 		m_rKernelContext.getLogManager() << LogLevel_Debug << "Deleting " << (*itDriver)->getName() << "\n";
 		delete (*itDriver);
@@ -410,18 +412,19 @@ boolean CAcquisitionServerGUI::initialize(void)
 	::GtkTreeStore* l_pDriverTreeStore=gtk_tree_store_new(1, G_TYPE_STRING);
 	gtk_combo_box_set_model(l_pComboBoxDriver, GTK_TREE_MODEL(l_pDriverTreeStore));
 
-	vector<IDriver*>::size_type i;
 	string l_sDefaultDriverName=m_rKernelContext.getConfigurationManager().expand("${AcquisitionServer_DefaultDriver}").toASCIIString();
 	transform(l_sDefaultDriverName.begin(), l_sDefaultDriverName.end(), l_sDefaultDriverName.begin(), ::to_lower<string::value_type>);
-	for(i=0; i<m_vDriver.size(); i++)
+	for(size_t i=0; i<m_vDriver.size(); i++) // n.b. dont use iterator here as we need a numeric index for gtk later anyway
 	{
+		IDriver *l_pDriver = m_vDriver[i];
+
 		::GtkTreeIter l_oIter;
 		gtk_tree_store_append(l_pDriverTreeStore, &l_oIter, NULL);
 
-		string l_sDriverName=m_vDriver[i]->getName();
+		string l_sDriverName=l_pDriver->getName();
 
-		const bool l_bUnstable = m_vDriver[i]->isFlagSet(DriverFlag_IsUnstable);
-		const bool l_bDeprecated = m_vDriver[i]->isFlagSet(DriverFlag_IsDeprecated);
+		const bool l_bUnstable = l_pDriver->isFlagSet(DriverFlag_IsUnstable);
+		const bool l_bDeprecated = l_pDriver->isFlagSet(DriverFlag_IsDeprecated);
 
 		const std::string l_sStringToDisplay =
 			   std::string((l_bUnstable || l_bDeprecated) ? "<span foreground=\"#6f6f6f\">" : "")
@@ -518,12 +521,14 @@ IHeader& CAcquisitionServerGUI::getHeaderCopy(void)
 	return m_oHeaderCopy;
 }
 
-void CAcquisitionServerGUI::setClientCount(uint32 ui32ClientCount)
+void CAcquisitionServerGUI::setClientText(const char *sClientText)
 {
-	// Updates 'host count' label when needed
-	char l_sLabel[1024];
-	::sprintf(l_sLabel, "%u host%s connected...", (unsigned int)ui32ClientCount, ui32ClientCount?"s":"");
-	::gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), l_sLabel);
+	gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), sClientText);
+}
+
+void CAcquisitionServerGUI::setStateText(const char *sStateText)
+{
+	gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), sStateText);
 }
 
 void CAcquisitionServerGUI::setDriftMs(float64 f64DriftMs)
@@ -562,11 +567,11 @@ void CAcquisitionServerGUI::setDriftMs(float64 f64DriftMs)
 
 	if(l_bDriftWarning)
 	{
-		::sprintf(l_sLabel, "<b>Device drift is too high</b> : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %llu ms) --&gt; early</small>", f64DriftMs, l_ui64DriftToleranceDurationMs);
+		::sprintf(l_sLabel, "<b>Device drift is too high</b> : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %u ms) --&gt; early</small>", f64DriftMs, static_cast<unsigned int>(l_ui64DriftToleranceDurationMs));
 	}
 	else
 	{
-		::sprintf(l_sLabel, "Device drift : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %llu ms) --&gt; early</small>", f64DriftMs, l_ui64DriftToleranceDurationMs);
+		::sprintf(l_sLabel, "Device drift : %3.2lf ms\n<small>late &lt;-- (tolerance is set to %u ms) --&gt; early</small>", f64DriftMs, static_cast<unsigned int>(l_ui64DriftToleranceDurationMs));
 	}
 	::gtk_label_set_markup(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_drift")), l_sLabel);
 }
@@ -652,16 +657,16 @@ void CAcquisitionServerGUI::buttonConnectToggledCB(::GtkToggleButton* pButton)
 		{
 			// Impedance window creation
 			{
-				uint64 l_ui64ColumnCount=m_rKernelContext.getConfigurationManager().expandAsInteger("${AcquisitionServer_CheckImpedance_ColumnCount}", 8);
-				uint32 l_ui32LineCount=(uint32)(m_oHeaderCopy.getChannelCount()/l_ui64ColumnCount);
-				uint32 l_ui32LastCount=(uint32)(m_oHeaderCopy.getChannelCount()%l_ui64ColumnCount);
+				const uint64 l_ui64ColumnCount=m_rKernelContext.getConfigurationManager().expandAsInteger("${AcquisitionServer_CheckImpedance_ColumnCount}", 8);
+				const uint32 l_ui32LineCount=(uint32)(m_oHeaderCopy.getChannelCount()/l_ui64ColumnCount);
+				const uint32 l_ui32LastCount=(uint32)(m_oHeaderCopy.getChannelCount()%l_ui64ColumnCount);
 
 				::GtkWidget* l_pTable=gtk_table_new((gint)(l_ui32LineCount+(l_ui32LastCount?1:0)), (gint)((l_ui32LineCount?l_ui64ColumnCount:l_ui32LastCount)), true);
 
 				for(uint32 i=0; i<m_oHeaderCopy.getChannelCount(); i++)
 				{
-					uint32 j=(uint32)(i/l_ui64ColumnCount);
-					uint32 k=(uint32)(i%l_ui64ColumnCount);
+					const uint32 j=(uint32)(i/l_ui64ColumnCount);
+					const uint32 k=(uint32)(i%l_ui64ColumnCount);
 					::GtkWidget* l_pProgressBar=::gtk_progress_bar_new();
 					::gtk_progress_bar_set_orientation(GTK_PROGRESS_BAR(l_pProgressBar), GTK_PROGRESS_BOTTOM_TO_TOP);
 					::gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(l_pProgressBar), 0);
@@ -689,9 +694,6 @@ void CAcquisitionServerGUI::buttonConnectToggledCB(::GtkToggleButton* pButton)
 			gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "spinbutton_connection_port")), false);
 			gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "combobox_sample_count_per_sent_block")), false);
 			gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "combobox_driver")), false);
-
-			gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "Connected ! Ready...");
-			gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), "0 host connected...");
 		}
 		else
 		{
@@ -725,8 +727,7 @@ void CAcquisitionServerGUI::buttonConnectToggledCB(::GtkToggleButton* pButton)
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "combobox_sample_count_per_sent_block")), true);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "combobox_driver")), true);
 
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "");
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), "");
+		setClientText("");
 	}
 }
 
@@ -744,12 +745,12 @@ void CAcquisitionServerGUI::buttonStartPressedCB(::GtkButton* pButton)
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "button_play")), false);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "button_stop")), true);
 
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "Sending...");
+		setStateText("Starting...");
 	}
 	else
 	{
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "Failed !");
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), "");
+		setStateText("Start failed !");
+		setClientText("");
 	}
 }
 
@@ -761,13 +762,11 @@ void CAcquisitionServerGUI::buttonStopPressedCB(::GtkButton* pButton)
 	{
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "button_play")), true);
 		gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(m_pBuilderInterface, "button_stop")), false);
-
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "Connected ! Ready...");
 	}
 	else
 	{
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_status")), "Failed !");
-		gtk_label_set_label(GTK_LABEL(gtk_builder_get_object(m_pBuilderInterface, "label_connected_host_count")), "");
+		setStateText("Stop failed !");
+		setClientText("");
 	}
 }
 
@@ -817,10 +816,24 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 			l_pSettingControl = gtk_entry_new();
 			gtk_entry_append_text(GTK_ENTRY(l_pSettingControl), r->getData()->toASCIIString());
 		} 
+		else if( const TypedProperty<uint32>* r = dynamic_cast< const TypedProperty<uint32>* >(l_pCurrentProperty)) 
+		{
+			// cout << "uinteger\n";
+			l_pSettingControl = gtk_spin_button_new_with_range((gdouble)std::numeric_limits<uint32>::min(), (gdouble)std::numeric_limits<uint32>::max(), 1.0);
+			gtk_spin_button_set_value(GTK_SPIN_BUTTON(l_pSettingControl), (gdouble)*(r->getData()));
+		} 
 		else if( const TypedProperty<int64>* r = dynamic_cast< const TypedProperty<int64>* >(l_pCurrentProperty)) 
 		{
 			// cout << "integer\n";
 			l_pSettingControl = gtk_spin_button_new_with_range((gdouble)std::numeric_limits<int64>::min(), (gdouble)std::numeric_limits<int64>::max(), 1.0);
+			gtk_spin_button_set_value(GTK_SPIN_BUTTON(l_pSettingControl), (gdouble)*(r->getData()));
+		} 
+		else if( const TypedProperty<float32>* r = dynamic_cast< const TypedProperty<float32>* >(l_pCurrentProperty)) 
+		{
+			// cout << "float32\n";
+			l_pSettingControl = gtk_spin_button_new_with_range((gdouble)std::numeric_limits<float32>::min(), (gdouble)std::numeric_limits<float32>::max(), 1.0);
+			gtk_spin_button_set_digits(GTK_SPIN_BUTTON(l_pSettingControl), 5);
+			gtk_spin_button_set_increments(GTK_SPIN_BUTTON(l_pSettingControl), 0.1f, 1.0f);
 			gtk_spin_button_set_value(GTK_SPIN_BUTTON(l_pSettingControl), (gdouble)*(r->getData()));
 		} 
 		else 
@@ -882,6 +895,12 @@ void CAcquisitionServerGUI::buttonPreferencePressedCB(::GtkButton* pButton)
 				{
 					// cout << "integer\n";
 					int64 tmp = static_cast<int64>(::gtk_spin_button_get_value(GTK_SPIN_BUTTON(m_vPluginProperties[setting_index].m_pWidget)));
+					r->replaceData( tmp );
+				} 
+				else if( TypedProperty<float32>* r = dynamic_cast< TypedProperty<float32>* >(l_pCurrentProperty)) 
+				{
+					// cout << "float32\n";
+					float32 tmp = static_cast<float32>(::gtk_spin_button_get_value(GTK_SPIN_BUTTON(m_vPluginProperties[setting_index].m_pWidget)));
 					r->replaceData( tmp );
 				} 
 				else 
@@ -952,15 +971,14 @@ void CAcquisitionServerGUI::scanPluginSettings()
 
 	m_vPluginProperties.clear();
 
-	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
+	for(auto itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
 	{
 		IAcquisitionServerPlugin* l_pPlugin = dynamic_cast<IAcquisitionServerPlugin*>(*itp);
 
 		SettingsHelper& tmp = l_pPlugin->getSettingsHelper();
 		const std::map<OpenViBE::CString, Property*>& props = tmp.getAllProperties();
 
-		std::map<OpenViBE::CString, Property*>::const_iterator prop_it = props.begin();
-		for(;prop_it!=props.end();++prop_it) {
+		for(auto prop_it = props.begin();prop_it!=props.end();++prop_it) {
 			m_vPluginProperties.push_back( PropertyAndWidget(prop_it->second, NULL) );
 		}
 
@@ -972,7 +990,7 @@ void CAcquisitionServerGUI::savePluginSettings()
 {
 	vector<IAcquisitionServerPlugin*> l_vPlugins = m_pAcquisitionServer->getPlugins();
 
-	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
+	for(auto itp = l_vPlugins.begin(); itp != l_vPlugins.end(); ++itp)
 	{
 		IAcquisitionServerPlugin* l_pPlugin = dynamic_cast<IAcquisitionServerPlugin*>(*itp);
 

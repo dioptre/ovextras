@@ -54,7 +54,10 @@
       </row>
       <row>
         <col id="0" translatable="yes">512</col>
-      </row>
+	  </row>
+      <row>
+        <col id="0" translatable="yes">1000</col>
+      </row>	  
       <row>
         <col id="0" translatable="yes">1024</col>
       </row>
@@ -64,6 +67,18 @@
       <row>
         <col id="0" translatable="yes">4096</col>
       </row>
+      <row>
+        <col id="0" translatable="yes">9600</col>
+      </row>	  
+      <row>
+        <col id="0" translatable="yes">19200</col>
+      </row>	 	  
+      <row>
+        <col id="0" translatable="yes">44100</col>
+      </row>	  
+      <row>
+        <col id="0" translatable="yes">48000</col>
+      </row>	  
     </data>
   </object>
   <object class="GtkDialog" id="openvibe-acquisition-server-settings">

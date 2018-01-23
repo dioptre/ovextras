@@ -138,7 +138,7 @@ boolean CConfigurationLabStreamingLayer::preConfigure(void)
 	else
 	{
 		char l_sBuffer[1024];
-		sprintf(l_sBuffer, "%lu", m_ui32FallbackSamplingRate);
+		sprintf(l_sBuffer, "%u", static_cast<unsigned int>(m_ui32FallbackSamplingRate));
 		::gtk_entry_set_text(l_pFallbackSamplingRateEntry, l_sBuffer);
 	}
 
@@ -197,7 +197,12 @@ boolean CConfigurationLabStreamingLayer::postConfigure(void)
 
 		// Retrieve fallback sampling rate
 		::GtkEntry* l_pFallbackSamplingRateEntry = GTK_ENTRY(gtk_builder_get_object(m_pBuilderConfigureInterface, "entry_fallback_sampling_frequency"));
-		if (::sscanf(gtk_entry_get_text(l_pFallbackSamplingRateEntry), "%lu", &m_ui32FallbackSamplingRate) != 1)
+		unsigned int l_uiFallbackSamplingRate = 0;
+		if (::sscanf(gtk_entry_get_text(l_pFallbackSamplingRateEntry), "%u", &l_uiFallbackSamplingRate) == 1)
+		{
+			m_ui32FallbackSamplingRate = static_cast<uint32>(l_uiFallbackSamplingRate);
+		}
+		else
 		{
 			m_ui32FallbackSamplingRate = 0;
 		}

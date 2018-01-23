@@ -35,7 +35,9 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::uint32 getSampleCountPerBuffer(void);
 		OpenViBE::uint32 getTCPPort(void);
 		OpenViBEAcquisitionServer::IHeader& getHeaderCopy(void);
-		void setClientCount(OpenViBE::uint32 ui32ClientCount);
+
+		void setStateText(const char *sStateText);
+		void setClientText(const char *sClientText);
 		void setDriftMs(OpenViBE::float64 f64DriftMs);
 		void setImpedance(OpenViBE::uint32 ui32ChannelIndex, OpenViBE::float64 f64Impedance);
 		void disconnect(void);

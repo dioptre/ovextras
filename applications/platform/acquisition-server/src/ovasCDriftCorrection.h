@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <list>
+#include <deque>
 
 namespace OpenViBEAcquisitionServer
 {
@@ -46,11 +47,12 @@ namespace OpenViBEAcquisitionServer
 		// \param oPendingStimulationSet [in/out] : The stimulation set to be realigned
 		// \param vPaddingBuffer[in] : The sample to repeatedly add if i64Correction > 0
 		virtual OpenViBE::boolean correctDrift(const OpenViBE::int64 i64Correction, OpenViBE::uint64& ui64TotalSamples, 
-					std::vector < std::vector < OpenViBE::float32 > >& vPendingBuffers, OpenViBE::CStimulationSet& oPendingStimulationSet,
+					std::deque < std::vector < OpenViBE::float32 > >& vPendingBuffers, OpenViBE::CStimulationSet& oPendingStimulationSet,
 					const std::vector < OpenViBE::float32 >& vPaddingBuffer );
 		
 		// Status functions
 		virtual OpenViBE::boolean isActive(void) const { return m_bIsActive; };
+
 		// Prints various statistics but only if drift tolerance was exceeded
 		virtual void printStats(void) const;
 

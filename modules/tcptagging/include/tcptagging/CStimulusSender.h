@@ -25,10 +25,11 @@ namespace TCPTagging
 		virtual ~CStimulusSender();
 
 		// Connect to the TCP Tagging plugin of the Acquisition Server
-		virtual TCPTagging::boolean connect(const char* sAddress, const char* sStimulusPort);
+		bool connect(const char* sAddress, const char* sStimulusPort) override;
 
-		// Send a stimulation. Set Timestamp to 0 for immediate tagging (also the default).
-		virtual TCPTagging::boolean sendStimulation(TCPTagging::uint64 ui64Stimulation, TCPTagging::uint64 ui64Timestamp = 0) ;
+		// Send a stimulation. 
+		bool sendStimulation(uint64_t ui64Stimulation, uint64_t ui64Timestamp = 0, 
+			uint64_t ui64Flags = (FLAG_FPTIME | FLAG_AUTOSTAMP_CLIENTSIDE) ) override;
 
 	protected:
 

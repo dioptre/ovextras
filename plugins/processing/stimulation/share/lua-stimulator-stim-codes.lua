@@ -21,6 +21,10 @@ OVTK_StimulationId_VisualStimulationStop              = 0x0000800c
 OVTK_StimulationId_VisualSteadyStateStimulationStart  = 0x00008010
 OVTK_StimulationId_VisualSteadyStateStimulationStop   = 0x00008011
 
+OVTK_StimulationId_RemovedSamples                     = 0x00008310
+OVTK_StimulationId_AddedSamplesBegin                  = 0x00008311
+OVTK_StimulationId_AddedSamplesEnd                    = 0x00008312
+
 OVTK_StimulationId_LabelStart                         = 0x00008100
 OVTK_StimulationId_Label_00                           = 0x00008100
 OVTK_StimulationId_Label_01                           = 0x00008101

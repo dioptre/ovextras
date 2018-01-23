@@ -25,11 +25,11 @@ namespace OpenViBEAcquisitionServer
 
 	typedef struct
 	{
-		OpenViBE::uint64 m_ui64ConnectionTime;
-		OpenViBE::uint64 m_ui64StimulationTimeOffset;
-		OpenViBE::uint64 m_ui64SignalSampleCountToSkip;
-		CConnectionClientHandlerThread* m_pConnectionClientHandlerThread;
-		std::thread* m_pConnectionClientHandlerStdThread;
+		OpenViBE::uint64 m_ui64ConnectionTime;                              // Time the client connected
+		OpenViBE::uint64 m_ui64StimulationTimeOffset;                       // Time offset wrt acquisition start
+		OpenViBE::uint64 m_ui64SignalSampleCountToSkip;                     // How many samples to skip wrt current buffer start. n.b. not a constant.
+		CConnectionClientHandlerThread* m_pConnectionClientHandlerThread;  // Ptr to the class object that is executed by the client connection handler thread
+		std::thread* m_pConnectionClientHandlerStdThread;                  // The actual thread handle
 		bool m_bChannelUnitsSent; 
 		bool m_bChannelLocalisationSent;
 	} SConnectionInfo;
@@ -109,6 +109,10 @@ namespace OpenViBEAcquisitionServer
 		//
 		virtual OpenViBE::boolean acceptNewConnection(Socket::IConnection* pConnection);
 
+	protected:
+
+		bool requestClientThreadQuit(CConnectionClientHandlerThread* th);
+
 	public:
 
 		// See class DoubleLock
@@ -143,7 +147,7 @@ namespace OpenViBEAcquisitionServer
 
 		std::list < std::pair < Socket::IConnection*, SConnectionInfo > > m_vConnection;
 		std::list < std::pair < Socket::IConnection*, SConnectionInfo > > m_vPendingConnection;
-		std::vector < std::vector < OpenViBE::float32 > > m_vPendingBuffer;
+		std::deque < std::vector < OpenViBE::float32 > > m_vPendingBuffer;
 		std::vector < OpenViBE::float32 > m_vSwapBuffer;
 		std::vector < OpenViBE::float32 > m_vOverSamplingSwapBuffer;
 		std::vector < OpenViBE::float64 > m_vImpedance;
@@ -171,9 +175,9 @@ namespace OpenViBEAcquisitionServer
 		CDriftCorrection m_oDriftCorrection;
 
 		OpenViBE::uint64 m_ui64JitterEstimationCountForDrift;
-		OpenViBE::uint64 m_ui64DriverTimeoutDuration;
-		OpenViBE::uint64 m_ui64StartedDriverSleepDuration;
-		OpenViBE::uint64 m_ui64StoppedDriverSleepDuration;
+		OpenViBE::uint64 m_ui64DriverTimeoutDuration;               // ms after which the driver is considered having time-outed
+		OpenViBE::int64 m_i64StartedDriverSleepDuration;            // ms, <0 == spin, 0 == yield thread, >0 sleep. Used when driver does not return samples.
+		OpenViBE::uint64 m_ui64StoppedDriverSleepDuration;          // ms to sleep when driver is not running
 
 		OpenViBE::uint8* m_pSampleBuffer;
 		OpenViBE::CStimulationSet m_oPendingStimulationSet;

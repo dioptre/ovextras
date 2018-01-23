@@ -118,6 +118,7 @@ namespace OpenViBEAcquisitionServer
 
 		OpenViBE::uint32 m_ui32TotalHardwareStimulations; //since start button clicked
 		OpenViBE::uint32 m_ui32TotalDriverChunksLost;     //since start button clicked
+		OpenViBE::uint32 m_ui32TotalDriverTimeouts;		  //since start button clicked
 		OpenViBE::uint32 m_ui32TotalRingBufferOverruns;
 		OpenViBE::uint32 m_ui32TotalDataUnavailable; 
 

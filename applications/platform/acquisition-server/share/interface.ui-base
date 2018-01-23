@@ -444,11 +444,9 @@
             <property name="n_columns">2</property>
             <child>
               <object class="GtkLabel" id="label_status">
-                <property name="width_request">128</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="justify">center</property>
-                <property name="wrap">True</property>
               </object>
               <packing>
                 <property name="right_attach">2</property>
@@ -456,11 +454,9 @@
             </child>
             <child>
               <object class="GtkLabel" id="label_connected_host_count">
-                <property name="width_request">128</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="justify">center</property>
-                <property name="wrap">True</property>
               </object>
               <packing>
                 <property name="right_attach">2</property>

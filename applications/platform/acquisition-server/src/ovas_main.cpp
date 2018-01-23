@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+#include <system/ovCTime.h>
+
 #if defined(TARGET_OS_Windows)
   #include <Windows.h>
   #include <MMSystem.h>
@@ -31,16 +33,14 @@ boolean parse_arguments(int argc, char** argv, SConfiguration& rConfiguration)
 {
 	SConfiguration l_oConfiguration;
 
-	int i;
 	std::vector < std::string > l_vArgValue;
-	std::vector < std::string >::const_iterator it;
-	for(i=1; i<argc; i++)
+	for(int i=1; i<argc; i++)
 	{
 		l_vArgValue.push_back(argv[i]);
 	}
 	l_vArgValue.push_back("");
 
-	for(it=l_vArgValue.begin(); it!=l_vArgValue.end(); it++)
+	for(auto it=l_vArgValue.begin(); it!=l_vArgValue.end(); it++)
 	{
 		if(*it=="")
 		{
@@ -176,8 +176,6 @@ int main(int argc, char ** argv)
 			}
 			else
 			{
-				// @FIXME CERT what is the correct initialization convention? The legacy style from toolkit crashes.
-				// OpenViBEToolkit::initialize(*l_pKernelContext);
 				l_pKernelContext->initialize();
 
 				IConfigurationManager& l_rConfigurationManager=l_pKernelContext->getConfigurationManager();
@@ -190,13 +188,18 @@ int main(int argc, char ** argv)
 
 				l_pKernelContext->getPluginManager().addPluginsFromFiles(l_rConfigurationManager.expand("${AcquisitionServer_Plugins}"));
 
-				std::map<std::string, std::string>::const_iterator itr;
-				for(itr=l_oConfiguration.m_oTokenMap.begin();
+				for(auto itr=l_oConfiguration.m_oTokenMap.begin();
 					itr!=l_oConfiguration.m_oTokenMap.end();
 					itr++)
 				{
 					l_pKernelContext->getLogManager() << LogLevel_Trace << "Adding command line configuration token [" << (*itr).first.c_str() << " = " << (*itr).second.c_str() << "]\n";
 					l_rConfigurationManager.addOrReplaceConfigurationToken((*itr).first.c_str(), (*itr).second.c_str());
+				}
+
+				// Check the clock
+				if(!System::Time::isClockSteady())
+				{
+					l_pKernelContext->getLogManager() << LogLevel_Warning << "The system does not seem to have a steady clock. This may affect the acquisition time precision.\n";
 				}
 
 				if(!gtk_init_check(&argc, &argv))
@@ -227,18 +230,9 @@ int main(int argc, char ** argv)
 				signal(SIGQUIT, SIG_DFL);
 #endif
 
-#if 0 // This is not needed in the acquisition server
-				if(l_rConfigurationManager.expandAsBoolean("${Kernel_3DVisualisationEnabled}"))
-				{
-					l_pKernelContext->getVisualisationManager().initialize3DContext();
-				}
-#endif
-
 				{
 					// If this is encapsulated by gdk_threads_enter() and gdk_threads_exit(), m_pThread->join() can hang when gtk_main() returns before destructor of app has been called.
 					OpenViBEAcquisitionServer::CAcquisitionServerGUI app(*l_pKernelContext);
-
-
 
 					try
 					{
@@ -248,8 +242,6 @@ int main(int argc, char ** argv)
 					{
 						l_pKernelContext->getLogManager() << LogLevel_Fatal << "Catched top level exception\n";
 					}
-
-
 				}
 
 				cout<<"[  INF  ] Application terminated, releasing allocated objects"<<endl;

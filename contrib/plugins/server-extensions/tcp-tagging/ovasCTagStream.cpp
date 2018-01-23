@@ -1,6 +1,8 @@
 #include "ovasCTagStream.h"
 
-#include <sys/timeb.h>
+#include <system/ovCTime.h>
+
+#include <iostream>
 
 #include <thread>
 #include <mutex>
@@ -28,7 +30,7 @@ bool CTagQueue::pop(Tag &tag)
 
 
 CTagSession::CTagSession(boost::asio::io_service &io_service, const SharedQueuePtr &queue)
-	: m_socket(io_service), m_queuePtr(queue)
+	: m_socket(io_service), m_queuePtr(queue), m_errorState(0)
 {
 }
 
@@ -39,6 +41,7 @@ tcp::socket &CTagSession::socket()
 
 void CTagSession::start()
 {
+	m_errorState = 0;
 	startRead();
 }
 
@@ -50,16 +53,23 @@ void CTagSession::startRead()
 
 void CTagSession::handleRead(const boost::system::error_code &error)
 {
-	if (!error) {
-		// If the timestamp is 0, set timestamp to current posix time.
-		if (m_tag.timestamp==0) {
-			// Get POSIX time (number of milliseconds since epoch)
-			timeb time_buffer;
-			ftime(&time_buffer);
-			unsigned long long posixTime = time_buffer.time*1000ULL + time_buffer.millitm;
-
-			// edit timestamp
-			m_tag.timestamp=posixTime;
+	if (!error) 
+	{
+		if(m_tag.timestamp == 0 || (m_tag.flags & TCP_Tagging_Flags::FLAG_AUTOSTAMP_SERVERSIDE))
+		{
+			// Client didn't provide timestamp or asked the server to do it. Stamp current time.
+			m_tag.timestamp = System::Time::zgetTimeRaw(false);
+		}
+		else if(!(m_tag.flags & TCP_Tagging_Flags::FLAG_FPTIME))
+		{
+			// Client provided stamp but not in FPTIME
+			m_tag.timestamp = System::Time::zgetTimeRaw(false);
+			if(!(m_errorState & (1LL<<1)))
+			{
+				// @fixme not appropriate to print errors from a thread, but better than silent fail
+				std::cout << "[WARNING] TCP Tagging: Received tag(s) not in fixed point time. Not supported, will replace with server time.\n";
+				m_errorState |= (1LL<<1);
+			}
 		}
 
 		// Push tag to the queue.

@@ -18,12 +18,15 @@
 #include <cctype>
 #include <cstring>
 #include <cmath> // std::isnan, std::isfinite
+#include <condition_variable>
 
 #include <cassert>
 
 #include <mutex>
 
 #include <iostream>
+
+// #include <iomanip>
 
 #define boolean OpenViBE::boolean
 
@@ -166,63 +169,94 @@ namespace OpenViBEAcquisitionServer
 		CConnectionClientHandlerThread(CAcquisitionServer& rAcquisitionServer, Socket::IConnection& rConnection)
 			:m_rAcquisitionServer(rAcquisitionServer)
 			,m_rConnection(rConnection)
+			,m_bPleaseQuit(false)
 		{
 		}
 
 		void operator()(void)
 		{
-			do
+			std::unique_lock<std::mutex> oLock(m_oClientThreadMutex, std::defer_lock);
+
+			while(true)
 			{
-				CMemoryBuffer* l_pMemoryBuffer=NULL;
+				oLock.lock();
 
-				{
-					DoubleLock lock(&m_oPendingBufferProtectionMutex, &m_oPendingBufferExecutionMutex);
-
-					if(m_vPendingBuffer.size())
-					{
-						l_pMemoryBuffer=m_vPendingBuffer.front();
-						m_vPendingBuffer.pop_front();
+				// Wait until something interesting happens...
+				m_oPendingBufferCondition.wait(oLock,
+					[this]() { 
+						return (m_bPleaseQuit ||  !m_rConnection.isConnected() || m_vClientPendingBuffer.size()>0);
 					}
+				);
+
+				// Exit the loop if we're told to quit or if we've lost the connection
+				if(m_bPleaseQuit || !m_rConnection.isConnected())
+				{
+					oLock.unlock();
+					break;
 				}
 
-				if(l_pMemoryBuffer)
+				// At this point, we should have a buffer
+				if(!m_vClientPendingBuffer.size())
 				{
-					uint64 l_ui64MemoryBufferSize=l_pMemoryBuffer->getSize();
-					m_rConnection.sendBufferBlocking(&l_ui64MemoryBufferSize, sizeof(l_ui64MemoryBufferSize));
-					m_rConnection.sendBufferBlocking(l_pMemoryBuffer->getDirectPointer(), (uint32)l_pMemoryBuffer->getSize());
-					delete l_pMemoryBuffer;
+					// n.b. Shouldn't happen, but we don't have an error reporting mechanism in the thread...
+					oLock.unlock();
+					continue;
 				}
-				else
-				{
-					System::Time::sleep((uint32)m_rAcquisitionServer.m_ui64StartedDriverSleepDuration);
-				}
+
+				CMemoryBuffer* l_pMemoryBuffer=m_vClientPendingBuffer.front();
+				m_vClientPendingBuffer.pop_front();
+
+				// Don't go into blocking send while holding the lock; ok to unlock as l_pMemoryBuffer ptr+mem is now owned by this thread
+				oLock.unlock();
+
+				const uint64 l_ui64MemoryBufferSize=l_pMemoryBuffer->getSize();
+				m_rConnection.sendBufferBlocking(&l_ui64MemoryBufferSize, sizeof(l_ui64MemoryBufferSize));
+				m_rConnection.sendBufferBlocking(l_pMemoryBuffer->getDirectPointer(), (uint32)l_pMemoryBuffer->getSize());
+				delete l_pMemoryBuffer;
+
 			}
-			while(m_rConnection.isConnected());
 
-			while(m_vPendingBuffer.size())
+			oLock.lock();
+
+			// We're done, clean any possible pending buffers
+			for(auto it = m_vClientPendingBuffer.begin(); it!=m_vClientPendingBuffer.end(); it++)
 			{
-				delete m_vPendingBuffer.front();
-				m_vPendingBuffer.pop_front();
+				delete *it;
 			}
+			m_vClientPendingBuffer.clear();
+
+			oLock.unlock();
+
+			// The thread will exit here and can be joined
 		}
 
 		void scheduleBuffer(const IMemoryBuffer& rMemoryBuffer)
 		{
-			CMemoryBuffer* l_pMemoryBuffer=new CMemoryBuffer(rMemoryBuffer);
+			{
+				std::lock_guard<std::mutex> oLock(m_oClientThreadMutex);
+				if(!m_bPleaseQuit)
+				{
+					CMemoryBuffer* l_pMemoryBuffer=new CMemoryBuffer(rMemoryBuffer);
+					m_vClientPendingBuffer.push_back(l_pMemoryBuffer);
+				}
+			}
 
-			DoubleLock lock(&m_oPendingBufferProtectionMutex, &m_oPendingBufferExecutionMutex);
-
-			m_vPendingBuffer.push_back(l_pMemoryBuffer);
+			// No big harm notifying in any case, though if in 'quit' state, the quit request has already notified
+			m_oPendingBufferCondition.notify_one();
 		}
 
 		CAcquisitionServer& m_rAcquisitionServer;
 		Socket::IConnection& m_rConnection;
 
-		std::deque < CMemoryBuffer* > m_vPendingBuffer;
+		std::deque < CMemoryBuffer* > m_vClientPendingBuffer;
 
-		// See class DoubleLock
-		std::mutex m_oPendingBufferProtectionMutex;
-		std::mutex m_oPendingBufferExecutionMutex;
+		// Here we use a condition variable to avoid sleeping
+		std::mutex m_oClientThreadMutex;
+		std::condition_variable m_oPendingBufferCondition;
+		
+		// Should this thread quit?
+		bool m_bPleaseQuit;
+
 	};
 
 	static void start_connection_client_handler_thread(CConnectionClientHandlerThread* pThread)
@@ -252,7 +286,6 @@ CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
 	m_pDriverContext=new CDriverContext(rKernelContext, *this);
 
 	m_pStreamEncoder=&m_rKernelContext.getAlgorithmManager().getAlgorithm(m_rKernelContext.getAlgorithmManager().createAlgorithm(OVP_GD_ClassId_Algorithm_MasterAcquisitionStreamEncoder));
-	// m_pStreamEncoder=&m_rKernelContext.getAlgorithmManager().getAlgorithm(m_rKernelContext.getAlgorithmManager().createAlgorithm(OVP_ClassId_GD_Algorithm_MasterAcquisitionStreamEncoderCSV));
 	m_pStreamEncoder->initialize();
 
 	ip_ui64SubjectIdentifier.initialize(m_pStreamEncoder->getInputParameter(OVP_GD_Algorithm_MasterAcquisitionStreamEncoder_InputParameterId_SubjectIdentifier));
@@ -286,11 +319,11 @@ CAcquisitionServer::CAcquisitionServer(const IKernelContext& rKernelContext)
 	this->setImpedanceCheckRequest(m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_CheckImpedance}", false));
 	this->setChannelSelectionRequest(m_rKernelContext.getConfigurationManager().expandAsBoolean("${AcquisitionServer_ChannelSelection}", false));
 
-	m_ui64StartedDriverSleepDuration=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_StartedDriverSleepDuration}", 2);
+	m_i64StartedDriverSleepDuration= m_rKernelContext.getConfigurationManager().expandAsInteger("${AcquisitionServer_StartedDriverSleepDuration}", 0);
 	m_ui64StoppedDriverSleepDuration=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_StoppedDriverSleepDuration}", 100);
 	m_ui64DriverTimeoutDuration=m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_DriverTimeoutDuration}", 5000);
 
-	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
+	for(auto itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
 	{
 		(*itp)->createHook();
 	}
@@ -301,14 +334,12 @@ CAcquisitionServer::~CAcquisitionServer(void)
 	if(m_bStarted)
 	{
 		m_pDriver->stop();
-		// m_pDriverContext->onStop(*m_pDriver->getHeader());
 		m_bStarted=false;
 	}
 
 	if(m_bInitialized)
 	{
 		m_pDriver->uninitialize();
-		// m_pDriverContext->onUninitialize(*m_pDriver->getHeader());
 		m_bInitialized=false;
 	}
 
@@ -318,15 +349,9 @@ CAcquisitionServer::~CAcquisitionServer(void)
 		m_pConnectionServer=NULL;
 	}
 
-	/* -- should already be empty after call to stop -- */
-	/*
-    list < pair < Socket::IConnection*, SConnectionInfo > >::iterator itConnection=m_vConnection.begin();
-    while(itConnection!=m_vConnection.end())
-    {
-	itConnection->first->release();
-	itConnection=m_vConnection.erase(itConnection);
-    }
-*/
+	// n.b. We don't clear the connection list as the teardown order (even on window close)
+	// will lead to AcquisitionServerGUI terminating the AcquisitionThread which will
+	// in turn call the server's ::stop() that clears the list.
 
 	ip_ui64SubjectIdentifier.uninitialize();
 	ip_ui64SubjectAge.uninitialize();
@@ -374,16 +399,14 @@ float64 CAcquisitionServer::getImpedance(const uint32 ui32ChannelIndex)
 
 boolean CAcquisitionServer::loop(void)
 {
-	// m_rKernelContext.getLogManager() << LogLevel_Debug << "idleCB\n";
-
-	list < pair < Socket::IConnection*, SConnectionInfo > >::iterator itConnection;
+	// m_rKernelContext.getLogManager() << LogLevel_Debug << "loop()\n";
 
 	// Searches for new connection(s)
 	if(m_pConnectionServer)
 	{
 		DoubleLock lock(&m_oPendingConnectionProtectionMutex, &m_oPendingConnectionExecutionMutex);
 
-		for(itConnection=m_vPendingConnection.begin(); itConnection!=m_vPendingConnection.end(); itConnection++)
+		for(auto itConnection=m_vPendingConnection.begin(); itConnection!=m_vPendingConnection.end(); itConnection++)
 		{
 			m_rKernelContext.getLogManager() << LogLevel_Info << "Received new connection...\n";
 
@@ -404,19 +427,26 @@ boolean CAcquisitionServer::loop(void)
 					l_i64SignedTheoreticalSampleCountToSkip=((int64(itConnection->second.m_ui64ConnectionTime-m_ui64LastDeliveryTime)*m_ui32SamplingFrequency)>>32)+m_vPendingBuffer.size();
 				}
 
-				uint64 l_ui64TheoreticalSampleCountToSkip=(l_i64SignedTheoreticalSampleCountToSkip<0?0:uint64(l_i64SignedTheoreticalSampleCountToSkip));
+				const uint64 l_ui64TheoreticalSampleCountToSkip=(l_i64SignedTheoreticalSampleCountToSkip<0?0:uint64(l_i64SignedTheoreticalSampleCountToSkip));
 
 				m_rKernelContext.getLogManager() << LogLevel_Trace << "Sample count offset at connection : " << l_ui64TheoreticalSampleCountToSkip << "\n";
 
+				if ( (m_ui64SampleCount-m_vPendingBuffer.size()) % m_ui32SampleCountPerSentBlock != 0)
+					m_rKernelContext.getLogManager() << LogLevel_Error << "Buffer start sample " << m_ui64SampleCount-m_vPendingBuffer.size() << " doesn't seem to be divisible by " 
+						<< m_ui32SampleCountPerSentBlock << " (case B)\n";
+
+				const uint64 l_ui64BufferDuration       = ip_ui64BufferDuration;
+				const uint64 l_ui64PastBufferCount      = (m_ui64SampleCount-m_vPendingBuffer.size())/m_ui32SampleCountPerSentBlock;
+				const uint64 l_ui64ConnBufferTimeOffset = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64TheoreticalSampleCountToSkip);
+
 				SConnectionInfo l_oInfo;
 				l_oInfo.m_ui64ConnectionTime=itConnection->second.m_ui64ConnectionTime;
-				l_oInfo.m_ui64StimulationTimeOffset=ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64TheoreticalSampleCountToSkip+m_ui64SampleCount-m_vPendingBuffer.size());
-				l_oInfo.m_ui64SignalSampleCountToSkip=l_ui64TheoreticalSampleCountToSkip;
+				l_oInfo.m_ui64StimulationTimeOffset = l_ui64PastBufferCount * l_ui64BufferDuration + l_ui64ConnBufferTimeOffset;
+				l_oInfo.m_ui64SignalSampleCountToSkip = l_ui64TheoreticalSampleCountToSkip;
 				l_oInfo.m_pConnectionClientHandlerThread=new CConnectionClientHandlerThread(*this, *l_pConnection);
 				l_oInfo.m_pConnectionClientHandlerStdThread=new std::thread(std::bind(&start_connection_client_handler_thread, l_oInfo.m_pConnectionClientHandlerThread));
 				l_oInfo.m_bChannelLocalisationSent = false;
 				l_oInfo.m_bChannelUnitsSent = false;
-				//applyPriority(l_oInfo.m_pConnectionClientHandlerStdThread,15);
 
 				m_vConnection.push_back(pair < Socket::IConnection*, SConnectionInfo >(l_pConnection, l_oInfo));
 
@@ -449,18 +479,20 @@ boolean CAcquisitionServer::loop(void)
 	}
 
 	// Cleans disconnected client(s)
-	for(itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); )
+	for(auto itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); )
 	{
 		Socket::IConnection* l_pConnection=itConnection->first;
 		if(!l_pConnection->isConnected())
 		{
-			l_pConnection->release();
 			if(itConnection->second.m_pConnectionClientHandlerStdThread)
 			{
+				requestClientThreadQuit(itConnection->second.m_pConnectionClientHandlerThread);
+
 				itConnection->second.m_pConnectionClientHandlerStdThread->join();
 				delete itConnection->second.m_pConnectionClientHandlerStdThread;
 				delete itConnection->second.m_pConnectionClientHandlerThread;
 			}
+			l_pConnection->release();
 			itConnection=m_vConnection.erase(itConnection);
 			m_rKernelContext.getLogManager() << LogLevel_Info << "Closed connection...\n";
 		}
@@ -480,15 +512,33 @@ boolean CAcquisitionServer::loop(void)
 			l_bResult=true;
 			l_bTimeout=false;
 			m_bGotData=false;
-			uint32 l_ui32StartTime=System::Time::getTime();
+			const uint32 l_ui32TimeBeforeCall=System::Time::getTime();
 			while(l_bResult && !m_bGotData && !l_bTimeout)
 			{
 				// Calls driver's loop
 				l_bResult=m_pDriver->loop();
 				if(!m_bGotData)
 				{
-					System::Time::sleep((uint32)m_ui64StartedDriverSleepDuration);
-					l_bTimeout=(System::Time::getTime()>l_ui32StartTime+m_ui64DriverTimeoutDuration);
+					l_bTimeout=(System::Time::getTime()>l_ui32TimeBeforeCall+m_ui64DriverTimeoutDuration);
+
+					if(m_i64StartedDriverSleepDuration>0) 
+					{
+						// This may cause jitter due to inaccuracies in sleep duration, but has the
+						// benefit that it frees the CPU core for other tasks
+						System::Time::sleep( static_cast<uint32_t>(m_i64StartedDriverSleepDuration) );
+					} 
+					else if(m_i64StartedDriverSleepDuration==0)
+					{
+						// Generally spins, but gives other threads a chance. Note that there is no guarantee when
+						// the scheduler reschedules this thread.
+						std::this_thread::yield();
+					}
+					else
+					{
+						// < 0 -> NOP, spins, doesn't offer to yield 
+						// n.b. Unless the driver waits for samples (preferably with a hardware event), 
+						// this choice will spin one core fully.
+					}
 				}
 			}
 			if(l_bTimeout)
@@ -524,21 +574,27 @@ boolean CAcquisitionServer::loop(void)
 		const int64 p = m_ui64SampleCount-m_vPendingBuffer.size();
 		if (p < 0)
 			m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << " (case A)\n";
+		if (p % m_ui32SampleCountPerSentBlock != 0)
+			m_rKernelContext.getLogManager() << LogLevel_Error << "Buffer start sample " << p << " doesn't seem to be divisible by " 
+				<< m_ui32SampleCountPerSentBlock << " (case A)\n";
 
+		// n.b. here we use arithmetic based on buffer duration so that we are in perfect agreement with
+		// Acquisition Client box that sets the chunk starts and ends by steps of buffer duration.
+		const uint64 l_ui64BufferDuration     = ip_ui64BufferDuration;
 		const uint64 l_ui64BufferStartSamples = m_ui64SampleCount-m_vPendingBuffer.size();
-		const uint64 l_ui64BufferEndSamples   = m_ui64SampleCount-m_vPendingBuffer.size()+m_ui32SampleCountPerSentBlock;
-		const uint64 l_ui64BufferStartTime    = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferStartSamples);
-		const uint64 l_ui64BufferEndTime      = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferEndSamples);
-		const uint64 l_ui64SampleTime         = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount);
+		const uint64 l_ui64PastBufferCount    = l_ui64BufferStartSamples / m_ui32SampleCountPerSentBlock;
+		const uint64 l_ui64BufferStartTime    = l_ui64PastBufferCount * l_ui64BufferDuration;
+		const uint64 l_ui64BufferEndTime      = l_ui64BufferStartTime + l_ui64BufferDuration;
+		const uint64 l_ui64LastSampleTime     = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64SampleCount);
 
 		// Pass the stimuli and buffer to all plugins; note that they may modify them
-		for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
+		for(auto itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
 		{
-			(*itp)->loopHook(m_vPendingBuffer, m_oPendingStimulationSet, l_ui64BufferStartTime, l_ui64BufferEndTime, l_ui64SampleTime);
+			(*itp)->loopHook(m_vPendingBuffer, m_oPendingStimulationSet, l_ui64BufferStartTime, l_ui64BufferEndTime, l_ui64LastSampleTime);
 		}
 
 		// Handle connections
-		for(itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); itConnection++)
+		for(auto itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); itConnection++)
 		{
 			// Socket::IConnection* l_pConnection=itConnection->first;
 			SConnectionInfo& l_rInfo=itConnection->second;
@@ -558,27 +614,38 @@ boolean CAcquisitionServer::loop(void)
 					}
 				}
 
-				//				int l = l_oStimulationSet.getStimulationCount();
-
-				const int64 p = l_ui64BufferStartSamples+l_rInfo.m_ui64SignalSampleCountToSkip;
-				if (p < 0)
-					m_rKernelContext.getLogManager() << LogLevel_Error << "Signed number used for bit operations:" << p << " (case B)\n";
-
-				const uint64 l_ui64ConnBlockStartTime = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferStartSamples + l_rInfo.m_ui64SignalSampleCountToSkip);
-				const uint64 l_ui64ConnBlockEndTime   = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64BufferEndSamples   + l_rInfo.m_ui64SignalSampleCountToSkip);
+				// Boundaries of the part of the buffer to be sent to this connection
+				const uint64 l_ui64ConnBufferTimeOffset = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_rInfo.m_ui64SignalSampleCountToSkip);
+				const uint64 l_ui64ConnBlockStartTime = l_ui64BufferStartTime + l_ui64ConnBufferTimeOffset;
+				const uint64 l_ui64ConnBlockEndTime   = l_ui64BufferEndTime + l_ui64ConnBufferTimeOffset;
 
 				//m_rKernelContext.getLogManager() << LogLevel_Info << "start: " << time64(start) << "end: " << time64(end) << "\n";
 
 				// Stimulation buffer
-				CStimulationSet l_oStimulationSet;
+				IStimulationSet& l_oStimulationSet = *ip_pStimulationSet;
+				l_oStimulationSet.clear();
 
-				// Take the stimuli range valid for the connection
-				OpenViBEToolkit::Tools::StimulationSet::appendRange(
-							l_oStimulationSet,
-							m_oPendingStimulationSet,
-							l_ui64ConnBlockStartTime,l_ui64ConnBlockEndTime);
+				// Take the stimuli range valid for the buffer and adjust wrt connection time (stamp at connection = stamp at time 0 for the client)
+				for(size_t k=0;k<m_oPendingStimulationSet.getStimulationCount();k++)
+				{
+					const uint64 lDate = m_oPendingStimulationSet.getStimulationDate(k); // this date is wrt the whole acquisition time in the server
+					if(lDate >= l_ui64ConnBlockStartTime && lDate <= l_ui64ConnBlockEndTime)
+					{
+						// The new date is wrt the specific connection time of the client (i.e. the chunk times on Designer side)
+						const uint64 lNewDate =
+							( (lDate > l_rInfo.m_ui64StimulationTimeOffset) ? (lDate - l_rInfo.m_ui64StimulationTimeOffset) : 0 );
 
-				OpenViBEToolkit::Tools::StimulationSet::copy(*ip_pStimulationSet, l_oStimulationSet, -int64(l_rInfo.m_ui64StimulationTimeOffset));
+						/*
+						std::cout << std::setprecision(10) << ITimeArithmetics::timeToSeconds(lDate) 
+						<< " to " << ITimeArithmetics::timeToSeconds(lNewDate) 
+						<< " for [" << ITimeArithmetics::timeToSeconds(l_ui64BufferStartTime) 
+						<< "," << ITimeArithmetics::timeToSeconds(l_ui64BufferEndTime)  << "]"
+						<< "\n";
+						*/
+
+						l_oStimulationSet.appendStimulation(m_oPendingStimulationSet.getStimulationIdentifier(k), lNewDate, m_oPendingStimulationSet.getStimulationDuration(k));
+					}
+				}
 
 				// Send a chunk of channel units? Note that we'll always send the units header.
 				if(!l_rInfo.m_bChannelUnitsSent)
@@ -608,14 +675,19 @@ boolean CAcquisitionServer::loop(void)
 			}
 			else
 			{
+				// Here sample count to skip >= block size, so we effective drop this chunk from the viewpoint of this connection.
+				// n.b. This is the reason why the pending buffer size needs to be 2x, as the skip can be up to 1x bufferSize and 
+				// after that we need a full buffer to send. Note that by construction
+				// the count to skip can never underflow but remains >= 0 (the other if branch doesnt decrement). 
 				l_rInfo.m_ui64SignalSampleCountToSkip-=m_ui32SampleCountPerSentBlock;
 			}
 		}
 
-		// Clears pending stimulations
+		// Clears pending stimulations; Can start from zero as we know we'll never send anything in the future thats
+		// before current BufferEndTime.
 		OpenViBEToolkit::Tools::StimulationSet::removeRange(
 					m_oPendingStimulationSet,
-					l_ui64BufferStartTime,
+					0,
 					l_ui64BufferEndTime
 					);
 
@@ -646,8 +718,6 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 		m_rKernelContext.getLogManager() << LogLevel_Error << "Connection failed...\n";
 		return false;
 	}
-
-	// m_pDriverContext->onInitialize(*m_pDriver->getHeader());
 
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Connection succeeded !\n";
 
@@ -726,7 +796,7 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Oversampling factor set to " << m_ui64OverSamplingFactor << "\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Sampling frequency set to " << m_ui32SamplingFrequency << "Hz\n";
-		m_rKernelContext.getLogManager() << LogLevel_Trace << "Started driver sleeping duration is " << m_ui64StartedDriverSleepDuration << " milliseconds\n";
+		m_rKernelContext.getLogManager() << LogLevel_Trace << "Started driver sleeping duration is " << m_i64StartedDriverSleepDuration << " milliseconds\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Stopped driver sleeping duration is " << m_ui64StoppedDriverSleepDuration << " milliseconds\n";
 		m_rKernelContext.getLogManager() << LogLevel_Trace << "Driver timeout duration set to " << m_ui64DriverTimeoutDuration << " milliseconds\n";
 
@@ -810,7 +880,6 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 	}
 
 	m_pConnectionServerHandlerStdThread=new std::thread(CConnectionServerHandlerThread(*this, *m_pConnectionServer));
-	//applyPriority(m_pConnectionServerHandlerStdThread,15);
 
 	return true;
 }
@@ -833,14 +902,13 @@ boolean CAcquisitionServer::start(void)
 		m_rKernelContext.getLogManager() << LogLevel_Error << "Starting failed !\n";
 		return false;
 	}
-	// m_pDriverContext->onStart(*m_pDriver->getHeader());
 
 	m_ui64StartTime = System::Time::zgetTime();
 	m_ui64LastDeliveryTime = m_ui64StartTime;
 
 	m_oDriftCorrection.start(m_ui32SamplingFrequency, m_ui64StartTime);
 
-	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
+	for(auto itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
 	{
 		(*itp)->startHook(m_vSelectedChannelNames, m_ui32SamplingFrequency, m_ui32ChannelCount, m_ui32SampleCountPerSentBlock);
 	}
@@ -848,6 +916,23 @@ boolean CAcquisitionServer::start(void)
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Now acquiring...\n";
 
 	m_bStarted=true;
+
+	return true;
+}
+
+bool CAcquisitionServer::requestClientThreadQuit(CConnectionClientHandlerThread* th)
+{
+	// Use a scoped lock before toggling a variable owned by the thread
+	{
+		std::lock_guard<std::mutex> oLock(th->m_oClientThreadMutex);
+				
+		// Tell the thread to quit
+		th->m_bPleaseQuit = true;
+	}
+
+	// Wake up the thread in case it happens to be waiting on the cond var
+	th->m_oPendingBufferCondition.notify_one();
+
 	return true;
 }
 
@@ -862,24 +947,26 @@ boolean CAcquisitionServer::stop(void)
 
 	// Stops driver
 	m_pDriver->stop();
-	// m_pDriverContext->onStop(*m_pDriver->getHeader());
 
-	list < pair < Socket::IConnection*, SConnectionInfo > >::iterator itConnection=m_vConnection.begin();
-	while(itConnection!=m_vConnection.end())
+	for(auto itConnection=m_vConnection.begin(); itConnection!=m_vConnection.end(); itConnection++)
 	{
-		itConnection->first->close();
+		if(itConnection->first->isConnected())
+		{
+			itConnection->first->close();
+		}
 		if(itConnection->second.m_pConnectionClientHandlerStdThread)
 		{
+			requestClientThreadQuit(itConnection->second.m_pConnectionClientHandlerThread);
+
 			itConnection->second.m_pConnectionClientHandlerStdThread->join();
 			delete itConnection->second.m_pConnectionClientHandlerStdThread;
 			delete itConnection->second.m_pConnectionClientHandlerThread;
 		}
 		itConnection->first->release();
-
-		itConnection=m_vConnection.erase(itConnection);
 	}
+	m_vConnection.clear();
 
-	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
+	for(auto itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
 	{
 		(*itp)->stopHook();
 	}
@@ -887,6 +974,7 @@ boolean CAcquisitionServer::stop(void)
 
 	m_bStarted=false;
 
+	m_vPendingBuffer.clear();
 
 	return true;
 }
@@ -898,7 +986,6 @@ boolean CAcquisitionServer::disconnect(void)
 	if(m_bInitialized)
 	{
 		m_pDriver->uninitialize();
-		// m_pDriverContext->onUninitialize(*m_pDriver->getHeader());
 	}
 
 	m_vImpedance.clear();
@@ -935,6 +1022,7 @@ void CAcquisitionServer::setSamples(const float32* pSample)
 
 void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32SampleCount)
 {
+
 	if(m_bStarted)
 	{
 		for(uint32 i=0; i<ui32SampleCount; i++)
@@ -1041,7 +1129,7 @@ void CAcquisitionServer::setStimulationSet(const IStimulationSet& rStimulationSe
 
 boolean CAcquisitionServer::updateImpedance(const uint32 ui32ChannelIndex, const float64 f64Impedance)
 {
-	for (OpenViBE::uint32 i=0;i<m_vSelectedChannels.size();++i)
+	for (size_t i=0;i<m_vSelectedChannels.size();++i)
 		if (ui32ChannelIndex==m_vSelectedChannels[i]) {
 			m_vImpedance[i] = f64Impedance;
 			return true;
@@ -1128,7 +1216,7 @@ boolean CAcquisitionServer::acceptNewConnection(Socket::IConnection* pConnection
 		return false;
 	}
 
-	uint64 l_ui64Time=System::Time::zgetTime();
+	const uint64 l_ui64Time=System::Time::zgetTime();
 
 	DoubleLock lock(&m_oPendingConnectionProtectionMutex, &m_oPendingConnectionExecutionMutex);
 
@@ -1143,7 +1231,7 @@ boolean CAcquisitionServer::acceptNewConnection(Socket::IConnection* pConnection
 
 	m_vPendingConnection.push_back(pair < Socket::IConnection*, SConnectionInfo > (pConnection, l_oInfo));
 
-	for(std::vector<IAcquisitionServerPlugin*>::iterator itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
+	for(auto itp = m_vPlugins.begin(); itp != m_vPlugins.end(); ++itp)
 	{
 		(*itp)->acceptNewConnectionHook();
 	}
