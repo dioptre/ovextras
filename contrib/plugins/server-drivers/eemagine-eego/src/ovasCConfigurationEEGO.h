@@ -1,7 +1,5 @@
 #if defined(TARGET_HAS_ThirdPartyEEGOAPI)
 
-#if defined TARGET_OS_Windows
-
 #ifndef __OpenViBE_AcquisitionServer_CConfigurationEEGO_H__
 #define __OpenViBE_AcquisitionServer_CConfigurationEEGO_H__
 
@@ -56,6 +54,5 @@ namespace OpenViBEAcquisitionServer
 };
 
 #endif // header guard
-#endif // TARGET_OS_Windows
 
 #endif

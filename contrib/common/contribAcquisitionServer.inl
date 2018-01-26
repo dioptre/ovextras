@@ -56,9 +56,9 @@ namespace OpenViBEContributions {
 #if defined TARGET_HAS_ThirdPartyBrainmasterCodeMakerAPI
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverBrainmasterDiscovery(pAcquisitionServer->getDriverContext()));
 #endif
- 
+
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverMBTSmarting(pAcquisitionServer->getDriverContext()));
-		
+
 #if defined(TARGET_HAS_ThirdPartyMitsar)
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverMitsarEEG202A(pAcquisitionServer->getDriverContext()));
 #endif
@@ -68,13 +68,13 @@ namespace OpenViBEContributions {
 #endif
 
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverOpenEEGModularEEG(pAcquisitionServer->getDriverContext()));
-		
+
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverOpenBCI(pAcquisitionServer->getDriverContext()));
 
 #if defined(TARGET_HAS_ThirdPartyEEGOAPI)
-#if defined TARGET_OS_Windows
+//#if defined TARGET_OS_Windows
 		vDriver->push_back(new OpenViBEAcquisitionServer::CDriverEEGO(pAcquisitionServer->getDriverContext()));
-#endif
+//#endif
 #endif
 
 		pGUI->registerPlugin(new OpenViBEAcquisitionServer::OpenViBEAcquisitionServerPlugins::CPluginExternalStimulations(rKernelContext));

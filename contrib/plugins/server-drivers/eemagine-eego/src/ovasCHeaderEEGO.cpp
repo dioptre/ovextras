@@ -1,7 +1,5 @@
 #if defined TARGET_HAS_ThirdPartyEEGOAPI
 
-#if defined TARGET_OS_Windows
-
 #include <algorithm>
 #include <locale>
 #include <boost/algorithm/string.hpp>
@@ -174,6 +172,5 @@ OpenViBE::boolean CHeaderEEGO::convertMask(char const* str, OpenViBE::uint64& r_
 	return !l_bParseError;
 }
 
-#endif // TARGET_OS_Windows
 
 #endif

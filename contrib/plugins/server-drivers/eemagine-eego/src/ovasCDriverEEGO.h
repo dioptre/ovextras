@@ -1,7 +1,5 @@
 #if defined(TARGET_HAS_ThirdPartyEEGOAPI)
 
-#if defined TARGET_OS_Windows
-
 #ifndef __OpenViBE_AcquisitionServer_CDriverEEGO_H__
 #define __OpenViBE_AcquisitionServer_CDriverEEGO_H__
 
@@ -102,6 +100,5 @@ namespace OpenViBEAcquisitionServer
 };
 
 #endif // __OpenViBE_AcquisitionServer_CDriverEEGO_H__
-#endif // TARGET_OS_Windows
 
 #endif
