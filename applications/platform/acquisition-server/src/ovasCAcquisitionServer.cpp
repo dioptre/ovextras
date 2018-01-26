@@ -1071,15 +1071,15 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 
 				if(l_bHadNaN)
 				{
-					// When a NaN is encountered at time t1 on any channel, OVTK_GDF_Incorrect stimulus is sent. When a first good sample is encountered 
-					// after the last bad sample t2, OVTK_GDF_Correct stimulus is sent, i.e. specifying a range of bad data : [t1,t2]. The stimuli are global 
+					// When a NaN is encountered at time t1 on any channel, OVTK_StimulationId_Artifact stimulus is sent. When a first good sample is encountered 
+					// after the last bad sample t2, OVTK_StimulationId_NoArtifact stimulus is sent, i.e. specifying a range of bad data : [t1,t2]. The stimuli are global 
 					// and not specific to channels.
 
 					if(!m_bReplacementInProgress)
 					{
 						const uint64 l_ui64IncorrectBlockStarts = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64CurrentSampleIndex);
 
-						m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Incorrect, l_ui64IncorrectBlockStarts, 0);
+						m_oPendingStimulationSet.appendStimulation(OVTK_StimulationId_Artifact, l_ui64IncorrectBlockStarts, 0);
 						m_bReplacementInProgress = true;
 					}
 				} 
@@ -1090,7 +1090,7 @@ void CAcquisitionServer::setSamples(const float32* pSample, const uint32 ui32Sam
 						// @note -1 is used here because the incorrect-correct range is inclusive, [a,b]. So when sample is good at b+1, we set the end point at b.
 						const uint64 l_ui64IncorrectBlockStops = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, l_ui64CurrentSampleIndex - 1);
 
-						m_oPendingStimulationSet.appendStimulation(OVTK_GDF_Correct, l_ui64IncorrectBlockStops, 0);
+						m_oPendingStimulationSet.appendStimulation(OVTK_StimulationId_NoArtifact, l_ui64IncorrectBlockStops, 0);
 						m_bReplacementInProgress = false;
 					}
 				}
