@@ -192,7 +192,7 @@ const char* g_sRegisteryKeyName="Software\\VB and VBA Program Settings\\Brain Qu
 		{ \
 			m_rDriverContext.getLogManager() << LogLevel_Error << "Load method " << name << "\n"; \
 			m_bValid=false; \
-			return; \
+			return false; \
 		}
 
 CDriverMicromedSystemPlusEvolution::CDriverMicromedSystemPlusEvolution(IDriverContext& rDriverContext)
@@ -207,96 +207,7 @@ CDriverMicromedSystemPlusEvolution::CDriverMicromedSystemPlusEvolution(IDriverCo
 ,m_pSample(NULL)
 ,m_ui32TimeOutMilliseconds(5000)
 {
-	//load the ddl of the driver
 	m_oLibMicromed = NULL ;
-
-	//Open library
-	OpenViBE::CString l_sPath = m_rDriverContext.getConfigurationManager().expand("${Path_Bin}") + "/" + MicromedDLL;
-	m_oLibMicromed = ::LoadLibrary(l_sPath.toASCIIString());
-
-	//if it can't be open return FALSE;
-	if( m_oLibMicromed == NULL)
-	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Couldn't load DLL: " << l_sPath << "\n";
-		return;
-	}
-
-	//load the method for initialized the driver
-	__load_dll_func__(m_oFgetStructHeader, STRUCTHEADER, "getStructHeader");
-	__load_dll_func__(m_oFgetStructHeaderSize, STRUCTHEADERSIZE, "getStructHeaderSize");
-	__load_dll_func__(m_oFgetStructHeaderInfo, STRUCTHEADERINFO, "getStructHeaderInfo");
-	__load_dll_func__(m_oFgetStructHeaderInfoSize, STRUCTHEADERINFOSIZE, "getStructHeaderInfoSize");
-	__load_dll_func__(m_oFgetStructBuffData, STRUCTBUFFDATA, "getStructBuffData");
-	__load_dll_func__(m_oFgetStructBuffDataSize, STRUCTBUFFDATASIZE, "getStructBuffDataSize");
-	__load_dll_func__(m_oFgetStructBuffNote, STRUCTBUFFNOTE, "getStructBuffNote");
-	__load_dll_func__(m_oFgetStructBuffNoteSize, STRUCTBUFFNOTESIZE, "getStructBuffNoteSize");
-	__load_dll_func__(m_oFgetStructBuffTrigger, STRUCTBUFFTRIGGER, "getStructBuffTrigger");
-	__load_dll_func__(m_oFgetStructBuffTriggerSize, STRUCTBUFFTRIGGERSIZE, "getStructBuffTriggerSize");
-	__load_dll_func__(m_oFisHeaderValid, HEADERVALID, "isHeaderValid");
-	__load_dll_func__(m_oFisDataHeader, DATAHEADER, "isDataHeader");
-	__load_dll_func__(m_oFisNoteHeader, NOTEHEADER, "isNoteHeader");
-	__load_dll_func__(m_oFisTriggerHeader, TRIGGERHEADER, "isTriggerHeader");
-	__load_dll_func__(m_oFisInitHeader, INITHEADER, "isInitHeader");
-	__load_dll_func__(m_oFgetDataLength, DATALENGTH, "getDataLength");
-	//__load_dll_func__(m_oFgetAddressOfData, ADDRESSOFDATA, "getAddressOfData");
-
-	__load_dll_func__(m_oFgetNbOfChannels, NBOFCHANNELS, "getNbOfChannels");
-	__load_dll_func__(m_oFgetMinimumSamplingRate, MINSAMPLINGRATE, "getMinimumSamplingRate");
-	__load_dll_func__(m_oFgetSizeOfEachDataInByte, SIZEOFEACHDATAINBYTE, "getSizeOfEachDataInByte");
-	__load_dll_func__(m_oFgetDataValue, DATAVALUE, "getDataValue");
-	__load_dll_func__(m_oFgetTriggerCount, TRIGGERCOUNT, "getTriggerCount");
-	__load_dll_func__(m_oFgetTriggerSample, TRIGGERSAMPLE, "getTriggerSample");
-	__load_dll_func__(m_oFgetTriggerValue, TRIGGERVALUE, "getTriggerValue");
-	__load_dll_func__(m_oFgetNoteCount, NOTECOUNT, "getNoteCount");
-	__load_dll_func__(m_oFgetNoteSample, NOTESAMPLE, "getNoteSample");
-	__load_dll_func__(m_oFgetNoteComment, NOTECOMMENT, "getNoteComment");
-	__load_dll_func__(m_oFshowElectrode,SHOWELECTRODE,"show_Electrode");
-	__load_dll_func__(m_oFshowNote,SHOWNOTE,"show_Note");
-	__load_dll_func__(m_oFshowTrigger,SHOWTRIGGER,"show_Trigger");
-	__load_dll_func__(m_oFshowSignal,SHOWSIGNAL,"showSignal");
-
-	m_rDriverContext.getLogManager() << LogLevel_Trace << "Succeeded in loading DLL: " << CString(l_sPath) << "\n";
-	m_pStructHeader=m_oFgetStructHeader();
-	m_pStructHeaderInfo=m_oFgetStructHeaderInfo();
-	m_pStructBuffData=m_oFgetStructBuffData();
-	m_pStructBuffNote=m_oFgetStructBuffNote();
-	m_pStructBuffTrigger=m_oFgetStructBuffTrigger();
-
-#if 1
-	if(ERROR_SUCCESS!=::RegOpenKeyEx(HKEY_CURRENT_USER, g_sRegisteryKeyName, 0, KEY_QUERY_VALUE, &g_hRegistryKey))
-	{
-		m_rDriverContext.getLogManager() << LogLevel_Warning << "Registery key " << CString(g_sRegisteryKeyName) << " is not initialized\n";
-		::strcpy(g_sTCPPortNumber, "");
-		::strcpy(g_sTCPSendAcq, "");
-		::strcpy(g_sTCPServerName, "");
-		return;
-	}
-
-	DWORD taille=sizeof(g_sTCPPortNumber);
-
-	if(ERROR_SUCCESS!=::RegQueryValueEx(g_hRegistryKey, "tcpPortNumber", NULL, NULL, (LPBYTE)g_sTCPPortNumber, &taille))
-	{
-		::strcpy(g_sTCPPortNumber, "");
-	}
-	else
-	{
-		m_ui32ServerHostPort=::atoi(g_sTCPPortNumber);
-	}
-
-	if(ERROR_SUCCESS!=::RegQueryValueEx(g_hRegistryKey, "tcpSendAcq", NULL, NULL, (LPBYTE)g_sTCPSendAcq, &taille))
-	{
-		::strcpy(g_sTCPSendAcq, "");
-	}
-
-	if(ERROR_SUCCESS!=::RegQueryValueEx(g_hRegistryKey, "tcpServerName", NULL, NULL, (LPBYTE)g_sTCPServerName, &taille))
-	{
-		::strcpy(g_sTCPServerName, "");
-	}
-
-	::RegCloseKey(g_hRegistryKey);
-	g_hRegistryKey=NULL;
-	//	g_bInitializedFromRegistry=true;
-#endif
 
 	m_oSettings.add("Header", &m_oHeader);
 	m_oSettings.add("ServerHostPort", &m_ui32ServerHostPort);
@@ -372,6 +283,105 @@ CDriverMicromedSystemPlusEvolution::~CDriverMicromedSystemPlusEvolution(void)
 	::RegCloseKey(g_hRegistryKey);
 	g_hRegistryKey=NULL;
 #endif
+}
+
+// Load the ddl of the driver
+boolean CDriverMicromedSystemPlusEvolution::loadDLL(void)
+{
+	if(m_oLibMicromed)
+	{
+		return true; // already loaded
+	}
+
+	//Open library
+	OpenViBE::CString l_sPath = m_rDriverContext.getConfigurationManager().expand("${Path_Bin}") + "/" + MicromedDLL;
+	m_oLibMicromed = ::LoadLibrary(l_sPath.toASCIIString());
+
+	//if it can't be open return FALSE;
+	if( m_oLibMicromed == NULL)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Couldn't load DLL: " << l_sPath << "\n";
+		return false;
+	}
+
+	//load the method for initialized the driver
+	__load_dll_func__(m_oFgetStructHeader, STRUCTHEADER, "getStructHeader");
+	__load_dll_func__(m_oFgetStructHeaderSize, STRUCTHEADERSIZE, "getStructHeaderSize");
+	__load_dll_func__(m_oFgetStructHeaderInfo, STRUCTHEADERINFO, "getStructHeaderInfo");
+	__load_dll_func__(m_oFgetStructHeaderInfoSize, STRUCTHEADERINFOSIZE, "getStructHeaderInfoSize");
+	__load_dll_func__(m_oFgetStructBuffData, STRUCTBUFFDATA, "getStructBuffData");
+	__load_dll_func__(m_oFgetStructBuffDataSize, STRUCTBUFFDATASIZE, "getStructBuffDataSize");
+	__load_dll_func__(m_oFgetStructBuffNote, STRUCTBUFFNOTE, "getStructBuffNote");
+	__load_dll_func__(m_oFgetStructBuffNoteSize, STRUCTBUFFNOTESIZE, "getStructBuffNoteSize");
+	__load_dll_func__(m_oFgetStructBuffTrigger, STRUCTBUFFTRIGGER, "getStructBuffTrigger");
+	__load_dll_func__(m_oFgetStructBuffTriggerSize, STRUCTBUFFTRIGGERSIZE, "getStructBuffTriggerSize");
+	__load_dll_func__(m_oFisHeaderValid, HEADERVALID, "isHeaderValid");
+	__load_dll_func__(m_oFisDataHeader, DATAHEADER, "isDataHeader");
+	__load_dll_func__(m_oFisNoteHeader, NOTEHEADER, "isNoteHeader");
+	__load_dll_func__(m_oFisTriggerHeader, TRIGGERHEADER, "isTriggerHeader");
+	__load_dll_func__(m_oFisInitHeader, INITHEADER, "isInitHeader");
+	__load_dll_func__(m_oFgetDataLength, DATALENGTH, "getDataLength");
+	//__load_dll_func__(m_oFgetAddressOfData, ADDRESSOFDATA, "getAddressOfData");
+
+	__load_dll_func__(m_oFgetNbOfChannels, NBOFCHANNELS, "getNbOfChannels");
+	__load_dll_func__(m_oFgetMinimumSamplingRate, MINSAMPLINGRATE, "getMinimumSamplingRate");
+	__load_dll_func__(m_oFgetSizeOfEachDataInByte, SIZEOFEACHDATAINBYTE, "getSizeOfEachDataInByte");
+	__load_dll_func__(m_oFgetDataValue, DATAVALUE, "getDataValue");
+	__load_dll_func__(m_oFgetTriggerCount, TRIGGERCOUNT, "getTriggerCount");
+	__load_dll_func__(m_oFgetTriggerSample, TRIGGERSAMPLE, "getTriggerSample");
+	__load_dll_func__(m_oFgetTriggerValue, TRIGGERVALUE, "getTriggerValue");
+	__load_dll_func__(m_oFgetNoteCount, NOTECOUNT, "getNoteCount");
+	__load_dll_func__(m_oFgetNoteSample, NOTESAMPLE, "getNoteSample");
+	__load_dll_func__(m_oFgetNoteComment, NOTECOMMENT, "getNoteComment");
+	__load_dll_func__(m_oFshowElectrode,SHOWELECTRODE,"show_Electrode");
+	__load_dll_func__(m_oFshowNote,SHOWNOTE,"show_Note");
+	__load_dll_func__(m_oFshowTrigger,SHOWTRIGGER,"show_Trigger");
+	__load_dll_func__(m_oFshowSignal,SHOWSIGNAL,"showSignal");
+
+	m_rDriverContext.getLogManager() << LogLevel_Trace << "Succeeded in loading DLL: " << CString(l_sPath) << "\n";
+	m_pStructHeader=m_oFgetStructHeader();
+	m_pStructHeaderInfo=m_oFgetStructHeaderInfo();
+	m_pStructBuffData=m_oFgetStructBuffData();
+	m_pStructBuffNote=m_oFgetStructBuffNote();
+	m_pStructBuffTrigger=m_oFgetStructBuffTrigger();
+
+#if 1
+	if(ERROR_SUCCESS!=::RegOpenKeyEx(HKEY_CURRENT_USER, g_sRegisteryKeyName, 0, KEY_QUERY_VALUE, &g_hRegistryKey))
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Warning << "Registery key " << CString(g_sRegisteryKeyName) << " is not initialized\n";
+		::strcpy(g_sTCPPortNumber, "");
+		::strcpy(g_sTCPSendAcq, "");
+		::strcpy(g_sTCPServerName, "");
+		return false;
+	}
+
+	DWORD taille=sizeof(g_sTCPPortNumber);
+
+	if(ERROR_SUCCESS!=::RegQueryValueEx(g_hRegistryKey, "tcpPortNumber", NULL, NULL, (LPBYTE)g_sTCPPortNumber, &taille))
+	{
+		::strcpy(g_sTCPPortNumber, "");
+	}
+	else
+	{
+		m_ui32ServerHostPort=::atoi(g_sTCPPortNumber);
+	}
+
+	if(ERROR_SUCCESS!=::RegQueryValueEx(g_hRegistryKey, "tcpSendAcq", NULL, NULL, (LPBYTE)g_sTCPSendAcq, &taille))
+	{
+		::strcpy(g_sTCPSendAcq, "");
+	}
+
+	if(ERROR_SUCCESS!=::RegQueryValueEx(g_hRegistryKey, "tcpServerName", NULL, NULL, (LPBYTE)g_sTCPServerName, &taille))
+	{
+		::strcpy(g_sTCPServerName, "");
+	}
+
+	::RegCloseKey(g_hRegistryKey);
+	g_hRegistryKey=NULL;
+	//	g_bInitializedFromRegistry=true;
+#endif
+
+	return true;
 }
 
 const char* CDriverMicromedSystemPlusEvolution::getName(void)
@@ -488,6 +498,14 @@ boolean CDriverMicromedSystemPlusEvolution::initialize(
 {
 	if(!m_bValid) { return false; }
 	if(m_rDriverContext.isConnected()) { return false; }
+
+	if(!m_oLibMicromed)
+	{
+		if(!loadDLL()) 
+		{
+			return false;
+		}
+	}
 
 	// Initialize var for connection
 	uint32 l_ui32Listen = 0;
@@ -880,6 +898,11 @@ boolean CDriverMicromedSystemPlusEvolution::isConfigurable(void)
 
 boolean CDriverMicromedSystemPlusEvolution::configure(void)
 {
+	if(!m_oLibMicromed)
+	{
+		loadDLL();
+	}
+
 	CConfigurationNetworkBuilder l_oConfiguration(
 		OpenViBE::Directories::getDataDir() + "/applications/acquisition-server/interface-Micromed-SystemPlusEvolution.ui");
 	l_oConfiguration.setHostPort(m_ui32ServerHostPort);

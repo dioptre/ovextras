@@ -51,6 +51,8 @@ namespace OpenViBEAcquisitionServer
 		virtual OpenViBE::boolean configure(void);
 		virtual const OpenViBEAcquisitionServer::IHeader* getHeader(void) { return &m_oHeader; }
 
+		virtual OpenViBE::boolean loadDLL(void);
+
 		Socket::IConnectionServer* m_pConnectionServer;
 		OpenViBE::uint32 m_ui32ServerHostPort;
 		Socket::IConnection* m_pConnection;
