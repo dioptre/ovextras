@@ -20,6 +20,7 @@ CDriverMBTSmarting::CDriverMBTSmarting(IDriverContext& rDriverContext)
 	,m_pCallback(NULL)
 	,m_ui32SampleCountPerSentBlock(0)
 	,m_pSample(NULL)
+	,m_ui32ConnectionID(1)
 {
 	m_oHeader.setSamplingFrequency(500);
 	m_oHeader.setChannelCount(27);
@@ -27,7 +28,7 @@ CDriverMBTSmarting::CDriverMBTSmarting(IDriverContext& rDriverContext)
 	// The following class allows saving and loading driver settings from the acquisition server .conf file
 	m_oSettings.add("Header", &m_oHeader);
 	// To save your custom driver settings, register each variable to the SettingsHelper
-	//m_oSettings.add("SettingName", &variable);
+	m_oSettings.add("ConnectionID", &m_ui32ConnectionID);
 	m_oSettings.load();	
 }
 
@@ -95,6 +96,10 @@ boolean CDriverMBTSmarting::initialize(
 			m_rDriverContext.getLogManager() << LogLevel_Info << "Setting the sampling frequency at " << 500 <<"\n";
 			m_pSmartingAmp->send_command(FREQUENCY_500);
 			break;
+		default:
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Only sampling frequencies 250 and 500 are supported\n";
+			return false;
+			break;
 		}
 
 		// Declare channel units
@@ -105,6 +110,10 @@ boolean CDriverMBTSmarting::initialize(
 		m_oHeader.setChannelUnits(24, OVTK_UNIT_Degree_Per_Second, OVTK_FACTOR_Base); // gyroscope outputs
 		m_oHeader.setChannelUnits(25, OVTK_UNIT_Degree_Per_Second, OVTK_FACTOR_Base);
 		m_oHeader.setChannelUnits(26, OVTK_UNIT_Degree_Per_Second, OVTK_FACTOR_Base);
+
+		m_oHeader.setChannelName(24, "Gyro 1");
+		m_oHeader.setChannelName(25, "Gyro 2");
+		m_oHeader.setChannelName(26, "Gyro 3");
 
 		// Saves parameters
 		m_pCallback=&rCallback;

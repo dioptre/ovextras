@@ -72,6 +72,7 @@ boolean CConfigurationMBTSmarting::postConfigure(void)
 		// For example, you can save the connection ID of the selected device:
 		// m_ui32ConnectionID = <value-from-gtk-widget>
 		::GtkSpinButton* l_pSpinButtonPortNumber = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_port_number"));
+		gtk_spin_button_update(l_pSpinButtonPortNumber);
 		m_ui32ConnectionID = ::gtk_spin_button_get_value_as_int(l_pSpinButtonPortNumber);
 	}
 
