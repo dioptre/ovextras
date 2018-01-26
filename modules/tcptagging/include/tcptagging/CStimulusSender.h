@@ -21,7 +21,7 @@ namespace TCPTagging
 	public:
 
 		CStimulusSender(void)
-			: m_oStimulusSocket(m_ioService), m_bConnectedOnce(false) { }
+			: m_oStimulusSocket(m_ioService), m_bConnectedOnce(false), m_lastTimestamp(0) { }
 		virtual ~CStimulusSender();
 
 		// Connect to the TCP Tagging plugin of the Acquisition Server
@@ -39,6 +39,7 @@ namespace TCPTagging
 
 		TCPTagging::boolean m_bConnectedOnce;
 
+		uint64_t m_lastTimestamp;
 	};
 }
 

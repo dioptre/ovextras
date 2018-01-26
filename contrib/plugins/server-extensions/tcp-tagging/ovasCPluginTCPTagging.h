@@ -47,6 +47,8 @@ namespace OpenViBEAcquisitionServer
 			private:
 				OpenViBE::uint64 m_previousClockTime;
 				OpenViBE::uint64 m_previousSampleTime;
+				OpenViBE::uint64 m_lastTagTime;
+				OpenViBE::uint64 m_lastTagTimeAdjusted;
 
 				std::unique_ptr<CTagStream> m_scopedTagStream;
 				OpenViBE::uint32 m_port;

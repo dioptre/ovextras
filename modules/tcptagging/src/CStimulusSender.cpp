@@ -47,6 +47,7 @@ boolean CStimulusSender::connect(const char* sAddress, const char* sStimulusPort
 	}
 		
 	m_bConnectedOnce = true;
+	m_lastTimestamp = 0;
 
 	return true;
 }
@@ -68,6 +69,14 @@ boolean CStimulusSender::sendStimulation(uint64_t ui64Stimulation, uint64_t ui64
 		ui64Timestamp = System::Time::zgetTimeRaw(false);
 		ui64Flags |= IStimulusSender::TCP_Tagging_Flags::FLAG_FPTIME;
 	}
+
+	if(ui64Timestamp < m_lastTimestamp)
+	{
+		std::cout << "Error: Stimulations must be inserted in increasing time order (now: "
+			<< ui64Timestamp << ", prev: " << m_lastTimestamp << ", stim=" << ui64Stimulation << ")\n";
+		return false;
+	}
+	m_lastTimestamp = ui64Timestamp;
 
 	try
 	{
