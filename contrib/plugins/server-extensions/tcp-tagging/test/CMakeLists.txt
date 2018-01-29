@@ -16,6 +16,8 @@ INCLUDE("FindThirdPartyBoost")
 INCLUDE("FindThirdPartyBoost_System")
 INCLUDE("FindThirdPartyBoost_Thread")
 
+SET_BUILD_PLATFORM()
+
 # Unfortunately we need to install the tests as any application to find .dll/.so files
 # on both Windows and Linux.
 OV_INSTALL_LAUNCH_SCRIPT(SCRIPT_PREFIX "${PROJECT_NAME}" EXECUTABLE_NAME  "${PROJECT_NAME}")

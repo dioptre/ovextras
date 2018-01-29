@@ -100,8 +100,8 @@ boolean CDriverEEGO::initialize(
 		// Create path to the dynamic library
 #ifdef _WIN32
 		const OpenViBE::CString l_oLibDir = Directories::getBinDir() + "\\eego-SDK.dll";
-		auto l_sPath = l_oLibDir.toASCIIString();
-		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll path: " << l_sPath << "\n";
+		const std::string l_sPath(l_oLibDir.toASCIIString());
+		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll path: " << l_sPath.c_str() << "\n";
 		es::factory fact(l_sPath);
 #else
 		es::factory fact("libeego-SDK.so");

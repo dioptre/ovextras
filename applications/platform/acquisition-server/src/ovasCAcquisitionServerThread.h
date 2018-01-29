@@ -5,6 +5,7 @@
 #include "ovasCAcquisitionServer.h"
 
 #include <system/ovCTime.h>
+#include <cmath> // std::abs() for Fedora
 
 // fwd declare of gtk idle callbacks
 static gboolean idle_updateimpedance_cb(void* pUserData);

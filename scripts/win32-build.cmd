@@ -215,7 +215,8 @@ echo An error occured during building process !
 echo.
 %PAUSE%
 
-goto terminate
+cd %ov_script_dir%
+exit 1
 
 REM #######################################################################################
 

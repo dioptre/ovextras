@@ -19,8 +19,8 @@ using namespace OpenViBE::Kernel;
 
 CDriverGenericTimeSignal::CDriverGenericTimeSignal(IDriverContext& rDriverContext)
 	:IDriver(rDriverContext)
-	,m_oSettings("AcquisitionServer_Driver_GenericTimeSignal", m_rDriverContext.getConfigurationManager())
 	,m_pCallback(NULL)
+	,m_oSettings("AcquisitionServer_Driver_GenericTimeSignal", m_rDriverContext.getConfigurationManager())
 	,m_ui64TotalSampleCount(0)
 	,m_ui64StartTime(0)
 {
