@@ -53,6 +53,16 @@ OV_ADD_CONTRIB_DRIVER("${CMAKE_SOURCE_DIR}/contrib/plugins/server-drivers/openee
 OV_ADD_CONTRIB_DRIVER("${CMAKE_SOURCE_DIR}/contrib/plugins/server-drivers/openbci")
 
 OV_ADD_CONTRIB_DRIVER("${CMAKE_SOURCE_DIR}/contrib/plugins/server-drivers/eemagine-eego")
+# The block is used to compile wrapper.cc into Acquisition Server which is not in OV git.
+# nb. we need to add the wrapper.cc file before the cmake add_executable() directive, and at that 
+# point FindThirdPartyEemagineEEGO has not yet been run on some builds (e.g. win command line build),
+# nor can we do the adding at that point; it'd be too late. On the other hand, the find script
+# cannot be called before the executable has been added.
+if (WIN32)
+    FIND_PATH(PATH_EEGOAPI amplifier.h PATHS ${LIST_DEPENDENCIES_PATH} PATH_SUFFIXES sdk-eemagine-eego/eemagine/sdk/)
+else()
+    FIND_PATH(PATH_EEGOAPI amplifier.h PATHS /usr/include PATH_SUFFIXES eemagine/sdk/)
+endif(WIN32)
 IF(PATH_EEGOAPI)
   SET(source_files "${source_files};${PATH_EEGOAPI}/wrapper.cc")
 ENDIF(PATH_EEGOAPI)
