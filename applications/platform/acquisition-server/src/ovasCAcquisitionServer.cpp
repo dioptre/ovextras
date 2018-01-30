@@ -517,6 +517,7 @@ boolean CAcquisitionServer::loop(void)
 			{
 				// Calls driver's loop
 				l_bResult=m_pDriver->loop();
+				// @fixme behavior seems to be bad if the loop() returns false; should fix this!
 				if(!m_bGotData)
 				{
 					l_bTimeout=(System::Time::getTime()>l_ui32TimeBeforeCall+m_ui64DriverTimeoutDuration);
@@ -887,6 +888,12 @@ boolean CAcquisitionServer::connect(IDriver& rDriver, IHeader& rHeaderCopy, uint
 boolean CAcquisitionServer::start(void)
 {
 	m_rKernelContext.getLogManager() << LogLevel_Debug << "buttonStartPressedCB\n";
+
+	if(isImpedanceCheckRequested())
+	{
+		m_rKernelContext.getLogManager() << LogLevel_Error << "Please disable impedance check before pressing Play\n";
+		return false;
+	}
 
 	m_rKernelContext.getLogManager() << LogLevel_Info << "Starting the acquisition...\n";
 

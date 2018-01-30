@@ -91,39 +91,46 @@ namespace OpenViBEAcquisitionServer
 
 				if (!l_bFinished)
 				{	
-					const OpenViBE::uint64 l_ui64TimeNow = System::Time::zgetTime();
+					if(m_rAcquisitionServer.isImpedanceCheckRequested())
+					{
+						// In the impedance check mode, we need to yield the thread to get reliable redraw
+						l_bShouldSleep = true;
+					}
 
 					// Update the GUI if the variables have changed. In order to avoid 
 					// gdk_threads_enter()/gdk_threads_exit() calls that may not work on all 
 					// backends (esp. Windows), delegate the work to g_idle_add() functions.
 					// As a result, we need to protect access to the variables that the callbacks use;
 					// this protection is done inside the callbacks.
-					if(l_ui64TimeNow - l_ui64LastGUIUpdate > (1LL<<32)/2LL )  // update at most every 0.5sec to avoid hammering the gui
+					if( !std::equal(m_vImpedance.begin(), m_vImpedance.end(), m_vImpedanceLast.begin(), 
+						[](OpenViBE::float64 a, OpenViBE::float64 b) { return (std::abs(a-b)<0.01); }) ) 
 					{
-						if (m_ui32LastStatus != m_ui32Status || l_ui32ClientCount != m_ui32ClientCount)
-						{
-							m_ui32LastStatus = m_ui32Status;
-							m_ui32ClientCount = l_ui32ClientCount;
-							gdk_threads_add_idle(idle_updatestatus_cb, (void *)this);
-						}
+						m_vImpedanceLast = m_vImpedance;
 
-						if (m_vImpedance != m_vImpedanceLast)
-						{
-							m_vImpedanceLast = m_vImpedance;
+						gdk_threads_add_idle(idle_updateimpedance_cb, (void *)this);
+					}
 
-							 gdk_threads_add_idle(idle_updateimpedance_cb, (void *)this);
-						}
+					if (m_ui32LastStatus != m_ui32Status || l_ui32ClientCount != m_ui32ClientCount)
+					{
+						m_ui32LastStatus = m_ui32Status;
+						m_ui32ClientCount = l_ui32ClientCount;
+						gdk_threads_add_idle(idle_updatestatus_cb, (void *)this);
+					}
 
+					if (l_bShouldDisconnect)
+					{
+						gdk_threads_add_idle(idle_updatedisconnect_cb, (void *)this);
+					}
+
+					// update fast changing variables at most every 0.25 sec to avoid hammering the gui
+					const OpenViBE::uint64 l_ui64TimeNow = System::Time::zgetTime();
+					if(l_ui64TimeNow - l_ui64LastGUIUpdate > (1LL<<32)/4LL ) 
+					{
 						if (std::abs(l_f64DriftMs-m_f64LastDriftMs) > 0)
 						{
 							m_f64LastDriftMs = l_f64DriftMs;
 
 							 gdk_threads_add_idle(idle_updatedrift_cb, (void *)this);
-						}
-
-						if (l_bShouldDisconnect)
-						{
-							 gdk_threads_add_idle(idle_updatedisconnect_cb, (void *)this);
 						}
 
 						l_ui64LastGUIUpdate = l_ui64TimeNow;
