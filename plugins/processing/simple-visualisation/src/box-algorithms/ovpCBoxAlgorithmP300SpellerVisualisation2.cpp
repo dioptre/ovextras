@@ -159,16 +159,28 @@ bool CBoxAlgorithmP300SpellerVisualisation2::initialize(void)
 	l_ui64MaxSize=std::max(l_ui64MaxSize, m_ui64TargetFontSize);
 	l_ui64MaxSize=std::max(l_ui64MaxSize, m_ui64SelectedFontSize);
 
+	::PangoFontDescription *l_pTmp = pango_context_get_font_description(gtk_widget_get_pango_context(GTK_WIDGET(m_pTarget)));
+	pango_font_description_set_family(l_pTmp, "mono");
+	l_pTmp = pango_context_get_font_description(gtk_widget_get_pango_context(GTK_WIDGET(m_pResult)));
+	pango_font_description_set_family(l_pTmp, "mono");
+	l_pTmp = pango_context_get_font_description(gtk_widget_get_pango_context(GTK_WIDGET(gtk_builder_get_object(m_pMainWidgetInterface, "label-target-title"))));
+	pango_font_description_set_family(l_pTmp, "mono");
+	l_pTmp = pango_context_get_font_description(gtk_widget_get_pango_context(GTK_WIDGET(gtk_builder_get_object(m_pMainWidgetInterface, "label-result-title"))));
+	pango_font_description_set_family(l_pTmp, "mono");
+
 	pango_font_description_set_size(l_pMaxFontDescription, (gint)(l_ui64MaxSize * PANGO_SCALE));
 	pango_font_description_set_size(m_pFlashFontDescription, (gint)(m_ui64FlashFontSize * PANGO_SCALE));
 	pango_font_description_set_size(m_pNoFlashFontDescription, (gint)(m_ui64NoFlashFontSize * PANGO_SCALE));
 	pango_font_description_set_size(m_pTargetFontDescription, (gint)(m_ui64TargetFontSize * PANGO_SCALE));
 	pango_font_description_set_size(m_pSelectedFontDescription, (gint)(m_ui64SelectedFontSize * PANGO_SCALE));
 
+	pango_font_description_set_weight(m_pFlashFontDescription, PANGO_WEIGHT_SEMIBOLD);
+	pango_font_description_set_weight(m_pNoFlashFontDescription, PANGO_WEIGHT_LIGHT);
+
 	this->_cache_build_from_table_(m_pTable);
 	this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_background_cb_, &m_oNoFlashBackgroundColor);
 	this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_foreground_cb_, &m_oNoFlashForegroundColor);
-	this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_font_cb_, l_pMaxFontDescription);
+	this->_cache_for_each_(&CBoxAlgorithmP300SpellerVisualisation2::_cache_change_font_cb_, m_pFlashFontDescription);
 
 	pango_font_description_free(l_pMaxFontDescription);
 

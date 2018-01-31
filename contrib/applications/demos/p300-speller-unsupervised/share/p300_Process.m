@@ -117,16 +117,19 @@ function box_out = p300_Process(box_in)
 			box_in.user_data.gsequence, ...
 			[],box_in.user_data.flashes_per_trial,A,gamma,1:numTrials,false);
 
-		% predict
-		% output prediction (2 stim pair?), print letter
+		% predict which letter was selected
 		[~,select]=max(box_in.user_data.C.classifier.probs,[],2);
+		
+		% Include predictions from before maxFeatures was reached
+		box_in.user_data.selection = select;
+		select = [box_in.user_data.oldSelections;select];
 		
 		if(box_in.user_data.debug)
 			fprintf(1,'Trial %03d end (at %f s, %d flashes total, %d trls used, fd %d): Spelled so far: %s\n', ...
 				box_in.user_data.total_trials, end_time, ...
 				box_in.user_data.total_flashes, numTrials, size(features,2), convert_position_to_letter(select));
 		end
-		
+
 		% Convert select to stimulations		
 		select = select - 1; 
 		rowidx = floor(select / box_in.user_data.keyboard_cols);
@@ -140,6 +143,11 @@ function box_out = p300_Process(box_in)
 		stim_set = [stim_set, [double(OVTK_StimulationId_SegmentStop); time_now; 0]];
 		
 		box_in = OV_addOutputBuffer(box_in,1,box_in.user_data.previous_time,time_now,stim_set);	
+		
+		if(box_in.user_data.total_flashes >= maxFeatures)		
+			box_in.user_data.oldSelections = [box_in.user_data.oldSelections;box_in.user_data.selection(1)];
+		end
+		
 	else
 		box_in = OV_addOutputBuffer(box_in,1,box_in.user_data.previous_time,time_now,[]);
 	end
