@@ -163,6 +163,19 @@ static int lua_get_setting_cb(lua_State* pState)
 	return 1;
 }
 
+static int lua_get_setting_by_name_cb(lua_State* pState)
+{
+	CString l_sSetting;
+	CBoxAlgorithmLuaStimulator* l_pThis=static_cast < CBoxAlgorithmLuaStimulator* >(lua_touserdata(pState, lua_upvalueindex(1)));
+	__CB_Assert__(l_pThis != NULL);
+
+	if(!lua_check_argument_count(pState, "get_setting_by_name", 1)) return 0;
+
+	__CB_Assert__(l_pThis->getSettingCB(lua_tostring(pState, 2), l_sSetting));
+	lua_pushstring(pState, l_sSetting.toASCIIString());
+	return 1;
+}
+
 static int lua_get_config_cb(lua_State* pState)
 {
 	CString l_sConfiguration;
@@ -401,6 +414,7 @@ boolean CBoxAlgorithmLuaStimulator::initialize(void)
 	lua_setcallback(m_pLuaState, "get_output_count", ::lua_get_output_count_cb, this);
 	lua_setcallback(m_pLuaState, "get_setting_count", ::lua_get_setting_count_cb, this);
 	lua_setcallback(m_pLuaState, "get_setting", ::lua_get_setting_cb, this);
+	lua_setcallback(m_pLuaState, "get_setting_by_name", ::lua_get_setting_by_name_cb, this);
 	lua_setcallback(m_pLuaState, "get_config", ::lua_get_config_cb, this);
 	lua_setcallback(m_pLuaState, "get_current_time", ::lua_get_current_time_cb, this);
 	lua_setcallback(m_pLuaState, "sleep", ::lua_sleep_cb, this);
@@ -750,6 +764,26 @@ boolean CBoxAlgorithmLuaStimulator::getOutputCountCB(uint32& rui32Count)
 boolean CBoxAlgorithmLuaStimulator::getSettingCountCB(uint32& rui32Count)
 {
 	rui32Count=this->getStaticBoxContext().getSettingCount();
+	return true;
+}
+
+boolean CBoxAlgorithmLuaStimulator::getSettingCB(const CString& rsName, CString& rsSetting)
+{
+	char *pEnd;
+	if(!this->getStaticBoxContext().getSettingValue(rsName, rsSetting))
+	{
+		this->getLogManager() << LogLevel_Warning << "Setting " << rsName << " does not exist\n";
+		rsSetting=CString("");
+		return true;
+	}
+	rsSetting = CString(std::to_string(std::strtol(rsSetting.toASCIIString(),&pEnd,10)).c_str());
+	// catch non numeric value
+	if(*pEnd)
+	{
+		// conversion has failed		
+		this->getStaticBoxContext().getSettingDefaultValue(rsName,rsSetting);
+		this->getLogManager() << LogLevel_Warning << "Bad value for setting '" << rsName << "'. Use default value: " << rsSetting << "\n";
+	}
 	return true;
 }
 

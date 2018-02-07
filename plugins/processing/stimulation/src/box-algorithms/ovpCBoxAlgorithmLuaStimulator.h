@@ -16,6 +16,10 @@
 #include <cstdio>
 #include <cstring>
 
+#include <openvibe/ov_all.h>
+#include <toolkit/ovtk_all.h>
+#include <visualization-toolkit/ovviz_all.h>
+
 extern "C"
 {
 	#include "lua.h"
@@ -27,8 +31,10 @@ extern "C"
 // - please move the identifier definitions in ovp_defines.h
 // - please include your desciptor in ovp_main.cpp
 
-#define OVP_ClassId_BoxAlgorithm_LuaStimulator     OpenViBE::CIdentifier(0x0B5A2787, 0x02750621)
-#define OVP_ClassId_BoxAlgorithm_LuaStimulatorDesc OpenViBE::CIdentifier(0x67AF36F3, 0x2B424F46)
+#define OVP_ClassId_BoxAlgorithm_LuaStimulator			OpenViBE::CIdentifier(0x0B5A2787, 0x02750621)
+#define OVP_ClassId_BoxAlgorithm_LuaStimulatorDesc		OpenViBE::CIdentifier(0x67AF36F3, 0x2B424F46)
+
+#define OVP_ClassId_BoxAlgorithm_Setting_Delay_Seconds  OpenViBE::CIdentifier(0x646836F3, 0x2A5624F46)
 
 namespace OpenViBEPlugins
 {
@@ -58,6 +64,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::boolean getOutputCountCB(OpenViBE::uint32& rui64Count);
 			virtual OpenViBE::boolean getSettingCountCB(OpenViBE::uint32& rui64Count);
 			virtual OpenViBE::boolean getSettingCB(OpenViBE::uint32 ui32SettingIndex, OpenViBE::CString& rsSetting);
+			virtual OpenViBE::boolean getSettingCB(const OpenViBE::CString& rsName, OpenViBE::CString& rsSetting);
 			virtual OpenViBE::boolean getConfigCB(const OpenViBE::CString& rsString, OpenViBE::CString& rsConfig);
 
 			virtual OpenViBE::boolean getCurrentTimeCB(OpenViBE::uint64& rui64Time);
@@ -162,12 +169,18 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmLuaStimulatorListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
+			virtual bool hasFunctionality(OpenViBE::CIdentifier functionalityIdentifier) const
+			{
+				return functionalityIdentifier == OVD_Functionality_Visualization;
+			}
+			
 			virtual OpenViBE::boolean getBoxPrototype(
 				OpenViBE::Kernel::IBoxProto& rBoxAlgorithmPrototype) const
 			{
 				rBoxAlgorithmPrototype.addOutput ("Stimulations", OV_TypeId_Stimulations);
 
 				rBoxAlgorithmPrototype.addSetting("Lua Script", OV_TypeId_Script, "");
+				rBoxAlgorithmPrototype.addSetting("delay(s)", OV_TypeId_String, "0", false, OVP_ClassId_BoxAlgorithm_Setting_Delay_Seconds);
 
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddOutput);
 				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddInput);

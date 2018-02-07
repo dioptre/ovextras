@@ -1,7 +1,10 @@
 <OpenViBE-Scenario>
 	<FormatVersion>1</FormatVersion>
-	<Creator>openvibe</Creator>
-	<CreatorVersion>2.0</CreatorVersion>
+	<Creator>OpenVIBE</Creator>
+	<CreatorVersion>0.4.99</CreatorVersion>
+	<Settings></Settings>
+	<Inputs></Inputs>
+	<Outputs></Outputs>
 	<Boxes>
 		<Box>
 			<Identifier>(0x00007851, 0x00004cd4)</Identifier>
@@ -92,10 +95,6 @@
 					<Value>304.000000</Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>38</Value>
-				</Attribute>
-				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
 					<Value>480.000000</Value>
 				</Attribute>
@@ -108,16 +107,8 @@
 					<Value></Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>113</Value>
-				</Attribute>
-				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
 					<Value>(0x00000000, 0x00fdd416)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xc67a01dc, 0x28ce06c1)</Identifier>
-					<Value></Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc73e83ec, 0xf855c5bc)</Identifier>
@@ -158,20 +149,12 @@
 					<Value>80</Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>25</Value>
-				</Attribute>
-				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
 					<Value>640</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
 					<Value>(0x8d89d3b7, 0x8339d210)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>161</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
@@ -188,8 +171,8 @@
 			</Attributes>
 		</Box>
 		<Box>
-			<Identifier>(0x2b9fd0aa, 0x64525c3a)</Identifier>
-			<Name>Mux + 5s delay</Name>
+			<Identifier>(0x355b6ad7, 0x03c8a962)</Identifier>
+			<Name>Mux + x s delay</Name>
 			<AlgorithmClassIdentifier>(0x0b5a2787, 0x02750621)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -198,7 +181,7 @@
 				</Input>
 				<Input>
 					<TypeIdentifier>(0x6f752dd0, 0x082a321e)</TypeIdentifier>
-					<Name>New input</Name>
+					<Name>New input 1</Name>
 				</Input>
 			</Inputs>
 			<Outputs>
@@ -215,6 +198,13 @@
 					<Value>${Player_ScenarioDirectory}/scripts/sample-lua-script.lua</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
+				<Setting>
+					<TypeIdentifier>(0x79a9edeb, 0x245d83fc)</TypeIdentifier>
+					<Name>delay(s)</Name>
+					<DefaultValue>0</DefaultValue>
+					<Value>0</Value>
+					<Modifiability>true</Modifiability>
+				</Setting>
 			</Settings>
 			<Attributes>
 				<Attribute>
@@ -226,28 +216,16 @@
 					<Value>192</Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>51</Value>
-				</Attribute>
-				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
 					<Value>528</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
-					<Value>(0xd6e3f48b, 0xbee3523a)</Value>
+					<Value>(0x554a19f2, 0x55beae1e)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x61d11811, 0x71e65362)</Identifier>
 					<Value></Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>123</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
-					<Value>(0x00000000, 0x05321c99)</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc80ce8af, 0xf699f813)</Identifier>
@@ -299,20 +277,12 @@
 					<Value>80</Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>25</Value>
-				</Attribute>
-				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
 					<Value>480</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
 					<Value>(0x27b3ee3c, 0xc50527e6)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>130</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
@@ -360,20 +330,12 @@
 					<Value>80</Value>
 				</Attribute>
 				<Attribute>
-					<Identifier>(0x1fa963f5, 0x1a638cd4)</Identifier>
-					<Value>25</Value>
-				</Attribute>
-				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
 					<Value>320</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
 					<Value>(0x9e5ca01e, 0x30a4d8c3)</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0xad100179, 0xa3c984ab)</Identifier>
-					<Value>94</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0xc46b3d00, 0x3e0454e1)</Identifier>
@@ -392,35 +354,6 @@
 	</Boxes>
 	<Links>
 		<Link>
-			<Identifier>(0x000006db, 0x00007628)</Identifier>
-			<Source>
-				<BoxIdentifier>(0x2b9fd0aa, 0x64525c3a)</BoxIdentifier>
-				<BoxOutputIndex>0</BoxOutputIndex>
-			</Source>
-			<Target>
-				<BoxIdentifier>(0x00007851, 0x00004cd4)</BoxIdentifier>
-				<BoxInputIndex>1</BoxInputIndex>
-			</Target>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
-					<Value>224</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
-					<Value>528</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
-					<Value>280</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
-					<Value>480</Value>
-				</Attribute>
-			</Attributes>
-		</Link>
-		<Link>
 			<Identifier>(0x00003a74, 0x00007163)</Identifier>
 			<Source>
 				<BoxIdentifier>(0x7f12f9f6, 0x1203d055)</BoxIdentifier>
@@ -430,82 +363,39 @@
 				<BoxIdentifier>(0x00007851, 0x00004cd4)</BoxIdentifier>
 				<BoxInputIndex>0</BoxInputIndex>
 			</Target>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
-					<Value>99</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
-					<Value>320</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
-					<Value>280</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
-					<Value>465</Value>
-				</Attribute>
-			</Attributes>
 		</Link>
 		<Link>
-			<Identifier>(0x11bc52c7, 0x7d39e76b)</Identifier>
+			<Identifier>(0x17d3cbbf, 0x33f91f67)</Identifier>
 			<Source>
 				<BoxIdentifier>(0x44d592ef, 0x79906895)</BoxIdentifier>
 				<BoxOutputIndex>0</BoxOutputIndex>
 			</Source>
 			<Target>
-				<BoxIdentifier>(0x2b9fd0aa, 0x64525c3a)</BoxIdentifier>
+				<BoxIdentifier>(0x355b6ad7, 0x03c8a962)</BoxIdentifier>
 				<BoxInputIndex>0</BoxInputIndex>
 			</Target>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
-					<Value>99</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
-					<Value>480</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
-					<Value>162</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
-					<Value>520</Value>
-				</Attribute>
-			</Attributes>
 		</Link>
 		<Link>
-			<Identifier>(0x68865d3e, 0x16e4e1af)</Identifier>
+			<Identifier>(0x568acc3e, 0x7715f607)</Identifier>
+			<Source>
+				<BoxIdentifier>(0x355b6ad7, 0x03c8a962)</BoxIdentifier>
+				<BoxOutputIndex>0</BoxOutputIndex>
+			</Source>
+			<Target>
+				<BoxIdentifier>(0x00007851, 0x00004cd4)</BoxIdentifier>
+				<BoxInputIndex>1</BoxInputIndex>
+			</Target>
+		</Link>
+		<Link>
+			<Identifier>(0x78a4b36e, 0x69746b88)</Identifier>
 			<Source>
 				<BoxIdentifier>(0x0f152388, 0x4bae9e07)</BoxIdentifier>
 				<BoxOutputIndex>0</BoxOutputIndex>
 			</Source>
 			<Target>
-				<BoxIdentifier>(0x2b9fd0aa, 0x64525c3a)</BoxIdentifier>
+				<BoxIdentifier>(0x355b6ad7, 0x03c8a962)</BoxIdentifier>
 				<BoxInputIndex>1</BoxInputIndex>
 			</Target>
-			<Attributes>
-				<Attribute>
-					<Identifier>(0x1b32c44c, 0x1905e0e9)</Identifier>
-					<Value>99</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x358ae8b5, 0x0f8bacd1)</Identifier>
-					<Value>640</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x3f0a3b27, 0x570913d2)</Identifier>
-					<Value>162</Value>
-				</Attribute>
-				<Attribute>
-					<Identifier>(0x6267b5c5, 0x676e3e42)</Identifier>
-					<Value>535</Value>
-				</Attribute>
-			</Attributes>
 		</Link>
 	</Links>
 	<Comments>
@@ -521,7 +411,7 @@ boxes. Each muxed stimulation is delayed by 5 seconds.</Text>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x7234b86b, 0x2b8651a5)</Identifier>
-					<Value>192</Value>
+					<Value>272</Value>
 				</Attribute>
 			</Attributes>
 		</Comment>
@@ -544,7 +434,49 @@ boxes. Each muxed stimulation is delayed by 5 seconds.</Text>
 		<Entry>
 			<Identifier>(0x0000775c, 0x000078ff)</Identifier>
 			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
-			<Data>[{"boxIdentifier":"(0x00007851, 0x00004cd4)","childCount":0,"identifier":"(0x000036ad, 0x00006f70)","index":0,"parentIdentifier":"(0xffffffff, 0xffffffff)","type":3},{"boxIdentifier":"(0x0f152388, 0x4bae9e07)","childCount":0,"identifier":"(0x06ca0825, 0x1209828e)","index":0,"parentIdentifier":"(0xffffffff, 0xffffffff)","type":3},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":400,"identifier":"(0x492edea0, 0x7fcf1a84)","index":0,"name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":400},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x333b0470, 0x69c97194)","index":0,"name":"Default tab","parentIdentifier":"(0x492edea0, 0x7fcf1a84)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":0,"identifier":"(0x36539222, 0x0801778f)","index":0,"name":"Empty","parentIdentifier":"(0x333b0470, 0x69c97194)","type":0}]</Data>
+			<Data>[{"boxIdentifier":"(0x0f152388, 0x4bae9e07)","childCount":0,"identifier":"(0x06ca0825, 0x1209828e)","parentIdentifier":"(0xffffffff, 0xffffffff)","type":3},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":555,"identifier":"(0x492edea0, 0x7fcf1a84)","name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":419},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x333b0470, 0x69c97194)","index":0,"name":"Default tab","parentIdentifier":"(0x492edea0, 0x7fcf1a84)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":2,"dividerPosition":250,"identifier":"(0x1f748c73, 0x252e99ac)","index":0,"maxDividerPosition":505,"name":"Vertical split","parentIdentifier":"(0x333b0470, 0x69c97194)","type":4},{"boxIdentifier":"(0x355b6ad7, 0x03c8a962)","childCount":0,"identifier":"(0x5b05acb5, 0x422751a8)","index":0,"parentIdentifier":"(0x1f748c73, 0x252e99ac)","type":3},{"boxIdentifier":"(0x00007851, 0x00004cd4)","childCount":0,"identifier":"(0x000036ad, 0x00006f70)","index":1,"parentIdentifier":"(0x1f748c73, 0x252e99ac)","type":3}]</Data>
 		</Entry>
 	</Metadata>
+	<Attributes>
+		<Attribute>
+			<Identifier>(0x079d1f09, 0x667c7871)</Identifier>
+			<Value></Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0x60bc58ab, 0x7a1b4d83)</Identifier>
+			<Value></Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0x790d75b8, 0x3bb90c33)</Identifier>
+			<Value></Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0x7a3a1558, 0xf12c63c2)</Identifier>
+			<Value></Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0x84009d7c, 0x3c4e763b)</Identifier>
+			<Value></Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0x8c1fc55b, 0x7b433dc2)</Identifier>
+			<Value></Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0x9f5c4075, 0x4a0d3666)</Identifier>
+			<Value></Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0xf36a1567, 0xd13c53da)</Identifier>
+			<Value></Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0xf6b2e3fa, 0x7bd43926)</Identifier>
+			<Value></Value>
+		</Attribute>
+		<Attribute>
+			<Identifier>(0xf8034a49, 0x8b3f37cc)</Identifier>
+			<Value></Value>
+		</Attribute>
+	</Attributes>
 </OpenViBE-Scenario>

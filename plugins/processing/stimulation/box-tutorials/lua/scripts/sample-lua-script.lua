@@ -48,7 +48,7 @@ function process(box)
 				box:remove_stimulation(input, 1)
 
 				-- triggers a new OVTK_StimulationId_Label_00 stimulation five seconds after
-				box:send_stimulation(1, OVTK_StimulationId_Label_00, t+5, 0)
+				box:send_stimulation(1, OVTK_StimulationId_Label_00, t+box:get_setting_by_name("delay(s)"), 0)
 			end
 		end
 
