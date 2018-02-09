@@ -51,4 +51,9 @@ OVP_Declare_Begin()
 
 	OVP_Declare_New(OpenViBEPlugins::SimpleVisualisation::CBoxAlgorithmErpPlotDesc)
 
+	GtkWindow *poo = (GtkWindow*)gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(poo,"Hello");
+
+	gtk_widget_show((GtkWidget*)poo);
+
 OVP_Declare_End()

@@ -13,8 +13,11 @@
 class Dataset {
 public:
 
+	bool initialize(const char *filename);
+	bool uninitialize(void);
+
 	std::vector<Marker> m_vMarkers;           // Replace with IStimulationSet? 
-	std::vector<OpenViBE::CMatrix> m_vEEG;    // Signal
+	std::vector<OpenViBE::CMatrix*> m_vEEG;    // Signal
 	uint64_t m_samplingRate;
 	uint64_t m_Duration;
 	uint64_t m_chunkSize;
