@@ -1,3 +1,7 @@
+
+// @note in this code, ITimeArithmetics::secondsToTime() and ITimeArithmetics::timeToSeconds() 
+// are sometimes used simply to convert between floating and fixed point even if the units are not seconds.
+//
 #include "ovasCDriftCorrection.h"
 
 #include <toolkit/ovtk_all.h>
@@ -43,6 +47,9 @@ CDriftCorrection::CDriftCorrection(const IKernelContext& rKernelContext)
 
 	this->setDriftToleranceDurationMs(m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_DriftToleranceDuration}", 5));
 	this->setJitterEstimationCountForDrift(m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_JitterEstimationCountForDrift}", 128));
+	
+	m_ui64InitialSkipPeriod = m_rKernelContext.getConfigurationManager().expandAsUInteger("${AcquisitionServer_DriftInitialSkipPeriodMs}", 0);
+	m_ui64InitialSkipPeriod = (m_ui64InitialSkipPeriod << 32) / 1000; // ms to fixed point sec
 
 	reset();
 }
@@ -65,7 +72,7 @@ boolean CDriftCorrection::start(uint32 ui32SamplingFrequency, uint64 ui64StartTi
 	m_ui32SamplingFrequency = ui32SamplingFrequency;
 	m_i64DriftToleranceSampleCount=(m_ui64DriftToleranceDurationMs * m_ui32SamplingFrequency) / 1000;
 
-	m_ui64StartTime = ui64StartTime;
+	m_ui64StartTime = ui64StartTime + m_ui64InitialSkipPeriod;
 
 	m_ui64LastEstimationTime = ui64StartTime;
 
@@ -96,8 +103,8 @@ void CDriftCorrection::reset(void)
 {
 	m_vJitterEstimate.clear();
 
-	m_ui64ReceivedSampleCount = 0;
-	m_ui64CorrectedSampleCount = 0;
+	m_f64ReceivedSampleCount = 0;
+	m_f64CorrectedSampleCount = 0;
 	m_i64InnerLatencySampleCount = 0;
 
 	m_f64DriftEstimate = 0;
@@ -106,11 +113,13 @@ void CDriftCorrection::reset(void)
 	m_i64DriftCorrectionSampleCountAdded=0;
 	m_i64DriftCorrectionSampleCountRemoved=0;
 
+	m_ui64DriftCorrectionCount = 0;
+
 	// Don't know the sampling rate yet, so cannot put a good value. Put something.
 	m_i64DriftToleranceSampleCount = 1;
 
 	m_bIsActive = false;
-
+	m_bInitialSkipPeriodPassed = (m_ui64InitialSkipPeriod<=0 ? true : false);
 }
 
 
@@ -130,18 +139,17 @@ void CDriftCorrection::printStats(void) const
 	const float64 l_f64ElapsedTime = ITimeArithmetics::timeToSeconds(l_ui64ElapsedTime);
 
 	const uint64 l_ui64TheoreticalSampleCountFixedPoint = m_ui32SamplingFrequency * l_ui64ElapsedTime;
-	const uint64 l_ui64TheoreticalSampleCount = (l_ui64TheoreticalSampleCountFixedPoint >> 32)
-		+ ( (l_ui64TheoreticalSampleCountFixedPoint & 0xFFFFFFFFLL) > 0x0000FFFFLL ? 1 : 0); // Rounding
+	const float64 l_f64TheoreticalSampleCount = ITimeArithmetics::timeToSeconds(l_ui64TheoreticalSampleCountFixedPoint);
 
-	const float64 l_f64AddedRatio  = (l_ui64TheoreticalSampleCount ? (m_i64DriftCorrectionSampleCountAdded   / static_cast<float64>(l_ui64TheoreticalSampleCount)) : 0);
-	const float64 l_f64RemovedRatio= (l_ui64TheoreticalSampleCount ? (m_i64DriftCorrectionSampleCountRemoved / static_cast<float64>(l_ui64TheoreticalSampleCount)) : 0);
+	const float64 l_f64AddedRatio  = (l_f64TheoreticalSampleCount ? (m_i64DriftCorrectionSampleCountAdded   / static_cast<float64>(l_f64TheoreticalSampleCount)) : 0);
+	const float64 l_f64RemovedRatio= (l_f64TheoreticalSampleCount ? (m_i64DriftCorrectionSampleCountRemoved / static_cast<float64>(l_f64TheoreticalSampleCount)) : 0);
 
 	const uint64 l_ui64DriftToleranceDurationMs = getDriftToleranceDurationMs();
 	const float64 l_f64DriftRatio=getDriftMs()/static_cast<float64>(l_ui64DriftToleranceDurationMs);
 	const float64 l_f64DriftRatioTooFastMax = getDriftTooFastMax()/static_cast<float64>(l_ui64DriftToleranceDurationMs);
 	const float64 l_f64DriftRatioTooSlowMax = getDriftTooSlowMax()/static_cast<float64>(l_ui64DriftToleranceDurationMs);
 
-	const float64 l_f64EstimatedSamplingRate = static_cast<float64>(m_ui64ReceivedSampleCount) / l_f64ElapsedTime;
+	const float64 l_f64EstimatedSamplingRate = m_f64ReceivedSampleCount / l_f64ElapsedTime;
 	const float64 l_f64DeviationPercent =  100.0*(l_f64EstimatedSamplingRate / static_cast<float64>(m_ui32SamplingFrequency));
 
 	
@@ -154,13 +162,14 @@ void CDriftCorrection::printStats(void) const
 		m_rKernelContext.getLogManager() << LogLevel_Info << "  Estimate : Driver samples at " << std::round(l_f64EstimatedSamplingRate*10.0)/10.0
 			<< "hz (" << std::round(l_f64DeviationPercent*10.0)/10.0 << "% of declared)\n";
 
-		m_rKernelContext.getLogManager() << LogLevel_Info << "  Received : " << m_ui64ReceivedSampleCount << " samples\n";
-		m_rKernelContext.getLogManager() << LogLevel_Info << "  Expected : " << l_ui64TheoreticalSampleCount << " samples\n";
-		m_rKernelContext.getLogManager() << LogLevel_Info << "  Returned : " << m_ui64CorrectedSampleCount << " samples " 
+		m_rKernelContext.getLogManager() << LogLevel_Info << "  Received : " << m_f64ReceivedSampleCount << " samples\n";
+		m_rKernelContext.getLogManager() << LogLevel_Info << "  Expected : " << l_f64TheoreticalSampleCount << " samples\n";
+		m_rKernelContext.getLogManager() << LogLevel_Info << "  Returned : " << m_f64CorrectedSampleCount << " samples " 
 			<< (m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled ? "(drift correction disabled)" : "(after drift correction)") << "\n";
 
 		m_rKernelContext.getLogManager() << LogLevel_Info << "  Added    : " << m_i64DriftCorrectionSampleCountAdded << " samples (" << l_f64AddedRatio << "%)\n";
 		m_rKernelContext.getLogManager() << LogLevel_Info << "  Removed  : " << m_i64DriftCorrectionSampleCountRemoved << " samples (" << l_f64RemovedRatio << "%)\n";
+		m_rKernelContext.getLogManager() << LogLevel_Info << "  Operated : " << m_ui64DriftCorrectionCount << " times (interventions)\n";
 
 		m_rKernelContext.getLogManager() << LogLevel_Info << "Estimated drift (tolerance = " << l_ui64DriftToleranceDurationMs << "ms),\n";
 
@@ -176,10 +185,10 @@ void CDriftCorrection::printStats(void) const
 			<< (m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled ? "" : ", after corr.")
 			<< "\n";
 
-		const int64 l_i64RemainingDriftCount = (static_cast<int64>(m_ui64CorrectedSampleCount) - static_cast<int64>(l_ui64TheoreticalSampleCount));
-		const float64 l_f64RemainingDriftMs = 1000.0 * l_i64RemainingDriftCount / static_cast<float64>(m_ui32SamplingFrequency);
+		const float64 l_f64RemainingDriftCount = m_f64CorrectedSampleCount - l_f64TheoreticalSampleCount;
+		const float64 l_f64RemainingDriftMs = 1000.0 * l_f64RemainingDriftCount / static_cast<float64>(m_ui32SamplingFrequency);
 		m_rKernelContext.getLogManager() << (std::abs(l_f64RemainingDriftMs) > l_ui64DriftToleranceDurationMs ? LogLevel_Warning : LogLevel_Info)
-			<< "  Remaining  : " << l_i64RemainingDriftCount << " samples (" << l_f64RemainingDriftMs << "ms, " << 100*l_f64RemainingDriftMs/l_ui64DriftToleranceDurationMs << "% of tol., "
+			<< "  Remaining  : " << l_f64RemainingDriftCount << " samples (" << l_f64RemainingDriftMs << "ms, " << 100*l_f64RemainingDriftMs/l_ui64DriftToleranceDurationMs << "% of tol., "
 			<< std::round(100.0* (l_f64RemainingDriftMs/1000.0) / l_f64ElapsedTime * 10.0) / 10.0 << "% of session length)"
 			<< (m_eDriftCorrectionPolicy == DriftCorrectionPolicy_Disabled ? "" : ", after corr.")
 			<< "\n";
@@ -202,7 +211,8 @@ OpenViBE::float64 CDriftCorrection::computeJitter(const OpenViBE::uint64 ui64Cur
 	// Compute the jitter. To get a bit cleaner code, instead of basing jitter estimate
 	// on difference of estimated sample counts, we compute the diffs in the elapsed 
 	// and the expected time based on the amount of samples received.
-	const uint64 l_ui64ExpectedTime = m_ui64StartTime + (m_ui64CorrectedSampleCount<<32) / static_cast<uint64>(m_ui32SamplingFrequency);
+	const uint64 l_ui64ExpectedTime = m_ui64StartTime
+		+ ITimeArithmetics::secondsToTime(m_f64CorrectedSampleCount) / static_cast<uint64>(m_ui32SamplingFrequency);
 
 	float64 l_f64TimeDiff; // time in seconds that our expectation differs from the measured clock
 	if(l_ui64ExpectedTime>=ui64CurrentTime)
@@ -231,10 +241,34 @@ boolean CDriftCorrection::estimateDrift(const uint64 ui64NewSamples)
 		return false;
 	}
 
-	m_ui64ReceivedSampleCount += ui64NewSamples;		// Just kept for statistics
-	m_ui64CorrectedSampleCount += ui64NewSamples;		// The "corrected" amount of samples
-
 	const uint64 l_ui64CurrentTime = System::Time::zgetTime();
+
+	if (l_ui64CurrentTime < m_ui64StartTime)
+	{
+		// We can ignore some sets of samples for the driver to stabilize. For example, 
+		// a delay in delivering the first set would cause a permanent drift (offset) unless corrected. 
+		// Yet this offset would be totally harmless to any client connecting to AS after first 
+		// set of samples have been received, and if drift correction is disabled, it would 
+		// stay there in the measure. 
+		//
+		// With conf token AcquisitionServer_DriftInitialSkipPeriodMs set to 0 no sets will be skipped.
+
+		return true;
+	}
+	else
+	{
+		if (!m_bInitialSkipPeriodPassed)
+		{
+			// The next call will be the first estimation
+			m_bInitialSkipPeriodPassed = true;
+			m_ui64StartTime = l_ui64CurrentTime;
+			m_ui64LastEstimationTime = l_ui64CurrentTime;
+			return true;
+		}
+	}
+
+	m_f64ReceivedSampleCount += ui64NewSamples;		// How many samples have arrived from the driver
+	m_f64CorrectedSampleCount += ui64NewSamples;		// The "corrected" amount of samples
 
 //	m_rKernelContext.getLogManager() << LogLevel_Info << "Drift measured at " << ITimeArithmetics::timeToSeconds(l_ui64CurrentTime - m_ui64StartTime) * 1000 << "ms.\n";
 
@@ -302,7 +336,7 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 		return true;
 	}
 
-	if(ui64TotalSamples != m_ui64CorrectedSampleCount) {
+	if(ui64TotalSamples != static_cast<uint64>(m_f64CorrectedSampleCount)) {
 		m_rKernelContext.getLogManager() << LogLevel_Warning << "Server and drift correction class disagree on the number of samples\n";
 	}
 
@@ -318,16 +352,17 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 			vPendingBuffer.push_back(vPaddingBuffer);
 		}
 
-		const uint64 l_ui64TimeOfIncorrect     = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64CorrectedSampleCount-1);
+		const uint64 l_ui64TimeOfIncorrect = ITimeArithmetics::secondsToTime(m_f64CorrectedSampleCount - 1) / static_cast<uint64>(m_ui32SamplingFrequency);
 		const uint64 l_ui64DurationOfIncorrect = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, i64Correction);
-		const uint64 l_ui64TimeOfCorrect       = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64CorrectedSampleCount-1+i64Correction);
+		const uint64 l_ui64TimeOfCorrect = ITimeArithmetics::secondsToTime(m_f64CorrectedSampleCount - 1 + i64Correction) / static_cast<uint64>(m_ui32SamplingFrequency);
 		oPendingStimulationSet.appendStimulation(OVTK_StimulationId_AddedSamplesBegin, l_ui64TimeOfIncorrect, l_ui64DurationOfIncorrect);
 		oPendingStimulationSet.appendStimulation(OVTK_StimulationId_AddedSamplesEnd,   l_ui64TimeOfCorrect, 0);
 
 		m_f64DriftEstimate+=i64Correction;
 
-		m_ui64CorrectedSampleCount+=i64Correction;
-		m_i64DriftCorrectionSampleCountAdded+=i64Correction;
+		m_f64CorrectedSampleCount+= i64Correction;
+		m_i64DriftCorrectionSampleCountAdded+= i64Correction;
+		m_ui64DriftCorrectionCount++;
 	}
 	else if(i64Correction < 0)
 	{
@@ -335,7 +370,7 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 
 		vPendingBuffer.erase(vPendingBuffer.begin()+vPendingBuffer.size()-(int)l_ui64SamplesToRemove, vPendingBuffer.begin()+vPendingBuffer.size());
 
-		const uint64 l_ui64LastSampleDate = ITimeArithmetics::sampleCountToTime(m_ui32SamplingFrequency, m_ui64CorrectedSampleCount-l_ui64SamplesToRemove);
+		const uint64 l_ui64LastSampleDate = ITimeArithmetics::secondsToTime(m_f64CorrectedSampleCount-l_ui64SamplesToRemove) / static_cast<uint64>(m_ui32SamplingFrequency);
 		for(uint32 i=0; i<oPendingStimulationSet.getStimulationCount(); i++)
 		{
 			if(oPendingStimulationSet.getStimulationDate(i) > l_ui64LastSampleDate)
@@ -348,8 +383,9 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 
 		m_f64DriftEstimate-=l_ui64SamplesToRemove;
 
-		m_ui64CorrectedSampleCount-=l_ui64SamplesToRemove;
+		m_f64CorrectedSampleCount-=l_ui64SamplesToRemove;
 		m_i64DriftCorrectionSampleCountRemoved+=l_ui64SamplesToRemove;
+		m_ui64DriftCorrectionCount++;
 	}
 
 	// correct the jitter estimate to match the correction we made. For example, if we had
@@ -362,7 +398,7 @@ boolean CDriftCorrection::correctDrift(int64 i64Correction, uint64& ui64TotalSam
 		(*j)+=i64Correction;
 	}
 
-	ui64TotalSamples = m_ui64CorrectedSampleCount;
+	ui64TotalSamples = static_cast<uint64>(m_f64CorrectedSampleCount);
 
 	return true;
 }

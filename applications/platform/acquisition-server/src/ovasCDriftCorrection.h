@@ -91,6 +91,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::boolean m_bInitialized;
 		OpenViBE::boolean m_bStarted;
 		OpenViBE::boolean m_bIsActive;
+		OpenViBE::boolean m_bInitialSkipPeriodPassed;
 
 		// Parameters
 		OpenViBEAcquisitionServer::EDriftCorrectionPolicy m_eDriftCorrectionPolicy;
@@ -99,10 +100,11 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::int64 m_i64InnerLatencySampleCount;
 		OpenViBE::uint64 m_ui64JitterEstimationCountForDrift;
 		OpenViBE::uint32 m_ui32SamplingFrequency;
+		OpenViBE::uint64 m_ui64InitialSkipPeriod;
 
 		// Results
-		OpenViBE::uint64 m_ui64ReceivedSampleCount;
-		OpenViBE::uint64 m_ui64CorrectedSampleCount;
+		OpenViBE::float64 m_f64ReceivedSampleCount;        
+		OpenViBE::float64 m_f64CorrectedSampleCount;
 		OpenViBE::float64 m_f64DriftEstimate;				// In subsample accuracy, e.g. 1.2 samples.
 		OpenViBE::float64 m_f64DriftEstimateTooFastMax;		// maximum over time
 		OpenViBE::float64 m_f64DriftEstimateTooSlowMax;		// minimum over time
@@ -110,6 +112,7 @@ namespace OpenViBEAcquisitionServer
 		// Stats
 		OpenViBE::int64 m_i64DriftCorrectionSampleCountAdded;
 		OpenViBE::int64 m_i64DriftCorrectionSampleCountRemoved;
+		OpenViBE::uint64 m_ui64DriftCorrectionCount;
 
 		// Timekeeping
 		OpenViBE::uint64 m_ui64StartTime;
