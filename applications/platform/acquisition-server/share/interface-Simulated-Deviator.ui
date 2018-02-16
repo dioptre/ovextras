@@ -116,6 +116,20 @@
       </row>	  
     </data>
   </object>
+  <object class="GtkListStore" id="model3">
+    <columns>
+      <!-- column-name gchararray -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Square</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Sine</col>
+      </row>
+    </data>
+  </object>  
   <object class="GtkDialog" id="openvibe-acquisition-server-settings">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -569,7 +583,37 @@
                         <property name="top_attach">11</property>
                         <property name="bottom_attach">12</property>
                       </packing>
+                    </child>		
+                    <child>
+                      <object class="GtkLabel" id="label_wavetype">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Wave type :</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">12</property>
+                        <property name="bottom_attach">13</property>
+                      </packing>
                     </child>						
+                    <child>
+                      <object class="GtkComboBox" id="combobox_wavetype">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="model">model3</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="renderer3"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">12</property>
+                        <property name="bottom_attach">13</property>
+                      </packing>
+                    </child>					
                   </object>
                   <packing>
                     <property name="expand">True</property>

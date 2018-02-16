@@ -28,6 +28,7 @@ CDriverSimulatedDeviator::CDriverSimulatedDeviator(IDriverContext& rDriverContex
 	,m_Spread(0.1)
 	,m_MaxDev(3)
 	,m_Pullback(0.001)
+	,m_Wavetype(0)	// 0 = square, 1 = sine
 	,m_Update(0.1)
 	,m_gen{m_rd()}
 {
@@ -43,6 +44,7 @@ CDriverSimulatedDeviator::CDriverSimulatedDeviator(IDriverContext& rDriverContex
 	m_oSettings.add("MaxDev",   &m_MaxDev);
 	m_oSettings.add("Pullback", &m_Pullback);
 	m_oSettings.add("Update",   &m_Update);
+	m_oSettings.add("Wavetype", &m_Wavetype);
 	m_oSettings.load();
 }
 
@@ -79,7 +81,7 @@ boolean CDriverSimulatedDeviator::initialize(
 
 	m_oHeader.setChannelCount(3);
 
-	m_oHeader.setChannelName(0, "SquareWave");
+	m_oHeader.setChannelName(0, (m_Wavetype == 0 ? "SquareWave" : "SineWave"));
 	m_oHeader.setChannelName(1, "SamplingRate");
 	m_oHeader.setChannelName(2, "DriftMs");
 
@@ -91,7 +93,6 @@ boolean CDriverSimulatedDeviator::initialize(
 
 	m_pCallback=&rCallback;
 	m_ui32SampleCountPerSentBlock=ui32SampleCountPerSentBlock;
-
 
 	return true;
 }
@@ -138,9 +139,12 @@ boolean CDriverSimulatedDeviator::loop(void)
 		if(now-m_ui64LastAdjustment > ITimeArithmetics::secondsToTime(m_Update))
 		{
 			// Make the sampling frequency random walk up or down
-			std::normal_distribution<> distro{0,m_Spread};
-			const float64 jitter = distro(m_gen);
-			m_usedSamplingFrequency += jitter;
+			if(m_Spread>0) 
+			{
+				std::normal_distribution<> distro{0,m_Spread};
+				const float64 jitter = distro(m_gen);
+				m_usedSamplingFrequency += jitter;
+			}
 
 			// Use linear interpolation to pull the drifting sample frequency towards the center frequency
 			m_usedSamplingFrequency = m_Pullback * (m_oHeader.getSamplingFrequency() + m_Offset) + (1-m_Pullback) * m_usedSamplingFrequency;
@@ -184,16 +188,36 @@ boolean CDriverSimulatedDeviator::loop(void)
 
 		for (uint32 i = 0; i<l_ui32RemainingSamples; i++)
 		{
-			const uint64_t sampleTimeInSeconds = ((ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui64TotalSampleCountReal)) >> 32);
+			float64 l_f64Value;
+			if(m_Wavetype==0)
+			{
+				const uint64_t sampleTimeInSeconds = ((ITimeArithmetics::sampleCountToTime(m_oHeader.getSamplingFrequency(), m_ui64TotalSampleCountReal)) >> 32);
+				l_f64Value = (sampleTimeInSeconds % 2 == 0 ? -1 : 1);
+			}
+			else
+			{
+				const float64 l_f64pi = 3.14159265358979323846;
+				l_f64Value = std::sin( 2 * l_f64pi  * m_ui64TotalSampleCountReal / static_cast<float64>(m_oHeader.getSamplingFrequency()) );
+			}
 
-			const float64 l_f64Value = (sampleTimeInSeconds % 2 == 0 ? -1 : 1);
-			m_vSample[0*l_ui32RemainingSamples + i] = static_cast<float32>(l_f64Value);
+			m_vSample[0*l_ui32RemainingSamples+i] = static_cast<float32>(l_f64Value);
 
 			m_vSample[1*l_ui32RemainingSamples+i] = static_cast<float32>(m_usedSamplingFrequency);
 
 			m_vSample[2*l_ui32RemainingSamples+i] = static_cast<float32>(driftMeasure * 1000.0);
 
-			m_ui64TotalSampleCountReal++;
+			if(l_ui64SamplesNeededSoFarReal >= l_ui64SamplesNeededSoFar)
+			{
+				m_ui64TotalSampleCountReal++;
+			}
+			else
+			{
+				// nop: we don't move the 'real' process forward if the sampler is in advance, it gets a duplicate sample on purpose, 
+				// we assume that the hardware sampling process has not had time to change state.
+				// @todo this implementation is not quite correct... if we take twice the amount of samples (512hz->1024hz), 
+				// we'd expect each sample to be replicated twice but we observe that only approximately. The sinusoid 1hz stays correct nevertheless.
+			}
+
 			m_ui64TotalSampleCount++;
 		}
 
@@ -258,6 +282,7 @@ boolean CDriverSimulatedDeviator::configure(void)
 		,m_MaxDev
 		,m_Pullback
 		,m_Update		
+		,m_Wavetype
 		);
 
 	if(m_oConfiguration.configure(m_oHeader)) 

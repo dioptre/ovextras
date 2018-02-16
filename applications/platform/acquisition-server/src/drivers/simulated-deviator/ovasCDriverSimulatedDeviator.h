@@ -74,6 +74,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::float64 m_MaxDev;
 		OpenViBE::float64 m_Pullback;
 		OpenViBE::float64 m_Update;
+		OpenViBE::uint64 m_Wavetype;
 
 		std::random_device m_rd;
 		std::mt19937 m_gen;

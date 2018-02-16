@@ -25,7 +25,8 @@ namespace OpenViBEAcquisitionServer
 				, OpenViBE::float64& rSpread
 				, OpenViBE::float64& rMaxDev
 				, OpenViBE::float64& rPullback
-				, OpenViBE::float64& rUpdate							
+				, OpenViBE::float64& rUpdate	
+				, OpenViBE::uint64& rWavetype
 				);
 
 			virtual OpenViBE::boolean preConfigure(void);
@@ -41,6 +42,7 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::float64& m_MaxDev;
 		OpenViBE::float64& m_Pullback;
 		OpenViBE::float64& m_Update;
+		OpenViBE::uint64& m_Wavetype;
 	};
 };
 

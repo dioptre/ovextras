@@ -12,6 +12,7 @@ CConfigurationDriverSimulatedDeviator::CConfigurationDriverSimulatedDeviator(IDr
 	,float64& rMaxDev
 	,float64& rPullback
 	,float64& rUpdate
+	,uint64& rWavetype
 	
 	)
 	:CConfigurationBuilder(sGtkBuilderFileName)
@@ -22,6 +23,7 @@ CConfigurationDriverSimulatedDeviator::CConfigurationDriverSimulatedDeviator(IDr
 	 ,m_MaxDev(rMaxDev)
 	 ,m_Pullback(rPullback)
 	 ,m_Update(rUpdate)
+	 ,m_Wavetype(rWavetype)
 {
 }
 
@@ -58,6 +60,9 @@ boolean CConfigurationDriverSimulatedDeviator::preConfigure(void)
 	gtk_spin_button_set_digits(tmp,3);
 	gtk_spin_button_set_value(tmp, m_Update);
 
+	GtkComboBox *wavetype = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_wavetype"));
+	gtk_combo_box_set_active(wavetype,static_cast<gint>(m_Wavetype) );
+
 	return true;
 }
 
@@ -86,6 +91,10 @@ boolean CConfigurationDriverSimulatedDeviator::postConfigure(void)
 		tmp = GTK_SPIN_BUTTON(gtk_builder_get_object(m_pBuilderConfigureInterface, "spinbutton_update"));
 		gtk_spin_button_update(tmp);
 		m_Update = gtk_spin_button_get_value(tmp);
+
+		GtkComboBox *wavetype = GTK_COMBO_BOX(gtk_builder_get_object(m_pBuilderConfigureInterface, "combobox_wavetype"));
+		m_Wavetype = static_cast<uint64>( gtk_combo_box_get_active(wavetype) );
+
 	}
 
 	if (!CConfigurationBuilder::postConfigure())
