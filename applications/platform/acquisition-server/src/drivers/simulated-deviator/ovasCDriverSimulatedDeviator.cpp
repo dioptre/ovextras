@@ -5,6 +5,7 @@
 #include <openvibe/ovITimeArithmetics.h>
 
 #include <system/ovCTime.h>
+#include <system/ovCMath.h>
 
 #include <cmath>
 #include <algorithm>
@@ -28,8 +29,11 @@ CDriverSimulatedDeviator::CDriverSimulatedDeviator(IDriverContext& rDriverContex
 	,m_Spread(0.1)
 	,m_MaxDev(3)
 	,m_Pullback(0.001)
-	,m_Wavetype(0)	// 0 = square, 1 = sine
 	,m_Update(0.1)
+	,m_Wavetype(0)	// 0 = square, 1 = sine
+	,m_FreezeFrequency(0)
+	,m_FreezeDuration(0)
+	,m_NextFreezeTime(0)
 	,m_gen{m_rd()}
 {
 	m_rDriverContext.getLogManager() << LogLevel_Trace << "CDriverSimulatedDeviator::CDriverSimulatedDeviator\n";
@@ -45,6 +49,8 @@ CDriverSimulatedDeviator::CDriverSimulatedDeviator(IDriverContext& rDriverContex
 	m_oSettings.add("Pullback", &m_Pullback);
 	m_oSettings.add("Update",   &m_Update);
 	m_oSettings.add("Wavetype", &m_Wavetype);
+	m_oSettings.add("FreezeFrequency", &m_FreezeFrequency);
+	m_oSettings.add("FreezeDuration", &m_FreezeDuration);
 	m_oSettings.load();
 }
 
@@ -123,6 +129,8 @@ boolean CDriverSimulatedDeviator::loop(void)
 
 	if (m_rDriverContext.isStarted())
 	{
+	
+
 		// Generate the contents we want to send next
 		CStimulationSet l_oStimulationSet;
 		if (m_bSendPeriodicStimulations)
@@ -134,6 +142,27 @@ boolean CDriverSimulatedDeviator::loop(void)
 		}
 
 		const uint64 now = System::Time::zgetTime();
+
+		// Is it time to freeze?
+		if(m_FreezeDuration>0 && m_FreezeFrequency>0)
+		{
+			if(m_NextFreezeTime>0 && now>=m_NextFreezeTime ) 
+			{
+				// Simulate a freeze by setting all samples as sent up to the de-freeze point
+				const uint64 freezeDurationFixedPoint = ITimeArithmetics::secondsToTime(m_FreezeDuration);
+				const uint64 samplesToSkip = ITimeArithmetics::timeToSampleCount(m_oHeader.getSamplingFrequency(), freezeDurationFixedPoint);
+				m_ui64TotalSampleCount += samplesToSkip;
+				m_ui64TotalSampleCountReal += samplesToSkip;
+			}
+			if(now>=m_NextFreezeTime) 
+			{
+				// Compute the next time to freeze; simulate a Poisson process
+				const float64 secondsUntilNext = -std::log(1.0 - System::Math::randomFloat32BetweenZeroAndOne()) / m_FreezeFrequency;
+				const uint64 secondsUntilNextFixedPoint = ITimeArithmetics::secondsToTime(secondsUntilNext);
+
+				m_NextFreezeTime = now + secondsUntilNextFixedPoint;
+			}
+		}
 
 		// Drift the sampling frequency?
 		if(now-m_ui64LastAdjustment > ITimeArithmetics::secondsToTime(m_Update))
@@ -283,6 +312,8 @@ boolean CDriverSimulatedDeviator::configure(void)
 		,m_Pullback
 		,m_Update		
 		,m_Wavetype
+		,m_FreezeFrequency
+		,m_FreezeDuration
 		);
 
 	if(m_oConfiguration.configure(m_oHeader)) 

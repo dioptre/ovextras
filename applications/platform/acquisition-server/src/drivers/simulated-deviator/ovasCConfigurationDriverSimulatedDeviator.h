@@ -27,6 +27,8 @@ namespace OpenViBEAcquisitionServer
 				, OpenViBE::float64& rPullback
 				, OpenViBE::float64& rUpdate	
 				, OpenViBE::uint64& rWavetype
+				, OpenViBE::float64& rFreezeFrequency
+				, OpenViBE::float64& rFreezeDuration
 				);
 
 			virtual OpenViBE::boolean preConfigure(void);
@@ -43,6 +45,8 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::float64& m_Pullback;
 		OpenViBE::float64& m_Update;
 		OpenViBE::uint64& m_Wavetype;
+		OpenViBE::float64& m_FreezeFrequency;
+		OpenViBE::float64& m_FreezeDuration;
 	};
 };
 

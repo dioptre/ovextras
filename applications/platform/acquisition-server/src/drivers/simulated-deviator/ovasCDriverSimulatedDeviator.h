@@ -76,6 +76,10 @@ namespace OpenViBEAcquisitionServer
 		OpenViBE::float64 m_Update;
 		OpenViBE::uint64 m_Wavetype;
 
+		OpenViBE::float64 m_FreezeFrequency;
+		OpenViBE::float64 m_FreezeDuration;
+		OpenViBE::uint64 m_NextFreezeTime;
+
 		std::random_device m_rd;
 		std::mt19937 m_gen;
 	};
