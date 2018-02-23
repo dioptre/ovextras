@@ -18,9 +18,9 @@ public:
 
 	std::vector<Marker> m_vMarkers;           // Replace with IStimulationSet? 
 	std::vector<OpenViBE::CMatrix*> m_vEEG;    // Signal
-	uint64_t m_samplingRate;
+	uint32_t m_samplingRate;
 	uint64_t m_Duration;
-	uint64_t m_chunkSize;
+	uint32_t m_chunkSize;
 
 	std::string m_Filename;
 

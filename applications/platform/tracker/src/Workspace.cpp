@@ -31,7 +31,9 @@ bool Workspace::play(void)
 		cnt++;
 	}
 
-	return 0;
+	m_output.stop();
+
+	return true;
 }
 
 bool Workspace::setTrack(const char *filename) 
@@ -39,8 +41,8 @@ bool Workspace::setTrack(const char *filename)
 	return m_track.initialize(filename); 
 };
 
-bool Workspace::setSink(const char *scenarioXml) 
+bool Workspace::setSink(const char *scenarioXml, uint32_t samplingRate, uint32_t chunkSize) 
 { 
-	return m_output.initialize(scenarioXml); 
+	return m_output.initialize(scenarioXml, samplingRate, chunkSize); 
 
 };
