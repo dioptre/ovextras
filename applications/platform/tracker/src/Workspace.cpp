@@ -19,13 +19,13 @@ bool Workspace::play(void)
 	bool go = true;uint64_t cnt = 0;
 	while(go)
 	{
-		const OpenViBE::CMatrix* chunk;
+		Stream* nextStream;
 
-		go = m_track.getNextChunk(cnt, &chunk);
+		go = m_track.getNextStream(&nextStream);
 
 		if(go)
 		{
-			go = m_output.pushChunk(*chunk);
+			go = m_output.pull(nextStream);
 		}
 
 		cnt++;
@@ -41,8 +41,10 @@ bool Workspace::setTrack(const char *filename)
 	return m_track.initialize(filename); 
 };
 
-bool Workspace::setSink(const char *scenarioXml, uint32_t samplingRate, uint32_t chunkSize) 
+bool Workspace::setSink(const char *scenarioXml) 
 { 
-	return m_output.initialize(scenarioXml, samplingRate, chunkSize); 
+	uint32_t samplingRate = m_track.getSamplingRate();
+
+	return m_output.initialize(scenarioXml, samplingRate); 
 
 };

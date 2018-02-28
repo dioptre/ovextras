@@ -10,6 +10,8 @@
 
 #include <system/ovCTime.h>
 
+#include <algorithm> // std::max
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 
@@ -24,6 +26,10 @@ using namespace OpenViBE::Kernel;
 //	  pushEndStim(); // XML have player controller that will quit
 // }
 // exit;
+
+#include "StreamChunk.h"
+#include "StreamSignalChunk.h"
+#include "StreamStimulationChunk.h"
 
 class OutputEncoder
 {
@@ -209,7 +215,7 @@ public:
 				}
 			}
 
-			std::cout << "Sending out chunk " << m_BuffersSent << " at " << ITimeArithmetics::timeToSeconds(System::Time::zgetTime()) << "\n";
+//			std::cout << "Sending out chunk " << m_BuffersSent << " at " << ITimeArithmetics::timeToSeconds(System::Time::zgetTime()) << "\n";
 
 			auto pBuffer=m_vClientPendingBuffer.front();
 			m_vClientPendingBuffer.pop_front();
@@ -253,16 +259,15 @@ void playerLaunch(const char *xmlFile)
 	}
 }
 
-bool Sink::initialize(const char *xmlFile, uint32_t samplingRate, uint32_t chunkSize) 
+bool Sink::initialize(const char *xmlFile, uint32_t samplingRate) 
 { 
 	std::cout << "Sink: Initializing with "	<< xmlFile << "\n";
 	
 	m_pConnectionServer = NULL;
 	const uint32_t ui32ConnectionPort = 1024;
 	m_SamplingRate = samplingRate;
-	m_ChunkSize = chunkSize;
+	m_ChunkSize = 32;
 	m_ChunksSent = 0;
-	playingStarted = false;
 
 	m_ClientHandlerThread = nullptr;
 	m_pPlayerThread = nullptr;
@@ -284,12 +289,11 @@ bool Sink::initialize(const char *xmlFile, uint32_t samplingRate, uint32_t chunk
 
 	m_ClientHandler = new CClientHandler(*this);
 
+	// Create a player object with the xml
 	m_ClientHandlerThread = new std::thread(std::bind(CClientHandler::start_thread, m_ClientHandler));
 	m_pPlayerThread = new std::thread(std::bind(&playerLaunch, xmlFile));
 
-	// Create a player object with the xml
-
-	return false; 
+	return true; 
 }
 
 bool Sink::uninitialize(void) 
@@ -304,8 +308,6 @@ bool Sink::uninitialize(void)
 		delete m_pPlayerThread;
 		m_pPlayerThread = nullptr;
 	}
-
-	playingStarted = false;
 
 	// tear down the server thread	
 	if(m_ClientHandlerThread)
@@ -352,15 +354,17 @@ bool Sink::uninitialize(void)
 	return true;
 }
 
-bool Sink::pushChunk(const OpenViBE::CMatrix& chunk)
+#if 0
+bool Sink::pushChunk(const StreamChunk* chunk)
 {
-	std::cout << "Sink: Queueing chunk\n";
+//	std::cout << "Sink: Queueing chunk\n";
 
 	if(!m_OutputEncoder)
 	{
 		return false;
 	}
 
+#if 0
 	if(!playingStarted)
 	{
 		m_OutputEncoder->ip_ui64SignalSamplingRate = m_SamplingRate;
@@ -376,6 +380,16 @@ bool Sink::pushChunk(const OpenViBE::CMatrix& chunk)
 		playingStarted = true;
 	}
 	
+	for(size_t i=0;i<chunk.getBufferElementCount();i++)
+	{
+		float32 val = std::abs(chunk.getBuffer()[i]);
+		if(val>100000000)
+		{
+			std::cout << "meh\n";
+			break;
+		}
+	}
+
 	IMatrix* target = m_OutputEncoder->ip_pSignalMatrix;
 	OpenViBEToolkit::Tools::Matrix::copy(*target, chunk);
 
@@ -384,12 +398,87 @@ bool Sink::pushChunk(const OpenViBE::CMatrix& chunk)
 	m_ClientHandler->pushChunk(*m_OutputEncoder->encodeBuffer());
 	m_ChunksSent++;
 
+#endif
+
 	return true;
 }
 
+#endif
+
+bool Sink::pull(Stream* stream)
+{
+
+	const StreamChunk* ptr;
+
+	if(!stream->peek(&ptr))
+	{
+		return false;
+	}
+
+	// Flush previous buffers when the current buffer start is older than the previous ones
+	if(ptr->m_bufferStart >= m_PreviousChunkEnd && m_PreviousChunkEnd>0)
+	{
+			m_ClientHandler->pushChunk(*m_OutputEncoder->encodeBuffer());
+
+			m_OutputEncoder->ip_pStimulationSet->clear();
+	}
+	m_PreviousChunkEnd = std::max(m_PreviousChunkEnd, ptr->m_bufferEnd);
+
+	if(stream->getTypeIdentifier() == OV_TypeId_Signal)
+	{
+		const StreamSignalChunk* sPtr = reinterpret_cast<const StreamSignalChunk*>(ptr);
+
+		if(!m_SignalHeaderSent)
+		{
+			m_OutputEncoder->ip_ui64SignalSamplingRate = m_SamplingRate;
+			m_OutputEncoder->ip_ui64BufferDuration = ITimeArithmetics::sampleCountToTime(m_SamplingRate, m_ChunkSize);
+			OpenViBEToolkit::Tools::Matrix::copyDescription(*m_OutputEncoder->ip_pSignalMatrix, sPtr->data);
+
+			IStimulationSet* stimSet = m_OutputEncoder->ip_pStimulationSet;
+			stimSet->clear();
+			stimSet->appendStimulation(OVTK_StimulationId_ExperimentStart, 0, 0);
+
+			m_ClientHandler->pushChunk(*m_OutputEncoder->encodeHeader());
+
+			m_SignalHeaderSent = true;
+		}
+
+		IMatrix* target = m_OutputEncoder->ip_pSignalMatrix;
+		OpenViBEToolkit::Tools::Matrix::copy(*target, sPtr->data);
+
+
+
+		m_ChunksSent++;
+
+	}
+	// @fixme issue here that the acquisition stream apparently actually expects all headers to be sent at once, so we drop all other streams before first signal chunk...
+	else if(stream->getTypeIdentifier() == OV_TypeId_Stimulations)
+	{
+			
+//			std::cout << "Stimchunk\n";
+
+		const StreamStimulationChunk* sPtr = reinterpret_cast<const StreamStimulationChunk*>(ptr);
+
+		// This will be sent when the next signal chunk is sent
+		for(size_t i=0;i<sPtr->stimSet.getStimulationCount();i++)
+		{
+			m_OutputEncoder->ip_pStimulationSet->appendStimulation(
+				sPtr->stimSet.getStimulationIdentifier(i),
+				sPtr->stimSet.getStimulationDate(i),
+				sPtr->stimSet.getStimulationDuration(i)
+				);
+		}
+	}
+
+	stream->step();
+
+	return true;
+}
+
+
 bool Sink::stop(void)
 {
-	if(playingStarted)
+	if(m_SignalHeaderSent)
 	{
 		const uint64_t endTime = ITimeArithmetics::sampleCountToTime(m_SamplingRate, (m_ChunksSent+1)*m_ChunkSize);
 
@@ -399,7 +488,8 @@ bool Sink::stop(void)
 		m_ClientHandler->pushChunk(*m_OutputEncoder->encodeBuffer());
 
 		m_ClientHandler->pushChunk(*m_OutputEncoder->encodeEnd());
-		playingStarted = false;
+
+		m_SignalHeaderSent = false;
 	}
 
 	return true;

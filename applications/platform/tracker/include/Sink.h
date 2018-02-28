@@ -10,34 +10,40 @@
 #include <mutex>
 #include <condition_variable>
 
+#include "Stream.h"
+
 class CClientHandler;
 class OutputEncoder;
 
 class Sink {
 public:
 
-	Sink(OpenViBE::Kernel::IKernelContext& KernelContext) : m_KernelContext(KernelContext), m_SamplingRate(0), m_ChunkSize(0) {};
+	Sink(OpenViBE::Kernel::IKernelContext& KernelContext) : m_KernelContext(KernelContext) {};
 
-	bool initialize(const char *xmlFile, uint32_t samplingRate, uint32_t chunkSize);
+	bool initialize(const char *xmlFile, uint32_t samplingRate);
 	bool uninitialize(void);
-	bool pushChunk(const OpenViBE::CMatrix& chunk);
+	bool pull(Stream* stream);
 	bool stop(void);
 
 public:
-	bool playingStarted;
 
-	Socket::IConnectionServer* m_pConnectionServer;
+	Socket::IConnectionServer* m_pConnectionServer = nullptr;
 
-	std::thread* m_ClientHandlerThread;
-	std::thread* m_pPlayerThread;
+	std::thread* m_ClientHandlerThread = nullptr;
+	std::thread* m_pPlayerThread = nullptr;
 
-	CClientHandler* m_ClientHandler;
-	OutputEncoder* m_OutputEncoder;
+	CClientHandler* m_ClientHandler = nullptr;
+	OutputEncoder* m_OutputEncoder = nullptr;
 
-	uint32_t m_SamplingRate;
-	uint32_t m_ChunkSize;
+	uint32_t m_SamplingRate = 0;
+	uint32_t m_ChunkSize = 0;
 
-	uint32_t m_ChunksSent;
+	uint32_t m_ChunksSent = 0;
+
+	uint64_t m_PreviousChunkEnd = 0;
+
+	bool m_SignalHeaderSent = false;
+	bool m_StimulationHeaderSent = false;
 
 private:
 

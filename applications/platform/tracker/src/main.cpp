@@ -10,6 +10,8 @@
 
 #include "Workspace.h"
 
+#include "Testclass.h"
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace std;
@@ -105,14 +107,23 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+// 	TestClass tmp(*kernelWrapper.m_KernelContext);
+
 	Workspace wp(*kernelWrapper.m_KernelContext);
 
+	const CString eegFile = OpenViBE::Directories::getDataDir() + CString("/scenarios/signals/bci-motor-imagery.ov");
+//	const CString eegFile = CString("E:/jl/noise-test.ov");
 	const CString scenarioFile = OpenViBE::Directories::getDataDir() + CString("/applications/tracker/tracker-debug-display.xml");
-
-// 	wp.setSink("E:\\jl\\test-helloworld.xml");
-	wp.setTrack("test-eeg.ov");
-	wp.setSink(scenarioFile.toASCIIString(), wp.m_track.m_Dataset.m_samplingRate, wp.m_track.m_Dataset.m_chunkSize);
 	
+	if(!wp.setTrack(eegFile.toASCIIString()))
+	{
+		return 2;
+	}
+	if(!wp.setSink(scenarioFile.toASCIIString()))
+	{
+		return 3;
+	}
+
 	// Push some chunks to selection
 	Selection& selection = wp.m_track.m_Selection;
 	selection.addRange(Range(3,5));
@@ -120,10 +131,8 @@ int main(int argc, char *argv[])
 
 	if(!wp.play())
 	{
-		return 2;
+		return 4;
 	}
-	
-
 
 	return 0;
 }
