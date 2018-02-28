@@ -95,22 +95,6 @@ boolean CDriverEEGO::initialize(
 			throw std::exception();
 		}
 
-		// create the amplifier factory
-		// To initialize we need to locate the path of the DLL
-		// Create path to the dynamic library
-#ifdef _WIN32
-		const OpenViBE::CString l_oLibDir = Directories::getBinDir() + "\\eego-SDK.dll";
-		const std::string l_sPath(l_oLibDir.toASCIIString());
-		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll path: " << l_sPath.c_str() << "\n";
-		es::factory fact(l_sPath);
-#else
-		es::factory fact("libeego-SDK.so");
-#endif // _WIN32
-
-		// to check what is going on case of error; Log version
-		const auto version = fact.getVersion();
-		m_rDriverContext.getLogManager() << LogLevel_Info << "EEGO RT: Version: " << version.major << "." << version.minor << "." << version.micro << "." << version.build << "\n";
-
 		// Get the amplifier. If none is connected an exception will be thrown
 		try
 		{
@@ -214,9 +198,14 @@ eemagine::sdk::factory& CDriverEEGO::factory()
 		// create the amplifier factory
 		// To initialize we need to locate the path of the DLL
 		// Create path to the dll
+#ifdef _WIN32
 		const CString l_oLibDir = Directories::getBinDir() + "\\eego-SDK.dll";
-		auto l_sPath = l_oLibDir.toASCIIString();
-		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll path: " << l_sPath << "\n";
+		const std::string l_sPath(l_oLibDir.toASCIIString());
+#else
+		const std::string l_sPath("libeego-SDK.so");
+#endif // _WIN32
+
+		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll/so path: " << l_sPath.c_str() << "\n";
 		m_pFactory = std::make_unique<es::factory>(l_sPath);
 
 		// to check what is going on case of error; Log version
