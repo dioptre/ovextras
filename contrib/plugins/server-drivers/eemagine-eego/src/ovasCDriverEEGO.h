@@ -61,6 +61,9 @@ namespace OpenViBEAcquisitionServer
 
 	private:
 
+
+		OpenViBE::boolean loop_wrapped(void);
+
 		/**
 		 * Check if the configuration makes sense and tries to fix it, informing the user.
 		 */

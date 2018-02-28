@@ -281,6 +281,26 @@ boolean CDriverEEGO::start(void)
 
 boolean CDriverEEGO::loop(void)
 {
+	boolean result = false;
+
+	try
+	{
+		result = loop_wrapped();
+	}
+	catch (const std::exception& ex)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Error in data update: " << ex.what() << "\n";
+	}
+	catch (...)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Unknown error in data update." << "\n";
+	}
+
+	return result;
+}
+
+OpenViBE::boolean CDriverEEGO::loop_wrapped()
+{
 	if (!m_rDriverContext.isConnected()) return false;
 
 	if (!m_rDriverContext.isStarted()
