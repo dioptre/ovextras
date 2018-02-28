@@ -90,10 +90,6 @@ boolean CDriverEEGO::initialize(
 		// server later...
 		m_pSample = std::make_unique<float32[]>(m_oHeader.getChannelCount() * ui32SampleCountPerSentBlock);
 		m_ui32SamplesInBuffer = 0;
-		if (!m_pSample)
-		{
-			throw std::exception();
-		}
 
 		// Get the amplifier. If none is connected an exception will be thrown
 		try
