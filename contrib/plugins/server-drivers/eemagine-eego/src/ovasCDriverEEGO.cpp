@@ -172,7 +172,7 @@ uint64 CDriverEEGO::getRefChannelMask() const
 	uint64 l_i64MaskEEG(0);
 	if (!CHeaderEEGO::convertMask(m_sEEGMask, l_i64MaskEEG))
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Warning << "Error converting mask: m_sEEGMask: " << m_sEEGMask;
+		m_rDriverContext.getLogManager() << LogLevel_Warning << "Error converting mask: m_sEEGMask: " << m_sEEGMask << "\n";
 	}
 	return l_i64MaskEEG;
 }
@@ -206,7 +206,7 @@ eemagine::sdk::factory& CDriverEEGO::factory()
 
 		// to check what is going on case of error; Log version
 		const auto version = m_pFactory->getVersion();
-		m_rDriverContext.getLogManager() << LogLevel_Info << "EEGO RT: Version: " << version.major << "." << version.minor << "." << version.micro << "." << version.build << "\n";
+		m_rDriverContext.getLogManager() << LogLevel_Info << "EEGO SDK Version: " << version.major << "." << version.minor << "." << version.micro << "." << version.build << "\n";
 	}
 
 	return *m_pFactory;
@@ -244,7 +244,7 @@ boolean CDriverEEGO::start(void)
 		// Error check
 		if (!m_pStream)
 		{
-			m_rDriverContext.getLogManager() << LogLevel_Error << "The stream returned is NULL!";
+			m_rDriverContext.getLogManager() << LogLevel_Error << "The stream returned is NULL!" << "\n";
 			return false;
 		}
 
@@ -272,7 +272,7 @@ boolean CDriverEEGO::start(void)
 	}
 	catch (const std::exception& ex)
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not open EEG stream: " << ex.what();
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not open EEG stream: " << ex.what() << "\n";
 		return false;
 	}
 
@@ -293,7 +293,7 @@ boolean CDriverEEGO::loop(void)
 	if (m_pStream->getChannelList().size() < m_oHeader.getChannelCount()
 		&& m_rDriverContext.isStarted()) // !started -> impedance
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "The amplifier got asked for more channels than it could provide";
+		m_rDriverContext.getLogManager() << LogLevel_Error << "The amplifier got asked for more channels than it could provide" << "\n";
 		return false;
 	}
 
@@ -307,7 +307,7 @@ boolean CDriverEEGO::loop(void)
 		}
 		catch (const std::exception& ex)
 		{
-			m_rDriverContext.getLogManager() << LogLevel_Error << "Error fetching data: " << ex.what();
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Error fetching data: " << ex.what() << "\n";
 			return false;
 		}
 
@@ -373,7 +373,7 @@ boolean CDriverEEGO::loop(void)
 		}
 		catch (const std::exception& ex)
 		{
-			m_rDriverContext.getLogManager() << LogLevel_Error << "Error fetching data: " << ex.what();
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Error fetching data: " << ex.what() << "\n";
 			return false;
 		}
 
