@@ -8,10 +8,12 @@
 
 #include <openvibe/ov_all.h>
 
-#include "Stream.h"
+#include "StreamBase.h"
 #include "Marker.h"
 #include "Range.h"
 #include "Selection.h"
+
+#include "DecoderBase.h"
 
 class Track {
 public:
@@ -26,7 +28,7 @@ public:
 
 	// Basically an iterator; should only return part covered by m_vSelection; @todo may need re-epoching
 
-	bool getNextStream(Stream** output);
+	bool getNextStream(StreamBase** output);
 
 //	bool getNextChunk(uint64_t idx, const StreamChunk** output);
 
@@ -36,8 +38,9 @@ public:
 
 	std::string m_Name;
 
-	std::map<uint64_t, Stream*> m_Streams;
+	std::map<uint64_t, StreamBase*> m_Streams;
 	std::map<uint64_t, uint64_t> m_StreamPosition;
+ 	std::map<uint64_t, DecoderBase*> m_Decoders;
 
 	OpenViBE::Kernel::IKernelContext& m_KernelContext;
 

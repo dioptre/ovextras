@@ -19,7 +19,7 @@ bool Workspace::play(void)
 	bool go = true;uint64_t cnt = 0;
 	while(go)
 	{
-		Stream* nextStream;
+		StreamBase* nextStream;
 
 		go = m_track.getNextStream(&nextStream);
 

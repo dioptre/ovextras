@@ -27,9 +27,13 @@ using namespace OpenViBE::Kernel;
 // }
 // exit;
 
-#include "StreamChunk.h"
-#include "StreamSignalChunk.h"
-#include "StreamStimulationChunk.h"
+// #include "StreamChunk.h"
+// #include "StreamSignalChunk.h"
+// #include "StreamStimulationChunk.h"
+
+#include "Stream.h"
+#include "TypeSignal.h"
+#include "TypeStimulation.h"
 
 class OutputEncoder
 {
@@ -405,10 +409,10 @@ bool Sink::pushChunk(const StreamChunk* chunk)
 
 #endif
 
-bool Sink::pull(Stream* stream)
+bool Sink::pull(StreamBase* stream)
 {
 
-	const StreamChunk* ptr;
+	const TypeBase::Buffer* ptr;
 
 	if(!stream->peek(&ptr))
 	{
@@ -416,23 +420,24 @@ bool Sink::pull(Stream* stream)
 	}
 
 	// Flush previous buffers when the current buffer start is older than the previous ones
-	if(ptr->m_bufferStart >= m_PreviousChunkEnd && m_PreviousChunkEnd>0)
+	if(ptr->m_bufferStart>= m_PreviousChunkEnd && m_PreviousChunkEnd>0)
 	{
 			m_ClientHandler->pushChunk(*m_OutputEncoder->encodeBuffer());
 
 			m_OutputEncoder->ip_pStimulationSet->clear();
 	}
-	m_PreviousChunkEnd = std::max(m_PreviousChunkEnd, ptr->m_bufferEnd);
+	m_PreviousChunkEnd = std::max(m_PreviousChunkEnd, ptr->m_bufferEnd );
 
 	if(stream->getTypeIdentifier() == OV_TypeId_Signal)
 	{
-		const StreamSignalChunk* sPtr = reinterpret_cast<const StreamSignalChunk*>(ptr);
+		// Stream<TypeSignal>* sPtr = reinterpret_cast< Stream<TypeSignal>* >(ptr);
+		const TypeSignal::Buffer* sPtr = reinterpret_cast<const TypeSignal::Buffer*>(ptr);
 
 		if(!m_SignalHeaderSent)
 		{
 			m_OutputEncoder->ip_ui64SignalSamplingRate = m_SamplingRate;
 			m_OutputEncoder->ip_ui64BufferDuration = ITimeArithmetics::sampleCountToTime(m_SamplingRate, m_ChunkSize);
-			OpenViBEToolkit::Tools::Matrix::copyDescription(*m_OutputEncoder->ip_pSignalMatrix, sPtr->data);
+			OpenViBEToolkit::Tools::Matrix::copyDescription(*m_OutputEncoder->ip_pSignalMatrix, sPtr->buffer);
 
 			IStimulationSet* stimSet = m_OutputEncoder->ip_pStimulationSet;
 			stimSet->clear();
@@ -444,7 +449,7 @@ bool Sink::pull(Stream* stream)
 		}
 
 		IMatrix* target = m_OutputEncoder->ip_pSignalMatrix;
-		OpenViBEToolkit::Tools::Matrix::copy(*target, sPtr->data);
+		OpenViBEToolkit::Tools::Matrix::copy(*target, sPtr->buffer);
 
 
 
@@ -456,21 +461,24 @@ bool Sink::pull(Stream* stream)
 	{
 			
 //			std::cout << "Stimchunk\n";
-
-		const StreamStimulationChunk* sPtr = reinterpret_cast<const StreamStimulationChunk*>(ptr);
+		const TypeStimulation::Buffer* sPtr = reinterpret_cast<const TypeStimulation::Buffer*>(ptr);
 
 		// This will be sent when the next signal chunk is sent
-		for(size_t i=0;i<sPtr->stimSet.getStimulationCount();i++)
+		for(size_t i=0;i<sPtr->buffer.getStimulationCount();i++)
 		{
 			m_OutputEncoder->ip_pStimulationSet->appendStimulation(
-				sPtr->stimSet.getStimulationIdentifier(i),
-				sPtr->stimSet.getStimulationDate(i),
-				sPtr->stimSet.getStimulationDuration(i)
+				sPtr->buffer.getStimulationIdentifier(i),
+				sPtr->buffer.getStimulationDate(i),
+				sPtr->buffer.getStimulationDuration(i)
 				);
 		}
 	}
 
-	stream->step();
+	if(!stream->step())
+	{
+		std::cout << "Can not step further\n";
+		return false;
+	}
 
 	return true;
 }

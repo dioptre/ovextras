@@ -10,7 +10,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "Stream.h"
+#include "StreamBase.h"
 
 class CClientHandler;
 class OutputEncoder;
@@ -22,7 +22,7 @@ public:
 
 	bool initialize(const char *xmlFile, uint32_t samplingRate);
 	bool uninitialize(void);
-	bool pull(Stream* stream);
+	bool pull(StreamBase* stream);
 	bool stop(void);
 
 public:

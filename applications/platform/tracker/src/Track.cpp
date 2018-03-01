@@ -1,11 +1,15 @@
 
+#include <iostream>
+
 #include "Track.h"
 #include "Source.h"
 
-#include "StreamSignal.h"
-#include "StreamStimulation.h"
+#include "Stream.h"
+#include "TypeSignal.h"
+#include "TypeStimulation.h"
 
-#include <iostream>
+#include "DecoderSignal.h"
+#include "DecoderStimulation.h"
 
 bool Track::initialize(const char *filename) 
 { 
@@ -23,13 +27,16 @@ bool Track::initialize(const char *filename)
 			// New stream; could use factory here
 			if(buf.streamType==OV_TypeId_Signal)
 			{
-				m_Streams[buf.streamIndex] = new StreamSignal(m_KernelContext);
-				m_StreamPosition[buf.streamIndex] = 0;
+				Stream<TypeSignal>* tmp = new Stream<TypeSignal>();
+				m_Streams[buf.streamIndex] = tmp;
+				m_Decoders[buf.streamIndex] = new DecoderSignal(m_KernelContext, tmp);
+//				m_StreamPosition[buf.streamIndex] = 0;
 			}
 			else if (buf.streamType==OV_TypeId_Stimulations)
 			{
-				m_Streams[buf.streamIndex] = new StreamStimulation(m_KernelContext);
-				m_StreamPosition[buf.streamIndex] = 0;
+				Stream<TypeStimulation>* tmp = new Stream<TypeStimulation>();
+				m_Streams[buf.streamIndex] = tmp;
+				m_Decoders[buf.streamIndex] = new DecoderStimulation(m_KernelContext, tmp);
 			}
 			else
 			{
@@ -37,7 +44,7 @@ bool Track::initialize(const char *filename)
 				continue;
 			}
 		}
-		m_Streams[buf.streamIndex]->push(buf);
+		m_Decoders[buf.streamIndex]->decode(buf);
 	}
 
 	return true;
@@ -54,17 +61,18 @@ uint32_t Track::getSamplingRate(void)
 	// @fixme picks rate of first signal stream
 	for(auto it = m_Streams.begin();it!=m_Streams.end();it++)
 	{
-		Stream* ptr = it->second;
+		StreamBase* ptr = it->second;
 		if( ptr->getTypeIdentifier()==OV_TypeId_Signal)
 		{
-			StreamSignal* tmp = reinterpret_cast<StreamSignal*>(ptr);
-			return tmp->getSamplingRate();
+			Stream<TypeSignal>* tmp = reinterpret_cast< Stream<TypeSignal>* >(ptr);
+			const TypeSignal::Header& head = tmp->getHeader();
+			return head.samplingFrequency;
 		}
 	}
 	return 0;
 }
 
-bool Track::getNextStream(Stream** output)
+bool Track::getNextStream(StreamBase** output)
 {
 	if(m_Streams.size()==0)
 	{
@@ -74,14 +82,14 @@ bool Track::getNextStream(Stream** output)
 	// @todo: check selection here
 
 	// Find the stream with the earliest chunk, return the stream
-	Stream* earliestPtr = nullptr;
+	StreamBase* earliestPtr = nullptr;
 	uint64_t earliest = std::numeric_limits<uint64_t>::max();
 
 	for(auto it = m_Streams.begin();it!=m_Streams.end();it++)
 	{
-		Stream* ptr = it->second;
+		StreamBase* ptr = it->second;
 
-		const StreamChunk* nextChunk;
+		const TypeBase::Buffer* nextChunk;
 		if(ptr->peek(&nextChunk) && nextChunk->m_bufferStart < earliest)
 		{
 			earliest = nextChunk->m_bufferStart;

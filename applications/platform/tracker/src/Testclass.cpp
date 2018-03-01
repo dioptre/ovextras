@@ -10,16 +10,9 @@
 
 #include "Testclass.h"
 
-#include "StreamSignal.h"
-#include "StreamMatrix.h"
-
 #include "Source.h"
 
-// #include "StreamHeaderSignal.h"
-// #include "StreamDataSignal.h"
-
-// #include "Codecs.h"
-// #include "CodecsSignal.h"
+#include "Stream.h"
 
 using namespace OpenViBE;
 
@@ -45,8 +38,6 @@ TestClass::TestClass(OpenViBE::Kernel::IKernelContext& ctx) : m_ctx(ctx)
 
 	Source src;
 	src.initialize(eegFile.toASCIIString());
-
-
 
 #if 0
 	StreamHeaderSignal signalHeader;
